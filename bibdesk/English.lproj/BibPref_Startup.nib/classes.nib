@@ -2,7 +2,7 @@
     IBClasses = (
         {
             ACTIONS = {changeStartupBehavior = id; toggleShowWarnings = id; }; 
-            CLASS = BibPref_Startup; 
+            CLASS = "BibPref_Startup"; 
             LANGUAGE = ObjC; 
             OUTLETS = {
                 defaultBibFileField = NSTextField; 
