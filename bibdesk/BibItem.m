@@ -924,7 +924,7 @@ _setupParagraphStyle()
                                                                               attributes:keyAttributes] autorelease]];
 
 				if([key isEqualToString:BDSKAuthorString]){
-					NSString *authors = [self bibtexAuthorString];
+					NSString *authors = [[self bibtexAuthorString] stringByRemovingCurlyBraces];
 					[aStr appendAttributedString:[[[NSAttributedString alloc] initWithString:[NSString stringWithFormat:@"%@\n",authors]
 																				  attributes:bodyAttributes] autorelease]];
 				}else{
@@ -951,7 +951,7 @@ _setupParagraphStyle()
                                                                               attributes:bodyAttributes] autorelease]];
 
             }else if([key isEqualToString:BDSKAuthorString]){
-                NSString *authors = [self bibtexAuthorString];
+                NSString *authors = [[self bibtexAuthorString] stringByRemovingCurlyBraces];
 
                 [aStr appendAttributedString:[[[NSAttributedString alloc] initWithString:[NSString stringWithFormat:@"%@\n",authors]
                                                                               attributes:bodyAttributes] autorelease]];
@@ -976,47 +976,7 @@ _setupParagraphStyle()
     return 	aStr;
 }
 
-- (NSString *)bibTeXString{
-    NSString *k;
-    NSString *v;
-    NSMutableString *s = [[[NSMutableString alloc] init] autorelease];
-    NSArray *keys = [[pubFields allKeys] sortedArrayUsingSelector:@selector(caseInsensitiveCompare:)];
-    NSEnumerator *e = [keys objectEnumerator];
-
-    //build BibTeX entry:
-    [s appendString:@"@"];
-    [s appendString:pubType];
-    [s appendString:@"{"];
-    [s appendString:[self citeKey]];
-    while(k = [e nextObject]){
-        v = [pubFields objectForKey:k];
-        NSString *valString;
-                 
-        if([v isComplex]){
-            valString = [v stringAsBibTeXString];
-        }else{
-            if([k isEqualToString:BDSKAuthorString] && [[OFPreferenceWrapper sharedPreferenceWrapper] boolForKey:BDSKShouldSaveNormalizedAuthorNames])
-                v = [self bibTeXAuthorStringNormalized:YES];
-            // Don't run the converter on Local-Url or Url fields, so we don't trash ~ and % escapes.
-            // Note that NSURLs comply with RFC 2396, and can't contain high-bit characters anyway.
-            if(![k isEqualToString:BDSKLocalUrlString] &&
-               ![k isEqualToString:BDSKUrlString]){
-                v = [[BDSKConverter sharedConverter] stringByTeXifyingString:v];
-            }
-            valString = [NSString stringWithFormat:@"{%@}", v];
-        }
-        
-        if(![v isEqualToString:@""]){
-            [s appendString:@",\n\t"];
-            [s appendFormat:@"%@ = ",k];
-            [s appendString:valString];
-        }
-    }
-    [s appendString:@"}"];
-    return s;
-}
-
-- (NSString *)unicodeBibTeXString{
+- (NSString *)bibTeXStringByTeXifying:(BOOL)shouldTeXify{
     NSString *k;
     NSString *v;
     NSMutableString *s = [[[NSMutableString alloc] init] autorelease];
@@ -1040,6 +1000,14 @@ _setupParagraphStyle()
         }else{            
             if([k isEqualToString:BDSKAuthorString] && [[OFPreferenceWrapper sharedPreferenceWrapper] boolForKey:BDSKShouldSaveNormalizedAuthorNames]) // only if it's not complex, use the normalized author name
                 v = [self bibTeXAuthorStringNormalized:YES];
+            
+            if(shouldTeXify){
+                if(![k isEqualToString:BDSKLocalUrlString] &&
+                   ![k isEqualToString:BDSKUrlString]){
+                    v = [[BDSKConverter sharedConverter] stringByTeXifyingString:v];
+                }
+            }                
+            
             valString = [NSString stringWithFormat:@"{%@}", v];
         }
         
@@ -1051,6 +1019,14 @@ _setupParagraphStyle()
     }
     [s appendString:@"}"];
     return s;
+}
+
+- (NSString *)bibTeXString{
+    return [self bibTeXStringByTeXifying:YES];
+}
+
+- (NSString *)unicodeBibTeXString{
+    return [self bibTeXStringByTeXifying:NO];
 }
     
 #warning not currently XML entity-escaped !!
