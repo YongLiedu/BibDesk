@@ -5,6 +5,7 @@
 // See legal notice below.
 
 #import "DraggableScrollView.h"
+#import <Carbon/Carbon.h>
 
 @implementation DraggableScrollView
 
@@ -15,9 +16,9 @@ static float BDSKScaleMenuFontSize = 11.0;
 
 #pragma mark Class method for cursor
 
-//	dragCursor -- Return a cursor which hints that the user can drag.
-//	FIXME: A hand would be better than this pointing finger.
-+ (NSCursor *) dragCursor
+// Cursors -- Return the open and closed grab hand cursors for dragging
+// Needed as the system ones are 10.3 only
++ (NSCursor *) openHandCursor
 {
     static NSCursor	*openHandCursor = nil;
 
@@ -25,12 +26,28 @@ static float BDSKScaleMenuFontSize = 11.0;
     {
         NSImage		*image;
 
-        image = [NSImage imageNamed: @"fingerCursor"];
+        image = [NSImage imageNamed: @"openHandCursor"];
         openHandCursor = [[NSCursor alloc] initWithImage: image
             hotSpot: NSMakePoint (8, 8)]; // guess that the center is good
     }
 
     return openHandCursor;
+}
+
++ (NSCursor *) closedHandCursor
+{
+    static NSCursor	*closedHandCursor = nil;
+
+    if (closedHandCursor == nil)
+    {
+        NSImage		*image;
+
+        image = [NSImage imageNamed: @"closedHandCursor"];
+        closedHandCursor = [[NSCursor alloc] initWithImage: image
+            hotSpot: NSMakePoint (8, 8)]; // guess that the center is good
+    }
+
+    return closedHandCursor;
 }
 
 
@@ -79,7 +96,7 @@ static float BDSKScaleMenuFontSize = 11.0;
 - (void)clipViewBoundsDidChange
 {
 	if ([self canScroll]) {
-        [self setDocumentCursor: [[self class] dragCursor]];
+        [self setDocumentCursor: [[self class] openHandCursor]];
     } else {
         [self setDocumentCursor: [NSCursor arrowCursor]];
 	}
@@ -94,6 +111,7 @@ static float BDSKScaleMenuFontSize = 11.0;
     BOOL			keepGoing;
     BOOL			result = NO;
 
+	[[[self class] closedHandCursor] push];
 	initialLocation = [theEvent locationInWindow];
     visibleRect = [[self documentView] visibleRect];
     keepGoing = YES;
@@ -137,6 +155,7 @@ static float BDSKScaleMenuFontSize = 11.0;
         }								// end of switch (event type)
     }									// end of mouse-tracking loop
 
+	[NSCursor pop];
     return result;
 }
 
