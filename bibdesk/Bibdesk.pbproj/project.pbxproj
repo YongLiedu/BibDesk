@@ -1549,6 +1549,7 @@
 				F9A59EDB06DFE4B400C411CA,
 				F9D5D16306E10D44000E02C2,
 				F962B2ED06FF5E1D00003231,
+				F98DD664070CE82200BEC3D2,
 			);
 			isa = PBXResourcesBuildPhase;
 			runOnlyForDeploymentPostprocessing = 0;
@@ -2319,6 +2320,7 @@
 		};
 		2A37F4B8FDCFA73011CA2CEA = {
 			children = (
+				F98DD663070CE82200BEC3D2,
 				F962B2EC06FF5E1D00003231,
 				F9D5D16206E10D44000E02C2,
 				F9BC920306E0EBB500B42137,
@@ -2433,7 +2435,7 @@
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = Bibdesk_Prefix.pch;
 				OPTIMIZATION_CFLAGS = "-O0";
-				ZERO_LINK = YES;
+				ZERO_LINK = NO;
 			};
 			isa = PBXBuildStyle;
 			name = Development;
@@ -4096,6 +4098,20 @@
 		};
 		F98BF7C5061B866D00367ECB = {
 			fileRef = 278F092505F2ED0B00725B39;
+			isa = PBXBuildFile;
+			settings = {
+			};
+		};
+		F98DD663070CE82200BEC3D2 = {
+			isa = PBXFileReference;
+			lastKnownFileType = image.icns;
+			name = risDocIcon.icns;
+			path = Images/risDocIcon.icns;
+			refType = 4;
+			sourceTree = "<group>";
+		};
+		F98DD664070CE82200BEC3D2 = {
+			fileRef = F98DD663070CE82200BEC3D2;
 			isa = PBXBuildFile;
 			settings = {
 			};
