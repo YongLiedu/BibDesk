@@ -8,7 +8,7 @@
 
 #import <Foundation/Foundation.h>
 #import "BibItem.h"
-
+#import "BibField.h"
 
 #define BibItemBasicObjects @"citeKey", @"pubDate", @"title", @"type", @"date", @"pubFields", @"bibTeXStrings", @"RTFValue", @"RSSValue"
 
