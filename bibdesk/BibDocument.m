@@ -1237,7 +1237,10 @@ didClickTableColumn: (NSTableColumn *) tableColumn{
 
 	NSString *tcID = [tableColumn identifier];
 	// resorting should happen whenever you click.
-	if([tcID isEqualToString:@"Cite Key"]){
+	if([tcID caseInsensitiveCompare:@"Cite Key"] == NSOrderedSame ||
+       [tcID caseInsensitiveCompare:@"CiteKey"] == NSOrderedSame ||
+       [tcID caseInsensitiveCompare:@"Cite-Key"] == NSOrderedSame ||
+       [tcID caseInsensitiveCompare:@"Key"]== NSOrderedSame){
 		
 		[publications sortUsingSelector:@selector(keyCompare:)];
 		[shownPublications sortUsingSelector:@selector(keyCompare:)];
@@ -1287,6 +1290,7 @@ int generalBibItemCompareFunc(id item1, id item2, void *context){
 	NSString *value1 = (NSString *)[item1 valueForKeyPath:keyPath];
 	NSString *value2 = (NSString *)[item2 valueForKeyPath:keyPath];
 	if (value1 == nil || value2 == nil) NSLog(@"a value is nil!");
+	// @@sort-fix: how do we handle nil values, which may now occur?
 	return [value1 compare:value2];
 }
 
