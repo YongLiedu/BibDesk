@@ -154,7 +154,7 @@ static BibFiler *_sharedFiler = nil;
 
 	[tv reloadData];
 	[infoTextField setStringValue:NSLocalizedString(@"There were problems moving the following files to the generated file location, according to the format string.",@"description string")];
-	[iconView setImage:[NSImage imageWithLargeIconForToolboxCode:kAlertCautionIcon]];
+	[iconView setImage:[NSImage imageWithLargeIconForToolboxCode:kAlertNoteIcon]];
 	[tv setDoubleAction:@selector(showFile:)];
 	[tv setTarget:self];
 	[window makeKeyAndOrderFront:self];
