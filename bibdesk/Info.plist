@@ -330,9 +330,9 @@
 					<key>Output Template File</key>
 					<string>~/Library/Application Support/BibDesk/template.txt</string>
 					<key>Save normalized names in BibTeX files</key>
-					<string>0</string>
+					<false/>
 					<key>Write template file when saving</key>
-					<string>1</string>
+					<true/>
 				</dict>
 				<key>icon</key>
 				<string>defaults.tiff</string>
@@ -356,11 +356,11 @@
 					<key>Export BibTeX document when saving BibDesk document</key>
 					<string>NO</string>
 					<key>Load files in background</key>
-					<string>NO</string>
+					<false/>
 					<key>TeXify characters when saving or copying BibTeX</key>
-					<string>YES</string>
+					<true/>
 					<key>Use Unicode BibTeX Parser</key>
-					<string>NO</string>
+					<false/>
 				</dict>
 				<key>icon</key>
 				<string>genericBibDocIcon.tiff</string>
@@ -382,7 +382,7 @@
 					<key>BlueComponentColor of alternating rows Key</key>
 					<string>1.010918794815856e-310</string>
 					<key>Check for updates when starting</key>
-					<string>1</string>
+					<true/>
 					<key>Column Widths By Name</key>
 					<dict>
 						<key>1st Author</key>
@@ -440,7 +440,7 @@
 					<key>RedComponentColor of alternating rows Key</key>
 					<string>1.156487706076073e-310</string>
 					<key>Show Status Bar</key>
-					<string>1</string>
+					<true/>
 					<key>Show Warnings in Error Panel</key>
 					<string>0</string>
 					<key>Shown Column Names</key>
