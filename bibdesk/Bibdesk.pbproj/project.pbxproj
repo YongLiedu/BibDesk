@@ -168,6 +168,7 @@
 		};
 		2711B30E05AD5099005A8084 = {
 			children = (
+				F96D5698063204760060114C,
 				2711B31905AD50B1005A8084,
 				2722DB6A05D398BD00352F0B,
 				2722DB6B05D398BD00352F0B,
@@ -225,6 +226,7 @@
 			dstPath = "BibDesk Help/gfx";
 			dstSubfolderSpec = 7;
 			files = (
+				F96D56A2063204B90060114C,
 				2722DBAC05D3993B00352F0B,
 				2711B31F05AD50FD005A8084,
 				2711B32205AD5136005A8084,
@@ -1982,6 +1984,7 @@
 			dstSubfolderSpec = 7;
 			files = (
 				F98BF7C5061B866D00367ECB,
+				F96D56A5063204FA0060114C,
 				2722DBC205D3997800352F0B,
 				2722DBC305D3997800352F0B,
 				2722DBC405D3997800352F0B,
@@ -3433,6 +3436,7 @@
 		};
 		F5FB32AB034D689801EF0AD8 = {
 			children = (
+				F96D5694063204650060114C,
 				2711B30E05AD5099005A8084,
 				F5FB32B0034D6D4601EF0AD8,
 				2722DB5A05D398A900352F0B,
@@ -3555,6 +3559,33 @@
 		};
 		F94E46110610B17900A61471 = {
 			fileRef = F94E460F0610B17900A61471;
+			isa = PBXBuildFile;
+			settings = {
+			};
+		};
+		F96D5694063204650060114C = {
+			fileEncoding = 30;
+			isa = PBXFileReference;
+			lastKnownFileType = text.html;
+			path = charconvert.htm;
+			refType = 4;
+			sourceTree = "<group>";
+		};
+		F96D5698063204760060114C = {
+			isa = PBXFileReference;
+			lastKnownFileType = image.png;
+			path = accents.png;
+			refType = 4;
+			sourceTree = "<group>";
+		};
+		F96D56A2063204B90060114C = {
+			fileRef = F96D5698063204760060114C;
+			isa = PBXBuildFile;
+			settings = {
+			};
+		};
+		F96D56A5063204FA0060114C = {
+			fileRef = F96D5694063204650060114C;
 			isa = PBXBuildFile;
 			settings = {
 			};
