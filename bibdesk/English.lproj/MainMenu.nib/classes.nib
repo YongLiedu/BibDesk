@@ -65,8 +65,12 @@
         }, 
         {
             ACTIONS = {
+                copyAsBibTex = id; 
+                copyAsPDF = id; 
+                copyAsTex = id; 
                 delPub = id; 
                 editPubCmd = id; 
+                emailPubCmd = id; 
                 exportAsRSS = id; 
                 newPub = id; 
                 toggle = id; 
