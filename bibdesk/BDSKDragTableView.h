@@ -40,3 +40,15 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 
 - (void)removeAllTableColumns;
 @end
+
+
+/* header view subclass that provides the appropriate contextual menu for clicks in header cells
+*/
+
+
+@interface BDSKDragTableHeaderView : NSTableHeaderView {
+}
+
+- (NSMenu *) menuForEvent:(NSEvent *)theEvent;
+
+@end
