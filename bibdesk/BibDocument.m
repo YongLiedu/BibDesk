@@ -1456,7 +1456,6 @@ stringByAppendingPathComponent:@"BibDesk"]; */
         [self updateUI];
         return;
     }
-    [tableView deselectAll:nil]; // selection is meaningless when we're searching, right?
     [shownPublications setArray:[self publicationsWithSubstring:substring
                                                         inField:field
                                                        forArray:publications]];
