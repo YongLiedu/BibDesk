@@ -19,10 +19,13 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 
     customStringArray = [[NSMutableArray arrayWithCapacity:6] retain];
     [customStringArray setArray:[defaults arrayForKey:BDSKCustomCiteStringsKey]];
+	[delSelectedCustomStringButton setEnabled:NO];
+
 }
 
 
 - (void)updateUI{
+	NSLog(@"update!!!!!!!!!");
     NSString *citeString = [defaults stringForKey:BDSKCiteStringKey];
 	NSString *startCiteBracket = [defaults stringForKey:BDSKCiteStartBracketKey]; 
 	NSString *endCiteBracket = [defaults stringForKey:BDSKCiteEndBracketKey]; 
@@ -51,7 +54,8 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
     [defaults setInteger:[sender state] forKey:BDSKSeparateCiteKey];
 	[self updateUI];
 }
-    - (IBAction)citeStringFieldChanged:(id)sender{
+
+- (IBAction)citeStringFieldChanged:(id)sender{
     [defaults setObject:[sender stringValue] forKey:BDSKCiteStringKey];
     [self changeSeparateCite:separateCiteCheckButton];
 }
@@ -91,6 +95,16 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 }
 - (id)tableView:(NSTableView *)tView objectValueForTableColumn:(NSTableColumn *)tableColumn row:(int)row{
     return [customStringArray objectAtIndex:row];
+}
+
+- (void)tableViewSelectionDidChange:(NSNotification *)aNotification{
+	NSTableView *tv = [aNotification object];
+	int selIdx = [tv selectedRow];
+	if(selIdx == -1){
+		[delSelectedCustomStringButton setEnabled:NO];
+	}else{
+		[delSelectedCustomStringButton setEnabled:YES];
+	}
 }
 
 - (IBAction)setCitationBracketStyle:(id)sender{
