@@ -13,6 +13,7 @@
 #import <OmniFoundation/OFScheduler.h>
 #import <OmniAppKit/OATypeAheadSelectionHelper.h>
 #import <OmniFoundation/NSString-OFExtensions.h>
+#import <OmniFoundation/OFScheduledEvent.h>
 
 @interface OATypeAheadSelectionHelper (BDSKExtensions)
 
