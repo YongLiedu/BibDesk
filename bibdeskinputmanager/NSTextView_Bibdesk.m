@@ -27,9 +27,7 @@ extern void _objc_resolve_categories_for_class(struct objc_class *cls);
 + (void)load{
     
     NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
-    
-    [[self superclass] load];
-    
+        
     NSString *bundleID = [[NSBundle mainBundle] bundleIdentifier]; // for the app we are loading into
     NSArray *array = [[[NSUserDefaults standardUserDefaults] persistentDomainForName:BDSKInputManagerID] objectForKey:BDSKInputManagerLoadableApplications];
     if(!array)
