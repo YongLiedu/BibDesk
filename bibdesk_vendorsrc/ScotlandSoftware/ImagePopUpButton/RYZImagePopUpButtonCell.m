@@ -7,29 +7,28 @@
 //	Initialization and termination
 // -----------------------------------------
 
-- (id) init
+- (id)init
 {
-    if (self = [super init])
-    {
-	RYZ_buttonCell = [[NSButtonCell alloc] initTextCell: @""];
-	[RYZ_buttonCell setBordered: NO];
-	[RYZ_buttonCell setHighlightsBy: NSContentsCellMask];
-	[RYZ_buttonCell setImagePosition: NSImageLeft];
-	
-	RYZ_iconSize = NSMakeSize(32, 32);
-	RYZ_showsMenuWhenIconClicked = NO;
-	RYZ_iconActionEnabled = YES;
-	RYZ_alwaysUsesFirstItemAsSelected = NO;
+    if (self = [super init]) {
+		RYZ_buttonCell = [[NSButtonCell alloc] initTextCell: @""];
+		[RYZ_buttonCell setBordered: NO];
+		[RYZ_buttonCell setHighlightsBy: NSContentsCellMask];
+		[RYZ_buttonCell setImagePosition: NSImageLeft];
+		
+		RYZ_iconSize = NSMakeSize(32, 32);
+		RYZ_showsMenuWhenIconClicked = NO;
+		RYZ_iconActionEnabled = YES;
+		RYZ_alwaysUsesFirstItemAsSelected = NO;
 
-	[self setIconImage: [NSImage imageNamed: @"NSApplicationIcon"]];	
-	[self setArrowImage: [NSImage imageNamed: @"ArrowPointingDown"]];
+		[self setIconImage: [NSImage imageNamed: @"NSApplicationIcon"]];	
+		[self setArrowImage: nil];
     }
     
     return self;
 }
 
 
-- (void) dealloc
+- (void)dealloc
 {
     [RYZ_buttonCell release];
     [RYZ_iconImage release];
@@ -37,11 +36,13 @@
     [super dealloc];
 }
 
-- (id)delegate {
+- (id)delegate 
+{
     return RYZ_delegate;
 }
 
-- (void)setDelegate:(id)newDelegate {
+- (void)setDelegate:(id)newDelegate 
+{
 	RYZ_delegate = newDelegate;
 }
 
@@ -51,23 +52,25 @@
 //	Getting and setting the icon size
 // --------------------------------------------
 
-- (NSSize) iconSize
+- (NSSize)iconSize
 {
     return RYZ_iconSize;
 }
 
 
-- (void) setIconSize: (NSSize) iconSize
+- (void)setIconSize:(NSSize)iconSize
 {
     RYZ_iconSize = iconSize;
 }
 
-- (BOOL)iconActionEnabled {
+- (BOOL)iconActionEnabled 
+{
     return RYZ_iconActionEnabled;
 }
 
-- (void)seticonActionEnabled:(BOOL)newiconActionEnabled {
-	RYZ_iconActionEnabled = newiconActionEnabled;
+- (void)setIconActionEnabled:(BOOL)newIconActionEnabled 
+{
+	RYZ_iconActionEnabled = newIconActionEnabled;
 }
 
 
@@ -75,13 +78,13 @@
 //	Getting and setting whether the menu is shown when the icon is clicked
 // ---------------------------------------------------------------------------------
 
-- (BOOL) showsMenuWhenIconClicked
+- (BOOL)showsMenuWhenIconClicked
 {
     return RYZ_showsMenuWhenIconClicked;
 }
 
 
-- (void) setShowsMenuWhenIconClicked: (BOOL) showsMenuWhenIconClicked
+- (void)setShowsMenuWhenIconClicked: (BOOL) showsMenuWhenIconClicked
 {
     RYZ_showsMenuWhenIconClicked = showsMenuWhenIconClicked;
 }
@@ -91,13 +94,13 @@
 //      Getting and setting the icon image
 // ---------------------------------------------
 
-- (NSImage *) iconImage
+- (NSImage *)iconImage
 {
     return RYZ_iconImage;
 }
 
 
-- (void) setIconImage: (NSImage *) iconImage
+- (void)setIconImage:(NSImage *)iconImage
 {
     [iconImage retain];
     [RYZ_iconImage release];
@@ -109,13 +112,13 @@
 //      Getting and setting the arrow image
 // ----------------------------------------------
 
-- (NSImage *) arrowImage
+- (NSImage *)arrowImage
 {
     return RYZ_arrowImage;
 }
 
 
-- (void) setArrowImage: (NSImage *) arrowImage
+- (void)setArrowImage:(NSImage *)arrowImage
 {
     [arrowImage retain];
     [RYZ_arrowImage release];
@@ -130,35 +133,48 @@
         RYZ_alwaysUsesFirstItemAsSelected = newAlwaysUsesFirstItemAsSelected;
 }
 
-- (NSMenuItem *)selectedItem{
-	if(RYZ_alwaysUsesFirstItemAsSelected){
+- (NSMenuItem *)selectedItem
+{
+	if (RYZ_alwaysUsesFirstItemAsSelected) {
 		return (NSMenuItem *)[self itemAtIndex:0];
-	}else{
+	} else {
 		return (NSMenuItem *)[super selectedItem];
 	}
 }
 
-- (BOOL)refreshesMenu {
+- (BOOL)refreshesMenu 
+{
     return RYZ_refreshesMenu;
 }
 
-- (void)setRefreshesMenu:(BOOL)newRefreshesMenu {
+- (void)setRefreshesMenu:(BOOL)newRefreshesMenu 
+{
     if (RYZ_refreshesMenu != newRefreshesMenu) {
         RYZ_refreshesMenu = newRefreshesMenu;
     }
 }
 
+- (BOOL)isEnabled 
+{
+	return [RYZ_buttonCell isEnabled];
+}
+
+- (void)setEnabled:(BOOL)flag 
+{
+	[RYZ_buttonCell setEnabled:flag];
+}
 
 // -----------------------------------------
 //	Handling mouse/keyboard events
 // -----------------------------------------
 
 - (BOOL) trackMouse: (NSEvent *) event
-	     inRect: (NSRect) cellFrame
-	     ofView: (NSView *) controlView
-       untilMouseUp: (BOOL) untilMouseUp{
+			 inRect: (NSRect) cellFrame
+			 ofView: (NSView *) controlView
+       untilMouseUp: (BOOL) untilMouseUp
+{
     BOOL trackingResult = YES;
-    if ([event type] == NSKeyDown){
+    if ([event type] == NSKeyDown) {
 		// Keyboard event
 		unichar upAndDownArrowCharacters[2];
 		upAndDownArrowCharacters[0] = NSUpArrowFunctionKey;
@@ -167,33 +183,26 @@
 		NSCharacterSet *upAndDownArrowCharacterSet = [NSCharacterSet characterSetWithCharactersInString: upAndDownArrowString];
 		
 		if ([self showsMenuWhenIconClicked] == YES ||
-			[[event characters] rangeOfCharacterFromSet: upAndDownArrowCharacterSet].location != NSNotFound){
-			NSEvent *newEvent = [NSEvent keyEventWithType: [event type]
-												 location: NSMakePoint([controlView frame].origin.x, [controlView frame].origin.y - 4)
-											modifierFlags: [event modifierFlags]
-												timestamp: [event timestamp]
-											 windowNumber: [event windowNumber]
-												  context: [event context]
-											   characters: [event characters]
-							  charactersIgnoringModifiers: [event charactersIgnoringModifiers]
-												isARepeat: [event isARepeat]
-												  keyCode: [event keyCode]];
-			
-			[NSMenu popUpContextMenu: [self menu]  withEvent: newEvent  forView: controlView];
-		}else if ([[event characters] rangeOfString: @" "].location != NSNotFound){
+			[[event characters] rangeOfCharacterFromSet: upAndDownArrowCharacterSet].location != NSNotFound) {
+			[self showMenuInView:controlView withEvent:event];
+		} else if ([[event characters] rangeOfString: @" "].location != NSNotFound) {
 			[self performClick: controlView];
 		}
-    }else{
+    } else {
 		// Mouse event
 		NSPoint mouseLocation = [controlView convertPoint: [event locationInWindow]  fromView: nil];
 		NSSize iconSize = [self iconSize];
-		NSSize arrowSize = [[self arrowImage] size];
-		NSRect arrowRect = NSMakeRect(cellFrame.origin.x + iconSize.width + 1,
-									  cellFrame.origin.y,
-									  arrowSize.width,
-									  arrowSize.height);
+		NSSize arrowSize = NSMakeSize(0,0);
+		NSRect arrowRect;
 		
-		if ([controlView isFlipped]){
+		if ([self arrowImage] != nil) {
+			arrowSize = [[self arrowImage] size];
+		}
+		
+		arrowRect = NSMakeRect(cellFrame.origin.x + iconSize.width + 1, cellFrame.origin.y,
+								arrowSize.width, arrowSize.height);
+		
+		if ([controlView isFlipped]) {
 			arrowRect.origin.y += iconSize.height;
 			arrowRect.origin.y -= arrowSize.height;
 		}
@@ -205,11 +214,11 @@
 		BOOL shouldSendAction = NO;
 
 		
-		if ([event type] == NSLeftMouseDown){
-			if(([self showsMenuWhenIconClicked] == YES && [self iconActionEnabled])
-			   || [controlView mouse: mouseLocation  inRect: arrowRect]){
+		if ([event type] == NSLeftMouseDown) {
+			if (([self showsMenuWhenIconClicked] == YES && [self iconActionEnabled])
+			    || [controlView mouse: mouseLocation inRect: arrowRect]) {
 				[self showMenuInView:controlView withEvent:event];
-			}else{
+			} else {
 				// Here we use periodic events to get 
 				// the menu to show up after a delay, but 
 				// only if we didn't mouse-up first.
@@ -225,24 +234,24 @@
 														   inMode:NSEventTrackingRunLoopMode
 														  dequeue:YES];
 				[NSEvent stopPeriodicEvents];
-				if([nextEvent type] == NSLeftMouseUp){
+				if ([nextEvent type] == NSLeftMouseUp) {
 					// if we mouse-up inside the button, send the action.
 					// note that because we show the menu on drags,
 					// we don't need to check that we're still inside 
 					// before we send the action.
 					
-					if([self iconActionEnabled]){
+					if ([self iconActionEnabled]) {
 						shouldSendAction = YES;
-					}else{
+					} else {
 						[self showMenuInView:controlView withEvent:nextEvent];
 					}
 					
-				}else if([nextEvent type] == NSLeftMouseDraggedMask){
+				} else if([nextEvent type] == NSLeftMouseDraggedMask) {
 					// NSLog(@"drag event %@" , nextEvent);
 					shouldSendAction = NO;
 					[self showMenuInView:controlView withEvent:nextEvent];
 
-				}else{
+				} else {
 					// NSLog(@"periodicEvent %@", nextEvent);
 					shouldSendAction = NO;
 					
@@ -252,22 +261,22 @@
 				}
 
 			}
-		}else{
+		} else {
 			trackingResult = [RYZ_buttonCell trackMouse: event
 											  inRect: cellFrame
 											  ofView: controlView
 										untilMouseUp: [[RYZ_buttonCell class] prefersTrackingUntilMouseUp]];  // NO for NSButton
 			
-			if (trackingResult == YES && [self iconActionEnabled]){
+			if (trackingResult == YES && [self iconActionEnabled]) {
 				shouldSendAction = YES;
 			}
 		}
-		if(shouldSendAction){
+		if (shouldSendAction) {
 			NSMenuItem *selectedItem = [self selectedItem];
 			[NSEvent stopPeriodicEvents];
 			[[NSApplication sharedApplication] sendAction: [selectedItem action]  
-								   to: [selectedItem target]
-								 from: selectedItem];
+													   to: [selectedItem target]
+													 from: selectedItem];
 			
 		}
     }
@@ -277,9 +286,12 @@
     return trackingResult;
 }
 
-- (void)showMenuInView:(NSView *)controlView withEvent:(NSEvent *)event{
+- (void)showMenuInView:(NSView *)controlView withEvent:(NSEvent *)event
+{
+	NSPoint newLoc = NSMakePoint(NSMinX([controlView bounds]), NSMaxY([controlView bounds]) + 4);
+	newLoc = [controlView convertPoint:newLoc toView:nil];
 	NSEvent *newEvent = [NSEvent mouseEventWithType: [event type]
-										   location: NSMakePoint([controlView frame].origin.x, [controlView frame].origin.y - 4)
+										   location: newLoc
 									  modifierFlags: [event modifierFlags]
 										  timestamp: [event timestamp]
 									   windowNumber: [event windowNumber]
@@ -288,14 +300,14 @@
 										 clickCount: [event clickCount]
 										   pressure: [event pressure]];
 	
-	if([self refreshesMenu]){
+	if ([self refreshesMenu]) {
 		[self setMenu:[[self delegate] menuForImagePopUpButton]];
 	}
 	[NSMenu popUpContextMenu: [self menu]  withEvent: newEvent  forView: controlView];
 }
 
 
-- (void) performClick: (id) sender
+- (void)performClick:(id)sender
 {
     [RYZ_buttonCell performClick: sender];
     [super performClick: sender];
@@ -306,47 +318,47 @@
 //	Drawing and highlighting
 // -----------------------------------
 
-- (void) drawWithFrame: (NSRect) cellFrame  inView: (NSView *) controlView
+- (void)drawWithFrame:(NSRect)cellFrame  inView:(NSView *)controlView
 {
     NSImage *iconImage;
     
-    if ([self usesItemFromMenu] == NO)
-    {
-	iconImage = [self iconImage];
-    }
-    else
-    {
-	iconImage = [[[[self selectedItem] image] copy] autorelease];
+    if ([self usesItemFromMenu] == NO) {
+		iconImage = [self iconImage];
+    } else {
+		iconImage = [[[[self selectedItem] image] copy] autorelease];
     }
     
-    [iconImage setSize: [self iconSize]];    
-    NSImage *arrowImage = [self arrowImage];
-    NSSize iconSize = [iconImage size];
-    NSSize arrowSize = [arrowImage size];
-    NSImage *popUpImage = [[NSImage alloc] initWithSize: NSMakeSize(iconSize.width + arrowSize.width, iconSize.height)];
+    [iconImage setSize: [self iconSize]];
+	
+	if ([self arrowImage] == nil) {
+		[RYZ_buttonCell setImage: iconImage];
+		[RYZ_buttonCell setAlternateImage: [self alternateImage]]; // this may be nil, that is OK
+	} else {
+		NSImage *arrowImage = [self arrowImage];
+		NSSize iconSize = [iconImage size];
+		NSSize arrowSize = [arrowImage size];
+		NSImage *popUpImage = [[NSImage alloc] initWithSize: NSMakeSize(iconSize.width + arrowSize.width, iconSize.height)];
+		
+		NSRect iconRect = NSMakeRect(0, 0, iconSize.width, iconSize.height);
+		NSRect arrowRect = NSMakeRect(0, 0, arrowSize.width, arrowSize.height);
+		NSRect iconDrawRect = NSMakeRect(0, 0, iconSize.width, iconSize.height);
+		NSRect arrowDrawRect = NSMakeRect(iconSize.width, 1, arrowSize.width, arrowSize.height);
+		
+		[popUpImage lockFocus];
+		[iconImage drawInRect: iconDrawRect  fromRect: iconRect  operation: NSCompositeSourceOver  fraction: 1.0];
+		[arrowImage drawInRect: arrowDrawRect  fromRect: arrowRect  operation: NSCompositeSourceOver  fraction: 1.0];
+		[popUpImage unlockFocus];
     
-    NSRect iconRect = NSMakeRect(0, 0, iconSize.width, iconSize.height);
-    NSRect arrowRect = NSMakeRect(0, 0, arrowSize.width, arrowSize.height);
-    NSRect iconDrawRect = NSMakeRect(0, 0, iconSize.width, iconSize.height);
-    NSRect arrowDrawRect = NSMakeRect(iconSize.width, 1, arrowSize.width, arrowSize.height);
-    
-    [popUpImage lockFocus];
-    [iconImage drawInRect: iconDrawRect  fromRect: iconRect  operation: NSCompositeSourceOver  fraction: 1.0];
-    [arrowImage drawInRect: arrowDrawRect  fromRect: arrowRect  operation: NSCompositeSourceOver  fraction: 1.0];
-    [popUpImage unlockFocus];
-    
-    [RYZ_buttonCell setImage: popUpImage];
-    [popUpImage release];
-    
-    if ([[controlView window] firstResponder] == controlView &&
-	[controlView respondsToSelector: @selector(selectedCell)] &&
-	[controlView performSelector: @selector(selectedCell)] == self)
-    {
-	[RYZ_buttonCell setShowsFirstResponder: YES];
+		[RYZ_buttonCell setImage: popUpImage];
+		[popUpImage release];
     }
-    else
-    {
-	[RYZ_buttonCell setShowsFirstResponder: NO];
+	
+    if ( [[controlView window] firstResponder] == controlView &&
+		 [controlView respondsToSelector: @selector(selectedCell)] &&
+		 [controlView performSelector: @selector(selectedCell)] == self) {
+		[RYZ_buttonCell setShowsFirstResponder: YES];
+    } else {
+		[RYZ_buttonCell setShowsFirstResponder: NO];
     }
     
 	 //   NSLog(@"cellFrame: %@  selectedItem: %@", NSStringFromRect(cellFrame), [[self selectedItem] title]);
@@ -355,7 +367,7 @@
 }
 
 
-- (void) highlight: (BOOL) flag  withFrame: (NSRect) cellFrame  inView: (NSView *) controlView
+- (void)highlight:(BOOL)flag  withFrame:(NSRect)cellFrame  inView:(NSView *)controlView
 {
 	[RYZ_buttonCell highlight: flag  withFrame: cellFrame  inView: controlView];
 	[super highlight: flag  withFrame: cellFrame  inView: controlView];

@@ -17,27 +17,27 @@
 // -- Setting if the icon is enabled, leaves the menu enabled --
 // -- meaningless if showsmenuwheniconclicked is true.
 - (BOOL)iconActionEnabled;
-- (void)seticonActionEnabled:(BOOL)iconActionEnabled;
+- (void)setIconActionEnabled:(BOOL)iconActionEnabled;
 
 
 // --- Getting and setting the icon size ---
-- (NSSize) iconSize;
-- (void) setIconSize: (NSSize) iconSize;
+- (NSSize)iconSize;
+- (void)setIconSize:(NSSize)iconSize;
 
 
 // --- Getting and setting whether the menu is shown when the icon is clicked ---
-- (BOOL) showsMenuWhenIconClicked;
-- (void) setShowsMenuWhenIconClicked: (BOOL) showsMenuWhenIconClicked;
+- (BOOL)showsMenuWhenIconClicked;
+- (void)setShowsMenuWhenIconClicked:(BOOL)showsMenuWhenIconClicked;
 
 
 // --- Getting and setting the icon image ---
-- (NSImage *) iconImage;
-- (void) setIconImage: (NSImage *) iconImage;
+- (NSImage *)iconImage;
+- (void)setIconImage:(NSImage *)iconImage;
 
 
 // --- Getting and setting the arrow image ---
 - (NSImage *) arrowImage;
-- (void) setArrowImage: (NSImage *) arrowImage;
+- (void)setArrowImage:(NSImage *)arrowImage;
 
 // --- changing whether or not the selected item changes.
 - (BOOL)alwaysUsesFirstItemAsSelected;
