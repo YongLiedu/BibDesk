@@ -39,7 +39,7 @@ from the "Bibdesk" menu, or press the key shortcut &#8984;-, (Command
 <a name="general"/>
 ### General
 
-<img src="gfx/generalPrefs.png" alt="" width=594 height=500>
+![General Prefs](gfx/generalPrefs.png)
 
 This panel controls what BibDesk does when it starts up. Clicking the
 &#8216;Open this bibliography&#8217; radio button prompts you to
@@ -53,7 +53,7 @@ information on the Error panel).
 <a name="citation"/>
 ### Citation
 
-<img src="gfx/citationPrefs.png" alt="" width=594 height=498>
+![Citation Prefs](gfx/citationPrefs.png)
 
 
 <em>Copying and Dragging Out</em>: This controls what gets dropped (or copied) on a drag (or copy).
@@ -79,7 +79,7 @@ information on the Error panel).
 ### Files
 
 
-<img src="gfx/filesPrefs.png" alt="">
+![Files Prefs](gfx/filesPrefs.png)
 
 
 <em>Default string encoding for opening and exporting BibTeX files</em>: This popup menu allows you to select the <a href="./charencoding.htm">encoding</a> used to open files by double-clicking on them in the Finder.
@@ -104,7 +104,7 @@ BibDesk.
 <a name="preview"/>
 ### Preview
 
-<img src="gfx/previewPrefs.png" alt="" width=593 height=492>
+![Preview Prefs](gfx/previewPrefs.png)
 
 
 <em>Use TeX for Previewing</em>: (More appropriately, use pdftex for previewing.) If this is checked, the preview pane will be drawn.
@@ -118,7 +118,7 @@ BibDesk.
 <a name="fields"/>
 ### Default Fields
 
-<img src="gfx/defaultsPrefs.png" alt="" width=592 height=397>
+![Defaults Prefs](gfx/defaultsPrefs.png)
 
 <em>BibTeX Fields</em>: You can set fields to be added to publications by default here. They are added when a file is opened and if a new publication is made.<br>
 Tip: Use this for fields you would like to use on every entry to avoid adding them every time. For example, a rating field or one that reminds you if you've read the cited paper.
@@ -128,14 +128,23 @@ Tip: Use this for fields you would like to use on every entry to avoid adding th
 <a name="rss"/>
 ### RSS
 
-<img src="gfx/rssPrefs.png" alt="" width=593 height=569>
+![RSS](gfx/rssPrefs.png)
 
-Hopefully this panel is self explanatory. If you click on the &#8216;Find out more...&#8217; link, your favorite web browser will open the page <a href="http://www.cs.ucsd.edu/~mmccrack/AboutRSS.html">http://www.cs.ucsd.edu/~mmccrack/AboutRSS.html</a>. The RSS publishing preferences control the RSS export features. If you check &#8216;Automatically save RSS feeds&#8217;, everytime you save a .bib file, a correspondingly named .rss file will be saved in the same directory. The &#8216;description&#8217; field in RSS is the text that shows up as the headline of each item in the RSS feed. See the link for more details.
+Hopefully this panel is self explanatory. If you click on the
+&#8216;Find out more...&#8217; link, your favorite web browser will
+open the page <a
+href="http://www.cs.ucsd.edu/~mmccrack/AboutRSS.html">http://www.cs.ucsd.edu/~mmccrack/AboutRSS.html</a>. The
+RSS publishing preferences control the RSS export features. If you
+check &#8216;Automatically save RSS feeds&#8217;, everytime you save a
+.bib file, a correspondingly named .rss file will be saved in the same
+directory. The &#8216;description&#8217; field in RSS is the text that
+shows up as the headline of each item in the RSS feed. See the link
+for more details.
 
 <a name="citekey"/>
 ### Cite Key
 
-<img src="gfx/citeKeyPrefs.png" alt="" width=625 height=489>
+![Cite Key](gfx/citeKeyPrefs.png)
 
 <em>Preset Format</em>: You can choose from several default cite key
 formats. Choosing <em>Custom</em> allows you to set the cite key
@@ -155,9 +164,15 @@ button will only be visible in custom mode.
 <a name="autocompletion"/>
 ### Autocompletion
 
-<img src="gfx/autocompletePrefs.png" alt="" width=594 height=423>
+#### Internal Autocompletion
+![Autocomplete Internal Prefs](gfx/autocompletePrefs-Internal.png)
 
-Autocompletion allows you to install a plugin which enables
+FIXME: What to say here?
+
+#### External Autocompletion
+![Autocomplete Internal Prefs](gfx/autocompletePrefs-External.png)
+
+External autocompletion allows you to install a plugin which enables
 bibliography-item autocompletion in Mac OS X 10.3 and greater using
 the "Install" button.  
 
@@ -171,7 +186,7 @@ more information.
 <a name="autofile"/>
 ### AutoFile
 
-<img src="gfx/autoFilePrefs.png" alt="" width=593 height=368>
+![AutoFile Prefs](gfx/autoFilePrefs.png)
 
 AutoFile lets you choose a folder as your "Papers Folder" to
 automatically move files into when you link to them. You can do this
