@@ -103,6 +103,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 	
 // Author tableView
 	IBOutlet NSTableView *authorTableView;
+	IBOutlet NSScrollView *authorScrollView;
 	
 	// add field sheet
 	IBOutlet NSPanel *addAuthorSheet;
@@ -113,6 +114,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 
 	// edit field stuff
 	BOOL forceEndEditing;
+    NSMutableDictionary *toolbarItems;
 }
 
 /*!

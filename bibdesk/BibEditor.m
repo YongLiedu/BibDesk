@@ -17,6 +17,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 
 
 #import "BibEditor.h"
+#import "BibEditor_Toolbar.h"
 #import "BibDocument.h"
 #import <OmniAppKit/NSScrollView-OAExtensions.h>
 #import "BDAlias.h"
@@ -185,6 +186,8 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
     NSEnumerator *typeNamesE = [[[BibTypeManager sharedManager] bibTypesForFileType:[theBib fileType]] objectEnumerator];
     NSString *typeName = nil;
     
+	[self setupToolbar];
+    
     [citeKeyField setFormatter:citeKeyFormatter];
     [newFieldName setFormatter:fieldNameFormatter];
 
@@ -290,6 +293,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
     [fieldNumbers release];
     [fieldNameFormatter release];
     [theBib setEditorObj:nil];
+	[toolbarItems release];
     [super dealloc];
 }
 
