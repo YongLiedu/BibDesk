@@ -453,9 +453,14 @@ void _setupFonts(){
     citeKey = [citeKey retain];
 	
 	NSDictionary *notifInfo = [NSDictionary dictionaryWithObjectsAndKeys:citeKey, @"value", @"Cite Key", @"key",nil];
-	[[NSNotificationCenter defaultCenter] postNotificationName:BDSKBibItemChangedNotification
-														object:self
-													  userInfo:notifInfo];
+	NSNotification *aNotification = [NSNotification notificationWithName:BDSKBibItemChangedNotification
+								      object:self
+								    userInfo:notifInfo];
+	// Queue the notification, since this can be expensive when opening large files
+	[[NSNotificationQueue defaultQueue] enqueueNotification:aNotification
+						   postingStyle:NSPostWhenIdle
+						   coalesceMask:NSNotificationCoalescingOnName
+						       forModes:nil];
 }
 
 - (NSString *)citeKey{
