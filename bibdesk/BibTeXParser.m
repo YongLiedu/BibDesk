@@ -21,6 +21,15 @@ NSRange SafeForwardSearchRange( unsigned startLoc, unsigned seekLength, unsigned
     return NSMakeRange(startLoc, seekLength);
 }
 
++ (void)postParsingErrorNotification:(NSString *)message errorType:(NSString *)type fileName:(NSString *)name errorRange:(NSRange)range{
+    
+    NSDictionary *errorDict = [NSDictionary dictionaryWithObjects:[NSArray arrayWithObjects:name, [NSNull null], type, message, [NSValue valueWithRange:range], nil]
+                                                          forKeys:[NSArray arrayWithObjects:@"fileName", @"lineNumber", @"errorClassName", @"errorMessage", @"errorRange", nil]];
+    [[NSNotificationCenter defaultCenter] postNotificationName:@"BTPARSE ERROR"
+                                                        object:errorDict];
+}
+
+
 + (NSMutableArray *)itemsFromString:(NSString *)fullString
                               error:(BOOL *)hadProblems
                         frontMatter:(NSMutableString *)frontMatter
@@ -33,7 +42,6 @@ NSRange SafeForwardSearchRange( unsigned startLoc, unsigned seekLength, unsigned
     NSScanner *scanner = [[NSScanner alloc] initWithString:fullString];
     [scanner setCharactersToBeSkipped:nil];
     NSMutableDictionary *dict = [NSMutableDictionary dictionary];
-    NSCharacterSet *newlineCharacterSet = [NSCharacterSet characterSetWithCharactersInString:@"\n"];
     unsigned fullStringLength = [fullString length];
     unsigned fileOrder = 0;
     
@@ -43,7 +51,7 @@ NSRange SafeForwardSearchRange( unsigned startLoc, unsigned seekLength, unsigned
     NSRange firstAtRange = [fullString rangeOfString:@"@" options:NSLiteralSearch range:NSMakeRange(0, [fullString length])];
     NSRange nextAtRange = [fullString rangeOfString:@"@" options:NSLiteralSearch range:SafeForwardSearchRange(firstAtRange.location + 1, fullStringLength - firstAtRange.location - 1, fullStringLength)];    
 
-    NSLog(@"Creating a new bibitem, first one is at %i, second is at %@", firstAtRange.location, ( nextAtRange.location != NSNotFound ? [NSString stringWithFormat:@"%i", nextAtRange.location] : @"NSNotFound" ) );
+    // NSLog(@"Creating a new bibitem, first one is at %i, second is at %@", firstAtRange.location, ( nextAtRange.location != NSNotFound ? [NSString stringWithFormat:@"%i", nextAtRange.location] : @"NSNotFound" ) );
     
     while(![scanner isAtEnd]){
         
@@ -52,13 +60,34 @@ NSRange SafeForwardSearchRange( unsigned startLoc, unsigned seekLength, unsigned
         NSString *citekey = nil;
                 
         [scanner setScanLocation:(firstAtRange.location + 1)];
-        [scanner scanUpToString:@"{" intoString:&type];
+
+        if(![scanner scanUpToString:@"{" intoString:&type]){
+            *hadProblems = YES;
+            [BibTeXParser postParsingErrorNotification:@"Reference type not found"
+                                             errorType:@"Parse Error"
+                                              fileName:filePath
+                                            errorRange:[fullString lineRangeForRange:NSMakeRange([scanner scanLocation], 0)]];
+        }
         
-        [scanner scanString:@"{" intoString:nil];
         
-        [scanner scanUpToString:@"," intoString:&citekey];
+        if(![scanner scanString:@"{" intoString:nil]){
+            *hadProblems = YES;
+            [BibTeXParser postParsingErrorNotification:@"Brace not found"
+                                             errorType:@"Parse Error"
+                                              fileName:filePath
+                                            errorRange:[fullString lineRangeForRange:NSMakeRange([scanner scanLocation], 0)]];
+        }
         
-        NSAssert( citekey != nil && type != nil, @"Missing a citekey or type" );
+        
+        if(![scanner scanUpToString:@"," intoString:&citekey]){
+            *hadProblems = YES;
+            [BibTeXParser postParsingErrorNotification:@"Citekey not found"
+                                             errorType:@"Parse Error"
+                                              fileName:filePath
+                                            errorRange:[fullString lineRangeForRange:NSMakeRange([scanner scanLocation], 0)]];
+        }
+        
+        // NSAssert( citekey != nil && type != nil, @"Missing a citekey or type" );
         
         newBI = [[BibItem alloc] initWithType:type
                                      fileType:@"BibTeX"
@@ -78,11 +107,39 @@ NSRange SafeForwardSearchRange( unsigned startLoc, unsigned seekLength, unsigned
             NSString *leftDelim = @"{";
             NSString *rightDelim = @"}";
             unsigned leftDelimLocation;
-                        
+              
             [scanner scanUpToString:@"," intoString:nil]; // find the comma
-            [scanner scanString:@"," intoString:nil]; // get rid of the comma
-            [scanner scanUpToString:@"=" intoString:&key]; // this should be our key
-            [scanner scanString:@"=" intoString:nil];
+
+            if([scanner scanLocation] >= nextAtRange.location){
+                NSLog(@"End of file or reached the next bibitem...breaking");
+                break; // either at EOF or scanned into the next bibitem
+            }
+
+
+            if(![scanner scanString:@"," intoString:nil]){// get rid of the comma
+                *hadProblems = YES;
+                [BibTeXParser postParsingErrorNotification:@"Comma not found" 
+                                                 errorType:@"Parse Error" 
+                                                  fileName:filePath 
+                                                errorRange:[fullString lineRangeForRange:NSMakeRange([scanner scanLocation], 0)]];
+            }
+            
+            if(![scanner scanUpToString:@"=" intoString:&key]){ // this should be our key
+                *hadProblems = YES;
+                [BibTeXParser postParsingErrorNotification:@"Field not found" 
+                                                 errorType:@"Warning" 
+                                                  fileName:filePath 
+                                                errorRange:[fullString lineRangeForRange:NSMakeRange([scanner scanLocation], 0)]];
+            }
+               
+           if(![scanner scanString:@"=" intoString:nil]){
+               *hadProblems = YES;
+               [BibTeXParser postParsingErrorNotification:@"= not found" 
+                                                errorType:@"Warning" 
+                                                 fileName:filePath 
+                                               errorRange:[fullString lineRangeForRange:NSMakeRange([scanner scanLocation], 0)]];
+           }
+           
             
             quoteRange = [fullString rangeOfString:@"\"" options:NSLiteralSearch range:SafeForwardSearchRange([scanner scanLocation], 100, fullStringLength)];
             braceRange = [fullString rangeOfString:@"{" options:NSLiteralSearch range:SafeForwardSearchRange([scanner scanLocation], 100, fullStringLength)];
@@ -101,8 +158,9 @@ NSRange SafeForwardSearchRange( unsigned startLoc, unsigned seekLength, unsigned
 
             leftDelimLocation = ( usingBraceDelimiter ? braceRange.location : quoteRange.location );
             
-            if([scanner scanLocation] >= nextAtRange.location)
-                break; // either at EOF or scanned into the next bibitem
+//            if([scanner scanLocation] >= nextAtRange.location)
+//                break; // either at EOF or scanned into the next bibitem
+            NSAssert ( nextAtRange.location >= [scanner scanLocation], @"Scanner tried to enter the next bibitem too early." );
 
             NSAssert ( leftDelimLocation != NSNotFound, @"Can't find a delimiter.");
             
@@ -115,8 +173,16 @@ NSRange SafeForwardSearchRange( unsigned startLoc, unsigned seekLength, unsigned
                 break;
                         
             unsigned rightDelimLocation = 0;
-            if([scanner scanUpToString:rightDelim intoString:nil])
+            if([scanner scanUpToString:rightDelim intoString:nil]){
                 rightDelimLocation = [scanner scanLocation];
+            } else {
+                *hadProblems = YES;
+                [BibTeXParser postParsingErrorNotification:[NSString stringWithFormat:@"Delimiter '%@' not found", rightDelim]
+                                                 errorType:@"Parse Error" 
+                                                  fileName:filePath 
+                                                errorRange:[fullString lineRangeForRange:NSMakeRange([scanner scanLocation], 0)]];
+            }
+               
 
 #warning ARM: Need more testing of nested brace code
             unsigned searchStart = leftDelimLocation + 1;
@@ -165,7 +231,7 @@ NSRange SafeForwardSearchRange( unsigned startLoc, unsigned seekLength, unsigned
         if(firstAtRange.location != NSNotFound)
             [scanner setScanLocation:firstAtRange.location];
         
-        NSLog(@"Finished a bibitem, next one is at %i, following is at %@", firstAtRange.location, ( nextAtRange.location != NSNotFound ? [NSString stringWithFormat:@"%i", nextAtRange.location] : @"NSNotFound" ) );
+        // NSLog(@"Finished a bibitem, next one is at %i, following is at %@", firstAtRange.location, ( nextAtRange.location != NSNotFound ? [NSString stringWithFormat:@"%i", nextAtRange.location] : @"NSNotFound" ) );
 
         
     }

@@ -642,8 +642,19 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
     NSString *fileName = [errObj valueForKey:@"fileName"];
     NSNumber *lineNumber = [errObj valueForKey:@"lineNumber"];
     NSFileManager *dfm = [NSFileManager defaultManager];
-
+    
     [self openEditWindowWithFile:fileName];
+    
+    
+    NSRange errorRange;
+    
+    if([errObj valueForKey:@"lineNumber"] == [NSNull null]){
+        errorRange = [[errObj valueForKey:@"errorRange"] rangeValue];
+        [sourceEditTextView setSelectedRange:errorRange];
+        [sourceEditTextView scrollRangeToVisible:errorRange];
+        return;
+    }
+    
     
     if ([dfm fileExistsAtPath:fileName]) {
         [sourceEditTextView selectLine:[lineNumber intValue]];
