@@ -100,10 +100,10 @@
 	};
 	27CB67AD05681124001D2AC3 = {
 		uiCtxt = {
-			sepNavIntBoundsRect = "{{0, 0}, {944, 6481}}";
-			sepNavSelRange = "{4902, 0}";
-			sepNavVisRect = "{{0, 1358}, {705, 428}}";
-			sepNavWindowFrame = "{{440, 444}, {750, 558}}";
+			sepNavIntBoundsRect = "{{0, 0}, {944, 6719}}";
+			sepNavSelRange = "{4515, 0}";
+			sepNavVisRect = "{{0, 1550}, {705, 428}}";
+			sepNavWindowFrame = "{{228, 357}, {750, 558}}";
 		};
 	};
 	27CCDA7305DF878700FAF2C9 = {
@@ -623,6 +623,93 @@
 			F95ECF11073FF13600E4DF5A = F95ECF11073FF13600E4DF5A;
 			F95ECF13073FF17400E4DF5A = F95ECF13073FF17400E4DF5A;
 			F95ECF29073FF1BC00E4DF5A = F95ECF29073FF1BC00E4DF5A;
+			F95ECF32073FF4C900E4DF5A = F95ECF32073FF4C900E4DF5A;
+			F95ECF33073FF4C900E4DF5A = F95ECF33073FF4C900E4DF5A;
+			F95ECF34073FF4FE00E4DF5A = F95ECF34073FF4FE00E4DF5A;
+			F95ECF35073FF52700E4DF5A = F95ECF35073FF52700E4DF5A;
+			F95ECF36073FF52700E4DF5A = F95ECF36073FF52700E4DF5A;
+			F95ECF37073FF52700E4DF5A = F95ECF37073FF52700E4DF5A;
+			F95ECF38073FF52700E4DF5A = F95ECF38073FF52700E4DF5A;
+			F95ECF39073FF52F00E4DF5A = F95ECF39073FF52F00E4DF5A;
+			F95ECF3A074000AA00E4DF5A = F95ECF3A074000AA00E4DF5A;
+			F95ECF3B0740036100E4DF5A = F95ECF3B0740036100E4DF5A;
+			F95ECF3C074004D400E4DF5A = F95ECF3C074004D400E4DF5A;
+			F95ECF3E0740051200E4DF5A = F95ECF3E0740051200E4DF5A;
+			F95ECF400740052C00E4DF5A = F95ECF400740052C00E4DF5A;
+			F95ECF420740086300E4DF5A = F95ECF420740086300E4DF5A;
+			F95ECF430740087100E4DF5A = F95ECF430740087100E4DF5A;
+			F95ECF4507400ADC00E4DF5A = F95ECF4507400ADC00E4DF5A;
+			F95ECF4707400BC100E4DF5A = F95ECF4707400BC100E4DF5A;
+			F95ECF4807400D0C00E4DF5A = F95ECF4807400D0C00E4DF5A;
+			F95ECF4907400D4000E4DF5A = F95ECF4907400D4000E4DF5A;
+			F95ECF4A07400DC100E4DF5A = F95ECF4A07400DC100E4DF5A;
+			F95ECF4B07400DC600E4DF5A = F95ECF4B07400DC600E4DF5A;
+			F95ECF4D07400E3800E4DF5A = F95ECF4D07400E3800E4DF5A;
+			F95ECF5007400EE600E4DF5A = F95ECF5007400EE600E4DF5A;
+			F95ECF5307400F4400E4DF5A = F95ECF5307400F4400E4DF5A;
+			F95ECF540740116700E4DF5A = F95ECF540740116700E4DF5A;
+			F95ECF56074013A800E4DF5A = F95ECF56074013A800E4DF5A;
+			F95ECF590740145100E4DF5A = F95ECF590740145100E4DF5A;
+			F95ECF5B074014AC00E4DF5A = F95ECF5B074014AC00E4DF5A;
+			F95ECF5C074014BF00E4DF5A = F95ECF5C074014BF00E4DF5A;
+			F95ECF5D074014EB00E4DF5A = F95ECF5D074014EB00E4DF5A;
+			F95ECF5E0740151F00E4DF5A = F95ECF5E0740151F00E4DF5A;
+			F95ECF5F0740157F00E4DF5A = F95ECF5F0740157F00E4DF5A;
+			F95ECF600740164400E4DF5A = F95ECF600740164400E4DF5A;
+			F95ECF610740165300E4DF5A = F95ECF610740165300E4DF5A;
+			F95ECF620740169300E4DF5A = F95ECF620740169300E4DF5A;
+			F95ECF630740177500E4DF5A = F95ECF630740177500E4DF5A;
+			F95ECF640740179600E4DF5A = F95ECF640740179600E4DF5A;
+			F95ECF65074017B000E4DF5A = F95ECF65074017B000E4DF5A;
+			F95ECF66074017CA00E4DF5A = F95ECF66074017CA00E4DF5A;
+			F95ECF67074017E700E4DF5A = F95ECF67074017E700E4DF5A;
+			F95ECF6A0740181300E4DF5A = F95ECF6A0740181300E4DF5A;
+			F95ECF6B0740184500E4DF5A = F95ECF6B0740184500E4DF5A;
+			F95ECF6C074018D100E4DF5A = F95ECF6C074018D100E4DF5A;
+			F95ECF6D0740194300E4DF5A = F95ECF6D0740194300E4DF5A;
+			F95ECF6E074019B000E4DF5A = F95ECF6E074019B000E4DF5A;
+			F95ECF6F07401A2D00E4DF5A = F95ECF6F07401A2D00E4DF5A;
+			F95ECF7007401A6700E4DF5A = F95ECF7007401A6700E4DF5A;
+			F95ECF7107401A6B00E4DF5A = F95ECF7107401A6B00E4DF5A;
+			F95ECF7207401A6D00E4DF5A = F95ECF7207401A6D00E4DF5A;
+			F95ECF7307401A9D00E4DF5A = F95ECF7307401A9D00E4DF5A;
+			F95ECF7407401AA000E4DF5A = F95ECF7407401AA000E4DF5A;
+			F95ECF7507401ADD00E4DF5A = F95ECF7507401ADD00E4DF5A;
+			F95ECF7607401B3500E4DF5A = F95ECF7607401B3500E4DF5A;
+			F95ECF7707401B8B00E4DF5A = F95ECF7707401B8B00E4DF5A;
+			F95ECF7807401BCE00E4DF5A = F95ECF7807401BCE00E4DF5A;
+			F95ECF7907401C9400E4DF5A = F95ECF7907401C9400E4DF5A;
+			F95ECF7A07401CF800E4DF5A = F95ECF7A07401CF800E4DF5A;
+			F95ECF7B07401D0C00E4DF5A = F95ECF7B07401D0C00E4DF5A;
+			F95ECF7C07401DC100E4DF5A = F95ECF7C07401DC100E4DF5A;
+			F95ECF7D07401DEE00E4DF5A = F95ECF7D07401DEE00E4DF5A;
+			F95ECF7E07401E1400E4DF5A = F95ECF7E07401E1400E4DF5A;
+			F95ECF7F07401E3100E4DF5A = F95ECF7F07401E3100E4DF5A;
+			F95ECF8007401EAA00E4DF5A = F95ECF8007401EAA00E4DF5A;
+			F95ECF810740204A00E4DF5A = F95ECF810740204A00E4DF5A;
+			F95ECF830740216500E4DF5A = F95ECF830740216500E4DF5A;
+			F95ECF840740219800E4DF5A = F95ECF840740219800E4DF5A;
+			F95ECF85074021D300E4DF5A = F95ECF85074021D300E4DF5A;
+			F95ECF86074021D500E4DF5A = F95ECF86074021D500E4DF5A;
+			F95ECF88074022D500E4DF5A = F95ECF88074022D500E4DF5A;
+			F95ECF8A074022FD00E4DF5A = F95ECF8A074022FD00E4DF5A;
+			F95ECF8B0740234800E4DF5A = F95ECF8B0740234800E4DF5A;
+			F95ECF8C0740283500E4DF5A = F95ECF8C0740283500E4DF5A;
+			F95ECF8D0740295300E4DF5A = F95ECF8D0740295300E4DF5A;
+			F95ECF8E074029BB00E4DF5A = F95ECF8E074029BB00E4DF5A;
+			F95ECF910740458A00E4DF5A = F95ECF910740458A00E4DF5A;
+			F95ECF92074045E600E4DF5A = F95ECF92074045E600E4DF5A;
+			F95ECF9E074056CE00E4DF5A = F95ECF9E074056CE00E4DF5A;
+			F95ECFA6074057BB00E4DF5A = F95ECFA6074057BB00E4DF5A;
+			F95ED034074121A500E4DF5A = F95ED034074121A500E4DF5A;
+			F95ED035074121DC00E4DF5A = F95ED035074121DC00E4DF5A;
+			F95ED0390741231300E4DF5A = F95ED0390741231300E4DF5A;
+			F95ED03B0741232400E4DF5A = F95ED03B0741232400E4DF5A;
+			F95ED03C0741232800E4DF5A = F95ED03C0741232800E4DF5A;
+			F95ED03D0741233A00E4DF5A = F95ED03D0741233A00E4DF5A;
+			F95ED03E0741235A00E4DF5A = F95ED03E0741235A00E4DF5A;
+			F95ED03F0741236600E4DF5A = F95ED03F0741236600E4DF5A;
+			F95ED040074123F900E4DF5A = F95ED040074123F900E4DF5A;
 		};
 		sourceControlManager = F9495E57069F8C3500475F69;
 		userBuildSettings = {
@@ -630,9 +717,9 @@
 	};
 	2A37F4ACFDCFA73011CA2CEA = {
 		uiCtxt = {
-			sepNavIntBoundsRect = "{{0, 0}, {4544, 29470}}";
-			sepNavSelRange = "{71079, 0}";
-			sepNavVisRect = "{{0, 24814}, {908, 255}}";
+			sepNavIntBoundsRect = "{{0, 0}, {4544, 31009}}";
+			sepNavSelRange = "{77008, 26}";
+			sepNavVisRect = "{{0, 27353}, {748, 189}}";
 			sepNavWindowFrame = "{{61, 132}, {902, 653}}";
 		};
 	};
@@ -718,10 +805,10 @@
 	};
 	F522132C0238508E01EF0AD7 = {
 		uiCtxt = {
-			sepNavIntBoundsRect = "{{0, 0}, {4544, 3681}}";
-			sepNavSelRange = "{4871, 0}";
-			sepNavVisRect = "{{0, 1371}, {647, 184}}";
-			sepNavWindowFrame = "{{38, 248}, {750, 558}}";
+			sepNavIntBoundsRect = "{{0, 0}, {4544, 3653}}";
+			sepNavSelRange = "{2835, 0}";
+			sepNavVisRect = "{{0, 549}, {705, 428}}";
+			sepNavWindowFrame = "{{6, 278}, {750, 558}}";
 		};
 	};
 	F549BA3402D3E09801EF0AD2 = {
@@ -791,8 +878,8 @@
 	F56DCB5701CFE5EF01227D25 = {
 		uiCtxt = {
 			sepNavIntBoundsRect = "{{0, 0}, {1004, 11577}}";
-			sepNavSelRange = "{15698, 0}";
-			sepNavVisRect = "{{0, 6664}, {705, 428}}";
+			sepNavSelRange = "{21127, 26}";
+			sepNavVisRect = "{{0, 8943}, {748, 189}}";
 			sepNavWindowFrame = "{{107, 355}, {750, 558}}";
 		};
 	};
@@ -910,10 +997,10 @@
 	};
 	F5AD2CBB0396F01101A80164 = {
 		uiCtxt = {
-			sepNavIntBoundsRect = "{{0, 0}, {986, 1119}}";
-			sepNavSelRange = "{701, 0}";
-			sepNavVisRect = "{{0, 0}, {705, 428}}";
-			sepNavWindowFrame = "{{199, 271}, {750, 558}}";
+			sepNavIntBoundsRect = "{{0, 0}, {986, 1203}}";
+			sepNavSelRange = "{935, 0}";
+			sepNavVisRect = "{{1, 76}, {985, 534}}";
+			sepNavWindowFrame = "{{99, 338}, {1030, 664}}";
 		};
 	};
 	F5AD2CC10397226201A80164 = {
@@ -1134,14 +1221,14 @@
 		fileReference = F522132C0238508E01EF0AD7;
 		functionName = "-convertedStringWithAccentedString:";
 		isa = PBXFileBreakpoint;
-		lineNumber = 161;
+		lineNumber = 159;
 		state = 1;
 	};
 	F95ECEFC073FE72E00E4DF5A = {
 		fRef = 27CB67AD05681124001D2AC3;
 		isa = PBXTextBookmark;
 		rLen = 7;
-		rLoc = 17551;
+		rLoc = 18749;
 		rType = 0;
 	};
 	F95ECF00073FE7D200E4DF5A = {
@@ -1149,7 +1236,7 @@
 		isa = PBXTextBookmark;
 		name = freport;
 		rLen = 7;
-		rLoc = 17491;
+		rLoc = 18689;
 		rType = 0;
 		vrLen = 406;
 		vrLoc = 17466;
@@ -1159,7 +1246,7 @@
 		isa = PBXTextBookmark;
 		name = freport;
 		rLen = 7;
-		rLoc = 17491;
+		rLoc = 18689;
 		rType = 0;
 		vrLen = 406;
 		vrLoc = 17466;
@@ -1169,7 +1256,7 @@
 		isa = PBXTextBookmark;
 		name = freport;
 		rLen = 7;
-		rLoc = 17491;
+		rLoc = 18689;
 		rType = 0;
 		vrLen = 430;
 		vrLoc = 17445;
@@ -1179,7 +1266,7 @@
 		isa = PBXTextBookmark;
 		name = freport;
 		rLen = 7;
-		rLoc = 17491;
+		rLoc = 18689;
 		rType = 0;
 		vrLen = 430;
 		vrLoc = 17445;
@@ -1189,7 +1276,7 @@
 		isa = PBXTextBookmark;
 		name = freport;
 		rLen = 7;
-		rLoc = 17491;
+		rLoc = 18689;
 		rType = 0;
 		vrLen = 430;
 		vrLoc = 17445;
@@ -1199,7 +1286,7 @@
 		isa = PBXTextBookmark;
 		name = freport;
 		rLen = 7;
-		rLoc = 17491;
+		rLoc = 18689;
 		rType = 0;
 		vrLen = 430;
 		vrLoc = 17445;
@@ -1209,7 +1296,7 @@
 		isa = PBXTextBookmark;
 		name = freport;
 		rLen = 7;
-		rLoc = 17491;
+		rLoc = 18689;
 		rType = 0;
 		vrLen = 430;
 		vrLoc = 17445;
@@ -1219,7 +1306,7 @@
 		isa = PBXTextBookmark;
 		name = freport;
 		rLen = 7;
-		rLoc = 17491;
+		rLoc = 18689;
 		rType = 0;
 		vrLen = 430;
 		vrLoc = 17445;
@@ -1229,7 +1316,7 @@
 		isa = PBXTextBookmark;
 		name = freport;
 		rLen = 7;
-		rLoc = 17491;
+		rLoc = 18689;
 		rType = 0;
 		vrLen = 430;
 		vrLoc = 17445;
@@ -1239,7 +1326,7 @@
 		isa = PBXTextBookmark;
 		name = freport;
 		rLen = 7;
-		rLoc = 17491;
+		rLoc = 18689;
 		rType = 0;
 		vrLen = 430;
 		vrLoc = 17445;
@@ -1249,7 +1336,7 @@
 		isa = PBXTextBookmark;
 		name = freport;
 		rLen = 7;
-		rLoc = 17491;
+		rLoc = 18689;
 		rType = 0;
 		vrLen = 430;
 		vrLoc = 17445;
@@ -1259,7 +1346,7 @@
 		isa = PBXTextBookmark;
 		name = freport;
 		rLen = 7;
-		rLoc = 17491;
+		rLoc = 18689;
 		rType = 0;
 		vrLen = 430;
 		vrLoc = 17445;
@@ -1269,10 +1356,874 @@
 		isa = PBXTextBookmark;
 		name = freport;
 		rLen = 7;
-		rLoc = 17491;
+		rLoc = 18689;
 		rType = 0;
 		vrLen = 430;
 		vrLoc = 17445;
+	};
+	F95ECF32073FF4C900E4DF5A = {
+		fRef = 2A37F4ACFDCFA73011CA2CEA;
+		isa = PBXTextBookmark;
+		rLen = 26;
+		rLoc = 77008;
+		rType = 0;
+	};
+	F95ECF33073FF4C900E4DF5A = {
+		fRef = 2A37F4ACFDCFA73011CA2CEA;
+		isa = PBXTextBookmark;
+		name = BibItemChangedNotification;
+		rLen = 26;
+		rLoc = 77008;
+		rType = 0;
+		vrLen = 447;
+		vrLoc = 77349;
+	};
+	F95ECF34073FF4FE00E4DF5A = {
+		fRef = 2A37F4ACFDCFA73011CA2CEA;
+		isa = PBXTextBookmark;
+		name = "BibDocument.m: 1960";
+		rLen = 0;
+		rLoc = 76993;
+		rType = 0;
+		vrLen = 593;
+		vrLoc = 76746;
+	};
+	F95ECF35073FF52700E4DF5A = {
+		fRef = 2A37F4ACFDCFA73011CA2CEA;
+		isa = PBXTextBookmark;
+		name = BibItemChangedNotification;
+		rLen = 26;
+		rLoc = 77008;
+		rType = 0;
+		vrLen = 593;
+		vrLoc = 76746;
+	};
+	F95ECF36073FF52700E4DF5A = {
+		fRef = F56DCB5701CFE5EF01227D25;
+		isa = PBXTextBookmark;
+		rLen = 26;
+		rLoc = 21127;
+		rType = 0;
+	};
+	F95ECF37073FF52700E4DF5A = {
+		fRef = 2A37F4ACFDCFA73011CA2CEA;
+		isa = PBXTextBookmark;
+		name = BibItemChangedNotification;
+		rLen = 26;
+		rLoc = 77008;
+		rType = 0;
+		vrLen = 593;
+		vrLoc = 76746;
+	};
+	F95ECF38073FF52700E4DF5A = {
+		fRef = F56DCB5701CFE5EF01227D25;
+		isa = PBXTextBookmark;
+		name = BibItemChangedNotification;
+		rLen = 26;
+		rLoc = 21127;
+		rType = 0;
+		vrLen = 527;
+		vrLoc = 20775;
+	};
+	F95ECF39073FF52F00E4DF5A = {
+		fRef = F56DCB5701CFE5EF01227D25;
+		isa = PBXTextBookmark;
+		name = BibItemChangedNotification;
+		rLen = 26;
+		rLoc = 21127;
+		rType = 0;
+		vrLen = 527;
+		vrLoc = 20775;
+	};
+	F95ECF3A074000AA00E4DF5A = {
+		fRef = F56DCB5701CFE5EF01227D25;
+		isa = PBXTextBookmark;
+		name = BibItemChangedNotification;
+		rLen = 26;
+		rLoc = 21127;
+		rType = 0;
+		vrLen = 527;
+		vrLoc = 20775;
+	};
+	F95ECF3B0740036100E4DF5A = {
+		fRef = F56DCB5701CFE5EF01227D25;
+		isa = PBXTextBookmark;
+		name = BibItemChangedNotification;
+		rLen = 26;
+		rLoc = 21127;
+		rType = 0;
+		vrLen = 527;
+		vrLoc = 20775;
+	};
+	F95ECF3C074004D400E4DF5A = {
+		fRef = F56DCB5701CFE5EF01227D25;
+		isa = PBXTextBookmark;
+		name = BibItemChangedNotification;
+		rLen = 26;
+		rLoc = 21127;
+		rType = 0;
+		vrLen = 527;
+		vrLoc = 20775;
+	};
+	F95ECF3E0740051200E4DF5A = {
+		fRef = F56DCB5701CFE5EF01227D25;
+		isa = PBXTextBookmark;
+		name = BibItemChangedNotification;
+		rLen = 26;
+		rLoc = 21127;
+		rType = 0;
+		vrLen = 527;
+		vrLoc = 20775;
+	};
+	F95ECF400740052C00E4DF5A = {
+		fRef = F56DCB5701CFE5EF01227D25;
+		isa = PBXTextBookmark;
+		name = BibItemChangedNotification;
+		rLen = 26;
+		rLoc = 21127;
+		rType = 0;
+		vrLen = 527;
+		vrLoc = 20775;
+	};
+	F95ECF420740086300E4DF5A = {
+		fRef = F56DCB5701CFE5EF01227D25;
+		isa = PBXTextBookmark;
+		name = BibItemChangedNotification;
+		rLen = 26;
+		rLoc = 21127;
+		rType = 0;
+		vrLen = 527;
+		vrLoc = 20775;
+	};
+	F95ECF430740087100E4DF5A = {
+		fRef = F56DCB5701CFE5EF01227D25;
+		isa = PBXTextBookmark;
+		name = BibItemChangedNotification;
+		rLen = 26;
+		rLoc = 21127;
+		rType = 0;
+		vrLen = 527;
+		vrLoc = 20775;
+	};
+	F95ECF4507400ADC00E4DF5A = {
+		fRef = F56DCB5701CFE5EF01227D25;
+		isa = PBXTextBookmark;
+		name = BibItemChangedNotification;
+		rLen = 26;
+		rLoc = 21127;
+		rType = 0;
+		vrLen = 527;
+		vrLoc = 20775;
+	};
+	F95ECF4707400BC100E4DF5A = {
+		fRef = F56DCB5701CFE5EF01227D25;
+		isa = PBXTextBookmark;
+		name = BibItemChangedNotification;
+		rLen = 26;
+		rLoc = 21127;
+		rType = 0;
+		vrLen = 527;
+		vrLoc = 20775;
+	};
+	F95ECF4807400D0C00E4DF5A = {
+		fRef = F56DCB5701CFE5EF01227D25;
+		isa = PBXTextBookmark;
+		name = BibItemChangedNotification;
+		rLen = 26;
+		rLoc = 21127;
+		rType = 0;
+		vrLen = 527;
+		vrLoc = 20775;
+	};
+	F95ECF4907400D4000E4DF5A = {
+		fRef = F56DCB5701CFE5EF01227D25;
+		isa = PBXTextBookmark;
+		name = BibItemChangedNotification;
+		rLen = 26;
+		rLoc = 21127;
+		rType = 0;
+		vrLen = 527;
+		vrLoc = 20775;
+	};
+	F95ECF4A07400DC100E4DF5A = {
+		fRef = F56DCB5701CFE5EF01227D25;
+		isa = PBXTextBookmark;
+		name = BibItemChangedNotification;
+		rLen = 26;
+		rLoc = 21127;
+		rType = 0;
+		vrLen = 527;
+		vrLoc = 20775;
+	};
+	F95ECF4B07400DC600E4DF5A = {
+		fRef = F56DCB5701CFE5EF01227D25;
+		isa = PBXTextBookmark;
+		name = BibItemChangedNotification;
+		rLen = 26;
+		rLoc = 21127;
+		rType = 0;
+		vrLen = 527;
+		vrLoc = 20775;
+	};
+	F95ECF4D07400E3800E4DF5A = {
+		fRef = F56DCB5701CFE5EF01227D25;
+		isa = PBXTextBookmark;
+		name = BibItemChangedNotification;
+		rLen = 26;
+		rLoc = 21127;
+		rType = 0;
+		vrLen = 527;
+		vrLoc = 20775;
+	};
+	F95ECF5007400EE600E4DF5A = {
+		fRef = F56DCB5701CFE5EF01227D25;
+		isa = PBXTextBookmark;
+		name = BibItemChangedNotification;
+		rLen = 26;
+		rLoc = 21127;
+		rType = 0;
+		vrLen = 527;
+		vrLoc = 20775;
+	};
+	F95ECF5307400F4400E4DF5A = {
+		fRef = F56DCB5701CFE5EF01227D25;
+		isa = PBXTextBookmark;
+		name = BibItemChangedNotification;
+		rLen = 26;
+		rLoc = 21127;
+		rType = 0;
+		vrLen = 527;
+		vrLoc = 20775;
+	};
+	F95ECF540740116700E4DF5A = {
+		fRef = F56DCB5701CFE5EF01227D25;
+		isa = PBXTextBookmark;
+		name = BibItemChangedNotification;
+		rLen = 26;
+		rLoc = 21127;
+		rType = 0;
+		vrLen = 527;
+		vrLoc = 20775;
+	};
+	F95ECF56074013A800E4DF5A = {
+		fRef = F56DCB5701CFE5EF01227D25;
+		isa = PBXTextBookmark;
+		name = BibItemChangedNotification;
+		rLen = 26;
+		rLoc = 21127;
+		rType = 0;
+		vrLen = 527;
+		vrLoc = 20775;
+	};
+	F95ECF590740145100E4DF5A = {
+		fRef = F56DCB5701CFE5EF01227D25;
+		isa = PBXTextBookmark;
+		name = BibItemChangedNotification;
+		rLen = 26;
+		rLoc = 21127;
+		rType = 0;
+		vrLen = 527;
+		vrLoc = 20775;
+	};
+	F95ECF5B074014AC00E4DF5A = {
+		fRef = F56DCB5701CFE5EF01227D25;
+		isa = PBXTextBookmark;
+		name = BibItemChangedNotification;
+		rLen = 26;
+		rLoc = 21127;
+		rType = 0;
+		vrLen = 527;
+		vrLoc = 20775;
+	};
+	F95ECF5C074014BF00E4DF5A = {
+		fRef = F56DCB5701CFE5EF01227D25;
+		isa = PBXTextBookmark;
+		name = BibItemChangedNotification;
+		rLen = 26;
+		rLoc = 21127;
+		rType = 0;
+		vrLen = 527;
+		vrLoc = 20775;
+	};
+	F95ECF5D074014EB00E4DF5A = {
+		fRef = F56DCB5701CFE5EF01227D25;
+		isa = PBXTextBookmark;
+		name = BibItemChangedNotification;
+		rLen = 26;
+		rLoc = 21127;
+		rType = 0;
+		vrLen = 527;
+		vrLoc = 20775;
+	};
+	F95ECF5E0740151F00E4DF5A = {
+		fRef = F56DCB5701CFE5EF01227D25;
+		isa = PBXTextBookmark;
+		name = BibItemChangedNotification;
+		rLen = 26;
+		rLoc = 21127;
+		rType = 0;
+		vrLen = 527;
+		vrLoc = 20775;
+	};
+	F95ECF5F0740157F00E4DF5A = {
+		fRef = F56DCB5701CFE5EF01227D25;
+		isa = PBXTextBookmark;
+		name = BibItemChangedNotification;
+		rLen = 26;
+		rLoc = 21127;
+		rType = 0;
+		vrLen = 527;
+		vrLoc = 20775;
+	};
+	F95ECF600740164400E4DF5A = {
+		fRef = F56DCB5701CFE5EF01227D25;
+		isa = PBXTextBookmark;
+		name = BibItemChangedNotification;
+		rLen = 26;
+		rLoc = 21127;
+		rType = 0;
+		vrLen = 527;
+		vrLoc = 20775;
+	};
+	F95ECF610740165300E4DF5A = {
+		fRef = F56DCB5701CFE5EF01227D25;
+		isa = PBXTextBookmark;
+		name = BibItemChangedNotification;
+		rLen = 26;
+		rLoc = 21127;
+		rType = 0;
+		vrLen = 527;
+		vrLoc = 20775;
+	};
+	F95ECF620740169300E4DF5A = {
+		fRef = F56DCB5701CFE5EF01227D25;
+		isa = PBXTextBookmark;
+		name = BibItemChangedNotification;
+		rLen = 26;
+		rLoc = 21127;
+		rType = 0;
+		vrLen = 527;
+		vrLoc = 20775;
+	};
+	F95ECF630740177500E4DF5A = {
+		fRef = F56DCB5701CFE5EF01227D25;
+		isa = PBXTextBookmark;
+		name = BibItemChangedNotification;
+		rLen = 26;
+		rLoc = 21127;
+		rType = 0;
+		vrLen = 527;
+		vrLoc = 20775;
+	};
+	F95ECF640740179600E4DF5A = {
+		fRef = F56DCB5701CFE5EF01227D25;
+		isa = PBXTextBookmark;
+		name = BibItemChangedNotification;
+		rLen = 26;
+		rLoc = 21127;
+		rType = 0;
+		vrLen = 527;
+		vrLoc = 20775;
+	};
+	F95ECF65074017B000E4DF5A = {
+		fRef = F56DCB5701CFE5EF01227D25;
+		isa = PBXTextBookmark;
+		name = BibItemChangedNotification;
+		rLen = 26;
+		rLoc = 21127;
+		rType = 0;
+		vrLen = 527;
+		vrLoc = 20775;
+	};
+	F95ECF66074017CA00E4DF5A = {
+		fRef = F56DCB5701CFE5EF01227D25;
+		isa = PBXTextBookmark;
+		name = BibItemChangedNotification;
+		rLen = 26;
+		rLoc = 21127;
+		rType = 0;
+		vrLen = 527;
+		vrLoc = 20775;
+	};
+	F95ECF67074017E700E4DF5A = {
+		fRef = F56DCB5701CFE5EF01227D25;
+		isa = PBXTextBookmark;
+		name = BibItemChangedNotification;
+		rLen = 26;
+		rLoc = 21127;
+		rType = 0;
+		vrLen = 527;
+		vrLoc = 20775;
+	};
+	F95ECF6A0740181300E4DF5A = {
+		fRef = F56DCB5701CFE5EF01227D25;
+		isa = PBXTextBookmark;
+		name = BibItemChangedNotification;
+		rLen = 26;
+		rLoc = 21127;
+		rType = 0;
+		vrLen = 527;
+		vrLoc = 20775;
+	};
+	F95ECF6B0740184500E4DF5A = {
+		fRef = F56DCB5701CFE5EF01227D25;
+		isa = PBXTextBookmark;
+		name = BibItemChangedNotification;
+		rLen = 26;
+		rLoc = 21127;
+		rType = 0;
+		vrLen = 527;
+		vrLoc = 20775;
+	};
+	F95ECF6C074018D100E4DF5A = {
+		fRef = F56DCB5701CFE5EF01227D25;
+		isa = PBXTextBookmark;
+		name = BibItemChangedNotification;
+		rLen = 26;
+		rLoc = 21127;
+		rType = 0;
+		vrLen = 527;
+		vrLoc = 20775;
+	};
+	F95ECF6D0740194300E4DF5A = {
+		fRef = F56DCB5701CFE5EF01227D25;
+		isa = PBXTextBookmark;
+		name = BibItemChangedNotification;
+		rLen = 26;
+		rLoc = 21127;
+		rType = 0;
+		vrLen = 527;
+		vrLoc = 20775;
+	};
+	F95ECF6E074019B000E4DF5A = {
+		fRef = F56DCB5701CFE5EF01227D25;
+		isa = PBXTextBookmark;
+		name = BibItemChangedNotification;
+		rLen = 26;
+		rLoc = 21127;
+		rType = 0;
+		vrLen = 527;
+		vrLoc = 20775;
+	};
+	F95ECF6F07401A2D00E4DF5A = {
+		fRef = F56DCB5701CFE5EF01227D25;
+		isa = PBXTextBookmark;
+		name = BibItemChangedNotification;
+		rLen = 26;
+		rLoc = 21127;
+		rType = 0;
+		vrLen = 527;
+		vrLoc = 20775;
+	};
+	F95ECF7007401A6700E4DF5A = {
+		fRef = F56DCB5701CFE5EF01227D25;
+		isa = PBXTextBookmark;
+		name = BibItemChangedNotification;
+		rLen = 26;
+		rLoc = 21127;
+		rType = 0;
+		vrLen = 527;
+		vrLoc = 20775;
+	};
+	F95ECF7107401A6B00E4DF5A = {
+		fRef = F56DCB5701CFE5EF01227D25;
+		isa = PBXTextBookmark;
+		name = BibItemChangedNotification;
+		rLen = 26;
+		rLoc = 21127;
+		rType = 0;
+		vrLen = 527;
+		vrLoc = 20775;
+	};
+	F95ECF7207401A6D00E4DF5A = {
+		fRef = F56DCB5701CFE5EF01227D25;
+		isa = PBXTextBookmark;
+		name = BibItemChangedNotification;
+		rLen = 26;
+		rLoc = 21127;
+		rType = 0;
+		vrLen = 527;
+		vrLoc = 20775;
+	};
+	F95ECF7307401A9D00E4DF5A = {
+		fRef = F56DCB5701CFE5EF01227D25;
+		isa = PBXTextBookmark;
+		name = BibItemChangedNotification;
+		rLen = 26;
+		rLoc = 21127;
+		rType = 0;
+		vrLen = 527;
+		vrLoc = 20775;
+	};
+	F95ECF7407401AA000E4DF5A = {
+		fRef = F56DCB5701CFE5EF01227D25;
+		isa = PBXTextBookmark;
+		name = BibItemChangedNotification;
+		rLen = 26;
+		rLoc = 21127;
+		rType = 0;
+		vrLen = 527;
+		vrLoc = 20775;
+	};
+	F95ECF7507401ADD00E4DF5A = {
+		fRef = F56DCB5701CFE5EF01227D25;
+		isa = PBXTextBookmark;
+		name = BibItemChangedNotification;
+		rLen = 26;
+		rLoc = 21127;
+		rType = 0;
+		vrLen = 527;
+		vrLoc = 20775;
+	};
+	F95ECF7607401B3500E4DF5A = {
+		fRef = F56DCB5701CFE5EF01227D25;
+		isa = PBXTextBookmark;
+		name = BibItemChangedNotification;
+		rLen = 26;
+		rLoc = 21127;
+		rType = 0;
+		vrLen = 527;
+		vrLoc = 20775;
+	};
+	F95ECF7707401B8B00E4DF5A = {
+		fRef = F56DCB5701CFE5EF01227D25;
+		isa = PBXTextBookmark;
+		name = BibItemChangedNotification;
+		rLen = 26;
+		rLoc = 21127;
+		rType = 0;
+		vrLen = 527;
+		vrLoc = 20775;
+	};
+	F95ECF7807401BCE00E4DF5A = {
+		fRef = F56DCB5701CFE5EF01227D25;
+		isa = PBXTextBookmark;
+		name = BibItemChangedNotification;
+		rLen = 26;
+		rLoc = 21127;
+		rType = 0;
+		vrLen = 527;
+		vrLoc = 20775;
+	};
+	F95ECF7907401C9400E4DF5A = {
+		fRef = F56DCB5701CFE5EF01227D25;
+		isa = PBXTextBookmark;
+		name = BibItemChangedNotification;
+		rLen = 26;
+		rLoc = 21127;
+		rType = 0;
+		vrLen = 527;
+		vrLoc = 20775;
+	};
+	F95ECF7A07401CF800E4DF5A = {
+		fRef = F56DCB5701CFE5EF01227D25;
+		isa = PBXTextBookmark;
+		name = BibItemChangedNotification;
+		rLen = 26;
+		rLoc = 21127;
+		rType = 0;
+		vrLen = 527;
+		vrLoc = 20775;
+	};
+	F95ECF7B07401D0C00E4DF5A = {
+		fRef = F56DCB5701CFE5EF01227D25;
+		isa = PBXTextBookmark;
+		name = BibItemChangedNotification;
+		rLen = 26;
+		rLoc = 21127;
+		rType = 0;
+		vrLen = 527;
+		vrLoc = 20775;
+	};
+	F95ECF7C07401DC100E4DF5A = {
+		fRef = F56DCB5701CFE5EF01227D25;
+		isa = PBXTextBookmark;
+		name = BibItemChangedNotification;
+		rLen = 26;
+		rLoc = 21127;
+		rType = 0;
+		vrLen = 527;
+		vrLoc = 20775;
+	};
+	F95ECF7D07401DEE00E4DF5A = {
+		fRef = F56DCB5701CFE5EF01227D25;
+		isa = PBXTextBookmark;
+		name = BibItemChangedNotification;
+		rLen = 26;
+		rLoc = 21127;
+		rType = 0;
+		vrLen = 527;
+		vrLoc = 20775;
+	};
+	F95ECF7E07401E1400E4DF5A = {
+		fRef = F56DCB5701CFE5EF01227D25;
+		isa = PBXTextBookmark;
+		name = BibItemChangedNotification;
+		rLen = 26;
+		rLoc = 21127;
+		rType = 0;
+		vrLen = 527;
+		vrLoc = 20775;
+	};
+	F95ECF7F07401E3100E4DF5A = {
+		fRef = F56DCB5701CFE5EF01227D25;
+		isa = PBXTextBookmark;
+		name = BibItemChangedNotification;
+		rLen = 26;
+		rLoc = 21127;
+		rType = 0;
+		vrLen = 527;
+		vrLoc = 20775;
+	};
+	F95ECF8007401EAA00E4DF5A = {
+		fRef = F56DCB5701CFE5EF01227D25;
+		isa = PBXTextBookmark;
+		name = BibItemChangedNotification;
+		rLen = 26;
+		rLoc = 21127;
+		rType = 0;
+		vrLen = 527;
+		vrLoc = 20775;
+	};
+	F95ECF810740204A00E4DF5A = {
+		fRef = F56DCB5701CFE5EF01227D25;
+		isa = PBXTextBookmark;
+		name = BibItemChangedNotification;
+		rLen = 26;
+		rLoc = 21127;
+		rType = 0;
+		vrLen = 527;
+		vrLoc = 20775;
+	};
+	F95ECF830740216500E4DF5A = {
+		fRef = F56DCB5701CFE5EF01227D25;
+		isa = PBXTextBookmark;
+		name = BibItemChangedNotification;
+		rLen = 26;
+		rLoc = 21127;
+		rType = 0;
+		vrLen = 527;
+		vrLoc = 20775;
+	};
+	F95ECF840740219800E4DF5A = {
+		fRef = F56DCB5701CFE5EF01227D25;
+		isa = PBXTextBookmark;
+		name = BibItemChangedNotification;
+		rLen = 26;
+		rLoc = 21127;
+		rType = 0;
+		vrLen = 527;
+		vrLoc = 20775;
+	};
+	F95ECF85074021D300E4DF5A = {
+		fRef = F56DCB5701CFE5EF01227D25;
+		isa = PBXTextBookmark;
+		name = BibItemChangedNotification;
+		rLen = 26;
+		rLoc = 21127;
+		rType = 0;
+		vrLen = 527;
+		vrLoc = 20775;
+	};
+	F95ECF86074021D500E4DF5A = {
+		fRef = F56DCB5701CFE5EF01227D25;
+		isa = PBXTextBookmark;
+		name = BibItemChangedNotification;
+		rLen = 26;
+		rLoc = 21127;
+		rType = 0;
+		vrLen = 527;
+		vrLoc = 20775;
+	};
+	F95ECF88074022D500E4DF5A = {
+		fRef = F56DCB5701CFE5EF01227D25;
+		isa = PBXTextBookmark;
+		name = BibItemChangedNotification;
+		rLen = 26;
+		rLoc = 21127;
+		rType = 0;
+		vrLen = 527;
+		vrLoc = 20775;
+	};
+	F95ECF8A074022FD00E4DF5A = {
+		fRef = F56DCB5701CFE5EF01227D25;
+		isa = PBXTextBookmark;
+		name = BibItemChangedNotification;
+		rLen = 26;
+		rLoc = 21127;
+		rType = 0;
+		vrLen = 527;
+		vrLoc = 20775;
+	};
+	F95ECF8B0740234800E4DF5A = {
+		fRef = F56DCB5701CFE5EF01227D25;
+		isa = PBXTextBookmark;
+		name = BibItemChangedNotification;
+		rLen = 26;
+		rLoc = 21127;
+		rType = 0;
+		vrLen = 527;
+		vrLoc = 20775;
+	};
+	F95ECF8C0740283500E4DF5A = {
+		fRef = F56DCB5701CFE5EF01227D25;
+		isa = PBXTextBookmark;
+		name = BibItemChangedNotification;
+		rLen = 26;
+		rLoc = 21127;
+		rType = 0;
+		vrLen = 527;
+		vrLoc = 20775;
+	};
+	F95ECF8D0740295300E4DF5A = {
+		fRef = F56DCB5701CFE5EF01227D25;
+		isa = PBXTextBookmark;
+		name = BibItemChangedNotification;
+		rLen = 26;
+		rLoc = 21127;
+		rType = 0;
+		vrLen = 527;
+		vrLoc = 20775;
+	};
+	F95ECF8E074029BB00E4DF5A = {
+		fRef = F56DCB5701CFE5EF01227D25;
+		isa = PBXTextBookmark;
+		name = BibItemChangedNotification;
+		rLen = 26;
+		rLoc = 21127;
+		rType = 0;
+		vrLen = 527;
+		vrLoc = 20775;
+	};
+	F95ECF910740458A00E4DF5A = {
+		fRef = F56DCB5701CFE5EF01227D25;
+		isa = PBXTextBookmark;
+		name = BibItemChangedNotification;
+		rLen = 26;
+		rLoc = 21127;
+		rType = 0;
+		vrLen = 527;
+		vrLoc = 20775;
+	};
+	F95ECF92074045E600E4DF5A = {
+		fRef = F56DCB5701CFE5EF01227D25;
+		isa = PBXTextBookmark;
+		name = BibItemChangedNotification;
+		rLen = 26;
+		rLoc = 21127;
+		rType = 0;
+		vrLen = 527;
+		vrLoc = 20775;
+	};
+	F95ECF9E074056CE00E4DF5A = {
+		fRef = F56DCB5701CFE5EF01227D25;
+		isa = PBXTextBookmark;
+		name = BibItemChangedNotification;
+		rLen = 26;
+		rLoc = 21127;
+		rType = 0;
+		vrLen = 527;
+		vrLoc = 20775;
+	};
+	F95ECFA6074057BB00E4DF5A = {
+		fRef = F56DCB5701CFE5EF01227D25;
+		isa = PBXTextBookmark;
+		name = BibItemChangedNotification;
+		rLen = 26;
+		rLoc = 21127;
+		rType = 0;
+		vrLen = 527;
+		vrLoc = 20775;
+	};
+	F95ED034074121A500E4DF5A = {
+		fRef = F56DCB5701CFE5EF01227D25;
+		isa = PBXTextBookmark;
+		name = BibItemChangedNotification;
+		rLen = 26;
+		rLoc = 21127;
+		rType = 0;
+		vrLen = 527;
+		vrLoc = 20775;
+	};
+	F95ED035074121DC00E4DF5A = {
+		fRef = F56DCB5701CFE5EF01227D25;
+		isa = PBXTextBookmark;
+		name = BibItemChangedNotification;
+		rLen = 26;
+		rLoc = 21127;
+		rType = 0;
+		vrLen = 527;
+		vrLoc = 20775;
+	};
+	F95ED0390741231300E4DF5A = {
+		fRef = F56DCB5701CFE5EF01227D25;
+		isa = PBXTextBookmark;
+		name = BibItemChangedNotification;
+		rLen = 26;
+		rLoc = 21127;
+		rType = 0;
+		vrLen = 527;
+		vrLoc = 20775;
+	};
+	F95ED03B0741232400E4DF5A = {
+		fRef = F56DCB5701CFE5EF01227D25;
+		isa = PBXTextBookmark;
+		name = BibItemChangedNotification;
+		rLen = 26;
+		rLoc = 21127;
+		rType = 0;
+		vrLen = 527;
+		vrLoc = 20775;
+	};
+	F95ED03C0741232800E4DF5A = {
+		fRef = F56DCB5701CFE5EF01227D25;
+		isa = PBXTextBookmark;
+		name = BibItemChangedNotification;
+		rLen = 26;
+		rLoc = 21127;
+		rType = 0;
+		vrLen = 527;
+		vrLoc = 20775;
+	};
+	F95ED03D0741233A00E4DF5A = {
+		fRef = F56DCB5701CFE5EF01227D25;
+		isa = PBXTextBookmark;
+		name = BibItemChangedNotification;
+		rLen = 26;
+		rLoc = 21127;
+		rType = 0;
+		vrLen = 527;
+		vrLoc = 20775;
+	};
+	F95ED03E0741235A00E4DF5A = {
+		fRef = F56DCB5701CFE5EF01227D25;
+		isa = PBXTextBookmark;
+		name = BibItemChangedNotification;
+		rLen = 26;
+		rLoc = 21127;
+		rType = 0;
+		vrLen = 527;
+		vrLoc = 20775;
+	};
+	F95ED03F0741236600E4DF5A = {
+		fRef = F56DCB5701CFE5EF01227D25;
+		isa = PBXTextBookmark;
+		name = BibItemChangedNotification;
+		rLen = 26;
+		rLoc = 21127;
+		rType = 0;
+		vrLen = 527;
+		vrLoc = 20775;
+	};
+	F95ED040074123F900E4DF5A = {
+		fRef = F56DCB5701CFE5EF01227D25;
+		isa = PBXTextBookmark;
+		name = BibItemChangedNotification;
+		rLen = 26;
+		rLoc = 21127;
+		rType = 0;
+		vrLen = 527;
+		vrLoc = 20775;
 	};
 	F960E4D706FF3D42006751F2 = {
 		fileReference = F9A59EDF06DFE7DD00C411CA;
@@ -1329,7 +2280,7 @@
 			sepNavIntBoundsRect = "{{0, 0}, {705, 3359}}";
 			sepNavSelRange = "{8461, 0}";
 			sepNavVisRect = "{{0, 2931}, {705, 428}}";
-			sepNavWindowFrame = "{{12, 444}, {750, 558}}";
+			sepNavWindowFrame = "{{187, 394}, {750, 558}}";
 		};
 	};
 	F9A11AA9073C4825006B766C = {
@@ -1343,7 +2294,7 @@
 		fileReference = 27CB67AD05681124001D2AC3;
 		functionName = "print_str()";
 		isa = PBXFileBreakpoint;
-		lineNumber = 313;
+		lineNumber = 328;
 		state = 1;
 	};
 	F9A11BB8073DEBD1006B766C = {

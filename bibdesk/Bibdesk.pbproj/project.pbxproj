@@ -4527,10 +4527,9 @@
 		F9A11A68073C3C26006B766C = {
 			isa = PBXFileReference;
 			lastKnownFileType = wrapper.framework;
-			name = AGRegex.framework;
-			path = ../../BuildProducts/AGRegex.framework;
-			refType = 2;
-			sourceTree = SOURCE_ROOT;
+			path = AGRegex.framework;
+			refType = 3;
+			sourceTree = BUILT_PRODUCTS_DIR;
 		};
 		F9A11A69073C3C26006B766C = {
 			fileRef = F9A11A68073C3C26006B766C;
