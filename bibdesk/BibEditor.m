@@ -972,8 +972,8 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
     NSPoint loc = [bibFields convertPoint:frame.origin toView:nil];
     loc = [[self window] convertBaseToScreen:loc];
     
-    loc.x = loc.x + titleWidth + 4; // 4 is a magic number based on the nib
-    loc.y = loc.y;
+    loc.x = loc.x + titleWidth;
+    loc.y = loc.y + 4; // 4 is a magic number based on the nib
     
     // make sure it's a complex string:
     NSString *value = [theBib valueOfField:[cell title]];
@@ -984,7 +984,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
     
     [macroTextFieldWC startEditingValue:(BDSKComplexString *)value
                              atLocation:loc
-                                  width:frame.size.width - titleWidth
+                                  width:frame.size.width - titleWidth + 4
                                withFont:nil
                               fieldName:[cell title]];
         
