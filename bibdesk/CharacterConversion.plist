@@ -33,6 +33,8 @@
 		<string>{\%}</string>
 		<key>¡</key>
 		<string>{!'}</string>
+		<key>§</key>
+		<string>{\S}</string>
 		<key>©</key>
 		<string>{\copyright}</string>
 		<key>®</key>
@@ -145,10 +147,16 @@
 		<string>{\H o}</string>
 		<key>œ</key>
 		<string>{\oe}</string>
+		<key>ş</key>
+		<string>{\c s}</string>
 		<key>š</key>
 		<string>{\v s}</string>
 		<key>Ÿ</key>
 		<string>{\"Y}</string>
+		<key>Ž</key>
+		<string>{\v Z}</string>
+		<key>ž</key>
+		<string>{\v z}</string>
 		<key>™</key>
 		<string>{\texttrademark}</string>
 	</dict>
@@ -214,6 +222,8 @@
 		<string>Œ</string>
 		<key>{\O}</key>
 		<string>Ø</string>
+		<key>{\S}</key>
+		<string>§</string>
 		<key>{\^A}</key>
 		<string>Â</string>
 		<key>{\^E}</key>
@@ -252,6 +262,8 @@
 		<string>Ç</string>
 		<key>{\c c}</key>
 		<string>ç</string>
+		<key>{\c s}</key>
+		<string>ş</string>
 		<key>{\cc}</key>
 		<string>ç</string>
 		<key>{\copyright}</key>
@@ -272,12 +284,16 @@
 		<string>č</string>
 		<key>{\v C}</key>
 		<string>Č</string>
+		<key>{\v Z}</key>
+		<string>Ž</string>
 		<key>{\v c}</key>
 		<string>č</string>
 		<key>{\v e}</key>
 		<string>ě</string>
 		<key>{\v s}</key>
 		<string>š</string>
+		<key>{\v z}</key>
+		<string>ž</string>
 		<key>{\~a}</key>
 		<string>ã</string>
 		<key>{\~n}</key>
