@@ -90,7 +90,7 @@ void _setupFonts(){
 		undoManager = nil;
         [self setFileType:inFileType];
         [self makeType:type];
-        citeKey = [@"cite-key" retain];
+        [self setCiteKeyString: @"cite-key"];
         [self setDate: nil];
 		[self setDateCreated: nil];
 		[self setDateModified: nil];
