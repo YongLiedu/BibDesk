@@ -207,7 +207,7 @@ static BibFinder *_sharedFinder = nil;
     NSNumber *i;
     [pasteboard declareTypes:[NSArray arrayWithObject:NSStringPboardType] owner:nil];
     while(i=[e nextObject]){
-        [s appendString:[[foundBibs objectAtIndex:[i intValue]] textValue]];
+        [s appendString:[[foundBibs objectAtIndex:[i intValue]] bibTeXString]];
     }
     [pasteboard setString:s forType:NSStringPboardType];
 }
@@ -245,7 +245,7 @@ static BibFinder *_sharedFinder = nil;
 
     [pb declareTypes:[NSArray arrayWithObject:NSPDFPboardType] owner:nil];
     while(i = [e nextObject]){
-        [bibString appendString:[[foundBibs objectAtIndex:[i intValue]] textValue]];
+        [bibString appendString:[[foundBibs objectAtIndex:[i intValue]] bibTeXString]];
     }
     d = [PDFpreviewer PDFDataFromString:bibString];
     [pb setData:d forType:NSPDFPboardType];
@@ -301,31 +301,32 @@ static BibFinder *_sharedFinder = nil;
 }
 
 - (id)tableView:(NSTableView *)tView objectValueForTableColumn:(NSTableColumn *)tableColumn row:(int)row{
-    NSArray *auths = [[foundBibs objectAtIndex:row] pubAuthors];
+    BibItem *aBib = (BibItem *)[foundBibs objectAtIndex:row];
+    NSArray *auths = [aBib pubAuthors];
 
     if([[tableColumn identifier] isEqualToString: @"Cite Key"] ){
-        return [[foundBibs objectAtIndex:row] citeKey];
+        return [aBib citeKey];
     }else if([[tableColumn identifier] isEqualToString: @"Title"] ){
-        return [[foundBibs objectAtIndex:row] title];
+        return [aBib title];
     }else if([[tableColumn identifier] isEqualToString: @"Date"] ){
-        if([[foundBibs objectAtIndex:row] date] == nil)
+        if([aBib date] == nil)
             return @"No date";
-        else if([[[foundBibs objectAtIndex:row] valueOfField:@"Month"] isEqualToString:@""])
-            return [[[foundBibs objectAtIndex:row] date] descriptionWithCalendarFormat:@"%Y"];
-        else return [[[foundBibs objectAtIndex:row] date] descriptionWithCalendarFormat:@"%b %Y"];
+        else if([[aBib valueOfField:@"Month"] isEqualToString:@""])
+            return [[aBib date] descriptionWithCalendarFormat:@"%Y"];
+        else return [[aBib date] descriptionWithCalendarFormat:@"%b %Y"];
     }else if([[tableColumn identifier] isEqualToString: @"1st Author"] ){
         if([auths count] > 0)
-            return [[foundBibs objectAtIndex:row] authorAtIndex:0];
+            return [aBib authorAtIndex:0];
         else
             return @"-";
     }else if([[tableColumn identifier] isEqualToString: @"2nd Author"] ){
         if([auths count] > 1)
-            return [[foundBibs objectAtIndex:row] authorAtIndex:1];
+            return [aBib authorAtIndex:1];
         else
             return @"-";
     }else if([[tableColumn identifier] isEqualToString: @"3rd Author"] ){
         if([auths count] > 2)
-            return [[foundBibs objectAtIndex:row] authorAtIndex:2];
+            return [aBib authorAtIndex:2];
         else
             return @"-";
     }else{
@@ -355,7 +356,7 @@ static BibFinder *_sharedFinder = nil;
     while (i = [enumerator nextObject]) {
         if(([[sud objectForKey:BDSKDragCopyKey] intValue] == 0) ||
            ([[sud objectForKey:BDSKDragCopyKey] intValue] == 2)){
-            [s appendString:[[foundBibs objectAtIndex:[i intValue]] textValue]];
+            [s appendString:[[foundBibs objectAtIndex:[i intValue]] bibTeXString]];
         }
         if([[sud objectForKey:BDSKDragCopyKey] intValue] == 1){
             if(sep) [s appendString:startCite];
