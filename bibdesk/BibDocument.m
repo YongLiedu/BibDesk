@@ -1432,7 +1432,9 @@ int generalBibItemCompareFunc(id item1, id item2, void *context){
     NSNumber *i;
     [pasteboard declareTypes:[NSArray arrayWithObject:NSStringPboardType] owner:nil];
     while(i=[e nextObject]){
+	    [s appendString:@"\n"];
         [s appendString:[[shownPublications objectAtIndex:[i intValue]] bibTeXString]];
+		[s appendString:@"\n"];
     }
     [pasteboard setString:s forType:NSStringPboardType];
 }
