@@ -17,7 +17,7 @@ NSString *BDSKInputManagerID = @"net.sourceforge.bibdesk.inputmanager";
     [super awakeFromNib];
     applicationSupportPath = [[NSHomeDirectory() stringByAppendingPathComponent:@"/Library/Application Support/BibDeskInputManager"] retain];
     inputManagerPath = [[NSHomeDirectory() stringByAppendingPathComponent:@"/Library/InputManagers/BibDeskInputManager"] retain];
-    if(![[NSFileManager defaultManager] fileExistsAtPath:applicationSupportPath]){
+    if(![[NSFileManager defaultManager] fileExistsAtPath:[applicationSupportPath stringByAppendingPathComponent:@"EnabledApplications.plist"]]){
 	appListArray = [[NSMutableArray arrayWithObjects:[NSMutableDictionary dictionaryWithObject:[@"/Applications/TextEdit.app" stringByStandardizingPath] forKey:@"Path"], 
 							 [NSMutableDictionary dictionaryWithObject:[@"/Developer/Applications/Xcode.app" stringByStandardizingPath] forKey:@"Path"], nil] retain];
 	[[NSFileManager defaultManager] createDirectoryAtPath:applicationSupportPath attributes:nil];
@@ -39,23 +39,24 @@ NSString *BDSKInputManagerID = @"net.sourceforge.bibdesk.inputmanager";
 	[enableButton setTitle:NSLocalizedString(@"Reinstall",@"Reinstall input manager")];
 	[enableButton sizeToFit];
     }    
-    [self getIconAndBundleID];
+    [self setBundleID];
     [appList reloadData];
 }
 
-- (void)getIconAndBundleID{
+- (NSString *)bundleIDForPath:(NSString *)path{
+    NSBundle *bundle = [NSBundle bundleWithPath:path];
+    
+    return [[bundle infoDictionary] objectForKey:@"CFBundleIdentifier"];
+}
+
+- (void)setBundleID{
     NSEnumerator *e = [appListArray objectEnumerator];
-    NSBundle *bundle;
-    NSDictionary *plist;
     NSMutableDictionary *dict;
     
     while(dict = [e nextObject]){
-	bundle = [NSBundle bundleWithPath:[dict objectForKey:@"Path"]];
-	plist = [bundle infoDictionary];
-	NSString *iconName = [plist objectForKey:@"CFBundleIconFile"];
-	[dict setObject:[bundle pathForImageResource:iconName] forKey:@"IconPath"];
-	[dict setObject:[plist objectForKey:@"CFBundleIdentifier"] forKey:@"BundleID"];
+	[dict setObject:[self bundleIDForPath:[dict objectForKey:@"Path"]] forKey:@"BundleID"];
     }
+
     [self cacheAppList];
 
 }
@@ -65,8 +66,11 @@ NSString *BDSKInputManagerID = @"net.sourceforge.bibdesk.inputmanager";
 }
 
 - (void)tableView:(NSTableView *)aTableView willDisplayCell:(id)aCell forTableColumn:(NSTableColumn *)aTableColumn row:(int)rowIndex{
+
     [aCell setStringValue:[[[[appListArray objectAtIndex:rowIndex] objectForKey:@"Path"] lastPathComponent] stringByDeletingPathExtension]];
-    NSImage *image = [[[NSImage alloc] initWithContentsOfFile:[[appListArray objectAtIndex:rowIndex] objectForKey:@"IconPath"]] autorelease];
+
+    NSImage *image = [[NSWorkspace sharedWorkspace] iconForFile:[[appListArray objectAtIndex:rowIndex] objectForKey:@"Path"]];
+
     [image setSize:NSMakeSize(16, 16)];
     [aCell setImage:image];
     [aCell setLeaf:YES];
@@ -97,7 +101,7 @@ NSString *BDSKInputManagerID = @"net.sourceforge.bibdesk.inputmanager";
 					 alternateButton:nil
 					     otherButton:nil
 			       informativeTextWithFormat:@"Unable to remove file at %@, please check file or directory permissions.", inputManagerPath];
-	[anAlert beginSheetModalForWindow:[sender window]
+	[anAlert beginSheetModalForWindow:[controlBox window]
 			    modalDelegate:nil
 			   didEndSelector:nil
 			      contextInfo:nil];    
@@ -110,7 +114,7 @@ NSString *BDSKInputManagerID = @"net.sourceforge.bibdesk.inputmanager";
     NSOpenPanel *op = [NSOpenPanel openPanel];
     [op setCanChooseDirectories:NO];
     [op setAllowsMultipleSelection:NO];
-    [op beginSheetForDirectory:@"/Applications"
+    [op beginSheetForDirectory:nil
 			  file:nil
 			 types:[NSArray arrayWithObject:@"app"]
 		modalForWindow:[controlBox window]
@@ -121,8 +125,43 @@ NSString *BDSKInputManagerID = @"net.sourceforge.bibdesk.inputmanager";
 
 - (void)openPanelDidEnd:(NSOpenPanel *)sheet returnCode:(int)returnCode contextInfo:(void *)contextInfo{
     if(returnCode == NSOKButton){
-	[appListArray addObject:[NSMutableDictionary dictionaryWithObject:[[sheet filenames] objectAtIndex:0] forKey:@"Path"]];
-	[self updateUI];
+	
+	// check to see if it's a Cocoa application (returns no for BBEdit Lite and MS Word, but yes for Carbon Emacs and Aqua LyX, so it's not foolproof)
+	NSString *fileType = nil;
+	[[NSWorkspace sharedWorkspace] getInfoForFile:[[sheet filenames] objectAtIndex:0]
+					  application:nil
+						 type:&fileType];
+	if(![fileType isEqualToString:NSApplicationFileType]){
+	    [sheet orderOut:nil];
+	    NSAlert *anAlert = [NSAlert alertWithMessageText:@"Error!"
+					       defaultButton:nil
+					     alternateButton:nil
+						 otherButton:nil
+				   informativeTextWithFormat:@"%@ is not a Cocoa application.", [[sheet filenames] objectAtIndex:0]];
+	    [anAlert beginSheetModalForWindow:[controlBox window]
+				modalDelegate:nil
+			       didEndSelector:nil
+				  contextInfo:nil];
+	    return;
+	}
+	
+	// LaTeX Equation Editor is Cocoa, but doesn't have a CFBundleIdentifier!  Perhaps there are others...
+	if([self bundleIDForPath:[[sheet filenames] objectAtIndex:0]] == nil){
+	    [sheet orderOut:nil];
+	    NSAlert *anAlert = [NSAlert alertWithMessageText:@"No Bundle Identifier!"
+					       defaultButton:nil
+					     alternateButton:nil
+						 otherButton:nil
+				   informativeTextWithFormat:@"The selected application does not have a bundle identifier.  Please inform the author of %@.", [[sheet filenames] objectAtIndex:0]];
+	    [anAlert beginSheetModalForWindow:[controlBox window]
+				modalDelegate:nil
+			       didEndSelector:nil
+				  contextInfo:nil];
+	    return;
+	} else {
+	    [appListArray addObject:[NSMutableDictionary dictionaryWithObject:[[sheet filenames] objectAtIndex:0] forKey:@"Path"]];
+	    [self updateUI];
+	}
     } else {
 	if(returnCode == NSCancelButton){
 	    // do nothing
@@ -132,7 +171,15 @@ NSString *BDSKInputManagerID = @"net.sourceforge.bibdesk.inputmanager";
 
 - (void)cacheAppList{
     if(![[[appListArray copy] autorelease] writeToFile:[applicationSupportPath stringByAppendingPathComponent:@"EnabledApplications.plist"] atomically:YES]){
-	NSLog(@"unable to write autocompletion cache");
+	NSAlert *anAlert = [NSAlert alertWithMessageText:@"Error!"
+					   defaultButton:nil
+					 alternateButton:nil
+					     otherButton:nil
+			       informativeTextWithFormat:@"Unable to write file at %@, please check file or directory permissions.", [applicationSupportPath stringByAppendingPathComponent:@"EnabledApplications.plist"]];
+	[anAlert beginSheetModalForWindow:[controlBox window]
+			    modalDelegate:nil
+			   didEndSelector:nil
+			      contextInfo:nil];
     }
 }
 
