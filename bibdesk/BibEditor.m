@@ -125,7 +125,8 @@ NSString *BDSKUrlString = @"Url";
             [entry setTitleFont:requiredFont];
             [entry setAttributedTitle:[[[NSAttributedString alloc] initWithString:tmp
                                                                        attributes:reqAtt] autorelease]];
-//            [entry setFormatter:[[NSApp delegate] formatterForEntry:tmp]];
+            // Autocompletion stuff
+            [entry setFormatter:[[NSApp delegate] formatterForEntry:tmp]];
             //[entry setTitleAlignment:NSRightTextAlignment]; this doesn't work...
             i++;
         }
@@ -144,7 +145,8 @@ NSString *BDSKUrlString = @"Url";
             [entry setTag:i];
             [entry setObjectValue:[tmpBib valueOfField:tmp]];
             [entry setTitleAlignment:NSLeftTextAlignment];
-//            [entry setFormatter:[[NSApp delegate] formatterForEntry:tmp]];
+            // Autocompletion stuff
+            [entry setFormatter:[[NSApp delegate] formatterForEntry:tmp]];
             i++;
         }
     }
