@@ -1088,8 +1088,15 @@ void _setupFonts(){
 					} else {
 						number = 1;
 					}
+					if ([scanner scanUpToString:@"%" intoString:&string]) {
+						string = [converter stringBySanitizingString:string forField:fieldName inFileType:[self fileType]];
+					}
+					else {
+						string = @"";
+					}
 					if ([scanner isAtEnd]) {
 						[parsedStr setString:[self uniqueString:parsedStr 
+														 suffix:string
 													   forField:fieldName
 												  numberOfChars:number 
 														   from:'a' to:'z' 
@@ -1106,8 +1113,15 @@ void _setupFonts(){
 					} else {
 						number = 1;
 					}
+					if ([scanner scanUpToString:@"%" intoString:&string]) {
+						string = [converter stringBySanitizingString:string forField:fieldName inFileType:[self fileType]];
+					}
+					else {
+						string = @"";
+					}
 					if ([scanner isAtEnd]) {
 						[parsedStr setString:[self uniqueString:parsedStr 
+														 suffix:string
 													   forField:fieldName
 												  numberOfChars:number 
 														   from:'A' to:'Z' 
@@ -1124,8 +1138,15 @@ void _setupFonts(){
 					} else {
 						number = 1;
 					}
+					if ([scanner scanUpToString:@"%" intoString:&string]) {
+						string = [converter stringBySanitizingString:string forField:fieldName inFileType:[self fileType]];
+					}
+					else {
+						string = @"";
+					}
 					if ([scanner isAtEnd]) {
 						[parsedStr setString:[self uniqueString:parsedStr 
+														 suffix:string
 													   forField:fieldName
 												  numberOfChars:number 
 														   from:'0' to:'1' 
@@ -1154,28 +1175,32 @@ void _setupFonts(){
 
 // returns a 'valid' string rather than a 'unique' one
 - (NSString *)uniqueString:(NSString *)baseStr 
+					suffix:(NSString *)suffix
 				  forField:(NSString *)fieldName
 			 numberOfChars:(unsigned int)number 
 					  from:(unichar)fromChar 
 						to:(unichar)toChar 
 					 force:(BOOL)force {
 	
-	NSString *uniqueStr = baseStr;
+	NSString *uniqueStr;
 	char c;
 	
 	if (number > 0) {
 		for (c = fromChar; c <= toChar; c++) {
 			// try with the first added char set to c
 			uniqueStr = [baseStr stringByAppendingFormat:@"%C", c];
-			uniqueStr = [self uniqueString:uniqueStr forField:fieldName numberOfChars:number - 1 from:fromChar to:toChar force:NO];
+			uniqueStr = [self uniqueString:uniqueStr suffix:suffix forField:fieldName numberOfChars:number - 1 from:fromChar to:toChar force:NO];
 			if ([self stringIsValid:uniqueStr forField:fieldName])
 				return uniqueStr;
 		}
 	}
+	else {
+		uniqueStr = [baseStr stringByAppendingString:suffix];
+	}
 	
 	if (force && ![self stringIsValid:uniqueStr forField:fieldName]) {
 		// not uniqueString yet, so try with 1 more char
-		return [self uniqueString:uniqueStr forField:fieldName numberOfChars:number + 1 from:fromChar to:toChar force:YES];
+		return [self uniqueString:baseStr suffix:suffix forField:fieldName numberOfChars:number + 1 from:fromChar to:toChar force:YES];
 	}
 	
 	return uniqueStr;

@@ -320,9 +320,7 @@ static BDSKConverter *theConverter;
 					string = [self stringBySanitizingString:[arr objectAtIndex:1] forField:fieldName inFileType:type];
 				}
 				else if (	i < [components count] - 1 || 
-							![validLastSpecifierChars characterIsMember:specifier] || 
-							![[NSCharacterSet decimalDigitCharacterSet] 
-								isSupersetOfSet:[NSCharacterSet characterSetWithCharactersInString:[string substringFromIndex:1]]]) {
+							![validLastSpecifierChars characterIsMember:specifier] ) {
 				
 					NSLog(@"Invalid specifier %%%C in format.", specifier);
 					return NO;
