@@ -199,6 +199,7 @@ NSString* BDSKBibTeXStringPboardType = @"edu.ucsd.cs.mmcrack.bibdesk: Local BibT
     [showColsArray release];
     [customStringArray release];
     [toolbarItems release];
+    [tableColumns release];
     [super dealloc];
 }
 
