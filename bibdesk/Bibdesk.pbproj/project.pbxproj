@@ -817,27 +817,6 @@
 			settings = {
 			};
 		};
-		274C83B505DF2BFF0020EEFF = {
-			buildArgumentsString = "$(ACTION)";
-			buildPhases = (
-			);
-			buildSettings = {
-				OTHER_CFLAGS = "";
-				OTHER_LDFLAGS = "";
-				OTHER_REZFLAGS = "";
-				PRODUCT_NAME = btparse;
-				SECTORDER_FLAGS = "";
-				WARNING_CFLAGS = "-Wmost -Wno-four-char-constants -Wno-unknown-pragmas";
-			};
-			buildToolPath = /usr/bin/make;
-			buildWorkingDirectory = ../bibdesk_vendorsrc/gward/btparse;
-			dependencies = (
-			);
-			isa = PBXLegacyTarget;
-			name = btparse;
-			passBuildSettingsInEnvironment = 0;
-			productName = btparse;
-		};
 		274C83B605DF2E500020EEFF = {
 			containerPortal = 2A37F4A9FDCFA73011CA2CEA;
 			isa = PBXContainerItemProxy;
@@ -847,7 +826,7 @@
 		};
 		274C83B705DF2E500020EEFF = {
 			isa = PBXTargetDependency;
-			target = 274C83B505DF2BFF0020EEFF;
+			target = 27CCDA7305DF878700FAF2C9;
 			targetProxy = 274C83B605DF2E500020EEFF;
 		};
 		274C83BA05DF2F850020EEFF = {
@@ -2438,6 +2417,38 @@
 			settings = {
 			};
 		};
+		27CCDA7205DF878700FAF2C9 = {
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+			);
+			isa = PBXShellScriptBuildPhase;
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/tcsh;
+			shellScript = "cd $SOURCE_ROOT/../bibdesk_vendorsrc/gward/btparse\ntouch src/.pccts_run\nmake\nexit 0";
+		};
+		27CCDA7305DF878700FAF2C9 = {
+			buildPhases = (
+				27CCDA7205DF878700FAF2C9,
+			);
+			buildSettings = {
+				OPTIMIZATION_CFLAGS = "";
+				OTHER_CFLAGS = "";
+				OTHER_LDFLAGS = "";
+				OTHER_REZFLAGS = "";
+				PRODUCT_NAME = btparse;
+				SECTORDER_FLAGS = "";
+				WARNING_CFLAGS = "-Wmost -Wno-four-char-constants -Wno-unknown-pragmas";
+			};
+			dependencies = (
+			);
+			isa = PBXAggregateTarget;
+			name = btparse;
+			productName = btparse;
+		};
 		27E0A9F405A7C86B005BA25A = {
 			buildPhases = (
 				27E0A9F605A7C86B005BA25A,
@@ -3555,11 +3566,11 @@
 				27E0A9F405A7C86B005BA25A,
 				F568CBDB025BBCB801709AC4,
 				27C41F3F04BE8818007932DC,
-				274C83B505DF2BFF0020EEFF,
 				274C83BA05DF2F850020EEFF,
 				274C83C105DF2FD40020EEFF,
 				274C83F205DF612E0020EEFF,
 				274C84F705DF720A0020EEFF,
+				27CCDA7305DF878700FAF2C9,
 			);
 		};
 		2A37F4AAFDCFA73011CA2CEA = {
