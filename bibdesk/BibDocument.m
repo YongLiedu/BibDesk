@@ -645,21 +645,25 @@ NSString *BDSKBibItemLocalDragPboardType = @"edu.ucsd.cs.mmccrack.bibdesk: Local
 	NSString *finalName = [NSString stringWithString:newName];
 	
 	if(![writableTypesArray containsObject:[self fileType]]){
-	    // this sets the file type and name if we open a type for which we are a viewer
-	    // we don't want to overwrite an existing file, though
-	    while([fm fileExistsAtPath:finalName]){
-		i++;
-		finalName = [[[newName stringByDeletingPathExtension] stringByAppendingFormat:@"%i",i] stringByAppendingPathExtension:@"bib"];
-	    }
-	    NSRunAlertPanel(NSLocalizedString(@"Import Successful",
-					      @"alert title"),
-			    NSLocalizedString(@"Your file has been converted to BibTeX and assigned a unique name.  To save the file or change the name, please use the Save As command.",
-					      @"file has been converted and assigned a unique name, can be saved with save as"),
-			    nil,nil, nil, nil);
-	    [self setFileName:finalName];
+	    int rv = NSRunAlertPanel(NSLocalizedString(@"File Imported",
+                                                       @"alert title"),
+			             NSLocalizedString(@"To re-read the file as BibTeX and see if the import was successful, use the \"Validate\" button.",
+                                                       @"Validate file or skip."),
+                                                       @"Validate",@"Skip", nil, nil);
+            // let NSDocument name it
+            [self setFileName:nil];
 	    [self setFileType:@"bibTeX database"];  // this is the only type we support via the save command
-
-	} return YES;
+            if(rv == NSAlertDefaultReturn){
+                // per user feedback, give an option to run the file through the BibTeX parser to see if we can open our own BibTeX representation
+                // it is necessary to write the data to a file in order to use the error panel to jump to the offending line
+                NSString *tempFilePath = [NSTemporaryDirectory() stringByAppendingPathComponent:[[NSProcessInfo processInfo] globallyUniqueString]];
+                [[self bibTeXDataWithEncoding:[[OFPreferenceWrapper sharedPreferenceWrapper] integerForKey:BDSKDefaultStringEncoding]] writeToFile:tempFilePath atomically:YES];
+                [[NSApp delegate] openBibTeXFile:tempFilePath withEncoding:[[OFPreferenceWrapper sharedPreferenceWrapper] integerForKey:BDSKDefaultStringEncoding]];
+#warning ARM: fix this
+                [self close]; // why doesn't this close the window?
+            }
+            
+        } return YES;
     
     } else return NO;  // if super failed
 
@@ -761,14 +765,12 @@ stringByAppendingPathComponent:@"BibDesk"]; */
         while(tmp = [e nextObject]){
             [d appendData:[[NSString stringWithString:@"\n\n"] dataUsingEncoding:NSASCIIStringEncoding  allowLossyConversion:YES]];
             //The TeXification is now done in the BibItem bibTeXString method
-            //Where it can be done once per field to handle newlines.
             [d appendData:[[tmp bibTeXString] dataUsingEncoding:NSUTF8StringEncoding allowLossyConversion:YES]];
         }
     } else {
         while(tmp = [e nextObject]){
             [d appendData:[[NSString stringWithString:@"\n\n"] dataUsingEncoding:[self documentStringEncoding]  allowLossyConversion:YES]];
             //The TeXification is now done in the BibItem bibTeXString method
-            //Where it can be done once per field to handle newlines.
             [d appendData:[[tmp unicodeBibTeXString] dataUsingEncoding:[self documentStringEncoding] allowLossyConversion:YES]];
         }
     }
@@ -938,7 +940,7 @@ stringByAppendingPathComponent:@"BibDesk"]; */
 		[pub setDocument:self];
 	}
     
-	[shownPublications setArray:publications];
+    [shownPublications setArray:publications];
     [self refreshAuthors];
     // since we can't save pubmed files as pubmed files:
     [self updateChangeCount:NSChangeDone];
