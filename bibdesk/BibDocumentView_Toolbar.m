@@ -22,7 +22,6 @@ static NSString*	SearchFieldDocToolbarItemIdentifier 	= @"NSSearchField Document
 static NSString*	EditDocToolbarItemIdentifier 	= @"Edit Document Item Identifier";
 static NSString*	DelDocToolbarItemIdentifier 	= @"Del Document Item Identifier";
 static NSString*	PrvDocToolbarItemIdentifier 	= @"Show Preview  Item Identifier";
-static NSString*	SortByDocToolbarItemIdentifier 	= @"Sort by Item Identifier";
 static NSString*	ToggleCiteDrawerToolbarItemIdentifier 	= @"Toggle Cite Drawer Identifier";
 
 @implementation BibDocument (Toolbar)
@@ -115,16 +114,6 @@ static void addToolbarItem(NSMutableDictionary *theDict,NSString *identifier,NSS
                    [NSImage imageNamed: @"previewdoc"],
                    @selector(toggleShowingPreviewPanel:), NULL);
 	
-    // this one switches between outline and tableviews.
-    addToolbarItem(toolbarItems, SortByDocToolbarItemIdentifier,
-                   NSLocalizedString(@"Change View",@""),
-                   NSLocalizedString(@"Change View",@""),
-                   NSLocalizedString(@"Change the way publications are viewed.",@""),
-                   nil, @selector(setView:), sortKeyView, @selector(didChangeSortKey:), NULL);
-    
-    // this is a bad hack. i'm probably going to leak tons of NSButtons.
-    //    [sortKeyButton retain];
-
     addToolbarItem(toolbarItems, ToggleCiteDrawerToolbarItemIdentifier,
                    NSLocalizedString(@"Cite Drawer",@""),
                    NSLocalizedString(@"Show Custom Citations Drawer",@""),
@@ -177,7 +166,6 @@ static void addToolbarItem(NSMutableDictionary *theDict,NSString *identifier,NSS
     return [NSArray arrayWithObjects: NewDocToolbarItemIdentifier,
 		EditDocToolbarItemIdentifier, 
 		NSToolbarSeparatorItemIdentifier, 
-		SortByDocToolbarItemIdentifier,
 		SearchFieldDocToolbarItemIdentifier, 
 		DelDocToolbarItemIdentifier, 
 		ToggleCiteDrawerToolbarItemIdentifier, nil];
@@ -185,9 +173,7 @@ static void addToolbarItem(NSMutableDictionary *theDict,NSString *identifier,NSS
 
 
 - (NSArray *) toolbarAllowedItemIdentifiers: (NSToolbar *) toolbar {
-    //SortByDocToolbarItemIdentifier, will be added when the outline view works.
-
-    return [NSArray arrayWithObjects: SortByDocToolbarItemIdentifier, 
+    return [NSArray arrayWithObjects: 
 		SearchFieldDocToolbarItemIdentifier,
 		NewDocToolbarItemIdentifier, 
 		EditDocToolbarItemIdentifier, 
@@ -206,9 +192,6 @@ static void addToolbarItem(NSMutableDictionary *theDict,NSString *identifier,NSS
 
     if([[addedItem itemIdentifier] isEqualToString: SearchFieldDocToolbarItemIdentifier]) {
 		searchFieldToolbarItem = [addedItem retain];
-    }else if([[addedItem itemIdentifier] isEqualToString: SortByDocToolbarItemIdentifier]){
-//        sortKeyButton = [addedItem retain]; //hmmmm....
- //       sortKeyToolbarItem = [addedItem retain]; //hmmmm....
     }else if([[addedItem itemIdentifier] isEqualToString: DelDocToolbarItemIdentifier]){
 //        delPubButton = addedItem;
     }else if([[addedItem itemIdentifier] isEqualToString: EditDocToolbarItemIdentifier]){
@@ -225,12 +208,7 @@ static void addToolbarItem(NSMutableDictionary *theDict,NSString *identifier,NSS
     // key in the userInfo
     NSToolbarItem *removedItem = [[notif userInfo] objectForKey: @"item"];
 
-if((id)removedItem == (id)sortKeyToolbarItem){
-        NSLog(@"removed sortKeyToolbarItem - button's retaincount is %d", [sortKeyButton retainCount]);
-       // [sortKeyToolbarItem autorelease];
-       // sortKeyToolbarItem = nil;
-        [sortKeyButton retain];
-    }
+
 }*/
 
 - (BOOL) validateToolbarItem: (NSToolbarItem *) toolbarItem {

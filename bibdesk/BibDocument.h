@@ -52,10 +52,6 @@ extern NSString* LocalDragPasteboardName;
     IBOutlet NSTextView *previewField;
     IBOutlet NSWindow* documentWindow;
     IBOutlet NSWindow *bibListViews;
-    IBOutlet NSBox *dummyView;
-    IBOutlet NSView *outlineBox;
-    IBOutlet NSOutlineView *outlineView;
-    IBOutlet NSView *tableBox;
     IBOutlet BDSKDragTableView *tableView;
     IBOutlet NSMenuItem *ctxCopyBibTex;
     IBOutlet NSMenuItem *ctxCopyTex;
@@ -79,12 +75,7 @@ extern NSString* LocalDragPasteboardName;
 	IBOutlet NSBox *searchFieldBox;
 	NSToolbarItem *searchFieldToolbarItem;
 
-		
-    IBOutlet NSView* sortKeyView;
-    IBOutlet NSPopUpButton *sortKeyButton;
-    NSToolbarItem *sortKeyToolbarItem;
-
-    IBOutlet NSTextField *infoLine;
+	IBOutlet NSTextField *infoLine;
 
 #pragma mark Custom Cite-String drawer variable declarations:
 
@@ -97,15 +88,14 @@ extern NSString* LocalDragPasteboardName;
     NSMutableArray *shownPublications;    // holds the ones we want to show.
     // All display related operations should use shownPublications
     // in aspect oriented objective c i could have coded that assertion!
+	
+	NSMutableArray *authors;
 
     NSMutableArray *bibEditors;
     NSString *quickSearchKey;
     NSMutableDictionary *quickSearchTextDict;
-    
-    NSMutableDictionary *fieldsSortDict;
-    NSString *currentSortField; // which field we sort by in the outlineview
-    
-    NSMutableString *frontMatter;    // for preambles, and stuff
+   
+	NSMutableString *frontMatter;    // for preambles, and stuff
     BDSKPreviewer *PDFpreviewer;
     NSMutableArray *showColsArray;
     NSMutableDictionary *tableColumns;
@@ -223,13 +213,7 @@ extern NSString* LocalDragPasteboardName;
 */
 - (void)updatePreviews:(NSNotification *)aNotification;
 
-/*!
-    @method didChangeSortKey
-    @abstract state of sort key pulldown has changed
-    @discussion Not used right now, but intended to support switching to an outline view sorted by authors.
-    @param sender the sender. not used.
-*/
-- (IBAction)didChangeSortKey:(id)sender;
+
 
 /*!
     @method displayPreviewForItems
@@ -367,13 +351,6 @@ extern NSString* LocalDragPasteboardName;
     @discussion Mainly, tells tableview to reload data and calls tableviewselectiondidchange.
 */
 - (void)updateUI;
-/*!
-    @method updateUIAndRefreshOutline
-    @abstract no different from updateUI, yet.
-    @discussion 
-    
-*/
-- (void)updateUIAndRefreshOutline:(BOOL)yn;
 
 /*!
     @method setupTableColumns
@@ -444,7 +421,7 @@ int generalBibItemCompareFunc(id item1, id item2, void *context);
 
 /*!
     @method handleFontChangedNotification
-    @abstract sets the font of the table/outlineView.
+    @abstract sets the font of the tableView.
     @discussion 
     
 */
@@ -469,8 +446,6 @@ int generalBibItemCompareFunc(id item1, id item2, void *context);
 - (IBAction)openCustomCitePrefPane:(id)sender;
 - (IBAction)toggleShowingCustomCiteDrawer:(id)sender;
 
-- (void)setupSortDict;
-- (NSArray *)currentSortFieldArray;
 
 /*!
     @method splitViewDoubleClick:
@@ -480,11 +455,4 @@ int generalBibItemCompareFunc(id item1, id item2, void *context);
 */
 - (void)splitViewDoubleClick:(OASplitView *)sender;
 
-/*!
-    @method currentView
-    @abstract returns which table/outlineview we're currently seeing.
-    @discussion \253discussion\273
-    
-*/
-- (id)currentView;
 @end

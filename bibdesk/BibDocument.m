@@ -21,7 +21,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 #import "BibDocument_DataSource.h"
 #import "BibDocumentView_Toolbar.h"
 #import "BibAppController.h"
-#import "BDSKDragOutlineView.h"
+
 
 
 #include <stdio.h>
@@ -38,8 +38,9 @@ NSString*   LocalDragPasteboardName = @"edu.ucsd.cs.mmccrack.bibdesk: Local Publ
     if(self = [super init]){
         publications = [[NSMutableArray alloc] initWithCapacity:1];
         shownPublications = [[NSMutableArray alloc] initWithCapacity:1];
-        fieldsSortDict = [[NSMutableDictionary alloc] init];
         frontMatter = [[NSMutableString alloc] initWithString:@""];
+		authors = [[NSMutableArray alloc] init];
+
 
         quickSearchKey = [[[OFPreferenceWrapper sharedPreferenceWrapper] objectForKey:BDSKCurrentQuickSearchKey] retain];
         if(!quickSearchKey){
@@ -104,8 +105,7 @@ NSString*   LocalDragPasteboardName = @"edu.ucsd.cs.mmccrack.bibdesk: Local Publ
 
      tableColumnsChanged = YES;
      sortDescending = YES;
-     currentSortField = [[OFPreferenceWrapper sharedPreferenceWrapper] stringForKey:BDSKViewByKey];
-     [self setupSortDict];
+	 [self refreshAuthors];
     }
     return self;
 }
@@ -140,19 +140,11 @@ NSString*   LocalDragPasteboardName = @"edu.ucsd.cs.mmccrack.bibdesk: Local Publ
 
         [tableColumns setObject:tc forKey:[tc identifier]];
     }
-    
-    //if(viewByKey)[sortKeyButton selectItemWithTitle:viewByKey];
-    // the button is by default set to "Title" - this makes sure we retain the views.
-    [tableBox retain]; [outlineBox retain];
-    [self didChangeSortKey:sortKeyButton];
-
+   
     [tableView setDoubleAction:@selector(editPubCmd:)];
     [tableView registerForDraggedTypes:[NSArray arrayWithObjects:NSStringPboardType, NSFilenamesPboardType, nil]];
-    [outlineView setDoubleAction:@selector(editPubCmd:)];
-    // [outlineView registerForDraggedTypes:[NSArray arrayWithObjects:NSStringPboardType, NSFilenamesPboardType, nil]];
 
     [tableView setMenu:contextualMenu];
-    [outlineView setMenu:contextualMenu];
     
     [splitView setPositionAutosaveName:[self fileName]];
     
@@ -175,8 +167,8 @@ NSString*   LocalDragPasteboardName = @"edu.ucsd.cs.mmccrack.bibdesk: Local Publ
     [publications release]; // these should cause the bibitems to get dealloc'ed
     [shownPublications release];
     [bibEditors release]; // gets rid of all the bibeditors.
-    [fieldsSortDict release];
-    [frontMatter release];
+	[frontMatter release];
+	[authors release];
     [quickSearchTextDict release];
     [quickSearchKey release];
     [showColsArray release];
@@ -253,20 +245,7 @@ NSString*   LocalDragPasteboardName = @"edu.ucsd.cs.mmccrack.bibdesk: Local Publ
 }
 
 
-- (void)setupSortDict{
-    // Sub for allAuthors
-    [fieldsSortDict setObject:[NSMutableArray array]
-                       forKey:@"Author"];
-}
-
-- (NSArray *)currentSortFieldArray{
-    // in the future, this should build the array on demand.
-    return [fieldsSortDict objectForKey:currentSortField];
-}
-
-// should become part of above method, when we start allowing sorting by keys other than author.
 - (void)refreshAuthors{
-    NSMutableArray *authors = [fieldsSortDict objectForKey:@"Author"];
     NSEnumerator *pubE = [shownPublications objectEnumerator];
     NSEnumerator *authE;
     BibAuthor *auth;
@@ -319,7 +298,7 @@ NSString*   LocalDragPasteboardName = @"edu.ucsd.cs.mmccrack.bibdesk: Local Publ
     [super windowControllerDidLoadNib:aController];
     [self setupToolbar];
     [[aController window] setFrameAutosaveName:[self displayName]];
-    [documentWindow makeFirstResponder:[self currentView]];	
+    [documentWindow makeFirstResponder:tableView];	
     [self setupTableColumns]; // calling it here mostly just makes sure that the menu is set up.
 }
 
@@ -704,7 +683,7 @@ stringByAppendingPathComponent:@"BibDesk"]; */
 				[self removePublication:objToDelete lastRequest:NO];
 			}
         }
-        [[self currentView] deselectAll:nil];
+        [tableView deselectAll:nil];
         [self updateUI];
     }else{
         //the user canceled, do nothing.
@@ -862,8 +841,9 @@ stringByAppendingPathComponent:@"BibDesk"]; */
 		NSSearchFieldCell *searchCell = [searchField cell];
 		searchCellOrTextField = searchCell;	
 		[searchCell setPlaceholderString:[NSString stringWithFormat:@"Search by %@",newKey]];
-		[searchField setNextKeyView:[self currentView]];
-		[[self currentView] setNextKeyView:searchField];
+		
+		[searchField setNextKeyView:tableView];
+		[tableView setNextKeyView:searchField];
 	
 		NSMenu *templateMenu = [searchCell searchMenuTemplate];
 		if(![quickSearchKey isEqualToString:newKey]){
@@ -973,7 +953,7 @@ stringByAppendingPathComponent:@"BibDesk"]; */
 
     NSRange r;
 	
-    [[self currentView] deselectAll:self];
+    [tableView deselectAll:self];
 	
 	// NSLog(@"looking for [%@] in [%@]",substring, field);
     
@@ -1029,9 +1009,9 @@ stringByAppendingPathComponent:@"BibDesk"]; */
                                                       forKey:BDSKCurrentQuickSearchTextDict];
     [[OFPreferenceWrapper sharedPreferenceWrapper] autoSynchronize];
 	
-    [self updateUIAndRefreshOutline:YES]; // calls reloadData
+    [self updateUI]; // calls reloadData
     if([shownPublications count] == 1)
-        [[self currentView] selectAll:self];
+        [tableView selectAll:self];
 }
 
 
@@ -1041,64 +1021,34 @@ stringByAppendingPathComponent:@"BibDesk"]; */
     NSNumber *i;
     NSMutableString *bibString = [NSMutableString stringWithString:@""];
     NSEnumerator *e = [self selectedPubEnumerator];
-
-    if(((NSTableView *)[self currentView] == tableView) ||
-       ((NSTableView *)[self currentView] == (NSTableView *)outlineView)){
-        [previewField setString:@""];
-        if([self numberOfSelectedPubs] == 0){
-         //   [editPubButton setEnabled:NO];
-          //  [delPubButton setEnabled:NO];
-        }else{
-           // [editPubButton setEnabled:YES];
-           // [delPubButton setEnabled:YES];
-            //take care of the preview field
-            [self displayPreviewForItems:[self selectedPubEnumerator]];
-            // (don't just pass it 'e' - it needs its own enum.)
-            
-            while(i = [e nextObject]){
-                [bibString appendString:[[shownPublications objectAtIndex:[i intValue]] bibTeXString]];
-            }// while i is num of selected row
-
-            if([[OFPreferenceWrapper sharedPreferenceWrapper] integerForKey:BDSKUsesTeXKey] == NSOnState){
-                [NSThread
+	
+	[previewField setString:@""];
+	if([self numberOfSelectedPubs] == 0){
+		//   [editPubButton setEnabled:NO];
+		//  [delPubButton setEnabled:NO];
+	}else{
+		// [editPubButton setEnabled:YES];
+		// [delPubButton setEnabled:YES];
+		//take care of the preview field
+		[self displayPreviewForItems:[self selectedPubEnumerator]];
+		// (don't just pass it 'e' - it needs its own enum.)
+		
+		while(i = [e nextObject]){
+			[bibString appendString:[[shownPublications objectAtIndex:[i intValue]] bibTeXString]];
+		}// while i is num of selected row
+		
+		if([[OFPreferenceWrapper sharedPreferenceWrapper] integerForKey:BDSKUsesTeXKey] == NSOnState){
+			[NSThread
                 detachNewThreadSelector:@selector(PDFFromString:)
                                toTarget:PDFpreviewer
                              withObject:bibString];
-            }else{
-                // do nothing for now... (later, tell it to nullify the view?)
-            }
-        }// else more than 0 selected rows
-    }else{
-        // the selection changed on the citestring tableview and we don't care.
-    }
-
+		}else{
+			// do nothing for now... (later, tell it to nullify the view?)
+		}
+	}// else more than 0 selected rows
+	
 }
 
-// Fixme - this is not correct memory management.
-- (IBAction)didChangeSortKey:(id)sender{
-    NSView *newView = nil;
-    NSView *prevView = nil;
-    NSString *sortKey = [sender titleOfSelectedItem];
-    
-    if([sortKey isEqualToString: @"Author"]){
-        newView = (NSView *) outlineBox;
-        prevView  = (NSView *) tableBox;
-    }else if([sortKey isEqualToString: @"Title"]){
-        newView = (NSView *) tableBox;
-        prevView = (NSView *) outlineBox;
-    }
-    
-    if([dummyView contentView] != (NSView *) newView){
-/*        NSLog(@"rcs: tv: %d olv: %d", [tableBox retainCount], [outlineBox retainCount]);
-        NSLog(@"csk: %@ ", sortKey);*/
-
-        [dummyView setContentView:newView];
-       
-        [self setupTableColumns];
-        [self updateUIAndRefreshOutline:YES];
-    }
-    [[OFPreferenceWrapper sharedPreferenceWrapper] setObject:currentSortField forKey:BDSKViewByKey];
-}
 
 // replaces sortPubsByColumn
 - (void) tableView: (NSTableView *) theTableView
@@ -1408,7 +1358,7 @@ int generalBibItemCompareFunc(id item1, id item2, void *context){
 	while(newBI = [newPubsE nextObject]){
 	    [self addPublication:newBI];
 	    
-	    [self updateUIAndRefreshOutline:YES];
+	    [self updateUI];
 	    [self updateChangeCount:NSChangeDone];
 	    if([[OFPreferenceWrapper sharedPreferenceWrapper] integerForKey:BDSKEditOnPasteKey] == NSOnState)
 		[self editPub:newBI forceChange:YES];
@@ -1433,7 +1383,7 @@ int generalBibItemCompareFunc(id item1, id item2, void *context){
     [newBI setFileOrder:fileOrderCount];
     fileOrderCount++;
     [self addPublication:newBI];
-    [self updateUIAndRefreshOutline:YES];
+    [self updateUI];
     if(yn == YES)
     {
         [self editPub:newBI];
@@ -1446,23 +1396,9 @@ int generalBibItemCompareFunc(id item1, id item2, void *context){
 
 
 - (void)updateUI{
-    [self updateUIAndRefreshOutline:NO];
-}
 
-- (void)updateUIAndRefreshOutline:(BOOL)refresh{
-    [self refreshAuthors];
+	[self refreshAuthors];
     [self handleFontChangedNotification:nil]; // calls reloadData.
-/*    if((NSTableView *)[self currentView] == tableView){
-        [tableView reloadData];
-    }else{
-#warning FIXME - reloadItem never seems to work...
-        if(YES){
-            [outlineView reloadData];
-        }else{
-            [outlineView reloadItem:nil];// reloadChildren:YES];
-        }
-    }
-    */
 
 // @@FIXME: will not always say "Publications shown"?
     [infoLine setStringValue: [NSString stringWithFormat:
@@ -1481,12 +1417,12 @@ int generalBibItemCompareFunc(id item1, id item2, void *context){
     NSEnumerator *shownColNamesE = [prefsShownColNamesArray objectEnumerator];
     NSTableColumn *tc;
     NSString *colName;
-    BDSKDragTableView *view = (BDSKDragTableView *)[self currentView];
+
     NSDictionary *tcWidthsByIdentifier = [[OFPreferenceWrapper sharedPreferenceWrapper] objectForKey:BDSKColumnWidthsKey];
     NSNumber *tcWidth = nil;
     NSImageCell *imageCell = [[[NSImageCell alloc] init] autorelease];
 
-    [view removeAllTableColumns];
+    [tableView removeAllTableColumns];
     
     while(colName = [shownColNamesE nextObject]){
         tc = [tableColumns objectForKey:colName];
@@ -1504,7 +1440,7 @@ int generalBibItemCompareFunc(id item1, id item2, void *context){
             // THIS IS A HACK.
             // I should probably set it up better in the nib, or something.
         }else{
-            [view addTableColumn:tc];
+            [tableView addTableColumn:tc];
             if([[tc identifier] isEqualToString:@"Local-Url"] ||
                [[tc identifier] isEqualToString:@"Url"]){
                 [tc setDataCell:imageCell];
@@ -1705,13 +1641,12 @@ int generalBibItemCompareFunc(id item1, id item2, void *context){
     NSFont *font = [NSFont fontWithName:[[OFPreferenceWrapper sharedPreferenceWrapper] objectForKey:BDSKTableViewFontKey]
                                    size:
         [[OFPreferenceWrapper sharedPreferenceWrapper] floatForKey:BDSKTableViewFontSizeKey]];
-    NSTableView *view  = (NSTableView *) [self currentView];
     
     // adjust the height of the rows: (sometimes this isn't quite right. why?)
     // //NSLog(@"default line height is %f, pointsize is %f", [font defaultLineHeightForFont], [font pointSize]);
-    [view setRowHeight:[font defaultLineHeightForFont]+2];
-    [view setFont:font];
-    [view reloadData];
+    [tableView setRowHeight:[font defaultLineHeightForFont]+2];
+    [tableView setFont:font];
+    [tableView reloadData];
 }
 
 - (void)highlightBib:(BibItem *)bib{
@@ -1719,17 +1654,14 @@ int generalBibItemCompareFunc(id item1, id item2, void *context){
 }
 
 - (void)highlightBib:(BibItem *)bib byExtendingSelection:(BOOL)yn{
-    NSTableView *view  = (NSTableView *) [self currentView];
+ 
     int i = [shownPublications indexOfObjectIdenticalTo:bib];
     i = (sortDescending ? [shownPublications count] - 1 - i : i);
     
 
-    if ([view isKindOfClass:[BDSKDragOutlineView class]]){
-        i = (int) [(BDSKDragOutlineView *)view rowForItem:bib];
-    }
     if(i != NSNotFound && i != -1){
-        [view selectRow:i byExtendingSelection:yn];
-        [view scrollRowToVisible:i];
+        [tableView selectRow:i byExtendingSelection:yn];
+        [tableView scrollRowToVisible:i];
     }
 }
 
@@ -1746,16 +1678,6 @@ int generalBibItemCompareFunc(id item1, id item2, void *context){
     [customCiteDrawer toggle:sender];
 }
 
-
-
-// returns the current view we're using. 
-- (id)currentView{
-   if([dummyView contentView] == tableBox){
-        return (id) tableView;
-    }else{
-        return (id) outlineView;
-    }
-}
 
 
 - (BOOL)validateMenuItem:(id <NSMenuItem>)menuItem{
@@ -1796,47 +1718,18 @@ int generalBibItemCompareFunc(id item1, id item2, void *context){
     int index;
     NSMutableArray *itemIndexes = [NSMutableArray arrayWithCapacity:10];
     
-    if ((NSTableView *)[self currentView] == tableView) {
-        // selectedRowEnum has to check sortDescending.. : ->
-        if(sortDescending){
-            int count = [shownPublications count];
-            itemsE = [tableView selectedRowEnumerator];
-            while(item = [itemsE nextObject]){
-                [itemIndexes addObject:[NSNumber numberWithInt:(count-[item intValue]- 1)]];
-            }
-            return [itemIndexes objectEnumerator];
-        }else{
-            return [tableView selectedRowEnumerator];
-        }
-    }else{
-        // outlineView
-        items = [NSMutableArray arrayWithCapacity:10]; // arbitrary, yes. Bad ?
-        
-        rowE = [outlineView selectedRowEnumerator];
-        while(rowIndex = [rowE nextObject]){
-            rowItem = [outlineView itemAtRow:[rowIndex intValue]];
-            
-            if([rowItem isKindOfClass:[BibItem class]]){
-                [items addObject:rowItem];
-            }else if([rowItem isKindOfClass:[BibAuthor class]]){
-                // rowItem *should* be expanded if we're getting called. (We assume this!)
-				// @@ note: this assumes bibauthors. 
-                childE = [[rowItem children] objectEnumerator];
-                while(child = [childE nextObject]){
-                    if ([items indexOfObjectIdenticalTo:child] == NSNotFound) {
-                        [items addObject:child];
-                    }
-                }
-                
-            }
-        }
-        itemsE = [items objectEnumerator];
-        while(item = [itemsE nextObject]){
-            index = [shownPublications indexOfObjectIdenticalTo:item];
-            [itemIndexes addObject:[NSNumber numberWithInt:index]];
-        }
-        return [itemIndexes objectEnumerator];
-    }
+	// selectedRowEnum has to check sortDescending.. : ->
+	if(sortDescending){
+		int count = [shownPublications count];
+		itemsE = [tableView selectedRowEnumerator];
+		while(item = [itemsE nextObject]){
+			[itemIndexes addObject:[NSNumber numberWithInt:(count-[item intValue]- 1)]];
+		}
+		return [itemIndexes objectEnumerator];
+	}else{
+		return [tableView selectedRowEnumerator];
+	}
+    
 }
 
 - (void)windowWillClose:(NSNotification *)notification{
