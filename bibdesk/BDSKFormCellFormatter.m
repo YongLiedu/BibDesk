@@ -16,6 +16,12 @@
 
 #import "BDSKFormCellFormatter.h"
 
+//  About this file: BDSKFormCellFormatter
+//
+//  This is an NSFormatter subclass that provides for the autocompletion
+//  facility in the NSFormCells that populate the form in the BibEditor window.
+//
+
 
 @implementation BDSKFormCellFormatter
 - (NSString *)stringForObjectValue:(id)obj{
