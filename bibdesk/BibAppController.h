@@ -109,9 +109,9 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 - (NSDictionary *)encodingDefinitionDictionary;
 
 - (NSArray *)requiredFieldsForCiteKey;
-- (NSArray *)setRequiredFieldsForCiteKey:(NSArray *)newFields;
+- (void)setRequiredFieldsForCiteKey:(NSArray *)newFields;
 - (NSArray *)requiredFieldsForLocalUrl;
-- (NSArray *)setRequiredFieldsForLocalUrl:(NSArray *)newFields;
+- (void)setRequiredFieldsForLocalUrl:(NSArray *)newFields;
 
 /*!
 @method addString:forCompletionEntry:

@@ -381,7 +381,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 	return requiredFieldsForCiteKey;
 }
 
-- (NSArray *)setRequiredFieldsForCiteKey:(NSArray *)newFields{
+- (void)setRequiredFieldsForCiteKey:(NSArray *)newFields{
 	[requiredFieldsForCiteKey autorelease];
 	requiredFieldsForCiteKey = [newFields retain];
 }
@@ -390,7 +390,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 	return requiredFieldsForLocalUrl;
 }
 
-- (NSArray *)setRequiredFieldsForLocalUrl:(NSArray *)newFields{
+- (void)setRequiredFieldsForLocalUrl:(NSArray *)newFields{
 	[requiredFieldsForLocalUrl autorelease];
 	requiredFieldsForLocalUrl = [newFields retain];
 }
