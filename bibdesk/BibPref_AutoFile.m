@@ -24,6 +24,8 @@
 
 - (void)updateUI{
     NSString *formatString = [defaults stringForKey:BDSKLocalUrlFormatKey];
+    int formatPresetChoice = [defaults integerForKey:BDSKLocalUrlFormatPresetKey];
+	BOOL custom = (formatPresetChoice == 0);
     NSString * error;
 	
     [filePapersAutomaticallyCheckButton setState:[defaults integerForKey:BDSKFilePapersAutomaticallyKey]];
@@ -44,13 +46,20 @@
 		[tmpBI setField:BDSKVolumeString toValue:@"1"];
 		[tmpBI setField:BDSKPagesString toValue:@"96"];
 		[tmpBI setField:BDSKKeywordsString toValue:@"Keyword1,Keyword2"];
+		[tmpBI setField:BDSKLocalUrlString toValue:@"Local%20File%20Name.pdf"];
 		[previewTextField setStringValue:[[tmpBI suggestedLocalUrl] stringByAbbreviatingWithTildeInPath]];
 		[tmpBI release];
 	} else {
 		[self setLocalUrlFormatInvalidWarning:YES message:error];
 		[previewTextField setStringValue:NSLocalizedString(@"Invalid Format", @"Local-url preview for invalid format")];
 	}
+	[formatPresetPopUp selectItemAtIndex:[formatPresetPopUp indexOfItemWithTag:formatPresetChoice]];
     [formatField setStringValue:formatString];
+	[formatField setEnabled:custom];
+	if([formatRepositoryPopUp respondsToSelector:@selector(setHidden:)])
+	    [formatRepositoryPopUp setHidden:!custom];
+	else 
+		[formatRepositoryPopUp setEnabled:custom];
 }
 
 - (void)resignCurrentPreferenceClient{
@@ -145,18 +154,46 @@
 }
 
 - (IBAction)localUrlFormatChanged:(id)sender{
-	NSString *formatString = [formatField stringValue];
-	NSString *error;
+	int presetChoice = 0;
+	NSString *formatString;
 	
-	//if ([formatString isEqualToString:[defaults stringForKey:BDSKLocalUrlFormatKey]]) return; // nothing changed
-	if ([[BDSKConverter sharedConverter] validateFormat:&formatString forField:BDSKLocalUrlString inFileType:BDSKBibtexString error:&error]) {
+	if (sender == formatPresetPopUp) {
+		presetChoice = [[formatPresetPopUp selectedItem] tag];
+		if (presetChoice == [defaults integerForKey:BDSKLocalUrlFormatPresetKey]) 
+			return; // nothing changed
+		[defaults setInteger:presetChoice forKey:BDSKLocalUrlFormatPresetKey];
+		switch (presetChoice) {
+			case 1:
+				formatString = @"%L";
+				break;
+			case 2:
+				formatString = @"%l%n0.pdf";
+				break;
+			case 3:
+				formatString = @"%a1/%Y%u0.pdf";
+				break;
+			case 4:
+				formatString = @"%a1/%T5.pdf";
+				break;
+			default:
+				formatString = [formatField stringValue];
+		}
+		// this one is always valid
 		[defaults setObject:formatString forKey:BDSKLocalUrlFormatKey];
 	}
-	else {
-		[self setLocalUrlFormatInvalidWarning:YES message:error];
-		return;
+	else { //changed the text field or added from the repository
+		NSString *formatString = [formatField stringValue];
+		NSString *error;
+		
+		//if ([formatString isEqualToString:[defaults stringForKey:BDSKLocalUrlFormatKey]]) return; // nothing changed
+		if ([[BDSKConverter sharedConverter] validateFormat:&formatString forField:BDSKLocalUrlString inFileType:BDSKBibtexString error:&error]) {
+			[defaults setObject:formatString forKey:BDSKLocalUrlFormatKey];
+		}
+		else {
+			[self setLocalUrlFormatInvalidWarning:YES message:error];
+			return;
+		}
 	}
-	
 	[[NSApp delegate] setRequiredFieldsForLocalUrl: [[BDSKConverter sharedConverter] requiredFieldsForFormat:formatString]];
 	[self updateUI];
 }

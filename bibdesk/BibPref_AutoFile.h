@@ -29,10 +29,11 @@
 	IBOutlet NSButton* filePapersAutomaticallyCheckButton;
 	IBOutlet NSButton* keepPapersFolderOrganizedCheckButton;
     IBOutlet NSTextField *formatField;
+    IBOutlet NSPopUpButton *formatPresetPopUp;
     IBOutlet NSPopUpButton *formatRepositoryPopUp;
     IBOutlet NSButton *formatWarningButton;
+	IBOutlet NSTextField *previewTextField;
 	NSImage *cautionIconImage;
-        IBOutlet NSTextField *previewTextField;
 }
 
 - (IBAction)choosePapersFolderLocationAction:(id)sender;
