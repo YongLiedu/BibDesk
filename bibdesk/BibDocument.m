@@ -85,6 +85,7 @@ NSString*   LocalDragPasteboardName = @"edu.ucsd.cs.mmccrack.bibdesk: Local Publ
      [customStringArray setArray:[[OFPreferenceWrapper sharedPreferenceWrapper] arrayForKey:BDSKCustomCiteStringsKey]];
 
      tableColumnsChanged = YES;
+     sortDescending = YES;
      currentSortField = [[OFPreferenceWrapper sharedPreferenceWrapper] stringForKey:BDSKViewByKey];
      [self setupSortDict];
     }
@@ -407,7 +408,8 @@ stringByAppendingPathComponent:@"BibDesk"]; */
 
     while(tmp = [e nextObject]){
         [d appendData:[[NSString stringWithString:@"\n\n"] dataUsingEncoding:NSASCIIStringEncoding  allowLossyConversion:YES]];
-        [d appendData:[[BDSKConverter stringByTeXifyingString:[tmp bibTeXString]] dataUsingEncoding:NSASCIIStringEncoding allowLossyConversion:YES]];
+        //    [d appendData:[[BDSKConverter stringByTeXifyingString:[tmp bibTeXString]] dataUsingEncoding:NSASCIIStringEncoding allowLossyConversion:YES]];
+        [d appendData:[[BDSKConverter stringByTeXifyingString:[tmp bibTeXString]] dataUsingEncoding:NSUTF8StringEncoding allowLossyConversion:YES]];
     }
     return d;
 }
@@ -619,8 +621,8 @@ stringByAppendingPathComponent:@"BibDesk"]; */
     }
     
     if([dummyView contentView] != (NSView *) newView){
-        NSLog(@"rcs: tv: %d olv: %d", [tableBox retainCount], [outlineBox retainCount]);
-        NSLog(@"csk: %@ ", sortKey);
+/*        NSLog(@"rcs: tv: %d olv: %d", [tableBox retainCount], [outlineBox retainCount]);
+        NSLog(@"csk: %@ ", sortKey);*/
 
         [dummyView setContentView:newView];
        
@@ -675,6 +677,7 @@ didClickTableColumn: (NSTableColumn *) tableColumn{
             [shownPublications sortUsingSelector:@selector(auth3Compare:)];
         }else{
             // don't handle sorting generally yet
+            NSLog(@"We don't handle sorting all columns yet! Tried sorting %@", [tableColumn identifier]);
         }
 
     }
@@ -697,7 +700,11 @@ didClickTableColumn: (NSTableColumn *) tableColumn{
     
     if([colID isEqualToString:@"Local-Url"]){
         pub = [shownPublications objectAtIndex:sortedRow];
-        [[NSWorkspace sharedWorkspace] openFile:[pub localURLPath]];
+        [[NSWorkspace sharedWorkspace] openFile:[pub localURLPathRelativeTo:[[self fileName] stringByDeletingLastPathComponent]]];
+    }else if([colID isEqualToString:@"Url"]){
+        pub = [shownPublications objectAtIndex:sortedRow];
+        [[NSWorkspace sharedWorkspace] openURL:[NSURL URLWithString:[pub valueOfField:@"Url"]]];
+        // @@ http-adding: change valueOfField to [pub url] and have it auto-add http://
     }else{
         while (i = [e nextObject]) {
             [self editPub:[shownPublications objectAtIndex:[i intValue]]];
@@ -708,6 +715,8 @@ didClickTableColumn: (NSTableColumn *) tableColumn{
 - (void)editPub:(BibItem *)pub{
     [self editPub:pub forceChange:NO];
 }
+
+// @@- what does forceChange do? Where does this get called?
 - (void)editPub:(BibItem *)pub forceChange:(BOOL)force{
     BibEditor *e = [pub editorObj];
     if(e == nil){
@@ -908,6 +917,7 @@ didClickTableColumn: (NSTableColumn *) tableColumn{
     [newBI setFileOrder:fileOrderCount];
     fileOrderCount++;
     [publications addObject:newBI];
+    [shownPublications addObject:newBI];
     [self updateUIAndRefreshOutline:YES];
     if(yn == YES)
     {
@@ -960,7 +970,7 @@ didClickTableColumn: (NSTableColumn *) tableColumn{
     BDSKDragTableView *view = (BDSKDragTableView *)[self currentView];
     NSDictionary *tcWidthsByIdentifier = [[OFPreferenceWrapper sharedPreferenceWrapper] objectForKey:BDSKColumnWidthsKey];
     NSNumber *tcWidth = nil;
-    NSImageCell *localURLImageCell = [[[NSImageCell alloc] init] autorelease];
+    NSImageCell *imageCell = [[[NSImageCell alloc] init] autorelease];
 
     [view removeAllTableColumns];
     
@@ -981,8 +991,9 @@ didClickTableColumn: (NSTableColumn *) tableColumn{
             // I should probably set it up better in the nib, or something.
         }else{
             [view addTableColumn:tc];
-            if([[tc identifier] isEqualToString:@"Local-Url"]){
-                [tc setDataCell:localURLImageCell];
+            if([[tc identifier] isEqualToString:@"Local-Url"] ||
+               [[tc identifier] isEqualToString:@"Url"]){
+                [tc setDataCell:imageCell];
                 
             }
             if(![[tc identifier] isEqualToString:@"Title"]){
@@ -1231,12 +1242,20 @@ didClickTableColumn: (NSTableColumn *) tableColumn{
     id item = nil;
     NSEnumerator *itemsE = nil;
     int index;
-    
-
-    NSMutableArray *itemIndexes = nil;
+    NSMutableArray *itemIndexes = [NSMutableArray arrayWithCapacity:10];
     
     if ((NSTableView *)[self currentView] == tableView) {
-        return [tableView selectedRowEnumerator];
+        // selectedRowEnum has to check sortDescending.. : ->
+        if(sortDescending){
+            int count = [shownPublications count];
+            itemsE = [tableView selectedRowEnumerator];
+            while(item = [itemsE nextObject]){
+                [itemIndexes addObject:[NSNumber numberWithInt:(count-[item intValue]- 1)]];
+            }
+            return [itemIndexes objectEnumerator];
+        }else{
+            return [tableView selectedRowEnumerator];
+        }
     }else{
         // outlineView
         items = [NSMutableArray arrayWithCapacity:10]; // arbitrary, yes. Bad ?
@@ -1260,7 +1279,6 @@ didClickTableColumn: (NSTableColumn *) tableColumn{
             }
         }
         itemsE = [items objectEnumerator];
-        itemIndexes = [NSMutableArray arrayWithCapacity:10];
         while(item = [itemsE nextObject]){
             index = [shownPublications indexOfObjectIdenticalTo:item];
             [itemIndexes addObject:[NSNumber numberWithInt:index]];
