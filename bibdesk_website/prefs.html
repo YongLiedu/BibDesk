@@ -1,0 +1,107 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="content-type" content="application/xhtml+xml; charset=utf-8" />
+<meta name="description" lang="en" content="BibDesk project web page" />
+<meta name="author" lang="en" content="The BibDesk project team" />
+<meta name="generator" content="http://www.codingmonkeys.de/subethaedit/" />
+<link rel="stylesheet" type="text/css" href="styles.css" title="stylesheet" />
+
+<title>BibDesk | Features: Preferences</title>
+
+</head>
+<body>
+	<div id="container">
+		<div id="banner">
+		<img class="bannerImage" src="images/bibDeskIcon.png" alt="BibDesk icon" height="64" width="64" />
+		<h1>BibDesk</h1>
+		</div>
+
+				<div id="sidebar">
+		<div class="box"><h3><a href="http://prdownloads.sourceforge.net/bibdesk/Bibdesk-0.90.dmg?download">Download BibDesk 0.90</a></h3></div>
+			<ul>
+			<li><a href="index.html">About</a></li>
+			<li id="current"><a href="features.html">Features</a></li>
+			<li><a href="screenshots.html">Screenshots</a></li>
+			<li><a href="http://sourceforge.net/export/projnews.php?group_id=61487news.htmllimit= 10news.htmlflat=1news.htmlshow_summaries=1">News</a></li>
+			<li><a href="http://sourceforge.net/tracker/?group_id=61487">Support</a></li>
+			<li><a href="mailingLists.html">Mailing lists</a></li>
+			<li><a href="developers.html">Developers</a></li>
+			</ul>
+		</div>
+
+		<div id="content">
+<h3>Preferences</h3>
+<h2>Startup</h2>
+<img src="images/startupPrefs.jpg" alt="" height="354" width="556">
+<p>
+This panel controls what BibDesk does when it starts up. Clicking the &#8216;Open this bibliography&#8217; radio button prompts you to choose a default bib file to open. Clicking the &#8216;Display errors panel for warnings&#8217; causes the Error panel to be shown at startup (see <a href ="help.html">Getting help</a> for information on the Error panel).
+</p>
+
+<h3>Citation</h3>
+<img src="images/citationPrefs.jpg" alt="" height="498" width="578">
+<p>
+<h4>Copying and Dragging Out</h4> This controls what gets dropped (or copied) on a drag (or copy).
+<ul>
+<li>BibTeX entry means the whole entry like: @misc{key, author="", ... , .... }.</li>
+<li>TeX Citation means: \cite{cite-key}</li>
+<li>PDF Description means essentially the contents of the Preview pane as a page of PDF.</li>
+<li>Separate citations lets you choose whether to have bibdesk drop strings like \cite{key1,key2} or \cite{key1} \cite{key2} when multiple items are involved.</li>
+<li>The citation text field lets you change the string that is used when dragging from the publications table to whatever you like (e.g. citep or citet ...)</li>
+<li>Bracket Style lets you choose to use square brackets for copy/paste and dragging citations, for compatibility with ConTeXt.</li>
+</ul>
+</p>
+<p>
+<h4>Custom Citation Drawer</h4> This allows you to enter further strings that you can access via dragging from the custom citation strings drawer. This drawer lets you drag the selected publications from the publications table, using a different citation string.
+</p>
+<p>
+<h4>Pasting and dragging in</h4> &#8216;Open edit window when paste/dragging in&#8217; lets you decide whether to always immediately open the edit window for an item you have pasted or dragged in.
+</p>
+<h3>Preview</h3>
+<img src="images/previewPrefs.jpg" alt="" height="394" width="625">
+<p>
+<h4>Use TeX for Previewing</h4> (More appropriately, use pdftex for previewing.) If this is checked, the preview pane will be drawn.
+</p>
+
+<p>
+<h4>TeX Options</h4> The style file (just the name, not the whole path) can be specified here. Also, the TeX and BibTeX program paths can be changed here, so you are not tied to one distribution of TeX.
+</p>
+<h3>Display</h3>
+<img src="images/displayPrefs.jpg" alt="" height="339" width="615">
+<p>
+<h4>Publications Table</h4> Here you can select what font to use for the table.
+</p>
+<p>
+<h4>Browser preview pane</h4> Select what you want the lower pane of the main browser window to show.
+</p>
+
+<h3>AutoFile</h3>
+<img src="images/autoFilePrefs.jpg" alt="" height="393" width="614">
+<p>
+Sorry, the AutoFile pane is a teaser for right now. In the future, it will contain settings to allow you to automatically manage local copies of papers.
+</p>
+<h3>Default Fields</h3>
+<img src="images/defaultsPrefs.jpg" alt="" height="424" width="618">
+<p>
+<h4>BibTeX Fields</h4> You can set fields to be added to publications by default here. They are added when a file is opened and if a new publication is made.
+</p>
+<p>
+<h4>Template File</h4> Clicking this button sends you to TextEdit to change the template file that is added to the beginning of every saved bib file. This template file is a great place to put your macros, copyright info (if applicable), or shameless plugs for your software :)
+</p>
+<h3>RSS</h3>
+<img src="images/rssPrefs.jpg" alt="" height="592" width="622">
+<p>
+Hopefully this panel is self explanatory. If you click on the &#8216;Find out more...&#8217; link, your favorite web browser will open the page <a href="http://www.cs.ucsd.edu/~mmccrack/AboutRSS.html">http://www.cs.ucsd.edu/~mmccrack/AboutRSS.html</a>. The RSS publishing preferences control the RSS export features. If you check &#8216;Automatically save RSS feeds&#8217;, everytime you save a .bib file, a correspondingly named .rss file will be saved in the same directory. The &#8216;description&#8217; field in RSS is the text that shows up as the headline of each item in the RSS feed. See the link for more details.
+</p>
+
+		</div>
+
+		<div id="footer">Last changed: Sunday, March 21, 2004 11:05:28<br />
+		<a href="http://sourceforge.net"><img src="http://sourceforge.net/sflogo.php?group_id=61487&amp;type=1" width="88" height="31" border="0" alt="SourceForge.net Logo" /></a>
+		<a href="http://validator.w3.org/check/referer"><img src="http://www.w3.org/Icons/valid-xhtml10" alt="Valid XHTML 1.0!" style="border:0" height="31" width="88" /></a>
+            <a href="http://jigsaw.w3.org/css-validator/"><img style="border:0;width:88px;height:31px" src="http://jigsaw.w3.org/css-validator/images/vcss" alt="Valid CSS!" /></a>
+		</div>
+		
+	</div>
+</body>
+</html>
