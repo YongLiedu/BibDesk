@@ -343,8 +343,8 @@ Broken out of BibDocument and split up into smaller parts to make things more ma
 
 - (BOOL) validatePrintDocumentMenuItem:(NSMenuItem*) menuItem {
 	// change name of menu item to indicate that we are only printing the selection?
-	if ([self numberOfSelectedPubs] == 0 || [[OFPreferenceWrapper sharedPreferenceWrapper] integerForKey:BDSKUsesTeXKey] != NSOnState){
-		// no selection => no printing, no preview generation => no printing
+    if ([self numberOfSelectedPubs] == 0){
+		// no selection => no printing
 		return NO;
 	}
 	else {

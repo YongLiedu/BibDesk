@@ -187,6 +187,20 @@ static unsigned threadCount = 0;
     
 }
 
+- (void)printDocument:(id)sender{ // first responder gets this
+    NSView *printView = ([tabView indexOfTabViewItem:[tabView selectedTabViewItem]] == 0 ? (NSView *)imagePreviewView : (NSView *)rtfPreviewView);
+    
+    // Construct the print operation and setup Print panel
+    NSPrintOperation *op = [NSPrintOperation printOperationWithView:printView
+                                                          printInfo:[NSPrintInfo sharedPrintInfo]];
+    [op setShowPanels:YES];
+    [op setCanSpawnSeparateThread:YES];
+    
+    // Run operation, which shows the Print panel if showPanels was YES
+    [op runOperationModalForWindow:[self window] delegate:nil didRunSelector:NULL contextInfo:NULL];
+    
+}
+
 - (void)performDrawing{
     NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
     if([tabView lockFocusIfCanDraw]){

@@ -2624,13 +2624,17 @@ This method always returns YES. Even if some or many operations fail.
         return;
     
     [previewField setString:@""];
+    int itemCount = 0;
 
     while(i = [enumerator nextObject]){
 
         switch([[OFPreferenceWrapper sharedPreferenceWrapper] integerForKey:BDSKPreviewDisplayKey]){
             case 0:
-                [previewField replaceCharactersInRange: [previewField selectedRange]
+                itemCount++;
+                [previewField replaceCharactersInRange:[previewField selectedRange]
                                                withRTF:[[shownPublications objectAtIndex:[i intValue]] RTFValue]];
+                if(itemCount < [tableView numberOfSelectedRows])
+                    [[[previewField textStorage] mutableString] appendCharacter:NSFormFeedCharacter]; // page break for printing; doesn't work unless you copy to TextEdit
                 break;
             case 1:
                 // special handling for annote-only
@@ -2881,34 +2885,21 @@ This method always returns YES. Even if some or many operations fail.
 	return previewField; // random hack for now. - this will only print the selected items.
 }
 
-
-/* ssp: 2004-07-19
-Basic printing of the preview
-Along with new menu validation code in the main file.
-Requires improved version of BDSKPreviewer class with accessor function
-The results are quite crappy, but these were low-hanging fruit and people seem to want the feature.
-*/
-- (void) printDocument:(id)sender {
-	[[[BDSKPreviewer sharedPreviewer] pdfView] print:sender];
-}
-
-
 - (void)printShowingPrintPanel:(BOOL)showPanels {
     // Obtain a custom view that will be printed
     NSView *printView = [self printableView];
 	
     // Construct the print operation and setup Print panel
-    NSPrintOperation *op = [NSPrintOperation
-                printOperationWithView:printView
-							 printInfo:[self printInfo]];
+    NSPrintOperation *op = [NSPrintOperation printOperationWithView:printView
+                                                          printInfo:[self printInfo]];
     [op setShowPanels:showPanels];
+    [op setCanSpawnSeparateThread:YES];
     if (showPanels) {
         // Add accessory view, if needed
     }
 	
     // Run operation, which shows the Print panel if showPanels was YES
-    // [self runModalPrintOperation:op						delegate:nil				  didRunSelector:NULL					 contextInfo:NULL];
-	[op runOperationModalForWindow:documentWindow delegate:nil didRunSelector:NULL contextInfo:NULL];
+    [op runOperationModalForWindow:[self windowForSheet] delegate:nil didRunSelector:NULL contextInfo:NULL];
 }
 
 #pragma mark 
