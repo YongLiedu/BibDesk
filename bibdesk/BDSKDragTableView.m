@@ -13,7 +13,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 
 #import "BDSKDragTableView.h"
 
-#import <OmniAppKit/NSString-OAExtensions.h>
+static NSColor *sStripeColor = nil;
 
 @implementation BDSKDragTableView
 
@@ -72,7 +72,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
     if(self=[super init]){
      //   ownedPublications = [NSMutableArray arrayWithCapacity:1];
       //  [self setDataSource:self];
-        NSLog(@"*SHOULDNT HAPPEN* called init of tableview");
+        //NSLog(@"*SHOULDNT HAPPEN* called init of tableview");
     }
     return self;
 }
@@ -125,14 +125,69 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
     
 }
 
+// Bogarted from apple sample code
+#define STRIPE_RED   (237.0 / 255.0)
+#define STRIPE_GREEN (243.0 / 255.0)
+#define STRIPE_BLUE  (255.0 / 255.0)
+// This is called after the table background is filled in,
+// but before the cell contents are drawn.
+// We override it so we can do our own light-blue row stripes a la iTunes.
+- (void) highlightSelectionInClipRect:(NSRect)rect {
+    [self drawStripesInRect:rect];
+    [super highlightSelectionInClipRect:rect];
+}
+
+// This routine does the actual blue stripe drawing,
+// filling in every other row of the table with a blue background
+// so you can follow the rows easier with your eyes.
+- (void) drawStripesInRect:(NSRect)clipRect {
+    NSRect stripeRect;
+    OFPreferenceWrapper *pw = [OFPreferenceWrapper sharedPreferenceWrapper];
+    float fullRowHeight = [self rowHeight] + [self intercellSpacing].height;
+    float clipBottom = NSMaxY(clipRect);
+    int firstStripe = clipRect.origin.y / fullRowHeight;
+    if (firstStripe % 2 == 0)
+        firstStripe++;   // we're only interested in drawing the stripes
+                         // set up first rect
+    stripeRect.origin.x = clipRect.origin.x;
+    stripeRect.origin.y = firstStripe * fullRowHeight;
+    stripeRect.size.width = clipRect.size.width;
+    stripeRect.size.height = fullRowHeight;
+    // set the color
+    if (sStripeColor == nil){
+        sStripeColor = [[NSColor colorWithCalibratedRed:STRIPE_RED //[pw floatForKey:BDSKRowColorRedKey]
+                                                  green:STRIPE_GREEN //[pw floatForKey:BDSKRowColorGreenKey]
+                                                   blue:STRIPE_BLUE //[pw floatForKey:BDSKRowColorBlueKey]
+                                                  alpha:1.0] retain];
+        /* trying to figure out why the preferences don't seem to be set correctly:
+        NSLog(@"r %f g %f b %f", STRIPE_RED, STRIPE_GREEN, STRIPE_BLUE);
+        NSLog(@"%@, %f", BDSKRowColorRedKey, [pw floatForKey:BDSKRowColorRedKey]);
+        NSLog(@"%@ %f", BDSKRowColorBlueKey, [pw floatForKey:BDSKRowColorBlueKey]);
+        NSLog(@"%@ %f", BDSKRowColorGreenKey, [pw floatForKey:BDSKRowColorGreenKey]); */
+    }
+    [sStripeColor set];
+    // and draw the stripes
+    while (stripeRect.origin.y < clipBottom) {
+        NSRectFill(stripeRect);
+        stripeRect.origin.y += fullRowHeight * 2.0;
+    }
+}
+/*
+ - (void)drawRow:(int)rowIndex clipRect:(NSRect)clipRect{
+     if(rowIndex % 2 == 0){
+         [sStripeColor set];
+         NSRectFill(clipRect);
+     }
+     [super drawRow:rowIndex clipRect:clipRect];
+ }*/
 
 // ----------------------------------------------------------------------------------------
-#pragma mark || tableView methods
+#pragma mark || tableView datasource methods
 // ----------------------------------------------------------------------------------------
 
 // this was part of an attempt to make BDSKTableView self-contained. Not currently in use.
 - (int)numberOfRowsInTableView:(NSTableView *)tView{
-    //NSLog(@"calling myself!");
+    ////NSLog(@"calling myself!");
     return [ownedPublications count];
 }
 

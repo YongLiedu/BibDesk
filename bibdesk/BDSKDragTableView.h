@@ -14,6 +14,8 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 
 #import <Cocoa/Cocoa.h>
 #import <OmniAppKit/OATypeAheadSelectionHelper.h>
+#import <OmniFoundation/OFPreference.h>
+#import "BibPrefController.h"
 
 /*!
     @class BDSKDragTableView
