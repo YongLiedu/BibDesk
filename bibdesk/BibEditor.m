@@ -201,20 +201,16 @@ NSString *BDSKUrlString = @"Url";
 
 - (IBAction)viewLocal:(id)sender{
     NSWorkspace *sw = [NSWorkspace sharedWorkspace];
-    NSString *lurl = [theBib valueOfField:BDSKLocalUrlString];
+    
     BOOL err = NO;
     NSURL *local;
 
     NS_DURING
-        if (![@"" isEqualToString:lurl]) {
-            local = [NSURL URLWithString:lurl];
-            if(!local){
-                local = [NSURL fileURLWithPath:[lurl stringByExpandingTildeInPath]];
-            }
-            if(![sw openFile:[local path]]){
+
+        if(![sw openFile:[theBib localURLPathRelativeTo:[[theDoc fileName] stringByDeletingLastPathComponent]]]){
                 err = YES;
-            }
         }
+
         NS_HANDLER
             err=YES;
         NS_ENDHANDLER
@@ -285,7 +281,7 @@ NSString *BDSKUrlString = @"Url";
 }
 
 - (void)fixURLs{
-    NSString *lurl = [theBib valueOfField:BDSKLocalUrlString];
+    NSString *lurl = [theBib localURLPathRelativeTo:[[theDoc fileName] stringByDeletingLastPathComponent]];
     NSString *rurl = [theBib valueOfField:BDSKUrlString];
     NSImage *icon;
     NSURL *local;
@@ -300,19 +296,10 @@ NSString *BDSKUrlString = @"Url";
     if(drawerWasOpen) [documentSnoopDrawer close];
     //local is either a file:// URL -or a path
     // How to use stringByExpandingTildeInPath to expand the URL? get the url, get its path, then expand that, then replace it as the url? ugly. 
-    
-    if(![@"" isEqualToString:lurl]){
-        local = [NSURL URLWithString:lurl];
-        if(!local){
-            local = [NSURL fileURLWithPath:[lurl stringByExpandingTildeInPath]];
-        }
-    }else{
-        local = nil;
-    }
 
-    if (local && [[NSFileManager defaultManager] fileExistsAtPath:[local path]]){
-            icon = [[NSWorkspace sharedWorkspace] iconForFile:
-                [local path]];
+    
+    if (lurl && [[NSFileManager defaultManager] fileExistsAtPath:lurl]){
+            icon = [[NSWorkspace sharedWorkspace] iconForFile:lurl];
             [viewLocalButton setImage:icon];
             [viewLocalButton setEnabled:YES];
             [viewLocalButton setToolTip:@"View File"];
@@ -324,14 +311,14 @@ NSString *BDSKUrlString = @"Url";
             
             if(drawerWasOpen || drawerIsOpening){
                 if(!_pdfSnoopImage){
-                    _pdfSnoopImage = [[NSImage alloc] initWithContentsOfFile:[local path]];
+                    _pdfSnoopImage = [[NSImage alloc] initWithContentsOfFile:lurl];
                 }
-#if DEBUG
+
                 NSLog(@"setting snoop to %@ from file %@", _pdfSnoopImage, lurl);
-#endif
+
                 if(_pdfSnoopImage){
                     // [documentSnoopImageView setImage:_pdfSnoopImage];
-                    [documentSnoopImageView loadFromPath:[local path]];
+                    [documentSnoopImageView loadFromPath:lurl];
                     [_pdfSnoopImage setBackgroundColor:[NSColor whiteColor]];
                     
                     [documentSnoopScrollView setDocumentViewAlignment:NSImageAlignTopLeft];
