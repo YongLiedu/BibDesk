@@ -441,7 +441,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
     NSPasteboard *pb;
     NSMutableArray *newBIs;
     NSEnumerator *fileNameEnum;
-    NSString *pbString;
+    NSData *pbData; 
     NSArray *pbArray;
     NSArray *newPubs;
     NSEnumerator *newPubE;
@@ -471,7 +471,6 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
     if([pb containsFiles]){
         newBIs = [NSMutableArray array];
         pbArray = [pb propertyListForType:NSFilenamesPboardType]; // we will get an array
-        pbString = [pb stringForType:NSURLPboardType]; // we will get an array
 #if DEBUG
         //NSLog(@"got filenames %@", pbArray);
 #endif
@@ -496,9 +495,9 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
         }
         return YES;
     }else if([types containsObject:NSStringPboardType]){
-        pbString = [pb stringForType:NSStringPboardType];
-       // //NSLog(@"<STRING IS>%@ </STRING IS>", pbString);
-        newPubs = [BibTeXParser itemsFromString:pbString
+        pbData = [pb dataForType:NSStringPboardType]; 
+
+        newPubs = [BibTeXParser itemsFromData:pbData
                                           error:&hadProblems];
         if(hadProblems) return NO;
             
