@@ -1,0 +1,28 @@
+{
+    IBClasses = (
+        {
+            ACTIONS = {
+                addCondition = id; 
+                addNewKey = id; 
+                dismissAddKeySheet = id; 
+                removeCondition = id; 
+            }; 
+            CLASS = BDSKConditionController; 
+            LANGUAGE = ObjC; 
+            OUTLETS = {
+                addButton = NSButton; 
+                addKeySheet = NSWindow; 
+                comparisonPopUp = NSPopUpButton; 
+                keyPopUp = NSPopUpButton; 
+                newKeyField = NSTextField; 
+                ownerController = NSObjectController; 
+                removeButton = NSButton; 
+                valueTextField = NSTextField; 
+                view = NSView; 
+            }; 
+            SUPERCLASS = NSObject; 
+        }, 
+        {CLASS = FirstResponder; LANGUAGE = ObjC; SUPERCLASS = NSObject; }
+    ); 
+    IBVersion = 1; 
+}
