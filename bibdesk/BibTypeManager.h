@@ -21,5 +21,6 @@
 - (NSArray *)userDefaultFieldsForType:(NSString *)type;
 - (NSArray *)bibTypesForFileType:(NSString *)fileType;
 - (NSString *)fieldNameForPubMedTag:(NSString *)tag;
+- (NSString *)bibtexTypeForPubMedType:(NSString *)type;
 - (NSCharacterSet *)invalidCharactersForField:(NSString *)fieldName inType:(NSString *)type;
 @end

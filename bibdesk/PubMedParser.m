@@ -185,6 +185,10 @@
         itemOrder++;
         [newBI setFields:pubDict];
         [returnArray addObject:[newBI autorelease]];
+	// set the pub type if we know the bibtex equivalent, otherwise leave it as misc
+	if([typeManager bibtexTypeForPubMedType:[pubDict objectForKey:@"TY"]] != nil){
+	    [newBI setType:[typeManager bibtexTypeForPubMedType:[pubDict objectForKey:@"TY"]]];
+	}
         [newBI setCiteKey:[pubDict valueForKey:@"PMID"]];
         
     }

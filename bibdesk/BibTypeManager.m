@@ -65,6 +65,10 @@ static BibTypeManager *_sharedInstance = nil;
     return [[_typeInfoDict objectForKey:@"BibTeXFieldNamesForPubMedTags"] objectForKey:tag];
 }
 
+- (NSString *)bibtexTypeForPubMedType:(NSString *)type{
+    return [[_typeInfoDict objectForKey:@"BibTeXTypesForPubMedTypes"] objectForKey:type];
+}
+
 - (NSCharacterSet *)invalidCharactersForField:(NSString *)fieldName inType:(NSString *)type{
 	if( ! [type isEqualToString:@"BibTeX"] || ! [fieldName isEqualToString:@"Cite Key"]){
 		[NSException raise:@"unimpl. feat. exc." format:@"invalidCharactersForField is partly implemented"];

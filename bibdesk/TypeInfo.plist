@@ -90,7 +90,10 @@
 		<string>Year</string>
 	</dict>
 	<key>BibTeXTypesForPubMedTypes</key>
-	<dict/>
+	<dict>
+		<key>JOUR</key>
+		<string>article</string>
+	</dict>
 	<key>FieldsForTypes</key>
 	<dict>
 		<key>article</key>
@@ -449,6 +452,7 @@
 		</array>
 		<key>PubMed</key>
 		<array>
+			<string>JOUR</string>
 			<string>ABST</string>
 			<string>ADVS</string>
 			<string>ART</string>
