@@ -20,18 +20,20 @@
 - (id)initWithCoder:(NSCoder *)coder
 {
 	if (self = [super initWithCoder:coder]) {
-		RYZImagePopUpButtonCell *cell = [[[RYZImagePopUpButtonCell alloc] init] autorelease];
-		
-		if ([self image] != nil) {
-			[cell setIconImage:[self image]];
-			[cell setIconSize:[[self image] size]];
+		if (![[self cell] isKindOfClass:[RYZImagePopUpButtonCell class]]) {
+			RYZImagePopUpButtonCell *cell = [[[RYZImagePopUpButtonCell alloc] init] autorelease];
+			
+			if ([self image] != nil) {
+				[cell setIconImage:[self image]];
+				[cell setIconSize:[[self image] size]];
+			}
+			if ([self menu] != nil) {
+				if ([self pullsDown])	
+					[[self menu] removeItemAtIndex:0];
+				[cell setMenu:[self menu]];
+			}
+			[self setCell:cell];
 		}
-		if ([self menu] != nil) {
-			if ([self pullsDown])	
-				[[self menu] removeItemAtIndex:0];
-			[cell setMenu:[self menu]];
-		}
-		[self setCell:cell];
 	}
 	return self;
 }

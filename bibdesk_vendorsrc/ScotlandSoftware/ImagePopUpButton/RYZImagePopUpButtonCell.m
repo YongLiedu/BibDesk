@@ -27,6 +27,7 @@
 		RYZ_showsMenuWhenIconClicked = NO;
 		RYZ_iconActionEnabled = YES;
 		RYZ_alwaysUsesFirstItemAsSelected = NO;
+		RYZ_refreshesMenu = NO;
 
 		[self setIconImage: anImage];	
 		[self setArrowImage: nil];
@@ -35,6 +36,42 @@
     return self;
 }
 
+- (id)initWithCoder:(NSCoder *)coder
+{
+	if (self = [super initWithCoder:coder]) {
+		RYZ_buttonCell = [[coder decodeObjectForKey:@"buttonCell"] retain];
+		
+		RYZ_iconSize = NSMakeSize([coder decodeFloatForKey:@"iconSizeWidth"], [coder decodeFloatForKey:@"iconSizeHeight"]);
+		RYZ_showsMenuWhenIconClicked = [coder decodeBoolForKey:@"showsMenuWhenIconClicked"];
+		RYZ_iconActionEnabled = [coder decodeBoolForKey:@"iconActionEnabled"];
+		RYZ_alwaysUsesFirstItemAsSelected = [coder decodeBoolForKey:@"alwaysUsesFirstItemAsSelected"];
+		RYZ_refreshesMenu = [coder decodeBoolForKey:@"refreshesMenu"];
+		
+		[self setIconImage:[coder decodeObjectForKey:@"iconImage"]];
+		[self setArrowImage:[coder decodeObjectForKey:@"arrowImage"]];
+		
+		[self setDelegate:[coder decodeObjectForKey:@"delegate"]];
+	}
+	return self;
+}
+
+- (void)encodeWithCoder:(NSCoder *)encoder
+{
+	[super encodeWithCoder:encoder];
+	[encoder encodeObject:RYZ_buttonCell forKey:@"buttonCell"];
+	
+	[encoder encodeFloat:RYZ_iconSize.width forKey:@"iconSizeWidth"];
+	[encoder encodeFloat:RYZ_iconSize.height forKey:@"iconSizeHeight"];
+	[encoder encodeBool:RYZ_showsMenuWhenIconClicked forKey:@"showsMenuWhenIconClicked"];
+	[encoder encodeBool:RYZ_iconActionEnabled forKey:@"iconActionEnabled"];
+	[encoder encodeBool:RYZ_alwaysUsesFirstItemAsSelected forKey:@"alwaysUsesFirstItemAsSelected"];
+	[encoder encodeBool:RYZ_refreshesMenu forKey:@"refreshesMenu"];
+	
+	[encoder encodeConditionalObject:RYZ_delegate forKey:@"delegate"];
+	[encoder encodeObject:RYZ_iconImage forKey:@"iconImage"];
+	
+	[encoder encodeObject:RYZ_arrowImage forKey:@"arrowImage"];
+}
 
 - (void)dealloc
 {
