@@ -991,6 +991,9 @@ NSString *BDSKDateModifiedString = @"Date-Modified";
 	}
 	[documentSnoopDrawer close];
 	[theDocument removeWindowController:self];
+    [[NSNotificationCenter defaultCenter] postNotificationName:BDSKDocumentUpdateUINotification
+                                                        object:nil
+                                                      userInfo:nil];
 }
 
 // we want to have the same undoManager as our document, so we use this 
