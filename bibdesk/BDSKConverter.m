@@ -88,6 +88,7 @@ static BDSKConverter *theConverter;
     // s should be in UTF-8 or UTF-16 (i'm not sure which exactly) format (since that's what the property list editor spat)
     // This direction could be faster, since we're comparing characters to the keys, but that'll be left for later.
     NSScanner *scanner = [[NSScanner alloc] initWithString:s];
+    [scanner setCharactersToBeSkipped:nil];
     NSString *tmpConv = nil;
     NSMutableString *convertedSoFar = [s mutableCopy];
 
