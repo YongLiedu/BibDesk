@@ -122,6 +122,7 @@
 				2786341F05FDB65A004D4F41,
 				F9A008F20638C00D00426F15,
 				F9A008F40638C01400426F15,
+				F992AB6F06FA903600B3747A,
 			);
 			isa = PBXAggregateTarget;
 			name = BuildMeFirst;
@@ -1281,6 +1282,7 @@
 				27BF060806D7F097008AD3AE,
 				27770FD306D94B2D0070C5F0,
 				F9A59EE206DFE7DD00C411CA,
+				F992AB6406FA8F7200B3747A,
 			);
 			isa = PBXHeadersBuildPhase;
 			runOnlyForDeploymentPostprocessing = 0;
@@ -1827,6 +1829,7 @@
 				27BF060906D7F097008AD3AE,
 				27770FD406D94B2D0070C5F0,
 				F9A59EE106DFE7DD00C411CA,
+				F992AB6506FA8F7200B3747A,
 			);
 			isa = PBXSourcesBuildPhase;
 			runOnlyForDeploymentPostprocessing = 0;
@@ -2239,6 +2242,7 @@
 				274C84F705DF720A0020EEFF,
 				F9AC17700638709B009399C1,
 				F9FC662A06A9C6750016151E,
+				F992AB6A06FA8FB600B3747A,
 			);
 		};
 		2A37F4AAFDCFA73011CA2CEA = {
@@ -4123,6 +4127,68 @@
 			settings = {
 			};
 		};
+		F992AB6206FA8F7200B3747A = {
+			fileEncoding = 30;
+			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.c.h;
+			path = BibDeskOpenCommand.h;
+			refType = 4;
+			sourceTree = "<group>";
+		};
+		F992AB6306FA8F7200B3747A = {
+			fileEncoding = 30;
+			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.c.objc;
+			path = BibDeskOpenCommand.m;
+			refType = 4;
+			sourceTree = "<group>";
+		};
+		F992AB6406FA8F7200B3747A = {
+			fileRef = F992AB6206FA8F7200B3747A;
+			isa = PBXBuildFile;
+			settings = {
+			};
+		};
+		F992AB6506FA8F7200B3747A = {
+			fileRef = F992AB6306FA8F7200B3747A;
+			isa = PBXBuildFile;
+			settings = {
+			};
+		};
+		F992AB6A06FA8FB600B3747A = {
+			buildArgumentsString = "$(ACTION) -buildstyle Deployment";
+			buildPhases = (
+			);
+			buildSettings = {
+				OPTIMIZATION_CFLAGS = "";
+				OTHER_CFLAGS = "";
+				OTHER_LDFLAGS = "";
+				OTHER_REZFLAGS = "";
+				PRODUCT_NAME = BibDeskInputManager;
+				SECTORDER_FLAGS = "";
+				WARNING_CFLAGS = "-Wmost -Wno-four-char-constants -Wno-unknown-pragmas";
+			};
+			buildToolPath = /usr/bin/xcodebuild;
+			buildWorkingDirectory = ../bibdeskinputmanager;
+			dependencies = (
+			);
+			isa = PBXLegacyTarget;
+			name = BibDeskInputManager;
+			passBuildSettingsInEnvironment = 1;
+			productName = BibDeskInputManager;
+		};
+		F992AB6E06FA903600B3747A = {
+			containerPortal = 2A37F4A9FDCFA73011CA2CEA;
+			isa = PBXContainerItemProxy;
+			proxyType = 1;
+			remoteGlobalIDString = F992AB6A06FA8FB600B3747A;
+			remoteInfo = BibDeskInputManager;
+		};
+		F992AB6F06FA903600B3747A = {
+			isa = PBXTargetDependency;
+			target = F992AB6A06FA8FB600B3747A;
+			targetProxy = F992AB6E06FA903600B3747A;
+		};
 		F99A21050607DD7A00DF3466 = {
 			buildActionMask = 2147483647;
 			files = (
@@ -5026,6 +5092,8 @@
 				6C18177206BD7A0A00D010A0,
 				6C18177306BD7A0A00D010A0,
 				F9D6C20F06AED0DA00EAEB04,
+				F992AB6206FA8F7200B3747A,
+				F992AB6306FA8F7200B3747A,
 				F9C4BECC06B3FF5A0008A694,
 				F9C4BECD06B3FF5A0008A694,
 				F9C4BEC406B3FF3E0008A694,
@@ -5073,7 +5141,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "/Developer/Tools/sdp -f st -i /Developer/Examples/Scripting\\ Definitions/NSCoreSuite.sdef -i /Developer/Examples/Scripting\\ Definitions/NSTextSuite.sdef Scripting/BibDesk.sdef";
+			shellScript = "if [ -x /Developer/Tools/sdp ]; then\n/Developer/Tools/sdp -f st -i /Developer/Examples/Scripting\\ Definitions/NSCoreSuite.sdef -i /Developer/Examples/Scripting\\ Definitions/NSTextSuite.sdef Scripting/BibDesk.sdef\nexit 0\nelse\n/usr/bin/sdp -f st -i /Developer/Examples/Scripting\\ Definitions/NSCoreSuite.sdef -i /Developer/Examples/Scripting\\ Definitions/NSTextSuite.sdef Scripting/BibDesk.sdef\nexit 0\nfi";
 		};
 		F9D6C21E06AED39F00EAEB04 = {
 			fileEncoding = 30;
