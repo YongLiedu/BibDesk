@@ -28,7 +28,7 @@ static NSColor *sStripeColor = nil;
     NSSize maxSize = NSMakeSize(600,200); // tunable...
     NSSize stringSize;
 
-    if(s = [[self dataSource] citeStringForSelectedPubsWithTableViewDragSource:self]){
+    if(s = [[self dataSource] citeStringForRows:dragRows tableViewDragSource:self]){
         string = [[NSAttributedString alloc] initWithString:s];
         image = [[[NSImage alloc] init] autorelease];
         stringSize = [string size];
@@ -133,18 +133,6 @@ static NSColor *sStripeColor = nil;
         [super keyDown:event];
     }
 }
-
-- (void)mouseDown:(NSEvent *)theEvent{
-    
-    if(![[self window] isKeyWindow] && [self selectedRow] == -1 ){ // preserve the selection if present, else select the row at the pointer
-        NSPoint pt=[self convertPoint:[theEvent locationInWindow] fromView:nil];
-        int row=[self rowAtPoint:pt];
-        [self selectRow:row byExtendingSelection:NO];
-    }
-    [super mouseDown:theEvent];
-}
-
-    
 
 // a convenience method.
 - (void)removeAllTableColumns{

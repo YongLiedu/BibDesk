@@ -200,7 +200,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 // This method returns the string to draw for dragImageForRows, 
 // to avoid calling tableView:writeRows: twice, which screws up the 
 // draggedItems array.
-- (NSString *)citeStringForSelectedPubsWithTableViewDragSource:(NSTableView *)tv{
+- (NSString *)citeStringForRows:(NSArray *)dragRows tableViewDragSource:(NSTableView *)tv{
 	
     OFPreferenceWrapper *sud = [OFPreferenceWrapper sharedPreferenceWrapper];
     NSMutableString *s = [[NSMutableString string] retain];
@@ -214,15 +214,15 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
     if(tv == (NSTableView *)ccTableView){
 		// check the publications table to see if an item is selected, otherwise we get an error on dragging from the cite drawer
 		if([tableView numberOfSelectedRows] == 0) return nil;
-        
+        dragRows = [tableView selectedRows]; // get the selection from the main pub table
         startCite = [NSString stringWithFormat:@"\\%@%@",[customStringArray objectAtIndex:[[rows objectAtIndex:0] intValue]], startCiteBracket];
 		// rows oi:0 is ok because we don't allow multiple selections in ccTV.
     }  
     // get rows = the main TV's selected rows,
 
     rows = [NSMutableArray arrayWithCapacity:10];
-    NSEnumerator *selRowE = [tableView selectedRowEnumerator]; 
-    while(idx = [selRowE nextObject]){
+    NSEnumerator *dragRowE = [dragRows objectEnumerator]; 
+    while(idx = [dragRowE nextObject]){
         [rows addObject:idx];
     }
     
@@ -271,8 +271,6 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 
     [draggedItems removeAllObjects];
     
-	if([tv numberOfSelectedRows] == 0) return NO;
-
     if(tv == (NSTableView *)ccTableView){
 		// check the publications table to see if an item is selected, otherwise we get an error on dragging from the cite drawer
 		if([tableView numberOfSelectedRows] == 0) return NO;
@@ -340,7 +338,6 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 
     return yn && lyn;
 }
-
 
 // This method is used by NSTableView to determine a valid drop target.  Based on the mouse position, the table view will suggest a proposed drop location.  This method must return a value that indicates which dragging operation the data source will perform.  The data source may "re-target" a drop if desired by calling setDropRow:dropOperation: and returning something other than NSDragOperationNone.  One may choose to re-target for various reasons (eg. for better visual feedback when inserting into a sorted position).
 - (NSDragOperation)tableView:(NSTableView*)tv
