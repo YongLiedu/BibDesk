@@ -320,6 +320,8 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
     NSMutableArray *completionArray = nil;
     BOOL keyExists = [[_autoCompletionDict allKeys] containsObject:entry];
     
+    if(string == nil) return; // shouldn't happen
+    
     if (!keyExists) {
         completionArray = [NSMutableArray arrayWithCapacity:5];
         [_autoCompletionDict setObject:completionArray forKey:entry];
@@ -348,8 +350,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 
         while(![scanner isAtEnd]){
             [scanner scanUpToCharactersFromSet:_autocompletePunctuationCharacterSet intoString:&tmp];
-            [completionArray addObject:tmp];
-            tmp = nil;
+            if(!tmp == nil) [completionArray addObject:tmp];
             [scanner scanCharactersFromSet:_autocompletePunctuationCharacterSet intoString:nil];
             [scanner scanCharactersFromSet:[NSCharacterSet whitespaceCharacterSet] intoString:nil];
         }
