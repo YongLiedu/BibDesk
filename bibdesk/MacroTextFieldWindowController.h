@@ -5,7 +5,6 @@
 #import <AppKit/AppKit.h>
 #import "BDSKComplexString.h"
 
-extern NSString *BDSKMacroTextFieldWindowWillCloseNotification;
 
 @interface MacroTextFieldWindowController : NSWindowController {
     IBOutlet NSTextField *textField;

@@ -1,6 +1,5 @@
 #import "MacroTextFieldWindowController.h"
 
-NSString *BDSKMacroTextFieldWindowWillCloseNotification = @"BDSKMacroTextFieldWindowWillCloseNotification";
 
 @implementation MacroTextFieldWindowController
 

@@ -122,4 +122,5 @@ NSString *BDSKBibDocMacroAddedNotification = @"added a macro or changed a macro 
 NSString *BDSKBibDocMacroRemovedNotification = @"removed a macro from the document";
 NSString *BDSKBibDocMacroKeyChangedNotification = @"changed the key of a macro";
 NSString *BDSKBibDocMacroDefinitionChangedNotification = @"changed the value of a macro";
+NSString *BDSKMacroTextFieldWindowWillCloseNotification = @"Macro TextField Window Will Close Notification";
 NSString *BDSKPreviewPaneFontChangedNotification = @"Changed the RTF preview pane font family";
