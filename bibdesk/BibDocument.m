@@ -52,6 +52,11 @@ NSString* BDSKBibTeXStringPboardType = @"edu.ucsd.cs.mmcrack.bibdesk: Local BibT
         localDragPboard = [NSPasteboard pasteboardWithName:LocalDragPasteboardName];
         tableColumns = [[NSMutableDictionary dictionaryWithCapacity:6] retain];
         fileOrderCount = 1;
+		
+		BDSKUndoManager *newUndoManager = [[[BDSKUndoManager alloc] init] autorelease];
+		[newUndoManager setDelegate:self];
+		[self setUndoManager:newUndoManager];
+		
         // Register as observer of font change events.
         [[NSNotificationCenter defaultCenter] addObserver:self
    selector:@selector(handleFontChangedNotification:)
@@ -198,6 +203,17 @@ NSString* BDSKBibTeXStringPboardType = @"edu.ucsd.cs.mmcrack.bibdesk: Local BibT
 	[actionMenuButton setMenu:menu];
 	
 	[actionMenuButton setEnabled:([self numberOfSelectedPubs] != 0)];
+}
+
+
+- (BOOL)undoManagerShouldUndoChange:(id)sender{
+	if (![self isDocumentEdited]) {
+        int button = NSRunAlertPanel(NSLocalizedString(@"Warning", @""),
+                                     NSLocalizedString(@"You are about to undo past the last point this file was saved. Do you want to do this?", @""),
+                                     @"OK", @"Cancel", nil);
+		return (button == NSOKButton);
+	}
+	return YES;
 }
 
 

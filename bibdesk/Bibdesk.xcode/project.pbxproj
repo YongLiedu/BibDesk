@@ -46,6 +46,7 @@
 				F9022C390758027800C3F701,
 				F9022C490758027800C3F701,
 				F9022C470758027800C3F701,
+				3DAEA2EC07703F6000AF111A,
 			);
 			isa = PBXGroup;
 			name = Classes;
@@ -368,6 +369,34 @@
 			settings = {
 			};
 		};
+		3DAEA2EB07703F6000AF111A = {
+			fileEncoding = 30;
+			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.c.h;
+			path = BDSKUndoManager.h;
+			refType = 4;
+			sourceTree = "<group>";
+		};
+		3DAEA2EC07703F6000AF111A = {
+			fileEncoding = 30;
+			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.c.objc;
+			path = BDSKUndoManager.m;
+			refType = 4;
+			sourceTree = "<group>";
+		};
+		3DAEA2ED07703F6000AF111A = {
+			fileRef = 3DAEA2EB07703F6000AF111A;
+			isa = PBXBuildFile;
+			settings = {
+			};
+		};
+		3DAEA2EE07703F6000AF111A = {
+			fileRef = 3DAEA2EC07703F6000AF111A;
+			isa = PBXBuildFile;
+			settings = {
+			};
+		};
 		3DD300F3075C0532003FD2D7 = {
 			fileEncoding = 30;
 			isa = PBXFileReference;
@@ -631,6 +660,7 @@
 				F9022FD407580B9400C3F701,
 				3DD300F6075C054D003FD2D7,
 				3DAE9ED3076E56C100AF111A,
+				3DAEA2EE07703F6000AF111A,
 			);
 			isa = PBXSourcesBuildPhase;
 			runOnlyForDeploymentPostprocessing = 0;
@@ -3598,6 +3628,7 @@
 				F9022C440758027800C3F701,
 				F9022C460758027800C3F701,
 				F9022C480758027800C3F701,
+				3DAEA2EB07703F6000AF111A,
 				F9022DDD075808EB00C3F701,
 				F9022C29075801AC00C3F701,
 				F9022C2B075801AC00C3F701,
@@ -4188,6 +4219,7 @@
 				F920DB02075C2B69000C5FCA,
 				F920DB03075C2B69000C5FCA,
 				3DAE9ED2076E56C100AF111A,
+				3DAEA2ED07703F6000AF111A,
 			);
 			isa = PBXHeadersBuildPhase;
 			runOnlyForDeploymentPostprocessing = 0;
