@@ -796,6 +796,20 @@
 //3D2
 //3D3
 //3D4
+		3D3EA58907C170A500DEEAA3 = {
+			isa = PBXFileReference;
+			lastKnownFileType = image.tiff;
+			name = WeblocFile_Disabled.tiff;
+			path = Images/WeblocFile_Disabled.tiff;
+			refType = 4;
+			sourceTree = "<group>";
+		};
+		3D3EA58A07C170A500DEEAA3 = {
+			fileRef = 3D3EA58907C170A500DEEAA3;
+			isa = PBXBuildFile;
+			settings = {
+			};
+		};
 		3D5D34380770C8C3006AF48A = {
 			isa = PBXFileReference;
 			lastKnownFileType = image.tiff;
@@ -1079,6 +1093,7 @@
 				27C162BA078BAE91008A4B83,
 				F96E21690794FE3400120AB3,
 				F94A950C079AEE7600D13AB5,
+				3D3EA58A07C170A500DEEAA3,
 			);
 			isa = PBXResourcesBuildPhase;
 			runOnlyForDeploymentPostprocessing = 0;
@@ -3448,6 +3463,7 @@
 				F91B5CDF076579FE0011ED22,
 				F9022DBB0758088000C3F701,
 				F9022DBC0758088000C3F701,
+				3D3EA58907C170A500DEEAA3,
 			);
 			isa = PBXGroup;
 			name = Images;
