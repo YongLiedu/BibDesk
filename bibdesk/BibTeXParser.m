@@ -187,7 +187,7 @@ NSRange SafeForwardSearchRange( unsigned startLoc, unsigned seekLength, unsigned
                                          fileType:@"BibTeX"
                                           authors:[NSMutableArray array]];        
             
-            [newBI setCiteKeyString:citekey];
+            [newBI setCiteKeyString:[citekey stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]]];
         }
         
         while(entryClosingBraceRange.location != NSNotFound && [scanner scanLocation] < entryClosingBraceRange.location){ // while we are within bounds of a single bibitem
