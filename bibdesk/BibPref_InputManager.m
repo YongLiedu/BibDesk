@@ -80,6 +80,13 @@ NSString *BDSKInputManagerID = @"net.sourceforge.bibdesk.inputmanager";
     NSFileManager *fm = [NSFileManager defaultManager];
     BOOL err = NO;
     
+    if(![fm fileExistsAtPath:[NSHomeDirectory() stringByAppendingPathComponent:@"/Library/InputManagers"]]){
+	if(![fm createDirectoryAtPath:[NSHomeDirectory() stringByAppendingPathComponent:@"/Library/InputManagers"] attributes:nil]){
+	    NSLog(@"unable to create the InputManagers folder in home directory");
+	    err = YES;
+	}
+    }
+    
     if([fm fileExistsAtPath:inputManagerPath]){
 	if([fm isDeletableFileAtPath:inputManagerPath]){
 	    if(![fm removeFileAtPath:inputManagerPath handler:nil]){
@@ -91,6 +98,7 @@ NSString *BDSKInputManagerID = @"net.sourceforge.bibdesk.inputmanager";
 	    NSLog(@"unable to remove file, check permissions");
 	}
     }
+	
     if(!err){
 	[fm copyPath:[[[NSBundle mainBundle] resourcePath] stringByAppendingPathComponent:@"BibDeskInputManager"]
 	      toPath:inputManagerPath
