@@ -683,14 +683,14 @@ stringByAppendingPathComponent:@"BibDesk"]; */
     dictionary = [NSMutableDictionary dictionaryWithCapacity:10];
 
     // to enable some cheapo timing, uncomment these:
-    //    NSDate *start = [NSDate date];
-    //    NSLog(@"start: %@", start);
+//    NSDate *start = [NSDate date];
+//    NSLog(@"start: %@", [start description]);
     publications = [[BibTeXParser itemsFromData:data
                                            error:&hadProblems
                                      frontMatter:frontMatter
                                         filePath:filePath] retain]; 
 
-    // NSLog(@"end %@ elapsed: %f", [NSDate date], [start timeIntervalSinceNow]);
+//    NSLog(@"end %@ elapsed: %f", [[NSDate date] description], [start timeIntervalSinceNow]);
 
     if(hadProblems){
         // run a modal dialog asking if we want to use partial data or give up
