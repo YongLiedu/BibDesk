@@ -491,7 +491,7 @@ void _setupFonts(){
     // Queue the notification, since this can be expensive when opening large files
     [[NSNotificationQueue defaultQueue] enqueueNotification:aNotification
                                                postingStyle:NSPostWhenIdle
-                                               coalesceMask:NSNotificationCoalescingOnSender
+                                               coalesceMask:NSNotificationCoalescingOnName
                                                    forModes:nil];
 }
 
