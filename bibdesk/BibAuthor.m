@@ -19,7 +19,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 
 #define emptyStr(x) ([x isEqualToString:@""] || !(x))
 
-static NSMutableSet *_authors;
+static NSCountedSet *_authors;  //use a counted set so the same object can be retained each time it's added
 
 @implementation BibAuthor
 
@@ -35,7 +35,7 @@ static NSMutableSet *_authors;
 + (BibAuthor *)authorWithName:(NSString *)newName andPub:(BibItem *)aPub{	
 	BibAuthor *newAuth = [[[BibAuthor alloc] initWithName:newName andPub:aPub] autorelease];
     BibAuthor *auth = [_authors member:newAuth];
-
+    
     if(auth != nil){
         [auth addPub:aPub];
         NSNotification *notif = [NSNotification notificationWithName:BDSKAuthorPubListChangedNotification
@@ -44,6 +44,7 @@ static NSMutableSet *_authors;
                                                    postingStyle:NSPostWhenIdle
                                                    coalesceMask:NSNotificationCoalescingOnSender
                                                        forModes:nil];
+        [_authors addObject:auth]; // increment its retain count in the set for each pub
         return auth;
     }
         	
@@ -77,6 +78,13 @@ static NSMutableSet *_authors;
     [[NSNotificationCenter defaultCenter] removeObserver:self];
     // NSLog(@"bibauthor dealloc");
     [super dealloc];
+}
+
+
+- (void)removeAuthorsFromGlobalAuthors:(NSArray *)authArray{
+    NSSet *setToRemove = [NSSet setWithArray:authArray];
+    [_authors minusSet:setToRemove]; // this is sent on a per-bibitem basis from BibDocument
+    // NSLog(@"removing %@, _authors has %i", [setToRemove description], [_authors count]);
 }
 
 - (id)copyWithZone:(NSZone *)zone{

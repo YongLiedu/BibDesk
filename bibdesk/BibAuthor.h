@@ -47,6 +47,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 - (id)initWithName:(NSString *)aName andPub:(BibItem *)aPub;
 - (void)dealloc;
 - (void)setPubs:(NSSet *)newPubs;
+- (void)removeAuthorsFromGlobalAuthors:(NSArray *)authArray;
 
 - (int)numberOfPublications;
 - (NSArray *)publications;
