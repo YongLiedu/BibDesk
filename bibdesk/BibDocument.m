@@ -700,11 +700,17 @@ didClickTableColumn: (NSTableColumn *) tableColumn{
 - (IBAction)editPubCmd:(id)sender{
     NSEnumerator *e = [self selectedPubEnumerator];
     NSNumber *i;
-    NSString *colID = [[[tableView tableColumns] objectAtIndex:[tableView clickedColumn]] identifier];
+    NSString *colID = nil;
     BibItem *pub = nil;
-    int row = [tableView clickedRow];
+    int row = [tableView selectedRow];// was : [tableView clickedRow];
     int sortedRow = (sortDescending ? [shownPublications count] - 1 - row : row);
-    
+
+
+    if([tableView clickedColumn] != -1){
+	colID = [[[tableView tableColumns] objectAtIndex:[tableView clickedColumn]] identifier];
+    }else{
+	colID = @"";
+    }
     if([colID isEqualToString:@"Local-Url"]){
         pub = [shownPublications objectAtIndex:sortedRow];
         [[NSWorkspace sharedWorkspace] openFile:[pub localURLPathRelativeTo:[[self fileName] stringByDeletingLastPathComponent]]];
