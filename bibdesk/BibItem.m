@@ -356,6 +356,9 @@ void _setupFonts(){
         return NSOrderedDescending;
     }
 }
+- (NSComparisonResult)authorCompare:(BibItem *)aBI{
+    return [[self bibtexAuthorString] compare: [aBI bibtexAuthorString]];
+}
 
 - (NSComparisonResult)fileOrderCompare:(BibItem *)aBI{
     int aBIOrd = [aBI fileOrder];

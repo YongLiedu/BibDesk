@@ -131,6 +131,7 @@
 - (NSComparisonResult)auth1Compare:(BibItem *)aBI;
 - (NSComparisonResult)auth2Compare:(BibItem *)aBI;
 - (NSComparisonResult)auth3Compare:(BibItem *)aBI;
+- (NSComparisonResult)authorCompare:(BibItem *)aBI;
 
 - (NSComparisonResult)fileOrderCompare:(BibItem *)aBI;
 

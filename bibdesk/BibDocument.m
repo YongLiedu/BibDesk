@@ -1794,11 +1794,14 @@ didClickTableColumn: (NSTableColumn *) tableColumn{
 		
 		[publications sortUsingSelector:@selector(dateCompare:)];
 		[shownPublications sortUsingSelector:@selector(dateCompare:)];
-	}else if([tcID isEqualToString:@"Created"]){
+	}else if([tcID isEqualToString:BDSKDateCreatedString] ||
+			 [tcID isEqualToString:@"Added"] ||
+			 [tcID isEqualToString:@"Created"]){
 		
 		[publications sortUsingSelector:@selector(createdDateCompare:)];
 		[shownPublications sortUsingSelector:@selector(createdDateCompare:)];
-	}else if([tcID isEqualToString:@"Modified"]){
+	}else if([tcID isEqualToString:BDSKDateModifiedString] ||
+			 [tcID isEqualToString:@"Modified"]){
 		
 		[publications sortUsingSelector:@selector(modDateCompare:)];
 		[shownPublications sortUsingSelector:@selector(modDateCompare:)];
@@ -1814,6 +1817,11 @@ didClickTableColumn: (NSTableColumn *) tableColumn{
 		
 		[publications sortUsingSelector:@selector(auth3Compare:)];
 		[shownPublications sortUsingSelector:@selector(auth3Compare:)];
+	}else if([tcID isEqualToString:BDSKAuthorString] ||
+			 [tcID isEqualToString:@"Authors"]){
+		
+		[publications sortUsingSelector:@selector(authorCompare:)];
+		[shownPublications sortUsingSelector:@selector(authorCompare:)];
 	}else if([tcID isEqualToString:@"Type"]){
 		
 		[publications sortUsingSelector:@selector(pubTypeCompare:)];
