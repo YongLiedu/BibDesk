@@ -35,6 +35,7 @@
 //104
 		1058C7A6FEA54F5311CA2CBB = {
 			children = (
+				3D890DB007526C580073F8E5,
 				6C83BB8006B864BF0050C05B,
 				1058C7A7FEA54F5311CA2CBB,
 				27413A6B05328D0A00BEE674,
@@ -2028,6 +2029,7 @@
 				27E0AA7505A7C86B005BA25A,
 				6C83BB8106B864BF0050C05B,
 				F9A11A69073C3C26006B766C,
+				3D890DB107526C580073F8E5,
 			);
 			isa = PBXFrameworksBuildPhase;
 			runOnlyForDeploymentPostprocessing = 0;
@@ -2437,6 +2439,20 @@
 //3D2
 //3D3
 //3D4
+		3D890DB007526C580073F8E5 = {
+			isa = PBXFileReference;
+			lastKnownFileType = wrapper.framework;
+			name = Carbon.framework;
+			path = /System/Library/Frameworks/Carbon.framework;
+			refType = 0;
+			sourceTree = "<absolute>";
+		};
+		3D890DB107526C580073F8E5 = {
+			fileRef = 3D890DB007526C580073F8E5;
+			isa = PBXBuildFile;
+			settings = {
+			};
+		};
 		3DC794CB074F915A00C4997E = {
 			isa = PBXFileReference;
 			lastKnownFileType = image.tiff;
@@ -3005,8 +3021,8 @@
 				279D5364053535B2002DBEA0,
 				F56FDB8102AACA4C01980570,
 				F56FDB8202AACA4C01980570,
-				3DC794D5074F91A500C4997E,
 				3DC794D6074F91A500C4997E,
+				3DC794D5074F91A500C4997E,
 				F56FDB8A02AAD8D601980570,
 				F56FDB8B02AAD8D601980570,
 				F56FDCA602AB07B101980570,

@@ -438,21 +438,6 @@ void _setupFonts(){
     return pubType;
 }
 
-- (void)setCiteKeyFormat: (NSString *)newKeyFormat{
-    // in the future, this will allow us to set how we want the citeKey computed
-}
-
-- (NSString *)sanitizedCiteKeyString:(NSString *)key{
-    // only call this for keys that we generate internally, as it uses a restrictive character set
-	NSCharacterSet *invalidSet = [[BibTypeManager sharedManager] sanitizedCiteKeyCharSet];
-		
-	NSString *newCiteKey = [key stringByReplacingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]
-												   withString:@"-"];
-	newCiteKey = [newCiteKey stringByReplacingCharactersInSet:invalidSet withString:@""];
-	
-	return newCiteKey;
-}
-
 - (NSString *)suggestedCiteKey{
     
 	NSString *citeKeyFormat = [[OFPreferenceWrapper sharedPreferenceWrapper] objectForKey:BDSKCiteKeyFormatKey];
@@ -582,6 +567,25 @@ void _setupFonts(){
 					if ([self date]) {
 						string = [[self date] descriptionWithCalendarFormat:@"%m"];
 						[citeKeyStr appendString:string];
+					}
+					break;
+				case '{':
+					// arbitrary field
+					[scanner scanUpToCharactersFromSet:[NSCharacterSet characterSetWithCharactersInString:@"}"] intoString:&string];
+					[scanner scanString:@"}" intoString:NULL];
+					if ([scanner scanCharactersFromSet:digits intoString:&numStr]) {
+						number = [numStr intValue];
+					} else {
+						number = 0;
+					}
+					string = [self valueOfField:string];
+					if (string != nil) {
+						string = [converter stringBySanitizingCiteKeyString:string];
+						if (number > 0 && [string length] > number) {
+							[citeKeyStr appendString:[string substringToIndex:number]];
+						} else {
+							[citeKeyStr appendString:string];
+						}
 					}
 					break;
 				case 'r':

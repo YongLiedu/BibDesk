@@ -166,9 +166,6 @@
 - (void)setType: (NSString *)newType;
 - (NSString *)type;
 
-- (void)setCiteKeyFormat: (NSString *)newKeyFormat; // @@unimplemented
-- (NSString *)sanitizedCiteKeyString:(NSString *)key;
-
 /*!
     @method suggestedCiteKey
     @abstract Returns a suggested cite key based on the receiver

@@ -7,6 +7,7 @@
 //
 
 #import "BibPref_CiteKey.h"
+#import <Carbon/Carbon.h>
 
 
 @implementation BibPref_CiteKey
@@ -29,10 +30,13 @@
 	
 	// use a BibItem with some data to build the preview cite key
 	BibItem *tmpBI = [[BibItem alloc] init];
-	[tmpBI setField:@"Year" toValue:@"2004"];
-	[tmpBI setField:@"Month" toValue:@"11"];
 	[tmpBI setField:@"Title" toValue:@"Bibdesk, a great application to manage your bibliographies"];
 	[tmpBI setField:@"Author" toValue:@"McCracken, M. and Maxwell, A. and Howison, J. and Routley, M. and Spiegel, S.  and Porst, S. S. and Hofman, C. M."];
+	[tmpBI setField:@"Year" toValue:@"2004"];
+	[tmpBI setField:@"Month" toValue:@"11"];
+	[tmpBI setField:@"Journal" toValue:@"SourceForge"];
+	[tmpBI setField:@"Volume" toValue:@"1"];
+	[tmpBI setField:@"Pages" toValue:@"96"];
 	
 	// update the UI elements
 	[self setCiteKeyFormatInvalidWarning:NO]; // the format in defaults is always valid, right?
@@ -45,12 +49,15 @@
 }
 
 - (IBAction)citeKeyHelp:(id)sender{
-	// is it possible to open the appropriate help page directly?
+	// Panther only
+	//[[NSHelpManager sharedHelpManager] openHelpAnchor:@"citekeyFormat" inBook:@"BibDesk Help"];
+	// ..or we need Carbon/AppleHelp.h
+	AHLookupAnchor((CFStringRef)@"BibDesk Help",(CFStringRef)@"citekeyFormat");
 }
 
 - (IBAction)citeKeyFormatAdd:(id)sender{
 	NSString *formatString = [formatField stringValue];
-	NSArray *specifierStrings = [NSArray arrayWithObjects:@"", @"%a00", @"%A0", @"%t0", @"%Y", @"%y", @"%m", @"%r2", @"%R2", @"%d2", @"%u0", @"%U0", @"%n0", @"%0", nil];
+	NSArray *specifierStrings = [NSArray arrayWithObjects:@"", @"%a00", @"%A0", @"%t0", @"%Y", @"%y", @"%m", @"%r2", @"%R2", @"%d2", @"%u0", @"%U0", @"%n0", @"%0", @"%{}0", nil];
 	NSString *newSpecifier = [specifierStrings objectAtIndex:[formatRepositoryPopUp indexOfSelectedItem]];
 	NSRange selRange = NSMakeRange([formatString length] + 2, [newSpecifier length] - 2);
 	
@@ -67,6 +74,9 @@
 	if (newSpecifier == @"%0") {
 		selRange.location -= 1;
 		selRange.length = 1;
+	}
+	else if (newSpecifier == @"%{}0") {
+		selRange.length = 0;
 	}
 	[formatField selectText:self];
 	[[formatField currentEditor] setSelectedRange:selRange];
@@ -120,6 +130,7 @@
 	NSCharacterSet *validLastSpecifierChars = [NSCharacterSet characterSetWithCharactersInString:@"uUn"];
 	NSArray *components = [*formatString componentsSeparatedByString:@"%"];
 	NSString *string;
+	NSArray *arr;
 	NSMutableString *sanitizedFormatString = [NSMutableString string];
 	unichar specifier;
 	int i;
@@ -134,15 +145,26 @@
 				return NO;
 			}
 			specifier = [string characterAtIndex:0];
-			//last one can be [u,U,n]+digits
-			if (![validSpecifierChars characterIsMember:specifier] && 
-				  ( i < [components count] - 1 || 
-					![validLastSpecifierChars characterIsMember:specifier] || 
-					![[NSCharacterSet decimalDigitCharacterSet] 
-						isSupersetOfSet:[NSCharacterSet characterSetWithCharactersInString:[string substringFromIndex:1]]])) {
+			//last one can be [u,U,n]+digits, {field} is special
+			if (![validSpecifierChars characterIsMember:specifier]) {
+				if (specifier == '{') {
+					arr = [string componentsSeparatedByString:@"}"];
+					if ([arr count] != 2) {
+						NSLog(@"Incomplete specifier {'field'} in cite key format.");
+						return NO;
+					}
+					string = [[BDSKConverter sharedConverter] stringBySanitizingCiteKeyString:[arr objectAtIndex:0]];
+					[sanitizedFormatString appendFormat:@"{%@}",string];
+					string = [[BDSKConverter sharedConverter] stringBySanitizingCiteKeyString:[arr objectAtIndex:1]];
+				}
+				else if (	i < [components count] - 1 || 
+							![validLastSpecifierChars characterIsMember:specifier] || 
+							![[NSCharacterSet decimalDigitCharacterSet] 
+								isSupersetOfSet:[NSCharacterSet characterSetWithCharactersInString:[string substringFromIndex:1]]]) {
 				
-				NSLog(@"Invalid specifier %%%C in cite key format.", specifier);
-				return NO;
+					NSLog(@"Invalid specifier %%%C in cite key format.", specifier);
+					return NO;
+				}
 			}
 		}
 		// sanitize stuff in between, this should not affect any of our specifier chars
