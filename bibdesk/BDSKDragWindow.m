@@ -71,7 +71,8 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 
         if (sourceDragMask & NSDragOperationCopy) {
             [editorBib setField:@"Local-Url"
-                        toValue:[fileNames objectAtIndex:0]];
+                        toValue:[[NSURL fileURLWithPath:
+                            [[fileNames objectAtIndex:0] stringByExpandingTildeInPath]]absoluteString]];
             [[self windowController] updateChangeCount:NSChangeDone];
         }
     }else if([[pboard types] containsObject:NSURLPboardType]){
@@ -86,14 +87,14 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
     }else if ( [[pboard types] containsObject:NSStringPboardType] ) {
         // get the item from the string
         pbString = [pboard stringForType:NSStringPboardType];
-        // need items from string here...
+
         draggedPubs = [BibItem itemsFromString:pbString];
         draggedPubsE = [draggedPubs objectEnumerator];
         while(tempBI = [draggedPubsE nextObject]){
             bibDict = [tempBI dict];
             newKeyE = [bibDict keyEnumerator];
 
-#warning - fixme, read this comment: i don't understand it anymore
+            // fixme, read this comment: i don't understand it anymore
             // Test a keyboard? mask so that sometimes we can override all fields.
 
             while(key = [newKeyE nextObject]){

@@ -57,7 +57,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 
 - (id)outlineView:(NSOutlineView *)oView child:(int)index ofItem:(id)item {
     if(item == nil){
-        //       NSLog(@"trying to give it %@",  [allAuthors objectAtIndex:index]);
+        //       //NSLog(@"trying to give it %@",  [allAuthors objectAtIndex:index]);
         return [allAuthors objectAtIndex:index];
     }
     else{
@@ -72,7 +72,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
     
     if(item == nil) {
 #if DEBUG
-        NSLog(@"objvalue called for nil");
+        //NSLog(@"objvalue called for nil");
 #endif
         return @"nil";
     }
@@ -173,6 +173,12 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 #pragma mark ||  Methods to support table view.
 //
 
+- (void)tableView: (NSTableView *)aTableView willDisplayCell: (id)aCell
+   forTableColumn: (NSTableColumn *)aTableColumn row: (int)aRowIndex
+{
+    [aCell setDrawsBackground: ((aRowIndex % 2) == 0)];
+}
+
 - (int)numberOfRowsInTableView:(NSTableView *)tView{
     if(tView == (NSTableView *)tableView){
         return [shownPublications count];
@@ -251,7 +257,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
         [columns setObject:[NSNumber numberWithFloat:[tc width]]
                     forKey:[tc identifier]];
     }
-    //NSLog(@"tableViewColumnDidResize - setting %@ forKey: %@ ", columns, BDSKColumnWidthsKey);
+    ////NSLog(@"tableViewColumnDidResize - setting %@ forKey: %@ ", columns, BDSKColumnWidthsKey);
     [pw setObject:columns forKey:BDSKColumnWidthsKey];
 }
 
@@ -312,7 +318,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
             [newRows addObject:idx];
         }
         rows = [NSArray arrayWithArray:newRows];
-        //NSLog(@"rows is %@", rows);
+        ////NSLog(@"rows is %@", rows);
     }
 
     enumerator = [rows objectEnumerator];
@@ -404,8 +410,8 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
     }
     types = [pb types];
 #if DEBUG
-    NSLog(@"types is %@", types);
-    NSLog(@"pb is %@ and \n sender dpb is %@", pb, [info draggingPasteboard]);
+    //NSLog(@"types is %@", types);
+    //NSLog(@"pb is %@ and \n sender dpb is %@", pb, [info draggingPasteboard]);
 #endif
     
 
@@ -415,7 +421,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
         pbArray = [pb propertyListForType:NSFilenamesPboardType]; // we will get an array
         pbString = [pb stringForType:NSURLPboardType]; // we will get an array
 #if DEBUG
-        NSLog(@"got filenames %@", pbArray);
+        //NSLog(@"got filenames %@", pbArray);
 #endif
         fileNameEnum = [pbArray objectEnumerator];
         while(fnStr = [fileNameEnum nextObject]){
@@ -423,7 +429,8 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
                 newBI = [[BibItem alloc] init];
                 [publications addObject:newBI];
                 [shownPublications addObject:newBI];
-                [newBI setField:@"Local-Url" toValue:[fnStr stringByExpandingTildeInPath]];
+                [newBI setField:@"Local-Url" toValue:[[NSURL fileURLWithPath:
+                    [fnStr stringByExpandingTildeInPath]]absoluteString]];
                 [self updateUI];
                 [self updateChangeCount:NSChangeDone];
 
@@ -436,7 +443,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
         return YES;
     }else if([types containsObject:NSStringPboardType]){
         pbString = [pb stringForType:NSStringPboardType];
-       // NSLog(@"<STRING IS>%@ </STRING IS>", pbString);
+       // //NSLog(@"<STRING IS>%@ </STRING IS>", pbString);
         newPubs = [BibItem itemsFromString:pbString];
         newPubE = [newPubs objectEnumerator];
         
