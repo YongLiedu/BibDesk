@@ -1,14 +1,33 @@
 // !$*UTF8*$!
 {
+	089C165DFE840E0CC02AAC07 = {
+		uiCtxt = {
+			sepNavIntBoundsRect = "{{0, 0}, {1097, 736}}";
+			sepNavSelRange = "{123, 0}";
+			sepNavVisRect = "{{0, 0}, {1097, 736}}";
+			sepNavWindowFrame = "{{61, 90}, {1142, 865}}";
+		};
+	};
 	2730077807CF20B500F2E485 = {
 		uiCtxt = {
-			sepNavIntBoundsRect = "{{0, 0}, {1097, 6034}}";
-			sepNavSelRange = "{8839, 0}";
-			sepNavVisRect = "{{0, 3336}, {1097, 736}}";
-			sepNavWindowFrame = "{{15, 132}, {1142, 865}}";
+			sepNavIntBoundsRect = "{{0, 0}, {1214, 6874}}";
+			sepNavSelRange = "{4865, 67}";
+			sepNavVisRect = "{{0, 1921}, {1097, 736}}";
+			sepNavWindowFrame = "{{32, 99}, {1142, 865}}";
+		};
+	};
+	273007A407CF216700F2E485 = {
+		uiCtxt = {
+			sepNavIntBoundsRect = "{{0, 0}, {1418, 2646}}";
+			sepNavSelRange = "{2616, 7}";
+			sepNavVisRect = "{{0, 690}, {1097, 736}}";
+			sepNavWindowFrame = "{{38, 111}, {1142, 865}}";
 		};
 	};
 	275E270607838EE30070398A = {
+		activeExec = 0;
+	};
+	27CD032307D82C7400806B7E = {
 		activeExec = 0;
 	};
 	29B97313FDCFA39411CA2CEA = {
@@ -47,40 +66,206 @@
 					PBXFileDataSource_Target_ColumnID,
 				);
 			};
-			PBXPerProjectTemplateStateSaveDate = 131328904;
-			PBXWorkspaceStateSaveDate = 131328904;
-		};
-		perUserProjectItems = {
-			F942E44707D389FC00F4A7E0 = F942E44707D389FC00F4A7E0;
-			F942E46107D38B6900F4A7E0 = F942E46107D38B6900F4A7E0;
-			F942E47007D38C3500F4A7E0 = F942E47007D38C3500F4A7E0;
-			F9F78C8307D509F0004B68AF = F9F78C8307D509F0004B68AF;
-			F9F78CA207D50E8B004B68AF = F9F78CA207D50E8B004B68AF;
-			F9F78CAF07D51013004B68AF = F9F78CAF07D51013004B68AF;
-			F9F78CB207D51013004B68AF = F9F78CB207D51013004B68AF;
-			F9F78CC607D5111D004B68AF = F9F78CC607D5111D004B68AF;
-			F9F78CC907D5113D004B68AF = F9F78CC907D5113D004B68AF;
-			F9F78CCC07D51194004B68AF = F9F78CCC07D51194004B68AF;
-			F9F78CD807D53231004B68AF = F9F78CD807D53231004B68AF;
-			F9F78D0C07D53A55004B68AF = F9F78D0C07D53A55004B68AF;
-			F9F78D0F07D53B32004B68AF = F9F78D0F07D53B32004B68AF;
-			F9F78D1707D53B7D004B68AF = F9F78D1707D53B7D004B68AF;
-			F9F78D1807D53BBF004B68AF = F9F78D1807D53BBF004B68AF;
-			F9F78D1F07D53C3B004B68AF = F9F78D1F07D53C3B004B68AF;
-			F9F78D3407D53E1F004B68AF = F9F78D3407D53E1F004B68AF;
-			F9F78D3507D53E1F004B68AF = F9F78D3507D53E1F004B68AF;
-			F9F78D3607D53E1F004B68AF = F9F78D3607D53E1F004B68AF;
-			F9F78D3707D53E1F004B68AF = F9F78D3707D53E1F004B68AF;
-			F9F78D3807D53E1F004B68AF = F9F78D3807D53E1F004B68AF;
-			F9F78D3907D53E1F004B68AF = F9F78D3907D53E1F004B68AF;
-			F9F78D3A07D53E1F004B68AF = F9F78D3A07D53E1F004B68AF;
-			F9F78D3B07D53E1F004B68AF = F9F78D3B07D53E1F004B68AF;
-			F9F78D3C07D53E1F004B68AF = F9F78D3C07D53E1F004B68AF;
-			F9F78D3D07D53E1F004B68AF = F9F78D3D07D53E1F004B68AF;
-			F9F78D3E07D53E1F004B68AF = F9F78D3E07D53E1F004B68AF;
-			F9F78D3F07D53E1F004B68AF = F9F78D3F07D53E1F004B68AF;
-			F9F78D4007D53E1F004B68AF = F9F78D4007D53E1F004B68AF;
-			F9F78D4107D53E1F004B68AF = F9F78D4107D53E1F004B68AF;
+			PBXConfiguration.PBXTargetDataSource.PBXTargetDataSource = {
+				PBXFileTableDataSourceColumnSortingDirectionKey = "-1";
+				PBXFileTableDataSourceColumnSortingKey = PBXFileDataSource_Filename_ColumnID;
+				PBXFileTableDataSourceColumnWidthsKey = (
+					20,
+					211,
+					50,
+					20,
+					50,
+					43,
+					43,
+				);
+				PBXFileTableDataSourceColumnsKey = (
+					PBXFileDataSource_FiletypeID,
+					PBXFileDataSource_Filename_ColumnID,
+					PBXTargetDataSource_PrimaryAttribute,
+					PBXFileDataSource_Built_ColumnID,
+					PBXFileDataSource_ObjectSize_ColumnID,
+					PBXFileDataSource_Errors_ColumnID,
+					PBXFileDataSource_Warnings_ColumnID,
+				);
+			};
+			PBXPerProjectTemplateStateSaveDate = 131992900;
+			PBXPrepackagedSmartGroups_v2 = (
+				{
+					PBXTransientLocationAtTop = bottom;
+					absolutePathToBundle = "";
+					activationKey = OldTargetSmartGroup;
+					clz = PBXTargetSmartGroup;
+					description = "Displays all targets of the project.";
+					globalID = 1C37FABC04509CD000000102;
+					name = Targets;
+					preferences = {
+						image = Targets;
+					};
+				},
+				{
+					PBXTransientLocationAtTop = bottom;
+					absolutePathToBundle = "";
+					clz = PBXTargetSmartGroup2;
+					description = "Displays all targets of the project as well as nested build phases.";
+					globalID = 1C37FBAC04509CD000000102;
+					name = Targets;
+					preferences = {
+						image = Targets;
+					};
+				},
+				{
+					PBXTransientLocationAtTop = bottom;
+					absolutePathToBundle = "";
+					clz = PBXExecutablesSmartGroup;
+					description = "Displays all executables of the project.";
+					globalID = 1C37FAAC04509CD000000102;
+					name = Executables;
+					preferences = {
+						image = Executable;
+					};
+				},
+				{
+					" PBXTransientLocationAtTop " = bottom;
+					absolutePathToBundle = "";
+					clz = PBXErrorsWarningsSmartGroup;
+					description = "Displays files with errors or warnings.";
+					globalID = 1C08E77C0454961000C914BD;
+					name = "Errors and Warnings";
+					preferences = {
+						fnmatch = "";
+						image = WarningsErrors;
+						recursive = 1;
+						regex = "";
+						root = "<PROJECT>";
+					};
+				},
+				{
+					PBXTransientLocationAtTop = bottom;
+					absolutePathToBundle = "";
+					clz = PBXFilenameSmartGroup;
+					description = "Filters items in a given group (potentially recursively) based on matching the name with the regular expression of the filter.";
+					globalID = 1CC0EA4004350EF90044410B;
+					name = "Implementation Files";
+					preferences = {
+						canSave = 1;
+						fnmatch = "";
+						image = SmartFolder;
+						isLeaf = 0;
+						recursive = 1;
+						regex = "?*\\.[mcMC]";
+						root = "<PROJECT>";
+					};
+				},
+				{
+					PBXTransientLocationAtTop = bottom;
+					absolutePathToBundle = "";
+					clz = PBXFilenameSmartGroup;
+					description = "This group displays Interface Builder NIB Files.";
+					globalID = 1CC0EA4004350EF90041110B;
+					name = "NIB Files";
+					preferences = {
+						canSave = 1;
+						fnmatch = "*.nib";
+						image = SmartFolder;
+						isLeaf = 0;
+						recursive = 1;
+						regex = "";
+						root = "<PROJECT>";
+					};
+				},
+				{
+					PBXTransientLocationAtTop = no;
+					absolutePathToBundle = "";
+					clz = PBXFindSmartGroup;
+					description = "Displays Find Results.";
+					globalID = 1C37FABC05509CD000000102;
+					name = "Find Results";
+					preferences = {
+						image = spyglass;
+					};
+				},
+				{
+					PBXTransientLocationAtTop = no;
+					absolutePathToBundle = "";
+					clz = PBXBookmarksSmartGroup;
+					description = "Displays Project Bookmarks.";
+					globalID = 1C37FABC05539CD112110102;
+					name = Bookmarks;
+					preferences = {
+						image = Bookmarks;
+					};
+				},
+				{
+					PBXTransientLocationAtTop = bottom;
+					absolutePathToBundle = "";
+					clz = XCSCMSmartGroup;
+					description = "Displays files with interesting SCM status.";
+					globalID = E2644B35053B69B200211256;
+					name = SCM;
+					preferences = {
+						image = PBXRepository;
+						isLeaf = 0;
+					};
+				},
+				{
+					PBXTransientLocationAtTop = bottom;
+					absolutePathToBundle = "";
+					clz = PBXSymbolsSmartGroup;
+					description = "Displays all symbols for the project.";
+					globalID = 1C37FABC04509CD000100104;
+					name = "Project Symbols";
+					preferences = {
+						image = ProjectSymbols;
+						isLeaf = 1;
+					};
+				},
+				{
+					PBXTransientLocationAtTop = bottom;
+					absolutePathToBundle = "";
+					clz = PBXFilenameSmartGroup;
+					description = "Filters items in a given group (potentially recursively) based on matching the name with the regular expression of the filter.";
+					globalID = PBXTemplateMarker;
+					name = "Simple Filter SmartGroup";
+					preferences = {
+						canSave = 1;
+						fnmatch = "*.nib";
+						image = SmartFolder;
+						isLeaf = 0;
+						recursive = 1;
+						regex = "";
+						root = "<PROJECT>";
+					};
+				},
+				{
+					PBXTransientLocationAtTop = bottom;
+					absolutePathToBundle = "";
+					clz = PBXFilenameSmartGroup;
+					description = "Filters items in a given group (potentially recursively) based on matching the name with the regular expression of the filter.";
+					globalID = PBXTemplateMarker;
+					name = "Simple Regular Expression SmartGroup";
+					preferences = {
+						canSave = 1;
+						fnmatch = "";
+						image = SmartFolder;
+						isLeaf = 0;
+						recursive = 1;
+						regex = "?*\\.[mcMC]";
+						root = "<PROJECT>";
+					};
+				},
+				{
+					PBXTransientLocationAtTop = bottom;
+					clz = XDDesignSmartGroup;
+					description = "Displays Xdesign models";
+					globalID = 2E4A936305E6979E00701470;
+					name = Design;
+					preferences = {
+						image = Design;
+						isLeaf = 0;
+					};
+				},
+			);
+			PBXWorkspaceStateSaveDate = 131992900;
 		};
 		sourceControlManager = F949492B07D37835001AD8A2;
 		userBuildSettings = {
@@ -92,6 +277,29 @@
 			F94948F407D37832001AD8A2,
 		);
 	};
+	8D1107310486CEB800E47090 = {
+		uiCtxt = {
+			sepNavIntBoundsRect = "{{0, 0}, {1097, 8050}}";
+			sepNavSelRange = "{2580, 0}";
+			sepNavVisRect = "{{0, 997}, {1097, 736}}";
+			sepNavWindowFrame = "{{38, 111}, {1142, 865}}";
+		};
+	};
+	F9022C430758027800C3F701 = {
+		uiCtxt = {
+			sepNavIntBoundsRect = "{{0, 0}, {4544, 1847}}";
+			sepNavSelRange = "{3534, 0}";
+			sepNavVisRect = "{{0, 892}, {705, 428}}";
+			sepNavWindowFrame = "{{15, 439}, {750, 558}}";
+		};
+	};
+	F9022C58075802E300C3F701 = {
+		uiCtxt = {
+			sepNavIntBoundsRect = "{{0, 0}, {4544, 7028}}";
+			sepNavSelRange = "{14160, 7}";
+			sepNavVisRect = "{{0, 4379}, {945, 356}}";
+		};
+	};
 	F9022C5D075802E300C3F701 = {
 		uiCtxt = {
 			sepNavIntBoundsRect = "{{0, 0}, {4544, 2926}}";
@@ -102,17 +310,17 @@
 	};
 	F9022C5E075802E300C3F701 = {
 		uiCtxt = {
-			sepNavIntBoundsRect = "{{0, 0}, {4544, 14630}}";
-			sepNavSelRange = "{10847, 0}";
-			sepNavVisRect = "{{0, 2492}, {945, 356}}";
+			sepNavIntBoundsRect = "{{0, 0}, {4544, 14588}}";
+			sepNavSelRange = "{7574, 0}";
+			sepNavVisRect = "{{0, 1404}, {1097, 736}}";
 			sepNavWindowFrame = "{{58, 50}, {1142, 865}}";
 		};
 	};
 	F9022C60075802E300C3F701 = {
 		uiCtxt = {
 			sepNavIntBoundsRect = "{{0, 0}, {4544, 3780}}";
-			sepNavSelRange = "{0, 0}";
-			sepNavVisRect = "{{0, 385}, {1097, 736}}";
+			sepNavSelRange = "{7494, 7}";
+			sepNavVisRect = "{{0, 2797}, {945, 356}}";
 			sepNavWindowFrame = "{{84, 69}, {1142, 865}}";
 		};
 	};
@@ -126,10 +334,10 @@
 	};
 	F9022C66075802E300C3F701 = {
 		uiCtxt = {
-			sepNavIntBoundsRect = "{{0, 0}, {4544, 46032}}";
-			sepNavSelRange = "{24784, 0}";
-			sepNavVisRect = "{{0, 8011}, {1097, 736}}";
-			sepNavWindowFrame = "{{45, 92}, {1142, 865}}";
+			sepNavIntBoundsRect = "{{0, 0}, {4544, 46018}}";
+			sepNavSelRange = "{36453, 0}";
+			sepNavVisRect = "{{0, 11245}, {1097, 736}}";
+			sepNavWindowFrame = "{{42, 137}, {1142, 865}}";
 		};
 	};
 	F9022C67075802E300C3F701 = {
@@ -150,10 +358,50 @@
 	};
 	F9022C6E075802E300C3F701 = {
 		uiCtxt = {
-			sepNavIntBoundsRect = "{{0, 0}, {1520, 23646}}";
-			sepNavSelRange = "{35488, 0}";
-			sepNavVisRect = "{{0, 12997}, {1097, 736}}";
-			sepNavWindowFrame = "{{61, 90}, {1142, 865}}";
+			sepNavIntBoundsRect = "{{0, 0}, {1520, 23478}}";
+			sepNavSelRange = "{14354, 0}";
+			sepNavVisRect = "{{0, 6075}, {945, 356}}";
+			sepNavWindowFrame = "{{59, 105}, {1142, 865}}";
+		};
+	};
+	F9022C960758038000C3F701 = {
+		uiCtxt = {
+			sepNavIntBoundsRect = "{{0, 0}, {1856, 13650}}";
+			sepNavSelRange = "{56072, 0}";
+			sepNavVisRect = "{{0, 12676}, {1097, 736}}";
+			sepNavWindowFrame = "{{64, 137}, {1142, 865}}";
+		};
+	};
+	F9022C9E0758038000C3F701 = {
+		uiCtxt = {
+			sepNavIntBoundsRect = "{{0, 0}, {4544, 1134}}";
+			sepNavSelRange = "{3346, 0}";
+			sepNavVisRect = "{{0, 118}, {1097, 736}}";
+			sepNavWindowFrame = "{{145, 115}, {1142, 865}}";
+		};
+	};
+	F9022C9F0758038000C3F701 = {
+		uiCtxt = {
+			sepNavIntBoundsRect = "{{0, 0}, {4544, 3052}}";
+			sepNavSelRange = "{7461, 0}";
+			sepNavVisRect = "{{0, 1950}, {1097, 736}}";
+			sepNavWindowFrame = "{{64, 57}, {1142, 865}}";
+		};
+	};
+	F9022D180758066000C3F701 = {
+		uiCtxt = {
+			sepNavIntBoundsRect = "{{0, 0}, {1097, 5624}}";
+			sepNavSelRange = "{1143, 0}";
+			sepNavVisRect = "{{0, 0}, {1097, 751}}";
+			sepNavWindowFrame = "{{68, 95}, {1142, 865}}";
+		};
+	};
+	F9022D1B0758066000C3F701 = {
+		uiCtxt = {
+			sepNavIntBoundsRect = "{{0, 0}, {1097, 9450}}";
+			sepNavSelRange = "{0, 0}";
+			sepNavVisRect = "{{0, 0}, {1097, 736}}";
+			sepNavWindowFrame = "{{15, 132}, {1142, 865}}";
 		};
 	};
 	F92F4E4C0788DEFC001B8F82 = {
@@ -166,35 +414,11 @@
 	};
 	F92F4E4D0788DEFC001B8F82 = {
 		uiCtxt = {
-			sepNavIntBoundsRect = "{{0, 0}, {1094, 840}}";
-			sepNavSelRange = "{2524, 0}";
-			sepNavVisRect = "{{0, 182}, {927, 156}}";
-			sepNavWindowFrame = "{{26, 72}, {1142, 865}}";
+			sepNavIntBoundsRect = "{{0, 0}, {1097, 812}}";
+			sepNavSelRange = "{1845, 0}";
+			sepNavVisRect = "{{0, 0}, {1097, 736}}";
+			sepNavWindowFrame = "{{38, 137}, {1142, 865}}";
 		};
-	};
-	F942E44707D389FC00F4A7E0 = {
-		fRef = F9022C66075802E300C3F701;
-		isa = PBXBookmark;
-	};
-	F942E46107D38B6900F4A7E0 = {
-		fRef = F9022C66075802E300C3F701;
-		isa = PBXTextBookmark;
-		name = "BibDocument.m: 2901";
-		rLen = 0;
-		rLoc = 122048;
-		rType = 0;
-		vrLen = 2148;
-		vrLoc = 120966;
-	};
-	F942E47007D38C3500F4A7E0 = {
-		fRef = F9022C66075802E300C3F701;
-		isa = PBXTextBookmark;
-		name = "BibDocument.m: 2901";
-		rLen = 0;
-		rLoc = 122048;
-		rType = 0;
-		vrLen = 2148;
-		vrLoc = 120966;
 	};
 	F94948F407D37832001AD8A2 = {
 		activeArgIndex = 2147483647;
@@ -213,896 +437,12 @@
 		enableDebugStr = 1;
 		environmentEntries = (
 		);
-		executableSystemSymbolLevel = 0;
-		executableUserSymbolLevel = 0;
 		isa = PBXExecutable;
 		libgmallocEnabled = 0;
 		name = Bibdesk;
 		savedGlobals = {
 		};
 		shlibInfoDictList = (
-		);
-		shlibInfoDictList_v2 = (
-			{
-				level = 0;
-				path = /usr/lib/system/libmathCommon.A.dylib;
-				whenToLoad = 0;
-			},
-			{
-				level = 0;
-				path = /usr/lib/libSystem.B.dylib;
-				whenToLoad = 0;
-			},
-			{
-				level = 0;
-				path = /usr/lib/libicucore.A.dylib;
-				whenToLoad = 0;
-			},
-			{
-				level = 0;
-				path = /usr/lib/libauto.dylib;
-				whenToLoad = 0;
-			},
-			{
-				level = 0;
-				path = /usr/lib/libobjc.A.dylib;
-				whenToLoad = 0;
-			},
-			{
-				level = 0;
-				path = /System/Library/Frameworks/CoreFoundation.framework/Versions/A/CoreFoundation;
-				whenToLoad = 0;
-			},
-			{
-				level = 0;
-				path = /usr/lib/libz.1.2.2.dylib;
-				whenToLoad = 0;
-			},
-			{
-				level = 0;
-				path = /System/Library/Frameworks/SystemConfiguration.framework/Versions/A/SystemConfiguration;
-				whenToLoad = 0;
-			},
-			{
-				level = 0;
-				path = /System/Library/Frameworks/IOKit.framework/Versions/A/IOKit;
-				whenToLoad = 0;
-			},
-			{
-				level = 0;
-				path = /System/Library/Frameworks/Security.framework/Versions/A/Security;
-				whenToLoad = 0;
-			},
-			{
-				level = 0;
-				path = /System/Library/Frameworks/DiskArbitration.framework/Versions/A/DiskArbitration;
-				whenToLoad = 0;
-			},
-			{
-				level = 0;
-				path = /System/Library/Frameworks/CoreServices.framework/Versions/A/Frameworks/CarbonCore.framework/Versions/A/CarbonCore;
-				whenToLoad = 0;
-			},
-			{
-				level = 0;
-				path = /System/Library/Frameworks/CoreServices.framework/Versions/A/Frameworks/OSServices.framework/Versions/A/OSServices;
-				whenToLoad = 0;
-			},
-			{
-				level = 0;
-				path = /System/Library/Frameworks/CoreServices.framework/Versions/A/Frameworks/CFNetwork.framework/Versions/A/CFNetwork;
-				whenToLoad = 0;
-			},
-			{
-				level = 0;
-				path = /System/Library/Frameworks/CoreServices.framework/Versions/A/Frameworks/WebServicesCore.framework/Versions/A/WebServicesCore;
-				whenToLoad = 0;
-			},
-			{
-				level = 0;
-				path = /System/Library/Frameworks/CoreServices.framework/Versions/A/Frameworks/SearchKit.framework/Versions/A/SearchKit;
-				whenToLoad = 0;
-			},
-			{
-				level = 0;
-				path = /System/Library/Frameworks/CoreServices.framework/Versions/A/Frameworks/Metadata.framework/Versions/A/Metadata;
-				whenToLoad = 0;
-			},
-			{
-				level = 0;
-				path = /System/Library/Frameworks/CoreServices.framework/Versions/A/CoreServices;
-				whenToLoad = 0;
-			},
-			{
-				level = 0;
-				path = /usr/lib/libbsm.dylib;
-				whenToLoad = 0;
-			},
-			{
-				level = 0;
-				path = /System/Library/Frameworks/ApplicationServices.framework/Versions/A/Frameworks/CoreGraphics.framework/Versions/A/CoreGraphics;
-				whenToLoad = 0;
-			},
-			{
-				level = 0;
-				path = /System/Library/Frameworks/ApplicationServices.framework/Versions/A/Frameworks/AE.framework/Versions/A/AE;
-				whenToLoad = 0;
-			},
-			{
-				level = 0;
-				path = /System/Library/Frameworks/ApplicationServices.framework/Versions/A/Frameworks/ATS.framework/Versions/A/ATS;
-				whenToLoad = 0;
-			},
-			{
-				level = 0;
-				path = /usr/lib/libcrypto.0.9.7.dylib;
-				whenToLoad = 0;
-			},
-			{
-				level = 0;
-				path = /System/Library/Frameworks/ApplicationServices.framework/Versions/A/Frameworks/LaunchServices.framework/Versions/A/LaunchServices;
-				whenToLoad = 0;
-			},
-			{
-				level = 0;
-				path = /System/Library/Frameworks/ApplicationServices.framework/Versions/A/Frameworks/ColorSync.framework/Versions/A/ColorSync;
-				whenToLoad = 0;
-			},
-			{
-				level = 0;
-				path = /System/Library/Frameworks/ApplicationServices.framework/Versions/A/Frameworks/CoreText.framework/Versions/A/CoreText;
-				whenToLoad = 0;
-			},
-			{
-				level = 0;
-				path = /System/Library/Frameworks/ApplicationServices.framework/Versions/A/Frameworks/QD.framework/Versions/A/QD;
-				whenToLoad = 0;
-			},
-			{
-				level = 0;
-				path = /usr/lib/libcups.2.dylib;
-				whenToLoad = 0;
-			},
-			{
-				level = 0;
-				path = /System/Library/Frameworks/ApplicationServices.framework/Versions/A/Frameworks/PrintCore.framework/Versions/A/PrintCore;
-				whenToLoad = 0;
-			},
-			{
-				level = 0;
-				path = /System/Library/Frameworks/ApplicationServices.framework/Versions/A/Frameworks/HIServices.framework/Versions/A/HIServices;
-				whenToLoad = 0;
-			},
-			{
-				level = 0;
-				path = /System/Library/Frameworks/ApplicationServices.framework/Versions/A/Frameworks/LangAnalysis.framework/Versions/A/LangAnalysis;
-				whenToLoad = 0;
-			},
-			{
-				level = 0;
-				path = /System/Library/Frameworks/ApplicationServices.framework/Versions/A/Frameworks/FindByContent.framework/Versions/A/FindByContent;
-				whenToLoad = 0;
-			},
-			{
-				level = 0;
-				path = /System/Library/Frameworks/ApplicationServices.framework/Versions/A/Frameworks/SpeechSynthesis.framework/Versions/A/SpeechSynthesis;
-				whenToLoad = 0;
-			},
-			{
-				level = 0;
-				path = /System/Library/Frameworks/ApplicationServices.framework/Versions/A/Frameworks/ImageIO.framework/Versions/A/Resources/libJPEG.dylib;
-				whenToLoad = 0;
-			},
-			{
-				level = 0;
-				path = /System/Library/Frameworks/ApplicationServices.framework/Versions/A/Frameworks/ImageIO.framework/Versions/A/Resources/libJP2.dylib;
-				whenToLoad = 0;
-			},
-			{
-				level = 0;
-				path = /System/Library/Frameworks/ApplicationServices.framework/Versions/A/Frameworks/ImageIO.framework/Versions/A/Resources/libGIF.dylib;
-				whenToLoad = 0;
-			},
-			{
-				level = 0;
-				path = /System/Library/Frameworks/ApplicationServices.framework/Versions/A/Frameworks/ImageIO.framework/Versions/A/Resources/libRaw.dylib;
-				whenToLoad = 0;
-			},
-			{
-				level = 0;
-				path = /System/Library/Frameworks/ApplicationServices.framework/Versions/A/Frameworks/ImageIO.framework/Versions/A/Resources/libTIFF.dylib;
-				whenToLoad = 0;
-			},
-			{
-				level = 0;
-				path = /System/Library/Frameworks/ApplicationServices.framework/Versions/A/Frameworks/ImageIO.framework/Versions/A/Resources/libPng.dylib;
-				whenToLoad = 0;
-			},
-			{
-				level = 0;
-				path = /System/Library/Frameworks/ApplicationServices.framework/Versions/A/Frameworks/ImageIO.framework/Versions/A/Resources/libRadiance.dylib;
-				whenToLoad = 0;
-			},
-			{
-				level = 0;
-				path = /System/Library/Frameworks/Accelerate.framework/Versions/A/Frameworks/vImage.framework/Versions/A/vImage;
-				whenToLoad = 0;
-			},
-			{
-				level = 0;
-				path = /System/Library/Frameworks/Accelerate.framework/Versions/A/Frameworks/vecLib.framework/Versions/A/libvMisc.dylib;
-				whenToLoad = 0;
-			},
-			{
-				level = 0;
-				path = /System/Library/Frameworks/Accelerate.framework/Versions/A/Frameworks/vecLib.framework/Versions/A/libvDSP.dylib;
-				whenToLoad = 0;
-			},
-			{
-				level = 0;
-				path = /System/Library/Frameworks/Accelerate.framework/Versions/A/Frameworks/vecLib.framework/Versions/A/libBLAS.dylib;
-				whenToLoad = 0;
-			},
-			{
-				level = 0;
-				path = /System/Library/Frameworks/Accelerate.framework/Versions/A/Frameworks/vecLib.framework/Versions/A/libLAPACK.dylib;
-				whenToLoad = 0;
-			},
-			{
-				level = 0;
-				path = /System/Library/Frameworks/Accelerate.framework/Versions/A/Frameworks/vecLib.framework/Versions/A/vecLib;
-				whenToLoad = 0;
-			},
-			{
-				level = 0;
-				path = /System/Library/Frameworks/Accelerate.framework/Versions/A/Accelerate;
-				whenToLoad = 0;
-			},
-			{
-				level = 0;
-				path = /System/Library/Frameworks/ApplicationServices.framework/Versions/A/Frameworks/ImageIO.framework/Versions/A/ImageIO;
-				whenToLoad = 0;
-			},
-			{
-				level = 0;
-				path = /System/Library/Frameworks/ApplicationServices.framework/Versions/A/ApplicationServices;
-				whenToLoad = 0;
-			},
-			{
-				level = 0;
-				path = /System/Library/Frameworks/CoreAudio.framework/Versions/A/CoreAudio;
-				whenToLoad = 0;
-			},
-			{
-				level = 0;
-				path = /System/Library/Frameworks/Carbon.framework/Versions/A/Frameworks/CarbonSound.framework/Versions/A/CarbonSound;
-				whenToLoad = 0;
-			},
-			{
-				level = 0;
-				path = /usr/lib/libiconv.2.dylib;
-				whenToLoad = 0;
-			},
-			{
-				level = 0;
-				path = /usr/lib/libxml2.2.dylib;
-				whenToLoad = 0;
-			},
-			{
-				level = 0;
-				path = /System/Library/Frameworks/Foundation.framework/Versions/C/Foundation;
-				whenToLoad = 0;
-			},
-			{
-				level = 0;
-				path = /System/Library/PrivateFrameworks/DesktopServicesPriv.framework/Versions/A/DesktopServicesPriv;
-				whenToLoad = 0;
-			},
-			{
-				level = 0;
-				path = /System/Library/Frameworks/Carbon.framework/Versions/A/Frameworks/HIToolbox.framework/Versions/A/HIToolbox;
-				whenToLoad = 0;
-			},
-			{
-				level = 0;
-				path = /System/Library/Frameworks/Carbon.framework/Versions/A/Frameworks/SpeechRecognition.framework/Versions/A/SpeechRecognition;
-				whenToLoad = 0;
-			},
-			{
-				level = 0;
-				path = /System/Library/Frameworks/AudioUnit.framework/Versions/A/AudioUnit;
-				whenToLoad = 0;
-			},
-			{
-				level = 0;
-				path = /System/Library/Frameworks/AudioToolbox.framework/Versions/A/AudioToolbox;
-				whenToLoad = 0;
-			},
-			{
-				level = 0;
-				path = /usr/lib/libsqlite3.0.dylib;
-				whenToLoad = 0;
-			},
-			{
-				level = 0;
-				path = /System/Library/Frameworks/CoreData.framework/Versions/A/CoreData;
-				whenToLoad = 0;
-			},
-			{
-				level = 0;
-				path = /System/Library/Frameworks/OpenGL.framework/Versions/A/Libraries/libGL.dylib;
-				whenToLoad = 0;
-			},
-			{
-				level = 0;
-				path = /System/Library/Frameworks/OpenGL.framework/Versions/A/Libraries/libGLU.dylib;
-				whenToLoad = 0;
-			},
-			{
-				level = 0;
-				path = /System/Library/Frameworks/OpenGL.framework/Versions/A/OpenGL;
-				whenToLoad = 0;
-			},
-			{
-				level = 0;
-				path = /System/Library/Frameworks/OpenGL.framework/Versions/A/Libraries/libGLImage.dylib;
-				whenToLoad = 0;
-			},
-			{
-				level = 0;
-				path = /System/Library/Frameworks/QuartzCore.framework/Versions/A/QuartzCore;
-				whenToLoad = 0;
-			},
-			{
-				level = 0;
-				path = /System/Library/Frameworks/AppKit.framework/Versions/C/AppKit;
-				whenToLoad = 0;
-			},
-			{
-				level = 0;
-				path = /System/Library/Frameworks/Cocoa.framework/Versions/A/Cocoa;
-				whenToLoad = 0;
-			},
-			{
-				level = 0;
-				path = /Volumes/Local/amaxwell/BuildProducts/AGRegex.framework/Versions/A/AGRegex;
-				whenToLoad = 0;
-			},
-			{
-				level = 0;
-				path = /Volumes/Local/amaxwell/BuildProducts/OmniBase.framework/Versions/2001A/OmniBase;
-				whenToLoad = 0;
-			},
-			{
-				level = 0;
-				path = /Volumes/Local/amaxwell/BuildProducts/OmniFoundation.framework/Versions/2001A/OmniFoundation;
-				whenToLoad = 0;
-			},
-			{
-				level = 0;
-				path = /System/Library/Frameworks/Carbon.framework/Versions/A/Frameworks/ImageCapture.framework/Versions/A/ImageCapture;
-				whenToLoad = 0;
-			},
-			{
-				level = 0;
-				path = /System/Library/Frameworks/Carbon.framework/Versions/A/Frameworks/SecurityHI.framework/Versions/A/SecurityHI;
-				whenToLoad = 0;
-			},
-			{
-				level = 0;
-				path = /System/Library/Frameworks/Carbon.framework/Versions/A/Frameworks/Ink.framework/Versions/A/Ink;
-				whenToLoad = 0;
-			},
-			{
-				level = 0;
-				path = /System/Library/Frameworks/Carbon.framework/Versions/A/Frameworks/Help.framework/Versions/A/Help;
-				whenToLoad = 0;
-			},
-			{
-				level = 0;
-				path = /System/Library/Frameworks/Carbon.framework/Versions/A/Frameworks/OpenScripting.framework/Versions/A/OpenScripting;
-				whenToLoad = 0;
-			},
-			{
-				level = 0;
-				path = /System/Library/Frameworks/Carbon.framework/Versions/A/Frameworks/Print.framework/Versions/A/Print;
-				whenToLoad = 0;
-			},
-			{
-				level = 0;
-				path = /System/Library/Frameworks/Carbon.framework/Versions/A/Frameworks/HTMLRendering.framework/Versions/A/HTMLRendering;
-				whenToLoad = 0;
-			},
-			{
-				level = 0;
-				path = /System/Library/Frameworks/Carbon.framework/Versions/A/Frameworks/NavigationServices.framework/Versions/A/NavigationServices;
-				whenToLoad = 0;
-			},
-			{
-				level = 0;
-				path = /System/Library/Frameworks/Carbon.framework/Versions/A/Frameworks/CommonPanels.framework/Versions/A/CommonPanels;
-				whenToLoad = 0;
-			},
-			{
-				level = 0;
-				path = /System/Library/Frameworks/Carbon.framework/Versions/A/Carbon;
-				whenToLoad = 0;
-			},
-			{
-				level = 0;
-				path = /Volumes/Local/amaxwell/BuildProducts/OmniAppKit.framework/Versions/2001A/OmniAppKit;
-				whenToLoad = 0;
-			},
-			{
-				level = 0;
-				path = /System/Library/Frameworks/vecLib.framework/Versions/A/vecLib;
-				whenToLoad = 0;
-			},
-			{
-				level = 0;
-				path = /System/Library/PrivateFrameworks/LatentSemanticMapping.framework/Versions/A/LatentSemanticMapping;
-				whenToLoad = 0;
-			},
-			{
-				level = 0;
-				path = /System/Library/Frameworks/DirectoryService.framework/Versions/A/DirectoryService;
-				whenToLoad = 0;
-			},
-			{
-				level = 0;
-				path = /usr/lib/libsasl2.2.dylib;
-				whenToLoad = 0;
-			},
-			{
-				level = 0;
-				path = /usr/lib/libssl.0.9.7.dylib;
-				whenToLoad = 0;
-			},
-			{
-				level = 0;
-				path = /usr/lib/libresolv.9.dylib;
-				whenToLoad = 0;
-			},
-			{
-				level = 0;
-				path = /System/Library/Frameworks/LDAP.framework/Versions/A/LDAP;
-				whenToLoad = 0;
-			},
-			{
-				level = 0;
-				path = /System/Library/PrivateFrameworks/DSObjCWrappers.framework/Versions/A/DSObjCWrappers;
-				whenToLoad = 0;
-			},
-			{
-				level = 0;
-				path = /System/Library/Frameworks/AddressBook.framework/Versions/A/AddressBook;
-				whenToLoad = 0;
-			},
-			{
-				level = 0;
-				path = /System/Library/PrivateFrameworks/Bom.framework/Versions/A/Bom;
-				whenToLoad = 0;
-			},
-			{
-				level = 0;
-				path = /System/Library/Frameworks/Message.framework/Versions/B/Message;
-				whenToLoad = 0;
-			},
-			{
-				level = 0;
-				path = /Volumes/Local/amaxwell/BuildProducts/ILCrashReporter.framework/Versions/A/ILCrashReporter;
-				whenToLoad = 0;
-			},
-			{
-				level = 0;
-				path = /System/Library/Frameworks/WebKit.framework/Versions/A/Frameworks/JavaScriptCore.framework/Versions/A/JavaScriptCore;
-				whenToLoad = 0;
-			},
-			{
-				level = 0;
-				path = /usr/lib/libxslt.1.dylib;
-				whenToLoad = 0;
-			},
-			{
-				level = 0;
-				path = /System/Library/Frameworks/WebKit.framework/Versions/A/Frameworks/WebCore.framework/Versions/A/WebCore;
-				whenToLoad = 0;
-			},
-			{
-				level = 0;
-				path = /System/Library/Frameworks/WebKit.framework/Versions/A/WebKit;
-				whenToLoad = 0;
-			},
-			{
-				level = 0;
-				path = /System/Library/PrivateFrameworks/ZeroLink.framework/Versions/A/ZeroLink;
-				whenToLoad = 0;
-			},
-			{
-				level = 0;
-				path = /Volumes/Local/amaxwell/BuildProducts/Bibdesk.app/Contents/MacOS/Bibdesk;
-				whenToLoad = 0;
-			},
-			{
-				level = 0;
-				path = "/Volumes/Local/amaxwell/IntermediateFiles/Bibdesk.build/Bibdesk.build/Objects-normal/ppc/NSString+Templating.ob";
-				whenToLoad = 0;
-			},
-			{
-				level = 0;
-				path = "/Volumes/Local/amaxwell/IntermediateFiles/Bibdesk.build/Bibdesk.build/Objects-normal/ppc/NSString+XMLUtils.ob";
-				whenToLoad = 0;
-			},
-			{
-				level = 0;
-				path = "/Volumes/Local/amaxwell/IntermediateFiles/Bibdesk.build/Bibdesk.build/Objects-normal/ppc/BDSKLinkButton.ob";
-				whenToLoad = 0;
-			},
-			{
-				level = 0;
-				path = "/Volumes/Local/amaxwell/IntermediateFiles/Bibdesk.build/Bibdesk.build/Objects-normal/ppc/BibPrefController.ob";
-				whenToLoad = 0;
-			},
-			{
-				level = 0;
-				path = "/Volumes/Local/amaxwell/IntermediateFiles/Bibdesk.build/Bibdesk.build/Objects-normal/ppc/BibDocumentView_Toolbar.ob";
-				whenToLoad = 0;
-			},
-			{
-				level = 0;
-				path = "/Volumes/Local/amaxwell/IntermediateFiles/Bibdesk.build/Bibdesk.build/Objects-normal/ppc/BibDocument.ob";
-				whenToLoad = 0;
-			},
-			{
-				level = 0;
-				path = "/Volumes/Local/amaxwell/IntermediateFiles/Bibdesk.build/Bibdesk.build/Objects-normal/ppc/BibAppController.ob";
-				whenToLoad = 0;
-			},
-			{
-				level = 0;
-				path = "/Volumes/Local/amaxwell/IntermediateFiles/Bibdesk.build/Bibdesk.build/Objects-normal/ppc/BibDocument_DataSource.ob";
-				whenToLoad = 0;
-			},
-			{
-				level = 0;
-				path = "/Volumes/Local/amaxwell/IntermediateFiles/Bibdesk.build/Bibdesk.build/Objects-normal/ppc/BibDocument+Menus.ob";
-				whenToLoad = 0;
-			},
-			{
-				level = 0;
-				path = "/Volumes/Local/amaxwell/IntermediateFiles/Bibdesk.build/Bibdesk.build/Objects-normal/ppc/NSImage+Toolbox.ob";
-				whenToLoad = 0;
-			},
-			{
-				level = 0;
-				path = "/Volumes/Local/amaxwell/IntermediateFiles/Bibdesk.build/Bibdesk.build/Objects-normal/ppc/NSString_BDSKExtensions.ob";
-				whenToLoad = 0;
-			},
-			{
-				level = 0;
-				path = "/Volumes/Local/amaxwell/IntermediateFiles/Bibdesk.build/Bibdesk.build/Objects-normal/ppc/NSTextView_BDSKExtensions.ob";
-				whenToLoad = 0;
-			},
-			{
-				level = 0;
-				path = "/Volumes/Local/amaxwell/IntermediateFiles/Bibdesk.build/Bibdesk.build/Objects-normal/ppc/OATypeAheadSelectionHelper_Extensions.ob";
-				whenToLoad = 0;
-			},
-			{
-				level = 0;
-				path = "/Volumes/Local/amaxwell/IntermediateFiles/Bibdesk.build/Bibdesk.build/Objects-normal/ppc/BibAppController+Scripting.ob";
-				whenToLoad = 0;
-			},
-			{
-				level = 0;
-				path = "/Volumes/Local/amaxwell/IntermediateFiles/Bibdesk.build/Bibdesk.build/Objects-normal/ppc/BibAuthor+Scripting.ob";
-				whenToLoad = 0;
-			},
-			{
-				level = 0;
-				path = "/Volumes/Local/amaxwell/IntermediateFiles/Bibdesk.build/Bibdesk.build/Objects-normal/ppc/BibAuthor.ob";
-				whenToLoad = 0;
-			},
-			{
-				level = 0;
-				path = "/Volumes/Local/amaxwell/IntermediateFiles/Bibdesk.build/Bibdesk.build/Objects-normal/ppc/BibDeskSearchForCommand.ob";
-				whenToLoad = 0;
-			},
-			{
-				level = 0;
-				path = "/Volumes/Local/amaxwell/IntermediateFiles/Bibdesk.build/Bibdesk.build/Objects-normal/ppc/BibItem.ob";
-				whenToLoad = 0;
-			},
-			{
-				level = 0;
-				path = "/Volumes/Local/amaxwell/IntermediateFiles/Bibdesk.build/Bibdesk.build/Objects-normal/ppc/BibDocument+Scripting.ob";
-				whenToLoad = 0;
-			},
-			{
-				level = 0;
-				path = "/Volumes/Local/amaxwell/IntermediateFiles/Bibdesk.build/Bibdesk.build/Objects-normal/ppc/BibItem+Scripting.ob";
-				whenToLoad = 0;
-			},
-			{
-				level = 0;
-				path = "/Volumes/Local/amaxwell/IntermediateFiles/Bibdesk.build/Bibdesk.build/Objects-normal/ppc/BDSKDragOutlineView.ob";
-				whenToLoad = 0;
-			},
-			{
-				level = 0;
-				path = "/Volumes/Local/amaxwell/IntermediateFiles/Bibdesk.build/Bibdesk.build/Objects-normal/ppc/NSMutableDictionary+ThreadSafety.ob";
-				whenToLoad = 0;
-			},
-			{
-				level = 0;
-				path = "/Volumes/Local/amaxwell/IntermediateFiles/Bibdesk.build/Bibdesk.build/Objects-normal/ppc/NSMutableArray+ThreadSafety.ob";
-				whenToLoad = 0;
-			},
-			{
-				level = 0;
-				path = "/Volumes/Local/amaxwell/IntermediateFiles/Bibdesk.build/Bibdesk.build/Objects-normal/ppc/main.ob";
-				whenToLoad = 0;
-			},
-			{
-				level = 0;
-				path = "/Volumes/Local/amaxwell/IntermediateFiles/Bibdesk.build/Bibdesk.build/Objects-normal/ppc/BibPref_Defaults.ob";
-				whenToLoad = 0;
-			},
-			{
-				level = 0;
-				path = "/Volumes/Local/amaxwell/IntermediateFiles/Bibdesk.build/Bibdesk.build/Objects-normal/ppc/BibPref_RSS.ob";
-				whenToLoad = 0;
-			},
-			{
-				level = 0;
-				path = "/Volumes/Local/amaxwell/IntermediateFiles/Bibdesk.build/Bibdesk.build/Objects-normal/ppc/BibPref_CiteKey.ob";
-				whenToLoad = 0;
-			},
-			{
-				level = 0;
-				path = "/Volumes/Local/amaxwell/IntermediateFiles/Bibdesk.build/Bibdesk.build/Objects-normal/ppc/BibPref_Files.ob";
-				whenToLoad = 0;
-			},
-			{
-				level = 0;
-				path = "/Volumes/Local/amaxwell/IntermediateFiles/Bibdesk.build/Bibdesk.build/Objects-normal/ppc/BibPref_General.ob";
-				whenToLoad = 0;
-			},
-			{
-				level = 0;
-				path = "/Volumes/Local/amaxwell/IntermediateFiles/Bibdesk.build/Bibdesk.build/Objects-normal/ppc/BibPref_TeX.ob";
-				whenToLoad = 0;
-			},
-			{
-				level = 0;
-				path = "/Volumes/Local/amaxwell/IntermediateFiles/Bibdesk.build/Bibdesk.build/Objects-normal/ppc/BibPref_InputManager.ob";
-				whenToLoad = 0;
-			},
-			{
-				level = 0;
-				path = "/Volumes/Local/amaxwell/IntermediateFiles/Bibdesk.build/Bibdesk.build/Objects-normal/ppc/BibPref_Cite.ob";
-				whenToLoad = 0;
-			},
-			{
-				level = 0;
-				path = "/Volumes/Local/amaxwell/IntermediateFiles/Bibdesk.build/Bibdesk.build/Objects-normal/ppc/BibPref_AutoFile.ob";
-				whenToLoad = 0;
-			},
-			{
-				level = 0;
-				path = "/Volumes/Local/amaxwell/IntermediateFiles/Bibdesk.build/Bibdesk.build/Objects-normal/ppc/BibField.ob";
-				whenToLoad = 0;
-			},
-			{
-				level = 0;
-				path = /System/Library/Frameworks/ApplicationServices.framework/Versions/A/Frameworks/CoreGraphics.framework/Versions/A/Resources/libCSync.A.dylib;
-				whenToLoad = 0;
-			},
-			{
-				level = 0;
-				path = /System/Library/Frameworks/ApplicationServices.framework/Versions/A/Frameworks/CoreGraphics.framework/Versions/A/Resources/libCGATS.A.dylib;
-				whenToLoad = 0;
-			},
-			{
-				level = 0;
-				path = "/Volumes/Local/amaxwell/IntermediateFiles/Bibdesk.build/Bibdesk.build/Objects-normal/ppc/BibFinder.ob";
-				whenToLoad = 0;
-			},
-			{
-				level = 0;
-				path = "/Volumes/Local/amaxwell/IntermediateFiles/Bibdesk.build/Bibdesk.build/Objects-normal/ppc/BDSKPreviewer.ob";
-				whenToLoad = 0;
-			},
-			{
-				level = 0;
-				path = "/Volumes/Local/amaxwell/IntermediateFiles/Bibdesk.build/Bibdesk.build/Objects-normal/ppc/BDSKConverter.ob";
-				whenToLoad = 0;
-			},
-			{
-				level = 0;
-				path = "/Volumes/Local/amaxwell/IntermediateFiles/Bibdesk.build/Bibdesk.build/Objects-normal/ppc/BibTypeManager.ob";
-				whenToLoad = 0;
-			},
-			{
-				level = 0;
-				path = /Volumes/Local/amaxwell/Library/InputManagers/TextExtras/TextExtras.bundle/Contents/MacOS/TextExtras;
-				whenToLoad = 0;
-			},
-			{
-				level = 0;
-				path = /Volumes/Local/amaxwell/Library/InputManagers/BibDeskInputManager/BibDeskInputManager.bundle/Contents/MacOS/BibDeskInputManager;
-				whenToLoad = 0;
-			},
-			{
-				level = 0;
-				path = /Volumes/Local/amaxwell/Library/InputManagers/IncrementalSearchInputManager/IncrementalSearchInputManager.bundle/Contents/MacOS/IncrementalSearchInputManager;
-				whenToLoad = 0;
-			},
-			{
-				level = 0;
-				path = /System/Library/Frameworks/ApplicationServices.framework/Versions/A/Frameworks/CoreGraphics.framework/Versions/A/Resources/libRIP.A.dylib;
-				whenToLoad = 0;
-			},
-			{
-				level = 0;
-				path = /System/Library/Components/DictionaryService.component/Contents/MacOS/DictionaryService;
-				whenToLoad = 0;
-			},
-			{
-				level = 0;
-				path = "/Volumes/Local/amaxwell/IntermediateFiles/Bibdesk.build/Bibdesk.build/Objects-normal/ppc/BDSKUndoManager.ob";
-				whenToLoad = 0;
-			},
-			{
-				level = 0;
-				path = "/Volumes/Local/amaxwell/IntermediateFiles/Bibdesk.build/Bibdesk.build/Objects-normal/ppc/BibTeXParser.ob";
-				whenToLoad = 0;
-			},
-			{
-				level = 0;
-				path = "/Volumes/Local/amaxwell/IntermediateFiles/Bibdesk.build/Bibdesk.build/Objects-normal/ppc/libbtparse.ab";
-				whenToLoad = 0;
-			},
-			{
-				level = 0;
-				path = "/Volumes/Local/amaxwell/IntermediateFiles/Bibdesk.build/Bibdesk.build/Objects-normal/ppc/MacroTextFieldWindowController.ob";
-				whenToLoad = 0;
-			},
-			{
-				level = 0;
-				path = "/Volumes/Local/amaxwell/IntermediateFiles/Bibdesk.build/Bibdesk.build/Objects-normal/ppc/BibEditor.ob";
-				whenToLoad = 0;
-			},
-			{
-				level = 0;
-				path = "/Volumes/Local/amaxwell/IntermediateFiles/Bibdesk.build/Bibdesk.build/Objects-normal/ppc/BibPersonController.ob";
-				whenToLoad = 0;
-			},
-			{
-				level = 0;
-				path = "/Volumes/Local/amaxwell/IntermediateFiles/Bibdesk.build/Bibdesk.build/Objects-normal/ppc/RYZImagePopUpButton.ob";
-				whenToLoad = 0;
-			},
-			{
-				level = 0;
-				path = "/Volumes/Local/amaxwell/IntermediateFiles/Bibdesk.build/Bibdesk.build/Objects-normal/ppc/RYZImagePopUpButtonCell.ob";
-				whenToLoad = 0;
-			},
-			{
-				level = 0;
-				path = "/Volumes/Local/amaxwell/IntermediateFiles/Bibdesk.build/Bibdesk.build/Objects-normal/ppc/BDSKDragTableView.ob";
-				whenToLoad = 0;
-			},
-			{
-				level = 0;
-				path = "/Volumes/Local/amaxwell/IntermediateFiles/Bibdesk.build/Bibdesk.build/Objects-normal/ppc/BDSKCustomCiteTableView.ob";
-				whenToLoad = 0;
-			},
-			{
-				level = 0;
-				path = "/Volumes/Local/amaxwell/IntermediateFiles/Bibdesk.build/Bibdesk.build/Objects-normal/ppc/BDSKFontManager.ob";
-				whenToLoad = 0;
-			},
-			{
-				level = 0;
-				path = "/Volumes/Local/amaxwell/IntermediateFiles/Bibdesk.build/Bibdesk.build/Objects-normal/ppc/MultiplePageView.ob";
-				whenToLoad = 0;
-			},
-			{
-				level = 0;
-				path = /Developer/Applications/Xcode.app/Contents/PlugIns/GDBMIDebugging.xcplugin/Contents/Resources/PBGDBIntrospectionSupport.A.dylib;
-				whenToLoad = 0;
-			},
-			{
-				level = 0;
-				path = /System/Library/Frameworks/Carbon.framework/Versions/A/Frameworks/Print.framework/Versions/A/Plugins/PrintCocoaUI.bundle/Contents/MacOS/PrintCocoaUI;
-				whenToLoad = 0;
-			},
-			{
-				level = 0;
-				path = /System/Library/Printers/Libraries/libLW8Utils.dylib;
-				whenToLoad = 0;
-			},
-			{
-				level = 0;
-				path = /System/Library/Printers/Libraries/libPPDLib.dylib;
-				whenToLoad = 0;
-			},
-			{
-				level = 0;
-				path = /Library/Printers/hp/Frameworks/hpImaging.framework/Versions/C/hpImaging;
-				whenToLoad = 0;
-			},
-			{
-				level = 0;
-				path = /Library/Printers/hp/PDEs/hpColorOptions.plugin/Contents/MacOS/hpColorOptions;
-				whenToLoad = 0;
-			},
-			{
-				level = 0;
-				path = /Library/Printers/hp/PDEs/hpEdgeToEdge.plugin/Contents/MacOS/hpEdgeToEdge;
-				whenToLoad = 0;
-			},
-			{
-				level = 0;
-				path = /Library/Printers/hp/PDEs/hpFinishing.plugin/Contents/MacOS/hpFinishing;
-				whenToLoad = 0;
-			},
-			{
-				level = 0;
-				path = /Library/Printers/hp/PDEs/hpImageQuality.plugin/Contents/MacOS/hpImageQuality;
-				whenToLoad = 0;
-			},
-			{
-				level = 0;
-				path = /Library/Printers/hp/PDEs/hpProofAndPrint.plugin/Contents/MacOS/hpProofAndPrint;
-				whenToLoad = 0;
-			},
-			{
-				level = 0;
-				path = /System/Library/Frameworks/Carbon.framework/Versions/A/Frameworks/Print.framework/Versions/A/Plugins/PrintingCocoaPDEs.bundle/Contents/MacOS/PrintingCocoaPDEs;
-				whenToLoad = 0;
-			},
-			{
-				level = 0;
-				path = /System/Library/Frameworks/Carbon.framework/Versions/A/Frameworks/Print.framework/Versions/A/Plugins/PrintingTiogaPDEs.bundle/Contents/MacOS/PrintingTiogaPDEs;
-				whenToLoad = 0;
-			},
-			{
-				level = 0;
-				path = /System/Library/Frameworks/ApplicationServices.framework/Versions/A/Frameworks/CoreGraphics.framework/Versions/A/Resources/libCFilter.A.dylib;
-				whenToLoad = 0;
-			},
-			{
-				level = 0;
-				path = "/Volumes/Local/amaxwell/IntermediateFiles/Bibdesk.build/Bibdesk.build/Objects-normal/ppc/DraggableScrollView.ob";
-				whenToLoad = 0;
-			},
-			{
-				level = 0;
-				path = "/Volumes/Local/amaxwell/IntermediateFiles/Bibdesk.build/Bibdesk.build/Objects-normal/ppc/PDFImageView.ob";
-				whenToLoad = 0;
-			},
-			{
-				level = 0;
-				path = /System/Library/Printers/Libraries/libLW8Converter.dylib;
-				whenToLoad = 0;
-			},
-			{
-				level = 0;
-				path = /System/Library/Printers/Libraries/libConverter.dylib;
-				whenToLoad = 0;
-			},
-			{
-				level = 0;
-				path = /System/Library/Printers/CVs/Converter.plugin/Contents/MacOS/Converter;
-				whenToLoad = 0;
-			},
-			{
-				level = 0;
-				path = /System/Library/Frameworks/ApplicationServices.framework/Versions/A/Frameworks/CoreGraphics.framework/Versions/A/Resources/libPDFRIP.A.dylib;
-				whenToLoad = 0;
-			},
 		);
 		sourceDirectories = (
 		);
@@ -1118,6 +458,16 @@
 	F949492C07D37835001AD8A2 = {
 		indexTemplatePath = "";
 		isa = PBXCodeSenseManager;
+		usesDefaults = 0;
+		wantsCodeCompletion = 0;
+		wantsCodeCompletionAutoSuggestions = 0;
+		wantsCodeCompletionCaseSensitivity = 0;
+		wantsCodeCompletionListAlways = 0;
+		wantsCodeCompletionOnlyMatchingItems = 0;
+		wantsCodeCompletionParametersIncluded = 0;
+		wantsCodeCompletionPlaceholdersInserted = 0;
+		wantsCodeCompletionTabCompletes = 0;
+		wantsIndex = 0;
 	};
 	F94A94E9079AEE5800D13AB5 = {
 		uiCtxt = {
@@ -1180,67 +530,6 @@
 	F9F14A47075811CF008BA22F = {
 		activeExec = 0;
 	};
-	F9F78C8307D509F0004B68AF = {
-		fRef = F9022C5E075802E300C3F701;
-		isa = PBXBookmark;
-	};
-	F9F78CA207D50E8B004B68AF = {
-		fRef = F92F4E4D0788DEFC001B8F82;
-		isa = PBXTextBookmark;
-		rLen = 0;
-		rLoc = 277;
-		rType = 0;
-	};
-	F9F78CAF07D51013004B68AF = {
-		fRef = F92F4E4D0788DEFC001B8F82;
-		isa = PBXTextBookmark;
-		name = "BibPref_Files.m: 32";
-		rLen = 0;
-		rLoc = 663;
-		rType = 0;
-		vrLen = 2373;
-		vrLoc = 197;
-	};
-	F9F78CB207D51013004B68AF = {
-		fRef = F9022C5E075802E300C3F701;
-		isa = PBXTextBookmark;
-		name = encodingDefinitionDictionary;
-		rLen = 0;
-		rLoc = 10847;
-		rType = 0;
-		vrLen = 4370;
-		vrLoc = 10073;
-	};
-	F9F78CC607D5111D004B68AF = {
-		fRef = F92F4E4D0788DEFC001B8F82;
-		isa = PBXTextBookmark;
-		name = "[[(BibAppController *)[NSApp delegate] encodingDefinitionDictionary] allKeys]";
-		rLen = 0;
-		rLoc = 277;
-		rType = 0;
-		vrLen = 303;
-		vrLoc = 229;
-	};
-	F9F78CC907D5113D004B68AF = {
-		fRef = F9022C5E075802E300C3F701;
-		isa = PBXTextBookmark;
-		name = "BibAppController.m: 200";
-		rLen = 0;
-		rLoc = 10847;
-		rType = 0;
-		vrLen = 4474;
-		vrLoc = 10073;
-	};
-	F9F78CCC07D51194004B68AF = {
-		fRef = F9022C5E075802E300C3F701;
-		isa = PBXTextBookmark;
-		name = "BibAppController.m: 198";
-		rLen = 0;
-		rLoc = 10847;
-		rType = 0;
-		vrLen = 3448;
-		vrLoc = 10073;
-	};
 	F9F78CD207D5320D004B68AF = {
 		uiCtxt = {
 			sepNavIntBoundsRect = "{{0, 0}, {1097, 980}}";
@@ -1251,192 +540,10 @@
 	};
 	F9F78CD307D5320D004B68AF = {
 		uiCtxt = {
-			sepNavIntBoundsRect = "{{0, 0}, {1097, 1274}}";
-			sepNavSelRange = "{3374, 17}";
-			sepNavVisRect = "{{0, 538}, {1097, 736}}";
+			sepNavIntBoundsRect = "{{0, 0}, {945, 1274}}";
+			sepNavSelRange = "{1161, 7}";
+			sepNavVisRect = "{{0, 403}, {945, 356}}";
 			sepNavWindowFrame = "{{40, 67}, {1142, 865}}";
 		};
-	};
-	F9F78CD807D53231004B68AF = {
-		fRef = F9F78CD307D5320D004B68AF;
-		isa = PBXBookmark;
-	};
-	F9F78D0C07D53A55004B68AF = {
-		fRef = F9F78CD307D5320D004B68AF;
-		isa = PBXTextBookmark;
-		name = "BDSKStringEncodingManager.m: availableEncodings";
-		rLen = 477;
-		rLoc = 2549;
-		rType = 0;
-		vrLen = 2640;
-		vrLoc = 732;
-	};
-	F9F78D0F07D53B32004B68AF = {
-		fRef = F9022C5E075802E300C3F701;
-		isa = PBXTextBookmark;
-		rLen = 0;
-		rLoc = 12463;
-		rType = 0;
-	};
-	F9F78D1707D53B7D004B68AF = {
-		fRef = F9022C5E075802E300C3F701;
-		isa = PBXTextBookmark;
-		name = "BibAppController.m: 236";
-		rLen = 0;
-		rLoc = 12546;
-		rType = 0;
-		vrLen = 2157;
-		vrLoc = 13045;
-	};
-	F9F78D1807D53BBF004B68AF = {
-		fRef = F9F78CD207D5320D004B68AF;
-		isa = PBXBookmark;
-	};
-	F9F78D1F07D53C3B004B68AF = {
-		fRef = F9F78CD207D5320D004B68AF;
-		isa = PBXTextBookmark;
-		name = availableEncodingDisplayedNames;
-		rLen = 31;
-		rLoc = 1357;
-		rType = 0;
-		vrLen = 615;
-		vrLoc = 0;
-	};
-	F9F78D3407D53E1F004B68AF = {
-		fRef = F92F4E4D0788DEFC001B8F82;
-		isa = PBXTextBookmark;
-		name = "BibPref_Files.m: 60";
-		rLen = 0;
-		rLoc = 2524;
-		rType = 0;
-		vrLen = 296;
-		vrLoc = 229;
-	};
-	F9F78D3507D53E1F004B68AF = {
-		fRef = F9022C66075802E300C3F701;
-		isa = PBXTextBookmark;
-		name = "BibDocument.m: 851";
-		rLen = 0;
-		rLoc = 37852;
-		rType = 0;
-		vrLen = 852;
-		vrLoc = 37425;
-	};
-	F9F78D3607D53E1F004B68AF = {
-		fRef = F9022C5E075802E300C3F701;
-		isa = PBXTextBookmark;
-		name = "BibAppController.m: 183";
-		rLen = 0;
-		rLoc = 10847;
-		rType = 0;
-		vrLen = 741;
-		vrLoc = 10814;
-	};
-	F9F78D3707D53E1F004B68AF = {
-		fRef = F94A94E9079AEE5800D13AB5;
-		isa = PBXTextBookmark;
-		name = "BDSKBibTeXExporter.m: 90";
-		rLen = 0;
-		rLoc = 2594;
-		rType = 0;
-		vrLen = 1593;
-		vrLoc = 2023;
-	};
-	F9F78D3807D53E1F004B68AF = {
-		fRef = F9022C5D075802E300C3F701;
-		isa = PBXTextBookmark;
-		rLen = 0;
-		rLoc = 4316;
-		rType = 0;
-	};
-	F9F78D3907D53E1F004B68AF = {
-		fRef = F92F4E4D0788DEFC001B8F82;
-		isa = PBXTextBookmark;
-		name = "BibPref_Files.m: 60";
-		rLen = 0;
-		rLoc = 2524;
-		rType = 0;
-		vrLen = 296;
-		vrLoc = 229;
-	};
-	F9F78D3A07D53E1F004B68AF = {
-		fRef = F9022C5D075802E300C3F701;
-		isa = PBXTextBookmark;
-		name = encodingDefinitionDictionary;
-		rLen = 0;
-		rLoc = 4316;
-		rType = 0;
-		vrLen = 619;
-		vrLoc = 4284;
-	};
-	F9F78D3B07D53E1F004B68AF = {
-		fRef = F94A94E9079AEE5800D13AB5;
-		isa = PBXTextBookmark;
-		name = encodingDefinitionDictionary;
-		rLen = 0;
-		rLoc = 2594;
-		rType = 0;
-		vrLen = 938;
-		vrLoc = 2126;
-	};
-	F9F78D3C07D53E1F004B68AF = {
-		fRef = F9022C66075802E300C3F701;
-		isa = PBXTextBookmark;
-		name = encodingDefinitionDictionary;
-		rLen = 0;
-		rLoc = 10671;
-		rType = 0;
-		vrLen = 369;
-		vrLoc = 10417;
-	};
-	F9F78D3D07D53E1F004B68AF = {
-		fRef = F9022C5E075802E300C3F701;
-		isa = PBXTextBookmark;
-		name = "BibAppController.m: 236";
-		rLen = 0;
-		rLoc = 12511;
-		rType = 0;
-		vrLen = 769;
-		vrLoc = 13965;
-	};
-	F9F78D3E07D53E1F004B68AF = {
-		fRef = F9022C66075802E300C3F701;
-		isa = PBXTextBookmark;
-		name = "BibDocument.m: 851";
-		rLen = 0;
-		rLoc = 37852;
-		rType = 0;
-		vrLen = 852;
-		vrLoc = 37425;
-	};
-	F9F78D3F07D53E1F004B68AF = {
-		fRef = F9022C5E075802E300C3F701;
-		isa = PBXTextBookmark;
-		name = "BibAppController.m: 183";
-		rLen = 0;
-		rLoc = 10847;
-		rType = 0;
-		vrLen = 741;
-		vrLoc = 10814;
-	};
-	F9F78D4007D53E1F004B68AF = {
-		fRef = F94A94E9079AEE5800D13AB5;
-		isa = PBXTextBookmark;
-		name = "BDSKBibTeXExporter.m: 90";
-		rLen = 0;
-		rLoc = 2594;
-		rType = 0;
-		vrLen = 1593;
-		vrLoc = 2023;
-	};
-	F9F78D4107D53E1F004B68AF = {
-		fRef = F9022C5D075802E300C3F701;
-		isa = PBXTextBookmark;
-		name = "BibAppController.h: openBibTeXFile:withEncoding:";
-		rLen = 0;
-		rLoc = 4316;
-		rType = 0;
-		vrLen = 1048;
-		vrLoc = 4016;
 	};
 }
