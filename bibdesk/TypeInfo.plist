@@ -140,7 +140,6 @@
 				<string>Number</string>
 				<string>Pages</string>
 				<string>Month</string>
-				<string>Lastchecked</string>
 			</array>
 			<key>required</key>
 			<array>
@@ -162,7 +161,6 @@
 				<string>Address</string>
 				<string>Edition</string>
 				<string>Month</string>
-				<string>Lastchecked</string>
 			</array>
 			<key>required</key>
 			<array>
@@ -180,7 +178,6 @@
 				<string>Address</string>
 				<string>Month</string>
 				<string>Year</string>
-				<string>Lastchecked</string>
 			</array>
 			<key>required</key>
 			<array>
@@ -193,7 +190,6 @@
 			<array>
 				<string>Volumetitle</string>
 				<string>Editor</string>
-				<string>Lastchecked</string>
 			</array>
 			<key>required</key>
 			<array>
@@ -210,7 +206,6 @@
 				<string>Urldate</string>
 				<string>Author</string>
 				<string>Title</string>
-				<string>Lastchecked</string>
 			</array>
 			<key>required</key>
 			<array/>
@@ -222,7 +217,6 @@
 				<string>Sort-Word</string>
 				<string>Short</string>
 				<string>Group</string>
-				<string>Lastchecked</string>
 			</array>
 			<key>required</key>
 			<array>
@@ -239,7 +233,6 @@
 				<string>Series</string>
 				<string>Address</string>
 				<string>Edition</string>
-				<string>Lastchecked</string>
 			</array>
 			<key>required</key>
 			<array>
@@ -265,7 +258,6 @@
 				<string>Address</string>
 				<string>Edition</string>
 				<string>Month</string>
-				<string>Lastchecked</string>
 			</array>
 			<key>required</key>
 			<array>
@@ -286,7 +278,6 @@
 				<string>Publisher</string>
 				<string>Address</string>
 				<string>Month</string>
-				<string>Lastchecked</string>
 			</array>
 			<key>required</key>
 			<array>
@@ -303,7 +294,6 @@
 				<string>Address</string>
 				<string>Month</string>
 				<string>Type</string>
-				<string>Lastchecked</string>
 			</array>
 			<key>required</key>
 			<array>
@@ -323,7 +313,6 @@
 				<string>Edition</string>
 				<string>Month</string>
 				<string>Year</string>
-				<string>Lastchecked</string>
 			</array>
 			<key>required</key>
 			<array>
@@ -337,7 +326,6 @@
 				<string>Address</string>
 				<string>Month</string>
 				<string>Type</string>
-				<string>Lastchecked</string>
 			</array>
 			<key>required</key>
 			<array>
@@ -358,7 +346,6 @@
 				<string>Edition</string>
 				<string>Month</string>
 				<string>Year</string>
-				<string>Lastchecked</string>
 			</array>
 			<key>required</key>
 			<array/>
@@ -370,7 +357,6 @@
 				<string>Year</string>
 				<string>Volume</string>
 				<string>Pages</string>
-				<string>Lastchecked</string>
 			</array>
 			<key>required</key>
 			<array>
@@ -386,7 +372,6 @@
 				<string>Address</string>
 				<string>Month</string>
 				<string>Type</string>
-				<string>Lastchecked</string>
 			</array>
 			<key>required</key>
 			<array>
@@ -405,7 +390,6 @@
 				<string>Organization</string>
 				<string>Address</string>
 				<string>Month</string>
-				<string>Lastchecked</string>
 			</array>
 			<key>required</key>
 			<array>
@@ -420,7 +404,6 @@
 				<string>Type</string>
 				<string>Number</string>
 				<string>Address</string>
-				<string>Lastchecked</string>
 			</array>
 			<key>required</key>
 			<array>
@@ -436,7 +419,6 @@
 			<array>
 				<string>Month</string>
 				<string>Year</string>
-				<string>Lastchecked</string>
 			</array>
 			<key>required</key>
 			<array>
