@@ -119,4 +119,6 @@ references. The preview file will also reflect any macros you have
 included in your template file, if you have included them in the
 current bib-item.
 
-<img src="gfx/typesetPreview.png" alt="" height="301" width="591">
+![PDF typeset preview](gfx/typesetPreview.png)
+
+![RTF typeset preview](gfx/typesetPreview-rtf.png)
