@@ -114,12 +114,14 @@ NSString *BDSKDateModifiedString = @"Date-Modified";
     }
 
     // make two passes to get the required entries at top.
-    // there's got to be a better way to do this but i was lazy when i wrote this.
     i=0;
     sKeys = [[[theBib pubFields] allKeys] sortedArrayUsingSelector:@selector(caseInsensitiveCompare:)];
-    e = [sKeys objectEnumerator];
+    
+    NSMutableSet *addedFields = [NSMutableSet set];
+    NSArray *requiredKeys = [theBib requiredFieldNames];
+    e = [requiredKeys objectEnumerator];
     while(tmp = [e nextObject]){
-        if ([theBib isRequired:tmp] && ![keysNotInForm containsObject:tmp]){
+        if (![keysNotInForm containsObject:tmp]){
             
             entry = [bibFields insertEntry:tmp atIndex:i];
             [entry setTarget:self];
@@ -133,12 +135,40 @@ NSString *BDSKDateModifiedString = @"Date-Modified";
             [entry setFormatter:[appController formatterForEntry:tmp]];
             //[entry setTitleAlignment:NSRightTextAlignment]; this doesn't work...
             i++;
+
+            [addedFields addObject:tmp];
         }
     }
 
+    // now, we add the optional fields in the order they came in the config file.
+    
+    e = [[[BibTypeManager sharedManager] optionalFieldsForType:[theBib type]] objectEnumerator];
+    
+    while(tmp = [e nextObject]){
+        if(![keysNotInForm containsObject:tmp]){
+            entry = [bibFields insertEntry:tmp atIndex:i];
+            [entry setTarget:self];
+            [entry setAction:@selector(textFieldDidEndEditing:)];
+            [entry setTag:i];
+            [entry setObjectValue:[theBib valueOfField:tmp]];
+            [entry setTitleAlignment:NSLeftTextAlignment];
+            
+            // Autocompletion stuff
+			[entry setFormatter:[appController formatterForEntry:tmp]];
+            
+            i++;
+            [addedFields addObject:tmp];
+        }
+        
+    }
+    
+    // now add any remaining fields at the end. 
+    // (Note: should we add remaining fields after required fields on 
+    // the assumption that they're important since the user added them?)
+    
     e = [sKeys objectEnumerator];
     while(tmp = [e nextObject]){
-        if(![theBib isRequired:tmp] && ![keysNotInForm containsObject:tmp]){
+        if(![addedFields containsObject:tmp] && ![keysNotInForm containsObject:tmp]){
             
             entry = [bibFields insertEntry:tmp atIndex:i];
             [entry setTarget:self];

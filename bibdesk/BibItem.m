@@ -36,8 +36,10 @@
 
 #import "BibItem.h"
 
-#define addokey(s) if([pubFields objectForKey: s] == nil){[pubFields setObject:@"" forKey: s];} [removeKeys removeObject: s];
-#define addrkey(s) if([pubFields objectForKey: s] == nil){[pubFields setObject:@"" forKey: s];} [requiredFieldNames addObject: s]; [removeKeys removeObject: s];
+#define addokey(s) if([pubFields objectForKey: s] == nil){[pubFields setObject:[BDSKComplexString complexStringWithString:@""] forKey: s];} [removeKeys removeObject: s];
+#define addrkey(s) if([pubFields objectForKey: s] == nil){[pubFields setObject:[BDSKComplexString complexStringWithString:@""] forKey: s];} if(![requiredFieldNames containsObject:s]){[requiredFieldNames addObject: s];} [removeKeys removeObject: s];
+
+#define isEmptyField(s) ([[[pubFields objectForKey:s] stringValue] isEqualToString:@""])
 
 /* Fonts and paragraph styles cached for efficiency. */
 static NSDictionary* _cachedFonts = nil; // font cached across all BibItems for speed.
