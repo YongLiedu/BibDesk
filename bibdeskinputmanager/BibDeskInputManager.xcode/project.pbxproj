@@ -13,7 +13,7 @@
 				GCC_ENABLE_FIX_AND_CONTINUE = YES;
 				GCC_GENERATE_DEBUGGING_SYMBOLS = YES;
 				GCC_OPTIMIZATION_LEVEL = 0;
-				GCC_PRECOMPILE_PREFIX_HEADER = NO;
+				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				OPTIMIZATION_CFLAGS = "-O0";
 				ZERO_LINK = NO;
 			};
@@ -24,6 +24,7 @@
 			buildSettings = {
 				COPY_PHASE_STRIP = YES;
 				GCC_ENABLE_FIX_AND_CONTINUE = NO;
+				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				ZERO_LINK = NO;
 			};
 			isa = PBXBuildStyle;
@@ -56,6 +57,7 @@
 		};
 		089C166AFE841209C02AAC07 = {
 			children = (
+				F9BFE18A06FA98910019E8AB,
 				08FB77AFFE84173DC02AAC07,
 				32C88E010371C26100C91783,
 				089C167CFE841241C02AAC07,
@@ -91,6 +93,7 @@
 				F9D86A0006B33E2000F2DE7D,
 				8D5B49B7048680CD000E48DA,
 				089C167DFE841241C02AAC07,
+				F953E82006EE6C96007EFF3D,
 			);
 			isa = PBXGroup;
 			name = Resources;
@@ -199,7 +202,6 @@
 //324
 		32C88E010371C26100C91783 = {
 			children = (
-				32DBCF630370AF2F00C91783,
 				F9D86A0106B33E2000F2DE7D,
 				F9D86A0206B33E2000F2DE7D,
 				F9D86A0306B33E2000F2DE7D,
@@ -208,14 +210,6 @@
 			);
 			isa = PBXGroup;
 			name = "Other Sources";
-			refType = 4;
-			sourceTree = "<group>";
-		};
-		32DBCF630370AF2F00C91783 = {
-			fileEncoding = 4;
-			isa = PBXFileReference;
-			lastKnownFileType = sourcecode.c.h;
-			path = BibDeskInputManager_Prefix.pch;
 			refType = 4;
 			sourceTree = "<group>";
 		};
@@ -244,8 +238,8 @@
 				FRAMEWORK_SEARCH_PATHS = "";
 				GCC_ENABLE_TRIGRAPHS = NO;
 				GCC_GENERATE_DEBUGGING_SYMBOLS = YES;
-				GCC_PRECOMPILE_PREFIX_HEADER = NO;
-				GCC_PREFIX_HEADER = BibDeskInputManager_Prefix.pch;
+				GCC_PRECOMPILE_PREFIX_HEADER = YES;
+				GCC_PREFIX_HEADER = Bibdesk_Prefix.pch;
 				GCC_WARN_FOUR_CHARACTER_CONSTANTS = NO;
 				GCC_WARN_UNKNOWN_PRAGMAS = NO;
 				HEADER_SEARCH_PATHS = "";
@@ -273,18 +267,12 @@
 		8D5B49AD048680CD000E48DA = {
 			buildActionMask = 2147483647;
 			files = (
-				8D5B49AE048680CD000E48DA,
 				F9D86A0606B33E2000F2DE7D,
 				F9D86A0806B33E2000F2DE7D,
+				F9BFE18E06FA98910019E8AB,
 			);
 			isa = PBXHeadersBuildPhase;
 			runOnlyForDeploymentPostprocessing = 0;
-		};
-		8D5B49AE048680CD000E48DA = {
-			fileRef = 32DBCF630370AF2F00C91783;
-			isa = PBXBuildFile;
-			settings = {
-			};
 		};
 		8D5B49AF048680CD000E48DA = {
 			buildActionMask = 2147483647;
@@ -358,6 +346,14 @@
 //F92
 //F93
 //F94
+		F953E82006EE6C96007EFF3D = {
+			isa = PBXFileReference;
+			lastKnownFileType = text.xml;
+			name = "Info copy.plist";
+			path = "/Volumes/Local/Users/amaxwell/build/bibdeskinputmanager/Info copy.plist";
+			refType = 0;
+			sourceTree = "<absolute>";
+		};
 		F9BC91E806E0EAFB00B42137 = {
 			buildActionMask = 2147483647;
 			dstPath = BibDeskInputManager;
@@ -390,6 +386,20 @@
 		};
 		F9BEBE1D06B42D3C00AA486C = {
 			fileRef = F9BEBE1C06B42D3C00AA486C;
+			isa = PBXBuildFile;
+			settings = {
+			};
+		};
+		F9BFE18A06FA98910019E8AB = {
+			fileEncoding = 30;
+			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.c.h;
+			path = Bibdesk_Prefix.pch;
+			refType = 4;
+			sourceTree = "<group>";
+		};
+		F9BFE18E06FA98910019E8AB = {
+			fileRef = F9BFE18A06FA98910019E8AB;
 			isa = PBXBuildFile;
 			settings = {
 			};
