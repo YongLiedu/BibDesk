@@ -363,9 +363,9 @@ Handle Notifications by the popup button to update its icon and its menu before 
 	NSNumber *row;
 	BibItem *aPub;
 	
-	while (row = [myEnum nextObject]) {
+	while (row = [selEnum nextObject]) {
 		aPub = [shownPublications objectAtIndex:[row intValue]];
-		[aPub setCitekey[aPub suggestedCiteKey]];
+		[aPub setCiteKey:[aPub suggestedCiteKey]];
 	}
 }
 
