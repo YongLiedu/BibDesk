@@ -100,4 +100,16 @@ NSFont *bodyFontForFamily(NSString *tryFamily)
     return cachedFontsForPreviewPane;
 }
 
+- (NSFontTraitMask)fontTraitMaskForTeXStyle:(NSString *)style{
+    if([style isEqualToString:@"\\textit"])
+        return NSItalicFontMask;
+    else if([style isEqualToString:@"\\textbf"])
+        return NSBoldFontMask;
+    else if([style isEqualToString:@"\\textsc"])
+        return NSSmallCapsFontMask;
+    else if([style isEqualToString:@"\\emph"])
+        return NSItalicFontMask;
+    else
+        return NSUnitalicFontMask | NSUnboldFontMask;
+}
 @end

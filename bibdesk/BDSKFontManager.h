@@ -30,5 +30,5 @@
     @result     (description)
 */
 - (NSDictionary *)cachedFontsForPreviewPane;
-
+- (NSFontTraitMask)fontTraitMaskForTeXStyle:(NSString *)style;
 @end

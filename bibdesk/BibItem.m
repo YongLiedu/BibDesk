@@ -41,6 +41,8 @@
 
 #define isEmptyField(s) ([[[pubFields objectForKey:s] stringValue] isEqualToString:@""])
 
+static AGRegex *regexForTeX = nil;
+
 /* Fonts and paragraph styles cached for efficiency. */
 static NSParagraphStyle* keyParagraphStyle = nil;
 static NSParagraphStyle* bodyParagraphStyle = nil;
@@ -920,8 +922,10 @@ setupParagraphStyle()
     
     [aStr appendAttributedString:[[[NSMutableAttributedString alloc] initWithString:
                       [NSString stringWithFormat:@"%@\n",[self citeKey]] attributes:typeAttributes] autorelease]];
-    [aStr appendAttributedString:[[[NSMutableAttributedString alloc] initWithString:
-                     [NSString stringWithFormat:@"%@ ",[[[self title] stringByRemovingCurlyBraces] stringByCollapsingWhitespaceAndRemovingSurroundingWhitespace]] attributes:titleAttributes] autorelease]];
+    NSAttributedString *titleStr = [self attributedStringByParsingTeX:[self title] inField:BDSKTitleString defaultStyle:keyParagraphStyle];
+    [aStr appendAttributedString:titleStr];
+//    [aStr appendAttributedString:[[[NSMutableAttributedString alloc] initWithString:
+//                     [NSString stringWithFormat:@"%@ ",[[[self title] stringByRemovingCurlyBraces] stringByCollapsingWhitespaceAndRemovingSurroundingWhitespace]] attributes:titleAttributes] autorelease]];
 
     
     [aStr appendAttributedString:[[[NSMutableAttributedString alloc] initWithString:
@@ -987,6 +991,52 @@ setupParagraphStyle()
                                                                   attributes:nil] autorelease]];
 
     return 	aStr;
+}
+
+- (NSAttributedString *)attributedStringByParsingTeX:(NSString *)texStr inField:(NSString *)field defaultStyle:(NSParagraphStyle *)defaultStyle{
+    
+    texStr = [texStr stringByCollapsingWhitespaceAndRemovingSurroundingWhitespace]; // clean this up first
+    
+    if(regexForTeX == nil)
+        regexForTeX = [[AGRegex alloc] initWithPattern:@"(\\\\[a-z].+)(?P<pn>\\{( (?>[^{}]+) | (?P>pn) )* \\} )"
+                                               options:AGRegexExtended | AGRegexLazy]; // recurse to handle infinite nested braces
+    NSEnumerator *matches = [regexForTeX findEnumeratorInString:texStr];
+    NSString *texStyle = nil;
+    NSRange range;
+    AGRegexMatch *aMatch = nil;
+    
+    NSFont *font = [[[BDSKFontManager sharedFontManager] cachedFontsForPreviewPane] objectForKey:field];
+    //NSLog(@"default font is %@", font);
+    NSDictionary *attrs = [NSDictionary dictionaryWithObjects:[NSArray arrayWithObjects:font, defaultStyle, nil]
+                                                      forKeys:[NSArray arrayWithObjects:NSFontAttributeName, NSParagraphStyleAttributeName, nil]];
+    NSMutableAttributedString *mas = [[NSMutableAttributedString alloc] initWithString:texStr attributes:attrs]; // set the whole thing up with default attrs
+    NSMutableSet *thingsToRemove = [NSMutableSet set];
+    
+    while(aMatch = [matches nextObject]){
+        texStyle = [aMatch groupAtIndex:1]; // index 0 is the entire match; this gives us the TeX command, e.g. \textsc
+        //NSLog(@"style is %@", texStyle);
+        [thingsToRemove addObject:texStyle];
+        range = [aMatch rangeAtIndex:2];
+        //NSLog(@"using font trait mask %X", [[BDSKFontManager sharedFontManager] fontTraitMaskForTeXStyle:texStyle]);
+        font = [[NSFontManager sharedFontManager] convertFont:font
+                                                  toHaveTrait:[[BDSKFontManager sharedFontManager] fontTraitMaskForTeXStyle:texStyle]];
+        //NSLog(@"using font %@", font);
+        attrs = [NSDictionary dictionaryWithObjects:[NSArray arrayWithObjects:font, defaultStyle, nil] // always body par style here
+                                            forKeys:[NSArray arrayWithObjects:NSFontAttributeName, NSParagraphStyleAttributeName, nil]];
+        [mas setAttributes:attrs range:range];
+    }
+    
+    // Tried to use a regex to find the range of each TeX style recursively as in while(1){find range; deleteCharactersInRange:range} but
+    // AGRegex kept returning the first match even after deletion (even though I called it on the string _after_ deletion).  This is clunky, but works.
+    NSMutableString *mstr = [mas mutableString];
+    NSEnumerator *e = [thingsToRemove objectEnumerator];
+    while(texStyle = [e nextObject])
+        [mstr replaceOccurrencesOfString:texStyle withString:@"" options:nil range:NSMakeRange(0, [[mas mutableString] length])];
+
+    [mstr replaceOccurrencesOfString:@"{" withString:@"" options:nil range:NSMakeRange(0, [[mas mutableString] length])];
+    [mstr replaceOccurrencesOfString:@"}" withString:@"" options:nil range:NSMakeRange(0, [[mas mutableString] length])];
+    
+    return [mas autorelease];
 }
 
 - (NSString *)bibTeXStringByTeXifying:(BOOL)shouldTeXify{
