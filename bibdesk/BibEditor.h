@@ -19,8 +19,8 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 */ 
 
 #import <Cocoa/Cocoa.h>
-
 #import <OmniFoundation/OmniFoundation.h>
+#import <WebKit/WebKit.h>
 
 #import "BibItem.h"
 #import "BibDocument.h"
@@ -86,6 +86,12 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
     IBOutlet NSTextView *documentSnoopTextView;
     IBOutlet NSView* textSnoopContainerView;
 	BOOL textSnoopViewLoaded;
+// ----------------------------------------------------------------------------------------
+// remote webpreview stuff
+// ----------------------------------------------------------------------------------------
+    IBOutlet WebView *remoteSnoopWebView;
+    IBOutlet NSView* webSnoopContainerView;
+	BOOL webSnoopViewLoaded;
     
 // Autocompletion stuff
     NSDictionary *completionMatcherDict;

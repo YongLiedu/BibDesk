@@ -43,6 +43,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 
 	pdfSnoopViewLoaded = NO;
 	textSnoopViewLoaded = NO;
+	webSnoopViewLoaded = NO;
 	
     // this should probably be moved around.
     [[self window] setTitle:[theBib title]];
@@ -398,6 +399,12 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 								   keyEquivalent:@""];
 		[item setRepresentedObject:textSnoopContainerView];
 		[menu addItem:item];
+		
+		item = [[NSMenuItem alloc] initWithTitle:NSLocalizedString(@"View Remote URL in Drawer",@"View remote URL in drawer menu item")
+										  action:@selector(toggleSnoopDrawer:)
+								   keyEquivalent:@""];
+		[item setRepresentedObject:webSnoopContainerView];
+		[menu addItem:item];
 	}
 	
 	return [menu autorelease];
@@ -583,8 +590,13 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 		} else if (requiredSnoopContainerView == textSnoopContainerView) {
 			[menuItem setTitle:NSLocalizedString(@"View File as Text in Drawer", @"View file as text in drawer menu item")];
 		}
-		NSString *lurl = [theBib localURLPathRelativeTo:[[theDocument fileName] stringByDeletingLastPathComponent]];
-		return (lurl && [[NSFileManager defaultManager] fileExistsAtPath:lurl]);
+		if (requiredSnoopContainerView == webSnoopContainerView) {
+			NSString *rurl = [theBib valueOfField:BDSKUrlString];
+			return (![rurl isEqualToString:@""]);
+		} else {
+			NSString *lurl = [theBib localURLPathRelativeTo:[[theDocument fileName] stringByDeletingLastPathComponent]];
+			return (lurl && [[NSFileManager defaultManager] fileExistsAtPath:lurl]);
+		}
 	}
 	else if ([menuItem action] == @selector(viewRemote:)) {
 		NSString *rurl = [theBib valueOfField:BDSKUrlString];
@@ -737,9 +749,6 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 		[viewLocalButton setToolTip:NSLocalizedString(@"View File",@"View file tooltip")];
 		[[self window] setRepresentedFilename:lurl];
 		
-		[self updateDocumentSnoopButton];
-		[documentSnoopButton setIconActionEnabled:YES];
-		
 		// reopen; notification takes care of updating the drawer content
 		if(drawerWasOpen)
 			[documentSnoopDrawer open];
@@ -748,9 +757,6 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 		[viewLocalButton setIconActionEnabled:NO];
         [viewLocalButton setToolTip:NSLocalizedString(@"Choose a file to link with in the Local-Url Field", @"bad/empty local url field tooltip")];
         [[self window] setRepresentedFilename:@""];
-		
-        [documentSnoopButton setIconImage:[NSImage imageNamed:@"drawerDisabled"]];
-		[documentSnoopButton setIconActionEnabled:NO];
     }
 
     if([NSURL URLWithString:rurl] && ![rurl isEqualToString:@""]){
@@ -763,6 +769,15 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 		[viewRemoteButton setIconActionEnabled:NO];
         [viewRemoteButton setToolTip:NSLocalizedString(@"Choose a URL to link with in the Url Field", @"bad/empty url field tooltip")];
     }
+	
+	if ( (lurl && [[NSFileManager defaultManager] fileExistsAtPath:lurl]) ||
+		 ([NSURL URLWithString:rurl] && ![rurl isEqualToString:@""]) ){
+		[self updateDocumentSnoopButton];
+		[documentSnoopButton setIconActionEnabled:YES];
+	}else{
+        [documentSnoopButton setIconImage:[NSImage imageNamed:@"drawerDisabled"]];
+		[documentSnoopButton setIconActionEnabled:NO];
+	}
 }
 
 #pragma mark choose local-url or url support
@@ -972,18 +987,19 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 			[entry setObjectValue:newValue];
 	}
 	
-	if([changedTitle isEqualToString:BDSKUrlString] || 
-	   [changedTitle isEqualToString:BDSKLocalUrlString]){
+	if([changedTitle isEqualToString:BDSKLocalUrlString]){
 		pdfSnoopViewLoaded = NO;
 		textSnoopViewLoaded = NO;
 		[self fixURLs];
 	}
-	
-	if([changedTitle isEqualToString:BDSKTitleString]){
+	else if([changedTitle isEqualToString:BDSKUrlString]){
+		webSnoopViewLoaded = NO;
+		[self fixURLs];
+	}
+	else if([changedTitle isEqualToString:BDSKTitleString]){
 		[[self window] setTitle:newValue];
 	}
-	
-	if([changedTitle isEqualToString:BDSKAuthorString]){
+	else if([changedTitle isEqualToString:BDSKAuthorString]){
 		[authorTableView reloadData];
 	}
 	
@@ -1049,9 +1065,10 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 					( [documentSnoopDrawer state] == NSDrawerOpenState ||
 					  [documentSnoopDrawer state] == NSDrawerOpeningState) );
 	BOOL isText = (requiredSnoopContainerView == textSnoopContainerView);
+	BOOL isWeb = (requiredSnoopContainerView == webSnoopContainerView);
 	NSImage *drawerImage = [NSImage imageNamed:@"drawerRight"];
 	NSImage *arrowImage = [NSImage imageNamed:@"drawerArrow"];
-	NSImage *badgeImage = [[NSWorkspace sharedWorkspace] iconForFileType:(isText ? @"txt" : @"pdf")];
+	NSImage *badgeImage = [[NSWorkspace sharedWorkspace] iconForFileType:(isWeb ? @"webloc" : (isText ? @"txt" : @"pdf"))];
 	NSRect iconRect = NSMakeRect(0, 0, 32, 32);
 	NSSize arrowSize = [arrowImage size];
 	NSRect arrowRect = NSMakeRect(0, 0, arrowSize.width, arrowSize.height);
@@ -1074,6 +1091,8 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 	
 	if (isClose) {
 		[documentSnoopButton setToolTip:NSLocalizedString(@"Close Drawer", @"Close drawer tooltip")];
+	} else if (isWeb) {
+		[documentSnoopButton setToolTip:NSLocalizedString(@"Show Remote URL in Drawer", @"Show remote URL in drawer tooltip")];
 	} else if (isText) {
 		[documentSnoopButton setToolTip:NSLocalizedString(@"Show File as Text in Drawer", @"Show file as Text in drawer tooltip")];
 	} else {
@@ -1082,11 +1101,9 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 }
 
 - (void)updateSnoopDrawerContent{
-    NSString *lurl = [theBib localURLPathRelativeTo:[[theDocument fileName] stringByDeletingLastPathComponent]];
-	
-	if (!lurl) return;
-	
 	if ([documentSnoopDrawer contentView] == pdfSnoopContainerView) {
+		NSString *lurl = [theBib localURLPathRelativeTo:[[theDocument fileName] stringByDeletingLastPathComponent]];
+		if (!lurl) return;
 		if (!pdfSnoopViewLoaded) {
 			[documentSnoopImageView loadFromPath:lurl];
 			[documentSnoopScrollView setDocumentViewAlignment:NSImageAlignTopLeft];
@@ -1094,12 +1111,22 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 		}
 	}
 	else if ([documentSnoopDrawer contentView] == textSnoopContainerView) {
+		NSString *lurl = [theBib localURLPathRelativeTo:[[theDocument fileName] stringByDeletingLastPathComponent]];
+		if (!lurl) return;
         if (!textSnoopViewLoaded) {
 			NSString *cmdString = [NSString stringWithFormat:@"%@/pdftotext -f 1 -l 1 \"%@\" -",[[NSBundle mainBundle] resourcePath], lurl, nil];
             NSString *textSnoopString = [[[BDSKShellTask shellTask] runShellCommand:cmdString withInputString:nil] retain];
 			[documentSnoopTextView setString:textSnoopString];
 			textSnoopViewLoaded = YES;
         }
+	}
+	else if ([documentSnoopDrawer contentView] == webSnoopContainerView) {
+		if (!webSnoopViewLoaded) {
+			NSString *rurl = [theBib valueOfField:BDSKUrlString];
+			if ([rurl isEqualToString:@""]) return;
+			[[remoteSnoopWebView mainFrame] loadRequest:[NSURLRequest requestWithURL:[NSURL URLWithString:rurl]]];
+			webSnoopViewLoaded = YES;
+		}
 	}
 }
 
