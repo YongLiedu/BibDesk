@@ -1702,7 +1702,7 @@ int generalBibItemCompareFunc(id item1, id item2, void *context){
 	
 	NSString *nowStr = [[NSCalendarDate date] description];
 	NSDictionary *dictWithDates = [NSDictionary dictionaryWithObjectsAndKeys:nowStr, BDSKDateCreatedString, nowStr, BDSKDateModifiedString, nil];
-	[newBI setFields:dictWithDates];	
+	[newBI setPubFields:dictWithDates];	
 	
     fileOrderCount++;
     [self addPublication:[newBI autorelease]];

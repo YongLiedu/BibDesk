@@ -106,14 +106,14 @@ void _setupFonts(){
     BibItem *theCopy = [[[self class] allocWithZone: zone] initWithType:pubType
                                                                fileType:fileType
                                                                 authors:pubAuthors];
-    [theCopy setCiteKey: citeKey];
+    [theCopy setCiteKeyString: citeKey];
     [theCopy setDate: pubDate];
 	
 	NSCalendarDate *currentDate = [NSCalendarDate calendarDate];
 	[theCopy setDateModified:currentDate];
 	[theCopy setDateCreated:currentDate];
 	
-    [theCopy setFields: pubFields];
+    [theCopy setPubFields: pubFields];
     [theCopy setRequiredFieldNames: requiredFieldNames];
     return theCopy;
 }
@@ -756,13 +756,7 @@ void _setupFonts(){
         [undoManager setActionName:NSLocalizedString(@"Change Cite Key",@"")];
     }
 	
-    [citeKey autorelease];
-		
-    if([newCiteKey isEqualToString:@""]){
-        citeKey = [[self suggestedCiteKey] retain];
-    } else {
-        citeKey = [newCiteKey copy];
-    }
+    [self setCiteKeyString:newCiteKey];
 		
     NSDictionary *notifInfo = [NSDictionary dictionaryWithObjectsAndKeys:citeKey, @"value", @"Cite Key", @"key",nil];
     NSNotification *aNotification = [NSNotification notificationWithName:BDSKBibItemChangedNotification
@@ -775,6 +769,16 @@ void _setupFonts(){
                                                    forModes:nil];
 }
 
+- (void)setCiteKeyString:(NSString *)newCiteKey{
+    [citeKey autorelease];
+		
+    if([newCiteKey isEqualToString:@""]){
+        citeKey = [[self suggestedCiteKey] retain];
+    } else {
+        citeKey = [newCiteKey copy];
+    }
+}
+
 - (NSString *)citeKey{
     if(!citeKey || [@"" isEqualToString:citeKey]){
 		// NSLog(@"setting suggested to %@",[self suggestedCiteKey]);
@@ -783,11 +787,31 @@ void _setupFonts(){
     return citeKey;
 }
 
-- (void)setFields: (NSDictionary *)newFields{
-	if(newFields != pubFields){
+- (void)setPubFields: (NSDictionary *)newFields{
+	if([newFields isEqualToDictionary:pubFields]){
 		[pubFields release];
 		pubFields = [newFields mutableCopy];
 		[self updateMetadataForKey:nil];
+    }
+}
+
+- (void)setFields: (NSDictionary *)newFields{
+	if([newFields isEqualToDictionary:pubFields]){
+		if(editorObj){
+			if(!undoManager){
+				undoManager = [[editorObj window] undoManager];
+			}
+
+			[[undoManager prepareWithInvocationTarget:self] setFields:pubFields];
+			[undoManager setActionName:NSLocalizedString(@"Change All Fields",@"")];
+		}
+		
+		[self setPubFields:newFields];
+		
+		NSDictionary *notifInfo = [NSDictionary dictionaryWithObjectsAndKeys:@"Add/Del Fields", @"type", nil]; // cmh: maybe not the best info, but handled correctly
+		[[NSNotificationCenter defaultCenter] postNotificationName:BDSKBibItemChangedNotification
+															object:self
+														  userInfo:notifInfo];
     }
 }
 

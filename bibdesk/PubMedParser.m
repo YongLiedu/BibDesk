@@ -25,7 +25,7 @@
     BibItem *newBI = nil;    
 
     int itemOrder = 1;
-    BibAppController *appController = (BibAppController *)[NSApp delegate]; // used to add autocomplete entries.
+    // BibAppController *appController = (BibAppController *)[NSApp delegate]; // used to add autocomplete entries.
 
     NSMutableArray *returnArray = [NSMutableArray arrayWithCapacity:1];
     
@@ -309,13 +309,13 @@ void mergePageNumbers(NSMutableDictionary *dict){
 	[NSMutableArray arrayWithCapacity:0]];
 
     [newBI setFileOrder:itemOrder];
-    [newBI setFields:pubDict];
+    [newBI setPubFields:pubDict];
     
     // set the pub type if we know the bibtex equivalent, otherwise leave it as misc
     if([typeManager bibtexTypeForPubMedType:[pubDict objectForKey:@"TY"]] != nil){
 	[newBI setType:[typeManager bibtexTypeForPubMedType:[pubDict objectForKey:@"TY"]]];
     }
-    [newBI setCiteKey:[pubDict valueForKey:@"PMID"]];
+    [newBI setCiteKeyString:[pubDict valueForKey:@"PMID"]];
     
     return [newBI autorelease];
 }

@@ -197,8 +197,8 @@
 
                     }// end while field - process next bt field
             
-                    [newBI setCiteKey:[NSString stringWithCString:bt_entry_key(entry)]];
-                    [newBI setFields:dictionary];
+                    [newBI setCiteKeyString:[NSString stringWithCString:bt_entry_key(entry)]];
+                    [newBI setPubFields:dictionary];
                     [returnArray addObject:[newBI autorelease]];
                     
                     [dictionary removeAllObjects];

@@ -195,15 +195,39 @@
 */
 - (BOOL)citeKeyIsValid:(NSString *)proposedCiteKey;
 
+/*!
+	@method     setCiteKeyString
+	@abstract   basic setter for the cite key, for initialization only.
+	@discussion -
+*/
+- (void)setCiteKeyString:(NSString *)newCiteKey;
+
+/*!
+	@method     setCiteKey
+	@abstract   basic setter for the cite key, with notification and undo.
+	@discussion -
+*/
 - (void)setCiteKey:(NSString *)newCiteKey;
+
+/*!
+	@method     citeKey
+	@abstract   returns the cite key, sets a suggested cite key if undefined.
+	@discussion -
+*/
 - (NSString *)citeKey;
 
 /*!
-	@method     setFields
- @abstract   setter for the dictionary.
-	 @discussion -
+	@method     setPubFields
+	@abstract   basic setter for the dictionary of fields, for initialization only.
+	@discussion -
 */
+- (void)setPubFields: (NSDictionary *)newFields;
 
+/*!
+	@method     setFields
+	@abstract   setter for the dictionary of fields, with notification and undo.
+	@discussion -
+*/
 - (void)setFields: (NSDictionary *)newFields;
 
 /*!
