@@ -14,6 +14,7 @@
 @interface BibPersonController : NSWindowController {
     BibAuthor *_person;
     NSArray *publications;
+	BibDocument *document;
     IBOutlet NSTextField *nameTextField;
     IBOutlet NSImageView *imageView;
     IBOutlet NSTableView *pubsTableView;

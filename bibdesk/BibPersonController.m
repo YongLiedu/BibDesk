@@ -25,6 +25,8 @@
             
             [person setPersonController:self];
             
+			document = doc;
+			
             [[self window] setTitle:[[self person] name]];
             [[self window] setDelegate:self];
 	}
@@ -77,6 +79,10 @@
 
 - (void)handlePubListChanged:(NSNotification *)notification{
 	[self _updateUI]; 
+}
+
+- (void)windowWillClose:(NSNotification *)notification{
+	[document removeWindowController:self];
 }
 
 #pragma mark  table view datasource methods

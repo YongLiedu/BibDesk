@@ -146,7 +146,6 @@ extern NSString* BDSKBibTeXStringPboardType;
 - (NSMenu *)searchFieldMenu;
 - (id)init;
 - (void)dealloc;
-- (void)addCustomWindowController:(NSWindowController *)windowController;
 - (NSArray *)publicationsForAuthor:(BibAuthor *)anAuthor;
 - (IBAction)exportAsRSS:(id)sender;
 - (IBAction)exportAsHTML:(id)sender;
@@ -511,13 +510,6 @@ int generalBibItemCompareFunc(id item1, id item2, void *context);
 	 @discussion 
 */
 - (void)handleBibItemChangedNotification:(NSNotification *)notification;
-
-/*!
-    @method handleBibItemChangedNotification
-	 @abstract responds to closing editor and personview windows
-	 @discussion 
-*/
-- (void)handleCustomWindowClosedNotification:(NSNotification *)notification;
 
 - (int)numberOfSelectedPubs;
 - (NSEnumerator *)selectedPubEnumerator;

@@ -985,6 +985,7 @@ NSString *BDSKDateModifiedString = @"Date-Modified";
 		[[self window] endEditingFor:nil];
 	}
 	[documentSnoopDrawer close];
+	[theDocument removeWindowController:self];
 }
 
 // we want to have the same undoManager as our document, so we use this 
@@ -1025,7 +1026,7 @@ NSString *BDSKDateModifiedString = @"Date-Modified";
 	BibPersonController *pc = [person personController];
 	if(pc == nil){
             pc = [[BibPersonController alloc] initWithPerson:person document:theDocument];
-            [theDocument addCustomWindowController:pc];
+            [theDocument addWindowController:pc];
             [pc release];
 	}
 	[pc show];

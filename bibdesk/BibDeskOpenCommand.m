@@ -58,7 +58,7 @@ It can be used with
 			if(pc == nil){
                             BibDocument *doc = [[author publication] document];
                             pc = [[BibPersonController alloc] initWithPerson:author document:doc];
-                            [doc addCustomWindowController:pc];
+                            [doc addWindowController:pc];
                             [pc release];
 			}
 			[pc show];		

@@ -219,15 +219,6 @@ Handle Notifications by the popup button to update its icon and its menu before 
 	[[[actionMenuButton menu] itemAtIndex:0] setImage:[NSImage imageNamed:@"Action"]];
 }
 
-- (void)addCustomWindowController:(NSWindowController *)windowController{
-    [wcArray addObject:windowController];
-	
-	[[NSNotificationCenter defaultCenter] addObserver:self
-											 selector:@selector(handleCustomWindowClosedNotification:)
-												 name:NSWindowWillCloseNotification
-											   object:[windowController window]];
-}
-
 
 - (void) updateActionMenu:(id) aNotification {
 	NSMenu * menu = [self menuForSelection];
@@ -1596,7 +1587,7 @@ int generalBibItemCompareFunc(id item1, id item2, void *context){
     BibEditor *e = [pub editorObj];
     if(e == nil){
         e = [[[BibEditor alloc] initWithBibItem:pub document:self] autorelease];
-        [self addCustomWindowController:e];
+        [self addWindowController:e];
     }
     [e show];
 }
@@ -2176,13 +2167,6 @@ This method always returns YES. Even if some or many operations fail.
 	// should: also check if we're filtering by the key that was changed and refilter.
 	// should: need to save the highlighted pub and rehighlight after sort...
 	
-}
-
-- (void)handleCustomWindowClosedNotification:(NSNotification *)notification{
-	//NSDictionary *userInfo = [notification userInfo];
-	NSWindowController *wc = [[notification object] delegate];
-	
-	[wcArray removeObject:wc];
 }
 
 - (void)displayPreviewForItems:(NSEnumerator *)enumerator{
