@@ -785,12 +785,21 @@ NSRange SafeBackwardSearchRange(NSRange startRange, unsigned seekLength){
                                         errorRange:[fullString lineRangeForRange:NSMakeRange([scanner scanLocation], 0)]];
             } else {
                 if(isMacro){
-                    [dict setObject:[NSString complexStringWithBibTeXString:value macroResolver:theDocument] forKey:[key capitalizedString]];
+                    NS_DURING
+						value = [NSString complexStringWithBibTeXString:value macroResolver:theDocument];
+						[dict setObject:value forKey:[key capitalizedString]];
+						[[NSApp delegate] addString:value forCompletionEntry:key];
+					NS_HANDLER
+						[self postParsingErrorNotification:@"Invalid BibTeX string for field value.  Skipping this field."
+												 errorType:@"Parse Error" 
+												  fileName:filePath 
+												errorRange:[fullString lineRangeForRange:NSMakeRange([scanner scanLocation], 0)]];
+					NS_ENDHANDLER
                     isMacro = NO;
                 } else {
                     [dict setObject:value forKey:[key capitalizedString]];
+					[[NSApp delegate] addString:value forCompletionEntry:key];
                 }
-                [[NSApp delegate] addString:value forCompletionEntry:key];
             }
             
         }
