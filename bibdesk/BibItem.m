@@ -13,6 +13,7 @@
  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+
 #import "BibItem.h"
 
 #define addokey(s) if([pubFields objectForKey: s] == nil){[pubFields setObject:@"" forKey: s];} [removeKeys removeObject: s];
@@ -58,6 +59,8 @@ void _setupFonts(){
         [self makeType:type];
         [self setCiteKey:@"cite-key"];
         [self setDate: nil];
+		[self setDateCreated: nil];
+		[self setDateModified: nil];
         [self setFileOrder:-1];
         _setupFonts();
     }
@@ -72,6 +75,11 @@ void _setupFonts(){
                                                                 authors:[pubAuthors mutableCopy]];
     [theCopy setCiteKey: [citeKey copy]];
     [theCopy setDate: [pubDate copy]];
+	
+	NSCalendarDate *currentDate = [NSCalendarDate calendarDate];
+	[theCopy setDateModified:currentDate];
+	[theCopy setDateCreated:currentDate];
+	
     [theCopy setFields: [pubFields mutableCopy]];
     [theCopy setRequiredFieldNames: [requiredFieldNames mutableCopy]];
     return theCopy;
@@ -128,15 +136,17 @@ void _setupFonts(){
 
 - (void)dealloc{
 	// NSLog([NSString stringWithFormat:@"bibitem Dealloc, rt: %d", [self retainCount]]);
-    [pubDate release];
+    [pubFields release];
     [requiredFieldNames release];
-
 	[pubAuthors release];
 
 	[pubType release];
 	[fileType release];
 	[citeKey release];
-    [pubFields release];
+    [pubDate release];
+	[dateCreated release];
+	[dateModified release];
+	
     [super dealloc];
 }
 
@@ -175,6 +185,15 @@ void _setupFonts(){
 - (NSComparisonResult)dateCompare:(BibItem *)aBI{
 	return [pubDate compare:[aBI date]];
 }
+
+- (NSComparisonResult)createdDateCompare:(BibItem *)aBI{
+	return [pubDate compare:[aBI date]];
+}
+
+- (NSComparisonResult)modDateCompare:(BibItem *)aBI{
+	return [pubDate compare:[aBI date]];
+}
+
 
 - (NSComparisonResult)auth1Compare:(BibItem *)aBI{
     if([pubAuthors count] > 0){
@@ -343,6 +362,28 @@ void _setupFonts(){
     return pubDate;
 }
 
+- (NSCalendarDate *)dateCreated {
+    return [[dateCreated retain] autorelease];
+}
+
+- (void)setDateCreated:(NSCalendarDate *)newDateCreated {
+    if (dateCreated != newDateCreated) {
+        [dateCreated release];
+        dateCreated = [newDateCreated copy];
+    }
+}
+
+- (NSCalendarDate *)dateModified {
+    return [[dateModified retain] autorelease];
+}
+
+- (void)setDateModified:(NSCalendarDate *)newDateModified {
+    if (dateModified != newDateModified) {
+        [dateModified release];
+        dateModified = [newDateModified copy];
+    }
+}
+
 - (void)setType: (NSString *)newType{
     [pubType autorelease];
     pubType = [newType retain];
@@ -425,7 +466,7 @@ void _setupFonts(){
     return citeKey;
 }
 
-- (void)setFields: (NSMutableDictionary *)newFields{
+- (void)setFields: (NSDictionary *)newFields{
 	if(newFields != pubFields){
 		[pubFields release];
 		pubFields = [newFields mutableCopy];
@@ -455,21 +496,32 @@ void _setupFonts(){
 	//@@ 3/5/2004: moved why is this here? 
 	[self makeType:[self type]];
 
-    if (([pubFields objectForKey:@"Year"] != nil) &&
-		(![[pubFields objectForKey:@"Year"] isEqualToString:@""] )) {
+	NSString *yearValue = [pubFields objectForKey:@"Year"];
+    if (yearValue && ![yearValue isEqualToString:@""]) {
 		
-        if (([pubFields objectForKey:@"Month"] != nil) &&
-			(![[pubFields objectForKey:@"Month"] isEqualToString:@""] )) {
+		NSString *monthValue = [pubFields objectForKey:@"Month"];
+        if (monthValue && ![monthValue isEqualToString:@""]) {
 			
-            [tmp appendString:[pubFields objectForKey:@"Month"]];
+            [tmp appendString:monthValue];
             [tmp appendString:@" "];
     	}
         [tmp appendString:[pubFields objectForKey:@"Year"]];
         [self setDate:[NSCalendarDate dateWithNaturalLanguageString:tmp]];
-                                      //calendarFormat:@"%B %Y"]];
     }else{
         [self setDate:nil];    // nil means we don't have a good date.
     }
+	
+	NSString *dateCreatedValue = [pubFields objectForKey:BDSKDateCreatedString];
+    if (dateCreatedValue && ![dateCreatedValue isEqualToString:@""]) {
+		[self setDateCreated:[NSCalendarDate dateWithNaturalLanguageString:dateCreatedValue]];
+	}
+	
+	NSString *dateModValue = [pubFields objectForKey:BDSKDateModifiedString];
+    if (dateModValue && ![dateModValue isEqualToString:@""]) {
+		// NSLog(@"updating date %@", dateModValue);
+		[self setDateModified:[NSCalendarDate dateWithNaturalLanguageString:dateModValue]];
+	}
+	
 }
 
 - (void)setRequiredFieldNames: (NSMutableArray *)newRequiredFieldNames{
@@ -478,19 +530,29 @@ void _setupFonts(){
 }
 
 - (void)setField: (NSString *)key toValue: (NSString *)value{
+	[self setField:key toValue:value withModDate:[NSCalendarDate date]];
+}
+
+- (void)setField:(NSString *)key toValue:(NSString *)value withModDate:(NSCalendarDate *)date{
 	if(!undoManager){
 		undoManager = [[editorObj window] undoManager];
 	}
 
 	id oldValue = [pubFields objectForKey:key];
+	NSCalendarDate *oldModDate = [self dateModified];
+	
 	[[undoManager prepareWithInvocationTarget:self] setField:key 
-													 toValue:oldValue];
+													 toValue:oldValue
+													  withModDate:oldModDate];
 	[undoManager setActionName:NSLocalizedString(@"Edit publication",@"")];
+
 	
     [pubFields setObject: value forKey: key];
+	NSString *dateString = [date description];
+	[pubFields setObject:dateString forKey:BDSKDateModifiedString];
 	[self updateMetadataForKey:key];
 	
-	NSDictionary *notifInfo = [NSDictionary dictionaryWithObjectsAndKeys:value, @"value", key, @"key",nil];
+	NSDictionary *notifInfo = [NSDictionary dictionaryWithObjectsAndKeys:value, @"value", key, @"key", @"Change", @"type",nil];
 	[[NSNotificationCenter defaultCenter] postNotificationName:BDSKBibItemChangedNotification
 														object:self
 													  userInfo:notifInfo];
@@ -503,8 +565,59 @@ void _setupFonts(){
 	return [[value retain] autorelease];
 }
 
+- (void)addField:(NSString *)key{
+	[self addField:key withModDate:[NSCalendarDate date]];
+}
+
+- (void)addField:(NSString *)key withModDate:(NSCalendarDate *)date{
+	if(!undoManager){
+		undoManager = [[editorObj window] undoManager];
+	}
+	
+	[[undoManager prepareWithInvocationTarget:self] removeField:key
+													withModDate:[self dateModified]];
+	[undoManager setActionName:NSLocalizedString(@"Add Field",@"")];
+	
+	NSString *msg = [NSString stringWithFormat:@"%@ %@",
+		NSLocalizedString(@"Add data for field:", @""), key];
+	[pubFields setObject:msg forKey:key];
+	
+	NSString *dateString = [date description];
+	[pubFields setObject:dateString forKey:BDSKDateModifiedString];
+	[self updateMetadataForKey:key];
+	
+	NSDictionary *notifInfo = [NSDictionary dictionaryWithObjectsAndKeys:@"Add/Del Field", @"type",nil];
+	[[NSNotificationCenter defaultCenter] postNotificationName:BDSKBibItemChangedNotification
+														object:self
+													  userInfo:notifInfo];
+
+}
+
 - (void)removeField: (NSString *)key{
+	[self removeField:key withModDate:[NSCalendarDate date]];
+}
+
+- (void)removeField: (NSString *)key withModDate:(NSCalendarDate *)date{
+	
+	if(!undoManager){
+		undoManager = [[editorObj window] undoManager];
+	}
+
+	[[undoManager prepareWithInvocationTarget:self] addField:key
+												 withModDate:[self dateModified]];
+	[undoManager setActionName:NSLocalizedString(@"Remove Field",@"")];
+
     [pubFields removeObjectForKey:key];
+	
+	NSString *dateString = [date description];
+	[pubFields setObject:dateString forKey:BDSKDateModifiedString];
+	[self updateMetadataForKey:key];
+
+	NSDictionary *notifInfo = [NSDictionary dictionaryWithObjectsAndKeys:@"Add/Del Field", @"type",nil];
+	[[NSNotificationCenter defaultCenter] postNotificationName:BDSKBibItemChangedNotification
+														object:self
+													  userInfo:notifInfo];
+	
 }
 
 - (NSMutableDictionary *)pubFields{

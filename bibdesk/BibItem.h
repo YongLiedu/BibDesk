@@ -39,6 +39,8 @@
     NSString *fileType;
     NSString *citeKey;    /*! @var citeKey the citeKey of the bibItem */
     NSCalendarDate *pubDate;
+	NSCalendarDate *dateCreated;
+	NSCalendarDate *dateModified;
     NSString *pubType;
     NSMutableDictionary *pubFields;
     NSMutableArray *pubAuthors;
@@ -133,6 +135,12 @@
 - (void)setDate: (NSCalendarDate *)newDate;
 - (NSCalendarDate *)date;
 
+- (NSCalendarDate *)dateCreated;
+- (void)setDateCreated:(NSCalendarDate *)newDateCreated;
+- (NSCalendarDate *)dateModified;
+- (void)setDateModified:(NSCalendarDate *)newDateModified;
+
+
 - (void)setType: (NSString *)newType;
 - (NSString *)type;
 
@@ -148,7 +156,7 @@
 	 @discussion -
 */
 
-- (void)setFields: (NSMutableDictionary *)newFields;
+- (void)setFields: (NSDictionary *)newFields;
 
 /*!
     @method     updateMetadataForKey
@@ -159,8 +167,16 @@
 
 - (void)setRequiredFieldNames: (NSMutableArray *)newRequiredFieldNames;
 - (void)setField: (NSString *)key toValue: (NSString *)value;
+- (void)setField: (NSString *)key toValue: (NSString *)value withModDate:(NSCalendarDate *)date;
+
 - (NSString *)valueOfField: (NSString *)key;
+
 - (void)removeField: (NSString *)key;
+- (void)removeField: (NSString *)key withModDate:(NSCalendarDate *)date;
+
+- (void)addField:(NSString *)key;
+- (void)addField:(NSString *)key withModDate:(NSCalendarDate *)date;
+
 - (NSMutableDictionary *)pubFields;
 
 /*!

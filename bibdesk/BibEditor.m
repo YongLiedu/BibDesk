@@ -26,6 +26,9 @@ NSString *BDSKAbstractString = @"Abstract";
 NSString *BDSKRssDescriptionString = @"Rss-Description";
 NSString *BDSKLocalUrlString = @"Local-Url";
 NSString *BDSKUrlString = @"Url";
+NSString *BDSKDateCreatedString = @"Date-Added";
+NSString *BDSKDateModifiedString = @"Date-Modified";
+
 
 @implementation BibEditor
 
@@ -95,6 +98,7 @@ NSString *BDSKUrlString = @"Url";
     NSPoint origin = rect.origin;
 	NSEnumerator *e;
 
+	NSArray *keysNotInForm = [NSArray arrayWithObjects: BDSKAnnoteString, BDSKAbstractString, BDSKRssDescriptionString, BDSKDateCreatedString, BDSKDateModifiedString, nil];
 
     NSDictionary *reqAtt = [NSDictionary dictionaryWithObjects:[NSArray arrayWithObjects:[NSColor redColor],nil]
                                                        forKeys:[NSArray arrayWithObjects:NSForegroundColorAttributeName,nil]];
@@ -115,10 +119,7 @@ NSString *BDSKUrlString = @"Url";
     sKeys = [[[theBib pubFields] allKeys] sortedArrayUsingSelector:@selector(caseInsensitiveCompare:)];
     e = [sKeys objectEnumerator];
     while(tmp = [e nextObject]){
-        if ([theBib isRequired:tmp] &&
-            ![tmp isEqualToString:BDSKAnnoteString] && 
-            ![tmp isEqualToString:BDSKAbstractString] &&
-            ![tmp isEqualToString:BDSKRssDescriptionString]){
+        if ([theBib isRequired:tmp] && ![keysNotInForm containsObject:tmp]){
             
             entry = [bibFields insertEntry:tmp atIndex:i];
             [entry setTarget:self];
@@ -137,10 +138,7 @@ NSString *BDSKUrlString = @"Url";
 
     e = [sKeys objectEnumerator];
     while(tmp = [e nextObject]){
-        if(![theBib isRequired:tmp] &&
-           ![tmp isEqualToString:BDSKAnnoteString] &&
-           ![tmp isEqualToString:BDSKAbstractString] &&
-           ![tmp isEqualToString:BDSKRssDescriptionString]){
+        if(![theBib isRequired:tmp] && ![keysNotInForm containsObject:tmp]){
             
             entry = [bibFields insertEntry:tmp atIndex:i];
             [entry setTarget:self];
@@ -673,10 +671,9 @@ NSString *BDSKUrlString = @"Url";
                 contextInfo:(void *)contextInfo{
     if(returnCode == 0){
         if(![[[theBib pubFields] allKeys] containsObject:[newFieldName stringValue]]){
-	    NSString *name = [newFieldName stringValue];
-	    NSString *msg = [NSString stringWithFormat:@"%@ %@",
-		NSLocalizedString(@"Add data for field:", @""), name];
-            [theBib setField:name toValue:msg];
+			NSString *name = [newFieldName stringValue];
+			
+			[theBib addField:name];
             [self setupForm];
             [self makeKeyField:[newFieldName stringValue]];
             [self noteChange];
@@ -765,6 +762,12 @@ NSString *BDSKUrlString = @"Url";
 - (void)bibDidChange:(NSNotification *)notification{
 // unused	BibItem *notifBib = [notification object];
 	NSDictionary *userInfo = [notification userInfo];
+	
+	if([[userInfo objectForKey:@"type"] isEqualToString:@"Add/Del Field"]){
+		[self setupForm];
+		return;
+	}
+	
 	NSString *changedTitle = [userInfo objectForKey:@"key"];
 	NSString *newValue = [userInfo objectForKey:@"value"];
 	

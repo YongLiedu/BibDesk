@@ -1578,6 +1578,11 @@ int generalBibItemCompareFunc(id item1, id item2, void *context){
                                            authors:[NSMutableArray arrayWithCapacity:0]];
 
     [newBI setFileOrder:fileOrderCount];
+	
+	NSString *nowStr = [[NSCalendarDate date] description];
+	NSDictionary *dictWithDates = [NSDictionary dictionaryWithObjectsAndKeys:nowStr, BDSKDateCreatedString, nowStr, BDSKDateModifiedString, nil];
+	[newBI setFields:dictWithDates];	
+	
     fileOrderCount++;
     [self addPublication:newBI];
     [self updateUI];
@@ -1824,6 +1829,10 @@ int generalBibItemCompareFunc(id item1, id item2, void *context){
 	NSDictionary *userInfo = [notification userInfo];
 	
 	NSString *changedKey = [userInfo objectForKey:@"key"];
+	if(!changedKey){
+		[tableView  reloadData];
+		return;
+	}
 		
 	if([quickSearchKey isEqualToString:changedKey] || 
 	   [quickSearchKey isEqualToString:@"All Fields"]){

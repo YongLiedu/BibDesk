@@ -38,6 +38,9 @@ extern NSString *BDSKAbstractString;
 extern NSString *BDSKRssDescriptionString;
 extern NSString *BDSKLocalUrlString;
 extern NSString *BDSKUrlString;
+extern NSString *BDSKDateCreatedString;
+extern NSString *BDSKDateModifiedString;
+
 
 
 /*!

@@ -62,13 +62,26 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
         }else if([tcID isEqualToString: @"Title"] ){
             return [pub title];
             
+        }else if([tcID isEqualToString: @"Created"] ){
+			NSCalendarDate *date = [pub dateCreated];
+			if(date == nil)
+                return @"";
+            return [date descriptionWithCalendarFormat:NSLocalizedString(@"%I:%M %p %b %d, %Y", @"Date format including time for inside table views")];
+            
+        }else if([tcID isEqualToString: @"Modified"] ){
+			NSCalendarDate *date = [pub dateModified];
+			if(date == nil)
+                return @"";
+			return [date descriptionWithCalendarFormat:NSLocalizedString(@"%I:%M %p %b %d, %Y", @"Date format including time for inside table views")];
+			
         }else if([tcID isEqualToString: @"Date"] ){
-            if([pub date] == nil)
+            NSCalendarDate *date = [pub date];
+			if(date == nil)
                 return @"No date";
             else if([[pub valueOfField:@"Month"] isEqualToString:@""])
-                return [[pub date] descriptionWithCalendarFormat:@"%Y"];
+                return [date descriptionWithCalendarFormat:NSLocalizedString(@"%Y", @"Date format for only year inside table views")];
             else
-                return [[pub date] descriptionWithCalendarFormat:@"%b %Y"];
+                return [date descriptionWithCalendarFormat:NSLocalizedString(@"%b %Y", @"Date format for month and year inside table views")];
             
         }else if([tcID isEqualToString: @"1st Author"] ){
             if([auths count] > 0){
