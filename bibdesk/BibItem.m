@@ -586,6 +586,8 @@ void _setupFonts(){
     NSEnumerator *pubFieldsE = [pubFields objectEnumerator];
     NSString *field = nil;
     
+	[result appendString:[self citeKey]];
+		
     while(field = [pubFieldsE nextObject]){
         [result appendFormat:@" %@ ", field];
     }
