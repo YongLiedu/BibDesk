@@ -6,10 +6,7 @@
                 gotoError = id; 
                 gotoErrorObj = id; 
                 hideErrorPanel = id; 
-                importAsLatin1 = id; 
-                importAsLatin2 = id; 
-                importAsMacOSRoman = id; 
-                importAsUTF8 = id; 
+                openDocument = id; 
                 openEditWindowWithFile = id; 
                 openUsingFilter = id; 
                 reopenDocument = id; 
@@ -26,12 +23,16 @@
             OUTLETS = {
                 errorPanel = NSPanel; 
                 errorTableView = NSTableView; 
+                openTextEncodingAccessoryView = NSView; 
+                openTextEncodingPopupButton = NSButton; 
                 openUsingFilterAccessoryView = NSView; 
                 openUsingFilterTextField = NSTextField; 
+                readmeTextView = NSTextView; 
+                readmeWindow = NSWindow; 
                 sourceEditTextView = NSTextView; 
                 sourceEditWindow = NSWindow; 
             }; 
-            SUPERCLASS = NSObject; 
+            SUPERCLASS = NSDocumentController; 
         }, 
         {
             ACTIONS = {
