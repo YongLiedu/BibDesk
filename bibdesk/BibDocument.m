@@ -160,15 +160,24 @@ NSString*   LocalDragPasteboardName = @"edu.ucsd.cs.mmccrack.bibdesk: Local Publ
     // finally, make sure the font is correct initially:
     [self handleFontChangedNotification:nil];
 	
-	/*
-	// set up the action menu - ssp: 2004-07-30 --- upcoming
-	NSPopUpButtonCell * c = [actionMenuButton cell];
-	[c setUsesItemFromMenu:NO];
-	[c setArrowPosition:NSPopUpNoArrow];
-	[c setMenu:actionMenu];
-	[actionMenuButton setAlternateImage:[NSImage imageNamed:@"Action_Pressed"]];
-	 */
+	/* ssp: 2004-08-02
+		Setup the action menu button. Thanks to Steffen for his help.
+		This isn't really good. You can click slightly left of the button and it will still be activated. I couldn't get Popup buttons to work in a way that I could set the button's look independently from the attached menu. 
+		If somebody actually understands the documentation on this (in case it is correct), make it work just like in Mail. 
+		This is also slightly complicated using our own subclass of NSPopUpButtonCell to make things happen.
+	*/
+	BDSKPopUpButtonCell * myCell = [[[BDSKPopUpButtonCell alloc] initImageCell:[NSImage imageNamed:@"Action"]] autorelease];
+	[actionMenuButton setCell:myCell];
+	[myCell setArrowPosition:NSPopUpNoArrow];
+	[myCell setPullsDown:YES];
+	[myCell setBordered:NO];
+	[myCell setBezelStyle:NSRegularSquareBezelStyle];
+	
+	[self updateActionMenu:nil];
+	[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(popup:) name:NSPopUpButtonWillPopUpNotification object:actionMenuButton];
+	[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(dismiss:) name:BDSKPopUpDismissedNotification object:actionMenuButton];
 }
+
 
 - (void)dealloc{
 #if DEBUG
@@ -187,6 +196,32 @@ NSString*   LocalDragPasteboardName = @"edu.ucsd.cs.mmccrack.bibdesk: Local Publ
     [toolbarItems release];
     [super dealloc];
 }
+
+
+
+/* ssp:  2004-08-02
+Handle Notifications by the popup button to update its icon and its menu before opening
+*/
+- (void)popup:(NSNotification *)notification {
+	[[[actionMenuButton menu] itemAtIndex:0] setImage:[NSImage imageNamed:@"Action_Pressed"]];
+}
+
+- (void)dismiss:(NSNotification *)notification {
+	[[[actionMenuButton menu] itemAtIndex:0] setImage:[NSImage imageNamed:@"Action"]];
+}
+
+
+
+- (void) updateActionMenu:(id) aNotification {
+	NSMenu * menu = [self menuForSelection];
+	NSMenuItem * menuItem = [[[NSMenuItem alloc] initWithTitle:@"" action:NULL keyEquivalent:@""] autorelease];
+	[menuItem setImage:[NSImage imageNamed:@"Action"]];
+	[menu insertItem:menuItem atIndex:0];
+	[actionMenuButton setMenu:menu];
+	
+	[actionMenuButton setEnabled:([self numberOfSelectedPubs] != 0)];
+}
+
 
 - (void)setPublications:(NSMutableArray *)newPubs{
 	if(newPubs != publications){
@@ -819,6 +854,11 @@ stringByAppendingPathComponent:@"BibDesk"]; */
 		
 		[searchField setDelegate:self];
 		[searchField setAction:@selector(searchFieldAction:)];
+		
+		// fit into tab key loop - doesn't work yet
+/*		[actionMenuButton setNextKeyView:searchField];
+		[searchField setNextKeyView:tableView]; 
+		*/
 	}
 	
 	if(quickSearchTextDict){
@@ -1452,14 +1492,24 @@ int generalBibItemCompareFunc(id item1, id item2, void *context){
 	[self refreshAuthors];
     [self handleFontChangedNotification:nil]; // calls reloadData.
 
-// @@FIXME: will not always say "Publications shown"?
-    [infoLine setStringValue: [NSString stringWithFormat:
-        NSLocalizedString(@"%d of %d Publications shown.",
+	int shownPubsCount = [shownPublications count];
+	int totalPubsCount = [publications count];
+	
+	if (shownPubsCount != totalPubsCount) { 
+		// inform people
+		[infoLine setStringValue: [NSString stringWithFormat:
+			NSLocalizedString(@"%d of %d Publications",
                           @"need two ints in format string."),
-            [shownPublications count], [publications count] ] ];
-
+            shownPubsCount,totalPubsCount] ];
+	}
+	else {
+		[infoLine setStringValue:[NSString stringWithFormat:
+			NSLocalizedString(@"%d Publications",
+							  @"%d Publications (total number)"),
+            totalPubsCount]];
+	}
+	
     [self updatePreviews:nil];
-
 }
 
 

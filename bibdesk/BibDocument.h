@@ -35,6 +35,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 
 #import "BDSKFileContentsFilter.h"
 #import "ApplicationServices/ApplicationServices.h"
+#import "BDSKPopUpButtonCell.h"
 
 
 @class BDSKCustomCiteTableView;
@@ -53,7 +54,10 @@ extern NSString* LocalDragPasteboardName;
 
 @interface BibDocument : NSDocument
 {
+	IBOutlet NSTabView *previewTabView;
     IBOutlet NSTextView *previewField;
+	IBOutlet NSImageView *PDFPreviewView;
+	IBOutlet NSTextView *RTFPreviewView;
     IBOutlet NSWindow* documentWindow;
     IBOutlet NSWindow *bibListViews;
     IBOutlet BDSKDragTableView *tableView;
@@ -120,6 +124,7 @@ extern NSString* LocalDragPasteboardName;
     IBOutlet NSMenu * contextualMenu;
 	IBOutlet NSMenu * actionMenu;
 	IBOutlet NSPopUpButton * actionMenuButton;
+	IBOutlet NSMenuItem * actionMenuFirstItem;
     int fileOrderCount;
     // ----------------------------------------------------------------------------------------
     // stuff for the accessory view for the exportAsRSS
@@ -442,6 +447,13 @@ int generalBibItemCompareFunc(id item1, id item2, void *context);
 */
 - (NSMenu*) menuForSelection;
 
+
+/*!
+	@method updateActionMenu:
+	@abstract makes sure the action menu is up to date and in place
+	@ uses menuForSelection to rebuild the action menu
+*/
+- (void) updateActionMenu:(id) aNotification;
 
 
 /*!
