@@ -82,3 +82,6 @@ extern NSString *BDSKPreviewDisplayChangedNotification;
 extern NSString *BDSKCustomStringsChangedNotification;
 extern NSString *BDSKTableColumnChangedNotification;
 extern NSString *BDSKBibItemChangedNotification;
+extern NSString *BDSKDocAddItemNotification;
+extern NSString *BDSKDocDelItemNotification;
+

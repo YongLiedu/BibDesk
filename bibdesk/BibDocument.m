@@ -86,6 +86,17 @@ NSString*   LocalDragPasteboardName = @"edu.ucsd.cs.mmccrack.bibdesk: Local Publ
                                               selector:@selector(handleBibItemChangedNotification:)
                                                   name:BDSKBibItemChangedNotification
                                                 object:nil];
+
+	 // register to observe for add/delete items.
+	 [[NSNotificationCenter defaultCenter] addObserver:self
+                                              selector:@selector(handleBibItemAddDelNotification:)
+                                                  name:BDSKDocAddItemNotification
+                                                object:self];
+
+	 [[NSNotificationCenter defaultCenter] addObserver:self
+                                              selector:@selector(handleBibItemAddDelNotification:)
+                                                  name:BDSKDocDelItemNotification
+                                                object:self];
 	 
 	 
      customStringArray = [[NSMutableArray arrayWithCapacity:6] retain];
@@ -185,15 +196,46 @@ NSString*   LocalDragPasteboardName = @"edu.ucsd.cs.mmccrack.bibdesk: Local Publ
     return [[publications retain] autorelease];
 }
 
+
 - (void)addPublication:(BibItem *)pub{
+	NSUndoManager *undoManager = [self undoManager];
+	[[undoManager prepareWithInvocationTarget:self] removePublication:pub];
+	[undoManager setActionName:NSLocalizedString(@"Add Publication",@"")];
+	
 	[publications addObject:pub];
 	[shownPublications addObject:pub];
-	//@@ accessors: need to send notif, register for undo
+
+	NSDictionary *notifInfo = [NSDictionary dictionaryWithObjectsAndKeys:pub, @"pub",nil];
+	[[NSNotificationCenter defaultCenter] postNotificationName:BDSKDocAddItemNotification
+														object:self
+													  userInfo:notifInfo];
+	
+	//@@ still need to add listener functions for both notifications. (maybe one for both for now)
+	
 }
 
 - (void)removePublication:(BibItem *)pub{
+	NSUndoManager *undoManager = [self undoManager];
+	[[undoManager prepareWithInvocationTarget:self] addPublication:pub];
+	[undoManager setActionName:NSLocalizedString(@"Delete Publication",@"")];
+	
+	BibEditor *editor = [pub editorObj];
+	if(editor){
+		[editor close];
+		[bibEditors removeObjectIdenticalTo:editor];
+	}
 	[publications removeObjectIdenticalTo:pub];
 	[shownPublications removeObjectIdenticalTo:pub];
+	
+	NSDictionary *notifInfo = [NSDictionary dictionaryWithObjectsAndKeys:pub, @"pub",nil];
+	[[NSNotificationCenter defaultCenter] postNotificationName:BDSKDocDelItemNotification
+														object:self
+													  userInfo:notifInfo];	
+}
+
+- (void)handleBibItemAddDelNotification:(NSNotification *)notification{
+	NSLog(@"handle bibitem add/del notif");
+	[self updateUI];
 }
 
 
@@ -609,11 +651,6 @@ stringByAppendingPathComponent:@"BibDesk"]; */
         delEnum = [self selectedPubEnumerator];
         while (rowToDelete = [delEnum nextObject]) {
             objToDelete = [shownPublications objectAtIndex:[rowToDelete intValue]];
-            BibEditor *editor = [objToDelete editorObj];
-            if(editor){
-                [editor close];
-                [bibEditors removeObjectIdenticalTo:editor];
-            }
             [self removePublication:objToDelete];
         }
         [self updateChangeCount:NSChangeDone];
@@ -1288,8 +1325,8 @@ int generalBibItemCompareFunc(id item1, id item2, void *context){
         }
         newPubsE = [newPubs objectEnumerator];
         while(newBI = [newPubsE nextObject]){
-            [publications addObject:newBI];
-            [shownPublications addObject:newBI];
+            [self addPublication:newBI];
+
             [self updateUIAndRefreshOutline:YES];
             [self updateChangeCount:NSChangeDone];
             if([[OFPreferenceWrapper sharedPreferenceWrapper] integerForKey:BDSKEditOnPasteKey] == NSOnState)
@@ -1313,8 +1350,7 @@ int generalBibItemCompareFunc(id item1, id item2, void *context){
 
     [newBI setFileOrder:fileOrderCount];
     fileOrderCount++;
-    [publications addObject:newBI];
-    [shownPublications addObject:newBI];
+    [self addPublication:newBI];
     [self updateUIAndRefreshOutline:YES];
     if(yn == YES)
     {

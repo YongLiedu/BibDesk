@@ -300,6 +300,10 @@ extern NSString* LocalDragPasteboardName;
 */
 - (NSMutableArray *)publications;
 
+- (void)addPublication:(BibItem *)pub;
+
+- (void)removePublication:(BibItem *)pub;
+
 
     /*!
 @method citeKeyIsUsed:byItemOtherThan

@@ -65,3 +65,5 @@ NSString *BDSKPreviewDisplayChangedNotification = @"Preview Pane Preference Chan
 NSString *BDSKCustomStringsChangedNotification = @"CustomStringsChangedNotification";
 NSString *BDSKTableColumnChangedNotification = @"TableColumnChangedNotification";
 NSString *BDSKBibItemChangedNotification = @"BibItem Changed notification";
+NSString *BDSKDocAddItemNotification = @"Added a bibitem to a document";
+NSString *BDSKDocDelItemNotification = @"removed a bibitem from a document";
