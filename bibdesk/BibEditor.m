@@ -555,6 +555,7 @@ NSString *BDSKDateModifiedString = @"Date-Modified";
             [viewLocalButton setIconImage:icon];
 			[[viewLocalButton cell] seticonActionEnabled:YES];
             [viewLocalButton setToolTip:@"View File"];
+            [[self window] setRepresentedFilename:lurl];
 			
 			NSString *ext = [lurl pathExtension];
 			BOOL fileIsPSOrPDF = ([ext isEqualToString:@"ps"] || [ext isEqualToString:@"pdf"]);
@@ -588,7 +589,8 @@ NSString *BDSKDateModifiedString = @"Date-Modified";
         [viewLocalButton setIconImage:[NSImage imageNamed:@"QuestionMarkFile"]];
 		[[viewLocalButton cell] seticonActionEnabled:NO];
         [viewLocalButton setToolTip:NSLocalizedString(@"Choose a file to link with in the Local-Url Field", @"bad/empty local url field")];
-        
+        [[self window] setRepresentedFilename:@""];
+
         [documentSnoopButton setEnabled:NO];
         [documentSnoopButton setToolTip:NSLocalizedString(@"Bad or Empty Local-Url Field", @"bad/empty local field")];
         [documentTextSnoopButton setEnabled:NO];
