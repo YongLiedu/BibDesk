@@ -20,8 +20,8 @@
     NSLocalizedStringFromTable(@"400%", @"ZoomValues", @"Zoom popup entry")
     NSLocalizedStringFromTable(@"800%", @"ZoomValues", @"Zoom popup entry")
 */   
-static NSString *BDSKDefaultScaleMenuLabels[] = {/* @"Set...", */ @"10%", @"25%", @"50%", @"75%", @"100%", @"128%", @"200%", @"400%", @"800%"};
-static float BDSKDefaultScaleMenuFactors[] = {/* 0.0, */ 0.1, 0.25, 0.5, 0.75, 1.0, 1.28, 2.0, 4.0, 8.0};
+static NSString *BDSKDefaultScaleMenuLabels[] = {/* @"Set...", */ @"10%", @"25%", @"50%", @"75%", @"100%", @"128%", @"150%", @"200%", @"400%", @"800%"};
+static float BDSKDefaultScaleMenuFactors[] = {/* 0.0, */ 0.1, 0.25, 0.5, 0.75, 1.0, 1.28, 1.5, 2.0, 4.0, 8.0};
 static unsigned BDSKDefaultScaleMenuSelectedItemIndex = 4;
 static float BDSKScaleMenuFontSize = 11.0;
 
