@@ -212,10 +212,14 @@
                                                                                              range:NSMakeRange(0, [wholeValue length])];
 							    addStringToDict([[wholeValue copy] autorelease], pubDict, @"Author");
 							}else{
-							    if([key isEqualToString:@"Keywords"]){
-								addStringToDict([[wholeValue copy] autorelease], pubDict, @"Keywords");
+							    if([key isEqualToString:@"Keywords"]){ // may have multiple keywords, so concatenate them
+                                    addStringToDict([[wholeValue copy] autorelease], pubDict, @"Keywords");
 							    }else{
-								[pubDict setObject:[[wholeValue copy] autorelease] forKey:key];
+                                    if([key isEqualToString:@"Editor"]){ // may have multiple editors, so concatenate them
+                                        addStringToDict([[wholeValue copy] autorelease], pubDict, @"Editor");
+                                    } else {
+                                        [pubDict setObject:[[wholeValue copy] autorelease] forKey:key];
+                                    }
 							    }
 							}
 						    }
