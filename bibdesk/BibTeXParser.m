@@ -403,8 +403,15 @@ NSRange SafeBackwardSearchRange(NSRange startRange, unsigned seekLength){
             NSAssert( value != nil, @"Found a nil value string");
             NSAssert( key != nil, @"Found a nil key string");
             
-            [dict setObject:value forKey:[key capitalizedString]];
-            [[NSApp delegate] addString:value forCompletionEntry:key];
+            if(![[NSCharacterSet letterCharacterSet] characterIsMember:[key characterAtIndex:0]]){
+                [self postParsingErrorNotification:@"Field names must begin with a letter.  Skipping this field."
+                                         errorType:@"Parse Error" 
+                                          fileName:filePath 
+                                        errorRange:[fullString lineRangeForRange:NSMakeRange([scanner scanLocation], 0)]];
+            } else {
+                [dict setObject:value forKey:[key capitalizedString]];
+                [[NSApp delegate] addString:value forCompletionEntry:key];
+            }
             
         }
         
