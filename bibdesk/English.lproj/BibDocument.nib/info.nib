@@ -20,13 +20,7 @@
 		<integer>303</integer>
 		<integer>626</integer>
 	</array>
-	<key>IBOpenObjects</key>
-	<array>
-		<integer>5</integer>
-		<integer>303</integer>
-		<integer>626</integer>
-	</array>
 	<key>IBSystem Version</key>
-	<string>7P134</string>
+	<string>7R28</string>
 </dict>
 </plist>
