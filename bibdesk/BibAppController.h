@@ -178,6 +178,9 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 - (IBAction)hidePreviewPanel:(id)sender;
 - (BOOL) isShowingPreviewPanel;
 
+- (IBAction)showTypeInfoEditor:(id)sender;
+- (IBAction)showConversionEditor:(id)sender;
+
 - (IBAction)showReadMeFile:(id)sender;
 - (IBAction)showRelNotes:(id)sender;
 

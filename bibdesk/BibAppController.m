@@ -23,6 +23,8 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 #import "NSTextView_BDSKExtensions.h"
 #import "NSString_BDSKExtensions.h"
 #import "BDSKConverter.h"
+#import "BDSKTypeInfoEditor.h"
+#import "BDSKCharacterConversion.h"
 
 #import <Carbon/Carbon.h>
 
@@ -766,6 +768,16 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 
 - (BOOL) isShowingPreviewPanel {
 	return showingPreviewPanel;
+}
+
+
+- (IBAction)showTypeInfoEditor:(id)sender{
+	[[BDSKTypeInfoEditor sharedTypeInfoEditor] showWindow:self];
+}
+
+
+- (IBAction)showConversionEditor:(id)sender{
+	[[BDSKCharacterConversion sharedConversionEditor] showWindow:self];
 }
 
 
