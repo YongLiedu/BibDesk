@@ -95,6 +95,9 @@ NSString *BDSKInputManagerLoadableApplications = @"Application bundles that we r
     return [[bundle infoDictionary] objectForKey:@"CFBundleIdentifier"];
 }
 
+// We use a common datasource for both tableviews.  Using objectValueForTableColumn:row: in conjunction with tableView:willDisplayCell:forTableColumn:row:
+// causes a crash, so we set up a cell for both types and just use the willDisplayCell method for both (required for the tv that uses an NSBrowserCell).
+
 - (int)numberOfRowsInTableView:(NSTableView *)tableView{
     return (tableView == appList) ? [appListArray count] : [enabledEditorAutocompletionStrings count];
 }
@@ -150,6 +153,8 @@ NSString *BDSKInputManagerLoadableApplications = @"Application bundles that we r
     [aCell setImage:image];
     [aCell setLeaf:YES];
 }
+
+#pragma mark Citekey autocompletion
 
 - (IBAction)enableAutocompletion:(id)sender{
     NSFileManager *fm = [NSFileManager defaultManager];
@@ -274,6 +279,8 @@ NSString *BDSKInputManagerLoadableApplications = @"Application bundles that we r
         [appListArray removeObjectAtIndex:[appList selectedRow]];
     [self updateUI];
 }
+
+#pragma mark Methods for BibEditor autocomplete
 
 - (IBAction)addAutocompleteString:(id)sender{
     [NSApp beginSheet:addFieldSheet
