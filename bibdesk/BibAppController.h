@@ -15,6 +15,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 */
 
 #import <Cocoa/Cocoa.h>
+#import <sys/stat.h>
 
 #import "BibPrefController.h";
 #import "BibFinder.h";
@@ -43,7 +44,25 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
     // global auto-completion dictionary:
     NSMutableDictionary *_autoCompletionDict;
     NSMutableDictionary *_formatters;
+
+    // ----------------------------------------------------------------------------------------
+    // stuff for the accessory view for openUsingFilter
+    IBOutlet NSView* openUsingFilterAccessoryView;
+    IBOutlet NSTextField* openUsingFilterTextField;
+    // data used to store stdOut from the filter
+    NSData *_stdoutData;
 }
+
+/*!
+    @method openUsingFilter
+    @abstract Lets user specify a command-line to read from stdin and give us stdout.
+    @discussion «discussion»
+    
+*/
+- (IBAction)openUsingFilter:(id)sender;
+- (NSString *)runShellCommand:(NSString *)cmd withInputString:(NSString *)input;
+- (NSString *)executeBinary:(NSString *)executablePath inDirectory:(NSString *)currentDirPath withArguments:(NSArray *)args environment:(NSDictionary *)env inputString:(NSString *)input;
+- (void)stdoutNowAvailable:(NSNotification *)notification;
 
 /*!
 @method addString:forCompletionEntry:

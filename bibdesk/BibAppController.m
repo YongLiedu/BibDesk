@@ -18,7 +18,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 #import "BibAppController.h"
 #import "BibPrefController.h"
 #import "BDSKPreviewer.h"
-
+#import "BibDocument.h"
 #import "NSTextView_BDSKExtensions.h"
 #import "NSString_BDSKExtensions.h"
 
@@ -92,11 +92,173 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
     NSLog(@"awakeFromNibCalled");
 #endif
     [errorTableView setDoubleAction:@selector(gotoError:)];
+    [openUsingFilterAccessoryView retain];
+}
+
+#pragma mark -
+
+- (IBAction)openUsingFilter:(id)sender
+{
+    int result;
+    NSString *fileToOpen = nil;
+    NSString *shellCommand = nil;
+    NSString *filterOutput = nil;
+    BibDocument *bibDoc = nil;
+    NSString *fileInputString = nil;
+    
+    NSOpenPanel *oPanel = [NSOpenPanel openPanel];
+    [oPanel setAccessoryView:openUsingFilterAccessoryView];
+    [oPanel setAllowsMultipleSelection:NO];
+    result = [oPanel runModalForDirectory:NSHomeDirectory()
+                                     file:nil
+                                    types:nil];
+    if (result == NSOKButton) {
+        fileToOpen = [oPanel filename];
+        shellCommand = [openUsingFilterTextField stringValue];
+        fileInputString = [NSString stringWithContentsOfFile:fileToOpen];
+        if (!fileInputString || [shellCommand isEqualToString:@""]){
+            NSRunCriticalAlertPanel(NSLocalizedString(@"Problems Opening with Filter",@""),
+                                    NSLocalizedString(@"Either we couldn't load the file or there was no shell command. Please try again.",@""),
+                                    NSLocalizedString(@"OK",@""),
+                                    nil, nil, nil, nil);
+        }
+        filterOutput = [self runShellCommand:shellCommand withInputString:fileInputString];
+        // @@ REFACTOR:
+        // I suppose in the future, bibTeX database won't be the default? 
+        bibDoc = [[NSDocumentController sharedDocumentController] openUntitledDocumentOfType:@"bibTeX database" display:YES]; // #retain?
+        [bibDoc loadDataRepresentation:[filterOutput dataUsingEncoding:NSUTF8StringEncoding] ofType:@"bibTeX database"];
+        [bibDoc updateChangeCount:NSChangeDone];
+        [bibDoc updateUI];
+    }
+}
+
+//
+// The following three methods are borrowed from Mike Ferris' TextExtras.
+// For the real versions of them, check out http://www.lorax.com/FreeStuff/TextExtras.html
+// - mmcc
+
+// was runWithInputString in TextExtras' TEPipeCommand class.
+- (NSString *)runShellCommand:(NSString *)cmd withInputString:(NSString *)input{
+    NSFileManager *fm = [NSFileManager defaultManager];
+    NSString *shellPath = @"/bin/sh";
+    NSString *shellScriptPath = [NSTemporaryDirectory() stringByAppendingPathComponent:[[NSProcessInfo processInfo] globallyUniqueString]];
+    NSString *script;
+    NSData *scriptData;
+    NSMutableDictionary *currentAttributes;
+    unsigned long currentMode;
+    NSString *output;
+
+    // ---------- Check the shell and create the script ----------
+    if (![fm isExecutableFileAtPath:shellPath]) {
+        NSLog(@"Filter Pipes: Shell path for Pipe panel does not exist or is not executable. (%@)", shellPath);
+        return nil;
+    }
+    if (!cmd){
+        return nil;
+    }
+    script = [NSString stringWithFormat:@"#!%@\n\n%@\n", shellPath, cmd];
+    // Use UTF8... and write out the shell script and make it exectuable
+    scriptData = [script dataUsingEncoding:NSUTF8StringEncoding];
+    if (![scriptData writeToFile:shellScriptPath atomically:YES]) {
+        NSLog(@"Filter Pipes: Failed to write temporary script file. (%@)", shellScriptPath);
+        return nil;
+    }
+    currentAttributes = [[[fm fileAttributesAtPath:shellScriptPath traverseLink:NO] mutableCopyWithZone:[self zone]] autorelease];
+    if (!currentAttributes) {
+        NSLog(@"Filter Pipes: Failed to get attributes of temporary script file. (%@)", shellScriptPath);
+        return nil;
+    }
+    currentMode = [currentAttributes filePosixPermissions];
+    currentMode |= S_IRWXU;
+    [currentAttributes setObject:[NSNumber numberWithUnsignedLong:currentMode] forKey:NSFilePosixPermissions];
+    if (![fm changeFileAttributes:currentAttributes atPath:shellScriptPath]) {
+        NSLog(@"Filter Pipes: Failed to get attributes of temporary script file. (%@)", shellScriptPath);
+        return nil;
+    }
+
+    // ---------- Execute the script ----------
+
+    // MF:!!! The current working dir isn't too appropriate
+    output = [self executeBinary:shellScriptPath inDirectory:[shellScriptPath stringByDeletingLastPathComponent] withArguments:nil environment:nil inputString:input];
+
+    // ---------- Remove the script file ----------
+    if (![fm removeFileAtPath:shellScriptPath handler:nil]) {
+        NSLog(@"Filter Pipes: Failed to delete temporary script file. (%@)", shellScriptPath);
+    }
+
+    return output;
+}
+
+// This method and the little notification method following implement synchronously running a task with input piped in from a string and output piped back out and returned as a string.   They require only a _stdoutData instance variable to function.
+- (NSString *)executeBinary:(NSString *)executablePath inDirectory:(NSString *)currentDirPath withArguments:(NSArray *)args environment:(NSDictionary *)env inputString:(NSString *)input {
+    NSTask *task;
+    NSPipe *inputPipe;
+    NSPipe *outputPipe;
+    NSFileHandle *inputFileHandle;
+    NSFileHandle *outputFileHandle;
+    NSString *output = nil;
+
+    task = [[NSTask allocWithZone:[self zone]] init];
+    [task setLaunchPath:executablePath];
+    if (currentDirPath) {
+        [task setCurrentDirectoryPath:currentDirPath];
+    }
+    if (args) {
+        [task setArguments:args];
+    }
+    if (env) {
+        [task setEnvironment:env];
+    }
+
+    inputPipe = [NSPipe pipe];
+    inputFileHandle = [inputPipe fileHandleForWriting];
+    [task setStandardInput:inputPipe];
+    outputPipe = [NSPipe pipe];
+    outputFileHandle = [outputPipe fileHandleForReading];
+    [task setStandardOutput:outputPipe];
+
+    [task launch];
+
+    if ([task isRunning]) {
+        [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(stdoutNowAvailable:) name:NSFileHandleReadToEndOfFileCompletionNotification object:outputFileHandle];
+        [outputFileHandle readToEndOfFileInBackgroundAndNotifyForModes:[NSArray arrayWithObject:@"BDSKSpecialPipeServiceRunLoopMode"]];
+
+        if (input) {
+            [inputFileHandle writeData:[input dataUsingEncoding:NSUTF8StringEncoding allowLossyConversion:YES]];
+        }
+        [inputFileHandle closeFile];
+
+        // Now loop the runloop in the special mode until we've processed the notification.
+        _stdoutData = nil;
+        while (_stdoutData == nil) {
+            // Run the run loop, briefly, until we get the notification...
+            [[NSRunLoop currentRunLoop] runMode:@"BDSKSpecialPipeServiceRunLoopMode" beforeDate:[NSDate dateWithTimeIntervalSinceNow:1.0]];
+        }
+        [[NSNotificationCenter defaultCenter] removeObserver:self name:NSFileHandleReadToEndOfFileCompletionNotification object:outputFileHandle];
+
+        [task waitUntilExit];
+
+        output = [[NSString allocWithZone:[self zone]] initWithData:_stdoutData encoding:NSUTF8StringEncoding];
+        [_stdoutData release];
+        _stdoutData = nil;
+    } else {
+        NSLog(@"Failed to launch task or task exited without accepting input.  Termination status was %d", [task terminationStatus]);
+    }
+
+    [task release];
+
+    return [output autorelease];
+}
+
+- (void)stdoutNowAvailable:(NSNotification *)notification {
+    // This is the notification method that executeBinary:inDirectory:withArguments:environment:inputString: registers to get called when all the data has been read. It just grabs the data and stuffs it in an ivar.  The setting of this ivar signals the main method that the output is complete and available.
+    NSData *outputData = [[notification userInfo] objectForKey:NSFileHandleNotificationDataItem];
+    _stdoutData = (outputData ? [outputData retain] : [[NSData allocWithZone:[self zone]] init]);
 }
 
 
-
-// auto-completion stuff
+#pragma mark -
+              // auto-completion stuff
 - (void)addString:(NSString *)string forCompletionEntry:(NSString *)entry{
     NSMutableArray *completionArray = nil;
     if (![[_autoCompletionDict allKeys] containsObject:entry]) {
@@ -264,7 +426,11 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
         return [NSString stringWithFormat:@"%@", [[_errors objectAtIndex:row] valueForKey:@"errorClassName"]];
     }
     if ([[tableColumn identifier] isEqualToString:@"fileName"]) {
-        return [[NSString stringWithFormat:@"%@", [[_errors objectAtIndex:row] valueForKey:@"fileName"]] lastPathComponent];
+        if([[NSFileManager defaultManager] fileExistsAtPath:[[_errors objectAtIndex:row] valueForKey:@"fileName"]]){
+            return [[NSString stringWithFormat:@"%@", [[_errors objectAtIndex:row] valueForKey:@"fileName"]] lastPathComponent];
+        }else{
+            return NSLocalizedString(@"Paste or Drag data", @"Paste or Drag data");
+        }
     }
     if ([[tableColumn identifier] isEqualToString:@"errorMessage"]) {
         return [NSString stringWithFormat:@"%@", [[_errors objectAtIndex:row] valueForKey:@"errorMessage"]];
