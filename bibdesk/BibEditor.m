@@ -1035,7 +1035,6 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 	// NSDictionary *userInfo = [notification userInfo];
 	
 	[self close];
-	[theBib setEditorObj:nil]; //cmh: obsolete?
 }
 	
 - (void)docWindowWillClose:(NSNotification *)notification{
