@@ -923,6 +923,24 @@ void _setupFonts(){
 	return [papersFolderPath stringByAppendingPathComponent:relativeFile];
 }
 
+- (BOOL)canSetLocalUrl
+{
+	NSEnumerator *fEnum = [[[NSApp delegate] requiredFieldsForLocalUrl] objectEnumerator];
+	NSString *fieldName;
+	NSString *fieldValue = [self valueOfField:@"Local-Url"];
+	
+	if (fieldValue != nil && ![fieldValue isEqualToString:@""]) {
+		return NO;
+	}
+	while (fieldName = [fEnum nextObject]) {
+		fieldValue = [self valueOfField:fieldName];
+		if (fieldValue == nil || [fieldValue isEqualToString:@""]) {
+			return NO;
+		}
+	}
+	return YES;
+}
+
 - (NSString *)parseFormat:(NSString *)format forField:(NSString *)fieldName
 {
 	BDSKConverter *converter = [BDSKConverter sharedConverter];

@@ -296,6 +296,13 @@
 - (NSString *)suggestedLocalUrl;
 
 /*!
+    @method canSetLocalUrl
+    @abstract Returns a boolean indicating whether all fields required for the generated local-url are set
+    @discussion - 
+*/
+- (BOOL)canSetLocalUrl;
+
+/*!
     @method parseFormat:forField:
     @abstract Generates a value for a field in a type based on the receiver and the format string
     @discussion -
