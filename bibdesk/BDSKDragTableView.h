@@ -24,7 +24,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 */
 @interface BDSKDragTableView : NSTableView
 {
-    // for supporting type-ahead in the table/outlineViews:
+    // for supporting type-ahead in the tableview:
     // datasource methods to support this are over in BibDocument_DataSource
     OATypeAheadSelectionHelper *typeAheadHelper;
     
