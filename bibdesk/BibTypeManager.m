@@ -7,6 +7,7 @@
 //
 
 #import "BibTypeManager.h"
+#import "BibAppController.h"
 
 static BibTypeManager *sharedInstance = nil;
 
@@ -22,7 +23,7 @@ static BibTypeManager *sharedInstance = nil;
 
 	NSFileManager *fm = [NSFileManager defaultManager];
 	NSString *applicationSupportPath = [[fm applicationSupportDirectory:kUserDomain] stringByAppendingPathComponent:@"BibDesk"];
-	NSString *userTypeInfoPath = [applicationSupportPath stringByAppendingPathComponent:TYPE_INFO_FILENAME];
+	NSString *userTypeInfoPath = [applicationSupportPath stringByAppendingPathComponent:@"TypeInfo.plist"];
 	NSDictionary *userTypeInfoDict;
 	
 	if ([fm fileExistsAtPath:userTypeInfoPath]) {
@@ -31,8 +32,8 @@ static BibTypeManager *sharedInstance = nil;
 		// set all the lists we support in the user file
 		fieldsForTypesDict = [[userTypeInfoDict objectForKey:@"FieldsForTypes"] retain];
 		typesForFileTypeDict = [[NSDictionary dictionaryWithObjectsAndKeys: 
-				[userTypeInfoDict objectForKey:@"TypesForFileType"], BDSKBibtexString,
-				[btm bibTypesForFileType:@"PubMed"], @"PubMed", nil] retain];
+				[[userTypeInfoDict objectForKey:@"TypesForFileType"] objectForKey:BDSKBibtexString], BDSKBibtexString, 
+				[[typeInfoDict objectForKey:@"TypesForFileType"] objectForKey:@"PubMed"], @"PubMed", nil] retain];
 		allFieldNames = [[userTypeInfoDict objectForKey:@"AllRemovableFieldNames"] retain];
 	}
 	
