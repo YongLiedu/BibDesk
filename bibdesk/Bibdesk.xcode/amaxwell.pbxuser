@@ -2,9 +2,9 @@
 {
 	089C165DFE840E0CC02AAC07 = {
 		uiCtxt = {
-			sepNavIntBoundsRect = "{{0, 0}, {705, 430}}";
+			sepNavIntBoundsRect = "{{0, 0}, {705, 428}}";
 			sepNavSelRange = "{173, 0}";
-			sepNavVisRect = "{{0, 0}, {705, 430}}";
+			sepNavVisRect = "{{0, 0}, {705, 428}}";
 			sepNavWindowFrame = "{{38, 248}, {750, 558}}";
 		};
 	};
@@ -35,7 +35,7 @@
 		};
 	};
 	29B97313FDCFA39411CA2CEA = {
-		activeBuildStyle = 4A9504CDFFE6A4B311CA0CBA;
+		activeBuildStyle = 4A9504CCFFE6A4B311CA0CBA;
 		activeExecutable = F9CCDAFE076BB73B006D37DF;
 		activeTarget = 8D1107260486CEB800E47090;
 		addToTargets = (
@@ -106,7 +106,7 @@
 					20,
 					242,
 					20,
-					48.1626,
+					48,
 					43,
 					43,
 					20,
@@ -154,10 +154,10 @@
 				PBXFileTableDataSourceColumnSortingKey = PBXFileDataSource_Filename_ColumnID;
 				PBXFileTableDataSourceColumnWidthsKey = (
 					20,
-					212,
+					210,
 					50,
 					20,
-					48.1626,
+					50,
 					43,
 					43,
 				);
@@ -171,7 +171,7 @@
 					PBXFileDataSource_Warnings_ColumnID,
 				);
 			};
-			PBXPerProjectTemplateStateSaveDate = 127509546;
+			PBXPerProjectTemplateStateSaveDate = 128324985;
 			PBXPrepackagedSmartGroups_v2 = (
 				{
 					PBXTransientLocationAtTop = bottom;
@@ -235,7 +235,7 @@
 						image = SmartFolder;
 						isLeaf = 0;
 						recursive = 1;
-						regex = "\\.(c|cpp|C|CPP|m|mm|java|sh|scpt)$";
+						regex = "?*\\.[mcMC]";
 						root = "<PROJECT>";
 					};
 				},
@@ -348,7 +348,7 @@
 					};
 				},
 			);
-			PBXWorkspaceStateSaveDate = 127509546;
+			PBXWorkspaceStateSaveDate = 128324985;
 		};
 		sourceControlManager = F9CCDB4B076BB743006D37DF;
 		userBookmarkGroup = F9B13D850784E65C00BAA3B1;
@@ -394,10 +394,10 @@
 	};
 	8D1107310486CEB800E47090 = {
 		uiCtxt = {
-			sepNavIntBoundsRect = "{{0, 0}, {710, 7700}}";
-			sepNavSelRange = "{2574, 4}";
-			sepNavVisRect = "{{0, 1150}, {705, 430}}";
-			sepNavWindowFrame = "{{6, 245}, {750, 558}}";
+			sepNavIntBoundsRect = "{{0, 0}, {710, 7755}}";
+			sepNavSelRange = "{3149, 6}";
+			sepNavVisRect = "{{0, 1403}, {705, 428}}";
+			sepNavWindowFrame = "{{15, 269}, {750, 558}}";
 		};
 	};
 	F9022C200758015B00C3F701 = {
@@ -544,10 +544,10 @@
 	};
 	F9022C66075802E300C3F701 = {
 		uiCtxt = {
-			sepNavIntBoundsRect = "{{0, 0}, {4544, 41776}}";
-			sepNavSelRange = "{109703, 85}";
-			sepNavVisRect = "{{0, 37765}, {912, 588}}";
-			sepNavWindowFrame = "{{27, 15}, {961, 716}}";
+			sepNavIntBoundsRect = "{{0, 0}, {4544, 42097}}";
+			sepNavSelRange = "{114637, 0}";
+			sepNavVisRect = "{{0, 39735}, {705, 428}}";
+			sepNavWindowFrame = "{{61, 227}, {750, 558}}";
 		};
 	};
 	F9022C67075802E300C3F701 = {
@@ -783,9 +783,9 @@
 	};
 	F9022D180758066000C3F701 = {
 		uiCtxt = {
-			sepNavIntBoundsRect = "{{0, 0}, {539, 4369}}";
-			sepNavSelRange = "{16, 0}";
-			sepNavVisRect = "{{0, 0}, {539, 427}}";
+			sepNavIntBoundsRect = "{{0, 0}, {539, 4829}}";
+			sepNavSelRange = "{190, 0}";
+			sepNavVisRect = "{{0, 0}, {539, 426}}";
 			sepNavWindowFrame = "{{41, 198}, {584, 540}}";
 		};
 	};
@@ -1052,8 +1052,6 @@
 				value = YES;
 			},
 		);
-		executableSystemSymbolLevel = 0;
-		executableUserSymbolLevel = 0;
 		isa = PBXExecutable;
 		libgmallocEnabled = 0;
 		name = Bibdesk;
@@ -2045,6 +2043,16 @@
 	F9CCDB4C076BB743006D37DF = {
 		indexTemplatePath = "";
 		isa = PBXCodeSenseManager;
+		usesDefaults = 0;
+		wantsCodeCompletion = 0;
+		wantsCodeCompletionAutoSuggestions = 0;
+		wantsCodeCompletionCaseSensitivity = 0;
+		wantsCodeCompletionListAlways = 0;
+		wantsCodeCompletionOnlyMatchingItems = 0;
+		wantsCodeCompletionParametersIncluded = 0;
+		wantsCodeCompletionPlaceholdersInserted = 0;
+		wantsCodeCompletionTabCompletes = 0;
+		wantsIndex = 0;
 	};
 	F9F14A47075811CF008BA22F = {
 		activeExec = 0;

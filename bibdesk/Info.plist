@@ -95,9 +95,9 @@
 	<key>CFBundleExecutable</key>
 	<string>Bibdesk</string>
 	<key>CFBundleGetInfoHTML</key>
-	<string>&lt;B&gt;BibDesk&lt;/B&gt; Version 0.97.6</string>
+	<string>&lt;B&gt;BibDesk&lt;/B&gt; Version 0.97.7</string>
 	<key>CFBundleGetInfoString</key>
-	<string>version 0.97.6</string>
+	<string>version 0.97.7</string>
 	<key>CFBundleHelpBookFolder</key>
 	<string>BibDesk Help</string>
 	<key>CFBundleHelpBookName</key>
@@ -113,11 +113,11 @@
 	<key>CFBundlePackageType</key>
 	<string>APPL</string>
 	<key>CFBundleShortVersionString</key>
-	<string>0.97.6</string>
+	<string>0.97.7</string>
 	<key>CFBundleSignature</key>
 	<string>BDSK</string>
 	<key>CFBundleVersion</key>
-	<string>0.97.6</string>
+	<string>0.97.7</string>
 	<key>NSAppleScriptEnabled</key>
 	<string>YES</string>
 	<key>NSMainNibFile</key>
@@ -321,8 +321,8 @@
 					</array>
 					<key>Output Template File</key>
 					<string>~/Library/Application Support/BibDesk/template.txt</string>
-                                        <key>Write template file when saving</key>
-                                        <string>1</string>
+					<key>Write template file when saving</key>
+					<string>1</string>
 				</dict>
 				<key>icon</key>
 				<string>defaults.tiff</string>
@@ -367,6 +367,8 @@
 				<dict>
 					<key>BlueComponentColor of alternating rows Key</key>
 					<string>1.010918794815856e-310</string>
+					<key>Check for updates when starting</key>
+					<string>1</string>
 					<key>Column Widths By Name</key>
 					<dict>
 						<key>1st Author</key>
@@ -446,8 +448,6 @@
 					<string>1.293993033330623e-310</string>
 					<key>View-by Field</key>
 					<string>Author</string>
-                    <key>Check for updates when starting</key>
-                    <string>1</string>
 				</dict>
 				<key>icon</key>
 				<string>startup.tiff</string>
