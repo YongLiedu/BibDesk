@@ -1317,13 +1317,21 @@ int compareSetLengths(NSSet *set1, NSSet *set2, void *context){
 }
 
 
-
 // replaces sortPubsByColumn
 - (void) tableView: (NSTableView *) theTableView
 didClickTableColumn: (NSTableColumn *) tableColumn{
 	// check whether this is the right kind of table view and don't re-sort when we have a contextual menu click
     if (tableView != (BDSKDragTableView *) theTableView || 	[[NSApp currentEvent] type] == NSRightMouseDown
 ) return;
+    
+    BibItem *selection = nil;
+    int sortedRow; // see the datasource methods for this; it's tricky
+    
+    if([tableView selectedRow] != -1){
+        sortedRow = (sortDescending ? [shownPublications count] - 1 - [tableView selectedRow] : [tableView selectedRow]);
+        selection = [shownPublications objectAtIndex:sortedRow];
+    }
+    
     if (lastSelectedColumnForSort == tableColumn) {
         // User clicked same column, change sort order
         sortDescending = !sortDescending;
@@ -1384,7 +1392,15 @@ didClickTableColumn: (NSTableColumn *) tableColumn{
                                    [NSImage imageNamed:@"sort-down"] :
                                    [NSImage imageNamed:@"sort-up"])
                    inTableColumn: tableColumn];
+
     [tableView reloadData];
+    
+    if(selection != nil){
+        // NSLog(@"selection later is %@", [selection title]);
+        sortedRow = (sortDescending ? [shownPublications count] - 1 - [shownPublications indexOfObjectIdenticalTo:selection] : [shownPublications indexOfObjectIdenticalTo:selection]);
+        [tableView selectRow:sortedRow byExtendingSelection:NO];
+        [tableView scrollRowToVisible:sortedRow];
+    }
 }
 
 
