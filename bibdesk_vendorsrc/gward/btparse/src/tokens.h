@@ -47,9 +47,9 @@ extern void contents();
 #endif
 
 #ifdef __STDC__
-void fields(AST**_root);
+void bibtex_fields(AST**_root);
 #else
-extern void fields();
+extern void bibtex_fields();
 #endif
 
 #ifdef __STDC__

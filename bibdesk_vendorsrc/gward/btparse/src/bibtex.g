@@ -370,9 +370,9 @@ contents [bt_metatype metatype]
              : << metatype == BTE_REGULAR /* || metatype == BTE_MODIFY */ >>?
                ( NAME | NUMBER ) << #1->nodetype = BTAST_KEY; >> 
                COMMA!
-               fields
+               bibtex_fields
              | << metatype == BTE_MACRODEF >>?
-               fields
+               bibtex_fields
              | << metatype == BTE_PREAMBLE >>?
                value
 //           | << metatype == BTE_ALIAS >>?
@@ -380,13 +380,13 @@ contents [bt_metatype metatype]
              ;
 
 /*
- * `fields' is a comma-separated list of fields.  Note that BibTeX has a
+ * `bibtex_fields' is a comma-separated list of fields.  Note that BibTeX has a
  * little wart in that it allows a single extra comma after the last field
  * only.  This is easy enough to handle, we just have to do it in the
  * traditional BNFish way (loop by recursion) rather than use EBNF
  * trickery.
  */
-fields       : field { COMMA! fields }
+bibtex_fields       : field { COMMA! bibtex_fields }
              | /* epsilon */
              ;
 

@@ -177,12 +177,12 @@ AST **_root;
 		}
 		zzastArg(1)->nodetype = BTAST_KEY;   
 		zzmatch(COMMA);  zzCONSUME;
-		fields(zzSTR); zzlink(_root, &_sibling, &_tail);
+		bibtex_fields(zzSTR); zzlink(_root, &_sibling, &_tail);
 	}
 	else {
 		if ( (setwd1[LA(1)]&0x10)&&(metatype == BTE_MACRODEF ) ) {
 			if (!(metatype == BTE_MACRODEF )) {zzfailed_pred("   metatype == BTE_MACRODEF ");}
-			fields(zzSTR); zzlink(_root, &_sibling, &_tail);
+			bibtex_fields(zzSTR); zzlink(_root, &_sibling, &_tail);
 		}
 		else {
 			if ( (setwd1[LA(1)]&0x20)&&(metatype == BTE_PREAMBLE ) ) {
@@ -203,9 +203,9 @@ fail:
 
 void
 #ifdef __STDC__
-fields(AST**_root)
+bibtex_fields(AST**_root)
 #else
-fields(_root)
+bibtex_fields(_root)
 AST **_root;
 #endif
 {
@@ -221,7 +221,7 @@ AST **_root;
 			{
 			if ( (LA(1)==COMMA) ) {
 				zzmatch(COMMA);  zzCONSUME;
-				fields(zzSTR); zzlink(_root, &_sibling, &_tail);
+				bibtex_fields(zzSTR); zzlink(_root, &_sibling, &_tail);
 			}
 			zzEXIT(zztasp2);
 			}
