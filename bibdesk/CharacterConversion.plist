@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!DOCTYPE plist SYSTEM "file://localhost/System/Library/DTDs/PropertyList.dtd">
-<plist version="0.9">
+<!DOCTYPE plist PUBLIC "-//Apple Computer//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
 <dict>
 	<key>Roman to TeX</key>
 	<dict>
@@ -28,6 +28,8 @@
 		<string>{\aa}</string>
 		<key>æ</key>
 		<string>{\ae}</string>
+		<key>ç</key>
+		<string>{\cc}</string>
 		<key>è</key>
 		<string>{\`e}</string>
 		<key>é</key>
@@ -131,6 +133,8 @@
 		<string>å</string>
 		<key>{\ae}</key>
 		<string>æ</string>
+		<key>{\cc}</key>
+		<string>ç</string>
 		<key>{\oe}</key>
 		<string>œ</string>
 		<key>{\o}</key>
