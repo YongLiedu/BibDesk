@@ -110,7 +110,44 @@ NSRange SafeBackwardSearchRange(NSRange startRange, unsigned seekLength){
     } else {
         return NO;
     }
-}    
+}
+
+- (BOOL)hasBalancedQuotes:(NSString *)string usingBraces:(BOOL)braces{
+    NSString *leftDelim, *rightDelim;
+    if(braces){ // need same number of each
+        leftDelim = @"{";
+        rightDelim = @"}";
+    } else {
+        leftDelim = @"\"";
+        rightDelim = leftDelim;  // we can have " " " (unbalanced)
+    }
+    unsigned start = 0;
+    unsigned ldelim = 0;
+    unsigned rdelim = 0;
+    NSRange range = [string rangeOfString:leftDelim options:NSLiteralSearch range:NSMakeRange(start, [string length] - start)];
+    while(range.location != NSNotFound){
+        ldelim++;
+        start = range.location + 1;
+        range = [string rangeOfString:leftDelim options:NSLiteralSearch range:NSMakeRange(start, [string length] - start)];
+    }
+    
+    if(!braces){ // we're done checking
+        if(ldelim & 1) // odd number of quotes --> unbalanced... but what if the quotes are inside of braces?
+            return NO;
+        else
+            return YES;
+    }
+    
+    range = [string rangeOfString:rightDelim options:NSLiteralSearch range:NSMakeRange(start, [string length] - start)];
+    while(range.location != NSNotFound){
+        rdelim++;
+        start = range.location + 1;
+        range = [string rangeOfString:rightDelim options:NSLiteralSearch range:NSMakeRange(start, [string length] - start)];
+    }
+   
+    return (ldelim == rdelim) ? YES : NO;
+    
+}
 
 - (NSMutableArray *)itemsFromString:(NSString *)fullString error:(BOOL *)hadProblems frontMatter:(NSMutableString *)frontMatter filePath:(NSString *)filePath document:(BibDocument *)aDocument background:(BOOL)background{
 
@@ -318,14 +355,17 @@ NSRange SafeBackwardSearchRange(NSRange startRange, unsigned seekLength){
                 [scanner setScanLocation:leftDelimLocation + 1];
             }
             
-            
-            // find the next '=' within the current bibitem, which will be the bounds for a new search range to see if this field=value line contains a #
-            NSRange equalsRange = [[fullString substringWithRange:NSMakeRange(leftDelimLocation, entryClosingBraceRange.location - leftDelimLocation)] rangeOfString:@"="];
-                
-            if(equalsRange.location != NSNotFound){// note that equalsRange location is relative to leftDelimLocation
-                NSRange poundRange = [[fullString substringWithRange:NSMakeRange(leftDelimLocation, equalsRange.location)] rangeOfString:@"#"];
-                // if the # character exists and is unescaped, we assume it's for concatenation
-                if(poundRange.location != NSNotFound && [fullString characterAtIndex:(poundRange.location - 1)] != '\\'){
+            // Look between leftDelim and \n to see if there is a hash, since we don't handle other cases anyway.
+            // In other words, if you have "field = {valueA} # {valueB \n valueC}," or something, you're SOL, because I can't figure out how to parse
+            // something like "field = "valueA" # "valueB \n valueC"," which uses double-quote delimiters.
+            unsigned contentsEnd;
+            [fullString getLineStart:NULL end:NULL contentsEnd:&contentsEnd forRange:NSMakeRange(leftDelimLocation, 1)]; // handles any newline character
+                        
+            NSRange hashRange = [[fullString substringWithRange:NSMakeRange(leftDelimLocation, contentsEnd - leftDelimLocation)] rangeOfString:@"#"];
+            // if the # character exists and is unescaped/unbraced, we assume it's for concatenation
+            if(hashRange.location != NSNotFound && [fullString characterAtIndex:(hashRange.location - 1)] != '\\'){
+                BOOL balanced = [self hasBalancedQuotes:[fullString substringWithRange:NSMakeRange(leftDelimLocation, hashRange.location)] usingBraces:usingBraceDelimiter]; 
+                if(balanced){
                     NSLog(@"BibTeXParser thinks this should be a complex string");
                     isMacro = YES;
                     rightDelim = @",\n"; // only search to the end of the line; if you can concatenate over multiple lines, this won't work
