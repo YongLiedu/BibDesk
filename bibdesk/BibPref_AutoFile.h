@@ -22,7 +22,16 @@
 #import "BibPrefController.h"
 
 @interface BibPref_AutoFile : OAPreferenceClient {
+	IBOutlet NSTextField* papersFolderLocationTextField;
+	IBOutlet NSButton* choosePapersFolderLocationButton;
+	IBOutlet NSButton* filePapersAutomaticallyCheckButton;
+	IBOutlet NSButton* keepPapersFolderOrganizedCheckButton;
 
 }
+
+- (IBAction)choosePapersFolderLocationAction:(id)sender;
+- (IBAction)toggleFilePapersAutomaticallyAction:(id)sender;
+- (IBAction)toggleKeepPapersFolderOrganizedAction:(id)sender;
+
 
 @end
