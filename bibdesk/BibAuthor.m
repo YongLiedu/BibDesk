@@ -189,7 +189,7 @@ Sets all the different variables for partial names and so on from a given string
 Note: The strings returned by the bt_split_name function seem to be in the wrong encoding Ð UTF-8 is treated as ASCII. This is manually fixed for the _firstName, _lastName,  _jrPart and _vonPart variables.
 */
 - (void)setName:(NSString *)newName{
-	NSStringEncoding defaultCStringEncoding = [NSString defaultCStringEncoding];
+	NSStringEncoding defaultCStringEncoding = NSUTF8StringEncoding; // should use since we split the name with a UTF8String
     bt_name *theName;
     int i = 0;
     NSMutableString *tmpStr = nil;
@@ -206,7 +206,7 @@ Note: The strings returned by the bt_split_name function seem to be in the wrong
     tmpStr = [NSMutableString string];
     for (i = 0; i < theName->part_len[BTN_FIRST]; i++)
     {
-        [tmpStr appendString:[NSString stringWithCString:theName->parts[BTN_FIRST][i]]];
+        [tmpStr appendString:[NSString stringWithUTF8String:theName->parts[BTN_FIRST][i]]];
         if(i >= 0 && i < theName->part_len[BTN_FIRST]-1)
             [tmpStr appendString:@" "];
     }
@@ -216,7 +216,7 @@ Note: The strings returned by the bt_split_name function seem to be in the wrong
     tmpStr = [NSMutableString string];
     for (i = 0; i < theName->part_len[BTN_VON]; i++)
     {
-        [tmpStr appendString:[NSString stringWithCString:theName->parts[BTN_VON][i]]];
+        [tmpStr appendString:[NSString stringWithUTF8String:theName->parts[BTN_VON][i]]];
         if(i >= 0 && i < theName->part_len[BTN_VON]-1)
             [tmpStr appendString:@" "];
 
@@ -227,7 +227,7 @@ Note: The strings returned by the bt_split_name function seem to be in the wrong
     tmpStr = [NSMutableString string];
     for (i = 0; i < theName->part_len[BTN_LAST]; i++)
     {
-        [tmpStr appendString:[NSString stringWithCString:theName->parts[BTN_LAST][i]]];
+        [tmpStr appendString:[NSString stringWithUTF8String:theName->parts[BTN_LAST][i]]];
         if(i >= 0 && i < theName->part_len[BTN_LAST]-1)
             [tmpStr appendString:@" "];
     }
@@ -238,7 +238,7 @@ Note: The strings returned by the bt_split_name function seem to be in the wrong
     tmpStr = [NSMutableString string];    
     for (i = 0; i < theName->part_len[BTN_JR]; i++)
     {
-        [tmpStr appendString:[NSString stringWithCString:theName->parts[BTN_JR][i]]];
+        [tmpStr appendString:[NSString stringWithUTF8String:theName->parts[BTN_JR][i]]];
         if(i >= 0 && i < theName->part_len[BTN_JR]-1)
             [tmpStr appendString:@" "];
     }
