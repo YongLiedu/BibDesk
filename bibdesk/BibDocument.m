@@ -1576,7 +1576,7 @@ int generalBibItemCompareFunc(id item1, id item2, void *context){
 
 - (void)handleBibItemChangedNotification:(NSNotification *)notification{
 	// dead simple for now
-	//NSLog(@"got handleBibItemChangedNotification with userinfo %@", [notification userInfo]);
+	// NSLog(@"got handleBibItemChangedNotification with userinfo %@", [notification userInfo]);
 	NSDictionary *userInfo = [notification userInfo];
 	
 	NSString *changedKey = [userInfo objectForKey:@"key"];
@@ -1586,7 +1586,13 @@ int generalBibItemCompareFunc(id item1, id item2, void *context){
 		if(BDSK_USING_JAGUAR){
 			[self searchFieldAction:searchFieldTextField];
 		}else{
-			[self searchFieldAction:searchField];
+			[NSObject cancelPreviousPerformRequestsWithTarget:self
+								 selector:@selector(searchFieldAction:)
+								   object:searchField];
+			[self performSelector:@selector(searchFieldAction:)
+				   withObject:searchField
+				   afterDelay:0.5];
+
 		}
 	}
 	// should: also check if we're filtering by the key that was changed and refilter.
