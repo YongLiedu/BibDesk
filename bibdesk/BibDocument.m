@@ -353,11 +353,11 @@ NSString *BDSKBibItemLocalDragPboardType = @"edu.ucsd.cs.mmccrack.bibdesk: Local
 	NSUndoManager *undoManager = [self undoManager];
 	[[undoManager prepareWithInvocationTarget:self] removePublication:pub];
 	
+        [publications addObject:pub usingLock:pubsLock];
+
         if(sortDescending){ // insert at beginning or add at end in order to maintain selection (if any) in tableview
-            [publications insertObject:pub atIndex:0 usingLock:pubsLock];
             [shownPublications insertObject:pub atIndex:0 usingLock:pubsLock];
         } else {
-            [publications addObject:pub usingLock:pubsLock];
             [shownPublications addObject:pub usingLock:pubsLock];
         }
 	[pub setDocument:self];
