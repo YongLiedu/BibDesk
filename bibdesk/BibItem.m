@@ -788,7 +788,7 @@ void _setupFonts(){
 }
 
 - (void)setPubFields: (NSDictionary *)newFields{
-	if([newFields isEqualToDictionary:pubFields]){
+	if(newFields != pubFields){
 		[pubFields release];
 		pubFields = [newFields mutableCopy];
 		[self updateMetadataForKey:nil];
@@ -796,7 +796,7 @@ void _setupFonts(){
 }
 
 - (void)setFields: (NSDictionary *)newFields{
-	if([newFields isEqualToDictionary:pubFields]){
+	if(![newFields isEqualToDictionary:pubFields]){
 		if(editorObj){
 			if(!undoManager){
 				undoManager = [[editorObj window] undoManager];
