@@ -173,7 +173,7 @@ void _setupFonts(){
 #ifdef DEBUG
     NSLog([NSString stringWithFormat:@"bibitem Dealloc, rt: %d", [self retainCount]]);
 #endif
-    if ([self undoManager]) {
+    if (undoManager != nil) {
         [[self undoManager] removeAllActionsWithTarget:self];
     }
     [pubFields release];
