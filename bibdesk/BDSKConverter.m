@@ -263,9 +263,9 @@ static BDSKConverter *theConverter;
 - (NSString *)stringBySanitizingString:(NSString *)string forField:(NSString *)fieldName inFileType:(NSString *)type
 {
 	NSCharacterSet *invalidCharSet = [[BibTypeManager sharedManager] strictInvalidCharactersForField:fieldName inFileType:type];
-	
+    NSString *newString = nil;
+
 	if ([fieldName isEqualToString:@"Cite Key"]) {
-		NSString *newString;
 		
 		if (string == nil || [string isEqualToString:@""]) {
 			return @"";
@@ -279,7 +279,6 @@ static BDSKConverter *theConverter;
 		return newString;
 	}
 	else if ([fieldName isEqualToString:@"Local-Url"]) {
-		NSString *newString;
 		
 		if (string == nil || [string isEqualToString:@""]) {
 			return @"";
@@ -305,7 +304,7 @@ static BDSKConverter *theConverter;
 	NSCharacterSet *invalidCharSet = [[BibTypeManager sharedManager] strictInvalidCharactersForField:fieldName inFileType:type];
 	NSScanner *scanner = [NSScanner scannerWithString:*formatString];
 	NSMutableString *sanitizedFormatString = [NSMutableString string];
-	NSString *string;
+	NSString *string = nil;
 	unichar specifier;
 	BOOL mustEnd = NO;
 	
@@ -342,7 +341,7 @@ static BDSKConverter *theConverter;
 				return NO;
 			}
 			string = [self stringBySanitizingString:string forField:fieldName inFileType:type];
-			[sanitizedFormatString appendFormat:@"{%@}", specifier, [string capitalizedString]]; // we need to have BibTeX field names capitalized
+			[sanitizedFormatString appendFormat:@"{%@}", [string capitalizedString]]; // we need to have BibTeX field names capitalized
 		}
 		else if ([validLastSpecifierChars characterIsMember:specifier]) {
 			mustEnd = YES;

@@ -141,12 +141,13 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 			[self setRequiredFieldsForCiteKey: [[BDSKConverter sharedConverter] requiredFieldsForFormat:formatString]];
 		}else{
 			button = NSRunCriticalAlertPanel(NSLocalizedString(@"The autogeneration format for Cite Key is invalid.", @""), 
-											 @"%@",
+											 [NSString stringWithFormat:@"%@", error],
 											 NSLocalizedString(@"Go to Preferences", @""), 
 											 NSLocalizedString(@"Revert to Default", @""), 
-											 error, nil);
+											 nil);
 			if (button == NSAlertAlternateReturn){
-				formatString = [[[OFPreferenceWrapper sharedPreferenceWrapper] preferenceForKey:BDSKCiteKeyFormatKey] defaultObjectValue];			
+				formatString = [[[OFPreferenceWrapper sharedPreferenceWrapper] preferenceForKey:BDSKCiteKeyFormatKey] defaultObjectValue];
+                [[OFPreferenceWrapper sharedPreferenceWrapper] setObject:formatString forKey:BDSKCiteKeyFormatKey];
 				[self setRequiredFieldsForCiteKey: [[BDSKConverter sharedConverter] requiredFieldsForFormat:formatString]];
 			}else{
 				[[OAPreferenceController sharedPreferenceController] showPreferencesPanel:self];
