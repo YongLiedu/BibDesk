@@ -18,6 +18,16 @@
         [node setValue:[[BDSKConverter sharedConverter] stringByDeTeXifyingString:s]];
         return [node autorelease];
         
+    }else if([s characterAtIndex:0] == '"'){
+        // if it's quoted, strip that and call it a simple string
+        s = [s substringFromIndex:1];
+        if([s characterAtIndex:([s length] - 1)] == '"'){
+            s = [s substringToIndex:([s length] - 1)];
+        }
+        [node setType:BSN_STRING];
+        [node setValue:[[BDSKConverter sharedConverter] stringByDeTeXifyingString:s]];
+        return [node autorelease];
+        
     }else{
         // a single macro
         
@@ -121,6 +131,15 @@ static NSDictionary *globalMacroDefs;
                 // if it's quoted, strip that and call it a simple string
                 s = [s substringFromIndex:1];
                 if([s characterAtIndex:[s length] -1 ] == '}'){
+                    s = [s substringToIndex:([s length] - 1)];
+                }
+                
+                return [BDSKComplexString complexStringWithString:s macroResolver:theMacroResolver];
+
+           }else if([s characterAtIndex:0] == '"'){
+                // if it's quoted, strip that and call it a simple string
+                s = [s substringFromIndex:1];
+                if([s characterAtIndex:[s length] -1 ] == '"'){
                     s = [s substringToIndex:([s length] - 1)];
                 }
                 
