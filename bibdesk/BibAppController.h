@@ -133,4 +133,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 			  userData:(NSString *)userData
 				 error:(NSString **)error;
 
+- (void)importDataFromSelection:(NSPasteboard *)pboard
+		       userData:(NSString *)userData
+			  error:(NSString **)error;
 @end

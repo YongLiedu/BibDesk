@@ -652,4 +652,24 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 //    yn = [pboard setString:retStr forType:NSStringPboardType];
 	
 }
+
+- (void)importDataFromSelection:(NSPasteboard *)pboard
+	      userData:(NSString *)userData
+		 error:(NSString **)error{	
+    NSArray *types = [pboard types];
+    if (![types containsObject:NSStringPboardType]) {
+        *error = NSLocalizedString(@"Error: couldn't read data from string.",
+                                   @"pboard couldn't give string.");
+        return;
+    }
+    NSString *pboardString = [pboard stringForType:NSStringPboardType];    
+
+    BibDocument *doc = [[[BibDocument alloc] init] autorelease];
+    
+    [doc loadPubMedDataRepresentation:[pboardString dataUsingEncoding:NSUTF8StringEncoding]];
+    [[NSDocumentController sharedDocumentController] setShouldCreateUI:YES];
+    [[NSDocumentController sharedDocumentController] addDocument:doc];
+    [doc makeWindowControllers];
+    [doc showWindows];
+}
 @end
