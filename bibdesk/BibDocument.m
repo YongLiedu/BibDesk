@@ -1637,7 +1637,13 @@ int generalBibItemCompareFunc(id item1, id item2, void *context){
                 [tc setWidth:[tcWidth floatValue]];
             }
         }
-        [[tc headerCell] setStringValue:NSLocalizedStringFromTable(colName, @"BibTeXKeys", @"")];
+		if([colName isEqualToString:@"Local-Url"]){
+			NSImage *pdfImage = [NSImage imageForFileType:@"pdf"];
+			[pdfImage setSize:NSMakeSize(15,15)];
+			[[tc headerCell] setImage:pdfImage];
+		}else{	
+			[[tc headerCell] setStringValue:NSLocalizedStringFromTable(colName, @"BibTeXKeys", @"")];
+		}
         [tc setEditable:NO];
 
         if([[tc identifier] isEqualToString:@"No Identifier"]){
