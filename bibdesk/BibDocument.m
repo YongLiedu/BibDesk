@@ -351,6 +351,23 @@ Handle Notifications by the popup button to update its icon and its menu before 
     
 }
 
+- (NSArray *)publicationsForAuthor:(BibAuthor *)anAuthor{
+    NSMutableSet *auths = [NSMutableSet set];
+    NSEnumerator *pubEnum = [publications objectEnumerator];
+    BibItem *bi;
+    NSMutableArray *anAuthorPubs = [NSMutableArray array];
+    
+    while(bi = [pubEnum nextObject]){
+        [auths addObjectsFromArray:[bi pubAuthors]];
+        if([auths member:anAuthor] != nil){
+            [anAuthorPubs addObject:bi];
+        }
+        [auths removeAllObjects];
+    }
+    return anAuthorPubs;
+}
+
+
 - (BOOL)citeKeyIsUsed:(NSString *)aCiteKey byItemOtherThan:(BibItem *)anItem{
     NSEnumerator *bibE = [publications objectEnumerator];
     BibItem *bi = nil;

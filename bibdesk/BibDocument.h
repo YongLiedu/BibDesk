@@ -42,7 +42,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 @class BDSKCustomCiteTableView;
 @class BibItem;
 @class BibEditor;
-
+@class BibAuthor;
 @class BibFinder;
 
 extern NSString* LocalDragPasteboardName;
@@ -145,6 +145,7 @@ extern NSString* BDSKBibTeXStringPboardType;
 - (NSMenu *)searchFieldMenu;
 - (id)init;
 - (void)dealloc;
+- (NSArray *)publicationsForAuthor:(BibAuthor *)anAuthor;
 - (IBAction)exportAsRSS:(id)sender;
 - (IBAction)exportAsHTML:(id)sender;
 - (void)exportAsFileType:(NSString *)fileType;

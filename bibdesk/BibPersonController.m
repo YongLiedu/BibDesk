@@ -21,7 +21,7 @@
     self = [super initWithWindowNibName:@"BibPersonView"];
 	if(self){
             [self setPerson:person];
-            publications = [[self publicationsForAuthor:person document:doc] copy];
+            publications = [[doc publicationsForAuthor:person] copy];
             
             [person setPersonController:self];
             
@@ -59,23 +59,6 @@
 
 - (void)setPerson:(BibAuthor *)newPerson {
 	_person = [newPerson retain];
-}
-
-- (NSMutableArray *)publicationsForAuthor:(BibAuthor *)person document:(BibDocument *)doc{
-    NSArray *pubs = [doc publications];
-    NSMutableSet *auths = [NSMutableSet set];
-    NSEnumerator *pubEnum = [pubs objectEnumerator];
-    BibItem *bi;
-    NSMutableArray *personsPubs = [NSMutableArray array];
-    
-    while(bi = [pubEnum nextObject]){
-        [auths addObjectsFromArray:[bi pubAuthors]];
-        if([auths member:person] != nil){
-            [personsPubs addObject:bi];
-        }
-        [auths removeAllObjects];
-    }
-    return personsPubs;
 }
 
 #pragma mark actions

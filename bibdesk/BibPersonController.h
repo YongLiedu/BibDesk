@@ -22,7 +22,6 @@
 #pragma mark initialization
 - (id)initWithPerson:(BibAuthor *)person document:(BibDocument *)doc;
 - (void)awakeFromNib;
-- (NSMutableArray *)publicationsForAuthor:(BibAuthor *)person document:(BibDocument *)doc;
 
 #pragma mark accessors
 - (BibAuthor *)person;
