@@ -30,7 +30,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
     if([separateCiteCheckButton state] == NSOnState)
         [citeBehaviorLine setStringValue:[NSString stringWithFormat:@"\\%@{key1} \\%@{key2}",citeString, citeString]];
     else
-        [citeBehaviorLine setStringValue:[NSString stringWithFormat:@"\\%@{key1, key2}" , citeString]];
+        [citeBehaviorLine setStringValue:[NSString stringWithFormat:@"\\%@{key1,key2}" , citeString]];
     [editOnPasteButton setState:[defaults integerForKey:BDSKEditOnPasteKey]];
 }
 
