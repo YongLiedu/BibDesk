@@ -270,8 +270,8 @@ static BDSKConverter *theConverter;
     NSDictionary *accents = [NSDictionary dictionaryWithContentsOfFile:[[NSBundle mainBundle] pathForResource:@"Accents" ofType:@"plist"]];
     NSScanner *scanner = [[NSScanner alloc] initWithString:texString];
     NSString *tmp;
-    NSString *accent;
-    NSString *character;
+    NSString *accent = nil;
+    NSString *character = nil;
         
     while(![scanner isAtEnd]){
         if(![scanner scanString:@"{\\" intoString:nil])
