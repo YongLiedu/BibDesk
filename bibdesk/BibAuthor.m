@@ -17,11 +17,35 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 #import "BibAuthor.h"
 #import "BibItem.h"
 
+static NSMutableArray *_authors;
+
 @implementation BibAuthor
+
++ (void)initialize{
+	static BOOL alreadyInit= NO;
+    if ( !alreadyInit ) {
+		_authors = [[NSMutableArray alloc] initWithCapacity:10];
+		
+        alreadyInit = YES;
+    }
+}
 
 + (BibAuthor *)authorWithName:(NSString *)newName andPub:(BibItem *)aPub{
 	//@@ this should be a factory method that checks if an author like this already exists...
-    return [[[BibAuthor alloc] initWithName:newName andPub:aPub] autorelease];
+	BibAuthor *auth = nil;
+	NSEnumerator *e = [_authors objectEnumerator];
+	
+	while(auth = [e nextObject]){
+		if([[auth name] isEqualToString:newName]){
+			[auth addPub:aPub];
+			return auth;
+		}
+	}
+	// no match was found, create a new author:
+	
+	auth = [[[BibAuthor alloc] initWithName:newName andPub:aPub] autorelease];
+	[_authors addObject:auth];
+	return auth;
 }
 
 - (id)initWithName:(NSString *)aName andPub:(BibItem *)aPub{
@@ -30,7 +54,6 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
         pubs = [[NSMutableArray arrayWithObject:aPub] retain];
     else
         pubs = [[NSMutableArray alloc] init];
-//    NSLog(@"bibauthor init -- name:[%@] pub:[%@]", aName, aPub);
     return self;
 }
 
