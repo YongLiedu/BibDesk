@@ -50,6 +50,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
     NSArray *auths = nil;
     int sortedRow = (sortDescending ? [shownPublications count] - 1 - row : row);
     NSString *path = nil;
+    NSString *extension = nil;
     NSString *tcID = [tableColumn identifier];
 	NSString *shortDateFormatString = [[NSUserDefaults standardUserDefaults] stringForKey:NSShortDateFormatString];
 	
@@ -112,8 +113,13 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
             
         }else if ([tcID isEqualToString:@"Local-Url"]){
             path = [pub localURLPathRelativeTo:[[self fileName] stringByDeletingLastPathComponent]];
+	    extension = [path pathExtension];
             if(path && [[NSFileManager defaultManager] fileExistsAtPath:path]){
-                return [[NSWorkspace sharedWorkspace] iconForFile:path];
+		if(![extension isEqualToString:@""]){
+		    return [NSImage imageForFileType:extension];
+		} else {
+		    return [[NSWorkspace sharedWorkspace] iconForFile:path];
+		}
             }else{
                 return nil;
             }
