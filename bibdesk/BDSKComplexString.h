@@ -78,6 +78,8 @@ typedef enum{
     /*" Overridden NSString performance methods "*/
 - (void)getCharacters:(unichar *)buffer;
 - (void)getCharacters:(unichar *)buffer range:(NSRange)aRange;
+/* a NSString can be equal if the receiver is not complex and the NSString is equal to the expandedValue */
+- (void)isEqualToString:(NSString *)s;
 
 
 + (BDSKComplexString *)complexStringWithString:(NSString *)s macroResolver:(id<BDSKMacroResolver>)macroResolver;

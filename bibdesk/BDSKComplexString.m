@@ -258,6 +258,19 @@ static NSDictionary *globalMacroDefs;
     [expandedValue getCharacters:buffer range:aRange];
 }
 
+- (BOOL)isEqualToString:(NSString *)s{
+	if (![s isKindOfClass:[BDSKComplexString class]])
+		return ![self isComplex] && 
+				[expandedValue isEqualToString:s];
+	
+	BDSKComplexString *cs = (BDSKComplexString *)s;
+	if ([self isComplex] != [cs isComplex])
+		return NO;
+	if ([self isComplex]) 
+		return [[self nodes] isEqualToArray:[cs nodes]];	
+	return [expandedValue isEqualToString:cs->expandedValue];
+}
+
 
 #pragma mark complex string methods
 
