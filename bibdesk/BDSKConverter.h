@@ -92,7 +92,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 - (void)runConversionAlertPanel:(NSString *)tmpConv;
 
 /*!
- @method stringBySanitizingString:forField:inType:
+ @method stringBySanitizingString:forField:inFieldType:
  @abstract Sanitize a string to use in a generated value for a field and type
  @discussion Creates a string containing only a strict set of characters, by converting some characters and removing others. 
  @param string The unsanitized string
@@ -105,7 +105,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 /*!
  @method stringBySanitizedCiteKeyString
  @abstract Validate a format string to use for a field in a type
- @discussion Checks for valid specifiers and calls stringBySanitizingString:forField:inType: on other parts of the string. Might change the format string.
+ @discussion Checks for valid specifiers and calls stringBySanitizingString:forField:inFieldType: on other parts of the string. Might change the format string.
  @param formatString The format string to check
  @param fieldName The name of the field (e.g. "Author")
  @param type The reference type (e.g. BibTeX, RIS)
