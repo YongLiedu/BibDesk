@@ -651,18 +651,10 @@ stringByAppendingPathComponent:@"BibDesk"]; */
     }
     dictionary = [NSMutableDictionary dictionaryWithCapacity:10];
     
-    [publications autorelease];
     newPubs = [PubMedParser itemsFromString:dataString
                                       error:&hadProblems
                                 frontMatter:frontMatter
                                    filePath:filePath];
-    publications = [newPubs retain];
-		
-	NSEnumerator *pubEnum = [publications objectEnumerator];
-	BibItem *pub;
-	while (pub = [pubEnum nextObject]) {
-		[pub setDocument:self];
-	}
     
     if(hadProblems){
         // run a modal dialog asking if we want to use partial data or give up
@@ -685,7 +677,17 @@ stringByAppendingPathComponent:@"BibDesk"]; */
             return NO;
         }
     }
-    [shownPublications setArray:publications];
+    
+	[publications autorelease];
+    publications = [newPubs retain];
+		
+	NSEnumerator *pubEnum = [publications objectEnumerator];
+	BibItem *pub;
+	while (pub = [pubEnum nextObject]) {
+		[pub setDocument:self];
+	}
+    
+	[shownPublications setArray:publications];
     [self refreshAuthors];
     // since we can't save pubmed files as pubmed files:
     [self updateChangeCount:NSChangeDone];
@@ -714,18 +716,10 @@ stringByAppendingPathComponent:@"BibDesk"]; */
     // to enable some cheapo timing, uncomment these:
 //    NSDate *start = [NSDate date];
 //    NSLog(@"start: %@", [start description]);
-    [publications autorelease];
     newPubs = [BibTeXParser itemsFromData:data
                                            error:&hadProblems
                                      frontMatter:frontMatter
                                         filePath:filePath];
-    publications = [newPubs retain];
-		
-	NSEnumerator *pubEnum = [publications objectEnumerator];
-	BibItem *pub;
-	while (pub = [pubEnum nextObject]) {
-		[pub setDocument:self];
-	}
 
 //    NSLog(@"end %@ elapsed: %f", [[NSDate date] description], [start timeIntervalSinceNow]);
 
@@ -750,7 +744,17 @@ stringByAppendingPathComponent:@"BibDesk"]; */
             return NO;
         }
     }
-    [shownPublications setArray:publications];
+    
+	[publications autorelease];
+    publications = [newPubs retain];
+		
+	NSEnumerator *pubEnum = [publications objectEnumerator];
+	BibItem *pub;
+	while (pub = [pubEnum nextObject]) {
+		[pub setDocument:self];
+	}
+    
+	[shownPublications setArray:publications];
     [self refreshAuthors];
     return YES;
 }
