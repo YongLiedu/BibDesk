@@ -7,6 +7,7 @@
 //
 
 #import "BibPref_Files.h"
+#import "BibAppController.h"
 
 
 @implementation BibPref_Files
@@ -14,8 +15,8 @@
 - (void)awakeFromNib{
     [super awakeFromNib];
     
-    encodingsArray = [[[[NSApp delegate] encodingDefinitionDictionary] objectForKey:@"StringEncodings"] retain];
-    encodingNames = [[[[NSApp delegate] encodingDefinitionDictionary] objectForKey:@"DisplayNames"] retain];
+    encodingsArray = [[[(BibAppController *)[NSApp delegate] encodingDefinitionDictionary] objectForKey:@"StringEncodings"] retain];
+    encodingNames = [[[(BibAppController *)[NSApp delegate] encodingDefinitionDictionary] objectForKey:@"DisplayNames"] retain];
 
     [encodingPopUp removeAllItems];
     [encodingPopUp addItemsWithTitles:encodingNames];
