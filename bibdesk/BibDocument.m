@@ -717,6 +717,9 @@ stringByAppendingPathComponent:@"BibDesk"]; */
 		if([quickSearchTextDict objectForKey:quickSearchKey]){
 			[searchCellOrTextField setStringValue:
 				[quickSearchTextDict objectForKey:quickSearchKey]];
+			if(BDSK_USING_JAGUAR){
+				[quickSearchClearButton setEnabled:YES];
+			}
 		}else{
 			[searchCellOrTextField setStringValue:@""];
 		}
@@ -833,20 +836,22 @@ stringByAppendingPathComponent:@"BibDesk"]; */
 
 - (IBAction)clearQuickSearch:(id)sender{
     [searchFieldTextField setStringValue:@""];
-    [self controlTextDidChange:nil];
+	[self searchFieldAction:searchFieldTextField];
+	[quickSearchClearButton setEnabled:NO];
 }
 
 - (void)controlTextDidChange:(NSNotification *)notif{
 	if([notif object] == searchFieldTextField){
-		NSLog(@"ctdc");
+		if([[searchFieldTextField stringValue] isEqualToString:@""]){
+			[quickSearchClearButton setEnabled:NO];
+		}else{
+			[quickSearchClearButton setEnabled:YES];
+		}
 		[self searchFieldAction:searchFieldTextField];
 	}
 }
 
-//@@ jaguar compat: need to add controlTextDidChange:
-
 - (IBAction)searchFieldAction:(id)sender{
-	NSLog(@"in searchFieldAction, sender is %@, stringValue is %@", sender, [sender stringValue]);
 	[self hidePublicationsWithoutSubstring:[sender stringValue] inField:quickSearchKey];
 }
 
@@ -859,7 +864,7 @@ stringByAppendingPathComponent:@"BibDesk"]; */
 	
     [[self currentView] deselectAll:self];
 	
-	NSLog(@"looking for [%@] in [%@]",substring, field);
+	// NSLog(@"looking for [%@] in [%@]",substring, field);
     
     if(![substring isEqualToString:@""]){
         while(pub = [e nextObject]){
