@@ -55,7 +55,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
     BOOL hadProblems = NO;
 
     BibItem *editorBib = [[self windowController] currentBib];
-    NSArray *oldKeys = [[editorBib dict] allKeys];
+    NSArray *oldKeys = [[editorBib pubFields] allKeys];
         
     sourceDragMask = [sender draggingSourceOperationMask];
     if([sender draggingSource]){
@@ -95,14 +95,14 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
             
         draggedPubsE = [draggedPubs objectEnumerator];
         while(tempBI = [draggedPubsE nextObject]){
-            bibDict = [tempBI dict];
+            bibDict = [tempBI pubFields];
             newKeyE = [bibDict keyEnumerator];
 
             // fixme, read this comment: i don't understand it anymore
             // Test a keyboard? mask so that sometimes we can override all fields.
 
             while(key = [newKeyE nextObject]){
-                value = [[editorBib dict] objectForKey:key]; // value is the value of key in the dragged-onto window.
+                value = [[editorBib pubFields] objectForKey:key]; // value is the value of key in the dragged-onto window.
 //                NSLog(@"a key is %@, its value is [%@]", key, value);
                 if (([oldKeys containsObject:key] &&
                      [value isEqualToString:@""]) ||
