@@ -1572,16 +1572,16 @@ void _setupFonts(){
 - (BOOL)stringIsValid:(NSString *)proposedStr forField:(NSString *)fieldName
 {
 	if ([fieldName isEqualToString:BDSKCiteKeyString]) {
-		    return !(proposedStr == nil || [proposedStr isEqualToString:@""] ||
-					 [[self document] citeKeyIsUsed:proposedStr byItemOtherThan:self]);
+		return !(proposedStr == nil || [proposedStr isEqualToString:@""] ||
+				 [[self document] citeKeyIsUsed:proposedStr byItemOtherThan:self]);
 	}
 	else if ([fieldName isEqualToString:BDSKLocalUrlString]) {
-			if (proposedStr == nil || [proposedStr isEqualToString:@""])
-				return NO;
-			if ([[NSFileManager defaultManager] fileExistsAtPath:proposedStr])
-				return NO;
-			return YES;
-			
+		if (proposedStr == nil || [proposedStr isEqualToString:@""])
+			return NO;
+		NSString *papersFolderPath = [[OFPreferenceWrapper sharedPreferenceWrapper] stringForKey:BDSKPapersFolderPathKey];
+		if ([[NSFileManager defaultManager] fileExistsAtPath:[papersFolderPath stringByAppendingPathComponent:proposedStr]])
+			return NO;
+		return YES;
 	}
 	else {
 		[NSException raise:@"unimpl. feat. exc." format:@"stringIsValid:forField: is partly implemented"];
