@@ -124,6 +124,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
                                                    object:nil];
         _errors = [[NSMutableArray alloc] initWithCapacity:5];
         _finder = [[BibFinder sharedFinder] retain];
+        acLock = [[NSLock alloc] init];
         _autoCompletionDict = [[NSMutableDictionary alloc] initWithCapacity:15]; // arbitrary
 	 	_formatters = [[NSMutableDictionary alloc] initWithCapacity:15]; // arbitrary
         _autocompletePunctuationCharacterSet = [[NSCharacterSet characterSetWithCharactersInString:@",:;"] retain];
@@ -201,6 +202,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 	[requiredFieldsForCiteKey release];
 	[_formatters release];
     [_autocompletePunctuationCharacterSet release];
+    [acLock release];
 	[_finder release];
     [_errors release];
     [super dealloc];
@@ -411,7 +413,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 
 - (void)addString:(NSString *)string forCompletionEntry:(NSString *)entry{
     NSMutableArray *completionArray = nil;
-    BOOL keyExists = [[_autoCompletionDict allKeys] containsObject:entry];
+    BOOL keyExists = [[_autoCompletionDict allKeysUsingLock:acLock] containsObject:entry usingLock:acLock];
     // NSLog(@"got string %@ for entry %@", string, entry);
     
     if(string == nil) return; // shouldn't happen

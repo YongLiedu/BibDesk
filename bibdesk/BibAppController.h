@@ -46,6 +46,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
     NSString *currentFileName;
     
     // global auto-completion dictionary:
+    NSLock *acLock;
     NSMutableDictionary *_autoCompletionDict;
     NSMutableDictionary *_formatters;
     NSCharacterSet *_autocompletePunctuationCharacterSet;

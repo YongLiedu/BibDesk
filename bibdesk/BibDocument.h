@@ -104,6 +104,8 @@ extern NSString *BDSKBibItemLocalDragPboardType;
     NSMutableArray *shownPublications;    // holds the ones we want to show.
     // All display related operations should use shownPublications
     // in aspect oriented objective c i could have coded that assertion!
+    NSLock *pubsLock;
+    NSTimer *parseUpdateTimer;
 	
 	NSMutableSet *authors;
 

@@ -40,6 +40,7 @@ NSString *BDSKBibItemLocalDragPboardType = @"edu.ucsd.cs.mmccrack.bibdesk: Local
     if(self = [super init]){
         publications = [[NSMutableArray alloc] initWithCapacity:1];
         shownPublications = [[NSMutableArray alloc] initWithCapacity:1];
+        pubsLock = [[NSLock alloc] init];
         frontMatter = [[NSMutableString alloc] initWithString:@""];
         authors = [[NSMutableSet alloc] init];
 
@@ -221,6 +222,7 @@ NSString *BDSKBibItemLocalDragPboardType = @"edu.ucsd.cs.mmccrack.bibdesk: Local
                                   withObject:nil];
     [publications release]; // these should cause the bibitems to get dealloc'ed
     [shownPublications release];
+    [pubsLock release];
     [frontMatter release];
     [authors release];
     [quickSearchTextDict release];
@@ -329,12 +331,19 @@ NSString *BDSKBibItemLocalDragPboardType = @"edu.ucsd.cs.mmccrack.bibdesk: Local
 	[self addPublication:pub lastRequest:YES];
 }
 
+- (void)addPublicationInBackground:(BibItem *)pub{
+    [publications addObject:pub usingLock:pubsLock];
+    [shownPublications addObject:pub usingLock:pubsLock];
+    [pub setDocument:self];
+    [self updateChangeCount:NSChangeCleared];
+}
+
 - (void)addPublication:(BibItem *)pub lastRequest:(BOOL)last{
 	NSUndoManager *undoManager = [self undoManager];
 	[[undoManager prepareWithInvocationTarget:self] removePublication:pub];
 	
-	[publications addObject:pub];
-	[shownPublications addObject:pub];
+	[publications addObject:pub usingLock:pubsLock];
+	[shownPublications addObject:pub usingLock:pubsLock];
 	[pub setDocument:self];
 
 	NSDictionary *notifInfo = [NSDictionary dictionaryWithObjectsAndKeys:pub, @"pub",
@@ -358,8 +367,8 @@ NSString *BDSKBibItemLocalDragPboardType = @"edu.ucsd.cs.mmccrack.bibdesk: Local
 													  userInfo:notifInfo];	
 	
 	[pub setDocument:nil];
-	[publications removeObjectIdenticalTo:pub];
-	[shownPublications removeObjectIdenticalTo:pub];
+	[publications removeObjectIdenticalTo:pub usingLock:pubsLock];
+	[shownPublications removeObjectIdenticalTo:pub usingLock:pubsLock];
 	
 	notifInfo = [NSDictionary dictionaryWithObjectsAndKeys:pub, @"pub",
 		(last ? @"YES" : @"NO"), @"lastRequest", nil];
@@ -377,7 +386,7 @@ NSString *BDSKBibItemLocalDragPboardType = @"edu.ucsd.cs.mmccrack.bibdesk: Local
 		// This method should also check the publication to see if it's selected?
 		// and maybe also resort it... - maybe not resort this.
         [self refreshAuthors];
-		[self updateUI];
+        [self performSelectorOnMainThread:@selector(updateUI) withObject:nil waitUntilDone:NO];
 	}
 }
 
@@ -973,10 +982,13 @@ stringByAppendingPathComponent:@"BibDesk"]; */
                 
 #warning ARM: Need to save document ivar for string encoding in binary file
         // NSLog(@"*** WARNING: using new parser.  To disable, use `defaults write edu.ucsd.cs.mmccrack.bibdesk \"Use Unicode BibTeX Parser\" 'NO'` and relaunch BibDesk.");
-        newPubs = [BibTeXParser itemsFromString:fileContentString
-                                          error:&hadProblems
-                                    frontMatter:frontMatter
-                                       filePath:filePath];
+
+        [self startParseUpdateTimer]; // start on the main thread
+        [NSThread detachNewThreadSelector:@selector(parseInBackground:)
+                                 toTarget:self
+                               withObject:fileContentString];
+        return YES;
+
     } else {
         newPubs = [BibTeXParser itemsFromData:data
                                         error:&hadProblems
@@ -1023,6 +1035,33 @@ stringByAppendingPathComponent:@"BibDesk"]; */
     return YES;
 }
 
+- (void)parseInBackground:(NSString *)fileContents{
+    NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
+    BibTeXParser *parser = [[BibTeXParser alloc] init];
+    [parser parseItemsFromString:fileContents addToDocument:self];
+    [parser release];
+    [pool release];
+}    
+
+- (void)startParseUpdateTimer{ // schedule this on the main run loop to update the UI at regular intervals
+    // NSLog(@"%@", NSStringFromSelector(_cmd) );
+    parseUpdateTimer = [NSTimer scheduledTimerWithTimeInterval:0.1
+                                               target:self 
+                                             selector:@selector(backgroundUpdateUI)
+                                             userInfo:nil
+                                              repeats:YES];
+    [parseUpdateTimer fire];
+}
+
+- (void)backgroundUpdateUI{
+    // NSLog(@"%@", NSStringFromSelector(_cmd) );
+    [self performSelectorOnMainThread:@selector(updateUI) withObject:nil waitUntilDone:NO];
+}
+
+- (void)stopParseUpdateTimer{ // sent by the parser when it's done with a file
+    [parseUpdateTimer invalidate];
+    [self backgroundUpdateUI];
+}
 
 - (IBAction)newPub:(id)sender{
     [self createNewBlankPubAndEdit:YES];
@@ -1671,7 +1710,7 @@ int compareSetLengths(NSSet *set1, NSSet *set2, void *context){
     NSNumber *i;
     NSMutableString *bibString = [NSMutableString stringWithString:@""];
     NSEnumerator *e = [self selectedPubEnumerator];
-	
+        
 	[previewField setString:@""];
 	if([self numberOfSelectedPubs] == 0){
 		//   [editPubButton setEnabled:NO];
@@ -2241,11 +2280,14 @@ This method always returns YES. Even if some or many operations fail.
 
 
 - (void)handleUpdateUINotification:(NSNotification *)notification{
-    [self updateUI];
+    [self performSelectorOnMainThread:@selector(updateUI)
+                           withObject:nil
+                        waitUntilDone:NO];
+//    [self updateUI];
 }
 
 
-- (void)updateUI{
+- (void)updateUI{ // not thread safe
     [self setTableFont];
 	[tableView reloadData];
 
@@ -2513,6 +2555,9 @@ This method always returns YES. Even if some or many operations fail.
                                                                 forKeys:[NSArray arrayWithObjects:NSUnderlineStyleAttributeName,  nil]];
     NSMutableAttributedString *s;
     
+    if(![previewField lockFocusIfCanDraw])
+        return;
+    
     [previewField setString:@""];
 
     while(i = [enumerator nextObject]){
@@ -2544,6 +2589,7 @@ This method always returns YES. Even if some or many operations fail.
 
         [previewField replaceCharactersInRange: [previewField selectedRange] withString:@"\n\n"];
     }
+    [previewField unlockFocus];
 }
 
 - (void)handlePreviewDisplayChangedNotification:(NSNotification *)notification{
