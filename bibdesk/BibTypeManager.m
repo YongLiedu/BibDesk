@@ -28,11 +28,8 @@ static BibTypeManager *sharedInstance = nil;
     [validSet addCharactersInRange:NSMakeRange( (unsigned int)'A', 26)];
     [validSet addCharactersInRange:NSMakeRange( (unsigned int)'-', 15)];  //  -./0123456789:;
     
-    // this is used for generated cite keys, verys strict!
+    // this is used for generated cite keys, very strict!
 	strictInvalidCiteKeyCharSet = [[validSet invertedSet] copy];  // don't release this
-    
-	[validSet removeCharactersInString:@":"];
-	[validSet addCharactersInString:@"%"];
     
 	// this set is used for warning the user on manual entry of a local-url; allows non-ASCII characters and some math symbols
     invalidLocalUrlCharSet = [[NSCharacterSet characterSetWithCharactersInString:@":"] retain];
@@ -116,7 +113,7 @@ static BibTypeManager *sharedInstance = nil;
 		return strictInvalidCiteKeyCharSet;
 	}
 	if([fieldName isEqualToString:@"Local-Url"]){
-		return invalidLocalUrlCharSet;
+		return strictInvalidLocalUrlCharSet;
 	}
 	[NSException raise:@"unimpl. feat. exc." format:@"strictInvalidCharactersForField is partly implemented"];
 }
