@@ -29,6 +29,29 @@
 #include "error.h"
 #include "my_dmalloc.h"
 
+// ----------------------------------------------------------------------------------------
+// changes for use with bibdesk - due to laziness and not wanting
+// to mess with configure too much, the struct is just copy-n-pasted
+// into BibAppController.h
+
+#import <Cocoa/Cocoa.h>
+
+@interface BDSKErrObj : NSObject{
+    NSString *fileName;
+    int lineNumber;
+
+    NSString *itemDescription;
+    int itemNumber;
+
+    NSString *errorClassName;
+    NSString *errorMessage;
+}
+@end
+@implementation BDSKErrObj
+@end
+//
+// ----------------------------------------------------------------------------------------
+
 
 #define NUM_ERRCLASSES ((int) BTERR_INTERNAL + 1)
 
@@ -83,42 +106,64 @@ void print_error (bt_error *err)
 {
    char *  name;
    boolean something_printed;
-
+   NSMutableString *errString = [NSMutableString stringWithString:@""];
+   BDSKErrObj *errObj = [[BDSKErrObj alloc] init];
+   
    something_printed = FALSE;
 
    if (err->filename)
    {
-      fprintf (stderr, err->filename);
-      something_printed = TRUE;
+       fprintf (stderr, err->filename);
+       [errString appendString:[NSString stringWithCString:err->filename]];
+       [errObj takeValue:[[NSString stringWithCString:err->filename] retain] forKey:@"fileName"];
+       something_printed = TRUE;
    }
    if (err->line > 0)                   /* going to print a line number? */
    {
-      if (something_printed)
-         fprintf (stderr, ", ");
-      fprintf (stderr, "line %d", err->line);
-      something_printed = TRUE;
+       if (something_printed){
+           fprintf (stderr, ", ");
+           [errString appendString:@", "];
+       }
+       fprintf (stderr, "line %d", err->line);
+       [errString appendString:[NSString stringWithFormat:@"line %d", err->line]];
+       [errObj takeValue:[[NSNumber numberWithInt:err->line] retain] forKey:@"lineNumber"];
+       something_printed = TRUE;
    }
    if (err->item_desc && err->item > 0) /* going to print an item number? */
    {
-      if (something_printed)
-         fprintf (stderr, ", ");
-      fprintf (stderr, "%s %d", err->item_desc, err->item);
+       if (something_printed){
+           fprintf (stderr, ", ");
+           [errString appendString:@", "];
+       }
+       fprintf (stderr, "%s %d", err->item_desc, err->item);
+       [errString appendString:[NSString stringWithFormat:@"%s %d", err->item_desc, err->item]];
+       [errObj takeValue:[[NSString stringWithCString:err->item_desc] retain] forKey:@"itemDescription"];
+       [errObj takeValue:[NSNumber numberWithInt:err->item] forKey:@"itemNumber"];
       something_printed = TRUE;
    }
 
    name = errclass_names[(int) err->class];
    if (name)
    {
-      if (something_printed)
-         fprintf (stderr, ", ");
-      fprintf (stderr, name);
+       if (something_printed){
+           fprintf (stderr, ", ");
+           [errString appendString:@", "];
+       }
+       fprintf (stderr, name);
+       [errString appendString:[NSString stringWithCString:name]];
+       [errObj takeValue:[[NSString stringWithCString:name] retain] forKey:@"errorClassName"];
       something_printed = TRUE;
    }
 
-   if (something_printed)
-      fprintf (stderr, ": ");
+   if (something_printed){
+       fprintf (stderr, ": ");
+       [errString appendString:@": "];
+   }
 
    fprintf (stderr, "%s\n", err->message);
+   [errString appendString:[NSString stringWithCString:err->message]];
+   [errObj takeValue:[[NSString stringWithCString:err->message] retain] forKey:@"errorMessage"];
+   [[NSNotificationCenter defaultCenter] postNotificationName:@"BTPARSE ERROR" object:errObj];
 
 } /* print_error() */
 
