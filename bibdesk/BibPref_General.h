@@ -32,6 +32,7 @@
     NSMutableArray *showColsArray;    //" the columns to show"
     // display pref radio matrix
     IBOutlet NSMatrix* displayPrefRadioMatrix;
+    IBOutlet NSTextField *previewMaxNumberField;
     
     IBOutlet NSPopUpButton *previewFontPopup;
     IBOutlet NSPopUpButton *tableViewFontPopup;
@@ -51,6 +52,7 @@
 // tableview font selection:
 - (IBAction)chooseFont:(id)sender;
 - (IBAction)changePreviewDisplay:(id)sender;
+- (IBAction)changePreviewMaxNumber:(id)sender;
 - (IBAction)changeShownColumns:(id)sender;
 
 - (IBAction)selectPreviewFont:(id)sender;

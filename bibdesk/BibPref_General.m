@@ -55,6 +55,12 @@
     [tableViewFontSizeField setFloatValue:[defaults floatForKey:BDSKTableViewFontSizeKey]];
     
     [displayPrefRadioMatrix selectCellWithTag:[defaults integerForKey:BDSKPreviewDisplayKey]];
+	
+    int maxNumber = [defaults integerForKey:BDSKPreviewMaxNumberKey];
+	if (maxNumber == 0)
+		[previewMaxNumberField setStringValue:NSLocalizedString(@"All",@"All")];
+	else 
+		[previewMaxNumberField setIntValue:maxNumber];
     
     [editOnPasteButton setState:[defaults integerForKey:BDSKEditOnPasteKey]];
 
@@ -166,6 +172,15 @@
         }
         [[NSNotificationCenter defaultCenter] postNotificationName:BDSKPreviewDisplayChangedNotification object:nil];
 	}
+}
+
+- (IBAction)changePreviewMaxNumber:(id)sender{
+    int maxNumber = [sender intValue];
+    if(maxNumber != [defaults integerForKey:BDSKPreviewMaxNumberKey]){
+		[defaults setInteger:maxNumber forKey:BDSKPreviewMaxNumberKey];
+		[[NSNotificationCenter defaultCenter] postNotificationName:BDSKPreviewDisplayChangedNotification object:nil];
+	}
+	[self updateUI];
 }
 
 - (IBAction)changeShownColumns:(id)sender{
