@@ -154,6 +154,9 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 }
 
 - (NSDictionary *)encodingDefinitionDictionary{
+    // From a model standpoint, it probably would make more sense to have an array of dictionaries, but the arrays are directly useful for
+    // populating the popup menus.  Just remember to add a displayName _and_ a corresponding NSStringEncoding if you need to add another one.
+    // This is used in the Files pref pane, and in the open/save accessory views at present (0.97.2+).
     NSArray *displayNames = [NSArray arrayWithObjects:@"ASCII (TeX)", @"NEXTSTEP", @"Japanese EUC", @"UTF-8", @"ISO Latin 1", @"Non-lossy ASCII",
         @"ISO Latin 2", @"Unicode", @"Cyrillic", @"Windows Latin 1", @"Greek", @"Turkish", @"Windows Latin 2", @"Mac OS Roman", nil];
     NSArray *encodings = [NSArray arrayWithObjects:[NSNumber numberWithInt:NSASCIIStringEncoding], [NSNumber numberWithInt:NSNEXTSTEPStringEncoding],

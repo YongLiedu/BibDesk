@@ -99,6 +99,14 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
  */
 - (void)openBibTeXFile:(NSString *)filePath withEncoding:(NSStringEncoding)encoding;
 
+/*!
+    @method     encodingDefinitionDictionary
+    @abstract   Returns a dictionary which contains two arrays, with corresponding objects at each index.  The arrays are used
+                for displaying lists of possible string encodings in a popup button, and synchronizing a human-readable name with
+                the actual NSStringEncoding values.
+    @discussion
+*/
+- (NSDictionary *)encodingDefinitionDictionary;
 
 - (NSArray *)requiredFieldsForCiteKey;
 - (NSArray *)setRequiredFieldsForCiteKey:(NSArray *)newFields;
