@@ -161,8 +161,9 @@ NSRange SafeForwardSearchRange( unsigned startLoc, unsigned seekLength, unsigned
         
         firstAtRange = nextAtRange;
         nextAtRange = [fullString rangeOfString:@"@" options:NSLiteralSearch range:SafeForwardSearchRange(firstAtRange.location + 1, fullStringLength - firstAtRange.location - 1, fullStringLength)];
-        if(nextAtRange.location != NSNotFound)
-            [scanner setScanLocation:nextAtRange.location];
+
+        if(firstAtRange.location != NSNotFound)
+            [scanner setScanLocation:firstAtRange.location];
         
         NSLog(@"Finished a bibitem, next one is at %i, following is at %@", firstAtRange.location, ( nextAtRange.location != NSNotFound ? [NSString stringWithFormat:@"%i", nextAtRange.location] : @"NSNotFound" ) );
 
