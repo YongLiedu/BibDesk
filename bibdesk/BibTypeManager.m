@@ -19,7 +19,7 @@ static BibTypeManager *_sharedInstance = nil;
 - (id)init{
     self = [super init];
     _typeInfoDict = [[NSDictionary dictionaryWithContentsOfFile:[[[NSBundle mainBundle] resourcePath] stringByAppendingPathComponent:@"TypeInfo.plist"]] retain];
-	_invalidCiteKeyCharSet = [[NSCharacterSet characterSetWithCharactersInString:@" '@,\\#}{~"] retain];
+	_invalidCiteKeyCharSet = [[NSCharacterSet characterSetWithCharactersInString:@" '\"@,\\#}{~()"] retain];
     return self;
 }
 
