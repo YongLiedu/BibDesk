@@ -161,11 +161,12 @@ NSString *stringFromBTField(AST *field,
                                     for(; buf[cidx] != '"'; cidx++);
                                 }
                                 complexString = [[[NSString alloc] initWithData:[NSData dataWithBytes:&buf[field->down->offset] length:(cidx- (field->down->offset))] encoding:parserEncoding] autorelease];
+                                complexString = checkAndTranslateString(complexString, field->line, filePath, parserEncoding); // check for bad characters, TeXify
                             }else{
                                 *hadProblems = YES;
                             }
                         }else{
-                            complexString = stringFromBTField(field, sFieldName, filePath, aDocument);
+                            complexString = stringFromBTField(field, sFieldName, filePath, aDocument); // handles TeXification
                         }
                         
                         [dictionary setObject:complexString forKey:sFieldName];
