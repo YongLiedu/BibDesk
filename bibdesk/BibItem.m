@@ -85,6 +85,7 @@ void _setupFonts(){
 
 - (id)initWithType:(NSString *)type fileType:(NSString *)inFileType authors:(NSMutableArray *)authArray{ // this is the designated initializer.
     if (self = [super init]){
+		NSCalendarDate *currentDate = [NSCalendarDate calendarDate];
         pubFields = [[NSMutableDictionary alloc] init];
         requiredFieldNames = [[NSMutableArray alloc] init];
         pubAuthors = [authArray mutableCopy];     // copy, it's mutable
@@ -95,8 +96,8 @@ void _setupFonts(){
         [self makeType:type];
         [self setCiteKeyString: @"cite-key"];
         [self setDate: nil];
-		[self setDateCreated: nil];
-		[self setDateModified: nil];
+		[self setDateCreated: currentDate];
+		[self setDateModified: currentDate];
         [self setFileOrder:-1];
         _setupFonts();
     }
