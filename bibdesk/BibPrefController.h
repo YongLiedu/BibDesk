@@ -61,8 +61,6 @@ extern NSString *BDSKRSSDescriptionFieldKey;
 extern NSString *BDSKColumnWidthsKey;
 extern NSString *BDSKColumnOrderKey;
 
-extern NSString *BDSKViewByKey;
-
 extern NSString *BDSKPubTypeKey;
 extern NSString *BDSKPubTypeStringKey;
 extern NSString *BDSKShowWarningsKey;

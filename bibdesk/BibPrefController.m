@@ -44,8 +44,6 @@ NSString *BDSKCustomCiteStringsKey = @"Custom CiteStrings";
 NSString *BDSKAutoSaveAsRSSKey = @"Auto-save as RSS";
 NSString *BDSKRSSDescriptionFieldKey = @"Field to use as Description in RSS";
 
-NSString *BDSKViewByKey = @"View-by Field";
-
 NSString *BDSKPubTypeKey = @"Current Publication Type";
 NSString *BDSKPubTypeStringKey = @"Current Publication Type String";
 
