@@ -178,6 +178,8 @@ NSString *BDSKUrlString = @"Url";
     [abstractView setString:[theBib valueOfField:BDSKAbstractString]];
     [rssDescriptionView setString:[theBib valueOfField:BDSKRssDescriptionString]];
     
+	[fieldsScrollView setDrawsBackground:NO];
+	
 	[citeKeyField setStringValue:[theBib citeKey]];
 	
 	[theBib setEditorObj:self];	
@@ -644,12 +646,20 @@ NSString *BDSKUrlString = @"Url";
 #pragma mark snoop drawer stuff
 
 - (void)toggleSnoopDrawer:(id)sender{
+	NSView* oldContentView = [documentSnoopDrawer contentView];
+		
     if (sender == documentSnoopButton) {
         [documentSnoopDrawer setContentView:pdfSnoopContainerView];
     }else{
         [documentSnoopDrawer setContentView:textSnoopContainerView];
     }
-    [documentSnoopDrawer toggle:sender];
+	
+	if (oldContentView == [documentSnoopDrawer contentView]) {
+		[documentSnoopDrawer toggle:sender ];
+	}
+	else {
+		[documentSnoopDrawer open:sender];
+	}
 }
 
 - (void)drawerWillOpen:(NSNotification *)notification{
