@@ -99,13 +99,14 @@ static void addToolbarItem(NSMutableDictionary *theDict,NSString *identifier,NSS
                    NSLocalizedString(@"Edit Selected Publication(s)",@""),
                    self, @selector(setImage:), [NSImage imageNamed: @"editdoc"],
                    @selector(editPubCmd:), NULL);
-
+	
+	
 	addToolbarItem(toolbarItems, SearchFieldDocToolbarItemIdentifier,
 				   NSLocalizedString(@"Search", @""),
 				   NSLocalizedString(@"Search", @""),
 				   NSLocalizedString(@"Search Publications", @""),
 				   self, @selector(setView:), searchFieldBox, NULL, NULL);
-
+	
     addToolbarItem(toolbarItems, PrvDocToolbarItemIdentifier,
                    NSLocalizedString(@"Preview",@""),
                    NSLocalizedString(@"Show Preview",@""),
@@ -113,7 +114,7 @@ static void addToolbarItem(NSMutableDictionary *theDict,NSString *identifier,NSS
                    nil, @selector(setImage:),
                    [NSImage imageNamed: @"previewdoc"],
                    @selector(toggleShowingPreviewPanel:), NULL);
-
+	
     // this one switches between outline and tableviews.
     addToolbarItem(toolbarItems, SortByDocToolbarItemIdentifier,
                    NSLocalizedString(@"Change View",@""),
