@@ -1218,7 +1218,6 @@ _setupParagraphStyle()
 	NSString *string, *numStr;
 	int number, numAuth, i, uniqueNumber;
 	unichar specifier, nextChar, uniqueSpecifier = 0;
-	BibAuthor *auth;
 	NSMutableArray *arr;
 	NSScanner *wordScanner;
 	
@@ -1259,7 +1258,7 @@ _setupParagraphStyle()
 						numAuth = [self numberOfAuthors];
 					}
 					for (i = 0; i < numAuth; i++) {
-						string = [[self authorAtIndex:i] lastName];
+						string = [[[self authorAtIndex:i] lastName] stringByRemovingCurlyBraces];
 						string = [converter stringBySanitizingString:string forField:fieldName inFileType:[self fileType]];
 						if ([string length] > number && number > 0) {
 							string = [string substringToIndex:number];
@@ -1290,12 +1289,14 @@ _setupParagraphStyle()
 						if (i > 0) {
 							[parsedStr appendString:@";"];
 						}
-						auth = [self authorAtIndex:i];
-						if ([[auth firstName] length] > 0) {
+						BibAuthor *auth = [self authorAtIndex:i];
+						NSString *firstName = [[auth firstName] stringByRemovingCurlyBraces];
+						NSString *lastName = [[auth lastName] stringByRemovingCurlyBraces];
+						if ([firstName length] > 0) {
 							string = [NSString stringWithFormat:@"%@.%C", 
-											[auth lastName], [[auth firstName] characterAtIndex:0]];
+											lastName, [firstName characterAtIndex:0]];
 						} else {
-							string = [auth lastName];
+							string = lastName;
 						}
 						string = [converter stringBySanitizingString:string forField:fieldName inFileType:[self fileType]];
 						if ([string length] > number && number > 0) {
