@@ -35,15 +35,18 @@ static NSMutableArray *_authors;
 + (BibAuthor *)authorWithName:(NSString *)newName andPub:(BibItem *)aPub{
 	BibAuthor *auth = nil;
 	BibAuthor *newAuth = [[[BibAuthor alloc] initWithName:newName andPub:aPub] autorelease];
-	
 	NSEnumerator *e = [_authors objectEnumerator];
 	
 	while(auth = [e nextObject]){
-		if([auth compare:newAuth] == NSOrderedSame){
-			[auth addPub:aPub];
-			[[NSNotificationCenter defaultCenter] postNotificationName:BDSKAuthorPubListChangedNotification
-																object:auth];
-			return auth;
+        if([auth compare:newAuth] == NSOrderedSame){
+            [auth addPub:aPub];
+            NSNotification *notif = [NSNotification notificationWithName:BDSKAuthorPubListChangedNotification
+                                                                  object:auth];
+            [[NSNotificationQueue defaultQueue] enqueueNotification:notif
+                                                       postingStyle:NSPostWhenIdle
+                                                       coalesceMask:NSNotificationCoalescingOnName
+                                                           forModes:nil];			
+            return auth;
 		}
 	}
 	// no match was found, create a new author:
@@ -60,9 +63,9 @@ static NSMutableArray *_authors;
         pubs = [[NSMutableArray alloc] init];
 	
 	[[NSNotificationCenter defaultCenter] addObserver:self
-											 selector:@selector(handleBibItemChangeNotification:)
-												 name:BDSKBibItemChangedNotification
-											   object:nil];
+                                                 selector:@selector(handleBibItemChangeNotification:)
+                                                     name:BDSKBibItemChangedNotification
+                                                   object:nil];
 	
     return self;
 }
