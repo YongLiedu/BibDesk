@@ -1,0 +1,170 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE dictionary SYSTEM "file://localhost/System/Library/DTDs/sdef.dtd">
+
+<!--
+ssp: 2004-07-19
+An experiment in using those modern sdef files to establish Bibdesk's scripting capabilities.
+
+/Developer/Tools/sdp -f st -i /Developer/Examples/Scripting\ Definitions/NSCoreSuite.sdef -i /Developer/Examples/Scripting\ Definitions/NSTextSuite.sdef BibDesk.sdef
+
+is a good command
+-->
+
+<dictionary title="BibDesk Terminology">
+    <suite name="Bibdesk Suite" code="MMcC" description="Bibdesk specific commands and classes for dealing with bibliographies and publications.">
+        <cocoa name="BibDeskSuite"/>
+        <classes>
+        
+        
+			<class name="author" plural="authors" code="auth" description="Contains the name of an author, tries to analyse it and list all publications of that author. Author names can be split into four E.g. '(Jean) (de la) (Fontaine) (Jr.)'">
+                <cocoa class="BibAuthor"/>
+                <!-- experimental -->
+                <contents name="full name" type="string" code="aunm" description="The author's full name">
+                	<cocoa method="name"/>
+                </contents>
+                <properties>
+                    <property name="first Name" code="aufn" type="string" description="The author's first name (hopefully)" access="r">
+                        <cocoa method="firstName"/>
+                    </property>  
+                    <property name="jr part" code="aujr" type="string" description="The 'Jr' part of the author's name (hopefully)" access="r">
+                        <cocoa method="jrPart"/>
+                    </property>  
+                    <property name="last name" code="auln" type="string" description="The author's last name (hopefully)" access="r">
+                        <cocoa method="lastName"/>
+                    </property>  
+                    <property name="von name part" code="auvp" type="string" description="'von' part of the author's name (hopefully)" access="r">
+                        <cocoa method="vonPart"/>
+                    </property>  
+ <!--                   <property name="full name" code="aunm" type="string" description="The author's full name">
+                        <cocoa method="name"/>
+                    </property>  -->
+			     </properties>
+			     <!-- Couldn't figure how to do the inverse relationships -->
+			     <elements>
+			         <element type="publication" description="Publications by the author" access="r">
+			             <cocoa method="publications"/>
+			         </element>
+			     </elements>
+			</class>
+
+
+
+
+			<class name="document" plural="documents" code="docu" description="A Bibdesk bibliography document." inherits="document">
+                <cocoa class="BibDocument"/>
+                <properties>
+                    <property name="selection" code="sele" type="list of publication" description="The selected publications.">
+                        <cocoa method="selection"/>
+                    </property>
+                </properties>
+			     <elements>
+			         <element type="publication" description="Publications in the bibliography">
+			             <cocoa method="publications"/>
+			         </element>
+			     </elements>
+                <responds-to-commands>
+                    <responds-to name="bibliography for">
+                    </responds-to>
+                    <responds-to name="selectionToClipboard">
+                        <cocoa method="copyAsRTF:"/>
+                    </responds-to>
+                </responds-to-commands>
+			</class>
+
+
+
+			<class name="publication" plural="publications" code="bibi" description="A publication.">
+                <cocoa class="BibItem"/>
+                <!-- experimental -->
+                <properties>
+                    <property name="RSS description" code="RSSd" type="string" description="The publication's RSS description as seen in the RSS Description tab.">
+                        <cocoa method="RSSDescription"/>
+                    </property>  
+                    <property name="RSS string" code="RSSv" type="string" description="RSS entry for the publication." access="r">
+                        <cocoa method="RSSValue"/>
+                    </property>  
+                    <property name="abstract" code="abst" type="string" description="The publication's abstract.">
+                        <cocoa method="abstract"/>
+                    </property>  
+                    <property name="note" code="note" type="string" description="Annotations for the publication as seen in the “Annote” tab.">
+                        <cocoa method="annotation"/>
+                    </property>  
+					<property name="text" code="ctxt" type="text" description="Styled string containing bibliography entry for the publication." access="r">
+						<cocoa method="attributedString"/>
+					</property>  
+					<property name="BibTeX string" code="BTeX" type="string" description="String for BibTeX entry.">
+						<cocoa method="bibTeXString"/>
+					</property>  
+					<property name="cite key" code="ckey" type="string" description="Key for citing the publication.">
+						<cocoa method="citeKey"/>
+					</property>  
+					<property name="publication date" code="pdat" type="date" description="Date of publication.">
+						<cocoa method="date"/>
+					</property>  
+					<property name="fields" code="flds" type="record" description="Fields with data about the publication. These may vary from publication to publication.">
+						<cocoa method="fields"/>
+					</property>  
+					<property name="local file" code="lURL" type="file" description="Location of a file containing the publication.">
+						<cocoa method="localURL"/>
+					</property>  
+					<property name="URL" code="rURL" type="string" description="URL pointing to the publication.">
+						<cocoa method="remoteURL"/>
+					</property>  
+					<property name="title" code="titl" type="string" description="The publication's title.">
+						<cocoa method="title"/>
+					</property>  
+					<property name="type" code="type" type="string" description="The publication's type. E.g. article, book, unpublished.">
+						<cocoa method="type"/>
+						<!-- Provide constants for these? This might be bad wrt to using types which aren't provided as constants. -->
+					</property>  
+					<property name="document" code="docu" type="document" description="The bibliography containing this publication record." access="r">
+						<cocoa method="document"/>
+					</property>  
+			     </properties>
+			     <!-- Couldn't figure how to do the inverse relationships -->
+			     <elements>
+			         <element type="author" name="author" description="Authors of the publication.">
+			             <cocoa method="pubAuthors"/>
+			         </element>
+			     </elements>
+			</class>
+
+
+			<class name="application" plural="applications" code="capp" description="Bibdesk's top level scripting object." inherits="application">
+                <cocoa class="NSApplication"/>
+                <properties>
+                    <property name="papers folder" code="pfol" type="string" description="Path to the papers folder as specified in the Auto File preference." access="r">
+                        <cocoa method="papersFolder"/>
+                    </property>
+                </properties>
+			     <elements>
+			         <element type="document" description="The bibliography files currently opened by Bibdesk.">
+			             <cocoa method="orderedDocuments"/>
+			         </element>
+			     </elements>
+                <responds-to-commands>
+                    <responds-to name="filter"/>
+                </responds-to-commands>
+			</class>
+        </classes>
+        
+        <commands>
+			<command name="find" code="MMcCfilt" description="Display only those publications containing the given string.">
+				<cocoa name="Filter" class="BibDeskFilterScriptCommand"/>
+				<direct-parameter type="object" description="The string to match in publication data"/>
+				<!-- type is actually string above -->
+			</command>
+			
+			<command name="bibliography for" code="MMcCbibf" description="Returns bibliography information for the publications passed to the command.">
+				<cocoa name="bibliographyFor" class="BibDeskBibliographyCommand"/>
+				<direct-parameter type="object" description="The list of publications to generate a bibliography for."/>
+				<!-- type is actually list of publication above -->
+				<result type="text" description="Bibliography as styled text"/>
+			</command>
+			
+			<command name="selectionToClipboard" description="Generates a bibliography from the selected items and puts it on the clipboard. This command has to be sent to a document." code="MMcCsbtc">
+				<!-- This is a silly command name. But AppleScript choked on all the reasonable ones as they contained words like copy or bibliography, which are already taken. =&gt; Ugly but less confusing. -->
+			</command>	
+		</commands>
+    </suite>
+</dictionary>
