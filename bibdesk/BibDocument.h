@@ -146,6 +146,7 @@ extern NSString* BDSKBibTeXStringPboardType;
 - (NSMenu *)searchFieldMenu;
 - (id)init;
 - (void)dealloc;
+- (void)addCustomWindowController:(NSWindowController *)windowController;
 - (NSArray *)publicationsForAuthor:(BibAuthor *)anAuthor;
 - (IBAction)exportAsRSS:(id)sender;
 - (IBAction)exportAsHTML:(id)sender;
