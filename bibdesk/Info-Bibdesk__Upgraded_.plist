@@ -301,19 +301,14 @@
 				<key>shortTitle</key>
 				<string>General</string>
 				<key>title</key>
-				<string>General application behaviour</string>
+				<string>General Application Behavior</string>
 			</dict>
 			<key>BibPref_InputManager</key>
 			<dict>
 				<key>defaultsDictionary</key>
-				<dict>
-					<key>bundleIdentifiers</key>
-					<array>
-						<string>com.apple.textedit</string>
-					</array>
-				</dict>
+				<dict/>
 				<key>icon</key>
-				<string>palm.icns</string>
+				<string>inputmanager.tiff</string>
 				<key>identifier</key>
 				<string>bp_inputmanager</string>
 				<key>nib</key>
@@ -323,7 +318,7 @@
 				<key>shortTitle</key>
 				<string>Autocompletion</string>
 				<key>title</key>
-				<string>Autocompletion InputManager</string>
+				<string>Autocompletion</string>
 			</dict>
 			<key>BibPref_RSS</key>
 			<dict>
@@ -345,7 +340,7 @@
 				<key>shortTitle</key>
 				<string>RSS</string>
 				<key>title</key>
-				<string>RSS publish &amp; subscribe</string>
+				<string>RSS Publish and Subscribe</string>
 			</dict>
 			<key>BibPref_TeX</key>
 			<dict>

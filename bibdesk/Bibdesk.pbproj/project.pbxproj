@@ -1596,6 +1596,7 @@
 				6CA69E0A06D2A388005F2126,
 				6CA69E0B06D2A38D005F2126,
 				F9A59EDB06DFE4B400C411CA,
+				F9D5D16306E10D44000E02C2,
 			);
 			isa = PBXResourcesBuildPhase;
 			runOnlyForDeploymentPostprocessing = 0;
@@ -2238,7 +2239,6 @@
 				274C84F705DF720A0020EEFF,
 				F9AC17700638709B009399C1,
 				F9FC662A06A9C6750016151E,
-				F9FC663006A9C6B00016151E,
 			);
 		};
 		2A37F4AAFDCFA73011CA2CEA = {
@@ -2358,6 +2358,7 @@
 		};
 		2A37F4B8FDCFA73011CA2CEA = {
 			children = (
+				F9D5D16206E10D44000E02C2,
 				F9BC920306E0EBB500B42137,
 				F9A59EDA06DFE4B400C411CA,
 				6CE46CB006C03BBB006BD69D,
@@ -4885,6 +4886,20 @@
 			settings = {
 			};
 		};
+		F9D5D16206E10D44000E02C2 = {
+			isa = PBXFileReference;
+			lastKnownFileType = image.tiff;
+			name = inputmanager.tiff;
+			path = Images/inputmanager.tiff;
+			refType = 4;
+			sourceTree = "<group>";
+		};
+		F9D5D16306E10D44000E02C2 = {
+			fileRef = F9D5D16206E10D44000E02C2;
+			isa = PBXBuildFile;
+			settings = {
+			};
+		};
 		F9D6C1E906AECF9700EAEB04 = {
 			fileEncoding = 30;
 			isa = PBXFileReference;
@@ -5112,7 +5127,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "/bin/cp $PROJECT_NAME.dmg /tmp\n/usr/bin/hdiutil attach /tmp/$PROJECT_NAME.dmg\n$SYSTEM_DEVELOPER_DIR/Tools/CpMac -r $BUILT_PRODUCTS_DIR/$PROJECT_NAME.app /Volumes/$PROJECT_NAME";
+			shellScript = "/bin/cp $PROJECT_NAME.dmg /tmp\n/usr/bin/hdiutil attach /tmp/$PROJECT_NAME.dmg\n$SYSTEM_DEVELOPER_DIR/Tools/CpMac -r $BUILT_PRODUCTS_DIR/$PROJECT_NAME.app /Volumes/$PROJECT_NAME\nosascript -e \"tell application \\\"Finder\\\"\" -e \"set the position of item 1 of the disk named \\\"$PROJECT_NAME\\\" to {204, 148}\" -e \"end tell\"\n/usr/sbin/diskutil eject /Volumes/$PROJECT_NAME\n/usr/bin/hdiutil convert /tmp/$PROJECT_NAME.dmg -format UDZO -o $HOME/Desktop/$PROJECT_NAME.dmg";
 		};
 		F9FC662A06A9C6750016151E = {
 			buildPhases = (
@@ -5131,37 +5146,6 @@
 			isa = PBXAggregateTarget;
 			name = DiskImage;
 			productName = DiskImage;
-		};
-		F9FC662F06A9C6B00016151E = {
-			buildActionMask = 2147483647;
-			files = (
-			);
-			inputPaths = (
-			);
-			isa = PBXShellScriptBuildPhase;
-			outputPaths = (
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-			shellPath = /bin/sh;
-			shellScript = "/usr/sbin/diskutil eject /Volumes/$PROJECT_NAME\n/usr/bin/hdiutil convert /tmp/$PROJECT_NAME.dmg -format UDZO -o $HOME/Desktop/$PROJECT_NAME.dmg";
-		};
-		F9FC663006A9C6B00016151E = {
-			buildPhases = (
-				F9FC662F06A9C6B00016151E,
-			);
-			buildSettings = {
-				OTHER_CFLAGS = "";
-				OTHER_LDFLAGS = "";
-				OTHER_REZFLAGS = "";
-				PRODUCT_NAME = CompressImage;
-				SECTORDER_FLAGS = "";
-				WARNING_CFLAGS = "-Wmost -Wno-four-char-constants -Wno-unknown-pragmas";
-			};
-			dependencies = (
-			);
-			isa = PBXAggregateTarget;
-			name = CompressImage;
-			productName = CompressImage;
 		};
 	};
 	rootObject = 2A37F4A9FDCFA73011CA2CEA;
