@@ -211,7 +211,14 @@ else if(([_lastName rangeOfString:@" "].location != NSNotFound) && VON){
     return _jrPart;
 }
 
+
+/*
+Sets all the different variables for partial names and so on from a given string. 
+ 
+Note: The strings returned by the bt_split_name function seem to be in the wrong encoding Ð UTF-8 is treated as ASCII. This is manually fixed for the _firstName, _lastName,  _jrPart and _vonPart variables.
+*/
 - (void)setName:(NSString *)newName{
+	NSStringEncoding defaultCStringEncoding = [NSString defaultCStringEncoding];
     bt_name *theName;
     int i = 0;
     NSMutableString *tmpStr = nil;
@@ -232,8 +239,8 @@ else if(([_lastName rangeOfString:@" "].location != NSNotFound) && VON){
         if(i >= 0 && i < theName->part_len[BTN_FIRST]-1)
             [tmpStr appendString:@" "];
     }
-    _firstName = [tmpStr retain];
-    
+    _firstName = [[NSString alloc] initWithData:[tmpStr dataUsingEncoding:defaultCStringEncoding allowLossyConversion:YES]  encoding:NSUTF8StringEncoding]; 
+		    
     // get tokens from von part
     tmpStr = [NSMutableString string];
     for (i = 0; i < theName->part_len[BTN_VON]; i++)
@@ -243,9 +250,9 @@ else if(([_lastName rangeOfString:@" "].location != NSNotFound) && VON){
             [tmpStr appendString:@" "];
 
     }
-    _vonPart = [tmpStr retain];
-    
-    // get tokens from last part
+    _vonPart = [[NSString alloc] initWithData:[tmpStr dataUsingEncoding:defaultCStringEncoding allowLossyConversion:YES]  encoding:NSUTF8StringEncoding]; 
+	
+	// get tokens from last part
     tmpStr = [NSMutableString string];
     for (i = 0; i < theName->part_len[BTN_LAST]; i++)
     {
@@ -253,7 +260,8 @@ else if(([_lastName rangeOfString:@" "].location != NSNotFound) && VON){
         if(i >= 0 && i < theName->part_len[BTN_LAST]-1)
             [tmpStr appendString:@" "];
     }
-    _lastName = [tmpStr retain];
+    _lastName = [[NSString alloc] initWithData:[tmpStr dataUsingEncoding:defaultCStringEncoding allowLossyConversion:YES]  encoding:NSUTF8StringEncoding]; 
+	
     
     // get tokens from jr part
     tmpStr = [NSMutableString string];    
@@ -263,8 +271,8 @@ else if(([_lastName rangeOfString:@" "].location != NSNotFound) && VON){
         if(i >= 0 && i < theName->part_len[BTN_JR]-1)
             [tmpStr appendString:@" "];
     }
-    _jrPart = [tmpStr retain];
-
+    _jrPart = [[NSString alloc] initWithData:[tmpStr dataUsingEncoding:defaultCStringEncoding allowLossyConversion:YES]  encoding:NSUTF8StringEncoding]; 
+	
 	[self refreshNormalizedName];
 	
 	bt_free_name(theName);
