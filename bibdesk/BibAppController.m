@@ -460,6 +460,8 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
   
 }
 
+#pragma mark || Service code
+
 - (void)completeCitationFromSelection:(NSPasteboard *)pboard
                              userData:(NSString *)userData
                                 error:(NSString **)error{
@@ -549,4 +551,26 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
     return;
 }
 
+- (void)completeCiteKeyFromSelection:(NSPasteboard *)pboard
+                             userData:(NSString *)userData
+                                error:(NSString **)error{
+
+    NSArray *types = [pboard types];
+    if (![types containsObject:NSStringPboardType]) {
+        *error = NSLocalizedString(@"Error: couldn't complete text.",
+                                   @"pboard couldn't give string.");
+        return;
+    }
+    NSString *pboardString = [pboard stringForType:NSStringPboardType];
+    NSArray *items = [_finder itemsMatchingCiteKey:pboardString];
+    BibItem *item;
+    NSMutableString *retStr = [NSMutableString string];
+    BOOL yn = NO;    
+    while(item = [[items objectEnumerator] nextObject]){
+        [retStr appendString:@" "];
+        [retStr appendString:[item citeKey]];
+    }
+    
+    yn = [pboard setString:retStr forType:NSStringPboardType];
+}
 @end
