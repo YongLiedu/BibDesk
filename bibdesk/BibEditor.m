@@ -103,7 +103,11 @@ NSString *BDSKDateModifiedString = @"Date-Modified";
     
     [[NSFontManager sharedFontManager] convertFont:requiredFont
                                        toHaveTrait:NSBoldFontMask];
-    // set up for adding all items 
+    
+	// make sure all changes are commited when we replace the form
+	[self finalizeChanges];
+	
+	// set up for adding all items 
     // remove all items in the NSForm (NSForm doesn't have a removeAllEntries.)
     numRows = [bibFields numberOfRows];
     for(i=0;i < numRows; i++){
@@ -565,6 +569,7 @@ NSString *BDSKDateModifiedString = @"Date-Modified";
     currentType = [bibTypeButton titleOfSelectedItem];
     if([theBib type] != currentType){
         [theBib makeType:currentType];
+		[self finalizeChanges];
         [self setupForm];
         [[OFPreferenceWrapper sharedPreferenceWrapper] setObject:currentType
                                                            forKey:BDSKPubTypeStringKey];
@@ -683,6 +688,7 @@ NSString *BDSKDateModifiedString = @"Date-Modified";
 							nil, nil, fileURLString);
 		}
 		
+		[self finalizeChanges];
 		[self setupForm];
         [self fixURLs];
     }
@@ -693,6 +699,7 @@ NSString *BDSKDateModifiedString = @"Date-Modified";
 	NSString *path = [sender representedObject];
 	
 	[theBib setField:@"Local-Url" toValue:[[NSURL fileURLWithPath:[path stringByStandardizingPath]] absoluteString]];
+	[self finalizeChanges];
 	[self setupForm];
 	[self fixURLs];
 }
@@ -728,6 +735,7 @@ NSString *BDSKDateModifiedString = @"Date-Modified";
 
 		[theBib addField:name];
 		[[[self window] undoManager] setActionName:NSLocalizedString(@"Add Field",@"")];
+		[self finalizeChanges];
 		[self setupForm];
 		[self makeKeyField:name];
         }
@@ -786,6 +794,7 @@ NSString *BDSKDateModifiedString = @"Date-Modified";
 
         [theBib removeField:[delFieldPopUp titleOfSelectedItem]];
 		[[[self window] undoManager] setActionName:NSLocalizedString(@"Remove Field",@"")];
+		[self finalizeChanges];
         [self setupForm];
     }
     // else, nothing.
@@ -822,6 +831,7 @@ NSString *BDSKDateModifiedString = @"Date-Modified";
 	NSDictionary *userInfo = [notification userInfo];
 	
 	if([[userInfo objectForKey:@"type"] isEqualToString:@"Add/Del Field"]){
+		[self finalizeChanges];
 		[self setupForm];
 		return;
 	}

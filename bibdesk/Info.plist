@@ -220,6 +220,8 @@
 					<string>0</string>
 					<key>Path to the papers folder</key>
 					<string>~/Documents/Papers</string>
+					<key>Local-Url Format</key>
+					<string>%a%Y%u.pdf</string>
 				</dict>
 				<key>icon</key>
 				<string>autofile.tiff</string>
