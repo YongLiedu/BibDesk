@@ -91,8 +91,26 @@
 	</dict>
 	<key>BibTeXTypesForPubMedTypes</key>
 	<dict>
+		<key>BOOK</key>
+		<string>book</string>
+		<key>CHAP</key>
+		<string>inbook</string>
+		<key>CONF</key>
+		<string>inproceedings</string>
+		<key>ELEC</key>
+		<string>electronic</string>
+		<key>GEN</key>
+		<string>misc</string>
 		<key>JOUR</key>
 		<string>article</string>
+		<key>MGZN</key>
+		<string>article</string>
+		<key>RPRT</key>
+		<string>techreport</string>
+		<key>SER</key>
+		<string>incollection</string>
+		<key>UNPB</key>
+		<string>unpublished</string>
 	</dict>
 	<key>FieldsForTypes</key>
 	<dict>
