@@ -603,7 +603,7 @@ NSString *BDSKDateModifiedString = @"Date-Modified";
     if (lurl && [[NSFileManager defaultManager] fileExistsAtPath:lurl]){
             icon = [[NSWorkspace sharedWorkspace] iconForFile:lurl];
             [viewLocalButton setIconImage:icon];      
-            [[viewLocalButton cell] seticonActionEnabled:YES];
+            [[viewLocalButton cell] setIconActionEnabled:YES];
             [viewLocalButton setToolTip:@"View File"];
             [[self window] setRepresentedFilename:lurl];
 			
@@ -637,7 +637,7 @@ NSString *BDSKDateModifiedString = @"Date-Modified";
             }
     }else{
         [viewLocalButton setIconImage:[NSImage imageNamed:@"QuestionMarkFile"]];
-		[[viewLocalButton cell] seticonActionEnabled:NO];
+		[[viewLocalButton cell] setIconActionEnabled:NO];
         [viewLocalButton setToolTip:NSLocalizedString(@"Choose a file to link with in the Local-Url Field", @"bad/empty local url field")];
         [[self window] setRepresentedFilename:@""];
 
