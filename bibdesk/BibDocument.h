@@ -33,6 +33,9 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 #import "AvailabilityMacros.h"
 #import "BibFiler.h"
 
+#import "BDSKFileContentsFilter.h"
+#import "ApplicationServices/ApplicationServices.h"
+
 
 @class BDSKCustomCiteTableView;
 @class BibItem;
@@ -459,10 +462,12 @@ int generalBibItemCompareFunc(id item1, id item2, void *context);
 
 /*!
     @method     consolidateLinkedFiles:
-    @abstract   (description)
-    @discussion (description)
+    @abstract   invokes autofile. see BibFiler.h,m for info
+    
 */
 
 - (IBAction)consolidateLinkedFiles:(id)sender;
+
+- (IBAction)postItemToWeblog:(id)sender;
 
 @end

@@ -1704,6 +1704,10 @@ int generalBibItemCompareFunc(id item1, id item2, void *context){
     }else{
         return YES;
     }
+ /*   if([@@ [menuItem title] isEqualToString:@"the one for blogging the item"]){
+      if(BDSK_USING_JAGUAR){return NO}; @@@@@ -- even better, get IBOutlet to that item, then in awakeFromNib, remove it if BDSK_USING_JAGUAR.
+    } */
+
 }
 
 
@@ -1782,18 +1786,43 @@ int generalBibItemCompareFunc(id item1, id item2, void *context){
 #pragma mark 
 #pragma mark AutoFile stuff
 - (IBAction)consolidateLinkedFiles:(id)sender{
+	[[BibFiler sharedFiler] showPreviewForPapers:[self publications] fromDocument:self];
+}
+
+#pragma mark blog stuff
+
+
+- (IBAction)postItemToWeblog:(id)sender{
+	NSEnumerator *pubE = [self selectedPubEnumerator];
+//	BibItem *pub = [pubE nextObject];
+
+	[NSException raise:@"unimplementedFunctionException"
+				format:@"postItemToWeblog is unimplemented."];
 	
-	NSString *papersFolderPath = [[[OFPreferenceWrapper sharedPreferenceWrapper] stringForKey:BDSKPapersFolderPathKey] stringByAbbreviatingWithTildeInPath];
+	NSString *appPath = [[NSWorkspace sharedWorkspace] fullPathForApplication:@"Blapp"]; // pref
+	NSLog(@"%@",appPath);
+#if 0	
+	AppleEvent *theAE;
+	OSERR err = AECreateAppleEvent (NNWEditDataItemAppleEventClass,
+									NNWEditDataItemAppleEventID,
+									'MMcC', // Blapp
+									kAutoGenerateReturnID,
+									kAnyTransactionID,
+									&theAE);
+
+
 	
-	int rv = NSRunAlertPanel(NSLocalizedString(@"Consolidate files", @""),
-							 NSLocalizedString(@"This command will move all linked files to the following directory: \n%@\n The operation cannot be undone. Do you wish to continue?",@""),
-							 NSLocalizedString(@"OK",@""),
-							 NSLocalizedString(@"Cancel",@""),nil, 
-							 papersFolderPath);
 	
-	if(rv != NSAlertDefaultReturn) return;
-	
-	[[BibFiler sharedFiler] filePapers:[self publications] fromDocument:self]; // @@ todo - selected pubs only?
+	OSErr AESend (
+				  const AppleEvent * theAppleEvent,
+				  AppleEvent * reply,
+				  AESendMode sendMode,
+				  AESendPriority sendPriority,
+				  SInt32 timeOutInTicks,
+				  AEIdleUPP idleProc,
+				  AEFilterUPP filterProc
+				  );
+#endif
 }
 
 @end
