@@ -150,7 +150,7 @@ void _setupFonts(){
 
 - (BOOL)isEqual:(BibItem *)aBI{
     return ([pubType isEqualToString:[aBI type]]) && ([citeKey isEqualToString:[aBI citeKey]]) &&
-    ([pubFields isEqual:[aBI dict]]);
+    ([pubFields isEqual:[aBI pubFields]]);
 }
 
 - (NSComparisonResult)keyCompare:(BibItem *)aBI{
@@ -381,9 +381,12 @@ void _setupFonts(){
 - (void)setFields: (NSMutableDictionary *)newFields{
     NSMutableString *tmp = [NSMutableString string];
     // this is what gets called when we make changes, so it has to keep the metadata intact.
-    [pubFields autorelease];
-    pubFields = [newFields mutableCopy];
-    if([pubFields objectForKey: @"Title"] == nil)
+	if(newFields != pubFields){
+		[pubFields release];
+		pubFields = [newFields mutableCopy];
+    }
+	
+	if([pubFields objectForKey: @"Title"] == nil)
         [self setTitle: @"Empty Title"];
     else
         [self setTitle: [pubFields objectForKey: @"Title"]];
@@ -427,7 +430,7 @@ void _setupFonts(){
 
 - (void)setField: (NSString *)key toValue: (NSString *)value{
     [pubFields setObject: value forKey: key];
-	[self setFields:[self dict]]; // update metadata. could have a better name
+	[self setFields:pubFields]; // update metadata. could have a better name
 	
 	NSDictionary *notifInfo = [NSDictionary dictionaryWithObjectsAndKeys:value, @"value", key, @"key",nil];
 	[[NSNotificationCenter defaultCenter] postNotificationName:BDSKBibItemChangedNotification
@@ -438,17 +441,16 @@ void _setupFonts(){
 }
 
 - (NSString *)valueOfField: (NSString *)key{
-    [pubFields retain];
-    return [pubFields objectForKey:key];
+    NSString* value = [pubFields objectForKey:key];
+	return [[value retain] autorelease];
 }
 
 - (void)removeField: (NSString *)key{
     [pubFields removeObjectForKey:key];
 }
 
-- (NSMutableDictionary *)dict{
-    [pubFields retain];
-    return pubFields;
+- (NSMutableDictionary *)pubFields{
+    return [[pubFields retain] autorelease];
 }
 
 - (NSData *)PDFValue{

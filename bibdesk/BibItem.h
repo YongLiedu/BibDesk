@@ -145,7 +145,7 @@
 - (void)setField: (NSString *)key toValue: (NSString *)value;
 - (NSString *)valueOfField: (NSString *)key;
 - (void)removeField: (NSString *)key;
-- (NSMutableDictionary *)dict;
+- (NSMutableDictionary *)pubFields;
 
 /*!
     @method PDFValue
