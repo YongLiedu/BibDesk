@@ -36,11 +36,19 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
         [texBinaryPath setEnabled:NO];
         [bibtexBinaryPath setEnabled:NO];
         [defaults setInteger:NSOffState forKey:BDSKUsesTeXKey];
+		// hide preview panel if necessary
+		if ([[NSApp delegate] isShowingPreviewPanel]) {
+			[[NSApp delegate] hidePreviewPanel:self];
+		}
     }else{
         [bibTeXStyle setEnabled:YES];
         [texBinaryPath setEnabled:YES];
         [bibtexBinaryPath setEnabled:YES];
         [defaults setInteger:NSOnState forKey:BDSKUsesTeXKey];
+		// show preview panel if necessary
+		if ([[defaults objectForKey:@"BDSK Showing Preview Key"] isEqualToString:@"showing"]) {
+			[[NSApp delegate] showPreviewPanel:self];
+		}
     }
 }
 

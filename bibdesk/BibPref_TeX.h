@@ -20,6 +20,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 #import <Cocoa/Cocoa.h>
 #import <OmniAppKit/OAPreferenceClient.h>
 #import "BibPrefController.h"
+#import "BibAppController.h"
 
 @interface BibPref_TeX : OAPreferenceClient
 {
