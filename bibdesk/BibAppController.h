@@ -31,7 +31,6 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 */
 @interface BibAppController : NSObject {
     BOOL showingPreviewPanel;
-    BibPrefController *prefController;
     BibFinder *_finder;
 
     // error-handling stuff:

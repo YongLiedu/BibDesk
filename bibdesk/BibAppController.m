@@ -46,7 +46,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
     NSString *applicationSupportPath;
     NSFileManager *DFM = [NSFileManager defaultManager];
 
-       // now check if the application support directory is there...
+    // now check if the application support directory is there...
     applicationSupportPath = [[[NSHomeDirectory() stringByAppendingPathComponent:@"Library"]
         stringByAppendingPathComponent:@"Application Support"]
         stringByAppendingPathComponent:@"BibDesk"];
@@ -85,14 +85,14 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 
 
     [NSApp registerServicesMenuSendTypes:[NSArray arrayWithObjects:NSStringPboardType,nil] returnTypes:[NSArray arrayWithObjects:NSStringPboardType,nil]];
+
 }
 
 - (void)awakeFromNib{
-#if DEBUG
-    NSLog(@"awakeFromNibCalled");
-#endif
+
     [errorTableView setDoubleAction:@selector(gotoError:)];
     [openUsingFilterAccessoryView retain];
+
 }
 
 #pragma mark -
@@ -264,7 +264,6 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 - (void)dealloc
 {
     [[NSNotificationCenter defaultCenter] removeObserver:self];
-    [prefController release];
     [_autoCompletionDict release];
     [_errors release];
     [super dealloc];

@@ -73,14 +73,3 @@ extern NSString *BDSKTableViewFontChangedNotification;
 extern NSString *BDSKPreviewDisplayChangedNotification;
 extern NSString *BDSKCustomStringsChangedNotification;
 extern NSString *BDSKTableColumnChangedNotification;
-/*!
-    @class BibPrefController
-    @abstract was Window Controller for the preferences panel
-    @discussion now just declares constant strings.
-*/
-@interface BibPrefController : NSWindowController
-{   
-   
-}
-- (id)init;
-@end

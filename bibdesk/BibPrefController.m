@@ -62,25 +62,3 @@ NSString *BDSKTableViewFontChangedNotification = @"Tableview font selection is c
 NSString *BDSKPreviewDisplayChangedNotification = @"Preview Pane Preference Change Notification";
 NSString *BDSKCustomStringsChangedNotification = @"CustomStringsChangedNotification";
 NSString *BDSKTableColumnChangedNotification = @"TableColumnChangedNotification";
-
-@implementation BibPrefController
-
-- (id)init
-{
-
- //   if(self = [super initWithWindowNibName:@"BibPreferences"]){
-
-       //    }
-
-    return self;
-}
-
-- (void)dealloc{
-//    [showColsArray release];
-//    [defaultFieldsArray release];
-}
-
-
-
-
-@end
