@@ -54,11 +54,13 @@
     // find the first whitespace preceding the current word being entered
     NSRange whiteSpaceRange = [*partialStringPtr rangeOfString:@" "
                                                        options:NSBackwardsSearch | NSLiteralSearch];
+    NSRange punctuationRange = [*partialStringPtr rangeOfCharacterFromSet:[[NSApp delegate] autoCompletePunctuationCharacterSet]
+                                                                  options:NSBackwardsSearch];
     NSString *matchString = nil;
     unsigned lengthToEnd = [*partialStringPtr length] - whiteSpaceRange.location;
     NSString *firstPart = [NSString stringWithString:@""]; // we'll use this as a base for appending the completion to
     
-    if(whiteSpaceRange.location != NSNotFound){
+    if(punctuationRange.location != NSNotFound){
         matchString = [*partialStringPtr substringWithRange:NSMakeRange(whiteSpaceRange.location + 1, lengthToEnd - 1)]; // everything after the last whitespace
         firstPart = [*partialStringPtr substringWithRange:NSMakeRange(0, whiteSpaceRange.location + 1)]; // everything through the last whitespace
     } else {
@@ -71,7 +73,7 @@
         }
     }
     
-    NSLog(@"string is %@", string);
+    // NSLog(@"string is %@", string);
     
     // also allow to keep typing for no match - new entries are OK.
     if (!string) return YES;

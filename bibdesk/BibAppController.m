@@ -120,6 +120,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
         _finder = [[BibFinder sharedFinder] retain];
         _autoCompletionDict = [[NSMutableDictionary alloc] initWithCapacity:15]; // arbitrary
 	 	_formatters = [[NSMutableDictionary alloc] initWithCapacity:15]; // arbitrary
+        _autocompletePunctuationCharacterSet = [[NSCharacterSet characterSetWithCharactersInString:@",:;"] retain];
     }
     return self;
 }
@@ -129,6 +130,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
     [[NSNotificationCenter defaultCenter] removeObserver:self];
     [_autoCompletionDict release];
 	[_formatters release];
+    [_autocompletePunctuationCharacterSet release];
 	[_finder release];
     [_errors release];
     [super dealloc];
@@ -310,6 +312,10 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 
 #pragma mark Auto-completion stuff
 
+- (NSCharacterSet *)autoCompletePunctuationCharacterSet{
+    return _autocompletePunctuationCharacterSet;
+}
+
 - (void)addString:(NSString *)string forCompletionEntry:(NSString *)entry{
     NSMutableArray *completionArray = nil;
     BOOL keyExists = [[_autoCompletionDict allKeys] containsObject:entry];
@@ -321,7 +327,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 
     completionArray = [_autoCompletionDict objectForKey:entry];
     
-    if([entry isEqualToString:@"Local-Url"]) return; // don't add Local-Url fields
+    if([entry isEqualToString:@"Local-Url"] || [entry isEqualToString:@"Url"]) return; // don't add Local-Url fields
     if([entry isEqualToString:@"Title"]){ // add the whole string for title? or add components separated by whitespace?
         [completionArray addObject:string];
         return;
@@ -331,7 +337,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
         return;
     }
     
-    NSRange r = [string rangeOfCharacterFromSet:[NSCharacterSet punctuationCharacterSet]];
+    NSRange r = [string rangeOfCharacterFromSet:_autocompletePunctuationCharacterSet];
     
     if(r.location != NSNotFound){
         NSScanner *scanner = [[NSScanner alloc] initWithString:string];
@@ -339,9 +345,9 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
         NSString *tmp;
 
         while(![scanner isAtEnd]){
-            [scanner scanUpToCharactersFromSet:[NSCharacterSet punctuationCharacterSet] intoString:&tmp];
+            [scanner scanUpToCharactersFromSet:_autocompletePunctuationCharacterSet intoString:&tmp];
             [completionArray addObject:tmp];
-            [scanner scanCharactersFromSet:[NSCharacterSet punctuationCharacterSet] intoString:nil];
+            [scanner scanCharactersFromSet:_autocompletePunctuationCharacterSet intoString:nil];
             [scanner scanCharactersFromSet:[NSCharacterSet whitespaceCharacterSet] intoString:nil];
         }
         [scanner release];

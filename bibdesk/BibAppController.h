@@ -47,6 +47,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
     // global auto-completion dictionary:
     NSMutableDictionary *_autoCompletionDict;
     NSMutableDictionary *_formatters;
+    NSCharacterSet *_autocompletePunctuationCharacterSet;
 
     // ----------------------------------------------------------------------------------------
     // stuff for the accessory view for openUsingFilter
@@ -101,7 +102,13 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
     
 */
 - (void)addString:(NSString *)string forCompletionEntry:(NSString *)entry;
-
+/*!
+    @method     autoCompletePunctuationCharacterSet
+    @abstract   Possible separators for punctuation marks recognized for autocompletion
+    @discussion Typically comma, colon, and semicolon, at least in US English usage.
+    @result     NSCharacterSet with the currenctly recognized separator characters; retained by the sender
+*/
+- (NSCharacterSet *)autoCompletePunctuationCharacterSet;
 /*!
     @method formatterForEntry
     @abstract returns the singleton formatter for a particular entry
