@@ -619,8 +619,8 @@ stringByAppendingPathComponent:@"BibDesk"]; */
 
 // Fixme - this is not correct memory management.
 - (IBAction)didChangeSortKey:(id)sender{
-    NSView *newView;
-    NSView *prevView;
+    NSView *newView = nil;
+    NSView *prevView = nil;
     NSString *sortKey = [sender titleOfSelectedItem];
     
     if([sortKey isEqualToString: @"Author"]){
@@ -1171,7 +1171,7 @@ didClickTableColumn: (NSTableColumn *) tableColumn{
 }
 
 - (void)handleTableColumnChangedNotification:(NSNotification *)notification{
-    NSMenuItem *menuItem = nil;
+    id menuItem = nil;
     NSString *colName = [notification object];
 
     // don't pay attention to notifications I send (infinite loop might result)
