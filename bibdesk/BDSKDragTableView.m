@@ -161,7 +161,9 @@ static NSColor *sStripeColor = nil;
 // but before the cell contents are drawn.
 // We override it so we can do our own light-blue row stripes a la iTunes.
 - (void) highlightSelectionInClipRect:(NSRect)rect {
-    [self drawStripesInRect:rect];
+	if (BDSK_USING_JAGUAR) {	
+		[self drawStripesInRect:rect];
+	}
     [super highlightSelectionInClipRect:rect];
 }
 
