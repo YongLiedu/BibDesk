@@ -85,7 +85,7 @@ static void addToolbarItem(NSMutableDictionary *theDict,NSString *identifier,NSS
 				   NSLocalizedString(@"New Publication",@""),
                    NSLocalizedString(@"Create New Publication",@""),
                    self, @selector(setImage:),
-				   [NSImage imageNamed: @"AddCard"], 
+				   [NSImage imageNamed: @"newdoc"], 
 				   @selector(newPub:),
                    NULL);
 
@@ -103,32 +103,24 @@ static void addToolbarItem(NSMutableDictionary *theDict,NSString *identifier,NSS
                    NSLocalizedString(@"Edit Publication",@""),
                    NSLocalizedString(@"Edit Selected Publication(s)",@""),
                    self, @selector(setImage:), 
-				   [NSImage imageNamed: @"EditCard"],
+				   [NSImage imageNamed: @"editdoc"],
                    @selector(editPubCmd:), 
 				   NULL);
 	
 	
-/*	searchField has been moved into the window itself
-		
-		addToolbarItem(toolbarItems, SearchFieldDocToolbarItemIdentifier,
-				   NSLocalizedString(@"Search", @""),
-				   NSLocalizedString(@"Search", @""),
-				   NSLocalizedString(@"Search Publications", @""),
-				   self, @selector(setView:), searchFieldBox, NULL, NULL);
-*/
-	
-    addToolbarItem(toolbarItems, PrvDocToolbarItemIdentifier,
+	addToolbarItem(toolbarItems, PrvDocToolbarItemIdentifier,
                    NSLocalizedString(@"Preview",@""),
-                   NSLocalizedString(@"Show Preview",@""),
-                   NSLocalizedString(@"Show PDF Preview",@""),
+                   NSLocalizedString(@"Show/Hide Preview",@""),
+                   NSLocalizedString(@"Show/Hide Preview Panel",@""),
                    nil, @selector(setImage:),
-                   [NSImage imageNamed: @"PreviewCard"],
+                   [NSImage imageNamed: @"preview"],
                    @selector(toggleShowingPreviewPanel:), NULL);
+	
 	
     addToolbarItem(toolbarItems, ToggleCiteDrawerToolbarItemIdentifier,
                    NSLocalizedString(@"Cite Drawer",@""),
-                   NSLocalizedString(@"Show Custom Citations Drawer",@""),
-                   NSLocalizedString(@"Show Custom Citations Drawer",@""),
+                   NSLocalizedString(@"Toggle Custom Citations Drawer",@""),
+                   NSLocalizedString(@"Toggle Custom Citations Drawer",@""),
                    self, @selector(setImage:),
                    [NSImage imageNamed: @"drawerToolbarImage"],
                    @selector(toggleShowingCustomCiteDrawer:), NULL);
@@ -174,28 +166,29 @@ static void addToolbarItem(NSMutableDictionary *theDict,NSString *identifier,NSS
 
 
 - (NSArray *) toolbarDefaultItemIdentifiers: (NSToolbar *) toolbar {
-    return [NSArray arrayWithObjects: NewDocToolbarItemIdentifier,
+    return [NSArray arrayWithObjects:
+		NewDocToolbarItemIdentifier,
 		EditDocToolbarItemIdentifier, 
-		NSToolbarSeparatorItemIdentifier, 
-		SearchFieldDocToolbarItemIdentifier, 
 		DelDocToolbarItemIdentifier, 
+		NSToolbarSeparatorItemIdentifier, 
+		PrvDocToolbarItemIdentifier,
+		NSToolbarFlexibleSpaceItemIdentifier, 
 		ToggleCiteDrawerToolbarItemIdentifier, nil];
 }
 
 
 - (NSArray *) toolbarAllowedItemIdentifiers: (NSToolbar *) toolbar {
     return [NSArray arrayWithObjects: 
-		SearchFieldDocToolbarItemIdentifier,
 		NewDocToolbarItemIdentifier, 
 		EditDocToolbarItemIdentifier, 
 		DelDocToolbarItemIdentifier,
 		PrvDocToolbarItemIdentifier , 
+		ToggleCiteDrawerToolbarItemIdentifier,
+		NSToolbarPrintItemIdentifier,
 		NSToolbarFlexibleSpaceItemIdentifier, 
 		NSToolbarSpaceItemIdentifier, 
 		NSToolbarSeparatorItemIdentifier, 
-		NSToolbarCustomizeToolbarItemIdentifier, 
-		ToggleCiteDrawerToolbarItemIdentifier,
-		NSToolbarPrintItemIdentifier,nil];
+		NSToolbarCustomizeToolbarItemIdentifier, nil];
 }
 
 - (void) toolbarWillAddItem: (NSNotification *) notif {
