@@ -378,7 +378,9 @@ NSString *BDSKUrlString = @"Url";
     BOOL drawerIsOpening = ([documentSnoopDrawer state] == NSDrawerOpeningState);
 
     if(drawerWasOpen) [documentSnoopDrawer close];
-    //local is either a file:// URL -or a path 
+    //local is either a file:// URL -or a path
+    // How to use stringByExpandingTildeInPath to expand the URL? get the url, get its path, then expand that, then replace it as the url? ugly. 
+    
     if(![@"" isEqualToString:lurl]){
         local = [NSURL URLWithString:lurl];
         if(!local){
@@ -395,7 +397,8 @@ NSString *BDSKUrlString = @"Url";
             [viewLocalButton setEnabled:YES];
             [viewLocalButton setToolTip:@"View File"];
             [viewLocalButton setTitle:@""];
-
+            [documentSnoopButton setEnabled:YES];
+            [documentSnoopButton setToolTip:NSLocalizedString(@"Show first page in a drawer.", @"show first page in a drawer")];
             if(drawerWasOpen || drawerIsOpening){
                 snoopImage = [[[NSImage alloc] initWithContentsOfFile:[local path]] autorelease];
 #if DEBUG
@@ -404,8 +407,7 @@ NSString *BDSKUrlString = @"Url";
                 if(snoopImage){
                     [documentSnoopImageView setImage:snoopImage];
                     [snoopImage setBackgroundColor:[NSColor whiteColor]];
-                    [documentSnoopButton setEnabled:YES];
-                    [documentSnoopButton setToolTip:NSLocalizedString(@"Show first page in a drawer.", @"show first page in a drawer")];
+                    
                     [documentSnoopScrollView setDocumentViewAlignment:NSImageAlignTopLeft];
                     if(drawerWasOpen) // open it again.
                         [documentSnoopDrawer open];
