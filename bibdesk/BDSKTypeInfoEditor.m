@@ -217,6 +217,7 @@ static BDSKTypeInfoEditor *sharedTypeInfoEditor;
 	
     int row = [types indexOfObject:newType];
     [typeTableView selectRow:row byExtendingSelection:NO];
+	[[[typeTableView tableColumnWithIdentifier:@"type"] dataCell] setEnabled:YES];
     [typeTableView editColumn:0 row:row withEvent:nil select:YES];
 }
 
@@ -245,6 +246,7 @@ static BDSKTypeInfoEditor *sharedTypeInfoEditor;
 	
     int row = [currentRequiredFields indexOfObject:newField];
     [requiredTableView selectRow:row byExtendingSelection:NO];
+	[[[requiredTableView tableColumnWithIdentifier:@"required"] dataCell] setEnabled:YES];
     [requiredTableView editColumn:0 row:row withEvent:nil select:YES];
 }
 
@@ -277,6 +279,7 @@ static BDSKTypeInfoEditor *sharedTypeInfoEditor;
 	
     int row = [currentOptionalFields indexOfObject:newField];
     [optionalTableView selectRow:row byExtendingSelection:NO];
+	[[[optionalTableView tableColumnWithIdentifier:@"optional"] dataCell] setEnabled:YES];
     [optionalTableView editColumn:0 row:row withEvent:nil select:YES];
 }
 
