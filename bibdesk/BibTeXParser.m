@@ -197,7 +197,7 @@ NSRange SafeForwardSearchRange( unsigned startLoc, unsigned seekLength, unsigned
                 break; // break here, since this happens at the end of every entry with JabRef-generated BibTeX, and we don't need to hit the assertion below
             }                
             
-            // scan whitespace after the = to see if we have an opening delimiter or not; this will be for macroish stuff
+            // scan whitespace after the = to see if we have an opening delimiter or not; this will be for macroish stuff like publisher =    pub-WADSWORTH # " and " # pub-BC,
             [scanner scanCharactersFromSet:[NSCharacterSet whitespaceCharacterSet] intoString:nil];
             if(![possibleLeftDelimiters characterIsMember:[fullString characterAtIndex:[scanner scanLocation]]]){
                 leftDelimLocation = [scanner scanLocation] - 1; // rewind so we don't lose the first character
@@ -255,7 +255,8 @@ NSRange SafeForwardSearchRange( unsigned startLoc, unsigned seekLength, unsigned
             NSAssert( NSMakeRange(leftDelimLocation + 1, [scanner scanLocation] - leftDelimLocation - 1).location <= nextAtRange.location, @"The parser scanned into the next bibitem");
 
             value = [value stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]];
-            value = [[BDSKConverter sharedConverter] stringByDeTeXifyingString:value];
+#warning Enable this if doc uses ASCII encoding?
+            // value = [[BDSKConverter sharedConverter] stringByDeTeXifyingString:value];
             key = [[key stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]] capitalizedString];
             
             NSAssert( value != nil, @"Found a nil value string");
