@@ -63,7 +63,7 @@
 
 - (IBAction)citeKeyFormatAdd:(id)sender{
 	NSString *formatString = [formatField stringValue];
-	NSArray *specifierStrings = [NSArray arrayWithObjects:@"", @"%a00", @"%A0", @"%t0", @"%Y", @"%y", @"%m", @"%r2", @"%R2", @"%d2", @"%u0", @"%U0", @"%n0", @"%0", @"%{}0", nil];
+	NSArray *specifierStrings = [NSArray arrayWithObjects:@"", @"%a00", @"%A0", @"%t0", @"%Y", @"%y", @"%m", @"%k0", @"%r2", @"%R2", @"%d2", @"%u0", @"%U0", @"%n0", @"%0", @"%{}0", nil];
 	NSString *newSpecifier = [specifierStrings objectAtIndex:[formatRepositoryPopUp indexOfSelectedItem]];
 	NSRange selRange = NSMakeRange([formatString length] + 2, [newSpecifier length] - 2);
 	
