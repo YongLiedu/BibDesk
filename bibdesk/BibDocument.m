@@ -127,6 +127,8 @@ NSString *BDSKBibItemLocalDragPboardType = @"edu.ucsd.cs.mmccrack.bibdesk: Local
 
 		tableColumnsChanged = YES;
 		sortDescending = YES;
+                
+                [self cacheQuickSearchRegexes];
 
     }
     return self;
@@ -237,6 +239,9 @@ NSString *BDSKBibItemLocalDragPboardType = @"edu.ucsd.cs.mmccrack.bibdesk: Local
     [sources release];
     [localDragPboard release];
     [draggedItems release];
+    [tipRegex release];
+    [andRegex release];
+    [orRegex release];
     [super dealloc];
 }
 
@@ -1520,6 +1525,12 @@ stringByAppendingPathComponent:@"BibDesk"]; */
 
 }
 
+- (void)cacheQuickSearchRegexes{
+    tipRegex = [[AGRegex regexWithPattern:@"(?(?=^.+(AND|OR))(^.+(?= AND| OR))|^.+)"] retain]; // match the any words up to but not including AND or OR if they exist (see "Lookahead assertions" and "CONDITIONAL SUBPATTERNS" in pcre docs)
+    andRegex = [[AGRegex regexWithPattern:@"AND \\b[^ ]+"] retain]; // match the word following an AND
+    orRegex = [[AGRegex regexWithPattern:@"OR \\b([^ ]+)"] retain]; // match the first word following an OR
+}
+
 - (NSArray *)publicationsWithSubstring:(NSString *)substring inField:(NSString *)field forArray:(NSArray *)arrayToSearch{
     
     NSString *selectorString;
@@ -1551,14 +1562,14 @@ stringByAppendingPathComponent:@"BibDesk"]; */
 	} else {
         isGeneric = YES; // this means that we don't have an accessor for it in BibItem
     }
-        
-    AGRegex *tip = [AGRegex regexWithPattern:@"(?(?=^.+(AND|OR))(^.+(?= AND| OR))|^.+)"]; // match the any words up to but not including AND or OR if they exist (see "Lookahead assertions" and "CONDITIONAL SUBPATTERNS" in pcre docs)
-    AGRegex *andRegex = [AGRegex regexWithPattern:@"AND \\b[^ ]+"]; // match the word following an AND
+//    The AGRegexes are now ivars, but I've left them here as comments in the relevant places.        
+//    AGRegex *tip = [AGRegex regexWithPattern:@"(?(?=^.+(AND|OR))(^.+(?= AND| OR))|^.+)"]; // match the any words up to but not including AND or OR if they exist (see "Lookahead assertions" and "CONDITIONAL SUBPATTERNS" in pcre docs)
+//    AGRegex *andRegex = [AGRegex regexWithPattern:@"AND \\b[^ ]+"]; // match the word following an AND
     NSArray *matchArray = [andRegex findAllInString:substring]; // an array of AGRegexMatch objects
     NSMutableArray *andArray = [NSMutableArray array]; // and array of all the AND terms we're looking for
     
     // get the tip of the search string first (always an AND)
-    [andArray addObject:[[tip findInString:substring] group]];
+    [andArray addObject:[[tipRegex findInString:substring] group]];
 
     NSEnumerator *e = [matchArray objectEnumerator];
     AGRegexMatch *m;
@@ -1567,8 +1578,8 @@ stringByAppendingPathComponent:@"BibDesk"]; */
         [andArray addObject:[[[m group] componentsSeparatedByString:@"AND "] objectAtIndex:1]];
     }
     // NSLog(@"andArray is %@", [andArray description]);
-    
-    AGRegex *orRegex = [AGRegex regexWithPattern:@"OR \\b([^ ]+)"]; // match the first word following an OR
+
+//    AGRegex *orRegex = [AGRegex regexWithPattern:@"OR \\b([^ ]+)"]; // match the first word following an OR
     NSMutableArray *orArray = [NSMutableArray array]; // an array of all the OR terms we're looking for
     
     matchArray = [orRegex findAllInString:substring];
@@ -1700,10 +1711,8 @@ stringByAppendingPathComponent:@"BibDesk"]; */
     while(tmpSet = [e nextObject]){
         [newSet unionSet:tmpSet];
     }
-        
-    NSArray *foundArray = [[[newSet copy] autorelease] allObjects];
-    
-    return foundArray;
+
+    return [newSet allObjects];
     
 }
 

@@ -86,6 +86,9 @@ extern NSString *BDSKBibItemLocalDragPboardType;
 	id searchField; 
 	IBOutlet NSBox *searchFieldBox;
 	NSToolbarItem *searchFieldToolbarItem;
+        AGRegex *tipRegex;
+        AGRegex *andRegex;
+        AGRegex *orRegex;
 
 	IBOutlet NSTextField *infoLine;
 
@@ -447,6 +450,13 @@ extern NSString *BDSKBibItemLocalDragPboardType;
     @result     Returns an array of BibItems which matched the given search terms.
 */
 - (NSArray *)publicationsWithSubstring:(NSString *)substring inField:(NSString *)field forArray:(NSArray *)arrayToSearch;
+
+/*!
+    @method     cacheQuickSearchRegexes
+    @abstract   Cache AGRegex ivars used in the quicksearch field
+    @discussion (comprehensive description)
+*/
+- (void)cacheQuickSearchRegexes;
 
 /*!
     @method updatePreviews
