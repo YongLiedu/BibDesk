@@ -424,7 +424,7 @@ void _setupFonts(){
 	NSCharacterSet *invalidSet = [[BibTypeManager sharedManager] invalidCharactersForField:@"Cite Key" inType:@"BibTeX"];
 		
 	NSString *newCiteKey = [key stringByReplacingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]
-												   withString:@"_"];
+												   withString:@"-"];
 	newCiteKey = [newCiteKey stringByReplacingCharactersInSet:invalidSet withString:@""];
 	
 	return newCiteKey;
