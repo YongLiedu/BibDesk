@@ -259,7 +259,6 @@ Handle Notifications by the popup button to update its icon and its menu before 
 - (void)insertPublication:(BibItem *)pub atIndex:(unsigned int)index lastRequest:(BOOL)last{
 	NSUndoManager *undoManager = [self undoManager];
 	[[undoManager prepareWithInvocationTarget:self] removePublication:pub];
-	[undoManager setActionName:NSLocalizedString(@"Insert Publication",@"")];
 	
 	[publications insertObject:pub atIndex:index];
 	[shownPublications insertObject:pub atIndex:index];
@@ -278,7 +277,6 @@ Handle Notifications by the popup button to update its icon and its menu before 
 - (void)addPublication:(BibItem *)pub lastRequest:(BOOL)last{
 	NSUndoManager *undoManager = [self undoManager];
 	[[undoManager prepareWithInvocationTarget:self] removePublication:pub];
-	[undoManager setActionName:NSLocalizedString(@"Add Publication",@"")];
 	
 	[publications addObject:pub];
 	[shownPublications addObject:pub];
@@ -297,7 +295,6 @@ Handle Notifications by the popup button to update its icon and its menu before 
 - (void)removePublication:(BibItem *)pub lastRequest:(BOOL)last{
 	NSUndoManager *undoManager = [self undoManager];
 	[[undoManager prepareWithInvocationTarget:self] addPublication:pub];
-	[undoManager setActionName:NSLocalizedString(@"Delete Publication",@"")];
 	
 	BibEditor *editor = [pub editorObj];
 	if(editor){
@@ -791,8 +788,11 @@ Enhanced delete method that uses a sheet instead of a modal dialogue.
 				[self removePublication:objToDelete lastRequest:NO];
 			}
         }
-        [tableView deselectAll:nil];
-        [self updateUI];
+		if (numDeletedPubs > 0) {
+			[[self undoManager] setActionName:NSLocalizedString(@"Remove Publication",@"")];
+			[tableView deselectAll:nil];
+			[self updateUI];
+		}
     }else{
         //the user canceled, do nothing.
     }
@@ -1732,6 +1732,7 @@ int generalBibItemCompareFunc(id item1, id item2, void *context){
 	
     fileOrderCount++;
     [self addPublication:[newBI autorelease]];
+	[[self undoManager] setActionName:NSLocalizedString(@"Add Publication",@"")];
     [self updateUI];
     if(yn == YES)
     {
@@ -1865,6 +1866,7 @@ This method always returns YES. Even if some or many operations fail.
 										  authors:[NSMutableArray arrayWithCapacity:0]];
 			
 			[self addPublication:[newBI autorelease]];
+			[[self undoManager] setActionName:NSLocalizedString(@"Insert Publication",@"")];
 			
 			NSString *newUrl = [[NSURL fileURLWithPath:
 				[fnStr stringByExpandingTildeInPath]]absoluteString];

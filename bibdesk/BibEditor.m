@@ -686,6 +686,7 @@ NSString *BDSKDateModifiedString = @"Date-Modified";
 		NSString *name = [[newFieldName stringValue] capitalizedString]; // add it as a capitalized string to avoid duplicates
 
 		[theBib addField:name];
+		[[[self window] undoManager] setActionName:NSLocalizedString(@"Add Field",@"")];
 		[self setupForm];
 		[self makeKeyField:name];
 		[self noteChange];
@@ -744,6 +745,7 @@ NSString *BDSKDateModifiedString = @"Date-Modified";
     if(returnCode == 0){
 
         [theBib removeField:[delFieldPopUp titleOfSelectedItem]];
+		[[[self window] undoManager] setActionName:NSLocalizedString(@"Remove Field",@"")];
         [self setupForm];
         [self noteChange];
     }

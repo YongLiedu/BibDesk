@@ -653,7 +653,6 @@ void _setupFonts(){
 	
 	[[undoManager prepareWithInvocationTarget:self] removeField:key
 													withModDate:[self dateModified]];
-	[undoManager setActionName:NSLocalizedString(@"Add Field",@"")];
 	
 	NSString *msg = [NSString stringWithFormat:@"%@ %@",
 		NSLocalizedString(@"Add data for field:", @""), key];
@@ -682,7 +681,6 @@ void _setupFonts(){
 
 	[[undoManager prepareWithInvocationTarget:self] addField:key
 												 withModDate:[self dateModified]];
-	[undoManager setActionName:NSLocalizedString(@"Remove Field",@"")];
 
     [pubFields removeObjectForKey:key];
 	

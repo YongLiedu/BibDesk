@@ -22,15 +22,18 @@ Scripting Key-Value coding methods to access publications
 }
 
 - (void)insertInPublications:(BibItem *)pub  atIndex:(unsigned int)index {
-   [self insertPublication:pub atIndex:index];
+	[self insertPublication:pub atIndex:index];
+	[[self undoManager] setActionName:NSLocalizedString(@"Insert Publication",@"")];
 }
 
 - (void)insertInPublications:(BibItem *)pub {
-   [self addPublication:pub];
+	[self addPublication:pub];
+	[[self undoManager] setActionName:NSLocalizedString(@"Add Publication",@"")];
 }
 
 - (void)removeFromPublicationsAtIndex:(unsigned int)index {
-   [self removePublication:[publications objectAtIndex:index]];
+	[self removePublication:[publications objectAtIndex:index]];
+	[[self undoManager] setActionName:NSLocalizedString(@"Delete Publication",@"")];
 }
 
 
