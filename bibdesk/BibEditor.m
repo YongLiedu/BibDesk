@@ -45,6 +45,8 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 	textSnoopViewLoaded = NO;
 	webSnoopViewLoaded = NO;
 	
+	forceEndEditing = NO;
+	
     // this should probably be moved around.
     [[self window] setTitle:[theBib title]];
     [[self window] setDelegate:self];
@@ -299,13 +301,15 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 // note that we don't want the - document accessor! It messes us up by getting called for other stuff.
 
 - (void)finalizeChanges{
-    if ([[self window] makeFirstResponder:[self window]]) {
+    forceEndEditing = YES;
+	if ([[self window] makeFirstResponder:[self window]]) {
     /* All fields are now valid; it's safe to use fieldEditor:forObject:
     to claim the field editor. */
     }else{
         /* Force first responder to resign. */
         [[self window] endEditingFor:nil];
     }
+	forceEndEditing = NO;
 }
 
 - (IBAction)saveDocument:(id)sender{
@@ -1016,6 +1020,37 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
                                                   object:macroTextFieldWC];
 }
 
+- (BOOL)control:(NSControl *)control textShouldEndEditing:(NSText *)fieldEditor{
+	if (control != bibFields) return YES;
+	
+	NSCell *cell = [bibFields cellAtIndex:[bibFields indexOfSelectedItem]];
+	
+	if (![[cell stringValue] isStringTeXQuotingBalancedWithBraces:YES connected:NO]) {
+		NSString *message = nil;
+		NSString *cancelButton = nil;
+		
+		if (forceEndEditing) {
+			message = NSLocalizedString(@"The value you entered contains unbalanced braces and cannot be saved.", @"");
+		} else {
+			message = NSLocalizedString(@"The value you entered contains unbalanced braces and canenot be saved. Do you want to keep editing?", @"");
+			cancelButton = NSLocalizedString(@"Cancel", @"Cancel");
+		}
+		
+		rv = NSRunAlertPanel(NSLocalizedString(@"Invalid Value", @"Invalid Value"),
+							 message;
+							 NSLocalizedString(@"OK", @"OK"), cancelButton, nil);
+		
+		if (forceEndEditing || rv == NSAlertAlternateReturn) {
+			[cell setStringValue:[theBib valueOfField:[cell title]]];
+			return YES;
+		} else {
+			return NO;
+		}
+	}
+	
+	return YES;
+}
+
 - (void)controlTextDidEndEditing:(NSNotification *)aNotification{
     // here for undo
 }
@@ -1294,9 +1329,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 
 - (void)windowWillClose:(NSNotification *)notification{
  //@@citekey   [[self window] makeFirstResponder:citeKeyField]; // makes the field check if there is a duplicate field.
-    if(![[self window] makeFirstResponder:[self window]]) {
-        [[self window] endEditingFor:nil];
-    }
+	[self finalizeChanges];
     [macroTextFieldWC close]; // close so it's not hanging around by itself; this works if the doc window closes, also
     [documentSnoopDrawer close];
     [theDocument removeWindowController:self];

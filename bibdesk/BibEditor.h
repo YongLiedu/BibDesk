@@ -111,6 +111,8 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
     // Macro editing stuff
     MacroTextFieldWindowController *macroTextFieldWC;
 
+	// edit field stuff
+	BOOL forceEndEditing;
 }
 
 /*!
