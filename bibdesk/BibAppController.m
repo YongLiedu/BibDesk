@@ -170,7 +170,11 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 }
 
 - (NSArray *)stringsForCompletionEntry:(NSString *)entry{
-    return [(NSArray *)[_autoCompletionDict objectForKey:entry] sortedArrayUsingSelector:@selector(caseInsensitiveCompare:)];
+	NSMutableArray* autoCompleteStrings = (NSMutableArray *)[_autoCompletionDict objectForKey:entry];
+	if (autoCompleteStrings)
+		return autoCompleteStrings; // why sort? [autoCompleteStrings sortedArrayUsingSelector:@selector(caseInsensitiveCompare:)];
+	else 
+		return nil;
 }
 
 
@@ -180,7 +184,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
         infoDictionary] objectForKey:@"CFBundleVersion"];
 
     NSDictionary *productVersionDict = [NSDictionary dictionaryWithContentsOfURL:
-        [NSURL URLWithString:@"http://www.cs.ucsd.edu/~mmccrack/bibdesk-versions-xml.txt"]];
+        [NSURL URLWithString:@"http://bibdesk.sourceforge.net/bibdesk-versions-xml.txt"]];
 
     NSString *latestVersionNumber = [productVersionDict valueForKey:@"BibDesk"];
 
@@ -193,8 +197,8 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
                         NSLocalizedString(@"Give up", @"Accept & give up"), nil, nil);
         return;
     }
-    
-    if([latestVersionNumber isEqualToString: currVersionNumber])
+
+    if([latestVersionNumber caseInsensitiveCompare: currVersionNumber] != NSOrderedDescending)
     {
         // tell user software is up to date
         NSRunAlertPanel(NSLocalizedString(@"BibDesk is up-to-date",
@@ -213,7 +217,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
                                                            @"format string asking if the user would like to get the new version"), latestVersionNumber],
                                      @"OK", @"Cancel", nil);
         if (button == NSOKButton) {
-            [[NSWorkspace sharedWorkspace] openURL:[NSURL URLWithString:@"http://www.cs.ucsd.edu/~mmccrack/bibdesk.html"]];
+            [[NSWorkspace sharedWorkspace] openURL:[NSURL URLWithString:@"http://bibdesk.sourceforge.net/"]];
         }
     }
     
@@ -268,6 +272,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
         _errors = [[NSMutableArray alloc] initWithCapacity:5];
         _finder = [BibFinder sharedFinder];
         _autoCompletionDict = [[NSMutableDictionary alloc] initWithCapacity:15]; // arbitrary
+		_formatters = [[NSMutableDictionary alloc] initWithCapacity:15]; // arbitrary
     }
     return self;
 }
@@ -276,6 +281,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 {
     [[NSNotificationCenter defaultCenter] removeObserver:self];
     [_autoCompletionDict release];
+	[_formatters release];
     [_errors release];
     [super dealloc];
 }
@@ -526,9 +532,12 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
     BOOL yn;
     NSMutableString *keys = [NSMutableString string];
     NSMutableString *commentString = [NSMutableString string];
-    
-    NSString *citeString = [NSString stringWithFormat:@"\\%@{",[[OFPreferenceWrapper sharedPreferenceWrapper] stringForKey:BDSKCiteStringKey]];
-    
+	OFPreferenceWrapper *sud = [OFPreferenceWrapper sharedPreferenceWrapper];
+    NSString *startCiteBracket = [sud stringForKey:BDSKCiteStartBracketKey];
+    NSString *citeString = [NSString stringWithFormat:@"\\%@%@",[[OFPreferenceWrapper sharedPreferenceWrapper] stringForKey:BDSKCiteStringKey],
+		startCiteBracket];
+	NSString *endCiteBracket = [sud stringForKey:BDSKCiteEndBracketKey]; 
+	
     types = [pboard types];
     if (![types containsObject:NSStringPboardType]) {
         *error = NSLocalizedString(@"Error: couldn't complete text.",
@@ -563,9 +572,10 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
             [commentString appendString:@" = "];
             [commentString appendString:[key title]];
         }
-        [keys appendString:@"} "];
+        [keys appendString:endCiteBracket];
+		[keys appendString:@" "];
         //        [keys appendString:@"%% "];
-        // @@ bug let people set this as a pref? 
+        // @@ commentString in service - let people set this as a pref? 
         //        [keys appendString:commentString];
         types = [NSArray arrayWithObject:NSStringPboardType];
         [pboard declareTypes:types owner:nil];
