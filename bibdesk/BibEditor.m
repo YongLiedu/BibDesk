@@ -1036,9 +1036,9 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 			cancelButton = NSLocalizedString(@"Cancel", @"Cancel");
 		}
 		
-		rv = NSRunAlertPanel(NSLocalizedString(@"Invalid Value", @"Invalid Value"),
-							 message;
-							 NSLocalizedString(@"OK", @"OK"), cancelButton, nil);
+		int rv = NSRunAlertPanel(NSLocalizedString(@"Invalid Value", @"Invalid Value"),
+								 message,
+								 NSLocalizedString(@"OK", @"OK"), cancelButton, nil);
 		
 		if (forceEndEditing || rv == NSAlertAlternateReturn) {
 			[cell setStringValue:[theBib valueOfField:[cell title]]];
