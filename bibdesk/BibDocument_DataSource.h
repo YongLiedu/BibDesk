@@ -22,6 +22,8 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 */
 @interface BibDocument (DataSource)
 
+- (NSString *)citeStringForSelectedPubsWithTableViewDragSource:(NSTableView *)tv;
+
 @end
 
 @interface NSPasteboard (JCRDragWellExtensions)
