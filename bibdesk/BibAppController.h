@@ -29,7 +29,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
  as showing & hiding the finder & preferences window, and the preview. <br>
  This class also performs the complete citation service.
 */
-@interface BibAppController : NSObject {
+@interface BibAppController : NSDocumentController {
     BOOL showingPreviewPanel;
     BibFinder *_finder;
 
@@ -49,11 +49,20 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
     // stuff for the accessory view for openUsingFilter
     IBOutlet NSView* openUsingFilterAccessoryView;
     IBOutlet NSTextField* openUsingFilterTextField;
+	
+	// stuff for the accessory view for open text encoding 
+	IBOutlet NSView *openTextEncodingAccessoryView;
+	IBOutlet NSButton *openTextEncodingPopupButton;
     
     IBOutlet NSTextView* readmeTextView;
     IBOutlet NSWindow* readmeWindow;
 
 }
+
+#pragma mark Overridden NSDocumentController methods
+
+- (IBAction)openDocument:(id)sender;
+
 
 /*!
     @method openUsingFilter
@@ -64,16 +73,12 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 - (IBAction)openUsingFilter:(id)sender;
 
 /*!
-    @method importWithEncoding
+    @method openFile:withEncoding:
     @abstract Imports a bibtex file with a specific encoding.  Useful if there are non-ASCII characters in the file.
     @discussion
  */
-- (void)importWithEncoding:(NSStringEncoding)encoding;
+- (void)openFile:(NSString *)filePath withEncoding:(NSStringEncoding)encoding;
 
-- (IBAction)importAsLatin1:(id)sender;
-- (IBAction)importAsUTF8:(id)sender;
-- (IBAction)importAsMacOSRoman:(id)sender;
-- (IBAction)importAsLatin2:(id)sender;
 
 /*!
 @method addString:forCompletionEntry:

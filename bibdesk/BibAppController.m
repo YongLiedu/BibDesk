@@ -140,6 +140,50 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 
 }
 
+#pragma mark Overridden NSDocumentController methods
+
+- (IBAction)openDocument:(id)sender{
+	NSOpenPanel *oPanel = [NSOpenPanel openPanel];
+    [oPanel setAccessoryView:openTextEncodingAccessoryView];
+		
+	NSArray *types = [NSArray arrayWithObjects:@"bib", @"fcgi", @"ris", nil];
+	
+	int result = [oPanel runModalForDirectory:nil
+                                     file:nil
+                                    types:types];
+	if (result == NSOKButton) {
+
+        NSString *fileToOpen = [oPanel filename];
+		int tag = [openTextEncodingPopupButton selectedTag];
+		
+		switch(tag){
+			case 1:
+				// ISO Latin 1
+				[self openFile:fileToOpen withEncoding:NSISOLatin1StringEncoding];
+				break;
+
+			case 2:
+				// ISO Latin 2
+				[self openFile:fileToOpen withEncoding:NSISOLatin2StringEncoding];
+				
+			case 3:
+				// UTF 8
+				[self openFile:fileToOpen withEncoding:NSUTF8StringEncoding];
+				break;
+			case 4:
+				// MacRoman
+				[self openFile:fileToOpen withEncoding:NSMacOSRomanStringEncoding];
+				break;
+
+			default:
+				[super openDocumentWithContentsOfFile:fileToOpen display:YES];
+				
+		}
+		
+	}
+	
+}
+
 #pragma mark -
 
 - (IBAction)openUsingFilter:(id)sender
@@ -154,7 +198,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
     NSOpenPanel *oPanel = [NSOpenPanel openPanel];
     [oPanel setAccessoryView:openUsingFilterAccessoryView];
     [oPanel setAllowsMultipleSelection:NO];
-    result = [oPanel runModalForDirectory:NSHomeDirectory()
+    result = [oPanel runModalForDirectory:nil
                                      file:nil
                                     types:nil];
     if (result == NSOKButton) {
@@ -179,36 +223,19 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
     }
 }
 
-- (IBAction)importAsLatin1:(id)sender{
-    [self importWithEncoding:NSISOLatin1StringEncoding];
-}
 
-- (IBAction)importAsUTF8:(id)sender{
-    [self importWithEncoding:NSUTF8StringEncoding];
-}
-
-- (IBAction)importAsMacOSRoman:(id)sender{
-    [self importWithEncoding:NSMacOSRomanStringEncoding];
-}
-
-- (IBAction)importAsLatin2:(id)sender{
-    [self importWithEncoding:NSISOLatin2StringEncoding];
-}
-
-- (void)importWithEncoding:(NSStringEncoding)encoding{
-    NSOpenPanel *op = [NSOpenPanel openPanel];
-    if([op runModalForDirectory:nil file:nil types:nil] == NSOKButton){
-	NSString *filename = [op filename];
-	NSData *data = [NSData dataWithContentsOfFile:filename];
+- (void)openFile:(NSString *)filePath withEncoding:(NSStringEncoding)encoding{
+	
+	NSData *data = [NSData dataWithContentsOfFile:filePath];
 	NSString *content = [[[NSString alloc] initWithData:data encoding:encoding] autorelease];  // this returns a Unicode string
 	BibDocument *doc = nil;
-
+	
 	doc = [[NSDocumentController sharedDocumentController] openUntitledDocumentOfType:@"bibTeX database" display:YES];
 	[doc loadBibTeXDataRepresentation:[[BDSKConverter stringByTeXifyingString:content] dataUsingEncoding:NSUTF8StringEncoding]];
 	[doc updateChangeCount:NSChangeDone];
 	[doc updateUI];
-    }
 }
+
 
 
 
