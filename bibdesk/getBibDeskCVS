@@ -75,13 +75,13 @@ sub prepdev {
 }
 
 sub getsources {
-   $GETMAIN = "cvs -z3 -d:$CVS_METHOD:$SFNAME\@cvs.sourceforge.net:/cvsroot/bibdesk co $bibtag bibdesk";
+   $GETMAIN = "cvs -z3 -d:$CVS_METHOD:$SFNAME\@cvs.sourceforge.net:/cvsroot/bibdesk checkout -P $bibtag bibdesk";
    tryGet($GETMAIN);
 
-   $GETVENDOR = "cvs -z3 -d:$CVS_METHOD:$SFNAME\@cvs.sourceforge.net:/cvsroot/bibdesk co bibdesk_vendorsrc";
+   $GETVENDOR = "cvs -z3 -d:$CVS_METHOD:$SFNAME\@cvs.sourceforge.net:/cvsroot/bibdesk checkout -P bibdesk_vendorsrc";
    tryGet($GETVENDOR);
    
-   $GETINPUTMANAGER = "cvs -z3 -d:$CVS_METHOD:$SFNAME\@cvs.sourceforge.net:/cvsroot/bibdesk co bibdeskinputmanager";
+   $GETINPUTMANAGER = "cvs -z3 -d:$CVS_METHOD:$SFNAME\@cvs.sourceforge.net:/cvsroot/bibdesk checkout -P bibdeskinputmanager";
    tryGet($GETINPUTMANAGER);
 
 }
