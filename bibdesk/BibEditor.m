@@ -503,6 +503,7 @@ NSString *BDSKDateModifiedString = @"Date-Modified";
 		[citeKeyWarningButton setToolTip:NSLocalizedString(@"",@"")]; // @@ this should be nil?
 	}
 	[citeKeyWarningButton setEnabled:set];
+	[citeKeyField setTextColor:(set ? [NSColor redColor] : [NSColor blackColor])];
 }
 
 // @@ should also check validity using citekeyformatter
