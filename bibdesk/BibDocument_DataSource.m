@@ -208,7 +208,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
     NSMutableArray* newRows;
     int sortedIndex = 0;
 
-    if([tv numberOfSelectedRows] == 0) return NO;
+    if([tableView numberOfSelectedRows] == 0) return NO;
 
     if(tv == (NSTableView *)ccTableView){
         startCite = [NSString stringWithFormat:@"\\%@%@",[customStringArray objectAtIndex:[[rows objectAtIndex:0] intValue]], startCiteBracket];
