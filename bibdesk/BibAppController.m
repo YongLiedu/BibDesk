@@ -581,12 +581,17 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
     BibItem *item;
     NSMutableString *retStr = [NSMutableString string];
     BOOL yn = NO;    
-    NSLog(@"items is %@", items);
-    while(item = [[items objectEnumerator] nextObject]){
-        [retStr appendString:@" "];
+    NSEnumerator *itemE = [items objectEnumerator];
+    int count = [items count];
+    
+    while(item = [itemE nextObject]){
         [retStr appendString:[item citeKey]];
+        if(count > 1)
+            [retStr appendString:@" "];
     }
     
+    types = [NSArray arrayWithObject:NSStringPboardType];
+    [pboard declareTypes:types owner:nil];
     yn = [pboard setString:retStr forType:NSStringPboardType];
 }
 @end
