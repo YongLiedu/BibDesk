@@ -10,6 +10,7 @@
                 contextualMenuSelectTableColumn = id; 
                 copyAsBibTex = id; 
                 copyAsPDF = id; 
+                copyAsRTF = id; 
                 copyAsTex = id; 
                 delPub = id; 
                 didChangeSortKey = id; 
@@ -18,6 +19,7 @@
                 emailPubCmd = id; 
                 exportAsHTML = id; 
                 exportAsRSS = id; 
+                makeSearchFieldKey = id; 
                 newPub = id; 
                 openCustomCitePrefPane = id; 
                 quickSearchAddField = id; 
@@ -40,11 +42,8 @@
                 ctxCopyTex = NSMenuItem; 
                 customCiteDrawer = NSDrawer; 
                 documentWindow = NSWindow; 
-                dummyView = NSBox; 
                 infoLine = NSTextField; 
                 openCustomCitePrefsButton = NSButton; 
-                outlineBox = NSView; 
-                outlineView = NSOutlineView; 
                 previewField = NSTextView; 
                 quickSearchButton = NSPopUpButton; 
                 quickSearchClearButton = NSButton; 
@@ -54,10 +53,7 @@
                 searchField = id; 
                 searchFieldBox = NSBox; 
                 searchFieldTextField = NSTextField; 
-                sortKeyButton = NSPopUpButton; 
-                sortKeyView = NSView; 
                 splitView = OASplitView; 
-                tableBox = NSView; 
                 tableView = BDSKDragTableView; 
             }; 
             SUPERCLASS = NSDocument; 
