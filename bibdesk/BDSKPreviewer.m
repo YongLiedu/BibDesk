@@ -215,6 +215,7 @@ static unsigned threadCount = 0;
     
     NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
     
+	int rv;
     NSTask *pdftex1;
     NSTask *pdftex2;
     NSTask *bibtex;
@@ -233,13 +234,29 @@ static unsigned threadCount = 0;
     
     if(![[NSFileManager defaultManager] fileExistsAtPath:pdftexbinpath]){
 #warning need more user-level errors in PDFPreviewer.
-        NSLog(@"Incorrect path for pdftex.");
+	    rv = NSRunAlertPanel(NSLocalizedString(@"Incorrect path for pdflatex.",@""),
+							 NSLocalizedString(@"There is no file at the path to pdflatex in the Preview Preference pane. Press \"Go to Preferences\" to either install TeX or set the Path. If you've installed the fink distribution the correct path probably is /sw/bin/pdflatex",@""),
+							 NSLocalizedString(@"OK",@"OK"),NSLocalizedString(@"Go to Preferences",@""),nil);
+     //   NSLog(@" , if you've installed with fink try setting the pdflatex path to /sw/bin/pdflatex?");
+	    if (rv == NSAlertAlternateReturn){
+				[[OAPreferenceController sharedPreferenceController] showPreferencesPanel:self];
+				[[OAPreferenceController sharedPreferenceController] setCurrentClientByClassName:@"BibPref_TeX"];
+		}
+
         [pool release];
         return NO;
     }
     if(![[NSFileManager defaultManager] fileExistsAtPath:bibtexbinpath]){
-        NSLog(@"Incorrect path for bibtex.");
-        [pool release];
+        rv = NSRunAlertPanel(NSLocalizedString(@"Incorrect path for bibtex.",@""),
+							 NSLocalizedString(@"There is no file at the path to bibtex in the Preview Preference pane. Press \"Go to Preferences\" to either install TeX or set the Path. If you've installed the fink distribution the correct path probably is /sw/bin/bibtex",@""),
+							 NSLocalizedString(@"OK",@"OK"),NSLocalizedString(@"Go to Preferences",@""),nil);
+     //   NSLog(@" , if you've installed with fink try setting the pdflatex path to /sw/bin/pdflatex?");
+	    if (rv == NSAlertAlternateReturn){
+				[[OAPreferenceController sharedPreferenceController] showPreferencesPanel:self];
+				[[OAPreferenceController sharedPreferenceController] setCurrentClientByClassName:@"BibPref_TeX"];
+		}
+
+       [pool release];
         return NO;
     }
 
@@ -309,6 +326,7 @@ static unsigned threadCount = 0;
     NSMutableString *bibTemplate = [NSMutableString stringWithContentsOfFile:
         [[[OFPreferenceWrapper sharedPreferenceWrapper] stringForKey:BDSKOutputTemplateFileKey] stringByExpandingTildeInPath]];
 
+	int rv;
     NSString *prefix;
     NSString *postfix;
     NSString *style;
@@ -339,18 +357,34 @@ static unsigned threadCount = 0;
         // if someone else is working and i'm the top go to sleep for a bit
         [NSThread sleepUntilDate:[[NSDate date] addTimeInterval:2.0]];
     }
-
     
     
     if(![[NSFileManager defaultManager] fileExistsAtPath:pdftexbinpath]){
-        NSLog(@"Incorrect path for pdftex.");
+#warning need more user-level errors in PDFPreviewer.
+	    rv = NSRunAlertPanel(NSLocalizedString(@"Incorrect path for pdflatex.",@""),
+							 NSLocalizedString(@"There is no file at the path to pdflatex in the Preview Preference pane. Press \"Go to Preferences\" to either install TeX or set the Path. If you've installed the fink distribution the correct path probably is /sw/bin/pdflatex",@""),
+							 NSLocalizedString(@"OK",@"OK"),NSLocalizedString(@"Go to Preferences",@""),nil);
+     //   NSLog(@" , if you've installed with fink try setting the pdflatex path to /sw/bin/pdflatex?");
+	    if (rv == NSAlertAlternateReturn){
+				[[OAPreferenceController sharedPreferenceController] showPreferencesPanel:self];
+				[[OAPreferenceController sharedPreferenceController] setCurrentClientByClassName:@"BibPref_TeX"];
+		}
+
         [pool release];
-        return nil;
+        return NO;
     }
     if(![[NSFileManager defaultManager] fileExistsAtPath:bibtexbinpath]){
-        NSLog(@"Incorrect path for bibtex.");
-        [pool release];
-        return nil;
+        rv = NSRunAlertPanel(NSLocalizedString(@"Incorrect path for bibtex.",@""),
+							 NSLocalizedString(@"There is no file at the path to bibtex in the Preview Preference pane. Press \"Go to Preferences\" to either install TeX or set the Path. If you've installed the fink distribution the correct path probably is /sw/bin/bibtex",@""),
+							 NSLocalizedString(@"OK",@"OK"),NSLocalizedString(@"Go to Preferences",@""),nil);
+     //   NSLog(@" , if you've installed with fink try setting the pdflatex path to /sw/bin/pdflatex?");
+	    if (rv == NSAlertAlternateReturn){
+				[[OAPreferenceController sharedPreferenceController] showPreferencesPanel:self];
+				[[OAPreferenceController sharedPreferenceController] setCurrentClientByClassName:@"BibPref_TeX"];
+		}
+
+       [pool release];
+        return NO;
     }
    
     if(working) return nil;
