@@ -48,7 +48,7 @@ and defines class methods that let you find a list of available exporters.
  @discussion (description)
  @result     The localized name as an nsstring
  */
-- (NSString *)displayName;
++ (NSString *)displayName;
 
 
 
@@ -80,7 +80,7 @@ and defines class methods that let you find a list of available exporters.
     @discussion 
     @result     classnames from nsclassfromstring
 */
-+ (NSArray *)availableExporters;   
++ (NSArray *)availableExporterClassNames;   
 
 /*!
     @method     availableExporterNames

@@ -611,7 +611,6 @@ void _setupFonts(){
 }
 
 - (void)updateMetadataForKey:(NSString *)key{
-    NSMutableString *tmp = [NSMutableString string];
 	
 	if([@"Annote" isEqualToString:key] || 
 	   [@"Abstract" isEqualToString:key] || 
@@ -936,7 +935,7 @@ void _setupFonts(){
 - (NSString *)MODSString{
     NSDictionary *genreForTypeDict = [[BibTypeManager sharedManager] MODSGenresForBibTeXType:pubType];
     NSMutableString *s = [NSMutableString stringWithString:@"<mods>"];
-    int i = 0;
+    unsigned i = 0;
     
     [s appendFormat:@"<titleInfo> <title>%@ </title>", [self valueOfField:@"Title"]];
     

@@ -21,7 +21,7 @@ static NSMutableArray *availableExporterClassNames;
 }
 
 + (NSArray *)availableExporterNames{
-    NSArray *availableExporterNames = [NSMutableArray arrayWithCapacity:1];
+    NSMutableArray *availableExporterNames = [NSMutableArray arrayWithCapacity:1];
     
     foreach(className, availableExporterClassNames){
         NSString *displayName = [NSClassFromString(className) displayName];

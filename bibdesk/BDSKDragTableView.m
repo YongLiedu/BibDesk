@@ -13,6 +13,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 
 #import "BDSKDragTableView.h"
 #import "BibDocument.h"
+#import "BibDocument_DataSource.h"
 
 static NSColor *sStripeColor = nil;
 
@@ -21,8 +22,6 @@ static NSColor *sStripeColor = nil;
 // this, of course, relies heavily on the fact that the datasource is a bibdocument... i guess it'll break horribly if I ever try to make the tableview
 // self contained (maybe not, huh)
 - (NSImage*)dragImageForRows:(NSArray*)dragRows event:(NSEvent*)dragEvent dragImageOffset:(NSPointPointer)dragImageOffset{
-    NSPasteboard *myPb = [NSPasteboard pasteboardWithUniqueName];
-    NSArray *types;
     NSImage *image = nil;
     NSAttributedString *string;
     NSString *s;

@@ -586,9 +586,7 @@ objectValueForTableColumn:(NSTableColumn *)tableColumn
                                       format:@"OutlineView data source method called by unknown outlineview."];
     
     id draggingSource = [info draggingSource];
-    
-    NSPasteboard *dragPB = [info draggingPasteboard];
-        
+            
     if(draggingSource && [localDragPboard hasType:BDSKBibItemLocalDragPboardType]){
         if(index == NSOutlineViewDropOnItemIndex){
             [(BibCollection *) item addPublicationsFromArray:draggedItems];
