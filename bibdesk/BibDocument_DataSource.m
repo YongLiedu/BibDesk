@@ -62,7 +62,12 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
             return [pub citeKey];
             
         }else if([tcID isEqualToString: @"Title"] ){
-            return [pub title];
+			
+			if ([[pub type] isEqualToString:@"inbook"]){
+				return [NSString stringWithFormat:@"%@ : %@", [pub valueOfField:@"Chapter"], [pub title]];
+			}else{
+				return [pub title];
+			}
             
         }else if([tcID isEqualToString: @"Created"] ){
 			NSCalendarDate *date = [pub dateCreated];
