@@ -5,13 +5,13 @@
     BOOL _showsMenuWhenIconClicked;
     NSImage *_iconImage;
     NSImage *_arrowImage;
-	BOOL _iconEnabled;
+	BOOL _iconActionEnabled;
 }
 
 // -- Setting if the icon is enabled, leaves the menu enabled --
 // -- meaningless if showsmenuwheniconclicked is true.
-- (BOOL)iconEnabled;
-- (void)setIconEnabled:(BOOL)iconEnabled;
+- (BOOL)iconActionEnabled;
+- (void)seticonActionEnabled:(BOOL)iconActionEnabled;
 
 
 // --- Getting and setting the icon size ---
@@ -32,5 +32,10 @@
 // --- Getting and setting the arrow image ---
 - (NSImage *) arrowImage;
 - (void) setArrowImage: (NSImage *) arrowImage;
+
+
+// Private methods
+
+- (void)showMenuInView:(NSView *)controlView withEvent:(NSEvent *)event;
 
 @end
