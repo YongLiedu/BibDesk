@@ -889,13 +889,10 @@ void _setupFonts(){
     NSDateFormatter *dateFormatter = [[[NSDateFormatter alloc] initWithDateFormat:[[NSUserDefaults standardUserDefaults] objectForKey:NSDateFormatString]
                                                          allowNaturalLanguage:NO] autorelease];
     
-	NSString *cleanTitle = [[self title] stringByReplacingCharactersInSet:[NSCharacterSet characterSetWithCharactersInString:@"{}"]
-															   withString:@""];
-	
     [aStr appendAttributedString:[[[NSMutableAttributedString alloc] initWithString:
                       [NSString stringWithFormat:@"%@\n",[self citeKey]] attributes:typeAttributes] autorelease]];
     [aStr appendAttributedString:[[[NSMutableAttributedString alloc] initWithString:
-                     [NSString stringWithFormat:@"%@ ",cleanTitle] attributes:titleAttributes] autorelease]];
+                     [NSString stringWithFormat:@"%@ ",[[self title] stringByRemovingCurlyBraces]] attributes:titleAttributes] autorelease]];
 
     
     [aStr appendAttributedString:[[[NSMutableAttributedString alloc] initWithString:
@@ -910,9 +907,15 @@ void _setupFonts(){
                 [aStr appendAttributedString:[[[NSAttributedString alloc] initWithString:[NSString stringWithFormat:@"%@\n",key]
                                                                               attributes:keyAttributes] autorelease]];
 
-                [aStr appendAttributedString:[[[NSAttributedString alloc] initWithString:[NSString stringWithFormat:@"%@\n",[pubFields objectForKey:key]]
-                                                                              attributes:bodyAttributes] autorelease]];
-            }else{
+				if([key isEqualToString:BDSKAuthorString]){
+					NSString *authors = [self bibtexAuthorString];
+					[aStr appendAttributedString:[[[NSAttributedString alloc] initWithString:[NSString stringWithFormat:@"%@\n",authors]
+																				  attributes:bodyAttributes] autorelease]];
+				}else{
+					[aStr appendAttributedString:[[[NSAttributedString alloc] initWithString:[NSString stringWithFormat:@"%@\n",[pubFields objectForKey:key]]
+																				  attributes:bodyAttributes] autorelease]];
+				}
+			}else{
                 [nonReqKeys addObject:key];
             }
         }
@@ -929,6 +932,12 @@ void _setupFonts(){
                 NSCalendarDate *date = [NSCalendarDate dateWithNaturalLanguageString:[pubFields objectForKey:key]];
 
                 [aStr appendAttributedString:[[[NSAttributedString alloc] initWithString:[NSString stringWithFormat:@"%@\n",[dateFormatter stringForObjectValue:date]]
+                                                                              attributes:bodyAttributes] autorelease]];
+
+            }else if([key isEqualToString:BDSKAuthorString]){
+                NSString *authors = [self bibtexAuthorString];
+
+                [aStr appendAttributedString:[[[NSAttributedString alloc] initWithString:[NSString stringWithFormat:@"%@\n",authors]
                                                                               attributes:bodyAttributes] autorelease]];
 
             }else if([key isEqualToString:BDSKLocalUrlString]){
