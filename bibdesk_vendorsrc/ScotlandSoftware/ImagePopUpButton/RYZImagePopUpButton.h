@@ -21,4 +21,9 @@
 - (NSImage *)arrowImage;
 - (void) setArrowImage:(NSImage *)arrowImage;
 
+
+// ---  Getting and setting the action enabled flag ---
+- (BOOL)iconActionEnabled;
+- (void)setIconActionEnabled:(BOOL)iconActionEnabled;
+
 @end

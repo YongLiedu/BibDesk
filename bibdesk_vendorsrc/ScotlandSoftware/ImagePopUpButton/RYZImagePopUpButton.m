@@ -101,4 +101,20 @@
     [[self cell] setArrowImage: arrowImage];
 }
 
+
+// ----------------------------------------------
+//      Getting and setting the action enabled flag
+// ----------------------------------------------
+
+- (BOOL)iconActionEnabled
+{
+    return [[self cell] iconActionEnabled];
+}
+
+
+- (void)setIconActionEnabled:(BOOL)iconActionEnabled
+{
+    [[self cell] setIconActionEnabled: iconActionEnabled];
+}
+
 @end
