@@ -36,6 +36,9 @@ Broken out of BibDocument and split up into smaller parts to make things more ma
 	else if (act == @selector(editPubCmd:)) {
 		return [self validateEditSelectionMenuItem:menuItem];
 	}
+	else if (act == @selector(generateCiteKey:)) {
+		return [self validateGenerateCiteKeyMenuItem:menuItem];
+	}
 	else if (act == @selector(delPub:)) {
 		return [self validateDeleteSelectionMenuItem:menuItem];
 	}
@@ -249,6 +252,30 @@ Broken out of BibDocument and split up into smaller parts to make things more ma
 	}
 	else {
 		s = NSLocalizedString(@"Edit %i Publications", @"Edit %i Publications");
+		[menuItem setTitle:[NSString stringWithFormat:s, [self numberOfSelectedPubs]]];
+		return YES;
+	}
+}	
+
+
+
+- (BOOL) validateGenerateCiteKeyMenuItem:(NSMenuItem*) menuItem {
+	NSString * s;
+	
+	if ([self numberOfSelectedPubs] == 0) {
+		// no selection
+		s = NSLocalizedString(@"Generate Cite Key", @"Generate Cite Key");
+		[menuItem setTitle:s];
+		return NO;
+	}
+	else if ([self numberOfSelectedPubs] == 1) {
+		// single selection
+		s = NSLocalizedString(@"Generate Cite Key", @"Generate Cite Key");
+		[menuItem setTitle:[NSString stringWithFormat:s]];
+		return YES;
+	}
+	else {
+		s = NSLocalizedString(@"Generate %i Cite Keys", @"Generate %i Cite Keys");
 		[menuItem setTitle:[NSString stringWithFormat:s, [self numberOfSelectedPubs]]];
 		return YES;
 	}
