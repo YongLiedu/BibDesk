@@ -50,6 +50,8 @@ NSString *BDSKShownColsNamesKey = @"Shown Column Names";
 NSString *BDSKColumnWidthsKey = @"Column Widths by Name";
 NSString *BDSKColumnOrderKey = @"Column Names in Order";
 
+NSString *BDSKShowStatusBarKey = @"Show Status Bar";
+
 NSString *BDSKTableViewFontKey = @"TableView Font";
 NSString *BDSKTableViewFontSizeKey = @"TableView Font Size";
 NSString *BDSKPreviewDisplayKey = @"Preview Pane Displays What?";
