@@ -3,7 +3,7 @@
         {CLASS = BDSKLinkButton; LANGUAGE = ObjC; SUPERCLASS = NSButton; }, 
         {
             ACTIONS = {changePreviewDisplay = id; changeShownColumns = id; chooseFont = id; }; 
-            CLASS = BibPref_Display; 
+            CLASS = "BibPref_Display"; 
             LANGUAGE = ObjC; 
             OUTLETS = {
                 displayPrefRadioMatrix = NSMatrix; 
@@ -18,7 +18,7 @@
                 descriptionFieldChanged = id; 
                 findOutMoreButtonPressed = id; 
             }; 
-            CLASS = BibPref_RSS; 
+            CLASS = "BibPref_RSS"; 
             LANGUAGE = ObjC; 
             OUTLETS = {
                 autoSaveAsRSSButton = NSButton; 
@@ -30,7 +30,7 @@
         }, 
         {
             ACTIONS = {changeStartupBehavior = id; }; 
-            CLASS = BibPref_Startup; 
+            CLASS = "BibPref_Startup"; 
             LANGUAGE = ObjC; 
             OUTLETS = {
                 defaultBibFileField = NSTextField; 
