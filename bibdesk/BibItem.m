@@ -136,6 +136,8 @@ void _setupFonts(){
     undoManager = nil;
     document = nil;
     editorObj = nil;
+    if(_cachedFonts == nil)
+        _setupFonts();
     return self;
 }
 
