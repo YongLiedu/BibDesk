@@ -162,7 +162,16 @@ void print_error (bt_error *err)
 
    [errString appendString:[NSString stringWithCString:err->message]];
    [errObj takeValue:[[NSString stringWithCString:err->message] retain] forKey:@"errorMessage"];
-   [[NSNotificationCenter defaultCenter] postNotificationName:@"BTPARSE ERROR" object:errObj];
+   /*   [[NSNotificationCenter defaultCenter] postNotificationName:@"BTPARSE ERROR" object:errObj]; */
+
+   NSNotification *errNotif = [NSNotification notificationWithName:@"BTPARSE ERROR"
+			       object:errObj];
+
+   
+   [[NSNotificationQueue defaultQueue] enqueueNotification:errNotif
+    postingStyle:NSPostWhenIdle
+    coalesceMask:NSNotificationCoalescingOnSender
+    forModes:nil];
 
 } /* print_error() */
 
