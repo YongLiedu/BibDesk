@@ -535,10 +535,12 @@ void _setupFonts(){
     NSString *lurl = [self valueOfField:@"Local-Url"];
 
     if (!lurl || [lurl isEqualToString:@""]) return nil;
-    
-    if(base && 
+
+    if(base &&
        ![lurl containsString:@"file://"] &&
-       ![[lurl substringWithRange:NSMakeRange(0,1)] isEqualToString:@"/"]){
+       ![[lurl substringWithRange:NSMakeRange(0,1)] isEqualToString:@"/"] &&
+       ![[lurl substringWithRange:NSMakeRange(0,1)] isEqualToString:@"~"]){
+
         lurl = [base stringByAppendingPathComponent:lurl];
     }
 //    NSLog(@"base is %@ lurl is %@", base, lurl);
