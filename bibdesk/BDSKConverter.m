@@ -74,6 +74,20 @@ static NSDictionary *WholeDict;
     [finalCharSet release];
     
     [workingSet release];
+
+    //Next two lines handle newlines.  These probably should be done in the dictionary
+    //But I could't make it return just "\n" it always returns "\\n" and none of the
+    //unicode chars for newline work as consistently as the code below.
+
+    //Added to convert double new line to {\par}
+    [convertedSoFar replaceOccurrencesOfString:@"\n\n" withString:@"{\\par}"
+                                       options: NSCaseInsensitiveSearch
+                                         range:NSMakeRange(0, [convertedSoFar length])];
+
+    //Added to convert \newline to single new line
+    [convertedSoFar replaceOccurrencesOfString:@"\n"
+                                    withString:@"{\\newline}" options: NSCaseInsensitiveSearch
+                                         range:NSMakeRange(0, [convertedSoFar length])];
     
     return([NSString stringWithString:convertedSoFar]);
 }
@@ -118,6 +132,21 @@ static NSDictionary *WholeDict;
             }
         }
     }
+
+    //Next two statements handle newlines.
+    //These two should be done thorugh the dictionary---but I can't work out
+    //how to make it return just \n.  It always returns "\\n".
+    
+    //Added to convert \par to double new line
+    [convertedSoFar replaceOccurrencesOfString:@"{\\par}"
+                                    withString:@"\n\n" options: NSCaseInsensitiveSearch
+                                         range:NSMakeRange(0, [convertedSoFar length])];
+
+    //Added to convert \newline to single new line
+    [convertedSoFar replaceOccurrencesOfString:@"{\\newline}"
+                                    withString:@"\n" options: NSCaseInsensitiveSearch
+                                         range:NSMakeRange(0, [convertedSoFar length])];
+    
 
     return [NSString stringWithString:convertedSoFar];    
 }
