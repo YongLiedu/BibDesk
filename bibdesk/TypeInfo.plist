@@ -151,15 +151,15 @@
 		<dict>
 			<key>optional</key>
 			<array>
-				<string>volumetitle</string>
-				<string>editor</string>
+				<string>Volumetitle</string>
+				<string>Editor</string>
 			</array>
 			<key>required</key>
 			<array>
-				<string>author</string>
-				<string>title</string>
-				<string>publisher</string>
-				<string>year</string>
+				<string>Author</string>
+				<string>Title</string>
+				<string>Publisher</string>
+				<string>Year</string>
 			</array>
 		</dict>
 		<key>inbook</key>
