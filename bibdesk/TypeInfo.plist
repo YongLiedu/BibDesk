@@ -51,7 +51,7 @@
 		<dict>
 			<key>optional</key>
 			<array>
-                                <string>Author</string>
+				<string>Author</string>
 				<string>Editor</string>
 				<string>Volume</string>
 				<string>Number</string>
@@ -62,7 +62,6 @@
 			</array>
 			<key>required</key>
 			<array>
-				
 				<string>Title</string>
 				<string>Publisher</string>
 				<string>Year</string>
@@ -88,9 +87,15 @@
 			<key>optional</key>
 			<array>
 				<string>volumetitle</string>
+				<string>editor</string>
 			</array>
 			<key>required</key>
-			<array/>
+			<array>
+				<string>author</string>
+				<string>title</string>
+				<string>publisher</string>
+				<string>year</string>
+			</array>
 		</dict>
 		<key>inbook</key>
 		<dict>
