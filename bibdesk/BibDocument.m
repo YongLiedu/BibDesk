@@ -81,6 +81,8 @@ NSString*   LocalDragPasteboardName = @"edu.ucsd.cs.mmccrack.bibdesk: Local Publ
                                                   name:BDSKCustomStringsChangedNotification
                                                 object:nil];
      
+	 // @@ itemChangeNotification - should register to observe for item change notifications here.
+	 
      customStringArray = [[NSMutableArray arrayWithCapacity:6] retain];
      [customStringArray setArray:[[OFPreferenceWrapper sharedPreferenceWrapper] arrayForKey:BDSKCustomCiteStringsKey]];
 
@@ -680,8 +682,8 @@ stringByAppendingPathComponent:@"BibDesk"]; */
 }
 
 - (void)setSelectedSearchFieldKey:(NSString *)newKey{
-    [quickSearchKey autorelease];  // quickSearchKey might == newKey.
 
+		
     [[OFPreferenceWrapper sharedPreferenceWrapper] setObject:newKey
                                                       forKey:BDSKCurrentQuickSearchKey];
 	
@@ -698,7 +700,7 @@ stringByAppendingPathComponent:@"BibDesk"]; */
 	if(![quickSearchKey isEqualToString:newKey]){
 		// find current key's menuitem and set it to NSOffState
 		NSMenuItem *oldItem = [templateMenu itemWithTitle:quickSearchKey];
-		[oldItem setState:NSOffState];
+		[oldItem setState:NSOffState];	
 	}
 	
 	// set new key's menuitem to NSOnState
@@ -706,7 +708,13 @@ stringByAppendingPathComponent:@"BibDesk"]; */
 	[newItem setState:NSOnState];
 	[searchCell setSearchMenuTemplate:templateMenu];
 	
-	quickSearchKey = newKey;
+	if(newKey != quickSearchKey){
+		
+		
+		[newKey retain];
+		[quickSearchKey release];
+		quickSearchKey = newKey;
+	}
     [self searchFieldAction:searchCell];
 }
 
@@ -794,9 +802,16 @@ stringByAppendingPathComponent:@"BibDesk"]; */
             }else if([field isEqualToString:@"Pub Type"]){
                 r = [[pub type] rangeOfString:substring
                                       options:NSCaseInsensitiveSearch];
-            }else{
-                r = [[pub valueOfField:quickSearchKey] rangeOfString:substring
-                                                             options:NSCaseInsensitiveSearch];
+            }else if([field isEqualToString:@"Cite Key"]){
+				NSString *pubCiteKey = [pub citeKey];
+				r = [pubCiteKey rangeOfString:substring
+									  options:NSCaseInsensitiveSearch];
+			}else{
+				NSString *value = [pub valueOfField:quickSearchKey];
+				if(!value)
+					r.location = NSNotFound;
+				else
+					r = [value rangeOfString:substring options:NSCaseInsensitiveSearch];
             }
 			
             if(r.location == NSNotFound) [remArray addObject:pub];
@@ -902,38 +917,39 @@ didClickTableColumn: (NSTableColumn *) tableColumn{
             [lastSelectedColumnForSort release];
         }
         lastSelectedColumnForSort = [tableColumn retain];
-        [tableView setHighlightedTableColumn: tableColumn]; //do I want to do that?
-
-        if([[tableColumn identifier] isEqualToString:@"Cite Key"]){
-
-            [publications sortUsingSelector:@selector(keyCompare:)];
-            [shownPublications sortUsingSelector:@selector(keyCompare:)];
-        }else if([[tableColumn identifier] isEqualToString:@"Title"]){
-
-            [publications sortUsingSelector:@selector(titleCompare:)];
-            [shownPublications sortUsingSelector:@selector(titleCompare:)];
-        }else if([[tableColumn identifier] isEqualToString:@"Date"]){
-
-            [publications sortUsingSelector:@selector(dateCompare:)];
-            [shownPublications sortUsingSelector:@selector(dateCompare:)];
-        }else if([[tableColumn identifier] isEqualToString:@"1st Author"]){
-
-            [publications sortUsingSelector:@selector(auth1Compare:)];
-            [shownPublications sortUsingSelector:@selector(auth1Compare:)];
-        }else if([[tableColumn identifier] isEqualToString:@"2nd Author"]){
-
-            [publications sortUsingSelector:@selector(auth2Compare:)];
-            [shownPublications sortUsingSelector:@selector(auth2Compare:)];
-        }else if([[tableColumn identifier] isEqualToString:@"3rd Author"]){
-
-            [publications sortUsingSelector:@selector(auth3Compare:)];
-            [shownPublications sortUsingSelector:@selector(auth3Compare:)];
-        }else{
-			[publications sortUsingFunction:generalBibItemCompareFunc context:[tableColumn identifier]];
-			[shownPublications sortUsingFunction:generalBibItemCompareFunc context:[tableColumn identifier]];
-        }
-
-    }
+        [tableView setHighlightedTableColumn: tableColumn]; 
+	}
+	// resorting should happen whenever you click.
+	if([[tableColumn identifier] isEqualToString:@"Cite Key"]){
+		
+		[publications sortUsingSelector:@selector(keyCompare:)];
+		[shownPublications sortUsingSelector:@selector(keyCompare:)];
+	}else if([[tableColumn identifier] isEqualToString:@"Title"]){
+		
+		[publications sortUsingSelector:@selector(titleCompare:)];
+		[shownPublications sortUsingSelector:@selector(titleCompare:)];
+	}else if([[tableColumn identifier] isEqualToString:@"Date"]){
+		
+		[publications sortUsingSelector:@selector(dateCompare:)];
+		[shownPublications sortUsingSelector:@selector(dateCompare:)];
+	}else if([[tableColumn identifier] isEqualToString:@"1st Author"]){
+		
+		[publications sortUsingSelector:@selector(auth1Compare:)];
+		[shownPublications sortUsingSelector:@selector(auth1Compare:)];
+	}else if([[tableColumn identifier] isEqualToString:@"2nd Author"]){
+		
+		[publications sortUsingSelector:@selector(auth2Compare:)];
+		[shownPublications sortUsingSelector:@selector(auth2Compare:)];
+	}else if([[tableColumn identifier] isEqualToString:@"3rd Author"]){
+		
+		[publications sortUsingSelector:@selector(auth3Compare:)];
+		[shownPublications sortUsingSelector:@selector(auth3Compare:)];
+	}else{
+		[publications sortUsingFunction:generalBibItemCompareFunc context:[tableColumn identifier]];
+		[shownPublications sortUsingFunction:generalBibItemCompareFunc context:[tableColumn identifier]];
+	}
+	
+	
 
     // Set the graphic for the new column header
     [tableView setIndicatorImage: (sortDescending ?
@@ -1084,24 +1100,30 @@ int generalBibItemCompareFunc(id item1, id item2, void *context){
 }
 
 - (IBAction)copyAsTex:(id)sender{
-    NSMutableString *s = [NSMutableString stringWithFormat:@"\\%@{",[[OFPreferenceWrapper sharedPreferenceWrapper] stringForKey:BDSKCiteStringKey]];
+	OFPreferenceWrapper *sud = [OFPreferenceWrapper sharedPreferenceWrapper];
+	NSString *startCiteBracket = [sud stringForKey:BDSKCiteStartBracketKey]; 
+	NSString *citeString = [sud stringForKey:BDSKCiteStringKey];
+    NSMutableString *s = [NSMutableString stringWithFormat:@"\\%@%@", citeString, startCiteBracket];
+	NSString *endCiteBracket = [sud stringForKey:BDSKCiteEndBracketKey]; 
+	
     NSEnumerator *e = [self selectedPubEnumerator];
     NSPasteboard *pasteboard = [NSPasteboard pasteboardWithName:NSGeneralPboard];
     NSNumber *i;
-    BOOL sep = ([[OFPreferenceWrapper sharedPreferenceWrapper] integerForKey:BDSKSeparateCiteKey] == NSOnState);
+    BOOL sep = ([sud integerForKey:BDSKSeparateCiteKey] == NSOnState);
     
     [pasteboard declareTypes:[NSArray arrayWithObject:NSStringPboardType] owner:nil];
     while(i=[e nextObject]){
         [s appendString:[[shownPublications objectAtIndex:[i intValue]] citeKey]];
         if(sep)
-            [s appendString:[NSString stringWithFormat:@"} \\%@{",[[OFPreferenceWrapper sharedPreferenceWrapper] stringForKey:BDSKCiteStringKey]]];
+            [s appendString:[NSString stringWithFormat:@"%@ \\%@%@", endCiteBracket, citeString, startCiteBracket]];
         else
             [s appendString:@","];
     }
     if(sep)
-        [s replaceCharactersInRange:[s rangeOfString:[NSString stringWithFormat:@"} \\%@{", [[OFPreferenceWrapper sharedPreferenceWrapper] stringForKey:BDSKCiteStringKey]] options:NSBackwardsSearch] withString:@"}"];
+        [s replaceCharactersInRange:[s rangeOfString:[NSString stringWithFormat:@"%@ \\%@%@", endCiteBracket, citeString, startCiteBracket]
+											 options:NSBackwardsSearch] withString:endCiteBracket];
     else
-        [s replaceCharactersInRange:[s rangeOfString:@"," options:NSBackwardsSearch] withString:@"}"];
+        [s replaceCharactersInRange:[s rangeOfString:@"," options:NSBackwardsSearch] withString:endCiteBracket];
     [pasteboard setString:s forType:NSStringPboardType];
 }
 
