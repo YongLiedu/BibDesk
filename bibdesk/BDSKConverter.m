@@ -298,7 +298,7 @@ static BDSKConverter *theConverter;
 - (BOOL)validateFormat:(NSString **)formatString forField:(NSString *)fieldName inFileType:(NSString *)type error:(NSString **)error
 {
 	// implemented specifiers, the same for any field and type
-	NSCharacterSet *validSpecifierChars = [NSCharacterSet characterSetWithCharactersInString:@"0123456789aAtmyYkrRd"];
+	NSCharacterSet *validSpecifierChars = [NSCharacterSet characterSetWithCharactersInString:@"0123456789aAtmyYkrRdc"];
 	NSCharacterSet *validLastSpecifierChars = [NSCharacterSet characterSetWithCharactersInString:@"uUn"];
 	NSCharacterSet *invalidCharSet = [[BibTypeManager sharedManager] strictInvalidCharactersForField:fieldName inFileType:type];
 	NSArray *components = [*formatString componentsSeparatedByString:@"%"];
@@ -322,9 +322,18 @@ static BDSKConverter *theConverter;
 				continue;
 			}
 			specifier = [string characterAtIndex:0];
+                        if (specifier == 'c'){
+                            [sanitizedFormatString appendFormat:@"%C", specifier];  // we know that c is okay, but what about the rest?
+                            specifier = [string characterAtIndex:1]; // move it up to where the { should be, then check between the braces later
+                                if (specifier != '{'){
+                                    *error = NSLocalizedString(@"Specifier %c must be followed by a {'field'} name.", @"");
+                                    return NO;
+                                }
+                            }
 			if (![validSpecifierChars characterIsMember:specifier]) {
 				if (specifier == '{') {
 					arr = [[string substringFromIndex:1] componentsSeparatedByString:@"}"];
+
 					if ([arr count] != 2) {
 						*error = NSLocalizedString(@"Incomplete specifier {'field'} in format.", @"");
 						return NO;

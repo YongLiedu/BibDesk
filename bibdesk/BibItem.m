@@ -727,6 +727,21 @@ void _setupFonts(){
 	return [[value retain] autorelease];
 }
 
+- (NSString *)acronymValueOfField:(NSString *)key{
+    NSMutableString *result = [NSMutableString string];
+    NSArray *allComponents = [[self valueOfField:key] componentsSeparatedByString:@" "]; // single whitespace
+    NSEnumerator *e = [allComponents objectEnumerator];
+    NSString *component = nil;
+    
+    while(component = [e nextObject]){
+        component = [component stringByTrimmingCharactersInSet:[[NSCharacterSet alphanumericCharacterSet] invertedSet]];
+        if([component length] > 3){
+            [result appendString:[[component substringToIndex:1] uppercaseString]];
+        }
+    }
+    return result;
+}
+
 - (void)addField:(NSString *)key{
 	[self addField:key withModDate:[NSCalendarDate date]];
 }
@@ -1368,6 +1383,14 @@ void _setupFonts(){
 						NSLog(@"Specifier %%%C can only be used at the end of format.", specifier);
 					}
 					break;
+                                case 'c':
+                                    // This handles acronym specifiers of the form %c{FieldName}
+                                    NSAssert( [scanner scanString:@"{" intoString:nil], @"Failed to scan {." ); // these errors will be handled gracefully by the BDSKConverter
+                                    NSAssert( [scanner scanUpToString:@"}" intoString:&string], @"Nothing found after {." );
+                                    NSAssert( [scanner scanString:@"}" intoString:nil], @"Failed to scan }." );
+                                    
+                                    [parsedStr appendString:[self acronymValueOfField:string]];
+                                    break;
 				default: 
 					NSLog(@"Unknown format specifier %%%C in format.", specifier);
 			}
