@@ -1,5 +1,13 @@
 // !$*UTF8*$!
 {
+	089C1660FE840EACC02AAC07 = {
+		uiCtxt = {
+			sepNavIntBoundsRect = "{{0, 0}, {711, 428}}";
+			sepNavSelRange = "{169, 0}";
+			sepNavVisRect = "{{0, 0}, {711, 428}}";
+			sepNavWindowFrame = "{{38, 248}, {750, 558}}";
+		};
+	};
 	270530000680DB28005F8C2E = {
 		uiCtxt = {
 			sepNavIntBoundsRect = "{{0, 0}, {711, 449}}";
@@ -85,16 +93,16 @@
 	};
 	27E0AA7D05A7C86C005BA25A = {
 		uiCtxt = {
-			sepNavIntBoundsRect = "{{0, 0}, {711, 5249}}";
-			sepNavSelRange = "{8329, 0}";
-			sepNavVisRect = "{{0, 4324}, {711, 428}}";
-			sepNavWindowFrame = "{{38, 248}, {750, 558}}";
+			sepNavIntBoundsRect = "{{0, 0}, {711, 5824}}";
+			sepNavSelRange = "{2181, 0}";
+			sepNavVisRect = "{{0, 871}, {711, 428}}";
+			sepNavWindowFrame = "{{84, 206}, {750, 558}}";
 		};
 	};
 	2A37F4A9FDCFA73011CA2CEA = {
 		activeBuildStyle = F55B9B6E02A0EC6001EF0AED;
 		activeExecutable = F9495E43069F8C1500475F69;
-		activeTarget = 27E0A9F405A7C86B005BA25A;
+		activeTarget = F9FC662A06A9C6750016151E;
 		addToTargets = (
 			27E0A9F405A7C86B005BA25A,
 		);
@@ -126,9 +134,9 @@
 				PBXFileTableDataSourceColumnSortingKey = PBXFileDataSource_Filename_ColumnID;
 				PBXFileTableDataSourceColumnWidthsKey = (
 					20,
-					282,
+					242,
 					20,
-					55,
+					48.1626,
 					43,
 					43,
 					20,
@@ -160,10 +168,10 @@
 				PBXFileTableDataSourceColumnSortingKey = PBXFileDataSource_Filename_ColumnID;
 				PBXFileTableDataSourceColumnWidthsKey = (
 					20,
-					245,
-					56,
+					210,
+					50,
 					20,
-					56,
+					50,
 					43,
 					43,
 				);
@@ -177,7 +185,7 @@
 					PBXFileDataSource_Warnings_ColumnID,
 				);
 			};
-			PBXPerProjectTemplateStateSaveDate = 117180671;
+			PBXPerProjectTemplateStateSaveDate = 117225817;
 			PBXPrepackagedSmartGroups_v2 = (
 				{
 					PBXTransientLocationAtTop = bottom;
@@ -566,7 +574,7 @@
 				PBXModuleWindowStatusBarHidden = YES;
 				RubberWindowFrame = "364 122 529 250 0 0 1280 832 ";
 			};
-			PBXWorkspaceStateSaveDate = 117180671;
+			PBXWorkspaceStateSaveDate = 117225817;
 		};
 		sourceControlManager = F9495E57069F8C3500475F69;
 		userBuildSettings = {
@@ -1098,10 +1106,10 @@
 	};
 	F9D8602306B2FC7D00F2DE7D = {
 		uiCtxt = {
-			sepNavIntBoundsRect = "{{0, 0}, {709, 1023}}";
-			sepNavSelRange = "{0, 0}";
-			sepNavVisRect = "{{0, 0}, {709, 464}}";
-			sepNavWindowFrame = "{{153, 143}, {750, 558}}";
+			sepNavIntBoundsRect = "{{0, 0}, {711, 1393}}";
+			sepNavSelRange = "{271, 0}";
+			sepNavVisRect = "{{0, 0}, {711, 443}}";
+			sepNavWindowFrame = "{{15, 269}, {750, 558}}";
 		};
 	};
 	F9FC662A06A9C6750016151E = {

@@ -57,9 +57,9 @@
 	<key>CFBundleExecutable</key>
 	<string>Bibdesk</string>
 	<key>CFBundleGetInfoHTML</key>
-	<string>&lt;B&gt;BibDesk&lt;/B&gt; Version 0.95</string>
+	<string>&lt;B&gt;BibDesk&lt;/B&gt; Version 0.96</string>
 	<key>CFBundleGetInfoString</key>
-	<string>version 0.95</string>
+	<string>version 0.96</string>
 	<key>CFBundleHelpBookFolder</key>
 	<string>BibDesk Help</string>
 	<key>CFBundleHelpBookName</key>
@@ -75,11 +75,11 @@
 	<key>CFBundlePackageType</key>
 	<string>APPL</string>
 	<key>CFBundleShortVersionString</key>
-	<string>0.95</string>
+	<string>0.96</string>
 	<key>CFBundleSignature</key>
 	<string>BDSK</string>
 	<key>CFBundleVersion</key>
-	<string>0.95</string>
+	<string>0.96</string>
 	<key>NSAppleScriptEnabled</key>
 	<string>YES</string>
 	<key>NSMainNibFile</key>
@@ -277,18 +277,6 @@
 			<dict>
 				<key>defaultsDictionary</key>
 				<dict>
-					<key>Default Bib File</key>
-					<string></string>
-					<key>Preview Pane Displays What?</key>
-					<string>1</string>
-					<key>Show Warnings in Error Panel</key>
-					<string>0</string>
-					<key>Startup Behavior</key>
-					<string>0</string>
-					<key>TableView Font</key>
-					<string>LucidaGrande</string>
-					<key>TableView Font Size</key>
-					<string>1.293993033330623e-310</string>  
 					<key>BlueComponentColor of alternating rows Key</key>
 					<string>1.010918794815856e-310</string>
 					<key>Current Publication Type</key>
@@ -299,38 +287,49 @@
 					<string>Keywords</string>
 					<key>Current Quick Search Text Dictionary</key>
 					<dict/>
+					<key>Default Bib File</key>
+					<string></string>
 					<key>GreenComponentColor of alternating rows Key</key>
 					<string>1.093888830242598e-310</string>
-					
+					<key>Preview Pane Displays What?</key>
+					<string>1</string>
 					<key>Quick Search Keys</key>
 					<array>
-					  <string>Keywords</string>
-					  <string>Pub Type</string>
+						<string>Keywords</string>
+						<string>Pub Type</string>
 					</array>
 					<key>RedComponentColor of alternating rows Key</key>
 					<string>1.156487706076073e-310</string>
+					<key>Show Warnings in Error Panel</key>
+					<string>0</string>
 					<key>Shown Column Names</key>
 					<array>
-					  <string>Keywords</string>
-					  <string>Type</string>
-					  <string>Cite Key</string>
-					  <string>Title</string>
-					  <string>Date</string>
-					  <string>1st Author</string>
-					  <string>2nd Author</string>
-					  <string>3rd Author</string>
+						<string>Keywords</string>
+						<string>Type</string>
+						<string>Cite Key</string>
+						<string>Title</string>
+						<string>Date</string>
+						<string>1st Author</string>
+						<string>2nd Author</string>
+						<string>3rd Author</string>
 					</array>
 					<key>Shown Columns</key>
 					<array>
-					  <string>1</string>
-					  <string>1</string>
-					  <string>1</string>
-					  <string>1</string>
-					  <string>0</string>
-					  <string>0</string>
+						<string>1</string>
+						<string>1</string>
+						<string>1</string>
+						<string>1</string>
+						<string>0</string>
+						<string>0</string>
 					</array>
-                                        <key>View-by Field</key>
-                                        <string>Author</string>
+					<key>Startup Behavior</key>
+					<string>0</string>
+					<key>TableView Font</key>
+					<string>LucidaGrande</string>
+					<key>TableView Font Size</key>
+					<string>1.293993033330623e-310</string>
+					<key>View-by Field</key>
+					<string>Author</string>
 				</dict>
 				<key>icon</key>
 				<string>startup.tiff</string>
