@@ -9,8 +9,19 @@
 
 @implementation DraggableScrollView
 
-static NSString *BDSKDefaultScaleMenuLabels[] = {/* @"Set...", */ @"10%", @"25%", @"50%", @"75%", @"100%", @"128%", @"200%", @"400%", @"800%", @"1600%"};
-static float BDSKDefaultScaleMenuFactors[] = {/* 0.0, */ 0.1, 0.25, 0.5, 0.75, 1.0, 1.28, 2.0, 4.0, 8.0, 16.0};
+/* For genstrings:
+    NSLocalizedStringFromTable(@"10%", @"ZoomValues", @"Zoom popup entry")
+    NSLocalizedStringFromTable(@"25%", @"ZoomValues", @"Zoom popup entry")
+    NSLocalizedStringFromTable(@"50%", @"ZoomValues", @"Zoom popup entry")
+    NSLocalizedStringFromTable(@"75%", @"ZoomValues", @"Zoom popup entry")
+    NSLocalizedStringFromTable(@"100%", @"ZoomValues", @"Zoom popup entry")
+    NSLocalizedStringFromTable(@"128%", @"ZoomValues", @"Zoom popup entry")
+    NSLocalizedStringFromTable(@"200%", @"ZoomValues", @"Zoom popup entry")
+    NSLocalizedStringFromTable(@"400%", @"ZoomValues", @"Zoom popup entry")
+    NSLocalizedStringFromTable(@"800%", @"ZoomValues", @"Zoom popup entry")
+*/   
+static NSString *BDSKDefaultScaleMenuLabels[] = {/* @"Set...", */ @"10%", @"25%", @"50%", @"75%", @"100%", @"128%", @"200%", @"400%", @"800%"};
+static float BDSKDefaultScaleMenuFactors[] = {/* 0.0, */ 0.1, 0.25, 0.5, 0.75, 1.0, 1.28, 2.0, 4.0, 8.0};
 static unsigned BDSKDefaultScaleMenuSelectedItemIndex = 4;
 static float BDSKScaleMenuFontSize = 11.0;
 
@@ -55,7 +66,6 @@ static float BDSKScaleMenuFontSize = 11.0;
 
 - (id)initWithFrame:(NSRect)rect {
     if ((self = [super initWithFrame:rect])) {
-        // we want to have a horizontal scroller to place the scaling popup
 		scaleFactor = 1.0;
     }
     return self;
