@@ -8,16 +8,11 @@
 
 #import <AppKit/AppKit.h>
 
-#define BDSKPopUpDismissedNotification @"BDSKPopUpDismissedNotification"
-
-
-/*
- Subclass that sends a notification when the popup menu is dismissed
- The relevant notification's object is the control containing this cell
-*/
 
 @interface BDSKPopUpButtonCell : NSPopUpButtonCell {
-
+	NSButtonCell *buttonCell;
 }
+
+- (id)initImageCell:(NSImage *)anImage pullsDown:(BOOL)pullDown;
 
 @end

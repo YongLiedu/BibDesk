@@ -159,25 +159,10 @@ NSString* BDSKBibTeXStringPboardType = @"edu.ucsd.cs.mmcrack.bibdesk: Local BibT
 	[self setTableFont];
 	[tableView reloadData];
 	
-	
-	/* ssp: 2004-08-02
-		Setup the action menu button. Thanks to Steffen for his help.
-		This isn't really good. You can click slightly left of the button and it will still be activated. I couldn't get Popup buttons to work in a way that I could set the button's look independently from the attached menu. 
-		If somebody actually understands the documentation on this (in case it is correct), make it work just like in Mail. 
-		This is also slightly complicated using our own subclass of NSPopUpButtonCell to make things happen.
-	*/
-	BDSKPopUpButtonCell * myCell = [[[BDSKPopUpButtonCell alloc] initImageCell:[NSImage imageNamed:@"Action"]] autorelease];
-	[actionMenuButton setCell:myCell];
-	[myCell setArrowPosition:NSPopUpNoArrow];
-	[myCell setPullsDown:YES];
-	[myCell setBordered:NO];
- 	[myCell setBezelStyle:NSRegularSquareBezelStyle];
+	// unfortunately we cannot set this in BI
+	[actionMenuButton setAlternateImage:[NSImage imageNamed:@"Action_Pressed"]];
 	
 	[self updateActionMenu:nil];
-    
-
-	[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(popup:) name:NSPopUpButtonWillPopUpNotification object:actionMenuButton];
-	[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(dismiss:) name:BDSKPopUpDismissedNotification object:actionMenuButton];
 	
 	contextualMenu = [[[NSApp delegate] displayMenuItem] submenu];		// better retain this?
 }
@@ -204,18 +189,6 @@ NSString* BDSKBibTeXStringPboardType = @"edu.ucsd.cs.mmcrack.bibdesk: Local BibT
     [super dealloc];
 }
 
-
-
-/* ssp:  2004-08-02
-Handle Notifications by the popup button to update its icon and its menu before opening
-*/
-- (void)popup:(NSNotification *)notification {
-	[[[actionMenuButton menu] itemAtIndex:0] setImage:[NSImage imageNamed:@"Action_Pressed"]];
-}
-
-- (void)dismiss:(NSNotification *)notification {
-	[[[actionMenuButton menu] itemAtIndex:0] setImage:[NSImage imageNamed:@"Action"]];
-}
 
 
 - (void) updateActionMenu:(id) aNotification {
