@@ -103,7 +103,7 @@ static NSCharacterSet *SkipSet;
 				              @"Title of alert when an error happens"),
 		            NSLocalizedString(@"An accented character could not be converted.  Please enter the TeX code directly in your bibliography and e-mail the developers.  For more information, see the Character Conversion topic of BibDesk Help.",
 				              @"Informative alert text when the error happens."),
-			    @"Send e-mail", @"Continue", nil, nil);
+			    @"Send e-mail", @"Edit", nil, nil);
     if(i == NSAlertDefaultReturn){
 	NSString *urlString = @"mailto:bibdesk-develop@sourceforge.net?subject=Character%20Conversion%20Error&body=Please%20enter%20the%20accented%20character%20that%20failed%20to%20convert%20and%20its%20TeX%20equivalent.";
 	NSURL *mailURL = [NSURL URLWithString:urlString];
