@@ -553,6 +553,13 @@ stringByAppendingPathComponent:@"BibDesk"]; */
     NSString *dataString = [[[NSString alloc] initWithData:data encoding:NSUTF8StringEncoding] autorelease];
     NSString* filePath = [self fileName];
     
+    // Dirty check to see if we guessed the right encoding.  UTF8 will do fine for ASCII and fairly well for MacRoman but fails for
+    // ISO-8859-1 and gives a nil string.  This is a problem with ScienceDirect, if your browser is set to accept 8859-1 by default.
+    if(dataString == nil){
+	[dataString release];
+	dataString = [[[NSString alloc] initWithData:data encoding:NSISOLatin1StringEncoding] autorelease];
+    }
+    
     if(!filePath){
         filePath = @"Untitled Document";
     }

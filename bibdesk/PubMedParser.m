@@ -28,7 +28,6 @@
     BibAppController *appController = (BibAppController *)[NSApp delegate]; // used to add autocomplete entries.
 
     NSMutableArray *returnArray = [NSMutableArray arrayWithCapacity:1];
-    NSArray *sourceLines = nil;
     
     //dictionary is the publication entry
     NSMutableDictionary *pubDict = [NSMutableDictionary dictionaryWithCapacity:6];
@@ -48,9 +47,32 @@
         usingTempFile = YES;
     }
     
-
-    sourceLines = [itemString componentsSeparatedByString:@"\r"];
+    // ARM:  This code came from Art Isbell to cocoa-dev on Tue Jul 10 22:13:11 2001.  Comments are his.
+    //       We were using componentsSeparatedByString:@"\r", but this is not robust.  Files from ScienceDirect
+    //       have \n as newlines, so this code handles those cases as well as PubMed.
+    unsigned stringLength = [itemString length];  // start cocoadev
+    unsigned startIndex;
+    unsigned lineEndIndex = 0;
+    unsigned contentsEndIndex;
+    NSRange range;
+    NSMutableArray *sourceLines = [NSMutableArray array];
     
+    // There is more than one way to terminate this loop.  Beware of an
+    // invalid termination test which might exist in this untested example :-)
+    while (lineEndIndex < stringLength)
+    {
+	// Include only a single character in range.  Not sure whether
+	// this will work with empty lines, but if not, try a length of 0.
+	range = NSMakeRange(lineEndIndex, 1);
+	[itemString getLineStart:&startIndex end:&lineEndIndex 
+		     contentsEnd:&contentsEndIndex forRange:range];
+	
+	// If you want to exclude line terminators...
+	[sourceLines addObject:[itemString 
+	 substringWithRange:NSMakeRange(startIndex, contentsEndIndex - 
+					startIndex)]];
+    } // end cocoadev
+
     
     NSEnumerator *sourceLineE = [sourceLines objectEnumerator];
     NSString *sourceLine = nil;
