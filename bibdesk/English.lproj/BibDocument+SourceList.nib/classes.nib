@@ -21,6 +21,8 @@
                 delPub = id; 
                 dismissAddFieldSheet = id; 
                 dismissDelFieldSheet = id; 
+                dismissEditExportSettingsSheet = id; 
+                editExportSettingsAction = id; 
                 editPubCmd = id; 
                 emailPubCmd = id; 
                 exportAsAtom = id; 
@@ -29,8 +31,11 @@
                 exportAsRSS = id; 
                 exportEncodedBib = id; 
                 generateCiteKey = id; 
+                handleExportChooserPopupChange = id; 
                 makeNewCollectionFromSelectedPublications = id; 
                 makeNewEmptyCollection = id; 
+                makeNewExternalSource = id; 
+                makeNewNotepad = id; 
                 makeSearchFieldKey = id; 
                 newPub = id; 
                 openCustomCitePrefPane = id; 
@@ -67,6 +72,10 @@
                 delFieldPrompt = NSTextField; 
                 delFieldSheet = NSWindow; 
                 documentWindow = NSWindow; 
+                editExportSettingsWindow = NSWindow; 
+                exporterEnabledCheckButton = NSButton; 
+                exporterSelectionPopUp = NSPopUpButton; 
+                exporterSubView = NSView; 
                 infoLine = NSTextField; 
                 openCustomCitePrefsButton = NSButton; 
                 previewField = NSTextView; 
@@ -81,6 +90,7 @@
                 searchFieldBox = NSBox; 
                 searchFieldTextField = NSTextField; 
                 sourceList = NSOutlineView; 
+                sourceListActionMenu = NSMenu; 
                 splitView = OASplitView; 
                 tableView = BDSKDragTableView; 
             }; 
