@@ -16,12 +16,9 @@ ssp 2004-07-10
  It isn't clear to me what status these objects have. Perhaps there should be a list of authors at the level of the document or application objects instead. 
  This tries to find _some_ instance of this class and return something along the lines of "author 4 of BibItem xxx"
 */
-#warning ARM: this is broken
 - (NSScriptObjectSpecifier *) objectSpecifier {
 	// NSLog(@"BibAuthor objectSpecifier");
-	NSArray * bars = [self publications];
-	// just use the first one here for the time being
-	BibItem * myPub = (BibItem*)[bars objectAtIndex:0];
+	BibItem * myPub = [self publication];
 	BibDocument * myDoc = [myPub document];
 	NSScriptObjectSpecifier *containerRef = [myDoc objectSpecifier];
 		
