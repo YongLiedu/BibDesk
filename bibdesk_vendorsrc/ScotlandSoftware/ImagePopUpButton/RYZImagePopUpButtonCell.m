@@ -11,15 +11,15 @@
 {
     if (self = [super init])
     {
-	_buttonCell = [[NSButtonCell alloc] initTextCell: @""];
-	[_buttonCell setBordered: NO];
-	[_buttonCell setHighlightsBy: NSContentsCellMask];
-	[_buttonCell setImagePosition: NSImageLeft];
+	RYZ_buttonCell = [[NSButtonCell alloc] initTextCell: @""];
+	[RYZ_buttonCell setBordered: NO];
+	[RYZ_buttonCell setHighlightsBy: NSContentsCellMask];
+	[RYZ_buttonCell setImagePosition: NSImageLeft];
 	
-	_iconSize = NSMakeSize(32, 32);
-	_showsMenuWhenIconClicked = NO;
-	_iconActionEnabled = YES;
-	_alwaysUsesFirstItemAsSelected = NO;
+	RYZ_iconSize = NSMakeSize(32, 32);
+	RYZ_showsMenuWhenIconClicked = NO;
+	RYZ_iconActionEnabled = YES;
+	RYZ_alwaysUsesFirstItemAsSelected = NO;
 
 	[self setIconImage: [NSImage imageNamed: @"NSApplicationIcon"]];	
 	[self setArrowImage: [NSImage imageNamed: @"ArrowPointingDown"]];
@@ -31,18 +31,18 @@
 
 - (void) dealloc
 {
-    [_buttonCell release];
-    [_iconImage release];
-    [_arrowImage release];
+    [RYZ_buttonCell release];
+    [RYZ_iconImage release];
+    [RYZ_arrowImage release];
     [super dealloc];
 }
 
 - (id)delegate {
-    return _delegate;
+    return RYZ_delegate;
 }
 
 - (void)setDelegate:(id)newDelegate {
-	_delegate = newDelegate;
+	RYZ_delegate = newDelegate;
 }
 
 
@@ -53,21 +53,21 @@
 
 - (NSSize) iconSize
 {
-    return _iconSize;
+    return RYZ_iconSize;
 }
 
 
 - (void) setIconSize: (NSSize) iconSize
 {
-    _iconSize = iconSize;
+    RYZ_iconSize = iconSize;
 }
 
 - (BOOL)iconActionEnabled {
-    return _iconActionEnabled;
+    return RYZ_iconActionEnabled;
 }
 
 - (void)seticonActionEnabled:(BOOL)newiconActionEnabled {
-	_iconActionEnabled = newiconActionEnabled;
+	RYZ_iconActionEnabled = newiconActionEnabled;
 }
 
 
@@ -77,13 +77,13 @@
 
 - (BOOL) showsMenuWhenIconClicked
 {
-    return _showsMenuWhenIconClicked;
+    return RYZ_showsMenuWhenIconClicked;
 }
 
 
 - (void) setShowsMenuWhenIconClicked: (BOOL) showsMenuWhenIconClicked
 {
-    _showsMenuWhenIconClicked = showsMenuWhenIconClicked;
+    RYZ_showsMenuWhenIconClicked = showsMenuWhenIconClicked;
 }
 
 
@@ -93,15 +93,15 @@
 
 - (NSImage *) iconImage
 {
-    return _iconImage;
+    return RYZ_iconImage;
 }
 
 
 - (void) setIconImage: (NSImage *) iconImage
 {
     [iconImage retain];
-    [_iconImage release];
-    _iconImage = iconImage;
+    [RYZ_iconImage release];
+    RYZ_iconImage = iconImage;
 }
 
 
@@ -111,27 +111,27 @@
 
 - (NSImage *) arrowImage
 {
-    return _arrowImage;
+    return RYZ_arrowImage;
 }
 
 
 - (void) setArrowImage: (NSImage *) arrowImage
 {
     [arrowImage retain];
-    [_arrowImage release];
-    _arrowImage = arrowImage;
+    [RYZ_arrowImage release];
+    RYZ_arrowImage = arrowImage;
 }
 
 - (BOOL)alwaysUsesFirstItemAsSelected {
-    return _alwaysUsesFirstItemAsSelected;
+    return RYZ_alwaysUsesFirstItemAsSelected;
 }
 
 - (void)setAlwaysUsesFirstItemAsSelected:(BOOL)newAlwaysUsesFirstItemAsSelected {
-        _alwaysUsesFirstItemAsSelected = newAlwaysUsesFirstItemAsSelected;
+        RYZ_alwaysUsesFirstItemAsSelected = newAlwaysUsesFirstItemAsSelected;
 }
 
 - (NSMenuItem *)selectedItem{
-	if(_alwaysUsesFirstItemAsSelected){
+	if(RYZ_alwaysUsesFirstItemAsSelected){
 		return (NSMenuItem *)[self itemAtIndex:0];
 	}else{
 		return (NSMenuItem *)[super selectedItem];
@@ -139,12 +139,12 @@
 }
 
 - (BOOL)refreshesMenu {
-    return _refreshesMenu;
+    return RYZ_refreshesMenu;
 }
 
 - (void)setRefreshesMenu:(BOOL)newRefreshesMenu {
-    if (_refreshesMenu != newRefreshesMenu) {
-        _refreshesMenu = newRefreshesMenu;
+    if (RYZ_refreshesMenu != newRefreshesMenu) {
+        RYZ_refreshesMenu = newRefreshesMenu;
     }
 }
 
@@ -253,10 +253,10 @@
 
 			}
 		}else{
-			trackingResult = [_buttonCell trackMouse: event
+			trackingResult = [RYZ_buttonCell trackMouse: event
 											  inRect: cellFrame
 											  ofView: controlView
-										untilMouseUp: [[_buttonCell class] prefersTrackingUntilMouseUp]];  // NO for NSButton
+										untilMouseUp: [[RYZ_buttonCell class] prefersTrackingUntilMouseUp]];  // NO for NSButton
 			
 			if (trackingResult == YES && [self iconActionEnabled]){
 				shouldSendAction = YES;
@@ -297,7 +297,7 @@
 
 - (void) performClick: (id) sender
 {
-    [_buttonCell performClick: sender];
+    [RYZ_buttonCell performClick: sender];
     [super performClick: sender];
 }
 
@@ -335,29 +335,29 @@
     [arrowImage drawInRect: arrowDrawRect  fromRect: arrowRect  operation: NSCompositeSourceOver  fraction: 1.0];
     [popUpImage unlockFocus];
     
-    [_buttonCell setImage: popUpImage];
+    [RYZ_buttonCell setImage: popUpImage];
     [popUpImage release];
     
     if ([[controlView window] firstResponder] == controlView &&
 	[controlView respondsToSelector: @selector(selectedCell)] &&
 	[controlView performSelector: @selector(selectedCell)] == self)
     {
-	[_buttonCell setShowsFirstResponder: YES];
+	[RYZ_buttonCell setShowsFirstResponder: YES];
     }
     else
     {
-	[_buttonCell setShowsFirstResponder: NO];
+	[RYZ_buttonCell setShowsFirstResponder: NO];
     }
     
-	//    NSLog(@"cellFrame: %@  selectedItem: %@", NSStringFromRect(cellFrame), [[self selectedItem] title]);
+	 //   NSLog(@"cellFrame: %@  selectedItem: %@", NSStringFromRect(cellFrame), [[self selectedItem] title]);
     
-    [_buttonCell drawWithFrame: cellFrame  inView: controlView];
+    [RYZ_buttonCell drawWithFrame: cellFrame  inView: controlView];
 }
 
 
 - (void) highlight: (BOOL) flag  withFrame: (NSRect) cellFrame  inView: (NSView *) controlView
 {
-	[_buttonCell highlight: flag  withFrame: cellFrame  inView: controlView];
+	[RYZ_buttonCell highlight: flag  withFrame: cellFrame  inView: controlView];
 	[super highlight: flag  withFrame: cellFrame  inView: controlView];
 }
 

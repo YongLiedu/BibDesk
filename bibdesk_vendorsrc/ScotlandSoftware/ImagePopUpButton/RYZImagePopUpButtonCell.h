@@ -1,14 +1,14 @@
 @interface RYZImagePopUpButtonCell : NSPopUpButtonCell
 {
-    NSButtonCell *_buttonCell;
-    NSSize _iconSize;
-    BOOL _showsMenuWhenIconClicked;
-    NSImage *_iconImage;
-    NSImage *_arrowImage;
-	BOOL _iconActionEnabled;
-	BOOL _alwaysUsesFirstItemAsSelected;
-	BOOL _refreshesMenu;
-	id _delegate;
+    NSButtonCell *RYZ_buttonCell;
+    NSSize RYZ_iconSize;
+    BOOL RYZ_showsMenuWhenIconClicked;
+    NSImage *RYZ_iconImage;
+    NSImage *RYZ_arrowImage;
+	BOOL RYZ_iconActionEnabled;
+	BOOL RYZ_alwaysUsesFirstItemAsSelected;
+	BOOL RYZ_refreshesMenu;
+	id RYZ_delegate;
 }
 
 - (id)delegate;
