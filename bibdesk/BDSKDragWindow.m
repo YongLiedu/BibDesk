@@ -125,9 +125,6 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
             }
         }//for each dragged-in pub
     }
-    // my windowcontroller is a BibEditor object
-    [[self windowController] setupForm];
-    [[self windowController] fixURLs];
     return YES;
 }
 
