@@ -24,6 +24,8 @@
 		<string>''</string>
 		<key>‟</key>
 		<string>``</string>
+		<key>•</key>
+		<string>*</string>
 		<key>…</key>
 		<string>{\ldots}</string>
 	</dict>
