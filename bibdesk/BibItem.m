@@ -1562,7 +1562,7 @@ void _setupFonts(){
 												 suffix:parsedStr
 											   forField:fieldName
 										  numberOfChars:uniqueNumber 
-												   from:'a' to:'z' 
+												   from:'0' to:'9' 
 												  force:(uniqueNumber == 0)]];
 				break;
 		}
