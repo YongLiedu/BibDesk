@@ -309,15 +309,18 @@ void mergePageNumbers(NSMutableDictionary *dict){
     
     newBI = [[BibItem alloc] initWithType:@"misc"
 				 fileType:@"BibTeX"
-				  authors:
-	[NSMutableArray arrayWithCapacity:0]];
+				  authors:[NSMutableArray arrayWithCapacity:0]];
 
     [newBI setFileOrder:itemOrder];
     [newBI setPubFields:pubDict];
     
     // set the pub type if we know the bibtex equivalent, otherwise leave it as misc
-    if([typeManager bibtexTypeForPubMedType:[pubDict objectForKey:@"TY"]] != nil){
+    if([typeManager bibtexTypeForPubMedType:[pubDict objectForKey:@"TY"]] != nil){ // "standard" RIS, if such a thing exists
         [newBI setType:[typeManager bibtexTypeForPubMedType:[pubDict objectForKey:@"TY"]]];
+    } else {
+        if([typeManager bibtexTypeForPubMedType:[pubDict objectForKey:@"PT"]] != nil){ // Medline RIS
+            [newBI setType:[typeManager bibtexTypeForPubMedType:[pubDict objectForKey:@"PT"]]];
+        }
     }
     // set the citekey, since RIS/Medline types don't have a citekey field
     [newBI setCiteKeyString:[newBI suggestedCiteKey]];

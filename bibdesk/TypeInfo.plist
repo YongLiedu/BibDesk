@@ -111,6 +111,8 @@
 		<string>incollection</string>
 		<key>UNPB</key>
 		<string>unpublished</string>
+                <key>Journal Article</key>
+                <string>article</string>
 	</dict>
 	<key>FieldsForTypes</key>
 	<dict>
