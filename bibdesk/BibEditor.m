@@ -1175,6 +1175,50 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
     [theDocument removeWindowController:self];
 }
 
+- (NSArray *)webView:(WebView *)sender contextMenuItemsForElement:(NSDictionary *)element defaultMenuItems:(NSArray *)defaultMenuItems{
+	NSMutableArray *menuItems = [NSMutableArray arrayWithCapacity:6];
+	NSMenuItem *item;
+	
+	if([defaultMenuItems count] > 0){
+		[menuItems addObjectsFromArray:defaultMenuItems];
+		[menuItems addObject:[NSMenuItem separatorItem]];
+	}
+	
+	item = [[NSMenuItem alloc] initWithTitle:NSLocalizedString(@"Back",@"Back")
+									  action:@selector(goBack:)
+							   keyEquivalent:@""];
+	[menuItems addObject:[item autorelease]];
+	
+	item = [[NSMenuItem alloc] initWithTitle:NSLocalizedString(@"Forward",@"Forward")
+									  action:@selector(goForward:)
+							   keyEquivalent:@""];
+	[menuItems addObject:[item autorelease]];
+	
+	item = [[NSMenuItem alloc] initWithTitle:NSLocalizedString(@"Reload",@"Reload")
+									  action:@selector(reload:)
+							   keyEquivalent:@""];
+	[menuItems addObject:[item autorelease]];
+	
+	item = [[NSMenuItem alloc] initWithTitle:NSLocalizedString(@"Stop",@"Stop")
+									  action:@selector(stopLoading:)
+							   keyEquivalent:@""];
+	[menuItems addObject:[item autorelease]];
+	
+	item = [[NSMenuItem alloc] initWithTitle:NSLocalizedString(@"Increase Text Size",@"Increase Text Size")
+									  action:@selector(makeTextLarger:)
+							   keyEquivalent:@""];
+	[menuItems addObject:[item autorelease]];
+	
+	item = [[NSMenuItem alloc] initWithTitle:NSLocalizedString(@"Decrease Text Size",@"Increase Text Size")
+									  action:@selector(makeTextSmaller:)
+							   keyEquivalent:@""];
+	[menuItems addObject:[item autorelease]];
+	
+	return menuItems;
+}
+
+#pragma mark undo manager
+
 // we want to have the same undoManager as our document, so we use this 
 // NSWindow delegate method to return the doc's undomanager.
 - (NSUndoManager *)windowWillReturnUndoManager:(NSWindow *)sender{
@@ -1182,6 +1226,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 }
 
 #pragma mark author table view datasource methods
+
 - (int)numberOfRowsInTableView:(NSTableView *)tableView{
 	return [theBib numberOfAuthors];
 }
