@@ -949,7 +949,9 @@ stringByAppendingPathComponent:@"BibDesk"]; */
 }
 
 - (IBAction)searchFieldAction:(id)sender{
+    if([sender stringValue] != nil){
 	[self hidePublicationsWithoutSubstring:[sender stringValue] inField:quickSearchKey];
+    }
 }
 
 - (void)hidePublicationsWithoutSubstring:(NSString *)substring inField:(NSString *)field{
