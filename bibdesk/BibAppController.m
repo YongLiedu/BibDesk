@@ -367,12 +367,12 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
     if(r.location != NSNotFound){
         NSScanner *scanner = [[NSScanner alloc] initWithString:string];
         [scanner setCharactersToBeSkipped:nil];
-        NSString *tmp;
+        NSString *tmp = nil;
 
         while(![scanner isAtEnd]){
             [scanner scanUpToCharactersFromSet:_autocompletePunctuationCharacterSet intoString:&tmp];
-            if(!tmp == nil && [tmp length] > 0) 
-		[completionArray addObject:tmp]; // tmp is invalid (zero-length) if the first character was in the punctuation set
+            if(tmp != nil) 
+		[completionArray addObject:tmp];
             [scanner scanCharactersFromSet:_autocompletePunctuationCharacterSet intoString:nil];
             [scanner scanCharactersFromSet:[NSCharacterSet whitespaceCharacterSet] intoString:nil];
         }
