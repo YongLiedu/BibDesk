@@ -678,8 +678,6 @@ stringByAppendingPathComponent:@"BibDesk"]; */
             return NO;
         }else if (rv == NSAlertAlternateReturn){
             // the user said to keep going, so if they save, they might clobber data...
-            // note this by setting the update count:
-            //[self updateChangeCount:NSChangeDone];
         }else if(rv == NSAlertOtherReturn){
             // they said to edit the file.
             tempFileName = [NSTemporaryDirectory() stringByAppendingPathComponent:[[NSProcessInfo processInfo] globallyUniqueString]];
@@ -745,8 +743,6 @@ stringByAppendingPathComponent:@"BibDesk"]; */
             return NO;
         }else if (rv == NSAlertAlternateReturn){
             // the user said to keep going, so if they save, they might clobber data...
-            // note this by setting the update count:
-            //[self updateChangeCount:NSChangeDone];
         }else if(rv == NSAlertOtherReturn){
             // they said to edit the file.
             tempFileName = [NSTemporaryDirectory() stringByAppendingPathComponent:[[NSProcessInfo processInfo] globallyUniqueString]];
@@ -1821,8 +1817,6 @@ Shouldn't there be some kind of safeguard against opening too many pub editors?
 			
 		}else if (rv == NSAlertAlternateReturn){
 			// the user said to keep going, so if they save, they might clobber data...
-			// note this by setting the update count:
-			//[self updateChangeCount:NSChangeDone];
 		}else if(rv == NSAlertOtherReturn){
 			// they said to edit the file.
 			NSString * tempFileName = [NSTemporaryDirectory() stringByAppendingPathComponent:[[NSProcessInfo processInfo] globallyUniqueString]];
@@ -1845,7 +1839,7 @@ Shouldn't there be some kind of safeguard against opening too many pub editors?
 		[self addPublication:newBI];
 			
 		[self updateUI];
-		//[self updateChangeCount:NSChangeDone];
+		
 		if([[OFPreferenceWrapper sharedPreferenceWrapper] integerForKey:BDSKEditOnPasteKey] == NSOnState) {
 			[self editPub:newBI];
 		}
@@ -1888,7 +1882,6 @@ This method always returns YES. Even if some or many operations fail.
 			[self addPublication:[newBI autorelease]];
 			
 			[self updateUI];
-			//[self updateChangeCount:NSChangeDone];
 			
 			if([pw integerForKey:BDSKEditOnPasteKey] == NSOnState){
 				[self editPub:newBI];
