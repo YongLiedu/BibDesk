@@ -209,7 +209,7 @@ NSRange SafeForwardSearchRange( unsigned startLoc, unsigned seekLength, unsigned
             
             // NSAssert( citekey != nil && type != nil, @"Missing a citekey or type" );
             
-            newBI = [[BibItem alloc] initWithType:type
+            newBI = [[BibItem alloc] initWithType:[type lowercaseString]
                                          fileType:BDSKBibtexString
                                           authors:[NSMutableArray array]];        
             
@@ -389,7 +389,7 @@ NSRange SafeForwardSearchRange( unsigned startLoc, unsigned seekLength, unsigned
             NSAssert( value != nil, @"Found a nil value string");
             NSAssert( key != nil, @"Found a nil key string");
             
-            [dict setObject:value forKey:key];
+            [dict setObject:value forKey:[key capitalizedString]];
             //[[NSApp delegate] addString:value forCompletionEntry:key];
             
         }
