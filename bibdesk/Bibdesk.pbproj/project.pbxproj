@@ -2467,7 +2467,7 @@
 				GCC_TREAT_WARNINGS_AS_ERRORS = NO;
 				HEADER_SEARCH_PATHS = .;
 				INFOPLIST_FILE = "Info-Bibdesk__Upgraded_.plist";
-				LIBRARY_SEARCH_PATHS = .;
+				LIBRARY_SEARCH_PATHS = "$(SOURCE_ROOT)/../bibdesk_vendorsrc/gward/btparse/";
 				OTHER_CFLAGS = "-pipe";
 				OTHER_LDFLAGS = "-pipe";
 				PRODUCT_NAME = Bibdesk;
