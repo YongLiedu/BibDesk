@@ -18,7 +18,8 @@
 	
 	_iconSize = NSMakeSize(32, 32);
 	_showsMenuWhenIconClicked = NO;
-	
+	_iconEnabled = NO;
+
 	[self setIconImage: [NSImage imageNamed: @"NSApplicationIcon"]];	
 	[self setArrowImage: [NSImage imageNamed: @"ArrowPointingDown"]];
     }
@@ -49,6 +50,14 @@
 - (void) setIconSize: (NSSize) iconSize
 {
     _iconSize = iconSize;
+}
+
+- (BOOL)iconEnabled {
+    return _iconEnabled;
+}
+
+- (void)setIconEnabled:(BOOL)newIconEnabled {
+	_iconEnabled = newIconEnabled;
 }
 
 
@@ -163,7 +172,9 @@
 	NSLog(@"isFlipped: %d", [controlView isFlipped]);
 	NSLog(@"arrowRect: %@", NSStringFromRect(arrowRect));
 	
-	if ([event type] == NSLeftMouseDown && ([self showsMenuWhenIconClicked] == YES || [controlView mouse: mouseLocation  inRect: arrowRect]))
+	if ([event type] == NSLeftMouseDown && 
+		(([self showsMenuWhenIconClicked] == YES && [self iconEnabled] ) 
+		 || [controlView mouse: mouseLocation  inRect: arrowRect]))
 	{
 	    NSEvent *newEvent = [NSEvent mouseEventWithType: [event type]
 						   location: NSMakePoint([controlView frame].origin.x, [controlView frame].origin.y - 4)
@@ -184,7 +195,7 @@
 					      ofView: controlView
 					untilMouseUp: [[_buttonCell class] prefersTrackingUntilMouseUp]];  // NO for NSButton
 	    
-	    if (trackingResult == YES)
+	    if (trackingResult == YES && [self iconEnabled])
 	    {
 		NSMenuItem *selectedItem = [self selectedItem];
 		[[NSApplication sharedApplication] sendAction: [selectedItem action]  to: [selectedItem target]  from: selectedItem];
@@ -263,9 +274,10 @@
 - (void) highlight: (BOOL) flag  withFrame: (NSRect) cellFrame  inView: (NSView *) controlView
 {
     NSLog(@"highlight: %d", flag);
-
-    [_buttonCell highlight: flag  withFrame: cellFrame  inView: controlView];
-    [super highlight: flag  withFrame: cellFrame  inView: controlView];
+	if([self iconEnabled]){
+		[_buttonCell highlight: flag  withFrame: cellFrame  inView: controlView];
+		[super highlight: flag  withFrame: cellFrame  inView: controlView];
+	}
 }
 
 @end

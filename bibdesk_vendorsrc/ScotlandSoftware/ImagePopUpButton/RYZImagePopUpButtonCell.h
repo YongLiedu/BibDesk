@@ -5,7 +5,14 @@
     BOOL _showsMenuWhenIconClicked;
     NSImage *_iconImage;
     NSImage *_arrowImage;
+	BOOL _iconEnabled;
 }
+
+// -- Setting if the icon is enabled, leaves the menu enabled --
+// -- meaningless if showsmenuwheniconclicked is true.
+- (BOOL)iconEnabled;
+- (void)setIconEnabled:(BOOL)iconEnabled;
+
 
 // --- Getting and setting the icon size ---
 - (NSSize) iconSize;
