@@ -213,6 +213,16 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 	[[viewRemoteButton cell] setDelegate:self];
 		
 	[viewRemoteButton setMenu:[self menuForImagePopUpButtonCell:[viewRemoteButton cell]]];
+
+	// Set the properties of documentSnoopButton that cannot be set in IB
+	[documentSnoopButton setArrowImage:[NSImage imageNamed:@"ArrowPointingDown"]];
+	[documentSnoopButton setShowsMenuWhenIconClicked:NO];
+	[[documentSnoopButton cell] setAltersStateOfSelectedItem:YES];
+	[[documentSnoopButton cell] setAlwaysUsesFirstItemAsSelected:NO];
+	[[documentSnoopButton cell] setUsesItemFromMenu:NO];
+	[[documentSnoopButton cell] setRefreshesMenu:NO];
+	
+	[documentSnoopButton setMenu:[self menuForImagePopUpButtonCell:[documentSnoopButton cell]]];
 	
     [notesView setString:[theBib valueOfField:BDSKAnnoteString]];
     [abstractView setString:[theBib valueOfField:BDSKAbstractString]];
@@ -332,7 +342,6 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 	NSMenu *menu = [[NSMenu alloc] init];
 	
 	if (cell == [viewLocalButton cell]) {
-		NSMenuItem *item;
 		// the first one has to be view file, since it's also the button's action when you're clicking on the icon.
 		[menu addItemWithTitle:NSLocalizedString(@"View File",@"View file string menu item")
 						action:@selector(viewLocal:)
@@ -341,18 +350,6 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 		[menu addItemWithTitle:NSLocalizedString(@"Reveal in Finder",@"Reveal in finder menu item")
 						action:@selector(revealLocal:)
 				 keyEquivalent:@""];
-		
-		item = [[NSMenuItem alloc] initWithTitle:NSLocalizedString(@"View File in Drawer",@"View file in drawer menu item")
-										  action:@selector(toggleSnoopDrawer:)
-								   keyEquivalent:@""];
-		[item setRepresentedObject:pdfSnoopContainerView];
-		[menu addItem:item];
-		
-		item = [[NSMenuItem alloc] initWithTitle:NSLocalizedString(@"View File as Text in Drawer",@"View file as text in drawer menu item")
-										  action:@selector(toggleSnoopDrawer:)
-								   keyEquivalent:@""];
-		[item setRepresentedObject:textSnoopContainerView];
-		[menu addItem:item];
 		
 		[menu addItem:[NSMenuItem separatorItem]];
 		
@@ -384,6 +381,21 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 		for (i = 0; i < [safariItems count]; i ++){
 			[menu addItem:[safariItems objectAtIndex:i]];
 		}
+	}
+	else if (cell == [documentSnoopButton cell]) {
+		NSMenuItem *item;
+		
+		item = [[NSMenuItem alloc] initWithTitle:NSLocalizedString(@"View File as Text in Drawer",@"View file as text in drawer menu item")
+										  action:@selector(toggleSnoopDrawer:)
+								   keyEquivalent:@""];
+		[item setRepresentedObject:textSnoopContainerView];
+		[menu addItem:item];
+		
+		item = [[NSMenuItem alloc] initWithTitle:NSLocalizedString(@"View File in Drawer",@"View file in drawer menu item")
+										  action:@selector(toggleSnoopDrawer:)
+								   keyEquivalent:@""];
+		[item setRepresentedObject:pdfSnoopContainerView];
+		[menu addItem:item];
 	}
 	
 	return [menu autorelease];
@@ -722,9 +734,12 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
     if (lurl && [[NSFileManager defaultManager] fileExistsAtPath:lurl]){
 		icon = [[NSWorkspace sharedWorkspace] iconForFile:lurl];
 		[viewLocalButton setIconImage:icon];      
-		[[viewLocalButton cell] setIconActionEnabled:YES];
+		[viewLocalButton setIconActionEnabled:YES];
 		[viewLocalButton setToolTip:NSLocalizedString(@"View File",@"View file tooltip")];
 		[[self window] setRepresentedFilename:lurl];
+		
+		[self updateDocumentSnoopButton];
+		[documentSnoopButton setIconActionEnabled:YES];
 		
 		if(drawerWasOpen || drawerIsOpening){
 			if(!_pdfSnoopImage){
@@ -746,22 +761,24 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 		}
     }else{
         [viewLocalButton setIconImage:[NSImage imageNamed:@"QuestionMarkFile"]];
-		[[viewLocalButton cell] setIconActionEnabled:NO];
+		[viewLocalButton setIconActionEnabled:NO];
         [viewLocalButton setToolTip:NSLocalizedString(@"Choose a file to link with in the Local-Url Field", @"bad/empty local url field tooltip")];
         [[self window] setRepresentedFilename:@""];
+		
+        [documentSnoopButton setIconImage:[NSImage imageNamed:@"drawerDisabled"]];
+		[documentSnoopButton setIconActionEnabled:NO];
     }
 
     if([NSURL URLWithString:rurl] && ![rurl isEqualToString:@""]){
 		icon = [[NSWorkspace sharedWorkspace] iconForFileType:@"webloc"];
 		[viewRemoteButton setIconImage:icon];
-        [[viewRemoteButton cell] setIconActionEnabled:YES];
+        [viewRemoteButton setIconActionEnabled:YES];
         [viewRemoteButton setToolTip:rurl];
     }else{
         [viewRemoteButton setIconImage:[NSImage imageNamed:@"WeblocFile_Disabled"]];
-		[[viewRemoteButton cell] setIconActionEnabled:NO];
+		[viewRemoteButton setIconActionEnabled:NO];
         [viewRemoteButton setToolTip:NSLocalizedString(@"Choose a URL to link with in the Url Field", @"bad/empty url field tooltip")];
     }
-
 }
 
 #pragma mark choose local-url or url support
@@ -1030,6 +1047,61 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 
 #pragma mark snoop drawer stuff
 
+-(NSImage *)flipHorizontal:(NSImage *)image;
+{
+	NSImage *flippedImage;
+	NSAffineTransform *transform = [NSAffineTransform transform];
+	NSSize size = [image size];
+	NSAffineTransformStruct flip = {-1.0, 0.0, 0.0, 1.0, size.width, 0.0};	
+	flippedImage = [[[NSImage alloc] initWithSize:size] autorelease];
+	[flippedImage lockFocus];
+	[transform setTransformStruct:flip];
+	[transform concat];
+	[image drawAtPoint:NSMakePoint(0, 0) fromRect:NSMakeRect(0, 0, size.width, size.height) operation:NSCompositeCopy fraction:1.0];
+	[flippedImage unlockFocus];
+	return flippedImage;
+}
+
+- (void)updateDocumentSnoopButton
+{
+	NSView *requiredSnoopContainerView = (NSView *)[[documentSnoopButton selectedItem] representedObject];
+	BOOL isRight = ([documentSnoopDrawer edge] == NSMaxXEdge);
+	BOOL isClose = ([documentSnoopDrawer contentView] == requiredSnoopContainerView &&
+					( [documentSnoopDrawer state] == NSDrawerOpenState ||
+					  [documentSnoopDrawer state] == NSDrawerOpeningState) );
+	BOOL isText = (requiredSnoopContainerView == textSnoopContainerView);
+	NSImage *drawerImage = [NSImage imageNamed:@"drawerRight"];
+	NSImage *arrowImage = [NSImage imageNamed:@"drawerArrow"];
+	NSImage *badgeImage = [[NSWorkspace sharedWorkspace] iconForFileType:(isText ? @"txt" : @"pdf")];
+	NSRect iconRect = NSMakeRect(0, 0, 32, 32);
+	NSSize arrowSize = [arrowImage size];
+	NSRect arrowRect = NSMakeRect(0, 0, arrowSize.width, arrowSize.height);
+	NSRect arrowDrawRect = NSMakeRect((isRight ? 29-arrowSize.width : 3), (32-arrowSize.height)/2, arrowSize.width, arrowSize.height);
+	NSRect badgeDrawRect = NSMakeRect((isRight ? 18 : 2), 0, 12, 12);
+	NSImage *image = [[[NSImage alloc] initWithSize:iconRect.size] autorelease];
+	
+	if (!isRight)
+		drawerImage = [self flipHorizontal:drawerImage];
+	if (isRight == isClose)
+		arrowImage = [self flipHorizontal:arrowImage];
+	
+	[image lockFocus];
+	[drawerImage drawInRect:iconRect fromRect:iconRect  operation:NSCompositeSourceOver  fraction: 1.0];
+	[badgeImage drawInRect:badgeDrawRect fromRect:iconRect  operation:NSCompositeSourceOver  fraction: 1.0];
+	[arrowImage drawInRect:arrowDrawRect fromRect:arrowRect  operation:NSCompositeSourceOver  fraction: 1.0];
+	[image unlockFocus];
+	
+	[documentSnoopButton setIconImage:image];
+	
+	if (isClose) {
+		[documentSnoopButton setToolTip:NSLocalizedString(@"Close Drawer", @"Close drawer tooltip")];
+	} else if (isText) {
+		[documentSnoopButton setToolTip:NSLocalizedString(@"Show File as Text in Drawer", @"Show file as Text in drawer tooltip")];
+	} else {
+		[documentSnoopButton setToolTip:NSLocalizedString(@"Show File in Drawer", @"Show file in drawer tooltip")];
+	}
+}
+
 - (void)toggleSnoopDrawer:(id)sender{
 	NSView *requiredSnoopContainerView = (NSView *)[sender representedObject];
 	
@@ -1048,14 +1120,6 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
     NSString *lurl = [theBib valueOfField:BDSKLocalUrlString];
     NSURL *local = nil;
     
-	if([documentSnoopDrawer edge] == NSMinXEdge){
-		[closeDrawerButton setImage:[NSImage imageNamed:@"drawerLeft"]];
-	}else{
-		[closeDrawerButton setImage:[NSImage imageNamed:@"drawerRight"]];
-	}
-	[closeDrawerButton setEnabled:YES];
-	[closeDrawerButton setToolTip:NSLocalizedString(@"Close Drawer",@"Close drawer tooltip")];
-	
     [self fixURLs]; //no this won't cause a loop - see fixURLs. Please don't break that though. Boy it's fragile.
 
     // @@snoop text - refactor this into a separate method later
@@ -1084,11 +1148,12 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
     [documentSnoopScrollView scrollToTop];
 }
 
+- (void)drawerDidOpen:(NSNotification *)notification{
+	[self updateDocumentSnoopButton];
+}
 
 - (void)drawerDidClose:(NSNotification *)notification{
-	[closeDrawerButton setEnabled:NO];
-	[closeDrawerButton setImage:nil];
-	[closeDrawerButton setToolTip:@""];
+	[self updateDocumentSnoopButton];
 }
 
 - (NSSize)drawerWillResizeContents:(NSDrawer *)sender toSize:(NSSize)contentSize{

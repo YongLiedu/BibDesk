@@ -51,9 +51,9 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
     IBOutlet NSTextField* citeKeyField;
 //    IBOutlet NSButton* viewLocalButton;
 	IBOutlet RYZImagePopUpButton *viewLocalButton;
-    IBOutlet RYZImagePopUpButton* viewRemoteButton;
-    IBOutlet NSButton* closeDrawerButton;
-    IBOutlet NSScrollView* fieldsScrollView;
+    IBOutlet RYZImagePopUpButton *viewRemoteButton;
+    IBOutlet RYZImagePopUpButton *documentSnoopButton;
+    IBOutlet NSScrollView *fieldsScrollView;
 	IBOutlet RYZImagePopUpButton *actionMenuButton;
     // ----------------------------------------------------------------------------------------
     // New-field Sheet stuff:
@@ -77,14 +77,12 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 // ----------------------------------------------------------------------------------------
     IBOutlet NSDrawer* documentSnoopDrawer;
     IBOutlet PDFImageView *documentSnoopImageView;
-    IBOutlet NSButton* documentSnoopButton;
     IBOutlet NSScrollView* documentSnoopScrollView;
     IBOutlet NSView* pdfSnoopContainerView;
     NSImage *_pdfSnoopImage;
 // ----------------------------------------------------------------------------------------
 // doc textpreview stuff
 // ----------------------------------------------------------------------------------------
-    IBOutlet NSButton* documentTextSnoopButton;
     IBOutlet NSTextView *documentSnoopTextView;
     IBOutlet NSView* textSnoopContainerView;
     NSString *_textSnoopString;
@@ -189,7 +187,9 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 - (IBAction)textFieldDidEndEditing:(id)sender;
 //- (void)closeSheetDidEnd:(NSWindow *)sheet returnCode:(int)returnCode contextInfo:(void  *)contextInfo;
 
+- (void)updateDocumentSnoopButton;
 - (void)toggleSnoopDrawer:(id)sender;
+
 - (BOOL)citeKeyIsValid:(NSString *)proposedCiteKey;
 - (IBAction)generateCiteKey:(id)sender;
 - (void)makeKeyField:(NSString *)fieldName;
