@@ -1581,8 +1581,8 @@ int generalBibItemCompareFunc(id item1, id item2, void *context){
 			[self searchFieldAction:searchField];
 		}
 	}
-	// should: check if we're sorting by the key that was changed and resort
 	// should: also check if we're filtering by the key that was changed and refilter.
+	// should: need to save the highlighted pub and rehighlight after sort...
 	
 }
 
