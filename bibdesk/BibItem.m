@@ -686,20 +686,12 @@ setupParagraphStyle()
 }
 
 - (void)handleComplexStringChangedNotification:(NSNotification *)aNotification{
-	NSEnumerator *fEnum = [pubFields keyEnumerator];
-	NSString *field;
-	NSString *value;
     id obj = [aNotification object];
-	
-	while (field = [fEnum nextObject]) {
-		value = [pubFields objectForKey:field];
-		if (value == obj) {
-            [[NSNotificationCenter defaultCenter] postNotificationName:BDSKBibItemChangedNotification
-                                                                object:self
-                                                              userInfo:nil];
-            break;
-		}
-	}
+    
+    if([[pubFields allValues] containsObjectIdenticalTo:obj])
+        [[NSNotificationCenter defaultCenter] postNotificationName:BDSKBibItemChangedNotification
+                                                            object:self
+                                                          userInfo:nil];
 }
 
 - (void)updateMetadataForKey:(NSString *)key{
