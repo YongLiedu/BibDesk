@@ -2428,7 +2428,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/tcsh;
-			shellScript = "cd $SOURCE_ROOT/../bibdesk_vendorsrc/gward/btparse\ntouch src/.pccts_run\nmake\nexit 0";
+			shellScript = "cd $SOURCE_ROOT/../bibdesk_vendorsrc/gward/btparse\ntouch src/.pccts_run\nmake\nranlib libbtparse.a\nexit 0";
 		};
 		27CCDA7305DF878700FAF2C9 = {
 			buildPhases = (
