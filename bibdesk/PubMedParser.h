@@ -20,5 +20,14 @@
 
 void addAuthorName_toDict(NSString *wholeValue, NSMutableDictionary *pubDict);
 void addKeywordString_toDict(NSString *wholeValue, NSMutableDictionary *pubDict);
+/*!
+    @function   mergePageNumbers
+    @abstract   Elsevier/ScienceDirect RIS output has SP for start page and EP for end page.  If we find
+                both of those in the entry, we merge them and add them back into the dictionary as
+                SP--EP forKey:Pages.
+    @param      dict NSMutableDictionary containing a single RIS bibliography entry
+*/
+void mergePageNumbers(NSMutableDictionary *dict);
+
 
 @end

@@ -176,6 +176,7 @@
         }
     }
     if([[pubDict allKeys] count] > 0){
+	mergePageNumbers(pubDict);
         newBI = [[BibItem alloc] initWithType:@"misc"
                                      fileType:@"PubMed"
                                       authors:
@@ -210,6 +211,16 @@ void addKeywordString_toDict(NSString *wholeValue, NSMutableDictionary *pubDict)
 		NSString *newKeywordString = [NSString stringWithFormat:@"%@, %@", oldKeywordString, wholeValue];
 		[pubDict setObject:newKeywordString forKey:@"Keywords"];
 	}
+}
+
+void mergePageNumbers(NSMutableDictionary *dict){
+    NSArray *keys = [dict allKeys];
+    NSString *merge;
+    
+    if([keys containsObject:@"SP"] && [keys containsObject:@"EP"]){
+	merge = [[[dict objectForKey:@"SP"] stringByAppendingString:@"--"] stringByAppendingString:[dict objectForKey:@"EP"]];
+	[dict setObject:merge forKey:@"Pages"];
+    }
 }
 
 
