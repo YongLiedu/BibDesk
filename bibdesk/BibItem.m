@@ -94,7 +94,6 @@ void _setupFonts(){
         pubAuthors = [authArray mutableCopy];     // copy, it's mutable
         document = nil;
         editorObj = nil;
-        undoManager = nil;
         [self setFileType:inFileType];
         [self makeType:type];
         [self setCiteKeyString: @"cite-key"];
@@ -138,7 +137,6 @@ void _setupFonts(){
     requiredFieldNames = [[coder decodeObjectForKey:@"requiredFieldNames"] retain];
     [self setFileOrder:[coder decodeIntForKey:@"fileOrder"]];
     // set by the document, which we don't archive
-    undoManager = nil;
     document = nil;
     editorObj = nil;
     if(_cachedFonts == nil)
@@ -212,9 +210,7 @@ void _setupFonts(){
 #ifdef DEBUG
     NSLog([NSString stringWithFormat:@"bibitem Dealloc, rt: %d", [self retainCount]]);
 #endif
-    if (undoManager != nil) {
-        [[self undoManager] removeAllActionsWithTarget:self];
-    }
+    [[self undoManager] removeAllActionsWithTarget:self];
     [pubFields release];
     [requiredFieldNames release];
     [pubAuthors release];

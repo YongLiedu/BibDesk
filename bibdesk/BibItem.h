@@ -69,7 +69,6 @@
     BibEditor *editorObj; /*! @var if we have an editor, don't create a new one. */
     int _fileOrder;
 	BibDocument *document;
-	NSUndoManager *undoManager;
 }
 
 /*!
