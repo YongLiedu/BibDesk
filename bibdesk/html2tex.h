@@ -44,7 +44,7 @@ http://home.planet.nl/~faase009/GNU.txt
 
 /************** prototypes ***************/
 
-NSString* print_str(char *str, FILE *freport, char *html_fn, int ln,
+NSString* TeXStringWithHTMLString(char *str, FILE *freport, char *html_fn, int ln,
               BOOL in_math, BOOL in_verb, BOOL in_alltt);
 
 /************** Program options stored in global variables *******/
@@ -57,8 +57,10 @@ BOOL option_info = NO,
 
 /******* Translating special characters to LaTeX characters ******/
 
-#define NR_CH_TABLE 163
-#define NR_CH_M     159
+// Number of entries in the character table
+#define NR_CH_TABLE 165
+// ARM:  Not sure what NR_CH_M is for
+#define NR_CH_M     159  
 
 struct {
   char *html_ch;
@@ -233,6 +235,9 @@ struct {
 		  { "gt",     "$>",       '>' },
 		  { "lt",     "$<",       '<' },
 		  { "quot",   "\\\"{}",   '"' },
+// BibDesk additions
+          { "plusmn",   "$\\pm",   '\0' },
+          { "times",   "$\\times",   'x' },
 };
 
 

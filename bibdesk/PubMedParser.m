@@ -107,7 +107,7 @@
                 // NB: do this before the regex find/replace on <sub> and <sup> tags, or else your LaTeX math
                 // stuff will get munged.
                 const char *str = [value UTF8String];
-                value = print_str(str, stdout, NULL, strlen(str), NO, NO, NO);
+                value = TeXStringWithHTMLString(str, stdout, NULL, strlen(str), NO, NO, NO);
 
                 // Do a regex find and replace to put LaTeX subscripts and superscripts in place of the HTML
                 // that Compendex (and possibly others) give us.
@@ -249,7 +249,7 @@ void mergePageNumbers(NSMutableDictionary *dict){
 }
 
 
-NSString* print_str(char *str, FILE *freport, char *html_fn, int ln,
+NSString* TeXStringWithHTMLString(char *str, FILE *freport, char *html_fn, int ln,
 			   BOOL in_math, BOOL in_verb, BOOL in_alltt)
 {  
     
