@@ -110,6 +110,7 @@ void _setupFonts(){
         [self setDateCreated: date];
         [self setDateModified: date];
         [self setFileOrder:-1];
+		[self setNeedsToBeFiled:NO];
         if(_cachedFonts == nil) _setupFonts();
     }
 
@@ -1125,6 +1126,28 @@ void _setupFonts(){
 		}
 	}
 	return YES;
+}
+
+- (BOOL)needsToBeFiled { 
+	return needsToBeFiled; 
+}
+
+- (void)setNeedsToBeFiled:(BOOL)flag {
+	needsToBeFiled = flag;
+}
+
+- (void)autoFilePaper
+{
+	if (![[OFPreferenceWrapper sharedPreferenceWrapper] boolForKey:BDSKFilePapersAutomaticallyKey])
+		return;
+	
+	if ([self canSetLocalUrl]) {
+		[[BibFiler sharedFiler] filePapers:[NSArray arrayWithObject:self]
+							  fromDocument:[self document] 
+									   ask:NO]; 
+	} else {
+		[self setNeedsToBeFiled:YES];
+	}
 }
 
 - (NSString *)parseFormat:(NSString *)format forField:(NSString *)fieldName

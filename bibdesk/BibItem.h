@@ -68,6 +68,7 @@
     NSMutableArray *requiredFieldNames;     /*! @var  this is for 'bibtex required fields'*/
     BibEditor *editorObj; /*! @var if we have an editor, don't create a new one. */
     int _fileOrder;
+	BOOL needsToBeFiled;
 	BibDocument *document;
 	NSLock *bibLock;
 }
@@ -337,6 +338,27 @@
     @discussion - 
 */
 - (BOOL)canSetLocalUrl;
+
+/*!
+    @method needsToBeFiled
+    @abstract Returns a boolean indicating whether the linked file should be automatically filed 
+    @discussion - 
+*/
+- (BOOL)needsToBeFiled;
+
+/*!
+    @method setNeedsToBeFiled:
+    @abstract Sets a boolean indicating whether the linked file should be automatically filed
+    @discussion - 
+*/
+- (void)setNeedsToBeFiled:(BOOL)flag;
+
+/*!
+    @method autoFilePaper
+    @abstract Automatically file a paper when all necessary fields are set, otherwise flags to be filed. Does nothing when the preference is set to not file automatically.  
+    @discussion - 
+*/
+- (void)autoFilePaper;
 
 /*!
     @method parseFormat:forField:
