@@ -27,7 +27,8 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 #include <stdio.h>
 char * InputFilename; // This is here because the btparse library can't live without it.
 
-NSString*   LocalDragPasteboardName = @"edu.ucsd.cs.mmccrack.bibdesk: Local Publication Drag Pasteboard";
+NSString* LocalDragPasteboardName = @"edu.ucsd.cs.mmccrack.bibdesk: Local Publication Drag Pasteboard";
+NSString* BDSKBibTeXStringPboardType = @"edu.ucsd.cs.mmcrack.bibdesk: Local BibTeX String Pasteboard";
 
 
 #import "btparse.h"
@@ -1441,13 +1442,22 @@ int generalBibItemCompareFunc(id item1, id item2, void *context){
 		[s appendString:@"\n"];
     }
     [pasteboard setString:s forType:NSStringPboardType];
-}
+}    
 
 - (IBAction)copyAsTex:(id)sender{
     NSPasteboard *pasteboard = [NSPasteboard pasteboardWithName:NSGeneralPboard];
 
-    [pasteboard declareTypes:[NSArray arrayWithObject:NSStringPboardType] owner:nil];
+    [pasteboard declareTypes:[NSArray arrayWithObjects:NSStringPboardType, BDSKBibTeXStringPboardType, nil] owner:nil];
     [pasteboard setString:[self citeStringForSelection] forType:NSStringPboardType];
+    
+    NSEnumerator *e = [self selectedPubEnumerator];
+    NSMutableString *s = [[NSMutableString string] retain];
+    NSNumber *i;
+    while(i=[e nextObject]){
+        [s appendString:[[shownPublications objectAtIndex:[i intValue]] bibTeXString]];
+    }
+    [pasteboard setString:s forType:BDSKBibTeXStringPboardType];
+    
 }
 
 
@@ -1492,6 +1502,7 @@ int generalBibItemCompareFunc(id item1, id item2, void *context){
     while(i = [e nextObject]){
         [bibString appendString:[[shownPublications objectAtIndex:[i intValue]] bibTeXString]];
     }
+    [pb setString:bibString forType:BDSKBibTeXStringPboardType];
     d = [PDFpreviewer PDFDataFromString:bibString];
     [pb setData:d forType:NSPDFPboardType];
 }
@@ -1507,6 +1518,7 @@ int generalBibItemCompareFunc(id item1, id item2, void *context){
     while(i = [e nextObject]){
         [bibString appendString:[[shownPublications objectAtIndex:[i intValue]] bibTeXString]];
     }
+    [pb setString:bibString forType:BDSKBibTeXStringPboardType];
     [PDFpreviewer PDFFromString:bibString];
     d = [PDFpreviewer rtfDataPreview];
     [pb setData:d forType:NSRTFPboardType];
@@ -1517,6 +1529,7 @@ int generalBibItemCompareFunc(id item1, id item2, void *context){
 // ----------------------------------------------------------------------------------------
 
 - (IBAction)paste:(id)sender{
+#warning overriden in category
     NSPasteboard *pasteboard = [NSPasteboard pasteboardWithName:NSGeneralPboard];
     NSArray *newPubs;
     NSEnumerator *newPubsE;
@@ -1526,11 +1539,18 @@ int generalBibItemCompareFunc(id item1, id item2, void *context){
     NSData *data = nil;
     int rv = 0;
     NSString *texstr = nil;
-
-    if ([[pasteboard types] containsObject:NSStringPboardType]) {
+    NSString *typeToPaste = nil;
+    
+    if([[pasteboard types] containsObject:BDSKBibTeXStringPboardType]){
+	typeToPaste = BDSKBibTeXStringPboardType;
+    } else {
+	typeToPaste = NSStringPboardType;
+    }
+	
+    if ([[pasteboard types] containsObject:typeToPaste]) {
 	
 	// TeXify the string before passing it to BibTeXParser as data
-	texstr = [[BDSKConverter sharedConverter] stringByTeXifyingString:[pasteboard stringForType:NSStringPboardType]];
+	texstr = [[BDSKConverter sharedConverter] stringByTeXifyingString:[pasteboard stringForType:typeToPaste]];
 	data = [texstr dataUsingEncoding:NSUTF8StringEncoding];
 	
 	newPubs = [BibTeXParser itemsFromData:data error:&hadProblems];
@@ -1566,7 +1586,6 @@ int generalBibItemCompareFunc(id item1, id item2, void *context){
 	    if([[OFPreferenceWrapper sharedPreferenceWrapper] integerForKey:BDSKEditOnPasteKey] == NSOnState)
 		[self editPub:newBI forceChange:YES];
 	}
-	
     }else{
         NSBeep();// Pasting the wrong type gets you nowhere.
     }

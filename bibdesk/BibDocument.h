@@ -46,6 +46,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 @class BibFinder;
 
 extern NSString* LocalDragPasteboardName;
+extern NSString* BDSKBibTeXStringPboardType;
 
 /*!
     @class BibDocument

@@ -24,7 +24,12 @@ Would it be advisable to also give access to the newly added records?
         NSArray * pbArray = [pb propertyListForType:NSFilenamesPboardType]; // we will get an array
 		return [self addPublicationsForFiles:pbArray error:error];
     }
-	else if([types containsObject:NSStringPboardType]){
+        else if([types containsObject:BDSKBibTeXStringPboardType]){
+            NSString *str = [pb stringForType:BDSKBibTeXStringPboardType];
+            return [self addPublicationsForString:str error:error];
+    }
+            
+        else if([types containsObject:NSStringPboardType]){
         NSData * pbData = [pb dataForType:NSStringPboardType]; 	
 		NSString * str = [[[NSString alloc] initWithData:pbData encoding:NSUTF8StringEncoding] autorelease];
 		return [self addPublicationsForString:str error:error];
