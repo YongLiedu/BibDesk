@@ -25,6 +25,7 @@ NSRange SafeForwardSearchRange( unsigned startLoc, unsigned seekLength, unsigned
     
     NSDictionary *errorDict = [NSDictionary dictionaryWithObjects:[NSArray arrayWithObjects:name, [NSNull null], type, message, [NSValue valueWithRange:range], nil]
                                                           forKeys:[NSArray arrayWithObjects:@"fileName", @"lineNumber", @"errorClassName", @"errorMessage", @"errorRange", nil]];
+#warning BTPARSE ERROR should be declared as BDSKBibTeXParseError or something
     [[NSNotificationCenter defaultCenter] postNotificationName:@"BTPARSE ERROR"
                                                         object:errorDict];
 }
@@ -72,6 +73,20 @@ NSRange SafeForwardSearchRange( unsigned startLoc, unsigned seekLength, unsigned
     while(nextAtRange.location != NSNotFound && [[fullString substringWithRange:NSMakeRange(nextAtRange.location - 1, 1)] isEqualToString:@"\\"])
         nextAtRange = [fullString rangeOfString:@"@" options:NSLiteralSearch range:SafeForwardSearchRange(nextAtRange.location + 1, fullStringLength - nextAtRange.location - 1, fullStringLength)];
 
+    if(nextAtRange.location == NSNotFound)
+        nextAtRange = NSMakeRange(fullStringLength, 0); // avoid out-of-range exceptions
+
+    NSRange entryClosingBraceRange = [fullString rangeOfString:@"}" options:NSLiteralSearch | NSBackwardsSearch range:NSMakeRange(firstAtRange.location + 1, nextAtRange.location - firstAtRange.location - 1)]; // look back from the next @ to find the closing brace of the present bib entry
+    
+    if(entryClosingBraceRange.location == NSNotFound && nextAtRange.location != fullStringLength){ // there's another @entry here (next), but we can't find the brace for the present one (first)
+        *hadProblems = YES;
+        [BibTeXParser postParsingErrorNotification:@"Entry is missing a closing brace."
+                                         errorType:@"Parse Error"
+                                          fileName:filePath
+                                        errorRange:[fullString lineRangeForRange:NSMakeRange(firstAtRange.location, 0)]];
+        entryClosingBraceRange.location = nextAtRange.location;
+    }    
+    
     // NSLog(@"Creating a new bibitem, first one is at %i, second is at %@", firstAtRange.location, ( nextAtRange.location != NSNotFound ? [NSString stringWithFormat:@"%i", nextAtRange.location] : @"NSNotFound" ) );
     
     while(![scanner isAtEnd]){
@@ -118,10 +133,7 @@ NSRange SafeForwardSearchRange( unsigned startLoc, unsigned seekLength, unsigned
         
         [newBI setCiteKeyString:citekey];
         
-        if(nextAtRange.location == NSNotFound)
-          nextAtRange = NSMakeRange(fullStringLength, 0);
-        
-        while([scanner scanLocation] < nextAtRange.location){ // while we are within bounds of a single bibitem
+        while(entryClosingBraceRange.location != NSNotFound && [scanner scanLocation] < entryClosingBraceRange.location){ // while we are within bounds of a single bibitem
             NSString *key = nil;
             NSString *value = nil;
             NSRange quoteRange;
@@ -133,7 +145,7 @@ NSRange SafeForwardSearchRange( unsigned startLoc, unsigned seekLength, unsigned
             
             [scanner scanUpToString:@"," intoString:nil]; // find the comma
               
-            if([scanner scanLocation] >= nextAtRange.location){
+            if([scanner scanLocation] >= entryClosingBraceRange.location){
                 // NSLog(@"End of file or reached the next bibitem...breaking");
                 break; // either at EOF or scanned into the next bibitem
             }
@@ -144,21 +156,6 @@ NSRange SafeForwardSearchRange( unsigned startLoc, unsigned seekLength, unsigned
                            
             [scanner scanString:@"=" intoString:nil];
 
-#warning ARM: for debugging
-            // scan whitespace after the = to see if we have an opening delimiter or not; this will be for macroish stuff
-            [scanner scanCharactersFromSet:[NSCharacterSet whitespaceCharacterSet] intoString:nil];
-            if([possibleLeftDelimiters characterIsMember:[fullString characterAtIndex:[scanner scanLocation]]]){
-                [BibTeXParser postParsingErrorNotification:@"Delimiter found"
-                                                 errorType:@"Parse Info"
-                                                  fileName:filePath
-                                                errorRange:[fullString lineRangeForRange:NSMakeRange([scanner scanLocation], 0)]];
-            } else {
-                [BibTeXParser postParsingErrorNotification:@"Delimiter not found"
-                                                 errorType:@"Parse Info"
-                                                  fileName:filePath
-                                                errorRange:[fullString lineRangeForRange:NSMakeRange([scanner scanLocation], 0)]];
-            }                
-                       
             quoteRange = [fullString rangeOfString:@"\"" options:NSLiteralSearch range:SafeForwardSearchRange([scanner scanLocation], 100, fullStringLength)];
             braceRange = [fullString rangeOfString:@"{" options:NSLiteralSearch range:SafeForwardSearchRange([scanner scanLocation], 100, fullStringLength)];
 
@@ -176,16 +173,20 @@ NSRange SafeForwardSearchRange( unsigned startLoc, unsigned seekLength, unsigned
 
             leftDelimLocation = ( usingBraceDelimiter ? braceRange.location : quoteRange.location );
             
-            if([scanner scanLocation] >= nextAtRange.location){ // this is a lousy warning, but I can't pick it up earlier
-                [BibTeXParser postParsingErrorNotification:@"Ignored extra comma in previous entry."
-                                                 errorType:@"Parse Warning"
-                                                  fileName:filePath
-                                                errorRange:[fullString lineRangeForRange:NSMakeRange([scanner scanLocation], 0)]];
+            if([scanner scanLocation] >= entryClosingBraceRange.location){
                 break; // break here, since this happens at the end of every entry with JabRef-generated BibTeX, and we don't need to hit the assertion below
             }                
             
-            // NSAssert ( nextAtRange.location >= [scanner scanLocation], @"Scanner tried to enter the next bibitem too early." );
             // NSAssert ( leftDelimLocation != NSNotFound, @"Can't find a delimiter.");
+#warning ARM: for debugging
+            // scan whitespace after the = to see if we have an opening delimiter or not; this will be for macroish stuff
+            [scanner scanCharactersFromSet:[NSCharacterSet whitespaceCharacterSet] intoString:nil];
+            if(![possibleLeftDelimiters characterIsMember:[fullString characterAtIndex:[scanner scanLocation]]]){
+                leftDelimLocation = [scanner scanLocation] - 1; // rewind so we don't lose the first character
+                rightDelim = @",\n"; // set the delimiter appropriately for an unquoted value
+            } else {
+                [scanner setScanLocation:leftDelimLocation + 1];
+            }
             
             if(leftDelimLocation == NSNotFound){
                 *hadProblems = YES;
@@ -195,15 +196,8 @@ NSRange SafeForwardSearchRange( unsigned startLoc, unsigned seekLength, unsigned
                                                 errorRange:[fullString lineRangeForRange:NSMakeRange([scanner scanLocation], 0)]];
                 break; // nothing more we can do with this one
             }                
-            
-                
-            
-            if(leftDelimLocation + 1 >= nextAtRange.location)
-                break;
-
-            [scanner setScanLocation:leftDelimLocation + 1];
-            
-            if([scanner scanLocation] >= nextAtRange.location)
+                        
+            if([scanner scanLocation] >= entryClosingBraceRange.location)
                 break;
                         
             unsigned rightDelimLocation = 0;
@@ -261,13 +255,30 @@ NSRange SafeForwardSearchRange( unsigned startLoc, unsigned seekLength, unsigned
         [dict removeAllObjects];
         
         firstAtRange = nextAtRange; // we know the next one is safe (unescaped)
+        
         nextAtRange = [fullString rangeOfString:@"@" options:NSLiteralSearch range:SafeForwardSearchRange(firstAtRange.location + 1, fullStringLength - firstAtRange.location - 1, fullStringLength)];
         // check for an escaped @ string...they're deadly when provoked
         while(nextAtRange.location != NSNotFound && [[fullString substringWithRange:NSMakeRange(nextAtRange.location - 1, 1)] isEqualToString:@"\\"])
             nextAtRange = [fullString rangeOfString:@"@" options:NSLiteralSearch range:SafeForwardSearchRange(nextAtRange.location + 1, fullStringLength - nextAtRange.location - 1, fullStringLength)];
 
-        if(firstAtRange.location != NSNotFound)
+        if(nextAtRange.location == NSNotFound)
+            nextAtRange = NSMakeRange(fullStringLength, 0);
+        
+        if(firstAtRange.location != NSNotFound){ // we get to scan another one, so set the scanner appropriately and find the end of the bibitem
             [scanner setScanLocation:firstAtRange.location];
+            entryClosingBraceRange = [fullString rangeOfString:@"}" options:NSLiteralSearch | NSBackwardsSearch range:NSMakeRange(firstAtRange.location + 1, nextAtRange.location - firstAtRange.location - 1)]; // look back from the next @ to find the closing brace of the present bib entry
+        } else {
+            entryClosingBraceRange.location = NSNotFound;
+        }
+        
+        if(entryClosingBraceRange.location == NSNotFound && nextAtRange.location != fullStringLength){ // there's another @entry here (next), but we can't find the brace for the present one (first)
+            *hadProblems = YES;
+            [BibTeXParser postParsingErrorNotification:@"Entry is missing a closing brace."
+                                             errorType:@"Parse Error"
+                                              fileName:filePath
+                                            errorRange:[fullString lineRangeForRange:NSMakeRange(firstAtRange.location, 0)]];
+            entryClosingBraceRange.location = nextAtRange.location;
+        }
         
         // NSLog(@"Finished a bibitem, next one is at %i, following is at %@", firstAtRange.location, ( nextAtRange.location != NSNotFound ? [NSString stringWithFormat:@"%i", nextAtRange.location] : @"NSNotFound" ) );
 
