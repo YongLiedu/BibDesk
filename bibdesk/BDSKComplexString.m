@@ -101,7 +101,7 @@ static NSDictionary *globalMacroDefs;
 
 - (id)initWithArray:(NSArray *)a macroResolver:(id)theMacroResolver{
     if (self = [super init]) {
-		nodes = [a copy];
+        nodes = [[NSArray alloc] initWithArray:a copyItems:YES];
 		if(theMacroResolver)
 			[self setMacroResolver:theMacroResolver];
 		else
@@ -212,10 +212,13 @@ static NSDictionary *globalMacroDefs;
 
 - (NSString *)expandedValueFromArray:(NSArray *)a{
     NSMutableString *s = [[NSMutableString alloc] initWithCapacity:10];
+    NSString *retStr = nil;
     int i =0;
     
-	if (a == nil)
-		return nil;
+    if (a == nil){
+        [s release];
+        return retStr;
+    }
 	
     for(i = 0 ; i < [a count]; i++){
         BDSKStringNode *node = [a objectAtIndex:i];
@@ -237,8 +240,9 @@ static NSDictionary *globalMacroDefs;
             [s appendString:[node value]];
         }
     }
-    [s autorelease];
-    return [[s copy] autorelease];
+    retStr = [[s copy] autorelease];
+    [s release];
+    return retStr;
 }
 
 - (id <BDSKMacroResolver>)macroResolver{
