@@ -1173,12 +1173,12 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 	BOOL isWeb = (requiredSnoopContainerView == webSnoopContainerView);
     NSString *lurl = [theBib localURLPath];
     NSString *rurl = [theBib valueOfField:BDSKUrlString];
-	NSImage *drawerImage = [NSImage imageNamed:@"drawerRight"];
 	
 	if ( isClose || 
 		 (isWeb && [NSURL URLWithString:rurl] && ![rurl isEqualToString:@""]) ||
 		 (!isWeb && lurl && [[NSFileManager defaultManager] fileExistsAtPath:lurl]) ) {
 		
+		NSImage *drawerImage = [NSImage imageNamed:@"drawerRight"];
 		NSImage *arrowImage = [NSImage imageNamed:@"drawerArrow"];
 		NSImage *badgeImage = [[NSWorkspace sharedWorkspace] iconForFileType:(isWeb ? @"webloc" : (isText ? @"txt" : @"pdf"))];
 		NSRect iconRect = NSMakeRect(0, 0, 32, 32);
@@ -1214,7 +1214,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 		[documentSnoopButton setIconActionEnabled:YES];
 	}
 	else {
-        [documentSnoopButton setIconImage:drawerImage];
+        [documentSnoopButton setIconImage:[NSImage imageNamed:@"drawerDisabled"]];
 		
 		if (isClose) {
 			[documentSnoopButton setToolTip:NSLocalizedString(@"Close Drawer", @"Close drawer tooltip")];
