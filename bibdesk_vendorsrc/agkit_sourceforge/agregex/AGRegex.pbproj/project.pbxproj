@@ -132,6 +132,7 @@
 				INSTALL_PATH = "@executable_path/../Frameworks/";
 				LIBRARY_SEARCH_PATHS = "";
 				OTHER_CFLAGS = "-DSUPPORT_UTF8 -DPOSIX_MALLOC_THRESHOLD=10";
+				OTHER_LDFLAGS = "-Wl,-prebind,-image_base,0xC5000000";
 				PRODUCT_NAME = AGRegex;
 				SECTORDER_FLAGS = "";
 				WARNING_CFLAGS = "-Wmost -Wno-four-char-constants -Wno-unknown-pragmas";
