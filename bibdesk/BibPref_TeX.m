@@ -26,8 +26,27 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 -(IBAction)changeTexBinPath:(id)sender{
     [defaults setObject:[sender stringValue] forKey:BDSKTeXBinPathKey];
 }
+
 - (IBAction)changeBibTexBinPath:(id)sender{
     [defaults setObject:[sender stringValue] forKey:BDSKBibTeXBinPathKey];
+}
+
+- (BOOL)control:(NSControl *)control textShouldEndEditing:(NSText *)fieldEditor{
+    if(control == bibtexBinaryPath || control == texBinaryPath){
+        if(![[NSFileManager defaultManager] isExecutableFileAtPath:[control stringValue]]){
+            NSAlert *anAlert = [NSAlert alertWithMessageText:NSLocalizedString(@"Error!",@"Error!")
+                                               defaultButton:nil
+                                             alternateButton:nil
+                                                 otherButton:nil
+                                   informativeTextWithFormat:NSLocalizedString(@"The file %@ does not exist or is not executable.  Please try again.",@""), [control stringValue]];
+            [anAlert beginSheetModalForWindow:[[OAPreferenceController sharedPreferenceController] window]
+                                modalDelegate:nil
+                               didEndSelector:nil
+                                  contextInfo:nil];
+            return NO;
+        }
+    } return YES;
+        
 }
 
 - (IBAction)changeUsesTeX:(id)sender{
@@ -45,10 +64,36 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
         [texBinaryPath setEnabled:YES];
         [bibtexBinaryPath setEnabled:YES];
         [defaults setInteger:NSOnState forKey:BDSKUsesTeXKey];
+        [self checkPathsAndWarn:[NSArray arrayWithObjects:[defaults objectForKey:BDSKBibTeXBinPathKey], [defaults objectForKey:BDSKTeXBinPathKey], nil]];
 		// show preview panel if necessary
 		if ([[defaults objectForKey:@"BDSK Showing Preview Key"] isEqualToString:@"showing"]) {
 			[[NSApp delegate] showPreviewPanel:self];
 		}
+    }
+}
+
+- (void)checkPathsAndWarn:(NSArray *)paths{
+    NSEnumerator *e = [paths objectEnumerator];
+    NSString *path = nil;
+    NSString *errStr = nil;
+    unsigned i = 0;
+    while(path = [e nextObject]){
+        if(![[NSFileManager defaultManager] isExecutableFileAtPath:path]){
+            i++;
+            errStr = ( i == 0 ? path : [errStr stringByAppendingFormat:@" and %@", path] );
+        }
+    }
+    
+    if(i){
+        NSAlert *anAlert = [NSAlert alertWithMessageText:NSLocalizedString(@"Error!",@"Error!")
+					   defaultButton:nil
+					 alternateButton:nil
+					     otherButton:nil
+			       informativeTextWithFormat:NSLocalizedString(@"The file %@ does not exist or is not executable.  Please set an appropriate path.",@""), path];
+	[anAlert beginSheetModalForWindow:[[OAPreferenceController sharedPreferenceController] window]
+			    modalDelegate:nil
+			   didEndSelector:nil
+			      contextInfo:nil];
     }
 }
 
