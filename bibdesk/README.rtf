@@ -1,4 +1,4 @@
-{\rtf1\mac\ansicpg10000\cocoartf797
+{\rtf1\mac\ansicpg10000\cocoartf802
 {\fonttbl\f0\fnil\fcharset77 GillSans;\f1\fnil\fcharset77 HelveticaNeue-Bold;\f2\fnil\fcharset77 HelveticaNeue-BoldItalic;
 \f3\fnil\fcharset77 LucidaGrande;\f4\fnil\fcharset77 HelveticaNeue-Italic;\f5\fnil\fcharset77 Geneva;
 \f6\fnil\fcharset77 HelveticaNeue;\f7\fnil\fcharset77 Verdana;\f8\froman\fcharset77 Times-Italic;
@@ -10,7 +10,49 @@
 \pard\tx1440\tx2880\tx4320\tx5760\tx7200\ql\qnatural
 
 \f1\b\fs28 \cf0 \
-Changes since 0.97.7\
+Changes since 0.97.8\
+\
+\pard\tx1440\tx2880\tx4320\tx5760\tx7200\ql\qnatural
+
+\f2\i\fs26 \cf0 New Features\
+
+\f3\i0\b0\fs22 \cf0   \'a5  Allow drag-copying PDF (or other attached file) from the main publication list (drop it on Mail to send as an attachment, in Finder to create a copy)\
+  \'a5  Enable spacebar scrolling in the preview pane below the main \cf0 publication list\cf0 \
+  \'a5  Added access to publications of an author in AppleScript\
+  \'a5  Results from a Reference Miner search of PubMed can now be dragged onto BibDesk's publications list\
+  \'a5  Add %L and %l format specifiers for Local-Url (see online help for details)\
+  \'a5  Changes to support urlbst (see TeX FAQ, <{\field{\*\fldinst{HYPERLINK "http://www.tex.ac.uk/cgi-bin/texfaq2html?label=citeURL"}}{\fldrslt http://www.tex.ac.uk/cgi-bin/texfaq2html?label=citeURL}}>).  This adds the webpage BibTeX type and associated fields, patch courtesy of Norman Gray.\
+\
+  
+\fs24 \cf0 \
+
+\f2\i\b\fs26 Bugfixes\
+
+\f3\i0\b0\fs22 \cf0   \'a5  Enable spacebar scrolling in the preview pane below the main table\
+  \'a5  Fix bug #1104598, split view can be dragged outside window bounds\
+  \'a5  Remove leading and trailing whitespace from cite keys, which will apparently fix Endnote's broken BibTeX exports\
+\pard\tx560\tx1120\tx1680\tx2240\tx2800\tx3360\tx3920\tx4480\tx5040\tx5600\tx6160\tx6720\ql\qnatural\pardirnatural
+  \'a5  Fix LaTeX/RTF preview bug which kept it from displaying until you deselect/reselect a row\
+  \'a5  Fix sorting by creation/modification dates\
+  \'a5  Update UI after generating a new citekey\
+  \'a5  Fixed some serious parsing bugs with nested braces in the experimental parser, and also added support for parsing @preambles\
+  \'a5  Experimental parser now correctly handles '@' characters inside bibitems (as in e-mail addresses)\
+  \'a5  Can close a document during background file load without causing a crash\
+  \'a5  Fix bug #1116921, experimental parser doesn't recognize types in all caps.\
+  \'a5  Added optional fields for some types, fixing bug #1116927\
+  \'a5  Implement cut command for main pub list to fix bug #1116920\
+  \'a5  Use localized string comparison methods for sorting\
+  \'a5  Improved thread safety when loading files in background (experimental feature)\
+  \'a5  Allow natural language in date fields for preview.\
+  \'a5  Allow multiple fonts in preview view, so you can copy it as RTF\
+  \'a5  Add ellipsis to menu item titles in BibEditor\
+  \'a5  Set date created properly from AppleScript\
+  \'a5  Don't autocomplete numeric fields in BibEditor\
+\pard\tx1440\tx2880\tx4320\tx5760\tx7200\ql\qnatural
+
+\f1\b \cf0 \
+
+\fs28 Changes since 0.97.7\
 \
 \pard\tx1440\tx2880\tx4320\tx5760\tx7200\ql\qnatural
 
@@ -22,12 +64,12 @@ Changes since 0.97.7\
 
 \f2\i\b\fs26 Bugfixes\
 
-\f3\i0\b0\fs24 \cf0   \'a5  Force ASCII encoding by default if libbtparse is used (bug ##1110754), which should (help) keep users from corrupting their files.  Note that the File->Open menu item can still be used to open with different encodings, no matter which parser is set in the Files preference pane.\
+\f3\i0\b0\fs24   \'a5  Force ASCII encoding by default if libbtparse is used (bug ##1110754), which should (help) keep users from corrupting their files.  Note that the File->Open menu item can still be used to open with different encodings, no matter which parser is set in the Files preference pane.\
   \'a5  Fixed a bug that prevented the use of colons in cite key formats\
   \'a5  Fixed a couple of crashing bugs related to invalid cite key format strings\
   \'a5  Improved the warnings for invalid cite key format strings, and improve the error checking/handling\
   \'a5  The Unicode parser is now used for paste/drag operations if selected as the default parser\
-  \'a5  Selection in the main reference list of a document is now more consistent with Apple's guidelines\cf0   
+  \'a5  Selection in the main reference list of a document is now more consistent with Apple's guidelines  
 \f1\b\fs28 \
 \
 Changes since 0.97.6\

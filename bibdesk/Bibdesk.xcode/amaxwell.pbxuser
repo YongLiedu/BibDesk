@@ -5,7 +5,7 @@
 			sepNavIntBoundsRect = "{{0, 0}, {705, 428}}";
 			sepNavSelRange = "{173, 0}";
 			sepNavVisRect = "{{0, 0}, {705, 428}}";
-			sepNavWindowFrame = "{{84, 206}, {750, 558}}";
+			sepNavWindowFrame = "{{61, 227}, {750, 558}}";
 		};
 	};
 	275E270607838EE30070398A = {
@@ -35,7 +35,7 @@
 		};
 	};
 	29B97313FDCFA39411CA2CEA = {
-		activeBuildStyle = 4A9504CDFFE6A4B311CA0CBA;
+		activeBuildStyle = 4A9504CCFFE6A4B311CA0CBA;
 		activeExecutable = F9CCDAFE076BB73B006D37DF;
 		activeTarget = 8D1107260486CEB800E47090;
 		addToTargets = (
@@ -48,6 +48,12 @@
 			F99343F5077FD9D500EF2850,
 			F9B1424007864E4400BAA3B1,
 			F911911F0791C45C00F42414,
+			F91DA44207B3372A00D910E4,
+			F9D5A7FA07B6D25D0092E7E2,
+			F9D5A84E07B6E8AA0092E7E2,
+			F9D5A89107B72E740092E7E2,
+			F9D5A89307B72E940092E7E2,
+			F9D5A89A07B72FA60092E7E2,
 		);
 		codeSenseManager = F9CCDB4C076BB743006D37DF;
 		executables = (
@@ -168,7 +174,7 @@
 					PBXFileDataSource_Warnings_ColumnID,
 				);
 			};
-			PBXPerProjectTemplateStateSaveDate = 128842745;
+			PBXPerProjectTemplateStateSaveDate = 129698795;
 			PBXPrepackagedSmartGroups_v2 = (
 				{
 					PBXTransientLocationAtTop = bottom;
@@ -345,7 +351,7 @@
 					};
 				},
 			);
-			PBXWorkspaceStateSaveDate = 128842745;
+			PBXWorkspaceStateSaveDate = 129698795;
 		};
 		sourceControlManager = F9CCDB4B076BB743006D37DF;
 		userBookmarkGroup = F9B13D850784E65C00BAA3B1;
@@ -392,9 +398,9 @@
 	8D1107310486CEB800E47090 = {
 		uiCtxt = {
 			sepNavIntBoundsRect = "{{0, 0}, {710, 7783}}";
-			sepNavSelRange = "{3255, 6}";
-			sepNavVisRect = "{{0, 1403}, {705, 428}}";
-			sepNavWindowFrame = "{{61, 227}, {750, 558}}";
+			sepNavSelRange = "{3261, 0}";
+			sepNavVisRect = "{{0, 1500}, {705, 428}}";
+			sepNavWindowFrame = "{{411, 133}, {750, 558}}";
 		};
 	};
 	F9022C200758015B00C3F701 = {
@@ -431,17 +437,17 @@
 	};
 	F9022C410758027800C3F701 = {
 		uiCtxt = {
-			sepNavIntBoundsRect = "{{0, 0}, {4544, 3696}}";
-			sepNavSelRange = "{2441, 0}";
-			sepNavVisRect = "{{0, 255}, {886, 596}}";
-			sepNavWindowFrame = "{{266, 54}, {935, 725}}";
+			sepNavIntBoundsRect = "{{0, 0}, {4544, 3808}}";
+			sepNavSelRange = "{2601, 0}";
+			sepNavVisRect = "{{0, 355}, {890, 596}}";
+			sepNavWindowFrame = "{{101, 107}, {935, 725}}";
 		};
 	};
 	F9022C430758027800C3F701 = {
 		uiCtxt = {
 			sepNavIntBoundsRect = "{{0, 0}, {4544, 1904}}";
-			sepNavSelRange = "{4980, 13}";
-			sepNavVisRect = "{{0, 1174}, {870, 439}}";
+			sepNavSelRange = "{2259, 11}";
+			sepNavVisRect = "{{0, 1326}, {954, 369}}";
 			sepNavWindowFrame = "{{213, 116}, {919, 568}}";
 		};
 	};
@@ -477,18 +483,18 @@
 	};
 	F9022C57075802E300C3F701 = {
 		uiCtxt = {
-			sepNavIntBoundsRect = "{{0, 0}, {4544, 2226}}";
-			sepNavSelRange = "{2221, 18}";
-			sepNavVisRect = "{{0, 465}, {906, 261}}";
+			sepNavIntBoundsRect = "{{0, 0}, {4544, 2240}}";
+			sepNavSelRange = "{2437, 41}";
+			sepNavVisRect = "{{0, 479}, {705, 428}}";
 			sepNavWindowFrame = "{{84, 207}, {750, 557}}";
 		};
 	};
 	F9022C58075802E300C3F701 = {
 		uiCtxt = {
-			sepNavIntBoundsRect = "{{0, 0}, {4544, 6916}}";
-			sepNavSelRange = "{2021, 30}";
-			sepNavVisRect = "{{0, 533}, {705, 428}}";
-			sepNavWindowFrame = "{{61, 228}, {750, 557}}";
+			sepNavIntBoundsRect = "{{0, 0}, {4544, 7098}}";
+			sepNavSelRange = "{8579, 18}";
+			sepNavVisRect = "{{0, 2498}, {988, 675}}";
+			sepNavWindowFrame = "{{154, 28}, {1037, 804}}";
 		};
 	};
 	F9022C5B075802E300C3F701 = {
@@ -511,32 +517,32 @@
 		uiCtxt = {
 			sepNavIntBoundsRect = "{{0, 0}, {4544, 3052}}";
 			sepNavSelRange = "{2419, 14}";
-			sepNavVisRect = "{{0, 451}, {705, 428}}";
+			sepNavVisRect = "{{0, 406}, {705, 428}}";
 			sepNavWindowFrame = "{{176, 123}, {750, 557}}";
 		};
 	};
 	F9022C5E075802E300C3F701 = {
 		uiCtxt = {
 			sepNavIntBoundsRect = "{{0, 0}, {4544, 15008}}";
-			sepNavSelRange = "{20726, 73}";
-			sepNavVisRect = "{{0, 5704}, {960, 575}}";
+			sepNavSelRange = "{22681, 0}";
+			sepNavVisRect = "{{0, 6128}, {956, 575}}";
 			sepNavWindowFrame = "{{173, 128}, {1005, 704}}";
 		};
 	};
 	F9022C5F075802E300C3F701 = {
 		uiCtxt = {
-			sepNavIntBoundsRect = "{{0, 0}, {4544, 994}}";
-			sepNavSelRange = "{2049, 0}";
-			sepNavVisRect = "{{0, 165}, {711, 429}}";
+			sepNavIntBoundsRect = "{{0, 0}, {4544, 1036}}";
+			sepNavSelRange = "{2306, 0}";
+			sepNavVisRect = "{{0, 241}, {705, 428}}";
 			sepNavWindowFrame = "{{95, 34}, {750, 557}}";
 		};
 	};
 	F9022C60075802E300C3F701 = {
 		uiCtxt = {
-			sepNavIntBoundsRect = "{{0, 0}, {4544, 3472}}";
-			sepNavSelRange = "{6510, 0}";
-			sepNavVisRect = "{{0, 2423}, {870, 377}}";
-			sepNavWindowFrame = "{{64, 139}, {1021, 693}}";
+			sepNavIntBoundsRect = "{{0, 0}, {4544, 3878}}";
+			sepNavSelRange = "{8735, 0}";
+			sepNavVisRect = "{{0, 2720}, {972, 564}}";
+			sepNavWindowFrame = "{{220, 139}, {1021, 693}}";
 		};
 	};
 	F9022C62075802E300C3F701 = {
@@ -551,16 +557,16 @@
 		uiCtxt = {
 			sepNavIntBoundsRect = "{{0, 0}, {4544, 560}}";
 			sepNavSelRange = "{1888, 0}";
-			sepNavVisRect = "{{0, 103}, {711, 429}}";
+			sepNavVisRect = "{{0, 129}, {705, 428}}";
 			sepNavWindowFrame = "{{222, 81}, {750, 557}}";
 		};
 	};
 	F9022C64075802E300C3F701 = {
 		uiCtxt = {
-			sepNavIntBoundsRect = "{{0, 0}, {4544, 9267}}";
-			sepNavSelRange = "{26977, 28}";
-			sepNavVisRect = "{{0, 8543}, {705, 428}}";
-			sepNavWindowFrame = "{{38, 248}, {750, 558}}";
+			sepNavIntBoundsRect = "{{0, 0}, {4544, 9800}}";
+			sepNavSelRange = "{5605, 0}";
+			sepNavVisRect = "{{0, 1510}, {869, 568}}";
+			sepNavWindowFrame = "{{182, 135}, {918, 697}}";
 		};
 	};
 	F9022C65075802E300C3F701 = {
@@ -573,10 +579,10 @@
 	};
 	F9022C66075802E300C3F701 = {
 		uiCtxt = {
-			sepNavIntBoundsRect = "{{0, 0}, {4544, 42854}}";
-			sepNavSelRange = "{43214, 26}";
-			sepNavVisRect = "{{0, 13375}, {993, 645}}";
-			sepNavWindowFrame = "{{144, 58}, {1042, 774}}";
+			sepNavIntBoundsRect = "{{0, 0}, {4544, 43050}}";
+			sepNavSelRange = "{106877, 9}";
+			sepNavVisRect = "{{0, 35943}, {993, 645}}";
+			sepNavWindowFrame = "{{137, 58}, {1042, 774}}";
 		};
 	};
 	F9022C67075802E300C3F701 = {
@@ -613,18 +619,18 @@
 	};
 	F9022C6D075802E300C3F701 = {
 		uiCtxt = {
-			sepNavIntBoundsRect = "{{0, 0}, {2126, 4956}}";
-			sepNavSelRange = "{2950, 13}";
-			sepNavVisRect = "{{0, 4228}, {711, 429}}";
+			sepNavIntBoundsRect = "{{0, 0}, {2126, 5236}}";
+			sepNavSelRange = "{2655, 36}";
+			sepNavVisRect = "{{0, 703}, {705, 428}}";
 			sepNavWindowFrame = "{{23, 106}, {750, 557}}";
 		};
 	};
 	F9022C6E075802E300C3F701 = {
 		uiCtxt = {
-			sepNavIntBoundsRect = "{{0, 0}, {1082, 20636}}";
-			sepNavSelRange = "{50345, 0}";
-			sepNavVisRect = "{{104, 19180}, {978, 635}}";
-			sepNavWindowFrame = "{{189, 69}, {1027, 763}}";
+			sepNavIntBoundsRect = "{{0, 0}, {1250, 22106}}";
+			sepNavSelRange = "{3861, 20}";
+			sepNavVisRect = "{{0, 1037}, {978, 634}}";
+			sepNavWindowFrame = "{{98, 39}, {1027, 763}}";
 		};
 	};
 	F9022C71075802E300C3F701 = {
@@ -709,26 +715,26 @@
 	};
 	F9022C940758038000C3F701 = {
 		uiCtxt = {
-			sepNavIntBoundsRect = "{{0, 0}, {4544, 1442}}";
-			sepNavSelRange = "{1915, 24}";
-			sepNavVisRect = "{{60, 101}, {705, 428}}";
+			sepNavIntBoundsRect = "{{0, 0}, {4544, 1638}}";
+			sepNavSelRange = "{3486, 69}";
+			sepNavVisRect = "{{0, 605}, {705, 428}}";
 			sepNavWindowFrame = "{{290, 239}, {750, 557}}";
 		};
 	};
 	F9022C950758038000C3F701 = {
 		uiCtxt = {
-			sepNavIntBoundsRect = "{{0, 0}, {1196, 588}}";
-			sepNavSelRange = "{645, 0}";
-			sepNavVisRect = "{{0, 118}, {705, 428}}";
+			sepNavIntBoundsRect = "{{0, 0}, {1196, 630}}";
+			sepNavSelRange = "{1145, 0}";
+			sepNavVisRect = "{{0, 169}, {705, 428}}";
 			sepNavWindowFrame = "{{224, 133}, {750, 557}}";
 		};
 	};
 	F9022C960758038000C3F701 = {
 		uiCtxt = {
-			sepNavIntBoundsRect = "{{0, 0}, {1748, 9436}}";
-			sepNavSelRange = "{1811, 135}";
-			sepNavVisRect = "{{0, 463}, {1027, 460}}";
-			sepNavWindowFrame = "{{163, 156}, {1072, 589}}";
+			sepNavIntBoundsRect = "{{0, 0}, {1748, 11592}}";
+			sepNavSelRange = "{3858, 0}";
+			sepNavVisRect = "{{0, 1036}, {1174, 547}}";
+			sepNavWindowFrame = "{{11, 50}, {1222, 765}}";
 		};
 	};
 	F9022C970758038000C3F701 = {
@@ -787,6 +793,14 @@
 			sepNavWindowFrame = "{{291, 18}, {750, 557}}";
 		};
 	};
+	F9022CA60758038000C3F701 = {
+		uiCtxt = {
+			sepNavIntBoundsRect = "{{0, 0}, {1164, 868}}";
+			sepNavSelRange = "{0, 0}";
+			sepNavVisRect = "{{0, 0}, {1164, 646}}";
+			sepNavWindowFrame = "{{92, -397}, {1209, 775}}";
+		};
+	};
 	F9022CA70758038000C3F701 = {
 		uiCtxt = {
 			sepNavIntBoundsRect = "{{0, 0}, {1130, 7406}}";
@@ -820,9 +834,9 @@
 	};
 	F9022CE60758050E00C3F701 = {
 		uiCtxt = {
-			sepNavIntBoundsRect = "{{0, 0}, {711, 2242}}";
+			sepNavIntBoundsRect = "{{0, 0}, {705, 2242}}";
 			sepNavSelRange = "{0, 0}";
-			sepNavVisRect = "{{0, 0}, {711, 444}}";
+			sepNavVisRect = "{{0, 0}, {705, 443}}";
 			sepNavWindowFrame = "{{15, 270}, {750, 557}}";
 		};
 	};
@@ -836,10 +850,18 @@
 	};
 	F9022D180758066000C3F701 = {
 		uiCtxt = {
-			sepNavIntBoundsRect = "{{0, 0}, {539, 5152}}";
-			sepNavSelRange = "{824, 0}";
+			sepNavIntBoundsRect = "{{0, 0}, {539, 5673}}";
+			sepNavSelRange = "{288, 0}";
 			sepNavVisRect = "{{0, 0}, {539, 426}}";
 			sepNavWindowFrame = "{{41, 198}, {584, 540}}";
+		};
+	};
+	F9022D1B0758066000C3F701 = {
+		uiCtxt = {
+			sepNavIntBoundsRect = "{{0, 0}, {1177, 9352}}";
+			sepNavSelRange = "{12909, 3}";
+			sepNavVisRect = "{{0, 8383}, {1177, 636}}";
+			sepNavWindowFrame = "{{15, 62}, {1222, 765}}";
 		};
 	};
 	F9022DAB0758088000C3F701 = {
@@ -883,40 +905,57 @@
 		fileReference = F9022C960758038000C3F701;
 		functionName = "+itemsFromString:error:frontMatter:filePath:";
 		isa = PBXFileBreakpoint;
-		lineNumber = 241;
+		lineNumber = 293;
 		state = 2;
 	};
 	F916E68A07A9F9AA009EF011 = {
 		uiCtxt = {
 			sepNavIntBoundsRect = "{{0, 0}, {647, 442}}";
-			sepNavSelRange = "{472, 0}";
+			sepNavSelRange = "{573, 0}";
 			sepNavVisRect = "{{0, 0}, {647, 442}}";
 			sepNavWindowFrame = "{{560, 261}, {692, 571}}";
 		};
 	};
 	F916E68F07A9F9AA009EF011 = {
 		uiCtxt = {
-			sepNavIntBoundsRect = "{{0, 0}, {647, 756}}";
-			sepNavSelRange = "{841, 0}";
-			sepNavVisRect = "{{0, 314}, {647, 442}}";
-			sepNavWindowFrame = "{{541, -14}, {692, 571}}";
+			sepNavIntBoundsRect = "{{0, 0}, {647, 854}}";
+			sepNavSelRange = "{867, 159}";
+			sepNavVisRect = "{{0, 412}, {647, 442}}";
+			sepNavWindowFrame = "{{513, -1}, {692, 571}}";
 		};
 	};
 	F916E6A007A9FB56009EF011 = {
 		uiCtxt = {
 			sepNavIntBoundsRect = "{{0, 0}, {647, 442}}";
-			sepNavSelRange = "{722, 74}";
+			sepNavSelRange = "{796, 51}";
 			sepNavVisRect = "{{0, 0}, {647, 442}}";
 			sepNavWindowFrame = "{{545, -1}, {692, 571}}";
 		};
 	};
 	F916E6A507A9FB56009EF011 = {
 		uiCtxt = {
-			sepNavIntBoundsRect = "{{0, 0}, {662, 1190}}";
-			sepNavSelRange = "{1739, 0}";
-			sepNavVisRect = "{{0, 594}, {662, 554}}";
+			sepNavIntBoundsRect = "{{0, 0}, {666, 1274}}";
+			sepNavSelRange = "{1878, 0}";
+			sepNavVisRect = "{{0, 692}, {666, 554}}";
 			sepNavWindowFrame = "{{10, 149}, {711, 683}}";
 		};
+	};
+	F91DA44207B3372A00D910E4 = {
+		fileReference = F9022C960758038000C3F701;
+		functionName = "-itemsFromString:error:frontMatter:filePath:addToDocument:";
+		isa = PBXFileBreakpoint;
+		lineNumber = 331;
+		state = 2;
+	};
+	F91DA46707B3433A00D910E4 = {
+		fRef = F9022C960758038000C3F701;
+		isa = PBXTextBookmark;
+		name = "fixme: add one";
+		rLen = 0;
+		rLoc = 25253;
+		rType = 0;
+		vrLen = 4507;
+		vrLoc = 18062;
 	};
 	F920DAFA075C2B69000C5FCA = {
 		uiCtxt = {
@@ -1042,6 +1081,7 @@
 			F9B141D30785DF1C00BAA3B1,
 			F9B142270786462000BAA3B1,
 			F9B1422A078646BA00BAA3B1,
+			F91DA46707B3433A00D910E4,
 		);
 		isa = PBXBookmarkGroup;
 		name = Root;
@@ -1051,7 +1091,7 @@
 		isa = PBXTextBookmark;
 		name = "BibTeXParser.m: 147";
 		rLen = 0;
-		rLoc = 9890;
+		rLoc = 12069;
 		rType = 0;
 		vrLen = 2617;
 		vrLoc = 7123;
@@ -1061,7 +1101,7 @@
 		isa = PBXTextBookmark;
 		name = "compare: String";
 		rLen = 0;
-		rLoc = 7348;
+		rLoc = 8694;
 		rType = 0;
 		vrLen = 2583;
 		vrLoc = 6262;
@@ -1071,7 +1111,7 @@
 		isa = PBXTextBookmark;
 		name = macroStringFromScanner;
 		rLen = 0;
-		rLoc = 20935;
+		rLoc = 24097;
 		rType = 0;
 		vrLen = 2213;
 		vrLoc = 15486;
@@ -1080,7 +1120,7 @@
 		fileReference = F9022C960758038000C3F701;
 		functionName = "+macroStringFromScanner:endingRange:string:";
 		isa = PBXFileBreakpoint;
-		lineNumber = 332;
+		lineNumber = 384;
 		state = 2;
 	};
 	F9CCDAFE076BB73B006D37DF = {
@@ -1116,7 +1156,7 @@
 				value = YES;
 			},
 			{
-				active = YES;
+				active = NO;
 				name = MallocScribble;
 				value = YES;
 			},
@@ -2127,6 +2167,16 @@
 				path = "/Volumes/Local/Users/amaxwell/IntermediateFiles/Bibdesk.build/Bibdesk.build/Objects-normal/ppc/BibPersonController.ob";
 				whenToLoad = 0;
 			},
+			{
+				level = 0;
+				path = /System/Library/Frameworks/ApplicationServices.framework/Versions/A/Frameworks/CoreGraphics.framework/Versions/A/Resources/libCFilter.A.dylib;
+				whenToLoad = 0;
+			},
+			{
+				level = 0;
+				path = "/Volumes/Local/Users/amaxwell/IntermediateFiles/Bibdesk.build/Bibdesk.build/Objects-normal/ppc/PubMedParser.ob";
+				whenToLoad = 0;
+			},
 		);
 		sourceDirectories = (
 		);
@@ -2152,6 +2202,41 @@
 		wantsCodeCompletionPlaceholdersInserted = 0;
 		wantsCodeCompletionTabCompletes = 0;
 		wantsIndex = 0;
+	};
+	F9D5A7FA07B6D25D0092E7E2 = {
+		fileReference = F9022C960758038000C3F701;
+		functionName = "-preambleStringFromScanner:endingRange:string:";
+		isa = PBXFileBreakpoint;
+		lineNumber = 522;
+		state = 1;
+	};
+	F9D5A84E07B6E8AA0092E7E2 = {
+		fileReference = F9022C960758038000C3F701;
+		functionName = "-preambleStringFromScanner:endingRange:string:filePath::";
+		isa = PBXFileBreakpoint;
+		lineNumber = 585;
+		state = 1;
+	};
+	F9D5A89107B72E740092E7E2 = {
+		fileReference = F9022C960758038000C3F701;
+		functionName = "-itemsFromString:error:frontMatter:filePath:addToDocument:";
+		isa = PBXFileBreakpoint;
+		lineNumber = 446;
+		state = 1;
+	};
+	F9D5A89307B72E940092E7E2 = {
+		fileReference = F9022C960758038000C3F701;
+		functionName = "-isNewEntryAtRange:inString:";
+		isa = PBXFileBreakpoint;
+		lineNumber = 95;
+		state = 1;
+	};
+	F9D5A89A07B72FA60092E7E2 = {
+		fileReference = F9022C960758038000C3F701;
+		functionName = "-itemsFromString:error:frontMatter:filePath:addToDocument:";
+		isa = PBXFileBreakpoint;
+		lineNumber = 143;
+		state = 1;
 	};
 	F9F14A47075811CF008BA22F = {
 		activeExec = 0;
