@@ -29,6 +29,9 @@
                 openUsingFilterTextField = NSTextField; 
                 readmeTextView = NSTextView; 
                 readmeWindow = NSWindow; 
+                showHideCustomCiteStringsMenuItem = NSMenuItem; 
+                showHideErrorsMenuItem = NSMenuItem; 
+                showHidePreviewMenuItem = NSMenuItem; 
                 sourceEditTextView = NSTextView; 
                 sourceEditWindow = NSWindow; 
             }; 
