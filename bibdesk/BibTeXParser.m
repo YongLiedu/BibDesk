@@ -25,8 +25,7 @@ NSRange SafeForwardSearchRange( unsigned startLoc, unsigned seekLength, unsigned
     
     NSDictionary *errorDict = [NSDictionary dictionaryWithObjects:[NSArray arrayWithObjects:name, [NSNull null], type, message, [NSValue valueWithRange:range], nil]
                                                           forKeys:[NSArray arrayWithObjects:@"fileName", @"lineNumber", @"errorClassName", @"errorMessage", @"errorRange", nil]];
-#warning BTPARSE ERROR should be declared as BDSKBibTeXParseError or something
-    [[NSNotificationCenter defaultCenter] postNotificationName:@"BTPARSE ERROR"
+    [[NSNotificationCenter defaultCenter] postNotificationName:BDSKParserErrorNotification
                                                         object:errorDict];
 }
 
@@ -102,7 +101,7 @@ NSRange SafeForwardSearchRange( unsigned startLoc, unsigned seekLength, unsigned
 
         if(![scanner scanUpToString:@"{" intoString:&type]){
             *hadProblems = YES;
-            [BibTeXParser postParsingErrorNotification:@"Reference type not found"
+            [BibTeXParser postParsingErrorNotification:@"Reference type or brace not found"
                                              errorType:@"Parse Error"
                                               fileName:filePath
                                             errorRange:[fullString lineRangeForRange:NSMakeRange([scanner scanLocation], 0)]];
@@ -222,11 +221,13 @@ NSRange SafeForwardSearchRange( unsigned startLoc, unsigned seekLength, unsigned
                                                 errorRange:[fullString lineRangeForRange:NSMakeRange([scanner scanLocation], 0)]];
             }
                
-#warning ARM: Need more testing of nested brace code
             unsigned searchStart = leftDelimLocation + 1;
             NSRange braceSearchRange;
             NSRange braceFoundRange;
             
+            // This while() loop looks for nested curly braces in a value string (rightDelimLocation).  
+            // The basic idea is to start from { and find the next closing brace }, then check to see if there's a { between those two; if so, reset the range to do the same search,
+            // starting from the middle brace.  Counting might be better for error detection, of which there is none at present.
             while(usingBraceDelimiter){ // should put us at the end of a record if we're using brace delimiters
                 braceSearchRange = NSMakeRange(searchStart, rightDelimLocation - searchStart);
                 braceFoundRange = [fullString rangeOfString:leftDelim options:NSLiteralSearch range:braceSearchRange];
@@ -300,30 +301,30 @@ NSRange SafeForwardSearchRange( unsigned startLoc, unsigned seekLength, unsigned
     return bibItemArray;    
 }
 
-#warning FIXME: need ivars in BibTeXParser
 + (NSDictionary *)macroStringFromScanner:(NSScanner *)scanner endingRange:(NSRange)range string:(NSString *)fullString{
     
     NSString *field = nil;
     NSString *value = nil;
+    NSCharacterSet *trimQuoteCharacterSet = [NSCharacterSet characterSetWithCharactersInString:@"\""]; // strip these from the ends of the value string
     
-    NSAssert( [scanner scanLocation] < range.location, @"Scanner wants to scan out of range!" );
-    
-    if(![scanner scanString:@"{" intoString:nil]){
-        [BibTeXParser postParsingErrorNotification:@"Brace not found"
-                                         errorType:@"Parse Error"
-                                          fileName:nil
-                                        errorRange:NSMakeRange(0,0)];
-    }
+    [scanner scanString:@"{" intoString:nil]; // if there wasn't a brace, the warning message will come from the caller
     
     [scanner scanUpToString:@"=" intoString:&field];
-#warning ARM: always a double quote delimiter?
-#warning ARM: need to handle unquoted strings, anyway
-    [scanner scanUpToString:@"\"" intoString:nil]; // go up to the first quote
-    [scanner scanString:@"\"" intoString:nil];
+    [scanner scanString:@"=" intoString:nil];
     
+    // someone (Nelson Beebe or Greg Ward) indicated that you can use macros within @string declarations, so we may not have a quote.  great.
+    [scanner scanCharactersFromSet:[NSCharacterSet whitespaceCharacterSet] intoString:nil];
+
     value = [fullString substringWithRange:NSMakeRange([scanner scanLocation], range.location - [scanner scanLocation])];
     value = [value stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceCharacterSet]];
+    value = [value stringByTrimmingCharactersInSet:trimQuoteCharacterSet];
+    
+    NSAssert( [scanner scanLocation] < range.location, @"Scanner scanned out of range!" );
+    
     [scanner setScanLocation:range.location]; // needs to be set so it's at the right location when we return
+    
+    NSAssert( field != nil, @"Found a nil @string field (key)" );
+    NSAssert( value != nil, @"Found a nil @string value" );
     
     return [NSDictionary dictionaryWithObject:value forKey:[field stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceCharacterSet]]];
     
@@ -493,7 +494,7 @@ NSRange SafeForwardSearchRange( unsigned startLoc, unsigned seekLength, unsigned
                                                                                 forKeys:[NSArray arrayWithObjects:@"fileName", @"lineNumber", @"errorClassName", @"errorMessage", nil]];
                             *hadProblems = YES; //Set this before we post the notification
                             //Maybe the dictionary should be passed as userInfo:errDict, but BibAppController expects object:errDict.
-                            [[NSNotificationCenter defaultCenter] postNotificationName:@"BTPARSE ERROR"
+                            [[NSNotificationCenter defaultCenter] postNotificationName:BDSKParserErrorNotification
                                                                                 object:errDict];
                             
                         }
