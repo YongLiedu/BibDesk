@@ -38,7 +38,7 @@ static NSMutableArray *_authors;
 	NSEnumerator *e = [_authors objectEnumerator];
 	
 	while(auth = [e nextObject]){
-        if([auth compare:newAuth] == NSOrderedSame){
+        if([[auth normalizedName] isEqualToString:[newAuth normalizedName]]){
             [auth addPub:aPub];
             NSNotification *notif = [NSNotification notificationWithName:BDSKAuthorPubListChangedNotification
                                                                   object:auth];
