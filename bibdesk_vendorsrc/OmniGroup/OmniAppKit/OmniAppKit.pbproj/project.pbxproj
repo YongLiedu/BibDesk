@@ -3,19 +3,23 @@
 	archiveVersion = 1;
 	classes = {
 	};
-	objectVersion = 38;
+	objectVersion = 39;
 	objects = {
 		000303DD014E0AC13997A12D = {
 			fileEncoding = 4;
 			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.c.h;
 			path = "NSDocumentController-OAExtensions.h";
 			refType = 4;
+			sourceTree = "<group>";
 		};
 		000303DE014E0AC13997A12D = {
 			fileEncoding = 4;
 			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.c.objc;
 			path = "NSDocumentController-OAExtensions.m";
 			refType = 4;
+			sourceTree = "<group>";
 		};
 		000303DF014E0AC13997A12D = {
 			fileRef = 000303DD014E0AC13997A12D;
@@ -39,8 +43,11 @@
 			isa = PBXGroup;
 			name = Products;
 			refType = 4;
+			sourceTree = "<group>";
 		};
 		00E51EF1FE8AB2E911C9CC38 = {
+			buildSettings = {
+			};
 			buildStyles = (
 				07F45149FEDD7CA911CB188F,
 				07F4514AFEDD7CA911CB188F,
@@ -83,6 +90,7 @@
 			isa = PBXGroup;
 			name = OmniAppKit;
 			refType = 4;
+			sourceTree = "<group>";
 		};
 		00E51EF3FE8AB2E911C9CC38 = {
 			children = (
@@ -93,108 +101,143 @@
 			name = OmniFoundation;
 			path = "";
 			refType = 2;
+			sourceTree = SOURCE_ROOT;
 		};
 		00E51EF4FE8AB2E911C9CC38 = {
 			fileEncoding = 4;
 			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.c.objc;
 			path = OAAppKitQueueProcessor.m;
 			refType = 4;
+			sourceTree = "<group>";
 		};
 		00E51EF5FE8AB2E911C9CC38 = {
 			fileEncoding = 4;
 			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.c.objc;
 			path = OAApplication.m;
 			refType = 2;
+			sourceTree = SOURCE_ROOT;
 		};
 		00E51EF6FE8AB2E911C9CC38 = {
 			fileEncoding = 4;
 			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.c.objc;
 			path = OAColorPalette.m;
 			refType = 2;
+			sourceTree = SOURCE_ROOT;
 		};
 		00E51EF7FE8AB2E911C9CC38 = {
 			fileEncoding = 4;
 			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.c.objc;
 			path = OADragController.m;
 			refType = 2;
+			sourceTree = SOURCE_ROOT;
 		};
 		00E51EF8FE8AB2E911C9CC38 = {
 			fileEncoding = 4;
 			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.c.objc;
 			path = OAFindController.m;
 			refType = 4;
+			sourceTree = "<group>";
 		};
 		00E51EF9FE8AB2E911C9CC38 = {
 			fileEncoding = 4;
 			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.c.objc;
 			path = OAFontCache.m;
 			refType = 2;
+			sourceTree = SOURCE_ROOT;
 		};
 		00E51EFAFE8AB2E911C9CC38 = {
 			fileEncoding = 4;
 			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.c.objc;
 			path = OAPasteboardHelper.m;
 			refType = 2;
+			sourceTree = SOURCE_ROOT;
 		};
 		00E51EFDFE8AB2E911C9CC38 = {
 			fileEncoding = 4;
 			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.c.h;
 			path = FrameworkDefines.h;
 			refType = 4;
+			sourceTree = "<group>";
 		};
 		00E51EFEFE8AB2E911C9CC38 = {
 			fileEncoding = 4;
 			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.c.h;
 			path = OAAppKitQueueProcessor.h;
 			refType = 4;
+			sourceTree = "<group>";
 		};
 		00E51EFFFE8AB2E911C9CC38 = {
 			fileEncoding = 4;
 			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.c.h;
 			path = OAApplication.h;
 			refType = 2;
+			sourceTree = SOURCE_ROOT;
 		};
 		00E51F00FE8AB2E911C9CC38 = {
 			fileEncoding = 4;
 			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.c.h;
 			path = OAColorPalette.h;
 			refType = 2;
+			sourceTree = SOURCE_ROOT;
 		};
 		00E51F01FE8AB2E911C9CC38 = {
 			fileEncoding = 4;
 			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.c.h;
 			path = OADragController.h;
 			refType = 2;
+			sourceTree = SOURCE_ROOT;
 		};
 		00E51F02FE8AB2E911C9CC38 = {
 			fileEncoding = 4;
 			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.c.h;
 			path = OAFindController.h;
 			refType = 4;
+			sourceTree = "<group>";
 		};
 		00E51F03FE8AB2E911C9CC38 = {
 			fileEncoding = 4;
 			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.c.h;
 			path = OAFindControllerTargetProtocol.h;
 			refType = 4;
+			sourceTree = "<group>";
 		};
 		00E51F04FE8AB2E911C9CC38 = {
 			fileEncoding = 4;
 			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.c.h;
 			path = OAFontCache.h;
 			refType = 2;
+			sourceTree = SOURCE_ROOT;
 		};
 		00E51F05FE8AB2E911C9CC38 = {
 			fileEncoding = 4;
 			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.c.h;
 			path = OAPasteboardHelper.h;
 			refType = 2;
+			sourceTree = SOURCE_ROOT;
 		};
 		00E51F07FE8AB2E911C9CC38 = {
 			fileEncoding = 4;
 			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.c.h;
 			path = OmniAppKit.h;
 			refType = 4;
+			sourceTree = "<group>";
 		};
 		00E51F0AFE8AB2E911C9CC38 = {
 			children = (
@@ -204,18 +247,23 @@
 			name = OAFindPanel.nib;
 			path = "";
 			refType = 4;
+			sourceTree = "<group>";
 		};
 		00E51F0BFE8AB2E911C9CC38 = {
 			isa = PBXFileReference;
+			lastKnownFileType = wrapper.nib;
 			name = English;
 			path = English.lproj/OAFindPanel.nib;
 			refType = 4;
+			sourceTree = "<group>";
 		};
 		00E51F0DFE8AB2E911C9CC38 = {
 			fileEncoding = 4;
 			isa = PBXFileReference;
+			lastKnownFileType = text.plist;
 			path = namedColors.plist;
 			refType = 2;
+			sourceTree = SOURCE_ROOT;
 		};
 		00E51F0FFE8AB2E911C9CC38 = {
 			children = (
@@ -251,6 +299,7 @@
 			name = Inspectors;
 			path = Inspector.subproj;
 			refType = 4;
+			sourceTree = "<group>";
 		};
 		00E51F1DFE8AB2E911C9CC38 = {
 			children = (
@@ -275,246 +324,327 @@
 			name = "Cocoa Class Categories";
 			path = OpenStepExtensions.subproj;
 			refType = 4;
+			sourceTree = "<group>";
 		};
 		00E51F1FFE8AB2E911C9CC38 = {
 			fileEncoding = 4;
 			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.c.objc;
 			path = "NSApplication-OAExtensions.m";
 			refType = 4;
+			sourceTree = "<group>";
 		};
 		00E51F20FE8AB2E911C9CC38 = {
 			fileEncoding = 4;
 			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.c.objc;
 			path = "NSAttributedString-OAExtensions.m";
 			refType = 4;
+			sourceTree = "<group>";
 		};
 		00E51F21FE8AB2E911C9CC38 = {
 			fileEncoding = 4;
 			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.c.objc;
 			path = "NSBrowser-OAExtensions.m";
 			refType = 4;
+			sourceTree = "<group>";
 		};
 		00E51F22FE8AB2E911C9CC38 = {
 			fileEncoding = 4;
 			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.c.objc;
 			path = "NSBundle-OAExtensions.m";
 			refType = 4;
+			sourceTree = "<group>";
 		};
 		00E51F23FE8AB2E911C9CC38 = {
 			fileEncoding = 4;
 			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.c.objc;
 			path = "NSCell-OAExtensions.m";
 			refType = 4;
+			sourceTree = "<group>";
 		};
 		00E51F24FE8AB2E911C9CC38 = {
 			fileEncoding = 4;
 			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.c.objc;
 			path = "NSControl-OAExtensions.m";
 			refType = 4;
+			sourceTree = "<group>";
 		};
 		00E51F26FE8AB2E911C9CC38 = {
 			fileEncoding = 4;
 			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.c.objc;
 			path = "NSFont-OAExtensions.m";
 			refType = 4;
+			sourceTree = "<group>";
 		};
 		00E51F27FE8AB2E911C9CC38 = {
 			fileEncoding = 4;
 			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.c.objc;
 			path = "NSImage-OAExtensions.m";
 			refType = 4;
+			sourceTree = "<group>";
 		};
 		00E51F28FE8AB2E911C9CC38 = {
 			fileEncoding = 4;
 			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.c.objc;
 			path = "NSOutlineView-OAExtensions.m";
 			refType = 4;
+			sourceTree = "<group>";
 		};
 		00E51F29FE8AB2E911C9CC38 = {
 			fileEncoding = 4;
 			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.c.objc;
 			path = "NSPasteboard-OAExtensions.m";
 			refType = 4;
+			sourceTree = "<group>";
 		};
 		00E51F2AFE8AB2E911C9CC38 = {
 			fileEncoding = 4;
 			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.c.objc;
 			path = "NSPopUpButton-OAExtensions.m";
 			refType = 4;
+			sourceTree = "<group>";
 		};
 		00E51F2BFE8AB2E911C9CC38 = {
 			fileEncoding = 4;
 			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.c.objc;
 			path = "NSScrollView-OAExtensions.m";
 			refType = 4;
+			sourceTree = "<group>";
 		};
 		00E51F2CFE8AB2E911C9CC38 = {
 			fileEncoding = 4;
 			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.c.objc;
 			path = "NSSliderCell-OAExtensions.m";
 			refType = 4;
+			sourceTree = "<group>";
 		};
 		00E51F2DFE8AB2E911C9CC38 = {
 			fileEncoding = 4;
 			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.c.objc;
 			path = "NSSplitView-OAExtensions.m";
 			refType = 4;
+			sourceTree = "<group>";
 		};
 		00E51F2EFE8AB2E911C9CC38 = {
 			fileEncoding = 4;
 			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.c.objc;
 			path = "NSString-OAExtensions.m";
 			refType = 4;
+			sourceTree = "<group>";
 		};
 		00E51F2FFE8AB2E911C9CC38 = {
 			fileEncoding = 4;
 			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.c.objc;
 			path = "NSText-OAExtensions.m";
 			refType = 4;
+			sourceTree = "<group>";
 		};
 		00E51F30FE8AB2E911C9CC38 = {
 			fileEncoding = 4;
 			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.c.objc;
 			path = "NSTextField-OAExtensions.m";
 			refType = 4;
+			sourceTree = "<group>";
 		};
 		00E51F31FE8AB2E911C9CC38 = {
 			fileEncoding = 4;
 			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.c.objc;
 			path = "NSUserDefaults-OAExtensions.m";
 			refType = 4;
+			sourceTree = "<group>";
 		};
 		00E51F32FE8AB2E911C9CC38 = {
 			fileEncoding = 4;
 			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.c.objc;
 			path = "NSView-OAExtensions.m";
 			refType = 4;
+			sourceTree = "<group>";
 		};
 		00E51F33FE8AB2E911C9CC38 = {
 			fileEncoding = 4;
 			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.c.objc;
 			path = "NSWindow-OAExtensions.m";
 			refType = 4;
+			sourceTree = "<group>";
 		};
 		00E51F35FE8AB2E911C9CC38 = {
 			fileEncoding = 4;
 			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.c.h;
 			path = "NSApplication-OAExtensions.h";
 			refType = 4;
+			sourceTree = "<group>";
 		};
 		00E51F36FE8AB2E911C9CC38 = {
 			fileEncoding = 4;
 			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.c.h;
 			path = "NSAttributedString-OAExtensions.h";
 			refType = 4;
+			sourceTree = "<group>";
 		};
 		00E51F37FE8AB2E911C9CC38 = {
 			fileEncoding = 4;
 			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.c.h;
 			path = "NSBrowser-OAExtensions.h";
 			refType = 4;
+			sourceTree = "<group>";
 		};
 		00E51F38FE8AB2E911C9CC38 = {
 			fileEncoding = 4;
 			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.c.h;
 			path = "NSBundle-OAExtensions.h";
 			refType = 4;
+			sourceTree = "<group>";
 		};
 		00E51F39FE8AB2E911C9CC38 = {
 			fileEncoding = 4;
 			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.c.h;
 			path = "NSCell-OAExtensions.h";
 			refType = 4;
+			sourceTree = "<group>";
 		};
 		00E51F3AFE8AB2E911C9CC38 = {
 			fileEncoding = 4;
 			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.c.h;
 			path = "NSControl-OAExtensions.h";
 			refType = 4;
+			sourceTree = "<group>";
 		};
 		00E51F3CFE8AB2E911C9CC38 = {
 			fileEncoding = 4;
 			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.c.h;
 			path = "NSFont-OAExtensions.h";
 			refType = 4;
+			sourceTree = "<group>";
 		};
 		00E51F3DFE8AB2E911C9CC38 = {
 			fileEncoding = 4;
 			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.c.h;
 			path = "NSImage-OAExtensions.h";
 			refType = 4;
+			sourceTree = "<group>";
 		};
 		00E51F3EFE8AB2E911C9CC38 = {
 			fileEncoding = 4;
 			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.c.h;
 			path = "NSOutlineView-OAExtensions.h";
 			refType = 4;
+			sourceTree = "<group>";
 		};
 		00E51F3FFE8AB2E911C9CC38 = {
 			fileEncoding = 4;
 			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.c.h;
 			path = "NSPasteboard-OAExtensions.h";
 			refType = 4;
+			sourceTree = "<group>";
 		};
 		00E51F40FE8AB2E911C9CC38 = {
 			fileEncoding = 4;
 			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.c.h;
 			path = "NSPopUpButton-OAExtensions.h";
 			refType = 4;
+			sourceTree = "<group>";
 		};
 		00E51F41FE8AB2E911C9CC38 = {
 			fileEncoding = 4;
 			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.c.h;
 			path = "NSScrollView-OAExtensions.h";
 			refType = 4;
+			sourceTree = "<group>";
 		};
 		00E51F42FE8AB2E911C9CC38 = {
 			fileEncoding = 4;
 			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.c.h;
 			path = "NSSliderCell-OAExtensions.h";
 			refType = 4;
+			sourceTree = "<group>";
 		};
 		00E51F43FE8AB2E911C9CC38 = {
 			fileEncoding = 4;
 			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.c.h;
 			path = "NSSplitView-OAExtensions.h";
 			refType = 4;
+			sourceTree = "<group>";
 		};
 		00E51F44FE8AB2E911C9CC38 = {
 			fileEncoding = 4;
 			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.c.h;
 			path = "NSString-OAExtensions.h";
 			refType = 4;
+			sourceTree = "<group>";
 		};
 		00E51F45FE8AB2E911C9CC38 = {
 			fileEncoding = 4;
 			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.c.h;
 			path = "NSText-OAExtensions.h";
 			refType = 4;
+			sourceTree = "<group>";
 		};
 		00E51F46FE8AB2E911C9CC38 = {
 			fileEncoding = 4;
 			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.c.h;
 			path = "NSTextField-OAExtensions.h";
 			refType = 4;
+			sourceTree = "<group>";
 		};
 		00E51F47FE8AB2E911C9CC38 = {
 			fileEncoding = 4;
 			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.c.h;
 			path = "NSUserDefaults-OAExtensions.h";
 			refType = 4;
+			sourceTree = "<group>";
 		};
 		00E51F48FE8AB2E911C9CC38 = {
 			fileEncoding = 4;
 			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.c.h;
 			path = "NSView-OAExtensions.h";
 			refType = 4;
+			sourceTree = "<group>";
 		};
 		00E51F49FE8AB2E911C9CC38 = {
 			fileEncoding = 4;
 			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.c.h;
 			path = "NSWindow-OAExtensions.h";
 			refType = 4;
+			sourceTree = "<group>";
 		};
 		00E51F67FE8AB2E911C9CC38 = {
 			children = (
@@ -530,42 +660,55 @@
 			name = Preferences;
 			path = Preferences.subproj;
 			refType = 4;
+			sourceTree = "<group>";
 		};
 		00E51F69FE8AB2E911C9CC38 = {
 			fileEncoding = 4;
 			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.c.objc;
 			path = OAPreferenceClient.m;
 			refType = 4;
+			sourceTree = "<group>";
 		};
 		00E51F6AFE8AB2E911C9CC38 = {
 			fileEncoding = 4;
 			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.c.objc;
 			path = OAPreferenceClientRecord.m;
 			refType = 4;
+			sourceTree = "<group>";
 		};
 		00E51F6BFE8AB2E911C9CC38 = {
 			fileEncoding = 4;
 			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.c.objc;
 			path = OAPreferenceController.m;
 			refType = 4;
+			sourceTree = "<group>";
 		};
 		00E51F6DFE8AB2E911C9CC38 = {
 			fileEncoding = 4;
 			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.c.h;
 			path = OAPreferenceClient.h;
 			refType = 4;
+			sourceTree = "<group>";
 		};
 		00E51F6EFE8AB2E911C9CC38 = {
 			fileEncoding = 4;
 			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.c.h;
 			path = OAPreferenceClientRecord.h;
 			refType = 4;
+			sourceTree = "<group>";
 		};
 		00E51F6FFE8AB2E911C9CC38 = {
 			fileEncoding = 4;
 			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.c.h;
 			path = OAPreferenceController.h;
 			refType = 4;
+			sourceTree = "<group>";
 		};
 		00E51F71FE8AB2E911C9CC38 = {
 			children = (
@@ -575,164 +718,217 @@
 			name = OAPreferences.nib;
 			path = "";
 			refType = 4;
+			sourceTree = "<group>";
 		};
 		00E51F72FE8AB2E911C9CC38 = {
 			isa = PBXFileReference;
+			lastKnownFileType = wrapper.nib;
 			name = English;
 			path = English.lproj/OAPreferences.nib;
 			refType = 4;
+			sourceTree = "<group>";
 		};
 		00E51F79FE8AB2E911C9CC38 = {
 			fileEncoding = 4;
 			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.c.objc;
 			path = OABrowserCell.m;
 			refType = 4;
+			sourceTree = "<group>";
 		};
 		00E51F7AFE8AB2E911C9CC38 = {
 			fileEncoding = 4;
 			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.c.objc;
 			path = OAFontView.m;
 			refType = 4;
+			sourceTree = "<group>";
 		};
 		00E51F7BFE8AB2E911C9CC38 = {
 			fileEncoding = 4;
 			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.c.objc;
 			path = OAConfigurableColumnTableView.m;
 			refType = 4;
+			sourceTree = "<group>";
 		};
 		00E51F7CFE8AB2E911C9CC38 = {
 			fileEncoding = 4;
 			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.c.objc;
 			path = OAPopUpButton.m;
 			refType = 4;
+			sourceTree = "<group>";
 		};
 		00E51F7EFE8AB2E911C9CC38 = {
 			fileEncoding = 4;
 			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.c.objc;
 			path = OAScrollView.m;
 			refType = 4;
+			sourceTree = "<group>";
 		};
 		00E51F81FE8AB2E911C9CC38 = {
 			fileEncoding = 4;
 			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.c.objc;
 			path = OATabbedWindowController.m;
 			refType = 4;
+			sourceTree = "<group>";
 		};
 		00E51F82FE8AB2E911C9CC38 = {
 			fileEncoding = 4;
 			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.c.objc;
 			path = OATabView.m;
 			refType = 4;
+			sourceTree = "<group>";
 		};
 		00E51F83FE8AB2E911C9CC38 = {
 			fileEncoding = 4;
 			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.c.objc;
 			path = OATabViewController.m;
 			refType = 4;
+			sourceTree = "<group>";
 		};
 		00E51F84FE8AB2E911C9CC38 = {
 			fileEncoding = 4;
 			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.c.objc;
 			path = OATextField.m;
 			refType = 4;
+			sourceTree = "<group>";
 		};
 		00E51F86FE8AB2E911C9CC38 = {
 			fileEncoding = 4;
 			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.c.objc;
 			path = OAThumbnailView.m;
 			refType = 4;
+			sourceTree = "<group>";
 		};
 		00E51F87FE8AB2E911C9CC38 = {
 			fileEncoding = 4;
 			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.c.objc;
 			path = OAAquaButton.m;
 			refType = 4;
+			sourceTree = "<group>";
 		};
 		00E51F89FE8AB2E911C9CC38 = {
 			fileEncoding = 4;
 			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.c.h;
 			path = OABrowserCell.h;
 			refType = 4;
+			sourceTree = "<group>";
 		};
 		00E51F8AFE8AB2E911C9CC38 = {
 			fileEncoding = 4;
 			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.c.h;
 			path = OAFontView.h;
 			refType = 4;
+			sourceTree = "<group>";
 		};
 		00E51F8CFE8AB2E911C9CC38 = {
 			fileEncoding = 4;
 			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.c.h;
 			name = OAPageSelectableDocumentProtocol.h;
 			path = Widgets.subproj/OAPageSelectableDocumentProtocol.h;
 			refType = 2;
+			sourceTree = SOURCE_ROOT;
 		};
 		00E51F8DFE8AB2E911C9CC38 = {
 			fileEncoding = 4;
 			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.c.h;
 			path = OAConfigurableColumnTableView.h;
 			refType = 4;
+			sourceTree = "<group>";
 		};
 		00E51F8EFE8AB2E911C9CC38 = {
 			fileEncoding = 4;
 			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.c.h;
 			path = OAPopUpButton.h;
 			refType = 4;
+			sourceTree = "<group>";
 		};
 		00E51F90FE8AB2E911C9CC38 = {
 			fileEncoding = 4;
 			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.c.h;
 			path = OAScrollView.h;
 			refType = 4;
+			sourceTree = "<group>";
 		};
 		00E51F93FE8AB2E911C9CC38 = {
 			fileEncoding = 4;
 			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.c.h;
 			path = OATabbedWindowController.h;
 			refType = 4;
+			sourceTree = "<group>";
 		};
 		00E51F94FE8AB2E911C9CC38 = {
 			fileEncoding = 4;
 			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.c.h;
 			path = OATabView.h;
 			refType = 4;
+			sourceTree = "<group>";
 		};
 		00E51F95FE8AB2E911C9CC38 = {
 			fileEncoding = 4;
 			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.c.h;
 			path = OATabViewController.h;
 			refType = 4;
+			sourceTree = "<group>";
 		};
 		00E51F96FE8AB2E911C9CC38 = {
 			fileEncoding = 4;
 			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.c.h;
 			path = OATextField.h;
 			refType = 4;
+			sourceTree = "<group>";
 		};
 		00E51F98FE8AB2E911C9CC38 = {
 			fileEncoding = 4;
 			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.c.h;
 			path = OAThumbnailView.h;
 			refType = 4;
+			sourceTree = "<group>";
 		};
 		00E51F99FE8AB2E911C9CC38 = {
 			fileEncoding = 4;
 			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.c.h;
 			name = OAZoomableViewProtocol.h;
 			path = Widgets.subproj/OAZoomableViewProtocol.h;
 			refType = 2;
+			sourceTree = SOURCE_ROOT;
 		};
 		00E51F9AFE8AB2E911C9CC38 = {
 			fileEncoding = 4;
 			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.c.h;
 			path = OAAquaButton.h;
 			refType = 4;
+			sourceTree = "<group>";
 		};
 		00E51FB7FE8AB2E911C9CC38 = {
 			fileEncoding = 4;
 			isa = PBXFileReference;
+			lastKnownFileType = text.html;
 			path = OmniSourceLicense.html;
 			refType = 4;
+			sourceTree = "<group>";
 		};
 		00E51FBAFE8AB2E911C9CC38 = {
 			children = (
@@ -749,23 +945,30 @@
 			isa = PBXGroup;
 			name = "External Frameworks and Libraries";
 			refType = 4;
+			sourceTree = "<group>";
 		};
 		00E51FBBFE8AB2E911C9CC38 = {
-			isa = PBXFrameworkReference;
+			isa = PBXFileReference;
+			lastKnownFileType = wrapper.framework;
 			path = OmniBase.framework;
 			refType = 3;
+			sourceTree = BUILT_PRODUCTS_DIR;
 		};
 		00E51FBDFE8AB2E911C9CC38 = {
-			isa = PBXFrameworkReference;
+			isa = PBXFileReference;
+			lastKnownFileType = wrapper.framework;
 			name = AppKit.framework;
 			path = /System/Library/Frameworks/AppKit.framework;
 			refType = 0;
+			sourceTree = "<absolute>";
 		};
 		00E51FBEFE8AB2E911C9CC38 = {
-			isa = PBXFrameworkReference;
+			isa = PBXFileReference;
+			lastKnownFileType = wrapper.framework;
 			name = Foundation.framework;
 			path = /System/Library/Frameworks/Foundation.framework;
 			refType = 0;
+			sourceTree = "<absolute>";
 		};
 		00E51FBFFE8AB2E911C9CC38 = {
 			buildPhases = (
@@ -780,23 +983,21 @@
 				DYLIB_CURRENT_VERSION = 1;
 				FRAMEWORK_SEARCH_PATHS = "\"$(SYSTEM_LIBRARY_DIR)/PrivateFrameworks\"";
 				FRAMEWORK_VERSION = 2001A;
-				GCC_TREAT_WARNINGS_AS_ERRORS = YES;
 				HEADER_SEARCH_PATHS = "";
-				INSTALL_PATH = "$(OMNI_INSTALLED_PRODUCTS)";
+				INSTALL_PATH = "@executable_path/../Frameworks";
 				LIBRARY_SEARCH_PATHS = "";
-				OMNI_PREBIND_FLAGS = "-Wl,-prebind,-image_base,0x313f0000";
+				OMNI_PREBIND_FLAGS = "-Wl,-prebind,-image_base,0xC7000000";
 				OTHER_CFLAGS = "";
 				OTHER_LDFLAGS = "";
 				OTHER_LIBTOOL_FLAGS = "";
 				OTHER_REZFLAGS = "";
 				PFE_FILE_C_DIALECTS = "objective-c";
-				PREBINDING = NO;
 				PRECOMPILE_PREFIX_HEADER = YES;
 				PREFIX_HEADER = OmniAppKit_Prefix.h;
 				PRINCIPAL_CLASS = "";
 				PRODUCT_NAME = OmniAppKit;
 				SECTORDER_FLAGS = "-sectorder __TEXT __text OmniAppKit.order";
-				WARNING_CFLAGS = "-Wall -Werror -Wno-#warnings -Wno-trigraphs";
+				WARNING_CFLAGS = "-Wall -Wno-#warnings -Wno-trigraphs";
 				WRAPPER_EXTENSION = framework;
 			};
 			dependencies = (
@@ -804,7 +1005,7 @@
 			);
 			isa = PBXFrameworkTarget;
 			name = "OmniAppKit (Framework)";
-			productInstallPath = "$(OMNI_INSTALLED_PRODUCTS)";
+			productInstallPath = "@executable_path/../Frameworks";
 			productName = OmniAppKit;
 			productReference = 020EDD0BFF69A37DC697A10E;
 			productSettingsXML = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>
@@ -2036,14 +2237,18 @@
 		00EB4311FEF05391C697A12D = {
 			fileEncoding = 4;
 			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.c.h;
 			path = OAGridView.h;
 			refType = 4;
+			sourceTree = "<group>";
 		};
 		00EB4312FEF05391C697A12D = {
 			fileEncoding = 4;
 			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.c.objc;
 			path = OAGridView.m;
 			refType = 4;
+			sourceTree = "<group>";
 		};
 		00EB4313FEF05391C697A12D = {
 			fileRef = 00EB4311FEF05391C697A12D;
@@ -2066,14 +2271,18 @@
 		00EC5D5DFF141372C697A12F = {
 			fileEncoding = 4;
 			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.c.h;
 			path = OAStackView.h;
 			refType = 4;
+			sourceTree = "<group>";
 		};
 		00EC5D5EFF141372C697A12F = {
 			fileEncoding = 4;
 			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.c.objc;
 			path = OAStackView.m;
 			refType = 4;
+			sourceTree = "<group>";
 		};
 		00EC5D5FFF141372C697A12F = {
 			fileRef = 00EC5D5DFF141372C697A12F;
@@ -2096,14 +2305,18 @@
 		00F1451300106CD07F000001 = {
 			fileEncoding = 4;
 			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.c.h;
 			path = OAFileWell.h;
 			refType = 4;
+			sourceTree = "<group>";
 		};
 		00F1451400106CD07F000001 = {
 			fileEncoding = 4;
 			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.c.objc;
 			path = OAFileWell.m;
 			refType = 4;
+			sourceTree = "<group>";
 		};
 		00F1451500106CD07F000001 = {
 			fileRef = 00F1451300106CD07F000001;
@@ -2135,14 +2348,18 @@
 		010A51C0005212DBC697A13D = {
 			fileEncoding = 4;
 			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.c.h;
 			path = OATextWithIconCell.h;
 			refType = 4;
+			sourceTree = "<group>";
 		};
 		010A51C1005212DBC697A13D = {
 			fileEncoding = 4;
 			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.c.objc;
 			path = OATextWithIconCell.m;
 			refType = 4;
+			sourceTree = "<group>";
 		};
 		010A51C2005212DBC697A13D = {
 			fileRef = 010A51C0005212DBC697A13D;
@@ -2160,9 +2377,11 @@
 			};
 		};
 		010AE8EBFF38DCF8C697A13D = {
-			isa = PBXFrameworkReference;
+			isa = PBXFileReference;
+			lastKnownFileType = wrapper.framework;
 			path = OmniFoundation.framework;
 			refType = 3;
+			sourceTree = BUILT_PRODUCTS_DIR;
 		};
 		010AE8ECFF38DCF9C697A13D = {
 			fileRef = 010AE8EBFF38DCF8C697A13D;
@@ -2173,14 +2392,18 @@
 		0145F2A8FFAFE867C697A15C = {
 			fileEncoding = 4;
 			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.c.objc;
 			path = "NSColor-OAExtensions.m";
 			refType = 4;
+			sourceTree = "<group>";
 		};
 		0145F2A9FFAFE867C697A15C = {
 			fileEncoding = 4;
 			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.c.h;
 			path = "NSColor-OAExtensions.h";
 			refType = 4;
+			sourceTree = "<group>";
 		};
 		0145F2AAFFAFE867C697A15C = {
 			fileRef = 0145F2A9FFAFE867C697A15C;
@@ -2202,14 +2425,18 @@
 		0147B439003E0D307F000001 = {
 			fileEncoding = 4;
 			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.c.h;
 			path = OAToolbarImageView.h;
 			refType = 4;
+			sourceTree = "<group>";
 		};
 		0147B43A003E0D307F000001 = {
 			fileEncoding = 4;
 			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.c.objc;
 			path = OAToolbarImageView.m;
 			refType = 4;
+			sourceTree = "<group>";
 		};
 		0147B43B003E0D307F000001 = {
 			fileRef = 0147B439003E0D307F000001;
@@ -2235,14 +2462,18 @@
 		01563696FFE9F5FAC697A14E = {
 			fileEncoding = 4;
 			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.c.h;
 			path = OAPreferencesIconView.h;
 			refType = 4;
+			sourceTree = "<group>";
 		};
 		01563697FFE9F5FAC697A14E = {
 			fileEncoding = 4;
 			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.c.objc;
 			path = OAPreferencesIconView.m;
 			refType = 4;
+			sourceTree = "<group>";
 		};
 		01563698FFE9F5FAC697A14E = {
 			fileRef = 01563696FFE9F5FAC697A14E;
@@ -2269,9 +2500,11 @@
 //023
 //024
 		020EDD0BFF69A37DC697A10E = {
-			isa = PBXFrameworkReference;
+			explicitFileType = wrapper.framework;
+			isa = PBXFileReference;
 			path = OmniAppKit.framework;
 			refType = 3;
+			sourceTree = BUILT_PRODUCTS_DIR;
 		};
 //020
 //021
@@ -2291,13 +2524,16 @@
 			name = OmniAppKit.strings;
 			path = "";
 			refType = 4;
+			sourceTree = "<group>";
 		};
 		030CEE2BFFC3FFE7C697A14E = {
 			fileEncoding = 10;
 			isa = PBXFileReference;
+			lastKnownFileType = text.plist.strings;
 			name = English;
 			path = English.lproj/OmniAppKit.strings;
 			refType = 4;
+			sourceTree = "<group>";
 		};
 		030CEE2CFFC3FFE7C697A14E = {
 			fileRef = 030CEE2AFFC3FFE7C697A14E;
@@ -2315,6 +2551,7 @@
 			isa = PBXGroup;
 			name = Clients;
 			refType = 4;
+			sourceTree = "<group>";
 		};
 		0326C6D5FFF368F3C697A14E = {
 			children = (
@@ -2324,6 +2561,7 @@
 			isa = PBXGroup;
 			name = "Icon Views";
 			refType = 4;
+			sourceTree = "<group>";
 		};
 //030
 //031
@@ -2336,29 +2574,32 @@
 //073
 //074
 		07F45149FEDD7CA911CB188F = {
-			buildRules = (
-			);
 			buildSettings = {
 				COPY_PHASE_STRIP = NO;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_ENABLE_FIX_AND_CONTINUE = YES;
+				GCC_GENERATE_DEBUGGING_SYMBOLS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
 				OPTIMIZATION_CFLAGS = "\U0001$(OPTIMIZATION_CFLAGS_FULL)";
 				OPTIMIZATION_CFLAGS_FULL = "-O2";
 				OPTIMIZATION_CFLAGS_ZERO = "-O0 -fno-inline-functions";
 				OTHER_CFLAGS = "\U0001-DDEBUG -DDEBUG_$(USER)";
+				ZERO_LINK = YES;
 			};
 			isa = PBXBuildStyle;
 			name = Development;
 		};
 		07F4514AFEDD7CA911CB188F = {
-			buildRules = (
-			);
 			buildSettings = {
 				COPY_PHASE_STRIP = YES;
 				DYLIB_INSTALLED_NAME_normal = "$(FRAMEWORK_INSTALLED_NAME)";
 				FRAMEWORK_INSTALLED_NAME = "$(OMNI_FRAMEWORK_TARGET_PATH)$(/)$(PRODUCT_NAME).$(WRAPPER_EXTENSION)$(/)Versions$(/)$(FRAMEWORK_VERSION)$(/)$(PRODUCT_NAME)";
+				GCC_ENABLE_FIX_AND_CONTINUE = NO;
 				INSTALL_MODE_FLAG = "a+rX";
 				OMNI_FRAMEWORK_TARGET_PATH = "@executable_path/../Frameworks";
 				OPTIMIZATION_CFLAGS = "-O2";
 				OTHER_LDFLAGS = "\U0001$(OMNI_PREBIND_FLAGS)";
+				ZERO_LINK = NO;
 			};
 			isa = PBXBuildStyle;
 			name = Deployment;
@@ -2376,15 +2617,19 @@
 		0B5CC061FE9C9092C697A14E = {
 			fileEncoding = 4;
 			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.c.h;
 			path = OAExtendedOutlineView.h;
 			refType = 4;
+			sourceTree = "<group>";
 		};
 		0B5CC062FE9C9092C697A14E = {
 			fileEncoding = 4;
 			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.c.objc;
 			name = OAExtendedOutlineView.m;
 			path = Widgets.subproj/OAExtendedOutlineView.m;
 			refType = 2;
+			sourceTree = SOURCE_ROOT;
 		};
 		0B5CC063FE9C9092C697A14E = {
 			fileRef = 0B5CC061FE9C9092C697A14E;
@@ -2408,14 +2653,18 @@
 		0B9399D6FFCA29A4C697A10E = {
 			fileEncoding = 4;
 			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.c.h;
 			path = "NSMenu-OAExtensions.h";
 			refType = 4;
+			sourceTree = "<group>";
 		};
 		0B9399D7FFCA29A4C697A10E = {
 			fileEncoding = 4;
 			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.c.objc;
 			path = "NSMenu-OAExtensions.m";
 			refType = 4;
+			sourceTree = "<group>";
 		};
 		0B9399D8FFCA29A4C697A10E = {
 			fileRef = 0B9399D6FFCA29A4C697A10E;
@@ -2447,14 +2696,18 @@
 		0C8017D3FEE3495AC697A14E = {
 			fileEncoding = 4;
 			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.c.h;
 			path = "NSData-CGDataProvider.h";
 			refType = 4;
+			sourceTree = "<group>";
 		};
 		0C8017D4FEE3495AC697A14E = {
 			fileEncoding = 4;
 			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.c.objc;
 			path = "NSData-CGDataProvider.m";
 			refType = 4;
+			sourceTree = "<group>";
 		};
 		0C8017D5FEE3495AC697A14E = {
 			fileRef = 0C8017D3FEE3495AC697A14E;
@@ -2486,11 +2739,14 @@
 			isa = PBXGroup;
 			name = "General-Use Images";
 			refType = 4;
+			sourceTree = "<group>";
 		};
 		0CCB2278004326CD7F000001 = {
 			isa = PBXFileReference;
+			lastKnownFileType = image.png;
 			path = OAHelpIcon.png;
 			refType = 2;
+			sourceTree = SOURCE_ROOT;
 		};
 		0CCB227B004326CD7F000001 = {
 			fileRef = 0CCB2278004326CD7F000001;
@@ -2500,13 +2756,17 @@
 		};
 		0CCB227E004327677F000001 = {
 			isa = PBXFileReference;
+			lastKnownFileType = image.png;
 			path = OAForwardArrow.png;
 			refType = 4;
+			sourceTree = "<group>";
 		};
 		0CCB227F004327677F000001 = {
 			isa = PBXFileReference;
+			lastKnownFileType = image.png;
 			path = OABackArrow.png;
 			refType = 4;
+			sourceTree = "<group>";
 		};
 		0CCB2280004327677F000001 = {
 			fileRef = 0CCB227E004327677F000001;
@@ -2523,14 +2783,18 @@
 		0CF02C24FF1319B8C697A12F = {
 			fileEncoding = 4;
 			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.c.h;
 			path = OAWindowCascade.h;
 			refType = 4;
+			sourceTree = "<group>";
 		};
 		0CF02C25FF1319B8C697A12F = {
 			fileEncoding = 4;
 			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.c.objc;
 			path = OAWindowCascade.m;
 			refType = 4;
+			sourceTree = "<group>";
 		};
 		0CF02C26FF1319B8C697A12F = {
 			fileRef = 0CF02C24FF1319B8C697A12F;
@@ -2563,14 +2827,18 @@
 		0DA2DC69FFC5E9A8C697A15C = {
 			fileEncoding = 4;
 			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.c.h;
 			path = OASplitView.h;
 			refType = 4;
+			sourceTree = "<group>";
 		};
 		0DA2DC6AFFC5E9A8C697A15C = {
 			fileEncoding = 4;
 			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.c.objc;
 			path = OASplitView.m;
 			refType = 4;
+			sourceTree = "<group>";
 		};
 		0DA2DC6BFFC5E9A8C697A15C = {
 			fileRef = 0DA2DC69FFC5E9A8C697A15C;
@@ -2602,14 +2870,18 @@
 		114343E10066D6B4C697A12D = {
 			fileEncoding = 4;
 			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.c.h;
 			path = OACalendarView.h;
 			refType = 4;
+			sourceTree = "<group>";
 		};
 		114343E20066D6B4C697A12D = {
 			fileEncoding = 4;
 			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.c.objc;
 			path = OACalendarView.m;
 			refType = 4;
+			sourceTree = "<group>";
 		};
 		114343E30066D6B4C697A12D = {
 			fileRef = 114343E10066D6B4C697A12D;
@@ -2639,14 +2911,18 @@
 		137CBE6F011899AF7F000001 = {
 			fileEncoding = 4;
 			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.c.h;
 			path = OAFindPattern.h;
 			refType = 4;
+			sourceTree = "<group>";
 		};
 		137CBE70011899AF7F000001 = {
 			fileEncoding = 4;
 			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.c.objc;
 			path = OAFindPattern.m;
 			refType = 4;
+			sourceTree = "<group>";
 		};
 		137CBE71011899AF7F000001 = {
 			fileRef = 137CBE6F011899AF7F000001;
@@ -2666,14 +2942,18 @@
 		137CBE730118A5EC7F000001 = {
 			fileEncoding = 4;
 			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.c.h;
 			path = OARegExFindPattern.h;
 			refType = 4;
+			sourceTree = "<group>";
 		};
 		137CBE740118A5EC7F000001 = {
 			fileEncoding = 4;
 			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.c.objc;
 			path = OARegExFindPattern.m;
 			refType = 4;
+			sourceTree = "<group>";
 		};
 		137CBE750118A5EC7F000001 = {
 			fileRef = 137CBE730118A5EC7F000001;
@@ -2693,16 +2973,20 @@
 		13F8BB49FF32715FC697A13D = {
 			fileEncoding = 4;
 			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.c.h;
 			name = OAShrinkingTextDisplayer.h;
 			path = Widgets.subproj/OAShrinkingTextDisplayer.h;
 			refType = 4;
+			sourceTree = "<group>";
 		};
 		13F8BB4AFF32715FC697A13D = {
 			fileEncoding = 4;
 			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.c.objc;
 			name = OAShrinkingTextDisplayer.m;
 			path = Widgets.subproj/OAShrinkingTextDisplayer.m;
 			refType = 4;
+			sourceTree = "<group>";
 		};
 		13F8BB4BFF32715FC697A13D = {
 			fileRef = 13F8BB49FF32715FC697A13D;
@@ -2741,18 +3025,23 @@
 			name = NSDocument;
 			path = "";
 			refType = 4;
+			sourceTree = "<group>";
 		};
 		163F2FA8055776D80097A165 = {
 			fileEncoding = 30;
 			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.c.h;
 			path = "NSDocument-OAExtensions.h";
 			refType = 4;
+			sourceTree = "<group>";
 		};
 		163F2FA9055776D80097A165 = {
 			fileEncoding = 30;
 			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.c.objc;
 			path = "NSDocument-OAExtensions.m";
 			refType = 4;
+			sourceTree = "<group>";
 		};
 		163F2FAA055776D80097A165 = {
 			fileRef = 163F2FA8055776D80097A165;
@@ -2781,8 +3070,10 @@
 //1D4
 		1D0E8F7703FBA2F90097A138 = {
 			isa = PBXFileReference;
+			lastKnownFileType = image.png;
 			path = OACautionIcon.png;
 			refType = 4;
+			sourceTree = "<group>";
 		};
 		1D0E8F7803FBA2F90097A138 = {
 			fileRef = 1D0E8F7703FBA2F90097A138;
@@ -2800,6 +3091,7 @@
 			name = OAOSAScript;
 			path = Carbon;
 			refType = 2;
+			sourceTree = SOURCE_ROOT;
 		};
 		1D4D829C0411A15C0097A138 = {
 			children = (
@@ -2816,6 +3108,7 @@
 			isa = PBXGroup;
 			name = Deprecated;
 			refType = 4;
+			sourceTree = "<group>";
 		};
 		1D4D83150411A4520097A138 = {
 			children = (
@@ -2825,6 +3118,7 @@
 			isa = PBXGroup;
 			name = NSWorkspace;
 			refType = 4;
+			sourceTree = "<group>";
 		};
 		1D6E57B5041028CA0097A138 = {
 			fileRef = 66D9C71B029F51620097A138;
@@ -2844,14 +3138,18 @@
 		1D8A2C6C05CB2D5E0097A138 = {
 			fileEncoding = 4;
 			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.c.h;
 			path = OAImageManager.h;
 			refType = 4;
+			sourceTree = "<group>";
 		};
 		1D8A2C6D05CB2D5E0097A138 = {
 			fileEncoding = 4;
 			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.c.objc;
 			path = OAImageManager.m;
 			refType = 4;
+			sourceTree = "<group>";
 		};
 		1D8A2C6E05CB2D5E0097A138 = {
 			fileRef = 1D8A2C6C05CB2D5E0097A138;
@@ -2916,14 +3214,18 @@
 		1DBE598C03E5D1C30097A138 = {
 			fileEncoding = 4;
 			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.c.h;
 			path = "NSWorkspace-OAExtensions.h";
 			refType = 4;
+			sourceTree = "<group>";
 		};
 		1DBE598D03E5D1C30097A138 = {
 			fileEncoding = 4;
 			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.c.objc;
 			path = "NSWorkspace-OAExtensions.m";
 			refType = 4;
+			sourceTree = "<group>";
 		};
 		1DBE598E03E5D1C30097A138 = {
 			fileRef = 1DBE598C03E5D1C30097A138;
@@ -2953,14 +3255,18 @@
 		1FF7E54AFF2C3BABC697A14E = {
 			fileEncoding = 4;
 			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.c.h;
 			path = OAResizingByteFormatter.h;
 			refType = 4;
+			sourceTree = "<group>";
 		};
 		1FF7E54BFF2C3BABC697A14E = {
 			fileEncoding = 4;
 			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.c.objc;
 			path = OAResizingByteFormatter.m;
 			refType = 4;
+			sourceTree = "<group>";
 		};
 		1FF7E54CFF2C3BABC697A14E = {
 			fileRef = 1FF7E54AFF2C3BABC697A14E;
@@ -2991,10 +3297,12 @@
 //253
 //254
 		25B27335FFDDE12711CB17EA = {
-			isa = PBXFrameworkReference;
+			isa = PBXFileReference;
+			lastKnownFileType = wrapper.framework;
 			name = Carbon.framework;
 			path = /System/Library/Frameworks/Carbon.framework;
 			refType = 0;
+			sourceTree = "<absolute>";
 		};
 //250
 //251
@@ -3009,14 +3317,18 @@
 		2EAA6AE5FF476391C697A12F = {
 			fileEncoding = 4;
 			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.c.h;
 			path = "NSTableView-OAExtensions.h";
 			refType = 4;
+			sourceTree = "<group>";
 		};
 		2EAA6AE6FF476391C697A12F = {
 			fileEncoding = 4;
 			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.c.objc;
 			path = "NSTableView-OAExtensions.m";
 			refType = 4;
+			sourceTree = "<group>";
 		};
 		2EAA6AE7FF476391C697A12F = {
 			fileRef = 2EAA6AE5FF476391C697A12F;
@@ -3047,23 +3359,31 @@
 //314
 		312A98BC008EFFB6C697A14B = {
 			isa = PBXFileReference;
+			lastKnownFileType = image.png;
 			path = OALeftArrow.png;
 			refType = 4;
+			sourceTree = "<group>";
 		};
 		312A98BD008EFFB6C697A14B = {
 			isa = PBXFileReference;
+			lastKnownFileType = image.png;
 			path = OALeftArrowPressed.png;
 			refType = 4;
+			sourceTree = "<group>";
 		};
 		312A98BE008EFFB6C697A14B = {
 			isa = PBXFileReference;
+			lastKnownFileType = image.png;
 			path = OARightArrow.png;
 			refType = 4;
+			sourceTree = "<group>";
 		};
 		312A98BF008EFFB6C697A14B = {
 			isa = PBXFileReference;
+			lastKnownFileType = image.png;
 			path = OARightArrowPressed.png;
 			refType = 4;
+			sourceTree = "<group>";
 		};
 		312A98C0008EFFB6C697A14B = {
 			fileRef = 312A98BC008EFFB6C697A14B;
@@ -3102,14 +3422,18 @@
 		34001C4A00325FDBC697A13D = {
 			fileEncoding = 4;
 			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.c.h;
 			path = OAToolbarItem.h;
 			refType = 4;
+			sourceTree = "<group>";
 		};
 		34001C4B00325FDBC697A13D = {
 			fileEncoding = 4;
 			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.c.objc;
 			path = OAToolbarItem.m;
 			refType = 4;
+			sourceTree = "<group>";
 		};
 		34001C4C00325FDBC697A13D = {
 			fileRef = 34001C4A00325FDBC697A13D;
@@ -3129,14 +3453,18 @@
 		341513E8FFA7B9E0C697A14A = {
 			fileEncoding = 4;
 			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.c.h;
 			path = "NSFontManager-OAExtensions.h";
 			refType = 4;
+			sourceTree = "<group>";
 		};
 		341513E9FFA7B9E0C697A14A = {
 			fileEncoding = 4;
 			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.c.objc;
 			path = "NSFontManager-OAExtensions.m";
 			refType = 4;
+			sourceTree = "<group>";
 		};
 		341513EAFFA7B9E0C697A14A = {
 			fileRef = 341513E8FFA7B9E0C697A14A;
@@ -3158,14 +3486,18 @@
 		3449BECE0520D1C20097A113 = {
 			fileEncoding = 4;
 			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.c.h;
 			path = OAInspectionSet.h;
 			refType = 4;
+			sourceTree = "<group>";
 		};
 		3449BECF0520D1C20097A113 = {
 			fileEncoding = 4;
 			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.c.objc;
 			path = OAInspectionSet.m;
 			refType = 4;
+			sourceTree = "<group>";
 		};
 		3449BED00520D1C20097A113 = {
 			fileRef = 3449BECE0520D1C20097A113;
@@ -3184,18 +3516,24 @@
 		};
 		344A49C6055FD29B0097A113 = {
 			isa = PBXFileReference;
+			lastKnownFileType = image.png;
 			path = OAMiniAdd.png;
 			refType = 4;
+			sourceTree = "<group>";
 		};
 		344A49C7055FD29B0097A113 = {
 			isa = PBXFileReference;
+			lastKnownFileType = image.png;
 			path = OAMiniAction.png;
 			refType = 4;
+			sourceTree = "<group>";
 		};
 		344A49C8055FD29B0097A113 = {
 			isa = PBXFileReference;
+			lastKnownFileType = image.png;
 			path = OAMiniRemove.png;
 			refType = 4;
+			sourceTree = "<group>";
 		};
 		344A49C9055FD29B0097A113 = {
 			fileRef = 344A49C6055FD29B0097A113;
@@ -3218,18 +3556,16 @@
 		344B4A6D0537177D0097A113 = {
 			fileEncoding = 4;
 			isa = PBXFileReference;
+			lastKnownFileType = text.sdef;
 			path = ExtendedText.sdef;
 			refType = 4;
+			sourceTree = "<group>";
 		};
 		344B4A6F0537178D0097A113 = {
 			buildActionMask = 2147483647;
 			files = (
 			);
-			generatedFileNames = (
-			);
 			isa = PBXShellScriptBuildPhase;
-			neededFileNames = (
-			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
 			shellScript = "# See the comments in the sdp file.  Uncomment this and remove our local scriptSuite and scriptTerminology files once we have a sdp that works (maybe with the updated Xcode)\n#/Developer/Tools/sdp -fst -o $TARGET_BUILD_DIR/$PROJECT.framework/Resources -i '/Developer/Examples/Scripting Definitions/NSCoreSuite.sdef' ExtendedText.sdef";
@@ -3256,6 +3592,7 @@
 			name = UnitTests;
 			path = Tests/UnitTests;
 			refType = 2;
+			sourceTree = SOURCE_ROOT;
 		};
 		34508D59050FA7D30097A113 = {
 			buildActionMask = 2147483647;
@@ -3361,9 +3698,11 @@
 ";
 		};
 		34508D5F050FA7D30097A113 = {
-			isa = PBXBundleReference;
+			explicitFileType = wrapper.cfbundle;
+			isa = PBXFileReference;
 			path = OAUnitTests.otest;
 			refType = 3;
+			sourceTree = BUILT_PRODUCTS_DIR;
 		};
 		34508D60050FA8350097A113 = {
 			fileRef = 020EDD0BFF69A37DC697A10E;
@@ -3390,9 +3729,11 @@
 			};
 		};
 		34508D64050FA8C30097A113 = {
-			isa = PBXFrameworkReference;
+			isa = PBXFileReference;
+			lastKnownFileType = wrapper.framework;
 			path = SenTestingKit.framework;
 			refType = 3;
+			sourceTree = BUILT_PRODUCTS_DIR;
 		};
 		34508D65050FA8C30097A113 = {
 			fileRef = 34508D64050FA8C30097A113;
@@ -3403,18 +3744,23 @@
 		34508D68050FA9A40097A113 = {
 			isa = PBXTargetDependency;
 			target = 00E51FBFFE8AB2E911C9CC38;
+			targetProxy = F9E8A4580694E7590012C212;
 		};
 		34508D6E050FAA750097A113 = {
 			fileEncoding = 4;
 			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.c.h;
 			path = OATestCase.h;
 			refType = 4;
+			sourceTree = "<group>";
 		};
 		34508D6F050FAA750097A113 = {
 			fileEncoding = 4;
 			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.c.objc;
 			path = OATestCase.m;
 			refType = 4;
+			sourceTree = "<group>";
 		};
 		34508D70050FAA750097A113 = {
 			fileRef = 34508D6E050FAA750097A113;
@@ -3429,8 +3775,6 @@
 			};
 		};
 		34508DFC0510F9670097A113 = {
-			buildRules = (
-			);
 			buildSettings = {
 				COPY_PHASE_STRIP = NO;
 				OPTIMIZATION_CFLAGS = "\U0001-O0";
@@ -3449,18 +3793,23 @@
 			name = NSColor;
 			path = "";
 			refType = 4;
+			sourceTree = "<group>";
 		};
 		3457306005D00FD50097A113 = {
 			fileEncoding = 4;
 			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.c.h;
 			path = OAPatternColorPicker.h;
 			refType = 4;
+			sourceTree = "<group>";
 		};
 		3457306105D00FD50097A113 = {
 			fileEncoding = 4;
 			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.c.objc;
 			path = OAPatternColorPicker.m;
 			refType = 4;
+			sourceTree = "<group>";
 		};
 		3457306205D00FD50097A113 = {
 			fileRef = 3457306005D00FD50097A113;
@@ -3482,12 +3831,15 @@
 			name = OAPatternColorPicker.nib;
 			path = "";
 			refType = 2;
+			sourceTree = SOURCE_ROOT;
 		};
 		3457306505D011B00097A113 = {
 			isa = PBXFileReference;
+			lastKnownFileType = wrapper.nib;
 			name = English;
 			path = English.lproj/OAPatternColorPicker.nib;
 			refType = 4;
+			sourceTree = "<group>";
 		};
 		3457306605D011B00097A113 = {
 			fileRef = 3457306405D011B00097A113;
@@ -3587,13 +3939,16 @@
 ";
 		};
 		3457306D05D0127F0097A113 = {
-			isa = PBXBundleReference;
+			explicitFileType = wrapper.cfbundle;
+			isa = PBXFileReference;
 			path = OAPatternColorPicker.bundle;
 			refType = 3;
+			sourceTree = BUILT_PRODUCTS_DIR;
 		};
 		3457306E05D012A60097A113 = {
 			isa = PBXTargetDependency;
 			target = 3457306C05D0127F0097A113;
+			targetProxy = F9E8A4570694E7590012C212;
 		};
 		345936A9052C7A470097A113 = {
 			children = (
@@ -3604,18 +3959,23 @@
 			name = NSDocument;
 			path = "";
 			refType = 4;
+			sourceTree = "<group>";
 		};
 		345936AE052C7A760097A113 = {
 			fileEncoding = 4;
 			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.c.h;
 			path = OADocument.h;
 			refType = 4;
+			sourceTree = "<group>";
 		};
 		345936AF052C7A760097A113 = {
 			fileEncoding = 4;
 			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.c.objc;
 			path = OADocument.m;
 			refType = 4;
+			sourceTree = "<group>";
 		};
 		345936B0052C7A760097A113 = {
 			fileRef = 345936AE052C7A760097A113;
@@ -3635,8 +3995,10 @@
 		346A548A0551B08600C03EF8 = {
 			fileEncoding = 4;
 			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.c.h;
 			path = OAUnitTests.h;
 			refType = 4;
+			sourceTree = "<group>";
 		};
 		346A548B0551B08600C03EF8 = {
 			fileRef = 346A548A0551B08600C03EF8;
@@ -3647,14 +4009,18 @@
 		348A50790571430C0097A113 = {
 			fileEncoding = 4;
 			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.c.h;
 			path = OAVectorView.h;
 			refType = 4;
+			sourceTree = "<group>";
 		};
 		348A507A0571430C0097A113 = {
 			fileEncoding = 4;
 			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.c.objc;
 			path = OAVectorView.m;
 			refType = 4;
+			sourceTree = "<group>";
 		};
 		348A507B0571430C0097A113 = {
 			fileRef = 348A50790571430C0097A113;
@@ -3674,14 +4040,18 @@
 		348A508B05715F0A0097A113 = {
 			fileEncoding = 4;
 			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.c.h;
 			path = OAVectorCell.h;
 			refType = 4;
+			sourceTree = "<group>";
 		};
 		348A508C05715F0A0097A113 = {
 			fileEncoding = 4;
 			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.c.objc;
 			path = OAVectorCell.m;
 			refType = 4;
+			sourceTree = "<group>";
 		};
 		348A508D05715F0A0097A113 = {
 			fileRef = 348A508B05715F0A0097A113;
@@ -3701,13 +4071,17 @@
 		34A1594805642A810097A113 = {
 			fileEncoding = 4;
 			isa = PBXFileReference;
+			lastKnownFileType = text;
 			path = OmniAppKit.order;
 			refType = 4;
+			sourceTree = "<group>";
 		};
 		34AA2A0B058D70900097A113 = {
 			isa = PBXFileReference;
+			lastKnownFileType = image.png;
 			path = OAScriptMenu.png;
 			refType = 4;
+			sourceTree = "<group>";
 		};
 		34AA2A0C058D70900097A113 = {
 			fileRef = 34AA2A0B058D70900097A113;
@@ -3718,14 +4092,18 @@
 		34B14EEC0572E2820097A113 = {
 			fileEncoding = 4;
 			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.c.h;
 			path = OADataSourceTableColumn.h;
 			refType = 4;
+			sourceTree = "<group>";
 		};
 		34B14EED0572E2820097A113 = {
 			fileEncoding = 4;
 			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.c.objc;
 			path = OADataSourceTableColumn.m;
 			refType = 4;
+			sourceTree = "<group>";
 		};
 		34B14EEE0572E2820097A113 = {
 			fileRef = 34B14EEC0572E2820097A113;
@@ -3745,14 +4123,18 @@
 		34B14EF40573A3FF0097A113 = {
 			fileEncoding = 4;
 			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.c.h;
 			path = OAColorWell.h;
 			refType = 4;
+			sourceTree = "<group>";
 		};
 		34B14EF50573A3FF0097A113 = {
 			fileEncoding = 4;
 			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.c.objc;
 			path = OAColorWell.m;
 			refType = 4;
+			sourceTree = "<group>";
 		};
 		34B14EF60573A3FF0097A113 = {
 			fileRef = 34B14EF40573A3FF0097A113;
@@ -3771,13 +4153,17 @@
 		};
 		34D4D55C05064CFF0097A113 = {
 			isa = PBXFileReference;
+			lastKnownFileType = image.png;
 			path = OAColorInspector.png;
 			refType = 4;
+			sourceTree = "<group>";
 		};
 		34D4D55D05064CFF0097A113 = {
 			isa = PBXFileReference;
+			lastKnownFileType = image.png;
 			path = OAFontInspector.png;
 			refType = 4;
+			sourceTree = "<group>";
 		};
 		34D4D55E05064CFF0097A113 = {
 			fileRef = 34D4D55C05064CFF0097A113;
@@ -3794,8 +4180,10 @@
 		34DAF8660556CA0D0097A113 = {
 			fileEncoding = 4;
 			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.c.h;
 			path = OAVersion.h;
 			refType = 4;
+			sourceTree = "<group>";
 		};
 		34DAF8670556CA0D0097A113 = {
 			fileRef = 34DAF8660556CA0D0097A113;
@@ -3861,9 +4249,11 @@
 			productReference = 34DBC8BF05979A9C0097A113;
 		};
 		34DBC8BF05979A9C0097A113 = {
-			isa = PBXExecutableFileReference;
+			explicitFileType = "compiled.mach-o.executable";
+			isa = PBXFileReference;
 			path = OAMakeImageSizeIntegral;
 			refType = 3;
+			sourceTree = BUILT_PRODUCTS_DIR;
 		};
 		34DBC8C105979AB00097A113 = {
 			children = (
@@ -3872,12 +4262,15 @@
 			isa = PBXGroup;
 			path = Tools;
 			refType = 4;
+			sourceTree = "<group>";
 		};
 		34DBC8C205979AE60097A113 = {
 			fileEncoding = 4;
 			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.c.objc;
 			path = OAMakeImageSizeIntegral.m;
 			refType = 4;
+			sourceTree = "<group>";
 		};
 		34DBC8C405979B000097A113 = {
 			fileRef = 34DBC8C205979AE60097A113;
@@ -3894,8 +4287,10 @@
 		34EC89C904F6E8160097A113 = {
 			fileEncoding = 4;
 			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.c.h;
 			path = OmniAppKit_Prefix.h;
 			refType = 4;
+			sourceTree = "<group>";
 		};
 //340
 //341
@@ -3910,8 +4305,10 @@
 		397A06CD000841B57F000001 = {
 			fileEncoding = 4;
 			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.c.h;
 			path = OADockStatusItem.h;
 			refType = 4;
+			sourceTree = "<group>";
 		};
 		397A06CE000841B57F000001 = {
 			fileRef = 397A06CD000841B57F000001;
@@ -3925,8 +4322,10 @@
 		397A06CF0008423B7F000001 = {
 			fileEncoding = 4;
 			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.c.objc;
 			path = OADockStatusItem.m;
 			refType = 4;
+			sourceTree = "<group>";
 		};
 //390
 //391
@@ -3963,6 +4362,7 @@
 			isa = PBXGroup;
 			name = NSColor;
 			refType = 4;
+			sourceTree = "<group>";
 		};
 		3F411EA0036D27010297A14E = {
 			children = (
@@ -3973,18 +4373,23 @@
 			name = NSBezierPath;
 			path = "";
 			refType = 4;
+			sourceTree = "<group>";
 		};
 		3F411EA1036D27330297A14E = {
 			fileEncoding = 4;
 			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.c.h;
 			path = "NSBezierPath-OAExtensions.h";
 			refType = 4;
+			sourceTree = "<group>";
 		};
 		3F411EA2036D27330297A14E = {
 			fileEncoding = 4;
 			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.c.objc;
 			path = "NSBezierPath-OAExtensions.m";
 			refType = 4;
+			sourceTree = "<group>";
 		};
 		3F411EA3036D27330297A14E = {
 			fileRef = 3F411EA1036D27330297A14E;
@@ -4004,14 +4409,18 @@
 		3F51348101C5B6D40297A14E = {
 			fileEncoding = 4;
 			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.c.h;
 			path = OAShrinkyTextField.h;
 			refType = 4;
+			sourceTree = "<group>";
 		};
 		3F51348201C5B6D40297A14E = {
 			fileEncoding = 4;
 			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.c.objc;
 			path = OAShrinkyTextField.m;
 			refType = 4;
+			sourceTree = "<group>";
 		};
 		3F51348301C5B6D50297A14E = {
 			fileRef = 3F51348101C5B6D40297A14E;
@@ -4053,6 +4462,7 @@
 			isa = PBXGroup;
 			name = Images;
 			refType = 4;
+			sourceTree = "<group>";
 		};
 		3FDA4130020966F30297A14E = {
 			children = (
@@ -4067,6 +4477,7 @@
 			name = "Tabbed Window Controller";
 			path = Widgets.subproj;
 			refType = 4;
+			sourceTree = "<group>";
 		};
 		3FDA41310209678F0297A14E = {
 			children = (
@@ -4082,6 +4493,7 @@
 			name = "Cocoa Class Subclasses";
 			path = Widgets.subproj;
 			refType = 4;
+			sourceTree = "<group>";
 		};
 		3FDA41320209678F0297A14E = {
 			children = (
@@ -4134,6 +4546,7 @@
 			name = "New Types of Widgets";
 			path = Widgets.subproj;
 			refType = 4;
+			sourceTree = "<group>";
 		};
 		3FDA4133020968290297A14E = {
 			children = (
@@ -4150,6 +4563,7 @@
 			name = "New Types of View Containers";
 			path = Widgets.subproj;
 			refType = 4;
+			sourceTree = "<group>";
 		};
 		3FDA413402096AEB0297A14E = {
 			children = (
@@ -4167,6 +4581,7 @@
 			name = "Omni Application Paradigms";
 			path = "";
 			refType = 4;
+			sourceTree = "<group>";
 		};
 		3FDA413502096BE30297A14E = {
 			children = (
@@ -4184,6 +4599,7 @@
 			name = Toolbar;
 			path = Widgets.subproj;
 			refType = 2;
+			sourceTree = SOURCE_ROOT;
 		};
 		3FDA413602096EE50297A14E = {
 			children = (
@@ -4195,6 +4611,7 @@
 			isa = PBXGroup;
 			name = NSApplication;
 			refType = 4;
+			sourceTree = "<group>";
 		};
 		3FDA4138020970130297A14E = {
 			children = (
@@ -4206,6 +4623,7 @@
 			name = NSView;
 			path = "";
 			refType = 4;
+			sourceTree = "<group>";
 		};
 		3FDA4139020970130297A14E = {
 			children = (
@@ -4218,6 +4636,7 @@
 			isa = PBXGroup;
 			name = NSControl;
 			refType = 4;
+			sourceTree = "<group>";
 		};
 		3FDA413A020970130297A14E = {
 			children = (
@@ -4228,6 +4647,7 @@
 			isa = PBXGroup;
 			name = NSButton;
 			refType = 4;
+			sourceTree = "<group>";
 		};
 		3FDA413C020970130297A14E = {
 			children = (
@@ -4241,6 +4661,7 @@
 			isa = PBXGroup;
 			name = CalendarView;
 			refType = 4;
+			sourceTree = "<group>";
 		};
 		3FDA413D0209705A0297A14E = {
 			children = (
@@ -4260,6 +4681,7 @@
 			isa = PBXGroup;
 			name = NSTableView;
 			refType = 4;
+			sourceTree = "<group>";
 		};
 		3FDA413E0209705A0297A14E = {
 			children = (
@@ -4272,6 +4694,7 @@
 			name = NSTextField;
 			path = "";
 			refType = 4;
+			sourceTree = "<group>";
 		};
 		3FDA413F020970820297A14E = {
 			children = (
@@ -4281,6 +4704,7 @@
 			isa = PBXGroup;
 			name = NSPopUpButton;
 			refType = 4;
+			sourceTree = "<group>";
 		};
 		3FDA4140020970820297A14E = {
 			children = (
@@ -4290,6 +4714,7 @@
 			isa = PBXGroup;
 			name = NSCell;
 			refType = 4;
+			sourceTree = "<group>";
 		};
 		3FDA4141020970CB0297A14E = {
 			children = (
@@ -4300,6 +4725,7 @@
 			name = NSScrollView;
 			path = "";
 			refType = 4;
+			sourceTree = "<group>";
 		};
 		3FDA41420209714E0297A14E = {
 			children = (
@@ -4309,6 +4735,7 @@
 			isa = PBXGroup;
 			name = NSSplitView;
 			refType = 4;
+			sourceTree = "<group>";
 		};
 		3FDA4143020972AA0297A14E = {
 			children = (
@@ -4318,6 +4745,7 @@
 			isa = PBXGroup;
 			name = NSApplication;
 			refType = 4;
+			sourceTree = "<group>";
 		};
 		3FDA4144020972AA0297A14E = {
 			children = (
@@ -4328,6 +4756,7 @@
 			isa = PBXGroup;
 			name = NSCell;
 			refType = 4;
+			sourceTree = "<group>";
 		};
 		3FDA4146020972AA0297A14E = {
 			children = (
@@ -4342,6 +4771,7 @@
 			name = NSView;
 			path = "";
 			refType = 4;
+			sourceTree = "<group>";
 		};
 		3FDA4147020972AA0297A14E = {
 			children = (
@@ -4356,6 +4786,7 @@
 			isa = PBXGroup;
 			name = NSControl;
 			refType = 4;
+			sourceTree = "<group>";
 		};
 		3FDA4148020972FB0297A14E = {
 			children = (
@@ -4365,6 +4796,7 @@
 			isa = PBXGroup;
 			name = NSBrowser;
 			refType = 4;
+			sourceTree = "<group>";
 		};
 		3FDA4149020973770297A14E = {
 			children = (
@@ -4390,6 +4822,7 @@
 			isa = PBXGroup;
 			name = Foundation;
 			refType = 4;
+			sourceTree = "<group>";
 		};
 		3FDA414B020973C90297A14E = {
 			children = (
@@ -4399,6 +4832,7 @@
 			isa = PBXGroup;
 			name = NSButton;
 			refType = 4;
+			sourceTree = "<group>";
 		};
 		3FDA414D020973C90297A14E = {
 			children = (
@@ -4408,6 +4842,7 @@
 			isa = PBXGroup;
 			name = NSOutlineView;
 			refType = 4;
+			sourceTree = "<group>";
 		};
 		3FDA414E020973C90297A14E = {
 			children = (
@@ -4419,6 +4854,7 @@
 			isa = PBXGroup;
 			name = NSScrollView;
 			refType = 4;
+			sourceTree = "<group>";
 		};
 		3FDA414F020973E70297A14E = {
 			children = (
@@ -4429,6 +4865,7 @@
 			name = NSSplitView;
 			path = "";
 			refType = 4;
+			sourceTree = "<group>";
 		};
 		3FDA4150020973FF0297A14E = {
 			children = (
@@ -4437,6 +4874,7 @@
 			isa = PBXGroup;
 			name = NSActionCell;
 			refType = 4;
+			sourceTree = "<group>";
 		};
 		3FDA4151020973FF0297A14E = {
 			children = (
@@ -4446,6 +4884,7 @@
 			isa = PBXGroup;
 			name = NSSliderCell;
 			refType = 4;
+			sourceTree = "<group>";
 		};
 		3FDA41520209741F0297A14E = {
 			children = (
@@ -4456,6 +4895,7 @@
 			name = NSText;
 			path = "";
 			refType = 4;
+			sourceTree = "<group>";
 		};
 		3FDA4153020975210297A14E = {
 			children = (
@@ -4465,6 +4905,7 @@
 			isa = PBXGroup;
 			name = NSDocumentController;
 			refType = 4;
+			sourceTree = "<group>";
 		};
 		3FDA4154020975210297A14E = {
 			children = (
@@ -4474,6 +4915,7 @@
 			isa = PBXGroup;
 			name = NSFont;
 			refType = 4;
+			sourceTree = "<group>";
 		};
 		3FDA4155020975210297A14E = {
 			children = (
@@ -4483,6 +4925,7 @@
 			isa = PBXGroup;
 			name = NSFontManager;
 			refType = 4;
+			sourceTree = "<group>";
 		};
 		3FDA4156020975210297A14E = {
 			children = (
@@ -4492,6 +4935,7 @@
 			isa = PBXGroup;
 			name = NSImage;
 			refType = 4;
+			sourceTree = "<group>";
 		};
 		3FDA4157020975210297A14E = {
 			children = (
@@ -4501,6 +4945,7 @@
 			isa = PBXGroup;
 			name = NSMenu;
 			refType = 4;
+			sourceTree = "<group>";
 		};
 		3FDA4158020975210297A14E = {
 			children = (
@@ -4513,6 +4958,7 @@
 			name = NSTableView;
 			path = "";
 			refType = 4;
+			sourceTree = "<group>";
 		};
 		3FDA4159020975210297A14E = {
 			children = (
@@ -4523,6 +4969,7 @@
 			name = NSTextField;
 			path = "";
 			refType = 4;
+			sourceTree = "<group>";
 		};
 		3FDA415A020975210297A14E = {
 			children = (
@@ -4533,6 +4980,7 @@
 			name = NSWindow;
 			path = "";
 			refType = 4;
+			sourceTree = "<group>";
 		};
 		3FDA415B020975210297A14E = {
 			children = (
@@ -4544,6 +4992,7 @@
 			isa = PBXGroup;
 			name = NSToolbar;
 			refType = 4;
+			sourceTree = "<group>";
 		};
 		3FDA415D0209771F0297A14E = {
 			children = (
@@ -4556,24 +5005,31 @@
 			isa = PBXGroup;
 			name = "Dock Status Item";
 			refType = 4;
+			sourceTree = "<group>";
 		};
 		3FDA415F02097FFE0297A14E = {
 			isa = PBXFileReference;
+			lastKnownFileType = image.png;
 			name = OADockStatusItemLeft.png;
 			path = Widgets.subproj/OADockStatusItemLeft.png;
 			refType = 2;
+			sourceTree = SOURCE_ROOT;
 		};
 		3FDA416002097FFE0297A14E = {
 			isa = PBXFileReference;
+			lastKnownFileType = image.png;
 			name = OADockStatusItemRight.png;
 			path = Widgets.subproj/OADockStatusItemRight.png;
 			refType = 2;
+			sourceTree = SOURCE_ROOT;
 		};
 		3FDA416102097FFE0297A14E = {
 			isa = PBXFileReference;
+			lastKnownFileType = image.png;
 			name = OADockStatusItemCenter.png;
 			path = Widgets.subproj/OADockStatusItemCenter.png;
 			refType = 2;
+			sourceTree = SOURCE_ROOT;
 		};
 		3FDA416202097FFE0297A14E = {
 			fileRef = 3FDA415F02097FFE0297A14E;
@@ -4606,14 +5062,18 @@
 		4006B5FCFF2D5911C697A12F = {
 			fileEncoding = 4;
 			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.c.h;
 			path = OAOutlineViewEnumerator.h;
 			refType = 4;
+			sourceTree = "<group>";
 		};
 		4006B5FDFF2D5911C697A12F = {
 			fileEncoding = 4;
 			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.c.objc;
 			path = OAOutlineViewEnumerator.m;
 			refType = 4;
+			sourceTree = "<group>";
 		};
 //400
 //401
@@ -4628,14 +5088,18 @@
 		4A04B9CB047BFCE40097A149 = {
 			fileEncoding = 4;
 			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.c.h;
 			path = OASheetRequest.h;
 			refType = 4;
+			sourceTree = "<group>";
 		};
 		4A04B9CC047BFCE40097A149 = {
 			fileEncoding = 4;
 			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.c.objc;
 			path = OASheetRequest.m;
 			refType = 4;
+			sourceTree = "<group>";
 		};
 		4A04B9CD047BFCE40097A149 = {
 			fileRef = 4A04B9CB047BFCE40097A149;
@@ -4650,9 +5114,11 @@
 			};
 		};
 		4A343B0805123BB10097A149 = {
-			isa = PBXFrameworkReference;
+			isa = PBXFileReference;
+			lastKnownFileType = wrapper.framework;
 			path = SenFoundation.framework;
 			refType = 3;
+			sourceTree = BUILT_PRODUCTS_DIR;
 		};
 		4A343B0905123BB10097A149 = {
 			fileRef = 4A343B0805123BB10097A149;
@@ -4663,8 +5129,10 @@
 		4A8571C205125D510097A149 = {
 			fileEncoding = 4;
 			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.c.h;
 			path = OAInspectableControllerProtocol.h;
 			refType = 4;
+			sourceTree = "<group>";
 		};
 		4A8571C305125D510097A149 = {
 			fileRef = 4A8571C205125D510097A149;
@@ -4682,6 +5150,7 @@
 			isa = PBXGroup;
 			path = ThirdParty;
 			refType = 4;
+			sourceTree = "<group>";
 		};
 		4AD042FD03FAB2D400278BF4 = {
 			children = (
@@ -4695,42 +5164,55 @@
 			isa = PBXGroup;
 			path = IconFamily;
 			refType = 4;
+			sourceTree = "<group>";
 		};
 		4AD0430803FAB2D400278BF4 = {
 			fileEncoding = 30;
 			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.c.h;
 			path = IconFamily.h;
 			refType = 4;
+			sourceTree = "<group>";
 		};
 		4AD0430903FAB2D400278BF4 = {
 			fileEncoding = 30;
 			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.c.objc;
 			path = IconFamily.m;
 			refType = 4;
+			sourceTree = "<group>";
 		};
 		4AD0431103FAB2D400278BF4 = {
 			fileEncoding = 30;
 			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.c.h;
 			path = "NSString+CarbonFSSpecCreation.h";
 			refType = 4;
+			sourceTree = "<group>";
 		};
 		4AD0431203FAB2D400278BF4 = {
 			fileEncoding = 30;
 			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.c.objc;
 			path = "NSString+CarbonFSSpecCreation.m";
 			refType = 4;
+			sourceTree = "<group>";
 		};
 		4AD0431303FAB2D400278BF4 = {
 			fileEncoding = 30;
 			isa = PBXFileReference;
+			lastKnownFileType = text.html;
 			path = ReadMe.html;
 			refType = 4;
+			sourceTree = "<group>";
 		};
 		4AD0431403FAB2D400278BF4 = {
 			fileEncoding = 30;
 			isa = PBXFileReference;
+			lastKnownFileType = text;
 			path = styles.css;
 			refType = 4;
+			sourceTree = "<group>";
 		};
 		4AD0431B03FAB2D400278BF4 = {
 			fileRef = 4AD0430803FAB2D400278BF4;
@@ -4797,6 +5279,7 @@
 			name = Find;
 			path = "";
 			refType = 4;
+			sourceTree = "<group>";
 		};
 //4F0
 //4F1
@@ -4817,6 +5300,7 @@
 			name = Images;
 			path = "";
 			refType = 4;
+			sourceTree = "<group>";
 		};
 //500
 //501
@@ -4831,14 +5315,18 @@
 		5BEAF23E01FF6D7D0297A15C = {
 			fileEncoding = 4;
 			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.c.h;
 			path = OADocumentPositioningView.h;
 			refType = 4;
+			sourceTree = "<group>";
 		};
 		5BEAF23F01FF6D7D0297A15C = {
 			fileEncoding = 4;
 			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.c.objc;
 			path = OADocumentPositioningView.m;
 			refType = 4;
+			sourceTree = "<group>";
 		};
 		5BEAF24001FF6D7D0297A15C = {
 			fileRef = 5BEAF23E01FF6D7D0297A15C;
@@ -4868,16 +5356,20 @@
 		6389AAF4FFFFE7FAC697A14E = {
 			fileEncoding = 4;
 			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.c.h;
 			name = OAChasingArrowsProgressIndicator.h;
 			path = Widgets.subproj/OAChasingArrowsProgressIndicator.h;
 			refType = 4;
+			sourceTree = "<group>";
 		};
 		6389AAF5FFFFE7FAC697A14E = {
 			fileEncoding = 4;
 			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.c.objc;
 			name = OAChasingArrowsProgressIndicator.m;
 			path = Widgets.subproj/OAChasingArrowsProgressIndicator.m;
 			refType = 4;
+			sourceTree = "<group>";
 		};
 		6389AAF6FFFFE7FAC697A14E = {
 			fileRef = 6389AAF4FFFFE7FAC697A14E;
@@ -4898,9 +5390,11 @@
 		};
 		6389AAF8FFFFE828C697A14E = {
 			isa = PBXFileReference;
+			lastKnownFileType = image.png;
 			name = OAChasingArrows.png;
 			path = Widgets.subproj/OAChasingArrows.png;
 			refType = 4;
+			sourceTree = "<group>";
 		};
 		6389AAF9FFFFE828C697A14E = {
 			fileRef = 6389AAF8FFFFE828C697A14E;
@@ -4909,10 +5403,12 @@
 			};
 		};
 		6389AAFAFFFFF26AC697A14E = {
-			isa = PBXFrameworkReference;
+			isa = PBXFileReference;
+			lastKnownFileType = wrapper.framework;
 			name = Cocoa.framework;
 			path = /System/Library/Frameworks/Cocoa.framework;
 			refType = 0;
+			sourceTree = "<absolute>";
 		};
 		6389AAFBFFFFF26AC697A14E = {
 			fileRef = 6389AAFAFFFFF26AC697A14E;
@@ -4921,10 +5417,12 @@
 			};
 		};
 		6389AAFCFFFFF4BBC697A14E = {
-			isa = PBXFrameworkReference;
+			isa = PBXFileReference;
+			lastKnownFileType = wrapper.framework;
 			name = ApplicationServices.framework;
 			path = /System/Library/Frameworks/ApplicationServices.framework;
 			refType = 0;
+			sourceTree = "<absolute>";
 		};
 		6389AAFDFFFFF4BBC697A14E = {
 			fileRef = 6389AAFCFFFFF4BBC697A14E;
@@ -4952,18 +5450,23 @@
 			isa = PBXGroup;
 			name = Support;
 			refType = 4;
+			sourceTree = "<group>";
 		};
 		6620D673013359840097A13E = {
 			fileEncoding = 4;
 			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.c.h;
 			path = OAPreferencesWindow.h;
 			refType = 4;
+			sourceTree = "<group>";
 		};
 		6620D674013359840097A13E = {
 			fileEncoding = 4;
 			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.c.objc;
 			path = OAPreferencesWindow.m;
 			refType = 4;
+			sourceTree = "<group>";
 		};
 		6620D675013359840097A13E = {
 			fileRef = 6620D673013359840097A13E;
@@ -4980,14 +5483,18 @@
 		6620D67A01335CA00097A13E = {
 			fileEncoding = 4;
 			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.c.h;
 			path = OAPreferencesToolbar.h;
 			refType = 4;
+			sourceTree = "<group>";
 		};
 		6620D67B01335CA00097A13E = {
 			fileEncoding = 4;
 			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.c.objc;
 			path = OAPreferencesToolbar.m;
 			refType = 4;
+			sourceTree = "<group>";
 		};
 		6620D67C01335CA00097A13E = {
 			fileRef = 6620D67A01335CA00097A13E;
@@ -5004,14 +5511,18 @@
 		662681AD00DFECA50097A13D = {
 			fileEncoding = 4;
 			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.c.h;
 			path = OADottedLine.h;
 			refType = 4;
+			sourceTree = "<group>";
 		};
 		662681AE00DFECA50097A13D = {
 			fileEncoding = 4;
 			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.c.objc;
 			path = OADottedLine.m;
 			refType = 4;
+			sourceTree = "<group>";
 		};
 		662681AF00DFECA50097A13D = {
 			fileRef = 662681AD00DFECA50097A13D;
@@ -5030,9 +5541,11 @@
 		};
 		6644E43C022F9FF70097A138 = {
 			isa = PBXFileReference;
+			lastKnownFileType = image.png;
 			name = OAScriptIcon.png;
 			path = Carbon/OAScriptIcon.png;
 			refType = 2;
+			sourceTree = SOURCE_ROOT;
 		};
 		6644E43D022F9FF70097A138 = {
 			fileRef = 6644E43C022F9FF70097A138;
@@ -5043,14 +5556,18 @@
 		66525F0701768E3B0097A13E = {
 			fileEncoding = 4;
 			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.c.h;
 			path = OATypeAheadSelectionHelper.h;
 			refType = 4;
+			sourceTree = "<group>";
 		};
 		66525F0801768E3B0097A13E = {
 			fileEncoding = 4;
 			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.c.objc;
 			path = OATypeAheadSelectionHelper.m;
 			refType = 4;
+			sourceTree = "<group>";
 		};
 		66525F0901768E3B0097A13E = {
 			fileRef = 66525F0701768E3B0097A13E;
@@ -5070,14 +5587,18 @@
 		6696F65F015FE7870097A13E = {
 			fileEncoding = 4;
 			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.c.h;
 			path = OAExtendedTableView.h;
 			refType = 4;
+			sourceTree = "<group>";
 		};
 		6696F660015FE7870097A13E = {
 			fileEncoding = 4;
 			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.c.objc;
 			path = OAExtendedTableView.m;
 			refType = 4;
+			sourceTree = "<group>";
 		};
 		6696F669016012710097A13E = {
 			fileRef = 6696F65F015FE7870097A13E;
@@ -5097,16 +5618,20 @@
 		66CD437A0132454A0097A13E = {
 			fileEncoding = 4;
 			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.c.h;
 			name = "NSToolbar-OAExtensions.h";
 			path = "OpenStepExtensions.subproj/NSToolbar-OAExtensions.h";
 			refType = 2;
+			sourceTree = SOURCE_ROOT;
 		};
 		66CD437B0132454A0097A13E = {
 			fileEncoding = 4;
 			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.c.objc;
 			name = "NSToolbar-OAExtensions.m";
 			path = "OpenStepExtensions.subproj/NSToolbar-OAExtensions.m";
 			refType = 2;
+			sourceTree = SOURCE_ROOT;
 		};
 		66CD437C0132454A0097A13E = {
 			fileRef = 66CD437A0132454A0097A13E;
@@ -5125,13 +5650,17 @@
 		};
 		66CD438101325EB10097A13E = {
 			isa = PBXFileReference;
+			lastKnownFileType = image.png;
 			path = OAPreferencesNextButton.png;
 			refType = 4;
+			sourceTree = "<group>";
 		};
 		66CD438201325EB10097A13E = {
 			isa = PBXFileReference;
+			lastKnownFileType = image.png;
 			path = OAPreferencesPreviousButton.png;
 			refType = 4;
+			sourceTree = "<group>";
 		};
 		66CD4383013269E10097A13E = {
 			fileRef = 66CD438201325EB10097A13E;
@@ -5148,14 +5677,18 @@
 		66D9C71B029F51620097A138 = {
 			fileEncoding = 4;
 			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.c.h;
 			path = "NSAppleScript-OAExtensions.h";
 			refType = 4;
+			sourceTree = "<group>";
 		};
 		66D9C71C029F51620097A138 = {
 			fileEncoding = 4;
 			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.c.objc;
 			path = "NSAppleScript-OAExtensions.m";
 			refType = 4;
+			sourceTree = "<group>";
 		};
 		66D9C71F029F51A90097A138 = {
 			children = (
@@ -5165,18 +5698,23 @@
 			isa = PBXGroup;
 			name = NSAppleScript;
 			refType = 4;
+			sourceTree = "<group>";
 		};
 		66D9C72A029F5AF60097A138 = {
 			fileEncoding = 4;
 			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.c.h;
 			path = "NSAppleEventDescriptor-OAExtensions.h";
 			refType = 4;
+			sourceTree = "<group>";
 		};
 		66D9C72B029F5AF60097A138 = {
 			fileEncoding = 4;
 			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.c.objc;
 			path = "NSAppleEventDescriptor-OAExtensions.m";
 			refType = 4;
+			sourceTree = "<group>";
 		};
 		66D9C72C029F5AF60097A138 = {
 			fileRef = 66D9C72A029F5AF60097A138;
@@ -5212,18 +5750,23 @@
 			isa = PBXGroup;
 			path = Carbon;
 			refType = 4;
+			sourceTree = "<group>";
 		};
 		683A0C790033CCD0CD999A52 = {
 			fileEncoding = 4;
 			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.c.h;
 			path = OAInternetConfig.h;
 			refType = 4;
+			sourceTree = "<group>";
 		};
 		683A0C7A0033CCD0CD999A52 = {
 			fileEncoding = 4;
 			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.c.objc;
 			path = OAInternetConfig.m;
 			refType = 4;
+			sourceTree = "<group>";
 		};
 		683A0C7B0033CCD0CD999A52 = {
 			fileRef = 683A0C790033CCD0CD999A52;
@@ -5253,14 +5796,18 @@
 		6C1571A304C5A5D800E7FE1C = {
 			fileEncoding = 4;
 			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.c.h;
 			path = OAMultiColumnListView.h;
 			refType = 4;
+			sourceTree = "<group>";
 		};
 		6C1571A404C5A5D800E7FE1C = {
 			fileEncoding = 4;
 			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.c.objc;
 			path = OAMultiColumnListView.m;
 			refType = 4;
+			sourceTree = "<group>";
 		};
 		6C1571A504C5A5D800E7FE1C = {
 			fileRef = 6C1571A304C5A5D800E7FE1C;
@@ -5279,8 +5826,10 @@
 		};
 		6C196DA503E1FEBC00E7FE1C = {
 			isa = PBXFileReference;
+			lastKnownFileType = image.png;
 			path = WindowResize.png;
 			refType = 4;
+			sourceTree = "<group>";
 		};
 		6C196DA603E1FEBC00E7FE1C = {
 			fileRef = 6C196DA503E1FEBC00E7FE1C;
@@ -5291,14 +5840,18 @@
 		6C72445503E886EE00E7FE1C = {
 			fileEncoding = 4;
 			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.c.h;
 			path = OAMouseTipWindow.h;
 			refType = 4;
+			sourceTree = "<group>";
 		};
 		6C72445603E886EE00E7FE1C = {
 			fileEncoding = 4;
 			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.c.objc;
 			path = OAMouseTipWindow.m;
 			refType = 4;
+			sourceTree = "<group>";
 		};
 		6C72445703E886EE00E7FE1C = {
 			fileRef = 6C72445503E886EE00E7FE1C;
@@ -5318,14 +5871,18 @@
 		6C72445903E88BCE00E7FE1C = {
 			fileEncoding = 4;
 			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.c.h;
 			path = OAMouseTipView.h;
 			refType = 4;
+			sourceTree = "<group>";
 		};
 		6C72445A03E88BCE00E7FE1C = {
 			fileEncoding = 4;
 			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.c.objc;
 			path = OAMouseTipView.m;
 			refType = 4;
+			sourceTree = "<group>";
 		};
 		6C72445B03E88BCE00E7FE1C = {
 			fileRef = 6C72445903E88BCE00E7FE1C;
@@ -5353,18 +5910,23 @@
 			isa = PBXGroup;
 			path = ColorSync;
 			refType = 4;
+			sourceTree = "<group>";
 		};
 		6CBB57E10416D5B800E7FE1C = {
 			fileEncoding = 4;
 			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.c.h;
 			path = OACompositeColorProfile.h;
 			refType = 4;
+			sourceTree = "<group>";
 		};
 		6CBB57E20416D5B800E7FE1C = {
 			fileEncoding = 4;
 			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.c.objc;
 			path = OACompositeColorProfile.m;
 			refType = 4;
+			sourceTree = "<group>";
 		};
 		6CBB57E30416D5B800E7FE1C = {
 			fileRef = 6CBB57E10416D5B800E7FE1C;
@@ -5384,14 +5946,18 @@
 		6CBB57E50416D63300E7FE1C = {
 			fileEncoding = 4;
 			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.c.h;
 			path = "NSColor-ColorSyncExtensions.h";
 			refType = 4;
+			sourceTree = "<group>";
 		};
 		6CBB57E60416D63300E7FE1C = {
 			fileEncoding = 4;
 			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.c.objc;
 			path = "NSColor-ColorSyncExtensions.m";
 			refType = 4;
+			sourceTree = "<group>";
 		};
 		6CBB57E70416D63300E7FE1C = {
 			fileRef = 6CBB57E50416D63300E7FE1C;
@@ -5411,14 +5977,18 @@
 		6CBB57EA0416D8B200E7FE1C = {
 			fileEncoding = 4;
 			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.c.h;
 			path = "NSImage-ColorSyncExtensions.h";
 			refType = 4;
+			sourceTree = "<group>";
 		};
 		6CBB57EB0416D8B200E7FE1C = {
 			fileEncoding = 4;
 			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.c.objc;
 			path = "NSImage-ColorSyncExtensions.m";
 			refType = 4;
+			sourceTree = "<group>";
 		};
 		6CBB57EC0416D8B200E7FE1C = {
 			fileRef = 6CBB57EA0416D8B200E7FE1C;
@@ -5454,14 +6024,18 @@
 		70BA5ED6FF72DDC0C697A146 = {
 			fileEncoding = 4;
 			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.c.h;
 			path = OAHierarchicalPopUpController.h;
 			refType = 4;
+			sourceTree = "<group>";
 		};
 		70BA5ED7FF72DDC0C697A146 = {
 			fileEncoding = 4;
 			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.c.objc;
 			path = OAHierarchicalPopUpController.m;
 			refType = 4;
+			sourceTree = "<group>";
 		};
 		70BA5ED8FF72DDC0C697A146 = {
 			fileRef = 70BA5ED6FF72DDC0C697A146;
@@ -5493,14 +6067,18 @@
 		7F0CA63A0431A0A00097A14E = {
 			fileEncoding = 4;
 			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.c.h;
 			path = OAInspectorResizerAvoidingScrollView.h;
 			refType = 4;
+			sourceTree = "<group>";
 		};
 		7F0CA63B0431A0A00097A14E = {
 			fileEncoding = 4;
 			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.c.objc;
 			path = OAInspectorResizerAvoidingScrollView.m;
 			refType = 4;
+			sourceTree = "<group>";
 		};
 		7F0CA63C0431A0A00097A14E = {
 			fileRef = 7F0CA63A0431A0A00097A14E;
@@ -5519,43 +6097,59 @@
 		};
 		7F509ADF04296D010097A14E = {
 			isa = PBXFileReference;
+			lastKnownFileType = image.png;
 			path = "OAInfoPanelHeaderWash-Graphite.png";
 			refType = 4;
+			sourceTree = "<group>";
 		};
 		7F509AE004296D010097A14E = {
 			isa = PBXFileReference;
+			lastKnownFileType = image.png;
 			path = "OAInfoPanelHeaderCap-Graphite-Pressed.png";
 			refType = 4;
+			sourceTree = "<group>";
 		};
 		7F509AE104296D010097A14E = {
 			isa = PBXFileReference;
+			lastKnownFileType = image.png;
 			path = "OAInfoPanelHeaderWash-Ice.png";
 			refType = 4;
+			sourceTree = "<group>";
 		};
 		7F509AE204296D010097A14E = {
 			isa = PBXFileReference;
+			lastKnownFileType = image.png;
 			path = "OAInfoPanelHeaderCap-Ice-Pressed.png";
 			refType = 4;
+			sourceTree = "<group>";
 		};
 		7F509AE304296D010097A14E = {
 			isa = PBXFileReference;
+			lastKnownFileType = image.png;
 			path = "OAInfoPanelHeaderWash-Graphite-Pressed.png";
 			refType = 4;
+			sourceTree = "<group>";
 		};
 		7F509AE404296D010097A14E = {
 			isa = PBXFileReference;
+			lastKnownFileType = image.png;
 			path = "OAInfoPanelHeaderCap-Graphite.png";
 			refType = 4;
+			sourceTree = "<group>";
 		};
 		7F509AE504296D010097A14E = {
 			isa = PBXFileReference;
+			lastKnownFileType = image.png;
 			path = "OAInfoPanelHeaderCap-Ice.png";
 			refType = 4;
+			sourceTree = "<group>";
 		};
 		7F509AE604296D010097A14E = {
 			isa = PBXFileReference;
+			lastKnownFileType = image.png;
 			path = "OAInfoPanelHeaderWash-Ice-Pressed.png";
 			refType = 4;
+			sourceTree = "<group>";
 		};
 		7F509AE704296D010097A14E = {
 			fileRef = 7F509ADF04296D010097A14E;
@@ -5607,9 +6201,11 @@
 		};
 		7F54986F041FDCAE0097A14E = {
 			isa = PBXFileReference;
+			lastKnownFileType = file;
 			name = English;
 			path = "English.lproj/Classic Crayons.clr";
 			refType = 4;
+			sourceTree = "<group>";
 		};
 		7F549877041FECFE0097A14E = {
 			children = (
@@ -5618,6 +6214,7 @@
 			isa = PBXVariantGroup;
 			name = "Classic Crayons.clr";
 			refType = 4;
+			sourceTree = "<group>";
 		};
 		7F549878041FECFE0097A14E = {
 			fileRef = 7F549877041FECFE0097A14E;
@@ -5628,14 +6225,18 @@
 		7F5F352904046F890097A14E = {
 			fileEncoding = 4;
 			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.c.h;
 			path = OAInspectorGroupAnimatedMergeController.h;
 			refType = 4;
+			sourceTree = "<group>";
 		};
 		7F5F352A04046F890097A14E = {
 			fileEncoding = 4;
 			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.c.objc;
 			path = OAInspectorGroupAnimatedMergeController.m;
 			refType = 4;
+			sourceTree = "<group>";
 		};
 		7F5F352B04046F890097A14E = {
 			fileRef = 7F5F352904046F890097A14E;
@@ -5659,18 +6260,23 @@
 			isa = PBXGroup;
 			name = "Animated Merges";
 			refType = 4;
+			sourceTree = "<group>";
 		};
 		7F5F3A88040488D00097A14E = {
 			fileEncoding = 4;
 			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.c.h;
 			path = OAInspectorGroupAnimatedMergeView.h;
 			refType = 4;
+			sourceTree = "<group>";
 		};
 		7F5F3A89040488D00097A14E = {
 			fileEncoding = 4;
 			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.c.objc;
 			path = OAInspectorGroupAnimatedMergeView.m;
 			refType = 4;
+			sourceTree = "<group>";
 		};
 		7F5F3A8A040488D00097A14E = {
 			fileRef = 7F5F3A88040488D00097A14E;
@@ -5698,14 +6304,18 @@
 		A2177CD404FEC4FF0097A146 = {
 			fileEncoding = 4;
 			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.c.h;
 			path = OASwoopView.h;
 			refType = 4;
+			sourceTree = "<group>";
 		};
 		A2177CD504FEC4FF0097A146 = {
 			fileEncoding = 4;
 			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.c.objc;
 			path = OASwoopView.m;
 			refType = 4;
+			sourceTree = "<group>";
 		};
 		A2177CD604FEC4FF0097A146 = {
 			fileRef = A2177CD404FEC4FF0097A146;
@@ -5735,39 +6345,53 @@
 		B50281E0055710210097A10E = {
 			fileEncoding = 4;
 			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.c.h;
 			path = OASearchField.h;
 			refType = 4;
+			sourceTree = "<group>";
 		};
 		B50281E1055710210097A10E = {
 			fileEncoding = 4;
 			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.c.objc;
 			path = OASearchField.m;
 			refType = 4;
+			sourceTree = "<group>";
 		};
 		B50281E2055710210097A10E = {
 			isa = PBXFileReference;
+			lastKnownFileType = image.png;
 			path = OASearchFieldClose.png;
 			refType = 4;
+			sourceTree = "<group>";
 		};
 		B50281E3055710210097A10E = {
 			isa = PBXFileReference;
+			lastKnownFileType = image.png;
 			path = OASearchFieldCloseDown.png;
 			refType = 4;
+			sourceTree = "<group>";
 		};
 		B50281E4055710210097A10E = {
 			isa = PBXFileReference;
+			lastKnownFileType = image.png;
 			path = OASearchFieldLeft.png;
 			refType = 4;
+			sourceTree = "<group>";
 		};
 		B50281E5055710210097A10E = {
 			isa = PBXFileReference;
+			lastKnownFileType = image.png;
 			path = OASearchFieldMiddle.png;
 			refType = 4;
+			sourceTree = "<group>";
 		};
 		B50281E6055710210097A10E = {
 			isa = PBXFileReference;
+			lastKnownFileType = image.png;
 			path = OASearchFieldRight.png;
 			refType = 4;
+			sourceTree = "<group>";
 		};
 		B50281E7055710210097A10E = {
 			fileRef = B50281E0055710210097A10E;
@@ -5832,18 +6456,23 @@
 			isa = PBXGroup;
 			name = "Default Setting Indicator";
 			refType = 4;
+			sourceTree = "<group>";
 		};
 		B584AFE6058A7A2F0097A10E = {
 			fileEncoding = 4;
 			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.c.h;
 			path = OADefaultSettingIndicatorButton.h;
 			refType = 4;
+			sourceTree = "<group>";
 		};
 		B584AFE7058A7A2F0097A10E = {
 			fileEncoding = 4;
 			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.c.objc;
 			path = OADefaultSettingIndicatorButton.m;
 			refType = 4;
+			sourceTree = "<group>";
 		};
 		B584AFE8058A7A2F0097A10E = {
 			fileRef = B584AFE6058A7A2F0097A10E;
@@ -5862,13 +6491,17 @@
 		};
 		B584AFEA058A7A5D0097A10E = {
 			isa = PBXFileReference;
+			lastKnownFileType = image.png;
 			path = OADefaultSettingIndicatorOff.png;
 			refType = 4;
+			sourceTree = "<group>";
 		};
 		B584AFEC058A7A5D0097A10E = {
 			isa = PBXFileReference;
+			lastKnownFileType = image.png;
 			path = OADefaultSettingIndicatorOn.png;
 			refType = 4;
+			sourceTree = "<group>";
 		};
 		B584AFED058A7A5D0097A10E = {
 			fileRef = B584AFEA058A7A5D0097A10E;
@@ -5890,18 +6523,23 @@
 			isa = PBXGroup;
 			name = Images;
 			refType = 4;
+			sourceTree = "<group>";
 		};
 		B594F4B70516718E0097A10E = {
 			fileEncoding = 4;
 			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.c.h;
 			path = "NSTableView-OAColumnConfigurationExtensions.h";
 			refType = 4;
+			sourceTree = "<group>";
 		};
 		B594F4B80516718E0097A10E = {
 			fileEncoding = 4;
 			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.c.objc;
 			path = "NSTableView-OAColumnConfigurationExtensions.m";
 			refType = 4;
+			sourceTree = "<group>";
 		};
 		B594F4B90516718E0097A10E = {
 			fileRef = B594F4B70516718E0097A10E;
@@ -5920,28 +6558,38 @@
 		};
 		B5C0124C059CD62F0097A10E = {
 			isa = PBXFileReference;
+			lastKnownFileType = image.png;
 			path = SwitcherBar_CapLeft_Select.png;
 			refType = 4;
+			sourceTree = "<group>";
 		};
 		B5C0124D059CD62F0097A10E = {
 			isa = PBXFileReference;
+			lastKnownFileType = image.png;
 			path = SwitcherBar_CapRight_Select.png;
 			refType = 4;
+			sourceTree = "<group>";
 		};
 		B5C0124E059CD62F0097A10E = {
 			isa = PBXFileReference;
+			lastKnownFileType = image.png;
 			path = SwitcherBar_DivLeft_Select.png;
 			refType = 4;
+			sourceTree = "<group>";
 		};
 		B5C0124F059CD62F0097A10E = {
 			isa = PBXFileReference;
+			lastKnownFileType = image.png;
 			path = SwitcherBar_DivRight_Select.png;
 			refType = 4;
+			sourceTree = "<group>";
 		};
 		B5C01250059CD62F0097A10E = {
 			isa = PBXFileReference;
+			lastKnownFileType = image.png;
 			path = SwitcherBar_Fill_Select.png;
 			refType = 4;
+			sourceTree = "<group>";
 		};
 		B5C01251059CD62F0097A10E = {
 			fileRef = B5C0124C059CD62F0097A10E;
@@ -5976,14 +6624,18 @@
 		B5C3F579050FE63D0097A10E = {
 			fileEncoding = 4;
 			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.c.h;
 			path = OAContextButton.h;
 			refType = 4;
+			sourceTree = "<group>";
 		};
 		B5C3F57A050FE63D0097A10E = {
 			fileEncoding = 4;
 			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.c.objc;
 			path = OAContextButton.m;
 			refType = 4;
+			sourceTree = "<group>";
 		};
 		B5C3F57C050FE63D0097A10E = {
 			fileRef = B5C3F57A050FE63D0097A10E;
@@ -6002,30 +6654,39 @@
 			isa = PBXGroup;
 			name = "Switcher Bar";
 			refType = 4;
+			sourceTree = "<group>";
 		};
 		B5CBF07F0517D86A0097A10E = {
 			fileEncoding = 4;
 			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.c.h;
 			path = OASwitcherBarButtonCell.h;
 			refType = 4;
+			sourceTree = "<group>";
 		};
 		B5CBF0800517D86A0097A10E = {
 			fileEncoding = 4;
 			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.c.objc;
 			path = OASwitcherBarButtonCell.m;
 			refType = 4;
+			sourceTree = "<group>";
 		};
 		B5CBF0810517D86A0097A10E = {
 			fileEncoding = 4;
 			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.c.h;
 			path = OASwitcherBarMatrix.h;
 			refType = 4;
+			sourceTree = "<group>";
 		};
 		B5CBF0820517D86A0097A10E = {
 			fileEncoding = 4;
 			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.c.objc;
 			path = OASwitcherBarMatrix.m;
 			refType = 4;
+			sourceTree = "<group>";
 		};
 		B5CBF0830517D86A0097A10E = {
 			fileRef = B5CBF07F0517D86A0097A10E;
@@ -6086,156 +6747,217 @@
 			isa = PBXGroup;
 			name = Images;
 			refType = 4;
+			sourceTree = "<group>";
 		};
 		B5CBF0880517D8860097A10E = {
 			isa = PBXFileReference;
+			lastKnownFileType = image.png;
 			path = SwitcherBar_CapLeft_A.png;
 			refType = 4;
+			sourceTree = "<group>";
 		};
 		B5CBF0890517D8860097A10E = {
 			isa = PBXFileReference;
+			lastKnownFileType = image.png;
 			path = SwitcherBar_CapLeft_G.png;
 			refType = 4;
+			sourceTree = "<group>";
 		};
 		B5CBF08A0517D8860097A10E = {
 			isa = PBXFileReference;
+			lastKnownFileType = image.png;
 			path = SwitcherBar_CapLeft_Press_A.png;
 			refType = 4;
+			sourceTree = "<group>";
 		};
 		B5CBF08B0517D8860097A10E = {
 			isa = PBXFileReference;
+			lastKnownFileType = image.png;
 			path = SwitcherBar_CapLeft_Press_G.png;
 			refType = 4;
+			sourceTree = "<group>";
 		};
 		B5CBF08C0517D8860097A10E = {
 			isa = PBXFileReference;
+			lastKnownFileType = image.png;
 			path = SwitcherBar_CapLeft_Press.png;
 			refType = 4;
+			sourceTree = "<group>";
 		};
 		B5CBF08D0517D8860097A10E = {
 			isa = PBXFileReference;
+			lastKnownFileType = image.png;
 			path = SwitcherBar_CapLeft.png;
 			refType = 4;
+			sourceTree = "<group>";
 		};
 		B5CBF08E0517D8860097A10E = {
 			isa = PBXFileReference;
+			lastKnownFileType = image.png;
 			path = SwitcherBar_CapRight_A.png;
 			refType = 4;
+			sourceTree = "<group>";
 		};
 		B5CBF08F0517D8860097A10E = {
 			isa = PBXFileReference;
+			lastKnownFileType = image.png;
 			path = SwitcherBar_CapRight_G.png;
 			refType = 4;
+			sourceTree = "<group>";
 		};
 		B5CBF0900517D8860097A10E = {
 			isa = PBXFileReference;
+			lastKnownFileType = image.png;
 			path = SwitcherBar_CapRight_Press_A.png;
 			refType = 4;
+			sourceTree = "<group>";
 		};
 		B5CBF0910517D8860097A10E = {
 			isa = PBXFileReference;
+			lastKnownFileType = image.png;
 			path = SwitcherBar_CapRight_Press_G.png;
 			refType = 4;
+			sourceTree = "<group>";
 		};
 		B5CBF0920517D8860097A10E = {
 			isa = PBXFileReference;
+			lastKnownFileType = image.png;
 			path = SwitcherBar_CapRight_Press.png;
 			refType = 4;
+			sourceTree = "<group>";
 		};
 		B5CBF0930517D8860097A10E = {
 			isa = PBXFileReference;
+			lastKnownFileType = image.png;
 			path = SwitcherBar_CapRight.png;
 			refType = 4;
+			sourceTree = "<group>";
 		};
 		B5CBF0940517D8860097A10E = {
 			isa = PBXFileReference;
+			lastKnownFileType = image.png;
 			path = SwitcherBar_DivLeft_A.png;
 			refType = 4;
+			sourceTree = "<group>";
 		};
 		B5CBF0950517D8860097A10E = {
 			isa = PBXFileReference;
+			lastKnownFileType = image.png;
 			path = SwitcherBar_DivLeft_G.png;
 			refType = 4;
+			sourceTree = "<group>";
 		};
 		B5CBF0960517D8860097A10E = {
 			isa = PBXFileReference;
+			lastKnownFileType = image.png;
 			path = SwitcherBar_DivLeft_Press_A.png;
 			refType = 4;
+			sourceTree = "<group>";
 		};
 		B5CBF0970517D8860097A10E = {
 			isa = PBXFileReference;
+			lastKnownFileType = image.png;
 			path = SwitcherBar_DivLeft_Press_G.png;
 			refType = 4;
+			sourceTree = "<group>";
 		};
 		B5CBF0980517D8860097A10E = {
 			isa = PBXFileReference;
+			lastKnownFileType = image.png;
 			path = SwitcherBar_DivLeft_Press.png;
 			refType = 4;
+			sourceTree = "<group>";
 		};
 		B5CBF0990517D8860097A10E = {
 			isa = PBXFileReference;
+			lastKnownFileType = image.png;
 			path = SwitcherBar_DivLeft.png;
 			refType = 4;
+			sourceTree = "<group>";
 		};
 		B5CBF09A0517D8860097A10E = {
 			isa = PBXFileReference;
+			lastKnownFileType = image.png;
 			path = SwitcherBar_DivRight_A.png;
 			refType = 4;
+			sourceTree = "<group>";
 		};
 		B5CBF09B0517D8860097A10E = {
 			isa = PBXFileReference;
+			lastKnownFileType = image.png;
 			path = SwitcherBar_DivRight_G.png;
 			refType = 4;
+			sourceTree = "<group>";
 		};
 		B5CBF09C0517D8860097A10E = {
 			isa = PBXFileReference;
+			lastKnownFileType = image.png;
 			path = SwitcherBar_DivRight_Press_A.png;
 			refType = 4;
+			sourceTree = "<group>";
 		};
 		B5CBF09D0517D8860097A10E = {
 			isa = PBXFileReference;
+			lastKnownFileType = image.png;
 			path = SwitcherBar_DivRight_Press_G.png;
 			refType = 4;
+			sourceTree = "<group>";
 		};
 		B5CBF09E0517D8860097A10E = {
 			isa = PBXFileReference;
+			lastKnownFileType = image.png;
 			path = SwitcherBar_DivRight_Press.png;
 			refType = 4;
+			sourceTree = "<group>";
 		};
 		B5CBF09F0517D8860097A10E = {
 			isa = PBXFileReference;
+			lastKnownFileType = image.png;
 			path = SwitcherBar_DivRight.png;
 			refType = 4;
+			sourceTree = "<group>";
 		};
 		B5CBF0A00517D8860097A10E = {
 			isa = PBXFileReference;
+			lastKnownFileType = image.png;
 			path = SwitcherBar_Fill_A.png;
 			refType = 4;
+			sourceTree = "<group>";
 		};
 		B5CBF0A10517D8860097A10E = {
 			isa = PBXFileReference;
+			lastKnownFileType = image.png;
 			path = SwitcherBar_Fill_G.png;
 			refType = 4;
+			sourceTree = "<group>";
 		};
 		B5CBF0A20517D8860097A10E = {
 			isa = PBXFileReference;
+			lastKnownFileType = image.png;
 			path = SwitcherBar_Fill_Press_A.png;
 			refType = 4;
+			sourceTree = "<group>";
 		};
 		B5CBF0A30517D8860097A10E = {
 			isa = PBXFileReference;
+			lastKnownFileType = image.png;
 			path = SwitcherBar_Fill_Press_G.png;
 			refType = 4;
+			sourceTree = "<group>";
 		};
 		B5CBF0A40517D8860097A10E = {
 			isa = PBXFileReference;
+			lastKnownFileType = image.png;
 			path = SwitcherBar_Fill_Press.png;
 			refType = 4;
+			sourceTree = "<group>";
 		};
 		B5CBF0A50517D8860097A10E = {
 			isa = PBXFileReference;
+			lastKnownFileType = image.png;
 			path = SwitcherBar_Fill.png;
 			refType = 4;
+			sourceTree = "<group>";
 		};
 		B5CBF0A60517D8860097A10E = {
 			fileRef = B5CBF0880517D8860097A10E;
@@ -6442,18 +7164,23 @@
 			isa = PBXGroup;
 			name = "Search Field";
 			refType = 4;
+			sourceTree = "<group>";
 		};
 		B5FEDACF055862C20097A10E = {
 			fileEncoding = 4;
 			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.c.h;
 			path = OABackgroundImageControl.h;
 			refType = 4;
+			sourceTree = "<group>";
 		};
 		B5FEDAD0055862C20097A10E = {
 			fileEncoding = 4;
 			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.c.objc;
 			path = OABackgroundImageControl.m;
 			refType = 4;
+			sourceTree = "<group>";
 		};
 		B5FEDAD1055862C20097A10E = {
 			fileRef = B5FEDACF055862C20097A10E;
@@ -6482,8 +7209,10 @@
 //E24
 		E20CCE8D058021200097A12E = {
 			isa = PBXFileReference;
+			lastKnownFileType = image.png;
 			path = OAAction.png;
 			refType = 4;
+			sourceTree = "<group>";
 		};
 		E20CCE8E058021200097A12E = {
 			fileRef = E20CCE8D058021200097A12E;
@@ -6494,14 +7223,18 @@
 		E274EDCB056D99550097A12E = {
 			fileEncoding = 4;
 			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.c.h;
 			path = OAGradientTableView.h;
 			refType = 4;
+			sourceTree = "<group>";
 		};
 		E274EDCC056D99550097A12E = {
 			fileEncoding = 4;
 			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.c.objc;
 			path = OAGradientTableView.m;
 			refType = 4;
+			sourceTree = "<group>";
 		};
 		E274EDCD056D99550097A12E = {
 			fileRef = E274EDCB056D99550097A12E;
@@ -6531,14 +7264,18 @@
 		F07B9A0D022AB6663897A113 = {
 			fileEncoding = 4;
 			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.c.h;
 			path = "NSToolbarItem-OAExtensions.h";
 			refType = 4;
+			sourceTree = "<group>";
 		};
 		F07B9A0E022AB6663897A113 = {
 			fileEncoding = 4;
 			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.c.objc;
 			path = "NSToolbarItem-OAExtensions.m";
 			refType = 4;
+			sourceTree = "<group>";
 		};
 		F07B9A0F022AB6663897A113 = {
 			fileRef = F07B9A0D022AB6663897A113;
@@ -6565,14 +7302,18 @@
 		F500F43B0204C91901648025 = {
 			fileEncoding = 4;
 			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.c.h;
 			path = "NSFileManager-OAExtensions.h";
 			refType = 4;
+			sourceTree = "<group>";
 		};
 		F500F43C0204C91901648025 = {
 			fileEncoding = 4;
 			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.c.objc;
 			path = "NSFileManager-OAExtensions.m";
 			refType = 4;
+			sourceTree = "<group>";
 		};
 		F500F43D0204C91901648025 = {
 			fileRef = F500F43B0204C91901648025;
@@ -6592,14 +7333,18 @@
 		F52D98FD038EB1E50161AB4F = {
 			fileEncoding = 4;
 			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.c.h;
 			path = OAColorInspector.h;
 			refType = 4;
+			sourceTree = "<group>";
 		};
 		F52D98FE038EB1E50161AB4F = {
 			fileEncoding = 4;
 			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.c.objc;
 			path = OAColorInspector.m;
 			refType = 4;
+			sourceTree = "<group>";
 		};
 		F52D98FF038EB1E50161AB4F = {
 			fileRef = F52D98FD038EB1E50161AB4F;
@@ -6616,14 +7361,18 @@
 		F53FD085037CAACC018E2C31 = {
 			fileEncoding = 4;
 			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.c.h;
 			path = OAInspectorController.h;
 			refType = 4;
+			sourceTree = "<group>";
 		};
 		F53FD086037CAACC018E2C31 = {
 			fileEncoding = 4;
 			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.c.objc;
 			path = OAInspectorController.m;
 			refType = 4;
+			sourceTree = "<group>";
 		};
 		F53FD087037CAACC018E2C31 = {
 			fileRef = F53FD085037CAACC018E2C31;
@@ -6643,14 +7392,18 @@
 		F53FD10003831A2E018E2C31 = {
 			fileEncoding = 4;
 			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.c.h;
 			path = OAInspectorGroup.h;
 			refType = 4;
+			sourceTree = "<group>";
 		};
 		F53FD10103831A2E018E2C31 = {
 			fileEncoding = 4;
 			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.c.objc;
 			path = OAInspectorGroup.m;
 			refType = 4;
+			sourceTree = "<group>";
 		};
 		F53FD10203831A2E018E2C31 = {
 			fileRef = F53FD10003831A2E018E2C31;
@@ -6670,16 +7423,20 @@
 		F54F12680204F1370127B3D4 = {
 			fileEncoding = 4;
 			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.c.h;
 			name = "NSTextStorage-OAExtensions.h";
 			path = "OpenStepExtensions.subproj/NSTextStorage-OAExtensions.h";
 			refType = 4;
+			sourceTree = "<group>";
 		};
 		F54F12690204F1370127B3D4 = {
 			fileEncoding = 4;
 			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.c.objc;
 			name = "NSTextStorage-OAExtensions.m";
 			path = "OpenStepExtensions.subproj/NSTextStorage-OAExtensions.m";
 			refType = 4;
+			sourceTree = "<group>";
 		};
 		F54F126A0204F1370127B3D4 = {
 			fileRef = F54F12680204F1370127B3D4;
@@ -6699,14 +7456,18 @@
 		F54F126C0204F4480127B3D4 = {
 			fileEncoding = 4;
 			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.c.h;
 			path = OAOSAScript.h;
 			refType = 4;
+			sourceTree = "<group>";
 		};
 		F54F126D0204F4480127B3D4 = {
 			fileEncoding = 4;
 			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.c.objc;
 			path = OAOSAScript.m;
 			refType = 4;
+			sourceTree = "<group>";
 		};
 		F54F126E0204F4480127B3D4 = {
 			fileRef = F54F126C0204F4480127B3D4;
@@ -6735,11 +7496,14 @@
 			name = "Text in AppleScript";
 			path = "";
 			refType = 4;
+			sourceTree = "<group>";
 		};
 		F54F12710204F5960127B3D4 = {
 			isa = PBXFileReference;
+			lastKnownFileType = text.xml;
 			path = ExtendedText.scriptSuite;
 			refType = 4;
+			sourceTree = "<group>";
 		};
 		F54F12720204F5960127B3D4 = {
 			children = (
@@ -6749,24 +7513,31 @@
 			name = ExtendedText.scriptTerminology;
 			path = "";
 			refType = 4;
+			sourceTree = "<group>";
 		};
 		F54F12730204F5960127B3D4 = {
 			isa = PBXFileReference;
+			lastKnownFileType = text.xml;
 			name = English;
 			path = English.lproj/ExtendedText.scriptTerminology;
 			refType = 4;
+			sourceTree = "<group>";
 		};
 		F5542FAA03AA4AA901D3197F = {
 			fileEncoding = 30;
 			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.c.h;
 			path = OAInspectorResizer.h;
 			refType = 4;
+			sourceTree = "<group>";
 		};
 		F5542FAB03AA4AA901D3197F = {
 			fileEncoding = 30;
 			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.c.objc;
 			path = OAInspectorResizer.m;
 			refType = 4;
+			sourceTree = "<group>";
 		};
 		F5542FAC03AA4AA901D3197F = {
 			fileRef = F5542FAA03AA4AA901D3197F;
@@ -6783,14 +7554,18 @@
 		F57089B301FEA73201B4A65B = {
 			fileEncoding = 4;
 			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.c.h;
 			path = OAScriptToolbarHelper.h;
 			refType = 2;
+			sourceTree = SOURCE_ROOT;
 		};
 		F57089B401FEA73201B4A65B = {
 			fileEncoding = 4;
 			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.c.objc;
 			path = OAScriptToolbarHelper.m;
 			refType = 2;
+			sourceTree = SOURCE_ROOT;
 		};
 		F57089B501FEA73301B4A65B = {
 			fileRef = F57089B301FEA73201B4A65B;
@@ -6807,14 +7582,18 @@
 		F59B07CF01FE36AE01B4A65D = {
 			fileEncoding = 4;
 			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.c.h;
 			path = OAToolbarWindowController.h;
 			refType = 2;
+			sourceTree = SOURCE_ROOT;
 		};
 		F59B07D001FE36AE01B4A65D = {
 			fileEncoding = 4;
 			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.c.objc;
 			path = OAToolbarWindowController.m;
 			refType = 2;
+			sourceTree = SOURCE_ROOT;
 		};
 		F59B07D101FE36AE01B4A65D = {
 			fileRef = F59B07CF01FE36AE01B4A65D;
@@ -6834,14 +7613,18 @@
 		F59D1C7F0389D1BF01CFE15A = {
 			fileEncoding = 4;
 			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.c.h;
 			path = OAInspectorWindow.h;
 			refType = 4;
+			sourceTree = "<group>";
 		};
 		F59D1C800389D1BF01CFE15A = {
 			fileEncoding = 4;
 			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.c.objc;
 			path = OAInspectorWindow.m;
 			refType = 4;
+			sourceTree = "<group>";
 		};
 		F59D1C810389D1BF01CFE15A = {
 			fileRef = F59D1C7F0389D1BF01CFE15A;
@@ -6858,14 +7641,18 @@
 		F5A104A8023BFD22013D6C0D = {
 			fileEncoding = 4;
 			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.c.h;
 			path = OAInspectorHeaderView.h;
 			refType = 4;
+			sourceTree = "<group>";
 		};
 		F5A104A9023BFD22013D6C0D = {
 			fileEncoding = 4;
 			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.c.objc;
 			path = OAInspectorHeaderView.m;
 			refType = 4;
+			sourceTree = "<group>";
 		};
 		F5A104AA023BFD22013D6C0D = {
 			fileRef = F5A104A8023BFD22013D6C0D;
@@ -6889,18 +7676,23 @@
 			name = NSMenuItem;
 			path = "";
 			refType = 4;
+			sourceTree = "<group>";
 		};
 		F5A5A4B4023E8BE501B4A65D = {
 			fileEncoding = 4;
 			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.c.h;
 			path = OAScriptMenuItem.h;
 			refType = 2;
+			sourceTree = SOURCE_ROOT;
 		};
 		F5A5A4B5023E8BE501B4A65D = {
 			fileEncoding = 4;
 			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.c.objc;
 			path = OAScriptMenuItem.m;
 			refType = 2;
+			sourceTree = SOURCE_ROOT;
 		};
 		F5A5A4B6023E8BE501B4A65D = {
 			fileRef = F5A5A4B4023E8BE501B4A65D;
@@ -6917,14 +7709,18 @@
 		F5A9872003AA3A6701D3197F = {
 			fileEncoding = 30;
 			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.c.h;
 			path = OAInspectorRegistry.h;
 			refType = 4;
+			sourceTree = "<group>";
 		};
 		F5A9872103AA3A6701D3197F = {
 			fileEncoding = 30;
 			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.c.objc;
 			path = OAInspectorRegistry.m;
 			refType = 4;
+			sourceTree = "<group>";
 		};
 		F5A9872203AA3A6701D3197F = {
 			fileRef = F5A9872003AA3A6701D3197F;
@@ -6944,8 +7740,10 @@
 		F5A9872503AA418201D3197F = {
 			fileEncoding = 30;
 			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.c.h;
 			path = OAGroupedInspectorProtocol.h;
 			refType = 4;
+			sourceTree = "<group>";
 		};
 		F5A9872603AA418201D3197F = {
 			fileRef = F5A9872503AA418201D3197F;
@@ -6958,8 +7756,10 @@
 		};
 		F5AA6A7E039E6E9101D3197F = {
 			isa = PBXFileReference;
+			lastKnownFileType = image.png;
 			path = "WindowSmallCloseBox-Normal-Ice.png";
 			refType = 4;
+			sourceTree = "<group>";
 		};
 		F5AA6A7F039E6E9101D3197F = {
 			fileRef = F5AA6A7E039E6E9101D3197F;
@@ -6969,8 +7769,10 @@
 		};
 		F5AA6A80039E6E9801D3197F = {
 			isa = PBXFileReference;
+			lastKnownFileType = image.png;
 			path = "WindowSmallCloseBox-Rollover-Ice.png";
 			refType = 4;
+			sourceTree = "<group>";
 		};
 		F5AA6A81039E6E9801D3197F = {
 			fileRef = F5AA6A80039E6E9801D3197F;
@@ -6980,8 +7782,10 @@
 		};
 		F5AA6A82039E6E9D01D3197F = {
 			isa = PBXFileReference;
+			lastKnownFileType = image.png;
 			path = "WindowSmallCloseBox-Pressed-Ice.png";
 			refType = 4;
+			sourceTree = "<group>";
 		};
 		F5AA6A83039E6E9D01D3197F = {
 			fileRef = F5AA6A82039E6E9D01D3197F;
@@ -6991,8 +7795,10 @@
 		};
 		F5AA6A84039E6EA101D3197F = {
 			isa = PBXFileReference;
+			lastKnownFileType = image.png;
 			path = "WindowSmallCloseBox-Normal-Graphite.png";
 			refType = 4;
+			sourceTree = "<group>";
 		};
 		F5AA6A85039E6EA101D3197F = {
 			fileRef = F5AA6A84039E6EA101D3197F;
@@ -7002,8 +7808,10 @@
 		};
 		F5AA6A86039E6EA601D3197F = {
 			isa = PBXFileReference;
+			lastKnownFileType = image.png;
 			path = "WindowSmallCloseBox-Rollover-Graphite.png";
 			refType = 4;
+			sourceTree = "<group>";
 		};
 		F5AA6A87039E6EA601D3197F = {
 			fileRef = F5AA6A86039E6EA601D3197F;
@@ -7013,8 +7821,10 @@
 		};
 		F5AA6A88039E6EAB01D3197F = {
 			isa = PBXFileReference;
+			lastKnownFileType = image.png;
 			path = "WindowSmallCloseBox-Pressed-Graphite.png";
 			refType = 4;
+			sourceTree = "<group>";
 		};
 		F5AA6A89039E6EAB01D3197F = {
 			fileRef = F5AA6A88039E6EAB01D3197F;
@@ -7025,14 +7835,18 @@
 		F5AC9DBB032D12E201B4A65D = {
 			fileEncoding = 4;
 			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.c.h;
 			path = OAColorProfile.h;
 			refType = 4;
+			sourceTree = "<group>";
 		};
 		F5AC9DBC032D12E201B4A65D = {
 			fileEncoding = 4;
 			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.c.objc;
 			path = OAColorProfile.m;
 			refType = 4;
+			sourceTree = "<group>";
 		};
 		F5AC9DBD032D12E201B4A65D = {
 			fileRef = F5AC9DBB032D12E201B4A65D;
@@ -7052,14 +7866,18 @@
 		F5B85746C5B0528F01D3197F = {
 			fileEncoding = 4;
 			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.c.h;
 			path = OAFontInspector.h;
 			refType = 4;
+			sourceTree = "<group>";
 		};
 		F5B85747C5B0528F01D3197F = {
 			fileEncoding = 4;
 			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.c.objc;
 			path = OAFontInspector.m;
 			refType = 4;
+			sourceTree = "<group>";
 		};
 		F5B85749C5B0528F01D3197F = {
 			fileRef = F5B85747C5B0528F01D3197F;
@@ -7075,12 +7893,15 @@
 			name = OAInspectorWorkspacePanels.nib;
 			path = "";
 			refType = 4;
+			sourceTree = "<group>";
 		};
 		F5C069C904035BFD01FB5972 = {
 			isa = PBXFileReference;
+			lastKnownFileType = wrapper.nib;
 			name = English;
 			path = English.lproj/OAInspectorWorkspacePanels.nib;
 			refType = 4;
+			sourceTree = "<group>";
 		};
 		F5C069CA04035BFD01FB5972 = {
 			fileRef = F5C069C804035BFD01FB5972;
@@ -7096,12 +7917,15 @@
 			name = OAScriptSheet.nib;
 			path = "";
 			refType = 2;
+			sourceTree = SOURCE_ROOT;
 		};
 		F5D4DA390222D61401B4A65D = {
 			isa = PBXFileReference;
+			lastKnownFileType = wrapper.nib;
 			name = English;
 			path = English.lproj/OAScriptSheet.nib;
 			refType = 4;
+			sourceTree = "<group>";
 		};
 		F5D4DA3A0222D61401B4A65D = {
 			fileRef = F5D4DA380222D61401B4A65D;
@@ -7111,13 +7935,17 @@
 		};
 		F5F2D32A01B5D197017A625D = {
 			isa = PBXFileReference;
+			lastKnownFileType = image.png;
 			path = OACollapsed.png;
 			refType = 2;
+			sourceTree = SOURCE_ROOT;
 		};
 		F5F2D32B01B5D197017A625D = {
 			isa = PBXFileReference;
+			lastKnownFileType = image.png;
 			path = OAExpanded.png;
 			refType = 2;
+			sourceTree = SOURCE_ROOT;
 		};
 		F5F2D32C01B5D197017A625D = {
 			fileRef = F5F2D32A01B5D197017A625D;
@@ -7134,14 +7962,18 @@
 		F5FD958203A01AD201D3197F = {
 			fileEncoding = 4;
 			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.c.h;
 			path = OADynamicInspectorMenuItem.h;
 			refType = 4;
+			sourceTree = "<group>";
 		};
 		F5FD958303A01AD201D3197F = {
 			fileEncoding = 4;
 			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.c.objc;
 			path = OADynamicInspectorMenuItem.m;
 			refType = 4;
+			sourceTree = "<group>";
 		};
 		F5FD958403A01AD201D3197F = {
 			fileRef = F5FD958203A01AD201D3197F;
@@ -7154,6 +7986,30 @@
 			isa = PBXBuildFile;
 			settings = {
 			};
+		};
+//F50
+//F51
+//F52
+//F53
+//F54
+//F90
+//F91
+//F92
+//F93
+//F94
+		F9E8A4570694E7590012C212 = {
+			containerPortal = 00E51EF1FE8AB2E911C9CC38;
+			isa = PBXContainerItemProxy;
+			proxyType = 1;
+			remoteGlobalIDString = 3457306C05D0127F0097A113;
+			remoteInfo = OAPatternColorPicker;
+		};
+		F9E8A4580694E7590012C212 = {
+			containerPortal = 00E51EF1FE8AB2E911C9CC38;
+			isa = PBXContainerItemProxy;
+			proxyType = 1;
+			remoteGlobalIDString = 00E51FBFFE8AB2E911C9CC38;
+			remoteInfo = "OmniAppKit (Framework)";
 		};
 	};
 	rootObject = 00E51EF1FE8AB2E911C9CC38;
