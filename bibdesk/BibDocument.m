@@ -2883,31 +2883,47 @@ This method always returns YES. Even if some or many operations fail.
 #pragma mark Printing support
 
 - (NSView *)printableView{
-    return previewField; // random hack for now. - this will only print the selected items.
     
-/// code for splitting it into pages
+/// Code for splitting it into pages, mostly taken from TextEdit.  Since each "page" (except the last) has an NSFormFeedCharacter appended to it in the preview field,
+/// we make as many text containers as we have pages, and the typesetter will then force a page break at each form feed.  It's not clear from the docs that this won't
+/// work without a scroll view, but I get an empty view without it.
+    
+    NSScrollView *theScrollView = [[[NSScrollView alloc] init] autorelease]; // this will retain the other views
+    NSClipView *clipView = [[NSClipView alloc] init];
     MultiplePageView *pagesView = [[MultiplePageView alloc] init];
+
+    [clipView setDocumentView:pagesView];
+    [pagesView release]; // retained by the clip view
+
+    [theScrollView setContentView:clipView];
+    [clipView release]; // retained by the scroll view
+    
     [pagesView setPrintInfo:[self printInfo]];
-    NSTextStorage *textStorage = [[[NSTextStorage alloc] initWithAttributedString:[previewField textStorage]] autorelease];
+
+    // set up the text object NSTextStorage->NSLayoutManager->((NSTextContainer->NSTextView) * numberOfPages)
+    NSTextStorage *textStorage = [[NSTextStorage alloc] initWithAttributedString:[previewField textStorage]]; // it seems like this leaks, but if I autorelease, the pages are empty
     NSLayoutManager *lm = [[NSLayoutManager alloc] init];
     [textStorage addLayoutManager:lm];
-    [lm release];
+    [lm release]; // owned by the text storage
     
     unsigned numberOfPages = [tableView numberOfSelectedRows];
     [pagesView setNumberOfPages:numberOfPages];
     
     NSTextContainer *textContainer;
     NSTextView *textView;
+    NSSize textSize = [pagesView documentSizeInPage];
     
     while(numberOfPages){
             
-        textContainer = [[NSTextContainer alloc] initWithContainerSize:NSMakeSize(400,800)];
-        [lm addTextContainer:textContainer];
+        textContainer = [[NSTextContainer alloc] initWithContainerSize:textSize];
             
-        textView = [[NSTextView alloc] initWithFrame:[pagesView documentRectForPageNumber:1] textContainer:textContainer];
+        textView = [[NSTextView alloc] initWithFrame:[pagesView documentRectForPageNumber:([tableView numberOfSelectedRows] - numberOfPages)] textContainer:textContainer];
         [textView setHorizontallyResizable:NO];
         [textView setVerticallyResizable:NO];
+        
         [pagesView addSubview:textView];
+        
+        [[[textStorage layoutManagers] objectAtIndex:0] addTextContainer:textContainer];
 
         [textView release];
         [textContainer release];
@@ -2921,14 +2937,13 @@ This method always returns YES. Even if some or many operations fail.
         NSRange glyphRange;
         if (loc >= len) loc = len - 1;
         /* Find out which glyph index the desired character index corresponds to */
-        glyphRange = [lm glyphRangeForCharacterRange:NSMakeRange(loc, 1) actualCharacterRange:NULL];
+        glyphRange = [[[textStorage layoutManagers] objectAtIndex:0] glyphRangeForCharacterRange:NSMakeRange(loc, 1) actualCharacterRange:NULL];
         if (glyphRange.location > 0) {
             /* Now cause layout by asking a question which has to determine where the glyph is */
-            (void)[lm textContainerForGlyphAtIndex:glyphRange.location - 1 effectiveRange:NULL];
+            (void)[[[textStorage layoutManagers] objectAtIndex:0] textContainerForGlyphAtIndex:glyphRange.location - 1 effectiveRange:NULL];
         }
     }
-    
-    return [pagesView autorelease];
+    return pagesView; // this has the content
 }
 
 - (void)printShowingPrintPanel:(BOOL)showPanels {
