@@ -217,8 +217,8 @@ NSString *BDSKBibItemLocalDragPboardType = @"edu.ucsd.cs.mmccrack.bibdesk: Local
 #if DEBUG
     NSLog(@"bibdoc dealloc");
 #endif
-    [tableView setDataSource:nil];
     [tableView setDelegate:nil];
+    [tableView setDataSource:nil];
     if ([self undoManager]) {
         [[self undoManager] removeAllActionsWithTarget:self];
     }

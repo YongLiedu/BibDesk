@@ -281,8 +281,8 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
     
     // This fixes some seriously weird issues with Jaguar, and possibly 10.3.  The tableview messages its datasource/delegate (BibEditor) after the editor is dealloced, which causes a crash.
     // See http://www.cocoabuilderfcom/search/archive?words=crash+%22setDataSource:nil%22 for similar problems.
-    [authorTableView setDataSource:nil];
     [authorTableView setDelegate:nil];
+    [authorTableView setDataSource:nil];
     
     [citeKeyFormatter release];
     [[NSNotificationCenter defaultCenter] removeObserver:self];
