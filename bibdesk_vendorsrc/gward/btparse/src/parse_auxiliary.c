@@ -178,7 +178,7 @@ zzsyn(char *        text,
    
    if (k != 1)
    {
-      snprintf (msg+len, sizeof(msg-len), "; \"%s\" not", bad_text);
+      snprintf (msg+len, sizeof(msg), "; \"%s\" not", bad_text);
         if (zzset_deg (eset) > 1) strlcat (msg, " in", sizeof(msg));
       len = strlen (msg);
    }
@@ -197,7 +197,7 @@ zzsyn(char *        text,
    }
    else
    {
-       snprintf (msg+len, sizeof(msg-len), "expected %s", zztokens[etok]);
+       snprintf (msg+len, sizeof(msg), "expected %s", zztokens[etok]);
       if (etok == ENTRY_CLOSE)
       {
           strlcat (msg, " (skipping to next \"@\")", sizeof(msg));
@@ -207,7 +207,7 @@ zzsyn(char *        text,
 
    len = strlen (msg);
    if (egroup && strlen (egroup) > 0) 
-        snprintf (msg+len, sizeof(msg-len), " in %s", egroup); /*sprintf (msg+len, " in %s", egroup);*/
+        snprintf (msg+len, sizeof(msg), " in %s", egroup); /*sprintf (msg+len, " in %s", egroup);*/
 
    syntax_error (msg);
 
