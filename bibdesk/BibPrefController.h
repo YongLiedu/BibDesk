@@ -93,6 +93,7 @@ extern NSString *BDSKKeepPapersFolderOrganizedKey;
 extern NSString *BDSKLastVersionLaunched;
 
 #pragma mark ||  Notification name strings
+extern NSString *BDSKDocumentWillSaveNotification;
 extern NSString *BDSKDocumentUpdateUINotification;
 extern NSString *BDSKTableViewFontChangedNotification;
 extern NSString *BDSKPreviewDisplayChangedNotification;
@@ -101,5 +102,6 @@ extern NSString *BDSKCustomStringsChangedNotification;
 extern NSString *BDSKTableColumnChangedNotification;
 extern NSString *BDSKBibItemChangedNotification;
 extern NSString *BDSKDocAddItemNotification;
+extern NSString *BDSKDocWillDelItemNotification;
 extern NSString *BDSKDocDelItemNotification;
 extern NSString *BDSKAuthorPubListChangedNotification;
