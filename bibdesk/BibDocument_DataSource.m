@@ -160,7 +160,11 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 
 - (void)tableViewSelectionDidChange:(NSNotification *)aNotification
 {
-    if([aNotification object] == tableView) [self updateUI];
+    if([aNotification object] == tableView) // coalesce notifications so it doesn't have to deal with a notification for every item
+        [[NSNotificationQueue defaultQueue] enqueueNotification:[NSNotification notificationWithName:BDSKDocumentUpdateUINotification object:self]
+                                                   postingStyle:NSPostWhenIdle
+                                                   coalesceMask:NSNotificationCoalescingOnSender
+                                                       forModes:nil];
 }
 
 
