@@ -54,13 +54,14 @@ NSRange SafeForwardSearchRange( unsigned startLoc, unsigned seekLength, unsigned
     NSMutableDictionary *dict = [NSMutableDictionary dictionary];
     unsigned fullStringLength = [fullString length];
     unsigned fileOrder = 0;
+    NSCharacterSet *possibleLeftDelimiters = [NSCharacterSet characterSetWithCharactersInString:@"\"{"];
     
     BibItem *newBI;
     NSMutableArray *bibItemArray = [NSMutableArray array];
     
     NSRange firstAtRange = [fullString rangeOfString:@"@" options:NSLiteralSearch range:NSMakeRange(0, [fullString length])];
     
-    NSAssert( firstAtRange != NSNotFound, @"This does not appear to be a BibTeX entry.  Perhaps due to an incorrect encoding guess?" );
+    NSAssert( firstAtRange.location != NSNotFound, @"This does not appear to be a BibTeX entry.  Perhaps due to an incorrect encoding guess?" );
     
     // if the @ is escaped, get the next one
     while(firstAtRange.location >= 1 && [[fullString substringWithRange:NSMakeRange(firstAtRange.location - 1, 1)] isEqualToString:@"\\"])
@@ -142,6 +143,21 @@ NSRange SafeForwardSearchRange( unsigned startLoc, unsigned seekLength, unsigned
             [scanner scanUpToString:@"=" intoString:&key]; // this should be our key
                            
             [scanner scanString:@"=" intoString:nil];
+
+#warning ARM: for debugging
+            // scan whitespace after the = to see if we have an opening delimiter or not; this will be for macroish stuff
+            [scanner scanCharactersFromSet:[NSCharacterSet whitespaceCharacterSet] intoString:nil];
+            if([possibleLeftDelimiters characterIsMember:[fullString characterAtIndex:[scanner scanLocation]]]){
+                [BibTeXParser postParsingErrorNotification:@"Delimiter found"
+                                                 errorType:@"Parse Info"
+                                                  fileName:filePath
+                                                errorRange:[fullString lineRangeForRange:NSMakeRange([scanner scanLocation], 0)]];
+            } else {
+                [BibTeXParser postParsingErrorNotification:@"Delimiter not found"
+                                                 errorType:@"Parse Info"
+                                                  fileName:filePath
+                                                errorRange:[fullString lineRangeForRange:NSMakeRange([scanner scanLocation], 0)]];
+            }                
                        
             quoteRange = [fullString rangeOfString:@"\"" options:NSLiteralSearch range:SafeForwardSearchRange([scanner scanLocation], 100, fullStringLength)];
             braceRange = [fullString rangeOfString:@"{" options:NSLiteralSearch range:SafeForwardSearchRange([scanner scanLocation], 100, fullStringLength)];
@@ -161,16 +177,26 @@ NSRange SafeForwardSearchRange( unsigned startLoc, unsigned seekLength, unsigned
             leftDelimLocation = ( usingBraceDelimiter ? braceRange.location : quoteRange.location );
             
             if([scanner scanLocation] >= nextAtRange.location){ // this is a lousy warning, but I can't pick it up earlier
-                *hadProblems = YES;
-                [BibTeXParser postParsingErrorNotification:@"Possible extra comma in previous entry."
+                [BibTeXParser postParsingErrorNotification:@"Ignored extra comma in previous entry."
                                                  errorType:@"Parse Warning"
                                                   fileName:filePath
                                                 errorRange:[fullString lineRangeForRange:NSMakeRange([scanner scanLocation], 0)]];
+                break; // break here, since this happens at the end of every entry with JabRef-generated BibTeX, and we don't need to hit the assertion below
             }                
             
             // NSAssert ( nextAtRange.location >= [scanner scanLocation], @"Scanner tried to enter the next bibitem too early." );
-#warning ARM: JabRef incompatibility
-            NSAssert ( leftDelimLocation != NSNotFound, @"Can't find a delimiter.");
+            // NSAssert ( leftDelimLocation != NSNotFound, @"Can't find a delimiter.");
+            
+            if(leftDelimLocation == NSNotFound){
+                *hadProblems = YES;
+                [BibTeXParser postParsingErrorNotification:@"Delimiter not found."
+                                                 errorType:@"Parse Error"
+                                                  fileName:filePath
+                                                errorRange:[fullString lineRangeForRange:NSMakeRange([scanner scanLocation], 0)]];
+                break; // nothing more we can do with this one
+            }                
+            
+                
             
             if(leftDelimLocation + 1 >= nextAtRange.location)
                 break;
