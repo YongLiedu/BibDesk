@@ -9,7 +9,7 @@
 	<key>LocalizedNames</key>
 	<dict>
 		<key>English</key>
-		<string>BibDesk</string>
+		<string>BibDesk Input Manager</string>
 	</dict>
 	<key>NoMenuEntry</key>
 	<string>YES</string>
