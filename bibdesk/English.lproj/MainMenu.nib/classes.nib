@@ -110,6 +110,7 @@
                 copyAsTex = id; 
                 delPub = id; 
                 editPubCmd = id; 
+                editSelectedFieldAsRawBibTeX = id; 
                 emailPubCmd = id; 
                 exportAsAtom = id; 
                 exportAsHTML = id; 
