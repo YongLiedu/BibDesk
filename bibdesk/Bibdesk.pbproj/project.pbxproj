@@ -2440,7 +2440,8 @@
 		3DC794CB074F915A00C4997E = {
 			isa = PBXFileReference;
 			lastKnownFileType = image.tiff;
-			path = key.tiff;
+			name = key.tiff;
+			path = Images/key.tiff;
 			refType = 4;
 			sourceTree = "<group>";
 		};
