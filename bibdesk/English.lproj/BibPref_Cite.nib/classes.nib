@@ -8,12 +8,14 @@
                 changeSeparateCite = id; 
                 citeStringFieldChanged = id; 
                 delSelectedCustomString = id; 
+                setCitationBracketStyle = id; 
             }; 
-            CLASS = BibPref_Cite; 
+            CLASS = "BibPref_Cite"; 
             LANGUAGE = ObjC; 
             OUTLETS = {
                 addCustomStringButton = NSButton; 
                 citeBehaviorLine = NSTextField; 
+                citeBracketRadio = NSMatrix; 
                 citeStringField = NSTextField; 
                 customStringField = NSTextField; 
                 customStringTableView = NSTableView; 
@@ -26,7 +28,7 @@
         }, 
         {
             ACTIONS = {changeStartupBehavior = id; }; 
-            CLASS = BibPref_Startup; 
+            CLASS = "BibPref_Startup"; 
             LANGUAGE = ObjC; 
             OUTLETS = {
                 defaultBibFileField = NSTextField; 
