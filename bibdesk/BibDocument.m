@@ -1581,26 +1581,27 @@ As an experiment, we also try to pass errors back.
 Would it be advisable to also give access to the newly added records?
 */
 - (BOOL) addPublicationsFromPasteboard:(NSPasteboard*) pb error:(NSString**) error{
-	NSArray * types = [pb types];
-
-	if([pb containsFiles]) {
-        NSArray * pbArray = [pb propertyListForType:NSFilenamesPboardType]; // we will get an array
-		return [self addPublicationsForFiles:pbArray error:error];
-    }
-	else if([types containsObject:BDSKBibTeXStringPboardType]){
-		NSString *str = [pb stringForType:BDSKBibTeXStringPboardType];
-		return [self addPublicationsForString:str error:error];
-    }
-            
-        else if([types containsObject:NSStringPboardType]){
+    NSArray * types = [pb types];
+    
+    // check for the NSStringPboardType first, so if it's a clipping with BibTeX we just get the text out of it, and explicitly check for our local BibTeX type
+    if([types containsObject:NSStringPboardType] && ![types containsObject:BDSKBibTeXStringPboardType]){
         NSData * pbData = [pb dataForType:NSStringPboardType]; 	
-		NSString * str = [[[NSString alloc] initWithData:pbData encoding:NSUTF8StringEncoding] autorelease];
-		return [self addPublicationsForString:str error:error];
+        NSString * str = [[[NSString alloc] initWithData:pbData encoding:NSUTF8StringEncoding] autorelease];
+        return [self addPublicationsForString:str error:error];
+    } else {
+        if([types containsObject:BDSKBibTeXStringPboardType]){
+            NSString *str = [pb stringForType:BDSKBibTeXStringPboardType];
+            return [self addPublicationsForString:str error:error];
+        } else {
+            if([pb containsFiles]) {
+                NSArray * pbArray = [pb propertyListForType:NSFilenamesPboardType]; // we will get an array
+                return [self addPublicationsForFiles:pbArray error:error];
+            } else {
+                *error = NSLocalizedString(@"didn't find anything appropriate on the pasteboard", @"Bibdesk couldn't find any files or bibliography information in the data it received.");
+                return NO;
+            }
+        }
     }
-	else {
-		*error = NSLocalizedString(@"didn't find anything appropriate on the pasteboard", @"Bibdesk couldn't find any files or bibliography information in the data it received.");
-		return NO;
-    }	
 }
 
 
