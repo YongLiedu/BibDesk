@@ -41,6 +41,7 @@
 			<key>CFBundleTypeExtensions</key>
 			<array>
 				<string>fcgi</string>
+				<string>ris</string>
 			</array>
 			<key>CFBundleTypeMIMETypes</key>
 			<array>
@@ -48,6 +49,8 @@
 			</array>
 			<key>CFBundleTypeName</key>
 			<string>RIS/Medline File</string>
+			<key>CFBundleTypeIconFile</key>
+			<string>risDocIcon.icns</string>
 			<key>CFBundleTypeRole</key>
 			<string>Viewer</string>
 			<key>NSDocumentClass</key>
