@@ -71,6 +71,7 @@ NSString *BDSKPapersFolderPathKey = @"Path to the papers folder";
 NSString *BDSKFilePapersAutomaticallyKey = @"File papers into the papers folder automatically";
 NSString *BDSKKeepPapersFolderOrganizedKey = @"Keep files in the papers folder organized";
 NSString *BDSKLocalUrlFormatKey = @"Local-Url Format";
+NSString *BDSKLocalUrlFormatPresetKey = @"Local-Url Format Preset";
 
 NSString *BDSKLastVersionLaunched = @"Last launched version number";
 NSString *BDSKSnoopDrawerSavedSize = @"Saved size of BibEditor document snoop drawer";
