@@ -313,9 +313,10 @@ void mergePageNumbers(NSMutableDictionary *dict){
     
     // set the pub type if we know the bibtex equivalent, otherwise leave it as misc
     if([typeManager bibtexTypeForPubMedType:[pubDict objectForKey:@"TY"]] != nil){
-	[newBI setType:[typeManager bibtexTypeForPubMedType:[pubDict objectForKey:@"TY"]]];
+        [newBI setType:[typeManager bibtexTypeForPubMedType:[pubDict objectForKey:@"TY"]]];
     }
-    [newBI setCiteKeyString:[pubDict valueForKey:@"PMID"]];
+    // set the citekey, since RIS/Medline types don't have a citekey field
+    [newBI setCiteKeyString:[newBI suggestedCiteKey]];
     
     return [newBI autorelease];
 }
