@@ -140,18 +140,9 @@
 - (IBAction)changePreviewDisplay:(id)sender{
     int tag = [[sender selectedCell] tag];
     if(tag != [defaults integerForKey:BDSKPreviewDisplayKey]){
-        switch(tag){
-            case 0:
-                // show everything
-                [defaults setInteger:tag forKey:BDSKPreviewDisplayKey];
-                break;
-            case 1:
-                // show only annote
-                [defaults setInteger:tag forKey:BDSKPreviewDisplayKey];
-                break;
-        }
+        [defaults setInteger:tag forKey:BDSKPreviewDisplayKey];
         [[NSNotificationCenter defaultCenter] postNotificationName:BDSKPreviewDisplayChangedNotification object:nil];
-	}
+    }
 }
 
 - (IBAction)changePreviewMaxNumber:(id)sender{

@@ -7,16 +7,16 @@
 	<key>IBEditorPositions</key>
 	<dict>
 		<key>5</key>
-		<string>323 322 598 464 0 0 1280 832 </string>
+		<string>321 322 598 464 0 0 1280 832 </string>
 	</dict>
 	<key>IBFramework Version</key>
-	<string>432.0</string>
+	<string>437.0</string>
 	<key>IBOpenObjects</key>
 	<array>
 		<integer>5</integer>
 	</array>
 	<key>IBSystem Version</key>
-	<string>8A393</string>
+	<string>8A414</string>
 	<key>IBUserGuides</key>
 	<dict>
 		<key>5</key>
@@ -24,7 +24,7 @@
 			<key>guideLocations</key>
 			<array>
 				<string>Horizontal:305.000000</string>
-				<string>Horizontal:241.000000</string>
+				<string>Horizontal:142.000000</string>
 			</array>
 			<key>guidesLocked</key>
 			<false/>

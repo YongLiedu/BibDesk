@@ -2568,6 +2568,23 @@ This method always returns YES. Even if some or many operations fail.
                     [[textStorage mutableString] appendString:[[shownPublications objectAtIndex:[i intValue]] valueOfField:BDSKAnnoteString]];
                 }
                 break;
+            case 2:
+                // special handling for abstract-only
+                // Write out the title
+                if([self numberOfSelectedPubs] > 1){
+                    s = [[[NSMutableAttributedString alloc] initWithString:[[shownPublications objectAtIndex:[i intValue]] title]
+                                                                attributes:titleAttributes] autorelease];
+                    [s appendAttributedString:[[[NSAttributedString alloc] initWithString:@"\n\n"
+                                                                               attributes:nil] autorelease]];
+                    [textStorage appendAttributedString:s];
+                }
+                
+                if([[[shownPublications objectAtIndex:[i intValue]] valueOfField:BDSKAbstractString] isEqualToString:@""]){
+                    [[textStorage mutableString] appendString:NSLocalizedString(@"No abstract.",@"")];
+                }else{
+                    [[textStorage mutableString] appendString:[[shownPublications objectAtIndex:[i intValue]] valueOfField:BDSKAbstractString]];
+                }
+                break;                
         }
         [[textStorage mutableString] appendString:@"\n\n"];
     }
