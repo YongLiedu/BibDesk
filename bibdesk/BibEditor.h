@@ -168,6 +168,7 @@ extern NSString *BDSKUrlString;
 - (IBAction)viewLocal:(id)sender;
 - (NSMenu *)menuForImagePopUpButton;
 - (NSArray *)getSafariRecentDownloadsMenu;
+- (NSArray *)getPreviewRecentDocumentsMenu;
 - (void)setLocalURLPathFromMenuItem:(NSMenuItem *)sender;
 
 

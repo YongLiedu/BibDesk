@@ -355,18 +355,18 @@ NSString *BDSKUrlString = @"Url";
 }
 
 - (NSArray *)getPreviewRecentDocumentsMenu{
-	BOOL yn = CFPreferencesSynchronize(@"com.apple.Preview",
+	BOOL yn = CFPreferencesSynchronize( (CFStringRef)@"com.apple.Preview",
 									   kCFPreferencesCurrentUser,
 									   kCFPreferencesCurrentHost);
 	
-	NSArray *historyArray = CFPreferencesCopyAppValue(@"NSRecentDocumentRecords",
-													  @"com.apple.Preview");
+	CFArrayRef historyArray = CFPreferencesCopyAppValue( (CFStringRef)@"NSRecentDocumentRecords",
+							   (CFStringRef)@"com.apple.Preview");
 	NSMutableArray *array = [NSMutableArray array];
 	int i = 0;
 	BOOL separatorAdded = NO;
 	
-	for (i = 0; i < [historyArray count]; i ++){
-		NSDictionary *itemDict1 = [historyArray objectAtIndex:i];
+	for (i = 0; i < [(NSArray *)historyArray count]; i ++){
+		NSDictionary *itemDict1 = [(NSArray *)historyArray objectAtIndex:i];
 		NSDictionary *itemDict2 = [itemDict1 objectForKey:@"_NSLocator"];
 		NSData *aliasData = [itemDict2 objectForKey:@"_NSAlias"];
 		
@@ -400,6 +400,7 @@ NSString *BDSKUrlString = @"Url";
 		}
 	}
 	
+	CFRelease(historyArray);
 	return array;
 }
 
