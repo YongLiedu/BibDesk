@@ -922,16 +922,10 @@ setupParagraphStyle()
     
     [aStr appendAttributedString:[[[NSMutableAttributedString alloc] initWithString:
                       [NSString stringWithFormat:@"%@\n",[self citeKey]] attributes:typeAttributes] autorelease]];
-    NSAttributedString *titleStr = [self attributedStringByParsingTeX:[self title] inField:BDSKTitleString defaultStyle:keyParagraphStyle];
-    [aStr appendAttributedString:titleStr];
-//    [aStr appendAttributedString:[[[NSMutableAttributedString alloc] initWithString:
-//                     [NSString stringWithFormat:@"%@ ",[[[self title] stringByRemovingCurlyBraces] stringByCollapsingWhitespaceAndRemovingSurroundingWhitespace]] attributes:titleAttributes] autorelease]];
-
+    [aStr appendAttributedString:[self attributedStringByParsingTeX:[self title] inField:BDSKTitleString defaultStyle:keyParagraphStyle]];
     
     [aStr appendAttributedString:[[[NSMutableAttributedString alloc] initWithString:
                        [NSString stringWithFormat:@"(%@)\n",[self type]] attributes:typeAttributes] autorelease]];
-
-    
 
     while(key = [e nextObject]){
         if(![[pubFields objectForKey:key] isEqualToString:@""] &&
@@ -945,8 +939,8 @@ setupParagraphStyle()
 					[aStr appendAttributedString:[[[NSAttributedString alloc] initWithString:[NSString stringWithFormat:@"%@\n",authors]
 																				  attributes:bodyAttributes] autorelease]];
 				}else{
-					[aStr appendAttributedString:[[[NSAttributedString alloc] initWithString:[NSString stringWithFormat:@"%@\n",[[[pubFields objectForKey:key] stringByRemovingCurlyBraces] stringByCollapsingWhitespaceAndRemovingSurroundingWhitespace]]
-																				  attributes:bodyAttributes] autorelease]];
+                    [aStr appendAttributedString:[self attributedStringByParsingTeX:[pubFields objectForKey:key] inField:@"Body" defaultStyle:bodyParagraphStyle]];
+                    [aStr appendString:@"\n"];
 				}
 			}else{
                 [nonReqKeys addObject:key];
@@ -980,8 +974,8 @@ setupParagraphStyle()
                                                                               attributes:bodyAttributes] autorelease]];
 
             }else{
-                [aStr appendAttributedString:[[[NSAttributedString alloc] initWithString:[NSString stringWithFormat:@"%@\n",[[[pubFields objectForKey:key] stringByRemovingCurlyBraces] stringByCollapsingWhitespaceAndRemovingSurroundingWhitespace]]
-                                                                              attributes:bodyAttributes] autorelease]];
+                [aStr appendAttributedString:[self attributedStringByParsingTeX:[pubFields objectForKey:key] inField:@"Body" defaultStyle:bodyParagraphStyle]];
+                [aStr appendString:@"\n"];
             }
 
         }
@@ -1007,7 +1001,6 @@ setupParagraphStyle()
     
     BDSKFontManager *fontManager = [BDSKFontManager sharedFontManager];
     NSFont *font = [[fontManager cachedFontsForPreviewPane] objectForKey:field];
-    NSFontTraitMask fontTraits = [fontManager traitsOfFont:font];
     //NSLog(@"default font is %@", font);
     NSDictionary *attrs = [NSDictionary dictionaryWithObjects:[NSArray arrayWithObjects:font, defaultStyle, nil]
                                                       forKeys:[NSArray arrayWithObjects:NSFontAttributeName, NSParagraphStyleAttributeName, nil]];
@@ -1021,9 +1014,9 @@ setupParagraphStyle()
         range = [aMatch rangeAtIndex:2];
         //NSLog(@"using font trait mask %X", [[BDSKFontManager sharedFontManager] fontTraitMaskForTeXStyle:texStyle]);
         font = [fontManager convertFont:font
-                            toHaveTrait:(fontTraits | [fontManager fontTraitMaskForTeXStyle:texStyle])];
+                            toHaveTrait:([fontManager fontTraitMaskForTeXStyle:texStyle])];
         //NSLog(@"using font %@", font);
-        attrs = [NSDictionary dictionaryWithObjects:[NSArray arrayWithObjects:font, defaultStyle, nil] // always body par style here
+        attrs = [NSDictionary dictionaryWithObjects:[NSArray arrayWithObjects:font, defaultStyle, nil]
                                             forKeys:[NSArray arrayWithObjects:NSFontAttributeName, NSParagraphStyleAttributeName, nil]];
         [mas setAttributes:attrs range:range];
     }
