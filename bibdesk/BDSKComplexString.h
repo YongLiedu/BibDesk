@@ -59,6 +59,7 @@ typedef enum{
 /* A bunch of methods that have to be overridden 
 * in a concrete subclass of NSString
 */
++ (id)allocWithZone:(NSZone *)aZone;
 - (id)init;
 /*!
     @method     initWithArray
@@ -71,9 +72,6 @@ typedef enum{
 - (id)initWithArray:(NSArray *)a macroResolver:(id)theMacroResolver;
 
 /*
- Docs say we should override this one, but I am not sure how, and it seems to work OK without it.
-  + (id)allocWithZone:(NSZone *)aZone;
- 
  The following methods are supposed to be overridden, but since we 
  only want to create BDSKComplexStrings using the convenience constructors,
  we don't need to.

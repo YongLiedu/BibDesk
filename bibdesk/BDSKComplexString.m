@@ -152,6 +152,10 @@ static NSDictionary *globalMacroDefs;
     }
 }
 
++ (id)allocWithZone:(NSZone *)aZone{
+    return NSAllocateObject(self, 0, aZone);
+}
+
 - (id)init{
     self = [self initWithArray:nil macroResolver:nil];
 	return self;
@@ -179,8 +183,8 @@ static NSDictionary *globalMacroDefs;
 }
 
 - (id)copyWithZone:(NSZone *)zone{
-    BDSKComplexString *cs = [[BDSKComplexString allocWithZone:zone] initWithArray:[[nodes copy] autorelease] 
-																	macroResolver:macroResolver];
+    BDSKComplexString *cs = [[BDSKComplexString allocWithZone:zone] initWithNodes:[[nodes copy] autorelease] 
+							macroResolver:macroResolver];
     return cs;
 }
 
@@ -218,9 +222,9 @@ static NSDictionary *globalMacroDefs;
     [expandedValue getCharacters:buffer range:aRange];
 }
 
-#pragma mark overridden methods from the BDSKComplexStringExtensions
+#pragma mark overridden methods from the ComplexStringExtensions
 
-- (BOOL)isComplex{
+- (BOOL)isComplex {
     return YES;
 }
 
@@ -340,7 +344,7 @@ static NSDictionary *globalMacroDefs;
 
 @end
 
-@implementation NSString (BDSKComplexStringExtensions)
+@implementation NSString (ComplexStringExtensions)
 
 + (NSString *)complexStringWithBibTeXString:(NSString *)btstring macroResolver:(id<BDSKMacroResolver>)theMacroResolver{
     NSMutableArray *returnNodes = [NSMutableArray array];
