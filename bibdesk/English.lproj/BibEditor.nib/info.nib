@@ -13,12 +13,12 @@
 	<string>364.0</string>
 	<key>IBOpenObjects</key>
 	<array>
-		<integer>287</integer>
-		<integer>74</integer>
-		<integer>345</integer>
 		<integer>270</integer>
+		<integer>287</integer>
+		<integer>345</integer>
+		<integer>74</integer>
 	</array>
 	<key>IBSystem Version</key>
-	<string>7S215</string>
+	<string>7U16</string>
 </dict>
 </plist>

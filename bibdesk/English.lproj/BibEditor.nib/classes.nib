@@ -17,6 +17,7 @@
                 dismissAddField = id; 
                 dismissDelField = id; 
                 generateCiteKey = id; 
+                generateLocalUrl = id; 
                 myAction = id; 
                 raiseAddField = id; 
                 raiseDelField = id; 
