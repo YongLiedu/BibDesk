@@ -142,3 +142,7 @@ extern NSString *BDSKDocWillRemoveItemNotification;
 extern NSString *BDSKDocDelItemNotification;
 extern NSString *BDSKAuthorPubListChangedNotification;
 extern NSString *BDSKParserErrorNotification;
+extern NSString *BDSKBibDocMacroAddedNotification;
+extern NSString *BDSKBibDocMacroRemovedNotification;
+extern NSString *BDSKBibDocMacroKeyChangedNotification;
+extern NSString *BDSKBibDocMacroDefinitionChangedNotification;

@@ -117,3 +117,7 @@ NSString *BDSKDocWillRemoveItemNotification = @"Will remove a bibitem from a doc
 NSString *BDSKDocDelItemNotification = @"Removed a bibitem from a document";
 NSString *BDSKAuthorPubListChangedNotification = @"added to or deleted a pub from an author";
 NSString *BDSKParserErrorNotification = @"A parsing error occurred";
+NSString *BDSKBibDocMacroAddedNotification = @"added a macro or changed a macro value in the document";
+NSString *BDSKBibDocMacroRemovedNotification = @"removed a macro from the document";
+NSString *BDSKBibDocMacroKeyChangedNotification = @"changed the key of a macro";
+NSString *BDSKBibDocMacroDefinitionChangedNotification = @"changed the value of a macro";
