@@ -56,7 +56,7 @@
 }
 
 - (void)setPerson:(BibAuthor *)newPerson {
-	_person = newPerson;
+	_person = [newPerson retain];
 }
 
 #pragma mark actions
