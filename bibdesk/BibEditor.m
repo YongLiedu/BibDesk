@@ -801,6 +801,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 - (IBAction)chooseLocalURL:(id)sender{
     NSOpenPanel *oPanel = [NSOpenPanel openPanel];
     [oPanel setAllowsMultipleSelection:NO];
+    [oPanel setResolvesAliases:NO];
     int result = [oPanel runModalForDirectory:nil
 										 file:nil
 										types:nil];
