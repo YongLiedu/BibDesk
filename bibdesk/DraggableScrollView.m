@@ -65,7 +65,14 @@ static float BDSKScaleMenuFontSize = 11.0;
 #pragma mark Instance methods
 
 - (id)initWithFrame:(NSRect)rect {
-    if ((self = [super initWithFrame:rect])) {
+    if (self = [super initWithFrame:rect]) {
+		scaleFactor = 1.0;
+    }
+    return self;
+}
+
+- (id)initWithCoder:(NSCoder *)coder {
+    if (self = [super initWithCoder:coder]) {
 		scaleFactor = 1.0;
     }
     return self;
