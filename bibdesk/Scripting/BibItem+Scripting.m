@@ -224,7 +224,9 @@ Extra wrapping of the created and modified date methods to
 	BibItem * newPub = [newPubs objectAtIndex:0];
 	
 	// a parsed pub has no creation date set, so we need to copy first
-	[newPub setField:BDSKDateCreatedString toValue:[self valueOfField:BDSKDateCreatedString]];
+	NSString *createdDate = [self valueOfField:BDSKDateCreatedString];
+	if (createdDate && ![createdDate isEqualToString:@""])
+		[newPub setField:BDSKDateCreatedString toValue:createdDate];
 	
 	// ... and replace the current record with it.
 	// hopefully, I don't understand the whole filetypes/pubtypes stuff	
