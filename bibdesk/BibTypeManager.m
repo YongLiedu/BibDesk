@@ -27,7 +27,9 @@ static BibTypeManager *_sharedInstance = nil;
 }
 
 - (NSArray *)allRemovableFieldNames{
-    return [_typeInfoDict objectForKey:@"AllRemovableFieldNames"];
+    NSArray *names = [_typeInfoDict objectForKey:@"AllRemovableFieldNames"];
+    if (names == nil) [NSException raise:@"nilNames exception" format:@"allRemovableFieldNames returning nil."];
+    return names;
 }
 
 - (NSArray *)requiredFieldsForType:(NSString *)type{
@@ -35,9 +37,9 @@ static BibTypeManager *_sharedInstance = nil;
 
     if(fieldsForType){
         return [fieldsForType objectForKey:@"required"];
+    }else{
+        return [NSArray array];
     }
-
-    return [NSArray array];
 }
 
 - (NSArray *)optionalFieldsForType:(NSString *)type{
@@ -45,9 +47,9 @@ static BibTypeManager *_sharedInstance = nil;
 
     if(fieldsForType){
         return [fieldsForType objectForKey:@"optional"];
+    }else{
+        return [NSArray array];
     }
-
-    return [NSArray array];
 }
 
 - (NSArray *)userDefaultFieldsForType:(NSString *)type{
