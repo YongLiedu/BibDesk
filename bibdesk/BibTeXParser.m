@@ -96,6 +96,7 @@
         bt_set_stringopts(BTE_REGULAR, BTO_MINIMAL);
 
         while(entry =  bt_parse_entry(infile, (char *)fs_path, 0, &ok)){
+	    NSAutoreleasePool *innerPool = [[NSAutoreleasePool alloc] init];
             if (ok){
                 // Adding a new BibItem
                 if (bt_entry_metatype (entry) != BTE_REGULAR){
@@ -195,9 +196,7 @@
                         [appController addString:sDeTexified forCompletionEntry:sFieldName];
 
                     }// end while field - process next bt field
-                    
-                    bt_free_ast(field);
-                   
+            
                     [newBI setCiteKey:[NSString stringWithCString:bt_entry_key(entry)]];
                     [newBI setFields:dictionary];
                     [returnArray addObject:[newBI autorelease]];
@@ -209,6 +208,7 @@
                 *hadProblems = YES;
             }
             bt_free_ast(entry);
+	    [innerPool release];
         } // while (scanning through file) 
 
         bt_cleanup();
