@@ -315,6 +315,22 @@ NSString*   LocalDragPasteboardName = @"edu.ucsd.cs.mmccrack.bibdesk: Local Publ
     [sp setAccessoryView:nil];
 }
 
+- (BOOL)writeToFile:(NSString *)fileName ofType:(NSString *)docType{
+	if ([docType isEqualToString:@"PubMed File"]){
+		// Can't save pubmed files now. Could try saving as bibtex.
+		int returnCode = NSRunAlertPanel(@"Cannot Save as PubMed.",
+										 @"Saving PubMed Files is not currently supported. You can choose to save as BibTeX instead.",
+										 @"Save as BibTeX", @"Don't Save", nil, nil);
+		if(returnCode == NSAlertDefaultReturn){
+			NSString *newName = [[[self fileName] stringByDeletingPathExtension] stringByAppendingPathExtension:@"bib"];
+			return [self writeToFile:newName ofType:@"bibTeX database"];
+		}else{
+			return NO;
+		}
+	}else{
+		return [super writeToFile:fileName ofType:docType];
+	}
+}
 
 - (NSData *)dataRepresentationOfType:(NSString *)aType
 {
@@ -326,15 +342,13 @@ NSString*   LocalDragPasteboardName = @"edu.ucsd.cs.mmccrack.bibdesk: Local Publ
         return [self rssDataRepresentation];
     }else if ([aType isEqualToString:@"HTML"]){
         return [self htmlDataRepresentation];
-    }
-    //else:
-    return nil;
-    // this is an error, maybe also raise an exception?
+    }else 
+		return nil;
 }
 
 - (void)saveDependentWindows{
     NSMutableArray *depWins = [NSMutableArray array];
-    NSEnumerator *pubE = [publications objectEnumerator]; // yeah, i've got two - so what.
+    NSEnumerator *pubE = [publications objectEnumerator]; 
     BibItem *pub;
 
     // make sure all bibitems have saved their changes.

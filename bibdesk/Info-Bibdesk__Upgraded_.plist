@@ -47,7 +47,7 @@
 			<key>CFBundleTypeName</key>
 			<string>PubMed File</string>
 			<key>CFBundleTypeRole</key>
-			<string>Editor</string>
+			<string>Viewer</string>
 			<key>NSDocumentClass</key>
 			<string>BibDocument</string>
 		</dict>
@@ -165,10 +165,10 @@
 			<dict>
 				<key>defaultsDictionary</key>
 				<dict>
-					<key>Citation Start Bracket</key>
-					<string>{</string>
 					<key>Citation End Bracket</key>
 					<string>}</string>
+					<key>Citation Start Bracket</key>
+					<string>{</string>
 					<key>Cite String</key>
 					<string>cite</string>
 					<key>Custom CiteStrings</key>
