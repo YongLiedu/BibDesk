@@ -190,7 +190,7 @@ NSString *BDSKBibItemLocalDragPboardType = @"edu.ucsd.cs.mmccrack.bibdesk: Local
 	[[actionMenuButton cell] setUsesItemFromMenu:NO];
 	[[actionMenuButton cell] setRefreshesMenu:NO];
 	
-	[self updateActionMenu:nil];
+	[self updateActionMenus:nil];
 	
 	columnsMenu = [[[NSApp delegate] displayMenuItem] submenu];		// better retain this?
 	
@@ -237,9 +237,10 @@ NSString *BDSKBibItemLocalDragPboardType = @"edu.ucsd.cs.mmccrack.bibdesk: Local
     [super dealloc];
 }
 
-- (void) updateActionMenu:(id) aNotification {
+- (void) updateActionMenus:(id) aNotification {
 	// this updates the menu
-	[self menuForSelection];
+	[self menuForTableViewSelection:sourceList];
+    [self menuForTableViewSelection:tableView];
 	
 	[actionMenuButton setEnabled:([self numberOfSelectedPubs] != 0)];
 }
@@ -2241,7 +2242,7 @@ This method always returns YES. Even if some or many operations fail.
 	}
 	
     [self updatePreviews:nil];
-    [self updateActionMenu:nil];
+    [self updateActionMenus:nil];
 }
 
 
@@ -2399,8 +2400,13 @@ This method always returns YES. Even if some or many operations fail.
  Returns action/contextual menu that contains items appropriate for the current selection.
  The code may need to be revised if the menu's contents are changed.
 */
-- (NSMenu*) menuForSelection {
-	NSMenu * myMenu = [[actionMenu copy] autorelease];
+- (NSMenu*) menuForTableViewSelection:(NSTableView *)theTableView {
+	NSMenu * myMenu = nil;
+    if(tableView == theTableView){
+        myMenu = [[actionMenu copy] autorelease];
+    }else{
+        myMenu = [[sourceListActionMenu copy] autorelease];
+    }
 	
 	// kick out every item we won't need:
 	NSEnumerator * itemEnum = [[myMenu itemArray] objectEnumerator];
@@ -2695,6 +2701,78 @@ The results are quite crappy, but these were low-hanging fruit and people seem t
 				  AEFilterUPP filterProc
 				  );
 #endif
+}
+
+// only sent if we are a .bdsk file.
+// Note that we don't expect a lot of collections, so all this iteration should be OK.
+
+- (IBAction)editExportSettingsAction:(id)sender{
+    if(![collections containsObject:[sourceList selectedItem]]){
+        [NSException raise:NSInternalInconsistencyException format:@"editExportSettingsAction called with invalid selectedItem"];
+    }
+    
+    [exporterSelectionPopUp removeAllItems];
+    currentCollection = [sourceList selectedItem];
+    
+    NSEnumerator *e = [[BDSKExporter availableExporterClassNames] objectEnumerator];
+    id className;
+    while(className = [e nextObject]){
+        NSString *name = [NSClassFromString(className) displayName];
+        [exporterSelectionPopUp addItemWithTitle:name];
+        id item = [exporterSelectionPopUp itemWithTitle:name];
+        [item setRepresentedObject:className];
+    }
+    [exporterSelectionPopUp synchronizeTitleAndSelectedItem];
+    // find currently selected item and set the subview to it.
+    // resize window with zoom.
+
+    [self  setEditExportViewForClassName:[[exporterSelectionPopUp selectedItem] representedObject]];
+ 	[NSApp beginSheet:editExportSettingsWindow
+       modalForWindow:documentWindow
+        modalDelegate:self
+       didEndSelector:@selector(editExportSettingsSheetDidEnd:returnCode:contextInfo:)
+          contextInfo:nil];
+    
+}
+
+
+
+- (IBAction)dismissEditExportSettingsSheet:(id)sender{
+    [editExportSettingsWindow orderOut:sender];
+    [NSApp endSheet:editExportSettingsWindow returnCode:[sender tag]];
+    currentCollection = nil;
+}
+
+// called upon dismissal
+- (void)editExportSettingsSheetDidEnd:(NSWindow *)sheet
+                  returnCode:(int) returnCode
+                 contextInfo:(void *)contextInfo{
+    if(returnCode == 0) return;
+    // TODO
+}
+
+- (IBAction)handleExportChooserPopupChange:(id)sender{
+    NSLog(@"%@", [[sender selectedItem] representedObject]);
+    [self setEditExportViewForClassName:[[sender selectedItem] representedObject]];
+}
+
+
+- (void)setEditExportViewForClassName:(NSString *)className{
+    Class exporterClass = NSClassFromString(className);
+    // if currentCollection has one of these, use it:
+    id existingExporter = nil;
+    foreach(exp, [currentCollection exporters]){
+        if([exp isKindOfClass:exporterClass]){
+            existingExporter = exp;
+        }
+    }
+    if(!existingExporter){
+        //make a new one:
+        existingExporter = [[[exporterClass alloc] init] autorelease];
+        [currentCollection addExporter:existingExporter];
+    }
+    
+    [[editExportSettingsWindow contentView] replaceSubview:exporterSubView with:[existingExporter settingsView]];
 }
 
 #pragma mark methods to support the source list for .bdsk style files

@@ -153,6 +153,13 @@ extern NSString *BDSKBibItemLocalDragPboardType;
     // Note: the outlets should migrate to a window controller.
     IBOutlet NSOutlineView *sourceList;
     IBOutlet NSButton *addSourceListItemButton;
+    IBOutlet NSMenu *sourceListActionMenu;
+    
+    IBOutlet NSWindow *editExportSettingsWindow;
+    IBOutlet NSPopUpButton *exporterSelectionPopUp;
+    IBOutlet NSButton *exporterEnabledCheckButton;
+    IBOutlet NSView *exporterSubView;
+    BibCollection *currentCollection;
     
     // model:
     NSMutableArray *collections; // playlist style sub-lists of publications. Can be 'smart'.
@@ -648,19 +655,21 @@ int generalBibItemCompareFunc(id item1, id item2, void *context);
                       contextInfo:(void *)contextInfo;
 
 /*!
-    @method menuForSelection...
-	@abstract called when an action/contextual menu is needed
+    @method menuForTableViewSelection...
+	@abstract called when an action/contextual menu is needed for a particular tableView
 	@discussion uses the menu wired up as actionMenu and removes every item that doesn't validate.
-*/
-- (NSMenu*) menuForSelection;
+Uses the tableview argument to determine which actionMenu it should validate.
+ */
+- (NSMenu *)menuForTableViewSelection:(NSTableView *)theTableView;
+
 
 
 /*!
-	@method updateActionMenu:
-	@abstract makes sure the action menu is up to date and in place
-	@ uses menuForSelection to rebuild the action menu
+	@method updateActionMenus:
+	@abstract makes sure the action menus are up to date and in place
+	@ uses menuForTableViewSelection to rebuild the action menus
 */
-- (void) updateActionMenu:(id) aNotification;
+- (void)updateActionMenus:(id) aNotification;
 
 
 /*!
@@ -763,6 +772,13 @@ int compareSetLengths(NSSet *set1, NSSet *set2, void *context);
 - (NSStringEncoding)documentStringEncoding;
 - (void)setDocumentStringEncoding:(NSStringEncoding)encoding;
 
+
+#pragma mark Methods for Exporting the entire file or collections.
+
+- (IBAction)editExportSettingsAction:(id)sender;
+- (IBAction)dismissEditExportSettingsSheet:(id)sender;
+- (IBAction)handleExportChooserPopupChange:(id)sender;
+- (void)setEditExportViewForClassName:(NSString *)className;
 
 #pragma mark Methods supporting the source list for .bdsk files
 
