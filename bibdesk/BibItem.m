@@ -896,7 +896,7 @@ _setupParagraphStyle()
                                     forKeys:[NSArray arrayWithObjects:NSFontAttributeName,  NSParagraphStyleAttributeName, nil]];
 
     NSDictionary *typeAttributes =
-        [NSDictionary dictionaryWithObjects:[NSArray arrayWithObjects:[_cachedFonts objectForKey:@"Type"], [NSColor colorWithCalibratedWhite:0.4 alpha:0.0], nil]
+        [NSDictionary dictionaryWithObjects:[NSArray arrayWithObjects:[_cachedFonts objectForKey:@"Type"], [NSColor colorWithCalibratedWhite:0.4 alpha:1.0], nil]
                                     forKeys:[NSArray arrayWithObjects:NSFontAttributeName, NSForegroundColorAttributeName, nil]];
 
     NSDictionary *keyAttributes =
@@ -904,10 +904,8 @@ _setupParagraphStyle()
                                     forKeys:[NSArray arrayWithObjects:NSFontAttributeName, NSParagraphStyleAttributeName, nil]];
 
     NSDictionary *bodyAttributes =
-        [NSDictionary dictionaryWithObjects:[NSArray arrayWithObjects:[_cachedFonts objectForKey:@"Body"],
-          /*  [NSColor colorWithCalibratedWhite:0.9 alpha:0.0], */
-            _bodyParagraphStyle, nil]
-                                    forKeys:[NSArray arrayWithObjects:NSFontAttributeName, /*NSBackgroundColorAttributeName, */NSParagraphStyleAttributeName, nil]];
+        [NSDictionary dictionaryWithObjects:[NSArray arrayWithObjects:[_cachedFonts objectForKey:@"Body"], _bodyParagraphStyle, nil]
+                                    forKeys:[NSArray arrayWithObjects:NSFontAttributeName, NSParagraphStyleAttributeName, nil]];
 
     NSMutableAttributedString* aStr = [[[NSMutableAttributedString alloc] init] autorelease];
 
