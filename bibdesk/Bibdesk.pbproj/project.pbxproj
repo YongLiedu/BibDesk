@@ -1513,19 +1513,17 @@
 			fileEncoding = 4;
 			isa = PBXFileReference;
 			lastKnownFileType = sourcecode.c.h;
-			name = BibLibrary.h;
-			path = /Users/mike/Code/bibdesk_experimental/BibLibrary.h;
-			refType = 0;
-			sourceTree = "<absolute>";
+			path = BibLibrary.h;
+			refType = 4;
+			sourceTree = "<group>";
 		};
 		27CB67A505680FC0001D2AC3 = {
 			fileEncoding = 4;
 			isa = PBXFileReference;
 			lastKnownFileType = sourcecode.c.objc;
-			name = BibLibrary.m;
-			path = /Users/mike/Code/bibdesk_experimental/BibLibrary.m;
-			refType = 0;
-			sourceTree = "<absolute>";
+			path = BibLibrary.m;
+			refType = 4;
+			sourceTree = "<group>";
 		};
 		27CB67A805680FC0001D2AC3 = {
 			fileRef = 27CB67A405680FC0001D2AC3;
@@ -1543,19 +1541,17 @@
 			fileEncoding = 4;
 			isa = PBXFileReference;
 			lastKnownFileType = sourcecode.c.h;
-			name = PubMedParser.h;
-			path = /Users/mike/Code/bibdesk_experimental/PubMedParser.h;
-			refType = 0;
-			sourceTree = "<absolute>";
+			path = PubMedParser.h;
+			refType = 4;
+			sourceTree = "<group>";
 		};
 		27CB67AD05681124001D2AC3 = {
 			fileEncoding = 4;
 			isa = PBXFileReference;
 			lastKnownFileType = sourcecode.c.objc;
-			name = PubMedParser.m;
-			path = /Users/mike/Code/bibdesk_experimental/PubMedParser.m;
-			refType = 0;
-			sourceTree = "<absolute>";
+			path = PubMedParser.m;
+			refType = 4;
+			sourceTree = "<group>";
 		};
 		27CB67B205681124001D2AC3 = {
 			fileRef = 27CB67AC05681124001D2AC3;
@@ -3294,10 +3290,9 @@
 			fileEncoding = 30;
 			isa = PBXFileReference;
 			lastKnownFileType = sourcecode.c.objc;
-			name = BibAuthor.m;
-			path = /Users/mike/Code/bibdesk/BibAuthor.m;
-			refType = 0;
-			sourceTree = "<absolute>";
+			path = BibAuthor.m;
+			refType = 4;
+			sourceTree = "<group>";
 		};
 		F56DCB7301D5326801227D25 = {
 			children = (
