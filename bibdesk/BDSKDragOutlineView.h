@@ -15,6 +15,8 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 
 #import <Cocoa/Cocoa.h>
 #import <OmniAppKit/OATypeAheadSelectionHelper.h>
+#import "BibDocument_DataSource.h"
+#import "OATypeAheadSelectionHelper_Extensions.h"
 
 
 /*! @category NSOutlineView(MyExtensions) Adds a useful method */

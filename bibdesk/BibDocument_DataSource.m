@@ -400,9 +400,12 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
        (dragType == 1)){
         [pboard declareTypes:[NSArray arrayWithObject:NSStringPboardType] owner:nil];
         yn = [pboard setString:s forType:NSStringPboardType];
-    }else{
+    }else if (dragType == 2){
         [pboard declareTypes:[NSArray arrayWithObject:NSPDFPboardType] owner:nil];
         yn = [pboard setData:[PDFpreviewer PDFDataFromString:s] forType:NSPDFPboardType];
+    }else if (dragType == 3){
+	[pboard declareTypes:[NSArray arrayWithObject:NSRTFPboardType] owner:nil];
+        yn = [pboard setData:[PDFpreviewer rtfDataPreview] forType:NSRTFPboardType];
     }
     [localDragPboard declareTypes:[NSArray arrayWithObject:NSStringPboardType] owner:nil];
     [localDragPboard setString:localPBString forType:NSStringPboardType];

@@ -295,6 +295,14 @@ extern NSString* LocalDragPasteboardName;
 - (IBAction)copyAsPDF:(id)sender;
 
 /*!
+@method copyAsRTF
+@abstract copy as RTF typeset image
+@discussion puts the typeset image of the currently selected publications onto the general pasteboard rendered using tex and bibtex and the user's selected style file.
+@param sender The sender. Not used.
+*/
+- (IBAction)copyAsRTF:(id)sender;
+
+/*!
     @method setPublications
     @abstract Sets the publications array
     @discussion Simply replaces the publications array

@@ -2,7 +2,7 @@
     IBClasses = (
         {
             ACTIONS = {changeStartupBehavior = id; }; 
-            CLASS = BibPref_Startup; 
+            CLASS = "BibPref_Startup"; 
             LANGUAGE = ObjC; 
             OUTLETS = {
                 defaultBibFileField = NSTextField; 
@@ -17,8 +17,9 @@
                 changeStyle = id; 
                 changeTexBinPath = id; 
                 changeUsesTeX = id; 
+                openTeXpreviewFile = id; 
             }; 
-            CLASS = BibPref_TeX; 
+            CLASS = "BibPref_TeX"; 
             LANGUAGE = ObjC; 
             OUTLETS = {
                 bibTeXStyle = NSTextField; 

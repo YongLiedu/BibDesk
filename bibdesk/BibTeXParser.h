@@ -11,6 +11,7 @@
 #import "btparse.h"
 #import "BibAppController.h"
 @class BibItem;
+#import "BibItem.h"
 #import "BDSKConverter.h"
 
 @interface BibTeXParser : NSObject {

@@ -24,6 +24,7 @@
 #import "BibAuthor.h"
 #import "NSString+Templating.h"
 #import "BibPrefController.h"
+#import "NSString_BDSKExtensions.h"
 
 @class BibEditor;
 @class BibDocument;

@@ -68,4 +68,5 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 - (IBAction)copyAsPDF:(id)sender;
 - (int)numberOfSelectedPubs;
 - (NSEnumerator *)selectedPubEnumerator;
+- (IBAction)copyAsRTF:(id)sender;
 @end

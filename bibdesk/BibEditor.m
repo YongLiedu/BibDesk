@@ -579,7 +579,7 @@ NSString *BDSKUrlString = @"Url";
 }
 
 - (void)bibDidChange:(NSNotification *)notification{
-	BibItem *notifBib = [notification object];
+// unused	BibItem *notifBib = [notification object];
 	NSDictionary *userInfo = [notification userInfo];
 	NSString *changedTitle = [userInfo objectForKey:@"key"];
 	NSString *newValue = [userInfo objectForKey:@"value"];
@@ -754,5 +754,8 @@ NSString *BDSKUrlString = @"Url";
 		// do nothing, user cancelled
 	}
 	[addAuthorTextView setString:@""];
+}
+
+- (void)setDocument:(NSDocument *)d;{
 }
 @end

@@ -1283,6 +1283,8 @@ int generalBibItemCompareFunc(id item1, id item2, void *context){
         [self copyAsTex:self];
     }else if([[sud objectForKey:BDSKDragCopyKey] intValue] == 2){
         [self copyAsPDF:self];
+    }else if([[sud objectForKey:BDSKDragCopyKey] intValue] == 3){
+        [self copyAsRTF:self];
     }
 }
 
@@ -1341,6 +1343,22 @@ int generalBibItemCompareFunc(id item1, id item2, void *context){
     [pb setData:d forType:NSPDFPboardType];
 }
 
+- (IBAction)copyAsRTF:(id)sender{
+    NSPasteboard *pb = [NSPasteboard pasteboardWithName:NSGeneralPboard];
+    NSData *d;
+    NSNumber *i;
+    NSEnumerator *e = [self selectedPubEnumerator];
+    NSMutableString *bibString = [NSMutableString string];
+    
+    [pb declareTypes:[NSArray arrayWithObject:NSRTFPboardType] owner:nil];
+    while(i = [e nextObject]){
+        [bibString appendString:[[shownPublications objectAtIndex:[i intValue]] bibTeXString]];
+    }
+    [PDFpreviewer PDFFromString:bibString];
+    d = [PDFpreviewer rtfDataPreview];
+    [pb setData:d forType:NSRTFPboardType];
+    
+}
 // ----------------------------------------------------------------------------------------
 // paste: get text, parse it as bibtex, add the entry to publications and (optionally) edit it.
 // ----------------------------------------------------------------------------------------
@@ -1744,6 +1762,7 @@ int generalBibItemCompareFunc(id item1, id item2, void *context){
     if([[menuItem title] isEqualToString:@"Copy BibTex"] ||
        [[menuItem title] isEqualToString:@"Copy Tex Citation"] ||
        [[menuItem title] isEqualToString:@"Copy PDF Citation"] ||
+       [[menuItem title] isEqualToString:@"Copy RTF Citation"] ||
        [[menuItem title] isEqualToString:@"Edit Reference"] ||
        [[menuItem title] isEqualToString:@"Delete Reference"]){
         if([self numberOfSelectedPubs] != 0)

@@ -32,7 +32,8 @@ static NSColor *sStripeColor = nil;
                           writeRows:dragRows
                        toPasteboard:myPb]){
         types = [myPb types];
-	if([[myPb availableTypeFromArray:types] isEqualToString:NSStringPboardType])
+	if([[myPb availableTypeFromArray:types] isEqualToString:NSStringPboardType] || 
+	   [[myPb availableTypeFromArray:types] isEqualToString:NSRTFPboardType])
         {
             // draw the string into image
             s = [myPb stringForType:NSStringPboardType];

@@ -110,7 +110,7 @@
                                                  fileType:@"BibTeX"
                                                   authors:
                         [NSMutableArray arrayWithCapacity:0]];
-                    [newBI setFileOrder:itemOrder];
+		    [newBI setFileOrder:itemOrder];
                     itemOrder++;
                     field = NULL;
                     // Returned special case handling of abstract & annote.

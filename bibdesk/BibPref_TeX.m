@@ -48,4 +48,21 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
     [defaults setObject:[sender stringValue] forKey:BDSKBTStyleKey];
 }
 
+- (IBAction)openTeXpreviewFile:(id)sender{
+    // Edit the TeX template in the Application Support folder
+    NSString *applicationSupportPath = [[[NSHomeDirectory() stringByAppendingPathComponent:@"Library"]
+                                                             stringByAppendingPathComponent:@"Application Support"]
+                                                             stringByAppendingPathComponent:@"BibDesk"];
+    // edit the previewtemplate.tex file, so the bibpreview.tex is only edited by PDFPreviewer
+    NSString *path = [applicationSupportPath stringByAppendingPathComponent:@"previewtemplate.tex"];
+    NSURL *url = nil;
+
+    url = [NSURL fileURLWithPath:path];
+    // we could check to see if the file exists, but this is already done at startup
+	if([url isFileURL]){
+	    LSOpenCFURLRef((CFURLRef)url, NULL);
+	} else
+	    NSLog(@"The url is not a FileURL.");
+}
+
 @end

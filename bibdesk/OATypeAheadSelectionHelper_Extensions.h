@@ -12,6 +12,7 @@
 #import <Cocoa/Cocoa.h>
 #import <OmniFoundation/OFScheduler.h>
 #import <OmniAppKit/OATypeAheadSelectionHelper.h>
+#import <OmniFoundation/NSString-OFExtensions.h>
 
 @interface OATypeAheadSelectionHelper (BDSKExtensions)
 

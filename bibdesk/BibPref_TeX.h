@@ -29,6 +29,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 - (IBAction)changeTexBinPath:(id)sender;
 - (IBAction)changeBibTexBinPath:(id)sender;
 - (IBAction)changeStyle:(id)sender;
+- (IBAction)openTeXpreviewFile:(id)sender;
 
 
 @end

@@ -1,10 +1,13 @@
 {
     IBClasses = (
         {
-            ACTIONS = {handleClick = id; }; 
             CLASS = BDSKPreviewer; 
             LANGUAGE = ObjC; 
-            OUTLETS = {imagePreviewView = NSImageView; }; 
+            OUTLETS = {
+                imagePreviewView = PDFImageView; 
+                rtfPreviewView = NSTextView; 
+                splitView = NSSplitView; 
+            }; 
             SUPERCLASS = NSWindowController; 
         }, 
         {CLASS = BDSKZoomImageView; LANGUAGE = ObjC; SUPERCLASS = NSImageView; }, 
@@ -14,6 +17,7 @@
             LANGUAGE = ObjC; 
             SUPERCLASS = NSObject; 
         }, 
+        {CLASS = DraggableScrollView; LANGUAGE = ObjC; SUPERCLASS = NSScrollView; }, 
         {CLASS = FirstResponder; LANGUAGE = ObjC; SUPERCLASS = NSObject; }, 
         {CLASS = PDFImageView; LANGUAGE = ObjC; SUPERCLASS = NSImageView; }
     ); 

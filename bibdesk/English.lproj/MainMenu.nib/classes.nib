@@ -36,6 +36,7 @@
                 contextualMenuSelectTableColumn = id; 
                 copyAsBibTex = id; 
                 copyAsPDF = id; 
+                copyAsRTF = id; 
                 copyAsTex = id; 
                 delPub = id; 
                 didChangeQuickSearchKey = id; 
@@ -48,6 +49,8 @@
                 newPub = id; 
                 openCustomCitePrefPane = id; 
                 quickSearchAddField = id; 
+                searchFieldAction = id; 
+                searchFieldChangeKey = id; 
                 splitViewDoubleClick = id; 
                 toggleShowingCustomCiteDrawer = id; 
             }; 
@@ -78,6 +81,9 @@
                 rssExportAccessoryView = NSView; 
                 rssExportForm = NSForm; 
                 rssExportTextField = NSTextField; 
+                searchField = id; 
+                searchFieldBox = NSBox; 
+                searchFieldTextField = NSTextField; 
                 sortKeyButton = NSPopUpButton; 
                 sortKeyView = NSView; 
                 splitView = OASplitView; 
@@ -90,6 +96,7 @@
             ACTIONS = {
                 copyAsBibTex = id; 
                 copyAsPDF = id; 
+                copyAsRTF = id; 
                 copyAsTex = id; 
                 delPub = id; 
                 editPubCmd = id; 
@@ -97,6 +104,7 @@
                 exportAsHTML = id; 
                 exportAsRSS = id; 
                 makeSearchFieldKey = id; 
+                myAction = id; 
                 newPub = id; 
                 toggle = id; 
                 toggleShowingCustomCiteDrawer = id; 

@@ -222,10 +222,12 @@ static BibFinder *_sharedFinder = nil;
     OFPreferenceWrapper *sud = [OFPreferenceWrapper sharedPreferenceWrapper];
     if([[sud objectForKey:BDSKDragCopyKey] intValue] == 0){
         [self copyAsBibTex:self];
-    }if([[sud objectForKey:BDSKDragCopyKey] intValue] == 1){
+    }else if([[sud objectForKey:BDSKDragCopyKey] intValue] == 1){
         [self copyAsTex:self];
-    }else{
+    }else if([[sud objectForKey:BDSKDragCopyKey] intValue] == 2){
         [self copyAsPDF:self];
+    }else if([[sud objectForKey:BDSKDragCopyKey] intValue] == 3){
+        [self copyAsRTF:self];
     }
 }
 
@@ -281,6 +283,23 @@ static BibFinder *_sharedFinder = nil;
     }
     d = [PDFpreviewer PDFDataFromString:bibString];
     [pb setData:d forType:NSPDFPboardType];
+    
+}
+
+- (IBAction)copyAsRTF:(id)sender{
+    NSPasteboard *pb = [NSPasteboard pasteboardWithName:NSGeneralPboard];
+    NSData *d;
+    NSNumber *i;
+    NSEnumerator *e = [self selectedPubEnumerator];
+    NSMutableString *bibString = [NSMutableString string];
+    
+    [pb declareTypes:[NSArray arrayWithObject:NSRTFPboardType] owner:nil];
+    while(i = [e nextObject]){
+        [bibString appendString:[[foundBibs objectAtIndex:[i intValue]] bibTeXString]];
+    }
+    [PDFpreviewer PDFFromString:bibString];
+    d = [PDFpreviewer rtfDataPreview];
+    [pb setData:d forType:NSRTFPboardType];
     
 }
 

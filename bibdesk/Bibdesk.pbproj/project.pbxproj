@@ -817,6 +817,136 @@
 			refType = 4;
 			sourceTree = "<group>";
 		};
+		2762924C06384763008D783C = {
+			children = (
+				2762925D063848B9008D783C,
+				27629253063847C8008D783C,
+				27629257063847F1008D783C,
+				27629258063847F1008D783C,
+				27629259063847F1008D783C,
+				27629254063847C8008D783C,
+			);
+			isa = PBXGroup;
+			name = latex2rtf;
+			refType = 4;
+			sourceTree = "<group>";
+		};
+		27629253063847C8008D783C = {
+			fileEncoding = 30;
+			isa = PBXFileReference;
+			lastKnownFileType = text;
+			name = direct.cfg;
+			path = ../bibdesk_vendorsrc/latex2rtf_sourceforge/latex2rtf/cfg/direct.cfg;
+			refType = 2;
+			sourceTree = SOURCE_ROOT;
+		};
+		27629254063847C8008D783C = {
+			fileEncoding = 30;
+			isa = PBXFileReference;
+			lastKnownFileType = text;
+			name = english.cfg;
+			path = ../bibdesk_vendorsrc/latex2rtf_sourceforge/latex2rtf/cfg/english.cfg;
+			refType = 2;
+			sourceTree = SOURCE_ROOT;
+		};
+		27629255063847C8008D783C = {
+			fileRef = 27629253063847C8008D783C;
+			isa = PBXBuildFile;
+			settings = {
+			};
+		};
+		27629256063847C8008D783C = {
+			fileRef = 27629254063847C8008D783C;
+			isa = PBXBuildFile;
+			settings = {
+			};
+		};
+		27629257063847F1008D783C = {
+			fileEncoding = 30;
+			isa = PBXFileReference;
+			lastKnownFileType = text;
+			name = fonts.cfg;
+			path = ../bibdesk_vendorsrc/latex2rtf_sourceforge/latex2rtf/cfg/fonts.cfg;
+			refType = 2;
+			sourceTree = SOURCE_ROOT;
+		};
+		27629258063847F1008D783C = {
+			fileEncoding = 30;
+			isa = PBXFileReference;
+			lastKnownFileType = text;
+			name = ignore.cfg;
+			path = ../bibdesk_vendorsrc/latex2rtf_sourceforge/latex2rtf/cfg/ignore.cfg;
+			refType = 2;
+			sourceTree = SOURCE_ROOT;
+		};
+		27629259063847F1008D783C = {
+			fileEncoding = 30;
+			isa = PBXFileReference;
+			lastKnownFileType = text;
+			name = style.cfg;
+			path = ../bibdesk_vendorsrc/latex2rtf_sourceforge/latex2rtf/cfg/style.cfg;
+			refType = 2;
+			sourceTree = SOURCE_ROOT;
+		};
+		2762925A063847F1008D783C = {
+			fileRef = 27629257063847F1008D783C;
+			isa = PBXBuildFile;
+			settings = {
+			};
+		};
+		2762925B063847F1008D783C = {
+			fileRef = 27629258063847F1008D783C;
+			isa = PBXBuildFile;
+			settings = {
+			};
+		};
+		2762925C063847F1008D783C = {
+			fileRef = 27629259063847F1008D783C;
+			isa = PBXBuildFile;
+			settings = {
+			};
+		};
+		2762925D063848B9008D783C = {
+			isa = PBXFileReference;
+			lastKnownFileType = "compiled.mach-o.executable";
+			name = latex2rtf;
+			path = ../bibdesk_vendorsrc/latex2rtf_sourceforge/latex2rtf/latex2rtf;
+			refType = 2;
+			sourceTree = SOURCE_ROOT;
+		};
+		2762925E063848B9008D783C = {
+			fileRef = 2762925D063848B9008D783C;
+			isa = PBXBuildFile;
+			settings = {
+			};
+		};
+		2762926506384946008D783C = {
+			isa = PBXFileReference;
+			lastKnownFileType = image.tiff;
+			path = fingerCursor.tiff;
+			refType = 4;
+			sourceTree = "<group>";
+		};
+		2762926606384946008D783C = {
+			fileRef = 2762926506384946008D783C;
+			isa = PBXBuildFile;
+			settings = {
+			};
+		};
+		276292A506384A63008D783C = {
+			fileEncoding = 30;
+			isa = PBXFileReference;
+			lastKnownFileType = text;
+			path = previewtemplate.tex;
+			refType = 4;
+			sourceTree = "<group>";
+		};
+		276292A606384A63008D783C = {
+			fileRef = 276292A506384A63008D783C;
+			isa = PBXBuildFile;
+			settings = {
+			};
+		};
 		27730C30049B13ED00231206 = {
 			fileEncoding = 4;
 			isa = PBXFileReference;
@@ -1388,6 +1518,14 @@
 				F9C34101061363A600F55DFE,
 				F9C34102061363A600F55DFE,
 				F9C34103061363A600F55DFE,
+				27629255063847C8008D783C,
+				27629256063847C8008D783C,
+				2762925A063847F1008D783C,
+				2762925B063847F1008D783C,
+				2762925C063847F1008D783C,
+				2762925E063848B9008D783C,
+				2762926606384946008D783C,
+				276292A606384A63008D783C,
 			);
 			isa = PBXResourcesBuildPhase;
 			runOnlyForDeploymentPostprocessing = 0;
@@ -2068,6 +2206,7 @@
 			mainGroup = 2A37F4AAFDCFA73011CA2CEA;
 			projectDirPath = "";
 			targets = (
+				F99A21060607DD7A00DF3466,
 				270C1A5F05EFF7BF00943DD0,
 				27E0A9F405A7C86B005BA25A,
 				270C1A6B05EFFB5200943DD0,
@@ -2190,8 +2329,10 @@
 		};
 		2A37F4B8FDCFA73011CA2CEA = {
 			children = (
+				2762924C06384763008D783C,
 				F94E460F0610B17900A61471,
 				F561F4B0025893FC01709AC4,
+				2762926506384946008D783C,
 				F5385A1402EC07DE014378E3,
 				2773D37E058C457E00C5ABDA,
 				2773D3A2058C45FE00C5ABDA,
@@ -2206,6 +2347,7 @@
 				F562790802BAA17E01EF0AF1,
 				F59F40B301FE8A0101F4F503,
 				F5C8DE440207D33F01731AA0,
+				276292A506384A63008D783C,
 				F5C8DE490207E53E01731AA0,
 				F5A9B9300225EE6201EF0ACB,
 				F54EFE9E02500B7C01709AC4,
@@ -3595,6 +3737,37 @@
 			isa = PBXBuildFile;
 			settings = {
 			};
+		};
+		F99A21050607DD7A00DF3466 = {
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+			);
+			isa = PBXShellScriptBuildPhase;
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "cd $SOURCE_ROOT/../bibdesk_vendorsrc/latex2rtf_sourceforge/latex2rtf\nmake\nexit 0";
+		};
+		F99A21060607DD7A00DF3466 = {
+			buildPhases = (
+				F99A21050607DD7A00DF3466,
+			);
+			buildSettings = {
+				OTHER_CFLAGS = "";
+				OTHER_LDFLAGS = "";
+				OTHER_REZFLAGS = "";
+				PRODUCT_NAME = latex2rtf;
+				SECTORDER_FLAGS = "";
+				WARNING_CFLAGS = "-Wmost -Wno-four-char-constants -Wno-unknown-pragmas";
+			};
+			dependencies = (
+			);
+			isa = PBXAggregateTarget;
+			name = latex2rtf;
+			productName = latex2rtf;
 		};
 		F9B5E472062ADDE700C8A129 = {
 			fileEncoding = 30;
