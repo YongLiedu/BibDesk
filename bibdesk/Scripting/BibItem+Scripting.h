@@ -44,10 +44,6 @@
 - (NSString *)keywords;
 - (void)setKeywords:(NSString *)keywords;
 
-- (NSTextStorage*) attributedString;
-
-
-
 - (NSScriptObjectSpecifier *) objectSpecifier;
 
 

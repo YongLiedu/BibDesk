@@ -162,7 +162,7 @@ will translate this file into the necessary scriptSuite and scriptTerminology fi
                         <cocoa method="RSSValue"/>
                     </property>  
 					<property name="text" code="ctxt" type="text" description="Styled string containing bibliography entry for the publication." access="r">
-						<cocoa method="attributedString"/>
+						<cocoa method="attributedStringValue"/>
 					</property>                      
 					
 					<property name="note" code="note" type="string" description="Annotations for the publication as seen in the “Annote” tab.">

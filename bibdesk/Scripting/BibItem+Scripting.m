@@ -166,24 +166,6 @@ Extra wrapping of the created and modified date methods to
 
 /*
  ssp: 2004-07-11
- THIS IS VERY BROKEN
- (a) It doesn't do the right thing - probably it should return the RTF we get when choosing Copy as RTF. But that is generated at BibDocument level. A method to give this at BibItem level would be nice. (Modifying everything to not have the 'references' heading would be good as well. That way people could automatically build Bibliographies in TextEdit (or even Word ...)
- (b) It doesn't do things very well: We convert NSData to NSTextStorage, wher the NSData is generated from NSAttributedString. 
- (c) Somehow the style information doesn't make it all the way to AppleScript, i.e. I can't paste it into TextEdit, say. This is despite the logs suggesting that the information is passed to AS. Sketch.app seems to have the same problem, so something may be wrong to the appraoch. Q: Which application can handle passing styled text around via AppleScript properly?
-*/
-- (NSTextStorage*) attributedString {
-	NSTextStorage * myString = nil;
-	NSData * RTFData = [self RTFValue];
-	if (RTFData) {
-		NSDictionary * myDict;
-		myString = [[[NSTextStorage alloc] initWithRTF:RTFData documentAttributes:&myDict] autorelease];
-	}
-	return myString;
-}
-
-
-/*
- ssp: 2004-07-11
  Make the bibTeXString settable.
  The only way I could figure out how to initialise a new record with a BibTeX string.
  Mostly stolen from the -paste: method of the document class, i.e. I don't know what I'm doing.
@@ -191,9 +173,7 @@ Extra wrapping of the created and modified date methods to
  This may be a bit of a hack for a few reasons: (a) there seems to be no good way to initialise a BibItem from a BibString when it already exists and (b) I suspect this isn't the way you're supposed to do AS.
 */
 - (void) setBibTeXString:(NSString*) btString {
-	// "Texify" - whatever that is
-    NSString *texstr = [[BDSKConverter sharedConverter] stringByTeXifyingString:btString];
-    NSData *data = [texstr dataUsingEncoding:NSUTF8StringEncoding];
+    NSData *data = [btString dataUsingEncoding:NSUTF8StringEncoding];
 	NSScriptCommand * cmd = [NSScriptCommand currentCommand];
 
 	NSEnumerator *fnEnum = [pubFields keyEnumerator];
