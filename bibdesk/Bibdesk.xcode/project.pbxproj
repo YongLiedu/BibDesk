@@ -703,6 +703,7 @@
 				F9022CD1075804E400C3F701,
 				F9022CD3075804E400C3F701,
 				F9022CC0075804A600C3F701,
+				3D8CA0A307CB625300460D07,
 				F9022CC2075804A600C3F701,
 				27C162B8078BAE91008A4B83,
 				F9022CC4075804A600C3F701,
@@ -877,6 +878,30 @@
 		};
 		3D7D473107C51ACE00F8D262 = {
 			fileRef = 3D7D473007C51ACE00F8D262;
+			isa = PBXBuildFile;
+			settings = {
+			};
+		};
+		3D8CA0A307CB625300460D07 = {
+			children = (
+				3D8CA0A407CB625300460D07,
+			);
+			isa = PBXVariantGroup;
+			name = AutoFileProgress.nib;
+			path = "";
+			refType = 4;
+			sourceTree = "<group>";
+		};
+		3D8CA0A407CB625300460D07 = {
+			isa = PBXFileReference;
+			lastKnownFileType = wrapper.nib;
+			name = English;
+			path = English.lproj/AutoFileProgress.nib;
+			refType = 4;
+			sourceTree = "<group>";
+		};
+		3D8CA0A507CB625300460D07 = {
+			fileRef = 3D8CA0A307CB625300460D07;
 			isa = PBXBuildFile;
 			settings = {
 			};
@@ -1169,6 +1194,7 @@
 				3D18B26807C220BC00C365B6,
 				3D7D45BD07C4EDB100F8D262,
 				3D7D473107C51ACE00F8D262,
+				3D8CA0A507CB625300460D07,
 			);
 			isa = PBXResourcesBuildPhase;
 			runOnlyForDeploymentPostprocessing = 0;
