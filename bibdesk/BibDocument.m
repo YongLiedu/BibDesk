@@ -244,11 +244,7 @@ NSString *BDSKBibItemLocalDragPboardType = @"edu.ucsd.cs.mmccrack.bibdesk: Local
 }
 
 - (void) updateActionMenus:(id) aNotification {
-	// this updates the menu
-	[self menuForTableViewSelection:sourceList];
-    [self menuForTableViewSelection:tableView];
-	
-	[actionMenuButton setEnabled:([self numberOfSelectedPubs] != 0)];
+	// this does nothing for now
 }
 
 
