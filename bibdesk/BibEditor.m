@@ -323,8 +323,14 @@ NSString *BDSKUrlString = @"Url";
 }
 
 - (IBAction)citeKeyDidChange:(id)sender{
+    NSString *proposedCiteKey = [sender stringValue];
+
+    if([theDoc citeKeyIsUsed:proposedCiteKey byItemOtherThan:theBib]){
+        NSBeginCriticalAlertSheet(NSLocalizedString(@"",@""), NSLocalizedString(@"OK",@"OK"), nil, nil, [self window], self, NULL, NULL, NULL,
+                                  NSLocalizedString(@"The citation key you entered is already used in this document. Please change it.",@""), nil);
+    }
     if(tmpBib){
-        [tmpBib setCiteKey:[sender stringValue]];
+        [tmpBib setCiteKey:proposedCiteKey];
         if(![tmpBib isEqual: theBib]){
             [self updateChangeCount:NSChangeDone];
             [theDoc updateChangeCount:NSChangeDone];
