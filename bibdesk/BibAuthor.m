@@ -20,6 +20,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 @implementation BibAuthor
 
 + (BibAuthor *)authorWithName:(NSString *)newName andPub:(BibItem *)aPub{
+	//@@ this should be a factory method that checks if an author like this already exists...
     return [[[BibAuthor alloc] initWithName:newName andPub:aPub] autorelease];
 }
 
@@ -29,7 +30,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
         pubs = [[NSMutableArray arrayWithObject:aPub] retain];
     else
         pubs = [[NSMutableArray alloc] init];
-    // NSLog(@"bibauthor init: %@", aName);
+    NSLog(@"bibauthor init -- name:[%@] pub:[%@]", aName, aPub);
     return self;
 }
 
@@ -151,6 +152,16 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
     	
 	bt_free_name(theName);
 }
+
+// Accessors for personController - we don't retain it to avoid cycles.
+- (BibPersonController *)personController{
+    return _personController; 
+}
+
+- (void)setPersonController:(BibPersonController *)newPersonController{
+	_personController = newPersonController;
+}
+
 
 - (BibItem *)pubAtIndex:(int)index{
     return [pubs objectAtIndex: index];
