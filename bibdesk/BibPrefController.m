@@ -99,6 +99,7 @@ NSString *BDSKRssDescriptionString = @"Rss-Description";
 NSString *BDSKLocalUrlString = @"Local-Url";
 NSString *BDSKUrlString = @"Url";
 NSString *BDSKAuthorString = @"Author";
+NSString *BDSKEditorString = @"Editor";
 NSString *BDSKTitleString = @"Title";
 NSString *BDSKYearString = @"Year";
 NSString *BDSKMonthString = @"Month";

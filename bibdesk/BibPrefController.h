@@ -123,6 +123,7 @@ extern NSString *BDSKRssDescriptionString;
 extern NSString *BDSKLocalUrlString;
 extern NSString *BDSKUrlString;
 extern NSString *BDSKAuthorString;
+extern NSString *BDSKEditorString;
 extern NSString *BDSKTitleString;
 extern NSString *BDSKYearString;
 extern NSString *BDSKMonthString;

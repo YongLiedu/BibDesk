@@ -1051,6 +1051,7 @@ setupParagraphStyle()
 		if([k isEqualToString:BDSKAuthorString] && 
 		   [[OFPreferenceWrapper sharedPreferenceWrapper] boolForKey:BDSKShouldSaveNormalizedAuthorNames] && 
 		   ![v isComplex]){ // only if it's not complex, use the normalized author name
+		    if(![v isEqualToString:@""]) // pubAuthors will have an editor if no authors exist, but editors can't be written out as authors
 			v = [self bibTeXAuthorStringNormalized:YES];
 		}
 		
