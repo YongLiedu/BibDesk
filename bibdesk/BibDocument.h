@@ -337,6 +337,25 @@ extern NSString *BDSKBibItemLocalDragPboardType;
 - (BOOL)loadArchivedDataRepresentation:(NSData *)data;
 - (BOOL)readFromFile:(NSString *)fileName ofType:(NSString *)docType;
 
+/*!
+    @method     addPublicationInBackground:
+    @abstract   Used to add new publications in the background from a separate thread.
+    @discussion Only for opening documents, not for adding publications, as it resets the change count to keep from dirtying a newly opened file.
+    @param      pub (description)
+*/
+- (void)addPublicationInBackground:(BibItem *)pub;
+/*!
+    @method     startParseUpdateTimer
+    @abstract   Schedules a timer on the current run loop, which must be on the main thread.
+    @discussion Calls updateUI at regular intervals during background file parsing.
+*/
+- (void)startParseUpdateTimer;
+/*!
+    @method     stopParseUpdateTimer
+    @abstract   Stops the timer that is started for UI updates while parsing in the background.  This must be sent by the parser when it is finished.
+    @discussion (comprehensive description)
+*/
+- (void)stopParseUpdateTimer;
 
 
 // Responses to UI actions

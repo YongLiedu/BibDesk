@@ -335,7 +335,7 @@ NSString *BDSKBibItemLocalDragPboardType = @"edu.ucsd.cs.mmccrack.bibdesk: Local
     [publications addObject:pub usingLock:pubsLock];
     [shownPublications addObject:pub usingLock:pubsLock];
     [pub setDocument:self];
-    [self updateChangeCount:NSChangeCleared];
+    [self updateChangeCount:NSChangeCleared]; // this is only used for opening files, not for adding pubs
 }
 
 - (void)addPublication:(BibItem *)pub lastRequest:(BOOL)last{
@@ -503,6 +503,7 @@ NSString *BDSKBibItemLocalDragPboardType = @"edu.ucsd.cs.mmccrack.bibdesk: Local
     archiver = [[NSKeyedArchiver alloc] initForWritingWithMutableData:data];
     [archiver encodeObject:[self publications] forKey:@"publications"];
     [archiver encodeObject:[self collections] forKey:@"collections"];
+    [archiver encodeInt:[self documentStringEncoding] forKey:@"stringEncoding"];
     [archiver encodeObject:[self notes] forKey:@"notes"];
     [archiver encodeObject:[self sources] forKey:@"sources"];
     
@@ -864,6 +865,7 @@ stringByAppendingPathComponent:@"BibDesk"]; */
     unarchiver = [[NSKeyedUnarchiver alloc] initForReadingWithData:data];
     [self setNewPublicationsFromArchivedArray:[unarchiver decodeObjectForKey:@"publications"]];
     [self setCollections:[unarchiver decodeObjectForKey:@"collections"]];
+    [self setDocumentStringEncoding:[unarchiver decodeIntForKey:@"stringEncoding"]];
     
     foreach(collection, collections){
         [collection setParent:self];
@@ -980,7 +982,6 @@ stringByAppendingPathComponent:@"BibDesk"]; */
         
         NSAssert( fileContentString != nil, @"File contents returned a nil string, probably due to incorrect encoding choice.");
                 
-#warning ARM: Need to save document ivar for string encoding in binary file
         // NSLog(@"*** WARNING: using new parser.  To disable, use `defaults write edu.ucsd.cs.mmccrack.bibdesk \"Use Unicode BibTeX Parser\" 'NO'` and relaunch BibDesk.");
 
         [self startParseUpdateTimer]; // start on the main thread
@@ -1047,26 +1048,20 @@ stringByAppendingPathComponent:@"BibDesk"]; */
     // NSLog(@"%@", NSStringFromSelector(_cmd) );
     parseUpdateTimer = [NSTimer scheduledTimerWithTimeInterval:0.1
                                                target:self 
-                                             selector:@selector(backgroundUpdateUI)
+                                             selector:@selector(updateUI)
                                              userInfo:nil
                                               repeats:YES];
     [parseUpdateTimer fire];
 }
 
-- (void)backgroundUpdateUI{
-    // NSLog(@"%@", NSStringFromSelector(_cmd) );
-    [self performSelectorOnMainThread:@selector(updateUI) withObject:nil waitUntilDone:NO];
-}
-
 - (void)stopParseUpdateTimer{ // sent by the parser when it's done with a file
     [parseUpdateTimer invalidate];
-    [self backgroundUpdateUI];
+    [self performSelectorOnMainThread:@selector(updateUI) withObject:nil waitUntilDone:NO]; // make sure this is on the main thread
 }
 
 - (IBAction)newPub:(id)sender{
     [self createNewBlankPubAndEdit:YES];
 }
-
 
 - (void)handleTableViewBackspaceDel{
     id selectedSource = [sourceList selectedItem];
