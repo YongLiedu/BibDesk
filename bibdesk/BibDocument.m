@@ -705,8 +705,6 @@ didClickTableColumn: (NSTableColumn *) tableColumn{
     NSEnumerator *e = [self selectedPubEnumerator];
     NSNumber *i;
     BibItem *pub = nil;
-    int row = [tableView selectedRow];
-    int sortedRow = (sortDescending ? [shownPublications count] - 1 - row : row);
     NSFileWrapper *fw = nil;
     NSTextAttachment *att = nil;
     NSFileManager *dfm = [NSFileManager defaultManager];
@@ -714,7 +712,7 @@ didClickTableColumn: (NSTableColumn *) tableColumn{
     NSString *pubPath = nil;
     NSMutableAttributedString *body = [[NSMutableAttributedString alloc] init];
     NSMutableArray *files = [NSMutableArray array];
-    BOOL sent = NO;
+    //    BOOL sent = NO;
 
     // other way:
     NSPasteboard *pb = [NSPasteboard pasteboardWithName:@"BDMailPasteboard"];
