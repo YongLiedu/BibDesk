@@ -330,7 +330,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 							 action:@selector(revealLocal:)
 					  keyEquivalent:@""];
 	
-	[viewLocalMenu addItemWithTitle:NSLocalizedString(@"Choose File...",@"Choose file string")
+	[viewLocalMenu addItemWithTitle:NSLocalizedString(@"Choose File…",@"Choose file string")
 							 action:@selector(chooseLocalURL:)
 					  keyEquivalent:@""];
 	
@@ -461,7 +461,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 		return NO;
 	}
 	else if ([menuItem action] == @selector(generateCiteKey:)) {
-		[menuItem setTitle: NSLocalizedString(@"Generate Cite Key", @"Generate Cite Key")];
+		[menuItem setTitle: NSLocalizedString(@"Auto File Paper", @"Auto File Paper menu item")];
 		return YES;
 	}
 	else if ([menuItem action] == @selector(generateLocalUrl:)) {
