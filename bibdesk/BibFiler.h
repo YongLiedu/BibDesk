@@ -33,6 +33,14 @@
 
 + (BibFiler *)sharedFiler;
 
+- (void)filePapers:(NSArray *)papers fromDocument:(BibDocument *)doc ask:(BOOL)ask;
+- (void)movePath:(NSString *)path toPath:(NSString *)newPath forPaper:(BibItem *)paper fromDocument:(BibDocument *)doc moveAll:(BOOL)moveAll;
+- (void)prepareMoveForDocument:(BibDocument *)doc;
+- (void)finishMoveForDocument:(BibDocument *)doc;
+- (void)showProblems;
+- (IBAction)done:(id)sender;
+- (IBAction)showFile:(id)sender;
+
 - (void)showPreviewForPapers:(NSArray *)papers fromDocument:(BibDocument *)doc;
 - (void)doMoveAction:(id)sender;
 - (IBAction)cancelFromPreview:(id)sender;
@@ -42,6 +50,5 @@
 - (BOOL)fileManager:(NSFileManager *)manager shouldProceedAfterError:(NSDictionary *)errorInfo;
 
 - (IBAction)handleCleanupLinksAction:(id)sender;
-
 
 @end
