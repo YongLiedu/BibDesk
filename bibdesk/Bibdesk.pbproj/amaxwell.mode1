@@ -382,7 +382,7 @@
 	<key>StatusbarIsVisible</key>
 	<true/>
 	<key>TimeStamp</key>
-	<real>117400282.67527707</real>
+	<real>117400755.85859448</real>
 	<key>ToolbarDisplayMode</key>
 	<integer>2</integer>
 	<key>ToolbarIsVisible</key>
@@ -397,8 +397,8 @@
 	<integer>5</integer>
 	<key>WindowOrderList</key>
 	<array>
-		<string>F9906C2506FF61FC00CC4FCD</string>
 		<string>/Volumes/Local/Users/amaxwell/build/bibdesk/Bibdesk.pbproj</string>
+		<string>F9906C2506FF61FC00CC4FCD</string>
 	</array>
 	<key>WindowString</key>
 	<string>110 424 690 397 0 0 1280 832 </string>
