@@ -120,7 +120,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 												   object:nil];
         [[NSNotificationCenter defaultCenter] addObserver:self
                                                  selector:@selector(handleErrorNotification:)
-                                                     name:@"BTPARSE ERROR"
+                                                     name:BDSKParserErrorNotification
                                                    object:nil];
         _errors = [[NSMutableArray alloc] initWithCapacity:5];
         _finder = [[BibFinder sharedFinder] retain];

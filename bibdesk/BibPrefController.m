@@ -85,3 +85,4 @@ NSString *BDSKDocAddItemNotification = @"Added a bibitem to a document";
 NSString *BDSKDocWillRemoveItemNotification = @"Will remove a bibitem from a document";
 NSString *BDSKDocDelItemNotification = @"Removed a bibitem from a document";
 NSString *BDSKAuthorPubListChangedNotification = @"added to or deleted a pub from an author";
+NSString *BDSKParserErrorNotification = @"A parsing error occurred";

@@ -109,3 +109,4 @@ extern NSString *BDSKDocAddItemNotification;
 extern NSString *BDSKDocWillRemoveItemNotification;
 extern NSString *BDSKDocDelItemNotification;
 extern NSString *BDSKAuthorPubListChangedNotification;
+extern NSString *BDSKParserErrorNotification;
