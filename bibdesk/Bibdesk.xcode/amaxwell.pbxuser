@@ -8,7 +8,21 @@
 			8D1107260486CEB800E47090,
 		);
 		breakpoints = (
-			F997178807583E4B009CD3FD,
+			F92D3C790758EB1A00BE5D70,
+			F92D3C950758ED1300BE5D70,
+			F92D3C980758EDD000BE5D70,
+			F9A6A8700759211B004CEC31,
+			F9A6A87407592228004CEC31,
+			F9A6A87F07592478004CEC31,
+			F9A6A8840759253C004CEC31,
+			F9A6A8AF07592DE3004CEC31,
+			F9A6A8B107592E7E004CEC31,
+			F9A6A8B4075930A7004CEC31,
+			F920D89207593FB7000C5FCA,
+			F920D89507593FC8000C5FCA,
+			F920D89707593FCD000C5FCA,
+			F920D8A707594243000C5FCA,
+			F920D8CE07594AE1000C5FCA,
 		);
 		codeSenseManager = F9022BEC0758004000C3F701;
 		executables = (
@@ -45,7 +59,7 @@
 					210,
 					50,
 					20,
-					50,
+					48.1626,
 					43,
 					43,
 				);
@@ -59,7 +73,7 @@
 					PBXFileDataSource_Warnings_ColumnID,
 				);
 			};
-			PBXPerProjectTemplateStateSaveDate = 123224100;
+			PBXPerProjectTemplateStateSaveDate = 123288582;
 			PBXPrepackagedSmartGroups_v2 = (
 				{
 					PBXTransientLocationAtTop = bottom;
@@ -236,7 +250,15 @@
 					};
 				},
 			);
-			PBXWorkspaceStateSaveDate = 123224100;
+			PBXWorkspaceStateSaveDate = 123288582;
+		};
+		perUserProjectItems = {
+			F92D3C8C0758ECDC00BE5D70 = F92D3C8C0758ECDC00BE5D70;
+			F9A6A89907592BF7004CEC31 = F9A6A89907592BF7004CEC31;
+			F9A6A89D07592BF7004CEC31 = F9A6A89D07592BF7004CEC31;
+			F9A6A89E07592BF7004CEC31 = F9A6A89E07592BF7004CEC31;
+			F9A6A8B6075930B8004CEC31 = F9A6A8B6075930B8004CEC31;
+			F9A6A90E07593B6B004CEC31 = F9A6A90E07593B6B004CEC31;
 		};
 		sourceControlManager = F9022BEB0758004000C3F701;
 		userBuildSettings = {
@@ -281,6 +303,271 @@
 		savedGlobals = {
 		};
 		shlibInfoDictList = (
+			{
+				level = 0;
+				path = "/Volumes/Local/Users/amaxwell/IntermediateFiles/Bibdesk.build/Bibdesk.build/Objects-normal/ppc/NSString+Templating.ob";
+				whenToLoad = 0;
+			},
+			{
+				level = 0;
+				path = "/Volumes/Local/Users/amaxwell/IntermediateFiles/Bibdesk.build/Bibdesk.build/Objects-normal/ppc/NSString+XMLUtils.ob";
+				whenToLoad = 0;
+			},
+			{
+				level = 0;
+				path = "/Volumes/Local/Users/amaxwell/IntermediateFiles/Bibdesk.build/Bibdesk.build/Objects-normal/ppc/BDSKDragOutlineView.ob";
+				whenToLoad = 0;
+			},
+			{
+				level = 0;
+				path = "/Volumes/Local/Users/amaxwell/IntermediateFiles/Bibdesk.build/Bibdesk.build/Objects-normal/ppc/BDSKLinkButton.ob";
+				whenToLoad = 0;
+			},
+			{
+				level = 0;
+				path = "/Volumes/Local/Users/amaxwell/IntermediateFiles/Bibdesk.build/Bibdesk.build/Objects-normal/ppc/BibDocument_DataSource.ob";
+				whenToLoad = 0;
+			},
+			{
+				level = 0;
+				path = "/Volumes/Local/Users/amaxwell/IntermediateFiles/Bibdesk.build/Bibdesk.build/Objects-normal/ppc/BibPrefController.ob";
+				whenToLoad = 0;
+			},
+			{
+				level = 0;
+				path = "/Volumes/Local/Users/amaxwell/IntermediateFiles/Bibdesk.build/Bibdesk.build/Objects-normal/ppc/BibDocument.ob";
+				whenToLoad = 0;
+			},
+			{
+				level = 0;
+				path = "/Volumes/Local/Users/amaxwell/IntermediateFiles/Bibdesk.build/Bibdesk.build/Objects-normal/ppc/BibEditor.ob";
+				whenToLoad = 0;
+			},
+			{
+				level = 0;
+				path = "/Volumes/Local/Users/amaxwell/IntermediateFiles/Bibdesk.build/Bibdesk.build/Objects-normal/ppc/BibDocument+Menus.ob";
+				whenToLoad = 0;
+			},
+			{
+				level = 0;
+				path = "/Volumes/Local/Users/amaxwell/IntermediateFiles/Bibdesk.build/Bibdesk.build/Objects-normal/ppc/BibDocumentView_Toolbar.ob";
+				whenToLoad = 0;
+			},
+			{
+				level = 0;
+				path = "/Volumes/Local/Users/amaxwell/IntermediateFiles/Bibdesk.build/Bibdesk.build/Objects-normal/ppc/NSImage+Toolbox.ob";
+				whenToLoad = 0;
+			},
+			{
+				level = 0;
+				path = "/Volumes/Local/Users/amaxwell/IntermediateFiles/Bibdesk.build/Bibdesk.build/Objects-normal/ppc/NSString_BDSKExtensions.ob";
+				whenToLoad = 0;
+			},
+			{
+				level = 0;
+				path = "/Volumes/Local/Users/amaxwell/IntermediateFiles/Bibdesk.build/Bibdesk.build/Objects-normal/ppc/NSTextView_BDSKExtensions.ob";
+				whenToLoad = 0;
+			},
+			{
+				level = 0;
+				path = "/Volumes/Local/Users/amaxwell/IntermediateFiles/Bibdesk.build/Bibdesk.build/Objects-normal/ppc/OATypeAheadSelectionHelper_Extensions.ob";
+				whenToLoad = 0;
+			},
+			{
+				level = 0;
+				path = "/Volumes/Local/Users/amaxwell/IntermediateFiles/Bibdesk.build/Bibdesk.build/Objects-normal/ppc/BibAppController+Scripting.ob";
+				whenToLoad = 0;
+			},
+			{
+				level = 0;
+				path = "/Volumes/Local/Users/amaxwell/IntermediateFiles/Bibdesk.build/Bibdesk.build/Objects-normal/ppc/BibAppController.ob";
+				whenToLoad = 0;
+			},
+			{
+				level = 0;
+				path = "/Volumes/Local/Users/amaxwell/IntermediateFiles/Bibdesk.build/Bibdesk.build/Objects-normal/ppc/BibAuthor+Scripting.ob";
+				whenToLoad = 0;
+			},
+			{
+				level = 0;
+				path = "/Volumes/Local/Users/amaxwell/IntermediateFiles/Bibdesk.build/Bibdesk.build/Objects-normal/ppc/BibAuthor.ob";
+				whenToLoad = 0;
+			},
+			{
+				level = 0;
+				path = "/Volumes/Local/Users/amaxwell/IntermediateFiles/Bibdesk.build/Bibdesk.build/Objects-normal/ppc/BibDeskSearchForCommand.ob";
+				whenToLoad = 0;
+			},
+			{
+				level = 0;
+				path = "/Volumes/Local/Users/amaxwell/IntermediateFiles/Bibdesk.build/Bibdesk.build/Objects-normal/ppc/BibItem.ob";
+				whenToLoad = 0;
+			},
+			{
+				level = 0;
+				path = "/Volumes/Local/Users/amaxwell/IntermediateFiles/Bibdesk.build/Bibdesk.build/Objects-normal/ppc/BibDocument+Scripting.ob";
+				whenToLoad = 0;
+			},
+			{
+				level = 0;
+				path = "/Volumes/Local/Users/amaxwell/IntermediateFiles/Bibdesk.build/Bibdesk.build/Objects-normal/ppc/BibItem+Scripting.ob";
+				whenToLoad = 0;
+			},
+			{
+				level = 0;
+				path = "/Volumes/Local/Users/amaxwell/IntermediateFiles/Bibdesk.build/Bibdesk.build/Objects-normal/ppc/main.ob";
+				whenToLoad = 0;
+			},
+			{
+				level = 0;
+				path = "/Volumes/Local/Users/amaxwell/IntermediateFiles/Bibdesk.build/Bibdesk.build/Objects-normal/ppc/BibPref_Defaults.ob";
+				whenToLoad = 0;
+			},
+			{
+				level = 0;
+				path = "/Volumes/Local/Users/amaxwell/IntermediateFiles/Bibdesk.build/Bibdesk.build/Objects-normal/ppc/BibPref_RSS.ob";
+				whenToLoad = 0;
+			},
+			{
+				level = 0;
+				path = "/Volumes/Local/Users/amaxwell/IntermediateFiles/Bibdesk.build/Bibdesk.build/Objects-normal/ppc/BibPref_CiteKey.ob";
+				whenToLoad = 0;
+			},
+			{
+				level = 0;
+				path = "/Volumes/Local/Users/amaxwell/IntermediateFiles/Bibdesk.build/Bibdesk.build/Objects-normal/ppc/BibPref_General.ob";
+				whenToLoad = 0;
+			},
+			{
+				level = 0;
+				path = "/Volumes/Local/Users/amaxwell/IntermediateFiles/Bibdesk.build/Bibdesk.build/Objects-normal/ppc/BibPref_TeX.ob";
+				whenToLoad = 0;
+			},
+			{
+				level = 0;
+				path = "/Volumes/Local/Users/amaxwell/IntermediateFiles/Bibdesk.build/Bibdesk.build/Objects-normal/ppc/BibPref_InputManager.ob";
+				whenToLoad = 0;
+			},
+			{
+				level = 0;
+				path = "/Volumes/Local/Users/amaxwell/IntermediateFiles/Bibdesk.build/Bibdesk.build/Objects-normal/ppc/BibPref_Cite.ob";
+				whenToLoad = 0;
+			},
+			{
+				level = 0;
+				path = "/Volumes/Local/Users/amaxwell/IntermediateFiles/Bibdesk.build/Bibdesk.build/Objects-normal/ppc/BibPref_AutoFile.ob";
+				whenToLoad = 0;
+			},
+			{
+				level = 0;
+				path = "/Volumes/Local/Users/amaxwell/IntermediateFiles/Bibdesk.build/Bibdesk.build/Objects-normal/ppc/BibFinder.ob";
+				whenToLoad = 0;
+			},
+			{
+				level = 0;
+				path = "/Volumes/Local/Users/amaxwell/IntermediateFiles/Bibdesk.build/Bibdesk.build/Objects-normal/ppc/BDSKPreviewer.ob";
+				whenToLoad = 0;
+			},
+			{
+				level = 0;
+				path = /Volumes/Local/Users/amaxwell/Library/InputManagers/TextExtras/TextExtras.bundle/Contents/MacOS/TextExtras;
+				whenToLoad = 0;
+			},
+			{
+				level = 0;
+				path = /Volumes/Local/Users/amaxwell/Library/InputManagers/BibDeskInputManager/BibDeskInputManager.bundle/Contents/MacOS/BibDeskInputManager;
+				whenToLoad = 0;
+			},
+			{
+				level = 0;
+				path = /Volumes/Local/Users/amaxwell/Library/InputManagers/IncrementalSearchInputManager/IncrementalSearchInputManager.bundle/Contents/MacOS/IncrementalSearchInputManager;
+				whenToLoad = 0;
+			},
+			{
+				level = 0;
+				path = /System/Library/Frameworks/ApplicationServices.framework/Versions/A/Frameworks/CoreGraphics.framework/Versions/A/Resources/libOpenGLContext.A.dylib;
+				whenToLoad = 0;
+			},
+			{
+				level = 0;
+				path = "/Volumes/Local/Users/amaxwell/IntermediateFiles/Bibdesk.build/Bibdesk.build/Objects-normal/ppc/BibTeXParser.ob";
+				whenToLoad = 0;
+			},
+			{
+				level = 0;
+				path = /Developer/Applications/Xcode.app/Contents/PlugIns/GDBMIDebugging.xcplugin/Contents/Resources/PBGDBIntrospectionSupport.A.dylib;
+				whenToLoad = 0;
+			},
+			{
+				level = 0;
+				path = /System/Library/Frameworks/AppKit.framework/Versions/C/AppKit;
+				whenToLoad = 0;
+			},
+			{
+				level = 0;
+				path = /System/Library/Frameworks/ApplicationServices.framework/Versions/A/Frameworks/AE.framework/Versions/A/AE;
+				whenToLoad = 0;
+			},
+			{
+				level = 0;
+				path = /System/Library/Frameworks/Carbon.framework/Versions/A/Frameworks/HIToolbox.framework/Versions/A/HIToolbox;
+				whenToLoad = 0;
+			},
+			{
+				level = 0;
+				path = "/Volumes/Local/Users/amaxwell/IntermediateFiles/Bibdesk.build/Bibdesk.build/Objects-normal/ppc/libbtparse.ab";
+				whenToLoad = 0;
+			},
+			{
+				level = 0;
+				path = "/Volumes/Local/Users/amaxwell/IntermediateFiles/Bibdesk.build/Bibdesk.build/Objects-normal/ppc/BibTypeManager.ob";
+				whenToLoad = 0;
+			},
+			{
+				level = 0;
+				path = "/Volumes/Local/Users/amaxwell/IntermediateFiles/Bibdesk.build/Bibdesk.build/Objects-normal/ppc/BDSKConverter.ob";
+				whenToLoad = 0;
+			},
+			{
+				level = 0;
+				path = "/Volumes/Local/Users/amaxwell/IntermediateFiles/Bibdesk.build/Bibdesk.build/Objects-normal/ppc/BDSKDragTableView.ob";
+				whenToLoad = 0;
+			},
+			{
+				level = 0;
+				path = "/Volumes/Local/Users/amaxwell/IntermediateFiles/Bibdesk.build/Bibdesk.build/Objects-normal/ppc/BDSKCustomCiteTableView.ob";
+				whenToLoad = 0;
+			},
+			{
+				level = 0;
+				path = "/Volumes/Local/Users/amaxwell/IntermediateFiles/Bibdesk.build/Bibdesk.build/Objects-normal/ppc/BDSKPopUpButtonCell.ob";
+				whenToLoad = 0;
+			},
+			{
+				level = 0;
+				path = /System/Library/Frameworks/OpenGL.framework/Versions/A/Resources/GLEngine.bundle/GLEngine;
+				whenToLoad = 0;
+			},
+			{
+				level = 0;
+				path = /System/Library/Frameworks/OpenGL.framework/Versions/A/Libraries/libGLProgrammability.dylib;
+				whenToLoad = 0;
+			},
+			{
+				level = 0;
+				path = /System/Library/Extensions/ATIRadeon9700GLDriver.bundle/Contents/MacOS/ATIRadeon9700GLDriver;
+				whenToLoad = 0;
+			},
+			{
+				level = 0;
+				path = "/Volumes/Local/Users/amaxwell/IntermediateFiles/Bibdesk.build/Bibdesk.build/Objects-normal/ppc/DraggableScrollView.ob";
+				whenToLoad = 0;
+			},
+			{
+				level = 0;
+				path = "/Volumes/Local/Users/amaxwell/IntermediateFiles/Bibdesk.build/Bibdesk.build/Objects-normal/ppc/PDFImageView.ob";
+				whenToLoad = 0;
+			},
 		);
 		sourceDirectories = (
 		);
@@ -297,6 +584,14 @@
 		indexTemplatePath = "";
 		isa = PBXCodeSenseManager;
 	};
+	F9022C200758015B00C3F701 = {
+		uiCtxt = {
+			sepNavIntBoundsRect = "{{0, 0}, {706, 5250}}";
+			sepNavSelRange = "{9992, 31}";
+			sepNavVisRect = "{{0, 3811}, {706, 429}}";
+			sepNavWindowFrame = "{{123, 3}, {750, 558}}";
+		};
+	};
 	F9022C240758018600C3F701 = {
 		uiCtxt = {
 			sepNavIntBoundsRect = "{{0, 0}, {860, 1119}}";
@@ -305,21 +600,214 @@
 			sepNavWindowFrame = "{{15, 269}, {750, 558}}";
 		};
 	};
+	F9022C400758027800C3F701 = {
+		uiCtxt = {
+			sepNavIntBoundsRect = "{{0, 0}, {4544, 756}}";
+			sepNavSelRange = "{2047, 0}";
+			sepNavVisRect = "{{0, 213}, {706, 429}}";
+			sepNavWindowFrame = "{{15, 269}, {750, 558}}";
+		};
+	};
+	F9022C410758027800C3F701 = {
+		uiCtxt = {
+			sepNavIntBoundsRect = "{{0, 0}, {4544, 3864}}";
+			sepNavSelRange = "{5397, 0}";
+			sepNavVisRect = "{{0, 1117}, {706, 429}}";
+			sepNavWindowFrame = "{{222, 80}, {750, 558}}";
+		};
+	};
+	F9022C63075802E300C3F701 = {
+		uiCtxt = {
+			sepNavIntBoundsRect = "{{0, 0}, {4544, 532}}";
+			sepNavSelRange = "{0, 0}";
+			sepNavVisRect = "{{0, 0}, {706, 429}}";
+			sepNavWindowFrame = "{{268, 38}, {750, 558}}";
+		};
+	};
+	F9022C64075802E300C3F701 = {
+		uiCtxt = {
+			sepNavIntBoundsRect = "{{0, 0}, {4544, 5558}}";
+			sepNavSelRange = "{14617, 38}";
+			sepNavVisRect = "{{0, 4581}, {706, 429}}";
+			sepNavWindowFrame = "{{153, 143}, {750, 558}}";
+		};
+	};
+	F9022C65075802E300C3F701 = {
+		uiCtxt = {
+			sepNavIntBoundsRect = "{{0, 0}, {4544, 7910}}";
+			sepNavSelRange = "{5773, 26}";
+			sepNavVisRect = "{{0, 1795}, {706, 429}}";
+			sepNavWindowFrame = "{{61, 227}, {750, 558}}";
+		};
+	};
 	F9022C66075802E300C3F701 = {
 		uiCtxt = {
-			sepNavIntBoundsRect = "{{0, 0}, {4544, 32703}}";
-			sepNavSelRange = "{27829, 51}";
-			sepNavVisRect = "{{0, 8893}, {705, 428}}";
-			sepNavWindowFrame = "{{61, 227}, {750, 558}}";
+			sepNavIntBoundsRect = "{{0, 0}, {4544, 32830}}";
+			sepNavSelRange = "{13766, 0}";
+			sepNavVisRect = "{{0, 4405}, {693, 277}}";
+			sepNavWindowFrame = "{{185, 188}, {1015, 560}}";
+		};
+	};
+	F9022C6E075802E300C3F701 = {
+		uiCtxt = {
+			sepNavIntBoundsRect = "{{0, 0}, {1004, 15862}}";
+			sepNavSelRange = "{12017, 0}";
+			sepNavVisRect = "{{0, 4933}, {706, 429}}";
+			sepNavWindowFrame = "{{240, 274}, {750, 558}}";
 		};
 	};
 	F9022C960758038000C3F701 = {
 		uiCtxt = {
-			sepNavIntBoundsRect = "{{0, 0}, {1124, 3289}}";
-			sepNavSelRange = "{1083, 0}";
-			sepNavVisRect = "{{0, 348}, {705, 428}}";
-			sepNavWindowFrame = "{{84, 206}, {750, 558}}";
+			sepNavIntBoundsRect = "{{0, 0}, {1124, 3304}}";
+			sepNavSelRange = "{10839, 0}";
+			sepNavVisRect = "{{0, 2605}, {706, 429}}";
+			sepNavWindowFrame = "{{429, 274}, {750, 558}}";
 		};
+	};
+	F9022CA20758038000C3F701 = {
+		uiCtxt = {
+			sepNavIntBoundsRect = "{{0, 0}, {4556, 429}}";
+			sepNavSelRange = "{0, 0}";
+			sepNavVisRect = "{{0, 0}, {706, 429}}";
+			sepNavWindowFrame = "{{176, 122}, {750, 558}}";
+		};
+	};
+	F9022CA30758038000C3F701 = {
+		uiCtxt = {
+			sepNavIntBoundsRect = "{{0, 0}, {4550, 1484}}";
+			sepNavSelRange = "{4684, 0}";
+			sepNavVisRect = "{{0, 1207}, {693, 277}}";
+			sepNavWindowFrame = "{{268, 38}, {750, 558}}";
+		};
+	};
+	F9022CB9075803AC00C3F701 = {
+		uiCtxt = {
+			sepNavIntBoundsRect = "{{0, 0}, {4544, 1176}}";
+			sepNavSelRange = "{0, 0}";
+			sepNavVisRect = "{{0, 0}, {706, 429}}";
+			sepNavWindowFrame = "{{130, 164}, {750, 558}}";
+		};
+	};
+	F920D89007593FB7000C5FCA = {
+		isa = PBXFileReference;
+		lastKnownFileType = sourcecode.c.objc;
+		name = OFQueueProcessor.m;
+		path = /Volumes/Local/Users/amaxwell/build/bibdesk_vendorsrc/OmniGroup/OmniFoundation/Scheduling.subproj/OFQueueProcessor.m;
+		refType = 0;
+		sourceTree = "<absolute>";
+		uiCtxt = {
+			sepNavIntBoundsRect = "{{0, 0}, {1004, 2716}}";
+			sepNavSelRange = "{2976, 0}";
+			sepNavVisRect = "{{0, 1199}, {693, 277}}";
+		};
+	};
+	F920D89207593FB7000C5FCA = {
+		fileReference = F920D89007593FB7000C5FCA;
+		functionName = "-processQueueUntilEmpty:forTime:";
+		isa = PBXFileBreakpoint;
+		lineNumber = 89;
+		state = 2;
+	};
+	F920D89307593FC8000C5FCA = {
+		isa = PBXFileReference;
+		lastKnownFileType = sourcecode.c.objc;
+		name = OFScheduler.m;
+		path = /Volumes/Local/Users/amaxwell/build/bibdesk_vendorsrc/OmniGroup/OmniFoundation/Scheduling.subproj/OFScheduler.m;
+		refType = 0;
+		sourceTree = "<absolute>";
+		uiCtxt = {
+			sepNavIntBoundsRect = "{{0, 0}, {1310, 5194}}";
+			sepNavSelRange = "{9463, 0}";
+			sepNavVisRect = "{{0, 4475}, {693, 277}}";
+		};
+	};
+	F920D89507593FC8000C5FCA = {
+		fileReference = F920D89307593FC8000C5FCA;
+		functionName = "-invokeScheduledEvents";
+		isa = PBXFileBreakpoint;
+		lineNumber = 272;
+		state = 2;
+	};
+	F920D89707593FCD000C5FCA = {
+		fileReference = F920D89307593FC8000C5FCA;
+		functionName = "-invokeEvents:";
+		isa = PBXFileBreakpoint;
+		lineNumber = 321;
+		state = 2;
+	};
+	F920D8A707594243000C5FCA = {
+		fileReference = F9022CA30758038000C3F701;
+		functionName = "-rebuildTypeAheadSearchCache";
+		isa = PBXFileBreakpoint;
+		lineNumber = 27;
+		state = 1;
+	};
+	F920D8CE07594AE1000C5FCA = {
+		fileReference = F9022CA30758038000C3F701;
+		functionName = "-newProcessKeyDownCharacter:";
+		isa = PBXFileBreakpoint;
+		lineNumber = 28;
+		state = 1;
+	};
+	F92D3C790758EB1A00BE5D70 = {
+		fileReference = F9022C410758027800C3F701;
+		functionName = "-dealloc";
+		isa = PBXFileBreakpoint;
+		lineNumber = 105;
+		state = 1;
+	};
+	F92D3C8C0758ECDC00BE5D70 = {
+		fRef = F92D3C8D0758ECDC00BE5D70;
+		isa = PBXTextBookmark;
+		name = OATypeAheadSelectionHelper;
+		rLen = 26;
+		rLoc = 556;
+		rType = 0;
+		vrLen = 308;
+		vrLoc = 398;
+	};
+	F92D3C8D0758ECDC00BE5D70 = {
+		isa = PBXFileReference;
+		lastKnownFileType = sourcecode.c.objc;
+		name = OATypeAheadSelectionHelper.m;
+		path = /Volumes/Local/Users/amaxwell/build/bibdesk_vendorsrc/OmniGroup/OmniAppKit/Widgets.subproj/OATypeAheadSelectionHelper.m;
+		refType = 0;
+		sourceTree = "<absolute>";
+	};
+	F92D3C900758ECDC00BE5D70 = {
+		isa = PBXFileReference;
+		lastKnownFileType = sourcecode.c.objc;
+		name = OATypeAheadSelectionHelper.m;
+		path = /Volumes/Local/Users/amaxwell/build/bibdesk_vendorsrc/OmniGroup/OmniAppKit/Widgets.subproj/OATypeAheadSelectionHelper.m;
+		refType = 0;
+		sourceTree = "<absolute>";
+		uiCtxt = {
+			sepNavIntBoundsRect = "{{0, 0}, {1316, 2436}}";
+			sepNavSelRange = "{1634, 0}";
+			sepNavVisRect = "{{0, 835}, {693, 277}}";
+		};
+	};
+	F92D3C950758ED1300BE5D70 = {
+		fileReference = F92D3C900758ECDC00BE5D70;
+		functionName = "-dealloc";
+		isa = PBXFileBreakpoint;
+		lineNumber = 34;
+		state = 1;
+	};
+	F92D3C980758EDD000BE5D70 = {
+		fileReference = F92D3C900758ECDC00BE5D70;
+		functionName = "-_typeAheadSearchTimeout";
+		isa = PBXFileBreakpoint;
+		lineNumber = 124;
+		state = 1;
+	};
+	F92D3CA60758F0A600BE5D70 = {
+		isa = PBXFileReference;
+		lastKnownFileType = sourcecode.c.objc;
+		name = OATypeAheadSelectionHelper.m;
+		path = /Volumes/Local/Users/amaxwell/build/bibdesk_vendorsrc/OmniGroup/OmniAppKit/Widgets.subproj/OATypeAheadSelectionHelper.m;
+		refType = 0;
+		sourceTree = "<absolute>";
 	};
 	F98870A107580D63001D4D49 = {
 		activeExec = 0;
@@ -348,12 +836,109 @@
 	F98870D407580E94001D4D49 = {
 		activeExec = 0;
 	};
-	F997178807583E4B009CD3FD = {
-		fileReference = F9022C960758038000C3F701;
-		functionName = "+itemsFromData:error:frontMatter:filePath:";
+	F9A6A8700759211B004CEC31 = {
+		fileReference = F9022C410758027800C3F701;
+		functionName = "-keyDown:";
 		isa = PBXFileBreakpoint;
-		lineNumber = 24;
+		lineNumber = 134;
 		state = 1;
+	};
+	F9A6A87407592228004CEC31 = {
+		fileReference = F9022CA30758038000C3F701;
+		functionName = "-newProcessKeyDownCharacter:";
+		isa = PBXFileBreakpoint;
+		lineNumber = 36;
+		state = 1;
+	};
+	F9A6A87F07592478004CEC31 = {
+		fileReference = F9022CA30758038000C3F701;
+		functionName = "-_indexOfItemWithSubstring:afterIndex:";
+		isa = PBXFileBreakpoint;
+		lineNumber = 98;
+		state = 1;
+	};
+	F9A6A8840759253C004CEC31 = {
+		fileReference = F92D3CA60758F0A600BE5D70;
+		functionName = "-rebuildTypeAheadSearchCache";
+		isa = PBXFileBreakpoint;
+		lineNumber = 71;
+		state = 1;
+	};
+	F9A6A89907592BF7004CEC31 = {
+		fRef = F92D3CA60758F0A600BE5D70;
+		isa = PBXTextBookmark;
+		name = TypeAhead;
+		rLen = 9;
+		rLoc = 335;
+		rType = 0;
+		vrLen = 184;
+		vrLoc = 256;
+	};
+	F9A6A89D07592BF7004CEC31 = {
+		fRef = F92D3CA60758F0A600BE5D70;
+		isa = PBXTextBookmark;
+		name = TypeAhead;
+		rLen = 9;
+		rLoc = 335;
+		rType = 0;
+		vrLen = 184;
+		vrLoc = 256;
+	};
+	F9A6A89E07592BF7004CEC31 = {
+		fRef = F9022C64075802E300C3F701;
+		isa = PBXTextBookmark;
+		name = bibtexAuthorString;
+		rLen = 18;
+		rLoc = 15320;
+		rType = 0;
+		vrLen = 215;
+		vrLoc = 15142;
+	};
+	F9A6A8AF07592DE3004CEC31 = {
+		fileReference = F9022C64075802E300C3F701;
+		functionName = "-currentlySelectedItem";
+		isa = PBXFileBreakpoint;
+		lineNumber = 357;
+		state = 1;
+	};
+	F9A6A8B107592E7E004CEC31 = {
+		fileReference = F9022C64075802E300C3F701;
+		functionName = "-typeAheadSelectionItems";
+		isa = PBXFileBreakpoint;
+		lineNumber = 351;
+		state = 1;
+	};
+	F9A6A8B4075930A7004CEC31 = {
+		fileReference = F9022CA30758038000C3F701;
+		functionName = "-_indexOfItemWithSubstring:afterIndex:";
+		isa = PBXFileBreakpoint;
+		lineNumber = 77;
+		state = 1;
+	};
+	F9A6A8B6075930B8004CEC31 = {
+		fRef = F9A6A8B7075930B8004CEC31;
+		isa = PBXTextBookmark;
+		rLen = 23;
+		rLoc = 16039;
+		rType = 0;
+	};
+	F9A6A8B7075930B8004CEC31 = {
+		isa = PBXFileReference;
+		lastKnownFileType = sourcecode.c.objc;
+		name = BibDocument_DataSource.m;
+		path = /Volumes/Local/Users/amaxwell/build/bibdesk/BibDocument_DataSource.m;
+		refType = 0;
+		sourceTree = "<absolute>";
+	};
+	F9A6A90E07593B6B004CEC31 = {
+		fRef = F9022C64075802E300C3F701;
+		isa = PBXTextBookmark;
+		name = typeAheadSelectionItems;
+		rLen = 23;
+		rLoc = 16039;
+		rType = 0;
+		vrLen = 483;
+		vrLoc = 15622;
 	};
 	F9F14A47075811CF008BA22F = {
 		activeExec = 0;

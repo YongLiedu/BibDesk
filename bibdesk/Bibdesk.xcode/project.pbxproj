@@ -386,10 +386,11 @@
 				HEADER_SEARCH_PATHS = "";
 				INFOPLIST_FILE = Info.plist;
 				INSTALL_PATH = "$(HOME)/Applications";
-				LIBRARY_SEARCH_PATHS = "";
+				LIBRARY_SEARCH_PATHS = "$(SOURCE_ROOT)/../bibdesk_vendorsrc/gward/btparse";
 				OTHER_LDFLAGS = "";
 				PRODUCT_NAME = Bibdesk;
 				WRAPPER_EXTENSION = app;
+				ZERO_LINK = YES;
 			};
 			dependencies = (
 			);
@@ -613,9 +614,9 @@
 			isa = PBXFileReference;
 			lastKnownFileType = sourcecode.c.h;
 			name = BDAlias.h;
-			path = /Volumes/Local/Users/amaxwell/build/bibdesk_vendorsrc/BDistributed/BDAlias/BDAlias.h;
-			refType = 0;
-			sourceTree = "<absolute>";
+			path = ../bibdesk_vendorsrc/BDistributed/BDAlias/BDAlias.h;
+			refType = 4;
+			sourceTree = "<group>";
 		};
 		F9022C1C0758013E00C3F701 = {
 			fileEncoding = 30;
@@ -637,18 +638,18 @@
 			isa = PBXFileReference;
 			lastKnownFileType = sourcecode.c.h;
 			name = btparse.h;
-			path = /Volumes/Local/Users/amaxwell/build/bibdesk_vendorsrc/gward/btparse/src/btparse.h;
-			refType = 0;
-			sourceTree = "<absolute>";
+			path = ../bibdesk_vendorsrc/gward/btparse/src/btparse.h;
+			refType = 4;
+			sourceTree = "<group>";
 		};
 		F9022C230758018600C3F701 = {
 			fileEncoding = 30;
 			isa = PBXFileReference;
 			lastKnownFileType = sourcecode.c.h;
 			name = "NSString+Templating.h";
-			path = "/Volumes/Local/Users/amaxwell/build/bibdesk_vendorsrc/scifihifi/NSString_Templating/NSString+Templating.h";
-			refType = 0;
-			sourceTree = "<absolute>";
+			path = "../bibdesk_vendorsrc/scifihifi/NSString_Templating/NSString+Templating.h";
+			refType = 4;
+			sourceTree = "<group>";
 		};
 		F9022C240758018600C3F701 = {
 			fileEncoding = 30;
@@ -670,9 +671,9 @@
 			isa = PBXFileReference;
 			lastKnownFileType = sourcecode.c.h;
 			name = "NSString+XMLUtils.h";
-			path = "/Volumes/Local/Users/amaxwell/build/bibdesk_vendorsrc/scifihifi/NSString_XMLUtils/NSString+XMLUtils.h";
-			refType = 0;
-			sourceTree = "<absolute>";
+			path = "../bibdesk_vendorsrc/scifihifi/NSString_XMLUtils/NSString+XMLUtils.h";
+			refType = 4;
+			sourceTree = "<group>";
 		};
 		F9022C270758019600C3F701 = {
 			fileEncoding = 30;
@@ -694,9 +695,9 @@
 			isa = PBXFileReference;
 			lastKnownFileType = sourcecode.c.h;
 			name = RYZImagePopUpButton.h;
-			path = /Volumes/Local/Users/amaxwell/build/bibdesk_vendorsrc/ScotlandSoftware/ImagePopUpButton/RYZImagePopUpButton.h;
-			refType = 0;
-			sourceTree = "<absolute>";
+			path = ../bibdesk_vendorsrc/ScotlandSoftware/ImagePopUpButton/RYZImagePopUpButton.h;
+			refType = 4;
+			sourceTree = "<group>";
 		};
 		F9022C2A075801AC00C3F701 = {
 			fileEncoding = 30;
@@ -712,9 +713,9 @@
 			isa = PBXFileReference;
 			lastKnownFileType = sourcecode.c.h;
 			name = RYZImagePopUpButtonCell.h;
-			path = /Volumes/Local/Users/amaxwell/build/bibdesk_vendorsrc/ScotlandSoftware/ImagePopUpButton/RYZImagePopUpButtonCell.h;
-			refType = 0;
-			sourceTree = "<absolute>";
+			path = ../bibdesk_vendorsrc/ScotlandSoftware/ImagePopUpButton/RYZImagePopUpButtonCell.h;
+			refType = 4;
+			sourceTree = "<group>";
 		};
 		F9022C2C075801AC00C3F701 = {
 			fileEncoding = 30;
