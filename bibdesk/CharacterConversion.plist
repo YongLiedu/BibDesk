@@ -30,7 +30,7 @@
 		<string>*</string>
 		<key>…</key>
 		<string>{\ldots}</string>
-        <key>ﬀ</key>
+		<key>ﬀ</key>
 		<string>ff</string>
 		<key>ﬁ</key>
 		<string>fi</string>
@@ -55,6 +55,8 @@
 		<string>{\'A}</string>
 		<key>Â</key>
 		<string>{\^A}</string>
+		<key>Ã</key>
+		<string>{\~A}</string>
 		<key>Ä</key>
 		<string>{\"A}</string>
 		<key>Å</key>
@@ -99,8 +101,6 @@
 		<string>{\^a}</string>
 		<key>ã</key>
 		<string>{\~a}</string>
-		<key>Ã</key>
-		<string>{\~A}</string>
 		<key>ä</key>
 		<string>{\"a}</string>
 		<key>å</key>
@@ -149,6 +149,10 @@
 		<string>{\"u}</string>
 		<key>ÿ</key>
 		<string>{\"y}</string>
+		<key>Ā</key>
+		<string>{\=A}</string>
+		<key>ā</key>
+		<string>{\=a}</string>
 		<key>ć</key>
 		<string>{\'c}</string>
 		<key>Č</key>
@@ -157,6 +161,10 @@
 		<string>{\v c}</string>
 		<key>ě</key>
 		<string>{\v e}</string>
+		<key>Ī</key>
+		<string>{\=I}</string>
+		<key>ī</key>
+		<string>{\=\i}</string>
 		<key>ő</key>
 		<string>{\H o}</string>
 		<key>Œ</key>
@@ -167,26 +175,16 @@
 		<string>{\c s}</string>
 		<key>š</key>
 		<string>{\v s}</string>
+		<key>Ū</key>
+		<string>{\=U}</string>
+		<key>ū</key>
+		<string>{\=u}</string>
 		<key>Ÿ</key>
 		<string>{\"Y}</string>
 		<key>Ž</key>
 		<string>{\v Z}</string>
 		<key>ž</key>
 		<string>{\v z}</string>
-		<key>™</key>
-		<string>{\texttrademark}</string>
-		<key>Ā</key>
-		<string>{\=A}</string>
-		<key>ā</key>
-		<string>{\=a}</string>
-		<key>Ī</key>
-		<string>{\=I}</string>
-		<key>ī</key>
-		<string>{\=\i}</string>
-		<key>Ū</key>
-		<string>{\=U}</string>
-		<key>ū</key>
-		<string>{\=u}</string>
 		<key>Ḍ</key>
 		<string>{\d D}</string>
 		<key>ḍ</key>
@@ -207,6 +205,37 @@
 		<string>{\d Z}</string>
 		<key>ẓ</key>
 		<string>{\d z}</string>
+		<key>™</key>
+		<string>{\texttrademark}</string>
+	</dict>
+	<key>Roman to TeX Accents</key>
+	<dict>
+		<key>̀</key>
+		<string>`</string>
+		<key>́</key>
+		<string>'</string>
+		<key>̂</key>
+		<string>^</string>
+		<key>̃</key>
+		<string>~</string>
+		<key>̄</key>
+		<string>=</string>
+		<key>̆</key>
+		<string>u </string>
+		<key>̇</key>
+		<string>.</string>
+		<key>̈</key>
+		<string>"</string>
+		<key>̋</key>
+		<string>H </string>
+		<key>̌</key>
+		<string>v </string>
+		<key>̠</key>
+		<string>b </string>
+		<key>̣</key>
+		<string>d </string>
+		<key>̧</key>
+		<string>c </string>
 	</dict>
 	<key>TeX to Roman</key>
 	<dict>
@@ -258,6 +287,18 @@
 		<string>ó</string>
 		<key>{\'u}</key>
 		<string>ú</string>
+		<key>{\=A}</key>
+		<string>Ā</string>
+		<key>{\=I}</key>
+		<string>Ī</string>
+		<key>{\=U}</key>
+		<string>Ū</string>
+		<key>{\=\i}</key>
+		<string>ī</string>
+		<key>{\=a}</key>
+		<string>ā</string>
+		<key>{\=u}</key>
+		<string>ū</string>
 		<key>{\AA}</key>
 		<string>Å</string>
 		<key>{\AE}</key>
@@ -314,6 +355,26 @@
 		<string>ç</string>
 		<key>{\copyright}</key>
 		<string>©</string>
+		<key>{\d D}</key>
+		<string>Ḍ</string>
+		<key>{\d H}</key>
+		<string>Ḥ</string>
+		<key>{\d S}</key>
+		<string>Ṣ</string>
+		<key>{\d T}</key>
+		<string>Ṭ</string>
+		<key>{\d Z}</key>
+		<string>Ẓ</string>
+		<key>{\d d}</key>
+		<string>ḍ</string>
+		<key>{\d h}</key>
+		<string>ḥ</string>
+		<key>{\d s}</key>
+		<string>ṣ</string>
+		<key>{\d t}</key>
+		<string>ṭ</string>
+		<key>{\d z}</key>
+		<string>ẓ</string>
 		<key>{\oe}</key>
 		<string>œ</string>
 		<key>{\o}</key>
@@ -340,46 +401,43 @@
 		<string>š</string>
 		<key>{\v z}</key>
 		<string>ž</string>
-		<key>{\~a}</key>
-		<string>ã</string>
 		<key>{\~A}</key>
 		<string>Ã</string>
+		<key>{\~a}</key>
+		<string>ã</string>
 		<key>{\~n}</key>
 		<string>ñ</string>
 		<key>{\~o}</key>
 		<string>õ</string>
-		<key>{\=A}</key>
-		<string>Ā</string>
-		<key>{\=a}</key>
-		<string>ā</string>
-		<key>{\=I}</key>
-		<string>Ī</string>
-		<key>{\=\i}</key>
-		<string>ī</string>
-		<key>{\=U}</key>
-		<string>Ū</string>
-		<key>{\=u}</key>
-		<string>ū</string>
-		<key>{\d D}</key>
-		<string>Ḍ</string>
-		<key>{\d d}</key>
-		<string>ḍ</string>
-		<key>{\d H}</key>
-		<string>Ḥ</string>
-		<key>{\d h}</key>
-		<string>ḥ</string>
-		<key>{\d S}</key>
-		<string>Ṣ</string>
-		<key>{\d s}</key>
-		<string>ṣ</string>
-		<key>{\d T}</key>
-		<string>Ṭ</string>
-		<key>{\d t}</key>
-		<string>ṭ</string>
-		<key>{\d Z}</key>
-		<string>Ẓ</string>
-		<key>{\d z}</key>
-		<string>ẓ</string>
+	</dict>
+	<key>TeX to Roman Accents</key>
+	<dict>
+		<key>"</key>
+		<string>̈</string>
+		<key>'</key>
+		<string>́</string>
+		<key>.</key>
+		<string>̇</string>
+		<key>=</key>
+		<string>̄</string>
+		<key>H</key>
+		<string>̋</string>
+		<key>^</key>
+		<string>̂</string>
+		<key>`</key>
+		<string>̀</string>
+		<key>b</key>
+		<string>̠</string>
+		<key>c</key>
+		<string>̧</string>
+		<key>d</key>
+		<string>̣</string>
+		<key>u</key>
+		<string>̆</string>
+		<key>v</key>
+		<string>̌</string>
+		<key>~</key>
+		<string>̃</string>
 	</dict>
 </dict>
 </plist>
