@@ -205,7 +205,6 @@ NSString *BDSKUrlString = @"Url";
     NSWorkspace *sw = [NSWorkspace sharedWorkspace];
     
     BOOL err = NO;
-    NSURL *local;
 
     NS_DURING
 
@@ -286,7 +285,6 @@ NSString *BDSKUrlString = @"Url";
     NSString *lurl = [theBib localURLPathRelativeTo:[[theDoc fileName] stringByDeletingLastPathComponent]];
     NSString *rurl = [theBib valueOfField:BDSKUrlString];
     NSImage *icon;
-    NSURL *local;
     NSURL *remote = [NSURL URLWithString:rurl];
     NSDictionary *linkAttributes;
     NSMutableAttributedString *link = [[NSMutableAttributedString alloc] initWithString:rurl];
