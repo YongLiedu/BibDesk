@@ -388,7 +388,7 @@ NSString*   LocalDragPasteboardName = @"edu.ucsd.cs.mmccrack.bibdesk: Local Publ
 }
 
 - (BOOL)writeToFile:(NSString *)fileName ofType:(NSString *)docType{
-	if ([docType isEqualToString:@"PubMed File"]){
+	if ([docType isEqualToString:@"RIS/Medline File"]){
 		// Can't save pubmed files now. Could try saving as bibtex.
 		int returnCode = NSRunAlertPanel(@"Cannot Save as PubMed.",
 										 @"Saving PubMed Files is not currently supported. You can choose to save as BibTeX instead.",
