@@ -175,27 +175,6 @@
 - (NSString *)suggestedCiteKey;
 
 /*!
-    @method uniqueCiteKey:numberOfChars:from:to:force:
-    @abstract Tries to return a unique cite key
-    @discussion Tries to return a cite key that is unique in the receivers document by adding characters from a range of characters. 
-    @param citeKeyString The cite key string to base the unique cite key on
-	@param number The number of characters to add, when force is YES the minimal number
-	@param fromChar The first character in the range to use
-	@param toChar The last character of the range to use
-	@param force Determines whether to allow for more characters to force a unique key
-	@result A cite key that starts with citeKeyString and is unique when force is YES
-*/
-- (NSString *)uniqueCiteKey:(NSString *)citeKeyString numberOfChars:(unsigned int)number from:(unichar)fromChar to:(unichar)toChar force:(BOOL)force;
-
-/*!
-    @method citeKeyIsValid:
-    @abstract Returns whether a cite key is a valid cite key
-    @discussion This essentially calls the corresponding method of BibEditor. 
-	@param proposedCiteKey The trial cite key to check for validity
-*/
-- (BOOL)citeKeyIsValid:(NSString *)proposedCiteKey;
-
-/*!
 	@method     setCiteKeyString
 	@abstract   basic setter for the cite key, for initialization only.
 	@discussion -
@@ -294,6 +273,48 @@
 - (NSString *)allFieldsString; 
 
 - (NSString *)localURLPathRelativeTo:(NSString *)base; 
+
+/*!
+    @method parseFormat:forField:inType:
+    @abstract Generates a value for a field in a type based on the receiver and the format string
+    @discussion -
+    @param format The format string to use
+    @param fieldName The name of the field (e.g. "Author")
+    @param type The reference type (e.g. BibTeX, RIS)
+	@result The suggested cite key string
+*/
+- (NSString *)parseFormat:(NSString *)format forField:(NSString *)fieldName inType:(NSString *)type;
+
+/*!
+    @method uniqueString:forField:inType:numberOfChars:from:to:force:
+    @abstract Tries to return a unique string value for a field in a type, by adding characters from a range
+    @discussion -
+    @param baseString The string to base the unique string on
+    @param fieldName The name of the field (e.g. "Author")
+    @param type The reference type (e.g. BibTeX, RIS)
+	@param number The number of characters to add, when force is YES the minimal number
+	@param fromChar The first character in the range to use
+	@param toChar The last character of the range to use
+	@param force Determines whether to allow for more characters to force a unique key
+	@result A string value for field in type that starts with baseString and is unique when force is YES
+*/
+- (NSString *)uniqueString:(NSString *)baseString 
+				  forField:(NSString *)fieldName 
+					inType:(NSString *)type
+			 numberOfChars:(unsigned int)number 
+					  from:(unichar)fromChar 
+						to:(unichar)toChar 
+					 force:(BOOL)force;
+
+/*!
+    @method stringIsValid:forField:inType:
+    @abstract Returns whether a string is a valid as a value for a field in a type
+    @discussion -
+	@param proposedStr The trial string to check for validity
+    @param fieldName The name of the field (e.g. "Author")
+    @param type The reference type (e.g. BibTeX, RIS)
+*/
+- (BOOL)stringIsValid:(NSString *)proposedStr forField:(NSString *)fieldName inType:(NSString *)type;
 @end
 
 

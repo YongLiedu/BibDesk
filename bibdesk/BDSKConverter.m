@@ -39,7 +39,6 @@ static BDSKConverter *theConverter;
     [finalCharSet release];
     [texifyConversions release];
     [detexifyConversions release];
-    [strictInvalidCharSet release];
     [super dealloc];
 }
     
@@ -83,16 +82,6 @@ static BDSKConverter *theConverter;
     if(!detexifyConversions){
         detexifyConversions = [[NSDictionary dictionary] retain]; // an empty one won't break the code.
     }
-    
-    // moved from BibTypeManager, should be removed there
-    NSMutableCharacterSet *validSet = [[NSMutableCharacterSet alloc] init];
-    [validSet addCharactersInRange:NSMakeRange( (unsigned int)'a', 26)];
-    [validSet addCharactersInRange:NSMakeRange( (unsigned int)'A', 26)];
-    [validSet addCharactersInRange:NSMakeRange( (unsigned int)'0', 12)];  // get everything through semicolon
-    [validSet addCharactersInString:@"-/."];
-    
-    strictInvalidCharSet = [[validSet invert] copy];  // don't release this
-    [validSet release];
 }
 
 - (NSString *)stringByTeXifyingString:(NSString *)s{
@@ -272,26 +261,83 @@ static BDSKConverter *theConverter;
   return [convertedSoFar autorelease]; 
 }
 
-- (NSString *)stringBySanitizingCiteKeyString:(NSString *)key{
-    // only call this for keys that we generate internally, as it uses a restrictive character set
-	NSString *newCiteKey;
+- (NSString *)stringBySanitizingString:(NSString *)string forField:(NSString *)fieldName inType:(NSString *)type
+{
+	NSCharacterSet *invalidCharSet = [[BibTypeManager sharedManager] strictInvalidCharactersForField:fieldName inType:type];
 	
-    if(!key || [key isEqualToString:@""]){
-		return [NSString string];
-    }
+	if ([fieldName isEqualToString:@"Cite Key"]) {
+		NSString *newString;
+		
+		if (string == nil || [string isEqualToString:@""]) {
+			return @"";
+		}
+		newString = [self stringByDeTeXifyingString:string];
+		newString = [newString stringByReplacingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]
+													 withString:@"-"];
+		newString = [[[NSString alloc] initWithData:[newString dataUsingEncoding:NSASCIIStringEncoding allowLossyConversion:YES] 
+											encoding:NSASCIIStringEncoding] autorelease];
+		newString = [newString stringByReplacingCharactersInSet:invalidCharSet withString:@""];
+		
+		return newString;
+	}
+	else {
+		[NSException raise:@"unimpl. feat. exc." format:@"stringBySanitizingString:forField: is partly implemented"];
+		return string;
+	}
+}
+
+- (BOOL)validateFormat:(NSString **)formatString forField:(NSString *)fieldName inType:(NSString *)type
+{
+	// implemented specifiers, the same for any field and type
+	NSCharacterSet *validSpecifierChars = [NSCharacterSet characterSetWithCharactersInString:@"0123456789aAtmyYrRd"];
+	NSCharacterSet *validLastSpecifierChars = [NSCharacterSet characterSetWithCharactersInString:@"uUn"];
+	NSArray *components = [*formatString componentsSeparatedByString:@"%"];
+	NSString *string;
+	NSArray *arr;
+	NSMutableString *sanitizedFormatString = [NSMutableString string];
+	unichar specifier;
+	int i;
 	
-	newCiteKey = [self stringByDeTeXifyingString:key];
+	for (i = 0; i < [components count]; i++) {
+		// or should we sanitize here?
+		string = [components objectAtIndex:i];
+		if (i > 0) { //first part can be anything
+			[sanitizedFormatString appendString:@"%"];
+			if ([string isEqualToString:@""]) {
+				NSLog(@"Missing specifier character in format.");
+				return NO;
+			}
+			specifier = [string characterAtIndex:0];
+			if (![validSpecifierChars characterIsMember:specifier]) {
+				if (specifier == '{') {
+					arr = [string componentsSeparatedByString:@"}"];
+					if ([arr count] != 2) {
+						NSLog(@"Incomplete specifier {'field'} in format.");
+						return NO;
+					}
+					string = [self stringBySanitizingString:[arr objectAtIndex:0] forField:fieldName inType:type];
+					[sanitizedFormatString appendFormat:@"{%@}",string];
+					string = [self stringBySanitizingString:[arr objectAtIndex:1] forField:fieldName inType:type];
+				}
+				else if (	i < [components count] - 1 || 
+							![validLastSpecifierChars characterIsMember:specifier] || 
+							![[NSCharacterSet decimalDigitCharacterSet] 
+								isSupersetOfSet:[NSCharacterSet characterSetWithCharactersInString:[string substringFromIndex:1]]]) {
+				
+					NSLog(@"Invalid specifier %%%C in format.", specifier);
+					return NO;
+				}
+			}
+		}
+		// sanitize stuff in between, this should not affect any of our specifier chars
+		string = [self stringBySanitizingString:string forField:fieldName inType:type];
+		[sanitizedFormatString appendString:string];
+	}
 	
-	newCiteKey = [newCiteKey stringByReplacingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]
-												   withString:@"-"];
+	// change formatString
+	*formatString = [[sanitizedFormatString copy] autorelease];
 	
-	newCiteKey = [[[NSString alloc] initWithData:[newCiteKey dataUsingEncoding:NSASCIIStringEncoding allowLossyConversion:YES] 
-										encoding:NSASCIIStringEncoding] autorelease];
-	
-	// can we include this in unaccentConversions?
-	newCiteKey = [newCiteKey stringByReplacingCharactersInSet:strictInvalidCharSet withString:@""];
-	
-	return newCiteKey;
+	return YES;
 }
 
 @end

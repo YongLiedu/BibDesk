@@ -113,7 +113,7 @@
 	else { //changed the text field or added from the repository
 		formatString = [formatField stringValue];
 		//if ([formatString isEqualToString:[defaults stringForKey:BDSKCiteKeyFormatKey]]) return; // nothing changed
-		if ([self validateCiteKeyFormat:&formatString]) {
+		if ([[BDSKConverter sharedConverter] validateFormat:&formatString forField:@"Cite Key" inType:@"BibTeX"]) {
 			[defaults setObject:formatString forKey:BDSKCiteKeyFormatKey];
 		}
 		else {
@@ -122,60 +122,6 @@
 		}
 	}
 	[self updateUI];
-}
-
-// checks if the character after a % is a valid specifier character, sanitizes any other characters.
-- (BOOL)validateCiteKeyFormat:(NSString **)formatString{
-	NSCharacterSet *validSpecifierChars = [NSCharacterSet characterSetWithCharactersInString:@"0123456789aAtmyYrRd"];
-	NSCharacterSet *validLastSpecifierChars = [NSCharacterSet characterSetWithCharactersInString:@"uUn"];
-	NSArray *components = [*formatString componentsSeparatedByString:@"%"];
-	NSString *string;
-	NSArray *arr;
-	NSMutableString *sanitizedFormatString = [NSMutableString string];
-	unichar specifier;
-	int i;
-	
-	for (i = 0; i < [components count]; i++) {
-		// or should we sanitize here?
-		string = [components objectAtIndex:i];
-		if (i > 0) { //first part can be anything
-			[sanitizedFormatString appendString:@"%"];
-			if ([string isEqualToString:@""]) {
-				NSLog(@"Missing specifier character in cite key format.");
-				return NO;
-			}
-			specifier = [string characterAtIndex:0];
-			//last one can be [u,U,n]+digits, {field} is special
-			if (![validSpecifierChars characterIsMember:specifier]) {
-				if (specifier == '{') {
-					arr = [string componentsSeparatedByString:@"}"];
-					if ([arr count] != 2) {
-						NSLog(@"Incomplete specifier {'field'} in cite key format.");
-						return NO;
-					}
-					string = [[BDSKConverter sharedConverter] stringBySanitizingCiteKeyString:[arr objectAtIndex:0]];
-					[sanitizedFormatString appendFormat:@"{%@}",string];
-					string = [[BDSKConverter sharedConverter] stringBySanitizingCiteKeyString:[arr objectAtIndex:1]];
-				}
-				else if (	i < [components count] - 1 || 
-							![validLastSpecifierChars characterIsMember:specifier] || 
-							![[NSCharacterSet decimalDigitCharacterSet] 
-								isSupersetOfSet:[NSCharacterSet characterSetWithCharactersInString:[string substringFromIndex:1]]]) {
-				
-					NSLog(@"Invalid specifier %%%C in cite key format.", specifier);
-					return NO;
-				}
-			}
-		}
-		// sanitize stuff in between, this should not affect any of our specifier chars
-		string = [[BDSKConverter sharedConverter] stringBySanitizingCiteKeyString:string];
-		[sanitizedFormatString appendString:string];
-	}
-	
-	// change formatString
-	*formatString = [[sanitizedFormatString copy] autorelease];
-	
-	return YES;
 }
 
 #pragma mark Invalid format warning stuff

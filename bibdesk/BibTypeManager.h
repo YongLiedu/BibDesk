@@ -12,6 +12,7 @@
 @interface BibTypeManager : NSObject {
     NSDictionary *typeInfoDict;
 	NSCharacterSet *invalidCiteKeyCharSet;
+	NSCharacterSet *strictInvalidCiteKeyCharSet;
 }
 + (BibTypeManager *)sharedManager;
 - (NSString *)defaultTypeForFileFormat:(NSString *)fileFormat;
@@ -24,7 +25,7 @@
 - (NSString *)bibtexTypeForPubMedType:(NSString *)type;
 /*!
     @method     invalidCharactersForField:inType:
-    @abstract   Characters that must not be used in a given key and reference type, currently only for BibTeX.  This is a fairly liberal definition, since it allows
+    @abstract   Characters that must not be used in a given key and reference type, currently only for Cite Key in BibTeX.  This is a fairly liberal definition, since it allows
                 non-ascii and some math characters.  Used by the formatter subclass for field entry in BibEditor.
     @discussion (comprehensive description)
     @param      fieldName The name of the field (e.g. "Author")
@@ -32,4 +33,14 @@
     @result     A character set of invalid entries.
 */
 - (NSCharacterSet *)invalidCharactersForField:(NSString *)fieldName inType:(NSString *)type;
+/*!
+    @method     strictInvalidCharactersForField:inType:
+    @abstract   Characters that will not be used in a generated key and reference type, currently only for Cite Key in BibTeX.  This is a very strict definition, since it allows
+                only ascii alphanumerioc characters and -./:;. Used by the parseFormat:forField:inType: method in BibItem.
+    @discussion (comprehensive description)
+    @param      fieldName The name of the field (e.g. "Author")
+    @param      type The reference type (e.g. BibTeX, RIS)
+    @result     A character set of invalid entries.
+*/
+- (NSCharacterSet *)strictInvalidCharactersForField:(NSString *)fieldName inType:(NSString *)type;
 @end

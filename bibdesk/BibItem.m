@@ -437,312 +437,10 @@ void _setupFonts(){
     return pubType;
 }
 
-- (NSString *)suggestedCiteKey{
-    
+- (NSString *)suggestedCiteKey
+{
 	NSString *citeKeyFormat = [[OFPreferenceWrapper sharedPreferenceWrapper] objectForKey:BDSKCiteKeyFormatKey];
-	BDSKConverter *converter = [BDSKConverter sharedConverter];
-	NSMutableString *citeKeyStr = [NSMutableString string];
-	NSScanner *scanner;
-	NSCharacterSet *digits = [NSCharacterSet decimalDigitCharacterSet];
-	NSString *string, *numStr;
-	int number, numAuth, i;
-	unichar specifier, nextChar;
-	BibAuthor *auth;
-	
-	// this is not necessary
-	if (citeKeyFormat == nil) {
-		citeKeyFormat = @"";
-	}
-	scanner = [NSScanner scannerWithString:citeKeyFormat];
-	
-	// seed for random letters or characters
-	srand(time(NULL));
-	
-	while (![scanner isAtEnd]) {
-		// scan non-specifier parts
-		if ([scanner scanUpToString:@"%" intoString:&string]) {
-			// if we are not sure about a valid format, we should sanitize string
-			[citeKeyStr appendString:string];
-		}
-		// does nothing at the end; allows but ignores % at end
-		[scanner scanString:@"%" intoString:NULL];
-		if (![scanner isAtEnd]) {
-			// found %, so now there should be a specifier char
-			specifier = [citeKeyFormat characterAtIndex:[scanner scanLocation]];
-			[scanner setScanLocation:[scanner scanLocation]+1];
-			switch (specifier) {
-				case 'a':
-					// author names, optional #names and #chars
-					numAuth = 0;
-					number = 0;
-					if (![scanner isAtEnd]) {
-						// look for #names
-						nextChar = [citeKeyFormat characterAtIndex:[scanner scanLocation]];
-						if ([[NSCharacterSet decimalDigitCharacterSet] characterIsMember:nextChar]) {
-							[scanner setScanLocation:[scanner scanLocation]+1];
-							numAuth = (int)(nextChar - '0');
-							// scan for #chars per name
-							if ([scanner scanCharactersFromSet:digits intoString:&numStr]) {
-								number = [numStr intValue];
-							}
-						}
-					}
-					if (numAuth == 0 || numAuth > [self numberOfAuthors]) {
-						numAuth = [self numberOfAuthors];
-					}
-					for (i = 0; i < numAuth; i++) {
-						string = [[self authorAtIndex:i] lastName];
-						string = [converter stringBySanitizingCiteKeyString:string];
-						if ([string length] > number && number > 0) {
-							string = [string substringToIndex:number];
-						}
-						[citeKeyStr appendString:string];
-					}
-					break;
-				case 'A':
-					// author names with initials, optional #names and #chars
-					numAuth = 0;
-					number = 0;
-					if (![scanner isAtEnd]) {
-						// look for #names
-						nextChar = [citeKeyFormat characterAtIndex:[scanner scanLocation]];
-						if ([[NSCharacterSet decimalDigitCharacterSet] characterIsMember:nextChar]) {
-							[scanner setScanLocation:[scanner scanLocation]+1];
-							numAuth = (int)(nextChar - '0');
-							// scan for #chars per name
-							if ([scanner scanCharactersFromSet:digits intoString:&numStr]) {
-								number = [numStr intValue];
-							}
-						}
-					}
-					if (numAuth == 0 || numAuth > [self numberOfAuthors]) {
-						numAuth = [self numberOfAuthors];
-					}
-					for (i = 0; i < numAuth; i++) {
-						if (i > 0) {
-							[citeKeyStr appendString:@";"];
-						}
-						auth = [self authorAtIndex:i];
-						if ([[auth firstName] length] > 0) {
-							string = [NSString stringWithFormat:@"%@.%C", 
-											[auth lastName], [[auth firstName] characterAtIndex:0]];
-						} else {
-							string = [auth lastName];
-						}
-						string = [converter stringBySanitizingCiteKeyString:string];
-						if ([string length] > number && number > 0) {
-							string = [string substringToIndex:number];
-						}
-						[citeKeyStr appendString:string];
-					}
-					break;
-				case 't':
-					// title, optional #chars
-					string = [converter stringBySanitizingCiteKeyString:[self title]];
-					if ([scanner scanCharactersFromSet:digits intoString:&numStr]) {
-						number = [numStr intValue];
-					} else {
-						number = 0;
-					}
-					if (number > 0 && [string length] > number) {
-						[citeKeyStr appendString:[string substringToIndex:number]];
-					} else {
-						[citeKeyStr appendString:string];
-					}
-					break;
-				case 'y':
-					// year without century
-					if ([self date]) {
-						string = [[self date] descriptionWithCalendarFormat:@"%y"];
-						[citeKeyStr appendString:string];
-					}
-					break;
-				case 'Y':
-					// year with century
-					if ([self date]) {
-						string = [[self date] descriptionWithCalendarFormat:@"%Y"];
-						[citeKeyStr appendString:string];
-					}
-					break;
-				case 'm':
-					// month
-					if ([self date]) {
-						string = [[self date] descriptionWithCalendarFormat:@"%m"];
-						[citeKeyStr appendString:string];
-					}
-					break;
-				case '{':
-					// arbitrary field
-					[scanner scanUpToCharactersFromSet:[NSCharacterSet characterSetWithCharactersInString:@"}"] intoString:&string];
-					[scanner scanString:@"}" intoString:NULL];
-					if ([scanner scanCharactersFromSet:digits intoString:&numStr]) {
-						number = [numStr intValue];
-					} else {
-						number = 0;
-					}
-					string = [self valueOfField:string];
-					if (string != nil) {
-						string = [converter stringBySanitizingCiteKeyString:string];
-						if (number > 0 && [string length] > number) {
-							[citeKeyStr appendString:[string substringToIndex:number]];
-						} else {
-							[citeKeyStr appendString:string];
-						}
-					}
-					break;
-				case 'r':
-					// random lowercase letters
-					if ([scanner scanCharactersFromSet:digits intoString:&numStr]) {
-						number = [numStr intValue];
-					} else {
-						number = 1;
-					}
-					while (number-- > 0) {
-						[citeKeyStr appendFormat:@"%c",'a' + (char)(rand() % 26)];
-					}
-					break;
-				case 'R':
-					// random uppercase letters
-					if ([scanner scanCharactersFromSet:digits intoString:&numStr]) {
-						number = [numStr intValue];
-					} else {
-						number = 1;
-					}
-					while (number-- > 0) {
-						[citeKeyStr appendFormat:@"%c",'A' + (char)(rand() % 26)];
-					}
-					break;
-				case 'd':
-					// random digits
-					if ([scanner scanCharactersFromSet:digits intoString:&numStr]) {
-						number = [numStr intValue];
-					} else {
-						number = 1;
-					}
-					while (number-- > 0) {
-						[citeKeyStr appendFormat:@"%i",(int)(rand() % 10)];
-					}
-					break;
-				case '0':
-				case '1':
-				case '2':
-				case '3':
-				case '4':
-				case '5':
-				case '6':
-				case '7':
-				case '8':
-				case '9':
-					// escaped digit
-					[citeKeyStr appendFormat:@"%C", specifier];
-					break;
-				// the rest is only vallid at the end of the format
-				case 'u':
-					// unique lowercase letters
-					if ([scanner scanCharactersFromSet:digits intoString:&numStr]) {
-						number = [numStr intValue];
-					} else {
-						number = 1;
-					}
-					if ([scanner isAtEnd]) {
-						[citeKeyStr setString:[self uniqueCiteKey:citeKeyStr 
-													numberOfChars:number 
-															 from:'a' to:'z' 
-															force:(number == 0)]];
-					}
-					else {
-						NSLog(@"Specifier %%u can only be used at the end of Cite Key Format.");
-					}
-					break;
-				case 'U':
-					// unique uppercase letters
-					if ([scanner scanCharactersFromSet:digits intoString:&numStr]) {
-						number = [numStr intValue];
-					} else {
-						number = 1;
-					}
-					if ([scanner isAtEnd]) {
-						[citeKeyStr setString:[self uniqueCiteKey:citeKeyStr 
-													numberOfChars:number 
-															 from:'A' to:'Z' 
-															force:(number == 0)]];
-					}
-					else {
-						NSLog(@"Specifier %%U can only be used at the end of Cite Key Format.");
-					}
-					break;
-				case 'n':
-					// unique number
-					if ([scanner scanCharactersFromSet:digits intoString:&numStr]) {
-						number = [numStr intValue];
-					} else {
-						number = 1;
-					}
-					if ([scanner isAtEnd]) {
-						[citeKeyStr setString:[self uniqueCiteKey:citeKeyStr 
-													numberOfChars:number 
-															 from:'0' to:'1' 
-															force:(number == 0)]];
-					}
-					else {
-						NSLog(@"Specifier %%%C can only be used at the end of Cite Key Format.", specifier);
-					}
-					break;
-				default: 
-					NSLog(@"Unknown format specifier %%%C in Cite Key Format.", specifier);
-			}
-		}
-	}
-	
-	if(citeKeyStr == nil || [citeKeyStr isEqualToString:@""]) {
-		number = 0;
-		do {
-			string = [@"empty" stringByAppendingFormat:@"%i", number++];
-		} while (![self citeKeyIsValid:string]);
-		return string;
-	} else {
-	   return [[citeKeyStr copy] autorelease];
-	}
-}
-
-// citeKeyString should not contain invalid characters, or there can be an infinite  loop
-- (NSString *)uniqueCiteKey:(NSString *)citeKeyString 
-			  numberOfChars:(unsigned int)number 
-					   from:(unichar)fromChar 
-						 to:(unichar)toChar 
-					  force:(BOOL)force {
-	
-	NSString *uniqueCK = citeKeyString;
-	char c;
-	
-	if (number > 0) {
-		for (c = fromChar; c <= toChar; c++) {
-			// try with the first added char set to c
-			uniqueCK = [citeKeyString stringByAppendingFormat:@"%C", c];
-			uniqueCK = [self uniqueCiteKey:uniqueCK numberOfChars:number - 1 from:fromChar to:toChar force:NO];
-			if ([self citeKeyIsValid:uniqueCK])
-				return uniqueCK;
-		}
-	}
-	
-	if (force && ![self citeKeyIsValid:uniqueCK]) {
-		// not unique yet, so try with 1 more char
-		return [self uniqueCiteKey:citeKeyString numberOfChars:number + 1 from:fromChar to:toChar force:YES];
-	}
-	
-	return uniqueCK;
-}
-
-// we only should check if it is unique, but we cannot do that
-- (BOOL)citeKeyIsValid:(NSString *)proposedCiteKey{
-	BibEditor *editor = [self editorObj];
-	
-	if (editor == nil) {
-		// we might check for invalid characters
-		return YES;
-	}
-	
-	return [editor citeKeyIsValid:proposedCiteKey];
+	return [self parseFormat:citeKeyFormat forField:@"Cite Key" inType:@"BibTeX"];
 }
 
 - (void)setCiteKey:(NSString *)newCiteKey{
@@ -1155,4 +853,319 @@ void _setupFonts(){
     }
 
 }
+
+- (NSString *)parseFormat:(NSString *)format forField:(NSString *)fieldName inType:(NSString *)type
+{
+	BDSKConverter *converter = [BDSKConverter sharedConverter];
+	NSMutableString *parsedStr = [NSMutableString string];
+	NSScanner *scanner = [NSScanner scannerWithString:format];
+	NSCharacterSet *digits = [NSCharacterSet decimalDigitCharacterSet];
+	NSString *string, *numStr;
+	int number, numAuth, i;
+	unichar specifier, nextChar;
+	BibAuthor *auth;
+	
+	// seed for random letters or characters
+	srand(time(NULL));
+	
+	while (![scanner isAtEnd]) {
+		// scan non-specifier parts
+		if ([scanner scanUpToString:@"%" intoString:&string]) {
+			// if we are not sure about a valid format, we should sanitize string
+			[parsedStr appendString:string];
+		}
+		// does nothing at the end; allows but ignores % at end
+		[scanner scanString:@"%" intoString:NULL];
+		if (![scanner isAtEnd]) {
+			// found %, so now there should be a specifier char
+			specifier = [format characterAtIndex:[scanner scanLocation]];
+			[scanner setScanLocation:[scanner scanLocation]+1];
+			switch (specifier) {
+				case 'a':
+					// author names, optional #names and #chars
+					numAuth = 0;
+					number = 0;
+					if (![scanner isAtEnd]) {
+						// look for #names
+						nextChar = [format characterAtIndex:[scanner scanLocation]];
+						if ([digits characterIsMember:nextChar]) {
+							[scanner setScanLocation:[scanner scanLocation]+1];
+							numAuth = (int)(nextChar - '0');
+							// scan for #chars per name
+							if ([scanner scanCharactersFromSet:digits intoString:&numStr]) {
+								number = [numStr intValue];
+							}
+						}
+					}
+					if (numAuth == 0 || numAuth > [self numberOfAuthors]) {
+						numAuth = [self numberOfAuthors];
+					}
+					for (i = 0; i < numAuth; i++) {
+						string = [[self authorAtIndex:i] lastName];
+						string = [converter stringBySanitizingString:string forField:fieldName inType:type];
+						if ([string length] > number && number > 0) {
+							string = [string substringToIndex:number];
+						}
+						[parsedStr appendString:string];
+					}
+					break;
+				case 'A':
+					// author names with initials, optional #names and #chars
+					numAuth = 0;
+					number = 0;
+					if (![scanner isAtEnd]) {
+						// look for #names
+						nextChar = [format characterAtIndex:[scanner scanLocation]];
+						if ([digits characterIsMember:nextChar]) {
+							[scanner setScanLocation:[scanner scanLocation]+1];
+							numAuth = (int)(nextChar - '0');
+							// scan for #chars per name
+							if ([scanner scanCharactersFromSet:digits intoString:&numStr]) {
+								number = [numStr intValue];
+							}
+						}
+					}
+					if (numAuth == 0 || numAuth > [self numberOfAuthors]) {
+						numAuth = [self numberOfAuthors];
+					}
+					for (i = 0; i < numAuth; i++) {
+						if (i > 0) {
+							[parsedStr appendString:@";"];
+						}
+						auth = [self authorAtIndex:i];
+						if ([[auth firstName] length] > 0) {
+							string = [NSString stringWithFormat:@"%@.%C", 
+											[auth lastName], [[auth firstName] characterAtIndex:0]];
+						} else {
+							string = [auth lastName];
+						}
+						string = [converter stringBySanitizingString:string forField:fieldName inType:type];
+						if ([string length] > number && number > 0) {
+							string = [string substringToIndex:number];
+						}
+						[parsedStr appendString:string];
+					}
+					break;
+				case 't':
+					// title, optional #chars
+					string = [converter stringBySanitizingString:[self title] forField:fieldName inType:type];
+					if ([scanner scanCharactersFromSet:digits intoString:&numStr]) {
+						number = [numStr intValue];
+					} else {
+						number = 0;
+					}
+					if (number > 0 && [string length] > number) {
+						[parsedStr appendString:[string substringToIndex:number]];
+					} else {
+						[parsedStr appendString:string];
+					}
+					break;
+				case 'y':
+					// year without century
+					if ([self date]) {
+						string = [[self date] descriptionWithCalendarFormat:@"%y"];
+						[parsedStr appendString:string];
+					}
+					break;
+				case 'Y':
+					// year with century
+					if ([self date]) {
+						string = [[self date] descriptionWithCalendarFormat:@"%Y"];
+						[parsedStr appendString:string];
+					}
+					break;
+				case 'm':
+					// month
+					if ([self date]) {
+						string = [[self date] descriptionWithCalendarFormat:@"%m"];
+						[parsedStr appendString:string];
+					}
+					break;
+				case '{':
+					// arbitrary field
+					[scanner scanUpToCharactersFromSet:[NSCharacterSet characterSetWithCharactersInString:@"}"] intoString:&string];
+					[scanner scanString:@"}" intoString:NULL];
+					if ([scanner scanCharactersFromSet:digits intoString:&numStr]) {
+						number = [numStr intValue];
+					} else {
+						number = 0;
+					}
+					string = [self valueOfField:string];
+					if (string != nil) {
+						string = [converter stringBySanitizingString:string forField:fieldName inType:type];
+						if (number > 0 && [string length] > number) {
+							[parsedStr appendString:[string substringToIndex:number]];
+						} else {
+							[parsedStr appendString:string];
+						}
+					}
+					break;
+				case 'r':
+					// random lowercase letters
+					if ([scanner scanCharactersFromSet:digits intoString:&numStr]) {
+						number = [numStr intValue];
+					} else {
+						number = 1;
+					}
+					while (number-- > 0) {
+						[parsedStr appendFormat:@"%c",'a' + (char)(rand() % 26)];
+					}
+					break;
+				case 'R':
+					// random uppercase letters
+					if ([scanner scanCharactersFromSet:digits intoString:&numStr]) {
+						number = [numStr intValue];
+					} else {
+						number = 1;
+					}
+					while (number-- > 0) {
+						[parsedStr appendFormat:@"%c",'A' + (char)(rand() % 26)];
+					}
+					break;
+				case 'd':
+					// random digits
+					if ([scanner scanCharactersFromSet:digits intoString:&numStr]) {
+						number = [numStr intValue];
+					} else {
+						number = 1;
+					}
+					while (number-- > 0) {
+						[parsedStr appendFormat:@"%i",(int)(rand() % 10)];
+					}
+					break;
+				case '0':
+				case '1':
+				case '2':
+				case '3':
+				case '4':
+				case '5':
+				case '6':
+				case '7':
+				case '8':
+				case '9':
+					// escaped digit
+					[parsedStr appendFormat:@"%C", specifier];
+					break;
+				// the rest is only vallid at the end of the format
+				case 'u':
+					// unique lowercase letters
+					if ([scanner scanCharactersFromSet:digits intoString:&numStr]) {
+						number = [numStr intValue];
+					} else {
+						number = 1;
+					}
+					if ([scanner isAtEnd]) {
+						[parsedStr setString:[self uniqueString:parsedStr 
+													   forField:fieldName
+														 inType:type
+												  numberOfChars:number 
+														   from:'a' to:'z' 
+														  force:(number == 0)]];
+					}
+					else {
+						NSLog(@"Specifier %%u can only be used at the end of format.");
+					}
+					break;
+				case 'U':
+					// unique uppercase letters
+					if ([scanner scanCharactersFromSet:digits intoString:&numStr]) {
+						number = [numStr intValue];
+					} else {
+						number = 1;
+					}
+					if ([scanner isAtEnd]) {
+						[parsedStr setString:[self uniqueString:parsedStr 
+													   forField:fieldName
+														 inType:type
+												  numberOfChars:number 
+														   from:'A' to:'Z' 
+														  force:(number == 0)]];
+					}
+					else {
+						NSLog(@"Specifier %%U can only be used at the end of the format.");
+					}
+					break;
+				case 'n':
+					// unique number
+					if ([scanner scanCharactersFromSet:digits intoString:&numStr]) {
+						number = [numStr intValue];
+					} else {
+						number = 1;
+					}
+					if ([scanner isAtEnd]) {
+						[parsedStr setString:[self uniqueString:parsedStr 
+													   forField:fieldName
+														 inType:type
+												  numberOfChars:number 
+														   from:'0' to:'1' 
+														  force:(number == 0)]];
+					}
+					else {
+						NSLog(@"Specifier %%%C can only be used at the end of format.", specifier);
+					}
+					break;
+				default: 
+					NSLog(@"Unknown format specifier %%%C in format.", specifier);
+			}
+		}
+	}
+	
+	if(parsedStr == nil || [parsedStr isEqualToString:@""]) {
+		number = 0;
+		do {
+			string = [@"empty" stringByAppendingFormat:@"%i", number++];
+		} while (![self stringIsValid:string forField:fieldName inType:type]);
+		return string;
+	} else {
+	   return [[parsedStr copy] autorelease];
+	}
+}
+
+// returns a 'valid' string rather than a 'unique' one
+- (NSString *)uniqueString:(NSString *)baseStr 
+				  forField:(NSString *)fieldName inType:(NSString *)type
+			 numberOfChars:(unsigned int)number 
+					  from:(unichar)fromChar 
+						to:(unichar)toChar 
+					 force:(BOOL)force {
+	
+	NSString *uniqueStr = baseStr;
+	char c;
+	
+	if (number > 0) {
+		for (c = fromChar; c <= toChar; c++) {
+			// try with the first added char set to c
+			uniqueStr = [baseStr stringByAppendingFormat:@"%C", c];
+			uniqueStr = [self uniqueString:uniqueStr forField:fieldName inType:type numberOfChars:number - 1 from:fromChar to:toChar force:NO];
+			if ([self stringIsValid:uniqueStr forField:fieldName inType:type])
+				return uniqueStr;
+		}
+	}
+	
+	if (force && ![self stringIsValid:uniqueStr forField:fieldName inType:type]) {
+		// not uniqueString yet, so try with 1 more char
+		return [self uniqueString:uniqueStr forField:fieldName inType:type numberOfChars:number + 1 from:fromChar to:toChar force:YES];
+	}
+	
+	return uniqueStr;
+}
+
+// this might be changed when more fields are available
+- (BOOL)stringIsValid:(NSString *)proposedStr forField:(NSString *)fieldName inType:(NSString *)type
+{
+	if (editorObj == nil) {
+		NSCharacterSet *invalidSet = [[BibTypeManager sharedManager] invalidCharactersForField:fieldName inType:type];
+		NSRange r = [proposedStr rangeOfCharacterFromSet:invalidSet];
+		
+		return (r.location == NSNotFound);
+	}
+	else if ([fieldName isEqualToString:@"Cite Key"]) {
+		return [editorObj citeKeyIsValid:proposedStr];
+	}
+	else {
+		[NSException raise:@"unimpl. feat. exc." format:@"stringIsValid:forField: is partly implemented"];
+		return YES;
+	}
+}
+
 @end

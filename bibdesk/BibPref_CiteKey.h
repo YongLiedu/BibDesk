@@ -25,7 +25,6 @@
 - (IBAction)citeKeyFormatAdd:(id)sender;
 - (IBAction)citeKeyHelp:(id)sender;
 - (void)updateUI;
-- (BOOL)validateCiteKeyFormat:(NSString **)formatString;
 - (void)setupCautionIcon;
 - (IBAction)showCiteKeyFormatWarning:(id)sender;
 - (void)setCiteKeyFormatInvalidWarning:(BOOL)set;
