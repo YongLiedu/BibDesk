@@ -214,4 +214,19 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 	return (nesting == 0);
 }
 
+- (BOOL)isRISString{ // sniff the string to see if it's or RIS
+    NSScanner *scanner = [[NSScanner alloc] initWithString:self];
+    BOOL isRIS = NO;
+    if([scanner scanString:@"PMID- " intoString:nil]) // for Medline
+    isRIS = YES;
+    else {
+        [scanner setScanLocation:0];
+        if([scanner scanString:@"TY  - " intoString:nil]) // for RIS
+            isRIS = YES;
+    }
+    [scanner release];
+    return isRIS;
+}
+
+
 @end

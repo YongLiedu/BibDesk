@@ -89,14 +89,25 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
     }else if ( [[pboard types] containsObject:NSStringPboardType] ) {
         // get the item from the string
         pbData = [pboard dataForType:NSStringPboardType];
-
-        if([[OFPreferenceWrapper sharedPreferenceWrapper] boolForKey:BDSKUseUnicodeBibTeXParser]){
-            NSString *aString = [[NSString alloc] initWithData:pbData encoding:[[OFPreferenceWrapper sharedPreferenceWrapper] integerForKey:BDSKDefaultStringEncoding]];
-            if(aString == nil) // bad encoding choice; fall back to latin1
-                aString = [[NSString alloc] initWithData:pbData encoding:NSISOLatin1StringEncoding];
-            draggedPubs = [BibTeXParser itemsFromString:aString error:&hadProblems];
-        } else { // using libbtparse
-            draggedPubs = [BibTeXParser itemsFromData:pbData error:&hadProblems];
+        
+        // sniff the string to see if it's BibTeX or RIS
+        BOOL isRIS = NO;
+        NSString *pbString = [[NSString alloc] initWithData:pbData encoding:NSUTF8StringEncoding];
+        if([pbString isRISString])
+            isRIS = YES;
+        
+        if(isRIS){
+            draggedPubs = [PubMedParser itemsFromString:pbString error:&hadProblems];
+        } else {
+            // must be BibTeX
+            if([[OFPreferenceWrapper sharedPreferenceWrapper] boolForKey:BDSKUseUnicodeBibTeXParser]){
+                NSString *aString = [[NSString alloc] initWithData:pbData encoding:[[OFPreferenceWrapper sharedPreferenceWrapper] integerForKey:BDSKDefaultStringEncoding]];
+                if(aString == nil) // bad encoding choice; fall back to latin1
+                    aString = [[NSString alloc] initWithData:pbData encoding:NSISOLatin1StringEncoding];
+                draggedPubs = [BibTeXParser itemsFromString:aString error:&hadProblems];
+            } else { // using libbtparse
+                draggedPubs = [BibTeXParser itemsFromData:pbData error:&hadProblems];
+            }
         }
         
         if(hadProblems) return NO;
@@ -106,19 +117,28 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
             bibDict = [tempBI pubFields];
             newKeyE = [bibDict keyEnumerator];
 
-            // fixme, read this comment: i don't understand it anymore
-            // Test a keyboard? mask so that sometimes we can override all fields.
-
+            // Test a keyboard mask so that sometimes we can override all fields when dragging into the editor window
+            // use the Carbon function since [[NSApp currentEvent] modifierFlags] won't work if we're not the front app
+            unsigned modifier = GetCurrentKeyModifiers();
+            if(modifier == optionKey){
+                // just setting the citekey won't update the form, so we have to use a notification
+                [[NSNotificationCenter defaultCenter] postNotificationName:BDSKBibItemChangedNotification object:editorBib userInfo:[NSDictionary dictionaryWithObjectsAndKeys:BDSKCiteKeyString, @"key", [tempBI citeKey], @"value", nil]];
+            }
             while(key = [newKeyE nextObject]){
-                value = [[editorBib pubFields] objectForKey:key]; // value is the value of key in the dragged-onto window.
-//                NSLog(@"a key is %@, its value is [%@]", key, value);
-                if (([oldKeys containsObject:key] &&
-                     [value isEqualToString:@""]) ||
-                    (![oldKeys containsObject:key] &&
-                     ![[bibDict objectForKey:key] isEqualToString:@""])){
+                if(modifier == optionKey){
+                    [editorBib setField:key toValue:[bibDict objectForKey:key]];
+                } else {
+                    // only set to the new value if the old one is non-existent
+                    value = [[editorBib pubFields] objectForKey:key]; // value is the value of key in the dragged-onto window.
+    //                NSLog(@"a key is %@, its value is [%@]", key, value);
+                    if (([oldKeys containsObject:key] &&
+                         [value isEqualToString:@""]) ||
+                        (![oldKeys containsObject:key] &&
+                         ![[bibDict objectForKey:key] isEqualToString:@""])){
 
-                    [editorBib setField:key
-                                toValue:[bibDict objectForKey:key]];
+                        [editorBib setField:key
+                                    toValue:[bibDict objectForKey:key]];
+                    }
                 }
             }
             [editorBib setType:[tempBI type]];

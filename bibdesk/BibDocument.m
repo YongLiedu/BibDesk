@@ -2120,23 +2120,16 @@ int generalBibItemCompareFunc(id item1, id item2, void *context){
 }
 
 - (BOOL) addPublicationsForData:(NSData*) data error:(NSString**) error {
-	BOOL hadProblems = NO;
-	NSArray * newPubs = nil;
+    BOOL hadProblems = NO;
+    NSArray * newPubs = nil;
     
     // sniff the string to see if it's BibTeX or RIS
+    BOOL isRIS = NO;
     NSString *pbString = [[NSString alloc] initWithData:data encoding:NSUTF8StringEncoding];
-    NSScanner *scanner = [[NSScanner alloc] initWithString:pbString];
-    BOOL isBibTeX = YES;
-    if([scanner scanString:@"PMID- " intoString:nil]) // for Medline
-        isBibTeX = NO;
-    else {
-        [scanner setScanLocation:0];
-        if([scanner scanString:@"TY  - " intoString:nil]) // for RIS
-            isBibTeX = NO;
-    }
-    [scanner release];
+    if([pbString isRISString])
+        isRIS = YES;
     
-    if(!isBibTeX){
+    if(isRIS){
         newPubs = [PubMedParser itemsFromString:pbString error:&hadProblems];
     } else {
     

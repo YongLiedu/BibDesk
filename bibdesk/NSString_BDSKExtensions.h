@@ -77,4 +77,13 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 */
 - (BOOL)isStringTeXQuotingBalancedWithBraces:(BOOL)braces connected:(BOOL)connected range:(NSRange)range;
 
+/*!
+    @method     isRISString
+    @abstract   Check to see if the string is RIS by scanning for "PMID- " or "TY  - ", which should appear in an RIS string.
+    @discussion See the <a href="http://www.refman.com/support/risformat_intro.asp">RIS specification</a> for details on the format.  The heuristics here could be improved,
+                but this is mainly intended to be a quick check of the pasteboard, not a full parser.
+    @result     A Boolean.
+*/
+- (BOOL)isRISString;
+
 @end
