@@ -541,10 +541,6 @@ void _setupFonts(){
     return [[dateModified retain] autorelease];
 }
 
-- (NSString *)calendarDateDescription{
-    return [pubDate descriptionWithCalendarFormat:@"%B %Y"];
-}
-
 - (void)setDateModified:(NSCalendarDate *)newDateModified {
     [bibLock lock];
     if (dateModified != newDateModified) {
@@ -552,6 +548,18 @@ void _setupFonts(){
         dateModified = [newDateModified copy];
     }
     [bibLock unlock];
+}
+
+- (NSString *)calendarDateDescription{
+    return [pubDate descriptionWithCalendarFormat:@"%B %Y"];
+}
+
+- (NSString *)calendarDateModifiedDescription{
+    return [dateModified descriptionWithCalendarFormat:@"%B %Y"];
+}
+
+- (NSString *)calendarDateCreatedDescription{
+    return [dateCreated descriptionWithCalendarFormat:@"%B %Y"];
 }
 
 - (void)setType: (NSString *)newType{
