@@ -100,17 +100,15 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
     int i = 0;
     NSMutableString *tmpStr = nil;
     
-    [name autorelease];
-    name = [newName copy];
-    
-    NS_DURING
-//        bt_initialize();
-        theName = bt_split_name([name UTF8String],"",0,0);
-    NS_HANDLER
-//        bt_cleanup();
-        NS_VOIDRETURN;
-    NS_ENDHANDLER;
-//    bt_cleanup();
+	if(newName != name){
+		[name release];
+		name = [newName copy];
+    }
+	
+	unichar *nameCharacters = (unichar *)malloc([name length] * sizeof(unichar));
+	[name getCharacters:nameCharacters];
+    	
+	theName = bt_split_name(nameCharacters,"",0,0);
     
     // get tokens from first part
     tmpStr = [NSMutableString string];
@@ -153,8 +151,8 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
     }
     _jrPart = [tmpStr retain];
     
-    bt_free_name(theName);
-    
+	bt_free_name(theName);
+	free(nameCharacters);
 }
 
 - (BibItem *)pubAtIndex:(int)index{
