@@ -17,13 +17,13 @@
 	<string>364.0</string>
 	<key>IBOpenObjects</key>
 	<array>
-		<integer>287</integer>
 		<integer>378</integer>
-		<integer>270</integer>
 		<integer>312</integer>
-		<integer>74</integer>
+		<integer>287</integer>
 		<integer>490</integer>
 		<integer>345</integer>
+		<integer>74</integer>
+		<integer>270</integer>
 	</array>
 	<key>IBSystem Version</key>
 	<string>7U16</string>
