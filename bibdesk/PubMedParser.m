@@ -131,21 +131,27 @@
 						// the AU values, otherwise, because it recognized FAU as Author.
 						if([key isEqualToString:@"FAU"] && usingAU==NO){
 						        haveFAU = YES;  // use full author info
-							addAuthorName_toDict([[wholeValue copy] autorelease],pubDict);
+							addStringToDict([[wholeValue copy] autorelease], pubDict, @"Author");
 						}else{
 						    // If we didn't get a FAU key (shows up first in PubMed), fall back to AU
 						    // AU is not in the dictionary, so we don't get confused with FAU
 						    if([key isEqualToString:@"AU"] && haveFAU==NO){
 							usingAU = YES;  // use AU info, and put FAU in its own field if it occurred too late
-							addAuthorName_toDict([[wholeValue copy] autorelease],pubDict);
+							addStringToDict([[wholeValue copy] autorelease], pubDict, @"Author");
 						    }else{
-						    if([key isEqualToString:@"Keywords"]){
-							addKeywordString_toDict([[wholeValue copy] autorelease],pubDict);
-						    }else{
-						        [pubDict setObject:[[wholeValue copy] autorelease] forKey:key];
+							// If we didn't get a FAU or AU, see if we have A1.  This is yet another variant of RIS.
+							if([key isEqualToString:@"A1"] && haveFAU==NO){
+							    usingAU = YES;  // use A1 info, and put FAU in its own field if it occurred too late
+							    addStringToDict([[wholeValue copy] autorelease], pubDict, @"Author");
+							}else{
+							    if([key isEqualToString:@"Keywords"]){
+								addStringToDict([[wholeValue copy] autorelease], pubDict, @"Keywords");
+							    }else{
+								[pubDict setObject:[[wholeValue copy] autorelease] forKey:key];
+							    }
+							}
 						    }
-						  }
-					        }
+						}
                     }
                     
                     [wholeValue setString:value];
@@ -178,24 +184,14 @@
     return returnArray;
 }
 
-void addAuthorName_toDict(NSString *wholeValue, NSMutableDictionary *pubDict){
-	NSString *oldAuthString = [pubDict objectForKey:@"Author"];
-	if(!oldAuthString){
-		[pubDict setObject:wholeValue forKey:@"Author"];
-	}else{
-		NSString *newAuthString = [NSString stringWithFormat:@"%@ and %@", oldAuthString, wholeValue];
-		[pubDict setObject:newAuthString forKey:@"Author"];
-	}
-}
-
-void addKeywordString_toDict(NSString *wholeValue, NSMutableDictionary *pubDict){
-	NSString *oldKeywordString = [pubDict objectForKey:@"Keywords"];
-	if(!oldKeywordString){
-		[pubDict setObject:wholeValue forKey:@"Keywords"];
-	}else{
-		NSString *newKeywordString = [NSString stringWithFormat:@"%@, %@", oldKeywordString, wholeValue];
-		[pubDict setObject:newKeywordString forKey:@"Keywords"];
-	}
+void addStringToDict(NSString *wholeValue, NSMutableDictionary *pubDict, NSString *theKey){
+    NSString *oldString = [pubDict objectForKey:theKey];
+    if(!oldString){
+	[pubDict setObject:wholeValue forKey:theKey];
+    } else {
+	NSString *newString = [NSString stringWithFormat:@"%@ and %@", oldString, wholeValue];
+	[pubDict setObject:newString forKey:theKey];
+    }
 }
 
 void mergePageNumbers(NSMutableDictionary *dict){

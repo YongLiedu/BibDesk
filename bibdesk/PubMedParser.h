@@ -18,8 +18,15 @@
 + (NSMutableArray *)itemsFromString:(NSString *)itemString error:(BOOL *)hadProblems;
 + (NSMutableArray *)itemsFromString:(NSString *)itemString error:(BOOL *)hadProblems frontMatter:(NSMutableString *)frontMatter filePath:(NSString *)filePath;
 
-void addAuthorName_toDict(NSString *wholeValue, NSMutableDictionary *pubDict);
-void addKeywordString_toDict(NSString *wholeValue, NSMutableDictionary *pubDict);
+/*!
+    @function	addStringToDict
+    @abstract   Used to add additional strings to an existing dictionary entry.
+    @discussion This is useful for multiple authors and multiple keywords, so we don't wipe them out by overwriting.
+    @param      wholeValue String object that we are adding (e.g. <tt>Ann Author</tt>).
+    @param	pubDict NSMutableDictionary containing the current publication.
+    @param	theKey NSString object with the key that we are adding an item to (e.g. <tt>Author</tt>).
+*/
+void addStringToDict(NSString *wholeValue, NSMutableDictionary *pubDict, NSString *theKey);
 /*!
     @function   mergePageNumbers
     @abstract   Elsevier/ScienceDirect RIS output has SP for start page and EP for end page.  If we find
