@@ -23,7 +23,7 @@
 }
 
 - (void)updateUI{
-    BibItem *tmpBI = [[BibItem alloc] init];
+	BibItem *tmpBI = [[BibItem alloc] init];
     [tmpBI setField:@"Title" toValue:@"Bibdesk, a great application to manage your bibliographies"];
     [tmpBI setField:@"Author" toValue:@"McCracken, M. and Maxwell, A. and Howison, J. and Routley, M. and Spiegel, S.  and Porst, S. S. and Hofman, C. M."];
     [tmpBI setField:@"Year" toValue:@"2004"];
@@ -33,13 +33,18 @@
     [tmpBI setField:@"Pages" toValue:@"96"];
     
     NSString *formatString = [defaults stringForKey:BDSKLocalUrlFormatKey];
+    NSString * error;
 	
     [filePapersAutomaticallyCheckButton setState:[defaults integerForKey:BDSKFilePapersAutomaticallyKey]];
     [keepPapersFolderOrganizedCheckButton setState:[defaults integerForKey:BDSKKeepPapersFolderOrganizedKey]];
 
     [papersFolderLocationTextField setStringValue:[[defaults objectForKey:BDSKPapersFolderPathKey] stringByAbbreviatingWithTildeInPath]];
 
-    [self setLocalUrlFormatInvalidWarning:NO message:NSLocalizedString(@"The local-url format is invalid.",@"")]; // the format in defaults is always valid, right?
+	if ([[BDSKConverter sharedConverter] validateFormat:&formatString forField:@"Local-Url" inFileType:@"BibTeX" error:&error]) {
+		[self setLocalUrlFormatInvalidWarning:NO message:nil];
+	} else {
+		[self setLocalUrlFormatInvalidWarning:YES message:error];
+	}
     [formatField setStringValue:formatString];
     [previewTextField setStringValue:[[tmpBI suggestedLocalUrl] stringByAbbreviatingWithTildeInPath]];
     [tmpBI release];

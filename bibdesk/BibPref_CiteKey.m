@@ -27,6 +27,7 @@
     NSString *citeKeyFormat = [defaults stringForKey:BDSKCiteKeyFormatKey];
     int citeKeyPresetChoice = [defaults integerForKey:BDSKCiteKeyFormatPresetKey];
 	BOOL custom = (citeKeyPresetChoice == 0);
+	NSString *error;
 	
 	// use a BibItem with some data to build the preview cite key
 	BibItem *tmpBI = [[BibItem alloc] init];
@@ -40,7 +41,11 @@
 	
 	// update the UI elements
     [citeKeyAutogenerateCheckButton setState:[defaults integerForKey:BDSKCiteKeyAutogenerateKey]];
-	[self setCiteKeyFormatInvalidWarning:NO message:NSLocalizedString(@"The cite key format is invalid.",@"")]; // the format in defaults is always valid, right?
+	if ([[BDSKConverter sharedConverter] validateFormat:&citeKeyFormat forField:@"Cite Key" inFileType:@"BibTeX" error:&error]) {
+		[self setCiteKeyFormatInvalidWarning:NO message:nil];
+	} else {
+		[self setCiteKeyFormatInvalidWarning:YES message:error];
+	}
 	[formatPresetPopUp selectItemAtIndex:[formatPresetPopUp indexOfItemWithTag:citeKeyPresetChoice]];
 	[formatField setStringValue:citeKeyFormat];
 	[citeKeyLine setStringValue:[tmpBI suggestedCiteKey]];
