@@ -180,7 +180,6 @@ NSString *BDSKBibItemLocalDragPboardType = @"edu.ucsd.cs.mmccrack.bibdesk: Local
 	
     // finally, make sure the font is correct initially:
 	[self setTableFont];
-	[tableView reloadData];
 	
 	// unfortunately we cannot set this in BI
 	[actionMenuButton setAlternateImage:[NSImage imageNamed:@"Action_Pressed"]];
@@ -2251,12 +2250,10 @@ This method always returns YES. Even if some or many operations fail.
     [self performSelectorOnMainThread:@selector(updateUI)
                            withObject:nil
                         waitUntilDone:NO];
-//    [self updateUI];
 }
 
 
 - (void)updateUI{ // not thread safe
-    [self setTableFont];
 	[tableView reloadData];
 
 	int shownPubsCount = [shownPublications count];
@@ -2603,7 +2600,7 @@ This method always returns YES. Even if some or many operations fail.
 	[tableView setRowHeight:[font defaultLineHeightForFont]+2];
 	[tableView setFont:font];
 	[tableView tile];
-        [tableView reloadData]; // othewise the change isn't immediately visible
+    [tableView reloadData]; // othewise the change isn't immediately visible
 }
 
 - (void)highlightBib:(BibItem *)bib{
