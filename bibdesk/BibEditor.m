@@ -568,7 +568,6 @@ NSString *BDSKDateModifiedString = @"Date-Modified";
         [self setupForm];
         [[OFPreferenceWrapper sharedPreferenceWrapper] setObject:currentType
                                                            forKey:BDSKPubTypeStringKey];
-        [self noteChange];
     }
 }
 
@@ -731,7 +730,6 @@ NSString *BDSKDateModifiedString = @"Date-Modified";
 		[[[self window] undoManager] setActionName:NSLocalizedString(@"Add Field",@"")];
 		[self setupForm];
 		[self makeKeyField:name];
-		[self noteChange];
         }
     }
     // else, nothing.
@@ -789,7 +787,6 @@ NSString *BDSKDateModifiedString = @"Date-Modified";
         [theBib removeField:[delFieldPopUp titleOfSelectedItem]];
 		[[[self window] undoManager] setActionName:NSLocalizedString(@"Remove Field",@"")];
         [self setupForm];
-        [self noteChange];
     }
     // else, nothing.
 }
@@ -887,16 +884,7 @@ NSString *BDSKDateModifiedString = @"Date-Modified";
         // NSLog(@"setting rssdesc to %@", [rssDescriptionView string]);
         [theBib setField:BDSKRssDescriptionString toValue:[rssDescriptionView string]];
     }
-	
-    [self noteChange];
 }
-
-// Note for a future refactoring: This should really just
-//  send a notification that "I changed" and let any Doc(/finder) that cares update.
-- (void)noteChange{
-    //[theDocument updateChangeCount:NSChangeDone];
-}
-
 
 - (void)docWillSave:(NSNotification *)notification{
 	// NSDictionary *userInfo = [notification userInfo];

@@ -186,7 +186,6 @@ extern NSString *BDSKDateModifiedString;
 - (IBAction)bibTypeDidChange:(id)sender;
 //- (IBAction)textFieldDidChange:(id)sender;
 - (IBAction)textFieldDidEndEditing:(id)sender;
-- (void)noteChange;
 //- (void)closeSheetDidEnd:(NSWindow *)sheet returnCode:(int)returnCode contextInfo:(void  *)contextInfo;
 
 - (void)toggleSnoopDrawer:(id)sender;
