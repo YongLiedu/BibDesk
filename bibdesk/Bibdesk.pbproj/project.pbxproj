@@ -2215,6 +2215,7 @@
 				274C83C105DF2FD40020EEFF,
 				274C83F205DF612E0020EEFF,
 				274C84F705DF720A0020EEFF,
+				F9AC17700638709B009399C1,
 			);
 		};
 		2A37F4AAFDCFA73011CA2CEA = {
@@ -3114,7 +3115,8 @@
 			fallbackIsa = PBXFileReference;
 			isa = PBXExecutableFileReference;
 			lastKnownFileType = "compiled.mach-o.executable";
-			path = pdftotext;
+			name = pdftotext;
+			path = ../bibdesk_vendorsrc/foolabs/xpdf/xpdf/pdftotext;
 			refType = 4;
 			sourceTree = "<group>";
 		};
@@ -3749,7 +3751,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "cd $SOURCE_ROOT/../bibdesk_vendorsrc/latex2rtf_sourceforge/latex2rtf\nmake\nexit 0";
+			shellScript = "cd $SOURCE_ROOT/../bibdesk_vendorsrc/latex2rtf_sourceforge/latex2rtf\nmake && strip latex2rtf\nexit 0";
 		};
 		F99A21060607DD7A00DF3466 = {
 			buildPhases = (
@@ -3768,6 +3770,38 @@
 			isa = PBXAggregateTarget;
 			name = latex2rtf;
 			productName = latex2rtf;
+		};
+		F9AC17700638709B009399C1 = {
+			buildPhases = (
+				F9AC1775063870B8009399C1,
+			);
+			buildSettings = {
+				OPTIMIZATION_CFLAGS = "";
+				OTHER_CFLAGS = "";
+				OTHER_LDFLAGS = "";
+				OTHER_REZFLAGS = "";
+				PRODUCT_NAME = pdftotext;
+				SECTORDER_FLAGS = "";
+				WARNING_CFLAGS = "-Wmost -Wno-four-char-constants -Wno-unknown-pragmas";
+			};
+			dependencies = (
+			);
+			isa = PBXAggregateTarget;
+			name = pdftotext;
+			productName = pdftotext;
+		};
+		F9AC1775063870B8009399C1 = {
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+			);
+			isa = PBXShellScriptBuildPhase;
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "cd $SOURCE_ROOT/../bibdesk_vendorsrc/foolabs/xpdf\n./configure --with-x=no && make && strip xpdf/pdftotext\nexit 0";
 		};
 		F9B5E472062ADDE700C8A129 = {
 			fileEncoding = 30;
