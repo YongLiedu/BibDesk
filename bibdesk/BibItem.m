@@ -1032,11 +1032,10 @@ setupParagraphStyle()
 }
 
 - (NSString *)bibTeXString{
-    return [self bibTeXStringByTeXifying:YES];
-}
-
-- (NSString *)unicodeBibTeXString{
-    return [self bibTeXStringByTeXifying:NO];
+    if([[OFPreferenceWrapper sharedPreferenceWrapper] boolForKey:BDSKShouldTeXifyWhenSavingAndCopying]){
+        return [self bibTeXStringByTeXifying:YES];
+    } else
+        return [self bibTeXStringByTeXifying:NO];
 }
     
 #warning not currently XML entity-escaped !!

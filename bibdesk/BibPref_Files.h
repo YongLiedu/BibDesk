@@ -15,10 +15,11 @@
     BDSKStringEncodingManager *encodingManager;
     IBOutlet NSButton *showErrorsCheckButton;
     IBOutlet NSPopUpButton *encodingPopUp;
+    IBOutlet NSButton *shouldTeXifyCheckButton;
 }
 
 - (IBAction)setDefaultStringEncoding:(id)sender;
-
 - (IBAction)toggleShowWarnings:(id)sender;
+- (IBAction)toggleShouldTeXify:(id)sender;
 
 @end

@@ -14,13 +14,22 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 #import "BibPref_TeX.h"
 
 @implementation BibPref_TeX
+
+- (void)awakeFromNib{
+    [super awakeFromNib];
+    encodingManager = [BDSKStringEncodingManager sharedEncodingManager];
+    [encodingPopUpButton removeAllItems];
+    [encodingPopUpButton addItemsWithTitles:[encodingManager availableEncodingDisplayedNames]];
+}
+
 - (void)updateUI{
     [usesTeXButton setState:[defaults integerForKey:BDSKUsesTeXKey]];
   
     [texBinaryPath setStringValue:[defaults objectForKey:BDSKTeXBinPathKey]];
     [bibtexBinaryPath setStringValue:[defaults objectForKey:BDSKBibTeXBinPathKey]];
     [bibTeXStyle setStringValue:[defaults objectForKey:BDSKBTStyleKey]];
-	
+    [encodingPopUpButton selectItemWithTitle:[encodingManager displayedNameForStringEncoding:[defaults integerForKey:BDSKTeXPreviewFileEncoding]]];
+
 	//This has to follow the lines above because it checks their validity
 	[self changeUsesTeX:usesTeXButton]; // this makes sure the fields are set enabled / disabled properly
 
@@ -143,6 +152,13 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 
 - (IBAction)downloadTeX:(id)sender {
 	[[NSWorkspace sharedWorkspace] openURL:[NSURL URLWithString:BDSKTEXDOWNLOADURL]];
+}
+
+- (IBAction)changeDefaultTeXEncoding:(id)sender{
+    NSStringEncoding encoding = [encodingManager stringEncodingForDisplayedName:[[sender selectedItem] title]];
+    
+    // NSLog(@"set encoding to %i for tag %i", [[encodingsArray objectAtIndex:[sender indexOfSelectedItem]] intValue], [sender indexOfSelectedItem]);    
+    [defaults setInteger:encoding forKey:BDSKTeXPreviewFileEncoding];        
 }
 
 

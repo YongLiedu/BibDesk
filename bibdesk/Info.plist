@@ -354,11 +354,13 @@
 					<key>Default string encoding for opening and saving</key>
 					<string>1</string>
 					<key>Export BibTeX document when saving BibDesk document</key>
-					<string>0</string>
+					<string>NO</string>
 					<key>Load files in background</key>
-					<string>0</string>
+					<string>NO</string>
 					<key>Use Unicode BibTeX Parser</key>
-					<string>0</string>
+					<string>NO</string>
+                    <key>TeXify characters when saving or copying BibTeX</key>
+                    <string>YES</string>
 				</dict>
 				<key>icon</key>
 				<string>genericBibDocIcon.tiff</string>
@@ -542,6 +544,8 @@
 					<string>/usr/local/teTeX/bin/powerpc-apple-darwin-current/pdflatex</string>
 					<key>Uses TeX</key>
 					<string>0</string>
+                    <key>Character encoding for TeX preview file</key>
+                    <string>1</string>
 				</dict>
 				<key>icon</key>
 				<string>preview.tiff</string>

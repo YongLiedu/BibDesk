@@ -21,6 +21,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 #import <OmniAppKit/OAPreferenceClient.h>
 #import "BibPrefController.h"
 #import "BibAppController.h"
+#import "BDSKStringEncodingManager.h"
 
 @interface BibPref_TeX : OAPreferenceClient
 {
@@ -29,6 +30,8 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
     IBOutlet NSTextField *texBinaryPath;
     IBOutlet NSTextField *bibtexBinaryPath;
     IBOutlet NSTextField *bibTeXStyle;
+    IBOutlet NSPopUpButton *encodingPopUpButton;
+    BDSKStringEncodingManager *encodingManager;
 }
 
 - (IBAction)changeUsesTeX:(id)sender;
@@ -40,5 +43,6 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 - (IBAction)changeStyle:(id)sender;
 - (IBAction)openTeXpreviewFile:(id)sender;
 - (IBAction)downloadTeX:(id)sender;
+- (IBAction)changeDefaultTeXEncoding:(id)sender;
 
 @end

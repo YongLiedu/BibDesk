@@ -95,21 +95,12 @@
     
     [templateFile appendFormat:@"\n%%%% Saved with string encoding %@ \n\n", encodingName];
     
-    [d appendData:[templateFile dataUsingEncoding:NSASCIIStringEncoding allowLossyConversion:YES]];
+    [d appendData:[templateFile dataUsingEncoding:outputEncoding allowLossyConversion:YES]];
    // [d appendData:[frontMatter dataUsingEncoding:NSASCIIStringEncoding allowLossyConversion:YES]];
     
-    if(outputEncoding == NSASCIIStringEncoding){
-        while(tmp = [e nextObject]){
-            [d appendData:[[NSString stringWithString:@"\n\n"] dataUsingEncoding:NSASCIIStringEncoding  allowLossyConversion:YES]];
-            //The TeXification is now done in the BibItem bibTeXString method
-            //Where it can be done once per field to handle newlines.
-            [d appendData:[[tmp bibTeXString] dataUsingEncoding:NSUTF8StringEncoding allowLossyConversion:YES]];
-        }
-    } else {
-        while(tmp = [e nextObject]){
-            [d appendData:[[NSString stringWithString:@"\n\n"] dataUsingEncoding:outputEncoding  allowLossyConversion:YES]];
-            [d appendData:[[tmp unicodeBibTeXString] dataUsingEncoding:outputEncoding allowLossyConversion:YES]];
-        }
+    while(tmp = [e nextObject]){
+        [d appendData:[[NSString stringWithString:@"\n\n"] dataUsingEncoding:outputEncoding  allowLossyConversion:YES]];
+        [d appendData:[[tmp bibTeXString] dataUsingEncoding:outputEncoding allowLossyConversion:YES]];
     }
     
     [d writeToFile:[self outFileName] atomically:YES];

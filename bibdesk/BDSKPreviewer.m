@@ -149,7 +149,7 @@ static unsigned threadCount = 0;
     [s scanUpToString:@"\bye" intoString:&postfix];
     [finalTexFile appendFormat:@"%@bibliographystyle{%@%@", prefix, style, postfix];
     // overwrites the old bibpreview.tex file, replacing the previous bibliographystyle
-    if(![[finalTexFile dataUsingEncoding:[[OFPreferenceWrapper sharedPreferenceWrapper] integerForKey:BDSKDefaultStringEncoding]] writeToFile:texTemplatePath atomically:YES]){
+    if(![[finalTexFile dataUsingEncoding:[[OFPreferenceWrapper sharedPreferenceWrapper] integerForKey:BDSKTeXPreviewFileEncoding]] writeToFile:texTemplatePath atomically:YES]){
         NSLog(@"error replacing texfile");
         [workingLock lock];
         working = NO;
@@ -160,7 +160,7 @@ static unsigned threadCount = 0;
 
     // write out the bib file with the template attached:
     [bibTemplate appendFormat:@"\n%@",str];
-    if(![[bibTemplate dataUsingEncoding:[[OFPreferenceWrapper sharedPreferenceWrapper] integerForKey:BDSKDefaultStringEncoding]] writeToFile:tmpBibFilePath atomically:YES]){
+    if(![[bibTemplate dataUsingEncoding:[[OFPreferenceWrapper sharedPreferenceWrapper] integerForKey:BDSKTeXPreviewFileEncoding]] writeToFile:tmpBibFilePath atomically:YES]){
         NSLog(@"Error replacing bibfile.");
         [workingLock lock];
         working = NO;

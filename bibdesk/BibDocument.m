@@ -778,29 +778,15 @@ stringByAppendingPathComponent:@"BibDesk"]; */
     NSArray *macros = [[macroDefinitions allKeys] sortedArrayUsingSelector:@selector(compare:)];
     
     // output the bibs
-    if(encoding == NSASCIIStringEncoding){
-        foreach(macro, macros){
-            macroString = [NSString stringWithFormat:@"\n@STRING{%@ = \"%@\"}\n",macro,[macroDefinitions objectForKey:macro]];
-            [d appendData:[macroString dataUsingEncoding:NSUTF8StringEncoding allowLossyConversion:YES]];
-        }
-        
-        while(tmp = [e nextObject]){
-            [d appendData:[[NSString stringWithString:@"\n\n"] dataUsingEncoding:NSASCIIStringEncoding  allowLossyConversion:YES]];
-            //The TeXification is now done in the BibItem bibTeXString method
-            [d appendData:[[tmp bibTeXString] dataUsingEncoding:NSUTF8StringEncoding allowLossyConversion:YES]];
-        }
-    } else {
-        foreach(macro, macros){
-            macroString = [NSString stringWithFormat:@"\n@STRING{%@ = \"%@\"}\n",macro,[macroDefinitions objectForKey:macro]];
-            [d appendData:[macroString dataUsingEncoding:encoding
-                                    allowLossyConversion:YES]];
-        }
-        
-        while(tmp = [e nextObject]){
-            [d appendData:[[NSString stringWithString:@"\n\n"] dataUsingEncoding:encoding  allowLossyConversion:YES]];
-            //The TeXification is now done in the BibItem bibTeXString method
-            [d appendData:[[tmp unicodeBibTeXString] dataUsingEncoding:encoding allowLossyConversion:YES]];
-        }
+    foreach(macro, macros){
+        macroString = [NSString stringWithFormat:@"\n@STRING{%@ = \"%@\"}\n",macro,[macroDefinitions objectForKey:macro]];
+        [d appendData:[macroString dataUsingEncoding:encoding
+                                allowLossyConversion:YES]];
+    }
+    
+    while(tmp = [e nextObject]){
+        [d appendData:[[NSString stringWithString:@"\n\n"] dataUsingEncoding:encoding  allowLossyConversion:YES]];
+        [d appendData:[[tmp bibTeXString] dataUsingEncoding:encoding allowLossyConversion:YES]];
     }
     
     return d;
@@ -1640,18 +1626,9 @@ int compareSetLengths(NSSet *set1, NSSet *set2, void *context){
     [self displayPreviewForItems:[self selectedPubEnumerator]];
     // (don't just pass it 'e' - it needs its own enum.)
     if([[OFPreferenceWrapper sharedPreferenceWrapper] integerForKey:BDSKUsesTeXKey] == NSOnState){ 
-
-        // It's fairly likely that the user wants Unicode if this is the case, right?  I'm assuming that the user will know how to set up their previewtemplate.tex
-        // file accordingly as well, so we'll write that out with the default encoding from prefs (not the per-document encoding)
-        if([[OFPreferenceWrapper sharedPreferenceWrapper] integerForKey:BDSKDefaultStringEncoding] != NSASCIIStringEncoding){ 
-            while(i = [e nextObject]){
-                [bibString appendString:[[shownPublications objectAtIndex:[i intValue]] unicodeBibTeXString]];
-            }
-        } else {
-            while(i = [e nextObject]){
-                [bibString appendString:[[shownPublications objectAtIndex:[i intValue]] bibTeXString]];
-            }// while i is num of selected row
-        }                    
+        while(i = [e nextObject]){
+            [bibString appendString:[[shownPublications objectAtIndex:[i intValue]] bibTeXString]];
+        }// while i is num of selected row                  
         [NSThread detachNewThreadSelector:@selector(PDFFromString:)
                                  toTarget:PDFpreviewer
                                withObject:bibString];

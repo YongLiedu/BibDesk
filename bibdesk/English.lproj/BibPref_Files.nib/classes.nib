@@ -1,10 +1,18 @@
 {
     IBClasses = (
         {
-            ACTIONS = {setDefaultStringEncoding = id; toggleShowWarnings = id; }; 
+            ACTIONS = {
+                setDefaultStringEncoding = id; 
+                toggleShouldTeXify = id; 
+                toggleShowWarnings = id; 
+            }; 
             CLASS = "BibPref_Files"; 
             LANGUAGE = ObjC; 
-            OUTLETS = {encodingPopUp = NSPopUpButton; showErrorsCheckButton = NSButton; }; 
+            OUTLETS = {
+                encodingPopUp = NSPopUpButton; 
+                shouldTeXifyCheckButton = NSButton; 
+                showErrorsCheckButton = NSButton; 
+            }; 
             SUPERCLASS = OAPreferenceClient; 
         }, 
         {

@@ -25,6 +25,8 @@ NSString *BDSKFilterFieldHistory = @"Open using filter command history";
 NSString *BDSKUseUnicodeBibTeXParser = @"Use Unicode BibTeX Parser"; // deprecated in 0.99
 NSString *BDSKUseThreadedFileLoading = @"Load files in background"; // deprecated in 0.99
 NSString *BDSKDefaultStringEncoding = @"Default string encoding for opening and saving";
+NSString *BDSKShouldTeXifyWhenSavingAndCopying = @"TeXify characters when saving or copying BibTeX";
+NSString *BDSKTeXPreviewFileEncoding = @"Character encoding for TeX preview file";
 
 NSString *BDSKTeXBinPathKey = @"TeX Binary Path";
 NSString *BDSKBibTeXBinPathKey = @"BibTeX Binary Path";

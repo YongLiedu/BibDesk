@@ -287,18 +287,11 @@
 
 /*!
     @method bibTeXString
- @abstract  returns the bibtex source for this bib item.
+ @abstract  returns the bibtex source for this bib item.  Is TeXified based on default preferences for the application.
     @discussion «discussion»
     
 */
 - (NSString *)bibTeXString;
-/*!
-    @method     unicodeBibTeXString
-    @abstract   Returns a BibTeX string without running BDSKConverter; accented characters are returned as-is.
-    @discussion Used for exporting BibTeX files with alternate encodings.
-    @result     UTF8 encoded string.
-*/
-- (NSString *)unicodeBibTeXString;
 
 /*!
     @method RTFValue

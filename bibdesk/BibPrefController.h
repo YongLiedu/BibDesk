@@ -49,6 +49,8 @@ extern NSString *BDSKBTStyleKey;
 extern NSString *BDSKUseUnicodeBibTeXParser;
 extern NSString *BDSKUseThreadedFileLoading;
 extern NSString *BDSKDefaultStringEncoding;
+extern NSString *BDSKShouldTeXifyWhenSavingAndCopying;
+extern NSString *BDSKTeXPreviewFileEncoding;
 extern NSString *BDSKDefaultBibFilePathKey;
 extern NSString *BDSKStartupBehaviorKey;
 extern NSString *BDSKAutoCheckForUpdates;
