@@ -57,9 +57,6 @@ becomes:
 
 <img src="gfx/serviceAfter.png" alt="" height="102" width="450">
 
-<p><font size="-1" face="Lucida Grande,Geneva,Arial">
-<font color="red">Note</font>: As of version 0.85, the comment shown above will not appear. only the text \cite{CasObe00} would be inserted. **************
-
 
 You can search more than just the title from the service. For example:
 
