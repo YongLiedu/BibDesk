@@ -37,7 +37,6 @@ static BibFiler *_sharedFiler = nil;
 - (void)showPreviewForPapers:(NSArray *)papers fromDocument:(BibDocument *)doc{
 	
 	NSString *papersFolderPath = [[OFPreferenceWrapper sharedPreferenceWrapper] stringForKey:BDSKPapersFolderPathKey];
-	papersFolderPath = [papersFolderPath stringByAbbreviatingWithTildeInPath];
 
 	NSFileManager *fm = [NSFileManager defaultManager];
 	BOOL isDir;
@@ -76,7 +75,7 @@ static BibFiler *_sharedFiler = nil;
 	[tv reloadData];
 	
 	[infoTextField setStringValue:[NSString stringWithFormat:
-		NSLocalizedString(@"These files that will be moved to %@.\nScan this list for errors, because this operation cannot be undone.",@"description string"), papersFolderPath]];
+		NSLocalizedString(@"These files that will be moved to %@.\nScan this list for errors, because this operation cannot be undone.",@"description string"), [papersFolderPath stringByAbbreviatingWithTildeInPath]]];
 	[window makeKeyAndOrderFront:self];	
 }
 
@@ -110,6 +109,8 @@ static BibFiler *_sharedFiler = nil;
 	// Because we don't call file:papers: from the preview window unless the directory exists,
 	// this will only be executed if we're not coming from there. We won't get a repeat error.
 	
+	BOOL fileExists = [fm fileExistsAtPath:papersFolderPath isDirectory:&isDir];
+		
 	if(!([fm fileExistsAtPath:papersFolderPath isDirectory:&isDir] && isDir)){
 		// The directory isn't there or isn't a directory, so pop up an alert.
 		int rv = NSRunAlertPanel(NSLocalizedString(@"Papers Folder doesn't exist",@""),
