@@ -57,6 +57,7 @@
 		1058C7A6FEA54F5311CA2CBB = {
 			children = (
 				1058C7A7FEA54F5311CA2CBB,
+				27413A6B05328D0A00BEE674,
 			);
 			isa = PBXGroup;
 			name = "Linked Frameworks";
@@ -122,6 +123,24 @@
 //272
 //273
 //274
+		27413A6B05328D0A00BEE674 = {
+			isa = PBXFrameworkReference;
+			name = Message.framework;
+			path = /System/Library/Frameworks/Message.framework;
+			refType = 0;
+		};
+		27413A6C05328D0A00BEE674 = {
+			fileRef = 27413A6B05328D0A00BEE674;
+			isa = PBXBuildFile;
+			settings = {
+			};
+		};
+		27413A6D05328D0A00BEE674 = {
+			fileRef = 27413A6B05328D0A00BEE674;
+			isa = PBXBuildFile;
+			settings = {
+			};
+		};
 		2758D08E05264CA900825D64 = {
 			fileEncoding = 4;
 			isa = PBXFileReference;
@@ -182,6 +201,69 @@
 			path = TestURLHandling.m;
 			refType = 4;
 		};
+		279D535F0535332E002DBEA0 = {
+			children = (
+				279D53600535332E002DBEA0,
+			);
+			isa = PBXVariantGroup;
+			name = BibPref_AutoFile.nib;
+			path = "";
+			refType = 4;
+		};
+		279D53600535332E002DBEA0 = {
+			isa = PBXFileReference;
+			name = English;
+			path = English.lproj/BibPref_AutoFile.nib;
+			refType = 4;
+		};
+		279D53610535332E002DBEA0 = {
+			fileRef = 279D535F0535332E002DBEA0;
+			isa = PBXBuildFile;
+			settings = {
+			};
+		};
+		279D53620535332E002DBEA0 = {
+			fileRef = 279D535F0535332E002DBEA0;
+			isa = PBXBuildFile;
+			settings = {
+			};
+		};
+		279D5363053535B2002DBEA0 = {
+			fileEncoding = 4;
+			isa = PBXFileReference;
+			path = BibPref_AutoFile.h;
+			refType = 4;
+		};
+		279D5364053535B2002DBEA0 = {
+			fileEncoding = 4;
+			isa = PBXFileReference;
+			path = BibPref_AutoFile.m;
+			refType = 4;
+		};
+		279D5365053535B2002DBEA0 = {
+			fileRef = 279D5363053535B2002DBEA0;
+			isa = PBXBuildFile;
+			settings = {
+			};
+		};
+		279D5366053535B2002DBEA0 = {
+			fileRef = 279D5364053535B2002DBEA0;
+			isa = PBXBuildFile;
+			settings = {
+			};
+		};
+		279D5367053535B2002DBEA0 = {
+			fileRef = 279D5363053535B2002DBEA0;
+			isa = PBXBuildFile;
+			settings = {
+			};
+		};
+		279D5368053535B2002DBEA0 = {
+			fileRef = 279D5364053535B2002DBEA0;
+			isa = PBXBuildFile;
+			settings = {
+			};
+		};
 		27C41F3A04BE8818007932DC = {
 			buildActionMask = 2147483647;
 			files = (
@@ -223,6 +305,7 @@
 				27C41F8F04BE88BD007932DC,
 				27C41F9104BE88BF007932DC,
 				2758D09205264CA900825D64,
+				279D5367053535B2002DBEA0,
 			);
 			isa = PBXHeadersBuildPhase;
 			runOnlyForDeploymentPostprocessing = 0;
@@ -265,6 +348,7 @@
 				27C41FB304BE88FF007932DC,
 				27C41FB404BE8900007932DC,
 				27C41FB504BE8901007932DC,
+				279D53620535332E002DBEA0,
 			);
 			isa = PBXResourcesBuildPhase;
 			runOnlyForDeploymentPostprocessing = 0;
@@ -310,6 +394,7 @@
 				27C41F9004BE88BE007932DC,
 				27C41F9204BE88C0007932DC,
 				2758D09305264CA900825D64,
+				279D5368053535B2002DBEA0,
 			);
 			isa = PBXSourcesBuildPhase;
 			runOnlyForDeploymentPostprocessing = 0;
@@ -324,6 +409,7 @@
 				27C41FB704BE8907007932DC,
 				27C41FB804BE8908007932DC,
 				27C41FB904BE890E007932DC,
+				27413A6D05328D0A00BEE674,
 			);
 			isa = PBXFrameworksBuildPhase;
 			runOnlyForDeploymentPostprocessing = 0;
@@ -1642,7 +1728,7 @@
 	<key>CFBundleExecutable</key>
 	<string>Bibdesk</string>
 	<key>CFBundleGetInfoString</key>
-	<string>version 0.82 ALPHA 3</string>
+	<string>version 0.83</string>
 	<key>CFBundleHelpBookFolder</key>
 	<string>BibDesk Help</string>
 	<key>CFBundleHelpBookName</key>
@@ -1658,11 +1744,11 @@
 	<key>CFBundlePackageType</key>
 	<string>APPL</string>
 	<key>CFBundleShortVersionString</key>
-	<string>0.82a3</string>
+	<string>0.83</string>
 	<key>CFBundleSignature</key>
 	<string>MMcC</string>
 	<key>CFBundleVersion</key>
-	<string>0.82a3</string>
+	<string>0.83</string>
 	<key>NSAppleScriptEnabled</key>
 	<string>YES</string>
 	<key>NSMainNibFile</key>
@@ -1724,6 +1810,30 @@
 	<dict>
 		<key>OAPreferenceController</key>
 		<dict>
+			<key>BibPref_AutoFile</key>
+			<dict>
+				<key>defaultsDictionary</key>
+				<dict>
+					<key>Auto Rename</key>
+					<false/>
+					<key>File Directory</key>
+					<string>~/Documents/Papers</string>
+					<key>Use AutoFile</key>
+					<false/>
+				</dict>
+				<key>icon</key>
+				<string>palm.icns</string>
+				<key>identifier</key>
+				<string>bp_autofile</string>
+				<key>nib</key>
+				<string>BibPref_AutoFile</string>
+				<key>ordering</key>
+				<integer>9</integer>
+				<key>shortTitle</key>
+				<string>AutoFile</string>
+				<key>title</key>
+				<string>AutoFile</string>
+			</dict>
 			<key>BibPref_Cite</key>
 			<dict>
 				<key>defaultsDictionary</key>
@@ -1962,6 +2072,7 @@
 				F5F7774903E9156E01EF0ABE,
 				F5F7774B03E9156E01EF0ABE,
 				2758D09005264CA900825D64,
+				279D5365053535B2002DBEA0,
 			);
 			isa = PBXHeadersBuildPhase;
 			runOnlyForDeploymentPostprocessing = 0;
@@ -2011,6 +2122,7 @@
 				F58886DC03ABFA7101A80167,
 				F544DC44042AD4E001499425,
 				F544DC45042AD4E001499425,
+				279D53610535332E002DBEA0,
 			);
 			isa = PBXResourcesBuildPhase;
 			runOnlyForDeploymentPostprocessing = 0;
@@ -2053,6 +2165,7 @@
 				F5F7774A03E9156E01EF0ABE,
 				F5F7774C03E9156E01EF0ABE,
 				2758D09105264CA900825D64,
+				279D5366053535B2002DBEA0,
 			);
 			isa = PBXSourcesBuildPhase;
 			runOnlyForDeploymentPostprocessing = 0;
@@ -2081,6 +2194,7 @@
 				F565BCEA038CAC0F01EF0A93,
 				F565BD61038CAC1601EF0A93,
 				F565BCFE038CAC1301EF0A93,
+				27413A6C05328D0A00BEE674,
 			);
 			isa = PBXFrameworksBuildPhase;
 			runOnlyForDeploymentPostprocessing = 0;
@@ -2100,7 +2214,7 @@
 			);
 			buildSettings = {
 				COPY_PHASE_STRIP = NO;
-				OPTIMIZATION_CFLAGS = "-O2";
+				OPTIMIZATION_CFLAGS = "-O0";
 			};
 			isa = PBXBuildStyle;
 			name = Development;
@@ -2264,6 +2378,8 @@
 				F5C8121B02C2BCF101EF0AD2,
 				F5C8121C02C2BCF101EF0AD2,
 				F51C6FE802A98BE5010DDB27,
+				279D5363053535B2002DBEA0,
+				279D5364053535B2002DBEA0,
 				F51C6FE702A98BE5010DDB27,
 				F56FDB8102AACA4C01980570,
 				F56FDB8202AACA4C01980570,
@@ -2584,6 +2700,7 @@
 		};
 		F562790802BAA17E01EF0AF1 = {
 			children = (
+				279D535F0535332E002DBEA0,
 				F5C8121802C2BCDA01EF0AD2,
 				F56FDB7E02AAC9D001980570,
 				F56FDB8702AAD8A201980570,
