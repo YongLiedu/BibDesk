@@ -344,7 +344,12 @@ void _setupFonts(){
         }
     }else{
         [self setAuthorsFromString:[pubFields objectForKey: @"Editor"]]; // or what else?
-        if ([[self citeKey] isEqualToString:@""]) {[self setCiteKey:@"fixme:01"];}
+        if ([[self citeKey] isEqualToString:@""]){
+            [self setCiteKey:
+                [NSString stringWithFormat:@"%@:%@",
+                    [[self authorAtIndex:0] substringToIndex:3],
+                    [[self date] descriptionWithCalendarFormat:@"%y"]]];
+        }
     }// FIXME: set new citeKeys to something more reasonable (make it a user default?)
     // re-call make type to make sure we still have all the appropriate bibtex defined fields...
     [self makeType:[self type]];
@@ -415,14 +420,21 @@ void _setupFonts(){
             _bodyParagraphStyle, nil]
                                     forKeys:[NSArray arrayWithObjects:NSFontAttributeName, /*NSBackgroundColorAttributeName, */NSParagraphStyleAttributeName, nil]];
 
-    NSMutableAttributedString* aStr = [[[NSMutableAttributedString alloc] initWithString:
-                              [NSString stringWithFormat:@"%@ ",[self title]] attributes:titleAttributes] autorelease];
-    
+    NSMutableAttributedString* aStr = [[NSMutableAttributedString alloc] init];
+
     NSMutableArray *nonReqKeys = [NSMutableArray arrayWithCapacity:5]; // yep, arbitrary
 
 
     [aStr appendAttributedString:[[[NSMutableAttributedString alloc] initWithString:
-    [NSString stringWithFormat:@"(%@)\n",[self type]] attributes:typeAttributes] autorelease]];
+                      [NSString stringWithFormat:@"%@\n",[self citeKey]] attributes:typeAttributes] autorelease]];
+    [aStr appendAttributedString:[[[NSMutableAttributedString alloc] initWithString:
+                     [NSString stringWithFormat:@"%@ ",[self title]] attributes:titleAttributes] autorelease]];
+
+    
+    [aStr appendAttributedString:[[[NSMutableAttributedString alloc] initWithString:
+                       [NSString stringWithFormat:@"(%@)\n",[self type]] attributes:typeAttributes] autorelease]];
+
+    
 
     while(key = [e nextObject]){
         if(![[pubFields objectForKey:key] isEqualToString:@""] &&
@@ -482,22 +494,22 @@ void _setupFonts(){
 }
 
 - (NSString *)RSSValue{
-  NSMutableString *s = [[[NSMutableString alloc] init] autorelease];
+    NSMutableString *s = [[[NSMutableString alloc] init] autorelease];
 
-  NSString *descField = [[OFPreferenceWrapper sharedPreferenceWrapper] objectForKey:BDSKRSSDescriptionFieldKey];
+    NSString *descField = [[OFPreferenceWrapper sharedPreferenceWrapper] objectForKey:BDSKRSSDescriptionFieldKey];
 
-[s appendString:@"<item>\n"];
-[s appendString:@"<description>\n"];
+    [s appendString:@"<item>\n"];
+    [s appendString:@"<description>\n"];
     if([self valueOfField:descField]){
         [s appendString:[[self valueOfField:descField] xmlString]];
-}
-[s appendString:@"</description>\n"];
-[s appendString:@"<link>"];
-[s appendString:[self valueOfField:@"Url"]];
-[s appendString:@"</link>\n"];
-//[s appendString:@"<bt:source><![CDATA[\n"];
-//    [s appendString:[[self bibTeXString] xmlString]];
-//    [s appendString:@"]]></bt:source>\n"];
+    }
+    [s appendString:@"</description>\n"];
+    [s appendString:@"<link>"];
+    [s appendString:[self valueOfField:@"Url"]];
+    [s appendString:@"</link>\n"];
+    //[s appendString:@"<bt:source><![CDATA[\n"];
+    //    [s appendString:[[self bibTeXString] xmlString]];
+    //    [s appendString:@"]]></bt:source>\n"];
     [s appendString:@"</item>\n"];
     return [[s copy] autorelease];
 }
