@@ -2263,9 +2263,7 @@ This method always returns YES. Even if some or many operations fail.
 	
 	while(fnStr = [fileNameEnum nextObject]){
 		if(url = [NSURL fileURLWithPath:fnStr]){
-			BibItem * newBI = [[BibItem alloc] initWithType:[pw stringForKey:BDSKPubTypeStringKey]
-										 fileType:BDSKBibtexString
-										  authors:[NSMutableArray arrayWithCapacity:0]];
+			BibItem * newBI = [[[BibItem alloc] init] autorelease];
 			
 			NSString *newUrl = [[NSURL fileURLWithPath:
 				[fnStr stringByExpandingTildeInPath]]absoluteString];
@@ -2277,7 +2275,7 @@ This method always returns YES. Even if some or many operations fail.
 								fromDocument:self];
 			}
 			
-			[self addPublication:[newBI autorelease]];
+			[self addPublication:newBI];
 			
 			[self updateUI];
 			
