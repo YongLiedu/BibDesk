@@ -748,57 +748,12 @@ stringByAppendingPathComponent:@"BibDesk"]; */
 }
 
 - (NSData *)bibDataRepresentation{
-    BibItem *tmp;
-    NSEnumerator *e = [[publications sortedArrayUsingSelector:@selector(fileOrderCompare:)] objectEnumerator];
-    NSMutableData *d = [NSMutableData data];
-
-    if([[OFPreferenceWrapper sharedPreferenceWrapper] boolForKey:BDSKShouldUseTemplateFile]){
-        NSMutableString *templateFile = [NSMutableString stringWithContentsOfFile:[[[OFPreferenceWrapper sharedPreferenceWrapper] stringForKey:BDSKOutputTemplateFileKey] stringByExpandingTildeInPath]];
-        
-        [templateFile appendFormat:@"\n%%%% Created for %@ at %@ \n\n", NSFullUserName(), [NSCalendarDate calendarDate]];
-
-        NSString *encodingName = [[BDSKStringEncodingManager sharedEncodingManager] displayedNameForStringEncoding:[self documentStringEncoding]];
-        
-        [templateFile appendFormat:@"\n%%%% Saved with string encoding %@ \n\n", encodingName];
-        
-        [d appendData:[templateFile dataUsingEncoding:[self documentStringEncoding] allowLossyConversion:YES]];
-        [d appendData:[frontMatter dataUsingEncoding:[self documentStringEncoding] allowLossyConversion:YES]];
-    }
     
-    NSAssert ( [self documentStringEncoding] != nil, @"Document does not have a specified string encoding." );
-        
-    // output the document's macros:
-    NSString *macroString = nil;
-    NSArray *macros = [[macroDefinitions allKeys] sortedArrayUsingSelector:@selector(compare:)];
-    
-    // output the bibs
-    if([self documentStringEncoding] == NSASCIIStringEncoding){
-        foreach(macro, macros){
-            macroString = [NSString stringWithFormat:@"\n@STRING{%@ = \"%@\"}\n",macro,[macroDefinitions objectForKey:macro]];
-            [d appendData:[macroString dataUsingEncoding:NSUTF8StringEncoding allowLossyConversion:YES]];
-        }
+    if([self documentStringEncoding] == 0)
+        [NSException raise:@"String encoding exception" format:@"Document does not have a specified string encoding."];
 
-        while(tmp = [e nextObject]){
-            [d appendData:[[NSString stringWithString:@"\n\n"] dataUsingEncoding:NSASCIIStringEncoding  allowLossyConversion:YES]];
-            //The TeXification is now done in the BibItem bibTeXString method
-            [d appendData:[[tmp bibTeXString] dataUsingEncoding:NSUTF8StringEncoding allowLossyConversion:YES]];
-        }
-    } else {
-        foreach(macro, macros){
-            macroString = [NSString stringWithFormat:@"\n@STRING{%@ = \"%@\"}\n",macro,[macroDefinitions objectForKey:macro]];
-            [d appendData:[macroString dataUsingEncoding:[self documentStringEncoding]
-                                    allowLossyConversion:YES]];
-        }
-        
-        while(tmp = [e nextObject]){
-            [d appendData:[[NSString stringWithString:@"\n\n"] dataUsingEncoding:[self documentStringEncoding]  allowLossyConversion:YES]];
-            //The TeXification is now done in the BibItem bibTeXString method
-            [d appendData:[[tmp unicodeBibTeXString] dataUsingEncoding:[self documentStringEncoding] allowLossyConversion:YES]];
-        }
-    }
-    
-    return d;
-            
+    return [self bibTeXDataWithEncoding:[self documentStringEncoding]];
+           
 }
 
 - (NSData *)atomDataRepresentation{
@@ -837,12 +792,12 @@ stringByAppendingPathComponent:@"BibDesk"]; */
 
 - (NSData *)bibTeXDataWithEncoding:(NSStringEncoding)encoding{
     
-    if(encoding == NSASCIIStringEncoding)
-        return [self bibDataRepresentation];   // run the converter on it
-    
     BibItem *tmp;
     NSEnumerator *e = [[publications sortedArrayUsingSelector:@selector(fileOrderCompare:)] objectEnumerator];
     NSMutableData *d = [NSMutableData data];
+
+    if(encoding == 0)
+        [NSException raise:@"String encoding exception" format:@"Sender did not specify an encoding to %@.", NSStringFromSelector(_cmd)];
 
     if([[OFPreferenceWrapper sharedPreferenceWrapper] boolForKey:BDSKShouldUseTemplateFile]){
         NSMutableString *templateFile = [NSMutableString stringWithContentsOfFile:[[[OFPreferenceWrapper sharedPreferenceWrapper] stringForKey:BDSKOutputTemplateFileKey] stringByExpandingTildeInPath]];
@@ -854,16 +809,43 @@ stringByAppendingPathComponent:@"BibDesk"]; */
         [templateFile appendFormat:@"\n%%%% Saved with string encoding %@ \n\n", encodingName];
         
         [d appendData:[templateFile dataUsingEncoding:encoding allowLossyConversion:YES]];
-        [d appendData:[frontMatter dataUsingEncoding:encoding allowLossyConversion:YES]];
     }
     
-    while(tmp = [e nextObject]){
-        [d appendData:[[NSString stringWithString:@"\n\n"] dataUsingEncoding:encoding allowLossyConversion:YES]];
-        //The TeXification is now done in the BibItem bibTeXString method
-        //Where it can be done once per field to handle newlines.
-        [d appendData:[[tmp unicodeBibTeXString] dataUsingEncoding:encoding allowLossyConversion:YES]];
+    // keep this regardless of the prefs setting for the template
+    [d appendData:[frontMatter dataUsingEncoding:encoding allowLossyConversion:YES]];
+    
+    // output the document's macros:
+    NSString *macroString = nil;
+    NSArray *macros = [[macroDefinitions allKeys] sortedArrayUsingSelector:@selector(compare:)];
+    
+    // output the bibs
+    if([self documentStringEncoding] == NSASCIIStringEncoding){
+        foreach(macro, macros){
+            macroString = [NSString stringWithFormat:@"\n@STRING{%@ = \"%@\"}\n",macro,[macroDefinitions objectForKey:macro]];
+            [d appendData:[macroString dataUsingEncoding:NSUTF8StringEncoding allowLossyConversion:YES]];
+        }
+        
+        while(tmp = [e nextObject]){
+            [d appendData:[[NSString stringWithString:@"\n\n"] dataUsingEncoding:NSASCIIStringEncoding  allowLossyConversion:YES]];
+            //The TeXification is now done in the BibItem bibTeXString method
+            [d appendData:[[tmp bibTeXString] dataUsingEncoding:NSUTF8StringEncoding allowLossyConversion:YES]];
+        }
+    } else {
+        foreach(macro, macros){
+            macroString = [NSString stringWithFormat:@"\n@STRING{%@ = \"%@\"}\n",macro,[macroDefinitions objectForKey:macro]];
+            [d appendData:[macroString dataUsingEncoding:encoding
+                                    allowLossyConversion:YES]];
+        }
+        
+        while(tmp = [e nextObject]){
+            [d appendData:[[NSString stringWithString:@"\n\n"] dataUsingEncoding:encoding  allowLossyConversion:YES]];
+            //The TeXification is now done in the BibItem bibTeXString method
+            [d appendData:[[tmp unicodeBibTeXString] dataUsingEncoding:encoding allowLossyConversion:YES]];
+        }
     }
+    
     return d;
+        
 }
 
 
