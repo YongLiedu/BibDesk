@@ -24,20 +24,16 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
     NSString *string;
     unsigned start;
     unsigned end;
-    unsigned irrelevant;
     NSRange myRange;
 
     string = [self string];
-
-    // simple sanity check:
-    if(line > [string length]) return;
     
     myRange.location = 0;
-    myRange.length = 1;
+    myRange.length = 0; // use zero length range so getLineStart: doesn't raise an exception if we're looking for the last line
     for (i = 1; i <= line; i++) {
         [string getLineStart:&start
                        end:&end
-               contentsEnd:&irrelevant
+               contentsEnd:NULL
                   forRange:myRange];
         myRange.location = end;
     }
