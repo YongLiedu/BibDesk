@@ -45,6 +45,14 @@ static NSCharacterSet *FinalCharSet;
     OFCharacterScanner *scanner = [[OFStringScanner alloc] initWithString:s];
     NSString *tmpConv = nil;
     NSMutableString *convertedSoFar = [s mutableCopy];
+    NSScanner *fastScan = [[NSScanner alloc] initWithString:s];
+    
+    // build a character set for stuff that does not need to be converted
+    NSCharacterSet *SkipSet;
+    NSRange skipRange;
+    skipRange.location = 0;
+    skipRange.length = 127;
+    SkipSet = [NSCharacterSet characterSetWithRange:skipRange];
 
     int offset=0;
     NSString *TEXString;
@@ -56,24 +64,31 @@ static NSCharacterSet *FinalCharSet;
         conversions = [NSDictionary dictionary]; // an empty one won't break the code.
     }
 
-    
     // convertedSoFar has s to begin with.
     // while scanner's not at eof, scan up to characters from that set into tmpOut
-    while(scannerHasData(scanner)){
-        [scanner scanUpToCharacterInSet:FinalCharSet];
-        tmpConv = [scanner readCharacterCount:1];
-        if(TEXString = [conversions objectForKey:tmpConv]){
-            [convertedSoFar replaceCharactersInRange:NSMakeRange((scannerScanLocation(scanner) + offset - 1), 1)
-                                          withString:TEXString];
-            offset += [TEXString length] - 1;    // we're adding length-1 characters, so we have to make sure we insert at the right point in the future.
-        }else{
 
-        }
+    // fastScan is an NSScanner, which is faster than the OFCharacterScanner (which makes an OFCharacterSet)
+    // tell fastScan to skip characters we know how to convert, then if
+    // it picks up something that is not in that range, run OFCharacterScanner
+    [fastScan setCharactersToBeSkipped:SkipSet];
+     if([fastScan scanCharactersFromSet:FinalCharSet intoString:nil]){
+	    while(scannerHasData(scanner)){
+		[scanner scanUpToCharacterInSet:FinalCharSet];
+		tmpConv = [scanner readCharacterCount:1];
+		if(TEXString = [conversions objectForKey:tmpConv]){
+		    [convertedSoFar replaceCharactersInRange:NSMakeRange((scannerScanLocation(scanner) + offset - 1), 1)
+						  withString:TEXString];
+		    offset += [TEXString length] - 1;    // we're adding length-1 characters, so we have to make sure we insert at the right point in the future.
+		}else{
 
+		}
+	    }
+     
     }
 
     //clean up
     [scanner release];
+    [fastScan release];
     // shouldn't [tmpConv release]; ? I should look in the omni source code...
 
 
