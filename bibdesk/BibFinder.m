@@ -342,17 +342,17 @@ static BibFinder *_sharedFinder = nil;
         else return [[aBib date] descriptionWithCalendarFormat:@"%b %Y"];
     }else if([[tableColumn identifier] isEqualToString: @"1st Author"] ){
         if([auths count] > 0)
-            return [aBib authorAtIndex:0];
+            return [[aBib authorAtIndex:0] name];
         else
             return @"-";
     }else if([[tableColumn identifier] isEqualToString: @"2nd Author"] ){
         if([auths count] > 1)
-            return [aBib authorAtIndex:1];
+            return [[aBib authorAtIndex:1] name];
         else
             return @"-";
     }else if([[tableColumn identifier] isEqualToString: @"3rd Author"] ){
         if([auths count] > 2)
-            return [aBib authorAtIndex:2];
+            return [[aBib authorAtIndex:2] name];
         else
             return @"-";
     }else{
