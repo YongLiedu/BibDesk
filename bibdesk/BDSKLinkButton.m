@@ -63,7 +63,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 // use the pointing hand cursor if provided by the OS (X.3+ only)
 // this could be refined to only cover the area of the button actually containing text!
 - (void) resetCursorRects {
-	NSLog(@"resetCursorRects");
+	// NSLog(@"resetCursorRects");
 	if (!BDSK_USING_JAGUAR){
 		[self addCursorRect:[self visibleRect] cursor:[NSCursor pointingHandCursor]];
 	}
