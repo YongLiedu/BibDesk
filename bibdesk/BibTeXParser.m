@@ -211,7 +211,8 @@ NSRange SafeForwardSearchRange( unsigned startLoc, unsigned seekLength, unsigned
             
             newBI = [[BibItem alloc] initWithType:[type lowercaseString]
                                          fileType:BDSKBibtexString
-                                          authors:[NSMutableArray array]];        
+                                          authors:[NSMutableArray array]
+									  createdDate:nil];        
             
             [newBI setCiteKeyString:[citekey stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]]];
         }
@@ -579,11 +580,10 @@ NSRange SafeForwardSearchRange( unsigned startLoc, unsigned seekLength, unsigned
                         [frontMatter appendString:@"\"}"];
                     }
                 }else{
-                    newBI = [[BibItem alloc] initWithType:
-                        [[NSString stringWithCString:bt_entry_type(entry)] lowercaseString]
+                    newBI = [[BibItem alloc] initWithType:[[NSString stringWithCString:bt_entry_type(entry)] lowercaseString]
                                                  fileType:BDSKBibtexString
-                                                  authors:
-                        [NSMutableArray arrayWithCapacity:0]];
+                                                  authors:[NSMutableArray arrayWithCapacity:0]
+											  createdDate:nil];
 					[newBI setFileOrder:itemOrder];
                     itemOrder++;
                     field = NULL;

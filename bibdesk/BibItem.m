@@ -82,15 +82,21 @@ void _setupFonts(){
 {
 	OFPreferenceWrapper *pw = [OFPreferenceWrapper sharedPreferenceWrapper];
 	self = [self initWithType:[pw stringForKey:BDSKPubTypeStringKey]
-									  fileType:BDSKBibtexString // Not Sure if this is good.
-									   authors:[NSMutableArray arrayWithCapacity:0]];
+					 fileType:BDSKBibtexString // Not Sure if this is good.
+					  authors:[NSMutableArray arrayWithCapacity:0]
+				  createdDate:[NSCalendarDate calendarDate]];
 	return self;
 }
 
-- (id)initWithType:(NSString *)type fileType:(NSString *)inFileType authors:(NSMutableArray *)authArray{ // this is the designated initializer.
+- (id)initWithType:(NSString *)type fileType:(NSString *)inFileType authors:(NSMutableArray *)authArray createdDate:(NSCalendarDate *)date{ // this is the designated initializer.
     if (self = [super init]){
-        pubFields = [[NSMutableDictionary alloc] init];
-        requiredFieldNames = [[NSMutableArray alloc] init];
+		if (date == nil){
+			pubFields = [[NSMutableDictionary alloc] init];
+		}else{
+			NSString *nowStr = [date description];
+			pubFields = [[NSMutableDictionary alloc] initWithObjectsAndKeys:nowStr, BDSKDateCreatedString, nowStr, BDSKDateModifiedString, nil];
+        }
+		requiredFieldNames = [[NSMutableArray alloc] init];
         pubAuthors = [authArray mutableCopy];     // copy, it's mutable
         document = nil;
         editorObj = nil;
@@ -98,8 +104,8 @@ void _setupFonts(){
         [self makeType:type];
         [self setCiteKeyString: @"cite-key"];
         [self setDate: nil];
-        [self setDateCreated: nil];
-        [self setDateModified: nil];
+        [self setDateCreated: date];
+        [self setDateModified: date];
         [self setFileOrder:-1];
         _setupFonts();
     }
@@ -111,13 +117,10 @@ void _setupFonts(){
 - (id)copyWithZone:(NSZone *)zone{
     BibItem *theCopy = [[[self class] allocWithZone: zone] initWithType:pubType
                                                                fileType:fileType
-                                                                authors:pubAuthors];
+                                                                authors:pubAuthors
+															createdDate:[NSCalendarDate calendarDate]];
     [theCopy setCiteKeyString: citeKey];
     [theCopy setDate: pubDate];
-	
-    NSCalendarDate *currentDate = [NSCalendarDate calendarDate];
-    [theCopy setDateModified:currentDate];
-    [theCopy setDateCreated:currentDate];
 	
     [theCopy setPubFields: pubFields];
     [theCopy setRequiredFieldNames: requiredFieldNames];
