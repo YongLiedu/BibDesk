@@ -103,6 +103,9 @@
     // and deletes dollar signs that it shouldn't touch.  Yuck.
     AGRegex *findNestedDollar = [AGRegex regexWithPattern:@"(< ?s ?u ?[bp] ?>[^<]+)(\\$)(.*)(\\$)(.*< ?/ ?s ?u ?[bp] ?>)"];
     
+    // This is used for stripping extraneous characters from BibTeX year fields
+    AGRegex *findYearString = [AGRegex regexWithPattern:@"(.*)(\\d{4})(.*)"];
+    
     NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
     
     while(sourceLine = [sourceLineE nextObject]){
@@ -148,8 +151,8 @@
                     
                     if([[pubDict allKeys] count] > 0){
                         // and we've already seen an old one: so save the old one off -
-			newBI = [self bibitemWithPubMedDictionary:pubDict fileOrder:itemOrder];
-			itemOrder ++;
+			            newBI = [self bibitemWithPubMedDictionary:pubDict fileOrder:itemOrder];
+			            itemOrder ++;
                         [returnArray addObject:newBI];
 
                     }
@@ -193,10 +196,21 @@
 						    }
 						}
                     }
-                    
+
                     [wholeValue setString:value];
                     
                     bibTeXKey = [typeManager fieldNameForPubMedTag:prefix];
+                    
+                    if([bibTeXKey isEqualToString:@"Year"]){ 
+                        // Scopus returns a PY with //// after it.  Others may return a full date, where BibTeX wants a year.  
+                        // Use a regex to find a substring with four consecutive digits and use that instead.  Not sure how robust this is.
+                        // NSLog(@"year is %@", value);
+                        value = [findYearString replaceWithString:@"$2"
+                                                         inString:value];
+                        // NSLog(@"year is %@", value);
+                    }                      
+                        
+                    
                     if(bibTeXKey){
                         key = bibTeXKey;
                     }else{
