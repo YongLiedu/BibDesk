@@ -200,17 +200,25 @@ Broken out of BibDocument and split up into smaller parts to make things more ma
 		return ([self numberOfSelectedPubs] != 0);
 	}
 	else {
-		// action menu, case of no selection doesn't happen here
-		if ([self numberOfSelectedPubs] == 1) {
+		// action menu
+		if ([self numberOfSelectedPubs] == 0) {
+			// no selection
 			s = NSLocalizedString(@"Copy Bibliography Entry as Image", @"Copy Bibliography Entry as Image"); 
 			[menuItem setTitle:s];
+			return NO;
+		}
+		else if ([self numberOfSelectedPubs] == 1) {
+			// single selection
+			s = NSLocalizedString(@"Copy Bibliography Entry as Image", @"Copy Bibliography Entry as Image"); 
+			[menuItem setTitle:s];
+			return YES;	
 		}
 		else {
 			// multiple selection
 			s = NSLocalizedString(@"Copy %i Bibliography Entries as Image", @"Copy %i Bibliography Entries as Image"); 
 			[menuItem setTitle:[NSString stringWithFormat:s, [self numberOfSelectedPubs]]];
+			return YES;	
 		}
-		return YES;	
 	}	
 }
 
@@ -227,17 +235,25 @@ Broken out of BibDocument and split up into smaller parts to make things more ma
 		return ([self numberOfSelectedPubs] != 0);
 	}
 	else {
-		// action menu, case of no selection doesn't happen here
-		if ([self numberOfSelectedPubs] == 1) {
+		// action menu
+		if ([self numberOfSelectedPubs] == 0) {
+			// no selection
 			s = NSLocalizedString(@"Copy Bibliography Entry as Text", @"Copy Bibliography Entry as Text"); 
 			[menuItem setTitle:s];
+			return NO;
+		}
+		else if ([self numberOfSelectedPubs] == 1) {
+			// single selection
+			s = NSLocalizedString(@"Copy Bibliography Entry as Text", @"Copy Bibliography Entry as Text"); 
+			[menuItem setTitle:s];
+			return YES;	
 		}
 		else {
 			// multiple selection
 			s = NSLocalizedString(@"Copy %i Bibliography Entries as Text", @"Copy %i Bibliography Entries as Text"); 
 			[menuItem setTitle:[NSString stringWithFormat:s, [self numberOfSelectedPubs]]];
+			return YES;	
 		}
-		return YES;	
 	}	
 }
 
