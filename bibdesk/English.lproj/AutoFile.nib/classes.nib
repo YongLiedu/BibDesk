@@ -4,7 +4,12 @@
             ACTIONS = {done = id; }; 
             CLASS = BibFiler; 
             LANGUAGE = ObjC; 
-            OUTLETS = {infoTextField = NSTextField; tv = NSTableView; window = NSWindow; }; 
+            OUTLETS = {
+                iconView = NSImageView; 
+                infoTextField = NSTextField; 
+                tv = NSTableView; 
+                window = NSWindow; 
+            }; 
             SUPERCLASS = NSObject; 
         }, 
         {CLASS = FirstResponder; LANGUAGE = ObjC; SUPERCLASS = NSObject; }, 
