@@ -944,7 +944,7 @@ stringByAppendingPathComponent:@"BibDesk"]; */
                 r = [[pub title]  rangeOfString:substring
                                         options:NSCaseInsensitiveSearch];
 			}else if ([field isEqualToString:@"Author"]){
-                r = [[pub authorString]  rangeOfString:substring
+                r = [[pub bibtexAuthorString]  rangeOfString:substring
                                                options:NSCaseInsensitiveSearch];
 			}else if ([field isEqualToString:@"Date"]){
 				NSCalendarDate *pubDate = [pub date];
@@ -1240,9 +1240,9 @@ int generalBibItemCompareFunc(id item1, id item2, void *context){
     OFPreferenceWrapper *sud = [OFPreferenceWrapper sharedPreferenceWrapper];
     if([[sud objectForKey:BDSKDragCopyKey] intValue] == 0){
         [self copyAsBibTex:self];
-    }if([[sud objectForKey:BDSKDragCopyKey] intValue] == 1){
+    }else if([[sud objectForKey:BDSKDragCopyKey] intValue] == 1){
         [self copyAsTex:self];
-    }if([[sud objectForKey:BDSKDragCopyKey] intValue] == 2){
+    }else if([[sud objectForKey:BDSKDragCopyKey] intValue] == 2){
         [self copyAsPDF:self];
     }
 }
