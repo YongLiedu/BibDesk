@@ -105,10 +105,8 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 		name = [newName copy];
     }
 	
-	unichar *nameCharacters = (unichar *)malloc([name length] * sizeof(unichar));
-	[name getCharacters:nameCharacters];
-    	
-	theName = bt_split_name(nameCharacters,"",0,0);
+
+	theName = bt_split_name([name UTF8String],[name UTF8String],0,0);
     
     // get tokens from first part
     tmpStr = [NSMutableString string];
@@ -150,9 +148,8 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
             [tmpStr appendString:@" "];
     }
     _jrPart = [tmpStr retain];
-    
+    	
 	bt_free_name(theName);
-	free(nameCharacters);
 }
 
 - (BibItem *)pubAtIndex:(int)index{
