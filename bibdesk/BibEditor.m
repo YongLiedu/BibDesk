@@ -84,6 +84,7 @@ NSString *BDSKUrlString = @"Url";
 }
 
 - (void)setupForm{
+    BibAppController *appController = (BibAppController *)[NSApp delegate];
     NSString *tmp;
     NSFormCell *entry;
     NSArray *sKeys;
@@ -126,7 +127,7 @@ NSString *BDSKUrlString = @"Url";
             [entry setAttributedTitle:[[[NSAttributedString alloc] initWithString:tmp
                                                                        attributes:reqAtt] autorelease]];
             // Autocompletion stuff
-            [entry setFormatter:[[NSApp delegate] formatterForEntry:tmp]];
+            [entry setFormatter:[appController formatterForEntry:tmp]];
             //[entry setTitleAlignment:NSRightTextAlignment]; this doesn't work...
             i++;
         }
@@ -146,7 +147,7 @@ NSString *BDSKUrlString = @"Url";
             [entry setObjectValue:[tmpBib valueOfField:tmp]];
             [entry setTitleAlignment:NSLeftTextAlignment];
             // Autocompletion stuff
-            [entry setFormatter:[[NSApp delegate] formatterForEntry:tmp]];
+            [entry setFormatter:[appController formatterForEntry:tmp]];
             i++;
         }
     }
@@ -157,30 +158,17 @@ NSString *BDSKUrlString = @"Url";
 }
 
 - (void)awakeFromNib{
-
+    NSEnumerator *typeNamesE = [[[BibTypeManager sharedManager] bibTypesForFileType:[theBib fileType]] objectEnumerator];
+    NSString *typeName = nil;
+    
     [citeKeyField setFormatter:citeKeyFormatter];
-    // This is here because I don't know how to make an empty popupbutton in IB.
+
     [bibTypeButton removeAllItems];
+    while(typeName = [typeNamesE nextObject]){
+        [bibTypeButton addItemWithTitle:typeName];
+    }
 
-    // 10/2002: See "refactoring plan" in BibItem.h.
-
-    // Now we add items. The indexes are the enum values we'll use later to set the selected item.
-    // Using them here guarantees that we'll have the right values later.
-    // ?? Bad comment?? - because we don't know what index they'll be put at if we don't explicitly change them...
-    [bibTypeButton insertItemWithTitle: @"Article" atIndex: ARTICLE];
-    [bibTypeButton insertItemWithTitle: @"Book" atIndex: BOOK];
-    [bibTypeButton insertItemWithTitle: @"Booklet" atIndex: BOOKLET];
-    [bibTypeButton insertItemWithTitle: @"InBook" atIndex: INBOOK];
-    [bibTypeButton insertItemWithTitle: @"InCollection" atIndex: INCOLLECTION];
-    [bibTypeButton insertItemWithTitle: @"InProceedings" atIndex: INPROCEEDINGS];
-    [bibTypeButton insertItemWithTitle: @"Manual" atIndex: MANUAL];
-    [bibTypeButton insertItemWithTitle: @"Mastersthesis" atIndex: MASTERSTHESIS];
-    [bibTypeButton insertItemWithTitle: @"Misc" atIndex: MISC];
-    [bibTypeButton insertItemWithTitle: @"PhdThesis" atIndex: PHDTHESIS];
-    [bibTypeButton insertItemWithTitle: @"Proceedings" atIndex: PROCEEDINGS];
-    [bibTypeButton insertItemWithTitle: @"Techreport" atIndex: TECHREPORT];
-    [bibTypeButton insertItemWithTitle: @"Unpublished" atIndex: UNPUBLISHED];
-    [bibTypeButton selectItemAtIndex: currentType];
+    [bibTypeButton selectItemWithTitle:currentType];
     [self setupForm];
 }
 
@@ -220,7 +208,7 @@ NSString *BDSKUrlString = @"Url";
     [notesView setString:[tmpBib valueOfField:BDSKAnnoteString]];
     [abstractView setString:[tmpBib valueOfField:BDSKAbstractString]];
     [rssDescriptionView setString:[tmpBib valueOfField:BDSKRssDescriptionString]];
-    [bibTypeButton selectItemAtIndex: currentType];
+    [bibTypeButton selectItemWithTitle: currentType];
 }
 
 - (IBAction)saveDocument:(id)sender{
@@ -359,15 +347,17 @@ NSString *BDSKUrlString = @"Url";
 }
 
 - (IBAction)bibTypeDidChange:(id)sender{
-    // we can use indexOfSelectedItem because we guarantee there is always a selected item.
-    currentType = [bibTypeButton indexOfSelectedItem];
+    if (![[self window] makeFirstResponder:[self window]]){
+        [[self window] endEditingFor:nil];
+    }
+    currentType = [bibTypeButton titleOfSelectedItem];
     if([tmpBib type] != currentType){
         [tmpBib makeType:currentType];
         [self setupForm];
         [self updateChangeCount:NSChangeDone];
         [theDoc updateChangeCount:NSChangeDone];
-        [[OFPreferenceWrapper sharedPreferenceWrapper] setInteger:currentType
-                                                           forKey:BDSKPubTypeKey];
+        [[OFPreferenceWrapper sharedPreferenceWrapper] setObject:currentType
+                                                           forKey:BDSKPubTypeStringKey];
         //[self fixEditedStatus];
     }
 }
@@ -565,7 +555,7 @@ NSString *BDSKUrlString = @"Url";
 - (void)controlTextDidBeginEditing:(NSNotification *)aNotification{
 //    id fieldEditor = [[aNotification userInfo] objectForKey:@"NSFieldEditor"];
 //    NSUndoManager *undoManager = [theDoc undoManager];
-    id cell = [aNotification object];
+//    id cell = [aNotification object];
  //   [undoManager registerUndoWithTarget:cell
   //                             selector:@selector(setStringValue:)
    //                              object:[cell stringValue]];
@@ -577,14 +567,14 @@ NSString *BDSKUrlString = @"Url";
 }
 
 // This does nothing right now because I can't seem to get a notification about changes in an nsformcell
-- (IBAction)controlTextDidChange:(NSNotification *)notification{
+/*- (IBAction)controlTextDidChange:(NSNotification *)notification{
     NSForm *form = [notification object];
     NSCell *sel = [form cellAtIndex: [form indexOfSelectedItem]];
     NSString *title = [sel title];
 #if DEBUG
     NSLog(@"controlTextDidChange -  %@", [notification object]);
 #endif
-}
+}*/
 
 #warning - why does this sometimes get called with no tmpBib?
 // I know the answer - it gets called before windowWillLoad... but why?!

@@ -25,6 +25,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 #import "BibItem.h"
 #import "BibDocument.h"
 #import "BDSKCiteKeyFormatter.h"
+#import "BibAppController.h";
 
 extern NSString *BDSKAnnoteString;
 extern NSString *BDSKAbstractString;
@@ -65,7 +66,7 @@ extern NSString *BDSKUrlString;
     IBOutlet NSButton* delFieldButtonCancel;
     IBOutlet NSWindow* delFieldWindow;
     // ----------------------------------------------------------------------------------------
-    BibType currentType;
+    NSString *currentType;
     BibItem *theBib;
     BibItem *tmpBib;
     BibDocument *theDoc;
@@ -142,7 +143,7 @@ extern NSString *BDSKUrlString;
 - (IBAction)citeKeyDidChange:(id)sender;
 
 - (IBAction)bibTypeDidChange:(id)sender;
-- (IBAction)textFieldDidChange:(id)sender;
+//- (IBAction)textFieldDidChange:(id)sender;
 - (IBAction)textFieldDidEndEditing:(id)sender;
 
 - (void)closeSheetDidEnd:(NSWindow *)sheet returnCode:(int)returnCode contextInfo:(void  *)contextInfo;
