@@ -32,6 +32,4 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 
 - (IBAction)descriptionFieldChanged:(id)sender;
 
-- (IBAction)findOutMoreButtonPressed:(id)sender;
-
 @end
