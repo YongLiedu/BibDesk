@@ -236,6 +236,7 @@ static float BDSKScaleMenuFontSize = 11.0;
     if (scaleFactor != newScaleFactor) {
 		NSSize curDocFrameSize, newDocBoundsSize;
 		NSView *clipView = [[self documentView] superview];
+        NSPoint scrollPoint = [self scrollPositionAsPercentage];
 		
 			if (flag) {	// Coming from elsewhere, first validate it
 				unsigned cnt = 0, numberOfDefaultItems = (sizeof(BDSKDefaultScaleMenuFactors) / sizeof(float));
@@ -258,7 +259,7 @@ static float BDSKScaleMenuFontSize = 11.0;
 		
 		[clipView setBoundsSize:newDocBoundsSize];
 		
-		[self scrollToTop];
+		[self setScrollPositionAsPercentage:scrollPoint]; // maintain approximate scroll position
     }
 }
 
