@@ -164,8 +164,10 @@ static BDSKConverter *theConverter;
 				[scanner setScanLocation:(index + 1)];
 				offset += [TEXString length] - 1;
 			} else if(tmpConv != nil){ // if tmpConv is non-nil, we had a character that was accented and not convertable by us
-				[NSException raise:@"BDSKTeXifyException" format:@"An error occurred converting %@", tmpConv];
 				[scanner setScanLocation:(index + 1)]; // increment the scanner to go past the character that we don't have in the dict
+                NSString *hexString = [NSString stringWithFormat:@"%X", [tmpConv characterAtIndex:0]];
+                NSLog(@"unable to convert character 0x%@", [hexString stringByPaddingToLength:4 withString:@"0" startingAtIndex:0]);
+				[NSException raise:@"BDSKTeXifyException" format:@"An error occurred converting %@", tmpConv]; // raise exception after moving the scanner past the offending char
 			}
         }
     }
