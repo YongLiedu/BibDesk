@@ -232,18 +232,47 @@ NSRange SafeForwardSearchRange( unsigned startLoc, unsigned seekLength, unsigned
             unsigned searchStart = leftDelimLocation + 1;
             NSRange braceSearchRange;
             NSRange braceFoundRange;
+            NSString *logString = nil;
             
             // This while() loop looks for nested curly braces in a value string (rightDelimLocation).  
             // The basic idea is to start from { and find the next closing brace }, then check to see if there's a { between those two; if so, reset the range to do the same search,
             // starting from the middle brace.  Counting might be better for error detection, of which there is none at present.
+            
             while(usingBraceDelimiter){ // should put us at the end of a record if we're using brace delimiters
                 braceSearchRange = NSMakeRange(searchStart, rightDelimLocation - searchStart);
+                // NSLog(@"substring in braceSearchRange is %@", [fullString substringWithRange:braceSearchRange] );
                 braceFoundRange = [fullString rangeOfString:leftDelim options:NSLiteralSearch range:braceSearchRange];
                 
+                // Okay, so we found a left delimiter.  However, it may be nested inside yet another brace pair, so let's look back from the left delimiter and see if we find another left delimiter at a different location.  
+                // Example:  Title = {Physical insight into the {Ergun} and {Wen {\&} Yu} equations for fluid flow in packed and fluidised beds},
+                // In this example, the {Wen {\&} Yu} expression is problematic, because we need to account for both left braces; if we don't, everything after the } is stripped.
+                // WARNING:  this if() has some trickery with resetting the scan location, but not setting the search location as in the next if() statement!
+                
+                if(braceFoundRange.location != [fullString rangeOfString:leftDelim options:NSLiteralSearch | NSBackwardsSearch range:braceSearchRange].location){ // this means we found "{ {" between { and }
+                    [scanner scanString:rightDelim intoString:&logString]; // it wasn't this one, so scan past it
+                    // NSLog(@"scanned rightDelim %@", logString);
+                    if(![scanner scanUpToString:rightDelim intoString:&logString]){  // find the next one
+                        [BibTeXParser postParsingErrorNotification:[NSString stringWithFormat:@"Delimiter '%@' not found", rightDelim]
+                                                         errorType:@"Parse Error" 
+                                                          fileName:filePath 
+                                                        errorRange:[fullString lineRangeForRange:NSMakeRange(leftDelimLocation, 0)]];
+                    }
+                    rightDelimLocation = [scanner scanLocation];
+                    // NSLog(@"scanned up to %@ and found %@", rightDelim, logString);
+                }
+                
                 if(braceFoundRange.location != NSNotFound){ // if there's a "{" between { and }
-                    [scanner scanString:rightDelim intoString:nil]; // it wasn't this one, so scan past it
-                    [scanner scanUpToString:rightDelim intoString:nil];  // find the next one
+                    [scanner scanString:rightDelim intoString:&logString]; // it wasn't this one, so scan past it
+                    // NSLog(@"scanned rightDelim %@", logString);
+                    if(![scanner scanUpToString:rightDelim intoString:&logString]){  // find the next one
+                        [BibTeXParser postParsingErrorNotification:[NSString stringWithFormat:@"Delimiter '%@' not found", rightDelim]
+                                                         errorType:@"Parse Error" 
+                                                          fileName:filePath 
+                                                        errorRange:[fullString lineRangeForRange:NSMakeRange(leftDelimLocation, 0)]];
+                    }
+                    // NSLog(@"scanned up to %@ and found %@", rightDelim, logString);
                     searchStart = rightDelimLocation + 1; // start from the previous search end
+                    // NSLog(@"string at searchStart is %@", [fullString substringWithRange:NSMakeRange(searchStart, 1)]);
                     rightDelimLocation = [scanner scanLocation];
                 } else {
                     break;
