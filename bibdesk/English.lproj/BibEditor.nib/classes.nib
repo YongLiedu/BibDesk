@@ -59,8 +59,8 @@
                 rssDescriptionView = NSTextView; 
                 tabView = NSTabView; 
                 textSnoopContainerView = NSView; 
-                viewLocalButton = NSButton; 
-                viewRemoteButton = NSButton; 
+                viewLocalButton = RYZImagePopUpButton; 
+                viewRemoteButton = RYZImagePopUpButton; 
             }; 
             SUPERCLASS = NSWindowController; 
         }, 
