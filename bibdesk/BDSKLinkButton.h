@@ -23,5 +23,6 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 }
 
 - (void)setLink:(NSString *)link;
+- (void)setLinkTitle:(NSString *)title;
 
 @end
