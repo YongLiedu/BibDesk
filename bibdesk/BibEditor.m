@@ -38,6 +38,7 @@ NSString *BDSKUrlString = @"Url";
     self = [super initWithWindowNibName:@"BibEditor"];
     fieldNumbers = [[NSMutableDictionary dictionaryWithCapacity:1] retain];
     citeKeyFormatter = [[BDSKCiteKeyFormatter alloc] init];
+    fieldNameFormatter = [[BDSKFieldNameFormatter alloc] init];
     
     theBib = aBib;
     [theBib setEditorObj:self];
@@ -151,6 +152,7 @@ NSString *BDSKUrlString = @"Url";
     NSString *typeName = nil;
     
     [citeKeyField setFormatter:citeKeyFormatter];
+    [newFieldName setFormatter:fieldNameFormatter];
 
     [bibTypeButton removeAllItems];
     while(typeName = [typeNamesE nextObject]){

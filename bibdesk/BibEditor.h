@@ -27,6 +27,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 #import "BDSKCiteKeyFormatter.h"
 #import "BibAppController.h"
 #import "PDFImageView.h"
+#import "BDSKFieldNameFormatter.h"
 
 
 extern NSString *BDSKAnnoteString;
@@ -96,6 +97,8 @@ extern NSString *BDSKUrlString;
     NSDictionary *completionMatcherDict;
 // cite string formatter
     BDSKCiteKeyFormatter *citeKeyFormatter;
+// new field formatter
+    BDSKFieldNameFormatter *fieldNameFormatter;
 }
 
 /*!
