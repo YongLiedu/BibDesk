@@ -16,10 +16,27 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 #import "BDSKConverter.h"
 
 static NSDictionary *WholeDict;
+static NSCharacterSet *EmptySet;
+static NSCharacterSet *FinalCharSet;
 
 @implementation BDSKConverter
 + (void)loadDict{
+    
+    //create a characterset from the characters we know how to convert
+
+    NSMutableCharacterSet *workingSet;
+    NSRange highCharRange;
+    
     WholeDict = [[NSDictionary dictionaryWithContentsOfFile:[[[NSBundle mainBundle] resourcePath] stringByAppendingPathComponent:@"CharacterConversion.plist"]] retain];
+    EmptySet = [[NSCharacterSet characterSetWithCharactersInString:@""] retain];
+    
+    highCharRange.location = (unsigned int) '~';
+    highCharRange.length = 128; //this should get all the characters in the upper-range.
+    workingSet = [[NSCharacterSet decomposableCharacterSet] mutableCopy];
+    [workingSet addCharactersInRange:highCharRange];
+    FinalCharSet = [workingSet copy];
+    
+    [workingSet release];
 }
 
 + (NSString *)stringByTeXifyingString:(NSString *)s{
@@ -29,11 +46,6 @@ static NSDictionary *WholeDict;
     NSString *tmpConv = nil;
     NSMutableString *convertedSoFar = [s mutableCopy];
 
-    //create a characterset from the characters we know how to convert
-    NSCharacterSet *finalInvertedCharSet;
-    NSCharacterSet *finalCharSet;
-    NSMutableCharacterSet *workingSet;
-    NSRange highCharRange;
     int offset=0;
     NSString *TEXString;
 
@@ -44,19 +56,11 @@ static NSDictionary *WholeDict;
         conversions = [NSDictionary dictionary]; // an empty one won't break the code.
     }
 
-    highCharRange.location = (unsigned int) '~';
-    highCharRange.length = 128; //this should get all the characters in the upper-range.
-    workingSet = [[NSCharacterSet decomposableCharacterSet] mutableCopy];
-    [workingSet addCharactersInRange:highCharRange];
-    finalCharSet = [workingSet copy];
-    finalInvertedCharSet = [finalCharSet invertedSet];
-   
-
-    // Now the character set is ready.
+    
     // convertedSoFar has s to begin with.
     // while scanner's not at eof, scan up to characters from that set into tmpOut
     while(scannerHasData(scanner)){
-        [scanner scanUpToCharacterInSet:finalCharSet];
+        [scanner scanUpToCharacterInSet:FinalCharSet];
         tmpConv = [scanner readCharacterCount:1];
         if(TEXString = [conversions objectForKey:tmpConv]){
             [convertedSoFar replaceCharactersInRange:NSMakeRange((scannerScanLocation(scanner) + offset - 1), 1)
@@ -71,9 +75,7 @@ static NSDictionary *WholeDict;
     //clean up
     [scanner release];
     // shouldn't [tmpConv release]; ? I should look in the omni source code...
-    [finalCharSet release];
-    
-    [workingSet release];
+
 
     //Next two lines handle newlines.  These probably should be done in the dictionary
     //But I could't make it return just "\n" it always returns "\\n" and none of the
@@ -89,7 +91,7 @@ static NSDictionary *WholeDict;
                                     withString:@"{\\newline}" options: NSCaseInsensitiveSearch
                                          range:NSMakeRange(0, [convertedSoFar length])];
     
-    return([NSString stringWithString:convertedSoFar]);
+    return([convertedSoFar autorelease]);
 }
 
 
@@ -99,22 +101,23 @@ static NSDictionary *WholeDict;
     NSString *tmpConv;
     NSString *tmpConvB;
     NSString *TEXString;
-    NSMutableString *convertedSoFar = [NSMutableString string];
-    NSCharacterSet *emptySet = [NSCharacterSet characterSetWithCharactersInString:@""];
+    NSMutableString *convertedSoFar = [[[NSMutableString alloc] initWithCapacity:10] autorelease];
+
 
     // get the dictionary
     NSDictionary *conversions;
 
-    if(!s || [s isEqualToString:@""])
-        return [NSString stringWithString:@""];
-
+    if(!s || [s isEqualToString:@""]){
+        return @"";
+    }
+    
     if(!WholeDict)[self loadDict];
     conversions = [WholeDict objectForKey:@"TeX to Roman"];
 
     if(!conversions){
         conversions = [NSDictionary dictionary]; // an empty one won't break the code.
     }
-    [scanner setCharactersToBeSkipped:emptySet];
+    [scanner setCharactersToBeSkipped:EmptySet];
     //    NSLog(@"scanning string: %@",s);
     while(![scanner isAtEnd]){
         if([scanner scanUpToString:@"{\\" intoString:&tmpPass])
@@ -148,6 +151,6 @@ static NSDictionary *WholeDict;
                                          range:NSMakeRange(0, [convertedSoFar length])];
     
 
-    return [NSString stringWithString:convertedSoFar];    
+    return [convertedSoFar autorelease]; 
 }
 @end
