@@ -2485,7 +2485,7 @@ This method always returns YES. Even if some or many operations fail.
     NSMutableArray *prefsShownColNamesMutableArray = nil;
 
     if(returnCode == 1){
-        NSString *newColumnName = [[addFieldTextField stringValue] capitalizedString];
+        NSString *newColumnName = [addFieldTextField stringValue];
 		[self columnsMenuAddTableColumnName:newColumnName enabled:YES];
         tc = [[[NSTableColumn alloc] initWithIdentifier:newColumnName] autorelease];
         [tc setResizable:YES];
