@@ -128,7 +128,7 @@ extern NSString* BDSKBibTeXStringPboardType;
 	IBOutlet NSPopUpButton* delFieldPopupButton;
 	
     // --------------------------------------------------------------------------------------
-    IBOutlet NSMenu * contextualMenu;
+    IBOutlet NSMenu * columnsMenu;
 	IBOutlet NSMenu * actionMenu;
 	IBOutlet RYZImagePopUpButton * actionMenuButton;
 	IBOutlet NSMenuItem * actionMenuFirstItem;
@@ -418,31 +418,31 @@ int generalBibItemCompareFunc(id item1, id item2, void *context);
  @discussion \253discussion\273
  
 */
-- (NSMenu *)menuForTableColumn:(NSTableColumn *)tc row:(int)row;
+//- (NSMenu *)menuForTableColumn:(NSTableColumn *)tc row:(int)row;
 
 /*!
-@method contextualMenuAddTableColumnName:enabled:
+@method columnsMenuAddTableColumnName:enabled:
     @abstract \253Abstract\273
     @discussion \253discussion\273
     
 */
-- (void)contextualMenuAddTableColumnName:(NSString *)name enabled:(BOOL)yn;
+- (void)columnsMenuAddTableColumnName:(NSString *)name enabled:(BOOL)yn;
 
 /*!
-    @method contextualMenuSelectTableColumn
+    @method columnsMenuSelectTableColumn
     @abstract handles when we choose an already-existing tablecolumn name in the menu
     @discussion \253discussion\273
     
 */
-- (IBAction)contextualMenuSelectTableColumn:(id)sender;
-- (void)contextualMenuSelectTableColumn:(id)sender post:(BOOL)yn;
+- (IBAction)columnsMenuSelectTableColumn:(id)sender;
+- (void)columnsMenuSelectTableColumn:(id)sender post:(BOOL)yn;
 /*!
-    @method contextualMenuAddTableColumn
+    @method columnsMenuAddTableColumn
     @abstract called by the "add other..." menu item
     @discussion \253discussion\273
     
 */
-- (IBAction)contextualMenuAddTableColumn:(id)sender;
+- (IBAction)columnsMenuAddTableColumn:(id)sender;
 /*!
     @method dismissAddFieldSheet
     @abstract called when OK or Cancel is pressed on the sheet

@@ -60,55 +60,55 @@ NSString* BDSKBibTeXStringPboardType = @"edu.ucsd.cs.mmcrack.bibdesk: Local BibT
 		
         // Register as observer of font change events.
         [[NSNotificationCenter defaultCenter] addObserver:self
-   selector:@selector(handleFontChangedNotification:)
-       name:BDSKTableViewFontChangedNotification
-     object:nil];
-        
-     [[NSNotificationCenter defaultCenter] addObserver:self
-   selector:@selector(handlePreviewDisplayChangedNotification:)
-       name:BDSKPreviewDisplayChangedNotification
-     object:nil];
+												 selector:@selector(handleFontChangedNotification:)
+													 name:BDSKTableViewFontChangedNotification
+												   object:nil];
 
-     // register for general UI changes notifications:
-     [[NSNotificationCenter defaultCenter] addObserver:self
-                                              selector:@selector(handleUpdateUINotification:)
-                                                  name:BDSKDocumentUpdateUINotification
-                                                object:nil];
+		[[NSNotificationCenter defaultCenter] addObserver:self
+												 selector:@selector(handlePreviewDisplayChangedNotification:)
+													 name:BDSKPreviewDisplayChangedNotification
+												   object:nil];
 
-     // register for tablecolumn changes notifications:
-     [[NSNotificationCenter defaultCenter] addObserver:self
-                                              selector:@selector(handleTableColumnChangedNotification:)
-                                                  name:BDSKTableColumnChangedNotification
-                                                object:nil];
-     
-     // want to register for changes to the custom string array too...
-     [[NSNotificationCenter defaultCenter] addObserver:self
-                                              selector:@selector(handleCustomStringsChangedNotification:)
-                                                  name:BDSKCustomStringsChangedNotification
-                                                object:nil];
+		// register for general UI changes notifications:
+		[[NSNotificationCenter defaultCenter] addObserver:self
+												 selector:@selector(handleUpdateUINotification:)
+													 name:BDSKDocumentUpdateUINotification
+												   object:nil];
 
-	 //  register to observe for item change notifications here.
-	 [[NSNotificationCenter defaultCenter] addObserver:self
-                                              selector:@selector(handleBibItemChangedNotification:)
-                                                  name:BDSKBibItemChangedNotification
-                                                object:nil];
+		// register for tablecolumn changes notifications:
+		[[NSNotificationCenter defaultCenter] addObserver:self
+												 selector:@selector(handleTableColumnChangedNotification:)
+													 name:BDSKTableColumnChangedNotification
+												   object:nil];
 
-	 // register to observe for add/delete items.
-	 [[NSNotificationCenter defaultCenter] addObserver:self
-                                              selector:@selector(handleBibItemAddDelNotification:)
-                                                  name:BDSKDocAddItemNotification
-                                                object:self];
+		// want to register for changes to the custom string array too...
+		[[NSNotificationCenter defaultCenter] addObserver:self
+												 selector:@selector(handleCustomStringsChangedNotification:)
+													 name:BDSKCustomStringsChangedNotification
+												   object:nil];
 
-	 [[NSNotificationCenter defaultCenter] addObserver:self
-                                              selector:@selector(handleBibItemAddDelNotification:)
-                                                  name:BDSKDocDelItemNotification
-                                                object:self];
-	 
-     customStringArray = [[NSMutableArray arrayWithCapacity:6] retain];
-     [customStringArray setArray:[[OFPreferenceWrapper sharedPreferenceWrapper] arrayForKey:BDSKCustomCiteStringsKey]];
+		//  register to observe for item change notifications here.
+		[[NSNotificationCenter defaultCenter] addObserver:self
+												 selector:@selector(handleBibItemChangedNotification:)
+													 name:BDSKBibItemChangedNotification
+												   object:nil];
 
-     tableColumnsChanged = YES;
-     sortDescending = YES;
+		// register to observe for add/delete items.
+		[[NSNotificationCenter defaultCenter] addObserver:self
+												 selector:@selector(handleBibItemAddDelNotification:)
+													 name:BDSKDocAddItemNotification
+												   object:self];
+
+		[[NSNotificationCenter defaultCenter] addObserver:self
+												 selector:@selector(handleBibItemAddDelNotification:)
+													 name:BDSKDocDelItemNotification
+												   object:self];
+
+		customStringArray = [[NSMutableArray arrayWithCapacity:6] retain];
+		[customStringArray setArray:[[OFPreferenceWrapper sharedPreferenceWrapper] arrayForKey:BDSKCustomCiteStringsKey]];
+
+		tableColumnsChanged = YES;
+		sortDescending = YES;
     }
     return self;
 }
@@ -147,8 +147,6 @@ NSString* BDSKBibTeXStringPboardType = @"edu.ucsd.cs.mmcrack.bibdesk: Local BibT
     [tableView setDoubleAction:@selector(editPubCmd:)];
     [tableView registerForDraggedTypes:[NSArray arrayWithObjects:NSStringPboardType, NSFilenamesPboardType, nil]];
 
-    [tableView setMenu:contextualMenu];
-    
     [splitView setPositionAutosaveName:[self fileName]];
     
     // 1:I'm using this as a catch-all.
@@ -174,7 +172,7 @@ NSString* BDSKBibTeXStringPboardType = @"edu.ucsd.cs.mmcrack.bibdesk: Local BibT
 	
 	[self updateActionMenu:nil];
 	
-	contextualMenu = [[[NSApp delegate] displayMenuItem] submenu];		// better retain this?
+	columnsMenu = [[[NSApp delegate] displayMenuItem] submenu];		// better retain this?
 	
 	RYZImagePopUpButton *cornerViewButton = (RYZImagePopUpButton*)[tableView cornerView];
 	[cornerViewButton setShowsMenuWhenIconClicked:YES];
@@ -183,7 +181,7 @@ NSString* BDSKBibTeXStringPboardType = @"edu.ucsd.cs.mmcrack.bibdesk: Local BibT
 	[[cornerViewButton cell] setUsesItemFromMenu:NO];
 	[[cornerViewButton cell] setRefreshesMenu:NO];
 		
-	[cornerViewButton setMenu:contextualMenu];
+	[cornerViewButton setMenu:columnsMenu];
 }
 
 
@@ -2004,7 +2002,7 @@ This method always returns YES. Even if some or many operations fail.
                 
             }
             if(![[tc identifier] isEqualToString:@"Title"]){
-                [self contextualMenuAddTableColumnName:[tc identifier] enabled:YES];
+                [self columnsMenuAddTableColumnName:[tc identifier] enabled:YES];
                 // OK to add multiple times.
             }
         }
@@ -2016,21 +2014,22 @@ This method always returns YES. Even if some or many operations fail.
     [NSApp endSheet:addFieldSheet returnCode:[sender tag]];
 }
 
+/*
 - (NSMenu *)menuForTableColumn:(NSTableColumn *)tc row:(int)row{
 	// for now, just returns the same all the time.
 	// Could customize menu for details of selected item.
-	return contextualMenu;
+	return columnsMenu;
 }
-
+*/
 
 #define ADD_MENUITEM_TAG 47
-- (void)contextualMenuAddTableColumnName:(NSString *)name enabled:(BOOL)yn{
+- (void)columnsMenuAddTableColumnName:(NSString *)name enabled:(BOOL)yn{
     NSMenuItem *item = nil;
-    if ([contextualMenu indexOfItemWithTitle:name] == -1) {
+    if ([columnsMenu indexOfItemWithTitle:name] == -1) {
         item = [[[NSMenuItem alloc] initWithTitle:name 
-                                           action:@selector(contextualMenuSelectTableColumn:)
+                                           action:@selector(columnsMenuSelectTableColumn:)
                                     keyEquivalent:@""] autorelease];
-        [contextualMenu insertItem:item atIndex:[contextualMenu indexOfItemWithTag:ADD_MENUITEM_TAG]]; // put it before the add other menu item.
+        [columnsMenu insertItem:item atIndex:[columnsMenu indexOfItemWithTag:ADD_MENUITEM_TAG]]; // put it before the add other menu item.
         if (yn) {
             [item setState:NSOnState];
         }else{
@@ -2040,11 +2039,11 @@ This method always returns YES. Even if some or many operations fail.
 
 }
 
-- (IBAction)contextualMenuSelectTableColumn:(id)sender{
-    [self contextualMenuSelectTableColumn:sender post:YES];
+- (IBAction)columnsMenuSelectTableColumn:(id)sender{
+    [self columnsMenuSelectTableColumn:sender post:YES];
 }
 
-- (void)contextualMenuSelectTableColumn:(id)sender post:(BOOL)yn{
+- (void)columnsMenuSelectTableColumn:(id)sender post:(BOOL)yn{
     NSTableColumn *tc = nil;
     NSMutableArray *prefsShownColNamesMutableArray = [[[OFPreferenceWrapper sharedPreferenceWrapper] arrayForKey:BDSKShownColsNamesKey] mutableCopy];
 
@@ -2073,8 +2072,8 @@ This method always returns YES. Even if some or many operations fail.
     }
 }
 
-- (IBAction)contextualMenuAddTableColumn:(id)sender{
-    // get the name, then call contextualMenuAddTableColumnName: enabled: to add it for you
+- (IBAction)columnsMenuAddTableColumn:(id)sender{
+    // get the name, then call columnsMenuAddTableColumnName: enabled: to add it for you
     [addFieldPrompt setStringValue:NSLocalizedString(@"Name of column to add:",@"")];
     [NSApp beginSheet:addFieldSheet
        modalForWindow:documentWindow
@@ -2091,7 +2090,7 @@ This method always returns YES. Even if some or many operations fail.
     NSMutableArray *prefsShownColNamesMutableArray = nil;
 
     if(returnCode == 1){
-        [self contextualMenuAddTableColumnName:[addFieldTextField stringValue] enabled:YES];
+        [self columnsMenuAddTableColumnName:[addFieldTextField stringValue] enabled:YES];
         tc = [[[NSTableColumn alloc] initWithIdentifier:[addFieldTextField stringValue]] autorelease];
         [tc setResizable:YES];
         [tableColumns setObject:tc forKey:[tc identifier]];
@@ -2156,10 +2155,10 @@ This method always returns YES. Even if some or many operations fail.
     }
     
     if (nil == [tableColumns objectForKey:colName]) {
-        [self contextualMenuAddTableColumnName:colName enabled:NO];
+        [self columnsMenuAddTableColumnName:colName enabled:NO];
     }
-    menuItem = [contextualMenu itemWithTitle:colName];
-    [self contextualMenuSelectTableColumn:menuItem post:NO]; 
+    menuItem = [columnsMenu itemWithTitle:colName];
+    [self columnsMenuSelectTableColumn:menuItem post:NO]; 
 }
 
 - (void)handleBibItemChangedNotification:(NSNotification *)notification{
