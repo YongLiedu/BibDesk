@@ -125,11 +125,10 @@
 */
 - (BibAuthor *)authorAtIndex:(int)index;
 
-- (NSString *)authorString;
-- (void)setAuthorsFromString:(NSString *)aString;
+- (NSString *)bibtexAuthorString;
+- (void)setAuthorsFromBibtexString:(NSString *)aString;
 
 - (NSString *)title;
-- (void)setTitle:(NSString *)aTitle;
 
 - (void)setDate: (NSCalendarDate *)newDate;
 - (NSCalendarDate *)date;
@@ -141,7 +140,21 @@
 - (void)setCiteKey:(NSString *)newCiteKey;
 - (NSString *)citeKey;
 
+/*!
+	@method     setFields
+ @abstract   setter for the dictionary.
+	 @discussion -
+*/
+
 - (void)setFields: (NSMutableDictionary *)newFields;
+
+/*!
+    @method     updateMetadata
+    @abstract   updates derived info from the dictionary
+    @discussion -
+*/
+- (void)updateMetadata;
+
 - (void)setRequiredFieldNames: (NSMutableArray *)newRequiredFieldNames;
 - (void)setField: (NSString *)key toValue: (NSString *)value;
 - (NSString *)valueOfField: (NSString *)key;

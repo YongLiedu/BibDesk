@@ -55,7 +55,6 @@ void _setupFonts(){
         editorObj = nil;
 		undoManager = nil;
         [self setFileType:inFileType];
-        [self setTitle:[[NSString stringWithString:@"BibTeX Publication"] retain]];
         [self makeType:type];
         [self setCiteKey:@""];
         [self setDate: nil];
@@ -73,7 +72,6 @@ void _setupFonts(){
                                                                 authors:[pubAuthors mutableCopy]];
     [theCopy setCiteKey: [citeKey copy]];
     [theCopy setDate: [pubDate copy]];
-    [theCopy setTitle: [title copy]];
     [theCopy setFields: [pubFields mutableCopy]];
     [theCopy setRequiredFieldNames: [requiredFieldNames mutableCopy]];
     return theCopy;
@@ -132,7 +130,7 @@ void _setupFonts(){
    // NSLog(@"bibitem Dealloc");
     [pubDate release];
     [requiredFieldNames release];
-    //[pubFields release]; //why does this cause a problem?
+    [pubFields release]; //why does this cause a problem?
     [super dealloc];
 }
 
@@ -150,20 +148,25 @@ void _setupFonts(){
 
 
 - (BOOL)isEqual:(BibItem *)aBI{
-    return ([pubType isEqualToString:[aBI type]]) && ([citeKey isEqualToString:[aBI citeKey]]) &&
-    ([pubFields isEqual:[aBI pubFields]]);
+    return ([pubType isEqualToString:[aBI type]]) && 
+	([citeKey isEqualToString:[aBI citeKey]]) &&
+	([pubFields isEqual:[aBI pubFields]]);
 }
+
+#pragma mark Comparison functions
 
 - (NSComparisonResult)keyCompare:(BibItem *)aBI{
     return [citeKey caseInsensitiveCompare:[aBI citeKey]];
 }
+
 - (NSComparisonResult)titleCompare:(BibItem *)aBI{
     return [title caseInsensitiveCompare:[aBI title]];
 }
+
 - (NSComparisonResult)dateCompare:(BibItem *)aBI{
-    // compare using year first, so Nov 1951 is lower than Dec 2000 . 
-    return [[pubDate descriptionWithCalendarFormat:@"%Y %b"] caseInsensitiveCompare:[[aBI date] descriptionWithCalendarFormat:@"%Y %b"]];
+	return [pubDate compare:[aBI date]];
 }
+
 - (NSComparisonResult)auth1Compare:(BibItem *)aBI{
     if([pubAuthors count] > 0){
         if([aBI numberOfAuthors] > 0){
@@ -200,7 +203,7 @@ void _setupFonts(){
 
 - (NSComparisonResult)fileOrderCompare:(BibItem *)aBI{
     int aBIOrd = [aBI fileOrder];
-    if (_fileOrder == -1) return NSOrderedDescending;
+    if (_fileOrder == -1) return NSOrderedDescending; //@@ file order for crossrefs - here is where we would change to accommodate new pubs in crossrefs...
     if (_fileOrder < aBIOrd) {
         return NSOrderedAscending;
     }
@@ -226,6 +229,8 @@ void _setupFonts(){
     [fileType release];
     fileType = someFileType;
 }
+
+#pragma mark Author Handling code
 
 - (int)numberOfAuthors{
     return [pubAuthors count];
@@ -265,7 +270,7 @@ void _setupFonts(){
         return nil;
 }
 
-- (void)setAuthorsFromString:(NSString *)aString{
+- (void)setAuthorsFromBibtexString:(NSString *)aString{
      char *str = nil;
 
     if (aString == nil) return;
@@ -276,20 +281,21 @@ void _setupFonts(){
     int i=0;
 #warning - Exception - might want to add an exception handler that notifies the user of the warning...
     [pubAuthors removeAllObjects];
-    sl = bt_split_list(str, "and", "BibTex Name", 1, "inside setAuthorsFromString");
+    sl = bt_split_list(str, "and", "BibTex Name", 1, "inside setAuthorsFromBibtexString");
     if (sl != nil) {
         for(i=0; i < sl->num_items; i++){
             if(sl->items[i] != nil){
-                [self addAuthorWithName:[NSString stringWithCString: sl->items[i]]];
+				NSString *s = [NSString stringWithCString: sl->items[i]];
+                [self addAuthorWithName:s];
                 
             }
         }
-        bt_free_list(sl); // hey! got to free the memory!
+       // bt_free_list(sl); // hey! got to free the memory!
     }
     //    NSLog(@"%@", pubAuthors);
 }
 
-- (NSString *)authorString{
+- (NSString *)bibtexAuthorString{
     NSEnumerator *en = [pubAuthors objectEnumerator];
     NSString *rs;
     BibAuthor *author;
@@ -312,12 +318,11 @@ void _setupFonts(){
 }
 
 - (NSString *)title{
-    return title;
-}
-
-- (void)setTitle:(NSString *)aTitle{
-    [title autorelease];
-    title = [aTitle copy];
+	NSString *t = [pubFields objectForKey: @"Title"];
+	if(t == nil)
+        return @"Empty Title";
+    else
+		return t;
 }
 
 - (void)setDate: (NSCalendarDate *)newDate{
@@ -380,42 +385,45 @@ void _setupFonts(){
     return citeKey;
 }
 
-
-//@@ BibItem Memory fix: setFields should be separate from updateMetadata
 - (void)setFields: (NSMutableDictionary *)newFields{
-    NSMutableString *tmp = [NSMutableString string];
-    // this is what gets called when we make changes, so it has to keep the metadata intact.
 	if(newFields != pubFields){
 		[pubFields release];
 		pubFields = [newFields mutableCopy];
+		[self updateMetadata];
     }
-	
-	if([pubFields objectForKey: @"Title"] == nil)
-        [self setTitle: @"Empty Title"];
-    else
-        [self setTitle: [pubFields objectForKey: @"Title"]];
+}
 
-    if((![@"" isEqualToString:[pubFields objectForKey: @"Author"]]) && ([pubFields objectForKey: @"Author"] != nil))
+- (void)updateMetadata{
+    NSMutableString *tmp = [NSMutableString string];
+
+    if((![@"" isEqualToString:[pubFields objectForKey: @"Author"]]) && 
+	   ([pubFields objectForKey: @"Author"] != nil))
     {
-        [self setAuthorsFromString:[pubFields objectForKey: @"Author"]];
+        [self setAuthorsFromBibtexString:[pubFields objectForKey: @"Author"]];
         if ([[self citeKey] isEqualToString:@""]) {
             [self setCiteKey:[NSString stringWithFormat:@"%@:%@",[[self authorAtIndex:0] lastName],
                 [[self date] descriptionWithCalendarFormat:@"%y"]]];
         }
     }else{
-        [self setAuthorsFromString:[pubFields objectForKey: @"Editor"]]; // or what else?
+        [self setAuthorsFromBibtexString:[pubFields objectForKey: @"Editor"]]; // or what else?
         if ([[self citeKey] isEqualToString:@""]){
             [self setCiteKey:
                 [NSString stringWithFormat:@"%@:%@",
                     [[self authorAtIndex:0] lastName],
                     [[self date] descriptionWithCalendarFormat:@"%y"]]];
         }
-    }// FIXME: set new citeKeys to something more reasonable (make it a user default?)
+    }
+	// FIXME: set new citeKeys to something more reasonable (make it a user default?)
     // re-call make type to make sure we still have all the appropriate bibtex defined fields...
-    [self makeType:[self type]];
+	//@@ 3/5/2004: moved why is this here? 
+	   [self makeType:[self type]];
 
-    if (([pubFields objectForKey:@"Year"] != nil) && (![[pubFields objectForKey:@"Year"] isEqualToString:@""] )) {
-        if (([pubFields objectForKey:@"Month"] != nil) && (![[pubFields objectForKey:@"Month"] isEqualToString:@""] )) {
+    if (([pubFields objectForKey:@"Year"] != nil) &&
+		(![[pubFields objectForKey:@"Year"] isEqualToString:@""] )) {
+		
+        if (([pubFields objectForKey:@"Month"] != nil) &&
+			(![[pubFields objectForKey:@"Month"] isEqualToString:@""] )) {
+			
             [tmp appendString:[pubFields objectForKey:@"Month"]];
             [tmp appendString:@" "];
     	}
@@ -441,14 +449,14 @@ void _setupFonts(){
 	[undoManager setActionName:NSLocalizedString(@"Edit publication",@"")];
 	
     [pubFields setObject: value forKey: key];
-	[self setFields:pubFields]; // update metadata. could have a better name
+	[self updateMetadata];
 	
 	NSDictionary *notifInfo = [NSDictionary dictionaryWithObjectsAndKeys:value, @"value", key, @"key",nil];
 	[[NSNotificationCenter defaultCenter] postNotificationName:BDSKBibItemChangedNotification
 														object:self
 													  userInfo:notifInfo];
     // to allow autocomplete:
-    [[NSApp delegate] addString:value forCompletionEntry:key];
+	[[NSApp delegate] addString:value forCompletionEntry:key];
 }
 
 - (NSString *)valueOfField: (NSString *)key{
@@ -590,7 +598,6 @@ void _setupFonts(){
 - (NSString *)HTMLValueUsingTemplateString:(NSString *)templateString{
     return [templateString stringByParsingTagsWithStartDelimeter:@"<$" endDelimeter:@"/>" usingObject:self];
 }
-
 
 - (NSString *)allFieldsString{
     NSMutableString *result = [[[NSMutableString alloc] init] autorelease];
