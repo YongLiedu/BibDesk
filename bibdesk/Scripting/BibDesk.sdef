@@ -22,6 +22,9 @@ will translate this file into the necessary scriptSuite and scriptTerminology fi
 			<class name="author" plural="authors" code="auth" description="Contains the name of an author, tries to analyse it and list all publications of that author. Author names can be split into four E.g. '(Jean) (de la) (Fontaine) (Jr.)'">
                 <cocoa class="BibAuthor"/>
                 <properties>
+	                <property name="name" type="string" code="pnam" description="The author's name." access="r">
+    	            	<cocoa method="normalizedName"/>
+        	        </property>
 	                <property name="full name" type="string" code="aunm" description="The author's full name.">
     	            	<cocoa method="name"/>
         	        </property>

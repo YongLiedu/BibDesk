@@ -45,6 +45,11 @@ Scripting Key-Value coding method to access an author by his name
 	BibAuthor * auth = nil;
 	// NSLog (@"valueInAuthors...");
 	while (auth = [myEnum nextObject]) {
+		if ([[auth fullName] isEqualToString:name]) {
+			return auth;
+		}
+	}
+	while (auth = [myEnum nextObject]) {
 		if ([[auth name] isEqualToString:name]) {
 			return auth;
 		}
