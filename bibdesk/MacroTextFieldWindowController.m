@@ -53,8 +53,18 @@
     [expandedValueTextField setStringValue:string];
     // in case we already ran and had an error that wasn't recorded:
     [infoLine setStringValue:originalInfoLineValue];
-    
-	[textField setStringValue:[string stringAsBibTeXString]];
+
+    NS_DURING
+        [textField setStringValue:[string stringAsBibTeXString]];
+    NS_HANDLER
+        if([[localException name] isEqualToString:@"BDSKComplexStringTeXifyException"]){
+            int i = NSRunAlertPanel(NSLocalizedString(@"Character Conversion Error", @"Title of alert when an error happens"),
+                                    [NSString stringWithFormat: NSLocalizedString(@"An unrecognized character in the complex string \"%@\" could not be converted.", @"Informative alert text when the error happens."), string],
+                                    nil, nil, nil, nil);
+        } else {
+            [localException raise];
+        }
+    NS_ENDHANDLER
     
     if(font) [textField setFont:font];
 

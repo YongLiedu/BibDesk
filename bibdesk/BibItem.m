@@ -996,7 +996,17 @@ setupParagraphStyle()
         NSString *valString;
         
         if([v isComplex]){
-            valString = [v stringAsBibTeXString];
+            NS_DURING
+                valString = [v stringAsBibTeXString];
+            NS_HANDLER
+                if([[localException name] isEqualToString:@"BDSKComplexStringTeXifyException"]){
+                    int i = NSRunAlertPanel(NSLocalizedString(@"Character Conversion Error", @"Title of alert when an error happens"),
+                                            [NSString stringWithFormat: NSLocalizedString(@"An unrecognized character in the complex string \"%@\" of \"%@\" could not be converted to TeX.", @"Informative alert text when the error happens."), v, [self citeKey]],
+                                            nil, nil, nil, nil);
+                } else {
+                    [localException raise];
+                }
+            NS_ENDHANDLER
         }else{            
             if([k isEqualToString:BDSKAuthorString] && [[OFPreferenceWrapper sharedPreferenceWrapper] boolForKey:BDSKShouldSaveNormalizedAuthorNames]) // only if it's not complex, use the normalized author name
                 v = [self bibTeXAuthorStringNormalized:YES];
@@ -1004,7 +1014,18 @@ setupParagraphStyle()
             if(shouldTeXify){
                 if(![k isEqualToString:BDSKLocalUrlString] &&
                    ![k isEqualToString:BDSKUrlString]){
-                    v = [[BDSKConverter sharedConverter] stringByTeXifyingString:v];
+                    NS_DURING
+                        v = [[BDSKConverter sharedConverter] stringByTeXifyingString:v];
+                    NS_HANDLER
+                        if([[localException name] isEqualToString:@"BDSKTeXifyException"]){
+                            int i = NSRunAlertPanel(NSLocalizedString(@"Character Conversion Error", @"Title of alert when an error happens"),
+                                                    [NSString stringWithFormat: NSLocalizedString(@"An unrecognized character in the \"%@\" field of \"%@\" could not be converted to TeX.", @"Informative alert text when the error happens."), k, [self citeKey]],
+                                                    nil, nil, nil, nil);
+                        } else {
+                            [localException raise];
+                        }
+                    NS_ENDHANDLER
+                                
                 }
             }                
             

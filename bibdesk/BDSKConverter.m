@@ -110,14 +110,15 @@ static BDSKConverter *theConverter;
     
     int offset=0;
     unsigned index = 0;
-    NSString *TEXString;
+    NSString *TEXString = nil;
+    NSString *logString = nil;
     
     // convertedSoFar has s to begin with.
     // while scanner's not at eof, scan up to characters from that set into tmpOut
 
     while(![scanner isAtEnd]){
 
-	[scanner scanUpToCharactersFromSet:finalCharSet intoString:nil];
+	[scanner scanUpToCharactersFromSet:finalCharSet intoString:&logString];
 	index = [scanner scanLocation];
 
 	if(index >= sLength) // don't go past the end
@@ -143,10 +144,7 @@ static BDSKConverter *theConverter;
 		offset += [TEXString length] - 1;
 	    } else {
 		if(tmpConv != nil){ // if tmpConv is non-nil, we had a character that was accented and not convertable by us
-		    [NSObject cancelPreviousPerformRequestsWithTarget:self 
-							     selector:@selector(runConversionAlertPanel:)
-							       object:tmpConv];
-		    [self performSelector:@selector(runConversionAlertPanel:) withObject:tmpConv afterDelay:0.1];
+            [NSException raise:@"BDSKTeXifyException" format:@"An error occurred converting %@", tmpConv];
 		    [scanner setScanLocation:(index + 1)]; // increment the scanner to go past the character that we don't have in the dict
 		}
 	    }
@@ -222,21 +220,6 @@ static BDSKConverter *theConverter;
     
     return [NSString stringWithFormat:@"{\\%@%@}", accent, character];
 }
-
-- (void)runConversionAlertPanel:(NSString *)tmpConv{
-    NSLog(@"runConversionAlert");
-    int i = NSRunAlertPanel(NSLocalizedString(@"Character Conversion Error", @"Title of alert when an error happens"),
-				[NSString stringWithFormat: NSLocalizedString(@"The accented or Unicode character \"%@\" could not be converted.  Please enter the TeX code directly in your bib file.", @"Informative alert text when the error happens."), tmpConv],
-			    NSLocalizedString(@"Send e-mail", @""), NSLocalizedString(@"Edit", @""), nil, nil);
-    if(i == NSAlertDefaultReturn){
-	NSString *urlString = [NSString stringWithFormat:@"mailto:bibdesk-develop@lists.sourceforge.net?subject=Character Conversion Error&body=Please enter a description of the accented character \"%@\" that failed to convert and its TeX equivalent.", tmpConv];
-	CFStringRef escapedString = CFURLCreateStringByAddingPercentEscapes(kCFAllocatorDefault, (CFStringRef)urlString, NULL, NULL, kCFStringEncodingUTF8);
-	NSURL *mailURL = [NSURL URLWithString:[(NSString *)escapedString autorelease]];
-	[[NSWorkspace sharedWorkspace] openURL:mailURL];
-    } else {
-    }
-}
-
 
 - (NSString *)stringByDeTeXifyingString:(NSString *)s{
 	// deTeXify only string nodes of complex strings;

@@ -51,7 +51,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 /*!
  @method stringByTeXifyingString:
  @abstract UTF-8 -> TeX
- @discussion Uses a dictionary to find replacements for candidate special characters.
+ @discussion Uses a dictionary to find replacements for candidate special characters.  Raises an exception named BDSKTeXifyException if an error occurred.
  @param s the string to convert into ASCII TeX encoding
  @result the string converted into ASCI TeX encoding
 */
@@ -91,15 +91,6 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
     @result     (description)
 */
 - (NSString *)composedStringFromTeXString:(NSString *)texString;
-
-/*!
- @method runConversionAlertPanel
- @abstract NSRunAlertPanel
- @discussion Gives options to send e-mail if stringByTeXifyingString encounters a character not in the dictionary
- @param none
- @result alert panel
-*/
-- (void)runConversionAlertPanel:(NSString *)tmpConv;
 
 /*!
  @method stringBySanitizingString:forField:inFieldType:

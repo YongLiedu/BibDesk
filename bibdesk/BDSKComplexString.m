@@ -244,12 +244,18 @@ static NSDictionary *globalMacroDefs;
         if (i != 0){
             [retStr appendString:@" # "];
         }
-        
+        NS_DURING
         if([valNode type] == BSN_STRING){
             [retStr appendFormat:@"{%@}", [conv stringByTeXifyingString:[valNode value]]];
         }else{
             [retStr appendString:[conv stringByTeXifyingString:[valNode value]]];
         }
+        NS_HANDLER
+            if([[localException name] isEqualToString:@"BDSKTeXifyException"])
+                [NSException raise:@"BDSKComplexStringTeXifyException" format:@"An error occurred while TeXifying %@", [valNode value]];
+            else
+                [localException raise];
+        NS_ENDHANDLER
     }
     
     return retStr; 
