@@ -234,7 +234,7 @@
 					<key>Keep files in the papers folder organized</key>
 					<string>0</string>
 					<key>Local-Url Format</key>
-					<string>%l%n0.pdf</string>
+					<string>%L</string>
 					<key>Path to the papers folder</key>
 					<string>~/Documents/Papers</string>
 				</dict>
