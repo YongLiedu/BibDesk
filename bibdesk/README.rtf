@@ -1,14 +1,42 @@
 {\rtf1\mac\ansicpg10000\cocoartf791\cocoasubrtf300
 {\fonttbl\f0\fnil\fcharset77 GillSans;\f1\fnil\fcharset77 HelveticaNeue-Bold;\f2\fnil\fcharset77 HelveticaNeue-BoldItalic;
-\f3\fnil\fcharset77 LucidaGrande;\f4\fnil\fcharset77 HelveticaNeue;\f5\fnil\fcharset77 Verdana;
-\f6\froman\fcharset77 Times-Italic;\f7\fnil\fcharset77 LucidaGrande-Bold;}
+\f3\fnil\fcharset77 LucidaGrande;\f4\fnil\fcharset77 Geneva;\f5\fnil\fcharset77 HelveticaNeue;
+\f6\fnil\fcharset77 Verdana;\f7\froman\fcharset77 Times-Italic;\f8\fnil\fcharset77 LucidaGrande-Bold;
+}
 {\colortbl;\red255\green255\blue255;\red255\green0\blue0;}
 {\info}\pard\tx1440\tx2880\tx4320\tx5760\tx7200\qc
 
 \f0\fs60 \cf0 BibDesk ReadMe\
 \pard\tx1440\tx2880\tx4320\tx5760\tx7200\ql\qnatural
 
-\f1\b\fs28 \cf0 Changes since 0.96.2\
+\f1\b\fs28 \cf0 Changes since 0.97\
+\pard\tx1440\tx2880\tx4320\tx5760\tx7200\ql\qnatural
+
+\f2\i\fs26 \cf0 Bugfixes\
+
+\f3\i0\b0\fs24   \'a5  Fixed the top reported crasher (canceling a file load with invalid characters)\
+  \'a5  Rewrote the code for the action menu/popup\
+  \'a5  Menu validation for generateCiteKey:\
+  \'a5  Tooltips/snoop drawer should reflect state more accurately\
+  \'a5  The script menu should behave better (#1083762)\
+  \'a5  Should be able to launch on Jaguar again (#1083915)\
+  \'a5  Some additions to CharacterConversion.plist (Arabic courtesy of Musa Furber)\
+  \'a5  Updated online help to be more specific about autocomplete keybinding, added a BBEdit note\
+  \'a5  Number of pubs display is updated after loading (#1084786)\
+  \'a5  AppleScript can create new publications (#1084943)\
+  \'a5  Can generate cite keys from AppleScript now\
+  \'a5  Month in date only read Dec. (#1085332)\
+  \'a5  Sort order was undefined for pubs without a year\
+  \'a5  Autocompletion code rewritten to fix #1085368 (Citekey autocompletion doesn't stop after cite) and #1085614 (Autocomplete for \\mycite\{\})\
+  \'a5  We now show a warning if you try to undo past the last save\
+  \'a5  Make shortcut Cmd-K for Generate Cite Key\
+\pard\tx560\tx1120\tx1680\tx2240\tx2800\tx3360\tx3920\tx4480\tx5040\tx5600\tx6160\tx6720\ql\qnatural
+\cf0   \'a5  Change casing for shortcut of cite key completion in Services to get Shift-Cmd-K
+\f4\fs22 \
+\pard\tx1440\tx2880\tx4320\tx5760\tx7200\ql\qnatural
+
+\f1\b\fs28 \cf0 \
+Changes since 0.96.2\
 \pard\tx1440\tx2880\tx4320\tx5760\tx7200\ql\qnatural
 
 \f2\i\fs26 \cf0 New Features
@@ -61,17 +89,19 @@
  \'a5  Force capitalization for field names in AppleScript for internal consistency's sake\
  \'a5  Moved setting of some undo action name to controller layer to get correct action name in redo menu item\
  \'a5  BibEditor now orders the fields in the form in the following way:  \
+\pard\tx560\tx1120\tx1680\tx2240\tx2800\tx3360\tx3920\tx4480\tx5040\tx5600\tx6160\tx6720\ql\qnatural
 
 \fs22 \cf0      1. Required fields in the order they are found in the Typeinfo.plist file.\
      2. Optional fields in the order ""\
      3. Any other fields, in alphabetical order.\
+\pard\tx560\tx1120\tx1680\tx2240\tx2800\tx3360\tx3920\tx4480\tx5040\tx5600\tx6160\tx6720\ql\qnatural
 
 \fs24 \cf0  \'a5  Allow for multiple editors in RIS imports\
  \'a5  Bug #1080931, data loss when adding a new field
 \f1\b\fs28 \
 \pard\tx1440\tx2880\tx4320\tx5760\tx7200\ql\qnatural
 
-\f4\b0\fs36 \cf0 \
+\f5\b0\fs36 \cf0 \
 \pard\tx1440\tx2880\tx4320\tx5760\tx7200\ql\qnatural
 
 \f1\b\fs28 \cf0 Changes since 0.96.1\
@@ -83,16 +113,16 @@
   \'a5  RIS import is now more seamless, and BibDesk can be assigned the RIS filetype\
   \'a5  Scrolling the publication list may be faster\
   \'a5  Fixed tab-keyloop issue in the BibEditor (#
-\f5\fs22 1033315)
+\f6\fs22 1033315)
 \f3\fs24 \
   \'a5  Fixed the periodic events bug in attaching files (#
-\f5\fs22 1032458)
+\f6\fs22 1032458)
 \f3\fs24 \
   \'a5  Fixed a bug that caused an error message when dragging from the citekey drawer without selecting a bibitem\
   \'a5  The TeX preview now supports harvard.sty (you need to edit the TeX template for this feature)\
   \'a5  TeX previewing item selection issues should be fixed (#1003373)\
   \'a5  Pasting bibitems as BibTeX now gives spaces between entries (#
-\f5\fs22 1043682) 
+\f6\fs22 1043682) 
 \f3\fs24   \
   \'a5  Updated character conversions\
 \
@@ -188,25 +218,25 @@ Changes since 0.95\
 \cf0 Thanks for using BibDesk. \
 \pard\tx1440\tx2880\tx4320\tx5760\tx7200\ql\qnatural
 
-\f6\i \cf0 Especially thanks to those who have sent in feedback and console logs!
+\f7\i \cf0 Especially thanks to those who have sent in feedback and console logs!
 \f3\i0 \
 \
 The BibDesk website is at {\field{\*\fldinst{HYPERLINK "http://bibdesk.sourceforge.net/"}}{\fldrslt http://bibdesk.sourceforge.net/}} - check there for current information and ways to find out more about the program and the development efforts.\
 \
 Bug reports should be submitted to the {\field{\*\fldinst{HYPERLINK "http://sourceforge.net/tracker/?group_id=61487&atid=497423"}}{\fldrslt bug tracker}} on SourceForge.  
-\f7\b \cf2 Note: 
+\f8\b \cf2 Note: 
 \f3\b0 \cf0 Please assign the bug report to someone - if you don't personally know any developers, assign the bug to mike (username mmcc). If you don't assign the bug to someone, nobody will notice it for a long time. Assigning it to someone sends them an email notification.\
 \
 \pard\tx1440\tx2880\tx4320\tx5760\tx7200\ql\qnatural
 
-\f7\b\fs28 \cf0 About BibDesk
+\f8\b\fs28 \cf0 About BibDesk
 \f3\b0\fs24 \
 \
 BibDesk is intended to help keep track of papers you've read, cited, heard about, etc - especially if you intend to cite them in a (La)TeX document.\
 Even more important, if you have electronic copies of these papers, I'd rather keep track of them through their titles, authors, keywords, etc. than through where I put them on disk, so I tried to make BibDesk help out with that, too. \
 \
 
-\f7\b\fs28 Notes and User Issues\
+\f8\b\fs28 Notes and User Issues\
 \pard\tx1440\tx2880\tx4320\tx5760\tx7200\ql\qnatural
 
 \f3\b0\fs24 \cf0 \
@@ -215,10 +245,10 @@ Even more important, if you have electronic copies of these papers, I'd rather k
 \pard\tx1440\tx2880\tx4320\tx5760\tx7200\ql\qnatural
 \cf0 \ulnone \
 This is a beta release version, so 
-\f6\i please back up your files
+\f7\i please back up your files
 \f3\i0 ! I recommend keeping important information in a version control system such as CVS.\
 Also remember that if you just open a file, and don't save it as the same name - you 
-\f7\b can't 
+\f8\b can't 
 \f3\b0 kill the original file.\
 \
 \pard\tx1440\tx2880\tx4320\tx5760\tx7200\ql\qnatural
@@ -227,9 +257,9 @@ Also remember that if you just open a file, and don't save it as the same name -
 \pard\tx1440\tx2880\tx4320\tx5760\tx7200\ql\qnatural
 \cf0 \ulnone - If your database file has macros, right now it will expand the ones that are used and won't save the macros. I will be changing this behavior in future versions.\
 - If your database doesn't parse completely and you choose to only use the ones that did, you will lose any information in the ill-formed entries! 
-\f7\b Now when an error occurs, you have the option to edit the text, save a new copy and open that copy. 
+\f8\b Now when an error occurs, you have the option to edit the text, save a new copy and open that copy. 
 \f3\b0 That should let you correct errors without worrying about losing data.
-\f7\b \
+\f8\b \
 
 \f3\b0 \
 \pard\tx1440\tx2880\tx4320\tx5760\tx7200\ql\qnatural
