@@ -35,7 +35,7 @@ static NSMutableSet *_authors;
 + (BibAuthor *)authorWithName:(NSString *)newName andPub:(BibItem *)aPub{	
 	BibAuthor *newAuth = [[[BibAuthor alloc] initWithName:newName andPub:aPub] autorelease];
     BibAuthor *auth = [_authors member:newAuth];
-	
+
     if(auth != nil){
         [auth addPub:aPub];
         NSNotification *notif = [NSNotification notificationWithName:BDSKAuthorPubListChangedNotification
@@ -74,7 +74,7 @@ static NSMutableSet *_authors;
 	[_lastName release];
 	[_jrPart release];
 	[_normalizedName release];
-    [[NSNotificationCenter defaultCenter] removeObserver:self object:nil];
+    [[NSNotificationCenter defaultCenter] removeObserver:self];
     // NSLog(@"bibauthor dealloc");
     [super dealloc];
 }
