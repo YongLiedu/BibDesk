@@ -468,13 +468,12 @@ void _setupFonts(){
         [undoManager setActionName:NSLocalizedString(@"Change Cite Key",@"")];
     }
 	
-    [newCiteKey retain];
     [citeKey autorelease];
 		
     if([newCiteKey isEqualToString:@""]){
-        citeKey = [self suggestedCiteKey];
+        citeKey = [[self suggestedCiteKey] retain];
     } else {
-        citeKey = newCiteKey;
+        citeKey = [newCiteKey retain];
     }
 		
     NSDictionary *notifInfo = [NSDictionary dictionaryWithObjectsAndKeys:citeKey, @"value", @"Cite Key", @"key",nil];
