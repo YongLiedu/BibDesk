@@ -462,9 +462,10 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 	}
 	else if ([menuItem action] == @selector(generateCiteKey:)) {
 		[menuItem setTitle: NSLocalizedString(@"Generate Cite Key", @"Generate Cite Key")];
-		if ([tabView indexOfTabViewItem:[tabView selectedTabViewItem]] != 0) {
-			return NO;
-		}
+		return YES;
+	}
+	else if ([menuItem action] == @selector(generateLocalUrl:)) {
+		return [[NSFileManager defaultManager] fileExistsAtPath:[theBib localURLPathRelativeTo:[[theDocument fileName] stringByDeletingLastPathComponent]]];
 	}
 	return YES;
 }
@@ -573,6 +574,37 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 - (IBAction)generateCiteKey:(id)sender
 {
 	[theBib setCiteKey:[theBib suggestedCiteKey]];
+	
+	[tabView selectFirstTabViewItem:self];
+}
+
+- (IBAction)generateLocalUrl:(id)sender
+{
+	if (![theBib canSetLocalUrl]){
+		NSString *message = NSLocalizedString(@"Not all fields needed for generating the file location are set. Do you want me to continue anyway, or wait till all the necessary fields are set?",@"");
+		NSString *otherButton = nil;
+		if([[OFPreferenceWrapper sharedPreferenceWrapper] integerForKey:BDSKFilePapersAutomaticallyKey] == NSOnState){
+			message = NSLocalizedString(@"Not all fields needed for generating the file location are set. Do you want me to continue anyway?",@""),
+			otherButton = NSLocalizedString(@"Wait",@"Wait");
+		}
+		int rv = NSRunAlertPanel(NSLocalizedString(@"Warning",@"Warning"),
+								 message, 
+								 NSLocalizedString(@"OK",@"OK"),
+								 NSLocalizedString(@"Cancel",@"Cancel"),
+								 otherButton);
+		if (rv == NSAlertAlternateReturn){
+			return;
+		}else if(rv == NSAlertOtherReturn){
+			[theBib setNeedsToBeFiled:YES];
+			return;
+		}
+	}
+	
+	[[BibFiler sharedFiler] filePapers:[NSArray arrayWithObject:theBib] fromDocument:[theBib document] ask:NO];
+	
+	[tabView selectFirstTabViewItem:self];
+	
+	[[[self window] undoManager] setActionName:NSLocalizedString(@"Move File",@"")];
 }
 
 - (IBAction)bibTypeDidChange:(id)sender{
@@ -696,15 +728,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
     if (result == NSOKButton) {
 		NSString *fileURLString = [[NSURL fileURLWithPath:[[oPanel filename] stringByStandardizingPath]] absoluteString];
         [theBib setField:BDSKLocalUrlString toValue:fileURLString];
-		if([[OFPreferenceWrapper sharedPreferenceWrapper] boolForKey:BDSKFilePapersAutomaticallyKey]){
-			[[BibFiler sharedFiler] file:YES 
-								  papers:[NSArray arrayWithObject:theBib]
-							fromDocument:(BibDocument *)theDocument];
-			NSRunAlertPanel(NSLocalizedString(@"Paper Filed",@""),
-							NSLocalizedString(@"The paper %@ was moved to your Papers Directory.",@""),
-							NSLocalizedString(@"OK",@"OK"),
-							nil, nil, fileURLString);
-		}
+		[theBib autoFilePaper];
 		
 		[self finalizeChanges];
 		[self setupForm];
@@ -841,9 +865,17 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 			 [theBib canSetCiteKey] ) {
 			[self generateCiteKey:sender];
 		}
-                [[NSNotificationCenter defaultCenter] postNotificationName:BDSKDocumentUpdateUINotification
-                                                                    object:nil
-                                                                  userInfo:nil];
+		
+		// autofile paper if we have enough information
+		if ( [[OFPreferenceWrapper sharedPreferenceWrapper] integerForKey:BDSKFilePapersAutomaticallyKey] == NSOnState &&
+			 [theBib needsToBeFiled] && [theBib canSetLocalUrl] ) {
+			[[BibFiler sharedFiler] filePapers:[NSArray arrayWithObject:theBib] fromDocument:[theBib document] ask:NO];
+			[theBib setNeedsToBeFiled:NO]; // unset the flag even when we fail, to avoid retrying at every edit
+		}
+		
+		[[NSNotificationCenter defaultCenter] postNotificationName:BDSKDocumentUpdateUINotification
+															object:nil
+														  userInfo:nil];
 	}
 }
 

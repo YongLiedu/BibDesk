@@ -76,11 +76,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 			
             [editorBib setField:BDSKLocalUrlString
                         toValue:fileUrlString];
-			
-			if([[OFPreferenceWrapper sharedPreferenceWrapper] boolForKey:BDSKFilePapersAutomaticallyKey]){
-				[[BibFiler sharedFiler] file:YES papers:[NSArray arrayWithObject:editorBib]
-									  fromDocument:[[self windowController] valueForKey:@"theDocument"]]; 
-			}
+			[editorBib autoFilePaper];
         }
     }else if([[pboard types] containsObject:NSURLPboardType]){
 

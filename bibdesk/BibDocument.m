@@ -2272,10 +2272,7 @@ This method always returns YES. Even if some or many operations fail.
 			
 			[newBI setField:BDSKLocalUrlString toValue:newUrl];	
 			
-			if([pw boolForKey:BDSKFilePapersAutomaticallyKey]){
-				[[BibFiler sharedFiler] file:YES papers:[NSArray arrayWithObject:newBI]
-								fromDocument:self];
-			}
+			[newBI autoFilePaper];
 			
 			[self addPublication:newBI];
 			
@@ -2757,7 +2754,16 @@ The results are quite crappy, but these were low-hanging fruit and people seem t
 #pragma mark 
 #pragma mark AutoFile stuff
 - (IBAction)consolidateLinkedFiles:(id)sender{
-	[[BibFiler sharedFiler] showPreviewForPapers:[self publications] fromDocument:self];
+	NSEnumerator *selEnum = [self selectedPubEnumerator]; // this is an array of indices, not pubs
+	NSMutableArray *selPubs = [NSMutableArray array];
+	NSNumber *row;
+
+	while(row = [selEnum nextObject]){
+		[selPubs addObject:[shownPublications objectAtIndex:[row intValue]]];
+	}
+	[[BibFiler sharedFiler] filePapers:selPubs fromDocument:self ask:YES];
+	
+	[[self undoManager] setActionName:NSLocalizedString(@"Consolidate Files",@"")];
 }
 
 #pragma mark blog stuff
