@@ -444,6 +444,8 @@
 						<string>0</string>
 						<string>0</string>
 					</array>
+					<key>Snoop Drawer Content</key>
+					<string>0</string>
 					<key>Startup Behavior</key>
 					<string>0</string>
 					<key>TableView Font</key>
