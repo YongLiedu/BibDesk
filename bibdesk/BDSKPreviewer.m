@@ -77,13 +77,9 @@ static unsigned threadCount = 0;
 }
 
 - (void)windowDidLoad{
-    [self resetPreviews];
-     // should use [self resetPreviews], but it doesn't work here for the PDFImageView
-//    [imagePreviewView loadFromPath:nopreviewPDFPath];
-//    [rtfPreviewView setString:@""];
-//    [rtfPreviewView setTextContainerInset:NSMakeSize(20, 20)];
-//    [rtfPreviewView replaceCharactersInRange:[rtfPreviewView selectedRange]
-//				  withString:@"Please select an item or items from the bibliography list for LaTeX to preview."];
+    [self performSelectorOnMainThread:@selector(resetPreviews)
+                           withObject:nil
+                        waitUntilDone:YES];
 }
 
 - (BOOL)PDFFromString:(NSString *)str{
@@ -166,16 +162,14 @@ static unsigned threadCount = 0;
     if([self previewTexTasks:@"bibpreview.tex"]){ // run the TeX tasks
     
       if (myThreadCount >= threadCount){
-	  if([tabView lockFocusIfCanDraw]) {  // Apple Thread Safety docs say to do this if a thread is drawing in a view
-	      [imagePreviewView loadFromPath:finalPDFPath];
-	      [self rtfPreviewFromData:[self rtfDataPreview]];
-	      [tabView unlockFocus];
-	  }
-      } else{
-	  return NO;
+		  [self performSelectorOnMainThread:@selector(performDrawing)
+								 withObject:nil
+							  waitUntilDone:YES];
+      }else{
+		  NSLog(@"unable to draw");
+		  return NO;
       } // if the tex task failed
     }
-    
     // Pool for MT
     [pool release];
     
@@ -186,6 +180,11 @@ static unsigned threadCount = 0;
     return YES;    
     
 }
+
+- (void)performDrawing{
+	[imagePreviewView loadFromPath:finalPDFPath];
+	[self rtfPreviewFromData:[self rtfDataPreview]];
+}	
 
 - (BOOL)previewTexTasks:(NSString *)fileName{ // we set working dir in NSTask
     
@@ -403,19 +402,19 @@ static unsigned threadCount = 0;
 
     // we get a zero-length string if a bad bibstyle is used, so check for it
     if([rtfdata length] > 0 && [tabView lockFocusIfCanDraw]){
-	[rtfPreviewView replaceCharactersInRange: [rtfPreviewView selectedRange]
-				      withRTF:rtfdata];
-	[tabView unlockFocus];
-	return YES;
-    }else{
-	NSString *errstr = [NSString stringWithString:@"***** ERROR:  unable to create preview *****"];
-	if([tabView lockFocusIfCanDraw]){
-	    [rtfPreviewView replaceCharactersInRange: [rtfPreviewView selectedRange]
-					  withString:errstr];
-	    [tabView unlockFocus];
-	}
-    
-	return NO;
+        [rtfPreviewView replaceCharactersInRange:[rtfPreviewView selectedRange]
+                                         withRTF:rtfdata];
+        [tabView unlockFocus];
+	    return YES;
+    } else {
+        NSString *errstr = [NSString stringWithString:@"***** ERROR:  unable to create preview *****"];
+        if([tabView lockFocusIfCanDraw]){
+            [rtfPreviewView replaceCharactersInRange: [rtfPreviewView selectedRange]
+                          withString:errstr];
+            [tabView unlockFocus];
+        }
+        
+    	return NO;
     }
 	
 }
@@ -430,12 +429,12 @@ static unsigned threadCount = 0;
 
 - (void)resetPreviews{
     if([tabView lockFocusIfCanDraw]){
-	[imagePreviewView loadFromPath:nopreviewPDFPath];
-	[rtfPreviewView setString:@""];
-	[rtfPreviewView setTextContainerInset:NSMakeSize(20, 20)];
-	[rtfPreviewView replaceCharactersInRange:[rtfPreviewView selectedRange]
-				      withString:@"Please select an item or items from the bibliography list for LaTeX to preview."];
-	[tabView unlockFocus];
+        [imagePreviewView loadFromPath:nopreviewPDFPath];
+        [rtfPreviewView setString:@""];
+        [rtfPreviewView setTextContainerInset:NSMakeSize(20, 20)];
+        [rtfPreviewView replaceCharactersInRange:[rtfPreviewView selectedRange]
+                                      withString:@"Please select an item or items from the bibliography list for LaTeX to preview."];
+        [tabView unlockFocus];
     }
 }
 
