@@ -140,10 +140,10 @@ will translate this file into the necessary scriptSuite and scriptTerminology fi
 					<property name="publication year" code="pyer" type="string" description="Year of publication.">
 						<cocoa method="year"/>
 					</property>  
-					<property name="added date" code="adat" type="date" description="Date on which the publication's record was added to the bibliography.">
+					<property name="added date" code="adat" type="date" description="Date on which the publication's record was added to the bibliography." access="r">
 						<cocoa method="ASDateCreated"/>
 					</property>
-					<property name="modified date" code="mdat" type="date" description="Date on which the publication's record was last modified in the bibliography.">
+					<property name="modified date" code="mdat" type="date" description="Date on which the publication's record was last modified in the bibliography." access="r">
 						<cocoa method="ASDateModified"/>
 					</property>
 					

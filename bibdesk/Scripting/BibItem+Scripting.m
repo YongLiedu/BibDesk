@@ -97,22 +97,11 @@ Extra wrapping of the created and modified date methods to
 	else return d;
 }
 
-- (void) setASDateCreated:(NSDate*) newDate {
-	// if ([newDate isKindOfClass:[NSDate class]]) {
-		[self setDateCreated:[newDate dateWithCalendarFormat:nil timeZone:nil]];
-	// }
-	// do nothing if the object passed isn't a date.
-}
-
 - (NSDate*) ASDateModified {
 	NSDate * d = [self dateModified];
 	
 	if (!d) return [NSDate dateWithTimeIntervalSince1970:0];
 	else return d;
-}
-
-- (void) setASDateModified:(NSDate*) newDate {
-	[self setDateModified:[newDate dateWithCalendarFormat:nil timeZone:nil]];
 }
 
 
@@ -210,7 +199,7 @@ Extra wrapping of the created and modified date methods to
 	NSEnumerator *fnEnum = [pubFields keyEnumerator];
 	NSString *fn;
 	while (fn = [fnEnum nextObject]) {
-		if (!([[self valueOfField:fn] isEqualToString:@""] || [fn isEqualToString:@"Date-Modified"] || [fn isEqualToString:@"Date-Added"])) {
+		if (![[self valueOfField:fn] isEqualToString:@""]) {
 			if (cmd) {
 				[cmd setScriptErrorNumber:NSReceiversCantHandleCommandScriptError];
 				[cmd setScriptErrorString:[NSString stringWithFormat:NSLocalizedString(@"Cannot set BibTeX string after initialization.",@"Cannot set BibTeX string after initialization.")]];
