@@ -392,7 +392,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 										  action:@selector(toggleSnoopDrawer:)
 								   keyEquivalent:@""];
 		[item setRepresentedObject:pdfSnoopContainerView];
-		[menu addItem:item];
+		[menu addItem:[item autorelease]];
 		
 		item = [[NSMenuItem alloc] initWithTitle:NSLocalizedString(@"View File as Text in Drawer",@"View file as text in drawer menu item")
 										  action:@selector(toggleSnoopDrawer:)
