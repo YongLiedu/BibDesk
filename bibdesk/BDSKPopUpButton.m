@@ -46,9 +46,11 @@
 		[cell setBordered:[self isBordered]];
 		if ([self alternateImage] != nil) 
 			[cell setAlternateImage:[self alternateImage]];
-		if ([self menu] != nil) 
-			[cell setMenu:[[[self menu] copy] autorelease]];
-		
+		if ([self menu] != nil) {
+			NSMenu *initialMenu = [self menu];
+			[initialMenu removeItemAtIndex:0];
+			[cell setMenu:initialMenu];
+		}
 		[self setCell:cell];
 	}
 	return self;

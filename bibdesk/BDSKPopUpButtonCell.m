@@ -47,11 +47,6 @@
     [super dealloc];
 }
 
-- (void)setMenu:(NSMenu *)menu
-{
-	[super setMenu:menu];
-}
-
 // set properties relevant for drawing in the buttoncell
 
 - (void)setImage:(NSImage *)anImage
