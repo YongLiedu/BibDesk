@@ -30,7 +30,7 @@
     NSMutableArray *returnArray = [NSMutableArray arrayWithCapacity:1];
     
     //dictionary is the publication entry
-    NSMutableDictionary *pubDict = [NSMutableDictionary dictionaryWithCapacity:6];
+    NSMutableDictionary *pubDict = [[NSMutableDictionary alloc] init];
     const char * fs_path = NULL;
     NSString *tempFilePath = nil;
     BOOL usingTempFile = NO;
@@ -105,9 +105,10 @@
     // This is used for stripping extraneous characters from BibTeX year fields
     AGRegex *findYearString = [AGRegex regexWithPattern:@"(.*)(\\d{4})(.*)"];
     
-    NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
-    
     while(sourceLine = [sourceLineE nextObject]){
+  
+    NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
+    // NSLog(@"allocating pool at start");        
         sourceLine = [sourceLine stringByTrimmingCharactersInSet:newlineSet];
 //        NSLog(@" = [%@]",sourceLine);        
         if([sourceLine length] > 5){
@@ -162,13 +163,11 @@
                 
                 if([prefix isEqualToString:@"PMID"] || [prefix isEqualToString:@"TY"]){ // ARM:  PMID for Medline, TY for Elsevier-ScienceDirect.  I hope.
                     // we have a new publication
-                    
                     if([[pubDict allKeys] count] > 0){
                         // and we've already seen an old one: so save the old one off -
 			            newBI = [self bibitemWithPubMedDictionary:pubDict fileOrder:itemOrder];
 			            itemOrder ++;
                         [returnArray addObject:newBI];
-
                     }
                     [pubDict removeAllObjects];
                     [pubDict setObject:value forKey:prefix];
@@ -235,9 +234,9 @@
                     [wholeValue setString:value];
                     
                     if(bibTeXKey){
-                        key = bibTeXKey;
+                        key = [bibTeXKey retain];  // retain needed for local autorelease pool
                     }else{
-                        key = prefix;
+                        key = [prefix retain];     // retain needed for local autorelease pool
                     }
                     
                     key = [key stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceCharacterSet]];
@@ -250,9 +249,11 @@
             }
             
         }
+        [pool release]; 
+        // NSLog(@"releasing pool");
     }
     
-    [pool release];
+
     
     if([[pubDict allKeys] count] > 0){
 	newBI = [self bibitemWithPubMedDictionary:pubDict fileOrder:itemOrder];
@@ -261,6 +262,7 @@
     }
     //    NSLog(@"pubDict is %@", pubDict);
     *hadProblems = NO;
+    [pubDict release];
     return returnArray;
 }
 
