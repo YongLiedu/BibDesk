@@ -223,7 +223,8 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 	[[documentSnoopButton cell] setRefreshesMenu:NO];
 	
 	[documentSnoopButton setMenu:[self menuForImagePopUpButtonCell:[documentSnoopButton cell]]];
-	
+	[documentSnoopButton selectItemAtIndex:[[OFPreferenceWrapper sharedPreferenceWrapper] integerForKey:BDSKSnoopDrawerContentKey]];
+		
     [notesView setString:[theBib valueOfField:BDSKAnnoteString]];
     [abstractView setString:[theBib valueOfField:BDSKAbstractString]];
     [rssDescriptionView setString:[theBib valueOfField:BDSKRssDescriptionString]];
@@ -385,16 +386,16 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 	else if (cell == [documentSnoopButton cell]) {
 		NSMenuItem *item;
 		
-		item = [[NSMenuItem alloc] initWithTitle:NSLocalizedString(@"View File as Text in Drawer",@"View file as text in drawer menu item")
-										  action:@selector(toggleSnoopDrawer:)
-								   keyEquivalent:@""];
-		[item setRepresentedObject:textSnoopContainerView];
-		[menu addItem:item];
-		
 		item = [[NSMenuItem alloc] initWithTitle:NSLocalizedString(@"View File in Drawer",@"View file in drawer menu item")
 										  action:@selector(toggleSnoopDrawer:)
 								   keyEquivalent:@""];
 		[item setRepresentedObject:pdfSnoopContainerView];
+		[menu addItem:item];
+		
+		item = [[NSMenuItem alloc] initWithTitle:NSLocalizedString(@"View File as Text in Drawer",@"View file as text in drawer menu item")
+										  action:@selector(toggleSnoopDrawer:)
+								   keyEquivalent:@""];
+		[item setRepresentedObject:textSnoopContainerView];
 		[menu addItem:item];
 	}
 	
@@ -1112,6 +1113,9 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 		[documentSnoopDrawer close:sender];
 		[documentSnoopDrawer open:sender];
 	}
+	// we remember the last item that was selected in the preferences, so it sticks between windows
+	[[OFPreferenceWrapper sharedPreferenceWrapper] setInteger:[documentSnoopButton indexOfSelectedItem]
+													   forKey:BDSKSnoopDrawerContentKey];
 }
 
 - (void)drawerWillOpen:(NSNotification *)notification{
