@@ -32,10 +32,10 @@ static BDSKFileContentsFilter *_sharedFileContentsFilter = nil;
 		[fm removeFileAtPath:indexFileName handler:nil];
 	}
 	
-	_index = SKIndexCreateWithURL(indexFileURL,
-								  @"BibDesk File Contents Index",
-								  kSKIndexInvertedVector, // larger, but useful for searching for similar docs, which we'll want to do
-								  NULL);
+	_index = SKIndexCreateWithURL( (CFURLRef)indexFileURL,
+				       (CFStringRef)@"BibDesk File Contents Index",
+				       kSKIndexInvertedVector, // larger, but useful for searching for similar docs, which we'll want to do
+				       NULL);
 	SKLoadDefaultExtractorPlugIns();
 }
 
