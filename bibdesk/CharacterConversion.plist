@@ -20,11 +20,17 @@
 		<string>''</string>
 		<key>‟</key>
 		<string>``</string>
+		<key>…</key>
+		<string>{\ldots}</string>
 	</dict>
 	<key>Roman to TeX</key>
 	<dict>
+		<key>%</key>
+		<string>{\%}</string>
 		<key>&amp;</key>
 		<string>{\&amp;}</string>
+		<key>~</key>
+		<string>{\~~}</string>
 		<key>¡</key>
 		<string>{!'}</string>
 		<key>©</key>
@@ -137,8 +143,6 @@
 		<string>{\oe}</string>
 		<key>Ÿ</key>
 		<string>{\"Y}</string>
-		<key>…</key>
-		<string>{\ldots}</string>
 		<key>™</key>
 		<string>{\texttrademark}</string>
 	</dict>
@@ -170,6 +174,8 @@
 		<string>ü</string>
 		<key>{\"y}</key>
 		<string>ÿ</string>
+		<key>{\%}</key>
+		<string>%</string>
 		<key>{\&amp;}</key>
 		<string>&amp;</string>
 		<key>{\'A}</key>
@@ -244,8 +250,6 @@
 		<string>ç</string>
 		<key>{\copyright}</key>
 		<string>©</string>
-		<key>{\ldots}</key>
-		<string>…</string>
 		<key>{\oe}</key>
 		<string>œ</string>
 		<key>{\o}</key>
@@ -266,6 +270,8 @@
 		<string>ñ</string>
 		<key>{\~o}</key>
 		<string>õ</string>
+		<key>{\~~}</key>
+		<string>~</string>
 	</dict>
 </dict>
 </plist>
