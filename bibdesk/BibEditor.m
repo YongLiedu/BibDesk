@@ -430,7 +430,7 @@ NSString *BDSKDateModifiedString = @"Date-Modified";
 		
 		BDAlias *bda = [BDAlias aliasWithData:aliasData];
 		
-		NSString *filePath = [bda fullPath];
+		NSString *filePath = [bda fullPathNoUI];
 
 		filePath = [filePath stringByExpandingTildeInPath];
 		if([[NSFileManager defaultManager] fileExistsAtPath:filePath]){
