@@ -15,7 +15,6 @@
 
 @interface BDSKFilterController : NSWindowController {
 	IBOutlet NSButton *enabledCheckButton;
-	IBOutlet NSPopUpButton *typePopUp;
 	IBOutlet NSPopUpButton *conjunctionPopUp;
 	IBOutlet OAStackView *stackView;
 	IBOutlet NSTextField *messageTextField;
@@ -23,7 +22,6 @@
 	NSMutableArray *conditionControllers;
 	BDSKFilter *filter;
 	BDSKConjunction conjunction;
-	NSString *itemType;
 	BOOL enabled;
 }
 
@@ -36,9 +34,6 @@
 - (BOOL)canRemoveCondition;
 - (NSArray *)conditionControllers;
 - (void)setConditionControllers:(NSArray *)newConditionControllers;
-- (NSString *)itemType;
-- (void)setItemType:(NSString *)newItemType;
-- (NSString *)itemClassName;
 - (BOOL)enabled;
 - (void)setEnabled:(BOOL)newEnabled;
 - (BDSKConjunction)conjunction;

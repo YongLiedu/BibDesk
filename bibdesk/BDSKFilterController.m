@@ -17,7 +17,6 @@
     if (self) {
 		filter = [aFilter retain];
 		[self setConditionControllers:[NSMutableArray arrayWithCapacity:[[filter conditions] count]]];
-		[self setItemType:@"Publication"];
 		[self setEnabled:[filter enabled]];
 		[self setConjunction:[filter conjunction]];
     }
@@ -26,13 +25,11 @@
 
 - (void)dealloc
 {
-	NSLog(@"dealloc filterController");
+	//NSLog(@"dealloc filterController");
     [filter release];
     filter  = nil;
     [conditionControllers release];
     conditionControllers = nil;
-    [itemType release];
-    itemType = nil;
     [super dealloc];
 }
 
@@ -125,31 +122,6 @@
         [conditionControllers release];
         conditionControllers = [newConditionControllers mutableCopy];
     }
-}
-
-
-- (NSString *)itemType {
-    return [[itemType retain] autorelease];
-}
-
-- (void)setItemType:(NSString *)newItemType {
-    if (![itemType isEqualToString:newItemType]) {
-        [itemType release];
-        itemType = [newItemType copy];
-		
-		[[NSNotificationCenter defaultCenter] postNotificationName:@"FilterControllerWillRemoveConditions"
-															object:self
-														  userInfo:[NSDictionary dictionary]];
-		
-		BDSKConditionController *controller = [[[BDSKConditionController alloc] initWithFilterController:self] autorelease];
-		[self setConditionControllers:[NSMutableArray arrayWithObject:controller]];
-		
-		[self updateUI];
-    }
-}
-
-- (NSString *)itemClassName {
-    return @"BDSKItem";
 }
 
 - (BOOL)enabled {

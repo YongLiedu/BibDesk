@@ -18,10 +18,17 @@ typedef enum {
 	BDSKEndWith = 5
 } BDSKComparison;
 
-@interface BDSKCondition : NSObject {
+typedef enum {
+	BDSKPublicationType = 0,
+	BDSKAuthorType = 1,
+	BDSKNoteType = 2
+} BDSKItemType;
+
+@interface BDSKCondition : NSObject <NSCopying, NSCoding> {
 	NSString *key;
 	NSString *value;
 	BDSKComparison comparison;
+	BDSKItemType itemType;
 }
 
 - (BOOL)isSatisfiedByItem:(id<BDSKFilterItem>)item;
@@ -31,5 +38,9 @@ typedef enum {
 - (void)setValue:(NSString *)newValue;
 - (BDSKComparison)comparison;
 - (void)setComparison:(BDSKComparison)newComparison;
+- (BDSKItemType)itemType;
+- (void)setItemType:(BDSKItemType)newItemType;
+- (NSString *)itemClassName;
+- (Class)itemClass;
 
 @end

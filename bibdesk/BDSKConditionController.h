@@ -14,6 +14,7 @@
 
 
 @interface BDSKConditionController : NSObject {
+	IBOutlet NSPopUpButton *itemTypePopUp;
 	IBOutlet NSPopUpButton *keyPopUp;
 	IBOutlet NSPopUpButton *comparisonPopUp;
 	IBOutlet NSTextField *valueTextField;
@@ -23,7 +24,6 @@
 	IBOutlet NSObjectController *ownerController;
 	IBOutlet NSWindow *addKeySheet;
 	IBOutlet NSTextField *newKeyField;
-	IBOutlet NSMenu *keyMenu;
 	BDSKFilterController *filterController;
 	BDSKCondition *condition;
 	NSMutableArray *keys;
@@ -35,6 +35,7 @@
 - (NSView *)view;
 - (NSMenu *)keyMenu;
 - (void)updateKeyMenu;
+- (void)updateKeys;
 - (IBAction)changeKey:(id)sender;
 - (IBAction)addCondition:(id)sender;
 - (IBAction)removeCondition:(id)sender;

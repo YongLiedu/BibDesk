@@ -10,7 +10,6 @@
                 messageTextField = NSTextField; 
                 ownerController = NSObjectController; 
                 stackView = OAStackView; 
-                typePopUp = NSPopUpButton; 
             }; 
             SUPERCLASS = NSWindowController; 
         }, 

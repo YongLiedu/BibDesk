@@ -15,7 +15,7 @@ typedef enum {
 	BDSKOr = 1
 } BDSKConjunction;
 
-@interface BDSKFilter : NSObject {
+@interface BDSKFilter : NSObject <NSCopying, NSCoding> {
 	NSMutableArray *conditions;
 	BDSKConjunction conjunction;
 	BOOL enabled;

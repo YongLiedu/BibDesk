@@ -4,6 +4,7 @@
             ACTIONS = {
                 addCondition = id; 
                 addNewKey = id; 
+                changeKey = id; 
                 dismissAddKeySheet = id; 
                 removeCondition = id; 
             }; 
@@ -13,6 +14,7 @@
                 addButton = NSButton; 
                 addKeySheet = NSWindow; 
                 comparisonPopUp = NSPopUpButton; 
+                itemTypePopUp = NSPopUpButton; 
                 keyPopUp = NSPopUpButton; 
                 newKeyField = NSTextField; 
                 ownerController = NSObjectController; 

@@ -9,9 +9,10 @@
 #import "BDSKFilterItem.h"
 
 
-@protocol BDSKFilterItem
+@protocol BDSKFilterItem <NSObject>
 
 + (NSArray *)filterKeys;
++ (BOOL)acceptsOtherFilterKeys;
 
 - (NSString *)filterValueForKey:(NSString *)key;
 

@@ -15,7 +15,6 @@
 - (id)initWithFilterController:(BDSKFilterController *)aFilterController
 {
 	BDSKCondition *aCondition = [[[BDSKCondition alloc] init] autorelease];
-	[aCondition setKey:[[NSClassFromString([aFilterController itemClassName]) filterKeys] objectAtIndex:0]];
     self = [self initWithFilterController:aFilterController condition:aCondition];
     return self;
 }
@@ -28,9 +27,9 @@
         condition = [aCondition retain];
 		canRemove = [filterController canRemoveCondition];
 		
-		keys = [[NSClassFromString([filterController itemClassName]) filterKeys] mutableCopy];
-		if (![keys containsObject:[[condition key] capitalizedString]])
-			[keys addObject:[[condition key] capitalizedString]];
+		[self updateKeys];
+		
+		[condition addObserver:self forKeyPath:@"itemType" options:0 context:NULL];
 		
 		BOOL success = [NSBundle loadNibNamed:@"BDSKCondition" owner:self];
 		if (!success) {
@@ -42,8 +41,9 @@
 
 - (void)dealloc
 {
-	NSLog(@"dealloc conditionController");
+	//NSLog(@"dealloc conditionController");
 	[[NSNotificationCenter defaultCenter] removeObserver:self];
+	[condition removeObserver:self forKeyPath:@"itemType"];
     filterController = nil;
 	[condition release];
     condition = nil;
@@ -58,16 +58,12 @@
 	[self updateKeyMenu];
 	
 	[[NSNotificationCenter defaultCenter] addObserver:self
-											 selector:@selector(conditionsWillBeRemoved:)
+											 selector:@selector(windowWillClose:)
 												 name:NSWindowWillCloseNotification
 											   object:[filterController window]];
-	[[NSNotificationCenter defaultCenter] addObserver:self
-											 selector:@selector(conditionsWillBeRemoved:)
-												 name:@"FilterControllerWillRemoveConditions"
-											   object:filterController];
 }
 
-- (void)conditionsWillBeRemoved:(NSNotification *)notification {
+- (void)windowWillClose:(NSNotification *)notification {
 	[ownerController setContent:nil]; // fix for binding-to-nib-owner bug
 }
 
@@ -87,18 +83,31 @@
 		[menuItem setTarget:self];
 		[menu addItem:[menuItem autorelease]];
 	}
-	[menu addItem:[NSMenuItem separatorItem]];
-	menuItem = [[NSMenuItem alloc] initWithTitle:NSLocalizedString(@"Add Other...", @"") action:@selector(addNewKey:) keyEquivalent:@""];
-	[menuItem setTarget:self];
-	[menu addItem:[menuItem autorelease]];
-		
+	
+	if ([[condition itemClass] acceptsOtherFilterKeys]) {
+		[menu addItem:[NSMenuItem separatorItem]];
+		menuItem = [[NSMenuItem alloc] initWithTitle:NSLocalizedString(@"Add Other...", @"") action:@selector(addNewKey:) keyEquivalent:@""];
+		[menuItem setTarget:self];
+		[menu addItem:[menuItem autorelease]];
+	}
+	
 	return [menu autorelease];
 }
 
 - (void)updateKeyMenu {
-	[keyPopUp setTarget:self];
 	[keyPopUp setMenu:[self keyMenu]];
-	[keyPopUp selectItemWithTitle:[[condition key] capitalizedString]];
+	[keyPopUp selectItemWithTitle:[condition key]];
+}
+
+- (void)updateKeys {
+	[keys autorelease];
+	keys = [[[condition itemClass] filterKeys] mutableCopy];
+	if ([condition key] == nil || [[condition key] isEqualToString:@""]) {
+		[condition setKey:[keys objectAtIndex:0]];
+	} else if (![keys containsObject:[condition key]]) {
+		[keys addObject:[condition key]];
+	}
+	[self updateKeyMenu];
 }
 
 - (IBAction)addCondition:(id)sender {
@@ -135,7 +144,7 @@
 }
 
 - (void)changeKey:(id)sender {
-	[condition setKey:[[sender title] lowercaseString]];
+	[condition setKey:[sender title]];
 }
 
 - (void)addKey:(NSString *)newKey {
@@ -162,11 +171,18 @@
     if(returnCode == NSOKButton){
 		NSString *newKey = [[newKeyField stringValue] capitalizedString];
 		[self addKey:newKey];
-		[condition setKey:[newKey lowercaseString]];
+		[condition setKey:newKey];
 		[self updateKeyMenu];
     }
 	else {
-		[keyPopUp selectItemWithTitle:[[condition key] capitalizedString]];
+		[keyPopUp selectItemWithTitle:[condition key]];
+	}
+}
+
+- (void)observeValueForKeyPath:(NSString *)keyPath ofObject:(id)object change:(NSDictionary *)change context:(void *)context {
+	if ([keyPath isEqualToString:@"itemType"]) {
+		[condition setKey:@""];
+		[self updateKeys];
 	}
 }
 
