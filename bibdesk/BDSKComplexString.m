@@ -390,8 +390,8 @@ static NSDictionary *globalMacroDefs;
 
 - (void)handleMacroKeyChangedNotification:(NSNotification *)notification{
 	NSDictionary *userInfo = [notification userInfo];
-	NSString *oldMacroNode = [BDSKStringNode nodeWithBibTeXString:[userInfo objectForKey:@"oldKey"]];
-	NSString *newMacroNode = [BDSKStringNode nodeWithBibTeXString:[userInfo objectForKey:@"newKey"]];
+	BDSKStringNode *oldMacroNode = [BDSKStringNode nodeWithBibTeXString:[userInfo objectForKey:@"oldKey"]];
+	BDSKStringNode *newMacroNode = [BDSKStringNode nodeWithBibTeXString:[userInfo objectForKey:@"newKey"]];
 	
 	if (isComplex && ([nodes containsObject:oldMacroNode] || [nodes containsObject:newMacroNode])) {
 		[expandedValue autorelease];
@@ -401,7 +401,7 @@ static NSDictionary *globalMacroDefs;
 
 - (void)handleMacroDefinitionChangedNotification:(NSNotification *)notification{
 	NSDictionary *userInfo = [notification userInfo];
-	NSString *macroNode = [BDSKStringNode nodeWithBibTeXString:[userInfo objectForKey:@"macroKey"]];
+	BDSKStringNode *macroNode = [BDSKStringNode nodeWithBibTeXString:[userInfo objectForKey:@"macroKey"]];
 	
 	if (isComplex && [nodes containsObject:macroNode]) {
 		[expandedValue autorelease];
