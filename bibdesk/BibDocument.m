@@ -2089,13 +2089,6 @@ int generalBibItemCompareFunc(id item1, id item2, void *context){
     }
 }
 
-
-/* ssp: 2004-07-18
-An attempt to unify the adding of BibItems from the pasteboard
-This takes the structural code from the original drag and drop handling code and breaks out the parts for handling file and text pasteboards.
-As an experiment, we also try to pass errors back.
-Would it be advisable to also give access to the newly added records?
-*/
 - (BOOL) addPublicationsFromPasteboard:(NSPasteboard*) pb error:(NSString**) error{
     NSArray * types = [pb types];
     
@@ -2120,41 +2113,44 @@ Would it be advisable to also give access to the newly added records?
     }
 }
 
-
-/* ssp: 2004-07-19
-'TeXify' the string, convert to data and insert then.
-Taken from original -paste: method
-Originally, drag and drop and services didn't seem to 'TeXify'
-I hope this is the right thing to do.
-There may be a bit too much conversion Data->String->Data going on.
-*/
 - (BOOL) addPublicationsForString:(NSString*) string error:(NSString**) error {
-	NSString * TeXifiedString = [[BDSKConverter sharedConverter] stringByTeXifyingString:string];
-	NSData * data = [TeXifiedString dataUsingEncoding:NSUTF8StringEncoding];
-
-	return [self addPublicationsForData:data error:error];
+    
+	NSData * data = [string dataUsingEncoding:NSUTF8StringEncoding];
+	return [self addPublicationsForData:[string dataUsingEncoding:NSUTF8StringEncoding] error:error];
 }
 
-
-/* ssp: 2004-07-18
-Broken out of  original drag and drop handling
-Runs the data it receives through BiBTeXParser and add the BibItems it receives.
-Error handling is quasi-nonexistant. 
-We don't even have the error handling that used to exist in the -paste: method yet. Did that actually help?
-Shouldn't there be some kind of safeguard against opening too many pub editors?
-*/
 - (BOOL) addPublicationsForData:(NSData*) data error:(NSString**) error {
 	BOOL hadProblems = NO;
 	NSArray * newPubs = nil;
     
-    if([[OFPreferenceWrapper sharedPreferenceWrapper] boolForKey:BDSKUseUnicodeBibTeXParser]){
-        NSString *aString = [[NSString alloc] initWithData:data encoding:[[OFPreferenceWrapper sharedPreferenceWrapper] integerForKey:BDSKDefaultStringEncoding]];
-        if(aString == nil) // bad encoding choice; fall back to latin1
-            aString = [[NSString alloc] initWithData:data encoding:NSISOLatin1StringEncoding];
-        newPubs = [BibTeXParser itemsFromString:aString error:&hadProblems];
-    } else { // using libbtparse
-        newPubs = [BibTeXParser itemsFromData:data error:&hadProblems];
+    // sniff the string to see if it's BibTeX or RIS
+    NSString *pbString = [[NSString alloc] initWithData:data encoding:NSUTF8StringEncoding];
+    NSScanner *scanner = [[NSScanner alloc] initWithString:pbString];
+    BOOL isBibTeX = YES;
+    if([scanner scanString:@"PMID- " intoString:nil]) // for Medline
+        isBibTeX = NO;
+    else {
+        [scanner setScanLocation:0];
+        if([scanner scanString:@"TY  - " intoString:nil]) // for RIS
+            isBibTeX = NO;
     }
+    [scanner release];
+    
+    if(!isBibTeX){
+        newPubs = [PubMedParser itemsFromString:pbString error:&hadProblems];
+    } else {
+    
+        if([[OFPreferenceWrapper sharedPreferenceWrapper] boolForKey:BDSKUseUnicodeBibTeXParser]){
+            NSString *aString = [[NSString alloc] initWithData:data encoding:[[OFPreferenceWrapper sharedPreferenceWrapper] integerForKey:BDSKDefaultStringEncoding]];
+            if(aString == nil) // bad encoding choice; fall back to latin1
+                aString = [[NSString alloc] initWithData:data encoding:NSISOLatin1StringEncoding];
+            newPubs = [BibTeXParser itemsFromString:aString error:&hadProblems];
+        } else { // using libbtparse
+            newPubs = [BibTeXParser itemsFromData:data error:&hadProblems];
+        }
+    }
+    
+    [pbString release]; // we're done with this now
 
 	if(hadProblems) {
 		// original code follows:
