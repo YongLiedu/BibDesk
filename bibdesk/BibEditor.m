@@ -1291,6 +1291,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
     if(![[self window] makeFirstResponder:[self window]]) {
         [[self window] endEditingFor:nil];
     }
+    [macroTextFieldWC close]; // close so it's not hanging around by itself; this works if the doc window closes, also
     [documentSnoopDrawer close];
     [theDocument removeWindowController:self];
 }
