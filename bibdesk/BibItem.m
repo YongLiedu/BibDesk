@@ -371,12 +371,11 @@ void _setupFonts(){
         return [author name];
     }else{
         author = [en nextObject];
-        rs = [[[NSString alloc] initWithString:[author name]] autorelease];
+        rs = [NSString stringWithString:[author name]];
         // since this method is used for display, BibAuthor -name is right above.
         
         while(author = [en nextObject]){
-            rs = [rs stringByAppendingString:@" and "];
-            rs = [rs stringByAppendingString:[author name]];
+            [rs appendFormat:@" and %@", [author name]];
         }
         return rs;
     }
