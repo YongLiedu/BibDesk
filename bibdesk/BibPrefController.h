@@ -56,14 +56,16 @@ extern NSString *BDSKColumnOrderKey;
 extern NSString *BDSKViewByKey;
 
 extern NSString *BDSKPubTypeKey;
-
+extern NSString *BDSKPubTypeStringKey;
 extern NSString *BDSKShowWarningsKey;
 
 extern NSString *BDSKCurrentQuickSearchKey;
 extern NSString *BDSKCurrentQuickSearchTextDict;
 extern NSString *BDSKQuickSearchKeys;
 
-
+extern NSString *BDSKRowColorRedKey;
+extern NSString *BDSKRowColorGreenKey;
+extern NSString *BDSKRowColorBlueKey;
 
 #pragma mark ||  Notification name strings
 extern NSString *BDSKDocumentUpdateUINotification;

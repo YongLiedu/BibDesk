@@ -45,12 +45,16 @@ NSString *BDSKRSSDescriptionFieldKey = @"Field to use as Description in RSS";
 NSString *BDSKViewByKey = @"View-by Field";
 
 NSString *BDSKPubTypeKey = @"Current Publication Type";
+NSString *BDSKPubTypeStringKey = @"Current Publication Type String";
 
 NSString *BDSKShowWarningsKey = @"Show Warnings in Error Panel";
 
 NSString *BDSKCurrentQuickSearchKey = @"Current Quick Search Key";
 NSString *BDSKCurrentQuickSearchTextDict = @"Current Quick Search Text Dictionary";
 NSString *BDSKQuickSearchKeys = @"Quick Search Keys";
+NSString *BDSKRowColorRedKey = @"RedComponentColor of alternating rows Key";
+NSString *BDSKRowColorGreenKey = @"GreenComponentColor of alternating rows Key";
+NSString *BDSKRowColorBlueKey = @"BlueComponentColor of alternating rows Key";
 
 #pragma mark ||  Notification name strings
 NSString *BDSKDocumentUpdateUINotification = @"General UI update Notification";
