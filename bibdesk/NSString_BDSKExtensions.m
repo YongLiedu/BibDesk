@@ -162,13 +162,13 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
     
     return [mStr autorelease];
 }
-
+ 
 + (NSString *)stringWithBytes:(const char *)byteString encoding:(NSStringEncoding)encoding{
-    [[[NSString alloc] initWithBytes:byteString length:strlen(byteString) encoding:encoding] autorelease];
+    return [[[NSString alloc] initWithBytes:byteString length:strlen(byteString) encoding:encoding] autorelease];
 }
 
 - (NSString *)initWithBytes:(const char *)byteString encoding:(NSStringEncoding)encoding{
-    [self initWithBytes:byteString length:strlen(byteString) encoding:encoding];
+    return [self initWithBytes:byteString length:strlen(byteString) encoding:encoding];
 }
 
 - (BOOL)isStringTeXQuotingBalancedWithBraces:(BOOL)braces connected:(BOOL)connected{
