@@ -55,6 +55,7 @@ It can be used with
 		
 			// the following is taken from BibEditor's -showPersonDetail: method. This method should probably live in BibAppController or so - which will let us call it from everywhere. It shouldn't depend on a publication or a publication's editor.
 			BibPersonController *pc = [author personController];
+#warning ARM: this is broken
 			if(pc == nil){
 				pc = [[BibPersonController alloc] initWithPerson:author];
 			}
