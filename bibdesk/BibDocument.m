@@ -37,7 +37,6 @@ NSString* BDSKBibTeXStringPboardType = @"edu.ucsd.cs.mmcrack.bibdesk: Local BibT
 
 - (id)init{
     if(self = [super init]){
-        wcArray = [[NSMutableArray alloc] initWithCapacity:1];
         publications = [[NSMutableArray alloc] initWithCapacity:1];
         shownPublications = [[NSMutableArray alloc] initWithCapacity:1];
         frontMatter = [[NSMutableString alloc] initWithString:@""];
@@ -191,12 +190,11 @@ NSString* BDSKBibTeXStringPboardType = @"edu.ucsd.cs.mmcrack.bibdesk: Local BibT
     if ([self undoManager]) {
 		[[self undoManager] removeAllActionsWithTarget:self];
 	}
-    [wcArray release];
     [[NSNotificationCenter defaultCenter] removeObserver:self];
     [publications release]; // these should cause the bibitems to get dealloc'ed
     [shownPublications release];
-	[frontMatter release];
-	[authors release];
+    [frontMatter release];
+    [authors release];
     [quickSearchTextDict release];
     [quickSearchKey release];
     [showColsArray release];

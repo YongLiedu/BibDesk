@@ -67,7 +67,6 @@ extern NSString* BDSKBibTeXStringPboardType;
     IBOutlet NSMenuItem *ctxCopyTex;
     IBOutlet NSMenuItem *ctxCopyPDF;
     IBOutlet OASplitView* splitView;
-    NSMutableArray *wcArray;
 
 #pragma mark Toolbar variable declarations
 
