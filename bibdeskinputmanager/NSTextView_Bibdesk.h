@@ -1,6 +1,6 @@
 //
-//  TextView+BD.h
-//  TeXShop
+//  NSTextView_Bibdesk.h
+//  BibDeskInputManager
 //
 //  Created by Sven-S. Porst on Sat Jul 17 2004.
 //  Copyright (c) 2004 __MyCompanyName__. All rights reserved.
@@ -9,11 +9,10 @@
 #import <Cocoa/Cocoa.h>
 #import "NSAppleScript+HandlerCalls.h"
 
-#define kScriptName (@"Bibdesk")
-#define kScriptType (@"scpt")
-#define kHandlerName (@"getcitekeys")
+extern NSString *BDSKInputManagerID;
 #define noScriptErr 0
 
+#warning Can you #define a localized (non-constant) string?
 // string to reconise the string we inserted
 #define kBibDeskInsertion NSLocalizedString(@" (Bibdesk insertion)", @" (Bibdesk insertion)")
 // hint string 

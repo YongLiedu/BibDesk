@@ -1,6 +1,6 @@
 //
-//  TextView+BD.m
-//  TeXShop
+//  NSTextView_Bibdesk.m
+//  BibDeskInputManager
 //
 //  Created by Sven-S. Porst on Sat Jul 17 2004.
 //  Copyright (c) 2004 __MyCompanyName__. All rights reserved.
@@ -9,14 +9,32 @@
 #import "NSTextView_Bibdesk.h"
 #import <Foundation/Foundation.h>
 
+NSString *BDSKInputManagerID = @"net.sourceforge.bibdesk.inputmanager";
+#warning  should be extern?  why were these #defined?
+static NSString *kScriptName = @"Bibdesk";
+static NSString *kScriptType = @"scpt";
+static NSString *kHandlerName = @"getcitekeys";
 
 @implementation NSTextView_Bibdesk
 
 + (void)load{
-    if([[self superclass] instancesRespondToSelector:@selector(completionsForPartialWordRange:indexOfSelectedItem:)]){
-	if(![[NSUserDefaults standardUserDefaults] boolForKey:@"BDSKDontUseBibDeskAutocompletion"]){
-	    [self poseAsClass:[NSTextView class]];
+    NSString *bundleID = [[NSBundle mainBundle] bundleIdentifier]; // for the app we are loading into
+    NSArray *array = [NSArray arrayWithContentsOfFile:[NSHomeDirectory() stringByAppendingPathComponent:@"/Library/Application Support/BibDeskInputManager/EnabledApplications.plist"]];
+
+    NSEnumerator *e = [array objectEnumerator];
+    NSDictionary *dict;
+    BOOL yn = NO;
+    
+    while(dict = [e nextObject]){
+	if([[dict objectForKey:@"BundleID"] isEqualToString:bundleID]){
+	    NSLog(@"match found");
+	    yn = YES;
+	    break;
 	}
+    }
+    
+    if(yn && [[self superclass] instancesRespondToSelector:@selector(completionsForPartialWordRange:indexOfSelectedItem:)]){
+	[self poseAsClass:[NSTextView class]];
     }
 }
 
@@ -100,7 +118,7 @@ requires X.3
 		// code shamelessly lifted from Buzz Anderson's ASHandlerTest example app
 		// Performance gain if we stored the script permanently? But where to store it?
 		/* Locate the script within the bundle */
-		NSString *scriptPath = [[NSBundle bundleWithIdentifier:@"net.sourceforge.bibdesk.inputmanager"] pathForResource:kScriptName ofType: kScriptType];
+		NSString *scriptPath = [[NSBundle bundleWithIdentifier:BDSKInputManagerID] pathForResource:kScriptName ofType: kScriptType];
 		NSURL *scriptURL = [NSURL fileURLWithPath: scriptPath];
 		
 		NSDictionary *errorInfo = nil;
