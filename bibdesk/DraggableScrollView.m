@@ -5,7 +5,7 @@
 // See legal notice below.
 
 #import "DraggableScrollView.h"
-#import <Carbon/Carbon.h>
+#import <OmniAppKit/NSView-OAExtensions.h>
 
 @implementation DraggableScrollView
 
@@ -258,7 +258,7 @@ static float BDSKScaleMenuFontSize = 11.0;
 		
 		[clipView setBoundsSize:newDocBoundsSize];
 		
-		[[self documentView] scrollPoint:NSMakePoint(0, NSMaxY([[self documentView] frame]))];
+		[self scrollToTop];
     }
 }
 
