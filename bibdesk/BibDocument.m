@@ -108,15 +108,15 @@ NSString *BDSKBibItemLocalDragPboardType = @"edu.ucsd.cs.mmccrack.bibdesk: Local
 		[[NSNotificationCenter defaultCenter] addObserver:self
 												 selector:@selector(handleBibItemAddDelNotification:)
 													 name:BDSKDocDelItemNotification
-                                                                                                object:self];
+                                                   object:self];
 
-                // It's wrong that we have to manually register for this, since the document is the window's delegate in IB (and debugging/logging appears to confirm this).
-                // However, we don't get this notification, and it's critical to clean up when closing the document window; this fixes #1097306, a crash when closing the
-                // document window if an editor is open.  I can't reproduce with a test document-based project, so something may be hosed in the nib.
-                [[NSNotificationCenter defaultCenter] addObserver:self
-                                                         selector:@selector(windowWillClose:)
-                                                             name:NSWindowWillCloseNotification
-                                                           object:nil]; // catch all of the notifications; if we pass documentWindow as the object, we don't get any notifications
+        // It's wrong that we have to manually register for this, since the document is the window's delegate in IB (and debugging/logging appears to confirm this).
+        // However, we don't get this notification, and it's critical to clean up when closing the document window; this fixes #1097306, a crash when closing the
+        // document window if an editor is open.  I can't reproduce with a test document-based project, so something may be hosed in the nib.
+        [[NSNotificationCenter defaultCenter] addObserver:self
+                                                 selector:@selector(windowWillClose:)
+                                                     name:NSWindowWillCloseNotification
+                                                   object:nil]; // catch all of the notifications; if we pass documentWindow as the object, we don't get any notifications
 
 		customStringArray = [[NSMutableArray arrayWithCapacity:6] retain];
 		[customStringArray setArray:[[OFPreferenceWrapper sharedPreferenceWrapper] arrayForKey:BDSKCustomCiteStringsKey]];
@@ -2421,7 +2421,7 @@ This method always returns YES. Even if some or many operations fail.
     [self refreshAuthors];
     
 	if(!changedKey){
-		[tableView  reloadData];
+		[self updateUI];
 		return;
 	}
 		
@@ -2687,7 +2687,7 @@ This method always returns YES. Even if some or many operations fail.
         [undoMan setActionName:NSLocalizedString(@"Change Macro Definition",
                                                  @"change macrodef action name for undo")];
     [macroDefinitions setObject:newDefinition forKey:macroKey];
-    
+
 	NSDictionary *notifInfo = [NSDictionary dictionaryWithObjectsAndKeys:macroKey, @"macroKey", @"Change macro", @"type", nil];
     [[NSNotificationCenter defaultCenter] postNotificationName:BDSKBibDocMacroDefinitionChangedNotification
 														object:self
