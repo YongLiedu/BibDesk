@@ -251,7 +251,10 @@ NSRange SafeForwardSearchRange( unsigned startLoc, unsigned seekLength, unsigned
                 if(braceFoundRange.location != [fullString rangeOfString:leftDelim options:NSLiteralSearch | NSBackwardsSearch range:braceSearchRange].location){ // this means we found "{ {" between { and }
                     [scanner scanString:rightDelim intoString:&logString]; // it wasn't this one, so scan past it
                     // NSLog(@"scanned rightDelim %@", logString);
-                    if(![scanner scanUpToString:rightDelim intoString:&logString]){  // find the next one
+                    if(![scanner scanUpToString:rightDelim intoString:&logString] &&        // find the next right delimiter
+                        [fullString characterAtIndex:([scanner scanLocation] + 1)] != '}'){ // it's not an error if it's terminated by a brace 
+                        // NSLog(@"*** ERROR doubly nested braces");
+                        *hadProblems = YES;
                         [BibTeXParser postParsingErrorNotification:[NSString stringWithFormat:@"Delimiter '%@' not found", rightDelim]
                                                          errorType:@"Parse Error" 
                                                           fileName:filePath 
@@ -264,7 +267,10 @@ NSRange SafeForwardSearchRange( unsigned startLoc, unsigned seekLength, unsigned
                 if(braceFoundRange.location != NSNotFound){ // if there's a "{" between { and }
                     [scanner scanString:rightDelim intoString:&logString]; // it wasn't this one, so scan past it
                     // NSLog(@"scanned rightDelim %@", logString);
-                    if(![scanner scanUpToString:rightDelim intoString:&logString]){  // find the next one
+                    if(![scanner scanUpToString:rightDelim intoString:&logString] &&        // find the next right delimiter
+                        [fullString characterAtIndex:([scanner scanLocation] + 1)] != ','){ // don't call this an error if there is a comma immediately following; may give some false alarms
+                        // NSLog(@"*** ERROR nested braces");
+                        *hadProblems = YES;
                         [BibTeXParser postParsingErrorNotification:[NSString stringWithFormat:@"Delimiter '%@' not found", rightDelim]
                                                          errorType:@"Parse Error" 
                                                           fileName:filePath 
