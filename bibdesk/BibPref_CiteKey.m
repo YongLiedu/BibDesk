@@ -40,7 +40,7 @@
 	
 	// update the UI elements
     [citeKeyAutogenerateCheckButton setState:[defaults integerForKey:BDSKCiteKeyAutogenerateKey]];
-	[self setCiteKeyFormatInvalidWarning:NO]; // the format in defaults is always valid, right?
+	[self setCiteKeyFormatInvalidWarning:NO message:NSLocalizedString(@"The cite key format is invalid.",@"")]; // the format in defaults is always valid, right?
 	[formatPresetPopUp selectItemAtIndex:[formatPresetPopUp indexOfItemWithTag:citeKeyPresetChoice]];
 	[formatField setStringValue:citeKeyFormat];
 	[citeKeyLine setStringValue:[tmpBI suggestedCiteKey]];
