@@ -22,7 +22,10 @@
                         frontMatter:(NSMutableString *)frontMatter
                            filePath:(NSString *)filePath{
     int ok = 1;
-
+    long cidx = 0; // used to scan through buf for annotes.
+    char annoteDelim = '\0';
+    int braceDepth = 0;
+    
     BibItem *newBI = nil;
 
     // Strings read from file and added to Dictionary object
@@ -95,22 +98,54 @@
                     [newBI setFileOrder:itemOrder];
                     itemOrder++;
                     field = NULL;
-                    // Removed special case handling of abstract & annote.
-                    // Special case was there only to avoid losing newlines
-                    // newlines now converted to \par and back in stringByDeTexifying
+                    // Returned special case handling of abstract & annote.
+                    // Special case is there to avoid losing newlines that exist in preexisting files.
+                    // newlines that are typed in bibdesk are
+                    //  now converted to \par and back in stringByDeTexifyingString
                     while (field = bt_next_field (entry, field, &fieldname))
                     {
-                        //get the text of the field from the file.
-                        s = [NSString stringWithCString:bt_get_text(field)];
 
+                        if(!strcmp(fieldname, "annote") ||
+                           !strcmp(fieldname, "abstract") ||
+                           !strcmp(fieldname, "rss-description")){
+                            if(field->down){
+                                cidx = field->down->offset;
+                                // the delimiter is at cidx-1
+                                if(buf[cidx-1] == '{'){
+                                    // scan up to the balanced brace
+                                    for(braceDepth = 1; braceDepth > 0; cidx++){
+                                        if(buf[cidx] == '{') braceDepth++;
+                                        if(buf[cidx] == '}') braceDepth--;
+                                    }
+                                    cidx--;     // just advanced cidx one past the end of the field.
+                                }else if(buf[cidx-1] == '"'){
+                                    // scan up to the next quote.
+                                    for(; buf[cidx] != '"'; cidx++);
+                                }
+                                annoteDelim = buf[cidx];
+                                buf[cidx] = '\0';
+                                s = [NSString stringWithCString:&buf[field->down->offset]];
+                                buf[cidx] = annoteDelim;
+                            }else{
+                                *hadProblems = YES;
+                            }
+                        }else{
+                            s = [NSString stringWithCString:bt_get_text(field)];
+                        }
+
+                        // Now that we have the string from the file, check for invalid characters:
+                        
                         //Begin check for valid characters (ASCII); otherwise we mangle the .bib file every time we write out
                         //by inserting two characters for every extended character.  All we do is pop up the corrupted file
                         //dialog and give the user the option to continue; it would be nice if we could pass the line no. too.
+
+                        // Note (mmcc) : This is necessary only when CharacterConversion.plist doesn't cover a character that's in the file - this may be fixable in BDSKConverter also.
+                        
                         NSScanner *validscan;
                         NSString *validscanstring = nil;
                         NSRange EnglishRange;
                         NSCharacterSet *EnglishLetters;
-                        
+
                         //This range defines ASCII without the control characters (or should).
                         EnglishRange.location = (unsigned int)' '; //Begin at space
                         EnglishRange.length = 95; //This should get everything through tilde
@@ -119,15 +154,15 @@
                         validscan = [NSScanner scannerWithString:s];  //Scan string s after we get it from bt
 
                         [validscan scanCharactersFromSet:EnglishLetters intoString:&validscanstring];
-                                 if([validscanstring length] != [s length]) //Compare it to the original string
-                            {
-                                //NSLog(@"I am string s: %@",s);
-                                //NSLog(@"I am validscanstring: %@",validscanstring);
-                                *hadProblems = YES;                                
-                            }
+                        if([validscanstring length] != [s length]) //Compare it to the original string
+                        {
+                            //NSLog(@"I am string s: %@",s);
+                            //NSLog(@"I am validscanstring: %@",validscanstring);
+                            *hadProblems = YES;
+                        }
                         //End check for valid characters.
-
-                        //deDetify it (includes conversion of /par to \n\n.
+                        
+                        //deTeXify it (includes conversion of /par to \n\n.)
                         sDeTexified = [BDSKConverter stringByDeTeXifyingString:s];
                         //Get fieldname as a capitalized NSString
                         sFieldName = [[NSString stringWithCString: fieldname] capitalizedString];
@@ -161,5 +196,6 @@
         free(buf);
         return returnArray;
 }
+
 
 @end
