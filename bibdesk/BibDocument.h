@@ -46,7 +46,6 @@ extern NSString* LocalDragPasteboardName;
 {
     NSToolbarItem *editPubButton;
     NSToolbarItem *delPubButton;
-    IBOutlet NSPopUpButton *sortKeyButton;
     IBOutlet NSTextView *previewField;
     IBOutlet NSWindow* documentWindow;
     IBOutlet NSWindow *bibListViews;
@@ -58,16 +57,21 @@ extern NSString* LocalDragPasteboardName;
     IBOutlet NSMenuItem *ctxCopyBibTex;
     IBOutlet NSMenuItem *ctxCopyTex;
     IBOutlet NSMenuItem *ctxCopyPDF;
+
+#pragma mark || Toolbar stuff
+    NSMutableDictionary *toolbarItems;
     IBOutlet NSTextField *quickSearchTextField;
     IBOutlet NSBox* quickSearchBox;    // encompasses the qstxtfield and the qs button.
     IBOutlet NSPopUpButton *quickSearchButton;
+    IBOutlet NSView* sortKeyView;
+    IBOutlet NSPopUpButton *sortKeyButton;
     NSToolbarItem *quickSearchToolbarItem;
     NSToolbarItem *sortKeyToolbarItem;
+    IBOutlet NSButton* quickSearchClearButton;
 
     IBOutlet NSTextField *infoLine;
-    IBOutlet NSButton* quickSearchClearButton;
 // ----------------------------------------------------------------------------------------
-// custom cite-String drawer stuff:
+#pragma mark ||  custom cite-String drawer stuff:
 // ----------------------------------------------------------------------------------------
     IBOutlet NSDrawer* customCiteDrawer;
     IBOutlet NSButton* openCustomCitePrefsButton;
@@ -80,7 +84,6 @@ extern NSString* LocalDragPasteboardName;
     // in aspect oriented objective c i could have coded that assertion!
 
     NSMutableArray *bibEditors;
-    NSString *currentSortKey;
     NSString *quickSearchKey;
     NSMutableDictionary *quickSearchTextDict;
     NSMutableArray *allAuthors;

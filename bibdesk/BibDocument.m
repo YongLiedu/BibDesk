@@ -40,7 +40,6 @@ NSString*   LocalDragPasteboardName = @"edu.ucsd.cs.mmccrack.bibdesk: Local Publ
         shownPublications = [[NSMutableArray alloc] initWithCapacity:1];
         allAuthors = [[NSMutableArray alloc] initWithCapacity:1];
         frontMatter = [[NSMutableString alloc] initWithString:@""];
-        currentSortKey = [[NSString alloc] initWithString:@"Title"];
 
         quickSearchKey = [[[OFPreferenceWrapper sharedPreferenceWrapper] objectForKey:BDSKCurrentQuickSearchKey] retain];
         if(!quickSearchKey){
@@ -146,6 +145,8 @@ NSString*   LocalDragPasteboardName = @"edu.ucsd.cs.mmccrack.bibdesk: Local Publ
     }
     
     //if(viewByKey)[sortKeyButton selectItemWithTitle:viewByKey];
+    // the button is by default set to "Title" - this makes sure we retain the views.
+    [tableBox retain]; [outlineBox retain];
     [self didChangeSortKey:sortKeyButton];
 
     [tableView setDoubleAction:@selector(editPubCmd:)];
@@ -182,11 +183,11 @@ NSString*   LocalDragPasteboardName = @"edu.ucsd.cs.mmccrack.bibdesk: Local Publ
     [bibEditors release]; // gets rid of all the bibeditors.
     [allAuthors release];
     [frontMatter release];
-    [currentSortKey release];
     [quickSearchTextDict release];
     [quickSearchKey release];
     [showColsArray release];
     [customStringArray release];
+    [toolbarItems release];
     [super dealloc];
 }
 
@@ -293,18 +294,18 @@ NSString*   LocalDragPasteboardName = @"edu.ucsd.cs.mmccrack.bibdesk: Local Publ
     // this is an error, maybe also raise an exception?
 }
 
-- (void)saveDependentWindows{ //@@bibeditor transparency - won't need this.
+- (void)saveDependentWindows{
     NSMutableArray *depWins = [NSMutableArray array];
     NSEnumerator *pubE = [publications objectEnumerator]; // yeah, i've got two - so what.
     BibItem *pub;
 
-    // make sure all bibitems have been saved:
+    // make sure all bibitems have saved their changes.
     while(pub = [pubE nextObject]){
-        if([[pub editorObj] isEdited]){
+        if([pub editorObj]){
             [depWins addObject:[pub editorObj]];
         }
     }
-    [depWins makeObjectsPerformSelector:@selector(saveDocument:)];
+    [depWins makeObjectsPerformSelector:@selector(finalizeChanges)];
 }
 
 #define AddDataFromString(s) [d appendData:[s dataUsingEncoding:NSASCIIStringEncoding]]
@@ -538,11 +539,11 @@ stringByAppendingPathComponent:@"BibDesk"]; */
        ((NSTableView *)[self currentView] == (NSTableView *)outlineView)){
         [previewField setString:@""];
         if([self numberOfSelectedPubs] == 0){
-            [editPubButton setEnabled:NO];
-            [delPubButton setEnabled:NO];
+         //   [editPubButton setEnabled:NO];
+          //  [delPubButton setEnabled:NO];
         }else{
-            [editPubButton setEnabled:YES];
-            [delPubButton setEnabled:YES];
+           // [editPubButton setEnabled:YES];
+           // [delPubButton setEnabled:YES];
             //take care of the preview field
             [self displayPreviewForItems:[self selectedPubEnumerator]];
             // (don't just pass it 'e' - it needs its own enum.)
@@ -569,18 +570,23 @@ stringByAppendingPathComponent:@"BibDesk"]; */
 // Fixme - this is not correct memory management.
 - (IBAction)didChangeSortKey:(id)sender{
     NSView *newView;
-
-    [currentSortKey autorelease];
-    currentSortKey = [sender titleOfSelectedItem];
+    NSView *prevView;
+    NSString *sortKey = [sender titleOfSelectedItem];
+    
+    if([sortKey isEqualToString: @"Author"]){
+        newView = (NSView *) outlineBox;
+        prevView  = (NSView *) tableBox;
+    }else if([sortKey isEqualToString: @"Title"]){
+        newView = (NSView *) tableBox;
+        prevView = (NSView *) outlineBox;
+    }
+    
     if([dummyView contentView] != (NSView *) newView){
-        if([currentSortKey isEqualToString: @"Author"]){
-            [tableBox retain];
-            newView = (NSView *) outlineBox;
-        }else if([currentSortKey isEqualToString: @"Title"]){
-            [outlineBox retain];
-            newView = (NSView *) tableBox;
-        }
+        NSLog(@"rcs: tv: %d olv: %d", [tableBox retainCount], [outlineBox retainCount]);
+        NSLog(@"csk: %@ ", sortKey);
+
         [dummyView setContentView:newView];
+       
         [self setupTableColumns];
         [self updateUIAndRefreshOutline:YES];
     }
@@ -645,7 +651,7 @@ stringByAppendingPathComponent:@"BibDesk"]; */
 #if DEBUG
         //NSLog(@"updating change count");
 #endif
-        [e updateChangeCount:NSChangeDone];
+        [self updateChangeCount:NSChangeDone]; // used to be 'e' updateChangeCount.
     }
 }
 
@@ -742,12 +748,12 @@ stringByAppendingPathComponent:@"BibDesk"]; */
         if(sep)
             [s appendString:[NSString stringWithFormat:@"} \\%@{",[[OFPreferenceWrapper sharedPreferenceWrapper] stringForKey:BDSKCiteStringKey]]];
         else
-            [s appendString:@", "];
+            [s appendString:@","];
     }
     if(sep)
         [s replaceCharactersInRange:[s rangeOfString:[NSString stringWithFormat:@"} \\%@{", [[OFPreferenceWrapper sharedPreferenceWrapper] stringForKey:BDSKCiteStringKey]] options:NSBackwardsSearch] withString:@"}"];
     else
-        [s replaceCharactersInRange:[s rangeOfString:@", " options:NSBackwardsSearch] withString:@"}"];
+        [s replaceCharactersInRange:[s rangeOfString:@"," options:NSBackwardsSearch] withString:@"}"];
     [pasteboard setString:s forType:NSStringPboardType];
 }
 
@@ -1005,7 +1011,7 @@ stringByAppendingPathComponent:@"BibDesk"]; */
                       contextInfo:(void *)contextInfo{
     NSTableColumn *tc = nil;
     NSMutableArray *prefsShownColNamesMutableArray = nil;
-    
+
     if(returnCode == 1){
         [self contextualMenuAddTableColumnName:[addFieldTextField stringValue] enabled:YES];
         tc = [[NSTableColumn alloc] initWithIdentifier:[addFieldTextField stringValue]];
@@ -1137,7 +1143,7 @@ stringByAppendingPathComponent:@"BibDesk"]; */
 
 // returns the current view we're using. (not well tested)
 - (id)currentView{
-    if([currentSortKey isEqualToString: @"Title"]){
+   if([dummyView contentView] == tableBox){
         return (id) tableView;
     }else{
         return (id) outlineView;
@@ -1223,7 +1229,7 @@ stringByAppendingPathComponent:@"BibDesk"]; */
     }
     [depWins makeObjectsPerformSelector:@selector(close)];
     [customCiteDrawer close];
-    [[NSApp delegate] removeErrorsFromFileName:[self fileName]];
+    [[NSApp delegate] removeErrorObjsForFileName:[self fileName]];
 
 }
 
