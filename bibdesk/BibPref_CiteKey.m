@@ -169,7 +169,7 @@
 	int rv;
 	// do we want to be more informative, i.e. name of offending specifier?
 	rv = NSRunCriticalAlertPanel(NSLocalizedString(@"",@""), 
-								 NSLocalizedString(@"The format string you entered contains invalid format specifiers.",@""),
+								 NSLocalizedString( ([sender toolTip] != nil) ? [sender toolTip] : @"The format string you entered contains invalid format specifiers.",@""),
 								 NSLocalizedString(@"OK",@"OK"), nil, nil, nil);
 }
 
