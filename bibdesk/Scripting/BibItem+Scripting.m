@@ -73,6 +73,27 @@ A Category on BibItem with a few additional methods to enable and enhance its sc
     return [self pubFields];
 }
 
+/* cmh:
+ Access to arbitrary fields through 'proxy' objects BibField. 
+ These are simply wrappers for the accessors in BibItem. 
+*/
+- (BibField *)valueInBibFieldsWithName:(NSString *)name
+{
+	return [[[BibField alloc] initWithName:name bibItem:self] autorelease];
+}
+
+- (NSArray *)bibFields
+{
+	NSEnumerator *fEnum = [pubFields keyEnumerator];
+	NSString *name;
+	NSMutableDictionary *bibFields = [[NSMutableDictionary dictionaryWithCapacity:1] retain];
+	
+	while (name = [fEnum nextObject]) {
+		if (![@"" isEqualToString:[self valueOfField:name]])
+			[bibFields setObject:[[[BibField alloc] initWithName:name bibItem:self] autorelease] forKey:name];
+	}
+	return [bibFields allValues];
+}
 
 /* ssp: 2004-09-21
 Extra wrapping of the created and modified date methods to 

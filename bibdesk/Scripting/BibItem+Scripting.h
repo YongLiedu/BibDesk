@@ -22,6 +22,10 @@
 #define BibItemKeywordsKey @"Keywords"
 
 @interface BibItem (Scripting) 
+
+- (BibField *)valueInBibFieldsWithName:(NSString *)name;
+- (NSArray *)bibFields;
+
 - (NSMutableDictionary *)fields;
 - (NSMutableArray*) requiredFieldNames;
 

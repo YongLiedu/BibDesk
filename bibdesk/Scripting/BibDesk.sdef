@@ -55,6 +55,21 @@ will translate this file into the necessary scriptSuite and scriptTerminology fi
 
 
 
+			<class name="field" plural="fields" code="bfld" description="Field containing data for a publication.">
+                <cocoa class="BibField"/>
+                <properties>
+                    <property name="value" code="fldv" type="string" description="The value of the field">
+                        <cocoa method="value"/>
+                    </property>  
+                    <property name="name" code="pnam" type="string" description="The name of the field" access="r">
+                        <cocoa method="name"/>
+                    </property>  
+			     </properties>
+			</class>
+
+
+
+
 			<class name="document" plural="documents" code="docu" description="A Bibdesk bibliography document." inherits="document">
                 <cocoa class="BibDocument"/>
                 <properties>
@@ -113,7 +128,7 @@ will translate this file into the necessary scriptSuite and scriptTerminology fi
 					<property name="text" code="ctxt" type="text" description="Styled string containing bibliography entry for the publication." access="r">
 						<cocoa method="attributedString"/>
 					</property>  
-					<property name="BibTeX string" code="BTeX" type="string" description="String for BibTeX entry.">
+					<property name="BibTeX string" code="BTeX" type="string" description="String for BibTeX entry. Can be set only at or immediately after initialization.">
 						<cocoa method="bibTeXString"/>
 					</property>  
 					<property name="cite key" code="ckey" type="string" description="Key for citing the publication.">
@@ -137,7 +152,7 @@ will translate this file into the necessary scriptSuite and scriptTerminology fi
 					<property name="modified date" code="mdat" type="date" description="Date on which the publication's record was last modified in the bibliography.">
 						<cocoa method="ASDateModified"/>
 					</property>
-					<property name="fields" code="flds" type="record" description="Fields with data about the publication. These may vary from publication to publication.">
+					<property name="fields record" code="flds" type="record" description="Fields with data about the publication. These may vary from publication to publication.">
 						<cocoa method="fields"/>
 					</property>  
 					<property name="local file" code="lURL" type="file" description="Location of a file containing the publication.">
@@ -164,6 +179,9 @@ will translate this file into the necessary scriptSuite and scriptTerminology fi
 			     <elements>
 			         <element type="author" name="author" description="Authors of the publication.">
 			             <cocoa method="pubAuthors"/>
+			         </element>
+			         <element type="field" description="The fields of the publication. These should be accessed by name.">
+			             <cocoa method="bibFields"/>
 			         </element>
 			     </elements>
 			     <responds-to-commands>
