@@ -120,6 +120,38 @@ void _setupFonts(){
     return theCopy;
 }
 
+- (id)initWithCoder:(NSCoder *)coder{
+    self = [super init];
+    [self setFileType:[coder decodeObjectForKey:@"fileType"]];
+    [self setCiteKey:[coder decodeObjectForKey:@"citeKey"]];
+    [self setDate:[coder decodeObjectForKey:@"pubDate"]];
+    [self setDateCreated:[coder decodeObjectForKey:@"dateCreated"]];
+    [self setDateModified:[coder decodeObjectForKey:@"dateModified"]];
+    [self setType:[coder decodeObjectForKey:@"pubType"]];
+    pubFields = [[coder decodeObjectForKey:@"pubFields"] retain];
+    pubAuthors = [[coder decodeObjectForKey:@"pubAuthors"] retain];
+    requiredFieldNames = [[coder decodeObjectForKey:@"requiredFieldNames"] retain];
+    [self setFileOrder:[coder decodeIntForKey:@"fileOrder"]];
+    // set by the document, which we don't archive
+    undoManager = nil;
+    document = nil;
+    editorObj = nil;
+    return self;
+}
+
+- (void)encodeWithCoder:(NSCoder *)coder{
+    [coder encodeObject:fileType forKey:@"fileType"];
+    [coder encodeObject:citeKey forKey:@"citeKey"];
+    [coder encodeObject:pubDate forKey:@"pubDate"];
+    [coder encodeObject:dateCreated forKey:@"dateCreated"];
+    [coder encodeObject:dateModified forKey:@"dateModified"];
+    [coder encodeObject:pubType forKey:@"pubType"];
+    [coder encodeObject:pubFields forKey:@"pubFields"];
+    [coder encodeObject:pubAuthors forKey:@"pubAuthors"];
+    [coder encodeObject:requiredFieldNames forKey:@"requiredFieldNames"];
+    [coder encodeInt:_fileOrder forKey:@"fileOrder"];
+}
+
 - (void)makeType:(NSString *)type{
     
     NSString *fieldString;
@@ -851,6 +883,31 @@ void _setupFonts(){
     [s appendString:@"}"];
     return s;
 }
+
+- (NSString *)unicodeBibTeXString{
+    NSString *k;
+    NSString *v;
+    NSMutableString *s = [[[NSMutableString alloc] init] autorelease];
+    NSArray *keys = [[pubFields allKeys] sortedArrayUsingSelector:@selector(caseInsensitiveCompare:)];
+    NSEnumerator *e = [keys objectEnumerator];
+    
+    //build BibTeX entry:
+    [s appendString:@"@"];
+    [s appendString:pubType];
+    [s appendString:@"{"];
+    [s appendString:[self citeKey]];
+    while(k = [e nextObject]){
+        v = [pubFields objectForKey:k];
+	
+        if(![v isEqualToString:@""]){
+            [s appendString:@",\n\t"];
+            [s appendFormat:@"%@ = {%@}",k,v];
+        }
+    }
+    [s appendString:@"}"];
+    return s;
+}
+    
 
 - (NSString *)RSSValue{
     NSMutableString *s = [[[NSMutableString alloc] init] autorelease];
