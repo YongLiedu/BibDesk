@@ -975,6 +975,7 @@ NSString *BDSKDateModifiedString = @"Date-Modified";
         }
         [documentSnoopTextView setString:_textSnoopString];
     }
+    [documentSnoopScrollView scrollToTop];
 }
 
 
