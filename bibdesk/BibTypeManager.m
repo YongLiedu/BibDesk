@@ -86,14 +86,14 @@ static BibTypeManager *sharedInstance = nil;
     return [[typeInfoDict objectForKey:@"BibTeXTypesForPubMedTypes"] objectForKey:type];
 }
 
-- (NSCharacterSet *)invalidCharactersForField:(NSString *)fieldName inType:(NSString *)type{
+- (NSCharacterSet *)invalidCharactersForField:(NSString *)fieldName inFileType:(NSString *)type{
 	if( ! [type isEqualToString:@"BibTeX"] || ! [fieldName isEqualToString:@"Cite Key"]){
 		[NSException raise:@"unimpl. feat. exc." format:@"invalidCharactersForField is partly implemented"];
 	}
 	return invalidCiteKeyCharSet;
 }
 
-- (NSCharacterSet *)strictInvalidCharactersForField:(NSString *)fieldName inType:(NSString *)type{
+- (NSCharacterSet *)strictInvalidCharactersForField:(NSString *)fieldName inFileType:(NSString *)type{
 	if( ! [type isEqualToString:@"BibTeX"] || ! [fieldName isEqualToString:@"Cite Key"]){
 		[NSException raise:@"unimpl. feat. exc." format:@"strictInvalidCharactersForField is partly implemented"];
 	}

@@ -100,7 +100,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
  @param type The reference type (e.g. BibTeX, RIS)
  @result The sanitized string
 */
-- (NSString *)stringBySanitizingString:(NSString *)string forField:(NSString *)fieldName inType:(NSString *)type;
+- (NSString *)stringBySanitizingString:(NSString *)string forField:(NSString *)fieldName inFileType:(NSString *)type;
 
 /*!
  @method stringBySanitizedCiteKeyString
@@ -111,7 +111,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
  @param type The reference type (e.g. BibTeX, RIS)
  @result The sanitized string
 */
-- (BOOL)validateFormat:(NSString **)formatString forField:(NSString *)fieldName inType:(NSString *)type;
+- (BOOL)validateFormat:(NSString **)formatString forField:(NSString *)fieldName inFileType:(NSString *)type;
 
 /*!
  @method requiredFieldsForFormat

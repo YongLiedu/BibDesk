@@ -32,7 +32,7 @@
     @param      type The reference type (e.g. BibTeX, RIS)
     @result     A character set of invalid entries.
 */
-- (NSCharacterSet *)invalidCharactersForField:(NSString *)fieldName inType:(NSString *)type;
+- (NSCharacterSet *)invalidCharactersForField:(NSString *)fieldName inFileType:(NSString *)type;
 /*!
     @method     strictInvalidCharactersForField:inType:
     @abstract   Characters that will not be used in a generated key and reference type, currently only for Cite Key in BibTeX.  This is a very strict definition, since it allows
@@ -42,5 +42,5 @@
     @param      type The reference type (e.g. BibTeX, RIS)
     @result     A character set of invalid entries.
 */
-- (NSCharacterSet *)strictInvalidCharactersForField:(NSString *)fieldName inType:(NSString *)type;
+- (NSCharacterSet *)strictInvalidCharactersForField:(NSString *)fieldName inFileType:(NSString *)type;
 @end

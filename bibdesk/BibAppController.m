@@ -125,7 +125,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 		
 		NSString *citeKeyFormat = [[OFPreferenceWrapper sharedPreferenceWrapper] objectForKey:BDSKCiteKeyFormatKey];
 		
-		if (![[BDSKConverter sharedConverter] validateFormat:&citeKeyFormat forField:@"Cite Key" inType:@"BibTeX"]) {
+		if (![[BDSKConverter sharedConverter] validateFormat:&citeKeyFormat forField:@"Cite Key" inFileType:@"BibTeX"]) {
 			NSLog(@"Invalid cite key format, restore default.");
 			
 			citeKeyFormat = [[[OFPreferenceWrapper sharedPreferenceWrapper] preferenceForKey:BDSKCiteKeyFormatKey] defaultObjectValue];			

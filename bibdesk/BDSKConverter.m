@@ -261,9 +261,9 @@ static BDSKConverter *theConverter;
   return [convertedSoFar autorelease]; 
 }
 
-- (NSString *)stringBySanitizingString:(NSString *)string forField:(NSString *)fieldName inType:(NSString *)type
+- (NSString *)stringBySanitizingString:(NSString *)string forField:(NSString *)fieldName inFileType:(NSString *)type
 {
-	NSCharacterSet *invalidCharSet = [[BibTypeManager sharedManager] strictInvalidCharactersForField:fieldName inType:type];
+	NSCharacterSet *invalidCharSet = [[BibTypeManager sharedManager] strictInvalidCharactersForField:fieldName inFileType:type];
 	
 	if ([fieldName isEqualToString:@"Cite Key"]) {
 		NSString *newString;
@@ -286,7 +286,7 @@ static BDSKConverter *theConverter;
 	}
 }
 
-- (BOOL)validateFormat:(NSString **)formatString forField:(NSString *)fieldName inType:(NSString *)type
+- (BOOL)validateFormat:(NSString **)formatString forField:(NSString *)fieldName inFileType:(NSString *)type
 {
 	// implemented specifiers, the same for any field and type
 	NSCharacterSet *validSpecifierChars = [NSCharacterSet characterSetWithCharactersInString:@"0123456789aAtmyYrRd"];
@@ -315,9 +315,9 @@ static BDSKConverter *theConverter;
 						NSLog(@"Incomplete specifier {'field'} in format.");
 						return NO;
 					}
-					string = [self stringBySanitizingString:[arr objectAtIndex:0] forField:fieldName inType:type];
+					string = [self stringBySanitizingString:[arr objectAtIndex:0] forField:fieldName inFileType:type];
 					[sanitizedFormatString appendFormat:@"{%@}",string];
-					string = [self stringBySanitizingString:[arr objectAtIndex:1] forField:fieldName inType:type];
+					string = [self stringBySanitizingString:[arr objectAtIndex:1] forField:fieldName inFileType:type];
 				}
 				else if (	i < [components count] - 1 || 
 							![validLastSpecifierChars characterIsMember:specifier] || 
@@ -330,7 +330,7 @@ static BDSKConverter *theConverter;
 			}
 		}
 		// sanitize stuff in between, this should not affect any of our specifier chars
-		string = [self stringBySanitizingString:string forField:fieldName inType:type];
+		string = [self stringBySanitizingString:string forField:fieldName inFileType:type];
 		[sanitizedFormatString appendString:string];
 	}
 	

@@ -119,7 +119,7 @@
 	else { //changed the text field or added from the repository
 		formatString = [formatField stringValue];
 		//if ([formatString isEqualToString:[defaults stringForKey:BDSKCiteKeyFormatKey]]) return; // nothing changed
-		if ([[BDSKConverter sharedConverter] validateFormat:&formatString forField:@"Cite Key" inType:@"BibTeX"]) {
+		if ([[BDSKConverter sharedConverter] validateFormat:&formatString forField:@"Cite Key" inFileType:@"BibTeX"]) {
 			[defaults setObject:formatString forKey:BDSKCiteKeyFormatKey];
 		}
 		else {
