@@ -97,6 +97,14 @@ extern NSString *BDSKUrlString;
 	
 // new field formatter
     BDSKFieldNameFormatter *fieldNameFormatter;
+	
+// Author tableView
+	IBOutlet NSTableView *authorTableView;
+	
+	// add field sheet
+	IBOutlet NSPanel *addAuthorSheet;
+	IBOutlet NSTextView *addAuthorTextView;
+
 }
 
 /*!
@@ -171,4 +179,17 @@ extern NSString *BDSKUrlString;
 - (BOOL)citeKeyIsValid:(NSString *)proposedCiteKey;
 - (void)makeKeyField:(NSString *)fieldName;
 - (void)bibDidChange:(NSNotification *)notification;
+
+/*!
+    @method     addAuthors:
+    @abstract   pops up a sheet to add more than one author at a time.
+    @discussion (description)
+*/
+
+- (IBAction)addAuthors:(id)sender;
+- (IBAction)dismissAddAuthorSheet:(id)sender;
+- (void)addAuthorSheetDidEnd:(NSWindow *)sheet
+				  returnCode:(int) returnCode
+				 contextInfo:(void *)contextInfo;
+
 @end

@@ -149,7 +149,7 @@ NSString *BDSKUrlString = @"Url";
             [entry setObjectValue:[theBib valueOfField:tmp]];
             [entry setTitleAlignment:NSLeftTextAlignment];
             // Autocompletion stuff
-            [entry setFormatter:[appController formatterForEntry:tmp]];
+			[entry setFormatter:[appController formatterForEntry:tmp]];
             i++;
         }
     }
@@ -599,8 +599,13 @@ NSString *BDSKUrlString = @"Url";
 		_textSnoopString = nil;
 		_pdfSnoopImage = nil;
 	}
+	
 	if([changedTitle isEqualToString:@"Title"]){
 		[[self window] setTitle:newValue];
+	}
+	
+	if([changedTitle isEqualToString:@"Author"]){
+		[authorTableView reloadData];
 	}
 	
 }
@@ -676,4 +681,48 @@ NSString *BDSKUrlString = @"Url";
 	return [theDocument undoManager];
 }
 
+#pragma mark author table view datasource methods
+- (int)numberOfRowsInTableView:(NSTableView *)tableView{
+	return [theBib numberOfAuthors];
+}
+
+- (id)tableView:(NSTableView *)tableView objectValueForTableColumn:(NSTableColumn *)tableColumn 
+			row:(int)row{
+	NSString *tcid = [tableColumn identifier];
+	
+	if([tcid isEqualToString:@"name"]){
+		return [[theBib authorAtIndex:row] name];
+	}else{
+		return @"";
+	}
+}
+
+- (IBAction)addAuthors:(id)sender{
+	[NSApp beginSheet:addAuthorSheet
+	   modalForWindow:[self window]
+		modalDelegate:self
+	   didEndSelector:@selector(addAuthorSheetDidEnd:returnCode:contextInfo:)
+		  contextInfo:nil];
+}
+
+- (IBAction)dismissAddAuthorSheet:(id)sender{
+    [addAuthorSheet orderOut:sender];
+    [NSApp endSheet:addAuthorSheet returnCode:[sender tag]];
+}
+
+// tag, and hence return code is 0 for OK and 1 for cancel.
+// called upon dismissal
+- (void)addAuthorSheetDidEnd:(NSWindow *)sheet
+                 returnCode:(int) returnCode
+                contextInfo:(void *)contextInfo{
+	NSString *str = [addAuthorTextView string];
+	if(returnCode == 0){
+		
+		NSArray *lines = [str componentsSeparatedByString:@"\n"];
+		NSLog(@"lines are [%@] on add authors", lines);
+	}else{
+		// do nothing, user cancelled
+	}
+	[addAuthorTextView setString:@""];
+}
 @end
