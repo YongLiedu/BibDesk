@@ -14,32 +14,21 @@
 // init
 - (id)init {
     if (self = [super init]) {
-        [self setName:nil];
         [self setData:nil];
     }
     return self;
 }
 
 - (void)encodeWithCoder:(NSCoder *)coder {
-    [coder encodeObject:[self name] forKey:@"name"];
+    [super encodeWithCoder:coder];
     [coder encodeObject:[self data] forKey:@"data"];
 }
 
 - (id)initWithCoder:(NSCoder *)coder {
-    if (self = [super init]) {
-        [self setName:[coder decodeObjectForKey:@"name"]];
+    if (self = [super initWithCoder:coder]) {
         [self setData:[coder decodeObjectForKey:@"data"]];
     }
     return self;
-}
-
-- (NSString *)name { return [[name retain] autorelease]; }
-
-- (void)setName:(NSString *)aName {
-    //NSLog(@"in -setName:, old value of name: %@, changed to: %@", name, aName);
-	
-    [name release];
-    name = [aName copy];
 }
 
 - (NSMutableDictionary *)data { return [[data retain] autorelease]; }
@@ -57,9 +46,12 @@
 }
 
 - (void)dealloc {
-    [name release];
     [data release];
     [super dealloc];
+}
+
+- (void)refresh {
+	// unimplemented
 }
 
 @end
