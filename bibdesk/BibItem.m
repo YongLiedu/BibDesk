@@ -566,7 +566,11 @@ _setupParagraphStyle()
 - (NSString *)suggestedCiteKey
 {
 	NSString *citeKeyFormat = [[OFPreferenceWrapper sharedPreferenceWrapper] objectForKey:BDSKCiteKeyFormatKey];
-	return [self parseFormat:citeKeyFormat forField:BDSKCiteKeyString];
+	NSString *ck = [self parseFormat:citeKeyFormat forField:BDSKCiteKeyString];
+	if ([[OFPreferenceWrapper sharedPreferenceWrapper] boolForKey:BDSKCiteKeyLowercaseKey]) {
+		ck = [ck lowercaseString];
+	}
+	return ck;
 }
 
 - (BOOL)canSetCiteKey
