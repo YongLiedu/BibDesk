@@ -1468,6 +1468,13 @@ int generalBibItemCompareFunc(id item1, id item2, void *context){
     [NSApp endSheet:addFieldSheet returnCode:[sender tag]];
 }
 
+- (NSMenu *)menuForTableColumn:(NSTableColumn *)tc row:(int)row{
+	// for now, just returns the same all the time.
+	// Could customize menu for details of selected item.
+	return contextualMenu;
+}
+
+
 #define ADD_MENUITEM_TAG 47
 - (void)contextualMenuAddTableColumnName:(NSString *)name enabled:(BOOL)yn{
     NSMenuItem *item = nil;

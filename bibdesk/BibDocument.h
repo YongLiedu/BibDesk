@@ -377,6 +377,14 @@ extern NSString* LocalDragPasteboardName;
 int generalBibItemCompareFunc(id item1, id item2, void *context);
 
 /*!
+	@method menuForTableColumn:row:
+ @abstract \253Abstract\273
+ @discussion \253discussion\273
+ 
+*/
+- (NSMenu *)menuForTableColumn:(NSTableColumn *)tc row:(int)row;
+
+/*!
 @method contextualMenuAddTableColumnName:enabled:
     @abstract \253Abstract\273
     @discussion \253discussion\273
