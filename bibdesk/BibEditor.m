@@ -202,17 +202,7 @@ NSString *BDSKDateModifiedString = @"Date-Modified";
     
 	// The popupbutton needs to be set before fixURLs is called, and -windowDidLoad gets sent after awakeFromNib.
 
-	//	creating an RYZImagePopUpButton in IB results in one that has the wrong cell.
-	// So we still create it there, we just replace it here with a proper one:
-	RYZImagePopUpButton *newViewLocalButton = [[RYZImagePopUpButton alloc] initWithFrame:[viewLocalButton frame]];
-	[[[self window] contentView] replaceSubview:viewLocalButton
-                                               with:newViewLocalButton];
-        [newViewLocalButton release]; // retained by the view
-
-	// copy the 'springs' from the placeholder in IB:
-	[newViewLocalButton setAutoresizingMask:[viewLocalButton autoresizingMask]];
-	viewLocalButton = newViewLocalButton;
-
+	// Set the properties of viewLocalButton that cannot be set in IB
 	[viewLocalButton setArrowImage:[NSImage imageNamed:@"ArrowPointingDown"]];
 	[viewLocalButton setShowsMenuWhenIconClicked:NO];
 	[[viewLocalButton cell] setAltersStateOfSelectedItem:NO];
@@ -233,8 +223,14 @@ NSString *BDSKDateModifiedString = @"Date-Modified";
 	
 	[theBib setEditorObj:self];	
 	
-	// unfortunately we cannot set this in BI
+	// Set the properties of actionMenuButton that cannot be set in IB
 	[actionMenuButton setAlternateImage:[NSImage imageNamed:@"Action_Pressed"]];
+	[actionMenuButton setArrowImage:nil];
+	[actionMenuButton setShowsMenuWhenIconClicked:YES];
+	[[actionMenuButton cell] setAltersStateOfSelectedItem:NO];
+	[[actionMenuButton cell] setAlwaysUsesFirstItemAsSelected:NO];
+	[[actionMenuButton cell] setUsesItemFromMenu:NO];
+	[[actionMenuButton cell] setRefreshesMenu:NO];
 	
 	[[NSNotificationCenter defaultCenter] addObserver:self
 											 selector:@selector(bibDidChange:)

@@ -2,7 +2,6 @@
     IBClasses = (
         {CLASS = BDSKDragForm; LANGUAGE = ObjC; SUPERCLASS = NSForm; }, 
         {CLASS = BDSKDragWindow; LANGUAGE = ObjC; SUPERCLASS = NSWindow; }, 
-        {CLASS = BDSKPopUpButton; LANGUAGE = ObjC; SUPERCLASS = NSPopUpButton; }, 
         {
             CLASS = BDSKPreviewer; 
             LANGUAGE = ObjC; 
@@ -67,6 +66,7 @@
         {CLASS = DraggableScrollView; LANGUAGE = ObjC; SUPERCLASS = NSScrollView; }, 
         {CLASS = FirstResponder; LANGUAGE = ObjC; SUPERCLASS = NSObject; }, 
         {CLASS = PDFImageView; LANGUAGE = ObjC; SUPERCLASS = NSImageView; }, 
+        {CLASS = RYZImagePopUpButton; LANGUAGE = ObjC; SUPERCLASS = NSPopUpButton; }, 
         {
             CLASS = RYZImagePopUpButtonCell; 
             LANGUAGE = ObjC; 

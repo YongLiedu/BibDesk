@@ -60,7 +60,7 @@ extern NSString *BDSKDateModifiedString;
 	IBOutlet RYZImagePopUpButton *viewLocalButton;
     IBOutlet NSButton* viewRemoteButton;
     IBOutlet NSScrollView* fieldsScrollView;
-	IBOutlet NSPopUpButton *actionMenuButton;
+	IBOutlet RYZImagePopUpButton *actionMenuButton;
     // ----------------------------------------------------------------------------------------
     // New-field Sheet stuff:
     IBOutlet NSTextField *newFieldName;
