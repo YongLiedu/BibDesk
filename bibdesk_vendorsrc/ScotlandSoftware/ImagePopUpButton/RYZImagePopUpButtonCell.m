@@ -7,9 +7,17 @@
 //	Initialization and termination
 // -----------------------------------------
 
-- (id)init
+// this used to be the designated intializer
+- (id)initTextCell:stringValue pullsDown:(BOOL)pullsDown
 {
-    if (self = [super init]) {
+    self = [self initImageCell:[NSImage imageNamed: @"NSApplicationIcon"]];
+    return self;
+}
+
+// this is now the designated intializer
+- (id)initImageCell:(NSImage *)anImage
+{
+    if (self = [super initTextCell:@"" pullsDown:NO]) {
 		RYZ_buttonCell = [[NSButtonCell alloc] initTextCell: @""];
 		[RYZ_buttonCell setBordered: NO];
 		[RYZ_buttonCell setHighlightsBy: NSContentsCellMask];
@@ -20,7 +28,7 @@
 		RYZ_iconActionEnabled = YES;
 		RYZ_alwaysUsesFirstItemAsSelected = NO;
 
-		[self setIconImage: [NSImage imageNamed: @"NSApplicationIcon"]];	
+		[self setIconImage: anImage];	
 		[self setArrowImage: nil];
     }
     
