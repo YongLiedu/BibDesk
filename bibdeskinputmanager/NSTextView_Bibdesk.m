@@ -48,16 +48,80 @@ static NSString *kHandlerName = @"getcitekeys";
 }
 
 + (void)printSelectorList:(id)anObject{
-    int i = 0, k = 0;
+    
+    int k = 0;
     void *iterator = 0;
     struct objc_method_list *mlist;
+    
     while( mlist = class_nextMethodList( [anObject class], &iterator ) ){
 	for(k=0; k<mlist->method_count; k++){
-	    NSLog(@"%@ implements %@",[anObject class], NSStringFromSelector(mlist->method_list[k].method_name));
+	   // NSLog(@"%@ implements %@",[anObject class], NSStringFromSelector(mlist->method_list[k].method_name));
+	    if([NSStringFromSelector(mlist->method_list[k].method_name) isEqualToString:@"complete:"]){
+		NSLog(@"found a complete: selector with imp (0x%08x)", (int)(mlist->method_list[k].method_imp) );
+	    }
 	}
-	NSLog(@"count %i", i);
-	i++;
     }
+}
+
++ (IMP)completionIMP:(id)anObject{
+    
+    int k = 0;
+    void *iterator = 0;
+    struct objc_method_list *mlist;
+    unsigned int impCount, impSize;
+    IMP *imps;
+    Method appkit_complete;
+    extern void _objc_flush_caches(Class);
+    
+    impSize = 256;
+    impCount = 0;
+    imps = NSZoneMalloc(NULL, sizeof(IMP) * impSize);
+    
+    _objc_flush_caches([self superclass]);
+    
+    while( mlist = class_nextMethodList( [anObject class], &iterator ) ){
+	for(k=0; k<mlist->method_count; k++){
+	    if([NSStringFromSelector(mlist->method_list[k].method_name) isEqualToString:@"complete:"]){
+		if(debug) NSLog(@"found a complete: selector with imp (0x%08x)", (int)(mlist->method_list[k].method_imp) );
+		imps[impCount] = mlist->method_list[k].method_imp;
+		impCount++;
+		if(debug) NSLog(@"impCount is %i", impCount);
+	    }
+	}
+    }
+    
+    if(impCount == 2){
+	if(imps[0] > imps[1]){
+	    appkit_complete = imps[0];
+	    if(debug) NSLog(@"using a complete: selector with imp (0x%08x)", (int)(appkit_complete) );
+	    return appkit_complete;
+	} else {
+	    appkit_complete = imps[1];
+	    if(debug) NSLog(@"using a complete: selector with imp (0x%08x)", (int)(appkit_complete) );
+	    return appkit_complete;
+	}
+    }
+    if(impCount == 1){
+	if(debug) NSLog(@"impCount was unity.  TextExtras not found or loaded after us.");
+	return appkit_complete = imps[0];
+    } else {
+	NSLog(@"failure...no complete: selector found, or more than two found.");
+    }
+    return nil;
+}
+
+// replace the TextExtras complete: with the one from the AppKit if TE loaded first
+- (void)complete:(id)sender{
+    void (*realcomplete)(id, SEL, id);
+    realcomplete = (void (*)(id, SEL, id))[[self class] completionIMP:[self superclass]];
+    realcomplete(self, @selector(complete:), sender);
+}
+
+// use our own completion selector if TE loaded after us
+- (void)BD_complete:(id)sender{
+    void (*bdcomplete)(id, SEL, id);
+    bdcomplete = (void (*)(id, SEL, id))[[self class] completionIMP:[self superclass]];
+    bdcomplete(self, @selector(BD_complete:), sender);
 }
 
 /* ssp: 2004-07-18
