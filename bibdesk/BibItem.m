@@ -53,6 +53,7 @@ void _setupFonts(){
         requiredFieldNames = [[NSMutableArray alloc] init];
         pubAuthors = [authArray mutableCopy];     // copy, it's mutable
         editorObj = nil;
+		undoManager = nil;
         [self setFileType:inFileType];
         [self setTitle:[[NSString stringWithString:@"BibTeX Publication"] retain]];
         [self makeType:type];
@@ -341,10 +342,13 @@ void _setupFonts(){
 }
 
 - (void)setCiteKey:(NSString *)newCiteKey{
-	// This could be a problem if we try to setCiteKey before we have an editorObj
-	NSUndoManager *undoManager = [[editorObj window] undoManager];
-	[[undoManager prepareWithInvocationTarget:self] setCiteKey:citeKey];
-	[undoManager setActionName:NSLocalizedString(@"Change Cite Key",@"")];
+	if(editorObj){
+		NSLog(@"setCiteKey called with a valid editor");
+		if(!undoManager) undoManager = [[editorObj window] undoManager];
+
+		[[undoManager prepareWithInvocationTarget:self] setCiteKey:citeKey];
+		[undoManager setActionName:NSLocalizedString(@"Change Cite Key",@"")];
+	}
 	
     [citeKey autorelease];
     citeKey = [newCiteKey retain];
@@ -429,6 +433,13 @@ void _setupFonts(){
 }
 
 - (void)setField: (NSString *)key toValue: (NSString *)value{
+	if(!undoManager) undoManager = [[editorObj window] undoManager];
+
+	id	oldValue = [pubFields objectForKey:key];
+	[[undoManager prepareWithInvocationTarget:self] setField:key 
+													 toValue:oldValue];
+	[undoManager setActionName:NSLocalizedString(@"Edit publication",@"")];
+	
     [pubFields setObject: value forKey: key];
 	[self setFields:pubFields]; // update metadata. could have a better name
 	
