@@ -365,7 +365,8 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
     completionArray = [_autoCompletionDict objectForKey:entry];
     
     if([entry isEqualToString:@"Local-Url"] || [entry isEqualToString:@"Url"] || 
-       [entry isEqualToString:@"Abstract"] || [entry isEqualToString:@"Annote"]) return; // don't add these
+       [entry isEqualToString:@"Abstract"] || [entry isEqualToString:@"Annote"] ||
+       [entry rangeOfString:@"Date"].location != NSNotFound ) return; // don't add these
 
     if([entry isEqualToString:@"Title"] || 
        [entry isEqualToString:@"Booktitle"] || 
