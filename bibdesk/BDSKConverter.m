@@ -18,6 +18,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 static NSDictionary *WholeDict;
 static NSCharacterSet *EmptySet;
 static NSCharacterSet *FinalCharSet;
+static NSCharacterSet *SkipSet;
 
 @implementation BDSKConverter
 + (void)loadDict{
@@ -36,6 +37,14 @@ static NSCharacterSet *FinalCharSet;
     [workingSet addCharactersInRange:highCharRange];
     FinalCharSet = [workingSet copy];
     
+    // build a character set SkipSet of stuff that we do not need to convert
+    // making the static NSCharacterSet cuts another second off save time with tugboat.bib
+    NSRange skipRange;
+    skipRange.location = 0;
+    skipRange.length = 127;
+    workingSet = [[NSCharacterSet characterSetWithRange:skipRange] mutableCopy];// Why is this necessary? (amaxwell)
+    SkipSet = [workingSet copy];
+
     [workingSet release];
 }
 
@@ -46,13 +55,6 @@ static NSCharacterSet *FinalCharSet;
     NSString *tmpConv = nil;
     NSMutableString *convertedSoFar = [s mutableCopy];
     NSScanner *fastScan = [[NSScanner alloc] initWithString:s];
-    
-    // build a character set for stuff that does not need to be converted
-    NSCharacterSet *SkipSet;
-    NSRange skipRange;
-    skipRange.location = 0;
-    skipRange.length = 127;
-    SkipSet = [NSCharacterSet characterSetWithRange:skipRange];
 
     int offset=0;
     NSString *TEXString;
