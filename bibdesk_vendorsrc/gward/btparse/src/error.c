@@ -113,7 +113,7 @@ void print_error (bt_error *err)
 
    if (err->filename)
    {
-       fprintf (stderr, err->filename);
+
        [errString appendString:[NSString stringWithCString:err->filename]];
        [errObj takeValue:[[NSString stringWithCString:err->filename] retain] forKey:@"fileName"];
        something_printed = TRUE;
@@ -121,10 +121,10 @@ void print_error (bt_error *err)
    if (err->line > 0)                   /* going to print a line number? */
    {
        if (something_printed){
-           fprintf (stderr, ", ");
+
            [errString appendString:@", "];
        }
-       fprintf (stderr, "line %d", err->line);
+
        [errString appendString:[NSString stringWithFormat:@"line %d", err->line]];
        [errObj takeValue:[[NSNumber numberWithInt:err->line] retain] forKey:@"lineNumber"];
        something_printed = TRUE;
@@ -132,10 +132,10 @@ void print_error (bt_error *err)
    if (err->item_desc && err->item > 0) /* going to print an item number? */
    {
        if (something_printed){
-           fprintf (stderr, ", ");
+
            [errString appendString:@", "];
        }
-       fprintf (stderr, "%s %d", err->item_desc, err->item);
+
        [errString appendString:[NSString stringWithFormat:@"%s %d", err->item_desc, err->item]];
        [errObj takeValue:[[NSString stringWithCString:err->item_desc] retain] forKey:@"itemDescription"];
        [errObj takeValue:[NSNumber numberWithInt:err->item] forKey:@"itemNumber"];
@@ -146,21 +146,20 @@ void print_error (bt_error *err)
    if (name)
    {
        if (something_printed){
-           fprintf (stderr, ", ");
+
            [errString appendString:@", "];
        }
-       fprintf (stderr, name);
+
        [errString appendString:[NSString stringWithCString:name]];
        [errObj takeValue:[[NSString stringWithCString:name] retain] forKey:@"errorClassName"];
       something_printed = TRUE;
    }
 
    if (something_printed){
-       fprintf (stderr, ": ");
+
        [errString appendString:@": "];
    }
 
-   fprintf (stderr, "%s\n", err->message);
    [errString appendString:[NSString stringWithCString:err->message]];
    [errObj takeValue:[[NSString stringWithCString:err->message] retain] forKey:@"errorMessage"];
    [[NSNotificationCenter defaultCenter] postNotificationName:@"BTPARSE ERROR" object:errObj];
