@@ -430,6 +430,7 @@
 			<key>required</key>
 			<array>
 				<string>Author</string>
+				<string>Note</string>
 				<string>Title</string>
 			</array>
 		</dict>
