@@ -129,8 +129,8 @@ NSString *BDSKInputManagerID = @"net.sourceforge.bibdesk.inputmanager";
     NSString *libraryPath = [NSSearchPathForDirectoriesInDomains(NSLibraryDirectory, NSUserDomainMask, YES) objectAtIndex:0];
     
     if(![fm fileExistsAtPath:[libraryPath stringByAppendingPathComponent:@"/InputManagers"]]){
-	if(![fm createDirectoryAtPath:[NSHomeDirectory() stringByAppendingPathComponent:@"/InputManagers"] attributes:nil]){
-	    NSLog(@"unable to create the InputManagers folder in home directory");
+	if(![fm createDirectoryAtPath:[libraryPath stringByAppendingPathComponent:@"/InputManagers"] attributes:nil]){
+	    NSLog(@"unable to create the InputManagers folder at path @%",[libraryPath stringByAppendingPathComponent:@"/InputManagers"]);
 	    err = YES;
 	}
     }
@@ -156,7 +156,7 @@ NSString *BDSKInputManagerID = @"net.sourceforge.bibdesk.inputmanager";
 					   defaultButton:nil
 					 alternateButton:nil
 					     otherButton:nil
-			       informativeTextWithFormat:@"Unable to remove file at %@, please check file or directory permissions.", inputManagerPath];
+			       informativeTextWithFormat:@"Unable to install plugin at %@, please check file or directory permissions.", inputManagerPath];
 	[anAlert beginSheetModalForWindow:[controlBox window]
 			    modalDelegate:nil
 			   didEndSelector:nil
