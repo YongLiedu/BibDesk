@@ -7,9 +7,9 @@
 //
 
 #import "MacroWindowController.h"
-#import "btparse.h"
 #import "NSString_BDSKExtensions.h"
 #import "OmniFoundation/NSData-OFExtensions.h"
+#import "BibTeXParser.h"
 
 @implementation MacroWindowController
 - (id) init {
@@ -260,42 +260,21 @@
 }
 
 - (BOOL)addMacrosFromBibTeXString:(NSString *)aString{
-    AST *entry = NULL;
-    AST *field = NULL;
-    char *entryType = NULL;
-    char *fieldName = NULL;
-    
-    bt_initialize();
-    bt_set_stringopts(BTE_PREAMBLE, BTO_EXPAND);
-    bt_set_stringopts(BTE_REGULAR, BTO_MINIMAL);
-    boolean ok;
-    
+    BOOL hadProblems = NO;
+    NSArray *defs = [BibTeXParser macrosFromBibTeXString:aString hadProblems:&hadProblems];
+    NSEnumerator *e = [defs objectEnumerator];
+    NSDictionary *dict = nil;
     NSString *macroKey;
     NSString *macroString;
     
-    FILE *stream = [[aString dataUsingEncoding:NSUTF8StringEncoding] openReadOnlyStandardIOFile];
-    
-    while(entry = bt_parse_entry(stream, NULL, 0, &ok)){
-        if(entry == NULL && ok)
-            break;
-        if(!ok)
-            break;
-        entryType = bt_entry_type(entry);
-        if(strcmp(entryType, "string") != 0)
-            break;
-        field = bt_next_field(entry, NULL, &fieldName);
-        NSString *macroKey = [NSString stringWithBytes: field->text encoding:NSUTF8StringEncoding];
-        NSString *macroString = [NSString stringWithBytes: field->down->text encoding:NSUTF8StringEncoding];                      
+    while(dict = [e nextObject]){
+        macroKey = [dict objectForKey:@"mkey"];
+        macroString = [dict objectForKey:@"mstring"];
         [(id <BDSKMacroResolver>)macroDataSource setMacroDefinition:macroString forMacro:macroKey];
-        bt_free_ast(entry);
-        entry = NULL;
-        field = NULL;
     }
-    bt_cleanup();
-    fclose(stream);
     [self refreshMacros];
     [tableView reloadData];
-    return ok;
+    return !hadProblems;
 }
 
 - (NSDragOperation)tableView:(NSTableView*)tv validateDrop:(id <NSDraggingInfo>)info proposedRow:(int)row proposedDropOperation:(NSTableViewDropOperation)op{

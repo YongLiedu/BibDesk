@@ -62,8 +62,6 @@ NSString *stringFromBTField(AST *field,
     NSMutableDictionary *dictionary = [NSMutableDictionary dictionaryWithCapacity:6];
     
     const char * fs_path = NULL;
-    NSString *tempFilePath = nil;
-    BOOL usingTempFile = NO;
     FILE *infile = NULL;
     
     NSStringEncoding parserEncoding;
@@ -74,16 +72,11 @@ NSString *stringFromBTField(AST *field,
     
     if( !([filePath isEqualToString:@"Paste/Drag"]) && [[NSFileManager defaultManager] fileExistsAtPath:filePath]){
         fs_path = [[NSFileManager defaultManager] fileSystemRepresentationWithPath:filePath];
-        usingTempFile = NO;
+        infile = fopen(fs_path, "r");
     }else{
-        tempFilePath = [NSTemporaryDirectory() stringByAppendingPathComponent:[[NSProcessInfo processInfo] globallyUniqueString]];
-        [inData writeToFile:tempFilePath atomically:YES];
-        fs_path = [[NSFileManager defaultManager] fileSystemRepresentationWithPath:tempFilePath];
-        NSLog(@"using temporary file %@ - was it deleted?",tempFilePath);
-        usingTempFile = YES;
-    }
-    
-    infile = fopen(fs_path, "r");
+        infile = [inData openReadOnlyStandardIOFile];
+        fs_path = NULL; // used for error context in libbtparse
+    }    
 
     *hadProblems = NO;
 
@@ -189,17 +182,7 @@ NSString *stringFromBTField(AST *field,
 		
         bt_cleanup();
 
-        if(tempFilePath){
-            if (![[NSFileManager defaultManager] removeFileAtPath:tempFilePath handler:nil]) {
-                NSLog(@"itemsFromString Failed to delete temporary file. (%@)", tempFilePath);
-            }
-        }
         fclose(infile);
-        if(usingTempFile){
-            if(remove(fs_path)){
-                NSLog(@"Error - unable to remove temporary file %@", tempFilePath);
-            }
-        }
         // @@readonly free(buf);
 		
 		[pool release];

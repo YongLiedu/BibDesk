@@ -49,6 +49,16 @@
                  document:(BibDocument *)aDocument;
 
 /*!
+    @method     macrosFromBibTeXString:hadProblems:
+    @abstract   Parses a BibTeX string as @string{} declarations, and returns an array of dictionary objects describing each one.
+    @discussion Access the objects with @"mkey" for the macro key and @"mstring" for the string definition.
+    @param      aString BibTeX as NSString
+    @param      hadProblems (description)
+    @result     (description)
+*/
++ (NSArray *)macrosFromBibTeXString:(NSString *)aString hadProblems:(BOOL *)hadProblems;
+    
+/*!
     @method     stringFromBibTeXValue:error:frontMatter:document:
     @abstract   Parsing method that returns a complex nor simple string for a value entered as BibTeX string, using libbtparse; needs a document to act as macro resolver.
     @discussion (comprehensive description)
