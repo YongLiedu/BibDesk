@@ -569,7 +569,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 		return NO;
 	}
 	else if ([menuItem action] == @selector(generateCiteKey:)) {
-		// need to set the title, as the document can change it in the main menu
+		// need to setthe title, as the document can change it in the main menu
 		[menuItem setTitle: NSLocalizedString(@"Generate Cite Key", @"Generate Cite Key menu item")];
 		return YES;
 	}
@@ -579,10 +579,6 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 		NSString *lurl = [theBib localURLPathRelativeTo:[[theDocument fileName] stringByDeletingLastPathComponent]];
 		return (lurl && [[NSFileManager defaultManager] fileExistsAtPath:lurl]);
 	}
-	else if ([menuItem action] == @selector(viewRemote:)) {
-		NSString *rurl = [theBib valueOfField:BDSKUrlString];
-		return (![rurl isEqualToString:@""] && [NSURL URLWithString:rurl]);
-	}
 	else if ([menuItem action] == @selector(toggleSnoopDrawer:)) {
 		NSView *requiredSnoopContainerView = (NSView *)[menuItem representedObject];
 		BOOL isCloseItem = [documentSnoopDrawer contentView] == requiredSnoopContainerView &&
@@ -590,20 +586,27 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 							  [documentSnoopDrawer state] == NSDrawerOpeningState);
 		if (isCloseItem) {
 			[menuItem setTitle:NSLocalizedString(@"Close Drawer", @"Close drawer menu item")];
-			return YES;
-		}
-		if (requiredSnoopContainerView == webSnoopContainerView) {
+		} else if (requiredSnoopContainerView == pdfSnoopContainerView) {
+			[menuItem setTitle:NSLocalizedString(@"View File in Drawer", @"View file in drawer menu item")];
+		} else if (requiredSnoopContainerView == textSnoopContainerView) {
+			[menuItem setTitle:NSLocalizedString(@"View File as Text in Drawer", @"View file as text in drawer menu item")];
+		} else if (requiredSnoopContainerView == webSnoopContainerView) {
 			[menuItem setTitle:NSLocalizedString(@"View Remote URL in Drawer", @"View remote URL in drawer menu item")];
+		}
+		if (isCloseItem) {
+			// always enable the close item
+			return YES;
+		} else if (requiredSnoopContainerView == webSnoopContainerView) {
 			NSString *rurl = [theBib valueOfField:BDSKUrlString];
 			return (![rurl isEqualToString:@""] && [NSURL URLWithString:rurl]);
-		}
-		if (requiredSnoopContainerView == pdfSnoopContainerView) {
-			[menuItem setTitle:NSLocalizedString(@"View File in Drawer", @"View file in drawer menu item")];
 		} else {
-			[menuItem setTitle:NSLocalizedString(@"View File as Text in Drawer", @"View file as text in drawer menu item")];
+			NSString *lurl = [theBib localURLPathRelativeTo:[[theDocument fileName] stringByDeletingLastPathComponent]];
+			return (lurl && [[NSFileManager defaultManager] fileExistsAtPath:lurl]);
 		}
-		NSString *lurl = [theBib localURLPathRelativeTo:[[theDocument fileName] stringByDeletingLastPathComponent]];
-		return (lurl && [[NSFileManager defaultManager] fileExistsAtPath:lurl]);
+	}
+	else if ([menuItem action] == @selector(viewRemote:)) {
+		NSString *rurl = [theBib valueOfField:BDSKUrlString];
+		return (![rurl isEqualToString:@""] && [NSURL URLWithString:rurl]);
 	}
 	else if ([menuItem action] == @selector(saveFileAsLocalUrl:)) {
 		return ![[[remoteSnoopWebView mainFrame] dataSource] isLoading];
@@ -656,6 +659,13 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 		NSString *newKey = [theBib citeKey];
 		
 		[sender setStringValue:newKey];
+		
+		// autofile paper if we have enough information
+		if ( [[OFPreferenceWrapper sharedPreferenceWrapper] integerForKey:BDSKFilePapersAutomaticallyKey] == NSOnState &&
+			 [theBib needsToBeFiled] && [theBib canSetLocalUrl] ) {
+			[[BibFiler sharedFiler] filePapers:[NSArray arrayWithObject:theBib] fromDocument:[theBib document] ask:NO];
+			[theBib setNeedsToBeFiled:NO]; // unset the flag even when we fail, to avoid retrying at every edit
+		}
 
 		// still need to check duplicates ourselves:
 		if(![self citeKeyIsValid:newKey]){

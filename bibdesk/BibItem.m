@@ -1131,9 +1131,16 @@ void _setupFonts(){
 	NSString *fieldValue;
 	
 	while (fieldName = [fEnum nextObject]) {
-		fieldValue = [self valueOfField:fieldName];
-		if (fieldValue == nil || [fieldValue isEqualToString:@""]) {
-			return NO;
+		if ( [fieldName isEqualToString:BDSKCiteKeyString] ||
+			 [fieldName isEqualToString:@"Citekey"] ||
+			 [fieldName isEqualToString:@"Cite-Key"]) {
+			fieldValue = [self citeKey];
+			if ([fieldValue isEqualToString:@""] || [fieldValue isEqualToString:@"cite-key"]) 
+				return NO;
+		} else {
+			fieldValue = [self valueOfField:fieldName];
+			if (fieldValue == nil || [fieldValue isEqualToString:@""]) 
+				return NO;
 		}
 	}
 	return YES;
@@ -1396,7 +1403,14 @@ void _setupFonts(){
 						} else {
 							number = 0;
 						}
-						string = [self valueOfField:string];
+						if (![fieldName isEqualToString:BDSKCiteKeyString] &&
+							([string isEqualToString:BDSKCiteKeyString] ||
+							 [string isEqualToString:@"Citekey"] ||
+							 [string isEqualToString:@"Cite-Key"]) ) {
+							string = [self citeKey];
+						} else {
+							string = [self valueOfField:string];
+						}
 						if (string != nil) {
 							string = [converter stringBySanitizingString:string forField:fieldName inFileType:[self fileType]];
 							if (number > 0 && [string length] > number) {
