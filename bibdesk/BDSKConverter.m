@@ -96,7 +96,7 @@ static BDSKConverter *theConverter;
 			if([node type] == BSN_STRING)
 				[node setValue:[self stringByTeXifyingString:[node value]]];
 		}
-		return;
+		return s;
 	}
 	
     // s should be in UTF-8 or UTF-16 (i'm not sure which exactly) format (since that's what the property list editor spat)
@@ -231,7 +231,7 @@ static BDSKConverter *theConverter;
 			if([node type] == BSN_STRING)
 				[node setValue:[self stringByDeTeXifyingString:[node value]]];
 		}
-		return;
+		return s;
 	}
 	
     NSScanner *scanner = [NSScanner scannerWithString:s];
