@@ -1,7 +1,6 @@
 #import "BDSKComplexString.h"
 #import "NSSTring_BDSKExtensions.h"
 
-static AGRegex *unquotedHashRegex = nil;
 static NSCharacterSet *macroCharSet = nil;
 
 @implementation BDSKStringNode
@@ -33,14 +32,7 @@ static NSCharacterSet *macroCharSet = nil;
     // a single string - may be a macro or a quoted string.
     s = [s stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]];
     
-    // check that there isn't an unquoted hash mark in there.
-    // it's really a latex error, but it's likely to happen here so we check for it.
-    if(!unquotedHashRegex) unquotedHashRegex = [[AGRegex alloc] initWithPattern:@"[^\\\\]#"];
-
-    // check for unquoted hash marks:
-    //@@todo
-    
-    // other errors to check for - unbalanced brackets are always an error, even if the quote style is quotes!
+    // unbalanced brackets are always an error, even if the quote style is quotes!
     
     unichar startChar = [s characterAtIndex:0];
     unichar endChar;
@@ -50,7 +42,9 @@ static NSCharacterSet *macroCharSet = nil;
         
         s = [s substringFromIndex:1]; // ignore startChar.
         
-        if([s characterAtIndex:([s length] - 1)] == endChar){
+        if([s length] > 0 &&
+		   [s characterAtIndex:([s length] - 1)] == endChar && 
+		   [s isStringTeXQuotingBalancedWithBraces:YES connected:NO range:NSMakeRange(0,[s length] - 1)]){
             s = [s substringToIndex:([s length] - 1)];
         }else{
             // it's an unbalanced string, so we raise
