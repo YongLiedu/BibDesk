@@ -215,16 +215,16 @@ static NSDictionary *globalMacroDefs;
 				if ([sc scanUpToString:@"\"" intoString:&s])
 					[nodeStr appendString:s];
 				if (![sc isAtEnd]) {
-					[sc setScanLocation:[sc scanLocation] + 1];
 					if ([btstring characterAtIndex:[sc scanLocation] - 1] == '\\')
 						[nodeStr appendString:@"\""];
 					else 
 						nesting = 0;
+					[sc setScanLocation:[sc scanLocation] + 1];
 				}
 			}
 			// we don't accept unbalanced braces, as we always quote with braces
 			// do we want to be more permissive and try to use "-quoted fields?
-			if (nesting > 0 || ![nodeStr isStringTeXQuotingBalanced:&nesting]) {
+			if (nesting > 0 || ![nodeStr isStringTeXQuotingBalanced]) {
 				[NSException raise:@"BDSKComplexStringException" 
 							format:@"Unbalanced string: [%@]", nodeStr];
 			}
@@ -497,13 +497,12 @@ static NSDictionary *globalMacroDefs;
 	return [[(BDSKComplexString*)self nodes] isEqualToArray:[(BDSKComplexString*)other nodes]];
 }
 
-- (BOOL)isStringTeXQuotingBalanced:(int *)balance{
-	return [self isStringTeXQuotingBalanced:balance range:NSMakeRange(0,[self length])];
+- (BOOL)isStringTeXQuotingBalanced{
+	return [self isStringTeXQuotingBalancedInRange:NSMakeRange(0,[self length])];
 }
 
-- (BOOL)isStringTeXQuotingBalanced:(int *)balance range:(NSRange)range{
+- (BOOL)isStringTeXQuotingBalancedInRange:(NSRange)range{
 	int nesting = 0;
-	BOOL isBalanced = YES;
 	NSRange braceRange;
 	int braceLoc;
 	unichar ch;
@@ -523,16 +522,13 @@ static NSDictionary *globalMacroDefs;
 			else
 				++nesting;
 			if (nesting < 0) // we should never get a negative nesting
-				isBalanced = NO;
+				return NO;
 		}
 		// search for the next brace
 		braceRange = [self rangeOfCharacterFromSet:bracesCharSet options:NSLiteralSearch range:range];
 		braceLoc = braceRange.location;
 	}
-	if (nesting != 0) 
-		isBalanced = NO;
-	*balance = nesting;
-	return isBalanced;
+	return (nesting == 0);
 }
 
 @end
