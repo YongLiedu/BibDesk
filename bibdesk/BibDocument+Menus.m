@@ -64,7 +64,14 @@ Broken out of BibDocument and split up into smaller parts to make things more ma
 //		[menuItem setSubmenu:contextualMenu];
 //		return YES;
 //	}
-	else{
+    
+    else if (act == @selector(makeNewEmptyCollection:)){
+        return [[self fileType] isEqualToString:@"BibDesk Library"];        
+    }else if (act == @selector(makeNewExternalSource:)){
+        return [[self fileType] isEqualToString:@"BibDesk Library"];        
+    }else if (act == @selector(makeNewNotepad:)){
+        return [[self fileType] isEqualToString:@"BibDesk Library"];        
+    }else{
 		return [super validateMenuItem:menuItem];
     }
 	/*   if([@@ [menuItem title] isEqualToString:@"the one for blogging the item"]){

@@ -54,6 +54,11 @@ NSString* BDSKBibTeXStringPboardType = @"edu.ucsd.cs.mmcrack.bibdesk: Local BibT
         tableColumns = [[NSMutableDictionary dictionaryWithCapacity:6] retain];
         fileOrderCount = 1;
 		
+        collections = [[NSMutableArray alloc] initWithCapacity:1];
+        notes = [[NSMutableArray alloc] initWithCapacity:1];
+        sources = [[NSMutableArray alloc] initWithCapacity:1];
+        
+        
 		BDSKUndoManager *newUndoManager = [[[BDSKUndoManager alloc] init] autorelease];
 		[newUndoManager setDelegate:self];
 		[self setUndoManager:newUndoManager];
@@ -181,12 +186,12 @@ NSString* BDSKBibTeXStringPboardType = @"edu.ucsd.cs.mmcrack.bibdesk: Local BibT
 	[[cornerViewButton cell] setAlwaysUsesFirstItemAsSelected:NO];
 	[[cornerViewButton cell] setUsesItemFromMenu:NO];
 	[[cornerViewButton cell] setRefreshesMenu:NO];
-		
+    
 	[cornerViewButton setMenu:columnsMenu];
-        
-        [saveTextEncodingPopupButton removeAllItems];
-        [saveTextEncodingPopupButton addItemsWithTitles:[[[NSApp delegate] encodingDefinitionDictionary] objectForKey:@"DisplayNames"]];
-
+    
+    [saveTextEncodingPopupButton removeAllItems];
+    [saveTextEncodingPopupButton addItemsWithTitles:[[[NSApp delegate] encodingDefinitionDictionary] objectForKey:@"DisplayNames"]];
+    
 }
 
 
@@ -252,7 +257,9 @@ NSString* BDSKBibTeXStringPboardType = @"edu.ucsd.cs.mmcrack.bibdesk: Local BibT
     }
 }
 
-- (void)setNewPublicationsFromArchivedArray:(NSArray *)newPubs{ // use this for new documents, so we don't mark the document dirty as in the standard setPublications method
+
+// use this for new documents, so we don't mark the document dirty as in the standard setPublications method
+- (void)setNewPublicationsFromArchivedArray:(NSArray *)newPubs{ 
     [publications autorelease];
     publications = [newPubs mutableCopy];
     NSEnumerator *pubEnum = [publications objectEnumerator];
@@ -410,9 +417,12 @@ NSString* BDSKBibTeXStringPboardType = @"edu.ucsd.cs.mmcrack.bibdesk: Local BibT
 	}
 }
 
-- (NSString *)windowNibName
-{
-    return @"BibDocument";
+- (NSString *)windowNibName{
+    if ([[self fileType] isEqualToString:@"BibDesk Library"]){
+        return @"BibDocument+SourceList";
+    }else{
+        return @"BibDocument";
+    }
 }
 
 - (void)windowControllerDidLoadNib:(NSWindowController *) aController
@@ -430,6 +440,23 @@ NSString* BDSKBibTeXStringPboardType = @"edu.ucsd.cs.mmcrack.bibdesk: Local BibT
 #pragma mark -
 #pragma mark  Document Saving and Reading
 
+// NSCoding support for .bdsk-style files:
+- (NSData *)archivedDataRepresentation{
+    NSKeyedArchiver *archiver;
+    NSMutableData *data = [NSMutableData data];
+    
+    archiver = [[NSKeyedArchiver alloc] initForWritingWithMutableData:data];
+    [archiver encodeObject:[self publications] forKey:@"publications"];
+    [archiver encodeObject:[self collections] forKey:@"collections"];
+    [archiver encodeObject:[self notes] forKey:@"notes"];
+    [archiver encodeObject:[self sources] forKey:@"sources"];
+    
+    [archiver finishEncoding];
+    [archiver release];
+    return data;
+}
+
+
 - (IBAction)saveDocument:(id)sender{
 
     [super saveDocument:sender];
@@ -445,6 +472,14 @@ NSString* BDSKBibTeXStringPboardType = @"edu.ucsd.cs.mmcrack.bibdesk: Local BibT
        && ![[self fileType] isEqualToString:@"bib"]){
         [self exportEncodedBib:nil];
     }
+}
+
+- (IBAction)exportAsAtom:(id)sender{
+    [self exportAsFileType:@"atom"];
+}
+
+- (IBAction)exportAsMODS:(id)sender{
+    [self exportAsFileType:@"mods"];
 }
 
 - (IBAction)exportAsHTML:(id)sender{
@@ -479,6 +514,7 @@ NSString* BDSKBibTeXStringPboardType = @"edu.ucsd.cs.mmcrack.bibdesk: Local BibT
                    contextInfo:fileType];
 
 }
+
 - (void)savePanelDidEnd:(NSWindow *)sheet returnCode:(int)returnCode contextInfo:(void *)contextInfo{
     NSData *fileData = nil;
     NSString *fileName = nil;
@@ -492,6 +528,10 @@ NSString* BDSKBibTeXStringPboardType = @"edu.ucsd.cs.mmcrack.bibdesk: Local BibT
             fileData = [self dataRepresentationOfType:@"Rich Site Summary file"];
         }else if([fileType isEqualToString:@"html"]){
             fileData = [self dataRepresentationOfType:@"HTML"];
+        }else if([fileType isEqualToString:@"mods"]){
+            fileData = [self dataRepresentationOfType:@"MODS"];
+        }else if([fileType isEqualToString:@"atom"]){
+            fileData = [self dataRepresentationOfType:@"ATOM"];
         }else if([fileType isEqualToString:@"bib"]){
             int index = [saveTextEncodingPopupButton indexOfSelectedItem];
             NSStringEncoding encoding = [[[[[NSApp delegate] encodingDefinitionDictionary] objectForKey:@"StringEncodings"] objectAtIndex:index] intValue];
@@ -532,8 +572,12 @@ NSString* BDSKBibTeXStringPboardType = @"edu.ucsd.cs.mmcrack.bibdesk: Local BibT
         return [self rssDataRepresentation];
     }else if ([aType isEqualToString:@"HTML"]){
         return [self htmlDataRepresentation];
-    }else if([aType isEqualToString:@"BibDocument File"]){
-        return [NSKeyedArchiver archivedDataWithRootObject:publications];
+    }else if ([aType isEqualToString:@"MODS"]){
+        return [self MODSDataRepresentation];
+    }else if ([aType isEqualToString:@"ATOM"]){
+        return [self atomDataRepresentation];
+    }else if([aType isEqualToString:@"BibDesk Library"]){
+        return [self archivedDataRepresentation];
     }else
         return nil;
 }
@@ -677,6 +721,40 @@ stringByAppendingPathComponent:@"BibDesk"]; */
             
 }
 
+- (NSData *)atomDataRepresentation{
+ 
+    NSMutableData *d = [NSMutableData data];
+    
+    AddDataFromString(@"<?xml version=\"1.0\" encoding=\"UTF-8\"?><feed xmlns=\"http://purl.org/atom/ns#\">");
+    
+    // TODO: output general feed info
+    
+    foreach(pub, publications){
+        AddDataFromString(@"<entry><title>foo</title><description>foo-2</description>");
+        AddDataFromString(@"<content type=\"application/xml+mods\">");
+        AddDataFromString([pub MODSString]);
+        AddDataFromString(@"</content>");
+        AddDataFromString(@"</entry>\n");
+    }
+    AddDataFromString(@"</feed>");
+    
+    return d;    
+}
+
+- (NSData *)MODSDataRepresentation{
+    
+    NSMutableData *d = [NSMutableData data];
+
+    AddDataFromString(@"<?xml version=\"1.0\" encoding=\"UTF-8\"?><modsCollection xmlns=\"http://www.loc.gov/mods/v3\">");
+    foreach(pub, publications){
+        AddDataFromString([pub MODSString]);
+        AddDataFromString(@"\n");
+    }
+    AddDataFromString(@"</modsCollection>");
+    
+    return d;
+}
+
 - (NSData *)bibTeXDataWithEncoding:(NSStringEncoding)encoding{
     
     if(encoding == NSASCIIStringEncoding)
@@ -713,11 +791,24 @@ stringByAppendingPathComponent:@"BibDesk"]; */
         return [self loadRSSDataRepresentation:data];
     }else if([aType isEqualToString:@"RIS/Medline File"]){
         return [self loadPubMedDataRepresentation:data];
-    }else if([aType isEqualToString:@"BibDocument File"]){
-        [self setNewPublicationsFromArchivedArray:[NSKeyedUnarchiver unarchiveObjectWithData:data]];
-        return YES;
+    }else if([aType isEqualToString:@"BibDesk Library"]){
+        return [self loadArchivedDataRepresentation:data];
     }else
         return NO;
+}
+
+- (BOOL)loadArchivedDataRepresentation:(NSData *)data{
+    NSKeyedUnarchiver *unarchiver;
+    
+    unarchiver = [[NSKeyedUnarchiver alloc] initForReadingWithData:data];
+    [self setNewPublicationsFromArchivedArray:[unarchiver decodeObjectForKey:@"publications"]];
+    [self setCollections:[unarchiver decodeObjectForKey:@"collections"]];
+    [self setNotes:[unarchiver decodeObjectForKey:@"notes"]];
+    [self setSources:[unarchiver decodeObjectForKey:@"sources"]];
+    
+    [unarchiver finishDecoding];
+    [unarchiver release];
+    return YES;
 }
 
 - (BOOL)loadPubMedDataRepresentation:(NSData *)data{
@@ -1256,7 +1347,8 @@ Enhanced delete method that uses a sheet instead of a modal dialogue.
 }
 
 - (void)controlTextDidChange:(NSNotification *)notif{
-	if([notif object] == searchFieldTextField){
+    id sender = [notif object];
+	if(sender == searchFieldTextField){
 		if([[searchFieldTextField stringValue] isEqualToString:@""]){
 			[quickSearchClearButton setEnabled:NO];
 		}else{
@@ -2538,5 +2630,193 @@ The results are quite crappy, but these were low-hanging fruit and people seem t
 				  );
 #endif
 }
+
+#pragma mark methods to support the source list for .bdsk style files
+
+- (NSMutableArray *)collections { return [[collections retain] autorelease]; }
+
+
+- (void)setCollections:(NSMutableArray *)newCollections {
+    //NSLog(@"in -setCollections:, old value of collections: %@, changed to: %@", collections, newCollections);
+    
+    if (collections != newCollections) {
+        [collections release];
+        collections = [newCollections mutableCopy];
+    }
+}
+
+
+- (NSMutableArray *)notes { return [[notes retain] autorelease]; }
+
+
+- (void)setNotes:(NSMutableArray *)newNotes {
+    //NSLog(@"in -setNotes:, old value of notes: %@, changed to: %@", notes, newNotes);
+    
+    if (notes != newNotes) {
+        [notes release];
+        notes = [newNotes mutableCopy];
+    }
+}
+
+
+- (NSMutableArray *)sources { return [[sources retain] autorelease]; }
+
+
+- (void)setSources:(NSMutableArray *)newSources {
+    //NSLog(@"in -setSources:, old value of sources: %@, changed to: %@", sources, newSources);
+    
+    if (sources != newSources) {
+        [sources release];
+        sources = [newSources mutableCopy];
+    }
+}
+
+
+// Indexed accessors:
+
+///////  collections  ///////
+
+- (unsigned int)countOfCollections {
+    return [[self collections] count];
+}
+
+- (id)objectInCollectionsAtIndex:(unsigned int)index {
+    id myCollections = [self collections];
+    unsigned int collectionsCount = [myCollections count];
+    if ( collectionsCount == 0 || index > (collectionsCount - 1) ) return nil;
+    
+    return [[[myCollections objectAtIndex:index] retain] autorelease];
+}
+
+- (void)insertObject:(id)anObject inCollectionsAtIndex:(unsigned int)index {
+    id myCollections = [self collections];
+    unsigned int collectionsCount = [myCollections count];
+    if (index > collectionsCount) return;
+    
+    if (anObject) [myCollections insertObject:anObject atIndex:index];
+}
+
+- (void)removeObjectFromCollectionsAtIndex:(unsigned int)index {
+    id myCollections = [self collections];
+    unsigned int collectionsCount = [myCollections count];
+    if ( collectionsCount == 0 || index > (collectionsCount - 1) ) return;
+    
+    [myCollections removeObjectAtIndex:index];
+}
+
+- (void)replaceObjectInCollectionsAtIndex:(unsigned int)index withObject:(id)anObject {
+    id myCollections = [self collections];
+    unsigned int collectionsCount = [myCollections count];
+    if ( collectionsCount == 0 || index > (collectionsCount - 1) ) return;
+    
+    [myCollections replaceObjectAtIndex:index withObject:anObject];
+}
+
+
+
+///////  notes  ///////
+
+- (unsigned int)countOfNotes {
+    return [[self notes] count];
+}
+
+- (id)objectInNotesAtIndex:(unsigned int)index {
+    id myNotes = [self notes];
+    unsigned int notesCount = [myNotes count];
+    if ( notesCount == 0 || index > (notesCount - 1) ) return nil;
+    
+    return [[[myNotes objectAtIndex:index] retain] autorelease];
+}
+
+- (void)insertObject:(id)anObject inNotesAtIndex:(unsigned int)index {
+    id myNotes = [self notes];
+    unsigned int notesCount = [myNotes count];
+    if (index > notesCount) return;
+    
+    if (anObject) [myNotes insertObject:anObject atIndex:index];
+}
+
+- (void)removeObjectFromNotesAtIndex:(unsigned int)index {
+    id myNotes = [self notes];
+    unsigned int notesCount = [myNotes count];
+    if ( notesCount == 0 || index > (notesCount - 1) ) return;
+    
+    [myNotes removeObjectAtIndex:index];
+}
+
+- (void)replaceObjectInNotesAtIndex:(unsigned int)index withObject:(id)anObject {
+    id myNotes = [self notes];
+    unsigned int notesCount = [myNotes count];
+    if ( notesCount == 0 || index > (notesCount - 1) ) return;
+    
+    [myNotes replaceObjectAtIndex:index withObject:anObject];
+}
+
+
+
+///////  sources  ///////
+
+- (unsigned int)countOfSources {
+    return [[self sources] count];
+}
+
+- (id)objectInSourcesAtIndex:(unsigned int)index {
+    NSMutableArray *mySources = [self sources];
+    unsigned int sourcesCount = [mySources count];
+    if ( sourcesCount == 0 || index > (sourcesCount - 1) ) return nil;
+    
+    return [[[mySources objectAtIndex:index] retain] autorelease];
+}
+
+- (void)insertObject:(id)anObject inSourcesAtIndex:(unsigned int)index {
+    NSMutableArray *mySources = [self sources];
+    unsigned int sourcesCount = [mySources count];
+    if (index > sourcesCount) return;
+    
+    if (anObject) [mySources insertObject:anObject atIndex:index];
+}
+
+- (void)removeObjectFromSourcesAtIndex:(unsigned int)index {
+    NSMutableArray *mySources = [self sources];
+    unsigned int sourcesCount = [mySources count];
+    if ( sourcesCount == 0 || index > (sourcesCount - 1) ) return;
+    
+    [mySources removeObjectAtIndex:index];
+}
+
+- (void)replaceObjectInSourcesAtIndex:(unsigned int)index withObject:(id)anObject {
+    NSMutableArray *mySources = [self sources];
+    unsigned int sourcesCount = [mySources count];
+    if ( sourcesCount == 0 || index > (sourcesCount - 1) ) return;
+    
+    [mySources replaceObjectAtIndex:index withObject:anObject];
+}
+
+- (void)reloadSourceList{
+    [sourceList reloadData];
+}
+
+- (IBAction)makeNewEmptyCollection:(id)sender{
+    BibCollection *newBC = [[BibCollection alloc] init];
+    [collections addObject:[newBC autorelease]];
+    [self reloadSourceList];
+}
+
+- (IBAction)makeNewCollectionFromSelectedPublications:(id)sender{
+    // untested.
+    BibCollection *newBC = [[BibCollection alloc] init];
+    [newBC setPublications:[[self selectedPubEnumerator] allObjects]];
+    [collections addObject:[newBC autorelease]];
+    [self reloadSourceList];
+}
+
+- (IBAction)makeNewExternalSource:(id)sender{
+    
+}
+
+- (IBAction)makeNewNotepad:(id)sender{
+    
+}
+
 
 @end

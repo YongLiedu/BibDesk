@@ -36,6 +36,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 #import "BDSKFileContentsFilter.h"
 #import "ApplicationServices/ApplicationServices.h"
 #import "RYZImagePopUpButton.h"
+#import "BibCollection.h"
 
 
 @class BDSKCustomCiteTableView;
@@ -141,26 +142,168 @@ extern NSString* BDSKBibTeXStringPboardType;
     IBOutlet NSView *SaveEncodingAccessoryView;
     IBOutlet NSPopUpButton *saveTextEncodingPopupButton;
     NSStringEncoding documentStringEncoding;
+    
+    // stuff for the Source List for .bdsk type files.
+    // Note: the outlets should migrate to a window controller.
+    IBOutlet NSOutlineView *sourceList;
+    IBOutlet NSButton *addSourceListItemButton;
+    
+    NSMutableArray *collections; // playlist style sub-lists of publications. Can be 'smart'.
+    NSMutableArray *notes;       // free-form note storage
+    NSMutableArray *sources;     // external sources of publications, not represented in library (aka the publications array)
+    
 }
 
-- (void)awakeFromNib;
-- (void)setupSearchField;
-- (NSMenu *)searchFieldMenu;
+
+/*!
+@method     init
+ @abstract   initializer
+ @discussion Sets up initial values. Note that this is called before IBOutlet ivars are connected.
+ If you need to set up initial values for those, use awakeFromNib instead.
+ @result     A BibDocument, or nil if some serious problem is encountered.
+ */
 - (id)init;
+
+
+/*!
+    @method     awakeFromNib
+    @abstract   Called when the document's nib is finished loading. Don't call this directly.
+    @discussion Put things here that need to be done once, as soon as the window is loaded but before it is shown.
+*/
+- (void)awakeFromNib;
+
+/*!
+    @method     dealloc
+    @abstract   Releases memory reserved by the BibDocument. 
+ @discussion Don't call this. 
+ It will be called automatically at the end of the object's lifetime.
+
+*/
 - (void)dealloc;
+
+/*!
+    @method     setupSearchField
+    @abstract   Sets up quick search field.
+    @discussion This method is called from awakeFromNib. 
+ It either sets up an existing NSTextField and NSButton from the nib, or 
+ creates an NSSearchField if you're running >10.2. It uses the global macro BDSK_USING_JAGUAR to tell.
+ It also used to load saved search keys from preferences, but this is commented out now and may soon go away.
+*/
+- (void)setupSearchField;
+
+/*!
+    @method     searchFieldMenu
+    @abstract   builds the quick search menu template for the NSSearchField
+    @discussion this is only used in setupSearchField if not BDSK_USING_JAGUAR. 
+ It is for the NSSearchField only, and it's only the template. 
+ It shouldn't get called more than once, really.
+    @result     An NSMenu for the NSSearchField to use as the template.
+*/
+- (NSMenu *)searchFieldMenu;
+
+/*!
+    @method     publicationsForAuthor:
+    @abstract   Returns publications that an author is connected to
+    @discussion ...
+    @param      anAuthor A BibAuthor that may be connected to a pub in this document.
+    @result     An array of BibItems that the author is connected to.
+*/
 - (NSArray *)publicationsForAuthor:(BibAuthor *)anAuthor;
+
+/*!
+    @method     exportAsRSS:
+    @abstract   Action method to export RSS XML
+    @discussion  This calls exportAsFileType:@"rss".
+    @param      sender anything
+*/
 - (IBAction)exportAsRSS:(id)sender;
+
+/*!
+@method     exportAsHTML:
+     @abstract   Action method to export HTML
+     @discussion  This calls exportAsFileType:@"html".
+     @param      sender anything
+*/
 - (IBAction)exportAsHTML:(id)sender;
+
+/*!
+@method     exportAsMODS:
+     @abstract   Action method to export MODS XML. 
+     @discussion  This calls exportAsFileType:@"mods".
+ It should not be considered robust currently.
+     @param      sender anything
+*/
+- (IBAction)exportAsMODS:(id)sender;
+
+/*!
+@method     exportAsAtom:
+     @abstract   Action method to export ATOM XML for syndication.
+     @discussion  This calls exportAsFileType:@"mods".
+     It should not be considered robust currently.
+     @param      sender anything
+*/
+- (IBAction)exportAsAtom:(id)sender;
+
+/*!
+    @method     exportAsFileType:
+    @abstract   Export the document's contents.
+    @discussion Exports the entire document to one of many file types. 
+ This method just opens a save panel, with the appropriate accessory view.
+ On return from the save panel, Cocoa calls our method savePanelDidEnd:returnCode:contextInfo:
+ @param      fileType A string representing the type to export.
+*/
 - (void)exportAsFileType:(NSString *)fileType;
+
+/*!
+    @method     savePanelDidEnd:returnCode:contextInfo:
+ @abstract   Called after a save panel is closed.
+ @discussion If the user chose to save, this calls the appropriate *DataRepresentation 
+ method to get the data to save. Otherwise, it just returns without doing anything.
+
+    @param      sheet The save panel
+    @param      returnCode what happened
+    @param      contextInfo ...
+*/
+- (void)savePanelDidEnd:(NSWindow *)sheet returnCode:(int)returnCode contextInfo:(void *)contextInfo;
+
 - (NSData *)rssDataRepresentation;
 - (NSData *)bibDataRepresentation;
+
+/*!
+    @method     htmlDataRepresentation
+    @abstract   (description)
+    @discussion (description)
+    @result     (description)
+*/
 - (NSData *)htmlDataRepresentation;
-- (NSData *)bibTeXDataWithEncoding:(NSStringEncoding)encoding;
+
+/*!
+    @method     publicationsAsHTML
+    @abstract   (description)
+    @discussion (description)
+    @result     (description)
+*/
 - (NSString *)publicationsAsHTML;
+
+/*!
+    @method     archivedDataRepresentation
+    @abstract   uses NSKeyedArchiver to generate save data
+    @discussion (description)
+    @result     (description)
+*/
+- (NSData *)archivedDataRepresentation;
+
+- (NSData *)atomDataRepresentation;
+- (NSData *)MODSDataRepresentation;
+- (NSData *)bibTeXDataWithEncoding:(NSStringEncoding)encoding;
+
+
 - (BOOL)loadDataRepresentation:(NSData *)data ofType:(NSString *)aType;
 - (BOOL)loadBibTeXDataRepresentation:(NSData *)data encoding:(NSStringEncoding)encoding;
 - (BOOL)loadRSSDataRepresentation:(NSData *)data;
 - (BOOL)loadPubMedDataRepresentation:(NSData *)data;
+
+- (BOOL)loadArchivedDataRepresentation:(NSData *)data;
 - (BOOL)readFromFile:(NSString *)fileName ofType:(NSString *)docType;
 
 
@@ -336,6 +479,7 @@ extern NSString* BDSKBibTeXStringPboardType;
 
 /*!
     @method publications
+ @abstract Returns the publications array.
     @discussion Returns the publications array.
     
 */
@@ -557,5 +701,124 @@ int compareSetLengths(NSSet *set1, NSSet *set2, void *context);
 
 - (IBAction)exportEncodedBib:(id)sender;
 - (NSStringEncoding)documentStringEncoding;
+
+
+#pragma mark Methods supporting the source list for .bdsk files
+
+/*!
+@method collections
+@abstract the getter corresponding to setCollections
+@result returns value for collections
+*/
+- (NSMutableArray *)collections;
+
+/*!
+@method setCollections
+@abstract sets collections to the param
+@discussion 
+@param newCollections 
+*/
+- (void)setCollections:(NSMutableArray *)newCollections;
+
+
+/*!
+@method notes
+@abstract the getter corresponding to setNotes
+@result returns value for notes
+*/
+- (NSMutableArray *)notes;
+
+/*!
+@method setNotes
+@abstract sets notes to the param
+@discussion 
+@param newNotes 
+*/
+- (void)setNotes:(NSMutableArray *)newNotes;
+
+
+/*!
+@method sources
+@abstract the getter corresponding to setSources
+@result returns value for sources
+*/
+- (NSMutableArray *)sources;
+
+/*!
+@method setSources
+@abstract sets sources to the param
+@discussion 
+@param newSources 
+*/
+- (void)setSources:(NSMutableArray *)newSources;
+
+
+    ///////  collections  ///////
+
+- (unsigned int)countOfCollections;
+- (id)objectInCollectionsAtIndex:(unsigned int)index;
+- (void)insertObject:(id)anObject inCollectionsAtIndex:(unsigned int)index;
+- (void)removeObjectFromCollectionsAtIndex:(unsigned int)index;
+- (void)replaceObjectInCollectionsAtIndex:(unsigned int)index withObject:(id)anObject;
+
+
+    ///////  notes  ///////
+
+- (unsigned int)countOfNotes;
+- (id)objectInNotesAtIndex:(unsigned int)index;
+- (void)insertObject:(id)anObject inNotesAtIndex:(unsigned int)index;
+- (void)removeObjectFromNotesAtIndex:(unsigned int)index;
+- (void)replaceObjectInNotesAtIndex:(unsigned int)index withObject:(id)anObject;
+
+
+    ///////  sources  ///////
+
+- (unsigned int)countOfSources;
+- (id)objectInSourcesAtIndex:(unsigned int)index;
+- (void)insertObject:(id)anObject inSourcesAtIndex:(unsigned int)index;
+- (void)removeObjectFromSourcesAtIndex:(unsigned int)index;
+- (void)replaceObjectInSourcesAtIndex:(unsigned int)index withObject:(id)anObject;
+
+
+/*!
+    @method     reloadSourceList
+    @abstract   reloads source list for changes
+    @discussion Currently just calles reloadData, but should save expanded state in future.
+*/
+- (void)reloadSourceList;
+
+/*!
+    @method     makeNewEmptyCollection:
+    @abstract   creates a new empty top-level collection and adds it to the document
+    @discussion (description)
+    @param      sender anything
+*/
+- (IBAction)makeNewEmptyCollection:(id)sender;
+
+/*!
+    @method     makeNewCollectionFromSelectedPublications:
+    @abstract   creates a new top level collection from the selected publications 
+ in the first responder view and adds it to the document
+    @discussion (description)
+    @param      sender (description)
+*/
+- (IBAction)makeNewCollectionFromSelectedPublications:(id)sender;
+
+    /*!
+                   @method     makeNewExternalSource
+     @abstract   creates a new externalSource and adds it to the document
+     @discussion (description)
+     @param      sender anything
+     */
+- (IBAction)makeNewExternalSource:(id)sender;
+
+    /*!
+    @method     makeNewNotepad
+     @abstract   creates a new empty notepad and adds it to the document
+     @discussion (description)
+     @param      sender anything
+     */
+- (IBAction)makeNewNotepad:(id)sender;
+
 
 @end
