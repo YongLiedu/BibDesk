@@ -26,6 +26,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 #import "BDSKDragTableView.h"
 #import "BDSKCustomCiteTableView.h"
 #import "BDSKConverter.h"
+#import "BibTeXParser.h"
 
 @class BDSKCustomCiteTableView;
 @class BibItem;
@@ -110,9 +111,10 @@ extern NSString* LocalDragPasteboardName;
 - (id)init;
 - (void)dealloc;
 - (IBAction)exportAsRSS:(id)sender;
-- (void)saveDependentWindows;
+- (void)saveDependentWindows; //@@bibeditor transparency - won't need this.
 - (NSData *)rssDataRepresentation;
 - (NSData *)bibDataRepresentation;
+- (BOOL)loadDataRepresentation:(NSData *)data ofType:(NSString *)aType;
 - (BOOL)loadBibTeXDataRepresentation:(NSData *)data;
 - (BOOL)loadRSSDataRepresentation:(NSData *)data;
 
