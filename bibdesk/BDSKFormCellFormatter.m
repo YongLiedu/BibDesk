@@ -64,14 +64,13 @@
     unsigned lengthToEnd = [*partialStringPtr length] - whiteSpaceRange.location;
     NSString *firstPart = [NSString stringWithString:@""]; // we'll use this as a base for appending the completion to
     
-    if( ((punctuationRange.location != NSNotFound) && (punctuationRange.location > [*partialStringPtr length])) ||
-        ((andRange.location != NSNotFound) && ((andRange.location + 4) <= [*partialStringPtr length])) ){ // we probably have an author; be careful not to go out of range
+    if([[self entry] isEqualToString:BDSKAuthorString] && ((andRange.location != NSNotFound) && ((andRange.location + 4) <= [*partialStringPtr length])) ){ //this is an author; be careful not to go out of range
         // NSLog(@"case 1");
         lengthToEnd = [*partialStringPtr length] - andRange.location;
         matchString = [*partialStringPtr substringWithRange:NSMakeRange(andRange.location + 4, lengthToEnd - 4)]; // everything after the last whitespace
         firstPart = [*partialStringPtr substringWithRange:NSMakeRange(0, andRange.location + 4)]; // everything through the last whitespace
     } else {
-        if( whiteSpaceRange.location != NSNotFound && punctuationRange.location != NSNotFound){ // we failed the first test, but have a whitespace and punctuation => probably a keyword
+        if([[self entry] isEqualToString:BDSKKeywordsString] && whiteSpaceRange.location != NSNotFound && punctuationRange.location != NSNotFound){ // this is a keyword
             // NSLog(@"case 2");
             matchString = [*partialStringPtr substringWithRange:NSMakeRange(whiteSpaceRange.location + 1, lengthToEnd - 1)]; // everything after the last whitespace
             firstPart = [*partialStringPtr substringWithRange:NSMakeRange(0, whiteSpaceRange.location + 1)]; // everything through the last whitespace
