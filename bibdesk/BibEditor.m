@@ -202,7 +202,7 @@ NSString *BDSKDateModifiedString = @"Date-Modified";
     [bibTypeButton selectItemWithTitle:currentType];
     [self setupForm]; // gets called in window will load...?
     
-	// The popupbutton needs to be set before fixURLs is called.
+	// The popupbutton needs to be set before fixURLs is called, and -windowDidLoad gets sent after awakeFromNib.
 
 	//	creating an RYZImagePopUpButton in IB results in one that has the wrong cell.
 	// So we still create it there, we just replace it here with a proper one:
@@ -225,7 +225,6 @@ NSString *BDSKDateModifiedString = @"Date-Modified";
 		
 	[viewLocalButton setMenu:[self menuForImagePopUpButton]];
 	
-	[self fixURLs];
     [notesView setString:[theBib valueOfField:BDSKAnnoteString]];
     [abstractView setString:[theBib valueOfField:BDSKAbstractString]];
     [rssDescriptionView setString:[theBib valueOfField:BDSKRssDescriptionString]];
@@ -583,6 +582,7 @@ NSString *BDSKDateModifiedString = @"Date-Modified";
     NSURL *remote = [NSURL URLWithString:rurl];
     NSDictionary *linkAttributes;
     NSMutableAttributedString *link = [[NSMutableAttributedString alloc] initWithString:rurl];
+    NSString *ext = nil;
 
 
     BOOL drawerWasOpen = ([documentSnoopDrawer state] == NSDrawerOpenState);
@@ -595,12 +595,12 @@ NSString *BDSKDateModifiedString = @"Date-Modified";
     
     if (lurl && [[NSFileManager defaultManager] fileExistsAtPath:lurl]){
             icon = [[NSWorkspace sharedWorkspace] iconForFile:lurl];
-            [viewLocalButton setIconImage:icon];
-			[[viewLocalButton cell] seticonActionEnabled:YES];
+            [viewLocalButton setIconImage:icon];      
+            [[viewLocalButton cell] seticonActionEnabled:YES];
             [viewLocalButton setToolTip:@"View File"];
             [[self window] setRepresentedFilename:lurl];
 			
-			NSString *ext = [lurl pathExtension];
+			ext = [lurl pathExtension];
 			BOOL fileIsPSOrPDF = ([ext isEqualToString:@"ps"] || [ext isEqualToString:@"pdf"]);
 			
 			if(fileIsPSOrPDF){
@@ -831,7 +831,7 @@ NSString *BDSKDateModifiedString = @"Date-Modified";
 		[self setupForm];
 		return;
 	}
-	
+
 	NSString *changedTitle = [userInfo objectForKey:@"key"];
 	NSString *newValue = [userInfo objectForKey:@"value"];
 	
@@ -858,7 +858,10 @@ NSString *BDSKDateModifiedString = @"Date-Modified";
 	
 	if([changedTitle isEqualToString:BDSKUrlString] || 
 	   [changedTitle isEqualToString:BDSKLocalUrlString]){
-		[self fixURLs];
+            [self fixURLs];
+            // ARM: This is a hack to get the icon to show up immediately; perhaps the button should do this itself?  I think it's unable to set the image in fixURLs because of the drag op
+            [[viewLocalButton cell] drawWithFrame:[viewLocalButton frame]
+                                           inView:[viewLocalButton superview]];      
 		[_textSnoopString release];
 		[_pdfSnoopImage release];
 		_textSnoopString = nil;
@@ -899,7 +902,7 @@ NSString *BDSKDateModifiedString = @"Date-Modified";
 
 
 - (void)docWillSave:(NSNotification *)notification{
-	//NSDictionary *userInfo = [notification userInfo];
+	// NSDictionary *userInfo = [notification userInfo];
 	
     if (![[self window] makeFirstResponder:[self window]]) {
         [[self window] endEditingFor:nil];
@@ -907,14 +910,14 @@ NSString *BDSKDateModifiedString = @"Date-Modified";
 }
 	
 - (void)bibWillBeRemoved:(NSNotification *)notification{
-	//NSDictionary *userInfo = [notification userInfo];
+	// NSDictionary *userInfo = [notification userInfo];
 	
 	[self close];
 	[theBib setEditorObj:nil]; //cmh: obsolete?
 }
 	
 - (void)docWindowWillClose:(NSNotification *)notification{
-	//NSDictionary *userInfo = [notification userInfo];
+	// NSDictionary *userInfo = [notification userInfo];
 	
 	[[self window] close];
 }
