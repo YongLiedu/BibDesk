@@ -148,6 +148,7 @@ extern NSString* LocalDragPasteboardName;
 - (BOOL)loadBibTeXDataRepresentation:(NSData *)data;
 - (BOOL)loadRSSDataRepresentation:(NSData *)data;
 - (BOOL)loadPubMedDataRepresentation:(NSData *)data;
+- (BOOL)readFromFile:(NSString *)fileName ofType:(NSString *)docType;
 
 
 

@@ -391,16 +391,16 @@ NSString*   LocalDragPasteboardName = @"edu.ucsd.cs.mmccrack.bibdesk: Local Publ
 	if ([docType isEqualToString:@"RIS/Medline File"]){
 		// Can't save pubmed files now. Could try saving as bibtex.
 		int returnCode = NSRunAlertPanel(@"Cannot Save as PubMed.",
-										 @"Saving PubMed Files is not currently supported. You can choose to save as BibTeX instead.",
-										 @"Save as BibTeX", @"Don't Save", nil, nil);
+						 @"Saving PubMed Files is not currently supported. You can choose to save as BibTeX instead.",
+						 @"Save as BibTeX", @"Don't Save", nil, nil);
 		if(returnCode == NSAlertDefaultReturn){
 			NSString *newName = [[[self fileName] stringByDeletingPathExtension] stringByAppendingPathExtension:@"bib"];
-			return [self writeToFile:newName ofType:@"bibTeX database"];
+		    return [self writeToFile:newName ofType:@"bibTeX database"];
 		}else{
 			return NO;
 		}
 	}else{
-		return [super writeToFile:fileName ofType:docType];
+	    return [super writeToFile:fileName ofType:docType];
 	}
 }
 
@@ -417,6 +417,34 @@ NSString*   LocalDragPasteboardName = @"edu.ucsd.cs.mmccrack.bibdesk: Local Publ
     }else 
 		return nil;
 }
+
+- (BOOL)readFromFile:(NSString *)fileName ofType:(NSString *)docType{
+    [super readFromFile:fileName ofType:docType];
+    
+    NSFileManager *fm = [NSFileManager defaultManager];
+    NSString *newName = [[[self fileName] stringByDeletingPathExtension] stringByAppendingPathExtension:@"bib"];
+    int i = 0;
+    NSArray *writableTypesArray = [[self class] writableTypes];
+    NSString *finalName = [NSString stringWithString:newName];
+    
+    if(![writableTypesArray containsObject:[self fileType]]){
+	// this sets the file type and name if we open a type for which we are a viewer
+	// we don't want to overwrite an existing file, though
+	while([fm fileExistsAtPath:finalName]){
+	    i++;
+	    finalName = [[[newName stringByDeletingPathExtension] stringByAppendingFormat:@"%i",i] stringByAppendingPathExtension:@"bib"];
+	}
+	NSRunAlertPanel(NSLocalizedString(@"Import Successful",
+					  "alert title"),
+			NSLocalizedString(@"Your file has been converted to BibTeX and assigned a unique name.  To save the file or change the name, please use the Save As command.",
+					  "file has been converted and assigned a unique name, can be saved with save as"),
+			nil,nil, nil, nil);
+	[self setFileName:finalName];
+	[self setFileType:@"bibTeX database"];  // this is the only type we support via the save command
+    }
+    return YES;
+}
+    
 
 - (void)saveDependentWindows{
     NSMutableArray *depWins = [NSMutableArray array];
@@ -553,7 +581,8 @@ stringByAppendingPathComponent:@"BibDesk"]; */
     publications = [[PubMedParser itemsFromString:dataString
                                          error:&hadProblems
                                    frontMatter:frontMatter
-                                      filePath:filePath] retain]; 
+                                      filePath:filePath] retain];
+
     if(hadProblems){
         // run a modal dialog asking if we want to use partial data or give up
         rv = NSRunAlertPanel(NSLocalizedString(@"Error reading file!",@""),
