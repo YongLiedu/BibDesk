@@ -70,7 +70,7 @@ static BibFiler *_sharedFiler = nil;
 	NSString *path = nil;
 	NSString *newPath = nil;
 	
-	[self prepareMoveForDocument:doc];
+	[self prepareMoveForDocument:doc number:[NSNumber numberWithInt:[papers count]]];
 	
 	foreach(paper , papers){
 		path = [paper localURLPathRelativeTo:[[(NSDocument *)doc fileName] stringByDeletingLastPathComponent]];
@@ -88,6 +88,11 @@ static BibFiler *_sharedFiler = nil;
 	NSString *status = nil;
 	int statusFlag = BDSKNoErrorMask;
 	NSFileManager *fm = [NSFileManager defaultManager];
+	
+	if (progressSheet) {
+		[progressIndicator incrementBy:1.0];
+		[progressIndicator displayIfNeeded];
+	}
 	
 	if(path == nil || [path isEqualToString:@""] || newPath == nil || [newPath isEqualToString:@""] || [path isEqualToString:newPath])
 		return;
@@ -134,7 +139,7 @@ static BibFiler *_sharedFiler = nil;
 	}
 }
 
-- (void)prepareMoveForDocument:(BibDocument *)doc{
+- (void)prepareMoveForDocument:(BibDocument *)doc number:(NSNumber *)number{
 	NSUndoManager *undoManager = [doc undoManager];
 	[[undoManager prepareWithInvocationTarget:self] finishMoveForDocument:doc];
 	
@@ -143,11 +148,27 @@ static BibFiler *_sharedFiler = nil;
 	_deletedCount = 0;
 	_cleanupChangeCount = 0;
 	[_fileInfoDicts removeAllObjects];
+	
+	if ([number intValue] > 1 && [NSBundle loadNibNamed:@"AutoFileProgress" owner:self]) {
+		[NSApp beginSheet:progressSheet
+		   modalForWindow:[doc windowForSheet]
+			modalDelegate:self
+		   didEndSelector:NULL
+			  contextInfo:nil];
+		[progressIndicator setMaxValue:[number doubleValue]];
+		[progressIndicator setDoubleValue:0.0];
+		[progressIndicator displayIfNeeded];
+	}
 }
 
 - (void)finishMoveForDocument:(BibDocument *)doc{
 	NSUndoManager *undoManager = [doc undoManager];
-	[[undoManager prepareWithInvocationTarget:self] prepareMoveForDocument:doc];
+	[[undoManager prepareWithInvocationTarget:self] prepareMoveForDocument:doc number:[NSNumber numberWithInt:_moveCount]];
+	
+	if (progressSheet) {
+		[progressSheet orderOut:nil];
+		[NSApp endSheet:progressSheet returnCode:0];
+	}
 	
 	if(_moveCount < _movableCount){
 		[self showProblems];

@@ -27,6 +27,9 @@ enum {
 	IBOutlet NSTextField *infoTextField;
 	IBOutlet NSImageView *iconView;
 	
+	IBOutlet NSPanel *progressSheet;
+	IBOutlet NSProgressIndicator *progressIndicator;
+	
 	NSArray *_currentPapers;
 	BibDocument *_currentDocument;
 	NSString *_errorString;
@@ -61,12 +64,13 @@ enum {
 - (void)movePath:(NSString *)path toPath:(NSString *)newPath forPaper:(BibItem *)paper fromDocument:(BibDocument *)doc moveAll:(BOOL)moveAll;
 
 /*!
-	@method		prepareMoveForDocument:
+	@method		prepareMoveForDocument:number:
 	@abstract	Prepares a move of several linked files, mainly initializing variables. 
 	@param		doc The parent document. 
+	@param		number The number of papers to move. 
 	@discussion -
 */
-- (void)prepareMoveForDocument:(BibDocument *)doc;
+- (void)prepareMoveForDocument:(BibDocument *)doc number:(NSNumber *)number;
 
 /*!
 	@method		finishMoveForDocument:
