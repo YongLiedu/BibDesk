@@ -355,6 +355,34 @@
 			settings = {
 			};
 		};
+		3D928AAB0778D28B00B2309A = {
+			isa = PBXFileReference;
+			lastKnownFileType = image.tiff;
+			name = closedHandCursor.tiff;
+			path = Images/closedHandCursor.tiff;
+			refType = 4;
+			sourceTree = "<group>";
+		};
+		3D928AAC0778D28B00B2309A = {
+			fileRef = 3D928AAB0778D28B00B2309A;
+			isa = PBXBuildFile;
+			settings = {
+			};
+		};
+		3D928AAD0778D2B600B2309A = {
+			isa = PBXFileReference;
+			lastKnownFileType = image.tiff;
+			name = openHandCursor.tiff;
+			path = Images/openHandCursor.tiff;
+			refType = 4;
+			sourceTree = "<group>";
+		};
+		3D928AAE0778D2B600B2309A = {
+			fileRef = 3D928AAD0778D2B600B2309A;
+			isa = PBXBuildFile;
+			settings = {
+			};
+		};
 		3DAE9ED0076E56C100AF111A = {
 			fileEncoding = 4;
 			isa = PBXFileReference;
@@ -598,6 +626,8 @@
 				F91B5CF707657D820011ED22,
 				F91B5CF807657D820011ED22,
 				3D5D34390770C8C3006AF48A,
+				3D928AAC0778D28B00B2309A,
+				3D928AAE0778D2B600B2309A,
 			);
 			isa = PBXResourcesBuildPhase;
 			runOnlyForDeploymentPostprocessing = 0;
@@ -2966,6 +2996,7 @@
 				F9022DA70758088000C3F701,
 				F9022DA80758088000C3F701,
 				F9022DA90758088000C3F701,
+				3D928AAB0778D28B00B2309A,
 				3D5D34380770C8C3006AF48A,
 				F9022DAA0758088000C3F701,
 				F9022DAB0758088000C3F701,
@@ -2976,6 +3007,7 @@
 				F9022DB00758088000C3F701,
 				F9022DB10758088000C3F701,
 				F9022DB20758088000C3F701,
+				3D928AAD0778D2B600B2309A,
 				F9022DB30758088000C3F701,
 				F9022DB40758088000C3F701,
 				F9022DB50758088000C3F701,
