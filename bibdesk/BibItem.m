@@ -1337,7 +1337,8 @@ _setupParagraphStyle()
 					break;
 				case 't':
 					// title, optional #chars
-					string = [converter stringBySanitizingString:[self title] forField:fieldName inFileType:[self fileType]];
+					string = [[self title] stringByRemovingCurlyBraces];
+					string = [converter stringBySanitizingString:string forField:fieldName inFileType:[self fileType]];
 					if ([scanner scanCharactersFromSet:digits intoString:&numStr]) {
 						number = [numStr intValue];
 					} else {
@@ -1351,7 +1352,7 @@ _setupParagraphStyle()
 					break;
 				case 'T':
 					// title, optional #words
-					string = [self title];
+					string = [[self title] stringByRemovingCurlyBraces];
 					if ([scanner scanCharactersFromSet:digits intoString:&numStr]) {
 						number = [numStr intValue];
 					} else {
