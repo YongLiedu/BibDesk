@@ -186,11 +186,11 @@ extern NSString *BDSKDateModifiedString;
 
 - (IBAction)bibTypeDidChange:(id)sender;
 /*!
-    @method     setTypePopup
+    @method     updateTypePopup
     @abstract   Update the type popup menu based on the current bibitem's type.  Needed for dragging support (see BDSKDragWindow.m).
     @discussion (comprehensive description)
 */
-- (void)setTypePopup;
+- (void)updateTypePopup;
 //- (IBAction)textFieldDidChange:(id)sender;
 - (IBAction)textFieldDidEndEditing:(id)sender;
 //- (void)closeSheetDidEnd:(NSWindow *)sheet returnCode:(int)returnCode contextInfo:(void  *)contextInfo;
