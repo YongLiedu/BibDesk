@@ -803,6 +803,8 @@ parameter: code: type of section-recursion-level
                 setCounter("subsubsection", 0);
                 setCounter("paragraph", 0);
                 setCounter("subparagraph", 0);
+        		setCounter("figure",0);
+       			setCounter("table",0);
                 resetTheoremCounter("chapter");
                 unit_label = FormatUnitNumber("chapter");
                 fprintRTF(" ");
@@ -1628,8 +1630,15 @@ void CmdFigure(int code)
 {
     char *loc, *figure_contents;
     char *endfigure = ((code & ~ON) == FIGURE) ? "\\end{figure}" : "\\end{figure*}";
-
+	static char     oldalignment;
+			
     if (code & ON) {
+		CmdEndParagraph(0);
+		oldalignment = alignment;
+		alignment = JUSTIFIED;
+
+		CmdVspace(VSPACE_BIG_SKIP);
+		CmdStartParagraph(0);
         loc = getBracketParam();
         diagnostics(4, "entering CmdFigure [%s]", (loc) ? loc : "");
         g_processing_figure = TRUE;
@@ -1660,6 +1669,9 @@ void CmdFigure(int code)
             free(g_figure_label);
         g_processing_figure = FALSE;
         diagnostics(4, "exiting CmdFigure");
+		alignment = oldalignment;
+		CmdEndParagraph(0);
+		CmdVspace(VSPACE_BIG_SKIP);
     }
 }
 
@@ -1890,8 +1902,33 @@ void CmdAbstract(int code)
     }
 }
 
-void CmdTitlepage(int code)
+void
+CmdAcknowledgments(int code)
+{
+	static char     oldalignment;
 
+	CmdEndParagraph(0);
+	
+	if (code == ON) {
+		
+		CmdVspace(VSPACE_BIG_SKIP);
+		CmdStartParagraph(0);
+		fprintRTF("\n{\\b ");
+		fprintRTF("Acknowledgments"); /* should be in cfg file, but it is not */
+		fprintRTF("}\n");
+		CmdEndParagraph(0);
+		oldalignment = alignment;
+		alignment = JUSTIFIED;
+
+	} else {
+		alignment = oldalignment;
+		CmdVspace(VSPACE_BIG_SKIP);				/* put \medskip after acknowledgments */
+	}
+}
+
+
+void 
+CmdTitlepage(int code)
 /******************************************************************************
   purpose: \begin{titlepage} ... \end{titlepage}
            add pagebreaks before and after this environment
