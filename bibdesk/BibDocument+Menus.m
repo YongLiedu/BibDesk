@@ -327,13 +327,13 @@ Broken out of BibDocument and split up into smaller parts to make things more ma
 	
 	if (n <= 1) {
 		// no selection or single selection
-		s = NSLocalizedString(@"Delete...", @"Delete... (needs proper ellipsis)");
+		s = NSLocalizedString(@"DeleteÉ", @"DeleteÉ (needs proper ellipsis)");
 		[menuItem setTitle:s];
 		return (n==1);
 	}
 	else {
 		// multiple selection
-		s = NSLocalizedString(@"Delete %i Publications...", @"Delete %i Publications... (needs proper ellipsis)");
+		s = NSLocalizedString(@"Delete %i PublicationsÉ", @"Delete %i PublicationsÉ (needs proper ellipsis)");
 		[menuItem setTitle:[NSString stringWithFormat:s, n]];
 		return YES;
 	}
