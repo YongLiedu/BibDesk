@@ -85,70 +85,71 @@ setting initial selection in list to second item doesn't work
 requires X.3
 */
 - (NSArray *)completionsForPartialWordRange:(NSRange)charRange indexOfSelectedItem:(int *)index	{
-    NSString * s = [[self textStorage] string];
-    NSRange r = [self citeKeyRange];
-    
-    if (r.location != NSNotFound ){
-	//	NSString * beginning = [s substringWithRange:NSMakeRange(charRange.location - 6, 6)];
-	NSString * end = [s substringWithRange:r];
+	NSString * s = [[self textStorage] string];
+	NSRange r = [self citeKeyRange];
 	
-	// code shamelessly lifted from Buzz Anderson's ASHandlerTest example app
-	// Performance gain if we stored the script permanently? But where to store it?
-	/* Locate the script within the bundle */
-	NSString *scriptPath = [[NSBundle bundleWithIdentifier:@"net.sourceforge.bibdesk.inputmanager"] pathForResource:kScriptName ofType: kScriptType];
-	NSURL *scriptURL = [NSURL fileURLWithPath: scriptPath];
-	
-	NSDictionary *errorInfo = nil;
-	NSAppleScript *script = [[[NSAppleScript alloc] initWithContentsOfURL:scriptURL error:&errorInfo] autorelease];
-	
-	/* See if there were any errors loading the script */
-	if (script && !errorInfo) {
-	    
-	    /* We have to construct an AppleEvent descriptor to contain the arguments for our handler call.  Remember that this list is 1, rather than 0, based. */
-	    NSAppleEventDescriptor *arguments = [[[NSAppleEventDescriptor alloc] initListDescriptor] autorelease];
-	    [arguments insertDescriptor: [NSAppleEventDescriptor descriptorWithString:end] atIndex: 1] ;
-	    
-	    errorInfo = nil;
-	    
-	    /* Call the handler using the method in our special NSAppleScript category */
-	    NSAppleEventDescriptor *result = [script callHandler: kHandlerName withArguments: arguments errorInfo: &errorInfo];
-	    
-	    if (!errorInfo ) {
+	if (r.location != NSNotFound ){
+		//	NSString * beginning = [s substringWithRange:NSMakeRange(charRange.location - 6, 6)];
+		NSString * end = [s substringWithRange:r];
 		
-		int n;
+		// code shamelessly lifted from Buzz Anderson's ASHandlerTest example app
+		// Performance gain if we stored the script permanently? But where to store it?
+		/* Locate the script within the bundle */
+		NSString *scriptPath = [[NSBundle bundleWithIdentifier:@"net.sourceforge.bibdesk.inputmanager"] pathForResource:kScriptName ofType: kScriptType];
+		NSURL *scriptURL = [NSURL fileURLWithPath: scriptPath];
 		
-		if (result &&  (n = [result numberOfItems])) {
-		    NSMutableArray * returnArray = [NSMutableArray arrayWithCapacity:2];
-		    if (n == 1) {
-			// if we have only one item for completion, artificially add a second one, so the user can review the full information before adding it to the document.
-			[returnArray addObject:kHint];
-			//  also set the index to 1, so the 'heading' line isn't selected initially.
-			// THIS DOESN'T SEEM TO WORK!
-			*index = 1;
-		    }
-		    
-		    NSAppleEventDescriptor * stringAEDesc;
-		    NSString * completionString;
-		    
-		    while (n) {
-			// run through the list top to bottom, keeping in mind it is 1 based.
-			stringAEDesc = [result descriptorAtIndex:n];
-			// insert 'identification string at end so we'll recognise our own completions in -insertCompletion:for...
-			completionString = [[stringAEDesc stringValue] stringByAppendingString:kBibDeskInsertion];
+		NSDictionary *errorInfo = nil;
+		NSAppleScript *script = [[[NSAppleScript alloc] initWithContentsOfURL:scriptURL error:&errorInfo] autorelease];
+		
+		/* See if there were any errors loading the script */
+		if (script && !errorInfo) {
 			
-			n--;
+			/* We have to construct an AppleEvent descriptor to contain the arguments for our handler call.  Remember that this list is 1, rather than 0, based. */
+			NSAppleEventDescriptor *arguments = [[[NSAppleEventDescriptor alloc] initListDescriptor] autorelease];
+			[arguments insertDescriptor: [NSAppleEventDescriptor descriptorWithString:end] atIndex: 1] ;
 			
-			[returnArray insertObject:completionString atIndex:0];
-		    }
-			// also add standard completion
-			[returnArray addObjectsFromArray:[super completionsForPartialWordRange:charRange indexOfSelectedItem:index]];
-		    return returnArray;
-		} 
-	    } // no script running error	
-	} // no script loading error
-    } // location > 5
-      // if in doubt just stick to ordinary completion dictionary
-    return [super completionsForPartialWordRange:charRange indexOfSelectedItem:index];
+			errorInfo = nil;
+			
+			/* Call the handler using the method in our special NSAppleScript category */
+			NSAppleEventDescriptor *result = [script callHandler: kHandlerName withArguments: arguments errorInfo: &errorInfo];
+			
+			if (!errorInfo ) {
+				
+				int n;
+				
+				if (result &&  (n = [result numberOfItems])) {
+					// start with the system's standard completions
+					NSMutableArray * returnArray = [[[super completionsForPartialWordRange:charRange indexOfSelectedItem:index] mutableCopy] autorelease];
+					
+					NSAppleEventDescriptor * stringAEDesc;
+					NSString * completionString;
+					
+					while (n) {
+						// run through the list top to bottom, keeping in mind it is 1 based.
+						stringAEDesc = [result descriptorAtIndex:n];
+						// insert 'identification string at end so we'll recognise our own completions in -insertCompletion:for...
+						completionString = [[stringAEDesc stringValue] stringByAppendingString:kBibDeskInsertion];
+						
+						n--;
+						// add in at beginning of array
+						[returnArray insertObject:completionString atIndex:0];
+					}			
+					
+					if ([returnArray count]  == 1) {
+						// if we have only one item for completion, artificially add a second one, so the user can review the full information before adding it to the document.
+						[returnArray addObject:kHint];
+						//  also set the index to 1, so the 'heading' line isn't selected initially.
+						// THIS DOESN'T SEEM TO WORK!
+						// *index = 1;
+					}
+					
+					return returnArray;
+				} 
+			} // no script running error	
+		} // no script loading error
+	} // location > 5
+	// if in doubt just stick to ordinary completion dictionary
+	return [super completionsForPartialWordRange:charRange indexOfSelectedItem:index];
 }
 
 
@@ -165,17 +166,32 @@ requires X.3
 	}
 	else {
 		// final step
+		
+		/*
+		 doesn't work
 		if([word isEqualToString:kHint]) {
 			// don't do anything if we get the heading 
 			[super insertCompletion:@"" forPartialWordRange:charRange movement:NSCancelTextMovement isFinal:YES];
 			return;
 		}
+		*/
 	
 		// strip the comment for this, this assumes cite keys can't have spaces in them
 		NSRange firstSpace = [word rangeOfString:@" "];
 		NSString * replacementString = [word substringToIndex:firstSpace.location];
-
-		[super insertCompletion:replacementString forPartialWordRange:charRange movement:movement isFinal:flag];
+		// add a little twist, so we can end completion by entering }
+		// sadly NSCancelTextMovement  and NSOtherTextMovement both are 0, so we can't really tell the difference from movement alone
+		int newMovement = movement;
+		NSEvent * theEvent = [NSApp currentEvent];
+		if ((movement == 0) && ([theEvent type] == NSKeyDown)) {
+			// we've got a key event
+			if ([[theEvent characters] isEqualToString:@"}"]) {
+				// with a closing bracket 
+				newMovement = NSRightTextMovement;
+			}
+		}			
+		
+		[super insertCompletion:replacementString forPartialWordRange:charRange movement:newMovement isFinal:flag];
 	}
 
 }
