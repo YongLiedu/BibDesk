@@ -209,7 +209,8 @@ NSString* BDSKBibTeXStringPboardType = @"edu.ucsd.cs.mmcrack.bibdesk: Local BibT
 
 
 - (void) updateActionMenu:(id) aNotification {
-	[actionMenuButton setMenu: [self menuForSelection]];
+	// this updates the menu
+	[self menuForSelection];
 	
 	[actionMenuButton setEnabled:([self numberOfSelectedPubs] != 0)];
 }
