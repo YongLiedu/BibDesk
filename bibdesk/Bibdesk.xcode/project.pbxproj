@@ -965,7 +965,7 @@
 			};
 		};
 		27AF751308021F4D006A6ADE = {
-			buildActionMask = 12;
+			buildActionMask = 8;
 			comments = "Building the help files with Markdown then copying them into the app wrapper. Uses a makefile.";
 			files = (
 			);
@@ -974,7 +974,7 @@
 			isa = PBXShellScriptBuildPhase;
 			outputPaths = (
 			);
-			runOnlyForDeploymentPostprocessing = 0;
+			runOnlyForDeploymentPostprocessing = 1;
 			shellPath = /bin/sh;
 			shellScript = "cd ${SOURCE_ROOT}/BibDesk\\ Help/\nmkdir ${BUILD_ROOT}/${UNLOCALIZED_RESOURCES_FOLDER_PATH}/BibDesk\\ Help/\nmkdir ${BUILD_ROOT}/${UNLOCALIZED_RESOURCES_FOLDER_PATH}/BibDesk\\ Help/gfx/\nmake\n";
 		};
