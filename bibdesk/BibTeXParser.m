@@ -118,7 +118,7 @@ NSRange SafeForwardSearchRange( unsigned startLoc, unsigned seekLength, unsigned
             if([scanner scanUpToString:rightDelim intoString:nil])
                 rightDelimLocation = [scanner scanLocation];
 
-#warning ARM: Need more testing for nested braces
+#warning ARM: Need more testing of nested brace code
             unsigned searchStart = leftDelimLocation + 1;
             NSRange braceSearchRange;
             NSRange braceFoundRange;
@@ -136,14 +136,13 @@ NSRange SafeForwardSearchRange( unsigned startLoc, unsigned seekLength, unsigned
                     break;
                 }
             }
-            
-            // bogus check if([scanner scanString:@"," intoString:nil] || [scanner scanString:@"}" intoString:nil]) // must be at end of a value line or bibitem?
-            
+                        
             value = [fullString substringWithRange:NSMakeRange(leftDelimLocation + 1, [scanner scanLocation] - leftDelimLocation - 1)]; // here's the "bar" part of foo = bar
 
             NSAssert( NSMakeRange(leftDelimLocation + 1, [scanner scanLocation] - leftDelimLocation - 1).location <= nextAtRange.location, @"The parser scanned into the next bibitem");
 
             value = [value stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]];
+            value = [[BDSKConverter sharedConverter] stringByDeTeXifyingString:value];
             key = [[key stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]] capitalizedString];
             
             NSAssert( value != nil, @"Found a nil value string");
