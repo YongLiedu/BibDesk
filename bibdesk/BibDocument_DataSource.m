@@ -242,20 +242,20 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
             
         }else if([[tableColumn identifier] isEqualToString: @"1st Author"] ){
             if([auths count] > 0){
-                return [pub authorAtIndex:0];
+                return [[pub authorAtIndex:0] name];
             }else{
                 return @"-";
             }
             
         }else if([[tableColumn identifier] isEqualToString: @"2nd Author"] ){
             if([auths count] > 1)
-                return [pub authorAtIndex:1]; 
+                return [[pub authorAtIndex:1] name]; 
             else
                 return @"-";
             
         }else if([[tableColumn identifier] isEqualToString: @"3rd Author"] ){
             if([auths count] > 2)
-                return [pub authorAtIndex:2];
+                return [[pub authorAtIndex:2] name];
             else
                 return @"-";
             
@@ -480,8 +480,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
             if(url = [NSURL fileURLWithPath:fnStr]){
                 newBI = [[BibItem alloc] initWithType:[pw stringForKey:BDSKPubTypeStringKey]
                                              fileType:@"BibTeX"
-                                              authors:[NSMutableArray arrayWithCapacity:0]
-                                                  doc:self];
+                                              authors:[NSMutableArray arrayWithCapacity:0]];
                 [publications addObject:newBI];
                 [shownPublications addObject:newBI];
                 [newBI setField:@"Local-Url" toValue:[[NSURL fileURLWithPath:
