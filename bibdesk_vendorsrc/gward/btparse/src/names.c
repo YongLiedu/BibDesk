@@ -321,7 +321,8 @@ find_commas (name_loc * loc, char *name, int max_commas)
     */
 
    if (warned)
-      bt_postprocess_string (name, 1);
+     bt_postprocess_string(name,BTO_COLLAPSE);
+   
 
    /* Now the real comma-finding loop (only if necessary) */
 
