@@ -18,7 +18,6 @@
                 dismissDelField = id; 
                 generateCiteKey = id; 
                 generateLocalUrl = id; 
-                myAction = id; 
                 raiseAddField = id; 
                 raiseDelField = id; 
                 showCiteKeyWarning = id; 
@@ -39,6 +38,7 @@
                 bibTypeButton = NSPopUpButton; 
                 citeKeyField = NSTextField; 
                 citeKeyWarningButton = NSButton; 
+                closeDrawerButton = NSButton; 
                 delFieldButtonCancel = NSButton; 
                 delFieldButtonOK = NSButton; 
                 delFieldPopUp = NSPopUpButton; 
