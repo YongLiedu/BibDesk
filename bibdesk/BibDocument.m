@@ -1359,7 +1359,7 @@ stringByAppendingPathComponent:@"BibDesk"]; */
     // first we fill the popup
 	NSArray *prefsQuickSearchKeysArray = [[OFPreferenceWrapper sharedPreferenceWrapper] arrayForKey:BDSKQuickSearchKeys];
 	NSMutableArray *colNames = [[[[BibTypeManager sharedManager] allRemovableFieldNames] mutableCopy] autorelease];
-	[colNames addObjectsFromArray:[NSArray arrayWithObjects:BDSKUrlString, BDSKLocalUrlString, BDSKCiteKeyString, BDSKKeywordsString, BDSKDateString, nil]];
+	[colNames addObjectsFromArray:[NSArray arrayWithObjects:BDSKUrlString, BDSKLocalUrlString, BDSKCiteKeyString, BDSKKeywordsString, BDSKDateString, @"Added", @"Modified", nil]];
 	[colNames removeObjectsInArray:prefsQuickSearchKeysArray];
 	[colNames sortUsingSelector:@selector(caseInsensitiveCompare:)];
 	[colNames insertObject:NSLocalizedString(@"Choose a Field:",@"") atIndex:0];
