@@ -461,10 +461,11 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 		return NO;
 	}
 	else if ([menuItem action] == @selector(generateCiteKey:)) {
-		[menuItem setTitle: NSLocalizedString(@"Auto File Paper", @"Auto File Paper menu item")];
+                [menuItem setTitle: NSLocalizedString(@"Generate Cite Key", @"Generate Cite Key menu item")];
 		return YES;
 	}
 	else if ([menuItem action] == @selector(generateLocalUrl:)) {
+                [menuItem setTitle: NSLocalizedString(@"Auto File Paper", @"Auto File Paper menu item")];
 		return [[NSFileManager defaultManager] fileExistsAtPath:[theBib localURLPathRelativeTo:[[theDocument fileName] stringByDeletingLastPathComponent]]];
 	}
 	return YES;
