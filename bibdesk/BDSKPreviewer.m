@@ -76,7 +76,7 @@ static unsigned threadCount = 0;
     return @"Previewer";
 }
 
-- (void)windowDidLoad{
+- (void)windowDidLoad{ // we get this the first time the user selects "Show Preview"
     NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
     [self performSelectorOnMainThread:@selector(resetPreviews)
                            withObject:nil
@@ -110,10 +110,10 @@ static unsigned threadCount = 0;
     myThreadCount = threadCount;
     [countLock unlock];
     
-    if(working){
+    while(working){
         if(myThreadCount == threadCount){
             // if someone else is working and i'm the top go to sleep for a bit
-            [NSThread sleepUntilDate:[[NSDate date] addTimeInterval:2.0]];
+            [NSThread sleepUntilDate:[[NSDate date] addTimeInterval:0.2]];
         }else{
             // if someone else is working and I'm not the top, die.
             [pool release];
@@ -131,7 +131,7 @@ static unsigned threadCount = 0;
     working = YES;
     [workingLock unlock];
 
-//    NSLog(@"**** starting thread %d", myThreadCount);
+    // NSLog(@"**** starting thread %d", myThreadCount);
     
     // Files:  previewtemplate.tex is intended to be changed by the user, and so we allow opening
     // this file from the preview prefpane.  By using previewtemplate.tex as a base instead of the previous
@@ -154,6 +154,9 @@ static unsigned threadCount = 0;
     // overwrites the old bibpreview.tex file, replacing the previous bibliographystyle
     if(![[finalTexFile dataUsingEncoding:[[OFPreferenceWrapper sharedPreferenceWrapper] integerForKey:BDSKDefaultStringEncoding]] writeToFile:texTemplatePath atomically:YES]){
         NSLog(@"error replacing texfile");
+        [workingLock lock];
+        working = NO;
+        [workingLock unlock];
         [pool release];
         return NO;
     }
@@ -162,21 +165,27 @@ static unsigned threadCount = 0;
     [bibTemplate appendFormat:@"\n%@",str];
     if(![[bibTemplate dataUsingEncoding:[[OFPreferenceWrapper sharedPreferenceWrapper] integerForKey:BDSKDefaultStringEncoding]] writeToFile:tmpBibFilePath atomically:YES]){
         NSLog(@"Error replacing bibfile.");
+        [workingLock lock];
+        working = NO;
+        [workingLock unlock];        
         [pool release];
         return NO;
     }
     
     if([self previewTexTasks:@"bibpreview.tex"]){ // run the TeX tasks
-    
-      if (myThreadCount >= threadCount){
-          [self performSelectorOnMainThread:@selector(performDrawing)
+
+        if (myThreadCount >= threadCount){
+            [self performSelectorOnMainThread:@selector(performDrawing)
                                                          withObject:nil
                                                   waitUntilDone:YES];
-      } else {
-        NSLog(@"unable to draw");
-        [pool release];
-        return NO;
-      } // if the tex task failed
+        } else {
+            NSLog(@"unable to draw");
+            [workingLock lock];
+            working = NO;
+            [workingLock unlock];          
+            [pool release];
+            return NO;
+        } // if the tex task failed
     }
     // Pool for MT
     [pool release];
