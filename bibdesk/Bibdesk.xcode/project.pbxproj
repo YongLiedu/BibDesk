@@ -211,6 +211,8 @@
 		};
 		29B97317FDCFA39411CA2CEA = {
 			children = (
+				F92F4E460788DEDD001B8F82,
+				F92F4E430788DEC5001B8F82,
 				F91B5CF507657D820011ED22,
 				F91B5CF607657D820011ED22,
 				F91B5CC7076579830011ED22,
@@ -615,6 +617,8 @@
 				3D928AAC0778D28B00B2309A,
 				3D928AAE0778D2B600B2309A,
 				3D8EA3E40788B9E300AAD253,
+				F92F4E450788DEC5001B8F82,
+				F92F4E470788DEDD001B8F82,
 			);
 			isa = PBXResourcesBuildPhase;
 			runOnlyForDeploymentPostprocessing = 0;
@@ -691,6 +695,7 @@
 				3DD300F6075C054D003FD2D7,
 				3DAEA2EE07703F6000AF111A,
 				F965D0A9077B8C0500628BD0,
+				F92F4E4F0788DEFC001B8F82,
 			);
 			isa = PBXSourcesBuildPhase;
 			runOnlyForDeploymentPostprocessing = 0;
@@ -735,9 +740,9 @@
 			sourceTree = "<group>";
 		};
 		8D1107320486CEB800E47090 = {
-			explicitFileType = wrapper.application;
 			includeInIndex = 0;
 			isa = PBXFileReference;
+			lastKnownFileType = wrapper.application;
 			path = Bibdesk.app;
 			refType = 3;
 			sourceTree = BUILT_PRODUCTS_DIR;
@@ -3856,6 +3861,72 @@
 			refType = 4;
 			sourceTree = "<group>";
 		};
+		F92F4E430788DEC5001B8F82 = {
+			children = (
+				F92F4E440788DEC5001B8F82,
+			);
+			isa = PBXVariantGroup;
+			name = BibPref_Files.nib;
+			path = "";
+			refType = 4;
+			sourceTree = "<group>";
+		};
+		F92F4E440788DEC5001B8F82 = {
+			isa = PBXFileReference;
+			lastKnownFileType = wrapper.nib;
+			name = English;
+			path = English.lproj/BibPref_Files.nib;
+			refType = 4;
+			sourceTree = "<group>";
+		};
+		F92F4E450788DEC5001B8F82 = {
+			fileRef = F92F4E430788DEC5001B8F82;
+			isa = PBXBuildFile;
+			settings = {
+			};
+		};
+		F92F4E460788DEDD001B8F82 = {
+			isa = PBXFileReference;
+			lastKnownFileType = image.tiff;
+			name = genericBibDocIcon.tiff;
+			path = Images/genericBibDocIcon.tiff;
+			refType = 4;
+			sourceTree = "<group>";
+		};
+		F92F4E470788DEDD001B8F82 = {
+			fileRef = F92F4E460788DEDD001B8F82;
+			isa = PBXBuildFile;
+			settings = {
+			};
+		};
+		F92F4E4C0788DEFC001B8F82 = {
+			fileEncoding = 30;
+			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.c.h;
+			path = BibPref_Files.h;
+			refType = 4;
+			sourceTree = "<group>";
+		};
+		F92F4E4D0788DEFC001B8F82 = {
+			fileEncoding = 30;
+			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.c.objc;
+			path = BibPref_Files.m;
+			refType = 4;
+			sourceTree = "<group>";
+		};
+		F92F4E4E0788DEFC001B8F82 = {
+			fileRef = F92F4E4C0788DEFC001B8F82;
+			isa = PBXBuildFile;
+			settings = {
+			};
+		};
+		F92F4E4F0788DEFC001B8F82 = {
+			fileRef = F92F4E4D0788DEFC001B8F82;
+			isa = PBXBuildFile;
+			settings = {
+			};
+		};
 		F965D0A9077B8C0500628BD0 = {
 			fileRef = F9022C3F0758027800C3F701;
 			isa = PBXBuildFile;
@@ -3864,6 +3935,8 @@
 		};
 		F988709007580CB4001D4D49 = {
 			children = (
+				F92F4E4C0788DEFC001B8F82,
+				F92F4E4D0788DEFC001B8F82,
 				F9022C73075802E300C3F701,
 				F9022C74075802E300C3F701,
 				F9022C75075802E300C3F701,
@@ -4215,6 +4288,7 @@
 				F920DB02075C2B69000C5FCA,
 				F920DB03075C2B69000C5FCA,
 				3DAEA2ED07703F6000AF111A,
+				F92F4E4E0788DEFC001B8F82,
 			);
 			isa = PBXHeadersBuildPhase;
 			runOnlyForDeploymentPostprocessing = 0;

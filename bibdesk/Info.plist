@@ -478,6 +478,30 @@
 				<key>title</key>
 				<string>TeX - Typeset Preview</string>
 			</dict>
+                        <key>BibPref_Files</key>
+			<dict>
+				<key>defaultsDictionary</key>
+				<dict>
+                                        <key>Default string encoding for opening and saving</key>
+					<string>1</string>
+					<key>Use Unicode BibTeX Parser</key>
+					<string>0</string>
+                                        <key>Export BibTeX document when saving BibDesk document</key>
+                                        <string>0</string>
+				</dict>
+				<key>icon</key>
+				<string>genericBibDocIcon.tiff</string>
+				<key>identifier</key>
+				<string>bp_files</string>
+				<key>nib</key>
+				<string>BibPref_Files</string>
+				<key>ordering</key>
+				<string>10</string>
+				<key>shortTitle</key>
+				<string>Files</string>
+				<key>title</key>
+				<string>Opening and Saving</string>
+			</dict>
 		</dict>
 	</dict>
 	<key>UTExportedTypeDeclarations</key>

@@ -437,6 +437,10 @@ NSString* BDSKBibTeXStringPboardType = @"edu.ucsd.cs.mmcrack.bibdesk: Local BibT
 #endif
         [self exportAsRSS:nil];
     }
+    if([[OFPreferenceWrapper sharedPreferenceWrapper] integerForKey:BDSKExportBibTeXWithBDSKDocument] == NSOnState
+       && ![[self fileType] isEqualToString:@"bib"]){
+        [self exportEncodedBib:nil];
+    }
 }
 
 - (IBAction)exportAsHTML:(id)sender{
@@ -464,7 +468,7 @@ NSString* BDSKBibTeXStringPboardType = @"edu.ucsd.cs.mmcrack.bibdesk: Local BibT
         }
     }
     [sp beginSheetForDirectory:nil
-                          file:[[NSString stringWithString:[[self fileName] stringByDeletingPathExtension]] lastPathComponent]
+                          file:( [self fileName] == nil ? nil : [[NSString stringWithString:[[self fileName] stringByDeletingPathExtension]] lastPathComponent])
                 modalForWindow:documentWindow
                  modalDelegate:self
                 didEndSelector:@selector(savePanelDidEnd:returnCode:contextInfo:)
@@ -705,7 +709,7 @@ stringByAppendingPathComponent:@"BibDesk"]; */
 - (BOOL)loadDataRepresentation:(NSData *)data ofType:(NSString *)aType
 {
     if ([aType isEqualToString:@"bibTeX database"]){
-        return [self loadBibTeXDataRepresentation:data];
+        return [self loadBibTeXDataRepresentation:data encoding:[[OFPreferenceWrapper sharedPreferenceWrapper] integerForKey:BDSKDefaultStringEncoding]];
     }else if([aType isEqualToString:@"Rich Site Summary File"]){
         return [self loadRSSDataRepresentation:data];
     }else if([aType isEqualToString:@"RIS/Medline File"]){
@@ -785,7 +789,15 @@ stringByAppendingPathComponent:@"BibDesk"]; */
     return NO;
 }
 
-- (BOOL)loadBibTeXDataRepresentation:(NSData *)data{
+- (void)setDocumentStringEncoding:(NSStringEncoding)encoding{
+    documentStringEncoding = encoding;
+}
+
+- (NSStringEncoding)documentStringEncoding{
+    return documentStringEncoding;
+}
+
+- (BOOL)loadBibTeXDataRepresentation:(NSData *)data encoding:(NSStringEncoding)encoding{
     int rv = 0;
     BOOL hadProblems = NO;
     NSMutableDictionary *dictionary = nil;
@@ -801,11 +813,16 @@ stringByAppendingPathComponent:@"BibDesk"]; */
     // to enable some cheapo timing, uncomment these:
 //    NSDate *start = [NSDate date];
 //    NSLog(@"start: %@", [start description]);
-    
+        
     if([[OFPreferenceWrapper sharedPreferenceWrapper] boolForKey:BDSKUseUnicodeBibTeXParser]){
+        NSString *fileContentString = [[[NSString alloc] initWithData:data encoding:encoding] autorelease];
+        
+        if(encoding == NSASCIIStringEncoding) // use bdskconverter always
+            fileContentString = [[BDSKConverter sharedConverter] stringByDeTeXifyingString:fileContentString];
+                
 #warning ARM: Need prefs and document ivar for string encoding (need to save in binary file)
         NSLog(@"*** WARNING: using new parser.  To disable, use `defaults write edu.ucsd.cs.mmccrack.bibdesk \"Use Unicode BibTeX Parser\" 'NO'` and relaunch BibDesk.");
-        newPubs = [BibTeXParser itemsFromString:[[[NSString alloc] initWithData:data encoding:NSUTF8StringEncoding] autorelease]
+        newPubs = [BibTeXParser itemsFromString:fileContentString
                                           error:&hadProblems
                                     frontMatter:frontMatter
                                        filePath:filePath];

@@ -140,6 +140,7 @@ extern NSString* BDSKBibTeXStringPboardType;
     
     IBOutlet NSView *SaveEncodingAccessoryView;
     IBOutlet NSPopUpButton *saveTextEncodingPopupButton;
+    NSStringEncoding documentStringEncoding;
 }
 
 - (void)awakeFromNib;
@@ -157,7 +158,7 @@ extern NSString* BDSKBibTeXStringPboardType;
 - (NSData *)bibTeXDataWithEncoding:(NSStringEncoding)encoding;
 - (NSString *)publicationsAsHTML;
 - (BOOL)loadDataRepresentation:(NSData *)data ofType:(NSString *)aType;
-- (BOOL)loadBibTeXDataRepresentation:(NSData *)data;
+- (BOOL)loadBibTeXDataRepresentation:(NSData *)data encoding:(NSStringEncoding)encoding;
 - (BOOL)loadRSSDataRepresentation:(NSData *)data;
 - (BOOL)loadPubMedDataRepresentation:(NSData *)data;
 - (BOOL)readFromFile:(NSString *)fileName ofType:(NSString *)docType;
