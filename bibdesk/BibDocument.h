@@ -29,6 +29,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 #import "BibTeXParser.h"
 #import <OmniAppKit/OASplitView.h>
 
+
 @class BDSKCustomCiteTableView;
 @class BibItem;
 @class BibEditor;
@@ -201,8 +202,13 @@ extern NSString* LocalDragPasteboardName;
 */
 - (void)displayPreviewForItems:(NSEnumerator *)enumerator;
 
-
 /*!
+@method emailPubCmd
+ 
+*/
+- (IBAction)emailPubCmd:(id)sender;
+
+    /*!
     @method editPubCmd
     @abstract an action to edit a publication has happened. 
     @discussion This is the tableview's doubleaction and the action of the edit pub button. It calls editPub with the tableview's selected publication.
