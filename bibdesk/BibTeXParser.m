@@ -8,6 +8,9 @@
 
 #import "BibTeXParser.h"
 
+
+@interface BibTeXParser (Private)
+
 // private function to do ASCII checking.
 NSString * checkAndTranslateString(NSString *s, int line, NSString *filePath);
 
@@ -18,6 +21,36 @@ BDSKComplexString *complexStringFromBTField(AST *field,
                                             NSString *fieldName, 
                                             NSString *filePath,
                                             BibDocument* theDocument);
+
+/// The remaining private methods are used by the NSString-based BibTeX parser
+
+// used to stop a parsing operation in progress if its parent document window closes
+- (void)terminateCurrentThread;
+
+// range functions used to avoid out-of-range exceptions when using NSString rangeOfString:
+NSRange SafeForwardSearchRange( unsigned startLoc, unsigned seekLength, unsigned maxLoc );
+NSRange SafeBackwardSearchRange(NSRange startRange, unsigned seekLength);
+
+// called by the Unicode parser; provides compatibility with the btparse error messages
+- (void)postParsingErrorNotification:(NSString *)message errorType:(NSString *)type fileName:(NSString *)name errorRange:(NSRange)range;
+
+// formerly used to determine if an '@' character represented a new entry, but is now only used to find the first one in the string
+- (BOOL)isNewEntryAtRange:(NSRange)theRange inString:(NSString *)fullString;
+
+// checks a string fragment to see if it contains balanced braces; used to determine if an '@' or '#' is quoted
+- (BOOL)hasBalancedQuotes:(NSString *)string usingBraces:(BOOL)braces;
+
+// main NSString-based parser method; use the public methods to access this
+- (NSMutableArray *)itemsFromString:(NSString *)fullString error:(BOOL *)hadProblems frontMatter:(NSMutableString *)frontMatter filePath:(NSString *)filePath document:(BibDocument *)aDocument background:(BOOL)background;
+
+// used to scan the contents of @string declarations
+- (NSDictionary *)macroStringFromScanner:(NSScanner *)scanner endingRange:(NSRange)range string:(NSString *)fullString;
+
+// used to scan @preamble declarations
+- (NSString *)preambleStringFromScanner:(NSScanner *)scanner endingRange:(NSRange)range string:(NSString *)fullString filePath:(NSString *)filePath hadProblems:(BOOL *)hadProblems;
+
+@end
+
 @implementation BibTeXParser
 
 - (id)init{
@@ -34,14 +67,6 @@ BDSKComplexString *complexStringFromBTField(AST *field,
 - (void)dealloc{
     [[NSNotificationCenter defaultCenter] removeObserver:self];
     [super dealloc];
-}
-
-- (void)terminateCurrentThread{
-    // NSLog(@"%@", NSStringFromSelector(_cmd));
-    [[NSNotificationCenter defaultCenter] removeObserver:self];
-    [theDocument stopParseUpdateTimer];
-    [self setDocument:nil];
-    // [NSThread exit]; // causes a hang; why?
 }
 
 /// libbtparse methods
@@ -67,21 +92,6 @@ BDSKComplexString *complexStringFromBTField(AST *field,
     return [parser itemsFromString:string error:hadProblems frontMatter:frontMatter filePath:filePath document:document background:NO];
 }
 
-NSRange SafeForwardSearchRange( unsigned startLoc, unsigned seekLength, unsigned maxLoc ){
-    seekLength = ( (startLoc + seekLength > maxLoc) ? maxLoc - startLoc : seekLength );
-    return NSMakeRange(startLoc, seekLength);
-}
-
-- (void)postParsingErrorNotification:(NSString *)message errorType:(NSString *)type fileName:(NSString *)name errorRange:(NSRange)range{
-    NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
-    
-    NSDictionary *errorDict = [NSDictionary dictionaryWithObjects:[NSArray arrayWithObjects:name, [NSNull null], type, message, [NSValue valueWithRange:range], nil]
-                                                          forKeys:[NSArray arrayWithObjects:@"fileName", @"lineNumber", @"errorClassName", @"errorMessage", @"errorRange", nil]];
-    [[NSNotificationCenter defaultCenter] postNotificationName:BDSKParserErrorNotification
-                                                        object:errorDict];
-    [pool release];
-}
-
 - (void)setDocument:(BibDocument *)aDocument{
     theDocument = aDocument;
 }
@@ -95,11 +105,219 @@ NSRange SafeForwardSearchRange( unsigned startLoc, unsigned seekLength, unsigned
     [self itemsFromString:fullString error:&hadProblems frontMatter:frontMatter filePath:[document fileName] document:document background:YES];
 }
 
+- (NSMutableArray *)itemsFromData:(NSData *)inData
+                            error:(BOOL *)hadProblems
+                      frontMatter:(NSMutableString *)frontMatter
+                         filePath:(NSString *)filePath
+                         document:(BibDocument *)aDocument{
+	
+	NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
+	
+    int ok = 1;
+    long cidx = 0; // used to scan through buf for annotes.
+    int braceDepth = 0;
+    
+    BibItem *newBI = nil;
+
+    // Strings read from file and added to Dictionary object
+    char *fieldname = "\0";
+    NSString *s = nil;
+    NSString *sFieldName = nil;
+    BDSKComplexString *complexString = nil;
+	
+    AST *entry = NULL;
+    AST *field = NULL;
+    int itemOrder = 1;
+    NSString *entryType = nil;
+    NSMutableArray *returnArray = [[NSMutableArray alloc] initWithCapacity:1];
+    
+    const char *buf = NULL; // (char *) malloc(sizeof(char) * [inData length]);
+
+    //dictionary is the bibtex entry
+    NSMutableDictionary *dictionary = [NSMutableDictionary dictionaryWithCapacity:6];
+    
+    const char * fs_path = NULL;
+    NSString *tempFilePath = nil;
+    BOOL usingTempFile = NO;
+    FILE *infile = NULL;
+
+    NSRange asciiRange;
+    NSCharacterSet *asciiLetters;
+
+    //This range defines ASCII, used for the invalid character check during file read
+    //we include all the control characters, since anything bad in here should be caught by btparse
+    asciiRange.location = 0;
+    asciiRange.length = 127; //This should get everything through tilde
+    asciiLetters = [NSCharacterSet characterSetWithRange:asciiRange];
+    
+    [self setDocument:aDocument];
+    
+    if( !([filePath isEqualToString:@"Paste/Drag"]) && [[NSFileManager defaultManager] fileExistsAtPath:filePath]){
+        fs_path = [[NSFileManager defaultManager] fileSystemRepresentationWithPath:filePath];
+        usingTempFile = NO;
+    }else{
+        tempFilePath = [NSTemporaryDirectory() stringByAppendingPathComponent:[[NSProcessInfo processInfo] globallyUniqueString]];
+        [inData writeToFile:tempFilePath atomically:YES];
+        fs_path = [[NSFileManager defaultManager] fileSystemRepresentationWithPath:tempFilePath];
+        NSLog(@"using temporary file %@ - was it deleted?",tempFilePath);
+        usingTempFile = YES;
+    }
+    
+    infile = fopen(fs_path, "r");
+
+    *hadProblems = NO;
+
+    NS_DURING
+       // [inData getBytes:buf length:[inData length]];
+        buf = (const char *) [inData bytes];
+    NS_HANDLER
+        // if we couldn't convert it, we won't be able to read it: just give up.
+        // maybe instead of giving up we should find a way to use lossyCString here... ?
+        if ([[localException name] isEqualToString:NSCharacterConversionException]) {
+            NSLog(@"Exception %@ raised in itemsFromString, handled by giving up.", [localException name]);
+            inData = nil;
+            NSBeep();
+        }else{
+            [localException raise];
+        }
+        NS_ENDHANDLER
+
+        bt_initialize();
+        bt_set_stringopts(BTE_PREAMBLE, BTO_EXPAND);
+        bt_set_stringopts(BTE_REGULAR, BTO_MINIMAL);
+
+        while(entry =  bt_parse_entry(infile, (char *)fs_path, 0, &ok)){
+	    NSAutoreleasePool *innerPool = [[NSAutoreleasePool alloc] init];
+            if (ok){
+                // Adding a new BibItem
+				entryType = [NSString stringWithCString:bt_entry_type(entry)];
+
+                if (bt_entry_metatype (entry) != BTE_REGULAR){
+                    // put preambles etc. into the frontmatter string so we carry them along.
+                    
+                    if (frontMatter && [entryType isEqualToString:@"preamble"]){
+                        [frontMatter appendString:@"\n@preamble{\""];
+                        [frontMatter appendString:[NSString stringWithCString:bt_get_text(entry) ]];
+                        [frontMatter appendString:@"\"}"];
+                    }else if(frontMatter && [entryType isEqualToString:@"string"]){
+						field = bt_next_field (entry, NULL, &fieldname);
+						NSString *macroKey = [NSString stringWithCString: field->text ];
+						NSString *macroString = [NSString stringWithCString: field->down->text ];                        
+                        if(theDocument)
+                            [theDocument addMacroDefinitionWithoutUndo:macroString
+                                                   forMacro:macroKey];
+					}
+                }else{
+                    newBI = [[BibItem alloc] initWithType:[entryType lowercaseString]
+                                                 fileType:BDSKBibtexString
+                                                  authors:[NSMutableArray arrayWithCapacity:0]
+                                              createdDate:nil];
+					[newBI setFileOrder:itemOrder];
+                    itemOrder++;
+                    field = NULL;
+                    // Returned special case handling of abstract & annote.
+                    // Special case is there to avoid losing newlines that exist in preexisting files.
+                    while (field = bt_next_field (entry, field, &fieldname))
+                    {
+                        //Get fieldname as a capitalized NSString
+                        sFieldName = [[NSString stringWithCString: fieldname] capitalizedString];
+                        
+                        if(!strcmp(fieldname, "annote") ||
+                           !strcmp(fieldname, "abstract") ||
+                           !strcmp(fieldname, "rss-description")){
+                            if(field->down){
+                                cidx = field->down->offset;
+
+                                // the delimiter is at cidx-1
+                                if(buf[cidx-1] == '{'){
+                                    // scan up to the balanced brace
+                                    for(braceDepth = 1; braceDepth > 0; cidx++){
+                                        if(buf[cidx] == '{') braceDepth++;
+                                        if(buf[cidx] == '}') braceDepth--;
+                                    }
+                                    cidx--;     // just advanced cidx one past the end of the field.
+                                }else if(buf[cidx-1] == '"'){
+                                    // scan up to the next quote.
+                                    for(; buf[cidx] != '"'; cidx++);
+                                }
+                                complexString = [NSString stringWithCString:&buf[field->down->offset] length:(cidx- (field->down->offset))];
+                            }else{
+                                *hadProblems = YES;
+                            }
+                        }else{
+                            complexString = complexStringFromBTField(field, sFieldName, filePath, theDocument);
+                        }
+                        
+                        [dictionary setObject:complexString forKey:sFieldName];
+
+                    }// end while field - process next bt field                    
+					
+                    [newBI setCiteKeyString:[NSString stringWithCString:bt_entry_key(entry)]];
+                    [newBI setPubFields:dictionary];
+                    [returnArray addObject:[newBI autorelease]];
+                    
+                    [dictionary removeAllObjects];
+                } // end generate BibItem from ENTRY metatype.
+            }else{
+                // wasn't ok, record it and deal with it later.
+				*hadProblems = YES;
+            }
+            bt_free_ast(entry);
+	    [innerPool release];
+        } // while (scanning through file) 
+		
+        bt_cleanup();
+
+        if(tempFilePath){
+            if (![[NSFileManager defaultManager] removeFileAtPath:tempFilePath handler:nil]) {
+                NSLog(@"itemsFromString Failed to delete temporary file. (%@)", tempFilePath);
+            }
+        }
+        fclose(infile);
+        if(usingTempFile){
+            if(remove(fs_path)){
+                NSLog(@"Error - unable to remove temporary file %@", tempFilePath);
+            }
+        }
+        // @@readonly free(buf);
+		
+		[pool release];
+        return [returnArray autorelease];
+}
+
+/// private method implementations for NSString-based parser
+
+- (void)terminateCurrentThread{
+    // NSLog(@"%@", NSStringFromSelector(_cmd));
+    [[NSNotificationCenter defaultCenter] removeObserver:self];
+    [theDocument stopParseUpdateTimer];
+    [self setDocument:nil];
+    // [NSThread exit]; // causes a hang; why?
+}
+
+- (void)postParsingErrorNotification:(NSString *)message errorType:(NSString *)type fileName:(NSString *)name errorRange:(NSRange)range{
+    NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
+    
+    NSDictionary *errorDict = [NSDictionary dictionaryWithObjects:[NSArray arrayWithObjects:name, [NSNull null], type, message, [NSValue valueWithRange:range], nil]
+                                                          forKeys:[NSArray arrayWithObjects:@"fileName", @"lineNumber", @"errorClassName", @"errorMessage", @"errorRange", nil]];
+    [[NSNotificationCenter defaultCenter] postNotificationName:BDSKParserErrorNotification
+                                                        object:errorDict];
+    [pool release];
+}
+
+// returns the largest possible search range from a starting location, based on a desired seek length and the maximum location (string length); avoids out-of-range exceptions
+NSRange SafeForwardSearchRange( unsigned startLoc, unsigned seekLength, unsigned maxLoc ){
+    seekLength = ( (startLoc + seekLength > maxLoc) ? maxLoc - startLoc : seekLength );
+    return NSMakeRange(startLoc, seekLength);
+}
+
+// returns the largest possible search range from a starting range to a previous location, based on a desired seek length; avoids out-of-range exceptions
 NSRange SafeBackwardSearchRange(NSRange startRange, unsigned seekLength){
     unsigned minLoc = ( (startRange.location > seekLength) ? seekLength : startRange.location);
     return NSMakeRange(startRange.location - minLoc, minLoc);
 }
 
+// used to determine if the first '@' character in a file is quoted or not; this method is not robust
 - (BOOL)isNewEntryAtRange:(NSRange)theRange inString:(NSString *)fullString{ // use this to determine if an '@' is inside braces or not
     NSRange rbRange = [fullString rangeOfString:@"}" options:NSLiteralSearch | NSBackwardsSearch range:SafeBackwardSearchRange(theRange, theRange.location)];
     NSRange lbRange = [fullString rangeOfString:@"{" options:NSLiteralSearch | NSBackwardsSearch range:SafeBackwardSearchRange(theRange, theRange.location)];
@@ -112,6 +330,8 @@ NSRange SafeBackwardSearchRange(NSRange startRange, unsigned seekLength){
     }
 }
 
+// Check a string to see if the number of braces or quotes matches up.  Used to determine whether brace depth of '#' and '@' characters.
+// The actual behavior of this method is dependent on usage in the parsing, and should not be relied upon for general-purpose brace matching.
 - (BOOL)hasBalancedQuotes:(NSString *)string usingBraces:(BOOL)braces{
     NSString *leftDelim, *rightDelim;
     if(braces){ // need same number of each
@@ -126,18 +346,19 @@ NSRange SafeBackwardSearchRange(NSRange startRange, unsigned seekLength){
     unsigned rdelim = 0;
     NSRange range = [string rangeOfString:leftDelim options:NSLiteralSearch range:NSMakeRange(start, [string length] - start)];
     while(range.location != NSNotFound){
-        ldelim++;
+        if(braces || (!braces && [string characterAtIndex:(range.location - 1)] != '\\')) // see if it's a \" sequence
+            ldelim++;
         start = range.location + 1;
         range = [string rangeOfString:leftDelim options:NSLiteralSearch range:NSMakeRange(start, [string length] - start)];
     }
-    
+
     if(!braces){ // we're done checking
         if(ldelim & 1) // odd number of quotes --> unbalanced... but what if the quotes are inside of braces?
             return NO;
         else
             return YES;
     }
-    
+
     start = 0; // must reset it!
     range = [string rangeOfString:rightDelim options:NSLiteralSearch range:NSMakeRange(start, [string length] - start)];
     while(range.location != NSNotFound){
@@ -145,10 +366,133 @@ NSRange SafeBackwardSearchRange(NSRange startRange, unsigned seekLength){
         start = range.location + 1;
         range = [string rangeOfString:rightDelim options:NSLiteralSearch range:NSMakeRange(start, [string length] - start)];
     }
-   
+
     return (ldelim == rdelim) ? YES : NO;
+
+}
+
+// Scan @string definitions into a dictionary
+- (NSDictionary *)macroStringFromScanner:(NSScanner *)scanner endingRange:(NSRange)range string:(NSString *)fullString{
+    
+    NSString *field = nil;
+    NSString *value = nil;
+    NSCharacterSet *trimQuoteCharacterSet = [NSCharacterSet characterSetWithCharactersInString:@"\""]; // strip these from the ends of the value string
+    
+    [scanner scanString:@"{" intoString:nil]; // if there wasn't a brace, the warning message will come from the caller
+    
+    [scanner scanUpToString:@"=" intoString:&field];
+    [scanner scanString:@"=" intoString:nil];
+    
+    // someone (Nelson Beebe or Greg Ward) indicated that you can use macros within @string declarations, so we may not have a quote.  great.
+    [scanner scanCharactersFromSet:[NSCharacterSet whitespaceCharacterSet] intoString:nil];
+    
+    value = [fullString substringWithRange:NSMakeRange([scanner scanLocation], range.location - [scanner scanLocation])];
+    value = [value stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceCharacterSet]];
+    
+    if([[fullString substringWithRange:NSMakeRange([scanner scanLocation], 1)] isEqualToString:@"\""])
+        value = [value stringByTrimmingCharactersInSet:trimQuoteCharacterSet];
+    
+    NSAssert( [scanner scanLocation] < range.location, @"Scanner scanned out of range!" );
+    
+    [scanner setScanLocation:range.location]; // needs to be set so it's at the right location when we return
+    
+    NSAssert( field != nil, @"Found a nil @string field (key)" );
+    NSAssert( value != nil, @"Found a nil @string value" );
+    
+    return [NSDictionary dictionaryWithObject:value forKey:[field stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceCharacterSet]]];
     
 }
+
+// scan @preamble declarations into a string, so they can be carried along with frontmatter
+- (NSString *)preambleStringFromScanner:(NSScanner *)scanner endingRange:(NSRange)range string:(NSString *)fullString filePath:(NSString *)filePath hadProblems:(BOOL *)hadProblems{
+    
+    BOOL keepScanning = YES;
+    
+    unsigned searchStart = [scanner scanLocation]; // we want to keep the first and last brace, so be careful of the start/end points
+    unsigned fullStringLength = [fullString length]; // we have no idea a priori where this will end, so we'll just scan through it up to the full length
+    NSString *leftDelim = @"{";
+    NSString *rightDelim = @"}";
+    NSString *logString;
+    
+    unsigned rightDelimLocation = 0;
+    unsigned leftDelimLocation = searchStart;
+    if([scanner scanUpToString:rightDelim intoString:nil]){
+        rightDelimLocation = [scanner scanLocation];
+    } else {
+        *hadProblems = YES;
+        [self postParsingErrorNotification:[NSString stringWithFormat:@"Delimiter '%@' not found", rightDelim]
+                                 errorType:@"Parse Error" 
+                                  fileName:filePath 
+                                errorRange:[fullString lineRangeForRange:NSMakeRange([scanner scanLocation], 0)]];
+    }
+    
+    while(keepScanning){
+        NSRange braceSearchRange = NSMakeRange(searchStart, fullStringLength - searchStart); // braceSearchRange is the "key = {" <-- brace, up to the first '}'
+                                                                                             // NSLog(@"Beginning search: substring in braceSearchRange is %@", [fullString substringWithRange:braceSearchRange] );
+        NSRange braceFoundRange = [fullString rangeOfString:leftDelim options:NSLiteralSearch range:braceSearchRange]; // this is the first '{' found searching forward in braceSearchRange
+        
+        // Locals used only in this while()
+        unsigned tempStart = braceFoundRange.location;
+        BOOL doShallow = YES;
+        
+        // Okay, so we found a left delimiter.  However, it may be nested inside yet another brace pair, so let's look back from the left delimiter and see if we find another left delimiter at a different location.  
+        // Example:  Title = {Physical insight into the {Ergun} and {Wen {\&} Yu} equations for fluid flow in packed and fluidised beds},
+        // In this example, the {Wen {\&} Yu} expression is problematic, because we need to account for both left braces; if we don't, everything after the } is stripped.
+        // WARNING:  this while() is sort of nasty, and the best way to see how it works is to uncomment the debugging code.  It handles cases such as the above.
+        // No guarantee that my comments are totally accurate, either, since some of this is by trial-and-error, and it's easy to get lost in the braces when you're debugging.
+        
+        while(tempStart != [fullString rangeOfString:leftDelim options:NSLiteralSearch | NSBackwardsSearch range:braceSearchRange].location){ // this means we found "{ {" between { and }
+            
+            // Reset tempStart, so we know where to look from on the next pass through the loop
+            tempStart = [fullString rangeOfString:leftDelim options:NSLiteralSearch range:braceSearchRange].location; // look forward to get the next one to compare with in the while() above
+                                                                                                                      // NSLog(@"Reset tempStart!  Neighboring characters are %@", [fullString substringWithRange:NSMakeRange(tempStart - 2, 5)]);
+            
+            // Perform a forward search to find the leftDelim that we're trying to match; we need to keep track of which leftDelim we're starting from or else we get off by one (or more) braces, and throw an error.
+            braceSearchRange = [fullString rangeOfString:leftDelim options:NSLiteralSearch range:NSMakeRange(braceSearchRange.location + 1, rightDelimLocation - braceSearchRange.location - 1)];
+            
+            // If there are no more leftDelims hanging around, we're done; bail out and go to the next key-value line in the parent while(); don't do the shallow brace check,
+            // since that puts us past the end.
+            if(braceSearchRange.location == NSNotFound){
+                // NSLog(@"braceSearchRange.location is not found, breaking out.");                        
+                keepScanning = NO;
+                break;
+            }
+            
+            [scanner scanString:rightDelim intoString:&logString]; // More to come, so scan past it
+                                                                   //NSLog(@"Deep nested brace check, scanned rightDelim %@", logString);
+            
+            if(![scanner scanUpToString:rightDelim intoString:&logString] && // find the next right delimiter
+               [fullString rangeOfString:@"},\n" options:NSLiteralSearch range:NSMakeRange(tempStart + 1, [scanner scanLocation] - tempStart - 1)].location != NSNotFound ){ // see if there's an equal sign, which means we probably went too far and hit another key/value 
+                                                                                                                                                                             //NSLog(@"*** ERROR doubly nested braces");
+                                                                                                                                                                             //NSLog(@"the substring was %@", [fullString substringWithRange:NSMakeRange(tempStart + 1, [scanner scanLocation] - tempStart - 1)]);
+                *hadProblems = YES; // May not be an error, since these tests are sort of bogus
+                                    // showWarning = YES;
+                [self postParsingErrorNotification:[NSString stringWithFormat:@"I am puzzled: delimiter '%@' may be missing", rightDelim]
+                                         errorType:@"Parse Warning" 
+                                          fileName:filePath 
+                                        errorRange:[fullString lineRangeForRange:NSMakeRange(leftDelimLocation, 0)]];
+            }
+            rightDelimLocation = [scanner scanLocation];
+            // NSLog(@"Deep nested braces, scanned up to %@ and found %@", rightDelim, logString);
+            // NSLog(@"Next I'll compare %i with %i", [fullString rangeOfString:leftDelim options:NSLiteralSearch range:braceSearchRange].location, [fullString rangeOfString:leftDelim options:NSLiteralSearch | NSBackwardsSearch range:braceSearchRange].location);
+        }
+        
+    }
+
+    if(![scanner scanString:rightDelim intoString:&logString]){
+        *hadProblems = YES;
+        [self postParsingErrorNotification:[NSString stringWithFormat:@"Delimiter '%@' not found", rightDelim]
+                                 errorType:@"Parse Error" 
+                                  fileName:filePath 
+                                errorRange:[fullString lineRangeForRange:NSMakeRange(leftDelimLocation, 0)]];
+    }
+
+    NSString *returnString = [NSString stringWithFormat:@"@preamble%@\n\n", [fullString substringWithRange:NSMakeRange(searchStart, [scanner scanLocation] - searchStart)]];
+    // NSLog(@"returning %@", returnString);
+    return returnString;
+}
+
+// NSString-based BibTeX parser method.
 
 - (NSMutableArray *)itemsFromString:(NSString *)fullString error:(BOOL *)hadProblems frontMatter:(NSMutableString *)frontMatter filePath:(NSString *)filePath document:(BibDocument *)aDocument background:(BOOL)background{
 
@@ -531,7 +875,7 @@ NSRange SafeBackwardSearchRange(NSRange startRange, unsigned seekLength){
 
         [pool release];
     }
-#warning ARM: prefs override
+
     if(*hadProblems || showWarning)
         [[NSApp delegate] performSelectorOnMainThread:@selector(showErrorPanel:)
                                            withObject:nil
@@ -551,306 +895,10 @@ NSRange SafeBackwardSearchRange(NSRange startRange, unsigned seekLength){
     return (isThreadedLoad) ? nil : bibItemArray;    
 }
 
-- (NSDictionary *)macroStringFromScanner:(NSScanner *)scanner endingRange:(NSRange)range string:(NSString *)fullString{
-    
-    NSString *field = nil;
-    NSString *value = nil;
-    NSCharacterSet *trimQuoteCharacterSet = [NSCharacterSet characterSetWithCharactersInString:@"\""]; // strip these from the ends of the value string
-    
-    [scanner scanString:@"{" intoString:nil]; // if there wasn't a brace, the warning message will come from the caller
-    
-    [scanner scanUpToString:@"=" intoString:&field];
-    [scanner scanString:@"=" intoString:nil];
-    
-    // someone (Nelson Beebe or Greg Ward) indicated that you can use macros within @string declarations, so we may not have a quote.  great.
-    [scanner scanCharactersFromSet:[NSCharacterSet whitespaceCharacterSet] intoString:nil];
-
-    value = [fullString substringWithRange:NSMakeRange([scanner scanLocation], range.location - [scanner scanLocation])];
-    value = [value stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceCharacterSet]];
-
-    if([[fullString substringWithRange:NSMakeRange([scanner scanLocation], 1)] isEqualToString:@"\""])
-        value = [value stringByTrimmingCharactersInSet:trimQuoteCharacterSet];
-    
-    NSAssert( [scanner scanLocation] < range.location, @"Scanner scanned out of range!" );
-    
-    [scanner setScanLocation:range.location]; // needs to be set so it's at the right location when we return
-    
-    NSAssert( field != nil, @"Found a nil @string field (key)" );
-    NSAssert( value != nil, @"Found a nil @string value" );
-    
-    return [NSDictionary dictionaryWithObject:value forKey:[field stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceCharacterSet]]];
-    
-}
-
-- (NSString *)preambleStringFromScanner:(NSScanner *)scanner endingRange:(NSRange)range string:(NSString *)fullString filePath:(NSString *)filePath hadProblems:(BOOL *)hadProblems{
-    
-    BOOL keepScanning = YES;
-    
-    unsigned searchStart = [scanner scanLocation]; // we want to keep the first and last brace, so be careful of the start/end points
-    unsigned fullStringLength = [fullString length]; // we have no idea a priori where this will end, so we'll just scan through it up to the full length
-    NSString *leftDelim = @"{";
-    NSString *rightDelim = @"}";
-    NSString *logString;
-    
-    unsigned rightDelimLocation = 0;
-    unsigned leftDelimLocation = searchStart;
-    if([scanner scanUpToString:rightDelim intoString:nil]){
-        rightDelimLocation = [scanner scanLocation];
-    } else {
-        *hadProblems = YES;
-        [self postParsingErrorNotification:[NSString stringWithFormat:@"Delimiter '%@' not found", rightDelim]
-                                 errorType:@"Parse Error" 
-                                  fileName:filePath 
-                                errorRange:[fullString lineRangeForRange:NSMakeRange([scanner scanLocation], 0)]];
-    }
-    
-    while(keepScanning){
-        NSRange braceSearchRange = NSMakeRange(searchStart, fullStringLength - searchStart); // braceSearchRange is the "key = {" <-- brace, up to the first '}'
-                                                                                       // NSLog(@"Beginning search: substring in braceSearchRange is %@", [fullString substringWithRange:braceSearchRange] );
-        NSRange braceFoundRange = [fullString rangeOfString:leftDelim options:NSLiteralSearch range:braceSearchRange]; // this is the first '{' found searching forward in braceSearchRange
-        
-        // Locals used only in this while()
-        unsigned tempStart = braceFoundRange.location;
-        BOOL doShallow = YES;
-        
-        // Okay, so we found a left delimiter.  However, it may be nested inside yet another brace pair, so let's look back from the left delimiter and see if we find another left delimiter at a different location.  
-        // Example:  Title = {Physical insight into the {Ergun} and {Wen {\&} Yu} equations for fluid flow in packed and fluidised beds},
-        // In this example, the {Wen {\&} Yu} expression is problematic, because we need to account for both left braces; if we don't, everything after the } is stripped.
-        // WARNING:  this while() is sort of nasty, and the best way to see how it works is to uncomment the debugging code.  It handles cases such as the above.
-        // No guarantee that my comments are totally accurate, either, since some of this is by trial-and-error, and it's easy to get lost in the braces when you're debugging.
-        
-        while(tempStart != [fullString rangeOfString:leftDelim options:NSLiteralSearch | NSBackwardsSearch range:braceSearchRange].location){ // this means we found "{ {" between { and }
-            
-            // Reset tempStart, so we know where to look from on the next pass through the loop
-            tempStart = [fullString rangeOfString:leftDelim options:NSLiteralSearch range:braceSearchRange].location; // look forward to get the next one to compare with in the while() above
-                                                                                                                      // NSLog(@"Reset tempStart!  Neighboring characters are %@", [fullString substringWithRange:NSMakeRange(tempStart - 2, 5)]);
-            
-            // Perform a forward search to find the leftDelim that we're trying to match; we need to keep track of which leftDelim we're starting from or else we get off by one (or more) braces, and throw an error.
-            braceSearchRange = [fullString rangeOfString:leftDelim options:NSLiteralSearch range:NSMakeRange(braceSearchRange.location + 1, rightDelimLocation - braceSearchRange.location - 1)];
-            
-            // If there are no more leftDelims hanging around, we're done; bail out and go to the next key-value line in the parent while(); don't do the shallow brace check,
-            // since that puts us past the end.
-            if(braceSearchRange.location == NSNotFound){
-                // NSLog(@"braceSearchRange.location is not found, breaking out.");                        
-                keepScanning = NO;
-                break;
-            }
-            
-            [scanner scanString:rightDelim intoString:&logString]; // More to come, so scan past it
-            //NSLog(@"Deep nested brace check, scanned rightDelim %@", logString);
-            
-            if(![scanner scanUpToString:rightDelim intoString:&logString] && // find the next right delimiter
-               [fullString rangeOfString:@"},\n" options:NSLiteralSearch range:NSMakeRange(tempStart + 1, [scanner scanLocation] - tempStart - 1)].location != NSNotFound ){ // see if there's an equal sign, which means we probably went too far and hit another key/value 
-                 //NSLog(@"*** ERROR doubly nested braces");
-                 //NSLog(@"the substring was %@", [fullString substringWithRange:NSMakeRange(tempStart + 1, [scanner scanLocation] - tempStart - 1)]);
-                *hadProblems = YES; // May not be an error, since these tests are sort of bogus
-                // showWarning = YES;
-                [self postParsingErrorNotification:[NSString stringWithFormat:@"I am puzzled: delimiter '%@' may be missing", rightDelim]
-                                         errorType:@"Parse Warning" 
-                                          fileName:filePath 
-                                        errorRange:[fullString lineRangeForRange:NSMakeRange(leftDelimLocation, 0)]];
-            }
-            rightDelimLocation = [scanner scanLocation];
-            // NSLog(@"Deep nested braces, scanned up to %@ and found %@", rightDelim, logString);
-            // NSLog(@"Next I'll compare %i with %i", [fullString rangeOfString:leftDelim options:NSLiteralSearch range:braceSearchRange].location, [fullString rangeOfString:leftDelim options:NSLiteralSearch | NSBackwardsSearch range:braceSearchRange].location);
-        }
-        
-    }
-    
-    if(![scanner scanString:rightDelim intoString:&logString]){
-        *hadProblems = YES;
-        [self postParsingErrorNotification:[NSString stringWithFormat:@"Delimiter '%@' not found", rightDelim]
-                                 errorType:@"Parse Error" 
-                                  fileName:filePath 
-                                errorRange:[fullString lineRangeForRange:NSMakeRange(leftDelimLocation, 0)]];
-    }
-    
-    NSString *returnString = [NSString stringWithFormat:@"@preamble%@\n\n", [fullString substringWithRange:NSMakeRange(searchStart, [scanner scanLocation] - searchStart)]];
-    // NSLog(@"returning %@", returnString);
-    return returnString;
-}
-
-- (NSMutableArray *)itemsFromData:(NSData *)inData
-                            error:(BOOL *)hadProblems
-                      frontMatter:(NSMutableString *)frontMatter
-                         filePath:(NSString *)filePath
-                         document:(BibDocument *)aDocument{
-	
-	NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
-	
-    int ok = 1;
-    long cidx = 0; // used to scan through buf for annotes.
-    int braceDepth = 0;
-    
-    BibItem *newBI = nil;
-
-    // Strings read from file and added to Dictionary object
-    char *fieldname = "\0";
-    NSString *s = nil;
-    NSString *sFieldName = nil;
-    BDSKComplexString *complexString = nil;
-	
-    AST *entry = NULL;
-    AST *field = NULL;
-    int itemOrder = 1;
-    NSString *entryType = nil;
-    NSMutableArray *returnArray = [[NSMutableArray alloc] initWithCapacity:1];
-    
-    const char *buf = NULL; // (char *) malloc(sizeof(char) * [inData length]);
-
-    //dictionary is the bibtex entry
-    NSMutableDictionary *dictionary = [NSMutableDictionary dictionaryWithCapacity:6];
-    
-    const char * fs_path = NULL;
-    NSString *tempFilePath = nil;
-    BOOL usingTempFile = NO;
-    FILE *infile = NULL;
-
-    NSRange asciiRange;
-    NSCharacterSet *asciiLetters;
-
-    //This range defines ASCII, used for the invalid character check during file read
-    //we include all the control characters, since anything bad in here should be caught by btparse
-    asciiRange.location = 0;
-    asciiRange.length = 127; //This should get everything through tilde
-    asciiLetters = [NSCharacterSet characterSetWithRange:asciiRange];
-    
-    [self setDocument:aDocument];
-    
-    if( !([filePath isEqualToString:@"Paste/Drag"]) && [[NSFileManager defaultManager] fileExistsAtPath:filePath]){
-        fs_path = [[NSFileManager defaultManager] fileSystemRepresentationWithPath:filePath];
-        usingTempFile = NO;
-    }else{
-        tempFilePath = [NSTemporaryDirectory() stringByAppendingPathComponent:[[NSProcessInfo processInfo] globallyUniqueString]];
-        [inData writeToFile:tempFilePath atomically:YES];
-        fs_path = [[NSFileManager defaultManager] fileSystemRepresentationWithPath:tempFilePath];
-        NSLog(@"using temporary file %@ - was it deleted?",tempFilePath);
-        usingTempFile = YES;
-    }
-    
-    infile = fopen(fs_path, "r");
-
-    *hadProblems = NO;
-
-    NS_DURING
-       // [inData getBytes:buf length:[inData length]];
-        buf = (const char *) [inData bytes];
-    NS_HANDLER
-        // if we couldn't convert it, we won't be able to read it: just give up.
-        // maybe instead of giving up we should find a way to use lossyCString here... ?
-        if ([[localException name] isEqualToString:NSCharacterConversionException]) {
-            NSLog(@"Exception %@ raised in itemsFromString, handled by giving up.", [localException name]);
-            inData = nil;
-            NSBeep();
-        }else{
-            [localException raise];
-        }
-        NS_ENDHANDLER
-
-        bt_initialize();
-        bt_set_stringopts(BTE_PREAMBLE, BTO_EXPAND);
-        bt_set_stringopts(BTE_REGULAR, BTO_MINIMAL);
-
-        while(entry =  bt_parse_entry(infile, (char *)fs_path, 0, &ok)){
-	    NSAutoreleasePool *innerPool = [[NSAutoreleasePool alloc] init];
-            if (ok){
-                // Adding a new BibItem
-				entryType = [NSString stringWithCString:bt_entry_type(entry)];
-
-                if (bt_entry_metatype (entry) != BTE_REGULAR){
-                    // put preambles etc. into the frontmatter string so we carry them along.
-                    
-                    if (frontMatter && [entryType isEqualToString:@"preamble"]){
-                        [frontMatter appendString:@"\n@preamble{\""];
-                        [frontMatter appendString:[NSString stringWithCString:bt_get_text(entry) ]];
-                        [frontMatter appendString:@"\"}"];
-                    }else if(frontMatter && [entryType isEqualToString:@"string"]){
-						field = bt_next_field (entry, NULL, &fieldname);
-						NSString *macroKey = [NSString stringWithCString: field->text ];
-						NSString *macroString = [NSString stringWithCString: field->down->text ];                        
-                        if(theDocument)
-                            [theDocument addMacroDefinitionWithoutUndo:macroString
-                                                   forMacro:macroKey];
-					}
-                }else{
-                    newBI = [[BibItem alloc] initWithType:[entryType lowercaseString]
-                                                 fileType:BDSKBibtexString
-                                                  authors:[NSMutableArray arrayWithCapacity:0]
-                                              createdDate:nil];
-					[newBI setFileOrder:itemOrder];
-                    itemOrder++;
-                    field = NULL;
-                    // Returned special case handling of abstract & annote.
-                    // Special case is there to avoid losing newlines that exist in preexisting files.
-                    while (field = bt_next_field (entry, field, &fieldname))
-                    {
-                        //Get fieldname as a capitalized NSString
-                        sFieldName = [[NSString stringWithCString: fieldname] capitalizedString];
-                        
-                        if(!strcmp(fieldname, "annote") ||
-                           !strcmp(fieldname, "abstract") ||
-                           !strcmp(fieldname, "rss-description")){
-                            if(field->down){
-                                cidx = field->down->offset;
-
-                                // the delimiter is at cidx-1
-                                if(buf[cidx-1] == '{'){
-                                    // scan up to the balanced brace
-                                    for(braceDepth = 1; braceDepth > 0; cidx++){
-                                        if(buf[cidx] == '{') braceDepth++;
-                                        if(buf[cidx] == '}') braceDepth--;
-                                    }
-                                    cidx--;     // just advanced cidx one past the end of the field.
-                                }else if(buf[cidx-1] == '"'){
-                                    // scan up to the next quote.
-                                    for(; buf[cidx] != '"'; cidx++);
-                                }
-                                complexString = [NSString stringWithCString:&buf[field->down->offset] length:(cidx- (field->down->offset))];
-                            }else{
-                                *hadProblems = YES;
-                            }
-                        }else{
-                            complexString = complexStringFromBTField(field, sFieldName, filePath, theDocument);
-                        }
-                        
-                        [dictionary setObject:complexString forKey:sFieldName];
-
-                    }// end while field - process next bt field                    
-					
-                    [newBI setCiteKeyString:[NSString stringWithCString:bt_entry_key(entry)]];
-                    [newBI setPubFields:dictionary];
-                    [returnArray addObject:[newBI autorelease]];
-                    
-                    [dictionary removeAllObjects];
-                } // end generate BibItem from ENTRY metatype.
-            }else{
-                // wasn't ok, record it and deal with it later.
-				*hadProblems = YES;
-            }
-            bt_free_ast(entry);
-	    [innerPool release];
-        } // while (scanning through file) 
-		
-        bt_cleanup();
-
-        if(tempFilePath){
-            if (![[NSFileManager defaultManager] removeFileAtPath:tempFilePath handler:nil]) {
-                NSLog(@"itemsFromString Failed to delete temporary file. (%@)", tempFilePath);
-            }
-        }
-        fclose(infile);
-        if(usingTempFile){
-            if(remove(fs_path)){
-                NSLog(@"Error - unable to remove temporary file %@", tempFilePath);
-            }
-        }
-        // @@readonly free(buf);
-		
-		[pool release];
-        return [returnArray autorelease];
-}
 
 @end
+
+/// private functions used with libbtparse code
 
 NSString * checkAndTranslateString(NSString *s, int line, NSString *filePath){
 	
