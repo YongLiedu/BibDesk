@@ -913,7 +913,7 @@ WritePageSize(void)
 	diagnostics(4, "Writepagesize bottom margin =%d pt", n/20);
 	
 	fprintRTF("\\pgnstart%d", getCounter("page"));
-	fprintRTF("\\widowctrl\\qj\\ftnbj\\f5\n");
+	fprintRTF("\\widowctrl\\qj\\ftnbj\\f6\n");
 }
 
 static void
