@@ -17,6 +17,7 @@
 - (NSString *)windowNibName{return @"BibPersonView";}
 
 - (id)initWithPerson:(BibAuthor *)person{
+    // NSLog(@"personcontroller init");
     self = [super initWithWindowNibName:@"BibPersonView"];
 	if(self){
 		[self setPerson:person];
@@ -28,7 +29,13 @@
 	}
 	return self;
 
-}	
+}
+
+- (void)dealloc{
+    // NSLog(@"personcontroller dealloc");
+    [_person release];
+    [super dealloc];
+}
 
 - (void)awakeFromNib{
 	if ([[self superclass] instancesRespondToSelector:@selector(awakeFromNib)]){
@@ -36,9 +43,9 @@
 	}
 	
 	[[NSNotificationCenter defaultCenter] addObserver:self
-											 selector:@selector(handlePubListChanged:)
-												 name:BDSKAuthorPubListChangedNotification
-											   object:nil]; 
+                                                 selector:@selector(handlePubListChanged:)
+                                                     name:BDSKAuthorPubListChangedNotification
+						object:nil]; 
 	[self _updateUI];
 }
 
