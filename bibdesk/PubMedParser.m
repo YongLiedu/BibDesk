@@ -103,7 +103,7 @@
                 value = [value stringByTrimmingCharactersInSet:whitespaceNewlineSet];
                 
                 
-                if([prefix isEqualToString:@"PMID"]){
+                if([prefix isEqualToString:@"PMID"] || [prefix isEqualToString:@"TY"]){ // ARM:  PMID for Medline, TY for Elsevier-ScienceDirect.  I hope.
                     // we have a new publication
                     
                     if([[pubDict allKeys] count] > 0){
