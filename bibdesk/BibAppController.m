@@ -420,10 +420,10 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
     
     if (!keyExists) {
         completionArray = [NSMutableArray arrayWithCapacity:5];
-        [_autoCompletionDict setObject:completionArray forKey:entry];
+        [_autoCompletionDict setObject:completionArray forKey:entry usingLock:acLock];
     }
 
-    completionArray = [_autoCompletionDict objectForKey:entry];
+    completionArray = [_autoCompletionDict objectForKey:entry usingLock:acLock];
     
     if([entry isEqualToString:@"Local-Url"] || [entry isEqualToString:@"Url"] || 
        [entry isEqualToString:@"Abstract"] || [entry isEqualToString:@"Annote"] ||
@@ -432,11 +432,11 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
     if([entry isEqualToString:@"Title"] || 
        [entry isEqualToString:@"Booktitle"] || 
        [entry isEqualToString:@"Publisher"]){ // add the whole string 
-        [completionArray addObject:string];
+        [completionArray addObject:string usingLock:acLock];
         return;
     }
     if([entry isEqualToString:@"Author"]){
-        [completionArray addObjectsFromArray:[string componentsSeparatedByString:@" and "]];
+        [completionArray addObjectsFromArray:[string componentsSeparatedByString:@" and "] usingLock:acLock];
         return;
     }
     
@@ -450,13 +450,13 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
         while(![scanner isAtEnd]){
             [scanner scanUpToCharactersFromSet:_autocompletePunctuationCharacterSet intoString:&tmp];
             if(tmp != nil) 
-		[completionArray addObject:tmp];
+		[completionArray addObject:tmp usingLock:acLock];
             [scanner scanCharactersFromSet:_autocompletePunctuationCharacterSet intoString:nil];
             [scanner scanCharactersFromSet:[NSCharacterSet whitespaceCharacterSet] intoString:nil];
         }
         [scanner release];
     } else {
-        [completionArray addObject:string];
+        [completionArray addObject:string usingLock:acLock];
     }
     
     // NSLog(@"completionArray is %@", [completionArray description]);
@@ -475,7 +475,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 }
 
 - (NSArray *)stringsForCompletionEntry:(NSString *)entry{
-	NSMutableArray* autoCompleteStrings = (NSMutableArray *)[_autoCompletionDict objectForKey:entry];
+    NSMutableArray* autoCompleteStrings = (NSMutableArray *)[_autoCompletionDict objectForKey:entry usingLock:acLock];
 	if (autoCompleteStrings)
 		return autoCompleteStrings; // why sort? [autoCompleteStrings sortedArrayUsingSelector:@selector(caseInsensitiveCompare:)];
 	else 
