@@ -8,7 +8,16 @@
 
 #import "BibTeXParser.h"
 
+// private function to do ASCII checking.
+NSString * checkAndTranslateString(NSString *s, int line, NSString *filePath);
 
+// private function to get array value from field:
+// "foo" # macro # {string} # 19
+// becomes an autoreleased array of dicts of different types.
+BDSKComplexString *complexStringFromBTField(AST *field, 
+                                            NSString *fieldName, 
+                                            NSString *filePath,
+                                            BibDocument* theDocument);
 @implementation BibTeXParser
 
 - (id)init{
@@ -39,12 +48,12 @@
 + (NSMutableArray *)itemsFromData:(NSData *)inData
                               error:(BOOL *)hadProblems{
     BibTeXParser *parser = [[[BibTeXParser alloc] init] autorelease];
-    return [parser itemsFromData:inData error:hadProblems frontMatter:nil filePath:@"Paste/Drag"];
+    return [parser itemsFromData:inData error:hadProblems frontMatter:nil filePath:@"Paste/Drag" document:nil];
 }
 
-+ (NSMutableArray *)itemsFromData:(NSData *)inData error:(BOOL *)hadProblems frontMatter:(NSMutableString *)frontMatter filePath:(NSString *)filePath{
++ (NSMutableArray *)itemsFromData:(NSData *)inData error:(BOOL *)hadProblems frontMatter:(NSMutableString *)frontMatter filePath:(NSString *)filePath document:(BibDocument *)aDocument{
     BibTeXParser *parser = [[[BibTeXParser alloc] init] autorelease];
-    return [parser itemsFromData:inData error:hadProblems frontMatter:frontMatter filePath:filePath];
+    return [parser itemsFromData:inData error:hadProblems frontMatter:frontMatter filePath:filePath document:aDocument];
 }
 
 /// Unicode scanner methods
@@ -615,9 +624,10 @@ NSRange SafeBackwardSearchRange(NSRange startRange, unsigned seekLength){
 }
 
 - (NSMutableArray *)itemsFromData:(NSData *)inData
-                              error:(BOOL *)hadProblems
-                        frontMatter:(NSMutableString *)frontMatter
-                           filePath:(NSString *)filePath{
+                            error:(BOOL *)hadProblems
+                      frontMatter:(NSMutableString *)frontMatter
+                         filePath:(NSString *)filePath
+                         document:(BibDocument *)aDocument{
 	
 	NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
 	
@@ -630,13 +640,12 @@ NSRange SafeBackwardSearchRange(NSRange startRange, unsigned seekLength){
     // Strings read from file and added to Dictionary object
     char *fieldname = "\0";
     NSString *s = nil;
-    NSString *sDeTexified = nil;
     NSString *sFieldName = nil;
-
+    BDSKComplexString *complexString = nil;
+	
     AST *entry = NULL;
     AST *field = NULL;
     int itemOrder = 1;
-    BibAppController *appController = (BibAppController *)[NSApp delegate];
     NSString *entryType = nil;
     NSMutableArray *returnArray = [[NSMutableArray alloc] initWithCapacity:1];
     
@@ -644,6 +653,7 @@ NSRange SafeBackwardSearchRange(NSRange startRange, unsigned seekLength){
 
     //dictionary is the bibtex entry
     NSMutableDictionary *dictionary = [NSMutableDictionary dictionaryWithCapacity:6];
+    
     const char * fs_path = NULL;
     NSString *tempFilePath = nil;
     BOOL usingTempFile = NO;
@@ -658,6 +668,7 @@ NSRange SafeBackwardSearchRange(NSRange startRange, unsigned seekLength){
     asciiRange.length = 127; //This should get everything through tilde
     asciiLetters = [NSCharacterSet characterSetWithRange:asciiRange];
     
+    [self setDocument:aDocument];
     
     if( !([filePath isEqualToString:@"Paste/Drag"]) && [[NSFileManager defaultManager] fileExistsAtPath:filePath]){
         fs_path = [[NSFileManager defaultManager] fileSystemRepresentationWithPath:filePath];
@@ -697,20 +708,28 @@ NSRange SafeBackwardSearchRange(NSRange startRange, unsigned seekLength){
 	    NSAutoreleasePool *innerPool = [[NSAutoreleasePool alloc] init];
             if (ok){
                 // Adding a new BibItem
+				entryType = [NSString stringWithCString:bt_entry_type(entry)];
+
                 if (bt_entry_metatype (entry) != BTE_REGULAR){
                     // put preambles etc. into the frontmatter string so we carry them along.
-                    entryType = [NSString stringWithCString:bt_entry_type(entry)];
                     
                     if (frontMatter && [entryType isEqualToString:@"preamble"]){
                         [frontMatter appendString:@"\n@preamble{\""];
                         [frontMatter appendString:[NSString stringWithCString:bt_get_text(entry) ]];
                         [frontMatter appendString:@"\"}"];
-                    }
+                    }else if(frontMatter && [entryType isEqualToString:@"string"]){
+						field = bt_next_field (entry, NULL, &fieldname);
+						NSString *macroKey = [NSString stringWithCString: field->text ];
+						NSString *macroString = [NSString stringWithCString: field->down->text ];                        
+                        if(theDocument)
+                            [theDocument addMacroDefinitionWithoutUndo:macroString
+                                                   forMacro:macroKey];
+					}
                 }else{
-                    newBI = [[BibItem alloc] initWithType:[[NSString stringWithCString:bt_entry_type(entry)] lowercaseString]
+                    newBI = [[BibItem alloc] initWithType:[entryType lowercaseString]
                                                  fileType:BDSKBibtexString
                                                   authors:[NSMutableArray arrayWithCapacity:0]
-											  createdDate:nil];
+                                              createdDate:nil];
 					[newBI setFileOrder:itemOrder];
                     itemOrder++;
                     field = NULL;
@@ -718,7 +737,9 @@ NSRange SafeBackwardSearchRange(NSRange startRange, unsigned seekLength){
                     // Special case is there to avoid losing newlines that exist in preexisting files.
                     while (field = bt_next_field (entry, field, &fieldname))
                     {
-
+                        //Get fieldname as a capitalized NSString
+                        sFieldName = [[NSString stringWithCString: fieldname] capitalizedString];
+                        
                         if(!strcmp(fieldname, "annote") ||
                            !strcmp(fieldname, "abstract") ||
                            !strcmp(fieldname, "rss-description")){
@@ -738,76 +759,32 @@ NSRange SafeBackwardSearchRange(NSRange startRange, unsigned seekLength){
                                     for(; buf[cidx] != '"'; cidx++);
                                 }
                                 s = [NSString stringWithCString:&buf[field->down->offset] length:(cidx- (field->down->offset))];
+                                complexString = [BDSKComplexString complexStringWithString:s macroResolver:theDocument];
                             }else{
                                 *hadProblems = YES;
                             }
                         }else{
-                            s = [NSString stringWithCString:bt_get_text(field)];
+                            complexString = complexStringFromBTField(field, sFieldName, filePath, theDocument);
                         }
-
-                        // Now that we have the string from the file, check for invalid characters:
                         
-                        //Begin check for valid characters (ASCII); otherwise we mangle the .bib file every time we write out
-                        //by inserting two characters for every extended character.
+                        [dictionary setObject:complexString forKey:sFieldName];
 
-                        // Note (mmcc) : This is necessary only when CharacterConversion.plist doesn't cover a character that's in the file - this may be fixable in BDSKConverter also.
-                        
-                        NSScanner *validscan;
-                        NSString *validscanstring = nil;
-                                                
-                        validscan = [NSScanner scannerWithString:s];  //Scan string s after we get it from bt
-                        
-                        [validscan setCharactersToBeSkipped:nil]; //If the first character is a newline or whitespace, NSScanner will skip it by default, which gives a bad length value
-                        BOOL scannedCharacters = [validscan scanCharactersFromSet:asciiLetters intoString:&validscanstring];
-                        
-                        if(scannedCharacters && ([validscanstring length] != [s length])) //Compare it to the original string
-                        {
-                            NSLog(@"This string was in the file: [%@]",s);
-                            NSLog(@"This is the part we can read: [%@]",validscanstring);
-                            int errorLine = field->line;
-                            NSLog(@"Invalid characters at line [%i]",errorLine);
-                            
-                            // This sets up an error dictionary object and passes it to the listener
-                            NSString *fileName = filePath;  //We call this fileName, but its actually trimmed in BibAppController
-                            NSValue *lineNumber = [NSNumber numberWithInt:errorLine];  //Need NSValues for NSArray
-                            NSString *errorClassName = @"warning"; //We call it a warning
-                            NSString *errorMessage = @"Invalid characters"; //This is the actual error message for the table
-                            //Need to make an NSDictionary, see BibAppController.m for implementation
-                            NSDictionary *errDict = [NSDictionary dictionaryWithObjects:[NSArray arrayWithObjects:fileName, lineNumber, errorClassName, errorMessage, nil]
-                                                                                forKeys:[NSArray arrayWithObjects:@"fileName", @"lineNumber", @"errorClassName", @"errorMessage", nil]];
-                            *hadProblems = YES; //Set this before we post the notification
-                            //Maybe the dictionary should be passed as userInfo:errDict, but BibAppController expects object:errDict.
-                            [[NSNotificationCenter defaultCenter] postNotificationName:BDSKParserErrorNotification
-                                                                                object:errDict];
-                            
-                        }
-                        //End check for valid characters.
-                        
-                        //deTeXify it (includes conversion of /par to \n\n.)
-                        sDeTexified = [[BDSKConverter sharedConverter] stringByDeTeXifyingString:s];
-                        //Get fieldname as a capitalized NSString
-                        sFieldName = [[NSString stringWithCString: fieldname] capitalizedString];
-
-                        [dictionary setObject:sDeTexified forKey:sFieldName];
-
-                        [appController addString:sDeTexified forCompletionEntry:sFieldName];
-
-                    }// end while field - process next bt field
-            
+                    }// end while field - process next bt field                    
+					
                     [newBI setCiteKeyString:[NSString stringWithCString:bt_entry_key(entry)]];
                     [newBI setPubFields:dictionary];
                     [returnArray addObject:[newBI autorelease]];
                     
                     [dictionary removeAllObjects];
-                }
+                } // end generate BibItem from ENTRY metatype.
             }else{
                 // wasn't ok, record it and deal with it later.
-                *hadProblems = YES;
+				*hadProblems = YES;
             }
             bt_free_ast(entry);
 	    [innerPool release];
         } // while (scanning through file) 
-
+		
         bt_cleanup();
 
         if(tempFilePath){
@@ -828,3 +805,127 @@ NSRange SafeBackwardSearchRange(NSRange startRange, unsigned seekLength){
 }
 
 @end
+
+NSString * checkAndTranslateString(NSString *s, int line, NSString *filePath){
+	
+	// Now that we have the string from the file, check for invalid characters:
+	
+	//Begin check for valid characters (ASCII); otherwise we mangle the .bib file every time we write out
+	//by inserting two characters for every extended character.
+	
+	// Note (mmcc) : This is necessary only when CharacterConversion.plist doesn't cover a character that's in the file - this may be fixable in BDSKConverter also.
+	
+	NSScanner *validscan;
+	NSString *validscanstring = nil;
+	
+	
+    NSRange asciiRange;
+    NSCharacterSet *asciiLetters;
+	
+    //This range defines ASCII, used for the invalid character check during file read
+    //we include all the control characters, since anything bad in here should be caught by btparse
+    asciiRange.location = 0;
+    asciiRange.length = 127; //This should get everything through tilde
+    asciiLetters = [NSCharacterSet characterSetWithRange:asciiRange];
+	
+	
+	validscan = [NSScanner scannerWithString:s];  //Scan string s after we get it from bt
+	
+	[validscan setCharactersToBeSkipped:nil]; //If the first character is a newline or whitespace, NSScanner will skip it by default, which gives a bad length value
+	BOOL scannedCharacters = [validscan scanCharactersFromSet:asciiLetters intoString:&validscanstring];
+	
+	if(scannedCharacters && ([validscanstring length] != [s length])) //Compare it to the original string
+	{
+		NSLog(@"This string was in the file: [%@]",s);
+		NSLog(@"This is the part we can read: [%@]",validscanstring);
+		NSLog(@"Invalid characters at line [%i]",line);
+		
+		// This sets up an error dictionary object and passes it to the listener
+		NSString *fileName = filePath;  //We call this fileName, but its actually trimmed in BibAppController
+		NSValue *lineNumber = [NSNumber numberWithInt:line];  //Need NSValues for NSArray
+		NSString *errorClassName = @"warning"; //We call it a warning
+		NSString *errorMessage = @"Invalid characters"; //This is the actual error message for the table
+														//Need to make an NSDictionary, see BibAppController.m for implementation
+		NSDictionary *errDict = [NSDictionary dictionaryWithObjects:[NSArray arrayWithObjects:fileName, lineNumber, errorClassName, errorMessage, nil]
+															forKeys:[NSArray arrayWithObjects:@"fileName", @"lineNumber", @"errorClassName", @"errorMessage", nil]];
+		//       *hadProblems = YES; //Set this before we post the notification
+		//Maybe the dictionary should be passed as userInfo:errDict, but BibAppController expects object:errDict.
+		[[NSNotificationCenter defaultCenter] postNotificationName:@"BTPARSE ERROR"
+															object:errDict];
+		
+	}
+	//End check for valid characters.
+
+
+	//deTeXify it (includes conversion of /par to \n\n.)
+	NSString *sDeTexified = [[BDSKConverter sharedConverter] stringByDeTeXifyingString:s];
+	return sDeTexified;
+}
+
+BDSKComplexString *complexStringFromBTField(AST *field, NSString *fieldName, NSString *filePath, BibDocument* document){
+    BibAppController *appController = (BibAppController *)[NSApp delegate];
+	NSMutableArray *stringValueArray = [[NSMutableArray alloc] initWithCapacity:10];
+	NSMutableString *s = NULL;
+	BDSKStringNode *sNode;
+	AST *simple_value;
+    
+	if(field->nodetype != BTAST_FIELD){
+		NSLog(@"error! expected field here");
+	}
+	simple_value = field->down;
+	
+	char *expanded_text = NULL;
+	
+	while(simple_value){
+        if (simple_value->text){
+            switch (simple_value->nodetype){
+                case BTAST_MACRO:
+					s = [[NSString alloc] initWithCString:simple_value->text];
+                    sNode = [[BDSKStringNode alloc] init];
+                    
+                    // We parse the macros in itemsFromData, but for reference, if we wanted to get the 
+                    // macro value we could do this:
+					// expanded_text = bt_macro_text (simple_value->text, (char *)[filePath cString], simple_value->line);
+                    [sNode setType:BSN_MACRODEF];
+                    [sNode setValue:s];
+                    
+                    break;
+                case BTAST_STRING:
+					s = [[NSString alloc] initWithCString:simple_value->text];
+                    sNode = [[BDSKStringNode alloc] init];
+                    [sNode setType:BSN_STRING];
+                    [sNode setValue:checkAndTranslateString(s, field->line, filePath)];
+                    
+                    break;
+                case BTAST_NUMBER:
+					s = [[NSString alloc] initWithCString:simple_value->text];
+                    sNode = [[BDSKStringNode alloc] init];
+                    [sNode setType:BSN_NUMBER];
+                    [sNode setValue:s];
+                    
+                    break;
+                default:
+                    [NSException raise:@"bad node type exception" format:@"Node type %d is unexpected.", simple_value->nodetype];
+            }
+            [stringValueArray addObject:sNode];
+            
+            // if we have multiple strings for one field, we add them separately.
+            [appController addString:s forCompletionEntry:fieldName]; 
+            [s release];
+            [sNode release];
+        }
+        
+		simple_value = simple_value->right;
+	} // while simple_value
+	
+    // Common case: return a solo string as a non-complex string.
+    
+    if([stringValueArray count] == 1 &&
+       [(BDSKStringNode *)[stringValueArray objectAtIndex:0] type] == BSN_STRING){
+        return [BDSKComplexString complexStringWithString:[(BDSKStringNode *)[stringValueArray objectAtIndex:0] value] 
+                                            macroResolver:document];
+    }
+    
+	return [BDSKComplexString complexStringWithArray:stringValueArray macroResolver:document];
+}
+

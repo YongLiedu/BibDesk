@@ -14,6 +14,9 @@
 #import "BibItem.h"
 #import "BDSKConverter.h"
 
+#import "BDSKComplexString.h"
+#import "BibPrefController.h"
+
 @interface BibTeXParser : NSObject {
     BibDocument *theDocument;
 }
@@ -29,14 +32,19 @@
  */
 
 + (NSMutableArray *)itemsFromData:(NSData *)inData error:(BOOL *)hadProblems;
-+ (NSMutableArray *)itemsFromData:(NSData *)inData error:(BOOL *)hadProblems frontMatter:(NSMutableString *)frontMatter filePath:(NSString *)filePath;
++ (NSMutableArray *)itemsFromData:(NSData *)inData
+                            error:(BOOL *)hadProblems
+                      frontMatter:(NSMutableString *)frontMatter
+                         filePath:(NSString *)filePath
+                 document:(BibDocument *)aDocument;
+    
 + (NSMutableArray *)itemsFromString:(NSString *)fullString error:(BOOL *)hadProblems frontMatter:(NSMutableString *)frontMatter filePath:(NSString *)filePath;
 + (NSMutableArray *)itemsFromString:(NSString *)string error:(BOOL *)hadProblems;
 
 - (NSString *)preambleStringFromScanner:(NSScanner *)scanner endingRange:(NSRange)range string:(NSString *)fullString filePath:(NSString *)filePath hadProblems:(BOOL *)hadProblems;
 - (NSDictionary *)macroStringFromScanner:(NSScanner *)scanner endingRange:(NSRange)range string:(NSString *)fullString;
 - (NSMutableArray *)itemsFromString:(NSString *)fullString error:(BOOL *)hadProblems frontMatter:(NSMutableString *)frontMatter filePath:(NSString *)filePath addToDocument:(BibDocument *)document;
-- (NSMutableArray *)itemsFromData:(NSData *)inData error:(BOOL *)hadProblems frontMatter:(NSMutableString *)frontMatter filePath:(NSString *)filePath;
+- (NSMutableArray *)itemsFromData:(NSData *)inData error:(BOOL *)hadProblems frontMatter:(NSMutableString *)frontMatter filePath:(NSString *)filePath document:(BibDocument *)document;
 - (void)parseItemsFromString:(NSString *)fullString addToDocument:(BibDocument *)document frontMatter:(NSMutableString *)frontMatter;
 - (BibDocument *)document;
 - (void)setDocument:(BibDocument *)aDocument;
