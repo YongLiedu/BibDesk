@@ -48,7 +48,7 @@ NSString *BDSKInputManagerLoadableApplications = @"Application bundles that we r
                                            defaultButton:NSLocalizedString(@"Update", @"Update")
                                          alternateButton:NSLocalizedString(@"Cancel", @"Cancel the update")
                                              otherButton:nil
-                               informativeTextWithFormat:@"You can install a newer version of the autocompletion plugin by clicking the \"Update\" button below."];
+                               informativeTextWithFormat:NSLocalizedString(@"You can install a newer version of the autocompletion plugin by clicking the \"Update\" button below.",@"")];
         [anAlert beginSheetModalForWindow:[[OAPreferenceController sharedPreferenceController] window]
                             modalDelegate:self
                            didEndSelector:@selector(updateAlertDidEnd:returnCode:contextInfo:)
@@ -132,7 +132,7 @@ NSString *BDSKInputManagerLoadableApplications = @"Application bundles that we r
                               kPlotIconRefNormalFlags,
                               genericIconRef);
         [image unlockFocus];
-        [aCell setStringValue:[NSString stringWithFormat:@"Error %d, LaunchServices can't find %@", err, inBundleID]];
+        [aCell setStringValue:[NSString stringWithFormat:NSLocalizedString(@"Error %d, LaunchServices can't find %@",@""), err, inBundleID]];
     }
 
     [image setSize:NSMakeSize(size, size)];
@@ -169,11 +169,11 @@ NSString *BDSKInputManagerLoadableApplications = @"Application bundles that we r
 	      toPath:inputManagerPath
 	     handler:nil];
     } else {
-	NSAlert *anAlert = [NSAlert alertWithMessageText:@"Error!"
+	NSAlert *anAlert = [NSAlert alertWithMessageText:NSLocalizedString(@"Error!",@"Error!")
 					   defaultButton:nil
 					 alternateButton:nil
 					     otherButton:nil
-			       informativeTextWithFormat:@"Unable to install plugin at %@, please check file or directory permissions.", inputManagerPath];
+			       informativeTextWithFormat:NSLocalizedString(@"Unable to install plugin at %@, please check file or directory permissions.",@""), inputManagerPath];
 	[anAlert beginSheetModalForWindow:[[OAPreferenceController sharedPreferenceController] window]
 			    modalDelegate:nil
 			   didEndSelector:nil
@@ -214,11 +214,11 @@ NSString *BDSKInputManagerLoadableApplications = @"Application bundles that we r
 						 type:&fileType];
 	if(![fileType isEqualToString:NSApplicationFileType]){
 	    [sheet orderOut:nil];
-	    NSAlert *anAlert = [NSAlert alertWithMessageText:@"Error!"
+	    NSAlert *anAlert = [NSAlert alertWithMessageText:NSLocalizedString(@"Error!",@"Error!")
 					       defaultButton:nil
 					     alternateButton:nil
 						 otherButton:nil
-				   informativeTextWithFormat:@"%@ is not a Cocoa application.", [[sheet filenames] objectAtIndex:0]];
+				   informativeTextWithFormat:NSLocalizedString(@"%@ is not a Cocoa application.",@""), [[sheet filenames] objectAtIndex:0]];
 	    [anAlert beginSheetModalForWindow:[[OAPreferenceController sharedPreferenceController] window]
 				modalDelegate:nil
 			       didEndSelector:nil
@@ -229,11 +229,11 @@ NSString *BDSKInputManagerLoadableApplications = @"Application bundles that we r
 	// LaTeX Equation Editor is Cocoa, but doesn't have a CFBundleIdentifier!  Perhaps there are others...
 	if([self bundleIDForPath:[[sheet filenames] objectAtIndex:0]] == nil){
 	    [sheet orderOut:nil];
-	    NSAlert *anAlert = [NSAlert alertWithMessageText:@"No Bundle Identifier!"
+	    NSAlert *anAlert = [NSAlert alertWithMessageText:NSLocalizedString(@"No Bundle Identifier!",@"No Bundle Identifier!")
 					       defaultButton:nil
 					     alternateButton:nil
 						 otherButton:nil
-				   informativeTextWithFormat:@"The selected application does not have a bundle identifier.  Please inform the author of %@.", [[sheet filenames] objectAtIndex:0]];
+				   informativeTextWithFormat:NSLocalizedString(@"The selected application does not have a bundle identifier.  Please inform the author of %@.",@""), [[sheet filenames] objectAtIndex:0]];
 	    [anAlert beginSheetModalForWindow:[[OAPreferenceController sharedPreferenceController] window]
 				modalDelegate:nil
 			       didEndSelector:nil

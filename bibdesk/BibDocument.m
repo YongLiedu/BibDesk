@@ -253,7 +253,8 @@ NSString *BDSKBibItemLocalDragPboardType = @"edu.ucsd.cs.mmccrack.bibdesk: Local
 	if (![self isDocumentEdited]) {
         int button = NSRunAlertPanel(NSLocalizedString(@"Warning", @""),
                                      NSLocalizedString(@"You are about to undo past the last point this file was saved. Do you want to do this?", @""),
-                                     @"OK", @"Cancel", nil);
+                                     NSLocalizedString(@"OK",@"OK"), 
+									 NSLocalizedString(@"Cancel",@"Cancel"), nil);
 		return (button == NSOKButton);
 	}
 	return YES;
@@ -597,9 +598,10 @@ NSString *BDSKBibItemLocalDragPboardType = @"edu.ucsd.cs.mmccrack.bibdesk: Local
 - (BOOL)writeToFile:(NSString *)fileName ofType:(NSString *)docType{
 	if ([docType isEqualToString:@"RIS/Medline File"]){
 		// Can't save pubmed files now. Could try saving as bibtex.
-		int returnCode = NSRunAlertPanel(@"Cannot Save as PubMed.",
-						 @"Saving PubMed Files is not currently supported. You can choose to save as BibTeX instead.",
-						 @"Save as BibTeX", @"Don't Save", nil, nil);
+		int returnCode = NSRunAlertPanel(NSLocalizedString(@"Cannot Save as PubMed.",@"alert title"),
+						 NSLocalizedString(@"Saving PubMed Files is not currently supported. You can choose to save as BibTeX instead.",@""),
+						 NSLocalizedString(@"Save as BibTeX",@""), 
+						 NSLocalizedString(@"Don't Save",@""), nil, nil);
 		if(returnCode == NSAlertDefaultReturn){
 			NSString *newName = [[[self fileName] stringByDeletingPathExtension] stringByAppendingPathExtension:@"bib"];
 		    return [self writeToFile:newName ofType:@"bibTeX database"];
@@ -649,9 +651,9 @@ NSString *BDSKBibItemLocalDragPboardType = @"edu.ucsd.cs.mmccrack.bibdesk: Local
 		finalName = [[[newName stringByDeletingPathExtension] stringByAppendingFormat:@"%i",i] stringByAppendingPathExtension:@"bib"];
 	    }
 	    NSRunAlertPanel(NSLocalizedString(@"Import Successful",
-					      "alert title"),
+					      @"alert title"),
 			    NSLocalizedString(@"Your file has been converted to BibTeX and assigned a unique name.  To save the file or change the name, please use the Save As command.",
-					      "file has been converted and assigned a unique name, can be saved with save as"),
+					      @"file has been converted and assigned a unique name, can be saved with save as"),
 			    nil,nil, nil, nil);
 	    [self setFileName:finalName];
 	    [self setFileType:@"bibTeX database"];  // this is the only type we support via the save command
@@ -1161,15 +1163,15 @@ stringByAppendingPathComponent:@"BibDesk"]; */
 	NSMenuItem *item1, *item2, *item3, *item4, *anItem;
 	int curIndex = 0;
 	
-	item1 = [[NSMenuItem alloc] initWithTitle:@"Recent Searches" action: @selector(limitOne:) keyEquivalent:@""];
+	item1 = [[NSMenuItem alloc] initWithTitle:NSLocalizedString(@"Recent Searches",@"Recent Searches menu item") action: @selector(limitOne:) keyEquivalent:@""];
 	[item1 setTag:NSSearchFieldRecentsTitleMenuItemTag];
 	[cellMenu insertItem:item1 atIndex:curIndex++];
 	[item1 release];
-	item2 = [[NSMenuItem alloc] initWithTitle:@"Recents" action:@selector(limitTwo:) keyEquivalent:@""];
+	item2 = [[NSMenuItem alloc] initWithTitle:NSLocalizedString(@"Recents",@"Recents menu item") action:@selector(limitTwo:) keyEquivalent:@""];
 	[item2 setTag:NSSearchFieldRecentsMenuItemTag];
 	[cellMenu insertItem:item2 atIndex:curIndex++];
 	[item2 release];
-	item3 = [[NSMenuItem alloc] initWithTitle:@"Clear" action:@selector(limitThree:) keyEquivalent:@""];
+	item3 = [[NSMenuItem alloc] initWithTitle:NSLocalizedString(@"Clear",@"Clear menu item") action:@selector(limitThree:) keyEquivalent:@""];
 	[item3 setTag:NSSearchFieldClearRecentsMenuItemTag];
 	[cellMenu insertItem:item3 atIndex:curIndex++];
 	[item3 release];
@@ -1178,21 +1180,21 @@ stringByAppendingPathComponent:@"BibDesk"]; */
 	[item4 setTag:NSSearchFieldRecentsTitleMenuItemTag]; // makes it go away if there are no recents.
 	[cellMenu insertItem:item4 atIndex:curIndex++];
 	[item4 release];
-	item4 = [[NSMenuItem alloc] initWithTitle:@"Search Fields" action:nil keyEquivalent:@""];
+	item4 = [[NSMenuItem alloc] initWithTitle:NSLocalizedString(@"Search Fields",@"Search Fields menu item") action:nil keyEquivalent:@""];
 	[cellMenu insertItem:item4 atIndex:curIndex++];
 	[item4 release];
 	
-	item4 = [[NSMenuItem alloc] initWithTitle:@"Add Field ..." action:@selector(quickSearchAddField:) keyEquivalent:@""];
+	item4 = [[NSMenuItem alloc] initWithTitle:NSLocalizedString(@"Add Field…",@"Add Field… menu item") action:@selector(quickSearchAddField:) keyEquivalent:@""];
 	[cellMenu insertItem:item4 atIndex:curIndex++];
 	[item4 release];
 	
-	item4 = [[NSMenuItem alloc] initWithTitle:@"Remove Field ..." action:@selector(quickSearchRemoveField:) keyEquivalent:@""];
+	item4 = [[NSMenuItem alloc] initWithTitle:NSLocalizedString(@"Remove Field…",@"Remove Field… menu item") action:@selector(quickSearchRemoveField:) keyEquivalent:@""];
 	[cellMenu insertItem:item4 atIndex:curIndex++];
 	[item4 release];
 	
 	[cellMenu insertItem:[NSMenuItem separatorItem] atIndex:curIndex++];
 	
-	item4 = [[NSMenuItem alloc] initWithTitle:@"All Fields" action:@selector(searchFieldChangeKey:) keyEquivalent:@""];
+	item4 = [[NSMenuItem alloc] initWithTitle:NSLocalizedString(@"All Fields",@"All Fields menu item") action:@selector(searchFieldChangeKey:) keyEquivalent:@""];
 	[cellMenu insertItem:item4 atIndex:curIndex++];
 	[item4 release];
 	
@@ -1257,8 +1259,8 @@ stringByAppendingPathComponent:@"BibDesk"]; */
 		searchCellOrTextField = [searchField cell];
 		[searchCellOrTextField setSendsWholeSearchString:NO]; // don't wait for Enter key press.
 		[searchCellOrTextField setSearchMenuTemplate:[self searchFieldMenu]];
-		[searchCellOrTextField setPlaceholderString:[NSString stringWithFormat:@"Search by %@",quickSearchKey]];
-		[searchCellOrTextField setRecentsAutosaveName:[NSString stringWithFormat:@"%@ recent searches autosave ",[self fileName]]];
+		[searchCellOrTextField setPlaceholderString:[NSString stringWithFormat:NSLocalizedString(@"Search by %@",@""),quickSearchKey]];
+		[searchCellOrTextField setRecentsAutosaveName:[NSString stringWithFormat:NSLocalizedString(@"%@ recent searches autosave ",@""),[self fileName]]];
 		
 		[searchField setDelegate:self];
 		[searchField setAction:@selector(searchFieldAction:)];
@@ -1309,7 +1311,7 @@ stringByAppendingPathComponent:@"BibDesk"]; */
 		
 		NSSearchFieldCell *searchCell = [searchField cell];
 		searchCellOrTextField = searchCell;	
-		[searchCell setPlaceholderString:[NSString stringWithFormat:@"Search by %@",newKey]];
+		[searchCell setPlaceholderString:[NSString stringWithFormat:NSLocalizedString(@"Search by %@",@""),newKey]];
 		
 		[searchField setNextKeyView:tableView];
 		[tableView setNextKeyView:searchField];
