@@ -455,7 +455,12 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
         }
         [scanner release];
         [acLock unlock];
-    } else {
+    } 
+    else if([entry isEqualToString:BDSKKeywordsString]){
+        // if it wasn't punctuated, try this; Elsevier uses "and" as a separator, and it's annoying to have the whole string autocomplete on you
+        [completionArray addObjectsFromArray:[string componentsSeparatedByString:@" and "]];
+    } 
+    else {
         [completionArray addObject:string usingLock:acLock];
     }
     
