@@ -20,6 +20,14 @@ static BibTypeManager *sharedInstance = nil;
     self = [super init];
     typeInfoDict = [[NSDictionary dictionaryWithContentsOfFile:[[[NSBundle mainBundle] resourcePath] stringByAppendingPathComponent:@"TypeInfo.plist"]] retain];
 
+	fileTypesDict = [[typeInfoDict objectForKey:@"FileTypes"] retain];
+	fieldsForTypesDict = [[typeInfoDict objectForKey:@"FieldsForTypes"] retain];
+	typesForFileTypeDict = [[typeInfoDict objectForKey:@"TypesForFileType"] retain];
+	fieldNameForPubMedTagDict = [[typeInfoDict objectForKey:@"BibTeXFieldNamesForPubMedTags"] retain];
+	bibtexTypeForPubMedTypeDict = [[typeInfoDict objectForKey:@"BibTeXTypesForPubMedTypes"] retain];
+	MODSGenresForBibTeXTypeDict = [[typeInfoDict objectForKey:@"MODSGenresForBibTeXType"] retain];
+	allFieldNames = [[typeInfoDict objectForKey:@"AllRemovableFieldNames"] retain];
+
     // this set is used for warning the user on manual entry of a citekey; allows non-ASCII characters and some math symbols
     invalidCiteKeyCharSet = [[NSCharacterSet characterSetWithCharactersInString:@" '\"@,\\#}{~&%$^"] retain];
     
@@ -42,6 +50,13 @@ static BibTypeManager *sharedInstance = nil;
 }
 
 - (void)dealloc{
+	[fileTypesDict release];
+	[fieldsForTypesDict release];
+	[typesForFileTypeDict release];
+	[fieldNameForPubMedTagDict release];
+	[bibtexTypeForPubMedTypeDict release];
+	[MODSGenresForBibTeXTypeDict release];
+	[allFieldNames release];
 	[invalidCiteKeyCharSet release];
 	[strictInvalidCiteKeyCharSet release];
 	[invalidLocalUrlCharSet release];
@@ -49,31 +64,58 @@ static BibTypeManager *sharedInstance = nil;
 	[super dealloc];
 }
 
+#pragma mark Getters and Setters
+
+- (void)setAllFieldNames:(NSArray *)newArray{
+	[allFieldNames autorelease];
+	allFieldNames = [newArray copy];
+	
+	NSDictionary *notifInfo = [NSDictionary dictionaryWithObjectsAndKeys:@"allFieldNames", @"list",nil];
+	[[NSNotificationCenter defaultCenter] postNotificationName:BDSKTypeInfoChangedNotification
+														object:self
+													  userInfo:notifInfo];
+}
+
+- (void)setFieldsForTypeDict:(NSDictionary *)newDict{
+	[fieldsForTypesDict autorelease];
+	fieldsForTypesDict = [newDict copy];
+	
+	NSDictionary *notifInfo = [NSDictionary dictionaryWithObjectsAndKeys:@"fieldsForTypes", @"list",nil];
+	[[NSNotificationCenter defaultCenter] postNotificationName:BDSKTypeInfoChangedNotification
+														object:self
+													  userInfo:notifInfo];
+}
+
+- (void)setBibTypesForFileTypeDict:(NSDictionary *)newDict{
+	[typesForFileTypeDict release];
+	typesForFileTypeDict = [newDict copy];
+	
+	NSDictionary *notifInfo = [NSDictionary dictionaryWithObjectsAndKeys:@"typesForFileTypes", @"list",nil];
+	[[NSNotificationCenter defaultCenter] postNotificationName:BDSKTypeInfoChangedNotification
+														object:self
+													  userInfo:notifInfo];
+}
+
 - (NSString *)defaultTypeForFileFormat:(NSString *)fileFormat{
-     return [[[typeInfoDict objectForKey:@"FileTypes"] objectForKey:fileFormat] objectForKey:@"DefaultType"];
+     return [[fileTypesDict objectForKey:fileFormat] objectForKey:@"DefaultType"];
 }
 
 - (NSArray *)allRemovableFieldNames{
-    NSArray *names = [typeInfoDict objectForKey:@"AllRemovableFieldNames"];
-    if (names == nil) [NSException raise:@"nilNames exception" format:@"allRemovableFieldNames returning nil."];
-    return names;
+    if (allFieldNames == nil) [NSException raise:@"nilNames exception" format:@"allRemovableFieldNames returning nil."];
+    return allFieldNames;
 }
 
 - (NSArray *)requiredFieldsForType:(NSString *)type{
-    NSDictionary *fieldsForType = [[typeInfoDict objectForKey:@"FieldsForTypes"] objectForKey:type];
-
-    if(fieldsForType){
-        return [fieldsForType objectForKey:@"required"];
+    if(fieldsForTypesDict){
+        return [fieldsForTypesDict objectForKey:@"required"];
     }else{
         return [NSArray array];
     }
 }
 
 - (NSArray *)optionalFieldsForType:(NSString *)type{
-    NSDictionary *fieldsForType = [[typeInfoDict objectForKey:@"FieldsForTypes"] objectForKey:type];
-
-    if(fieldsForType){
-        return [fieldsForType objectForKey:@"optional"];
+    if(fieldsForTypesDict){
+        return [fieldsForTypesDict objectForKey:@"optional"];
     }else{
         return [NSArray array];
     }
@@ -84,20 +126,22 @@ static BibTypeManager *sharedInstance = nil;
 }
 
 - (NSArray *)bibTypesForFileType:(NSString *)fileType{
-    return [[typeInfoDict objectForKey:@"TypesForFileType"] objectForKey:fileType];
+    return [typesForFileTypeDict objectForKey:fileType];
 }
 
 - (NSString *)fieldNameForPubMedTag:(NSString *)tag{
-    return [[typeInfoDict objectForKey:@"BibTeXFieldNamesForPubMedTags"] objectForKey:tag];
+    return [fieldNameForPubMedTagDict objectForKey:tag];
 }
 
 - (NSString *)bibtexTypeForPubMedType:(NSString *)type{
-    return [[typeInfoDict objectForKey:@"BibTeXTypesForPubMedTypes"] objectForKey:type];
+    return [bibtexTypeForPubMedTypeDict objectForKey:type];
 }
 
 - (NSDictionary *)MODSGenresForBibTeXType:(NSString *)type{
-    return [[typeInfoDict objectForKey:@"MODSGenresForBibTeXType"] objectForKey:type];
+    return [MODSGenresForBibTeXTypeDict objectForKey:type];
 }
+
+#pragma mark Character sets
 
 - (NSCharacterSet *)invalidCharactersForField:(NSString *)fieldName inFileType:(NSString *)type{
 	if( [type isEqualToString:BDSKBibtexString] && [fieldName isEqualToString:BDSKCiteKeyString]){

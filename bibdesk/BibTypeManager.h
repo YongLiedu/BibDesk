@@ -11,12 +11,24 @@
 
 @interface BibTypeManager : NSObject {
     NSDictionary *typeInfoDict;
+	NSDictionary *fileTypesDict;
+	NSDictionary *fieldsForTypesDict;
+	NSDictionary *typesForFileTypeDict;
+	NSDictionary *fieldNameForPubMedTagDict;
+	NSDictionary *bibtexTypeForPubMedTypeDict;
+	NSDictionary *MODSGenresForBibTeXTypeDict;
+	NSArray *allFieldNames;
 	NSCharacterSet *invalidCiteKeyCharSet;
 	NSCharacterSet *invalidLocalUrlCharSet;
 	NSCharacterSet *strictInvalidCiteKeyCharSet;
 	NSCharacterSet *strictInvalidLocalUrlCharSet;
 }
 + (BibTypeManager *)sharedManager;
+
+- (void)setAllFieldNames:(NSArray *)newDict;
+- (void)setFieldsForTypeDict:(NSDictionary *)newDict;
+- (void)setBibTypesForFileTypeDict:(NSDictionary *)newDict;
+
 - (NSString *)defaultTypeForFileFormat:(NSString *)fileFormat;
 - (NSArray *)allRemovableFieldNames;
 - (NSArray *)requiredFieldsForType:(NSString *)type;

@@ -173,13 +173,24 @@ static BDSKTypeInfoEditor *sharedTypeInfoEditor;
 		}
 	}
 	
-	NSString *error = nil;
-	NSPropertyListFormat format = NSPropertyListXMLFormat_v1_0;
+	// this might not be ideal, as it uses that there are just these 2 items
+	BibTypeManager *btm = [BibTypeManager sharedManager];
+	NSArray *allFieldsArray = [allFields allObjects];
+	NSDictionary *typesDict = [NSDictionary dictionaryWithObjectsAndKeys: 
+				[[types copy] autorelease], BDSKBibtexString,
+				[btm bibTypesForFileType:@"PubMed"], @"PubMed", nil];
+	
+	[btm setBibTypesForFileTypeDict:typesDict];
+	[btm setFieldsForTypeDict:fieldsForTypesDict];
+	[btm setAllFieldNames:allFieldsArray];
+	
 	NSDictionary *dict = [NSDictionary dictionaryWithObjectsAndKeys: 
 				fieldsForTypesDict, FIELDS_FOR_TYPES_KEY, 
 				[NSDictionary dictionaryWithObject:types forKey:BDSKBibtexString], TYPES_FOR_FILE_TYPE_KEY, 
-				[allFields allObjects], ALL_FIELDS_KEY, nil];
+				allFieldsArray, ALL_FIELDS_KEY, nil];
 	
+	NSString *error = nil;
+	NSPropertyListFormat format = NSPropertyListXMLFormat_v1_0;
 	NSData *data = [NSPropertyListSerialization dataFromPropertyList:dict
 															  format:format 
 													errorDescription:&error];
@@ -305,6 +316,7 @@ static BDSKTypeInfoEditor *sharedTypeInfoEditor;
 	NSString *type;
 	
 	[fieldsForTypesDict removeAllObjects];
+	[types removeAllObjects];
 	while (type = [typeEnum nextObject]) {
 		[self addType:type withFields:[defaultFieldsForTypesDict objectForKey:type]];
 	}
