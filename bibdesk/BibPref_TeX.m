@@ -87,8 +87,8 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
     unsigned i = 0;
     while(path = [e nextObject]){
         if(![[NSFileManager defaultManager] isExecutableFileAtPath:path]){
+            errStr = ( i == 0 ? path : [errStr stringByAppendingFormat:@" and/or the file %@", path] );
             i++;
-            errStr = ( i == 0 ? path : [errStr stringByAppendingFormat:@" and %@", path] );
         }
     }
     
