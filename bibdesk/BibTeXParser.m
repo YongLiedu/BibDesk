@@ -37,9 +37,6 @@ NSRange SafeBackwardSearchRange(NSRange startRange, unsigned seekLength);
 // formerly used to determine if an '@' character represented a new entry, but is now only used to find the first one in the string
 - (BOOL)isNewEntryAtRange:(NSRange)theRange inString:(NSString *)fullString;
 
-// checks a string fragment to see if it contains balanced braces; used to determine if an '@' or '#' is quoted
-- (BOOL)hasBalancedQuotes:(NSString *)string usingBraces:(BOOL)braces;
-
 // main NSString-based parser method; use the public methods to access this
 - (NSMutableArray *)itemsFromString:(NSString *)fullString error:(BOOL *)hadProblems frontMatter:(NSMutableString *)frontMatter filePath:(NSString *)filePath document:(BibDocument *)aDocument background:(BOOL)background;
 
@@ -330,47 +327,6 @@ NSRange SafeBackwardSearchRange(NSRange startRange, unsigned seekLength){
     }
 }
 
-// Check a string to see if the number of braces or quotes matches up.  Used to determine whether brace depth of '#' and '@' characters.
-// The actual behavior of this method is dependent on usage in the parsing, and should not be relied upon for general-purpose brace matching.
-- (BOOL)hasBalancedQuotes:(NSString *)string usingBraces:(BOOL)braces{
-    NSString *leftDelim, *rightDelim;
-    if(braces){ // need same number of each
-        leftDelim = @"{";
-        rightDelim = @"}";
-    } else {
-        leftDelim = @"\"";
-        rightDelim = leftDelim;  // we can have " " " (unbalanced)
-    }
-    unsigned start = 0;
-    unsigned ldelim = 0;
-    unsigned rdelim = 0;
-    NSRange range = [string rangeOfString:leftDelim options:NSLiteralSearch range:NSMakeRange(start, [string length] - start)];
-    while(range.location != NSNotFound){
-        if(braces || (!braces && [string characterAtIndex:(range.location - 1)] != '\\')) // see if it's a \" sequence
-            ldelim++;
-        start = range.location + 1;
-        range = [string rangeOfString:leftDelim options:NSLiteralSearch range:NSMakeRange(start, [string length] - start)];
-    }
-
-    if(!braces){ // we're done checking
-        if(ldelim & 1) // odd number of quotes --> unbalanced... but what if the quotes are inside of braces?
-            return NO;
-        else
-            return YES;
-    }
-
-    start = 0; // must reset it!
-    range = [string rangeOfString:rightDelim options:NSLiteralSearch range:NSMakeRange(start, [string length] - start)];
-    while(range.location != NSNotFound){
-        rdelim++;
-        start = range.location + 1;
-        range = [string rangeOfString:rightDelim options:NSLiteralSearch range:NSMakeRange(start, [string length] - start)];
-    }
-
-    return (ldelim == rdelim) ? YES : NO;
-
-}
-
 // Scan @string definitions into a dictionary
 - (NSDictionary *)macroStringFromScanner:(NSScanner *)scanner endingRange:(NSRange)range string:(NSString *)fullString{
     
@@ -534,7 +490,7 @@ NSRange SafeBackwardSearchRange(NSRange startRange, unsigned seekLength){
 
     NSRange nextAtRange = [fullString rangeOfString:@"@" options:NSLiteralSearch range:SafeForwardSearchRange(firstAtRange.location + 1, fullStringLength - firstAtRange.location - 1, fullStringLength)];    
     // check this one to make sure the @ is not escaped; make sure there _is_ another one, though!  if there are unbalanced braces between the firstAt and this one, we know it's not a new entry (or else the braces in the file are hosed)
-    while(nextAtRange.location != NSNotFound && ![self hasBalancedQuotes:[fullString substringWithRange:NSMakeRange(firstAtRange.location, nextAtRange.location - firstAtRange.location)] usingBraces:YES])
+    while(nextAtRange.location != NSNotFound && ![fullString isStringTeXQuotingBalancedWithBraces:YES connected:YES range:NSMakeRange(firstAtRange.location, nextAtRange.location - firstAtRange.location)])
         nextAtRange = [fullString rangeOfString:@"@" options:NSLiteralSearch range:SafeForwardSearchRange(nextAtRange.location + 1, fullStringLength - nextAtRange.location - 1, fullStringLength)];
 
     if(nextAtRange.location == NSNotFound)
@@ -709,7 +665,7 @@ NSRange SafeBackwardSearchRange(NSRange startRange, unsigned seekLength){
             NSRange hashRange = [[fullString substringWithRange:NSMakeRange(leftDelimLocation, contentsEnd - leftDelimLocation)] rangeOfString:@"#"];
             // if the # character exists and is unescaped/unbraced, we assume it's for concatenation
             if(hashRange.location != NSNotFound && [fullString characterAtIndex:(hashRange.location - 1)] != '\\'){
-                BOOL balanced = [self hasBalancedQuotes:[fullString substringWithRange:NSMakeRange(leftDelimLocation, hashRange.location)] usingBraces:usingBraceDelimiter]; 
+                BOOL balanced = [fullString isStringTeXQuotingBalancedWithBraces:usingBraceDelimiter connected:YES range:NSMakeRange(leftDelimLocation, hashRange.location)]; 
                 if(balanced){
                     NSLog(@"BibTeXParser thinks this should be a complex string");
                     leftDelimLocation = [scanner scanLocation] - ((isMacro) ? 1 : 2); // rewind so we don't lose the first character
@@ -849,7 +805,7 @@ NSRange SafeBackwardSearchRange(NSRange startRange, unsigned seekLength){
         
         nextAtRange = [fullString rangeOfString:@"@" options:NSLiteralSearch range:SafeForwardSearchRange(firstAtRange.location + 1, fullStringLength - firstAtRange.location - 1, fullStringLength)];
         // check for a braced @ string
-        while(nextAtRange.location != NSNotFound && ![self hasBalancedQuotes:[fullString substringWithRange:NSMakeRange(firstAtRange.location, nextAtRange.location - firstAtRange.location)] usingBraces:YES])
+        while(nextAtRange.location != NSNotFound && ![fullString isStringTeXQuotingBalancedWithBraces:YES connected:YES range:NSMakeRange(firstAtRange.location, nextAtRange.location - firstAtRange.location)])
             nextAtRange = [fullString rangeOfString:@"@" options:NSLiteralSearch range:SafeForwardSearchRange(nextAtRange.location + 1, fullStringLength - nextAtRange.location - 1, fullStringLength)];
 
         if(nextAtRange.location == NSNotFound)

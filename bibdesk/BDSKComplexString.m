@@ -1,4 +1,5 @@
 #import "BDSKComplexString.h"
+#import "NSSTring_BDSKExtensions.h"
 
 static AGRegex *unquotedHashRegex = nil;
 static NSCharacterSet *macroCharSet = nil;
@@ -225,7 +226,7 @@ static NSDictionary *globalMacroDefs;
 			}
 			// we don't accept unbalanced braces, as we always quote with braces
 			// do we want to be more permissive and try to use "-quoted fields?
-			if (nesting > 0 || ![nodeStr isStringTeXQuotingBalanced]) {
+			if (nesting > 0 || ![nodeStr isStringTeXQuotingBalancedWithBraces:YES connected:NO]) {
 				[NSException raise:@"BDSKComplexStringException" 
 							format:@"Unbalanced string: [%@]", nodeStr];
 			}
@@ -496,40 +497,6 @@ static NSDictionary *globalMacroDefs;
 		return [self isEqualToString:other]; // this compares (expanded) values
 	// now both have to be really complex
 	return [[(BDSKComplexString*)self nodes] isEqualToArray:[(BDSKComplexString*)other nodes]];
-}
-
-- (BOOL)isStringTeXQuotingBalanced{
-	return [self isStringTeXQuotingBalancedInRange:NSMakeRange(0,[self length])];
-}
-
-- (BOOL)isStringTeXQuotingBalancedInRange:(NSRange)range{
-	int nesting = 0;
-	NSRange braceRange;
-	int braceLoc;
-	unichar ch;
-	NSCharacterSet *bracesCharSet = [NSCharacterSet characterSetWithCharactersInString:@"{}"];
-	
-	braceRange = [self rangeOfCharacterFromSet:bracesCharSet options:NSLiteralSearch range:range];
-	braceLoc = braceRange.location;
-	while (braceLoc != NSNotFound) {
-		// set the range to the part of the range after the last found brace
-		range.length = range.length - braceLoc + range.location - 1;
-		range.location = braceLoc + 1;
-		if (braceLoc == 0 || [self characterAtIndex:braceLoc - 1] != '\\') {
-			// we found an unescaped brace
-			ch = [self characterAtIndex:braceLoc];
-			if (ch == '}')
-				--nesting;
-			else
-				++nesting;
-			if (nesting < 0) // we should never get a negative nesting
-				return NO;
-		}
-		// search for the next brace
-		braceRange = [self rangeOfCharacterFromSet:bracesCharSet options:NSLiteralSearch range:range];
-		braceLoc = braceRange.location;
-	}
-	return (nesting == 0);
 }
 
 @end

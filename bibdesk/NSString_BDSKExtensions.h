@@ -38,4 +38,23 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 */
 - (NSString *)stringByRemovingCurlyBraces;
 
+/*!
+    @method     isStringTeXQuotingBalancedWithBraces:connected:
+    @abstract   Invoces isStringTeXQuotingBalancedWithBraces:connected:range: with the full range of the receiver. 
+    @discussion (discussion)
+    @result     (description)
+*/
+- (BOOL)isStringTeXQuotingBalancedWithBraces:(BOOL)braces connected:(BOOL)connected;
+
+/*!
+    @method     isStringTeXQuotingBalancedWithBraces:connected:range:
+    @abstract   Checks if the receiver has balanced braces or doublequotes in range. 
+    @discussion Used in parsing a bibtex string to see if a substring has balanced quotes. Ignores TeX-escaped delimiters, and checks for correct order of delimiters. 
+    @param      braces Boolean, determines whether to use braces (or double-quotes) for quoting. 
+    @param      connected Boolean, determines whether curly braces have to quote a connected range. 
+    @param      range The range of the receiver in which to check for balanced braces.
+    @result     Boolean
+*/
+- (BOOL)isStringTeXQuotingBalancedWithBraces:(BOOL)braces connected:(BOOL)connected range:(NSRange)range;
+
 @end

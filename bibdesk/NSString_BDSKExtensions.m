@@ -163,4 +163,47 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
     return [mStr autorelease];
 }
 
+- (BOOL)isStringTeXQuotingBalancedWithBraces:(BOOL)braces connected:(BOOL)connected{
+	return [self isStringTeXQuotingBalancedWithBraces:braces connected:connected range:NSMakeRange(0,[self length])];
+}
+
+- (BOOL)isStringTeXQuotingBalancedWithBraces:(BOOL)braces connected:(BOOL)connected range:(NSRange)range{
+	int nesting = 0;
+	NSCharacterSet *delimCharSet;
+	unichar rightDelim;
+	
+	if (braces) {
+		delimCharSet = [NSCharacterSet characterSetWithCharactersInString:@"{}"];
+		rightDelim = '}';
+	} else {
+		delimCharSet = [NSCharacterSet characterSetWithCharactersInString:@"\""];
+		rightDelim = '"';
+	}
+	
+	NSRange delimRange = [self rangeOfCharacterFromSet:delimCharSet options:NSLiteralSearch range:range];
+	int delimLoc = delimRange.location;
+	
+	while (delimLoc != NSNotFound) {
+		if (delimLoc == 0 || [self characterAtIndex:delimLoc - 1] != '\\') {
+			// we found an unescaped delimiter
+			if (connected && nesting == 0) // connected quotes cannot have a nesting of 0 in the middle
+				return NO;
+			if ([self characterAtIndex:delimLoc] == rightDelim) {
+				--nesting;
+			} else {
+				++nesting;
+			}
+			if (nesting < 0) // we should never get a negative nesting
+				return NO;
+		}
+		// set the range to the part of the range after the last found brace
+		range = NSMakeRange(delimLoc + 1, range.length - delimLoc + range.location - 1);
+		// search for the next brace
+		delimRange = [self rangeOfCharacterFromSet:delimCharSet options:NSLiteralSearch range:range];
+		delimLoc = delimRange.location;
+	}
+	
+	return (nesting == 0);
+}
+
 @end
