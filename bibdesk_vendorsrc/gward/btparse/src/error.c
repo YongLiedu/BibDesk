@@ -163,8 +163,9 @@ void print_error (bt_error *err)
    [errString appendString:[NSString stringWithCString:err->message]];
    [errObj takeValue:[[NSString stringWithCString:err->message] retain] forKey:@"errorMessage"];
    /*   [[NSNotificationCenter defaultCenter] postNotificationName:@"BTPARSE ERROR" object:errObj]; */
+   /*   ARM: changed from "BTPARSE ERROR" to "A parsing error occurred" (BDSKParserErrorNotification) */
 
-   NSNotification *errNotif = [NSNotification notificationWithName:@"BTPARSE ERROR"
+   NSNotification *errNotif = [NSNotification notificationWithName:@"A parsing error occurred"
 			       object:errObj];
 
    
