@@ -57,6 +57,7 @@
                 actionMenu = NSMenu; 
                 actionMenuButton = RYZImagePopUpButton; 
                 actionMenuFirstItem = NSMenuItem; 
+                actionMenuView = NSView; 
                 addFieldPopupButton = NSPopUpButton; 
                 addFieldPrompt = NSTextField; 
                 addFieldSheet = NSWindow; 
@@ -88,6 +89,7 @@
                 searchField = id; 
                 searchFieldBox = NSBox; 
                 searchFieldTextField = NSTextField; 
+                searchFieldView = NSView; 
                 sourceList = NSOutlineView; 
                 sourceListActionMenu = NSMenu; 
                 splitView = OASplitView; 
