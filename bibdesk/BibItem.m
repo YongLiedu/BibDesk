@@ -215,6 +215,7 @@ void _setupFonts(){
 }
 
 
+
 - (NSComparisonResult)auth1Compare:(BibItem *)aBI{
     if([pubAuthors count] > 0){
         if([aBI numberOfAuthors] > 0){
@@ -587,6 +588,25 @@ void _setupFonts(){
 													  userInfo:notifInfo];
     // to allow autocomplete:
 	[[NSApp delegate] addString:value forCompletionEntry:key];
+}
+
+// for 10.2
+- (id)handleQueryWithUnboundKey:(NSString *)key{
+    return [self valueForUndefinedKey:key];
+}
+
+- (id)valueForUndefinedKey:(NSString *)key{
+    id obj = [pubFields objectForKey:key];
+    if (obj != nil){
+        return obj;
+    }else{
+        // handle 10.2
+        if ([super respondsToSelector:@selector(valueForUndefinedKey:)]){
+            return [super valueForUndefinedKey:key];
+        }else{
+            return [super handleQueryWithUnboundKey:key];
+        }
+    }
 }
 
 - (NSString *)valueOfField: (NSString *)key{
