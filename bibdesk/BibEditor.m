@@ -175,9 +175,15 @@ NSString *BDSKUrlString = @"Url";
     [self setupForm]; // gets called in window will load...?
     
 	// The popupbutton needs to be set before fixURLs is called.
+
+	//	creating an RYZImagePopUpButton in IB results in one that has the wrong cell.
+	// So we still create it there, we just replace it here with a proper one:
 	RYZImagePopUpButton *newViewLocalButton = [[RYZImagePopUpButton alloc] initWithFrame:[viewLocalButton frame]];
 	[[[self window] contentView] replaceSubview:viewLocalButton
 										   with:newViewLocalButton];
+
+	// copy the 'springs' from the placeholder in IB:
+	[newViewLocalButton setAutoresizingMask:[viewLocalButton autoresizingMask]];
 	viewLocalButton = newViewLocalButton;
 
 	[viewLocalButton setArrowImage:[NSImage imageNamed:@"ArrowPointingDown"]];
@@ -296,7 +302,7 @@ NSString *BDSKUrlString = @"Url";
 		[viewLocalMenu addItem:[safariItems objectAtIndex:i]];
 	}
 	
-	NSArray *previewItems = [self getPreviewRecentDocuments];
+	NSArray *previewItems = [self getPreviewRecentDocumentsMenu];
 	for (i = 0; i < [previewItems count]; i ++){
 		[viewLocalMenu addItem:[previewItems objectAtIndex:i]];
 	}
@@ -348,7 +354,7 @@ NSString *BDSKUrlString = @"Url";
 	return array;
 }
 
-- (NSArray *)getPreviewRecentDocuments{
+- (NSArray *)getPreviewRecentDocumentsMenu{
 	BOOL yn = CFPreferencesSynchronize(@"com.apple.Preview",
 									   kCFPreferencesCurrentUser,
 									   kCFPreferencesCurrentHost);
