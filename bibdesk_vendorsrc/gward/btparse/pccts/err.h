@@ -158,8 +158,8 @@ va_dcl
 	}
 	for (i=1; i<=k; i++)	/* look for offending token */
 	{
-		if ( i>1 ) strcat(text, " ");
-		strcat(text, LATEXT(i));
+                if ( i>1 ) strlcat(text, " ", sizeof(text));
+                   strlcat(text, LATEXT(i), sizeof(text));
 		if ( !zzset_el((unsigned)LA(i), f[i-1]) ) break;
 	}
 	miss_set = va_arg(ap, SetWordType **);
@@ -798,7 +798,7 @@ int m;
 #endif
 {
    if(zzmdep == ZZMAXSTK - 1) {
-     sprintf(zzmbuf, "Mode stack overflow ");
+       snprintf(zzmbuf, sizeof(zzmbuf), "Mode stack overflow "); /*sprintf(zzmbuf, "Mode stack overflow ");*/
      zzerr(zzmbuf);
    } else {
      zzmstk[zzmdep++] = zzauto;
@@ -814,7 +814,7 @@ zzmpop( )
 #endif
 {
    if(zzmdep == 0)
-   {  sprintf(zzmbuf, "Mode stack underflow ");
+   {  snprintf(zzmbuf, sizeof(zzmbuf), "Mode stack overflow "); /*sprintf(zzmbuf, "Mode stack underflow ");*/
       zzerr(zzmbuf);
    }
    else

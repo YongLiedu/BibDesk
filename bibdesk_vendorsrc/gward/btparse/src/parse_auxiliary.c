@@ -120,12 +120,12 @@ append_token_set (char *msg, SetWordType *a)
       {
          if (t & *b)
          {
-            strcat (msg, zztokens[e]);
+             strlcat (msg, zztokens[e], sizeof(msg));
             tokens_printed++;
             if (tokens_printed < zzset_deg (a) - 1)
-               strcat (msg, ", ");
+                strlcat (msg, ", ", sizeof(msg));
             else if (tokens_printed == zzset_deg (a) - 1)
-               strcat (msg, " or ");
+                strlcat (msg, ", ", sizeof(msg));
          }
          e++;
       } while (++b < &(bitmask[sizeof(SetWordType)*8]));
@@ -153,9 +153,9 @@ zzsyn(char *        text,
 
    msg[0] = (char) 0;           /* make sure string is empty to start! */
    if (tok == zzEOF_TOKEN)
-      strcat (msg, "at end of input");
+       strlcat (msg, "at end of input", sizeof(msg) );
    else
-      sprintf (msg, "found \"%s\"", bad_text);
+       snprintf (msg, sizeof(msg), "found \"%s\"", bad_text);
 
    len = strlen (msg);
 
@@ -169,7 +169,7 @@ zzsyn(char *        text,
    }
    else
    {
-      strcat (msg, ", ");
+       strlcat (msg, ", ", sizeof(msg));
       len += 2;
    }
 
@@ -178,8 +178,8 @@ zzsyn(char *        text,
    
    if (k != 1)
    {
-      sprintf (msg+len, "; \"%s\" not", bad_text);
-      if (zzset_deg (eset) > 1) strcat (msg, " in");
+      snprintf (msg+len, sizeof(msg-len), "; \"%s\" not", bad_text);
+        if (zzset_deg (eset) > 1) strlcat (msg, " in", sizeof(msg));
       len = strlen (msg);
    }
 
@@ -189,25 +189,25 @@ zzsyn(char *        text,
    if (zzset_deg (eset) > 0) 
    {
       if (zzset_deg (eset) == 1)
-         strcat (msg, "expected ");
+          strlcat (msg, "expected ", sizeof(msg));
       else
-         strcat (msg, "expected one of: ");
+          strlcat (msg, "expected one of: ", sizeof(msg));
 
       append_token_set (msg, eset);
    }
    else
    {
-      sprintf (msg+len, "expected %s", zztokens[etok]);
+       snprintf (msg+len, sizeof(msg-len), "expected %s", zztokens[etok]);
       if (etok == ENTRY_CLOSE)
       {
-         strcat (msg, " (skipping to next \"@\")");
+          strlcat (msg, " (skipping to next \"@\")", sizeof(msg));
          initialize_lexer_state ();
       }
    }
 
    len = strlen (msg);
    if (egroup && strlen (egroup) > 0) 
-      sprintf (msg+len, " in %s", egroup);
+        snprintf (msg+len, sizeof(msg-len), " in %s", egroup); /*sprintf (msg+len, " in %s", egroup);*/
 
    syntax_error (msg);
 

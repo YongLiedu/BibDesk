@@ -358,7 +358,7 @@ bt_postprocess_value (AST * value, ushort options, boolean replace)
       if (pasting)
       {
          if (tmp_string)
-            strcat (new_string, tmp_string);
+             strlcat (new_string, tmp_string, sizeof(new_string));
          if (free_tmp)
             free (tmp_string);
       }
