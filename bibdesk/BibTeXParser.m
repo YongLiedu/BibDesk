@@ -162,7 +162,22 @@
                         {
                             NSLog(@"I am string s: [%@]",s);
                             NSLog(@"I am validscanstring: [%@]",validscanstring);
-                            *hadProblems = YES;
+                            int errorLine = field->line;
+                            NSLog(@"Invalid characters at line [%i]",errorLine);
+                            
+                            // This sets up an error dictionary object and passes it to the listener
+                            NSString *fileName = filePath;  //We call this fileName, but its actually trimmed in BibAppController
+                            NSValue *lineNumber = [NSNumber numberWithInt:errorLine];  //Need NSValues for NSArray
+                            NSString *errorClassName = @"warning"; //We call it a warning
+                            NSString *errorMessage = @"Invalid characters"; //This is the actual error message for the table
+                            //Need to make an NSDictionary, see BibAppController.m for implementation
+                            NSDictionary *errDict = [NSDictionary dictionaryWithObjects:[NSArray arrayWithObjects:fileName, lineNumber, errorClassName, errorMessage, nil]
+                                                                                forKeys:[NSArray arrayWithObjects:@"fileName", @"lineNumber", @"errorClassName", @"errorMessage", nil]];
+                            *hadProblems = YES; //Set this before we post the notification
+                            //Maybe the dictionary should be passed as userInfo:errDict, but BibAppController expects object:errDict.
+                            [[NSNotificationCenter defaultCenter] postNotificationName:@"BTPARSE ERROR"
+                                                                                object:errDict];
+                            
                         }
                         //End check for valid characters.
                         
