@@ -178,7 +178,7 @@ static BDSKConverter *theConverter;
 	}
     }
     
-    return [[t copy] autorelease];
+    return t;
     
 }
 
@@ -367,7 +367,7 @@ static BDSKConverter *theConverter;
 				[arr addObject:[[[string componentsSeparatedByString:@"}"] objectAtIndex:0] substringFromIndex:1]];
 		}
 	}
-	return [[arr copy] autorelease];
+	return arr;
 }
 
 @end

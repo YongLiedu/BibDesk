@@ -377,7 +377,7 @@ void _setupFonts(){
         while(author = [en nextObject]){
             [rs appendFormat:@" and %@", [author name]];
         }
-        return [[rs copy] autorelease];
+        return rs;
     }
         
 }
@@ -544,11 +544,6 @@ void _setupFonts(){
         [self setAuthorsFromBibtexString:[pubFields objectForKey: @"Editor"]]; // or what else?
     }
 	
-	// autogenerate cite key if we have enough information
-	if ([self canSetCiteKey]) {
-		[self setCiteKey:[self suggestedCiteKey]];
-	}
-	
     // re-call make type to make sure we still have all the appropriate bibtex defined fields...
 	//@@ 3/5/2004: moved why is this here? 
 	[self makeType:[self type]];
@@ -580,6 +575,10 @@ void _setupFonts(){
 		[self setDateModified:[NSCalendarDate dateWithNaturalLanguageString:dateModValue]];
 	}
 	
+	// autogenerate cite key if we have enough information
+	if ([self canSetCiteKey]) {
+		[self setCiteKey:[self suggestedCiteKey]];
+	}
 }
 
 - (void)setRequiredFieldNames: (NSArray *)newRequiredFieldNames{
@@ -845,7 +844,7 @@ void _setupFonts(){
     while(field = [pubFieldsE nextObject]){
         [result appendFormat:@" %@ ", field];
     }
-    return [[result copy] autorelease];
+    return result;
 }
 
 - (NSString *)localURLPathRelativeTo:(NSString *)base{
@@ -1135,7 +1134,7 @@ void _setupFonts(){
 		} while (![self stringIsValid:string forField:fieldName inType:type]);
 		return string;
 	} else {
-	   return [[parsedStr copy] autorelease];
+	   return parsedStr;
 	}
 }
 
