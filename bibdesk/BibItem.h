@@ -67,7 +67,7 @@
     NSMutableArray *pubAuthors;
     NSMutableArray *requiredFieldNames;     /*! @var  this is for 'bibtex required fields'*/
     BibEditor *editorObj; /*! @var if we have an editor, don't create a new one. */
-    unsigned _fileOrder;
+    int _fileOrder;
 	BibDocument *document;
 	NSUndoManager *undoManager;
 }
