@@ -46,6 +46,9 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
     BOOL isDir;
     NSString *applicationSupportPath;
     NSFileManager *DFM = [NSFileManager defaultManager];
+    
+    // start the crash reporter
+    [[ILCrashReporter defaultReporter] launchReporterForCompany:@"BibDesk Project" reportAddr:@"bibdesk-develop@lists.sourceforge.net"];
 
     // now check if the application support directory is there...
     applicationSupportPath = [[[NSHomeDirectory() stringByAppendingPathComponent:@"Library"]
@@ -148,8 +151,8 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
     [super dealloc];
 }
 
-
 - (void)awakeFromNib{
+
     [errorTableView setDoubleAction:@selector(gotoError:)];
     [openUsingFilterAccessoryView retain];
 	[showHideCustomCiteStringsMenuItem setRepresentedObject:@"showHideCustomCiteMenuItem"];

@@ -21,6 +21,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 #import "BDSKFormCellFormatter.h";
 #import "BDSKShellTask.h";
 #import <OmniAppKit/OAScriptMenuItem.h>
+#import <ILCrashReporter/ILCrashReporter.h>
 
 
 
