@@ -51,6 +51,7 @@
 		<dict>
 			<key>optional</key>
 			<array>
+                                <string>Author</string>
 				<string>Editor</string>
 				<string>Volume</string>
 				<string>Number</string>
@@ -61,7 +62,7 @@
 			</array>
 			<key>required</key>
 			<array>
-				<string>Author</string>
+				
 				<string>Title</string>
 				<string>Publisher</string>
 				<string>Year</string>
