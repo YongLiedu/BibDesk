@@ -53,19 +53,30 @@
     
     // find the first whitespace preceding the current word being entered
     NSRange whiteSpaceRange = [*partialStringPtr rangeOfString:@" "
-                                                       options:NSBackwardsSearch | NSLiteralSearch];
+                                                       options:NSBackwardsSearch | NSLiteralSearch]; // see if there's a separator
     NSRange punctuationRange = [*partialStringPtr rangeOfCharacterFromSet:[[NSApp delegate] autoCompletePunctuationCharacterSet]
-                                                                  options:NSBackwardsSearch];
+                                                                  options:NSBackwardsSearch]; // check to see if this is a keyword-type
+    NSRange andRange = [*partialStringPtr rangeOfString:@"and"
+                                                options:NSBackwardsSearch | NSLiteralSearch]; // check to see if it's an author (not robust)
     NSString *matchString = nil;
     unsigned lengthToEnd = [*partialStringPtr length] - whiteSpaceRange.location;
     NSString *firstPart = [NSString stringWithString:@""]; // we'll use this as a base for appending the completion to
     
-    if(punctuationRange.location != NSNotFound){
+    if( ((punctuationRange.location != NSNotFound) && 
+         (punctuationRange.location > [*partialStringPtr length])) ||
+        (andRange.location != NSNotFound) ){ // we have a comma, semicolon, colon or "and" separator, and the punctuation mark isn't past the end of the string
         matchString = [*partialStringPtr substringWithRange:NSMakeRange(whiteSpaceRange.location + 1, lengthToEnd - 1)]; // everything after the last whitespace
         firstPart = [*partialStringPtr substringWithRange:NSMakeRange(0, whiteSpaceRange.location + 1)]; // everything through the last whitespace
     } else {
-        matchString = *partialStringPtr; // first word being entered, so use it
+        if( whiteSpaceRange.location != NSNotFound ){ // we failed the first test, so we're probably not an author, but have a whitespace
+            matchString = [*partialStringPtr substringWithRange:NSMakeRange(whiteSpaceRange.location + 1, lengthToEnd - 1)]; // everything after the last whitespace
+            firstPart = [*partialStringPtr substringWithRange:NSMakeRange(0, whiteSpaceRange.location + 1)]; // everything through the last whitespace
+        } else {
+            matchString = *partialStringPtr; // first word being entered, so use it
+        }
     }
+    
+    // NSLog(@"matchString is %@", matchString);
     
     while(string = [stringE nextObject]){
         if ([string hasPrefix:matchString]) {
@@ -73,7 +84,7 @@
         }
     }
     
-    // NSLog(@"string is %@", string);
+     // NSLog(@"string is %@", string);
     
     // also allow to keep typing for no match - new entries are OK.
     if (!string) return YES;
