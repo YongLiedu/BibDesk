@@ -54,21 +54,10 @@ static unsigned threadCount = 0;
 - (void)awakeFromNib{
     // register for notifications so we can save the window size and location
     [[NSNotificationCenter defaultCenter] addObserver:self
-					     selector:@selector(saveWindowFrame)
-						 name:NSWindowDidResizeNotification
-					       object:[self window]];
-    [[NSNotificationCenter defaultCenter] addObserver:self
-					     selector:@selector(saveWindowFrame)
-						 name:NSWindowDidMoveNotification
-					       object:[self window]];
-    [[NSNotificationCenter defaultCenter] addObserver:self
-					     selector:@selector(setWindowFrame)
-						 name:NSWindowDidBecomeKeyNotification
-					       object:[self window]];
-    [[NSNotificationCenter defaultCenter] addObserver:self
 					     selector:@selector(resetPreviews)
 						 name:NSWindowWillCloseNotification
 					       object:[self window]];
+    [self setWindowFrameAutosaveName:@"BDSKPreviewPanel"];
 }
 
 - (NSString *)windowNibName
@@ -464,14 +453,6 @@ static unsigned threadCount = 0;
     	return NO;
     }
 	
-}
-
-- (void)saveWindowFrame{
-    [[self window] saveFrameUsingName:@"BDSKPreviewPanel"];
-}
-
-- (void)setWindowFrame{
-    [[self window] setFrameUsingName:@"BDSKPreviewPanel"];
 }
 
 - (void)resetPreviews{

@@ -266,7 +266,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 											   object:theDocument];
 
 	[authorTableView setDoubleAction:@selector(showPersonDetailCmd:)];
-		
+    [self setWindowFrameAutosaveName:@"BibEditor window autosave name"];
 }
 
 - (void)dealloc{
