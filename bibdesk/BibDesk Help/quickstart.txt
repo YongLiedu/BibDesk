@@ -18,21 +18,41 @@
 ## Quick Start for those already familiar with BibTeX
 
 Using BibDesk should be pretty natural for the average user of
-BibTeX. Simply open a .bib file with BibDesk and start browsing and
-editing.
+BibTeX. Simply open your .bib file with BibDesk and start [browsing and editing](managing.html).
+To get you up to speed faster, here are a few important features and
+differences from other BibTeX editors.
+
+### Accented Characters
 
 If you are used to writing LaTeX code for accented characters and
 special fonts, you will be glad to know that BibDesk handles most of
 that work for you now. See [Editing references](managing.html#editing)
 for an overview, or [Character Conversion](char-convert.html) for more detail.
 
+### Capitalized letters in fields
+
+If you use braces in your BibTeX fields to protect meaningful
+captialization, BibDesk attempts not to interfere. The braces will be
+saved and any previews will show the intended capitalization.
+
+Searches will match the string without the braces - a search for
+"LaTeX" will match a publication with the title "{L}a{T}e{X}".
+
+### File Encodings
+
 If you have a BibTeX file that is not stored with ASCII encoding, see
 [Opening a file with specific encodings](open-import.html#encoding)
+
+### Citation Keys
 
 BibDesk can help you maintain useful and readable citation keys
 painlessly. See [Cite-key generation](cite-key.html) for more information.
 
+### Macros
+
 BibDesk supports BibTeX macros. See [BibTeX macros](managing.html#edit-macro) for more information.
+
+### BibDesk Does Not Recognize `crossref`
 
 BibDesk does not currently take advantage of the BibTeX crossref
 feature for display or searching, but if you use crossrefs, using
