@@ -15,11 +15,12 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 */
 
 #import <Cocoa/Cocoa.h>
-#import <sys/stat.h>
+
 
 #import "BibPrefController.h";
 #import "BibFinder.h";
 #import "BDSKFormCellFormatter.h";
+#import "BDSKShellTask.h";
 
 /*!
     @class BibAppController
@@ -49,8 +50,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
     // stuff for the accessory view for openUsingFilter
     IBOutlet NSView* openUsingFilterAccessoryView;
     IBOutlet NSTextField* openUsingFilterTextField;
-    // data used to store stdOut from the filter
-    NSData *_stdoutData;
+
 }
 
 /*!
@@ -60,9 +60,6 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
     
 */
 - (IBAction)openUsingFilter:(id)sender;
-- (NSString *)runShellCommand:(NSString *)cmd withInputString:(NSString *)input;
-- (NSString *)executeBinary:(NSString *)executablePath inDirectory:(NSString *)currentDirPath withArguments:(NSArray *)args environment:(NSDictionary *)env inputString:(NSString *)input;
-- (void)stdoutNowAvailable:(NSNotification *)notification;
 
 /*!
 @method addString:forCompletionEntry:
@@ -91,7 +88,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 - (IBAction)toggleShowingErrorPanel:(id)sender;
 - (IBAction)hideErrorPanel:(id)sender;
 - (IBAction)showErrorPanel:(id)sender;
-- (void)removeErrorsFromFileName:(NSString *)fileName;
+- (void)removeErrorObjsForFileName:(NSString *)fileName;
 - (IBAction)gotoError:(id)sender;
 - (IBAction)gotoErrorObj:(id)errObj;
 - (IBAction)openEditWindowWithFile:(NSString *)fileName;
