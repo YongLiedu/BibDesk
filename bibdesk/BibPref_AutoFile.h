@@ -20,18 +20,28 @@
 
 #import <Foundation/Foundation.h>
 #import "BibPrefController.h"
+#import "BibItem.h"
+#import "BDSKConverter.h"
 
 @interface BibPref_AutoFile : OAPreferenceClient {
 	IBOutlet NSTextField* papersFolderLocationTextField;
 	IBOutlet NSButton* choosePapersFolderLocationButton;
 	IBOutlet NSButton* filePapersAutomaticallyCheckButton;
 	IBOutlet NSButton* keepPapersFolderOrganizedCheckButton;
-
+    IBOutlet NSTextField *formatField;
+    IBOutlet NSPopUpButton *formatRepositoryPopUp;
+    IBOutlet NSButton *formatWarningButton;
+	NSImage *cautionIconImage;
 }
 
 - (IBAction)choosePapersFolderLocationAction:(id)sender;
 - (IBAction)toggleFilePapersAutomaticallyAction:(id)sender;
 - (IBAction)toggleKeepPapersFolderOrganizedAction:(id)sender;
-
+- (IBAction)localUrlFormatChanged:(id)sender;
+- (IBAction)localUrlFormatAdd:(id)sender;
+- (IBAction)formatHelp:(id)sender;
+- (void)setupCautionIcon;
+- (IBAction)showLocalUrlFormatWarning:(id)sender;
+- (void)setLocalUrlFormatInvalidWarning:(BOOL)set message:message;
 
 @end
