@@ -69,7 +69,7 @@ static NSCharacterSet *SkipSet;
     // while scanner's not at eof, scan up to characters from that set into tmpOut
 
     // fastScan is an NSScanner, which is faster than the OFCharacterScanner (which makes an OFCharacterSet)
-    // tell fastScan to skip characters we know how to convert, then if
+    // tell fastScan to skip characters we do not need to convert, then if
     // it picks up something that is not in that range, run OFCharacterScanner
     [fastScan setCharactersToBeSkipped:SkipSet];
 	if([fastScan scanCharactersFromSet:FinalCharSet intoString:nil]){
@@ -81,7 +81,10 @@ static NSCharacterSet *SkipSet;
 											  withString:TEXString];
 				offset += [TEXString length] - 1;    // we're adding length-1 characters, so we have to make sure we insert at the right point in the future.
 			}else{
-				
+			    [NSObject cancelPreviousPerformRequestsWithTarget:self 
+								     selector:@selector(runConversionAlertPanel)
+								       object:nil];
+			    [self performSelector:@selector(runConversionAlertPanel) withObject:nil afterDelay:0.1];
 			}
 	    }
 		
@@ -91,23 +94,22 @@ static NSCharacterSet *SkipSet;
     [scanner release];
     [fastScan release];
     // shouldn't [tmpConv release]; ? I should look in the omni source code...
-
-
-    //Next two lines handle newlines.  These probably should be done in the dictionary
-    //But I could't make it return just "\n" it always returns "\\n" and none of the
-    //unicode chars for newline work as consistently as the code below.
-
-    //Added to convert double new line to {\par}
-    //[convertedSoFar replaceOccurrencesOfString:@"\n\n" withString:@"{\\par}"
-                                     //  options: NSCaseInsensitiveSearch
-                                       //  range:NSMakeRange(0, [convertedSoFar length])];
-
-    //Added to convert \newline to single new line
-    //[convertedSoFar replaceOccurrencesOfString:@"\n"
-                                    //withString:@"{\\newline}" options: NSCaseInsensitiveSearch
-                                      //   range:NSMakeRange(0, [convertedSoFar length])];
     
     return([convertedSoFar autorelease]);
+}
+
++ (void)runConversionAlertPanel{
+    int i = NSRunAlertPanel(NSLocalizedString(@"Character Conversion Error",
+				              @"Title of alert when an error happens"),
+		            NSLocalizedString(@"An accented character could not be converted.  Please enter the TeX code directly in your bibliography and e-mail the developers.  For more information, see the Character Conversion topic of BibDesk Help.",
+				              @"Informative alert text when the error happens."),
+			    @"Send e-mail", @"Continue", nil, nil);
+    if(i == NSAlertDefaultReturn){
+	NSString *urlString = @"mailto:bibdesk-develop@sourceforge.net?subject=Character%20Conversion%20Error&body=Please%20enter%20the%20accented%20character%20that%20failed%20to%20convert%20and%20its%20TeX%20equivalent.";
+	NSURL *mailURL = [NSURL URLWithString:urlString];
+	[[NSWorkspace sharedWorkspace] openURL:mailURL];
+    } else {
+    }
 }
 
 
@@ -150,21 +152,7 @@ static NSCharacterSet *SkipSet;
             }
         }
     }
-
-    //Next two statements handle newlines.
-    //These two should be done thorugh the dictionary---but I can't work out
-    //how to make it return just \n.  It always returns "\\n".
     
-    //Added to convert \par to double new line
-    //[convertedSoFar replaceOccurrencesOfString:@"{\\par}"
-      //                           withString:@"\n\n" options: NSCaseInsensitiveSearch
-        //                         range:NSMakeRange(0, [convertedSoFar length])];
-
-    //Added to convert \newline to single new line
-    //[convertedSoFar replaceOccurrencesOfString:@"{\\newline}"
-      //                              withString:@"\n" options: NSCaseInsensitiveSearch
-        //                                 range:NSMakeRange(0, [convertedSoFar length])];
-    
-    return [convertedSoFar autorelease]; 
+  return [convertedSoFar autorelease]; 
 }
 @end

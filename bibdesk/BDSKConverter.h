@@ -23,28 +23,37 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 #import <OmniFoundation/OFStringScanner.h>
 
 /*!
-    @class BDSKConverter
-    @abstract converts from UTF-8 <-> TeX
+ @class BDSKConverter
+ @abstract converts from UTF-8 <-> TeX
  @discussion This was a pain to write, and more of a pain to link. :)
 */
 @interface BDSKConverter : NSObject {
 }
 
 /*!
-@method stringByTeXifyingString:
-    @abstract UTF-8 -> TeX
-    @discussion Uses a dictionary to find replacements for candidate special characters.
-  @param s the string to convert into ASCII TeX encoding
+ @method stringByTeXifyingString:
+ @abstract UTF-8 -> TeX
+ @discussion Uses a dictionary to find replacements for candidate special characters.
+ @param s the string to convert into ASCII TeX encoding
  @result the string converted into ASCI TeX encoding
 */
 + (NSString *)stringByTeXifyingString:(NSString *)s;
 
-    /*!
-    @method stringByDeTeXifyingString:
-     @abstract TeX -> UTF-8
-     @discussion Uses a dictionary to find replacements for strings like {\ ... }.
-     @param s the string to convert from ASCII TeX encoding
-     @result the string converted from ASCI TeX encoding
-     */
+/*!
+ @method stringByDeTeXifyingString:
+ @abstract TeX -> UTF-8
+ @discussion Uses a dictionary to find replacements for strings like {\ ... }.
+ @param s the string to convert from ASCII TeX encoding
+ @result the string converted from ASCI TeX encoding
+*/
 + (NSString *)stringByDeTeXifyingString:(NSString *)s;
+
+/*!
+ @method runConversionAlertPanel
+ @abstract NSRunAlertPanel
+ @discussion Gives options to send e-mail if stringByTeXifyingString encounters a character not in the dictionary
+ @param none
+ @result alert panel
+*/
++ (void)runConversionAlertPanel;
 @end
