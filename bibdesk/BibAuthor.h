@@ -59,6 +59,8 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 - (NSString *)lastName;
 - (NSString *)jrPart;
 
+- (NSString *)MODSStringWithRole:(NSString *)rel;
+
 - (BibItem *)publication;
 - (void)setPublication:(BibItem *)newPub;
 

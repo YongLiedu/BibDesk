@@ -30,6 +30,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 		[self setName:aName];
 		publication = aPub; // don't retain this, since it retains us
 	}
+    
     return self;
 }
 
@@ -160,6 +161,27 @@ You may almost always use the first form; you shouldn’t if either there’s a Jr p
     return _jrPart;
 }
 
+- (NSString *)MODSStringWithRole:(NSString *)role{
+    NSMutableString *s = [NSMutableString stringWithString:@"<name type=\"personal\">"];
+    
+    if(_firstName){
+        [s appendFormat:@"<namePart type=\"given\">%@</namePart>", _firstName];
+    }
+    
+    if(_lastName){
+        [s appendFormat:@"<namePart type=\"family\">%@%@</namePart>", (_vonPart ? _vonPart : @""),
+            _lastName];
+    }
+    
+    if(role){
+        [s appendFormat:@"<role> <roleTerm authority=\"marcrelator\" type=\"text\">%@</roleTerm></role>",
+        role];
+    }
+    
+    [s appendString:@"</name>"];
+    
+    return [[s copy] autorelease];
+}
 
 /*
 Sets all the different variables for partial names and so on from a given string. 
