@@ -601,7 +601,6 @@ stringByAppendingPathComponent:@"BibDesk"]; */
     // Dirty check to see if we guessed the right encoding.  UTF8 will do fine for ASCII and fairly well for MacRoman but fails for
     // ISO-8859-1 and gives a nil string.  This is a problem with ScienceDirect, if your browser is set to accept 8859-1 by default.
     if(dataString == nil){
-	[dataString release];
 	dataString = [[[NSString alloc] initWithData:data encoding:NSISOLatin1StringEncoding] autorelease];
     }
     
@@ -610,11 +609,13 @@ stringByAppendingPathComponent:@"BibDesk"]; */
     }
     dictionary = [NSMutableDictionary dictionaryWithCapacity:10];
     
-    newPubs = [PubMedParser itemsFromString:dataString
+    [publications autorelease];
+    newPubs = [BibTeXParser itemsFromData:data
                                     error:&hadProblems
                               frontMatter:frontMatter
                                  filePath:filePath];
-
+    publications = [newPubs retain];
+    
     if(hadProblems){
         // run a modal dialog asking if we want to use partial data or give up
         rv = NSRunAlertPanel(NSLocalizedString(@"Error reading file!",@""),
@@ -638,8 +639,6 @@ stringByAppendingPathComponent:@"BibDesk"]; */
             return NO;
         }
     }
-    
-    [self setPublications:newPubs];
     [shownPublications setArray:publications];
     
     // since we can't save pubmed files as pubmed files:
@@ -669,10 +668,12 @@ stringByAppendingPathComponent:@"BibDesk"]; */
     // to enable some cheapo timing, uncomment these:
 //    NSDate *start = [NSDate date];
 //    NSLog(@"start: %@", [start description]);
+    [publications autorelease];
     newPubs = [BibTeXParser itemsFromData:data
                                            error:&hadProblems
                                      frontMatter:frontMatter
                                         filePath:filePath];
+    publications = [newPubs retain];
 
 //    NSLog(@"end %@ elapsed: %f", [[NSDate date] description], [start timeIntervalSinceNow]);
 
@@ -699,7 +700,6 @@ stringByAppendingPathComponent:@"BibDesk"]; */
             return NO;
         }
     }
-    [self setPublications:newPubs];
     [shownPublications setArray:publications];
     return YES;
 }
