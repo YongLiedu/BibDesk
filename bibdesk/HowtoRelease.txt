@@ -1,5 +1,7 @@
 How to generate a release for BibDesk:
 
+This file has been replaced by a wiki page at http://bibdesk.sourceforge.net/cgi-bin/piki/HowToRelease
+
 * Preparation:
 
 First, check that all desired changes have been committed, and that your local cvs tree is completely up to date.
@@ -30,4 +32,5 @@ Use the panther Disk Utility to create a new DMG from the folder you've prepared
 
 Then go to the sourceforge page to create a new file release. Add a new release to the BibDesk package (or the alpha, if that's appropriate), name it the same as the archive. 
 
-Then just follow the instructions from sourceforge...
+Then just follow the instructions from sourceforge at http://sourceforge.net/docman/display_doc.php?docid=6445&group_id=1
+"Guide to the File Release System" I usually have to re-read the whole thing every time I do it.
