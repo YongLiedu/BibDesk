@@ -664,16 +664,6 @@ NSString *BDSKUrlString = @"Url";
     [documentTextSnoopButton setToolTip:NSLocalizedString(@"Show the first page as Text in a drawer.", @"")];
 }
 
-- (BOOL)windowShouldClose:(id)sender{
-    int rv = 0;
-    if (![self citeKeyIsValid:[citeKeyField stringValue]]) {
-        rv = NSRunCriticalAlertPanel(NSLocalizedString(@"",@""), NSLocalizedString(@"The citation key you entered is either already used in this document or is empty. Please provide an unique one.",@""),
-                                     NSLocalizedString(@"OK",@"OK"), nil, nil, nil);
-        return NO;
-    }
-    return YES;
-}
-
 - (void)windowWillClose:(NSNotification *)notification{
  //@@citekey   [[self window] makeFirstResponder:citeKeyField]; // makes the field check if there is a duplicate field.
     [[self window] makeFirstResponder:[self window]];
