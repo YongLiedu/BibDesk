@@ -1022,7 +1022,7 @@ stringByAppendingPathComponent:@"BibDesk"]; */
 
 - (void)handleTableViewBackspaceDel{
     id selectedSource = [sourceList selectedItem];
-    if(selectedSource == self){
+    if(selectedSource == self || selectedSource == nil){
         // we're working with the library, delete pub.
         [self delPub:nil];
     }else{
