@@ -3,7 +3,11 @@
         {CLASS = BDSKCustomCiteTableView; LANGUAGE = ObjC; SUPERCLASS = NSTableView; }, 
         {CLASS = BDSKDragOutlineView; LANGUAGE = ObjC; SUPERCLASS = NSOutlineView; }, 
         {CLASS = BDSKDragTableView; LANGUAGE = ObjC; SUPERCLASS = NSTableView; }, 
-        {CLASS = BDSKMenuButton; LANGUAGE = ObjC; SUPERCLASS = NSButton; }, 
+        {
+            CLASS = BDSKPopUpButtonCell; 
+            LANGUAGE = ObjC; 
+            SUPERCLASS = NSPopUpButtonCell; 
+        }, 
         {
             ACTIONS = {
                 clearQuickSearch = id; 
@@ -33,8 +37,11 @@
             CLASS = BibDocument; 
             LANGUAGE = ObjC; 
             OUTLETS = {
+                PDFPreviewView = NSImageView; 
+                RTFPreviewView = NSTextView; 
                 actionMenu = NSMenu; 
                 actionMenuButton = NSPopUpButton; 
+                actionMenuFirstItem = NSMenuItem; 
                 addFieldPrompt = NSTextField; 
                 addFieldSheet = NSWindow; 
                 addFieldTextField = NSTextField; 
@@ -49,6 +56,7 @@
                 infoLine = NSTextField; 
                 openCustomCitePrefsButton = NSButton; 
                 previewField = NSTextView; 
+                previewTabView = NSTabView; 
                 quickSearchButton = NSPopUpButton; 
                 quickSearchClearButton = NSButton; 
                 rssExportAccessoryView = NSView; 
@@ -63,8 +71,7 @@
             SUPERCLASS = NSDocument; 
         }, 
         {CLASS = MyTextField; LANGUAGE = ObjC; SUPERCLASS = NSTextField; }, 
-        {CLASS = OASplitView; LANGUAGE = ObjC; SUPERCLASS = NSSplitView; }, 
-        {CLASS = RYZImagePopUpButton; LANGUAGE = ObjC; SUPERCLASS = NSPopUpButton; }
+        {CLASS = OASplitView; LANGUAGE = ObjC; SUPERCLASS = NSSplitView; }
     ); 
     IBVersion = 1; 
 }
