@@ -265,7 +265,7 @@ static BDSKConverter *theConverter;
 {
 	NSCharacterSet *invalidCharSet = [[BibTypeManager sharedManager] strictInvalidCharactersForField:fieldName inFileType:type];
 	
-	if ([fieldName isEqualToString:@"Cite Key"] || [fieldName isEqualToString:@"Local-Url"]) {
+	if ([fieldName isEqualToString:@"Cite Key"]) {
 		NSString *newString;
 		
 		if (string == nil || [string isEqualToString:@""]) {
@@ -276,6 +276,17 @@ static BDSKConverter *theConverter;
 													 withString:@"-"];
 		newString = [[[NSString alloc] initWithData:[newString dataUsingEncoding:NSASCIIStringEncoding allowLossyConversion:YES] 
 											encoding:NSASCIIStringEncoding] autorelease];
+		newString = [newString stringByReplacingCharactersInSet:invalidCharSet withString:@""];
+		
+		return newString;
+	}
+	else if ([fieldName isEqualToString:@"Local-Url"]) {
+		NSString *newString;
+		
+		if (string == nil || [string isEqualToString:@""]) {
+			return @"";
+		}
+		newString = [self stringByDeTeXifyingString:string];
 		newString = [newString stringByReplacingCharactersInSet:invalidCharSet withString:@""];
 		
 		return newString;

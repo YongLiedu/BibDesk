@@ -23,9 +23,6 @@ static BibTypeManager *sharedInstance = nil;
     // this set is used for warning the user on manual entry of a citekey; allows non-ASCII characters and some math symbols
     invalidCiteKeyCharSet = [[NSCharacterSet characterSetWithCharactersInString:@" '\"@,\\#}{~&%$^"] retain];
     
-	// this set is used for warning the user on manual entry of a local-url; allows non-ASCII characters and some math symbols
-    invalidLocalUrlCharSet = [[NSCharacterSet characterSetWithCharactersInString:@" '\"@,\\#}{~&$^:"] retain];
-    
     NSMutableCharacterSet *validSet = [[[NSMutableCharacterSet alloc] init] autorelease];
     [validSet addCharactersInRange:NSMakeRange( (unsigned int)'a', 26)];
     [validSet addCharactersInRange:NSMakeRange( (unsigned int)'A', 26)];
@@ -37,8 +34,11 @@ static BibTypeManager *sharedInstance = nil;
 	[validSet removeCharactersInString:@":"];
 	[validSet addCharactersInString:@"%"];
     
-	// this is used for generated local urls, verys strict!
-	strictInvalidLocalUrlCharSet = [[validSet invert] copy];  // don't release this
+	// this set is used for warning the user on manual entry of a local-url; allows non-ASCII characters and some math symbols
+    invalidLocalUrlCharSet = [[NSCharacterSet characterSetWithCharactersInString:@":"] retain];
+    
+	// this is used for generated local urls
+	strictInvalidLocalUrlCharSet = [invalidLocalUrlCharSet copy];  // don't release this
 	
     return self;
 }
@@ -46,6 +46,8 @@ static BibTypeManager *sharedInstance = nil;
 - (void)dealloc{
 	[invalidCiteKeyCharSet release];
 	[strictInvalidCiteKeyCharSet release];
+	[invalidLocalUrlCharSet release];
+	[strictInvalidLocalUrlCharSet release];
 	[super dealloc];
 }
 
