@@ -39,6 +39,8 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
                                              alternateButton:nil
                                                  otherButton:nil
                                    informativeTextWithFormat:NSLocalizedString(@"The file %@ does not exist or is not executable.  Please try again.",@""), [control stringValue]];
+            // work around apparent appkit bug that causes endless loop here
+            [control setStringValue:(control == bibtexBinaryPath ? [defaults objectForKey:BDSKBibTeXBinPathKey] : [defaults objectForKey:BDSKTeXBinPathKey])];
             [anAlert beginSheetModalForWindow:[[OAPreferenceController sharedPreferenceController] window]
                                 modalDelegate:nil
                                didEndSelector:nil
