@@ -95,9 +95,9 @@
 	<key>CFBundleExecutable</key>
 	<string>Bibdesk</string>
 	<key>CFBundleGetInfoHTML</key>
-	<string>&lt;B&gt;BibDesk&lt;/B&gt; Version 0.99a1</string>
+	<string>&lt;B&gt;BibDesk&lt;/B&gt; Version 0.99</string>
 	<key>CFBundleGetInfoString</key>
-	<string>version 0.99a1</string>
+	<string>version 0.99</string>
 	<key>CFBundleHelpBookFolder</key>
 	<string>BibDesk Help</string>
 	<key>CFBundleHelpBookName</key>
@@ -113,11 +113,11 @@
 	<key>CFBundlePackageType</key>
 	<string>APPL</string>
 	<key>CFBundleShortVersionString</key>
-	<string>0.99a1</string>
+	<string>0.99</string>
 	<key>CFBundleSignature</key>
 	<string>BDSK</string>
 	<key>CFBundleVersion</key>
-	<string>0.99a1</string>
+	<string>0.99</string>
 	<key>NSAppleScriptEnabled</key>
 	<string>YES</string>
 	<key>NSMainNibFile</key>
@@ -329,10 +329,10 @@
 					</array>
 					<key>Output Template File</key>
 					<string>~/Library/Application Support/BibDesk/template.txt</string>
+					<key>Save normalized names in BibTeX files</key>
+					<string>0</string>
 					<key>Write template file when saving</key>
 					<string>1</string>
-                    <key>Save normalized names in BibTeX files</key>
-                    <string>0</string>
 				</dict>
 				<key>icon</key>
 				<string>defaults.tiff</string>
@@ -357,10 +357,10 @@
 					<string>NO</string>
 					<key>Load files in background</key>
 					<string>NO</string>
+					<key>TeXify characters when saving or copying BibTeX</key>
+					<string>YES</string>
 					<key>Use Unicode BibTeX Parser</key>
 					<string>NO</string>
-                    <key>TeXify characters when saving or copying BibTeX</key>
-                    <string>YES</string>
 				</dict>
 				<key>icon</key>
 				<string>genericBibDocIcon.tiff</string>
@@ -426,10 +426,10 @@
 					<string>1.093888830242598e-310</string>
 					<key>Maximum Number of Items in Preview Pane</key>
 					<string>0</string>
-					<key>Preview Pane Displays What?</key>
-					<string>1</string>
 					<key>Preview PDF Scale Factor</key>
 					<string>1.0</string>
+					<key>Preview Pane Displays What?</key>
+					<string>1</string>
 					<key>Preview RTF Scale Factor</key>
 					<string>1.0</string>
 					<key>Quick Search Keys</key>
@@ -540,12 +540,12 @@
 					<string>/usr/local/teTeX/bin/powerpc-apple-darwin-current/bibtex</string>
 					<key>BibTeX Style</key>
 					<string>abbrv</string>
+					<key>Character encoding for TeX preview file</key>
+					<string>1</string>
 					<key>TeX Binary Path</key>
 					<string>/usr/local/teTeX/bin/powerpc-apple-darwin-current/pdflatex</string>
 					<key>Uses TeX</key>
 					<string>0</string>
-                    <key>Character encoding for TeX preview file</key>
-                    <string>1</string>
 				</dict>
 				<key>icon</key>
 				<string>preview.tiff</string>
