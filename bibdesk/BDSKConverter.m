@@ -297,7 +297,7 @@ static BDSKConverter *theConverter;
 - (BOOL)validateFormat:(NSString **)formatString forField:(NSString *)fieldName inFileType:(NSString *)type error:(NSString **)error
 {
 	// implemented specifiers, the same for any field and type
-	NSCharacterSet *validSpecifierChars = [NSCharacterSet characterSetWithCharactersInString:@"aAtTmyYkrRdc"];
+	NSCharacterSet *validSpecifierChars = [NSCharacterSet characterSetWithCharactersInString:@"aAtTmyYlLkrRdc"];
 	NSCharacterSet *validLastSpecifierChars = [NSCharacterSet characterSetWithCharactersInString:@"uUn"];
 	NSCharacterSet *escapeSpecifierChars = [NSCharacterSet characterSetWithCharactersInString:@"0123456789%{}"];
 	NSCharacterSet *validArgSpecifierChars = [NSCharacterSet characterSetWithCharactersInString:@"fc"];
@@ -391,6 +391,10 @@ static BDSKConverter *theConverter;
 				break;
 			case 'm':
 				[arr addObject:BDSKMonthString];
+				break;
+			case 'l':
+			case 'L':
+				[arr addObject:BDSKLocalUrlString];
 				break;
 			case 'f':
 			case 'c':
