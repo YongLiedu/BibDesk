@@ -133,18 +133,23 @@ However, we will simply add the usual completions after our own for safety...
 // look back to find [ starting from ]
 // now we have [, see if there is a cite immediately preceding it (rangeOfString:@"cite" || rangeOfString:@"bibentry"
 
-// now we've search back to a brace, and then checked for a cite command with two optional parameters
+// after all of this, we've searched back to a brace, and then checked for a cite command with two optional parameters
+
+NSRange SafeBackwardSearchRange(NSRange startRange, unsigned seekLength){
+    unsigned minLoc = ( (startRange.location > seekLength) ? seekLength : startRange.location);
+    return NSMakeRange(startRange.location - minLoc, minLoc);
+}
 
 - (BOOL)isBibTeXCitation:(NSRange)braceRange{
     NSString *str = [[self textStorage] string];
+    NSRange citeSearchRange;
 
-    NSRange rightBracketRange = [str rangeOfString:@"]" options:NSBackwardsSearch | NSLiteralSearch range:NSMakeRange(braceRange.location - 1, 1)];
-    
-    unsigned minLoc = ( (braceRange.location > 10) ? 10 : braceRange.location);
-	NSRange citeSearchRange = NSMakeRange(braceRange.location - minLoc, minLoc); 
+    NSRange rightBracketRange = [str rangeOfString:@"]" options:NSBackwardsSearch | NSLiteralSearch range:SafeBackwardSearchRange(braceRange, 1)];
     
     if(rightBracketRange.location == NSNotFound){
-        if([str rangeOfString:@"cite" options:NSBackwardsSearch | NSLiteralSearch range:citeSearchRange].location != NSNotFound){
+        citeSearchRange = SafeBackwardSearchRange(braceRange, 10);
+        if([str rangeOfString:@"cite" options:NSBackwardsSearch | NSLiteralSearch range:citeSearchRange].location != NSNotFound ||
+           [str rangeOfString:@"bibentry" options:NSBackwardsSearch | NSLiteralSearch range:citeSearchRange].location != NSNotFound){
             return YES;
         } else {
             return NO;
@@ -152,48 +157,59 @@ However, we will simply add the usual completions after our own for safety...
     }
     
     NSRange leftBracketRange = [str rangeOfString:@"[" options:NSBackwardsSearch | NSLiteralSearch]; // first occurrence of it, looking backwards
-    NSRange doubleBracketRange = [str rangeOfString:@"][" options:NSBackwardsSearch | NSLiteralSearch range:NSMakeRange(leftBracketRange.location - 2, 3)]; // look back from [ to see if we have ][; allow some slop
-#warning range checks needed    
+    NSRange doubleBracketRange = [str rangeOfString:@"][" options:NSBackwardsSearch | NSLiteralSearch range:SafeBackwardSearchRange( NSMakeRange(leftBracketRange.location + 1, 3), 3)];
+
     if(doubleBracketRange.location != NSNotFound)
-        leftBracketRange = [str rangeOfString:@"[" options:NSBackwardsSearch | NSLiteralSearch range:NSMakeRange(doubleBracketRange.location - 50, 50)];
+        leftBracketRange = [str rangeOfString:@"[" options:NSBackwardsSearch | NSLiteralSearch range:SafeBackwardSearchRange(doubleBracketRange, 50)];
     
     if(leftBracketRange.location != NSNotFound){
-        minLoc = ( (leftBracketRange.location > 10) ? 10 : leftBracketRange.location);
-		citeSearchRange = NSMakeRange(leftBracketRange.location - minLoc, minLoc);
-        if([str rangeOfString:@"cite" options:NSBackwardsSearch | NSLiteralSearch range:citeSearchRange].location != NSNotFound){
+        citeSearchRange = SafeBackwardSearchRange(leftBracketRange, 10);
+        if([str rangeOfString:@"cite" options:NSBackwardsSearch | NSLiteralSearch range:citeSearchRange].location != NSNotFound ||
+           [str rangeOfString:@"bibentry" options:NSBackwardsSearch | NSLiteralSearch range:citeSearchRange].location != NSNotFound){
             return YES;
         } else {
             return NO;
         }
     }
-    NSLog(@"why am I here?");
     return NO;
+}
+
+NSRange SafeForwardSearchRange( unsigned startLoc, unsigned seekLength, unsigned maxLength ){
+    seekLength = ( (startLoc + seekLength > maxLength) ? maxLength - startLoc : seekLength );
+    return NSMakeRange(startLoc, seekLength);
 }
             
 - (NSRange)newCiteKeyRange{
     NSString *str = [[self textStorage] string];
     NSRange r = [self selectedRange]; // here's the insertion point
     NSRange commaRange;
+    NSRange finalRange;
+    unsigned maxLoc;
 
-    unsigned minLoc = ( (r.location > 100) ? 100 : r.location);
-    NSRange braceRange = [str rangeOfString:@"{" options:NSBackwardsSearch | NSLiteralSearch range:NSMakeRange(r.location - minLoc, minLoc)];
+    NSRange braceRange = [str rangeOfString:@"{" options:NSBackwardsSearch | NSLiteralSearch range:SafeBackwardSearchRange(r, 100)];
 
     if(braceRange.location != NSNotFound) // may be TeX
-        commaRange = [str rangeOfString:@"," options:NSBackwardsSearch | NSLiteralSearch range:NSUnionRange(braceRange, r)];
+        commaRange = [str rangeOfString:@"," options:NSBackwardsSearch | NSLiteralSearch range:NSUnionRange(braceRange, r)]; // exclude commas in the optional parameters
 
     if([self isBibTeXCitation:braceRange]){
-#warning range checks needed
-        return ( (commaRange.location != NSNotFound) ? NSMakeRange(commaRange.location + 1, r.location - commaRange.location - 1) : NSMakeRange(braceRange.location + 1, r.location - braceRange.location - 1)  );
+        if(commaRange.location != NSNotFound){
+            maxLoc = ( (commaRange.location + 1 > r.location) ? commaRange.location : commaRange.location + 1 );
+            finalRange = SafeForwardSearchRange(maxLoc, r.location - commaRange.location - 1, r.location);
+        } else {
+            maxLoc = ( (braceRange.location + 1 > r.location) ? braceRange.location : braceRange.location + 1 );
+            finalRange = SafeForwardSearchRange(maxLoc, r.location - braceRange.location - 1, r.location);
+        }
     } else {
-        return NSMakeRange(NSNotFound, 0);
+        finalRange = NSMakeRange(NSNotFound, 0);
     }
+
+    return finalRange;
 }
                 
 - (NSRange)refLabelRange{
     NSString *s = [[self textStorage] string];
     NSRange r = [self selectedRange];
-    unsigned minLoc = ( (r.location > 12) ? 12 : r.location);
-    return [s rangeOfString:@"\\ref{" options:NSBackwardsSearch range:NSMakeRange(r.location - minLoc, minLoc)]; // make this a fairly small range, otherwise bad thing can happen when inserting
+    return [s rangeOfString:@"\\ref{" options:NSBackwardsSearch range:SafeBackwardSearchRange(r, 12)]; // make this a fairly small range, otherwise bad thing can happen when inserting
 }
 
 /* ssp: 2004-07-18
@@ -216,17 +232,15 @@ setting initial selection in list to second item doesn't work
 requires X.3
 */
 - (NSArray *)completionsForPartialWordRange:(NSRange)charRange indexOfSelectedItem:(int *)index	{
-	NSString * s = [[self textStorage] string];
-	NSRange r = [self citeKeyRange];
+	NSString *s = [[self textStorage] string];
         NSRange refLabelRange = [self refLabelRange];
-        NSRange newRange = [self newCiteKeyRange];
+        NSRange keyRange = ( (refLabelRange.location == NSNotFound) ? [self newCiteKeyRange] : NSMakeRange(NSNotFound, 0) ); // don't bother checking for a citekey if this is a \ref
 	
-	if (r.location != NSNotFound ){
+	if(keyRange.location != NSNotFound){ // if it's a re
 		//	NSString * beginning = [s substringWithRange:NSMakeRange(charRange.location - 6, 6)];
 #warning debug only
-		NSString * end = [s substringWithRange:r];
-        NSString *newend = [[s substringWithRange:newRange] stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceCharacterSet]];
-        end = newend;
+               // NSString * end = [s substringWithRange:r];
+               NSString *end = [[s substringWithRange:keyRange] stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceCharacterSet]];
 		
 		// code shamelessly lifted from Buzz Anderson's ASHandlerTest example app
 		// Performance gain if we stored the script permanently? But where to store it?
@@ -254,11 +268,10 @@ requires X.3
 				int n;
 				
 				if (result &&  (n = [result numberOfItems])) {
-					// start with the system's standard completions
-					NSMutableArray * returnArray = [[[super completionsForPartialWordRange:charRange indexOfSelectedItem:index] mutableCopy] autorelease];
+					NSMutableArray *returnArray = [NSMutableArray array];
 					
-					NSAppleEventDescriptor * stringAEDesc;
-					NSString * completionString;
+					NSAppleEventDescriptor *stringAEDesc;
+					NSString *completionString;
 					
 					while (n) {
 						// run through the list top to bottom, keeping in mind it is 1 based.
