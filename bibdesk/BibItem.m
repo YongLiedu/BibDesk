@@ -771,7 +771,7 @@ setupParagraphStyle()
 		[[[self undoManager] prepareWithInvocationTarget:self] setField:key 
 														 toValue:oldValue
 													 withModDate:oldModDate];
-		[[self undoManager] setActionName:NSLocalizedString(@"Edit publication",@"")];
+		[[self undoManager] setActionName:NSLocalizedString(@"Edit Publication",@"")];
 	}
 	
     [pubFields setObject:value forKey:key usingLock:bibLock];
