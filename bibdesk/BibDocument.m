@@ -166,10 +166,24 @@ NSString* BDSKBibTeXStringPboardType = @"edu.ucsd.cs.mmcrack.bibdesk: Local BibT
 	
 	// unfortunately we cannot set this in BI
 	[actionMenuButton setAlternateImage:[NSImage imageNamed:@"Action_Pressed"]];
+	[actionMenuButton setShowsMenuWhenIconClicked:YES];
+	[[actionMenuButton cell] setAltersStateOfSelectedItem:NO];
+	[[actionMenuButton cell] setAlwaysUsesFirstItemAsSelected:NO];
+	[[actionMenuButton cell] setUsesItemFromMenu:NO];
+	[[actionMenuButton cell] setRefreshesMenu:NO];
 	
 	[self updateActionMenu:nil];
 	
 	contextualMenu = [[[NSApp delegate] displayMenuItem] submenu];		// better retain this?
+	
+	RYZImagePopUpButton *cornerViewButton = (RYZImagePopUpButton*)[tableView cornerView];
+	[cornerViewButton setShowsMenuWhenIconClicked:YES];
+	[[cornerViewButton cell] setAltersStateOfSelectedItem:NO];
+	[[cornerViewButton cell] setAlwaysUsesFirstItemAsSelected:NO];
+	[[cornerViewButton cell] setUsesItemFromMenu:NO];
+	[[cornerViewButton cell] setRefreshesMenu:NO];
+		
+	[cornerViewButton setMenu:contextualMenu];
 }
 
 
@@ -197,11 +211,7 @@ NSString* BDSKBibTeXStringPboardType = @"edu.ucsd.cs.mmcrack.bibdesk: Local BibT
 
 
 - (void) updateActionMenu:(id) aNotification {
-	NSMenu * menu = [self menuForSelection];
-	NSMenuItem * menuItem = [[[NSMenuItem alloc] initWithTitle:@"" action:NULL keyEquivalent:@""] autorelease];
-	[menuItem setImage:[NSImage imageNamed:@"Action"]];
-	[menu insertItem:menuItem atIndex:0]; 
-	[actionMenuButton setMenu:menu];
+	[actionMenuButton setMenu: [self menuForSelection]];
 	
 	[actionMenuButton setEnabled:([self numberOfSelectedPubs] != 0)];
 }

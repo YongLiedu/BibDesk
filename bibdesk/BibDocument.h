@@ -130,7 +130,7 @@ extern NSString* BDSKBibTeXStringPboardType;
     // --------------------------------------------------------------------------------------
     IBOutlet NSMenu * contextualMenu;
 	IBOutlet NSMenu * actionMenu;
-	IBOutlet NSPopUpButton * actionMenuButton;
+	IBOutlet RYZImagePopUpButton * actionMenuButton;
 	IBOutlet NSMenuItem * actionMenuFirstItem;
     int fileOrderCount;
     // ----------------------------------------------------------------------------------------

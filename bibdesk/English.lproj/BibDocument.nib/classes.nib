@@ -3,7 +3,6 @@
         {CLASS = BDSKCustomCiteTableView; LANGUAGE = ObjC; SUPERCLASS = NSTableView; }, 
         {CLASS = BDSKDragOutlineView; LANGUAGE = ObjC; SUPERCLASS = NSOutlineView; }, 
         {CLASS = BDSKDragTableView; LANGUAGE = ObjC; SUPERCLASS = NSTableView; }, 
-        {CLASS = BDSKPopUpButton; LANGUAGE = ObjC; SUPERCLASS = NSPopUpButton; }, 
         {
             CLASS = BDSKPopUpButtonCell; 
             LANGUAGE = ObjC; 
@@ -76,7 +75,8 @@
             SUPERCLASS = NSDocument; 
         }, 
         {CLASS = MyTextField; LANGUAGE = ObjC; SUPERCLASS = NSTextField; }, 
-        {CLASS = OASplitView; LANGUAGE = ObjC; SUPERCLASS = NSSplitView; }
+        {CLASS = OASplitView; LANGUAGE = ObjC; SUPERCLASS = NSSplitView; }, 
+        {CLASS = RYZImagePopUpButton; LANGUAGE = ObjC; SUPERCLASS = NSPopUpButton; }
     ); 
     IBVersion = 1; 
 }
