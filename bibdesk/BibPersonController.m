@@ -61,7 +61,7 @@
 
 #pragma mark  table view datasource methods
 - (int)numberOfRowsInTableView:(NSTableView *)tableView{
-	return [[self person] numberOfChildren]; //@@ kill outlineView - numberOfChildren should be number of pubs.
+	return [[self person] numberOfPublications]; 
 }
 
 - (id)tableView:(NSTableView *)tableView objectValueForTableColumn:(NSTableColumn *)tableColumn 
