@@ -124,6 +124,7 @@
                 myAction = id; 
                 newPub = id; 
                 saveAsBDSKDocument = id; 
+                showMacrosWindow = id; 
                 toggle = id; 
                 toggleShowingCustomCiteDrawer = id; 
             }; 
