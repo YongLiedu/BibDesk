@@ -136,10 +136,10 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 			[[OFPreferenceWrapper sharedPreferenceWrapper] setObject:formatString forKey:BDSKCiteKeyFormatKey];
 			[self setRequiredFieldsForCiteKey: [[BDSKConverter sharedConverter] requiredFieldsForFormat:formatString]];
 		}else{
-			button = NSRunAlertPanel(NSLocalizedString(@"The autogeneration format for Cite Key is invalid.", @""), 
-									 error,
-									 NSLocalizedString(@"Go to Preferences", @""), 
-									 NSLocalizedString(@"Revert to Default", @""), nil);
+			button = NSRunCriticalAlertPanel(NSLocalizedString(@"The autogeneration format for Cite Key is invalid.", @""), 
+											 error,
+											 NSLocalizedString(@"Go to Preferences", @""), 
+											 NSLocalizedString(@"Revert to Default", @""), nil);
 			if (button == NSAlertAlternateReturn){
 				formatString = [[[OFPreferenceWrapper sharedPreferenceWrapper] preferenceForKey:BDSKCiteKeyFormatKey] defaultObjectValue];			
 				[self setRequiredFieldsForCiteKey: [[BDSKConverter sharedConverter] requiredFieldsForFormat:formatString]];
@@ -156,10 +156,10 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 			[[OFPreferenceWrapper sharedPreferenceWrapper] setObject:formatString forKey:BDSKLocalUrlFormatKey];
 			[self setRequiredFieldsForLocalUrl: [[BDSKConverter sharedConverter] requiredFieldsForFormat:formatString]];
 		}else{
-			button = NSRunAlertPanel(NSLocalizedString(@"The autogeneration format for Local-Url is invalid.", @""), 
-									 error,
-									 NSLocalizedString(@"Go to Preferences", @""), 
-									 NSLocalizedString(@"Revert to Default", @""), nil);
+			button = NSRunCriticalAlertPanel(NSLocalizedString(@"The autogeneration format for Local-Url is invalid.", @""), 
+											 error,
+											 NSLocalizedString(@"Go to Preferences", @""), 
+											 NSLocalizedString(@"Revert to Default", @""), nil);
 			if (button == NSAlertAlternateReturn){
 				formatString = [[[OFPreferenceWrapper sharedPreferenceWrapper] preferenceForKey:BDSKLocalUrlFormatKey] defaultObjectValue];			
 				[self setRequiredFieldsForLocalUrl: [[BDSKConverter sharedConverter] requiredFieldsForFormat:formatString]];
