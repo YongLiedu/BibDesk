@@ -1119,7 +1119,7 @@ _setupParagraphStyle()
 }
 
 - (NSString *)localURLPath{
-	return [self localURLPathRelativeTo:[[document fileName] lastPathComponent]];
+	return [self localURLPathRelativeTo:[[document fileName] stringByDeletingLastPathComponent]];
 }
 
 - (NSString *)localURLPathRelativeTo:(NSString *)base{
@@ -1160,8 +1160,9 @@ _setupParagraphStyle()
 	if ([[OFPreferenceWrapper sharedPreferenceWrapper] boolForKey:BDSKCiteKeyLowercaseKey]) {
 		relativeFile = [relativeFile lowercaseString];
 	}
+	NSURL *url = [NSURL fileURLWithPath:[papersFolderPath stringByAppendingPathComponent:relativeFile]];
 	
-	return [papersFolderPath stringByAppendingPathComponent:relativeFile];
+	return [url absoluteString];
 }
 
 - (BOOL)canSetLocalUrl

@@ -36,8 +36,8 @@
 		[tmpBI setField:BDSKVolumeString toValue:@"1"];
 		[tmpBI setField:BDSKPagesString toValue:@"96"];
 		[tmpBI setField:BDSKKeywordsString toValue:@"Keyword1,Keyword2"];
-		[tmpBI setField:BDSKLocalUrlString toValue:@"Local%20File%20Name.pdf"];
-		[previewTextField setStringValue:[[tmpBI suggestedLocalUrl] stringByAbbreviatingWithTildeInPath]];
+		[tmpBI setField:BDSKLocalUrlString toValue:@"Local File Name.pdf"];
+		[previewTextField setStringValue:[[[NSURL URLWithString:[tmpBI suggestedLocalUrl]] path] stringByAbbreviatingWithTildeInPath]];
 		[tmpBI release];
 	} else {
 		[self setLocalUrlFormatInvalidWarning:YES message:error];
