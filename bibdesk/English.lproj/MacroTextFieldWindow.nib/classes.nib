@@ -1,5 +1,6 @@
 {
     IBClasses = (
+        {CLASS = BDSKBackgroundView; LANGUAGE = ObjC; SUPERCLASS = NSView; }, 
         {CLASS = BDSKBorderlessKeyWindow; LANGUAGE = ObjC; SUPERCLASS = NSWindow; }, 
         {CLASS = FirstResponder; LANGUAGE = ObjC; SUPERCLASS = NSObject; }, 
         {
