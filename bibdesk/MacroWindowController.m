@@ -303,7 +303,7 @@
 }
 
 - (NSAttributedString *)attributedStringForObjectValue:(id)obj withDefaultAttributes:(NSDictionary *)attrs{
-    NSLog(@"attributed string for obj");
+    // NSLog(@"attributed string for obj");
     return [[[NSAttributedString alloc] initWithString:[self stringForObjectValue:obj]] autorelease];
 }
 
