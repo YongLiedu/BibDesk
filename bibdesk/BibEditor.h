@@ -71,11 +71,8 @@ extern NSString *BDSKUrlString;
     // ----------------------------------------------------------------------------------------
     NSString *currentType;
     BibItem *theBib;
-    // Killed for write-through:    BibItem *tmpBib;
-    BibDocument *theDoc;
-    NSEnumerator *e;
+    NSDocument *theDocument;
     NSMutableDictionary *fieldNumbers;
-    // Killed for write-through:    BOOL needsRefresh;
 // ----------------------------------------------------------------------------------------
 // doc preview stuff
 // ----------------------------------------------------------------------------------------
@@ -122,6 +119,12 @@ extern NSString *BDSKUrlString;
 - (BibItem *)currentBib;
 - (void)setupForm;
 - (void)show;
+/*!
+    @method     setDocument:
+    @discussion   overrides the default impl. to just save a ref to the doc and not mess with the title.
+*/
+
+- (void)setDocument:(NSDocument *)d;
 
 - (void)fixURLs;
 - (IBAction)chooseLocalURL:(id)sender;
@@ -145,10 +148,7 @@ extern NSString *BDSKUrlString;
                  returnCode:(int) returnCode
                 contextInfo:(void *)contextInfo;
 
-// deprecated - (IBAction)revert:(id)sender;
-//- (IBAction)saveDocument:(id)sender;
-//- (IBAction)save:(id)sender;
-//- (IBAction)cancel:(id)sender;
+
 - (void)finalizeChanges;
 
 - (IBAction)viewLocal:(id)sender;
