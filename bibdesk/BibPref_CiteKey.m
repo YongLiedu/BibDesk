@@ -166,11 +166,16 @@
 }
 
 - (IBAction)showCiteKeyFormatWarning:(id)sender{
+	NSString *msg = [sender toolTip];
 	int rv;
-	// do we want to be more informative, i.e. name of offending specifier?
+	
+	if (msg == nil || [msg isEqualToString:@""]) {
+		msg = NSLocalizedString(@"The format string you entered contains invalid format specifiers.",@"");
+	}
 	rv = NSRunCriticalAlertPanel(NSLocalizedString(@"",@""), 
-								 NSLocalizedString( ([sender toolTip] != nil) ? [sender toolTip] : @"The format string you entered contains invalid format specifiers.",@""),
-								 NSLocalizedString(@"OK",@"OK"), nil, nil, nil);
+								 @"%@",
+								 NSLocalizedString(@"OK",@"OK"), nil, nil, 
+								 msg, nil);
 }
 
 - (void)setCiteKeyFormatInvalidWarning:(BOOL)set message:message{
