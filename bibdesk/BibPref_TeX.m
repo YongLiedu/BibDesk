@@ -40,11 +40,15 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
                                                defaultButton:nil
                                              alternateButton:nil
                                                  otherButton:nil
-                                   informativeTextWithFormat:NSLocalizedString(@"The file %@ does not exist or is not executable.  Please try again.",@""), [control stringValue]];
+                                   informativeTextWithFormat:NSLocalizedString(@"The file %@ does not exist or is not executable.  Previewing is disabled. Please set an appropriate path and re-enable previewing.",@""), [control stringValue]];
             [anAlert beginSheetModalForWindow:[[OAPreferenceController sharedPreferenceController] window]
                                 modalDelegate:self
                                didEndSelector:@selector(alertDidEnd:returnCode:contextInfo:)
                                   contextInfo:control];
+			//Disable previewing
+			[usesTeXButton setState:NSOffState];
+            [self changeUsesTeX:usesTeXButton];
+
         }
     }
 }
@@ -60,8 +64,8 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 - (IBAction)changeUsesTeX:(id)sender{
     if ([sender state] == NSOffState) {
         [bibTeXStyle setEnabled:NO];
-        [texBinaryPath setEnabled:NO];
-        [bibtexBinaryPath setEnabled:NO];
+        [texBinaryPath setEnabled:YES];
+        [bibtexBinaryPath setEnabled:YES];
         [defaults setInteger:NSOffState forKey:BDSKUsesTeXKey];
 		// hide preview panel if necessary
 		if ([[NSApp delegate] isShowingPreviewPanel]) {
@@ -97,12 +101,17 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 					   defaultButton:nil
 					 alternateButton:nil
 					     otherButton:nil
-			       informativeTextWithFormat:NSLocalizedString(@"The file %@ does not exist or is not executable.  Please set an appropriate path.",@""), errStr];
+			       informativeTextWithFormat:NSLocalizedString(@"The file %@ does not exist or is not executable. Previewing is disabled. Please set an appropriate path and re-enable previewing.",@""), errStr];
 	[anAlert beginSheetModalForWindow:[[OAPreferenceController sharedPreferenceController] window]
 			    modalDelegate:nil
 			   didEndSelector:nil
 			      contextInfo:nil];
+			//Disable previewing
+			[usesTeXButton setState:NSOffState];
+            [self changeUsesTeX:usesTeXButton];
+
     }
+
 }
 
 - (IBAction)changeStyle:(id)sender{
