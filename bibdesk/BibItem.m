@@ -456,25 +456,29 @@ _setupParagraphStyle()
       //  NSLog(@"%@", pubAuthors);
 }
 
-- (NSString *)bibtexAuthorString{
+- (NSString *)bibTeXAuthorStringNormalized:(BOOL)normalized{ // used for save operations; returns names as "von Last, Jr., First" if normalized is YES
+    
     NSEnumerator *en = [pubAuthors objectEnumerator];
     BibAuthor *author;
     if([pubAuthors count] == 0) return [NSString stringWithString:@""];
     if([pubAuthors count] == 1){
         author = [pubAuthors objectAtIndex:0];
-        return [author name];
+        return (normalized ? [author normalizedName] : [author name]);
     }else{
-		NSMutableString *rs;
+        NSMutableString *rs;
         author = [en nextObject];
-        rs = [NSMutableString stringWithString:[author name]];
+        rs = [NSMutableString stringWithString:(normalized ? [author normalizedName] : [author name])];
         // since this method is used for display, BibAuthor -name is right above.
         
         while(author = [en nextObject]){
-            [rs appendFormat:@" and %@", [author name]];
+            [rs appendFormat:@" and %@", (normalized ? [author normalizedName] : [author name])];
         }
         return rs;
     }
-        
+}
+
+- (NSString *)bibtexAuthorString{
+    return [self bibTeXAuthorStringNormalized:NO];
 }
 
 - (NSString *)title{
@@ -920,7 +924,7 @@ _setupParagraphStyle()
                                                                               attributes:keyAttributes] autorelease]];
 
 				if([key isEqualToString:BDSKAuthorString]){
-					NSString *authors = [[self bibtexAuthorString] stringByCollapsingWhitespaceAndRemovingSurroundingWhitespace];
+					NSString *authors = [self bibtexAuthorString];
 					[aStr appendAttributedString:[[[NSAttributedString alloc] initWithString:[NSString stringWithFormat:@"%@\n",authors]
 																				  attributes:bodyAttributes] autorelease]];
 				}else{
@@ -947,7 +951,7 @@ _setupParagraphStyle()
                                                                               attributes:bodyAttributes] autorelease]];
 
             }else if([key isEqualToString:BDSKAuthorString]){
-                NSString *authors = [[self bibtexAuthorString] stringByCollapsingWhitespaceAndRemovingSurroundingWhitespace];
+                NSString *authors = [self bibtexAuthorString];
 
                 [aStr appendAttributedString:[[[NSAttributedString alloc] initWithString:[NSString stringWithFormat:@"%@\n",authors]
                                                                               attributes:bodyAttributes] autorelease]];
@@ -990,7 +994,9 @@ _setupParagraphStyle()
                  
         if([v isComplex]){
             valString = [v stringAsBibTeXString];
-        }else{    
+        }else{
+            if([k isEqualToString:BDSKAuthorString] && [[OFPreferenceWrapper sharedPreferenceWrapper] boolForKey:BDSKShouldSaveNormalizedAuthorNames])
+                v = [self bibTeXAuthorStringNormalized:YES];
             // Don't run the converter on Local-Url or Url fields, so we don't trash ~ and % escapes.
             // Note that NSURLs comply with RFC 2396, and can't contain high-bit characters anyway.
             if(![k isEqualToString:BDSKLocalUrlString] &&
@@ -1031,7 +1037,9 @@ _setupParagraphStyle()
         
         if([v isComplex]){
             valString = [v stringAsBibTeXString];
-        }else{    
+        }else{            
+            if([k isEqualToString:BDSKAuthorString] && [[OFPreferenceWrapper sharedPreferenceWrapper] boolForKey:BDSKShouldSaveNormalizedAuthorNames]) // only if it's not complex, use the normalized author name
+                v = [self bibTeXAuthorStringNormalized:YES];
             valString = [NSString stringWithFormat:@"{%@}", v];
         }
         

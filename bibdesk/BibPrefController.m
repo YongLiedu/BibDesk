@@ -79,6 +79,7 @@ NSString *BDSKLocalUrlFormatPresetKey = @"Local-Url Format Preset";
 
 NSString *BDSKLastVersionLaunched = @"Last launched version number";
 NSString *BDSKSnoopDrawerSavedSize = @"Saved size of BibEditor document snoop drawer";
+NSString *BDSKShouldSaveNormalizedAuthorNames = @"Save normalized names in BibTeX files";
 
 #pragma mark Field name strings
 

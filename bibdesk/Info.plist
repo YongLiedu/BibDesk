@@ -329,6 +329,8 @@
 					<string>~/Library/Application Support/BibDesk/template.txt</string>
 					<key>Write template file when saving</key>
 					<string>1</string>
+                    <key>Save normalized names in BibTeX files</key>
+                    <string>0</string>
 				</dict>
 				<key>icon</key>
 				<string>defaults.tiff</string>

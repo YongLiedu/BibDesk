@@ -5,6 +5,7 @@
                 addDefaultField = id; 
                 delSelectedDefaultField = id; 
                 outputTemplateButtonPressed = id; 
+                setShouldUseNormalizedNames = id; 
                 shouldUseTemplateFile = id; 
             }; 
             CLASS = "BibPref_Defaults"; 
@@ -16,6 +17,7 @@
                 delSelectedFieldButton = NSButton; 
                 outputTemplateFileButton = NSButton; 
                 templateRadioMatrix = NSMatrix; 
+                useNormalizedNamesButton = NSButton; 
             }; 
             SUPERCLASS = OAPreferenceClient; 
         }, 
@@ -30,7 +32,12 @@
             }; 
             SUPERCLASS = OAPreferenceClient; 
         }, 
-        {CLASS = FirstResponder; LANGUAGE = ObjC; SUPERCLASS = NSObject; }, 
+        {
+            ACTIONS = {"" = id; }; 
+            CLASS = FirstResponder; 
+            LANGUAGE = ObjC; 
+            SUPERCLASS = NSObject; 
+        }, 
         {
             ACTIONS = {restoreDefaults = id; setValueForSender = id; }; 
             CLASS = OAPreferenceClient; 

@@ -104,6 +104,7 @@ extern NSString *BDSKLocalUrlFormatPresetKey;
 
 extern NSString *BDSKLastVersionLaunched;
 extern NSString *BDSKSnoopDrawerSavedSize;
+extern NSString *BDSKShouldSaveNormalizedAuthorNames;
 
 #pragma mark Field name strings
 

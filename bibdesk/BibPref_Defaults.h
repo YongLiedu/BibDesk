@@ -27,6 +27,8 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
     // the template file button:
     IBOutlet NSButton* outputTemplateFileButton;
     IBOutlet NSMatrix *templateRadioMatrix;
+    
+    IBOutlet NSButton *useNormalizedNamesButton;
 }
 // defaultFieldStuff
 - (IBAction)delSelectedDefaultField:(id)sender;
@@ -34,5 +36,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 // edits the template file:
 - (IBAction)outputTemplateButtonPressed:(id)sender;
 - (IBAction)shouldUseTemplateFile:(id)sender;
+
+- (IBAction)setShouldUseNormalizedNames:(id)sender;
 
 @end
