@@ -61,7 +61,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
         if([tcID isEqualToString:BDSKCiteKeyString] ||
 		   [tcID isEqualToString:@"Citekey"] ||
 		   [tcID isEqualToString:@"Cite-Key"] ||
-		   [tcID isEqualToString:@"Key"){
+		   [tcID isEqualToString:@"Key"]){
             return [pub citeKey];
             
         }else if([tcID isEqualToString: BDSKTitleString] ){
