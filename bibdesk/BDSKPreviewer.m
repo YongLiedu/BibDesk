@@ -56,7 +56,7 @@ static unsigned threadCount = 0;
 	DraggableScrollView *scrollView = (DraggableScrollView*)[imagePreviewView enclosingScrollView];
     float scaleFactor = [[OFPreferenceWrapper sharedPreferenceWrapper] floatForKey:BDSKPreviewPDFScaleFactorKey];
 	[scrollView setScaleFactor:scaleFactor];
-	scrollView = (DraggableScrollView*)[imagePreviewView enclosingScrollView];
+	scrollView = (DraggableScrollView*)[rtfPreviewView enclosingScrollView];
 	scaleFactor = [[OFPreferenceWrapper sharedPreferenceWrapper] floatForKey:BDSKPreviewRTFScaleFactorKey];
 	[scrollView setScaleFactor:scaleFactor];
 	
@@ -403,10 +403,12 @@ static unsigned threadCount = 0;
 
 - (void)appWillTerminate:(NSNotification *)notification{
 	// save the scalefactors of the views
-	DraggableScrollView *scrollView = (DraggableScrollView*)[imagePreviewView enclosingScrollView];
-	[[OFPreferenceWrapper sharedPreferenceWrapper] setFloat:[scrollView scaleFactor] forKey:BDSKPreviewPDFScaleFactorKey];
-	scrollView = (DraggableScrollView*)[imagePreviewView enclosingScrollView];
-	[[OFPreferenceWrapper sharedPreferenceWrapper] setFloat:[scrollView scaleFactor] forKey:BDSKPreviewRTFScaleFactorKey];
+    float scaleFactor = [(DraggableScrollView*)[imagePreviewView enclosingScrollView] scaleFactor];
+	if (scaleFactor != [[OFPreferenceWrapper sharedPreferenceWrapper] floatForKey:BDSKPreviewPDFScaleFactorKey])
+		[[OFPreferenceWrapper sharedPreferenceWrapper] setFloat:scaleFactor forKey:BDSKPreviewPDFScaleFactorKey];
+	scaleFactor = [(DraggableScrollView*)[rtfPreviewView enclosingScrollView] scaleFactor];
+	if (scaleFactor != [[OFPreferenceWrapper sharedPreferenceWrapper] floatForKey:BDSKPreviewRTFScaleFactorKey])
+		[[OFPreferenceWrapper sharedPreferenceWrapper] setFloat:scaleFactor forKey:BDSKPreviewRTFScaleFactorKey];
 }
 
 - (void)resetPreviews{
