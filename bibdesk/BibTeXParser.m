@@ -111,7 +111,7 @@ NSRange SafeForwardSearchRange( unsigned startLoc, unsigned seekLength, unsigned
             [scanner scanUpToString:@"," intoString:nil]; // find the comma
 
             if([scanner scanLocation] >= nextAtRange.location){
-                NSLog(@"End of file or reached the next bibitem...breaking");
+                // NSLog(@"End of file or reached the next bibitem...breaking");
                 break; // either at EOF or scanned into the next bibitem
             }
 
@@ -158,10 +158,7 @@ NSRange SafeForwardSearchRange( unsigned startLoc, unsigned seekLength, unsigned
 
             leftDelimLocation = ( usingBraceDelimiter ? braceRange.location : quoteRange.location );
             
-//            if([scanner scanLocation] >= nextAtRange.location)
-//                break; // either at EOF or scanned into the next bibitem
             NSAssert ( nextAtRange.location >= [scanner scanLocation], @"Scanner tried to enter the next bibitem too early." );
-
             NSAssert ( leftDelimLocation != NSNotFound, @"Can't find a delimiter.");
             
             if(leftDelimLocation + 1 >= nextAtRange.location)
