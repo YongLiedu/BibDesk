@@ -128,6 +128,7 @@
 			return;
 		}
 	}
+	[[NSApp delegate] setRequiredFieldsForCiteKey: [[BDSKConverter sharedConverter] requiredFieldsForFormat:formatString]];
 	[self updateUI];
 }
 

@@ -101,6 +101,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 
 
 - (NSArray *)requiredFieldsForCiteKey;
+- (NSArray *)setRequiredFieldsForCiteKey:(NSArray *)newFields;
 
 /*!
 @method addString:forCompletionEntry:

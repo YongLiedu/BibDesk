@@ -134,7 +134,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 			
 			citeKeyFormat = [[[OFPreferenceWrapper sharedPreferenceWrapper] preferenceForKey:BDSKCiteKeyFormatKey] defaultObjectValue];			
 		}
-		requiredFieldsForCiteKey = [[[BDSKConverter sharedConverter] requiredFieldsForFormat:citeKeyFormat] retain];
+		[self setRequiredFieldsForCiteKey: [[BDSKConverter sharedConverter] requiredFieldsForFormat:citeKeyFormat]];
 		[[OFPreferenceWrapper sharedPreferenceWrapper] setObject:citeKeyFormat forKey:BDSKCiteKeyFormatKey];
     }
     return self;
@@ -336,6 +336,11 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 
 - (NSArray *)requiredFieldsForCiteKey{
 	return requiredFieldsForCiteKey;
+}
+
+- (NSArray *)setRequiredFieldsForCiteKey:(NSArray *)newFields{
+	[requiredFieldsForCiteKey autorelease];
+	requiredFieldsForCiteKey = [newFields retain];
 }
 
 
