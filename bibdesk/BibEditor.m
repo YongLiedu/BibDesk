@@ -841,6 +841,9 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 			 [theBib canSetCiteKey] ) {
 			[self generateCiteKey:sender];
 		}
+                [[NSNotificationCenter defaultCenter] postNotificationName:BDSKDocumentUpdateUINotification
+                                                                    object:nil
+                                                                  userInfo:nil];
 	}
 }
 
@@ -1009,14 +1012,11 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 
 - (void)windowWillClose:(NSNotification *)notification{
  //@@citekey   [[self window] makeFirstResponder:citeKeyField]; // makes the field check if there is a duplicate field.
-    if (![[self window] makeFirstResponder:[self window]]) {
-		[[self window] endEditingFor:nil];
-	}
-	[documentSnoopDrawer close];
-	[theDocument removeWindowController:self];
-    [[NSNotificationCenter defaultCenter] postNotificationName:BDSKDocumentUpdateUINotification
-                                                        object:nil
-                                                      userInfo:nil];
+    if(![[self window] makeFirstResponder:[self window]]) {
+        [[self window] endEditingFor:nil];
+    }
+    [documentSnoopDrawer close];
+    [theDocument removeWindowController:self];
 }
 
 // we want to have the same undoManager as our document, so we use this 
