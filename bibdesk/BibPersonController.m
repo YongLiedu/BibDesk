@@ -40,6 +40,7 @@
 #endif
     [pubsTableView setDataSource:nil];
     [pubsTableView setDelegate:nil];
+    [_person setPersonController:nil];
     [_person release];
     [publications release];
     [super dealloc];
