@@ -109,13 +109,22 @@ NSString *BDSKBibItemLocalDragPboardType = @"edu.ucsd.cs.mmccrack.bibdesk: Local
 		[[NSNotificationCenter defaultCenter] addObserver:self
 												 selector:@selector(handleBibItemAddDelNotification:)
 													 name:BDSKDocDelItemNotification
-												   object:self];
+                                                                                                object:self];
+
+                // It's wrong that we have to manually register for this, since the document is the window's delegate in IB (and debugging/logging appears to confirm this).
+                // However, we don't get this notification, and it's critical to clean up when closing the document window; this fixes #1097306, a crash when closing the
+                // document window if an editor is open.  I can't reproduce with a test document-based project, so something may be hosed in the nib.
+                [[NSNotificationCenter defaultCenter] addObserver:self
+                                                         selector:@selector(windowWillClose:)
+                                                             name:NSWindowWillCloseNotification
+                                                           object:nil]; // catch all of the notifications; if we pass documentWindow as the object, we don't get any notifications
 
 		customStringArray = [[NSMutableArray arrayWithCapacity:6] retain];
 		[customStringArray setArray:[[OFPreferenceWrapper sharedPreferenceWrapper] arrayForKey:BDSKCustomCiteStringsKey]];
 
 		tableColumnsChanged = YES;
 		sortDescending = YES;
+
     }
     return self;
 }
@@ -432,7 +441,7 @@ NSString *BDSKBibItemLocalDragPboardType = @"edu.ucsd.cs.mmccrack.bibdesk: Local
 
 - (void)windowControllerDidLoadNib:(NSWindowController *) aController
 {
-//	NSLog(@"windowcontroller didloadnib");
+    // NSLog(@"windowcontroller didloadnib");
     [super windowControllerDidLoadNib:aController];
     [self setupToolbar];
     [[aController window] setFrameAutosaveName:[self displayName]];
@@ -440,6 +449,7 @@ NSString *BDSKBibItemLocalDragPboardType = @"edu.ucsd.cs.mmccrack.bibdesk: Local
     [self setupTableColumns]; // calling it here mostly just makes sure that the menu is set up.
     [self setTableFont];
     [self updateUI];
+
 }
 
 #pragma mark -
@@ -2567,14 +2577,15 @@ This method always returns YES. Even if some or many operations fail.
     
 }
 
-- (void)windowWillClose:(NSNotification *)notification{
-	[[NSNotificationCenter defaultCenter] postNotificationName:BDSKDocumentWindowWillCloseNotification
-														object:self
-													  userInfo:[NSDictionary dictionary]];
+ - (void)windowWillClose:(NSNotification *)notification{
+    if([notification object] != documentWindow) // this is critical; see note where we register for this notification
+        return;
+    [[NSNotificationCenter defaultCenter] postNotificationName:BDSKDocumentWindowWillCloseNotification
+                                                        object:self
+                                                      userInfo:[NSDictionary dictionary]];
 
     [customCiteDrawer close];
     [[NSApp delegate] removeErrorObjsForFileName:[self fileName]];
-
 }
 
 - (void)splitViewDoubleClick:(OASplitView *)sender{
