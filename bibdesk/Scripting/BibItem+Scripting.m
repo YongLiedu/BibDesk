@@ -199,7 +199,7 @@ Extra wrapping of the created and modified date methods to
 	NSEnumerator *fnEnum = [pubFields keyEnumerator];
 	NSString *fn;
 	while (fn = [fnEnum nextObject]) {
-		if (![[self valueOfField:fn] isEqualToString:@""]) {
+		if (![[self valueOfField:fn] isEqualToString:@""] && ![fn isEqualToString:BDSKDateCreatedString] && ![fn isEqualToString:BDSKDateModifiedString]) {
 			if (cmd) {
 				[cmd setScriptErrorNumber:NSReceiversCantHandleCommandScriptError];
 				[cmd setScriptErrorString:[NSString stringWithFormat:NSLocalizedString(@"Cannot set BibTeX string after initialization.",@"Cannot set BibTeX string after initialization.")]];
