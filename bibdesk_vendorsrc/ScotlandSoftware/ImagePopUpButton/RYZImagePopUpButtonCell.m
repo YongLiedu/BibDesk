@@ -19,6 +19,7 @@
 	_iconSize = NSMakeSize(32, 32);
 	_showsMenuWhenIconClicked = NO;
 	_iconActionEnabled = YES;
+	_alwaysUsesFirstItemAsSelected = NO;
 
 	[self setIconImage: [NSImage imageNamed: @"NSApplicationIcon"]];	
 	[self setArrowImage: [NSImage imageNamed: @"ArrowPointingDown"]];
@@ -35,6 +36,15 @@
     [_arrowImage release];
     [super dealloc];
 }
+
+- (id)delegate {
+    return _delegate;
+}
+
+- (void)setDelegate:(id)newDelegate {
+	_delegate = newDelegate;
+}
+
 
 
 // --------------------------------------------
@@ -112,6 +122,32 @@
     _arrowImage = arrowImage;
 }
 
+- (BOOL)alwaysUsesFirstItemAsSelected {
+    return _alwaysUsesFirstItemAsSelected;
+}
+
+- (void)setAlwaysUsesFirstItemAsSelected:(BOOL)newAlwaysUsesFirstItemAsSelected {
+        _alwaysUsesFirstItemAsSelected = newAlwaysUsesFirstItemAsSelected;
+}
+
+- (NSMenuItem *)selectedItem{
+	if(_alwaysUsesFirstItemAsSelected){
+		return [self itemAtIndex:0];
+	}else{
+		return [super selectedItem];
+	}
+}
+
+- (BOOL)refreshesMenu {
+    return _refreshesMenu;
+}
+
+- (void)setRefreshesMenu:(BOOL)newRefreshesMenu {
+    if (_refreshesMenu != newRefreshesMenu) {
+        _refreshesMenu = newRefreshesMenu;
+    }
+}
+
 
 // -----------------------------------------
 //	Handling mouse/keyboard events
@@ -162,10 +198,10 @@
 			arrowRect.origin.y -= arrowSize.height;
 		}
 		
-		NSLog(@"mouseLocation: %@", NSStringFromPoint(mouseLocation));
+/*		NSLog(@"mouseLocation: %@", NSStringFromPoint(mouseLocation));
 		NSLog(@"isFlipped: %d", [controlView isFlipped]);
 		NSLog(@"arrowRect: %@", NSStringFromRect(arrowRect));
-		
+*/		
 		BOOL shouldSendAction = NO;
 
 		
@@ -201,19 +237,19 @@
 					}
 					
 				}else if([nextEvent type] == NSLeftMouseDraggedMask){
-					NSLog(@"drag event %@" , nextEvent);
+					// NSLog(@"drag event %@" , nextEvent);
 					shouldSendAction = NO;
 					[self showMenuInView:controlView withEvent:nextEvent];
 
 				}else{
-					NSLog(@"periodicEvent %@", nextEvent);
+					// NSLog(@"periodicEvent %@", nextEvent);
 					shouldSendAction = NO;
 					
 					// showMenu expects a mouseEvent, 
 					// so we send it the original event:
 					[self showMenuInView:controlView withEvent:event];
 				}
-				NSLog(@"stopping periodic events");
+
 				[NSEvent stopPeriodicEvents];
 			}
 		}else{
@@ -250,6 +286,9 @@
 										 clickCount: [event clickCount]
 										   pressure: [event pressure]];
 	
+	if([self refreshesMenu]){
+		[self setMenu:[[self delegate] menuForImagePopUpButton]];
+	}
 	[NSMenu popUpContextMenu: [self menu]  withEvent: newEvent  forView: controlView];
 }
 
@@ -308,7 +347,7 @@
 	[_buttonCell setShowsFirstResponder: NO];
     }
     
-    NSLog(@"cellFrame: %@  selectedItem: %@", NSStringFromRect(cellFrame), [[self selectedItem] title]);
+	//    NSLog(@"cellFrame: %@  selectedItem: %@", NSStringFromRect(cellFrame), [[self selectedItem] title]);
     
     [_buttonCell drawWithFrame: cellFrame  inView: controlView];
 }

@@ -77,14 +77,4 @@
     [[self cell] setArrowImage: arrowImage];
 }
 
-
-//
-// override mouseDown: to display menu after delay
-//
-
-- (void)mouseDown:(NSEvent *)theEvent{
-	NSLog(@"(don't forget to remove me) mouseDown: %@", theEvent);
-	[super mouseDown:theEvent];
-}
-
 @end
