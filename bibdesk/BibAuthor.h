@@ -37,8 +37,8 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
     NSString *_vonPart;
     NSString *_lastName;
     NSString *_jrPart;
-    
-    BibPersonController *_personController;
+    NSString *_normalizedName;
+    BibPersonController *_personController; // unretained
 }
 
 + (BibAuthor *)authorWithName:(NSString *)name andPub:(BibItem *)aPub;
@@ -56,6 +56,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 
 - (NSString *)description;
 - (NSString *)normalizedName;
+- (void)refreshNormalizedName;
 - (NSString *)name;
 - (NSString *)firstName;
 - (NSString *)vonPart;

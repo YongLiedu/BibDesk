@@ -70,6 +70,11 @@ static NSMutableArray *_authors;
 - (void)dealloc{
     [name release];
     [pubs release];
+	[_firstName release];
+	[_vonPart release];
+	[_lastName release];
+	[_jrPart release];
+	[_normalizedName release];
 	[[NSNotificationCenter defaultCenter] removeObserver:self];
     // NSLog(@"bibauthor dealloc");
     [super dealloc];
@@ -151,27 +156,38 @@ You may almost always use the first form; you shouldn’t if either there’s a Jr p
 // Note that if there is only one word/token, it is the _lastName, so that's assumed to always be there.
 
 - (NSString *)normalizedName{
-	if(!emptyStr(_jrPart)){
-		return [NSString stringWithFormat:@"%@%@%@%@%@%@%@", (!emptyStr(_vonPart) ? _vonPart : @""),
-			(!emptyStr(_vonPart) ? @" " : @""),
-			(!emptyStr(_lastName) ? _lastName : @""),
-			(!emptyStr(_jrPart) ? @", " : @""),
-			(!emptyStr(_jrPart) ? _jrPart : @""),
-			(!emptyStr(_firstName) ? @", " : @""),
-			(!emptyStr(_firstName) ? _firstName : @"")];
+	return _normalizedName;
+}
+
+- (void)refreshNormalizedName{
+	[_normalizedName release];
+	
+	BOOL FIRST = !emptyStr(_firstName);
+	BOOL VON = !emptyStr(_vonPart);
+	BOOL LAST = !emptyStr(_lastName);
+	BOOL JR = !emptyStr(_jrPart);
+	
+	if(JR){
+		_normalizedName = [[NSString stringWithFormat:@"%@%@%@%@%@%@%@", (VON ? _vonPart : @""),
+			(VON ? @" " : @""),
+			(LAST ? _lastName : @""),
+			(JR ? @", " : @""),
+			(JR ? _jrPart : @""),
+			(FIRST ? @", " : @""),
+			(FIRST ? _firstName : @"")] retain];
 		
 	}
 	
-	return [NSString stringWithFormat:@"%@%@%@%@%@", (!emptyStr(_vonPart) ? _vonPart: @""), (!emptyStr(_vonPart) ? @" " : @""),
+	_normalizedName = [[NSString stringWithFormat:@"%@%@%@%@%@", (VON ? _vonPart: @""), (VON ? @" " : @""),
 		_lastName, 
-		(!emptyStr(_firstName) ? @", " : @""), 
-		(!emptyStr(_firstName) ? _firstName : @"")];
+		(FIRST ? @", " : @""), 
+		(FIRST ? _firstName : @"")] retain];
 /*
-else if(([_lastName rangeOfString:@" "].location != NSNotFound) && !emptyStr(_vonPart)){
-	return [NSString stringWithFormat:@"%@%@%@%@%@",(!emptyStr(_firstName) ? _firstName : @""),
-		(!emptyStr(_firstName) ? @" " : @""), 
-		(!emptyStr(_vonPart) ? _vonPart : @""),
-		(!emptyStr(_vonPart) ? @" " : @""), _lastName];
+else if(([_lastName rangeOfString:@" "].location != NSNotFound) && VON){
+	return [NSString stringWithFormat:@"%@%@%@%@%@",(FIRST ? _firstName : @""),
+		(FIRST ? @" " : @""), 
+		(VON ? _vonPart : @""),
+		(VON ? @" " : @""), _lastName];
 */	
 }
 
@@ -200,11 +216,11 @@ else if(([_lastName rangeOfString:@" "].location != NSNotFound) && !emptyStr(_vo
     int i = 0;
     NSMutableString *tmpStr = nil;
     
-	if(newName != name){
-		[name release];
-		name = [newName copy];
-    }
-	
+	if(newName == name){
+		return;
+	}
+	[name release];
+	name = [newName copy];
 
 	theName = bt_split_name((char *)[name UTF8String],(char *)[name UTF8String],0,0);
     
@@ -248,7 +264,9 @@ else if(([_lastName rangeOfString:@" "].location != NSNotFound) && !emptyStr(_vo
             [tmpStr appendString:@" "];
     }
     _jrPart = [tmpStr retain];
-    	
+
+	[self refreshNormalizedName];
+	
 	bt_free_name(theName);
 }
 

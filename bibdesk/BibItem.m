@@ -127,10 +127,14 @@ void _setupFonts(){
 }
 
 - (void)dealloc{
-   // NSLog(@"bibitem Dealloc");
+	// NSLog(@"bibitem Dealloc");
     [pubDate release];
     [requiredFieldNames release];
-    [pubFields release]; //why does this cause a problem?
+	[pubAuthors release];
+	[pubType release];
+	[fileType release];
+	[citeKey release];
+    [pubFields release];
     [super dealloc];
 }
 
@@ -243,12 +247,12 @@ void _setupFonts(){
   
     presentAuthE = [pubAuthors objectEnumerator];
     while(bibAuthor = [presentAuthE nextObject]){
-        if([[bibAuthor name] isEqualToString:newAuthorName]){ // @@ fuzzy author handling
+        if([[bibAuthor name] isEqualToString:newAuthorName]){ // @@ TODO: fuzzy author handling
             existingAuthor = bibAuthor;
         }
     }
     if(!existingAuthor){
-        existingAuthor =  [BibAuthor authorWithName:newAuthorName andPub:self]; //@@author - why was this nil before?!
+        existingAuthor =  [BibAuthor authorWithName:newAuthorName andPub:self]; //@@author - why was andPub:nil before?!
         [pubAuthors addObject:existingAuthor];
     }
     return;
