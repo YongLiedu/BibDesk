@@ -512,7 +512,8 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
                              [NSString stringWithFormat:
                                  NSLocalizedString(@"A new version of BibDesk is available (version %@). Would you like to download the new version now?",
                                                    @"format string asking if the user would like to get the new version"), latestVersionNumber],
-                             @"OK", @"Cancel", nil);
+							     NSLocalizedString(@"OK",@"OK"), 
+								 NSLocalizedString(@"Cancel",@"Cancel"), nil);
     if (button == NSOKButton) {
         [[NSWorkspace sharedWorkspace] openURL:[NSURL URLWithString:@"http://bibdesk.sourceforge.net/"]];
     }
@@ -555,7 +556,8 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
                                      [NSString stringWithFormat:
                                          NSLocalizedString(@"A new version of BibDesk is available (version %@). Would you like to download the new version now?",
                                                            @"format string asking if the user would like to get the new version"), latestVersionNumber],
-                                     @"OK", @"Cancel", nil);
+                                         NSLocalizedString(@"OK",@"OK"), 
+										 NSLocalizedString(@"Cancel",@"Cancel"), nil);
         if (button == NSOKButton) {
             [[NSWorkspace sharedWorkspace] openURL:[NSURL URLWithString:@"http://bibdesk.sourceforge.net/"]];
         }

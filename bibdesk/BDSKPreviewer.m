@@ -479,7 +479,7 @@ static unsigned threadCount = 0;
         [rtfPreviewView setString:@""];
         [rtfPreviewView setTextContainerInset:NSMakeSize(20, 20)];
         [rtfPreviewView replaceCharactersInRange:[rtfPreviewView selectedRange]
-                                      withString:@"Please select an item or items from the bibliography list for LaTeX to preview."];
+                                      withString:NSLocalizedString(@"Please select an item or items from the bibliography list for LaTeX to preview.",@"")];
         [tabView unlockFocus];
     }
 }
