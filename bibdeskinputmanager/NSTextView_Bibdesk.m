@@ -19,6 +19,11 @@ static NSString *kScriptName = @"Bibdesk";
 static NSString *kScriptType = @"scpt";
 static NSString *kHandlerName = @"getcitekeys";
 
+extern void _objc_resolve_categories_for_class(struct objc_class *cls);
+extern void _objc_flush_caches(Class);
+void (*bdcomplete)(id, SEL, id) = NULL;
+void (*realcomplete)(id, SEL, id) = NULL;
+
 @implementation NSTextView_Bibdesk
 
 + (void)load{
@@ -43,6 +48,11 @@ static NSString *kHandlerName = @"getcitekeys";
     if(yn && [[self superclass] instancesRespondToSelector:@selector(completionsForPartialWordRange:indexOfSelectedItem:)]){
 	if(debug) NSLog(@"%@ performing posing for %@", [self class], [self superclass]);
 	[self poseAsClass:[NSTextView class]];
+	// Cache the completion methods for the BD_complete: and complete: selectors.
+	// We need to do this before a subclass of NSTextView is loaded, or else we break completionIMP: by
+	// forcing an endless loop of calling self (the subclass), then the superclass (NSTextView).
+	bdcomplete = (void (*)(id, SEL, id))[[self class] completionIMP:[self superclass]];
+	realcomplete = (void (*)(id, SEL, id))[[self class] completionIMP:[self superclass]];
 	if(debug) [self printSelectorList:[self superclass]];
     }
 }
@@ -53,9 +63,12 @@ static NSString *kHandlerName = @"getcitekeys";
     void *iterator = 0;
     struct objc_method_list *mlist;
     
+    _objc_flush_caches([anObject class]);
+    _objc_resolve_categories_for_class([anObject class]);
+        
     while( mlist = class_nextMethodList( [anObject class], &iterator ) ){
 	for(k=0; k<mlist->method_count; k++){
-	   // NSLog(@"%@ implements %@",[anObject class], NSStringFromSelector(mlist->method_list[k].method_name));
+	    // NSLog(@"%@ implements %@",[anObject class], NSStringFromSelector(mlist->method_list[k].method_name));
 	    if([NSStringFromSelector(mlist->method_list[k].method_name) isEqualToString:@"complete:"]){
 		NSLog(@"found a complete: selector with imp (0x%08x)", (int)(mlist->method_list[k].method_imp) );
 	    }
@@ -69,29 +82,39 @@ static NSString *kHandlerName = @"getcitekeys";
     void *iterator = 0;
     struct objc_method_list *mlist;
     unsigned int impCount, impSize;
-    IMP *imps;
-    Method appkit_complete;
-    extern void _objc_flush_caches(Class);
+    IMP *imps = NULL;
+    IMP appkit_complete = NULL;
     
     impSize = 256;
     impCount = 0;
     imps = NSZoneMalloc(NULL, sizeof(IMP) * impSize);
     
-    _objc_flush_caches([self superclass]);
+    _objc_resolve_categories_for_class([anObject class]);
+    
+    if(debug) NSLog(@"-[%@ %@] 0x%x", [self class], NSStringFromSelector(_cmd), self);
     
     while( mlist = class_nextMethodList( [anObject class], &iterator ) ){
-	for(k=0; k<mlist->method_count; k++){
+	for(k = 0; k < mlist->method_count; k++){
+	    // NSLog(@"step %i of %i", k, mlist->method_count);
 	    if([NSStringFromSelector(mlist->method_list[k].method_name) isEqualToString:@"complete:"]){
 		if(debug) NSLog(@"found a complete: selector with imp (0x%08x)", (int)(mlist->method_list[k].method_imp) );
 		imps[impCount] = mlist->method_list[k].method_imp;
 		impCount++;
 		if(debug) NSLog(@"impCount is %i", impCount);
+	    } else {
+		if(k == mlist->method_count){
+		    NSBeep();
+		    NSLog(@"No complete: selector found in %i methods of class %@.", mlist->method_count, [anObject class]);
+		    return NULL;
+		}
 	    }
 	}
     }
     
     if(impCount == 2){
 	if(imps[0] > imps[1]){
+	    // Should get the base address of the AppKit, then compare the addresses of the IMPs and pick the one closest to the kit.
+	    // However, that requires using mach-o API, and the current code works for now.
 	    appkit_complete = imps[0];
 	    if(debug) NSLog(@"using a complete: selector with imp (0x%08x)", (int)(appkit_complete) );
 	    return appkit_complete;
@@ -102,26 +125,41 @@ static NSString *kHandlerName = @"getcitekeys";
 	}
     }
     if(impCount == 1){
-	if(debug) NSLog(@"impCount was unity.  TextExtras not found or loaded after us.");
-	return appkit_complete = imps[0];
+	// Maybe this is the AppKit implementation, maybe not.  If not, we're SOL for BibDesk, but someone's complete: will work.
+	appkit_complete = imps[0];
+	if(debug) NSLog(@"using a complete: selector with imp (0x%08x)", (int)(appkit_complete) );
+	return appkit_complete;
     } else {
-	NSLog(@"failure...no complete: selector found, or more than two found.");
+	NSLog(@"%i complete: implementations found.  I am confused, bailing out.", impCount);
     }
-    return nil;
+    return NULL;
 }
 
 // replace the TextExtras complete: with the one from the AppKit if TE loaded first
 - (void)complete:(id)sender{
-    void (*realcomplete)(id, SEL, id);
-    realcomplete = (void (*)(id, SEL, id))[[self class] completionIMP:[self superclass]];
-    realcomplete(self, @selector(complete:), sender);
+
+    if(debug) NSLog(@"-[%@ %@] 0x%x", [self class], NSStringFromSelector(_cmd), self);
+    if(debug) NSLog(@"sender object is %@", [sender class]);
+    
+     if(realcomplete != NULL){
+	// _objc_flush_caches([self class]);
+	realcomplete(self, @selector(complete:), sender);
+    } else {
+	NSLog(@"Couldn't find a method for complete:");
+	NSBeep();
+    }
 }
 
-// use our own completion selector if TE loaded after us
+// use our own completion method if TE loaded after us
 - (void)BD_complete:(id)sender{
-    void (*bdcomplete)(id, SEL, id);
-    bdcomplete = (void (*)(id, SEL, id))[[self class] completionIMP:[self superclass]];
-    bdcomplete(self, @selector(BD_complete:), sender);
+    
+    if(bdcomplete != NULL){
+	// _objc_flush_caches([self class]);
+	bdcomplete(self, @selector(BD_complete:), sender);
+    } else {
+	NSLog(@"Couldn't find a method for BD_complete:");
+	NSBeep();
+    }
 }
 
 /* ssp: 2004-07-18

@@ -28,6 +28,7 @@ extern NSString *BDSKInputManagerID;
                 of self; you need to use [self superclass] for this.
 */
 + (void)printSelectorList:(id)anObject;
++ (IMP)completionIMP:(id)anObject;
 - (NSRange) citeKeyRange;
 - (NSRange)rangeForUserCompletion;
 - (NSArray *)completionsForPartialWordRange:(NSRange)charRange indexOfSelectedItem:(int *)index;
