@@ -175,6 +175,7 @@ NSString* BDSKBibTeXStringPboardType = @"edu.ucsd.cs.mmcrack.bibdesk: Local BibT
 	columnsMenu = [[[NSApp delegate] displayMenuItem] submenu];		// better retain this?
 	
 	RYZImagePopUpButton *cornerViewButton = (RYZImagePopUpButton*)[tableView cornerView];
+	[cornerViewButton setAlternateImage:[NSImage imageNamed:@"cornerColumns_Pressed"]];
 	[cornerViewButton setShowsMenuWhenIconClicked:YES];
 	[[cornerViewButton cell] setAltersStateOfSelectedItem:NO];
 	[[cornerViewButton cell] setAlwaysUsesFirstItemAsSelected:NO];
