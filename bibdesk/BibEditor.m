@@ -469,6 +469,9 @@ NSString *BDSKDateModifiedString = @"Date-Modified";
 	}
 	else if ([menuItem action] == @selector(generateCiteKey:)) {
 		[menuItem setTitle: NSLocalizedString(@"Generate Cite Key", @"Generate Cite Key")];
+		if ([tabView indexOfTabViewItem:[tabView selectedTabViewItem]] != 0) {
+			return NO;
+		}
 	}
 	return YES;
 }
