@@ -15,7 +15,7 @@ static NSString *twoItems = @"@inproceedings{Lee96RTOptML,\nYear = {1996},\nUrl 
     BibItem *b = [[BibItem alloc] initWithType:@"incollection"
                                       fileType:@"BibTeX"
                                        authors:[NSMutableArray arrayWithObjects:@"Less, von More, Jr.",nil]];
-    should1([b numberOfAuthors] == 1 , @"Number of Authors == 1");
+    UKIntsEqual(1, [b numberOfAuthors]);
 
 }
 
@@ -30,10 +30,10 @@ static NSString *twoItems = @"@inproceedings{Lee96RTOptML,\nYear = {1996},\nUrl 
     BibItem *item1 = [testArray objectAtIndex:0];
     BibItem *item2 = [testArray objectAtIndex:1];
 
-    should(testArray);
-    should(2 == [testArray count]);
-//    shouldnt(error);
-    should1([item1 fileOrder] != [item2 fileOrder], @"The fileOrders were the same.");
+    UKNotNil(testArray);
+    UKIntsEqual(2, [testArray count]);
+
+    UKObjectsNotEqual([item1 fileOrder], [item2 fileOrder]);
 }
 
 - (void)testFieldOrder{
@@ -49,9 +49,8 @@ static NSString *twoItems = @"@inproceedings{Lee96RTOptML,\nYear = {1996},\nUrl 
     
     BibItem *item2 = [item1 copy];
 
-    should(testArray);
-    should(1 == [testArray count]);
-//    shouldnt(error);
+    UKNotNil(testArray);
+    UKIntsEqual(1, [testArray count]);
 
     [item1 setField:@"Author" toValue:@"foo"];
     [item1 setField:@"Year" toValue:@"2000"];
@@ -59,7 +58,7 @@ static NSString *twoItems = @"@inproceedings{Lee96RTOptML,\nYear = {1996},\nUrl 
     [item2 setField:@"Year" toValue:@"2000"];
     [item2 setField:@"Author" toValue:@"foo"];
 
-    should1([[item1 bibTeXString] isEqualToString:[item2 bibTeXString]], @"the fields didn't print out in the same order.");
+    UKStringsEqual([item1 bibTeXString], [item2 bibTeXString]);
 }
 
 - (void)testMakeTypeBibTeX{
@@ -79,7 +78,7 @@ static NSString *twoItems = @"@inproceedings{Lee96RTOptML,\nYear = {1996},\nUrl 
         [item1 makeType:aType];
     }
     [item1 makeType:firstType];
-    should1([beforeString isEqualToString:[item1 bibTeXString]], @"Cycling pub types isn't preserving!");
+    UKStringsEqual(beforeString, [item1 bibTeXString]);
 }
 
 @end

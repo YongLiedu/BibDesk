@@ -7,12 +7,9 @@
 //
 
 #import <Foundation/Foundation.h>
-#import <SenTestingKit/SenTestCase.h>
+#import <UnitKit/UnitKit.h>
 
-
-
-@interface TestSystemServices : SenTestCase
-{
+@interface TestSystemServices : NSObject <UKTest> {
 
 }
 

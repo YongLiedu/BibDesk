@@ -24,11 +24,10 @@
 
 - (void)testConstraintsFromString{
     
-    should1(([self _constraintsFromString:@"Optimizing"
-                          isEqualToDict:[NSDictionary dictionaryWithObjectsAndKeys:@"Optimizing", @"Title", nil]]), @"Title-only constraint parsing");
+    UKEqual([NSDictionary dictionaryWithObjectsAndKeys:@"Optimizing", @"Title", nil], [self _constraintsFromString:@"Optimizing"]);
 
-    should1(([self _constraintsFromString:@"Author: Foo"
-                            isEqualToDict:[NSDictionary dictionaryWithObjectsAndKeys:@"Foo", @"Author", nil]]), @"Author: Foo constraint parsing");
+    UKEqual([NSDictionary dictionaryWithObjectsAndKeys:@"Foo", @"Author", nil],
+            [self _constraintsFromString:@"Author: Foo"]);
     
 }
 

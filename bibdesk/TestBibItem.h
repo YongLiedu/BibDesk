@@ -6,12 +6,13 @@
 //  Copyright (c) 2002 __MyCompanyName__. All rights reserved.
 //
 
-#import <Foundation/Foundation.h>
-#import <SenTestingKit/SenTestCase.h>
+#import <Cocoa/Cocoa.h>
+#import <UnitKit/UnitKit.h>
 #import "BibItem.h"
+#import "BibTeXParser.h"
+#import <OmniFoundation/OmniFoundation.h>
 
-@interface TestBibItem : SenTestCase 
-{
+@interface TestBibItem : NSObject <UKTest> {
 
 }
 
