@@ -210,7 +210,7 @@ Note: The strings returned by the bt_split_name function seem to be in the wrong
         if(i >= 0 && i < theName->part_len[BTN_FIRST]-1)
             [tmpStr appendString:@" "];
     }
-    _firstName = [[NSString alloc] initWithData:[tmpStr dataUsingEncoding:defaultCStringEncoding allowLossyConversion:YES]  encoding:NSUTF8StringEncoding]; 
+    _firstName = [[NSString alloc] initWithData:[[tmpStr stringByRemovingCurlyBraces] dataUsingEncoding:defaultCStringEncoding allowLossyConversion:YES]  encoding:NSUTF8StringEncoding]; 
 		    
     // get tokens from von part
     tmpStr = [NSMutableString string];
@@ -221,7 +221,7 @@ Note: The strings returned by the bt_split_name function seem to be in the wrong
             [tmpStr appendString:@" "];
 
     }
-    _vonPart = [[NSString alloc] initWithData:[tmpStr dataUsingEncoding:defaultCStringEncoding allowLossyConversion:YES]  encoding:NSUTF8StringEncoding]; 
+    _vonPart = [[NSString alloc] initWithData:[[tmpStr stringByRemovingCurlyBraces] dataUsingEncoding:defaultCStringEncoding allowLossyConversion:YES]  encoding:NSUTF8StringEncoding]; 
 	
 	// get tokens from last part
     tmpStr = [NSMutableString string];
@@ -231,7 +231,7 @@ Note: The strings returned by the bt_split_name function seem to be in the wrong
         if(i >= 0 && i < theName->part_len[BTN_LAST]-1)
             [tmpStr appendString:@" "];
     }
-    _lastName = [[NSString alloc] initWithData:[tmpStr dataUsingEncoding:defaultCStringEncoding allowLossyConversion:YES]  encoding:NSUTF8StringEncoding]; 
+    _lastName = [[NSString alloc] initWithData:[[tmpStr stringByRemovingCurlyBraces] dataUsingEncoding:defaultCStringEncoding allowLossyConversion:YES]  encoding:NSUTF8StringEncoding]; 
 	
     
     // get tokens from jr part
@@ -242,7 +242,7 @@ Note: The strings returned by the bt_split_name function seem to be in the wrong
         if(i >= 0 && i < theName->part_len[BTN_JR]-1)
             [tmpStr appendString:@" "];
     }
-    _jrPart = [[NSString alloc] initWithData:[tmpStr dataUsingEncoding:defaultCStringEncoding allowLossyConversion:YES]  encoding:NSUTF8StringEncoding]; 
+    _jrPart = [[NSString alloc] initWithData:[[tmpStr stringByRemovingCurlyBraces] dataUsingEncoding:defaultCStringEncoding allowLossyConversion:YES]  encoding:NSUTF8StringEncoding]; 
 	
 	[self refreshNormalizedName];
 	
