@@ -16,10 +16,13 @@
     IBOutlet NSMatrix *defaultParserRadio;
     IBOutlet NSButton *backgroundLoadCheckbox;
     BDSKStringEncodingManager *encodingManager;
+    IBOutlet NSButton *showErrorsCheckButton;
 }
 
 - (IBAction)setDefaultStringEncoding:(id)sender;
 - (IBAction)setDefaultBibTeXParser:(id)sender;
 - (IBAction)setLoadFilesInBackground:(id)sender;
+
+- (IBAction)toggleShowWarnings:(id)sender;
 
 @end

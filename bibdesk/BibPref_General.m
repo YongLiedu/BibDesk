@@ -22,19 +22,29 @@
 - (void)awakeFromNib{
     [super awakeFromNib];
         
-        NSMutableArray *availableFontFamilies = [[[NSFontManager sharedFontManager] availableFontFamilies] mutableCopy];
+    NSMutableArray *availableFontFamilies = [[[NSFontManager sharedFontManager] availableFontFamilies] mutableCopy];
 
-        [previewFontPopup removeAllItems];
-        [previewFontPopup addItemsWithTitles:[availableFontFamilies sortedArrayUsingSelector:@selector(compare:)]];
-        [previewFontPopup selectItemWithTitle:[defaults objectForKey:BDSKPreviewPaneFontFamily]];
-        [availableFontFamilies release];
-        
-        NSMutableArray *availableFonts = [[[NSFontManager sharedFontManager] availableFonts] mutableCopy];
-        
-        [tableViewFontPopup removeAllItems];
-        [tableViewFontPopup addItemsWithTitles:[availableFonts sortedArrayUsingSelector:@selector(compare:)]];
-        [tableViewFontPopup selectItemWithTitle:[defaults objectForKey:BDSKTableViewFontKey]];
-        [availableFonts release];
+    [previewFontPopup removeAllItems];
+    [previewFontPopup addItemsWithTitles:[availableFontFamilies sortedArrayUsingSelector:@selector(compare:)]];
+    [previewFontPopup selectItemWithTitle:[defaults objectForKey:BDSKPreviewPaneFontFamily]];
+    [availableFontFamilies release];
+    
+    NSMutableArray *availableFonts = [[[NSFontManager sharedFontManager] availableFonts] mutableCopy];
+    
+    [tableViewFontPopup removeAllItems];
+    [tableViewFontPopup addItemsWithTitles:[availableFonts sortedArrayUsingSelector:@selector(compare:)]];
+    [tableViewFontPopup selectItemWithTitle:[defaults objectForKey:BDSKTableViewFontKey]];
+    [availableFonts release];
+    
+    // the whole point of using an NSTextView instead of a text field is so we can set the baseline properly on an unshadowed text view.
+    // for the default system font at 12pt size, a height of 18 is correct, in order to avoid clipping while scrolling (scrolling horizontally actually scrolls vertically and can show the characters from the previous line)
+    [defaultBibFileTextView setEditable:YES];
+    [defaultBibFileTextView setFont:[NSFont systemFontOfSize:12]];
+    int i;
+    for( i = 0 ; i < 2 ; i++ )
+        [defaultBibFileTextView lowerBaseline:nil];
+    [defaultBibFileTextView setEditable:NO];
+
 }
 
 - (IBAction)selectPreviewFont:(id)sender{
@@ -47,11 +57,9 @@
 - (void)updateUI{
     [startupBehaviorRadio selectCellWithTag:[[defaults objectForKey:BDSKStartupBehaviorKey] intValue]];
 	
-	[self updateButtonForAutoOpenFile:[defaults objectForKey:BDSKDefaultBibFilePathKey]];
+    [defaultBibFileTextView setString:[[defaults objectForKey:BDSKDefaultBibFilePathKey] stringByAbbreviatingWithTildeInPath]];
 	
     prevStartupBehaviorTag = [[defaults objectForKey:BDSKStartupBehaviorKey] intValue];
-    [showErrorsCheckButton setState: 
-		([defaults boolForKey:BDSKShowWarningsKey] == YES) ? NSOnState : NSOffState  ];	
     [tableViewFontSizeField setFloatValue:[defaults floatForKey:BDSKTableViewFontSizeKey]];
     
     [displayPrefRadioMatrix selectCellWithTag:[defaults integerForKey:BDSKPreviewDisplayKey]];
@@ -80,16 +88,6 @@
 }
 - (void)resignCurrentPreferenceClient{
 	//    NSLog(@"not sure - resigncurrent");
-}
-
-- (IBAction)toggleShowWarnings:(id)sender{
-    BibAppController *ac = (BibAppController *)[NSApp delegate];
-    [defaults setBool:([sender state] == NSOnState) ? YES : NO forKey:BDSKShowWarningsKey];
-    if ([sender state] == NSOnState) {
-        [ac showErrorPanel:self];
-    }else{
-        [ac hideErrorPanel:self];
-    }        
 }
 
 - (IBAction)toggleAutoCheckForUpdates:(id)sender{
@@ -124,38 +122,20 @@
  finishing off the open panel for selecting the file to open on startup
  
  -> re-sets the previous behaviour if the user cancels
- -> sets the 'auto open' behaviour otherwise and adjusts the corresponding button's text
+ -> sets the 'auto open' behaviour otherwise
 */
 - (void)openPanelDidEnd:(NSOpenPanel *)sheet returnCode:(int)returnCode contextInfo:(void *)contextInfo {
-	if (returnCode == NSCancelButton)
-	{
-		[startupBehaviorRadio selectCellWithTag:prevStartupBehaviorTag];
-		return;
-	}
-	NSString * path = [[sheet filenames] objectAtIndex: 0];
-	[self updateButtonForAutoOpenFile:path];
-	
-	[defaults setObject:path forKey:BDSKDefaultBibFilePathKey];
-	[defaults setObject:path forKey:@"NSOpen"]; // -- what did this do?		
+    if (returnCode == NSCancelButton)
+    {
+            [startupBehaviorRadio selectCellWithTag:prevStartupBehaviorTag];
+            return;
+    }
+    NSString * path = [[sheet filenames] objectAtIndex: 0];
+    [defaultBibFileTextView setString:[path stringByAbbreviatingWithTildeInPath]];    
+    
+    [defaults setObject:path forKey:BDSKDefaultBibFilePathKey];
+    [defaults setObject:path forKey:@"NSOpen"]; // -- what did this do?		
 }
-
-
-
-/*
-	Updates the UI to reflect the file setup for auto-opening on startup
-	This is called from both -openPanelDidEnd and -updateUI
-*/
-- (void) updateButtonForAutoOpenFile:(NSString*) path {
-	NSCell * autoOpenRadioButton = [startupBehaviorRadio cellWithTag:3];
-
-	// change title to reflect the file name
-	[autoOpenRadioButton setTitle:[NSString stringWithFormat:NSLocalizedString(@"Open Bibliography \"%@\"",@"Open bibliography %@ (should be the same as the radio button in the general preference, don't forget to use curly quotes)"), [path stringByAbbreviatingWithTildeInPath]]];
-	
-	// change the tool tip to reflect the whole path
-	[startupBehaviorRadio setToolTip:path forCell:autoOpenRadioButton];
-}
-
-
 
 - (IBAction)changePreviewDisplay:(id)sender{
     int tag = [[sender selectedCell] tag];
@@ -182,22 +162,6 @@
 	}
 	[self updateUI];
 }
-
-- (IBAction)changeShownColumns:(id)sender{
-    // 0,1,2,3,4,5 = citekey, title(shouldn't change), date,auth1,auth2,auth3
-    int n = [[sender selectedCell] tag];
-    if([[sender selectedCell] state] == NSOnState){
-        [showColsArray replaceObjectAtIndex:n
-                                 withObject:[NSNumber numberWithInt:1]];
-    }else{
-        [showColsArray replaceObjectAtIndex:n
-                                 withObject:[NSNumber numberWithInt:0]];
-    }
-    [defaults setObject:showColsArray forKey:BDSKShowColsKey];
-    [[[NSDocumentController sharedDocumentController] documents]
-makeObjectsPerformSelector:@selector(updateUI)];
-}
-
 
 - (IBAction)chooseFont:(id)sender{
     if([sender isKindOfClass:[NSPopUpButton class]])

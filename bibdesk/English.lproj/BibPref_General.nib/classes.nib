@@ -16,26 +16,22 @@
                 changeEditOnPaste = id; 
                 changePreviewDisplay = id; 
                 changePreviewMaxNumber = id; 
-                changeShownColumns = id; 
                 changeStartupBehavior = id; 
                 chooseAutoOpenFile = id; 
                 chooseFont = id; 
                 selectPreviewFont = id; 
                 toggleAutoCheckForUpdates = id; 
-                toggleShowWarnings = id; 
             }; 
             CLASS = "BibPref_General"; 
             LANGUAGE = ObjC; 
             OUTLETS = {
                 checkForUpdatesButton = NSButton; 
-                defaultBibFileField = NSTextField; 
+                defaultBibFileTextView = NSTextView; 
                 displayPrefRadioMatrix = NSMatrix; 
                 editOnPasteButton = NSButton; 
                 openSheetAccessoryView = NSView; 
                 previewFontPopup = NSPopUpButton; 
                 previewMaxNumberField = NSTextField; 
-                showColsButtons = NSMatrix; 
-                showErrorsCheckButton = NSButton; 
                 startupBehaviorRadio = NSMatrix; 
                 tableViewFontPopup = NSPopUpButton; 
                 tableViewFontSizeField = NSTextField; 

@@ -21,15 +21,11 @@
 @interface BibPref_General : OAPreferenceClient {
     IBOutlet NSMatrix *startupBehaviorRadio;
     IBOutlet NSView* openSheetAccessoryView;
-    IBOutlet NSTextField *defaultBibFileField;
     int prevStartupBehaviorTag;
 	
-    IBOutlet NSButton* showErrorsCheckButton;
 	IBOutlet NSButton* editOnPasteButton;
     IBOutlet NSButton *checkForUpdatesButton;
 
-    IBOutlet NSMatrix* showColsButtons;
-    NSMutableArray *showColsArray;    //" the columns to show"
     // display pref radio matrix
     IBOutlet NSMatrix* displayPrefRadioMatrix;
     IBOutlet NSTextField *previewMaxNumberField;
@@ -37,12 +33,11 @@
     IBOutlet NSPopUpButton *previewFontPopup;
     IBOutlet NSPopUpButton *tableViewFontPopup;
     IBOutlet NSTextField *tableViewFontSizeField;
+    IBOutlet NSTextView *defaultBibFileTextView;
 }
 
-- (IBAction)toggleShowWarnings:(id)sender;
 - (IBAction)changeStartupBehavior:(id)sender;
 - (IBAction) chooseAutoOpenFile:(id) sender;
-- (void) updateButtonForAutoOpenFile:(NSString*) path;
 
 - (IBAction)toggleAutoCheckForUpdates:(id)sender;
 
@@ -53,7 +48,6 @@
 - (IBAction)chooseFont:(id)sender;
 - (IBAction)changePreviewDisplay:(id)sender;
 - (IBAction)changePreviewMaxNumber:(id)sender;
-- (IBAction)changeShownColumns:(id)sender;
 
 - (IBAction)selectPreviewFont:(id)sender;
 

@@ -30,6 +30,9 @@
     [defaultParserRadio selectCellWithTag:( [prefs boolForKey:BDSKUseUnicodeBibTeXParser] ? 1 : 0 )];
     [backgroundLoadCheckbox setEnabled:[prefs boolForKey:BDSKUseUnicodeBibTeXParser]];
     [backgroundLoadCheckbox setState:( [prefs boolForKey:BDSKUseThreadedFileLoading] ? NSOnState : NSOffState )];
+    [showErrorsCheckButton setState: 
+		([defaults boolForKey:BDSKShowWarningsKey] == YES) ? NSOnState : NSOffState  ];	
+
 }
 
 - (IBAction)setDefaultStringEncoding:(id)sender{    
@@ -52,6 +55,14 @@
     [[OFPreferenceWrapper sharedPreferenceWrapper] setBool:([sender state] == NSOnState ? YES : NO ) forKey:BDSKUseThreadedFileLoading];
 }
 
-    
+- (IBAction)toggleShowWarnings:(id)sender{
+    BibAppController *ac = (BibAppController *)[NSApp delegate];
+    [defaults setBool:([sender state] == NSOnState) ? YES : NO forKey:BDSKShowWarningsKey];
+    if ([sender state] == NSOnState) {
+        [ac showErrorPanel:self];
+    }else{
+        [ac hideErrorPanel:self];
+    }        
+}
 
 @end
