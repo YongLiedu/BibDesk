@@ -1415,6 +1415,7 @@
 		};
 		29B97317FDCFA39411CA2CEA = {
 			children = (
+				F994B8F607F5F65F00751DA1,
 				27D4FA5D07DE5CF5001CAB00,
 				27D4FA5F07DE5CF5001CAB00,
 				3D6D748807EE1F8F00E8A7EF,
@@ -2161,6 +2162,7 @@
 				27D4FA6207DE5CF5001CAB00,
 				3D6D748A07EE1F8F00E8A7EF,
 				3D6D748B07EE1F8F00E8A7EF,
+				F994B8F707F5F65F00751DA1,
 			);
 			isa = PBXResourcesBuildPhase;
 			runOnlyForDeploymentPostprocessing = 0;
@@ -6041,6 +6043,19 @@
 			);
 			isa = PBXHeadersBuildPhase;
 			runOnlyForDeploymentPostprocessing = 0;
+		};
+		F994B8F607F5F65F00751DA1 = {
+			isa = PBXFileReference;
+			lastKnownFileType = text.rtf;
+			path = RelNotes.rtf;
+			refType = 4;
+			sourceTree = "<group>";
+		};
+		F994B8F707F5F65F00751DA1 = {
+			fileRef = F994B8F607F5F65F00751DA1;
+			isa = PBXBuildFile;
+			settings = {
+			};
 		};
 		F9A6742807D04E8000782ACD = {
 			fileEncoding = 4;
