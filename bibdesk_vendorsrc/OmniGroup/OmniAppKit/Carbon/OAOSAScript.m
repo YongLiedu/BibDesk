@@ -617,7 +617,7 @@ static id aedesc_to_id(AEDesc *desc)
         {
             Boolean bool8    = FALSE;    // MacOS boolean type
             bool    bool32   = false;    // C++ boolean type
-            BOOL    result;              // Objective-C boolean type
+            BOOL    result   = NO;       // Objective-C boolean type
             
             if (AEGetDescDataSize(desc) == 1) {
                 err = AEGetDescData(desc, &bool8, sizeof(bool8));
