@@ -5,7 +5,7 @@
                 changeCiteKeyAutogenerate = id; 
                 citeKeyFormatAdd = id; 
                 citeKeyFormatChanged = id; 
-                citeKeyHelp = id; 
+                formatHelp = id; 
                 showCiteKeyFormatWarning = id; 
             }; 
             CLASS = "BibPref_CiteKey"; 
