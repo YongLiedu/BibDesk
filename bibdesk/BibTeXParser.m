@@ -276,10 +276,10 @@ NSRange SafeForwardSearchRange( unsigned startLoc, unsigned seekLength, unsigned
             // starting from the middle brace.  Counting might be better for error detection, of which there is none at present.
             
             while(usingBraceDelimiter){ // should put us at the end of a record if we're using brace delimiters
-                braceSearchRange = NSMakeRange(searchStart, rightDelimLocation - searchStart);
-                //NSLog(@"Beginning search: substring in braceSearchRange is %@", [fullString substringWithRange:braceSearchRange] );
-                braceFoundRange = [fullString rangeOfString:leftDelim options:NSLiteralSearch range:braceSearchRange];
-                
+                braceSearchRange = NSMakeRange(searchStart, rightDelimLocation - searchStart); // braceSearchRange is the "key = {" <-- brace, up to the first '}'
+                // NSLog(@"Beginning search: substring in braceSearchRange is %@", [fullString substringWithRange:braceSearchRange] );
+                braceFoundRange = [fullString rangeOfString:leftDelim options:NSLiteralSearch range:braceSearchRange]; // this is the first '{' found searching forward in braceSearchRange
+
                 // Locals used only in this while()
                 unsigned tempStart = braceFoundRange.location;
                 BOOL doShallow = YES;
@@ -291,10 +291,10 @@ NSRange SafeForwardSearchRange( unsigned startLoc, unsigned seekLength, unsigned
                 // No guarantee that my comments are totally accurate, either, since some of this is by trial-and-error, and it's easy to get lost in the braces when you're debugging.
 
                 while(tempStart != [fullString rangeOfString:leftDelim options:NSLiteralSearch | NSBackwardsSearch range:braceSearchRange].location){ // this means we found "{ {" between { and }
-                    
+
                     // Reset tempStart, so we know where to look from on the next pass through the loop
-                    tempStart = [fullString rangeOfString:leftDelim options:NSLiteralSearch | NSBackwardsSearch range:braceSearchRange].location;
-                    //NSLog(@"Reset tempStart!  Neighboring characters are %@", [fullString substringWithRange:NSMakeRange(tempStart - 2, 5)]);
+                    tempStart = [fullString rangeOfString:leftDelim options:NSLiteralSearch range:braceSearchRange].location; // look forward to get the next one to compare with in the while() above
+                    // NSLog(@"Reset tempStart!  Neighboring characters are %@", [fullString substringWithRange:NSMakeRange(tempStart - 2, 5)]);
                     
                     // Perform a forward search to find the leftDelim that we're trying to match; we need to keep track of which leftDelim we're starting from or else we get off by one (or more) braces, and throw an error.
                     braceSearchRange = [fullString rangeOfString:leftDelim options:NSLiteralSearch range:NSMakeRange(braceSearchRange.location + 1, rightDelimLocation - braceSearchRange.location - 1)];
@@ -303,17 +303,17 @@ NSRange SafeForwardSearchRange( unsigned startLoc, unsigned seekLength, unsigned
                     // since that puts us past the end.
                     if(braceSearchRange.location == NSNotFound){
                         // NSLog(@"braceSearchRange.location is not found, breaking out.");                        
-                        doShallow = NO;
+                        doShallow = YES;
                         break;
                     }
                     
                     [scanner scanString:rightDelim intoString:&logString]; // More to come, so scan past it
-                    //NSLog(@"Deep nested brace check, scanned rightDelim %@", logString);
+                    // NSLog(@"Deep nested brace check, scanned rightDelim %@", logString);
                      
                     if(![scanner scanUpToString:rightDelim intoString:&logString] && // find the next right delimiter
                        [fullString rangeOfString:@"},\n" options:NSLiteralSearch range:NSMakeRange(tempStart + 1, [scanner scanLocation] - tempStart - 1)].location != NSNotFound ){ // see if there's an equal sign, which means we probably went too far and hit another key/value 
-                        //NSLog(@"*** ERROR doubly nested braces");
-                        //NSLog(@"the substring was %@", [fullString substringWithRange:NSMakeRange(tempStart + 1, [scanner scanLocation] - tempStart - 1)]);
+                        // NSLog(@"*** ERROR doubly nested braces");
+                        // NSLog(@"the substring was %@", [fullString substringWithRange:NSMakeRange(tempStart + 1, [scanner scanLocation] - tempStart - 1)]);
                         // *hadProblems = YES; // May not be an error, since these tests are sort of bogus
                         showWarning = YES;
                         [self postParsingErrorNotification:[NSString stringWithFormat:@"I am puzzled: delimiter '%@' may be missing", rightDelim]
@@ -322,30 +322,31 @@ NSRange SafeForwardSearchRange( unsigned startLoc, unsigned seekLength, unsigned
                                                         errorRange:[fullString lineRangeForRange:NSMakeRange(leftDelimLocation, 0)]];
                     }
                     rightDelimLocation = [scanner scanLocation];
-                    //NSLog(@"Deep nested braces, scanned up to %@ and found %@", rightDelim, logString);
+                    // NSLog(@"Deep nested braces, scanned up to %@ and found %@", rightDelim, logString);
+                    // NSLog(@"Next I'll compare %i with %i", [fullString rangeOfString:leftDelim options:NSLiteralSearch range:braceSearchRange].location, [fullString rangeOfString:leftDelim options:NSLiteralSearch | NSBackwardsSearch range:braceSearchRange].location);
                 }
                 
                 // This if() handles shallow nested braces (depth 1), such as key = {some {value} string}, that we don't need to iterate through.
                 if(braceFoundRange.location != NSNotFound && doShallow){ // if there's a "{" between { and }
                     [scanner scanString:rightDelim intoString:&logString]; // it wasn't this one, so scan past it
-                     //NSLog(@"Shallow nested brace check, scanned rightDelim %@", logString);
+                     // NSLog(@"Shallow nested brace check, scanned rightDelim %@", logString);
                      if([scanner scanLocation] + 1 >= nextAtRange.location) break; // check for next entry or EOF before we try characterAtIndex:
                     if(![scanner scanUpToString:rightDelim intoString:&logString] &&        // find the next right delimiter
                         [fullString characterAtIndex:([scanner scanLocation] + 1)] != ',' ){ // don't call this an error if there is a comma immediately following; may give some false alarms
-                        //NSLog(@"*** ERROR nested braces");
+                        // NSLog(@"*** ERROR nested braces");
                         *hadProblems = YES;
                         [self postParsingErrorNotification:[NSString stringWithFormat:@"Delimiter '%@' not found", rightDelim]
                                                          errorType:@"Parse Error" 
                                                           fileName:filePath 
                                                         errorRange:[fullString lineRangeForRange:NSMakeRange(leftDelimLocation, 0)]];
                     }
-                     //NSLog(@"Shallow nested braces, scanned up to %@ and found %@", rightDelim, logString);
+                    // NSLog(@"Shallow nested braces, scanned up to %@ and found %@", rightDelim, logString);
                     searchStart = rightDelimLocation + 1; // start from the previous search end
                     if(searchStart >= nextAtRange.location) break; // check to be sure we're not going past EOF
-                    //NSLog(@"string at searchStart is %@", [fullString substringWithRange:NSMakeRange(searchStart, 1)]);
+                    // NSLog(@"string at searchStart is %@", [fullString substringWithRange:NSMakeRange(searchStart, 1)]);
                     rightDelimLocation = [scanner scanLocation];
                 } else {
-                    //NSLog(@"shallow brace loop...breaking out");
+                    // NSLog(@"shallow brace loop...breaking out");
                     break;
                 }
             }
