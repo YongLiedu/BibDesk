@@ -17,6 +17,7 @@
                 changeStyle = id; 
                 changeTexBinPath = id; 
                 changeUsesTeX = id; 
+                downloadTeX = id; 
                 openTeXpreviewFile = id; 
             }; 
             CLASS = "BibPref_TeX"; 
