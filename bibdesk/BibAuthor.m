@@ -30,7 +30,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
         pubs = [[NSMutableArray arrayWithObject:aPub] retain];
     else
         pubs = [[NSMutableArray alloc] init];
-    NSLog(@"bibauthor init -- name:[%@] pub:[%@]", aName, aPub);
+//    NSLog(@"bibauthor init -- name:[%@] pub:[%@]", aName, aPub);
     return self;
 }
 
