@@ -19,6 +19,7 @@ NSString *BDSKAutoCheckForUpdates = @"Check for updates when starting";
 NSString *BDSKShouldUseTemplateFile = @"Write template file when saving";
 NSString *BDSKSnoopDrawerContentKey = @"Snoop Drawer Content";
 NSString *BDSKBibEditorAutocompletionFields = @"Enabled for autocompletion in BibEditor";
+NSString *BDSKPreviewPaneFontFamily = @"Font family to use for RTF preview display";
 
 NSString *BDSKUseUnicodeBibTeXParser = @"Use Unicode BibTeX Parser";
 NSString *BDSKUseThreadedFileLoading = @"Load files in background";
@@ -121,3 +122,4 @@ NSString *BDSKBibDocMacroAddedNotification = @"added a macro or changed a macro 
 NSString *BDSKBibDocMacroRemovedNotification = @"removed a macro from the document";
 NSString *BDSKBibDocMacroKeyChangedNotification = @"changed the key of a macro";
 NSString *BDSKBibDocMacroDefinitionChangedNotification = @"changed the value of a macro";
+NSString *BDSKPreviewPaneFontChangedNotification = @"Changed the RTF preview pane font family";

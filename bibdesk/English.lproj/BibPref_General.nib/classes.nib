@@ -19,6 +19,7 @@
                 changeStartupBehavior = id; 
                 chooseAutoOpenFile = id; 
                 chooseFont = id; 
+                selectPreviewFont = id; 
                 toggleAutoCheckForUpdates = id; 
                 toggleShowWarnings = id; 
             }; 
@@ -29,11 +30,13 @@
                 defaultBibFileField = NSTextField; 
                 displayPrefRadioMatrix = NSMatrix; 
                 editOnPasteButton = NSButton; 
-                fontPreviewField = NSTextField; 
                 openSheetAccessoryView = NSView; 
+                previewFontPopup = NSPopUpButton; 
                 showColsButtons = NSMatrix; 
                 showErrorsCheckButton = NSButton; 
                 startupBehaviorRadio = NSMatrix; 
+                tableViewFontPopup = NSPopUpButton; 
+                tableViewFontSizeField = NSTextField; 
             }; 
             SUPERCLASS = OAPreferenceClient; 
         }, 

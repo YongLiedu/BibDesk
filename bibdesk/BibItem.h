@@ -46,6 +46,7 @@
 #import "BibPrefController.h"
 #import "NSString_BDSKExtensions.h"
 #import "BDSKConverter.h"
+#import "BDSKFontManager.h"
 
 @class BibEditor;
 @class BibDocument;

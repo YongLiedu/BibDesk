@@ -70,6 +70,7 @@ extern NSString *BDSKCiteEndBracketKey;
 extern NSString *BDSKShouldUseTemplateFile;
 extern NSString *BDSKSnoopDrawerContentKey;
 extern NSString *BDSKBibEditorAutocompletionFields;
+extern NSString *BDSKPreviewPaneFontFamily;
 
 extern NSString *BDSKCiteKeyFormatKey;
 extern NSString *BDSKCiteKeyFormatPresetKey;
@@ -146,3 +147,4 @@ extern NSString *BDSKBibDocMacroAddedNotification;
 extern NSString *BDSKBibDocMacroRemovedNotification;
 extern NSString *BDSKBibDocMacroKeyChangedNotification;
 extern NSString *BDSKBibDocMacroDefinitionChangedNotification;
+extern NSString *BDSKPreviewPaneFontChangedNotification;

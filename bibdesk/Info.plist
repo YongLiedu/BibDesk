@@ -373,6 +373,8 @@
 					<string>1.010918794815856e-310</string>
 					<key>Check for updates when starting</key>
 					<string>1</string>
+                                        <key>Font family to use for RTF preview display</key>
+                                        <string>Gill Sans</string>
 					<key>Column Widths By Name</key>
 					<dict>
 						<key>1st Author</key>

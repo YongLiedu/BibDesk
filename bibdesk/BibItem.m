@@ -42,39 +42,19 @@
 #define isEmptyField(s) ([[[pubFields objectForKey:s] stringValue] isEqualToString:@""])
 
 /* Fonts and paragraph styles cached for efficiency. */
-static NSDictionary* _cachedFonts = nil; // font cached across all BibItems for speed.
 static NSParagraphStyle* _keyParagraphStyle = nil;
 static NSParagraphStyle* _bodyParagraphStyle = nil;
 
-// private function to get the cached Font.
-void _setupFonts(){
-    NSMutableParagraphStyle* defaultStyle = nil;
-    if(_cachedFonts == nil){
-        defaultStyle = [[NSMutableParagraphStyle alloc] init];
-        [defaultStyle setParagraphStyle:[NSParagraphStyle defaultParagraphStyle]];
-        if([NSFont fontWithName:@"Gill Sans" size:10.0] == nil){ // Gill Sans is our preferred font, but we'll fall back on the system font if Gill Sans isn't available
-            _cachedFonts = [[NSDictionary dictionaryWithObjectsAndKeys:
-                [NSFont boldSystemFontOfSize:14.0], @"Title",
-                [NSFont systemFontOfSize:10.0], @"Type",
-                [NSFont boldSystemFontOfSize:12.0], @"Key",
-                [NSFont systemFontOfSize:12.0], @"Body",
-                nil] retain]; // we'll never release this
-        } else {
-            _cachedFonts = [[NSDictionary dictionaryWithObjectsAndKeys:
-                [NSFont fontWithName:@"Gill Sans Bold Italic" size:14.0], @"Title",
-                [NSFont fontWithName:@"Gill Sans" size:10.0], @"Type",
-                [NSFont fontWithName:@"Gill Sans Bold" size:12.0], @"Key",
-                [NSFont fontWithName:@"Gill Sans" size:12.0], @"Body",
-                nil] retain]; // we'll never release this
-        }
-        
-// ?        [defaultStyle setAlignment:NSLeftTextAlignment];
-        _keyParagraphStyle = [defaultStyle copy];
-        [defaultStyle setHeadIndent:50];
-        [defaultStyle setFirstLineHeadIndent:50];
-        [defaultStyle setTailIndent:-30];
-        _bodyParagraphStyle = [defaultStyle copy];
-    }
+_setupParagraphStyle()
+{
+    NSMutableParagraphStyle *defaultStyle = [[NSMutableParagraphStyle alloc] init];
+    [defaultStyle setParagraphStyle:[NSParagraphStyle defaultParagraphStyle]];
+    // ?        [defaultStyle setAlignment:NSLeftTextAlignment];
+    _keyParagraphStyle = [defaultStyle copy];
+    [defaultStyle setHeadIndent:50];
+    [defaultStyle setFirstLineHeadIndent:50];
+    [defaultStyle setTailIndent:-30];
+    _bodyParagraphStyle = [defaultStyle copy];
 }
 
 @implementation BibItem
@@ -112,7 +92,8 @@ void _setupFonts(){
         [self setDateModified: date];
         [self setFileOrder:-1];
 		[self setNeedsToBeFiled:NO];
-        if(_cachedFonts == nil) _setupFonts();
+        _setupParagraphStyle();
+
     }
 
     //NSLog(@"bibitem init");
@@ -147,8 +128,8 @@ void _setupFonts(){
     // set by the document, which we don't archive
     document = nil;
     editorObj = nil;
-    if(_cachedFonts == nil)
-        _setupFonts();
+    _setupParagraphStyle();
+    bibLock = [[NSLock alloc] init]; // not encoded
     return self;
 }
 
@@ -214,6 +195,7 @@ void _setupFonts(){
 }
 
 - (void)dealloc{
+    [[NSNotificationCenter defaultCenter] removeObserver:self];
 #ifdef DEBUG
     NSLog([NSString stringWithFormat:@"bibitem Dealloc, rt: %d", [self retainCount]]);
 #endif
@@ -863,6 +845,7 @@ void _setupFonts(){
 - (NSData *)RTFValue{
     NSString *key;
     NSEnumerator *e = [[[pubFields allKeys] sortedArrayUsingSelector:@selector(caseInsensitiveCompare:)] objectEnumerator];
+    NSDictionary *_cachedFonts = [[BDSKFontManager sharedFontManager] cachedFontsForPreviewPane];
 
     NSDictionary *titleAttributes =
         [NSDictionary dictionaryWithObjects:[NSArray arrayWithObjects:[_cachedFonts objectForKey:@"Title"], _keyParagraphStyle, nil]

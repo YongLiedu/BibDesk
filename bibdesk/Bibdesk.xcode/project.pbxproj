@@ -10,6 +10,8 @@
 				F9022FB707580B9400C3F701,
 				F918104307583A6E00CF822D,
 				F988709007580CB4001D4D49,
+				F9A6742807D04E8000782ACD,
+				F9A6742907D04E8000782ACD,
 				F94A94F3079AEE5800D13AB5,
 				2730077607CF20B500F2E485,
 				2730077707CF20B500F2E485,
@@ -1452,6 +1454,7 @@
 				2730077F07CF20B500F2E485,
 				2730078107CF20B500F2E485,
 				2730078307CF20B500F2E485,
+				F9A6742B07D04E8000782ACD,
 			);
 			isa = PBXSourcesBuildPhase;
 			runOnlyForDeploymentPostprocessing = 0;
@@ -5207,9 +5210,38 @@
 				2730078007CF20B500F2E485,
 				2730078207CF20B500F2E485,
 				273007A507CF216700F2E485,
+				F9A6742A07D04E8000782ACD,
 			);
 			isa = PBXHeadersBuildPhase;
 			runOnlyForDeploymentPostprocessing = 0;
+		};
+		F9A6742807D04E8000782ACD = {
+			fileEncoding = 4;
+			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.c.h;
+			path = BDSKFontManager.h;
+			refType = 4;
+			sourceTree = "<group>";
+		};
+		F9A6742907D04E8000782ACD = {
+			fileEncoding = 4;
+			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.c.objc;
+			path = BDSKFontManager.m;
+			refType = 4;
+			sourceTree = "<group>";
+		};
+		F9A6742A07D04E8000782ACD = {
+			fileRef = F9A6742807D04E8000782ACD;
+			isa = PBXBuildFile;
+			settings = {
+			};
+		};
+		F9A6742B07D04E8000782ACD = {
+			fileRef = F9A6742907D04E8000782ACD;
+			isa = PBXBuildFile;
+			settings = {
+			};
 		};
 		F9D5A8CB07B9B94F0092E7E2 = {
 			fileRef = F9022C420758027800C3F701;

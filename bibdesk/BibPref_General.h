@@ -30,10 +30,12 @@
 
     IBOutlet NSMatrix* showColsButtons;
     NSMutableArray *showColsArray;    //" the columns to show"
-    // shows the font
-    IBOutlet NSTextField* fontPreviewField;
     // display pref radio matrix
     IBOutlet NSMatrix* displayPrefRadioMatrix;
+    
+    IBOutlet NSPopUpButton *previewFontPopup;
+    IBOutlet NSPopUpButton *tableViewFontPopup;
+    IBOutlet NSTextField *tableViewFontSizeField;
 }
 
 - (IBAction)toggleShowWarnings:(id)sender;
@@ -50,4 +52,7 @@
 - (IBAction)chooseFont:(id)sender;
 - (IBAction)changePreviewDisplay:(id)sender;
 - (IBAction)changeShownColumns:(id)sender;
+
+- (IBAction)selectPreviewFont:(id)sender;
+
 @end

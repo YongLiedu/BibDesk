@@ -21,16 +21,27 @@
 
 - (void)awakeFromNib{
     [super awakeFromNib];
-	
-	
-	[[NSNotificationCenter defaultCenter]
-addObserver:self
-   selector:@selector(handleFontChangedNotification:)
-       name:BDSKTableViewFontChangedNotification
-     object:nil];
+        
+        NSMutableArray *availableFontFamilies = [[[NSFontManager sharedFontManager] availableFontFamilies] mutableCopy];
+
+        [previewFontPopup removeAllItems];
+        [previewFontPopup addItemsWithTitles:[availableFontFamilies sortedArrayUsingSelector:@selector(compare:)]];
+        [previewFontPopup selectItemWithTitle:[defaults objectForKey:BDSKPreviewPaneFontFamily]];
+        [availableFontFamilies release];
+        
+        NSMutableArray *availableFonts = [[[NSFontManager sharedFontManager] availableFonts] mutableCopy];
+        
+        [tableViewFontPopup removeAllItems];
+        [tableViewFontPopup addItemsWithTitles:[availableFonts sortedArrayUsingSelector:@selector(compare:)]];
+        [tableViewFontPopup selectItemWithTitle:[defaults objectForKey:BDSKTableViewFontKey]];
+        [availableFonts release];
 }
 
-
+- (IBAction)selectPreviewFont:(id)sender{
+    [defaults setObject:[sender titleOfSelectedItem] forKey:BDSKPreviewPaneFontFamily];
+    [[NSNotificationCenter defaultCenter] postNotificationName:BDSKPreviewPaneFontChangedNotification object:nil];
+    [[NSNotificationCenter defaultCenter] postNotificationName:BDSKPreviewDisplayChangedNotification object:nil];
+}
 
 
 - (void)updateUI{
@@ -41,18 +52,13 @@ addObserver:self
     prevStartupBehaviorTag = [[defaults objectForKey:BDSKStartupBehaviorKey] intValue];
     [showErrorsCheckButton setState: 
 		([defaults boolForKey:BDSKShowWarningsKey] == YES) ? NSOnState : NSOffState  ];	
-	
-	NSFont *tableViewFont = [NSFont fontWithName:[defaults objectForKey:BDSKTableViewFontKey]
-												size:[defaults floatForKey:BDSKTableViewFontSizeKey]];
-		
-		[fontPreviewField setStringValue:[[tableViewFont displayName] stringByAppendingFormat:@" %.0f",[tableViewFont pointSize]]];
-		[fontPreviewField setFont:tableViewFont];
-		
-		[displayPrefRadioMatrix selectCellWithTag:[defaults integerForKey:BDSKPreviewDisplayKey]];
-		
-		[editOnPasteButton setState:[defaults integerForKey:BDSKEditOnPasteKey]];
+    [tableViewFontSizeField setFloatValue:[defaults floatForKey:BDSKTableViewFontSizeKey]];
+    
+    [displayPrefRadioMatrix selectCellWithTag:[defaults integerForKey:BDSKPreviewDisplayKey]];
+    
+    [editOnPasteButton setState:[defaults integerForKey:BDSKEditOnPasteKey]];
 
-        [checkForUpdatesButton setState:([defaults boolForKey:BDSKAutoCheckForUpdates] == YES) ? NSOnState : NSOffState];
+    [checkForUpdatesButton setState:([defaults boolForKey:BDSKAutoCheckForUpdates] == YES) ? NSOnState : NSOffState];
 
 }
 
@@ -179,55 +185,18 @@ makeObjectsPerformSelector:@selector(updateUI)];
 
 
 - (IBAction)chooseFont:(id)sender{
-    NSFont *oldFont = [NSFont fontWithName:
-        [defaults objectForKey:BDSKTableViewFontKey]
-                                      size:
-        [defaults floatForKey:BDSKTableViewFontSizeKey]];
-    [[NSFontManager sharedFontManager] setSelectedFont:oldFont isMultiple:NO];
-    [[NSFontManager sharedFontManager] orderFrontFontPanel:self];
+    if([sender isKindOfClass:[NSPopUpButton class]])
+        [defaults setObject:[sender titleOfSelectedItem] forKey:BDSKTableViewFontKey];
+    else if([sender isKindOfClass:[NSTextField class]])
+        [defaults setFloat:[sender floatValue] forKey:BDSKTableViewFontSizeKey];
+    
+    [[NSNotificationCenter defaultCenter] postNotificationName:BDSKTableViewFontChangedNotification
+                                                        object:nil];
 }
-
-
-- (void)handleFontChangedNotification:(NSNotification *)notification{
-    NSFont *font =
-    [NSFont fontWithName:[defaults objectForKey:BDSKTableViewFontKey]
-                    size:[defaults floatForKey:BDSKTableViewFontSizeKey]];
-    //NSLog(@"%@", font);
-    [fontPreviewField setStringValue:
-        [[font displayName] stringByAppendingFormat:@" %.0f",[font pointSize]]];
-    [fontPreviewField setFont:font];
-}
-
-
-
-// changeFont is deprecated here.
-// this same code (mostly) is in the BibAppController now.
-// we just listen for a notification about the font change so we can change the previewfield.
-- (void)changeFont:(id)fontManager{
-    NSFont *newFont;
-    NSFont *oldFont =
-        [NSFont fontWithName:[defaults objectForKey:BDSKTableViewFontKey]
-                        size:[defaults floatForKey:BDSKTableViewFontSizeKey]];
-	
-    newFont = [[NSFontPanel sharedFontPanel] panelConvertFont:oldFont];
-    [defaults setObject:[newFont fontName] forKey:BDSKTableViewFontKey];
-    [defaults setFloat:[newFont pointSize] forKey:BDSKTableViewFontSizeKey];
-    [fontPreviewField setStringValue:
-        [[newFont displayName] stringByAppendingFormat:@" %.0f",[newFont pointSize]]];
-    // make it have live updates:
-    //  [[[NSDocumentController sharedDocumentController] documents]
-    //makeObjectsPerformSelector:@selector(updateUI)];
-	[[NSNotificationCenter defaultCenter] postNotificationName:BDSKTableViewFontChangedNotification
-														object:nil];
-}
-
 
 - (IBAction)changeEditOnPaste:(id)sender{
     [defaults setInteger:[sender state] forKey:BDSKEditOnPasteKey];
 }
-
-
-
 
 - (void)dealloc{
     [[NSNotificationCenter defaultCenter] removeObserver:self];
