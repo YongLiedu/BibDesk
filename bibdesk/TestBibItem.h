@@ -7,7 +7,6 @@
 //
 
 #import <Foundation/Foundation.h>
-#import <SenFoundation/SenFoundation.h>
 #import <SenTestingKit/SenTestCase.h>
 #import "BibItem.h"
 

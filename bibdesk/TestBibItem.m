@@ -22,9 +22,11 @@ static NSString *twoItems = @"@inproceedings{Lee96RTOptML,\nYear = {1996},\nUrl 
 - (void)testFileOrder{
     // init two bibitems, then check that the difference in their fileorder is one
     BOOL error = NO;
-    NSMutableArray *testArray = [BibTeXParser itemsFromString:twoItems  error:&error
-                                           frontMatter:nil
-                                              filePath:@"testFileOrder"];
+	NSData *twoItemsData = [twoItems dataUsingEncoding:NSASCIIStringEncoding];
+    NSMutableArray *testArray = [BibTeXParser itemsFromData:twoItemsData
+													  error:&error
+												frontMatter:nil
+												   filePath:@"testFileOrder"];
     BibItem *item1 = [testArray objectAtIndex:0];
     BibItem *item2 = [testArray objectAtIndex:1];
 
@@ -38,9 +40,11 @@ static NSString *twoItems = @"@inproceedings{Lee96RTOptML,\nYear = {1996},\nUrl 
     // init two bibitems from same string, change two fields each (identically but in different order) then test that their bibtexvalues are equal.
     // init two bibitems, then check that the difference in their fileorder is one
     BOOL error = NO;
-    NSMutableArray *testArray = [BibTeXParser itemsFromString:oneItem  error:&error
-                                           frontMatter:nil
-                                              filePath:@"testFieldOrder"];
+	NSData *oneItemData = [oneItem dataUsingEncoding:NSASCIIStringEncoding];
+    NSMutableArray *testArray = [BibTeXParser itemsFromData:oneItemData
+													  error:&error
+												frontMatter:nil
+												   filePath:@"testFieldOrder"];
     BibItem *item1 = [testArray objectAtIndex:0];
     
     BibItem *item2 = [item1 copy];
@@ -60,9 +64,11 @@ static NSString *twoItems = @"@inproceedings{Lee96RTOptML,\nYear = {1996},\nUrl 
 
 - (void)testMakeTypeBibTeX{
     BOOL error = NO;
-    NSMutableArray *testArray = [BibTeXParser itemsFromString:oneItem  error:&error
-                                                  frontMatter:nil
-                                                     filePath:@"testFieldOrder"];
+	NSData *oneItemData = [oneItem dataUsingEncoding:NSASCIIStringEncoding];
+    NSMutableArray *testArray = [BibTeXParser itemsFromData:oneItemData
+													  error:&error
+												frontMatter:nil
+												   filePath:@"testFieldOrder"];
     BibItem *item1 = [testArray objectAtIndex:0];
     NSString *firstType = [item1 type];
     NSEnumerator *typeE = [[[BibTypeManager sharedManager] bibTypesForFileType:@"BibTeX"] objectEnumerator];
