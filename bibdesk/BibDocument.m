@@ -984,11 +984,15 @@ stringByAppendingPathComponent:@"BibDesk"]; */
                 
         // NSLog(@"*** WARNING: using new parser.  To disable, use `defaults write edu.ucsd.cs.mmccrack.bibdesk \"Use Unicode BibTeX Parser\" 'NO'` and relaunch BibDesk.");
 
-        [self startParseUpdateTimer]; // start on the main thread
-        [NSThread detachNewThreadSelector:@selector(parseInBackground:)
-                                 toTarget:self
-                               withObject:fileContentString];
-        return YES;
+        if([[OFPreferenceWrapper sharedPreferenceWrapper] boolForKey:BDSKUseThreadedFileLoading]){
+            [self startParseUpdateTimer]; // start on the main thread
+            [NSThread detachNewThreadSelector:@selector(parseInBackground:)
+                                     toTarget:self
+                                   withObject:fileContentString];
+            return YES;
+        } else {
+            newPubs = [BibTeXParser itemsFromString:fileContentString error:&hadProblems frontMatter:frontMatter filePath:filePath];
+        }
 
     } else {
         newPubs = [BibTeXParser itemsFromData:data

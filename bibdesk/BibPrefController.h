@@ -47,6 +47,7 @@ extern NSString *BDSKBibTeXBinPathKey;
 /*! @const BDSKBTStyleKey Key for user default: The style file name to be inserted into the tex template for preview. */
 extern NSString *BDSKBTStyleKey;
 extern NSString *BDSKUseUnicodeBibTeXParser;
+extern NSString *BDSKUseThreadedFileLoading;
 extern NSString *BDSKDefaultStringEncoding;
 extern NSString *BDSKDefaultBibFilePathKey;
 extern NSString *BDSKStartupBehaviorKey;

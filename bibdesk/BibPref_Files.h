@@ -15,10 +15,12 @@
     IBOutlet NSMatrix *defaultParserRadio;
     NSArray *encodingsArray;
     NSArray *encodingNames;
+    IBOutlet NSButton *backgroundLoadCheckbox;
 }
 
 - (IBAction)setDefaultStringEncoding:(id)sender;
 - (unsigned)tagForEncoding:(NSStringEncoding)encoding;
 - (IBAction)setDefaultBibTeXParser:(id)sender;
+- (IBAction)setLoadFilesInBackground:(id)sender;
 
 @end

@@ -33,6 +33,8 @@
     [encodingPopUp selectItemAtIndex:[self tagForEncoding:[prefs integerForKey:BDSKDefaultStringEncoding]]];
     [defaultParserRadio selectCellWithTag:( [prefs boolForKey:BDSKUseUnicodeBibTeXParser] ? 1 : 0 )];
     [encodingPopUp setEnabled:[prefs boolForKey:BDSKUseUnicodeBibTeXParser]]; // since btparse is not compatible with other encodings; it can still be used via the File->Open menu
+    [backgroundLoadCheckbox setEnabled:[prefs boolForKey:BDSKUseUnicodeBibTeXParser]];
+    [backgroundLoadCheckbox setState:( [prefs boolForKey:BDSKUseThreadedFileLoading] ? NSOnState : NSOffState )];
 }
 
 - (IBAction)setDefaultStringEncoding:(id)sender{    
@@ -49,11 +51,17 @@
 - (IBAction)setDefaultBibTeXParser:(id)sender{
     BOOL yn = ( [[sender selectedCell] tag] == 0 ? NO : YES );
     [[OFPreferenceWrapper sharedPreferenceWrapper] setBool:yn forKey:BDSKUseUnicodeBibTeXParser];
-    if(!yn)
+    if(!yn) // use libbtparse
+        [[OFPreferenceWrapper sharedPreferenceWrapper] setBool:NO forKey:BDSKUseThreadedFileLoading];
         [[OFPreferenceWrapper sharedPreferenceWrapper] setInteger:NSASCIIStringEncoding forKey:BDSKDefaultStringEncoding];
     [self updateUI];
     // NSLog(@"use unicode parser is %@", ( [[OFPreferenceWrapper sharedPreferenceWrapper] boolForKey:BDSKUseUnicodeBibTeXParser] ? @"YES" : @"NO" ) );
 }
+
+- (IBAction)setLoadFilesInBackground:(id)sender{
+    [[OFPreferenceWrapper sharedPreferenceWrapper] setBool:([sender state] == NSOnState ? YES : NO ) forKey:BDSKUseThreadedFileLoading];
+}
+
     
 
 @end

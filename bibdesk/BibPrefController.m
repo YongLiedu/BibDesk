@@ -20,6 +20,7 @@ NSString *BDSKShouldUseTemplateFile = @"Write template file when saving";
 
 
 NSString *BDSKUseUnicodeBibTeXParser = @"Use Unicode BibTeX Parser";
+NSString *BDSKUseThreadedFileLoading = @"Load files in background";
 NSString *BDSKDefaultStringEncoding = @"Default string encoding for opening and saving";
 
 NSString *BDSKTeXBinPathKey = @"TeX Binary Path";

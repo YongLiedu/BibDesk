@@ -4,18 +4,23 @@
             ACTIONS = {
                 setDefaultBibTeXParser = id; 
                 setDefaultStringEncoding = id; 
-                setExportBibTeXAutomatically = id; 
+                setLoadFilesInBackground = id; 
             }; 
             CLASS = "BibPref_Files"; 
             LANGUAGE = ObjC; 
             OUTLETS = {
+                backgroundLoadCheckbox = NSButton; 
                 defaultParserRadio = NSMatrix; 
                 encodingPopUp = NSPopUpButton; 
-                exportBibTeXAutomaticallyRadio = NSMatrix; 
             }; 
             SUPERCLASS = OAPreferenceClient; 
         }, 
-        {CLASS = FirstResponder; LANGUAGE = ObjC; SUPERCLASS = NSObject; }, 
+        {
+            ACTIONS = {"" = id; }; 
+            CLASS = FirstResponder; 
+            LANGUAGE = ObjC; 
+            SUPERCLASS = NSObject; 
+        }, 
         {
             ACTIONS = {restoreDefaults = id; setValueForSender = id; }; 
             CLASS = OAPreferenceClient; 
