@@ -255,6 +255,8 @@ NSString* BDSKBibTeXStringPboardType = @"edu.ucsd.cs.mmcrack.bibdesk: Local BibT
     while (pub = [pubEnum nextObject]) {
         [pub setDocument:self];
     }
+    [shownPublications setArray:publications];
+    [self refreshAuthors];
     
     NSDictionary *notifInfo = [NSDictionary dictionaryWithObjectsAndKeys:newPubs, @"pubs", nil];
     [[NSNotificationCenter defaultCenter] postNotificationName:@"Set the publications in document"
