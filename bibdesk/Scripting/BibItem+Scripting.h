@@ -62,8 +62,6 @@
 
 - (NSScriptObjectSpecifier *) objectSpecifier;
 
-- (BibDocument*) document;
-
 
 @end
 

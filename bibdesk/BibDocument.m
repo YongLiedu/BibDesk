@@ -653,6 +653,12 @@ stringByAppendingPathComponent:@"BibDesk"]; */
                                 frontMatter:frontMatter
                                    filePath:filePath];
     publications = [newPubs retain];
+		
+	NSEnumerator *pubEnum = [publications objectEnumerator];
+	BibItem *pub;
+	while (pub = [pubEnum nextObject]) {
+		[pub setDocument:self];
+	}
     
     if(hadProblems){
         // run a modal dialog asking if we want to use partial data or give up
@@ -712,6 +718,12 @@ stringByAppendingPathComponent:@"BibDesk"]; */
                                      frontMatter:frontMatter
                                         filePath:filePath];
     publications = [newPubs retain];
+		
+	NSEnumerator *pubEnum = [publications objectEnumerator];
+	BibItem *pub;
+	while (pub = [pubEnum nextObject]) {
+		[pub setDocument:self];
+	}
 
 //    NSLog(@"end %@ elapsed: %f", [[NSDate date] description], [start timeIntervalSinceNow]);
 

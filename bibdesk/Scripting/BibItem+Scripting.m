@@ -14,35 +14,6 @@ A Category on BibItem with a few additional methods to enable and enhance its sc
 @implementation BibItem (Scripting)
 
 
-/*
- ssp: 2004-07-10 / 2004-08-03
- Returns the document containing self.
- This is done by running through all open documents as we have no back-reference.
-*/
-- (BibDocument*) document {
-	NSArray * oDs = [NSApp orderedDocuments];
-	BibDocument * doc;
-	int i;
-	
-	if ([oDs count] == 1) {
-		// Performance: this saves us a bit of looping through everything in case there is only a single document
-		return [oDs objectAtIndex:0];
-	}
-	else {
-		NSEnumerator * docEnum = [oDs objectEnumerator];
-		// run through all open documents and find the one containing self
-		while (doc = [docEnum nextObject]) {
-			// we really want identity here, isEqual isn't good enough (in case we just copied a publication from one document to another, say)
-			i = [[doc publications] indexOfObjectIdenticalTo:self];
-			if (i != NSNotFound) {
-				return doc;
-			}
-		}
-		return nil;	
-	}
-}
-
-
 /* 
  ssp 2004-07-10
  Returns a path to the BibItem for Apple Script
