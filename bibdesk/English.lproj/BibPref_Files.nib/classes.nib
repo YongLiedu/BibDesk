@@ -1,20 +1,10 @@
 {
     IBClasses = (
         {
-            ACTIONS = {
-                setDefaultBibTeXParser = id; 
-                setDefaultStringEncoding = id; 
-                setLoadFilesInBackground = id; 
-                toggleShowWarnings = id; 
-            }; 
+            ACTIONS = {setDefaultStringEncoding = id; toggleShowWarnings = id; }; 
             CLASS = "BibPref_Files"; 
             LANGUAGE = ObjC; 
-            OUTLETS = {
-                backgroundLoadCheckbox = NSButton; 
-                defaultParserRadio = NSMatrix; 
-                encodingPopUp = NSPopUpButton; 
-                showErrorsCheckButton = NSButton; 
-            }; 
+            OUTLETS = {encodingPopUp = NSPopUpButton; showErrorsCheckButton = NSButton; }; 
             SUPERCLASS = OAPreferenceClient; 
         }, 
         {

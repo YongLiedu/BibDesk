@@ -47,29 +47,6 @@
                       frontMatter:(NSMutableString *)frontMatter
                          filePath:(NSString *)filePath
                  document:(BibDocument *)aDocument;
-    
-/*!
-    @method     itemsFromString:error:frontMatter:filePath:document:
-    @abstract   Convenience method that returns an array of BibItems from the input string, using NSString and NSScanner methods to parse the BibTeX.  Ad-hoc.
-    @discussion (comprehensive description)
-    @param      string (description)
-    @param      hadProblems (description)
-    @param      frontMatter (description)
-    @param      filePath (description)
-    @param      document (description)
-    @result     (description)
-*/
-+ (NSMutableArray *)itemsFromString:(NSString *)string error:(BOOL *)hadProblems frontMatter:(NSMutableString *)frontMatter filePath:(NSString *)filePath document:(BibDocument *)document;
-
-    /*!
-    @method     itemsFromString:error:
-    @abstract   Convenience method that returns an array of BibItems from the input string, using NSString and NSScanner methods; this method should be used for pasteboard ops.
-    @discussion (comprehensive description)
-    @param      string (description)
-    @param      hadProblems (description)
-    @result     (description)
-*/
-+ (NSMutableArray *)itemsFromString:(NSString *)string error:(BOOL *)hadProblems;
 
 /*!
     @method     itemsFromData:error:frontMatter:filePath:document:
@@ -83,16 +60,6 @@
     @result     (description)
 */
 - (NSMutableArray *)itemsFromData:(NSData *)inData error:(BOOL *)hadProblems frontMatter:(NSMutableString *)frontMatter filePath:(NSString *)filePath document:(BibDocument *)document;
-
-/*!
-    @method     parseItemsFromString:addToDocument:frontMatter:
-    @abstract   This method is called by the document, in order to parse a BibTeX file from another thread.
-    @discussion (comprehensive description)
-    @param      fullString (description)
-    @param      document (description)
-    @param      frontMatter (description)
-*/
-- (void)parseItemsFromString:(NSString *)fullString addToDocument:(BibDocument *)document frontMatter:(NSMutableString *)frontMatter;
 
 /*!
     @method     document

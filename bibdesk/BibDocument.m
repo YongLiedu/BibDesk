@@ -314,13 +314,6 @@ NSString *BDSKBibItemLocalDragPboardType = @"edu.ucsd.cs.mmccrack.bibdesk: Local
 	[self addPublication:pub lastRequest:YES];
 }
 
-- (void)addPublicationInBackground:(BibItem *)pub{
-    [publications addObject:pub usingLock:pubsLock];
-    [shownPublications addObject:pub usingLock:pubsLock];
-    [pub setDocument:self];
-    [self updateChangeCount:NSChangeCleared]; // this is only used for opening files, not for adding pubs
-}
-
 - (void)addPublication:(BibItem *)pub lastRequest:(BOOL)last{
 	NSUndoManager *undoManager = [self undoManager];
 	[[undoManager prepareWithInvocationTarget:self] removePublication:pub];
@@ -925,34 +918,11 @@ stringByAppendingPathComponent:@"BibDesk"]; */
 //    NSDate *start = [NSDate date];
 //    NSLog(@"start: %@", [start description]);
         
-    if([[OFPreferenceWrapper sharedPreferenceWrapper] boolForKey:BDSKUseUnicodeBibTeXParser]){
-        NSString *fileContentString = [[[NSString alloc] initWithData:data encoding:encoding] autorelease];
-                
-        if(encoding == NSASCIIStringEncoding) // use bdskconverter always
-            fileContentString = [[BDSKConverter sharedConverter] stringByDeTeXifyingString:fileContentString];
-        
-        NSAssert( fileContentString != nil, @"File contents returned a nil string, probably due to incorrect encoding choice.");
-                
-        // NSLog(@"*** WARNING: using new parser.  To disable, use `defaults write edu.ucsd.cs.mmccrack.bibdesk \"Use Unicode BibTeX Parser\" 'NO'` and relaunch BibDesk.");
-
-        if([[OFPreferenceWrapper sharedPreferenceWrapper] boolForKey:BDSKUseThreadedFileLoading]){
-            [self startParseUpdateTimer]; // start on the main thread
-            [NSThread detachNewThreadSelector:@selector(parseInBackground:)
-                                     toTarget:self
-                                   withObject:fileContentString];
-            return YES;
-        } else {
-            newPubs = [BibTeXParser itemsFromString:fileContentString error:&hadProblems frontMatter:frontMatter filePath:filePath document:self];
-        }
-
-    } else {
-        newPubs = [BibTeXParser itemsFromData:data
-                                        error:&hadProblems
-                                  frontMatter:frontMatter
-                                     filePath:filePath
-                                     document:self];
-    }
-
+    newPubs = [BibTeXParser itemsFromData:data
+                                    error:&hadProblems
+                              frontMatter:frontMatter
+                                 filePath:filePath
+                                 document:self];
 
 //    NSLog(@"end %@ elapsed: %f", [[NSDate date] description], [start timeIntervalSinceNow]);
 
@@ -990,28 +960,6 @@ stringByAppendingPathComponent:@"BibDesk"]; */
 	[shownPublications setArray:publications];
     [self refreshAuthors];
     return YES;
-}
-
-- (void)parseInBackground:(NSString *)fileContents{
-    NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
-    BibTeXParser *parser = [[BibTeXParser alloc] init];
-    [parser parseItemsFromString:fileContents addToDocument:self frontMatter:frontMatter];
-    [parser release];
-    [pool release];
-}    
-
-- (void)startParseUpdateTimer{ // schedule this on the main run loop to update the UI at regular intervals
-    // NSLog(@"%@", NSStringFromSelector(_cmd) );
-    parseUpdateTimer = [NSTimer scheduledTimerWithTimeInterval:0.1
-                                               target:self 
-                                             selector:@selector(updateUI)
-                                             userInfo:nil
-                                              repeats:YES];
-    [parseUpdateTimer fire];
-}
-
-- (void)stopParseUpdateTimer{ // sent by the parser when it's done with a file
-    [parseUpdateTimer invalidate];
 }
 
 - (IBAction)newPub:(id)sender{
@@ -2142,15 +2090,7 @@ int generalBibItemCompareFunc(id item1, id item2, void *context){
     if(isRIS){
         newPubs = [PubMedParser itemsFromString:pbString error:&hadProblems];
     } else {
-    
-        if([[OFPreferenceWrapper sharedPreferenceWrapper] boolForKey:BDSKUseUnicodeBibTeXParser]){
-            NSString *aString = [[NSString alloc] initWithData:data encoding:[[OFPreferenceWrapper sharedPreferenceWrapper] integerForKey:BDSKDefaultStringEncoding]];
-            if(aString == nil) // bad encoding choice; fall back to latin1
-                aString = [[NSString alloc] initWithData:data encoding:NSISOLatin1StringEncoding];
-            newPubs = [BibTeXParser itemsFromString:aString error:&hadProblems];
-        } else { // using libbtparse
-            newPubs = [BibTeXParser itemsFromData:data error:&hadProblems];
-        }
+        newPubs = [BibTeXParser itemsFromData:data error:&hadProblems];
     }
     
     [pbString release]; // we're done with this now

@@ -108,6 +108,8 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
     if([[OFPreferenceWrapper sharedPreferenceWrapper] objectForKey:@"NSToolbar Configuration OAPreferences"] != nil){
 	[[OFPreferenceWrapper sharedPreferenceWrapper] removeObjectForKey:@"NSToolbar Configuration OAPreferences"];
     }
+    // removed this functionality in 0.99
+    [[OFPreferenceWrapper sharedPreferenceWrapper] setBool:NO forKey:BDSKUseUnicodeBibTeXParser];
 }
 
 - (id)init
@@ -691,17 +693,6 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
     NSFileManager *dfm = [NSFileManager defaultManager];
     
     [self openEditWindowWithFile:fileName];
-    
-    
-    NSRange errorRange;
-    
-    if([errObj valueForKey:@"lineNumber"] == [NSNull null]){
-        errorRange = [[errObj valueForKey:@"errorRange"] rangeValue];
-        [sourceEditTextView setSelectedRange:errorRange];
-        [sourceEditTextView scrollRangeToVisible:errorRange];
-        return;
-    }
-    
     
     if ([dfm fileExistsAtPath:fileName]) {
         [sourceEditTextView selectLine:[lineNumber intValue]];

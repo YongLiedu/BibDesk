@@ -101,14 +101,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
             draggedPubs = [PubMedParser itemsFromString:pbString error:&hadProblems];
         } else {
             // must be BibTeX
-            if([[OFPreferenceWrapper sharedPreferenceWrapper] boolForKey:BDSKUseUnicodeBibTeXParser]){
-                NSString *aString = [[NSString alloc] initWithData:pbData encoding:[[OFPreferenceWrapper sharedPreferenceWrapper] integerForKey:BDSKDefaultStringEncoding]];
-                if(aString == nil) // bad encoding choice; fall back to latin1
-                    aString = [[NSString alloc] initWithData:pbData encoding:NSISOLatin1StringEncoding];
-                draggedPubs = [BibTeXParser itemsFromString:aString error:&hadProblems];
-            } else { // using libbtparse
-                draggedPubs = [BibTeXParser itemsFromData:pbData error:&hadProblems];
-            }
+            draggedPubs = [BibTeXParser itemsFromData:pbData error:&hadProblems];
         }
         
         if(hadProblems) return NO;

@@ -12,16 +12,12 @@
 
 
 @interface BibPref_Files : OAPreferenceClient {
-    IBOutlet NSPopUpButton *encodingPopUp;
-    IBOutlet NSMatrix *defaultParserRadio;
-    IBOutlet NSButton *backgroundLoadCheckbox;
     BDSKStringEncodingManager *encodingManager;
     IBOutlet NSButton *showErrorsCheckButton;
+    IBOutlet NSPopUpButton *encodingPopUp;
 }
 
 - (IBAction)setDefaultStringEncoding:(id)sender;
-- (IBAction)setDefaultBibTeXParser:(id)sender;
-- (IBAction)setLoadFilesInBackground:(id)sender;
 
 - (IBAction)toggleShowWarnings:(id)sender;
 
