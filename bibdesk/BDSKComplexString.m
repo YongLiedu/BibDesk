@@ -306,7 +306,11 @@ static NSDictionary *globalMacroDefs;
 }
 
 - (void)setMacroResolver:(id <BDSKMacroResolver>)newMacroResolver{
-	macroResolver = newMacroResolver;
+	if (newMacroResolver != macroResolver) {
+		macroResolver = newMacroResolver;
+		if (isComplex)
+			expandedValue = [self expandedValueFromArray:nodes];
+	}
 }
 
 // Returns the bibtex value of the string.
