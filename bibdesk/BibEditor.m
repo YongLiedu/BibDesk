@@ -489,7 +489,10 @@ NSString *BDSKUrlString = @"Url";
                 contextInfo:(void *)contextInfo{
     if(returnCode == 0){
         if(![[[theBib pubFields] allKeys] containsObject:[newFieldName stringValue]]){
-            [theBib setField:[newFieldName stringValue] toValue:@""];
+	    NSString *name = [newFieldName stringValue];
+	    NSString *msg = [NSString stringWithFormat:@"%@ %@",
+		NSLocalizedString(@"Add data for field:", @""), name];
+            [theBib setField:name toValue:msg];
             [self setupForm];
             [self makeKeyField:[newFieldName stringValue]];
             [self noteChange];
