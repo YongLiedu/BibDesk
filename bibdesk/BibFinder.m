@@ -362,11 +362,11 @@ static BibFinder *_sharedFinder = nil;
             if(sep) [s appendString:startCite];
             [s appendString:[[foundBibs objectAtIndex:[i intValue]] citeKey]];
             if(sep) [s appendString:@"}"];
-            else [s appendString:@", "];
+            else [s appendString:@","];
         }
     }
     if([[sud objectForKey:BDSKDragCopyKey] intValue] == 1){
-        if(!sep)[s replaceCharactersInRange:[s rangeOfString:@", " options:NSBackwardsSearch] withString:@"}"];
+        if(!sep)[s replaceCharactersInRange:[s rangeOfString:@"," options:NSBackwardsSearch] withString:@"}"];
     }
     if(([[sud objectForKey:BDSKDragCopyKey] intValue] == 0) ||
        ([[sud objectForKey:BDSKDragCopyKey] intValue] == 1)){
