@@ -157,7 +157,8 @@ NSString*   LocalDragPasteboardName = @"edu.ucsd.cs.mmccrack.bibdesk: Local Publ
 	showingCustomCiteDrawer = NO;
 	
     // finally, make sure the font is correct initially:
-    [self handleFontChangedNotification:nil];
+	[self setTableFont];
+	[tableView reloadData];
 	
 	
 	/* ssp: 2004-08-02
@@ -353,15 +354,16 @@ Handle Notifications by the popup button to update its icon and its menu before 
 
 - (void)windowControllerDidLoadNib:(NSWindowController *) aController
 {
+//	NSLog(@"windowcontroller didloadnib");
     [super windowControllerDidLoadNib:aController];
     [self setupToolbar];
     [[aController window] setFrameAutosaveName:[self displayName]];
     [documentWindow makeFirstResponder:tableView];	
     [self setupTableColumns]; // calling it here mostly just makes sure that the menu is set up.
+	[self setTableFont];
 }
 
 - (void)windowDidBecomeMain:(NSNotification *)aNotification{
-    ////NSLog(@"win did become main");
     [self updateUI]; // mostly because the BDSKPreviewer is a singleton class.
 }
 
@@ -1518,7 +1520,8 @@ int generalBibItemCompareFunc(id item1, id item2, void *context){
 - (void)updateUI{
 
 	[self refreshAuthors];
-    [self handleFontChangedNotification:nil]; // calls reloadData.
+    [self setTableFont];
+	[tableView reloadData];
 
 	int shownPubsCount = [shownPublications count];
 	int totalPubsCount = [publications count];
@@ -1810,16 +1813,17 @@ int generalBibItemCompareFunc(id item1, id item2, void *context){
 }
 
 - (void)handleFontChangedNotification:(NSNotification *)notification{
+	[self setTableFont];
+}
+
+- (void)setTableFont{
     // The font we're using now
     NSFont *font = [NSFont fontWithName:[[OFPreferenceWrapper sharedPreferenceWrapper] objectForKey:BDSKTableViewFontKey]
                                    size:
         [[OFPreferenceWrapper sharedPreferenceWrapper] floatForKey:BDSKTableViewFontSizeKey]];
-    
-    // adjust the height of the rows: (sometimes this isn't quite right. why?)
-    // //NSLog(@"default line height is %f, pointsize is %f", [font defaultLineHeightForFont], [font pointSize]);
-    [tableView setRowHeight:[font defaultLineHeightForFont]+2];
-    [tableView setFont:font];
-    [tableView reloadData];
+
+	[tableView setFont:font];
+	[tableView tile];
 }
 
 - (void)highlightBib:(BibItem *)bib{

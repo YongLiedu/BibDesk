@@ -466,18 +466,27 @@ int generalBibItemCompareFunc(id item1, id item2, void *context);
 
 /*!
     @method handleFontChangedNotification
-    @abstract sets the font of the tableView.
-    @discussion 
+    @abstract responds to font change notification by calling setTableFont
+    @discussion
     
 */
 - (void)handleFontChangedNotification:(NSNotification *)notification;
-	
+
+
 	/*!
-    @method handleBibItemChangedNotification
-	 @abstract responds to changing bib data
+    @method setTableFont
+	 @abstract sets the font of the tableView.
 	 @discussion 
 	 
 	 */
+- (void)setTableFont;
+
+	
+/*!
+    @method handleBibItemChangedNotification
+	 @abstract responds to changing bib data
+	 @discussion 
+*/
 - (void)handleBibItemChangedNotification:(NSNotification *)notification;
 
 - (int)numberOfSelectedPubs;
