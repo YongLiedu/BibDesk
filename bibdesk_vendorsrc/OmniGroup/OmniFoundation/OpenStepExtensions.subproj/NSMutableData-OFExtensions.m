@@ -10,7 +10,7 @@
 #import <Foundation/Foundation.h>
 #import <OmniBase/OmniBase.h>
 
-RCS_ID("$Header: /Network/Source/CVS/OmniGroup/Frameworks/OmniFoundation/OpenStepExtensions.subproj/NSMutableData-OFExtensions.m,v 1.13 2004/02/10 04:07:45 kc Exp $")
+RCS_ID("$Header: /Source/CVS/OmniGroup/Frameworks/OmniFoundation/OpenStepExtensions.subproj/NSMutableData-OFExtensions.m,v 1.13 2004/02/10 04:07:45 kc Exp $")
 
 @implementation NSMutableData (OFExtensions)
 

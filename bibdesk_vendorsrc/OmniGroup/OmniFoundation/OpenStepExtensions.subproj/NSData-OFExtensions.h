@@ -5,9 +5,10 @@
 // distributed with this project and can also be found at
 // <http://www.omnigroup.com/developer/sourcecode/sourcelicense/>.
 //
-// $Header: /Network/Source/CVS/OmniGroup/Frameworks/OmniFoundation/OpenStepExtensions.subproj/NSData-OFExtensions.h,v 1.26 2004/02/10 04:07:45 kc Exp $
+// $Header: /Source/CVS/OmniGroup/Frameworks/OmniFoundation/OpenStepExtensions.subproj/NSData-OFExtensions.h,v 1.28.2.1 2004/07/15 17:13:08 kc Exp $
 
 #import <Foundation/NSData.h>
+#import <stdio.h>
 
 typedef struct OFQuotedPrintableMapping {
     char map[256];   // 256 entries, one for each octet value
@@ -46,7 +47,7 @@ typedef struct OFQuotedPrintableMapping {
     // Returns the index of the first non-zero byte in the receiver, or NSNotFound if if all the bytes in the data are zero.
 
 - (NSData *)sha1Signature;
-    // Uses the SHA-1 algorithm to compute a signature for the receiver.  Obviously, due to the dynamic nature of ObjC, and due to the fact that users will get access to the binary, this cannot be depended upon as an absolutely secure licensing mechanism, but this will prevent users from accidentally breaking the licensing agreement, which is really all we can hope for.
+    // Uses the SHA-1 algorithm to compute a signature for the receiver.
 
 - (NSData *)md5Signature;
     // Computes an MD5 digest of the receiver and returns it. (Derived from the RSA Data Security, Inc. MD5 Message-Digest Algorithm.)
@@ -62,5 +63,8 @@ typedef struct OFQuotedPrintableMapping {
 
 - propertyList;
     // a cover for the CoreFoundation function call
+
+// stdio support
+- (FILE *)openReadOnlyStandardIOFile;
 
 @end

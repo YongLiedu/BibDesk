@@ -12,6 +12,8 @@
 #import <OmniBase/OmniBase.h>
 
 #import <OmniFoundation/NSFileManager-OFExtensions.h>
+#import <OmniFoundation/NSMutableData-OFExtensions.h>
+#import <OmniFoundation/NSObject-OFExtensions.h>
 #import <OmniFoundation/NSString-OFExtensions.h>
 #import <OmniFoundation/OFDataBuffer.h>
 #import <OmniFoundation/OFRandom.h>
@@ -19,7 +21,7 @@
 #import "sha1.h"
 #import <OmniFoundation/md5.h>
 
-RCS_ID("$Header: /Network/Source/CVS/OmniGroup/Frameworks/OmniFoundation/OpenStepExtensions.subproj/NSData-OFExtensions.m,v 1.49 2004/02/10 04:07:45 kc Exp $")
+RCS_ID("$Header: /Source/CVS/OmniGroup/Frameworks/OmniFoundation/OpenStepExtensions.subproj/NSData-OFExtensions.m,v 1.52.2.1 2004/07/15 17:13:08 kc Exp $")
 
 @implementation NSData (OFExtensions)
 
@@ -837,16 +839,20 @@ static inline unichar hex(int i)
     if (myLength < otherLength) // This test is a nice shortcut, but it's also necessary to avoid crashing: zero-length CFDatas will sometimes(?) return NULL for their bytes pointer, and the resulting pointer arithmetic can underflow.
         return NO;
     selfEnd = selfRestart + (myLength - otherLength);
+
+    /* A note on the goto in the following code, for the structure-obsessed among us: it could be replaced with a flag and a 'break', yes, but since that code path is the most common one (and gcc3 doesn't optimize out control-flow flags) it seems worth the potential disapprobation from the use of reviled goto. */
     
     while(selfRestart <= selfEnd) {
         selfPtr = selfRestart;
         ptr = ptrRestart;
         while(ptr < end) {
-            if (*ptr++ != *selfPtr++) 
-                break;
+            if (*ptr++ != *selfPtr++)
+                goto notThisOffset;
         }
-        if (ptr == end)
-            return YES;
+
+        return YES;
+
+      notThisOffset:
         selfRestart++;
     }
     return NO;
@@ -908,5 +914,110 @@ static inline unichar hex(int i)
 
     return [result autorelease];
 }
+
+/*" Creates a stdio FILE pointer for reading from the receiver via the funopen() BSD facility.  The receiver is automatically retained until the returned FILE is closed. "*/
+
+// Same context used for read and write.
+typedef struct _NSDataFileContext {
+    NSData *data;
+    void   *bytes;
+    size_t  length;
+    size_t  position;
+} NSDataFileContext;
+
+static int _NSData_readfn(void *_ctx, char *buf, int nbytes)
+{
+    //fprintf(stderr, " read(ctx:%p buf:%p nbytes:%d)\n", _ctx, buf, nbytes);
+    NSDataFileContext *ctx = (NSDataFileContext *)_ctx;
+
+    nbytes = MIN(nbytes, ctx->length - ctx->position);
+    memcpy(buf, ctx->bytes + ctx->position, nbytes);
+    ctx->position += nbytes;
+    return nbytes;
+}
+
+static int _NSData_writefn(void *_ctx, const char *buf, int nbytes)
+{
+    //fprintf(stderr, "write(ctx:%p buf:%p nbytes:%d)\n", _ctx, buf, nbytes);
+    NSDataFileContext *ctx = (NSDataFileContext *)_ctx;
+
+    // Might be in the middle of a the file if a seek has been done so we can't just append naively!
+    if (ctx->position + nbytes > ctx->length) {
+        ctx->length = ctx->position + nbytes;
+        [(NSMutableData *)ctx->data setLength:ctx->length];
+        ctx->bytes = [(NSMutableData *)ctx->data mutableBytes]; // Might have moved after size change
+    }
+
+    memcpy(ctx->bytes + ctx->position, buf, nbytes);
+    ctx->position += nbytes;
+    return nbytes;
+}
+
+static fpos_t _NSData_seekfn(void *_ctx, off_t offset, int whence)
+{
+    //fprintf(stderr, " seek(ctx:%p off:%qd whence:%d)\n", _ctx, offset, whence);
+    NSDataFileContext *ctx = (NSDataFileContext *)_ctx;
+
+    size_t reference;
+    if (whence == SEEK_SET)
+        reference = 0;
+    else if (whence == SEEK_CUR)
+        reference = ctx->position;
+    else if (whence == SEEK_END)
+        reference = ctx->length;
+    else
+        return -1;
+
+    if (reference + offset >= 0 && reference + offset <= ctx->length) {
+        ctx->position = reference + offset;
+        return ctx->position;
+    }
+    return -1;
+}
+
+static int _NSData_closefn(void *_ctx)
+{
+    //fprintf(stderr, "close(ctx:%p)\n", _ctx);
+    NSDataFileContext *ctx = (NSDataFileContext *)_ctx;
+    [ctx->data release];
+    free(ctx);
     
+    return 0;
+}
+
+
+- (FILE *)openReadOnlyStandardIOFile;
+{
+    NSDataFileContext *ctx = calloc(1, sizeof(NSDataFileContext));
+    ctx->data = [self retain];
+    ctx->bytes = (void *)[self bytes];
+    ctx->length = [self length];
+    //fprintf(stderr, "open read -> ctx:%p\n", ctx);
+
+    FILE *f = funopen(ctx, _NSData_readfn, NULL/*writefn*/, _NSData_seekfn, _NSData_closefn);
+    if (f == NULL)
+        [self release]; // Don't leak ourselves if funopen fails
+    return f;
+}
+
+
+@end
+
+
+@implementation NSMutableData (OFIOExtensions)
+
+- (FILE *)openReadWriteStandardIOFile;
+{
+    NSDataFileContext *ctx = calloc(1, sizeof(NSDataFileContext));
+    ctx->data   = [self retain];
+    ctx->bytes  = [self mutableBytes];
+    ctx->length = [self length];
+    //fprintf(stderr, "open write -> ctx:%p\n", ctx);
+    
+    FILE *f = funopen(ctx, _NSData_readfn, _NSData_writefn, _NSData_seekfn, _NSData_closefn);
+    if (f == NULL)
+        [self release]; // Don't leak ourselves if funopen fails
+    return f;
+}
+
 @end

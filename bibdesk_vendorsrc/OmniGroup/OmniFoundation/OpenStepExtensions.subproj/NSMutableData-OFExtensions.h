@@ -5,9 +5,10 @@
 // distributed with this project and can also be found at
 // <http://www.omnigroup.com/developer/sourcecode/sourcelicense/>.
 //
-// $Header: /Network/Source/CVS/OmniGroup/Frameworks/OmniFoundation/OpenStepExtensions.subproj/NSMutableData-OFExtensions.h,v 1.10 2004/02/10 04:07:45 kc Exp $
+// $Header: /Source/CVS/OmniGroup/Frameworks/OmniFoundation/OpenStepExtensions.subproj/NSMutableData-OFExtensions.h,v 1.11 2004/04/30 17:49:29 bungi Exp $
 
 #import <Foundation/NSData.h>
+#import <stdio.h>
 
 @interface NSMutableData (OFExtensions)
 
@@ -36,4 +37,9 @@ PRECONDITION(aData);
 PRECONDITION([self length] == [aData length]);
 */
 
+@end
+
+
+@interface NSMutableData (OFIOExtensions)
+- (FILE *)openReadWriteStandardIOFile;
 @end
