@@ -5,6 +5,7 @@
         {CLASS = BDSKDragTableView; LANGUAGE = ObjC; SUPERCLASS = NSTableView; }, 
         {
             ACTIONS = {
+                clearQuickSearch = id; 
                 contextualMenuAddTableColumn = id; 
                 contextualMenuSelectTableColumn = id; 
                 copyAsBibTex = id; 
@@ -45,11 +46,14 @@
                 outlineBox = NSView; 
                 outlineView = NSOutlineView; 
                 previewField = NSTextView; 
+                quickSearchButton = NSPopUpButton; 
+                quickSearchClearButton = NSButton; 
                 rssExportAccessoryView = NSView; 
                 rssExportForm = NSForm; 
                 rssExportTextField = NSTextField; 
-                searchField = NSSearchField; 
+                searchField = id; 
                 searchFieldBox = NSBox; 
+                searchFieldTextField = NSTextField; 
                 sortKeyButton = NSPopUpButton; 
                 sortKeyView = NSView; 
                 splitView = OASplitView; 
@@ -58,6 +62,7 @@
             }; 
             SUPERCLASS = NSDocument; 
         }, 
+        {CLASS = MyTextField; LANGUAGE = ObjC; SUPERCLASS = NSTextField; }, 
         {CLASS = OASplitView; LANGUAGE = ObjC; SUPERCLASS = NSSplitView; }
     ); 
     IBVersion = 1; 
