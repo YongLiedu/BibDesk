@@ -906,7 +906,7 @@ void _setupFonts(){
             
             if([key isEqualToString:BDSKDateCreatedString] || 
                [key isEqualToString:BDSKDateModifiedString]){
-                NSCalendarDate *date = [NSCalendarDate dateWithString:[pubFields objectForKey:key]];
+                NSCalendarDate *date = [NSCalendarDate dateWithNaturalLanguageString:[pubFields objectForKey:key]];
 
                 [aStr appendAttributedString:[[[NSAttributedString alloc] initWithString:[NSString stringWithFormat:@"%@\n",[dateFormatter stringForObjectValue:date]]
                                                                               attributes:bodyAttributes] autorelease]];
