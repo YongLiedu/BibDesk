@@ -389,7 +389,7 @@ NSString *BDSKUrlString = @"Url";
                     _pdfSnoopImage = [[NSImage alloc] initWithContentsOfFile:lurl];
                 }
 
-                NSLog(@"setting snoop to %@ from file %@", _pdfSnoopImage, lurl);
+                //NSLog(@"setting snoop to %@ from file %@", _pdfSnoopImage, lurl);
 
                 if(_pdfSnoopImage){
                     // [documentSnoopImageView setImage:_pdfSnoopImage];
@@ -446,8 +446,13 @@ NSString *BDSKUrlString = @"Url";
 		NSString *fileURLString = [[NSURL fileURLWithPath:[[oPanel filename] stringByStandardizingPath]] absoluteString];
         [theBib setField:@"Local-Url" toValue:fileURLString];
 		if([[OFPreferenceWrapper sharedPreferenceWrapper] boolForKey:BDSKFilePapersAutomaticallyKey]){
-			[[BibFiler sharedFiler] filePapers:[NSArray arrayWithObject:theBib]
-								  fromDocument:(BibDocument *)theDocument];
+			[[BibFiler sharedFiler] file:YES 
+								  papers:[NSArray arrayWithObject:theBib]
+							fromDocument:(BibDocument *)theDocument];
+			NSRunAlertPanel(NSLocalizedString(@"Paper Filed",@""),
+							NSLocalizedString(@"The paper %@ was moved to your Papers Directory.",@""),
+							NSLocalizedString(@"OK",@"OK"),
+							nil, nil, fileURLString);
 		}
 		
 		[self setupForm];
@@ -731,7 +736,6 @@ NSString *BDSKUrlString = @"Url";
 	BibPersonController *pc = [person personController];
 	if(pc == nil){
 		pc = [[BibPersonController alloc] initWithPerson:person];
-		NSLog(@"editing person [%@]", person);
 	}
 	[pc show];
 }
