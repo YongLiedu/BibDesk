@@ -20,19 +20,26 @@ A Category on BibItem with a few additional methods to enable and enhance its sc
  This is done by running through all open documents as we have no back-reference.
 */
 - (BibDocument*) document {
-	NSEnumerator * docEnum = [[NSApp orderedDocuments] objectEnumerator];
+	NSArray * oDs = [NSApp orderedDocuments];
 	BibDocument * doc;
 	int i;
 	
-	// run through all open documents and find the one containing self
-	while (doc = [docEnum nextObject]) {
-		// we really want identity here, isEqual isn't good enough (in case we just copied a publication from one document to another, say)
-		i = [[doc publications] indexOfObjectIdenticalTo:self];
-		if (i != NSNotFound) {
-			return doc;
-		}
+	if ([oDs count] == 1) {
+		// Performance: this saves us a bit of looping through everything in case there is only a single document
+		return [oDs objectAtIndex:0];
 	}
-	return nil;	
+	else {
+		NSEnumerator * docEnum = [oDs objectEnumerator];
+		// run through all open documents and find the one containing self
+		while (doc = [docEnum nextObject]) {
+			// we really want identity here, isEqual isn't good enough (in case we just copied a publication from one document to another, say)
+			i = [[doc publications] indexOfObjectIdenticalTo:self];
+			if (i != NSNotFound) {
+				return doc;
+			}
+		}
+		return nil;	
+	}
 }
 
 
@@ -65,6 +72,37 @@ A Category on BibItem with a few additional methods to enable and enhance its sc
 - (NSMutableDictionary *)fields{
     return [self pubFields];
 }
+
+
+/* ssp: 2004-09-21
+Extra wrapping of the created and modified date methods to 
+- return some value when there is none
+- do some NSDate -> NSCalendarDate conversion
+*/
+
+- (NSDate*) ASDateCreated {
+	NSDate * d = [self dateCreated];
+	
+	if (!d) return [NSDate dateWithTimeIntervalSince1970:0];
+	else return d;
+}
+
+- (void) setASDateCreated:(NSDate*) newDate {
+	[self setDateCreated:[newDate dateWithCalendarFormat:nil timeZone:nil]];
+}
+
+- (NSDate*) ASDateModified {
+	NSDate * d = [self dateModified];
+	
+	if (!d) return [NSDate dateWithTimeIntervalSince1970:0];
+	else return d;
+}
+
+- (void) setASDateModified:(NSDate*) newDate {
+	[self setDateModified:[newDate dateWithCalendarFormat:nil timeZone:nil]];
+}
+
+
 
 
 

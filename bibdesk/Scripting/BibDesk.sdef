@@ -122,6 +122,12 @@ will translate this file into the necessary scriptSuite and scriptTerminology fi
 					<property name="publication date" code="pdat" type="date" description="Date of publication.">
 						<cocoa method="date"/>
 					</property>  
+					<property name="added date" code="adat" type="date" description="Date on which the publication's record was added to the bibliography.">
+						<cocoa method="ASDateCreated"/>
+					</property>
+					<property name="modified date" code="mdat" type="date" description="Date on which the publication's record was last modified in the bibliography.">
+						<cocoa method="ASDateModified"/>
+					</property>
 					<property name="fields" code="flds" type="record" description="Fields with data about the publication. These may vary from publication to publication.">
 						<cocoa method="fields"/>
 					</property>  

@@ -25,6 +25,11 @@
 
 - (void) setBibTeXString:(NSString*) btString;
 
+// wrapping original methods 
+- (NSDate*) ASDateCreated;
+- (void) setASDateCreated:(NSDate*) newDate;
+- (NSDate*) ASDateModified;
+- (void) setASDateModified:(NSDate*) newDate;
 
 // more (pseudo) accessors for key-value coding
 - (NSString*) remoteURL;
