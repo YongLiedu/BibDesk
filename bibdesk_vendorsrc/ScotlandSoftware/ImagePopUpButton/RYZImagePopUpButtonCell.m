@@ -265,8 +265,9 @@
 		if(shouldSendAction){
 			NSMenuItem *selectedItem = [self selectedItem];
 			[[NSApplication sharedApplication] sendAction: [selectedItem action]  
-													   to: [selectedItem target]
-													 from: selectedItem];
+								   to: [selectedItem target]
+								 from: selectedItem];
+			[NSEvent stopPeriodicEvents];
 		}
     }
     
