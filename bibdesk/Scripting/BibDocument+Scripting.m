@@ -14,16 +14,23 @@ Category on BibDocument to implement a few additional functions needed for scrip
 */
 @implementation BibDocument (Scripting)
 
+/* ssp: 2004-07-22
+Accessor to get the current state of the filter field.
+*/
+-(NSString*) filterField {
+	return [[[searchField stringValue] copy] autorelease];
+}
+
 
 /* ssp: 2004-04-03
 Sets the filter field to a specified string.
 Have to make it firstResponder first as otherwise it doesn't update (show clear cell) corectly.
 */
-- (void)setSearchField:(NSString*) mySearchString {
+- (void)setFilterField:(NSString*) filterterm {
     NSResponder * oldFirstResponder = [documentWindow firstResponder];
     [documentWindow makeFirstResponder:searchField];
     
-    [searchField setObjectValue:mySearchString];
+    [searchField setObjectValue:filterterm];
     [self searchFieldAction:searchField];
     
     [documentWindow makeFirstResponder:oldFirstResponder];
@@ -31,10 +38,19 @@ Have to make it firstResponder first as otherwise it doesn't update (show clear 
 
 
 
+/* ssp: 2004-07-22
+Getting the displayed publications.
+*/
+- (NSArray*) displayedPublications {
+	return shownPublications;
+}
+
+
+
+
 /* ssp: 2004-07-11
 Getting and setting the selection of the table
 */
-
 - (NSArray*) selection {
 	// enumerator of row numbers	
 	NSEnumerator * myEnum = [self selectedPubEnumerator];
@@ -61,15 +77,19 @@ Getting and setting the selection of the table
 	// do the first one manually to deselect previous selection
 	aPub = [myEnum nextObject]; 
 	if (!aPub) return;
-	[self highlightBib:[shownPublications objectAtIndex:[aPub index]]];
+	[self highlightBib:[publications objectAtIndex:[aPub index]]];
 	
 	while (aPub = [myEnum nextObject]){
-		[self highlightBib:[shownPublications objectAtIndex:[aPub index]] byExtendingSelection:YES];
+		
+		[self highlightBib:[publications objectAtIndex:[aPub index]] byExtendingSelection:YES];
 	}	
 }
 
 
 
+/* ssp
+Return styled text for a bibstring.
+*/
 - (NSTextStorage*) textStorageForBibString:(NSString*) bibString {
 	[PDFpreviewer PDFFromString:bibString];
     NSData * d = [PDFpreviewer rtfDataPreview];
@@ -87,17 +107,15 @@ ssp: 2004-07-11
  NSScriptCommand for the "bibliography for" command.
  This is sent to the BibDocument.
 */
-
-
 @implementation BibDeskBibliographyCommand
+
 
 /*
  ssp: 2004-07-11
  Takes an array of items as given by AppleScript in the formt of NSIndexSpecifiers, runs the items through BibTeX and RTF conversion and returns an attributed string.
  BDSKPreviewer being able to return NSAttributedStrings instead of NSData for RTF might save a few conversions. For the time being I implemented a little function in BibDocument+Scripting. This could be merged into Bibdocument.
  As the BibItem's 'text' attribute, somehow the styling is lost somewhere in the process. Hints?!
- */
-
+*/
 - (id) performDefaultImplementation {
     id param = [self directParameter];
 	
@@ -135,55 +153,71 @@ ssp: 2004-07-11
 
 
 /*
+ssp: 2004-07-22
+This command has been dropped in favour of simply having 'filter field' as a property of the document class.
+ 
+ 
  ssp: 2004-04-03
  NSScriptCommand for the "find" command.
-*/
+
 
 @implementation BibDeskFilterScriptCommand
 
-/*
- ssp: 2004-04-03
- Currently this goes through all documents and sets the filterField there.
- Ideally this could be done on a per-document basis is the command is sent to a single document and to all documents if it is sent to the application. But I can't figure out how to tell which object the command was sent to. [self evaluatedReceivers] gives null.
-*/
+ssp: 2004-04-03 first version
+ssp: 2004-07-21 improved version that will set all filter fields if sent to the application and, if sent to a document, just the filter field of that document. Also makes proper use of direct parameter and parameters now.
 
 - (id)performDefaultImplementation {
-    id param = [self directParameter];
-    NSString *input = nil;
-    if([param isKindOfClass:[NSString class]]) {
-        input = param;
-    } else if([param respondsToSelector:@selector(stringValue)]) {
-        input = [param stringValue];
-    } else {
-        return nil;
+	// NSLog(@"******** BibDeskFilterForCommand **********");
+	
+	// figure out parameters first
+	NSDictionary * params = [self evaluatedArguments];
+	if (!params) {
+		[self setScriptErrorNumber:NSRequiredArgumentsMissingScriptError]; 
+		// [self setScriptErrorString:NSLocalizedString(@"Please specify the string you want to search for. E.g.: \"search for search_term\".", @"Please specify the string you want to search for. E.g.: \"search for search_term\".", )];
+		// I don't think everybody would ever see the message about. ScriptEditor/AppleScript seem to catch those errors earlier on, seeing that the command is malformed and simply give a NSCannotCreateScriptCommand error message. Those are the error messages that sometimes make AppleScript nearly unusuable. But it seems we can't do any better :(
+		return nil;
+	}
+	
+	// the 'for' parameters gives the term to search for
+	NSString * searchterm = [params objectForKey:@"for"];
+	// make sure we get something
+	if (!searchterm) {
+		[self setScriptErrorNumber:NSRequiredArgumentsMissingScriptError]; 
+		return nil;
+	}
+	// make sure we get the right thing
+	if (![searchterm isKindOfClass:[NSString class]] ) {
+		[self setScriptErrorNumber:NSArgumentsWrongScriptError]; 
+		[self setScriptErrorString:NSLocalizedString(@"Please pass a string as a search term.", Please pass a string as a search term.)];
+		return nil;
 	}
 		
+	
+	// now let's do the work
+	id receiver = [self evaluatedReceivers];
+	// the receiver could be the application object or a document object
+	//	While [self description] will give 	"Receivers: (null)" in case we are dealing with the application object, this is wrong information and in fact receiver won't be nil in that case.
 
-	/*
-	// THIS DOESN'T WORK - Just do the same in every situation for the time being
-	// Whom are we sent to?
-	 
-		// Application -> apply to every document
-		// Document -> Just apply to that document
-	id receivers = [self evaluatedReceivers];
-	NSLog([receivers description]);
-	NSLog([[self receiversSpecifier] description]);
-		  NSLog([self description]);
-		  NSLog([[NSScriptCommand currentCommand] description]);
-	*/
-    if([input length] > 0) {
-        NSDocumentController * dc = [NSDocumentController sharedDocumentController];
-        NSArray * docs = [dc documents];
-        if ([docs count]) {
-            NSEnumerator * myEnum = [docs objectEnumerator];
-            id theDoc = nil;
-            while (theDoc = [myEnum nextObject]) {
-                if (theDoc) { 
-                    [theDoc setSearchField:input];
-                }
-            }
-        }
-    }
+	if ([receiver isKindOfClass:[NSApplication class]] ) {
+		// it's the application, so run through all the open documents
+		NSEnumerator * myEnum = [[NSApp orderedDocuments] objectEnumerator];
+		BibDocument * bd = nil;
+		while (bd = [myEnum nextObject]) {
+			[bd setFilterField:searchterm];
+		}
+	}
+	else if ([receiver isKindOfClass:[BibDocument class]]) {
+		// it's a document, just set the filter here
+		[(BibDocument*)receiver setFilterField:searchterm];
+	}
+	else {
+		// we were sent to something other than a document or the application
+		[self setScriptErrorNumber:NSReceiversCantHandleCommandScriptError];
+		[self setScriptErrorString:NSLocalizedString(@"The search command can only be sent to the application itself or to documents. Usually it is used in the form \"search for search_term\".", @"The search command can only be sent to the application itself or to documents. Usually it is used in the form \"search for search_term\".")];
+		return nil;
+	}
+	
     return nil;
 }
 @end
+*/

@@ -10,7 +10,12 @@
 #import "BibDocument.h"
 
 @interface BibDocument (Scripting) 
-- (void)setSearchField:(NSString*) mySearchString;
+
+- (NSString*) filterField;
+- (void)setFilterField:(NSString*) filterterm;
+
+- (NSArray*) displayedPublications;
+
 - (NSArray*) selection;
 - (void) setSelection: (NSArray*) newSelection;
 
@@ -23,6 +28,8 @@
 }
 @end
 
+/*
 @interface BibDeskFilterScriptCommand : NSScriptCommand {
 }
 @end
+*/
