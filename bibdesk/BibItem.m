@@ -930,7 +930,7 @@ _setupParagraphStyle()
 					[aStr appendAttributedString:[[[NSAttributedString alloc] initWithString:[NSString stringWithFormat:@"%@\n",authors]
 																				  attributes:bodyAttributes] autorelease]];
 				}else{
-					[aStr appendAttributedString:[[[NSAttributedString alloc] initWithString:[NSString stringWithFormat:@"%@\n",[[pubFields objectForKey:key] stringByCollapsingWhitespaceAndRemovingSurroundingWhitespace]]
+					[aStr appendAttributedString:[[[NSAttributedString alloc] initWithString:[NSString stringWithFormat:@"%@\n",[[[pubFields objectForKey:key] stringByRemovingCurlyBraces] stringByCollapsingWhitespaceAndRemovingSurroundingWhitespace]]
 																				  attributes:bodyAttributes] autorelease]];
 				}
 			}else{
@@ -965,7 +965,7 @@ _setupParagraphStyle()
                                                                               attributes:bodyAttributes] autorelease]];
 
             }else{
-                [aStr appendAttributedString:[[[NSAttributedString alloc] initWithString:[NSString stringWithFormat:@"%@\n",[[pubFields objectForKey:key] stringByCollapsingWhitespaceAndRemovingSurroundingWhitespace]]
+                [aStr appendAttributedString:[[[NSAttributedString alloc] initWithString:[NSString stringWithFormat:@"%@\n",[[[pubFields objectForKey:key] stringByRemovingCurlyBraces] stringByCollapsingWhitespaceAndRemovingSurroundingWhitespace]]
                                                                               attributes:bodyAttributes] autorelease]];
             }
 
