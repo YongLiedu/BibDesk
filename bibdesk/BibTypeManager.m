@@ -59,4 +59,8 @@ static BibTypeManager *_sharedInstance = nil;
 - (NSArray *)bibTypesForFileType:(NSString *)fileType{
     return [[_typeInfoDict objectForKey:@"TypesForFileType"] objectForKey:fileType];
 }
+
+- (NSString *)fieldNameForPubMedTag:(NSString *)tag{
+    return [[_typeInfoDict objectForKey:@"BibTeXFieldNamesForPubMedTags"] objectForKey:tag];
+}
 @end

@@ -91,7 +91,7 @@ static NSCharacterSet *FinalCharSet;
                                     withString:@"{\\newline}" options: NSCaseInsensitiveSearch
                                          range:NSMakeRange(0, [convertedSoFar length])];
     
-    return([convertedSoFar autorelease]);
+    return([convertedSoFar autorelease]); // was stringWithString:convertedSoFar - this should be faster by a lot
 }
 
 
@@ -101,8 +101,7 @@ static NSCharacterSet *FinalCharSet;
     NSString *tmpConv;
     NSString *tmpConvB;
     NSString *TEXString;
-    NSMutableString *convertedSoFar = [[[NSMutableString alloc] initWithCapacity:10] autorelease];
-
+    NSMutableString *convertedSoFar = [NSMutableString stringWithCapacity:10];
 
     // get the dictionary
     NSDictionary *conversions;
@@ -150,7 +149,6 @@ static NSCharacterSet *FinalCharSet;
                                     withString:@"\n" options: NSCaseInsensitiveSearch
                                          range:NSMakeRange(0, [convertedSoFar length])];
     
-
     return [convertedSoFar autorelease]; 
 }
 @end

@@ -125,6 +125,7 @@ extern NSString *BDSKUrlString;
 - (void)show;
 
 - (void)fixURLs;
+- (IBAction)chooseLocalURL:(id)sender;
 
 
 // ----------------------------------------------------------------------------------------

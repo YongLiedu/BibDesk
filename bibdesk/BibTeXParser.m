@@ -16,14 +16,12 @@
     return [BibTeXParser itemsFromData:inData error:hadProblems frontMatter:nil filePath:@"Paste/Drag"];
 }
 
-// @@todo: change to itemsFromData: and look for how to convert other fromString uses...
 + (NSMutableArray *)itemsFromData:(NSData *)inData
                               error:(BOOL *)hadProblems
                         frontMatter:(NSMutableString *)frontMatter
                            filePath:(NSString *)filePath{
     int ok = 1;
     long cidx = 0; // used to scan through buf for annotes.
-    char annoteDelim = '\0';
     int braceDepth = 0;
     
     BibItem *newBI = nil;

@@ -950,6 +950,7 @@ int generalBibItemCompareFunc(id item1, id item2, void *context){
 	NSString *keyPath = [NSString stringWithFormat:@"pubFields.%@", tableColumnName];
 	NSString *value1 = (NSString *)[item1 valueForKeyPath:keyPath];
 	NSString *value2 = (NSString *)[item2 valueForKeyPath:keyPath];
+	if (value1 == nil || value2 == nil) NSLog(@"a value is nil!");
 	return [value1 compare:value2];
 }
 

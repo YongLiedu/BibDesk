@@ -18,7 +18,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 
 static NSString* 	BibDocToolbarIdentifier 		= @"BibDesk Browser Toolbar Identifier";
 static NSString*	NewDocToolbarItemIdentifier 	= @"New Document Item Identifier";
-static NSString*	QuickSearchDocToolbarItemIdentifier 	= @"QuickSearch Document Item Identifier";
+static NSString*	SearchFieldDocToolbarItemIdentifier 	= @"NSSearchField Document Item Identifier";
 static NSString*	EditDocToolbarItemIdentifier 	= @"Edit Document Item Identifier";
 static NSString*	DelDocToolbarItemIdentifier 	= @"Del Document Item Identifier";
 static NSString*	PrvDocToolbarItemIdentifier 	= @"Show Preview  Item Identifier";
@@ -100,15 +100,11 @@ static void addToolbarItem(NSMutableDictionary *theDict,NSString *identifier,NSS
                    self, @selector(setImage:), [NSImage imageNamed: @"editdoc"],
                    @selector(editPubCmd:), NULL);
 
-    addToolbarItem(toolbarItems, QuickSearchDocToolbarItemIdentifier,
-                   NSLocalizedString(@"Substring Search",@""),
-                   NSLocalizedString(@"Substring Search",@""),
-                   NSLocalizedString(@"Search Publications",@""),
-                   self, @selector(setView:), quickSearchBox,
-                   NULL, NULL);
-    // from qstoolbaritem:
-    //[toolbarItem setMinSize:NSMakeSize(300, NSHeight([quickSearchBox frame]))];
-    //    [toolbarItem setMaxSize:NSMakeSize(400,NSHeight([quickSearchBox frame]))];
+	addToolbarItem(toolbarItems, SearchFieldDocToolbarItemIdentifier,
+				   NSLocalizedString(@"Search", @""),
+				   NSLocalizedString(@"Search", @""),
+				   NSLocalizedString(@"Search Publications", @""),
+				   self, @selector(setView:), searchFieldBox, NULL, NULL);
 
     addToolbarItem(toolbarItems, PrvDocToolbarItemIdentifier,
                    NSLocalizedString(@"Preview",@""),
@@ -177,22 +173,38 @@ static void addToolbarItem(NSMutableDictionary *theDict,NSString *identifier,NSS
 
 
 - (NSArray *) toolbarDefaultItemIdentifiers: (NSToolbar *) toolbar {
-    //SortByDocToolbarItemIdentifier, will be added when the outline view works.
-    return [NSArray arrayWithObjects:	NewDocToolbarItemIdentifier,  EditDocToolbarItemIdentifier, NSToolbarSeparatorItemIdentifier, QuickSearchDocToolbarItemIdentifier, DelDocToolbarItemIdentifier, ToggleCiteDrawerToolbarItemIdentifier, nil];
+    return [NSArray arrayWithObjects: NewDocToolbarItemIdentifier,
+		EditDocToolbarItemIdentifier, 
+		NSToolbarSeparatorItemIdentifier, 
+		SortByDocToolbarItemIdentifier,
+		SearchFieldDocToolbarItemIdentifier, 
+		DelDocToolbarItemIdentifier, 
+		ToggleCiteDrawerToolbarItemIdentifier, nil];
 }
 
 
 - (NSArray *) toolbarAllowedItemIdentifiers: (NSToolbar *) toolbar {
     //SortByDocToolbarItemIdentifier, will be added when the outline view works.
 
-    return [NSArray arrayWithObjects: SortByDocToolbarItemIdentifier, QuickSearchDocToolbarItemIdentifier, NewDocToolbarItemIdentifier, EditDocToolbarItemIdentifier, DelDocToolbarItemIdentifier,PrvDocToolbarItemIdentifier ,  NSToolbarFlexibleSpaceItemIdentifier, NSToolbarSpaceItemIdentifier, NSToolbarSeparatorItemIdentifier, NSToolbarCustomizeToolbarItemIdentifier, ToggleCiteDrawerToolbarItemIdentifier,nil];
+    return [NSArray arrayWithObjects: SortByDocToolbarItemIdentifier, 
+		SearchFieldDocToolbarItemIdentifier,
+		NewDocToolbarItemIdentifier, 
+		EditDocToolbarItemIdentifier, 
+		DelDocToolbarItemIdentifier,
+		PrvDocToolbarItemIdentifier , 
+		NSToolbarFlexibleSpaceItemIdentifier, 
+		NSToolbarSpaceItemIdentifier, 
+		NSToolbarSeparatorItemIdentifier, 
+		NSToolbarCustomizeToolbarItemIdentifier, 
+		ToggleCiteDrawerToolbarItemIdentifier,
+		NSToolbarPrintItemIdentifier,nil];
 }
 
 - (void) toolbarWillAddItem: (NSNotification *) notif {
     NSToolbarItem *addedItem = [[notif userInfo] objectForKey: @"item"];
 
-    if([[addedItem itemIdentifier] isEqualToString: QuickSearchDocToolbarItemIdentifier]) {
-        quickSearchToolbarItem = [addedItem retain];
+    if([[addedItem itemIdentifier] isEqualToString: SearchFieldDocToolbarItemIdentifier]) {
+		searchFieldToolbarItem = [addedItem retain];
     }else if([[addedItem itemIdentifier] isEqualToString: SortByDocToolbarItemIdentifier]){
 //        sortKeyButton = [addedItem retain]; //hmmmm....
  //       sortKeyToolbarItem = [addedItem retain]; //hmmmm....
@@ -212,14 +224,7 @@ static void addToolbarItem(NSMutableDictionary *theDict,NSString *identifier,NSS
     // key in the userInfo
     NSToolbarItem *removedItem = [[notif userInfo] objectForKey: @"item"];
 
-    if(quickSearchToolbarItem==removedItem){
-        // [quickSearchToolbarItem autorelease];
-        // quickSearchToolbarItem = nil;
-        [quickSearchBox retain];
-        [quickSearchButton retain];
-        [quickSearchTextField retain];
-        NSLog(@"removed quickSearchTextField");
-    }else if((id)removedItem == (id)sortKeyToolbarItem){
+if((id)removedItem == (id)sortKeyToolbarItem){
         NSLog(@"removed sortKeyToolbarItem - button's retaincount is %d", [sortKeyButton retainCount]);
        // [sortKeyToolbarItem autorelease];
        // sortKeyToolbarItem = nil;
@@ -232,7 +237,7 @@ static void addToolbarItem(NSMutableDictionary *theDict,NSString *identifier,NSS
     // (for example:  of the save items action)
     BOOL enable = YES;
     if ([[toolbarItem itemIdentifier] isEqualToString: NSToolbarPrintItemIdentifier]) {
-        enable = NO;
+        enable = YES;
     }else if([[toolbarItem itemIdentifier] isEqualToString: DelDocToolbarItemIdentifier]
              || [[toolbarItem itemIdentifier] isEqualToString: EditDocToolbarItemIdentifier]){
         if([self numberOfSelectedPubs] == 0) enable = NO;

@@ -140,4 +140,13 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
             return result;
 }
 
+- (NSString *)stringByConvertingHTMLLineBreaks{
+    NSMutableString *rv = [self mutableCopy];
+    [rv replaceOccurrencesOfString:@"\n" 
+                        withString:@"<br>"
+                           options:NSCaseInsensitiveSearch
+                             range:NSMakeRange(0,[self length])];
+    return [rv autorelease];
+}
+
 @end

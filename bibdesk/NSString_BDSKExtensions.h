@@ -21,5 +21,5 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 
 - (NSString *)uniquePathByAddingNumber;
 - (NSString *)xmlString;
-
+- (NSString *)stringByConvertingHTMLLineBreaks;
 @end

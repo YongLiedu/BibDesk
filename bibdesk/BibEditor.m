@@ -301,9 +301,11 @@ NSString *BDSKUrlString = @"Url";
     if (lurl && [[NSFileManager defaultManager] fileExistsAtPath:lurl]){
             icon = [[NSWorkspace sharedWorkspace] iconForFile:lurl];
             [viewLocalButton setImage:icon];
-            [viewLocalButton setEnabled:YES];
+            //            [viewLocalButton setEnabled:YES];
+            [viewLocalButton setBordered:NO]; // @@openLocalURL
             [viewLocalButton setToolTip:@"View File"];
             [viewLocalButton setTitle:@""];
+            [viewLocalButton setAction:@selector(viewLocal:)];
             [documentSnoopButton setEnabled:YES];
             [documentSnoopButton setToolTip:NSLocalizedString(@"Show first page in a drawer.", @"show first page in a drawer")];
             [documentTextSnoopButton setEnabled:YES];
@@ -328,11 +330,13 @@ NSString *BDSKUrlString = @"Url";
                 }
             }
     }else{
-        [viewLocalButton setEnabled:NO];
+        //[viewLocalButton setEnabled:NO];
         [viewLocalButton setImage:nil];
-        [viewLocalButton setTitle:NSLocalizedString(@"No\nFile.", @"No file, make sure it fits in the icon")];
+        [viewLocalButton setBordered:YES]; // @@openLocalURL
+        [viewLocalButton setTitle:NSLocalizedString(@"Pick\nFile.", @"Choose file, make sure it fits in the icon")];
         [viewLocalButton setToolTip:NSLocalizedString(@"Bad or Empty Local-Url Field", @"bad/empty local url field")];
-
+        [viewLocalButton setAction:@selector(chooseLocalURL:)];
+        
         [documentSnoopButton setEnabled:NO];
         [documentSnoopButton setToolTip:NSLocalizedString(@"Bad or Empty Local-Url Field", @"bad/empty local field")];
         [documentTextSnoopButton setEnabled:NO];
@@ -356,6 +360,23 @@ NSString *BDSKUrlString = @"Url";
     }
 
     [link release];
+}
+
+#pragma mark || choose-local-url open-sheet support
+
+- (IBAction)chooseLocalURL:(id)sender{
+    NSOpenPanel *oPanel = [NSOpenPanel openPanel];
+    [oPanel setAllowsMultipleSelection:NO];
+    int result = [oPanel runModalForDirectory:nil
+                                     file:nil
+                                    types:nil];
+    if (result == NSOKButton) {
+        [theBib setField:@"Local-Url" toValue:[[oPanel filename] stringByAddingPercentEscapesUsingEncoding:NSASCIIStringEncoding]];
+        [self noteChange];
+        [self setupForm];
+        [self fixURLs];
+    }
+    
 }
 
 

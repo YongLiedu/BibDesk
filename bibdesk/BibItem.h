@@ -22,6 +22,7 @@
 #import "BibEditor.h"
 #import "BibTypeManager.h"
 #import "BibAuthor.h"
+#import "NSString+Templating.h"
 
 @class BibEditor;
 @class BibDocument;
@@ -176,6 +177,8 @@
     
 */
 - (NSString *)RSSValue;
+
+- (NSString *)HTMLValueUsingTemplateString:(NSString *)templateString;
 
 /*!
     @method allFieldsString
