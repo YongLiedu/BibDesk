@@ -130,25 +130,44 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 		
 		NSString *formatString = [[OFPreferenceWrapper sharedPreferenceWrapper] objectForKey:BDSKCiteKeyFormatKey];
 		NSString *error = nil;
+		int button = 0;
 		
-		if (![[BDSKConverter sharedConverter] validateFormat:&formatString forField:@"Cite Key" inFileType:@"BibTeX" error:&error]) {
-			NSLog(@"Invalid Cite Key format: %@ Restore default.", error);
-			
-			formatString = [[[OFPreferenceWrapper sharedPreferenceWrapper] preferenceForKey:BDSKCiteKeyFormatKey] defaultObjectValue];			
+		if ([[BDSKConverter sharedConverter] validateFormat:&formatString forField:@"Cite Key" inFileType:@"BibTeX" error:&error]) {
+			[[OFPreferenceWrapper sharedPreferenceWrapper] setObject:formatString forKey:BDSKCiteKeyFormatKey];
+			[self setRequiredFieldsForCiteKey: [[BDSKConverter sharedConverter] requiredFieldsForFormat:formatString]];
+		}else{
+			button = NSRunAlertPanel(NSLocalizedString(@"The autogeneration format for Cite Key is invalid.", @""), 
+									 error,
+									 NSLocalizedString(@"Go to Preferences", @""), 
+									 NSLocalizedString(@"Revert to Default", @""), nil);
+			if (button == NSAlertAlternateReturn){
+				formatString = [[[OFPreferenceWrapper sharedPreferenceWrapper] preferenceForKey:BDSKCiteKeyFormatKey] defaultObjectValue];			
+				[self setRequiredFieldsForCiteKey: [[BDSKConverter sharedConverter] requiredFieldsForFormat:formatString]];
+			}else{
+				[[OAPreferenceController sharedPreferenceController] showPreferencesPanel:self];
+				[[OAPreferenceController sharedPreferenceController] setCurrentClientByClassName:@"BibPref_CiteKey"];
+			}
 		}
-		[self setRequiredFieldsForCiteKey: [[BDSKConverter sharedConverter] requiredFieldsForFormat:formatString]];
-		[[OFPreferenceWrapper sharedPreferenceWrapper] setObject:formatString forKey:BDSKCiteKeyFormatKey];
 		
 		formatString = [[OFPreferenceWrapper sharedPreferenceWrapper] objectForKey:BDSKLocalUrlFormatKey];
 		error = nil;
 		
-		if (![[BDSKConverter sharedConverter] validateFormat:&formatString forField:@"Local-Url" inFileType:@"BibTeX" error:&error]) {
-			NSLog(@"Invalid Local-Url format: %@ Restore default.", error);
-			
-			formatString = [[[OFPreferenceWrapper sharedPreferenceWrapper] preferenceForKey:BDSKLocalUrlFormatKey] defaultObjectValue];			
+		if ([[BDSKConverter sharedConverter] validateFormat:&formatString forField:@"Local-Url" inFileType:@"BibTeX" error:&error]) {
+			[[OFPreferenceWrapper sharedPreferenceWrapper] setObject:formatString forKey:BDSKLocalUrlFormatKey];
+			[self setRequiredFieldsForLocalUrl: [[BDSKConverter sharedConverter] requiredFieldsForFormat:formatString]];
+		}else{
+			button = NSRunAlertPanel(NSLocalizedString(@"The autogeneration format for Local-Url is invalid.", @""), 
+									 error,
+									 NSLocalizedString(@"Go to Preferences", @""), 
+									 NSLocalizedString(@"Revert to Default", @""), nil);
+			if (button == NSAlertAlternateReturn){
+				formatString = [[[OFPreferenceWrapper sharedPreferenceWrapper] preferenceForKey:BDSKLocalUrlFormatKey] defaultObjectValue];			
+				[self setRequiredFieldsForLocalUrl: [[BDSKConverter sharedConverter] requiredFieldsForFormat:formatString]];
+			}else{
+				[[OAPreferenceController sharedPreferenceController] showPreferencesPanel:self];
+				[[OAPreferenceController sharedPreferenceController] setCurrentClientByClassName:@"BibPref_AutoFile"];
+			}
 		}
-		[self setRequiredFieldsForLocalUrl: [[BDSKConverter sharedConverter] requiredFieldsForFormat:formatString]];
-		[[OFPreferenceWrapper sharedPreferenceWrapper] setObject:formatString forKey:BDSKLocalUrlFormatKey];
     }
     return self;
 }
