@@ -74,7 +74,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
             [editorBib setField:@"Local-Url"
                         toValue:[[NSURL fileURLWithPath:
                             [[fileNames objectAtIndex:0] stringByExpandingTildeInPath]]absoluteString]];
-            [[self windowController] updateChangeCount:NSChangeDone];
+            [[self windowController] noteChange];
         }
     }else if([[pboard types] containsObject:NSURLPboardType]){
 
@@ -83,7 +83,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
         if(sourceDragMask & NSDragOperationCopy){
             [editorBib setField:@"Url"
                         toValue:[fileNames objectAtIndex:0]];
-            [[self windowController] updateChangeCount:NSChangeDone];
+            [[self windowController] noteChange];
         }
     }else if ( [[pboard types] containsObject:NSStringPboardType] ) {
         // get the item from the string
@@ -111,7 +111,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 
                     [editorBib setField:key
                                 toValue:[bibDict objectForKey:key]];
-                    [[self windowController] updateChangeCount:NSChangeDone];
+                    [[self windowController] noteChange];
                 }
             }
         }//for each dragged-in pub
