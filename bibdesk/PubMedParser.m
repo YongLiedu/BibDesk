@@ -108,16 +108,9 @@
                     
                     if([[pubDict allKeys] count] > 0){
                         // and we've already seen an old one: so save the old one off -
-                        
-                        newBI = [[BibItem alloc] initWithType:@"misc"
-                                                     fileType:@"PubMed"
-                                                      authors:
-                            [NSMutableArray arrayWithCapacity:0]];
-                        [newBI setFileOrder:itemOrder];
-                        itemOrder++;
-                        [newBI setFields:pubDict];
-                        [newBI setCiteKey:[pubDict valueForKey:@"PMID"]];
-                        [returnArray addObject:[newBI autorelease]];
+			newBI = [self bibitemWithPubMedDictionary:pubDict fileOrder:itemOrder];
+			itemOrder ++;
+                        [returnArray addObject:newBI];
 
                     }
                     [pubDict removeAllObjects];
@@ -176,21 +169,9 @@
         }
     }
     if([[pubDict allKeys] count] > 0){
-	mergePageNumbers(pubDict);
-        newBI = [[BibItem alloc] initWithType:@"misc"
-                                     fileType:@"PubMed"
-                                      authors:
-            [NSMutableArray arrayWithCapacity:0]];
-        [newBI setFileOrder:itemOrder];
-        itemOrder++;
-        [newBI setFields:pubDict];
-        [returnArray addObject:[newBI autorelease]];
-	// set the pub type if we know the bibtex equivalent, otherwise leave it as misc
-	if([typeManager bibtexTypeForPubMedType:[pubDict objectForKey:@"TY"]] != nil){
-	    [newBI setType:[typeManager bibtexTypeForPubMedType:[pubDict objectForKey:@"TY"]]];
-	}
-        [newBI setCiteKey:[pubDict valueForKey:@"PMID"]];
-        
+	newBI = [self bibitemWithPubMedDictionary:pubDict fileOrder:itemOrder];
+	itemOrder ++;
+	[returnArray addObject:newBI];
     }
     //    NSLog(@"pubDict is %@", pubDict);
     *hadProblems = NO;
@@ -226,6 +207,32 @@ void mergePageNumbers(NSMutableDictionary *dict){
 	[dict setObject:merge forKey:@"Pages"];
     }
 }
+
++ (BibItem *)bibitemWithPubMedDictionary:(NSMutableDictionary *)pubDict fileOrder:(int)itemOrder{
+    
+    BibTypeManager *typeManager = [BibTypeManager sharedManager];
+    BibItem *newBI = nil;
+    
+    // fix up the page numbers if necessary
+    mergePageNumbers(pubDict);
+    
+    newBI = [[BibItem alloc] initWithType:@"misc"
+				 fileType:@"BibTeX"
+				  authors:
+	[NSMutableArray arrayWithCapacity:0]];
+
+    [newBI setFileOrder:itemOrder];
+    [newBI setFields:pubDict];
+    
+    // set the pub type if we know the bibtex equivalent, otherwise leave it as misc
+    if([typeManager bibtexTypeForPubMedType:[pubDict objectForKey:@"TY"]] != nil){
+	[newBI setType:[typeManager bibtexTypeForPubMedType:[pubDict objectForKey:@"TY"]]];
+    }
+    [newBI setCiteKey:[pubDict valueForKey:@"PMID"]];
+    
+    return [newBI autorelease];
+}
+
 
 
 @end

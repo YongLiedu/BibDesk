@@ -28,6 +28,16 @@ void addKeywordString_toDict(NSString *wholeValue, NSMutableDictionary *pubDict)
     @param      dict NSMutableDictionary containing a single RIS bibliography entry
 */
 void mergePageNumbers(NSMutableDictionary *dict);
+/*!
+    @method     bibitemWithPubMedDictionary:fileOrder:
+    @abstract   Convenience method which returns an autoreleased BibItem when given a pubDict object which
+		may represent PubMed or other RIS information.
+    @discussion (comprehensive description)
+    @param      pubDict Dictionary containing an RIS representation of a bib item.
+    @param      itemOrder (description)
+    @result     A new, autoreleased BibItem, of type BibTeX.
+*/
++ (BibItem *)bibitemWithPubMedDictionary:(NSMutableDictionary *)pubDict fileOrder:(int)itemOrder;
 
 
 @end
