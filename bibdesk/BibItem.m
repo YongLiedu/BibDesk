@@ -105,16 +105,16 @@ void _setupFonts(){
 - (id)copyWithZone:(NSZone *)zone{
     BibItem *theCopy = [[[self class] allocWithZone: zone] initWithType:pubType
                                                                fileType:fileType
-                                                                authors:[pubAuthors mutableCopy]];
-    [theCopy setCiteKey: [citeKey copy]];
-    [theCopy setDate: [pubDate copy]];
+                                                                authors:pubAuthors];
+    [theCopy setCiteKey: citeKey];
+    [theCopy setDate: pubDate];
 	
 	NSCalendarDate *currentDate = [NSCalendarDate calendarDate];
 	[theCopy setDateModified:currentDate];
 	[theCopy setDateCreated:currentDate];
 	
-    [theCopy setFields: [pubFields mutableCopy]];
-    [theCopy setRequiredFieldNames: [requiredFieldNames mutableCopy]];
+    [theCopy setFields: pubFields];
+    [theCopy setRequiredFieldNames: requiredFieldNames];
     return theCopy;
 }
 
@@ -759,7 +759,7 @@ void _setupFonts(){
     if([newCiteKey isEqualToString:@""]){
         citeKey = [[self suggestedCiteKey] retain];
     } else {
-        citeKey = [newCiteKey retain];
+        citeKey = [newCiteKey copy];
     }
 		
     NSDictionary *notifInfo = [NSDictionary dictionaryWithObjectsAndKeys:citeKey, @"value", @"Cite Key", @"key",nil];
@@ -840,7 +840,7 @@ void _setupFonts(){
 	
 }
 
-- (void)setRequiredFieldNames: (NSMutableArray *)newRequiredFieldNames{
+- (void)setRequiredFieldNames: (NSArray *)newRequiredFieldNames{
     [requiredFieldNames autorelease];
     requiredFieldNames = [newRequiredFieldNames mutableCopy];
 }

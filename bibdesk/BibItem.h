@@ -213,7 +213,7 @@
 */
 - (void)updateMetadataForKey:(NSString *)key;
 
-- (void)setRequiredFieldNames: (NSMutableArray *)newRequiredFieldNames;
+- (void)setRequiredFieldNames: (NSArray *)newRequiredFieldNames;
 - (void)setField: (NSString *)key toValue: (NSString *)value;
 - (void)setField: (NSString *)key toValue: (NSString *)value withModDate:(NSCalendarDate *)date;
 
