@@ -57,7 +57,7 @@
 *  makefiles for this to work correctly.
 */
 #ifdef PC
-# if (defined(__WATCOM__) || defined(_WIN32) || defined(__WIN32__) || \       
+# if (defined(__WATCOM__) || defined(_WIN32) || defined(__WIN32__) || \
    defined(__GNUC__) || defined(__GNUG__))
 #     ifndef PC32
 #        define PC32
