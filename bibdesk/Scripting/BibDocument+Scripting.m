@@ -16,12 +16,12 @@ Category on BibDocument to implement a few additional functions needed for scrip
 
 
 /* ssp: 2004-08-03
-Scripting Key-Value coding method to  access an author by its name
+Scripting Key-Value coding method to access an author by his name
 */
 - (BibAuthor*) valueInAuthorsWithName:(NSString*) name {
 	NSEnumerator * myEnum = [authors objectEnumerator];
 	BibAuthor * auth = nil;
-	NSLog (@"valueInAuthtors...");
+	// NSLog (@"valueInAuthors...");
 	while (auth = [myEnum nextObject]) {
 		if ([[auth name] isEqualToString:name]) {
 			return auth;
