@@ -19,8 +19,11 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
     @discussion declares an interface to author model objects
 */
 #import <Cocoa/Cocoa.h>
+#import "NSString+XMLUtils.h"
+#import "BibPrefController.h"
 @class BibPersonController;
 @class BibItem;
+
 
 /*!
     @class BibAuthor
@@ -48,7 +51,11 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 - (int)numberOfPublications;
 - (NSArray *)publications;
 
+- (NSComparisonResult)compare:(BibAuthor *)otherAuth;
+- (NSComparisonResult)fuzzyCompare:(BibAuthor *)otherAuth;
+
 - (NSString *)description;
+- (NSString *)normalizedName;
 - (NSString *)name;
 - (NSString *)firstName;
 - (NSString *)vonPart;
@@ -59,7 +66,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 - (void)setPersonController:(BibPersonController *)newPersonController;
 
 - (void)setName:(NSString *)newName;
-
+- (void)handleBibItemChangeNotification:(NSNotification *)notification;
 - (BibItem *)pubAtIndex:(int)index;
 - (void)addPub:(BibItem *)pub;
 - (void)removePubFromAuthorList:(BibItem *)pub;
