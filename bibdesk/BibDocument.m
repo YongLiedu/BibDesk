@@ -800,10 +800,21 @@ stringByAppendingPathComponent:@"BibDesk"]; */
     // to enable some cheapo timing, uncomment these:
 //    NSDate *start = [NSDate date];
 //    NSLog(@"start: %@", [start description]);
-    newPubs = [BibTeXParser itemsFromData:data
-                                           error:&hadProblems
-                                     frontMatter:frontMatter
-                                        filePath:filePath];
+    
+    if([[OFPreferenceWrapper sharedPreferenceWrapper] boolForKey:BDSKUseUnicodeBibTeXParser]){
+#warning ARM: Need prefs and document ivar for string encoding (need to save in binary file)
+        NSLog(@"*** WARNING: using new parser.  To disable, use `defaults write edu.ucsd.cs.mmccrack.bibdesk \"Use Unicode BibTeX Parser\" 'NO'` and relaunch BibDesk.");
+        newPubs = [BibTeXParser itemsFromString:[[[NSString alloc] initWithData:data encoding:NSUTF8StringEncoding] autorelease]
+                                          error:&hadProblems
+                                    frontMatter:frontMatter
+                                       filePath:filePath];
+    } else {
+        newPubs = [BibTeXParser itemsFromData:data
+                                        error:&hadProblems
+                                  frontMatter:frontMatter
+                                     filePath:filePath];
+    }
+
 
 //    NSLog(@"end %@ elapsed: %f", [[NSDate date] description], [start timeIntervalSinceNow]);
 
