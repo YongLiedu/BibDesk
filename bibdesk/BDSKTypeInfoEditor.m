@@ -388,33 +388,14 @@ static BDSKTypeInfoEditor *sharedTypeInfoEditor;
 }
 
 - (id)tableView:(NSTableView *)tv objectValueForTableColumn:(NSTableColumn *)tableColumn row:(int)row{
-	NSString *value;
-	NSDictionary *grayAttr = [NSDictionary dictionaryWithObject:[NSColor grayColor] forKey:NSForegroundColorAttributeName];
-	
-	// we make default items gray, somehow setting uneditable in ...willDisplayCell:... gives problems with selection
 	if (tv == typeTableView) {
-		value = [types objectAtIndex:row];
-		if ([self canEditType:value]) {
-			return value;
-		} else {
-			return [[[NSAttributedString alloc] initWithString:value attributes:grayAttr] autorelease];
-		}
+		return [types objectAtIndex:row];
 	}
 	else if (tv == requiredTableView) {
-		value =  [currentRequiredFields objectAtIndex:row];
-		if ([self canEditField:value]) {
-			return value;
-		} else {
-			return [[[NSAttributedString alloc] initWithString:value attributes:grayAttr] autorelease];
-		}
+		return [currentRequiredFields objectAtIndex:row];
 	}
 	else if (tv == optionalTableView) {
-		value =  [currentOptionalFields objectAtIndex:row];
-		if ([self canEditField:value]) {
-			return value;
-		} else {
-			return [[[NSAttributedString alloc] initWithString:value attributes:grayAttr] autorelease];
-		}
+		return [currentOptionalFields objectAtIndex:row];
 	}
 }
 
@@ -458,18 +439,23 @@ static BDSKTypeInfoEditor *sharedTypeInfoEditor;
 
 #pragma mark NSTableview delegate
 
-- (BOOL)tableView:(NSTableView *)tv shouldEditTableColumn:(NSTableColumn *)tableColumn row:(int)row {
+- (void)tableView:(NSTableView *)tv willDisplayCell:(id)cell forTableColumn:(NSTableColumn *)tableColumn row:(int)row {
+	NSString *value;
 	if (tv == typeTableView) {
-		return [self canEditType: [types objectAtIndex:row]];
+		value = [types objectAtIndex:row];
+		[cell setEnabled:[self canEditType:value]];
 	}
-	
-	if ([self canEditType:currentType]) // if we can edit the type, we can edit all the fields
-		return YES;
-	
-	if (tv == requiredTableView) {
-		return [self canEditField: [currentRequiredFields objectAtIndex:row]];
-	} else if (tv == optionalTableView) {
-		return [self canEditField: [currentOptionalFields objectAtIndex:row]];
+	else if ([self canEditType:currentType]) {
+		 // if we can edit the type, we can edit all the fields
+		[cell setEnabled:YES];
+	}
+	else if (tv == requiredTableView) {
+		value = [currentRequiredFields objectAtIndex:row];
+		[cell setEnabled:[self canEditField:value]];
+	}
+	else if (tv == optionalTableView) {
+		value = [currentOptionalFields objectAtIndex:row];
+		[cell setEnabled:[self canEditField:value]];
 	}
 }
 
