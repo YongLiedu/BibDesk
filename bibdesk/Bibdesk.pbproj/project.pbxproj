@@ -349,6 +349,7 @@
 				27C41FB404BE8900007932DC,
 				27C41FB504BE8901007932DC,
 				279D53620535332E002DBEA0,
+				27E2B7200552092300FCECC3,
 			);
 			isa = PBXResourcesBuildPhase;
 			runOnlyForDeploymentPostprocessing = 0;
@@ -1472,6 +1473,27 @@
 			settings = {
 			};
 		};
+		27E2B71D0552090100FCECC3 = {
+			children = (
+				F561A4AC04577CDE01C78117,
+				27E2B71E0552092300FCECC3,
+			);
+			isa = PBXGroup;
+			name = "Developer Documentation";
+			refType = 4;
+		};
+		27E2B71E0552092300FCECC3 = {
+			isa = PBXFileReference;
+			name = build_instructions.tex;
+			path = DeveloperDocumentation/build_instructions.tex;
+			refType = 4;
+		};
+		27E2B7200552092300FCECC3 = {
+			fileRef = 27E2B71E0552092300FCECC3;
+			isa = PBXBuildFile;
+			settings = {
+			};
+		};
 //270
 //271
 //272
@@ -1506,7 +1528,7 @@
 				F5A86D8F0398EAB601A80164,
 				2A37F4B8FDCFA73011CA2CEA,
 				2A37F4C3FDCFA73011CA2CEA,
-				F561A4AC04577CDE01C78117,
+				27E2B71D0552090100FCECC3,
 			);
 			isa = PBXGroup;
 			name = Bibdesk;
