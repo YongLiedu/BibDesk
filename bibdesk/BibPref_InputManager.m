@@ -108,17 +108,18 @@ NSString *BDSKInputManagerLoadableApplications = @"Application bundles that we r
     // NSAssert1( (!err), @"Couldn't find icon for application %@", inBundleID);
     if(!err){
         NSString *path = [(NSURL *)outAppURL path];
+        CFRelease(outAppURL);
         [aCell setStringValue:[[path lastPathComponent] stringByDeletingPathExtension]];
 
         image = [[NSWorkspace sharedWorkspace] iconForFile:path];
     } else {
         // if LS failed us (my cache was corrupt when I wrote this code, so it's been tested)
         IconRef genericIconRef;
-        err = GetIconRef( kOnSystemDisk,
-                          kSystemIconsCreator,
-                          kGenericDocumentIcon,
-                          &genericIconRef );
-        NSAssert1( (!err), @"Couldn't get generic document icon, error %d.", err); // now you're really out of luck
+        OSStatus getIconErr = GetIconRef( kOnSystemDisk,
+                                          kSystemIconsCreator,
+                                          kAlertCautionIcon,
+                                          &genericIconRef );
+        NSAssert1( (!getIconErr), @"Couldn't get kAlertCautionIcon, error %d.", getIconErr); // now you're really out of luck
         image = [[[NSImage alloc] initWithSize:NSMakeSize(size, size)] autorelease];
         CGRect iconCGRect = CGRectMake(0, 0, size, size);
         [image lockFocus];
@@ -130,13 +131,12 @@ NSString *BDSKInputManagerLoadableApplications = @"Application bundles that we r
                               kPlotIconRefNormalFlags,
                               genericIconRef);
         [image unlockFocus];
-        [aCell setStringValue:[NSString stringWithFormat:@"LaunchServices can't find %@", inBundleID]];
+        [aCell setStringValue:[NSString stringWithFormat:@"Error %d, LaunchServices can't find %@", err, inBundleID]];
     }
 
     [image setSize:NSMakeSize(size, size)];
     [aCell setImage:image];
     [aCell setLeaf:YES];
-    if(outAppURL) CFRelease(outAppURL);
 }
 
 - (IBAction)enableAutocompletion:(id)sender{
