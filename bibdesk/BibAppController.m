@@ -439,6 +439,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
         formatter = [[BDSKFormCellFormatter alloc] init];
         [formatter setEntry:entry];
         [_formatters setObject:formatter forKey:entry];
+        [formatter release];
     }
     return formatter;
 }

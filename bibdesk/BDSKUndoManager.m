@@ -22,6 +22,7 @@
 - (void)dealloc
 {
 	delegate = nil;
+        [super dealloc];
 }
 
 - (id)delegate

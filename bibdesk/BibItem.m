@@ -94,13 +94,13 @@ void _setupFonts(){
         pubAuthors = [authArray mutableCopy];     // copy, it's mutable
         document = nil;
         editorObj = nil;
-		undoManager = nil;
+        undoManager = nil;
         [self setFileType:inFileType];
         [self makeType:type];
         [self setCiteKeyString: @"cite-key"];
         [self setDate: nil];
-		[self setDateCreated: nil];
-		[self setDateModified: nil];
+        [self setDateCreated: nil];
+        [self setDateModified: nil];
         [self setFileOrder:-1];
         _setupFonts();
     }
@@ -116,9 +116,9 @@ void _setupFonts(){
     [theCopy setCiteKeyString: citeKey];
     [theCopy setDate: pubDate];
 	
-	NSCalendarDate *currentDate = [NSCalendarDate calendarDate];
-	[theCopy setDateModified:currentDate];
-	[theCopy setDateCreated:currentDate];
+    NSCalendarDate *currentDate = [NSCalendarDate calendarDate];
+    [theCopy setDateModified:currentDate];
+    [theCopy setDateCreated:currentDate];
 	
     [theCopy setPubFields: pubFields];
     [theCopy setRequiredFieldNames: requiredFieldNames];
@@ -828,7 +828,7 @@ void _setupFonts(){
             _bodyParagraphStyle, nil]
                                     forKeys:[NSArray arrayWithObjects:NSFontAttributeName, /*NSBackgroundColorAttributeName, */NSParagraphStyleAttributeName, nil]];
 
-    NSMutableAttributedString* aStr = [[NSMutableAttributedString alloc] init];
+    NSMutableAttributedString* aStr = [[[NSMutableAttributedString alloc] init] autorelease];
 
     NSMutableArray *nonReqKeys = [NSMutableArray arrayWithCapacity:5]; // yep, arbitrary
 

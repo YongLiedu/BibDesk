@@ -61,9 +61,9 @@ NSString *BDSKBibItemLocalDragPboardType = @"edu.ucsd.cs.mmccrack.bibdesk: Local
         sources = [[NSMutableArray alloc] initWithCapacity:1];
         
         
-		BDSKUndoManager *newUndoManager = [[[BDSKUndoManager alloc] init] autorelease];
-		[newUndoManager setDelegate:self];
-		[self setUndoManager:newUndoManager];
+        BDSKUndoManager *newUndoManager = [[[BDSKUndoManager alloc] init] autorelease];
+        [newUndoManager setDelegate:self];
+        [self setUndoManager:newUndoManager];
 		
         // Register as observer of font change events.
         [[NSNotificationCenter defaultCenter] addObserver:self
@@ -212,8 +212,8 @@ NSString *BDSKBibItemLocalDragPboardType = @"edu.ucsd.cs.mmccrack.bibdesk: Local
     NSLog(@"bibdoc dealloc");
 #endif
     if ([self undoManager]) {
-		[[self undoManager] removeAllActionsWithTarget:self];
-	}
+        [[self undoManager] removeAllActionsWithTarget:self];
+    }
     [[NSNotificationCenter defaultCenter] removeObserver:self];
     [publications release]; // these should cause the bibitems to get dealloc'ed
     [shownPublications release];
@@ -225,6 +225,9 @@ NSString *BDSKBibItemLocalDragPboardType = @"edu.ucsd.cs.mmccrack.bibdesk: Local
     [customStringArray release];
     [toolbarItems release];
     [tableColumns release];
+    [collections release];
+    [notes release];
+    [sources release];
     [localDragPboard release];
     [draggedItems release];
     [super dealloc];
@@ -1162,6 +1165,7 @@ stringByAppendingPathComponent:@"BibDesk"]; */
 		searchField = (id) [[NSSearchField alloc] initWithFrame:[[searchFieldBox contentView] frame]];
 
 		[searchFieldBox setContentView:searchField];
+                [searchField release];
 				
 		searchCellOrTextField = [searchField cell];
 		[searchCellOrTextField setSendsWholeSearchString:NO]; // don't wait for Enter key press.
@@ -2577,13 +2581,13 @@ This method always returns YES. Even if some or many operations fail.
     
 }
 
- - (void)windowWillClose:(NSNotification *)notification{
+- (void)windowWillClose:(NSNotification *)notification{
     if([notification object] != documentWindow) // this is critical; see note where we register for this notification
         return;
     [[NSNotificationCenter defaultCenter] postNotificationName:BDSKDocumentWindowWillCloseNotification
                                                         object:self
                                                       userInfo:[NSDictionary dictionary]];
-
+    
     [customCiteDrawer close];
     [[NSApp delegate] removeErrorObjsForFileName:[self fileName]];
 }
