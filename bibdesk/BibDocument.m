@@ -1879,8 +1879,6 @@ This method always returns YES. Even if some or many operations fail.
 										 fileType:@"BibTeX"
 										  authors:[NSMutableArray arrayWithCapacity:0]];
 			
-			[self addPublication:[newBI autorelease]];
-			
 			NSString *newUrl = [[NSURL fileURLWithPath:
 				[fnStr stringByExpandingTildeInPath]]absoluteString];
 			
@@ -1890,6 +1888,8 @@ This method always returns YES. Even if some or many operations fail.
 				[[BibFiler sharedFiler] file:YES papers:[NSArray arrayWithObject:newBI]
 								fromDocument:self];
 			}
+			
+			[self addPublication:[newBI autorelease]];
 			
 			[self updateUI];
 			[self updateChangeCount:NSChangeDone];
