@@ -51,7 +51,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
     }
 }
 - (IBAction)addDefaultField:(id)sender{
-    [defaultFieldsArray addObject:[addFieldField stringValue]];
+    [defaultFieldsArray addObject:[[addFieldField stringValue] capitalizedString]];  // ARM: force uppercase, otherwise the user will end up with an upper and lower case field
     [defaultFieldsTableView reloadData];
     [defaults setObject:defaultFieldsArray
                  forKey:BDSKDefaultFieldsKey];
