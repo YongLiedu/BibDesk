@@ -697,7 +697,8 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 										types:nil];
     if (result == NSOKButton) {
 		NSString *fileURLString = [[NSURL fileURLWithPath:[[oPanel filename] stringByStandardizingPath]] absoluteString];
-        [theBib setField:BDSKLocalUrlString toValue:fileURLString];
+        
+		[theBib setField:BDSKLocalUrlString toValue:fileURLString];
 		[theBib autoFilePaper];
 		
 		[self finalizeChanges];
@@ -711,6 +712,8 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 	NSString *path = [sender representedObject];
 	
 	[theBib setField:BDSKLocalUrlString toValue:[[NSURL fileURLWithPath:[path stringByStandardizingPath]] absoluteString]];
+	[theBib autoFilePaper];
+		
 	[self finalizeChanges];
 	[self setupForm];
 	[self fixURLs];
