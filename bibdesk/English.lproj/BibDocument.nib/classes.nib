@@ -10,6 +10,9 @@
         }, 
         {
             ACTIONS = {
+                clearQuickSearch = id; 
+                columnsMenuAddTableColumn = id; 
+                columnsMenuSelectTableColumn = id; 
                 consolidateLinkedFiles = id; 
                 contextualMenuAddTableColumn = id; 
                 contextualMenuSelectTableColumn = id; 
@@ -24,9 +27,11 @@
                 emailPubCmd = id; 
                 exportAsHTML = id; 
                 exportAsRSS = id; 
+                generateCiteKey = id; 
                 makeSearchFieldKey = id; 
                 newPub = id; 
                 openCustomCitePrefPane = id; 
+                paste = id; 
                 postItemToWeblog = id; 
                 quickSearchAddField = id; 
                 quickSearchRemoveField = id; 
@@ -40,14 +45,16 @@
             OUTLETS = {
                 PDFPreviewView = NSImageView; 
                 RTFPreviewView = NSTextView; 
+                SaveEncodingAccessoryView = NSView; 
                 actionMenu = NSMenu; 
-                actionMenuButton = NSPopUpButton; 
+                actionMenuButton = RYZImagePopUpButton; 
                 actionMenuFirstItem = NSMenuItem; 
                 addFieldPrompt = NSTextField; 
                 addFieldSheet = NSWindow; 
                 addFieldTextField = NSTextField; 
                 bibListViews = NSWindow; 
                 ccTableView = BDSKCustomCiteTableView; 
+                columnsMenu = NSMenu; 
                 contextualMenu = NSMenu; 
                 ctxCopyBibTex = NSMenuItem; 
                 ctxCopyPDF = NSMenuItem; 
@@ -66,6 +73,7 @@
                 rssExportAccessoryView = NSView; 
                 rssExportForm = NSForm; 
                 rssExportTextField = NSTextField; 
+                saveTextEncodingPopupButton = NSPopUpButton; 
                 searchField = id; 
                 searchFieldBox = NSBox; 
                 searchFieldTextField = NSTextField; 

@@ -206,8 +206,6 @@ NSString* BDSKBibTeXStringPboardType = @"edu.ucsd.cs.mmcrack.bibdesk: Local BibT
     [super dealloc];
 }
 
-
-
 - (void) updateActionMenu:(id) aNotification {
 	// this updates the menu
 	[self menuForSelection];
@@ -248,6 +246,22 @@ NSString* BDSKBibTeXStringPboardType = @"edu.ucsd.cs.mmcrack.bibdesk: Local BibT
 														  userInfo:notifInfo];
     }
 }
+
+- (void)setNewPublicationsFromArchivedArray:(NSArray *)newPubs{ // use this for new documents, so we don't mark the document dirty as in the standard setPublications method
+    [publications autorelease];
+    publications = [newPubs mutableCopy];
+    NSEnumerator *pubEnum = [publications objectEnumerator];
+    BibItem *pub;
+    while (pub = [pubEnum nextObject]) {
+        [pub setDocument:self];
+    }
+    
+    NSDictionary *notifInfo = [NSDictionary dictionaryWithObjectsAndKeys:newPubs, @"pubs", nil];
+    [[NSNotificationCenter defaultCenter] postNotificationName:@"Set the publications in document"
+                                                        object:self
+                                                      userInfo:notifInfo];
+}    
+    
 
 - (NSMutableArray *) publications{
     return [[publications retain] autorelease];
@@ -430,6 +444,10 @@ NSString* BDSKBibTeXStringPboardType = @"edu.ucsd.cs.mmcrack.bibdesk: Local BibT
     [self exportAsFileType:@"rss"];
 }
 
+- (IBAction)exportEncodedBib:(id)sender{
+    [self exportAsFileType:@"bib"];
+}
+
 - (void)exportAsFileType:(NSString *)fileType{
     NSSavePanel *sp = [NSSavePanel savePanel];
     [sp setRequiredFileType:fileType];
@@ -437,6 +455,10 @@ NSString* BDSKBibTeXStringPboardType = @"edu.ucsd.cs.mmcrack.bibdesk: Local BibT
     if([fileType isEqualToString:@"rss"]){
         [sp setAccessoryView:rssExportAccessoryView];
         // should call a [self setupRSSExportView]; to populate those with saved userdefaults!
+    } else {
+        if([fileType isEqualToString:@"bib"]){ // this is for exporting bib files with alternate text encodings
+            [sp setAccessoryView:SaveEncodingAccessoryView];
+        }
     }
     [sp beginSheetForDirectory:nil
                           file:[[NSString stringWithString:[[self fileName] stringByDeletingPathExtension]] lastPathComponent]
@@ -450,7 +472,8 @@ NSString* BDSKBibTeXStringPboardType = @"edu.ucsd.cs.mmcrack.bibdesk: Local BibT
     NSData *fileData = nil;
     NSString *fileName = nil;
     NSSavePanel *sp = (NSSavePanel *)sheet;
-    NSString *fileType = (NSString *)contextInfo;
+    NSString *fileType = contextInfo;
+    NSStringEncoding encoding;
     
     if(returnCode == NSOKButton){
         fileName = [sp filename];
@@ -458,6 +481,35 @@ NSString* BDSKBibTeXStringPboardType = @"edu.ucsd.cs.mmcrack.bibdesk: Local BibT
             fileData = [self dataRepresentationOfType:@"Rich Site Summary file"];
         }else if([fileType isEqualToString:@"html"]){
             fileData = [self dataRepresentationOfType:@"HTML"];
+        }else if([fileType isEqualToString:@"bib"]){
+            int encodingTag = [saveTextEncodingPopupButton selectedTag];
+
+		switch(encodingTag){
+
+                    case 1:
+                        // ISO Latin 1
+                        encoding = NSISOLatin1StringEncoding;
+                        break;
+                        
+                    case 2:
+                        // ISO Latin 2
+                        encoding = NSISOLatin2StringEncoding;
+                        
+                    case 3:
+                        // UTF 8
+                        encoding = NSUTF8StringEncoding;
+                        break;
+                    case 4:
+                        // MacRoman
+                        encoding = NSMacOSRomanStringEncoding;
+                        break;
+                        
+                    default:
+                        encoding = NSASCIIStringEncoding;
+                        
+		}
+            
+                fileData = [self bibTeXDataWithEncoding:encoding];
         }
         [fileData writeToFile:fileName atomically:YES];
     }
@@ -484,9 +536,9 @@ NSString* BDSKBibTeXStringPboardType = @"edu.ucsd.cs.mmcrack.bibdesk: Local BibT
 
 - (NSData *)dataRepresentationOfType:(NSString *)aType
 {
-	[[NSNotificationCenter defaultCenter] postNotificationName:BDSKDocumentWillSaveNotification
-														object:self
-													  userInfo:[NSDictionary dictionary]];
+    [[NSNotificationCenter defaultCenter] postNotificationName:BDSKDocumentWillSaveNotification
+                                                        object:self
+                                                      userInfo:[NSDictionary dictionary]];
     
     if ([aType isEqualToString:@"bibTeX database"]){
         return [self bibDataRepresentation];
@@ -494,8 +546,10 @@ NSString* BDSKBibTeXStringPboardType = @"edu.ucsd.cs.mmcrack.bibdesk: Local BibT
         return [self rssDataRepresentation];
     }else if ([aType isEqualToString:@"HTML"]){
         return [self htmlDataRepresentation];
-    }else 
-		return nil;
+    }else if([aType isEqualToString:@"BibDocument File"]){
+        return [NSKeyedArchiver archivedDataWithRootObject:publications];
+    }else
+        return nil;
 }
 
 - (BOOL)readFromFile:(NSString *)fileName ofType:(NSString *)docType{
@@ -617,6 +671,31 @@ stringByAppendingPathComponent:@"BibDesk"]; */
     return d;
 }
 
+- (NSData *)bibTeXDataWithEncoding:(NSStringEncoding)encoding{
+    
+    if(encoding == NSASCIIStringEncoding)
+        return [self bibDataRepresentation];   // run the converter on it
+    
+    BibItem *tmp;
+    NSEnumerator *e = [[publications sortedArrayUsingSelector:@selector(fileOrderCompare:)] objectEnumerator];
+    NSMutableData *d = [NSMutableData data];
+    NSMutableString *templateFile = [NSMutableString stringWithContentsOfFile:[[[OFPreferenceWrapper sharedPreferenceWrapper] stringForKey:BDSKOutputTemplateFileKey] stringByExpandingTildeInPath]];
+    
+    [templateFile appendFormat:@"\n%%%% Created for %@ at %@ \n\n", NSFullUserName(), [NSCalendarDate calendarDate]];
+    
+    [d appendData:[templateFile dataUsingEncoding:encoding allowLossyConversion:YES]];
+    [d appendData:[frontMatter dataUsingEncoding:encoding allowLossyConversion:YES]];
+    
+    while(tmp = [e nextObject]){
+        [d appendData:[[NSString stringWithString:@"\n\n"] dataUsingEncoding:encoding allowLossyConversion:YES]];
+        //The TeXification is now done in the BibItem bibTeXString method
+        //Where it can be done once per field to handle newlines.
+        [d appendData:[[tmp unicodeBibTeXString] dataUsingEncoding:encoding allowLossyConversion:YES]];
+    }
+    return d;
+}
+
+
 #pragma mark -
 #pragma mark Opening and Loading Files
 
@@ -628,8 +707,11 @@ stringByAppendingPathComponent:@"BibDesk"]; */
         return [self loadRSSDataRepresentation:data];
     }else if([aType isEqualToString:@"RIS/Medline File"]){
         return [self loadPubMedDataRepresentation:data];
-    }
-    return NO;
+    }else if([aType isEqualToString:@"BibDocument File"]){
+        [self setNewPublicationsFromArchivedArray:[NSKeyedUnarchiver unarchiveObjectWithData:data]];
+        return YES;
+    }else
+        return NO;
 }
 
 - (BOOL)loadPubMedDataRepresentation:(NSData *)data{

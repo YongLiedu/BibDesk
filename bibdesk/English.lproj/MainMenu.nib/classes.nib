@@ -113,10 +113,12 @@
                 emailPubCmd = id; 
                 exportAsHTML = id; 
                 exportAsRSS = id; 
+                exportEncodedBib = id; 
                 generateCiteKey = id; 
                 makeSearchFieldKey = id; 
                 myAction = id; 
                 newPub = id; 
+                saveAsBDSKDocument = id; 
                 toggle = id; 
                 toggleShowingCustomCiteDrawer = id; 
             }; 

@@ -56,6 +56,20 @@
 			<key>NSDocumentClass</key>
 			<string>BibDocument</string>
 		</dict>
+		<dict>
+			<key>CFBundleTypeExtensions</key>
+			<array>
+				<string>bdsk</string>
+			</array>
+			<key>CFBundleTypeIconFile</key>
+			<string>bibDocIcon.icns</string>
+			<key>CFBundleTypeName</key>
+			<string>BibDocument File</string>
+			<key>CFBundleTypeRole</key>
+			<string>Editor</string>
+			<key>NSDocumentClass</key>
+			<string>BibDocument</string>
+		</dict>
 	</array>
 	<key>CFBundleExecutable</key>
 	<string>Bibdesk</string>

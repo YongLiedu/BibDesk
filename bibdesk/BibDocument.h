@@ -137,6 +137,9 @@ extern NSString* BDSKBibTeXStringPboardType;
     IBOutlet NSView *rssExportAccessoryView;
     IBOutlet NSForm *rssExportForm;
     IBOutlet NSTextField* rssExportTextField;
+    
+    IBOutlet NSView *SaveEncodingAccessoryView;
+    IBOutlet NSPopUpButton *saveTextEncodingPopupButton;
 }
 
 - (void)awakeFromNib;
@@ -151,6 +154,7 @@ extern NSString* BDSKBibTeXStringPboardType;
 - (NSData *)rssDataRepresentation;
 - (NSData *)bibDataRepresentation;
 - (NSData *)htmlDataRepresentation;
+- (NSData *)bibTeXDataWithEncoding:(NSStringEncoding)encoding;
 - (NSString *)publicationsAsHTML;
 - (BOOL)loadDataRepresentation:(NSData *)data ofType:(NSString *)aType;
 - (BOOL)loadBibTeXDataRepresentation:(NSData *)data;
