@@ -11,7 +11,7 @@ is a good command
 -->
 
 <dictionary title="BibDesk Terminology">
-    <suite name="Bibdesk Suite" code="MMcC" description="Bibdesk specific commands and classes for dealing with bibliographies and publications.">
+    <suite name="Bibdesk Suite" code="BDSK" description="Bibdesk specific commands and classes for dealing with bibliographies and publications.">
         <cocoa name="BibDeskSuite"/>
         
         <classes>		
@@ -172,7 +172,7 @@ is a good command
 
         
         <commands>
-<!--			<command name="filter" code="MMcCfilt" description="Display only those publications containing the given string. Usage: filter for string.">
+<!--			<command name="filter" code="BDSKfilt" description="Display only those publications containing the given string. Usage: filter for string.">
 				<cocoa name="Filter" class="BibDeskFilterScriptCommand"/>
 				<direct-parameter type="object" description="The object performing the filtering. Either a document or the application, which will filter in all open documents."/>
 				<parameter name="for" type="string" code="for " description="The string to filter for.">
@@ -183,7 +183,7 @@ is a good command
 The filter command has been dropped and the functionality moved into the 'filter field' property of the document class
 -->		
 			
-			<command name="bibliography for" code="MMcCbibf" description="Returns bibliography information for the publications passed to the command.">
+			<command name="bibliography for" code="BDSKbibf" description="Returns bibliography information for the publications passed to the command.">
 				<cocoa name="bibliographyFor" class="BibDeskBibliographyCommand"/>
 				<direct-parameter type="object" description="The list of publications to generate a bibliography for."/>
 				<!-- type is actually list of publication above -->
@@ -191,12 +191,12 @@ The filter command has been dropped and the functionality moved into the 'filter
 			</command>
 			
 		
-			<command name="selectionToClipboard" description="Generates a bibliography from the selected items and puts it on the clipboard. This command has to be sent to a document." code="MMcCsbtc">
+			<command name="selectionToClipboard" description="Generates a bibliography from the selected items and puts it on the clipboard. This command has to be sent to a document." code="BDSKsbtc">
 				<!-- This is a silly command name. But AppleScript choked on all the reasonable ones as they contained words like copy or bibliography, which are already taken. =&gt; Ugly but less confusing. -->
 			</command>	
 
 		
-			<command name="search" code="MMcCsrch" description="Returns a list of publicatios matching the given string. Typical usage: search for string.">
+			<command name="search" code="BDSKsrch" description="Returns a list of publicatios matching the given string. Typical usage: search for string.">
 				<cocoa name="Search" class="BibDeskSearchForCommand"/>
 				<direct-parameter type="object" description="The object responding to the command. Either the application or a document"/>
 				<!-- type is actually application | document above -->
