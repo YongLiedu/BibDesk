@@ -602,6 +602,12 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 		NSString *rurl = [theBib valueOfField:BDSKUrlString];
 		return (![rurl isEqualToString:@""] && [NSURL URLWithString:rurl]);
 	}
+	else if ([menuItem action] == @selector(saveFileAsLocalUrl:)) {
+		return ![[[remoteSnoopWebView mainFrame] dataSource] isLoading];
+	}
+	else if ([menuItem action] == @selector(downloadLinkedFileAsLocalUrl:)) {
+		return NO;
+	}
 	return YES;
 }
 
@@ -1176,13 +1182,28 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 }
 
 - (NSArray *)webView:(WebView *)sender contextMenuItemsForElement:(NSDictionary *)element defaultMenuItems:(NSArray *)defaultMenuItems{
-	NSMutableArray *menuItems = [NSMutableArray arrayWithCapacity:6];
+	NSMutableArray *menuItems = [NSMutableArray arrayWithCapacity:8];
 	NSMenuItem *item;
 	
-	if([defaultMenuItems count] > 0){
-		[menuItems addObjectsFromArray:defaultMenuItems];
-		[menuItems addObject:[NSMenuItem separatorItem]];
+	NSEnumerator *iEnum = [defaultMenuItems objectEnumerator];
+	while (item = [iEnum nextObject]) { 
+		if ([item tag] != WebMenuItemTagOpenLinkInNewWindow &&
+			[item tag] != WebMenuItemTagOpenImageInNewWindow &&
+			[item tag] != WebMenuItemTagOpenFrameInNewWindow) {
+			
+			[menuItems addObject:item];
+			
+			if ([item tag] == WebMenuItemTagDownloadLinkToDisk) {
+				item = [[NSMenuItem alloc] initWithTitle:NSLocalizedString(@"Download Linked File as Local File",@"Download linked file as local file")
+												  action:@selector(downloadLinkedFileAsLocalUrl:)
+										   keyEquivalent:@""];
+				[item setTarget:self];
+				[menuItems addObject:[item autorelease]];
+			}
+		}
 	}
+	if ([menuItems count] > 0) 
+		[menuItems addObject:[NSMenuItem separatorItem]];
 	
 	item = [[NSMenuItem alloc] initWithTitle:NSLocalizedString(@"Back",@"Back")
 									  action:@selector(goBack:)
@@ -1214,7 +1235,47 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 							   keyEquivalent:@""];
 	[menuItems addObject:[item autorelease]];
 	
+	[menuItems addObject:[NSMenuItem separatorItem]];
+	
+	item = [[NSMenuItem alloc] initWithTitle:NSLocalizedString(@"Save as Local File",@"Save as local file")
+									  action:@selector(saveFileAsLocalUrl:)
+							   keyEquivalent:@""];
+	[item setTarget:self];
+	[menuItems addObject:[item autorelease]];
+	
 	return menuItems;
+}
+
+- (void)saveFileAsLocalUrl:(id)sender{
+	WebDataSource *dataSource = [[remoteSnoopWebView mainFrame] dataSource];
+	if (!dataSource || [dataSource isLoading]) 
+		return;
+	
+	NSString *fileName = [[[[dataSource request] URL] relativePath] lastPathComponent];
+	NSString *extension = [fileName pathExtension];
+   
+	NSSavePanel *sPanel = [NSSavePanel savePanel];
+    if (![extension isEqualToString:@""]) 
+		[sPanel setRequiredFileType:extension];
+    int result = [sPanel runModalForDirectory:nil file:fileName];
+    if (result == NSOKButton) {
+		if ([[dataSource data] writeToFile:[sPanel filename] atomically:YES]) {
+			NSString *fileURLString = [[NSURL fileURLWithPath:[[sPanel filename] stringByStandardizingPath]] absoluteString];
+			
+			[theBib setField:BDSKLocalUrlString toValue:fileURLString];
+			[theBib autoFilePaper];
+			
+			[self finalizeChanges];
+			[self setupForm];
+			[self fixURLs];
+		} else {
+			NSLog(@"Could not write downloaded file.");
+		}
+    }
+}
+
+- (void)downloadLinkedFileAsLocalUrl:(id)sender{
+	// not yet implemented 
 }
 
 #pragma mark undo manager

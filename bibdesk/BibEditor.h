@@ -302,6 +302,19 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 */
 - (void)toggleSnoopDrawer:(id)sender;
 
+/*!
+    @method     saveFileAsLocalUrl:
+    @abstract   Action to save the current file in the web drawer and set the Local-Url to the saved location. 
+    @discussion (comprehensive description)
+*/
+- (void)saveFileAsLocalUrl:(id)sender;
+
+/*!
+    @method     downloadLinkedFileAsLocalUrl:
+    @abstract   Action to download a file linked in the web drawer and set the Local-Url to the saved location. 
+    @discussion (comprehensive description)
+*/
+- (void)downloadLinkedFileAsLocalUrl:(id)sender;
 
 /*!
     @method     citeKeyIsValid:
