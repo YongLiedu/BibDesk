@@ -50,11 +50,11 @@
 	[tmpBI release];
 }
 
-- (IBAction)citeKeyHelp:(id)sender{
+- (IBAction)formatHelp:(id)sender{
 	// Panther only
 	//[[NSHelpManager sharedHelpManager] openHelpAnchor:@"citekeyFormat" inBook:@"BibDesk Help"];
 	// ..or we need Carbon/AppleHelp.h
-	AHLookupAnchor((CFStringRef)@"BibDesk Help",(CFStringRef)@"citekeyFormat");
+	AHLookupAnchor((CFStringRef)@"BibDesk Help",(CFStringRef)@"format");
 }
 
 - (IBAction)changeCiteKeyAutogenerate:(id)sender{

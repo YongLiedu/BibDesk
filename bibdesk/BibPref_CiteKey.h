@@ -24,7 +24,7 @@
 
 - (IBAction)citeKeyFormatChanged:(id)sender;
 - (IBAction)citeKeyFormatAdd:(id)sender;
-- (IBAction)citeKeyHelp:(id)sender;
+- (IBAction)formatHelp:(id)sender;
 - (IBAction)changeCiteKeyAutogenerate:(id)sender;
 - (void)updateUI;
 - (void)setupCautionIcon;

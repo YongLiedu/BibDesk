@@ -79,7 +79,7 @@
 	// Panther only
 	//[[NSHelpManager sharedHelpManager] openHelpAnchor:@"citekeyFormat" inBook:@"BibDesk Help"];
 	// ..or we need Carbon/AppleHelp.h
-	AHLookupAnchor((CFStringRef)@"BibDesk Help",(CFStringRef)@"citekeyFormat"); // name of page should change
+	AHLookupAnchor((CFStringRef)@"BibDesk Help",(CFStringRef)@"format");
 }
 
 - (IBAction)localUrlFormatAdd:(id)sender{
