@@ -764,7 +764,9 @@ void _setupFonts(){
 
     NSMutableArray *nonReqKeys = [NSMutableArray arrayWithCapacity:5]; // yep, arbitrary
 
-
+    NSDateFormatter *dateFormatter = [[[NSDateFormatter alloc] initWithDateFormat:[[NSUserDefaults standardUserDefaults] objectForKey:NSDateFormatString]
+                                                         allowNaturalLanguage:NO] autorelease];
+    
     [aStr appendAttributedString:[[[NSMutableAttributedString alloc] initWithString:
                       [NSString stringWithFormat:@"%@\n",[self citeKey]] attributes:typeAttributes] autorelease]];
     [aStr appendAttributedString:[[[NSMutableAttributedString alloc] initWithString:
@@ -796,9 +798,18 @@ void _setupFonts(){
         if(![[pubFields objectForKey:key] isEqualToString:@""]){
             [aStr appendAttributedString:[[[NSAttributedString alloc] initWithString:[NSString stringWithFormat:@"%@\n",key]
                                                                           attributes:keyAttributes] autorelease]];
+            
+            if([key isEqualToString:@"Date-Added"] || 
+               [key isEqualToString:@"Date-Modified"]){
+                NSCalendarDate *date = [NSCalendarDate dateWithString:[pubFields objectForKey:key]];
 
-            [aStr appendAttributedString:[[[NSAttributedString alloc] initWithString:[NSString stringWithFormat:@"%@\n",[pubFields objectForKey:key]]
-                                                                          attributes:bodyAttributes] autorelease]];
+                [aStr appendAttributedString:[[[NSAttributedString alloc] initWithString:[NSString stringWithFormat:@"%@\n",[dateFormatter stringForObjectValue:date]]
+                                                                              attributes:bodyAttributes] autorelease]];
+
+            }else{
+                [aStr appendAttributedString:[[[NSAttributedString alloc] initWithString:[NSString stringWithFormat:@"%@\n",[pubFields objectForKey:key]]
+                                                                              attributes:bodyAttributes] autorelease]];
+            }
 
         }
     }
