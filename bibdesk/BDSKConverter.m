@@ -15,6 +15,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 
 #import "BDSKConverter.h"
 #import "NSString_BDSKExtensions.h"
+#import "BDSKComplexString.h"
 
 static BDSKConverter *theConverter;
 
@@ -86,6 +87,18 @@ static BDSKConverter *theConverter;
 }
 
 - (NSString *)stringByTeXifyingString:(NSString *)s{
+	// TeXify only string nodes of complex strings;
+	if([s isComplex]){
+		NSEnumerator *nodeEnum = [[(BDSKComplexString *)s nodes] objectEnumerator];
+		BDSKStringNode *node = nil;
+		
+		while(node = [nodeEnum nextObject]){
+			if([node type] == BSN_STRING)
+				[node setValue:[self stringByTeXifyingString:[node value]]];
+		}
+		return;
+	}
+	
     // s should be in UTF-8 or UTF-16 (i'm not sure which exactly) format (since that's what the property list editor spat)
     // This direction could be faster, since we're comparing characters to the keys, but that'll be left for later.
     NSScanner *scanner = [[NSScanner alloc] initWithString:s];
@@ -226,6 +239,18 @@ static BDSKConverter *theConverter;
 
 
 - (NSString *)stringByDeTeXifyingString:(NSString *)s{
+	// deTeXify only string nodes of complex strings;
+	if([s isComplex]){
+		NSEnumerator *nodeEnum = [[(BDSKComplexString *)s nodes] objectEnumerator];
+		BDSKStringNode *node = nil;
+		
+		while(node = [nodeEnum nextObject]){
+			if([node type] == BSN_STRING)
+				[node setValue:[self stringByDeTeXifyingString:[node value]]];
+		}
+		return;
+	}
+	
     NSScanner *scanner = [NSScanner scannerWithString:s];
     NSString *tmpPass;
     NSString *tmpConv;
