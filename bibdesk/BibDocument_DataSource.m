@@ -50,18 +50,19 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
     NSArray *auths = nil;
     int sortedRow = (sortDescending ? [shownPublications count] - 1 - row : row);
     NSString *path = nil;
-    
+    NSString *tcID = [tableColumn identifier];
+	
     if(tView == tableView){
         pub = [shownPublications objectAtIndex:sortedRow];
         auths = [pub pubAuthors];
         
-        if([[tableColumn identifier] isEqualToString: @"Cite Key"] ){
+        if([tcID isEqualToString: @"Cite Key"] ){
             return [pub citeKey];
             
-        }else if([[tableColumn identifier] isEqualToString: @"Title"] ){
+        }else if([tcID isEqualToString: @"Title"] ){
             return [pub title];
             
-        }else if([[tableColumn identifier] isEqualToString: @"Date"] ){
+        }else if([tcID isEqualToString: @"Date"] ){
             if([pub date] == nil)
                 return @"No date";
             else if([[pub valueOfField:@"Month"] isEqualToString:@""])
@@ -69,26 +70,26 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
             else
                 return [[pub date] descriptionWithCalendarFormat:@"%b %Y"];
             
-        }else if([[tableColumn identifier] isEqualToString: @"1st Author"] ){
+        }else if([tcID isEqualToString: @"1st Author"] ){
             if([auths count] > 0){
                 return [[pub authorAtIndex:0] name];
             }else{
                 return @"-";
             }
             
-        }else if([[tableColumn identifier] isEqualToString: @"2nd Author"] ){
+        }else if([tcID isEqualToString: @"2nd Author"] ){
             if([auths count] > 1)
                 return [[pub authorAtIndex:1] name]; 
             else
                 return @"-";
             
-        }else if([[tableColumn identifier] isEqualToString: @"3rd Author"] ){
+        }else if([tcID isEqualToString: @"3rd Author"] ){
             if([auths count] > 2)
                 return [[pub authorAtIndex:2] name];
             else
                 return @"-";
             
-        }else if ([[tableColumn identifier] isEqualToString:@"Local-Url"]){
+        }else if ([tcID isEqualToString:@"Local-Url"]){
             path = [pub localURLPathRelativeTo:[[self fileName] stringByDeletingLastPathComponent]];
             if(path && [[NSFileManager defaultManager] fileExistsAtPath:path]){
                 return [[NSWorkspace sharedWorkspace] iconForFile:path];
@@ -96,14 +97,15 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
                 return nil;
             }
 
-        }else if ([[tableColumn identifier] isEqualToString:@"Url"]){
+        }else if ([tcID isEqualToString:@"Url"]){
             path = [pub valueOfField:@"Url"];
             if(path && ![path isEqualToString:@""]){
                 return [[NSWorkspace sharedWorkspace] iconForFileType:@"webloc"];
             }else{
                 return nil;
             }
-
+	}else if([tcID isEqualToString:@"Type"]){
+	    return [pub type];
         }else{
             // the tableColumn isn't something we handle in a custom way.
             return [pub valueOfField:[tableColumn identifier]];

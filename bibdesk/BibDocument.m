@@ -1231,31 +1231,36 @@ didClickTableColumn: (NSTableColumn *) tableColumn{
         lastSelectedColumnForSort = [tableColumn retain];
         [tableView setHighlightedTableColumn: tableColumn]; 
 	}
+
+	NSString *tcID = [tableColumn identifier];
 	// resorting should happen whenever you click.
-	if([[tableColumn identifier] isEqualToString:@"Cite Key"]){
+	if([tcID isEqualToString:@"Cite Key"]){
 		
 		[publications sortUsingSelector:@selector(keyCompare:)];
 		[shownPublications sortUsingSelector:@selector(keyCompare:)];
-	}else if([[tableColumn identifier] isEqualToString:@"Title"]){
+	}else if([tcID isEqualToString:@"Title"]){
 		
 		[publications sortUsingSelector:@selector(titleCompare:)];
 		[shownPublications sortUsingSelector:@selector(titleCompare:)];
-	}else if([[tableColumn identifier] isEqualToString:@"Date"]){
+	}else if([tcID isEqualToString:@"Date"]){
 		
 		[publications sortUsingSelector:@selector(dateCompare:)];
 		[shownPublications sortUsingSelector:@selector(dateCompare:)];
-	}else if([[tableColumn identifier] isEqualToString:@"1st Author"]){
+	}else if([tcID isEqualToString:@"1st Author"]){
 		
 		[publications sortUsingSelector:@selector(auth1Compare:)];
 		[shownPublications sortUsingSelector:@selector(auth1Compare:)];
-	}else if([[tableColumn identifier] isEqualToString:@"2nd Author"]){
+	}else if([tcID isEqualToString:@"2nd Author"]){
 		
 		[publications sortUsingSelector:@selector(auth2Compare:)];
 		[shownPublications sortUsingSelector:@selector(auth2Compare:)];
-	}else if([[tableColumn identifier] isEqualToString:@"3rd Author"]){
+	}else if([tcID isEqualToString:@"3rd Author"]){
 		
 		[publications sortUsingSelector:@selector(auth3Compare:)];
 		[shownPublications sortUsingSelector:@selector(auth3Compare:)];
+	}else if([tcID isEqualToString:@"Type"]){
+		[publications sortUsingSelector:@selector(pubTypeCompare:)];
+		[shownPublications sortUsingSelector:@selector(pubTypeCompare:)];
 	}else{
 		[publications sortUsingFunction:generalBibItemCompareFunc context:[tableColumn identifier]];
 		[shownPublications sortUsingFunction:generalBibItemCompareFunc context:[tableColumn identifier]];
