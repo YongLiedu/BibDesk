@@ -20,6 +20,9 @@
                               error:(BOOL *)hadProblems
                         frontMatter:(NSMutableString *)frontMatter
                            filePath:(NSString *)filePath{
+	
+	NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
+	
     int ok = 1;
     long cidx = 0; // used to scan through buf for annotes.
     int braceDepth = 0;
@@ -37,7 +40,7 @@
     int itemOrder = 1;
     BibAppController *appController = (BibAppController *)[NSApp delegate];
     NSString *entryType = nil;
-    NSMutableArray *returnArray = [NSMutableArray arrayWithCapacity:1];
+    NSMutableArray *returnArray = [[NSMutableArray alloc] initWithCapacity:1];
     
     const char *buf = NULL; // (char *) malloc(sizeof(char) * [inData length]);
 
@@ -110,7 +113,7 @@
                                                  fileType:@"BibTeX"
                                                   authors:
                         [NSMutableArray arrayWithCapacity:0]];
-		    [newBI setFileOrder:itemOrder];
+					[newBI setFileOrder:itemOrder];
                     itemOrder++;
                     field = NULL;
                     // Returned special case handling of abstract & annote.
@@ -221,7 +224,9 @@
             }
         }
         // @@readonly free(buf);
-        return returnArray;
+		
+		[pool release];
+        return [returnArray autorelease];
 }
 
 
