@@ -39,8 +39,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
     [theBib setEditorObj:self];
     currentType = [theBib type];    // do this once in init so it's right at the start.
                                     // has to be before we call [self window] because that calls windowDidLoad:.
-    [self setDocument:doc];
-
+    theDocument = doc; // don't retain - it retains us.
 	pdfSnoopViewLoaded = NO;
 	textSnoopViewLoaded = NO;
 	webSnoopViewLoaded = NO;
@@ -1182,11 +1181,10 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
     [[self document] showMacrosWindow:self];
 }
 
+// Note:  implementing setDocument or -document can have strange side effects with our document window controller array at present.
+// every window controller subclass managed by the document needs to have this implemented in order for automatic closing/releasing,
+// but we're doing it manually at present.
 - (void)setDocument:(NSDocument *)d{
-}
-
-- (id)document{
-    return theDocument;
 }
 
 #pragma mark snoop drawer stuff
