@@ -76,6 +76,9 @@ sub getsources {
 
    $GETVENDOR = "cvs -z3 -d:$CVS_METHOD:$SFNAME\@cvs.sourceforge.net:/cvsroot/bibdesk co bibdesk_vendorsrc";
    tryGet($GETVENDOR);
+   
+   $GETINPUTMANAGER = "cvs -z3 -d:$CVS_METHOD:$SFNAME\@cvs.sourceforge.net:/cvsroot/bibdesk co bibdeskinputmanager";
+   tryGet($GETINPUTMANAGER);
 
 }
 
