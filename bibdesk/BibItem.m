@@ -882,6 +882,11 @@ _setupParagraphStyle()
 }
 
 - (NSData *)RTFValue{
+    NSAttributedString *aStr = [self attributedStringValue];
+    return [aStr RTFFromRange:NSMakeRange(0,[aStr length]) documentAttributes:nil];
+}
+
+- (NSAttributedString *)attributedStringValue{
     NSString *key;
     NSEnumerator *e = [[[pubFields allKeys] sortedArrayUsingSelector:@selector(caseInsensitiveCompare:)] objectEnumerator];
     NSDictionary *_cachedFonts = [[BDSKFontManager sharedFontManager] cachedFontsForPreviewPane];
@@ -979,8 +984,7 @@ _setupParagraphStyle()
     [aStr appendAttributedString:[[[NSAttributedString alloc] initWithString:@" "
                                                                   attributes:nil] autorelease]];
 
-
-    return 	[aStr RTFFromRange:NSMakeRange(0,[aStr length]) documentAttributes:nil];
+    return 	aStr;
 }
 
 - (NSString *)bibTeXString{

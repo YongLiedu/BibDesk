@@ -308,6 +308,13 @@
 - (NSData *)RTFValue;
 
 
+/*!
+    @method     attributedStringValue
+    @abstract   Returns an attributed string representation of the receiver, suitable for display purposes
+    @discussion Uses the default font family set in the preferences
+    @result     (description)
+*/
+- (NSAttributedString *)attributedStringValue;
 
     /*!
     @method RSSValue

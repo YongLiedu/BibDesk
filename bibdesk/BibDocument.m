@@ -2603,16 +2603,19 @@ This method always returns YES. Even if some or many operations fail.
     
     [previewField setString:@""];
     int itemCount = 0;
+    
+    NSTextStorage *textStorage = [previewField textStorage];
+    [textStorage fixesAttributesLazily];
+    [textStorage beginEditing];
 
     while(i = [enumerator nextObject]){
 
         switch([[OFPreferenceWrapper sharedPreferenceWrapper] integerForKey:BDSKPreviewDisplayKey]){
             case 0:                
                 itemCount++;
-                [previewField replaceCharactersInRange:[previewField selectedRange]
-                                               withRTF:[[shownPublications objectAtIndex:[i intValue]] RTFValue]];
+                [textStorage appendAttributedString:[[shownPublications objectAtIndex:[i intValue]] attributedStringValue]];
                 if(itemCount < [tableView numberOfSelectedRows])
-                    [[[previewField textStorage] mutableString] appendCharacter:NSFormFeedCharacter]; // page break for printing; doesn't work unless you copy to TextEdit
+                    [[textStorage mutableString] appendCharacter:NSFormFeedCharacter]; // page break for printing; doesn't display
                 break;
             case 1:
                 // special handling for annote-only
@@ -2622,20 +2625,21 @@ This method always returns YES. Even if some or many operations fail.
                                                          attributes:titleAttributes] autorelease];
                     [s appendAttributedString:[[[NSAttributedString alloc] initWithString:@"\n\n"
                                                                                   attributes:nil] autorelease]];
-                    [previewField replaceCharactersInRange: [previewField selectedRange] withRTF:
-                        [s RTFFromRange:NSMakeRange(0, [s length]) documentAttributes:nil]];
+                    [textStorage appendAttributedString:s];
                 }
 
                 if([[[shownPublications objectAtIndex:[i intValue]] valueOfField:BDSKAnnoteString] isEqualToString:@""]){
-                    [previewField replaceCharactersInRange: [previewField selectedRange] withString:NSLocalizedString(@"No notes.",@"")];
+                    [[textStorage mutableString] appendString:NSLocalizedString(@"No notes.",@"")];
                 }else{
-                    [previewField replaceCharactersInRange: [previewField selectedRange] withString: [[shownPublications objectAtIndex:[i intValue]] valueOfField:BDSKAnnoteString]];
+                    [[textStorage mutableString] appendString:[[shownPublications objectAtIndex:[i intValue]] valueOfField:BDSKAnnoteString]];
                 }
                 break;
         }
-
-        [previewField replaceCharactersInRange: [previewField selectedRange] withString:@"\n\n"];
+        [[textStorage mutableString] appendString:@"\n\n"];
     }
+    [textStorage endEditing];
+    [textStorage ensureAttributesAreFixedInRange:NSMakeRange(0, [textStorage length])];
+
     [previewField unlockFocus];
 }
 
