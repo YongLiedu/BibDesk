@@ -79,7 +79,7 @@ A Category on BibItem with a few additional methods to enable and enhance its sc
 */
 - (BibField *)valueInBibFieldsWithName:(NSString *)name
 {
-	return [[[BibField alloc] initWithName:name bibItem:self] autorelease];
+	return [[[BibField alloc] initWithName:[name capitalizedString] bibItem:self] autorelease];
 }
 
 - (NSArray *)bibFields
@@ -89,6 +89,7 @@ A Category on BibItem with a few additional methods to enable and enhance its sc
 	NSMutableDictionary *bibFields = [[NSMutableDictionary dictionaryWithCapacity:1] retain];
 	
 	while (name = [fEnum nextObject]) {
+		name = [name capitalizedString];
 		if (![@"" isEqualToString:[self valueOfField:name]])
 			[bibFields setObject:[[[BibField alloc] initWithName:name bibItem:self] autorelease] forKey:name];
 	}
