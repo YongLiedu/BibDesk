@@ -68,6 +68,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
     BibItem *bi = (BibItem *)item;
     NSMutableString *value = [NSMutableString stringWithString:@""];
     NSString *s;
+    NSString *path;
     
     if(bi == nil) {
 #if DEBUG
@@ -80,6 +81,10 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
     if([bi numberOfChildren] > 0){
         if(tableColumn == [oView outlineTableColumn]){
             [value appendString: [bi name]];
+        }else if ([[tableColumn identifier] isEqualToString:@"Local-Url"]){
+            return nil;
+        }else if ([[tableColumn identifier] isEqualToString:@"Url"]){
+            return nil;
         }else{
             [value appendString: @""];
         }
@@ -95,6 +100,24 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
             else if([[bi valueOfField:@"Month"] isEqualToString:@""])
                 [value appendString: [[bi date] descriptionWithCalendarFormat:@"%Y"]];
             else [value appendString: [[bi date] descriptionWithCalendarFormat:@"%b %Y"]];
+
+        }else if ([[tableColumn identifier] isEqualToString:@"Local-Url"]){
+            path = [bi localURLPathRelativeTo:[[self fileName] stringByDeletingLastPathComponent]];
+            if(path && [[NSFileManager defaultManager] fileExistsAtPath:path]){
+                return [[NSWorkspace sharedWorkspace] iconForFile:path];
+            }else{
+                return nil;
+            }
+
+        }else if ([[tableColumn identifier] isEqualToString:@"Url"]){
+            path = [bi valueOfField:@"Url"];
+            if(path && ![path isEqualToString:@""]){
+                return [[NSWorkspace sharedWorkspace] iconForFileType:@"webloc"];
+            }else{
+                return nil;
+            }
+
+
         }else{
             // the tableColumn isn't something we handle in a custom way.
             s = [bi valueOfField:[tableColumn identifier]];
