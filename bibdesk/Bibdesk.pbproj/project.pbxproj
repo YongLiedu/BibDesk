@@ -1139,7 +1139,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /usr/bin/python;
-			shellScript = "import os\nbuildpath = os.environ[\"SOURCE_ROOT\"]\nos.environ[\"OTEST\"] = \"/Users/mike/Code/customizedLibs/OCUnit/tools/otest\"\nif os.environ.has_key(\"TEST_AFTER_BUILD\") and os.environ[\"TEST_AFTER_BUILD\"] == \"YES\":\n#\tos.popen(buildpath + \"RunTargetUnitTests\")\n\tos.popen(\"/Users/mike/Code/customizedLibs/OCUnit/tools/RunTargetUnitTests\")";
+			shellScript = "import os,sys\nbuildpath = os.environ[\"SOURCE_ROOT\"]\nos.environ[\"OTEST\"] = \"/Users/mike/Code/customizedLibs/OCUnit/tools/otest\"\nif os.environ.has_key(\"TEST_AFTER_BUILD\") and os.environ[\"TEST_AFTER_BUILD\"] == \"YES\":\n#\tos.popen(buildpath + \"RunTargetUnitTests\")\n\tos.popen(\"/Users/mike/Code/customizedLibs/OCUnit/tools/RunTargetUnitTests\")\nsys.exit(0)";
 		};
 		27CB67A405680FC0001D2AC3 = {
 			fileEncoding = 4;
@@ -1225,10 +1225,10 @@
 				INFOPLIST_FILE = "Info-Bibdesk__Upgraded_.plist";
 				LIBRARY_SEARCH_PATHS = "$(SOURCE_ROOT)/../bibdesk_vendorsrc/gward/btparse/";
 				OTHER_CFLAGS = "-pipe";
-				OTHER_LDFLAGS = "-pipe";
+				OTHER_LDFLAGS = "";
 				PRODUCT_NAME = Bibdesk;
 				SECTORDER_FLAGS = "";
-				WARNING_CFLAGS = "-Wmost -Wno-four-char-constants -Wno-unknown-pragmas";
+				WARNING_CFLAGS = "-Wall -Wmost -Wno-four-char-constants -Wno-unknown-pragmas";
 				WRAPPER_EXTENSION = app;
 				ZERO_LINK = NO;
 			};
