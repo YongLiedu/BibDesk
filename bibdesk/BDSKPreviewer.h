@@ -49,6 +49,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
     NSAttributedString *rtfString;
     IBOutlet NSTextView *rtfPreviewView;
     IBOutlet NSTabView *tabView;
+    NSString *binPathDir;
 }
 /*!
     @method sharedPreviewer
