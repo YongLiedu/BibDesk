@@ -575,10 +575,6 @@ void _setupFonts(){
 		[self setDateModified:[NSCalendarDate dateWithNaturalLanguageString:dateModValue]];
 	}
 	
-	// autogenerate cite key if we have enough information
-	if ([self canSetCiteKey]) {
-		[self setCiteKey:[self suggestedCiteKey]];
-	}
 }
 
 - (void)setRequiredFieldNames: (NSArray *)newRequiredFieldNames{

@@ -767,6 +767,10 @@ NSString *BDSKDateModifiedString = @"Date-Modified";
 		
 		[theBib setField:title toValue:value];
 		
+		// autogenerate cite key if we have enough information
+		if ([theBib canSetCiteKey]) {
+			[self generateCiteKey:sender];
+		}
 	}
 }
 
