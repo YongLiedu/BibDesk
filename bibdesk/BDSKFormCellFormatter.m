@@ -44,15 +44,18 @@
     NSArray *strings = [[NSApp delegate] stringsForCompletionEntry:_entry];
     NSEnumerator *stringE = [strings objectEnumerator];
     NSString *string = nil;
-
-    while(string = [stringE nextObject]){
-        if ([string hasPrefix:*partialStringPtr]) {
+	
+	// If this would not move the cursor forward, it is a delete.
+	if(origSelRange.location == proposedSelRangePtr->location) return YES;
+    
+	while(string = [stringE nextObject]){
+        if ([string isKindOfClass:[NSString class]] && [string hasPrefix:*partialStringPtr]) { // it will occasionally get here with an invalid 'string'. 'strings' is ok though... this is an evil hack, but trying to fix it opened up a huge can of worms... ouch
             break;
         }
     }
-    // If this would not move the cursor forward, it is a delete.
+    
     // also allow to keep typing for no match - new entries are OK.
-    if (!string || origSelRange.location == proposedSelRangePtr->location) return YES;
+    if (!string) return YES;
 
     // If the partial string is shorter than the
     // match,  provide the match and set the selection
