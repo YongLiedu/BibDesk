@@ -16,6 +16,7 @@
                 choosePapersFolderLocationButton = NSButton; 
                 filePapersAutomaticallyCheckButton = NSButton; 
                 formatField = NSTextField; 
+                formatPresetPopUp = NSPopUpButton; 
                 formatRepositoryPopUp = NSPopUpButton; 
                 formatWarningButton = NSButton; 
                 keepPapersFolderOrganizedCheckButton = NSButton; 
