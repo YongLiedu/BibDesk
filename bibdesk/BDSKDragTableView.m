@@ -41,6 +41,10 @@ static NSColor *sStripeColor = nil;
             string = [[NSAttributedString alloc] initWithString:s];
             image = [[[NSImage alloc] init] autorelease];
             stringSize = [string size];
+			if(stringSize.width == 0 || stringSize.height == 0){
+				NSLog(@"string size was zero");
+				stringSize = maxSize; // work around bug in NSAttributedString
+			}
             if(stringSize.width > maxSize.width)
                 stringSize.width = maxSize.width += 4.0;
             if(stringSize.height > maxSize.height)
