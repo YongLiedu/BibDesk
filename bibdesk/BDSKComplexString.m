@@ -160,7 +160,7 @@ static NSDictionary *globalMacroDefs;
     if([btstring length] == 0){
         // if the string was whitespace only, it becomes empty.
         // empty strings are a special case, they are not complex.
-        return [BDSKComplexString complexStringWithString:@"" macroResolver:theMacroResolver];
+        return [NSString stringWithString:@""];
     }
     
     NSScanner *sc = [NSScanner scannerWithString:btstring];
@@ -266,9 +266,9 @@ static NSDictionary *globalMacroDefs;
 		}
 	}
 	
-	// if we have a single string-type node, we make a simple complexstring
+	// if we have a single string-type node, we return an NSString
 	if ([returnNodes count] == 1 && [(BDSKStringNode*)[returnNodes objectAtIndex:0] type] == BSN_STRING) {
-		return [BDSKComplexString complexStringWithString:[[returnNodes objectAtIndex:0] value] macroResolver:theMacroResolver];
+		return [[returnNodes objectAtIndex:0] value];
 	}
 	return [BDSKComplexString complexStringWithArray:returnNodes macroResolver:theMacroResolver];
 }

@@ -804,8 +804,7 @@ NSRange SafeBackwardSearchRange(NSRange startRange, unsigned seekLength){
                                     // scan up to the next quote.
                                     for(; buf[cidx] != '"'; cidx++);
                                 }
-                                s = [NSString stringWithCString:&buf[field->down->offset] length:(cidx- (field->down->offset))];
-                                complexString = [BDSKComplexString complexStringWithString:s macroResolver:theDocument];
+                                complexString = [NSString stringWithCString:&buf[field->down->offset] length:(cidx- (field->down->offset))];
                             }else{
                                 *hadProblems = YES;
                             }
@@ -968,8 +967,7 @@ BDSKComplexString *complexStringFromBTField(AST *field, NSString *fieldName, NSS
     
     if([stringValueArray count] == 1 &&
        [(BDSKStringNode *)[stringValueArray objectAtIndex:0] type] == BSN_STRING){
-        return [BDSKComplexString complexStringWithString:[(BDSKStringNode *)[stringValueArray objectAtIndex:0] value] 
-                                            macroResolver:document];
+        return [[stringValueArray objectAtIndex:0] value]; // an NSString
     }
     
 	return [BDSKComplexString complexStringWithArray:stringValueArray macroResolver:document];
