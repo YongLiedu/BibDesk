@@ -498,6 +498,22 @@ extern NSString *BDSKBibItemLocalDragPboardType;
 - (void)editPub:(BibItem *)pub;
 
 /*!
+    @method cut
+    @abstract delete and copy according to the preference
+    @discussion deletes the currently selected publications and uses copy to put a representation on the general pasteboard. Does not call the delete sheet; you can paste them back. 
+    @param sender The sender. Not used.
+*/
+- (IBAction)cut:(id)sender;
+
+/*!
+    @method copy
+    @abstract copy according to the preference
+    @discussion puts a representation of the currently selected publications onto the general pasteboard.
+    @param sender The sender. Not used.
+*/
+- (IBAction)copy:(id)sender;
+
+/*!
     @method copyAsBibTex
     @abstract copy as bibtex source
     @discussion puts the bibtex source of the currently selected publications onto the general pasteboard.

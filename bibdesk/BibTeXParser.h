@@ -37,5 +37,7 @@
 - (NSMutableArray *)itemsFromString:(NSString *)fullString error:(BOOL *)hadProblems frontMatter:(NSMutableString *)frontMatter filePath:(NSString *)filePath addToDocument:(BibDocument *)document;
 - (NSMutableArray *)itemsFromData:(NSData *)inData error:(BOOL *)hadProblems frontMatter:(NSMutableString *)frontMatter filePath:(NSString *)filePath;
 - (void)parseItemsFromString:(NSString *)fullString addToDocument:(BibDocument *)document;
+- (BibDocument *)document;
+- (void)setDocument:(BibDocument *)aDocument;
 
 @end
