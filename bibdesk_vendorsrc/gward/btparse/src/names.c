@@ -443,6 +443,7 @@ find_tokens (char *  name,
          if (in_boundary)
          {
             tokens->items[num_tok-1] = NULL;
+          num_tok--;
          }
 
          /* in any case, mark the end of one token and prepare for the 
@@ -805,6 +806,7 @@ bt_split_name (char *  name,
 
    if (len == 0)                        /* non-existent or empty string? */
    {
+     split_name->tokens = NULL;
       for (i = 0; i < BT_MAX_NAMEPARTS; i++)
       {
          split_name->parts[i] = NULL;
@@ -855,6 +857,7 @@ bt_split_name (char *  name,
 
    if (strlen (name) == 0)              /* name now empty? */
    {
+     split_name->tokens = NULL;
       for (i = 0; i < BT_MAX_NAMEPARTS; i++)
       {
          split_name->parts[i] = NULL;
