@@ -39,17 +39,17 @@ INSTALL_MAN3 = $(INSTALL_MAN)/man3
 #   CPPFLAGS  all flags for the C preprocessor
 
 CC = gcc
-CFLAGS = -g -O2 -W -Wall -Wpointer-arith -Wbad-function-cast -Wmissing-prototypes
+CFLAGS = -g -O2 -Wall -Wpointer-arith -Wbad-function-cast -Wmissing-prototypes -x objective-c
 CFLAGS2 = -g -O2
-DEFINES = 
-EXTRA_CPPFLAGS = -x objective-c -framework Cocoa
+DEFINES =
+#EXTRA_CPPFLAGS = -x objective-c -framework Cocoa
 CPPFLAGS = -Ipccts $(DEFINES) $(EXTRA_CPPFLAGS)
 
 # Linker flags -- needed to build the standalone programs included with
 # the library (test and example programs).  This doesn't include flags
 # needed to link with btparse itself; those are the responsbility of
 # the lower-level makefiles.
-EXTRA_LDFLAGS = 
+EXTRA_LDFLAGS = -framework Cocoa
 
 # Archiver (ar) options
 AR = /usr/bin/ar
