@@ -981,7 +981,9 @@ NSString *BDSKDateModifiedString = @"Date-Modified";
 
 - (void)windowWillClose:(NSNotification *)notification{
  //@@citekey   [[self window] makeFirstResponder:citeKeyField]; // makes the field check if there is a duplicate field.
-    [[self window] makeFirstResponder:[self window]];
+    if (![[self window] makeFirstResponder:[self window]]) {
+		[[self window] endEditingFor:nil];
+	}
 	[documentSnoopDrawer close];
 }
 
