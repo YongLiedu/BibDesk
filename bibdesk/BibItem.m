@@ -197,13 +197,15 @@ void _setupFonts(){
 
 
 - (BOOL)isEqual:(BibItem *)aBI{
-    return ([pubType isEqualToString:[aBI type]]) && 
-	([citeKey isEqualToString:[aBI citeKey]]) &&
-	([pubFields isEqual:[aBI pubFields]]);
+    BOOL yn = ([citeKey isEqualToString:[aBI citeKey]]) && 
+              ([pubType isEqualToString:[aBI type]]) &&
+              ([[self title] isEqualToString:[aBI title]]);
+    // NSLog(@"isEqual returns %i", yn);
+    return yn;
 }
 
 - (unsigned)hash{
-    return [[self allFieldsString] hash];
+    return [citeKey hash];
 }
 
 #pragma mark Comparison functions
