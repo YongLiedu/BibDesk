@@ -13,7 +13,6 @@
                 showErrorPanel = id; 
                 showFindPanel = id; 
                 showPreferencePanel = id; 
-                showPreviewPanel = id; 
                 toggleShowingErrorPanel = id; 
                 toggleShowingPreviewPanel = id; 
                 visitWebSite = id; 
