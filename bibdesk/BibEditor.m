@@ -233,6 +233,9 @@ NSString *BDSKDateModifiedString = @"Date-Modified";
 	
 	[theBib setEditorObj:self];	
 	
+	// unfortunately we cannot set this in BI
+	[actionMenuButton setAlternateImage:[NSImage imageNamed:@"Action_Pressed"]];
+	
 	[[NSNotificationCenter defaultCenter] addObserver:self
 											 selector:@selector(bibDidChange:)
 												 name:BDSKBibItemChangedNotification
