@@ -262,7 +262,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 
 - (IBAction)visitWebSite:(id)sender{
     if(![[NSWorkspace sharedWorkspace] openURL:
-        [NSURL URLWithString:@"http://www.cs.ucsd.edu/~mmccrack/bibdesk.html"]]){
+        [NSURL URLWithString:@"http://bibdesk.sourceforge.net/"]]){
         NSBeep();
     }
 }
