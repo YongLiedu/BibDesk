@@ -1222,7 +1222,7 @@ Enhanced delete method that uses a sheet instead of a modal dialogue.
     NSMutableArray *orResultsArray = [NSMutableArray array];
     
     if(isGeneric){ // use the -[BibItem valueOfField:] method to get the substring we want to search in, if it's not a "standard" one
-        while(componentSubstring = [andEnum nextObject]){
+        while(componentSubstring = [orEnum nextObject]){
             NSString *value = nil;
             pubEnum = [publications objectEnumerator];
             while(pub = [pubEnum nextObject]){
@@ -1238,7 +1238,7 @@ Enhanced delete method that uses a sheet instead of a modal dialogue.
                     [aSet addObject:pub];
                 }
             }
-            [andResultsArray addObject:[[aSet copy] autorelease]];
+            [orResultsArray addObject:[[aSet copy] autorelease]];
             [aSet removeAllObjects]; // don't forget this step!
         }
     } else { // if it was a substring that has an accessor in BibItem, use that directly
