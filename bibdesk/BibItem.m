@@ -1088,6 +1088,7 @@ void _setupFonts(){
 	
 	// seed for random letters or characters
 	srand(time(NULL));
+	[scanner setCharactersToBeSkipped:nil];
 	
 	while (![scanner isAtEnd]) {
 		// scan non-specifier parts

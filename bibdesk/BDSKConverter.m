@@ -309,6 +309,8 @@ static BDSKConverter *theConverter;
 	unichar specifier;
 	BOOL mustEnd = NO;
 	
+	[scanner setCharactersToBeSkipped:nil];
+	
 	while (![scanner isAtEnd]) {
 		// scan non-specifier parts
 		if ([scanner scanUpToString:@"%" intoString:&string]) {
