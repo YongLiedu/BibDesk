@@ -98,7 +98,6 @@ NSString* BDSKBibTeXStringPboardType = @"edu.ucsd.cs.mmcrack.bibdesk: Local BibT
                                                   name:BDSKDocDelItemNotification
                                                 object:self];
 	 
-	 
      customStringArray = [[NSMutableArray arrayWithCapacity:6] retain];
      [customStringArray setArray:[[OFPreferenceWrapper sharedPreferenceWrapper] arrayForKey:BDSKCustomCiteStringsKey]];
 
@@ -375,7 +374,7 @@ NSString* BDSKBibTeXStringPboardType = @"edu.ucsd.cs.mmcrack.bibdesk: Local BibT
     [[aController window] setFrameAutosaveName:[self displayName]];
     [documentWindow makeFirstResponder:tableView];	
     [self setupTableColumns]; // calling it here mostly just makes sure that the menu is set up.
-	[self setTableFont];
+    [self setTableFont];
 }
 
 #pragma mark -
@@ -664,7 +663,9 @@ stringByAppendingPathComponent:@"BibDesk"]; */
     [self refreshAuthors];
     // since we can't save pubmed files as pubmed files:
     [self updateChangeCount:NSChangeDone];
-    
+    [self performSelector:@selector(updateUI)
+               withObject:nil
+               afterDelay:0.1];
     return YES;
 }
 
@@ -729,6 +730,9 @@ stringByAppendingPathComponent:@"BibDesk"]; */
     
 	[shownPublications setArray:publications];
     [self refreshAuthors];
+    [self performSelector:@selector(updateUI)
+               withObject:nil
+               afterDelay:0.1];
     return YES;
 }
 
@@ -2285,11 +2289,6 @@ This method always returns YES. Even if some or many operations fail.
     [customCiteDrawer close];
     [[NSApp delegate] removeErrorObjsForFileName:[self fileName]];
 
-}
-
-- (void)windowDidBecomeMain:(NSNotification *)notification{
-    // handle the update at initial file load
-    [self updateUI];
 }
 
 - (void)splitViewDoubleClick:(OASplitView *)sender{
