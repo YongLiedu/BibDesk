@@ -23,6 +23,7 @@
 #import "BibTypeManager.h"
 #import "BibAuthor.h"
 #import "NSString+Templating.h"
+#import "BibPrefController.h"
 
 @class BibEditor;
 @class BibDocument;

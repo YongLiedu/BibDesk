@@ -415,6 +415,11 @@ void _setupFonts(){
 
 - (void)setField: (NSString *)key toValue: (NSString *)value{
     [pubFields setObject: value forKey: key];
+
+	NSDictionary *notifInfo = [NSDictionary dictionaryWithObjectsAndKeys:value, @"value", key, @"key",nil];
+	[[NSNotificationCenter defaultCenter] postNotificationName:BDSKBibItemChangedNotification
+														object:self
+													  userInfo:notifInfo];
     // to allow autocomplete:
     [[NSApp delegate] addString:value forCompletionEntry:key];
 }
