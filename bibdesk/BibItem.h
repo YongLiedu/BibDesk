@@ -288,6 +288,14 @@
 - (NSString *)localURLPathRelativeTo:(NSString *)base; 
 
 /*!
+    @method suggestedLocalUrl
+    @abstract Returns a suggested local-url based on the receiver
+    @discussion Returns a suggested local-url based on the local-url format and the receivers publication  data. 
+    @result The suggested full path for the local file
+*/
+- (NSString *)suggestedLocalUrl;
+
+/*!
     @method parseFormat:forField:
     @abstract Generates a value for a field in a type based on the receiver and the format string
     @discussion -

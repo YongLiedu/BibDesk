@@ -879,6 +879,15 @@ void _setupFonts(){
 
 }
 
+- (NSString *)suggestedLocalUrl{
+	OFPreferenceWrapper *prefs = [OFPreferenceWrapper sharedPreferenceWrapper];
+	NSString *localUrlFormat = [prefs objectForKey:BDSKLocalUrlFormatKey];
+	NSString *papersFolderPath = [prefs stringForKey:BDSKPapersFolderPathKey];
+	NSString *relativeFile = [self parseFormat:localUrlFormat forField:@"Local-Url"];
+	
+	return [papersFolderPath stringByAppendingPathComponent:relativeFile];
+}
+
 - (NSString *)parseFormat:(NSString *)format forField:(NSString *)fieldName
 {
 	BDSKConverter *converter = [BDSKConverter sharedConverter];
@@ -1179,6 +1188,14 @@ void _setupFonts(){
 	if ([fieldName isEqualToString:@"Cite Key"]) {
 		    return !(proposedStr == nil || [proposedStr isEqualToString:@""] ||
 					 [[self document] citeKeyIsUsed:proposedStr byItemOtherThan:self]);
+	}
+	else if ([fieldName isEqualToString:@"Local-Url"]) {
+			if (proposedStr == nil || [proposedStr isEqualToString:@""])
+				return NO;
+			if ([[NSFileManager defaultManager] fileExistsAtPath:proposedStr])
+				return NO;
+			return YES;
+			
 	}
 	else {
 		[NSException raise:@"unimpl. feat. exc." format:@"stringIsValid:forField: is partly implemented"];
