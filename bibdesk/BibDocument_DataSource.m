@@ -237,8 +237,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
         yn = [pboard setData:[PDFpreviewer rtfDataPreview] forType:NSRTFPboardType];
     }
     [localDragPboard declareTypes:[NSArray arrayWithObject:NSStringPboardType] owner:nil];
-    [localDragPboard setString:localPBString forType:NSStringPboardType];
-    return yn;
+    return yn = [localDragPboard setString:localPBString forType:NSStringPboardType];
 
 }
 
