@@ -96,8 +96,6 @@ NSRange SafeForwardSearchRange( unsigned startLoc, unsigned seekLength, unsigned
 // Nested double quotes are bound to cause problems if the entries use the key = "value", instead of key = {value}, approach.  I can't do anything about this; if you're using TeX,
 // you shouldn't have double quotes in your files.  This is a non-issue for BibDesk-created files, as BibItem uses curly braces instead of double quotes; JabRef-1.6 appears to use braces, also.
 // This problem will only munge a single entry, though, since we scan between @ != \@ markers as entry delimiters; the larger problem is that there is no warning for this case.
-
-#warning ARM: Scan comments into preamble
     
     NSAutoreleasePool *threadPool = [[NSAutoreleasePool alloc] init];
     BOOL isThreadedLoad = NO;
@@ -126,7 +124,8 @@ NSRange SafeForwardSearchRange( unsigned startLoc, unsigned seekLength, unsigned
     NSRange firstAtRange = [fullString rangeOfString:@"@" options:NSLiteralSearch range:NSMakeRange(0, [fullString length])];
     
     NSAssert( firstAtRange.location != NSNotFound, @"This does not appear to be a BibTeX entry.  Perhaps due to an incorrect encoding guess?" );
-    
+
+#warning ARM: these checks are wrong! check brace depth
     // if the @ is escaped, get the next one
     while(firstAtRange.location >= 1 && [[fullString substringWithRange:NSMakeRange(firstAtRange.location - 1, 1)] isEqualToString:@"\\"])
         firstAtRange = [fullString rangeOfString:@"@" options:NSLiteralSearch range:SafeForwardSearchRange(firstAtRange.location + 1, fullStringLength - firstAtRange.location - 1, fullStringLength)];
@@ -160,7 +159,10 @@ NSRange SafeForwardSearchRange( unsigned startLoc, unsigned seekLength, unsigned
         NSString *type = nil;
         NSString *citekey = nil;
                 
-        [scanner setScanLocation:(firstAtRange.location + 1)];
+        if(firstAtRange.location + 1 < fullStringLength)
+            [scanner setScanLocation:(firstAtRange.location + 1)];
+        else
+            [scanner setScanLocation:fullStringLength];
 
         if(![scanner scanUpToString:@"{" intoString:&type]){
             *hadProblems = YES;
@@ -178,15 +180,35 @@ NSRange SafeForwardSearchRange( unsigned startLoc, unsigned seekLength, unsigned
                                             errorRange:[fullString lineRangeForRange:NSMakeRange(entryClosingBraceRange.location, 0)]];
         }            
         
-        if([type compare:@"String" options:NSCaseInsensitiveSearch] == NSOrderedSame){ // it's a string!  add it to the dictionary
+        if(type && [type compare:@"String" options:NSCaseInsensitiveSearch] == NSOrderedSame){ // it's a string!  add it to the dictionary
             isStringValue = YES;
             // macroStringFromScanner: also sets the scanner so we don't go into the while() loop below
             [stringsDictionary addEntriesFromDictionary:[self macroStringFromScanner:scanner
                                                                                  endingRange:entryClosingBraceRange
                                                                                       string:fullString]];
-            NSLog(@"stringsDict has %@", [stringsDictionary description]);
+            // NSLog(@"stringsDict has %@", [stringsDictionary description]);
         } else {
-            isStringValue = NO; // don't forget to reset this!
+            if(type && [type compare:@"preamble" options:NSCaseInsensitiveSearch] == NSOrderedSame){ // it's the preamble, oh no...
+                isStringValue = YES; // this works for preamble as well, since we don't want to run those through the while() loop
+                [frontMatter appendString:[self preambleStringFromScanner:scanner
+                                                              endingRange:entryClosingBraceRange
+                                                                   string:fullString
+                                                                 filePath:filePath
+                                                              hadProblems:&*hadProblems]];
+                nextAtRange = [fullString rangeOfString:@"@" options:NSLiteralSearch range:SafeForwardSearchRange([scanner scanLocation], fullStringLength - [scanner scanLocation], fullStringLength)];
+                if(nextAtRange.location != NSNotFound){
+                    entryClosingBraceRange = [fullString rangeOfString:@"}" options:NSLiteralSearch | NSBackwardsSearch range:NSMakeRange([scanner scanLocation], nextAtRange.location - [scanner scanLocation])];
+                } else {
+                    entryClosingBraceRange = NSMakeRange(NSNotFound, 0);
+                    showWarning = YES;
+                    [self postParsingErrorNotification:@"Content not found after @preamble!"
+                                             errorType:@"Parse Warning"
+                                              fileName:filePath
+                                            errorRange:[fullString lineRangeForRange:NSMakeRange([scanner scanLocation], 0)]];                    
+                }
+            } else {
+                isStringValue = NO; // don't forget to reset this!
+            }
         }
         
         if(!isStringValue){
@@ -485,6 +507,94 @@ NSRange SafeForwardSearchRange( unsigned startLoc, unsigned seekLength, unsigned
     
     return [NSDictionary dictionaryWithObject:value forKey:[field stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceCharacterSet]]];
     
+}
+
+- (NSString *)preambleStringFromScanner:(NSScanner *)scanner endingRange:(NSRange)range string:(NSString *)fullString filePath:(NSString *)filePath hadProblems:(BOOL *)hadProblems{
+    
+    BOOL keepScanning = YES;
+    
+    unsigned searchStart = [scanner scanLocation]; // we want to keep the first and last brace, so be careful of the start/end points
+    unsigned fullStringLength = [fullString length]; // we have no idea a priori where this will end, so we'll just scan through it up to the full length
+    NSString *leftDelim = @"{";
+    NSString *rightDelim = @"}";
+    NSString *logString;
+    
+    unsigned rightDelimLocation = 0;
+    unsigned leftDelimLocation = searchStart;
+    if([scanner scanUpToString:rightDelim intoString:nil]){
+        rightDelimLocation = [scanner scanLocation];
+    } else {
+        *hadProblems = YES;
+        [self postParsingErrorNotification:[NSString stringWithFormat:@"Delimiter '%@' not found", rightDelim]
+                                 errorType:@"Parse Error" 
+                                  fileName:filePath 
+                                errorRange:[fullString lineRangeForRange:NSMakeRange([scanner scanLocation], 0)]];
+    }
+    
+    while(keepScanning){
+        NSRange braceSearchRange = NSMakeRange(searchStart, fullStringLength - searchStart); // braceSearchRange is the "key = {" <-- brace, up to the first '}'
+                                                                                       // NSLog(@"Beginning search: substring in braceSearchRange is %@", [fullString substringWithRange:braceSearchRange] );
+        NSRange braceFoundRange = [fullString rangeOfString:leftDelim options:NSLiteralSearch range:braceSearchRange]; // this is the first '{' found searching forward in braceSearchRange
+        
+        // Locals used only in this while()
+        unsigned tempStart = braceFoundRange.location;
+        BOOL doShallow = YES;
+        
+        // Okay, so we found a left delimiter.  However, it may be nested inside yet another brace pair, so let's look back from the left delimiter and see if we find another left delimiter at a different location.  
+        // Example:  Title = {Physical insight into the {Ergun} and {Wen {\&} Yu} equations for fluid flow in packed and fluidised beds},
+        // In this example, the {Wen {\&} Yu} expression is problematic, because we need to account for both left braces; if we don't, everything after the } is stripped.
+        // WARNING:  this while() is sort of nasty, and the best way to see how it works is to uncomment the debugging code.  It handles cases such as the above.
+        // No guarantee that my comments are totally accurate, either, since some of this is by trial-and-error, and it's easy to get lost in the braces when you're debugging.
+        
+        while(tempStart != [fullString rangeOfString:leftDelim options:NSLiteralSearch | NSBackwardsSearch range:braceSearchRange].location){ // this means we found "{ {" between { and }
+            
+            // Reset tempStart, so we know where to look from on the next pass through the loop
+            tempStart = [fullString rangeOfString:leftDelim options:NSLiteralSearch range:braceSearchRange].location; // look forward to get the next one to compare with in the while() above
+                                                                                                                      // NSLog(@"Reset tempStart!  Neighboring characters are %@", [fullString substringWithRange:NSMakeRange(tempStart - 2, 5)]);
+            
+            // Perform a forward search to find the leftDelim that we're trying to match; we need to keep track of which leftDelim we're starting from or else we get off by one (or more) braces, and throw an error.
+            braceSearchRange = [fullString rangeOfString:leftDelim options:NSLiteralSearch range:NSMakeRange(braceSearchRange.location + 1, rightDelimLocation - braceSearchRange.location - 1)];
+            
+            // If there are no more leftDelims hanging around, we're done; bail out and go to the next key-value line in the parent while(); don't do the shallow brace check,
+            // since that puts us past the end.
+            if(braceSearchRange.location == NSNotFound){
+                // NSLog(@"braceSearchRange.location is not found, breaking out.");                        
+                keepScanning = NO;
+                break;
+            }
+            
+            [scanner scanString:rightDelim intoString:&logString]; // More to come, so scan past it
+            //NSLog(@"Deep nested brace check, scanned rightDelim %@", logString);
+            
+            if(![scanner scanUpToString:rightDelim intoString:&logString] && // find the next right delimiter
+               [fullString rangeOfString:@"},\n" options:NSLiteralSearch range:NSMakeRange(tempStart + 1, [scanner scanLocation] - tempStart - 1)].location != NSNotFound ){ // see if there's an equal sign, which means we probably went too far and hit another key/value 
+                 //NSLog(@"*** ERROR doubly nested braces");
+                 //NSLog(@"the substring was %@", [fullString substringWithRange:NSMakeRange(tempStart + 1, [scanner scanLocation] - tempStart - 1)]);
+                *hadProblems = YES; // May not be an error, since these tests are sort of bogus
+                // showWarning = YES;
+                [self postParsingErrorNotification:[NSString stringWithFormat:@"I am puzzled: delimiter '%@' may be missing", rightDelim]
+                                         errorType:@"Parse Warning" 
+                                          fileName:filePath 
+                                        errorRange:[fullString lineRangeForRange:NSMakeRange(leftDelimLocation, 0)]];
+            }
+            rightDelimLocation = [scanner scanLocation];
+            // NSLog(@"Deep nested braces, scanned up to %@ and found %@", rightDelim, logString);
+            // NSLog(@"Next I'll compare %i with %i", [fullString rangeOfString:leftDelim options:NSLiteralSearch range:braceSearchRange].location, [fullString rangeOfString:leftDelim options:NSLiteralSearch | NSBackwardsSearch range:braceSearchRange].location);
+        }
+        
+    }
+    
+    if(![scanner scanString:rightDelim intoString:&logString]){
+        *hadProblems = YES;
+        [self postParsingErrorNotification:[NSString stringWithFormat:@"Delimiter '%@' not found", rightDelim]
+                                 errorType:@"Parse Error" 
+                                  fileName:filePath 
+                                errorRange:[fullString lineRangeForRange:NSMakeRange(leftDelimLocation, 0)]];
+    }
+    
+    NSString *returnString = [NSString stringWithFormat:@"@preamble%@\n\n", [fullString substringWithRange:NSMakeRange(searchStart, [scanner scanLocation] - searchStart)]];
+    // NSLog(@"returning %@", returnString);
+    return returnString;
 }
 
 - (NSMutableArray *)itemsFromData:(NSData *)inData
