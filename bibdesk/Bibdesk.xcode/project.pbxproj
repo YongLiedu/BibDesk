@@ -164,12 +164,6 @@
 			refType = 0;
 			sourceTree = "<absolute>";
 		};
-		275E26FC07838EB80070398A = {
-			fileRef = 275E26FB07838EB80070398A;
-			isa = PBXBuildFile;
-			settings = {
-			};
-		};
 		275E270107838EE30070398A = {
 			buildActionMask = 2147483647;
 			files = (
@@ -309,10 +303,9 @@
 		275E270807838EE30070398A = {
 			isa = PBXFileReference;
 			lastKnownFileType = text.xml;
-			name = "TestBibItem-Info.plist";
-			path = "/Users/mike/Code/bibdesk-NEWHEAD/TestBibItem-Info.plist";
-			refType = 0;
-			sourceTree = "<absolute>";
+			path = "TestBibItem-Info.plist";
+			refType = 4;
+			sourceTree = "<group>";
 		};
 		275E271D07838F7B0070398A = {
 			fileEncoding = 30;
@@ -937,7 +930,7 @@
 			buildSettings = {
 				COPY_PHASE_STRIP = YES;
 				GCC_ENABLE_FIX_AND_CONTINUE = NO;
-				GCC_PREPROCESSOR_DEFINITIONS = "-DUSECRASHREPORTER";
+				GCC_PREPROCESSOR_DEFINITIONS = USECRASHREPORTER;
 				ZERO_LINK = NO;
 			};
 			isa = PBXBuildStyle;
@@ -1178,7 +1171,6 @@
 				F9022DEF0758099D00C3F701,
 				F9022DF00758099D00C3F701,
 				F91B5CFC0765824C0011ED22,
-				275E26FC07838EB80070398A,
 			);
 			isa = PBXFrameworksBuildPhase;
 			runOnlyForDeploymentPostprocessing = 0;
@@ -1198,9 +1190,9 @@
 			sourceTree = "<group>";
 		};
 		8D1107320486CEB800E47090 = {
-			explicitFileType = wrapper.application;
 			includeInIndex = 0;
 			isa = PBXFileReference;
+			lastKnownFileType = wrapper.application;
 			path = Bibdesk.app;
 			refType = 3;
 			sourceTree = BUILT_PRODUCTS_DIR;
@@ -4320,6 +4312,12 @@
 			refType = 4;
 			sourceTree = "<group>";
 		};
+		F9273968078E58A600609739 = {
+			fileRef = 32CA4F630368D1EE00C91783;
+			isa = PBXBuildFile;
+			settings = {
+			};
+		};
 		F92F4E430788DEC5001B8F82 = {
 			children = (
 				F92F4E440788DEC5001B8F82,
@@ -4749,6 +4747,7 @@
 				3DAEA2ED07703F6000AF111A,
 				F92F4E4E0788DEFC001B8F82,
 				27C1639E078BF48C008A4B83,
+				F9273968078E58A600609739,
 			);
 			isa = PBXHeadersBuildPhase;
 			runOnlyForDeploymentPostprocessing = 0;

@@ -277,7 +277,7 @@
 							<key>PBXSmartGroupTreeModuleOutlineStateSelectionKey</key>
 							<array>
 								<array>
-									<integer>2</integer>
+									<integer>3</integer>
 									<integer>0</integer>
 								</array>
 							</array>
@@ -386,9 +386,9 @@
 			</array>
 			<key>TableOfContents</key>
 			<array>
-				<string>F92F4E500788DF0D001B8F82</string>
+				<string>F9273E53078E594B00609739</string>
 				<string>1CE0B1FE06471DED0097A5F4</string>
-				<string>F92F4E510788DF0D001B8F82</string>
+				<string>F9273E54078E594B00609739</string>
 				<string>1CE0B20306471E060097A5F4</string>
 				<string>1CE0B20506471E060097A5F4</string>
 			</array>
@@ -507,7 +507,7 @@
 	<key>StatusbarIsVisible</key>
 	<true/>
 	<key>TimeStamp</key>
-	<real>126411592.03528267</real>
+	<real>126769614.02280501</real>
 	<key>ToolbarDisplayMode</key>
 	<integer>1</integer>
 	<key>ToolbarIsVisible</key>
@@ -522,8 +522,7 @@
 	<integer>5</integer>
 	<key>WindowOrderList</key>
 	<array>
-		<string>1C530D57069F1CE1000CFCEE</string>
-		<string>F92F4E530788E19A001B8F82</string>
+		<string>F9273E55078E594B00609739</string>
 		<string>1C0AD2B3069F1EA900FABCE6</string>
 		<string>/Volumes/Local/Users/amaxwell/build/bibdesk/Bibdesk.xcode</string>
 	</array>
@@ -604,8 +603,8 @@
 			<true/>
 			<key>TableOfContents</key>
 			<array>
-				<string>F92F4E530788E19A001B8F82</string>
-				<string>F92F4E540788E19A001B8F82</string>
+				<string>F9273E55078E594B00609739</string>
+				<string>F9273E56078E594B00609739</string>
 				<string>1CD0528F0623707200166675</string>
 				<string>XCMainBuildResultsModuleGUID</string>
 			</array>
@@ -614,9 +613,9 @@
 			<key>WindowString</key>
 			<string>11 41 639 236 0 0 1280 832 </string>
 			<key>WindowToolGUID</key>
-			<string>F92F4E530788E19A001B8F82</string>
+			<string>F9273E55078E594B00609739</string>
 			<key>WindowToolIsVisible</key>
-			<true/>
+			<false/>
 		</dict>
 		<dict>
 			<key>FirstTimeWindowDisplayed</key>
@@ -911,8 +910,8 @@
 										<string>yes</string>
 										<key>sizes</key>
 										<array>
-											<string>{{0, 0}, {491, 168}}</string>
-											<string>{{0, 172}, {491, 271}}</string>
+											<string>{{0, 0}, {367, 168}}</string>
+											<string>{{0, 172}, {367, 271}}</string>
 										</array>
 									</dict>
 									<key>VerticalSplitView</key>
@@ -961,9 +960,9 @@
 			<key>TableOfContents</key>
 			<array>
 				<string>1C0AD2B3069F1EA900FABCE6</string>
-				<string>F92F4E4A0788DEED001B8F82</string>
+				<string>F9273E57078E594B00609739</string>
 				<string>1CD0528B0623707200166675</string>
-				<string>F92F4E4B0788DEED001B8F82</string>
+				<string>F9273E58078E594B00609739</string>
 			</array>
 			<key>ToolbarConfiguration</key>
 			<string>xcode.toolbar.config.run</string>
@@ -972,7 +971,7 @@
 			<key>WindowToolGUID</key>
 			<string>1C0AD2B3069F1EA900FABCE6</string>
 			<key>WindowToolIsVisible</key>
-			<true/>
+			<false/>
 		</dict>
 		<dict>
 			<key>Identifier</key>
