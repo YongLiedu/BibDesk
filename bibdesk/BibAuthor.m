@@ -119,28 +119,13 @@ You may almost always use the first form; you shouldn’t if either there’s a Jr p
 	BOOL LAST = !emptyStr(_lastName);
 	BOOL JR = !emptyStr(_jrPart);
 	
-	if(JR){
-		_normalizedName = [[NSString stringWithFormat:@"%@%@%@%@%@%@%@", (VON ? _vonPart : @""),
-			(VON ? @" " : @""),
-			(LAST ? _lastName : @""),
-			(JR ? @", " : @""),
-			(JR ? _jrPart : @""),
-			(FIRST ? @", " : @""),
-			(FIRST ? _firstName : @"")] retain];
-		
-	}
-	
-	_normalizedName = [[NSString stringWithFormat:@"%@%@%@%@%@", (VON ? _vonPart: @""), (VON ? @" " : @""),
-		_lastName, 
-		(FIRST ? @", " : @""), 
+	_normalizedName = [[NSString stringWithFormat:@"%@%@%@%@%@%@%@", (VON ? _vonPart : @""),
+		(VON ? @" " : @""),
+		(LAST ? _lastName : @""),
+		(JR ? @", " : @""),
+		(JR ? _jrPart : @""),
+		(FIRST ? @", " : @""),
 		(FIRST ? _firstName : @"")] retain];
-/*
-else if(([_lastName rangeOfString:@" "].location != NSNotFound) && VON){
-	return [NSString stringWithFormat:@"%@%@%@%@%@",(FIRST ? _firstName : @""),
-		(FIRST ? @" " : @""), 
-		(VON ? _vonPart : @""),
-		(VON ? @" " : @""), _lastName];
-*/	
 }
 
 - (NSString *)name{
