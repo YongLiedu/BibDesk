@@ -27,6 +27,8 @@ static NSCharacterSet *SkipSet;
 
     NSMutableCharacterSet *workingSet;
     NSRange highCharRange;
+    NSMutableCharacterSet *tempSet = [[NSMutableCharacterSet alloc] init];
+    NSString *texReserved = [NSString stringWithString:@"&%~"]; // use this for characters that are ASCII but still need to be converted.
     
     WholeDict = [[NSDictionary dictionaryWithContentsOfFile:[[[NSBundle mainBundle] resourcePath] stringByAppendingPathComponent:@"CharacterConversion.plist"]] retain];
     EmptySet = [[NSCharacterSet characterSetWithCharactersInString:@""] retain];
@@ -35,6 +37,7 @@ static NSCharacterSet *SkipSet;
     highCharRange.length = 256; //this should get all the characters in the upper-range.
     workingSet = [[NSCharacterSet decomposableCharacterSet] mutableCopy];
     [workingSet addCharactersInRange:highCharRange];
+    [workingSet addCharactersInString:texReserved];
 
     // Build a dictionary of one-way conversions that we know how to do, then add these to the character set
     NSDictionary *oneWayCharacters = [WholeDict objectForKey:@"One-Way Conversions"];
@@ -52,7 +55,10 @@ static NSCharacterSet *SkipSet;
     NSRange skipRange;
     skipRange.location = 0;
     skipRange.length = 127;
-    SkipSet = [[NSCharacterSet characterSetWithRange:skipRange] retain];
+    [tempSet addCharactersInRange:skipRange];
+    [tempSet removeCharactersInString:texReserved];
+    SkipSet = [tempSet copy];
+    [tempSet release];
 
 }
 
