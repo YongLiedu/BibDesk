@@ -1282,34 +1282,42 @@ void _setupFonts(){
 					break;
 				case 'f':
 					// arbitrary field
-					[scanner scanString:@"{" intoString:NULL]; // errors here will be handled gracefully by the BDSKConverter
-					[scanner scanUpToString:@"}" intoString:&string]; // it isn't really an error if there's no content
-					[scanner scanString:@"}" intoString:NULL];
+					if ([scanner scanString:@"{" intoString:NULL] &&
+						[scanner scanUpToString:@"}" intoString:&string] &&
+						[scanner scanString:@"}" intoString:NULL]) {
 					
-					if ([scanner scanCharactersFromSet:digits intoString:&numStr]) {
-						number = [numStr intValue];
-					} else {
-						number = 0;
-					}
-					string = [self valueOfField:string];
-					if (string != nil) {
-						string = [converter stringBySanitizingString:string forField:fieldName inFileType:[self fileType]];
-						if (number > 0 && [string length] > number) {
-							[parsedStr appendString:[string substringToIndex:number]];
+						if ([scanner scanCharactersFromSet:digits intoString:&numStr]) {
+							number = [numStr intValue];
 						} else {
-							[parsedStr appendString:string];
+							number = 0;
 						}
+						string = [self valueOfField:string];
+						if (string != nil) {
+							string = [converter stringBySanitizingString:string forField:fieldName inFileType:[self fileType]];
+							if (number > 0 && [string length] > number) {
+								[parsedStr appendString:[string substringToIndex:number]];
+							} else {
+								[parsedStr appendString:string];
+							}
+						}
+					}
+					else {
+						NSLog(@"Missing {'field'} after format specifier %%f in format.");
 					}
 					break;
 				case 'c':
 					// This handles acronym specifiers of the form %c{FieldName}
-					[scanner scanString:@"{" intoString:NULL]; // errors here will be handled gracefully by the BDSKConverter
-					[scanner scanUpToString:@"}" intoString:&string]; // it isn't really an error if there's no content
-					[scanner scanString:@"}" intoString:NULL];
+					if ([scanner scanString:@"{" intoString:NULL] &&
+						[scanner scanUpToString:@"}" intoString:&string] &&
+						[scanner scanString:@"}" intoString:NULL]) {
 					
-					string = [self acronymValueOfField:string];
-					string = [converter stringBySanitizingString:string forField:fieldName inFileType:[self fileType]];
-					[parsedStr appendString:string];
+						string = [self acronymValueOfField:string];
+						string = [converter stringBySanitizingString:string forField:fieldName inFileType:[self fileType]];
+						[parsedStr appendString:string];
+					}
+					else {
+						NSLog(@"Missing {'field'} after format specifier %%c in format.");
+					}
 					break;
 				case 'r':
 					// random lowercase letters
