@@ -89,7 +89,7 @@
 			<key>CFBundleTypeRole</key>
 			<string>Editor</string>
 			<key>NSDocumentClass</key>
-			<string>BibDocument</string>
+			<string>BDSKLibrary</string>
 		</dict>
 	</array>
 	<key>CFBundleExecutable</key>
@@ -295,12 +295,12 @@
 			<dict>
 				<key>defaultsDictionary</key>
 				<dict>
+					<key>Cite Key Autogenerate</key>
+					<integer>0</integer>
 					<key>Cite Key Format</key>
 					<string>%a1:%Y%r2</string>
 					<key>Cite Key Format Preset</key>
 					<integer>1</integer>
-					<key>Cite Key Autogenerate</key>
-					<integer>0</integer>
 					<key>Cite Key Generate Lowercase</key>
 					<integer>0</integer>
 				</dict>
@@ -377,8 +377,6 @@
 					<string>1.010918794815856e-310</string>
 					<key>Check for updates when starting</key>
 					<string>1</string>
-                                        <key>Font family to use for RTF preview display</key>
-                                        <string>Gill Sans</string>
 					<key>Column Widths By Name</key>
 					<dict>
 						<key>1st Author</key>
@@ -416,12 +414,14 @@
 					<dict/>
 					<key>Default Bib File</key>
 					<string></string>
+					<key>Font family to use for RTF preview display</key>
+					<string>Gill Sans</string>
 					<key>GreenComponentColor of alternating rows Key</key>
 					<string>1.093888830242598e-310</string>
-					<key>Preview Pane Displays What?</key>
-					<string>1</string>
 					<key>Maximum Number of Items in Preview Pane</key>
 					<string>0</string>
+					<key>Preview Pane Displays What?</key>
+					<string>1</string>
 					<key>Quick Search Keys</key>
 					<array>
 						<string>Keywords</string>
