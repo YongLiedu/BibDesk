@@ -610,10 +610,10 @@ stringByAppendingPathComponent:@"BibDesk"]; */
     dictionary = [NSMutableDictionary dictionaryWithCapacity:10];
     
     [publications autorelease];
-    newPubs = [BibTeXParser itemsFromData:data
-                                    error:&hadProblems
-                              frontMatter:frontMatter
-                                 filePath:filePath];
+    newPubs = [PubMedParser itemsFromString:dataString
+                                      error:&hadProblems
+                                frontMatter:frontMatter
+                                   filePath:filePath];
     publications = [newPubs retain];
     
     if(hadProblems){
