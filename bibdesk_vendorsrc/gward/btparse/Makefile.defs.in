@@ -41,7 +41,7 @@ CC = @CC@
 CFLAGS = @CFLAGS@
 CFLAGS2 = @CFLAGS2@
 DEFINES = @DEFINES@
-EXTRA_CPPFLAGS = 
+EXTRA_CPPFLAGS = -x objective-c -framework Cocoa
 CPPFLAGS = -Ipccts $(DEFINES) $(EXTRA_CPPFLAGS)
 
 # Linker flags -- needed to build the standalone programs included with
