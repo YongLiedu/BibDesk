@@ -5,6 +5,7 @@
                 addDefaultField = id; 
                 delSelectedDefaultField = id; 
                 outputTemplateButtonPressed = id; 
+                shouldUseTemplateFile = id; 
             }; 
             CLASS = "BibPref_Defaults"; 
             LANGUAGE = ObjC; 
@@ -14,6 +15,7 @@
                 defaultFieldsTableView = NSTableView; 
                 delSelectedFieldButton = NSButton; 
                 outputTemplateFileButton = NSButton; 
+                templateRadioMatrix = NSMatrix; 
             }; 
             SUPERCLASS = OAPreferenceClient; 
         }, 

@@ -15,6 +15,8 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 
 NSString *BDSKDefaultBibFilePathKey = @"Default Bib File";
 NSString *BDSKStartupBehaviorKey = @"Startup Behavior";
+NSString *BDSKShouldUseTemplateFile = @"Write template file when saving";
+
 
 NSString *BDSKUseUnicodeBibTeXParser = @"Use Unicode BibTeX Parser";
 NSString *BDSKDefaultStringEncoding = @"Default string encoding for opening and saving";

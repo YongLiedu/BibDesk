@@ -20,6 +20,9 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 
     defaultFieldsArray = [[NSMutableArray arrayWithCapacity:6] retain];
     [defaultFieldsArray setArray:[defaults arrayForKey:BDSKDefaultFieldsKey]];
+    [[templateRadioMatrix cellWithTag:1] setState:NSOffState];
+    [[templateRadioMatrix cellWithTag:0] setState:NSOffState];
+    [[templateRadioMatrix cellWithTag:([defaults boolForKey:BDSKShouldUseTemplateFile] ? 1 : 0 )] setState:NSOnState];
     
 }
 
@@ -63,6 +66,10 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
     [[NSWorkspace sharedWorkspace] openFile:
         [[defaults stringForKey:BDSKOutputTemplateFileKey] stringByExpandingTildeInPath]
                             withApplication:@"TextEdit"];
+}
+
+- (IBAction)shouldUseTemplateFile:(id)sender{
+    [defaults setBool:([[sender selectedCell] tag] == 1 ? YES : NO) forKey:BDSKShouldUseTemplateFile];
 }
 
 @end

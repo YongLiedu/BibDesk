@@ -321,6 +321,8 @@
 					</array>
 					<key>Output Template File</key>
 					<string>~/Library/Application Support/BibDesk/template.txt</string>
+                                        <key>Write template file when saving</key>
+                                        <string>1</string>
 				</dict>
 				<key>icon</key>
 				<string>defaults.tiff</string>

@@ -24,7 +24,6 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 #import "BDSKUndoManager.h"
 #import "RYZImagePopUpButtonCell.h"
 
-
 #include <stdio.h>
 char * InputFilename; // This is here because the btparse library can't live without it.
 
@@ -563,7 +562,6 @@ NSString *BDSKBibItemLocalDragPboardType = @"edu.ucsd.cs.mmccrack.bibdesk: Local
     NSString *fileName = nil;
     NSSavePanel *sp = (NSSavePanel *)sheet;
     NSString *fileType = contextInfo;
-    NSStringEncoding encoding;
     
     if(returnCode == NSOKButton){
         fileName = [sp filename];
@@ -728,22 +726,24 @@ stringByAppendingPathComponent:@"BibDesk"]; */
     BibItem *tmp;
     NSEnumerator *e = [[publications sortedArrayUsingSelector:@selector(fileOrderCompare:)] objectEnumerator];
     NSMutableData *d = [NSMutableData data];
-    NSMutableString *templateFile = [NSMutableString stringWithContentsOfFile:[[[OFPreferenceWrapper sharedPreferenceWrapper] stringForKey:BDSKOutputTemplateFileKey] stringByExpandingTildeInPath]];
 
-    [templateFile appendFormat:@"\n%%%% Created for %@ at %@ \n\n", NSFullUserName(), [NSCalendarDate calendarDate]];
+    if([[OFPreferenceWrapper sharedPreferenceWrapper] boolForKey:BDSKShouldUseTemplateFile]){
+        NSMutableString *templateFile = [NSMutableString stringWithContentsOfFile:[[[OFPreferenceWrapper sharedPreferenceWrapper] stringForKey:BDSKOutputTemplateFileKey] stringByExpandingTildeInPath]];
+        
+        [templateFile appendFormat:@"\n%%%% Created for %@ at %@ \n\n", NSFullUserName(), [NSCalendarDate calendarDate]];
 
-    NSArray *encodingsArray = [[[NSApp delegate] encodingDefinitionDictionary] objectForKey:@"StringEncodings"];
-    NSArray *encodingNames = [[[NSApp delegate] encodingDefinitionDictionary] objectForKey:@"DisplayNames"];
+        NSArray *encodingsArray = [[[NSApp delegate] encodingDefinitionDictionary] objectForKey:@"StringEncodings"];
+        NSArray *encodingNames = [[[NSApp delegate] encodingDefinitionDictionary] objectForKey:@"DisplayNames"];
+        NSString *encodingName = [encodingNames objectAtIndex:[encodingsArray indexOfObject:[NSNumber numberWithInt:[self documentStringEncoding]]]];
+        
+        [templateFile appendFormat:@"\n%%%% Saved with string encoding %@ \n\n", encodingName];
+        
+        [d appendData:[templateFile dataUsingEncoding:[self documentStringEncoding] allowLossyConversion:YES]];
+        [d appendData:[frontMatter dataUsingEncoding:[self documentStringEncoding] allowLossyConversion:YES]];
+    }
     
     NSAssert ( [self documentStringEncoding] != nil, @"Document does not have a specified string encoding." );
-
-    NSString *encodingName = [encodingNames objectAtIndex:[encodingsArray indexOfObject:[NSNumber numberWithInt:[self documentStringEncoding]]]];
-
-    [templateFile appendFormat:@"\n%%%% Saved with string encoding %@ \n\n", encodingName];
-    
-    [d appendData:[templateFile dataUsingEncoding:NSASCIIStringEncoding allowLossyConversion:YES]];
-    [d appendData:[frontMatter dataUsingEncoding:NSASCIIStringEncoding allowLossyConversion:YES]];
-    
+        
     if([self documentStringEncoding] == NSASCIIStringEncoding){
         while(tmp = [e nextObject]){
             [d appendData:[[NSString stringWithString:@"\n\n"] dataUsingEncoding:NSASCIIStringEncoding  allowLossyConversion:YES]];
@@ -806,12 +806,21 @@ stringByAppendingPathComponent:@"BibDesk"]; */
     BibItem *tmp;
     NSEnumerator *e = [[publications sortedArrayUsingSelector:@selector(fileOrderCompare:)] objectEnumerator];
     NSMutableData *d = [NSMutableData data];
-    NSMutableString *templateFile = [NSMutableString stringWithContentsOfFile:[[[OFPreferenceWrapper sharedPreferenceWrapper] stringForKey:BDSKOutputTemplateFileKey] stringByExpandingTildeInPath]];
-    
-    [templateFile appendFormat:@"\n%%%% Created for %@ at %@ \n\n", NSFullUserName(), [NSCalendarDate calendarDate]];
-    
-    [d appendData:[templateFile dataUsingEncoding:encoding allowLossyConversion:YES]];
-    [d appendData:[frontMatter dataUsingEncoding:encoding allowLossyConversion:YES]];
+
+    if([[OFPreferenceWrapper sharedPreferenceWrapper] boolForKey:BDSKShouldUseTemplateFile]){
+        NSMutableString *templateFile = [NSMutableString stringWithContentsOfFile:[[[OFPreferenceWrapper sharedPreferenceWrapper] stringForKey:BDSKOutputTemplateFileKey] stringByExpandingTildeInPath]];
+        
+        [templateFile appendFormat:@"\n%%%% Created for %@ at %@ \n\n", NSFullUserName(), [NSCalendarDate calendarDate]];
+
+        NSArray *encodingsArray = [[[NSApp delegate] encodingDefinitionDictionary] objectForKey:@"StringEncodings"];
+        NSArray *encodingNames = [[[NSApp delegate] encodingDefinitionDictionary] objectForKey:@"DisplayNames"];
+        NSString *encodingName = [encodingNames objectAtIndex:[encodingsArray indexOfObject:[NSNumber numberWithInt:encoding]]];
+        
+        [templateFile appendFormat:@"\n%%%% Saved with string encoding %@ \n\n", encodingName];
+        
+        [d appendData:[templateFile dataUsingEncoding:encoding allowLossyConversion:YES]];
+        [d appendData:[frontMatter dataUsingEncoding:encoding allowLossyConversion:YES]];
+    }
     
     while(tmp = [e nextObject]){
         [d appendData:[[NSString stringWithString:@"\n\n"] dataUsingEncoding:encoding allowLossyConversion:YES]];
@@ -2061,7 +2070,6 @@ int generalBibItemCompareFunc(id item1, id item2, void *context){
 }
 
 - (void)createNewBlankPubAndEdit:(BOOL)yn{
-    OFPreferenceWrapper *pw = [OFPreferenceWrapper sharedPreferenceWrapper];
     BibItem *newBI = [[[BibItem alloc] init] autorelease];
 
     [newBI setFileOrder:fileOrderCount];

@@ -65,6 +65,7 @@ extern NSString *BDSKCustomCiteStringsKey;
 extern NSString *BDSKCiteStringKey;
 extern NSString *BDSKCiteStartBracketKey;
 extern NSString *BDSKCiteEndBracketKey;
+extern NSString *BDSKShouldUseTemplateFile;
 
 extern NSString *BDSKCiteKeyFormatKey;
 extern NSString *BDSKCiteKeyFormatPresetKey;

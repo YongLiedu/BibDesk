@@ -26,11 +26,13 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
     IBOutlet NSTableView* defaultFieldsTableView;
     // the template file button:
     IBOutlet NSButton* outputTemplateFileButton;
+    IBOutlet NSMatrix *templateRadioMatrix;
 }
 // defaultFieldStuff
 - (IBAction)delSelectedDefaultField:(id)sender;
 - (IBAction)addDefaultField:(id)sender;
 // edits the template file:
 - (IBAction)outputTemplateButtonPressed:(id)sender;
+- (IBAction)shouldUseTemplateFile:(id)sender;
 
 @end
