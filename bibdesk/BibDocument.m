@@ -668,14 +668,25 @@ stringByAppendingPathComponent:@"BibDesk"]; */
     
     [d appendData:[templateFile dataUsingEncoding:NSASCIIStringEncoding allowLossyConversion:YES]];
     [d appendData:[frontMatter dataUsingEncoding:NSASCIIStringEncoding allowLossyConversion:YES]];
-
-    while(tmp = [e nextObject]){
-        [d appendData:[[NSString stringWithString:@"\n\n"] dataUsingEncoding:NSASCIIStringEncoding  allowLossyConversion:YES]];
-        //The TeXification is now done in the BibItem bibTeXString method
-        //Where it can be done once per field to handle newlines.
-        [d appendData:[[tmp bibTeXString] dataUsingEncoding:NSUTF8StringEncoding allowLossyConversion:YES]];
+    
+    if([self documentStringEncoding] == NSASCIIStringEncoding){
+        while(tmp = [e nextObject]){
+            [d appendData:[[NSString stringWithString:@"\n\n"] dataUsingEncoding:NSASCIIStringEncoding  allowLossyConversion:YES]];
+            //The TeXification is now done in the BibItem bibTeXString method
+            //Where it can be done once per field to handle newlines.
+            [d appendData:[[tmp bibTeXString] dataUsingEncoding:NSUTF8StringEncoding allowLossyConversion:YES]];
+        }
+    } else {
+        while(tmp = [e nextObject]){
+            [d appendData:[[NSString stringWithString:@"\n\n"] dataUsingEncoding:[self documentStringEncoding]  allowLossyConversion:YES]];
+            //The TeXification is now done in the BibItem bibTeXString method
+            //Where it can be done once per field to handle newlines.
+            [d appendData:[[tmp unicodeBibTeXString] dataUsingEncoding:[self documentStringEncoding] allowLossyConversion:YES]];
+        }
     }
+    
     return d;
+            
 }
 
 - (NSData *)bibTeXDataWithEncoding:(NSStringEncoding)encoding{
@@ -816,11 +827,13 @@ stringByAppendingPathComponent:@"BibDesk"]; */
         
     if([[OFPreferenceWrapper sharedPreferenceWrapper] boolForKey:BDSKUseUnicodeBibTeXParser]){
         NSString *fileContentString = [[[NSString alloc] initWithData:data encoding:encoding] autorelease];
-        
+                
         if(encoding == NSASCIIStringEncoding) // use bdskconverter always
             fileContentString = [[BDSKConverter sharedConverter] stringByDeTeXifyingString:fileContentString];
+        
+        NSAssert( fileContentString != nil, @"File contents returned a nil string, probably due to incorrect encoding choice.");
                 
-#warning ARM: Need prefs and document ivar for string encoding (need to save in binary file)
+#warning ARM: Need to save document ivar for string encoding in binary file
         NSLog(@"*** WARNING: using new parser.  To disable, use `defaults write edu.ucsd.cs.mmccrack.bibdesk \"Use Unicode BibTeX Parser\" 'NO'` and relaunch BibDesk.");
         newPubs = [BibTeXParser itemsFromString:fileContentString
                                           error:&hadProblems

@@ -555,6 +555,7 @@ int generalBibItemCompareFunc(id item1, id item2, void *context);
 */
 int compareSetLengths(NSSet *set1, NSSet *set2, void *context);
 
-
+- (IBAction)exportEncodedBib:(id)sender;
+- (NSStringEncoding)documentStringEncoding;
 
 @end
