@@ -19,7 +19,6 @@
     IBOutlet NSPopUpButton *formatRepositoryPopUp;
     IBOutlet NSButton *formatWarningButton;
     IBOutlet NSButton* citeKeyAutogenerateCheckButton;
-	NSImage *cautionIconImage;
 }
 
 - (IBAction)citeKeyFormatChanged:(id)sender;
@@ -27,7 +26,6 @@
 - (IBAction)formatHelp:(id)sender;
 - (IBAction)changeCiteKeyAutogenerate:(id)sender;
 - (void)updateUI;
-- (void)setupCautionIcon;
 - (IBAction)showCiteKeyFormatWarning:(id)sender;
 - (void)setCiteKeyFormatInvalidWarning:(BOOL)set message:message;
 

@@ -15,12 +15,15 @@
 	Code taken from http://cocoa.mamasam.com/MACOSXDEV/2002/01/2/22427.php
 */
 
+static NSImage *cautionIconImage = nil;
+
 @implementation NSImage (Toolbox)
-+ (NSImage*) imageWithLargeIconForToolboxCode:(OSType) code {
+
++ (NSImage *)imageWithLargeIconForToolboxCode:(OSType) code {
 	int width = 32;
 	int height = 32;
 	IconRef iconref;
-	OSErr myErr = GetIconRef (kOnSystemDisk, 'macs', code, &iconref);
+	OSErr myErr = GetIconRef (kOnSystemDisk, kSystemIconsCreator, code, &iconref);
 	
 	NSImage* image = [[NSImage alloc] initWithSize:NSMakeSize(width,height)]; 
 	[image lockFocus]; 
@@ -29,7 +32,7 @@
 	
 	PlotIconRefInContext((CGContextRef)[[NSGraphicsContext currentContext] graphicsPort],
 						&rect,
-						 kAlignNone,
+						 kAlignAbsoluteCenter, //kAlignNone,
 						 kTransformNone,
 						 NULL /*inLabelColor*/,
 						 kPlotIconRefNormalFlags,
@@ -38,7 +41,15 @@
 	
 	myErr = ReleaseIconRef(iconref);
 	
-	 [image autorelease];	
-	 return image;
+	[image autorelease];	
+	return image;
 }
+
++ (NSImage *)cautionIconImage {
+	if (!cautionIconImage) {
+		cautionIconImage = [[self imageWithLargeIconForToolboxCode:kAlertCautionBadgeIcon] retain];
+	}
+	return cautionIconImage;
+}
+
 @end

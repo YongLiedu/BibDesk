@@ -20,6 +20,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 #import "BibDocument.h"
 #import <OmniAppKit/NSScrollView-OAExtensions.h>
 #import "BDAlias.h"
+#import "NSImage+Toolbox.h"
 
 @implementation BibEditor
 
@@ -40,8 +41,6 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
                                     // has to be before we call [self window] because that calls windowDidLoad:.
 	theDocument = doc; // don't retain - it retains us.
 	
-	[self setupCautionIcon];
-
     // this should probably be moved around.
     [[self window] setTitle:[theBib title]];
     [[self window] setDelegate:self];
@@ -257,7 +256,6 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
     
     [citeKeyFormatter release];
     [[NSNotificationCenter defaultCenter] removeObserver:self];
-    [cautionIconImage release]; 
     [fieldNumbers release];
     [_pdfSnoopImage release];
     [_textSnoopString release];
@@ -494,35 +492,6 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 }
 
 #pragma mark Cite Key handling methods
-- (void)setupCautionIcon{
-	IconRef cautionIconRef;
-	OSErr err = GetIconRef(kOnSystemDisk,
-						   kSystemIconsCreator,
-						   kAlertCautionBadgeIcon,
-						   &cautionIconRef);
-	if(err){
-		[NSException raise:@"BDSK No Icon Exception"  
-					format:@"Error getting the caution badge icon. To decipher the error number (%d),\n see file:///Developer/Documentation/Carbon/Reference/IconServices/index.html#//apple_ref/doc/uid/TP30000239", err];
-	}
-	
-	int size = 32;
-	
-	cautionIconImage = [[NSImage alloc] initWithSize:NSMakeSize(size,size)]; 
-	CGRect iconCGRect = CGRectMake(0,0,size,size);
-	
-	[cautionIconImage lockFocus]; 
-	
-	PlotIconRefInContext((CGContextRef)[[NSGraphicsContext currentContext] 
-		graphicsPort],
-						 &iconCGRect,
-						 kAlignAbsoluteCenter, //kAlignNone,
-						 kTransformNone,
-						 NULL /*inLabelColor*/,
-						 kPlotIconRefNormalFlags,
-						 cautionIconRef); 
-	
-	[cautionIconImage unlockFocus];
-}
 
 - (IBAction)showCiteKeyWarning:(id)sender{
 	int rv;
@@ -555,7 +524,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 
 - (void)setCiteKeyDuplicateWarning:(BOOL)set{
 	if(set){
-		[citeKeyWarningButton setImage:cautionIconImage];
+		[citeKeyWarningButton setImage:[NSImage cautionIconImage]];
 		[citeKeyWarningButton setToolTip:NSLocalizedString(@"This cite-key is a duplicate",@"")];
 	}else{
 		[citeKeyWarningButton setImage:nil];

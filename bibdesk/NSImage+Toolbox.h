@@ -10,6 +10,8 @@
 #import <ApplicationServices/ApplicationServices.h>
 
 @interface NSImage (Toolbox)
-+ (NSImage*) imageWithLargeIconForToolboxCode:(OSType) code;
+
++ (NSImage *)imageWithLargeIconForToolboxCode:(OSType) code;
++ (NSImage *)cautionIconImage;
 
 @end

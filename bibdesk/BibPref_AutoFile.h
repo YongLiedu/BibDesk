@@ -33,7 +33,6 @@
     IBOutlet NSPopUpButton *formatRepositoryPopUp;
     IBOutlet NSButton *formatWarningButton;
 	IBOutlet NSTextField *previewTextField;
-	NSImage *cautionIconImage;
 }
 
 - (IBAction)choosePapersFolderLocationAction:(id)sender;
@@ -42,7 +41,6 @@
 - (IBAction)localUrlFormatChanged:(id)sender;
 - (IBAction)localUrlFormatAdd:(id)sender;
 - (IBAction)formatHelp:(id)sender;
-- (void)setupCautionIcon;
 - (IBAction)showLocalUrlFormatWarning:(id)sender;
 - (void)setLocalUrlFormatInvalidWarning:(BOOL)set message:message;
 

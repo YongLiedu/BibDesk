@@ -94,7 +94,6 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 // cite-key checking stuff:
     BDSKCiteKeyFormatter *citeKeyFormatter;
 	IBOutlet NSButton *citeKeyWarningButton;
-	NSImage *cautionIconImage;
 	
 // new field formatter
     BDSKFieldNameFormatter *fieldNameFormatter;
@@ -171,7 +170,6 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 
 - (IBAction)viewRemote:(id)sender;
 
-- (void)setupCautionIcon;
 - (IBAction)showCiteKeyWarning:(id)sender;
 - (IBAction)citeKeyDidChange:(id)sender;
 - (void)setCiteKeyDuplicateWarning:(BOOL)set;

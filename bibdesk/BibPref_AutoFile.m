@@ -7,20 +7,10 @@
 //
 
 #import "BibPref_AutoFile.h"
+#import "NSImage+Toolbox.h"
 #import <Carbon/Carbon.h>
 
 @implementation BibPref_AutoFile
-
-- (void)awakeFromNib{
-    [super awakeFromNib];
-	
-	[self setupCautionIcon];
-}
-
-- (void)dealloc{
-	[cautionIconImage release]; 
-    [super dealloc];
-}
 
 - (void)updateUI{
     NSString *formatString = [defaults stringForKey:BDSKLocalUrlFormatKey];
@@ -204,36 +194,6 @@
 
 #pragma mark Invalid format warning stuff
 
-- (void)setupCautionIcon{
-	IconRef cautionIconRef;
-	OSErr err = GetIconRef(kOnSystemDisk,
-						   kSystemIconsCreator,
-						   kAlertCautionBadgeIcon,
-						   &cautionIconRef);
-	if(err){
-		[NSException raise:@"BDSK No Icon Exception"  
-					format:@"Error getting the caution badge icon. To decipher the error number (%d),\n see file:///Developer/Documentation/Carbon/Reference/IconServices/index.html#//apple_ref/doc/uid/TP30000239", err];
-	}
-	
-	int size = 32;
-	
-	cautionIconImage = [[NSImage alloc] initWithSize:NSMakeSize(size,size)]; 
-	CGRect iconCGRect = CGRectMake(0,0,size,size);
-	
-	[cautionIconImage lockFocus]; 
-	
-	PlotIconRefInContext((CGContextRef)[[NSGraphicsContext currentContext] 
-		graphicsPort],
-						 &iconCGRect,
-						 kAlignAbsoluteCenter, //kAlignNone,
-						 kTransformNone,
-						 NULL /*inLabelColor*/,
-						 kPlotIconRefNormalFlags,
-						 cautionIconRef); 
-	
-	[cautionIconImage unlockFocus]; 
-}
-
 - (IBAction)showLocalUrlFormatWarning:(id)sender{
 	NSString *msg = [sender toolTip];
 	int rv;
@@ -249,7 +209,7 @@
 
 - (void)setLocalUrlFormatInvalidWarning:(BOOL)set message:message{
 	if(set){
-		[formatWarningButton setImage:cautionIconImage];
+		[formatWarningButton setImage:[NSImage cautionIconImage]];
 		[formatWarningButton setToolTip:message];
 	}else{
 		[formatWarningButton setImage:nil];
