@@ -593,8 +593,15 @@ void _setupFonts(){
     [s appendString:@"{"];
     [s appendString:[self citeKey]];
     while(k = [e nextObject]){
-        //Get TeX version of each field.
-        v = [BDSKConverter stringByTeXifyingString:[pubFields objectForKey:k]];
+        // Get TeX version of each field.
+	// Don't run the converter on Local-Url or Url fields, so we don't trash ~ and % escapes.
+	// Note that NSURLs comply with RFC 2396, and can't contain high-bit characters anyway.
+	if([k isEqualToString:@"Local-Url"] || [k isEqualToString:@"Url"]){
+	    v = [pubFields objectForKey:k];
+	} else {
+	    v = [BDSKConverter stringByTeXifyingString:[pubFields objectForKey:k]];
+	}
+	
         if(![v isEqualToString:@""]){
             [s appendString:@",\n\t"];
             [s appendFormat:@"%@ = {%@}",k,v];
