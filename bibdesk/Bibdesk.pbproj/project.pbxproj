@@ -1072,6 +1072,8 @@
 				F9D6C1F306AECF9700EAEB04,
 				F9D6C1F506AECF9700EAEB04,
 				F9D6C1F706AECF9700EAEB04,
+				F9C4BEC606B3FF3E0008A694,
+				F9C4BECE06B3FF5A0008A694,
 			);
 			isa = PBXHeadersBuildPhase;
 			runOnlyForDeploymentPostprocessing = 0;
@@ -1671,6 +1673,8 @@
 				F9D6C1F406AECF9700EAEB04,
 				F9D6C1F606AECF9700EAEB04,
 				F9D6C1F806AECF9700EAEB04,
+				F9C4BEC706B3FF3E0008A694,
+				F9C4BECF06B3FF5A0008A694,
 			);
 			isa = PBXSourcesBuildPhase;
 			runOnlyForDeploymentPostprocessing = 0;
@@ -2156,7 +2160,6 @@
 			children = (
 				F9B5E472062ADDE700C8A129,
 				270530000680DB28005F8C2E,
-				F9D6C20F06AED0DA00EAEB04,
 				2773D35B058C410500C5ABDA,
 				F50730EC01F235880174A366,
 				2A37F4B0FDCFA73011CA2CEA,
@@ -4226,6 +4229,64 @@
 			settings = {
 			};
 		};
+		F9C4BEC406B3FF3E0008A694 = {
+			fileEncoding = 30;
+			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.c.h;
+			path = "BibDocument+Adding.h";
+			refType = 4;
+			sourceTree = "<group>";
+		};
+		F9C4BEC506B3FF3E0008A694 = {
+			fileEncoding = 30;
+			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.c.objc;
+			path = "BibDocument+Adding.m";
+			refType = 4;
+			sourceTree = "<group>";
+		};
+		F9C4BEC606B3FF3E0008A694 = {
+			fileRef = F9C4BEC406B3FF3E0008A694;
+			isa = PBXBuildFile;
+			settings = {
+			};
+		};
+		F9C4BEC706B3FF3E0008A694 = {
+			fileRef = F9C4BEC506B3FF3E0008A694;
+			isa = PBXBuildFile;
+			settings = {
+			};
+		};
+		F9C4BECC06B3FF5A0008A694 = {
+			fileEncoding = 30;
+			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.c.h;
+			name = BibDeskSearchForCommand.h;
+			path = Scripting/BibDeskSearchForCommand.h;
+			refType = 4;
+			sourceTree = "<group>";
+		};
+		F9C4BECD06B3FF5A0008A694 = {
+			fileEncoding = 30;
+			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.c.objc;
+			name = BibDeskSearchForCommand.m;
+			path = Scripting/BibDeskSearchForCommand.m;
+			refType = 4;
+			sourceTree = "<group>";
+		};
+		F9C4BECE06B3FF5A0008A694 = {
+			fileRef = F9C4BECC06B3FF5A0008A694;
+			isa = PBXBuildFile;
+			settings = {
+			};
+		};
+		F9C4BECF06B3FF5A0008A694 = {
+			fileRef = F9C4BECD06B3FF5A0008A694;
+			isa = PBXBuildFile;
+			settings = {
+			};
+		};
 		F9D6C1E906AECF9700EAEB04 = {
 			fileEncoding = 30;
 			isa = PBXFileReference;
@@ -4348,6 +4409,11 @@
 		};
 		F9D6C1F906AECFB700EAEB04 = {
 			children = (
+				F9D6C20F06AED0DA00EAEB04,
+				F9C4BECC06B3FF5A0008A694,
+				F9C4BECD06B3FF5A0008A694,
+				F9C4BEC406B3FF3E0008A694,
+				F9C4BEC506B3FF3E0008A694,
 				F9D6C1E906AECF9700EAEB04,
 				F9D6C1EA06AECF9700EAEB04,
 				F9D6C1EB06AECF9700EAEB04,
