@@ -43,8 +43,8 @@
 @implementation TestComplexString
 
 - (void)testLoneMacroFromBibTeXString{
-    BDSKComplexString *cs = [BDSKComplexString complexStringWithBibTeXString:@"macro1"
-                                                               macroResolver:[[[ResolverMock alloc] init] autorelease]];
+    NSString *cs = [NSString complexStringWithBibTeXString:@"macro1"
+											 macroResolver:[[[ResolverMock alloc] init] autorelease]];
     
     UKNotNil(cs);
     UKTrue([cs isComplex]);
@@ -52,79 +52,79 @@
 }
 
 - (void)testQuotedStringFromBibTeXString{
-    BDSKComplexString *cs = [BDSKComplexString complexStringWithBibTeXString:@"{quoted string}"
-                                                               macroResolver:[[[ResolverMock alloc] init] autorelease]];
+    NSString *cs = [NSString complexStringWithBibTeXString:@"{quoted string}"
+											 macroResolver:[[[ResolverMock alloc] init] autorelease]];
     UKNotNil(cs);
     UKFalse([cs isComplex]);
     UKStringsEqual(@"quoted string", (NSString *)cs);
 }
 
 - (void)testLoneNumberFromBibTeXString{
-     BDSKComplexString *cs = [BDSKComplexString complexStringWithBibTeXString:@"14"
-                                            macroResolver:[[[ResolverMock alloc] init] autorelease]];
+     NSString *cs = [NSString complexStringWithBibTeXString:@"14"
+											  macroResolver:[[[ResolverMock alloc] init] autorelease]];
     UKNotNil(cs);
     UKTrue([cs isComplex]);
     UKStringsEqual(@"14", (NSString *)cs);
 }
 
 - (void)testTwoNumbersFromBibTeXString{
-    BDSKComplexString *cs = [BDSKComplexString complexStringWithBibTeXString:@"14 # 14"
-                                                               macroResolver:[[[ResolverMock alloc] init] autorelease]];
+    NSString *cs = [NSString complexStringWithBibTeXString:@"14 # 14"
+											 macroResolver:[[[ResolverMock alloc] init] autorelease]];
     UKNotNil(cs);
     UKTrue([cs isComplex]);
     UKStringsEqual(@"1414", (NSString *)cs);
 }
 
 - (void)testThreeNumbersFromBibTeXString{
-    BDSKComplexString *cs = [BDSKComplexString complexStringWithBibTeXString:@"14 # 14 # 14"
-                                                               macroResolver:[[[ResolverMock alloc] init] autorelease]];
+    NSString *cs = [NSString complexStringWithBibTeXString:@"14 # 14 # 14"
+											 macroResolver:[[[ResolverMock alloc] init] autorelease]];
     UKNotNil(cs);
     UKTrue([cs isComplex]);
     UKStringsEqual(@"141414", (NSString *)cs);
 }
 
 - (void)testQuotedNestedStringFromBibTeXString{
-    BDSKComplexString *cs = [BDSKComplexString complexStringWithBibTeXString:@"{quoted {nested} string}"
-                                                               macroResolver:[[[ResolverMock alloc] init] autorelease]];
+    NSString *cs = [NSString complexStringWithBibTeXString:@"{quoted {nested} string}"
+											 macroResolver:[[[ResolverMock alloc] init] autorelease]];
     UKNotNil(cs);
     UKFalse([cs isComplex]);
     UKStringsEqual(@"quoted {nested} string", (NSString *)cs);
 }
 
 - (void)testQuotedNestedConcatenatedStringFromBibTeXString{
-    BDSKComplexString *cs = [BDSKComplexString complexStringWithBibTeXString:@"{A } # {quoted {nested} string} # {dood}"
-                                                               macroResolver:[[[ResolverMock alloc] init] autorelease]];
+    NSString *cs = [NSString complexStringWithBibTeXString:@"{A } # {quoted {nested} string} # {dood}"
+											 macroResolver:[[[ResolverMock alloc] init] autorelease]];
     UKNotNil(cs);
     UKTrue([cs isComplex]);
     UKStringsEqual(@"A quoted {nested} stringdood", (NSString *)cs);
-    UKNotNil([cs nodes]);
-    UKIntsEqual(3, [[cs nodes] count]);
+    UKNotNil([(BDSKComplexString*)cs nodes]);
+    UKIntsEqual(3, [[(BDSKComplexString*)cs nodes] count]);
 }
 
 - (void)testEmptyStringFromBibTeXString{
-    BDSKComplexString *cs = [BDSKComplexString complexStringWithBibTeXString:@""
-                                                               macroResolver:[[[ResolverMock alloc] init] autorelease]];
+    NSString *cs = [NSString complexStringWithBibTeXString:@""
+											 macroResolver:[[[ResolverMock alloc] init] autorelease]];
     UKNotNil(cs);
     UKFalse([cs isComplex]);
     UKStringsEqual(@"", (NSString *)cs);
-    UKNil([cs nodes]);
+    UKNil([(BDSKComplexString*)cs nodes]);
 }
 
 - (void)testWhitespaceStringFromBibTeXString{
-    BDSKComplexString *cs = [BDSKComplexString complexStringWithBibTeXString:@" "
-                                                               macroResolver:[[[ResolverMock alloc] init] autorelease]];
+    NSString *cs = [NSString complexStringWithBibTeXString:@" "
+											 macroResolver:[[[ResolverMock alloc] init] autorelease]];
     UKNotNil(cs);
     UKFalse([cs isComplex]);
     UKStringsEqual(@"", (NSString *)cs);
-    UKNil([cs nodes]);
+    UKNil([(BDSKComplexString*)cs nodes]);
 }
 
 
 - (void)testDisplayTwoNumbers{
     NSArray *a = [NSArray arrayWithObjects:[BDSKStringNode nodeWithBibTeXString:@"14"], 
         [BDSKStringNode nodeWithBibTeXString:@"14"], nil];
-    BDSKComplexString *cs = [BDSKComplexString complexStringWithArray:a
-                                                               macroResolver:[[[ResolverMock alloc] init] autorelease]];
+    BDSKComplexString *cs = [NSString complexStringWithArray:a
+											   macroResolver:[[[ResolverMock alloc] init] autorelease]];
     UKNotNil(cs);
     UKTrue([cs isComplex]);
     UKStringsEqual(@"1414", (NSString *)cs);
@@ -135,8 +135,8 @@
     NSArray *a = [NSArray arrayWithObjects:[BDSKStringNode nodeWithBibTeXString:@"14"], 
         [BDSKStringNode nodeWithBibTeXString:@"14"], 
         [BDSKStringNode nodeWithBibTeXString:@"14"], nil];
-    BDSKComplexString *cs = [BDSKComplexString complexStringWithArray:a
-                                                        macroResolver:[[[ResolverMock alloc] init] autorelease]];
+    BDSKComplexString *cs = [NSString complexStringWithArray:a
+											   macroResolver:[[[ResolverMock alloc] init] autorelease]];
     UKNotNil(cs);
     UKTrue([cs isComplex]);
     UKStringsEqual(@"141414", (NSString *)cs);
