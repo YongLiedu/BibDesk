@@ -20,6 +20,7 @@
                 downloadLinkedFileAsLocalUrl = id; 
                 editSelectedFieldAsRawBibTeX = id; 
                 generateCiteKey = id; 
+                generateLocalUrl = id; 
                 raiseAddField = id; 
                 raiseDelField = id; 
                 saveFileAsLocalUrl = id; 
