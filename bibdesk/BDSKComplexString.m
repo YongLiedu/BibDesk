@@ -183,7 +183,7 @@ static NSDictionary *globalMacroDefs;
 }
 
 - (id)copyWithZone:(NSZone *)zone{
-    BDSKComplexString *cs = [[BDSKComplexString allocWithZone:zone] initWithNodes:[[nodes copy] autorelease] 
+    BDSKComplexString *cs = [[BDSKComplexString allocWithZone:zone] initWithArray:[[nodes copy] autorelease] 
 							macroResolver:macroResolver];
     return cs;
 }
