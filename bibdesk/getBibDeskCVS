@@ -11,7 +11,9 @@ if ($SFNAME ne "") {
     prepdev();
 } else {
     prepanon();
-}
+} 
+$bibtag=gettag();
+
 getsources();
 
 print "\n****************************\n";                     
@@ -31,9 +33,27 @@ sub getSFName {
       } else {
          print "What is your sourceforge username (setenv SF_USERNAME for a default)?  ";
          $SFNAME = <STDIN>;
-	 return($SFNAME);
+	 chomp($SFNAME);
+         return $SFNAME;
       }
   }
+}
+
+
+# Set the BIB tag
+sub gettag {
+ if (defined $ENV{'SF_BIB_TAG'} ) {
+   $bibtag = $ENV{'SF_BIB_TAG'};
+ } else {
+   print "Do you want a specific tag? (empty for none or enter tag(eg TRY_RTF_041503) ";
+   $bibtag = <STDIN>;
+ }
+ chomp($bibtag);
+ if ($bibtag eq "") {
+   return $bibtag;
+ } else {
+   return "-r $bibtag";
+ }
 }
 
 sub prepanon {
@@ -42,7 +62,7 @@ sub prepanon {
   $LOGIN = "cvs -z3 -d:$CVS_METHOD:$SFNAME\@cvs.sourceforge.net:/cvsroot/bibdesk login";
   print "$LOGIN\n";
   print "\nPassword is empty--just hit return when asked for a password\n";
-  system $LOGIN;
+  tryGet($LOGIN);
 }
 
 sub prepdev {
@@ -51,7 +71,7 @@ sub prepdev {
 }
 
 sub getsources {
-   $GETMAIN = "cvs -z3 -d:$CVS_METHOD:$SFNAME\@cvs.sourceforge.net:/cvsroot/bibdesk co bibdesk";
+   $GETMAIN = "cvs -z3 -d:$CVS_METHOD:$SFNAME\@cvs.sourceforge.net:/cvsroot/bibdesk co $bibtag bibdesk";
    tryGet($GETMAIN);
 
    $GETVENDOR = "cvs -z3 -d:$CVS_METHOD:$SFNAME\@cvs.sourceforge.net:/cvsroot/bibdesk co bibdesk_vendorsrc";
@@ -78,5 +98,3 @@ sub tryGet {
      }
   } 
 }
-
-
