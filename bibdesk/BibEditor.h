@@ -352,6 +352,13 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 - (IBAction)generateCiteKey:(id)sender;
 
 /*!
+    @method     generateLocalUrl:
+    @abstract   Action to auto file the linked paper, using the local-url format string. 
+    @discussion (comprehensive description)
+*/
+- (IBAction)generateLocalUrl:(id)sender;
+
+/*!
     @method     makeKeyField:
     @abstract   Selects the field and makes it key. 
     @discussion (comprehensive description)
