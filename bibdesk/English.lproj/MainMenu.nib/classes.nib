@@ -111,10 +111,15 @@
                 delPub = id; 
                 editPubCmd = id; 
                 emailPubCmd = id; 
+                exportAsAtom = id; 
                 exportAsHTML = id; 
+                exportAsMODS = id; 
                 exportAsRSS = id; 
                 exportEncodedBib = id; 
                 generateCiteKey = id; 
+                makeNewEmptyCollection = id; 
+                makeNewExternalSource = id; 
+                makeNewNotepad = id; 
                 makeSearchFieldKey = id; 
                 myAction = id; 
                 newPub = id; 
