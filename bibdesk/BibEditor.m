@@ -897,7 +897,7 @@ NSString *BDSKDateModifiedString = @"Date-Modified";
 // Note for a future refactoring: This should really just
 //  send a notification that "I changed" and let any Doc(/finder) that cares update.
 - (void)noteChange{
-    [theDocument updateChangeCount:NSChangeDone];
+    //[theDocument updateChangeCount:NSChangeDone];
 }
 
 

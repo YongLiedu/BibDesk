@@ -688,7 +688,7 @@ stringByAppendingPathComponent:@"BibDesk"]; */
         }else if (rv == NSAlertAlternateReturn){
             // the user said to keep going, so if they save, they might clobber data...
             // note this by setting the update count:
-            [self updateChangeCount:NSChangeDone];
+            //[self updateChangeCount:NSChangeDone];
         }else if(rv == NSAlertOtherReturn){
             // they said to edit the file.
             tempFileName = [NSTemporaryDirectory() stringByAppendingPathComponent:[[NSProcessInfo processInfo] globallyUniqueString]];
@@ -701,7 +701,7 @@ stringByAppendingPathComponent:@"BibDesk"]; */
     [shownPublications setArray:publications];
     [self refreshAuthors];
     // since we can't save pubmed files as pubmed files:
-    [self updateChangeCount:NSChangeDone];
+    //[self updateChangeCount:NSChangeDone];
     
     return YES;
 }
@@ -755,7 +755,7 @@ stringByAppendingPathComponent:@"BibDesk"]; */
         }else if (rv == NSAlertAlternateReturn){
             // the user said to keep going, so if they save, they might clobber data...
             // note this by setting the update count:
-            [self updateChangeCount:NSChangeDone];
+            //[self updateChangeCount:NSChangeDone];
         }else if(rv == NSAlertOtherReturn){
             // they said to edit the file.
             tempFileName = [NSTemporaryDirectory() stringByAppendingPathComponent:[[NSProcessInfo processInfo] globallyUniqueString]];
@@ -1609,7 +1609,7 @@ int generalBibItemCompareFunc(id item1, id item2, void *context){
 #if DEBUG
         //NSLog(@"updating change count");
 #endif
-        [self updateChangeCount:NSChangeDone]; // used to be 'e' updateChangeCount.
+        //[self updateChangeCount:NSChangeDone]; // used to be 'e' updateChangeCount.
     }
 }
 
@@ -1843,7 +1843,7 @@ Shouldn't there be some kind of safeguard against opening too many pub editors?
 		}else if (rv == NSAlertAlternateReturn){
 			// the user said to keep going, so if they save, they might clobber data...
 			// note this by setting the update count:
-			[self updateChangeCount:NSChangeDone];
+			//[self updateChangeCount:NSChangeDone];
 		}else if(rv == NSAlertOtherReturn){
 			// they said to edit the file.
 			NSString * tempFileName = [NSTemporaryDirectory() stringByAppendingPathComponent:[[NSProcessInfo processInfo] globallyUniqueString]];
@@ -1866,7 +1866,7 @@ Shouldn't there be some kind of safeguard against opening too many pub editors?
 		[self addPublication:newBI];
 			
 		[self updateUI];
-		[self updateChangeCount:NSChangeDone];
+		//[self updateChangeCount:NSChangeDone];
 		if([[OFPreferenceWrapper sharedPreferenceWrapper] integerForKey:BDSKEditOnPasteKey] == NSOnState) {
 			[self editPub:newBI forceChange:YES];
 		}
@@ -1909,7 +1909,7 @@ This method always returns YES. Even if some or many operations fail.
 			[self addPublication:[newBI autorelease]];
 			
 			[self updateUI];
-			[self updateChangeCount:NSChangeDone];
+			//[self updateChangeCount:NSChangeDone];
 			
 			if([pw integerForKey:BDSKEditOnPasteKey] == NSOnState){
 				[self editPub:newBI forceChange:YES];

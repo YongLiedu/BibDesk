@@ -301,7 +301,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 			// I suppose in the future, bibTeX database won't be the default? 
 			bibDoc = [[NSDocumentController sharedDocumentController] openUntitledDocumentOfType:@"bibTeX database" display:YES]; // #retain?
 			[bibDoc loadDataRepresentation:[filterOutput dataUsingEncoding:NSUTF8StringEncoding] ofType:@"bibTeX database"];
-			[bibDoc updateChangeCount:NSChangeDone];
+			//[bibDoc updateChangeCount:NSChangeDone];
 			[bibDoc updateUI];
 		}
     }
@@ -322,7 +322,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 	
 	doc = [[NSDocumentController sharedDocumentController] openUntitledDocumentOfType:@"bibTeX database" display:YES];
 	[doc loadBibTeXDataRepresentation:[[[BDSKConverter sharedConverter] stringByTeXifyingString:content] dataUsingEncoding:NSUTF8StringEncoding]];
-	[doc updateChangeCount:NSChangeDone];
+	//[doc updateChangeCount:NSChangeDone];
 	[doc updateUI];
 }
 

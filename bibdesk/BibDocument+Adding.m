@@ -80,7 +80,7 @@ Shouldn't there be some kind of safeguard against opening too many pub editors?
 		[publications addObject:newBI];
 		[shownPublications addObject:newBI];
 		[self updateUI];
-		[self updateChangeCount:NSChangeDone];
+		//[self updateChangeCount:NSChangeDone];
 		if([[OFPreferenceWrapper sharedPreferenceWrapper] integerForKey:BDSKEditOnPasteKey] == NSOnState) {
 			[self editPub:newBI forceChange:YES];
 		}
@@ -122,7 +122,7 @@ This method always returns YES. Even if some or many operations fail.
 			}
 			
 			[self updateUI];
-			[self updateChangeCount:NSChangeDone];
+			//[self updateChangeCount:NSChangeDone];
 			
 			if([pw integerForKey:BDSKEditOnPasteKey] == NSOnState){
 				[self editPub:newBI forceChange:YES];

@@ -181,7 +181,7 @@ static BibFiler *_sharedFiler = nil;
 			
 	}
 	if(_moveCount > 0 || _deletedCount > 0 || _cleanupChangeCount > 0){
-		[doc updateChangeCount:NSChangeDone];
+		//[doc updateChangeCount:NSChangeDone];
 	}
 
 }
