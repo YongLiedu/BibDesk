@@ -1,0 +1,53 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+        "http://www.w3.org/TR/1999/REC-html401-19991224/loose.dtd">
+<html>
+<head>
+	<title> Getting More Help </title> 
+
+	<meta http-equiv="content-type" content="text/html;
+						 charset=x-mac-roman">
+		<META NAME="AppleIcon" CONTENT="gfx/BibDeskIcon.png">
+		<META NAME="AppleFont" CONTENT="Lucida
+						Grande,Helvetica">
+		<META NAME="AppleSearchResultsFont" CONTENT="Lucida
+							     Grande,Helvetica">
+		<META ROBOTS="robots" CONTENT="anchors">
+		<style type="text/css">@import "appleHelp.css";</style>
+</head>
+
+## More Help
+
+### The Error panel
+
+The Error panel provides feedback on errors contained in a bib
+file. You can always show the panel by selecting &#8216;Show/Hide
+Error Panel&#8217; from the Window menu (&#8984;-Shift-E). This is
+what the errors panel looks like:
+
+Clicking on a warning line in this table opens an editing window with
+the offending line highlighted.
+
+<img src="gfx/errorWindow.png" alt="" height="167" width="445">
+
+### Mailing List
+If your questions aren't answered in this help file, the
+[bibdesk-users mailing list][list] may have an answer. Your question
+may have been answered already, so you can check the [list
+archives][arc] to get instant gratification.
+
+[list]:http://lists.sourceforge.net/lists/listinfo/bibdesk-users
+[arc]:http://sourceforge.net/mailarchive/forum.php?forum=bibdesk-users
+
+### Bug reports
+
+You can submit a bug report to the bug tracker at <a
+href="http://sourceforge.net/projects/bibdesk/">http://sourceforge.net/projects/bibdesk/</a>.
+
+The reports are most useful if they provide a clear description of
+what went wrong, what you expected, and how to reproduce the problem
+at a different computer without you there helping us.
+
+If you're submitting a problem with how it handled a certain file, it
+would help if you sent that file too, or at least the representative
+subset that causes the errors. Crash reports are also useful and can
+be obtained from the Console application (in `Applications/Utilities`).
