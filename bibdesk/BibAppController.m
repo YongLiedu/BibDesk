@@ -291,6 +291,12 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 	NSString *content = [[[NSString alloc] initWithData:data encoding:encoding] autorelease];  // this returns a Unicode string
 	BibDocument *doc = nil;
 	
+	if(content == nil){ // ARM:  This happens if you try to open a MacRoman encoded file as UTF8, and then the loadBibTeXDataRepresentation: fails somewhere (I didn't bother tracing it any further).
+	    NSRunAlertPanel(NSLocalizedString(@"Error",@"Error"),
+			    NSLocalizedString(@"Incorrect file encoding chosen.  Please try to reopen the file with a different encoding.",@"Wrong encoding message."), nil, nil, nil);
+	    return;
+	}	    
+	
 	doc = [[NSDocumentController sharedDocumentController] openUntitledDocumentOfType:@"bibTeX database" display:YES];
 	[doc loadBibTeXDataRepresentation:[[BDSKConverter stringByTeXifyingString:content] dataUsingEncoding:NSUTF8StringEncoding]];
 	[doc updateChangeCount:NSChangeDone];
