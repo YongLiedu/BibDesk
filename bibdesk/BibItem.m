@@ -36,7 +36,7 @@
 
 #import "BibItem.h"
 
-#define addkey(s) if([pubFields objectForKey: s] == nil){[pubFields setObject:[BDSKComplexString complexStringWithString:@""] forKey: s];} [removeKeys removeObject: s];
+#define addkey(s) if([pubFields objectForKey: s] == nil){[pubFields setObject:[NSString stringWithString:@""] forKey: s];} [removeKeys removeObject: s];
 
 
 #define isEmptyField(s) ([[[pubFields objectForKey:s] stringValue] isEqualToString:@""])
