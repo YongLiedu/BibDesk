@@ -117,6 +117,7 @@
 
 - (void)dealloc{
     [_entry release];
+    [super dealloc];
 }
 
 @end

@@ -470,5 +470,6 @@ static unsigned threadCount = 0;
     [applicationSupportPath release];
     [countLock release];
     [workingLock release];
+    [super dealloc];
 }
 @end
