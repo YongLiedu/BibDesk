@@ -394,6 +394,7 @@ NSString* BDSKBibTeXStringPboardType = @"edu.ucsd.cs.mmcrack.bibdesk: Local BibT
     [documentWindow makeFirstResponder:tableView];	
     [self setupTableColumns]; // calling it here mostly just makes sure that the menu is set up.
     [self setTableFont];
+    [self updateUI];
 }
 
 #pragma mark -
@@ -682,9 +683,6 @@ stringByAppendingPathComponent:@"BibDesk"]; */
     [self refreshAuthors];
     // since we can't save pubmed files as pubmed files:
     [self updateChangeCount:NSChangeDone];
-    [self performSelector:@selector(updateUI)
-               withObject:nil
-               afterDelay:0.1];
     return YES;
 }
 
@@ -749,9 +747,6 @@ stringByAppendingPathComponent:@"BibDesk"]; */
     
 	[shownPublications setArray:publications];
     [self refreshAuthors];
-    [self performSelector:@selector(updateUI)
-               withObject:nil
-               afterDelay:0.1];
     return YES;
 }
 
