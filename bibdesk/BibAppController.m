@@ -99,7 +99,9 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
     }
 
     [NSApp registerServicesMenuSendTypes:[NSArray arrayWithObjects:NSStringPboardType,nil] returnTypes:[NSArray arrayWithObjects:NSStringPboardType,nil]];
-
+    if([[OFPreferenceWrapper sharedPreferenceWrapper] objectForKey:@"NSToolbar Configuration OAPreferences"] != nil){
+	[[OFPreferenceWrapper sharedPreferenceWrapper] removeObjectForKey:@"NSToolbar Configuration OAPreferences"];
+    }
 }
 
 - (id)init
