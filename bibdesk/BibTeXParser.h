@@ -43,7 +43,7 @@
 
 - (NSString *)preambleStringFromScanner:(NSScanner *)scanner endingRange:(NSRange)range string:(NSString *)fullString filePath:(NSString *)filePath hadProblems:(BOOL *)hadProblems;
 - (NSDictionary *)macroStringFromScanner:(NSScanner *)scanner endingRange:(NSRange)range string:(NSString *)fullString;
-- (NSMutableArray *)itemsFromString:(NSString *)fullString error:(BOOL *)hadProblems frontMatter:(NSMutableString *)frontMatter filePath:(NSString *)filePath addToDocument:(BibDocument *)document;
+- (NSMutableArray *)itemsFromString:(NSString *)fullString error:(BOOL *)hadProblems frontMatter:(NSMutableString *)frontMatter filePath:(NSString *)filePath document:(BibDocument *)aDocument background:(BOOL)background;
 - (NSMutableArray *)itemsFromData:(NSData *)inData error:(BOOL *)hadProblems frontMatter:(NSMutableString *)frontMatter filePath:(NSString *)filePath document:(BibDocument *)document;
 - (void)parseItemsFromString:(NSString *)fullString addToDocument:(BibDocument *)document frontMatter:(NSMutableString *)frontMatter;
 - (BibDocument *)document;
