@@ -2,6 +2,7 @@
     IBClasses = (
         {
             ACTIONS = {
+                changeCiteKeyAutogenerate = id; 
                 citeKeyFormatAdd = id; 
                 citeKeyFormatChanged = id; 
                 citeKeyHelp = id; 
@@ -10,6 +11,7 @@
             CLASS = "BibPref_CiteKey"; 
             LANGUAGE = ObjC; 
             OUTLETS = {
+                citeKeyAutogenerateCheckButton = NSButton; 
                 citeKeyLine = NSTextField; 
                 formatField = NSTextField; 
                 formatPresetPopUp = NSPopUpButton; 
