@@ -273,8 +273,8 @@ void _setupFonts(){
     if(![aString canBeConvertedToEncoding:[NSString defaultCStringEncoding]]){
 	NSLog(@"An author name could not be displayed losslessly.");
 	NSLog(@"Using lossy encoding for %@", aString);
-	str = [aString lossyCString];
-    } else  str = [aString cString];
+	str = (char *)[aString lossyCString];
+    } else  str = (char *)[aString cString];
     
 //    [aString getCString:str]; // str will be autoreleased. (freed?)
     bt_stringlist *sl = nil;

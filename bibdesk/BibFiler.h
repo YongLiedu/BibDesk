@@ -8,6 +8,7 @@
 
 #import <Foundation/Foundation.h>
 #import "BibPrefController.h"
+#import "BibItem.h"
 @class BibDocument;
 
 @interface BibFiler : NSObject {

@@ -325,7 +325,7 @@ NSString *BDSKUrlString = @"Url";
 // @@ should also check validity using citekeyformatter
 - (BOOL)citeKeyIsValid:(NSString *)proposedCiteKey{
 	
-    return !([theDocument citeKeyIsUsed:proposedCiteKey byItemOtherThan:theBib] ||
+    return !([(BibDocument *)theDocument citeKeyIsUsed:proposedCiteKey byItemOtherThan:theBib] ||
 			 [proposedCiteKey isEqualToString:@""]);
 }
 
@@ -457,7 +457,7 @@ NSString *BDSKUrlString = @"Url";
         [theBib setField:@"Local-Url" toValue:fileURLString];
 		if([[OFPreferenceWrapper sharedPreferenceWrapper] boolForKey:BDSKFilePapersAutomaticallyKey]){
 			[[BibFiler sharedFiler] filePapers:[NSArray arrayWithObject:theBib]
-								  fromDocument:theDocument];
+								  fromDocument:(BibDocument *)theDocument];
 		}
 		
 		[self setupForm];

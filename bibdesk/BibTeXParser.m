@@ -92,7 +92,7 @@
         bt_set_stringopts(BTE_PREAMBLE, BTO_EXPAND);
         bt_set_stringopts(BTE_REGULAR, BTO_MINIMAL);
 
-        while(entry =  bt_parse_entry(infile, fs_path, 0, &ok)){
+        while(entry =  bt_parse_entry(infile, (char *)fs_path, 0, &ok)){
             if (ok){
                 // Adding a new BibItem
                 if (bt_entry_metatype (entry) != BTE_REGULAR){

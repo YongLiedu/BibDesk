@@ -23,7 +23,7 @@ static BibFiler *_sharedFiler = nil;
 	NSFileManager *fm = [NSFileManager defaultManager];
 	
 	foreach(paper , papers){
-		NSString *path = [paper localURLPathRelativeTo:[[doc fileName] stringByDeletingLastPathComponent]];
+		NSString *path = [paper localURLPathRelativeTo:[[(NSDocument *)doc fileName] stringByDeletingLastPathComponent]];
 		NSString *fileName = [path lastPathComponent];
 		NSString *newPath = [[OFPreferenceWrapper sharedPreferenceWrapper] stringForKey:BDSKPapersFolderPathKey];
 		newPath = [newPath stringByAppendingPathComponent:fileName];

@@ -130,7 +130,7 @@ static NSMutableArray *_authors;
     }
 	
 
-	theName = bt_split_name([name UTF8String],[name UTF8String],0,0);
+	theName = bt_split_name((char *)[name UTF8String],(char *)[name UTF8String],0,0);
     
     // get tokens from first part
     tmpStr = [NSMutableString string];

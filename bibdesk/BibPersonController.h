@@ -8,6 +8,7 @@
 
 #import <AppKit/AppKit.h>
 #import "BibAuthor.h"
+#import "BibItem.h"
 
 
 @interface BibPersonController : NSWindowController {
