@@ -275,9 +275,9 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 }
 
 - (void)dealloc{
-//#if DEBUG
+#if DEBUG
     NSLog(@"BibEditor dealloc");
-//#endif
+#endif
     // release theBib? no...
     
     // This fixes some seriously weird issues with Jaguar, and possibly 10.3.  The tableview messages its datasource/delegate (BibEditor) after the editor is dealloced, which causes a crash.
@@ -964,7 +964,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
     NSFormCell *cell = [bibFields selectedCell];
     if(cell == nil) return;
     
-    NSLog(@"edit as raw: %@", cell);
+    //NSLog(@"edit as raw: %@", cell);
     [self editFormCellAsMacro:cell];
 }
 
