@@ -379,6 +379,18 @@ extern NSString* BDSKBibTeXStringPboardType;
 */
 
 - (void)hidePublicationsWithoutSubstring:(NSString *)substring inField:(NSString *)field;
+/*!
+    @method     publicationsWithSubstring:inField:forArray:
+    @abstract   Returns an array of publications matching the search term in the given field and array of BibItems.
+    @discussion This method does all of the work in searching through a publications array for BibItems with a given
+                substring, in a particular field or all fields.  A Boolean-type search is possible, by using AND and OR
+                keywords (all caps), although it appears to be flaky under some conditions.
+    @param      substring The string to search for.
+    @param      field The BibItem field to search in (e.g. Author).
+    @param      arrayToSearch The array of BibItems to search in, typically the documents publications ivar.
+    @result     Returns an array of BibItems which matched the given search terms.
+*/
+- (NSArray *)publicationsWithSubstring:(NSString *)substring inField:(NSString *)field forArray:(NSArray *)arrayToSearch;
 
 /*!
     @method updatePreviews

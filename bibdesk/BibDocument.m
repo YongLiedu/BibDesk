@@ -1371,8 +1371,26 @@ Enhanced delete method that uses a sheet instead of a modal dialogue.
         [self updateUI];
         return;
     }
+    [shownPublications setArray:[self publicationsWithSubstring:substring
+                                                        inField:field
+                                                       forArray:publications]];
     
-    NSString *selectorString = [[[NSString alloc] init] autorelease];
+    [quickSearchTextDict setObject:substring
+                            forKey:field];
+    
+    [[OFPreferenceWrapper sharedPreferenceWrapper] setObject:[[quickSearchTextDict copy] autorelease]
+                                                      forKey:BDSKCurrentQuickSearchTextDict];
+    [[OFPreferenceWrapper sharedPreferenceWrapper] autoSynchronize];
+    
+    [self updateUI]; // calls reloadData
+    if([shownPublications count] == 1)
+        [tableView selectAll:self];
+
+}
+
+- (NSArray *)publicationsWithSubstring:(NSString *)substring inField:(NSString *)field forArray:(NSArray *)arrayToSearch{
+    
+    NSString *selectorString;
     BOOL isGeneric = NO;
     
     if([field isEqualToString:@"Title"]){
@@ -1444,16 +1462,15 @@ Enhanced delete method that uses a sheet instead of a modal dialogue.
     if(isGeneric){ // use the -[BibItem valueOfField:] method to get the substring we want to search in, if it's not a "standard" one
         NSString *value = nil;
         while(componentSubstring = [andEnum nextObject]){ // strip the accents from the search string, and from the string we get from BibItem
-            componentSubstring = [[[NSString alloc] initWithData:[componentSubstring dataUsingEncoding:NSASCIIStringEncoding allowLossyConversion:YES] 
-                                                        encoding:NSASCIIStringEncoding] autorelease];
-            pubEnum = [publications objectEnumerator];
+            componentSubstring = [NSString lossyASCIIStringWithString:componentSubstring];
+            
+            pubEnum = [arrayToSearch objectEnumerator];
             while(pub = [pubEnum nextObject]){
                 value = [pub valueOfField:quickSearchKey];
                 if(!value){
                     r.location = NSNotFound;
                 } else {
-                    value = [[[NSString alloc] initWithData:[value dataUsingEncoding:NSASCIIStringEncoding allowLossyConversion:YES] 
-                                                   encoding:NSASCIIStringEncoding] autorelease];
+                    value = [NSString lossyASCIIStringWithString:value];
                     r = [value rangeOfString:componentSubstring
                                      options:NSCaseInsensitiveSearch];
                 }
@@ -1467,13 +1484,12 @@ Enhanced delete method that uses a sheet instead of a modal dialogue.
         }
     } else { // if it was a substring that has an accessor in BibItem, use that directly
         while(componentSubstring = [andEnum nextObject]){
-            componentSubstring = [[[NSString alloc] initWithData:[componentSubstring dataUsingEncoding:NSASCIIStringEncoding allowLossyConversion:YES] 
-                                                        encoding:NSASCIIStringEncoding] autorelease];
-            pubEnum = [publications objectEnumerator];
+            componentSubstring = [NSString lossyASCIIStringWithString:componentSubstring];
+            
+            pubEnum = [arrayToSearch objectEnumerator];
             while(pub = [pubEnum nextObject]){
                 accessorResult = [pub performSelector:NSSelectorFromString(selectorString) withObject:nil];
-                accessorResult = [[[NSString alloc] initWithData:[accessorResult dataUsingEncoding:NSASCIIStringEncoding allowLossyConversion:YES] 
-                                                        encoding:NSASCIIStringEncoding] autorelease];
+                accessorResult = [NSString lossyASCIIStringWithString:accessorResult];
                 r = [accessorResult rangeOfString:componentSubstring
                                           options:NSCaseInsensitiveSearch];
                 if(r.location != NSNotFound){
@@ -1491,17 +1507,16 @@ Enhanced delete method that uses a sheet instead of a modal dialogue.
     
     if(isGeneric){ // use the -[BibItem valueOfField:] method to get the substring we want to search in, if it's not a "standard" one
         while(componentSubstring = [orEnum nextObject]){
-            componentSubstring = [[[NSString alloc] initWithData:[componentSubstring dataUsingEncoding:NSASCIIStringEncoding allowLossyConversion:YES] 
-                                                        encoding:NSASCIIStringEncoding] autorelease];
+            componentSubstring = [NSString lossyASCIIStringWithString:componentSubstring];
+            
             NSString *value = nil;
-            pubEnum = [publications objectEnumerator];
+            pubEnum = [arrayToSearch objectEnumerator];
             while(pub = [pubEnum nextObject]){
                 value = [pub valueOfField:quickSearchKey];
                 if(!value){
                     r.location = NSNotFound;
                 } else {
-                    value = [[[NSString alloc] initWithData:[value dataUsingEncoding:NSASCIIStringEncoding allowLossyConversion:YES] 
-                                                   encoding:NSASCIIStringEncoding] autorelease];
+                    value = [NSString lossyASCIIStringWithString:value];
                     r = [value rangeOfString:componentSubstring
                                      options:NSCaseInsensitiveSearch];
                 }
@@ -1515,13 +1530,12 @@ Enhanced delete method that uses a sheet instead of a modal dialogue.
         }
     } else { // if it was a substring that has an accessor in BibItem, use that directly
         while(componentSubstring = [orEnum nextObject]){
-            componentSubstring = [[[NSString alloc] initWithData:[componentSubstring dataUsingEncoding:NSASCIIStringEncoding allowLossyConversion:YES] 
-                                                        encoding:NSASCIIStringEncoding] autorelease];        
-            pubEnum = [publications objectEnumerator];
+            componentSubstring = [NSString lossyASCIIStringWithString:componentSubstring];
+            
+            pubEnum = [arrayToSearch objectEnumerator];
             while(pub = [pubEnum nextObject]){
                 accessorResult = [pub performSelector:NSSelectorFromString(selectorString) withObject:nil];
-                accessorResult = [[[NSString alloc] initWithData:[accessorResult dataUsingEncoding:NSASCIIStringEncoding allowLossyConversion:YES] 
-                                                        encoding:NSASCIIStringEncoding] autorelease];
+                accessorResult = [NSString lossyASCIIStringWithString:accessorResult];
                 r = [accessorResult rangeOfString:componentSubstring
                                           options:NSCaseInsensitiveSearch];
                 if(r.location != NSNotFound){
@@ -1559,18 +1573,7 @@ Enhanced delete method that uses a sheet instead of a modal dialogue.
         
     NSArray *foundArray = [[[newSet copy] autorelease] allObjects];
     
-    [shownPublications setArray:foundArray];
-
-    [quickSearchTextDict setObject:substring
-                            forKey:field];
-    
-    [[OFPreferenceWrapper sharedPreferenceWrapper] setObject:[[quickSearchTextDict copy] autorelease]
-                                                      forKey:BDSKCurrentQuickSearchTextDict];
-    [[OFPreferenceWrapper sharedPreferenceWrapper] autoSynchronize];
-    
-    [self updateUI]; // calls reloadData
-    if([shownPublications count] == 1)
-        [tableView selectAll:self];
+    return foundArray;
     
 }
 
