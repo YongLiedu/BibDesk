@@ -223,6 +223,9 @@ Extra wrapping of the created and modified date methods to
 	// otherwise use the information of the first publication found in the string.
 	BibItem * newPub = [newPubs objectAtIndex:0];
 	
+	// a parsed pub has no creation date set, so we need to copy first
+	[newPub setField:BDSKDateCreatedString toValue:[self valueOfField:BDSKDateCreatedString]];
+	
 	// ... and replace the current record with it.
 	// hopefully, I don't understand the whole filetypes/pubtypes stuff	
 	[self setFileType:[newPub fileType]];
