@@ -116,13 +116,13 @@ static NSCharacterSet *FinalCharSet;
     NSString *tmpConv;
     NSString *tmpConvB;
     NSString *TEXString;
-    NSMutableString *convertedSoFar = [NSMutableString stringWithCapacity:10];
+    NSMutableString *convertedSoFar = [[NSMutableString alloc] initWithCapacity:10];
 
     // get the dictionary
     NSDictionary *conversions;
 
     if(!s || [s isEqualToString:@""]){
-        return @"";
+		return [NSString string];
     }
     
     if(!WholeDict)[self loadDict];
