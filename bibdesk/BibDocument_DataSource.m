@@ -58,13 +58,13 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
         pub = [shownPublications objectAtIndex:sortedRow];
         auths = [pub pubAuthors];
         
-        if([tcID caseInsensitiveCompare:@"Cite Key"] == NSOrderedSame ||
+        if([tcID caseInsensitiveCompare:BDSKCiteKeyString] == NSOrderedSame ||
 		   [tcID caseInsensitiveCompare:@"CiteKey"] == NSOrderedSame ||
 		   [tcID caseInsensitiveCompare:@"Cite-Key"] == NSOrderedSame ||
 		   [tcID caseInsensitiveCompare:@"Key"]== NSOrderedSame){
             return [pub citeKey];
             
-        }else if([tcID isEqualToString: @"Title"] ){
+        }else if([tcID isEqualToString: BDSKTitleString] ){
 			
 			if ([[pub type] isEqualToString:@"inbook"]){
 				return [NSString stringWithFormat:@"%@ : %@", [pub valueOfField:@"Chapter"], [pub title]];
@@ -86,7 +86,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 			
         }else if([tcID isEqualToString: @"Date"] ){
             NSCalendarDate *date = [pub date];
-			NSString *monthStr = [pub valueOfField:@"Month"];
+			NSString *monthStr = [pub valueOfField:BDSKMonthString];
 			if(date == nil)
                 return @"No date";
             else if( !monthStr ||  [monthStr isEqualToString:@""])
@@ -120,7 +120,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 				return @"-";
 			}										
             
-        }else if ([tcID isEqualToString:@"Local-Url"]){
+        }else if ([tcID isEqualToString:BDSKLocalUrlString]){
             path = [pub localURLPathRelativeTo:[[self fileName] stringByDeletingLastPathComponent]];
 	    extension = [path pathExtension];
             if(path && [[NSFileManager defaultManager] fileExistsAtPath:path]){
@@ -134,8 +134,8 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
                 return nil;
             }
 
-        }else if ([tcID isEqualToString:@"Url"]){
-            path = [pub valueOfField:@"Url"];
+        }else if ([tcID isEqualToString:BDSKUrlString]){
+            path = [pub valueOfField:BDSKUrlString];
             if(path && ![path isEqualToString:@""]){
                 return [[NSWorkspace sharedWorkspace] iconForFileType:@"webloc"];
             }else{

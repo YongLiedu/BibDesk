@@ -265,7 +265,7 @@ static BDSKConverter *theConverter;
 	NSCharacterSet *invalidCharSet = [[BibTypeManager sharedManager] strictInvalidCharactersForField:fieldName inFileType:type];
     NSString *newString = nil;
 
-	if ([fieldName isEqualToString:@"Cite Key"]) {
+	if ([fieldName isEqualToString:BDSKCiteKeyString]) {
 		
 		if (string == nil || [string isEqualToString:@""]) {
 			return @"";
@@ -278,7 +278,7 @@ static BDSKConverter *theConverter;
 		
 		return newString;
 	}
-	else if ([fieldName isEqualToString:@"Local-Url"]) {
+	else if ([fieldName isEqualToString:BDSKLocalUrlString]) {
 		
 		if (string == nil || [string isEqualToString:@""]) {
 			return @"";
@@ -379,18 +379,18 @@ static BDSKConverter *theConverter;
 		switch ([string characterAtIndex:0]) {
 			case 'a':
 			case 'A':
-				[arr addObject:@"Author"];
+				[arr addObject:BDSKAuthorString];
 				break;
 			case 't':
 			case 'T':
-				[arr addObject:@"Title"];
+				[arr addObject:BDSKTitleString];
 				break;
 			case 'y':
 			case 'Y':
-				[arr addObject:@"Year"];
+				[arr addObject:BDSKYearString];
 				break;
 			case 'm':
-				[arr addObject:@"Month"];
+				[arr addObject:BDSKMonthString];
 				break;
 			case 'f':
 			case 'c':

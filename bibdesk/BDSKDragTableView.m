@@ -232,10 +232,10 @@ static NSColor *sStripeColor = nil;
 
 // this was part of an attempt to make BDSKTableView self-contained. Not currently in use.
 //- (id)tableView:(NSTableView *)tView objectValueForTableColumn:(NSTableColumn *)tableColumn row:(int)row{
-//    if([[tableColumn identifier] isEqualToString: @"Cite Key"] ){
+//    if([[tableColumn identifier] isEqualToString: BDSKCiteKeyString] ){
 //        return [[ownedPublications objectAtIndex:row] citeKey];
 //    }
-//    if([[tableColumn identifier] isEqualToString: @"Title"] ){
+//    if([[tableColumn identifier] isEqualToString: BDSKTitleString] ){
 //        return [[ownedPublications objectAtIndex:row] title];
 //    }
 //    if([[tableColumn identifier] isEqualToString: @"Date"] ){

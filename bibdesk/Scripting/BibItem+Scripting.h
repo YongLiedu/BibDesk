@@ -12,15 +12,6 @@
 
 #define BibItemBasicObjects @"citeKey", @"pubDate", @"title", @"type", @"date", @"pubFields", @"bibTeXStrings", @"RTFValue", @"RSSValue"
 
-#define BibItemYearKey @"Year"
-#define BibItemMonthKey @"Month"
-#define BibItemRemoteURLKey @"Url"
-#define BibItemLocalURLKey @"Local-Url"
-#define BibItemAbstractKey @"Abstract"
-#define BibItemAnnotationKey @"Annote"
-#define BibItemRSSDescriptionKey @"Rss-Description"
-#define BibItemKeywordsKey @"Keywords"
-
 @interface BibItem (Scripting) 
 
 - (BibField *)valueInBibFieldsWithName:(NSString *)name;

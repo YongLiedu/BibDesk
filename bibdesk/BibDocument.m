@@ -46,7 +46,7 @@ NSString *BDSKBibItemLocalDragPboardType = @"edu.ucsd.cs.mmccrack.bibdesk: Local
 
         quickSearchKey = [[[OFPreferenceWrapper sharedPreferenceWrapper] objectForKey:BDSKCurrentQuickSearchKey] retain];
         if(!quickSearchKey){
-            quickSearchKey = [[NSString alloc] initWithString:@"Title"];
+            quickSearchKey = [[NSString alloc] initWithString:BDSKTitleString];
         }
         PDFpreviewer = [BDSKPreviewer sharedPreviewer];
         showColsArray = [[NSMutableArray arrayWithObjects:
@@ -1196,11 +1196,11 @@ stringByAppendingPathComponent:@"BibDesk"]; */
 	[cellMenu insertItem:item4 atIndex:curIndex++];
 	[item4 release];
 	
-	item4 = [[NSMenuItem alloc] initWithTitle:@"Title" action:@selector(searchFieldChangeKey:) keyEquivalent:@""];
+	item4 = [[NSMenuItem alloc] initWithTitle:BDSKTitleString action:@selector(searchFieldChangeKey:) keyEquivalent:@""];
 	[cellMenu insertItem:item4 atIndex:curIndex++];
 	[item4 release];
 	
-	item4 = [[NSMenuItem alloc] initWithTitle:@"Author" action:@selector(searchFieldChangeKey:) keyEquivalent:@""];
+	item4 = [[NSMenuItem alloc] initWithTitle:BDSKAuthorString action:@selector(searchFieldChangeKey:) keyEquivalent:@""];
 	[cellMenu insertItem:item4 atIndex:curIndex++];
 	[item4 release];
 	
@@ -1513,10 +1513,10 @@ stringByAppendingPathComponent:@"BibDesk"]; */
     NSString *selectorString;
     BOOL isGeneric = NO;
     
-    if([field isEqualToString:@"Title"]){
+    if([field isEqualToString:BDSKTitleString]){
         selectorString=@"title";
     } else {
-        if([field isEqualToString:@"Author"]){
+        if([field isEqualToString:BDSKAuthorString]){
             selectorString=@"bibtexAuthorString";
         } else {
             if([field isEqualToString:@"Date"]){
@@ -1779,14 +1779,14 @@ didClickTableColumn: (NSTableColumn *) tableColumn{
 
 	NSString *tcID = [tableColumn identifier];
 	// resorting should happen whenever you click.
-	if([tcID caseInsensitiveCompare:@"Cite Key"] == NSOrderedSame ||
+	if([tcID caseInsensitiveCompare:BDSKCiteKeyString] == NSOrderedSame ||
        [tcID caseInsensitiveCompare:@"CiteKey"] == NSOrderedSame ||
        [tcID caseInsensitiveCompare:@"Cite-Key"] == NSOrderedSame ||
        [tcID caseInsensitiveCompare:@"Key"]== NSOrderedSame){
 		
 		[publications sortUsingSelector:@selector(keyCompare:)];
 		[shownPublications sortUsingSelector:@selector(keyCompare:)];
-	}else if([tcID isEqualToString:@"Title"]){
+	}else if([tcID isEqualToString:BDSKTitleString]){
 		
 		[publications sortUsingSelector:@selector(titleCompare:)];
 		[shownPublications sortUsingSelector:@selector(titleCompare:)];
@@ -1927,12 +1927,12 @@ int generalBibItemCompareFunc(id item1, id item2, void *context){
     }else{
 	colID = @"";
     }
-    if([colID isEqualToString:@"Local-Url"]){
+    if([colID isEqualToString:BDSKLocalUrlString]){
         pub = [shownPublications objectAtIndex:sortedRow];
         [[NSWorkspace sharedWorkspace] openFile:[pub localURLPathRelativeTo:[[self fileName] stringByDeletingLastPathComponent]]];
-    }else if([colID isEqualToString:@"Url"]){
+    }else if([colID isEqualToString:BDSKUrlString]){
         pub = [shownPublications objectAtIndex:sortedRow];
-        [[NSWorkspace sharedWorkspace] openURL:[NSURL URLWithString:[pub valueOfField:@"Url"]]];
+        [[NSWorkspace sharedWorkspace] openURL:[NSURL URLWithString:[pub valueOfField:BDSKUrlString]]];
         // @@ http-adding: change valueOfField to [pub url] and have it auto-add http://
     }else{
 		int n = [self numberOfSelectedPubs];
@@ -2260,7 +2260,7 @@ This method always returns YES. Even if some or many operations fail.
 			NSString *newUrl = [[NSURL fileURLWithPath:
 				[fnStr stringByExpandingTildeInPath]]absoluteString];
 			
-			[newBI setField:@"Local-Url" toValue:newUrl];	
+			[newBI setField:BDSKLocalUrlString toValue:newUrl];	
 			
 			if([pw boolForKey:BDSKFilePapersAutomaticallyKey]){
 				[[BibFiler sharedFiler] file:YES papers:[NSArray arrayWithObject:newBI]
@@ -2342,7 +2342,7 @@ This method always returns YES. Even if some or many operations fail.
                 [tc setWidth:[tcWidth floatValue]];
             }
         }
-		if([colName isEqualToString:@"Local-Url"]){
+		if([colName isEqualToString:BDSKLocalUrlString]){
 			NSImage * pdfImage = [NSImage imageNamed:@"TinyFile"];
 			[[tc headerCell] setImage:pdfImage];
 		}else{	
@@ -2356,12 +2356,12 @@ This method always returns YES. Even if some or many operations fail.
             // I should probably set it up better in the nib, or something.
         }else{
             [tableView addTableColumn:tc];
-            if([[tc identifier] isEqualToString:@"Local-Url"] ||
-               [[tc identifier] isEqualToString:@"Url"]){
+            if([[tc identifier] isEqualToString:BDSKLocalUrlString] ||
+               [[tc identifier] isEqualToString:BDSKUrlString]){
                 [tc setDataCell:imageCell];
                 
             }
-            if(![[tc identifier] isEqualToString:@"Title"]){
+            if(![[tc identifier] isEqualToString:BDSKTitleString]){
                 [self columnsMenuAddTableColumnName:[tc identifier] enabled:YES];
                 // OK to add multiple times.
             }
@@ -2587,10 +2587,10 @@ This method always returns YES. Even if some or many operations fail.
                         [s RTFFromRange:NSMakeRange(0, [s length]) documentAttributes:nil]];
                 }
 
-                if([[[shownPublications objectAtIndex:[i intValue]] valueOfField:@"Annote"] isEqualToString:@""]){
+                if([[[shownPublications objectAtIndex:[i intValue]] valueOfField:BDSKAnnoteString] isEqualToString:@""]){
                     [previewField replaceCharactersInRange: [previewField selectedRange] withString:NSLocalizedString(@"No notes.",@"")];
                 }else{
-                    [previewField replaceCharactersInRange: [previewField selectedRange] withString: [[shownPublications objectAtIndex:[i intValue]] valueOfField:@"Annote"]];
+                    [previewField replaceCharactersInRange: [previewField selectedRange] withString: [[shownPublications objectAtIndex:[i intValue]] valueOfField:BDSKAnnoteString]];
                 }
                 break;
         }

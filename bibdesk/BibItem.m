@@ -53,14 +53,14 @@ void _setupFonts(){
         [defaultStyle setParagraphStyle:[NSParagraphStyle defaultParagraphStyle]];
         if([NSFont fontWithName:@"Gill Sans" size:10.0] == nil){ // Gill Sans is our preferred font, but we'll fall back on the system font if Gill Sans isn't available
             _cachedFonts = [[NSDictionary dictionaryWithObjectsAndKeys:
-                [NSFont boldSystemFontOfSize:14.0], @"Title",
+                [NSFont boldSystemFontOfSize:14.0], BDSKTitleString,
                 [NSFont systemFontOfSize:10.0], @"Type",
                 [NSFont boldSystemFontOfSize:12.0], @"Key",
                 [NSFont systemFontOfSize:12.0], @"Body",
                 nil] retain]; // we'll never release this
         } else {
             _cachedFonts = [[NSDictionary dictionaryWithObjectsAndKeys:
-                [NSFont fontWithName:@"Gill Sans Bold Italic" size:14.0], @"Title",
+                [NSFont fontWithName:@"Gill Sans Bold Italic" size:14.0], BDSKTitleString,
                 [NSFont fontWithName:@"Gill Sans" size:10.0], @"Type",
                 [NSFont fontWithName:@"Gill Sans Bold" size:12.0], @"Key",
                 [NSFont fontWithName:@"Gill Sans" size:12.0], @"Body",
@@ -179,7 +179,7 @@ void _setupFonts(){
     }    
     
     //I don't enforce Keywords, but since there's GUI depending on them, I will enforce these others:
-    addkey(@"Url") addkey(@"Local-Url") addkey(@"Annote") addkey(@"Abstract") addkey(@"Rss-Description")
+    addkey(BDSKUrlString) addkey(BDSKLocalUrlString) addkey(BDSKAnnoteString) addkey(BDSKAbstractString) addkey(BDSKRssDescriptionString)
 
         // remove from removeKeys things that aren't == @"" in pubFields
         // this includes things left over from the previous bibtype - that's good.
@@ -487,7 +487,7 @@ void _setupFonts(){
 }
 
 - (NSString *)title{
-  NSString *t = [pubFields objectForKey: @"Title"];
+  NSString *t = [pubFields objectForKey: BDSKTitleString];
   if(t == nil)
     return @"Empty Title";
   else
@@ -495,7 +495,7 @@ void _setupFonts(){
 }
 
 - (void)setTitle:(NSString *)title{
-  [self setField:@"Title" toValue:title];
+  [self setField:BDSKTitleString toValue:title];
 }
 
 - (void)setDate: (NSCalendarDate *)newDate{
@@ -544,7 +544,7 @@ void _setupFonts(){
 - (NSString *)suggestedCiteKey
 {
 	NSString *citeKeyFormat = [[OFPreferenceWrapper sharedPreferenceWrapper] objectForKey:BDSKCiteKeyFormatKey];
-	return [self parseFormat:citeKeyFormat forField:@"Cite Key"];
+	return [self parseFormat:citeKeyFormat forField:BDSKCiteKeyString];
 }
 
 - (BOOL)canSetCiteKey
@@ -582,9 +582,9 @@ void _setupFonts(){
 	if (date != nil) {
 		[pubFields setObject:[date description] forKey:BDSKDateModifiedString];
 	}
-	[self updateMetadataForKey:@"Cite Key"];
+	[self updateMetadataForKey:BDSKCiteKeyString];
 		
-    NSDictionary *notifInfo = [NSDictionary dictionaryWithObjectsAndKeys:citeKey, @"value", @"Cite Key", @"key",nil];
+    NSDictionary *notifInfo = [NSDictionary dictionaryWithObjectsAndKeys:citeKey, @"value", BDSKCiteKeyString, @"key",nil];
     NSNotification *aNotification = [NSNotification notificationWithName:BDSKBibItemChangedNotification
                                                                   object:self
                                                                 userInfo:notifInfo];
@@ -634,17 +634,17 @@ void _setupFonts(){
 
 - (void)updateMetadataForKey:(NSString *)key{
 	
-	if([@"Annote" isEqualToString:key] || 
-	   [@"Abstract" isEqualToString:key] || 
-	   [@"Rss-Description" isEqualToString:key]){
+	if([BDSKAnnoteString isEqualToString:key] || 
+	   [BDSKAbstractString isEqualToString:key] || 
+	   [BDSKRssDescriptionString isEqualToString:key]){
 		// don't do anything for fields we don't need to update.
 		return;
 	}
 
-    if((![@"" isEqualToString:[pubFields objectForKey: @"Author"]]) && 
-	   ([pubFields objectForKey: @"Author"] != nil))
+    if((![@"" isEqualToString:[pubFields objectForKey: BDSKAuthorString]]) && 
+	   ([pubFields objectForKey: BDSKAuthorString] != nil))
     {
-        [self setAuthorsFromBibtexString:[pubFields objectForKey: @"Author"]];
+        [self setAuthorsFromBibtexString:[pubFields objectForKey: BDSKAuthorString]];
     }else{
         [self setAuthorsFromBibtexString:[pubFields objectForKey: @"Editor"]]; // or what else?
     }
@@ -653,11 +653,11 @@ void _setupFonts(){
 	//@@ 3/5/2004: moved why is this here? 
 	[self makeType:[self type]];
 
-	NSString *yearValue = [pubFields objectForKey:@"Year"];
+	NSString *yearValue = [pubFields objectForKey:BDSKYearString];
     if (yearValue && ![yearValue isEqualToString:@""]) {
-		NSString *monthValue = [pubFields objectForKey:@"Month"];
+		NSString *monthValue = [pubFields objectForKey:BDSKMonthString];
 		if (!monthValue) monthValue = @"";
-		NSString *dateStr = [NSString stringWithFormat:@"%@ 1 %@", monthValue, [pubFields objectForKey:@"Year"]];
+		NSString *dateStr = [NSString stringWithFormat:@"%@ 1 %@", monthValue, [pubFields objectForKey:BDSKYearString]];
 		NSDictionary *locale = [NSDictionary dictionaryWithObjectsAndKeys:@"MDYH", NSDateTimeOrdering, 
 			[NSArray arrayWithObjects:@"January", @"February", @"March", @"April", @"May", @"June", @"July", @"August", @"September", @"October", @"November", @"December", nil], NSMonthNameArray,
 			[NSArray arrayWithObjects:@"Jan", @"Feb", @"Mar", @"Apr", @"May", @"Jun", @"Jul", @"Aug", @"Sep", @"Oct", @"Nov", @"Dec", nil], NSShortMonthNameArray, nil];
@@ -820,7 +820,7 @@ void _setupFonts(){
     NSEnumerator *e = [[[pubFields allKeys] sortedArrayUsingSelector:@selector(caseInsensitiveCompare:)] objectEnumerator];
 
     NSDictionary *titleAttributes =
-        [NSDictionary dictionaryWithObjects:[NSArray arrayWithObjects:[_cachedFonts objectForKey:@"Title"], _keyParagraphStyle, nil]
+        [NSDictionary dictionaryWithObjects:[NSArray arrayWithObjects:[_cachedFonts objectForKey:BDSKTitleString], _keyParagraphStyle, nil]
                                     forKeys:[NSArray arrayWithObjects:NSFontAttributeName,  NSParagraphStyleAttributeName, nil]];
 
     NSDictionary *typeAttributes =
@@ -857,7 +857,7 @@ void _setupFonts(){
 
     while(key = [e nextObject]){
         if(![[pubFields objectForKey:key] isEqualToString:@""] &&
-           ![key isEqualToString:@"Title"]){
+           ![key isEqualToString:BDSKTitleString]){
             if([self isRequired:key]){
                 [aStr appendAttributedString:[[[NSAttributedString alloc] initWithString:[NSString stringWithFormat:@"%@\n",key]
                                                                               attributes:keyAttributes] autorelease]];
@@ -876,8 +876,8 @@ void _setupFonts(){
             [aStr appendAttributedString:[[[NSAttributedString alloc] initWithString:[NSString stringWithFormat:@"%@\n",key]
                                                                           attributes:keyAttributes] autorelease]];
             
-            if([key isEqualToString:@"Date-Added"] || 
-               [key isEqualToString:@"Date-Modified"]){
+            if([key isEqualToString:BDSKDateCreatedString] || 
+               [key isEqualToString:BDSKDateModifiedString]){
                 NSCalendarDate *date = [NSCalendarDate dateWithString:[pubFields objectForKey:key]];
 
                 [aStr appendAttributedString:[[[NSAttributedString alloc] initWithString:[NSString stringWithFormat:@"%@\n",[dateFormatter stringForObjectValue:date]]
@@ -914,7 +914,7 @@ void _setupFonts(){
         // Get TeX version of each field.
 	// Don't run the converter on Local-Url or Url fields, so we don't trash ~ and % escapes.
 	// Note that NSURLs comply with RFC 2396, and can't contain high-bit characters anyway.
-	if([k isEqualToString:@"Local-Url"] || [k isEqualToString:@"Url"]){
+	if([k isEqualToString:BDSKLocalUrlString] || [k isEqualToString:BDSKUrlString]){
 	    v = [pubFields objectForKey:k];
 	} else {
 	    v = [[BDSKConverter sharedConverter] stringByTeXifyingString:[pubFields objectForKey:k]];
@@ -959,14 +959,14 @@ void _setupFonts(){
     NSMutableString *s = [NSMutableString stringWithString:@"<mods>"];
     unsigned i = 0;
     
-    [s appendFormat:@"<titleInfo> <title>%@ </title>", [self valueOfField:@"Title"]];
+    [s appendFormat:@"<titleInfo> <title>%@ </title>", [self valueOfField:BDSKTitleString]];
     
     // note: may in the future want to output subtitles.
 
     [s appendString:@"</titleInfo>\n"];
     
     foreach (author, pubAuthors){
-        [s appendString:[author MODSStringWithRole:@"author"]];
+        [s appendString:[author MODSStringWithRole:BDSKAuthorString]];
         [s appendString:@"\n"];
     }
 
@@ -990,9 +990,9 @@ void _setupFonts(){
         if([pubType isEqualToString:@"inproceedings"] || 
            [pubType isEqualToString:@"article"] || 
            [pubType isEqualToString:@"incollection"]){
-            hostTitle = [self valueOfField:@"booktitle"];
+            hostTitle = [self valueOfField:BDSKBooktitleString];
         }else if([pubType isEqualToString:@"article"]){
-            hostTitle = [self valueOfField:@"Journal"];
+            hostTitle = [self valueOfField:BDSKJournalString];
         }
         [s appendFormat:@"<titleInfo><title>%@</title></titleInfo>", (hostTitle ? hostTitle : @"unknown")];
         
@@ -1017,7 +1017,7 @@ void _setupFonts(){
     }
     [s appendString:@"</description>\n"];
     [s appendString:@"<link>"];
-    [s appendString:[self valueOfField:@"Url"]];
+    [s appendString:[self valueOfField:BDSKUrlString]];
     [s appendString:@"</link>\n"];
     //[s appendString:@"<bt:source><![CDATA[\n"];
     //    [s appendString:[[self bibTeXString] xmlString]];
@@ -1045,7 +1045,7 @@ void _setupFonts(){
 
 - (NSString *)localURLPathRelativeTo:(NSString *)base{
     NSURL *local = nil;
-    NSString *lurl = [self valueOfField:@"Local-Url"];
+    NSString *lurl = [self valueOfField:BDSKLocalUrlString];
 
     if (!lurl || [lurl isEqualToString:@""]) return nil;
 
@@ -1071,7 +1071,7 @@ void _setupFonts(){
 	OFPreferenceWrapper *prefs = [OFPreferenceWrapper sharedPreferenceWrapper];
 	NSString *localUrlFormat = [prefs objectForKey:BDSKLocalUrlFormatKey];
 	NSString *papersFolderPath = [prefs stringForKey:BDSKPapersFolderPathKey];
-	NSString *relativeFile = [self parseFormat:localUrlFormat forField:@"Local-Url"];
+	NSString *relativeFile = [self parseFormat:localUrlFormat forField:BDSKLocalUrlString];
 	
 	return [papersFolderPath stringByAppendingPathComponent:relativeFile];
 }
@@ -1083,7 +1083,7 @@ void _setupFonts(){
 	
 	NSEnumerator *fEnum = [[[NSApp delegate] requiredFieldsForLocalUrl] objectEnumerator];
 	NSString *fieldName;
-	NSString *fieldValue = [self valueOfField:@"Local-Url"];
+	NSString *fieldValue = [self valueOfField:BDSKLocalUrlString];
 	
 	if (fieldValue != nil && ![fieldValue isEqualToString:@""]) {
 		return NO;
@@ -1255,14 +1255,14 @@ void _setupFonts(){
 					break;
 				case 'm':
 					// month
-					if ([self date] && [self valueOfField:@"Month"] != nil && ![[self valueOfField:@"Month"] isEqualToString:@""]) {
+					if ([self date] && [self valueOfField:BDSKMonthString] != nil && ![[self valueOfField:BDSKMonthString] isEqualToString:@""]) {
 						string = [[self date] descriptionWithCalendarFormat:@"%m"];
 						[parsedStr appendString:string];
 					}
 					break;
 				case 'k':
 					// keywords
-					string = [self valueOfField:@"Keywords"];
+					string = [self valueOfField:BDSKKeywordsString];
 					if ([scanner scanCharactersFromSet:digits intoString:&numStr]) {
 						number = [numStr intValue];
 					} else {
@@ -1509,11 +1509,11 @@ void _setupFonts(){
 // do we want to add character checks as in CiteKeyFormatter?
 - (BOOL)stringIsValid:(NSString *)proposedStr forField:(NSString *)fieldName
 {
-	if ([fieldName isEqualToString:@"Cite Key"]) {
+	if ([fieldName isEqualToString:BDSKCiteKeyString]) {
 		    return !(proposedStr == nil || [proposedStr isEqualToString:@""] ||
 					 [[self document] citeKeyIsUsed:proposedStr byItemOtherThan:self]);
 	}
-	else if ([fieldName isEqualToString:@"Local-Url"]) {
+	else if ([fieldName isEqualToString:BDSKLocalUrlString]) {
 			if (proposedStr == nil || [proposedStr isEqualToString:@""])
 				return NO;
 			if ([[NSFileManager defaultManager] fileExistsAtPath:proposedStr])

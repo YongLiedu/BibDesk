@@ -191,7 +191,7 @@
                                                                                 withString:@". "
                                                                                    options:NSLiteralSearch
                                                                                      range:NSMakeRange(0, [wholeValue length])];
-                                                    addStringToDict([[wholeValue copy] autorelease], pubDict, @"Author");
+                                                    addStringToDict([[wholeValue copy] autorelease], pubDict, BDSKAuthorString);
 						}else{
 						    // If we didn't get a FAU key (shows up first in PubMed), fall back to AU
 						    // AU is not in the dictionary, so we don't get confused with FAU
@@ -201,7 +201,7 @@
                                                                                     withString:@". "
                                                                                        options:NSLiteralSearch
                                                                                          range:NSMakeRange(0, [wholeValue length])];
-							addStringToDict([[wholeValue copy] autorelease], pubDict, @"Author");
+							addStringToDict([[wholeValue copy] autorelease], pubDict, BDSKAuthorString);
 						    }else{
 							// If we didn't get a FAU or AU, see if we have A1.  This is yet another variant of RIS.
 							if([key isEqualToString:@"A1"] && haveFAU==NO){
@@ -210,10 +210,10 @@
                                                                                         withString:@". "
                                                                                            options:NSLiteralSearch
                                                                                              range:NSMakeRange(0, [wholeValue length])];
-							    addStringToDict([[wholeValue copy] autorelease], pubDict, @"Author");
+							    addStringToDict([[wholeValue copy] autorelease], pubDict, BDSKAuthorString);
 							}else{
-							    if([key isEqualToString:@"Keywords"]){ // may have multiple keywords, so concatenate them
-                                    addStringToDict([[wholeValue copy] autorelease], pubDict, @"Keywords");
+							    if([key isEqualToString:BDSKKeywordsString]){ // may have multiple keywords, so concatenate them
+                                    addStringToDict([[wholeValue copy] autorelease], pubDict, BDSKKeywordsString);
 							    }else{
                                     if([key isEqualToString:@"Editor"]){ // may have multiple editors, so concatenate them
                                         addStringToDict([[wholeValue copy] autorelease], pubDict, @"Editor");
@@ -228,7 +228,7 @@
                     
                     bibTeXKey = [typeManager fieldNameForPubMedTag:prefix];
                     
-                    if([bibTeXKey isEqualToString:@"Year"]){ 
+                    if([bibTeXKey isEqualToString:BDSKYearString]){ 
                         // Scopus returns a PY with //// after it.  Others may return a full date, where BibTeX wants a year.  
                         // Use a regex to find a substring with four consecutive digits and use that instead.  Not sure how robust this is.
                         value = [findYearString replaceWithString:@"$2"
@@ -275,7 +275,7 @@ void addStringToDict(NSString *wholeValue, NSMutableDictionary *pubDict, NSStrin
     if(!oldString){
         [pubDict setObject:wholeValue forKey:theKey];
     } else {
-        if( [theKey isEqualToString:@"Author"] && isDuplicateAuthor(oldString, wholeValue)==YES ){
+        if( [theKey isEqualToString:BDSKAuthorString] && isDuplicateAuthor(oldString, wholeValue)==YES ){
             NSLog(@"Not adding duplicate author %@", wholeValue);
             return;
         }
@@ -295,7 +295,7 @@ void mergePageNumbers(NSMutableDictionary *dict){
     
     if([keys containsObject:@"SP"] && [keys containsObject:@"EP"]){
 	merge = [[[dict objectForKey:@"SP"] stringByAppendingString:@"--"] stringByAppendingString:[dict objectForKey:@"EP"]];
-	[dict setObject:merge forKey:@"Pages"];
+	[dict setObject:merge forKey:BDSKPagesString];
     }
 }
 

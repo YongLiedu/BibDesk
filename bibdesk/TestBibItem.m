@@ -52,11 +52,11 @@ static NSString *twoItems = @"@inproceedings{Lee96RTOptML,\nYear = {1996},\nUrl 
     UKNotNil(testArray);
     UKIntsEqual(1, [testArray count]);
 
-    [item1 setField:@"Author" toValue:@"foo"];
-    [item1 setField:@"Year" toValue:@"2000"];
+    [item1 setField:BDSKAuthorString toValue:@"foo"];
+    [item1 setField:BDSKYearString toValue:@"2000"];
 
-    [item2 setField:@"Year" toValue:@"2000"];
-    [item2 setField:@"Author" toValue:@"foo"];
+    [item2 setField:BDSKYearString toValue:@"2000"];
+    [item2 setField:BDSKAuthorString toValue:@"foo"];
 
     UKStringsEqual([item1 bibTeXString], [item2 bibTeXString]);
 }

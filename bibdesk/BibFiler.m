@@ -156,14 +156,14 @@ static BibFiler *_sharedFiler = nil;
 							_deletedCount++;
 						}
 						if([cleanupCheckBox state] == NSOnState){
-							[paper setField:@"Local-Url" toValue:fileURLString];
+							[paper setField:BDSKLocalUrlString toValue:fileURLString];
 							_cleanupChangeCount++;
 						}
 					}
 				}else{
 					if(doFile){
 						if([fm movePath:path toPath:newPath handler:self]){
-							[paper setField:@"Local-Url" toValue:fileURLString];
+							[paper setField:BDSKLocalUrlString toValue:fileURLString];
 							status = NSLocalizedString(@"success", @"success"); // won't appear
 							_moveCount++;
 						}else{

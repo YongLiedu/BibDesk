@@ -695,7 +695,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 										types:nil];
     if (result == NSOKButton) {
 		NSString *fileURLString = [[NSURL fileURLWithPath:[[oPanel filename] stringByStandardizingPath]] absoluteString];
-        [theBib setField:@"Local-Url" toValue:fileURLString];
+        [theBib setField:BDSKLocalUrlString toValue:fileURLString];
 		if([[OFPreferenceWrapper sharedPreferenceWrapper] boolForKey:BDSKFilePapersAutomaticallyKey]){
 			[[BibFiler sharedFiler] file:YES 
 								  papers:[NSArray arrayWithObject:theBib]
@@ -716,7 +716,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 - (void)setLocalURLPathFromMenuItem:(NSMenuItem *)sender{
 	NSString *path = [sender representedObject];
 	
-	[theBib setField:@"Local-Url" toValue:[[NSURL fileURLWithPath:[path stringByStandardizingPath]] absoluteString]];
+	[theBib setField:BDSKLocalUrlString toValue:[[NSURL fileURLWithPath:[path stringByStandardizingPath]] absoluteString]];
 	[self finalizeChanges];
 	[self setupForm];
 	[self fixURLs];
@@ -860,7 +860,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 	NSString *changedTitle = [userInfo objectForKey:@"key"];
 	NSString *newValue = [userInfo objectForKey:@"value"];
 	
-	if([changedTitle isEqualToString:@"Cite Key"]){
+	if([changedTitle isEqualToString:BDSKCiteKeyString]){
 		[citeKeyField setStringValue:newValue];
 		// still need to check duplicates ourselves:
 		if(![self citeKeyIsValid:newValue]){
@@ -893,11 +893,11 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 		_pdfSnoopImage = nil;
 	}
 	
-	if([changedTitle isEqualToString:@"Title"]){
+	if([changedTitle isEqualToString:BDSKTitleString]){
 		[[self window] setTitle:newValue];
 	}
 	
-	if([changedTitle isEqualToString:@"Author"]){
+	if([changedTitle isEqualToString:BDSKAuthorString]){
 		[authorTableView reloadData];
 	}
 	

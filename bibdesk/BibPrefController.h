@@ -105,6 +105,16 @@ extern NSString *BDSKAbstractString;
 extern NSString *BDSKRssDescriptionString;
 extern NSString *BDSKLocalUrlString;
 extern NSString *BDSKUrlString;
+extern NSString *BDSKAuthorString;
+extern NSString *BDSKTitleString;
+extern NSString *BDSKYearString;
+extern NSString *BDSKMonthString;
+extern NSString *BDSKKeywordsString;
+extern NSString *BDSKJournalString;
+extern NSString *BDSKVolumeString;
+extern NSString *BDSKPagesString;
+extern NSString *BDSKBooktitleString;
+extern NSString *BDSKPublisherString;
 extern NSString *BDSKDateCreatedString;
 extern NSString *BDSKDateModifiedString;
 

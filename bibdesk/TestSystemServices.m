@@ -24,9 +24,9 @@
 
 - (void)testConstraintsFromString{
     
-    UKEqual([NSDictionary dictionaryWithObjectsAndKeys:@"Optimizing", @"Title", nil], [self _constraintsFromString:@"Optimizing"]);
+    UKEqual([NSDictionary dictionaryWithObjectsAndKeys:@"Optimizing", BDSKTitleString, nil], [self _constraintsFromString:@"Optimizing"]);
 
-    UKEqual([NSDictionary dictionaryWithObjectsAndKeys:@"Foo", @"Author", nil],
+    UKEqual([NSDictionary dictionaryWithObjectsAndKeys:@"Foo", BDSKAuthorString, nil],
             [self _constraintsFromString:@"Author: Foo"]);
     
 }

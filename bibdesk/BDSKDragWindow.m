@@ -74,7 +74,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 			NSString *fileUrlString = [[NSURL fileURLWithPath:
 				[[fileNames objectAtIndex:0] stringByExpandingTildeInPath]]absoluteString];
 			
-            [editorBib setField:@"Local-Url"
+            [editorBib setField:BDSKLocalUrlString
                         toValue:fileUrlString];
 			
 			if([[OFPreferenceWrapper sharedPreferenceWrapper] boolForKey:BDSKFilePapersAutomaticallyKey]){
@@ -87,7 +87,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
         fileNames = [pboard propertyListForType:NSURLPboardType];
         
         if(sourceDragMask & NSDragOperationCopy){
-            [editorBib setField:@"Url"
+            [editorBib setField:BDSKUrlString
                         toValue:[fileNames objectAtIndex:0]];
         }
     }else if ( [[pboard types] containsObject:NSStringPboardType] ) {

@@ -74,19 +74,19 @@ Extra wrapping of the created and modified date methods to
 */
 
 - (NSString *) month {
-	return [self valueOfField:BibItemMonthKey];
+	return [self valueOfField:BDSKMonthString];
 }
 
 - (void) setMonth:(NSString*) newMonth {
-	[self setField:BibItemMonthKey toValue:newMonth];
+	[self setField:BDSKMonthString toValue:newMonth];
 }
 
 - (NSString *) year {
-	return [self valueOfField:BibItemYearKey];
+	return [self valueOfField:BDSKYearString];
 }
 
 - (void) setYear:(NSString*) newYear {
-	[self setField:BibItemYearKey toValue:newYear];
+	[self setField:BDSKYearString toValue:newYear];
 }
 
 
@@ -117,51 +117,51 @@ Extra wrapping of the created and modified date methods to
  Any policies on whether to rather return copies of the strings in question here?
 */
 - (NSString*) remoteURL {
-	return [self valueOfField:BibItemRemoteURLKey];
+	return [self valueOfField:BDSKUrlString];
 }
 
 - (void) setRemoteURL:(NSString*) newURL{
-	[self setField:BibItemRemoteURLKey toValue:newURL];
+	[self setField:BDSKUrlString toValue:newURL];
 }
 
 - (NSString*) localURL {
-	return [self valueOfField:BibItemLocalURLKey];
+	return [self valueOfField:BDSKLocalUrlString];
 }
 
 - (void) setLocalURL:(NSString*) newURL {
-	[self setField:BibItemLocalURLKey toValue:newURL];
+	[self setField:BDSKLocalUrlString toValue:newURL];
 }
 
 - (NSString*) abstract {
-	return [self valueOfField:BibItemAbstractKey];
+	return [self valueOfField:BDSKAbstractString];
 }
 
 - (void) setAbstract:(NSString*) newAbstract {
-	[self setField:BibItemAbstractKey toValue:newAbstract];
+	[self setField:BDSKAbstractString toValue:newAbstract];
 }
 
 - (NSString*) annotation {
-	return [self valueOfField:BibItemAnnotationKey];
+	return [self valueOfField:BDSKAnnoteString];
 }
 
 - (void) setAnnotation:(NSString*) newAnnotation {
-	[self setField:BibItemAnnotationKey toValue:newAnnotation];
+	[self setField:BDSKAnnoteString toValue:newAnnotation];
 }
 
 - (NSString*) RSSDescription {
-	return [self valueOfField:BibItemRSSDescriptionKey];
+	return [self valueOfField:BDSKRssDescriptionString];
 }
 
 - (void) setRSSDescription:(NSString*) newDesc {
-	[self setField:BibItemRSSDescriptionKey toValue:newDesc];
+	[self setField:BDSKRssDescriptionString toValue:newDesc];
 }
 
 - (NSString *)keywords{
-    return [self valueOfField:BibItemKeywordsKey];
+    return [self valueOfField:BDSKKeywordsString];
 }
 
 - (void)setKeywords:(NSString *)keywords{
-    [self setField:BibItemKeywordsKey toValue:keywords];
+    [self setField:BDSKKeywordsString toValue:keywords];
 }
 
 /*

@@ -138,7 +138,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 		NSString *error = nil;
 		int button = 0;
 		
-		if ([[BDSKConverter sharedConverter] validateFormat:&formatString forField:@"Cite Key" inFileType:@"BibTeX" error:&error]) {
+		if ([[BDSKConverter sharedConverter] validateFormat:&formatString forField:BDSKCiteKeyString inFileType:@"BibTeX" error:&error]) {
 			[[OFPreferenceWrapper sharedPreferenceWrapper] setObject:formatString forKey:BDSKCiteKeyFormatKey];
 			[self setRequiredFieldsForCiteKey: [[BDSKConverter sharedConverter] requiredFieldsForFormat:formatString]];
 		}else{
@@ -160,7 +160,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 		formatString = [[OFPreferenceWrapper sharedPreferenceWrapper] objectForKey:BDSKLocalUrlFormatKey];
 		error = nil;
 		
-		if ([[BDSKConverter sharedConverter] validateFormat:&formatString forField:@"Local-Url" inFileType:@"BibTeX" error:&error]) {
+		if ([[BDSKConverter sharedConverter] validateFormat:&formatString forField:BDSKLocalUrlString inFileType:@"BibTeX" error:&error]) {
 			[[OFPreferenceWrapper sharedPreferenceWrapper] setObject:formatString forKey:BDSKLocalUrlFormatKey];
 			[self setRequiredFieldsForLocalUrl: [[BDSKConverter sharedConverter] requiredFieldsForFormat:formatString]];
 		}else{
@@ -429,17 +429,17 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 
     completionArray = [_autoCompletionDict objectForKey:entry usingLock:acLock];
     
-    if([entry isEqualToString:@"Local-Url"] || [entry isEqualToString:@"Url"] || 
-       [entry isEqualToString:@"Abstract"] || [entry isEqualToString:@"Annote"] ||
+    if([entry isEqualToString:BDSKLocalUrlString] || [entry isEqualToString:BDSKUrlString] || 
+       [entry isEqualToString:BDSKAbstractString] || [entry isEqualToString:BDSKAnnoteString] ||
        [entry rangeOfString:@"Date"].location != NSNotFound ) return; // don't add these
 
-    if([entry isEqualToString:@"Title"] || 
-       [entry isEqualToString:@"Booktitle"] || 
-       [entry isEqualToString:@"Publisher"]){ // add the whole string 
+    if([entry isEqualToString:BDSKTitleString] || 
+       [entry isEqualToString:BDSKBooktitleString] || 
+       [entry isEqualToString:BDSKPublisherString]){ // add the whole string 
         [completionArray addObject:string usingLock:acLock];
         return;
     }
-    if([entry isEqualToString:@"Author"]){
+    if([entry isEqualToString:BDSKAuthorString]){
         [completionArray addObjectsFromArray:[string componentsSeparatedByString:@" and "] usingLock:acLock];
         return;
     }
@@ -874,8 +874,8 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 
     }else{
         // if it was at end, we are done, and we'll scan in the title:
-        // items = [_finder itemsMatchingText:queryKey inKey:@"Title"];
-        [searchConstraints setObject:queryKey forKey:@"Title"];
+        // items = [_finder itemsMatchingText:queryKey inKey:BDSKTitleString];
+        [searchConstraints setObject:queryKey forKey:BDSKTitleString];
     }
     
     return searchConstraints;

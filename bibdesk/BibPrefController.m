@@ -82,6 +82,16 @@ NSString *BDSKAbstractString = @"Abstract";
 NSString *BDSKRssDescriptionString = @"Rss-Description";
 NSString *BDSKLocalUrlString = @"Local-Url";
 NSString *BDSKUrlString = @"Url";
+NSString *BDSKAuthorString = @"Author";
+NSString *BDSKTitleString = @"Title";
+NSString *BDSKYearString = @"Year";
+NSString *BDSKMonthString = @"Month";
+NSString *BDSKKeywordsString = @"Keywords";
+NSString *BDSKJournalString = @"Journal";
+NSString *BDSKVolumeString = @"Volume";
+NSString *BDSKPagesString = @"Pages";
+NSString *BDSKBooktitleString = @"Booktitle";
+NSString *BDSKPublisherString = @"Publisher";
 NSString *BDSKDateCreatedString = @"Date-Added";
 NSString *BDSKDateModifiedString = @"Date-Modified";
 

@@ -31,19 +31,19 @@
 	
 	// update the UI elements
     [citeKeyAutogenerateCheckButton setState:[defaults integerForKey:BDSKCiteKeyAutogenerateKey]];
-	if ([[BDSKConverter sharedConverter] validateFormat:&citeKeyFormat forField:@"Cite Key" inFileType:@"BibTeX" error:&error]) {
+	if ([[BDSKConverter sharedConverter] validateFormat:&citeKeyFormat forField:BDSKCiteKeyString inFileType:@"BibTeX" error:&error]) {
 		[self setCiteKeyFormatInvalidWarning:NO message:nil];
 		
 		// use a BibItem with some data to build the preview cite key
 		BibItem *tmpBI = [[BibItem alloc] init];
-		[tmpBI setField:@"Title" toValue:@"Bibdesk, a great application to manage your bibliographies"];
-		[tmpBI setField:@"Author" toValue:@"McCracken, M. and Maxwell, A. and Howison, J. and Routley, M. and Spiegel, S.  and Porst, S. S. and Hofman, C. M."];
-		[tmpBI setField:@"Year" toValue:@"2004"];
-		[tmpBI setField:@"Month" toValue:@"11"];
-		[tmpBI setField:@"Journal" toValue:@"SourceForge"];
-		[tmpBI setField:@"Volume" toValue:@"1"];
-		[tmpBI setField:@"Pages" toValue:@"96"];
-		[tmpBI setField:@"Keywords" toValue:@"Keyword1,Keyword2"];
+		[tmpBI setField:BDSKTitleString toValue:@"Bibdesk, a great application to manage your bibliographies"];
+		[tmpBI setField:BDSKAuthorString toValue:@"McCracken, M. and Maxwell, A. and Howison, J. and Routley, M. and Spiegel, S.  and Porst, S. S. and Hofman, C. M."];
+		[tmpBI setField:BDSKYearString toValue:@"2004"];
+		[tmpBI setField:BDSKMonthString toValue:@"11"];
+		[tmpBI setField:BDSKJournalString toValue:@"SourceForge"];
+		[tmpBI setField:BDSKVolumeString toValue:@"1"];
+		[tmpBI setField:BDSKPagesString toValue:@"96"];
+		[tmpBI setField:BDSKKeywordsString toValue:@"Keyword1,Keyword2"];
 		[citeKeyLine setStringValue:[tmpBI suggestedCiteKey]];
 		[tmpBI release];
 	} else {
@@ -65,9 +65,9 @@
 	NSString *alternateButton = nil;
 	int rv;
 	
-	if (![[BDSKConverter sharedConverter] validateFormat:&formatString forField:@"Cite Key" inFileType:@"BibTeX" error:&error]) {
+	if (![[BDSKConverter sharedConverter] validateFormat:&formatString forField:BDSKCiteKeyString inFileType:@"BibTeX" error:&error]) {
 		formatString = [defaults stringForKey:BDSKCiteKeyFormatKey];
-		if ([[BDSKConverter sharedConverter] validateFormat:&formatString forField:@"Cite Key" inFileType:@"BibTeX" error:NULL]) {
+		if ([[BDSKConverter sharedConverter] validateFormat:&formatString forField:BDSKCiteKeyString inFileType:@"BibTeX" error:NULL]) {
 			// The currently set cite-key format is valid, so we can keep it 
 			alternateButton = NSLocalizedString(@"Revert to Last", @"Revert to Last Valid Cite Key Format");
 		}
@@ -156,7 +156,7 @@
 		NSString *error;
 		formatString = [formatField stringValue];
 		//if ([formatString isEqualToString:[defaults stringForKey:BDSKCiteKeyFormatKey]]) return; // nothing changed
-		if ([[BDSKConverter sharedConverter] validateFormat:&formatString forField:@"Cite Key" inFileType:@"BibTeX" error:&error]) {
+		if ([[BDSKConverter sharedConverter] validateFormat:&formatString forField:BDSKCiteKeyString inFileType:@"BibTeX" error:&error]) {
 			[defaults setObject:formatString forKey:BDSKCiteKeyFormatKey];
 		}
 		else {

@@ -100,20 +100,20 @@ static BibTypeManager *sharedInstance = nil;
 }
 
 - (NSCharacterSet *)invalidCharactersForField:(NSString *)fieldName inFileType:(NSString *)type{
-	if( [type isEqualToString:@"BibTeX"] && [fieldName isEqualToString:@"Cite Key"]){
+	if( [type isEqualToString:@"BibTeX"] && [fieldName isEqualToString:BDSKCiteKeyString]){
 		return invalidCiteKeyCharSet;
 	}
-	if([fieldName isEqualToString:@"Local-Url"]){
+	if([fieldName isEqualToString:BDSKLocalUrlString]){
 		return invalidLocalUrlCharSet;
 	}
 	[NSException raise:@"unimpl. feat. exc." format:@"invalidCharactersForField is partly implemented"];
 }
 
 - (NSCharacterSet *)strictInvalidCharactersForField:(NSString *)fieldName inFileType:(NSString *)type{
-	if( [type isEqualToString:@"BibTeX"] && [fieldName isEqualToString:@"Cite Key"]){
+	if( [type isEqualToString:@"BibTeX"] && [fieldName isEqualToString:BDSKCiteKeyString]){
 		return strictInvalidCiteKeyCharSet;
 	}
-	if([fieldName isEqualToString:@"Local-Url"]){
+	if([fieldName isEqualToString:BDSKLocalUrlString]){
 		return strictInvalidLocalUrlCharSet;
 	}
 	[NSException raise:@"unimpl. feat. exc." format:@"strictInvalidCharactersForField is partly implemented"];

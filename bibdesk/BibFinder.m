@@ -355,14 +355,14 @@ static BibFinder *_sharedFinder = nil;
     BibItem *aBib = (BibItem *)[foundBibs objectAtIndex:row];
     NSArray *auths = [aBib pubAuthors];
 
-    if([[tableColumn identifier] isEqualToString: @"Cite Key"] ){
+    if([[tableColumn identifier] isEqualToString: BDSKCiteKeyString] ){
         return [aBib citeKey];
-    }else if([[tableColumn identifier] isEqualToString: @"Title"] ){
+    }else if([[tableColumn identifier] isEqualToString: BDSKTitleString] ){
         return [aBib title];
     }else if([[tableColumn identifier] isEqualToString: @"Date"] ){
         if([aBib date] == nil)
             return @"No date";
-        else if([[aBib valueOfField:@"Month"] isEqualToString:@""])
+        else if([[aBib valueOfField:BDSKMonthString] isEqualToString:@""])
             return [[aBib date] descriptionWithCalendarFormat:@"%Y"];
         else return [[aBib date] descriptionWithCalendarFormat:@"%b %Y"];
     }else if([[tableColumn identifier] isEqualToString: @"1st Author"] ){
