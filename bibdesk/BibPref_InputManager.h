@@ -19,7 +19,6 @@ extern NSString *BDSKInputManagerLoadableApplications;
     IBOutlet NSTableView *appList;
     IBOutlet NSButton *enableButton;
     NSMutableArray *appListArray;
-    NSMutableDictionary *mutablePreferences;
 }
 /*!
     @method     bundleIDForPath:

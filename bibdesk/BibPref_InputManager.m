@@ -29,18 +29,17 @@ NSString *BDSKInputManagerLoadableApplications = @"Application bundles that we r
                           NSLocalizedString(@"You appear to be using a system version earlier than 10.3.  Autocompletion requires Mac OS X 10.3 or greater.",
                                             @"You appear to be using a system version earlier than 10.3.  Autocompletion requires Mac OS X 10.3 or greater.") );
     }
-    
-    mutablePreferences = [[[NSUserDefaults standardUserDefaults] persistentDomainForName:BDSKInputManagerID] mutableCopy];
-    if(!mutablePreferences)
-        mutablePreferences = [[NSMutableDictionary dictionary] retain];
-    
-    if([mutablePreferences objectForKey:BDSKInputManagerLoadableApplications] != nil){
-        appListArray = [[mutablePreferences objectForKey:BDSKInputManagerLoadableApplications] mutableCopy];
+        
+    CFPropertyListRef prefs = CFPreferencesCopyAppValue( (CFStringRef)BDSKInputManagerLoadableApplications,
+                                                      (CFStringRef)BDSKInputManagerID );
+                                                      
+    if(prefs != nil){
+        appListArray = [(NSArray *)prefs mutableCopy];
     } else {
         appListArray = [[NSMutableArray array] retain];
         [appListArray addObject:@"com.apple.textedit"];
     }
-	
+    	
     [[appList tableColumnWithIdentifier:@"AppList"] setDataCell:[[[NSBrowserCell alloc] init] autorelease]];
 
     if(![self isInstalledVersionCurrent] && 
@@ -61,7 +60,6 @@ NSString *BDSKInputManagerLoadableApplications = @"Application bundles that we r
 - (void)dealloc{
     [inputManagerPath release];
     [appListArray release];
-    [mutablePreferences release];
     [super dealloc];
 }
 
@@ -70,10 +68,14 @@ NSString *BDSKInputManagerLoadableApplications = @"Application bundles that we r
     if([[NSFileManager defaultManager] fileExistsAtPath:inputManagerPath]){
 	[enableButton setTitle:NSLocalizedString(@"Reinstall",@"Reinstall input manager")];
 	[enableButton sizeToFit];
-    }            
-    [mutablePreferences setObject:appListArray forKey:BDSKInputManagerLoadableApplications];
-    [[NSUserDefaults standardUserDefaults] setPersistentDomain:[[mutablePreferences copy] autorelease] forName:BDSKInputManagerID];
-    [[NSUserDefaults standardUserDefaults] synchronize];
+    }
+
+    CFPreferencesSetAppValue( (CFStringRef)BDSKInputManagerLoadableApplications,
+                              appListArray,
+                              (CFStringRef)BDSKInputManagerID );
+    BOOL success = CFPreferencesAppSynchronize( (CFStringRef)BDSKInputManagerID );
+    NSAssert1( success, @"Failed to synchronize preferences for %@", BDSKInputManagerID);
+
     [appList reloadData];
 }
 
