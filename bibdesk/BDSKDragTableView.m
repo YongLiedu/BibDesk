@@ -100,6 +100,7 @@ static NSColor *sStripeColor = nil;
 
 - (void)dealloc{
     [typeAheadHelper release];
+    [super dealloc];
 }
 
 -(NSMenu*)menuForEvent:(NSEvent*)evt {
