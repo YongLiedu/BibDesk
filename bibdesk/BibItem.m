@@ -237,11 +237,8 @@ void _setupFonts(){
     document = newDocument;
 }
 
-- (NSUndoManager *)undoManager {
-	if (undoManager == nil && document != nil) {
-		undoManager = [document undoManager];
-	}
-    return undoManager;
+- (NSUndoManager *)undoManager { // this may be nil
+    return [document undoManager];
 }
 
 - (BibEditor *)editorObj{
