@@ -125,6 +125,7 @@
 			buildStyles = (
 				4A9504D0FFE6A4CB11CA0CBA,
 				F55B9B6E02A0EC6001EF0AED,
+				F5AD2C780396E97C01A80164,
 			);
 			isa = PBXProject;
 			mainGroup = 2A37F4AAFDCFA73011CA2CEA;
@@ -238,6 +239,9 @@
 				F54EFE9E02500B7C01709AC4,
 				F5FCEF9C02AC15D801C59A92,
 				F5FB32AB034D689801EF0AD8,
+				F5AD2CBE03970F0401A80164,
+				F5A86D2003976CDF01A80164,
+				F5A86D8F0398EAB601A80164,
 			);
 			isa = PBXGroup;
 			name = Resources;
@@ -294,9 +298,10 @@
 				2A37F4D1FDCFA73011CA2CEA,
 				F578BF8D0253B9B90138D078,
 				F5FB32B2034D6D5901EF0AD8,
+				F5AD2C7E0396EAA101A80164,
 			);
 			buildSettings = {
-				FRAMEWORK_SEARCH_PATHS = .;
+				FRAMEWORK_SEARCH_PATHS = ". /Users/mike/Code/bibdesk";
 				HEADER_SEARCH_PATHS = .;
 				LIBRARY_SEARCH_PATHS = .;
 				OPTIMIZATION_CFLAGS = "-O0";
@@ -375,6 +380,8 @@
 	<string>MMcC</string>
 	<key>CFBundleVersion</key>
 	<string>0.80</string>
+	<key>NSAppleScriptEnabled</key>
+	<string>YES</string>
 	<key>NSMainNibFile</key>
 	<string>MainMenu</string>
 	<key>NSPrincipalClass</key>
@@ -473,15 +480,17 @@
 				<key>defaultsDictionary</key>
 				<dict>
 					<key>BlueComponentColor of alternating rows Key</key>
-					<real>8.8359904735793939e-311</real>
+					<real>8.9527002420824839e-311</real>
 					<key>Current Publication Type</key>
 					<integer>6</integer>
+					<key>Current Publication Type String</key>
+					<string>Inproceedings</string>
 					<key>Current Quick Search Key</key>
 					<string>Keywords</string>
 					<key>Current Quick Search Text Dictionary</key>
 					<dict/>
 					<key>GreenComponentColor of alternating rows Key</key>
-					<real>9.4874431814057325e-311</real>
+					<real>9.7824005963499054e-311</real>
 					<key>Preview Pane Displays What?</key>
 					<integer>1</integer>
 					<key>Quick Search Keys</key>
@@ -490,7 +499,7 @@
 						<string>Pub Type</string>
 					</array>
 					<key>RedComponentColor of alternating rows Key</key>
-					<real>1.0113431939740488e-310</real>
+					<real>1.0408389354684661e-310</real>
 					<key>Shown Column Names</key>
 					<array>
 						<string>Keywords</string>
@@ -513,7 +522,7 @@
 					<key>TableView Font</key>
 					<string>LucidaGrande</string>
 					<key>TableView Font Size</key>
-					<real>1.1488485212285984e-310</real>
+					<real>1.1783442627230157e-310</real>
 					<key>View-by Field</key>
 					<string>Title</string>
 				</dict>
@@ -641,6 +650,8 @@
 				F5385A1902EC140E014378E3,
 				F5385A8A02ECE98D014378E3,
 				F59CA11E02F06A7701EF0A84,
+				F5AD2CBC0396F01101A80164,
+				F5AD2CC20397226201A80164,
 			);
 			isa = PBXHeadersBuildPhase;
 			runOnlyForDeploymentPostprocessing = 0;
@@ -685,6 +696,8 @@
 				F508016702F9E9A301A8020B,
 				F508016902F9E9C201A8020B,
 				F5FB32B1034D6D4601EF0AD8,
+				F5AD2CBF03970F0401A80164,
+				F5A86D2103976CDF01A80164,
 			);
 			isa = PBXResourcesBuildPhase;
 			runOnlyForDeploymentPostprocessing = 0;
@@ -721,6 +734,8 @@
 				F5385A1802EC140E014378E3,
 				F5385A8902ECE98D014378E3,
 				F59CA11D02F06A7701EF0A84,
+				F5AD2CBD0396F01101A80164,
+				F5AD2CC30397226201A80164,
 			);
 			isa = PBXSourcesBuildPhase;
 			runOnlyForDeploymentPostprocessing = 0;
@@ -1393,6 +1408,8 @@
 				F56DCB5701CFE5EF01227D25,
 				F56DCB5D01D14B8601227D25,
 				F56DCB5E01D14B8601227D25,
+				F5AD2CBA0396F01101A80164,
+				F5AD2CBB0396F01101A80164,
 			);
 			isa = PBXGroup;
 			name = "Data Objects";
@@ -1410,6 +1427,8 @@
 				F5B5806501F996C001D64482,
 				F59F40AF01FE890401F4F503,
 				F59F40B001FE890401F4F503,
+				F5AD2CC00397226201A80164,
+				F5AD2CC10397226201A80164,
 			);
 			isa = PBXGroup;
 			name = Controllers;
@@ -1798,6 +1817,67 @@
 			settings = {
 			};
 		};
+		F5A86D2003976CDF01A80164 = {
+			isa = PBXFileReference;
+			path = TypeInfo.plist;
+			refType = 4;
+		};
+		F5A86D2103976CDF01A80164 = {
+			fileRef = F5A86D2003976CDF01A80164;
+			isa = PBXBuildFile;
+			settings = {
+			};
+		};
+		F5A86D8F0398EAB601A80164 = {
+			children = (
+				F5A86D910398EACE01A80164,
+				F5A86D900398EAC301A80164,
+			);
+			isa = PBXGroup;
+			name = Testing;
+			refType = 4;
+		};
+		F5A86D900398EAC301A80164 = {
+			children = (
+				F5A86DCD0398EC9401A80164,
+				F5A86DCE0398EC9401A80164,
+			);
+			isa = PBXGroup;
+			name = "Test Cases";
+			refType = 4;
+		};
+		F5A86D910398EACE01A80164 = {
+			children = (
+				F5A86D920398EC5D01A80164,
+				F5A86D930398EC5D01A80164,
+			);
+			isa = PBXGroup;
+			name = "Testing Framework";
+			path = "";
+			refType = 4;
+		};
+		F5A86D920398EC5D01A80164 = {
+			isa = PBXFrameworkReference;
+			name = SenFoundation.framework;
+			path = /Library/Frameworks/SenFoundation.framework;
+			refType = 0;
+		};
+		F5A86D930398EC5D01A80164 = {
+			isa = PBXFrameworkReference;
+			name = SenTestingKit.framework;
+			path = /Library/Frameworks/SenTestingKit.framework;
+			refType = 0;
+		};
+		F5A86DCD0398EC9401A80164 = {
+			isa = PBXFileReference;
+			path = TestBibItem.h;
+			refType = 2;
+		};
+		F5A86DCE0398EC9401A80164 = {
+			isa = PBXFileReference;
+			path = TestBibItem.m;
+			refType = 2;
+		};
 		F5A9B9300225EE6201EF0ACB = {
 			children = (
 				F5A9B9310225EE6201EF0ACB,
@@ -1885,6 +1965,83 @@
 		};
 		F5A9B941022720E701EF0ACB = {
 			fileRef = F5A9B93E022720E701EF0ACB;
+			isa = PBXBuildFile;
+			settings = {
+			};
+		};
+		F5AD2C780396E97C01A80164 = {
+			buildRules = (
+			);
+			buildSettings = {
+				TEST_AFTER_BUILD = YES;
+			};
+			isa = PBXBuildStyle;
+			name = Test;
+		};
+		F5AD2C7E0396EAA101A80164 = {
+			buildActionMask = 2147483647;
+			files = (
+			);
+			generatedFileNames = (
+			);
+			isa = PBXShellScriptBuildPhase;
+			neededFileNames = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = $SYSTEM_DEVELOPER_DIR/Makefiles/Resources/OCUnit/RunTargetUnitTests;
+		};
+		F5AD2CBA0396F01101A80164 = {
+			isa = PBXFileReference;
+			path = BibTypeManager.h;
+			refType = 4;
+		};
+		F5AD2CBB0396F01101A80164 = {
+			isa = PBXFileReference;
+			path = BibTypeManager.m;
+			refType = 4;
+		};
+		F5AD2CBC0396F01101A80164 = {
+			fileRef = F5AD2CBA0396F01101A80164;
+			isa = PBXBuildFile;
+			settings = {
+			};
+		};
+		F5AD2CBD0396F01101A80164 = {
+			fileRef = F5AD2CBB0396F01101A80164;
+			isa = PBXBuildFile;
+			settings = {
+			};
+		};
+		F5AD2CBE03970F0401A80164 = {
+			isa = PBXFileReference;
+			path = Notes;
+			refType = 4;
+		};
+		F5AD2CBF03970F0401A80164 = {
+			fileRef = F5AD2CBE03970F0401A80164;
+			isa = PBXBuildFile;
+			settings = {
+			};
+		};
+		F5AD2CC00397226201A80164 = {
+			isa = PBXFileReference;
+			path = BibTeXParser.h;
+			refType = 4;
+		};
+		F5AD2CC10397226201A80164 = {
+			isa = PBXFileReference;
+			path = BibTeXParser.m;
+			refType = 4;
+		};
+		F5AD2CC20397226201A80164 = {
+			fileRef = F5AD2CC00397226201A80164;
+			isa = PBXBuildFile;
+			settings = {
+			};
+		};
+		F5AD2CC30397226201A80164 = {
+			fileRef = F5AD2CC10397226201A80164;
 			isa = PBXBuildFile;
 			settings = {
 			};
