@@ -261,7 +261,6 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
     return [super validateToolbarItem:toolbarItem];
 }
 
-
 - (IBAction)openDocument:(id)sender{
 	NSOpenPanel *oPanel = [NSOpenPanel openPanel];
     [oPanel setAccessoryView:openTextEncodingAccessoryView];
@@ -282,7 +281,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
         }else{
             // handle other types in the usual way 
             // This ends up calling NSDocumentController makeDocumentWithContentsOfFile:ofType:
-            // which calls NSDocument (here, most likely BibDocument) initWithcontentsOfFile:ofType:
+            // which calls NSDocument (here, most likely BibDocument) initWithContentsOfFile:ofType:
             [self openDocumentWithContentsOfFile:fileToOpen display:YES]; 
         }
 	}
@@ -334,10 +333,13 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 	NSData *data = [NSData dataWithContentsOfFile:filePath];
 	BibDocument *doc = nil;
 	
-	doc = [self openUntitledDocumentOfType:@"bibTeX database" display:YES];
-	[doc loadBibTeXDataRepresentation:data encoding:encoding];
-	//[doc updateChangeCount:NSChangeDone];
-	[doc updateUI];
+    // make a fresh document, and don't display it until we can set its name.
+	doc = [self openUntitledDocumentOfType:@"bibTeX database" display:NO];
+    [doc setFileName:filePath]; // this effectively makes it not an untitled document anymore.
+    [doc showWindows];
+    [doc loadBibTeXDataRepresentation:data encoding:encoding];
+    [doc updateUI];  
+    
 }
 
 
