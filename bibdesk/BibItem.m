@@ -291,16 +291,19 @@ void _setupFonts(){
 - (NSString *)authorString{
     NSEnumerator *en = [pubAuthors objectEnumerator];
     NSString *rs;
-    NSString *tmp;
+    BibAuthor *author;
     if([pubAuthors count] == 0) return @"";
     if([pubAuthors count] == 1){
-        return [[pubAuthors objectAtIndex:0] name];
+        author = [pubAuthors objectAtIndex:0];
+        return [author name];
     }else{
-        rs = [[NSString alloc] initWithString:[[en nextObject] name]];
+        author = [en nextObject];
+        rs = [[NSString alloc] initWithString:[author name]];
         // since this method is used for display, BibAuthor -name is right above.
-        while(tmp = [en nextObject]){
+        
+        while(author = [en nextObject]){
             rs = [rs stringByAppendingString:@" and "];
-            rs = [rs stringByAppendingString:tmp];
+            rs = [rs stringByAppendingString:[author name]];
         }
         return rs;
     }
