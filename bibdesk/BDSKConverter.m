@@ -39,8 +39,11 @@ static BDSKConverter *theConverter;
     [wholeDict release];
     [emptySet release];
     [finalCharSet release];
+    [accentCharSet release];
     [texifyConversions release];
     [detexifyConversions release];
+    [texifyAccents release];
+    [detexifyAccents release];
     [baseCharacterSetForTeX release];
     [super dealloc];
 }
@@ -64,9 +67,9 @@ static BDSKConverter *theConverter;
     NSDictionary *oneWayCharacters = [wholeDict objectForKey:@"One-Way Conversions"];
     NSEnumerator *e = [oneWayCharacters keyEnumerator];
     NSString *oneWayKey;
-      while(oneWayKey = [e nextObject]){
-	  [workingSet addCharactersInString:oneWayKey];
-      }
+	while(oneWayKey = [e nextObject]){
+		[workingSet addCharactersInString:oneWayKey];
+	}
 
     finalCharSet = [workingSet copy];
     [workingSet release];
@@ -85,13 +88,18 @@ static BDSKConverter *theConverter;
     if(!detexifyConversions){
         detexifyConversions = [[NSDictionary dictionary] retain]; // an empty one won't break the code.
     }
-    // build a character set of [a-z][A-Z] representing the base character set that we can decompose and recompose as TeX
+    
+	// build a character set of [a-z][A-Z] representing the base character set that we can decompose and recompose as TeX
     NSRange ucRange = NSMakeRange('A', 26);
     NSRange lcRange = NSMakeRange('a', 26);
     workingSet = [[NSCharacterSet characterSetWithRange:ucRange] mutableCopy];
     [workingSet addCharactersInRange:lcRange];
     baseCharacterSetForTeX = [workingSet copy];
     [workingSet release];
+	
+    texifyAccents = [[wholeDict objectForKey:@"Roman to TeX Accents"] retain];
+    accentCharSet = [[NSCharacterSet characterSetWithCharactersInString:[[texifyAccents allKeys] componentsJoinedByString:@""]] retain];
+	detexifyAccents = [[wholeDict objectForKey:@"TeX to Roman Accents"] retain];
 }
 
 - (NSString *)stringByTeXifyingString:(NSString *)s{
@@ -131,36 +139,34 @@ static BDSKConverter *theConverter;
 
     while(![scanner isAtEnd]){
 
-	[scanner scanUpToCharactersFromSet:finalCharSet intoString:&logString];
-	index = [scanner scanLocation];
+		[scanner scanUpToCharactersFromSet:finalCharSet intoString:&logString];
+		index = [scanner scanLocation];
 
-	if(index >= sLength) // don't go past the end
-	    break;
-	
-	tmpConv = [s substringWithRange:NSMakeRange(index, 1)];
+		if(index >= sLength) // don't go past the end
+			break;
+		
+		tmpConv = [s substringWithRange:NSMakeRange(index, 1)];
 
-	if(TEXString = [texifyConversions objectForKey:tmpConv]){
-	    [convertedSoFar replaceCharactersInRange:NSMakeRange((index + offset), 1)
-								      withString:TEXString];
-	    [scanner setScanLocation:(index + 1)];
-	    offset += [TEXString length] - 1;    // we're adding length-1 characters, so we have to make sure we insert at the right point in the future.
-	} else {
-	    TEXString = [self convertedStringWithAccentedString:tmpConv];
+		if(TEXString = [texifyConversions objectForKey:tmpConv]){
+			[convertedSoFar replaceCharactersInRange:NSMakeRange((index + offset), 1)
+										  withString:TEXString];
+			[scanner setScanLocation:(index + 1)];
+			offset += [TEXString length] - 1;    // we're adding length-1 characters, so we have to make sure we insert at the right point in the future.
+		} else {
+			TEXString = [self convertedStringWithAccentedString:tmpConv];
 
-	    // Check to see if the unicode composition conversion worked.  If it fails, it returns the decomposed string, so we precompose it
-	    // and compare it to tmpConv; if they're the same, we know that the unicode conversion failed.
-	    if(![tmpConv isEqualToString:[TEXString precomposedStringWithCanonicalMapping]]){
-		// NSLog(@"plist didn't work, using unicode magic");
-		[convertedSoFar replaceCharactersInRange:NSMakeRange((index + offset), 1)
-					      withString:TEXString];
-		[scanner setScanLocation:(index + 1)];
-		offset += [TEXString length] - 1;
-	    } else {
-		if(tmpConv != nil){ // if tmpConv is non-nil, we had a character that was accented and not convertable by us
-            [NSException raise:@"BDSKTeXifyException" format:@"An error occurred converting %@", tmpConv];
-		    [scanner setScanLocation:(index + 1)]; // increment the scanner to go past the character that we don't have in the dict
-		}
-	    }
+			// Check to see if the unicode composition conversion worked.  If it fails, it returns the decomposed string, so we precompose it
+			// and compare it to tmpConv; if they're the same, we know that the unicode conversion failed.
+			if(TEXString && ![tmpConv isEqualToString:[TEXString precomposedStringWithCanonicalMapping]]){
+				// NSLog(@"plist didn't work, using unicode magic");
+				[convertedSoFar replaceCharactersInRange:NSMakeRange((index + offset), 1)
+								  withString:TEXString];
+				[scanner setScanLocation:(index + 1)];
+				offset += [TEXString length] - 1;
+			} else if(tmpConv != nil){ // if tmpConv is non-nil, we had a character that was accented and not convertable by us
+				[NSException raise:@"BDSKTeXifyException" format:@"An error occurred converting %@", tmpConv];
+				[scanner setScanLocation:(index + 1)]; // increment the scanner to go past the character that we don't have in the dict
+			}
         }
     }
 		
@@ -176,10 +182,6 @@ static BDSKConverter *theConverter;
     // decompose into D form, make mutable
     NSMutableString * t = [[[s decomposedStringWithCanonicalMapping] mutableCopy] autorelease];
     
-    NSDictionary * accents = [NSDictionary dictionaryWithContentsOfFile:[[NSBundle mainBundle] pathForResource:@"Accents" ofType:@"plist"]];
-    NSArray * accentArray = [accents allKeys];
-    NSString * accentString = [accentArray componentsJoinedByString:@""];
-    NSCharacterSet * accentSet = [NSCharacterSet characterSetWithCharactersInString:accentString];
     BOOL goOn = YES;
     NSRange searchRange = NSMakeRange(0,[t length]);
     NSRange foundRange;
@@ -187,22 +189,22 @@ static BDSKConverter *theConverter;
     NSString * replacementString;
     
     while (goOn) {
-	foundRange = [t rangeOfCharacterFromSet:accentSet options:NSLiteralSearch range:searchRange];
+		foundRange = [t rangeOfCharacterFromSet:accentCharSet options:NSLiteralSearch range:searchRange];
 
-	if (foundRange.location == NSNotFound) {
-	    // no more accents => STOP
-	    goOn = NO;
-	} else {
-	    // found an accent => process
-	    composedRange = [t rangeOfComposedCharacterSequenceAtIndex:foundRange.location];
-	    if(replacementString = [self convertBunch:[t substringWithRange:composedRange] usingDict:accents])
-                [t replaceCharactersInRange:composedRange withString:replacementString];
-	    else
-                return nil;
-	    // move searchable range
-	    searchRange.location = composedRange.location;
-	    searchRange.length = [t length] - composedRange.location;
-	}
+		if (foundRange.location == NSNotFound) {
+			// no more accents => STOP
+			goOn = NO;
+		} else {
+			// found an accent => process
+			composedRange = [t rangeOfComposedCharacterSequenceAtIndex:foundRange.location];
+			if(replacementString = [self convertBunch:[t substringWithRange:composedRange]])
+					[t replaceCharactersInRange:composedRange withString:replacementString];
+			else
+					return nil;
+			// move searchable range
+			searchRange.location = composedRange.location;
+			searchRange.length = [t length] - composedRange.location;
+		}
     }
     
     return t;
@@ -210,28 +212,20 @@ static BDSKConverter *theConverter;
 }
 
 
-- (NSString*) convertBunch:(NSString*) s usingDict:(NSDictionary*) accents {
+- (NSString*) convertBunch:(NSString*) s {
     // isolate accent
     NSString * unicodeAccent = [s substringFromIndex:[s length] -1];
-    NSString * accent = [accents objectForKey:unicodeAccent];
+    NSString * accent = [texifyAccents objectForKey:unicodeAccent];
     
     // isolate character(s)
     NSString * character = [s substringToIndex:[s length] - 1];
-    if(![baseCharacterSetForTeX characterIsMember:[character characterAtIndex:1]]) // length 1 string
+    if(![baseCharacterSetForTeX characterIsMember:[character characterAtIndex:0]]) // length 1 string
         return nil;
     // handle i and j (others as well?)
-    if ([character isEqualToString:@"i"] || [character isEqualToString:@"j"]) {
-	if (![accent isEqualToString:@"c"] && ![accent isEqualToString:@"d"] && ![accent isEqualToString:@"b"]) {
+    if (([character isEqualToString:@"i"] || [character isEqualToString:@"j"]) &&
+		![accent isEqualToString:@"c"] && ![accent isEqualToString:@"d"] && ![accent isEqualToString:@"b"]) {
 	    character = [@"\\" stringByAppendingString:character];
-	}
     }
-    
-    /* The following lines might give support for multiply accented characters. These are available in Unicode but don't seem to work in TeX.
-	
-	if ([character length] > 1) {
-	    character = [self convertBunch:character usingDict:accents];
-	}
-    */
 
     return [NSString stringWithFormat:@"{\\%@%@}", accent, character];
 }
@@ -272,22 +266,24 @@ static BDSKConverter *theConverter;
         if([scanner scanUpToString:@"{\\" intoString:&tmpPass])
             [convertedSoFar appendString:tmpPass];
         if([scanner scanUpToString:@"}" intoString:&tmpConv]){
-            tmpConvB = [NSString stringWithFormat:@"%@}", tmpConv];
-            if(TEXString = [detexifyConversions objectForKey:tmpConvB]){
-                [convertedSoFar appendString:TEXString];
-                [scanner scanString:@"}" intoString:nil];
-            } else {
-                TEXString = [self composedStringFromTeXString:tmpConvB];
-                if(TEXString != nil){
-                    [convertedSoFar appendString:TEXString];
-                    [scanner scanString:@"}" intoString:nil];
-                } else {
-                    [convertedSoFar appendString:tmpConvB];
-                    // if there's another rightbracket hanging around, we want to scan past it:
-                    [scanner scanString:@"}" intoString:nil];
-                    // but what if that was the end?
-                }
-            }
+			NSRange range = [tmpConv rangeOfString:@"{\\" options:(NSLiteralSearch | NSBackwardsSearch)];
+			while(range.location != NSNotFound){
+				// we have a {\, now look for the matching closing brace
+				if(![scanner scanString:@"}" intoString:nil]) // the closing brace does not follow immediately, don't convert
+					break;
+				tmpConv = [tmpConv  stringByAppendingString:@"}"];
+				tmpConvB = [tmpConv substringFromIndex:range.location]; // thid holds the possible TeX char at the end of tmpConv
+				if((TEXString = [detexifyConversions objectForKey:tmpConvB]) ||
+					(TEXString = [self composedStringFromTeXString:tmpConvB])){
+					// we could convert the last part, so replace that part
+					tmpConv = [[tmpConv substringToIndex:range.location] stringByAppendingString:TEXString];
+				} else { // we couldn't convert
+					break;
+				}
+				// look for another {\
+				range = [tmpConv rangeOfString:@"{\\" options:(NSLiteralSearch | NSBackwardsSearch)];
+			}
+			[convertedSoFar appendString:tmpConv];
         }
     }
     
@@ -295,36 +291,26 @@ static BDSKConverter *theConverter;
 }
 
 - (NSString *)composedStringFromTeXString:(NSString *)texString{
-    NSDictionary *accents = [NSDictionary dictionaryWithContentsOfFile:[[NSBundle mainBundle] pathForResource:@"Accents" ofType:@"plist"]];
-    NSScanner *scanner = [[NSScanner alloc] initWithString:texString];
-    NSString *accent = nil;
+    NSScanner *scanner = [[[NSScanner alloc] initWithString:texString] autorelease];
+	NSString *texAccent = nil;
+	NSString *accent = nil;
     NSString *character = nil;
-    unichar u;
-        
-    while(![scanner isAtEnd]){
-        if(![scanner scanString:@"{\\" intoString:nil])
-            break;
-        [scanner scanString:@" " intoString:nil]; // if whitespace, get rid of it; this puts the scanner immediately before the base char
-        NSEnumerator *e = [accents objectEnumerator]; // get all of the objects
-        NSString *str;
-        u = [texString characterAtIndex:[scanner scanLocation]]; // this is the accent
-        while(str = [e nextObject]){
-            if([str characterAtIndex:0] == u){ // each one is a single unichar, and isEqualToString: fails
-                accent = [[accents allKeysForObject:str] lastObject];
-                break;
-            }
-        }
-        if([scanner scanLocation] + 1 < [texString length]) // make sure we don't go out of range
-            [scanner setScanLocation:[scanner scanLocation] + 1]; // go past the accent
-        [scanner scanUpToString:@"}" intoString:&character];
-        break;
-    }
-    
-    [scanner release];
-    if(character && accent)
-        return [[NSString stringWithFormat:@"%@%@", character, accent] precomposedStringWithCanonicalMapping];
-    else
-        return nil;
+	
+	[scanner setCharactersToBeSkipped:nil];
+    if(![scanner scanString:@"{\\" intoString:NULL])
+		return nil;
+	texAccent = [texString substringWithRange:NSMakeRange([scanner scanLocation],1)];
+	[scanner setScanLocation:[scanner scanLocation] + 1]; // go past the accent
+	if(![scanner scanString:@" " intoString:NULL] &&
+	   [[NSCharacterSet letterCharacterSet] characterIsMember:[texAccent characterAtIndex:0]]) // letters need an extra space
+		return nil;
+	
+	if ((accent = [detexifyAccents objectForKey:texAccent]) && 
+		[scanner scanUpToString:@"}" intoString:&character] && 
+		([character length] == 1))
+		return [[character stringByAppendingString:accent] precomposedStringWithCanonicalMapping];
+	
+	return nil;
 }
 
 

@@ -31,8 +31,11 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
      NSDictionary *wholeDict;
      NSCharacterSet *emptySet;
      NSCharacterSet *finalCharSet;
+     NSCharacterSet *accentCharSet;
      NSDictionary *detexifyConversions;
      NSDictionary *texifyConversions;
+     NSDictionary *texifyAccents;
+     NSDictionary *detexifyAccents;
      NSCharacterSet *baseCharacterSetForTeX;
 }
 /*!
@@ -67,13 +70,12 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 - (NSString *)convertedStringWithAccentedString:(NSString *)s;
 /*!
     @method     convertBunch:usingDict:
-    @abstract   Converts a decomposed accented string using a dictionary of accents
+    @abstract   Converts a decomposed accented string
     @discussion (comprehensive description)
     @param      s Decomposed string (canonical mapping)
-    @param      accents Dictionary of available accents
     @result     TeX sequence representing the character, or the decomposed character.
 */
-- (NSString*) convertBunch:(NSString*)s usingDict:(NSDictionary*)accents;
+- (NSString*) convertBunch:(NSString*)s;
 /*!
  @method stringByDeTeXifyingString:
  @abstract TeX -> UTF-8
