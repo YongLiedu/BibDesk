@@ -9,6 +9,54 @@
 #import "PubMedParser.h"
 #import "html2tex.h"
 
+@interface PubMedParser (Private)
+//
+// Private function for cleaning up reference miner output for Amazon references.  Use an NSLog to see
+// what it's giving us, then compare with <http://www.refman.com/support/risformat_intro.asp>.  We'll
+// fix it up enough to separate the references and save typing the author/title, but the date is just
+// too messed up to bother with.
+//
+NSString *StringByFixingReferenceMinerString(NSString *aString);
+
+/*!
+@function	addStringToDict
+ @abstract   Used to add additional strings to an existing dictionary entry.
+ @discussion This is useful for multiple authors and multiple keywords, so we don't wipe them out by overwriting.
+ @param      wholeValue String object that we are adding (e.g. <tt>Ann Author</tt>).
+ @param	pubDict NSMutableDictionary containing the current publication.
+ @param	theKey NSString object with the key that we are adding an item to (e.g. <tt>Author</tt>).
+ */
+void addStringToDict(NSString *wholeValue, NSMutableDictionary *pubDict, NSString *theKey);
+/*!
+@function   isDuplicateAuthor
+ @abstract   Check to see if we have a duplicate author in the list
+ @discussion Some online databases (Scopus in particular) give us RIS with multiple instances of the same author.
+ BibTeX accepts this, and happily prints out duplicate author names.  This isn't a very robust check.
+ @param      oldList Existing author list in the dictionary
+ @param      newAuthor The author that we want to add
+ @result     Returns YES if it's a duplicate
+ */
+BOOL isDuplicateAuthor(NSString *oldList, NSString *newAuthor);
+/*!
+@function   mergePageNumbers
+ @abstract   Elsevier/ScienceDirect RIS output has SP for start page and EP for end page.  If we find
+ both of those in the entry, we merge them and add them back into the dictionary as
+ SP--EP forKey:Pages.
+ @param      dict NSMutableDictionary containing a single RIS bibliography entry
+ */
+void mergePageNumbers(NSMutableDictionary *dict);
+/*!
+@method     bibitemWithPubMedDictionary:fileOrder:
+ @abstract   Convenience method which returns an autoreleased BibItem when given a pubDict object which
+ may represent PubMed or other RIS information.
+ @discussion (comprehensive description)
+ @param      pubDict Dictionary containing an RIS representation of a bib item.
+ @param      itemOrder (description)
+ @result     A new, autoreleased BibItem, of type BibTeX.
+ */
++ (BibItem *)bibitemWithPubMedDictionary:(NSMutableDictionary *)pubDict fileOrder:(int)itemOrder;
+@end
+
 @implementation PubMedParser
 
 + (NSMutableArray *)itemsFromString:(NSString *)itemString
@@ -16,13 +64,15 @@
     return [PubMedParser itemsFromString:itemString error:hadProblems frontMatter:nil filePath:@"Paste/Drag"];
 }
 
-
 + (NSMutableArray *)itemsFromString:(NSString *)itemString
                               error:(BOOL *)hadProblems
                         frontMatter:(NSMutableString *)frontMatter
                            filePath:(NSString *)filePath{
-
-    BibItem *newBI = nil;    
+    
+    if([itemString rangeOfString:@"Amazon" options:nil range:NSMakeRange(0,6)].location != NSNotFound)
+        itemString = StringByFixingReferenceMinerString(itemString); // run a crude hack for fixing the broken RIS that we get for Amazon entries from Reference Miner
+    
+    BibItem *newBI = nil;
 
     int itemOrder = 1;
     // BibAppController *appController = (BibAppController *)[NSApp delegate]; // used to add autocomplete entries.
@@ -31,20 +81,6 @@
     
     //dictionary is the publication entry
     NSMutableDictionary *pubDict = [[NSMutableDictionary alloc] init];
-    const char * fs_path = NULL;
-    NSString *tempFilePath = nil;
-    BOOL usingTempFile = NO;
-    
-    if( !([filePath isEqualToString:@"Paste/Drag"]) && [[NSFileManager defaultManager] fileExistsAtPath:filePath]){
-        fs_path = [[NSFileManager defaultManager] fileSystemRepresentationWithPath:filePath];
-        usingTempFile = NO;
-    }else{
-        tempFilePath = [NSTemporaryDirectory() stringByAppendingPathComponent:[[NSProcessInfo processInfo] globallyUniqueString]];
-        [itemString writeToFile:tempFilePath atomically:YES];
-        fs_path = [[NSFileManager defaultManager] fileSystemRepresentationWithPath:tempFilePath];
-        NSLog(@"using temporary file %@ - was it deleted?",tempFilePath);
-        usingTempFile = YES;
-    }
     
     // ARM:  This code came from Art Isbell to cocoa-dev on Tue Jul 10 22:13:11 2001.  Comments are his.
     //       We were using componentsSeparatedByString:@"\r", but this is not robust.  Files from ScienceDirect
@@ -110,7 +146,7 @@
     NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
     // NSLog(@"allocating pool at start");        
         sourceLine = [sourceLine stringByTrimmingCharactersInSet:newlineSet];
-//        NSLog(@" = [%@]",sourceLine);        
+        //NSLog(@" = [%@]",sourceLine);        
         if([sourceLine length] > 5){
 
             prefix = [[sourceLine substringWithRange:NSMakeRange(0,4)] stringByTrimmingCharactersInSet:whitespaceNewlineSet];
@@ -298,6 +334,23 @@ void mergePageNumbers(NSMutableDictionary *dict){
 	[dict setObject:merge forKey:BDSKPagesString];
     }
 }
+
+NSString *StringByFixingReferenceMinerString(NSString *aString)
+{
+    // this is what Ref Miner uses to mark the beginning; should be TY key instead, so we'll fake it; this means the actual TY doesn't get set
+    AGRegex *start = [AGRegex regexWithPattern:@"ITEM"];
+    aString = [start replaceWithString:@"TY  - " inString:aString];
+    
+    // special case for handling the url; others we just won't worry about
+    AGRegex *url = [AGRegex regexWithPattern:@"URL- "];
+    aString = [url replaceWithString:@"UR  - " inString:aString];
+    
+    AGRegex *tagRegex = [AGRegex regexWithPattern:@"([A-Z]+)- "];
+    aString = [tagRegex replaceWithString:@"$1  - " inString:aString];
+    
+    return aString;
+}
+
 
 + (BibItem *)bibitemWithPubMedDictionary:(NSMutableDictionary *)pubDict fileOrder:(int)itemOrder{
     
