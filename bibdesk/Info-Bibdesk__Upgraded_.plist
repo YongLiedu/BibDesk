@@ -11,6 +11,8 @@
 			<array>
 				<string>bib</string>
 			</array>
+			<key>CFBundleTypeIconFile</key>
+			<string>bibDocIcon.icns</string>
 			<key>CFBundleTypeName</key>
 			<string>bibTeX database</string>
 			<key>CFBundleTypeOSTypes</key>
@@ -204,7 +206,7 @@
 					<integer>0</integer>
 				</dict>
 				<key>icon</key>
-				<string>palm.icns</string>
+				<string>citation.tiff</string>
 				<key>identifier</key>
 				<string>bp_cite</string>
 				<key>nib</key>
@@ -228,7 +230,7 @@
 					<string>~/Library/Application Support/BibDesk/template.txt</string>
 				</dict>
 				<key>icon</key>
-				<string>palm.icns</string>
+				<string>defaults.tiff</string>
 				<key>identifier</key>
 				<string>bp_defaults</string>
 				<key>nib</key>
@@ -292,7 +294,7 @@
 					<string>Author</string>
 				</dict>
 				<key>icon</key>
-				<string>palm.icns</string>
+				<string>display.tiff</string>
 				<key>identifier</key>
 				<string>bp_display</string>
 				<key>nib</key>
@@ -314,7 +316,7 @@
 					<string>Rss-Description</string>
 				</dict>
 				<key>icon</key>
-				<string>palm.icns</string>
+				<string>rss.tiff</string>
 				<key>identifier</key>
 				<string>bp_rss</string>
 				<key>nib</key>
@@ -338,7 +340,7 @@
 					<integer>0</integer>
 				</dict>
 				<key>icon</key>
-				<string>palm.icns</string>
+				<string>startup.tiff</string>
 				<key>identifier</key>
 				<string>bp_startup</string>
 				<key>nib</key>
@@ -364,7 +366,7 @@
 					<integer>0</integer>
 				</dict>
 				<key>icon</key>
-				<string>palm.icns</string>
+				<string>preview.tiff</string>
 				<key>identifier</key>
 				<string>bp_TeX</string>
 				<key>nib</key>
