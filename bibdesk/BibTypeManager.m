@@ -19,13 +19,20 @@ static BibTypeManager *_sharedInstance = nil;
 - (id)init{
     self = [super init];
     _typeInfoDict = [[NSDictionary dictionaryWithContentsOfFile:[[[NSBundle mainBundle] resourcePath] stringByAppendingPathComponent:@"TypeInfo.plist"]] retain];
+
+    // use this character set for generating citekey suggestions; it is very restrictive, based on TLC 2nd Ed. p. 842
     NSMutableCharacterSet *validSet = [[NSMutableCharacterSet alloc] init];
     [validSet addCharactersInRange:NSMakeRange( (unsigned int)'a', 26)];
     [validSet addCharactersInRange:NSMakeRange( (unsigned int)'A', 26)];
     [validSet addCharactersInRange:NSMakeRange( (unsigned int)'0', 12)];  // get everything through semicolon
     [validSet addCharactersInString:@"-"];
-    _invalidCiteKeyCharSet = [[validSet invert] copy];  // don't release this
+    
+    _sanitizedCiteKeyCharSet = [[validSet invert] copy];  // don't release this
     [validSet release];
+
+    // this set is used for warning the user on manual entry of a citekey; allows non-ASCII characters and some math symbols
+    _invalidCiteKeyCharSet = [[NSCharacterSet characterSetWithCharactersInString:@" '\"@,\\#}{~&%$^"] retain];
+    
     return self;
 }
 
@@ -80,6 +87,10 @@ static BibTypeManager *_sharedInstance = nil;
 		[NSException raise:@"unimpl. feat. exc." format:@"invalidCharactersForField is partly implemented"];
 	}
 	return _invalidCiteKeyCharSet;
+}
+
+- (NSCharacterSet *)sanitizedCiteKeyCharSet{
+    return _sanitizedCiteKeyCharSet;
 }
 
 @end
