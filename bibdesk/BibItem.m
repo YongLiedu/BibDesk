@@ -524,4 +524,21 @@ void _setupFonts(){
     }
     return [[result copy] autorelease];
 }
+
+- (NSString *)localURLPath{
+    NSURL *local = nil;
+    NSString *lurl = [self valueOfField:@"Local-Url"];
+    
+    if(![@"" isEqualToString:lurl]){
+        local = [NSURL URLWithString:lurl];
+        if(!local){
+            local = [NSURL fileURLWithPath:[lurl stringByExpandingTildeInPath]];
+        }
+    }else{
+        local = nil;
+    }
+
+    if (local) return [local path];
+    else return nil;
+}
 @end

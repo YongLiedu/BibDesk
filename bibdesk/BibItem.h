@@ -183,5 +183,8 @@
     
 */
 - (NSString *)allFieldsString; 
+
+- (NSString *)localURLPath; 
 @end
+
 
