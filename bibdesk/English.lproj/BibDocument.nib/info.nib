@@ -26,14 +26,14 @@
 	</array>
 	<key>IBOpenObjects</key>
 	<array>
+		<integer>68</integer>
 		<integer>277</integer>
-		<integer>303</integer>
-		<integer>641</integer>
-		<integer>5</integer>
 		<integer>661</integer>
 		<integer>433</integer>
-		<integer>68</integer>
 		<integer>626</integer>
+		<integer>641</integer>
+		<integer>5</integer>
+		<integer>303</integer>
 	</array>
 	<key>IBSystem Version</key>
 	<string>7U16</string>
