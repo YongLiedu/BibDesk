@@ -69,11 +69,15 @@ NSRange SafeBackwardSearchRange(NSRange startRange, unsigned seekLength);
 /// libbtparse methods
 + (NSMutableArray *)itemsFromData:(NSData *)inData
                               error:(BOOL *)hadProblems{
+    if(![inData length]) // btparse chokes on non-BibTeX or empty data, so we'll at least check for zero length
+        return [NSMutableArray array];
     BibTeXParser *parser = [[[BibTeXParser alloc] init] autorelease];
     return [parser itemsFromData:inData error:hadProblems frontMatter:nil filePath:@"Paste/Drag" document:nil];
 }
 
 + (NSMutableArray *)itemsFromData:(NSData *)inData error:(BOOL *)hadProblems frontMatter:(NSMutableString *)frontMatter filePath:(NSString *)filePath document:(BibDocument *)aDocument{
+    if(![inData length]) // btparse chokes on non-BibTeX or empty data, so we'll at least check for zero length
+        return [NSMutableArray array];
     BibTeXParser *parser = [[[BibTeXParser alloc] init] autorelease];
     return [parser itemsFromData:inData error:hadProblems frontMatter:frontMatter filePath:filePath document:aDocument];
 }
