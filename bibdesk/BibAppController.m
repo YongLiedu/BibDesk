@@ -637,14 +637,12 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 
 - (IBAction)hideErrorPanel:(id)sender{
     [errorPanel orderOut:sender];
-	[showHideErrorsMenuItem setState:NSOffState];
-	//	[showHideErrorsMenuItem setTitle:NSLocalizedString(@"Show Errors",@"show errors - should be same as menu title in nib")];
+    [showHideErrorsMenuItem setState:NSOffState];
 }
 
 - (IBAction)showErrorPanel:(id)sender{
     [errorPanel makeKeyAndOrderFront:sender];
-	[showHideErrorsMenuItem setState:NSOnState];
-	//[showHideErrorsMenuItem setTitle:NSLocalizedString(@"Hide Errors",@"hide errors")];
+    [showHideErrorsMenuItem setState:NSOnState];
 }
 
 - (void)handleErrorNotification:(NSNotification *)notification{
@@ -659,11 +657,8 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 
 - (void)updateErrorPanelUI{
 	[errorTableView reloadData];
-	NSLog(@"err panel");
-	//[errorTableView scrollRowToVisible:[_errors count]];
 	if ([[OFPreferenceWrapper sharedPreferenceWrapper] boolForKey:BDSKShowWarningsKey]) {
-		[self showErrorPanel:self];
-		[showHideErrorsMenuItem setTitle:NSLocalizedString(@"Hide Errors",@"hide errors")];
+            [self showErrorPanel:self];
 	}
 }
 
