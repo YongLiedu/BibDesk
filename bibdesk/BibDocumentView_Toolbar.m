@@ -81,37 +81,48 @@ static void addToolbarItem(NSMutableDictionary *theDict,NSString *identifier,NSS
     // add toolbaritems:
 
     addToolbarItem(toolbarItems, NewDocToolbarItemIdentifier,
-                   NSLocalizedString(@"New",@""), NSLocalizedString(@"New Publication",@""),
+                   NSLocalizedString(@"New",@""), 
+				   NSLocalizedString(@"New Publication",@""),
                    NSLocalizedString(@"Create New Publication",@""),
-                   self, @selector(setImage:), [NSImage imageNamed: @"newdoc"], @selector(newPub:),
+                   self, @selector(setImage:),
+				   [NSImage imageNamed: @"AddCard"], 
+				   @selector(newPub:),
                    NULL);
 
     addToolbarItem(toolbarItems, DelDocToolbarItemIdentifier,
-                   NSLocalizedString(@"Delete",@""), NSLocalizedString(@"Delete Publication",@""),
+                   NSLocalizedString(@"Delete",@""), 
+				   NSLocalizedString(@"Delete Publication",@""),
                    NSLocalizedString(@"Delete Selected Publication(s)",@""),
-                   self, @selector(setImage:), [NSImage imageNamed: @"deldoc"], @selector(delPub:),
+                   self, @selector(setImage:),  
+				   [NSImage imageWithLargeIconForToolboxCode:kToolbarDeleteIcon],
+				   @selector(delPub:),
                    NULL);
 
     addToolbarItem(toolbarItems, EditDocToolbarItemIdentifier,
                    NSLocalizedString(@"Edit",@""),
                    NSLocalizedString(@"Edit Publication",@""),
                    NSLocalizedString(@"Edit Selected Publication(s)",@""),
-                   self, @selector(setImage:), [NSImage imageNamed: @"editdoc"],
-                   @selector(editPubCmd:), NULL);
+                   self, @selector(setImage:), 
+				   [NSImage imageNamed: @"EditCard"],
+                   @selector(editPubCmd:), 
+				   NULL);
 	
 	
-	addToolbarItem(toolbarItems, SearchFieldDocToolbarItemIdentifier,
+/*	searchField has been moved into the window itself
+		
+		addToolbarItem(toolbarItems, SearchFieldDocToolbarItemIdentifier,
 				   NSLocalizedString(@"Search", @""),
 				   NSLocalizedString(@"Search", @""),
 				   NSLocalizedString(@"Search Publications", @""),
 				   self, @selector(setView:), searchFieldBox, NULL, NULL);
+*/
 	
     addToolbarItem(toolbarItems, PrvDocToolbarItemIdentifier,
                    NSLocalizedString(@"Preview",@""),
                    NSLocalizedString(@"Show Preview",@""),
                    NSLocalizedString(@"Show PDF Preview",@""),
                    nil, @selector(setImage:),
-                   [NSImage imageNamed: @"previewdoc"],
+                   [NSImage imageNamed: @"PreviewCard"],
                    @selector(toggleShowingPreviewPanel:), NULL);
 	
     addToolbarItem(toolbarItems, ToggleCiteDrawerToolbarItemIdentifier,
