@@ -37,6 +37,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
     NSString *_lastName;
     NSString *_jrPart;
     NSString *_normalizedName;
+    NSString *sortableName;
     BibPersonController *_personController; // unretained
     BibItem *publication;
 }
@@ -50,9 +51,21 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 - (NSComparisonResult)compare:(BibAuthor *)otherAuth;
 - (NSComparisonResult)fuzzyCompare:(BibAuthor *)otherAuth;
 
+/*!
+    @method     sortCompare:
+    @abstract   Used for comparing authors based on "Lastname Firstname" with no comma separator, von part, or jr part.  From user feedback, it appears that
+                "de Wit" should be sorted with "Witten", not with "Dewar."  Used for tableview sorting.
+    @discussion (comprehensive description)
+    @param      otherAuth (description)
+    @result     (description)
+*/
+- (NSComparisonResult)sortCompare:(BibAuthor *)otherAuth;
+
 - (NSString *)description;
 - (NSString *)normalizedName;
 - (void)refreshNormalizedName;
+- (NSString *)sortableName;
+- (void)refreshSortableName;
 - (NSString *)name;
 - (NSString *)firstName;
 - (NSString *)vonPart;

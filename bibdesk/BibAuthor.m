@@ -41,6 +41,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 	[_lastName release];
 	[_jrPart release];
 	[_normalizedName release];
+        [sortableName release];
     [[NSNotificationCenter defaultCenter] removeObserver:self];
 #if DEBUG
     NSLog(@"bibauthor dealloc");
@@ -101,6 +102,10 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 
 }
 
+- (NSComparisonResult)sortCompare:(BibAuthor *)otherAuth{ // used for tableview sorts; omits von and jr parts
+    return [[self sortableName] compare:[otherAuth sortableName] options:NSCaseInsensitiveSearch];
+}
+
 
 #pragma mark String Representations
 
@@ -140,6 +145,23 @@ You may almost always use the first form; you shouldn’t if either there’s a Jr p
 		(FIRST ? @", " : @""),
 		(FIRST ? _firstName : @"")] retain];
 }
+
+- (void)refreshSortableName{ // "Lastname Firstname" (no comma, von, or jr)
+    [sortableName release];
+    
+    BOOL FIRST = !emptyStr(_firstName);
+    BOOL LAST = !emptyStr(_lastName);
+    
+    sortableName = [[NSString stringWithFormat:@"%@%@%@", 
+        (LAST ? _lastName : @""),
+        (FIRST ? @" " : @""),
+        (FIRST ? _firstName : @"")] retain];
+}
+
+- (NSString *)sortableName{
+    return sortableName;
+}
+
 
 - (NSString *)name{
     return name;
@@ -189,18 +211,18 @@ Sets all the different variables for partial names and so on from a given string
 Note: The strings returned by the bt_split_name function seem to be in the wrong encoding – UTF-8 is treated as ASCII. This is manually fixed for the _firstName, _lastName,  _jrPart and _vonPart variables.
 */
 - (void)setName:(NSString *)newName{
-	NSStringEncoding defaultCStringEncoding = NSUTF8StringEncoding; // should use since we split the name with a UTF8String
+    NSStringEncoding defaultCStringEncoding = NSUTF8StringEncoding; // should use since we split the name with a UTF8String
     bt_name *theName;
     int i = 0;
     NSMutableString *tmpStr = nil;
     
-	if(newName == name){
-		return;
-	}
-	[name release];
-	name = [newName copy];
+    if(newName == name){
+            return;
+    }
+    [name release];
+    name = [newName copy];
 
-	theName = bt_split_name((char *)[name UTF8String],(char *)[name UTF8String],0,0);
+    theName = bt_split_name((char *)[name UTF8String],(char *)[name UTF8String],0,0);
     
     // get tokens from first part
     tmpStr = [NSMutableString string];
@@ -244,9 +266,10 @@ Note: The strings returned by the bt_split_name function seem to be in the wrong
     }
     _jrPart = [[NSString alloc] initWithData:[[tmpStr stringByRemovingCurlyBraces] dataUsingEncoding:defaultCStringEncoding allowLossyConversion:YES]  encoding:NSUTF8StringEncoding]; 
 	
-	[self refreshNormalizedName];
-	
-	bt_free_name(theName);
+    [self refreshNormalizedName];
+    [self refreshSortableName];
+    
+    bt_free_name(theName);
 }
 
 - (BibItem *)publication{

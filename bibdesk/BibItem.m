@@ -321,7 +321,7 @@ _setupParagraphStyle()
 - (NSComparisonResult)auth1Compare:(BibItem *)aBI{
     if([pubAuthors count] > 0){
         if([aBI numberOfAuthors] > 0){
-            return [[self authorAtIndex:0] compare:
+            return [[self authorAtIndex:0] sortCompare:
                 [aBI authorAtIndex:0]];
         }
         return NSOrderedAscending;
@@ -332,7 +332,7 @@ _setupParagraphStyle()
 - (NSComparisonResult)auth2Compare:(BibItem *)aBI{
     if([pubAuthors count] > 1){
         if([aBI numberOfAuthors] > 1){
-            return [[self authorAtIndex:1] compare:
+            return [[self authorAtIndex:1] sortCompare:
                 [aBI authorAtIndex:1]];
         }
         return NSOrderedAscending;
@@ -343,7 +343,7 @@ _setupParagraphStyle()
 - (NSComparisonResult)auth3Compare:(BibItem *)aBI{
     if([pubAuthors count] > 2){
         if([aBI numberOfAuthors] > 2){
-            return [[self authorAtIndex:2] compare:
+            return [[self authorAtIndex:2] sortCompare:
                 [aBI authorAtIndex:2]];
         }
         return NSOrderedAscending;
