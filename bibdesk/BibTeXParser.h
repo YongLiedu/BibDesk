@@ -38,7 +38,7 @@
                          filePath:(NSString *)filePath
                  document:(BibDocument *)aDocument;
     
-+ (NSMutableArray *)itemsFromString:(NSString *)fullString error:(BOOL *)hadProblems frontMatter:(NSMutableString *)frontMatter filePath:(NSString *)filePath;
++ (NSMutableArray *)itemsFromString:(NSString *)string error:(BOOL *)hadProblems frontMatter:(NSMutableString *)frontMatter filePath:(NSString *)filePath document:(BibDocument *)document;
 + (NSMutableArray *)itemsFromString:(NSString *)string error:(BOOL *)hadProblems;
 
 - (NSString *)preambleStringFromScanner:(NSScanner *)scanner endingRange:(NSRange)range string:(NSString *)fullString filePath:(NSString *)filePath hadProblems:(BOOL *)hadProblems;
