@@ -1445,6 +1445,14 @@ didClickTableColumn: (NSTableColumn *) tableColumn{
 		
 		[publications sortUsingSelector:@selector(dateCompare:)];
 		[shownPublications sortUsingSelector:@selector(dateCompare:)];
+	}else if([tcID isEqualToString:@"Date-Added"]){
+		
+		[publications sortUsingSelector:@selector(createdDateCompare:)];
+		[shownPublications sortUsingSelector:@selector(createdDateCompare:)];
+	}else if([tcID isEqualToString:@"Date-Modified"]){
+		
+		[publications sortUsingSelector:@selector(modDateCompare:)];
+		[shownPublications sortUsingSelector:@selector(modDateCompare:)];
 	}else if([tcID isEqualToString:@"1st Author"]){
 		
 		[publications sortUsingSelector:@selector(auth1Compare:)];
@@ -1458,11 +1466,13 @@ didClickTableColumn: (NSTableColumn *) tableColumn{
 		[publications sortUsingSelector:@selector(auth3Compare:)];
 		[shownPublications sortUsingSelector:@selector(auth3Compare:)];
 	}else if([tcID isEqualToString:@"Type"]){
+		
 		[publications sortUsingSelector:@selector(pubTypeCompare:)];
 		[shownPublications sortUsingSelector:@selector(pubTypeCompare:)];
 	}else{
-		[publications sortUsingFunction:generalBibItemCompareFunc context:[tableColumn identifier]];
-		[shownPublications sortUsingFunction:generalBibItemCompareFunc context:[tableColumn identifier]];
+		
+		[publications sortUsingFunction:generalBibItemCompareFunc context:tcID];
+		[shownPublications sortUsingFunction:generalBibItemCompareFunc context:tcID];
 	}
 	
 	
@@ -1490,8 +1500,13 @@ int generalBibItemCompareFunc(id item1, id item2, void *context){
 	NSString *keyPath = [NSString stringWithFormat:@"pubFields.%@", tableColumnName];
 	NSString *value1 = (NSString *)[item1 valueForKeyPath:keyPath];
 	NSString *value2 = (NSString *)[item2 valueForKeyPath:keyPath];
-	if (value1 == nil || value2 == nil) NSLog(@"a value is nil!");
-	// @@sort-fix: how do we handle nil values, which may now occur?
+	if (value1 == nil) {
+		NSLog(@"a value is nil!");
+		return (value2 == nil)? NSOrderedSame : NSOrderedDescending;
+	} else if (value2 == nil) {
+		NSLog(@"a value is nil!");
+		return NSOrderedAscending;
+	}
 	return [value1 compare:value2];
 }
 
