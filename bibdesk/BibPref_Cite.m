@@ -25,7 +25,6 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 
 
 - (void)updateUI{
-	NSLog(@"update!!!!!!!!!");
     NSString *citeString = [defaults stringForKey:BDSKCiteStringKey];
 	NSString *startCiteBracket = [defaults stringForKey:BDSKCiteStartBracketKey]; 
 	NSString *endCiteBracket = [defaults stringForKey:BDSKCiteEndBracketKey]; 
