@@ -14,6 +14,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 
 #import "BDSKDragWindow.h"
 
+#import <Carbon/Carbon.h>
 #import "BibDocument.h"
 #import "BibItem.h"
 #import "BibEditor.h"
