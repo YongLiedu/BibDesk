@@ -137,7 +137,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 
     [errorTableView setDoubleAction:@selector(gotoError:)];
     [openUsingFilterAccessoryView retain];
-
+	[showHideCustomCiteStringsMenuItem setRepresentedObject:@"showHideCustomCiteMenuItem"];
 }
 
 #pragma mark Overridden NSDocumentController methods
@@ -412,10 +412,12 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 
 - (IBAction)hideErrorPanel:(id)sender{
     [errorPanel orderOut:sender];
+	[showHideErrorsMenuItem setTitle:NSLocalizedString(@"Show Errors",@"show errors - should be same as menu title in nib")];
 }
 
 - (IBAction)showErrorPanel:(id)sender{
     [errorPanel makeKeyAndOrderFront:sender];
+	[showHideErrorsMenuItem setTitle:NSLocalizedString(@"Hide Errors",@"hide errors")];
 }
 
 - (void)handleErrorNotification:(NSNotification *)notification{
@@ -424,12 +426,22 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 
     if (errorClass) {
         [_errors addObject:errDict];
-        [errorTableView reloadData];
-        //[errorTableView scrollRowToVisible:[_errors count]];
-        if ([[OFPreferenceWrapper sharedPreferenceWrapper] boolForKey:BDSKShowWarningsKey]) {
-            [self showErrorPanel:self];
-        }
+		[NSObject cancelPreviousPerformRequestsWithTarget:self 
+												 selector:@selector(updateErrorPanelUI)
+												   object:nil];
+		
+		[self performSelector:@selector(updateErrorPanelUI)];
     }
+}
+
+- (void)updateErrorPanelUI{
+	[errorTableView reloadData];
+	NSLog(@"err panel");
+	//[errorTableView scrollRowToVisible:[_errors count]];
+	if ([[OFPreferenceWrapper sharedPreferenceWrapper] boolForKey:BDSKShowWarningsKey]) {
+		[self showErrorPanel:self];
+		[showHideErrorsMenuItem setTitle:NSLocalizedString(@"Hide Errors",@"hide errors")];
+	}
 }
 
 - (void)removeErrorObjsForFileName:(NSString *)fileName{
@@ -499,23 +511,18 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
     [_finder showWindow:self];
 }
 
-- (IBAction)showPreviewPanel:(id)sender{
-    if(!showingPreviewPanel){
-        [[BDSKPreviewer sharedPreviewer] showWindow:self]; // why self?
-        showingPreviewPanel = YES;
-        [[OFPreferenceWrapper sharedPreferenceWrapper] setObject:@"showing" forKey:@"BDSK Showing Preview Key"];
-    }
-}
 
 - (IBAction)toggleShowingPreviewPanel:(id)sender{
     if(!showingPreviewPanel){
         [[BDSKPreviewer sharedPreviewer] showWindow:self];
         showingPreviewPanel = YES;
         [[OFPreferenceWrapper sharedPreferenceWrapper] setObject:@"showing" forKey:@"BDSK Showing Preview Key"];
+		[showHidePreviewMenuItem setTitle:NSLocalizedString(@"Hide Preview",@"hide preview")];
     }else{
         [[[BDSKPreviewer sharedPreviewer] window] close];
         showingPreviewPanel = NO; // redundant.
         [[OFPreferenceWrapper sharedPreferenceWrapper] setObject:@"not showing" forKey:@"BDSK Showing Preview Key"];
+		[showHidePreviewMenuItem setTitle:NSLocalizedString(@"Show Preview",@"show preview, should be same as title in nib")];
     }    
 }
 
@@ -541,7 +548,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
     NSUpdateDynamicServices();
 
     if([@"showing" isEqualToString:[[OFPreferenceWrapper sharedPreferenceWrapper] objectForKey:@"BDSK Showing Preview Key"]]){
-        [self showPreviewPanel:self];
+        [self toggleShowingPreviewPanel:self];
     }
    
     NSString *versionString = [[[NSBundle mainBundle] infoDictionary] objectForKey:@"CFBundleVersion"];

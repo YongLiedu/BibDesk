@@ -155,6 +155,8 @@ NSString*   LocalDragPasteboardName = @"edu.ucsd.cs.mmccrack.bibdesk: Local Publ
     drawerSize = [customCiteDrawer contentSize];
     [customCiteDrawer setContentSize:NSMakeSize(100,drawerSize.height)];
 
+	showingCustomCiteDrawer = NO;
+	
     // finally, make sure the font is correct initially:
     [self handleFontChangedNotification:nil];
 }
@@ -1690,9 +1692,12 @@ int generalBibItemCompareFunc(id item1, id item2, void *context){
 
 - (IBAction)toggleShowingCustomCiteDrawer:(id)sender{
     [customCiteDrawer toggle:sender];
+	if(showingCustomCiteDrawer){
+		showingCustomCiteDrawer = NO;
+	}else{
+		showingCustomCiteDrawer = YES;
+	}
 }
-
-
 
 - (BOOL)validateMenuItem:(id <NSMenuItem>)menuItem{
     if([[menuItem title] isEqualToString:@"Copy BibTex"] ||
@@ -1709,7 +1714,14 @@ int generalBibItemCompareFunc(id item1, id item2, void *context){
     }else if([[menuItem title] isEqualToString:@"Send via email"]&& [self numberOfSelectedPubs] != 1){
         // Localization note: does using this string work under localizations?
         return NO;
-    }else{
+    }else if([[menuItem representedObject] isEqualToString:@"showHideCustomCiteMenuItem"] ){
+
+		if(showingCustomCiteDrawer){
+			[menuItem setTitle:NSLocalizedString(@"Hide Custom Citation Strings",@"")];
+		}else{
+			[menuItem setTitle:NSLocalizedString(@"Show Custom Citation Strings",@"should be the same as in the nib")];
+		}
+	}else{
         return YES;
     }
  /*   if([@@ [menuItem title] isEqualToString:@"the one for blogging the item"]){

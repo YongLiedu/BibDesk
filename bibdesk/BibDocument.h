@@ -87,6 +87,7 @@ extern NSString* LocalDragPasteboardName;
     IBOutlet NSButton* openCustomCitePrefsButton;
     IBOutlet BDSKCustomCiteTableView* ccTableView;
     NSMutableArray* customStringArray;
+	BOOL showingCustomCiteDrawer;
     
     NSMutableArray *publications;    // holds all the publications
     NSMutableArray *shownPublications;    // holds the ones we want to show.

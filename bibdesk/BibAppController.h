@@ -56,6 +56,10 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
     
     IBOutlet NSTextView* readmeTextView;
     IBOutlet NSWindow* readmeWindow;
+	
+	IBOutlet NSMenuItem* showHidePreviewMenuItem;
+	IBOutlet NSMenuItem* showHideCustomCiteStringsMenuItem;
+	IBOutlet NSMenuItem* showHideErrorsMenuItem;
 
 }
 
@@ -108,6 +112,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 - (IBAction)hideErrorPanel:(id)sender;
 - (IBAction)showErrorPanel:(id)sender;
 - (void)removeErrorObjsForFileName:(NSString *)fileName;
+- (void)updateErrorPanelUI;
 - (IBAction)gotoError:(id)sender;
 - (IBAction)gotoErrorObj:(id)errObj;
 - (IBAction)openEditWindowWithFile:(NSString *)fileName;
@@ -119,7 +124,6 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 
 - (IBAction)showPreferencePanel:(id)sender;
 - (IBAction)showFindPanel:(id)sender;
-- (IBAction)showPreviewPanel:(id)sender;
 - (IBAction)toggleShowingPreviewPanel:(id)sender;
 
 - (void)showReadMeFile;
