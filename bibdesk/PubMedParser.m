@@ -267,11 +267,20 @@
 void addStringToDict(NSString *wholeValue, NSMutableDictionary *pubDict, NSString *theKey){
     NSString *oldString = [pubDict objectForKey:theKey];
     if(!oldString){
-	[pubDict setObject:wholeValue forKey:theKey];
+        [pubDict setObject:wholeValue forKey:theKey];
     } else {
-	NSString *newString = [NSString stringWithFormat:@"%@ and %@", oldString, wholeValue];
-	[pubDict setObject:newString forKey:theKey];
+        if( [theKey isEqualToString:@"Author"] && isDuplicateAuthor(oldString, wholeValue)==YES ){
+            NSLog(@"Not adding duplicate author %@", wholeValue);
+            return;
+        }
+        NSString *newString = [NSString stringWithFormat:@"%@ and %@", oldString, wholeValue];
+        [pubDict setObject:newString forKey:theKey];
     }
+}
+
+BOOL isDuplicateAuthor(NSString *oldList, NSString *newAuthor){ // check to see if it's a duplicate; this relies on the whitespace around the " and ", and is basically a hack for Scopus
+    NSArray *oldAuthArray = [oldList componentsSeparatedByString:@" and "];
+    return [oldAuthArray containsObject:newAuthor];
 }
 
 void mergePageNumbers(NSMutableDictionary *dict){

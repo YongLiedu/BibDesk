@@ -29,6 +29,16 @@
 */
 void addStringToDict(NSString *wholeValue, NSMutableDictionary *pubDict, NSString *theKey);
 /*!
+    @function   isDuplicateAuthor
+    @abstract   Check to see if we have a duplicate author in the list
+    @discussion Some online databases (Scopus in particular) give us RIS with multiple instances of the same author.
+                BibTeX accepts this, and happily prints out duplicate author names.  This isn't a very robust check.
+    @param      oldList Existing author list in the dictionary
+    @param      newAuthor The author that we want to add
+    @result     Returns YES if it's a duplicate
+*/
+BOOL isDuplicateAuthor(NSString *oldList, NSString *newAuthor);
+/*!
     @function   mergePageNumbers
     @abstract   Elsevier/ScienceDirect RIS output has SP for start page and EP for end page.  If we find
                 both of those in the entry, we merge them and add them back into the dictionary as
