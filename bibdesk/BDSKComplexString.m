@@ -103,6 +103,7 @@ static NSDictionary *globalMacroDefs;
     if (self = [super init]) {
         nodes = [[NSArray alloc] initWithArray:a copyItems:YES];
 		if(theMacroResolver) {
+            NSNotificationCenter *nc = [NSNotificationCenter defaultCenter];
 			macroResolver = theMacroResolver;
                         NSNotificationCenter *nc = [NSNotificationCenter defaultCenter];
 			[nc addObserver:self
