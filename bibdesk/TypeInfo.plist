@@ -34,7 +34,6 @@
 		<string>Abstract</string>
 		<key>AD</key>
 		<string>affiliation</string>
-
 		<key>BT</key>
 		<string>Title</string>
 		<key>CT</key>
@@ -156,6 +155,20 @@
 				<string>Publisher</string>
 				<string>Year</string>
 			</array>
+		</dict>
+		<key>electronic</key>
+		<dict>
+			<key>optional</key>
+			<dict>
+				<key>0</key>
+				<string>Urldate</string>
+				<key>1</key>
+				<string>Author</string>
+				<key>2</key>
+				<string>Title</string>
+			</dict>
+			<key>required</key>
+			<dict/>
 		</dict>
 		<key>inbook</key>
 		<dict>
@@ -416,6 +429,7 @@
 			<string>techreport</string>
 			<string>unpublished</string>
 			<string>url</string>
+			<string>electronic</string>
 		</array>
 		<key>PubMed</key>
 		<array>
