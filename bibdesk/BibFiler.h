@@ -47,7 +47,8 @@ enum {
 	@param		papers The BibItemsfor which linked files should be moved.
 	@param		doc The parent document of the papers. 
 	@param		ask Boolean determines whether to ask the user to proceed or to move only entries with all necessary fields set. 
-	@discussion	-
+	@discussion	This is the main method that should be used to autofile papers.
+It calls the necessary methods to do the move and generates the new locations for the papers. 
 */
 - (void)filePapers:(NSArray *)papers fromDocument:(BibDocument *)doc ask:(BOOL)ask;
 
@@ -59,7 +60,10 @@ enum {
 	@param		paper The BibItem for the linked file.
 	@param		doc The parent document of the paper. 
 	@param		ask Boolean determines to move irrespective of whether all necessary bibliography fields are set.
-	@discussion -
+	@discussion This is the core method to move a file. It should not be called directly, as it relies on the next two methods. 
+It is separately undoable, but only moves that were succesfull are registered for undo. 
+It can handle aliases and symlinks, also when they occur in the middle of the paths. 
+Aliases and symlinks are moved unresolved. Relative paths in symlinks will be made absolute. 
 */
 - (void)movePath:(NSString *)path toPath:(NSString *)newPath forPaper:(BibItem *)paper fromDocument:(BibDocument *)doc moveAll:(BOOL)moveAll;
 
