@@ -72,13 +72,15 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 				return [pub title];
 			}
             
-        }else if([tcID isEqualToString: @"Created"] ){
+        }else if([tcID isEqualToString: BDSKDateAddedString] ||
+				 [tcID isEqualToString: @"Created"] ){
 			NSCalendarDate *date = [pub dateCreated];
 			if(date == nil)
                 return @"";
             return [date descriptionWithCalendarFormat:shortDateFormatString];
             
-        }else if([tcID isEqualToString: @"Modified"] ){
+        }else if([tcID isEqualToString: BDSKDateModifiedString] ||
+				 [tcID isEqualToString: @"Modified"] ){
 			NSCalendarDate *date = [pub dateModified];
 			if(date == nil)
                 return @"";
@@ -113,7 +115,8 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
             else
                 return @"-";
 
-		} else if ([tcID isEqualToString:@"Authors"]) {
+		} else if ([tcID isEqualToString:BDSKAuthorString] ||
+				   [tcID isEqualToString:@"Authors"]) {
 			if ([auths count] > 0) {
 				return [pub bibtexAuthorString];
 			} else {
@@ -122,14 +125,14 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
             
         }else if ([tcID isEqualToString:BDSKLocalUrlString]){
             path = [pub localURLPathRelativeTo:[[self fileName] stringByDeletingLastPathComponent]];
-	    extension = [path pathExtension];
+	        extension = [path pathExtension];
             if(path && [[NSFileManager defaultManager] fileExistsAtPath:path]){
-		if(![extension isEqualToString:@""]){
-		    // use the NSImage method, as it seems to be faster, but only for files with extensions
-		    return [NSImage imageForFileType:extension];
-		} else {
-		    return [[NSWorkspace sharedWorkspace] iconForFile:path];
-		}
+				if(![extension isEqualToString:@""]){
+					// use the NSImage method, as it seems to be faster, but only for files with extensions
+					return [NSImage imageForFileType:extension];
+				} else {
+					return [[NSWorkspace sharedWorkspace] iconForFile:path];
+				}
             }else{
                 return nil;
             }
@@ -141,8 +144,8 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
             }else{
                 return nil;
             }
-	}else if([tcID isEqualToString:@"Type"]){
-	    return [pub type];
+		}else if([tcID isEqualToString:@"Type"]){
+			return [pub type];
         }else{
             // the tableColumn isn't something we handle in a custom way.
             return [pub valueOfField:[tableColumn identifier]];
