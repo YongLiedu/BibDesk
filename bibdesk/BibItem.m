@@ -36,7 +36,8 @@
 
 #import "BibItem.h"
 
-#define addkey(s) if([pubFields objectForKey: s] == nil){[pubFields setObject:@"" forKey: s];} [removeKeys removeObject: s];
+#define addkey(s) if([pubFields objectForKey: s] == nil){[pubFields setObject:[BDSKComplexString complexStringWithString:@""] forKey: s];} [removeKeys removeObject: s];
+
 
 #define isEmptyField(s) ([[[pubFields objectForKey:s] stringValue] isEqualToString:@""])
 
@@ -213,9 +214,9 @@ void _setupFonts(){
 }
 
 - (void)dealloc{
-#ifdef DEBUG
+//#ifdef DEBUG
     NSLog([NSString stringWithFormat:@"bibitem Dealloc, rt: %d", [self retainCount]]);
-#endif
+//#endif
     [[self undoManager] removeAllActionsWithTarget:self];
     [pubFields release];
     [requiredFieldNames release];
@@ -735,6 +736,7 @@ void _setupFonts(){
 }
 
 - (void)setField:(NSString *)key toValue:(NSString *)value withModDate:(NSCalendarDate *)date{
+    
 	if ([self undoManager]) {
 		id oldValue = [pubFields objectForKey:key usingLock:bibLock];
 		NSCalendarDate *oldModDate = [self dateModified];
@@ -963,18 +965,27 @@ void _setupFonts(){
     [s appendString:@"{"];
     [s appendString:[self citeKey]];
     while(k = [e nextObject]){
-        // Get TeX version of each field.
-	// Don't run the converter on Local-Url or Url fields, so we don't trash ~ and % escapes.
-	// Note that NSURLs comply with RFC 2396, and can't contain high-bit characters anyway.
-	if([k isEqualToString:BDSKLocalUrlString] || [k isEqualToString:BDSKUrlString]){
-	    v = [pubFields objectForKey:k];
-	} else {
-	    v = [[BDSKConverter sharedConverter] stringByTeXifyingString:[pubFields objectForKey:k]];
-	}
-	
+        
+        v = [pubFields objectForKey:k];
+        
+        NSString *valString;
+        
+        if([v isKindOfClass:[BDSKComplexString class]] && [v isComplex]){
+            valString = [v nodesAsBibTeXString];
+        }else{    
+            // Don't run the converter on Local-Url or Url fields, so we don't trash ~ and % escapes.
+            // Note that NSURLs comply with RFC 2396, and can't contain high-bit characters anyway.
+            if(![k isEqualToString:BDSKLocalUrlString] &&
+               ![k isEqualToString:BDSKUrlString]){
+                v = [[BDSKConverter sharedConverter] stringByTeXifyingString:v];
+            }
+            valString = [NSString stringWithFormat:@"{%@}", v];
+        }
+        
         if(![v isEqualToString:@""]){
             [s appendString:@",\n\t"];
-            [s appendFormat:@"%@ = {%@}",k,v];
+            [s appendFormat:@"%@ = ",k];
+            [s appendString:valString];
         }
     }
     [s appendString:@"}"];
@@ -1098,27 +1109,33 @@ void _setupFonts(){
 }
 
 - (NSString *)localURLPathRelativeTo:(NSString *)base{
-    NSURL *local = nil;
-    NSString *lurl = [self valueOfField:BDSKLocalUrlString];
-
-    if (!lurl || [lurl isEqualToString:@""]) return nil;
-
-    if(base &&
-       ![lurl containsString:@"file://"] &&
-       ![[lurl substringWithRange:NSMakeRange(0,1)] isEqualToString:@"/"] &&
-       ![[lurl substringWithRange:NSMakeRange(0,1)] isEqualToString:@"~"]){
-        lurl = [base stringByAppendingPathComponent:lurl];
-    }
-
+    NSURL *localURL = nil;
+    NSString *localURLFieldValue = [self valueOfField:BDSKLocalUrlString];
     
-    if(![@"" isEqualToString:lurl]){
-        local = [NSURL URLWithString:lurl];
-        return [[local path] stringByExpandingTildeInPath];
+    if (!localURLFieldValue || [localURLFieldValue isEqualToString:@""]) return nil;
+        
+    if(![localURLFieldValue containsString:@"file://"]){
+        // the local-url isn't already a file: url.
+        if(base && 
+           ![[localURLFieldValue substringWithRange:NSMakeRange(0,1)] isEqualToString:@"/"] &&
+           ![[localURLFieldValue substringWithRange:NSMakeRange(0,1)] isEqualToString:@"~"]){
+            
+            // it's a relative path and we can prepend base to it.
+            localURLFieldValue = [base stringByAppendingPathComponent:localURLFieldValue];
+
+        }else{
+            // Ignore base if we had a full path to begin with.
+            // make sure we remove ~. If the string started with /, this is still OK.
+            localURLFieldValue = [localURLFieldValue stringByExpandingTildeInPath];
+        }
+
+        localURL = [NSURL fileURLWithPath:localURLFieldValue];
     }else{
-        local = nil;
-        return lurl;
+        // it's already a file: url and we can just build it 
+        localURL = [NSURL URLWithString:localURLFieldValue];
     }
 
+    return [[localURL path] stringByExpandingTildeInPath];
 }
 
 - (NSString *)suggestedLocalUrl{
