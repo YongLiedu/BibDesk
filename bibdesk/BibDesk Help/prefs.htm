@@ -23,6 +23,7 @@ To change your preferences, choose "Preferences" from the "Bibdesk" menu, or pre
 <ul>
 <li><a href="#general">General</a> - Change what Bibdesk does when starting up, such as opening specific files, as well as overall appearance.</li>
 <li><a href="#citation">Citation</a> - Set what you get when copying or dragging citations to other apps.</li>
+<li><a href="#files">Files</a> - Set preferences for opening and saving files.</li>
 <li><a href="#preview">Preview</a> - Change the default settings for using LaTeX in the typeset preview window.</li>
 <li><a href="#defaults">Defaults</a> - Add fields that Bibdesk will add to every entry.</li>
 <li><a href="#rss">RSS</a> - Configure syndication settings.</li>
@@ -66,6 +67,31 @@ This panel controls what BibDesk does when it starts up. Clicking the &#8216;Ope
 
 <p><font size="-1" face="Lucida Grande,Geneva,Arial">
 <em>Pasting and dragging in</em>: &#8216;Open edit window when paste/dragging in&#8217; lets you decide whether to always immediately open the edit window for an item you have pasted or dragged in.
+</font></p>
+
+<p><font size="+1"  face="Lucida Grande,Helvetica,Geneva"><b>
+<a name="files"></a>Files
+</b></font></p>
+
+<img src="gfx/filesPrefs.png" alt="">
+
+<p><font size="-1" face="Lucida Grande,Geneva,Arial">
+<em>Default string encoding for opening and exporting BibTeX files</em>: This popup menu allows you to select the <a href="./charencoding.htm">encoding</a> used to open files by double-clicking on them in the Finder.
+</p>
+<p>
+<em>Specific notes and warnings:</em>
+<ul>
+<li>Files that are opened as ASCII will be run through the <a href="./charconvert.htm">character conversion</a> process so that accented characters display properly.  This is the default behavior in BibDesk 0.97.2 and earlier versions.</li>
+<li>Files opened with a given encoding will be saved with that encoding.  To save with an alternate encoding, choose the "File->Export->Export BibTeX With Encoding..." menu option and select a particular encoding.  Characters will only be converted to TeX when saving as ASCII files; otherwise, they are written out as displayed in BibDesk.</li>
+</ul>
+</p>
+<p>
+<em>Reading BibTeX Files</em>:  This selects the internal parser to use when reading a BibTeX file.  If you experience errors with the ASCII/TeX parser, try the Unicode parser.  <b>The Unicode parser is an experimental feature: use at your own risk!</b>
+<ul>
+<li>For most reliable error checking, select "Read as TeX in above encoding"</li>
+<li>For non-ASCII encoded files, select "Read as Unicode TeX"</li>
+</ul>
+The parser choice applies regardless of the encoding chosen, and cannot be set on a per-file basis.  The parser used in BibDesk 0.97.2 and earlier versions is a true parser, while the Unicode one is an ad-hoc implementation developed by the BibDesk team.  We hope that user feedback will help improve the Unicode parser so that it can become the standard for BibDesk.
 </font></p>
 
 <p><font size="+1"  face="Lucida Grande,Helvetica,Geneva"><b>
