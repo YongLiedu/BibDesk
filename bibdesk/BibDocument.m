@@ -233,7 +233,6 @@ NSString*   LocalDragPasteboardName = @"edu.ucsd.cs.mmccrack.bibdesk: Local Publ
 
 - (void)handleBibItemAddDelNotification:(NSNotification *)notification{
 	NSDictionary *userInfo = [notification userInfo];
-	BibItem *pub = [userInfo objectForKey:@"pub"];
 	BOOL wasLastRequest = [[userInfo objectForKey:@"lastRequest"] isEqualToString:@"YES"];
 
 	if(wasLastRequest){
@@ -1707,15 +1706,8 @@ int generalBibItemCompareFunc(id item1, id item2, void *context){
 
 
 - (NSEnumerator *)selectedPubEnumerator{
-    NSEnumerator *rowE = nil;
-    id rowIndex = nil;
-    id rowItem = nil;
-    NSMutableArray *items = nil;
-    NSEnumerator *childE = nil;
-    id child = nil;
     id item = nil;
     NSEnumerator *itemsE = nil;
-    int index;
     NSMutableArray *itemIndexes = [NSMutableArray arrayWithCapacity:10];
     
 	// selectedRowEnum has to check sortDescending.. : ->
