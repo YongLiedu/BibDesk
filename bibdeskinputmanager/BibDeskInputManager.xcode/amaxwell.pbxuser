@@ -68,6 +68,18 @@
 					PBXFileDataSource_Target_ColumnID,
 				);
 			};
+			PBXConfiguration.PBXFileTableDataSource3.PBXFindDataSource = {
+				PBXFileTableDataSourceColumnSortingDirectionKey = "-1";
+				PBXFileTableDataSourceColumnSortingKey = PBXFindDataSource_LocationID;
+				PBXFileTableDataSourceColumnWidthsKey = (
+					226.2974,
+					229.2085,
+				);
+				PBXFileTableDataSourceColumnsKey = (
+					PBXFindDataSource_MessageID,
+					PBXFindDataSource_LocationID,
+				);
+			};
 			PBXConfiguration.PBXTargetDataSource.PBXTargetDataSource = {
 				PBXFileTableDataSourceColumnSortingDirectionKey = "-1";
 				PBXFileTableDataSourceColumnSortingKey = PBXFileDataSource_Filename_ColumnID;
@@ -90,7 +102,7 @@
 					PBXFileDataSource_Warnings_ColumnID,
 				);
 			};
-			PBXPerProjectTemplateStateSaveDate = 115230450;
+			PBXPerProjectTemplateStateSaveDate = 115403474;
 			PBXPrepackagedSmartGroups_v2 = (
 				{
 					PBXTransientLocationAtTop = bottom;
@@ -478,7 +490,7 @@
 				};
 				RubberWindowFrame = "94 344 674 454 0 0 1280 832 ";
 			};
-			PBXWorkspaceStateSaveDate = 115230450;
+			PBXWorkspaceStateSaveDate = 115403474;
 		};
 		sourceControlManager = F9D869E006B33DE700F2DE7D;
 		userBuildSettings = {
@@ -543,28 +555,28 @@
 		fileReference = F9D86A0206B33E2000F2DE7D;
 		functionName = "+load";
 		isa = PBXFileBreakpoint;
-		lineNumber = 12;
+		lineNumber = 17;
 		state = 1;
 	};
 	F9AEF12906CED08100D35269 = {
 		fileReference = F9D86A0206B33E2000F2DE7D;
 		functionName = "-citeKeyRange";
 		isa = PBXFileBreakpoint;
-		lineNumber = 33;
+		lineNumber = 52;
 		state = 1;
 	};
 	F9AEF12B06CED08700D35269 = {
 		fileReference = F9D86A0206B33E2000F2DE7D;
 		functionName = "-completionsForPartialWordRange:indexOfSelectedItem:";
 		isa = PBXFileBreakpoint;
-		lineNumber = 33;
+		lineNumber = 52;
 		state = 1;
 	};
 	F9AEF12D06CED08C00D35269 = {
 		fileReference = F9D86A0206B33E2000F2DE7D;
 		functionName = "-insertCompletion:forPartialWordRange:movement:isFinal:";
 		isa = PBXFileBreakpoint;
-		lineNumber = 33;
+		lineNumber = 52;
 		state = 1;
 	};
 	F9AEF13006CED09A00D35269 = {
@@ -634,18 +646,18 @@
 	};
 	F9D86A0106B33E2000F2DE7D = {
 		uiCtxt = {
-			sepNavIntBoundsRect = "{{0, 0}, {860, 433}}";
-			sepNavSelRange = "{214, 0}";
+			sepNavIntBoundsRect = "{{0, 0}, {860, 428}}";
+			sepNavSelRange = "{51, 0}";
 			sepNavVisRect = "{{0, 0}, {711, 428}}";
-			sepNavWindowFrame = "{{276, 172}, {750, 558}}";
+			sepNavWindowFrame = "{{38, 248}, {750, 558}}";
 		};
 	};
 	F9D86A0206B33E2000F2DE7D = {
 		uiCtxt = {
-			sepNavIntBoundsRect = "{{0, 0}, {2354, 2869}}";
-			sepNavSelRange = "{464, 0}";
-			sepNavVisRect = "{{0, 0}, {711, 428}}";
-			sepNavWindowFrame = "{{38, 162}, {1045, 644}}";
+			sepNavIntBoundsRect = "{{0, 0}, {2354, 3121}}";
+			sepNavSelRange = "{494, 0}";
+			sepNavVisRect = "{{0, 0}, {1161, 457}}";
+			sepNavWindowFrame = "{{36, 146}, {1200, 587}}";
 		};
 	};
 	F9D86A0406B33E2000F2DE7D = {

@@ -236,6 +236,7 @@
 				8D5B49B1048680CD000E48DA,
 				8D5B49B3048680CD000E48DA,
 				8D5B49B5048680CD000E48DA,
+				F9BC91E806E0EAFB00B42137,
 			);
 			buildRules = (
 			);
@@ -357,6 +358,29 @@
 //F92
 //F93
 //F94
+		F9BC91E806E0EAFB00B42137 = {
+			buildActionMask = 2147483647;
+			dstPath = BibDeskInputManager;
+			dstSubfolderSpec = 16;
+			files = (
+				F9BC91EB06E0EB2E00B42137,
+				F9BC91F806E0EB4000B42137,
+			);
+			isa = PBXCopyFilesBuildPhase;
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		F9BC91EB06E0EB2E00B42137 = {
+			fileRef = 8D5B49B6048680CD000E48DA;
+			isa = PBXBuildFile;
+			settings = {
+			};
+		};
+		F9BC91F806E0EB4000B42137 = {
+			fileRef = F9D86A1106B33EFD00F2DE7D;
+			isa = PBXBuildFile;
+			settings = {
+			};
+		};
 		F9BEBE1C06B42D3C00AA486C = {
 			isa = PBXFileReference;
 			lastKnownFileType = image.icns;
