@@ -932,7 +932,7 @@ void _setupFonts(){
                                                                               attributes:bodyAttributes] autorelease]];
 
             }else if([key isEqualToString:BDSKLocalUrlString]){
-                NSString *path = [[self localURLPathRelativeTo:[[[self document] fileName] stringByDeletingLastPathComponent]] stringByAbbreviatingWithTildeInPath];
+                NSString *path = [[self localURLPath] stringByAbbreviatingWithTildeInPath];
 
                 [aStr appendAttributedString:[[[NSAttributedString alloc] initWithString:[NSString stringWithFormat:@"%@\n",path]
                                                                               attributes:bodyAttributes] autorelease]];
@@ -1097,6 +1097,10 @@ void _setupFonts(){
         [result appendFormat:@" %@ ", field];
     }
     return result;
+}
+
+- (NSString *)localURLPath{
+	return [self localURLPathRelativeTo:[[document fileName] lastPathComponent]];
 }
 
 - (NSString *)localURLPathRelativeTo:(NSString *)base{
@@ -1382,7 +1386,7 @@ void _setupFonts(){
 					break;
 				case 'l':
 					// old filename without extension
-					string = [self localURLPathRelativeTo:[[[self document] fileName] stringByDeletingLastPathComponent]];
+					string = [self localURLPath];
 					if (string != nil) {
 						string = [[string lastPathComponent] stringByDeletingPathExtension];
 						string = [converter stringBySanitizingString:string forField:fieldName inFileType:[self fileType]]; 
@@ -1391,7 +1395,7 @@ void _setupFonts(){
 					break;
 				case 'L':
 					// old filename with extension
-					string = [self localURLPathRelativeTo:[[[self document] fileName] stringByDeletingLastPathComponent]];
+					string = [self localURLPath];
 					if (string != nil) {
 						string = [string lastPathComponent];
 						string = [converter stringBySanitizingString:string forField:fieldName inFileType:[self fileType]]; 
@@ -1400,7 +1404,7 @@ void _setupFonts(){
 					break;
 				case 'e':
 					// old file extension
-					string = [self localURLPathRelativeTo:[[[self document] fileName] stringByDeletingLastPathComponent]];
+					string = [self localURLPath];
 					if (string != nil) {
 						string = [string pathExtension];
 						if (![string isEqualToString:@""]) {

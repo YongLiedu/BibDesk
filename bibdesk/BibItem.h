@@ -323,6 +323,14 @@
 - (NSString *)allFieldsString; 
 
 /*!
+    @method     localURLPath
+    @abstract   Calls localURLPathRelativeTo: with the path to the document.
+    @discussion -
+    @result     a complete path with no tildes, or nil if an error occurred.
+*/
+- (NSString *)localURLPath; 
+
+/*!
     @method     localURLPathRelativeTo:
     @abstract   attempts to return a path to the local-url file, relative to the base parameter
     @discussion If the local-url field is a relative path, this will prepend base to it and return the path from building a URL with the result. If the value of local-url is a valid file url already, base is ignored. Base is also ignored if the value of local-url is an absolute path or has a tilde.

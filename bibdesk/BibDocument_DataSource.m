@@ -125,7 +125,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 			}										
             
         }else if ([tcID isEqualToString:BDSKLocalUrlString]){
-            path = [pub localURLPathRelativeTo:[[self fileName] stringByDeletingLastPathComponent]];
+            path = [pub localURLPath];
 	        extension = [path pathExtension];
             if(path && [[NSFileManager defaultManager] fileExistsAtPath:path]){
 				if(![extension isEqualToString:@""]){
@@ -311,7 +311,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
         i = [rows objectAtIndex:0];
         sortedIndex = (sortDescending ? shownCount - 1 - [i intValue] : [i intValue]);
         pub = [shownPublications objectAtIndex:sortedIndex];
-        NSString *path = [pub localURLPathRelativeTo:nil];
+        NSString *path = [pub localURLPath];
         if(path != nil){
             yn = [pboard writeFileContents:path];
             [pboard setPropertyList:[NSArray arrayWithObject:path] forType:NSFilenamesPboardType];

@@ -40,7 +40,7 @@ static BDSKFileContentsFilter *_sharedFileContentsFilter = nil;
 - (void)indexFilesFromDocument:(BibDocument *)doc{
 	NSArray *pubs = [doc publications];
 	foreach(pub, pubs){
-		NSString *path = [pub localURLPathRelativeTo:[[doc fileName] stringByDeletingLastPathComponent]];
+		NSString *path = [pub localURLPath];
 		if(path){
 			NSURL *url = [NSURL fileURLWithPath:path];
 			[self indexFileAtURL:url fromPub:pub inDocument:doc];

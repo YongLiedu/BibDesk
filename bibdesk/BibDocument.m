@@ -1885,7 +1885,6 @@ int generalBibItemCompareFunc(id item1, id item2, void *context){
     NSFileWrapper *fw = nil;
     NSTextAttachment *att = nil;
     NSFileManager *dfm = [NSFileManager defaultManager];
-    NSString *docPath = [[self fileName] stringByDeletingLastPathComponent];
     NSString *pubPath = nil;
     NSMutableAttributedString *body = [[NSMutableAttributedString alloc] init];
     NSMutableArray *files = [NSMutableArray array];
@@ -1899,7 +1898,7 @@ int generalBibItemCompareFunc(id item1, id item2, void *context){
     
     while (i = [e nextObject]) {
         pub = [shownPublications objectAtIndex:[i intValue]];
-        pubPath = [pub localURLPathRelativeTo:docPath];
+        pubPath = [pub localURLPath];
        
         if([dfm fileExistsAtPath:pubPath]){
             [files addObject:pubPath];
@@ -1947,7 +1946,7 @@ int generalBibItemCompareFunc(id item1, id item2, void *context){
     }
     if([colID isEqualToString:BDSKLocalUrlString]){
         pub = [shownPublications objectAtIndex:sortedRow];
-        [[NSWorkspace sharedWorkspace] openFile:[pub localURLPathRelativeTo:[[self fileName] stringByDeletingLastPathComponent]]];
+        [[NSWorkspace sharedWorkspace] openFile:[pub localURLPath]];
     }else if([colID isEqualToString:BDSKUrlString]){
         pub = [shownPublications objectAtIndex:sortedRow];
         [[NSWorkspace sharedWorkspace] openURL:[NSURL URLWithString:[pub valueOfField:BDSKUrlString]]];
