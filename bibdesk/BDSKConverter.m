@@ -35,7 +35,15 @@ static NSCharacterSet *SkipSet;
     highCharRange.length = 256; //this should get all the characters in the upper-range.
     workingSet = [[NSCharacterSet decomposableCharacterSet] mutableCopy];
     [workingSet addCharactersInRange:highCharRange];
-    [workingSet addCharactersInString:@"пя"]; // special case for en-dash and em-dash (we do one-way conversion only)
+
+    // Build a dictionary of one-way conversions that we know how to do, then add these to the character set
+    NSDictionary *oneWayCharacters = [WholeDict objectForKey:@"One-Way Conversions"];
+    NSEnumerator *e = [oneWayCharacters keyEnumerator];
+    NSString *oneWayKey;
+      while(oneWayKey = [e nextObject]){
+	  [workingSet addCharactersInString:oneWayKey];
+      }
+
     FinalCharSet = [workingSet copy];
     [workingSet release];
 	
@@ -61,7 +69,8 @@ static NSCharacterSet *SkipSet;
 
     // get the dictionary
     if(!WholeDict)[self loadDict];
-    NSDictionary *conversions = [WholeDict objectForKey:@"Roman to TeX"];
+    NSMutableDictionary *conversions = [WholeDict objectForKey:@"Roman to TeX"];
+    [conversions addEntriesFromDictionary:[WholeDict objectForKey:@"One-Way Conversions"]];
     if(!conversions){
         conversions = [NSDictionary dictionary]; // an empty one won't break the code.
     }
