@@ -62,7 +62,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 	
 	// stuff for the accessory view for open text encoding 
 	IBOutlet NSView *openTextEncodingAccessoryView;
-	IBOutlet NSButton *openTextEncodingPopupButton;
+	IBOutlet NSPopUpButton *openTextEncodingPopupButton;
     
     IBOutlet NSTextView* readmeTextView;
     IBOutlet NSWindow* readmeWindow;

@@ -183,6 +183,10 @@ NSString* BDSKBibTeXStringPboardType = @"edu.ucsd.cs.mmcrack.bibdesk: Local BibT
 	[[cornerViewButton cell] setRefreshesMenu:NO];
 		
 	[cornerViewButton setMenu:columnsMenu];
+        
+        [saveTextEncodingPopupButton removeAllItems];
+        [saveTextEncodingPopupButton addItemsWithTitles:[[[NSApp delegate] encodingDefinitionDictionary] objectForKey:@"DisplayNames"]];
+
 }
 
 
@@ -489,34 +493,9 @@ NSString* BDSKBibTeXStringPboardType = @"edu.ucsd.cs.mmcrack.bibdesk: Local BibT
         }else if([fileType isEqualToString:@"html"]){
             fileData = [self dataRepresentationOfType:@"HTML"];
         }else if([fileType isEqualToString:@"bib"]){
-            int encodingTag = [saveTextEncodingPopupButton selectedTag];
-
-		switch(encodingTag){
-
-                    case 1:
-                        // ISO Latin 1
-                        encoding = NSISOLatin1StringEncoding;
-                        break;
-                        
-                    case 2:
-                        // ISO Latin 2
-                        encoding = NSISOLatin2StringEncoding;
-                        
-                    case 3:
-                        // UTF 8
-                        encoding = NSUTF8StringEncoding;
-                        break;
-                    case 4:
-                        // MacRoman
-                        encoding = NSMacOSRomanStringEncoding;
-                        break;
-                        
-                    default:
-                        encoding = NSASCIIStringEncoding;
-                        
-		}
-            
-                fileData = [self bibTeXDataWithEncoding:encoding];
+            int index = [saveTextEncodingPopupButton indexOfSelectedItem];
+            NSStringEncoding encoding = [[[[[NSApp delegate] encodingDefinitionDictionary] objectForKey:@"StringEncodings"] objectAtIndex:index] intValue];
+            fileData = [self bibTeXDataWithEncoding:encoding];
         }
         [fileData writeToFile:fileName atomically:YES];
     }
@@ -665,6 +644,15 @@ stringByAppendingPathComponent:@"BibDesk"]; */
     NSMutableString *templateFile = [NSMutableString stringWithContentsOfFile:[[[OFPreferenceWrapper sharedPreferenceWrapper] stringForKey:BDSKOutputTemplateFileKey] stringByExpandingTildeInPath]];
 
     [templateFile appendFormat:@"\n%%%% Created for %@ at %@ \n\n", NSFullUserName(), [NSCalendarDate calendarDate]];
+
+    NSArray *encodingsArray = [[[NSApp delegate] encodingDefinitionDictionary] objectForKey:@"StringEncodings"];
+    NSArray *encodingNames = [[[NSApp delegate] encodingDefinitionDictionary] objectForKey:@"DisplayNames"];
+    
+    NSAssert ( [self documentStringEncoding] != nil, @"Document does not have a specified string encoding." );
+
+    NSString *encodingName = [encodingNames objectAtIndex:[encodingsArray indexOfObject:[NSNumber numberWithInt:[self documentStringEncoding]]]];
+
+    [templateFile appendFormat:@"\n%%%% Saved with string encoding %@ \n\n", encodingName];
     
     [d appendData:[templateFile dataUsingEncoding:NSASCIIStringEncoding allowLossyConversion:YES]];
     [d appendData:[frontMatter dataUsingEncoding:NSASCIIStringEncoding allowLossyConversion:YES]];
@@ -820,6 +808,8 @@ stringByAppendingPathComponent:@"BibDesk"]; */
         filePath = @"Untitled Document";
     }
     dictionary = [NSMutableDictionary dictionaryWithCapacity:10];
+    
+    [self setDocumentStringEncoding:encoding];
 
     // to enable some cheapo timing, uncomment these:
 //    NSDate *start = [NSDate date];

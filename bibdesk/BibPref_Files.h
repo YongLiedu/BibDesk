@@ -14,6 +14,8 @@
     IBOutlet NSMatrix *exportBibTeXAutomaticallyRadio;
     IBOutlet NSPopUpButton *encodingPopUp;
     IBOutlet NSMatrix *defaultParserRadio;
+    NSArray *encodingsArray;
+    NSArray *encodingNames;
 }
 
 - (IBAction)setExportBibTeXAutomatically:(id)sender;

@@ -153,6 +153,20 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
     return self;
 }
 
+- (NSDictionary *)encodingDefinitionDictionary{
+    NSArray *displayNames = [NSArray arrayWithObjects:@"ASCII (TeX)", @"NEXTSTEP", @"Japanese EUC", @"UTF-8", @"ISO Latin 1", @"Non-lossy ASCII",
+        @"ISO Latin 2", @"Unicode", @"Cyrillic", @"Windows Latin 1", @"Greek", @"Turkish", @"Windows Latin 2", @"Mac OS Roman", nil];
+    NSArray *encodings = [NSArray arrayWithObjects:[NSNumber numberWithInt:NSASCIIStringEncoding], [NSNumber numberWithInt:NSNEXTSTEPStringEncoding],
+        [NSNumber numberWithInt:NSJapaneseEUCStringEncoding], [NSNumber numberWithInt:NSUTF8StringEncoding], [NSNumber numberWithInt:NSISOLatin1StringEncoding],
+        [NSNumber numberWithInt:NSNonLossyASCIIStringEncoding], [NSNumber numberWithInt:NSISOLatin2StringEncoding], [NSNumber numberWithInt:NSUnicodeStringEncoding],
+        [NSNumber numberWithInt:NSWindowsCP1251StringEncoding], [NSNumber numberWithInt:NSWindowsCP1252StringEncoding], [NSNumber numberWithInt:NSWindowsCP1253StringEncoding],
+        [NSNumber numberWithInt:NSWindowsCP1254StringEncoding], [NSNumber numberWithInt:NSWindowsCP1250StringEncoding], [NSNumber numberWithInt:NSMacOSRomanStringEncoding], nil];
+    
+    NSAssert( [displayNames count] == [encodings count], @"Number of encoding names displayed does not match number of string encodings defined" );
+    
+    return [NSDictionary dictionaryWithObjectsAndKeys:displayNames, @"DisplayNames", encodings, @"StringEncodings", nil];
+}
+
 - (void)dealloc
 {
     [[NSNotificationCenter defaultCenter] removeObserver:self];
@@ -184,6 +198,8 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
         [newMenu release];
         [[NSApp mainMenu] insertItem:scriptItem atIndex:[[NSApp mainMenu] indexOfItemWithTitle:@"Help"]];
         [scriptItem release];
+        [openTextEncodingPopupButton removeAllItems];
+        [openTextEncodingPopupButton addItemsWithTitles:[[self encodingDefinitionDictionary] objectForKey:@"DisplayNames"]];
 
 }
 
@@ -255,32 +271,9 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 	if (result == NSOKButton) {
 
         NSString *fileToOpen = [oPanel filename];
-		int tag = [openTextEncodingPopupButton selectedTag];
-		
-		switch(tag){
-			case 1:
-				// ISO Latin 1
-				[self openFile:fileToOpen withEncoding:NSISOLatin1StringEncoding];
-				break;
-
-			case 2:
-				// ISO Latin 2
-				[self openFile:fileToOpen withEncoding:NSISOLatin2StringEncoding];
-				
-			case 3:
-				// UTF 8
-				[self openFile:fileToOpen withEncoding:NSUTF8StringEncoding];
-				break;
-			case 4:
-				// MacRoman
-				[self openFile:fileToOpen withEncoding:NSMacOSRomanStringEncoding];
-				break;
-
-			default:
-				[super openDocumentWithContentsOfFile:fileToOpen display:YES];
-				
-		}
-		
+		int index = [openTextEncodingPopupButton indexOfSelectedItem];
+                NSStringEncoding encoding = [[[[self encodingDefinitionDictionary] objectForKey:@"StringEncodings"] objectAtIndex:index] intValue];
+                [self openFile:fileToOpen withEncoding:encoding];		
 	}
 	
 }
