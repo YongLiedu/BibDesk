@@ -1569,9 +1569,21 @@ int generalBibItemCompareFunc(id item1, id item2, void *context){
 - (void)handleBibItemChangedNotification:(NSNotification *)notification{
 	// dead simple for now
 	NSLog(@"got handleBibItemChangedNotification with userinfo %@", [notification userInfo]);
-	[self updateUI];
+	NSDictionary *userInfo = [notification userInfo];
+	
+	NSString *changedKey = [userInfo objectForKey:@"key"];
+		
+	if([quickSearchKey isEqualToString:changedKey] || 
+	   [quickSearchKey isEqualToString:@"All Fields"]){
+		if(BDSK_USING_JAGUAR){
+			[self searchFieldAction:searchFieldTextField];
+		}else{
+			[self searchFieldAction:searchField];
+		}
+	}
 	// should: check if we're sorting by the key that was changed and resort
 	// should: also check if we're filtering by the key that was changed and refilter.
+	
 }
 
 - (void)displayPreviewForItems:(NSEnumerator *)enumerator{
