@@ -165,7 +165,8 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
         writeRows:(NSArray*)rows
      toPasteboard:(NSPasteboard*)pboard{
     OFPreferenceWrapper *sud = [OFPreferenceWrapper sharedPreferenceWrapper];
-    BOOL yn;
+    BOOL yn = NO;
+	BOOL lyn = NO;
 	NSString *startCiteBracket = [sud stringForKey:BDSKCiteStartBracketKey]; 
 	NSString *startCite = [NSString stringWithFormat:@"\\%@%@",[sud stringForKey:BDSKCiteStringKey], startCiteBracket];
 	NSString *endCiteBracket = [sud stringForKey:BDSKCiteEndBracketKey]; 
@@ -233,11 +234,12 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
         [pboard declareTypes:[NSArray arrayWithObject:NSPDFPboardType] owner:nil];
         yn = [pboard setData:[PDFpreviewer PDFDataFromString:s] forType:NSPDFPboardType];
     }else if (dragType == 3){
-	[pboard declareTypes:[NSArray arrayWithObject:NSRTFPboardType] owner:nil];
+		[pboard declareTypes:[NSArray arrayWithObject:NSRTFPboardType] owner:nil];
         yn = [pboard setData:[PDFpreviewer rtfDataPreview] forType:NSRTFPboardType];
     }
     [localDragPboard declareTypes:[NSArray arrayWithObject:NSStringPboardType] owner:nil];
-    return yn = [localDragPboard setString:localPBString forType:NSStringPboardType];
+    lyn = [localDragPboard setString:localPBString forType:NSStringPboardType];
+    return yn && lyn;
 
 }
 
