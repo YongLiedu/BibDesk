@@ -1076,8 +1076,8 @@ int generalBibItemCompareFunc(id item1, id item2, void *context){
 - (void)editPub:(BibItem *)pub forceChange:(BOOL)force{
     BibEditor *e = [pub editorObj];
     if(e == nil){
-        e = [[BibEditor alloc] initWithBibItem:pub
-                                andBibDocument:self];
+        e = [[BibEditor alloc] initWithBibItem:pub];
+		[e setDocument:self];
         //       e = [[BDSKMultiEditor alloc] initWithBibItems:[NSArray arrayWithObjects:pub,nil] andBibDocument:self];
         [bibEditors addObject:[e autorelease]];// we need to keep track of the bibeditors
     }
