@@ -29,4 +29,13 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
     @param      aString (description)
 */
 + (NSString *)lossyASCIIStringWithString:(NSString *)aString;
+
+/*!
+    @method     stringByRemovingCurlyBraces
+    @abstract   Removes curly braces from a string
+    @discussion Used for searching; removes curly braces from search results, so that a search for "Kynch theory" works even if the title has "{K}ynch theory"
+    @result     (description)
+*/
+- (NSString *)stringByRemovingCurlyBraces;
+
 @end

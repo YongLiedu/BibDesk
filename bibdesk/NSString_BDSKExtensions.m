@@ -154,4 +154,13 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
                                   encoding:NSASCIIStringEncoding] autorelease];
 }
 
+- (NSString *)stringByRemovingCurlyBraces{
+    NSMutableString *mStr = [self mutableCopy];
+    
+    [mStr replaceOccurrencesOfString:@"{" withString:@"" options:nil range:NSMakeRange(0, [mStr length])];
+    [mStr replaceOccurrencesOfString:@"}" withString:@"" options:nil range:NSMakeRange(0, [mStr length])];
+    
+    return [mStr autorelease];
+}
+
 @end
