@@ -56,12 +56,14 @@
 
 - (void)setImage:(NSImage *)anImage
 {
-	[buttonCell setImage:anImage];
+	if (anImage != nil) 
+		[buttonCell setImage:anImage];
 }
 
 - (void)setAlternateImage:(NSImage *)anImage
 {
-	[buttonCell setAlternateImage:anImage];
+	if (anImage != nil) 
+		[buttonCell setAlternateImage:anImage];
 }
 
 - (void)setBordered:(BOOL)flag
