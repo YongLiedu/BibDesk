@@ -23,6 +23,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 #import "BibAppController.h"
 #import "BDSKUndoManager.h"
 #import "RYZImagePopUpButtonCell.h"
+#import "MultiplePageView.h"
 
 #include <stdio.h>
 char * InputFilename; // This is here because the btparse library can't live without it.
@@ -1750,7 +1751,7 @@ int compareSetLengths(NSSet *set1, NSSet *set2, void *context){
     NSMutableString *bibString = [NSMutableString stringWithString:@""];
     NSEnumerator *e = [self selectedPubEnumerator];
         
-	[previewField setString:@""];
+	//[previewField setString:@""];
 	if([self numberOfSelectedPubs] == 0){
 		//   [editPubButton setEnabled:NO];
 		//  [delPubButton setEnabled:NO];
@@ -2629,7 +2630,7 @@ This method always returns YES. Even if some or many operations fail.
     while(i = [enumerator nextObject]){
 
         switch([[OFPreferenceWrapper sharedPreferenceWrapper] integerForKey:BDSKPreviewDisplayKey]){
-            case 0:
+            case 0:                
                 itemCount++;
                 [previewField replaceCharactersInRange:[previewField selectedRange]
                                                withRTF:[[shownPublications objectAtIndex:[i intValue]] RTFValue]];
@@ -2882,7 +2883,52 @@ This method always returns YES. Even if some or many operations fail.
 #pragma mark Printing support
 
 - (NSView *)printableView{
-	return previewField; // random hack for now. - this will only print the selected items.
+    return previewField; // random hack for now. - this will only print the selected items.
+    
+/// code for splitting it into pages
+    MultiplePageView *pagesView = [[MultiplePageView alloc] init];
+    [pagesView setPrintInfo:[self printInfo]];
+    NSTextStorage *textStorage = [[[NSTextStorage alloc] initWithAttributedString:[previewField textStorage]] autorelease];
+    NSLayoutManager *lm = [[NSLayoutManager alloc] init];
+    [textStorage addLayoutManager:lm];
+    [lm release];
+    
+    unsigned numberOfPages = [tableView numberOfSelectedRows];
+    [pagesView setNumberOfPages:numberOfPages];
+    
+    NSTextContainer *textContainer;
+    NSTextView *textView;
+    
+    while(numberOfPages){
+            
+        textContainer = [[NSTextContainer alloc] initWithContainerSize:NSMakeSize(400,800)];
+        [lm addTextContainer:textContainer];
+            
+        textView = [[NSTextView alloc] initWithFrame:[pagesView documentRectForPageNumber:1] textContainer:textContainer];
+        [textView setHorizontallyResizable:NO];
+        [textView setVerticallyResizable:NO];
+        [pagesView addSubview:textView];
+
+        [textView release];
+        [textContainer release];
+        numberOfPages--;
+    }
+    
+    // force layout before printing
+    unsigned len;
+    unsigned loc = INT_MAX;
+    if (loc > 0 && (len = [textStorage length]) > 0) {
+        NSRange glyphRange;
+        if (loc >= len) loc = len - 1;
+        /* Find out which glyph index the desired character index corresponds to */
+        glyphRange = [lm glyphRangeForCharacterRange:NSMakeRange(loc, 1) actualCharacterRange:NULL];
+        if (glyphRange.location > 0) {
+            /* Now cause layout by asking a question which has to determine where the glyph is */
+            (void)[lm textContainerForGlyphAtIndex:glyphRange.location - 1 effectiveRange:NULL];
+        }
+    }
+    
+    return [pagesView autorelease];
 }
 
 - (void)printShowingPrintPanel:(BOOL)showPanels {
