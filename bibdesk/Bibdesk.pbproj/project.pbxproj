@@ -150,6 +150,8 @@
 		};
 		2A37F4ABFDCFA73011CA2CEA = {
 			children = (
+				F58886D503ABF2D601A80167,
+				F58886D603ABF2D601A80167,
 				F522132B0238508E01EF0AD7,
 				F522132C0238508E01EF0AD7,
 				F5084A4802D954C801C8CAB4,
@@ -242,6 +244,7 @@
 				F5AD2CBE03970F0401A80164,
 				F5A86D2003976CDF01A80164,
 				F5A86D8F0398EAB601A80164,
+				F58886DB03ABFA7101A80167,
 			);
 			isa = PBXGroup;
 			name = Resources;
@@ -359,7 +362,7 @@
 	<key>CFBundleExecutable</key>
 	<string>Bibdesk</string>
 	<key>CFBundleGetInfoString</key>
-	<string>version 0.80 beta</string>
+	<string>version 0.82 ALPHA 2</string>
 	<key>CFBundleHelpBookFolder</key>
 	<string>BibDesk Help</string>
 	<key>CFBundleHelpBookName</key>
@@ -375,11 +378,11 @@
 	<key>CFBundlePackageType</key>
 	<string>APPL</string>
 	<key>CFBundleShortVersionString</key>
-	<string>0.80b</string>
+	<string>0.82a2</string>
 	<key>CFBundleSignature</key>
 	<string>MMcC</string>
 	<key>CFBundleVersion</key>
-	<string>0.80</string>
+	<string>0.82a2</string>
 	<key>NSAppleScriptEnabled</key>
 	<string>YES</string>
 	<key>NSMainNibFile</key>
@@ -480,7 +483,7 @@
 				<key>defaultsDictionary</key>
 				<dict>
 					<key>BlueComponentColor of alternating rows Key</key>
-					<real>8.9527002420824839e-311</real>
+					<real>8.9548222378734492e-311</real>
 					<key>Current Publication Type</key>
 					<integer>6</integer>
 					<key>Current Publication Type String</key>
@@ -490,7 +493,7 @@
 					<key>Current Quick Search Text Dictionary</key>
 					<dict/>
 					<key>GreenComponentColor of alternating rows Key</key>
-					<real>9.7824005963499054e-311</real>
+					<real>9.7845225921408706e-311</real>
 					<key>Preview Pane Displays What?</key>
 					<integer>1</integer>
 					<key>Quick Search Keys</key>
@@ -499,7 +502,7 @@
 						<string>Pub Type</string>
 					</array>
 					<key>RedComponentColor of alternating rows Key</key>
-					<real>1.0408389354684661e-310</real>
+					<real>1.0410511350475626e-310</real>
 					<key>Shown Column Names</key>
 					<array>
 						<string>Keywords</string>
@@ -522,7 +525,7 @@
 					<key>TableView Font</key>
 					<string>LucidaGrande</string>
 					<key>TableView Font Size</key>
-					<real>1.1783442627230157e-310</real>
+					<real>1.1785564623021122e-310</real>
 					<key>View-by Field</key>
 					<string>Title</string>
 				</dict>
@@ -652,6 +655,9 @@
 				F59CA11E02F06A7701EF0A84,
 				F5AD2CBC0396F01101A80164,
 				F5AD2CC20397226201A80164,
+				F58886D703ABF2D601A80167,
+				F5F7774903E9156E01EF0ABE,
+				F5F7774B03E9156E01EF0ABE,
 			);
 			isa = PBXHeadersBuildPhase;
 			runOnlyForDeploymentPostprocessing = 0;
@@ -698,6 +704,7 @@
 				F5FB32B1034D6D4601EF0AD8,
 				F5AD2CBF03970F0401A80164,
 				F5A86D2103976CDF01A80164,
+				F58886DC03ABFA7101A80167,
 			);
 			isa = PBXResourcesBuildPhase;
 			runOnlyForDeploymentPostprocessing = 0;
@@ -736,6 +743,9 @@
 				F59CA11D02F06A7701EF0A84,
 				F5AD2CBD0396F01101A80164,
 				F5AD2CC30397226201A80164,
+				F58886D803ABF2D601A80167,
+				F5F7774A03E9156E01EF0ABE,
+				F5F7774C03E9156E01EF0ABE,
 			);
 			isa = PBXSourcesBuildPhase;
 			runOnlyForDeploymentPostprocessing = 0;
@@ -1687,6 +1697,39 @@
 			settings = {
 			};
 		};
+		F58886D503ABF2D601A80167 = {
+			isa = PBXFileReference;
+			path = BDSKShellTask.h;
+			refType = 4;
+		};
+		F58886D603ABF2D601A80167 = {
+			isa = PBXFileReference;
+			path = BDSKShellTask.m;
+			refType = 4;
+		};
+		F58886D703ABF2D601A80167 = {
+			fileRef = F58886D503ABF2D601A80167;
+			isa = PBXBuildFile;
+			settings = {
+			};
+		};
+		F58886D803ABF2D601A80167 = {
+			fileRef = F58886D603ABF2D601A80167;
+			isa = PBXBuildFile;
+			settings = {
+			};
+		};
+		F58886DB03ABFA7101A80167 = {
+			isa = PBXExecutableFileReference;
+			path = pdftotext;
+			refType = 4;
+		};
+		F58886DC03ABFA7101A80167 = {
+			fileRef = F58886DB03ABFA7101A80167;
+			isa = PBXBuildFile;
+			settings = {
+			};
+		};
 		F5941276037E3B5401A80166 = {
 			isa = PBXFrameworkReference;
 			path = OmniAppKit.framework;
@@ -1789,6 +1832,10 @@
 				F5385A8802ECE98D014378E3,
 				F59CA11C02F06A7701EF0A84,
 				F59CA11B02F06A7701EF0A84,
+				F5F7774503E9156E01EF0ABE,
+				F5F7774603E9156E01EF0ABE,
+				F5F7774703E9156E01EF0ABE,
+				F5F7774803E9156E01EF0ABE,
 			);
 			isa = PBXGroup;
 			name = "Appkit extensions";
@@ -2187,6 +2234,50 @@
 			isa = PBXGroup;
 			name = Icons;
 			refType = 4;
+		};
+		F5F7774503E9156E01EF0ABE = {
+			isa = PBXFileReference;
+			path = DraggableScrollView.h;
+			refType = 4;
+		};
+		F5F7774603E9156E01EF0ABE = {
+			isa = PBXFileReference;
+			path = DraggableScrollView.m;
+			refType = 4;
+		};
+		F5F7774703E9156E01EF0ABE = {
+			isa = PBXFileReference;
+			path = PDFImageView.h;
+			refType = 4;
+		};
+		F5F7774803E9156E01EF0ABE = {
+			isa = PBXFileReference;
+			path = PDFImageView.m;
+			refType = 4;
+		};
+		F5F7774903E9156E01EF0ABE = {
+			fileRef = F5F7774503E9156E01EF0ABE;
+			isa = PBXBuildFile;
+			settings = {
+			};
+		};
+		F5F7774A03E9156E01EF0ABE = {
+			fileRef = F5F7774603E9156E01EF0ABE;
+			isa = PBXBuildFile;
+			settings = {
+			};
+		};
+		F5F7774B03E9156E01EF0ABE = {
+			fileRef = F5F7774703E9156E01EF0ABE;
+			isa = PBXBuildFile;
+			settings = {
+			};
+		};
+		F5F7774C03E9156E01EF0ABE = {
+			fileRef = F5F7774803E9156E01EF0ABE;
+			isa = PBXBuildFile;
+			settings = {
+			};
 		};
 		F5F83F6D02EF7C7501EF0A84 = {
 			isa = PBXFileReference;
