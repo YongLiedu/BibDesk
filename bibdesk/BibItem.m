@@ -236,11 +236,6 @@ void _setupFonts(){
     return [pubAuthors count];
 }
 
-// for the outlineview. (yeah, it's wack - I'm lazy.)
-- (int)numberOfChildren{
-    return 0;     // for now. Later, we might have it tell us how many x-ref's it has
-}
-
 - (void)addAuthorWithName:(NSString *)newAuthorName{
     NSEnumerator *presentAuthE = nil;
     BibAuthor *bibAuthor = nil;

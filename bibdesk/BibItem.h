@@ -111,7 +111,6 @@
 - (NSString *)fileType;
 - (void)setFileType:(NSString *)someFileType;
 
-- (int)numberOfChildren;
 
 - (int)numberOfAuthors;
 - (NSArray *)pubAuthors;
