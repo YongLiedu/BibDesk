@@ -160,6 +160,9 @@ void _setupFonts(){
 }
 
 #pragma mark Comparison functions
+- (NSComparisonResult)pubTypeCompare:(BibItem *)aBI{
+	return [[self type] caseInsensitiveCompare:[aBI type]];
+}
 
 - (NSComparisonResult)keyCompare:(BibItem *)aBI{
     return [citeKey caseInsensitiveCompare:[aBI citeKey]];

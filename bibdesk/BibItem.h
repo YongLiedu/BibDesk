@@ -96,6 +96,7 @@
 // ----------------------------------------------------------------------------------------
 
 - (BOOL)isEqual:(BibItem *)aBI;
+- (NSComparisonResult)pubTypeCompare:(BibItem *)aBI;
 - (NSComparisonResult)keyCompare:(BibItem *)aBI;
 - (NSComparisonResult)titleCompare:(BibItem *)aBI;
 - (NSComparisonResult)dateCompare:(BibItem *)aBI;
