@@ -484,7 +484,7 @@ NSString *BDSKUrlString = @"Url";
 - (IBAction)textFieldDidEndEditing:(id)sender{
     NSCell *sel = [sender cellAtIndex: [sender indexOfSelectedItem]];
     NSString *title = [sel title];
-    NSLog(@"textFieldDidEndEditing sent by %@ ", title);
+
     if([sender indexOfSelectedItem] != -1){
         [theBib setField:title toValue:[sel stringValue]];
         if([title isEqualToString:BDSKUrlString] || [title isEqualToString:BDSKLocalUrlString]){
@@ -497,6 +497,7 @@ NSString *BDSKUrlString = @"Url";
         if([title isEqualToString:@"Title"]){
             [[self window] setTitle:[sel stringValue]];
         }
+
         [self noteChange]; // shouldn't get called if there was no change.
     }
 }
@@ -505,7 +506,6 @@ NSString *BDSKUrlString = @"Url";
 //  send a notification that "I changed" and let any Doc(/finder) that cares update.
 - (void)noteChange{
     [theDoc updateChangeCount:NSChangeDone];
-
 }
 
 #pragma mark -
@@ -573,6 +573,7 @@ NSString *BDSKUrlString = @"Url";
 - (void)windowWillClose:(NSNotification *)notification{
     [[self window] makeFirstResponder:citeKeyField]; // makes the field check if there is a duplicate field.
     [[self window] makeFirstResponder:[self window]];
+    [theBib setFields:[theBib dict]]; // should really update its own metadata whenever you call setField:forvalue or whatever. Another thing for the to-do list.
     [theDoc controlTextDidChange:nil]; // should really just tell them I changed and have them update only if my bib is already highlit...
     [theDoc highlightBib:theBib];
     [documentSnoopDrawer close];
