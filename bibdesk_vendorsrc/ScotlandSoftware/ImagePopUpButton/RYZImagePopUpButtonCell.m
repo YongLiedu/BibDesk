@@ -1,5 +1,5 @@
 #import "RYZImagePopUpButtonCell.h"
-
+#import "BibEditor.h"
 
 @implementation RYZImagePopUpButtonCell
 
@@ -132,9 +132,9 @@
 
 - (NSMenuItem *)selectedItem{
 	if(_alwaysUsesFirstItemAsSelected){
-		return [self itemAtIndex:0];
+		return (NSMenuItem *)[self itemAtIndex:0];
 	}else{
-		return [super selectedItem];
+		return (NSMenuItem *)[super selectedItem];
 	}
 }
 
