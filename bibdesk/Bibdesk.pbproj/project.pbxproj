@@ -373,7 +373,7 @@
 			productName = OmniFrameworks;
 		};
 		274C83C105DF2FD40020EEFF = {
-			buildArgumentsString = "-project OmniBase.xcode \"OMNI_INSTALLED_PRODUCTS=@executable_path/../Frameworks\" $ACTION";
+			buildArgumentsString = "-project OmniBase.pbproj \"OMNI_INSTALLED_PRODUCTS=@executable_path/../Frameworks\" $ACTION";
 			buildPhases = (
 			);
 			buildSettings = {
