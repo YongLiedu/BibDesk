@@ -21,15 +21,6 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 #import <OmniAppKit/NSScrollView-OAExtensions.h>
 #import "BDAlias.h"
 
-NSString *BDSKAnnoteString = @"Annote";
-NSString *BDSKAbstractString = @"Abstract";
-NSString *BDSKRssDescriptionString = @"Rss-Description";
-NSString *BDSKLocalUrlString = @"Local-Url";
-NSString *BDSKUrlString = @"Url";
-NSString *BDSKDateCreatedString = @"Date-Added";
-NSString *BDSKDateModifiedString = @"Date-Modified";
-
-
 @implementation BibEditor
 
 - (NSString *)windowNibName{

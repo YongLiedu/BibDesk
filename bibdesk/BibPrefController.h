@@ -97,6 +97,15 @@ extern NSString *BDSKLocalUrlFormatKey;
 extern NSString *BDSKLastVersionLaunched;
 extern NSString *BDSKSnoopDrawerSavedSize;
 
+extern NSString *BDSKAnnoteString;
+extern NSString *BDSKAbstractString;
+extern NSString *BDSKRssDescriptionString;
+extern NSString *BDSKLocalUrlString;
+extern NSString *BDSKUrlString;
+extern NSString *BDSKDateCreatedString;
+extern NSString *BDSKDateModifiedString;
+
+
 #pragma mark ||  Notification name strings
 extern NSString *BDSKDocumentWillSaveNotification;
 extern NSString *BDSKDocumentWindowWillCloseNotification;

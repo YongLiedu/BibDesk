@@ -33,13 +33,6 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 #import "RYZImagePopUpButtonCell.h"
 
 
-extern NSString *BDSKAnnoteString;
-extern NSString *BDSKAbstractString;
-extern NSString *BDSKRssDescriptionString;
-extern NSString *BDSKLocalUrlString;
-extern NSString *BDSKUrlString;
-extern NSString *BDSKDateCreatedString;
-extern NSString *BDSKDateModifiedString;
 
 
 

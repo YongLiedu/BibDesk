@@ -73,6 +73,15 @@ NSString *BDSKLastVersionLaunched = @"Last launched version number";
 NSString *BDSKSnoopDrawerSavedSize = @"Saved size of BibEditor document snoop drawer";
 
 
+NSString *BDSKAnnoteString = @"Annote";
+NSString *BDSKAbstractString = @"Abstract";
+NSString *BDSKRssDescriptionString = @"Rss-Description";
+NSString *BDSKLocalUrlString = @"Local-Url";
+NSString *BDSKUrlString = @"Url";
+NSString *BDSKDateCreatedString = @"Date-Added";
+NSString *BDSKDateModifiedString = @"Date-Modified";
+
+
 #pragma mark ||  Notification name strings
 NSString *BDSKDocumentWillSaveNotification = @"Document Will Save Notification";
 NSString *BDSKDocumentWindowWillCloseNotification = @"Document Window Will Close Notification";
