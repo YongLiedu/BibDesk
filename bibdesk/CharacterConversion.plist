@@ -149,6 +149,8 @@
 		<string>{\H o}</string>
 		<key>œ</key>
 		<string>{\oe}</string>
+		<key>š</key>
+		<string>{\v s}</string>
 		<key>Ÿ</key>
 		<string>{\"Y}</string>
 		<key>™</key>
@@ -280,6 +282,8 @@
 		<string>č</string>
 		<key>{\v e}</key>
 		<string>ě</string>
+		<key>{\v s}</key>
+		<string>š</string>
 		<key>{\~a}</key>
 		<string>ã</string>
 		<key>{\~n}</key>
