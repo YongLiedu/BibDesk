@@ -1005,10 +1005,9 @@ setupParagraphStyle()
     NSRange range;
     AGRegexMatch *aMatch = nil;
     
-    BDSKFontManager *bfm = [BDSKFontManager sharedFontManager];
-    NSFontManager *afm = [NSFontManager sharedFontManager];
-    NSFont *font = [[bfm cachedFontsForPreviewPane] objectForKey:field];
-    NSFontTraitMask fontTraits = [afm traitsOfFont:font];
+    BDSKFontManager *fontManager = [BDSKFontManager sharedFontManager];
+    NSFont *font = [[fontManager cachedFontsForPreviewPane] objectForKey:field];
+    NSFontTraitMask fontTraits = [fontManager traitsOfFont:font];
     //NSLog(@"default font is %@", font);
     NSDictionary *attrs = [NSDictionary dictionaryWithObjects:[NSArray arrayWithObjects:font, defaultStyle, nil]
                                                       forKeys:[NSArray arrayWithObjects:NSFontAttributeName, NSParagraphStyleAttributeName, nil]];
@@ -1021,8 +1020,8 @@ setupParagraphStyle()
         [thingsToRemove addObject:texStyle]; // even if it's not a TeX style, we'll remove the command; is this safe?
         range = [aMatch rangeAtIndex:2];
         //NSLog(@"using font trait mask %X", [[BDSKFontManager sharedFontManager] fontTraitMaskForTeXStyle:texStyle]);
-        font = [afm convertFont:font
-                    toHaveTrait:(fontTraits | [bfm fontTraitMaskForTeXStyle:texStyle])];
+        font = [fontManager convertFont:font
+                            toHaveTrait:(fontTraits | [fontManager fontTraitMaskForTeXStyle:texStyle])];
         //NSLog(@"using font %@", font);
         attrs = [NSDictionary dictionaryWithObjects:[NSArray arrayWithObjects:font, defaultStyle, nil] // always body par style here
                                             forKeys:[NSArray arrayWithObjects:NSFontAttributeName, NSParagraphStyleAttributeName, nil]];

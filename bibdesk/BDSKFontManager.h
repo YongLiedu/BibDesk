@@ -10,7 +10,7 @@
 #import "BibPrefController.h"
 
 
-@interface BDSKFontManager : NSObject {
+@interface BDSKFontManager : NSFontManager {
     NSDictionary *cachedFontsForPreviewPane;
 }
 

@@ -20,7 +20,7 @@ static BDSKFontManager *privateFontManager = nil;
 }
 
 - (id)init{
-    if(self = [super init]){
+    if(self){ // don't send [super init]
         cachedFontsForPreviewPane = nil;
         [self setupFonts];
         [[NSNotificationCenter defaultCenter] addObserver:self
