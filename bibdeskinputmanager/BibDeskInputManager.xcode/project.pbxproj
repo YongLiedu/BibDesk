@@ -53,6 +53,7 @@
 			projectDirPath = "";
 			targets = (
 				8D5B49AC048680CD000E48DA,
+				F90014830709EABB002EC8DF,
 			);
 		};
 		089C166AFE841209C02AAC07 = {
@@ -93,7 +94,6 @@
 				F9D86A0006B33E2000F2DE7D,
 				8D5B49B7048680CD000E48DA,
 				089C167DFE841241C02AAC07,
-				F953E82006EE6C96007EFF3D,
 			);
 			isa = PBXGroup;
 			name = Resources;
@@ -128,6 +128,10 @@
 		};
 		08FB77AFFE84173DC02AAC07 = {
 			children = (
+				F9D86A0106B33E2000F2DE7D,
+				F9D86A0206B33E2000F2DE7D,
+				F9D86A0306B33E2000F2DE7D,
+				F9D86A0406B33E2000F2DE7D,
 			);
 			isa = PBXGroup;
 			name = Classes;
@@ -202,10 +206,6 @@
 //324
 		32C88E010371C26100C91783 = {
 			children = (
-				F9D86A0106B33E2000F2DE7D,
-				F9D86A0206B33E2000F2DE7D,
-				F9D86A0306B33E2000F2DE7D,
-				F9D86A0406B33E2000F2DE7D,
 				F9D86A1106B33EFD00F2DE7D,
 			);
 			isa = PBXGroup;
@@ -346,13 +346,52 @@
 //F92
 //F93
 //F94
-		F953E82006EE6C96007EFF3D = {
-			isa = PBXFileReference;
-			lastKnownFileType = text.xml;
-			name = "Info copy.plist";
-			path = "/Volumes/Local/Users/amaxwell/build/bibdeskinputmanager/Info copy.plist";
-			refType = 0;
-			sourceTree = "<absolute>";
+		F90014820709EABB002EC8DF = {
+			buildActionMask = 2147483647;
+			dstPath = /Volumes/Local/Users/amaxwell/Library/InputManagers/BibDeskInputManager;
+			dstSubfolderSpec = 0;
+			files = (
+				F900148B0709EAF2002EC8DF,
+			);
+			isa = PBXCopyFilesBuildPhase;
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		F90014830709EABB002EC8DF = {
+			buildPhases = (
+				F90014820709EABB002EC8DF,
+			);
+			buildSettings = {
+				OTHER_CFLAGS = "";
+				OTHER_LDFLAGS = "";
+				OTHER_REZFLAGS = "";
+				PRODUCT_NAME = Install;
+				SECTORDER_FLAGS = "";
+				WARNING_CFLAGS = "-Wmost -Wno-four-char-constants -Wno-unknown-pragmas";
+			};
+			dependencies = (
+				F900148A0709EAC1002EC8DF,
+			);
+			isa = PBXAggregateTarget;
+			name = Install;
+			productName = Install;
+		};
+		F90014890709EAC1002EC8DF = {
+			containerPortal = 089C1669FE841209C02AAC07;
+			isa = PBXContainerItemProxy;
+			proxyType = 1;
+			remoteGlobalIDString = 8D5B49AC048680CD000E48DA;
+			remoteInfo = BibDeskInputManager;
+		};
+		F900148A0709EAC1002EC8DF = {
+			isa = PBXTargetDependency;
+			target = 8D5B49AC048680CD000E48DA;
+			targetProxy = F90014890709EAC1002EC8DF;
+		};
+		F900148B0709EAF2002EC8DF = {
+			fileRef = 8D5B49B6048680CD000E48DA;
+			isa = PBXBuildFile;
+			settings = {
+			};
 		};
 		F9BC91E806E0EAFB00B42137 = {
 			buildActionMask = 2147483647;

@@ -2,22 +2,20 @@
 {
 	089C1669FE841209C02AAC07 = {
 		activeBuildStyle = 014CEA420018CDE011CA2923;
-		activeExecutable = F9AEF11206CED02C00D35269;
+		activeExecutable = F9F9BE04070E90A100E00826;
 		activeTarget = 8D5B49AC048680CD000E48DA;
 		addToTargets = (
 			8D5B49AC048680CD000E48DA,
 		);
 		breakpoints = (
-			F9AEF11906CED05700D35269,
-			F9AEF12906CED08100D35269,
-			F9AEF12B06CED08700D35269,
-			F9AEF12D06CED08C00D35269,
 			F9AEF13006CED09A00D35269,
+			F9F9BE01070E907A00E00826,
 		);
 		codeSenseManager = F9D869E106B33DE700F2DE7D;
 		executables = (
 			F9BEBEE006B5EA1D00AA486C,
 			F9AEF11206CED02C00D35269,
+			F9F9BE04070E90A100E00826,
 		);
 		perUserDictionary = {
 			PBXConfiguration.PBXFileTableDataSource3.PBXErrorsWarningsDataSource = {
@@ -39,7 +37,7 @@
 				PBXFileTableDataSourceColumnSortingKey = PBXExecutablesDataSource_NameID;
 				PBXFileTableDataSourceColumnWidthsKey = (
 					22,
-					433.7974,
+					433,
 				);
 				PBXFileTableDataSourceColumnsKey = (
 					PBXExecutablesDataSource_ActiveFlagID,
@@ -53,7 +51,7 @@
 					20,
 					242,
 					20,
-					48,
+					48.1626,
 					43,
 					43,
 					20,
@@ -85,10 +83,10 @@
 				PBXFileTableDataSourceColumnSortingKey = PBXFileDataSource_Filename_ColumnID;
 				PBXFileTableDataSourceColumnWidthsKey = (
 					20,
-					210,
-					50,
+					252,
+					10,
 					20,
-					50,
+					48.1626,
 					43,
 					43,
 				);
@@ -102,7 +100,7 @@
 					PBXFileDataSource_Warnings_ColumnID,
 				);
 			};
-			PBXPerProjectTemplateStateSaveDate = 115403474;
+			PBXPerProjectTemplateStateSaveDate = 119124910;
 			PBXPrepackagedSmartGroups_v2 = (
 				{
 					PBXTransientLocationAtTop = bottom;
@@ -490,7 +488,7 @@
 				};
 				RubberWindowFrame = "94 344 674 454 0 0 1280 832 ";
 			};
-			PBXWorkspaceStateSaveDate = 115403474;
+			PBXWorkspaceStateSaveDate = 119124910;
 		};
 		sourceControlManager = F9D869E006B33DE700F2DE7D;
 		userBuildSettings = {
@@ -498,10 +496,10 @@
 	};
 	089C167EFE841241C02AAC07 = {
 		uiCtxt = {
-			sepNavIntBoundsRect = "{{0, 0}, {711, 449}}";
-			sepNavSelRange = "{0, 0}";
-			sepNavVisRect = "{{0, 0}, {711, 449}}";
-			sepNavWindowFrame = "{{176, 122}, {750, 558}}";
+			sepNavIntBoundsRect = "{{0, 0}, {711, 428}}";
+			sepNavSelRange = "{61, 0}";
+			sepNavVisRect = "{{0, 0}, {711, 428}}";
+			sepNavWindowFrame = "{{199, 101}, {750, 558}}";
 		};
 	};
 	8D5B49AC048680CD000E48DA = {
@@ -509,11 +507,14 @@
 	};
 	8D5B49B7048680CD000E48DA = {
 		uiCtxt = {
-			sepNavIntBoundsRect = "{{0, 0}, {711, 449}}";
-			sepNavSelRange = "{401, 36}";
-			sepNavVisRect = "{{0, 0}, {711, 449}}";
-			sepNavWindowFrame = "{{107, 185}, {750, 558}}";
+			sepNavIntBoundsRect = "{{0, 0}, {712, 429}}";
+			sepNavSelRange = "{563, 0}";
+			sepNavVisRect = "{{0, 0}, {712, 429}}";
+			sepNavWindowFrame = "{{291, 17}, {750, 558}}";
 		};
+	};
+	F90014830709EABB002EC8DF = {
+		activeExec = 0;
 	};
 	F9AEF11206CED02C00D35269 = {
 		activeArgIndex = 2147483647;
@@ -550,34 +551,6 @@
 		path = /Applications/Stickies.app;
 		refType = 0;
 		sourceTree = "<absolute>";
-	};
-	F9AEF11906CED05700D35269 = {
-		fileReference = F9D86A0206B33E2000F2DE7D;
-		functionName = "+load";
-		isa = PBXFileBreakpoint;
-		lineNumber = 17;
-		state = 1;
-	};
-	F9AEF12906CED08100D35269 = {
-		fileReference = F9D86A0206B33E2000F2DE7D;
-		functionName = "-citeKeyRange";
-		isa = PBXFileBreakpoint;
-		lineNumber = 52;
-		state = 1;
-	};
-	F9AEF12B06CED08700D35269 = {
-		fileReference = F9D86A0206B33E2000F2DE7D;
-		functionName = "-completionsForPartialWordRange:indexOfSelectedItem:";
-		isa = PBXFileBreakpoint;
-		lineNumber = 52;
-		state = 1;
-	};
-	F9AEF12D06CED08C00D35269 = {
-		fileReference = F9D86A0206B33E2000F2DE7D;
-		functionName = "-insertCompletion:forPartialWordRange:movement:isFinal:";
-		isa = PBXFileBreakpoint;
-		lineNumber = 52;
-		state = 1;
 	};
 	F9AEF13006CED09A00D35269 = {
 		fileReference = F9D86A0406B33E2000F2DE7D;
@@ -633,31 +606,21 @@
 	F9D869E106B33DE700F2DE7D = {
 		indexTemplatePath = "";
 		isa = PBXCodeSenseManager;
-		usesDefaults = 1;
-		wantsCodeCompletion = 1;
-		wantsCodeCompletionAutoSuggestions = 0;
-		wantsCodeCompletionCaseSensitivity = 1;
-		wantsCodeCompletionListAlways = 1;
-		wantsCodeCompletionOnlyMatchingItems = 1;
-		wantsCodeCompletionParametersIncluded = 1;
-		wantsCodeCompletionPlaceholdersInserted = 1;
-		wantsCodeCompletionTabCompletes = 1;
-		wantsIndex = 1;
 	};
 	F9D86A0106B33E2000F2DE7D = {
 		uiCtxt = {
-			sepNavIntBoundsRect = "{{0, 0}, {860, 428}}";
-			sepNavSelRange = "{51, 0}";
-			sepNavVisRect = "{{0, 0}, {711, 428}}";
-			sepNavWindowFrame = "{{38, 248}, {750, 558}}";
+			sepNavIntBoundsRect = "{{0, 0}, {860, 518}}";
+			sepNavSelRange = "{1088, 0}";
+			sepNavVisRect = "{{0, 89}, {712, 429}}";
+			sepNavWindowFrame = "{{153, 143}, {750, 558}}";
 		};
 	};
 	F9D86A0206B33E2000F2DE7D = {
 		uiCtxt = {
-			sepNavIntBoundsRect = "{{0, 0}, {2354, 3121}}";
-			sepNavSelRange = "{494, 0}";
-			sepNavVisRect = "{{0, 0}, {1161, 457}}";
-			sepNavWindowFrame = "{{36, 146}, {1200, 587}}";
+			sepNavIntBoundsRect = "{{0, 0}, {2354, 3584}}";
+			sepNavSelRange = "{669, 0}";
+			sepNavVisRect = "{{0, 455}, {879, 435}}";
+			sepNavWindowFrame = "{{192, 260}, {917, 564}}";
 		};
 	};
 	F9D86A0406B33E2000F2DE7D = {
@@ -670,10 +633,53 @@
 	};
 	F9D86A1106B33EFD00F2DE7D = {
 		uiCtxt = {
-			sepNavIntBoundsRect = "{{0, 0}, {711, 449}}";
+			sepNavIntBoundsRect = "{{0, 0}, {711, 428}}";
 			sepNavSelRange = "{356, 0}";
-			sepNavVisRect = "{{0, 0}, {711, 449}}";
-			sepNavWindowFrame = "{{199, 101}, {750, 558}}";
+			sepNavVisRect = "{{0, 0}, {711, 428}}";
+			sepNavWindowFrame = "{{15, 269}, {750, 558}}";
 		};
+	};
+	F9F9BE01070E907A00E00826 = {
+		fileReference = F9D86A0206B33E2000F2DE7D;
+		functionName = "+printSelectorList:";
+		isa = PBXFileBreakpoint;
+		lineNumber = 54;
+		state = 1;
+	};
+	F9F9BE04070E90A100E00826 = {
+		activeArgIndex = 2147483647;
+		activeArgIndices = (
+		);
+		argumentStrings = (
+		);
+		configStateDict = {
+		};
+		cppStopOnCatchEnabled = 0;
+		cppStopOnThrowEnabled = 0;
+		customDataFormattersEnabled = 1;
+		debuggerPlugin = GDBDebugging;
+		disassemblyDisplayState = 0;
+		dylibVariantSuffix = "";
+		enableDebugStr = 1;
+		environmentEntries = (
+		);
+		isa = PBXExecutable;
+		launchableReference = F9F9BE05070E90A100E00826;
+		libgmallocEnabled = 0;
+		name = iTeXMac;
+		savedGlobals = {
+		};
+		shlibInfoDictList = (
+		);
+		sourceDirectories = (
+		);
+	};
+	F9F9BE05070E90A100E00826 = {
+		isa = PBXFileReference;
+		lastKnownFileType = wrapper.application;
+		name = iTeXMac.app;
+		path = /Volumes/Local/Users/amaxwell/BuildProducts/iTeXMac.app;
+		refType = 0;
+		sourceTree = "<absolute>";
 	};
 }
