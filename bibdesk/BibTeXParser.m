@@ -55,7 +55,7 @@
     EnglishRange.location = (unsigned int)' '; //Begin at space
     EnglishRange.length = 95; //This should get everything through tilde
     EnglishLetters = [NSMutableCharacterSet characterSetWithRange:EnglishRange];
-    [EnglishLetters addCharactersInString:@"\n"];
+    [EnglishLetters addCharactersInString:@"\n\t"];
     
     
     if( !([filePath isEqualToString:@"Paste/Drag"]) && [[NSFileManager defaultManager] fileExistsAtPath:filePath]){
