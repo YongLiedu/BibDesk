@@ -39,6 +39,26 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 - (NSString *)stringByRemovingCurlyBraces;
 
 /*!
+    @method     stringWithBytes:encoding:
+    @abstract   Returns an autoreleased string allocated and initialized with the contents of the input characters (assumes a NULL terminated string).
+    @discussion Used to create Unicode string instances from C strings, based on the given string encoding.
+    @param      byteString (description)
+    @param      encoding (description)
+    @result     (description)
+*/
++ (NSString *)stringWithBytes:(const char *)byteString encoding:(NSStringEncoding)encoding;
+
+/*!
+    @method     initWithBytes:encoding:
+    @abstract   Initializes the receiver with the input string of (NULL terminated) bytes.
+    @discussion Used to create Unicode string instances from C strings, based on the given string encoding.
+    @param      byteString (description)
+    @param      encoding (description)
+    @result     (description)
+*/
+- (NSString *)initWithBytes:(const char *)byteString encoding:(NSStringEncoding)encoding;
+
+/*!
     @method     isStringTeXQuotingBalancedWithBraces:connected:
     @abstract   Invoces isStringTeXQuotingBalancedWithBraces:connected:range: with the full range of the receiver. 
     @discussion (discussion)
