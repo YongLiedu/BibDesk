@@ -10,17 +10,23 @@
         }, 
         {
             ACTIONS = {
+                addAuthors = id; 
                 bibTypeDidChange = id; 
                 chooseLocalURL = id; 
                 citeKeyDidChange = id; 
                 dismissAddAuthorSheet = id; 
                 dismissAddField = id; 
                 dismissDelField = id; 
+                downloadLinkedFileAsLocalUrl = id; 
+                editSelectedFieldAsRawBibTeX = id; 
                 generateCiteKey = id; 
-                generateLocalUrl = id; 
                 raiseAddField = id; 
                 raiseDelField = id; 
+                saveFileAsLocalUrl = id; 
+                setLocalURLPathFromMenuItem = id; 
+                setRemoteURLFromMenuItem = id; 
                 showCiteKeyWarning = id; 
+                showPersonDetailCmd = id; 
                 textFieldDidEndEditing = id; 
                 toggleSnoopDrawer = id; 
                 viewLocal = id; 
@@ -30,7 +36,7 @@
             LANGUAGE = ObjC; 
             OUTLETS = {
                 abstractView = NSTextView; 
-                actionMenuButton = NSPopUpButton; 
+                actionMenuButton = RYZImagePopUpButton; 
                 addAuthorSheet = NSPanel; 
                 addAuthorTextView = NSTextView; 
                 authorTableView = NSTableView; 
