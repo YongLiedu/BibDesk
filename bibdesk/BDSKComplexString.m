@@ -243,7 +243,7 @@ static NSDictionary *globalMacroDefs;
 - (void)dealloc{
     [expandedValue release];
 	[nodes release];
-	if (macroResolver)
+	if (isComplex && macroResolver)
 		[[NSNotificationCenter defaultCenter] removeObserver:self];
     [super dealloc];
 }
@@ -310,31 +310,32 @@ static NSDictionary *globalMacroDefs;
 
 - (void)setMacroResolver:(id <BDSKMacroResolver>)newMacroResolver{
 	if (newMacroResolver != macroResolver) {
-		if (macroResolver) {
-			[[NSNotificationCenter defaultCenter] removeObserver:self];
+		NSNotificationCenter *nc = [NSNotificationCenter defaultCenter];
+		if (isComplex && macroResolver) {
+			[nc removeObserver:self];
 		}
 		macroResolver = newMacroResolver;
 		if (isComplex) {
 			[expandedValue autorelease];
 			expandedValue = [[self expandedValueFromArray:nodes] retain];
-		}
-		if (newMacroResolver) {
-			[[NSNotificationCenter defaultCenter] addObserver:self
-													 selector:@selector(handleMacroKeyChangedNotification:)
-														 name:BDSKBibDocMacroKeyChangedNotification
-													   object:newMacroResolver];
-			[[NSNotificationCenter defaultCenter] addObserver:self
-													 selector:@selector(handleMacroDefinitionChangedNotification:)
-														 name:BDSKBibDocMacroDefinitionChangedNotification
-													   object:newMacroResolver];
-			[[NSNotificationCenter defaultCenter] addObserver:self
-													 selector:@selector(handleMacroDefinitionChangedNotification:)
-														 name:BDSKBibDocMacroAddedNotification
-													   object:newMacroResolver];
-			[[NSNotificationCenter defaultCenter] addObserver:self
-													 selector:@selector(handleMacroDefinitionChangedNotification:)
-														 name:BDSKBibDocMacroRemovedNotification
-													   object:newMacroResolver];
+			if (newMacroResolver) {
+				[nc addObserver:self
+					   selector:@selector(handleMacroKeyChangedNotification:)
+						   name:BDSKBibDocMacroKeyChangedNotification
+						 object:newMacroResolver];
+				[nc addObserver:self
+					   selector:@selector(handleMacroDefinitionChangedNotification:)
+						   name:BDSKBibDocMacroDefinitionChangedNotification
+						 object:newMacroResolver];
+				[nc addObserver:self
+					   selector:@selector(handleMacroDefinitionChangedNotification:)
+						   name:BDSKBibDocMacroAddedNotification
+						 object:newMacroResolver];
+				[nc addObserver:self
+					   selector:@selector(handleMacroDefinitionChangedNotification:)
+						   name:BDSKBibDocMacroRemovedNotification
+						 object:newMacroResolver];
+			}
 		}
 	}
 }
