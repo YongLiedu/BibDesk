@@ -394,20 +394,29 @@ static unsigned threadCount = 0;
 
 - (BOOL)rtfPreviewFromData:(NSData *)rtfdata{  // This draws the RTF in a textview
     NSSize inset = NSMakeSize(20,20); // set this for the margin
-    [rtfPreviewView setString:@""];   // clean the view
-    [rtfPreviewView setTextContainerInset:inset];  // pad the edges of the text
+    
+    if([tabView lockFocusIfCanDraw]){
+	[rtfPreviewView setString:@""];   // clean the view
+	[rtfPreviewView setTextContainerInset:inset];  // pad the edges of the text
+	[tabView unlockFocus];
+    }
 
     // we get a zero-length string if a bad bibstyle is used, so check for it
-    if([rtfdata length] > 0){
+    if([rtfdata length] > 0 && [tabView lockFocusIfCanDraw]){
 	[rtfPreviewView replaceCharactersInRange: [rtfPreviewView selectedRange]
 				      withRTF:rtfdata];
-      return YES;
+	[tabView unlockFocus];
+	return YES;
     }else{
 	NSString *errstr = [NSString stringWithString:@"***** ERROR:  unable to create preview *****"];
-        [rtfPreviewView replaceCharactersInRange: [rtfPreviewView selectedRange]
-				      withString:errstr];
-        return NO;
-        }
+	if([tabView lockFocusIfCanDraw]){
+	    [rtfPreviewView replaceCharactersInRange: [rtfPreviewView selectedRange]
+					  withString:errstr];
+	    [tabView unlockFocus];
+	}
+    
+	return NO;
+    }
 	
 }
 
@@ -420,11 +429,14 @@ static unsigned threadCount = 0;
 }
 
 - (void)resetPreviews{
-    [imagePreviewView loadFromPath:nopreviewPDFPath];
-    [rtfPreviewView setString:@""];
-    [rtfPreviewView setTextContainerInset:NSMakeSize(20, 20)];
-    [rtfPreviewView replaceCharactersInRange:[rtfPreviewView selectedRange]
-				  withString:@"Please select an item or items from the bibliography list for LaTeX to preview."];
+    if([tabView lockFocusIfCanDraw]){
+	[imagePreviewView loadFromPath:nopreviewPDFPath];
+	[rtfPreviewView setString:@""];
+	[rtfPreviewView setTextContainerInset:NSMakeSize(20, 20)];
+	[rtfPreviewView replaceCharactersInRange:[rtfPreviewView selectedRange]
+				      withString:@"Please select an item or items from the bibliography list for LaTeX to preview."];
+	[tabView unlockFocus];
+    }
 }
 
 
