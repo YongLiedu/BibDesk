@@ -45,6 +45,11 @@ static float BDSKScaleMenuFontSize = 10.0;
     return self;
 }
 
+- (void)dealloc{
+    [[NSNotificationCenter defaultCenter] removeObserver:self];
+    [super dealloc];
+}
+
 #pragma mark Instance methods - drag-scrolling related
 
 //	canScroll -- Return YES if the user could scroll.
