@@ -123,27 +123,13 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 */
 - (BOOL)rtfPreviewFromData:(NSData *)rtfdata;
 
-
-- (NSImageView*) pdfView;
 /*!
 	@method pdfView:
 	 @abstract accessor for pdfView outlet
 	 @discussion returns pdfView (used for printing)
 	 @result pdfView
 */
-
-/*!
-    @method     saveWindowFrame
-    @abstract   Save the window frame, as utility panels seem to have problems with this.
-*/
-- (void)saveWindowFrame;
-
-/*!
-    @method     setWindowFrame
-    @abstract   Set the window's position to the last saved state.
-*/
-- (void)setWindowFrame;
-
+- (NSImageView*) pdfView;
 
 /*!
     @method     resetPreviews
