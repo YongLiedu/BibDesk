@@ -14,7 +14,7 @@
 
 + (void)load{
     if([[self superclass] instancesRespondToSelector:@selector(completionsForPartialWordRange:indexOfSelectedItem:)]){
-	if([[NSUserDefaults standardUserDefaults] boolForKey:@"BDSKUseInputManager"]){
+	if(![[NSUserDefaults standardUserDefaults] boolForKey:@"BDSKDontUseBibDeskAutocompletion"]){
 	    [self poseAsClass:[NSTextView class]];
 	}
     }
