@@ -988,7 +988,6 @@ void _setupFonts(){
         NSString *hostTitle = nil;
         
         if([pubType isEqualToString:@"inproceedings"] || 
-           [pubType isEqualToString:@"article"] || 
            [pubType isEqualToString:@"incollection"]){
             hostTitle = [self valueOfField:BDSKBooktitleString];
         }else if([pubType isEqualToString:@"article"]){
