@@ -761,6 +761,7 @@ int compareSetLengths(NSSet *set1, NSSet *set2, void *context);
 
 - (IBAction)exportEncodedBib:(id)sender;
 - (NSStringEncoding)documentStringEncoding;
+- (void)setDocumentStringEncoding:(NSStringEncoding)encoding;
 
 
 #pragma mark Methods supporting the source list for .bdsk files

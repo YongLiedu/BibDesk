@@ -122,6 +122,8 @@ NSString *BDSKBibItemLocalDragPboardType = @"edu.ucsd.cs.mmccrack.bibdesk: Local
 
 		customStringArray = [[NSMutableArray arrayWithCapacity:6] retain];
 		[customStringArray setArray:[[OFPreferenceWrapper sharedPreferenceWrapper] arrayForKey:BDSKCustomCiteStringsKey]];
+        
+        [self setDocumentStringEncoding:[[OFPreferenceWrapper sharedPreferenceWrapper] integerForKey:BDSKDefaultStringEncoding]]; // need to set this for new documents
 
 		tableColumnsChanged = YES;
 		sortDescending = YES;
