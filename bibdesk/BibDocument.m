@@ -1109,6 +1109,132 @@ Enhanced delete method that uses a sheet instead of a modal dialogue.
     }
 }
 
+- (IBAction)doAdvancedSearch:(id)sender{
+    if([sender stringValue] != nil){
+        [self showPublicationsForBooleanString:[sender stringValue] inField:nil];
+    }
+}
+
+- (void)showPublicationsForBooleanString:(NSString *)searchString inField:(NSString *)field{
+    
+    if([searchString isEqualToString:@""]){
+        [shownPublications setArray:publications];
+        [self updateUI];
+        return;
+    }
+    
+    if(field != nil) NSLog(@"Boolean searching by field is currently not implemented.");
+    
+    AGRegex *tip = [AGRegex regexWithPattern:@"^\\S+"]; // match the first word of the string
+    AGRegex *andRegex = [AGRegex regexWithPattern:@"AND \\b[^ ]+"]; // match the word following an AND
+    NSArray *matchArray = [andRegex findAllInString:searchString]; // an array of AGRegexMatch objects
+    
+    NSMutableArray *andArray = [NSMutableArray array]; // and array of all the AND terms we're looking for
+    
+    // get the tip first (always an &&)
+    [andArray addObject:[[tip findInString:searchString] group]];
+
+    NSEnumerator *e = [matchArray objectEnumerator];
+    AGRegexMatch *m;
+
+    while(m = [e nextObject]){ // get the resulting string from the match, and strip the AND from it; there might be a better way, but this works
+        [andArray addObject:[[[m group] componentsSeparatedByString:@"AND "] objectAtIndex:1]];
+    }
+    // NSLog(@"andArray is %@", [andArray description]);
+    
+    AGRegex *orRegex = [AGRegex regexWithPattern:@"OR \\b([^ ]+)"]; // match the first word following an OR
+    NSMutableArray *orArray = [NSMutableArray array]; // an array of all the OR terms we're looking for
+    
+    matchArray = [orRegex findAllInString:searchString];
+    e = [matchArray objectEnumerator];
+    
+    while(m = [e nextObject]){ // now get all of the OR strings and strip the OR from them
+        [orArray addObject:[[[m group] componentsSeparatedByString:@"OR "] objectAtIndex:1]];
+    }    
+    
+    NSMutableSet *aSet = [NSMutableSet setWithCapacity:10];
+    
+    NSEnumerator *andEnum = [andArray objectEnumerator];
+    NSEnumerator *orEnum = [orArray objectEnumerator];
+
+    NSRange r;
+    NSString *substring = nil;
+    BibItem *pub = nil;
+    NSEnumerator *pubEnum;
+        
+    NSMutableArray *andResultsArray = [NSMutableArray array];
+    
+    // for each AND term, enumerate the entire publications array and search for a match; if we get a match, add it to a mutable set
+    while(substring = [andEnum nextObject]){
+        pubEnum = [publications objectEnumerator];
+        while(pub = [pubEnum nextObject]){
+            r = [[pub allFieldsString] rangeOfString:substring
+                                             options:NSCaseInsensitiveSearch];
+            if(r.location != NSNotFound){
+                // NSLog(@"Found %@ in %@", substring, [pub citeKey]);
+                [aSet addObject:pub];
+            }
+        }
+        [andResultsArray addObject:[[aSet copy] autorelease]];
+        [aSet removeAllObjects]; // don't forget this step!
+    }
+    
+    NSMutableArray *orResultsArray = [NSMutableArray array];
+    // get all of the OR matches, each in a separate set, and add the sets to the dictionary
+    while(substring = [orEnum nextObject]){
+        pubEnum = [publications objectEnumerator];
+        while(pub = [pubEnum nextObject]){
+            r = [[pub allFieldsString] rangeOfString:substring
+                                             options:NSCaseInsensitiveSearch];
+            if(r.location != NSNotFound){
+                [aSet addObject:pub];
+            }
+        }
+        [orResultsArray addObject:[[aSet copy] autorelease]];
+        [aSet removeAllObjects];
+    }
+        
+    NSMutableSet *newSet = [NSMutableSet setWithCapacity:10];
+    NSSet *tmpSet;
+
+    // we need to sort the set so we always start with the shortest one
+    [andResultsArray sortUsingFunction:compareSetLengths context:nil];
+    
+    e = [andResultsArray objectEnumerator];
+    unsigned count = 0;
+    while(tmpSet = [e nextObject]){
+        // NSLog(@"object at index %i has %i length", count, [tmpSet count]);
+        count ++;
+    }
+
+    [newSet setSet:[andResultsArray objectAtIndex:0]];
+    // NSLog(@"newSet count is %i", [newSet count]);
+    // NSLog(@"nextSet count is %i", [[andResultsArray objectAtIndex:1] count]);
+        
+    e = [andResultsArray objectEnumerator];
+    while(tmpSet = [e nextObject]){
+        [newSet intersectSet:tmpSet];
+    }
+    
+    // union the results from the OR search
+    e = [orResultsArray objectEnumerator];
+    
+    while(tmpSet = [e nextObject]){
+        [newSet unionSet:tmpSet];
+    }
+        
+    NSArray *foundArray = [[[newSet copy] autorelease] allObjects];
+    
+    [shownPublications setArray:foundArray];
+    [self updateUI];
+}
+
+int compareSetLengths(NSSet *set1, NSSet *set2, void *context){
+    NSNumber *n1 = [NSNumber numberWithInt:[set1 count]];
+    NSNumber *n2 = [NSNumber numberWithInt:[set2 count]];
+    return [n1 compare:n2];
+}
+    
 - (void)hidePublicationsWithoutSubstring:(NSString *)substring inField:(NSString *)field{
     NSMutableArray *remArray = [NSMutableArray arrayWithCapacity:1];
     NSEnumerator *e = [publications objectEnumerator];

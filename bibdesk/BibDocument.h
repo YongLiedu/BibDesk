@@ -547,4 +547,9 @@ int generalBibItemCompareFunc(id item1, id item2, void *context);
 
 - (IBAction)postItemToWeblog:(id)sender;
 
+- (IBAction)doAdvancedSearch:(id)sender;
+
+int compareSetLengths(NSSet *set1, NSSet *set2, void *context);
+- (void)showPublicationsForBooleanString:(NSString *)searchString inField:(NSString *)field;
+
 @end
