@@ -30,6 +30,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 #import "PubMedParser.h"
 #import <OmniAppKit/OASplitView.h>
 #import "NSString+Templating.h"
+#import "AvailabilityMacros.h"
 
 
 @class BDSKCustomCiteTableView;
@@ -48,8 +49,6 @@ extern NSString* LocalDragPasteboardName;
 
 @interface BibDocument : NSDocument
 {
-    NSToolbarItem *editPubButton;
-    NSToolbarItem *delPubButton;
     IBOutlet NSTextView *previewField;
     IBOutlet NSWindow* documentWindow;
     IBOutlet NSWindow *bibListViews;
@@ -66,11 +65,21 @@ extern NSString* LocalDragPasteboardName;
 #pragma mark Toolbar variable declarations
 
     NSMutableDictionary *toolbarItems;
+    NSToolbarItem *editPubButton;
+    NSToolbarItem *delPubButton;
 	
-	IBOutlet NSSearchField *searchField; //@@ backwards compatibility - can i leave this symbol in?
+#pragma mark SearchField variable declarations
+	
+	// in nib for 10.2 compatibility
+	IBOutlet NSTextField *searchFieldTextField; 
+	IBOutlet NSPopUpButton *quickSearchButton;
+    IBOutlet NSButton* quickSearchClearButton;
+	
+	id searchField; 
 	IBOutlet NSBox *searchFieldBox;
 	NSToolbarItem *searchFieldToolbarItem;
-	
+
+		
     IBOutlet NSView* sortKeyView;
     IBOutlet NSPopUpButton *sortKeyButton;
     NSToolbarItem *sortKeyToolbarItem;
@@ -124,6 +133,7 @@ extern NSString* LocalDragPasteboardName;
 
 - (void)awakeFromNib;
 - (void)setupSearchField;
+- (NSMenu *)searchFieldMenu;
 - (id)init;
 - (void)dealloc;
 - (IBAction)exportAsRSS:(id)sender;
@@ -173,8 +183,8 @@ extern NSString* LocalDragPasteboardName;
 
 /*!
     @method quickSearchAddField
-    @abstract \253Abstract\273
-    @discussion \253discussion\273
+    @abstract adds a field to the quicksearchMenu.
+    @discussion 
     
 */
 - (IBAction)quickSearchAddField:(id)sender;
@@ -184,9 +194,16 @@ extern NSString* LocalDragPasteboardName;
                            contextInfo:(void *)contextInfo;
 
 
+- (IBAction)clearQuickSearch:(id)sender;
+
 - (IBAction)searchFieldAction:(id)sender;
 
-// Hides all pubs without substring in field.
+/*!
+    @method     hidePublicationsWithoutSubstring:inField:
+    @abstract Hides all pubs without substring in field.
+    @discussion This manipulates the shownPublications array.
+*/
+
 - (void)hidePublicationsWithoutSubstring:(NSString *)substring inField:(NSString *)field;
 
 /*!

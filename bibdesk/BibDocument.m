@@ -253,7 +253,6 @@ NSString*   LocalDragPasteboardName = @"edu.ucsd.cs.mmccrack.bibdesk: Local Publ
 
     [self setupTableColumns]; // calling it here mostly just makes sure that the menu is set up.
 
-    [self searchFieldAction:[searchField cell]]; // calls updateUI, makes sure the quicksearch filter is loaded appropriately when we open a file.
 }
 
 - (void)windowDidBecomeMain:(NSNotification *)aNotification{
@@ -615,126 +614,177 @@ stringByAppendingPathComponent:@"BibDesk"]; */
 #pragma mark -
 #pragma mark Search Field methods
 
-
-- (void)setupSearchField{
-	// called in awakeFromNib
+- (NSMenu *)searchFieldMenu{
 	NSMenu *cellMenu = [[NSMenu alloc] initWithTitle:@"Search Menu"];
-    NSMenuItem *item1, *item2, *item3, *item4, *anItem;
-    id searchCell = [searchField cell];
-    item1 = [[NSMenuItem alloc] initWithTitle:@"Recent Searches" action: @selector(limitOne:) keyEquivalent:@""];
-    [item1 setTag:NSSearchFieldRecentsTitleMenuItemTag];
-    [cellMenu insertItem:item1 atIndex:0];
-    [item1 release];
-    item2 = [[NSMenuItem alloc] initWithTitle:@"Recents" action:@selector(limitTwo:) keyEquivalent:@""];
-    [item2 setTag:NSSearchFieldRecentsMenuItemTag];
-    [cellMenu insertItem:item2 atIndex:1];
-    [item2 release];
-    item3 = [[NSMenuItem alloc] initWithTitle:@"Clear" action:@selector(limitThree:) keyEquivalent:@""];
-    [item3 setTag:NSSearchFieldClearRecentsMenuItemTag];
-    [cellMenu insertItem:item3 atIndex:2];
-    [item3 release];
+	NSMenuItem *item1, *item2, *item3, *item4, *anItem;
+	
+	item1 = [[NSMenuItem alloc] initWithTitle:@"Recent Searches" action: @selector(limitOne:) keyEquivalent:@""];
+	[item1 setTag:NSSearchFieldRecentsTitleMenuItemTag];
+	[cellMenu insertItem:item1 atIndex:0];
+	[item1 release];
+	item2 = [[NSMenuItem alloc] initWithTitle:@"Recents" action:@selector(limitTwo:) keyEquivalent:@""];
+	[item2 setTag:NSSearchFieldRecentsMenuItemTag];
+	[cellMenu insertItem:item2 atIndex:1];
+	[item2 release];
+	item3 = [[NSMenuItem alloc] initWithTitle:@"Clear" action:@selector(limitThree:) keyEquivalent:@""];
+	[item3 setTag:NSSearchFieldClearRecentsMenuItemTag];
+	[cellMenu insertItem:item3 atIndex:2];
+	[item3 release];
 	// my stuff:
 	item4 = [[NSMenuItem alloc] initWithTitle:@"" action:nil keyEquivalent:@""];
 	[item4 setTag:NSSearchFieldRecentsTitleMenuItemTag]; // makes it go away if there are no recents.
 	[cellMenu insertItem:item4 atIndex:3];
-    [item4 release];
+	[item4 release];
 	item4 = [[NSMenuItem alloc] initWithTitle:@"Search Fields" action:nil keyEquivalent:@""];
 	[cellMenu insertItem:item4 atIndex:4];
-    [item4 release];
-
+	[item4 release];
+	
 	item4 = [[NSMenuItem alloc] initWithTitle:@"Add Field ..." action:@selector(quickSearchAddField:) keyEquivalent:@""];
 	[cellMenu insertItem:item4 atIndex:5];
-    [item4 release];
+	[item4 release];
 	
 	item4 = [[NSMenuItem alloc] initWithTitle:@"All Fields" action:@selector(searchFieldChangeKey:) keyEquivalent:@""];
 	[cellMenu insertItem:item4 atIndex:6];
-    [item4 release];
+	[item4 release];
 	
 	item4 = [[NSMenuItem alloc] initWithTitle:@"Title" action:@selector(searchFieldChangeKey:) keyEquivalent:@""];
 	[cellMenu insertItem:item4 atIndex:7];
-    [item4 release];
+	[item4 release];
 	
 	item4 = [[NSMenuItem alloc] initWithTitle:@"Author" action:@selector(searchFieldChangeKey:) keyEquivalent:@""];
 	[cellMenu insertItem:item4 atIndex:8];
-    [item4 release];
+	[item4 release];
 	
 	item4 = [[NSMenuItem alloc] initWithTitle:@"Date" action:@selector(searchFieldChangeKey:) keyEquivalent:@""];
 	[cellMenu insertItem:item4 atIndex:9];
-    [item4 release];
-	
+	[item4 release];
 	
 	NSArray *prefsQuickSearchKeysArray = [[OFPreferenceWrapper sharedPreferenceWrapper] arrayForKey:BDSKQuickSearchKeys];
     NSString *aKey = nil;
     NSEnumerator *quickSearchKeyE = [prefsQuickSearchKeysArray objectEnumerator];
 	
-    quickSearchTextDict = [[[OFPreferenceWrapper sharedPreferenceWrapper] objectForKey:BDSKCurrentQuickSearchTextDict] mutableCopy];
     while(aKey = [quickSearchKeyE nextObject]){
-
-		anItem = [[NSMenuItem alloc] initWithTitle:aKey action:@selector(searchFieldChangeKey:) keyEquivalent:@""]; // @@ searchfield: need action
+		
+		anItem = [[NSMenuItem alloc] initWithTitle:aKey 
+											action:@selector(searchFieldChangeKey:)
+									 keyEquivalent:@""]; 
 		[cellMenu insertItem:anItem atIndex:10];
 		[anItem release];
     }
+	
+	return cellMenu;
+}
 
-	[searchCell setSendsWholeSearchString:NO]; // don't wait for Enter key press.
-	[searchCell setSearchMenuTemplate:cellMenu];
-	[searchCell setPlaceholderString:[NSString stringWithFormat:@"Search by %@",quickSearchKey]];
-	[searchCell setRecentsAutosaveName:[NSString stringWithFormat:@"%@ recent searches autosave ",[self fileName]]];
+- (void)setupSearchField{
+	// called in awakeFromNib
+	    quickSearchTextDict = [[[OFPreferenceWrapper sharedPreferenceWrapper] objectForKey:BDSKCurrentQuickSearchTextDict] mutableCopy];
+	id searchCellOrTextField = nil;
+	
+
+	if (BDSK_USING_JAGUAR) {
+		/* On a 10.2 - 10.2.x system */
+		//@@ backwards Compatibility -, and set up the button
+		searchCellOrTextField = searchFieldTextField;
+		
+		NSArray *prefsQuickSearchKeysArray = [[OFPreferenceWrapper sharedPreferenceWrapper] arrayForKey:BDSKQuickSearchKeys];
+		
+		NSString *aKey = nil;
+		NSEnumerator *quickSearchKeyE = [prefsQuickSearchKeysArray objectEnumerator];
+
+		while(aKey = [quickSearchKeyE nextObject]){
+			[quickSearchButton insertItemWithTitle:aKey
+										   atIndex:0];
+		}
+		
+		[quickSearchClearButton setEnabled:NO];
+		[quickSearchClearButton setToolTip:NSLocalizedString(@"Clear the Quicksearch Field",@"")];
+		
+	} else {
+		searchField = (id) [[NSSearchField alloc] initWithFrame:[searchFieldTextField frame]];
+
+		[searchFieldBox replaceSubview:searchFieldTextField with:searchField];
+		searchCellOrTextField = [searchField cell];
+		[searchCellOrTextField setSendsWholeSearchString:NO]; // don't wait for Enter key press.
+		[searchCellOrTextField setSearchMenuTemplate:[self searchFieldMenu]];
+		[searchCellOrTextField setPlaceholderString:[NSString stringWithFormat:@"Search by %@",quickSearchKey]];
+		[searchCellOrTextField setRecentsAutosaveName:[NSString stringWithFormat:@"%@ recent searches autosave ",[self fileName]]];
+		
+		[searchField setDelegate:self];
+		[searchField setAction:@selector(searchFieldAction:)];
+	}
+	
+	if(quickSearchTextDict){
+		if([quickSearchTextDict objectForKey:quickSearchKey]){
+			[searchCellOrTextField setStringValue:
+				[quickSearchTextDict objectForKey:quickSearchKey]];
+		}else{
+			[searchCellOrTextField setStringValue:@""];
+		}
+	}else{
+		quickSearchTextDict = [[NSMutableDictionary dictionaryWithCapacity:4] retain];
+	}
 	
 	[self setSelectedSearchFieldKey:quickSearchKey];
 	
-    if(quickSearchTextDict){
-        if([quickSearchTextDict objectForKey:quickSearchKey]){
-            [searchCell setStringValue:
-                [quickSearchTextDict objectForKey:quickSearchKey]];
-        }else{
-            [searchCell setStringValue:@""];
-        }
-    }else{
-        quickSearchTextDict = [[NSMutableDictionary dictionaryWithCapacity:4] retain];
-    }
-	
 }
 
-
 - (IBAction)searchFieldChangeKey:(id)sender{
-	[self setSelectedSearchFieldKey:[sender title]];
+	if([sender isKindOfClass:[NSPopUpButton class]]){
+		[self setSelectedSearchFieldKey:[sender titleOfSelectedItem]];
+	}else{
+		[self setSelectedSearchFieldKey:[sender title]];
+	}
 }
 
 - (void)setSelectedSearchFieldKey:(NSString *)newKey{
 
-		
+	id searchCellOrTextField = nil;
+	
     [[OFPreferenceWrapper sharedPreferenceWrapper] setObject:newKey
                                                       forKey:BDSKCurrentQuickSearchKey];
 	
-	NSSearchFieldCell *searchCell = [searchField cell];
+	if(BDSK_USING_JAGUAR){
+		searchCellOrTextField = searchFieldTextField;
+	}else{
+		
+		NSSearchFieldCell *searchCell = [searchField cell];
+		searchCellOrTextField = searchCell;	
+		[searchCell setPlaceholderString:[NSString stringWithFormat:@"Search by %@",newKey]];
 	
-    [searchCell setPlaceholderString:[NSString stringWithFormat:@"Search by %@",newKey]];
-    if([quickSearchTextDict objectForKey:newKey]){
-        [searchCell setStringValue:[quickSearchTextDict objectForKey:newKey]];
+		NSMenu *templateMenu = [searchCell searchMenuTemplate];
+		if(![quickSearchKey isEqualToString:newKey]){
+			// find current key's menuitem and set it to NSOffState
+			NSMenuItem *oldItem = [templateMenu itemWithTitle:quickSearchKey];
+			[oldItem setState:NSOffState];	
+		}
+		
+		// set new key's menuitem to NSOnState
+		NSMenuItem *newItem = [templateMenu itemWithTitle:newKey];
+		[newItem setState:NSOnState];
+		[searchCell setSearchMenuTemplate:templateMenu];
+		
+		if(newKey != quickSearchKey){
+			
+			
+			[newKey retain];
+			[quickSearchKey release];
+			quickSearchKey = newKey;
+		}
+		
+	}
+	
+	NSString *newQueryString = [quickSearchTextDict objectForKey:newKey];
+    if(newQueryString){
+        [searchCellOrTextField setStringValue:newQueryString];
     }else{
-        [searchCell setStringValue:@""];
+        [searchCellOrTextField setStringValue:@""];
+		newQueryString = @"";
     }
-
-	NSMenu *templateMenu = [searchCell searchMenuTemplate];
-	if(![quickSearchKey isEqualToString:newKey]){
-		// find current key's menuitem and set it to NSOffState
-		NSMenuItem *oldItem = [templateMenu itemWithTitle:quickSearchKey];
-		[oldItem setState:NSOffState];	
-	}
-	
-	// set new key's menuitem to NSOnState
-	NSMenuItem *newItem = [templateMenu itemWithTitle:newKey];
-	[newItem setState:NSOnState];
-	[searchCell setSearchMenuTemplate:templateMenu];
-	
-	if(newKey != quickSearchKey){
+ 
+	NSLog(@"in setSelectedSearchFieldKey, newQueryString is [%@]", newQueryString);
+	[self hidePublicationsWithoutSubstring:newQueryString
+								   inField:quickSearchKey];
 		
-		
-		[newKey retain];
-		[quickSearchKey release];
-		quickSearchKey = newKey;
-	}
-    [self searchFieldAction:searchCell];
 }
 
 - (IBAction)quickSearchAddField:(id)sender{
@@ -781,7 +831,22 @@ stringByAppendingPathComponent:@"BibDesk"]; */
     }
 }
 
+- (IBAction)clearQuickSearch:(id)sender{
+    [searchFieldTextField setStringValue:@""];
+    [self controlTextDidChange:nil];
+}
+
+- (void)controlTextDidChange:(NSNotification *)notif{
+	if([notif object] == searchFieldTextField){
+		NSLog(@"ctdc");
+		[self searchFieldAction:searchFieldTextField];
+	}
+}
+
+//@@ jaguar compat: need to add controlTextDidChange:
+
 - (IBAction)searchFieldAction:(id)sender{
+	NSLog(@"in searchFieldAction, sender is %@, stringValue is %@", sender, [sender stringValue]);
 	[self hidePublicationsWithoutSubstring:[sender stringValue] inField:quickSearchKey];
 }
 
@@ -794,7 +859,7 @@ stringByAppendingPathComponent:@"BibDesk"]; */
 	
     [[self currentView] deselectAll:self];
 	
-	// NSLog(@"looking for [%@] in [%@]",substring, field);
+	NSLog(@"looking for [%@] in [%@]",substring, field);
     
     if(![substring isEqualToString:@""]){
         while(pub = [e nextObject]){
