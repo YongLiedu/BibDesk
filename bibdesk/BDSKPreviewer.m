@@ -137,10 +137,10 @@ static unsigned threadCount = 0;
     if([self previewTexTasks:@"bibpreview.tex"]){ // run the TeX tasks
     
       if (myThreadCount >= threadCount){
-	  if([splitView lockFocusIfCanDraw]) {  // Apple Thread Safety docs say to do this if a thread is drawing in a view
+	  if([tabView lockFocusIfCanDraw]) {  // Apple Thread Safety docs say to do this if a thread is drawing in a view
 	      [imagePreviewView loadFromPath:finalPDFPath];
 	      [self rtfPreviewFromData:[self rtfDataPreview]];
-	      [splitView unlockFocus];
+	      [tabView unlockFocus];
 	  }
       } else{
 	  return NO;
@@ -191,6 +191,7 @@ static unsigned threadCount = 0;
     [pdftex1 setLaunchPath:pdftexbinpath];
     [pdftex1 setArguments:[NSArray arrayWithObjects:@"-interaction=batchmode", [NSString stringWithString:fileName],
         nil ]];
+    [pdftex1 setStandardOutput:[NSFileHandle fileHandleWithNullDevice]];
     [pdftex1 launch];
     [pdftex1 waitUntilExit];
 
@@ -198,6 +199,7 @@ static unsigned threadCount = 0;
     [bibtex setCurrentDirectoryPath:applicationSupportPath];
     [bibtex setLaunchPath:bibtexbinpath];
     [bibtex setArguments:[NSArray arrayWithObjects:[fileName stringByDeletingPathExtension],nil ]];
+    [bibtex setStandardOutput:[NSFileHandle fileHandleWithNullDevice]];
     [bibtex launch];
     [bibtex waitUntilExit];
 
@@ -206,6 +208,7 @@ static unsigned threadCount = 0;
     [pdftex2 setLaunchPath:pdftexbinpath];
     [pdftex2 setArguments:[NSArray arrayWithObjects:@"-interaction=batchmode",[NSString stringWithString:fileName],
         nil ]];
+    [pdftex2 setStandardOutput:[NSFileHandle fileHandleWithNullDevice]];
     [pdftex2 launch];
     [pdftex2 waitUntilExit];
 
@@ -217,6 +220,8 @@ static unsigned threadCount = 0;
     [latex2rtf setArguments:[NSArray arrayWithObjects:[NSString stringWithString:@"-P"],
 	                   [[NSBundle mainBundle] resourcePath],
 	                   [NSString stringWithString:fileName],nil ]];
+    [latex2rtf setStandardOutput:[NSFileHandle fileHandleWithNullDevice]];
+    [latex2rtf setStandardError:[NSFileHandle fileHandleWithNullDevice]];
     [latex2rtf launch];
     [latex2rtf waitUntilExit];
     
@@ -308,6 +313,7 @@ static unsigned threadCount = 0;
     [pdftex1 setLaunchPath:pdftexbinpath];
     [pdftex1 setArguments:[NSArray arrayWithObjects:@"-interaction=batchmode", [NSString stringWithString:@"bibpreview.tex"],
         nil ]];
+    [pdftex1 setStandardOutput:[NSFileHandle fileHandleWithNullDevice]];
     [pdftex1 launch];
     [pdftex1 waitUntilExit];
 
@@ -315,6 +321,7 @@ static unsigned threadCount = 0;
     [bibtex setCurrentDirectoryPath:applicationSupportPath];
     [bibtex setLaunchPath:bibtexbinpath];
     [bibtex setArguments:[NSArray arrayWithObjects:[NSString stringWithString:@"bibpreview"],nil ]];
+    [bibtex setStandardOutput:[NSFileHandle fileHandleWithNullDevice]];
     [bibtex launch];
     [bibtex waitUntilExit];
 
@@ -323,6 +330,7 @@ static unsigned threadCount = 0;
     [pdftex2 setLaunchPath:pdftexbinpath];
     [pdftex2 setArguments:[NSArray arrayWithObjects:@"-interaction=batchmode",[NSString stringWithString:@"bibpreview.tex"],
         nil ]];
+    [pdftex2 setStandardOutput:[NSFileHandle fileHandleWithNullDevice]];
     [pdftex2 launch];
     [pdftex2 waitUntilExit];
 
