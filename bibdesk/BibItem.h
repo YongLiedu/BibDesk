@@ -205,7 +205,7 @@
 	@abstract   basic setter for the cite key, with notification and undo.
 	@discussion -
 */
-- (void)setCiteKey:(NSString *)newCiteKey withModDate:(NSCalendarData *)date;
+- (void)setCiteKey:(NSString *)newCiteKey withModDate:(NSCalendarDate *)date;
 
 /*!
 	@method     citeKey

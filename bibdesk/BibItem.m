@@ -558,7 +558,7 @@ void _setupFonts(){
     [self setCiteKey:newCiteKey withModDate:[NSCalendarDate date]];
 }
 
-- (void)setCiteKey:(NSString *)newCiteKey withModDate:(NSCalendarData *)date{
+- (void)setCiteKey:(NSString *)newCiteKey withModDate:(NSCalendarDate *)date{
     if ([self undoManager]) {
         [[[self undoManager] prepareWithInvocationTarget:self] setCiteKey:citeKey];
         [[self undoManager] setActionName:NSLocalizedString(@"Change Cite Key",@"")];
