@@ -50,6 +50,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
     [[self window] setDelegate:self];
     [[self window] registerForDraggedTypes:[NSArray arrayWithObjects:
             NSStringPboardType, NSFilenamesPboardType, nil]];					
+    macroTextFieldWC = [[MacroTextFieldWindowController alloc] init];
 
 #if DEBUG
     NSLog(@"BibEditor alloc");
@@ -266,13 +267,16 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 											   object:theDocument];
 
 	[authorTableView setDoubleAction:@selector(showPersonDetailCmd:)];
+
+    [bibFields setDelegate:self];
     [self setWindowFrameAutosaveName:@"BibEditor window autosave name"];
+
 }
 
 - (void)dealloc{
-#if DEBUG
+//#if DEBUG
     NSLog(@"BibEditor dealloc");
-#endif
+//#endif
     // release theBib? no...
     
     // This fixes some seriously weird issues with Jaguar, and possibly 10.3.  The tableview messages its datasource/delegate (BibEditor) after the editor is dealloced, which causes a crash.
@@ -614,6 +618,9 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 	else if ([menuItem action] == @selector(downloadLinkedFileAsLocalUrl:)) {
 		return NO;
 	}
+    else if ([menuItem action] == @selector(editSelectedFieldAsRawBibTeX:)) {
+        return ([bibFields selectedCell] != nil);
+    }
 	return YES;
 }
 
@@ -923,11 +930,89 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 
 #pragma mark Text Change handling
 
+- (BOOL)control:(NSControl *)control textShouldBeginEditing:(NSText *)fieldEditor{
+
+    if (control != bibFields) return YES;
+    
+    NSFormCell *selectedCell = [bibFields selectedCell];
+    
+    NSString *value = [theBib valueOfField:[selectedCell title]];
+    
+    if([value isKindOfClass:[BDSKComplexString class]] && 
+       [(BDSKComplexString *)value isComplex]){
+        [self editFormCellAsMacro:selectedCell];
+        return NO;
+    }else{
+        // edit it in the usual way.
+        return YES;
+    }
+}
+
+- (IBAction)editSelectedFieldAsRawBibTeX:(id)sender{
+    NSFormCell *cell = [bibFields selectedCell];
+    if(cell == nil) return;
+    
+    NSLog(@"edit as raw: %@", cell);
+    [self editFormCellAsMacro:cell];
+}
+
+- (void)editFormCellAsMacro:(NSFormCell *)cell{
+    float titleWidth = [cell titleWidth];
+    int cellRow = 0;
+    int cellCol = 0;
+    BOOL foundCell = [bibFields getRow:&cellRow
+                                column:&cellCol
+                                ofCell:cell];
+    if(!foundCell)[NSException raise:NSInternalInconsistencyException
+                              format:@"Called editFormCellAsMacro with wrong cell."];
+    
+    NSRect frame = [bibFields cellFrameAtRow:cellRow 
+                                      column:0]; // we want column 0.
+    
+    NSPoint loc = [bibFields convertPoint:frame.origin toView:nil];
+    loc = [[self window] convertBaseToScreen:loc];
+    
+    loc.x = loc.x + titleWidth + 4; // 4 is a magic number based on the nib
+    loc.y = loc.y;
+    
+    // make sure it's a complex string:
+    NSString *value = [theBib valueOfField:[cell title]];
+    if(![value isKindOfClass:[BDSKComplexString class]]){
+        value = [BDSKComplexString complexStringWithString:value
+                                             macroResolver:theDocument];
+    }
+    
+    [macroTextFieldWC startEditingValue:(BDSKComplexString *)value
+                             atLocation:loc
+                                  width:frame.size.width - titleWidth
+                               withFont:nil
+                              fieldName:[cell title]];
+        
+    [[NSNotificationCenter defaultCenter] addObserver:self
+                                             selector:@selector(handleMacroTextFieldWindowWillCloseNotification:)
+                                                 name:BDSKMacroTextFieldWindowWillCloseNotification
+                                               object:macroTextFieldWC];
+    
+}
+
+- (void)handleMacroTextFieldWindowWillCloseNotification:(NSNotification *)notification{
+    NSDictionary *userInfo = [notification userInfo];
+    NSString *fieldName = [userInfo objectForKey:@"fieldName"];
+    NSString *value = [userInfo objectForKey:@"complexStringValue"];
+    
+    [self recordChangingField:fieldName toValue:value];
+
+    
+    [[NSNotificationCenter defaultCenter] removeObserver:self
+                                                    name:BDSKMacroTextFieldWindowWillCloseNotification
+                                                  object:macroTextFieldWC];
+}
+
 - (void)controlTextDidEndEditing:(NSNotification *)aNotification{
     // here for undo
 }
 
-// sent by the NSForm
+// sent by the NSForm when we are done editing a field if we used the formcell.
 - (IBAction)textFieldDidEndEditing:(id)sender{
     NSCell *sel = [sender cellAtIndex: [sender indexOfSelectedItem]];
     NSString *title = [sel title];
@@ -936,26 +1021,30 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 	
     if([sender indexOfSelectedItem] != -1 &&
 	   ![value isEqualToString:prevValue]){
-		
-		[theBib setField:title toValue:value];
-		
-		// autogenerate cite key if we have enough information
-		if ( [[OFPreferenceWrapper sharedPreferenceWrapper] integerForKey:BDSKCiteKeyAutogenerateKey] == NSOnState &&
-			 [theBib canSetCiteKey] ) {
-			[self generateCiteKey:sender];
-		}
-		
-		// autofile paper if we have enough information
-		if ( [[OFPreferenceWrapper sharedPreferenceWrapper] integerForKey:BDSKFilePapersAutomaticallyKey] == NSOnState &&
-			 [theBib needsToBeFiled] && [theBib canSetLocalUrl] ) {
-			[[BibFiler sharedFiler] filePapers:[NSArray arrayWithObject:theBib] fromDocument:[theBib document] ask:NO];
-			[theBib setNeedsToBeFiled:NO]; // unset the flag even when we fail, to avoid retrying at every edit
-		}
-		
-		[[NSNotificationCenter defaultCenter] postNotificationName:BDSKDocumentUpdateUINotification
-															object:nil
-														  userInfo:nil];
-	}
+		[self recordChangingField:title toValue:value];
+    }
+}
+
+- (void)recordChangingField:(NSString *)fieldName toValue:(NSString *)value{
+
+    [theBib setField:fieldName toValue:value];
+    
+    // autogenerate cite key if we have enough information
+    if ( [[OFPreferenceWrapper sharedPreferenceWrapper] integerForKey:BDSKCiteKeyAutogenerateKey] == NSOnState &&
+         [theBib canSetCiteKey] ) {
+        [self generateCiteKey:nil];
+    }
+    
+    // autofile paper if we have enough information
+    if ( [[OFPreferenceWrapper sharedPreferenceWrapper] integerForKey:BDSKFilePapersAutomaticallyKey] == NSOnState &&
+         [theBib needsToBeFiled] && [theBib canSetLocalUrl] ) {
+        [[BibFiler sharedFiler] filePapers:[NSArray arrayWithObject:theBib] fromDocument:[theBib document] ask:NO];
+        [theBib setNeedsToBeFiled:NO]; // unset the flag even when we fail, to avoid retrying at every edit
+    }
+    
+    [[NSNotificationCenter defaultCenter] postNotificationName:BDSKDocumentUpdateUINotification
+                                                        object:nil
+                                                      userInfo:nil];
 }
 
 - (void)bibDidChange:(NSNotification *)notification{

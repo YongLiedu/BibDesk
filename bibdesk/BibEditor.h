@@ -31,9 +31,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 #import "BibPersonController.h"
 #import "RYZImagePopUpButton.h"
 #import "RYZImagePopUpButtonCell.h"
-
-
-
+#import "MacroTextFieldWindowController.h"
 
 
 /*!
@@ -110,6 +108,9 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 	IBOutlet NSPanel *addAuthorSheet;
 	IBOutlet NSTextView *addAuthorTextView;
 
+    // Macro editing stuff
+    MacroTextFieldWindowController *macroTextFieldWC;
+
 }
 
 /*!
@@ -180,6 +181,24 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
                  returnCode:(int) returnCode
                 contextInfo:(void *)contextInfo;
 
+
+/*!
+    @method     editSelectedFieldAsRawBibTeX:
+    @abstract   edits the current field as a macro.
+    @discussion This is not necessary if the field is already a macro.
+    @param      sender (description)
+    @result     (description)
+*/
+- (IBAction)editSelectedFieldAsRawBibTeX:(id)sender;
+
+/*!
+    @method     recordChangingField:toValue:
+    @abstract   sets field to value in theBib and does other stuff
+    @discussion factored out because setting field and doing other things is done from more than one place.
+    @param      fieldName (description)
+    @param      value (description)
+*/
+- (void)recordChangingField:(NSString *)fieldName toValue:(NSString *)value;
 
 /*!
     @method     finalizeChanges
@@ -363,5 +382,15 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 - (void)addAuthorSheetDidEnd:(NSWindow *)sheet
 				  returnCode:(int) returnCode
 				 contextInfo:(void *)contextInfo;
+
+#pragma mark Macro support
+    
+/*!
+    @method     editFormCellAsMacro:
+    @abstract   pops up a window above the form cell with extra info about a macro.
+    @discussion (description)
+    @param      cell (description)
+*/
+- (void)editFormCellAsMacro:(NSFormCell *)cell;
 
 @end
