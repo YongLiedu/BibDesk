@@ -28,15 +28,49 @@ static NSString*	ToggleCiteDrawerToolbarItemIdentifier 	= @"Toggle Cite Drawer I
 @implementation BibDocument (Toolbar)
 
 // ----------------------------------------------------------------------------------------
-
 // toolbar stuff
-
 // ----------------------------------------------------------------------------------------
 
+// label, palettelabel, toolTip, action, and menu can all be NULL, depending upon what you want the item to do
+static void addToolbarItem(NSMutableDictionary *theDict,NSString *identifier,NSString *label,NSString *paletteLabel,NSString *toolTip,id target,SEL settingSelector, id itemContent,SEL action, NSMenu * menu)
+{
+    NSMenuItem *mItem;
+    // here we create the NSToolbarItem and setup its attributes in line with the parameters
+    NSToolbarItem *item = [[[NSToolbarItem alloc] initWithItemIdentifier:identifier] autorelease];
+    [item setLabel:label];
+    [item setPaletteLabel:paletteLabel];
+    [item setToolTip:toolTip];
+    [item setTarget:target];
+    // the settingSelector parameter can either be @selector(setView:) or @selector(setImage:).  Pass in the right
+    // one depending upon whether your NSToolbarItem will have a custom view or an image, respectively
+    // (in the itemContent parameter).  Then this next line will do the right thing automatically.
+    [item performSelector:settingSelector withObject:itemContent];
+    [item setAction:action];
+    // If this NSToolbarItem is supposed to have a menu "form representation" associated with it (for text-only mode),
+    // we set it up here.  Actually, you have to hand an NSMenuItem (not a complete NSMenu) to the toolbar item,
+    // so we create a dummy NSMenuItem that has our real menu as a submenu.
+    if (menu!=NULL)
+    {
+        // we actually need an NSMenuItem here, so we construct one
+        mItem=[[[NSMenuItem alloc] init] autorelease];
+        [mItem setSubmenu: menu];
+        [mItem setTitle: [menu title]];
+        [item setMenuFormRepresentation:mItem];
+    }
+    // Now that we've setup all the settings for this new toolbar item, we add it to the dictionary.
+    // The dictionary retains the toolbar item for us, which is why we could autorelease it when we created
+    // it (above).
+    [theDict setObject:item forKey:identifier];
+}
+
+
+// called from WindowControllerDidLoadNib.
 - (void) setupToolbar {
     // Create a new toolbar instance, and attach it to our document window
     NSToolbar *toolbar = [[[NSToolbar alloc] initWithIdentifier:BibDocToolbarIdentifier] autorelease];
 
+    toolbarItems=[[NSMutableDictionary dictionary] retain];
+    
     // Set up toolbar properties: Allow customization, give a default display mode, and remember state in user defaults
     [toolbar setAllowsUserCustomization: YES];
     [toolbar setAutosavesConfiguration: YES];
@@ -45,100 +79,99 @@ static NSString*	ToggleCiteDrawerToolbarItemIdentifier 	= @"Toggle Cite Drawer I
     // We are the delegate
     [toolbar setDelegate: self];
 
-    // this is a bad hack. i'm probably going to leak tons of NSButtons.
-    [sortKeyButton retain];
+    // add toolbaritems:
 
+    addToolbarItem(toolbarItems, NewDocToolbarItemIdentifier,
+                   NSLocalizedString(@"New",@""), NSLocalizedString(@"New Publication",@""),
+                   NSLocalizedString(@"Create New Publication",@""),
+                   self, @selector(setImage:), [NSImage imageNamed: @"newdoc"], @selector(newPub:),
+                   NULL);
+
+    addToolbarItem(toolbarItems, NewDocToolbarItemIdentifier,
+                   NSLocalizedString(@"Delete",@""), NSLocalizedString(@"Delete Publication",@""),
+                   NSLocalizedString(@"Delete Selected Publication(s)",@""),
+                   self, @selector(setImage:), [NSImage imageNamed: @"deldoc"], @selector(delPub:),
+                   NULL);
+
+    addToolbarItem(toolbarItems, EditDocToolbarItemIdentifier,
+                   NSLocalizedString(@"Edit",@""),
+                   NSLocalizedString(@"Edit Publication",@""),
+                   NSLocalizedString(@"Edit Selected Publication(s)",@""),
+                   self, @selector(setImage:), [NSImage imageNamed: @"editdoc"],
+                   @selector(editPubCmd:), NULL);
+
+    addToolbarItem(toolbarItems, QuickSearchDocToolbarItemIdentifier,
+                   NSLocalizedString(@"Substring Search",@""),
+                   NSLocalizedString(@"Substring Search",@""),
+                   NSLocalizedString(@"Search Publications",@""),
+                   self, @selector(setView:), quickSearchBox,
+                   NULL, NULL);
+    // from qstoolbaritem:
+    //[toolbarItem setMinSize:NSMakeSize(300, NSHeight([quickSearchBox frame]))];
+    //    [toolbarItem setMaxSize:NSMakeSize(400,NSHeight([quickSearchBox frame]))];
+
+    addToolbarItem(toolbarItems, PrvDocToolbarItemIdentifier,
+                   NSLocalizedString(@"Preview",@""),
+                   NSLocalizedString(@"Show Preview",@""),
+                   NSLocalizedString(@"Show PDF Preview",@""),
+                   nil, @selector(setImage:),
+                   [NSImage imageNamed: @"previewdoc"],
+                   @selector(toggleShowingPreviewPanel:), NULL);
+
+    // this one switches between outline and tableviews.
+    addToolbarItem(toolbarItems, SortByDocToolbarItemIdentifier,
+                   NSLocalizedString(@"Change View",@""),
+                   NSLocalizedString(@"Change View",@""),
+                   NSLocalizedString(@"Change the way publications are viewed.",@""),
+                   nil, @selector(setView:), sortKeyView, @selector(didChangeSortKey:), NULL);
+    
+    // this is a bad hack. i'm probably going to leak tons of NSButtons.
+    //    [sortKeyButton retain];
+
+    addToolbarItem(toolbarItems, ToggleCiteDrawerToolbarItemIdentifier,
+                   NSLocalizedString(@"Cite Drawer",@""),
+                   NSLocalizedString(@"Show Custom Citations Drawer",@""),
+                   NSLocalizedString(@"Show Custom Citations Drawer",@""),
+                   self, @selector(setImage:),
+                   [NSImage imageNamed: @"drawerToolbarImage"],
+                   @selector(toggleShowingCustomCiteDrawer:), NULL);
+    
     // Attach the toolbar to the document window
     [documentWindow setToolbar: toolbar];
 }
 
 
 
-- (NSToolbarItem *) toolbar: (NSToolbar *)toolbar itemForItemIdentifier: (NSString *) itemIdent willBeInsertedIntoToolbar:(BOOL) willBeInserted {
-    NSToolbarItem *toolbarItem = [[[NSToolbarItem alloc] initWithItemIdentifier: itemIdent] autorelease];
+- (NSToolbarItem *) toolbar: (NSToolbar *)toolbar
+      itemForItemIdentifier: (NSString *)itemIdent
+  willBeInsertedIntoToolbar:(BOOL) willBeInserted {
 
-    if ([itemIdent isEqualToString: NewDocToolbarItemIdentifier]) {
-        [toolbarItem setLabel:
-            NSLocalizedString(@"New",@"")];
-        [toolbarItem setPaletteLabel:
-            NSLocalizedString(@"New Publication",@"")];
-        [toolbarItem setToolTip:
-            NSLocalizedString(@"Create New Publication",@"")];
-        [toolbarItem setImage: [NSImage imageNamed: @"newdoc"]];
-        [toolbarItem setTarget: self];
-        [toolbarItem setAction: @selector(newPub:)];
-    } else if([itemIdent isEqualToString:DelDocToolbarItemIdentifier]){
-        [toolbarItem setLabel:
-            NSLocalizedString(@"Delete",@"")];
-        [toolbarItem setPaletteLabel:
-            NSLocalizedString(@"Delete Publication",@"")];
-        [toolbarItem setToolTip:
-            NSLocalizedString(@"Delete Selected Publication(s)",@"")];
-        [toolbarItem setImage: [NSImage imageNamed: @"deldoc"]];
-        [toolbarItem setTarget: self];
-        [toolbarItem setAction: @selector(delPub:)];
-    } else if([itemIdent isEqualToString:EditDocToolbarItemIdentifier]){
-        [toolbarItem setLabel:
-            NSLocalizedString(@"Edit",@"")];
-        [toolbarItem setPaletteLabel:
-            NSLocalizedString(@"Edit Publication",@"")];
-        [toolbarItem setToolTip:
-            NSLocalizedString(@"Edit Selected Publication",@"")];
-        [toolbarItem setImage: [NSImage imageNamed: @"editdoc"]];
-        [toolbarItem setTarget: self];
-        [toolbarItem setAction: @selector(editPubCmd:)];
-    } else if([itemIdent isEqualToString: QuickSearchDocToolbarItemIdentifier]) {
+    NSToolbarItem *newItem = [[[NSToolbarItem alloc] initWithItemIdentifier:itemIdent] autorelease];
+    NSToolbarItem *item=[toolbarItems objectForKey:itemIdent];
 
-        [toolbarItem setLabel:
-            NSLocalizedString(@"Substring Search",@"")];
-        [toolbarItem setPaletteLabel:
-            NSLocalizedString(@"Substring Search",@"")];
-        [toolbarItem setToolTip:
-            NSLocalizedString(@"Search Publications",@"")];
-        [toolbarItem setView: quickSearchBox];
-        [toolbarItem setMinSize:NSMakeSize(300, NSHeight([quickSearchBox frame]))];
-        [toolbarItem setMaxSize:NSMakeSize(400,NSHeight([quickSearchBox frame]))];
-
-    } else if([itemIdent isEqualToString: PrvDocToolbarItemIdentifier]) {
-        [toolbarItem setLabel:
-            NSLocalizedString(@"Preview",@"")];
-        [toolbarItem setPaletteLabel:
-            NSLocalizedString(@"Show Preview",@"")];
-        [toolbarItem setToolTip:
-            NSLocalizedString(@"Show PDF Preview",@"")];
-        [toolbarItem setImage: [NSImage imageNamed: @"previewdoc"]]; // get an image!
-        [toolbarItem setTarget: nil]; //nil because bibappcontroller gets it.
-        [toolbarItem setAction: @selector(toggleShowingPreviewPanel:)];
-
-    } else if([itemIdent isEqualToString: SortByDocToolbarItemIdentifier]) {
-        // this one switches between outline and tableviews.
-        [toolbarItem setLabel:
-            NSLocalizedString(@"Change View",@"")];
-        [toolbarItem setPaletteLabel:
-            NSLocalizedString(@"Change View",@"")];
-        [toolbarItem setToolTip:
-            NSLocalizedString(@"Change the way publications are viewed.",@"")];
-        
-        [toolbarItem setView:sortKeyButton];
-        [toolbarItem setMinSize:NSMakeSize(100, NSHeight([quickSearchBox frame]))];
-        [toolbarItem setMaxSize:NSMakeSize(100,NSHeight([quickSearchBox frame]))];
-    }else if([itemIdent isEqualToString: ToggleCiteDrawerToolbarItemIdentifier]){
-        [toolbarItem setLabel:
-            NSLocalizedString(@"Cite Drawer",@"")];
-        [toolbarItem setPaletteLabel:
-            NSLocalizedString(@"Show Custom Citations Drawer",@"")];
-        [toolbarItem setToolTip:
-            NSLocalizedString(@"Show Custom Citations Drawer",@"")];
-        [toolbarItem setImage: [NSImage imageNamed: @"drawerToolbarImage"]]; 
-        [toolbarItem setTarget: self];
-        [toolbarItem setAction: @selector(toggleShowingCustomCiteDrawer:)];
-
-    }else {
-        // itemIdent refered to a toolbar item that is not provide or supported by us or cocoa
-        // Returning nil will inform the toolbar self kind of item is not supported
-        toolbarItem = nil;
+    [newItem setLabel:[item label]];
+    [newItem setPaletteLabel:[item paletteLabel]];
+    if ([item view]!=NULL)
+    {
+        [newItem setView:[item view]];
     }
-    return toolbarItem;
+    else
+    {
+        [newItem setImage:[item image]];
+    }
+    [newItem setToolTip:[item toolTip]];
+    [newItem setTarget:[item target]];
+    [newItem setAction:[item action]];
+    [newItem setMenuFormRepresentation:[item menuFormRepresentation]];
+    // If we have a custom view, we *have* to set the min/max size - otherwise, it'll default to 0,0 and the custom
+    // view won't show up at all!  This doesn't affect toolbar items with images, however.
+    if ([newItem view]!=NULL)
+    {
+        [newItem setMinSize:[[item view] bounds].size];
+        [newItem setMaxSize:[[item view] bounds].size];
+    }
+
+    return newItem;
 }
 
 
@@ -161,34 +194,38 @@ static NSString*	ToggleCiteDrawerToolbarItemIdentifier 	= @"Toggle Cite Drawer I
     if([[addedItem itemIdentifier] isEqualToString: QuickSearchDocToolbarItemIdentifier]) {
         quickSearchToolbarItem = [addedItem retain];
     }else if([[addedItem itemIdentifier] isEqualToString: SortByDocToolbarItemIdentifier]){
-        sortKeyButton = [addedItem retain]; //hmmmm....
+//        sortKeyButton = [addedItem retain]; //hmmmm....
+ //       sortKeyToolbarItem = [addedItem retain]; //hmmmm....
     }else if([[addedItem itemIdentifier] isEqualToString: DelDocToolbarItemIdentifier]){
-        delPubButton = addedItem;
+//        delPubButton = addedItem;
     }else if([[addedItem itemIdentifier] isEqualToString: EditDocToolbarItemIdentifier]){
-        editPubButton = addedItem;
+//        editPubButton = addedItem;
     }
 
 }
 
-
+/*
 - (void) toolbarDidRemoveItem: (NSNotification *) notif {
     // Optional delegate method   After an item is removed from a toolbar the notification is sent   self allows
     // the chance to tear down information related to the item that may have been cached   The notification object
     // is the toolbar to which the item is being added   The item being added is found by referencing the @"item"
     // key in the userInfo
     NSToolbarItem *removedItem = [[notif userInfo] objectForKey: @"item"];
+
     if(quickSearchToolbarItem==removedItem){
-        [quickSearchToolbarItem autorelease];
-        quickSearchToolbarItem = nil;
+        // [quickSearchToolbarItem autorelease];
+        // quickSearchToolbarItem = nil;
         [quickSearchBox retain];
         [quickSearchButton retain];
         [quickSearchTextField retain];
-    }else if((id)removedItem == (id)sortKeyButton){
-        [sortKeyToolbarItem autorelease];
-        sortKeyToolbarItem = nil;
+        NSLog(@"removed quickSearchTextField");
+    }else if((id)removedItem == (id)sortKeyToolbarItem){
+        NSLog(@"removed sortKeyToolbarItem - button's retaincount is %d", [sortKeyButton retainCount]);
+       // [sortKeyToolbarItem autorelease];
+       // sortKeyToolbarItem = nil;
         [sortKeyButton retain];
     }
-}
+}*/
 
 - (BOOL) validateToolbarItem: (NSToolbarItem *) toolbarItem {
     // Optional method   self message is sent to us since we are the target of some toolbar item actions
