@@ -325,6 +325,7 @@ NSRange SafeForwardSearchRange( unsigned startLoc, unsigned seekLength, unsigned
             NSAssert( key != nil, @"Found a nil key string");
             
             [dict setObject:value forKey:key];
+            [[NSApp delegate] addString:value forCompletionEntry:key];
             
         }
         
