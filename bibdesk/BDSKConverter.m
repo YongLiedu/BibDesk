@@ -210,12 +210,9 @@ static BDSKConverter *theConverter;
 
 - (void)runConversionAlertPanel:(NSString *)tmpConv{
     NSLog(@"runConversionAlert");
-    NSString *errorString = [NSString localizedStringWithFormat:@"The accented or Unicode character \"%@\" could not be converted.  Please enter the TeX code directly in your bib file.", tmpConv];
-    int i = NSRunAlertPanel(NSLocalizedString(@"Character Conversion Error",
-				              @"Title of alert when an error happens"),
-		            NSLocalizedString(errorString,
-				              @"Informative alert text when the error happens."),
-			    @"Send e-mail", @"Edit", nil, nil);
+    int i = NSRunAlertPanel(NSLocalizedString(@"Character Conversion Error", @"Title of alert when an error happens"),
+				[NSString stringWithFormat: NSLocalizedString(@"The accented or Unicode character \"%@\" could not be converted.  Please enter the TeX code directly in your bib file.", @"Informative alert text when the error happens."), tmpConv],
+			    NSLocalizedString(@"Send e-mail", @""), NSLocalizedString(@"Edit", @""), nil, nil);
     if(i == NSAlertDefaultReturn){
 	NSString *urlString = [NSString stringWithFormat:@"mailto:bibdesk-develop@lists.sourceforge.net?subject=Character Conversion Error&body=Please enter a description of the accented character \"%@\" that failed to convert and its TeX equivalent.", tmpConv];
 	CFStringRef escapedString = CFURLCreateStringByAddingPercentEscapes(kCFAllocatorDefault, (CFStringRef)urlString, NULL, NULL, kCFStringEncodingUTF8);
