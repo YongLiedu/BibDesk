@@ -32,7 +32,7 @@ static NSColor *sStripeColor = nil;
                           writeRows:dragRows
                        toPasteboard:myPb]){
         types = [myPb types];
-        if([myPb hasType:NSStringPboardType])
+	if([[myPb availableTypeFromArray:types] isEqualToString:NSStringPboardType])
         {
             // draw the string into image
             s = [myPb stringForType:NSStringPboardType];
@@ -50,10 +50,10 @@ static NSColor *sStripeColor = nil;
             //[s drawWithFont:[NSFont systemFontOfSize:12.0] color:[NSColor textColor] alignment:NSCenterTextAlignment verticallyCenter:YES inRectangle:(NSRect){NSMakePoint(0, -2), stringSize}];
             [image unlockFocus];
 
-        }
-    }else if([myPb hasType:NSPDFPboardType]){
-        image = [[[NSImage alloc] initWithData:[myPb dataForType:NSPDFPboardType]] autorelease];
-    }else{
+        }else if([[myPb availableTypeFromArray:types] isEqualToString:@"Apple PDF pasteboard type"]){
+		image = [[[NSImage alloc] initWithData:[myPb dataForType:NSPDFPboardType]] autorelease];
+		}
+	}else{
         image = [super dragImageForRows:dragRows event:dragEvent dragImageOffset:dragImageOffset];
     }
     //*dragImageOffset = NSMakePoint(([image size].width)/2.0, 0.0);
