@@ -101,11 +101,19 @@ NSRange SafeForwardSearchRange( unsigned startLoc, unsigned seekLength, unsigned
 
         if(![scanner scanUpToString:@"{" intoString:&type]){
             *hadProblems = YES;
-            [BibTeXParser postParsingErrorNotification:@"Reference type or brace not found"
+            [BibTeXParser postParsingErrorNotification:@"Reference type not found"
                                              errorType:@"Parse Error"
                                               fileName:filePath
                                             errorRange:[fullString lineRangeForRange:NSMakeRange([scanner scanLocation], 0)]];
         }
+        
+        if([scanner scanLocation] > entryClosingBraceRange.location){
+            *hadProblems = YES;
+            [BibTeXParser postParsingErrorNotification:@"Opening brace not found for entry"
+                                             errorType:@"Parse Error"
+                                              fileName:filePath
+                                            errorRange:[fullString lineRangeForRange:NSMakeRange(entryClosingBraceRange.location, 0)]];
+        }            
         
         if([type compare:@"String" options:NSCaseInsensitiveSearch] == NSOrderedSame){ // it's a string!  add it to the dictionary
             isStringValue = YES;
