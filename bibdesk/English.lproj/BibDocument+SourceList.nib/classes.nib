@@ -4,6 +4,31 @@
         {CLASS = BDSKDragOutlineView; LANGUAGE = ObjC; SUPERCLASS = NSOutlineView; }, 
         {CLASS = BDSKDragTableView; LANGUAGE = ObjC; SUPERCLASS = NSTableView; }, 
         {
+            ACTIONS = {
+                makeNewAuthorCollection = id; 
+                makeNewExternalSourceCollection = id; 
+                makeNewNoteCollection = id; 
+                makeNewPublicationCollection = id; 
+                newPub = id; 
+            }; 
+            CLASS = BDSKLibraryController; 
+            LANGUAGE = ObjC; 
+            OUTLETS = {
+                addSourceListItemButton = NSButton; 
+                currentItemDisplayView = NSView; 
+                editExportSettingsWindow = NSWindow; 
+                exporterEnabledCheckButton = NSButton; 
+                exporterSelectionPopUp = NSPopUpButton; 
+                exporterSubView = NSView; 
+                infoLine = NSTextField; 
+                mainSplitView = NSSplitView; 
+                searchField = NSSearchField; 
+                sourceList = NSOutlineView; 
+                sourceListActionMenu = NSMenu; 
+            }; 
+            SUPERCLASS = NSWindowController; 
+        }, 
+        {
             CLASS = BDSKPopUpButtonCell; 
             LANGUAGE = ObjC; 
             SUPERCLASS = NSPopUpButtonCell; 
