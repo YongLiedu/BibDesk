@@ -174,7 +174,9 @@ static unsigned threadCount = 0;
             [workingLock unlock];          
             [pool release];
             return NO;
-        } // if the tex task failed
+        }
+    } else {
+        NSLog(@"Task failure in -[%@ %@]", [self class], NSStringFromSelector(_cmd));
     }
     // Pool for MT
     [pool release];
@@ -215,7 +217,6 @@ static unsigned threadCount = 0;
     
     NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
     
-	int rv;
     NSTask *pdftex1;
     NSTask *pdftex2;
     NSTask *bibtex;
@@ -233,30 +234,19 @@ static unsigned threadCount = 0;
     }
     
     if(![[NSFileManager defaultManager] fileExistsAtPath:pdftexbinpath]){
-#warning need more user-level errors in PDFPreviewer.
-	    rv = NSRunAlertPanel(NSLocalizedString(@"Incorrect path for pdflatex.",@""),
-							 NSLocalizedString(@"There is no file at the path to pdflatex in the Preview Preference pane. Press \"Go to Preferences\" to either install TeX or set the Path. If you've installed the fink distribution the correct path probably is /sw/bin/pdflatex",@""),
-							 NSLocalizedString(@"OK",@"OK"),NSLocalizedString(@"Go to Preferences",@""),nil);
-     //   NSLog(@" , if you've installed with fink try setting the pdflatex path to /sw/bin/pdflatex?");
-	    if (rv == NSAlertAlternateReturn){
-				[[OAPreferenceController sharedPreferenceController] showPreferencesPanel:self];
-				[[OAPreferenceController sharedPreferenceController] setCurrentClientByClassName:@"BibPref_TeX"];
-		}
-
+        [NSException raise:@"BDSKPreviewerPathNotFound" format:@"File does not exist at %@", pdftexbinpath];
+        [workingLock lock];
+        working = NO;
+        [workingLock unlock];        
         [pool release];
         return NO;
     }
-    if(![[NSFileManager defaultManager] fileExistsAtPath:bibtexbinpath]){
-        rv = NSRunAlertPanel(NSLocalizedString(@"Incorrect path for bibtex.",@""),
-							 NSLocalizedString(@"There is no file at the path to bibtex in the Preview Preference pane. Press \"Go to Preferences\" to either install TeX or set the Path. If you've installed the fink distribution the correct path probably is /sw/bin/bibtex",@""),
-							 NSLocalizedString(@"OK",@"OK"),NSLocalizedString(@"Go to Preferences",@""),nil);
-     //   NSLog(@" , if you've installed with fink try setting the pdflatex path to /sw/bin/pdflatex?");
-	    if (rv == NSAlertAlternateReturn){
-				[[OAPreferenceController sharedPreferenceController] showPreferencesPanel:self];
-				[[OAPreferenceController sharedPreferenceController] setCurrentClientByClassName:@"BibPref_TeX"];
-		}
-
-       [pool release];
+    if(![[NSFileManager defaultManager] fileExistsAtPath:bibtexbinpath]){        
+        [NSException raise:@"BDSKPreviewerPathNotFound" format:@"File does not exist at %@", bibtexbinpath];
+        [workingLock lock];
+        working = NO;
+        [workingLock unlock];        
+        [pool release];
         return NO;
     }
 
@@ -266,24 +256,46 @@ static unsigned threadCount = 0;
     
     // Now start the tex task fun.
 
-    //FIXME = we need to deal with errors better...
-
     pdftex1 = [[NSTask alloc] init];
     [pdftex1 setCurrentDirectoryPath:applicationSupportPath];
     [pdftex1 setLaunchPath:pdftexbinpath];
     [pdftex1 setArguments:[NSArray arrayWithObjects:@"-interaction=batchmode", [NSString stringWithString:fileName],
         nil ]];
     [pdftex1 setStandardOutput:[NSFileHandle fileHandleWithNullDevice]];
-    [pdftex1 launch];
-    [pdftex1 waitUntilExit];
+
+    NS_DURING
+        [pdftex1 launch];
+        [pdftex1 waitUntilExit];
+    NS_HANDLER
+        if([pdftex1 isRunning])
+            [pdftex1 terminate];
+        NSLog(@"%@ %@ failed", [pdftex1 description], [pdftex1 launchPath]);
+        [pdftex1 release];
+        [pool release];
+        return NO;
+    NS_ENDHANDLER
+    
+    [pdftex1 release];
 
     bibtex = [[NSTask alloc] init];
     [bibtex setCurrentDirectoryPath:applicationSupportPath];
     [bibtex setLaunchPath:bibtexbinpath];
     [bibtex setArguments:[NSArray arrayWithObjects:[fileName stringByDeletingPathExtension],nil ]];
     [bibtex setStandardOutput:[NSFileHandle fileHandleWithNullDevice]];
-    [bibtex launch];
-    [bibtex waitUntilExit];
+
+    NS_DURING
+        [bibtex launch];
+        [bibtex waitUntilExit];
+    NS_HANDLER
+        if([bibtex isRunning])
+            [bibtex terminate];
+        NSLog(@"%@ %@ failed", [bibtex description], [bibtex launchPath]);
+        [bibtex release];
+        [pool release];
+        return NO;
+    NS_ENDHANDLER
+    
+    [bibtex release];
 
     pdftex2 = [[NSTask alloc] init];
     [pdftex2 setCurrentDirectoryPath:applicationSupportPath];
@@ -291,8 +303,20 @@ static unsigned threadCount = 0;
     [pdftex2 setArguments:[NSArray arrayWithObjects:@"-interaction=batchmode",[NSString stringWithString:fileName],
         nil ]];
     [pdftex2 setStandardOutput:[NSFileHandle fileHandleWithNullDevice]];
-    [pdftex2 launch];
-    [pdftex2 waitUntilExit];
+    
+    NS_DURING
+        [pdftex2 launch];
+        [pdftex2 waitUntilExit];
+    NS_HANDLER
+        if([pdftex2 isRunning])
+            [pdftex2 terminate];
+        NSLog(@"%@ %@ failed", [pdftex2 description], [pdftex2 launchPath]);
+        [pdftex2 release];
+        [pool release];
+        return NO;
+    NS_ENDHANDLER
+    
+    [pdftex2 release];
 
     // This task runs latex2rtf on our tex file to generate bibpreview.rtf
     latex2rtf = [[NSTask alloc] init];
@@ -304,14 +328,20 @@ static unsigned threadCount = 0;
 	                   [NSString stringWithString:fileName],nil ]];
     [latex2rtf setStandardOutput:[NSFileHandle fileHandleWithNullDevice]];
     [latex2rtf setStandardError:[NSFileHandle fileHandleWithNullDevice]];
-    [latex2rtf launch];
-    [latex2rtf waitUntilExit];
     
-    [pdftex1 release];
-    [bibtex release];
-    [pdftex2 release];
-    [latex2rtf release];
+    NS_DURING
+        [latex2rtf launch];
+        [latex2rtf waitUntilExit];
+    NS_HANDLER
+        if([latex2rtf isRunning])
+            [latex2rtf terminate];
+        NSLog(@"%@ %@ failed", [latex2rtf description], [latex2rtf launchPath]);
+        [latex2rtf release];
+        [pool release];
+        return NO;
+    NS_ENDHANDLER
 
+    [latex2rtf release];
     [pool release];
     return YES;
 
@@ -360,33 +390,22 @@ static unsigned threadCount = 0;
     
     
     if(![[NSFileManager defaultManager] fileExistsAtPath:pdftexbinpath]){
-#warning need more user-level errors in PDFPreviewer.
-	    rv = NSRunAlertPanel(NSLocalizedString(@"Incorrect path for pdflatex.",@""),
-							 NSLocalizedString(@"There is no file at the path to pdflatex in the Preview Preference pane. Press \"Go to Preferences\" to either install TeX or set the Path. If you've installed the fink distribution the correct path probably is /sw/bin/pdflatex",@""),
-							 NSLocalizedString(@"OK",@"OK"),NSLocalizedString(@"Go to Preferences",@""),nil);
-     //   NSLog(@" , if you've installed with fink try setting the pdflatex path to /sw/bin/pdflatex?");
-	    if (rv == NSAlertAlternateReturn){
-				[[OAPreferenceController sharedPreferenceController] showPreferencesPanel:self];
-				[[OAPreferenceController sharedPreferenceController] setCurrentClientByClassName:@"BibPref_TeX"];
-		}
-
+        [NSException raise:@"BDSKPreviewerPathNotFound" format:@"File does not exist at %@", pdftexbinpath];
+        [workingLock lock];
+        working = NO;
+        [workingLock unlock];        
         [pool release];
-        return NO;
+        return nil;
     }
-    if(![[NSFileManager defaultManager] fileExistsAtPath:bibtexbinpath]){
-        rv = NSRunAlertPanel(NSLocalizedString(@"Incorrect path for bibtex.",@""),
-							 NSLocalizedString(@"There is no file at the path to bibtex in the Preview Preference pane. Press \"Go to Preferences\" to either install TeX or set the Path. If you've installed the fink distribution the correct path probably is /sw/bin/bibtex",@""),
-							 NSLocalizedString(@"OK",@"OK"),NSLocalizedString(@"Go to Preferences",@""),nil);
-     //   NSLog(@" , if you've installed with fink try setting the pdflatex path to /sw/bin/pdflatex?");
-	    if (rv == NSAlertAlternateReturn){
-				[[OAPreferenceController sharedPreferenceController] showPreferencesPanel:self];
-				[[OAPreferenceController sharedPreferenceController] setCurrentClientByClassName:@"BibPref_TeX"];
-		}
-
-       [pool release];
-        return NO;
+    if(![[NSFileManager defaultManager] fileExistsAtPath:bibtexbinpath]){        
+        [NSException raise:@"BDSKPreviewerPathNotFound" format:@"File does not exist at %@", bibtexbinpath];
+        [workingLock lock];
+        working = NO;
+        [workingLock unlock];        
+        [pool release];
+        return nil;
     }
-   
+    
     if(working) return nil;
 
     [workingLock lock];
