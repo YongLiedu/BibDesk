@@ -86,6 +86,21 @@ NSRange SafeForwardSearchRange( unsigned startLoc, unsigned seekLength, unsigned
     [self itemsFromString:fullString error:&hadProblems frontMatter:nil filePath:[document fileName] addToDocument:document];
 }
 
+NSRange SafeBackwardSearchRange(NSRange startRange, unsigned seekLength){
+    unsigned minLoc = ( (startRange.location > seekLength) ? seekLength : startRange.location);
+    return NSMakeRange(startRange.location - minLoc, minLoc);
+}
+
+- (BOOL)isNewEntryAtRange:(NSRange)theRange inString:(NSString *)fullString{ // use this to determine if an '@' is inside braces or not
+    NSRange rbRange = [fullString rangeOfString:@"}" options:NSLiteralSearch | NSBackwardsSearch range:SafeBackwardSearchRange(theRange, theRange.location)];
+    NSRange lbRange = [fullString rangeOfString:@"{" options:NSLiteralSearch | NSBackwardsSearch range:SafeBackwardSearchRange(theRange, theRange.location)];
+    if(rbRange.location >= lbRange.location && rbRange.location != NSNotFound){ // it's an unbraced @, so should be a new entry ( '=' handles NSNotFound for both, as in the initial @ )
+        return YES;
+    } else {
+        return NO;
+    }
+}    
+
 - (NSMutableArray *)itemsFromString:(NSString *)fullString error:(BOOL *)hadProblems frontMatter:(NSMutableString *)frontMatter filePath:(NSString *)filePath addToDocument:(BibDocument *)document{
 
 // Potential problems with this method:
@@ -124,15 +139,14 @@ NSRange SafeForwardSearchRange( unsigned startLoc, unsigned seekLength, unsigned
     NSRange firstAtRange = [fullString rangeOfString:@"@" options:NSLiteralSearch range:NSMakeRange(0, [fullString length])];
     
     NSAssert( firstAtRange.location != NSNotFound, @"This does not appear to be a BibTeX entry.  Perhaps due to an incorrect encoding guess?" );
-
-#warning ARM: these checks are wrong! check brace depth
-    // if the @ is escaped, get the next one
-    while(firstAtRange.location >= 1 && [[fullString substringWithRange:NSMakeRange(firstAtRange.location - 1, 1)] isEqualToString:@"\\"])
+    
+    // if the @ is unbraced, get the next one
+    while(firstAtRange.location >= 1 && ![self isNewEntryAtRange:firstAtRange inString:fullString])
         firstAtRange = [fullString rangeOfString:@"@" options:NSLiteralSearch range:SafeForwardSearchRange(firstAtRange.location + 1, fullStringLength - firstAtRange.location - 1, fullStringLength)];
 
     NSRange nextAtRange = [fullString rangeOfString:@"@" options:NSLiteralSearch range:SafeForwardSearchRange(firstAtRange.location + 1, fullStringLength - firstAtRange.location - 1, fullStringLength)];    
     // check this one to make sure the @ is not escaped; make sure there _is_ another one, though
-    while(nextAtRange.location != NSNotFound && [[fullString substringWithRange:NSMakeRange(nextAtRange.location - 1, 1)] isEqualToString:@"\\"])
+    while(nextAtRange.location != NSNotFound && ![self isNewEntryAtRange:nextAtRange inString:fullString])
         nextAtRange = [fullString rangeOfString:@"@" options:NSLiteralSearch range:SafeForwardSearchRange(nextAtRange.location + 1, fullStringLength - nextAtRange.location - 1, fullStringLength)];
 
     if(nextAtRange.location == NSNotFound)
@@ -428,11 +442,11 @@ NSRange SafeForwardSearchRange( unsigned startLoc, unsigned seekLength, unsigned
         
         [dict removeAllObjects];
         
-        firstAtRange = nextAtRange; // we know the next one is safe (unescaped)
+        firstAtRange = nextAtRange; // we know the next one is safe (unbraced)
         
         nextAtRange = [fullString rangeOfString:@"@" options:NSLiteralSearch range:SafeForwardSearchRange(firstAtRange.location + 1, fullStringLength - firstAtRange.location - 1, fullStringLength)];
-        // check for an escaped @ string...they're deadly when provoked
-        while(nextAtRange.location != NSNotFound && [[fullString substringWithRange:NSMakeRange(nextAtRange.location - 1, 1)] isEqualToString:@"\\"])
+        // check for a braced @ string
+        while(nextAtRange.location != NSNotFound && ![self isNewEntryAtRange:nextAtRange inString:fullString])
             nextAtRange = [fullString rangeOfString:@"@" options:NSLiteralSearch range:SafeForwardSearchRange(nextAtRange.location + 1, fullStringLength - nextAtRange.location - 1, fullStringLength)];
 
         if(nextAtRange.location == NSNotFound)
