@@ -42,6 +42,7 @@ static unsigned threadCount = 0;
 	usertexTemplatePath = [[applicationSupportPath stringByAppendingPathComponent:@"previewtemplate.tex"] retain];
         texTemplatePath = [[applicationSupportPath stringByAppendingPathComponent:@"bibpreview.tex"] retain];
         finalPDFPath = [[applicationSupportPath stringByAppendingPathComponent:@"bibpreview.pdf"] retain];
+	nopreviewPDFPath = [[[bundle resourcePath] stringByAppendingPathComponent:@"nopreview.pdf"] retain];
         tmpBibFilePath = [[applicationSupportPath stringByAppendingPathComponent:@"bibpreview.bib"] retain];
 	rtfFilePath = [[applicationSupportPath stringByAppendingPathComponent:@"bibpreview.rtf"] retain];
         countLock = [[NSLock alloc] init];
@@ -64,6 +65,10 @@ static unsigned threadCount = 0;
 					     selector:@selector(setWindowFrame)
 						 name:NSWindowDidBecomeKeyNotification
 					       object:[self window]];
+    [[NSNotificationCenter defaultCenter] addObserver:self
+					     selector:@selector(resetPreviews)
+						 name:NSWindowWillCloseNotification
+					       object:[self window]];
 }
 
 - (NSString *)windowNibName
@@ -72,12 +77,21 @@ static unsigned threadCount = 0;
 }
 
 - (void)windowDidLoad{
-             
-             [imagePreviewView loadFromPath:finalPDFPath];
-	     [self rtfPreviewFromData:[self rtfDataPreview]];  // set up the rtf preview also
+    [self resetPreviews];
+     // should use [self resetPreviews], but it doesn't work here for the PDFImageView
+//    [imagePreviewView loadFromPath:nopreviewPDFPath];
+//    [rtfPreviewView setString:@""];
+//    [rtfPreviewView setTextContainerInset:NSMakeSize(20, 20)];
+//    [rtfPreviewView replaceCharactersInRange:[rtfPreviewView selectedRange]
+//				  withString:@"Please select an item or items from the bibliography list for LaTeX to preview."];
 }
 
 - (BOOL)PDFFromString:(NSString *)str{
+    
+    if(str == nil){
+	[self resetPreviews];
+	return YES;
+    }
     // pool for MT
     NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
 
@@ -128,7 +142,7 @@ static unsigned threadCount = 0;
         [[[OFPreferenceWrapper sharedPreferenceWrapper] stringForKey:BDSKOutputTemplateFileKey] stringByExpandingTildeInPath]];
     s = [NSScanner scannerWithString:texFile];
 
-    //[imagePreviewView setImage:[NSImage imageNamed:@"typesetting.pdf"]];
+    [imagePreviewView setImage:[NSImage imageNamed:@"typesetting.pdf"]];
 
     // replace the appropriate style & bib files.
     style = [[OFPreferenceWrapper sharedPreferenceWrapper] objectForKey:BDSKBTStyleKey];
@@ -405,12 +419,21 @@ static unsigned threadCount = 0;
     [[self window] setFrameUsingName:@"BDSKPreviewPanel"];
 }
 
+- (void)resetPreviews{
+    [imagePreviewView loadFromPath:nopreviewPDFPath];
+    [rtfPreviewView setString:@""];
+    [rtfPreviewView setTextContainerInset:NSMakeSize(20, 20)];
+    [rtfPreviewView replaceCharactersInRange:[rtfPreviewView selectedRange]
+				  withString:@"Please select an item or items from the bibliography list for LaTeX to preview."];
+}
+
 
 - (void)dealloc{
     [[NSNotificationCenter defaultCenter] removeObserver:self];
     [usertexTemplatePath release];
     [texTemplatePath release];
     [finalPDFPath release];
+    [nopreviewPDFPath release];
     [tmpBibFilePath release];
     [rtfFilePath release];
     [applicationSupportPath release];

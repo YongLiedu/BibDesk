@@ -33,6 +33,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
     NSString *usertexTemplatePath;
     NSString *texTemplatePath;
     NSString *finalPDFPath;
+    NSString *nopreviewPDFPath;
     NSString *tmpBibFilePath;
     NSImageView *imageView;
     NSImage *image;
@@ -42,11 +43,11 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
     NSString *applicationSupportPath;
     NSLock *countLock;
     NSLock *workingLock;
-    IBOutlet NSSplitView* splitView;
+    IBOutlet NSSplitView *splitView;
     IBOutlet PDFImageView *imagePreviewView;
     NSString *rtfFilePath;
     NSAttributedString *rtfString;
-    IBOutlet NSTextView* rtfPreviewView;
+    IBOutlet NSTextView *rtfPreviewView;
     IBOutlet NSTabView *tabView;
 }
 /*!
@@ -130,7 +131,26 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 	 @result pdfView
 */
 
+/*!
+    @method     saveWindowFrame
+    @abstract   Save the window frame, as utility panels seem to have problems with this.
+*/
+- (void)saveWindowFrame;
 
+/*!
+    @method     setWindowFrame
+    @abstract   Set the window's position to the last saved state.
+*/
+- (void)setWindowFrame;
+
+
+/*!
+    @method     resetPreviews
+    @abstract   Set the preview views to a no-selection state.
+    @discussion Presently, this uses a file called nopreview.pdf which lives in the Resources folder
+		for the PDFImageView, and the same text is entered in the text view (RTF preview view).
+*/
+- (void)resetPreviews;
 
 
 @end
