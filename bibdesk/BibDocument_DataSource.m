@@ -535,7 +535,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
     BibItem *pub = nil;
 
     while(pub = [e nextObject]){
-        [a addObject:[pub authorString]];
+        [a addObject:[pub bibtexAuthorString]];
     }
     return a;
 }
@@ -546,7 +546,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
     BibItem *bib;
     if (n == 1){
         bib = [shownPublications objectAtIndex:[[[self selectedPubEnumerator] nextObject] intValue]];
-        return [bib authorString];
+        return [bib bibtexAuthorString];
     }else{
         return nil;
     }
