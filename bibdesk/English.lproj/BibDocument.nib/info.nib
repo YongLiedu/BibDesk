@@ -23,9 +23,10 @@
 	</array>
 	<key>IBOpenObjects</key>
 	<array>
-		<integer>374</integer>
 		<integer>324</integer>
+		<integer>68</integer>
 		<integer>108</integer>
+		<integer>374</integer>
 	</array>
 	<key>IBSystem Version</key>
 	<string>6I32</string>
