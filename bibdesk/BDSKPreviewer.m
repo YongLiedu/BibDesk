@@ -202,8 +202,8 @@ static unsigned threadCount = 0;
     NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
     if([tabView lockFocusIfCanDraw]){
         [imagePreviewView loadFromPath:finalPDFPath];
-        [self rtfPreviewFromData:[self rtfDataPreview]];
         [tabView unlockFocus];
+        [self rtfPreviewFromData:[self rtfDataPreview]]; // does its own locking of the view
     }
     [pool release];
 }	
@@ -477,6 +477,9 @@ static unsigned threadCount = 0;
 - (void)resetPreviews{
     if([tabView lockFocusIfCanDraw]){
         [imagePreviewView loadFromPath:nopreviewPDFPath];
+        [tabView unlockFocus];
+    }
+    if([tabView lockFocusIfCanDraw]){
         [rtfPreviewView setString:@""];
         [rtfPreviewView setTextContainerInset:NSMakeSize(20, 20)];
         [rtfPreviewView replaceCharactersInRange:[rtfPreviewView selectedRange]
