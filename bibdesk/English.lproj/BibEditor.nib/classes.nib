@@ -10,9 +10,11 @@
         }, 
         {
             ACTIONS = {
+                addAuthors = id; 
                 bibTypeDidChange = id; 
                 chooseLocalURL = id; 
                 citeKeyDidChange = id; 
+                dismissAddAuthorSheet = id; 
                 dismissAddField = id; 
                 dismissDelField = id; 
                 raiseAddField = id; 
@@ -27,6 +29,9 @@
             LANGUAGE = ObjC; 
             OUTLETS = {
                 abstractView = NSTextView; 
+                addAuthorSheet = NSPanel; 
+                addAuthorTextView = NSTextView; 
+                authorTableView = NSTableView; 
                 bibFields = NSForm; 
                 bibTypeButton = NSPopUpButton; 
                 citeKeyField = NSTextField; 
