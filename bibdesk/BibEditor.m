@@ -771,7 +771,7 @@ NSString *BDSKDateModifiedString = @"Date-Modified";
 		[theBib setField:title toValue:value];
 		
 		// autogenerate cite key if we have enough information
-		if ( [[OFPreferenceWrapper sharedPreferenceWrapper] integerForKey:BDSKCiteKeyAutogenerate] == NSOnState &&
+		if ( [[OFPreferenceWrapper sharedPreferenceWrapper] integerForKey:BDSKCiteKeyAutogenerateKey] == NSOnState &&
 			 [theBib canSetCiteKey] ) {
 			[self generateCiteKey:sender];
 		}
