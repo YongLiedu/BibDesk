@@ -1551,6 +1551,7 @@
 				F962B2ED06FF5E1D00003231,
 				F98DD664070CE82200BEC3D2,
 				F959D73C073546C300EC13A4,
+				F9863F59073AB39400F738BE,
 			);
 			isa = PBXResourcesBuildPhase;
 			runOnlyForDeploymentPostprocessing = 0;
@@ -2321,6 +2322,7 @@
 		};
 		2A37F4B8FDCFA73011CA2CEA = {
 			children = (
+				F9863F58073AB39400F738BE,
 				F959D73B073546C300EC13A4,
 				F98DD663070CE82200BEC3D2,
 				F962B2EC06FF5E1D00003231,
@@ -4108,6 +4110,19 @@
 		};
 		F96D56A5063204FA0060114C = {
 			fileRef = F96D5694063204650060114C;
+			isa = PBXBuildFile;
+			settings = {
+			};
+		};
+		F9863F58073AB39400F738BE = {
+			isa = PBXFileReference;
+			lastKnownFileType = image.pdf;
+			path = nopreview.pdf;
+			refType = 4;
+			sourceTree = "<group>";
+		};
+		F9863F59073AB39400F738BE = {
+			fileRef = F9863F58073AB39400F738BE;
 			isa = PBXBuildFile;
 			settings = {
 			};
