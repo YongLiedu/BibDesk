@@ -89,16 +89,19 @@ static BDSKConverter *theConverter;
 - (NSString *)stringByTeXifyingString:(NSString *)s{
 	// TeXify only string nodes of complex strings;
 	if([s isComplex]){
-		BDSKComplexString *cs = [s copy];
-		
+		BDSKComplexString *cs = (BDSKComplexString *)s;
 		NSEnumerator *nodeEnum = [[cs nodes] objectEnumerator];
-		BDSKStringNode *node = nil;
+		BDSKStringNode *node, *newNode;
+		NSMutableArray *nodes = [NSMutableArray arrayWithCapacity:[[cs nodes] count]];
 		
 		while(node = [nodeEnum nextObject]){
 			if([node type] == BSN_STRING)
-				[node setValue:[self stringByTeXifyingString:[node value]]];
+				newNode = [BDSKStringNode nodeWithQuotedString:[self stringByTeXifyingString:[node value]]];
+			else 
+				newNode = [node copy];
+			[nodes addObject:newNode];
 		}
-		return [cs autorelease];
+		return [NSString complexStringWithArray:nodes macroResolver:[cs macroResolver]];
 	}
 	
     // s should be in UTF-8 or UTF-16 (i'm not sure which exactly) format (since that's what the property list editor spat)
@@ -226,16 +229,19 @@ static BDSKConverter *theConverter;
 - (NSString *)stringByDeTeXifyingString:(NSString *)s{
 	// deTeXify only string nodes of complex strings;
 	if([s isComplex]){
-		BDSKComplexString *cs = [s copy];
-		
+		BDSKComplexString *cs = (BDSKComplexString *)s;
 		NSEnumerator *nodeEnum = [[cs nodes] objectEnumerator];
-		BDSKStringNode *node = nil;
+		BDSKStringNode *node, *newNode;
+		NSMutableArray *nodes = [NSMutableArray arrayWithCapacity:[[cs nodes] count]];
 		
 		while(node = [nodeEnum nextObject]){
 			if([node type] == BSN_STRING)
-				[node setValue:[self stringByDeTeXifyingString:[node value]]];
+				newNode = [BDSKStringNode nodeWithQuotedString:[self stringByDeTeXifyingString:[node value]]];
+			else 
+				newNode = [node copy];
+			[nodes addObject:newNode];
 		}
-		return [cs autorelease];
+		return [NSString complexStringWithArray:nodes macroResolver:[cs macroResolver]];
 	}
 	
     NSScanner *scanner = [NSScanner scannerWithString:s];
