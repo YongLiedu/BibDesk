@@ -103,9 +103,6 @@ NSString *BDSKDateModifiedString = @"Date-Modified";
     
     [[NSFontManager sharedFontManager] convertFont:requiredFont
                                        toHaveTrait:NSBoldFontMask];
-    
-	// make sure all changes are commited when we replace the form
-	[self finalizeChanges];
 	
 	// set up for adding all items 
     // remove all items in the NSForm (NSForm doesn't have a removeAllEntries.)
