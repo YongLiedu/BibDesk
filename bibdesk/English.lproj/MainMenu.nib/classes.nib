@@ -136,6 +136,7 @@
                 showRelNotes = id; 
                 toggle = id; 
                 toggleShowingCustomCiteDrawer = id; 
+                toggleStatusBar = id; 
             }; 
             CLASS = FirstResponder; 
             LANGUAGE = ObjC; 
