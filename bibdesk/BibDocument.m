@@ -1356,6 +1356,15 @@ stringByAppendingPathComponent:@"BibDesk"]; */
 }
 
 - (IBAction)quickSearchAddField:(id)sender{
+    // first we fill the popup
+	NSArray *prefsQuickSearchKeysArray = [[OFPreferenceWrapper sharedPreferenceWrapper] arrayForKey:BDSKQuickSearchKeys];
+	NSMutableArray *colNames = [[[[BibTypeManager sharedManager] allRemovableFieldNames] mutableCopy] autorelease];
+	[colNames addObjectsFromArray:[NSArray arrayWithObjects:BDSKUrlString, BDSKLocalUrlString, BDSKCiteKeyString, BDSKKeywordsString, BDSKDateString, nil]];
+	[colNames removeObjectsInArray:prefsQuickSearchKeysArray];
+	[colNames sortUsingSelector:@selector(caseInsensitiveCompare:)];
+	[colNames insertObject:NSLocalizedString(@"Choose a Field:",@"") atIndex:0];
+	[addFieldPopupButton removeAllItems];
+	[addFieldPopupButton addItemsWithTitles:colNames];
     [addFieldPrompt setStringValue:NSLocalizedString(@"Name of field to search:",@"")];
     [NSApp beginSheet:addFieldSheet
        modalForWindow:documentWindow
@@ -1528,7 +1537,8 @@ stringByAppendingPathComponent:@"BibDesk"]; */
                 if([field isEqualToString:@"All Fields"]){
                     selectorString=@"allFieldsString";
                 } else {
-                    if([field isEqualToString:@"Pub Type"]){
+                    if([field isEqualToString:@"Type"] || 
+					   [field isEqualToString:@"Pub Type"]){
                         selectorString=@"type";
                     } else {
                         if([field caseInsensitiveCompare:@"Cite Key"] == NSOrderedSame ||
