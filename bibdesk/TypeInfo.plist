@@ -28,22 +28,13 @@
 		<string>Code</string>
 		<string>Crossref</string>
 	</array>
-	<key>BibTeXTypesForPubMedTypes</key>
-	<dict/>
 	<key>BibTeXFieldNamesForPubMedTags</key>
 	<dict>
-		<key>A1</key>
-		<string>Author</string>
-		<key>A2</key>
-		<string>Author</string>
-		<key>A3</key>
-		<string>Author</string>
 		<key>AB</key>
 		<string>Abstract</string>
 		<key>AD</key>
 		<string>affiliation</string>
-		<key>AU</key>
-		<string>Author</string>
+
 		<key>BT</key>
 		<string>Title</string>
 		<key>CT</key>
@@ -52,6 +43,8 @@
 		<string>date</string>
 		<key>ED</key>
 		<string>Editor</string>
+		<key>FAU</key>
+		<string>Author</string>
 		<key>IP</key>
 		<string>number</string>
 		<key>JA</key>
@@ -93,6 +86,8 @@
 		<key>Y1</key>
 		<string>Year</string>
 	</dict>
+	<key>BibTeXTypesForPubMedTypes</key>
+	<dict/>
 	<key>FieldsForTypes</key>
 	<dict>
 		<key>article</key>

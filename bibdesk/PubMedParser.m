@@ -66,7 +66,7 @@
     
     while(sourceLine = [sourceLineE nextObject]){
         sourceLine = [sourceLine stringByTrimmingCharactersInSet:newlineSet];
-        NSLog(@" = [%@]",sourceLine);        
+//        NSLog(@" = [%@]",sourceLine);        
         if([sourceLine length] > 5){
 
             prefix = [[sourceLine substringWithRange:NSMakeRange(0,4)] stringByTrimmingCharactersInSet:whitespaceNewlineSet];
@@ -102,11 +102,15 @@
                 }else{
                     // we just have a new key in the same publication.
                     // key is still the old value. prefix has the new key.
-                    NSLog(@"old key     - [%@]", key);
-                    NSLog(@"new, prefix - [%@]", prefix);
+					//    NSLog(@"old key     - [%@]", key);
+					//    NSLog(@"new, prefix - [%@]", prefix);
                     if(key){
-                        NSLog(@"  inserting obj [%@] for key [%@]", wholeValue, key);
-                        [pubDict setObject:[[wholeValue copy] autorelease] forKey:key];
+						//		NSLog(@"  inserting obj [%@] for key [%@]", wholeValue, key);
+						if([key isEqualToString:@"Author"]){
+							addAuthorName_toDict([[wholeValue copy] autorelease],pubDict);
+						}else{
+							[pubDict setObject:[[wholeValue copy] autorelease] forKey:key];
+						}
                     }
                     
                     [wholeValue setString:value];
@@ -144,6 +148,16 @@
     //    NSLog(@"pubDict is %@", pubDict);
     *hadProblems = NO;
     return returnArray;
+}
+
+void addAuthorName_toDict(NSString *wholeValue, NSMutableDictionary *pubDict){
+	NSString *oldAuthString = [pubDict objectForKey:@"Author"];
+	if(!oldAuthString){
+		[pubDict setObject:wholeValue forKey:@"Author"];
+	}else{
+		NSString *newAuthString = [NSString stringWithFormat:@"%@ and %@", oldAuthString, wholeValue];
+		[pubDict setObject:newAuthString forKey:@"Author"];
+	}
 }
 
 @end
