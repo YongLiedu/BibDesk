@@ -1070,9 +1070,8 @@ setupParagraphStyle()
 					int i = NSRunAlertPanel(NSLocalizedString(@"Character Conversion Error", @"Title of alert when an error happens"),
 											[NSString stringWithFormat: NSLocalizedString(@"An unrecognized character in the \"%@\" field of \"%@\" could not be converted to TeX.", @"Informative alert text when the error happens."), k, [self citeKey]],
 											nil, nil, nil, nil);
-				} else {
-					[localException raise];
 				}
+                                [localException raise]; // re-raise; we localized the error, but the sender needs to know we failed
 			NS_ENDHANDLER
 							
 		}                

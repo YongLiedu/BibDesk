@@ -790,9 +790,18 @@ stringByAppendingPathComponent:@"BibDesk"]; */
     
     while(tmp = [e nextObject]){
         [d appendData:[[NSString stringWithString:@"\n\n"] dataUsingEncoding:encoding  allowLossyConversion:YES]];
-        [d appendData:[[tmp bibTeXString] dataUsingEncoding:encoding allowLossyConversion:YES]];
+        NS_DURING
+            [d appendData:[[tmp bibTeXString] dataUsingEncoding:encoding allowLossyConversion:YES]];
+        NS_HANDLER
+            if([[localException name] isEqualToString:@"BDSKTeXifyException"]){
+		int i = NSRunAlertPanel(NSLocalizedString(@"Warning!", @"Title of alert when an error happens"),
+                                        NSLocalizedString(@"Data will be lost if you are saving in ASCII encoding.", @"Informative alert text when the error happens."),
+                                        nil, nil, nil, nil);
+            } else {
+                [localException raise];
+            }
+        NS_ENDHANDLER
     }
-    
     return d;
         
 }
