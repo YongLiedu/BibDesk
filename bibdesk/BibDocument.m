@@ -1650,40 +1650,27 @@ int compareSetLengths(NSSet *set1, NSSet *set2, void *context){
     NSNumber *i;
     NSMutableString *bibString = [NSMutableString stringWithString:@""];
     NSEnumerator *e = [self selectedPubEnumerator];
-        
-	//[previewField setString:@""];
-	if([self numberOfSelectedPubs] == 0){
-		//   [editPubButton setEnabled:NO];
-		//  [delPubButton setEnabled:NO];
-	}else{
-		// [editPubButton setEnabled:YES];
-		// [delPubButton setEnabled:YES];
-		//take care of the preview field
-		[self displayPreviewForItems:[self selectedPubEnumerator]];
-		// (don't just pass it 'e' - it needs its own enum.)
-		if([[OFPreferenceWrapper sharedPreferenceWrapper] integerForKey:BDSKUsesTeXKey] == NSOnState){ 
 
-                    // It's fairly likely that the user wants Unicode if this is the case, right?  I'm assuming that the user will know how to set up their previewtemplate.tex
-                    // file accordingly as well, so we'll write that out with the default encoding from prefs (not the per-document encoding)
-                    if([[OFPreferenceWrapper sharedPreferenceWrapper] boolForKey:BDSKUseUnicodeBibTeXParser] &&
-                       [[OFPreferenceWrapper sharedPreferenceWrapper] integerForKey:BDSKDefaultStringEncoding] != NSASCIIStringEncoding){ 
-                        while(i = [e nextObject]){
-                            [bibString appendString:[[shownPublications objectAtIndex:[i intValue]] unicodeBibTeXString]];
-                        }
-                    } else {
-                        
-                        while(i = [e nextObject]){
-                            [bibString appendString:[[shownPublications objectAtIndex:[i intValue]] bibTeXString]];
-                        }// while i is num of selected row
-                    }                    
-			[NSThread detachNewThreadSelector:@selector(PDFFromString:)
-                                                 toTarget:PDFpreviewer
-                                               withObject:bibString];
-		}else{
-			// do nothing for now... (later, tell it to nullify the view?)
-		}
-	}// else more than 0 selected rows
-	
+    //take care of the preview field (NSTextView below the pub table); if the enumerator is nil, the view will get cleared out
+    [self displayPreviewForItems:[self selectedPubEnumerator]];
+    // (don't just pass it 'e' - it needs its own enum.)
+    if([[OFPreferenceWrapper sharedPreferenceWrapper] integerForKey:BDSKUsesTeXKey] == NSOnState){ 
+
+        // It's fairly likely that the user wants Unicode if this is the case, right?  I'm assuming that the user will know how to set up their previewtemplate.tex
+        // file accordingly as well, so we'll write that out with the default encoding from prefs (not the per-document encoding)
+        if([[OFPreferenceWrapper sharedPreferenceWrapper] integerForKey:BDSKDefaultStringEncoding] != NSASCIIStringEncoding){ 
+            while(i = [e nextObject]){
+                [bibString appendString:[[shownPublications objectAtIndex:[i intValue]] unicodeBibTeXString]];
+            }
+        } else {
+            while(i = [e nextObject]){
+                [bibString appendString:[[shownPublications objectAtIndex:[i intValue]] bibTeXString]];
+            }// while i is num of selected row
+        }                    
+        [NSThread detachNewThreadSelector:@selector(PDFFromString:)
+                                 toTarget:PDFpreviewer
+                               withObject:bibString];
+    }
 }
 
 
@@ -2520,7 +2507,6 @@ This method always returns YES. Even if some or many operations fail.
     NSDictionary *titleAttributes = [NSDictionary dictionaryWithObjects:[NSArray arrayWithObjects:[NSNumber numberWithInt:1], nil]
                                                                 forKeys:[NSArray arrayWithObjects:NSUnderlineStyleAttributeName,  nil]];
     NSMutableAttributedString *s;
-    
     if(![previewField lockFocusIfCanDraw])
         return;
     
