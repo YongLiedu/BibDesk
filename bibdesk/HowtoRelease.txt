@@ -4,6 +4,10 @@ How to generate a release for BibDesk:
 
 First, check that all desired changes have been committed, and that your local cvs tree is completely up to date.
 
+Once all the changes have been committed, tag the CVS repository with the release tag. Release tags for bibdesk look like "REL_0_84" for version 0.84, for instance.
+
+The command to do that is "cvs rtag REL_0_84 bibdesk".
+
 Check that everyone agrees on a version number.
 
 **note** - This info assumes you're using XCode, and I will probably be able to update it with the easy way eventually. Believe it or not, the next step was easier in Project Builder.
