@@ -15,8 +15,9 @@
 				GCC_ENABLE_FIX_AND_CONTINUE = YES;
 				GCC_GENERATE_DEBUGGING_SYMBOLS = YES;
 				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PRECOMPILE_PREFIX_HEADER = NO;
 				OPTIMIZATION_CFLAGS = "-O0";
-				ZERO_LINK = YES;
+				ZERO_LINK = NO;
 			};
 			isa = PBXBuildStyle;
 			name = Development;
@@ -91,6 +92,7 @@
 		};
 		089C167CFE841241C02AAC07 = {
 			children = (
+				F9BEBE1C06B42D3C00AA486C,
 				F9D86A0006B33E2000F2DE7D,
 				8D5B49B7048680CD000E48DA,
 				089C167DFE841241C02AAC07,
@@ -247,8 +249,8 @@
 			buildSettings = {
 				FRAMEWORK_SEARCH_PATHS = "";
 				GCC_ENABLE_TRIGRAPHS = NO;
-				GCC_GENERATE_DEBUGGING_SYMBOLS = NO;
-				GCC_PRECOMPILE_PREFIX_HEADER = YES;
+				GCC_GENERATE_DEBUGGING_SYMBOLS = YES;
+				GCC_PRECOMPILE_PREFIX_HEADER = NO;
 				GCC_PREFIX_HEADER = BibDeskInputManager_Prefix.pch;
 				GCC_WARN_FOUR_CHARACTER_CONSTANTS = NO;
 				GCC_WARN_UNKNOWN_PRAGMAS = NO;
@@ -295,6 +297,7 @@
 			files = (
 				8D5B49B0048680CD000E48DA,
 				F9D86A0506B33E2000F2DE7D,
+				F9BEBE1D06B42D3C00AA486C,
 			);
 			isa = PBXResourcesBuildPhase;
 			runOnlyForDeploymentPostprocessing = 0;
@@ -361,6 +364,19 @@
 //F92
 //F93
 //F94
+		F9BEBE1C06B42D3C00AA486C = {
+			isa = PBXFileReference;
+			lastKnownFileType = image.icns;
+			path = "BD Input Manager.icns";
+			refType = 4;
+			sourceTree = "<group>";
+		};
+		F9BEBE1D06B42D3C00AA486C = {
+			fileRef = F9BEBE1C06B42D3C00AA486C;
+			isa = PBXBuildFile;
+			settings = {
+			};
+		};
 		F9D86A0006B33E2000F2DE7D = {
 			isa = PBXFileReference;
 			lastKnownFileType = file;
