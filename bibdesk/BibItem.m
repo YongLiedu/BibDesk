@@ -1294,6 +1294,24 @@ void _setupFonts(){
 						}
 					}
 					break;
+				case 'l':
+					// old filename without extension
+					string = [self localURLPathRelativeTo:[self document]];
+					if (string != nil) {
+						string = [[string lastPathComponent] stringByDeletingPathExtension];
+						string = [converter stringBySanitizingString:string forField:fieldName inFileType:[self fileType]]; 
+						[parsedStr appendString:string];
+					}
+					break;
+				case 'L':
+					// old filename with extension
+					string = [self localURLPathRelativeTo:[self document]];
+					if (string != nil) {
+						string = [string lastPathComponent];
+						string = [converter stringBySanitizingString:string forField:fieldName inFileType:[self fileType]]; 
+						[parsedStr appendString:string];
+					}
+					break;
 				case 'f':
 					// arbitrary field
 					if ([scanner scanString:@"{" intoString:NULL] &&
