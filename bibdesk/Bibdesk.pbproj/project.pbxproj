@@ -1314,6 +1314,7 @@
 				27E0AA1B05A7C86B005BA25A,
 				27E0AA1C05A7C86B005BA25A,
 				27E0AA1D05A7C86B005BA25A,
+				F94E460B06109C0C00A61471,
 			);
 			isa = PBXHeadersBuildPhase;
 			runOnlyForDeploymentPostprocessing = 0;
@@ -1630,6 +1631,14 @@
 				2722DB9805D398BD00352F0B,
 				2722DB9905D398BD00352F0B,
 				278F092605F2ED0B00725B39,
+				F94E46110610B17900A61471,
+				F946E34306135F2800AB29EA,
+				F9C340FE061363A600F55DFE,
+				F9C340FF061363A600F55DFE,
+				F9C34100061363A600F55DFE,
+				F9C34101061363A600F55DFE,
+				F9C34102061363A600F55DFE,
+				F9C34103061363A600F55DFE,
 			);
 			isa = PBXResourcesBuildPhase;
 			runOnlyForDeploymentPostprocessing = 0;
@@ -1916,6 +1925,7 @@
 				27E0AA6C05A7C86B005BA25A,
 				27E0AA6D05A7C86B005BA25A,
 				27E0AA6E05A7C86B005BA25A,
+				F94E460C06109C0C00A61471,
 			);
 			isa = PBXSourcesBuildPhase;
 			runOnlyForDeploymentPostprocessing = 0;
@@ -2355,6 +2365,8 @@
 		};
 		2A37F4ABFDCFA73011CA2CEA = {
 			children = (
+				F94E460906109C0C00A61471,
+				F94E460A06109C0C00A61471,
 				F58886D503ABF2D601A80167,
 				F58886D603ABF2D601A80167,
 				F522132B0238508E01EF0AD7,
@@ -2445,6 +2457,7 @@
 		};
 		2A37F4B8FDCFA73011CA2CEA = {
 			children = (
+				F94E460F0610B17900A61471,
 				F561F4B0025893FC01709AC4,
 				F5385A1402EC07DE014378E3,
 				2773D37E058C457E00C5ABDA,
@@ -3622,6 +3635,13 @@
 		};
 		F5CE4C220228994301EF0ACB = {
 			children = (
+				F9C340F8061363A600F55DFE,
+				F9C340F9061363A600F55DFE,
+				F9C340FA061363A600F55DFE,
+				F9C340FB061363A600F55DFE,
+				F9C340FC061363A600F55DFE,
+				F9C340FD061363A600F55DFE,
+				F946E34206135F2800AB29EA,
 				F507317B01F417D50174A366,
 				F56E9E0F01FFF3FB01B83F33,
 				F5FE401101F96851018ED75C,
@@ -3728,6 +3748,166 @@
 			path = Images/find.tiff;
 			refType = 4;
 			sourceTree = "<group>";
+		};
+//F50
+//F51
+//F52
+//F53
+//F54
+//F90
+//F91
+//F92
+//F93
+//F94
+		F946E34206135F2800AB29EA = {
+			isa = PBXFileReference;
+			lastKnownFileType = image.icns;
+			name = bibDocIcon.icns;
+			path = Images/bibDocIcon.icns;
+			refType = 4;
+			sourceTree = "<group>";
+		};
+		F946E34306135F2800AB29EA = {
+			fileRef = F946E34206135F2800AB29EA;
+			isa = PBXBuildFile;
+			settings = {
+			};
+		};
+		F94E460906109C0C00A61471 = {
+			fileEncoding = 30;
+			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.c.h;
+			path = BibPersonController.h;
+			refType = 4;
+			sourceTree = "<group>";
+		};
+		F94E460A06109C0C00A61471 = {
+			fileEncoding = 30;
+			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.c.objc;
+			path = BibPersonController.m;
+			refType = 4;
+			sourceTree = "<group>";
+		};
+		F94E460B06109C0C00A61471 = {
+			fileRef = F94E460906109C0C00A61471;
+			isa = PBXBuildFile;
+			settings = {
+			};
+		};
+		F94E460C06109C0C00A61471 = {
+			fileRef = F94E460A06109C0C00A61471;
+			isa = PBXBuildFile;
+			settings = {
+			};
+		};
+		F94E460F0610B17900A61471 = {
+			children = (
+				F94E46100610B17900A61471,
+			);
+			isa = PBXVariantGroup;
+			name = BibPersonView.nib;
+			path = "";
+			refType = 4;
+			sourceTree = "<group>";
+		};
+		F94E46100610B17900A61471 = {
+			isa = PBXFileReference;
+			lastKnownFileType = wrapper.nib;
+			name = English;
+			path = English.lproj/BibPersonView.nib;
+			refType = 4;
+			sourceTree = "<group>";
+		};
+		F94E46110610B17900A61471 = {
+			fileRef = F94E460F0610B17900A61471;
+			isa = PBXBuildFile;
+			settings = {
+			};
+		};
+		F9C340F8061363A600F55DFE = {
+			isa = PBXFileReference;
+			lastKnownFileType = image.tiff;
+			name = citation.tiff;
+			path = Images/citation.tiff;
+			refType = 4;
+			sourceTree = "<group>";
+		};
+		F9C340F9061363A600F55DFE = {
+			isa = PBXFileReference;
+			lastKnownFileType = image.tiff;
+			name = defaults.tiff;
+			path = Images/defaults.tiff;
+			refType = 4;
+			sourceTree = "<group>";
+		};
+		F9C340FA061363A600F55DFE = {
+			isa = PBXFileReference;
+			lastKnownFileType = image.tiff;
+			name = display.tiff;
+			path = Images/display.tiff;
+			refType = 4;
+			sourceTree = "<group>";
+		};
+		F9C340FB061363A600F55DFE = {
+			isa = PBXFileReference;
+			lastKnownFileType = image.tiff;
+			name = preview.tiff;
+			path = Images/preview.tiff;
+			refType = 4;
+			sourceTree = "<group>";
+		};
+		F9C340FC061363A600F55DFE = {
+			isa = PBXFileReference;
+			lastKnownFileType = image.tiff;
+			name = rss.tiff;
+			path = Images/rss.tiff;
+			refType = 4;
+			sourceTree = "<group>";
+		};
+		F9C340FD061363A600F55DFE = {
+			isa = PBXFileReference;
+			lastKnownFileType = image.tiff;
+			name = startup.tiff;
+			path = Images/startup.tiff;
+			refType = 4;
+			sourceTree = "<group>";
+		};
+		F9C340FE061363A600F55DFE = {
+			fileRef = F9C340F8061363A600F55DFE;
+			isa = PBXBuildFile;
+			settings = {
+			};
+		};
+		F9C340FF061363A600F55DFE = {
+			fileRef = F9C340F9061363A600F55DFE;
+			isa = PBXBuildFile;
+			settings = {
+			};
+		};
+		F9C34100061363A600F55DFE = {
+			fileRef = F9C340FA061363A600F55DFE;
+			isa = PBXBuildFile;
+			settings = {
+			};
+		};
+		F9C34101061363A600F55DFE = {
+			fileRef = F9C340FB061363A600F55DFE;
+			isa = PBXBuildFile;
+			settings = {
+			};
+		};
+		F9C34102061363A600F55DFE = {
+			fileRef = F9C340FC061363A600F55DFE;
+			isa = PBXBuildFile;
+			settings = {
+			};
+		};
+		F9C34103061363A600F55DFE = {
+			fileRef = F9C340FD061363A600F55DFE;
+			isa = PBXBuildFile;
+			settings = {
+			};
 		};
 	};
 	rootObject = 2A37F4A9FDCFA73011CA2CEA;
