@@ -137,6 +137,7 @@
 			children = (
 				8D1107320486CEB800E47090,
 				275E270707838EE30070398A,
+				27CD032407D82C7400806B7E,
 			);
 			isa = PBXGroup;
 			name = Products;
@@ -317,6 +318,8 @@
 			children = (
 				275E271D07838F7B0070398A,
 				275E271E07838F7B0070398A,
+				27CD031A07D82C4E00806B7E,
+				27CD031B07D82C4E00806B7E,
 				275E271F07838F7B0070398A,
 				275E272007838F7B0070398A,
 				275E272107838F7B0070398A,
@@ -745,6 +748,275 @@
 			settings = {
 			};
 		};
+		27CD031A07D82C4E00806B7E = {
+			fileEncoding = 30;
+			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.c.h;
+			path = TestComplexString.h;
+			refType = 2;
+			sourceTree = SOURCE_ROOT;
+		};
+		27CD031B07D82C4E00806B7E = {
+			fileEncoding = 30;
+			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.c.objc;
+			path = TestComplexString.m;
+			refType = 2;
+			sourceTree = SOURCE_ROOT;
+		};
+		27CD031E07D82C7400806B7E = {
+			buildActionMask = 2147483647;
+			files = (
+				27CD036A07D82CB700806B7E,
+				27CD03B807D82D1900806B7E,
+				27CD03BC07D82D4600806B7E,
+				27CD03BE07D82D5000806B7E,
+				27CD03C007D82D5F00806B7E,
+			);
+			isa = PBXHeadersBuildPhase;
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		27CD031F07D82C7400806B7E = {
+			buildActionMask = 2147483647;
+			files = (
+			);
+			isa = PBXResourcesBuildPhase;
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		27CD032007D82C7400806B7E = {
+			buildActionMask = 2147483647;
+			files = (
+				27CD036B07D82CB700806B7E,
+				27CD03B907D82D1A00806B7E,
+				27CD03BD07D82D4700806B7E,
+				27CD03BF07D82D5100806B7E,
+				27CD03C107D82D6000806B7E,
+			);
+			isa = PBXSourcesBuildPhase;
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		27CD032107D82C7400806B7E = {
+			buildActionMask = 2147483647;
+			files = (
+				27CD03A307D82CFF00806B7E,
+				27CD03BA07D82D3200806B7E,
+				27CD03BB07D82D3600806B7E,
+				27CD03C407D82D8500806B7E,
+				27CD03C607D82D9100806B7E,
+			);
+			isa = PBXFrameworksBuildPhase;
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		27CD032207D82C7400806B7E = {
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+			);
+			isa = PBXShellScriptBuildPhase;
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/bash;
+			shellScript = "/usr/local/bin/ukrun \"$BUILD_DIR/$PRODUCT_NAME.$WRAPPER_EXTENSION\"";
+		};
+		27CD032307D82C7400806B7E = {
+			buildPhases = (
+				27CD031E07D82C7400806B7E,
+				27CD031F07D82C7400806B7E,
+				27CD032007D82C7400806B7E,
+				27CD032107D82C7400806B7E,
+				27CD032207D82C7400806B7E,
+				27CD03CE07D82DD400806B7E,
+			);
+			buildRules = (
+			);
+			buildSettings = {
+				GCC_PRECOMPILE_PREFIX_HEADER = YES;
+				GCC_PREFIX_HEADER = "$(SYSTEM_LIBRARY_DIR)/Frameworks/Foundation.framework/Headers/Foundation.h";
+				GCC_WARN_FOUR_CHARACTER_CONSTANTS = NO;
+				GCC_WARN_UNKNOWN_PRAGMAS = NO;
+				INFOPLIST_FILE = "TestComplexString-Info.plist";
+				INSTALL_PATH = "$(USER_LIBRARY_DIR)/Bundles";
+				OPTIMIZATION_CFLAGS = "";
+				OTHER_CFLAGS = "";
+				OTHER_LDFLAGS = "-framework Foundation";
+				OTHER_REZFLAGS = "";
+				PRODUCT_NAME = TestComplexString;
+				SECTORDER_FLAGS = "";
+				WARNING_CFLAGS = "-Wmost";
+			};
+			dependencies = (
+			);
+			isa = PBXNativeTarget;
+			name = TestComplexString;
+			productName = TestComplexString;
+			productReference = 27CD032407D82C7400806B7E;
+			productSettingsXML = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>
+<!DOCTYPE plist PUBLIC \"-//Apple Computer//DTD PLIST 1.0//EN\" \"http://www.apple.com/DTDs/PropertyList-1.0.dtd\">
+<plist version=\"1.0\">
+<dict>
+	<key>CFBundleDevelopmentRegion</key>
+	<string>English</string>
+	<key>CFBundleExecutable</key>
+	<string>TestComplexString</string>
+	<key>CFBundleGetInfoString</key>
+	<string></string>
+	<key>CFBundleIconFile</key>
+	<string></string>
+	<key>CFBundleIdentifier</key>
+	<string>com.MySoftwareCompany.TestComplexString</string>
+	<key>CFBundleInfoDictionaryVersion</key>
+	<string>6.0</string>
+	<key>CFBundlePackageType</key>
+	<string>APPL</string>
+	<key>CFBundleShortVersionString</key>
+	<string></string>
+	<key>CFBundleSignature</key>
+	<string>????</string>
+	<key>CFBundleVersion</key>
+	<string>1.0.0d1</string>
+</dict>
+</plist>
+";
+			productType = "com.apple.product-type.bundle";
+		};
+		27CD032407D82C7400806B7E = {
+			explicitFileType = wrapper.cfbundle;
+			includeInIndex = 0;
+			isa = PBXFileReference;
+			path = TestComplexString.bundle;
+			refType = 3;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+		27CD032507D82C7400806B7E = {
+			isa = PBXFileReference;
+			lastKnownFileType = text.xml;
+			name = "TestComplexString-Info.plist";
+			path = "/Users/mike/Code/bibdesk-HEAD-Macro/TestComplexString-Info.plist";
+			refType = 0;
+			sourceTree = "<absolute>";
+		};
+		27CD036A07D82CB700806B7E = {
+			fileRef = 27CD031A07D82C4E00806B7E;
+			isa = PBXBuildFile;
+			settings = {
+			};
+		};
+		27CD036B07D82CB700806B7E = {
+			fileRef = 27CD031B07D82C4E00806B7E;
+			isa = PBXBuildFile;
+			settings = {
+			};
+		};
+		27CD03A307D82CFF00806B7E = {
+			fileRef = 275E26FB07838EB80070398A;
+			isa = PBXBuildFile;
+			settings = {
+			};
+		};
+		27CD03B807D82D1900806B7E = {
+			fileRef = 273007A407CF216700F2E485;
+			isa = PBXBuildFile;
+			settings = {
+			};
+		};
+		27CD03B907D82D1A00806B7E = {
+			fileRef = 2730077807CF20B500F2E485;
+			isa = PBXBuildFile;
+			settings = {
+			};
+		};
+		27CD03BA07D82D3200806B7E = {
+			fileRef = 1058C7A1FEA54F0111CA2CBB;
+			isa = PBXBuildFile;
+			settings = {
+			};
+		};
+		27CD03BB07D82D3600806B7E = {
+			fileRef = F9022DE30758095000C3F701;
+			isa = PBXBuildFile;
+			settings = {
+			};
+		};
+		27CD03BC07D82D4600806B7E = {
+			fileRef = F9022C3A0758027800C3F701;
+			isa = PBXBuildFile;
+			settings = {
+			};
+		};
+		27CD03BD07D82D4700806B7E = {
+			fileRef = F9022C3B0758027800C3F701;
+			isa = PBXBuildFile;
+			settings = {
+			};
+		};
+		27CD03BE07D82D5000806B7E = {
+			fileRef = F9022C930758038000C3F701;
+			isa = PBXBuildFile;
+			settings = {
+			};
+		};
+		27CD03BF07D82D5100806B7E = {
+			fileRef = F9022C940758038000C3F701;
+			isa = PBXBuildFile;
+			settings = {
+			};
+		};
+		27CD03C007D82D5F00806B7E = {
+			fileRef = F9022C970758038000C3F701;
+			isa = PBXBuildFile;
+			settings = {
+			};
+		};
+		27CD03C107D82D6000806B7E = {
+			fileRef = F9022C980758038000C3F701;
+			isa = PBXBuildFile;
+			settings = {
+			};
+		};
+		27CD03C407D82D8500806B7E = {
+			fileRef = F9022DE60758095000C3F701;
+			isa = PBXBuildFile;
+			settings = {
+			};
+		};
+		27CD03C607D82D9100806B7E = {
+			fileRef = F9022DE50758095000C3F701;
+			isa = PBXBuildFile;
+			settings = {
+			};
+		};
+		27CD03CE07D82DD400806B7E = {
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 10;
+			files = (
+				27CD047107D82DF600806B7E,
+				27CD047207D82DF600806B7E,
+				27CD03CF07D82DED00806B7E,
+			);
+			isa = PBXCopyFilesBuildPhase;
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		27CD03CF07D82DED00806B7E = {
+			fileRef = F9022DE30758095000C3F701;
+			isa = PBXBuildFile;
+			settings = {
+			};
+		};
+		27CD047107D82DF600806B7E = {
+			fileRef = F9022DE50758095000C3F701;
+			isa = PBXBuildFile;
+			settings = {
+			};
+		};
+		27CD047207D82DF600806B7E = {
+			fileRef = F9022DE60758095000C3F701;
+			isa = PBXBuildFile;
+			settings = {
+			};
+		};
 //270
 //271
 //272
@@ -786,6 +1058,7 @@
 				F98870D407580E94001D4D49,
 				F9F14A47075811CF008BA22F,
 				275E270607838EE30070398A,
+				27CD032307D82C7400806B7E,
 			);
 		};
 		29B97314FDCFA39411CA2CEA = {
@@ -797,6 +1070,7 @@
 				29B97317FDCFA39411CA2CEA,
 				29B97323FDCFA39411CA2CEA,
 				19C28FACFE9D520D11CA2CBB,
+				27CD032507D82C7400806B7E,
 			);
 			isa = PBXGroup;
 			name = Bibdesk;
