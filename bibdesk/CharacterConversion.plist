@@ -30,6 +30,16 @@
 		<string>*</string>
 		<key>…</key>
 		<string>{\ldots}</string>
+        <key>ﬀ</key>
+		<string>ff</string>
+		<key>ﬁ</key>
+		<string>fi</string>
+		<key>ﬂ</key>
+		<string>fl</string>
+		<key>ﬃ</key>
+		<string>ffi</string>
+		<key>ﬄ</key>
+		<string>ffl</string>
 	</dict>
 	<key>Roman to TeX</key>
 	<dict>
