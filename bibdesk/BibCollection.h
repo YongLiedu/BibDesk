@@ -164,10 +164,17 @@
 	 @param newSubCollections The new array of subcollections
 	 */
 - (void)setSubCollections:(NSMutableArray *)newSubCollections;
+
+/*!
+	@method addNewSubCollection
+	 @abstract Adds a new empty subcollection with the same item class as the receiver.
+	 @discussion 
+	 */
+- (void)addNewSubCollection;
 	
 /*!
 	@method insertSubCollection:atIndex:
-	 @abstract insets a new subCollection at the index
+	 @abstract Inserts a new subCollection at the index
 	 @discussion 
 	 @param newSubCollection The new subcollection to add
 	 @param index The location in the subcollections array to insert the new subcollection

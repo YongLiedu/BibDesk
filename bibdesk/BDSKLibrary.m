@@ -16,12 +16,19 @@
     if (self = [super init]) {
 		publications = [[BibCollection alloc] initWithParent:self];
 		[publications setName:NSLocalizedString(@"Library", @"Library label in source list of bibdocument")];
+		[publications setItemClassName:NSStringFromClass([BibItem class])];
+		
 		authors = [[BibCollection alloc] initWithParent:self];
 		[authors setName:NSLocalizedString(@"Authors", @"Authors label in source list of bibdocument")];
+		[authors setItemClassName:NSStringFromClass([BibAuthor class])];
+		
 		notes = [[BibCollection alloc] initWithParent:self];
 		[notes setName:NSLocalizedString(@"Notes", @"Notes label in source list of bibdocument")];
+		[notes setItemClassName:NSStringFromClass([BibNote class])];
+		
 		sources = [[BibCollection alloc] initWithParent:self];
 		[sources setName:NSLocalizedString(@"Sources", @"External Sources label in source list of bibdocument")];
+		[sources setItemClassName:NSStringFromClass([BDSKRemoteSource class])];
     }
     return self;
 }

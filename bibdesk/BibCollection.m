@@ -187,6 +187,12 @@
     }
 }
 
+- (void)addNewSubCollection{
+	BibCollection *newBC = [[BibCollection alloc] initWithParent:self];
+	[newBC setItemClassName:[self itemClassName]];
+	[self addSubCollection:[newBC autorelease]];
+}
+
 - (void)insertSubCollection:(BibCollection *)newSubCollection atIndex:(unsigned int)index{
 	[subCollections insertObject:newSubCollection atIndex:index];
 }

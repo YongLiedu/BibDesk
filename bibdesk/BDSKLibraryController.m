@@ -86,25 +86,21 @@
 #pragma mark actions
 
 - (IBAction)makeNewPublicationCollection:(id)sender{
-    BibCollection *newBC = [[BibCollection alloc] initWithParent:self];
-    [[(BDSKLibrary*)[self document] publications] addSubCollection:[newBC autorelease]];
+    [[(BDSKLibrary*)[self document] publications] addNewSubCollection];
     [self reloadSourceList];
 }
 
 - (IBAction)makeNewAuthorCollection:(id)sender{
-	BibCollection *newBC = [[BibCollection alloc] initWithParent:self];
-    [[(BDSKLibrary*)[self document] authors] addSubCollection:[newBC autorelease]];
+    [[(BDSKLibrary*)[self document] authors] addNewSubCollection];
     [self reloadSourceList];
 }
 - (IBAction)makeNewExternalSourceCollection:(id)sender{
-	BibCollection *newBC = [[BibCollection alloc] initWithParent:self];
-    [[(BDSKLibrary*)[self document] sources] addSubCollection:[newBC autorelease]];
+    [[(BDSKLibrary*)[self document] sources] addNewSubCollection];
     [self reloadSourceList];
 }
 
 - (IBAction)makeNewNoteCollection:(id)sender{
-	BibCollection *newBC = [[BibCollection alloc] initWithParent:self];
-    [[(BDSKLibrary*)[self document] notes] addSubCollection:[newBC autorelease]];
+    [[(BDSKLibrary*)[self document] notes] addNewSubCollection];
     [self reloadSourceList];
 }
 
