@@ -19,7 +19,12 @@ static BibTypeManager *_sharedInstance = nil;
 - (id)init{
     self = [super init];
     _typeInfoDict = [[NSDictionary dictionaryWithContentsOfFile:[[[NSBundle mainBundle] resourcePath] stringByAppendingPathComponent:@"TypeInfo.plist"]] retain];
-	_invalidCiteKeyCharSet = [[NSCharacterSet characterSetWithCharactersInString:@" '\"@,\\#}{~()&><%="] retain];
+    NSMutableCharacterSet *validSet = [[NSMutableCharacterSet alloc] init];
+    [validSet addCharactersInRange:NSMakeRange( (unsigned int)'a', 26)];
+    [validSet addCharactersInRange:NSMakeRange( (unsigned int)'A', 26)];
+    [validSet addCharactersInString:@"-"];
+    _invalidCiteKeyCharSet = [[validSet invert] copy];  // don't release this
+    [validSet release];
     return self;
 }
 
