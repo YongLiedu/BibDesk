@@ -36,13 +36,13 @@ static BibFiler *_sharedFiler = nil;
 #pragma mark Auto file methods
 
 - (void)filePapers:(NSArray *)papers fromDocument:(BibDocument *)doc ask:(BOOL)ask{
+	NSFileManager *fm = [NSFileManager defaultManager];
 	NSString *papersFolderPath = [[OFPreferenceWrapper sharedPreferenceWrapper] stringForKey:BDSKPapersFolderPathKey];
 	BOOL isDir;
-	BOOL fileExists = [[NSFileManager defaultManager] fileExistsAtPath:papersFolderPath isDirectory:&isDir];
 	int rv;
 	BOOL moveAll = YES;
 
-	if(!(fileExists && isDir)){
+	if(!([fm fileExistsAtPath:[fm resolveAliasesInPath:papersFolderPath] isDirectory:&isDir] && isDir)){
 		// The directory isn't there or isn't a directory, so pop up an alert.
 		rv = NSRunAlertPanel(NSLocalizedString(@"Papers Folder doesn't exist",@""),
 							 NSLocalizedString(@"The Papers Folder you've chosen either doesn't exist or isn't a folder. Any files you have dragged in will be linked to in their original location. Press \"Go to Preferences\" to set the Papers Folder.",@""),
@@ -83,33 +83,40 @@ static BibFiler *_sharedFiler = nil;
 }
 
 - (void)movePath:(NSString *)path toPath:(NSString *)newPath forPaper:(BibItem *)paper fromDocument:(BibDocument *)doc moveAll:(BOOL)moveAll{
-	NSMutableDictionary *info = [NSMutableDictionary dictionaryWithObjectsAndKeys:[path stringByAbbreviatingWithTildeInPath], @"oloc", 
-			[newPath stringByAbbreviatingWithTildeInPath], @"nloc", nil];
-	NSString *status = nil;
-	int statusFlag = BDSKNoErrorMask;
-	NSFileManager *fm = [NSFileManager defaultManager];
-	
 	if (progressSheet) {
 		[progressIndicator incrementBy:1.0];
 		[progressIndicator displayIfNeeded];
 	}
-	
-	if(path == nil || [path isEqualToString:@""] || newPath == nil || [newPath isEqualToString:@""] || [path isEqualToString:newPath])
+	if(path == nil || [path isEqualToString:@""] || newPath == nil || 
+	   [newPath isEqualToString:@""] || [path isEqualToString:newPath])
 		return;
 	
+	NSMutableDictionary *info = [NSMutableDictionary dictionaryWithObjectsAndKeys:
+			[path stringByAbbreviatingWithTildeInPath], @"oloc", 
+			[newPath stringByAbbreviatingWithTildeInPath], @"nloc", nil];
+	NSString *status = nil;
+	int statusFlag = BDSKNoErrorMask;
+	NSFileManager *fm = [NSFileManager defaultManager];
+	// filemanager needs aliases resolved for moving and existence checks
+	// ...however we want to move aliases, not their targets
+	NSString *resolvedNewPath = [[fm resolveAliasesInPath:[newPath stringByDeletingLastPathComponent]] 
+										stringByAppendingPathComponent:[newPath lastPathComponent]];
+	NSString *resolvedPath = [[fm resolveAliasesInPath:[path stringByDeletingLastPathComponent]] 
+										stringByAppendingPathComponent:[path lastPathComponent]];
+	
 	if(moveAll || [paper canSetLocalUrl]){
-		if([fm fileExistsAtPath:newPath]){
+		if([fm fileExistsAtPath:resolvedNewPath]){
 			statusFlag = statusFlag | BDSKGeneratedFileExistsMask;
-			if([fm fileExistsAtPath:path]){
+			if([fm fileExistsAtPath:resolvedPath]){
 				status = NSLocalizedString(@"A file already exists at the generated location.",@"");
 			}else{
 				status = NSLocalizedString(@"The linked file does not exists, while a file already exists at the generated location.", @"");
 				statusFlag = statusFlag | BDSKOldFileDoesNotExistMask;
 			}
 		}else{
-			if([fm fileExistsAtPath:path]){
-				[fm createPathToFile:newPath attributes:nil]; // create parent directories if necessary (OmniFoundation)
-				if([fm movePath:path toPath:newPath handler:self]){
+			if([fm fileExistsAtPath:resolvedPath]){
+				[fm createPathToFile:resolvedNewPath attributes:nil]; // create parent directories if necessary (OmniFoundation)
+				if([fm movePath:resolvedPath toPath:resolvedNewPath handler:self]){
 					[paper setField:@"Local-Url" toValue:[[NSURL fileURLWithPath:newPath] absoluteString]];
 					//status = NSLocalizedString(@"Successfully moved.",@"");
 					
