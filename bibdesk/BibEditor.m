@@ -226,6 +226,7 @@ NSString *BDSKDateModifiedString = @"Date-Modified";
     [_pdfSnoopImage release];
     [_textSnoopString release];
     [fieldNameFormatter release];
+	[theBib setEditorObj:nil];
     [super dealloc];
 }
 
