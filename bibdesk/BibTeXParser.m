@@ -11,13 +11,13 @@
 
 @implementation BibTeXParser
 
-+ (NSMutableArray *)itemsFromString:(NSString *)itemString
++ (NSMutableArray *)itemsFromData:(NSData *)inData
                               error:(BOOL *)hadProblems{
-    return [BibTeXParser itemsFromString:itemString error:hadProblems frontMatter:nil filePath:@"Paste/Drag"];
+    return [BibTeXParser itemsFromData:inData error:hadProblems frontMatter:nil filePath:@"Paste/Drag"];
 }
 
-
-+ (NSMutableArray *)itemsFromString:(NSString *)itemString
+// @@todo: change to itemsFromData: and look for how to convert other fromString uses...
++ (NSMutableArray *)itemsFromData:(NSData *)inData
                               error:(BOOL *)hadProblems
                         frontMatter:(NSMutableString *)frontMatter
                            filePath:(NSString *)filePath{
@@ -40,7 +40,8 @@
     BibAppController *appController = (BibAppController *)[NSApp delegate];
     NSString *entryType = nil;
     NSMutableArray *returnArray = [NSMutableArray arrayWithCapacity:1];
-    char *buf = (char *) malloc(sizeof(char) * [itemString cStringLength]);
+    
+    const char *buf = NULL; // (char *) malloc(sizeof(char) * [inData length]);
 
     //dictionary is the bibtex entry
     NSMutableDictionary *dictionary = [NSMutableDictionary dictionaryWithCapacity:6];
@@ -64,7 +65,7 @@
         usingTempFile = NO;
     }else{
         tempFilePath = [NSTemporaryDirectory() stringByAppendingPathComponent:[[NSProcessInfo processInfo] globallyUniqueString]];
-        [itemString writeToFile:tempFilePath atomically:YES];
+        [inData writeToFile:tempFilePath atomically:YES];
         fs_path = [[NSFileManager defaultManager] fileSystemRepresentationWithPath:tempFilePath];
         NSLog(@"using temporary file %@ - was it deleted?",tempFilePath);
         usingTempFile = YES;
@@ -75,13 +76,14 @@
     *hadProblems = NO;
 
     NS_DURING
-        [itemString getCString:buf];
+       // [inData getBytes:buf length:[inData length]];
+        buf = (const char *) [inData bytes];
     NS_HANDLER
         // if we couldn't convert it, we won't be able to read it: just give up.
         // maybe instead of giving up we should find a way to use lossyCString here... ?
         if ([[localException name] isEqualToString:NSCharacterConversionException]) {
             NSLog(@"Exception %@ raised in itemsFromString, handled by giving up.", [localException name]);
-            itemString = @"";
+            inData = nil;
             NSBeep();
         }else{
             [localException raise];
@@ -125,6 +127,7 @@
                            !strcmp(fieldname, "rss-description")){
                             if(field->down){
                                 cidx = field->down->offset;
+
                                 // the delimiter is at cidx-1
                                 if(buf[cidx-1] == '{'){
                                     // scan up to the balanced brace
@@ -137,10 +140,7 @@
                                     // scan up to the next quote.
                                     for(; buf[cidx] != '"'; cidx++);
                                 }
-                                annoteDelim = buf[cidx];
-                                buf[cidx] = '\0';
-                                s = [NSString stringWithCString:&buf[field->down->offset]];
-                                buf[cidx] = annoteDelim;
+                                s = [NSString stringWithCString:&buf[field->down->offset] length:(cidx- (field->down->offset))];
                             }else{
                                 *hadProblems = YES;
                             }
@@ -222,7 +222,7 @@
                 NSLog(@"Error - unable to remove temporary file %@", tempFilePath);
             }
         }
-        free(buf);
+        // @@readonly free(buf);
         return returnArray;
 }
 
