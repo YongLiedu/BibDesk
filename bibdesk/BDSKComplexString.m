@@ -262,7 +262,7 @@ static NSDictionary *globalMacroDefs;
 		isComplex = [coder decodeBoolForKey:@"isComplex"];
 		nodes = [[coder decodeObjectForKey:@"nodes"] retain];
 		expandedValue = [[coder decodeObjectForKey:@"expandedValue"] retain];
-		[self setMacroResolver:[coder encodeConditionalObject:macroResolver forKey:@"macroResolver"]];
+		[self setMacroResolver:[coder decodeObjectForKey:@"macroResolver"]];
 	}
 	return self;
 }
