@@ -22,12 +22,15 @@
                         frontMatter:(NSMutableString *)frontMatter
                            filePath:(NSString *)filePath{
     int ok = 1;
-    long cidx = 0; // used to scan through buf for annotes.
-    char annoteDelim = '\0';
-    int braceDepth = 0;
+
     BibItem *newBI = nil;
+
+    // Strings read from file and added to Dictionary object
     char *fieldname = "\0";
     NSString *s = nil;
+    NSString *sDeTexified = nil;
+    NSString *sFieldName = nil;
+
     AST *entry = NULL;
     AST *field = NULL;
     int itemOrder = 1;
@@ -35,11 +38,13 @@
     NSString *entryType = nil;
     NSMutableArray *returnArray = [NSMutableArray arrayWithCapacity:1];
     char *buf = (char *) malloc(sizeof(char) * [itemString cStringLength]);
+
+    //dictionary is the bibtex entry
     NSMutableDictionary *dictionary = [NSMutableDictionary dictionaryWithCapacity:6];
     const char * fs_path = NULL;
     NSString *tempFilePath = nil;
     FILE *infile = NULL;
-
+    
     if( !([filePath isEqualToString:@"Paste/Drag"]) && [[NSFileManager defaultManager] fileExistsAtPath:filePath]){
         fs_path = [[NSFileManager defaultManager] fileSystemRepresentationWithPath:filePath];
     }else{
@@ -90,42 +95,23 @@
                     [newBI setFileOrder:itemOrder];
                     itemOrder++;
                     field = NULL;
+                    // Removed special case handling of abstract & annote.
+                    // Special case was there only to avoid losing newlines
+                    // newlines now converted to \par and back in stringByDeTexifying
                     while (field = bt_next_field (entry, field, &fieldname))
                     {
-                        if(!strcmp(fieldname, "annote") ||
-                           !strcmp(fieldname, "abstract") ||
-                           !strcmp(fieldname, "rss-description")){
-                            if(field->down){
-                                cidx = field->down->offset;
-                                // the delimiter is at cidx-1
-                                if(buf[cidx-1] == '{'){
-                                    // scan up to the balanced brace
-                                    for(braceDepth = 1; braceDepth > 0; cidx++){
-                                        if(buf[cidx] == '{') braceDepth++;
-                                        if(buf[cidx] == '}') braceDepth--;
-                                    }
-                                    cidx--;     // just advanced cidx one past the end of the field.
-                                }else if(buf[cidx-1] == '"'){
-                                    // scan up to the next quote.
-                                    for(; buf[cidx] != '"'; cidx++);
-                                }
-                                annoteDelim = buf[cidx];
-                                buf[cidx] = '\0';
-                                s = [NSString stringWithCString:&buf[field->down->offset]];
-                                buf[cidx] = annoteDelim;
-                            }else{
-                                *hadProblems = YES;
-                            }
-                        }else{
-                            // fieldname wasn't annote or abstract, just get bt's version:
-                            s = [NSString stringWithCString:bt_get_text(field)];
-                        }
-                        [dictionary setObject:[BDSKConverter stringByDeTeXifyingString:s]
-                                       forKey:[[NSString stringWithCString: fieldname] capitalizedString]];
-                        [appController addString:[BDSKConverter stringByDeTeXifyingString:s]
-                              forCompletionEntry:[[NSString stringWithCString: fieldname ] capitalizedString]];
+                        //get the text of the field from the file.
+                        s = [NSString stringWithCString:bt_get_text(field)];
+                        //deDetify it (includes conversion of /par to \n\n.
+                        sDeTexified = [BDSKConverter stringByDeTeXifyingString:s];
+                        //Get fieldname as a capitalized NSString
+                        sFieldName = [[NSString stringWithCString: fieldname] capitalizedString];
 
-                    }// end while field = bt next field
+                        [dictionary setObject:sDeTexified forKey:sFieldName];
+
+                        [appController addString:sDeTexified forCompletionEntry:sFieldName ];
+                        
+                    }// end while field - process next bt field                    
                    
                     [newBI setCiteKey:[NSString stringWithCString:bt_entry_key(entry)]];
                     [newBI setFields:dictionary];
