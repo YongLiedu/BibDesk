@@ -66,6 +66,7 @@ NSString *BDSKKeepPapersFolderOrganizedKey = @"Keep files in the papers folder o
 NSString *BDSKLocalUrlFormatKey = @"Local-Url Format";
 
 NSString *BDSKLastVersionLaunched = @"Last launched version number";
+NSString *BDSKSnoopDrawerSavedSize = @"Saved size of BibEditor document snoop drawer";
 
 
 #pragma mark ||  Notification name strings

@@ -975,6 +975,8 @@ NSString *BDSKDateModifiedString = @"Date-Modified";
         }
         [documentSnoopTextView setString:_textSnoopString];
     }
+    if([[OFPreferenceWrapper sharedPreferenceWrapper] objectForKey:BDSKSnoopDrawerSavedSize] != nil)
+        [documentSnoopDrawer setContentSize:NSSizeFromString([[OFPreferenceWrapper sharedPreferenceWrapper] objectForKey:BDSKSnoopDrawerSavedSize])];
     [documentSnoopScrollView scrollToTop];
 }
 
@@ -982,6 +984,11 @@ NSString *BDSKDateModifiedString = @"Date-Modified";
 - (void)drawerWillClose:(NSNotification *)notification{
     [documentSnoopButton setToolTip:NSLocalizedString(@"Show the first page as PDF in a drawer.", @"")];
     [documentTextSnoopButton setToolTip:NSLocalizedString(@"Show the first page as Text in a drawer.", @"")];
+}
+
+- (NSSize)drawerWillResizeContents:(NSDrawer *)sender toSize:(NSSize)contentSize{
+    [[OFPreferenceWrapper sharedPreferenceWrapper] setObject:NSStringFromSize(contentSize) forKey:BDSKSnoopDrawerSavedSize];
+    return contentSize;
 }
 
 - (void)windowWillClose:(NSNotification *)notification{

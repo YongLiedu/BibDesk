@@ -92,6 +92,7 @@ extern NSString *BDSKKeepPapersFolderOrganizedKey;
 extern NSString *BDSKLocalUrlFormatKey;
 
 extern NSString *BDSKLastVersionLaunched;
+extern NSString *BDSKSnoopDrawerSavedSize;
 
 #pragma mark ||  Notification name strings
 extern NSString *BDSKDocumentWillSaveNotification;
