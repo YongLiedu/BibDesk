@@ -597,13 +597,15 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
     }
     NSString *pboardString = [pboard stringForType:NSStringPboardType];
     NSArray *items = [_finder itemsMatchingCiteKey:pboardString];
-    BibItem *item;
+    NSDictionary *itemDict = nil;
+	BibItem *item = nil;
     NSMutableString *retStr = [NSMutableString string];
     BOOL yn = NO;    
     NSEnumerator *itemE = [items objectEnumerator];
     int count = [items count];
     
-    while(item = [itemE nextObject]){
+    while(itemDict = [itemE nextObject]){
+		item = [itemDict objectForKey:@"BibItem"];
         [retStr appendString:[item citeKey]];
         if(count > 1)
             [retStr appendString:@" "];
@@ -612,5 +614,33 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
     types = [NSArray arrayWithObject:NSStringPboardType];
     [pboard declareTypes:types owner:nil];
     yn = [pboard setString:retStr forType:NSStringPboardType];
+}
+
+- (void)showPubWithKey:(NSPasteboard *)pboard
+			  userData:(NSString *)userData
+				 error:(NSString **)error{	
+    NSArray *types = [pboard types];
+    if (![types containsObject:NSStringPboardType]) {
+        *error = NSLocalizedString(@"Error: couldn't complete text.",
+                                   @"pboard couldn't give string.");
+        return;
+    }
+    NSString *pboardString = [pboard stringForType:NSStringPboardType];
+    NSArray *items = [_finder itemsMatchingCiteKey:pboardString];
+	NSDictionary *itemDict = nil;
+	BibItem *item;
+	BibDocument *doc = nil;
+	NSEnumerator *itemE = [items objectEnumerator];
+    
+    while(itemDict = [itemE nextObject]){
+		doc = [itemDict objectForKey:@"BibDocument"];
+		item = [itemDict objectForKey:@"BibItem"];
+		[doc editPub:item];
+    }
+    
+//    types = [NSArray arrayWithObject:NSStringPboardType];
+//    [pboard declareTypes:types owner:nil];
+//    yn = [pboard setString:retStr forType:NSStringPboardType];
+	
 }
 @end

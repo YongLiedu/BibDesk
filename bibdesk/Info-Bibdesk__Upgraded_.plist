@@ -56,6 +56,8 @@
 	<string>Bibdesk</string>
 	<key>CFBundleGetInfoString</key>
 	<string>version 0.85</string>
+	<key>CFBundleGetInfoHTML</key>
+	<string>&lt;B&gt;BibDesk&lt;/B&gt; Version 0.85</string>
 	<key>CFBundleHelpBookFolder</key>
 	<string>BibDesk Help</string>
 	<key>CFBundleHelpBookName</key>
@@ -92,7 +94,7 @@
 			</dict>
 			<key>NSMenuItem</key>
 			<dict>
-				<key>New item</key>
+				<key>default</key>
 				<string>Bibdesk/Complete Cite Key</string>
 			</dict>
 			<key>NSMessage</key>
@@ -127,6 +129,23 @@
 			<array>
 				<string>NSStringPboardType</string>
 			</array>
+			<key>NSSendTypes</key>
+			<array>
+				<string>NSStringPboardType</string>
+			</array>
+		</dict>
+		<dict>
+			
+			<key>NSMenuItem</key>
+			<dict>
+				<key>default</key>
+				<string>Bibdesk/Show Matching Reference</string>
+			</dict>
+			<key>NSMessage</key>
+			<string>showPubWithKey</string>
+			<key>NSPortName</key>
+			<string>Bibdesk</string>
+			
 			<key>NSSendTypes</key>
 			<array>
 				<string>NSStringPboardType</string>

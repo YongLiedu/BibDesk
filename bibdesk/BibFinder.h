@@ -53,6 +53,12 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 */
 - (NSMutableArray *)itemsMatchingConstraints:(NSDictionary *)constraints;
 - (NSMutableArray *)itemsMatchingText:(NSString *)s inKey:(NSString *)key;
+/*!
+    @method    itemsMatchingCiteKey 
+    @abstract   gives an array of dictionaries of items matching key.
+ @discussion the dictionaries have @"BibItem" = the matching item and @"BibDocument" = the matching item's owner document
+*/
+
 - (NSMutableArray *)itemsMatchingCiteKey:(NSString *)key;
 - (BOOL)searchForText:(NSString *)s inKey:(NSString *)key;
 - (id)init;

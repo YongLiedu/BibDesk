@@ -128,4 +128,9 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 - (void)completeCiteKeyFromSelection:(NSPasteboard *)pboard
                              userData:(NSString *)userData
                                 error:(NSString **)error;
+
+- (void)showPubWithKey:(NSPasteboard *)pboard
+			  userData:(NSString *)userData
+				 error:(NSString **)error;
+
 @end

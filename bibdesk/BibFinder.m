@@ -156,6 +156,7 @@ static BibFinder *_sharedFinder = nil;
     NSRange r;
     NSString *val;
     NSMutableArray *returnArray = [NSMutableArray arrayWithCapacity:1];
+	NSDictionary *itemDict = nil;
 
     while (doc = [docEnum nextObject]) {
         bibEnum = [[doc publications] objectEnumerator];
@@ -165,7 +166,9 @@ static BibFinder *_sharedFinder = nil;
             if((val != nil) && (![@"" isEqualToString:val])) {
                 r = [val rangeOfString:key options:NSCaseInsensitiveSearch];
                 if(r.location != NSNotFound){
-                    [returnArray addObject:bib];
+					itemDict = [NSDictionary dictionaryWithObjectsAndKeys:bib,@"BibItem",
+						doc,@"BibDocument",nil];
+                    [returnArray addObject:itemDict];
                 }
             }
         }
