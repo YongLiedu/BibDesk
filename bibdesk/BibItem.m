@@ -36,8 +36,8 @@
 
 #import "BibItem.h"
 
-#define addokey(s) if([pubFields objectForKey: s] == nil){[pubFields setObject:[BDSKComplexString complexStringWithString:@""] forKey: s];} [removeKeys removeObject: s];
-#define addrkey(s) if([pubFields objectForKey: s] == nil){[pubFields setObject:[BDSKComplexString complexStringWithString:@""] forKey: s];} if(![requiredFieldNames containsObject:s]){[requiredFieldNames addObject: s];} [removeKeys removeObject: s];
+#define addokey(s) if([pubFields objectForKey: s] == nil){[pubFields setObject:@"" forKey: s];} [removeKeys removeObject: s];
+#define addrkey(s) if([pubFields objectForKey: s] == nil){[pubFields setObject:@"" forKey: s];} if(![requiredFieldNames containsObject:s]){[requiredFieldNames addObject: s];} [removeKeys removeObject: s];
 
 #define isEmptyField(s) ([[[pubFields objectForKey:s] stringValue] isEqualToString:@""])
 
