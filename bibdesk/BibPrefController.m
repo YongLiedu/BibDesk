@@ -95,6 +95,7 @@ NSString *BDSKBooktitleString = @"Booktitle";
 NSString *BDSKPublisherString = @"Publisher";
 NSString *BDSKDateCreatedString = @"Date-Added";
 NSString *BDSKDateModifiedString = @"Date-Modified";
+NSString *BDSKDateString = @"Date";
 NSString *BDSKBibtexString = @"BibTeX";
 
 

@@ -359,7 +359,7 @@ static BibFinder *_sharedFinder = nil;
         return [aBib citeKey];
     }else if([[tableColumn identifier] isEqualToString: BDSKTitleString] ){
         return [aBib title];
-    }else if([[tableColumn identifier] isEqualToString: @"Date"] ){
+    }else if([[tableColumn identifier] isEqualToString: BDSKDateString] ){
         if([aBib date] == nil)
             return @"No date";
         else if([[aBib valueOfField:BDSKMonthString] isEqualToString:@""])

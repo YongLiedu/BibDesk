@@ -238,7 +238,7 @@ static NSColor *sStripeColor = nil;
 //    if([[tableColumn identifier] isEqualToString: BDSKTitleString] ){
 //        return [[ownedPublications objectAtIndex:row] title];
 //    }
-//    if([[tableColumn identifier] isEqualToString: @"Date"] ){
+//    if([[tableColumn identifier] isEqualToString: BDSKDateString] ){
 //        if([[ownedPublications objectAtIndex:row] date] == nil)
 //            return @"No date";
 //        else

@@ -431,7 +431,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
     
     if([entry isEqualToString:BDSKLocalUrlString] || [entry isEqualToString:BDSKUrlString] || 
        [entry isEqualToString:BDSKAbstractString] || [entry isEqualToString:BDSKAnnoteString] ||
-       [entry rangeOfString:@"Date"].location != NSNotFound ) return; // don't add these
+       [entry rangeOfString:BDSKDateString].location != NSNotFound ) return; // don't add these
 
     if([entry isEqualToString:BDSKTitleString] || 
        [entry isEqualToString:BDSKBooktitleString] || 

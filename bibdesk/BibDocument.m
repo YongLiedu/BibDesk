@@ -1204,7 +1204,7 @@ stringByAppendingPathComponent:@"BibDesk"]; */
 	[cellMenu insertItem:item4 atIndex:curIndex++];
 	[item4 release];
 	
-	item4 = [[NSMenuItem alloc] initWithTitle:@"Date" action:@selector(searchFieldChangeKey:) keyEquivalent:@""];
+	item4 = [[NSMenuItem alloc] initWithTitle:BDSKDateString action:@selector(searchFieldChangeKey:) keyEquivalent:@""];
 	[cellMenu insertItem:item4 atIndex:curIndex++];
 	[item4 release];
 	
@@ -1519,7 +1519,7 @@ stringByAppendingPathComponent:@"BibDesk"]; */
         if([field isEqualToString:BDSKAuthorString]){
             selectorString=@"bibtexAuthorString";
         } else {
-            if([field isEqualToString:@"Date"]){
+            if([field isEqualToString:BDSKDateString]){
                 selectorString=@"calendarDateDescription";
             } else {
                 if([field isEqualToString:@"All Fields"]){
@@ -1790,7 +1790,7 @@ didClickTableColumn: (NSTableColumn *) tableColumn{
 		
 		[publications sortUsingSelector:@selector(titleCompare:)];
 		[shownPublications sortUsingSelector:@selector(titleCompare:)];
-	}else if([tcID isEqualToString:@"Date"]){
+	}else if([tcID isEqualToString:BDSKDateString]){
 		
 		[publications sortUsingSelector:@selector(dateCompare:)];
 		[shownPublications sortUsingSelector:@selector(dateCompare:)];

@@ -119,6 +119,7 @@ extern NSString *BDSKBooktitleString;
 extern NSString *BDSKPublisherString;
 extern NSString *BDSKDateCreatedString;
 extern NSString *BDSKDateModifiedString;
+extern NSString *BDSKDateString;
 extern NSString *BDSKBibtexString;
 
 

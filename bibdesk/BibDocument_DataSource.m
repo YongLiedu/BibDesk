@@ -72,7 +72,8 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 				return [pub title];
 			}
             
-        }else if([tcID isEqualToString: BDSKDateAddedString] ||
+        }else if([tcID isEqualToString: BDSKDateCreatedString] ||
+				 [tcID isEqualToString: @"Added"] ||
 				 [tcID isEqualToString: @"Created"] ){
 			NSCalendarDate *date = [pub dateCreated];
 			if(date == nil)
@@ -86,7 +87,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
                 return @"";
 			return [date descriptionWithCalendarFormat:shortDateFormatString];
 			
-        }else if([tcID isEqualToString: @"Date"] ){
+        }else if([tcID isEqualToString: BDSKDateString] ){
             NSCalendarDate *date = [pub date];
 			NSString *monthStr = [pub valueOfField:BDSKMonthString];
 			if(date == nil)
