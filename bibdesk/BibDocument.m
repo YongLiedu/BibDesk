@@ -1242,7 +1242,7 @@ int generalBibItemCompareFunc(id item1, id item2, void *context){
         [self copyAsBibTex:self];
     }if([[sud objectForKey:BDSKDragCopyKey] intValue] == 1){
         [self copyAsTex:self];
-    }else{
+    }if([[sud objectForKey:BDSKDragCopyKey] intValue] == 2){
         [self copyAsPDF:self];
     }
 }
