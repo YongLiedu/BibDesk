@@ -538,6 +538,9 @@ void _setupFonts(){
 
 - (BOOL)canSetCiteKey
 {
+	if ([[NSApp delegate] requiredFieldsForCiteKey] == nil)
+		return NO;
+	
 	NSEnumerator *fEnum = [[[NSApp delegate] requiredFieldsForCiteKey] objectEnumerator];
 	NSString *fieldName;
 	NSString *fieldValue = [self citeKey];
@@ -1064,6 +1067,9 @@ void _setupFonts(){
 
 - (BOOL)canSetLocalUrl
 {
+	if ([[NSApp delegate] requiredFieldsForLocalUrl] == nil) 
+		return NO;
+	
 	NSEnumerator *fEnum = [[[NSApp delegate] requiredFieldsForLocalUrl] objectEnumerator];
 	NSString *fieldName;
 	NSString *fieldValue = [self valueOfField:@"Local-Url"];
