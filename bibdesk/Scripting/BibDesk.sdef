@@ -111,6 +111,9 @@ will translate this file into the necessary scriptSuite and scriptTerminology fi
 					<property name="cite key" code="ckey" type="string" description="Key for citing the publication.">
 						<cocoa method="citeKey"/>
 					</property>  
+					<property name="generated cite key" code="gcky" type="string" description="Auto-generated key for the publication." access="r">
+						<cocoa method="suggestedCiteKey"/>
+					</property>  
 					<property name="title" code="titl" type="string" description="The publication's title.">
 						<cocoa method="title"/>
 					</property>  
