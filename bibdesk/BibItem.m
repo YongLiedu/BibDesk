@@ -421,7 +421,8 @@ void _setupFonts(){
 }
 
 - (NSString *)sanitizedCiteKeyString:(NSString *)key{
-	NSCharacterSet *invalidSet = [[BibTypeManager sharedManager] invalidCharactersForField:@"Cite Key" inType:@"BibTeX"];
+    // only call this for keys that we generate internally, as it uses a restrictive character set
+	NSCharacterSet *invalidSet = [[BibTypeManager sharedManager] sanitizedCiteKeyCharSet];
 		
 	NSString *newCiteKey = [key stringByReplacingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]
 												   withString:@"-"];
@@ -456,35 +457,34 @@ void _setupFonts(){
 }
 
 - (void)setCiteKey:(NSString *)newCiteKey{
-	if(editorObj){
-		// NSLog(@"setCiteKey called with a valid editor");
-		if(!undoManager){
-				undoManager = [[editorObj window] undoManager];
-		}
+    if(editorObj){
+        // NSLog(@"setCiteKey called with a valid editor");
+        if(!undoManager){
+            undoManager = [[editorObj window] undoManager];
+        }
 
-		[[undoManager prepareWithInvocationTarget:self] setCiteKey:citeKey];
-		[undoManager setActionName:NSLocalizedString(@"Change Cite Key",@"")];
-	}
+        [[undoManager prepareWithInvocationTarget:self] setCiteKey:citeKey];
+        [undoManager setActionName:NSLocalizedString(@"Change Cite Key",@"")];
+    }
 	
+    [newCiteKey retain];
     [citeKey autorelease];
-	
-	citeKey = [self sanitizedCiteKeyString:newCiteKey];
-	
-	if([citeKey isEqualToString:@""]){
-		citeKey = [self suggestedCiteKey];
-	}
-	
-    citeKey = [citeKey retain];
-	
-	NSDictionary *notifInfo = [NSDictionary dictionaryWithObjectsAndKeys:citeKey, @"value", @"Cite Key", @"key",nil];
-	NSNotification *aNotification = [NSNotification notificationWithName:BDSKBibItemChangedNotification
-								      object:self
-								    userInfo:notifInfo];
-	// Queue the notification, since this can be expensive when opening large files
-	[[NSNotificationQueue defaultQueue] enqueueNotification:aNotification
-						   postingStyle:NSPostWhenIdle
-						   coalesceMask:NSNotificationCoalescingOnSender
-						       forModes:nil];
+		
+    if([newCiteKey isEqualToString:@""]){
+        citeKey = [self suggestedCiteKey];
+    } else {
+        citeKey = newCiteKey;
+    }
+		
+    NSDictionary *notifInfo = [NSDictionary dictionaryWithObjectsAndKeys:citeKey, @"value", @"Cite Key", @"key",nil];
+    NSNotification *aNotification = [NSNotification notificationWithName:BDSKBibItemChangedNotification
+                                                                  object:self
+                                                                userInfo:notifInfo];
+    // Queue the notification, since this can be expensive when opening large files
+    [[NSNotificationQueue defaultQueue] enqueueNotification:aNotification
+                                               postingStyle:NSPostWhenIdle
+                                               coalesceMask:NSNotificationCoalescingOnSender
+                                                   forModes:nil];
 }
 
 - (NSString *)citeKey{
