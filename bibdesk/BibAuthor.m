@@ -36,11 +36,11 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 
 - (void)dealloc{
     [name release];
-	[_firstName release];
-	[_vonPart release];
-	[_lastName release];
-	[_jrPart release];
-	[_normalizedName release];
+	[firstName release];
+	[vonPart release];
+	[lastName release];
+	[jrPart release];
+	[normalizedName release];
         [sortableName release];
     [[NSNotificationCenter defaultCenter] removeObserver:self];
 #if DEBUG
@@ -87,12 +87,12 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 	// if there's a vonPart, append it to 'last'.
 	// omitting a von is like misspelling the last name, not like omitting a first name.
 	
-	NSString *lastStrMe = [NSString stringWithFormat:@"%@%@", _vonPart,_lastName];
+	NSString *lastStrMe = [NSString stringWithFormat:@"%@%@", vonPart,lastName];
 	NSString *lastStrOther = [NSString stringWithFormat:@"%@%@", [otherAuth vonPart], [otherAuth lastName]];
 	
 	// if we both have a first name, compare first lastStr == first lastStr
-	if(!emptyStr(_firstName) && !emptyStr([otherAuth firstName])){
-		return [ [NSString stringWithFormat:@"%@%@", _firstName, lastStrMe] compare:
+	if(!emptyStr(firstName) && !emptyStr([otherAuth firstName])){
+		return [ [NSString stringWithFormat:@"%@%@", firstName, lastStrMe] compare:
 	[NSString stringWithFormat:@"%@%@",[otherAuth firstName], lastStrOther] options:NSCaseInsensitiveSearch];
 		
 	}else{
@@ -110,7 +110,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 #pragma mark String Representations
 
 - (NSString *)description{
-    return [NSString stringWithFormat:@"[%@_%@_%@_%@]", _firstName,_vonPart,_lastName,_jrPart];
+    return [NSString stringWithFormat:@"[%@_%@_%@_%@]", firstName,vonPart,lastName,jrPart];
 }
 
 
@@ -123,39 +123,39 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 "von Last, Jr, First" 
 You may almost always use the first form; you shouldn’t if either there’s a Jr part, or the Last part has multiple tokens but there’s no von part. 
 */
-// Note that if there is only one word/token, it is the _lastName, so that's assumed to always be there.
+// Note that if there is only one word/token, it is the lastName, so that's assumed to always be there.
 
 - (NSString *)normalizedName{
-	return _normalizedName;
+	return normalizedName;
 }
 
 - (void)refreshNormalizedName{
-	[_normalizedName release];
+	[normalizedName release];
 	
-	BOOL FIRST = !emptyStr(_firstName);
-	BOOL VON = !emptyStr(_vonPart);
-	BOOL LAST = !emptyStr(_lastName);
-	BOOL JR = !emptyStr(_jrPart);
+	BOOL FIRST = !emptyStr(firstName);
+	BOOL VON = !emptyStr(vonPart);
+	BOOL LAST = !emptyStr(lastName);
+	BOOL JR = !emptyStr(jrPart);
 	
-	_normalizedName = [[NSString stringWithFormat:@"%@%@%@%@%@%@%@", (VON ? _vonPart : @""),
+	normalizedName = [[NSString stringWithFormat:@"%@%@%@%@%@%@%@", (VON ? vonPart : @""),
 		(VON ? @" " : @""),
-		(LAST ? _lastName : @""),
+		(LAST ? lastName : @""),
 		(JR ? @", " : @""),
-		(JR ? _jrPart : @""),
+		(JR ? jrPart : @""),
 		(FIRST ? @", " : @""),
-		(FIRST ? _firstName : @"")] retain];
+		(FIRST ? firstName : @"")] retain];
 }
 
 - (void)refreshSortableName{ // "Lastname Firstname" (no comma, von, or jr)
     [sortableName release];
     
-    BOOL FIRST = !emptyStr(_firstName);
-    BOOL LAST = !emptyStr(_lastName);
+    BOOL FIRST = !emptyStr(firstName);
+    BOOL LAST = !emptyStr(lastName);
     
     sortableName = [[NSString stringWithFormat:@"%@%@%@", 
-        (LAST ? _lastName : @""),
+        (LAST ? lastName : @""),
         (FIRST ? @" " : @""),
-        (FIRST ? _firstName : @"")] retain];
+        (FIRST ? firstName : @"")] retain];
 }
 
 - (NSString *)sortableName{
@@ -168,31 +168,31 @@ You may almost always use the first form; you shouldn’t if either there’s a Jr p
 }
 
 - (NSString *)firstName{
-    return _firstName;
+    return firstName;
 }
 
 - (NSString *)vonPart{
-    return _vonPart;
+    return vonPart;
 }
 
 - (NSString *)lastName{
-    return _lastName;
+    return lastName;
 }
 
 - (NSString *)jrPart{
-    return _jrPart;
+    return jrPart;
 }
 
 - (NSString *)MODSStringWithRole:(NSString *)role{
     NSMutableString *s = [NSMutableString stringWithString:@"<name type=\"personal\">"];
     
-    if(_firstName){
-        [s appendFormat:@"<namePart type=\"given\">%@</namePart>", _firstName];
+    if(firstName){
+        [s appendFormat:@"<namePart type=\"given\">%@</namePart>", firstName];
     }
     
-    if(_lastName){
-        [s appendFormat:@"<namePart type=\"family\">%@%@</namePart>", (_vonPart ? _vonPart : @""),
-            _lastName];
+    if(lastName){
+        [s appendFormat:@"<namePart type=\"family\">%@%@</namePart>", (vonPart ? vonPart : @""),
+            lastName];
     }
     
     if(role){
@@ -208,7 +208,7 @@ You may almost always use the first form; you shouldn’t if either there’s a Jr p
 /*
 Sets all the different variables for partial names and so on from a given string. 
  
-Note: The strings returned by the bt_split_name function seem to be in the wrong encoding – UTF-8 is treated as ASCII. This is manually fixed for the _firstName, _lastName,  _jrPart and _vonPart variables.
+Note: The strings returned by the bt_split_name function seem to be in the wrong encoding – UTF-8 is treated as ASCII. This is manually fixed for the firstName, lastName,  jrPart and vonPart variables.
 */
 - (void)setName:(NSString *)newName{
     bt_name *theName;
@@ -231,7 +231,7 @@ Note: The strings returned by the bt_split_name function seem to be in the wrong
         if(i >= 0 && i < theName->part_len[BTN_FIRST]-1)
             [tmpStr appendString:@" "];
     }
-    _firstName = [[NSString alloc] initWithData:[tmpStr dataUsingEncoding:NSUTF8StringEncoding allowLossyConversion:YES]  encoding:NSUTF8StringEncoding]; 
+    firstName = [[NSString alloc] initWithData:[tmpStr dataUsingEncoding:NSUTF8StringEncoding allowLossyConversion:YES]  encoding:NSUTF8StringEncoding]; 
 		    
     // get tokens from von part
     tmpStr = [NSMutableString string];
@@ -242,7 +242,7 @@ Note: The strings returned by the bt_split_name function seem to be in the wrong
             [tmpStr appendString:@" "];
 
     }
-    _vonPart = [[NSString alloc] initWithData:[tmpStr dataUsingEncoding:NSUTF8StringEncoding allowLossyConversion:YES]  encoding:NSUTF8StringEncoding]; 
+    vonPart = [[NSString alloc] initWithData:[tmpStr dataUsingEncoding:NSUTF8StringEncoding allowLossyConversion:YES]  encoding:NSUTF8StringEncoding]; 
 	
 	// get tokens from last part
     tmpStr = [NSMutableString string];
@@ -252,7 +252,7 @@ Note: The strings returned by the bt_split_name function seem to be in the wrong
         if(i >= 0 && i < theName->part_len[BTN_LAST]-1)
             [tmpStr appendString:@" "];
     }
-    _lastName = [[NSString alloc] initWithData:[tmpStr dataUsingEncoding:NSUTF8StringEncoding allowLossyConversion:YES]  encoding:NSUTF8StringEncoding]; 
+    lastName = [[NSString alloc] initWithData:[tmpStr dataUsingEncoding:NSUTF8StringEncoding allowLossyConversion:YES]  encoding:NSUTF8StringEncoding]; 
 	
     
     // get tokens from jr part
@@ -263,7 +263,7 @@ Note: The strings returned by the bt_split_name function seem to be in the wrong
         if(i >= 0 && i < theName->part_len[BTN_JR]-1)
             [tmpStr appendString:@" "];
     }
-    _jrPart = [[NSString alloc] initWithData:[tmpStr dataUsingEncoding:NSUTF8StringEncoding allowLossyConversion:YES]  encoding:NSUTF8StringEncoding]; 
+    jrPart = [[NSString alloc] initWithData:[tmpStr dataUsingEncoding:NSUTF8StringEncoding allowLossyConversion:YES]  encoding:NSUTF8StringEncoding]; 
 	
     [self refreshNormalizedName];
     [self refreshSortableName];
@@ -281,11 +281,11 @@ Note: The strings returned by the bt_split_name function seem to be in the wrong
 
 // Accessors for personController - we don't retain it to avoid cycles.
 - (BibPersonController *)personController{
-    return _personController; 
+    return personController; 
 }
 
 - (void)setPersonController:(BibPersonController *)newPersonController{
-	_personController = newPersonController;
+	personController = newPersonController;
 }
 
 @end

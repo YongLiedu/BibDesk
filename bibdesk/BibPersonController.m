@@ -16,12 +16,12 @@
 
 - (NSString *)windowNibName{return @"BibPersonView";}
 
-- (id)initWithPerson:(BibAuthor *)person document:(BibDocument *)doc{
+- (id)initWithPerson:(BibAuthor *)aPerson document:(BibDocument *)doc{
    //  NSLog(@"personcontroller init");
     self = [super initWithWindowNibName:@"BibPersonView"];
 	if(self){
-            [self setPerson:person];
-            publications = [[doc publicationsForAuthor:person] copy];
+            [self setPerson:aPerson];
+            publications = [[doc publicationsForAuthor:aPerson] copy];
             
             [person setPersonController:self];
             
@@ -40,8 +40,8 @@
 #endif
     [pubsTableView setDelegate:nil];
     [pubsTableView setDataSource:nil];
-    [_person setPersonController:nil];
-    [_person release];
+    [person setPersonController:nil];
+    [person release];
     [publications release];
     [super dealloc];
 }
@@ -55,17 +55,17 @@
                                                  selector:@selector(handlePubListChanged:)
                                                      name:BDSKAuthorPubListChangedNotification
 						object:nil]; 
-	[self _updateUI];
+	[self updateUI];
 }
 
 #pragma mark accessors
 
 - (BibAuthor *)person {
-    return _person;
+    return person;
 }
 
 - (void)setPerson:(BibAuthor *)newPerson {
-	_person = [newPerson retain];
+	person = [newPerson retain];
 }
 
 #pragma mark actions
@@ -74,14 +74,14 @@
     [self showWindow:self];
 }
 
-- (void)_updateUI{
-	[nameTextField setStringValue:[_person name]];
+- (void)updateUI{
+	[nameTextField setStringValue:[person name]];
 	[pubsTableView reloadData];
 	// TODO: get picture from AB
 }
 
 - (void)handlePubListChanged:(NSNotification *)notification{
-	[self _updateUI]; 
+	[self updateUI]; 
 }
 
 - (void)windowWillClose:(NSNotification *)notification{

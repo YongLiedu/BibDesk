@@ -122,12 +122,12 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
                                                  selector:@selector(handleErrorNotification:)
                                                      name:BDSKParserErrorNotification
                                                    object:nil];
-        _errors = [[NSMutableArray alloc] initWithCapacity:5];
-        _finder = [[BibFinder sharedFinder] retain];
+        errors = [[NSMutableArray alloc] initWithCapacity:5];
+        finder = [[BibFinder sharedFinder] retain];
         acLock = [[NSLock alloc] init];
-        _autoCompletionDict = [[NSMutableDictionary alloc] initWithCapacity:15]; // arbitrary
-	 	_formatters = [[NSMutableDictionary alloc] initWithCapacity:15]; // arbitrary
-        _autocompletePunctuationCharacterSet = [[NSCharacterSet characterSetWithCharactersInString:@",:;"] retain];
+        autoCompletionDict = [[NSMutableDictionary alloc] initWithCapacity:15]; // arbitrary
+	 	formatters = [[NSMutableDictionary alloc] initWithCapacity:15]; // arbitrary
+        autocompletePunctuationCharacterSet = [[NSCharacterSet characterSetWithCharactersInString:@",:;"] retain];
         requiredFieldsForCiteKey = nil;
         requiredFieldsForLocalUrl = nil;
 				
@@ -182,13 +182,13 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 - (void)dealloc
 {
     [[NSNotificationCenter defaultCenter] removeObserver:self];
-    [_autoCompletionDict release];
+    [autoCompletionDict release];
 	[requiredFieldsForCiteKey release];
-	[_formatters release];
-    [_autocompletePunctuationCharacterSet release];
+	[formatters release];
+    [autocompletePunctuationCharacterSet release];
     [acLock release];
-	[_finder release];
-    [_errors release];
+	[finder release];
+    [errors release];
     [super dealloc];
 }
 
@@ -404,22 +404,22 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 #pragma mark Auto-completion stuff
 
 - (NSCharacterSet *)autoCompletePunctuationCharacterSet{
-    return _autocompletePunctuationCharacterSet;
+    return autocompletePunctuationCharacterSet;
 }
 
 - (void)addString:(NSString *)string forCompletionEntry:(NSString *)entry{
     NSMutableArray *completionArray = nil;
-    BOOL keyExists = [(NSMutableArray *)[_autoCompletionDict allKeysUsingLock:acLock] containsObject:entry usingLock:acLock];
+    BOOL keyExists = [(NSMutableArray *)[autoCompletionDict allKeysUsingLock:acLock] containsObject:entry usingLock:acLock];
     // NSLog(@"got string %@ for entry %@", string, entry);
     
     if(string == nil) return; // shouldn't happen
     
     if (!keyExists) {
         completionArray = [NSMutableArray arrayWithCapacity:5];
-        [_autoCompletionDict setObject:completionArray forKey:entry usingLock:acLock];
+        [autoCompletionDict setObject:completionArray forKey:entry usingLock:acLock];
     }
 
-    completionArray = [_autoCompletionDict objectForKey:entry usingLock:acLock];
+    completionArray = [autoCompletionDict objectForKey:entry usingLock:acLock];
     
     if([entry isEqualToString:BDSKLocalUrlString] || [entry isEqualToString:BDSKUrlString] || 
        [entry isEqualToString:BDSKAbstractString] || [entry isEqualToString:BDSKAnnoteString] ||
@@ -438,7 +438,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
         return;
     }
     
-    NSRange r = [string rangeOfCharacterFromSet:_autocompletePunctuationCharacterSet];
+    NSRange r = [string rangeOfCharacterFromSet:autocompletePunctuationCharacterSet];
     
     if(r.location != NSNotFound){
         [acLock lock];
@@ -447,10 +447,10 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
         NSString *tmp = nil;
 
         while(![scanner isAtEnd]){
-            [scanner scanUpToCharactersFromSet:_autocompletePunctuationCharacterSet intoString:&tmp];
+            [scanner scanUpToCharactersFromSet:autocompletePunctuationCharacterSet intoString:&tmp];
             if(tmp != nil) 
                 [completionArray addObject:tmp]; // we have the lock, so don't use the locking method here
-            [scanner scanCharactersFromSet:_autocompletePunctuationCharacterSet intoString:nil];
+            [scanner scanCharactersFromSet:autocompletePunctuationCharacterSet intoString:nil];
             [scanner scanCharactersFromSet:[NSCharacterSet whitespaceCharacterSet] intoString:nil];
         }
         [scanner release];
@@ -469,18 +469,18 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 
 - (NSFormatter *)formatterForEntry:(NSString *)entry{
     BDSKFormCellFormatter *formatter = nil;
-    formatter = [_formatters objectForKey:entry];
+    formatter = [formatters objectForKey:entry];
     if (formatter == nil) {
         formatter = [[BDSKFormCellFormatter alloc] init];
         [formatter setEntry:entry];
-        [_formatters setObject:formatter forKey:entry];
+        [formatters setObject:formatter forKey:entry];
         [formatter release];
     }
     return formatter;
 }
 
 - (NSArray *)stringsForCompletionEntry:(NSString *)entry{
-    NSMutableArray* autoCompleteStrings = (NSMutableArray *)[_autoCompletionDict objectForKey:entry usingLock:acLock];
+    NSMutableArray* autoCompleteStrings = (NSMutableArray *)[autoCompletionDict objectForKey:entry usingLock:acLock];
 	if (autoCompleteStrings)
 		return autoCompleteStrings; // why sort? [autoCompleteStrings sortedArrayUsingSelector:@selector(caseInsensitiveCompare:)];
 	else 
@@ -600,25 +600,25 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 
 #pragma mark || tableView datasource methods
 - (int)numberOfRowsInTableView:(NSTableView *)tableView{
-    return [_errors count];
+    return [errors count];
 }
 
 - (id)tableView:(NSTableView *)tableView objectValueForTableColumn:(NSTableColumn *)tableColumn row:(int)row{
     if ([[tableColumn identifier] isEqualToString:@"lineNumber"]) {
-        return ([[_errors objectAtIndex:row] valueForKey:@"lineNumber"] != [NSNull null] ? [NSString stringWithFormat:@"%@", [[_errors objectAtIndex:row] valueForKey:@"lineNumber"]] : @"" ); // return empty string if it was null, which the Unicode parser returns.
+        return ([[errors objectAtIndex:row] valueForKey:@"lineNumber"] != [NSNull null] ? [NSString stringWithFormat:@"%@", [[errors objectAtIndex:row] valueForKey:@"lineNumber"]] : @"" ); // return empty string if it was null, which the Unicode parser returns.
     }
     if ([[tableColumn identifier] isEqualToString:@"errorClass"]) {
-        return [NSString stringWithFormat:@"%@", [[_errors objectAtIndex:row] valueForKey:@"errorClassName"]];
+        return [NSString stringWithFormat:@"%@", [[errors objectAtIndex:row] valueForKey:@"errorClassName"]];
     }
     if ([[tableColumn identifier] isEqualToString:@"fileName"]) {
-        if([[NSFileManager defaultManager] fileExistsAtPath:[[_errors objectAtIndex:row] valueForKey:@"fileName"]]){
-            return [[NSString stringWithFormat:@"%@", [[_errors objectAtIndex:row] valueForKey:@"fileName"]] lastPathComponent];
+        if([[NSFileManager defaultManager] fileExistsAtPath:[[errors objectAtIndex:row] valueForKey:@"fileName"]]){
+            return [[NSString stringWithFormat:@"%@", [[errors objectAtIndex:row] valueForKey:@"fileName"]] lastPathComponent];
         }else{
             return NSLocalizedString(@"Paste or Drag data", @"Paste or Drag data");
         }
     }
     if ([[tableColumn identifier] isEqualToString:@"errorMessage"]) {
-        return [NSString stringWithFormat:@"%@", [[_errors objectAtIndex:row] valueForKey:@"errorMessage"]];
+        return [NSString stringWithFormat:@"%@", [[errors objectAtIndex:row] valueForKey:@"errorMessage"]];
     }else{
         return @"";
     }
@@ -650,7 +650,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
     NSString *errorClass = [errDict valueForKey:@"errorClassName"];
 
     if (errorClass) {
-        [_errors addObject:errDict];
+        [errors addObject:errDict];
         [self performSelectorOnMainThread:@selector(updateErrorPanelUI) withObject:nil waitUntilDone:NO];
     }
 }
@@ -664,7 +664,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 
 - (void)removeErrorObjsForFileName:(NSString *)fileName{
     NSMutableArray *errorsToRemove = [NSMutableArray arrayWithCapacity:10];
-    NSEnumerator *enumerator = [_errors objectEnumerator];
+    NSEnumerator *enumerator = [errors objectEnumerator];
     id errObj;
 
     while (errObj = [enumerator nextObject]) {
@@ -672,7 +672,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
             [errorsToRemove addObject:errObj];
     	}
     }
-    [_errors removeObjectsInArray:errorsToRemove];
+    [errors removeObjectsInArray:errorsToRemove];
     [errorTableView reloadData];
 }
 
@@ -680,7 +680,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
     id errObj = nil;
     int selectedRow = [sender selectedRow];
     if(selectedRow != -1){
-      errObj = [_errors objectAtIndex:selectedRow];
+      errObj = [errors objectAtIndex:selectedRow];
       [self gotoErrorObj:errObj];
     }
 }
@@ -737,7 +737,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 }
 
 - (IBAction)showFindPanel:(id)sender{
-    [_finder showWindow:self];
+    [finder showWindow:self];
 }
 
 
@@ -811,7 +811,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 
 #pragma mark || Service code
 
-- (NSDictionary *)_constraintsFromString:(NSString *)string{
+- (NSDictionary *)constraintsFromString:(NSString *)string{
     NSScanner *scanner;
     NSMutableDictionary *searchConstraints = [NSMutableDictionary dictionary];
     NSString *queryString;
@@ -847,7 +847,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 
     }else{
         // if it was at end, we are done, and we'll scan in the title:
-        // items = [_finder itemsMatchingText:queryKey inKey:BDSKTitleString];
+        // items = [finder itemsMatchingText:queryKey inKey:BDSKTitleString];
         if(queryKey){
             [searchConstraints setObject:queryKey forKey:BDSKTitleString];
         } else {
@@ -888,7 +888,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
         return;
     }
 
-    NSDictionary *searchConstraints = [self _constraintsFromString:pboardString];
+    NSDictionary *searchConstraints = [self constraintsFromString:pboardString];
     
     if(searchConstraints == nil){
         *error = NSLocalizedString(@"Error: invalid search constraints.",
@@ -896,7 +896,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
         return;
     }        
     
-    items = [_finder itemsMatchingConstraints:searchConstraints];
+    items = [finder itemsMatchingConstraints:searchConstraints];
     
     e = [items objectEnumerator];
     if([items count] > 0){
@@ -939,7 +939,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
         return;
     }
     NSString *pboardString = [pboard stringForType:NSStringPboardType];
-    NSArray *items = [_finder itemsMatchingCiteKey:pboardString];
+    NSArray *items = [finder itemsMatchingCiteKey:pboardString];
     NSDictionary *itemDict = nil;
 	BibItem *item = nil;
     NSMutableString *retStr = [NSMutableString string];
@@ -969,7 +969,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
         return;
     }
     NSString *pboardString = [pboard stringForType:NSStringPboardType];
-    NSArray *items = [_finder itemsMatchingCiteKey:pboardString];
+    NSArray *items = [finder itemsMatchingCiteKey:pboardString];
 	NSDictionary *itemDict = nil;
 	BibItem *item;
 	BibDocument *doc = nil;

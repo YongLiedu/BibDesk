@@ -18,9 +18,9 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 #import "BibAppController.h"
 
 @interface BDSKFormCellFormatter : NSFormatter {
-    NSString *_entry;
+    NSString *entry;
 }
 
 - (NSString *)entry;
-- (void)setEntry:(NSString *)entry;
+- (void)setEntry:(NSString *)newEntry;
 @end

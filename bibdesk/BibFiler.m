@@ -9,27 +9,27 @@
 #import "BibFiler.h"
 #import "NSImage+Toolbox.h"
 
-static BibFiler *_sharedFiler = nil;
+static BibFiler *sharedFiler = nil;
 
 @implementation BibFiler
 
 + (BibFiler *)sharedFiler{
-	if(!_sharedFiler){
-		_sharedFiler = [[BibFiler alloc] init];
+	if(!sharedFiler){
+		sharedFiler = [[BibFiler alloc] init];
 	}
-	return _sharedFiler;
+	return sharedFiler;
 }
 
 - (id)init{
 	if(self = [super init]){
-		_fileInfoDicts = [[NSMutableArray arrayWithCapacity:10] retain];
+		fileInfoDicts = [[NSMutableArray arrayWithCapacity:10] retain];
 		
 	}
 	return self;
 }
 
 - (void)dealloc{
-	[_fileInfoDicts release];
+	[fileInfoDicts release];
 	[super dealloc];
 }
 
@@ -147,7 +147,7 @@ static BibFiler *_sharedFiler = nil;
 					}
 					if([fm createSymbolicLinkAtPath:resolvedNewPath pathContent:pathContent]){
 						if(![fm removeFileAtPath:resolvedPath handler:self]){
-							status = [_errorString autorelease];
+							status = [errorString autorelease];
 							statusFlag = statusFlag | BDSKMoveErrorMask;
 						}
 						[paper setField:@"Local-Url" toValue:[[NSURL fileURLWithPath:newPath] absoluteString]];
@@ -156,7 +156,7 @@ static BibFiler *_sharedFiler = nil;
 						NSUndoManager *undoManager = [doc undoManager];
 						[[undoManager prepareWithInvocationTarget:self] 
 							movePath:newPath toPath:path forPaper:paper fromDocument:doc moveAll:YES];
-						_moveCount++;
+						moveCount++;
 					}else{
 						status = NSLocalizedString(@"Could not move symbolic link.", @"");
 						statusFlag = statusFlag | BDSKMoveErrorMask;
@@ -168,9 +168,9 @@ static BibFiler *_sharedFiler = nil;
 					NSUndoManager *undoManager = [doc undoManager];
 					[[undoManager prepareWithInvocationTarget:self] 
 						movePath:newPath toPath:path forPaper:paper fromDocument:doc moveAll:YES];
-					_moveCount++;
+					moveCount++;
 				}else{
-					status = [_errorString autorelease];
+					status = [errorString autorelease];
 					statusFlag = statusFlag | BDSKMoveErrorMask;
 				}
 			}else{
@@ -182,12 +182,12 @@ static BibFiler *_sharedFiler = nil;
 		status = NSLocalizedString(@"Incomplete information to generate the file name.",@"");
 		statusFlag = statusFlag | BDSKIncompleteFieldsMask;
 	}
-	_movableCount++;
+	movableCount++;
 	
 	if(statusFlag != BDSKNoErrorMask){
 		[info setObject:status forKey:@"status"];
 		[info setObject:[NSNumber numberWithInt:statusFlag] forKey:@"flag"];
-		[_fileInfoDicts addObject:info];
+		[fileInfoDicts addObject:info];
 	}
 }
 
@@ -195,11 +195,9 @@ static BibFiler *_sharedFiler = nil;
 	NSUndoManager *undoManager = [doc undoManager];
 	[[undoManager prepareWithInvocationTarget:self] finishMoveForDocument:doc];
 	
-	_moveCount = 0;
-	_movableCount = 0;
-	_deletedCount = 0;
-	_cleanupChangeCount = 0;
-	[_fileInfoDicts removeAllObjects];
+	moveCount = 0;
+	movableCount = 0;
+	[fileInfoDicts removeAllObjects];
 	
 	if ([number intValue] > 1 && [NSBundle loadNibNamed:@"AutoFileProgress" owner:self]) {
 		[NSApp beginSheet:progressSheet
@@ -215,14 +213,14 @@ static BibFiler *_sharedFiler = nil;
 
 - (void)finishMoveForDocument:(BibDocument *)doc{
 	NSUndoManager *undoManager = [doc undoManager];
-	[[undoManager prepareWithInvocationTarget:self] prepareMoveForDocument:doc number:[NSNumber numberWithInt:_moveCount]];
+	[[undoManager prepareWithInvocationTarget:self] prepareMoveForDocument:doc number:[NSNumber numberWithInt:moveCount]];
 	
 	if (progressSheet) {
 		[progressSheet orderOut:nil];
 		[NSApp endSheet:progressSheet returnCode:0];
 	}
 	
-	if([_fileInfoDicts count] > 0){
+	if([fileInfoDicts count] > 0){
 		[self showProblems];
 	}
 }
@@ -249,27 +247,27 @@ static BibFiler *_sharedFiler = nil;
 }
 
 - (void)doCleanup{
-	_currentPapers = nil;
-	_currentDocument = nil;
+	currentPapers = nil;
+	currentDocument = nil;
 	[window close];
 }
 
 - (BOOL)fileManager:(NSFileManager *)manager shouldProceedAfterError:(NSDictionary *)errorInfo{
-	_errorString = [[errorInfo objectForKey:@"Error"] retain];
+	errorString = [[errorInfo objectForKey:@"Error"] retain];
 	return NO;
 }
 
 #pragma mark table view stuff
 
 - (int)numberOfRowsInTableView:(NSTableView *)tableView{
-	return [_fileInfoDicts count]; 
+	return [fileInfoDicts count]; 
 }
 
 - (id)tableView:(NSTableView *)tableView 
 objectValueForTableColumn:(NSTableColumn *)tableColumn 
 			row:(int)row{
 	NSString *tcid = [tableColumn identifier];
-	NSDictionary *dict = [_fileInfoDicts objectAtIndex:row];
+	NSDictionary *dict = [fileInfoDicts objectAtIndex:row];
 	
 	if([tcid isEqualToString:@"oloc"]){
 		return [dict objectForKey:@"oloc"];
@@ -299,7 +297,7 @@ objectValueForTableColumn:(NSTableColumn *)tableColumn
    forTableColumn:(NSTableColumn *)tableColumn 
 			  row:(int)row{
 	NSString *tcid = [tableColumn identifier];
-	NSDictionary *dict = [_fileInfoDicts objectAtIndex:row];
+	NSDictionary *dict = [fileInfoDicts objectAtIndex:row];
 	int statusFlag = [[dict objectForKey:@"flag"] intValue];
 		
 	if([tcid isEqualToString:@"oloc"]){
@@ -321,7 +319,7 @@ objectValueForTableColumn:(NSTableColumn *)tableColumn
 
 - (IBAction)showFile:(id)sender{
 	NSString *tcid;
-	NSDictionary *dict = [_fileInfoDicts objectAtIndex:[tv clickedRow]];
+	NSDictionary *dict = [fileInfoDicts objectAtIndex:[tv clickedRow]];
 	NSString *path;
 	int statusFlag = [[dict objectForKey:@"flag"] intValue];
 

@@ -32,13 +32,13 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 */
 @interface BibAuthor : NSObject <NSCopying, NSCoding> {
     NSString *name;
-    NSString *_firstName;
-    NSString *_vonPart;
-    NSString *_lastName;
-    NSString *_jrPart;
-    NSString *_normalizedName;
+    NSString *firstName;
+    NSString *vonPart;
+    NSString *lastName;
+    NSString *jrPart;
+    NSString *normalizedName;
     NSString *sortableName;
-    BibPersonController *_personController; // unretained
+    BibPersonController *personController; // unretained
     BibItem *publication;
 }
 

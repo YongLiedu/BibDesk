@@ -43,10 +43,10 @@
 	   originalSelectedRange:(NSRange)origSelRange
             errorDescription:(NSString **)error{
 
-    if(![[[OFPreferenceWrapper sharedPreferenceWrapper] objectForKey:BDSKBibEditorAutocompletionFields] containsObject:_entry])
+    if(![[[OFPreferenceWrapper sharedPreferenceWrapper] objectForKey:BDSKBibEditorAutocompletionFields] containsObject:entry])
         return YES;
     
-    NSArray *strings = [[NSApp delegate] stringsForCompletionEntry:_entry];
+    NSArray *strings = [[NSApp delegate] stringsForCompletionEntry:entry];
     NSEnumerator *stringE = [strings objectEnumerator];
     NSString *string = nil;
 	
@@ -106,18 +106,18 @@
 }
 
 - (NSString *)entry{
-    return [[_entry retain] autorelease];
+    return [[entry retain] autorelease];
 }
 
-- (void)setEntry:(NSString *)entry{
-	if(_entry != entry){
-		[_entry release];
-		_entry = [entry retain];
+- (void)setEntry:(NSString *)newEntry{
+	if(entry != newEntry){
+		[entry release];
+		entry = [newEntry retain];
 	}
 }
 
 - (void)dealloc{
-    [_entry release];
+    [entry release];
     [super dealloc];
 }
 

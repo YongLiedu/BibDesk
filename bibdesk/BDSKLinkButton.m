@@ -20,7 +20,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 // implemented at end of file
 @interface BDSKLinkButton (Private)
 
-- (void)_gotoLink:(id)sender;
+- (void)gotoLink:(id)sender;
 
 @end
 
@@ -33,20 +33,20 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
     return self;
 }
 
-- (void)setLink:(NSString *)link{
-    NSString *oldLink = _link;
-    _link = [link retain];
+- (void)setLink:(NSString *)newLink{
+    NSString *oldLink = link;
+    link = [newLink retain];
     [oldLink release];
     [self setTarget:self];
-    [self setAction:@selector(_gotoLink:)];
+    [self setAction:@selector(gotoLink:)];
 }
 
 - (void)setLinkTitle:(NSString *)title{
     NSDictionary *linkAttributes = nil;
     NSMutableAttributedString *linkAttStr = nil;
 
-    if(_link){
-        linkAttributes = [NSDictionary dictionaryWithObjectsAndKeys: _link, NSLinkAttributeName,
+    if(link){
+        linkAttributes = [NSDictionary dictionaryWithObjectsAndKeys: link, NSLinkAttributeName,
         [NSNumber numberWithInt:NSSingleUnderlineStyle], NSUnderlineStyleAttributeName,
         [NSColor blueColor], NSForegroundColorAttributeName,
         NULL];
@@ -74,9 +74,9 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 
 @implementation BDSKLinkButton (Private)
 
-- (void)_gotoLink:(id)sender{
+- (void)gotoLink:(id)sender{
     NS_DURING{
-        [[NSWorkspace sharedWorkspace] openURL:[NSURL URLWithString:_link]];
+        [[NSWorkspace sharedWorkspace] openURL:[NSURL URLWithString:link]];
     }NS_HANDLER{
         // for now, ignore NSURL exceptions.
     }NS_ENDHANDLER

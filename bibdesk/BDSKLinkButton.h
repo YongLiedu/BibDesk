@@ -18,11 +18,11 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 
 
 @interface  BDSKLinkButton : NSButton {
-    NSString *_link;
+    NSString *link;
     
 }
 
-- (void)setLink:(NSString *)link;
+- (void)setLink:(NSString *)newLink;
 - (void)setLinkTitle:(NSString *)title;
 
 @end

@@ -42,19 +42,19 @@
 #define isEmptyField(s) ([[[pubFields objectForKey:s] stringValue] isEqualToString:@""])
 
 /* Fonts and paragraph styles cached for efficiency. */
-static NSParagraphStyle* _keyParagraphStyle = nil;
-static NSParagraphStyle* _bodyParagraphStyle = nil;
+static NSParagraphStyle* keyParagraphStyle = nil;
+static NSParagraphStyle* bodyParagraphStyle = nil;
 
-_setupParagraphStyle()
+setupParagraphStyle()
 {
     NSMutableParagraphStyle *defaultStyle = [[NSMutableParagraphStyle alloc] init];
     [defaultStyle setParagraphStyle:[NSParagraphStyle defaultParagraphStyle]];
     // ?        [defaultStyle setAlignment:NSLeftTextAlignment];
-    _keyParagraphStyle = [defaultStyle copy];
+    keyParagraphStyle = [defaultStyle copy];
     [defaultStyle setHeadIndent:50];
     [defaultStyle setFirstLineHeadIndent:50];
     [defaultStyle setTailIndent:-30];
-    _bodyParagraphStyle = [defaultStyle copy];
+    bodyParagraphStyle = [defaultStyle copy];
 }
 
 @implementation BibItem
@@ -92,7 +92,7 @@ _setupParagraphStyle()
         [self setDateModified: date];
         [self setFileOrder:-1];
 		[self setNeedsToBeFiled:NO];
-        _setupParagraphStyle();
+        setupParagraphStyle();
 
     }
 
@@ -131,7 +131,7 @@ _setupParagraphStyle()
     // set by the document, which we don't archive
     document = nil;
     editorObj = nil;
-    _setupParagraphStyle();
+    setupParagraphStyle();
     bibLock = [[NSLock alloc] init]; // not encoded
     return self;
 }
@@ -146,7 +146,7 @@ _setupParagraphStyle()
     [coder encodeObject:pubFields forKey:@"pubFields"];
     [coder encodeObject:pubAuthors forKey:@"pubAuthors"];
     [coder encodeObject:requiredFieldNames forKey:@"requiredFieldNames"];
-    [coder encodeInt:_fileOrder forKey:@"fileOrder"];
+    [coder encodeInt:fileOrder forKey:@"fileOrder"];
 }
 
 - (void)makeType:(NSString *)type{
@@ -357,11 +357,11 @@ _setupParagraphStyle()
 
 - (NSComparisonResult)fileOrderCompare:(BibItem *)aBI{
     int aBIOrd = [aBI fileOrder];
-    if (_fileOrder == -1) return NSOrderedDescending; //@@ file order for crossrefs - here is where we would change to accommodate new pubs in crossrefs...
-    if (_fileOrder < aBIOrd) {
+    if (fileOrder == -1) return NSOrderedDescending; //@@ file order for crossrefs - here is where we would change to accommodate new pubs in crossrefs...
+    if (fileOrder < aBIOrd) {
         return NSOrderedAscending;
     }
-    if (_fileOrder > aBIOrd){
+    if (fileOrder > aBIOrd){
         return NSOrderedDescending;
     }else{
         return NSOrderedSame;
@@ -370,12 +370,12 @@ _setupParagraphStyle()
 
 // accessors for fileorder
 - (int)fileOrder{
-    return _fileOrder;
+    return fileOrder;
 }
 
 - (void)setFileOrder:(int)ord{
     [bibLock lock];
-    _fileOrder = ord;
+    fileOrder = ord;
     [bibLock unlock];
 }
 - (NSString *)fileType { return fileType; }
@@ -880,22 +880,22 @@ _setupParagraphStyle()
 - (NSAttributedString *)attributedStringValue{
     NSString *key;
     NSEnumerator *e = [[[pubFields allKeys] sortedArrayUsingSelector:@selector(caseInsensitiveCompare:)] objectEnumerator];
-    NSDictionary *_cachedFonts = [[BDSKFontManager sharedFontManager] cachedFontsForPreviewPane];
+    NSDictionary *cachedFonts = [[BDSKFontManager sharedFontManager] cachedFontsForPreviewPane];
 
     NSDictionary *titleAttributes =
-        [NSDictionary dictionaryWithObjects:[NSArray arrayWithObjects:[_cachedFonts objectForKey:@"Title"], _keyParagraphStyle, nil]
+        [NSDictionary dictionaryWithObjects:[NSArray arrayWithObjects:[cachedFonts objectForKey:@"Title"], keyParagraphStyle, nil]
                                     forKeys:[NSArray arrayWithObjects:NSFontAttributeName,  NSParagraphStyleAttributeName, nil]];
 
     NSDictionary *typeAttributes =
-        [NSDictionary dictionaryWithObjects:[NSArray arrayWithObjects:[_cachedFonts objectForKey:@"Type"], [NSColor colorWithCalibratedWhite:0.4 alpha:1.0], nil]
+        [NSDictionary dictionaryWithObjects:[NSArray arrayWithObjects:[cachedFonts objectForKey:@"Type"], [NSColor colorWithCalibratedWhite:0.4 alpha:1.0], nil]
                                     forKeys:[NSArray arrayWithObjects:NSFontAttributeName, NSForegroundColorAttributeName, nil]];
 
     NSDictionary *keyAttributes =
-        [NSDictionary dictionaryWithObjects:[NSArray arrayWithObjects:[_cachedFonts objectForKey:@"Key"], _keyParagraphStyle, nil]
+        [NSDictionary dictionaryWithObjects:[NSArray arrayWithObjects:[cachedFonts objectForKey:@"Key"], keyParagraphStyle, nil]
                                     forKeys:[NSArray arrayWithObjects:NSFontAttributeName, NSParagraphStyleAttributeName, nil]];
 
     NSDictionary *bodyAttributes =
-        [NSDictionary dictionaryWithObjects:[NSArray arrayWithObjects:[_cachedFonts objectForKey:@"Body"], _bodyParagraphStyle, nil]
+        [NSDictionary dictionaryWithObjects:[NSArray arrayWithObjects:[cachedFonts objectForKey:@"Body"], bodyParagraphStyle, nil]
                                     forKeys:[NSArray arrayWithObjects:NSFontAttributeName, NSParagraphStyleAttributeName, nil]];
 
     NSMutableAttributedString* aStr = [[[NSMutableAttributedString alloc] init] autorelease];

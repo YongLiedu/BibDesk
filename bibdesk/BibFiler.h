@@ -22,7 +22,7 @@ enum {
 };
 
 @interface BibFiler : NSObject {
-	NSMutableArray *_fileInfoDicts;
+	NSMutableArray *fileInfoDicts;
 	
 	IBOutlet NSWindow *window;
 	IBOutlet NSTableView *tv;
@@ -32,13 +32,11 @@ enum {
 	IBOutlet NSPanel *progressSheet;
 	IBOutlet NSProgressIndicator *progressIndicator;
 	
-	NSArray *_currentPapers;
-	BibDocument *_currentDocument;
-	NSString *_errorString;
-	int _moveCount;
-	int _movableCount;
-	int _deletedCount;
-	int _cleanupChangeCount;
+	NSArray *currentPapers;
+	BibDocument *currentDocument;
+	NSString *errorString;
+	int moveCount;
+	int movableCount;
 }
 
 + (BibFiler *)sharedFiler;

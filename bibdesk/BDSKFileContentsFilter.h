@@ -14,7 +14,7 @@
 
 
 @interface BDSKFileContentsFilter : NSObject {
-	SKIndexRef _index;
+	SKIndexRef index;
 }
 
 + (BDSKFileContentsFilter *)sharedFileContentsFilter;

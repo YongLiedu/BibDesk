@@ -38,21 +38,21 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 
 @interface BibAppController : NSDocumentController {
     BOOL showingPreviewPanel;
-    BibFinder *_finder;
+    BibFinder *finder;
 
     // error-handling stuff:
     IBOutlet NSPanel* errorPanel;
     IBOutlet NSTableView *errorTableView;
-    NSMutableArray *_errors;
+    NSMutableArray *errors;
     IBOutlet NSTextView *sourceEditTextView;
     IBOutlet NSWindow *sourceEditWindow;
     NSString *currentFileName;
     
     // global auto-completion dictionary:
     NSLock *acLock;
-    NSMutableDictionary *_autoCompletionDict;
-    NSMutableDictionary *_formatters;
-    NSCharacterSet *_autocompletePunctuationCharacterSet;
+    NSMutableDictionary *autoCompletionDict;
+    NSMutableDictionary *formatters;
+    NSCharacterSet *autocompletePunctuationCharacterSet;
 	
 	// auto generation format
 	NSArray *requiredFieldsForCiteKey;
@@ -188,7 +188,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 // ----------------------------------------------------------------------------------------
 
 // helper method
-- (NSDictionary *)_constraintsFromString:(NSString *)string;
+- (NSDictionary *)constraintsFromString:(NSString *)string;
 
 /*!
 @method completeCitationFromSelection:userData:error

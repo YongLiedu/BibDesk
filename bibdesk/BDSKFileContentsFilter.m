@@ -8,15 +8,15 @@
 
 #import "BDSKFileContentsFilter.h"
 
-static BDSKFileContentsFilter *_sharedFileContentsFilter = nil;
+static BDSKFileContentsFilter *sharedFileContentsFilter = nil;
 
 @implementation BDSKFileContentsFilter
 
 + (BDSKFileContentsFilter *)sharedFileContentsFilter{
-	if(!_sharedFileContentsFilter){
-		_sharedFileContentsFilter = [[BDSKFileContentsFilter alloc] init];
+	if(!sharedFileContentsFilter){
+		sharedFileContentsFilter = [[BDSKFileContentsFilter alloc] init];
 	}
-	return _sharedFileContentsFilter;
+	return sharedFileContentsFilter;
 }
 
 - (void)setupIndex{
@@ -30,7 +30,7 @@ static BDSKFileContentsFilter *_sharedFileContentsFilter = nil;
 		[fm removeFileAtPath:indexFileName handler:nil];
 	}
 	
-	_index = SKIndexCreateWithURL( (CFURLRef)indexFileURL,
+	index = SKIndexCreateWithURL( (CFURLRef)indexFileURL,
 				       (CFStringRef)@"BibDesk File Contents Index",
 				       kSKIndexInvertedVector, // larger, but useful for searching for similar docs, which we'll want to do
 				       NULL);
@@ -50,11 +50,11 @@ static BDSKFileContentsFilter *_sharedFileContentsFilter = nil;
 
 - (void)indexFileAtURL:(NSURL *)url fromPub:(BibItem *)pub inDocument:(BibDocument *)doc{
 	NSLog(@"indexing %@",[url absoluteString]);
-	NSAssert(_index != nil, @"Index is nil");
+	NSAssert(index != nil, @"Index is nil");
 	
 	SKDocumentRef skDoc = SKDocumentCreateWithURL((CFURLRef) url);
 		
-	Boolean success = SKIndexAddDocument(_index,skDoc,NULL,true);
+	Boolean success = SKIndexAddDocument(index,skDoc,NULL,true);
 	
 	if(!success){
 		[NSException raise:@"IndexAddDocumentException" 
@@ -62,7 +62,7 @@ static BDSKFileContentsFilter *_sharedFileContentsFilter = nil;
 	}
 	
 	NSDictionary *propDict = [NSDictionary dictionaryWithObjectsAndKeys:@"docFileName",[doc fileName],@"pubCiteKey", [pub citeKey],nil];
-	SKIndexSetDocumentProperties(_index, skDoc, (CFDictionaryRef) propDict);
+	SKIndexSetDocumentProperties(index, skDoc, (CFDictionaryRef) propDict);
 	
 	CFRelease(skDoc);
 	
@@ -71,13 +71,13 @@ static BDSKFileContentsFilter *_sharedFileContentsFilter = nil;
 - (NSArray *)filesMatchingQuery:(NSString *)query inDocument:(BibDocument *)doc{
 	int maxResults = 15;  // @@ pref
 	
-	if(!_index){
+	if(!index){
 		[NSException raise:@"IndexNotThereException" 
 					format:@"There is no index in filesMatchingQuery"];
 	}
 	
 	SKIndexRef indexArray[1];
-	indexArray[0] = _index;
+	indexArray[0] = index;
 	CFArrayRef searchArray = CFArrayCreate(NULL, (void *)indexArray, 1, &kCFTypeArrayCallBacks);
 	SKSearchGroupRef searchGroup = SKSearchGroupCreate(searchArray);
 	
@@ -100,7 +100,7 @@ static BDSKFileContentsFilter *_sharedFileContentsFilter = nil;
 	for(i = 0; i< resultCount; i++){
 		NSLog(@"sc: %f ___ doc: %@ __ prop: %@",scoresArray[i], 
 			  (NSString *) SKDocumentGetName(outDocumentsArray[i]),
-			  (NSDictionary *) SKIndexCopyDocumentProperties (_index, outDocumentsArray[i])
+			  (NSDictionary *) SKIndexCopyDocumentProperties (index, outDocumentsArray[i])
 			  );
 		
 	}

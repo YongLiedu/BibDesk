@@ -11,7 +11,7 @@
 
 @interface BDSKShellTask : NSObject {
     // data used to store stdOut from the filter
-    NSData *_stdoutData;
+    NSData *stdoutData;
 }
 
 + (BDSKShellTask *)shellTask;

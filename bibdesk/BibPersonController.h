@@ -12,7 +12,7 @@
 
 
 @interface BibPersonController : NSWindowController {
-    BibAuthor *_person;
+    BibAuthor *person;
     NSArray *publications;
 	BibDocument *document;
     IBOutlet NSTextField *nameTextField;
@@ -21,7 +21,7 @@
 }
 
 #pragma mark initialization
-- (id)initWithPerson:(BibAuthor *)person document:(BibDocument *)doc;
+- (id)initWithPerson:(BibAuthor *)aPerson document:(BibDocument *)doc;
 - (void)awakeFromNib;
 
 #pragma mark accessors
@@ -30,7 +30,7 @@
 
 #pragma mark actions
 - (void)show;
-- (void)_updateUI;
+- (void)updateUI;
 - (void)handlePubListChanged:(NSNotification *)notification;
 
 #pragma mark table view datasource methods

@@ -72,7 +72,7 @@
     return output;
 }
 
-// This method and the little notification method following implement synchronously running a task with input piped in from a string and output piped back out and returned as a string.   They require only a _stdoutData instance variable to function.
+// This method and the little notification method following implement synchronously running a task with input piped in from a string and output piped back out and returned as a string.   They require only a stdoutData instance variable to function.
 - (NSString *)executeBinary:(NSString *)executablePath inDirectory:(NSString *)currentDirPath withArguments:(NSArray *)args environment:(NSDictionary *)env inputString:(NSString *)input {
     NSTask *task;
     NSPipe *inputPipe;
@@ -112,8 +112,8 @@
         [inputFileHandle closeFile];
 
         // Now loop the runloop in the special mode until we've processed the notification.
-        _stdoutData = nil;
-        while (_stdoutData == nil) {
+        stdoutData = nil;
+        while (stdoutData == nil) {
             // Run the run loop, briefly, until we get the notification...
             [[NSRunLoop currentRunLoop] runMode:@"BDSKSpecialPipeServiceRunLoopMode" beforeDate:[NSDate dateWithTimeIntervalSinceNow:1.0]];
         }
@@ -121,13 +121,13 @@
 
         [task waitUntilExit];
 
-        output = [[NSString allocWithZone:[self zone]] initWithData:_stdoutData encoding:NSUTF8StringEncoding];
+        output = [[NSString allocWithZone:[self zone]] initWithData:stdoutData encoding:NSUTF8StringEncoding];
         if(!output){
-            output = [[NSString allocWithZone:[self zone]] initWithData:_stdoutData encoding:NSASCIIStringEncoding];
+            output = [[NSString allocWithZone:[self zone]] initWithData:stdoutData encoding:NSASCIIStringEncoding];
         }
         
-        [_stdoutData release];
-        _stdoutData = nil;
+        [stdoutData release];
+        stdoutData = nil;
     } else {
         NSLog(@"Failed to launch task or task exited without accepting input.  Termination status was %d", [task terminationStatus]);
     }
@@ -140,7 +140,7 @@
 - (void)stdoutNowAvailable:(NSNotification *)notification {
     // This is the notification method that executeBinary:inDirectory:withArguments:environment:inputString: registers to get called when all the data has been read. It just grabs the data and stuffs it in an ivar.  The setting of this ivar signals the main method that the output is complete and available.
     NSData *outputData = [[notification userInfo] objectForKey:NSFileHandleNotificationDataItem];
-    _stdoutData = (outputData ? [outputData retain] : [[NSData allocWithZone:[self zone]] init]);
+    stdoutData = (outputData ? [outputData retain] : [[NSData allocWithZone:[self zone]] init]);
 }
 
 

@@ -199,7 +199,7 @@ typedef enum{
     @param		macroResolver The macro resolver used to resolve macros in the complex string.
     @result     - 
 */
-+ (id)complexStringWithBibTeXString:(NSString *)btstring macroResolver:(id<BDSKMacroResolver>)theMacroResolver;
++ (id)complexStringWithBibTeXString:(NSString *)btstring macroResolver:(id<BDSKMacroResolver>)theMacroResolver;
 
 /*!
     @method     isComplex

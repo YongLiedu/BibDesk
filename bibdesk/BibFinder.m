@@ -20,15 +20,15 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 #import "BibDocument.h"
 #import "BibItem.h"
 
-static BibFinder *_sharedFinder = nil;
+static BibFinder *sharedFinder = nil;
 
 @implementation BibFinder
 
 + (BibFinder *)sharedFinder{
-    if(!_sharedFinder){
-        _sharedFinder = [[BibFinder alloc] init];
+    if(!sharedFinder){
+        sharedFinder = [[BibFinder alloc] init];
     }
-    return _sharedFinder;
+    return sharedFinder;
 }
 
 - (id)init
