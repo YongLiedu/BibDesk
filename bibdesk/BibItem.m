@@ -634,18 +634,13 @@ void _setupFonts(){
 
 	NSString *yearValue = [pubFields objectForKey:@"Year"];
     if (yearValue && ![yearValue isEqualToString:@""]) {
-		
 		NSString *monthValue = [pubFields objectForKey:@"Month"];
-        if (monthValue && ![monthValue isEqualToString:@""]) {
-			[tmp appendString:monthValue];
-			[tmp appendString:@" 1 "];
-		}else{
-			[tmp appendString:@"1 1 "];
-    	}
-        [tmp appendString:[pubFields objectForKey:@"Year"]];
-		NSMutableDictionary *locale = [[[[NSUserDefaults standardUserDefaults] persistentDomainForName:NSGlobalDomain] mutableCopy] autorelease];
-		[locale setObject:@"MDYH" forKey:NSDateTimeOrdering];
-        [self setDate:[NSCalendarDate dateWithNaturalLanguageString:tmp locale:locale]];
+		if (!monthValue) monthValue = @"";
+		NSString *dateStr = [NSString stringWithFormat:@"%@ 1 %@", monthValue, [pubFields objectForKey:@"Year"]];
+		NSDictionary *locale = [NSDictionary dictionaryWithObjectsAndKeys:@"MDYH", NSDateTimeOrdering, 
+			[NSArray arrayWithObjects:@"January", @"February", @"March", @"April", @"May", @"June", @"July", @"August", @"September", @"October", @"November", @"December", nil], NSMonthNameArray,
+			[NSArray arrayWithObjects:@"Jan", @"Feb", @"Mar", @"Apr", @"May", @"Jun", @"Jul", @"Aug", @"Sep", @"Oct", @"Nov", @"Dec", nil], NSShortMonthNameArray, nil];
+        [self setDate:[NSCalendarDate dateWithNaturalLanguageString:dateStr locale:locale]];
     }else{
         [self setDate:nil];    // nil means we don't have a good date.
     }
@@ -1420,7 +1415,7 @@ void _setupFonts(){
 														 suffix:string
 													   forField:fieldName
 												  numberOfChars:number 
-														   from:'0' to:'1' 
+														   from:'0' to:'9' 
 														  force:(number == 0)]];
 					}
 					else {
