@@ -14,6 +14,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 */
 
 #import "BDSKConverter.h"
+#import "NSString_BDSKExtensions.h"
 
 static BDSKConverter *theConverter;
 
@@ -272,8 +273,7 @@ static BDSKConverter *theConverter;
 		newString = [self stringByDeTeXifyingString:string];
 		newString = [newString stringByReplacingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]
 													 withString:@"-"];
-		newString = [[[NSString alloc] initWithData:[newString dataUsingEncoding:NSASCIIStringEncoding allowLossyConversion:YES] 
-											encoding:NSASCIIStringEncoding] autorelease];
+		newString = [NSString lossyASCIIStringWithString:newString];
 		newString = [newString stringByReplacingCharactersInSet:invalidCharSet withString:@""];
 		
 		return newString;
@@ -339,7 +339,7 @@ static BDSKConverter *theConverter;
 						return NO;
 					}
 					string = [self stringBySanitizingString:[arr objectAtIndex:0] forField:fieldName inFileType:type];
-					[sanitizedFormatString appendFormat:@"{%@}",string];
+					[sanitizedFormatString appendFormat:@"{%@}", [string capitalizedString]]; // we need to have BibTeX field names capitalized
 					string = [self stringBySanitizingString:[arr objectAtIndex:1] forField:fieldName inFileType:type];
 				}
 				else if (	i < [components count] - 1 || 
