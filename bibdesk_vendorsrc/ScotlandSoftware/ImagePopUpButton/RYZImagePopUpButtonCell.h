@@ -51,4 +51,6 @@
 
 - (void)showMenuInView:(NSView *)controlView withEvent:(NSEvent *)event;
 
+- (NSSize)iconDrawSize;
+
 @end

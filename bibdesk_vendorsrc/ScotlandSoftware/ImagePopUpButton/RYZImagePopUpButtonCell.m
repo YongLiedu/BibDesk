@@ -239,13 +239,9 @@
     } else {
 		// Mouse event
 		NSPoint mouseLocation = [controlView convertPoint: [event locationInWindow]  fromView: nil];
-		NSSize iconSize = [self iconSize];
+		NSSize iconSize = [self iconDrawSize];
 		NSSize arrowSize = NSMakeSize(0.0,0.0);
 		NSRect arrowRect;
-		
-		if ([self controlSize] != NSRegularControlSize) {
-			iconSize = NSMakeSize(iconSize.width * 0.75, iconSize.height * 0.75);
-		}
 		
 		if ([self arrowImage] != nil) {
 			arrowSize = [[self arrowImage] size];
@@ -370,6 +366,23 @@
 //	Drawing and highlighting
 // -----------------------------------
 
+- (NSSize)iconDrawSize {
+	NSSize size = [self iconSize];
+	if ([self controlSize] != NSRegularControlSize) {
+		// for small and mini controls we just scale the icon by 75% 
+		size = NSMakeSize(size.width * 0.75, size.height * 0.75);
+	}
+	return size;
+}
+
+- (NSSize)cellSize {
+	NSSize size = [self iconDrawSize];
+	if ([self arrowImage]) {
+		size.width += [[self arrowImage] size].width;
+	}
+	return size;
+}
+
 - (void)drawWithFrame:(NSRect)cellFrame  inView:(NSView *)controlView
 {
     NSImage *iconImage;
@@ -384,11 +397,8 @@
 	
 	NSSize iconSize = [iconImage size];
 	NSRect iconRect = NSMakeRect(0.0, 0.0, iconSize.width, iconSize.height);
-	NSRect iconDrawRect = iconRect;
-	if ([self controlSize] != NSRegularControlSize) {
-		// for small and mini controls we just scale the icon by 75% 
-		iconDrawRect = NSMakeRect(0.0, 0.0, iconSize.width * 0.75, iconSize.height * 0.75);
-	}
+	NSSize drawSize = [self iconDrawSize];
+	NSRect iconDrawRect = NSMakeRect(0.0, 0.0, drawSize.width, drawSize.height);
 	NSImage *arrowImage = [self arrowImage];
 	NSSize arrowSize = NSZeroSize;
 	NSRect arrowRect = NSZeroRect;
@@ -397,8 +407,8 @@
 		arrowSize = [arrowImage size];
 		arrowRect.size = arrowSize;
 		arrowDrawRect = NSMakeRect(NSWidth(iconDrawRect), 1.0, arrowSize.width, arrowSize.height);
+		drawSize.width += arrowSize.width;
 	}
-	NSSize drawSize = NSMakeSize(NSWidth(iconDrawRect) + arrowSize.width, NSHeight(iconDrawRect));
 	
 	NSImage *popUpImage = [[NSImage alloc] initWithSize: drawSize];
 	
@@ -436,7 +446,6 @@
     
     [RYZ_buttonCell drawWithFrame: cellFrame  inView: controlView];
 }
-
 
 - (void)highlight:(BOOL)flag  withFrame:(NSRect)cellFrame  inView:(NSView *)controlView
 {
