@@ -182,7 +182,7 @@ NSString *BDSKBibItemLocalDragPboardType = @"edu.ucsd.cs.mmccrack.bibdesk: Local
 	[self setTableFont];
 	
 	// unfortunately we cannot set this in BI
-	[actionMenuButton setAlternateImage:[NSImage imageNamed:@"Action_Pressed"]];
+	[actionMenuButton setArrowImage:[NSImage imageNamed:@"ArrowPointingDown"]];
 	[actionMenuButton setShowsMenuWhenIconClicked:YES];
 	[[actionMenuButton cell] setAltersStateOfSelectedItem:NO];
 	[[actionMenuButton cell] setAlwaysUsesFirstItemAsSelected:NO];
