@@ -300,6 +300,7 @@ Handle Notifications by the popup button to update its icon and its menu before 
 	if(editor){
 		[editor close];
 		[bibEditors removeObjectIdenticalTo:editor];
+        [pub setEditorObj:nil];
 	}
 	// unregister with the publication's authors
 	[[pub pubAuthors] makeObjectsPerformSelector:@selector(removePubFromAuthorList:) withObject:pub];
