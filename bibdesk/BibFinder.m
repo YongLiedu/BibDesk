@@ -240,8 +240,11 @@ static BibFinder *_sharedFinder = nil;
 
 - (IBAction)copyAsTex:(id)sender{
     NSEnumerator *e = [self selectedPubEnumerator];
-    NSString *citeString = [[OFPreferenceWrapper sharedPreferenceWrapper] stringForKey:BDSKCiteStringKey];
-    NSMutableString *s = [NSMutableString stringWithFormat:@"\\%@{", citeString];
+	OFPreferenceWrapper *sud = [OFPreferenceWrapper sharedPreferenceWrapper];
+    NSString *citeString = [sud stringForKey:BDSKCiteStringKey];
+	NSString *startCiteBracket = [sud stringForKey:BDSKCiteStartBracketKey]; 
+	NSString *endCiteBracket = [sud stringForKey:BDSKCiteEndBracketKey]; 
+    NSMutableString *s = [NSMutableString stringWithFormat:@"\\%@%@", citeString, startCiteBracket];
     NSPasteboard *pasteboard = [NSPasteboard pasteboardWithName:NSGeneralPboard];
     NSNumber *i;
     BOOL sep = ([[OFPreferenceWrapper sharedPreferenceWrapper] integerForKey:BDSKSeparateCiteKey] == NSOnState);
@@ -250,14 +253,14 @@ static BibFinder *_sharedFinder = nil;
     while(i=[e nextObject]){
         [s appendString:[[foundBibs objectAtIndex:[i intValue]] citeKey]];
         if(sep)
-            [s appendFormat:@"} \\%@{", citeString];
+            [s appendFormat:@"%@ \\%@%@", startCiteBracket, citeString, endCiteBracket];
         else
             [s appendString:@", "];
     }
     if(sep)
-        [s replaceCharactersInRange:[s rangeOfString:[NSString stringWithFormat:@"} \\%@{", citeString] options:NSBackwardsSearch] withString:@"}"];
+        [s replaceCharactersInRange:[s rangeOfString:[NSString stringWithFormat:@"%@ \\%@%@", startCiteBracket, citeString, endCiteBracket] options:NSBackwardsSearch] withString:@"}"];
     else
-        [s replaceCharactersInRange:[s rangeOfString:@", " options:NSBackwardsSearch] withString:@"}"];
+        [s replaceCharactersInRange:[s rangeOfString:@", " options:NSBackwardsSearch] withString:endCiteBracket];
     
     [pasteboard setString:s forType:NSStringPboardType];
 }
@@ -369,7 +372,10 @@ static BibFinder *_sharedFinder = nil;
     OFPreferenceWrapper *sud = [OFPreferenceWrapper sharedPreferenceWrapper];
     BOOL yn;
     NSString *citeString = [sud stringForKey:BDSKCiteStringKey];
-    NSString *startCite = [NSString stringWithFormat:@"\\%@{", citeString];
+	NSString *startCiteBracket = [sud stringForKey:BDSKCiteStartBracketKey]; 
+    NSString *startCite = [NSString stringWithFormat:@"\\%@%@", citeString, startCiteBracket];
+	NSString *endCiteBracket = [sud stringForKey:BDSKCiteEndBracketKey]; 
+	
     NSMutableString *s = [[NSMutableString string] retain];
     NSEnumerator *enumerator = [rows objectEnumerator];
     NSNumber *i;
@@ -387,12 +393,12 @@ static BibFinder *_sharedFinder = nil;
         if([[sud objectForKey:BDSKDragCopyKey] intValue] == 1){
             if(sep) [s appendString:startCite];
             [s appendString:[[foundBibs objectAtIndex:[i intValue]] citeKey]];
-            if(sep) [s appendString:@"}"];
+            if(sep) [s appendString:endCiteBracket];
             else [s appendString:@","];
         }
     }
     if([[sud objectForKey:BDSKDragCopyKey] intValue] == 1){
-        if(!sep)[s replaceCharactersInRange:[s rangeOfString:@"," options:NSBackwardsSearch] withString:@"}"];
+        if(!sep)[s replaceCharactersInRange:[s rangeOfString:@"," options:NSBackwardsSearch] withString:endCiteBracket];
     }
     if(([[sud objectForKey:BDSKDragCopyKey] intValue] == 0) ||
        ([[sud objectForKey:BDSKDragCopyKey] intValue] == 1)){
