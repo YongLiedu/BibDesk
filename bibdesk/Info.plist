@@ -95,9 +95,9 @@
 	<key>CFBundleExecutable</key>
 	<string>Bibdesk</string>
 	<key>CFBundleGetInfoHTML</key>
-	<string>&lt;B&gt;BibDesk&lt;/B&gt; Version 0.97.5</string>
+	<string>&lt;B&gt;BibDesk&lt;/B&gt; Version 0.97.6</string>
 	<key>CFBundleGetInfoString</key>
-	<string>version 0.97.5</string>
+	<string>version 0.97.6</string>
 	<key>CFBundleHelpBookFolder</key>
 	<string>BibDesk Help</string>
 	<key>CFBundleHelpBookName</key>
@@ -113,11 +113,11 @@
 	<key>CFBundlePackageType</key>
 	<string>APPL</string>
 	<key>CFBundleShortVersionString</key>
-	<string>0.97.5</string>
+	<string>0.97.6</string>
 	<key>CFBundleSignature</key>
 	<string>BDSK</string>
 	<key>CFBundleVersion</key>
-	<string>0.97.5</string>
+	<string>0.97.6</string>
 	<key>NSAppleScriptEnabled</key>
 	<string>YES</string>
 	<key>NSMainNibFile</key>
@@ -335,6 +335,30 @@
 				<key>title</key>
 				<string>Defaults</string>
 			</dict>
+			<key>BibPref_Files</key>
+			<dict>
+				<key>defaultsDictionary</key>
+				<dict>
+					<key>Default string encoding for opening and saving</key>
+					<string>1</string>
+					<key>Export BibTeX document when saving BibDesk document</key>
+					<string>0</string>
+					<key>Use Unicode BibTeX Parser</key>
+					<string>0</string>
+				</dict>
+				<key>icon</key>
+				<string>genericBibDocIcon.tiff</string>
+				<key>identifier</key>
+				<string>bp_files</string>
+				<key>nib</key>
+				<string>BibPref_Files</string>
+				<key>ordering</key>
+				<string>10</string>
+				<key>shortTitle</key>
+				<string>Files</string>
+				<key>title</key>
+				<string>Opening and Saving</string>
+			</dict>
 			<key>BibPref_General</key>
 			<dict>
 				<key>defaultsDictionary</key>
@@ -498,30 +522,6 @@
 				<string>Preview</string>
 				<key>title</key>
 				<string>TeX - Typeset Preview</string>
-			</dict>
-                        <key>BibPref_Files</key>
-			<dict>
-				<key>defaultsDictionary</key>
-				<dict>
-                                        <key>Default string encoding for opening and saving</key>
-					<string>1</string>
-					<key>Use Unicode BibTeX Parser</key>
-					<string>0</string>
-                                        <key>Export BibTeX document when saving BibDesk document</key>
-                                        <string>0</string>
-				</dict>
-				<key>icon</key>
-				<string>genericBibDocIcon.tiff</string>
-				<key>identifier</key>
-				<string>bp_files</string>
-				<key>nib</key>
-				<string>BibPref_Files</string>
-				<key>ordering</key>
-				<string>10</string>
-				<key>shortTitle</key>
-				<string>Files</string>
-				<key>title</key>
-				<string>Opening and Saving</string>
 			</dict>
 		</dict>
 	</dict>

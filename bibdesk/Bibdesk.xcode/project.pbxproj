@@ -10,6 +10,8 @@
 				F9022FB707580B9400C3F701,
 				F918104307583A6E00CF822D,
 				F988709007580CB4001D4D49,
+				F94A94F3079AEE5800D13AB5,
+				F94A94E9079AEE5800D13AB5,
 				27C1639D078BF48C008A4B83,
 				F9022C66075802E300C3F701,
 				F9022C64075802E300C3F701,
@@ -583,6 +585,8 @@
 //294
 		29B97313FDCFA39411CA2CEA = {
 			buildSettings = {
+				MACOSX_DEPLOYMENT_TARGET = 10.3;
+				SDKROOT = /Developer/SDKs/MacOSX10.3.0.sdk;
 			};
 			buildStyles = (
 				4A9504CCFFE6A4B311CA0CBA,
@@ -660,6 +664,7 @@
 			children = (
 				F92F4E460788DEDD001B8F82,
 				F92F4E430788DEC5001B8F82,
+				F94A9504079AEE7600D13AB5,
 				F91B5CF507657D820011ED22,
 				F91B5CF607657D820011ED22,
 				F91B5CC7076579830011ED22,
@@ -1069,6 +1074,7 @@
 				F92F4E470788DEDD001B8F82,
 				27C162BA078BAE91008A4B83,
 				F96E21690794FE3400120AB3,
+				F94A950C079AEE7600D13AB5,
 			);
 			isa = PBXResourcesBuildPhase;
 			runOnlyForDeploymentPostprocessing = 0;
@@ -1147,6 +1153,8 @@
 				F965D0A9077B8C0500628BD0,
 				F92F4E4F0788DEFC001B8F82,
 				27C1639F078BF48C008A4B83,
+				F94A9500079AEE5800D13AB5,
+				F94A9502079AEE5800D13AB5,
 			);
 			isa = PBXSourcesBuildPhase;
 			runOnlyForDeploymentPostprocessing = 0;
@@ -4034,6 +4042,8 @@
 		};
 		F918104307583A6E00CF822D = {
 			children = (
+				F94A94E4079AEE5800D13AB5,
+				F94A94EE079AEE5800D13AB5,
 				27C1639C078BF48C008A4B83,
 				F920DAFA075C2B69000C5FCA,
 				F920DAFB075C2B69000C5FCA,
@@ -4381,6 +4391,86 @@
 		};
 		F92F4E4F0788DEFC001B8F82 = {
 			fileRef = F92F4E4D0788DEFC001B8F82;
+			isa = PBXBuildFile;
+			settings = {
+			};
+		};
+		F94A94E4079AEE5800D13AB5 = {
+			fileEncoding = 30;
+			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.c.h;
+			path = BDSKBibTeXExporter.h;
+			refType = 4;
+			sourceTree = "<group>";
+		};
+		F94A94E9079AEE5800D13AB5 = {
+			fileEncoding = 30;
+			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.c.objc;
+			path = BDSKBibTeXExporter.m;
+			refType = 4;
+			sourceTree = "<group>";
+		};
+		F94A94EE079AEE5800D13AB5 = {
+			fileEncoding = 30;
+			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.c.h;
+			path = BDSKExporter.h;
+			refType = 4;
+			sourceTree = "<group>";
+		};
+		F94A94F3079AEE5800D13AB5 = {
+			fileEncoding = 30;
+			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.c.objc;
+			path = BDSKExporter.m;
+			refType = 4;
+			sourceTree = "<group>";
+		};
+		F94A94FF079AEE5800D13AB5 = {
+			fileRef = F94A94E4079AEE5800D13AB5;
+			isa = PBXBuildFile;
+			settings = {
+			};
+		};
+		F94A9500079AEE5800D13AB5 = {
+			fileRef = F94A94E9079AEE5800D13AB5;
+			isa = PBXBuildFile;
+			settings = {
+			};
+		};
+		F94A9501079AEE5800D13AB5 = {
+			fileRef = F94A94EE079AEE5800D13AB5;
+			isa = PBXBuildFile;
+			settings = {
+			};
+		};
+		F94A9502079AEE5800D13AB5 = {
+			fileRef = F94A94F3079AEE5800D13AB5;
+			isa = PBXBuildFile;
+			settings = {
+			};
+		};
+		F94A9504079AEE7600D13AB5 = {
+			children = (
+				F94A9507079AEE7600D13AB5,
+			);
+			isa = PBXVariantGroup;
+			name = BibTexExporterSettings.nib;
+			path = "";
+			refType = 4;
+			sourceTree = "<group>";
+		};
+		F94A9507079AEE7600D13AB5 = {
+			isa = PBXFileReference;
+			lastKnownFileType = wrapper.nib;
+			name = English;
+			path = English.lproj/BibTexExporterSettings.nib;
+			refType = 4;
+			sourceTree = "<group>";
+		};
+		F94A950C079AEE7600D13AB5 = {
+			fileRef = F94A9504079AEE7600D13AB5;
 			isa = PBXBuildFile;
 			settings = {
 			};
@@ -4755,6 +4845,8 @@
 				F92F4E4E0788DEFC001B8F82,
 				27C1639E078BF48C008A4B83,
 				F9273968078E58A600609739,
+				F94A94FF079AEE5800D13AB5,
+				F94A9501079AEE5800D13AB5,
 			);
 			isa = PBXHeadersBuildPhase;
 			runOnlyForDeploymentPostprocessing = 0;
