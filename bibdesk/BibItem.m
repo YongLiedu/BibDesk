@@ -1080,7 +1080,7 @@ void _setupFonts(){
 							number = 0;
 						}
                         if(number < [arr count])
-                            [parsedStr appendString:[arr objectAtIndex:number]];
+                            [parsedStr appendString:[converter stringBySanitizingString:[arr objectAtIndex:number] forField:fieldName inFileType:[self fileType]]];
 					}
 					break;
 				case '{':
