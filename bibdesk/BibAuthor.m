@@ -26,8 +26,10 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 }
 
 - (id)initWithName:(NSString *)aName andPub:(BibItem *)aPub{
-    [self setName:aName];
-    publication = aPub; // don't retain this, since it retains us
+	if (self = [super init]) {
+		[self setName:aName];
+		publication = aPub; // don't retain this, since it retains us
+	}
     return self;
 }
 
