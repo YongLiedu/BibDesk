@@ -161,6 +161,7 @@ static unsigned threadCount = 0;
         return NO;
     }
     
+    NS_DURING
     if([self previewTexTasks:@"bibpreview.tex"]){ // run the TeX tasks
 
         if (myThreadCount >= threadCount){
@@ -178,6 +179,18 @@ static unsigned threadCount = 0;
     } else {
         NSLog(@"Task failure in -[%@ %@]", [self class], NSStringFromSelector(_cmd));
     }
+    NS_HANDLER
+        if([[localException name] isEqualToString:@"BDSKPreviewerPathNotFound"]){ // clean up and return
+            NSLog(@"Task failure in -[%@ %@], executable(s) not found", [self class], NSStringFromSelector(_cmd));
+            [pool release];
+            [workingLock lock];
+            working = NO;
+            [workingLock unlock];
+            return NO;
+        } else {
+            [localException raise]; // re-raise, it's not ours
+        }
+    NS_ENDHANDLER
     // Pool for MT
     [pool release];
     
@@ -234,18 +247,12 @@ static unsigned threadCount = 0;
     }
     
     if(![[NSFileManager defaultManager] fileExistsAtPath:pdftexbinpath]){
-        [NSException raise:@"BDSKPreviewerPathNotFound" format:@"File does not exist at %@", pdftexbinpath];
-        [workingLock lock];
-        working = NO;
-        [workingLock unlock];        
+        [NSException raise:@"BDSKPreviewerPathNotFound" format:@"File does not exist at %@", pdftexbinpath];    
         [pool release];
         return NO;
     }
     if(![[NSFileManager defaultManager] fileExistsAtPath:bibtexbinpath]){        
-        [NSException raise:@"BDSKPreviewerPathNotFound" format:@"File does not exist at %@", bibtexbinpath];
-        [workingLock lock];
-        working = NO;
-        [workingLock unlock];        
+        [NSException raise:@"BDSKPreviewerPathNotFound" format:@"File does not exist at %@", bibtexbinpath];     
         [pool release];
         return NO;
     }
