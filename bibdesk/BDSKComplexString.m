@@ -104,7 +104,7 @@ static NSDictionary *globalMacroDefs;
         nodes = [[NSArray alloc] initWithArray:a copyItems:YES];
 		if(theMacroResolver) {
 			macroResolver = theMacroResolver;
-			
+                        NSNotificationCenter *nc = [NSNotificationCenter defaultCenter];
 			[nc addObserver:self
 				   selector:@selector(handleMacroKeyChangedNotification:)
 					   name:BDSKBibDocMacroKeyChangedNotification
@@ -287,26 +287,18 @@ static NSDictionary *globalMacroDefs;
 }
 
 - (void)updateExpandedValue{
-	[expandedValue autorelease];
-	expandedValue = [[self expandedValueFromArray:nodes] retain];
-    [[NSNotificationCenter defaultCenter] postNotificationName:BDSKComplexStringChangedNotification object:self];
+    [expandedValue release];
+    expandedValue = [[self expandedValueFromArray:nodes] retain];
+    NSNotification *aNotif = [NSNotification notificationWithName:BDSKComplexStringChangedNotification object:macroResolver];
+    [[NSNotificationQueue defaultQueue] enqueueNotification:aNotif postingStyle:NSPostWhenIdle coalesceMask:NSNotificationCoalescingOnName forModes:nil];
 }
 
 - (void)handleMacroKeyChangedNotification:(NSNotification *)notification{
-	NSDictionary *userInfo = [notification userInfo];
-	BDSKStringNode *oldMacroNode = [BDSKStringNode nodeWithMacroString:[userInfo objectForKey:@"oldKey"]];
-	BDSKStringNode *newMacroNode = [BDSKStringNode nodeWithMacroString:[userInfo objectForKey:@"newKey"]];
-	
-	if ([nodes containsObject:oldMacroNode] || [nodes containsObject:newMacroNode])
-		[self updateExpandedValue];
+	[self updateExpandedValue];
 }
 
-- (void)handleMacroDefinitionChangedNotification:(NSNotification *)notification{
-	NSDictionary *userInfo = [notification userInfo];
-	BDSKStringNode *macroNode = [BDSKStringNode nodeWithMacroString:[userInfo objectForKey:@"macroKey"]];
-	
-	if ([nodes containsObject:macroNode])
-		[self updateExpandedValue];
+- (void)handleMacroDefinitionChangedNotification:(NSNotification *)notification{	
+	[self updateExpandedValue];
 }
 
 - (void)handleNodeValueChangedNotification:(NSNotification *)notification{

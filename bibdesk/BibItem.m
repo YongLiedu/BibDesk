@@ -99,11 +99,6 @@ setupParagraphStyle()
         [self setFileOrder:-1];
 		[self setNeedsToBeFiled:NO];
         setupParagraphStyle();
-        [[NSNotificationCenter defaultCenter] addObserver:self 
-                                                 selector:@selector(handleComplexStringChangedNotification:) 
-                                                     name:BDSKComplexStringChangedNotification 
-                                                   object:nil];
-
     }
 
     //NSLog(@"bibitem init");
@@ -689,15 +684,6 @@ setupParagraphStyle()
 			[(BDSKComplexString*)value setMacroResolver:[self document]];
 		}
 	}
-}
-
-- (void)handleComplexStringChangedNotification:(NSNotification *)aNotification{
-    id obj = [aNotification object];
-    
-    if([[pubFields allValues] containsObjectIdenticalTo:obj])
-        [[NSNotificationCenter defaultCenter] postNotificationName:BDSKBibItemChangedNotification
-                                                            object:self
-                                                          userInfo:nil];
 }
 
 - (void)updateMetadataForKey:(NSString *)key{

@@ -109,6 +109,11 @@ NSString *BDSKBibItemLocalDragPboardType = @"edu.ucsd.cs.mmccrack.bibdesk: Local
 												 selector:@selector(handleBibItemAddDelNotification:)
 													 name:BDSKDocDelItemNotification
                                                    object:self];
+                
+                [[NSNotificationCenter defaultCenter] addObserver:self 
+                                                         selector:@selector(handleComplexStringChangedNotification:) 
+                                                             name:BDSKComplexStringChangedNotification 
+                                                           object:self];
 
         // It's wrong that we have to manually register for this, since the document is the window's delegate in IB (and debugging/logging appears to confirm this).
         // However, we don't get this notification, and it's critical to clean up when closing the document window; this fixes #1097306, a crash when closing the
@@ -2179,7 +2184,10 @@ This method always returns YES. Even if some or many operations fail.
 }
 
 
-
+- (void)handleComplexStringChangedNotification:(NSNotification *)notification{
+    if([notification object] == self)
+        [self updateUI];
+}
 
 
 - (void)handleUpdateUINotification:(NSNotification *)notification{
