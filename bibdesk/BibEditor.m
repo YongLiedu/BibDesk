@@ -554,6 +554,8 @@ NSString *BDSKUrlString = @"Url";
     // else, nothing.
 }
 
+#pragma mark Text Change handling
+
 - (void)controlTextDidEndEditing:(NSNotification *)aNotification{
     // here for undo
 }
