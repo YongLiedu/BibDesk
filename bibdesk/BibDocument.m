@@ -230,7 +230,7 @@ NSString *BDSKBibItemLocalDragPboardType = @"edu.ucsd.cs.mmccrack.bibdesk: Local
         [[self undoManager] removeAllActionsWithTarget:self];
     }
     [[NSNotificationCenter defaultCenter] removeObserver:self];
-    [macroDefinitions release]; // release this before setting bibitem documents to nil, otherwise we leak complex strings
+    [macroDefinitions release];
     [publications makeObjectsPerformSelector:@selector(setDocument:) // Set the non-retained document ivar in each BibItem to nil.  Otherwise, they message the document in -[BibItem dealloc] when removing undo action; since the doc is dealloced, this causes a crash.
                                   withObject:nil];
     [publications release]; // these should cause the bibitems to get dealloc'ed
@@ -1703,8 +1703,8 @@ didClickTableColumn: (NSTableColumn *) tableColumn{
 		[shownPublications sortUsingSelector:@selector(keyCompare:)];
 	}else if([tcID isEqualToString:BDSKTitleString]){
 		
-		[publications sortUsingSelector:@selector(titleWithoutBracesCompare:)];
-		[shownPublications sortUsingSelector:@selector(titleWithoutBracesCompare:)];
+		[publications sortUsingSelector:@selector(titleWithoutTeXCompare:)];
+		[shownPublications sortUsingSelector:@selector(titleWithoutTeXCompare:)];
 	}else if([tcID isEqualToString:BDSKDateString]){
 		
 		[publications sortUsingSelector:@selector(dateCompare:)];

@@ -280,9 +280,9 @@ setupParagraphStyle()
     return [[self title] localizedCaseInsensitiveCompare:[aBI title]];
 }
 
-- (NSComparisonResult)titleWithoutBracesCompare:(BibItem *)aBI{
-    NSString *titleNoBraces = [[self title] stringByRemovingCurlyBraces];
-    NSString *aBITitleNoBraces = [[aBI title] stringByRemovingCurlyBraces];
+- (NSComparisonResult)titleWithoutTeXCompare:(BibItem *)aBI{
+    NSString *titleNoBraces = [[self title] stringByRemovingTeXForSorting];
+    NSString *aBITitleNoBraces = [[aBI title] stringByRemovingTeXForSorting];
     return [titleNoBraces localizedCaseInsensitiveCompare:aBITitleNoBraces];
 }
 
