@@ -54,11 +54,13 @@
                 newFieldWindow = NSWindow; 
                 notesView = NSTextView; 
                 pdfSnoopContainerView = NSView; 
+                remoteSnoopWebView = WebView; 
                 rssDescriptionView = NSTextView; 
                 tabView = NSTabView; 
                 textSnoopContainerView = NSView; 
                 viewLocalButton = RYZImagePopUpButton; 
                 viewRemoteButton = RYZImagePopUpButton; 
+                webSnoopContainerView = NSView; 
             }; 
             SUPERCLASS = NSWindowController; 
         }, 
