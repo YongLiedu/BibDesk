@@ -244,6 +244,7 @@ NSRange SafeForwardSearchRange( unsigned startLoc, unsigned seekLength, unsigned
                 braceFoundRange = [fullString rangeOfString:leftDelim options:NSLiteralSearch range:braceSearchRange];
                 
                 unsigned tempStart = braceFoundRange.location;
+                BOOL doShallow = YES;
                 
                 // Okay, so we found a left delimiter.  However, it may be nested inside yet another brace pair, so let's look back from the left delimiter and see if we find another left delimiter at a different location.  
                 // Example:  Title = {Physical insight into the {Ergun} and {Wen {\&} Yu} equations for fluid flow in packed and fluidised beds},
@@ -251,12 +252,25 @@ NSRange SafeForwardSearchRange( unsigned startLoc, unsigned seekLength, unsigned
                 // WARNING:  this if() has some trickery with resetting the scan location, but not setting the search location as in the next if() statement!
 
                 while(tempStart != [fullString rangeOfString:leftDelim options:NSLiteralSearch | NSBackwardsSearch range:braceSearchRange].location){ // this means we found "{ {" between { and }
+                    
                     tempStart = [fullString rangeOfString:leftDelim options:NSLiteralSearch | NSBackwardsSearch range:braceSearchRange].location;
                     NSLog(@"Reset tempStart!");
+                    
+                    // this is sort of the right idea, but I need to allow/perform more backwards searches, resetting the range every time so I get the next { until I run out
+                    // what is the stop condition for that, though?
+                    braceSearchRange = [fullString rangeOfString:leftDelim options:NSLiteralSearch range:NSMakeRange(braceSearchRange.location + 1, rightDelimLocation - braceSearchRange.location - 1)];
+
+                    if(braceSearchRange.location == NSNotFound){
+                        NSLog(@"braceSearchRange.location is not found, breaking out.");
+                        doShallow = NO;
+                        break;
+                    }
+                    
                     [scanner scanString:rightDelim intoString:&logString]; // it wasn't this one, so scan past it
                      NSLog(@"Deep nested brace check, scanned rightDelim %@", logString);
+                     
                     if(![scanner scanUpToString:rightDelim intoString:&logString] &&        // find the next right delimiter
-                        [fullString characterAtIndex:([scanner scanLocation] )] != '}'){ // it's not an error if it's terminated by a brace 
+                        [fullString characterAtIndex:([scanner scanLocation])] != '}'){ // it's not an error if it's terminated by a brace 
                          NSLog(@"*** ERROR doubly nested braces");
                         *hadProblems = YES;
                         [BibTeXParser postParsingErrorNotification:[NSString stringWithFormat:@"Delimiter '%@' not found", rightDelim]
@@ -265,14 +279,10 @@ NSRange SafeForwardSearchRange( unsigned startLoc, unsigned seekLength, unsigned
                                                         errorRange:[fullString lineRangeForRange:NSMakeRange(leftDelimLocation, 0)]];
                     }
                     rightDelimLocation = [scanner scanLocation];
-                    // this is sort of the right idea, but I need to allow/perform more backwards searches, resetting the range every time so I get the next { until I run out
-                    // what is the stop condition for that, though?
-                    braceSearchRange = [fullString rangeOfString:leftDelim options:NSLiteralSearch range:NSMakeRange(braceSearchRange.location, rightDelimLocation - braceSearchRange.location)];
-                    if(braceSearchRange.location == NSNotFound) break;
                      NSLog(@"Deep nested braces, scanned up to %@ and found %@", rightDelim, logString);
                 }
                 
-                if(braceFoundRange.location != NSNotFound){ // if there's a "{" between { and }
+                if(braceFoundRange.location != NSNotFound && doShallow){ // if there's a "{" between { and }
                     [scanner scanString:rightDelim intoString:&logString]; // it wasn't this one, so scan past it
                      NSLog(@"Shallow nested brace check, scanned rightDelim %@", logString);
                      if([scanner scanLocation] + 1 >= nextAtRange.location) break; // check for next entry or EOF before we try characterAtIndex:
@@ -291,6 +301,7 @@ NSRange SafeForwardSearchRange( unsigned startLoc, unsigned seekLength, unsigned
                      NSLog(@"string at searchStart is %@", [fullString substringWithRange:NSMakeRange(searchStart, 1)]);
                     rightDelimLocation = [scanner scanLocation];
                 } else {
+                    NSLog(@"shallow brace loop...breaking out");
                     break;
                 }
             }
