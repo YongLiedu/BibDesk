@@ -52,6 +52,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
     NSEnumerator *newKeyE;
     NSString *key;
     NSString *value;
+    BOOL hadProblems = NO;
 
     BibItem *editorBib = [[self windowController] currentBib];
     NSArray *oldKeys = [[editorBib dict] allKeys];
@@ -88,7 +89,10 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
         // get the item from the string
         pbString = [pboard stringForType:NSStringPboardType];
 
-        draggedPubs = [BibItem itemsFromString:pbString];
+        draggedPubs = [BibTeXParser itemsFromString:pbString
+                                              error:&hadProblems];
+        if(hadProblems) return NO;
+            
         draggedPubsE = [draggedPubs objectEnumerator];
         while(tempBI = [draggedPubsE nextObject]){
             bibDict = [tempBI dict];
