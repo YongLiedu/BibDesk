@@ -470,7 +470,7 @@ void _setupFonts(){
 - (NSString *)suggestedCiteKey
 {
 	NSString *citeKeyFormat = [[OFPreferenceWrapper sharedPreferenceWrapper] objectForKey:BDSKCiteKeyFormatKey];
-	return [self parseFormat:citeKeyFormat forField:@"Cite Key" inType:@"BibTeX"];
+	return [self parseFormat:citeKeyFormat forField:@"Cite Key"];
 }
 
 - (BOOL)canSetCiteKey
@@ -879,7 +879,7 @@ void _setupFonts(){
 
 }
 
-- (NSString *)parseFormat:(NSString *)format forField:(NSString *)fieldName inType:(NSString *)type
+- (NSString *)parseFormat:(NSString *)format forField:(NSString *)fieldName
 {
 	BDSKConverter *converter = [BDSKConverter sharedConverter];
 	NSMutableString *parsedStr = [NSMutableString string];
@@ -927,7 +927,7 @@ void _setupFonts(){
 					}
 					for (i = 0; i < numAuth; i++) {
 						string = [[self authorAtIndex:i] lastName];
-						string = [converter stringBySanitizingString:string forField:fieldName inType:type];
+						string = [converter stringBySanitizingString:string forField:fieldName inType:[self type]];
 						if ([string length] > number && number > 0) {
 							string = [string substringToIndex:number];
 						}
@@ -964,7 +964,7 @@ void _setupFonts(){
 						} else {
 							string = [auth lastName];
 						}
-						string = [converter stringBySanitizingString:string forField:fieldName inType:type];
+						string = [converter stringBySanitizingString:string forField:fieldName inType:[self type]];
 						if ([string length] > number && number > 0) {
 							string = [string substringToIndex:number];
 						}
@@ -973,7 +973,7 @@ void _setupFonts(){
 					break;
 				case 't':
 					// title, optional #chars
-					string = [converter stringBySanitizingString:[self title] forField:fieldName inType:type];
+					string = [converter stringBySanitizingString:[self title] forField:fieldName inType:[self type]];
 					if ([scanner scanCharactersFromSet:digits intoString:&numStr]) {
 						number = [numStr intValue];
 					} else {
@@ -1017,7 +1017,7 @@ void _setupFonts(){
 					}
 					string = [self valueOfField:string];
 					if (string != nil) {
-						string = [converter stringBySanitizingString:string forField:fieldName inType:type];
+						string = [converter stringBySanitizingString:string forField:fieldName inType:[self type]];
 						if (number > 0 && [string length] > number) {
 							[parsedStr appendString:[string substringToIndex:number]];
 						} else {
@@ -1082,7 +1082,6 @@ void _setupFonts(){
 					if ([scanner isAtEnd]) {
 						[parsedStr setString:[self uniqueString:parsedStr 
 													   forField:fieldName
-														 inType:type
 												  numberOfChars:number 
 														   from:'a' to:'z' 
 														  force:(number == 0)]];
@@ -1101,7 +1100,6 @@ void _setupFonts(){
 					if ([scanner isAtEnd]) {
 						[parsedStr setString:[self uniqueString:parsedStr 
 													   forField:fieldName
-														 inType:type
 												  numberOfChars:number 
 														   from:'A' to:'Z' 
 														  force:(number == 0)]];
@@ -1120,7 +1118,6 @@ void _setupFonts(){
 					if ([scanner isAtEnd]) {
 						[parsedStr setString:[self uniqueString:parsedStr 
 													   forField:fieldName
-														 inType:type
 												  numberOfChars:number 
 														   from:'0' to:'1' 
 														  force:(number == 0)]];
@@ -1139,7 +1136,7 @@ void _setupFonts(){
 		number = 0;
 		do {
 			string = [@"empty" stringByAppendingFormat:@"%i", number++];
-		} while (![self stringIsValid:string forField:fieldName inType:type]);
+		} while (![self stringIsValid:string forField:fieldName]);
 		return string;
 	} else {
 	   return parsedStr;
@@ -1148,7 +1145,7 @@ void _setupFonts(){
 
 // returns a 'valid' string rather than a 'unique' one
 - (NSString *)uniqueString:(NSString *)baseStr 
-				  forField:(NSString *)fieldName inType:(NSString *)type
+				  forField:(NSString *)fieldName
 			 numberOfChars:(unsigned int)number 
 					  from:(unichar)fromChar 
 						to:(unichar)toChar 
@@ -1161,15 +1158,15 @@ void _setupFonts(){
 		for (c = fromChar; c <= toChar; c++) {
 			// try with the first added char set to c
 			uniqueStr = [baseStr stringByAppendingFormat:@"%C", c];
-			uniqueStr = [self uniqueString:uniqueStr forField:fieldName inType:type numberOfChars:number - 1 from:fromChar to:toChar force:NO];
-			if ([self stringIsValid:uniqueStr forField:fieldName inType:type])
+			uniqueStr = [self uniqueString:uniqueStr forField:fieldName numberOfChars:number - 1 from:fromChar to:toChar force:NO];
+			if ([self stringIsValid:uniqueStr forField:fieldName])
 				return uniqueStr;
 		}
 	}
 	
-	if (force && ![self stringIsValid:uniqueStr forField:fieldName inType:type]) {
+	if (force && ![self stringIsValid:uniqueStr forField:fieldName]) {
 		// not uniqueString yet, so try with 1 more char
-		return [self uniqueString:uniqueStr forField:fieldName inType:type numberOfChars:number + 1 from:fromChar to:toChar force:YES];
+		return [self uniqueString:uniqueStr forField:fieldName numberOfChars:number + 1 from:fromChar to:toChar force:YES];
 	}
 	
 	return uniqueStr;
@@ -1177,7 +1174,7 @@ void _setupFonts(){
 
 // this might be changed when more fields are available
 // do we want to add character checks as in CiteKeyFormatter?
-- (BOOL)stringIsValid:(NSString *)proposedStr forField:(NSString *)fieldName inType:(NSString *)type
+- (BOOL)stringIsValid:(NSString *)proposedStr forField:(NSString *)fieldName
 {
 	if ([fieldName isEqualToString:@"Cite Key"]) {
 		    return !(proposedStr == nil || [proposedStr isEqualToString:@""] ||

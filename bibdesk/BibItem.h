@@ -288,23 +288,21 @@
 - (NSString *)localURLPathRelativeTo:(NSString *)base; 
 
 /*!
-    @method parseFormat:forField:inType:
+    @method parseFormat:forField:
     @abstract Generates a value for a field in a type based on the receiver and the format string
     @discussion -
     @param format The format string to use
     @param fieldName The name of the field (e.g. "Author")
-    @param type The reference type (e.g. BibTeX, RIS)
 	@result The suggested cite key string
 */
-- (NSString *)parseFormat:(NSString *)format forField:(NSString *)fieldName inType:(NSString *)type;
+- (NSString *)parseFormat:(NSString *)format forField:(NSString *)fieldName;
 
 /*!
-    @method uniqueString:forField:inType:numberOfChars:from:to:force:
+    @method uniqueString:forField:numberOfChars:from:to:force:
     @abstract Tries to return a unique string value for a field in a type, by adding characters from a range
     @discussion -
     @param baseString The string to base the unique string on
     @param fieldName The name of the field (e.g. "Author")
-    @param type The reference type (e.g. BibTeX, RIS)
 	@param number The number of characters to add, when force is YES the minimal number
 	@param fromChar The first character in the range to use
 	@param toChar The last character of the range to use
@@ -313,21 +311,19 @@
 */
 - (NSString *)uniqueString:(NSString *)baseString 
 				  forField:(NSString *)fieldName 
-					inType:(NSString *)type
 			 numberOfChars:(unsigned int)number 
 					  from:(unichar)fromChar 
 						to:(unichar)toChar 
 					 force:(BOOL)force;
 
 /*!
-    @method stringIsValid:forField:inType:
+    @method stringIsValid:forField:
     @abstract Returns whether a string is a valid as a value for a field in a type
     @discussion -
 	@param proposedStr The trial string to check for validity
     @param fieldName The name of the field (e.g. "Author")
-    @param type The reference type (e.g. BibTeX, RIS)
 */
-- (BOOL)stringIsValid:(NSString *)proposedStr forField:(NSString *)fieldName inType:(NSString *)type;
+- (BOOL)stringIsValid:(NSString *)proposedStr forField:(NSString *)fieldName;
 @end
 
 
