@@ -31,13 +31,22 @@ Papers Folder as described in the
 
 ### Consolidate Linked Files
 
-<img src="gfx/consolidateLinkedFiles.png" alt="" >
+![Consolidate Linked Files Menu Item](gfx/consolidateLinkedFiles.png)
 
-Choose this command to scan all publications in the file for linked files. A preview window will be opened that shows you some information about each of the linked files. You can then choose to move them all to your Papers Folder or cancel. 
+Choose this command to scan all publications in the file for linked
+files. A preview window will be opened that shows you some information
+about each of the linked files. You can then choose to move them all
+to your Papers Folder or cancel.
 
-<img src="gfx/consolidateLinkedFilesWindow.png" alt="" >
+![Confirmation dialog](gfx/consolidateLinkedFilesDialog.png)
 
-You have the option to change links that match files in the Papers Folder. This means that if a link specifies a filename that already exists in the Papers Folder, even if the link isn't pointing to the Papers Folder, Bibdesk will change the link to point to the Papers Folder. You can also optionally delete a duplicate file if a file with the same name exists in the Papers Folder. 
+If any files can not be moved or renamed for some reason, an error
+dialog will show you what the problems were:
+
+![Error window](gfx/consolidateLinkedFilesErrorWindow.png)
+
+Consolidating linked files is undoable, so feel free to experiment.
+
 
 ### Automatically Move Files
 
