@@ -10,6 +10,7 @@
 #import "BibPrefController.h"
 
 extern NSString *BDSKInputManagerID;
+extern NSString *BDSKInputManagerLoadableApplications;
 
 @interface BibPref_InputManager : OAPreferenceClient
 {
@@ -18,15 +19,9 @@ extern NSString *BDSKInputManagerID;
     IBOutlet NSTableView *appList;
     IBOutlet NSButton *enableButton;
     NSMutableArray *appListArray;
+    NSMutableDictionary *mutablePreferences;
 }
 
-/*!
-    @method     setBundleID
-    @abstract   Sets the bundle identifier for all of the application paths in the input manager's plist.
-    @discussion The input manager's plist dictionary key for this is "BundleID", even though it's a duplicate
-		of the chosen application's CFBundleIdentifier, to avoid confusion in the input manager code.
-*/
-- (void)setBundleID;
 /*!
     @method     bundleIDForPath:
     @abstract   Returns the CFBundleIdentifier for a given application bundle path.
@@ -38,12 +33,5 @@ extern NSString *BDSKInputManagerID;
 - (IBAction)enableAutocompletion:(id)sender;
 - (IBAction)addApplication:(id)sender;
 - (IBAction)removeApplication:(id)sender;
-
-/*!
-    @method     cacheAppList
-    @abstract   Write out a plist with the app names and bundle identifiers.
-    @discussion This gets written to the input manager's application support hierarchy, not BibDesk's.
-*/
-- (void)cacheAppList;
 
 @end

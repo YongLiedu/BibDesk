@@ -10,6 +10,7 @@
 #import "BibPref_InputManager.h"
 
 NSString *BDSKInputManagerID = @"net.sourceforge.bibdesk.inputmanager";
+NSString *BDSKInputManagerLoadableApplications = @"Application bundles that we recognize";
 
 @implementation BibPref_InputManager
 
@@ -19,48 +20,47 @@ NSString *BDSKInputManagerID = @"net.sourceforge.bibdesk.inputmanager";
     NSWorkspace *ws = [NSWorkspace sharedWorkspace];
     
     NSString *libraryPath = [NSSearchPathForDirectoriesInDomains(NSLibraryDirectory, NSUserDomainMask, YES) objectAtIndex:0];
-    applicationSupportPath = [[libraryPath stringByAppendingPathComponent:@"/Application Support/BibDeskInputManager"] retain];
     inputManagerPath = [[libraryPath stringByAppendingPathComponent:@"/InputManagers/BibDeskInputManager"] retain];
     
-    // Try to find TextEdit.app so the table isn't empty
-    NSString *textEditPath = nil;
-    if([ws respondsToSelector:@selector(absolutePathForAppBundleWithIdentifier:)]){
-	    textEditPath = [ws absolutePathForAppBundleWithIdentifier:@"com.apple.textedit"];
-    } else {
-	    [enableButton setEnabled:NO];
+    if(![ws respondsToSelector:@selector(absolutePathForAppBundleWithIdentifier:)]){ // check the OS version
+        [enableButton setEnabled:NO];
         NSBeginAlertSheet(NSLocalizedString(@"Error!", @"Error!"),
                           nil, nil, nil, [controlBox window], nil, nil, nil, nil,
                           NSLocalizedString(@"You appear to be using a system version earlier than 10.3.  Autocompletion requires Mac OS X 10.3 or greater.",
                                             @"You appear to be using a system version earlier than 10.3.  Autocompletion requires Mac OS X 10.3 or greater.") );
     }
-	
-    if(![fm fileExistsAtPath:[applicationSupportPath stringByAppendingPathComponent:@"EnabledApplications.plist"]]){
-	if([fm fileExistsAtPath:textEditPath]){
-	    appListArray = [[NSMutableArray arrayWithObjects:[NSMutableDictionary dictionaryWithObject:textEditPath forKey:@"Path"], nil] retain];
-	} else {
-	    appListArray = [[NSMutableArray array] retain]; // create an empty one if we didn't find TextEdit.app
-	}
-	[fm createDirectoryAtPath:applicationSupportPath attributes:nil];
-    } else { // if we found the plist, use that instead
-	    appListArray = [[NSArray arrayWithContentsOfFile:[applicationSupportPath stringByAppendingPathComponent:@"EnabledApplications.plist"]] mutableCopy];
+    
+    mutablePreferences = [[[NSUserDefaults standardUserDefaults] persistentDomainForName:BDSKInputManagerID] mutableCopy];
+    if(!mutablePreferences)
+        mutablePreferences = [[NSMutableDictionary dictionary] retain];
+    
+    if([mutablePreferences objectForKey:BDSKInputManagerLoadableApplications] != nil){
+        appListArray = [[mutablePreferences objectForKey:BDSKInputManagerLoadableApplications] mutableCopy];
+    } else {
+        appListArray = [[NSMutableArray array] retain];
+        [appListArray addObject:@"com.apple.textedit"];
     }
+	
     [[appList tableColumnWithIdentifier:@"AppList"] setDataCell:[[[NSBrowserCell alloc] init] autorelease]];
 }
 
 - (void)dealloc{
-    [applicationSupportPath release];
     [inputManagerPath release];
     [appListArray release];
+    [mutablePreferences release];
     [super dealloc];
 }
 
 - (void)updateUI{
-//    NSLog(@"-[%@ %@] 0x%x", [self class], NSStringFromSelector(_cmd), self);
+    // NSLog(@"-[%@ %@] 0x%x", [self class], NSStringFromSelector(_cmd), self);
     if([[NSFileManager defaultManager] fileExistsAtPath:inputManagerPath]){
 	[enableButton setTitle:NSLocalizedString(@"Reinstall",@"Reinstall input manager")];
 	[enableButton sizeToFit];
     }    
-    [self setBundleID];
+    // [self setBundleID];
+    [mutablePreferences setObject:appListArray forKey:BDSKInputManagerLoadableApplications];
+    [[NSUserDefaults standardUserDefaults] setPersistentDomain:[[mutablePreferences copy] autorelease] forName:BDSKInputManagerID];
+    [[NSUserDefaults standardUserDefaults] synchronize];
     [appList reloadData];
 }
 
@@ -71,52 +71,54 @@ NSString *BDSKInputManagerID = @"net.sourceforge.bibdesk.inputmanager";
     return [[bundle infoDictionary] objectForKey:@"CFBundleIdentifier"];
 }
 
-- (void)setBundleID{
-//    NSLog(@"-[%@ %@] 0x%x", [self class], NSStringFromSelector(_cmd), self);
-    NSEnumerator *e = [appListArray objectEnumerator];
-    NSMutableDictionary *dict;
-    BOOL err = NO;
-    
-    while(dict = [e nextObject]){
-	if([[NSFileManager defaultManager] fileExistsAtPath:[dict objectForKey:@"Path"]]){
-	    [dict setObject:[self bundleIDForPath:[dict objectForKey:@"Path"]] forKey:@"BundleID"];
-	} else {
-	    err = YES;
-	    [dict setObject:[NSNull null] forKey:@"BundleID"];
-	}
-    }
-
-    if(!err){
-	[self cacheAppList];
-    } else {
-	// show an alert if an app wasn't found, otherwise we get a writeToFile: failure in cacheAppList
-	NSAlert *anAlert = [NSAlert alertWithMessageText:@"Error!"
-					   defaultButton:nil
-					 alternateButton:nil
-					     otherButton:nil
-			       informativeTextWithFormat:@"The application(s) with a blank icon cannot be found and must be removed from the list."];
-	[anAlert beginSheetModalForWindow:[controlBox window]
-			    modalDelegate:nil
-			   didEndSelector:nil
-			      contextInfo:nil];
-    }
-	
-
-}
-
 - (int)numberOfRowsInTableView:(NSTableView *)tableView{
     return [appListArray count];
 }
 
 - (void)tableView:(NSTableView *)aTableView willDisplayCell:(id)aCell forTableColumn:(NSTableColumn *)aTableColumn row:(int)rowIndex{
+    NSString *inBundleID = [appListArray objectAtIndex:rowIndex];
+    CFURLRef outAppURL = nil;
+    NSImage *image = nil;
+    int size = 16;
+    
+    OSStatus err = LSFindApplicationForInfo( kLSUnknownCreator,
+                                             (CFStringRef)inBundleID,
+                                             NULL,
+                                             NULL,
+                                             &outAppURL );
+    
+    // NSAssert1( (!err), @"Couldn't find icon for application %@", inBundleID);
+    if(!err){
+        NSString *path = [(NSURL *)outAppURL path];
+        [aCell setStringValue:[[path lastPathComponent] stringByDeletingPathExtension]];
 
-    [aCell setStringValue:[[[[appListArray objectAtIndex:rowIndex] objectForKey:@"Path"] lastPathComponent] stringByDeletingPathExtension]];
+        image = [[NSWorkspace sharedWorkspace] iconForFile:path];
+    } else {
+        // if LS failed us (my cache was corrupt when I wrote this code, so it's been tested)
+        IconRef genericIconRef;
+        err = GetIconRef( kOnSystemDisk,
+                          kSystemIconsCreator,
+                          kGenericDocumentIcon,
+                          &genericIconRef );
+        NSAssert1( (!err), @"Couldn't get generic document icon, error %d.", err); // now you're really out of luck
+        image = [[[NSImage alloc] initWithSize:NSMakeSize(size, size)] autorelease];
+        CGRect iconCGRect = CGRectMake(0, 0, size, size);
+        [image lockFocus];
+        PlotIconRefInContext( (CGContextRef)[[NSGraphicsContext currentContext] graphicsPort], // borrowed from BibEditor code
+                              &iconCGRect,
+                              kAlignAbsoluteCenter,
+                              kTransformNone,
+                              NULL,
+                              kPlotIconRefNormalFlags,
+                              genericIconRef);
+        [image unlockFocus];
+        [aCell setStringValue:[NSString stringWithFormat:@"LaunchServices can't find %@", inBundleID]];
+    }
 
-    NSImage *image = [[NSWorkspace sharedWorkspace] iconForFile:[[appListArray objectAtIndex:rowIndex] objectForKey:@"Path"]];
-
-    [image setSize:NSMakeSize(16, 16)];
+    [image setSize:NSMakeSize(size, size)];
     [aCell setImage:image];
     [aCell setLeaf:YES];
+    CFRelease(outAppURL);
 }
 
 - (IBAction)enableAutocompletion:(id)sender{
@@ -211,27 +213,13 @@ NSString *BDSKInputManagerID = @"net.sourceforge.bibdesk.inputmanager";
 				  contextInfo:nil];
 	    return;
 	} else {
-	    [appListArray addObject:[NSMutableDictionary dictionaryWithObject:[[sheet filenames] objectAtIndex:0] forKey:@"Path"]];
+	    [appListArray addObject:[self bundleIDForPath:[[sheet filenames] objectAtIndex:0]]];
 	    [self updateUI];
 	}
     } else {
 	if(returnCode == NSCancelButton){
 	    // do nothing
 	}
-    }
-}
-
-- (void)cacheAppList{
-    if(![[[appListArray copy] autorelease] writeToFile:[applicationSupportPath stringByAppendingPathComponent:@"EnabledApplications.plist"] atomically:YES]){
-	NSAlert *anAlert = [NSAlert alertWithMessageText:@"Error!"
-					   defaultButton:nil
-					 alternateButton:nil
-					     otherButton:nil
-			       informativeTextWithFormat:@"Unable to write file at %@, please check file or directory permissions.", [applicationSupportPath stringByAppendingPathComponent:@"EnabledApplications.plist"]];
-	[anAlert beginSheetModalForWindow:[controlBox window]
-			    modalDelegate:nil
-			   didEndSelector:nil
-			      contextInfo:nil];
     }
 }
 
