@@ -1068,6 +1068,7 @@
 				F92F4E450788DEC5001B8F82,
 				F92F4E470788DEDD001B8F82,
 				27C162BA078BAE91008A4B83,
+				F96E21690794FE3400120AB3,
 			);
 			isa = PBXResourcesBuildPhase;
 			runOnlyForDeploymentPostprocessing = 0;
@@ -1190,9 +1191,9 @@
 			sourceTree = "<group>";
 		};
 		8D1107320486CEB800E47090 = {
-			explicitFileType = wrapper.application;
 			includeInIndex = 0;
 			isa = PBXFileReference;
+			lastKnownFileType = wrapper.application;
 			path = Bibdesk.app;
 			refType = 3;
 			sourceTree = BUILT_PRODUCTS_DIR;
@@ -4386,6 +4387,12 @@
 		};
 		F965D0A9077B8C0500628BD0 = {
 			fileRef = F9022C3F0758027800C3F701;
+			isa = PBXBuildFile;
+			settings = {
+			};
+		};
+		F96E21690794FE3400120AB3 = {
+			fileRef = 8D1107310486CEB800E47090;
 			isa = PBXBuildFile;
 			settings = {
 			};
