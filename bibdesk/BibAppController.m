@@ -447,6 +447,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
     NSRange r = [string rangeOfCharacterFromSet:_autocompletePunctuationCharacterSet];
     
     if(r.location != NSNotFound){
+        [acLock lock];
         NSScanner *scanner = [[NSScanner alloc] initWithString:string];
         [scanner setCharactersToBeSkipped:nil];
         NSString *tmp = nil;
@@ -454,11 +455,12 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
         while(![scanner isAtEnd]){
             [scanner scanUpToCharactersFromSet:_autocompletePunctuationCharacterSet intoString:&tmp];
             if(tmp != nil) 
-		[completionArray addObject:tmp usingLock:acLock];
+		[completionArray addObject:tmp]; // we have the lock, so don't use the locking method here
             [scanner scanCharactersFromSet:_autocompletePunctuationCharacterSet intoString:nil];
             [scanner scanCharactersFromSet:[NSCharacterSet whitespaceCharacterSet] intoString:nil];
         }
         [scanner release];
+        [acLock unlock];
     } else {
         [completionArray addObject:string usingLock:acLock];
     }
@@ -674,11 +676,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 
     if (errorClass) {
         [_errors addObject:errDict];
-		[NSObject cancelPreviousPerformRequestsWithTarget:self 
-												 selector:@selector(updateErrorPanelUI)
-												   object:nil];
-		
-		[self performSelector:@selector(updateErrorPanelUI)];
+        [self performSelectorOnMainThread:@selector(updateErrorPanelUI) withObject:nil waitUntilDone:NO];
     }
 }
 
