@@ -31,7 +31,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
     @discussion none.
 */
 @interface BibAuthor : NSObject {
-    NSMutableArray *pubs;
+    NSMutableSet *pubs;
     NSString *name;
     NSString *_firstName;
     NSString *_vonPart;
@@ -46,7 +46,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 // maybe this should be 'and pubs'
 - (id)initWithName:(NSString *)aName andPub:(BibItem *)aPub;
 - (void)dealloc;
-- (void)setPubs:(NSArray *)newPubs;
+- (void)setPubs:(NSSet *)newPubs;
 
 - (int)numberOfPublications;
 - (NSArray *)publications;

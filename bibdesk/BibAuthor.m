@@ -19,39 +19,34 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 
 #define emptyStr(x) ([x isEqualToString:@""] || !(x))
 
-static NSMutableArray *_authors;
+static NSMutableSet *_authors;
 
 @implementation BibAuthor
 
 + (void)initialize{
 	static BOOL alreadyInit= NO;
     if ( !alreadyInit ) {
-		_authors = [[NSMutableArray alloc] initWithCapacity:10];
+		_authors = [[NSMutableSet alloc] initWithCapacity:10];
 		
         alreadyInit = YES;
     }
 }
 
-+ (BibAuthor *)authorWithName:(NSString *)newName andPub:(BibItem *)aPub{
-	BibAuthor *auth = nil;
++ (BibAuthor *)authorWithName:(NSString *)newName andPub:(BibItem *)aPub{	
 	BibAuthor *newAuth = [[[BibAuthor alloc] initWithName:newName andPub:aPub] autorelease];
-	NSEnumerator *e = [_authors objectEnumerator];
-    NSString *newAuthName = [newAuth normalizedName];
+    BibAuthor *auth = [_authors member:newAuth];
 	
-	while(auth = [e nextObject]){
-        if([[auth normalizedName] isEqualToString:newAuthName]){
-            [auth addPub:aPub];
-            NSNotification *notif = [NSNotification notificationWithName:BDSKAuthorPubListChangedNotification
-                                                                  object:auth];
-            [[NSNotificationQueue defaultQueue] enqueueNotification:notif
-                                                       postingStyle:NSPostWhenIdle
-                                                       coalesceMask:NSNotificationCoalescingOnName
-                                                           forModes:nil];			
-            return auth;
-		}
-	}
-	// no match was found, create a new author:
-	
+    if(auth != nil){
+        [auth addPub:aPub];
+        NSNotification *notif = [NSNotification notificationWithName:BDSKAuthorPubListChangedNotification
+                                                              object:auth];
+        [[NSNotificationQueue defaultQueue] enqueueNotification:notif
+                                                   postingStyle:NSPostWhenIdle
+                                                   coalesceMask:NSNotificationCoalescingOnSender
+                                                       forModes:nil];
+        return auth;
+    }
+        	
 	[_authors addObject:newAuth];
 	return newAuth;
 }
@@ -59,9 +54,9 @@ static NSMutableArray *_authors;
 - (id)initWithName:(NSString *)aName andPub:(BibItem *)aPub{
     [self setName:aName];
     if(aPub)
-        pubs = [[NSMutableArray arrayWithObject:aPub] retain];
+        pubs = [[NSMutableSet setWithObject:aPub] retain];
     else
-        pubs = [[NSMutableArray alloc] init];
+        pubs = [[NSMutableSet alloc] init];
 	
 	[[NSNotificationCenter defaultCenter] addObserver:self
                                                  selector:@selector(handleBibItemChangeNotification:)
@@ -79,7 +74,7 @@ static NSMutableArray *_authors;
 	[_lastName release];
 	[_jrPart release];
 	[_normalizedName release];
-	[[NSNotificationCenter defaultCenter] removeObserver:self];
+    [[NSNotificationCenter defaultCenter] removeObserver:self object:nil];
     // NSLog(@"bibauthor dealloc");
     [super dealloc];
 }
@@ -100,7 +95,7 @@ static NSMutableArray *_authors;
 }
 
 
-- (void)setPubs:(NSArray *)newPubs{
+- (void)setPubs:(NSSet *)newPubs{
     [pubs autorelease];
     pubs = [newPubs mutableCopy];
 }
@@ -110,7 +105,7 @@ static NSMutableArray *_authors;
 }
 
 - (NSArray *)publications{
-    return pubs;
+    return [pubs allObjects];
 }
 
 #pragma mark Comparison
@@ -295,7 +290,7 @@ Note: The strings returned by the bt_split_name function seem to be in the wrong
 	BibItem *pub = [notification object];
 
 	// if a pub changes and it's in our pubs list, we have to check that we're still an author.
-	if([pubs containsObjectIdenticalTo:pub] &&
+	if([pubs containsObject:pub] &&
 	   ![[pub pubAuthors] containsObjectIdenticalTo:self]){
 		[self removePubFromAuthorList:pub];
 	}
@@ -306,15 +301,13 @@ Note: The strings returned by the bt_split_name function seem to be in the wrong
 
 
 - (BibItem *)pubAtIndex:(int)index{
-    return [pubs objectAtIndex: index];
+    return [[pubs allObjects] objectAtIndex: index];
 }
 - (void)addPub:(BibItem *)pub{
-    if(![pubs containsObject:pub]){
-        [pubs addObject: pub];
-    }
+    [pubs addObject: pub];
 }
 - (void)removePubFromAuthorList:(BibItem *)pub{
-    [pubs removeObjectIdenticalTo:pub];
+    [pubs removeObject:pub];
 	[[NSNotificationCenter defaultCenter] postNotificationName:BDSKAuthorPubListChangedNotification
 														object:self];
 }
