@@ -13,7 +13,7 @@
     @abstract   A superclass for sources.
     @discussion (description)
 */
-#warning : shouldn't this become a subclass of bibcollection?
+// should this become a subclass of bibcollection?
 @interface BDSKRemoteSource : NSObject{
 	NSString *name;
 	NSMutableDictionary *data;
