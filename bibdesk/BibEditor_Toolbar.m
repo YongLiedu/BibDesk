@@ -24,7 +24,6 @@ NSString*	AuthorTableToolbarItemIdentifier 	= @"Author Table Item Identifier";
 // label, palettelabel, toolTip, action, and menu can all be NULL, depending upon what you want the item to do
 static void addToolbarItem(NSMutableDictionary *theDict,NSString *identifier,NSString *label,NSString *paletteLabel,NSString *toolTip,id target,SEL settingSelector, id itemContent,SEL action, NSMenuItem *menuItem)
 {
-    NSMenuItem *mItem;
     // here we create the NSToolbarItem and setup its attributes in line with the parameters
     NSToolbarItem *item = [[[NSToolbarItem alloc] initWithItemIdentifier:identifier] autorelease];
     [item setLabel:label];
@@ -49,7 +48,7 @@ static void addToolbarItem(NSMutableDictionary *theDict,NSString *identifier,NSS
 - (void) setupToolbar {
     // Create a new toolbar instance, and attach it to our document window
     NSToolbar *toolbar = [[[NSToolbar alloc] initWithIdentifier:BibEditorToolbarIdentifier] autorelease];
-    NSMenuItem *menuItem;
+    BDSKMenuItem *menuItem;
 
     toolbarItems=[[NSMutableDictionary dictionary] retain];
     
@@ -63,10 +62,10 @@ static void addToolbarItem(NSMutableDictionary *theDict,NSString *identifier,NSS
 
     // add toolbaritems:
 
-	menuItem = [[[NSMenuItem alloc] initWithTitle:NSLocalizedString(@"View File",@"") 
-										   action:@selector(viewLocal:)
-									keyEquivalent:@""] autorelease];
-    [menuItem setTarget:self];
+	menuItem = [[[BDSKMenuItem alloc] initWithTitle:NSLocalizedString(@"View File",@"") 
+											 action:NULL
+									  keyEquivalent:@""] autorelease];
+    [menuItem setDelegate:self];
 	addToolbarItem(toolbarItems, ViewLocalEditorToolbarItemIdentifier,
                    NSLocalizedString(@"View File",@""), 
 				   NSLocalizedString(@"View File",@""),
@@ -76,10 +75,10 @@ static void addToolbarItem(NSMutableDictionary *theDict,NSString *identifier,NSS
 				   NULL,
                    menuItem);
 
-	menuItem = [[[NSMenuItem alloc] initWithTitle:NSLocalizedString(@"View Remote",@"") 
-										   action:@selector(viewRemote:)
+	menuItem = [[[BDSKMenuItem alloc] initWithTitle:NSLocalizedString(@"View Remote",@"") 
+										   action:NULL
 									keyEquivalent:@""] autorelease];
-    [menuItem setTarget:self];
+    [menuItem setDelegate:self];
     addToolbarItem(toolbarItems, ViewRemoteEditorToolbarItemIdentifier,
                    NSLocalizedString(@"View Remote",@""), 
 				   NSLocalizedString(@"View Remote URL",@""),
@@ -89,10 +88,10 @@ static void addToolbarItem(NSMutableDictionary *theDict,NSString *identifier,NSS
 				   NULL,
                    menuItem);
 
-	menuItem = [[[NSMenuItem alloc] initWithTitle:NSLocalizedString(@"View in Drawer",@"") 
-										   action:@selector(toggleSnoopDrawer:)
-									keyEquivalent:@""] autorelease];
-    [menuItem setTarget:self];
+	menuItem = [[[BDSKMenuItem alloc] initWithTitle:NSLocalizedString(@"View in Drawer",@"") 
+											 action:NULL
+									  keyEquivalent:@""] autorelease];
+    [menuItem setDelegate:self];
     addToolbarItem(toolbarItems, ToggleSnoopDrawerToolbarItemIdentifier,
                    NSLocalizedString(@"View in Drawer",@""), 
 				   NSLocalizedString(@"View in Drawer",@""),
@@ -102,14 +101,18 @@ static void addToolbarItem(NSMutableDictionary *theDict,NSString *identifier,NSS
 				   NULL,
                    menuItem);
 
+	menuItem = [[[BDSKMenuItem alloc] initWithTitle:NSLocalizedString(@"Authors",@"") 
+											 action:@selector(showPersonDetailCmd:)
+									  keyEquivalent:@""] autorelease];
+    [menuItem setTarget:self];
     addToolbarItem(toolbarItems, AuthorTableToolbarItemIdentifier,
                    NSLocalizedString(@"Authors",@""), 
-				   NSLocalizedString(@"Authors Table",@""),
-                   NSLocalizedString(@"Authors Table",@""),
+				   NSLocalizedString(@"Authors",@""),
+                   NSLocalizedString(@"Authors",@""),
                    nil, @selector(setView:),  
 				   authorScrollView,
 				   NULL,
-                   nil);
+                   menuItem);
     
     // Attach the toolbar to the document window
     [[self window] setToolbar: toolbar];

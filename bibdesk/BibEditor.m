@@ -355,6 +355,18 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 
 }
 
+- (NSMenu *)submenuForMenuItem:(NSMenuItem *)menuItem{
+	if (menuItem == [viewLocalToolbarItem menuFormRepresentation]) {
+		return [self menuForImagePopUpButtonCell:[viewLocalButton cell]];
+	} 
+	else if (menuItem == [viewRemoteToolbarItem menuFormRepresentation]) {
+		return [self menuForImagePopUpButtonCell:[viewRemoteButton cell]];
+	} 
+	else if (menuItem == [documentSnoopToolbarItem menuFormRepresentation]) {
+		return [self menuForImagePopUpButtonCell:[documentSnoopButton cell]];
+	} 
+}
+
 - (NSMenu *)menuForImagePopUpButtonCell:(RYZImagePopUpButtonCell *)cell{
 	NSMenu *menu = [[NSMenu alloc] init];
 	
@@ -1466,6 +1478,8 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 
 
 - (IBAction)showPersonDetailCmd:(id)sender{
+	if (sender != authorTableView)
+		[authorTableView selectAll:self];
 	// find selected author
     NSEnumerator *e = [authorTableView selectedRowEnumerator]; //@@ 10.3 deprecated for IndexSets
 	NSNumber *idx = nil;

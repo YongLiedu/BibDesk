@@ -32,6 +32,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 #import "RYZImagePopUpButton.h"
 #import "RYZImagePopUpButtonCell.h"
 #import "MacroTextFieldWindowController.h"
+#import "BDSKMenuItem.h"
 
 
 /*!
