@@ -44,7 +44,7 @@
 - (void)dealloc
 {
     [buttonCell release];
-	buttoncell = nil;
+	buttonCell = nil;
     [super dealloc];
 }
 
@@ -53,13 +53,13 @@
 - (void)setImage:(NSImage *)anImage
 {
 	// need to check this because dealloc might call it
-	if (buttoncell != nil) 
+	if (buttonCell != nil) 
 		[buttonCell setImage:anImage];
 }
 
 - (void)setAlternateImage:(NSImage *)anImage
 {
-	if (buttoncell != nil) 
+	if (buttonCell != nil) 
 		[buttonCell setAlternateImage:anImage];
 }
 
