@@ -38,12 +38,6 @@ will translate this file into the necessary scriptSuite and scriptTerminology fi
                         <cocoa method="jrPart"/>
                     </property>  
 			     </properties>
-			     <!-- Couldn't figure how to do the inverse relationships -->
-			     <elements>
-			         <element type="publication" description="Publications by the author" access="r">
-			             <cocoa method="publications"/>
-			         </element>
-			     </elements>
                <responds-to-commands>
                     <responds-to name="show">
 						<cocoa method=""/>
