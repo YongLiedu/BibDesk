@@ -1794,11 +1794,11 @@ didClickTableColumn: (NSTableColumn *) tableColumn{
 		
 		[publications sortUsingSelector:@selector(dateCompare:)];
 		[shownPublications sortUsingSelector:@selector(dateCompare:)];
-	}else if([tcID isEqualToString:@"Date-Added"]){
+	}else if([tcID isEqualToString:@"Created"]){
 		
 		[publications sortUsingSelector:@selector(createdDateCompare:)];
 		[shownPublications sortUsingSelector:@selector(createdDateCompare:)];
-	}else if([tcID isEqualToString:@"Date-Modified"]){
+	}else if([tcID isEqualToString:@"Modified"]){
 		
 		[publications sortUsingSelector:@selector(modDateCompare:)];
 		[shownPublications sortUsingSelector:@selector(modDateCompare:)];

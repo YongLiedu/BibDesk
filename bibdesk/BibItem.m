@@ -280,34 +280,45 @@ void _setupFonts(){
     return [[self title] caseInsensitiveCompare:[aBI title]];
 }
 
-- (NSComparisonResult)dateCompare:(BibItem *)aBI{
-	NSCalendarDate *aDate = [aBI date];
-	if (pubDate == nil) {
-		return (aDate == nil)? NSOrderedSame : NSOrderedDescending;
-	} else if (aDate == nil) {
-		return NSOrderedAscending;
+
+/* Helper method that treats all the special cases of nil values properly, by making them smaller than all other dates.	It is used by the comparison methods for creation, modification and publication date.
+*/	
+- (NSComparisonResult) compareCalendarDate:(NSCalendarDate*) myDate with:(NSCalendarDate*) otherDate {
+	if (myDate) {
+		// myDate is not nil
+		if (otherDate) {
+			// otherDate is not nil either => return standard date comparison result
+			return [myDate compare:otherDate];
+		}
+		else {
+			// i.e. otherDate is nil => otherDate is smaller than myDate
+			return NSOrderedDescending;
+		}
 	}
-	return [pubDate compare:aDate];
+	else {
+		// i.e. myDate is nil
+		if (otherDate) {
+			// otherDate is not nil => otherDate is larger than myDate
+			return NSOrderedAscending;
+		}
+		else {
+				// i.e. both dates are nil, thus the same
+			return NSOrderedSame;
+		}
+	}
+}
+
+	
+- (NSComparisonResult)dateCompare:(BibItem *)aBI{
+	return [self compareCalendarDate:pubDate with:[aBI date]];
 }
 
 - (NSComparisonResult)createdDateCompare:(BibItem *)aBI{
-	NSCalendarDate *aDate = [aBI dateCreated];
-	if (pubDate == nil) {
-		return (aDate == nil)? NSOrderedSame : NSOrderedDescending;
-	} else if (aDate == nil) {
-		return NSOrderedAscending;
-	}
-	return [dateCreated compare:aDate];
+	return [self compareCalendarDate:dateCreated with:[aBI dateCreated]];
 }
 
 - (NSComparisonResult)modDateCompare:(BibItem *)aBI{
-	NSCalendarDate *aDate = [aBI dateModified];
-	if (pubDate == nil) {
-		return (aDate == nil)? NSOrderedSame : NSOrderedDescending;
-	} else if (aDate == nil) {
-		return NSOrderedAscending;
-	}
-	return [dateModified compare:aDate];
+	return [self compareCalendarDate:dateModified with:[aBI dateModified]];
 }
 
 
