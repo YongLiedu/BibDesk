@@ -892,7 +892,7 @@ void _setupFonts(){
     [aStr appendAttributedString:[[[NSMutableAttributedString alloc] initWithString:
                       [NSString stringWithFormat:@"%@\n",[self citeKey]] attributes:typeAttributes] autorelease]];
     [aStr appendAttributedString:[[[NSMutableAttributedString alloc] initWithString:
-                     [NSString stringWithFormat:@"%@ ",[[self title] stringByRemovingCurlyBraces]] attributes:titleAttributes] autorelease]];
+                     [NSString stringWithFormat:@"%@ ",[[[self title] stringByRemovingCurlyBraces] stringByCollapsingWhitespaceAndRemovingSurroundingWhitespace]] attributes:titleAttributes] autorelease]];
 
     
     [aStr appendAttributedString:[[[NSMutableAttributedString alloc] initWithString:
@@ -908,11 +908,11 @@ void _setupFonts(){
                                                                               attributes:keyAttributes] autorelease]];
 
 				if([key isEqualToString:BDSKAuthorString]){
-					NSString *authors = [self bibtexAuthorString];
+					NSString *authors = [[self bibtexAuthorString] stringByCollapsingWhitespaceAndRemovingSurroundingWhitespace];
 					[aStr appendAttributedString:[[[NSAttributedString alloc] initWithString:[NSString stringWithFormat:@"%@\n",authors]
 																				  attributes:bodyAttributes] autorelease]];
 				}else{
-					[aStr appendAttributedString:[[[NSAttributedString alloc] initWithString:[NSString stringWithFormat:@"%@\n",[pubFields objectForKey:key]]
+					[aStr appendAttributedString:[[[NSAttributedString alloc] initWithString:[NSString stringWithFormat:@"%@\n",[[pubFields objectForKey:key] stringByCollapsingWhitespaceAndRemovingSurroundingWhitespace]]
 																				  attributes:bodyAttributes] autorelease]];
 				}
 			}else{
@@ -935,7 +935,7 @@ void _setupFonts(){
                                                                               attributes:bodyAttributes] autorelease]];
 
             }else if([key isEqualToString:BDSKAuthorString]){
-                NSString *authors = [self bibtexAuthorString];
+                NSString *authors = [[self bibtexAuthorString] stringByCollapsingWhitespaceAndRemovingSurroundingWhitespace];
 
                 [aStr appendAttributedString:[[[NSAttributedString alloc] initWithString:[NSString stringWithFormat:@"%@\n",authors]
                                                                               attributes:bodyAttributes] autorelease]];
@@ -947,7 +947,7 @@ void _setupFonts(){
                                                                               attributes:bodyAttributes] autorelease]];
 
             }else{
-                [aStr appendAttributedString:[[[NSAttributedString alloc] initWithString:[NSString stringWithFormat:@"%@\n",[pubFields objectForKey:key]]
+                [aStr appendAttributedString:[[[NSAttributedString alloc] initWithString:[NSString stringWithFormat:@"%@\n",[[pubFields objectForKey:key] stringByCollapsingWhitespaceAndRemovingSurroundingWhitespace]]
                                                                               attributes:bodyAttributes] autorelease]];
             }
 
