@@ -61,6 +61,8 @@
     BibTypeManager *typeManager = [BibTypeManager sharedManager];
     NSCharacterSet *whitespaceNewlineSet = [NSCharacterSet whitespaceAndNewlineCharacterSet];
     NSCharacterSet *newlineSet = [NSCharacterSet characterSetWithCharactersInString:@"\n"];
+    BOOL haveFAU = NO;
+    BOOL usingAU = NO;
     
     NSString *prefix = nil;
     
@@ -98,6 +100,9 @@
                     }
                     [pubDict removeAllObjects];
                     [pubDict setObject:value forKey:prefix];
+		    // reset these for the next pub
+		    haveFAU = NO;
+		    usingAU = NO;
                     
                 }else{
                     // we just have a new key in the same publication.
@@ -105,16 +110,27 @@
 					//    NSLog(@"old key     - [%@]", key);
 					//    NSLog(@"new, prefix - [%@]", prefix);
                     if(key){
-						//		NSLog(@"  inserting obj [%@] for key [%@]", wholeValue, key);
-						if([key isEqualToString:@"Author"]){
+						//	    NSLog(@"  inserting obj [%@] for key [%@]", wholeValue, key);
+						// ARM:  I removed FAU = Author from the dictionary, because we need to discriminate between FAU and AU
+						// and handle the case where AU occurs before FAU.  The final setObject: forKey: was blowing away
+						// the AU values, otherwise, because it recognized FAU as Author.
+						if([key isEqualToString:@"FAU"] && usingAU==NO){
+						        haveFAU = YES;  // use full author info
 							addAuthorName_toDict([[wholeValue copy] autorelease],pubDict);
 						}else{
-						if([key isEqualToString:@"Keywords"]){
-						    addKeywordString_toDict([[wholeValue copy] autorelease],pubDict);
-						}else{
-							[pubDict setObject:[[wholeValue copy] autorelease] forKey:key];
-						}
-					  }
+						    // If we didn't get a FAU key (shows up first in PubMed), fall back to AU
+						    // AU is not in the dictionary, so we don't get confused with FAU
+						    if([key isEqualToString:@"AU"] && haveFAU==NO){
+							usingAU = YES;  // use AU info, and put FAU in its own field if it occurred too late
+							addAuthorName_toDict([[wholeValue copy] autorelease],pubDict);
+						    }else{
+						    if([key isEqualToString:@"Keywords"]){
+							addKeywordString_toDict([[wholeValue copy] autorelease],pubDict);
+						    }else{
+						        [pubDict setObject:[[wholeValue copy] autorelease] forKey:key];
+						    }
+						  }
+					        }
                     }
                     
                     [wholeValue setString:value];
@@ -132,7 +148,7 @@
             }else{
                 [wholeValue appendString:@" "];
                 [wholeValue appendString:[sourceLine stringByTrimmingCharactersInSet:whitespaceNewlineSet]];
-                NSLog(@"cont. [%@]", sourceLine);
+                // NSLog(@"cont. [%@]", sourceLine);
             }
             
         }
