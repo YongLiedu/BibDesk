@@ -75,8 +75,8 @@
 		19C28FB0FE9D524F11CA2CBB = {
 			children = (
 				F568CBDA025BBCB801709AC4,
-				27C41F4004BE8818007932DC,
 				27E0AA7E05A7C86C005BA25A,
+				27C41F4004BE8818007932DC,
 			);
 			isa = PBXGroup;
 			name = Products;
@@ -4017,7 +4017,7 @@
 			isa = PBXShellScriptBuildPhase;
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "/usr/bin/headerDoc2HTML -o $TARGET_BUILD_DIR/doc $SRCROOT/*.h";
+			shellScript = "/usr/bin/headerDoc2HTML -o $TARGET_BUILD_DIR/BibDesk\\ Documentation $SRCROOT/*.h";
 		};
 		F568CBDE025BBDA501709AC4 = {
 			buildActionMask = 2147483647;
@@ -4026,7 +4026,7 @@
 			isa = PBXShellScriptBuildPhase;
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "/usr/bin/gatherHeaderDoc $TARGET_BUILD_DIR/doc \n";
+			shellScript = "/usr/bin/gatherHeaderDoc $TARGET_BUILD_DIR/Bibdesk\\ Documentation\n";
 		};
 		F56DCB5601CFE5EF01227D25 = {
 			fileEncoding = 30;
