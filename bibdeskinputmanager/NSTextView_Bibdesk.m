@@ -123,13 +123,14 @@ However, we will simply add the usual completions after our own for safety...
 }
 
 // ** Check to see if it's TeX
-// look back to see if { ; if no brace, return not TeX
-// if { found, look back between insertion point and { to find comma; check to see if it's BibTeX, then return the match range
+//  - look back to see if { ; if no brace, return not TeX
+//  - if { found, look back between insertion point and { to find comma; check to see if it's BibTeX, then return the match range
 // ** Check to see if it's BibTeX
-// look back to see if ] ; if no options, then just find the citecommand (or not) by searching back from {
-// look back to see if ][ ; if so, set ] range again
-// look back to find [ starting from ]
-// now we have the last [, see if there is a cite immediately preceding it using rangeOfString:@"cite" || rangeOfString:@"bibentry"
+//  - look back to see if it's jurabib with }{
+//  - look back to see if ] ; if no options, then just find the citecommand (or not) by searching back from {
+//  - look back to see if ][ ; if so, set ] range again
+//  - look back to find [ starting from ]
+//  - now we have the last [, see if there is a cite immediately preceding it using rangeOfString:@"cite" || rangeOfString:@"bibentry"
 // ** After all of this, we've searched back to a brace, and then checked for a cite command with two optional parameters
 
 NSRange SafeBackwardSearchRange(NSRange startRange, unsigned seekLength){
@@ -142,8 +143,11 @@ NSRange SafeBackwardSearchRange(NSRange startRange, unsigned seekLength){
     NSRange citeSearchRange;
 
     NSRange rightBracketRange = [str rangeOfString:@"]" options:NSBackwardsSearch | NSLiteralSearch range:SafeBackwardSearchRange(braceRange, 1)]; // see if there are any optional parameters
+
+    // check for jurabib \citefield, which has two mandatory parameters in curly braces, e.g. \citefield[pagerange]{title}{cite:key}
+    NSRange doubleBraceRange = [str rangeOfString:@"}{" options:NSBackwardsSearch | NSLiteralSearch range:SafeBackwardSearchRange( NSMakeRange(braceRange.location + 1, 1), 10)];
     
-    if(rightBracketRange.location == NSNotFound){ // no options, so life is easy; look backwards 10 characters from the brace and see if there's a citecommand
+    if(rightBracketRange.location == NSNotFound && doubleBraceRange.location == NSNotFound){ // no options, so life is easy; look backwards 10 characters from the brace and see if there's a citecommand
         citeSearchRange = SafeBackwardSearchRange(braceRange, 20);
         if([str rangeOfString:@"cite" options:NSBackwardsSearch | NSLiteralSearch range:citeSearchRange].location != NSNotFound ||
            [str rangeOfString:@"bibentry" options:NSBackwardsSearch | NSLiteralSearch range:citeSearchRange].location != NSNotFound){
@@ -152,6 +156,9 @@ NSRange SafeBackwardSearchRange(NSRange startRange, unsigned seekLength){
             return NO;
         }
     }
+    
+    if(doubleBraceRange.location != NSNotFound) // reset the brace range if we have jurabib
+        braceRange = [str rangeOfString:@"{" options:NSBackwardsSearch | NSLiteralSearch range:SafeBackwardSearchRange(doubleBraceRange, 10)];
     
     NSRange leftBracketRange = [str rangeOfString:@"[" options:NSBackwardsSearch | NSLiteralSearch]; // first occurrence of it, looking backwards
     // next, see if we have two optional parameters; this range is tricky, since we have to go forward one, then do a safe backward search over the previous characters
@@ -172,8 +179,8 @@ NSRange SafeBackwardSearchRange(NSRange startRange, unsigned seekLength){
     return NO;
 }
 
-NSRange SafeForwardSearchRange( unsigned startLoc, unsigned seekLength, unsigned maxLength ){
-    seekLength = ( (startLoc + seekLength > maxLength) ? maxLength - startLoc : seekLength );
+NSRange SafeForwardSearchRange( unsigned startLoc, unsigned seekLength, unsigned maxLoc ){
+    seekLength = ( (startLoc + seekLength > maxLoc) ? maxLoc - startLoc : seekLength );
     return NSMakeRange(startLoc, seekLength);
 }
             
@@ -242,10 +249,8 @@ requires X.3
         NSRange keyRange = ( (refLabelRange.location == NSNotFound) ? [self newCiteKeyRange] : NSMakeRange(NSNotFound, 0) ); // don't bother checking for a citekey if this is a \ref
 	
 	if(keyRange.location != NSNotFound){ // if it's a re
-		//	NSString * beginning = [s substringWithRange:NSMakeRange(charRange.location - 6, 6)];
-#warning debug only
-        // NSString * end = [s substringWithRange:r];
-        NSString *end = [[s substringWithRange:keyRange] stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceCharacterSet]];
+                
+            NSString *end = [[s substringWithRange:keyRange] stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceCharacterSet]];
 		
 		// code shamelessly lifted from Buzz Anderson's ASHandlerTest example app
 		// Performance gain if we stored the script permanently? But where to store it?
@@ -302,7 +307,6 @@ requires X.3
 			} // no script running error	
 		} // no script loading error
 	} // location > 5
-	// if in doubt just stick to ordinary completion dictionary
         
         if(refLabelRange.location != NSNotFound){
             NSString *hintPossibilities = nil;
