@@ -39,6 +39,7 @@
 	[tmpBI setField:@"Pages" toValue:@"96"];
 	
 	// update the UI elements
+    [citeKeyAutogenerateCheckButton setState:[defaults integerForKey:BDSKCiteKeyAutogenerateKey]];
 	[self setCiteKeyFormatInvalidWarning:NO]; // the format in defaults is always valid, right?
 	[formatPresetPopUp selectItemAtIndex:[formatPresetPopUp indexOfItemWithTag:citeKeyPresetChoice]];
 	[formatField setStringValue:citeKeyFormat];
@@ -53,6 +54,11 @@
 	//[[NSHelpManager sharedHelpManager] openHelpAnchor:@"citekeyFormat" inBook:@"BibDesk Help"];
 	// ..or we need Carbon/AppleHelp.h
 	AHLookupAnchor((CFStringRef)@"BibDesk Help",(CFStringRef)@"citekeyFormat");
+}
+
+- (IBAction)changeCiteKeyAutogenerate:(id)sender{
+    [defaults setInteger:[sender state] forKey:BDSKCiteKeyAutogenerateKey];
+	[self updateUI];
 }
 
 - (IBAction)citeKeyFormatAdd:(id)sender{
