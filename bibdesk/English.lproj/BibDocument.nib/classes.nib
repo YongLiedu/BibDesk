@@ -10,7 +10,6 @@
         }, 
         {
             ACTIONS = {
-                clearQuickSearch = id; 
                 consolidateLinkedFiles = id; 
                 contextualMenuAddTableColumn = id; 
                 contextualMenuSelectTableColumn = id; 
@@ -20,6 +19,7 @@
                 copyAsTex = id; 
                 delPub = id; 
                 dismissAddFieldSheet = id; 
+                dismissDelFieldSheet = id; 
                 editPubCmd = id; 
                 emailPubCmd = id; 
                 exportAsHTML = id; 
@@ -29,6 +29,7 @@
                 openCustomCitePrefPane = id; 
                 postItemToWeblog = id; 
                 quickSearchAddField = id; 
+                quickSearchRemoveField = id; 
                 searchFieldAction = id; 
                 searchFieldChangeKey = id; 
                 splitViewDoubleClick = id; 
@@ -52,6 +53,9 @@
                 ctxCopyPDF = NSMenuItem; 
                 ctxCopyTex = NSMenuItem; 
                 customCiteDrawer = NSDrawer; 
+                delFieldPopupButton = NSPopUpButton; 
+                delFieldPrompt = NSTextField; 
+                delFieldSheet = NSWindow; 
                 documentWindow = NSWindow; 
                 infoLine = NSTextField; 
                 openCustomCitePrefsButton = NSButton; 

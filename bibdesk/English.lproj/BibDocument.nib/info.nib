@@ -18,10 +18,13 @@
 	<key>IBLockedObjects</key>
 	<array>
 		<integer>303</integer>
+		<integer>626</integer>
 	</array>
 	<key>IBOpenObjects</key>
 	<array>
 		<integer>5</integer>
+		<integer>303</integer>
+		<integer>626</integer>
 	</array>
 	<key>IBSystem Version</key>
 	<string>7H63</string>

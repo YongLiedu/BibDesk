@@ -791,46 +791,51 @@ Enhanced delete method that uses a sheet instead of a modal dialogue.
 - (NSMenu *)searchFieldMenu{
 	NSMenu *cellMenu = [[NSMenu alloc] initWithTitle:@"Search Menu"];
 	NSMenuItem *item1, *item2, *item3, *item4, *anItem;
+	int curIndex = 0;
 	
 	item1 = [[NSMenuItem alloc] initWithTitle:@"Recent Searches" action: @selector(limitOne:) keyEquivalent:@""];
 	[item1 setTag:NSSearchFieldRecentsTitleMenuItemTag];
-	[cellMenu insertItem:item1 atIndex:0];
+	[cellMenu insertItem:item1 atIndex:curIndex++];
 	[item1 release];
 	item2 = [[NSMenuItem alloc] initWithTitle:@"Recents" action:@selector(limitTwo:) keyEquivalent:@""];
 	[item2 setTag:NSSearchFieldRecentsMenuItemTag];
-	[cellMenu insertItem:item2 atIndex:1];
+	[cellMenu insertItem:item2 atIndex:curIndex++];
 	[item2 release];
 	item3 = [[NSMenuItem alloc] initWithTitle:@"Clear" action:@selector(limitThree:) keyEquivalent:@""];
 	[item3 setTag:NSSearchFieldClearRecentsMenuItemTag];
-	[cellMenu insertItem:item3 atIndex:2];
+	[cellMenu insertItem:item3 atIndex:curIndex++];
 	[item3 release];
 	// my stuff:
 	item4 = [[NSMenuItem alloc] initWithTitle:@"" action:nil keyEquivalent:@""];
 	[item4 setTag:NSSearchFieldRecentsTitleMenuItemTag]; // makes it go away if there are no recents.
-	[cellMenu insertItem:item4 atIndex:3];
+	[cellMenu insertItem:item4 atIndex:curIndex++];
 	[item4 release];
 	item4 = [[NSMenuItem alloc] initWithTitle:@"Search Fields" action:nil keyEquivalent:@""];
-	[cellMenu insertItem:item4 atIndex:4];
+	[cellMenu insertItem:item4 atIndex:curIndex++];
 	[item4 release];
 	
 	item4 = [[NSMenuItem alloc] initWithTitle:@"Add Field ..." action:@selector(quickSearchAddField:) keyEquivalent:@""];
-	[cellMenu insertItem:item4 atIndex:5];
+	[cellMenu insertItem:item4 atIndex:curIndex++];
+	[item4 release];
+	
+	item4 = [[NSMenuItem alloc] initWithTitle:@"Remove Field ..." action:@selector(quickSearchRemoveField:) keyEquivalent:@""];
+	[cellMenu insertItem:item4 atIndex:curIndex++];
 	[item4 release];
 	
 	item4 = [[NSMenuItem alloc] initWithTitle:@"All Fields" action:@selector(searchFieldChangeKey:) keyEquivalent:@""];
-	[cellMenu insertItem:item4 atIndex:6];
+	[cellMenu insertItem:item4 atIndex:curIndex++];
 	[item4 release];
 	
 	item4 = [[NSMenuItem alloc] initWithTitle:@"Title" action:@selector(searchFieldChangeKey:) keyEquivalent:@""];
-	[cellMenu insertItem:item4 atIndex:7];
+	[cellMenu insertItem:item4 atIndex:curIndex++];
 	[item4 release];
 	
 	item4 = [[NSMenuItem alloc] initWithTitle:@"Author" action:@selector(searchFieldChangeKey:) keyEquivalent:@""];
-	[cellMenu insertItem:item4 atIndex:8];
+	[cellMenu insertItem:item4 atIndex:curIndex++];
 	[item4 release];
 	
 	item4 = [[NSMenuItem alloc] initWithTitle:@"Date" action:@selector(searchFieldChangeKey:) keyEquivalent:@""];
-	[cellMenu insertItem:item4 atIndex:9];
+	[cellMenu insertItem:item4 atIndex:curIndex++];
 	[item4 release];
 	
 	NSArray *prefsQuickSearchKeysArray = [[OFPreferenceWrapper sharedPreferenceWrapper] arrayForKey:BDSKQuickSearchKeys];
@@ -842,7 +847,7 @@ Enhanced delete method that uses a sheet instead of a modal dialogue.
 		anItem = [[NSMenuItem alloc] initWithTitle:aKey 
 											action:@selector(searchFieldChangeKey:)
 									 keyEquivalent:@""]; 
-		[cellMenu insertItem:anItem atIndex:10];
+		[cellMenu insertItem:anItem atIndex:curIndex++];
 		[anItem release];
     }
 	
@@ -983,34 +988,92 @@ Enhanced delete method that uses a sheet instead of a modal dialogue.
 }
 
 - (void)quickSearchAddFieldSheetDidEnd:(NSWindow *)sheet
-                       returnCode:(int) returnCode
-                      contextInfo:(void *)contextInfo{
-   
+							returnCode:(int) returnCode
+						   contextInfo:(void *)contextInfo{
+	
     NSMutableArray *prefsQuickSearchKeysMutableArray = nil;
 	NSSearchFieldCell *searchFieldCell = [searchField cell];
 	NSMenu *searchFieldMenuTemplate = [searchFieldCell searchMenuTemplate];
 	NSMenuItem *menuItem = nil;
 	NSString *newFieldTitle = nil;
-
+	
     if(returnCode == 1){
 		newFieldTitle = [addFieldTextField stringValue];
 		
         [self setSelectedSearchFieldKey:newFieldTitle];
-
+		
         prefsQuickSearchKeysMutableArray = [[[[OFPreferenceWrapper sharedPreferenceWrapper] arrayForKey:BDSKQuickSearchKeys] mutableCopy] autorelease];
-
+		
         if(!prefsQuickSearchKeysMutableArray){
             prefsQuickSearchKeysMutableArray = [NSMutableArray arrayWithCapacity:1];
         }
         [prefsQuickSearchKeysMutableArray addObject:newFieldTitle];
         [[OFPreferenceWrapper sharedPreferenceWrapper] setObject:prefsQuickSearchKeysMutableArray
                                                           forKey:BDSKQuickSearchKeys];
-
+		
 		menuItem = [[NSMenuItem alloc] initWithTitle:newFieldTitle action:@selector(searchFieldChangeKey:) keyEquivalent:@""];
 		[searchFieldMenuTemplate insertItem:menuItem atIndex:10];
 		[menuItem release];
 		[searchFieldCell setSearchMenuTemplate:searchFieldMenuTemplate];
 		[self setSelectedSearchFieldKey:newFieldTitle];
+    }else{
+        // cancel. we don't have to do anything..?
+		
+    }
+}
+
+- (IBAction)quickSearchRemoveField:(id)sender{
+    [delFieldPrompt setStringValue:NSLocalizedString(@"Name of search field to remove:",@"")];
+	NSMutableArray *prefsQuickSearchKeysMutableArray = [[[[OFPreferenceWrapper sharedPreferenceWrapper] arrayForKey:BDSKQuickSearchKeys] mutableCopy] autorelease];
+	
+	if(!prefsQuickSearchKeysMutableArray){
+		prefsQuickSearchKeysMutableArray = [NSMutableArray arrayWithCapacity:1];
+	}
+	[delFieldPopupButton removeAllItems];
+	
+	[delFieldPopupButton addItemsWithTitles:prefsQuickSearchKeysMutableArray];
+	
+	[NSApp beginSheet:delFieldSheet
+       modalForWindow:documentWindow
+        modalDelegate:self
+       didEndSelector:@selector(quickSearchDelFieldSheetDidEnd:returnCode:contextInfo:)
+          contextInfo:prefsQuickSearchKeysMutableArray];
+}
+
+- (IBAction)dismissDelFieldSheet:(id)sender{
+    [delFieldSheet orderOut:sender];
+    [NSApp endSheet:delFieldSheet returnCode:[sender tag]];
+}
+
+- (void)quickSearchDelFieldSheetDidEnd:(NSWindow *)sheet
+							returnCode:(int) returnCode
+						   contextInfo:(void *)contextInfo{
+   
+    NSMutableArray *prefsQuickSearchKeysMutableArray = (NSMutableArray *)contextInfo;
+	NSSearchFieldCell *searchFieldCell = [searchField cell];
+	NSMenu *searchFieldMenuTemplate = [searchFieldCell searchMenuTemplate];
+	NSMenuItem *menuItem = nil;
+	NSString *delFieldTitle = nil;
+
+    if(returnCode == 1){
+		delFieldTitle = [[delFieldPopupButton selectedItem] title];
+		
+		// if we were using that key, select another?
+
+        prefsQuickSearchKeysMutableArray = [[[[OFPreferenceWrapper sharedPreferenceWrapper] arrayForKey:BDSKQuickSearchKeys] mutableCopy] autorelease];
+
+        if(!prefsQuickSearchKeysMutableArray){
+            prefsQuickSearchKeysMutableArray = [NSMutableArray arrayWithCapacity:1];
+        }
+        [prefsQuickSearchKeysMutableArray removeObject:delFieldTitle];
+        [[OFPreferenceWrapper sharedPreferenceWrapper] setObject:prefsQuickSearchKeysMutableArray
+                                                          forKey:BDSKQuickSearchKeys];
+
+		int itemIndex = [searchFieldMenuTemplate indexOfItemWithTitle:delFieldTitle];
+		[searchFieldMenuTemplate removeItemAtIndex:itemIndex];
+
+		[searchFieldCell setSearchMenuTemplate:searchFieldMenuTemplate];
+		[self setSelectedSearchFieldKey:NSLocalizedString(@"All Fields",@"")];
     }else{
         // cancel. we don't have to do anything..?
        

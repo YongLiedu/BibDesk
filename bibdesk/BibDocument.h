@@ -36,6 +36,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 #import "BDSKFileContentsFilter.h"
 #import "ApplicationServices/ApplicationServices.h"
 #import "BDSKPopUpButtonCell.h"
+#import "RYZImagePopUpButton.h"
 
 
 @class BDSKCustomCiteTableView;
@@ -120,6 +121,12 @@ extern NSString* LocalDragPasteboardName;
     // and its prompt:
     IBOutlet NSTextField* addFieldPrompt;
     IBOutlet NSTextField* addFieldTextField;
+	
+	// dialog for removing 'fields'.
+	IBOutlet NSWindow *delFieldSheet;
+	IBOutlet NSTextField* delFieldPrompt;
+	IBOutlet NSPopUpButton* delFieldPopupButton;
+	
     // --------------------------------------------------------------------------------------
     IBOutlet NSMenu * contextualMenu;
 	IBOutlet NSMenu * actionMenu;
@@ -192,6 +199,7 @@ extern NSString* LocalDragPasteboardName;
 
 - (void)setSelectedSearchFieldKey:(NSString *)newKey;
 
+
 /*!
     @method quickSearchAddField
     @abstract adds a field to the quicksearchMenu.
@@ -205,6 +213,14 @@ extern NSString* LocalDragPasteboardName;
                            contextInfo:(void *)contextInfo;
 
 
+- (IBAction)quickSearchRemoveField:(id)sender;
+
+- (IBAction)dismissDelFieldSheet:(id)sender;
+
+- (void)quickSearchDelFieldSheetDidEnd:(NSWindow *)sheet
+							returnCode:(int) returnCode
+						   contextInfo:(void *)contextInfo;
+	
 - (IBAction)clearQuickSearch:(id)sender;
 
 - (IBAction)searchFieldAction:(id)sender;
