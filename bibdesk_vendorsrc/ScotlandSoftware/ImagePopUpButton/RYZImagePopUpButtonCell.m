@@ -221,15 +221,16 @@
 											withPeriod:1];
 				
 				NSEvent *nextEvent = [NSApp nextEventMatchingMask:(NSLeftMouseUpMask | NSPeriodicMask | NSLeftMouseDraggedMask)
-													untilDate:[NSDate distantFuture]
-													   inMode:NSEventTrackingRunLoopMode
-													  dequeue:YES];
+														untilDate:[NSDate distantFuture]
+														   inMode:NSEventTrackingRunLoopMode
+														  dequeue:YES];
+				[NSEvent stopPeriodicEvents];
 				if([nextEvent type] == NSLeftMouseUp){
 					// if we mouse-up inside the button, send the action.
 					// note that because we show the menu on drags,
 					// we don't need to check that we're still inside 
 					// before we send the action.
-
+					
 					if([self iconActionEnabled]){
 						shouldSendAction = YES;
 					}else{
@@ -250,7 +251,6 @@
 					[self showMenuInView:controlView withEvent:event];
 				}
 
-				[NSEvent stopPeriodicEvents];
 			}
 		}else{
 			trackingResult = [_buttonCell trackMouse: event
@@ -264,10 +264,11 @@
 		}
 		if(shouldSendAction){
 			NSMenuItem *selectedItem = [self selectedItem];
+			[NSEvent stopPeriodicEvents];
 			[[NSApplication sharedApplication] sendAction: [selectedItem action]  
 								   to: [selectedItem target]
 								 from: selectedItem];
-			[NSEvent stopPeriodicEvents];
+			
 		}
     }
     
