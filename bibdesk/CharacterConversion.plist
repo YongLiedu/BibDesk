@@ -31,8 +31,6 @@
 	<dict>
 		<key>%</key>
 		<string>{\%}</string>
-		<key>~</key>
-		<string>{\~~}</string>
 		<key>¡</key>
 		<string>{!'}</string>
 		<key>©</key>
@@ -286,8 +284,6 @@
 		<string>ñ</string>
 		<key>{\~o}</key>
 		<string>õ</string>
-		<key>{\~~}</key>
-		<string>~</string>
 	</dict>
 </dict>
 </plist>

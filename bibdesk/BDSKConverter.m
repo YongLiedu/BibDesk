@@ -28,12 +28,12 @@ static NSCharacterSet *SkipSet;
     NSMutableCharacterSet *workingSet;
     NSRange highCharRange;
     NSMutableCharacterSet *tempSet = [[NSMutableCharacterSet alloc] init];
-    NSString *texReserved = [NSString stringWithString:@"%~"]; // use this for characters that are ASCII but still need to be converted.
+    NSString *texReserved = [NSString stringWithString:@"%"]; // use this for characters that are ASCII but still need to be converted.
     
     WholeDict = [[NSDictionary dictionaryWithContentsOfFile:[[[NSBundle mainBundle] resourcePath] stringByAppendingPathComponent:@"CharacterConversion.plist"]] retain];
     EmptySet = [[NSCharacterSet characterSetWithCharactersInString:@""] retain];
     
-    highCharRange.location = (unsigned int) '~';
+    highCharRange.location = (unsigned int) '~' + 1; //exclude tilde, or we'll get an alert on it
     highCharRange.length = 256; //this should get all the characters in the upper-range.
     workingSet = [[NSCharacterSet decomposableCharacterSet] mutableCopy];
     [workingSet addCharactersInRange:highCharRange];
