@@ -78,7 +78,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
                         toValue:fileUrlString];
 			
 			if([[OFPreferenceWrapper sharedPreferenceWrapper] boolForKey:BDSKFilePapersAutomaticallyKey]){
-				[[BibFiler sharedFiler] filePapers:[NSArray arrayWithObject:editorBib]
+				[[BibFiler sharedFiler] file:YES papers:[NSArray arrayWithObject:editorBib]
 									  fromDocument:[[self windowController] valueForKey:@"theDocument"]]; 
 			}
 			
