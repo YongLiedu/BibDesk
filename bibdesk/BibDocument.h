@@ -547,6 +547,15 @@ int generalBibItemCompareFunc(id item1, id item2, void *context);
 
 - (IBAction)postItemToWeblog:(id)sender;
 
+/*!
+    @function   compareSetLengths
+    @abstract   Comparison function for sorting a mutable array of NSSets according to length
+    @discussion (description)
+    @param      (name) (description)
+    @result     NSComparisonResult
+*/
 int compareSetLengths(NSSet *set1, NSSet *set2, void *context);
+
+
 
 @end

@@ -1118,6 +1118,7 @@ Enhanced delete method that uses a sheet instead of a modal dialogue.
     }
     
     NSString *selectorString = [[[NSString alloc] init] autorelease];
+    BOOL isGeneric = NO;
     
     if([field isEqualToString:@"Title"]){
         selectorString=@"title";
@@ -1137,8 +1138,7 @@ Enhanced delete method that uses a sheet instead of a modal dialogue.
                         if([field isEqualToString:@"Cite Key"]){
                             selectorString=@"citekey";
                         } else {
-#warning need a generic method
-                            return;
+                            isGeneric = YES; // this means that we don't have an accessor for it in BibItem
                         }
                     }
                 }
@@ -1149,10 +1149,9 @@ Enhanced delete method that uses a sheet instead of a modal dialogue.
     AGRegex *tip = [AGRegex regexWithPattern:@"(?(?=^.+(AND|OR))(^.+(?= AND| OR))|^.+)"]; // match the any words up to but not including AND or OR if they exist (see "Lookahead assertions" and "CONDITIONAL SUBPATTERNS" in pcre docs)
     AGRegex *andRegex = [AGRegex regexWithPattern:@"AND \\b[^ ]+"]; // match the word following an AND
     NSArray *matchArray = [andRegex findAllInString:substring]; // an array of AGRegexMatch objects
-    
     NSMutableArray *andArray = [NSMutableArray array]; // and array of all the AND terms we're looking for
     
-    // get the tip first (always an AND)
+    // get the tip of the search string first (always an AND)
     [andArray addObject:[[tip findInString:substring] group]];
 
     NSEnumerator *e = [matchArray objectEnumerator];
@@ -1174,45 +1173,87 @@ Enhanced delete method that uses a sheet instead of a modal dialogue.
     }    
     
     NSMutableSet *aSet = [NSMutableSet setWithCapacity:10];
-    
     NSEnumerator *andEnum = [andArray objectEnumerator];
     NSEnumerator *orEnum = [orArray objectEnumerator];
-
     NSRange r;
     NSString *componentSubstring = nil;
     BibItem *pub = nil;
     NSEnumerator *pubEnum;
-        
     NSMutableArray *andResultsArray = [NSMutableArray array];
     
     // for each AND term, enumerate the entire publications array and search for a match; if we get a match, add it to a mutable set
-    while(componentSubstring = [andEnum nextObject]){
-        pubEnum = [publications objectEnumerator];
-        while(pub = [pubEnum nextObject]){
-            r = [[pub performSelector:NSSelectorFromString(selectorString) withObject:nil] rangeOfString:componentSubstring
-                                                                                                 options:NSCaseInsensitiveSearch];
-            if(r.location != NSNotFound){
-                // NSLog(@"Found %@ in %@", substring, [pub citeKey]);
-                [aSet addObject:pub];
+    if(isGeneric){ // use the -[BibItem valueOfField:] method to get the substring we want to search in, if it's not a "standard" one
+        NSString *value = nil;
+        while(componentSubstring = [andEnum nextObject]){
+            pubEnum = [publications objectEnumerator];
+            while(pub = [pubEnum nextObject]){
+                value = [pub valueOfField:quickSearchKey];
+                if(!value){
+                    r.location = NSNotFound;
+                } else {
+                    r = [value rangeOfString:componentSubstring
+                                     options:NSCaseInsensitiveSearch];
+                }
+                if(r.location != NSNotFound){
+                    // NSLog(@"Found %@ in %@", substring, [pub citeKey]);
+                    [aSet addObject:pub];
+                }
             }
+            [andResultsArray addObject:[[aSet copy] autorelease]];
+            [aSet removeAllObjects]; // don't forget this step!
         }
-        [andResultsArray addObject:[[aSet copy] autorelease]];
-        [aSet removeAllObjects]; // don't forget this step!
+    } else { // if it was a substring that has an accessor in BibItem, use that directly
+        while(componentSubstring = [andEnum nextObject]){
+            pubEnum = [publications objectEnumerator];
+            while(pub = [pubEnum nextObject]){
+                r = [[pub performSelector:NSSelectorFromString(selectorString) withObject:nil] rangeOfString:componentSubstring
+                                                                                                     options:NSCaseInsensitiveSearch];
+                if(r.location != NSNotFound){
+                    // NSLog(@"Found %@ in %@", substring, [pub citeKey]);
+                    [aSet addObject:pub];
+                }
+            }
+            [andResultsArray addObject:[[aSet copy] autorelease]];
+            [aSet removeAllObjects]; // don't forget this step!
+        }
     }
-    
+
+    // Get all of the OR matches, each in a separate set added to orResultsArray
     NSMutableArray *orResultsArray = [NSMutableArray array];
-    // get all of the OR matches, each in a separate set
-    while(componentSubstring = [orEnum nextObject]){
-        pubEnum = [publications objectEnumerator];
-        while(pub = [pubEnum nextObject]){
-            r = [[pub performSelector:NSSelectorFromString(selectorString) withObject:nil] rangeOfString:componentSubstring
-                                                                                                 options:NSCaseInsensitiveSearch];
-            if(r.location != NSNotFound){
-                [aSet addObject:pub];
+    
+    if(isGeneric){ // use the -[BibItem valueOfField:] method to get the substring we want to search in, if it's not a "standard" one
+        while(componentSubstring = [andEnum nextObject]){
+            NSString *value = nil;
+            pubEnum = [publications objectEnumerator];
+            while(pub = [pubEnum nextObject]){
+                value = [pub valueOfField:quickSearchKey];
+                if(!value){
+                    r.location = NSNotFound;
+                } else {
+                    r = [value rangeOfString:componentSubstring
+                                     options:NSCaseInsensitiveSearch];
+                }
+                if(r.location != NSNotFound){
+                    // NSLog(@"Found %@ in %@", substring, [pub citeKey]);
+                    [aSet addObject:pub];
+                }
             }
+            [andResultsArray addObject:[[aSet copy] autorelease]];
+            [aSet removeAllObjects]; // don't forget this step!
         }
-        [orResultsArray addObject:[[aSet copy] autorelease]];
-        [aSet removeAllObjects];
+    } else { // if it was a substring that has an accessor in BibItem, use that directly
+        while(componentSubstring = [orEnum nextObject]){
+            pubEnum = [publications objectEnumerator];
+            while(pub = [pubEnum nextObject]){
+                r = [[pub performSelector:NSSelectorFromString(selectorString) withObject:nil] rangeOfString:componentSubstring
+                                                                                                     options:NSCaseInsensitiveSearch];
+                if(r.location != NSNotFound){
+                    [aSet addObject:pub];
+                }
+            }
+            [orResultsArray addObject:[[aSet copy] autorelease]];
+            [aSet removeAllObjects];
+        }
     }
         
     NSMutableSet *newSet = [NSMutableSet setWithCapacity:10];
@@ -1220,17 +1261,19 @@ Enhanced delete method that uses a sheet instead of a modal dialogue.
 
     // we need to sort the set so we always start with the shortest one
     [andResultsArray sortUsingFunction:compareSetLengths context:nil];
-
+    
+    // don't start out by intersecting an empty set
     [newSet setSet:[andResultsArray objectAtIndex:0]];
     // NSLog(@"newSet count is %i", [newSet count]);
     // NSLog(@"nextSet count is %i", [[andResultsArray objectAtIndex:1] count]);
-        
+    
+    // get the intersection of all of the results from the AND terms
     e = [andResultsArray objectEnumerator];
     while(tmpSet = [e nextObject]){
         [newSet intersectSet:tmpSet];
     }
     
-    // union the results from the OR search
+    // union the results from the OR search; use the newSet, so we don't have to worry about duplicates
     e = [orResultsArray objectEnumerator];
     
     while(tmpSet = [e nextObject]){
@@ -1259,75 +1302,6 @@ int compareSetLengths(NSSet *set1, NSSet *set2, void *context){
     NSNumber *n2 = [NSNumber numberWithInt:[set2 count]];
     return [n1 compare:n2];
 }
-    
-//- (void)hidePublicationsWithoutSubstring:(NSString *)substring inField:(NSString *)field{
-//    NSMutableArray *remArray = [NSMutableArray arrayWithCapacity:1];
-//    NSEnumerator *e = [publications objectEnumerator];
-//    BibItem *pub;
-//
-//    NSRange r;
-//	
-//    [tableView deselectAll:self];
-//	
-//	// NSLog(@"looking for [%@] in [%@]",substring, field);
-//    
-//    if(![substring isEqualToString:@""]){
-//        while(pub = [e nextObject]){
-//            if ([field isEqualToString:@"Title"]){
-//                r = [[pub title]  rangeOfString:substring
-//                                        options:NSCaseInsensitiveSearch];
-//			}else if ([field isEqualToString:@"Author"]){
-//                r = [[pub bibtexAuthorString]  rangeOfString:substring
-//                                               options:NSCaseInsensitiveSearch];
-//			}else if ([field isEqualToString:@"Date"]){
-//				NSCalendarDate *pubDate = [pub date];
-//				if(pubDate){
-//					r = [[pubDate descriptionWithCalendarFormat:@"%B %Y"] rangeOfString:substring
-//																				options:NSCaseInsensitiveSearch];
-//				}else{
-//					r = [@"No Date" rangeOfString:substring
-//										  options:NSCaseInsensitiveSearch];
-//					// if there's no good date, we use "no date" because that's what we display.
-//				}
-//            }else if([field isEqualToString:@"All Fields"]){
-//                r = [[pub allFieldsString] rangeOfString:substring
-//                                                 options:NSCaseInsensitiveSearch];
-//				
-//            }else if([field isEqualToString:@"Pub Type"]){
-//                r = [[pub type] rangeOfString:substring
-//                                      options:NSCaseInsensitiveSearch];
-//            }else if([field isEqualToString:@"Cite Key"]){
-//				NSString *pubCiteKey = [pub citeKey];
-//				r = [pubCiteKey rangeOfString:substring
-//									  options:NSCaseInsensitiveSearch];
-//			}else{
-//				NSString *value = [pub valueOfField:quickSearchKey];
-//				if(!value)
-//					r.location = NSNotFound;
-//				else
-//					r = [value rangeOfString:substring options:NSCaseInsensitiveSearch];
-//            }
-//			
-//            if(r.location == NSNotFound) [remArray addObject:pub];
-//        }
-//    }else{
-//		// do nothing
-//    }
-//    [shownPublications setArray:publications];
-//    [shownPublications removeObjectsInArray:remArray];
-//	
-//    [quickSearchTextDict setObject:substring
-//                            forKey:field];
-//	
-//    [[OFPreferenceWrapper sharedPreferenceWrapper] setObject:[[quickSearchTextDict copy] autorelease]
-//                                                      forKey:BDSKCurrentQuickSearchTextDict];
-//    [[OFPreferenceWrapper sharedPreferenceWrapper] autoSynchronize];
-//	
-//    [self updateUI]; // calls reloadData
-//    if([shownPublications count] == 1)
-//        [tableView selectAll:self];
-//}
-
 
 #pragma mark -
 
