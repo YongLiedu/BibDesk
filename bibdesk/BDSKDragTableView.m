@@ -12,6 +12,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 */
 
 #import "BDSKDragTableView.h"
+#import "BibDocument.h"
 
 static NSColor *sStripeColor = nil;
 
@@ -22,7 +23,7 @@ static NSColor *sStripeColor = nil;
 - (NSImage*)dragImageForRows:(NSArray*)dragRows event:(NSEvent*)dragEvent dragImageOffset:(NSPointPointer)dragImageOffset{
     NSPasteboard *myPb = [NSPasteboard pasteboardWithUniqueName];
     NSArray *types;
-    NSImage *image;
+    NSImage *image = nil;
     NSAttributedString *string;
     NSString *s;
     NSSize maxSize = NSMakeSize(600,200); // tunable...
@@ -207,22 +208,22 @@ static NSColor *sStripeColor = nil;
 }
 
 // this was part of an attempt to make BDSKTableView self-contained. Not currently in use.
-- (id)tableView:(NSTableView *)tView objectValueForTableColumn:(NSTableColumn *)tableColumn row:(int)row{
-    if([[tableColumn identifier] isEqualToString: @"Cite Key"] ){
-        return [[ownedPublications objectAtIndex:row] citeKey];
-    }
-    if([[tableColumn identifier] isEqualToString: @"Title"] ){
-        return [[ownedPublications objectAtIndex:row] title];
-    }
-    if([[tableColumn identifier] isEqualToString: @"Date"] ){
-        if([[ownedPublications objectAtIndex:row] date] == nil)
-            return @"No date";
-        else
-            return [[[ownedPublications objectAtIndex:row] date] descriptionWithCalendarFormat:@"%b %Y"];
-    }else{
-        return nil; // This really shouldn't happen. Maybe I should abort here, but I won't
-    }
-}
+//- (id)tableView:(NSTableView *)tView objectValueForTableColumn:(NSTableColumn *)tableColumn row:(int)row{
+//    if([[tableColumn identifier] isEqualToString: @"Cite Key"] ){
+//        return [[ownedPublications objectAtIndex:row] citeKey];
+//    }
+//    if([[tableColumn identifier] isEqualToString: @"Title"] ){
+//        return [[ownedPublications objectAtIndex:row] title];
+//    }
+//    if([[tableColumn identifier] isEqualToString: @"Date"] ){
+//        if([[ownedPublications objectAtIndex:row] date] == nil)
+//            return @"No date";
+//        else
+//            return [[[ownedPublications objectAtIndex:row] date] descriptionWithCalendarFormat:@"%b %Y"];
+//    }else{
+//        return nil; // This really shouldn't happen. Maybe I should abort here, but I won't
+//    }
+//}
 
 
 
