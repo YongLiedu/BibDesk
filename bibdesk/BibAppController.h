@@ -22,6 +22,8 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 #import "BDSKShellTask.h";
 #import <OmniAppKit/OAScriptMenuItem.h>
 #import <ILCrashReporter/ILCrashReporter.h>
+#import "NSMutableArray+ThreadSafety.h"
+#import "NSMutableDictionary+ThreadSafety.h"
 
 
 /*!

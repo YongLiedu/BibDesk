@@ -54,10 +54,7 @@ NSRange SafeForwardSearchRange( unsigned startLoc, unsigned seekLength, unsigned
 }
 
 
-- (NSMutableArray *)itemsFromString:(NSString *)fullString
-                              error:(BOOL *)hadProblems
-                        frontMatter:(NSMutableString *)frontMatter
-                           filePath:(NSString *)filePath{
+- (NSMutableArray *)itemsFromString:(NSString *)fullString error:(BOOL *)hadProblems frontMatter:(NSMutableString *)frontMatter filePath:(NSString *)filePath{
 
 // Potential problems with this method:
 //

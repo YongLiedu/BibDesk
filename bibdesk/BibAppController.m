@@ -413,7 +413,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 
 - (void)addString:(NSString *)string forCompletionEntry:(NSString *)entry{
     NSMutableArray *completionArray = nil;
-    BOOL keyExists = [[_autoCompletionDict allKeysUsingLock:acLock] containsObject:entry usingLock:acLock];
+    BOOL keyExists = [(NSMutableArray *)[_autoCompletionDict allKeysUsingLock:acLock] containsObject:entry usingLock:acLock];
     // NSLog(@"got string %@ for entry %@", string, entry);
     
     if(string == nil) return; // shouldn't happen
