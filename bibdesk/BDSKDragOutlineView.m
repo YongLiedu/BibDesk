@@ -39,6 +39,22 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
     }
 }
 
+-(NSMenu*)menuForEvent:(NSEvent *)evt {
+	id theDelegate = [self delegate];
+	NSPoint pt=[self convertPoint:[evt locationInWindow] fromView:nil];
+	int column=[self columnAtPoint:pt];
+	int row=[self rowAtPoint:pt];
+	
+	if (column >= 0 && row >= 0 && [theDelegate respondsToSelector:@selector(menuForTableViewSelection:)]) {
+		// select the clicked row if it isn't selected yet
+		if (![self isRowSelected:row]){
+			[self selectRow:row byExtendingSelection:NO];
+		}
+		return (NSMenu*)[theDelegate menuForTableViewSelection:self];	
+	}
+	return nil; 
+} 
+
 @end
 
 @implementation BDSKDragOutlineView
