@@ -18,7 +18,6 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 static NSDictionary *WholeDict;
 static NSCharacterSet *EmptySet;
 static NSCharacterSet *FinalCharSet;
-static NSCharacterSet *SkipSet;
 static BDSKConverter *theConverter;
 static NSDictionary *detexifyConversions;
 static NSDictionary *texifyConversions;
@@ -44,7 +43,6 @@ static NSDictionary *texifyConversions;
     //create a characterset from the characters we know how to convert
     NSMutableCharacterSet *workingSet;
     NSRange highCharRange;
-    NSMutableCharacterSet *tempSet = [[NSMutableCharacterSet alloc] init];
     NSString *texReserved = [NSString stringWithString:@"%"]; // use this for characters that are ASCII but still need to be converted.
     
     WholeDict = [[NSDictionary dictionaryWithContentsOfFile:[[[NSBundle mainBundle] resourcePath] stringByAppendingPathComponent:@"CharacterConversion.plist"]] retain];
@@ -66,16 +64,6 @@ static NSDictionary *texifyConversions;
 
     FinalCharSet = [workingSet copy];
     [workingSet release];
-	
-    // build a character set SkipSet of stuff that we do not need to convert
-    // making the static NSCharacterSet cuts another second off save time with tugboat.bib
-    NSRange skipRange;
-    skipRange.location = 0;
-    skipRange.length = 127;
-    [tempSet addCharactersInRange:skipRange];
-    [tempSet removeCharactersInString:texReserved];
-    SkipSet = [tempSet copy];
-    [tempSet release];
     
     // set up the dictionaries
     NSMutableDictionary *tmpConversions = [WholeDict objectForKey:@"Roman to TeX"];
@@ -102,7 +90,7 @@ static NSDictionary *texifyConversions;
     [scanner setCharactersToBeSkipped:nil]; //otherwise it stalls on whitespace
     NSString *tmpConv = nil;
     NSMutableString *convertedSoFar = [s mutableCopy];
-    NSScanner *fastScan = [[NSScanner alloc] initWithString:s];
+
     unsigned sLength = [s length];
     
     int offset=0;
@@ -112,47 +100,43 @@ static NSDictionary *texifyConversions;
     // convertedSoFar has s to begin with.
     // while scanner's not at eof, scan up to characters from that set into tmpOut
 
-    // fastScan is an NSScanner, which is faster than the OFCharacterScanner (which makes an OFCharacterSet)
-    // tell fastScan to skip characters we do not need to convert, then if
-    // it picks up something that is not in that range, run OFCharacterScanner
-    [fastScan setCharactersToBeSkipped:SkipSet];
-	if([fastScan scanCharactersFromSet:FinalCharSet intoString:nil]){
+    while(![scanner isAtEnd]){
 
-	    while(index < sLength){
+	[scanner scanUpToCharactersFromSet:FinalCharSet intoString:nil];
+	index = [scanner scanLocation];
 
-		[scanner scanUpToCharactersFromSet:FinalCharSet intoString:nil];
-		index = [scanner scanLocation];
+	if(index >= sLength) // don't go past the end
+	    break;
+	
+	tmpConv = [s substringWithRange:NSMakeRange(index, 1)];
 
-		if(index >= sLength) // don't go past the end
-		    break;
-		tmpConv = [s substringWithRange:NSMakeRange(index, 1)];
-			if(TEXString = [texifyConversions objectForKey:tmpConv]){
-				[convertedSoFar replaceCharactersInRange:NSMakeRange((index + offset), 1)
-											  withString:TEXString];
-				[scanner setScanLocation:(index + 1)];
-				offset += [TEXString length] - 1;    // we're adding length-1 characters, so we have to make sure we insert at the right point in the future.
+	if(TEXString = [texifyConversions objectForKey:tmpConv]){
+		[convertedSoFar replaceCharactersInRange:NSMakeRange((index + offset), 1)
+									  withString:TEXString];
+		[scanner setScanLocation:(index + 1)];
+		offset += [TEXString length] - 1;    // we're adding length-1 characters, so we have to make sure we insert at the right point in the future.
 
-			} else {
-			    if(tmpConv != nil){ // if tmpConv is non-nil, we had a character that was accented and not in the dictionary
-				[NSObject cancelPreviousPerformRequestsWithTarget:self 
-									 selector:@selector(runConversionAlertPanel:)
-									   object:tmpConv];
-				[self performSelector:@selector(runConversionAlertPanel:) withObject:tmpConv afterDelay:0.1];
-			    }
-			}
-		}
+	} else {
+	    if(tmpConv != nil){ // if tmpConv is non-nil, we had a character that was accented and not in the dictionary
+		[NSObject cancelPreviousPerformRequestsWithTarget:self 
+							 selector:@selector(runConversionAlertPanel:)
+							   object:tmpConv];
+		[self performSelector:@selector(runConversionAlertPanel:) withObject:tmpConv afterDelay:0.1];
+		[scanner setScanLocation:(index + 1)]; // increment the scanner to go past the character that we don't have in the dict
+	    }
+	}
     }
+		
     
     //clean up
-//	NSLog(@"cleaning up...returning %@", convertedSoFar);
     [scanner release];
-    [fastScan release];
     // shouldn't [tmpConv release]; ? I should look in the omni source code...
     
     return([convertedSoFar autorelease]);
 }
 
 - (void)runConversionAlertPanel:(NSString *)tmpConv{
+    NSLog(@"runConversionAlert");
     NSString *errorString = [NSString localizedStringWithFormat:@"The accented or Unicode character \"%@\" could not be converted.  Please enter the TeX code directly in your bib file.", tmpConv];
     int i = NSRunAlertPanel(NSLocalizedString(@"Character Conversion Error",
 				              @"Title of alert when an error happens"),
