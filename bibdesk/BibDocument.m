@@ -61,6 +61,7 @@ NSString *BDSKBibItemLocalDragPboardType = @"edu.ucsd.cs.mmccrack.bibdesk: Local
         sources = [[NSMutableArray alloc] initWithCapacity:1];
         BD_windowControllers = [[NSMutableArray alloc] initWithCapacity:1];
         
+        macroDefinitions = [[NSMutableDictionary alloc] initWithCapacity:10];
         
         BDSKUndoManager *newUndoManager = [[[BDSKUndoManager alloc] init] autorelease];
         [newUndoManager setDelegate:self];
@@ -241,6 +242,7 @@ NSString *BDSKBibItemLocalDragPboardType = @"edu.ucsd.cs.mmccrack.bibdesk: Local
     [sources release];
     [localDragPboard release];
     [draggedItems release];
+    [macroDefinitions release];
     [tipRegex release];
     [andRegex release];
     [orRegex release];
@@ -767,13 +769,29 @@ stringByAppendingPathComponent:@"BibDesk"]; */
     
     NSAssert ( [self documentStringEncoding] != nil, @"Document does not have a specified string encoding." );
         
+    // output the document's macros:
+    NSString *macroString = nil;
+    NSArray *macros = [[macroDefinitions allKeys] sortedArrayUsingSelector:@selector(compare:)];
+    
+    // output the bibs
     if([self documentStringEncoding] == NSASCIIStringEncoding){
+        foreach(macro, macros){
+            macroString = [NSString stringWithFormat:@"\n@STRING{%@ = \"%@\"}\n",macro,[macroDefinitions objectForKey:macro]];
+            [d appendData:[macroString dataUsingEncoding:NSUTF8StringEncoding allowLossyConversion:YES]];
+        }
+
         while(tmp = [e nextObject]){
             [d appendData:[[NSString stringWithString:@"\n\n"] dataUsingEncoding:NSASCIIStringEncoding  allowLossyConversion:YES]];
             //The TeXification is now done in the BibItem bibTeXString method
             [d appendData:[[tmp bibTeXString] dataUsingEncoding:NSUTF8StringEncoding allowLossyConversion:YES]];
         }
     } else {
+        foreach(macro, macros){
+            macroString = [NSString stringWithFormat:@"\n@STRING{%@ = \"%@\"}\n",macro,[macroDefinitions objectForKey:macro]];
+            [d appendData:[macroString dataUsingEncoding:[self documentStringEncoding]
+                                    allowLossyConversion:YES]];
+        }
+        
         while(tmp = [e nextObject]){
             [d appendData:[[NSString stringWithString:@"\n\n"] dataUsingEncoding:[self documentStringEncoding]  allowLossyConversion:YES]];
             //The TeXification is now done in the BibItem bibTeXString method
@@ -1009,7 +1027,8 @@ stringByAppendingPathComponent:@"BibDesk"]; */
         newPubs = [BibTeXParser itemsFromData:data
                                         error:&hadProblems
                                   frontMatter:frontMatter
-                                     filePath:filePath];
+                                     filePath:filePath
+                                     document:self];
     }
 
 
@@ -1271,7 +1290,7 @@ stringByAppendingPathComponent:@"BibDesk"]; */
 		[searchCellOrTextField setRecentsAutosaveName:[NSString stringWithFormat:NSLocalizedString(@"%@ recent searches autosave ",@""),[self fileName]]];
 		
 		[searchField setDelegate:self];
-		[searchField setAction:@selector(searchFieldAction:)];
+		[(NSCell *)searchField setAction:@selector(searchFieldAction:)];
 		
 		// fit into tab key loop - doesn't work yet
 /*		[actionMenuButton setNextKeyView:searchField];
@@ -2743,6 +2762,115 @@ This method always returns YES. Even if some or many operations fail.
 
 - (void)splitViewDoubleClick:(OASplitView *)sender{
     [NSException raise:@"UnimplementedException" format:@"splitview %@ was clicked.", sender];
+}
+
+#pragma mark macro stuff
+
+- (NSMutableDictionary *)macroDefinitions {
+    return [[macroDefinitions retain] autorelease];
+}
+
+- (void)setMacroDefinitions:(NSMutableDictionary *)newMacroDefinitions {
+    if (macroDefinitions != newMacroDefinitions) {
+        [macroDefinitions release];
+        macroDefinitions = [newMacroDefinitions mutableCopy];
+    }
+}
+
+- (void)addMacroDefinitionWithoutUndo:(NSString *)macroString forMacro:(NSString *)macroKey{
+    [macroDefinitions setObject:macroString forKey:macroKey];
+}
+
+- (void)changeMacroKey:(NSString *)oldKey to:(NSString *)newKey{
+    NSUndoManager *undoMan = [self undoManager];
+    if([macroDefinitions objectForKey:oldKey] == nil)
+        [NSException raise:NSInvalidArgumentException
+                    format:@"tried to change the value of a macro key that doesn't exist"];
+    [[undoMan prepareWithInvocationTarget:self]
+        changeMacroKey:newKey to:oldKey];
+    if(![undoMan isUndoing])
+        [undoMan setActionName:NSLocalizedString(@"Change Macro Key",
+                                                 @"change macro key action name for undo")];
+    NSString *val = [macroDefinitions valueForKey:oldKey];
+    [val retain]; // so the next line doesn't kill it
+    [macroDefinitions removeObjectForKey:oldKey];
+    [macroDefinitions setObject:[val autorelease] forKey:newKey];
+    [[NSNotificationCenter defaultCenter] postNotificationName:BDSKBibDocMacroKeyChangedNotification
+														object:self
+													  userInfo:[NSDictionary dictionaryWithObjectsAndKeys:newKey, @"newKey", oldKey, @"oldKey", nil]];
+    
+}
+
+- (void)addMacroDefinition:(NSString *)macroString forMacro:(NSString *)macroKey{
+    NSUndoManager *undoMan = [self undoManager];
+    // we're adding a new one, so to undo, we remove.
+    [[undoMan prepareWithInvocationTarget:self]
+            removeMacro:macroKey];
+    if(![undoMan isUndoing])
+        [undoMan setActionName:NSLocalizedString(@"Add Macro",
+                                                 @"add macro action name for undo")];
+
+    [macroDefinitions setObject:macroString forKey:macroKey];
+    
+    [[NSNotificationCenter defaultCenter] postNotificationName:BDSKBibDocMacroAddedNotification
+														object:self
+													  userInfo:[NSDictionary dictionaryWithObject:macroKey forKey:@"macroKey"]];
+    
+}
+
+- (void)setMacroDefinition:(NSString *)newDefinition forMacro:(NSString *)macroKey{
+    NSString *oldDef = [macroDefinitions objectForKey:macroKey];
+    NSUndoManager *undoMan = [self undoManager];
+    // we're just changing an existing one, so to undo, we change back.
+    [[undoMan prepareWithInvocationTarget:self]
+            setMacroDefinition:oldDef forMacro:macroKey];
+    if(![undoMan isUndoing])
+        [undoMan setActionName:NSLocalizedString(@"Change Macro Definition",
+                                                 @"change macrodef action name for undo")];
+    [macroDefinitions setObject:newDefinition forKey:macroKey];
+    
+    [[NSNotificationCenter defaultCenter] postNotificationName:BDSKBibDocMacroDefinitionChangedNotification
+														object:self
+													  userInfo:[NSDictionary dictionaryWithObject:macroKey forKey:@"macroKey"]];
+    
+}
+
+
+- (void)removeMacro:(NSString *)macroKey{
+    NSString *currentValue = [macroDefinitions objectForKey:macroKey];
+    NSUndoManager *undoMan = [self undoManager];
+    if(!currentValue){
+        return;
+    }else{
+        [[undoMan prepareWithInvocationTarget:self]
+        addMacroDefinition:currentValue
+                  forMacro:macroKey];
+        if(![undoMan isUndoing])
+            [undoMan setActionName:NSLocalizedString(@"Delete Macro",
+                                                     @"delete macro action name for undo")];
+    }
+    [macroDefinitions removeObjectForKey:macroKey];
+    [[NSNotificationCenter defaultCenter] postNotificationName:BDSKBibDocMacroRemovedNotification
+														object:self
+													  userInfo:[NSDictionary dictionaryWithObject:macroKey forKey:@"macroKey"]];
+    
+}
+
+- (NSString *)valueOfMacro:(NSString *)macroString{
+    // Note we treat upper and lowercase values the same, 
+    // because that's how btparse gives the string constants to us.
+    // It is not quite correct because bibtex does discriminate,
+    // but this is the best we can do.
+    return [macroDefinitions objectForKey:[macroString lowercaseString]];
+}
+
+
+- (IBAction)showMacrosWindow:(id)sender{
+    if (!macroWC){
+        macroWC = [[MacroWindowController alloc] init];
+        [macroWC setMacroDataSource:self];
+    }
+    [macroWC showWindow:self];
 }
 
 #pragma mark

@@ -37,6 +37,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 #import "ApplicationServices/ApplicationServices.h"
 #import "RYZImagePopUpButton.h"
 #import "BibCollection.h"
+#import "MacroWindowController.h"
 
 
 @class BDSKCustomCiteTableView;
@@ -60,7 +61,7 @@ extern NSString *BDSKBibItemLocalDragPboardType;
     @discussion This is the document class. It keeps an array of BibItems (called (NSMutableArray *)publications) and handles the quick search box. It delegates PDF generation to a BDSKPreviewer.
 */
 
-@interface BibDocument : NSDocument
+@interface BibDocument : NSDocument <BDSKMacroResolver>
 {
     IBOutlet NSTextView *previewField;
     IBOutlet NSWindow* documentWindow;
@@ -172,6 +173,9 @@ extern NSString *BDSKBibItemLocalDragPboardType;
     
     // view:
     NSMutableArray *draggedItems; // an array to temporarily hold references to dragged items used locally.
+    
+    NSMutableDictionary *macroDefinitions;	
+    MacroWindowController *macroWC;
 }
 
 
@@ -361,6 +365,7 @@ extern NSString *BDSKBibItemLocalDragPboardType;
 
 
 // Responses to UI actions
+
 /*!
 @method newPub:
     @abstract creates a new publication (BibItem)
@@ -601,6 +606,80 @@ extern NSString *BDSKBibItemLocalDragPboardType;
 
 - (void)removePublication:(BibItem *)pub;
 
+#pragma mark bibtex macro support
+
+- (NSMutableDictionary *)macroDefinitions;
+
+/*!
+    @method     setMacroDefinitions:
+    @abstract   setter for macroDefinitions
+    @discussion not to be used as part of UI - it doesn't invoke undo.
+ It's intended to be used with file parsers to add many defs at once.
+    @param      newMacroDefinitions (description)
+*/
+- (void)setMacroDefinitions:(NSMutableDictionary *)newMacroDefinitions;
+
+/*!
+    @method     addMacroDefinitionWithoutUndo:forMacro:
+     @abstract   changes the definition for a macro
+     @discussion overwrites an existing one if it exists. not undoable.
+ for use with parsers.
+     @param      macroString (description)
+     @param      macroKey (description)
+     */
+- (void)addMacroDefinitionWithoutUndo:(NSString *)macroString forMacro:(NSString *)macroKey;
+
+/*!
+    @method     addMacroDefinition:forMacro:
+    @abstract   changes the definition for a macro
+    @discussion overwrites an existing one if it exists. undoable.
+ sends BDSKBibDocMacroAddedNotification
+    @param      macroString (description)
+    @param      macroKey (description)
+*/
+- (void)addMacroDefinition:(NSString *)macroString forMacro:(NSString *)macroKey;
+
+/*!
+    @method     valueOfMacro:
+    @abstract   returns the expanded value of a macro
+    @discussion undoable.
+    @param      macroString (description)
+    @result     (description)
+*/
+- (NSString *)valueOfMacro:(NSString *)macroString;
+
+/*!
+    @method     removeMacro:
+    @abstract   deletes a macro. 
+    @discussion does nothing if macroKey isn't a current macro. if it does something, it's undoable.
+    @param      macroKey (description)
+*/
+- (void)removeMacro:(NSString *)macroKey;
+
+    /*!
+    @method     showMacrosWindow:
+     @abstract   shows the macro editing window
+     @param      sender 
+     */
+- (IBAction)showMacrosWindow:(id)sender;
+
+/*!
+    @method     changeMacroKey:to:
+    @abstract   changes a key but keeps the value the same.
+    @discussion sends bdskbibdocmacrokeychangednotification.
+    @param      oldKey (description)
+    @param      newKey (description)
+*/
+- (void)changeMacroKey:(NSString *)oldKey to:(NSString *)newKey;
+
+/*!
+    @method     setMacroDefinition:forMacro:
+    @abstract   sets the value of an existing macro.
+    @discussion sends BDSKBibDocMacroDefinitionChangedNotification.
+    @param      newDefinition (description)
+    @param      macroKey (description)
+*/
+- (void)setMacroDefinition:(NSString *)newDefinition forMacro:(NSString *)macroKey;
 
     /*!
 @method citeKeyIsUsed:byItemOtherThan
