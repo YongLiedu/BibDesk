@@ -127,6 +127,7 @@ NSString *BDSKAuthorPubListChangedNotification = @"added to or deleted a pub fro
 NSString *BDSKParserErrorNotification = @"A parsing error occurred";
 NSString *BDSKBibDocMacroKeyChangedNotification = @"changed the key of a macro";
 NSString *BDSKBibDocMacroDefinitionChangedNotification = @"changed the value of a macro";
+NSString *BDSKNodeValueChangedNotification = @"changed the value of a string node";
 NSString *BDSKMacroTextFieldWindowWillCloseNotification = @"Macro TextField Window Will Close Notification";
 NSString *BDSKPreviewPaneFontChangedNotification = @"Changed the RTF preview pane font family";
 

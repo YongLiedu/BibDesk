@@ -151,6 +151,7 @@ extern NSString *BDSKAuthorPubListChangedNotification;
 extern NSString *BDSKParserErrorNotification;
 extern NSString *BDSKBibDocMacroKeyChangedNotification;
 extern NSString *BDSKBibDocMacroDefinitionChangedNotification;
+extern NSString *BDSKNodeValueChangedNotification;
 extern NSString *BDSKMacroTextFieldWindowWillCloseNotification;
 extern NSString *BDSKPreviewPaneFontChangedNotification;
 
