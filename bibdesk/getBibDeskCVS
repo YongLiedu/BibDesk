@@ -1,0 +1,21 @@
+#!/bin/csh
+
+echo "*******************************"
+echo "Welcome to BibDesk development. "
+echo "This script will get the stuff you need from cvs to build bibdesk."
+echo "What is your sourceforge username?"
+
+set SFNAME=$<
+
+setenv CVS_RSH ssh
+
+set GETMAIN = "cvs -z3 -d:ext:$SFNAME@cvs.sourceforge.net:/cvsroot/bibdesk co bibdesk"
+echo $GETMAIN
+$GETMAIN
+
+set GETVENDOR = "cvs -z3 -d:ext:$SFNAME@cvs.sourceforge.net:/cvsroot/bibdesk co bibdesk_vendorsrc"
+echo $GETVENDOR
+$GETVENDOR
+
+echo OK, done:
+#ls -l
