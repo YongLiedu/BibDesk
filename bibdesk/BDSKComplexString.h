@@ -148,6 +148,15 @@ typedef enum{
 - (NSArray *)nodes;
 
 /*!
+    @method     setNodes:
+    @abstract   Sets the nodes of the complex string. Should be used only privately, as it does not update the expanded value.
+    @discussion (description)
+    @param      newNodes an array of BDSKStringNodes
+    @result     -
+*/
+- (void)setNodes:(NSArray *)newNodes;
+
+/*!
     @method     expandedValueFromArray:
     @abstract   given an array of BDSKStringNodes,
     @discussion (description)

@@ -166,25 +166,13 @@ static NSDictionary *globalMacroDefs;
 
 - (id)initWithArray:(NSArray *)a macroResolver:(id)theMacroResolver{
     if (self = [super init]) {
-		nodes = [a copy];
+		[self setNodes:[[a copy] autorelease];
 		if(theMacroResolver)
 			[self setMacroResolver:theMacroResolver];
 		else
 			NSLog(@"Warning: complex string being created without macro resolver. Macros in it will not be resolved.");
 		
 		expandedValue = [[self expandedValueFromArray:[self nodes]] retain];
-		
-		NSNotificationCenter *nc = [NSNotificationCenter defaultCenter];
-		NSEnumerator *nodeEnum = [nodes objectEnumerator];
-		BDSKStringNode *node;
-		
-		while (node = [nodeEnum nextObject]) {
-			[nc addObserver:self
-				   selector:@selector(handleNodeValueChangedNotification:)
-					   name:BDSKNodeValueChangedNotification
-					 object:node];
-			
-		}
 	}		
     return self;
 }
@@ -198,15 +186,22 @@ static NSDictionary *globalMacroDefs;
 }
 
 - (id)copyWithZone:(NSZone *)zone{
-    BDSKComplexString *cs = [[BDSKComplexString allocWithZone:zone] initWithArray:[[nodes copy] autorelease] 
-							macroResolver:macroResolver];
+	NSEnumerator *nodeEnum = [nodes objectEnumerator];
+	BDSKStringNode *node;
+	NSMutableArray *copiedNodes = [NSMutableArray array];
+	
+	while (node = [nodeEnum nextObject]) {
+		[copiedNodes addObject:[[node copyWithZone:zone] autorelease]];
+	}
+    BDSKComplexString *cs = [[BDSKComplexString allocWithZone:zone] initWithArray:copiedNodes 
+																	macroResolver:macroResolver];
     return cs;
 }
 
 - (id)initWithCoder:(NSCoder *)coder{
 	if (self = [super initWithCoder:coder]) {
-		nodes = [[coder decodeObjectForKey:@"nodes"] retain];
 		expandedValue = [[coder decodeObjectForKey:@"expandedValue"] retain];
+		[self setNodes:[coder decodeObjectForKey:@"nodes"]];
 		[self setMacroResolver:[coder decodeObjectForKey:@"macroResolver"]];
 	}
 	return self;
@@ -273,6 +268,31 @@ static NSDictionary *globalMacroDefs;
 
 - (NSArray *)nodes{
     return nodes;
+}
+
+- (void)setNodes:(NSArray *)newNodes{
+	NSNotificationCenter *nc = [NSNotificationCenter defaultCenter];
+	NSEnumerator *nodeEnum = [nodes objectEnumerator];
+	BDSKStringNode *node;
+	
+	while (node = [nodeEnum nextObject]) {
+		[nc removeObserver:self
+					  name:BDSKNodeValueChangedNotification
+					object:node];
+		
+	}
+	
+	[nodes autorelease];
+	nodes = [newNodes retain];
+	
+	nodeEnum = [nodes objectEnumerator];
+	while (node = [nodeEnum nextObject]) {
+		[nc addObserver:self
+			   selector:@selector(handleNodeValueChangedNotification:)
+				   name:BDSKNodeValueChangedNotification
+				 object:node];
+		
+	}
 }
 
 - (NSString *)expandedValueFromArray:(NSArray *)a{
