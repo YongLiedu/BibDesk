@@ -20,6 +20,7 @@
             CLASS = BibAppController; 
             LANGUAGE = ObjC; 
             OUTLETS = {
+                displayMenuItem = NSMenuItem; 
                 errorPanel = NSPanel; 
                 errorTableView = NSTableView; 
                 openTextEncodingAccessoryView = NSView; 
@@ -102,6 +103,7 @@
         {
             ACTIONS = {
                 consolidateLinkedFiles = id; 
+                contextualMenuAddTableColumn = id; 
                 copyAsBibTex = id; 
                 copyAsPDF = id; 
                 copyAsRTF = id; 
