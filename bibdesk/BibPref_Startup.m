@@ -39,11 +39,12 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 }
 
 - (IBAction)toggleShowWarnings:(id)sender{
+    BibAppController *ac = (BibAppController *)[NSApp delegate];
     [defaults setBool:([sender state] == NSOnState) ? YES : NO forKey:BDSKShowWarningsKey];
     if ([sender state] == NSOnState) {
-        [[NSApp delegate] showErrorPanel:self];
+        [ac showErrorPanel:self];
     }else{
-        [[NSApp delegate] hideErrorPanel:self];
+        [ac hideErrorPanel:self];
     }        
 }
 
