@@ -160,7 +160,7 @@ void _setupFonts(){
 }
 
 - (NSComparisonResult)titleCompare:(BibItem *)aBI{
-    return [title caseInsensitiveCompare:[aBI title]];
+    return [[self title] caseInsensitiveCompare:[aBI title]];
 }
 
 - (NSComparisonResult)dateCompare:(BibItem *)aBI{
@@ -253,7 +253,7 @@ void _setupFonts(){
         }
     }
     if(!existingAuthor){
-        existingAuthor =  [BibAuthor authorWithName:newAuthorName andPub:nil];
+        existingAuthor =  [BibAuthor authorWithName:newAuthorName andPub:self]; //@@author - why was this nil before?!
         [pubAuthors addObject:existingAuthor];
     }
     return;
@@ -475,7 +475,7 @@ void _setupFonts(){
 - (NSData *)PDFValue{
     // Obtain the PDF of a bibtex formatted version of the bibtex entry as is.
     //* we won't be doing this on a per-item basis. this is deprecated. */
-    return [title dataUsingEncoding:NSUnicodeStringEncoding allowLossyConversion:YES];
+    return [[self title] dataUsingEncoding:NSUnicodeStringEncoding allowLossyConversion:YES];
 }
 
 - (NSData *)RTFValue{

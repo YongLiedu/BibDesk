@@ -36,7 +36,6 @@
 */
 @interface BibItem : NSObject <NSCopying>{
     NSString *fileType;
-    NSString *title;     /*! @var title the title of the bibitem. */
     NSString *citeKey;    /*! @var citeKey the citeKey of the bibItem */
     NSCalendarDate *pubDate;
     NSString *pubType;
