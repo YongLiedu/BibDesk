@@ -93,6 +93,7 @@ static float BDSKScaleMenuFontSize = 11.0;
 {
 	// make sure we have a horizontal scroller to show the popup
 	[self setHasHorizontalScroller:YES];
+    if([self respondsToSelector:@selector(setAutohidesScrollers:)])
 	[self setAutohidesScrollers:NO];
 	
 	NSView *clipView = [[self documentView] superview];
