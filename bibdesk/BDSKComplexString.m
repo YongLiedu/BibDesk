@@ -272,6 +272,7 @@ static NSDictionary *globalMacroDefs;
 - (void)updateExpandedValue{
 	[expandedValue autorelease];
 	expandedValue = [[self expandedValueFromArray:nodes] retain];
+    [[NSNotificationCenter defaultCenter] postNotificationName:BDSKComplexStringChangedNotification object:self];
 }
 
 - (void)handleMacroKeyChangedNotification:(NSNotification *)notification{

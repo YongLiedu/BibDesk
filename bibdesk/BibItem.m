@@ -93,6 +93,10 @@ setupParagraphStyle()
         [self setFileOrder:-1];
 		[self setNeedsToBeFiled:NO];
         setupParagraphStyle();
+        [[NSNotificationCenter defaultCenter] addObserver:self 
+                                                 selector:@selector(handleComplexStringChangedNotification:) 
+                                                     name:BDSKComplexStringChangedNotification 
+                                                   object:nil];
 
     }
 
@@ -677,6 +681,23 @@ setupParagraphStyle()
 		value = [pubFields objectForKey:field];
 		if ([value isComplex]) {
 			[(BDSKComplexString*)value setMacroResolver:[self document]];
+		}
+	}
+}
+
+- (void)handleComplexStringChangedNotification:(NSNotification *)aNotification{
+	NSEnumerator *fEnum = [pubFields keyEnumerator];
+	NSString *field;
+	NSString *value;
+    id obj = [aNotification object];
+	
+	while (field = [fEnum nextObject]) {
+		value = [pubFields objectForKey:field];
+		if (value == obj) {
+            [[NSNotificationCenter defaultCenter] postNotificationName:BDSKBibItemChangedNotification
+                                                                object:self
+                                                              userInfo:nil];
+            break;
 		}
 	}
 }
