@@ -191,7 +191,10 @@ static NSDictionary *globalMacroDefs;
     cs = [[BDSKComplexString alloc] init];    
     cs->isComplex = YES;
     cs->nodes = [returnNodes copy];
-    cs->macroResolver = theMacroResolver;
+	if(theMacroResolver)
+		[cs setMacroResolver:theMacroResolver];
+    else
+        NSLog(@"Warning: complex string being created without macro resolver. Macros in it will not be resolved.");
 
     cs->expandedValue = [[cs expandedValueFromArray:[cs nodes]] retain];
     return [cs autorelease];
@@ -201,16 +204,16 @@ static NSDictionary *globalMacroDefs;
 // todo: instead, should I override stringWithString?
 // using this makes it explicit, which is probably good...
 + (BDSKComplexString *)complexStringWithString:(NSString *)s macroResolver:(id)theMacroResolver{
-  BDSKComplexString *cs = [[BDSKComplexString alloc] init];
-  cs->isComplex = NO;
-  cs->nodes = nil;
-  if(theMacroResolver)
-      cs->macroResolver = theMacroResolver;
+	BDSKComplexString *cs = [[BDSKComplexString alloc] init];
+	cs->isComplex = NO;
+	cs->nodes = nil;
+	if(theMacroResolver)
+		[cs setMacroResolver:theMacroResolver];
     else
         NSLog(@"Warning: complex string being created without macro resolver. Macros in it will not be resolved.");
     
-  cs->expandedValue = [s copy]; 
-  return [cs autorelease];
+	cs->expandedValue = [s copy]; 
+	return [cs autorelease];
 }
 
 + (BDSKComplexString *)complexStringWithArray:(NSArray *)a macroResolver:(id)theMacroResolver{
@@ -218,7 +221,7 @@ static NSDictionary *globalMacroDefs;
     cs->isComplex = YES;
     cs->nodes = [a copy];
     if(theMacroResolver)
-        cs->macroResolver = theMacroResolver;
+        [cs setMacroResolver:theMacroResolver];
     else
         NSLog(@"Warning: complex string being created without macro resolver. Macros in it will not be resolved.");
     
@@ -233,15 +236,15 @@ static NSDictionary *globalMacroDefs;
     if(self){
         expandedValue = nil;
         isComplex = NO;
-        // TODO: register for notifications about changing macro definitions.
     }
     return self;
 }
 
 - (void)dealloc{
     [expandedValue release];
-    if(nodes)
-        [nodes release];
+	[nodes release];
+	if (macroResolver)
+		[[NSNotificationCenter defaultCenter] removeObserver:self];
     [super dealloc];
 }
 
@@ -307,9 +310,32 @@ static NSDictionary *globalMacroDefs;
 
 - (void)setMacroResolver:(id <BDSKMacroResolver>)newMacroResolver{
 	if (newMacroResolver != macroResolver) {
+		if (macroResolver) {
+			[[NSNotificationCenter defaultCenter] removeObserver:self];
+		}
 		macroResolver = newMacroResolver;
-		if (isComplex)
-			expandedValue = [self expandedValueFromArray:nodes];
+		if (isComplex) {
+			[expandedValue autorelease];
+			expandedValue = [[self expandedValueFromArray:nodes] retain];
+		}
+		if (newMacroResolver) {
+			[[NSNotificationCenter defaultCenter] addObserver:self
+													 selector:@selector(handleMacroKeyChangedNotification:)
+														 name:BDSKBibDocMacroKeyChangedNotification
+													   object:newMacroResolver];
+			[[NSNotificationCenter defaultCenter] addObserver:self
+													 selector:@selector(handleMacroDefinitionChangedNotification:)
+														 name:BDSKBibDocMacroDefinitionChangedNotification
+													   object:newMacroResolver];
+			[[NSNotificationCenter defaultCenter] addObserver:self
+													 selector:@selector(handleMacroDefinitionChangedNotification:)
+														 name:BDSKBibDocMacroAddedNotification
+													   object:newMacroResolver];
+			[[NSNotificationCenter defaultCenter] addObserver:self
+													 selector:@selector(handleMacroDefinitionChangedNotification:)
+														 name:BDSKBibDocMacroRemovedNotification
+													   object:newMacroResolver];
+		}
 	}
 }
 
@@ -360,6 +386,27 @@ static NSDictionary *globalMacroDefs;
     }
     [s autorelease];
     return [[s copy] autorelease];
+}
+
+- (void)handleMacroKeyChangedNotification:(NSNotification *)notification{
+	NSDictionary *userInfo = [notification userInfo];
+	NSString *oldKey = [userInfo objectForKey:@"oldKey"];
+	NSString *newKey = [userInfo objectForKey:@"newKey"];
+	
+	if (isComplex && ([nodes containsObject:oldKey] || [nodes containsObject:newKey])) {
+		[expandedValue autorelease];
+		expandedValue = [[self expandedValueFromArray:nodes] retain];
+	}
+}
+
+- (void)handleMacroDefinitionChangedNotification:(NSNotification *)notification{
+	NSDictionary *userInfo = [notification userInfo];
+	NSString *macroKey = [userInfo objectForKey:@"macroKey"];
+	
+	if (isComplex && [nodes containsObject:macroKey]) {
+		[expandedValue autorelease];
+		expandedValue = [[self expandedValueFromArray:nodes] retain];
+	}
 }
 
 @end

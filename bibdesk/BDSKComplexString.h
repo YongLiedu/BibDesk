@@ -103,6 +103,9 @@ typedef enum{
 */
 - (NSString *)expandedValueFromArray:(NSArray *)nodes;
 
+- (void)handleMacroKeyChangedNotification:(NSNotification *)notification;
+- (void)handleMacroDefinitionChangedNotification:(NSNotification *)notification;
+
 @end
 
 @interface NSString (ComplexStringEquivalence)
