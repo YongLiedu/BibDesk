@@ -82,9 +82,10 @@
 	[openPanel setAllowsMultipleSelection:NO];
 	[openPanel setCanChooseFiles:NO];
 	[openPanel setCanChooseDirectories:YES];
-        if([openPanel respondsToSelector:@selector(setCanCreateDirectories:)]){
-            [openPanel setCanCreateDirectories:YES];
-        }
+	if([openPanel respondsToSelector:@selector(setCanCreateDirectories:)]){
+		[openPanel setCanCreateDirectories:YES];
+	}
+    [openPanel setPrompt:NSLocalizedString(@"Choose", @"Choose directory")];
 
 	if ([openPanel runModalForTypes:nil] != NSOKButton)
 	{
