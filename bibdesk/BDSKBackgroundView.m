@@ -13,6 +13,9 @@
 {
 	[[NSColor controlColor] set];
 	[NSBezierPath fillRect:rect];
+	[[NSColor lightGrayColor] set];
+	[NSBezierPath setDefaultLineWidth:2];
+	[NSBezierPath strokeRect:rect];
 	[super drawRect:rect];
 }
 @end
