@@ -822,6 +822,8 @@ Enhanced delete method that uses a sheet instead of a modal dialogue.
 	[cellMenu insertItem:item4 atIndex:curIndex++];
 	[item4 release];
 	
+	[cellMenu insertItem:[NSMenuItem separatorItem] atIndex:curIndex++];
+	
 	item4 = [[NSMenuItem alloc] initWithTitle:@"All Fields" action:@selector(searchFieldChangeKey:) keyEquivalent:@""];
 	[cellMenu insertItem:item4 atIndex:curIndex++];
 	[item4 release];
