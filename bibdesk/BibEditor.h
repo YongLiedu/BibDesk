@@ -51,7 +51,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
     IBOutlet NSTextField* citeKeyField;
 //    IBOutlet NSButton* viewLocalButton;
 	IBOutlet RYZImagePopUpButton *viewLocalButton;
-    IBOutlet NSButton* viewRemoteButton;
+    IBOutlet RYZImagePopUpButton* viewRemoteButton;
     IBOutlet NSScrollView* fieldsScrollView;
 	IBOutlet RYZImagePopUpButton *actionMenuButton;
     // ----------------------------------------------------------------------------------------
@@ -162,10 +162,12 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 - (void)finalizeChanges;
 
 - (IBAction)viewLocal:(id)sender;
-- (NSMenu *)menuForImagePopUpButton;
+- (NSMenu *)menuForImagePopUpButtonCell:(RYZImagePopUpButtonCell *)cell;
 - (NSArray *)getSafariRecentDownloadsMenu;
+- (NSArray *)getSafariRecentURLsMenu;
 - (NSArray *)getPreviewRecentDocumentsMenu;
 - (void)setLocalURLPathFromMenuItem:(NSMenuItem *)sender;
+- (void)setRemoteURLFromMenuItem:(NSMenuItem *)sender;
 
 
 - (IBAction)viewRemote:(id)sender;
@@ -186,7 +188,8 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 - (IBAction)textFieldDidEndEditing:(id)sender;
 //- (void)closeSheetDidEnd:(NSWindow *)sheet returnCode:(int)returnCode contextInfo:(void  *)contextInfo;
 
-- (void)toggleSnoopDrawer:(id)sender;
+- (void)togglePDFSnoopDrawer:(id)sender;
+- (void)toggleTextSnoopDrawer:(id)sender;
 - (BOOL)citeKeyIsValid:(NSString *)proposedCiteKey;
 - (IBAction)generateCiteKey:(id)sender;
 - (void)makeKeyField:(NSString *)fieldName;

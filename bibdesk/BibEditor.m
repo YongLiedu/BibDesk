@@ -201,7 +201,18 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 	[[viewLocalButton cell] setRefreshesMenu:YES];
 	[[viewLocalButton cell] setDelegate:self];
 		
-	[viewLocalButton setMenu:[self menuForImagePopUpButton]];
+	[viewLocalButton setMenu:[self menuForImagePopUpButtonCell:[viewLocalButton cell]]];
+
+	// Set the properties of viewRemoteButton that cannot be set in IB
+	[viewRemoteButton setArrowImage:[NSImage imageNamed:@"ArrowPointingDown"]];
+	[viewRemoteButton setShowsMenuWhenIconClicked:NO];
+	[[viewRemoteButton cell] setAltersStateOfSelectedItem:NO];
+	[[viewRemoteButton cell] setAlwaysUsesFirstItemAsSelected:YES];
+	[[viewRemoteButton cell] setUsesItemFromMenu:NO];
+	[[viewRemoteButton cell] setRefreshesMenu:YES];
+	[[viewRemoteButton cell] setDelegate:self];
+		
+	[viewRemoteButton setMenu:[self menuForImagePopUpButtonCell:[viewRemoteButton cell]]];
 	
     [notesView setString:[theBib valueOfField:BDSKAnnoteString]];
     [abstractView setString:[theBib valueOfField:BDSKAbstractString]];
@@ -317,33 +328,60 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 
 }
 
-- (NSMenu *)menuForImagePopUpButton{
-	NSMenu *viewLocalMenu = [[NSMenu alloc] init];
-	// the first one has to be view file, since it's also the button's action when you're clicking on the icon.
-	[viewLocalMenu addItemWithTitle:NSLocalizedString(@"View File",@"View file string")
-							 action:@selector(viewLocal:)
-					  keyEquivalent:@""];
+- (NSMenu *)menuForImagePopUpButtonCell:(RYZImagePopUpButtonCell *)cell{
+	NSMenu *menu = [[NSMenu alloc] init];
 	
-	[viewLocalMenu addItemWithTitle:NSLocalizedString(@"Reveal in Finder",@"Reveal in finder")
-							 action:@selector(revealLocal:)
-					  keyEquivalent:@""];
-	
-	[viewLocalMenu addItemWithTitle:NSLocalizedString(@"Choose File…",@"Choose file string")
-							 action:@selector(chooseLocalURL:)
-					  keyEquivalent:@""];
-	
-	// get Safari recent downloads
-	NSArray *safariItems = [self getSafariRecentDownloadsMenu];
-	int i = 0;
-	for (i = 0; i < [safariItems count]; i ++){
-		[viewLocalMenu addItem:[safariItems objectAtIndex:i]];
+	if (cell == [viewLocalButton cell]) {
+		// the first one has to be view file, since it's also the button's action when you're clicking on the icon.
+		[menu addItemWithTitle:NSLocalizedString(@"View File",@"View file string")
+								 action:@selector(viewLocal:)
+						  keyEquivalent:@""];
+		
+		[menu addItemWithTitle:NSLocalizedString(@"Reveal in Finder",@"Reveal in finder")
+								 action:@selector(revealLocal:)
+						  keyEquivalent:@""];
+		
+		[menu addItemWithTitle:NSLocalizedString(@"View File in Drawer",@"View file in drawer")
+								 action:@selector(togglePDFSnoopDrawer:)
+						  keyEquivalent:@""];
+		
+		[menu addItemWithTitle:NSLocalizedString(@"View File as Text in Drawer",@"View file as text in drawer")
+								 action:@selector(toggleTextSnoopDrawer:)
+						  keyEquivalent:@""];
+		
+		[menu addItem:[NSMenuItem separatorItem]];
+		
+		[menu addItemWithTitle:NSLocalizedString(@"Choose File…",@"Choose file string")
+								 action:@selector(chooseLocalURL:)
+						  keyEquivalent:@""];
+		
+		// get Safari recent downloads
+		NSArray *safariItems = [self getSafariRecentDownloadsMenu];
+		int i = 0;
+		for (i = 0; i < [safariItems count]; i ++){
+			[menu addItem:[safariItems objectAtIndex:i]];
+		}
+		
+		NSArray *previewItems = [self getPreviewRecentDocumentsMenu];
+		for (i = 0; i < [previewItems count]; i ++){
+			[menu addItem:[previewItems objectAtIndex:i]];
+		}
+	}
+	else if (cell == [viewRemoteButton cell]) {
+		// the first one has to be view in web brower, since it's also the button's action when you're clicking on the icon.
+		[menu addItemWithTitle:NSLocalizedString(@"View in Web Browser",@"View in web browser string")
+								 action:@selector(viewRemote:)
+						  keyEquivalent:@""];
+		
+		// get Safari recent downloads
+		NSArray *safariItems = [self getSafariRecentURLsMenu];
+		int i = 0;
+		for (i = 0; i < [safariItems count]; i ++){
+			[menu addItem:[safariItems objectAtIndex:i]];
+		}
 	}
 	
-	NSArray *previewItems = [self getPreviewRecentDocumentsMenu];
-	for (i = 0; i < [previewItems count]; i ++){
-		[viewLocalMenu addItem:[previewItems objectAtIndex:i]];
-	}
-	return [viewLocalMenu autorelease];
+	return [menu autorelease];
 }
 
 
@@ -369,7 +407,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 				[array addObject:[NSMenuItem separatorItem]];
 				NSString *headerString = NSLocalizedString(@"Link to downloaded file:",@"");
 				NSMenuItem *headerItem = [[NSMenuItem alloc] initWithTitle:headerString
-																	action:nil
+																	action:@selector(dummy:)
 															 keyEquivalent:@""];
 				[headerItem setTarget:self];
 				[array addObject:[headerItem autorelease]];
@@ -385,6 +423,51 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 			[item setImage:image];
 			if([item respondsToSelector:@selector(setIndentationLevel:)]){
 			    [item setIndentationLevel:1];
+			}
+			[array addObject:[item autorelease]];
+		}
+	}
+
+	return array;
+}
+
+
+- (NSArray *)getSafariRecentURLsMenu{
+	NSString *downloadPlistFileName = [NSHomeDirectory()  stringByAppendingPathComponent:@"Library"];
+	downloadPlistFileName = [downloadPlistFileName stringByAppendingPathComponent:@"Safari"];
+	downloadPlistFileName = [downloadPlistFileName stringByAppendingPathComponent:@"downloads.plist"];
+	
+	NSDictionary *dict = [NSDictionary dictionaryWithContentsOfFile:downloadPlistFileName];
+
+	NSArray *historyArray = [dict objectForKey:@"DownloadHistory"];
+	NSMutableArray *array = [NSMutableArray array];
+	int i = 0;
+	BOOL separatorAdded = NO;
+	
+	for (i = 0; i < [historyArray count]; i ++){
+		NSDictionary *itemDict = [historyArray objectAtIndex:i];
+		NSString *URLString = [itemDict objectForKey:@"DownloadEntryURL"];
+		if ([NSURL URLWithString:URLString] && ![URLString isEqualToString:@""]) {
+			if(!separatorAdded){
+				separatorAdded = YES;
+				[array addObject:[NSMenuItem separatorItem]];
+				NSString *headerString = NSLocalizedString(@"Link to download URL:",@"");
+				NSMenuItem *headerItem = [[NSMenuItem alloc] initWithTitle:headerString
+																	action:@selector(dummy:)
+															 keyEquivalent:@""];
+				[headerItem setTarget:self];
+				[array addObject:[headerItem autorelease]];
+			}
+			NSImage *image = [[NSWorkspace sharedWorkspace] iconForFileType:@"webloc"];
+			[image setSize: NSMakeSize(16, 16)];
+			
+			NSMenuItem *item = [[NSMenuItem alloc] initWithTitle:URLString
+														  action:@selector(setRemoteURLFromMenuItem:)
+												   keyEquivalent:@""];
+			[item setRepresentedObject:URLString];
+			[item setImage:image];
+			if([item respondsToSelector:@selector(setIndentationLevel:)]){
+				[item setIndentationLevel:1];
 			}
 			[array addObject:[item autorelease]];
 		}
@@ -428,7 +511,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 				[array addObject:[NSMenuItem separatorItem]];
 				NSString *headerString = NSLocalizedString(@"Link to Recent File from Preview:",@"");
 				NSMenuItem *headerItem = [[NSMenuItem alloc] initWithTitle:headerString
-																	action:nil
+																	action:@selector(dummy:)
 															 keyEquivalent:@""];
 				[headerItem setTarget:self];
 				[array addObject:[headerItem autorelease]];
@@ -455,16 +538,46 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 
 
 - (BOOL)validateMenuItem:(id <NSMenuItem>)menuItem{
-	if([menuItem action] == nil){
+	if ([menuItem action] == nil ||
+		[menuItem action] == @selector(dummy:)){ // Unused selector for disabled items. Needed to avoid the popupbutton to insert its own
 		return NO;
 	}
 	else if ([menuItem action] == @selector(generateCiteKey:)) {
-                [menuItem setTitle: NSLocalizedString(@"Generate Cite Key", @"Generate Cite Key menu item")];
+		// need to setthe title, as the document can change it in the main menu
+		[menuItem setTitle: NSLocalizedString(@"Generate Cite Key", @"Generate Cite Key menu item")];
 		return YES;
 	}
-	else if ([menuItem action] == @selector(generateLocalUrl:)) {
-                [menuItem setTitle: NSLocalizedString(@"Auto File Paper", @"Auto File Paper menu item")];
-		return [[NSFileManager defaultManager] fileExistsAtPath:[theBib localURLPathRelativeTo:[[theDocument fileName] stringByDeletingLastPathComponent]]];
+	else if ([menuItem action] == @selector(generateLocalUrl:) ||
+			 [menuItem action] == @selector(viewLocal:) ||
+			 [menuItem action] == @selector(revealLocal:)) {
+		NSString *lurl = [theBib localURLPathRelativeTo:[[theDocument fileName] stringByDeletingLastPathComponent]];
+		return (lurl && [[NSFileManager defaultManager] fileExistsAtPath:lurl]);
+	}
+	else if ([menuItem action] == @selector(togglePDFSnoopDrawer:)) {
+		if ([documentSnoopDrawer contentView] == pdfSnoopContainerView &&
+			([documentSnoopDrawer state] == NSDrawerOpenState ||
+			 [documentSnoopDrawer state] == NSDrawerOpeningState)) {
+			[menuItem setTitle:NSLocalizedString(@"Close Drawer", @"Close drawer")];
+		} else {
+			[menuItem setTitle:NSLocalizedString(@"View File in Drawer", @"View file in drawer")];
+		}
+		NSString *lurl = [theBib localURLPathRelativeTo:[[theDocument fileName] stringByDeletingLastPathComponent]];
+		return (lurl && [[NSFileManager defaultManager] fileExistsAtPath:lurl]);
+	}
+	else if ([menuItem action] == @selector(toggleTextSnoopDrawer:)) {
+		if ([documentSnoopDrawer contentView] == textSnoopContainerView &&
+			([documentSnoopDrawer state] == NSDrawerOpenState ||
+			 [documentSnoopDrawer state] == NSDrawerOpeningState)) {
+			[menuItem setTitle:NSLocalizedString(@"Close Drawer", @"Close drawer")];
+		} else {
+			[menuItem setTitle:NSLocalizedString(@"View File as Text in Drawer", @"View as text file in drawer")];
+		}
+		NSString *lurl = [theBib localURLPathRelativeTo:[[theDocument fileName] stringByDeletingLastPathComponent]];
+		return (lurl && [[NSFileManager defaultManager] fileExistsAtPath:lurl]);
+	}
+	else if ([menuItem action] == @selector(viewRemote:)) {
+		NSString *rurl = [theBib valueOfField:BDSKUrlString];
+		return (![rurl isEqualToString:@""] && [NSURL URLWithString:rurl]);
 	}
 	return YES;
 }
@@ -600,11 +713,6 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
     NSString *lurl = [theBib localURLPathRelativeTo:[[theDocument fileName] stringByDeletingLastPathComponent]];
     NSString *rurl = [theBib valueOfField:BDSKUrlString];
     NSImage *icon;
-    NSURL *remote = [NSURL URLWithString:rurl];
-    NSDictionary *linkAttributes;
-    NSMutableAttributedString *link = [[NSMutableAttributedString alloc] initWithString:rurl];
-    NSString *ext = nil;
-
 
     BOOL drawerWasOpen = ([documentSnoopDrawer state] == NSDrawerOpenState);
     BOOL drawerIsOpening = ([documentSnoopDrawer state] == NSDrawerOpeningState);
@@ -615,79 +723,51 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 
     
     if (lurl && [[NSFileManager defaultManager] fileExistsAtPath:lurl]){
-            icon = [[NSWorkspace sharedWorkspace] iconForFile:lurl];
-            [viewLocalButton setIconImage:icon];      
-            [[viewLocalButton cell] setIconActionEnabled:YES];
-            [viewLocalButton setToolTip:@"View File"];
-            [[self window] setRepresentedFilename:lurl];
-			
-			ext = [lurl pathExtension];
-			BOOL fileIsPSOrPDF = ([ext isEqualToString:@"ps"] || [ext isEqualToString:@"pdf"]);
-			
-			if(fileIsPSOrPDF){
-				[documentSnoopButton setEnabled:YES];
-				[documentSnoopButton setToolTip:NSLocalizedString(@"Show first page in a drawer.", @"show first page in a drawer")];
-				[documentTextSnoopButton setEnabled:YES];
-				[documentTextSnoopButton setToolTip:NSLocalizedString(@"Show first page as text in a drawer.", @"show first page as text in a drawer")];
-            }
-			
-            if(drawerWasOpen || drawerIsOpening){
-                if(!_pdfSnoopImage){
-                    _pdfSnoopImage = [[NSImage alloc] initWithContentsOfFile:lurl];
-                }
+		icon = [[NSWorkspace sharedWorkspace] iconForFile:lurl];
+		[viewLocalButton setIconImage:icon];      
+		[[viewLocalButton cell] setIconActionEnabled:YES];
+		[viewLocalButton setToolTip:@"View File"];
+		[[self window] setRepresentedFilename:lurl];
+		
+		if(drawerWasOpen || drawerIsOpening){
+			if(!_pdfSnoopImage){
+				_pdfSnoopImage = [[NSImage alloc] initWithContentsOfFile:lurl];
+			}
 
-                //NSLog(@"setting snoop to %@ from file %@", _pdfSnoopImage, lurl);
+			//NSLog(@"setting snoop to %@ from file %@", _pdfSnoopImage, lurl);
 
-                if(_pdfSnoopImage){
-                    // [documentSnoopImageView setImage:_pdfSnoopImage];
-                    [documentSnoopImageView loadFromPath:lurl];
-                    [_pdfSnoopImage setBackgroundColor:[NSColor whiteColor]];
-                    
-                    [documentSnoopScrollView setDocumentViewAlignment:NSImageAlignTopLeft];
-                    if(drawerWasOpen) // open it again.
-                        [documentSnoopDrawer open];
-                    
-                }
-            }
+			if(_pdfSnoopImage){
+				// [documentSnoopImageView setImage:_pdfSnoopImage];
+				[documentSnoopImageView loadFromPath:lurl];
+				[_pdfSnoopImage setBackgroundColor:[NSColor whiteColor]];
+				
+				[documentSnoopScrollView setDocumentViewAlignment:NSImageAlignTopLeft];
+				if(drawerWasOpen) // open it again.
+					[documentSnoopDrawer open];
+				
+			}
+		}
     }else{
         [viewLocalButton setIconImage:[NSImage imageNamed:@"QuestionMarkFile"]];
 		[[viewLocalButton cell] setIconActionEnabled:NO];
         [viewLocalButton setToolTip:NSLocalizedString(@"Choose a file to link with in the Local-Url Field", @"bad/empty local url field")];
         [[self window] setRepresentedFilename:@""];
-
-        [documentSnoopButton setEnabled:NO];
-        [documentSnoopButton setToolTip:NSLocalizedString(@"Bad or Empty Local-Url Field", @"bad/empty local field")];
-        [documentTextSnoopButton setEnabled:NO];
-        [documentTextSnoopButton setToolTip:NSLocalizedString(@"Bad or Empty Local-Url Field", @"bad/empty local field")];
-        
     }
 
-    if(remote && ![rurl isEqualToString:@""]){
-        linkAttributes= [NSDictionary dictionaryWithObjectsAndKeys: rurl, NSLinkAttributeName,
-            [NSNumber numberWithInt:NSSingleUnderlineStyle], NSUnderlineStyleAttributeName,
-            [NSColor blueColor], NSForegroundColorAttributeName,
-            NULL];
-        [link setAttributes:linkAttributes range:NSMakeRange(0,[rurl length])];
-        [viewRemoteButton setAttributedTitle:link];     // set the URL field
-        linkAttributes= [NSDictionary dictionaryWithObjectsAndKeys: rurl, NSLinkAttributeName,
-            [NSNumber numberWithInt:NSSingleUnderlineStyle], NSUnderlineStyleAttributeName,
-            [NSColor redColor], NSForegroundColorAttributeName,
-            NULL];
-		[link setAttributes:linkAttributes range:NSMakeRange(0,[rurl length])];
-        [viewRemoteButton setAttributedAlternateTitle:link];     // set the URL field
-
-        [viewRemoteButton setEnabled:YES];
-        [viewRemoteButton setToolTip:NSLocalizedString(@"View in web browser", @"")];
+    if([NSURL URLWithString:rurl] && ![rurl isEqualToString:@""]){
+		icon = [[NSWorkspace sharedWorkspace] iconForFileType:@"webloc"];
+		[viewRemoteButton setIconImage:icon];
+        [[viewRemoteButton cell] setIconActionEnabled:YES];
+        [viewRemoteButton setToolTip:rurl];
     }else{
-        [viewRemoteButton setTitle:rurl];
-        [viewRemoteButton setEnabled:NO];
-        [viewRemoteButton setToolTip:NSLocalizedString(@"Bad or Empty Url Field", @"")];
+        [viewRemoteButton setIconImage:[NSImage imageNamed:@"QuestionMarkFile"]]; // this should be a different image
+		[[viewRemoteButton cell] setIconActionEnabled:NO];
+        [viewRemoteButton setToolTip:NSLocalizedString(@"Choose a URL to link with in the Url Field", @"bad/empty url field")];
     }
 
-    [link release];
 }
 
-#pragma mark || choose-local-url open-sheet support
+#pragma mark choose local-url or url support
 
 - (IBAction)chooseLocalURL:(id)sender{
     NSOpenPanel *oPanel = [NSOpenPanel openPanel];
@@ -719,8 +799,16 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 	[self fixURLs];
 }
 
+- (void)setRemoteURLFromMenuItem:(NSMenuItem *)sender{
+	[theBib setField:BDSKUrlString toValue:[sender representedObject]];
+		
+	[self finalizeChanges];
+	[self setupForm];
+	[self fixURLs];
+}
+
 // ----------------------------------------------------------------------------------------
-#pragma mark ||  add-Field-Sheet Support
+#pragma mark add-Field-Sheet Support
 // Add field sheet support
 // ----------------------------------------------------------------------------------------
 
@@ -943,22 +1031,23 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 	[[self window] close];
 }
 
-#pragma mark -
 #pragma mark snoop drawer stuff
 
-- (void)toggleSnoopDrawer:(id)sender{
-	NSView* oldContentView = [documentSnoopDrawer contentView];
-		
-    if (sender == documentSnoopButton) {
-        [documentSnoopDrawer setContentView:pdfSnoopContainerView];
-    }else{
-        [documentSnoopDrawer setContentView:textSnoopContainerView];
-    }
-	
-	if (oldContentView == [documentSnoopDrawer contentView]) {
+- (void)togglePDFSnoopDrawer:(id)sender{
+	if ([documentSnoopDrawer contentView] == pdfSnoopContainerView) {
 		[documentSnoopDrawer toggle:sender];
+	} else {
+		[documentSnoopDrawer setContentView:pdfSnoopContainerView];
+		[documentSnoopDrawer close:sender];
+		[documentSnoopDrawer open:sender];
 	}
-	else {
+}
+
+- (void)toggleTextSnoopDrawer:(id)sender{
+	if ([documentSnoopDrawer contentView] == textSnoopContainerView) {
+		[documentSnoopDrawer toggle:sender];
+	} else {
+		[documentSnoopDrawer setContentView:textSnoopContainerView];
 		[documentSnoopDrawer close:sender];
 		[documentSnoopDrawer open:sender];
 	}
@@ -972,11 +1061,6 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
     
 
     [self fixURLs]; //no this won't cause a loop - see fixURLs. Please don't break that though. Boy it's fragile.
-    if ([documentSnoopDrawer contentView] == pdfSnoopContainerView) {
-		[documentSnoopButton setToolTip:NSLocalizedString(@"Close drawer", @"")];
-	} else {
-		[documentTextSnoopButton setToolTip:NSLocalizedString(@"Close drawer", @"")];
-	}
 
     // @@snoop text - refactor this into a separate method later
     // @@URL handling refactor this
@@ -1006,8 +1090,6 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 
 
 - (void)drawerWillClose:(NSNotification *)notification{
-    [documentSnoopButton setToolTip:NSLocalizedString(@"Show the first page as PDF in a drawer.", @"")];
-    [documentTextSnoopButton setToolTip:NSLocalizedString(@"Show the first page as Text in a drawer.", @"")];
 }
 
 - (NSSize)drawerWillResizeContents:(NSDrawer *)sender toSize:(NSSize)contentSize{
