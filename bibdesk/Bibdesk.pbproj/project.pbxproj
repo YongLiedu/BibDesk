@@ -93,6 +93,65 @@
 //272
 //273
 //274
+		2711B30E05AD5099005A8084 = {
+			children = (
+				2711B31905AD50B1005A8084,
+				2711B31A05AD50B1005A8084,
+			);
+			isa = PBXGroup;
+			path = gfx;
+			refType = 4;
+			sourceTree = "<group>";
+		};
+		2711B31905AD50B1005A8084 = {
+			isa = PBXFileReference;
+			lastKnownFileType = image.tiff;
+			path = "BibDeskFolderIcon-1a-24.tiff";
+			refType = 4;
+			sourceTree = "<group>";
+		};
+		2711B31A05AD50B1005A8084 = {
+			isa = PBXFileReference;
+			lastKnownFileType = image.tiff;
+			path = "BibDeskFolderIcon-1a-48.tiff";
+			refType = 4;
+			sourceTree = "<group>";
+		};
+		2711B31B05AD50B1005A8084 = {
+			fileRef = 2711B31905AD50B1005A8084;
+			isa = PBXBuildFile;
+			settings = {
+			};
+		};
+		2711B31C05AD50B1005A8084 = {
+			fileRef = 2711B31A05AD50B1005A8084;
+			isa = PBXBuildFile;
+			settings = {
+			};
+		};
+		2711B31F05AD50FD005A8084 = {
+			fileRef = 2711B31905AD50B1005A8084;
+			isa = PBXBuildFile;
+			settings = {
+			};
+		};
+		2711B32105AD5108005A8084 = {
+			buildActionMask = 2147483647;
+			dstPath = "BibDesk Help/gfx";
+			dstSubfolderSpec = 7;
+			files = (
+				2711B31F05AD50FD005A8084,
+				2711B32205AD5136005A8084,
+			);
+			isa = PBXCopyFilesBuildPhase;
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		2711B32205AD5136005A8084 = {
+			fileRef = 2711B31A05AD50B1005A8084;
+			isa = PBXBuildFile;
+			settings = {
+			};
+		};
 		27413A6B05328D0A00BEE674 = {
 			fallbackIsa = PBXFileReference;
 			isa = PBXFrameworkReference;
@@ -1574,11 +1633,13 @@
 				27E0AA6F05A7C86B005BA25A,
 				27E0AA7605A7C86B005BA25A,
 				27E0AA7A05A7C86B005BA25A,
+				2711B32105AD5108005A8084,
 			);
 			buildRules = (
 			);
 			buildSettings = {
 				FRAMEWORK_SEARCH_PATHS = .;
+				GCC_PRECOMPILE_PREFIX_HEADER = NO;
 				HEADER_SEARCH_PATHS = .;
 				INFOPLIST_FILE = "Info-Bibdesk__Upgraded_.plist";
 				LIBRARY_SEARCH_PATHS = .;
@@ -1930,6 +1991,8 @@
 				27E0AA4405A7C86B005BA25A,
 				27E0AA4505A7C86B005BA25A,
 				27E0AA4605A7C86B005BA25A,
+				2711B31B05AD50B1005A8084,
+				2711B31C05AD50B1005A8084,
 			);
 			isa = PBXResourcesBuildPhase;
 			runOnlyForDeploymentPostprocessing = 0;
@@ -2639,7 +2702,6 @@
 				19C28FB0FE9D524F11CA2CBB,
 				2A37F4ABFDCFA73011CA2CEA,
 				2A37F4AFFDCFA73011CA2CEA,
-				F5A86D8F0398EAB601A80164,
 				2A37F4B8FDCFA73011CA2CEA,
 				2A37F4C3FDCFA73011CA2CEA,
 				27E2B71D0552090100FCECC3,
@@ -2747,6 +2809,7 @@
 				F5385A1402EC07DE014378E3,
 				2773D37E058C457E00C5ABDA,
 				2773D3A2058C45FE00C5ABDA,
+				F5A86D8F0398EAB601A80164,
 				F5C8DE480207E53E01731AA0,
 				F5CE4C220228994301EF0ACB,
 				2A37F4B9FDCFA73011CA2CEA,
@@ -4036,6 +4099,7 @@
 		};
 		F5FB32AB034D689801EF0AD8 = {
 			children = (
+				2711B30E05AD5099005A8084,
 				F5FB32BD034D714901EF0AD8,
 				F5FB32BE034D714901EF0AD8,
 				F5FB32B0034D6D4601EF0AD8,
