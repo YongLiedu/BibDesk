@@ -77,9 +77,11 @@ static unsigned threadCount = 0;
 }
 
 - (void)windowDidLoad{
+    NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
     [self performSelectorOnMainThread:@selector(resetPreviews)
                            withObject:nil
                         waitUntilDone:YES];
+    [pool release];
 }
 
 - (BOOL)PDFFromString:(NSString *)str{
@@ -114,14 +116,17 @@ static unsigned threadCount = 0;
             [NSThread sleepUntilDate:[[NSDate date] addTimeInterval:2.0]];
         }else{
             // if someone else is working and I'm not the top, die.
+            [pool release];
             return NO;
         }
     }
 
     // don't do anything if i'm not the top.
-    if(myThreadCount < threadCount)
+    if(myThreadCount < threadCount){
+        [pool release];
         return NO;
-
+    }
+    
     [workingLock lock];
     working = YES;
     [workingLock unlock];
@@ -149,6 +154,7 @@ static unsigned threadCount = 0;
     // overwrites the old bibpreview.tex file, replacing the previous bibliographystyle
     if(![finalTexFile writeToFile:texTemplatePath atomically:YES]){
         NSLog(@"error replacing texfile");
+        [pool release];
         return NO;
     }
 
@@ -156,18 +162,20 @@ static unsigned threadCount = 0;
     [bibTemplate appendFormat:@"\n%@",str];
     if(![bibTemplate writeToFile:tmpBibFilePath atomically:YES]){
         NSLog(@"Error replacing bibfile.");
+        [pool release];
         return NO;
     }
     
     if([self previewTexTasks:@"bibpreview.tex"]){ // run the TeX tasks
     
       if (myThreadCount >= threadCount){
-		  [self performSelectorOnMainThread:@selector(performDrawing)
-								 withObject:nil
-							  waitUntilDone:YES];
-      }else{
-		  NSLog(@"unable to draw");
-		  return NO;
+          [self performSelectorOnMainThread:@selector(performDrawing)
+                                                         withObject:nil
+                                                  waitUntilDone:YES];
+      } else {
+        NSLog(@"unable to draw");
+        [pool release];
+        return NO;
       } // if the tex task failed
     }
     // Pool for MT
@@ -182,11 +190,15 @@ static unsigned threadCount = 0;
 }
 
 - (void)performDrawing{
-	[imagePreviewView loadFromPath:finalPDFPath];
-	[self rtfPreviewFromData:[self rtfDataPreview]];
+    NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
+    [imagePreviewView loadFromPath:finalPDFPath];
+    [self rtfPreviewFromData:[self rtfDataPreview]];
+    [pool release];
 }	
 
 - (BOOL)previewTexTasks:(NSString *)fileName{ // we set working dir in NSTask
+    
+    NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
     
     NSTask *pdftex1;
     NSTask *pdftex2;
@@ -199,10 +211,12 @@ static unsigned threadCount = 0;
     if(![[NSFileManager defaultManager] fileExistsAtPath:pdftexbinpath]){
 #warning need more user-level errors in PDFPreviewer.
         NSLog(@"Incorrect path for pdftex.");
+        [pool release];
         return NO;
     }
     if(![[NSFileManager defaultManager] fileExistsAtPath:bibtexbinpath]){
         NSLog(@"Incorrect path for bibtex.");
+        [pool release];
         return NO;
     }
 
@@ -257,7 +271,8 @@ static unsigned threadCount = 0;
     [bibtex release];
     [pdftex2 release];
     [latex2rtf release];
-    
+
+    [pool release];
     return YES;
 
 }
@@ -297,10 +312,12 @@ static unsigned threadCount = 0;
     
     if(![[NSFileManager defaultManager] fileExistsAtPath:pdftexbinpath]){
         NSLog(@"Incorrect path for pdftex.");
+        [pool release];
         return nil;
     }
     if(![[NSFileManager defaultManager] fileExistsAtPath:bibtexbinpath]){
         NSLog(@"Incorrect path for bibtex.");
+        [pool release];
         return nil;
     }
    
@@ -318,6 +335,7 @@ static unsigned threadCount = 0;
     [finalTexFile appendFormat:@"%@bibliographystyle{%@%@", prefix, style, postfix];
     if(![finalTexFile writeToFile:texTemplatePath atomically:YES]){
         NSLog(@"error replacing texfile");
+        [pool release];
         return nil;
     }
 
@@ -325,6 +343,7 @@ static unsigned threadCount = 0;
     [bibTemplate appendFormat:@"\n%@",str];
     if(![bibTemplate writeToFile:tmpBibFilePath atomically:YES]){
         NSLog(@"Error replacing bibfile.");
+        [pool release];
         return nil;
     }
 
@@ -405,7 +424,7 @@ static unsigned threadCount = 0;
         [rtfPreviewView replaceCharactersInRange:[rtfPreviewView selectedRange]
                                          withRTF:rtfdata];
         [tabView unlockFocus];
-	    return YES;
+        return YES;
     } else {
         NSString *errstr = [NSString stringWithString:@"***** ERROR:  unable to create preview *****"];
         if([tabView lockFocusIfCanDraw]){
@@ -413,7 +432,6 @@ static unsigned threadCount = 0;
                           withString:errstr];
             [tabView unlockFocus];
         }
-        
     	return NO;
     }
 	
