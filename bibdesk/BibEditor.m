@@ -34,7 +34,7 @@ NSString *BDSKUrlString = @"Url";
 }
 
 
-- (id)initWithBibItem:(BibItem *)aBib{
+- (id)initWithBibItem:(BibItem *)aBib document:(BibDocument *)doc{
     self = [super initWithWindowNibName:@"BibEditor"];
     fieldNumbers = [[NSMutableDictionary dictionaryWithCapacity:1] retain];
     citeKeyFormatter = [[BDSKCiteKeyFormatter alloc] init];
@@ -44,18 +44,22 @@ NSString *BDSKUrlString = @"Url";
     [theBib setEditorObj:self];
     currentType = [theBib type];    // do this once in init so it's right at the start.
                                     // has to be before we call [self window] because that calls windowDidLoad:.
+	theDocument = doc; // don't retain - it retains us.
+	
+	[self setupCautionIcon];
+
     // this should probably be moved around.
     [[self window] setTitle:[theBib title]];
     [[self window] setDelegate:self];
     [[self window] registerForDraggedTypes:[NSArray arrayWithObjects:
-            NSStringPboardType, NSFilenamesPboardType, nil]];
+            NSStringPboardType, NSFilenamesPboardType, nil]];						   
 
 #if DEBUG
     NSLog(@"BibEditor alloc");
 #endif
-    changeCount = 0;
     return self;
 }
+
 - (void)windowWillLoad{
     [theBib setEditorObj:self];
     [citeKeyField setStringValue:[theBib citeKey]];
@@ -64,7 +68,14 @@ NSString *BDSKUrlString = @"Url";
     [abstractView setString:[theBib valueOfField:BDSKAbstractString]];
     [rssDescriptionView setString:[theBib valueOfField:BDSKRssDescriptionString]];
     [self fixURLs];
-    NSLog(@"BibEditor gets willLoad.");
+    // NSLog(@"BibEditor gets willLoad.");
+}
+
+- (void)windowDidLoad{
+    
+	if(![self citeKeyIsValid:[theBib citeKey]]){
+		[self setCiteKeyDuplicateWarning:YES];
+	} 	
 }
 
 
@@ -166,8 +177,10 @@ NSString *BDSKUrlString = @"Url";
     [notesView setString:[theBib valueOfField:BDSKAnnoteString]];
     [abstractView setString:[theBib valueOfField:BDSKAbstractString]];
     [rssDescriptionView setString:[theBib valueOfField:BDSKRssDescriptionString]];
-    [citeKeyField setStringValue:[theBib citeKey]];
-    [theBib setEditorObj:self];
+    
+	[citeKeyField setStringValue:[theBib citeKey]];
+	
+	[theBib setEditorObj:self];	
 	
 	[[NSNotificationCenter defaultCenter] addObserver:self
 											 selector:@selector(bibDidChange:)
@@ -182,16 +195,13 @@ NSString *BDSKUrlString = @"Url";
     // release theBib? no...
     [citeKeyFormatter release];
 	[[NSNotificationCenter defaultCenter] removeObserver:self];
+	[cautionIconImage release]; 
     [super dealloc];
 }
 
 - (void)show{
     [self showWindow:self];
 }
-
-- (void)setDocument:(NSDocument *)d{
-	theDocument = d; // don't retain - it retains us.
-}	
 
 // note that we don't want the - document accessor! It messes us up by getting called for other stuff.
 
@@ -244,27 +254,81 @@ NSString *BDSKUrlString = @"Url";
     }
 }
 
+#pragma mark Cite Key handling methods
+- (void)setupCautionIcon{
+	NSLog(@"init: getting icon");
+	IconRef cautionIconRef;
+	OSErr err = GetIconRef(kOnSystemDisk,
+						   kSystemIconsCreator,
+						   kAlertCautionBadgeIcon,
+						   &cautionIconRef);
+	if(err){
+		[NSException raise:@"BDSK No Icon Exception"  
+					format:@"Error getting the caution badge icon. To decipher the error number (%d),\n see file:///Developer/Documentation/Carbon/Reference/IconServices/index.html#//apple_ref/doc/uid/TP30000239", err];
+	}
+	
+	int size = 32;
+	
+	cautionIconImage = [[NSImage alloc] initWithSize:NSMakeSize(size,size)]; 
+	CGRect iconCGRect = CGRectMake(0,0,size,size);
+	
+	[cautionIconImage lockFocus]; 
+	
+	PlotIconRefInContext((CGContextRef)[[NSGraphicsContext currentContext] 
+		graphicsPort],
+						 &iconCGRect,
+						 kAlignAbsoluteCenter, //kAlignNone,
+						 kTransformNone,
+						 NULL /*inLabelColor*/,
+						 kPlotIconRefNormalFlags,
+						 cautionIconRef); 
+	
+	[cautionIconImage unlockFocus]; 
+}
+
+- (IBAction)showCiteKeyWarning:(id)sender{
+	int rv;
+	rv = NSRunCriticalAlertPanel(NSLocalizedString(@"",@""), 
+								 NSLocalizedString(@"The citation key you entered is either already used in this document or is empty. Please provide an unique one.",@""),
+								  NSLocalizedString(@"OK",@"OK"), nil, nil, nil);
+}
+
 - (IBAction)citeKeyDidChange:(id)sender{
     NSString *proposedCiteKey = [sender stringValue];
 	NSString *prevCiteKey = [theBib citeKey];
 	
-    int rv;
-	if(![proposedCiteKey isEqualToString:prevCiteKey]){
+   	if(![proposedCiteKey isEqualToString:prevCiteKey]){
 		if(![self citeKeyIsValid:proposedCiteKey]){
-			rv = NSRunCriticalAlertPanel(NSLocalizedString(@"",@""), 
-										 NSLocalizedString(@"The citation key you entered is either already used in this document or is empty. Please provide an unique one.",@""),
-										 NSLocalizedString(@"OK",@"OK"), nil, nil, nil);
-			NSLog(@"%d makeFirstResponder",[[self window] makeFirstResponder:citeKeyField]); // why won't this work?
-		}else{
 			
+			[self setCiteKeyDuplicateWarning:YES];
+	
+		}else{
+			[self setCiteKeyDuplicateWarning:NO];
 			[theBib setCiteKey:proposedCiteKey];
-			[self noteChange];
 		}
 	}
 }
 
+- (void)setCiteKeyDuplicateWarning:(BOOL)set{
+	NSLog(@"setting warning: %@", (set?@"YES":@"NO"));
+	if(set){
+		NSLog(@"setting image: %@ in button: %@",cautionIconImage, citeKeyWarningButton);
+		[citeKeyWarningButton setImage:cautionIconImage];
+		[citeKeyWarningButton setToolTip:NSLocalizedString(@"This cite-key is a duplicate",@"")];
+	}else{
+		[citeKeyWarningButton setImage:nil];
+		[citeKeyWarningButton setToolTip:NSLocalizedString(@"",@"")]; // @@ this should be nil?
+	}
+	[citeKeyWarningButton setEnabled:set];
+}
+
+// @@ should also check validity using citekeyformatter
 - (BOOL)citeKeyIsValid:(NSString *)proposedCiteKey{
-    return !([theDocument citeKeyIsUsed:proposedCiteKey byItemOtherThan:theBib] || [proposedCiteKey isEqualToString:@""]);
+	NSLog(@" - proposed [%@], used %@ in doc %@", proposedCiteKey,
+		  (([theDocument citeKeyIsUsed:proposedCiteKey byItemOtherThan:theBib]) ? @"YES": @"NO"), theDocument
+		  );
+    return !([theDocument citeKeyIsUsed:proposedCiteKey byItemOtherThan:theBib] ||
+			 [proposedCiteKey isEqualToString:@""]);
 }
 
 // sent by the notesView and the abstractView
@@ -347,7 +411,7 @@ NSString *BDSKUrlString = @"Url";
     }else{
         [viewLocalButton setImage:nil];
         [viewLocalButton setBordered:YES]; 
-        [viewLocalButton setTitle:NSLocalizedString(@"Pick\nFile.", @"Choose file, make sure it fits in the icon")];
+        [viewLocalButton setTitle:NSLocalizedString(@"Pick\nFile", @"Choose file, make sure it fits in the icon")];
         [viewLocalButton setToolTip:NSLocalizedString(@"Bad or Empty Local-Url Field", @"bad/empty local url field")];
         [viewLocalButton setAction:@selector(chooseLocalURL:)];
         

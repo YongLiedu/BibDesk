@@ -60,10 +60,7 @@ extern NSString *BDSKUrlString;
     IBOutlet NSButton* newFieldButtonCancel;
     IBOutlet NSWindow* newFieldWindow;
     // ----------------------------------------------------------------------------------------
-    // change count stuff:
-    int changeCount;
-    // ----------------------------------------------------------------------------------------
-    // Delete-field Sheet stuff:
+	// Delete-field Sheet stuff:
     IBOutlet NSPopUpButton *delFieldPopUp;
     IBOutlet NSButton* delFieldButtonOK;
     IBOutlet NSButton* delFieldButtonCancel;
@@ -92,19 +89,23 @@ extern NSString *BDSKUrlString;
     
 // Autocompletion stuff
     NSDictionary *completionMatcherDict;
-// cite string formatter
+	
+// cite-key checking stuff:
     BDSKCiteKeyFormatter *citeKeyFormatter;
+	IBOutlet NSButton *citeKeyWarningButton;
+	NSImage *cautionIconImage;
+	
 // new field formatter
     BDSKFieldNameFormatter *fieldNameFormatter;
 }
 
 /*!
-@method initWithBibItem:andBibDocument:
+@method initWithBibItem: document:
     @abstract designated Initializer
     @discussion
  @param aBib gives us a bib to edit
 */
-- (id)initWithBibItem:(BibItem *)aBib;
+- (id)initWithBibItem:(BibItem *)aBib document:(BibDocument *)doc;
 
 /*!
     @method setupForm
@@ -153,7 +154,12 @@ extern NSString *BDSKUrlString;
 
 - (IBAction)viewLocal:(id)sender;
 - (IBAction)viewRemote:(id)sender;
+
+- (void)setupCautionIcon;
+- (IBAction)showCiteKeyWarning:(id)sender;
 - (IBAction)citeKeyDidChange:(id)sender;
+- (void)setCiteKeyDuplicateWarning:(BOOL)set;
+
 
 - (IBAction)bibTypeDidChange:(id)sender;
 //- (IBAction)textFieldDidChange:(id)sender;
