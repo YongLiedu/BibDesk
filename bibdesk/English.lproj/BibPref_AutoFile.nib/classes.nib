@@ -3,6 +3,10 @@
         {
             ACTIONS = {
                 choosePapersFolderLocationAction = id; 
+                formatHelp = id; 
+                localUrlFormatAdd = id; 
+                localUrlFormatChanged = id; 
+                showLocalUrlFormatWarning = id; 
                 toggleFilePapersAutomaticallyAction = id; 
                 toggleKeepPapersFolderOrganizedAction = id; 
             }; 
@@ -11,6 +15,9 @@
             OUTLETS = {
                 choosePapersFolderLocationButton = NSButton; 
                 filePapersAutomaticallyCheckButton = NSButton; 
+                formatField = NSTextField; 
+                formatRepositoryPopUp = NSPopUpButton; 
+                formatWarningButton = NSButton; 
                 keepPapersFolderOrganizedCheckButton = NSButton; 
                 papersFolderLocationTextField = NSTextField; 
             }; 
