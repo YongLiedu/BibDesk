@@ -1141,42 +1141,6 @@
 			shellPath = /usr/bin/python;
 			shellScript = "import os\nbuildpath = os.environ[\"SOURCE_ROOT\"]\nos.environ[\"OTEST\"] = \"/Users/mike/Code/customizedLibs/OCUnit/tools/otest\"\nif os.environ.has_key(\"TEST_AFTER_BUILD\") and os.environ[\"TEST_AFTER_BUILD\"] == \"YES\":\n#\tos.popen(buildpath + \"RunTargetUnitTests\")\n\tos.popen(\"/Users/mike/Code/customizedLibs/OCUnit/tools/RunTargetUnitTests\")";
 		};
-		27BC882005EFF07B00309A0A = {
-			fileRef = F5A86DCD0398EC9401A80164;
-			isa = PBXBuildFile;
-			settings = {
-			};
-		};
-		27BC882105EFF07C00309A0A = {
-			fileRef = F5A86DCE0398EC9401A80164;
-			isa = PBXBuildFile;
-			settings = {
-			};
-		};
-		27BC882205EFF07D00309A0A = {
-			fileRef = 27730C30049B13ED00231206;
-			isa = PBXBuildFile;
-			settings = {
-			};
-		};
-		27BC882305EFF07E00309A0A = {
-			fileRef = 27730C31049B13ED00231206;
-			isa = PBXBuildFile;
-			settings = {
-			};
-		};
-		27BC882405EFF07E00309A0A = {
-			fileRef = 27730C37049B306900231206;
-			isa = PBXBuildFile;
-			settings = {
-			};
-		};
-		27BC882505EFF07F00309A0A = {
-			fileRef = 27730C38049B306900231206;
-			isa = PBXBuildFile;
-			settings = {
-			};
-		};
 		27CB67A405680FC0001D2AC3 = {
 			fileEncoding = 4;
 			isa = PBXFileReference;
@@ -1319,9 +1283,6 @@
 				27E0AA1B05A7C86B005BA25A,
 				27E0AA1C05A7C86B005BA25A,
 				27E0AA1D05A7C86B005BA25A,
-				27BC882005EFF07B00309A0A,
-				27BC882205EFF07D00309A0A,
-				27BC882405EFF07E00309A0A,
 			);
 			isa = PBXHeadersBuildPhase;
 			runOnlyForDeploymentPostprocessing = 0;
@@ -1923,9 +1884,6 @@
 				27E0AA6C05A7C86B005BA25A,
 				27E0AA6D05A7C86B005BA25A,
 				27E0AA6E05A7C86B005BA25A,
-				27BC882105EFF07C00309A0A,
-				27BC882305EFF07E00309A0A,
-				27BC882505EFF07F00309A0A,
 			);
 			isa = PBXSourcesBuildPhase;
 			runOnlyForDeploymentPostprocessing = 0;
