@@ -1323,42 +1323,52 @@ int generalBibItemCompareFunc(id item1, id item2, void *context){
     NSString *tempFileName = nil;
     NSData *data = nil;
     int rv = 0;
+    NSString *texstr = nil;
 
     if ([[pasteboard types] containsObject:NSStringPboardType]) {
-        data = [pasteboard dataForType:NSStringPboardType];
-        newPubs = [BibTeXParser itemsFromData:data error:&hadProblems];
-        if(hadProblems) {
-            // run a modal dialog asking if we want to use partial data or give up
-            rv = NSRunAlertPanel(NSLocalizedString(@"Error reading file!",@""),
-                                 NSLocalizedString(@"There was a problem reading the file. Do you want to use everything that did work (\"Keep Going\"), edit the file to correct the errors, or give up?\n(If you choose \"Keep Going\" and then save the file, you will probably lose data.)",@""),
-                                 NSLocalizedString(@"Give up",@""),
-                                 NSLocalizedString(@"Keep going",@""),
-                                 NSLocalizedString(@"Edit data", @""));
-            if (rv == NSAlertDefaultReturn) {
-                // the user said to give up
-              
-            }else if (rv == NSAlertAlternateReturn){
-                // the user said to keep going, so if they save, they might clobber data...
-                // note this by setting the update count:
-                [self updateChangeCount:NSChangeDone];
-            }else if(rv == NSAlertOtherReturn){
-                // they said to edit the file.
-                tempFileName = [NSTemporaryDirectory() stringByAppendingPathComponent:[[NSProcessInfo processInfo] globallyUniqueString]];
-                [data writeToFile:tempFileName atomically:YES];
-                [[NSApp delegate] openEditWindowWithFile:tempFileName];
-                [[NSApp delegate] showErrorPanel:self];
-                
-            }
-        }
-        newPubsE = [newPubs objectEnumerator];
-        while(newBI = [newPubsE nextObject]){
-            [self addPublication:newBI];
+	// TeXify the string before passing it to BibTeXParser as data
+	texstr = [BDSKConverter stringByTeXifyingString:[pasteboard stringForType:NSStringPboardType]];
+	[pasteboard declareTypes:[NSArray arrayWithObject:NSStringPboardType] owner:nil];
 
-            [self updateUIAndRefreshOutline:YES];
-            [self updateChangeCount:NSChangeDone];
-            if([[OFPreferenceWrapper sharedPreferenceWrapper] integerForKey:BDSKEditOnPasteKey] == NSOnState)
-                [self editPub:newBI forceChange:YES];
-        }
+	if([pasteboard setString:texstr forType:NSStringPboardType]){
+	    
+	    data = [pasteboard dataForType:NSStringPboardType];
+	    
+	    newPubs = [BibTeXParser itemsFromData:data error:&hadProblems];
+	    if(hadProblems) {
+		// run a modal dialog asking if we want to use partial data or give up
+		rv = NSRunAlertPanel(NSLocalizedString(@"Error reading file!",@""),
+				     NSLocalizedString(@"There was a problem reading the file. Do you want to use everything that did work (\"Keep Going\"), edit the file to correct the errors, or give up?\n(If you choose \"Keep Going\" and then save the file, you will probably lose data.)",@""),
+				     NSLocalizedString(@"Give up",@""),
+				     NSLocalizedString(@"Keep going",@""),
+				     NSLocalizedString(@"Edit data", @""));
+		if (rv == NSAlertDefaultReturn) {
+		    // the user said to give up
+		    
+		}else if (rv == NSAlertAlternateReturn){
+		    // the user said to keep going, so if they save, they might clobber data...
+		    // note this by setting the update count:
+		    [self updateChangeCount:NSChangeDone];
+		}else if(rv == NSAlertOtherReturn){
+		    // they said to edit the file.
+		    tempFileName = [NSTemporaryDirectory() stringByAppendingPathComponent:[[NSProcessInfo processInfo] globallyUniqueString]];
+		    [data writeToFile:tempFileName atomically:YES];
+		    [[NSApp delegate] openEditWindowWithFile:tempFileName];
+		    [[NSApp delegate] showErrorPanel:self];
+		    
+		}
+	    }
+	    newPubsE = [newPubs objectEnumerator];
+	    while(newBI = [newPubsE nextObject]){
+		[self addPublication:newBI];
+		
+		[self updateUIAndRefreshOutline:YES];
+		[self updateChangeCount:NSChangeDone];
+		if([[OFPreferenceWrapper sharedPreferenceWrapper] integerForKey:BDSKEditOnPasteKey] == NSOnState)
+		    [self editPub:newBI forceChange:YES];
+	    }
+	} // pasteboard setString
+	
     }else{
         NSBeep();// Pasting the wrong type gets you nowhere.
     }
