@@ -140,9 +140,13 @@
 		<key>ć</key>
 		<string>{\'c}</string>
 		<key>Č</key>
-		<string>{\u C}</string>
+		<string>{\v C}</string>
 		<key>č</key>
-		<string>{\u c}</string>
+		<string>{\v c}</string>
+		<key>ě</key>
+		<string>{\v e}</string>
+		<key>ő</key>
+		<string>{\H o}</string>
 		<key>œ</key>
 		<string>{\oe}</string>
 		<key>Ÿ</key>
@@ -208,6 +212,8 @@
 		<string>Å</string>
 		<key>{\AE}</key>
 		<string>Æ</string>
+		<key>{\H o}</key>
+		<string>ő</string>
 		<key>{\OE}</key>
 		<string>Œ</string>
 		<key>{\O}</key>
@@ -268,6 +274,12 @@
 		<string>Č</string>
 		<key>{\u c}</key>
 		<string>č</string>
+		<key>{\v C}</key>
+		<string>Č</string>
+		<key>{\v c}</key>
+		<string>č</string>
+		<key>{\v e}</key>
+		<string>ě</string>
 		<key>{\~a}</key>
 		<string>ã</string>
 		<key>{\~n}</key>
