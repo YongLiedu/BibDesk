@@ -19,6 +19,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
     @discussion declares an interface to author model objects
 */
 #import <Cocoa/Cocoa.h>
+@class BibPersonController;
 @class BibItem;
 
 /*!
@@ -33,6 +34,8 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
     NSString *_vonPart;
     NSString *_lastName;
     NSString *_jrPart;
+    
+    BibPersonController *_personController;
 }
 
 + (BibAuthor *)authorWithName:(NSString *)name andPub:(BibItem *)aPub;
@@ -52,6 +55,8 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 - (NSString *)lastName;
 - (NSString *)jrPart;
 
+- (BibPersonController *)personController;
+- (void)setPersonController:(BibPersonController *)newPersonController;
 
 - (void)setName:(NSString *)newName;
 
@@ -59,3 +64,4 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 - (void)addPub:(BibItem *)pub;
 - (void)removePubFromAuthorList:(BibItem *)pub;
 @end
+
