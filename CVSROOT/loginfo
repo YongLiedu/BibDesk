@@ -28,3 +28,5 @@
 CVSROOT /cvsroot/sitedocs/CVSROOT/cvstools/syncmail %{sVv} mmcc@users.sourceforge.net
 
 DEFAULT /cvsroot/sitedocs/CVSROOT/cvstools/syncmail %{sVv} bibdesk-commit@lists.sourceforge.net
+
+ALL /usr/bin/perl $CVSROOT/CVSROOT/ciabot_cvs.pl %{,,,s} $USER 
