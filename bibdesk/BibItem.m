@@ -249,15 +249,33 @@ void _setupFonts(){
 }
 
 - (NSComparisonResult)dateCompare:(BibItem *)aBI{
-	return [pubDate compare:[aBI date]];
+	NSCalendarDate *aDate = [aBI date];
+	if (pubDate == nil) {
+		return (aDate == nil)? NSOrderedSame : NSOrderedDescending;
+	} else if (aDate == nil) {
+		return NSOrderedAscending;
+	}
+	return [pubDate compare:aDate];
 }
 
 - (NSComparisonResult)createdDateCompare:(BibItem *)aBI{
-	return [pubDate compare:[aBI date]];
+	NSCalendarDate *aDate = [aBI dateCreated];
+	if (pubDate == nil) {
+		return (aDate == nil)? NSOrderedSame : NSOrderedDescending;
+	} else if (aDate == nil) {
+		return NSOrderedAscending;
+	}
+	return [dateCreated compare:aDate];
 }
 
 - (NSComparisonResult)modDateCompare:(BibItem *)aBI{
-	return [pubDate compare:[aBI date]];
+	NSCalendarDate *aDate = [aBI dateModified];
+	if (pubDate == nil) {
+		return (aDate == nil)? NSOrderedSame : NSOrderedDescending;
+	} else if (aDate == nil) {
+		return NSOrderedAscending;
+	}
+	return [dateModified compare:aDate];
 }
 
 
