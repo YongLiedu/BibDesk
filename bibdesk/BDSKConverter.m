@@ -89,14 +89,16 @@ static BDSKConverter *theConverter;
 - (NSString *)stringByTeXifyingString:(NSString *)s{
 	// TeXify only string nodes of complex strings;
 	if([s isComplex]){
-		NSEnumerator *nodeEnum = [[(BDSKComplexString *)s nodes] objectEnumerator];
+		BDSKComplexString *cs = [s copy];
+		
+		NSEnumerator *nodeEnum = [[cs nodes] objectEnumerator];
 		BDSKStringNode *node = nil;
 		
 		while(node = [nodeEnum nextObject]){
 			if([node type] == BSN_STRING)
 				[node setValue:[self stringByTeXifyingString:[node value]]];
 		}
-		return s;
+		return [cs autorelease];
 	}
 	
     // s should be in UTF-8 or UTF-16 (i'm not sure which exactly) format (since that's what the property list editor spat)
@@ -224,14 +226,16 @@ static BDSKConverter *theConverter;
 - (NSString *)stringByDeTeXifyingString:(NSString *)s{
 	// deTeXify only string nodes of complex strings;
 	if([s isComplex]){
-		NSEnumerator *nodeEnum = [[(BDSKComplexString *)s nodes] objectEnumerator];
+		BDSKComplexString *cs = [s copy];
+		
+		NSEnumerator *nodeEnum = [[cs nodes] objectEnumerator];
 		BDSKStringNode *node = nil;
 		
 		while(node = [nodeEnum nextObject]){
 			if([node type] == BSN_STRING)
 				[node setValue:[self stringByDeTeXifyingString:[node value]]];
 		}
-		return s;
+		return [cs autorelease];
 	}
 	
     NSScanner *scanner = [NSScanner scannerWithString:s];
