@@ -22,6 +22,7 @@
 }
 
 - (void)dealloc{
+    [[NSNotificationCenter defaultCenter] removeObserver:self];
     [macros release];
     [super dealloc];
 }
@@ -33,22 +34,34 @@
 }
 
 - (void)setMacroDataSource:(id)newMacroDataSource{
-    macroDataSource = newMacroDataSource;
+    if (macroDataSource) {
+		[[NSNotificationCenter defaultCenter]
+				removeObserver:self
+						  name:BDSKBibDocMacroKeyChangedNotification
+						object:macroDataSource];
+		[[NSNotificationCenter defaultCenter]
+				removeObserver:self
+						  name:BDSKBibDocMacroDefinitionChangedNotification
+						object:macroDataSource];
+    }
+	
+	macroDataSource = newMacroDataSource;
     // register to listen for changes in the macros.
     // mostly used to correctly catch undo changes.
     // there are 4 notifications, but for now our 
     // response is the same for all of them.
-    [[NSNotificationCenter defaultCenter]
-            addObserver:self
-               selector:@selector(handleMacroKeyChangedNotification:)
-                   name:BDSKBibDocMacroKeyChangedNotification
-                 object:macroDataSource];
-    [[NSNotificationCenter defaultCenter]
-            addObserver:self
-               selector:@selector(handleMacroChangedNotification:)
-                   name:BDSKBibDocMacroDefinitionChangedNotification
-                 object:macroDataSource];
-    
+    if (macroDataSource) {
+		[[NSNotificationCenter defaultCenter]
+				addObserver:self
+				   selector:@selector(handleMacroKeyChangedNotification:)
+					   name:BDSKBibDocMacroKeyChangedNotification
+					 object:macroDataSource];
+		[[NSNotificationCenter defaultCenter]
+				addObserver:self
+				   selector:@selector(handleMacroChangedNotification:)
+					   name:BDSKBibDocMacroDefinitionChangedNotification
+					 object:macroDataSource];
+    }
     
     [self refreshMacros];
 }
