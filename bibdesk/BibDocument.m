@@ -1134,8 +1134,11 @@ Enhanced delete method that uses a sheet instead of a modal dialogue.
                     if([field isEqualToString:@"Pub Type"]){
                         selectorString=@"type";
                     } else {
-                        if([field isEqualToString:@"Cite Key"]){
-                            selectorString=@"citekey";
+                        if([field caseInsensitiveCompare:@"Cite Key"] == NSOrderedSame ||
+                           [field caseInsensitiveCompare:@"CiteKey"] == NSOrderedSame ||
+                           [field caseInsensitiveCompare:@"Cite-Key"] == NSOrderedSame ||
+                           [field caseInsensitiveCompare:@"Key"] == NSOrderedSame){
+                            selectorString=@"citeKey";
                         } else {
                             isGeneric = YES; // this means that we don't have an accessor for it in BibItem
                         }
