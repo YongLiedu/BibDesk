@@ -55,8 +55,6 @@ extern NSString *BDSKUrlString;
     IBOutlet NSTextField* citeKeyField;
 //    IBOutlet NSButton* viewLocalButton;
 	IBOutlet RYZImagePopUpButton *viewLocalButton;
-	NSMenu *viewLocalMenu;
-	NSImage *noFilesIconImage;
     IBOutlet NSButton* viewRemoteButton;
     IBOutlet NSScrollView* fieldsScrollView;
     // ----------------------------------------------------------------------------------------
@@ -168,8 +166,10 @@ extern NSString *BDSKUrlString;
 - (void)finalizeChanges;
 
 - (IBAction)viewLocal:(id)sender;
-- (void)setupViewLocalMenu;
-- (void)setupNoFilesIcon;
+- (NSMenu *)menuForImagePopUpButton;
+- (NSArray *)getSafariRecentDownloadsMenu;
+- (void)setLocalURLPathFromMenuItem:(NSMenuItem *)sender;
+
 
 - (IBAction)viewRemote:(id)sender;
 

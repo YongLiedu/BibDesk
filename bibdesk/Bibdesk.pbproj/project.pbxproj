@@ -771,6 +771,8 @@
 		};
 		2773D35B058C410500C5ABDA = {
 			children = (
+				27770FD106D94B2D0070C5F0,
+				27770FD206D94B2D0070C5F0,
 				27BF060206D7F097008AD3AE,
 				27BF060306D7F097008AD3AE,
 				27BF060406D7F097008AD3AE,
@@ -818,6 +820,56 @@
 			path = htmlExportTemplate;
 			refType = 4;
 			sourceTree = "<group>";
+		};
+		27770F6D06D936320070C5F0 = {
+			isa = PBXFileReference;
+			lastKnownFileType = image.tiff;
+			name = QuestionMarkFile.tiff;
+			path = Images/QuestionMarkFile.tiff;
+			refType = 4;
+			sourceTree = "<group>";
+		};
+		27770F6E06D936320070C5F0 = {
+			fileRef = 27770F6D06D936320070C5F0;
+			isa = PBXBuildFile;
+			settings = {
+			};
+		};
+		27770F8806D938960070C5F0 = {
+			fileRef = 27770F6D06D936320070C5F0;
+			isa = PBXBuildFile;
+			settings = {
+			};
+		};
+		27770FD106D94B2D0070C5F0 = {
+			fileEncoding = 30;
+			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.c.h;
+			name = BDAlias.h;
+			path = ../bibdesk_vendorsrc/BDistributed/BDAlias/BDAlias.h;
+			refType = 2;
+			sourceTree = SOURCE_ROOT;
+		};
+		27770FD206D94B2D0070C5F0 = {
+			fileEncoding = 30;
+			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.c.objc;
+			name = BDAlias.m;
+			path = ../bibdesk_vendorsrc/BDistributed/BDAlias/BDAlias.m;
+			refType = 2;
+			sourceTree = SOURCE_ROOT;
+		};
+		27770FD306D94B2D0070C5F0 = {
+			fileRef = 27770FD106D94B2D0070C5F0;
+			isa = PBXBuildFile;
+			settings = {
+			};
+		};
+		27770FD406D94B2D0070C5F0 = {
+			fileRef = 27770FD206D94B2D0070C5F0;
+			isa = PBXBuildFile;
+			settings = {
+			};
 		};
 		2777412406B6465100200533 = {
 			fileEncoding = 30;
@@ -1226,6 +1278,7 @@
 				6CA69B9106D1F780005F2126,
 				27BF060606D7F097008AD3AE,
 				27BF060806D7F097008AD3AE,
+				27770FD306D94B2D0070C5F0,
 			);
 			isa = PBXHeadersBuildPhase;
 			runOnlyForDeploymentPostprocessing = 0;
@@ -1529,6 +1582,7 @@
 				F9D8602406B2FC7D00F2DE7D,
 				27BF095E06D81B39008AD3AE,
 				6CF888E006BB35A7000AC4FC,
+				27770F8806D938960070C5F0,
 				6CF888E106BB35A7000AC4FC,
 				6CF888E206BB35A7000AC4FC,
 				6CF888E306BB35A7000AC4FC,
@@ -1767,6 +1821,7 @@
 				6CA69B9206D1F780005F2126,
 				27BF060706D7F097008AD3AE,
 				27BF060906D7F097008AD3AE,
+				27770FD406D94B2D0070C5F0,
 			);
 			isa = PBXSourcesBuildPhase;
 			runOnlyForDeploymentPostprocessing = 0;
@@ -3849,6 +3904,7 @@
 		};
 		F5CE4C220228994301EF0ACB = {
 			children = (
+				27770F6D06D936320070C5F0,
 				F508016802F9E9C201A8020B,
 				27BF095506D81ABC008AD3AE,
 				F946E34206135F2800AB29EA,
@@ -4902,6 +4958,7 @@
 				2777412806B6465100200533,
 				2777412906B6465100200533,
 				27BF095606D81ABC008AD3AE,
+				27770F6E06D936320070C5F0,
 			);
 			inputPaths = (
 				Scripting/BibDesk.sdef,

@@ -19,7 +19,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 #import "BibEditor.h"
 #import "BibDocument.h"
 #import <OmniAppKit/NSScrollView-OAExtensions.h>
-
+#import "BDAlias.h"
 
 NSString *BDSKAnnoteString = @"Annote";
 NSString *BDSKAbstractString = @"Abstract";
@@ -40,8 +40,6 @@ NSString *BDSKUrlString = @"Url";
     citeKeyFormatter = [[BDSKCiteKeyFormatter alloc] init];
     fieldNameFormatter = [[BDSKFieldNameFormatter alloc] init];
 	
-	[self setupViewLocalMenu];
-    
     theBib = aBib;
     [theBib setEditorObj:self];
     currentType = [theBib type];    // do this once in init so it's right at the start.
@@ -49,14 +47,12 @@ NSString *BDSKUrlString = @"Url";
 	theDocument = doc; // don't retain - it retains us.
 	
 	[self setupCautionIcon];
-	[self setupNoFilesIcon];
 
     // this should probably be moved around.
     [[self window] setTitle:[theBib title]];
     [[self window] setDelegate:self];
     [[self window] registerForDraggedTypes:[NSArray arrayWithObjects:
             NSStringPboardType, NSFilenamesPboardType, nil]];					
-
 
 #if DEBUG
     NSLog(@"BibEditor alloc");
@@ -187,11 +183,12 @@ NSString *BDSKUrlString = @"Url";
 	[viewLocalButton setArrowImage:[NSImage imageNamed:@"ArrowPointingDown"]];
 	[viewLocalButton setShowsMenuWhenIconClicked:NO];
 	[[viewLocalButton cell] setAltersStateOfSelectedItem:NO];
-
-	[[viewLocalButton cell] setUsesItemFromMenu:NO];	 
-	
-	[viewLocalButton setMenu:viewLocalMenu];
-	
+	[[viewLocalButton cell] setAlwaysUsesFirstItemAsSelected:YES];
+	[[viewLocalButton cell] setUsesItemFromMenu:NO];
+	[[viewLocalButton cell] setRefreshesMenu:YES];
+	[[viewLocalButton cell] setDelegate:self];
+		
+	[viewLocalButton setMenu:[self menuForImagePopUpButton]];
 	
 	[self fixURLs];
     [notesView setString:[theBib valueOfField:BDSKAnnoteString]];
@@ -221,8 +218,6 @@ NSString *BDSKUrlString = @"Url";
     [citeKeyFormatter release];
 	[[NSNotificationCenter defaultCenter] removeObserver:self];
 	[cautionIconImage release]; 
-	[noFilesIconImage release];
-	[viewLocalMenu release];
     [super dealloc];
 }
 
@@ -249,6 +244,12 @@ NSString *BDSKUrlString = @"Url";
     [theDocument saveDocument:sender];
 }
 
+- (IBAction)revealLocal:(id)sender{
+    NSWorkspace *sw = [NSWorkspace sharedWorkspace];
+	NSString *path = [theBib localURLPathRelativeTo:[[theDocument fileName] stringByDeletingLastPathComponent]];
+	[sw selectFile:path inFileViewerRootedAtPath:nil];
+}
+
 - (IBAction)viewLocal:(id)sender{
     NSWorkspace *sw = [NSWorkspace sharedWorkspace];
     
@@ -273,55 +274,136 @@ NSString *BDSKUrlString = @"Url";
 
 }
 
-- (void)setupViewLocalMenu{
-	[viewLocalMenu autorelease];
-	viewLocalMenu = [[NSMenu alloc] init];
+- (NSMenu *)menuForImagePopUpButton{
+	NSMenu *viewLocalMenu = [[NSMenu alloc] init];
 	// the first one has to be view file, since it's also the button's action when you're clicking on the icon.
-	NSMenuItem *viewLocalMenuItem = [[[NSMenuItem alloc] initWithTitle:NSLocalizedString(@"View File",@"View file string")
-																action:@selector(viewLocal:)
-														 keyEquivalent:@""] autorelease];
-	[viewLocalMenu addItem:viewLocalMenuItem];
+	[viewLocalMenu addItemWithTitle:NSLocalizedString(@"View File",@"View file string")
+							 action:@selector(viewLocal:)
+					  keyEquivalent:@""];
 	
-	NSMenuItem *chooseFileMenuItem = [[[NSMenuItem alloc] initWithTitle:NSLocalizedString(@"Choose File...",@"Choose file string")
-																 action:@selector(chooseLocalURL:)
-														  keyEquivalent:@""] autorelease];
-	[viewLocalMenu addItem:chooseFileMenuItem];
+	[viewLocalMenu addItemWithTitle:NSLocalizedString(@"Reveal in Finder",@"Reveal in finder")
+							 action:@selector(revealLocal:)
+					  keyEquivalent:@""];
 	
-	[viewLocalMenu addItem:[NSMenuItem separatorItem]];
+	[viewLocalMenu addItemWithTitle:NSLocalizedString(@"Choose File...",@"Choose file string")
+							 action:@selector(chooseLocalURL:)
+					  keyEquivalent:@""];
 	
-}
-
-
-- (void)setupNoFilesIcon{
-	IconRef noFilesIconRef;
-	OSErr err = GetIconRef(kOnSystemDisk,
-						   kSystemIconsCreator,
-						   kNoFilesIcon,
-						   &noFilesIconRef);
-	if(err){
-		[NSException raise:@"BDSK No Icon Exception"  
-					format:@"Error getting the caution badge icon. To decipher the error number (%d),\n see file:///Developer/Documentation/Carbon/Reference/IconServices/index.html#//apple_ref/doc/uid/TP30000239", err];
+	// get Safari recent downloads
+	NSArray *safariItems = [self getSafariRecentDownloadsMenu];
+	int i = 0;
+	for (i = 0; i < [safariItems count]; i ++){
+		[viewLocalMenu addItem:[safariItems objectAtIndex:i]];
 	}
 	
-	int size = 32;
-	
-	noFilesIconImage = [[NSImage alloc] initWithSize:NSMakeSize(size,size)]; 
-	CGRect iconCGRect = CGRectMake(0,0,size,size);
-	
-	[noFilesIconImage lockFocus]; 
-	
-	PlotIconRefInContext((CGContextRef)[[NSGraphicsContext currentContext] 
-		graphicsPort],
-						 &iconCGRect,
-						 kAlignAbsoluteCenter, //kAlignNone,
-						 kTransformNone,
-						 NULL /*inLabelColor*/,
-						 kPlotIconRefNormalFlags,
-						 noFilesIconRef); 
-	
-	[noFilesIconImage unlockFocus]; 
+	NSArray *previewItems = [self getPreviewRecentDocuments];
+	for (i = 0; i < [previewItems count]; i ++){
+		[viewLocalMenu addItem:[previewItems objectAtIndex:i]];
+	}
+	return [viewLocalMenu autorelease];
 }
 
+
+- (NSArray *)getSafariRecentDownloadsMenu{
+	NSString *downloadPlistFileName = [NSHomeDirectory()  stringByAppendingPathComponent:@"Library"];
+	downloadPlistFileName = [downloadPlistFileName stringByAppendingPathComponent:@"Safari"];
+	downloadPlistFileName = [downloadPlistFileName stringByAppendingPathComponent:@"downloads.plist"];
+	
+	NSDictionary *dict = [NSDictionary dictionaryWithContentsOfFile:downloadPlistFileName];
+
+	NSArray *historyArray = [dict objectForKey:@"DownloadHistory"];
+	NSMutableArray *array = [NSMutableArray array];
+	int i = 0;
+	BOOL separatorAdded = NO;
+	
+	for (i = 0; i < [historyArray count]; i ++){
+		NSDictionary *itemDict = [historyArray objectAtIndex:i];
+		NSString *filePath = [itemDict objectForKey:@"DownloadEntryPath"];
+		filePath = [filePath stringByExpandingTildeInPath];
+		if([[NSFileManager defaultManager] fileExistsAtPath:filePath]){
+			if(!separatorAdded){
+				separatorAdded = YES;
+				[array addObject:[NSMenuItem separatorItem]];
+				NSString *headerString = NSLocalizedString(@"Link to downloaded file:",@"");
+				NSMenuItem *headerItem = [[NSMenuItem alloc] initWithTitle:headerString
+																	action:nil
+															 keyEquivalent:@""];
+				[headerItem setTarget:self];
+				[array addObject:[headerItem autorelease]];
+			}
+			NSString *fileName = [filePath lastPathComponent];
+			NSImage *image = [[NSWorkspace sharedWorkspace] iconForFile:filePath];
+			[image setSize: NSMakeSize(16, 16)];
+			
+			NSMenuItem *item = [[NSMenuItem alloc] initWithTitle:fileName
+														  action:@selector(setLocalURLPathFromMenuItem:)
+												   keyEquivalent:@""];
+			[item setRepresentedObject:filePath];
+			[item setImage:image];
+			[item setIndentationLevel:1];
+			[array addObject:[item autorelease]];
+		}
+	}
+
+	return array;
+}
+
+- (NSArray *)getPreviewRecentDocuments{
+	BOOL yn = CFPreferencesSynchronize(@"com.apple.Preview",
+									   kCFPreferencesCurrentUser,
+									   kCFPreferencesCurrentHost);
+	
+	NSArray *historyArray = CFPreferencesCopyAppValue(@"NSRecentDocumentRecords",
+													  @"com.apple.Preview");
+	NSMutableArray *array = [NSMutableArray array];
+	int i = 0;
+	BOOL separatorAdded = NO;
+	
+	for (i = 0; i < [historyArray count]; i ++){
+		NSDictionary *itemDict1 = [historyArray objectAtIndex:i];
+		NSDictionary *itemDict2 = [itemDict1 objectForKey:@"_NSLocator"];
+		NSData *aliasData = [itemDict2 objectForKey:@"_NSAlias"];
+		
+		BDAlias *bda = [BDAlias aliasWithData:aliasData];
+		
+		NSString *filePath = [bda fullPath];
+
+		filePath = [filePath stringByExpandingTildeInPath];
+		if([[NSFileManager defaultManager] fileExistsAtPath:filePath]){
+			if(!separatorAdded){
+				separatorAdded = YES;
+				[array addObject:[NSMenuItem separatorItem]];
+				NSString *headerString = NSLocalizedString(@"Link to Recent File from Preview:",@"");
+				NSMenuItem *headerItem = [[NSMenuItem alloc] initWithTitle:headerString
+																	action:nil
+															 keyEquivalent:@""];
+				[headerItem setTarget:self];
+				[array addObject:[headerItem autorelease]];
+			}
+			NSString *fileName = [filePath lastPathComponent];
+			NSImage *image = [[NSWorkspace sharedWorkspace] iconForFile:filePath];
+			[image setSize: NSMakeSize(16, 16)];
+			
+			NSMenuItem *item = [[NSMenuItem alloc] initWithTitle:fileName
+														  action:@selector(setLocalURLPathFromMenuItem:)
+												   keyEquivalent:@""];
+			[item setRepresentedObject:filePath];
+			[item setImage:image];
+			[item setIndentationLevel:1];
+			[array addObject:[item autorelease]];
+		}
+	}
+	
+	return array;
+}
+
+
+- (BOOL)validateMenuItem:(id <NSMenuItem>)menuItem{
+	if([menuItem action] == nil){
+		return NO;
+	}
+	return YES;
+}
 
 - (IBAction)viewRemote:(id)sender{
     NSWorkspace *sw = [NSWorkspace sharedWorkspace];
@@ -475,7 +557,7 @@ NSString *BDSKUrlString = @"Url";
                 }
             }
     }else{
-        [viewLocalButton setIconImage:noFilesIconImage];
+        [viewLocalButton setIconImage:[NSImage imageNamed:@"QuestionMarkFile"]];
 		[[viewLocalButton cell] seticonActionEnabled:NO];
         [viewLocalButton setToolTip:NSLocalizedString(@"Choose a file to link with in the Local-Url Field", @"bad/empty local url field")];
         
@@ -531,6 +613,12 @@ NSString *BDSKUrlString = @"Url";
     
 }
 
+- (void)setLocalURLPathFromMenuItem:(NSMenuItem *)sender{
+	NSString *path = [sender representedObject];
+	[theBib setField:@"Local-Url" toValue:path];
+	[self setupForm];
+	[self fixURLs];
+}
 
 // ----------------------------------------------------------------------------------------
 #pragma mark ||  add-Field-Sheet Support
