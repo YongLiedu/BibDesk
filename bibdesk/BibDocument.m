@@ -429,38 +429,29 @@ stringByAppendingPathComponent:@"BibDesk"]; */
         return [self loadBibTeXDataRepresentation:data];
     }else if([aType isEqualToString:@"Rich Site Summary File"]){
         return [self loadRSSDataRepresentation:data];
+    }else if([aType isEqualToString:@"PubMed File"]){
+        return [self loadPubMedDataRepresentation:data];
     }
-    //else
     return NO;
 }
 
-- (BOOL)loadRSSDataRepresentation:(NSData *)data{
-    //stub
-    return NO;
-}
-
-- (BOOL)loadBibTeXDataRepresentation:(NSData *)data{
+- (BOOL)loadPubMedDataRepresentation:(NSData *)data{
     int rv = 0;
     BOOL hadProblems = NO;
     NSMutableDictionary *dictionary = nil;
     NSString *tempFileName = nil;
+    NSString *dataString = [[[NSString alloc] initWithData:data encoding:NSUTF8StringEncoding] autorelease];
     NSString* filePath = [self fileName];
-
+    
     if(!filePath){
         filePath = @"Untitled Document";
     }
     dictionary = [NSMutableDictionary dictionaryWithCapacity:10];
-
-    // to enable some cheapo timing, uncomment these:
-    //    NSDate *start = [NSDate date];
-    //    NSLog(@"start: %@", start);
-    publications = [[BibTeXParser itemsFromData:data
-                                           error:&hadProblems
-                                     frontMatter:frontMatter
-                                        filePath:filePath] retain]; 
-
-    // NSLog(@"end %@ elapsed: %f", [NSDate date], [start timeIntervalSinceNow]);
     
+    publications = [[PubMedParser itemsFromString:dataString
+                                         error:&hadProblems
+                                   frontMatter:frontMatter
+                                      filePath:filePath] retain]; 
     if(hadProblems){
         // run a modal dialog asking if we want to use partial data or give up
         rv = NSRunAlertPanel(NSLocalizedString(@"Error reading file!",@""),
@@ -478,7 +469,61 @@ stringByAppendingPathComponent:@"BibDesk"]; */
         }else if(rv == NSAlertOtherReturn){
             // they said to edit the file.
             tempFileName = [NSTemporaryDirectory() stringByAppendingPathComponent:[[NSProcessInfo processInfo] globallyUniqueString]];
-            [data writeToFile:tempFileName atomically:YES];
+            [dataString writeToFile:tempFileName atomically:YES];
+            [[NSApp delegate] openEditWindowWithFile:tempFileName];
+            [[NSApp delegate] showErrorPanel:self];
+            return NO;
+        }
+    }
+    
+    [shownPublications setArray:publications];
+    
+    // since we can't save pubmed files as pubmed files:
+    [self updateChangeCount:NSChangeDone];
+    
+    return YES;
+}
+
+- (BOOL)loadRSSDataRepresentation:(NSData *)data{
+    //stub
+    return NO;
+}
+
+- (BOOL)loadBibTeXDataRepresentation:(NSData *)data{
+    int rv = 0;
+    BOOL hadProblems = NO;
+    NSMutableDictionary *dictionary = nil;
+    NSString *tempFileName = nil;
+    NSString *dataString = [[[NSString alloc] initWithData:data encoding:NSUTF8StringEncoding] autorelease];
+    NSString* filePath = [self fileName];
+
+    if(!filePath){
+        filePath = @"Untitled Document";
+    }
+    dictionary = [NSMutableDictionary dictionaryWithCapacity:10];
+
+    publications = [[BibTeXParser itemsFromString:dataString
+                                           error:&hadProblems
+                                     frontMatter:frontMatter
+                                        filePath:filePath] retain]; 
+    if(hadProblems){
+        // run a modal dialog asking if we want to use partial data or give up
+        rv = NSRunAlertPanel(NSLocalizedString(@"Error reading file!",@""),
+                             NSLocalizedString(@"There was a problem reading the file. Do you want to use everything that did work (\"Keep Going\"), edit the file to correct the errors, or give up?\n(If you choose \"Keep Going\" and then save the file, you will probably lose data.)",@""),
+                             NSLocalizedString(@"Give up",@""),
+                             NSLocalizedString(@"Keep going",@""),
+                             NSLocalizedString(@"Edit file", @""));
+        if (rv == NSAlertDefaultReturn) {
+            // the user said to give up
+            return NO;
+        }else if (rv == NSAlertAlternateReturn){
+            // the user said to keep going, so if they save, they might clobber data...
+            // note this by setting the update count:
+            [self updateChangeCount:NSChangeDone];
+        }else if(rv == NSAlertOtherReturn){
+            // they said to edit the file.
+            tempFileName = [NSTemporaryDirectory() stringByAppendingPathComponent:[[NSProcessInfo processInfo] globallyUniqueString]];
+            [dataString writeToFile:tempFileName atomically:YES];
             [[NSApp delegate] openEditWindowWithFile:tempFileName];
             [[NSApp delegate] showErrorPanel:self];
             return NO;
@@ -940,12 +985,12 @@ didClickTableColumn: (NSTableColumn *) tableColumn{
     BibItem *newBI;
     BOOL hadProblems = NO;
     NSString *tempFileName = nil;
-    NSData *data = nil;
+    NSString *dataString = nil;
     int rv = 0;
 
     if ([[pasteboard types] containsObject:NSStringPboardType]) {
-        data = [pasteboard dataForType:NSStringPboardType];
-        newPubs = [BibTeXParser itemsFromData:data error:&hadProblems];
+        dataString = [pasteboard stringForType:NSStringPboardType];
+        newPubs = [BibTeXParser itemsFromString:dataString error:&hadProblems];
         if(hadProblems) {
             // run a modal dialog asking if we want to use partial data or give up
             rv = NSRunAlertPanel(NSLocalizedString(@"Error reading file!",@""),
@@ -963,7 +1008,7 @@ didClickTableColumn: (NSTableColumn *) tableColumn{
             }else if(rv == NSAlertOtherReturn){
                 // they said to edit the file.
                 tempFileName = [NSTemporaryDirectory() stringByAppendingPathComponent:[[NSProcessInfo processInfo] globallyUniqueString]];
-                [data writeToFile:tempFileName atomically:YES];
+                [dataString writeToFile:tempFileName atomically:YES];
                 [[NSApp delegate] openEditWindowWithFile:tempFileName];
                 [[NSApp delegate] showErrorPanel:self];
                 
@@ -1030,7 +1075,7 @@ didClickTableColumn: (NSTableColumn *) tableColumn{
     }
     */
 
-// @@FIXME: will not always say "Publications shown"?
+#warning FIXME: will not always say "Publications shown"?
     [infoLine setStringValue: [NSString stringWithFormat:
         NSLocalizedString(@"%d of %d Publications shown.",
                           @"need two ints in format string."),
@@ -1358,7 +1403,7 @@ didClickTableColumn: (NSTableColumn *) tableColumn{
                 [items addObject:rowItem];
             }else if([rowItem isKindOfClass:[BibAuthor class]]){
                 // rowItem *should* be expanded if we're getting called. (We assume this!)
-                //@@fixme -  bibauthor dependence
+#warning bibauthor dependence
                 childE = [[rowItem children] objectEnumerator];
                 while(child = [childE nextObject]){
                     if ([items indexOfObjectIdenticalTo:child] == NSNotFound) {

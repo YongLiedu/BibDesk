@@ -43,7 +43,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 - (BOOL)performDragOperation:(id <NSDraggingInfo>)sender {
     NSPasteboard *pboard;
     NSDragOperation sourceDragMask;
-    NSData *pbData; 
+    NSString *pbString;
     NSArray *fileNames;
     NSArray *draggedPubs;
     NSEnumerator *draggedPubsE;
@@ -87,9 +87,9 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
         }
     }else if ( [[pboard types] containsObject:NSStringPboardType] ) {
         // get the item from the string
-        pbData = [pboard dataForType:NSStringPboardType];
+        pbString = [pboard stringForType:NSStringPboardType];
 
-        draggedPubs = [BibTeXParser itemsFromData:pbData
+        draggedPubs = [BibTeXParser itemsFromString:pbString
                                               error:&hadProblems];
         if(hadProblems) return NO;
             

@@ -218,7 +218,7 @@
 				LIBRARY_SEARCH_PATHS = .;
 				OTHER_CFLAGS = "-pipe";
 				OTHER_LDFLAGS = "-pipe";
-				PRODUCT_NAME = Bibdesk;
+				PRODUCT_NAME = BibdeskExperimental;
 				SECTORDER_FLAGS = "";
 				WARNING_CFLAGS = "-Wmost";
 				WRAPPER_EXTENSION = app;
@@ -279,6 +279,8 @@
 				2769A8CE055354A000F49EFD,
 				2769A8CF055354A000F49EFD,
 				2769A8D0055354A000F49EFD,
+				27CB67AA05680FC0001D2AC3,
+				27CB67B005681124001D2AC3,
 			);
 			isa = PBXHeadersBuildPhase;
 			runOnlyForDeploymentPostprocessing = 0;
@@ -804,6 +806,8 @@
 				2769A919055354A000F49EFD,
 				2769A91A055354A000F49EFD,
 				2769A91B055354A000F49EFD,
+				27CB67AB05680FC0001D2AC3,
+				27CB67B105681124001D2AC3,
 			);
 			isa = PBXSourcesBuildPhase;
 			runOnlyForDeploymentPostprocessing = 0;
@@ -1134,7 +1138,7 @@
 			expectedFileType = wrapper.application;
 			includeInIndex = 0;
 			isa = PBXFileReference;
-			path = Bibdesk.app;
+			path = BibdeskExperimental.app;
 			refType = 3;
 			sourceTree = BUILT_PRODUCTS_DIR;
 		};
@@ -1282,6 +1286,8 @@
 				27C41F9104BE88BF007932DC,
 				2758D09205264CA900825D64,
 				279D5367053535B2002DBEA0,
+				27CB67A805680FC0001D2AC3,
+				27CB67B205681124001D2AC3,
 			);
 			isa = PBXHeadersBuildPhase;
 			runOnlyForDeploymentPostprocessing = 0;
@@ -1372,6 +1378,8 @@
 				27C41F9204BE88C0007932DC,
 				2758D09305264CA900825D64,
 				279D5368053535B2002DBEA0,
+				27CB67A905680FC0001D2AC3,
+				27CB67B305681124001D2AC3,
 			);
 			isa = PBXSourcesBuildPhase;
 			runOnlyForDeploymentPostprocessing = 0;
@@ -2452,6 +2460,114 @@
 			settings = {
 			};
 		};
+		27CB67A405680FC0001D2AC3 = {
+			expectedFileType = sourcecode.c.h;
+			fileEncoding = 4;
+			isa = PBXFileReference;
+			name = BibLibrary.h;
+			path = /Users/mike/Code/bibdesk_experimental/BibLibrary.h;
+			refType = 0;
+			sourceTree = "<absolute>";
+		};
+		27CB67A505680FC0001D2AC3 = {
+			expectedFileType = sourcecode.c.objc;
+			fileEncoding = 4;
+			isa = PBXFileReference;
+			name = BibLibrary.m;
+			path = /Users/mike/Code/bibdesk_experimental/BibLibrary.m;
+			refType = 0;
+			sourceTree = "<absolute>";
+		};
+		27CB67A605680FC0001D2AC3 = {
+			fileRef = 27CB67A405680FC0001D2AC3;
+			isa = PBXBuildFile;
+			settings = {
+			};
+		};
+		27CB67A705680FC0001D2AC3 = {
+			fileRef = 27CB67A505680FC0001D2AC3;
+			isa = PBXBuildFile;
+			settings = {
+			};
+		};
+		27CB67A805680FC0001D2AC3 = {
+			fileRef = 27CB67A405680FC0001D2AC3;
+			isa = PBXBuildFile;
+			settings = {
+			};
+		};
+		27CB67A905680FC0001D2AC3 = {
+			fileRef = 27CB67A505680FC0001D2AC3;
+			isa = PBXBuildFile;
+			settings = {
+			};
+		};
+		27CB67AA05680FC0001D2AC3 = {
+			fileRef = 27CB67A405680FC0001D2AC3;
+			isa = PBXBuildFile;
+			settings = {
+			};
+		};
+		27CB67AB05680FC0001D2AC3 = {
+			fileRef = 27CB67A505680FC0001D2AC3;
+			isa = PBXBuildFile;
+			settings = {
+			};
+		};
+		27CB67AC05681124001D2AC3 = {
+			expectedFileType = sourcecode.c.h;
+			fileEncoding = 4;
+			isa = PBXFileReference;
+			name = PubMedParser.h;
+			path = /Users/mike/Code/bibdesk_experimental/PubMedParser.h;
+			refType = 0;
+			sourceTree = "<absolute>";
+		};
+		27CB67AD05681124001D2AC3 = {
+			expectedFileType = sourcecode.c.objc;
+			fileEncoding = 4;
+			isa = PBXFileReference;
+			name = PubMedParser.m;
+			path = /Users/mike/Code/bibdesk_experimental/PubMedParser.m;
+			refType = 0;
+			sourceTree = "<absolute>";
+		};
+		27CB67AE05681124001D2AC3 = {
+			fileRef = 27CB67AC05681124001D2AC3;
+			isa = PBXBuildFile;
+			settings = {
+			};
+		};
+		27CB67AF05681124001D2AC3 = {
+			fileRef = 27CB67AD05681124001D2AC3;
+			isa = PBXBuildFile;
+			settings = {
+			};
+		};
+		27CB67B005681124001D2AC3 = {
+			fileRef = 27CB67AC05681124001D2AC3;
+			isa = PBXBuildFile;
+			settings = {
+			};
+		};
+		27CB67B105681124001D2AC3 = {
+			fileRef = 27CB67AD05681124001D2AC3;
+			isa = PBXBuildFile;
+			settings = {
+			};
+		};
+		27CB67B205681124001D2AC3 = {
+			fileRef = 27CB67AC05681124001D2AC3;
+			isa = PBXBuildFile;
+			settings = {
+			};
+		};
+		27CB67B305681124001D2AC3 = {
+			fileRef = 27CB67AD05681124001D2AC3;
+			isa = PBXBuildFile;
+			settings = {
+			};
+		};
 		27E2B71D0552090100FCECC3 = {
 			children = (
 				F561A4AC04577CDE01C78117,
@@ -3107,6 +3223,8 @@
 				F5F7774B03E9156E01EF0ABE,
 				2758D09005264CA900825D64,
 				279D5365053535B2002DBEA0,
+				27CB67A605680FC0001D2AC3,
+				27CB67AE05681124001D2AC3,
 			);
 			isa = PBXHeadersBuildPhase;
 			runOnlyForDeploymentPostprocessing = 0;
@@ -3200,6 +3318,8 @@
 				F5F7774C03E9156E01EF0ABE,
 				2758D09105264CA900825D64,
 				279D5366053535B2002DBEA0,
+				27CB67A705680FC0001D2AC3,
+				27CB67AF05681124001D2AC3,
 			);
 			isa = PBXSourcesBuildPhase;
 			runOnlyForDeploymentPostprocessing = 0;
@@ -3734,6 +3854,8 @@
 		};
 		F54EFEAE0251690501709AC4 = {
 			children = (
+				27CB67A405680FC0001D2AC3,
+				27CB67A505680FC0001D2AC3,
 				2A37F4AEFDCFA73011CA2CEA,
 				2A37F4ACFDCFA73011CA2CEA,
 				F549BA3502D3E09801EF0AD2,
@@ -4043,6 +4165,8 @@
 				F59F40B001FE890401F4F503,
 				F5AD2CC00397226201A80164,
 				F5AD2CC10397226201A80164,
+				27CB67AC05681124001D2AC3,
+				27CB67AD05681124001D2AC3,
 			);
 			isa = PBXGroup;
 			name = Controllers;

@@ -19,4 +19,5 @@
 - (NSArray *)optionalFieldsForType:(NSString *)type;
 - (NSArray *)userDefaultFieldsForType:(NSString *)type;
 - (NSArray *)bibTypesForFileType:(NSString *)fileType;
+- (NSString *)fieldNameForPubMedTag:(NSString *)tag;
 @end

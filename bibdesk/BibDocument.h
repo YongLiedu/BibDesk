@@ -27,6 +27,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 #import "BDSKCustomCiteTableView.h"
 #import "BDSKConverter.h"
 #import "BibTeXParser.h"
+#import "PubMedParser.h"
 #import <OmniAppKit/OASplitView.h>
 
 
@@ -129,6 +130,7 @@ extern NSString* LocalDragPasteboardName;
 - (BOOL)loadDataRepresentation:(NSData *)data ofType:(NSString *)aType;
 - (BOOL)loadBibTeXDataRepresentation:(NSData *)data;
 - (BOOL)loadRSSDataRepresentation:(NSData *)data;
+- (BOOL)loadPubMedDataRepresentation:(NSData *)data;
 
 
 // Responses to UI actions

@@ -352,7 +352,7 @@ void _setupFonts(){
 
     if(!citeKey){
         if([self numberOfAuthors] > 0){
-            authString = [self authorAtIndex:0];
+            authString = [[self authorAtIndex:0] lastName];
             // [BibAuthor lastNameFromString:
         }
         if([self date]){

@@ -28,6 +28,71 @@
 		<string>Code</string>
 		<string>Crossref</string>
 	</array>
+	<key>BibTeXTypesForPubMedTypes</key>
+	<dict/>
+	<key>BibTeXFieldNamesForPubMedTags</key>
+	<dict>
+		<key>A1</key>
+		<string>Author</string>
+		<key>A2</key>
+		<string>Author</string>
+		<key>A3</key>
+		<string>Author</string>
+		<key>AB</key>
+		<string>Abstract</string>
+		<key>AD</key>
+		<string>affiliation</string>
+		<key>AU</key>
+		<string>Author</string>
+		<key>BT</key>
+		<string>Title</string>
+		<key>CT</key>
+		<string>Title</string>
+		<key>DP</key>
+		<string>date</string>
+		<key>ED</key>
+		<string>Editor</string>
+		<key>IP</key>
+		<string>number</string>
+		<key>JA</key>
+		<string>Journal</string>
+		<key>JF</key>
+		<string>Journal</string>
+		<key>JO</key>
+		<string>Journal</string>
+		<key>KW</key>
+		<string>Keywords</string>
+		<key>LA</key>
+		<string>language</string>
+		<key>MH</key>
+		<string>keywords</string>
+		<key>N1</key>
+		<string>Annote</string>
+		<key>N2</key>
+		<string>Abstract</string>
+		<key>PG</key>
+		<string>pages</string>
+		<key>PY</key>
+		<string>Year</string>
+		<key>RP</key>
+		<string>Status</string>
+		<key>T1</key>
+		<string>Title</string>
+		<key>T2</key>
+		<string>Title</string>
+		<key>T3</key>
+		<string>Title</string>
+		<key>TA</key>
+		<string>Journal</string>
+		<key>TI</key>
+		<string>Title</string>
+		<key>UI</key>
+		<string>medlineref</string>
+		<key>VI</key>
+		<string>volume</string>
+		<key>Y1</key>
+		<string>Year</string>
+	</dict>
 	<key>FieldsForTypes</key>
 	<dict>
 		<key>article</key>
@@ -327,6 +392,13 @@
 			<key>FileExtension</key>
 			<string>.xml</string>
 		</dict>
+		<key>RIS</key>
+		<dict>
+			<key>DefaultType</key>
+			<string>Article</string>
+			<key>FileExtension</key>
+			<string>.ris</string>
+		</dict>
 	</dict>
 	<key>TypesForFileType</key>
 	<dict>
@@ -349,6 +421,44 @@
 			<string>techreport</string>
 			<string>unpublished</string>
 			<string>url</string>
+		</array>
+		<key>PubMed</key>
+		<array>
+			<string>ABST</string>
+			<string>ADVS</string>
+			<string>ART</string>
+			<string>BILL</string>
+			<string>BOOK</string>
+			<string>CASE</string>
+			<string>CHAP</string>
+			<string>COMP</string>
+			<string>CONF</string>
+			<string>CTLG</string>
+			<string>DATA</string>
+			<string>ELEC</string>
+			<string>GEN</string>
+			<string>HEAR</string>
+			<string>ICOMM</string>
+			<string>INPR</string>
+			<string>JFULL</string>
+			<string>FOUR</string>
+			<string>MAP</string>
+			<string>MGZN</string>
+			<string>MPCT</string>
+			<string>MUSIC</string>
+			<string>NEWS</string>
+			<string>PAMP</string>
+			<string>PAT</string>
+			<string>PCOMM</string>
+			<string>RPRT</string>
+			<string>SER</string>
+			<string>SLIDE</string>
+			<string>SOUND</string>
+			<string>STAT</string>
+			<string>THES</string>
+			<string>UNBILI</string>
+			<string>UNPB</string>
+			<string>VIDEO</string>
 		</array>
 	</dict>
 </dict>

@@ -35,9 +35,41 @@
 			<key>NSDocumentClass</key>
 			<string>BibDocument</string>
 		</dict>
+		<dict>
+			<key>CFBundleTypeExtensions</key>
+			<array>
+				<string>bdlib</string>
+			</array>
+			<key>CFBundleTypeName</key>
+			<string>BibDesk Library</string>
+			<key>CFBundleTypeOSTypes</key>
+			<array>
+				<string>BDLIB</string>
+			</array>
+			<key>CFBundleTypeRole</key>
+			<string>Editor</string>
+			<key>NSDocumentClass</key>
+			<string>BibLibrary</string>
+		</dict>
+		<dict>
+			<key>CFBundleTypeExtensions</key>
+			<array>
+				<string>fcgi</string>
+			</array>
+			<key>CFBundleTypeMIMETypes</key>
+			<array>
+				<string>application/x-Research-Info-Systems</string>
+			</array>
+			<key>CFBundleTypeName</key>
+			<string>PubMed File</string>
+			<key>CFBundleTypeRole</key>
+			<string>Editor</string>
+			<key>NSDocumentClass</key>
+			<string>BibDocument</string>
+		</dict>
 	</array>
 	<key>CFBundleExecutable</key>
-	<string>Bibdesk</string>
+	<string>BibdeskExperimental</string>
 	<key>CFBundleGetInfoString</key>
 	<string>version 0.84</string>
 	<key>CFBundleHelpBookFolder</key>
@@ -59,7 +91,7 @@
 	<key>CFBundleSignature</key>
 	<string>MMcC</string>
 	<key>CFBundleVersion</key>
-	<string>0.84</string>
+	<string>0.84e1</string>
 	<key>NSAppleScriptEnabled</key>
 	<string>YES</string>
 	<key>NSMainNibFile</key>

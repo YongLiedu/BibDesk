@@ -26,6 +26,6 @@
  @result An array where each entry is anautoreleased bibItem (or null if the parsing failed.)
 
  */
-+ (NSMutableArray *)itemsFromData:(NSData *)inData error:(BOOL *)hadProblems;
-+ (NSMutableArray *)itemsFromData:(NSData *)inData error:(BOOL *)hadProblems frontMatter:(NSMutableString *)frontMatter filePath:(NSString *)filePath;
++ (NSMutableArray *)itemsFromString:(NSString *)itemString error:(BOOL *)hadProblems;
++ (NSMutableArray *)itemsFromString:(NSString *)itemString error:(BOOL *)hadProblems frontMatter:(NSMutableString *)frontMatter filePath:(NSString *)filePath;
 @end
