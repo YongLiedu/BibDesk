@@ -8,15 +8,15 @@
 
 #import "BDSKFontManager.h"
 
-static BDSKFontManager *sharedFontManager = nil;
+static BDSKFontManager *privateFontManager = nil;
 
 @implementation BDSKFontManager
 
 + (BDSKFontManager *)sharedFontManager{
-    if(!sharedFontManager){
-        sharedFontManager = [[BDSKFontManager alloc] init];
+    if(!privateFontManager){
+        privateFontManager = [[self alloc] init];
     }
-    return sharedFontManager;
+    return privateFontManager;
 }
 
 - (id)init{
@@ -109,7 +109,8 @@ NSFont *bodyFontForFamily(NSString *tryFamily)
         return NSSmallCapsFontMask;
     else if([style isEqualToString:@"\\emph"])
         return NSItalicFontMask;
-    else
-        return NSUnitalicFontMask | NSUnboldFontMask;
+    else if([style isEqualToString:@"\\textup"])
+        return NSUnitalicFontMask;
+    else return 0;
 }
 @end
