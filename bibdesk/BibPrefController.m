@@ -30,6 +30,7 @@ NSString *BDSKCiteEndBracketKey = @"Citation End Bracket";
 
 NSString *BDSKCiteKeyFormatKey = @"Cite Key Format";
 NSString *BDSKCiteKeyFormatPresetKey = @"Cite Key Format Preset";
+NSString *BDSKCiteKeyAutogenerateKey = @"Cite Key Autogenerate";
 
 NSString *BDSKShowColsKey = @"Shown Columns";
 NSString *BDSKShownColsNamesKey = @"Shown Column Names";

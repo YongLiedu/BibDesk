@@ -66,6 +66,7 @@ extern NSString *BDSKCiteEndBracketKey;
 
 extern NSString *BDSKCiteKeyFormatKey;
 extern NSString *BDSKCiteKeyFormatPresetKey;
+extern NSString *BDSKCiteKeyAutogenerateKey;
 
 extern NSString *BDSKAutoSaveAsRSSKey;
 extern NSString *BDSKRSSDescriptionFieldKey;

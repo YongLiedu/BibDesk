@@ -260,6 +260,8 @@
 					<string>%a1:%Y%r2</string>
 					<key>Cite Key Format Preset</key>
 					<integer>1</integer>
+					<key>Cite Key Autogenerate</key>
+					<integer>1</integer>
 				</dict>
 				<key>icon</key>
 				<string>key.tiff</string>
