@@ -33,7 +33,7 @@
     NSTableColumn *tc = [tableView tableColumnWithIdentifier:@"macro"];
     if([[self macroDataSource] respondsToSelector:@selector(displayName)])
         [[self window] setTitle:[NSString stringWithFormat:@"%@: %@", [[self window] title], [[self macroDataSource] displayName]]];
-  //  [[tc dataCell] setFormatter:[[[MacroKeyFormatter alloc] init] autorelease]];
+    [[tc dataCell] setFormatter:[[[MacroKeyFormatter alloc] init] autorelease]];
     [tableView registerForDraggedTypes:[NSArray arrayWithObject:NSStringPboardType]];
     [tableView reloadData];
 }
@@ -155,11 +155,18 @@
     [super showWindow:sender];
 }
 
-- (int)numberOfRowsInTableView:(NSTableView *)tableView{
+- (void)windowWillClose:(NSNotification *)notification{
+	if(![[self window] makeFirstResponder:[self window]])
+        [[self window] endEditingFor:nil];
+}
+
+#pragma mark tableView datasource methods
+
+- (int)numberOfRowsInTableView:(NSTableView *)tv{
     return [macros count];
 }
 
-- (id)tableView:(NSTableView *)tableView objectValueForTableColumn:(NSTableColumn *)tableColumn row:(int)row{
+- (id)tableView:(NSTableView *)tv objectValueForTableColumn:(NSTableColumn *)tableColumn row:(int)row{
     NSDictionary *macroDefinitions = [(id <BDSKMacroResolver>)macroDataSource macroDefinitions];
     NSString *key = [macros objectAtIndex:row];
     
@@ -171,7 +178,7 @@
     
 }
 
-- (void)tableView:(NSTableView *)tableView setObjectValue:(id)object forTableColumn:(NSTableColumn *)tableColumn row:(int)row{
+- (void)tableView:(NSTableView *)tv setObjectValue:(id)object forTableColumn:(NSTableColumn *)tableColumn row:(int)row{
     if([[[self window] undoManager] isUndoingOrRedoing]) return;
     NSParameterAssert(row >= 0 && row < [macros count]);    
     NSDictionary *macroDefinitions = [(id <BDSKMacroResolver>)macroDataSource macroDefinitions];
@@ -181,13 +188,31 @@
         // do nothing if there was no change.
         if([key isEqualToString:object]) return;
                 
+		if([object isEqualToString:@""]){
+			NSRunAlertPanel(NSLocalizedString(@"Empty Macro", @"Empty Macro"),
+							NSLocalizedString(@"The macro can not be empty.", @""),
+							NSLocalizedString(@"OK", @"OK"), nil, nil);
+			
+			[tableView reloadData];
+			return;
+		}
+		
         [(id <BDSKMacroResolver>)macroDataSource changeMacroKey:key to:object];
 
     }else{
         // do nothing if there was no change.
         if([[macroDefinitions objectForKey:key] isEqualToString:object]) return;
         
-        [(id <BDSKMacroResolver>)macroDataSource setMacroDefinition:object forMacro:key];
+		if(![object isStringTeXQuotingBalancedWithBraces:YES connected:NO]){
+			NSRunAlertPanel(NSLocalizedString(@"Invalid Value", @"Invalid Value"),
+							NSLocalizedString(@"The value you entered contains unbalanced braces and cannot be saved.", @""),
+							NSLocalizedString(@"OK", @"OK"), nil, nil);
+			
+			[tableView reloadData];
+			return;
+		}
+		
+		[(id <BDSKMacroResolver>)macroDataSource setMacroDefinition:object forMacro:key];
     }
 }
 
@@ -309,15 +334,25 @@
 }
 
 - (BOOL)isPartialStringValid:(NSString **)partialStringPtr proposedSelectedRange:(NSRangePointer)proposedSelRangePtr originalString:(NSString *)origString originalSelectedRange:(NSRange)origSelRange errorDescription:(NSString **)error{
+    static NSCharacterSet *invalidMacroCharSet = nil;
+	
+	if (!invalidMacroCharSet) {
+		NSMutableCharacterSet *tmpSet = [[[NSMutableCharacterSet alloc] init] autorelease];
+		[tmpSet addCharactersInRange:NSMakeRange(48,10)]; // 0-9
+		[tmpSet addCharactersInRange:NSMakeRange(65,26)]; // A-Z
+		[tmpSet addCharactersInRange:NSMakeRange(97,26)]; // a-z
+		[tmpSet addCharactersInString:@"!$&*+-./:;<>?[]^_`|"]; // see the btparse documentation
+		invalidMacroCharSet = [[[[tmpSet copy] autorelease] invertedSet] retain];
+	}
     
-    NSString *partialString = *partialStringPtr;
+	NSString *partialString = *partialStringPtr;
     
-    if([partialString containsCharacterInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]]){
+    if( [partialString containsCharacterInSet:invalidMacroCharSet] ||
+	    ([partialString length] && 
+		 [[NSCharacterSet decimalDigitCharacterSet] characterIsMember:[partialString characterAtIndex:0]]) ){
         return NO;
-    }else{
-        return YES;
     }
-    
+    return YES;
 }
 
 
