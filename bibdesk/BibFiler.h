@@ -16,11 +16,7 @@
 	
 	IBOutlet NSWindow *window;
 	IBOutlet NSTableView *tv;
-	IBOutlet NSButton *actionButton;
-	IBOutlet NSButton *cancelButton;
 	IBOutlet NSTextField *infoTextField;
-	IBOutlet NSButton *cleanupCheckBox;
-	IBOutlet NSButton *deleteCheckBox;
 	
 	NSArray *_currentPapers;
 	BibDocument *_currentDocument;
@@ -33,22 +29,77 @@
 
 + (BibFiler *)sharedFiler;
 
+/*!
+	@method		filePapers:fromDocument:doc:ask:
+	@abstract	Main auto-file routine to file papers in the Papers folder according to a generated location.
+	@param		papers The BibItemsfor which linked files should be moved.
+	@param		doc The parent document of the papers. 
+	@param		ask Boolean determines whether to ask the user to proceed or to move only entries with all necessary fields set. 
+	@discussion	-
+*/
 - (void)filePapers:(NSArray *)papers fromDocument:(BibDocument *)doc ask:(BOOL)ask;
+
+/*!
+	@method		movePath:toPath:forPaper:fromDocument:moveAll:
+	@abstract	Tries to move a file 
+	@param		path The original path of the linked file.
+	@param		newPath The path where to move the file to. 
+	@param		paper The BibItem for the linked file.
+	@param		doc The parent document of the paper. 
+	@param		ask Boolean determines to move irrespective of whether all necessary bibliography fields are set.
+	@discussion -
+*/
 - (void)movePath:(NSString *)path toPath:(NSString *)newPath forPaper:(BibItem *)paper fromDocument:(BibDocument *)doc moveAll:(BOOL)moveAll;
+
+/*!
+	@method		prepareMoveForDocument:
+	@abstract	Prepares a move of several linked files, mainly initializing variables. 
+	@param		doc The parent document. 
+	@discussion -
+*/
 - (void)prepareMoveForDocument:(BibDocument *)doc;
+
+/*!
+	@method		finishMoveForDocument:
+	@abstract	Finishes the move of several linked files.
+	@param		doc The parent document. 
+	@discussion -
+*/
 - (void)finishMoveForDocument:(BibDocument *)doc;
+
+/*!
+	@method		showProblems
+	@abstract	Shows a dialog with information on files that had problems moving. 
+	@discussion -
+*/
 - (void)showProblems;
+
+/*!
+	@method		done:
+	@abstract	Action for the problems view button, cleans up. 
+	@discussion -
+*/
 - (IBAction)done:(id)sender;
-- (IBAction)showFile:(id)sender;
 
-- (void)showPreviewForPapers:(NSArray *)papers fromDocument:(BibDocument *)doc;
-- (void)doMoveAction:(id)sender;
-- (IBAction)cancelFromPreview:(id)sender;
+/*!
+	@method		doCleanup
+	@abstract	Cleans up after finishing.
+	@discussion -
+*/
 - (void)doCleanup;
-- (void)file:(BOOL)doFile papers:(NSArray *)papers fromDocument:(BibDocument *)doc;
 
+/*!
+	@method		fileManager:shouldProceedAfterError:
+	@abstract	NSFileManager delegate method.
+	@discussion -
+*/
 - (BOOL)fileManager:(NSFileManager *)manager shouldProceedAfterError:(NSDictionary *)errorInfo;
 
-- (IBAction)handleCleanupLinksAction:(id)sender;
+/*!
+	@method		showFile:
+	@abstract	Double click action of the problems view tableview, shows the linked file or the status message.
+	@discussion -
+*/
+- (IBAction)showFile:(id)sender;
 
 @end
