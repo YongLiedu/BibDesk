@@ -365,20 +365,20 @@ void _setupFonts(){
     NSEnumerator *en = [pubAuthors objectEnumerator];
     NSString *rs;
     BibAuthor *author;
-    if([pubAuthors count] == 0) return @"";
+    if([pubAuthors count] == 0) return [NSString stringWithString:@""];
     if([pubAuthors count] == 1){
         author = [pubAuthors objectAtIndex:0];
         return [author name];
     }else{
         author = [en nextObject];
-        rs = [[NSString alloc] initWithString:[author name]];
+        rs = [[[NSString alloc] initWithString:[author name]] autorelease];
         // since this method is used for display, BibAuthor -name is right above.
         
         while(author = [en nextObject]){
             rs = [rs stringByAppendingString:@" and "];
             rs = [rs stringByAppendingString:[author name]];
         }
-        return [rs autorelease];
+        return rs;
     }
         
 }
