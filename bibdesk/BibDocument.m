@@ -556,7 +556,7 @@ stringByAppendingPathComponent:@"BibDesk"]; */
 - (void)quickSearchAddFieldSheetDidEnd:(NSWindow *)sheet
                        returnCode:(int) returnCode
                       contextInfo:(void *)contextInfo{
-    
+   
     NSMutableArray *prefsQuickSearchKeysMutableArray = nil;
 
     if(returnCode == 1){
@@ -575,7 +575,9 @@ stringByAppendingPathComponent:@"BibDesk"]; */
         [[OFPreferenceWrapper sharedPreferenceWrapper] setObject:prefsQuickSearchKeysMutableArray
                                                           forKey:BDSKQuickSearchKeys];
     }else{
-        //do nothing -- cancel.
+        // cancel.
+        // set the title back to what it was before.
+        [quickSearchButton selectItemWithTitle:quickSearchKey];
     }
 }
 
@@ -807,7 +809,7 @@ didClickTableColumn: (NSTableColumn *) tableColumn{
 }
 
 // This is a delegate method of the quick search text field.
-#warning Localizable - quicksearchkeys ?
+
 - (void)controlTextDidChange:(NSNotification *)aNotification{
     NSMutableArray *remArray = [NSMutableArray arrayWithCapacity:1];
     NSEnumerator *e = [publications objectEnumerator];
