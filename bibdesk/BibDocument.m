@@ -1288,14 +1288,22 @@ didClickTableColumn: (NSTableColumn *) tableColumn{
     }
 }
 
+
 - (BOOL)validateMenuItem:(id <NSMenuItem>)menuItem{
-    if(menuItem == ctxCopyBibTex || menuItem == ctxCopyTex || menuItem == ctxCopyPDF){
+    if([[menuItem title] isEqualToString:@"Copy BibTex"] ||
+       [[menuItem title] isEqualToString:@"Copy Tex Citation"] ||
+       [[menuItem title] isEqualToString:@"Copy PDF Citation"] ||
+       [[menuItem title] isEqualToString:@"Edit Reference"] ||
+       [[menuItem title] isEqualToString:@"Delete Reference"]){
         if([self numberOfSelectedPubs] != 0)
             return YES;
         else
             return NO;
+
+    }else if([[menuItem title] isEqualToString:@"Send via email"]&& [self numberOfSelectedPubs] != 1){
+        // Localization note: does using this string work under localizations?
+        return NO;
     }else{
-        // validate other menu items:
         return YES;
     }
 }
