@@ -235,7 +235,6 @@ static NSDictionary *globalMacroDefs;
 
 // Returns the bibtex value of the string.
 - (NSString *)stringAsBibTeXString{
-    BDSKConverter *conv = [BDSKConverter sharedConverter];
     int i = 0;
     NSMutableString *retStr = [NSMutableString string];
         
@@ -245,7 +244,7 @@ static NSDictionary *globalMacroDefs;
             [retStr appendString:@" # "];
         }
         if([valNode type] == BSN_STRING){
-            [[valNode value] stringAsBibTeXString];
+            [retStr appendString:[[valNode value] stringAsBibTeXString]];
         }else{
             [retStr appendString:[valNode value]];
         }
