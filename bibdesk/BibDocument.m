@@ -292,6 +292,12 @@ Handle Notifications by the popup button to update its icon and its menu before 
 }
 
 
+// accessor method used by AppleScript (at least)
+- (NSArray*) authors {
+	return authors;
+}
+
+
 - (void)refreshAuthors{
     NSEnumerator *pubE = [shownPublications objectEnumerator];
     NSEnumerator *authE;

@@ -491,6 +491,7 @@ int generalBibItemCompareFunc(id item1, id item2, void *context);
 - (IBAction)openCustomCitePrefPane:(id)sender;
 - (IBAction)toggleShowingCustomCiteDrawer:(id)sender;
 
+- (NSArray*) authors;
 - (void)refreshAuthors;
 
 /*!
