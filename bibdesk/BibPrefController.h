@@ -75,6 +75,7 @@ extern NSString *BDSKPreviewPaneFontFamily;
 extern NSString *BDSKCiteKeyFormatKey;
 extern NSString *BDSKCiteKeyFormatPresetKey;
 extern NSString *BDSKCiteKeyAutogenerateKey;
+extern NSString *BDSKCiteKeyLowercaseKey;
 
 extern NSString *BDSKAutoSaveAsRSSKey;
 extern NSString *BDSKRSSDescriptionFieldKey;
