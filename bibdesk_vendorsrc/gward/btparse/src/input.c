@@ -166,7 +166,7 @@ finish_parse (int **err_counts)
 @DESCRIPTION: Sets prev_file pointer to NULL, since this doesn't happen when
               we ask bt_parse_entry() to parse non-BibTeX (which of course
               fails).  Since we always call bt_cleanup() when we're done
-              parsing, this works around the problem.
+              parsing, this works around the problem.  Leaks *err_counts.
 @GLOBALS    : 
 @CALLS      :
 @CALLERS    : bt_cleanup() 
@@ -176,7 +176,12 @@ finish_parse (int **err_counts)
 void
 cleanup_prev_file(void)
 {
-   prev_file = NULL;
+   if(prev_file != NULL)
+   {
+       clearerr(prev_file);
+       prev_file = NULL;
+       free_lex_buffer ();
+   }
 }
 
 /* ------------------------------------------------------------------------
