@@ -270,7 +270,8 @@ NSRange SafeForwardSearchRange( unsigned startLoc, unsigned seekLength, unsigned
             
             [newBI setFileOrder:fileOrder];
             [newBI setPubFields:dict];
-            [bibItemArray addObject:[newBI autorelease]];
+            [bibItemArray addObject:newBI];
+            [newBI release]; // now retained by the array
 
             fileOrder ++;
         }
