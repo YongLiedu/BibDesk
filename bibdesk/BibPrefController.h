@@ -99,6 +99,7 @@ extern NSString *BDSKLocalUrlFormatKey;
 extern NSString *BDSKLastVersionLaunched;
 extern NSString *BDSKSnoopDrawerSavedSize;
 
+extern NSString *BDSKCiteKeyString;
 extern NSString *BDSKAnnoteString;
 extern NSString *BDSKAbstractString;
 extern NSString *BDSKRssDescriptionString;

@@ -76,6 +76,7 @@ NSString *BDSKLastVersionLaunched = @"Last launched version number";
 NSString *BDSKSnoopDrawerSavedSize = @"Saved size of BibEditor document snoop drawer";
 
 
+NSString *BDSKCiteKeyString = @"Cite Key";
 NSString *BDSKAnnoteString = @"Annote";
 NSString *BDSKAbstractString = @"Abstract";
 NSString *BDSKRssDescriptionString = @"Rss-Description";
