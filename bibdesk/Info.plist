@@ -420,6 +420,8 @@
 					<string>1.093888830242598e-310</string>
 					<key>Preview Pane Displays What?</key>
 					<string>1</string>
+					<key>Maximum Number of Items in Preview Pane</key>
+					<string>0</string>
 					<key>Quick Search Keys</key>
 					<array>
 						<string>Keywords</string>

@@ -50,6 +50,7 @@ NSString *BDSKColumnOrderKey = @"Column Names in Order";
 NSString *BDSKTableViewFontKey = @"TableView Font";
 NSString *BDSKTableViewFontSizeKey = @"TableView Font Size";
 NSString *BDSKPreviewDisplayKey = @"Preview Pane Displays What?";
+NSString *BDSKPreviewMaxNumberKey = @"Maximum Number of Items in Preview Pane";
 
 NSString *BDSKDefaultFieldsKey = @"Default Fields";
 NSString *BDSKOutputTemplateFileKey = @"Output Template File";

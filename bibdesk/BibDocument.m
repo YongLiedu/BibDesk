@@ -2593,7 +2593,7 @@ This method always returns YES. Even if some or many operations fail.
 }
 
 - (void)displayPreviewForItems:(NSEnumerator *)enumerator{
-    NSNumber *i;
+	NSNumber *i;
     NSDictionary *titleAttributes = [NSDictionary dictionaryWithObjects:[NSArray arrayWithObjects:[NSNumber numberWithInt:1], nil]
                                                                 forKeys:[NSArray arrayWithObjects:NSUnderlineStyleAttributeName,  nil]];
     NSMutableAttributedString *s;
@@ -2602,20 +2602,21 @@ This method always returns YES. Even if some or many operations fail.
         return;
     
     [previewField setString:@""];
+    int maxItems = [[OFPreferenceWrapper sharedPreferenceWrapper] integerForKey:BDSKPreviewMaxNumberKey];
     int itemCount = 0;
     
     NSTextStorage *textStorage = [previewField textStorage];
     [textStorage fixesAttributesLazily];
     [textStorage beginEditing];
 
-    while(i = [enumerator nextObject]){
+    while(i = [enumerator nextObject] && (maxItems == 0 || itemCount < maxItems)){
+		itemCount++;
 
         switch([[OFPreferenceWrapper sharedPreferenceWrapper] integerForKey:BDSKPreviewDisplayKey]){
             case 0:                
-                itemCount++;
-                [textStorage appendAttributedString:[[shownPublications objectAtIndex:[i intValue]] attributedStringValue]];
-                if(itemCount < [tableView numberOfSelectedRows])
+                if(itemCount > 1)
                     [[textStorage mutableString] appendCharacter:NSFormFeedCharacter]; // page break for printing; doesn't display
+                [textStorage appendAttributedString:[[shownPublications objectAtIndex:[i intValue]] attributedStringValue]];
                 break;
             case 1:
                 // special handling for annote-only

@@ -63,6 +63,7 @@ extern NSString *BDSKOutputTemplateFileKey;
 extern NSString *BDSKTableViewFontKey;
 extern NSString *BDSKTableViewFontSizeKey;
 extern NSString *BDSKPreviewDisplayKey;
+extern NSString *BDSKPreviewMaxNumberKey;
 extern NSString *BDSKCustomCiteStringsKey;
 extern NSString *BDSKCiteStringKey;
 extern NSString *BDSKCiteStartBracketKey;
