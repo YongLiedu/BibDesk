@@ -65,7 +65,6 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
             [dragItems addObject:rowItem];
         }else if([rowItem isKindOfClass:[BibAuthor class]]){
             // rowItem *should* be expanded if we're getting called. (We assume this!)
-#warning bibauthor dependence
             childE = [[rowItem children] objectEnumerator];
             while(child = [childE nextObject]){
                 if ([dragItems indexOfObjectIdenticalTo:child] == NSNotFound) {
@@ -120,6 +119,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 
 - (void)dealloc{
     [typeAheadHelper release];
+    [super dealloc];
 }
 
 - (void)keyDown:(NSEvent *)event{
