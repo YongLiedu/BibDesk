@@ -8,6 +8,7 @@
 
 #import <Cocoa/Cocoa.h>
 #import "BibPrefController.h"
+#import "BDSKExporter.h"
 
 /*!
     @header BibCollection
@@ -26,6 +27,7 @@
     NSMutableArray *publications;
     NSMutableArray *subCollections;
     id parent;
+    NSMutableArray *exporters;
 }
 
 /*!
@@ -131,6 +133,23 @@
 */
 - (void)setSubCollections:(NSMutableArray *)newSubCollections;
 
+    /*!
+    @method exporters
+     @abstract the getter corresponding to setExporters
+     @result returns value for exporters
+     */
+- (NSMutableArray *)exporters;
+
+    /*!
+    @method setExporters
+     @abstract sets exporters to the param
+     @discussion 
+     @param newExporters 
+     */
+- (void)setExporters:(NSMutableArray *)newExporters;
+
+- (void)addExporter:(id)exporter;
+- (void)removeExporter:(id)exporter;
 
 
 @end

@@ -19,6 +19,8 @@
         name = [[NSString alloc] initWithString:NSLocalizedString(@"New Collection", @"New Collection")];
         publications = [[NSMutableArray alloc] initWithCapacity:1];
         subCollections = [[NSMutableArray alloc] initWithCapacity:1];
+        exporters = [[NSMutableArray alloc] initWithCapacity:1];
+
         [self registerForNotifications];
     }
     return self;
@@ -28,14 +30,20 @@
     [coder encodeObject:[self name] forKey:@"name"];
     [coder encodeObject:[self publications] forKey:@"publications"];
     [coder encodeObject:[self subCollections] forKey:@"subCollections"];
+    [coder encodeObject:[self exporters] forKey:@"exporters"];
 }
 
 - (id)initWithCoder:(NSCoder *)coder {
     if (self = [super init]) {
-        [self setName:[coder decodeObjectForKey:@"name"]];
-        [self setPublications:[coder decodeObjectForKey:@"publications"]];
+        name = [[coder decodeObjectForKey:@"name"] retain];
+        publications = [[coder decodeObjectForKey:@"publications"] retain];
+        exporters = [[coder decodeObjectForKey:@"exporters"] retain];
+        if(!exporters){
+            exporters = [[NSMutableArray alloc] initWithCapacity:1];
+        }
         parent = nil;
-        [self setSubCollections:[coder decodeObjectForKey:@"subCollections"]];
+        subCollections = [[coder decodeObjectForKey:@"subCollections"] retain];
+
         foreach(collection, subCollections){
             [collection setParent:self];
         }
@@ -123,10 +131,34 @@
 
 
 
+- (NSMutableArray *)exporters { return [[exporters retain] autorelease]; }
+
+
+- (void)setExporters:(NSMutableArray *)newExporters {
+    //NSLog(@"in -setExporters:, old value of exporters: %@, changed to: %@", exporters, newExporters);
+    
+    if (exporters != newExporters) {
+        [exporters release];
+        exporters = [newExporters copy];
+    }
+}
+
+- (void)addExporter:(id)exporter{
+    [exporters addObject:exporter];
+}
+
+
+- (void)removeExporter:(id)exporter{
+    [exporters removeObject:exporter];
+}
+
+
+
 - (void)dealloc {
     [name release];
     [publications release];
     [subCollections release];
+    [exporters release];
     [super dealloc];
 }
 
