@@ -127,6 +127,9 @@ is a good command
 					<property name="title" code="titl" type="string" description="The publication's title.">
 						<cocoa method="title"/>
 					</property>  
+					<property name="keywords" code="keyw" type="string" description="The publication's keywords.">
+						<cocoa method="keywords"/>
+					</property>
 					<property name="type" code="type" type="string" description="The publication's type. E.g. article, book, unpublished.">
 						<cocoa method="type"/>
 						<!-- Provide constants for these? This might be bad wrt to using types which aren't provided as constants. -->

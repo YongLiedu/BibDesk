@@ -17,6 +17,7 @@
 #define BibItemAbstractKey @"Abstract"
 #define BibItemAnnotationKey @"Annote"
 #define BibItemRSSDescriptionKey @"Rss-Description"
+#define BibItemKeywordsKey @"Keywords"
 
 @interface BibItem (Scripting) 
 - (NSMutableDictionary *)fields;
@@ -40,6 +41,9 @@
 
 - (NSString*) RSSDescription;
 - (void) setRSSDescription:(NSString*) newDesc; 
+
+- (NSString *)keywords;
+- (void)setKeywords:(NSString *)keywords;
 
 - (NSTextStorage*) attributedString;
 

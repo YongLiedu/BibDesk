@@ -104,6 +104,13 @@ A Category on BibItem with a few additional methods to enable and enhance its sc
 	[pubFields setObject:newDesc forKey:BibItemRSSDescriptionKey];
 }
 
+- (NSString *)keywords{
+    return [pubFields objectForKey:BibItemKeywordsKey];
+}
+
+- (void)setKeywords:(NSString *)keywords{
+    [pubFields setObject:keywords forKey:BibItemKeywordsKey];
+}
 
 /*
  ssp: 2004-07-11
