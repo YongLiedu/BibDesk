@@ -7,6 +7,7 @@
 //
 
 #import "BibFiler.h"
+#import "NSImage+Toolbox.h"
 
 static BibFiler *_sharedFiler = nil;
 
@@ -152,7 +153,8 @@ static BibFiler *_sharedFiler = nil;
 	}
 
 	[tv reloadData];
-	[infoTextField setStringValue:NSLocalizedString(@"There were problems moving the follolwing files to the generated file location, according to the format string.",@"description string")];
+	[infoTextField setStringValue:NSLocalizedString(@"There were problems moving the following files to the generated file location, according to the format string.",@"description string")];
+	[iconView setImage:[NSImage imageWithLargeIconForToolboxCode:kAlertCautionIcon]];
 	[tv setDoubleAction:@selector(showFile:)];
 	[tv setTarget:self];
 	[window makeKeyAndOrderFront:self];

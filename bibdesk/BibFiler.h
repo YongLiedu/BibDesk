@@ -17,6 +17,7 @@
 	IBOutlet NSWindow *window;
 	IBOutlet NSTableView *tv;
 	IBOutlet NSTextField *infoTextField;
+	IBOutlet NSImageView *iconView;
 	
 	NSArray *_currentPapers;
 	BibDocument *_currentDocument;
