@@ -55,8 +55,7 @@
 	[formatField setEnabled:custom];
 	if([formatRepositoryPopUp respondsToSelector:@selector(setHidden:)])
 	    [formatRepositoryPopUp setHidden:!custom];
-	else 
-		[formatRepositoryPopUp setEnabled:custom];
+	[formatRepositoryPopUp setEnabled:custom];
 }
 
 - (void)resignCurrentPreferenceClient{
