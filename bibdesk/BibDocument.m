@@ -1742,9 +1742,7 @@ int generalBibItemCompareFunc(id item1, id item2, void *context){
 
 - (void)createNewBlankPubAndEdit:(BOOL)yn{
     OFPreferenceWrapper *pw = [OFPreferenceWrapper sharedPreferenceWrapper];
-    BibItem *newBI = [[BibItem alloc] initWithType:[pw stringForKey:BDSKPubTypeStringKey]
-                                          fileType:@"BibTeX" // Not Sure if this is good.
-                                           authors:[NSMutableArray arrayWithCapacity:0]];
+    BibItem *newBI = [[[BibItem alloc] init] autorelease];
 
     [newBI setFileOrder:fileOrderCount];
 	
@@ -1753,7 +1751,7 @@ int generalBibItemCompareFunc(id item1, id item2, void *context){
 	[newBI setPubFields:dictWithDates];	
 	
     fileOrderCount++;
-    [self addPublication:[newBI autorelease]];
+    [self addPublication:newBI];
 	[[self undoManager] setActionName:NSLocalizedString(@"Add Publication",@"")];
     [self updateUI];
     if(yn == YES)
