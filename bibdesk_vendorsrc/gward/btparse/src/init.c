@@ -39,4 +39,5 @@ void bt_free_ast (AST *ast)
 void bt_cleanup (void)
 {
    done_macros ();
+   // cleanup_prev_file();
 }

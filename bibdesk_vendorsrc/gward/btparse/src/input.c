@@ -26,6 +26,7 @@
 #include "error.h"
 #include "my_dmalloc.h"
 
+static FILE * prev_file = NULL;
 
 char *   InputFilename;
 ushort   StringOptions[NUM_METATYPES] = 
@@ -158,6 +159,27 @@ finish_parse (int **err_counts)
 
 
 /* ------------------------------------------------------------------------
+@NAME       : cleanup_prev_file()
+@INPUT      : 
+@OUTPUT     : 
+@RETURNS    : 
+@DESCRIPTION: Sets prev_file pointer to NULL, since this doesn't happen when
+              we ask bt_parse_entry() to parse non-BibTeX (which of course
+              fails).  Since we always call bt_cleanup() when we're done
+              parsing, this works around the problem.
+@GLOBALS    : 
+@CALLS      :
+@CALLERS    : bt_cleanup() 
+@CREATED    : 2005/03/09, ARM
+@MODIFIED   : 
+-------------------------------------------------------------------------- */
+void
+cleanup_prev_file(void)
+{
+   prev_file = NULL;
+}
+
+/* ------------------------------------------------------------------------
 @NAME       : parse_status()
 @INPUT      : saved_counts
 @OUTPUT     : 
@@ -285,7 +307,6 @@ AST * bt_parse_entry (FILE *    infile,
 {
    AST *         entry_ast = NULL;
    static int *  err_counts = NULL;
-   static FILE * prev_file = NULL;
 
    if (prev_file != NULL && infile != prev_file)
    {

@@ -44,4 +44,7 @@ void  done_macros (void);
 /* bibtex_ast.c */
 void dump_ast (char *msg, AST *root);
 
+/* input.c */
+void cleanup_prev_file(void);
+
 #endif /* PROTOTYPES_H */
