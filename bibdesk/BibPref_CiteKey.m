@@ -1,0 +1,211 @@
+//
+//  BibItem_CiteKey.m
+//  
+//
+//  Created by Christiaan Hofman on 11/4/04.
+//  Copyright 2004 __MyCompanyName__. All rights reserved.
+//
+
+#import "BibPref_CiteKey.h"
+
+
+@implementation BibPref_CiteKey
+
+- (void)awakeFromNib{
+    [super awakeFromNib];
+	
+	[self setupCautionIcon];
+}
+
+- (void)dealloc{
+	[cautionIconImage release]; 
+    [super dealloc];
+}
+
+- (void)updateUI{
+    NSString *citeKeyFormat = [defaults stringForKey:BDSKCiteKeyFormatKey];
+    int citeKeyPresetChoice = [defaults integerForKey:BDSKCiteKeyFormatPresetKey];
+	BOOL custom = (citeKeyPresetChoice == 0);
+	
+	// use a BibItem with some data to build the preview cite key
+	BibItem *tmpBI = [[BibItem alloc] init];
+	[tmpBI setField:@"Year" toValue:@"2004"];
+	[tmpBI setField:@"Month" toValue:@"11"];
+	[tmpBI setField:@"Title" toValue:@"Bibdesk, a great application to manage your bibliographies"];
+	[tmpBI setField:@"Author" toValue:@"McCracken, M. and Maxwell, A. and Howison, J. and Routley, M. and Spiegel, S.  and Porst, S. S. and Hofman, C. M."];
+	
+	// update the UI elements
+	[self setCiteKeyFormatInvalidWarning:NO]; // the format in defaults is always valid, right?
+	[formatPresetPopUp selectItemAtIndex:[formatPresetPopUp indexOfItemWithTag:citeKeyPresetChoice]];
+	[formatField setStringValue:citeKeyFormat];
+	[citeKeyLine setStringValue:[tmpBI suggestedCiteKey]];
+	[formatField setEnabled:custom]; // or hidden?
+	[formatRepositoryPopUp setHidden:!custom];
+	[tmpBI release];
+}
+
+- (IBAction)citeKeyHelp:(id)sender{
+	// is it possible to open the appropriate help page directly?
+}
+
+- (IBAction)citeKeyFormatAdd:(id)sender{
+	NSString *formatString = [formatField stringValue];
+	NSArray *specifierStrings = [NSArray arrayWithObjects:@"", @"%a00", @"%A0", @"%t0", @"%Y", @"%y", @"%m", @"%r2", @"%R2", @"%d2", @"%u0", @"%U0", @"%n0", @"%0", nil];
+	NSString *newSpecifier = [specifierStrings objectAtIndex:[formatRepositoryPopUp indexOfSelectedItem]];
+	NSRange selRange = NSMakeRange([formatString length] + 2, [newSpecifier length] - 2);
+	
+	if (!newSpecifier || [newSpecifier isEqualToString:@""])
+		return;
+	
+	formatString = [formatString stringByAppendingString:newSpecifier];
+	[formatField setStringValue:formatString];
+	
+	// this handles the new defaults and the UI update
+	[self citeKeyFormatChanged:sender];
+	
+	// select the 'arbitrary' numbers
+	if (newSpecifier == @"%0") {
+		selRange.location -= 1;
+		selRange.length = 1;
+	}
+	[formatField selectText:self];
+	[[formatField currentEditor] setSelectedRange:selRange];
+}
+
+- (IBAction)citeKeyFormatChanged:(id)sender{
+	int presetChoice = 0;
+	NSString *formatString;
+	
+	if (sender == formatPresetPopUp) {
+		presetChoice = [[formatPresetPopUp selectedItem] tag];
+		if (presetChoice == [defaults integerForKey:BDSKCiteKeyFormatPresetKey]) 
+			return; // nothing changed
+		[defaults setInteger:presetChoice forKey:BDSKCiteKeyFormatPresetKey];
+		switch (presetChoice) {
+			case 1:
+				formatString = @"%a1:%Y%r2";
+				break;
+			case 2:
+				formatString = @"%a1:%Y%u0";
+				break;
+			case 3:
+				formatString = @"%a33%y%m";
+				break;
+			case 4:
+				formatString = @"%a1%Y%t15";
+				break;
+			default:
+				formatString = [formatField stringValue];
+		}
+		// this one is always valid
+		[defaults setObject:formatString forKey:BDSKCiteKeyFormatKey];
+	}
+	else { //changed the text field or added from the repository
+		formatString = [formatField stringValue];
+		//if ([formatString isEqualToString:[defaults stringForKey:BDSKCiteKeyFormatKey]]) return; // nothing changed
+		if ([self validateCiteKeyFormat:&formatString]) {
+			[defaults setObject:formatString forKey:BDSKCiteKeyFormatKey];
+		}
+		else {
+			[self setCiteKeyFormatInvalidWarning:YES];
+			return;
+		}
+	}
+	[self updateUI];
+}
+
+// checks if the character after a % is a valid specifier character, sanitizes any other characters.
+- (BOOL)validateCiteKeyFormat:(NSString **)formatString{
+	NSCharacterSet *validSpecifierChars = [NSCharacterSet characterSetWithCharactersInString:@"0123456789aAtmyYrRd"];
+	NSCharacterSet *validLastSpecifierChars = [NSCharacterSet characterSetWithCharactersInString:@"uUn"];
+	NSArray *components = [*formatString componentsSeparatedByString:@"%"];
+	NSString *string;
+	NSMutableString *sanitizedFormatString = [NSMutableString string];
+	unichar specifier;
+	int i;
+	
+	for (i = 0; i < [components count]; i++) {
+		// or should we sanitize here?
+		string = [components objectAtIndex:i];
+		if (i > 0) { //first part can be anything
+			[sanitizedFormatString appendString:@"%"];
+			if ([string isEqualToString:@""]) {
+				NSLog(@"Missing specifier character in cite key format.");
+				return NO;
+			}
+			specifier = [string characterAtIndex:0];
+			//last one can be [u,U,n]+digits
+			if (![validSpecifierChars characterIsMember:specifier] && 
+				  ( i < [components count] - 1 || 
+					![validLastSpecifierChars characterIsMember:specifier] || 
+					![[NSCharacterSet decimalDigitCharacterSet] 
+						isSupersetOfSet:[NSCharacterSet characterSetWithCharactersInString:[string substringFromIndex:1]]])) {
+				
+				NSLog(@"Invalid specifier %%%C in cite key format.", specifier);
+				return NO;
+			}
+		}
+		// sanitize stuff in between, this should not affect any of our specifier chars
+		string = [[BDSKConverter sharedConverter] stringBySanitizingCiteKeyString:string];
+		[sanitizedFormatString appendString:string];
+	}
+	
+	// change formatString
+	*formatString = [[sanitizedFormatString copy] autorelease];
+	
+	return YES;
+}
+
+#pragma mark Invalid format warning stuff
+
+- (void)setupCautionIcon{
+	IconRef cautionIconRef;
+	OSErr err = GetIconRef(kOnSystemDisk,
+						   kSystemIconsCreator,
+						   kAlertCautionBadgeIcon,
+						   &cautionIconRef);
+	if(err){
+		[NSException raise:@"BDSK No Icon Exception"  
+					format:@"Error getting the caution badge icon. To decipher the error number (%d),\n see file:///Developer/Documentation/Carbon/Reference/IconServices/index.html#//apple_ref/doc/uid/TP30000239", err];
+	}
+	
+	int size = 32;
+	
+	cautionIconImage = [[NSImage alloc] initWithSize:NSMakeSize(size,size)]; 
+	CGRect iconCGRect = CGRectMake(0,0,size,size);
+	
+	[cautionIconImage lockFocus]; 
+	
+	PlotIconRefInContext((CGContextRef)[[NSGraphicsContext currentContext] 
+		graphicsPort],
+						 &iconCGRect,
+						 kAlignAbsoluteCenter, //kAlignNone,
+						 kTransformNone,
+						 NULL /*inLabelColor*/,
+						 kPlotIconRefNormalFlags,
+						 cautionIconRef); 
+	
+	[cautionIconImage unlockFocus]; 
+}
+
+- (IBAction)showCiteKeyFormatWarning:(id)sender{
+	int rv;
+	// do we want to be more informative, i.e. name of offending specifier?
+	rv = NSRunCriticalAlertPanel(NSLocalizedString(@"",@""), 
+								 NSLocalizedString(@"The format string you entered contains invalid format specifiers.",@""),
+								 NSLocalizedString(@"OK",@"OK"), nil, nil, nil);
+}
+
+- (void)setCiteKeyFormatInvalidWarning:(BOOL)set{
+	if(set){
+		[formatWarningButton setImage:cautionIconImage];
+		[formatWarningButton setToolTip:NSLocalizedString(@"The format is invalid",@"")];
+	}else{
+		[formatWarningButton setImage:nil];
+		[formatWarningButton setToolTip:NSLocalizedString(@"",@"")]; // @@ this should be nil?
+	}
+	[formatWarningButton setEnabled:set];
+	[formatField setTextColor:(set ? [NSColor redColor] : [NSColor blackColor])]; // overdone?
+}
+
+@end

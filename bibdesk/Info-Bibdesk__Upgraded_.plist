@@ -252,6 +252,28 @@
 				<key>title</key>
 				<string>Citation Behavior</string>
 			</dict>
+			<key>BibPref_CiteKey</key>
+			<dict>
+				<key>defaultsDictionary</key>
+				<dict>
+					<key>Cite Key Format</key>
+					<string>%a1:%Y%r2</string>
+					<key>Cite Key Format Preset</key>
+					<integer>1</integer>
+				</dict>
+				<key>icon</key>
+				<string>key.tiff</string>
+				<key>identifier</key>
+				<string>bp_citekey</string>
+				<key>nib</key>
+				<string>BibPref_CiteKey</string>
+				<key>ordering</key>
+				<string>30</string>
+				<key>shortTitle</key>
+				<string>Cite Key</string>
+				<key>title</key>
+				<string>Cite Key Format</string>
+			</dict>
 			<key>BibPref_Defaults</key>
 			<dict>
 				<key>defaultsDictionary</key>
