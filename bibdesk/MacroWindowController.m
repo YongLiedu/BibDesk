@@ -40,16 +40,6 @@
     // response is the same for all of them.
     [[NSNotificationCenter defaultCenter]
             addObserver:self
-               selector:@selector(handleMacroAddedNotification:)
-                   name:BDSKBibDocMacroAddedNotification
-                 object:macroDataSource];
-    [[NSNotificationCenter defaultCenter]
-            addObserver:self
-               selector:@selector(handleMacroRemovedNotification:)
-                   name:BDSKBibDocMacroRemovedNotification
-                 object:macroDataSource];
-    [[NSNotificationCenter defaultCenter]
-            addObserver:self
                selector:@selector(handleMacroKeyChangedNotification:)
                    name:BDSKBibDocMacroKeyChangedNotification
                  object:macroDataSource];
@@ -74,18 +64,13 @@
 }
 
 - (void)handleMacroChangedNotification:(NSNotification *)notif{
-    [tableView reloadData];
-}
-
-- (void)handleMacroAddedNotification:(NSNotification *)notif{
-    NSString *newKey = [[notif userInfo] objectForKey:@"macroKey"];
-    [macros addObject:newKey];
-    [tableView reloadData];
-}
-
-- (void)handleMacroRemovedNotification:(NSNotification *)notif{
+    NSString *type = [[notif userInfo] objectForKey:@"type"];
     NSString *key = [[notif userInfo] objectForKey:@"macroKey"];
-    [macros removeObject:key];
+	if ([type isEqualToString:@"Add macro"]) {
+		[macros addObject:key];
+	} else if ([type isEqualToString:@"Remove macro"]) {
+		[macros removeObject:key];
+	}
     [tableView reloadData];
 }
 

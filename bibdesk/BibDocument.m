@@ -2782,9 +2782,11 @@ This method always returns YES. Even if some or many operations fail.
     [val retain]; // so the next line doesn't kill it
     [macroDefinitions removeObjectForKey:oldKey];
     [macroDefinitions setObject:[val autorelease] forKey:newKey];
+	
+	NSDictionary *notifInfo = [NSDictionary dictionaryWithObjectsAndKeys:newKey, @"newKey", oldKey, @"oldKey", nil];
     [[NSNotificationCenter defaultCenter] postNotificationName:BDSKBibDocMacroKeyChangedNotification
 														object:self
-													  userInfo:[NSDictionary dictionaryWithObjectsAndKeys:newKey, @"newKey", oldKey, @"oldKey", nil]];
+													  userInfo:notifInfo];
     
 }
 
@@ -2798,10 +2800,11 @@ This method always returns YES. Even if some or many operations fail.
                                                  @"add macro action name for undo")];
 
     [macroDefinitions setObject:macroString forKey:macroKey];
-    
-    [[NSNotificationCenter defaultCenter] postNotificationName:BDSKBibDocMacroAddedNotification
+	
+	NSDictionary *notifInfo = [NSDictionary dictionaryWithObjectsAndKeys:macroKey, @"macroKey", @"Add macro", @"type", nil];
+    [[NSNotificationCenter defaultCenter] postNotificationName:BDSKBibDocMacroDefinitionChangedNotification
 														object:self
-													  userInfo:[NSDictionary dictionaryWithObject:macroKey forKey:@"macroKey"]];
+													  userInfo:notifInfo];
     
 }
 
@@ -2816,9 +2819,10 @@ This method always returns YES. Even if some or many operations fail.
                                                  @"change macrodef action name for undo")];
     [macroDefinitions setObject:newDefinition forKey:macroKey];
     
+	NSDictionary *notifInfo = [NSDictionary dictionaryWithObjectsAndKeys:macroKey, @"macroKey", @"Change macro", @"type", nil];
     [[NSNotificationCenter defaultCenter] postNotificationName:BDSKBibDocMacroDefinitionChangedNotification
 														object:self
-													  userInfo:[NSDictionary dictionaryWithObject:macroKey forKey:@"macroKey"]];
+													  userInfo:notifInfo];
     
 }
 
@@ -2837,9 +2841,11 @@ This method always returns YES. Even if some or many operations fail.
                                                      @"delete macro action name for undo")];
     }
     [macroDefinitions removeObjectForKey:macroKey];
-    [[NSNotificationCenter defaultCenter] postNotificationName:BDSKBibDocMacroRemovedNotification
+	
+	NSDictionary *notifInfo = [NSDictionary dictionaryWithObjectsAndKeys:macroKey, @"macroKey", @"Remove macro", @"type", nil];
+    [[NSNotificationCenter defaultCenter] postNotificationName:BDSKBibDocMacroDefinitionChangedNotification
 														object:self
-													  userInfo:[NSDictionary dictionaryWithObject:macroKey forKey:@"macroKey"]];
+													  userInfo:notifInfo];
     
 }
 

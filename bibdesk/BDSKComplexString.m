@@ -327,14 +327,6 @@ static NSDictionary *globalMacroDefs;
 					   selector:@selector(handleMacroDefinitionChangedNotification:)
 						   name:BDSKBibDocMacroDefinitionChangedNotification
 						 object:newMacroResolver];
-				[nc addObserver:self
-					   selector:@selector(handleMacroDefinitionChangedNotification:)
-						   name:BDSKBibDocMacroAddedNotification
-						 object:newMacroResolver];
-				[nc addObserver:self
-					   selector:@selector(handleMacroDefinitionChangedNotification:)
-						   name:BDSKBibDocMacroRemovedNotification
-						 object:newMacroResolver];
 			}
 		}
 	}
