@@ -230,7 +230,6 @@ Extra wrapping of the created and modified date methods to
 	// hopefully, I don't understand the whole filetypes/pubtypes stuff	
 	[self setFileType:[newPub fileType]];
 	[self setCiteKey:[newPub citeKey]];
-	[self setDate:[newPub date]];
 	[self setFields:[newPub fields]];
 	[self setRequiredFieldNames: [newPub requiredFieldNames]];
 	[self makeType:[newPub type]];
