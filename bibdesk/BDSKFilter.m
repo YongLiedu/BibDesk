@@ -18,7 +18,7 @@
 
 - (id)initWithConditions:(NSArray *)newConditions {
 	if (self = [super init]) {
-		conditions = [newConditions retain];
+		conditions = [newConditions mutableCopy];
 		conjunction = BDSKAnd;
 		enabled = NO;
 	}
