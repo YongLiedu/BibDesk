@@ -17,6 +17,8 @@
  */
 
 #import <Foundation/Foundation.h>
+#import "BibPrefController.h"
+#import "BibTypeManager.h"
 
 
 @interface BDSKFieldNameFormatter : NSFormatter {

@@ -23,6 +23,9 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
     [[templateRadioMatrix cellWithTag:1] setState:NSOffState];
     [[templateRadioMatrix cellWithTag:0] setState:NSOffState];
     [[templateRadioMatrix cellWithTag:([defaults boolForKey:BDSKShouldUseTemplateFile] ? 1 : 0 )] setState:NSOnState];
+    BDSKFieldNameFormatter *fieldNameFormatter = [[BDSKFieldNameFormatter alloc] init];
+    [addFieldField setFormatter:fieldNameFormatter];
+    [fieldNameFormatter release];
     
 }
 

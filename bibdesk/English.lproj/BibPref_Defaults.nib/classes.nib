@@ -32,6 +32,7 @@
             }; 
             SUPERCLASS = OAPreferenceClient; 
         }, 
+        {CLASS = BibTeXFieldNameFormatter; LANGUAGE = ObjC; SUPERCLASS = NSFormatter; }, 
         {
             ACTIONS = {"" = id; }; 
             CLASS = FirstResponder; 

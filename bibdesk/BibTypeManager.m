@@ -119,4 +119,11 @@ static BibTypeManager *sharedInstance = nil;
 	[NSException raise:@"unimpl. feat. exc." format:@"strictInvalidCharactersForField is partly implemented"];
 }
 
+- (NSCharacterSet *)invalidFieldNameCharacterSetForFileType:(NSString *)type{
+    if([type isEqualToString:BDSKBibtexString])
+        return invalidCiteKeyCharSet;
+    else
+        [NSException raise:@"unimpl. feat. exc." format:@"invalidFieldNameCharacterSetForFileType is only implemented for BibTeX"];
+}
+
 @end

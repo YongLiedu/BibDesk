@@ -56,4 +56,14 @@
     @result     A character set of invalid entries.
 */
 - (NSCharacterSet *)strictInvalidCharactersForField:(NSString *)fieldName inFileType:(NSString *)type;
+
+/*!
+    @method     invalidFieldNameCharacterSetForFileType:
+    @abstract   Returns invalid characters for field names; currently only for BibTeX.  Same character set as for citekeys.
+    @discussion (comprehensive description)
+    @param      type (description)
+    @result     (description)
+*/
+- (NSCharacterSet *)invalidFieldNameCharacterSetForFileType:(NSString *)type;
+
 @end
