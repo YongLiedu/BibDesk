@@ -67,11 +67,11 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 }
 
 - (BOOL)isEqual:(BibAuthor *)otherAuth{
-    return [name isEqualToString:[otherAuth name]];
+    return [[self normalizedName] isEqualToString:[otherAuth normalizedName]];
 }
 
 - (unsigned)hash{
-    return [name hash];
+    return [[self normalizedName] hash];
 }
 
 #pragma mark Comparison
