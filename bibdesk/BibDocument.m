@@ -1020,7 +1020,7 @@ stringByAppendingPathComponent:@"BibDesk"]; */
                                    withObject:fileContentString];
             return YES;
         } else {
-            newPubs = [BibTeXParser itemsFromString:fileContentString error:&hadProblems frontMatter:frontMatter filePath:filePath];
+            newPubs = [BibTeXParser itemsFromString:fileContentString error:&hadProblems frontMatter:frontMatter filePath:filePath document:self];
         }
 
     } else {

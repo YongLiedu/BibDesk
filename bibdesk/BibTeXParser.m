@@ -59,12 +59,12 @@ BDSKComplexString *complexStringFromBTField(AST *field,
 /// Unicode scanner methods
 + (NSMutableArray *)itemsFromString:(NSString *)string error:(BOOL *)hadProblems{
     BibTeXParser *parser = [[[BibTeXParser alloc] init] autorelease];
-    return [parser itemsFromString:string error:hadProblems frontMatter:nil filePath:@"Paste/Drag" addToDocument:nil];
+    return [parser itemsFromString:string error:hadProblems frontMatter:nil filePath:@"Paste/Drag" document:nil background:NO];
 }
 
-+ (NSMutableArray *)itemsFromString:(NSString *)string error:(BOOL *)hadProblems frontMatter:(NSMutableString *)frontMatter filePath:(NSString *)filePath{
++ (NSMutableArray *)itemsFromString:(NSString *)string error:(BOOL *)hadProblems frontMatter:(NSMutableString *)frontMatter filePath:(NSString *)filePath document:(BibDocument *)document{
     BibTeXParser *parser = [[[BibTeXParser alloc] init] autorelease];
-    return [parser itemsFromString:string error:hadProblems frontMatter:frontMatter filePath:filePath addToDocument:nil];
+    return [parser itemsFromString:string error:hadProblems frontMatter:frontMatter filePath:filePath document:document background:NO];
 }
 
 NSRange SafeForwardSearchRange( unsigned startLoc, unsigned seekLength, unsigned maxLoc ){
@@ -92,7 +92,7 @@ NSRange SafeForwardSearchRange( unsigned startLoc, unsigned seekLength, unsigned
 
 - (void)parseItemsFromString:(NSString *)fullString addToDocument:(BibDocument *)document frontMatter:(NSMutableString *)frontMatter{
     BOOL hadProblems;
-    [self itemsFromString:fullString error:&hadProblems frontMatter:frontMatter filePath:[document fileName] addToDocument:document];
+    [self itemsFromString:fullString error:&hadProblems frontMatter:frontMatter filePath:[document fileName] document:document background:YES];
 }
 
 NSRange SafeBackwardSearchRange(NSRange startRange, unsigned seekLength){
@@ -112,7 +112,7 @@ NSRange SafeBackwardSearchRange(NSRange startRange, unsigned seekLength){
     }
 }    
 
-- (NSMutableArray *)itemsFromString:(NSString *)fullString error:(BOOL *)hadProblems frontMatter:(NSMutableString *)frontMatter filePath:(NSString *)filePath addToDocument:(BibDocument *)document{
+- (NSMutableArray *)itemsFromString:(NSString *)fullString error:(BOOL *)hadProblems frontMatter:(NSMutableString *)frontMatter filePath:(NSString *)filePath document:(BibDocument *)aDocument background:(BOOL)background{
 
 // Potential problems with this method:
 //
@@ -121,13 +121,11 @@ NSRange SafeBackwardSearchRange(NSRange startRange, unsigned seekLength){
 // This problem will only munge a single entry, though, since we scan between @ markers as entry delimiters; the larger problem is that there is no warning for this case.
     
     NSAutoreleasePool *threadPool = [[NSAutoreleasePool alloc] init];
-    BOOL isThreadedLoad = NO;
+    BOOL isThreadedLoad = background;
     *hadProblems = NO;
-
-    if(document != nil)
-        isThreadedLoad = YES;
+    BOOL isMacro = NO;
     
-    [self setDocument:document];
+    [self setDocument:aDocument];
     
     NSAssert( fullString != nil, @"A nil string was passed to the parser.  This is probably due to an incorrect guess at the string encoding." );
 
@@ -204,11 +202,15 @@ NSRange SafeBackwardSearchRange(NSRange startRange, unsigned seekLength){
         
         if(type && [type compare:@"String" options:NSCaseInsensitiveSearch] == NSOrderedSame){ // it's a string!  add it to the dictionary
             isStringValue = YES;
+            NSDictionary *macDefDict = [self macroStringFromScanner:scanner
+                                                        endingRange:entryClosingBraceRange
+                                                             string:fullString];
             // macroStringFromScanner: also sets the scanner so we don't go into the while() loop below
-            [stringsDictionary addEntriesFromDictionary:[self macroStringFromScanner:scanner
-                                                                                 endingRange:entryClosingBraceRange
-                                                                                      string:fullString]];
-            // NSLog(@"stringsDict has %@", [stringsDictionary description]);
+            [stringsDictionary addEntriesFromDictionary:macDefDict];
+#warning temporary hack
+            if(theDocument)
+                [theDocument addMacroDefinitionWithoutUndo:[[macDefDict allValues] objectAtIndex:0] forMacro:[[[macDefDict allKeys] objectAtIndex:0] lowercaseString]];
+            // NSLog(@"macDefDict has %@", [macDefDict description]);
         } else {
             if(type && [type compare:@"preamble" options:NSCaseInsensitiveSearch] == NSOrderedSame){ // it's the preamble, oh no...
                 isStringValue = YES; // this works for preamble as well, since we don't want to run those through the while() loop
@@ -312,12 +314,7 @@ NSRange SafeBackwardSearchRange(NSRange startRange, unsigned seekLength){
                 leftDelimLocation = [scanner scanLocation] - 1; // rewind so we don't lose the first character
                 rightDelim = @",\n"; // set the delimiter appropriately for an unquoted value
 #warning FIXME: macros
-                // remove this error message when macro support is finished
-                *hadProblems = YES;
-                [self postParsingErrorNotification:[NSString stringWithFormat:@"Macros are not handled properly!", leftDelim]
-                                         errorType:@"Macro Error"
-                                          fileName:filePath
-                                        errorRange:[fullString lineRangeForRange:NSMakeRange([scanner scanLocation], 0)]];                
+                isMacro = YES;
             } else {
                 [scanner setScanLocation:leftDelimLocation + 1];
             }
@@ -426,7 +423,12 @@ NSRange SafeBackwardSearchRange(NSRange startRange, unsigned seekLength){
                                           fileName:filePath 
                                         errorRange:[fullString lineRangeForRange:NSMakeRange([scanner scanLocation], 0)]];
             } else {
-                [dict setObject:value forKey:[key capitalizedString]];
+                if(isMacro){
+                    [dict setObject:[BDSKComplexString complexStringWithBibTeXString:value macroResolver:theDocument] forKey:[key capitalizedString]];
+                    isMacro = NO;
+                } else {
+                    [dict setObject:value forKey:[key capitalizedString]];
+                }
                 [[NSApp delegate] addString:value forCompletionEntry:key];
             }
             
@@ -521,8 +523,8 @@ NSRange SafeBackwardSearchRange(NSRange startRange, unsigned seekLength){
 
 #warning FIXME: macros
     // not sure if the macro support will want these quoted or unquoted; in order to save them with the frontmatter, I'm leaving quotes for now, if they exist.
-//    if([[fullString substringWithRange:NSMakeRange([scanner scanLocation], 1)] isEqualToString:@"\""])
-//        value = [value stringByTrimmingCharactersInSet:trimQuoteCharacterSet];
+    if([[fullString substringWithRange:NSMakeRange([scanner scanLocation], 1)] isEqualToString:@"\""])
+        value = [value stringByTrimmingCharactersInSet:trimQuoteCharacterSet];
     
     NSAssert( [scanner scanLocation] < range.location, @"Scanner scanned out of range!" );
     
