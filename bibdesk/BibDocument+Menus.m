@@ -62,6 +62,9 @@ Broken out of BibDocument and split up into smaller parts to make things more ma
 	else if (act == @selector(printDocument:)) {
 		return [self validatePrintDocumentMenuItem:menuItem];
 	}
+	else if (act == @selector(toggleStatusBar:)) {
+		return [self validateToggleStatusBarMenuItem:menuItem];
+	}
 //	else if ([[menuItem representedObject] isEqualToString:@"displayMenuItem"]) {
 //		// update the display menu. Is this smart enough?
 //		[menuItem setSubmenu:contextualMenu];
@@ -366,6 +369,21 @@ Broken out of BibDocument and split up into smaller parts to make things more ma
 	else {
 		return YES;
 	}
+}
+
+
+
+- (BOOL) validateToggleStatusBarMenuItem:(NSMenuItem*) menuItem {
+    NSString *s;
+	if (showStatus){
+		s = NSLocalizedString(@"Hide Status Bar", @"Hide Status Bar");
+		[menuItem setTitle:s];
+	}
+	else {
+		s = NSLocalizedString(@"Show Status Bar", @"Show Status Bar");
+		[menuItem setTitle:s];
+	}
+	return YES;
 }
 
 

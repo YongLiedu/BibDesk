@@ -23,6 +23,7 @@
 - (BOOL) validateConsolidateLinkedFilesMenuItem:(NSMenuItem*) menuItem;
 - (BOOL) validateDeleteSelectionMenuItem:(NSMenuItem*) menuItem;
 - (BOOL) validatePrintDocumentMenuItem:(NSMenuItem*) menuItem;
+- (BOOL) validateToggleStatusBarMenuItem:(NSMenuItem*) menuItem;
 
 
 - (IBAction) clear:(id) sender;

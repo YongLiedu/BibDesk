@@ -120,6 +120,7 @@ extern NSString *BDSKBibItemLocalDragPboardType;
     BOOL tableColumnsChanged;
     NSTableColumn *lastSelectedColumnForSort;
     BOOL sortDescending;
+	BOOL showStatus;
     NSMutableArray *BD_windowControllers; // private ivar for maintaining relationship with the docs windowcontrollers
 
     NSPasteboard *localDragPboard;
@@ -837,6 +838,7 @@ Uses the tableview argument to determine which actionMenu it should validate.
 
 - (void)highlightBib:(BibItem *)bib byExtendingSelection:(BOOL)yn;
 
+- (IBAction)toggleStatusBar:(id)sender;
 
 - (IBAction)openCustomCitePrefPane:(id)sender;
 - (IBAction)toggleShowingCustomCiteDrawer:(id)sender;

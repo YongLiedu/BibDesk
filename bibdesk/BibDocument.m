@@ -125,6 +125,7 @@ NSString *BDSKBibItemLocalDragPboardType = @"edu.ucsd.cs.mmccrack.bibdesk: Local
 
 		tableColumnsChanged = YES;
 		sortDescending = YES;
+		showStatus = YES;
                 
                 [self cacheQuickSearchRegexes];
 
@@ -169,6 +170,11 @@ NSString *BDSKBibItemLocalDragPboardType = @"edu.ucsd.cs.mmccrack.bibdesk: Local
 
     [splitView setPositionAutosaveName:[self fileName]];
     
+	[infoLine retain]; // we need to retain, as we might remove it from the window
+	if (![[OFPreferenceWrapper sharedPreferenceWrapper] boolForKey:BDSKShowStatusBarKey]) {
+		[self toggleStatusBar:nil];
+	}
+
     // 1:I'm using this as a catch-all.
     // 2:this gets called lots of other places, no need to. [self updateUI]; 
 
@@ -232,6 +238,7 @@ NSString *BDSKBibItemLocalDragPboardType = @"edu.ucsd.cs.mmccrack.bibdesk: Local
     [customStringArray release];
     [toolbarItems release];
     [tableColumns release];
+	[infoLine release];
     [BD_windowControllers release];
     [localDragPboard release];
     [draggedItems release];
@@ -2564,6 +2571,30 @@ This method always returns YES. Even if some or many operations fail.
         [tableView selectRow:i byExtendingSelection:yn];
         [tableView scrollRowToVisible:i];
     }
+}
+
+- (IBAction)toggleStatusBar:(id)sender{
+	NSRect splitViewFrame = [splitView frame];
+	NSRect statusRect = [[documentWindow contentView] frame];
+	NSRect infoRect = [infoLine frame];
+	if (showStatus) {
+		showStatus = NO;
+		splitViewFrame.size.height += 20.0;
+		splitViewFrame.origin.y -= 20.0;
+		statusRect.size.height = 0.0;
+		[infoLine removeFromSuperview];
+	} else {
+		showStatus = YES;
+		splitViewFrame.size.height -= 20.0;
+		splitViewFrame.origin.y += 20.0;
+		statusRect.size.height = 20.0;
+		infoRect.size.width = splitViewFrame.size.width - 16.0;
+		[infoLine setFrame:infoRect];
+		[[documentWindow contentView]  addSubview:infoLine];
+	}
+	[splitView setFrame:splitViewFrame];
+	[[documentWindow contentView] setNeedsDisplayInRect:statusRect];
+	[[OFPreferenceWrapper sharedPreferenceWrapper] setBool:showStatus forKey:BDSKShowStatusBarKey];
 }
 
 #pragma mark
