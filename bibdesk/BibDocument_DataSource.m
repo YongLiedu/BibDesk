@@ -51,6 +51,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
     int sortedRow = (sortDescending ? [shownPublications count] - 1 - row : row);
     NSString *path = nil;
     NSString *tcID = [tableColumn identifier];
+	NSString *shortDateFormatString = [[NSUserDefaults standardUserDefaults] stringForKey:NSShortDateFormatString];
 	
     if(tView == tableView){
         pub = [shownPublications objectAtIndex:sortedRow];
@@ -66,13 +67,13 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 			NSCalendarDate *date = [pub dateCreated];
 			if(date == nil)
                 return @"";
-            return [date descriptionWithCalendarFormat:NSLocalizedString(@"%I:%M %p %b %d, %Y", @"Date format including time for inside table views")];
+            return [date descriptionWithCalendarFormat:shortDateFormatString];
             
         }else if([tcID isEqualToString: @"Modified"] ){
 			NSCalendarDate *date = [pub dateModified];
 			if(date == nil)
                 return @"";
-			return [date descriptionWithCalendarFormat:NSLocalizedString(@"%I:%M %p %b %d, %Y", @"Date format including time for inside table views")];
+			return [date descriptionWithCalendarFormat:shortDateFormatString];
 			
         }else if([tcID isEqualToString: @"Date"] ){
             NSCalendarDate *date = [pub date];
