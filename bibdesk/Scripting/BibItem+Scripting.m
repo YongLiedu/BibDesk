@@ -80,6 +80,25 @@ Extra wrapping of the created and modified date methods to
 - do some NSDate -> NSCalendarDate conversion
 */
 
+- (NSString *) month {
+	return [[self fields] objectForKey:@"Month"];
+}
+
+- (void) setMonth:(NSString*) newMonth {
+	[[self fields] setObject:newMonth forKey:@"Month"];
+	[self updateMetadataForKey:@"Month"];
+}
+
+- (NSString *) year {
+	return [[self fields] objectForKey:@"Year"];
+}
+
+- (void) setYear:(NSString*) newYear {
+	[[self fields] setObject:newYear forKey:@"Year"];
+	[self updateMetadataForKey:@"Year"];
+}
+
+
 - (NSDate*) ASDateCreated {
 	NSDate * d = [self dateCreated];
 	
@@ -88,7 +107,10 @@ Extra wrapping of the created and modified date methods to
 }
 
 - (void) setASDateCreated:(NSDate*) newDate {
-	[self setDateCreated:[newDate dateWithCalendarFormat:nil timeZone:nil]];
+	// if ([newDate isKindOfClass:[NSDate class]]) {
+		[self setDateCreated:[newDate dateWithCalendarFormat:nil timeZone:nil]];
+	// }
+	// do nothing if the object passed isn't a date.
 }
 
 - (NSDate*) ASDateModified {

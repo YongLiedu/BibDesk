@@ -119,6 +119,15 @@ will translate this file into the necessary scriptSuite and scriptTerminology fi
 					<property name="cite key" code="ckey" type="string" description="Key for citing the publication.">
 						<cocoa method="citeKey"/>
 					</property>  
+					<property name="publication date" code="pdat" type="date" description="Deprecated. Use publication year and publication month instead." hidden="">
+						<cocoa method="date"/>
+					</property>  
+					<property name="publication month" code="pmon" type="string" description="Month of publication.">
+						<cocoa method="month"/>
+					</property>  
+					<property name="publication year" code="pyer" type="string" description="Year of publication.">
+						<cocoa method="year"/>
+					</property>  
 					<property name="publication date" code="pdat" type="date" description="Date of publication.">
 						<cocoa method="date"/>
 					</property>  
