@@ -373,8 +373,11 @@
 		iconImage = [[[[self selectedItem] image] copy] autorelease];
     }
     
-    [iconImage setSize: [self iconSize]];
-	
+	if ([self controlSize] == NSRegularControlSize) {
+		[iconImage setSize: [self iconSize]];
+	} else {
+		[iconImage setSize: NSMakeSize([self iconSize].width * 0.75, [self iconSize].height * 0.75)];
+	}
 	if ([self arrowImage] == nil) {
 		[RYZ_buttonCell setImage: iconImage];
 		[RYZ_buttonCell setAlternateImage: [self alternateImage]]; // this may be nil, that is OK
