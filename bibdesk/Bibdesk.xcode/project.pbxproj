@@ -24,8 +24,6 @@
 				F9022CA50758038000C3F701,
 				F9022CA70758038000C3F701,
 				F9022C54075802E300C3F701,
-				3DAE9ED1076E56C100AF111A,
-				F9022C56075802E300C3F701,
 				F9022C58075802E300C3F701,
 				F9022C5A075802E300C3F701,
 				F9022C5C075802E300C3F701,
@@ -383,34 +381,6 @@
 			settings = {
 			};
 		};
-		3DAE9ED0076E56C100AF111A = {
-			fileEncoding = 4;
-			isa = PBXFileReference;
-			lastKnownFileType = sourcecode.c.h;
-			path = BDSKPopUpButton.h;
-			refType = 4;
-			sourceTree = "<group>";
-		};
-		3DAE9ED1076E56C100AF111A = {
-			fileEncoding = 4;
-			isa = PBXFileReference;
-			lastKnownFileType = sourcecode.c.objc;
-			path = BDSKPopUpButton.m;
-			refType = 4;
-			sourceTree = "<group>";
-		};
-		3DAE9ED2076E56C100AF111A = {
-			fileRef = 3DAE9ED0076E56C100AF111A;
-			isa = PBXBuildFile;
-			settings = {
-			};
-		};
-		3DAE9ED3076E56C100AF111A = {
-			fileRef = 3DAE9ED1076E56C100AF111A;
-			isa = PBXBuildFile;
-			settings = {
-			};
-		};
 		3DAEA2EB07703F6000AF111A = {
 			fileEncoding = 30;
 			isa = PBXFileReference;
@@ -663,7 +633,6 @@
 				F9022C510758027800C3F701,
 				F9022C520758027800C3F701,
 				F9022C77075802E300C3F701,
-				F9022C78075802E300C3F701,
 				F9022C79075802E300C3F701,
 				F9022C7A075802E300C3F701,
 				F9022C7B075802E300C3F701,
@@ -704,7 +673,6 @@
 				F9022FD207580B9400C3F701,
 				F9022FD407580B9400C3F701,
 				3DD300F6075C054D003FD2D7,
-				3DAE9ED3076E56C100AF111A,
 				3DAEA2EE07703F6000AF111A,
 			);
 			isa = PBXSourcesBuildPhase;
@@ -1118,22 +1086,6 @@
 			refType = 4;
 			sourceTree = "<group>";
 		};
-		F9022C55075802E300C3F701 = {
-			fileEncoding = 30;
-			isa = PBXFileReference;
-			lastKnownFileType = sourcecode.c.h;
-			path = BDSKPopUpButtonCell.h;
-			refType = 4;
-			sourceTree = "<group>";
-		};
-		F9022C56075802E300C3F701 = {
-			fileEncoding = 30;
-			isa = PBXFileReference;
-			lastKnownFileType = sourcecode.c.objc;
-			path = BDSKPopUpButtonCell.m;
-			refType = 4;
-			sourceTree = "<group>";
-		};
 		F9022C57075802E300C3F701 = {
 			fileEncoding = 30;
 			isa = PBXFileReference;
@@ -1392,12 +1344,6 @@
 		};
 		F9022C77075802E300C3F701 = {
 			fileRef = F9022C54075802E300C3F701;
-			isa = PBXBuildFile;
-			settings = {
-			};
-		};
-		F9022C78075802E300C3F701 = {
-			fileRef = F9022C56075802E300C3F701;
 			isa = PBXBuildFile;
 			settings = {
 			};
@@ -3378,12 +3324,6 @@
 			settings = {
 			};
 		};
-		F918101907583A5B00CF822D = {
-			fileRef = F9022C55075802E300C3F701;
-			isa = PBXBuildFile;
-			settings = {
-			};
-		};
 		F918101A07583A5B00CF822D = {
 			fileRef = F9022C57075802E300C3F701;
 			isa = PBXBuildFile;
@@ -3644,8 +3584,6 @@
 				F9022C890758034000C3F701,
 				F9022C8B0758034000C3F701,
 				F9022C53075802E300C3F701,
-				3DAE9ED0076E56C100AF111A,
-				F9022C55075802E300C3F701,
 				F9022C57075802E300C3F701,
 				F9022C59075802E300C3F701,
 				F9022C5B075802E300C3F701,
@@ -4212,7 +4150,6 @@
 				F918101607583A5B00CF822D,
 				F918101707583A5B00CF822D,
 				F918101807583A5B00CF822D,
-				F918101907583A5B00CF822D,
 				F918101A07583A5B00CF822D,
 				F918101B07583A5B00CF822D,
 				F918101C07583A5B00CF822D,
@@ -4259,7 +4196,6 @@
 				F920DB01075C2B69000C5FCA,
 				F920DB02075C2B69000C5FCA,
 				F920DB03075C2B69000C5FCA,
-				3DAE9ED2076E56C100AF111A,
 				3DAEA2ED07703F6000AF111A,
 			);
 			isa = PBXHeadersBuildPhase;
