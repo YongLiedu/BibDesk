@@ -100,33 +100,10 @@ NSString*   LocalDragPasteboardName = @"edu.ucsd.cs.mmccrack.bibdesk: Local Publ
     NSEnumerator *prefTCNamesE = [prefTCNames objectEnumerator];
     NSString *tcName;
     
-    NSMutableAttributedString *clearStr = [[[NSMutableAttributedString alloc] initWithString:NSLocalizedString(@"clear",@"")] autorelease];
-    NSDictionary *linkAttributes= [NSDictionary dictionaryWithObjectsAndKeys:             [NSNumber numberWithInt:NSSingleUnderlineStyle], NSUnderlineStyleAttributeName,
-        [NSColor blueColor], NSForegroundColorAttributeName,
-        NULL];
     NSSize drawerSize;
     //NSString *viewByKey = [[OFPreferenceWrapper sharedPreferenceWrapper] objectForKey:BDSKViewByKey];
-    NSArray *prefsQuickSearchKeysArray = [[OFPreferenceWrapper sharedPreferenceWrapper] arrayForKey:BDSKQuickSearchKeys];
-    NSString *aKey = nil;
-    NSEnumerator *quickSearchKeyE = [prefsQuickSearchKeysArray objectEnumerator];
-
-    quickSearchTextDict = [[[OFPreferenceWrapper sharedPreferenceWrapper] objectForKey:BDSKCurrentQuickSearchTextDict] mutableCopy];
-    while(aKey = [quickSearchKeyE nextObject]){
-        [quickSearchButton insertItemWithTitle:aKey
-                                       atIndex:0];
-    }
-    
-    [quickSearchButton selectItemWithTitle:quickSearchKey];
-    if(quickSearchTextDict){
-        if([quickSearchTextDict objectForKey:quickSearchKey]){
-            [quickSearchTextField setStringValue:
-                [quickSearchTextDict objectForKey:quickSearchKey]];
-        }else{
-            [quickSearchTextField setStringValue:@""];
-        }
-    }else{
-        quickSearchTextDict = [[NSMutableDictionary dictionaryWithCapacity:4] retain];
-    }
+	
+	[self setupSearchField];
 
     // this is kind of a hack... we're getting the pre-configured tableColumns
     //    from the nib file, and then we're treating them just like the other ones.
@@ -159,11 +136,6 @@ NSString*   LocalDragPasteboardName = @"edu.ucsd.cs.mmccrack.bibdesk: Local Publ
     [tableView setMenu:contextualMenu];
     [outlineView setMenu:contextualMenu];
     
-    [clearStr setAttributes:linkAttributes range:NSMakeRange(0,[clearStr length])];
-    [quickSearchClearButton setAttributedTitle:clearStr];
-    [quickSearchClearButton setEnabled:NO];
-    [quickSearchClearButton setToolTip:NSLocalizedString(@"Clear the Quicksearch Field",@"")];
-
     [splitView setPositionAutosaveName:[self fileName]];
     
     // 1:I'm using this as a catch-all.
@@ -274,7 +246,7 @@ NSString*   LocalDragPasteboardName = @"edu.ucsd.cs.mmccrack.bibdesk: Local Publ
 
     [self setupTableColumns]; // calling it here mostly just makes sure that the menu is set up.
 
-    [self controlTextDidChange:nil]; // calls updateUI, makes sure the quicksearch filter is loaded appropriately when we open a file.
+    [self searchFieldAction:[searchField cell]]; // calls updateUI, makes sure the quicksearch filter is loaded appropriately when we open a file.
 }
 
 - (void)windowDidBecomeMain:(NSNotification *)aNotification{
@@ -282,7 +254,8 @@ NSString*   LocalDragPasteboardName = @"edu.ucsd.cs.mmccrack.bibdesk: Local Publ
     [self updateUI]; // mostly because the BDSKPreviewer is a singleton class.
 }
 
-#pragma mark || Document Saving and Reading
+#pragma mark -
+#pragma mark  Document Saving and Reading
 
 - (IBAction)saveDocument:(id)sender{
 
@@ -297,28 +270,44 @@ NSString*   LocalDragPasteboardName = @"edu.ucsd.cs.mmccrack.bibdesk: Local Publ
     }
 }
 
+- (IBAction)exportAsHTML:(id)sender{
+    [self exportAsFileType:@"html"];
+}
+
 - (IBAction)exportAsRSS:(id)sender{
+    [self exportAsFileType:@"rss"];
+}
+
+- (void)exportAsFileType:(NSString *)fileType{
     NSSavePanel *sp = [NSSavePanel savePanel];
-    [sp setRequiredFileType:@"rss"];
+    [sp setRequiredFileType:fileType];
     [sp setDelegate:self];
-    [sp setAccessoryView:rssExportAccessoryView];
+    if([fileType isEqualToString:@"rss"]){
+        [sp setAccessoryView:rssExportAccessoryView];
+        // should call a [self setupRSSExportView]; to populate those with saved userdefaults!
+    }
     [sp beginSheetForDirectory:nil
                           file:[[NSString stringWithString:[[self fileName] stringByDeletingPathExtension]] lastPathComponent]
                 modalForWindow:documentWindow
                  modalDelegate:self
                 didEndSelector:@selector(savePanelDidEnd:returnCode:contextInfo:)
-                   contextInfo:nil];
+                   contextInfo:fileType];
 
 }
 - (void)savePanelDidEnd:(NSWindow *)sheet returnCode:(int)returnCode contextInfo:(void *)contextInfo{
-    NSData *rssData = nil;
+    NSData *fileData = nil;
     NSString *fileName = nil;
     NSSavePanel *sp = (NSSavePanel *)sheet;
+    NSString *fileType = (NSString *)contextInfo;
     
     if(returnCode == NSOKButton){
         fileName = [sp filename];
-        rssData = [self dataRepresentationOfType:@"Rich Site Summary file"];
-        [rssData writeToFile:fileName atomically:YES];
+        if([fileType isEqualToString:@"rss"]){
+            fileData = [self dataRepresentationOfType:@"Rich Site Summary file"];
+        }else if([fileType isEqualToString:@"html"]){
+            fileData = [self dataRepresentationOfType:@"HTML"];
+        }
+        [fileData writeToFile:fileName atomically:YES];
     }
     [sp setRequiredFileType:@"bib"]; // just in case...
     [sp setAccessoryView:nil];
@@ -327,10 +316,14 @@ NSString*   LocalDragPasteboardName = @"edu.ucsd.cs.mmccrack.bibdesk: Local Publ
 
 - (NSData *)dataRepresentationOfType:(NSString *)aType
 {
+    [self saveDependentWindows];//@@bibeditor transparency - won't need this.
+    
     if ([aType isEqualToString:@"bibTeX database"]){
         return [self bibDataRepresentation];
     }else if ([aType isEqualToString:@"Rich Site Summary file"]){
         return [self rssDataRepresentation];
+    }else if ([aType isEqualToString:@"HTML"]){
+        return [self htmlDataRepresentation];
     }
     //else:
     return nil;
@@ -364,8 +357,6 @@ stringByAppendingPathComponent:@"BibDesk"]; */
 
     //  NSString *RSSTemplateFileName = [applicationSupportPath stringByAppendingPathComponent:@"rssTemplate.txt"];
     
-    [self saveDependentWindows]; //@@bibeditor transparency - won't need this.
-
     // add boilerplate RSS
     //    AddDataFromString(@"<?xml version=\"1.0\" encoding=\"utf-8\"?>\n<rdf:RDF\nxmlns:rdf=\"http://www.w3.org/1999/02/22-rdf-syntax-ns#\"\nxmlns:bt=\"http://purl.org/rss/1.0/modules/bibtex/\"\nxmlns=\"http://purl.org/rss/1.0/\">\n<channel>\n");
     AddDataFromString(@"<?xml version=\"1.0\" encoding=\"utf-8\"?>\n<rss version=\"0.92\">\n<channel>\n");
@@ -399,13 +390,36 @@ stringByAppendingPathComponent:@"BibDesk"]; */
     return d;
 }
 
+- (NSData *)htmlDataRepresentation{
+    NSString *applicationSupportPath = [NSHomeDirectory() stringByAppendingPathComponent:@"Library/Application Support/BibDesk"]; 
+
+
+    NSString *fileTemplate = [NSString stringWithContentsOfFile:[applicationSupportPath stringByAppendingPathComponent:@"htmlExportTemplate"]];
+    fileTemplate = [fileTemplate stringByParsingTagsWithStartDelimeter:@"<$"
+                                                          endDelimeter:@"/>" 
+                                                           usingObject:self];
+    return [fileTemplate dataUsingEncoding:NSUTF8StringEncoding allowLossyConversion:YES];    
+}
+
+- (NSString *)publicationsAsHTML{
+    NSMutableString *s = [NSMutableString stringWithString:@""];
+    NSString *applicationSupportPath = [NSHomeDirectory() stringByAppendingPathComponent:@"Library/Application Support/BibDesk"]; 
+    NSString *itemTemplate = [NSString stringWithContentsOfFile:[applicationSupportPath stringByAppendingPathComponent:@"htmlItemExportTemplate"]];
+    BibItem *tmp;
+    NSEnumerator *e = [publications objectEnumerator];
+    while(tmp = [e nextObject]){
+        [s appendString:[NSString stringWithString:@"\n\n"]];
+        [s appendString:[tmp HTMLValueUsingTemplateString:itemTemplate]];
+    }
+    return s;
+}
+
 - (NSData *)bibDataRepresentation{
     BibItem *tmp;
     NSEnumerator *e = [[publications sortedArrayUsingSelector:@selector(fileOrderCompare:)] objectEnumerator];
     NSMutableData *d = [NSMutableData data];
     NSMutableString *templateFile = [NSMutableString stringWithContentsOfFile:[[[OFPreferenceWrapper sharedPreferenceWrapper] stringForKey:BDSKOutputTemplateFileKey] stringByExpandingTildeInPath]];
 
-    [self saveDependentWindows];//@@bibeditor transparency - won't need this.
     [templateFile appendFormat:@"\n%%%% Created for %@ at %@ \n\n", NSFullUserName(), [NSCalendarDate calendarDate]];
     
     [d appendData:[templateFile dataUsingEncoding:NSASCIIStringEncoding allowLossyConversion:YES]];
@@ -429,9 +443,59 @@ stringByAppendingPathComponent:@"BibDesk"]; */
         return [self loadBibTeXDataRepresentation:data];
     }else if([aType isEqualToString:@"Rich Site Summary File"]){
         return [self loadRSSDataRepresentation:data];
+    }else if([aType isEqualToString:@"PubMed File"]){
+        return [self loadPubMedDataRepresentation:data];
     }
-    //else
     return NO;
+}
+
+- (BOOL)loadPubMedDataRepresentation:(NSData *)data{
+    int rv = 0;
+    BOOL hadProblems = NO;
+    NSMutableDictionary *dictionary = nil;
+    NSString *tempFileName = nil;
+    NSString *dataString = [[[NSString alloc] initWithData:data encoding:NSUTF8StringEncoding] autorelease];
+    NSString* filePath = [self fileName];
+    
+    if(!filePath){
+        filePath = @"Untitled Document";
+    }
+    dictionary = [NSMutableDictionary dictionaryWithCapacity:10];
+    
+    publications = [[PubMedParser itemsFromString:dataString
+                                         error:&hadProblems
+                                   frontMatter:frontMatter
+                                      filePath:filePath] retain]; 
+    if(hadProblems){
+        // run a modal dialog asking if we want to use partial data or give up
+        rv = NSRunAlertPanel(NSLocalizedString(@"Error reading file!",@""),
+                             NSLocalizedString(@"There was a problem reading the file. Do you want to use everything that did work (\"Keep Going\"), edit the file to correct the errors, or give up?\n(If you choose \"Keep Going\" and then save the file, you will probably lose data.)",@""),
+                             NSLocalizedString(@"Give up",@""),
+                             NSLocalizedString(@"Keep going",@""),
+                             NSLocalizedString(@"Edit file", @""));
+        if (rv == NSAlertDefaultReturn) {
+            // the user said to give up
+            return NO;
+        }else if (rv == NSAlertAlternateReturn){
+            // the user said to keep going, so if they save, they might clobber data...
+            // note this by setting the update count:
+            [self updateChangeCount:NSChangeDone];
+        }else if(rv == NSAlertOtherReturn){
+            // they said to edit the file.
+            tempFileName = [NSTemporaryDirectory() stringByAppendingPathComponent:[[NSProcessInfo processInfo] globallyUniqueString]];
+            [dataString writeToFile:tempFileName atomically:YES];
+            [[NSApp delegate] openEditWindowWithFile:tempFileName];
+            [[NSApp delegate] showErrorPanel:self];
+            return NO;
+        }
+    }
+    
+    [shownPublications setArray:publications];
+    
+    // since we can't save pubmed files as pubmed files:
+    [self updateChangeCount:NSChangeDone];
+    
+    return YES;
 }
 
 - (BOOL)loadRSSDataRepresentation:(NSData *)data{
@@ -527,26 +591,123 @@ stringByAppendingPathComponent:@"BibDesk"]; */
     }
 }
 
-- (IBAction)clearQuickSearch:(id)sender{
-    [quickSearchTextField setStringValue:@""];
-    [self controlTextDidChange:nil];
+#pragma mark -
+#pragma mark Search Field methods
+
+
+- (void)setupSearchField{
+	// called in awakeFromNib
+	NSMenu *cellMenu = [[NSMenu alloc] initWithTitle:@"Search Menu"];
+    NSMenuItem *item1, *item2, *item3, *item4, *anItem;
+    id searchCell = [searchField cell];
+    item1 = [[NSMenuItem alloc] initWithTitle:@"Recent Searches" action: @selector(limitOne:) keyEquivalent:@""];
+    [item1 setTag:NSSearchFieldRecentsTitleMenuItemTag];
+    [cellMenu insertItem:item1 atIndex:0];
+    [item1 release];
+    item2 = [[NSMenuItem alloc] initWithTitle:@"Recents" action:@selector(limitTwo:) keyEquivalent:@""];
+    [item2 setTag:NSSearchFieldRecentsMenuItemTag];
+    [cellMenu insertItem:item2 atIndex:1];
+    [item2 release];
+    item3 = [[NSMenuItem alloc] initWithTitle:@"Clear" action:@selector(limitThree:) keyEquivalent:@""];
+    [item3 setTag:NSSearchFieldClearRecentsMenuItemTag];
+    [cellMenu insertItem:item3 atIndex:2];
+    [item3 release];
+	// my stuff:
+	item4 = [[NSMenuItem alloc] initWithTitle:@"" action:nil keyEquivalent:@""];
+	[item4 setTag:NSSearchFieldRecentsTitleMenuItemTag]; // makes it go away if there are no recents.
+	[cellMenu insertItem:item4 atIndex:3];
+    [item4 release];
+	item4 = [[NSMenuItem alloc] initWithTitle:@"Search Fields" action:nil keyEquivalent:@""];
+	[cellMenu insertItem:item4 atIndex:4];
+    [item4 release];
+
+	item4 = [[NSMenuItem alloc] initWithTitle:@"Add Field ..." action:@selector(quickSearchAddField:) keyEquivalent:@""];
+	[cellMenu insertItem:item4 atIndex:5];
+    [item4 release];
+	
+	item4 = [[NSMenuItem alloc] initWithTitle:@"All Fields" action:@selector(searchFieldChangeKey:) keyEquivalent:@""];
+	[cellMenu insertItem:item4 atIndex:6];
+    [item4 release];
+	
+	item4 = [[NSMenuItem alloc] initWithTitle:@"Title" action:@selector(searchFieldChangeKey:) keyEquivalent:@""];
+	[cellMenu insertItem:item4 atIndex:7];
+    [item4 release];
+	
+	item4 = [[NSMenuItem alloc] initWithTitle:@"Author" action:@selector(searchFieldChangeKey:) keyEquivalent:@""];
+	[cellMenu insertItem:item4 atIndex:8];
+    [item4 release];
+	
+	item4 = [[NSMenuItem alloc] initWithTitle:@"Date" action:@selector(searchFieldChangeKey:) keyEquivalent:@""];
+	[cellMenu insertItem:item4 atIndex:9];
+    [item4 release];
+	
+	
+	NSArray *prefsQuickSearchKeysArray = [[OFPreferenceWrapper sharedPreferenceWrapper] arrayForKey:BDSKQuickSearchKeys];
+    NSString *aKey = nil;
+    NSEnumerator *quickSearchKeyE = [prefsQuickSearchKeysArray objectEnumerator];
+	
+    quickSearchTextDict = [[[OFPreferenceWrapper sharedPreferenceWrapper] objectForKey:BDSKCurrentQuickSearchTextDict] mutableCopy];
+    while(aKey = [quickSearchKeyE nextObject]){
+
+		anItem = [[NSMenuItem alloc] initWithTitle:aKey action:@selector(searchFieldChangeKey:) keyEquivalent:@""]; // @@ searchfield: need action
+		[cellMenu insertItem:anItem atIndex:10];
+		[anItem release];
+    }
+
+	[searchCell setSendsWholeSearchString:NO]; // don't wait for Enter key press.
+	[searchCell setSearchMenuTemplate:cellMenu];
+	[searchCell setPlaceholderString:[NSString stringWithFormat:@"Search by %@",quickSearchKey]];
+	[searchCell setRecentsAutosaveName:[NSString stringWithFormat:@"%@ recent searches autosave ",[self fileName]]];
+	
+	[self setSelectedSearchFieldKey:quickSearchKey];
+	
+    if(quickSearchTextDict){
+        if([quickSearchTextDict objectForKey:quickSearchKey]){
+            [searchCell setStringValue:
+                [quickSearchTextDict objectForKey:quickSearchKey]];
+        }else{
+            [searchCell setStringValue:@""];
+        }
+    }else{
+        quickSearchTextDict = [[NSMutableDictionary dictionaryWithCapacity:4] retain];
+    }
+	
 }
 
-- (IBAction)didChangeQuickSearchKey:(id)sender{
-    [quickSearchKey autorelease];
-    quickSearchKey = [[sender titleOfSelectedItem] retain];
-    [[OFPreferenceWrapper sharedPreferenceWrapper] setObject:quickSearchKey
+
+- (IBAction)searchFieldChangeKey:(id)sender{
+	[self setSelectedSearchFieldKey:[sender title]];
+}
+
+- (void)setSelectedSearchFieldKey:(NSString *)newKey{
+    [quickSearchKey autorelease];  // quickSearchKey might == newKey.
+
+    [[OFPreferenceWrapper sharedPreferenceWrapper] setObject:newKey
                                                       forKey:BDSKCurrentQuickSearchKey];
- 
-    //   [quickSearchToolbarItem setLabel:[NSString stringWithFormat:@"%@%@",@"Search by ",[sender titleOfSelectedItem]]];
-    if([quickSearchTextDict objectForKey:quickSearchKey]){
-        [quickSearchTextField setStringValue:
-            [quickSearchTextDict objectForKey:quickSearchKey]];
+	
+	NSSearchFieldCell *searchCell = [searchField cell];
+	
+    [searchCell setPlaceholderString:[NSString stringWithFormat:@"Search by %@",newKey]];
+    if([quickSearchTextDict objectForKey:newKey]){
+        [searchCell setStringValue:[quickSearchTextDict objectForKey:newKey]];
     }else{
-        [quickSearchTextField setStringValue:@""];
+        [searchCell setStringValue:@""];
     }
-    [self controlTextDidChange:nil];
-    //    [documentWindow setViewsNeedDisplay:YES];
+
+	NSMenu *templateMenu = [searchCell searchMenuTemplate];
+	if(![quickSearchKey isEqualToString:newKey]){
+		// find current key's menuitem and set it to NSOffState
+		NSMenuItem *oldItem = [templateMenu itemWithTitle:quickSearchKey];
+		[oldItem setState:NSOffState];
+	}
+	
+	// set new key's menuitem to NSOnState
+	NSMenuItem *newItem = [templateMenu itemWithTitle:newKey];
+	[newItem setState:NSOnState];
+	[searchCell setSearchMenuTemplate:templateMenu];
+	
+	quickSearchKey = newKey;
+    [self searchFieldAction:searchCell];
 }
 
 - (IBAction)quickSearchAddField:(id)sender{
@@ -563,29 +724,103 @@ stringByAppendingPathComponent:@"BibDesk"]; */
                       contextInfo:(void *)contextInfo{
    
     NSMutableArray *prefsQuickSearchKeysMutableArray = nil;
+	NSSearchFieldCell *searchFieldCell = [searchField cell];
+	NSMenu *searchFieldMenuTemplate = [searchFieldCell searchMenuTemplate];
+	NSMenuItem *menuItem = nil;
+	NSString *newFieldTitle = nil;
 
     if(returnCode == 1){
-        //        //NSLog(@"addFieldTextField title is %@", [addFieldTextField stringValue]);
-        [quickSearchButton insertItemWithTitle:[addFieldTextField stringValue]
-                                       atIndex:0];
-        [quickSearchButton selectItemWithTitle:[addFieldTextField stringValue]];
-        [self didChangeQuickSearchKey:quickSearchButton];
+		newFieldTitle = [addFieldTextField stringValue];
+		
+        [self setSelectedSearchFieldKey:newFieldTitle];
 
         prefsQuickSearchKeysMutableArray = [[[[OFPreferenceWrapper sharedPreferenceWrapper] arrayForKey:BDSKQuickSearchKeys] mutableCopy] autorelease];
 
         if(!prefsQuickSearchKeysMutableArray){
             prefsQuickSearchKeysMutableArray = [NSMutableArray arrayWithCapacity:1];
         }
-        [prefsQuickSearchKeysMutableArray addObject:[addFieldTextField stringValue]];
+        [prefsQuickSearchKeysMutableArray addObject:newFieldTitle];
         [[OFPreferenceWrapper sharedPreferenceWrapper] setObject:prefsQuickSearchKeysMutableArray
                                                           forKey:BDSKQuickSearchKeys];
+
+		menuItem = [[NSMenuItem alloc] initWithTitle:newFieldTitle action:@selector(searchFieldChangeKey:) keyEquivalent:@""];
+		[searchFieldMenuTemplate insertItem:menuItem atIndex:10];
+		[menuItem release];
+		[searchFieldCell setSearchMenuTemplate:searchFieldMenuTemplate];
+		[self setSelectedSearchFieldKey:newFieldTitle];
     }else{
-        // cancel.
-        // set the title back to what it was before.
-        [quickSearchButton selectItemWithTitle:quickSearchKey];
+        // cancel. we don't have to do anything..?
+       
     }
 }
 
+- (IBAction)searchFieldAction:(id)sender{
+	[self hidePublicationsWithoutSubstring:[sender stringValue] inField:quickSearchKey];
+}
+
+- (void)hidePublicationsWithoutSubstring:(NSString *)substring inField:(NSString *)field{
+    NSMutableArray *remArray = [NSMutableArray arrayWithCapacity:1];
+    NSEnumerator *e = [publications objectEnumerator];
+    BibItem *pub;
+
+    NSRange r;
+	
+    [[self currentView] deselectAll:self];
+	
+	// NSLog(@"looking for [%@] in [%@]",substring, field);
+    
+    if(![substring isEqualToString:@""]){
+        while(pub = [e nextObject]){
+            if ([field isEqualToString:@"Title"]){
+                r = [[pub title]  rangeOfString:substring
+                                        options:NSCaseInsensitiveSearch];
+			}else if ([field isEqualToString:@"Author"]){
+                r = [[pub authorString]  rangeOfString:substring
+                                               options:NSCaseInsensitiveSearch];
+			}else if ([field isEqualToString:@"Date"]){
+				NSCalendarDate *pubDate = [pub date];
+				if(pubDate){
+					r = [[pubDate descriptionWithCalendarFormat:@"%B %Y"] rangeOfString:substring
+																				options:NSCaseInsensitiveSearch];
+				}else{
+					r = [@"No Date" rangeOfString:substring
+										  options:NSCaseInsensitiveSearch];
+					// if there's no good date, we use "no date" because that's what we display.
+				}
+            }else if([field isEqualToString:@"All Fields"]){
+                r = [[pub allFieldsString] rangeOfString:substring
+                                                 options:NSCaseInsensitiveSearch];
+				
+            }else if([field isEqualToString:@"Pub Type"]){
+                r = [[pub type] rangeOfString:substring
+                                      options:NSCaseInsensitiveSearch];
+            }else{
+                r = [[pub valueOfField:quickSearchKey] rangeOfString:substring
+                                                             options:NSCaseInsensitiveSearch];
+            }
+			
+            if(r.location == NSNotFound) [remArray addObject:pub];
+        }
+    }else{
+		// do nothing
+    }
+    [shownPublications setArray:publications];
+    [shownPublications removeObjectsInArray:remArray];
+	
+    [quickSearchTextDict setObject:substring
+                            forKey:field];
+	
+    [[OFPreferenceWrapper sharedPreferenceWrapper] setObject:[[quickSearchTextDict copy] autorelease]
+                                                      forKey:BDSKCurrentQuickSearchTextDict];
+    [[OFPreferenceWrapper sharedPreferenceWrapper] autoSynchronize];
+	
+    [self updateUIAndRefreshOutline:YES]; // calls reloadData
+    if([shownPublications count] == 1)
+        [[self currentView] selectAll:self];
+}
+
+
+#pragma mark -
 
 - (void)updatePreviews:(NSNotification *)aNotification{
     NSNumber *i;
@@ -694,8 +929,8 @@ didClickTableColumn: (NSTableColumn *) tableColumn{
             [publications sortUsingSelector:@selector(auth3Compare:)];
             [shownPublications sortUsingSelector:@selector(auth3Compare:)];
         }else{
-            // don't handle sorting generally yet
-            NSLog(@"We don't handle sorting all columns yet! Tried sorting %@", [tableColumn identifier]);
+			[publications sortUsingFunction:generalBibItemCompareFunc context:[tableColumn identifier]];
+			[shownPublications sortUsingFunction:generalBibItemCompareFunc context:[tableColumn identifier]];
         }
 
     }
@@ -707,6 +942,17 @@ didClickTableColumn: (NSTableColumn *) tableColumn{
                    inTableColumn: tableColumn];
     [tableView reloadData];
 }
+
+
+int generalBibItemCompareFunc(id item1, id item2, void *context){
+	NSString *tableColumnName = (NSString *)context;
+
+	NSString *keyPath = [NSString stringWithFormat:@"pubFields.%@", tableColumnName];
+	NSString *value1 = (NSString *)[item1 valueForKeyPath:keyPath];
+	NSString *value2 = (NSString *)[item2 valueForKeyPath:keyPath];
+	return [value1 compare:value2];
+}
+
 
 - (IBAction)emailPubCmd:(id)sender{
     NSEnumerator *e = [self selectedPubEnumerator];
@@ -811,62 +1057,6 @@ didClickTableColumn: (NSTableColumn *) tableColumn{
 #endif
         [self updateChangeCount:NSChangeDone]; // used to be 'e' updateChangeCount.
     }
-}
-
-// This is a delegate method of the quick search text field.
-
-- (void)controlTextDidChange:(NSNotification *)aNotification{
-    NSMutableArray *remArray = [NSMutableArray arrayWithCapacity:1];
-    NSEnumerator *e = [publications objectEnumerator];
-    BibItem *pub;
-    NSString *prefix = [quickSearchTextField stringValue];
-    NSRange r;
-
-    [[self currentView] deselectAll:self];
-    
-    if(![prefix isEqualToString:@""]){
-        while(pub = [e nextObject]){
-            if ([quickSearchKey isEqualToString:@"Title"]){
-                r = [[pub title]  rangeOfString:prefix
-                                        options:NSCaseInsensitiveSearch];
-	    }else if ([quickSearchKey isEqualToString:@"Author"]){
-                r = [[pub authorString]  rangeOfString:prefix
-                                               options:NSCaseInsensitiveSearch];
-	    }else if ([quickSearchKey isEqualToString:@"Date"]){
-                r = [[[pub date] descriptionWithCalendarFormat:@"%B %Y"] rangeOfString:prefix                                                                                options:NSCaseInsensitiveSearch];
-            }else if([quickSearchKey isEqualToString:@"All Fields"]){
-                r = [[pub allFieldsString] rangeOfString:prefix
-                                                 options:NSCaseInsensitiveSearch];
-
-            }else if([quickSearchKey isEqualToString:@"Pub Type"]){
-                r = [[pub type] rangeOfString:prefix
-                                      options:NSCaseInsensitiveSearch];
-            }else{
-                r = [[pub valueOfField:quickSearchKey] rangeOfString:prefix
-                                                             options:NSCaseInsensitiveSearch];
-            }
-	    
-            if(r.location == NSNotFound) [remArray addObject:pub];
-        }
-        [quickSearchClearButton setEnabled:YES];
-        [quickSearchClearButton setToolTip:NSLocalizedString(@"Clear quick-search field",@"")];
-    }else{
-        [quickSearchClearButton setEnabled:NO];
-        [quickSearchClearButton setToolTip:NSLocalizedString(@"Empty field",@"")];
-    }
-    [shownPublications setArray:publications];
-    [shownPublications removeObjectsInArray:remArray];
-
-    [quickSearchTextDict setObject:prefix
-                            forKey:quickSearchKey];
-
-    [[OFPreferenceWrapper sharedPreferenceWrapper] setObject:[[quickSearchTextDict copy] autorelease]
-                                                      forKey:BDSKCurrentQuickSearchTextDict];
-    [[OFPreferenceWrapper sharedPreferenceWrapper] autoSynchronize];
-
-    [self updateUIAndRefreshOutline:YES]; // calls reloadData
-    if([shownPublications count] == 1)
-        [[self currentView] selectAll:self];
 }
 
 - (IBAction)copy:(id)sender{
@@ -1358,7 +1548,7 @@ didClickTableColumn: (NSTableColumn *) tableColumn{
                 [items addObject:rowItem];
             }else if([rowItem isKindOfClass:[BibAuthor class]]){
                 // rowItem *should* be expanded if we're getting called. (We assume this!)
-                //@@fixme -  bibauthor dependence
+				// @@ note: this assumes bibauthors. 
                 childE = [[rowItem children] objectEnumerator];
                 while(child = [childE nextObject]){
                     if ([items indexOfObjectIdenticalTo:child] == NSNotFound) {
@@ -1399,10 +1589,30 @@ didClickTableColumn: (NSTableColumn *) tableColumn{
 }
 
 #pragma mark
-#pragma mark || printing support
+#pragma mark Printing support
 
-- (void)printShowingPrintPanel:(BOOL)flag{
-    // do nothing.
+- (NSView *)printableView{
+	return previewField; // random hack for now. - this will only print the selected items.
+}
+
+- (void)printShowingPrintPanel:(BOOL)showPanels {
+    // Obtain a custom view that will be printed
+    NSView *printView = [self printableView];
+	
+    // Construct the print operation and setup Print panel
+    NSPrintOperation *op = [NSPrintOperation
+                printOperationWithView:printView
+							 printInfo:[self printInfo]];
+    [op setShowPanels:showPanels];
+    if (showPanels) {
+        // Add accessory view, if needed
+    }
+	
+    // Run operation, which shows the Print panel if showPanels was YES
+    [self runModalPrintOperation:op
+						delegate:nil
+				  didRunSelector:NULL
+					 contextInfo:NULL];
 }
 
 @end

@@ -27,7 +27,9 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 #import "BDSKCustomCiteTableView.h"
 #import "BDSKConverter.h"
 #import "BibTeXParser.h"
+#import "PubMedParser.h"
 #import <OmniAppKit/OASplitView.h>
+#import "NSString+Templating.h"
 
 
 @class BDSKCustomCiteTableView;
@@ -61,21 +63,22 @@ extern NSString* LocalDragPasteboardName;
     IBOutlet NSMenuItem *ctxCopyPDF;
     IBOutlet OASplitView* splitView;
 
-#pragma mark || Toolbar stuff
+#pragma mark Toolbar variable declarations
+
     NSMutableDictionary *toolbarItems;
-    IBOutlet NSTextField *quickSearchTextField;
-    IBOutlet NSBox* quickSearchBox;    // encompasses the qstxtfield and the qs button.
-    IBOutlet NSPopUpButton *quickSearchButton;
+	
+	IBOutlet NSSearchField *searchField;
+	IBOutlet NSBox *searchFieldBox;
+	NSToolbarItem *searchFieldToolbarItem;
+	
     IBOutlet NSView* sortKeyView;
     IBOutlet NSPopUpButton *sortKeyButton;
-    NSToolbarItem *quickSearchToolbarItem;
     NSToolbarItem *sortKeyToolbarItem;
-    IBOutlet NSButton* quickSearchClearButton;
 
     IBOutlet NSTextField *infoLine;
-// ----------------------------------------------------------------------------------------
-#pragma mark ||  custom cite-String drawer stuff:
-// ----------------------------------------------------------------------------------------
+
+#pragma mark Custom Cite-String drawer variable declarations:
+
     IBOutlet NSDrawer* customCiteDrawer;
     IBOutlet NSButton* openCustomCitePrefsButton;
     IBOutlet BDSKCustomCiteTableView* ccTableView;
@@ -120,15 +123,21 @@ extern NSString* LocalDragPasteboardName;
 }
 
 - (void)awakeFromNib;
+- (void)setupSearchField;
 - (id)init;
 - (void)dealloc;
 - (IBAction)exportAsRSS:(id)sender;
+- (IBAction)exportAsHTML:(id)sender;
+- (void)exportAsFileType:(NSString *)fileType;
 - (void)saveDependentWindows; //@@bibeditor transparency - won't need this.
 - (NSData *)rssDataRepresentation;
 - (NSData *)bibDataRepresentation;
+- (NSData *)htmlDataRepresentation;
+- (NSString *)publicationsAsHTML;
 - (BOOL)loadDataRepresentation:(NSData *)data ofType:(NSString *)aType;
 - (BOOL)loadBibTeXDataRepresentation:(NSData *)data;
 - (BOOL)loadRSSDataRepresentation:(NSData *)data;
+- (BOOL)loadPubMedDataRepresentation:(NSData *)data;
 
 
 // Responses to UI actions
@@ -150,13 +159,16 @@ extern NSString* LocalDragPasteboardName;
 - (IBAction)delPub:(id)sender;
 
 /*!
-@method didChangeQuickSearchKey
+@method searchFieldChangeKey
  @abstract Changed what we look for in quicksearch
- @discussion This is called when we change what key to look for. It's the target of the popupbutton.
- @param sender the sender. not used
+ @discussion This is called when we change what key to look for. It's the target of the nssearchfield.
+ @param sender the sender. 
  
 */
-- (IBAction)didChangeQuickSearchKey:(id)sender;
+
+- (IBAction)searchFieldChangeKey:(id)sender;
+
+- (void)setSelectedSearchFieldKey:(NSString *)newKey;
 
 /*!
     @method quickSearchAddField
@@ -170,13 +182,11 @@ extern NSString* LocalDragPasteboardName;
                             returnCode:(int) returnCode
                            contextInfo:(void *)contextInfo;
 
-/*!
-    @method clearQuickSearch
-    @abstract \253Abstract\273
-    @discussion \253discussion\273
-    
-*/
-- (IBAction)clearQuickSearch:(id)sender;
+
+- (IBAction)searchFieldAction:(id)sender;
+
+// Hides all pubs without substring in field.
+- (void)hidePublicationsWithoutSubstring:(NSString *)substring inField:(NSString *)field;
 
 /*!
     @method updatePreviews
@@ -329,6 +339,8 @@ extern NSString* LocalDragPasteboardName;
     
 */
 - (void)setupTableColumns;
+
+int generalBibItemCompareFunc(id item1, id item2, void *context);
 
 /*!
 @method contextualMenuAddTableColumnName:enabled:
