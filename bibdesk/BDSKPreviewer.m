@@ -191,8 +191,10 @@ static unsigned threadCount = 0;
 
 - (void)performDrawing{
     NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
-    [imagePreviewView loadFromPath:finalPDFPath];
-    [self rtfPreviewFromData:[self rtfDataPreview]];
+    if([tabView lockFocusIfCanDraw]){
+        [imagePreviewView loadFromPath:finalPDFPath];
+        [self rtfPreviewFromData:[self rtfDataPreview]];
+    }
     [pool release];
 }	
 
