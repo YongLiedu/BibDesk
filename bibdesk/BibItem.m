@@ -445,7 +445,7 @@ void _setupFonts(){
 	NSScanner *scanner;
 	NSCharacterSet *digits = [NSCharacterSet decimalDigitCharacterSet];
 	NSString *string, *numStr;
-	int number, numAth, i;
+	int number, numAuth, i;
 	unichar specifier, nextChar;
 	BibAuthor *auth;
 	
@@ -473,24 +473,24 @@ void _setupFonts(){
 			switch (specifier) {
 				case 'a':
 					// author names, optional #names and #chars
-					numAth = 0;
+					numAuth = 0;
 					number = 0;
 					if (![scanner isAtEnd]) {
 						// look for #names
 						nextChar = [citeKeyFormat characterAtIndex:[scanner scanLocation]];
 						if ([[NSCharacterSet decimalDigitCharacterSet] characterIsMember:nextChar]) {
 							[scanner setScanLocation:[scanner scanLocation]+1];
-							numAth = (int)(nextChar - '0');
+							numAuth = (int)(nextChar - '0');
 							// scan for #chars per name
 							if ([scanner scanCharactersFromSet:digits intoString:&numStr]) {
 								number = [numStr intValue];
 							}
 						}
 					}
-					if (numAth == 0 || numAth > [self numberOfAuthors]) {
-						numAth = [self numberOfAuthors];
+					if (numAuth == 0 || numAuth > [self numberOfAuthors]) {
+						numAuth = [self numberOfAuthors];
 					}
-					for (i = 0; i < numAth; i++) {
+					for (i = 0; i < numAuth; i++) {
 						string = [[self authorAtIndex:i] lastName];
 						string = [converter stringBySanitizingCiteKeyString:string];
 						if ([string length] > number && number > 0) {
@@ -501,24 +501,24 @@ void _setupFonts(){
 					break;
 				case 'A':
 					// author names with initials, optional #names and #chars
-					numAth = 0;
+					numAuth = 0;
 					number = 0;
 					if (![scanner isAtEnd]) {
 						// look for #names
 						nextChar = [citeKeyFormat characterAtIndex:[scanner scanLocation]];
 						if ([[NSCharacterSet decimalDigitCharacterSet] characterIsMember:nextChar]) {
 							[scanner setScanLocation:[scanner scanLocation]+1];
-							numAth = (int)(nextChar - '0');
+							numAuth = (int)(nextChar - '0');
 							// scan for #chars per name
 							if ([scanner scanCharactersFromSet:digits intoString:&numStr]) {
 								number = [numStr intValue];
 							}
 						}
 					}
-					if (numAth == 0 || numAth > [self numberOfAuthors]) {
-						numAth = [self numberOfAuthors];
+					if (numAuth == 0 || numAuth > [self numberOfAuthors]) {
+						numAuth = [self numberOfAuthors];
 					}
-					for (i = 0; i < numAth; i++) {
+					for (i = 0; i < numAuth; i++) {
 						if (i > 0) {
 							[citeKeyStr appendString:@";"];
 						}
