@@ -233,7 +233,10 @@ static void addToolbarItem(NSMutableDictionary *theDict,NSString *identifier,NSS
     NSToolbarItem *addedItem = [[notif userInfo] objectForKey: @"item"];
 
     if([[addedItem itemIdentifier] isEqualToString: SearchFieldDocToolbarItemIdentifier]) {
-		searchFieldToolbarItem = [addedItem retain];
+		if (searchFieldToolbarItem != addedItem) {
+			[searchFieldToolbarItem autorelease];
+			searchFieldToolbarItem = [addedItem retain];
+		}
     }else if([[addedItem itemIdentifier] isEqualToString: DelDocToolbarItemIdentifier]){
 //        delPubButton = addedItem;
     }else if([[addedItem itemIdentifier] isEqualToString: EditDocToolbarItemIdentifier]){
