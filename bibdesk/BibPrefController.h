@@ -94,6 +94,7 @@ extern NSString *BDSKLastVersionLaunched;
 
 #pragma mark ||  Notification name strings
 extern NSString *BDSKDocumentWillSaveNotification;
+extern NSString *BDSKDocumentWindowWillCloseNotification;
 extern NSString *BDSKDocumentUpdateUINotification;
 extern NSString *BDSKTableViewFontChangedNotification;
 extern NSString *BDSKPreviewDisplayChangedNotification;
@@ -102,6 +103,6 @@ extern NSString *BDSKCustomStringsChangedNotification;
 extern NSString *BDSKTableColumnChangedNotification;
 extern NSString *BDSKBibItemChangedNotification;
 extern NSString *BDSKDocAddItemNotification;
-extern NSString *BDSKDocWillDelItemNotification;
+extern NSString *BDSKDocWillRemoveItemNotification;
 extern NSString *BDSKDocDelItemNotification;
 extern NSString *BDSKAuthorPubListChangedNotification;

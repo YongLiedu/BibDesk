@@ -195,6 +195,9 @@ extern NSString *BDSKDateModifiedString;
 - (void)makeKeyField:(NSString *)fieldName;
 - (void)bibDidChange:(NSNotification *)notification;
 
+- (void)docWillSave:(NSNotification *)notification;
+- (void)bibWillBeRemoved:(NSNotification *)notification;
+- (void)docWindowWillClose:(NSNotification *)notification;
 
 /*!
     @method     showPersonDetail:

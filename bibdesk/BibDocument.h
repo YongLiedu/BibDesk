@@ -102,7 +102,6 @@ extern NSString* BDSKBibTeXStringPboardType;
 	
 	NSMutableSet *authors;
 
-    NSMutableArray *bibEditors;
     NSString *quickSearchKey;
     NSMutableDictionary *quickSearchTextDict;
    
@@ -149,7 +148,6 @@ extern NSString* BDSKBibTeXStringPboardType;
 - (IBAction)exportAsRSS:(id)sender;
 - (IBAction)exportAsHTML:(id)sender;
 - (void)exportAsFileType:(NSString *)fileType;
-- (void)saveDependentWindows; //@@bibeditor transparency - won't need this.
 - (NSData *)rssDataRepresentation;
 - (NSData *)bibDataRepresentation;
 - (NSData *)htmlDataRepresentation;

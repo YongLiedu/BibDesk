@@ -209,6 +209,18 @@ NSString *BDSKDateModifiedString = @"Date-Modified";
 											 selector:@selector(bibDidChange:)
 												 name:BDSKBibItemChangedNotification
 											   object:theBib];
+	[[NSNotificationCenter defaultCenter] addObserver:self
+											 selector:@selector(bibWillBeRemoved:)
+												 name:BDSKDocWillRemoveItemNotification
+											   object:theBib];
+	[[NSNotificationCenter defaultCenter] addObserver:self
+											 selector:@selector(docWillSave:)
+												 name:BDSKDocumentWillSaveNotification
+											   object:theDocument];
+	[[NSNotificationCenter defaultCenter] addObserver:self
+											 selector:@selector(docWindowWillClose:)
+												 name:BDSKDocumentWindowWillCloseNotification
+											   object:theDocument];
 
 	[authorTableView setDoubleAction:@selector(showPersonDetailCmd:)];
 		
@@ -852,6 +864,28 @@ NSString *BDSKDateModifiedString = @"Date-Modified";
 //  send a notification that "I changed" and let any Doc(/finder) that cares update.
 - (void)noteChange{
     [theDocument updateChangeCount:NSChangeDone];
+}
+
+
+- (void)docWillSave:(NSNotification *)notification{
+	//NSDictionary *userInfo = [notification userInfo];
+	
+    if (![[self window] makeFirstResponder:[self window]]) {
+        [[self window] endEditingFor:nil];
+    }
+}
+	
+- (void)bibWillBeRemoved:(NSNotification *)notification{
+	//NSDictionary *userInfo = [notification userInfo];
+	
+	[self close];
+	[theBib setEditorObj:nil]; //cmh: obsolete?
+}
+	
+- (void)docWindowWillClose:(NSNotification *)notification{
+	//NSDictionary *userInfo = [notification userInfo];
+	
+	[[self window] close];
 }
 
 #pragma mark -

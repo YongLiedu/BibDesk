@@ -51,7 +51,6 @@ NSString* BDSKBibTeXStringPboardType = @"edu.ucsd.cs.mmcrack.bibdesk: Local BibT
             [NSNumber numberWithInt:1],[NSNumber numberWithInt:1],[NSNumber numberWithInt:1],[NSNumber numberWithInt:1],[NSNumber numberWithInt:1],[NSNumber numberWithInt:1],nil] retain];
         localDragPboard = [NSPasteboard pasteboardWithName:LocalDragPasteboardName];
         tableColumns = [[NSMutableDictionary dictionaryWithCapacity:6] retain];
-        bibEditors = [[NSMutableArray alloc] initWithCapacity:1];
         fileOrderCount = 1;
         // Register as observer of font change events.
         [[NSNotificationCenter defaultCenter] addObserver:self
@@ -194,7 +193,6 @@ NSString* BDSKBibTeXStringPboardType = @"edu.ucsd.cs.mmcrack.bibdesk: Local BibT
     [[NSNotificationCenter defaultCenter] removeObserver:self];
     [publications release]; // these should cause the bibitems to get dealloc'ed
     [shownPublications release];
-    [bibEditors release]; // gets rid of all the bibeditors.
 	[frontMatter release];
 	[authors release];
     [quickSearchTextDict release];
@@ -304,19 +302,18 @@ Handle Notifications by the popup button to update its icon and its menu before 
 	NSUndoManager *undoManager = [self undoManager];
 	[[undoManager prepareWithInvocationTarget:self] addPublication:pub];
 	
-	BibEditor *editor = [pub editorObj];
-	if(editor){
-		[editor close];
-		[bibEditors removeObjectIdenticalTo:editor];
-        [pub setEditorObj:nil];
-	}
+	NSDictionary *notifInfo = [NSDictionary dictionaryWithObjectsAndKeys:self, @"Sender", nil];
+	[[NSNotificationCenter defaultCenter] postNotificationName:BDSKDocWillRemoveItemNotification
+														object:pub
+													  userInfo:notifInfo];	
+	
 	[pub setDocument:nil];
 	// unregister with the publication's authors
 	[[pub pubAuthors] makeObjectsPerformSelector:@selector(removePubFromAuthorList:) withObject:pub];
 	[publications removeObjectIdenticalTo:pub];
 	[shownPublications removeObjectIdenticalTo:pub];
 	
-	NSDictionary *notifInfo = [NSDictionary dictionaryWithObjectsAndKeys:pub, @"pub",
+	notifInfo = [NSDictionary dictionaryWithObjectsAndKeys:pub, @"pub",
 		(last ? @"YES" : @"NO"), @"lastRequest", nil];
 	[[NSNotificationCenter defaultCenter] postNotificationName:BDSKDocDelItemNotification
 														object:self
@@ -482,7 +479,9 @@ Handle Notifications by the popup button to update its icon and its menu before 
 
 - (NSData *)dataRepresentationOfType:(NSString *)aType
 {
-    [self saveDependentWindows];//@@bibeditor transparency - won't need this.
+	[[NSNotificationCenter defaultCenter] postNotificationName:BDSKDocumentWillSaveNotification
+														object:self
+													  userInfo:[NSDictionary dictionary]];
     
     if ([aType isEqualToString:@"bibTeX database"]){
         return [self bibDataRepresentation];
@@ -521,21 +520,6 @@ Handle Notifications by the popup button to update its icon and its menu before 
     
     } else return NO;  // if super failed
 
-}
-    
-
-- (void)saveDependentWindows{
-    NSMutableArray *depWins = [NSMutableArray array];
-    NSEnumerator *pubE = [publications objectEnumerator]; 
-    BibItem *pub;
-
-    // make sure all bibitems have saved their changes.
-    while(pub = [pubE nextObject]){
-        if([pub editorObj]){
-            [depWins addObject:[pub editorObj]];
-        }
-    }
-    [depWins makeObjectsPerformSelector:@selector(finalizeChanges)];
 }
 
 #define AddDataFromString(s) [d appendData:[s dataUsingEncoding:NSASCIIStringEncoding]]
@@ -1590,8 +1574,6 @@ int generalBibItemCompareFunc(id item1, id item2, void *context){
     BibEditor *e = [pub editorObj];
     if(e == nil){
         e = [[BibEditor alloc] initWithBibItem:pub document:self];
-
-		[bibEditors addObject:[e autorelease]];// we need to keep track of the bibeditors
     }
     [e show];    //    [e showWindow:self];
     if(force){
@@ -2303,17 +2285,10 @@ This method always returns YES. Even if some or many operations fail.
 }
 
 - (void)windowWillClose:(NSNotification *)notification{
-    NSMutableArray *depWins = [NSMutableArray array];
-    NSEnumerator *pubE = [publications objectEnumerator];
-    BibItem *pub;
+	[[NSNotificationCenter defaultCenter] postNotificationName:BDSKDocumentWindowWillCloseNotification
+														object:self
+													  userInfo:[NSDictionary dictionary]];
 
-    // make sure all bibitems have been saved:
-    while(pub = [pubE nextObject]){
-        if([pub editorObj]){ //should be isedited, or isshowing??
-            [depWins addObject:[[pub editorObj] window]];
-        }
-    }
-    [depWins makeObjectsPerformSelector:@selector(close)];
     [customCiteDrawer close];
     [self removeAllAuthors];
     [[NSApp delegate] removeErrorObjsForFileName:[self fileName]];

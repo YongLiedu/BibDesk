@@ -69,6 +69,7 @@ NSString *BDSKLastVersionLaunched = @"Last launched version number";
 
 #pragma mark ||  Notification name strings
 NSString *BDSKDocumentWillSaveNotification = @"Document Will Save Notification";
+NSString *BDSKDocumentWindowWillCloseNotification = @"Document Window Will Close Notification";
 NSString *BDSKDocumentUpdateUINotification = @"General UI update Notification";
 NSString *BDSKTableViewFontChangedNotification = @"Tableview font selection is changing Notification";
 NSString *BDSKPreviewDisplayChangedNotification = @"Preview Pane Preference Change Notification";
@@ -77,6 +78,6 @@ NSString *BDSKPreviewNeedsUpdateNotification = @"Preview Needs Update Notificati
 NSString *BDSKTableColumnChangedNotification = @"TableColumnChangedNotification";
 NSString *BDSKBibItemChangedNotification = @"BibItem Changed notification";
 NSString *BDSKDocAddItemNotification = @"Added a bibitem to a document";
-NSString *BDSKDocWillDelItemNotification = @"Will remove a bibitem from a document";
+NSString *BDSKDocWillRemoveItemNotification = @"Will remove a bibitem from a document";
 NSString *BDSKDocDelItemNotification = @"Removed a bibitem from a document";
 NSString *BDSKAuthorPubListChangedNotification = @"added to or deleted a pub from an author";
