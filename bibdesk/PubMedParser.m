@@ -94,6 +94,14 @@
     AGRegex *findSubscriptOrSuperscriptTrailingTag = [AGRegex regexWithPattern:@"</su[bp]>"];
     AGRegex *findSuperscriptLeadingTag = [AGRegex regexWithPattern:@"<sup>"];
     
+    // This one might require some explanation.  An entry with TI of "Flapping flight as a bifurcation in Re<sub>&omega;</sub>"
+    // was run through the html conversion to give "...Re<sub>$\omega$</sub>", then the find sub/super regex replaced the sub tags to give
+    // "...Re$_$omega$$", which LaTeX barfed on.  So, we now search for <sub></sub> tags with matching dollar signs inside, and remove the inner
+    // dollar signs, since we'll use the dollar signs from our subsequent regex search and replace; however, we have to
+    // reject the case where there is a <sub><\sub> by matching [^<]+ (at least one character which is not <), or else it goes to the next </sub> tag
+    // and deletes dollar signs that it shouldn't touch.  Yuck.
+    AGRegex *findNestedDollar = [AGRegex regexWithPattern:@"(<su[bp]>[^<]+)(\\$)(.*)(\\$)(.*</su[bp]>)"];
+    
     NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
     
     while(sourceLine = [sourceLineE nextObject]){
@@ -119,6 +127,14 @@
 
                 // Do a regex find and replace to put LaTeX subscripts and superscripts in place of the HTML
                 // that Compendex (and possibly others) give us.
+                if([findNestedDollar findInString:value] != nil){
+                    NSLog(@"WARNING: found nested math mode; trying to repair...");
+                    NSLog(@"Original string was %@", value);
+                    value = [findNestedDollar replaceWithString:@"$1$3$5"
+                                                       inString:value];
+                    NSLog(@"String is now %@", value);
+                }
+                    
                 value = [findSubscriptLeadingTag replaceWithString:@"\\$_{"
                                                           inString:value];
                 value = [findSuperscriptLeadingTag replaceWithString:@"\\$^{"
@@ -442,7 +458,7 @@ http://home.planet.nl/~faase009/GNU.txt
                                         case '\t': [mString appendString:@"        \n"]; break;
 					case '_': case '{': case '}':
 					case '#': case '$': case '%':
-                       [mString appendFormat:@"\\%c", ch]; break;
+                       [mString appendFormat:@"{\\%c}", ch]; break;
                                         case '@' : [mString appendFormat:@"{\\char64}\n"]; break;
 					case '[' :
 					case ']' : [mString appendFormat:@"{$%c$}", ch]; break;
