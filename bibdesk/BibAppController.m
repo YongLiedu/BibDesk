@@ -97,6 +97,37 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 
 }
 
+- (id)init
+{
+    if(self = [super init]){
+        //register as a listener for the previewpanel opening and closing
+        [[NSNotificationCenter defaultCenter] addObserver:self
+												 selector:@selector(handleWindowCloseNotification:)
+													 name:NSWindowWillCloseNotification
+												   object:nil];
+        [[NSNotificationCenter defaultCenter] addObserver:self
+                                                 selector:@selector(handleErrorNotification:)
+                                                     name:@"BTPARSE ERROR"
+                                                   object:nil];
+        _errors = [[NSMutableArray alloc] initWithCapacity:5];
+        _finder = [[BibFinder sharedFinder] retain];
+        _autoCompletionDict = [[NSMutableDictionary alloc] initWithCapacity:15]; // arbitrary
+	 	_formatters = [[NSMutableDictionary alloc] initWithCapacity:15]; // arbitrary
+    }
+    return self;
+}
+
+- (void)dealloc
+{
+    [[NSNotificationCenter defaultCenter] removeObserver:self];
+    [_autoCompletionDict release];
+	[_formatters release];
+	[_finder release];
+    [_errors release];
+    [super dealloc];
+}
+
+
 - (void)awakeFromNib{
 
     [errorTableView setDoubleAction:@selector(gotoError:)];
@@ -142,15 +173,15 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
     }
 }
 
-#pragma mark -
-              // auto-completion stuff
+#pragma mark Auto-completion stuff
+
 - (void)addString:(NSString *)string forCompletionEntry:(NSString *)entry{
-    NSMutableArray *completionArray = nil;
+	NSMutableArray *completionArray = nil;
     BOOL keyExists = [[_autoCompletionDict allKeys] containsObject:entry];
-    if (!keyExists) {
+	if (!keyExists) {
         completionArray = [NSMutableArray arrayWithCapacity:5];
-    }else{
-        completionArray = [_autoCompletionDict objectForKey:entry];
+	}else{
+		completionArray = [_autoCompletionDict objectForKey:entry];
     }
     [completionArray addObject:string];
     if(!keyExists){
@@ -257,34 +288,6 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 }
 
 
-- (id)init
-{
-    if(self = [super init]){
-        //register as a listener for the previewpanel opening and closing
-        [[NSNotificationCenter defaultCenter] addObserver:self
-                                 selector:@selector(handleWindowCloseNotification:)
-                                     name:NSWindowWillCloseNotification
-                                   object:nil];
-        [[NSNotificationCenter defaultCenter] addObserver:self
-                                                 selector:@selector(handleErrorNotification:)
-                                                     name:@"BTPARSE ERROR"
-                                                   object:nil];
-        _errors = [[NSMutableArray alloc] initWithCapacity:5];
-        _finder = [BibFinder sharedFinder];
-        _autoCompletionDict = [[NSMutableDictionary alloc] initWithCapacity:15]; // arbitrary
-		_formatters = [[NSMutableDictionary alloc] initWithCapacity:15]; // arbitrary
-    }
-    return self;
-}
-
-- (void)dealloc
-{
-    [[NSNotificationCenter defaultCenter] removeObserver:self];
-    [_autoCompletionDict release];
-	[_formatters release];
-    [_errors release];
-    [super dealloc];
-}
 
 - (void)handleWindowCloseNotification:(NSNotification *)notification{
     if ([notification object] == [[BDSKPreviewer sharedPreviewer] window] ) {
