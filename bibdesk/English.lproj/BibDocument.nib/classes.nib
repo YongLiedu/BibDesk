@@ -74,6 +74,12 @@
             }; 
             SUPERCLASS = NSDocument; 
         }, 
+        {
+            ACTIONS = {clearQuickSearch = id; }; 
+            CLASS = FirstResponder; 
+            LANGUAGE = ObjC; 
+            SUPERCLASS = NSObject; 
+        }, 
         {CLASS = MyTextField; LANGUAGE = ObjC; SUPERCLASS = NSTextField; }, 
         {CLASS = OASplitView; LANGUAGE = ObjC; SUPERCLASS = NSSplitView; }, 
         {CLASS = RYZImagePopUpButton; LANGUAGE = ObjC; SUPERCLASS = NSPopUpButton; }
