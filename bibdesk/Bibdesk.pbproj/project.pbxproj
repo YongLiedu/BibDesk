@@ -1394,6 +1394,7 @@
 				27662E7A0693442800E3338C,
 				276A500C069F6FC80090D522,
 				276A500E069F6FF90090D522,
+				F9D8602406B2FC7D00F2DE7D,
 			);
 			isa = PBXResourcesBuildPhase;
 			runOnlyForDeploymentPostprocessing = 0;
@@ -2212,6 +2213,7 @@
 		};
 		2A37F4B8FDCFA73011CA2CEA = {
 			children = (
+				F9D8602306B2FC7D00F2DE7D,
 				F9D6C21E06AED39F00EAEB04,
 				F9D6C21F06AED39F00EAEB04,
 				2762924C06384763008D783C,
@@ -4409,6 +4411,19 @@
 		};
 		F9D84C1406B2D1C300F2DE7D = {
 			fileRef = F9D6C21F06AED39F00EAEB04;
+			isa = PBXBuildFile;
+			settings = {
+			};
+		};
+		F9D8602306B2FC7D00F2DE7D = {
+			isa = PBXFileReference;
+			lastKnownFileType = text.rtf;
+			path = README.rtf;
+			refType = 4;
+			sourceTree = "<group>";
+		};
+		F9D8602406B2FC7D00F2DE7D = {
+			fileRef = F9D8602306B2FC7D00F2DE7D;
 			isa = PBXBuildFile;
 			settings = {
 			};
