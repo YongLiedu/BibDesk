@@ -297,11 +297,20 @@ static BDSKConverter *theConverter;
 - (BOOL)validateFormat:(NSString **)formatString forField:(NSString *)fieldName inFileType:(NSString *)type error:(NSString **)error
 {
 	// implemented specifiers, the same for any field and type
-	NSCharacterSet *validSpecifierChars = [NSCharacterSet characterSetWithCharactersInString:@"tTmyYlLekrRdc"];
-	NSCharacterSet *validUniqueSpecifierChars = [NSCharacterSet characterSetWithCharactersInString:@"uUn"];
-	NSCharacterSet *validEscapeSpecifierChars = [NSCharacterSet characterSetWithCharactersInString:@"0123456789%[]"];
-	NSCharacterSet *validArgSpecifierChars = [NSCharacterSet characterSetWithCharactersInString:@"fc"];
-	NSCharacterSet *validOptArgSpecifierChars = [NSCharacterSet characterSetWithCharactersInString:@"aA"];
+	static NSCharacterSet *validSpecifierChars = nil;
+	static NSCharacterSet *validUniqueSpecifierChars = nil;
+	static NSCharacterSet *validEscapeSpecifierChars = nil;
+	static NSCharacterSet *validArgSpecifierChars = nil;
+	static NSCharacterSet *validOptArgSpecifierChars = nil;
+	
+	if (validSpecifierChars == nil) {
+		validSpecifierChars = [[NSCharacterSet characterSetWithCharactersInString:@"tTmyYlLekrRdc"] retain];
+		validUniqueSpecifierChars = [[NSCharacterSet characterSetWithCharactersInString:@"uUn"] retain];
+		validEscapeSpecifierChars = [[NSCharacterSet characterSetWithCharactersInString:@"0123456789%[]"] retain];
+		validArgSpecifierChars = [[NSCharacterSet characterSetWithCharactersInString:@"fc"] retain];
+		validOptArgSpecifierChars = [[NSCharacterSet characterSetWithCharactersInString:@"aA"] retain];
+	}
+	
 	NSCharacterSet *invalidCharSet = [[BibTypeManager sharedManager] strictInvalidCharactersForField:fieldName inFileType:type];
 	NSScanner *scanner = [NSScanner scannerWithString:*formatString];
 	NSMutableString *sanitizedFormatString = [NSMutableString string];
@@ -361,7 +370,7 @@ static BDSKConverter *theConverter;
 		}
 		else if ([validUniqueSpecifierChars characterIsMember:specifier]) {
 			if (foundUnique) { // a second 'unique' specifier was found
-				*error = [NSString stringWithFormat: NSLocalizedString(@"specifier %%%C, unique specifiers can appear only once in format.", @""), specifier];
+				*error = [NSString stringWithFormat: NSLocalizedString(@"Unique specifier %%%C can appear only once in format.", @""), specifier];
 				return NO;
 			}
 			foundUnique = YES;
