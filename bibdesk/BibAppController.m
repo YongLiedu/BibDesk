@@ -288,6 +288,16 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 	
 }
 
+- (void)noteNewRecentDocument:(NSDocument *)aDocument{
+    NSStringEncoding encoding = [(BibDocument *)aDocument documentStringEncoding];
+    
+    if(encoding == NSASCIIStringEncoding || encoding == [[OFPreferenceWrapper sharedPreferenceWrapper] integerForKey:BDSKDefaultStringEncoding]){
+        // NSLog(@"adding to recents list");
+        [super noteNewRecentDocument:aDocument]; // only add it to the list of recent documents if it can be opened without manually selecting an encoding
+    }
+}
+        
+
 #pragma mark -
 
 - (IBAction)openUsingFilter:(id)sender
