@@ -36,9 +36,10 @@ static NSMutableArray *_authors;
 	BibAuthor *auth = nil;
 	BibAuthor *newAuth = [[[BibAuthor alloc] initWithName:newName andPub:aPub] autorelease];
 	NSEnumerator *e = [_authors objectEnumerator];
+    NSString *newAuthName = [newAuth normalizedName];
 	
 	while(auth = [e nextObject]){
-        if([[auth normalizedName] isEqualToString:[newAuth normalizedName]]){
+        if([[auth normalizedName] isEqualToString:newAuthName]){
             [auth addPub:aPub];
             NSNotification *notif = [NSNotification notificationWithName:BDSKAuthorPubListChangedNotification
                                                                   object:auth];
