@@ -207,7 +207,7 @@ NSRange SafeBackwardSearchRange(NSRange startRange, unsigned seekLength){
                                                              string:fullString];
             // macroStringFromScanner: also sets the scanner so we don't go into the while() loop below
             [stringsDictionary addEntriesFromDictionary:macDefDict];
-#warning temporary hack
+            
             if(theDocument)
                 [theDocument addMacroDefinitionWithoutUndo:[[macDefDict allValues] objectAtIndex:0] forMacro:[[[macDefDict allKeys] objectAtIndex:0] lowercaseString]];
             // NSLog(@"macDefDict has %@", [macDefDict description]);
@@ -313,10 +313,24 @@ NSRange SafeBackwardSearchRange(NSRange startRange, unsigned seekLength){
             if(![possibleLeftDelimiters characterIsMember:[fullString characterAtIndex:[scanner scanLocation]]]){
                 leftDelimLocation = [scanner scanLocation] - 1; // rewind so we don't lose the first character
                 rightDelim = @",\n"; // set the delimiter appropriately for an unquoted value
-#warning FIXME: macros
                 isMacro = YES;
             } else {
                 [scanner setScanLocation:leftDelimLocation + 1];
+            }
+            
+            
+            // find the next '=' within the current bibitem, which will be the bounds for a new search range to see if this field=value line contains a #
+            NSRange equalsRange = [[fullString substringWithRange:NSMakeRange(leftDelimLocation, entryClosingBraceRange.location - leftDelimLocation)] rangeOfString:@"="];
+                
+            if(equalsRange.location != NSNotFound){// note that equalsRange location is relative to leftDelimLocation
+                NSRange poundRange = [[fullString substringWithRange:NSMakeRange(leftDelimLocation, equalsRange.location)] rangeOfString:@"#"];
+                // if the # character exists and is unescaped, we assume it's for concatenation
+                if(poundRange.location != NSNotFound && [fullString characterAtIndex:(poundRange.location - 1)] != '\\'){
+                    NSLog(@"BibTeXParser thinks this should be a complex string");
+                    isMacro = YES;
+                    rightDelim = @",\n"; // only search to the end of the line; if you can concatenate over multiple lines, this won't work
+                    usingBraceDelimiter = NO;
+                }
             }
             
             if(leftDelimLocation == NSNotFound){
@@ -485,15 +499,6 @@ NSRange SafeBackwardSearchRange(NSRange startRange, unsigned seekLength){
         [theDocument stopParseUpdateTimer]; // tell the doc to stop periodic gui updates
         [[NSNotificationCenter defaultCenter] postNotificationName:BDSKDocumentUpdateUINotification object:nil]; // tell the doc to update; this will happen on the main thread
     }
-
-#warning FIXME: macros
-    // temporary hack to save @string definitions along with frontmatter
-    NSEnumerator *stringEnum = [stringsDictionary keyEnumerator];
-    NSString *theString = nil;
-    while(theString = [stringEnum nextObject]){
-        [frontMatter appendFormat:@"@string{%@ = %@}\n\n", theString, [stringsDictionary objectForKey:theString]];
-    }
-    // end @string hack
     
     [bibItemArray retain]; // don't release this when we release the threadPool!
 
@@ -521,8 +526,6 @@ NSRange SafeBackwardSearchRange(NSRange startRange, unsigned seekLength){
     value = [fullString substringWithRange:NSMakeRange([scanner scanLocation], range.location - [scanner scanLocation])];
     value = [value stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceCharacterSet]];
 
-#warning FIXME: macros
-    // not sure if the macro support will want these quoted or unquoted; in order to save them with the frontmatter, I'm leaving quotes for now, if they exist.
     if([[fullString substringWithRange:NSMakeRange([scanner scanLocation], 1)] isEqualToString:@"\""])
         value = [value stringByTrimmingCharactersInSet:trimQuoteCharacterSet];
     
