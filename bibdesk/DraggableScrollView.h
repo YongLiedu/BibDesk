@@ -7,7 +7,14 @@
 #import <Cocoa/Cocoa.h>
 
 
-@interface DraggableScrollView : NSScrollView
+@interface DraggableScrollView : NSScrollView {
+    NSPopUpButton *scalePopUpButton;
+    float scaleFactor;
+}
+
+- (void)scalePopUpAction:(id)sender;
+- (void)setScaleFactor:(float)factor adjustPopup:(BOOL)flag;
+- (float)scaleFactor;
 
 //	dragDocumentWithMouseDown: -- Given a mousedown event, which should be in
 //	our document view, track the mouse to let the user drag the document.
