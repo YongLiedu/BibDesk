@@ -127,6 +127,12 @@
 		<string>{\"u}</string>
 		<key>ÿ</key>
 		<string>{\"y}</string>
+		<key>ć</key>
+		<string>{\'c}</string>
+		<key>Č</key>
+		<string>{\u C}</string>
+		<key>č</key>
+		<string>{\u c}</string>
 		<key>œ</key>
 		<string>{\oe}</string>
 		<key>Ÿ</key>
@@ -178,6 +184,8 @@
 		<string>Ú</string>
 		<key>{\'a}</key>
 		<string>á</string>
+		<key>{\'c}</key>
+		<string>ć</string>
 		<key>{\'e}</key>
 		<string>é</string>
 		<key>{\'i}</key>
@@ -248,6 +256,10 @@
 		<string>®</string>
 		<key>{\texttrademark}</key>
 		<string>™</string>
+		<key>{\u C}</key>
+		<string>Č</string>
+		<key>{\u c}</key>
+		<string>č</string>
 		<key>{\~a}</key>
 		<string>ã</string>
 		<key>{\~n}</key>

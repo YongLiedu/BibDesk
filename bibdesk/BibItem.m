@@ -266,10 +266,15 @@ void _setupFonts(){
 }
 
 - (void)setAuthorsFromBibtexString:(NSString *)aString{
-     char *str = nil;
+    char *str = nil;
 
     if (aString == nil) return;
-    str = [aString cString];
+
+    if(![aString canBeConvertedToEncoding:[NSString defaultCStringEncoding]]){
+	NSLog(@"An author name could not be displayed losslessly.");
+	NSLog(@"Using lossy encoding for %@", aString);
+	str = [aString lossyCString];
+    } else  str = [aString cString];
     
 //    [aString getCString:str]; // str will be autoreleased. (freed?)
     bt_stringlist *sl = nil;
