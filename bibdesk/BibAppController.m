@@ -1064,12 +1064,14 @@ Implements service to import selection
     NSAssert1( err == noErr, @"Error %d:  the system was unable to find your Application Support folder.", err);
     
     CFURLRef url = CFURLCreateFromFSRef(kCFAllocatorDefault, &foundRef);
+    NSString *retStr = nil;
     
     if(url != nil){
-        return [(NSURL *)url path];
-    } else {
-        return nil; 
+        retStr = [(NSURL *)url path];
+        CFRelease(url);
     }
+    
+    return retStr;
 }
                              
 
