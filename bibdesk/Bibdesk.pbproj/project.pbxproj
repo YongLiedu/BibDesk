@@ -117,6 +117,7 @@
 				WARNING_CFLAGS = "-Wmost -Wno-four-char-constants -Wno-unknown-pragmas";
 			};
 			dependencies = (
+				F9A11C6C073DF736006B766C,
 				270C1A6105EFF7C900943DD0,
 				270C1A6305EFF7C900943DD0,
 				2786341F05FDB65A004D4F41,
@@ -1171,7 +1172,7 @@
 			buildRules = (
 			);
 			buildSettings = {
-				FRAMEWORK_SEARCH_PATHS = .;
+				FRAMEWORK_SEARCH_PATHS = ". /Volumes/Local/Users/amaxwell/BuildProducts";
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_TREAT_WARNINGS_AS_ERRORS = NO;
 				HEADER_SEARCH_PATHS = .;
@@ -1244,7 +1245,6 @@
 				F9D6C1F306AECF9700EAEB04,
 				F9D6C1F506AECF9700EAEB04,
 				F9D6C1F706AECF9700EAEB04,
-				F9C4BEC606B3FF3E0008A694,
 				F9C4BECE06B3FF5A0008A694,
 				6C83BB5E06B863BE0050C05B,
 				6CF8863306BA9067000AC4FC,
@@ -1255,6 +1255,7 @@
 				27770FD306D94B2D0070C5F0,
 				F9A59EE206DFE7DD00C411CA,
 				F992AB6406FA8F7200B3747A,
+				F9A11A63073C3B91006B766C,
 			);
 			isa = PBXHeadersBuildPhase;
 			runOnlyForDeploymentPostprocessing = 0;
@@ -1772,7 +1773,6 @@
 				F9D6C1F406AECF9700EAEB04,
 				F9D6C1F606AECF9700EAEB04,
 				F9D6C1F806AECF9700EAEB04,
-				F9C4BEC706B3FF3E0008A694,
 				F9C4BECF06B3FF5A0008A694,
 				6C83BB5F06B863BE0050C05B,
 				6CF8863406BA9067000AC4FC,
@@ -2023,6 +2023,7 @@
 				27E0AA7405A7C86B005BA25A,
 				27E0AA7505A7C86B005BA25A,
 				6C83BB8106B864BF0050C05B,
+				F9A11A69073C3C26006B766C,
 			);
 			isa = PBXFrameworksBuildPhase;
 			runOnlyForDeploymentPostprocessing = 0;
@@ -2068,6 +2069,7 @@
 			dstPath = "";
 			dstSubfolderSpec = 10;
 			files = (
+				F9A11AE8073C55F0006B766C,
 				27E0AA7705A7C86B005BA25A,
 				27E0AA7805A7C86B005BA25A,
 				27E0AA7905A7C86B005BA25A,
@@ -2202,6 +2204,7 @@
 				274C84F705DF720A0020EEFF,
 				F9AC17700638709B009399C1,
 				F9FC662A06A9C6750016151E,
+				F9A11BF6073DF687006B766C,
 			);
 		};
 		2A37F4AAFDCFA73011CA2CEA = {
@@ -2390,6 +2393,7 @@
 		};
 		2A37F4C3FDCFA73011CA2CEA = {
 			children = (
+				F9A11A68073C3C26006B766C,
 				F578BF890253B5AD0138D078,
 				1058C7A6FEA54F5311CA2CBB,
 				1058C7A8FEA54F5311CA2CBB,
@@ -2654,6 +2658,8 @@
 		};
 		6CA69DA606D29F24005F2126 = {
 			children = (
+				F9C4BEC406B3FF3E0008A694,
+				F9C4BEC506B3FF3E0008A694,
 				F51C6FE802A98BE5010DDB27,
 				F51C6FE702A98BE5010DDB27,
 				F56FDB9102AAE0F601980570,
@@ -3136,7 +3142,7 @@
 				GCC_ENABLE_FIX_AND_CONTINUE = NO;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = Bibdesk_Prefix.pch;
-				OPTIMIZATION_CFLAGS = "-Os";
+				OPTIMIZATION_CFLAGS = "-O3";
 				REMOVE_CVS_FROM_RESOURCES = YES;
 				ZERO_LINK = NO;
 			};
@@ -3263,6 +3269,7 @@
 				F5AD2CC10397226201A80164,
 				27CB67AC05681124001D2AC3,
 				27CB67AD05681124001D2AC3,
+				F9A11A62073C3B91006B766C,
 			);
 			isa = PBXGroup;
 			name = Controllers;
@@ -4503,6 +4510,74 @@
 			target = F9AC17700638709B009399C1;
 			targetProxy = F9A008F30638C01400426F15;
 		};
+		F9A11A62073C3B91006B766C = {
+			fileEncoding = 4;
+			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.c.h;
+			path = html2tex.h;
+			refType = 2;
+			sourceTree = SOURCE_ROOT;
+		};
+		F9A11A63073C3B91006B766C = {
+			fileRef = F9A11A62073C3B91006B766C;
+			isa = PBXBuildFile;
+			settings = {
+			};
+		};
+		F9A11A68073C3C26006B766C = {
+			isa = PBXFileReference;
+			lastKnownFileType = wrapper.framework;
+			name = AGRegex.framework;
+			path = ../../BuildProducts/AGRegex.framework;
+			refType = 2;
+			sourceTree = SOURCE_ROOT;
+		};
+		F9A11A69073C3C26006B766C = {
+			fileRef = F9A11A68073C3C26006B766C;
+			isa = PBXBuildFile;
+			settings = {
+			};
+		};
+		F9A11AE8073C55F0006B766C = {
+			fileRef = F9A11A68073C3C26006B766C;
+			isa = PBXBuildFile;
+			settings = {
+			};
+		};
+		F9A11BF6073DF687006B766C = {
+			buildArgumentsString = "$(ACTION)";
+			buildPhases = (
+			);
+			buildSettings = {
+				OPTIMIZATION_CFLAGS = "";
+				OTHER_CFLAGS = "";
+				OTHER_LDFLAGS = "";
+				OTHER_REZFLAGS = "";
+				PRODUCT_NAME = AGRegex;
+				SECTORDER_FLAGS = "";
+				WARNING_CFLAGS = "-Wmost -Wno-four-char-constants -Wno-unknown-pragmas";
+			};
+			buildToolPath = /usr/bin/xcodebuild;
+			buildWorkingDirectory = ../bibdesk_vendorsrc/agkit_sourceforge/agregex;
+			dependencies = (
+			);
+			isa = PBXLegacyTarget;
+			name = AGRegex;
+			passBuildSettingsInEnvironment = 1;
+			productName = AGRegex;
+		};
+		F9A11C6B073DF736006B766C = {
+			containerPortal = 2A37F4A9FDCFA73011CA2CEA;
+			isa = PBXContainerItemProxy;
+			proxyType = 1;
+			remoteGlobalIDString = F9A11BF6073DF687006B766C;
+			remoteInfo = AGRegex;
+		};
+		F9A11C6C073DF736006B766C = {
+			isa = PBXTargetDependency;
+			target = F9A11BF6073DF687006B766C;
+			targetProxy = F9A11C6B073DF736006B766C;
+		};
 		F9A59EDA06DFE4B400C411CA = {
 			isa = PBXFileReference;
 			lastKnownFileType = wrapper.nib;
@@ -4829,18 +4904,6 @@
 			refType = 4;
 			sourceTree = "<group>";
 		};
-		F9C4BEC606B3FF3E0008A694 = {
-			fileRef = F9C4BEC406B3FF3E0008A694;
-			isa = PBXBuildFile;
-			settings = {
-			};
-		};
-		F9C4BEC706B3FF3E0008A694 = {
-			fileRef = F9C4BEC506B3FF3E0008A694;
-			isa = PBXBuildFile;
-			settings = {
-			};
-		};
 		F9C4BECC06B3FF5A0008A694 = {
 			fileEncoding = 30;
 			isa = PBXFileReference;
@@ -5015,8 +5078,6 @@
 				F992AB6306FA8F7200B3747A,
 				F9C4BECC06B3FF5A0008A694,
 				F9C4BECD06B3FF5A0008A694,
-				F9C4BEC406B3FF3E0008A694,
-				F9C4BEC506B3FF3E0008A694,
 				F9D6C1E906AECF9700EAEB04,
 				F9D6C1EA06AECF9700EAEB04,
 				F9D6C1EB06AECF9700EAEB04,

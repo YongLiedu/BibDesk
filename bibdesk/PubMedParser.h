@@ -9,6 +9,7 @@
 #import <Foundation/Foundation.h>
 #import "BibItem.h"
 #import "BibAppController.h"
+#import "AGRegex/AGRegex.h"
 
 @interface PubMedParser : NSObject {
 

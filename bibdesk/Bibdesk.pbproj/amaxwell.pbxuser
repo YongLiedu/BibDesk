@@ -92,18 +92,18 @@
 	};
 	27CB67AC05681124001D2AC3 = {
 		uiCtxt = {
-			sepNavIntBoundsRect = "{{0, 0}, {968, 714}}";
-			sepNavSelRange = "{1122, 0}";
-			sepNavVisRect = "{{0, 199}, {712, 429}}";
-			sepNavWindowFrame = "{{245, 59}, {750, 558}}";
+			sepNavIntBoundsRect = "{{0, 0}, {968, 728}}";
+			sepNavSelRange = "{306, 0}";
+			sepNavVisRect = "{{0, 299}, {712, 429}}";
+			sepNavWindowFrame = "{{38, 248}, {750, 558}}";
 		};
 	};
 	27CB67AD05681124001D2AC3 = {
 		uiCtxt = {
-			sepNavIntBoundsRect = "{{0, 0}, {993, 3290}}";
-			sepNavSelRange = "{8010, 10}";
-			sepNavVisRect = "{{0, 2268}, {993, 686}}";
-			sepNavWindowFrame = "{{137, 17}, {1031, 815}}";
+			sepNavIntBoundsRect = "{{0, 0}, {944, 6412}}";
+			sepNavSelRange = "{11398, 0}";
+			sepNavVisRect = "{{0, 0}, {845, 560}}";
+			sepNavWindowFrame = "{{335, 143}, {883, 689}}";
 		};
 	};
 	27CCDA7305DF878700FAF2C9 = {
@@ -138,6 +138,9 @@
 			F99895FC07333AF3006023EF,
 			F959D73F073565A400EC13A4,
 			F9863F10073AADFF00F738BE,
+			F9A11AA9073C4825006B766C,
+			F9A11AF6073C5730006B766C,
+			F9A11BB8073DEBD1006B766C,
 		);
 		codeSenseManager = F9495E58069F8C3500475F69;
 		executables = (
@@ -165,7 +168,7 @@
 					20,
 					242,
 					20,
-					48,
+					48.1626,
 					43,
 					43,
 					20,
@@ -214,7 +217,7 @@
 					PBXFileDataSource_Warnings_ColumnID,
 				);
 			};
-			PBXPerProjectTemplateStateSaveDate = 121292585;
+			PBXPerProjectTemplateStateSaveDate = 121321191;
 			PBXPrepackagedSmartGroups_v2 = (
 				{
 					PBXTransientLocationAtTop = bottom;
@@ -603,7 +606,7 @@
 				PBXModuleWindowStatusBarHidden = YES;
 				RubberWindowFrame = "364 122 529 250 0 0 1280 832 ";
 			};
-			PBXWorkspaceStateSaveDate = 121292585;
+			PBXWorkspaceStateSaveDate = 121321191;
 		};
 		perUserProjectItems = {
 			F9863EF9073AAA6700F738BE = F9863EF9073AAA6700F738BE;
@@ -645,6 +648,16 @@
 			F9863F5E073AB52D00F738BE = F9863F5E073AB52D00F738BE;
 			F9863F5F073AB56000F738BE = F9863F5F073AB56000F738BE;
 			F9863F60073AB57000F738BE = F9863F60073AB57000F738BE;
+			F9A11B55073D3C96006B766C = F9A11B55073D3C96006B766C;
+			F9A11B56073D3C96006B766C = F9A11B56073D3C96006B766C;
+			F9A11B6B073D435C006B766C = F9A11B6B073D435C006B766C;
+			F9A11B70073D440C006B766C = F9A11B70073D440C006B766C;
+			F9A11B79073DE3C3006B766C = F9A11B79073DE3C3006B766C;
+			F9A11B7C073DE727006B766C = F9A11B7C073DE727006B766C;
+			F9A11BAC073DEA1F006B766C = F9A11BAC073DEA1F006B766C;
+			F9A11BB2073DEB7B006B766C = F9A11BB2073DEB7B006B766C;
+			F9A11BF3073DF65B006B766C = F9A11BF3073DF65B006B766C;
+			F9A11C18073DF6FA006B766C = F9A11C18073DF6FA006B766C;
 		};
 		sourceControlManager = F9495E57069F8C3500475F69;
 		userBuildSettings = {
@@ -652,10 +665,10 @@
 	};
 	2A37F4ACFDCFA73011CA2CEA = {
 		uiCtxt = {
-			sepNavIntBoundsRect = "{{0, 0}, {4544, 29147}}";
-			sepNavSelRange = "{28991, 0}";
-			sepNavVisRect = "{{0, 9533}, {647, 184}}";
-			sepNavWindowFrame = "{{221, 409}, {750, 558}}";
+			sepNavIntBoundsRect = "{{0, 0}, {4544, 29470}}";
+			sepNavSelRange = "{71079, 0}";
+			sepNavVisRect = "{{0, 24814}, {908, 255}}";
+			sepNavWindowFrame = "{{61, 132}, {902, 653}}";
 		};
 	};
 	2A37F4AEFDCFA73011CA2CEA = {
@@ -710,8 +723,8 @@
 		uiCtxt = {
 			sepNavIntBoundsRect = "{{0, 0}, {712, 5166}}";
 			sepNavSelRange = "{0, 0}";
-			sepNavVisRect = "{{0, 1035}, {712, 429}}";
-			sepNavWindowFrame = "{{130, 164}, {750, 558}}";
+			sepNavVisRect = "{{0, 4737}, {712, 429}}";
+			sepNavWindowFrame = "{{176, 122}, {750, 558}}";
 		};
 	};
 	F507318601F551780174A366 = {
@@ -812,18 +825,18 @@
 	};
 	F56DCB5701CFE5EF01227D25 = {
 		uiCtxt = {
-			sepNavIntBoundsRect = "{{0, 0}, {1004, 11577}}";
-			sepNavSelRange = "{15704, 17}";
-			sepNavVisRect = "{{0, 6845}, {734, 73}}";
-			sepNavWindowFrame = "{{222, 216}, {867, 592}}";
+			sepNavIntBoundsRect = "{{0, 0}, {1004, 11578}}";
+			sepNavSelRange = "{15587, 0}";
+			sepNavVisRect = "{{230, 6583}, {712, 429}}";
+			sepNavWindowFrame = "{{199, 101}, {750, 558}}";
 		};
 	};
 	F56DCB5E01D14B8601227D25 = {
 		uiCtxt = {
-			sepNavIntBoundsRect = "{{0, 0}, {4544, 4452}}";
-			sepNavSelRange = "{2783, 0}";
-			sepNavVisRect = "{{0, 645}, {1031, 474}}";
-			sepNavWindowFrame = "{{68, 93}, {1069, 603}}";
+			sepNavIntBoundsRect = "{{0, 0}, {4544, 4508}}";
+			sepNavSelRange = "{11134, 5}";
+			sepNavVisRect = "{{0, 4079}, {712, 429}}";
+			sepNavWindowFrame = "{{38, 248}, {750, 558}}";
 		};
 	};
 	F56DCB7601D7B21701227D25 = {
@@ -1037,6 +1050,8 @@
 		enableDebugStr = 1;
 		environmentEntries = (
 		);
+		executableSystemSymbolLevel = 0;
+		executableUserSymbolLevel = 0;
 		isa = PBXExecutable;
 		libgmallocEnabled = 0;
 		name = "Bibdesk (Upgraded)";
@@ -1108,6 +1123,16 @@
 				path = /System/Library/Frameworks/ApplicationServices.framework/Versions/A/Frameworks/AE.framework/Versions/A/AE;
 				whenToLoad = 0;
 			},
+			{
+				level = 0;
+				path = /usr/lib/dyld;
+				whenToLoad = 0;
+			},
+			{
+				level = 0;
+				path = /usr/lib/libSystem.B.dylib;
+				whenToLoad = 0;
+			},
 		);
 		sourceDirectories = (
 		);
@@ -1123,16 +1148,6 @@
 	F9495E58069F8C3500475F69 = {
 		indexTemplatePath = "";
 		isa = PBXCodeSenseManager;
-		usesDefaults = 0;
-		wantsCodeCompletion = 0;
-		wantsCodeCompletionAutoSuggestions = 0;
-		wantsCodeCompletionCaseSensitivity = 0;
-		wantsCodeCompletionListAlways = 0;
-		wantsCodeCompletionOnlyMatchingItems = 0;
-		wantsCodeCompletionParametersIncluded = 0;
-		wantsCodeCompletionPlaceholdersInserted = 0;
-		wantsCodeCompletionTabCompletes = 0;
-		wantsIndex = 0;
 	};
 	F94E460A06109C0C00A61471 = {
 		uiCtxt = {
@@ -1167,7 +1182,7 @@
 		fRef = F56DCB5701CFE5EF01227D25;
 		isa = PBXTextBookmark;
 		rLen = 17;
-		rLoc = 15704;
+		rLoc = 15702;
 		rType = 0;
 	};
 	F9863EFA073AAA7800F738BE = {
@@ -1175,7 +1190,7 @@
 		isa = PBXTextBookmark;
 		name = "setting suggested";
 		rLen = 17;
-		rLoc = 15704;
+		rLoc = 15702;
 		rType = 0;
 		vrLen = 217;
 		vrLoc = 15616;
@@ -1185,7 +1200,7 @@
 		isa = PBXTextBookmark;
 		name = "setting suggested";
 		rLen = 17;
-		rLoc = 15704;
+		rLoc = 15702;
 		rType = 0;
 		vrLen = 217;
 		vrLoc = 15616;
@@ -1195,7 +1210,7 @@
 		isa = PBXTextBookmark;
 		name = "setting suggested";
 		rLen = 17;
-		rLoc = 15704;
+		rLoc = 15702;
 		rType = 0;
 		vrLen = 217;
 		vrLoc = 15616;
@@ -1205,7 +1220,7 @@
 		isa = PBXTextBookmark;
 		name = "setting suggested";
 		rLen = 17;
-		rLoc = 15704;
+		rLoc = 15702;
 		rType = 0;
 		vrLen = 217;
 		vrLoc = 15616;
@@ -1215,7 +1230,7 @@
 		isa = PBXTextBookmark;
 		name = "setting suggested";
 		rLen = 17;
-		rLoc = 15704;
+		rLoc = 15702;
 		rType = 0;
 		vrLen = 217;
 		vrLoc = 15616;
@@ -1225,7 +1240,7 @@
 		isa = PBXTextBookmark;
 		name = "setting suggested";
 		rLen = 17;
-		rLoc = 15704;
+		rLoc = 15702;
 		rType = 0;
 		vrLen = 217;
 		vrLoc = 15616;
@@ -1235,7 +1250,7 @@
 		isa = PBXTextBookmark;
 		name = "setting suggested";
 		rLen = 17;
-		rLoc = 15704;
+		rLoc = 15702;
 		rType = 0;
 		vrLen = 217;
 		vrLoc = 15616;
@@ -1245,7 +1260,7 @@
 		isa = PBXTextBookmark;
 		name = "setting suggested";
 		rLen = 17;
-		rLoc = 15704;
+		rLoc = 15702;
 		rType = 0;
 		vrLen = 217;
 		vrLoc = 15616;
@@ -1255,7 +1270,7 @@
 		isa = PBXTextBookmark;
 		name = "setting suggested";
 		rLen = 17;
-		rLoc = 15704;
+		rLoc = 15702;
 		rType = 0;
 		vrLen = 217;
 		vrLoc = 15616;
@@ -1265,7 +1280,7 @@
 		isa = PBXTextBookmark;
 		name = "setting suggested";
 		rLen = 17;
-		rLoc = 15704;
+		rLoc = 15702;
 		rType = 0;
 		vrLen = 217;
 		vrLoc = 15616;
@@ -1275,7 +1290,7 @@
 		isa = PBXTextBookmark;
 		name = "setting suggested";
 		rLen = 17;
-		rLoc = 15704;
+		rLoc = 15702;
 		rType = 0;
 		vrLen = 217;
 		vrLoc = 15616;
@@ -1285,7 +1300,7 @@
 		isa = PBXTextBookmark;
 		name = "setting suggested";
 		rLen = 17;
-		rLoc = 15704;
+		rLoc = 15702;
 		rType = 0;
 		vrLen = 217;
 		vrLoc = 15616;
@@ -1295,7 +1310,7 @@
 		isa = PBXTextBookmark;
 		name = "setting suggested";
 		rLen = 17;
-		rLoc = 15704;
+		rLoc = 15702;
 		rType = 0;
 		vrLen = 217;
 		vrLoc = 15616;
@@ -1305,7 +1320,7 @@
 		isa = PBXTextBookmark;
 		name = "setting suggested";
 		rLen = 17;
-		rLoc = 15704;
+		rLoc = 15702;
 		rType = 0;
 		vrLen = 217;
 		vrLoc = 15616;
@@ -1322,7 +1337,7 @@
 		isa = PBXTextBookmark;
 		name = "setting suggested";
 		rLen = 17;
-		rLoc = 15704;
+		rLoc = 15702;
 		rType = 0;
 		vrLen = 217;
 		vrLoc = 15616;
@@ -1332,7 +1347,7 @@
 		isa = PBXTextBookmark;
 		name = "setting suggested";
 		rLen = 17;
-		rLoc = 15704;
+		rLoc = 15702;
 		rType = 0;
 		vrLen = 217;
 		vrLoc = 15616;
@@ -1342,7 +1357,7 @@
 		isa = PBXTextBookmark;
 		name = "setting suggested";
 		rLen = 17;
-		rLoc = 15704;
+		rLoc = 15702;
 		rType = 0;
 		vrLen = 217;
 		vrLoc = 15616;
@@ -1352,7 +1367,7 @@
 		isa = PBXTextBookmark;
 		name = "setting suggested";
 		rLen = 17;
-		rLoc = 15704;
+		rLoc = 15702;
 		rType = 0;
 		vrLen = 217;
 		vrLoc = 15616;
@@ -1362,7 +1377,7 @@
 		isa = PBXTextBookmark;
 		name = "setting suggested";
 		rLen = 17;
-		rLoc = 15704;
+		rLoc = 15702;
 		rType = 0;
 		vrLen = 217;
 		vrLoc = 15616;
@@ -1372,7 +1387,7 @@
 		isa = PBXTextBookmark;
 		name = "setting suggested";
 		rLen = 17;
-		rLoc = 15704;
+		rLoc = 15702;
 		rType = 0;
 		vrLen = 217;
 		vrLoc = 15616;
@@ -1382,7 +1397,7 @@
 		isa = PBXTextBookmark;
 		name = "setting suggested";
 		rLen = 17;
-		rLoc = 15704;
+		rLoc = 15702;
 		rType = 0;
 		vrLen = 217;
 		vrLoc = 15616;
@@ -1392,7 +1407,7 @@
 		isa = PBXTextBookmark;
 		name = "setting suggested";
 		rLen = 17;
-		rLoc = 15704;
+		rLoc = 15702;
 		rType = 0;
 		vrLen = 217;
 		vrLoc = 15616;
@@ -1402,7 +1417,7 @@
 		isa = PBXTextBookmark;
 		name = "setting suggested";
 		rLen = 17;
-		rLoc = 15704;
+		rLoc = 15702;
 		rType = 0;
 		vrLen = 217;
 		vrLoc = 15616;
@@ -1412,7 +1427,7 @@
 		isa = PBXTextBookmark;
 		name = "setting suggested";
 		rLen = 17;
-		rLoc = 15704;
+		rLoc = 15702;
 		rType = 0;
 		vrLen = 217;
 		vrLoc = 15616;
@@ -1422,7 +1437,7 @@
 		isa = PBXTextBookmark;
 		name = "setting suggested";
 		rLen = 17;
-		rLoc = 15704;
+		rLoc = 15702;
 		rType = 0;
 		vrLen = 217;
 		vrLoc = 15616;
@@ -1432,7 +1447,7 @@
 		isa = PBXTextBookmark;
 		name = "setting suggested";
 		rLen = 17;
-		rLoc = 15704;
+		rLoc = 15702;
 		rType = 0;
 		vrLen = 217;
 		vrLoc = 15616;
@@ -1442,7 +1457,7 @@
 		isa = PBXTextBookmark;
 		name = "setting suggested";
 		rLen = 17;
-		rLoc = 15704;
+		rLoc = 15702;
 		rType = 0;
 		vrLen = 217;
 		vrLoc = 15616;
@@ -1452,7 +1467,7 @@
 		isa = PBXTextBookmark;
 		name = "setting suggested";
 		rLen = 17;
-		rLoc = 15704;
+		rLoc = 15702;
 		rType = 0;
 		vrLen = 217;
 		vrLoc = 15616;
@@ -1462,7 +1477,7 @@
 		isa = PBXTextBookmark;
 		name = "setting suggested";
 		rLen = 17;
-		rLoc = 15704;
+		rLoc = 15702;
 		rType = 0;
 		vrLen = 217;
 		vrLoc = 15616;
@@ -1472,7 +1487,7 @@
 		isa = PBXTextBookmark;
 		name = "setting suggested";
 		rLen = 17;
-		rLoc = 15704;
+		rLoc = 15702;
 		rType = 0;
 		vrLen = 217;
 		vrLoc = 15616;
@@ -1482,7 +1497,7 @@
 		isa = PBXTextBookmark;
 		name = "setting suggested";
 		rLen = 17;
-		rLoc = 15704;
+		rLoc = 15702;
 		rType = 0;
 		vrLen = 217;
 		vrLoc = 15616;
@@ -1492,7 +1507,7 @@
 		isa = PBXTextBookmark;
 		name = "setting suggested";
 		rLen = 17;
-		rLoc = 15704;
+		rLoc = 15702;
 		rType = 0;
 		vrLen = 217;
 		vrLoc = 15616;
@@ -1502,7 +1517,7 @@
 		isa = PBXTextBookmark;
 		name = "setting suggested";
 		rLen = 17;
-		rLoc = 15704;
+		rLoc = 15702;
 		rType = 0;
 		vrLen = 217;
 		vrLoc = 15616;
@@ -1512,7 +1527,7 @@
 		isa = PBXTextBookmark;
 		name = "setting suggested";
 		rLen = 17;
-		rLoc = 15704;
+		rLoc = 15702;
 		rType = 0;
 		vrLen = 217;
 		vrLoc = 15616;
@@ -1522,7 +1537,7 @@
 		isa = PBXTextBookmark;
 		name = "setting suggested";
 		rLen = 17;
-		rLoc = 15704;
+		rLoc = 15702;
 		rType = 0;
 		vrLen = 217;
 		vrLoc = 15616;
@@ -1532,7 +1547,7 @@
 		isa = PBXTextBookmark;
 		name = "setting suggested";
 		rLen = 17;
-		rLoc = 15704;
+		rLoc = 15702;
 		rType = 0;
 		vrLen = 217;
 		vrLoc = 15616;
@@ -1542,7 +1557,7 @@
 		isa = PBXTextBookmark;
 		name = "setting suggested";
 		rLen = 17;
-		rLoc = 15704;
+		rLoc = 15702;
 		rType = 0;
 		vrLen = 217;
 		vrLoc = 15616;
@@ -1552,7 +1567,7 @@
 		isa = PBXTextBookmark;
 		name = "setting suggested";
 		rLen = 17;
-		rLoc = 15704;
+		rLoc = 15702;
 		rType = 0;
 		vrLen = 217;
 		vrLoc = 15616;
@@ -1585,6 +1600,134 @@
 		uiCtxt = {
 			sepNavWindowFrame = "{{130, 164}, {750, 558}}";
 		};
+	};
+	F9A11A62073C3B91006B766C = {
+		uiCtxt = {
+			sepNavIntBoundsRect = "{{0, 0}, {712, 3346}}";
+			sepNavSelRange = "{1491, 0}";
+			sepNavVisRect = "{{0, 0}, {712, 429}}";
+			sepNavWindowFrame = "{{61, 227}, {750, 558}}";
+		};
+	};
+	F9A11AA9073C4825006B766C = {
+		fileReference = 27CB67AD05681124001D2AC3;
+		functionName = "+itemsFromString:error:frontMatter:filePath:";
+		isa = PBXFileBreakpoint;
+		lineNumber = 38;
+		state = 1;
+	};
+	F9A11AF6073C5730006B766C = {
+		fileReference = 27CB67AD05681124001D2AC3;
+		functionName = "print_str()";
+		isa = PBXFileBreakpoint;
+		lineNumber = 307;
+		state = 1;
+	};
+	F9A11B55073D3C96006B766C = {
+		fRef = 2A37F4ACFDCFA73011CA2CEA;
+		isa = PBXTextBookmark;
+		rLen = 8;
+		rLoc = 71300;
+		rType = 0;
+	};
+	F9A11B56073D3C96006B766C = {
+		fRef = 2A37F4ACFDCFA73011CA2CEA;
+		isa = PBXTextBookmark;
+		name = "BibDocument.m: 1777";
+		rLen = 0;
+		rLoc = 71079;
+		rType = 0;
+		vrLen = 1242;
+		vrLoc = 70835;
+	};
+	F9A11B6B073D435C006B766C = {
+		fRef = 2A37F4ACFDCFA73011CA2CEA;
+		isa = PBXTextBookmark;
+		name = "BibDocument.m: 1777";
+		rLen = 0;
+		rLoc = 71079;
+		rType = 0;
+		vrLen = 1242;
+		vrLoc = 70835;
+	};
+	F9A11B70073D440C006B766C = {
+		fRef = 2A37F4ACFDCFA73011CA2CEA;
+		isa = PBXTextBookmark;
+		name = "BibDocument.m: 1777";
+		rLen = 0;
+		rLoc = 71079;
+		rType = 0;
+		vrLen = 1242;
+		vrLoc = 70835;
+	};
+	F9A11B79073DE3C3006B766C = {
+		fRef = 2A37F4ACFDCFA73011CA2CEA;
+		isa = PBXTextBookmark;
+		name = "BibDocument.m: 1777";
+		rLen = 0;
+		rLoc = 71079;
+		rType = 0;
+		vrLen = 1242;
+		vrLoc = 70835;
+	};
+	F9A11B7C073DE727006B766C = {
+		fRef = 2A37F4ACFDCFA73011CA2CEA;
+		isa = PBXTextBookmark;
+		name = "BibDocument.m: 1777";
+		rLen = 0;
+		rLoc = 71079;
+		rType = 0;
+		vrLen = 1242;
+		vrLoc = 70835;
+	};
+	F9A11BAC073DEA1F006B766C = {
+		fRef = 2A37F4ACFDCFA73011CA2CEA;
+		isa = PBXTextBookmark;
+		name = "BibDocument.m: 1777";
+		rLen = 0;
+		rLoc = 71079;
+		rType = 0;
+		vrLen = 1242;
+		vrLoc = 70835;
+	};
+	F9A11BB2073DEB7B006B766C = {
+		fRef = 2A37F4ACFDCFA73011CA2CEA;
+		isa = PBXTextBookmark;
+		name = "BibDocument.m: 1777";
+		rLen = 0;
+		rLoc = 71079;
+		rType = 0;
+		vrLen = 1242;
+		vrLoc = 70835;
+	};
+	F9A11BB8073DEBD1006B766C = {
+		fileReference = F9A11A62073C3B91006B766C;
+		isa = PBXFileBreakpoint;
+		lineNumber = 48;
+		state = 1;
+	};
+	F9A11BF3073DF65B006B766C = {
+		fRef = 2A37F4ACFDCFA73011CA2CEA;
+		isa = PBXTextBookmark;
+		name = "BibDocument.m: 2213";
+		rLen = 0;
+		rLoc = 85793;
+		rType = 0;
+		vrLen = 743;
+		vrLoc = 70014;
+	};
+	F9A11BF6073DF687006B766C = {
+		activeExec = 0;
+	};
+	F9A11C18073DF6FA006B766C = {
+		fRef = 2A37F4ACFDCFA73011CA2CEA;
+		isa = PBXTextBookmark;
+		name = "BibDocument.m: 2213";
+		rLen = 0;
+		rLoc = 85793;
+		rType = 0;
+		vrLen = 743;
+		vrLoc = 70014;
 	};
 	F9A59EDF06DFE7DD00C411CA = {
 		uiCtxt = {
@@ -1622,10 +1765,10 @@
 	};
 	F9C4BEC506B3FF3E0008A694 = {
 		uiCtxt = {
-			sepNavIntBoundsRect = "{{0, 0}, {1400, 2925}}";
-			sepNavSelRange = "{1799, 0}";
-			sepNavVisRect = "{{0, 0}, {874, 438}}";
-			sepNavWindowFrame = "{{107, 345}, {919, 568}}";
+			sepNavIntBoundsRect = "{{0, 0}, {1448, 2996}}";
+			sepNavSelRange = "{928, 0}";
+			sepNavVisRect = "{{0, 617}, {1039, 628}}";
+			sepNavWindowFrame = "{{150, 75}, {1077, 757}}";
 		};
 	};
 	F9C4BECC06B3FF5A0008A694 = {

@@ -7,9 +7,12 @@
 //
 
 #import "PubMedParser.h"
-
+#import "html2tex.h"
+#import <sys/mman.h>
+#import <sys/fcntl.h>
 
 @implementation PubMedParser
+
 + (NSMutableArray *)itemsFromString:(NSString *)itemString
                               error:(BOOL *)hadProblems{
     return [PubMedParser itemsFromString:itemString error:hadProblems frontMatter:nil filePath:@"Paste/Drag"];
@@ -20,9 +23,8 @@
                               error:(BOOL *)hadProblems
                         frontMatter:(NSMutableString *)frontMatter
                            filePath:(NSString *)filePath{
-    
-    BibItem *newBI = nil;
-    
+
+    BibItem *newBI = nil;    
 
     int itemOrder = 1;
     BibAppController *appController = (BibAppController *)[NSApp delegate]; // used to add autocomplete entries.
@@ -34,7 +36,6 @@
     const char * fs_path = NULL;
     NSString *tempFilePath = nil;
     BOOL usingTempFile = NO;
-
     
     if( !([filePath isEqualToString:@"Paste/Drag"]) && [[NSFileManager defaultManager] fileExistsAtPath:filePath]){
         fs_path = [[NSFileManager defaultManager] fileSystemRepresentationWithPath:filePath];
@@ -61,7 +62,7 @@
     // invalid termination test which might exist in this untested example :-)
     while (lineEndIndex < stringLength)
     {
-	// Include only a single character in range.  Not sure whether
+	// Include only a single character in range.¬† Not sure whether
 	// this will work with empty lines, but if not, try a length of 0.
 	range = NSMakeRange(lineEndIndex, 1);
 	[itemString getLineStart:&startIndex end:&lineEndIndex 
@@ -101,7 +102,25 @@
                 
                 value = [sourceLine substringWithRange:NSMakeRange(6,[sourceLine length]-6)];
                 value = [value stringByTrimmingCharactersInSet:whitespaceNewlineSet];
+
+                // Run the value string through the HTML2LaTeX conversion, to clean up &theta; and friends.
+                // NB: do this before the regex find/replace on <sub> and <sup> tags, or else your LaTeX math
+                // stuff will get munged.
+                const char *str = [value UTF8String];
+                value = print_str(str, stdout, NULL, strlen(str), NO, NO, NO);
+
+                // Do a regex find and replace to put LaTeX subscripts and superscripts in place of the HTML
+                // that Compendex (and possibly others) give us.
+                AGRegex *findSubscriptLeadingTag = [AGRegex regexWithPattern:@"<sub>"];
+                AGRegex *findSubscriptOrSuperscriptTrailingTag = [AGRegex regexWithPattern:@"</su[bp]>"];
+                AGRegex *findSuperscriptLeadingTag = [AGRegex regexWithPattern:@"<sup>"];
                 
+                value = [findSubscriptLeadingTag replaceWithString:@"\\$_{"
+                                                          inString:value];
+                value = [findSuperscriptLeadingTag replaceWithString:@"\\$^{"
+                                                            inString:value];
+                value = [findSubscriptOrSuperscriptTrailingTag replaceWithString:@"}\\$"
+                                                                        inString:value];
                 
                 if([prefix isEqualToString:@"PMID"] || [prefix isEqualToString:@"TY"]){ // ARM:  PMID for Medline, TY for Elsevier-ScienceDirect.  I hope.
                     // we have a new publication
@@ -230,5 +249,209 @@ void mergePageNumbers(NSMutableDictionary *dict){
 }
 
 
+NSString* print_str(char *str, FILE *freport, char *html_fn, int ln,
+			   BOOL in_math, BOOL in_verb, BOOL in_alltt)
+{  
+    
+// ARM:  this code was taken directly from HTML2LaTeX.  I modified it to return
+// an NSString object, since working with FILE* streams led to really nasty problems
+// with NSPipe needing asynchronous reads to avoid blocking.
+// The NSMutableString appendFormat method was used to replace all of the calls to
+// fputc, fprintf, and fputs.
+// The following copyright notice was taken verbatim from the HTML2LaTeX code:
+    
+/* HTML2LaTeX -- Converting HTML files to LaTeX
+Copyright (C) 1995-2003 Frans Faase
+
+This program is free software; you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation; either version 2 of the License, or
+(at your option) any later version.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with this program; if not, write to the Free Software
+Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+
+GNU General Public License:
+http://home.planet.nl/~faase009/GNU.txt
+*/
+     
+
+    NSMutableString *mString = [NSMutableString string];
+    
+    DEBUG_P1("print_str(, %s)\n", str);
+    BOOL option_warn = NO;
+    
+	for(; *str; str++)
+	{   BOOL special = NO;
+		int v = 0;
+		char ch = '\0';
+		char html_ch[10];
+		html_ch[0] = '\0';
+        
+#ifndef ASCII8
+		if ((unsigned char)*str >= 160 && (unsigned char)*str <= 255)
+		{   special = YES;
+			v = (unsigned char)*str - 160;
+			ch = ch_table[v].ch;
+		}
+		else
+#endif 
+            if (*str == '&')
+            {   int i = 0;
+                BOOL correct = NO;
+                
+                if (isalpha(str[1]))
+                {   for (i = 0; i < 9; i++)
+					if (isalpha(str[i+1]))
+						html_ch[i] = str[i+1];
+					else
+						break;
+                    html_ch[i] = '\0';
+                    for (v = 0; v < NR_CH_TABLE; v++)
+                        if (   ch_table[v].html_ch != NULL
+                               && !strcmp(html_ch, ch_table[v].html_ch))
+                        {   special = YES;
+                            correct = YES;
+                            ch = ch_table[v].ch;
+                            break;
+                        }
+                }
+                    else if (str[1] == '#')
+                    {   int code = 0;
+                        html_ch[0] = '#';
+                        for (i = 1; i < 9; i++)
+                            if (isdigit(str[i+1]))
+                            {   html_ch[i] = str[i+1];
+                                code = code * 10 + str[i+1] - '0';
+                            }
+                                else
+                                    break;
+                        if ((code >= ' ' && code < 127) || code == 8)
+                        {   correct = YES;
+                            ch = code;
+                        }
+                        else if (code >= 160 && code <= 255)
+                        {
+                            correct = YES;
+                            special = YES;
+                            v = code - 160;
+                            ch = ch_table[v].ch;
+                        }
+                    }
+                    html_ch[i] = '\0';
+                    
+                    if (correct)
+                    {   str += i;
+                        if (str[1] == ';')
+                            str++;
+                    }
+                    else 
+                    {   if (freport != NULL && option_warn)
+                        if (html_ch[0] == '\0')
+                            fprintf(freport,
+                                    "%s (%d) : Replace `&' by `&amp;'.\n",
+                                    html_fn, ln);
+                        else
+                            fprintf(freport,
+                                    "%s (%d) : Unknown sequence `&%s;'.\n",
+                                    html_fn, ln, html_ch);
+                        ch = *str;
+                    }
+            }
+                else if (((unsigned char)*str >= ' ' && (unsigned char)*str <= HIGHASCII) || *str == '\t')
+                    ch = *str;
+                else if (option_warn && freport != NULL)
+                    fprintf(freport,
+                            "%s (%d) : Unknown character %d (decimal)\n",
+                            html_fn, ln, (unsigned char)*str);
+                if (mString)
+                {   if (in_verb)
+                {   
+                    [mString appendFormat:@"%c", ch != '\0' ? ch : ' '];
+                    if (   special && freport != NULL && option_warn
+                           && v < NR_CH_M)
+                    {   fprintf(freport, "%s (%d) : ", html_fn, ln);
+                        if (html_ch[0] == '\0')
+                            fprintf(freport, "character %d (decimal)", 
+                                    (unsigned char) *str);
+                        else
+                            fprintf(freport, "sequence `&%s;'", html_ch);
+                        fprintf(freport, " rendered as `%c' in verbatim\n",
+                                ch != '\0' ? ch : ' ');
+                    }
+                }
+                    else if (in_alltt)
+                    {   if (special)
+                    {   char *o = ch_table[v].tex_ch;
+                        if (o != NULL)
+                            if (*o == '$')
+                                [mString appendFormat:@"\\(%s\\)", o + 1];
+                            else
+                                [mString appendFormat:@"%s", o];
+                    }
+                        else if (ch == '{' || ch == '}')
+                            [mString appendFormat:@"\\%c", ch];
+                        else if (ch == '\\')
+                            [mString appendFormat:@"\\%c", ch];
+                        else if (ch != '\0')
+                            [mString appendFormat:@"%c", ch];
+                    }
+                    else if (special)
+                    {   char *o = ch_table[v].tex_ch;
+                        if (o == NULL)
+                        {   if (freport != NULL && option_warn)
+                        {   fprintf(freport,
+                                    "%s (%d) : no LaTeX representation for ",
+                                    html_fn, ln);
+                            if (html_ch[0] == '\0')
+                                fprintf(freport, "character %d (decimal)\n", 
+                                        (unsigned char) *str);
+                            else
+                                fprintf(freport, "sequence `&%s;'\n", html_ch);
+                        }
+                        }
+                        else if (*o == '$')
+                            if (in_math)
+                                [mString appendFormat:@"%s", o+1];
+                            else
+                                [mString appendFormat:@"{%s$}", o];
+                        else
+                            [mString appendFormat:@"%s\n", o];
+                    }
+                    else if (in_math)
+                    {   if (ch == '#' || ch == '%')
+                            [mString appendFormat:@"\\%c", ch];
+                        else
+                            [mString appendFormat:@"%c", ch];
+                    }
+                    else
+                    {   switch(ch)
+                    {   case '\0' : break;
+                                        case '\t': [mString appendString:@"        \n"]; break;
+					case '_': case '{': case '}':
+					case '#': case '$': case '%':
+                       [mString appendFormat:@"\\%c", ch]; break;
+                                        case '@' : [mString appendFormat:@"{\\char64}\n"]; break;
+					case '[' :
+					case ']' : [mString appendFormat:@"{$%c$}", ch]; break;
+					case '"' : [mString appendString:@"{\\tt{}\"{}}\n"]; break;
+					case '~' : [mString appendString:@"\\~{}\n"]; break;
+                                        case '^' : [mString appendString:@"\\^{}\n"]; break;
+					case '|' : [mString appendString:@"{$|$}\n"]; break;
+					case '\\': [mString appendString:@"{$\\backslash$}\n"]; break;
+					case '&' : [mString appendString:@"\\&\n"]; break;
+                                        default: [mString appendFormat:@"%c", ch]; break;
+                    }
+                    }
+                }
+	}
+    return [[mString copy] autorelease];
+}
 
 @end
