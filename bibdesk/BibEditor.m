@@ -1021,7 +1021,7 @@ NSString *BDSKDateModifiedString = @"Date-Modified";
 - (void)showPersonDetail:(BibAuthor *)person{
 	BibPersonController *pc = [person personController];
 	if(pc == nil){
-		pc = [[BibPersonController alloc] initWithPerson:person];
+            pc = [[BibPersonController alloc] initWithPerson:person document:theDocument];
 	}
 	[pc show];
 }

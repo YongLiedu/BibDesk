@@ -75,7 +75,7 @@ extern NSString *BDSKDateModifiedString;
     // ----------------------------------------------------------------------------------------
     NSString *currentType;
     BibItem *theBib;
-    NSDocument *theDocument;
+    BibDocument *theDocument;
     NSMutableDictionary *fieldNumbers;
 // ----------------------------------------------------------------------------------------
 // doc preview stuff

@@ -351,16 +351,6 @@ Handle Notifications by the popup button to update its icon and its menu before 
     
 }
 
-- (void)removeAllAuthors{ // send before closing the document
-    NSEnumerator *pubE = [shownPublications objectEnumerator];
-    BibItem *pub = nil;
-    
-    while (pub = [pubE nextObject]) {
-        // for each pub, get its authors and remove them from the global counted set, which either removes the object or decrements its retaincount
-        [[pub authorAtIndex:0] removeAuthorsFromGlobalAuthors:[pub pubAuthors]];
-    }
-}
-
 - (BOOL)citeKeyIsUsed:(NSString *)aCiteKey byItemOtherThan:(BibItem *)anItem{
     NSEnumerator *bibE = [publications objectEnumerator];
     BibItem *bi = nil;
@@ -2302,7 +2292,6 @@ This method always returns YES. Even if some or many operations fail.
 													  userInfo:[NSDictionary dictionary]];
 
     [customCiteDrawer close];
-    [self removeAllAuthors];
     [[NSApp delegate] removeErrorObjsForFileName:[self fileName]];
 
 }

@@ -171,20 +171,20 @@ void _setupFonts(){
 }
 
 - (void)dealloc{
-	// NSLog([NSString stringWithFormat:@"bibitem Dealloc, rt: %d", [self retainCount]]);
+    // NSLog([NSString stringWithFormat:@"bibitem Dealloc, rt: %d", [self retainCount]]);
     if ([self undoManager]) {
-		[[self undoManager] removeAllActionsWithTarget:self];
-	}
+        [[self undoManager] removeAllActionsWithTarget:self];
+    }
     [pubFields release];
     [requiredFieldNames release];
-	[pubAuthors release];
+    [pubAuthors release];
 
-	[pubType release];
-	[fileType release];
-	[citeKey release];
+    [pubType release];
+    [fileType release];
+    [citeKey release];
     [pubDate release];
-	[dateCreated release];
-	[dateModified release];
+    [dateCreated release];
+    [dateModified release];
 	
     [super dealloc];
 }
