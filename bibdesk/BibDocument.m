@@ -675,7 +675,6 @@ stringByAppendingPathComponent:@"BibDesk"]; */
 				[self removePublication:objToDelete lastRequest:NO];
 			}
         }
-        [self updateChangeCount:NSChangeDone];
         [[self currentView] deselectAll:nil];
         [self updateUI];
     }else{
@@ -1376,7 +1375,6 @@ int generalBibItemCompareFunc(id item1, id item2, void *context){
     {
         [self editPub:newBI];
     }
-    [self updateChangeCount:NSChangeDone];
 }
 
 - (void)handleUpdateUINotification:(NSNotification *)notification{
