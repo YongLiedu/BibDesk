@@ -33,6 +33,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
      NSCharacterSet *finalCharSet;
      NSDictionary *detexifyConversions;
      NSDictionary *texifyConversions;
+     NSCharacterSet *baseCharacterSetForTeX;
 }
 /*!
     @method     sharedConverter

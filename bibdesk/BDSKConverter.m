@@ -41,6 +41,7 @@ static BDSKConverter *theConverter;
     [finalCharSet release];
     [texifyConversions release];
     [detexifyConversions release];
+    [baseCharacterSetForTeX release];
     [super dealloc];
 }
     
@@ -84,6 +85,13 @@ static BDSKConverter *theConverter;
     if(!detexifyConversions){
         detexifyConversions = [[NSDictionary dictionary] retain]; // an empty one won't break the code.
     }
+    // build a character set of [a-z][A-Z] representing the base character set that we can decompose and recompose as TeX
+    NSRange ucRange = NSMakeRange('A', 26);
+    NSRange lcRange = NSMakeRange('a', 26);
+    workingSet = [[NSCharacterSet characterSetWithRange:ucRange] mutableCopy];
+    [workingSet addCharactersInRange:lcRange];
+    baseCharacterSetForTeX = [workingSet copy];
+    [workingSet release];
 }
 
 - (NSString *)stringByTeXifyingString:(NSString *)s{
@@ -187,9 +195,10 @@ static BDSKConverter *theConverter;
 	} else {
 	    // found an accent => process
 	    composedRange = [t rangeOfComposedCharacterSequenceAtIndex:foundRange.location];
-	    replacementString = [self convertBunch:[t substringWithRange:composedRange] usingDict:accents];
-	    [t replaceCharactersInRange:composedRange withString:replacementString];
-	    
+	    if(replacementString = [self convertBunch:[t substringWithRange:composedRange] usingDict:accents])
+                [t replaceCharactersInRange:composedRange withString:replacementString];
+	    else
+                return nil;
 	    // move searchable range
 	    searchRange.location = composedRange.location;
 	    searchRange.length = [t length] - composedRange.location;
@@ -208,7 +217,8 @@ static BDSKConverter *theConverter;
     
     // isolate character(s)
     NSString * character = [s substringToIndex:[s length] - 1];
-    
+    if(![baseCharacterSetForTeX characterIsMember:[character characterAtIndex:1]]) // length 1 string
+        return nil;
     // handle i and j (others as well?)
     if ([character isEqualToString:@"i"] || [character isEqualToString:@"j"]) {
 	if (![accent isEqualToString:@"c"] && ![accent isEqualToString:@"d"] && ![accent isEqualToString:@"b"]) {
@@ -222,7 +232,7 @@ static BDSKConverter *theConverter;
 	    character = [self convertBunch:character usingDict:accents];
 	}
     */
-    
+
     return [NSString stringWithFormat:@"{\\%@%@}", accent, character];
 }
 
