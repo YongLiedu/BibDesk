@@ -13,9 +13,8 @@ is a good command
 <dictionary title="BibDesk Terminology">
     <suite name="Bibdesk Suite" code="MMcC" description="Bibdesk specific commands and classes for dealing with bibliographies and publications.">
         <cocoa name="BibDeskSuite"/>
-        <classes>
         
-        
+        <classes>		
 			<class name="author" plural="authors" code="auth" description="Contains the name of an author, tries to analyse it and list all publications of that author. Author names can be split into four E.g. '(Jean) (de la) (Fontaine) (Jr.)'">
                 <cocoa class="BibAuthor"/>
                 <!-- experimental -->
@@ -56,18 +55,34 @@ is a good command
                     <property name="selection" code="sele" type="list of publication" description="The selected publications.">
                         <cocoa method="selection"/>
                     </property>
+					<property name="filter field" code="filt" type="string" description="Only publications matching this property will be displayed">
+						<cocoa method="filterField"/>
+					</property>
+			         <property name="displayed publications" code="disp" type="list of publication" access="r" description="The publications currently displayed. This can differ from all publications depending on the state of the filter field and recently added publications.">
+			         	<cocoa method="displayedPublications"/>
+			         </property>
                 </properties>
-			     <elements>
+
+
+				<elements>
 			         <element type="publication" description="Publications in the bibliography">
 			             <cocoa method="publications"/>
 			         </element>
-			     </elements>
+			    </elements>
+			     
+			     
                 <responds-to-commands>
-                    <responds-to name="bibliography for">
-                    </responds-to>
+                    <responds-to name="bibliography for"/>
                     <responds-to name="selectionToClipboard">
                         <cocoa method="copyAsRTF:"/>
                     </responds-to>
+					<responds-to name="search">
+						<cocoa method=""/>
+						<!-- This is necessary for some reason -->
+					</responds-to>
+<!--					<responds-to name="filter">
+						<cocoa method=""/>
+					</responds-to> 					-->
                 </responds-to-commands>
 			</class>
 
@@ -75,7 +90,6 @@ is a good command
 
 			<class name="publication" plural="publications" code="bibi" description="A publication.">
                 <cocoa class="BibItem"/>
-                <!-- experimental -->
                 <properties>
                     <property name="RSS description" code="RSSd" type="string" description="The publication's RSS description as seen in the RSS Description tab.">
                         <cocoa method="RSSDescription"/>
@@ -127,7 +141,10 @@ is a good command
 			             <cocoa method="pubAuthors"/>
 			         </element>
 			     </elements>
+			     
 			</class>
+
+
 
 
 			<class name="application" plural="applications" code="capp" description="Bibdesk's top level scripting object." inherits="application">
@@ -143,17 +160,28 @@ is a good command
 			         </element>
 			     </elements>
                 <responds-to-commands>
-                    <responds-to name="filter"/>
+<!--                    <responds-to name="filter">
+                    	<cocoa method=""/>
+                    </responds-to>							-->
+                    <responds-to name="search">
+						<cocoa method=""/>
+					</responds-to>
                 </responds-to-commands>
 			</class>
         </classes>
+
         
         <commands>
-			<command name="find" code="MMcCfilt" description="Display only those publications containing the given string.">
+<!--			<command name="filter" code="MMcCfilt" description="Display only those publications containing the given string. Usage: filter for string.">
 				<cocoa name="Filter" class="BibDeskFilterScriptCommand"/>
-				<direct-parameter type="object" description="The string to match in publication data"/>
-				<!-- type is actually string above -->
+				<direct-parameter type="object" description="The object performing the filtering. Either a document or the application, which will filter in all open documents."/>
+				<parameter name="for" type="string" code="for " description="The string to filter for.">
+					<cocoa key="for"/>
+				</parameter>
 			</command>
+
+The filter command has been dropped and the functionality moved into the 'filter field' property of the document class
+-->		
 			
 			<command name="bibliography for" code="MMcCbibf" description="Returns bibliography information for the publications passed to the command.">
 				<cocoa name="bibliographyFor" class="BibDeskBibliographyCommand"/>
@@ -162,9 +190,25 @@ is a good command
 				<result type="text" description="Bibliography as styled text"/>
 			</command>
 			
+		
 			<command name="selectionToClipboard" description="Generates a bibliography from the selected items and puts it on the clipboard. This command has to be sent to a document." code="MMcCsbtc">
 				<!-- This is a silly command name. But AppleScript choked on all the reasonable ones as they contained words like copy or bibliography, which are already taken. =&gt; Ugly but less confusing. -->
 			</command>	
+
+		
+			<command name="search" code="MMcCsrch" description="Returns a list of publicatios matching the given string. Typical usage: search for string.">
+				<cocoa name="Search" class="BibDeskSearchForCommand"/>
+				<direct-parameter type="object" description="The object responding to the command. Either the application or a document"/>
+				<!-- type is actually application | document above -->
+				<parameter name="for" type="string" code="for " description="The string to search for.">
+					<cocoa key="for"/>
+				</parameter>
+				<parameter name="for completion" type="boolean" code="cmpl" optional="optional" description="Specifies whether to return a string for completion rather than a publication.">
+					<cocoa key="forCompletion"/>
+				</parameter>				
+				<result type="list of publication | list of string" description="list of results"/>
+			</command>	
+			
 		</commands>
     </suite>
 </dictionary>
