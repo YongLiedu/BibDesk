@@ -1031,7 +1031,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 		if (forceEndEditing) {
 			message = NSLocalizedString(@"The value you entered contains unbalanced braces and cannot be saved.", @"");
 		} else {
-			message = NSLocalizedString(@"The value you entered contains unbalanced braces and canenot be saved. Do you want to keep editing?", @"");
+			message = NSLocalizedString(@"The value you entered contains unbalanced braces and cannot be saved. Do you want to keep editing?", @"");
 			cancelButton = NSLocalizedString(@"Cancel", @"Cancel");
 		}
 		
