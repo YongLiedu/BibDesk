@@ -72,5 +72,13 @@
     [aLock unlock];
 }
 
+- (void)addObjectsFromArray:(NSArray *)anArray usingLock:(NSLock *)aLock{
+    
+    [aLock lock];
+    [[anArray retain] autorelease];
+    [self addObjectsFromArray:anArray];
+    [aLock unlock];
+}
+
     
 @end
