@@ -46,7 +46,6 @@ NSRange SafeForwardSearchRange( unsigned startLoc, unsigned seekLength, unsigned
 // This problem will only munge a single entry, though, since we scan between @ != \@ markers as entry delimiters; the larger problem is that there is no warning for this case.
 
 #warning ARM: Scan comments into preamble
-#warning ARM: Scan strings into a separate container?  Ask mmcc about this.
     
     NSAssert( fullString != nil, @"A nil string was passed to the parser.  This is probably due to an incorrect guess at the string encoding." );
 
@@ -56,6 +55,8 @@ NSRange SafeForwardSearchRange( unsigned startLoc, unsigned seekLength, unsigned
     unsigned fullStringLength = [fullString length];
     unsigned fileOrder = 0;
     NSCharacterSet *possibleLeftDelimiters = [NSCharacterSet characterSetWithCharactersInString:@"\"{"];
+    BOOL isStringValue = NO;
+    NSMutableDictionary *stringsDictionary = [NSMutableDictionary dictionary];
     
     BibItem *newBI;
     NSMutableArray *bibItemArray = [NSMutableArray array];
@@ -107,31 +108,43 @@ NSRange SafeForwardSearchRange( unsigned startLoc, unsigned seekLength, unsigned
                                             errorRange:[fullString lineRangeForRange:NSMakeRange([scanner scanLocation], 0)]];
         }
         
-        
-        if(![scanner scanString:@"{" intoString:nil]){
-            *hadProblems = YES;
-            [BibTeXParser postParsingErrorNotification:@"Brace not found"
-                                             errorType:@"Parse Error"
-                                              fileName:filePath
-                                            errorRange:[fullString lineRangeForRange:NSMakeRange([scanner scanLocation], 0)]];
+        if([type compare:@"String" options:NSCaseInsensitiveSearch] == NSOrderedSame){ // it's a string!  add it to the dictionary
+            isStringValue = YES;
+            // macroStringFromScanner: also sets the scanner so we don't go into the while() loop below
+            [stringsDictionary addEntriesFromDictionary:[BibTeXParser macroStringFromScanner:scanner
+                                                                                 endingRange:entryClosingBraceRange
+                                                                                      string:fullString]];
+            // NSLog(@"stringsDict has %@", [stringsDictionary description]);
+        } else {
+            isStringValue = NO; // don't forget to reset this!
         }
         
-        
-        if(![scanner scanUpToString:@"," intoString:&citekey]){
-            *hadProblems = YES;
-            [BibTeXParser postParsingErrorNotification:@"Citekey not found"
-                                             errorType:@"Parse Error"
-                                              fileName:filePath
-                                            errorRange:[fullString lineRangeForRange:NSMakeRange([scanner scanLocation], 0)]];
+        if(!isStringValue){
+            if(![scanner scanString:@"{" intoString:nil]){
+                *hadProblems = YES;
+                [BibTeXParser postParsingErrorNotification:@"Brace not found"
+                                                 errorType:@"Parse Error"
+                                                  fileName:filePath
+                                                errorRange:[fullString lineRangeForRange:NSMakeRange([scanner scanLocation], 0)]];
+            }
+            
+            
+            if(![scanner scanUpToString:@"," intoString:&citekey]){ // order matters here...
+                *hadProblems = YES;
+                [BibTeXParser postParsingErrorNotification:@"Citekey not found"
+                                                 errorType:@"Parse Error"
+                                                  fileName:filePath
+                                                errorRange:[fullString lineRangeForRange:NSMakeRange([scanner scanLocation], 0)]];
+            }
+            
+            // NSAssert( citekey != nil && type != nil, @"Missing a citekey or type" );
+            
+            newBI = [[BibItem alloc] initWithType:type
+                                         fileType:@"BibTeX"
+                                          authors:[NSMutableArray array]];        
+            
+            [newBI setCiteKeyString:citekey];
         }
-        
-        // NSAssert( citekey != nil && type != nil, @"Missing a citekey or type" );
-        
-        newBI = [[BibItem alloc] initWithType:type
-                                     fileType:@"BibTeX"
-                                      authors:[NSMutableArray array]];        
-        
-        [newBI setCiteKeyString:citekey];
         
         while(entryClosingBraceRange.location != NSNotFound && [scanner scanLocation] < entryClosingBraceRange.location){ // while we are within bounds of a single bibitem
             NSString *key = nil;
@@ -177,8 +190,6 @@ NSRange SafeForwardSearchRange( unsigned startLoc, unsigned seekLength, unsigned
                 break; // break here, since this happens at the end of every entry with JabRef-generated BibTeX, and we don't need to hit the assertion below
             }                
             
-            // NSAssert ( leftDelimLocation != NSNotFound, @"Can't find a delimiter.");
-#warning ARM: for debugging
             // scan whitespace after the = to see if we have an opening delimiter or not; this will be for macroish stuff
             [scanner scanCharactersFromSet:[NSCharacterSet whitespaceCharacterSet] intoString:nil];
             if(![possibleLeftDelimiters characterIsMember:[fullString characterAtIndex:[scanner scanLocation]]]){
@@ -211,7 +222,6 @@ NSRange SafeForwardSearchRange( unsigned startLoc, unsigned seekLength, unsigned
                                                 errorRange:[fullString lineRangeForRange:NSMakeRange([scanner scanLocation], 0)]];
             }
                
-
 #warning ARM: Need more testing of nested brace code
             unsigned searchStart = leftDelimLocation + 1;
             NSRange braceSearchRange;
@@ -246,11 +256,14 @@ NSRange SafeForwardSearchRange( unsigned startLoc, unsigned seekLength, unsigned
             
         }
         
-        [newBI setFileOrder:fileOrder];
-        [newBI setPubFields:dict];
-        [bibItemArray addObject:[newBI autorelease]];
+        if(!isStringValue){ // this is all BibItem related stuff
+            
+            [newBI setFileOrder:fileOrder];
+            [newBI setPubFields:dict];
+            [bibItemArray addObject:[newBI autorelease]];
 
-        fileOrder ++;
+            fileOrder ++;
+        }
         
         [dict removeAllObjects];
         
@@ -285,6 +298,35 @@ NSRange SafeForwardSearchRange( unsigned startLoc, unsigned seekLength, unsigned
         [pool release];
     }
     return bibItemArray;    
+}
+
+#warning FIXME: need ivars in BibTeXParser
++ (NSDictionary *)macroStringFromScanner:(NSScanner *)scanner endingRange:(NSRange)range string:(NSString *)fullString{
+    
+    NSString *field = nil;
+    NSString *value = nil;
+    
+    NSAssert( [scanner scanLocation] < range.location, @"Scanner wants to scan out of range!" );
+    
+    if(![scanner scanString:@"{" intoString:nil]){
+        [BibTeXParser postParsingErrorNotification:@"Brace not found"
+                                         errorType:@"Parse Error"
+                                          fileName:nil
+                                        errorRange:NSMakeRange(0,0)];
+    }
+    
+    [scanner scanUpToString:@"=" intoString:&field];
+#warning ARM: always a double quote delimiter?
+#warning ARM: need to handle unquoted strings, anyway
+    [scanner scanUpToString:@"\"" intoString:nil]; // go up to the first quote
+    [scanner scanString:@"\"" intoString:nil];
+    
+    value = [fullString substringWithRange:NSMakeRange([scanner scanLocation], range.location - [scanner scanLocation])];
+    value = [value stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceCharacterSet]];
+    [scanner setScanLocation:range.location]; // needs to be set so it's at the right location when we return
+    
+    return [NSDictionary dictionaryWithObject:value forKey:[field stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceCharacterSet]]];
+    
 }
 
 + (NSMutableArray *)itemsFromData:(NSData *)inData
