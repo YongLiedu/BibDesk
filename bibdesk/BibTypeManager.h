@@ -10,7 +10,6 @@
 #import "BibPrefController.h"
 
 @interface BibTypeManager : NSObject {
-    NSDictionary *typeInfoDict;
 	NSDictionary *fileTypesDict;
 	NSDictionary *fieldsForTypesDict;
 	NSDictionary *typesForFileTypeDict;

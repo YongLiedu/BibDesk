@@ -18,15 +18,34 @@ static BibTypeManager *sharedInstance = nil;
 
 - (id)init{
     self = [super init];
-    typeInfoDict = [[NSDictionary dictionaryWithContentsOfFile:[[[NSBundle mainBundle] resourcePath] stringByAppendingPathComponent:@"TypeInfo.plist"]] retain];
+    NSDictionary *typeInfoDict = [[NSDictionary dictionaryWithContentsOfFile:[[[NSBundle mainBundle] resourcePath] stringByAppendingPathComponent:@"TypeInfo.plist"]] retain];
 
+	NSFileManager *fm = [NSFileManager defaultManager];
+	NSString *applicationSupportPath = [[fm applicationSupportDirectory:kUserDomain] stringByAppendingPathComponent:@"BibDesk"];
+	NSString *userTypeInfoPath = [applicationSupportPath stringByAppendingPathComponent:TYPE_INFO_FILENAME];
+	NSDictionary *userTypeInfoDict;
+	
+	if ([fm fileExistsAtPath:userTypeInfoPath]) {
+		userTypeInfoDict = [NSDictionary dictionaryWithContentsOfFile:userTypeInfoPath];
+		
+		// set all the lists we support in the user file
+		fieldsForTypesDict = [[userTypeInfoDict objectForKey:@"FieldsForTypes"] retain];
+		typesForFileTypeDict = [[NSDictionary dictionaryWithObjectsAndKeys: 
+				[userTypeInfoDict objectForKey:@"TypesForFileType"], BDSKBibtexString,
+				[btm bibTypesForFileType:@"PubMed"], @"PubMed", nil] retain];
+		allFieldNames = [[userTypeInfoDict objectForKey:@"AllRemovableFieldNames"] retain];
+	}
+	
+	if (fieldsForTypesDict == nil)
+		fieldsForTypesDict = [[typeInfoDict objectForKey:@"FieldsForTypes"] retain];
+	if (typesForFileTypeDict == nil)
+		typesForFileTypeDict = [[typeInfoDict objectForKey:@"TypesForFileType"] retain];
+	if (allFieldNames == nil)
+		allFieldNames = [[typeInfoDict objectForKey:@"AllRemovableFieldNames"] retain];
 	fileTypesDict = [[typeInfoDict objectForKey:@"FileTypes"] retain];
-	fieldsForTypesDict = [[typeInfoDict objectForKey:@"FieldsForTypes"] retain];
-	typesForFileTypeDict = [[typeInfoDict objectForKey:@"TypesForFileType"] retain];
 	fieldNameForPubMedTagDict = [[typeInfoDict objectForKey:@"BibTeXFieldNamesForPubMedTags"] retain];
 	bibtexTypeForPubMedTypeDict = [[typeInfoDict objectForKey:@"BibTeXTypesForPubMedTypes"] retain];
 	MODSGenresForBibTeXTypeDict = [[typeInfoDict objectForKey:@"MODSGenresForBibTeXType"] retain];
-	allFieldNames = [[typeInfoDict objectForKey:@"AllRemovableFieldNames"] retain];
 
     // this set is used for warning the user on manual entry of a citekey; allows non-ASCII characters and some math symbols
     invalidCiteKeyCharSet = [[NSCharacterSet characterSetWithCharactersInString:@" '\"@,\\#}{~&%$^"] retain];
@@ -71,7 +90,7 @@ static BibTypeManager *sharedInstance = nil;
 	allFieldNames = [newArray copy];
 	
 	NSDictionary *notifInfo = [NSDictionary dictionaryWithObjectsAndKeys:@"allFieldNames", @"list",nil];
-	[[NSNotificationCenter defaultCenter] postNotificationName:BDSKTypeInfoChangedNotification
+	[[NSNotificationCenter defaultCenter] postNotificationName:BDSKBibTypeInfoChangedNotification
 														object:self
 													  userInfo:notifInfo];
 }
@@ -81,7 +100,7 @@ static BibTypeManager *sharedInstance = nil;
 	fieldsForTypesDict = [newDict copy];
 	
 	NSDictionary *notifInfo = [NSDictionary dictionaryWithObjectsAndKeys:@"fieldsForTypes", @"list",nil];
-	[[NSNotificationCenter defaultCenter] postNotificationName:BDSKTypeInfoChangedNotification
+	[[NSNotificationCenter defaultCenter] postNotificationName:BDSKBibTypeInfoChangedNotification
 														object:self
 													  userInfo:notifInfo];
 }
@@ -91,7 +110,7 @@ static BibTypeManager *sharedInstance = nil;
 	typesForFileTypeDict = [newDict copy];
 	
 	NSDictionary *notifInfo = [NSDictionary dictionaryWithObjectsAndKeys:@"typesForFileTypes", @"list",nil];
-	[[NSNotificationCenter defaultCenter] postNotificationName:BDSKTypeInfoChangedNotification
+	[[NSNotificationCenter defaultCenter] postNotificationName:BDSKBibTypeInfoChangedNotification
 														object:self
 													  userInfo:notifInfo];
 }
