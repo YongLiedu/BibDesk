@@ -191,7 +191,8 @@ static float BDSKScaleMenuFontSize = 11.0;
                 [curItem setRepresentedObject:[NSNumber numberWithFloat:BDSKDefaultScaleMenuFactors[cnt]]];
             }
         }
-        [scalePopUpButton selectItemAtIndex:BDSKDefaultScaleMenuSelectedItemIndex];
+        // select the appropriate item, adjusting the scaleFactor if necessary
+		[self setScaleFactor:scaleFactor adjustPopup:YES];
 
         // hook it up
         [scalePopUpButton setTarget:self];
@@ -243,23 +244,27 @@ static float BDSKScaleMenuFontSize = 11.0;
     return scaleFactor;
 }
 
+- (void)setScaleFactor:(float)newScaleFactor {
+	[self setScaleFactor:newScaleFactor adjustPopup:YES];
+}
+
 - (void)setScaleFactor:(float)newScaleFactor adjustPopup:(BOOL)flag {
-    if (scaleFactor != newScaleFactor) {
+	if (flag) {
+		unsigned cnt = 0, numberOfDefaultItems = (sizeof(BDSKDefaultScaleMenuFactors) / sizeof(float));
+		
+		// We only work with some preset zoom values, so choose one of the appropriate values (Fudge a little for floating point == to work)
+		while (cnt < numberOfDefaultItems && newScaleFactor * .99 > BDSKDefaultScaleMenuFactors[cnt]) cnt++;
+		if (cnt == numberOfDefaultItems) cnt--;
+		[scalePopUpButton selectItemAtIndex:cnt];
+		newScaleFactor = BDSKDefaultScaleMenuFactors[cnt];
+    }
+	
+	if (scaleFactor != newScaleFactor) {
 		NSSize curDocFrameSize, newDocBoundsSize;
 		NSView *clipView = [[self documentView] superview];
         NSPoint scrollPoint = [self scrollPositionAsPercentage];
 		
-			if (flag) {	// Coming from elsewhere, first validate it
-				unsigned cnt = 0, numberOfDefaultItems = (sizeof(BDSKDefaultScaleMenuFactors) / sizeof(float));
-		
-				// We only work with some preset zoom values, so choose one of the appropriate values (Fudge a little for floating point == to work)
-				while (cnt < numberOfDefaultItems && newScaleFactor * .99 > BDSKDefaultScaleMenuFactors[cnt]) cnt++;
-				if (cnt == numberOfDefaultItems) cnt--;
-				[scalePopUpButton selectItemAtIndex:cnt];
-				scaleFactor = BDSKDefaultScaleMenuFactors[cnt];
-			} else {
-				scaleFactor = newScaleFactor;
-			}
+		scaleFactor = newScaleFactor;
 		
 		// Get the frame.  The frame must stay the same.
 		curDocFrameSize = [clipView frame].size;

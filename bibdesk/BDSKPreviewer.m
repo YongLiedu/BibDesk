@@ -17,6 +17,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 #import "BDSKPreviewer.h"
 #import "BibPrefController.h"
 #import "BibAppController.h"
+#import "DraggableScrollView.h"
 
 
 /*! @const BDSKPreviewer helps to enforce a single object of this class */
@@ -28,7 +29,7 @@ static unsigned threadCount = 0;
 
 + (BDSKPreviewer *)sharedPreviewer{
     if (!thePreviewer) {
-        thePreviewer = [[[BDSKPreviewer alloc] init] retain];
+        thePreviewer = [[BDSKPreviewer alloc] init];
     }
     return thePreviewer;
 }
@@ -52,12 +53,19 @@ static unsigned threadCount = 0;
 }
 
 - (void)awakeFromNib{
-    // register for notifications so we can save the window size and location
+	DraggableScrollView *scrollView = (DraggableScrollView*)[imagePreviewView enclosingScrollView];
+    float scaleFactor = [[OFPreferenceWrapper sharedPreferenceWrapper] floatForKey:BDSKPreviewPDFScaleFactorKey];
+	[scrollView setScaleFactor:scaleFactor];
+	scrollView = (DraggableScrollView*)[imagePreviewView enclosingScrollView];
+	scaleFactor = [[OFPreferenceWrapper sharedPreferenceWrapper] floatForKey:BDSKPreviewRTFScaleFactorKey];
+	[scrollView setScaleFactor:scaleFactor];
+	
     [[NSNotificationCenter defaultCenter] addObserver:self
-					     selector:@selector(resetPreviews)
-						 name:NSWindowWillCloseNotification
-					       object:[self window]];
-    [self setWindowFrameAutosaveName:@"BDSKPreviewPanel"];
+					     selector:@selector(appWillTerminate:)
+						 name:NSApplicationWillTerminateNotification
+					       object:NSApp];
+	
+	[self setWindowFrameAutosaveName:@"BDSKPreviewPanel"];
 }
 
 - (NSString *)windowNibName
@@ -387,6 +395,18 @@ static unsigned threadCount = 0;
     	return NO;
     }
 	
+}
+
+- (void)windowWillClose:(NSNotification *)notification{
+	[self resetPreviews];
+}
+
+- (void)appWillTerminate:(NSNotification *)notification{
+	// save the scalefactors of the views
+	DraggableScrollView *scrollView = (DraggableScrollView*)[imagePreviewView enclosingScrollView];
+	[[OFPreferenceWrapper sharedPreferenceWrapper] setFloat:[scrollView scaleFactor] forKey:BDSKPreviewPDFScaleFactorKey];
+	scrollView = (DraggableScrollView*)[imagePreviewView enclosingScrollView];
+	[[OFPreferenceWrapper sharedPreferenceWrapper] setFloat:[scrollView scaleFactor] forKey:BDSKPreviewRTFScaleFactorKey];
 }
 
 - (void)resetPreviews{

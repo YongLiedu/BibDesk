@@ -426,6 +426,10 @@
 					<string>0</string>
 					<key>Preview Pane Displays What?</key>
 					<string>1</string>
+					<key>Preview PDF Scale Factor</key>
+					<string>1.0</string>
+					<key>Preview RTF Scale Factor</key>
+					<string>1.0</string>
 					<key>Quick Search Keys</key>
 					<array>
 						<string>Keywords</string>
