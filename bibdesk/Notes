@@ -1,5 +1,0 @@
-Refactoring Notes:
-
-BibAuthor -- needs to be more of a firstclass object.
-    BibItems should have arrays of bibauthor objects.
-    BibAuthor Init should return a matching present instance, never duplicates.
