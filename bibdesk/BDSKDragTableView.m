@@ -27,9 +27,18 @@ static NSColor *sStripeColor = nil;
     NSString *s;
     NSSize maxSize = NSMakeSize(600,200); // tunable...
     NSSize stringSize;
-
-    if(s = [[self dataSource] citeStringForRows:dragRows tableViewDragSource:self]){
-        string = [[NSAttributedString alloc] initWithString:s];
+    
+    NSPasteboard *pb = [NSPasteboard pasteboardWithName:NSDragPboard];
+    NSArray *types = [pb types];
+    
+    if([[pb availableTypeFromArray:types] isEqualToString:NSStringPboardType]){
+        s = [pb stringForType:NSStringPboardType];  // draw the string from the drag pboard, if it's available
+    } else {
+        s = [[self dataSource] citeStringForRows:dragRows tableViewDragSource:self];
+    }
+    
+    if(s){
+        string = [[[NSAttributedString alloc] initWithString:s] autorelease];
         image = [[[NSImage alloc] init] autorelease];
         stringSize = [string size];
         if(stringSize.width == 0 || stringSize.height == 0){
