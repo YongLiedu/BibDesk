@@ -46,6 +46,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 
 - (IBAction)changeStyle:(id)sender{
     [defaults setObject:[sender stringValue] forKey:BDSKBTStyleKey];
+	[[NSNotificationCenter defaultCenter] postNotificationName:BDSKPreviewNeedsUpdateNotification object:self];
 }
 
 - (IBAction)openTeXpreviewFile:(id)sender{
@@ -64,5 +65,11 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 	} else
 	    NSLog(@"The url is not a FileURL.");
 }
+
+
+- (IBAction)downloadTeX:(id)sender {
+	[[NSWorkspace sharedWorkspace] openURL:[NSURL URLWithString:BDSKTEXDOWNLOADURL]];
+}
+
 
 @end

@@ -137,6 +137,14 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
     [errorTableView setDoubleAction:@selector(gotoError:)];
     [openUsingFilterAccessoryView retain];
 	[showHideCustomCiteStringsMenuItem setRepresentedObject:@"showHideCustomCiteMenuItem"];
+
+	// register to observe when the preview needs to be updated (handle this here rather than on a per document basis as the preview is currently global for the application)
+	[[NSNotificationCenter defaultCenter] addObserver:self
+			selector:@selector(handlePreviewNeedsUpdate:)
+			name:BDSKPreviewNeedsUpdateNotification
+			object:nil];
+	
+
 }
 
 
@@ -151,6 +159,17 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 	[temp release];
 }
 	
+
+/*
+ if the preview needs to be updated, get the first document and make it do the updating
+*/
+- (void) handlePreviewNeedsUpdate:(id)sender {
+	BibDocument * firstDoc = [[NSApp orderedDocuments] objectAtIndex:0];
+	if (firstDoc) {
+		[firstDoc updatePreviews:nil];
+	}
+}
+
 
 
 #pragma mark Overridden NSDocumentController methods

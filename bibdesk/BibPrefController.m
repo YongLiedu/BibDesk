@@ -68,6 +68,7 @@ NSString *BDSKDocumentUpdateUINotification = @"General UI update Notification";
 NSString *BDSKTableViewFontChangedNotification = @"Tableview font selection is changing Notification";
 NSString *BDSKPreviewDisplayChangedNotification = @"Preview Pane Preference Change Notification";
 NSString *BDSKCustomStringsChangedNotification = @"CustomStringsChangedNotification";
+NSString *BDSKPreviewNeedsUpdateNotification = @"Preview Needs Update Notification";
 NSString *BDSKTableColumnChangedNotification = @"TableColumnChangedNotification";
 NSString *BDSKBibItemChangedNotification = @"BibItem Changed notification";
 NSString *BDSKDocAddItemNotification = @"Added a bibitem to a document";

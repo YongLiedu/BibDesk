@@ -92,6 +92,7 @@ extern NSString *BDSKLastVersionLaunched;
 extern NSString *BDSKDocumentUpdateUINotification;
 extern NSString *BDSKTableViewFontChangedNotification;
 extern NSString *BDSKPreviewDisplayChangedNotification;
+extern NSString *BDSKPreviewNeedsUpdateNotification;
 extern NSString *BDSKCustomStringsChangedNotification;
 extern NSString *BDSKTableColumnChangedNotification;
 extern NSString *BDSKBibItemChangedNotification;
