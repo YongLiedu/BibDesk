@@ -249,7 +249,7 @@ NSRange SafeForwardSearchRange( unsigned startLoc, unsigned seekLength, unsigned
                 // Example:  Title = {Physical insight into the {Ergun} and {Wen {\&} Yu} equations for fluid flow in packed and fluidised beds},
                 // In this example, the {Wen {\&} Yu} expression is problematic, because we need to account for both left braces; if we don't, everything after the } is stripped.
                 // WARNING:  this if() has some trickery with resetting the scan location, but not setting the search location as in the next if() statement!
-                
+
                 while(tempStart != [fullString rangeOfString:leftDelim options:NSLiteralSearch | NSBackwardsSearch range:braceSearchRange].location){ // this means we found "{ {" between { and }
                     tempStart = [fullString rangeOfString:leftDelim options:NSLiteralSearch | NSBackwardsSearch range:braceSearchRange].location;
                     NSLog(@"Reset tempStart!");
@@ -257,7 +257,7 @@ NSRange SafeForwardSearchRange( unsigned startLoc, unsigned seekLength, unsigned
                      NSLog(@"Deep nested brace check, scanned rightDelim %@", logString);
                     if(![scanner scanUpToString:rightDelim intoString:&logString] &&        // find the next right delimiter
                         [fullString characterAtIndex:([scanner scanLocation] )] != '}'){ // it's not an error if it's terminated by a brace 
-                         NSLog(@"*** ERROR doubly nested braces, scanned %@", logString);
+                         NSLog(@"*** ERROR doubly nested braces");
                         *hadProblems = YES;
                         [BibTeXParser postParsingErrorNotification:[NSString stringWithFormat:@"Delimiter '%@' not found", rightDelim]
                                                          errorType:@"Parse Error" 
@@ -265,12 +265,17 @@ NSRange SafeForwardSearchRange( unsigned startLoc, unsigned seekLength, unsigned
                                                         errorRange:[fullString lineRangeForRange:NSMakeRange(leftDelimLocation, 0)]];
                     }
                     rightDelimLocation = [scanner scanLocation];
+                    // this is sort of the right idea, but I need to allow/perform more backwards searches, resetting the range every time so I get the next { until I run out
+                    // what is the stop condition for that, though?
+                    braceSearchRange = [fullString rangeOfString:leftDelim options:NSLiteralSearch range:NSMakeRange(braceSearchRange.location, rightDelimLocation - braceSearchRange.location)];
+                    if(braceSearchRange.location == NSNotFound) break;
                      NSLog(@"Deep nested braces, scanned up to %@ and found %@", rightDelim, logString);
                 }
                 
                 if(braceFoundRange.location != NSNotFound){ // if there's a "{" between { and }
                     [scanner scanString:rightDelim intoString:&logString]; // it wasn't this one, so scan past it
                      NSLog(@"Shallow nested brace check, scanned rightDelim %@", logString);
+                     if([scanner scanLocation] + 1 >= nextAtRange.location) break; // check for next entry or EOF before we try characterAtIndex:
                     if(![scanner scanUpToString:rightDelim intoString:&logString] &&        // find the next right delimiter
                         [fullString characterAtIndex:([scanner scanLocation] + 1)] != ',' ){ // don't call this an error if there is a comma immediately following; may give some false alarms
                          NSLog(@"*** ERROR nested braces");
@@ -282,7 +287,7 @@ NSRange SafeForwardSearchRange( unsigned startLoc, unsigned seekLength, unsigned
                     }
                      NSLog(@"Shallow nested braces, scanned up to %@ and found %@", rightDelim, logString);
                     searchStart = rightDelimLocation + 1; // start from the previous search end
-                    if(searchStart >= entryClosingBraceRange.location) break;
+                    if(searchStart >= nextAtRange.location) break; // check to be sure we're not going past EOF
                      NSLog(@"string at searchStart is %@", [fullString substringWithRange:NSMakeRange(searchStart, 1)]);
                     rightDelimLocation = [scanner scanLocation];
                 } else {
