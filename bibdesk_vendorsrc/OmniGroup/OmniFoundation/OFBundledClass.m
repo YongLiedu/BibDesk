@@ -1,9 +1,9 @@
-// Copyright 1997-2003 Omni Development, Inc.  All rights reserved.
+// Copyright 1997-2004 Omni Development, Inc.  All rights reserved.
 //
 // This software may only be used and reproduced according to the
 // terms in the file OmniSourceLicense.html, which should be
 // distributed with this project and can also be found at
-// http://www.omnigroup.com/DeveloperResources/OmniSourceLicense.html.
+// <http://www.omnigroup.com/developer/sourcecode/sourcelicense/>.
 
 #import <OmniFoundation/OFBundledClass.h>
 
@@ -14,7 +14,7 @@
 #import <OmniFoundation/NSObject-OFExtensions.h>
 #import <OmniFoundation/NSThread-OFExtensions.h>
 
-RCS_ID("$Header: /Network/Source/CVS/OmniGroup/Frameworks/OmniFoundation/OFBundledClass.m,v 1.27 2003/01/15 22:51:48 kc Exp $")
+RCS_ID("$Header: /Network/Source/CVS/OmniGroup/Frameworks/OmniFoundation/OFBundledClass.m,v 1.34 2004/02/10 04:07:40 kc Exp $")
 
 @interface OFBundledClass (Private)
 
@@ -42,6 +42,10 @@ static NSMutableDictionary *bundledClassRegistry;
 static NSString *OFBundledClassDidLoadNotification;
 static NSMutableArray *immediateLoadClasses;
 
+#ifndef PRELOAD_ALL_CLASSES
+#define PRELOAD_ALL_CLASSES 1
+#endif
+
 + (void)initialize;
 {
     OBINITIALIZE;
@@ -50,7 +54,17 @@ static NSMutableArray *immediateLoadClasses;
     bundledClassRegistry = [[NSMutableDictionary alloc] initWithCapacity:64];
     immediateLoadClasses = [[NSMutableArray alloc] init];
     OFBundledClassDidLoadNotification = [@"OFBundledClassDidLoad" retain];
-    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(loadAllClasses) name:NSWillBecomeMultiThreadedNotification object:nil];
+
+#if PRELOAD_ALL_CLASSES
+    if ([NSThread isMultiThreaded]) {
+#ifdef DEBUG
+        NSLog(@"Warning: +[%@ %@] called after going multithreaded!", NSStringFromClass(self), NSStringFromSelector(_cmd));
+#endif
+        [self loadAllClasses];
+    } else {
+        [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(loadAllClasses) name:NSWillBecomeMultiThreadedNotification object:nil];
+    }
+#endif
 }
 
 static BOOL OFBundledClassDebug = NO;
@@ -204,6 +218,11 @@ static BOOL OFBundledClassDebug = NO;
 	return nil;
 }
 
+- (BOOL)isLoaded;
+{
+    return (loaded || (bundleClass != nil));
+}
+
 - (NSDictionary *)descriptionDictionary;
 {
     return descriptionDictionary;
@@ -255,8 +274,6 @@ static BOOL OFBundledClassDebug = NO;
                 // If the class is in a framework which is linked into the bundle, then -[NSBundle classNamed:] won't find the class, but NSClassFromString() will.
                 bundleClass = NSClassFromString(className);
             }
-            if ([NSThread isMultiThreaded])
-                [NSObject initializeAllClasses];
             [[NSNotificationCenter defaultCenter] postNotificationName:OFBundledClassDidLoadNotification object:bundle];
 #endif
         } else {
@@ -391,7 +408,7 @@ static BOOL OFBundledClassDebug = NO;
 
     enumerator = [dependencyClassNames objectEnumerator];
     while ((aClassName = [enumerator nextObject]))
-	[[[self class] classNamed:aClassName] loadBundledClass];
+	[[[self class] bundledClassNamed:aClassName] loadBundledClass];
 }
 
 - (void)loadModifierClasses;

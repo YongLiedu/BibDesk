@@ -1,9 +1,9 @@
-// Copyright 1998-2003 Omni Development, Inc.  All rights reserved.
+// Copyright 1998-2004 Omni Development, Inc.  All rights reserved.
 //
 // This software may only be used and reproduced according to the
 // terms in the file OmniSourceLicense.html, which should be
 // distributed with this project and can also be found at
-// http://www.omnigroup.com/DeveloperResources/OmniSourceLicense.html.
+// <http://www.omnigroup.com/developer/sourcecode/sourcelicense/>.
 
 #import <OmniFoundation/NSData-OFExtensions.h>
 
@@ -19,7 +19,7 @@
 #import "sha1.h"
 #import <OmniFoundation/md5.h>
 
-RCS_ID("$Header: /Network/Source/CVS/OmniGroup/Frameworks/OmniFoundation/OpenStepExtensions.subproj/NSData-OFExtensions.m,v 1.40 2003/01/15 22:51:59 kc Exp $")
+RCS_ID("$Header: /Network/Source/CVS/OmniGroup/Frameworks/OmniFoundation/OpenStepExtensions.subproj/NSData-OFExtensions.m,v 1.49 2004/02/10 04:07:45 kc Exp $")
 
 @implementation NSData (OFExtensions)
 
@@ -47,7 +47,6 @@ static inline unsigned char fromhex(unsigned char hexDigit)
      [NSException raise:@"IllegalHexDigit" format:@"Attempt to interpret a string containing '%c' as a hexidecimal value", hexDigit];
      return 0; // Never reached
 }
-
 
 + (id)dataWithHexString:(NSString *)hexString;
 {
@@ -329,7 +328,7 @@ static char index_64[256] = {
 };
 #define CHAR64(c) (index_64[(unsigned char)(c)])
 
-#define BASE64_GETC (length > 0 ? (length--, bytes++, bytes[-1]) : (unsigned int)EOF)
+#define BASE64_GETC (length > 0 ? (length--, bytes++, (unsigned int)(bytes[-1])) : (unsigned int)EOF)
 #define BASE64_PUTC(c) OFDataBufferAppendByte(buffer, (c))
 
 + (id)dataWithBase64String:(NSString *)base64String;
@@ -346,7 +345,7 @@ static char index_64[256] = {
     NSData *decodedData;
     NSData *returnValue;
     BOOL suppressCR = NO;
-    int c1, c2, c3, c4;
+    unsigned int c1, c2, c3, c4;
     int DataDone = 0;
     char buf[3];
 
@@ -470,10 +469,13 @@ static inline void output64chunk(int c1, int c2, int c3, int pads, OFDataBuffer 
 // Omni's custom base-26 support.  This is based on the ascii85 implementation above.
 //
 // Input strings are characters (either upper or lowercase).  Dashes are ignored.
-// Anything else is illegal.
+// Anything else, including whitespace, is illegal.
 //
 // Output strings are four-character tuples separated by dashes.  The last
 // tuple might have fewer than four characters.
+//
+// Unlike most encodings in this file, a partially-filled 4-octet group has the data
+// packed into the less-significant bytes, instead of the more-significant bytes.
 //
 
 #define POW4_26_COUNT (7)   // Four base 256 digits take 7 base 26 digits
@@ -648,6 +650,95 @@ static inline void encode26(OFDataBuffer *dataBuffer, unsigned long tuple, int c
     return string;
 }
 
++ dataWithDecodedURLString:(NSString *)urlString
+{
+    if (urlString == nil)
+        return [NSData data];
+    else
+        return [urlString dataUsingCFEncoding:[NSString urlEncoding] allowLossyConversion:NO hexEscapes:@"%"];
+}
+
+static inline unichar hex(int i)
+{
+    static const char hexDigits[16] = {
+        '0', '1', '2', '3', '4', '5', '6', '7',
+        '8', '9', 'A', 'B', 'C', 'D', 'E', 'F'
+    };
+
+    return (unichar)hexDigits[i];
+}
+
+- (unsigned)lengthOfQuotedPrintableStringWithMapping:(const OFQuotedPrintableMapping *)qpMap
+{
+    unsigned const char *sourceBuffer;
+    unsigned sourceLength, sourceIndex, quotedPairs;
+
+    sourceLength = [self length];
+    if (sourceLength == 0)
+        return 0;
+    sourceBuffer = [self bytes];
+
+    quotedPairs = 0;
+
+    for (sourceIndex = 0; sourceIndex < sourceLength; sourceIndex++) {
+        unsigned char ch = sourceBuffer[sourceIndex];
+        if (qpMap->map[ch] == 1)
+            quotedPairs ++;
+    }
+
+    return sourceLength + ( 2 * quotedPairs );
+}
+
+- (NSString *)quotedPrintableStringWithMapping:(const OFQuotedPrintableMapping *)qpMap lengthHint:(unsigned)outputLengthHint
+{
+    unsigned const char *sourceBuffer;
+    int sourceLength;
+    int sourceIndex;
+    unichar *destinationBuffer;
+    int destinationBufferSize;
+    int destinationIndex;
+    NSString *escapedString;
+
+    sourceLength = [self length];
+    if (sourceLength == 0)
+        return [NSString string];
+    sourceBuffer = [self bytes];
+
+    if (outputLengthHint > 0)
+        destinationBufferSize = outputLengthHint;
+    else
+        destinationBufferSize = sourceLength + (sourceLength >> 2) + 12;
+    destinationBuffer = malloc((destinationBufferSize) * sizeof(*destinationBuffer));
+    destinationIndex = 0;
+
+    for (sourceIndex = 0; sourceIndex < sourceLength; sourceIndex++) {
+        unsigned char ch;
+        unsigned char chtype;
+
+        ch = sourceBuffer[sourceIndex];
+
+        if (destinationIndex >= destinationBufferSize - 3) {
+            destinationBufferSize += destinationBufferSize >> 2;
+            destinationBuffer = realloc(destinationBuffer, (destinationBufferSize) * sizeof(*destinationBuffer));
+        }
+
+        chtype = qpMap->map[ ch ];
+        if (!chtype) {
+            destinationBuffer[destinationIndex++] = ch;
+        } else {
+            destinationBuffer[destinationIndex++] = qpMap->translations[chtype-1];
+            if (chtype == 1) {
+                // "1" indicates a quoted-printable rather than a translation
+                destinationBuffer[destinationIndex++] = hex((ch & 0xF0) >> 4);
+                destinationBuffer[destinationIndex++] = hex(ch & 0x0F);
+            }
+        }
+    }
+
+    escapedString = [[[NSString alloc] initWithCharactersNoCopy:destinationBuffer length:destinationIndex freeWhenDone:YES] autorelease];
+
+    return escapedString;
+}
 
 //
 // Misc extensions
@@ -734,11 +825,18 @@ static inline void encode26(OFDataBuffer *dataBuffer, unsigned long tuple, int c
 - (BOOL)containsData:(NSData *)data;
 {
     unsigned const char *selfPtr, *selfEnd, *selfRestart, *ptr, *ptrRestart, *end;
+    unsigned myLength, otherLength;
 
     ptrRestart = [data bytes];
-    end = ptrRestart + [data length];
+    otherLength = [data length];
+    if (otherLength == 0)
+        return YES;
+    end = ptrRestart + otherLength;
     selfRestart = [self bytes];
-    selfEnd = selfRestart + [self length] - [data length];
+    myLength = [self length];
+    if (myLength < otherLength) // This test is a nice shortcut, but it's also necessary to avoid crashing: zero-length CFDatas will sometimes(?) return NULL for their bytes pointer, and the resulting pointer arithmetic can underflow.
+        return NO;
+    selfEnd = selfRestart + (myLength - otherLength);
     
     while(selfRestart <= selfEnd) {
         selfPtr = selfRestart;
@@ -776,30 +874,6 @@ static inline void encode26(OFDataBuffer *dataBuffer, unsigned long tuple, int c
 }
 
 
-#if defined(sun)
-
-- (BOOL)writeToFile:(NSString *)path atomically:(BOOL)useAuxiliaryFile;
-{
-#warning Ryan: This method does not reimplement atomic writing of files but it works for most purposes that we need  
-
-    FILE *fp;
-    int length;
-
-    fp = fopen([path cString], "w");
-    if (fp == NULL)
-        return NO;
-
-    length = [self length];
-    if (fwrite([self bytes], 1, length, fp) < length)
-        return NO;
-
-    fclose(fp);
-
-    return YES;
-}
-
-#endif
-
 - (BOOL)writeToFile:(NSString *)path atomically:(BOOL)useAuxiliaryFile createDirectories:(BOOL)shouldCreateDirectories;
     // Will raise an exception if it can't create the required directories.
 {
@@ -836,59 +910,3 @@ static inline void encode26(OFDataBuffer *dataBuffer, unsigned long tuple, int c
 }
     
 @end
-
-#if OBOperatingSystemMajorVersion == 5 && OBOperatingSystemMinorVersion == 2
-
-#warning On Mac OS X Server 1.0, replacing -[NSData initWithContentsOfMappedFile:] with one which actually maps files
-
-// On Mac OS X Server 1.0, -initWithContentsOfMappedFile: immediately reads the entire file via read(), which was Apple's quick fix to avoid a semantic difference between mapping HFS files and UFS files:  on HFS filesystems, an open file cannot be removed, renamed, etc.  (Most NSDocument applications would be bit by this, since some mapped data might still be in memory when they try to replace the file on disk.)
-
-// We're overriding their version with one which checks whether we're on hfs, and if we're not we'll map the file using Mach and some private NSData API.  (Apple has apparently already implemented this behavior in later versions of Foundation.)
-
-#import <OmniBase/system.h>
-
-@interface NSData (PrivateAPI)
-- (id)initWithBytes:(void *)bytes length:(unsigned int)length copy:(BOOL)copy freeWhenDone:(BOOL)free bytesAreVM:(BOOL)vm;
-@end
-
-@interface NSData (OFFixes)
-- (id)initWithContentsOfMappedFile:(NSString *)path;
-@end
-
-@implementation NSData (OFFixes)
-
-- (id)initWithContentsOfMappedFile:(NSString *)path;
-{
-    if ([[[NSFileManager defaultManager] fileSystemTypeForPath:path] isEqualToString:@"hfs"]) {
-        // Mapping a file doesn't have the same semantics under HFS, so let's not try it.
-    } else {
-        char fileSystemRepresentationOfPath[MAXPATHLEN];
-        int fd;
-
-        [path getFileSystemRepresentation:fileSystemRepresentationOfPath maxLength:sizeof(fileSystemRepresentationOfPath)];
-        if ((fd = open(fileSystemRepresentationOfPath, O_RDONLY, 0)) != -1) {
-            struct stat statbuf;
-
-            if (fstat(fd, &statbuf) != -1) {
-                vm_offset_t addr;
-                kern_return_t rc;
-
-                // int map_fd(int fd, vm_offset_t offset, vm_offset_t *address, boolean_t Þnd_space, vm_size_t size)
-                rc = map_fd(fd, 0, &addr, TRUE, statbuf.st_size);
-                close(fd);
-
-                if (rc == KERN_SUCCESS) {
-                    // Everything worked, let's return an NSData initialized with the mapped bytes
-                    return [self initWithBytes:(void *)addr length:statbuf.st_size copy:NO freeWhenDone:YES bytesAreVM:YES];
-                }
-            }
-            close(fd);
-        }
-    }
-    // Mapping the file failed, so let's read the file using the non-mapped implementation.  (If -initWithContentsOfFile: also has problems, it can raise its own exception.)
-    return [self initWithContentsOfFile:path];
-}
-
-@end
-
-#endif

@@ -1,9 +1,9 @@
-// Copyright 1997-2003 Omni Development, Inc.  All rights reserved.
+// Copyright 1997-2004 Omni Development, Inc.  All rights reserved.
 //
 // This software may only be used and reproduced according to the
 // terms in the file OmniSourceLicense.html, which should be
 // distributed with this project and can also be found at
-// http://www.omnigroup.com/DeveloperResources/OmniSourceLicense.html.
+// <http://www.omnigroup.com/developer/sourcecode/sourcelicense/>.
 
 #import <OmniFoundation/NSMutableString-OFExtensions.h>
 
@@ -11,7 +11,7 @@
 #import <OmniBase/OmniBase.h>
 #import <OmniFoundation/OFStringScanner.h>
 
-RCS_ID("$Header: /Network/Source/CVS/OmniGroup/Frameworks/OmniFoundation/OpenStepExtensions.subproj/NSMutableString-OFExtensions.m,v 1.17 2003/01/15 22:52:00 kc Exp $")
+RCS_ID("$Header: /Network/Source/CVS/OmniGroup/Frameworks/OmniFoundation/OpenStepExtensions.subproj/NSMutableString-OFExtensions.m,v 1.20 2004/02/10 04:07:45 kc Exp $")
 
 @implementation NSMutableString (OFExtensions)
 
@@ -128,6 +128,32 @@ RCS_ID("$Header: /Network/Source/CVS/OmniGroup/Frameworks/OmniFoundation/OpenSte
     while ((next = va_arg(argList, NSString *)))
         [self appendString:next];
     va_end(argList);
+}
+
+- (void)removeSurroundingWhitespace;
+{
+    static NSCharacterSet *nonWhitespace = nil;
+    NSRange firstValidCharacter, lastValidCharacter;
+
+    if (!nonWhitespace) {
+        nonWhitespace = [[[NSCharacterSet characterSetWithCharactersInString:
+            @" \t\r\n"] invertedSet] retain];
+    }
+    
+    firstValidCharacter = [self rangeOfCharacterFromSet:nonWhitespace];
+    if (firstValidCharacter.length == 0) {
+	[self setString:@""];
+        return;
+    }
+    
+    lastValidCharacter = [self rangeOfCharacterFromSet:nonWhitespace options:NSBackwardsSearch];
+
+    if (firstValidCharacter.location == 0 && lastValidCharacter.location == [self length] - 1)
+	return;
+    else {
+	[self deleteCharactersInRange:NSMakeRange(0, firstValidCharacter.location)];
+        [self deleteCharactersInRange:NSMakeRange(lastValidCharacter.location, [self length] - lastValidCharacter.location)];
+    }
 }
 
 @end

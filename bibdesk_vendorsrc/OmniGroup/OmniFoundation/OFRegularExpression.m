@@ -1,9 +1,9 @@
-// Copyright 1997-2003 Omni Development, Inc.  All rights reserved.
+// Copyright 1997-2004 Omni Development, Inc.  All rights reserved.
 //
 // This software may only be used and reproduced according to the
 // terms in the file OmniSourceLicense.html, which should be
 // distributed with this project and can also be found at
-// http://www.omnigroup.com/DeveloperResources/OmniSourceLicense.html.
+// <http://www.omnigroup.com/developer/sourcecode/sourcelicense/>.
 
 #import <OmniFoundation/OFRegularExpression.h>
 
@@ -12,7 +12,9 @@
 #import <OmniFoundation/OFRegularExpressionMatch.h>
 #import <OmniFoundation/OFStringScanner.h>
 
-RCS_ID("$Header: /Network/Source/CVS/OmniGroup/Frameworks/OmniFoundation/OFRegularExpression.m,v 1.34 2003/04/17 22:27:45 kc Exp $")
+RCS_ID("$Header: /Network/Source/CVS/OmniGroup/Frameworks/OmniFoundation/OFRegularExpression.m,v 1.39 2004/02/10 04:07:41 kc Exp $")
+
+#define MAX_SUBEXPRESSION_NESTING 10
 
 typedef struct {
     unichar *scanningString;
@@ -21,196 +23,9 @@ typedef struct {
     unsigned int writeLength;
     unsigned int stringLength;
     BOOL wroteArgument;
+    int subexpressionNesting[MAX_SUBEXPRESSION_NESTING];
+    int subexpressionNestingCount;
 } CompileStatus;
-
-@interface OFRegularExpression (Compilation)
-- (ExpressionState *)compile:(CompileStatus *)status parenthesized:(BOOL)parens flags:(unsigned int *)compileFlags;
-- (ExpressionState *)compileBranch:(CompileStatus *)status flags:(unsigned int *)compileFlags;
-- (ExpressionState *)compilePiece:(CompileStatus *)status flags:(unsigned int *)compileFlags;
-- (ExpressionState *)compileAtom:(CompileStatus *)status flags:(unsigned int *)compileFlags;
-- (void)findOptimizations:(unsigned int)compileFlags;
-@end
-
-@interface OFRegularExpression (Search)
-- (BOOL)findMatch:(OFRegularExpressionMatch *)match withScanner:(OFStringScanner *)scanner;
-- (BOOL)tryMatch:(OFRegularExpressionMatch *)match withScanner:(OFStringScanner *)scanner atStartOfLine:(BOOL)beginningOfLine;
-- (BOOL)nestedMatch:(OFRegularExpressionMatch *)match inState:(ExpressionState *)state withScanner:(OFStringScanner *)scanner atStartOfLine:(BOOL)beginningOfLine;
-- (BOOL)matchNextCharacterInState:(ExpressionState *)state withScanner:(OFStringScanner *)scanner;
-- (unsigned int)repeatedlyMatchState:(ExpressionState *)state withScanner:(OFStringScanner *)scanner;
-@end
-
-@interface OFRegularExpressionMatch (privateUsedByOFRegularExpression)
-- initWithExpression:(OFRegularExpression *)expression inScanner:(OFStringScanner *)scanner;
-@end
-
-@implementation OFRegularExpression
-
-- initWithCharacters:(unichar *)characters isGreedy:(BOOL)isGreedy;
-{
-    unsigned int compileFlags;
-    CompileStatus status;
-    NSZone *myZone;
-
-    [super init];
-    if (!characters || !*characters) {
-        [self release];
-        return nil;
-    }
-
-    beGreedyWithRepetitions = isGreedy;
-    status.scanningString = characters;
-    status.writePtr = NULL;
-    status.stringPtr = NULL;
-    status.writeLength = 0;
-    status.stringLength = 0;
-    status.wroteArgument = NO;
-    [self compile:&status parenthesized:NO flags:&compileFlags];
-    if (status.writeLength > (1<<16)) { // expression is too big
-        [self release];
-        return nil;
-    }
-    status.scanningString = characters;
-    myZone = [self zone];
-    program = NSZoneMalloc(myZone, sizeof(ExpressionState) * status.writeLength);
-    stringBuffer = NSZoneMalloc(myZone, sizeof(unichar) * (status.stringLength+1)); // +1 because we sometimes write an extra then undo
-    subExpressionCount = 0;
-    status.writePtr = program;
-    status.stringPtr = stringBuffer;
-    if (![self compile:&status parenthesized:NO flags:&compileFlags]) {
-        [self release];
-        return nil;
-    }
-    [self findOptimizations:compileFlags];
-    return self;
-}
-
-- initWithString:(NSString *)string isGreedy:(BOOL)isGreedy;
-{
-    unsigned int length = [string length];
-    unichar *buffer = alloca(sizeof(unichar) * (length+1));
-
-    patternString = [string copyWithZone:[self zone]];
-    
-    [string getCharacters:buffer];
-    buffer[length] = 0;
-    return [self initWithCharacters:buffer isGreedy:isGreedy];
-}
-
-- initWithString:(NSString *)string;
-{
-    return [self initWithString:string isGreedy:YES];
-}
-
-- (void)dealloc;
-{
-    NSZone *myZone;
-    [patternString release];
-    myZone = [self zone];
-    NSZoneFree(myZone, program);
-    NSZoneFree(myZone, stringBuffer);
-    [super dealloc];
-}
-
-- (unsigned int)subexpressionCount;
-{
-    return subExpressionCount;
-}
-
-- (OFRegularExpressionMatch *)matchInString:(NSString *)string;
-{
-    OFStringScanner *scanner;
-    OFRegularExpressionMatch *result;
-
-    scanner = [[OFStringScanner allocWithZone:[self zone]] initWithString:string];
-    result = [self matchInScanner:scanner];
-    [scanner release];
-    return result;
-}
-
-- (OFRegularExpressionMatch *)matchInScanner:(OFStringScanner *)scanner;
-{
-    OFRegularExpressionMatch *result;
-
-    result = [[OFRegularExpressionMatch allocWithZone:[self zone]] initWithExpression:self inScanner:scanner];
-    return [result autorelease];
-}
-
-static inline BOOL unicodeSubstring(unichar *substring, unichar *string)
-{
-    unichar *substringPtr;
-    
-    while (*string) {
-        if (*string++ == *substring) {
-            unichar *stringPtr = string;
-
-            substringPtr = substring + 1;
-            while(*stringPtr && *stringPtr == *substringPtr)
-                stringPtr++, substringPtr++;
-            if (!*substringPtr)
-                return YES;
-        }
-    }
-    return NO;
-}
-
-#define LARGE_STRING_LENGTH 8192
-
-- (BOOL)hasMatchInString:(NSString *)string;
-{
-    unsigned int length;
-    BOOL isLarge;
-    unichar *buffer;
-    OFStringScanner *scanner;
-    BOOL result;
-
-    /* get the string characters into a buffer */
-    length = [string length];
-    isLarge = (length > LARGE_STRING_LENGTH);
-    if (isLarge)
-        buffer = NSZoneMalloc(NULL, sizeof(unichar) * (length+1));
-    else
-        buffer = alloca(sizeof(unichar) * (length+1));
-    [string getCharacters:buffer];
-    buffer[length] = 0;
-
-    /* if this expression has a matchString and is small quickly check to see if it is in the buffer */
-    if (matchString && !unicodeSubstring(matchString, buffer)) {
-        if (isLarge)
-            NSZoneFree(NULL, buffer);
-        return NO;
-    }
-
-    /* make a string scanner and try to do a real match */
-    scanner = [[OFStringScanner alloc] init];
-    [scanner fetchMoreDataFromCharacters:buffer length:length offset:0 freeWhenDone:isLarge];
-    result = [self findMatch:nil withScanner:scanner];
-    [scanner release];
-    return result;
-}
-
-- (BOOL)hasMatchInScanner:(OFStringScanner *)scanner;
-{
-    return [self findMatch:nil withScanner:scanner];    
-}
-
-- (NSString *)patternString;
-{
-    return patternString;
-}
-
-- (NSMutableDictionary *) debugDictionary;
-{
-    NSMutableDictionary *dict;
-
-    dict = [super debugDictionary];
-    [dict setObject: patternString forKey: @"patternString"];
-
-    return dict;
-}
-
-@end
-
-@implementation OFRegularExpression (Compilation)
 
 static ExpressionState fakeState;
 
@@ -318,6 +133,203 @@ static inline unsigned int unicodeStringLength(unichar *string)
     return ptr - string;
 }
 
+@interface OFRegularExpression (Compilation)
+- (ExpressionState *)compile:(CompileStatus *)status parenthesized:(BOOL)parens flags:(unsigned int *)compileFlags;
+- (ExpressionState *)compileBranch:(CompileStatus *)status flags:(unsigned int *)compileFlags;
+- (ExpressionState *)compilePiece:(CompileStatus *)status flags:(unsigned int *)compileFlags;
+- (ExpressionState *)compileAtom:(CompileStatus *)status flags:(unsigned int *)compileFlags;
+- (void)findOptimizations:(unsigned int)compileFlags;
+@end
+
+@interface OFRegularExpression (Search)
+- (BOOL)findMatch:(OFRegularExpressionMatch *)match withScanner:(OFStringScanner *)scanner;
+- (BOOL)tryMatch:(OFRegularExpressionMatch *)match withScanner:(OFStringScanner *)scanner atStartOfLine:(BOOL)beginningOfLine;
+- (BOOL)nestedMatch:(OFRegularExpressionMatch *)match inState:(ExpressionState *)state withScanner:(OFStringScanner *)scanner atStartOfLine:(BOOL)beginningOfLine;
+- (BOOL)matchNextCharacterInState:(ExpressionState *)state withScanner:(OFStringScanner *)scanner;
+- (unsigned int)repeatedlyMatchState:(ExpressionState *)state withScanner:(OFStringScanner *)scanner;
+@end
+
+@interface OFRegularExpressionMatch (privateUsedByOFRegularExpression)
+- initWithExpression:(OFRegularExpression *)expression inScanner:(OFStringScanner *)scanner;
+@end
+
+@implementation OFRegularExpression
+
+- initWithCharacters:(unichar *)characters;
+{
+    unsigned int compileFlags;
+    CompileStatus status;
+    NSZone *myZone;
+
+    [super init];
+    if (!characters || !*characters) {
+        [self release];
+        return nil;
+    }
+
+    status.scanningString = characters;
+    status.writePtr = NULL;
+    status.stringPtr = NULL;
+    status.writeLength = 0;
+    status.stringLength = 0;
+    status.wroteArgument = NO;
+    status.subexpressionNestingCount = 0;
+    [self compile:&status parenthesized:NO flags:&compileFlags];
+    if (status.writeLength > (1<<16)) { // expression is too big
+        [self release];
+        return nil;
+    }
+    status.scanningString = characters;
+    myZone = [self zone];
+    program = NSZoneMalloc(myZone, sizeof(ExpressionState) * status.writeLength);
+    stringBuffer = NSZoneMalloc(myZone, sizeof(unichar) * (status.stringLength+1)); // +1 because we sometimes write an extra then undo
+    subExpressionCount = 0;
+    status.writePtr = program;
+    status.stringPtr = stringBuffer;
+    if (![self compile:&status parenthesized:NO flags:&compileFlags]) {
+        [self release];
+        return nil;
+    }
+    [self findOptimizations:compileFlags];
+    return self;
+}
+
+- initWithString:(NSString *)string;
+{
+    unsigned int length = [string length];
+    unichar *buffer = alloca(sizeof(unichar) * (length+1));
+
+    patternString = [string copyWithZone:[self zone]];
+    
+    [string getCharacters:buffer];
+    buffer[length] = 0;
+    return [self initWithCharacters:buffer];
+}
+
+- (void)dealloc;
+{
+    NSZone *myZone;
+    [patternString release];
+    myZone = [self zone];
+    NSZoneFree(myZone, program);
+    NSZoneFree(myZone, stringBuffer);
+    [super dealloc];
+}
+
+- (unsigned int)subexpressionCount;
+{
+    return subExpressionCount;
+}
+
+- (OFRegularExpressionMatch *)matchInString:(NSString *)string;
+{
+    OFStringScanner *scanner;
+    OFRegularExpressionMatch *result;
+
+    scanner = [[OFStringScanner allocWithZone:[self zone]] initWithString:string];
+    result = [self matchInScanner:scanner];
+    [scanner release];
+    return result;
+}
+
+- (OFRegularExpressionMatch *)matchInScanner:(OFStringScanner *)scanner;
+{
+    OFRegularExpressionMatch *result;
+
+    result = [[OFRegularExpressionMatch allocWithZone:[self zone]] initWithExpression:self inScanner:scanner];
+    return [result autorelease];
+}
+
+static inline BOOL unicodeSubstring(unichar *substring, unichar *string)
+{
+    unichar *substringPtr;
+    
+    while (*string) {
+        if (*string++ == *substring) {
+            unichar *stringPtr = string;
+
+            substringPtr = substring + 1;
+            while(*stringPtr && *stringPtr == *substringPtr)
+                stringPtr++, substringPtr++;
+            if (!*substringPtr)
+                return YES;
+        }
+    }
+    return NO;
+}
+
+#define LARGE_STRING_LENGTH 8192
+
+- (BOOL)hasMatchInString:(NSString *)string;
+{
+    unsigned int length;
+    BOOL isLarge;
+    unichar *buffer;
+    OFStringScanner *scanner;
+    BOOL result;
+
+    /* get the string characters into a buffer */
+    length = [string length];
+    isLarge = (length > LARGE_STRING_LENGTH);
+    if (isLarge)
+        buffer = NSZoneMalloc(NULL, sizeof(unichar) * (length+1));
+    else
+        buffer = alloca(sizeof(unichar) * (length+1));
+    [string getCharacters:buffer];
+    buffer[length] = 0;
+
+    /* if this expression has a matchString and is small quickly check to see if it is in the buffer */
+    if (matchString && !unicodeSubstring(matchString, buffer)) {
+        if (isLarge)
+            NSZoneFree(NULL, buffer);
+        return NO;
+    }
+
+    /* make a string scanner and try to do a real match */
+    scanner = [[OFStringScanner alloc] init];
+    [scanner fetchMoreDataFromCharacters:buffer length:length offset:0 freeWhenDone:isLarge];
+    result = [self findMatch:nil withScanner:scanner];
+    [scanner release];
+    return result;
+}
+
+- (BOOL)hasMatchInScanner:(OFStringScanner *)scanner;
+{
+    return [self findMatch:nil withScanner:scanner];    
+}
+
+- (NSString *)patternString;
+{
+    return patternString;
+}
+
+- (NSString *)prefixString;
+{
+    if (nextState(program) && nextState(program)->opCode == OpEnd) { /* Is there only one top level choice? */
+        ExpressionState *scan = STATE_PARAMETER(program);
+
+        if (scan->opCode == OpExactlyString) {
+            unichar *uniString = STRING_PARAMETER(scan);
+            return [NSString stringWithCharacters:uniString length:unicodeStringLength(uniString)];
+        }
+    }
+    return nil;
+}
+
+- (NSMutableDictionary *) debugDictionary;
+{
+    NSMutableDictionary *dict;
+
+    dict = [super debugDictionary];
+    [dict setObject: patternString forKey: @"patternString"];
+
+    return dict;
+}
+
+@end
+
+@implementation OFRegularExpression (Compilation)
+
 /* compile flags - determines the complexity of the state machine so far */
 #define FLAG_NONULLSTRING	1
 #define FLAG_SIMPLE		2
@@ -337,10 +349,11 @@ static inline unsigned int unicodeStringLength(unichar *string)
 
     /* Make an Open state if parenthesized */
     if (parens) {
-        if (subExpressionCount >= MAX_SUBEXPRESSIONS)
+        if (subExpressionCount >= MAX_SUBEXPRESSIONS || status->subexpressionNestingCount >= MAX_SUBEXPRESSION_NESTING)
             return 0;
         result = writeState(status, OpOpen);
         result->argumentNumber = subExpressionCount++;
+        status->subexpressionNesting[status->subexpressionNestingCount++] = result->argumentNumber;
     } else
         result = NULL;
 
@@ -369,7 +382,7 @@ static inline unsigned int unicodeStringLength(unichar *string)
     /* write a Close state or End state */
     if (parens) {
         end = writeState(status, OpClose);
-        end->argumentNumber = subExpressionCount - 1;
+        end->argumentNumber = status->subexpressionNesting[--status->subexpressionNestingCount];
     } else
         end = writeState(status, OpEnd);
     setNextPointer(result, end);
@@ -419,6 +432,7 @@ static inline unsigned int unicodeStringLength(unichar *string)
     unsigned int subFlags;
     unichar operator;
     ExpressionOpCode branchOpCode;
+    BOOL isGreedy;
     
     if (!(result = [self compileAtom:status flags:&subFlags]))
         return NULL;
@@ -431,10 +445,13 @@ static inline unsigned int unicodeStringLength(unichar *string)
     if (!(subFlags & FLAG_NONULLSTRING) && operator != '?') // *+ operand empty
         return NULL;
     *compileFlags = (operator == '+') ? (FLAG_WORSTCASE|FLAG_NONULLSTRING) : (FLAG_WORSTCASE|FLAG_STARTSWITHSTAR);
-    branchOpCode = beGreedyWithRepetitions ? OpBranch : OpReverseBranch;
+    isGreedy = status->scanningString[1] != '?';
+    if (!isGreedy)
+        status->scanningString++;
+    branchOpCode = isGreedy ? OpBranch : OpReverseBranch;
 
     if (operator == '*' && subFlags & FLAG_SIMPLE) {
-        insertState(status, OpZeroOrMore, result);
+        insertState(status, isGreedy ? OpZeroOrMoreGreedy : OpZeroOrMore, result);
     } else if (operator == '*') {
         /* write x* as (x&|) where & means self */
         insertState(status, branchOpCode, result);
@@ -443,7 +460,7 @@ static inline unsigned int unicodeStringLength(unichar *string)
         setNextPointer(result, writeState(status, branchOpCode));
         setNextPointer(result, writeState(status, OpNothing));
     } else if (operator == '+' && subFlags & FLAG_SIMPLE) {
-        insertState(status, OpOneOrMore, result);
+        insertState(status, isGreedy ? OpOneOrMoreGreedy : OpOneOrMore, result);
     } else if (operator == '+') {
         /* write x+ as x(&|) where & means self */
         next = writeState(status, branchOpCode);
@@ -642,6 +659,8 @@ static inline unsigned int unicodeStringLength(unichar *string)
         case OpNothing: return @"Nothing";
         case OpZeroOrMore: return @"ZeroOrMore";
         case OpOneOrMore: return @"OneOrMore";
+        case OpZeroOrMoreGreedy: return @"ZeroOrMore(Greedy)";
+        case OpOneOrMoreGreedy: return @"OneOrMore(Greedy)";
         case OpOpen: return [NSString stringWithFormat:@"Open#%d", state->argumentNumber];
         case OpClose: return [NSString stringWithFormat:@"Close#%d", state->argumentNumber];
         default: return @"***Corrupted***";
@@ -755,7 +774,7 @@ static inline BOOL characterInUnicodeString(unichar character, unichar *string)
         end = start + subExpressionCount;
         while (start < end) {
             start->location = INVALID_SUBEXPRESSION_LOCATION;
-            start->length = 0;
+            start->length = INVALID_SUBEXPRESSION_LOCATION;
             start++;
         }
     }
@@ -851,6 +870,28 @@ static inline BOOL characterInUnicodeString(unichar character, unichar *string)
                 break;
             case OpNothing:
                 break;
+            case OpZeroOrMoreGreedy:
+            case OpOneOrMoreGreedy:
+                /* lookahead to avoid useless match attempts if we know what character comes next */
+                if (next->opCode == OpExactlyString)
+                    character = *STRING_PARAMETER(next);
+                else
+                    character = 0;
+                minimumMatches = state->opCode == OpZeroOrMoreGreedy ? 0 : 1;
+                currentLocation = scannerScanLocation(scanner);
+                matchCount = [self repeatedlyMatchState:STATE_PARAMETER(state) withScanner:scanner];
+                while (matchCount >= minimumMatches) {
+                    /* if it could work, try it */
+                    if (!character || scannerPeekCharacter(scanner) == character)
+                        if ([self nestedMatch:match inState:next withScanner:scanner atStartOfLine:beginningOfLine])
+                            return YES;
+                    /* didn't work, so back up */
+                    if (matchCount == 0)
+                        return NO;
+                    matchCount--;
+                    [scanner setScanLocation:currentLocation + matchCount];
+                }
+                return NO;
             case OpZeroOrMore:
             case OpOneOrMore:
                 /* lookahead to avoid useless match attempts if we know what character comes next */
@@ -858,38 +899,21 @@ static inline BOOL characterInUnicodeString(unichar character, unichar *string)
                     character = *STRING_PARAMETER(next);
                 else
                     character = 0;
-                minimumMatches = state->opCode == OpZeroOrMore ? 0 : 1;
-                if (beGreedyWithRepetitions) {
-                    currentLocation = scannerScanLocation(scanner);
-                    matchCount = [self repeatedlyMatchState:STATE_PARAMETER(state) withScanner:scanner];
-                    while (matchCount >= minimumMatches) {
-                        /* if it could work, try it */
-                        if (!character || scannerPeekCharacter(scanner) == character)
-                            if ([self nestedMatch:match inState:next withScanner:scanner atStartOfLine:beginningOfLine])
-                                return YES;
-                        /* didn't work, so back up */
-                        if (matchCount == 0)
-                            return NO;
-                        matchCount--;
-                        [scanner setScanLocation:currentLocation + matchCount];
-                    }
-                } else {
-                    matchCount = 0;
-                    while (matchCount < minimumMatches) {
-                        if (![self matchNextCharacterInState:STATE_PARAMETER(state) withScanner:scanner])
-                            return NO;
-                        matchCount++;
-                    }
-                    do {
-                        if (!character || scannerPeekCharacter(scanner) == character) {
-                            currentLocation = scannerScanLocation(scanner);
-                            if ([self nestedMatch:match inState:next withScanner:scanner atStartOfLine:beginningOfLine])
-                                return YES;
-                            [scanner setScanLocation:currentLocation];
-                        }
-                    } while ([self matchNextCharacterInState:STATE_PARAMETER(state) withScanner:scanner]);
-
+                minimumMatches = state->opCode == OpZeroOrMoreGreedy ? 0 : 1;
+                matchCount = 0;
+                while (matchCount < minimumMatches) {
+                    if (![self matchNextCharacterInState:STATE_PARAMETER(state) withScanner:scanner])
+                        return NO;
+                    matchCount++;
                 }
+                do {
+                    if (!character || scannerPeekCharacter(scanner) == character) {
+                        currentLocation = scannerScanLocation(scanner);
+                        if ([self nestedMatch:match inState:next withScanner:scanner atStartOfLine:beginningOfLine])
+                            return YES;
+                        [scanner setScanLocation:currentLocation];
+                    }
+                } while ([self matchNextCharacterInState:STATE_PARAMETER(state) withScanner:scanner]);
                 return NO;
             case OpOpen:
                 if (match)

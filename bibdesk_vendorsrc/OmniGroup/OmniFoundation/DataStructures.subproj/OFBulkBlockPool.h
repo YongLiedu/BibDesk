@@ -1,16 +1,17 @@
-// Copyright 1998-2003 Omni Development, Inc.  All rights reserved.
+// Copyright 1998-2004 Omni Development, Inc.  All rights reserved.
 //
 // This software may only be used and reproduced according to the
 // terms in the file OmniSourceLicense.html, which should be
 // distributed with this project and can also be found at
-// http://www.omnigroup.com/DeveloperResources/OmniSourceLicense.html.
+// <http://www.omnigroup.com/developer/sourcecode/sourcelicense/>.
 //
-// $Header: /Network/Source/CVS/OmniGroup/Frameworks/OmniFoundation/DataStructures.subproj/OFBulkBlockPool.h,v 1.15 2003/01/15 22:51:53 kc Exp $
+// $Header: /Network/Source/CVS/OmniGroup/Frameworks/OmniFoundation/DataStructures.subproj/OFBulkBlockPool.h,v 1.18 2004/02/10 04:07:42 kc Exp $
 
 #import <OmniFoundation/OFObject.h>
 
 #import <OmniBase/assertions.h>
 #import <OmniFoundation/FrameworkDefines.h>
+#import <OmniFoundation/OFByte.h>
 
 #ifdef OMNI_ASSERTIONS_ON
 // Uncomment this (or define this) to turn on more stringent (and costly) assertions
@@ -28,13 +29,13 @@
 
 
 typedef struct _OFBulkBlockPage {
-    void *freeList; // the head of a linked list of free blocks
+    OFByte *freeList; // the head of a linked list of free blocks
     struct _OFBulkBlockPool *pool; // this backpointer allow us to free stuff w/o knowing the pool
-    void *data[0]; // the rest of the page;
+    OFByte *data[0]; // the rest of the page;
 } OFBulkBlockPage;
 
 typedef struct _OFBulkBlockPool {
-    void *freeList; // A cache of the freeList of the current page
+    OFByte *freeList; // A cache of the freeList of the current page
     OFBulkBlockPage *currentPage;
     OFBulkBlockPage **pages;
     unsigned int pageCount;
@@ -60,17 +61,17 @@ OmniFoundation_EXTERN BOOL OFBulkBlockPoolCheckFreeLists(OFBulkBlockPool *pool);
 #endif
 
 
-static inline void *OFBulkBlockPoolAllocate(OFBulkBlockPool *pool)
+static inline OFByte *OFBulkBlockPoolAllocate(OFBulkBlockPool *pool)
 // Allocates and returns a new block of memory.  The contents of the memory are indeterminant -- the caller must set any bytes to their proper value.
 {
-    void *block;
+    OFByte *block;
 #ifdef OMNI_ASSERTIONS_ON
     OmniFoundation_PRIVATE_EXTERN unsigned int _OFBulkBlockPageSize;
 #endif
 
     OBPRECONDITION(pool);
     // Either the free list should be empty or it should point to something in the current page
-    OBPRECONDITION(!pool->freeList || (unsigned int)((void *)pool->freeList - (void *)pool->currentPage) < _OFBulkBlockPageSize);
+    OBPRECONDITION(!pool->freeList || (unsigned int)((OFByte *)pool->freeList - (OFByte *)pool->currentPage) < _OFBulkBlockPageSize);
 #ifdef OF_BULK_BLOCK_POOL_AGGRESSIVE_ASSERTIONS
     OBPRECONDITION(OFBulkBlockPoolCheckFreeLists(pool));
 #endif
@@ -79,10 +80,10 @@ static inline void *OFBulkBlockPoolAllocate(OFBulkBlockPool *pool)
         _OFBulkBlockPoolGetPage(pool);
     
     block = pool->freeList;
-    pool->freeList = *(void **)pool->freeList;
+    pool->freeList = *(OFByte **)pool->freeList;
 
     // Either the free list should be empty or it should point to something in the current page
-    OBPOSTCONDITION(!pool->freeList || (unsigned int)((void *)pool->freeList - (void *)pool->currentPage) < _OFBulkBlockPageSize);
+    OBPOSTCONDITION(!pool->freeList || (unsigned int)((OFByte *)pool->freeList - (OFByte *)pool->currentPage) < _OFBulkBlockPageSize);
 #ifdef OF_BULK_BLOCK_POOL_AGGRESSIVE_ASSERTIONS
     OBPOSTCONDITION(OFBulkBlockPoolCheckFreeLists(pool));
 #endif
@@ -90,7 +91,7 @@ static inline void *OFBulkBlockPoolAllocate(OFBulkBlockPool *pool)
     return block;
 }
 
-static inline OFBulkBlockPool *OFBulkBlockPoolForBlock(void *block)
+static inline OFBulkBlockPool *OFBulkBlockPoolForBlock(OFByte *block)
 // Returns the bulk block pool for the given block which must have been allocated with OFBulkBlockPoolAllocate() (and not have been deallocated yet).
 {
     OFBulkBlockPage *page;
@@ -103,7 +104,7 @@ static inline OFBulkBlockPool *OFBulkBlockPoolForBlock(void *block)
     return pool;
 }
 
-static inline void OFBulkBlockPoolDeallocate(void *block)
+static inline void OFBulkBlockPoolDeallocate(OFByte *block)
 {
     OFBulkBlockPage *page;
     OFBulkBlockPool *pool;
@@ -119,24 +120,24 @@ static inline void OFBulkBlockPoolDeallocate(void *block)
 
     if (page == pool->currentPage) {
         // Either the free list should be empty or it should point to something in the current page
-        OBASSERT(!pool->freeList || (unsigned int)((void *)pool->freeList - (void *)pool->currentPage) < _OFBulkBlockPageSize);
+        OBASSERT(!pool->freeList || (unsigned int)((OFByte *)pool->freeList - (OFByte *)pool->currentPage) < _OFBulkBlockPageSize);
 
         // Update our local cached freeList
-        *(void **)block = pool->freeList;
+        *(OFByte **)block = pool->freeList;
         pool->freeList  = block;
 
         // Either the free list should be empty or it should point to something in the current page
-        OBPOSTCONDITION(!pool->freeList || (unsigned int)((void *)pool->freeList - (void *)pool->currentPage) < _OFBulkBlockPageSize);
+        OBPOSTCONDITION(!pool->freeList || (unsigned int)((OFByte *)pool->freeList - (OFByte *)pool->currentPage) < _OFBulkBlockPageSize);
     } else {
         // Either the free list should be empty or it should point to something in the current page
-        OBASSERT(!page->freeList || (unsigned int)((void *)page->freeList - (void *)page) < _OFBulkBlockPageSize);
+        OBASSERT(!page->freeList || (unsigned int)((OFByte *)page->freeList - (OFByte *)page) < _OFBulkBlockPageSize);
 
         // Update the freeList on the appropriate page
-        *(void **)block = page->freeList;
+        *(OFByte **)block = page->freeList;
         page->freeList  = block;
 
         // Either the free list should be empty or it should point to something in the current page
-        OBPOSTCONDITION(!page->freeList || (unsigned int)((void *)page->freeList - (void *)page) < _OFBulkBlockPageSize);
+        OBPOSTCONDITION(!page->freeList || (unsigned int)((OFByte *)page->freeList - (OFByte *)page) < _OFBulkBlockPageSize);
     }
 
 #ifdef OF_BULK_BLOCK_POOL_AGGRESSIVE_ASSERTIONS

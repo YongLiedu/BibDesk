@@ -1,20 +1,15 @@
-// Copyright 1999-2003 Omni Development, Inc.  All rights reserved.
+// Copyright 1999-2004 Omni Development, Inc.  All rights reserved.
 //
 // This software may only be used and reproduced according to the
 // terms in the file OmniSourceLicense.html, which should be
 // distributed with this project and can also be found at
-// http://www.omnigroup.com/DeveloperResources/OmniSourceLicense.html.
+// <http://www.omnigroup.com/developer/sourcecode/sourcelicense/>.
 //
-// $Header: /Network/Source/CVS/OmniGroup/Frameworks/OmniFoundation/OpenStepExtensions.subproj/NSString-OFPathExtensions.h,v 1.7 2003/01/27 05:51:16 rick Exp $
+// $Header: /Network/Source/CVS/OmniGroup/Frameworks/OmniFoundation/OpenStepExtensions.subproj/NSString-OFPathExtensions.h,v 1.10 2004/02/10 04:07:46 kc Exp $
 
 #import <Foundation/NSString.h>
 
 @interface NSString (OFPathExtensions)
-
-- (NSString *) fileSystemSafeNonLossyPathComponent;
-    // When called on a path component, this returns a new path component that can be safely stored in any relevant filesystem.  This eliminates special chararacters by encoding them in a recoverable fashion.  This does NOT eliminate case issues.  That is, it is still not safe to store two files with differing cases.
-- (NSString *) decodedFileSystemSafeNonLossyPathComponent;
-    // Returns the original string used to generate this string via -fileSystemSafeNonLossyPathComponent.
 
 - (NSString *) prettyPathString;
     // Reformats a path as 'lastComponent emdash stringByByRemovingLastPathComponent.

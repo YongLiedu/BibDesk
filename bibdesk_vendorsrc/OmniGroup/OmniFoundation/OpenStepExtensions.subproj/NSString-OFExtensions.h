@@ -1,26 +1,47 @@
-// Copyright 1997-2003 Omni Development, Inc.  All rights reserved.
+// Copyright 1997-2004 Omni Development, Inc.  All rights reserved.
 //
 // This software may only be used and reproduced according to the
 // terms in the file OmniSourceLicense.html, which should be
 // distributed with this project and can also be found at
-// http://www.omnigroup.com/DeveloperResources/OmniSourceLicense.html.
+// <http://www.omnigroup.com/developer/sourcecode/sourcelicense/>.
 //
-// $Header: /Network/Source/CVS/OmniGroup/Frameworks/OmniFoundation/OpenStepExtensions.subproj/NSString-OFExtensions.h,v 1.50 2003/04/11 23:14:44 ryan Exp $
+// $Header: /Network/Source/CVS/OmniGroup/Frameworks/OmniFoundation/OpenStepExtensions.subproj/NSString-OFExtensions.h,v 1.59 2004/02/10 04:07:46 kc Exp $
 
-#import <Foundation/NSDecimalNumber.h>
 #import <Foundation/NSString.h>
+
+#import <Foundation/NSCalendarDate.h>
+#import <Foundation/NSDecimalNumber.h>
 #import <Foundation/NSDate.h> // For NSTimeInterval
+
 #import <CoreFoundation/CFString.h>  // for CFStringEncoding
 
-#import <OmniBase/SystemType.h> // For YELLOW_BOX
-
-#ifdef YELLOW_BOX
-#import <Foundation/NSCalendarDate.h>
-#else
-#import <Foundation/NSDate.h>
-#endif
 
 @class OFCharacterSet;
+@class OFRegularExpression;
+
+/* A note on deferred string decoding.
+
+A recurring problem in OmniWeb is dealing with strings whose encoding is unknown. Usually this is because a protocol or format was originally specified in terms of 7-bit ASCII, and has later been extended to support larger character sets by adding a character encoding field (in ASCII). This shows up in HTML (the <META> tag is often used to specify its own file's interpretation), FTP (the MLST/MLSD response includes a charset field, possibly different for each line of the response), XML (the charset attribute in the declaration element), etc.
+
+One way to handle this would be to treat these as octet-strings rather than character-strings, until their encoding is known. However, keeping octet-strings in NSDatas would keep us from using the large library of useful routines which manipulate NSStrings.
+
+Instead, OmniFoundation sets aside a range of 256 code points in the Supplementary Private Use Area A to represent bytes which have not yet been converted into characters. OFStringDecoder understands a new encoding, OFDeferredASCIISupersetStringEncoding, which interprets ASCII as ASCII but maps all apparently non-ASCII bytes into the private use area. Later, the original byte sequence can be recovered (including interleaved high-bit-clear bytes, since the ASCII->Unicode->ASCII roundtrip is lossless) and the correct string encoding can be applied.
+
+It's intended that strings containing these private-use code points have as short a lifetime and as limited a scope as possible. We don't want our private-use characters getting out into the rest of the world and gumming up glyph generation or being mistaken for someone else's private-use characters. As soon as the correct string encoding is known, all strings should be re-encoded using -stringByApplyingDeferredCFEncoding: or an equivalent function.
+
+Low-level functions for dealing with NSStrings containing "deferred" bytes/characters can be found in OFStringDecoder. In general, searching, splitting, and combining strings containing deferred characters can be done safely, as long as you don't split up any deferred multibyte characters. In addition, the following methods in this file understand deferred-encoding strings and will do the right thing:
+
+   -stringByApplyingDeferredCFEncoding:
+   -dataUsingCFEncoding:
+   -dataUsingCFEncoding:allowLossyConversion:
+   -dataUsingCFEncoding:allowLossyConversion:hexEscapes:
+   -encodeURLString:asQuery:leaveSlashes:leaveColons:
+   -encodeURLString:encoding:asQuery:leaveSlashes:leaveColons:
+   -fullyEncodeAsIURI:
+
+Currently the only way to create strings with deferred bytes/characters is using OFStringDecoder (possibly via OWDataStreamCharacterCursor/Scanner).
+
+*/
 
 @interface NSString (OFExtensions)
 + (NSString *)stringWithData:(NSData *)data encoding:(NSStringEncoding)encoding;
@@ -68,11 +89,11 @@
 
 - (NSString *)stringByUppercasingAndUnderscoringCaseChanges;
 - (NSString *)stringByRemovingSurroundingWhitespace;
-    // Note: this may return the same NSString instance
 - (NSString *)stringByCollapsingWhitespaceAndRemovingSurroundingWhitespace;
 - (NSString *)stringByRemovingWhitespace;
 - (NSString *)stringByRemovingCharactersInOFCharacterSet:(OFCharacterSet *)removeSet;
 - (NSString *)stringByRemovingReturns;
+- (NSString *)stringByRemovingRegularExpression:(OFRegularExpression *)regularExpression;
 - (NSString *)stringByRemovingString:(NSString *)removeString;
 - (NSString *)stringByPaddingToLength:(unsigned int)aLength;
 - (NSString *)stringByNormalizingPath;
@@ -82,6 +103,9 @@
 - (unichar)lastCharacter;
 - (NSString *)lowercaseFirst;
 - (NSString *)uppercaseFirst;
+
+- (NSString *)stringByApplyingDeferredCFEncoding:(CFStringEncoding)newEncoding;
+
 - (NSString *)stringByReplacingCharactersInSet:(NSCharacterSet *)set withString:(NSString *)replaceString;
 
 - (NSString *)stringByReplacingKeysInDictionary:(NSDictionary *)keywordDictionary startingDelimiter:(NSString *)startingDelimiterString endingDelimiter:(NSString *)endingDelimiterString removeUndefinedKeys: (BOOL) removeUndefinedKeys;
@@ -120,7 +144,7 @@
 
 - (BOOL)writeToFile:(NSString *)path atomically:(BOOL)useAuxiliaryFile createDirectories:(BOOL)shouldCreateDirectories;
 
-#define OF_CHARACTER_BUFFER_SIZE 1024
+#define OF_CHARACTER_BUFFER_SIZE (1024u)
 
 #define OFStringStartLoopThroughCharacters(string, ch)			\
 {									\
@@ -154,10 +178,22 @@
 + (NSString *)decodeURLString:(NSString *)encodedString encoding:(CFStringEncoding)thisUrlEncoding;
 + (NSString *)decodeURLString:(NSString *)encodedString;
 
+- (NSData *)dataUsingCFEncoding:(CFStringEncoding)anEncoding allowLossyConversion:(BOOL)lossy hexEscapes:(NSString *)escapePrefix;
+
 + (NSString *)encodeURLString:(NSString *)unencodedString asQuery:(BOOL)asQuery leaveSlashes:(BOOL)leaveSlashes leaveColons:(BOOL)leaveColons;
 + (NSString *)encodeURLString:(NSString *)unencodedString encoding:(CFStringEncoding)thisUrlEncoding asQuery:(BOOL)asQuery leaveSlashes:(BOOL)leaveSlashes leaveColons:(BOOL)leaveColons;
 - (NSString *)fullyEncodeAsIURI;  // This takes a string which is already in %-escaped URI format and fully escapes any characters which are not safe. Slashes, question marks, etc. are unaffected.
 
 - (NSString *)htmlString;
+
+/* Regular expression encoding */
+- (NSString *)regularExpressionForLiteralString;
+
+
+/* Mail header encoding according to RFCs 822 and 2047 */
+- (NSString *)asRFC822Word;         /* Returns an 'atom' or 'quoted-string', or nil if not possible */
+- (NSString *)asRFC2047EncodedWord; /* Returns an 'encoded-word' representing the receiver */
+- (NSString *)asRFC2047Phrase;      /* Returns a sequence of atoms, quoted-strings, and encoded-words, as appropriate to represent the receiver in the syntax defined by RFC822 and RFC2047. */
+
 
 @end

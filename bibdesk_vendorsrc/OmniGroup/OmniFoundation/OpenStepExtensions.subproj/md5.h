@@ -1,11 +1,11 @@
-// Copyright 1999-2003 Omni Development, Inc.  All rights reserved.
+// Copyright 1999-2004 Omni Development, Inc.  All rights reserved.
 //
 // This software may only be used and reproduced according to the
 // terms in the file OmniSourceLicense.html, which should be
 // distributed with this project and can also be found at
-// http://www.omnigroup.com/DeveloperResources/OmniSourceLicense.html.
+// <http://www.omnigroup.com/developer/sourcecode/sourcelicense/>.
 //
-// $Header: /Network/Source/CVS/OmniGroup/Frameworks/OmniFoundation/OpenStepExtensions.subproj/md5.h,v 1.9 2003/03/24 23:05:06 neo Exp $
+// $Header: /Network/Source/CVS/OmniGroup/Frameworks/OmniFoundation/OpenStepExtensions.subproj/md5.h,v 1.11 2004/02/10 04:07:46 kc Exp $
 //
 // Most of the contents of this file are owned by RSA Data Security, and
 // are thus subject to RSA's license (see copyright below).

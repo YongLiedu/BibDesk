@@ -1,9 +1,9 @@
-// Copyright 1997-2003 Omni Development, Inc.  All rights reserved.
+// Copyright 1997-2004 Omni Development, Inc.  All rights reserved.
 //
 // This software may only be used and reproduced according to the
 // terms in the file OmniSourceLicense.html, which should be
 // distributed with this project and can also be found at
-// http://www.omnigroup.com/DeveloperResources/OmniSourceLicense.html.
+// <http://www.omnigroup.com/developer/sourcecode/sourcelicense/>.
 
 #import <OmniFoundation/OFRandom.h>
 
@@ -11,7 +11,7 @@
 #import <OmniBase/OmniBase.h>
 #import <OmniBase/system.h>
 
-RCS_ID("$Header: /Network/Source/CVS/OmniGroup/Frameworks/OmniFoundation/DataStructures.subproj/OFRandom.m,v 1.19 2003/01/15 22:51:55 kc Exp $")
+RCS_ID("$Header: /Network/Source/CVS/OmniGroup/Frameworks/OmniFoundation/DataStructures.subproj/OFRandom.m,v 1.22 2004/02/10 04:07:43 kc Exp $")
 
 
 /* This is an nonlinear congruential generator, see
@@ -68,7 +68,7 @@ static inline unsigned long _invert(unsigned long a, unsigned long p)
 /* Modular Multiplication: Decomposition method (from L'Ecuyer & Cote) */
 static inline unsigned long _mult_mod(unsigned long a, unsigned long s, unsigned long m)
 {
-    long                        H, a0, a1, q, qh, rh, k, p;
+    unsigned long                        H, a0, a1, q, qh, rh, k, p;
 
 
     H = 32768;			/* 2 ^ 15  for 32 bit basetypes. */

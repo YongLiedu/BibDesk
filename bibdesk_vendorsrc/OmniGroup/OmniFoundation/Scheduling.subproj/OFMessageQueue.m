@@ -1,9 +1,9 @@
-// Copyright 1997-2003 Omni Development, Inc.  All rights reserved.
+// Copyright 1997-2004 Omni Development, Inc.  All rights reserved.
 //
 // This software may only be used and reproduced according to the
 // terms in the file OmniSourceLicense.html, which should be
 // distributed with this project and can also be found at
-// http://www.omnigroup.com/DeveloperResources/OmniSourceLicense.html.
+// <http://www.omnigroup.com/developer/sourcecode/sourcelicense/>.
 
 #import <OmniFoundation/OFMessageQueue.h>
 
@@ -14,7 +14,7 @@
 #import <OmniFoundation/OFQueueProcessor.h>
 #import <OmniFoundation/NSThread-OFExtensions.h>
 
-RCS_ID("$Header: /Network/Source/CVS/OmniGroup/Frameworks/OmniFoundation/Scheduling.subproj/OFMessageQueue.m,v 1.27 2003/04/07 17:50:06 kc Exp $")
+RCS_ID("$Header: /Network/Source/CVS/OmniGroup/Frameworks/OmniFoundation/Scheduling.subproj/OFMessageQueue.m,v 1.29 2004/02/10 04:07:47 kc Exp $")
 
 @interface OFMessageQueue (Private)
 - (void)_createProcessorsForQueueSize:(unsigned int)queueCount;

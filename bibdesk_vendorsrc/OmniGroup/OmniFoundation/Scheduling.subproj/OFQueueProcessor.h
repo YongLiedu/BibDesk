@@ -1,14 +1,15 @@
-// Copyright 1997-2003 Omni Development, Inc.  All rights reserved.
+// Copyright 1997-2004 Omni Development, Inc.  All rights reserved.
 //
 // This software may only be used and reproduced according to the
 // terms in the file OmniSourceLicense.html, which should be
 // distributed with this project and can also be found at
-// http://www.omnigroup.com/DeveloperResources/OmniSourceLicense.html.
+// <http://www.omnigroup.com/developer/sourcecode/sourcelicense/>.
 //
-// $Header: /Network/Source/CVS/OmniGroup/Frameworks/OmniFoundation/Scheduling.subproj/OFQueueProcessor.h,v 1.11 2003/01/15 22:52:03 kc Exp $
+// $Header: /Network/Source/CVS/OmniGroup/Frameworks/OmniFoundation/Scheduling.subproj/OFQueueProcessor.h,v 1.14 2004/02/10 04:07:47 kc Exp $
 
 #import <OmniFoundation/OFObject.h>
 #import <OmniFoundation/FrameworkDefines.h>
+#import <Foundation/NSDate.h>
 
 @class NSLock;
 @class OFInvocation, OFMessageQueue;
@@ -26,6 +27,8 @@
 - (void)processQueueUntilEmpty;
 - (void)processQueueForever;
 - (void)startProcessingQueueInNewThread;
+
+- (void)processQueueUntilEmpty:(BOOL)onlyUntilEmpty forTime:(NSTimeInterval)maximumTime;
 
 - (OFInvocation *)retainedCurrentInvocation;
 

@@ -1,9 +1,9 @@
-// Copyright 1997-2003 Omni Development, Inc.  All rights reserved.
+// Copyright 1997-2004 Omni Development, Inc.  All rights reserved.
 //
 // This software may only be used and reproduced according to the
 // terms in the file OmniSourceLicense.html, which should be
 // distributed with this project and can also be found at
-// http://www.omnigroup.com/DeveloperResources/OmniSourceLicense.html.
+// <http://www.omnigroup.com/developer/sourcecode/sourcelicense/>.
 
 #import "OFTrieEnumerator.h"
 
@@ -13,7 +13,7 @@
 #import <OmniFoundation/OFTrie.h>
 #import <OmniFoundation/OFTrieNode.h>
 
-RCS_ID("$Header: /Network/Source/CVS/OmniGroup/Frameworks/OmniFoundation/DataStructures.subproj/OFTrieEnumerator.m,v 1.9 2003/01/15 22:51:56 kc Exp $")
+RCS_ID("$Header: /Network/Source/CVS/OmniGroup/Frameworks/OmniFoundation/DataStructures.subproj/OFTrieEnumerator.m,v 1.12 2004/02/10 04:07:44 kc Exp $")
 
 @implementation OFTrieEnumerator
 
@@ -21,6 +21,8 @@ static NSCharacterSet *uppercaseLetters;
 
 + (void)initialize;
 {
+    OBINITIALIZE;
+
     uppercaseLetters = [[NSCharacterSet uppercaseLetterCharacterSet] retain];
 }
 

@@ -1,9 +1,9 @@
-// Copyright 1999-2003 Omni Development, Inc.  All rights reserved.
+// Copyright 1999-2004 Omni Development, Inc.  All rights reserved.
 //
 // This software may only be used and reproduced according to the
 // terms in the file OmniSourceLicense.html, which should be
 // distributed with this project and can also be found at
-// http://www.omnigroup.com/DeveloperResources/OmniSourceLicense.html.
+// <http://www.omnigroup.com/developer/sourcecode/sourcelicense/>.
 // 
 // Much of the contents of this file are owned by RSA Data Security, and
 // are thus subject to RSA's license (see copyright below).
@@ -12,7 +12,7 @@
 
 #import <OmniBase/rcsid.h>
 
-RCS_ID("$Header: /Network/Source/CVS/OmniGroup/Frameworks/OmniFoundation/OpenStepExtensions.subproj/md5c.c,v 1.8 2003/03/24 23:05:06 neo Exp $")
+RCS_ID("$Header: /Network/Source/CVS/OmniGroup/Frameworks/OmniFoundation/OpenStepExtensions.subproj/md5c.c,v 1.11 2004/02/10 04:07:46 kc Exp $")
 
 /* MD5C.C - RSA Data Security, Inc., MD5 message-digest algorithm */
 
@@ -40,7 +40,7 @@ RCS_ID("$Header: /Network/Source/CVS/OmniGroup/Frameworks/OmniFoundation/OpenSte
 #include "md5.h"
 
 #define HAVE_MEMCPY
-// #define HAVE_MEMSET
+#define HAVE_MEMSET
 
 /* Constants for MD5Transform routine.
  */

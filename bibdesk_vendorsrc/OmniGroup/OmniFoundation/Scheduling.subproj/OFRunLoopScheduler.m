@@ -1,9 +1,9 @@
-// Copyright 1999-2003 Omni Development, Inc.  All rights reserved.
+// Copyright 1999-2004 Omni Development, Inc.  All rights reserved.
 //
 // This software may only be used and reproduced according to the
 // terms in the file OmniSourceLicense.html, which should be
 // distributed with this project and can also be found at
-// http://www.omnigroup.com/DeveloperResources/OmniSourceLicense.html.
+// <http://www.omnigroup.com/developer/sourcecode/sourcelicense/>.
 
 #import "OFRunLoopScheduler.h"
 
@@ -14,7 +14,7 @@
 #import <OmniFoundation/NSThread-OFExtensions.h>
 #import <OmniFoundation/OFObject-Queue.h>
 
-RCS_ID("$Header: /Network/Source/CVS/OmniGroup/Frameworks/OmniFoundation/Scheduling.subproj/OFRunLoopScheduler.m,v 1.5 2003/01/15 22:52:03 kc Exp $")
+RCS_ID("$Header: /Network/Source/CVS/OmniGroup/Frameworks/OmniFoundation/Scheduling.subproj/OFRunLoopScheduler.m,v 1.8 2004/02/10 04:07:47 kc Exp $")
 
 @interface OFRunLoopScheduler (Private)
 - (void)mainThreadResetAlarmToFirstEntry;
@@ -27,13 +27,7 @@ static OFRunLoopScheduler *runLoopScheduler = nil;
 
 + (void)initialize;
 {
-    static BOOL initialized = NO;
-
-    [super initialize];
-    if (initialized)
-        return;
-    initialized = YES;
-
+    OBINITIALIZE;
     runLoopSchedulerLock = [[NSLock alloc] init];
 }
 

@@ -1,16 +1,16 @@
-// Copyright 1997-2003 Omni Development, Inc.  All rights reserved.
+// Copyright 1997-2004 Omni Development, Inc.  All rights reserved.
 //
 // This software may only be used and reproduced according to the
 // terms in the file OmniSourceLicense.html, which should be
 // distributed with this project and can also be found at
-// http://www.omnigroup.com/DeveloperResources/OmniSourceLicense.html.
+// <http://www.omnigroup.com/developer/sourcecode/sourcelicense/>.
 
 #import "OFConcreteInvocation.h"
 
 #import <Foundation/Foundation.h>
 #import <OmniBase/OmniBase.h>
 
-RCS_ID("$Header: /Network/Source/CVS/OmniGroup/Frameworks/OmniFoundation/Scheduling.subproj/OFConcreteInvocation.m,v 1.15 2003/01/15 22:52:01 kc Exp $")
+RCS_ID("$Header: /Network/Source/CVS/OmniGroup/Frameworks/OmniFoundation/Scheduling.subproj/OFConcreteInvocation.m,v 1.19 2004/02/10 04:07:47 kc Exp $")
 
 #import <OmniFoundation/OFMessageQueuePriorityProtocol.h>
 
@@ -37,6 +37,7 @@ RCS_ID("$Header: /Network/Source/CVS/OmniGroup/Frameworks/OmniFoundation/Schedul
     [super init];
     object = [targetObject retain];
 
+    priorityLevel = OFMediumPriority;
     // Note that it's perfectly legal to respond to just some and not all.
     flags.objectRespondsToPriority = [object respondsToSelector:@selector(priority)];
     flags.objectRespondsToGroup = [object respondsToSelector:@selector(group)];
@@ -51,6 +52,12 @@ RCS_ID("$Header: /Network/Source/CVS/OmniGroup/Frameworks/OmniFoundation/Schedul
     [super dealloc];
 }
 
+// API
+
+- (void)setPriorityLevel:(OFInvocationPriorityLevel)newPriorityLevel;
+{
+    priorityLevel = newPriorityLevel;
+}
 
 // OFInvocation subclass
 
@@ -66,7 +73,7 @@ RCS_ID("$Header: /Network/Source/CVS/OmniGroup/Frameworks/OmniFoundation/Schedul
     if (flags.objectRespondsToPriority)
         return [(id <OFMessageQueuePriority>)object priority];
     else
-        return OFMediumPriority;
+        return priorityLevel;
 }
 
 - (unsigned int)group;
@@ -94,6 +101,7 @@ RCS_ID("$Header: /Network/Source/CVS/OmniGroup/Frameworks/OmniFoundation/Schedul
 #import "OFIObjectSelectorInt.h"
 #import "OFIObjectSelectorIntInt.h"
 #import "OFIObjectSelectorObject.h"
+#import "OFIObjectSelectorObjectInt.h"
 #import "OFIObjectSelectorObjectObject.h"
 #import "OFIObjectSelectorObjectObjectObject.h"
 
@@ -127,6 +135,11 @@ RCS_ID("$Header: /Network/Source/CVS/OmniGroup/Frameworks/OmniFoundation/Schedul
 - initForObject:(id <NSObject>)targetObject selector:(SEL)aSelector withObject:(id <NSObject>)aWithObject;
 {
     return [[OFIObjectSelectorObject alloc] initForObject:targetObject selector:aSelector withObject:aWithObject];
+}
+
+- initForObject:(id <NSObject>)targetObject selector:(SEL)aSelector withObject:(id <NSObject>)anObject withInt:(int)anInt;
+{
+    return [[OFIObjectSelectorObjectInt alloc] initForObject:targetObject selector:aSelector withObject:anObject withInt:anInt];
 }
 
 - initForObject:(id <NSObject>)targetObject selector:(SEL)aSelector withObject:(id <NSObject>)object1 withObject:(id <NSObject>)object2;

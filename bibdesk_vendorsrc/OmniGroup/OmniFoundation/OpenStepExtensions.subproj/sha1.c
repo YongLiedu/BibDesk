@@ -1,9 +1,9 @@
-// Copyright 1997-2003 Omni Development, Inc.  All rights reserved.
+// Copyright 1997-2004 Omni Development, Inc.  All rights reserved.
 //
 // This software may only be used and reproduced according to the
 // terms in the file OmniSourceLicense.html, which should be
 // distributed with this project and can also be found at
-// http://www.omnigroup.com/DeveloperResources/OmniSourceLicense.html.
+// <http://www.omnigroup.com/developer/sourcecode/sourcelicense/>.
 
 // TJW -- I picked this hash function rather than MD5 since some of the recent notes on MD5 claimed that it has been proven to be rather weaker than previously thought.  Source for both algorithms was readily available, so I figured I'd pick the better one.  This algorithm was developed by the NSA -- maybe there is a backdoor and they will be able to break our protector <grin>.
 //
@@ -11,7 +11,7 @@
 
 #import <OmniBase/rcsid.h>
 
-RCS_ID("$Header: /Network/Source/CVS/OmniGroup/Frameworks/OmniFoundation/OpenStepExtensions.subproj/sha1.c,v 1.10 2003/01/15 22:52:01 kc Exp $")
+RCS_ID("$Header: /Network/Source/CVS/OmniGroup/Frameworks/OmniFoundation/OpenStepExtensions.subproj/sha1.c,v 1.13 2004/02/10 04:07:46 kc Exp $")
 
 /*
 SHA-1 in C
@@ -34,10 +34,7 @@ A million repetitions of "a"
 #include <stdio.h>
 #include <string.h>
 
-// On Rhapsody, these are defined in the system header files
-// (possibly from the BSD 4.4 sources) to be 1234 or 4321.
-// This means that BOTH are defined.  Sucks.  We'll undefine
-// both and the redefine the one that we actually want.
+/* <$machine/endian.h> defines LITTLE_ENDIAN as 1234 and BIG_ENDIAN as 4321.  The sha1 code just wants one defined based on the current endian-ness */
 #undef LITTLE_ENDIAN
 #undef BIG_ENDIAN
 

@@ -1,9 +1,9 @@
-// Copyright 2000-2003 Omni Development, Inc.  All rights reserved.
+// Copyright 2000-2004 Omni Development, Inc.  All rights reserved.
 //
 // This software may only be used and reproduced according to the
 // terms in the file OmniSourceLicense.html, which should be
 // distributed with this project and can also be found at
-// http://www.omnigroup.com/DeveloperResources/OmniSourceLicense.html.
+// <http://www.omnigroup.com/developer/sourcecode/sourcelicense/>.
 
 #import "OFResourceFork.h"
 
@@ -15,7 +15,7 @@
 #import "OFResource.h"
 #import "NSString-OFExtensions.h"
 
-RCS_ID("$Header: /Network/Source/CVS/OmniGroup/Frameworks/OmniFoundation/CoreServicesExtensions/OFResourceFork.m,v 1.8 2003/02/08 00:57:23 wiml Exp $")
+RCS_ID("$Header: /Network/Source/CVS/OmniGroup/Frameworks/OmniFoundation/CoreServicesExtensions/OFResourceFork.m,v 1.14 2004/02/10 04:07:42 kc Exp $")
 
 
 @implementation OFResourceFork
@@ -68,7 +68,7 @@ RCS_ID("$Header: /Network/Source/CVS/OmniGroup/Frameworks/OmniFoundation/CoreSer
     return strings;
 }
 
-- initWithContentsOfFile: (NSString *) aPath forkType: (OFForkType) aForkType;
+- initWithContentsOfFile: (NSString *) aPath forkType: (OFForkType) aForkType createFork:(BOOL)shouldCreateFork;
 {
     CFURLRef url;
     Boolean success;
@@ -79,6 +79,17 @@ RCS_ID("$Header: /Network/Source/CVS/OmniGroup/Frameworks/OmniFoundation/CoreSer
     refNumValid = NO;
     path = [aPath copy];
 
+    BOOL isDir = NO;
+    if (![[NSFileManager defaultManager] fileExistsAtPath:path isDirectory:&isDir]) {
+        [self release];
+        [NSException raise:NSInvalidArgumentException format:@"File doesn't exist at path %@.", aPath];
+    }
+
+    if (isDir && ![[NSFileManager defaultManager] isExecutableFileAtPath:path]) {
+        [self release];
+        [NSException raise:NSInvalidArgumentException format:@"Directory exists, but is not executable at path %@.", aPath];
+    }
+    
 #define RAISE(exceptionName, format...) [[NSException exceptionWithName:exceptionName reason:[NSString stringWithFormat: format] userInfo:[NSDictionary dictionaryWithObject:[NSNumber numberWithInt:err] forKey:OBExceptionCarbonErrorNumberKey]] raise]
 
     url = CFURLCreateWithFileSystemPath(kCFAllocatorDefault, (CFStringRef)path, kCFURLPOSIXPathStyle, false);
@@ -86,7 +97,7 @@ RCS_ID("$Header: /Network/Source/CVS/OmniGroup/Frameworks/OmniFoundation/CoreSer
     CFRelease(url);
     if (!success) {
         [self release];
-        [NSException raise: NSInvalidArgumentException format: @"Unable to get a FSRef from the path %@.", aPath];
+        [NSException raise:NSInvalidArgumentException format:@"Unable to get a FSRef from the path %@.", aPath];
     }
     
     if (aForkType == OFDataForkType) {
@@ -96,22 +107,52 @@ RCS_ID("$Header: /Network/Source/CVS/OmniGroup/Frameworks/OmniFoundation/CoreSer
     } else {
         err = noErr;
         [self release];
-        [NSException raise: NSInvalidArgumentException format: @"Invalid fork type %d.", aForkType];
+        [NSException raise:NSInvalidArgumentException format:@"Invalid fork type %d", aForkType];
     }
     
     if (err != noErr) {
         [self release];
-        RAISE(NSInvalidArgumentException, @"Unable to get fork name for fork type %d (err = %d)", aForkType, err);
+        RAISE(NSInvalidArgumentException, @"Unable to get fork name for fork type %d (error code %d)", aForkType, err);
     }
+
+    BOOL shouldReallyCreateFork = shouldCreateFork;
+    if (![[NSFileManager defaultManager] isWritableFileAtPath:aPath])
+        shouldReallyCreateFork = NO;
     
     err = FSOpenResourceFile(&fsRef, forkName.length, forkName.unicode, fsCurPerm, &refNum);
     if (err != noErr) {
-        [self release];
-        RAISE(NSInvalidArgumentException,  @"Unable to open resource fork from fork type %d in file %@ (err = %d).", aForkType, aPath, err);
+        if (shouldReallyCreateFork) {
+            err = FSCreateResourceFork(&fsRef, forkName.length, forkName.unicode, 0);
+            if (err == noErr) {
+                err = FSOpenResourceFile(&fsRef, forkName.length, forkName.unicode, fsCurPerm, &refNum);
+            }
+        }
+        if (err != noErr) {
+            if (shouldReallyCreateFork) {
+                RAISE(NSInvalidArgumentException, @"Unable to create resource fork from fork type %d in file %@ (error code %d)", aForkType, aPath, err);
+            } else {
+                switch (err) {
+                    case eofErr:
+                    case fnfErr:
+                    case errFSForkNotFound:
+                        [self release];
+                        return nil;
+                    default:
+                        [self release];
+                        RAISE(NSInvalidArgumentException, @"Unable to open resource fork from fork type %d in file %@ (error code %d).", aForkType, aPath, err);
+                        return nil;
+                }
+            }
+        }
     }
     refNumValid = YES;
     
     return self;
+}
+
+- initWithContentsOfFile: (NSString *) aPath forkType: (OFForkType) aForkType;
+{
+    return [self initWithContentsOfFile: aPath forkType: aForkType createFork:NO];
 }
 
 - initWithContentsOfFile: (NSString *) aPath;
@@ -194,6 +235,42 @@ RCS_ID("$Header: /Network/Source/CVS/OmniGroup/Frameworks/OmniFoundation/CoreSer
     UseResFile(oldCurRsrcMap);
     
     return data;
+}
+
+- (void)deleteResourceOfType:(ResType)resType atIndex:(short)index;
+{
+    SInt16 oldCurRsrcMap;
+
+    oldCurRsrcMap = CurResFile();
+    UseResFile(refNum);
+
+    // Get the resource, converting for 1-based indexing
+    Handle resourceHandle = Get1IndResource(resType, index+1);
+
+    if (resourceHandle) {
+        RemoveResource(resourceHandle);
+    }
+
+    UpdateResFile(refNum);
+    UseResFile(oldCurRsrcMap);    
+}
+
+- (void)setData:(NSData *)contentData forResourceType:(ResType)resType;
+{
+    SInt16 oldCurRsrcMap;
+
+    oldCurRsrcMap = CurResFile();
+    UseResFile(refNum);
+
+    const void *data = [contentData bytes];
+    Handle dataHandle;
+    PtrToHand(data, &dataHandle, [contentData length]);
+    Str255 dst;
+    CopyCStringToPascal("OFResourceForkData", dst);
+    AddResource(dataHandle, resType, Unique1ID(resType), dst);
+    
+    UpdateResFile(refNum);
+    UseResFile(oldCurRsrcMap);
 }
 
 - (NSArray *)resourceTypes;

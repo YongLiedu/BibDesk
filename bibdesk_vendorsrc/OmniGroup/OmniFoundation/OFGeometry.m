@@ -1,9 +1,9 @@
-// Copyright 2002-2003 Omni Development, Inc.  All rights reserved.
+// Copyright 2002-2004 Omni Development, Inc.  All rights reserved.
 //
 // This software may only be used and reproduced according to the
 // terms in the file OmniSourceLicense.html, which should be
 // distributed with this project and can also be found at
-// http://www.omnigroup.com/DeveloperResources/OmniSourceLicense.html.
+// <http://www.omnigroup.com/developer/sourcecode/sourcelicense/>.
 
 #import "OFGeometry.h"
 
@@ -11,7 +11,7 @@
 #import <OmniBase/rcsid.h>
 #import <OmniBase/assertions.h>
 
-RCS_ID("$Header: /Network/Source/CVS/OmniGroup/Frameworks/OmniFoundation/OFGeometry.m,v 1.4 2003/01/15 22:51:50 kc Exp $");
+RCS_ID("$Header: /Network/Source/CVS/OmniGroup/Frameworks/OmniFoundation/OFGeometry.m,v 1.7 2004/02/10 04:07:40 kc Exp $");
 
 
 NSPoint OFCenterOfCircleFromThreePoints(NSPoint point1, NSPoint point2, NSPoint point3)
@@ -64,4 +64,71 @@ NSRect OFConstrainRect(NSRect rect, NSRect boundary)
     OBPOSTCONDITION(NSContainsRect(boundary, rect));
 
     return rect;
+}
+
+/*" This returns the largest of the rects lying to the left, right, top or bottom of the child rect inside the parent rect.  If the two rects do not intersect, parentRect is returned.  If they are the same (or childRect actually contains parentRect), NSZeroRect is returned.  Note that if you which to avoid multiple rects, repeated use of this algorithm is not guaranteed to return the largest non-intersecting rect). "*/
+NSRect OFLargestRectAvoidingRectAndFitSize(NSRect parentRect, NSRect childRect, NSSize fitSize)
+{
+    NSRect rect, bestRect;
+    float size, bestSize;
+
+    childRect = NSIntersectionRect(parentRect, childRect);
+    if (NSIsEmptyRect(childRect)) {
+        // If the child rect doesn't intersect the parent rect, then all of the
+        // parent rect avoids the inside rect
+        return parentRect;
+    }
+
+    // Initialize the result so that if the two rects are equal, we'll
+    // return a zero rect.
+    bestRect = NSZeroRect;
+    bestSize = 0.0;
+
+    // Test the left rect
+    rect.origin = parentRect.origin;
+    rect.size.width = NSMinX(childRect) - NSMinX(parentRect);
+    rect.size.height = NSHeight(parentRect);
+
+    size = rect.size.height * rect.size.width;
+    if (size > bestSize && rect.size.height >= fitSize.height && rect.size.width >= fitSize.width) {
+        bestSize = size;
+        bestRect = rect;
+    }
+
+    // Test the right rect
+    rect.origin.x = NSMaxX(childRect);
+    rect.origin.y = NSMinY(parentRect);
+    rect.size.width = NSMaxX(parentRect) - NSMaxX(childRect);
+    rect.size.height = NSHeight(parentRect);
+
+    size = rect.size.height * rect.size.width;
+    if (size > bestSize && rect.size.height >= fitSize.height && rect.size.width >= fitSize.width) {
+        bestSize = size;
+        bestRect = rect;
+    }
+
+    // Test the top rect
+    rect.origin.x = NSMinX(parentRect);
+    rect.origin.y = NSMaxY(childRect);
+    rect.size.width = NSWidth(parentRect);
+    rect.size.height = NSMaxY(parentRect) - NSMaxY(childRect);
+
+    size = rect.size.height * rect.size.width;
+    if (size > bestSize && rect.size.height >= fitSize.height && rect.size.width >= fitSize.width) {
+        bestSize = size;
+        bestRect = rect;
+    }
+
+    // Test the bottom rect
+    rect.origin = parentRect.origin;
+    rect.size.width = NSWidth(parentRect);
+    rect.size.height = NSMinY(childRect) - NSMinY(parentRect);
+
+    size = rect.size.height * rect.size.width;
+    if (size > bestSize && rect.size.height >= fitSize.height && rect.size.width >= fitSize.width) {
+        bestSize = size;
+        bestRect = rect;
+    }
+
+    return bestRect;
 }

@@ -1,9 +1,9 @@
-// Copyright 1998-2003 Omni Development, Inc.  All rights reserved.
+// Copyright 1998-2004 Omni Development, Inc.  All rights reserved.
 //
 // This software may only be used and reproduced according to the
 // terms in the file OmniSourceLicense.html, which should be
 // distributed with this project and can also be found at
-// http://www.omnigroup.com/DeveloperResources/OmniSourceLicense.html.
+// <http://www.omnigroup.com/developer/sourcecode/sourcelicense/>.
 
 #import <OmniFoundation/OFMutableKnownKeyDictionary.h>
 
@@ -12,7 +12,7 @@
 #import <Foundation/Foundation.h>
 #import <OmniBase/OmniBase.h>
 
-RCS_ID("$Header: /Network/Source/CVS/OmniGroup/Frameworks/OmniFoundation/DataStructures.subproj/OFMutableKnownKeyDictionary.m,v 1.12 2003/01/15 22:51:55 kc Exp $")
+RCS_ID("$Header: /Network/Source/CVS/OmniGroup/Frameworks/OmniFoundation/DataStructures.subproj/OFMutableKnownKeyDictionary.m,v 1.15 2004/02/10 04:07:43 kc Exp $")
 
 @interface OFMutableKnownKeyDictionary (PrivateAPI)
 - _initWithTemplate: (OFKnownKeyDictionaryTemplate *) template;
@@ -207,6 +207,11 @@ static inline void _nonNilKey(id key)
 
 - (NSArray *)allKeys;
 {
+    return [[self copyKeys] autorelease];
+}
+
+- (NSArray *) copyKeys;
+{
     // See if we have any nil values.  If we don't, we can just use
     // the keys array from the template.
     unsigned int  objectIndex, fullCount;
@@ -214,7 +219,7 @@ static inline void _nonNilKey(id key)
 
     // Collect the non-nil keys in here
     keys = alloca(sizeof(id) * _template->_keyCount);
-    
+
     // Count the non-nil slots
     fullCount = 0;
     for (objectIndex = 0; objectIndex < _template->_keyCount; objectIndex++) {
@@ -227,10 +232,10 @@ static inline void _nonNilKey(id key)
 
     if (fullCount == _template->_keyCount)
         // all keys present
-        return _template->_keyArray;
+        return [_template->_keyArray retain];
     else
         // return a new array formed from the keys with non-nil values
-        return [[[NSArray alloc] initWithObjects: keys count: fullCount] autorelease];
+        return [[NSArray alloc] initWithObjects: keys count: fullCount];
 }
 
 - (NSArray *)allValues;

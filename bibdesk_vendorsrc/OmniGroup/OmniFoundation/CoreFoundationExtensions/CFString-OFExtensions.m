@@ -1,9 +1,9 @@
-// Copyright 1997-2003 Omni Development, Inc.  All rights reserved.
+// Copyright 1997-2004 Omni Development, Inc.  All rights reserved.
 //
 // This software may only be used and reproduced according to the
 // terms in the file OmniSourceLicense.html, which should be
 // distributed with this project and can also be found at
-// http://www.omnigroup.com/DeveloperResources/OmniSourceLicense.html.
+// <http://www.omnigroup.com/developer/sourcecode/sourcelicense/>.
 
 #import <OmniFoundation/CFString-OFExtensions.h>
 #import <Foundation/NSObjCRuntime.h> // for BOOL
@@ -11,7 +11,7 @@
 #import <OmniBase/rcsid.h>
 #import <string.h>
 
-RCS_ID("$Header: /Network/Source/CVS/OmniGroup/Frameworks/OmniFoundation/CoreFoundationExtensions/CFString-OFExtensions.m,v 1.7 2003/03/24 23:05:05 neo Exp $")
+RCS_ID("$Header: /Network/Source/CVS/OmniGroup/Frameworks/OmniFoundation/CoreFoundationExtensions/CFString-OFExtensions.m,v 1.10 2004/02/10 04:07:42 kc Exp $")
 
 
 void OFCaseConversionBufferInit(OFCaseConversionBuffer *caseBuffer)
@@ -120,3 +120,23 @@ HandleUnicode:
         return hash;
     }
 }
+
+
+CFIndex OFAppendStringBytesToBuffer(CFMutableDataRef buffer, CFStringRef source, CFRange range, CFStringEncoding encoding, UInt8 lossByte, Boolean isExternalRepresentation)
+{
+    CFIndex bufSize = CFStringGetMaximumSizeForEncoding(range.length, encoding);
+    CFIndex origLength = CFDataGetLength(buffer);
+    CFIndex convertedChars, convertedBytes;
+
+    CFDataSetLength(buffer, origLength + bufSize);
+    convertedBytes = 0;
+    convertedChars = CFStringGetBytes(source, range,
+                                      encoding, lossByte, isExternalRepresentation,
+                                      CFDataGetMutableBytePtr(buffer) + origLength,
+                                      bufSize, &convertedBytes);
+    CFDataSetLength(buffer, origLength + convertedBytes);
+
+    return convertedChars;
+}
+
+

@@ -1,9 +1,9 @@
-// Copyright 1997-2003 Omni Development, Inc.  All rights reserved.
+// Copyright 1997-2004 Omni Development, Inc.  All rights reserved.
 //
 // This software may only be used and reproduced according to the
 // terms in the file OmniSourceLicense.html, which should be
 // distributed with this project and can also be found at
-// http://www.omnigroup.com/DeveloperResources/OmniSourceLicense.html.
+// <http://www.omnigroup.com/developer/sourcecode/sourcelicense/>.
 
 #import <OmniFoundation/OFQueue.h>
 
@@ -12,9 +12,9 @@
 
 
 
-RCS_ID("$Header: /Network/Source/CVS/OmniGroup/Frameworks/OmniFoundation/DataStructures.subproj/OFQueue.m,v 1.15 2003/01/15 22:51:55 kc Exp $")
+RCS_ID("$Header: /Network/Source/CVS/OmniGroup/Frameworks/OmniFoundation/DataStructures.subproj/OFQueue.m,v 1.18 2004/02/10 04:07:43 kc Exp $")
 
-DEFINE_NSSTRING(OFQueueIsClosed);
+NSString *OFQueueIsClosed = @"OFQueueIsClosed";
 
 /*
 I don't see how a NSConditionLock can be used to implement an overlapping state structure like this as efficiently as mutex/condition.  There are three states, empty, full and partially full.  Enqueue should block only on full, dequeue should only block on empty.  If you try to represent the states as not-empty and not-full, you have no way to represent the partially-full state.

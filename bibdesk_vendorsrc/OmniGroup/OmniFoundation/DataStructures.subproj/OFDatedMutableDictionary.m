@@ -1,9 +1,9 @@
-// Copyright 1998-2003 Omni Development, Inc.  All rights reserved.
+// Copyright 1998-2004 Omni Development, Inc.  All rights reserved.
 //
 // This software may only be used and reproduced according to the
 // terms in the file OmniSourceLicense.html, which should be
 // distributed with this project and can also be found at
-// http://www.omnigroup.com/DeveloperResources/OmniSourceLicense.html.
+// <http://www.omnigroup.com/developer/sourcecode/sourcelicense/>.
 
 #import <OmniFoundation/OFDatedMutableDictionary.h>
 
@@ -12,7 +12,7 @@
 
 #import <OmniFoundation/NSDate-OFExtensions.h>
 
-RCS_ID("$Header: /Network/Source/CVS/OmniGroup/Frameworks/OmniFoundation/DataStructures.subproj/OFDatedMutableDictionary.m,v 1.13 2003/01/31 18:06:46 andrew Exp $")
+RCS_ID("$Header: /Network/Source/CVS/OmniGroup/Frameworks/OmniFoundation/DataStructures.subproj/OFDatedMutableDictionary.m,v 1.15 2004/02/10 04:07:43 kc Exp $")
 
 @interface OFDatedMutableDictionaryEntry : OFObject
 {

@@ -1,11 +1,11 @@
-// Copyright 1998-2003 Omni Development, Inc.  All rights reserved.
+// Copyright 1998-2004 Omni Development, Inc.  All rights reserved.
 //
 // This software may only be used and reproduced according to the
 // terms in the file OmniSourceLicense.html, which should be
 // distributed with this project and can also be found at
-// http://www.omnigroup.com/DeveloperResources/OmniSourceLicense.html.
+// <http://www.omnigroup.com/developer/sourcecode/sourcelicense/>.
 //
-// $Header: /Network/Source/CVS/OmniGroup/Frameworks/OmniFoundation/DataStructures.subproj/OFDatedMutableDictionary.h,v 1.12 2003/01/31 18:06:46 andrew Exp $
+// $Header: /Network/Source/CVS/OmniGroup/Frameworks/OmniFoundation/DataStructures.subproj/OFDatedMutableDictionary.h,v 1.14 2004/02/10 04:07:43 kc Exp $
 
 #import <OmniFoundation/OFObject.h>
 

@@ -1,11 +1,11 @@
-// Copyright 1997-2003 Omni Development, Inc.  All rights reserved.
+// Copyright 1997-2004 Omni Development, Inc.  All rights reserved.
 //
 // This software may only be used and reproduced according to the
 // terms in the file OmniSourceLicense.html, which should be
 // distributed with this project and can also be found at
-// http://www.omnigroup.com/DeveloperResources/OmniSourceLicense.html.
+// <http://www.omnigroup.com/developer/sourcecode/sourcelicense/>.
 //
-// $Header: /Network/Source/CVS/OmniGroup/Frameworks/OmniFoundation/DataStructures.subproj/OFDataBuffer.h,v 1.22 2003/01/15 22:51:53 kc Exp $
+// $Header: /Network/Source/CVS/OmniGroup/Frameworks/OmniFoundation/DataStructures.subproj/OFDataBuffer.h,v 1.26 2004/02/10 04:07:42 kc Exp $
 
 #import <OmniFoundation/OFObject.h>
 #import <OmniFoundation/FrameworkDefines.h>
@@ -88,7 +88,7 @@ OFDataBufferSetCapacity(OFDataBuffer *dataBuffer, size_t capacity)
 
     occupied = OFDataBufferSpaceOccupied(dataBuffer);
     [dataBuffer->data setLength: capacity];
-    dataBuffer->buffer = [dataBuffer->data mutableBytes];
+    dataBuffer->buffer = (OFByte *)[dataBuffer->data mutableBytes];
     dataBuffer->writeStart = dataBuffer->buffer + occupied;
     dataBuffer->bufferEnd  = dataBuffer->buffer + capacity;
 }
@@ -215,7 +215,7 @@ static inline void OFDataBufferAppend ## nameType      			\
 	(OFDataBuffer *dataBuffer, cType value)				\
 {									\
     OFDataBufferSwapBytes(value, swapType);    				\
-    OFDataBufferAppendBytes(dataBuffer, (void *)&value, sizeof(cType));	\
+    OFDataBufferAppendBytes(dataBuffer, (OFByte *)&value, sizeof(cType));	\
 }
 
 OFDataBufferAppendOfType(long int, LongInt, Long)
@@ -241,7 +241,7 @@ static inline void OFDataBufferAppendFloat(OFDataBuffer *dataBuffer, float value
             swappedValue = NSSwapHostFloatToBig(value);
             break;
     }
-    OFDataBufferAppendBytes(dataBuffer, (void *)&swappedValue, sizeof(float));
+    OFDataBufferAppendBytes(dataBuffer, (OFByte *)&swappedValue, sizeof(float));
 }
 
 static inline void OFDataBufferAppendDouble(OFDataBuffer *dataBuffer, double value)
@@ -259,7 +259,7 @@ static inline void OFDataBufferAppendDouble(OFDataBuffer *dataBuffer, double val
             swappedValue = NSSwapHostDoubleToBig(value);
             break;
     }
-    OFDataBufferAppendBytes(dataBuffer, (const void *)&swappedValue, sizeof(double));
+    OFDataBufferAppendBytes(dataBuffer, (const OFByte *)&swappedValue, sizeof(double));
 }
 
 #define OF_COMPRESSED_INT_BITS_OF_DATA    7
@@ -317,10 +317,10 @@ OFDataBufferAppendInteger(OFDataBuffer *dataBuffer, int integer)
 	OFDataBufferAppendByte(dataBuffer, '-');
     }
     
-    divisor = log10(integer);
+    divisor = (int)log10((double)integer);
     if (divisor < 0)
 	divisor = 0;
-    divisor = pow(10, divisor);
+    divisor = (int)pow(10.0, (double)divisor);
     while (1) {
 	OFDataBufferAppendByte(dataBuffer, (integer / divisor) + '0');
 	if (divisor <= 1)
@@ -346,8 +346,7 @@ static inline void
 OFDataBufferAppendString(OFDataBuffer *dataBuffer, CFStringRef string, CFStringEncoding encoding)
 {
     OFByte *ptr;
-    unsigned int characterCount;
-    CFIndex index, usedBufLen;
+    CFIndex characterCount, index, usedBufLen;
     
     OBPRECONDITION(string);
     
@@ -386,8 +385,7 @@ static inline void
 OFDataBufferAppendUnicodeString(OFDataBuffer *dataBuffer, CFStringRef string)
 {
     OFByte       *ptr;
-    unsigned int  characterCount;
-    CFIndex       index, usedBufLen;
+    CFIndex       characterCount, index, usedBufLen;
     
     characterCount = CFStringGetLength(string);
     ptr = OFDataBufferGetPointer(dataBuffer, sizeof(unichar) * characterCount);

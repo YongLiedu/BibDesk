@@ -1,9 +1,9 @@
-// Copyright 1997-2003 Omni Development, Inc.  All rights reserved.
+// Copyright 1997-2004 Omni Development, Inc.  All rights reserved.
 //
 // This software may only be used and reproduced according to the
 // terms in the file OmniSourceLicense.html, which should be
 // distributed with this project and can also be found at
-// http://www.omnigroup.com/DeveloperResources/OmniSourceLicense.html.
+// <http://www.omnigroup.com/developer/sourcecode/sourcelicense/>.
 
 #import <OmniFoundation/OFInvocation.h>
 
@@ -12,7 +12,7 @@
 
 #import "OFTemporaryPlaceholderInvocation.h"
 
-RCS_ID("$Header: /Network/Source/CVS/OmniGroup/Frameworks/OmniFoundation/Scheduling.subproj/OFInvocation.m,v 1.11 2003/01/15 22:52:03 kc Exp $")
+RCS_ID("$Header: /Network/Source/CVS/OmniGroup/Frameworks/OmniFoundation/Scheduling.subproj/OFInvocation.m,v 1.16 2004/02/10 04:07:47 kc Exp $")
 
 @implementation OFInvocation
 
@@ -20,13 +20,7 @@ OFTemporaryPlaceholderInvocation *temporaryPlaceholderInvocation;
 
 + (void)initialize;
 {
-    static BOOL initialized = NO;
-
-    [super initialize];
-    if (initialized)
-	return;
-    initialized = YES;
-
+    OBINITIALIZE;
     temporaryPlaceholderInvocation = [OFTemporaryPlaceholderInvocation alloc];
 }
 
@@ -47,24 +41,34 @@ OFTemporaryPlaceholderInvocation *temporaryPlaceholderInvocation;
     return nil;
 }
 
+- (SEL)selector;
+{
+    OBRequestConcreteImplementation(self, _cmd);
+    return (SEL)0;
+}
+
 - (void)invoke;
 {
+    OBRequestConcreteImplementation(self, _cmd);
 }
 
 // OFMessageQueuePriority protocol
 
 - (unsigned int)priority;
 {
+    OBRequestConcreteImplementation(self, _cmd);
     return 0;
 }
 
 - (unsigned int)group;
 {
+    OBRequestConcreteImplementation(self, _cmd);
     return 0;
 }
 
 - (unsigned int)maximumSimultaneousThreadsInGroup;
 {
+    OBRequestConcreteImplementation(self, _cmd);
     return 0;
 }
 

@@ -1,15 +1,15 @@
-// Copyright 2002-2003 Omni Development, Inc.  All rights reserved.
+// Copyright 2002-2004 Omni Development, Inc.  All rights reserved.
 //
 // This software may only be used and reproduced according to the
 // terms in the file OmniSourceLicense.html, which should be
 // distributed with this project and can also be found at
-// http://www.omnigroup.com/DeveloperResources/OmniSourceLicense.html.
+// <http://www.omnigroup.com/developer/sourcecode/sourcelicense/>.
 
 #import <Foundation/Foundation.h>
 #import <OmniBase/rcsid.h>
 #import <objc/objc-class.h>
 
-RCS_ID("$Header: /Network/Source/CVS/OmniGroup/Frameworks/OmniFoundation/OpenStepExtensions.subproj/NSObjectSpecifier-OFFixes.m,v 1.3 2003/03/24 23:06:47 neo Exp $");
+RCS_ID("$Header: /Network/Source/CVS/OmniGroup/Frameworks/OmniFoundation/OpenStepExtensions.subproj/NSObjectSpecifier-OFFixes.m,v 1.6 2004/02/10 04:07:46 kc Exp $");
 
 /* Private methods used when converting an NSObjectSpecifier to an NSAppleEventDecriptor (10.2.+ only) */
 @interface NSScriptObjectSpecifier (NSPrivateAPI)
@@ -122,7 +122,7 @@ RCS_ID("$Header: /Network/Source/CVS/OmniGroup/Frameworks/OmniFoundation/OpenSte
 /* static void __attribute__((constructor)) do_posing(void) */
 + (void)performPosing
 {
-    // don't use -poseAs: method as it messes up OBPostLoader
+    // don't use +poseAsClass: since that would force +initialize early (and +performPosing gets called w/o forcing it via OBPostLoader).
     class_poseAs((Class)self, ((Class)self)->super_class);
 }
 

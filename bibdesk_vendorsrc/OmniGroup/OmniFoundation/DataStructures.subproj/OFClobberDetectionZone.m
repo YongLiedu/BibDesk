@@ -1,9 +1,9 @@
-// Copyright 2001-2003 Omni Development, Inc.  All rights reserved.
+// Copyright 2001-2004 Omni Development, Inc.  All rights reserved.
 //
 // This software may only be used and reproduced according to the
 // terms in the file OmniSourceLicense.html, which should be
 // distributed with this project and can also be found at
-// http://www.omnigroup.com/DeveloperResources/OmniSourceLicense.html.
+// <http://www.omnigroup.com/developer/sourcecode/sourcelicense/>.
 
 #import <OmniFoundation/OFClobberDetectionZone.h>
 
@@ -14,8 +14,10 @@
 #import <pthread.h>
 #import <stdlib.h>
 #import <unistd.h>
+#import <mach/mach_init.h>
+#import <mach/vm_map.h>
 
-RCS_ID("$Header: /Network/Source/CVS/OmniGroup/Frameworks/OmniFoundation/DataStructures.subproj/OFClobberDetectionZone.m,v 1.13 2003/03/24 23:05:05 neo Exp $")
+RCS_ID("$Header: /Network/Source/CVS/OmniGroup/Frameworks/OmniFoundation/DataStructures.subproj/OFClobberDetectionZone.m,v 1.17 2004/02/10 04:07:42 kc Exp $")
 
 
 //#define USE_MUTEX
@@ -555,7 +557,8 @@ _locked_OFClobberDetectionZoneGetSmallBlock(OFClobberDetectionZone *z, unsigned 
         void *pages;
         
         // Need to populate the free queue with some more entries
-        pagesToAllocate = MAX(MIN_PAGES_TO_ALLOCATE, pageCount * MIN_BLOCKS_TO_ALLOCATE);
+        if ((pagesToAllocate = pageCount * MIN_BLOCKS_TO_ALLOCATE) < MIN_PAGES_TO_ALLOCATE)
+            pagesToAllocate = MIN_PAGES_TO_ALLOCATE;
         
         // Make sure that we allocate a multiple of the amount we're going to use
         if (pagesToAllocate % pageCount) {

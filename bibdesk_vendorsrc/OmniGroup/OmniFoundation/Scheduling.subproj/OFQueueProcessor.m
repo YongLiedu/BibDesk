@@ -1,9 +1,9 @@
-// Copyright 1997-2003 Omni Development, Inc.  All rights reserved.
+// Copyright 1997-2004 Omni Development, Inc.  All rights reserved.
 //
 // This software may only be used and reproduced according to the
 // terms in the file OmniSourceLicense.html, which should be
 // distributed with this project and can also be found at
-// http://www.omnigroup.com/DeveloperResources/OmniSourceLicense.html.
+// <http://www.omnigroup.com/developer/sourcecode/sourcelicense/>.
 
 #import <OmniFoundation/OFQueueProcessor.h>
 
@@ -14,7 +14,7 @@
 #import <OmniFoundation/OFInvocation.h>
 #import <OmniFoundation/OFMessageQueue.h>
 
-RCS_ID("$Header: /Network/Source/CVS/OmniGroup/Frameworks/OmniFoundation/Scheduling.subproj/OFQueueProcessor.m,v 1.20 2003/01/15 22:52:03 kc Exp $")
+RCS_ID("$Header: /Network/Source/CVS/OmniGroup/Frameworks/OmniFoundation/Scheduling.subproj/OFQueueProcessor.m,v 1.24 2004/02/10 04:07:47 kc Exp $")
 
 @interface OFQueueProcessor (Private)
 - (BOOL)shouldProcessQueueEnd;
@@ -59,17 +59,19 @@ static OFQueueProcessor *detachingQueueProcessor;
 
 - (void)processQueueUntilEmpty:(BOOL)onlyUntilEmpty;
 {
+    // TJW -- Bug #332 about why this time check is here by default
+    [self processQueueUntilEmpty:onlyUntilEmpty forTime:(0.25)];
+}
+
+- (void)processQueueUntilEmpty:(BOOL)onlyUntilEmpty forTime:(NSTimeInterval)maximumTime;
+{
     OFInvocation *retainedInvocation;
     BOOL waitForMessages = !onlyUntilEmpty;
-#ifdef DEBUG
-    BOOL setThreadNames = !onlyUntilEmpty;
-#else
-    BOOL setThreadNames = NO;
-#endif
     NSAutoreleasePool *autoreleasePool;
-    NSTimeInterval startingInterval, now;
+    NSTimeInterval startingInterval, endTime;
     
     startingInterval = [NSDate timeIntervalSinceReferenceDate];
+    endTime = ( maximumTime >= 0 ) ? startingInterval + maximumTime : startingInterval;
     autoreleasePool = [[NSAutoreleasePool alloc] init];
     
     if (detachingQueueProcessor == self) {
@@ -81,23 +83,13 @@ static OFQueueProcessor *detachingQueueProcessor;
     if (OFQueueProcessorDebug)
         NSLog(@"%@: processQueueUntilEmpty: %d", [self shortDescription], onlyUntilEmpty);
         
-    // This should be #ifndef PRODUCTION_BUILD, except we don't have a symbol for that right now.
-    if (setThreadNames)
-        [[NSThread currentThread] setName:@"(new queue)"];
-    
     while ((retainedInvocation = [messageQueue nextRetainedInvocationWithBlock:waitForMessages])) {
         [currentInvocationLock lock];
         currentInvocation = retainedInvocation;
         [currentInvocationLock unlock];
         
-        // This should be #ifndef PRODUCTION_BUILD, except we don't have a symbol for that right now.
-        if (setThreadNames)
-            [[NSThread currentThread] setName:[retainedInvocation shortDescription]];
-
         if (OFQueueProcessorDebug) {
             NSLog(@"%@: invoking %@", [self shortDescription], [retainedInvocation shortDescription]);
-            if (setThreadNames)
-                [[NSThread currentThread] setName:[retainedInvocation shortDescription]];
         }
 
         NS_DURING {
@@ -114,24 +106,22 @@ static OFQueueProcessor *detachingQueueProcessor;
         currentInvocation = nil;
         [currentInvocationLock unlock];
 
-        if (setThreadNames)
-            [[NSThread currentThread] setName:@"(idle)"];
-
         [retainedInvocation release];
 
+        if (maximumTime >= 0) {
+            // TJW -- Bug #332 about why this time check is here
+            if (endTime < [NSDate timeIntervalSinceReferenceDate])
+                break;
+        }
+        
         if (waitForMessages) {
             [autoreleasePool release];
             autoreleasePool = [[NSAutoreleasePool alloc] init];
         } else {
-            // TJW -- Bug #332 about why this time check is here
-            now = [NSDate timeIntervalSinceReferenceDate];
-            if ((now - startingInterval > 0.25) || [self shouldProcessQueueEnd])
+            if ([self shouldProcessQueueEnd])
                 break;
         }
     }
-
-    if (setThreadNames)
-        [[NSThread currentThread] setName:@"(exiting)"];
 
     if (OFQueueProcessorDebug)
         NSLog(@"%@: processQueueUntilEmpty: (exiting)", [self shortDescription]);

@@ -1,9 +1,9 @@
-// Copyright 2002-2003 Omni Development, Inc.  All rights reserved.
+// Copyright 2002-2004 Omni Development, Inc.  All rights reserved.
 //
 // This software may only be used and reproduced according to the
 // terms in the file OmniSourceLicense.html, which should be
 // distributed with this project and can also be found at
-// http://www.omnigroup.com/DeveloperResources/OmniSourceLicense.html.
+// <http://www.omnigroup.com/developer/sourcecode/sourcelicense/>.
 
 #import "OFSoftwareUpdateCheckTool.h"
 
@@ -13,7 +13,7 @@
 #import <SystemConfiguration/SCDynamicStore.h>
 #import <SystemConfiguration/SCNetwork.h>
 
-RCS_ID("$Header: /Network/Source/CVS/OmniGroup/Frameworks/OmniFoundation/OFSoftwareUpdateCheckTool.m,v 1.3 2003/03/26 00:24:35 wiml Exp $");
+RCS_ID("$Header: /Network/Source/CVS/OmniGroup/Frameworks/OmniFoundation/OFSoftwareUpdateCheckTool.m,v 1.5 2004/02/10 04:07:41 kc Exp $");
 
 void contemplate_reachability(const char *hostname);
 void perform_check(const char *url);

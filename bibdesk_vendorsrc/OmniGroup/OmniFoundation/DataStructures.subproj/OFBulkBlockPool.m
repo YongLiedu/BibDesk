@@ -1,16 +1,16 @@
-// Copyright 1997-2003 Omni Development, Inc.  All rights reserved.
+// Copyright 1997-2004 Omni Development, Inc.  All rights reserved.
 //
 // This software may only be used and reproduced according to the
 // terms in the file OmniSourceLicense.html, which should be
 // distributed with this project and can also be found at
-// http://www.omnigroup.com/DeveloperResources/OmniSourceLicense.html.
+// <http://www.omnigroup.com/developer/sourcecode/sourcelicense/>.
 
 #import <OmniFoundation/OFBulkBlockPool.h>
 
 #import <Foundation/Foundation.h>
 #import <OmniBase/OmniBase.h>
 
-RCS_ID("$Header: /Network/Source/CVS/OmniGroup/Frameworks/OmniFoundation/DataStructures.subproj/OFBulkBlockPool.m,v 1.11 2003/01/15 22:51:53 kc Exp $")
+RCS_ID("$Header: /Network/Source/CVS/OmniGroup/Frameworks/OmniFoundation/DataStructures.subproj/OFBulkBlockPool.m,v 1.14 2004/02/10 04:07:42 kc Exp $")
 
 unsigned int _OFBulkBlockPageSize;
 
@@ -95,7 +95,7 @@ void _OFBulkBlockPoolGetPage(OFBulkBlockPool *pool)
         // Terminate the free list -- probably not necessary since we just did a low level page allocation, but it can't really hurt.
         //fprintf(stderr, "  blockEnd = 0x%08x\n", blockEnd);
         block -= pool->allocationSize;                   // back up to the last block
-        OBASSERT(blockEnd - block < pool->allocationSize); // there should not be a whole block left
+        OBASSERT((unsigned)(blockEnd - block) < pool->allocationSize); // there should not be a whole block left
         *(void **)block = NULL;                          // terminate the list
 
         // Cache the freeList

@@ -1,9 +1,9 @@
-// Copyright 1997-2003 Omni Development, Inc.  All rights reserved.
+// Copyright 1997-2004 Omni Development, Inc.  All rights reserved.
 //
 // This software may only be used and reproduced according to the
 // terms in the file OmniSourceLicense.html, which should be
 // distributed with this project and can also be found at
-// http://www.omnigroup.com/DeveloperResources/OmniSourceLicense.html.
+// <http://www.omnigroup.com/developer/sourcecode/sourcelicense/>.
 
 #import <OmniFoundation/NSMutableArray-OFExtensions.h>
 
@@ -12,7 +12,7 @@
 #import <Foundation/Foundation.h>
 #import <OmniBase/OmniBase.h>
 
-RCS_ID("$Header: /Network/Source/CVS/OmniGroup/Frameworks/OmniFoundation/OpenStepExtensions.subproj/NSMutableArray-OFExtensions.m,v 1.13 2003/02/20 05:30:51 wiml Exp $")
+RCS_ID("$Header: /Network/Source/CVS/OmniGroup/Frameworks/OmniFoundation/OpenStepExtensions.subproj/NSMutableArray-OFExtensions.m,v 1.16 2004/02/10 04:07:45 kc Exp $")
 
 @implementation NSMutableArray (OFExtensions)
 
@@ -45,6 +45,33 @@ static void addObjectToArray(const void *value, void *context)
 
     /* We use this instead of an NSSet method in order to avoid autoreleases */
     CFSetApplyFunction((CFSetRef)aSet, addObjectToArray, (void *)self);
+}
+
+- (void)replaceObjectsInRange:(NSRange)replacementRange byApplyingSelector:(SEL)selector
+{
+    NSMutableArray *replacements = [[NSMutableArray alloc] initWithCapacity:replacementRange.length];
+    unsigned index;
+
+    NS_DURING;
+    
+    for(index = 0; index < replacementRange.length; index ++) {
+        id sourceObject, replacementObject;
+
+        sourceObject = [self objectAtIndex:(replacementRange.location + index)];
+        replacementObject = [sourceObject performSelector:selector];
+        if (replacementObject == nil)
+            OBRejectInvalidCall(self, _cmd, @"Object at index %d returned nil from %@", (replacementRange.location + index), NSStringFromSelector(selector));
+        [replacements addObject:replacementObject];
+    }
+
+    [self replaceObjectsInRange:replacementRange withObjectsFromArray:replacements];
+
+    NS_HANDLER {
+        [replacements release];
+        [localException raise];
+    } NS_ENDHANDLER;
+
+    [replacements release];
 }
 
 /* Assumes the array is already sorted to insert the object quickly in the right place */

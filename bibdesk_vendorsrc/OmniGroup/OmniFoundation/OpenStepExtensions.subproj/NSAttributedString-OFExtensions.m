@@ -1,16 +1,16 @@
-// Copyright 1997-2003 Omni Development, Inc.  All rights reserved.
+// Copyright 1997-2004 Omni Development, Inc.  All rights reserved.
 //
 // This software may only be used and reproduced according to the
 // terms in the file OmniSourceLicense.html, which should be
 // distributed with this project and can also be found at
-// http://www.omnigroup.com/DeveloperResources/OmniSourceLicense.html.
+// <http://www.omnigroup.com/developer/sourcecode/sourcelicense/>.
 
 #import <OmniFoundation/NSAttributedString-OFExtensions.h>
 
 #import <Foundation/Foundation.h>
 #import <OmniBase/OmniBase.h>
 
-RCS_ID("$Header: /Network/Source/CVS/OmniGroup/Frameworks/OmniFoundation/OpenStepExtensions.subproj/NSAttributedString-OFExtensions.m,v 1.11 2003/01/15 22:51:58 kc Exp $")
+RCS_ID("$Header: /Network/Source/CVS/OmniGroup/Frameworks/OmniFoundation/OpenStepExtensions.subproj/NSAttributedString-OFExtensions.m,v 1.15 2004/02/10 04:07:45 kc Exp $")
 
 @implementation NSAttributedString (OFExtensions)
 
@@ -57,6 +57,29 @@ RCS_ID("$Header: /Network/Source/CVS/OmniGroup/Frameworks/OmniFoundation/OpenSte
     } while (range.length);
 
     return components;
+}
+
+@end
+
+@implementation NSMutableAttributedString (OFExtensions)
+- (void)appendString:(NSString *)string attributes:(NSDictionary *)attributes;
+{
+    NSAttributedString *append;
+
+    append = [[NSAttributedString alloc] initWithString:string attributes:attributes];
+    [self appendAttributedString:append];
+    [append release];
+}
+
+/*" Appends the given string to the receiver, using the attributes of the last character in the receiver for the new characters.  If the receiver is empty, the appended string has no attributes. "*/
+- (void)appendString:(NSString *)string;
+{
+    NSDictionary *attributes = nil;
+    unsigned int  length = [self length];
+
+    if (length)
+        attributes = [self attributesAtIndex:length-1 effectiveRange:NULL];
+    [self appendString:string attributes:attributes];
 }
 
 @end

@@ -1,28 +1,23 @@
-// Copyright 1997-2003 Omni Development, Inc.  All rights reserved.
+// Copyright 1997-2004 Omni Development, Inc.  All rights reserved.
 //
 // This software may only be used and reproduced according to the
 // terms in the file OmniSourceLicense.html, which should be
 // distributed with this project and can also be found at
-// http://www.omnigroup.com/DeveloperResources/OmniSourceLicense.html.
+// <http://www.omnigroup.com/developer/sourcecode/sourcelicense/>.
 
 #import <OmniFoundation/OFSimpleStringFormatter.h>
 
 #import <Foundation/Foundation.h>
 #import <OmniBase/OmniBase.h>
 
-RCS_ID("$Header: /Network/Source/CVS/OmniGroup/Frameworks/OmniFoundation/Formatters.subproj/OFSimpleStringFormatter.m,v 1.7 2003/01/15 22:51:57 kc Exp $")
-
-// This is a hack to avoid a compiler warning about multiple declarations for +setVersion (in +Object and +NSObject).
-@interface NSObjectSetVersion : NSObject
-- (void)setVersion:(int)aVersion;
-@end
+RCS_ID("$Header: /Network/Source/CVS/OmniGroup/Frameworks/OmniFoundation/Formatters.subproj/OFSimpleStringFormatter.m,v 1.10 2004/02/10 04:07:44 kc Exp $")
 
 @implementation OFSimpleStringFormatter
 
 + (void)initialize;
 {
-    [super initialize];
-    [(NSObjectSetVersion *)self setVersion:0];
+    OBINITIALIZE;
+    [self setVersion:0];
 }
 
 - init;
@@ -75,7 +70,6 @@ RCS_ID("$Header: /Network/Source/CVS/OmniGroup/Frameworks/OmniFoundation/Formatt
 {
     [super encodeWithCoder:coder];
     [coder encodeValueOfObjCType:@encode(unsigned int) at:&maxLength];
-    return;
 }
 
 - initWithCoder:(NSCoder *)coder;
@@ -90,6 +84,7 @@ RCS_ID("$Header: /Network/Source/CVS/OmniGroup/Frameworks/OmniFoundation/Formatt
             break;
 
         default:
+            OBASSERT(NO);
             break;
     }
     

@@ -1,11 +1,11 @@
-// Copyright 1998-2003 Omni Development, Inc.  All rights reserved.
+// Copyright 1998-2004 Omni Development, Inc.  All rights reserved.
 //
 // This software may only be used and reproduced according to the
 // terms in the file OmniSourceLicense.html, which should be
 // distributed with this project and can also be found at
-// http://www.omnigroup.com/DeveloperResources/OmniSourceLicense.html.
+// <http://www.omnigroup.com/developer/sourcecode/sourcelicense/>.
 //
-// $Header: /Network/Source/CVS/OmniGroup/Frameworks/OmniFoundation/DataStructures.subproj/OFMutableKnownKeyDictionary.h,v 1.8 2003/01/15 22:51:54 kc Exp $
+// $Header: /Network/Source/CVS/OmniGroup/Frameworks/OmniFoundation/DataStructures.subproj/OFMutableKnownKeyDictionary.h,v 1.12 2004/02/10 04:07:43 kc Exp $
 
 #import <Foundation/NSDictionary.h>
 
@@ -20,12 +20,12 @@ This subclass of NSMutableDictionary should be used when the set of possible key
     NSObject                     *_values[0];
 }
 
-+ (OFMutableKnownKeyDictionary *) newWithTemplate: (OFKnownKeyDictionaryTemplate *) template zone: (NSZone *) zone;
++ (OFMutableKnownKeyDictionary *) newWithTemplate: (OFKnownKeyDictionaryTemplate *)aTemplate zone: (NSZone *) zone;
 /*.doc.
 Returns a new, retained, empty instance.
 */
 
-+ (OFMutableKnownKeyDictionary *) newWithTemplate: (OFKnownKeyDictionaryTemplate *) template;
++ (OFMutableKnownKeyDictionary *) newWithTemplate: (OFKnownKeyDictionaryTemplate *)aTemplate;
 /*.doc.
 Calls +newWithTemplate:zone: using the default zone.
 */
@@ -34,5 +34,7 @@ Calls +newWithTemplate:zone: using the default zone.
 /*.doc.
 Returns a new retained mutable copy of the receive.  This is named as it is so that -mutableCopyWithZone: will still return a vanilla NSMutableDictionary.
 */
+
+- (NSArray *) copyKeys;
 
 @end

@@ -1,9 +1,9 @@
-// Copyright 1997-2003 Omni Development, Inc.  All rights reserved.
+// Copyright 1997-2004 Omni Development, Inc.  All rights reserved.
 //
 // This software may only be used and reproduced according to the
 // terms in the file OmniSourceLicense.html, which should be
 // distributed with this project and can also be found at
-// http://www.omnigroup.com/DeveloperResources/OmniSourceLicense.html.
+// <http://www.omnigroup.com/developer/sourcecode/sourcelicense/>.
 
 #import <OmniFoundation/OFObject.h>
 
@@ -14,9 +14,8 @@
 #import <OmniFoundation/OFNull.h>
 #import <OmniFoundation/OFSimpleLock.h>
 #import <OmniFoundation/NSThread-OFExtensions.h>
-#import <OmniFoundation/NSDebug-OFExtensions.h>
 
-RCS_ID("$Header: /Network/Source/CVS/OmniGroup/Frameworks/OmniFoundation/OFObject.m,v 1.36 2003/01/15 22:51:50 kc Exp $")
+RCS_ID("$Header: /Network/Source/CVS/OmniGroup/Frameworks/OmniFoundation/OFObject.m,v 1.41 2004/02/10 04:07:41 kc Exp $")
 
 @implementation OFObject
 /*" OFObject provides an inline retain count for much more efficient reference counting. "*/
@@ -104,9 +103,7 @@ static inline OFSimpleLockType *_lockForObject(OFObject *obj)
     if (retainCount > SaneRetainCount) {
         OFSimpleUnlock(lock);
         OBASSERT(retainCount <= SaneRetainCount);
-        [NSException raise:@"RetainInsane"
-                    format:@"Insane retain count! count=%d self=0x%x",
-                           retainCount, (unsigned int)self];
+        [NSException raise:@"RetainInsane" format:@"-[%@ %s]: Insane retain count! count=%d", OBShortObjectDescription(self), _cmd, retainCount];
     }
 #endif
 
@@ -137,7 +134,8 @@ static inline OFSimpleLockType *_lockForObject(OFObject *obj)
     } else {
 #ifdef DEBUG
         if (retainCount > SaneRetainCount) {
-            [NSException raise:@"RetainInsane" format:@"Insane retain count! count=%d self=0x%x", retainCount, (unsigned int)self];
+            OFSimpleUnlock(lock);
+            [NSException raise:@"RetainInsane" format:@"-[%@ %s]: Insane retain count! count=%d", OBShortObjectDescription(self), _cmd, retainCount];
 	}
 #endif
 	retainCount--;

@@ -1,14 +1,12 @@
-// Copyright 1997-2003 Omni Development, Inc.  All rights reserved.
+// Copyright 1997-2004 Omni Development, Inc.  All rights reserved.
 //
 // This software may only be used and reproduced according to the
 // terms in the file OmniSourceLicense.html, which should be
 // distributed with this project and can also be found at
-// http://www.omnigroup.com/DeveloperResources/OmniSourceLicense.html.
+// <http://www.omnigroup.com/developer/sourcecode/sourcelicense/>.
 //
-// $Header: /Network/Source/CVS/OmniGroup/Frameworks/OmniFoundation/OmniFoundation.h,v 1.94 2003/02/18 22:30:19 wiml Exp $
+// $Header: /Network/Source/CVS/OmniGroup/Frameworks/OmniFoundation/OmniFoundation.h,v 1.105 2004/02/10 04:07:41 kc Exp $
 
-#import <OmniFoundation/OFAbbreviationMatch.h>
-#import <OmniFoundation/OFAbbreviationMatcher.h>
 #import <OmniFoundation/OFAsynchronousDOServer.h>
 #import <OmniFoundation/OFAutoreleasedMemory.h>
 #import <OmniFoundation/OFBTree.h>
@@ -21,7 +19,6 @@
 #import <OmniFoundation/OFCacheFile.h>
 #import <OmniFoundation/OFCharacterSet.h>
 #import <OmniFoundation/OFCodeFragment.h>
-#import <OmniFoundation/OFCondition.h>
 #import <OmniFoundation/OFController.h>
 #import <OmniFoundation/OFDOServer.h>
 #import <OmniFoundation/OFDataBuffer.h>
@@ -52,6 +49,7 @@
 #import <OmniFoundation/OFObject-Queue.h>
 #import <OmniFoundation/OFObject.h>
 #import <OmniFoundation/OFOid.h>
+#import <OmniFoundation/OFPoint.h>
 #import <OmniFoundation/OFPreference.h>
 #import <OmniFoundation/OFQueue.h>
 #import <OmniFoundation/OFQueueProcessor.h>
@@ -68,6 +66,7 @@
 #import <OmniFoundation/OFScheduledEvent.h>
 #import <OmniFoundation/OFScheduler.h>
 #import <OmniFoundation/OFScratchFile.h>
+#import <OmniFoundation/OFScriptPlaceholder.h>
 #import <OmniFoundation/OFSignature.h>
 #import <OmniFoundation/OFSlotManager.h>
 #import <OmniFoundation/OFSoftwareUpdateChecker.h>
@@ -87,6 +86,10 @@
 #import <OmniFoundation/OFUtilities.h>
 #import <OmniFoundation/OFWeakRetainConcreteImplementation.h>
 #import <OmniFoundation/OFWeakRetainProtocol.h>
+#import <OmniFoundation/OFXMLCursor.h>
+#import <OmniFoundation/OFXMLDocument.h>
+#import <OmniFoundation/OFXMLElement.h>
+#import <OmniFoundation/OFXMLString.h>
 #import <OmniFoundation/OFZone.h>
 
 // Formatters
@@ -107,7 +110,6 @@
 #import <OmniFoundation/NSCalendarDate-OFExtensions.h>
 #import <OmniFoundation/NSData-OFExtensions.h>
 #import <OmniFoundation/NSDate-OFExtensions.h>
-#import <OmniFoundation/NSDebug-OFExtensions.h>
 #import <OmniFoundation/NSDecimalNumber-OFExtensions.h>
 #import <OmniFoundation/NSDictionary-OFExtensions.h>
 #import <OmniFoundation/NSException-OFExtensions.h>
@@ -128,11 +130,11 @@
 #import <OmniFoundation/NSString-OFExtensions.h>
 #import <OmniFoundation/NSString-OFPathExtensions.h>
 #import <OmniFoundation/NSThread-OFExtensions.h>
-#import <OmniFoundation/NSTimeZone-OFExtensions.h>
 #import <OmniFoundation/NSUndoManager-OFExtensions.h>
 #import <OmniFoundation/NSUserDefaults-OFExtensions.h>
 
 // CoreFoundation extensions
+#import <OmniFoundation/CFArray-OFExtensions.h>
 #import <OmniFoundation/CFDictionary-OFExtensions.h>
 #import <OmniFoundation/CFSet-OFExtensions.h>
 #import <OmniFoundation/CFString-OFExtensions.h>

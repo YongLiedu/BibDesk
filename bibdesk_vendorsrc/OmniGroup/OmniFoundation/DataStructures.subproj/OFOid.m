@@ -1,9 +1,9 @@
-// Copyright 1997-2003 Omni Development, Inc.  All rights reserved.
+// Copyright 1997-2004 Omni Development, Inc.  All rights reserved.
 //
 // This software may only be used and reproduced according to the
 // terms in the file OmniSourceLicense.html, which should be
 // distributed with this project and can also be found at
-// http://www.omnigroup.com/DeveloperResources/OmniSourceLicense.html.
+// <http://www.omnigroup.com/developer/sourcecode/sourcelicense/>.
 
 #import <OmniFoundation/OFOid.h>
 
@@ -18,7 +18,7 @@
 #import <OmniFoundation/OFSimpleLock.h>
 #import <OmniFoundation/OFUtilities.h>
 
-RCS_ID("$Header: /Network/Source/CVS/OmniGroup/Frameworks/OmniFoundation/DataStructures.subproj/OFOid.m,v 1.24 2003/01/15 22:51:55 kc Exp $")
+RCS_ID("$Header: /Network/Source/CVS/OmniGroup/Frameworks/OmniFoundation/DataStructures.subproj/OFOid.m,v 1.28 2004/02/10 04:07:43 kc Exp $")
 
 @implementation OFOid
 
@@ -195,12 +195,6 @@ error:
 // NSData subclass
 //
 
-// BUG FIX: This is here because in Rhapsody DR2, [NSData initWithData:] calls this method instead of initWithBytes:length:, below.  Apple has fixed this bug in later releases.
-- (id)initWithBytes:(const void *)newBytes length:(unsigned int)length copy:(BOOL)copy freeWhenDone:(BOOL)freeWhenDone bytesAreVM:(BOOL)bytesAreVM;
-{
-    return [self initWithBytes:newBytes length:length];
-}
-
 - initWithBytes:(const void *)newBytes length:(unsigned int)length;
 {
     [super init];
@@ -223,6 +217,12 @@ error:
     }
     
     return self;
+}
+
+// The NSData version of this method doesn't do this -- it calls some private method.
+- initWithData: (NSData *) data;
+{
+    return [self initWithBytes: [data bytes] length: [data length]];
 }
 
 - (unsigned int)length;
@@ -306,7 +306,7 @@ static OFRandomState oidRandomState;
     OBINITIALIZE;
     
     // Force +[OBObject initialize] to be called if it hasn't been called already which will
-    // in turn call +[OBPostLoader processClasses], setting up the ORRandom gunk.
+    // in turn call +[OBPostLoader processClasses], setting up the OFRandom gunk.
     [OBObject self];
 
     OFSimpleLockInit(&_baseOidLock);

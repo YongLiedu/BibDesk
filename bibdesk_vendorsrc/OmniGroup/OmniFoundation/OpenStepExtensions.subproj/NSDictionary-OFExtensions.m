@@ -1,9 +1,9 @@
-// Copyright 1997-2003 Omni Development, Inc.  All rights reserved.
+// Copyright 1997-2004 Omni Development, Inc.  All rights reserved.
 //
 // This software may only be used and reproduced according to the
 // terms in the file OmniSourceLicense.html, which should be
 // distributed with this project and can also be found at
-// http://www.omnigroup.com/DeveloperResources/OmniSourceLicense.html.
+// <http://www.omnigroup.com/developer/sourcecode/sourcelicense/>.
 
 #import <OmniFoundation/NSDictionary-OFExtensions.h>
 
@@ -13,9 +13,11 @@
 #import <OmniFoundation/NSArray-OFExtensions.h>
 #import <OmniFoundation/NSString-OFExtensions.h>
 
-RCS_ID("$Header: /Network/Source/CVS/OmniGroup/Frameworks/OmniFoundation/OpenStepExtensions.subproj/NSDictionary-OFExtensions.m,v 1.17 2003/01/15 22:51:59 kc Exp $")
+RCS_ID("$Header: /Network/Source/CVS/OmniGroup/Frameworks/OmniFoundation/OpenStepExtensions.subproj/NSDictionary-OFExtensions.m,v 1.23 2004/02/10 04:07:45 kc Exp $")
 
 NSString *OmniDictionaryElementNameKey = @"__omniDictionaryElementNameKey";
+
+#define SAFE_ALLOCA_SIZE (8 * 8192)
 
 @implementation NSDictionary (OFExtensions)
 
@@ -24,42 +26,43 @@ NSString *OmniDictionaryElementNameKey = @"__omniDictionaryElementNameKey";
     return [[self allValues] anyObject];
 }
 
-/*" Returns an object which is a shallow copy of the receiver except that the given key now maps to anObj. "*/
+/*" Returns an object which is a shallow copy of the receiver except that the given key now maps to anObj. anObj may be nil in order to remove the given key from the dictionary. "*/
 - (NSDictionary *)dictionaryWithObject:anObj forKey:key
 {
-    unsigned int keyCount, keyIndex;
-    NSArray *newKeys;
-    NSMutableArray *newValues;
-    BOOL didReplace;
+    unsigned int keyCount;
+    NSMutableArray *newKeys, *newValues;
+    NSEnumerator *keyEnumerator;
+    NSDictionary *result;
+    id aKey;
 
     keyCount = [self count];
     
-    if (keyCount == 0 ||
-        (keyCount == 1 && [self objectForKey:key] != nil))
-        return [NSDictionary dictionaryWithObject:anObj forKey:key];
+    if (keyCount == 0 || (keyCount == 1 && [self objectForKey:key] != nil))
+        return anObj ? [NSDictionary dictionaryWithObject:anObj forKey:key] : [NSDictionary dictionary];
 
     if ([self objectForKey:key] == anObj)
         return [NSDictionary dictionaryWithDictionary:self];
 
-    newKeys = [self allKeys];
+    newKeys = [[NSMutableArray alloc] initWithCapacity:keyCount+1];
     newValues = [[NSMutableArray alloc] initWithCapacity:keyCount+1];
-    didReplace = NO;
-    for(keyIndex = 0; keyIndex < keyCount; keyIndex ++) {
-        id aKey = [newKeys objectAtIndex:keyIndex];
-
-        if ([aKey isEqual:key]) {
-            [newValues addObject:anObj];
-            didReplace = YES;
-        } else
+    keyEnumerator = [self keyEnumerator];
+    while ( (aKey = [keyEnumerator nextObject]) != nil ) {
+        if (![aKey isEqual:key]) {
+            [newKeys addObject:aKey];
             [newValues addObject:[self objectForKey:aKey]];
+        }
     }
 
-    if (!didReplace) {
-        newKeys = [newKeys arrayByAddingObject:key];
+    if (anObj != nil) {
+        [newKeys addObject:key];
         [newValues addObject:anObj];
     }
 
-    return [NSDictionary dictionaryWithObjects:newValues forKeys:newKeys];
+    result = [NSDictionary dictionaryWithObjects:newValues forKeys:newKeys];
+    [newKeys release];
+    [newValues release];
+
+    return result;
 }
 
 - (NSDictionary *)elementsAsInstancesOfClass:(Class)aClass withContext:(id)context;
@@ -181,7 +184,7 @@ NSString *OmniDictionaryElementNameKey = @"__omniDictionaryElementNameKey";
     return defaultObject;
 }
 
-- (NSMutableDictionary *)deepMutableCopy;
+- (id)deepMutableCopy;
 {
     NSMutableDictionary *newDictionary;
     NSEnumerator *keyEnumerator;
@@ -211,7 +214,7 @@ NSString *OmniDictionaryElementNameKey = @"__omniDictionaryElementNameKey";
 {
     NSMutableArray *objects;
     NSArray *keys;
-    int pairCount, pairIndex;
+    unsigned int pairCount, pairIndex;
     BOOL changed;
     NSDictionary *result;
     
@@ -256,6 +259,30 @@ NSString *OmniDictionaryElementNameKey = @"__omniDictionaryElementNameKey";
     OBPOSTCONDITION([result count] == [self count]);
     
     return result;
+}
+
+- (NSArray *) copyKeys;
+/*.doc. Just like -allKeys on NSDictionary, except that it doesn't autorelease the result but returns a retained array. */
+{
+    const void   **keys;
+    unsigned int   keyCount, byteCount;
+    BOOL           useMalloc;
+    
+    keyCount = CFDictionaryGetCount((CFDictionaryRef)self);
+
+    byteCount = sizeof(*keys) * keyCount;
+    useMalloc = byteCount >= SAFE_ALLOCA_SIZE;
+    keys = useMalloc ? malloc(byteCount) : alloca(byteCount);
+    
+    CFDictionaryGetKeysAndValues((CFDictionaryRef)self, keys, NULL);
+
+    NSArray *keyArray;
+    keyArray = [[NSArray alloc] initWithObjects:(id *)keys count:keyCount];
+
+    if (useMalloc)
+        free(keys);
+
+    return keyArray;
 }
 
 @end

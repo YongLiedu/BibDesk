@@ -1,18 +1,18 @@
-// Copyright 2002-2003 Omni Development, Inc.  All rights reserved.
+// Copyright 2002-2004 Omni Development, Inc.  All rights reserved.
 //
 // This software may only be used and reproduced according to the
 // terms in the file OmniSourceLicense.html, which should be
 // distributed with this project and can also be found at
-// http://www.omnigroup.com/DeveloperResources/OmniSourceLicense.html.
+// <http://www.omnigroup.com/developer/sourcecode/sourcelicense/>.
 
 #import <OmniFoundation/OFCFCallbacks.h>
-
 #import <OmniFoundation/CFString-OFExtensions.h>
+#import <OmniFoundation/OFWeakRetainProtocol.h>
 
 #import <Foundation/Foundation.h>
-#import <OmniBase/rcsid.h>
+#import <OmniBase/OmniBase.h>
 
-RCS_ID("$Header: /Network/Source/CVS/OmniGroup/Frameworks/OmniFoundation/CoreFoundationExtensions/OFCFCallbacks.m,v 1.2 2003/01/15 22:51:52 kc Exp $");
+RCS_ID("$Header: /Network/Source/CVS/OmniGroup/Frameworks/OmniFoundation/CoreFoundationExtensions/OFCFCallbacks.m,v 1.7 2004/02/10 04:07:42 kc Exp $");
 
 //
 // NSObject callbacks
@@ -21,6 +21,11 @@ RCS_ID("$Header: /Network/Source/CVS/OmniGroup/Frameworks/OmniFoundation/CoreFou
 const void * OFNSObjectRetain(CFAllocatorRef allocator, const void *value)
 {
     return [(id)value retain];
+}
+
+const void * OFNSObjectRetainCopy(CFAllocatorRef allocator, const void *value)
+{
+    return [(id)value copyWithZone:NULL];
 }
 
 void OFNSObjectRelease(CFAllocatorRef allocator, const void *value)
@@ -43,6 +48,24 @@ CFHashCode OFNSObjectHash(const void *value1)
     return [(id)value1 hash];
 }
 
+//
+// OFWeakRetain callbacks
+//
+
+const void *OFNSObjectWeakRetain(CFAllocatorRef allocator, const void *value)
+{
+    id <OFWeakRetain,NSObject> objectValue = (void *)value;
+    [objectValue retain];
+    [objectValue incrementWeakRetainCount];
+    return objectValue;
+}
+
+void OFNSObjectWeakRelease(CFAllocatorRef allocator, const void *value)
+{
+    id <OFWeakRetain,NSObject> const objectValue = (void *)value;
+    [objectValue decrementWeakRetainCount];
+    [objectValue release];
+}
 
 //
 // CFTypeRef callbacks
@@ -89,11 +112,14 @@ CFStringRef OFIntegerCopyDescription(const void *ptr)
 
 Boolean OFCaseInsensitiveStringIsEqual(const void *value1, const void *value2)
 {
+    OBASSERT([(id)value1 isKindOfClass:[NSString class]] && [(id)value2 isKindOfClass:[NSString class]]);
     return CFStringCompare((CFStringRef)value1, (CFStringRef)value2, kCFCompareCaseInsensitive) == kCFCompareEqualTo;
 }
 
 CFHashCode OFCaseInsensitiveStringHash(const void *value)
 {
+    OBASSERT([(id)value isKindOfClass:[NSString class]]);
+    
     // This is the only interesting function in the bunch.  We need to ensure that all
     // case variants of the same string (when 'same' is determine case insensitively)
     // have the same hash code.  We will do this by using CFStringGetCharacters over

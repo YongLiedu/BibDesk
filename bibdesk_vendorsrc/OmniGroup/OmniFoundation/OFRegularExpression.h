@@ -1,22 +1,22 @@
-// Copyright 1997-2003 Omni Development, Inc.  All rights reserved.
+// Copyright 1997-2004 Omni Development, Inc.  All rights reserved.
 //
 // This software may only be used and reproduced according to the
 // terms in the file OmniSourceLicense.html, which should be
 // distributed with this project and can also be found at
-// http://www.omnigroup.com/DeveloperResources/OmniSourceLicense.html.
+// <http://www.omnigroup.com/developer/sourcecode/sourcelicense/>.
 //
-// $Header: /Network/Source/CVS/OmniGroup/Frameworks/OmniFoundation/OFRegularExpression.h,v 1.17 2003/04/17 22:27:45 kc Exp $
+// $Header: /Network/Source/CVS/OmniGroup/Frameworks/OmniFoundation/OFRegularExpression.h,v 1.21 2004/02/10 04:07:41 kc Exp $
 
 #import <OmniFoundation/OFObject.h>
 #import <Foundation/NSString.h>
 
 typedef enum {
-    OpEnd, OpStartOfLine, OpEndOfLine, OpAnyCharacter, OpAnyOfString, OpAnyButString, OpBranch, OpReverseBranch, OpBack, OpExactlyString, OpNothing, OpZeroOrMore, OpOneOrMore, OpOpen, OpClose
+    OpEnd, OpStartOfLine, OpEndOfLine, OpAnyCharacter, OpAnyOfString, OpAnyButString, OpBranch, OpReverseBranch, OpBack, OpExactlyString, OpNothing, OpZeroOrMore, OpZeroOrMoreGreedy, OpOneOrMore, OpOneOrMoreGreedy, OpOpen, OpClose
 } ExpressionOpCode;
 
 typedef struct {
-    ExpressionOpCode opCode	: 4;
-    unsigned int argumentNumber	: 12;
+    ExpressionOpCode opCode	: 5;
+    unsigned int argumentNumber	: 11;
     unsigned int nextState	: 16;
 } ExpressionState;
 
@@ -31,10 +31,8 @@ typedef struct {
     unsigned int subExpressionCount;
     ExpressionState *program;
     unichar *stringBuffer;
-    BOOL beGreedyWithRepetitions;
 }
 
-- initWithString:(NSString *)string isGreedy:(BOOL)isGreedy;
 - initWithString:(NSString *)string;
 
 - (unsigned int)subexpressionCount;
@@ -47,5 +45,6 @@ typedef struct {
 - (BOOL)hasMatchInScanner:(OFStringScanner *)scanner;
 
 - (NSString *)patternString;
+- (NSString *)prefixString;
 
 @end

@@ -1,9 +1,9 @@
-// Copyright 1997-2003 Omni Development, Inc.  All rights reserved.
+// Copyright 1997-2004 Omni Development, Inc.  All rights reserved.
 //
 // This software may only be used and reproduced according to the
 // terms in the file OmniSourceLicense.html, which should be
 // distributed with this project and can also be found at
-// http://www.omnigroup.com/DeveloperResources/OmniSourceLicense.html.
+// <http://www.omnigroup.com/developer/sourcecode/sourcelicense/>.
 
 #import "OFIObjectSelector.h"
 
@@ -11,7 +11,9 @@
 #import <objc/objc-class.h>
 #import <OmniBase/OmniBase.h>
 
-RCS_ID("$Header: /Network/Source/CVS/OmniGroup/Frameworks/OmniFoundation/Scheduling.subproj/OFIObjectSelector.m,v 1.11 2003/01/15 22:52:02 kc Exp $")
+#import "OFMessageQueuePriorityProtocol.h"
+
+RCS_ID("$Header: /Network/Source/CVS/OmniGroup/Frameworks/OmniFoundation/Scheduling.subproj/OFIObjectSelector.m,v 1.16 2004/02/10 04:07:47 kc Exp $")
 
 @implementation OFIObjectSelector
 
@@ -19,22 +21,26 @@ static Class myClass;
 
 + (void)initialize;
 {
-    static BOOL initialized = NO;
-
-    [super initialize];
-    if (initialized)
-	return;
-    initialized = YES;
-
+    OBINITIALIZE;
     myClass = self;
+}
+
+- initForObject:(id)anObject;
+{
+    OBRejectUnusedImplementation(self, _cmd);
+    return nil;
 }
 
 - initForObject:(id)anObject selector:(SEL)aSelector;
 {
-    OBPRECONDITION([anObject respondsToSelector: aSelector]);
+    OBPRECONDITION([anObject respondsToSelector:aSelector]);
 
     [super initForObject:anObject];
+
     selector = aSelector;
+    if ([anObject respondsToSelector:@selector(fixedPriorityForSelector:)])
+        priorityLevel = [anObject fixedPriorityForSelector:aSelector];
+
     return self;
 }
 
@@ -47,6 +53,11 @@ static Class myClass;
         [NSException raise:NSInvalidArgumentException format:@"%s(0x%x) does not respond to the selector %@", ((OFIObjectSelector *)object)->isa->name, (unsigned)object, NSStringFromSelector(selector)];
 
     method->method_imp(object, selector);
+}
+
+- (SEL)selector;
+{
+    return selector;
 }
 
 - (unsigned int)hash;

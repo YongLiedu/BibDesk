@@ -1,9 +1,9 @@
-// Copyright 2000-2003 Omni Development, Inc.  All rights reserved.
+// Copyright 2000-2004 Omni Development, Inc.  All rights reserved.
 //
 // This software may only be used and reproduced according to the
 // terms in the file OmniSourceLicense.html, which should be
 // distributed with this project and can also be found at
-// http://www.omnigroup.com/DeveloperResources/OmniSourceLicense.html.
+// <http://www.omnigroup.com/developer/sourcecode/sourcelicense/>.
 
 #import <OmniFoundation/OFCodeFragment.h>
 
@@ -11,7 +11,7 @@
 #import <Foundation/Foundation.h>
 #import <OmniBase/rcsid.h>
 
-RCS_ID("$Header: /Network/Source/CVS/OmniGroup/Frameworks/OmniFoundation/CoreServicesExtensions/OFCodeFragment.m,v 1.5 2003/02/06 22:31:27 wiml Exp $")
+RCS_ID("$Header: /Network/Source/CVS/OmniGroup/Frameworks/OmniFoundation/CoreServicesExtensions/OFCodeFragment.m,v 1.8 2004/02/10 04:07:42 kc Exp $")
 
 
 // Adapted from code from Doug Davidson at Apple.  This builds a new blob of memory given the instruction template below.  This loads a 32-bit address for the given tvector into a volatile register and then loads the instruction pointer of the code into the count register, the RTOC value into r2 and jumps through the counter.
@@ -176,7 +176,7 @@ static UInt32 templateCode[6] = {0x3D800000, 0x618C0000, 0x800C0000, 0x804C0004,
     if (!func) {
         UInt32 *words;
         
-        words = OFBulkBlockPoolAllocate(&locked_functionBlockPool);
+        words = (UInt32 *)OFBulkBlockPoolAllocate(&locked_functionBlockPool);
         words[0] = templateCode[0] | ((UInt32)tvector >> 16);
         words[1] = templateCode[1] | ((UInt32)tvector & 0xFFFF);
         words[2] = templateCode[2];

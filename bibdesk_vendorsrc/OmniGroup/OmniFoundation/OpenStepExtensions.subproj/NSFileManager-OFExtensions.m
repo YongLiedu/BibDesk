@@ -1,9 +1,9 @@
-// Copyright 1997-2003 Omni Development, Inc.  All rights reserved.
+// Copyright 1997-2004 Omni Development, Inc.  All rights reserved.
 //
 // This software may only be used and reproduced according to the
 // terms in the file OmniSourceLicense.html, which should be
 // distributed with this project and can also be found at
-// http://www.omnigroup.com/DeveloperResources/OmniSourceLicense.html.
+// <http://www.omnigroup.com/developer/sourcecode/sourcelicense/>.
 
 #import "NSFileManager-OFExtensions.h"
 
@@ -15,23 +15,17 @@
 #import "NSString-OFExtensions.h"
 #import "OFUtilities.h"
 
-#ifdef WIN32
-#import <errno.h>
-#else
 #import <sys/errno.h>
-#endif
 #import <sys/param.h>
 #import <stdio.h>
-#ifndef WIN32
 #import <sys/mount.h>
-#include <unistd.h>
-#include <sys/types.h>
-#include <sys/stat.h>
-#include <sys/attr.h>
-#include <fcntl.h>
-#endif
+#import <unistd.h>
+#import <sys/types.h>
+#import <sys/stat.h>
+#import <sys/attr.h>
+#import <fcntl.h>
 
-RCS_ID("$Header: /Network/Source/CVS/OmniGroup/Frameworks/OmniFoundation/OpenStepExtensions.subproj/NSFileManager-OFExtensions.m,v 1.64 2003/04/23 06:34:05 rick Exp $")
+RCS_ID("$Header: /Network/Source/CVS/OmniGroup/Frameworks/OmniFoundation/OpenStepExtensions.subproj/NSFileManager-OFExtensions.m,v 1.69 2004/02/10 04:07:45 kc Exp $")
 @interface NSFileManager (OFPrivate)
 - (int)filesystemStats:(struct statfs *)stats forPath:(NSString *)path;
 - (NSString *)lockFilePathForPath:(NSString *)path;
@@ -52,6 +46,65 @@ static int permissionsMask = 0022;
 
     permissionsMask = umask(permissionsMask);
     umask(permissionsMask); // Restore the original value
+}
+
+// Note that due to the permissions behavior of FSFindFolder, this shouldn't have the security problems that raw calls to -uniqueFilenameFromName: may have.
+- (NSString *)temporaryPathForWritingToPath:(NSString *)path allowOriginalDirectory:(BOOL)allowOriginalDirectory;
+/*" Returns a unique filename in the -temporaryDirectoryForFileSystemContainingPath: for the filesystem containing the given path.  If no suitable temporary items folder is found and allowOriginalDirectory is NO, this will raise.  If allowOriginalDirectory is YES, on the other hand, this will return a file name in the same folder.  Note that passing YES for allowOriginalDirectory could potentially result in security implications of the form noted with -uniqueFilenameFromName:. "*/
+{
+    NSString *temporaryFilePath;
+    NS_DURING {
+        NSString *dir = [self temporaryDirectoryForFileSystemContainingPath:path];
+        temporaryFilePath = [dir stringByAppendingPathComponent:[path lastPathComponent]];
+        temporaryFilePath = [self uniqueFilenameFromName:temporaryFilePath];
+    } NS_HANDLER {
+        if (!allowOriginalDirectory)
+            [localException raise];
+
+        // Try to use the same directory.
+        temporaryFilePath = [[path stringByDeletingPathExtension] stringByAppendingString:@"-######"];
+        temporaryFilePath = [temporaryFilePath stringByAppendingPathExtension:[path pathExtension]];
+        temporaryFilePath = [self tempFilenameFromHashesTemplate:temporaryFilePath];
+    } NS_ENDHANDLER;
+
+    return temporaryFilePath;
+}
+
+// Note that if this raises, a common course of action would be to put the temporary file in the same folder as the original file.  This has the same security problems as -uniqueFilenameFromName:, of course, so we don't want to do that by default.  The calling code should make this decision.
+- (NSString *)temporaryDirectoryForFileSystemContainingPath:(NSString *)path;
+/*" Returns the path to the 'Temporary Items' folder on the same filesystem as the given path.  Raises if there is an error (for example, iDisk doesn't have temporary folders).  The returned directory should be only readable by the calling user, so files written into this directory can be written with the desired final permissions without worrying about security (the expectation being that you'll soon call -exchangeFileAtPath:withFileAtPath:). "*/
+{
+    OSErr err;
+    FSRef ref;
+
+    // The file in question might not exist yet.  This loop assumes that it will terminate due to '/' always being valid.
+    NSString *attempt = path;
+    while (YES) {
+        CFURLRef url = (CFURLRef)[[[NSURL alloc] initFileURLWithPath:attempt] autorelease];
+        if (CFURLGetFSRef((CFURLRef)url, &ref))
+            break;
+        attempt = [attempt stringByDeletingLastPathComponent];
+    }
+
+    FSCatalogInfo catalogInfo;
+    err = FSGetCatalogInfo(&ref, kFSCatInfoVolume, &catalogInfo, NULL, NULL, NULL);
+    if (err != noErr)
+        [NSException raise:NSInvalidArgumentException format:@"Unable to get catalog info for '%@'", path];
+
+    FSRef temporaryItemsRef;
+    err = FSFindFolder(catalogInfo.volume, kTemporaryFolderType, kCreateFolder, &temporaryItemsRef);
+    if (err != noErr)
+        [NSException raise:NSInvalidArgumentException format:@"Unable to find temporary items directory for '%@'", path];
+
+    CFURLRef temporaryItemsURL;
+    temporaryItemsURL = CFURLCreateFromFSRef(kCFAllocatorDefault, &temporaryItemsRef);
+    if (!temporaryItemsURL)
+        [NSException raise:NSInvalidArgumentException format:@"Unable to create URL to temporary items directory for '%@'", path];
+
+    NSString *temporaryItemsPath = [[[(NSURL *)temporaryItemsURL path] copy] autorelease];
+    [(id)temporaryItemsURL release];
+
+    return temporaryItemsPath;
 }
 
 // Create a unique temp filename from a template filename, given a range within the template filename which identifies where the unique portion of the filename is to lie.
@@ -116,6 +169,12 @@ static int permissionsMask = 0022;
 #warning uniqueFilenameFromName: needs fixing
 - (NSString *)uniqueFilenameFromName:(NSString *)filename;
 {
+    return [self  uniqueFilenameFromName:filename create:YES];
+}
+
+// If 'create' is NO, the returned path will not exist.  This could allow another thread/process to steal the filename.
+- (NSString *)uniqueFilenameFromName:(NSString *)filename create:(BOOL)create;
+{
     NSString *directory;
     NSString *name;
     NSString *nameWithHashes;
@@ -124,9 +183,12 @@ static int permissionsMask = 0022;
     int tries = 0;
 
     do {
-        testFD = open([self fileSystemRepresentationWithPath:filename], O_EXCL | O_WRONLY | O_CREAT | O_TRUNC, 0666);
+        const char *fsRep = [self fileSystemRepresentationWithPath:filename];
+        testFD = open(fsRep, O_EXCL | O_WRONLY | O_CREAT | O_TRUNC, 0666);
         if (testFD != -1) {
             close(testFD);
+            if (!create)
+                unlink(fsRep);
             return filename;
         }
         if (errno != EEXIST)
@@ -245,7 +307,7 @@ static int permissionsMask = 0022;
     dirCount = [pathComponents count] - 1;
     // Short-circuit if the final directory already exists
     finalDirectory = [NSString pathWithComponents:[pathComponents subarrayWithRange:NSMakeRange(0, dirCount)]];
-    return [self createPath:finalDirectory attributes:attributes];
+    [self createPath:finalDirectory attributes:attributes];
 }
 
 - (void)createPath:(NSString *)path attributes:(NSDictionary *)attributes;
@@ -263,14 +325,8 @@ static int permissionsMask = 0022;
     if ([self directoryExistsAtPath:path traverseLink:YES])
         return;
 
-#ifdef WIN32
-    if ([path isAbsolutePath])
-        startingIndex = 1; // For "C:/foo/bar", don't try to create "C:"
-    else
-        startingIndex = 0; // For "foo/bar", create "foo"
-#else
-    startingIndex = 0; // UNIX doesn't have weird root paths like "C:"
-#endif
+    startingIndex = 0;
+    
     for (dirIndex = startingIndex; dirIndex < dirCount; dirIndex++) {
         NSString *partialPath;
         BOOL fileExists;
@@ -303,14 +359,8 @@ static int permissionsMask = 0022;
 
     pathComponents = [path pathComponents];
     componentCount = [pathComponents count];
-#ifdef WIN32
-    if ([path isAbsolutePath])
-        startingIndex = 1; // For "C:/foo/bar", don't try to create "C:"
-    else
-        startingIndex = 0; // For "foo/bar", create "foo"
-#else
-    startingIndex = 0; // UNIX doesn't have weird root paths like "C:"
-#endif
+    startingIndex  = 0;
+    
     for (goodComponentsCount = startingIndex; goodComponentsCount < componentCount; goodComponentsCount++) {
         NSString *testPath;
 
@@ -333,13 +383,8 @@ static int permissionsMask = 0022;
         // Returns @"/" on UNIX, and (hopefully) @"C:\" on Windows
         return [pathComponents objectAtIndex:0];
     } else {
-#if defined(WIN32)
-        // Append a trailing backslash to the existing directory
-        return [[NSString pathWithComponents:[pathComponents subarrayWithRange:NSMakeRange(0, goodComponentsCount)]] stringByAppendingString:@"\\"];
-#else
         // Append a trailing slash to the existing directory
         return [[NSString pathWithComponents:[pathComponents subarrayWithRange:NSMakeRange(0, goodComponentsCount)]] stringByAppendingString:@"/"];
-#endif
     }
 }
 
@@ -471,6 +516,59 @@ static int permissionsMask = 0022;
     }
 }
 
+- (void)replaceFileAtPath:(NSString *)originalFile withFileAtPath:(NSString *)newFile;
+/*" Replaces the orginal file with the new file, possibly using underlying filesystem features to do so atomically.  Raises if the operation fails. "*/
+{
+    NSURL *originalURL = [[[NSURL alloc] initFileURLWithPath:originalFile] autorelease];
+    NSURL *newURL = [[[NSURL alloc] initFileURLWithPath:newFile] autorelease];
+
+    // Try FSExchangeObjects.  Under 10.2 this will only work if both files are on the same filesystem and both are files (not folders).  We could check for these conditions up front, but they might fix/extend FSExchangeObjects, so we'll just try it.
+    FSRef originalRef, newRef;
+    if (!CFURLGetFSRef((CFURLRef)originalURL, &originalRef))
+        [NSException raise:NSInvalidArgumentException format:@"Unable to get file reference for '%@'", originalFile];
+    if (!CFURLGetFSRef((CFURLRef)newURL, &newRef))
+        [NSException raise:NSInvalidArgumentException format:@"Unable to get file reference for '%@'", newFile];
+
+    OSErr err = FSExchangeObjects(&originalRef, &newRef);
+    if (err == noErr) {
+        // Delete the original file which is now at the new file path.
+        if (![self removeFileAtPath:newFile handler:nil]) {
+            // We assume that failing to remove the temporary file is not a fatal error and don't raise.
+            NSLog(@"Unable to remove '%@'", newFile);
+        }
+        return;
+    }
+
+    // Do a file renaming dance instead.
+    {
+        // Move the new file to the same directory as the original file.  If the files are on different filesystems, this may involve copying.  We do this before renaming the original to ensure that the destination filesystem has enough room for the new file.
+        originalFile = [originalFile stringByStandardizingPath];
+        NSString *originalDir = [originalFile stringByDeletingLastPathComponent];
+        NSString *temporaryPath = [self uniqueFilenameFromName:[originalDir stringByAppendingPathComponent:[newFile lastPathComponent]] create:NO];
+
+        if (![self movePath:newFile toPath:temporaryPath handler:nil])
+            [NSException raise:NSInvalidArgumentException format:@"Unable to move '%@' to '%@'", newFile, temporaryPath];
+        
+        // Move the original file aside (in the same directory)
+        NSString *originalAside = [self uniqueFilenameFromName:originalFile create:NO];
+        if (![self movePath:originalFile toPath:originalAside handler:nil])
+            [NSException raise:NSInvalidArgumentException format:@"Unable to move '%@' to '%@'", originalFile, originalAside];
+
+        // Move the temp to the original
+        if (![self movePath:temporaryPath toPath:originalFile handler:nil]) {
+            // Move the original back, hopefully.  This still leaves the temporary file in the original's directory.  Don't really want to move it back (might be across filesystems and might be big).  Maybe we should delete it?
+            [self movePath:originalAside toPath:originalFile handler:nil];
+            [NSException raise:NSInvalidArgumentException format:@"Unable to move '%@' to '%@'", temporaryPath, originalFile];
+        }
+
+        // Finally, delete the old original (which has successfully been replaced)
+        if (![self removeFileAtPath:originalAside handler:nil]) {
+            // We assume failure isn't fatal
+            NSLog(@"Unable to remove '%@'", originalAside);
+        }
+    }
+}
+
 //
 
 - (NSNumber *)posixPermissionsForMode:(unsigned int)mode;
@@ -504,7 +602,6 @@ static int permissionsMask = 0022;
 
 - (NSString *)networkMountPointForPath:(NSString *)path returnMountSource:(NSString **)mountSource;
 {
-#ifdef RHAPSODY
     struct statfs stats;
 
     if ([self filesystemStats:&stats forPath:path] == -1)
@@ -517,39 +614,15 @@ static int permissionsMask = 0022;
         *mountSource = [self stringWithFileSystemRepresentation:stats.f_mntfromname length:strlen(stats.f_mntfromname)];
     
     return [self stringWithFileSystemRepresentation:stats.f_mntonname length:strlen(stats.f_mntonname)];
-#else
-#warning -networkMountPointForPath:returnMountSource: not yet implemented for this operating system
-    OBRequestConcreteImplementation(self, _cmd);
-    return nil;
-#endif
 }
 
 - (NSString *)fileSystemTypeForPath:(NSString *)path;
 {
-#if !defined(WIN32) && !defined(sun)
-#ifdef YELLOW_BOX
     struct statfs stats;
 
     if ([[NSFileManager defaultManager] filesystemStats:&stats forPath:path] == -1)
         return nil; // Apparently the file doesn't exist
     return [NSString stringWithCString:stats.f_fstypename];
-#else
-#warning -fileSystemTypeForPath: has a bogus implementation on OPENSTEP/Mach
-    // This should really determine the underlying filesystem type, e.g. ufs, dos, etc.
-    return @"nextstep";
-#endif
-#else
-#ifdef WIN32
-#warning -fileSystemTypeForPath: has a bogus implementation on Windows
-    // This should really determine the underlying filesystem type, e.g. ntfs, fat16, fat32
-    return @"windows";
-#endif // WIN32
-#ifdef sun
-#warning -fileSystemTypeForPath: has a bogus implementation on solaris
-    // This should really be implemented in terms of statvfs
-    return @"solaris";
-#endif // sun
-#endif
 }
 
 typedef struct {
@@ -568,11 +641,6 @@ typedef struct {
 } OFFinderInfo;
 
 - (int)getType:(unsigned long *)typeCode andCreator:(unsigned long *)creatorCode forPath:(NSString *)path;
-#ifdef WIN32
-{
-    return -1;
-}
-#else
 {
     struct attrlist attributeList;
     struct {
@@ -624,11 +692,9 @@ typedef struct {
 
     return errorCode;
 }
-#endif
 
 - (int)setType:(unsigned long)typeCode andCreator:(unsigned long)creatorCode forPath:(NSString *)path;
 {
-#ifndef WIN32
      struct attrlist attributeList;
      struct {
          long ssize;
@@ -675,9 +741,6 @@ typedef struct {
              return errorCode;
      }
      return errorCode;
-#else
-     return -1
-#endif
 }
 
 - (NSString *)resolveAliasAtPath:(NSString *)path
@@ -823,17 +886,11 @@ typedef struct {
 
 - (int)filesystemStats:(struct statfs *)stats forPath:(NSString *)path;
 {
-#ifndef WIN32
     if ([[[self fileAttributesAtPath:path traverseLink:NO] fileType] isEqualToString:NSFileTypeSymbolicLink])
         // BUG: statfs() will return stats on the file we link to, not the link itself.  We want stats on the link itself, but there is no lstatfs().  As a mostly-correct hackaround, I get the stats on the link's parent directory. This will fail if you NFS-mount a link as the source from a remote machine -- it'll report that the link isn't network mounted, because its local parent dir isn't.  Hopefully, this isn't real common.
         return statfs([self fileSystemRepresentationWithPath:[path stringByDeletingLastPathComponent]], stats);
     else
         return statfs([self fileSystemRepresentationWithPath:path], stats);
-#else
-#warning -filesystemStats:forPath: not yet implemented for this operating system
-    OBRequestConcreteImplementation(self, _cmd);
-    return -1;
-#endif
 }
 
 - (NSString *)lockFilePathForPath:(NSString *)path;
@@ -843,40 +900,3 @@ typedef struct {
 }
 
 @end
-
-#if !defined(YELLOW_BOX) && !defined(WIN32) && defined(NeXT)
-
-// OPENSTEP/Mach 4.2 had a bug where -createFileAtPath:contents:attributes: with nil attributes would create a file with the permissions of 0700 (u=rwx), rather than 0666 (a=rw) modified by the umask.  Thus, all files created using this method (by OmniWeb, for example) were made executable, which meant that when opening them in the Workspace tried to execute them rather than view them.
-
-@interface NSFileManager (OFBugFix)
-- (BOOL)OFCreateFileAtPath:(NSString *)path contents:(NSData *)data attributes:(NSDictionary *)attr;
-@end
-
-@implementation NSFileManager (OFBugFix)
-
-static BOOL (*originalCreateFileAtPathIMP)(id, SEL, NSString *, NSData *, NSDictionary *);
-
-+ (void)didLoad;
-{
-    originalCreateFileAtPathIMP = (typeof(originalCreateFileAtPathIMP))OBReplaceMethodImplementationWithSelector(self, @selector(createFileAtPath:contents:attributes:), @selector(OFCreateFileAtPath:contents:attributes:));
-}
-
-- (BOOL)OFCreateFileAtPath:(NSString *)path contents:(NSData *)data attributes:(NSDictionary *)attributes;
-{
-    NSMutableDictionary *fixedAttributes;
-    BOOL success;
-
-    if ([attributes objectForKey:NSFilePosixPermissions] != nil) {
-        return originalCreateFileAtPathIMP(self, _cmd, path, data, attributes);
-    }
-
-    fixedAttributes = [[NSMutableDictionary alloc] initWithDictionary:attributes];
-    [fixedAttributes setObject:[self defaultFilePermissions] forKey:NSFilePosixPermissions];
-    success = originalCreateFileAtPathIMP(self, _cmd, path, data, fixedAttributes);
-    [fixedAttributes release];
-    return success;
-}
-
-@end
-
-#endif

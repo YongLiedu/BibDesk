@@ -1,21 +1,55 @@
-// Copyright 2000-2003 Omni Development, Inc.  All rights reserved.
+// Copyright 2000-2004 Omni Development, Inc.  All rights reserved.
 //
 // This software may only be used and reproduced according to the
 // terms in the file OmniSourceLicense.html, which should be
 // distributed with this project and can also be found at
-// http://www.omnigroup.com/DeveloperResources/OmniSourceLicense.html.
+// <http://www.omnigroup.com/developer/sourcecode/sourcelicense/>.
 
 #import <OmniFoundation/OFStringDecoder.h>
+#import <OmniFoundation/CFString-OFExtensions.h>
+#import <CoreFoundation/CFCharacterSet.h>
 #import <Foundation/Foundation.h>
 #import <OmniBase/OmniBase.h>
 
-RCS_ID("$Header: /Network/Source/CVS/OmniGroup/Frameworks/OmniFoundation/OFStringDecoder.m,v 1.10 2003/01/15 22:51:50 kc Exp $")
+#define OSX_10_1_KLUDGE
+
+RCS_ID("$Header: /Network/Source/CVS/OmniGroup/Frameworks/OmniFoundation/OFStringDecoder.m,v 1.14 2004/02/10 04:07:41 kc Exp $")
 
 /* From the Unicode standard:
  * U+FFFD REPLACEMENT CHARACTER 
  * used to replace an incoming character whose value is unknown or unrepresentable in Unicode
  */
 #define UNKNOWN_CHAR OF_UNICODE_REPLACEMENT_CHARACTER
+
+/* Under 10.1.x, CFCharacterSets are pretty much useless, and aren't toll-free-bridged with NSCharacterSets. So we use NSCharacterSets here ... some happy day, we will be free of the burden of 10.1 support ... */
+#ifdef OSX_10_1_KLUDGE
+#define CFCharacterSetRef NSCharacterSet *
+static CFCharacterSetRef kludge_CreateCharacterSet(CFRange r)
+{
+    return [[NSCharacterSet characterSetWithRange:(NSRange){r.location, r.length}] retain];
+}
+static Boolean kludge_FindCharacterFromSet(CFStringRef str, CFCharacterSetRef set, CFRange r, CFIndex opts, CFRange *result)
+{
+    NSRange found = [(NSString *)str rangeOfCharacterFromSet:set options:opts range:(NSRange){r.location, r.length}];
+    if (found.length > 0) {
+        result->location = found.location;
+        result->length = found.length;
+        return TRUE;
+    } else {
+        return FALSE;
+    }
+}
+#define CFStringFindCharacterFromSet(a,b,c,d,e) kludge_FindCharacterFromSet(a,b,c,d,e)
+#define CFCharacterSetCreateWithCharactersInRange(a,b) kludge_CreateCharacterSet(b)
+#define CFCharacterSetCreateInvertedSet(a,b) [[(b) invertedSet] retain]
+#define ReleaseCharacterSet(b) [(b) release]
+#else
+#define ReleaseCharacterSet(b) CFRelease(b)
+#endif /* OSX_10_1_KLUDGE */
+
+/* This is where we stash high-bit-set bytes when we're using OFDeferredASCIISupersetStringEncoding. This value was arbitrarily chosen to be somewhere in the Supplementary Private Use Area A. Anything in this range should be re-coded before it leaves this process, so it's OK to set this to a different value if necessary. */
+#define OFDeferredASCIISupersetBase (0xFA00)
+static CFCharacterSetRef deferredCharactersSet = NULL;
 
 NSString *OFCharacterConversionExceptionName = @"OFCharacterConversionException";
 
@@ -206,6 +240,8 @@ struct OFCharacterScanResult OFScanCharactersIntoBuffer(struct OFStringDecoderSt
             SINGLE_BYTE_MAPPING( ((aCharacter & 0xE0) == 0x80) ? UNKNOWN_CHAR : (unichar)aCharacter );
         case kCFStringEncodingWindowsLatin1:
             SINGLE_BYTE_MAPPING( ((aCharacter & 0xE0) == 0x80) ? cp1252UpperRegionMap[aCharacter - 0x80] : (unichar)aCharacter );
+        case OFDeferredASCIISupersetStringEncoding:
+            SINGLE_BYTE_MAPPING( ((aCharacter & 0x80) == 0x00) ? (unichar)aCharacter : (OFDeferredASCIISupersetBase + (unichar)aCharacter) )
         
         case kCFStringEncodingUTF8:
             return OFScanUTF8CharactersIntoBuffer(state, in_bytes, in_bytes_count, out_characters, out_characters_max);
@@ -240,6 +276,7 @@ BOOL OFCanScanEncoding(CFStringEncoding anEncoding)
         case kCFStringEncodingISOLatin1:
         case kCFStringEncodingWindowsLatin1:
         case kCFStringEncodingUTF8:
+        case OFDeferredASCIISupersetStringEncoding:
             return YES;
         SIMPLE_FOUNDATION_ENCODINGS
             return YES;
@@ -254,6 +291,7 @@ BOOL OFEncodingIsSimple(CFStringEncoding anEncoding)
         case kCFStringEncodingASCII:
         case kCFStringEncodingISOLatin1:
         case kCFStringEncodingWindowsLatin1:
+        case OFDeferredASCIISupersetStringEncoding:
             return YES;
         SIMPLE_FOUNDATION_ENCODINGS
             return YES;
@@ -292,3 +330,120 @@ BOOL OFDecoderContainsPartialCharacters(struct OFStringDecoderState state)
     
     /* NB: If we ever implement shift-JIS or other encodings with shift sequences, we'll have to return YES if we're in a shift state other than the initial state, or else the callers of this function may behave incorrectly. In that case perhaps we should rename this function as well, or have two functions. */
 }
+
+CFDataRef OFCreateDataFromStringWithDeferredEncoding(CFStringRef str, CFRange rangeToConvert, CFStringEncoding newEncoding, UInt8 lossByte)
+{
+    CFCharacterSetRef nonDeferredCharacters;
+    CFRange deferred;
+    CFMutableDataRef octets;
+    CFIndex conversionEnd, slowCursor, fastCursor;
+
+    OBASSERT(deferredCharactersSet != NULL);
+
+    conversionEnd = rangeToConvert.location + rangeToConvert.length;
+
+    if (!CFStringFindCharacterFromSet(str, deferredCharactersSet, rangeToConvert, 0, &deferred)) {
+        /* Input string contains no deferred characters, so we don't need to do anything special */
+        if (rangeToConvert.location == 0 && rangeToConvert.length == CFStringGetLength(str))
+            return CFStringCreateExternalRepresentation(kCFAllocatorDefault, str, newEncoding, lossByte);
+        fastCursor = conversionEnd;
+    } else {
+        fastCursor = deferred.location;
+    }
+
+    nonDeferredCharacters = CFCharacterSetCreateInvertedSet(kCFAllocatorDefault, deferredCharactersSet);
+    octets = CFDataCreateMutable(kCFAllocatorDefault, 0);
+    
+    slowCursor = rangeToConvert.location;
+
+    while (slowCursor < conversionEnd) {
+
+        if (slowCursor < fastCursor) {
+            slowCursor += OFAppendStringBytesToBuffer(octets, str, (CFRange){ location:slowCursor, length: fastCursor - slowCursor }, newEncoding, lossByte, ( slowCursor == 0 )? TRUE : FALSE);
+        }
+        OBASSERT(slowCursor == fastCursor);
+
+        if (CFStringFindCharacterFromSet(str, nonDeferredCharacters, ((CFRange){ location:slowCursor, length:conversionEnd-slowCursor }), 0, &deferred)) {
+            unichar *unicharPtr;
+            UInt8 *charPtr;
+            CFIndex charCount;
+            CFIndex precedingChars;
+            
+            fastCursor = deferred.location;
+
+            precedingChars = CFDataGetLength(octets);
+            charCount = fastCursor - slowCursor;
+            CFDataSetLength(octets, precedingChars + (sizeof(unichar) * charCount));
+            charPtr = CFDataGetMutableBytePtr(octets) + precedingChars;
+            unicharPtr = (unichar *)charPtr;
+            CFStringGetCharacters(str, (CFRange){slowCursor, charCount}, unicharPtr);
+            precedingChars += charCount;
+            slowCursor = fastCursor; // slowCursor += charCount; 
+            while (charCount) {
+                OBASSERT( *unicharPtr >= OFDeferredASCIISupersetBase && *unicharPtr < (OFDeferredASCIISupersetBase+256) );
+                *charPtr = ( *unicharPtr - OFDeferredASCIISupersetBase );
+                charPtr ++;
+                unicharPtr ++;
+                charCount --;
+                // precedingChars ++;
+                // slowCursor ++;
+            }
+            CFDataSetLength(octets, precedingChars);
+        }
+
+        if (CFStringFindCharacterFromSet(str, deferredCharactersSet, ((CFRange){ location:slowCursor, length:conversionEnd-slowCursor }), 0, &deferred))
+            fastCursor = deferred.location;
+        else
+            fastCursor = conversionEnd;
+
+    }
+
+    ReleaseCharacterSet(nonDeferredCharacters);
+
+    return octets;
+}
+
+OmniFoundation_EXTERN NSString *OFApplyDeferredEncoding(NSString *str, CFStringEncoding newEncoding)
+{
+    CFDataRef octets;
+    CFStringRef result;
+    unsigned int stringLength = [str length];
+
+    if (str == nil)
+        return str;
+
+    octets = OFCreateDataFromStringWithDeferredEncoding((CFStringRef)str, (CFRange){location: 0, length:stringLength}, newEncoding, 0);
+    if (!octets)
+        return nil;
+
+    result = CFStringCreateFromExternalRepresentation(kCFAllocatorDefault, octets, newEncoding);
+    CFRelease(octets);
+
+    return [(NSString *)result autorelease];
+}
+
+OmniFoundation_EXTERN BOOL OFStringContainsDeferredEncodingCharacters(NSString *str)
+{
+    int stringLength;
+    CFRange firstDeferredCharacter;
+
+    if (str == nil)
+        return NO;
+    stringLength = [str length];
+    if (stringLength == 0)
+        return NO;
+    if (CFStringFindCharacterFromSet((CFStringRef)str, deferredCharactersSet,
+                                     ((CFRange){location: 0, length:stringLength}), 0,
+                                     &firstDeferredCharacter)) {
+        return YES;
+    }
+    return NO;
+}
+
+OmniFoundation_PRIVATE_EXTERN void OFStringDecoder_DidLoad(void)
+{
+    if (deferredCharactersSet == NULL) {
+        deferredCharactersSet = CFCharacterSetCreateWithCharactersInRange(kCFAllocatorDefault, ((CFRange){ location: OFDeferredASCIISupersetBase, length: 256 }));
+    }
+}
+

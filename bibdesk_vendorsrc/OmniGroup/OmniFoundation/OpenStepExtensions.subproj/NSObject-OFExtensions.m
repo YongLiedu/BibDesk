@@ -1,16 +1,16 @@
-// Copyright 1997-2003 Omni Development, Inc.  All rights reserved.
+// Copyright 1997-2004 Omni Development, Inc.  All rights reserved.
 //
 // This software may only be used and reproduced according to the
 // terms in the file OmniSourceLicense.html, which should be
 // distributed with this project and can also be found at
-// http://www.omnigroup.com/DeveloperResources/OmniSourceLicense.html.
+// <http://www.omnigroup.com/developer/sourcecode/sourcelicense/>.
 
 #import <OmniFoundation/NSObject-OFExtensions.h>
 #import "NSString-OFExtensions.h"
 #import <Foundation/Foundation.h>
 #import <OmniBase/OmniBase.h>
 
-RCS_ID("$Header: /Network/Source/CVS/OmniGroup/Frameworks/OmniFoundation/OpenStepExtensions.subproj/NSObject-OFExtensions.m,v 1.41 2003/03/26 21:19:19 toon Exp $")
+RCS_ID("$Header: /Network/Source/CVS/OmniGroup/Frameworks/OmniFoundation/OpenStepExtensions.subproj/NSObject-OFExtensions.m,v 1.49 2004/02/10 04:07:46 kc Exp $")
 
 // These methods were introduced in 10.2.  We test to make sure the target responds before sending them, but we want to declare them as well so we won't get warnings on 10.1
 
@@ -21,96 +21,6 @@ RCS_ID("$Header: /Network/Source/CVS/OmniGroup/Frameworks/OmniFoundation/OpenSte
 
 @implementation NSObject (OFExtensions)
 
-// +initializeAllClasses is necessary because class_initialize() isn't thread safe.  That is, a given +initialize can be called simultaneously in several threads, which not only confuses it, but can also confuse the runtime.
-
-+ (void)didLoad;
-{
-    NSString *processName;
-
-    // Call +initializeAllClasses when the app is about to go multithreaded.  This gives IB fits, so don't do it in common utility applications.
-    processName = [[NSProcessInfo processInfo] processName];
-    if (![processName isEqualToString:@"InterfaceBuilder"] && ![processName isEqualToString:@"EOModeler"])
-        [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(initializeAllClasses) name:NSWillBecomeMultiThreadedNotification object:nil];
-}
-
-
-#define SKIP_CLASS_NAMED(aName) \
-do { \
-    Class aClass; \
- \
-    aClass = NSClassFromString(aName); \
-    if (aClass != nil) \
-        NSHashInsertKnownAbsent(skipClasssesHashTable, aClass); \
-} while (0)
-
-+ (void)initializeAllClasses;
-{
-    static NSHashTable *skipClasssesHashTable = NULL;
-    int classCount = 0, newClassCount;
-    Class *classes = NULL;
-    Method initializeMethod;
-    SEL initializeSelector = @selector(initialize);
-
-    OMNI_POOL_START {
-
-        if (skipClasssesHashTable == NULL) {
-            skipClasssesHashTable = NSCreateHashTable(NSNonOwnedPointerHashCallBacks, 20);
-            // Skip some classes we never want to initialize
-            SKIP_CLASS_NAMED(@"HTMLCheckBoxInspector");
-            SKIP_CLASS_NAMED(@"HTMLPageToolbarController");
-            SKIP_CLASS_NAMED(@"NMSScriptedClass");
-            SKIP_CLASS_NAMED(@"NSDataLinkManager");
-            SKIP_CLASS_NAMED(@"NSInvocationBuilder");
-            SKIP_CLASS_NAMED(@"NSMovieView");
-            SKIP_CLASS_NAMED(@"NSSimpleNumberFormatter");
-            SKIP_CLASS_NAMED(@"NSTabView");
-            SKIP_CLASS_NAMED(@"OFForwardObject");
-            SKIP_CLASS_NAMED(@"OFRetainableObject");
-        }
-
-        // Get the class list
-        newClassCount = objc_getClassList(NULL, 0);
-        while (classCount < newClassCount) {
-            classCount = newClassCount;
-            classes = realloc(classes, sizeof(Class) * classCount);
-            newClassCount = objc_getClassList(classes, classCount);
-        }
-        // Now, use the class list; if NULL, there are no classes.  (And that would happen how?  Oh well, might as well code this safely...)
-        if (classes != NULL) {
-            unsigned int classIndex;
-            
-            // Loop over the gathered classes
-            for (classIndex = 0; classIndex < classCount; classIndex++) {
-                Class aClass;
-                NSString *className;
-
-                aClass = classes[classIndex];
-                className = NSStringFromClass(aClass);
-                if (CLS_GETINFO(aClass->isa, CLS_INITIALIZED) || NSHashGet(skipClasssesHashTable, aClass))
-                    continue;
-                if ([className hasPrefix:@"NSZombie"]) {
-                    // Hangs in GDB under Mac OS X DP3.
-                    SKIP_CLASS_NAMED(className);
-                    continue;
-                }
-                initializeMethod = class_getClassMethod(aClass, initializeSelector);
-                if (initializeMethod) {
-                    NS_DURING {
-                        // NSLog(@"Initializing class: %s", aClass->name);
-                        [aClass class];
-                    } NS_HANDLER {
-                        fprintf(stderr, "Exception raised by +[%s class]: %s\n", aClass->name, [[localException reason] UTF8String]);
-                    } NS_ENDHANDLER;
-                }
-            }
-        }
-
-        // Free the class list
-        free(classes);
-
-    } OMNI_POOL_END;
-}
-
 static BOOL implementsInstanceMethod(struct objc_class *class, SEL aSelector)
 {
     struct objc_method_list *methodList;
@@ -118,12 +28,8 @@ static BOOL implementsInstanceMethod(struct objc_class *class, SEL aSelector)
 
     /* Check only this class, NOT any superclasses. */
 
-#if defined(OBJC_NEXT_METHOD_LIST)
     void *iterator = 0;
     while ((methodList = class_nextMethodList(class, &iterator))) {
-#else
-    for (methodList = class->methods; methodList; methodList = methodList->method_next) {
-#endif
         for (methodIndex = 0; methodIndex < methodList->method_count; methodIndex++) {
             if (methodList->method_list[methodIndex].method_name == aSelector)
                 return YES;
@@ -159,7 +65,14 @@ static BOOL implementsInstanceMethod(struct objc_class *class, SEL aSelector)
 
 @implementation NSObject (OFASExtensions) 
 
-+ (id)coerceRecord:(NSDictionary *)dictionary toClass:(Class)aClass
++ (void)registerConversionFromRecord;
+{
+    NSScriptCoercionHandler *handler = [NSScriptCoercionHandler sharedCoercionHandler];
+    [handler registerCoercer:self selector:@selector(coerceObject:toRecordClass:) toConvertFromClass:self toClass:[NSDictionary class]];
+    [handler registerCoercer:self selector:@selector(coerceRecord:toClass:) toConvertFromClass:[NSDictionary class] toClass:self];
+}
+
++ (id)coerceRecord:(NSDictionary *)dictionary toClass:(Class)aClass;
 {
     id result = [[aClass alloc] init];
 
@@ -170,13 +83,6 @@ static BOOL implementsInstanceMethod(struct objc_class *class, SEL aSelector)
 + (id)coerceObject:(id)object toRecordClass:(Class)aClass;
 {
     return [object appleScriptAsRecord];
-}
-
-+ (void)registerConversionFromRecord;
-{
-    NSScriptCoercionHandler *handler = [NSScriptCoercionHandler sharedCoercionHandler];
-    [handler registerCoercer:self selector:@selector(coerceObject:toRecordClass:) toConvertFromClass:self toClass:[NSDictionary class]];
-    [handler registerCoercer:self selector:@selector(coerceRecord:toClass:) toConvertFromClass:[NSDictionary class] toClass:self];
 }
 
 - (BOOL)ignoreAppleScriptValueForClassID;
@@ -264,7 +170,7 @@ static BOOL implementsInstanceMethod(struct objc_class *class, SEL aSelector)
         [cachedTerminology setObject:result forKey:suiteName];
         [result release];
     }
-    return [result objectForKey:@"Classes"];
+    return result;
 }
 
 
@@ -275,7 +181,7 @@ static BOOL implementsInstanceMethod(struct objc_class *class, SEL aSelector)
     NSScriptClassDescription *classDescription;
     NSString *path;
     NSBundle *bundle;
-    NSDictionary *suiteInfo, *typeInfo;
+    NSDictionary *suiteInfo, *typeInfo, *terminologyInfo;
     NSString *type;
     NSEnumerator *enumerator, *codeEnumerator;
 
@@ -291,16 +197,19 @@ static BOOL implementsInstanceMethod(struct objc_class *class, SEL aSelector)
         return nil;
     suiteInfo = [NSDictionary dictionaryWithContentsOfFile:path];
     suiteInfo = [suiteInfo objectForKey:@"Enumerations"];
+    terminologyInfo = [[self _appleScriptTerminologyForSuite:[classDescription suiteName]] objectForKey:@"Enumerations"];
     enumerator = [suiteInfo keyEnumerator];
     while ((type = [enumerator nextObject])) {
         NSString *code, *value;
+        NSDictionary *terminology;
         
         typeInfo = [[suiteInfo objectForKey:type] objectForKey:@"Enumerators"];
+        terminology = [terminologyInfo objectForKey:type];
         mapping = [[NSMutableDictionary alloc] init];
         codeEnumerator = [typeInfo keyEnumerator];
         while ((value = [codeEnumerator nextObject])) {
             code = [typeInfo objectForKey:value];
-            [mapping setObject:value forKey:[NSNumber numberWithLong:[code fourCharCodeValue]]];
+            [mapping setObject:[[terminology objectForKey:value] objectForKey:@"Name"] forKey:[NSNumber numberWithLong:[code fourCharCodeValue]]];
         }
         [cachedEnumerations setObject:mapping forKey:type];
         [mapping release];
@@ -321,7 +230,7 @@ static BOOL implementsInstanceMethod(struct objc_class *class, SEL aSelector)
         classDescription = test;
     }
 
-    terminology = [self _appleScriptTerminologyForSuite:[classDescription suiteName]];
+    terminology = [[self _appleScriptTerminologyForSuite:[classDescription suiteName]] objectForKey:@"Classes"];
     return [[[[terminology objectForKey:[classDescription className]] objectForKey:@"Attributes"] objectForKey:key] objectForKey:@"Name"];
 }
 
@@ -365,8 +274,6 @@ static BOOL implementsInstanceMethod(struct objc_class *class, SEL aSelector)
 - (NSString *)stringValueForValue:(id)value ofKey:(NSString *)key;
 {
     NSString *type, *enumerationValue;
-    NSArray *arrayValue;
-    NSScriptCoercionHandler *coercer;
 
     if ([value isKindOfClass:[NSString class]])
         return [NSString stringWithFormat:@"\"%@\"", value];
@@ -396,12 +303,7 @@ static BOOL implementsInstanceMethod(struct objc_class *class, SEL aSelector)
         return [NSString stringWithFormat:@"{%@}", [parts componentsJoinedByString:@", "]];
     }
 
-    coercer = [NSScriptCoercionHandler sharedCoercionHandler];
-    arrayValue = [coercer coerceValue:value toClass:[NSArray class]];
-    if ([arrayValue isKindOfClass:[NSArray class]])
-        return [NSString stringWithFormat:@"{%@}", [arrayValue componentsJoinedByString:@", "]];
-    else
-        return [value appleScriptMakeProperties];
+    return [value appleScriptMakeProperties];
 }
 
 - (NSString *)appleScriptMakeProperties;
@@ -452,7 +354,7 @@ static BOOL implementsInstanceMethod(struct objc_class *class, SEL aSelector)
         return @"";
     
     classDescription = (NSScriptClassDescription *)[self classDescription];
-    terminology = [[self _appleScriptTerminologyForSuite:[classDescription suiteName]] objectForKey:[classDescription className]];
+    terminology = [[[self _appleScriptTerminologyForSuite:[classDescription suiteName]] objectForKey:@"Classes"] objectForKey:[classDescription className]];
     if ([properties isEqualToString:@"{}"])
         return [NSString stringWithFormat:@"make new %@ at %@\r", [terminology objectForKey:@"Name"], aLocationSpecifier];
     else

@@ -1,9 +1,9 @@
-// Copyright 1997-2003 Omni Development, Inc.  All rights reserved.
+// Copyright 1997-2004 Omni Development, Inc.  All rights reserved.
 //
 // This software may only be used and reproduced according to the
 // terms in the file OmniSourceLicense.html, which should be
 // distributed with this project and can also be found at
-// http://www.omnigroup.com/DeveloperResources/OmniSourceLicense.html.
+// <http://www.omnigroup.com/developer/sourcecode/sourcelicense/>.
 
 #import <OmniFoundation/NSArray-OFExtensions.h>
 
@@ -14,7 +14,7 @@
 #import <OmniFoundation/OFRandom.h>
 #import <OmniFoundation/NSString-OFExtensions.h>
 
-RCS_ID("$Header: /Network/Source/CVS/OmniGroup/Frameworks/OmniFoundation/OpenStepExtensions.subproj/NSArray-OFExtensions.m,v 1.28 2003/04/02 23:55:23 ryan Exp $")
+RCS_ID("$Header: /Network/Source/CVS/OmniGroup/Frameworks/OmniFoundation/OpenStepExtensions.subproj/NSArray-OFExtensions.m,v 1.34 2004/02/10 04:07:45 kc Exp $")
 
 @implementation NSArray (OFExtensions)
 
@@ -164,6 +164,46 @@ RCS_ID("$Header: /Network/Source/CVS/OmniGroup/Frameworks/OmniFoundation/OpenSte
     return NSNotFound;
 }
 
+static int _compareWithSelector(id obj1, id obj2, void *context)
+{
+    return (int)objc_msgSend(obj1, (SEL)context, obj2);
+}
+
+- (BOOL) isSortedUsingSelector:(SEL)selector;
+{
+    return [self isSortedUsingFunction:_compareWithSelector context:selector];
+}
+
+- (BOOL) isSortedUsingFunction:(int (*)(id, id, void *))comparator context:(void *)context;
+{
+    unsigned int index, count;
+
+    count = [self count];
+    if (count < 2)
+        return YES;
+
+    id obj1, obj2;
+    obj2 = [self objectAtIndex: 0];
+    for (index = 1; index < count; index++) {
+        obj1 = obj2;
+        obj2 = [self objectAtIndex: index];
+        if (comparator(obj1, obj2, context) < 0)
+            return NO;
+    }
+
+    return YES;
+}
+
+- (void)makeObjectsPerformSelector:(SEL)selector withObject:(id)arg1 withObject:(id)arg2;
+{
+    unsigned int objectIndex, objectCount;
+    objectCount = CFArrayGetCount((CFArrayRef)self);
+    for (objectIndex = 0; objectIndex < objectCount; objectIndex++) {
+        id object = (id)CFArrayGetValueAtIndex((CFArrayRef)self, objectIndex);
+        objc_msgSend(object, selector, arg1, arg2);
+    }
+}
+
 - (NSDecimalNumber *)decimalNumberSumForSelector:(SEL)aSelector;
 {
     NSDecimalNumber *result;
@@ -216,6 +256,19 @@ RCS_ID("$Header: /Network/Source/CVS/OmniGroup/Frameworks/OmniFoundation/OpenSte
     }
 
     return results;
+}
+
+- (NSArray *)arrayByRemovingObject:(id)anObject;
+{
+    NSMutableArray *filteredArray;
+    
+    if (![self containsObject:anObject])
+        return [NSArray arrayWithArray:self];
+
+    filteredArray = [NSMutableArray arrayWithArray:self];
+    [filteredArray removeObject:anObject];
+
+    return [NSArray arrayWithArray:filteredArray];
 }
 
 - (NSArray *)arrayByRemovingObjectIdenticalTo:(id)anObject;
@@ -443,6 +496,19 @@ RCS_ID("$Header: /Network/Source/CVS/OmniGroup/Frameworks/OmniFoundation/OpenSte
     }
 }
 
+// Returns YES if the two arrays contain exactly the same pointers in the same order.  That is, this doesn't use -isEqual: on the components
+- (BOOL)isIdenticalToArray:(NSArray *)otherArray;
+{
+    unsigned int index = [self count];
+
+    if (index != [otherArray count])
+        return NO;
+    while (index--)
+        if ([self objectAtIndex:index] != [otherArray objectAtIndex:index])
+            return NO;
+    return YES;
+}
+
 // -containsObjectsInOrder: moved from TPTrending 6Dec2001 wiml
 - (BOOL)containsObjectsInOrder:(NSArray *)orderedObjects
 {
@@ -471,6 +537,11 @@ RCS_ID("$Header: /Network/Source/CVS/OmniGroup/Frameworks/OmniFoundation/OpenSte
     }
     
     return YES;
+}
+
+- (BOOL)containsObjectIdenticalTo:anObject;
+{
+    return [self indexOfObjectIdenticalTo:anObject] != NSNotFound;
 }
 
 @end

@@ -1,9 +1,9 @@
-// Copyright 1997-2003 Omni Development, Inc.  All rights reserved.
+// Copyright 1997-2004 Omni Development, Inc.  All rights reserved.
 //
 // This software may only be used and reproduced according to the
 // terms in the file OmniSourceLicense.html, which should be
 // distributed with this project and can also be found at
-// http://www.omnigroup.com/DeveloperResources/OmniSourceLicense.html.
+// <http://www.omnigroup.com/developer/sourcecode/sourcelicense/>.
 
 #import <OmniFoundation/OFBundleRegistry.h>
 
@@ -15,10 +15,7 @@
 #import <OmniFoundation/NSMutableSet-OFExtensions.h>
 #import <OmniFoundation/OFBundledClass.h>
 
-#import "NSBundle-OFFixes.h"
-
-
-RCS_ID("$Header: /Network/Source/CVS/OmniGroup/Frameworks/OmniFoundation/OFBundleRegistry.m,v 1.50 2003/03/12 00:07:10 wiml Exp $")
+RCS_ID("$Header: /Network/Source/CVS/OmniGroup/Frameworks/OmniFoundation/OFBundleRegistry.m,v 1.58 2004/02/10 04:07:40 kc Exp $")
 
 /* Bundle descriptions are currently NSMutableDictionaries with the following keys:
 
@@ -148,9 +145,9 @@ static NSArray *oldDisabledBundleNames;
 
 @implementation OFBundleRegistry (Private)
 
-static DEFINE_NSSTRING(OFBundleRegistryConfig);
-static DEFINE_NSSTRING(OFRequiredSoftwareVersions);
-static DEFINE_NSSTRING(OFRegistrations);
+static NSString *OFBundleRegistryConfig = @"OFBundleRegistryConfig";
+static NSString *OFRequiredSoftwareVersions = @"OFRequiredSoftwareVersions";
+static NSString *OFRegistrations = @"OFRegistrations";
 
 static NSString *OFBundleRegistryConfigSearchPaths = @"SearchPaths";
 static NSString *OFBundleRegistryConfigAppWrapperPath = @"AppWrapper";
@@ -160,8 +157,6 @@ static NSString *OFBundleRegistryConfigLogBundleRegistration = @"LogBundleRegist
 
 NSString *OFBundleRegistryDisabledBundlesDefaultsKey = @"DisabledBundles";
 NSString *OFBundleRegistryChangedNotificationName = @"OFBundleRegistry changed";
-
-// static NSString *frameworkExtension = @"framework"; No longer used.
 
 static NSDictionary *configDictionary = nil;
 static BOOL OFBundleRegistryDebug = NO;
@@ -221,22 +216,15 @@ static BOOL OFBundleRegistryDebug = NO;
         standardPath = [newPath copy];
         [newPath release];
     } else {
-        // standardPath = ("~/Library/Components", "/Library/Components", "/Local/Library/Components", "/Network/Library/Components", "/System/Library/Components", "/LocalLibrary/Components", "/NextLibrary/Components", "AppWrapper");
+        // standardPath = ("~/Library/Components", "/Library/Components", "/Network/Library/Components", "/System/Library/Components", "AppWrapper");
         standardPath = [[NSArray alloc] initWithObjects:[NSString pathWithComponents:
             // User's library directory
             [NSArray arrayWithObjects:NSHomeDirectory(), @"Library", @"Components", nil]],
 
             // Standard Mac OS X library directories
             [NSString pathWithComponents:[NSArray arrayWithObjects:@"/", @"Library", @"Components", nil]],
-            
-            // Standard Rhapsody library directories
-            [NSString pathWithComponents:[NSArray arrayWithObjects:@"/", @"Local", @"Library", @"Components", nil]],
             [NSString pathWithComponents:[NSArray arrayWithObjects:@"/", @"Network", @"Library", @"Components", nil]],
             [NSString pathWithComponents:[NSArray arrayWithObjects:@"/", @"System", @"Library", @"Components", nil]],
-
-            // Standard OPENSTEP library directories
-            [NSString pathWithComponents:[NSArray arrayWithObjects:@"/", @"LocalLibrary", @"Components", nil]],
-            [NSString pathWithComponents:[NSArray arrayWithObjects:@"/", @"NextLibrary", @"Components", nil]],
 
             // App wrapper
             mainBundleResourcesPath,
@@ -260,9 +248,6 @@ static BOOL OFBundleRegistryDebug = NO;
     // The frameworks and main bundle are already loaded, so we should register them first.
     frameworkEnumerator = [[NSBundle allFrameworks] objectEnumerator];
     while ((framework = [frameworkEnumerator nextObject])) {
-#ifdef __MACH__
-        [framework fixFrameworkVersioning];
-#endif
         [linkedBundles addObject:[NSMutableDictionary dictionaryWithObjectsAndKeys:framework, @"bundle", @"YES", @"loaded", @"YES", @"preloaded", nil]];
     }
     
@@ -417,7 +402,7 @@ static BOOL OFBundleRegistryDebug = NO;
     NSFileManager *fileManager;
 
     if (!(bundleExtensions = [configDictionary objectForKey:OFBundleRegistryConfigBundleExtensions]))
-        bundleExtensions = [NSArray arrayWithObjects:@"omni", /* frameworkExtension, */ nil];
+        bundleExtensions = [NSArray arrayWithObjects:@"omni", nil];
 
     disabledBundleNamesArray = [[NSUserDefaults standardUserDefaults] arrayForKey:OFBundleRegistryDisabledBundlesDefaultsKey]; 
     if (disabledBundleNamesArray)
@@ -472,10 +457,10 @@ static BOOL OFBundleRegistryDebug = NO;
     return [bundles count] > 0 ? bundles : nil;
 }
 
-+ (void)registerDictionary:(NSDictionary *)registrationDictionary forBundle:(NSDictionary *)bundleDescription;
++ (void)registerDictionary:(NSDictionary *)registrationClassToOptionsDictionary forBundle:(NSDictionary *)bundleDescription;
 {
     NSString *bundlePath, *registrationClassName;
-    NSEnumerator *registrationClassEnumerator, *registrationDictionaryEnumerator;
+    NSEnumerator *registrationClassEnumerator, *registrationClassToOptionsDictionaryEnumerator;
     NSBundle *bundle;
 
     bundle = [bundleDescription objectForKey:@"bundle"];
@@ -489,8 +474,8 @@ static BOOL OFBundleRegistryDebug = NO;
     
     bundlePath = bundle ? [bundle bundlePath] : NSLocalizedStringFromTableInBundle(@"local configuration file", @"OmniFoundation", [OFBundleRegistry bundle], local bundle path readable string);
 
-    registrationClassEnumerator = [registrationDictionary keyEnumerator];
-    registrationDictionaryEnumerator = [registrationDictionary objectEnumerator];
+    registrationClassEnumerator = [registrationClassToOptionsDictionary keyEnumerator];
+    registrationClassToOptionsDictionaryEnumerator = [registrationClassToOptionsDictionary objectEnumerator];
 
     while ((registrationClassName = [registrationClassEnumerator nextObject])) {
         NSDictionary *registrationDictionary;
@@ -502,7 +487,7 @@ static BOOL OFBundleRegistryDebug = NO;
         if (!registrationClassName || [registrationClassName length] == 0)
             break;
 
-        registrationDictionary = [registrationDictionaryEnumerator nextObject];
+        registrationDictionary = [registrationClassToOptionsDictionaryEnumerator nextObject];
         registrationClass = NSClassFromString(registrationClassName);
         if (!registrationClass) {
             NSLog(@"OFBundleRegistry warning: registration class '%@' from bundle '%@' not found.", registrationClassName, bundlePath);
@@ -520,7 +505,11 @@ static BOOL OFBundleRegistryDebug = NO;
             NSDictionary *descriptionDictionary;
 
             descriptionDictionary = [descriptionEnumerator nextObject];
-            [registrationClass registerItemName:itemName bundle:bundle description:descriptionDictionary];
+            NS_DURING {
+                [registrationClass registerItemName:itemName bundle:bundle description:descriptionDictionary];
+            } NS_HANDLER {
+                NSLog(@"+[%@ registerItemName:%@ bundle:%@ description:%@]: %@", [registrationClass description], [itemName description], [bundle description], [descriptionDictionary description], [localException reason]);
+            } NS_ENDHANDLER;
         }
     }
 }
@@ -559,7 +548,7 @@ static BOOL OFBundleRegistryDebug = NO;
         bundlePath = [bundle bundlePath];
         bundleName = [bundlePath lastPathComponent];
         bundleIdentifier = [bundle bundleIdentifier];
-        if (bundleIdentifier == nil)
+        if ([NSString isEmptyString:bundleIdentifier])
             bundleIdentifier = [bundleName stringByDeletingPathExtension];
         infoDictionary = [bundle infoDictionary];
 
@@ -656,6 +645,8 @@ static BOOL OFBundleRegistryDebug = NO;
 
         requiredVersion = [requiredVersionEnumerator nextObject];
         softwareVersion = [softwareVersionDictionary objectForKey:software];
+        if (OFBundleRegistryDebug)
+            NSLog(@"OFBundleRegistry: Looking for version %@ of %@, found %@", requiredVersion, software, softwareVersion);
         if ([NSString isEmptyString:requiredVersion]) {
             // Match any version of the software
             if (softwareVersion == nil)

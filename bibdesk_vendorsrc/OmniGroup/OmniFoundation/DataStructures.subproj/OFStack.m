@@ -1,9 +1,9 @@
-// Copyright 1997-2003 Omni Development, Inc.  All rights reserved.
+// Copyright 1997-2004 Omni Development, Inc.  All rights reserved.
 //
 // This software may only be used and reproduced according to the
 // terms in the file OmniSourceLicense.html, which should be
 // distributed with this project and can also be found at
-// http://www.omnigroup.com/DeveloperResources/OmniSourceLicense.html.
+// <http://www.omnigroup.com/developer/sourcecode/sourcelicense/>.
 
 #import <OmniFoundation/OFStack.h>
 
@@ -13,13 +13,7 @@
 #define OMNI_STACK_START_SIZE NSPageSize()
 #define OMNI_STACK_DEBUG
 
-#ifndef NOINLINE
-#define INLINE inline
-#else
-#define INLINE
-#endif
-
-RCS_ID("$Header: /Network/Source/CVS/OmniGroup/Frameworks/OmniFoundation/DataStructures.subproj/OFStack.m,v 1.12 2003/01/15 22:51:55 kc Exp $")
+RCS_ID("$Header: /Network/Source/CVS/OmniGroup/Frameworks/OmniFoundation/DataStructures.subproj/OFStack.m,v 1.15 2004/02/10 04:07:43 kc Exp $")
 
 static BOOL _stackDebug = NO;
 
@@ -48,7 +42,7 @@ void OFStackDeallocate(OFStack *stack)
     NSZoneFree(stack->stackZone, stack);
 }
 
-static INLINE void _OFStackEnsurePushSpace(OFStack *stack, unsigned long aSize)
+static inline void _OFStackEnsurePushSpace(OFStack *stack, unsigned long aSize)
 {
     while (stack->stackSize - stack->stackPointer < aSize) {
 	if (!stack->stackSize) {
@@ -77,7 +71,7 @@ static INLINE void _OFStackEnsurePushSpace(OFStack *stack, unsigned long aSize)
     }
 }
 
-static INLINE void _OFStackEnsurePopSpace(OFStack *stack, unsigned long aSize)
+static inline void _OFStackEnsurePopSpace(OFStack *stack, unsigned long aSize)
 {
     if (aSize > stack->currentFrameSize) {
         fprintf(stderr, "OFStack: UnderFlow! (wanted %ld bytes, but had only %ld)\n",

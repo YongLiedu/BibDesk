@@ -1,9 +1,9 @@
-// Copyright 2000-2003 Omni Development, Inc.  All rights reserved.
+// Copyright 2000-2004 Omni Development, Inc.  All rights reserved.
 //
 // This software may only be used and reproduced according to the
 // terms in the file OmniSourceLicense.html, which should be
 // distributed with this project and can also be found at
-// http://www.omnigroup.com/DeveloperResources/OmniSourceLicense.html.
+// <http://www.omnigroup.com/developer/sourcecode/sourcelicense/>.
 
 #import "OFTimeSpanFormatter.h"
 
@@ -12,7 +12,7 @@
 
 #import "NSObject-OFExtensions.h"
 
-RCS_ID("$Header: /Network/Source/CVS/OmniGroup/Frameworks/OmniFoundation/Formatters.subproj/OFTimeSpanFormatter.m,v 1.12 2003/02/12 22:47:28 ryan Exp $")
+RCS_ID("$Header: /Network/Source/CVS/OmniGroup/Frameworks/OmniFoundation/Formatters.subproj/OFTimeSpanFormatter.m,v 1.15 2004/02/10 04:07:45 kc Exp $")
 
 @implementation OFTimeSpanFormatter
 
@@ -153,6 +153,7 @@ RCS_ID("$Header: /Network/Source/CVS/OmniGroup/Frameworks/OmniFoundation/Formatt
     float number, hours = 0.0;
     NSScanner *scanner;
     NSCharacterSet *whitespaceCharacterSet;
+    NSCharacterSet *letterCharacterSet;
     
     if (![string length]) {
         *obj = nil;
@@ -160,10 +161,11 @@ RCS_ID("$Header: /Network/Source/CVS/OmniGroup/Frameworks/OmniFoundation/Formatt
     }
 
     whitespaceCharacterSet = [NSCharacterSet whitespaceCharacterSet];
+    letterCharacterSet = [NSCharacterSet letterCharacterSet];
     scanner = [NSScanner scannerWithString:string];
     while(1) {
         // Eat whitespace
-        [scanner scanCharactersFromSet:whitespaceCharacterSet intoString:(NSString **)0];
+        [scanner scanCharactersFromSet:whitespaceCharacterSet intoString:NULL];
         
         if (![scanner scanFloat:&number]) {
             if (gotAnythingValid)
@@ -182,6 +184,9 @@ RCS_ID("$Header: /Network/Source/CVS/OmniGroup/Frameworks/OmniFoundation/Formatt
         }
         hours += number;
         gotAnythingValid = YES;
+
+        // eat anything remaining since we might be parsing long forms... Yes... this sucks. (ryan)
+        [scanner scanCharactersFromSet:letterCharacterSet intoString:NULL];
     }
 
     *obj = [NSDecimalNumber numberWithFloat:hours];

@@ -1,13 +1,18 @@
-// Copyright 1997-2003 Omni Development, Inc.  All rights reserved.
+// Copyright 1997-2004 Omni Development, Inc.  All rights reserved.
 //
 // This software may only be used and reproduced according to the
 // terms in the file OmniSourceLicense.html, which should be
 // distributed with this project and can also be found at
-// http://www.omnigroup.com/DeveloperResources/OmniSourceLicense.html.
+// <http://www.omnigroup.com/developer/sourcecode/sourcelicense/>.
 //
-// $Header: /Network/Source/CVS/OmniGroup/Frameworks/OmniFoundation/OpenStepExtensions.subproj/NSData-OFExtensions.h,v 1.22 2003/01/15 22:51:59 kc Exp $
+// $Header: /Network/Source/CVS/OmniGroup/Frameworks/OmniFoundation/OpenStepExtensions.subproj/NSData-OFExtensions.h,v 1.26 2004/02/10 04:07:45 kc Exp $
 
 #import <Foundation/NSData.h>
+
+typedef struct OFQuotedPrintableMapping {
+    char map[256];   // 256 entries, one for each octet value
+    unsigned short translations[8];  // 8 is an arbitrary size; must be at least 2
+} OFQuotedPrintableMapping;
 
 @interface NSData (OFExtensions)
 
@@ -30,6 +35,12 @@
 // for NSData strings that users have to type in.
 - initWithASCII26String:(NSString *)ascii26String;
 - (NSString *)ascii26String;
+
++ dataWithDecodedURLString:(NSString *)urlString;
+
+// This is a generic implementation of quoted-printable-style encodings, used by methods elsewhere in OmniFoundation
+- (NSString *)quotedPrintableStringWithMapping:(const OFQuotedPrintableMapping *)qpMap lengthHint:(unsigned)zeroIfNoHint;
+- (unsigned)lengthOfQuotedPrintableStringWithMapping:(const OFQuotedPrintableMapping *)qpMap;
 
 - (unsigned long)indexOfFirstNonZeroByte;
     // Returns the index of the first non-zero byte in the receiver, or NSNotFound if if all the bytes in the data are zero.

@@ -1,11 +1,9 @@
-// OFCacheFile.m - OmniFoundation
-// Copyright 2003 Omni Development, Inc.  All rights reserved.
-// Created on Monday, 17 February 2003 by <wiml@omnigroup.com>
+// Copyright 2003-2004 Omni Development, Inc.  All rights reserved.
 //
 // This software may only be used and reproduced according to the
 // terms in the file OmniSourceLicense.html, which should be
 // distributed with this project and can also be found at
-// http://www.omnigroup.com/DeveloperResources/OmniSourceLicense.html.
+// <http://www.omnigroup.com/developer/sourcecode/sourcelicense/>.
 
 #import "OFCacheFile.h"
 
@@ -17,16 +15,88 @@
 #import <OmniFoundation/NSString-OFExtensions.h>
 #import <unistd.h>
 
-RCS_ID("$Header: /Network/Source/CVS/OmniGroup/Frameworks/OmniFoundation/FileManagement.subproj/OFCacheFile.m,v 1.1 2003/02/18 22:30:18 wiml Exp $");
+RCS_ID("$Header: /Network/Source/CVS/OmniGroup/Frameworks/OmniFoundation/FileManagement.subproj/OFCacheFile.m,v 1.4 2004/02/10 04:07:44 kc Exp $");
 
 
 @implementation OFCacheFile
+
++ (OFCacheFile *)cacheFileNamed:(NSString *)aName;
+{
+    return [self cacheFileNamed:aName inDirectory:nil];
+}
+
++ (OFCacheFile *)cacheFileNamed:(NSString *)aName inDirectory:(NSString *)cacheFileDirectory;
+{
+    OFCacheFile *cacheFile;
+
+    OBPRECONDITION(![NSString isEmptyString:aName]);
+    OBPRECONDITION(cacheFileDirectory == nil || [cacheFileDirectory isAbsolutePath]);
+
+    if (![aName isAbsolutePath]) {
+        if (cacheFileDirectory == nil)
+            cacheFileDirectory = [self applicationCacheDirectory];
+
+        aName = [cacheFileDirectory stringByAppendingPathComponent:aName];
+    }
+
+    [[NSFileManager defaultManager] createPathToFile:aName attributes:nil];
+
+    // TODO: Unique instances of OFCacheFile.
+    cacheFile = [[self alloc] initWithPath:aName];
+    return [cacheFile autorelease];
+}
+
++ (NSString *)userCacheDirectory;
+    // e.g., ~/Library/Caches
+{
+    static NSString *userCacheDirectory = nil;
+
+    if (userCacheDirectory == nil) {
+        FSRef foundFolder;
+        OSErr err;
+        NSString *result = nil;
+        
+        err = FSFindFolder(kUserDomain, kCachedDataFolderType, TRUE, &foundFolder);
+        if (err == noErr) {
+            UInt32 pathSize = PATH_MAX * 2;  // generous max path len
+            char *buf = alloca(pathSize);
+    
+            err = FSRefMakePath(&foundFolder, buf, pathSize);
+            if (err == noErr) {
+                result = [[NSFileManager defaultManager] stringWithFileSystemRepresentation:buf length:strlen(buf)];
+            }
+        }
+    
+        // Fall back to mostly-hard-coded value.
+        if (result == nil)
+            result = [@"~/Library/Caches" stringByExpandingTildeInPath];
+    
+        userCacheDirectory = [result retain];
+    }
+
+    OBPOSTCONDITION(userCacheDirectory != nil);
+    return userCacheDirectory;
+}
+
++ (NSString *)applicationCacheDirectory;
+    // e.g., ~/Library/Caches/com.omnigroup.OmniWeb
+{
+    // Get the (non-localized) name of the application.
+    NSString *applicationIdentifier;
+
+    applicationIdentifier = [[[NSBundle mainBundle] infoDictionary] objectForKey:(NSString *)kCFBundleIdentifierKey];
+    if (applicationIdentifier == nil)
+        applicationIdentifier = [[NSProcessInfo processInfo] processName];
+
+    return [[self userCacheDirectory] stringByAppendingPathComponent:applicationIdentifier];
+}
+
 
 // Init and dealloc
 
 - initWithPath:(NSString *)myPath;
 {
-    if ((self = [super init]) == nil)
+    if ([super init] == nil)
         return nil;
 
     filename = [myPath copy];
@@ -49,82 +119,13 @@ RCS_ID("$Header: /Network/Source/CVS/OmniGroup/Frameworks/OmniFoundation/FileMan
 
 
 // API
-+ (OFCacheFile *)cacheFileNamed:(NSString *)aName
-{
-    return [self cacheFileNamed:aName inDirectory:nil];
-}
 
-+ (OFCacheFile *)cacheFileNamed:(NSString *)aName inDirectory:(NSString *)cacheFileDirectory
-{
-    OFCacheFile *cacheFile;
-
-    OBASSERT(![NSString isEmptyString:aName]);
-
-    if (![aName isAbsolutePath]) {
-        BOOL prependAppSupportPath;
-
-        prependAppSupportPath = NO;
-
-        if (cacheFileDirectory == nil) {
-            // Get the (non-localized) name of the application.
-            NSString *appName;
-
-            appName = (NSString *)CFDictionaryGetValue(CFBundleGetInfoDictionary(CFBundleGetMainBundle()), kCFBundleNameKey);
-            if (appName == nil)
-                appName = [[NSProcessInfo processInfo] processName];
-
-            cacheFileDirectory = appName;
-            prependAppSupportPath = YES;
-        }
-
-        if (prependAppSupportPath || ![cacheFileDirectory isAbsolutePath]) {
-            cacheFileDirectory = [[self applicationSupportPath] stringByAppendingPathComponent:cacheFileDirectory];
-        }
-
-        aName = [cacheFileDirectory stringByAppendingPathComponent:aName];
-
-        [[NSFileManager defaultManager] createPathToFile:aName attributes:nil];
-    }
-
-    // TODO: Unique instances of OFCacheFile.
-    cacheFile = [[self alloc] initWithPath:aName];
-    [cacheFile autorelease];
-    return cacheFile;
-}
-
-// TODO: Cache the results of this call.
-+ (NSString *)applicationSupportPath
-{
-    FSRef foundFolder;
-    OSErr err;
-    NSString *result;
-
-    result = nil;
-    
-    err = FSFindFolder(kUserDomain, kApplicationSupportFolderType, TRUE, &foundFolder);
-    if (err == noErr) {
-        UInt32 pathSize = PATH_MAX * 2;  // generous max path len
-        char *buf = alloca(pathSize);
-
-        err = FSRefMakePath(&foundFolder, buf, pathSize);
-        if (err == noErr) {
-            result = [[NSFileManager defaultManager] stringWithFileSystemRepresentation:buf length:strlen(buf)];
-        }
-    }
-
-    // Fall back to mostly-hard-coded value.
-    if (result == nil)
-        result = [@"~/Library/Application Support/" stringByExpandingTildeInPath];
-
-    return result;
-}
-
-- (NSString *)filename
+- (NSString *)filename;
 {
     return filename;
 }
 
-- (NSData *)contentData
+- (NSData *)contentData;
 {
     if (!flags.contentDataIsValid) {
         OBASSERT(!flags.contentDataIsDirty);
@@ -137,7 +138,7 @@ RCS_ID("$Header: /Network/Source/CVS/OmniGroup/Frameworks/OmniFoundation/FileMan
     return contentData;
 }
 
-- (void)setContentData:(NSData *)newData
+- (void)setContentData:(NSData *)newData;
 {
     if (contentData == newData)
         return;
@@ -152,12 +153,12 @@ RCS_ID("$Header: /Network/Source/CVS/OmniGroup/Frameworks/OmniFoundation/FileMan
     flags.contentDataIsDirty = 1;
 }
 
-- (id)propertyList
+- (id)propertyList;
 {
     return [[self contentData] propertyList];
 }
 
-- (void)setPropertyList:newPlist
+- (void)setPropertyList:(id)newPlist;
 {
     CFDataRef plistData;
     
@@ -174,7 +175,7 @@ RCS_ID("$Header: /Network/Source/CVS/OmniGroup/Frameworks/OmniFoundation/FileMan
     CFRelease(plistData);
 }
 
-- (void)writeIfNecessary
+- (void)writeIfNecessary;
 {
     if (flags.contentDataIsDirty) {
         BOOL ok;

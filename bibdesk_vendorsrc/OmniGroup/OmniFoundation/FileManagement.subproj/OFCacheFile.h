@@ -1,11 +1,11 @@
-// Copyright 2003 Omni Development, Inc.  All rights reserved.
+// Copyright 2003-2004 Omni Development, Inc.  All rights reserved.
 //
 // This software may only be used and reproduced according to the
 // terms in the file OmniSourceLicense.html, which should be
 // distributed with this project and can also be found at
-// http://www.omnigroup.com/DeveloperResources/OmniSourceLicense.html.
+// <http://www.omnigroup.com/developer/sourcecode/sourcelicense/>.
 //
-// $Header: /Network/Source/CVS/OmniGroup/Frameworks/OmniFoundation/FileManagement.subproj/OFCacheFile.h,v 1.1 2003/02/18 22:30:18 wiml Exp $
+// $Header: /Network/Source/CVS/OmniGroup/Frameworks/OmniFoundation/FileManagement.subproj/OFCacheFile.h,v 1.4 2004/02/10 04:07:44 kc Exp $
 
 #import <Foundation/NSObject.h>
 #import <Foundation/NSDate.h>
@@ -28,7 +28,8 @@
 + (OFCacheFile *)cacheFileNamed:(NSString *)aName;
 + (OFCacheFile *)cacheFileNamed:(NSString *)aName inDirectory:(NSString *)cacheFileDirectory;
 
-+ (NSString *)applicationSupportPath;
++ (NSString *)userCacheDirectory;
++ (NSString *)applicationCacheDirectory;
 
 - (NSString *)filename;
 
@@ -36,7 +37,7 @@
 - (void)setContentData:(NSData *)newData;
 
 - (id)propertyList;
-- (void)setPropertyList:newPlist;
+- (void)setPropertyList:(id)newPlist;
 
 // You must call this method in order to write any changes back to disk. 
 // If a failure occurs, the OFCacheFile remains "dirty". Currently there's no way to check whether it's dirty, but if you want one, you know how to add it.

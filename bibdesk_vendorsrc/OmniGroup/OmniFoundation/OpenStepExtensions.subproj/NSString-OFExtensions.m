@@ -1,9 +1,9 @@
-// Copyright 1997-2003 Omni Development, Inc.  All rights reserved.
+// Copyright 1997-2004 Omni Development, Inc.  All rights reserved.
 //
 // This software may only be used and reproduced according to the
 // terms in the file OmniSourceLicense.html, which should be
 // distributed with this project and can also be found at
-// http://www.omnigroup.com/DeveloperResources/OmniSourceLicense.html.
+// <http://www.omnigroup.com/developer/sourcecode/sourcelicense/>.
 
 #import <OmniFoundation/NSString-OFExtensions.h>
 
@@ -12,22 +12,37 @@
 
 #import <OmniFoundation/OFStringDecoder.h>
 #import <OmniFoundation/OFStringScanner.h>
+#import <OmniFoundation/OFRegularExpression.h>
+#import <OmniFoundation/OFRegularExpressionMatch.h>
+#import <OmniFoundation/NSData-OFExtensions.h>
 #import <OmniFoundation/NSMutableString-OFExtensions.h>
 #import <OmniFoundation/NSThread-OFExtensions.h>
 #import <OmniFoundation/NSFileManager-OFExtensions.h>
 #import "NSObject-OFExtensions.h"
+#import "OFStringScanner.h"
 
-RCS_ID("$Header: /Network/Source/CVS/OmniGroup/Frameworks/OmniFoundation/OpenStepExtensions.subproj/NSString-OFExtensions.m,v 1.76 2003/04/11 23:14:44 ryan Exp $")
+RCS_ID("$Header: /Network/Source/CVS/OmniGroup/Frameworks/OmniFoundation/OpenStepExtensions.subproj/NSString-OFExtensions.m,v 1.89 2004/02/10 04:07:46 kc Exp $")
 
-
+/* Character sets & variables used for URI encoding */
 static NSMutableCharacterSet *EscapeCharacterSet;
 static NSMutableCharacterSet *UnsafeCharacterSet;
 static CFStringEncoding urlEncoding = kCFStringEncodingUTF8;
+
+/* Character sets used for mail header encoding */
+static NSCharacterSet *nonNonCTLChars = nil;
+static NSCharacterSet *nonAtomChars = nil;
+static NSCharacterSet *nonAtomCharsExceptLWSP = nil;
+
+/* To set up character set used for deferred string decoding (see OFStringDecoder.[hm]) */
+OmniFoundation_PRIVATE_EXTERN void OFStringDecoder_DidLoad(void);
 
 @implementation NSString (OFExtensions)
 
 + (void) didLoad;
 {
+    NSCharacterSet *nonCTLChars;
+    NSMutableCharacterSet *workSet;
+
     EscapeCharacterSet = [[NSMutableCharacterSet alloc] init];
     [EscapeCharacterSet addCharactersInString:@"*-.0123456789@ABCDEFGHIJKLMNOPQRSTUVWXYZ_abcdefghijklmnopqrstuvwxyz"];
     [EscapeCharacterSet invert];
@@ -37,6 +52,20 @@ static CFStringEncoding urlEncoding = kCFStringEncodingUTF8;
     [UnsafeCharacterSet invert];
     [UnsafeCharacterSet addCharactersInString:@"#\"<[{|}]>\\^`"];
     // UnsafeCharacterSet should match the bitmap isSafe in -fullyEncodeAsIURI
+
+    nonCTLChars = [NSCharacterSet characterSetWithRange:(NSRange){32, 95}];
+    nonNonCTLChars = [[nonCTLChars invertedSet] retain];
+
+    workSet = [nonNonCTLChars mutableCopy];
+    [workSet addCharactersInString:@"()<>@,;:\\\".[] "];
+    nonAtomChars = [workSet copy];
+    
+    [workSet removeCharactersInString:@" \t"];
+    nonAtomCharsExceptLWSP = [workSet copy];
+    
+    [workSet release];
+
+    OFStringDecoder_DidLoad();
 }
 
 + (NSString *)stringWithData:(NSData *)data encoding:(NSStringEncoding)encoding;
@@ -273,6 +302,7 @@ static CFStringEncoding urlEncoding = kCFStringEncodingUTF8;
 + (BOOL)isEmptyString:(NSString *)string;
     // Returns YES if the string is nil or equal to @""
 {
+    // Note that [string length] == 0 can be false when [string isEqualToString:@""] is true, because these are Unicode strings.
     return string == nil || [string isEqualToString:@""];
 }
 
@@ -566,7 +596,7 @@ static inline unsigned int parseHexString(NSString *hexString, unsigned long lon
     lastValidCharacter = [self rangeOfCharacterFromSet:nonWhitespace options:NSBackwardsSearch];
 
     if (firstValidCharacter.location == 0 && lastValidCharacter.location == [self length] - 1)
-	return self;
+	return [[self retain] autorelease];
     else
 	return [self substringWithRange:NSUnionRange(firstValidCharacter, lastValidCharacter)];
 }
@@ -637,6 +667,15 @@ static inline unsigned int parseHexString(NSString *hexString, unsigned long lon
     return [self stringByRemovingCharactersInOFCharacterSet:[OFCharacterSet characterSetWithString:@"\r\n"]];
 }
 
+- (NSString *)stringByRemovingRegularExpression:(OFRegularExpression *)regularExpression;
+{
+    OFRegularExpressionMatch *match = [regularExpression matchInString:self];
+        
+    if (match == nil)
+       return self;
+    return [[self stringByRemovingString:[match matchString]] stringByRemovingRegularExpression:regularExpression];
+}
+
 - (NSString *)stringByRemovingString:(NSString *)removeString
 {
     NSArray *lines;
@@ -663,7 +702,7 @@ static inline unsigned int parseHexString(NSString *hexString, unsigned long lon
     currentLength = [self length];
 
     if (currentLength == aLength)
-	return self;
+	return [[self retain] autorelease];
     if (currentLength > aLength)
 	return [self substringToIndex:aLength];
     return [self stringByAppendingString:[[self class] spacesOfLength:aLength - currentLength]];
@@ -677,10 +716,6 @@ static inline unsigned int parseHexString(NSString *hexString, unsigned long lon
     unsigned int elementIndex, elementCount;
 
     // Split on slashes and chop out '.' and '..' correctly.
-
-#ifdef WIN32
-#warning -stringByNormalizingPath does not work properly on Windows
-#endif
 
     pathElements = [self componentsSeparatedByString:@"/"];
     elementCount = [pathElements count];
@@ -729,12 +764,21 @@ static inline unsigned int parseHexString(NSString *hexString, unsigned long lon
     return [[[self substringToIndex:1] uppercaseString] stringByAppendingString:[self substringFromIndex:1]];
 }
 
+- (NSString *)stringByApplyingDeferredCFEncoding:(CFStringEncoding)newEncoding;
+{
+    if (!OFStringContainsDeferredEncodingCharacters(self)) {
+        return [[self copy] autorelease];
+    } else {
+        return OFApplyDeferredEncoding(self, newEncoding);
+    }
+}
+
 - (NSString *)stringByReplacingCharactersInSet:(NSCharacterSet *)set withString:(NSString *)replaceString;
 {
     NSMutableString *newString;
 
     if (![self containsCharacterInSet:set])
-	return self;
+	return [[self retain] autorelease];
     newString = [[self mutableCopy] autorelease];
     [newString replaceAllOccurrencesOfCharactersInSet:set withString:replaceString];
     return newString;
@@ -841,7 +885,7 @@ static inline unsigned int parseHexString(NSString *hexString, unsigned long lon
     lengthLeft = [self length];
     if (lengthLeft <= substringLength)
         // Use <= since you have to have more than one group to need a separator.
-        return self;
+        return [[self retain] autorelease];
 
     if (!substringLength)
         [NSException raise: NSInvalidArgumentException
@@ -906,14 +950,14 @@ static inline unsigned int parseHexString(NSString *hexString, unsigned long lon
 
     aRange = [self rangeOfString:prefix];
     if ((aRange.length == 0) || (aRange.location != 0))
-        return self;
+        return [[self retain] autorelease];
     return [self substringFromIndex:aRange.location + aRange.length];
 }
 
 - (NSString *)stringByRemovingSuffix:(NSString *)suffix;
 {
     if (![self hasSuffix:suffix])
-        return self;
+        return [[self retain] autorelease];
     return [self substringToIndex:[self length] - [suffix length]];
 }
 
@@ -1114,7 +1158,7 @@ static inline unsigned int parseHexString(NSString *hexString, unsigned long lon
     CFRange testCFRange;
     CFIndex bufLen = 1024;
     CFIndex usedBufLen;
-    unsigned int myLength; 
+    int myLength; 
 
     myLength = [self length];
     firstBad = [self indexOfCharacterNotRepresentableInCFEncoding:anEncoding];
@@ -1144,12 +1188,20 @@ static inline unsigned int parseHexString(NSString *hexString, unsigned long lon
 
 - (NSData *)dataUsingCFEncoding:(CFStringEncoding)anEncoding;
 {
-    return [(id)CFStringCreateExternalRepresentation(kCFAllocatorDefault, (CFStringRef)self, anEncoding, FALSE) autorelease];
+    CFDataRef result;
+
+    result = OFCreateDataFromStringWithDeferredEncoding((CFStringRef)self, (CFRange){location: 0, length:[self length]}, anEncoding, (char)0);
+
+    return [(NSData *)result autorelease];
 }
 
 - (NSData *)dataUsingCFEncoding:(CFStringEncoding)anEncoding allowLossyConversion:(BOOL)lossy;
 {
-    return [(id)CFStringCreateExternalRepresentation(kCFAllocatorDefault, (CFStringRef)self, anEncoding, lossy?TRUE:FALSE) autorelease];
+    CFDataRef result;
+    
+    result = OFCreateDataFromStringWithDeferredEncoding((CFStringRef)self, (CFRange){location: 0, length:[self length]}, anEncoding, lossy?'?':0);
+
+    return [(NSData *)result autorelease];
 }
 
 - (BOOL)writeToFile:(NSString *)path atomically:(BOOL)useAuxiliaryFile createDirectories:(BOOL)shouldCreateDirectories;
@@ -1187,6 +1239,32 @@ static inline unichar hexDigit(unichar digit)
 	return 10 + digit - 'A';
     else 
 	return 10 + digit - 'a';
+}
+
+static inline int valueOfHexPair(unichar highNybble, unichar lowNybble)
+{
+    short hnValue, lnValue;
+    
+    static const short hexValues[103] =
+    {
+          -1,  -1,  -1,  -1,  -1,  -1,  -1,  -1,  -1,  -1,  -1,  -1,  -1,  -1,  -1,  -1,
+          -1,  -1,  -1,  -1,  -1,  -1,  -1,  -1,  -1,  -1,  -1,  -1,  -1,  -1,  -1,  -1,
+          -1,  -1,  -1,  -1,  -1,  -1,  -1,  -1,  -1,  -1,  -1,  -1,  -1,  -1,  -1,  -1,
+        0x00,0x11,0x22,0x33,0x44,0x55,0x66,0x77,0x88,0x99,  -1,  -1,  -1,  -1,  -1,  -1,
+          -1,0xAA,0xBB,0xCC,0xDD,0xEE,0xFF,  -1,  -1,  -1,  -1,  -1,  -1,  -1,  -1,  -1,
+          -1,  -1,  -1,  -1,  -1,  -1,  -1,  -1,  -1,  -1,  -1,  -1,  -1,  -1,  -1,  -1,
+          -1,0xAA,0xBB,0xCC,0xDD,0xEE,0xFF
+    };
+    
+    if (highNybble > 'f' || lowNybble > 'f')
+        return -1;
+
+    hnValue = hexValues[highNybble];
+    lnValue = hexValues[lowNybble];
+    if (hnValue == -1 || lnValue == -1)
+        return -1;
+
+    return ( hnValue & 0xF0 ) | ( lnValue & 0x0F );
 }
 
 + (NSString *)decodeURLString:(NSString *)encodedString encoding:(CFStringEncoding)thisUrlEncoding;
@@ -1228,11 +1306,83 @@ static inline unichar hexDigit(unichar digit)
     return [self decodeURLString:encodedString encoding:urlEncoding];
 }
 
-static inline char hex(int i)
+- (NSData *)dataUsingCFEncoding:(CFStringEncoding)anEncoding allowLossyConversion:(BOOL)lossy hexEscapes:(NSString *)escapePrefix;
 {
-    static const char *hexchars = "0123456789ABCDEF";
+    unsigned int stringLength;
+    NSMutableData *buffer;
+    NSRange remaining;
+    
+    stringLength = [self length];
+    if (stringLength == 0)
+        return [NSData data];
 
-    return hexchars[i];
+    buffer = nil;
+    remaining = (NSRange){ location: 0, length: stringLength };
+    while (remaining.length > 0) {
+        NSRange prefix;
+        CFRange escapelessRange;
+        CFDataRef appendage;
+
+        if (1) {
+            prefix = [self rangeOfString:escapePrefix options:0 range:remaining];
+        } else {
+        continueAndSkipBogusEscapePrefix:
+            prefix = [self rangeOfString:escapePrefix options:0 range:(NSRange){ remaining.location + 1, remaining.length - 1}];
+        }
+        
+        escapelessRange.location = remaining.location;
+        if (prefix.length == 0)
+            escapelessRange.length = remaining.length;
+        else
+            escapelessRange.length = prefix.location - escapelessRange.location;
+        remaining.length -= escapelessRange.length;
+        remaining.location += escapelessRange.length;
+
+        if (escapelessRange.length > 0) {
+            appendage = OFCreateDataFromStringWithDeferredEncoding((CFStringRef)self, escapelessRange, anEncoding, lossy?'?':0);
+            if (buffer == nil && remaining.length == 0)
+                return [(NSData *)appendage autorelease];
+            else if (buffer == nil)
+                buffer = [[(NSData *)appendage mutableCopy] autorelease];
+            else
+                [buffer appendData:(NSData *)appendage];
+            CFRelease(appendage);
+        } else if (buffer == nil) {
+            buffer = [NSMutableData data];
+        }
+
+        if (prefix.length > 0) {
+            unichar highNybble, lowNybble;
+            int byteValue;
+            unsigned char buf[1];
+
+            if (prefix.length+2 > remaining.length)
+                goto continueAndSkipBogusEscapePrefix;
+
+            highNybble = [self characterAtIndex: NSMaxRange(prefix)];
+            lowNybble =  [self characterAtIndex: NSMaxRange(prefix)+1];
+            byteValue = valueOfHexPair(highNybble, lowNybble);
+            if (byteValue < 0)
+                goto continueAndSkipBogusEscapePrefix;
+            buf[0] = byteValue;
+            [buffer appendBytes:buf length:1];
+
+            remaining.location += prefix.length+2;
+            remaining.length   -= prefix.length+2;
+        }
+    }
+
+    return buffer;
+}
+
+static inline unichar hex(int i)
+{
+    static const char hexDigits[16] = {
+        '0', '1', '2', '3', '4', '5', '6', '7',
+        '8', '9', 'A', 'B', 'C', 'D', 'E', 'F'
+    };
+    
+    return (unichar)hexDigits[i];
 }
 
 + (NSString *)encodeURLString:(NSString *)unencodedString asQuery:(BOOL)asQuery leaveSlashes:(BOOL)leaveSlashes leaveColons:(BOOL)leaveColons;
@@ -1240,11 +1390,43 @@ static inline char hex(int i)
     return [self encodeURLString:unencodedString encoding:urlEncoding asQuery:asQuery leaveSlashes:leaveSlashes leaveColons:leaveColons];
 }
 
+#define USE_GENERIC_QP_DECODER 0
+
+#if USE_GENERIC_QP_DECODER
+
+#define SIXTEEN_OF(x) x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x
+#define ONE_HUNDRED_TWENTY_EIGHT_OF(x) SIXTEEN_OF(x),SIXTEEN_OF(x),SIXTEEN_OF(x),SIXTEEN_OF(x),SIXTEEN_OF(x),SIXTEEN_OF(x),SIXTEEN_OF(x),SIXTEEN_OF(x) 
+
+#define TEMPLATE(S,C,V) {	\
+    1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,       /* 0x control characters	*/ \
+    1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,       /* 1x control characters	*/ \
+    S,1,1,1,1,1,1,1,1,1,0,1,1,0,0,V,	   /* 2x   !"#$%&'()*+,-./	*/ \
+    0,0,0,0,0,0,0,0,0,0,C,1,1,1,1,1,	   /* 3x  0123456789:;<=>?	*/ \
+    0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,	   /* 4x  @ABCDEFGHIJKLMNO	*/ \
+    0,0,0,0,0,0,0,0,0,0,0,1,1,1,1,0,	   /* 5X  PQRSTUVWXYZ[\]^_	*/ \
+    1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,	   /* 6x  `abcdefghijklmno	*/ \
+    0,0,0,0,0,0,0,0,0,0,0,1,1,1,1,1,	   /* 7X  pqrstuvwxyz{|}~  DEL	*/ \
+    ONE_HUNDRED_TWENTY_EIGHT_OF(1)         /* 8x through FF       	*/ \
+    }
+
+static const OFQuotedPrintableMapping urlCodingVariants[8] = {
+    { TEMPLATE(1,1,1), { '%', '+' } },
+    { TEMPLATE(1,1,0), { '%', '+' } },
+    { TEMPLATE(1,0,1), { '%', '+' } },
+    { TEMPLATE(1,0,0), { '%', '+' } },
+    { TEMPLATE(2,1,1), { '%', '+' } },
+    { TEMPLATE(2,1,0), { '%', '+' } },
+    { TEMPLATE(2,0,1), { '%', '+' } },
+    { TEMPLATE(2,0,0), { '%', '+' } }
+};
+
+#endif  /* USE_GENERIC_QP_DECODER */
 
 + (NSString *)encodeURLString:(NSString *)unencodedString encoding:(CFStringEncoding)thisUrlEncoding asQuery:(BOOL)asQuery leaveSlashes:(BOOL)leaveSlashes leaveColons:(BOOL)leaveColons;
 {
     NSString *escapedString;
     NSData *sourceData;
+#if !USE_GENERIC_QP_DECODER
     unsigned const char *sourceBuffer;
     int sourceLength;
     int sourceIndex;
@@ -1259,8 +1441,9 @@ static inline char hex(int i)
 	 1,1,1,1,1,1,1,1,1,1,1,0,0,0,0,1,	// 5X  PQRSTUVWXYZ[\]^_
 	 0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,	// 6x  `abcdefghijklmno
 	 1,1,1,1,1,1,1,1,1,1,1,0,0,0,0,0 };	// 7X  pqrstuvwxyz{|}~	DEL
+#endif
 
-    // TJW: This line here is why these are class methods, not instance methods.  If these were instance methods, we wouldn't do this check and would get a nil instead.  Maybe later this can be revisted.
+    // TJW: This line here is why these are class methods, not instance methods.  If these were instance methods, we wouldn't do this check and would get a nil instead.  Maybe later this can be revisited.
     if (!unencodedString)
 	return @"";
 
@@ -1271,6 +1454,12 @@ static inline char hex(int i)
     if (thisUrlEncoding == kCFStringEncodingInvalidId)
         thisUrlEncoding = urlEncoding;
     sourceData = [unencodedString dataUsingCFEncoding:thisUrlEncoding allowLossyConversion:YES];
+#if USE_GENERIC_QP_DECODER
+    {
+        int variantIndex = ( asQuery? 4 : 0 ) | ( leaveColons? 2 : 0 ) | ( leaveSlashes? 1 : 0 );
+        escapedString = [sourceData quotedPrintableStringWithMapping:&(urlCodingVariants[variantIndex]) lengthHint:0];
+    }
+#else
     sourceBuffer = [sourceData bytes];
     sourceLength = [sourceData length];
     
@@ -1304,6 +1493,7 @@ static inline char hex(int i)
     }
     
     escapedString = [[[NSString alloc] initWithCharactersNoCopy:destinationBuffer length:destinationIndex freeWhenDone:YES] autorelease];
+#endif
     
     return escapedString;
 }
@@ -1334,7 +1524,7 @@ static inline char hex(int i)
         return [[self copy] autorelease];
     }
     
-    utf8BytesData = [self dataUsingEncoding:NSUTF8StringEncoding allowLossyConversion:NO];
+    utf8BytesData = [self dataUsingCFEncoding:kCFStringEncodingUTF8 allowLossyConversion:NO];
     sourceBufferSize = [utf8BytesData length];
     sourceBuffer = [utf8BytesData bytes];
 
@@ -1419,5 +1609,277 @@ static inline char hex(int i)
     return result;
 }
 
+// Regular expression encoding
+
+- (NSString *)regularExpressionForLiteralString;
+{
+    OFStringScanner *scanner;
+    NSMutableString *result;
+    static OFCharacterSet *regularExpressionLiteralDelimiterSet = nil;
+    
+    if (regularExpressionLiteralDelimiterSet == nil)
+        regularExpressionLiteralDelimiterSet = [[OFCharacterSet alloc] initWithString:@"^$.[()|\\?*+"];
+
+    result = [NSMutableString stringWithCapacity:[self length]];
+    scanner = [[OFStringScanner alloc] initWithString:self];
+    while (scannerHasData(scanner)) {
+        unichar character;
+        NSString *nextLiteralFragment;
+
+        character = scannerPeekCharacter(scanner);
+        if (OFCharacterSetHasMember(regularExpressionLiteralDelimiterSet, character)) {
+            [result appendString:@"\\"];
+            [result appendString:[NSString stringWithCharacter:character]];
+            scannerSkipPeekedCharacter(scanner);
+        } else {
+            nextLiteralFragment = [scanner readFullTokenWithDelimiterOFCharacterSet:regularExpressionLiteralDelimiterSet];
+            [result appendString:nextLiteralFragment];
+        }
+    }
+    [scanner release];
+    return result;
+}
+
+// Encoding mail headers
+
+- (NSString *)asRFC822Word
+{
+    if ([self length] > 0 &&
+        [self rangeOfCharacterFromSet:nonAtomChars].length == 0 &&
+        !([self hasPrefix:@"=?"] && [self hasSuffix:@"?="])) {
+        /* We're an atom. */
+        return [[self copy] autorelease];
+    }
+
+    /* The nonNonCTLChars set has a wacky name, but what the heck. It contains all the characters that we are not willing to represent in a quoted-string. Technically, we're allowed to have qtext, which is "any CHAR excepting <">, "\" & CR, and including linear-white-space" (RFC822 3.3); CHAR means characters 0 through 127 (inclusive), and so a qtext may contain arbitrary ASCII control characters. But to be on the safe side, we don't include those. */
+    /* TODO: Consider adding a few specific control characters, perhaps HTAB */
+
+    if ([self rangeOfCharacterFromSet:nonNonCTLChars].length == 0) {
+        /* We don't contain any characters that aren't "nonCTLChars", so we can be represented as a quoted-string. */
+        NSMutableString *buffer = [self mutableCopy];
+        NSString *result;
+        unsigned int chIndex = [buffer length];
+
+        while(chIndex > 0) {
+            unichar ch = [buffer characterAtIndex:(-- chIndex)];
+            OBASSERT( !( ch < 32 || ch >= 127 ) ); // guaranteed by definition of nonNonCTLChars
+            if (ch == '"' || ch == '\\' /* || ch < 32 || ch >= 127 */) {
+                [buffer replaceCharactersInRange:(NSRange){chIndex, 0} withString:@"\\"];
+            }
+        }
+
+        [buffer replaceCharactersInRange:(NSRange){0, 0} withString:@"\""];
+        [buffer appendString:@"\""];
+
+        result = [[buffer copy] autorelease];
+        [buffer release];
+
+        return result;
+    }
+
+    /* Otherwise, we cannot be represented as an RFC822 word (atom or quoted-string). If appropriate, the caller can use the RFC2047 encoded-word format. */
+    return nil;
+}
+
+/* Preferred encodings as alluded in RFC2047 */
+static const CFStringEncoding preferredEncodings[] = {
+    kCFStringEncodingISOLatin1,
+    kCFStringEncodingISOLatin2,
+    kCFStringEncodingISOLatin3,
+    kCFStringEncodingISOLatin4,
+    kCFStringEncodingISOLatinCyrillic,
+    kCFStringEncodingISOLatinArabic,
+    kCFStringEncodingISOLatinGreek,
+    kCFStringEncodingISOLatinHebrew,
+    kCFStringEncodingISOLatin5,
+    kCFStringEncodingISOLatin6,
+    kCFStringEncodingISOLatinThai,
+    kCFStringEncodingISOLatin7,
+    kCFStringEncodingISOLatin8,
+    kCFStringEncodingISOLatin9,
+    kCFStringEncodingInvalidId /* sentinel */
+};
+
+/* Some encodings we like, which we try out if preferredEncodings fails */
+static const CFStringEncoding desirableEncodings[] = {
+    kCFStringEncodingUTF8,
+    kCFStringEncodingUnicode,
+    kCFStringEncodingHZ_GB_2312,
+    /* TODO: Determine preferred encoding for Japanese mail? */
+    kCFStringEncodingInvalidId /* sentinel */
+};
+
+
+/* Characters which do not need to be quoted in an RFC2047 quoted-printable-encoded word.
+   Note that 0x20 is treated specially by the routine that uses this bitmap. */
+static const char qpNonSpecials[128] = {
+    0, 0, 0, 0, 0, 0, 0, 0,   //  
+    0, 0, 0, 0, 0, 0, 0, 0,   //  
+    0, 0, 0, 0, 0, 0, 0, 0,   //  
+    0, 0, 0, 0, 0, 0, 0, 0,   //  
+    1, 1, 0, 0, 0, 0, 0, 0,   //  SP and !
+    0, 0, 1, 1, 0, 1, 0, 1,   //    *+ - /
+    1, 1, 1, 1, 1, 1, 1, 1,   //  01234567
+    1, 1, 0, 0, 0, 0, 0, 0,   //  89
+    0, 1, 1, 1, 1, 1, 1, 1,   //   ABCDEFG
+    1, 1, 1, 1, 1, 1, 1, 1,   //  HIJKLMNO
+    1, 1, 1, 1, 1, 1, 1, 1,   //  PQRSTUVW
+    1, 1, 1, 0, 0, 0, 0, 0,   //  XYZ
+    0, 1, 1, 1, 1, 1, 1, 1,   //   abcdefg
+    1, 1, 1, 1, 1, 1, 1, 1,   //  hijklmno
+    1, 1, 1, 1, 1, 1, 1, 1,   //  pqrstuvw
+    1, 1, 1, 0, 0, 0, 0, 0    //  xyz
+};
+
+
+/* TODO: RFC2047 requires us to break up encoded-words so that each one is no longer than 75 characters. We don't do that, which means it's possible for us to produce non-conforming tokens if called on a long string. */
+- (NSString *)asRFC2047EncodedWord
+{
+    CFStringEncoding fastestEncoding, bestEncoding;
+    int encodingIndex, byteIndex, byteCount, qpSize, b64Size;
+    CFStringRef cfSelf = (CFStringRef)self;
+    CFDataRef convertedBytes;
+    CFStringRef charsetName;
+    const UInt8 *bytePtr;
+    NSString *encodedWord;
+
+    bestEncoding = kCFStringEncodingInvalidId;
+    convertedBytes = NULL;
+
+    fastestEncoding = CFStringGetFastestEncoding(cfSelf);
+    for(encodingIndex = 0; preferredEncodings[encodingIndex] != kCFStringEncodingInvalidId; encodingIndex ++) {
+        if (fastestEncoding == preferredEncodings[encodingIndex]) {
+            bestEncoding = fastestEncoding;
+            break;
+        }
+    }
+
+    if (bestEncoding == kCFStringEncodingInvalidId) {
+        // The fastest encoding is not in the preferred encodings list. Check whether any of the preferred encodings are possible at all.
+
+        for(encodingIndex = 0; preferredEncodings[encodingIndex] != kCFStringEncodingInvalidId; encodingIndex ++) {
+            convertedBytes = CFStringCreateExternalRepresentation(kCFAllocatorDefault, cfSelf, preferredEncodings[encodingIndex], 0);
+            if (convertedBytes != NULL) {
+                bestEncoding = preferredEncodings[encodingIndex];
+                break;
+            }
+        }
+    }
+
+    if (bestEncoding == kCFStringEncodingInvalidId) {
+        // We can't use any of the preferred encodings, so use the smallest one.
+        bestEncoding = CFStringGetSmallestEncoding(cfSelf);
+    }
+
+    if (convertedBytes == NULL)
+        convertedBytes = CFStringCreateExternalRepresentation(kCFAllocatorDefault, cfSelf, bestEncoding, 0);
+
+    // CFStringGetSmallestEncoding() doesn't always return the smallest encoding, so try out a few others on our own
+    {
+        CFStringEncoding betterEncoding = kCFStringEncodingInvalidId;
+        CFDataRef betterBytes = NULL;
+        
+        for(encodingIndex = 0; desirableEncodings[encodingIndex] != kCFStringEncodingInvalidId; encodingIndex ++) {
+            CFDataRef alternateBytes;
+            if (desirableEncodings[encodingIndex] == bestEncoding)
+                continue;
+            alternateBytes = CFStringCreateExternalRepresentation(kCFAllocatorDefault, cfSelf, desirableEncodings[encodingIndex], 0);
+            if (alternateBytes != NULL) {
+                if (betterBytes == NULL) {
+                    betterEncoding = desirableEncodings[encodingIndex];
+                    betterBytes = alternateBytes;
+                } else if(CFDataGetLength(betterBytes) > CFDataGetLength(alternateBytes)) {
+                    CFRelease(betterBytes);
+                    betterEncoding = desirableEncodings[encodingIndex];
+                    betterBytes = alternateBytes;
+                } else {
+                    CFRelease(alternateBytes);
+                }
+            }
+        }
+
+        if (betterBytes != NULL) {
+            if (CFDataGetLength(betterBytes) < CFDataGetLength(convertedBytes)) {
+                CFRelease(convertedBytes);
+                convertedBytes = betterBytes;
+                bestEncoding = betterEncoding;
+            } else {
+                CFRelease(betterBytes);
+            }
+        }
+    }
+
+    OBASSERT(bestEncoding != kCFStringEncodingInvalidId);
+    OBASSERT(convertedBytes != NULL);
+
+    charsetName = CFStringConvertEncodingToIANACharSetName(bestEncoding);
+
+    byteCount = CFDataGetLength(convertedBytes);
+    bytePtr = CFDataGetBytePtr(convertedBytes);
+
+    // Now decide whether to use quoted-printable or base64 encoding. Again, we choose the smallest size.
+    qpSize = 0;
+    for(byteIndex = 0; byteIndex < byteCount; byteIndex ++) {
+        if (bytePtr[byteIndex] < 128 && qpNonSpecials[bytePtr[byteIndex]])
+            qpSize += 1;
+        else
+            qpSize += 3;
+    }
+
+    b64Size = (( byteCount + 2 ) / 3) * 4;
+
+    if (b64Size < qpSize) {
+        // Base64 is smallest. Use it.
+        encodedWord = [NSString stringWithFormat:@"=?%@?B?%@?=", charsetName, [(NSData *)convertedBytes base64String]];
+    } else {
+        NSMutableString *encodedContent;
+        // Quoted-Printable is smallest (or, at least, not larger than Base64).
+        encodedContent = [[NSMutableString alloc] initWithCapacity:qpSize];
+        for(byteIndex = 0; byteIndex < byteCount; byteIndex ++) {
+            UInt8 byte = bytePtr[byteIndex];
+            if (byte < 128 && qpNonSpecials[byte]) {
+                if (byte == 0x20) /* RFC2047 4.2(2) */
+                    byte = 0x5F;
+                [encodedContent appendCharacter:byte];
+            } else {
+                unichar highNybble, lowNybble;
+
+                highNybble = hex((byte & 0xF0) >> 4);
+                lowNybble = hex(byte & 0x0F);
+                [encodedContent appendCharacter:'='];
+                [encodedContent appendCharacter:highNybble];
+                [encodedContent appendCharacter:lowNybble];
+            }
+        }
+        encodedWord = [NSString stringWithFormat:@"=?%@?Q?%@?=", charsetName, encodedContent];
+        [encodedContent release];
+    }
+
+    CFRelease(convertedBytes);
+
+    return encodedWord;
+}
+
+- (NSString *)asRFC2047Phrase
+{
+    NSString *result;
+
+    if ([self rangeOfCharacterFromSet:nonAtomCharsExceptLWSP].length == 0) {
+        /* We look like a sequence of atoms. However, we need to check for strings like "foo =?bl?e?gga?= bar", which have special semantics described in RFC2047. (This test is a little over-cautious but that's OK.) */
+
+        if (!([self rangeOfString:@"=?"].length > 0 &&
+              [self rangeOfString:@"?="].length > 0))
+            return self;
+    }
+
+    /* -asRFC822Word will produce a single double-quoted string for all our text; e.g. if called with [John Q. Public] we'll return ["John Q. Public"] rather than [John "Q." Public]. */
+    result = [self asRFC822Word];
+
+    /* If we can't be represented as an RFC822 word, use the extended syntax from RFC2047. */
+    if (result == nil)
+        result = [self asRFC2047EncodedWord];
+
+    return result;
+}
 
 @end

@@ -1,156 +1,340 @@
-// Copyright 1997-2003 Omni Development, Inc.  All rights reserved.
+// Copyright 1997-2004 Omni Development, Inc.  All rights reserved.
 //
 // This software may only be used and reproduced according to the
 // terms in the file OmniSourceLicense.html, which should be
 // distributed with this project and can also be found at
-// http://www.omnigroup.com/DeveloperResources/OmniSourceLicense.html.
+// <http://www.omnigroup.com/developer/sourcecode/sourcelicense/>.
 
 #import <OmniFoundation/OFMultiValueDictionary.h>
 
-#import <OmniFoundation/CFDictionary-OFExtensions.h>
-#import <Foundation/Foundation.h>
-#import <OmniBase/OmniBase.h>
+#include <stdlib.h>
+#import <Foundation/NSArray.h>
+#import <Foundation/NSCoder.h>
+#import <Foundation/NSDictionary.h>
+#import <Foundation/NSEnumerator.h>
 
-RCS_ID("$Header: /Network/Source/CVS/OmniGroup/Frameworks/OmniFoundation/DataStructures.subproj/OFMultiValueDictionary.m,v 1.20 2003/01/15 22:51:54 kc Exp $")
+#import <OmniBase/OmniBase.h>
+#import <OmniFoundation/CFDictionary-OFExtensions.h>
+#import <OmniFoundation/NSDictionary-OFExtensions.h>
+
+RCS_ID("$Header: /Network/Source/CVS/OmniGroup/Frameworks/OmniFoundation/DataStructures.subproj/OFMultiValueDictionary.m,v 1.28 2004/02/10 04:07:43 kc Exp $")
 
 @implementation OFMultiValueDictionary
 
+#define DictKeysStandard  0   // dictionary is an NSMutableDictionary
+#define DictKeysOFCaseInsensitiveStrings  1  // dictionary uses OFCaseInsensitiveStringKeyDictionaryCallbacks
+#define DictKeysCustom  2  // dictionary uses some caller-supplied key callbacks
+
 - init;
 {
-    return [self initWithCaseInsensitiveKeys: NO];
+    return [self initWithKeyCallBacks: NULL];
 }
 
 - initWithCaseInsensitiveKeys: (BOOL) caseInsensitivity;
 {
     if (caseInsensitivity)
-        dictionary = OFCreateCaseInsensitiveKeyMutableDictionary();
+        return [self initWithKeyCallBacks:&OFCaseInsensitiveStringKeyDictionaryCallbacks];
     else
-        dictionary = [[NSMutableDictionary allocWithZone:[self zone]] init];
+        return [self initWithKeyCallBacks:&OFNSObjectCopyDictionaryKeyCallbacks];
+}
+
+// The designated initializer
+- initWithKeyCallBacks: (const CFDictionaryKeyCallBacks *) keyBehavior;
+{
+    if (![super init])
+        return nil;
+
+    if (keyBehavior == NULL)
+        keyBehavior = &OFNSObjectCopyDictionaryKeyCallbacks;
+
+    if (keyBehavior == &OFNSObjectCopyDictionaryKeyCallbacks)
+        dictionaryFlags = DictKeysStandard;
+    else if (keyBehavior == &OFCaseInsensitiveStringKeyDictionaryCallbacks)
+        dictionaryFlags = DictKeysOFCaseInsensitiveStrings;
+    else
+        dictionaryFlags = DictKeysCustom;
+
+    dictionary = CFDictionaryCreateMutable(kCFAllocatorDefault, 0,
+                                           keyBehavior,
+                                           &OFNSObjectDictionaryValueCallbacks);
+
+    return self;
+}
+
+- initWithCoder:(NSCoder *)coder
+{
+    short flags;
+    int keyCount;
+    unsigned *valueCounts;
+    unsigned keyIndex, valueIndex;
+
+    [coder decodeValuesOfObjCTypes:"si", &flags, &keyCount];
+
+    if ((flags & 0xFE) != 0)
+        [NSException raise:NSGenericException format:@"Serialized %@ is of unknown kind", [(id)isa name]];
+
+    if (![self initWithCaseInsensitiveKeys: (flags&1)? YES : NO])
+        return nil;
+
+    if (keyCount == 0)
+        return self;
+
+    valueCounts = malloc(sizeof(*valueCounts) * keyCount);
+    [coder decodeArrayOfObjCType:@encode(unsigned int) count:keyCount at:valueCounts];
+    for (keyIndex = 0; keyIndex < keyCount; keyIndex ++) {
+        NSMutableArray *values;
+        NSString *key;
+
+        key = [coder decodeObject];
+        values = [[NSMutableArray alloc] initWithCapacity:valueCounts[keyIndex]];
+        for (valueIndex = 0; valueIndex < valueCounts[keyIndex]; valueIndex ++) {
+            [values addObject:[coder decodeObject]];
+        }
+        CFDictionaryAddValue(dictionary, key, values);
+        [values release];
+    }
+    free(valueCounts);
 
     return self;
 }
 
 - (void)dealloc;
 {
-    [dictionary release];
+    CFRelease(dictionary);
     [super dealloc];
 }
 
-- (NSArray *)arrayForKey:(NSString *)aKey;
+- (NSMutableArray *)_arrayForKey:(id)aKey alloc:(unsigned)allocCapacity;
 {
-    return [dictionary objectForKey:aKey];
+    NSMutableArray *value;
+
+    if (aKey == nil) {
+        if (allocCapacity != 0)
+            OBRejectInvalidCall(self, _cmd, @"Attempt to insert nil key");
+        return nil;
+    }
+        
+    value = (id)CFDictionaryGetValue(dictionary, aKey);
+    if (allocCapacity && !value) {
+        value = [[NSMutableArray alloc] initWithCapacity:allocCapacity];
+        CFDictionaryAddValue(dictionary, aKey, value);
+        [value release];
+    }
+
+    return value;
 }
 
-- (id)firstObjectForKey:(NSString *)aKey;
+- (NSArray *)arrayForKey:(id)aKey;
 {
-    return [[dictionary objectForKey:aKey] objectAtIndex:0];
+    return [self _arrayForKey:aKey alloc:0];
 }
 
-- (id)lastObjectForKey:(NSString *)aKey;
+- (id)firstObjectForKey:(id)aKey;
 {
-    return [[dictionary objectForKey:aKey] lastObject];
+    return [[self _arrayForKey:aKey alloc:0] objectAtIndex:0];
 }
 
-- (void)addObject:(id)anObject forKey:(NSString *)aKey;
+- (id)lastObjectForKey:(id)aKey;
+{
+    return [[self _arrayForKey:aKey alloc:0] lastObject];
+}
+
+- (void)addObject:(id)anObject forKey:(id)aKey;
+{
+    if (anObject == nil)
+        OBRejectInvalidCall(self, _cmd, @"Attempt to insert nil value");
+    [[self _arrayForKey:aKey alloc:1] addObject:anObject];
+}
+
+- (void)addObjects:(NSArray *)moreObjects forKey:(id)aKey;
 {
     NSMutableArray *valueArray;
+    unsigned objectCount = [moreObjects count];
 
-    valueArray = [dictionary objectForKey:aKey];
-    if (!valueArray) {
-	valueArray = [NSMutableArray arrayWithObject:anObject];
-	[dictionary setObject:valueArray forKey:aKey];
-    } else
-	[valueArray addObject:anObject];
-}
-
-- (void)addObjects:(NSArray *)moreObjects forKey:(NSString *)aKey;
-{
-    NSMutableArray *valueArray;
-
-    valueArray = [dictionary objectForKey:aKey];
-    if (!valueArray) {
-        valueArray = [[NSMutableArray alloc] initWithArray:moreObjects];
-        [dictionary setObject:valueArray forKey:aKey];
-        [valueArray release];
-    } else
-        [valueArray addObjectsFromArray:moreObjects];
-}
-
-- (void)removeObject:(id)anObject forKey:(NSString *)aKey
-{
-    NSMutableArray *valueArray = [dictionary objectForKey:aKey];
-    unsigned int objectIndex;
-    
-    if (!valueArray)
+    if (objectCount == 0)
         return;
-    
+    valueArray = [self _arrayForKey:aKey alloc:objectCount];
+    [valueArray addObjectsFromArray:moreObjects];
+}
+
+- (void)setObjects:(NSArray *)replacementObjects forKey:(id)aKey;
+{
+    if (replacementObjects != nil && [replacementObjects count] > 0) {
+        NSMutableArray *valueArray;
+
+        valueArray = [[NSMutableArray alloc] initWithArray:replacementObjects];
+        CFDictionaryAddValue(dictionary, aKey, valueArray);
+        [valueArray release];
+    } else {
+        CFDictionaryRemoveValue(dictionary, aKey);
+    }
+}
+
+- (void)insertObject:(id)anObject forKey:(id)aKey atIndex:(unsigned int)anIndex;
+{
+    if (anObject == nil)
+        OBRejectInvalidCall(self, _cmd, @"Attempt to insert nil value");
+    [[self _arrayForKey:aKey alloc:1] insertObject:anObject atIndex:anIndex];
+}
+
+- (BOOL)removeObject:(id)anObject forKey:(id)aKey
+{
+    NSMutableArray *valueArray = [self _arrayForKey:aKey alloc:0];
+    unsigned int objectIndex;
+
+    if (!valueArray)
+        return NO;
+
     objectIndex = [valueArray indexOfObject:anObject];
     if (objectIndex == NSNotFound)
-        return;
-    
+        return NO;
+
     [valueArray removeObjectAtIndex:objectIndex];
-    
+
     if ([valueArray count] == 0)
-        [dictionary removeObjectForKey:aKey];
+        CFDictionaryRemoveValue(dictionary, aKey);
+
+    return YES;
 }
 
+- (BOOL)removeObjectIdenticalTo:(id)anObject forKey:(id)aKey
+{
+    NSMutableArray *valueArray = [self _arrayForKey:aKey alloc:0];
+    unsigned int objectIndex;
+
+    if (!valueArray)
+        return NO;
+
+    objectIndex = [valueArray indexOfObjectIdenticalTo:anObject];
+    if (objectIndex == NSNotFound)
+        return NO;
+
+    [valueArray removeObjectAtIndex:objectIndex];
+
+    if ([valueArray count] == 0)
+        CFDictionaryRemoveValue(dictionary, aKey);
+
+    return YES;
+}
 
 - (NSEnumerator *)keyEnumerator;
 {
-    return [dictionary keyEnumerator];
+    return [(NSDictionary *)dictionary keyEnumerator];
+}
+
+struct copyOutContext {
+    NSMutableArray *copyKeys;
+    NSMutableArray *copyValues;
+};
+
+static void copyFunction(const void *key, const void *value, void *context)
+{
+    struct copyOutContext *copyOut = context;
+
+    if (copyOut->copyKeys)
+        [copyOut->copyKeys addObject:(id)key];
+    if (copyOut->copyValues)
+        [copyOut->copyValues addObjectsFromArray:(NSArray *)value];
 }
 
 - (NSArray *)allKeys;
 {
-    return [dictionary allKeys];
+    struct copyOutContext copyOut;
+    
+    copyOut.copyKeys = [NSMutableArray array];
+    copyOut.copyValues = nil;
+    CFDictionaryApplyFunction(dictionary, &copyFunction, &copyOut);
+    return copyOut.copyKeys;
 }
 
 - (NSArray *)allValues;
 {
-    NSArray *arrays;
-    unsigned int arrayIndex, arrayCount;
-    NSMutableArray *allValues;
-    
-    allValues = [NSMutableArray array];
+    struct copyOutContext copyOut;
 
-    arrays = [dictionary allValues];
-    arrayCount = [arrays count];
-    for (arrayIndex = 0; arrayIndex < arrayCount; arrayIndex++) {
-        [allValues addObjectsFromArray:[arrays objectAtIndex:arrayIndex]];
-    }
-    
-    return allValues;
+    copyOut.copyKeys = nil;
+    copyOut.copyValues = [NSMutableArray array];
+    CFDictionaryApplyFunction(dictionary, &copyFunction, &copyOut);
+    return copyOut.copyValues;
 }
 
 - (NSMutableDictionary *)dictionary;
 {
-    return dictionary;
+    return (NSMutableDictionary *)dictionary;
+}
+
+static void duplicateFunction(const void *key, const void *value, void *context)
+{
+    OFMultiValueDictionary *other = context;
+
+    [other setObjects:(NSArray *)value forKey:(id)key];
 }
 
 - mutableCopyWithZone:(NSZone *)newZone
 {
     OFMultiValueDictionary *newSelf;
-    NSMutableDictionary *otherDictionary;
-    NSString *aKey;
-    NSEnumerator *keyEnumerator;
-    
+
     newSelf = [[[self class] allocWithZone:newZone] init];
-    otherDictionary = [newSelf dictionary];
-    keyEnumerator = [dictionary keyEnumerator];
-    while( (aKey = [keyEnumerator nextObject]) != nil) {
-        NSArray *myArray = [dictionary objectForKey:aKey];
-        NSMutableArray *arrayCopy = [[NSMutableArray allocWithZone:newZone] initWithCapacity:[myArray count]];
-        [arrayCopy addObjectsFromArray:myArray];
-        [otherDictionary setObject:arrayCopy forKey:aKey];
-        [arrayCopy release];
-    }
-    
+    CFDictionaryApplyFunction(dictionary, &duplicateFunction, (void *)newSelf);
     return newSelf;
 }
 
-- mutableCopy
+- (BOOL)isEqual:anotherObject
 {
-    return [self mutableCopyWithZone:NULL];
+    NSMutableDictionary *otherDictionary;
+
+    if (anotherObject == self)
+        return YES;
+    if ([anotherObject isKindOfClass:[OFMultiValueDictionary class]])
+        otherDictionary = [anotherObject dictionary];
+    else
+        return NO;
+
+    return CFEqual(dictionary, otherDictionary)? YES : NO;
+}
+
+- (void)encodeWithCoder:(NSCoder *)coder
+{
+    short flags;
+    int keyIndex, keyCount;
+    NSArray *keys;
+    NSArray **values;
+    unsigned int *valueCounts, valueIndex;
+
+    flags = 0;
+    if (dictionaryFlags == DictKeysOFCaseInsensitiveStrings)
+        flags |= 1;
+    else if (dictionaryFlags != DictKeysStandard) {
+        [NSException raise:NSGenericException format:@"Cannot serialize an %@ with custom key callbacks", [(id)isa name]];
+    }
+
+    keys = [[self allKeys] sortedArrayUsingSelector:@selector(compare:)];
+    keyCount = [keys count];
+
+    [coder encodeValuesOfObjCTypes:"si", &flags, &keyCount];
+
+    if (keyCount == 0)
+        return;
+
+    valueCounts = malloc(sizeof(*valueCounts) * keyCount);
+    values = malloc(sizeof(*values) * keyCount);
+
+    for(keyIndex = 0; keyIndex < keyCount; keyIndex ++) {
+        NSArray *valueArray = [self arrayForKey:[keys objectAtIndex:keyIndex]];
+        values[keyIndex] = valueArray;
+        valueCounts[keyIndex] = [valueArray count];
+    }
+
+    [coder encodeArrayOfObjCType:@encode(unsigned int) count:keyCount at:valueCounts];
+
+    for(keyIndex = 0; keyIndex < keyCount; keyIndex ++) {
+        [coder encodeObject:[keys objectAtIndex:keyIndex]];
+        for(valueIndex = 0; valueIndex < valueCounts[keyIndex]; valueIndex ++) {
+            [coder encodeObject:[values[keyIndex] objectAtIndex:valueIndex]];
+        }
+    }
+
+    free(valueCounts);
+    free(values);
 }
 
 // Debugging
@@ -160,8 +344,7 @@ RCS_ID("$Header: /Network/Source/CVS/OmniGroup/Frameworks/OmniFoundation/DataStr
     NSMutableDictionary *debugDictionary;
 
     debugDictionary = [super debugDictionary];
-    if (dictionary)
-	[debugDictionary setObject:dictionary forKey:@"dictionary"];
+    [debugDictionary setObject:(id)dictionary forKey:@"dictionary"];
     return debugDictionary;
 }
 

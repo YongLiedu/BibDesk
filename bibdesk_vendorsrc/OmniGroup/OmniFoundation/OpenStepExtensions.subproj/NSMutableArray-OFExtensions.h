@@ -1,11 +1,11 @@
-// Copyright 1997-2003 Omni Development, Inc.  All rights reserved.
+// Copyright 1997-2004 Omni Development, Inc.  All rights reserved.
 //
 // This software may only be used and reproduced according to the
 // terms in the file OmniSourceLicense.html, which should be
 // distributed with this project and can also be found at
-// http://www.omnigroup.com/DeveloperResources/OmniSourceLicense.html.
+// <http://www.omnigroup.com/developer/sourcecode/sourcelicense/>.
 //
-// $Header: /Network/Source/CVS/OmniGroup/Frameworks/OmniFoundation/OpenStepExtensions.subproj/NSMutableArray-OFExtensions.h,v 1.9 2003/02/20 05:30:51 wiml Exp $
+// $Header: /Network/Source/CVS/OmniGroup/Frameworks/OmniFoundation/OpenStepExtensions.subproj/NSMutableArray-OFExtensions.h,v 1.12 2004/02/10 04:07:45 kc Exp $
 
 #import <Foundation/NSArray.h>
 
@@ -17,6 +17,8 @@
 - (void)removeIdenticalObjectsFromArray:(NSArray *)removeArray;
 
 - (void)addObjectsFromSet:(NSSet *)aSet;
+
+- (void)replaceObjectsInRange:(NSRange)replacementRange byApplyingSelector:(SEL)selector;
 
 // Maintaining sorted arrays
 - (void)insertObject:(id)anObject inArraySortedUsingSelector:(SEL)selector;

@@ -1,9 +1,9 @@
-// Copyright 2001-2003 Omni Development, Inc.  All rights reserved.
+// Copyright 2001-2004 Omni Development, Inc.  All rights reserved.
 //
 // This software may only be used and reproduced according to the
 // terms in the file OmniSourceLicense.html, which should be
 // distributed with this project and can also be found at
-// http://www.omnigroup.com/DeveloperResources/OmniSourceLicense.html.
+// <http://www.omnigroup.com/developer/sourcecode/sourcelicense/>.
 
 #import "OFSoftwareUpdateChecker.h"
 
@@ -20,7 +20,7 @@
 #import "NSString-OFExtensions.h"
 #import "NSUserDefaults-OFExtensions.h"
 
-RCS_ID("$Header: /Network/Source/CVS/OmniGroup/Frameworks/OmniFoundation/OFSoftwareUpdateChecker.m,v 1.31 2003/05/02 00:35:43 wjs Exp $");
+RCS_ID("$Header: /Network/Source/CVS/OmniGroup/Frameworks/OmniFoundation/OFSoftwareUpdateChecker.m,v 1.35 2004/02/10 04:07:41 kc Exp $");
 
 // Strings of interest
 static NSString *OSUCurrentVersionsURL = @"http://www.omnigroup.com/CurrentSoftwareVersions2.plist";
@@ -129,12 +129,9 @@ static OFSoftwareUpdateChecker *sharedChecker = nil;
     static NSString *userVisibleSystemVersion = nil;
     
     if (userVisibleSystemVersion == nil) {
-        NSDictionary *versionDictionary = [NSDictionary dictionaryWithContentsOfFile:@"/System/Library/CoreServices/SystemVersion.plist"];
-
-        userVisibleSystemVersion = [versionDictionary objectForKey:@"ProductUserVisibleVersion"];
-        if (userVisibleSystemVersion == nil)
-            userVisibleSystemVersion = [versionDictionary objectForKey:@"ProductVersion"];
-        [userVisibleSystemVersion retain];
+        SInt32 macVersion;
+        Gestalt(gestaltSystemVersion, &macVersion);
+        userVisibleSystemVersion = [[NSString alloc] initWithFormat:@"%x.%x.%x", ((macVersion & 0xff00) >> 8), ((macVersion & 0x00f0) >> 4), (macVersion & 0xf)];
     }
     return userVisibleSystemVersion;
 }
@@ -207,38 +204,6 @@ static OFSoftwareUpdateChecker *sharedChecker = nil;
     flags.shouldCheckAutomatically = [[NSUserDefaults standardUserDefaults] boolForKey:OSUCheckEnabled];
     [self _scheduleNextCheck];
 }
-
-#if 0
-- (void)URLResourceDidFinishLoading:(NSURL *)sender;
-{
-    NSData *resourceData;
-    
-    flags.updateInProgress--;
-    
-    resourceData = [sender resourceDataUsingCache:YES];
-    
-    [self _interpretSoftwareStatus:dataToPlist(resourceData)];
-    // NB (TODO): _interpretSoftwareStatus can raise an exception, in which case we won't schedule another check, and will stop checking for updates until the next time the app is launched. Not sure if this is the best behavior or not.
-    
-    [self _scheduleNextCheck];
-}
-
-- (void)URLResourceDidCancelLoading:(NSURL *)sender;
-{
-    [self URL:sender resourceDidFailLoadingWithReason:NSLocalizedStringFromTableInBundle(@"Canceled", @"OmniFoundation", [OFSoftwareUpdateChecker bundle], reason for failure to check for update if user has canceled the request)];
-}
-
-- (void)URL:(NSURL *)sender resourceDidFailLoadingWithReason:(NSString *)reason;
-{
-    NSLog(@"Background software update failed: %@", reason);
-    
-    flags.updateInProgress--;
-    [self _interpretSoftwareStatus:nil];
-    // NB (TODO): _interpretSoftwareStatus can raise an exception, in which case we won't schedule another check, and will stop checking for updates until the next time the app is launched. Not sure if this is the best behavior or not.
-    
-    [self _scheduleNextCheck];
-}
-#endif
 
 @end
 

@@ -1,11 +1,11 @@
-// Copyright 2000-2003 Omni Development, Inc.  All rights reserved.
+// Copyright 2000-2004 Omni Development, Inc.  All rights reserved.
 //
 // This software may only be used and reproduced according to the
 // terms in the file OmniSourceLicense.html, which should be
 // distributed with this project and can also be found at
-// http://www.omnigroup.com/DeveloperResources/OmniSourceLicense.html.
+// <http://www.omnigroup.com/developer/sourcecode/sourcelicense/>.
 //
-// $Header: /Network/Source/CVS/OmniGroup/Frameworks/OmniFoundation/OFWeakRetainConcreteImplementation.h,v 1.11 2003/01/15 22:51:51 kc Exp $
+// $Header: /Network/Source/CVS/OmniGroup/Frameworks/OmniFoundation/OFWeakRetainConcreteImplementation.h,v 1.15 2004/02/10 04:07:41 kc Exp $
 
 #import <Foundation/NSObject.h>
 
@@ -82,41 +82,7 @@ static inline void _OFWeakRetainDecrement(OFWeakRetainIvars *ivars, NSObject <OF
     OFSimpleUnlock(&ivars->lock);
 }
 
-static inline void _OFWeakRetainRelease(OFWeakRetainIvars *ivars, NSObject <OFWeakRetain> *self)
-{
-    NSException *raisedException = nil;
-    BOOL shouldInvalidate;
-
-    OBPRECONDITION(ivars->inited);
-
-    OFSimpleLock(&ivars->lock);
-    NS_DURING {
-        shouldInvalidate = ivars->count != OF_WEAK_RETAIN_INVALID_COUNT && ivars->count != 0 && [self retainCount] - 1 == ivars->count;
-#ifdef DEBUG_WEAK_RETAIN
-        NSLog(@"-[%@ release] (retainCount=%d, count=%d, shouldInvalidate=%@)", OBShortObjectDescription(self), [self retainCount], ivars->count, shouldInvalidate ? @"YES" : @"NO");
-#endif
-        if (shouldInvalidate) {
-            // Defer our release until after we've invalidated the weak retains, and make sure nobody else gets it into their heads to also call -invalidateWeakRetains
-            ivars->count = OF_WEAK_RETAIN_INVALID_COUNT;
-        } else {
-            // Release within the lock so that if we switch threads we won't have two threads doing releases after both decided they didn't need to invalidate the object.
-            [self _releaseFromWeakRetainHelper];
-        }
-    } NS_HANDLER {
-        raisedException = localException;
-        shouldInvalidate = NO; // This won't be used because we'll raise first, but assigning a value to it here makes the compiler happy
-    } NS_ENDHANDLER;
-    OFSimpleUnlock(&ivars->lock);
-
-    if (raisedException != nil)
-        [raisedException raise];
-
-    if (shouldInvalidate) {
-        [self invalidateWeakRetains];
-        [self _releaseFromWeakRetainHelper]; // OK, the object can go away now
-    }
-}
-
+extern void _OFWeakRetainRelease(OFWeakRetainIvars *ivars, NSObject <OFWeakRetain> *self);
 
 //
 // Public macros
