@@ -639,7 +639,8 @@ NSString *BDSKDateModifiedString = @"Date-Modified";
 
 - (void)setLocalURLPathFromMenuItem:(NSMenuItem *)sender{
 	NSString *path = [sender representedObject];
-	[theBib setField:@"Local-Url" toValue:path];
+	
+	[theBib setField:@"Local-Url" toValue:[[NSURL fileURLWithPath:[path stringByStandardizingPath]] absoluteString]];
 	[self setupForm];
 	[self fixURLs];
 }
