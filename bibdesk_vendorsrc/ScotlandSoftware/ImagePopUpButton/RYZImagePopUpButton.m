@@ -27,6 +27,8 @@
 			[cell setIconSize:[[self image] size]];
 		}
 		if ([self menu] != nil) {
+			if ([self pullsDown])	
+				[[self menu] removeItemAtIndex:0];
 			[cell setMenu:[self menu]];
 		}
 		[self setCell:cell];
