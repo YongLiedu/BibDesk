@@ -241,6 +241,12 @@ Handle Notifications by the popup button to update its icon and its menu before 
 		[publications autorelease];
 		publications = [newPubs mutableCopy];
 		
+		NSEnumerator *pubEnum = [publications objectEnumerator];
+		BibItem *pub;
+		while (pub = [pubEnum nextObject]) {
+			[pub setDocument:self];
+		}
+		
 		NSDictionary *notifInfo = [NSDictionary dictionaryWithObjectsAndKeys:newPubs, @"pubs", nil];
 		[[NSNotificationCenter defaultCenter] postNotificationName:@"Set the publications in document"
 															object:self
@@ -262,7 +268,8 @@ Handle Notifications by the popup button to update its icon and its menu before 
 	
 	[publications insertObject:pub atIndex:index];
 	[shownPublications insertObject:pub atIndex:index];
-
+	[pub setDocument:self];
+	
 	NSDictionary *notifInfo = [NSDictionary dictionaryWithObjectsAndKeys:pub, @"pub",
 		(last ? @"YES" : @"NO"), @"lastRequest", nil];
 	[[NSNotificationCenter defaultCenter] postNotificationName:BDSKDocAddItemNotification //should change this
@@ -280,6 +287,7 @@ Handle Notifications by the popup button to update its icon and its menu before 
 	
 	[publications addObject:pub];
 	[shownPublications addObject:pub];
+	[pub setDocument:self];
 
 	NSDictionary *notifInfo = [NSDictionary dictionaryWithObjectsAndKeys:pub, @"pub",
 		(last ? @"YES" : @"NO"), @"lastRequest", nil];
@@ -302,6 +310,7 @@ Handle Notifications by the popup button to update its icon and its menu before 
 		[bibEditors removeObjectIdenticalTo:editor];
         [pub setEditorObj:nil];
 	}
+	[pub setDocument:nil];
 	// unregister with the publication's authors
 	[[pub pubAuthors] makeObjectsPerformSelector:@selector(removePubFromAuthorList:) withObject:pub];
 	[publications removeObjectIdenticalTo:pub];

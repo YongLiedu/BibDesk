@@ -86,6 +86,7 @@ void _setupFonts(){
         pubFields = [[NSMutableDictionary alloc] init];
         requiredFieldNames = [[NSMutableArray alloc] init];
         pubAuthors = [authArray mutableCopy];     // copy, it's mutable
+        document = nil;
         editorObj = nil;
 		undoManager = nil;
         [self setFileType:inFileType];
@@ -169,8 +170,8 @@ void _setupFonts(){
 
 - (void)dealloc{
 	// NSLog([NSString stringWithFormat:@"bibitem Dealloc, rt: %d", [self retainCount]]);
-    if (undoManager) {
-		[undoManager removeAllActionsWithTarget:self];
+    if ([self undoManager]) {
+		[[self undoManager] removeAllActionsWithTarget:self];
 	}
     [pubFields release];
     [requiredFieldNames release];
@@ -184,6 +185,21 @@ void _setupFonts(){
 	[dateModified release];
 	
     [super dealloc];
+}
+
+- (BibDocument *)document {
+    return document;
+}
+
+- (void)setDocument:(BibDocument *)newDocument {
+    document = newDocument;
+}
+
+- (NSUndoManager *)undoManager {
+	if (undoManager == nil && document != nil) {
+		undoManager = [document undoManager];
+	}
+    return undoManager;
 }
 
 - (BibEditor *)editorObj{
@@ -467,14 +483,9 @@ void _setupFonts(){
 }
 
 - (void)setCiteKey:(NSString *)newCiteKey{
-    if(editorObj){
-        // NSLog(@"setCiteKey called with a valid editor");
-        if(!undoManager){
-            undoManager = [[editorObj window] undoManager];
-        }
-
-        [[undoManager prepareWithInvocationTarget:self] setCiteKey:citeKey];
-        [undoManager setActionName:NSLocalizedString(@"Change Cite Key",@"")];
+    if ([self undoManager]) {
+        [[[self undoManager] prepareWithInvocationTarget:self] setCiteKey:citeKey];
+        [[self undoManager] setActionName:NSLocalizedString(@"Change Cite Key",@"")];
     }
 	
     [self setCiteKeyString:newCiteKey];
@@ -513,13 +524,9 @@ void _setupFonts(){
 
 - (void)setFields: (NSDictionary *)newFields{
 	if(![newFields isEqualToDictionary:pubFields]){
-		if(editorObj){
-			if(!undoManager){
-				undoManager = [[editorObj window] undoManager];
-			}
-
-			[[undoManager prepareWithInvocationTarget:self] setFields:pubFields];
-			[undoManager setActionName:NSLocalizedString(@"Change All Fields",@"")];
+		if ([self undoManager]) {
+			[[[self undoManager] prepareWithInvocationTarget:self] setFields:pubFields];
+			[[self undoManager] setActionName:NSLocalizedString(@"Change All Fields",@"")];
 		}
 		
 		[self setPubFields:newFields];
@@ -592,18 +599,15 @@ void _setupFonts(){
 }
 
 - (void)setField:(NSString *)key toValue:(NSString *)value withModDate:(NSCalendarDate *)date{
-	if(!undoManager){
-		undoManager = [[editorObj window] undoManager];
+	if ([self undoManager]) {
+		id oldValue = [pubFields objectForKey:key];
+		NSCalendarDate *oldModDate = [self dateModified];
+		
+		[[[self undoManager] prepareWithInvocationTarget:self] setField:key 
+														 toValue:oldValue
+													 withModDate:oldModDate];
+		[[self undoManager] setActionName:NSLocalizedString(@"Edit publication",@"")];
 	}
-
-	id oldValue = [pubFields objectForKey:key];
-	NSCalendarDate *oldModDate = [self dateModified];
-	
-	[[undoManager prepareWithInvocationTarget:self] setField:key 
-													 toValue:oldValue
-													  withModDate:oldModDate];
-	[undoManager setActionName:NSLocalizedString(@"Edit publication",@"")];
-
 	
     [pubFields setObject: value forKey: key];
 	NSString *dateString = [date description];
@@ -647,12 +651,10 @@ void _setupFonts(){
 }
 
 - (void)addField:(NSString *)key withModDate:(NSCalendarDate *)date{
-	if(!undoManager){
-		undoManager = [[editorObj window] undoManager];
+	if ([self undoManager]) {
+		[[[self undoManager] prepareWithInvocationTarget:self] removeField:key
+														withModDate:[self dateModified]];
 	}
-	
-	[[undoManager prepareWithInvocationTarget:self] removeField:key
-													withModDate:[self dateModified]];
 	
 	NSString *msg = [NSString stringWithFormat:@"%@ %@",
 		NSLocalizedString(@"Add data for field:", @""), key];
@@ -675,13 +677,11 @@ void _setupFonts(){
 
 - (void)removeField: (NSString *)key withModDate:(NSCalendarDate *)date{
 	
-	if(!undoManager){
-		undoManager = [[editorObj window] undoManager];
+	if ([self undoManager]) {
+		[[[self undoManager] prepareWithInvocationTarget:self] addField:key
+													 withModDate:[self dateModified]];
 	}
-
-	[[undoManager prepareWithInvocationTarget:self] addField:key
-												 withModDate:[self dateModified]];
-
+	
     [pubFields removeObjectForKey:key];
 	
 	NSString *dateString = [date description];
@@ -1167,16 +1167,12 @@ void _setupFonts(){
 }
 
 // this might be changed when more fields are available
+// do we want to add character checks as in CiteKeyFormatter?
 - (BOOL)stringIsValid:(NSString *)proposedStr forField:(NSString *)fieldName inType:(NSString *)type
 {
-	if (editorObj == nil) {
-		NSCharacterSet *invalidSet = [[BibTypeManager sharedManager] invalidCharactersForField:fieldName inType:type];
-		NSRange r = [proposedStr rangeOfCharacterFromSet:invalidSet];
-		
-		return (r.location == NSNotFound);
-	}
-	else if ([fieldName isEqualToString:@"Cite Key"]) {
-		return [editorObj citeKeyIsValid:proposedStr];
+	if ([fieldName isEqualToString:@"Cite Key"]) {
+		    return !(proposedStr == nil || [proposedStr isEqualToString:@""] ||
+					 [[self document] citeKeyIsUsed:proposedStr byItemOtherThan:self]);
 	}
 	else {
 		[NSException raise:@"unimpl. feat. exc." format:@"stringIsValid:forField: is partly implemented"];

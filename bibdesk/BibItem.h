@@ -68,6 +68,7 @@
     NSMutableArray *requiredFieldNames;     /*! @var  this is for 'bibtex required fields'*/
     BibEditor *editorObj; /*! @var if we have an editor, don't create a new one. */
     unsigned _fileOrder;
+	BibDocument *document;
 	NSUndoManager *undoManager;
 }
 
@@ -108,7 +109,12 @@
     
 */
 - (BOOL)isRequired:(NSString *)rString; // @@type - move to type class.
-    
+
+- (BibDocument *)document;
+- (void)setDocument:(BibDocument *)newDocument;
+
+- (NSUndoManager *)undoManager;
+   
 - (BibEditor *)editorObj;
 - (void)setEditorObj:(BibEditor *)editor;
 
