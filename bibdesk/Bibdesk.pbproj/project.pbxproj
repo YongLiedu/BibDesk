@@ -812,34 +812,6 @@
 			refType = 4;
 			sourceTree = "<group>";
 		};
-		277D26080694D26B0047A142 = {
-			fileEncoding = 30;
-			isa = PBXFileReference;
-			lastKnownFileType = text.plist.scriptSuite;
-			path = BibDesk.scriptSuite;
-			refType = 4;
-			sourceTree = "<group>";
-		};
-		277D26090694D26B0047A142 = {
-			fileEncoding = 30;
-			isa = PBXFileReference;
-			lastKnownFileType = text.plist.scriptTerminology;
-			path = BibDesk.scriptTerminology;
-			refType = 4;
-			sourceTree = "<group>";
-		};
-		277D260A0694D26B0047A142 = {
-			fileRef = 277D26080694D26B0047A142;
-			isa = PBXBuildFile;
-			settings = {
-			};
-		};
-		277D260B0694D26B0047A142 = {
-			fileRef = 277D26090694D26B0047A142;
-			isa = PBXBuildFile;
-			settings = {
-			};
-		};
 		2786341E05FDB65A004D4F41 = {
 			containerPortal = 2A37F4A9FDCFA73011CA2CEA;
 			isa = PBXContainerItemProxy;
@@ -1013,6 +985,7 @@
 		};
 		27E0A9F405A7C86B005BA25A = {
 			buildPhases = (
+				F9D6C21906AED26900EAEB04,
 				27E0A9F605A7C86B005BA25A,
 				27E0AA1E05A7C86B005BA25A,
 				27E0AA4705A7C86B005BA25A,
@@ -1095,6 +1068,10 @@
 				276D2847067E740400299D0E,
 				270530010680DB28005F8C2E,
 				27639CF1068C94D8000EFFCB,
+				F9D6C1F106AECF9700EAEB04,
+				F9D6C1F306AECF9700EAEB04,
+				F9D6C1F506AECF9700EAEB04,
+				F9D6C1F706AECF9700EAEB04,
 			);
 			isa = PBXHeadersBuildPhase;
 			runOnlyForDeploymentPostprocessing = 0;
@@ -1336,6 +1313,8 @@
 		27E0AA1E05A7C86B005BA25A = {
 			buildActionMask = 2147483647;
 			files = (
+				F9D84C1306B2D1C300F2DE7D,
+				F9D84C1406B2D1C300F2DE7D,
 				27E0AA1F05A7C86B005BA25A,
 				27E0AA2005A7C86B005BA25A,
 				27E0AA2105A7C86B005BA25A,
@@ -1413,8 +1392,6 @@
 				F9A008D20638B5CD00426F15,
 				F9A008D30638B5CD00426F15,
 				27662E7A0693442800E3338C,
-				277D260A0694D26B0047A142,
-				277D260B0694D26B0047A142,
 				276A500C069F6FC80090D522,
 				276A500E069F6FF90090D522,
 			);
@@ -1689,6 +1666,10 @@
 				27A06F0E06431B8A00A6F64E,
 				27995B8706480FF90057A538,
 				27639CF2068C94D8000EFFCB,
+				F9D6C1F206AECF9700EAEB04,
+				F9D6C1F406AECF9700EAEB04,
+				F9D6C1F606AECF9700EAEB04,
+				F9D6C1F806AECF9700EAEB04,
 			);
 			isa = PBXSourcesBuildPhase;
 			runOnlyForDeploymentPostprocessing = 0;
@@ -2133,6 +2114,7 @@
 		};
 		2A37F4ABFDCFA73011CA2CEA = {
 			children = (
+				F9D6C1F906AECFB700EAEB04,
 				27995B8406480FF90057A538,
 				27995B8506480FF90057A538,
 				276D2846067E740400299D0E,
@@ -2173,6 +2155,7 @@
 			children = (
 				F9B5E472062ADDE700C8A129,
 				270530000680DB28005F8C2E,
+				F9D6C20F06AED0DA00EAEB04,
 				2773D35B058C410500C5ABDA,
 				F50730EC01F235880174A366,
 				2A37F4B0FDCFA73011CA2CEA,
@@ -2229,6 +2212,8 @@
 		};
 		2A37F4B8FDCFA73011CA2CEA = {
 			children = (
+				F9D6C21E06AED39F00EAEB04,
+				F9D6C21F06AED39F00EAEB04,
 				2762924C06384763008D783C,
 				F561F4B0025893FC01709AC4,
 				F5385A1402EC07DE014378E3,
@@ -2236,8 +2221,6 @@
 				F5A86D2003976CDF01A80164,
 				2773D37E058C457E00C5ABDA,
 				2773D3A2058C45FE00C5ABDA,
-				277D26080694D26B0047A142,
-				277D26090694D26B0047A142,
 				F5C8DE480207E53E01731AA0,
 				F544DC43042AD4E001499425,
 				F544DC42042AD4E001499425,
@@ -4241,6 +4224,195 @@
 			settings = {
 			};
 		};
+		F9D6C1E906AECF9700EAEB04 = {
+			fileEncoding = 30;
+			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.c.h;
+			name = "BibAppController+Scripting.h";
+			path = "Scripting/BibAppController+Scripting.h";
+			refType = 4;
+			sourceTree = "<group>";
+		};
+		F9D6C1EA06AECF9700EAEB04 = {
+			fileEncoding = 30;
+			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.c.objc;
+			name = "BibAppController+Scripting.m";
+			path = "Scripting/BibAppController+Scripting.m";
+			refType = 4;
+			sourceTree = "<group>";
+		};
+		F9D6C1EB06AECF9700EAEB04 = {
+			fileEncoding = 30;
+			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.c.h;
+			name = "BibAuthor+Scripting.h";
+			path = "Scripting/BibAuthor+Scripting.h";
+			refType = 4;
+			sourceTree = "<group>";
+		};
+		F9D6C1EC06AECF9700EAEB04 = {
+			fileEncoding = 30;
+			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.c.objc;
+			name = "BibAuthor+Scripting.m";
+			path = "Scripting/BibAuthor+Scripting.m";
+			refType = 4;
+			sourceTree = "<group>";
+		};
+		F9D6C1ED06AECF9700EAEB04 = {
+			fileEncoding = 30;
+			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.c.h;
+			name = "BibDocument+Scripting.h";
+			path = "Scripting/BibDocument+Scripting.h";
+			refType = 4;
+			sourceTree = "<group>";
+		};
+		F9D6C1EE06AECF9700EAEB04 = {
+			fileEncoding = 30;
+			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.c.objc;
+			name = "BibDocument+Scripting.m";
+			path = "Scripting/BibDocument+Scripting.m";
+			refType = 4;
+			sourceTree = "<group>";
+		};
+		F9D6C1EF06AECF9700EAEB04 = {
+			fileEncoding = 30;
+			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.c.h;
+			name = "BibItem+Scripting.h";
+			path = "Scripting/BibItem+Scripting.h";
+			refType = 4;
+			sourceTree = "<group>";
+		};
+		F9D6C1F006AECF9700EAEB04 = {
+			fileEncoding = 30;
+			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.c.objc;
+			name = "BibItem+Scripting.m";
+			path = "Scripting/BibItem+Scripting.m";
+			refType = 4;
+			sourceTree = "<group>";
+		};
+		F9D6C1F106AECF9700EAEB04 = {
+			fileRef = F9D6C1E906AECF9700EAEB04;
+			isa = PBXBuildFile;
+			settings = {
+			};
+		};
+		F9D6C1F206AECF9700EAEB04 = {
+			fileRef = F9D6C1EA06AECF9700EAEB04;
+			isa = PBXBuildFile;
+			settings = {
+			};
+		};
+		F9D6C1F306AECF9700EAEB04 = {
+			fileRef = F9D6C1EB06AECF9700EAEB04;
+			isa = PBXBuildFile;
+			settings = {
+			};
+		};
+		F9D6C1F406AECF9700EAEB04 = {
+			fileRef = F9D6C1EC06AECF9700EAEB04;
+			isa = PBXBuildFile;
+			settings = {
+			};
+		};
+		F9D6C1F506AECF9700EAEB04 = {
+			fileRef = F9D6C1ED06AECF9700EAEB04;
+			isa = PBXBuildFile;
+			settings = {
+			};
+		};
+		F9D6C1F606AECF9700EAEB04 = {
+			fileRef = F9D6C1EE06AECF9700EAEB04;
+			isa = PBXBuildFile;
+			settings = {
+			};
+		};
+		F9D6C1F706AECF9700EAEB04 = {
+			fileRef = F9D6C1EF06AECF9700EAEB04;
+			isa = PBXBuildFile;
+			settings = {
+			};
+		};
+		F9D6C1F806AECF9700EAEB04 = {
+			fileRef = F9D6C1F006AECF9700EAEB04;
+			isa = PBXBuildFile;
+			settings = {
+			};
+		};
+		F9D6C1F906AECFB700EAEB04 = {
+			children = (
+				F9D6C1E906AECF9700EAEB04,
+				F9D6C1EA06AECF9700EAEB04,
+				F9D6C1EB06AECF9700EAEB04,
+				F9D6C1EC06AECF9700EAEB04,
+				F9D6C1ED06AECF9700EAEB04,
+				F9D6C1EE06AECF9700EAEB04,
+				F9D6C1EF06AECF9700EAEB04,
+				F9D6C1F006AECF9700EAEB04,
+			);
+			isa = PBXGroup;
+			name = "Scripting extensions";
+			refType = 4;
+			sourceTree = "<group>";
+		};
+		F9D6C20F06AED0DA00EAEB04 = {
+			fileEncoding = 30;
+			isa = PBXFileReference;
+			lastKnownFileType = text.plist.xml;
+			name = BibDesk.sdef;
+			path = Scripting/BibDesk.sdef;
+			refType = 4;
+			sourceTree = "<group>";
+		};
+		F9D6C21906AED26900EAEB04 = {
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+				Scripting/BibDesk.sdef,
+			);
+			isa = PBXShellScriptBuildPhase;
+			outputPaths = (
+				BibDeskSuite.scriptSuite,
+				BibDeskSuite.scriptTerminology,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "/Developer/Tools/sdp -f st -i /Developer/Examples/Scripting\\ Definitions/NSCoreSuite.sdef -i /Developer/Examples/Scripting\\ Definitions/NSTextSuite.sdef Scripting/BibDesk.sdef";
+		};
+		F9D6C21E06AED39F00EAEB04 = {
+			fileEncoding = 30;
+			isa = PBXFileReference;
+			lastKnownFileType = text.plist.xml;
+			path = BibDeskSuite.scriptSuite;
+			refType = 4;
+			sourceTree = "<group>";
+		};
+		F9D6C21F06AED39F00EAEB04 = {
+			fileEncoding = 30;
+			isa = PBXFileReference;
+			lastKnownFileType = text.plist.xml;
+			path = BibDeskSuite.scriptTerminology;
+			refType = 4;
+			sourceTree = "<group>";
+		};
+		F9D84C1306B2D1C300F2DE7D = {
+			fileRef = F9D6C21E06AED39F00EAEB04;
+			isa = PBXBuildFile;
+			settings = {
+			};
+		};
+		F9D84C1406B2D1C300F2DE7D = {
+			fileRef = F9D6C21F06AED39F00EAEB04;
+			isa = PBXBuildFile;
+			settings = {
+			};
+		};
 		F9FC662906A9C6750016151E = {
 			buildActionMask = 2147483647;
 			files = (
@@ -4259,7 +4431,6 @@
 				F9FC662906A9C6750016151E,
 			);
 			buildSettings = {
-				OPTIMIZATION_CFLAGS = "";
 				OTHER_CFLAGS = "";
 				OTHER_LDFLAGS = "";
 				OTHER_REZFLAGS = "";
@@ -4291,7 +4462,6 @@
 				F9FC662F06A9C6B00016151E,
 			);
 			buildSettings = {
-				OPTIMIZATION_CFLAGS = "";
 				OTHER_CFLAGS = "";
 				OTHER_LDFLAGS = "";
 				OTHER_REZFLAGS = "";
