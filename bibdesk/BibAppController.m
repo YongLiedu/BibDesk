@@ -838,4 +838,25 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
     [doc makeWindowControllers];
     [doc showWindows];
 }
+
+
+/* ssp: 2004-07-18
+Implements service to import selection
+*/
+- (void)addPublicationsFromSelection:(NSPasteboard *)pboard
+						   userData:(NSString *)userData
+							  error:(NSString **)error{	
+	
+	// add to the frontmost bibliography
+	BibDocument * doc = [[NSApp orderedDocuments] objectAtIndex:0];
+    if (!doc) {
+		// if there are no open documents, give an error. 
+		// Or rather create a new document and add the entry there? Would anybody want that?
+		*error = NSLocalizedString(@"Error: No open document", @"Bibdesk couldn't import the selected information because there is no open bibliography file to add it to. Please create or open a bibliography file and try again.");
+		return;
+	}
+	
+	[doc addPublicationsFromPasteboard:pboard error:error];
+}
+
 @end

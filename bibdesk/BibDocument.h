@@ -365,6 +365,15 @@ extern NSString* BDSKBibTeXStringPboardType;
 - (BOOL)citeKeyIsUsed:(NSString *)aCiteKey byItemOtherThan:(BibItem *)anItem;
 
 
+/* Paste related methods */
+- (BOOL) addPublicationsFromPasteboard:(NSPasteboard*) pb error:(NSString**) error;
+- (BOOL) addPublicationsForString:(NSString*) string error:(NSString**) error;
+- (BOOL) addPublicationsForData:(NSData*) data error:(NSString**) error;
+- (BOOL) addPublicationsForFiles:(NSArray*) filenames error:(NSString**) error;
+- (IBAction)paste:(id)sender;
+
+
+
 // Private methods
 /*!
     @method createNewBlankPub

@@ -1524,72 +1524,28 @@ int generalBibItemCompareFunc(id item1, id item2, void *context){
     [pb setData:d forType:NSRTFPboardType];
     
 }
+
+
+#pragma mark Paste
+
 // ----------------------------------------------------------------------------------------
 // paste: get text, parse it as bibtex, add the entry to publications and (optionally) edit it.
 // ----------------------------------------------------------------------------------------
 
+
+/* ssp: 2004-07-19
+*/ 
 - (IBAction)paste:(id)sender{
-#warning overriden in category
     NSPasteboard *pasteboard = [NSPasteboard pasteboardWithName:NSGeneralPboard];
-    NSArray *newPubs;
-    NSEnumerator *newPubsE;
-    BibItem *newBI;
-    BOOL hadProblems = NO;
-    NSString *tempFileName = nil;
-    NSData *data = nil;
-    int rv = 0;
-    NSString *texstr = nil;
-    NSString *typeToPaste = nil;
-    
-    if([[pasteboard types] containsObject:BDSKBibTeXStringPboardType]){
-	typeToPaste = BDSKBibTeXStringPboardType;
-    } else {
-	typeToPaste = NSStringPboardType;
-    }
-	
-    if ([[pasteboard types] containsObject:typeToPaste]) {
-	
-	// TeXify the string before passing it to BibTeXParser as data
-	texstr = [[BDSKConverter sharedConverter] stringByTeXifyingString:[pasteboard stringForType:typeToPaste]];
-	data = [texstr dataUsingEncoding:NSUTF8StringEncoding];
-	
-	newPubs = [BibTeXParser itemsFromData:data error:&hadProblems];
-	if(hadProblems) {
-	    // run a modal dialog asking if we want to use partial data or give up
-	    rv = NSRunAlertPanel(NSLocalizedString(@"Error reading file!",@""),
-				 NSLocalizedString(@"There was a problem reading the file. Do you want to use everything that did work (\"Keep Going\"), edit the file to correct the errors, or give up?\n(If you choose \"Keep Going\" and then save the file, you will probably lose data.)",@""),
-				 NSLocalizedString(@"Give up",@""),
-				 NSLocalizedString(@"Keep going",@""),
-				 NSLocalizedString(@"Edit data", @""));
-	    if (rv == NSAlertDefaultReturn) {
-		// the user said to give up
-		
-	    }else if (rv == NSAlertAlternateReturn){
-		// the user said to keep going, so if they save, they might clobber data...
-		// note this by setting the update count:
-		[self updateChangeCount:NSChangeDone];
-	    }else if(rv == NSAlertOtherReturn){
-		// they said to edit the file.
-		tempFileName = [NSTemporaryDirectory() stringByAppendingPathComponent:[[NSProcessInfo processInfo] globallyUniqueString]];
-		[data writeToFile:tempFileName atomically:YES];
-		[[NSApp delegate] openEditWindowWithFile:tempFileName];
-		[[NSApp delegate] showErrorPanel:self];
-		
-	    }
+	NSString * error;
+
+	if (![self addPublicationsFromPasteboard:pasteboard error:&error]) {
+			// an error occured
+		//Display error message or simply Beep?
+		NSBeep();
 	}
-	newPubsE = [newPubs objectEnumerator];
-	while(newBI = [newPubsE nextObject]){
-	    [self addPublication:newBI];
-	    
-	    [self updateUI];
-	    [self updateChangeCount:NSChangeDone];
-	    if([[OFPreferenceWrapper sharedPreferenceWrapper] integerForKey:BDSKEditOnPasteKey] == NSOnState)
-		[self editPub:newBI forceChange:YES];
-	}
-    }else{
-        NSBeep();// Pasting the wrong type gets you nowhere.
-    }
 }
+
 
 
 - (void)createNewBlankPub{
@@ -1616,6 +1572,158 @@ int generalBibItemCompareFunc(id item1, id item2, void *context){
         [self editPub:newBI];
     }
 }
+
+
+/* ssp: 2004-07-18
+An attempt to unify the adding of BibItems from the pasteboard
+This takes the structural code from the original drag and drop handling code and breaks out the parts for handling file and text pasteboards.
+As an experiment, we also try to pass errors back.
+Would it be advisable to also give access to the newly added records?
+*/
+- (BOOL) addPublicationsFromPasteboard:(NSPasteboard*) pb error:(NSString**) error{
+	NSArray * types = [pb types];
+
+	if([pb containsFiles]) {
+        NSArray * pbArray = [pb propertyListForType:NSFilenamesPboardType]; // we will get an array
+		return [self addPublicationsForFiles:pbArray error:error];
+    }
+	else if([types containsObject:BDSKBibTeXStringPboardType]){
+		NSString *str = [pb stringForType:BDSKBibTeXStringPboardType];
+		return [self addPublicationsForString:str error:error];
+    }
+            
+        else if([types containsObject:NSStringPboardType]){
+        NSData * pbData = [pb dataForType:NSStringPboardType]; 	
+		NSString * str = [[[NSString alloc] initWithData:pbData encoding:NSUTF8StringEncoding] autorelease];
+		return [self addPublicationsForString:str error:error];
+    }
+	else {
+		*error = NSLocalizedString(@"didn't find anything appropriate on the pasteboard", @"Bibdesk couldn't find any files or bibliography information in the data it received.");
+		return NO;
+    }	
+}
+
+
+/* ssp: 2004-07-19
+'TeXify' the string, convert to data and insert then.
+Taken from original -paste: method
+Originally, drag and drop and services didn't seem to 'TeXify'
+I hope this is the right thing to do.
+There may be a bit too much conversion Data->String->Data going on.
+*/
+- (BOOL) addPublicationsForString:(NSString*) string error:(NSString**) error {
+	NSString * TeXifiedString = [[BDSKConverter sharedConverter] stringByTeXifyingString:string];
+	NSData * data = [TeXifiedString dataUsingEncoding:NSUTF8StringEncoding];
+
+	return [self addPublicationsForData:data error:error];
+}
+
+
+/* ssp: 2004-07-18
+Broken out of  original drag and drop handling
+Runs the data it receives through BiBTeXParser and add the BibItems it receives.
+Error handling is quasi-nonexistant. 
+We don't even have the error handling that used to exist in the -paste: method yet. Did that actually help?
+Shouldn't there be some kind of safeguard against opening too many pub editors?
+*/
+- (BOOL) addPublicationsForData:(NSData*) data error:(NSString**) error {
+	BOOL hadProblems = NO;
+	NSArray * newPubs = [BibTeXParser itemsFromData:data error:&hadProblems];
+
+	if(hadProblems) {
+		// original code follows:
+		// run a modal dialog asking if we want to use partial data or give up
+		int rv = 0;
+		rv = NSRunAlertPanel(NSLocalizedString(@"Error reading file!",@""),
+							 NSLocalizedString(@"There was a problem inserting the data. Do you want to keep going and use everything that BibDesk could analyse or open a window containing the data to edit it and remove the errors?\n(It's likely that choosing \"Keep Going\" will lose some data.)",@""),
+							 NSLocalizedString(@"Cancel",@""),
+							 NSLocalizedString(@"Keep going",@""),
+							 NSLocalizedString(@"Edit data", @""));
+		if (rv == NSAlertDefaultReturn) {
+			// the user said to give up
+			
+		}else if (rv == NSAlertAlternateReturn){
+			// the user said to keep going, so if they save, they might clobber data...
+			// note this by setting the update count:
+			[self updateChangeCount:NSChangeDone];
+		}else if(rv == NSAlertOtherReturn){
+			// they said to edit the file.
+			NSString * tempFileName = [NSTemporaryDirectory() stringByAppendingPathComponent:[[NSProcessInfo processInfo] globallyUniqueString]];
+			[data writeToFile:tempFileName atomically:YES];
+			[[NSApp delegate] openEditWindowWithFile:tempFileName];
+			[[NSApp delegate] showErrorPanel:self];			
+		}		
+	}
+
+	if ([newPubs count] == 0) {
+		*error = NSLocalizedString(@"couldn't analyse string", @"Bibdesk couldn't find bibliography data in the text it received.");
+		return NO;
+	}
+	
+	
+	NSEnumerator * newPubE = [newPubs objectEnumerator];
+	BibItem * newBI = nil;
+
+	while(newBI = [newPubE nextObject]){		
+		[publications addObject:newBI];
+		[shownPublications addObject:newBI];
+		[self updateUI];
+		[self updateChangeCount:NSChangeDone];
+		if([[OFPreferenceWrapper sharedPreferenceWrapper] integerForKey:BDSKEditOnPasteKey] == NSOnState) {
+			[self editPub:newBI forceChange:YES];
+		}
+	}
+	return YES;
+}
+
+
+
+
+/* ssp: 2004-07-18
+Broken out of  original drag and drop handling
+Takes an array of file paths and adds them to the document if possible.
+This method always returns YES. Even if some or many operations fail.
+*/
+- (BOOL) addPublicationsForFiles:(NSArray*) filenames error:(NSString**) error {
+	OFPreferenceWrapper *pw = [OFPreferenceWrapper sharedPreferenceWrapper];
+
+	NSEnumerator * fileNameEnum = [filenames objectEnumerator];
+	NSString * fnStr = nil;
+	NSURL * url = nil;
+	
+	while(fnStr = [fileNameEnum nextObject]){
+		if(url = [NSURL fileURLWithPath:fnStr]){
+			BibItem * newBI = [[BibItem alloc] initWithType:[pw stringForKey:BDSKPubTypeStringKey]
+										 fileType:@"BibTeX"
+										  authors:[NSMutableArray arrayWithCapacity:0]];
+			
+			[self addPublication:newBI];
+			
+			NSString *newUrl = [[NSURL fileURLWithPath:
+				[fnStr stringByExpandingTildeInPath]]absoluteString];
+			
+			[newBI setField:@"Local-Url" toValue:newUrl];	
+			
+			if([pw boolForKey:BDSKFilePapersAutomaticallyKey]){
+				[[BibFiler sharedFiler] file:YES papers:[NSArray arrayWithObject:newBI]
+								fromDocument:self];
+			}
+			
+			[self updateUI];
+			[self updateChangeCount:NSChangeDone];
+			
+			if([pw integerForKey:BDSKEditOnPasteKey] == NSOnState){
+				[self editPub:newBI forceChange:YES];
+				//[[newBI editorObj] fixEditedStatus];  - deprecated
+			}
+		}
+	}
+	return YES;
+}
+
+
+
+
 
 - (void)handleUpdateUINotification:(NSNotification *)notification{
     [self updateUI];

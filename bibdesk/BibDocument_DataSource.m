@@ -311,106 +311,33 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 }
 
 // This method is called when the mouse is released over an outline view that previously decided to allow a drop via the validateDrop method.  The data source should incorporate the data from the dragging pasteboard at this time.
+
 - (BOOL)tableView:(NSTableView*)tv
        acceptDrop:(id <NSDraggingInfo>)info
               row:(int)row
     dropOperation:(NSTableViewDropOperation)op{
-
-    BibItem *newBI;
+	
     NSPasteboard *pb;
-    NSMutableArray *newBIs;
-    NSEnumerator *fileNameEnum;
-    NSData *pbData; 
-    NSArray *pbArray;
-    NSArray *newPubs;
-    NSEnumerator *newPubE;
-    NSString *fnStr;
-    NSArray *types;
-    NSURL *url;
-    BOOL hadProblems = NO;
-    OFPreferenceWrapper *pw = [OFPreferenceWrapper sharedPreferenceWrapper];
-
+	
     if(tv == (NSTableView *)ccTableView){
         return NO; // can't drag into that tv.
     }
     
-    if([info draggingSource]){
+	if([info draggingSource]){
         pb = localDragPboard;     // it's really local, so use the local pboard.
     }else{
-       // pb = [NSPasteboard  pasteboardWithName:NSDragPboard];
         pb = [info draggingPasteboard];
     }
-    types = [pb types];
-#if DEBUG
-    //NSLog(@"types is %@", types);
-    //NSLog(@"pb is %@ and \n sender dpb is %@", pb, [info draggingPasteboard]);
-#endif
+	
+	NSString * myError;
+	BOOL result = [self addPublicationsFromPasteboard:pb error:&myError];
     
-
-    if([pb containsFiles]){
-        newBIs = [NSMutableArray array];
-        pbArray = [pb propertyListForType:NSFilenamesPboardType]; // we will get an array
-#if DEBUG
-        //NSLog(@"got filenames %@", pbArray);
-#endif
-        fileNameEnum = [pbArray objectEnumerator];
-        while(fnStr = [fileNameEnum nextObject]){
-            if(url = [NSURL fileURLWithPath:fnStr]){
-                newBI = [[BibItem alloc] initWithType:[pw stringForKey:BDSKPubTypeStringKey]
-                                             fileType:@"BibTeX"
-                                              authors:[NSMutableArray arrayWithCapacity:0]];
-              
-				[self addPublication:newBI];
-				
-				NSString *newUrl = [[NSURL fileURLWithPath:
-                    [fnStr stringByExpandingTildeInPath]]absoluteString];
-				
-				[newBI setField:@"Local-Url" toValue:newUrl];	
-
-				if([[OFPreferenceWrapper sharedPreferenceWrapper] boolForKey:BDSKFilePapersAutomaticallyKey]){
-					[[BibFiler sharedFiler] file:YES papers:[NSArray arrayWithObject:newBI]
-										  fromDocument:self];
-				}
-				
-                [self updateUI];
-                [self updateChangeCount:NSChangeDone];
-
-                if([pw integerForKey:BDSKEditOnPasteKey] == NSOnState){
-                    [self editPub:newBI forceChange:YES];
-                    //[[newBI editorObj] fixEditedStatus];  - deprecated
-                }
-            }
-        }
-        return YES;
-    }else if([types containsObject:NSStringPboardType]){
-        pbData = [pb dataForType:NSStringPboardType]; 
-
-        newPubs = [BibTeXParser itemsFromData:pbData
-                                          error:&hadProblems];
-        if(hadProblems) return NO;
-            
-        newPubE = [newPubs objectEnumerator];
-        
-        while(newBI = [newPubE nextObject]){
-
-            if (newBI != nil) {
-                [publications addObject:newBI];
-                [shownPublications addObject:newBI];
-                [self updateUI];
-                [self updateChangeCount:NSChangeDone];
-                if([[OFPreferenceWrapper sharedPreferenceWrapper] integerForKey:BDSKEditOnPasteKey] == NSOnState)
-                    [self editPub:newBI forceChange:YES];
-            }else{
-
-            }
-        }
-    }else{
-        return NO;
-    }
-    
-    [self updateUI];
-    return YES;
+    if (result) [self updateUI];
+    return result;
 }
+
+
+
 
 
 #pragma mark || Methods to support the type-ahead selector.
