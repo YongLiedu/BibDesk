@@ -16,11 +16,14 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 @implementation BibPref_TeX
 - (void)updateUI{
     [usesTeXButton setState:[defaults integerForKey:BDSKUsesTeXKey]];
-    [self changeUsesTeX:usesTeXButton]; // this makes sure the fields are set enabled / disabled properly
-
+  
     [texBinaryPath setStringValue:[defaults objectForKey:BDSKTeXBinPathKey]];
     [bibtexBinaryPath setStringValue:[defaults objectForKey:BDSKBibTeXBinPathKey]];
     [bibTeXStyle setStringValue:[defaults objectForKey:BDSKBTStyleKey]];
+	
+	//This has to follow the lines above because it checks their validity
+	[self changeUsesTeX:usesTeXButton]; // this makes sure the fields are set enabled / disabled properly
+
 }
 
 -(IBAction)changeTexBinPath:(id)sender{
@@ -29,28 +32,6 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 
 - (IBAction)changeBibTexBinPath:(id)sender{
     [defaults setObject:[sender stringValue] forKey:BDSKBibTeXBinPathKey];
-}
-
-- (void)controlTextDidEndEditing:(NSNotification *)aNotification{
-    NSTextField *control = [aNotification object];
-    if(control == bibtexBinaryPath || control == texBinaryPath){
-        if(![[NSFileManager defaultManager] isExecutableFileAtPath:[control stringValue]]){
-            NSBeep();
-            NSAlert *anAlert = [NSAlert alertWithMessageText:NSLocalizedString(@"Error!",@"Error!")
-                                               defaultButton:nil
-                                             alternateButton:nil
-                                                 otherButton:nil
-                                   informativeTextWithFormat:NSLocalizedString(@"The file %@ does not exist or is not executable.  Previewing is disabled. Please set an appropriate path and re-enable previewing.",@""), [control stringValue]];
-            [anAlert beginSheetModalForWindow:[[OAPreferenceController sharedPreferenceController] window]
-                                modalDelegate:self
-                               didEndSelector:@selector(alertDidEnd:returnCode:contextInfo:)
-                                  contextInfo:control];
-			//Disable previewing
-			[usesTeXButton setState:NSOffState];
-            [self changeUsesTeX:usesTeXButton];
-
-        }
-    }
 }
 
 - (void)alertDidEnd:(NSAlert *)alert returnCode:(int)returnCode contextInfo:(void *)control{
@@ -64,39 +45,65 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 - (IBAction)changeUsesTeX:(id)sender{
     if ([sender state] == NSOffState) {
         [bibTeXStyle setEnabled:NO];
+		
+		//These are left enabled so that the user can fix errors.
         [texBinaryPath setEnabled:YES];
         [bibtexBinaryPath setEnabled:YES];
+		
         [defaults setInteger:NSOffState forKey:BDSKUsesTeXKey];
+		
 		// hide preview panel if necessary
 		if ([[NSApp delegate] isShowingPreviewPanel]) {
 			[[NSApp delegate] hidePreviewPanel:self];
 		}
     }else{
-        [bibTeXStyle setEnabled:YES];
-        [texBinaryPath setEnabled:YES];
-        [bibtexBinaryPath setEnabled:YES];
-        [defaults setInteger:NSOnState forKey:BDSKUsesTeXKey];
-        [self checkPathsAndWarn:[NSArray arrayWithObjects:[defaults objectForKey:BDSKBibTeXBinPathKey], [defaults objectForKey:BDSKTeXBinPathKey], nil]];
-		// show preview panel if necessary
-		if ([[defaults objectForKey:@"BDSK Showing Preview Key"] isEqualToString:@"showing"]) {
-			[[NSApp delegate] showPreviewPanel:self];
+		// Check that executable paths are valid
+	    if ([self checkBibTexBinPath] && [self checkTexBinPath]) {
+		
+			// Ensure that paths don't change while previewing is enabled.
+			// so that we can reliably validate them.
+			[bibtexBinaryPath setEnabled:NO];
+			[texBinaryPath setEnabled:NO];
+		
+			// Enable the style changing interface
+			[bibTeXStyle setEnabled:YES];
+			
+			[defaults setInteger:NSOnState forKey:BDSKUsesTeXKey];
+		
+			// show preview panel if necessary
+			if ([[defaults objectForKey:@"BDSK Showing Preview Key"] isEqualToString:@"showing"]) {
+				[[NSApp delegate] showPreviewPanel:self];
+			}
 		}
     }
 }
 
-- (void)checkPathsAndWarn:(NSArray *)paths{
-    NSEnumerator *e = [paths objectEnumerator];
-    NSString *path = nil;
-    NSString *errStr = nil;
-    unsigned i = 0;
-    while(path = [e nextObject]){
-        if(![[NSFileManager defaultManager] isExecutableFileAtPath:path]){
-            errStr = ( i == 0 ? path : [errStr stringByAppendingFormat:@" and/or the file %@", path] );
-            i++;
-        }
-    }
-    
-    if(i){
+- (BOOL) checkTexBinPath { 
+  //Ensure that the fields to be validated have finished editing and thus called changeTexPath
+  [self changeTexBinPath:texBinaryPath];
+
+  if( ![[NSFileManager defaultManager] isExecutableFileAtPath:[defaults objectForKey:BDSKTeXBinPathKey]] ) {
+    [self warnAndDisablePreview:[defaults objectForKey:BDSKTeXBinPathKey]];
+	return FALSE;
+   } else {
+	return TRUE;
+   }
+}
+
+- (BOOL) checkBibTexBinPath { 
+  //Ensure that the fields to be validated have finished editing and thus called changeTexPath
+  [self changeBibTexBinPath:bibtexBinaryPath];
+
+  if( ![[NSFileManager defaultManager] isExecutableFileAtPath:[defaults objectForKey:BDSKBibTeXBinPathKey]] ) {
+    [self warnAndDisablePreview:[defaults objectForKey:BDSKBibTeXBinPathKey]];
+	return FALSE;
+   } else {
+	return TRUE;
+   }
+}
+		
+- (void) warnAndDisablePreview:(NSString *) errStr {
+        NSBeep();
         NSAlert *anAlert = [NSAlert alertWithMessageText:NSLocalizedString(@"Error!",@"Error!")
 					   defaultButton:nil
 					 alternateButton:nil
@@ -106,13 +113,11 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 			    modalDelegate:nil
 			   didEndSelector:nil
 			      contextInfo:nil];
-			//Disable previewing
-			[usesTeXButton setState:NSOffState];
-            [self changeUsesTeX:usesTeXButton];
-
+				  
+		//Disable previewing
+		[usesTeXButton setState:NSOffState];
+		[self changeUsesTeX:usesTeXButton];
     }
-
-}
 
 - (IBAction)changeStyle:(id)sender{
     [defaults setObject:[sender stringValue] forKey:BDSKBTStyleKey];

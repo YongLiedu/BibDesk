@@ -34,7 +34,9 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 - (IBAction)changeUsesTeX:(id)sender;
 - (IBAction)changeTexBinPath:(id)sender;
 - (IBAction)changeBibTexBinPath:(id)sender;
-- (void)checkPathsAndWarn:(NSArray *)paths;
+- (BOOL) checkTexBinPath;
+- (BOOL) checkBibTexBinPath;
+- (void) warnAndDisablePreview:(NSString *) errStr;
 - (IBAction)changeStyle:(id)sender;
 - (IBAction)openTeXpreviewFile:(id)sender;
 - (IBAction)downloadTeX:(id)sender;
