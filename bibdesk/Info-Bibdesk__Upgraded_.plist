@@ -128,6 +128,22 @@
 			</array>
 		</dict>
 		<dict>
+			<key>NSMenuItem</key>
+			<dict>
+				<key>default</key>
+				<string>Bibdesk/Add to Bibliography</string>
+			</dict>
+			<key>NSMessage</key>
+			<string>addPublicationsFromSelection</string>
+			<key>NSPortName</key>
+			<string>Bibdesk</string>
+			<key>NSSendTypes</key>
+			<array>
+				<string>NSStringPboardType</string>
+				<string>NSFilenamesPboardType</string>
+			</array>
+		</dict>		
+		<dict>
 			<key>NSKeyEquivalent</key>
 			<dict>
 				<key>default</key>
