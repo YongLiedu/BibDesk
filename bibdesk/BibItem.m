@@ -1088,6 +1088,8 @@ void _setupFonts(){
 	int number, numAuth, i;
 	unichar specifier, nextChar;
 	BibAuthor *auth;
+	NSMutableArray *arr;
+	NSScanner *wordScanner;
 	
 	// seed for random letters or characters
 	srand(time(NULL));
@@ -1184,6 +1186,39 @@ void _setupFonts(){
 						[parsedStr appendString:string];
 					}
 					break;
+				case 'T':
+					// title, optional #words
+					string = [self title];
+					if ([scanner scanCharactersFromSet:digits intoString:&numStr]) {
+						number = [numStr intValue];
+					} else {
+						number = 0;
+					}
+					if (string != nil) {
+						arr = [NSMutableArray array];
+						NSSet *ignoredWords = [NSSet setWithObjects:@"", @"a", @"A", @"an", @"An", @"the", @"The", nil];
+						// split the title into words using the same methodology as addString:forCompletionEntry:
+						NSRange wordSpacingRange = [string rangeOfCharacterFromSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]];
+						if (wordSpacingRange.location != NSNotFound) {
+							wordScanner = [NSScanner scannerWithString:string];
+							
+							while (![wordScanner isAtEnd]) {
+								if ([wordScanner scanUpToCharactersFromSet:[NSCharacterSet whitespaceAndNewlineCharacterSet] intoString:&string] && 
+									![ignoredWords containsObject:string]){
+									[arr addObject:string];
+								}
+								[wordScanner scanCharactersFromSet:[NSCharacterSet whitespaceAndNewlineCharacterSet] intoString:NULL];
+							}
+						} else {
+							[arr addObject:string];
+						}
+						for (i = 0; i < [arr count] && (number == 0 || i < number); i++) { 
+							if (i > 0) [parsedStr appendString:@"-"]; 
+							string = [converter stringBySanitizingString:[arr objectAtIndex:i] forField:fieldName inFileType:[self fileType]]; 
+							[parsedStr appendString:string]; 
+						}
+					}
+					break;
 				case 'y':
 					// year without century
 					if ([self date]) {
@@ -1208,29 +1243,26 @@ void _setupFonts(){
 				case 'k':
 					// keywords
 					string = [self valueOfField:@"Keywords"];
+					if ([scanner scanCharactersFromSet:digits intoString:&numStr]) {
+						number = [numStr intValue];
+					} else {
+						number = 0;
+					}
 					if (string != nil) {
-						NSMutableArray *arr = [NSMutableArray array];
-                                                // split the keyword string using the same methodology as addString:forCompletionEntry:, treating ,:; as possible dividers
-                                                NSRange keywordPunctuationRange = [string rangeOfCharacterFromSet:[[NSApp delegate] autoCompletePunctuationCharacterSet]];
-                                                if (keywordPunctuationRange.location != NSNotFound) {
-                                                    NSScanner *keywordScanner = [[NSScanner alloc] initWithString:string];
-                                                    [keywordScanner setCharactersToBeSkipped:nil];
-                                                    
-                                                    while (![keywordScanner isAtEnd]) {
-                                                        if ([keywordScanner scanUpToCharactersFromSet:[[NSApp delegate] autoCompletePunctuationCharacterSet] intoString:&string])
-                                                            [arr addObject:string];
-                                                        [keywordScanner scanCharactersFromSet:[[NSApp delegate] autoCompletePunctuationCharacterSet] intoString:nil];
-                                                        [keywordScanner scanCharactersFromSet:[NSCharacterSet whitespaceCharacterSet] intoString:nil];
-                                                    }
-                                                    [keywordScanner release];
-                                                } else {
-                                                    [arr addObject:string];
-                                                }
-                                                                        
-						if ([scanner scanCharactersFromSet:digits intoString:&numStr]) {
-							number = [numStr intValue];
+						arr = [NSMutableArray array];
+						// split the keyword string using the same methodology as addString:forCompletionEntry:, treating ,:; as possible dividers
+						NSRange keywordPunctuationRange = [string rangeOfCharacterFromSet:[[NSApp delegate] autoCompletePunctuationCharacterSet]];
+						if (keywordPunctuationRange.location != NSNotFound) {
+							wordScanner = [NSScanner scannerWithString:string];
+							[wordScanner setCharactersToBeSkipped:nil];
+							
+							while (![wordScanner isAtEnd]) {
+								if ([wordScanner scanUpToCharactersFromSet:[[NSApp delegate] autoCompletePunctuationCharacterSet] intoString:&string])
+									[arr addObject:string];
+								[wordScanner scanCharactersFromSet:[[NSApp delegate] autoCompletePunctuationCharacterSet] intoString:nil];
+							}
 						} else {
-							number = 0;
+							[arr addObject:string];
 						}
 						for (i = 0; i < [arr count] && (number == 0 || i < number); i++) { 
 							string = [[arr objectAtIndex:i] stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceCharacterSet]]; 
