@@ -551,15 +551,18 @@ void _setupFonts(){
 }
 
 - (NSString *)calendarDateDescription{
-    return [pubDate descriptionWithCalendarFormat:@"%B %Y"];
+	NSString *shortDateFormatString = [[NSUserDefaults standardUserDefaults] stringForKey:NSShortDateFormatString];
+	return [[self date] descriptionWithCalendarFormat:shortDateFormatString];
 }
 
 - (NSString *)calendarDateModifiedDescription{
-    return [dateModified descriptionWithCalendarFormat:@"%B %Y"];
+	NSString *shortDateFormatString = [[NSUserDefaults standardUserDefaults] stringForKey:NSShortDateFormatString];
+    return [[self dateModified] descriptionWithCalendarFormat:shortDateFormatString];
 }
 
 - (NSString *)calendarDateCreatedDescription{
-    return [dateCreated descriptionWithCalendarFormat:@"%B %Y"];
+	NSString *shortDateFormatString = [[NSUserDefaults standardUserDefaults] stringForKey:NSShortDateFormatString];
+	return [[self dateCreated] descriptionWithCalendarFormat:shortDateFormatString];
 }
 
 - (void)setType: (NSString *)newType{
