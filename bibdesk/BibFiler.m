@@ -74,8 +74,8 @@ static BibFiler *_sharedFiler = nil;
 	
 	foreach(paper , papers){
 		path = [paper localURLPath];
-		newPath = [paper suggestedLocalUrl];
-	
+		//newPath = [[NSURL URLWithString:[paper suggestedLocalUrl]] path];
+        newPath = [paper suggestedLocalUrl];
 		[self movePath:path toPath:newPath forPaper:paper fromDocument:doc moveAll:moveAll];
 	}
 	
@@ -87,6 +87,7 @@ static BibFiler *_sharedFiler = nil;
 		[progressIndicator incrementBy:1.0];
 		[progressIndicator displayIfNeeded];
 	}
+        
 	if(path == nil || [path isEqualToString:@""] |
 	   newPath == nil || [newPath isEqualToString:@""] || 
 	   [path isEqualToString:newPath])
@@ -100,10 +101,25 @@ static BibFiler *_sharedFiler = nil;
 	NSFileManager *fm = [NSFileManager defaultManager];
 	// filemanager needs aliases resolved for moving and existence checks
 	// ...however we want to move aliases, not their targets
-	NSString *resolvedNewPath = [[fm resolveAliasesInPath:[newPath stringByDeletingLastPathComponent]] 
-										stringByAppendingPathComponent:[newPath lastPathComponent]];
-	NSString *resolvedPath = [[fm resolveAliasesInPath:[path stringByDeletingLastPathComponent]] 
-										stringByAppendingPathComponent:[path lastPathComponent]];
+    NSString *resolvedNewPath = nil;
+    NS_DURING
+	resolvedNewPath = [[fm resolveAliasesInPath:[newPath stringByDeletingLastPathComponent]] 
+                 stringByAppendingPathComponent:[newPath lastPathComponent]];
+    NS_HANDLER
+        NSLog(@"Ignoring exception %@ raised while resolving aliases in %@", [localException name], newPath);
+        status = NSLocalizedString(@"Unable to resolve aliases in path.", @"");
+        statusFlag = statusFlag | BDSKUnableToResolveAliasMask;
+    NS_ENDHANDLER
+    
+    NSString *resolvedPath = nil;
+    NS_DURING
+        resolvedPath = [[fm resolveAliasesInPath:[path stringByDeletingLastPathComponent]] 
+                  stringByAppendingPathComponent:[path lastPathComponent]];
+    NS_HANDLER
+        NSLog(@"Ignoring exception %@ raised while resolving aliases in %@", [localException name], path);
+        status = NSLocalizedString(@"Unable to resolve aliases in path.", @"");
+        statusFlag = statusFlag | BDSKUnableToResolveAliasMask;
+    NS_ENDHANDLER
 	
 	if(moveAll || [paper canSetLocalUrl]){
 		if([fm fileExistsAtPath:resolvedNewPath]){
@@ -117,7 +133,13 @@ static BibFiler *_sharedFiler = nil;
 		}else{
 			if([fm fileExistsAtPath:resolvedPath]){
 				NSString *fileType = [[fm fileAttributesAtPath:resolvedPath traverseLink:NO] objectForKey:NSFileType];
-				[fm createPathToFile:resolvedNewPath attributes:nil]; // create parent directories if necessary (OmniFoundation)
+                NS_DURING
+                    [fm createPathToFile:resolvedNewPath attributes:nil]; // create parent directories if necessary (OmniFoundation)
+                NS_HANDLER
+                    NSLog(@"Ignoring exception %@ raised while creating path %@", [localException name], resolvedNewPath);
+                    status = NSLocalizedString(@"Unable to create the parent directory structure.", @"");
+                    statusFlag = statusFlag | BDSKUnableToCreateParentMask;
+                NS_ENDHANDLER
 				// unfortunately NSFileManager cannot reliably move symlinks...
 				if([fileType isEqualToString:NSFileTypeSymbolicLink]){
 					NSString *pathContent = [fm pathContentOfSymbolicLinkAtPath:resolvedPath];

@@ -16,7 +16,9 @@ enum {
 	BDSKOldFileDoesNotExistMask = 1,
 	BDSKGeneratedFileExistsMask = 2,
 	BDSKIncompleteFieldsMask = 4,
-	BDSKMoveErrorMask = 8
+	BDSKMoveErrorMask = 8,
+    BDSKUnableToResolveAliasMask = 16,
+    BDSKUnableToCreateParentMask = 32
 };
 
 @interface BibFiler : NSObject {
