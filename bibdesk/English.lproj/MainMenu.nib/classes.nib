@@ -96,6 +96,7 @@
                 emailPubCmd = id; 
                 exportAsHTML = id; 
                 exportAsRSS = id; 
+                makeSearchFieldKey = id; 
                 newPub = id; 
                 toggle = id; 
                 toggleShowingCustomCiteDrawer = id; 
