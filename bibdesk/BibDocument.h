@@ -86,6 +86,7 @@ extern NSString *BDSKBibItemLocalDragPboardType;
 	
 	id searchField; 
 	IBOutlet NSBox *searchFieldBox;
+	IBOutlet NSView *searchFieldView; 
 	NSToolbarItem *searchFieldToolbarItem;
         AGRegex *tipRegex;
         AGRegex *andRegex;
@@ -141,6 +142,7 @@ extern NSString *BDSKBibItemLocalDragPboardType;
 	IBOutlet NSMenu * actionMenu;
 	IBOutlet RYZImagePopUpButton * actionMenuButton;
 	IBOutlet NSMenuItem * actionMenuFirstItem;
+	IBOutlet NSView * actionMenuView;
     int fileOrderCount;
     // ----------------------------------------------------------------------------------------
     // stuff for the accessory view for the exportAsRSS

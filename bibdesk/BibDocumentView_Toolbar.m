@@ -19,6 +19,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 NSString* 	BibDocToolbarIdentifier 		= @"BibDesk Browser Toolbar Identifier";
 NSString*	NewDocToolbarItemIdentifier 	= @"New Document Item Identifier";
 NSString*	SearchFieldDocToolbarItemIdentifier 	= @"NSSearchField Document Item Identifier";
+NSString*	ActionMenuToolbarItemIdentifier 	= @"Action Menu Item Identifier";
 NSString*	EditDocToolbarItemIdentifier 	= @"Edit Document Item Identifier";
 NSString*	DelDocToolbarItemIdentifier 	= @"Del Document Item Identifier";
 NSString*	PrvDocToolbarItemIdentifier 	= @"Show Preview  Item Identifier";
@@ -53,7 +54,7 @@ static void addToolbarItem(NSMutableDictionary *theDict,NSString *identifier,NSS
         // we actually need an NSMenuItem here, so we construct one
         mItem=[[[NSMenuItem alloc] init] autorelease];
         [mItem setSubmenu: menu];
-        [mItem setTitle: [menu title]];
+        [mItem setTitle: label];
         [item setMenuFormRepresentation:mItem];
     }
     // Now that we've setup all the settings for this new toolbar item, we add it to the dictionary.
@@ -106,6 +107,15 @@ static void addToolbarItem(NSMutableDictionary *theDict,NSString *identifier,NSS
 				   [NSImage imageNamed: @"editdoc"],
                    @selector(editPubCmd:), 
 				   NULL);
+
+    addToolbarItem(toolbarItems, EditDocToolbarItemIdentifier,
+                   NSLocalizedString(@"Edit",@""),
+                   NSLocalizedString(@"Edit Publication",@""),
+                   NSLocalizedString(@"Edit Selected Publication(s)",@""),
+                   self, @selector(setImage:), 
+				   [NSImage imageNamed: @"editdoc"],
+                   @selector(editPubCmd:), 
+				   NULL);
 	
 	
 	addToolbarItem(toolbarItems, PrvDocToolbarItemIdentifier,
@@ -124,6 +134,24 @@ static void addToolbarItem(NSMutableDictionary *theDict,NSString *identifier,NSS
                    self, @selector(setImage:),
                    [NSImage imageNamed: @"drawerToolbarImage"],
                    @selector(toggleShowingCustomCiteDrawer:), NULL);
+	
+	
+    addToolbarItem(toolbarItems, SearchFieldDocToolbarItemIdentifier,
+                   NSLocalizedString(@"Search",@""),
+                   NSLocalizedString(@"Search",@""),
+                   NSLocalizedString(@"Search Publication",@""),
+                   self, @selector(setView:),
+                   searchFieldView,
+                   NULL, NULL);
+	
+	
+    addToolbarItem(toolbarItems, ActionMenuToolbarItemIdentifier,
+                   NSLocalizedString(@"Action",@""),
+                   NSLocalizedString(@"Action",@""),
+                   NSLocalizedString(@"Action for Selection",@""),
+                   self, @selector(setView:),
+                   actionMenuView,
+                   NULL, actionMenu);
     
     // Attach the toolbar to the document window
     [documentWindow setToolbar: toolbar];
@@ -154,7 +182,12 @@ static void addToolbarItem(NSMutableDictionary *theDict,NSString *identifier,NSS
     [newItem setMenuFormRepresentation:[item menuFormRepresentation]];
     // If we have a custom view, we *have* to set the min/max size - otherwise, it'll default to 0,0 and the custom
     // view won't show up at all!  This doesn't affect toolbar items with images, however.
-    if ([newItem view]!=NULL)
+    if ([itemIdent isEqualToString:SearchFieldDocToolbarItemIdentifier])
+    {
+        [newItem setMinSize:NSMakeSize(110,NSHeight([[item view] bounds]))];
+        [newItem setMaxSize:NSMakeSize(1000,NSHeight([[item view] bounds]))];
+    }
+	else if ([newItem view]!=NULL)
     {
         [newItem setMinSize:[[item view] bounds].size];
         [newItem setMaxSize:[[item view] bounds].size];
@@ -167,12 +200,15 @@ static void addToolbarItem(NSMutableDictionary *theDict,NSString *identifier,NSS
 
 - (NSArray *) toolbarDefaultItemIdentifiers: (NSToolbar *) toolbar {
     return [NSArray arrayWithObjects:
+		ActionMenuToolbarItemIdentifier,
+		NSToolbarSpaceItemIdentifier, 
 		NewDocToolbarItemIdentifier,
 		EditDocToolbarItemIdentifier, 
 		DelDocToolbarItemIdentifier, 
 		NSToolbarSeparatorItemIdentifier, 
 		PrvDocToolbarItemIdentifier,
 		NSToolbarFlexibleSpaceItemIdentifier, 
+		SearchFieldDocToolbarItemIdentifier,
 		ToggleCiteDrawerToolbarItemIdentifier, nil];
 }
 
@@ -183,6 +219,8 @@ static void addToolbarItem(NSMutableDictionary *theDict,NSString *identifier,NSS
 		EditDocToolbarItemIdentifier, 
 		DelDocToolbarItemIdentifier,
 		PrvDocToolbarItemIdentifier , 
+		ActionMenuToolbarItemIdentifier,
+		SearchFieldDocToolbarItemIdentifier,
 		ToggleCiteDrawerToolbarItemIdentifier,
 		NSToolbarPrintItemIdentifier,
 		NSToolbarFlexibleSpaceItemIdentifier, 
@@ -222,7 +260,8 @@ static void addToolbarItem(NSMutableDictionary *theDict,NSString *identifier,NSS
     if ([[toolbarItem itemIdentifier] isEqualToString: NSToolbarPrintItemIdentifier]) {
 		enable = [self validatePrintDocumentMenuItem:nil];
     }else if([[toolbarItem itemIdentifier] isEqualToString: DelDocToolbarItemIdentifier]
-             || [[toolbarItem itemIdentifier] isEqualToString: EditDocToolbarItemIdentifier]){
+             || [[toolbarItem itemIdentifier] isEqualToString: EditDocToolbarItemIdentifier]
+			 || [[toolbarItem itemIdentifier] isEqualToString: ActionMenuToolbarItemIdentifier]){
         if([self numberOfSelectedPubs] == 0) enable = NO;
     }
 
