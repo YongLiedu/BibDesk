@@ -12,12 +12,13 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 */
 
 #import "BDSKCustomCiteTableView.h"
+#import "BibDocument_DataSource.h"
 
 @implementation BDSKCustomCiteTableView
 - (NSImage*)dragImageForRows:(NSArray*)dragRows event:(NSEvent*)dragEvent dragImageOffset:(NSPointPointer)dragImageOffset{
     NSPasteboard *myPb = [NSPasteboard pasteboardWithUniqueName];
     NSArray *types;
-    NSImage *image;
+    NSImage *image = nil;
     NSAttributedString *string;
     NSString *s;
     NSSize maxSize = NSMakeSize(600,200); // tunable...
