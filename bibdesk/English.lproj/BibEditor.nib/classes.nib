@@ -11,15 +11,13 @@
         {
             ACTIONS = {
                 bibTypeDidChange = id; 
-                cancel = id; 
+                chooseLocalURL = id; 
                 citeKeyDidChange = id; 
                 dismissAddField = id; 
                 dismissDelField = id; 
                 raiseAddField = id; 
                 raiseDelField = id; 
-                revert = id; 
-                save = id; 
-                saveDocument = id; 
+                showCiteKeyWarning = id; 
                 textFieldDidEndEditing = id; 
                 toggleSnoopDrawer = id; 
                 viewLocal = id; 
@@ -32,13 +30,14 @@
                 bibFields = NSForm; 
                 bibTypeButton = NSPopUpButton; 
                 citeKeyField = NSTextField; 
+                citeKeyWarningButton = NSButton; 
                 delFieldButtonCancel = NSButton; 
                 delFieldButtonOK = NSButton; 
                 delFieldPopUp = NSPopUpButton; 
                 delFieldWindow = NSWindow; 
                 documentSnoopButton = NSButton; 
                 documentSnoopDrawer = NSDrawer; 
-                documentSnoopImageView = NSImageView; 
+                documentSnoopImageView = PDFImageView; 
                 documentSnoopScrollView = NSScrollView; 
                 documentSnoopTextView = NSTextView; 
                 documentTextSnoopButton = NSButton; 
