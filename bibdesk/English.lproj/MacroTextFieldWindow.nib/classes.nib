@@ -4,13 +4,12 @@
         {CLASS = BDSKBorderlessKeyWindow; LANGUAGE = ObjC; SUPERCLASS = NSWindow; }, 
         {CLASS = FirstResponder; LANGUAGE = ObjC; SUPERCLASS = NSObject; }, 
         {
-            ACTIONS = {editMacros = id; }; 
             CLASS = MacroTextFieldWindowController; 
             LANGUAGE = ObjC; 
             OUTLETS = {
-                callBackObject = id; 
-                editMacroButton = NSButton; 
                 expandedValueTextField = NSTextField; 
+                infoLine = NSTextField; 
+                macroResolver = id; 
                 textField = NSTextField; 
             }; 
             SUPERCLASS = NSWindowController; 
