@@ -115,8 +115,27 @@ static BibFiler *_sharedFiler = nil;
 			}
 		}else{
 			if([fm fileExistsAtPath:resolvedPath]){
+				NSString *fileType = [[fm fileAttributesAtPath:resolvedPath traverseLink:NO] objectForKey:NSFileType];
 				[fm createPathToFile:resolvedNewPath attributes:nil]; // create parent directories if necessary (OmniFoundation)
-				if([fm movePath:resolvedPath toPath:resolvedNewPath handler:self]){
+				// unfortunately NSFileManager cannot reliably move symlinks...
+				if([fileType isEqualToString:NSFileTypeSymbolicLink]){
+					if([fm createSymbolicLinkAtPath:resolvedNewPath pathContent:[resolvedPath stringByResolvingSymlinksInPath]]){
+						if(![fm removeFileAtPath:resolvedPath handler:self]){
+							status = [_errorString autorelease];
+							statusFlag = statusFlag | BDSKMoveErrorMask;
+						}
+						[paper setField:@"Local-Url" toValue:[[NSURL fileURLWithPath:newPath] absoluteString]];
+						//status = NSLocalizedString(@"Successfully moved.",@"");
+						
+						NSUndoManager *undoManager = [doc undoManager];
+						[[undoManager prepareWithInvocationTarget:self] 
+							movePath:newPath toPath:path forPaper:paper fromDocument:doc moveAll:YES];
+						_moveCount++;
+					}else{
+						status = NSLocalizedString(@"Could not move symbolic link.", @"");
+						statusFlag = statusFlag | BDSKMoveErrorMask;
+					}
+				}else if([fm movePath:resolvedPath toPath:resolvedNewPath handler:self]){
 					[paper setField:@"Local-Url" toValue:[[NSURL fileURLWithPath:newPath] absoluteString]];
 					//status = NSLocalizedString(@"Successfully moved.",@"");
 					
@@ -177,7 +196,7 @@ static BibFiler *_sharedFiler = nil;
 		[NSApp endSheet:progressSheet returnCode:0];
 	}
 	
-	if(_moveCount < _movableCount){
+	if([_fileInfoDicts count] > 0){
 		[self showProblems];
 	}
 }
