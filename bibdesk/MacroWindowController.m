@@ -114,9 +114,7 @@
     [tableView reloadData];
 
     int row = [macros indexOfObject:newKey];
-#warning FIXME: NSIndexSet is 10.3 only
-    NSIndexSet *indexes = [NSIndexSet indexSetWithIndex:row];
-    [tableView selectRowIndexes:indexes byExtendingSelection:NO];
+    [tableView selectRow:row byExtendingSelection:NO];
     [tableView editColumn:0
                       row:row
                 withEvent:nil
@@ -124,11 +122,9 @@
 }
 
 - (IBAction)removeSelectedMacros:(id)sender{
-#warning FIXME: NSIndexSet is 10.3 only
-    NSIndexSet *indexes = [tableView selectedRowIndexes];
-    unsigned int i = [indexes firstIndex];
+	NSEnumerator *rowEnum = [tableView selectedRowEnumerator];
+	NSNumber *row;
     NSDictionary *macroDefinitions = [(id <BDSKMacroResolver>)macroDataSource macroDefinitions];
-    int numberOfIndexes = [indexes count];
 
     // used because we modify the macros array during the loop
     NSArray *shadowOfMacros = [[macros copy] autorelease];
@@ -137,10 +133,9 @@
     // we don't give it a chance to modify state.
     [[self window] endEditingFor:[tableView selectedCell]];
 
-    while(i != NSNotFound){
-        NSString *key = [shadowOfMacros objectAtIndex:i];
+    while(row = [rowEnum nextObject]){
+        NSString *key = [shadowOfMacros objectAtIndex:[row intValue]];
         [(id <BDSKMacroResolver>)macroDataSource removeMacro:key];
-        i = [indexes indexGreaterThanIndex:i];
     }
     
     [tableView reloadData];
