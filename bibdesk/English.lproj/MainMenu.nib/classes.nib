@@ -6,6 +6,10 @@
                 gotoError = id; 
                 gotoErrorObj = id; 
                 hideErrorPanel = id; 
+                importAsLatin1 = id; 
+                importAsLatin2 = id; 
+                importAsMacOSRoman = id; 
+                importAsUTF8 = id; 
                 openEditWindowWithFile = id; 
                 openUsingFilter = id; 
                 reopenDocument = id; 

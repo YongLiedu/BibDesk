@@ -64,6 +64,18 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 - (IBAction)openUsingFilter:(id)sender;
 
 /*!
+    @method importWithEncoding
+    @abstract Imports a bibtex file with a specific encoding.  Useful if there are non-ASCII characters in the file.
+    @discussion
+ */
+- (void)importWithEncoding:(NSStringEncoding)encoding;
+
+- (IBAction)importAsLatin1:(id)sender;
+- (IBAction)importAsUTF8:(id)sender;
+- (IBAction)importAsMacOSRoman:(id)sender;
+- (IBAction)importAsLatin2:(id)sender;
+
+/*!
 @method addString:forCompletionEntry:
     @abstract 
     @discussion 
@@ -140,4 +152,6 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 - (void)importDataFromSelection:(NSPasteboard *)pboard
 		       userData:(NSString *)userData
 			  error:(NSString **)error;
+
+
 @end

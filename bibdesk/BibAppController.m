@@ -179,6 +179,39 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
     }
 }
 
+- (IBAction)importAsLatin1:(id)sender{
+    [self importWithEncoding:NSISOLatin1StringEncoding];
+}
+
+- (IBAction)importAsUTF8:(id)sender{
+    [self importWithEncoding:NSUTF8StringEncoding];
+}
+
+- (IBAction)importAsMacOSRoman:(id)sender{
+    [self importWithEncoding:NSMacOSRomanStringEncoding];
+}
+
+- (IBAction)importAsLatin2:(id)sender{
+    [self importWithEncoding:NSISOLatin2StringEncoding];
+}
+
+- (void)importWithEncoding:(NSStringEncoding)encoding{
+    NSOpenPanel *op = [NSOpenPanel openPanel];
+    if([op runModalForDirectory:nil file:nil types:nil] == NSOKButton){
+	NSString *filename = [op filename];
+	NSData *data = [NSData dataWithContentsOfFile:filename];
+	NSString *content = [[[NSString alloc] initWithData:data encoding:encoding] autorelease];  // this returns a Unicode string
+	BibDocument *doc = nil;
+
+	doc = [[NSDocumentController sharedDocumentController] openUntitledDocumentOfType:@"bibTeX database" display:YES];
+	[doc loadBibTeXDataRepresentation:[[BDSKConverter stringByTeXifyingString:content] dataUsingEncoding:NSUTF8StringEncoding]];
+	[doc updateChangeCount:NSChangeDone];
+	[doc updateUI];
+    }
+}
+
+
+
 #pragma mark Auto-completion stuff
 
 - (void)addString:(NSString *)string forCompletionEntry:(NSString *)entry{
