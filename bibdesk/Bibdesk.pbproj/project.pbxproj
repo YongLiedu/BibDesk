@@ -105,6 +105,7 @@
 			dependencies = (
 				270C1A6105EFF7C900943DD0,
 				270C1A6305EFF7C900943DD0,
+				2786341F05FDB65A004D4F41,
 			);
 			isa = PBXAggregateTarget;
 			name = BuildMeFirst;
@@ -1094,6 +1095,37 @@
 			refType = 4;
 			sourceTree = "<group>";
 		};
+		2786341E05FDB65A004D4F41 = {
+			containerPortal = 2A37F4A9FDCFA73011CA2CEA;
+			isa = PBXContainerItemProxy;
+			proxyType = 1;
+			remoteGlobalIDString = 270C1A6B05EFFB5200943DD0;
+			remoteInfo = Documentation;
+		};
+		2786341F05FDB65A004D4F41 = {
+			isa = PBXTargetDependency;
+			target = 270C1A6B05EFFB5200943DD0;
+			targetProxy = 2786341E05FDB65A004D4F41;
+		};
+		278F092505F2ED0B00725B39 = {
+			isa = PBXFileReference;
+			lastKnownFileType = file;
+			path = "BibDesk Help idx";
+			refType = 4;
+			sourceTree = "<group>";
+		};
+		278F092605F2ED0B00725B39 = {
+			fileRef = 278F092505F2ED0B00725B39;
+			isa = PBXBuildFile;
+			settings = {
+			};
+		};
+		278F092705F2ED3400725B39 = {
+			fileRef = 278F092505F2ED0B00725B39;
+			isa = PBXBuildFile;
+			settings = {
+			};
+		};
 		279D535F0535332E002DBEA0 = {
 			children = (
 				279D53600535332E002DBEA0,
@@ -1139,7 +1171,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /usr/bin/python;
-			shellScript = "import os,sys\nbuildpath = os.environ[\"SOURCE_ROOT\"]\nos.environ[\"OTEST\"] = \"/Users/mike/Code/customizedLibs/OCUnit/tools/otest\"\nif os.environ.has_key(\"TEST_AFTER_BUILD\") and os.environ[\"TEST_AFTER_BUILD\"] == \"YES\":\n#\tos.popen(buildpath + \"RunTargetUnitTests\")\n\tos.popen(\"/Users/mike/Code/customizedLibs/OCUnit/tools/RunTargetUnitTests\")\nsys.exit(0)";
+			shellScript = "import os,sys\nbuildpath = os.environ[\"SOURCE_ROOT\"]\nos.environ[\"OTEST\"] = \"/Users/mike/Code/customizedLibs/OCUnit/tools/otest\"\nif os.environ.has_key(\"TEST_AFTER_BUILD\") and os.environ[\"TEST_AFTER_BUILD\"] == \"YES\":\n\tprint \"running tests.\"\n#\tos.popen(buildpath + \"RunTargetUnitTests\")\n\tos.popen(\"/Users/mike/Code/customizedLibs/OCUnit/tools/RunTargetUnitTests\")\nsys.exit(0)";
 		};
 		27CB67A405680FC0001D2AC3 = {
 			fileEncoding = 4;
@@ -1233,7 +1265,6 @@
 				ZERO_LINK = NO;
 			};
 			dependencies = (
-				27EAC2A305D46044009CE0E9,
 			);
 			isa = PBXNativeTarget;
 			name = "Bibdesk (Upgraded)";
@@ -1598,6 +1629,7 @@
 				2722DB9705D398BD00352F0B,
 				2722DB9805D398BD00352F0B,
 				2722DB9905D398BD00352F0B,
+				278F092605F2ED0B00725B39,
 			);
 			isa = PBXResourcesBuildPhase;
 			runOnlyForDeploymentPostprocessing = 0;
@@ -2210,6 +2242,7 @@
 			dstPath = "BibDesk Help";
 			dstSubfolderSpec = 7;
 			files = (
+				278F092705F2ED3400725B39,
 				2722DBC205D3997800352F0B,
 				2722DBC305D3997800352F0B,
 				2722DBC405D3997800352F0B,
@@ -2269,18 +2302,6 @@
 			path = DeveloperDocumentation/HackingBibDesk.rtf;
 			refType = 4;
 			sourceTree = "<group>";
-		};
-		27EAC2A205D46044009CE0E9 = {
-			containerPortal = 2A37F4A9FDCFA73011CA2CEA;
-			isa = PBXContainerItemProxy;
-			proxyType = 1;
-			remoteGlobalIDString = F568CBDB025BBCB801709AC4;
-			remoteInfo = Documentation;
-		};
-		27EAC2A305D46044009CE0E9 = {
-			isa = PBXTargetDependency;
-			target = 270C1A6B05EFFB5200943DD0;
-			targetProxy = 27EAC2A205D46044009CE0E9;
 		};
 //270
 //271
@@ -3662,6 +3683,7 @@
 				F5FB32B0034D6D4601EF0AD8,
 				2722DB5A05D398A900352F0B,
 				2722DB5B05D398A900352F0B,
+				278F092505F2ED0B00725B39,
 				2722DB5C05D398A900352F0B,
 				2722DB5D05D398A900352F0B,
 				2722DB5E05D398A900352F0B,
