@@ -10,6 +10,10 @@
 				F9022FB707580B9400C3F701,
 				F918104307583A6E00CF822D,
 				F988709007580CB4001D4D49,
+				F9022C66075802E300C3F701,
+				F9022C64075802E300C3F701,
+				F9022C8A0758034000C3F701,
+				F9022C8C0758034000C3F701,
 				F9022C960758038000C3F701,
 				F9022C980758038000C3F701,
 				F9022C9A0758038000C3F701,
@@ -19,8 +23,6 @@
 				F9022CA30758038000C3F701,
 				F9022CA50758038000C3F701,
 				F9022CA70758038000C3F701,
-				F9022C8A0758034000C3F701,
-				F9022C8C0758034000C3F701,
 				F9022C54075802E300C3F701,
 				F9022C56075802E300C3F701,
 				F9022C58075802E300C3F701,
@@ -28,26 +30,21 @@
 				F9022C5C075802E300C3F701,
 				F9022C5E075802E300C3F701,
 				F9022C60075802E300C3F701,
-				F9022C62075802E300C3F701,
-				F9022C64075802E300C3F701,
-				F9022C66075802E300C3F701,
 				F9022C68075802E300C3F701,
 				F9022C6A075802E300C3F701,
 				F9022C6C075802E300C3F701,
 				F9022C6E075802E300C3F701,
 				F9022C70075802E300C3F701,
 				F9022C72075802E300C3F701,
-				F9022C74075802E300C3F701,
-				F9022C76075802E300C3F701,
-				F9022C390758027800C3F701,
 				F9022C3B0758027800C3F701,
 				F9022C3D0758027800C3F701,
 				F9022C3F0758027800C3F701,
 				F9022C410758027800C3F701,
 				F9022C430758027800C3F701,
 				F9022C450758027800C3F701,
-				F9022C470758027800C3F701,
+				F9022C390758027800C3F701,
 				F9022C490758027800C3F701,
+				F9022C470758027800C3F701,
 			);
 			isa = PBXGroup;
 			name = Classes;
@@ -415,6 +412,7 @@
 				8D11072C0486CEB800E47090,
 				8D11072E0486CEB800E47090,
 				F9022E8B07580A7C00C3F701,
+				F920DB22075C2D40000C5FCA,
 			);
 			buildRules = (
 			);
@@ -1109,8 +1107,8 @@
 			isa = PBXFileReference;
 			lastKnownFileType = sourcecode.c.objc;
 			path = BibDeskOpenCommand.m;
-			refType = 4;
-			sourceTree = "<group>";
+			refType = 2;
+			sourceTree = SOURCE_ROOT;
 		};
 		F9022C63075802E300C3F701 = {
 			fileEncoding = 30;
@@ -3038,10 +3036,11 @@
 			outputPaths = (
 				BibDeskSuite.scriptSuite,
 				BibDeskSuite.scriptTerminology,
+				BibDeskScripting.r,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "if [ -x /Developer/Tools/sdp ]; then\n/Developer/Tools/sdp -f st -i /Developer/Examples/Scripting\\ Definitions/NSCoreSuite.sdef -i /Developer/Examples/Scripting\\ Definitions/NSTextSuite.sdef Scripting/BibDesk.sdef\nexit 0\nelse\n/usr/bin/sdp -f st -i /Developer/Examples/Scripting\\ Definitions/NSCoreSuite.sdef -i /Developer/Examples/Scripting\\ Definitions/NSTextSuite.sdef Scripting/BibDesk.sdef\nexit 0\nfi";
+			shellScript = "if [ -x /Developer/Tools/sdp ]; then\n/Developer/Tools/sdp -f ast -i /Developer/Examples/Scripting\\ Definitions/NSCoreSuite.sdef -i /Developer/Examples/Scripting\\ Definitions/NSTextSuite.sdef Scripting/BibDesk.sdef\nexit 0\nelse\n/usr/bin/sdp -f ast -i /Developer/Examples/Scripting\\ Definitions/NSCoreSuite.sdef -i /Developer/Examples/Scripting\\ Definitions/NSTextSuite.sdef Scripting/BibDesk.sdef\nexit 0\nfi";
 		};
 		F9022E8B07580A7C00C3F701 = {
 			buildActionMask = 2147483647;
@@ -3082,10 +3081,12 @@
 		};
 		F9022FB707580B9400C3F701 = {
 			children = (
+				F920DB25075C2D8F000C5FCA,
+				F9022FC107580B9400C3F701,
+				F9022C62075802E300C3F701,
 				F9022FBC07580B9400C3F701,
 				F9022FBE07580B9400C3F701,
 				F9022FBF07580B9400C3F701,
-				F9022FC107580B9400C3F701,
 				F9022FC307580B9400C3F701,
 				3DD300F5075C054D003FD2D7,
 				F9022FC507580B9400C3F701,
@@ -3505,6 +3506,11 @@
 		};
 		F918104307583A6E00CF822D = {
 			children = (
+				F920DAFA075C2B69000C5FCA,
+				F920DAFB075C2B69000C5FCA,
+				F920DAFC075C2B69000C5FCA,
+				F920DAFD075C2B69000C5FCA,
+				F920DAFE075C2B69000C5FCA,
 				F9022C950758038000C3F701,
 				F9022C970758038000C3F701,
 				F9022C990758038000C3F701,
@@ -3534,8 +3540,6 @@
 				F9022C6D075802E300C3F701,
 				F9022C6F075802E300C3F701,
 				F9022C71075802E300C3F701,
-				F9022C73075802E300C3F701,
-				F9022C75075802E300C3F701,
 				F9022C380758027800C3F701,
 				F9022C3A0758027800C3F701,
 				F9022C3C0758027800C3F701,
@@ -3559,8 +3563,110 @@
 			refType = 4;
 			sourceTree = "<group>";
 		};
+		F920DAFA075C2B69000C5FCA = {
+			fileEncoding = 30;
+			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.c.h;
+			name = "BibAppController+Scripting.h";
+			path = "Scripting/BibAppController+Scripting.h";
+			refType = 4;
+			sourceTree = "<group>";
+		};
+		F920DAFB075C2B69000C5FCA = {
+			fileEncoding = 30;
+			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.c.h;
+			name = "BibAuthor+Scripting.h";
+			path = "Scripting/BibAuthor+Scripting.h";
+			refType = 4;
+			sourceTree = "<group>";
+		};
+		F920DAFC075C2B69000C5FCA = {
+			fileEncoding = 30;
+			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.c.h;
+			name = BibDeskSearchForCommand.h;
+			path = Scripting/BibDeskSearchForCommand.h;
+			refType = 4;
+			sourceTree = "<group>";
+		};
+		F920DAFD075C2B69000C5FCA = {
+			fileEncoding = 30;
+			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.c.h;
+			name = "BibDocument+Scripting.h";
+			path = "Scripting/BibDocument+Scripting.h";
+			refType = 4;
+			sourceTree = "<group>";
+		};
+		F920DAFE075C2B69000C5FCA = {
+			fileEncoding = 30;
+			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.c.h;
+			name = "BibItem+Scripting.h";
+			path = "Scripting/BibItem+Scripting.h";
+			refType = 4;
+			sourceTree = "<group>";
+		};
+		F920DAFF075C2B69000C5FCA = {
+			fileRef = F920DAFA075C2B69000C5FCA;
+			isa = PBXBuildFile;
+			settings = {
+			};
+		};
+		F920DB00075C2B69000C5FCA = {
+			fileRef = F920DAFB075C2B69000C5FCA;
+			isa = PBXBuildFile;
+			settings = {
+			};
+		};
+		F920DB01075C2B69000C5FCA = {
+			fileRef = F920DAFC075C2B69000C5FCA;
+			isa = PBXBuildFile;
+			settings = {
+			};
+		};
+		F920DB02075C2B69000C5FCA = {
+			fileRef = F920DAFD075C2B69000C5FCA;
+			isa = PBXBuildFile;
+			settings = {
+			};
+		};
+		F920DB03075C2B69000C5FCA = {
+			fileRef = F920DAFE075C2B69000C5FCA;
+			isa = PBXBuildFile;
+			settings = {
+			};
+		};
+		F920DB22075C2D40000C5FCA = {
+			buildActionMask = 2147483647;
+			files = (
+				F920DB26075C2D8F000C5FCA,
+			);
+			isa = PBXRezBuildPhase;
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		F920DB25075C2D8F000C5FCA = {
+			fileEncoding = 30;
+			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.rez;
+			name = BibDeskScripting.r;
+			path = ../BibDeskScripting.r;
+			refType = 4;
+			sourceTree = "<group>";
+		};
+		F920DB26075C2D8F000C5FCA = {
+			fileRef = F920DB25075C2D8F000C5FCA;
+			isa = PBXBuildFile;
+			settings = {
+			};
+		};
 		F988709007580CB4001D4D49 = {
 			children = (
+				F9022C73075802E300C3F701,
+				F9022C74075802E300C3F701,
+				F9022C75075802E300C3F701,
+				F9022C76075802E300C3F701,
 				F9022DDB075808EB00C3F701,
 				F9022DDC075808EB00C3F701,
 				F9022CB4075803AC00C3F701,
@@ -3904,6 +4010,11 @@
 				F918104107583A5B00CF822D,
 				F918104207583A5B00CF822D,
 				3DD300F4075C0532003FD2D7,
+				F920DAFF075C2B69000C5FCA,
+				F920DB00075C2B69000C5FCA,
+				F920DB01075C2B69000C5FCA,
+				F920DB02075C2B69000C5FCA,
+				F920DB03075C2B69000C5FCA,
 			);
 			isa = PBXHeadersBuildPhase;
 			runOnlyForDeploymentPostprocessing = 0;

@@ -23,6 +23,7 @@
 			F920D89707593FCD000C5FCA,
 			F920D8A707594243000C5FCA,
 			F920D8CE07594AE1000C5FCA,
+			F920DA2F075B0295000C5FCA,
 		);
 		codeSenseManager = F9022BEC0758004000C3F701;
 		executables = (
@@ -73,7 +74,7 @@
 					PBXFileDataSource_Warnings_ColumnID,
 				);
 			};
-			PBXPerProjectTemplateStateSaveDate = 123288582;
+			PBXPerProjectTemplateStateSaveDate = 123480856;
 			PBXPrepackagedSmartGroups_v2 = (
 				{
 					PBXTransientLocationAtTop = bottom;
@@ -250,7 +251,7 @@
 					};
 				},
 			);
-			PBXWorkspaceStateSaveDate = 123288582;
+			PBXWorkspaceStateSaveDate = 123480856;
 		};
 		perUserProjectItems = {
 			F92D3C8C0758ECDC00BE5D70 = F92D3C8C0758ECDC00BE5D70;
@@ -616,6 +617,14 @@
 			sepNavWindowFrame = "{{222, 80}, {750, 558}}";
 		};
 	};
+	F9022C5E075802E300C3F701 = {
+		uiCtxt = {
+			sepNavIntBoundsRect = "{{0, 0}, {4544, 12656}}";
+			sepNavSelRange = "{15082, 0}";
+			sepNavVisRect = "{{0, 4596}, {706, 429}}";
+			sepNavWindowFrame = "{{214, 154}, {750, 558}}";
+		};
+	};
 	F9022C63075802E300C3F701 = {
 		uiCtxt = {
 			sepNavIntBoundsRect = "{{0, 0}, {4544, 532}}";
@@ -664,6 +673,14 @@
 			sepNavWindowFrame = "{{429, 274}, {750, 558}}";
 		};
 	};
+	F9022C980758038000C3F701 = {
+		uiCtxt = {
+			sepNavIntBoundsRect = "{{0, 0}, {980, 1162}}";
+			sepNavSelRange = "{0, 0}";
+			sepNavVisRect = "{{0, 733}, {706, 429}}";
+			sepNavWindowFrame = "{{61, 227}, {750, 558}}";
+		};
+	};
 	F9022CA20758038000C3F701 = {
 		uiCtxt = {
 			sepNavIntBoundsRect = "{{0, 0}, {4556, 429}}";
@@ -680,12 +697,28 @@
 			sepNavWindowFrame = "{{268, 38}, {750, 558}}";
 		};
 	};
+	F9022CA70758038000C3F701 = {
+		uiCtxt = {
+			sepNavIntBoundsRect = "{{0, 0}, {1130, 7294}}";
+			sepNavSelRange = "{3018, 0}";
+			sepNavVisRect = "{{0, 622}, {706, 429}}";
+			sepNavWindowFrame = "{{126, 270}, {750, 558}}";
+		};
+	};
 	F9022CB9075803AC00C3F701 = {
 		uiCtxt = {
 			sepNavIntBoundsRect = "{{0, 0}, {4544, 1176}}";
 			sepNavSelRange = "{0, 0}";
 			sepNavVisRect = "{{0, 0}, {706, 429}}";
 			sepNavWindowFrame = "{{130, 164}, {750, 558}}";
+		};
+	};
+	F9022D1B0758066000C3F701 = {
+		uiCtxt = {
+			sepNavIntBoundsRect = "{{0, 0}, {706, 6930}}";
+			sepNavSelRange = "{0, 0}";
+			sepNavVisRect = "{{0, 0}, {706, 429}}";
+			sepNavWindowFrame = "{{95, 274}, {750, 558}}";
 		};
 	};
 	F920D89007593FB7000C5FCA = {
@@ -695,11 +728,6 @@
 		path = /Volumes/Local/Users/amaxwell/build/bibdesk_vendorsrc/OmniGroup/OmniFoundation/Scheduling.subproj/OFQueueProcessor.m;
 		refType = 0;
 		sourceTree = "<absolute>";
-		uiCtxt = {
-			sepNavIntBoundsRect = "{{0, 0}, {1004, 2716}}";
-			sepNavSelRange = "{2976, 0}";
-			sepNavVisRect = "{{0, 1199}, {693, 277}}";
-		};
 	};
 	F920D89207593FB7000C5FCA = {
 		fileReference = F920D89007593FB7000C5FCA;
@@ -715,11 +743,6 @@
 		path = /Volumes/Local/Users/amaxwell/build/bibdesk_vendorsrc/OmniGroup/OmniFoundation/Scheduling.subproj/OFScheduler.m;
 		refType = 0;
 		sourceTree = "<absolute>";
-		uiCtxt = {
-			sepNavIntBoundsRect = "{{0, 0}, {1310, 5194}}";
-			sepNavSelRange = "{9463, 0}";
-			sepNavVisRect = "{{0, 4475}, {693, 277}}";
-		};
 	};
 	F920D89507593FC8000C5FCA = {
 		fileReference = F920D89307593FC8000C5FCA;
@@ -747,6 +770,13 @@
 		functionName = "-newProcessKeyDownCharacter:";
 		isa = PBXFileBreakpoint;
 		lineNumber = 28;
+		state = 1;
+	};
+	F920DA2F075B0295000C5FCA = {
+		fileReference = F9022C5E075802E300C3F701;
+		functionName = "-addString:forCompletionEntry:";
+		isa = PBXFileBreakpoint;
+		lineNumber = 323;
 		state = 1;
 	};
 	F92D3C790758EB1A00BE5D70 = {
@@ -781,11 +811,6 @@
 		path = /Volumes/Local/Users/amaxwell/build/bibdesk_vendorsrc/OmniGroup/OmniAppKit/Widgets.subproj/OATypeAheadSelectionHelper.m;
 		refType = 0;
 		sourceTree = "<absolute>";
-		uiCtxt = {
-			sepNavIntBoundsRect = "{{0, 0}, {1316, 2436}}";
-			sepNavSelRange = "{1634, 0}";
-			sepNavVisRect = "{{0, 835}, {693, 277}}";
-		};
 	};
 	F92D3C950758ED1300BE5D70 = {
 		fileReference = F92D3C900758ECDC00BE5D70;
