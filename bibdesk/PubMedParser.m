@@ -109,8 +109,12 @@
 						if([key isEqualToString:@"Author"]){
 							addAuthorName_toDict([[wholeValue copy] autorelease],pubDict);
 						}else{
+						if([key isEqualToString:@"Keywords"]){
+						    addKeywordString_toDict([[wholeValue copy] autorelease],pubDict);
+						}else{
 							[pubDict setObject:[[wholeValue copy] autorelease] forKey:key];
 						}
+					  }
                     }
                     
                     [wholeValue setString:value];
@@ -159,5 +163,16 @@ void addAuthorName_toDict(NSString *wholeValue, NSMutableDictionary *pubDict){
 		[pubDict setObject:newAuthString forKey:@"Author"];
 	}
 }
+
+void addKeywordString_toDict(NSString *wholeValue, NSMutableDictionary *pubDict){
+	NSString *oldKeywordString = [pubDict objectForKey:@"Keywords"];
+	if(!oldKeywordString){
+		[pubDict setObject:wholeValue forKey:@"Keywords"];
+	}else{
+		NSString *newKeywordString = [NSString stringWithFormat:@"%@, %@", oldKeywordString, wholeValue];
+		[pubDict setObject:newKeywordString forKey:@"Keywords"];
+	}
+}
+
 
 @end

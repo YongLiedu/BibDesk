@@ -19,5 +19,6 @@
 + (NSMutableArray *)itemsFromString:(NSString *)itemString error:(BOOL *)hadProblems frontMatter:(NSMutableString *)frontMatter filePath:(NSString *)filePath;
 
 void addAuthorName_toDict(NSString *wholeValue, NSMutableDictionary *pubDict);
+void addKeywordString_toDict(NSString *wholeValue, NSMutableDictionary *pubDict);
 
 @end
