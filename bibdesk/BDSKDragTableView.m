@@ -137,7 +137,7 @@ static NSColor *sStripeColor = nil;
     NSCharacterSet *alnum = [NSCharacterSet alphanumericCharacterSet];
     if (c == NSDeleteCharacter ||
         c == NSBackspaceCharacter) {
-        [[self delegate] handleTableViewBackspaceDel];
+        [[self delegate] delPub:self];
     }else if(c == NSNewlineCharacter ||
              c == NSEnterCharacter ||
              c == NSCarriageReturnCharacter){
