@@ -67,7 +67,7 @@ extern NSString* LocalDragPasteboardName;
 
     NSMutableDictionary *toolbarItems;
 	
-	IBOutlet NSSearchField *searchField;
+	IBOutlet NSSearchField *searchField; //@@ backwards compatibility - can i leave this symbol in?
 	IBOutlet NSBox *searchFieldBox;
 	NSToolbarItem *searchFieldToolbarItem;
 	
@@ -387,7 +387,7 @@ int generalBibItemCompareFunc(id item1, id item2, void *context);
 /*!
     @method handleTableColumnChangedNotification
     @abstract incorporates changes from other windows.
-    @discussion \253discussion\273
+    @discussion 
     
 */
 - (void)handleTableColumnChangedNotification:(NSNotification *)notification;
@@ -395,10 +395,18 @@ int generalBibItemCompareFunc(id item1, id item2, void *context);
 /*!
     @method handleFontChangedNotification
     @abstract sets the font of the table/outlineView.
-    @discussion \253discussion\273
+    @discussion 
     
 */
 - (void)handleFontChangedNotification:(NSNotification *)notification;
+	
+	/*!
+    @method handleBibItemChangedNotification
+	 @abstract responds to changing bib data
+	 @discussion 
+	 
+	 */
+- (void)handleBibItemChangedNotification:(NSNotification *)notification;
 
 - (int)numberOfSelectedPubs;
 - (NSEnumerator *)selectedPubEnumerator;

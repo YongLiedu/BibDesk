@@ -80,8 +80,13 @@ NSString*   LocalDragPasteboardName = @"edu.ucsd.cs.mmccrack.bibdesk: Local Publ
                                               selector:@selector(handleCustomStringsChangedNotification:)
                                                   name:BDSKCustomStringsChangedNotification
                                                 object:nil];
-     
-	 // @@ itemChangeNotification - should register to observe for item change notifications here.
+
+	 //  register to observe for item change notifications here.
+	 [[NSNotificationCenter defaultCenter] addObserver:self
+                                              selector:@selector(handleBibItemChangedNotification:)
+                                                  name:BDSKBibItemChangedNotification
+                                                object:nil];
+	 
 	 
      customStringArray = [[NSMutableArray arrayWithCapacity:6] retain];
      [customStringArray setArray:[[OFPreferenceWrapper sharedPreferenceWrapper] arrayForKey:BDSKCustomCiteStringsKey]];
@@ -1077,9 +1082,10 @@ int generalBibItemCompareFunc(id item1, id item2, void *context){
     BibEditor *e = [pub editorObj];
     if(e == nil){
         e = [[BibEditor alloc] initWithBibItem:pub];
-		[e setDocument:self];
-        //       e = [[BDSKMultiEditor alloc] initWithBibItems:[NSArray arrayWithObjects:pub,nil] andBibDocument:self];
-        [bibEditors addObject:[e autorelease]];// we need to keep track of the bibeditors
+		[e setDocument:self]; 
+		// bibitem overrides the traditional implementation that was not what we wanted.
+
+		[bibEditors addObject:[e autorelease]];// we need to keep track of the bibeditors
     }
     [e show];    //    [e showWindow:self];
     if(force){
@@ -1416,6 +1422,14 @@ int generalBibItemCompareFunc(id item1, id item2, void *context){
     }
     menuItem = [contextualMenu itemWithTitle:colName];
     [self contextualMenuSelectTableColumn:menuItem post:NO]; 
+}
+
+- (void)handleBibItemChangedNotification:(NSNotification *)notification{
+	// dead simple for now
+	NSLog(@"got handleBibItemChangedNotification with userinfo %@", [notification userInfo]);
+	[self updateUI];
+	// should: check if we're sorting by the key that was changed and resort
+	// should: also check if we're filtering by the key that was changed and refilter.
 }
 
 - (void)displayPreviewForItems:(NSEnumerator *)enumerator{
