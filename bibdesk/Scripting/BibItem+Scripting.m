@@ -81,21 +81,19 @@ Extra wrapping of the created and modified date methods to
 */
 
 - (NSString *) month {
-	return [[self fields] objectForKey:@"Month"];
+	return [self valueOfField:BibItemMonthKey];
 }
 
 - (void) setMonth:(NSString*) newMonth {
-	[[self fields] setObject:newMonth forKey:@"Month"];
-	[self updateMetadataForKey:@"Month"];
+	[self setField:BibItemMonthKey toValue:newMonth];
 }
 
 - (NSString *) year {
-	return [[self fields] objectForKey:@"Year"];
+	return [self valueOfField:BibItemYearKey];
 }
 
 - (void) setYear:(NSString*) newYear {
-	[[self fields] setObject:newYear forKey:@"Year"];
-	[self updateMetadataForKey:@"Year"];
+	[self setField:BibItemYearKey toValue:newYear];
 }
 
 
@@ -137,51 +135,51 @@ Extra wrapping of the created and modified date methods to
  Any policies on whether to rather return copies of the strings in question here?
 */
 - (NSString*) remoteURL {
-	return [pubFields objectForKey:BibItemRemoteURLKey];
+	return [self valueOfField:BibItemRemoteURLKey];
 }
 
 - (void) setRemoteURL:(NSString*) newURL{
-	[pubFields setObject:newURL forKey:BibItemRemoteURLKey];
+	[self setField:BibItemRemoteURLKey toValue:newURL];
 }
 
 - (NSString*) localURL {
-	return [pubFields objectForKey:BibItemLocalURLKey];
+	return [self valueOfField:BibItemLocalURLKey];
 }
 
 - (void) setLocalURL:(NSString*) newURL {
-	[pubFields setObject:newURL forKey:BibItemLocalURLKey];
+	[self setField:BibItemLocalURLKey toValue:newURL];
 }
 
 - (NSString*) abstract {
-	return [pubFields objectForKey:BibItemAbstractKey];
+	return [self valueOfField:BibItemAbstractKey];
 }
 
 - (void) setAbstract:(NSString*) newAbstract {
-	[pubFields setObject:newAbstract forKey:BibItemAbstractKey];
+	[self setField:BibItemAbstractKey toValue:newAbstract];
 }
 
 - (NSString*) annotation {
-	return [pubFields objectForKey:BibItemAnnotationKey];
+	return [self valueOfField:BibItemAnnotationKey];
 }
 
 - (void) setAnnotation:(NSString*) newAnnotation {
-	[pubFields setObject:newAnnotation forKey:BibItemAnnotationKey];
+	[self setField:BibItemAnnotationKey toValue:newAnnotation];
 }
 
 - (NSString*) RSSDescription {
-	return [pubFields objectForKey:BibItemRSSDescriptionKey];
+	return [self valueOfField:BibItemRSSDescriptionKey];
 }
 
 - (void) setRSSDescription:(NSString*) newDesc {
-	[pubFields setObject:newDesc forKey:BibItemRSSDescriptionKey];
+	[self setField:BibItemRSSDescriptionKey toValue:newDesc];
 }
 
 - (NSString *)keywords{
-    return [pubFields objectForKey:BibItemKeywordsKey];
+    return [self valueOfField:BibItemKeywordsKey];
 }
 
 - (void)setKeywords:(NSString *)keywords{
-    [pubFields setObject:keywords forKey:BibItemKeywordsKey];
+    [self setField:BibItemKeywordsKey toValue:keywords];
 }
 
 /*
@@ -233,8 +231,6 @@ Extra wrapping of the created and modified date methods to
 	[self setFileType:[newPub fileType]];
 	[self setCiteKey:[newPub citeKey]];
 	[self setDate:[newPub date]];
-	[self setDate:[newPub date]];
-	[self setAuthorsFromBibtexString:[newPub bibtexAuthorString]];
 	[self setFields:[newPub fields]];
 	[self setRequiredFieldNames: [newPub requiredFieldNames]];
 	[self makeType:[newPub type]];
@@ -286,7 +282,7 @@ ssp: 2004-07-12
  Apparently this is X.3 and up only.
 
 - (id)valueForUndefinedKey:(NSString *)key {
-	NSString * s = (NSString*) [[self fields] objectForKey:key];
+	NSString * s = (NSString*) [self valueOfField:key];
 	if (!s) {
 		[NSException raise:NSUndefinedKeyException format:@""];
 	}		

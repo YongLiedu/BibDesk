@@ -240,6 +240,25 @@ Handle Notifications by the popup button to update its icon and its menu before 
     return [[publications retain] autorelease];
 }
 
+- (void)insertPublication:(BibItem *)pub atIndex:(unsigned int)index {
+	[self insertPublication:pub atIndex:index lastRequest:YES];
+}
+
+- (void)insertPublication:(BibItem *)pub atIndex:(unsigned int)index lastRequest:(BOOL)last{
+	NSUndoManager *undoManager = [self undoManager];
+	[[undoManager prepareWithInvocationTarget:self] removePublication:pub];
+	[undoManager setActionName:NSLocalizedString(@"Insert Publication",@"")];
+	
+	[publications insertObject:pub atIndex:index];
+	[shownPublications insertObject:pub atIndex:index];
+
+	NSDictionary *notifInfo = [NSDictionary dictionaryWithObjectsAndKeys:pub, @"pub",
+		(last ? @"YES" : @"NO"), @"lastRequest", nil];
+	[[NSNotificationCenter defaultCenter] postNotificationName:BDSKDocAddItemNotification //should change this
+														object:self
+													  userInfo:notifInfo];
+}
+
 - (void)addPublication:(BibItem *)pub{
 	[self addPublication:pub lastRequest:YES];
 }

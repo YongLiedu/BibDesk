@@ -347,9 +347,13 @@ extern NSString* BDSKBibTeXStringPboardType;
 */
 - (NSMutableArray *)publications;
 
+- (void)insertPublication:(BibItem *)pub atIndex:(unsigned int)index lastRequest:(BOOL)last;
+
 - (void)addPublication:(BibItem *)pub lastRequest:(BOOL)last;
 
 - (void)removePublication:(BibItem *)pub lastRequest:(BOOL)last;
+
+- (void)insertPublication:(BibItem *)pub atIndex:(unsigned int)index;
 
 - (void)addPublication:(BibItem *)pub;
 

@@ -12,6 +12,8 @@
 
 #define BibItemBasicObjects @"citeKey", @"pubDate", @"title", @"type", @"date", @"pubFields", @"bibTeXStrings", @"RTFValue", @"RSSValue"
 
+#define BibItemYearKey @"Year"
+#define BibItemMonthKey @"Month"
 #define BibItemRemoteURLKey @"Url"
 #define BibItemLocalURLKey @"Local-Url"
 #define BibItemAbstractKey @"Abstract"

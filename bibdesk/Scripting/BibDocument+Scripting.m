@@ -14,6 +14,25 @@ Category on BibDocument to implement a few additional functions needed for scrip
 */
 @implementation BibDocument (Scripting)
 
+/* cmh: 2004-1-28
+Scripting Key-Value coding methods to access publications
+*/
+- (BibItem *)valueInPublicationsAtIndex:(unsigned int)index {
+    return [publications objectAtIndex:index];
+}
+
+- (void)insertInPublications:(BibItem *)pub  atIndex:(unsigned int)index {
+   [self insertPublication:pub atIndex:index];
+}
+
+- (void)insertInPublications:(BibItem *)pub {
+   [self addPublication:pub];
+}
+
+- (void)removeFromPublicationsAtIndex:(unsigned int)index {
+   [self removePublication:[publications objectAtIndex:index]];
+}
+
 
 /* ssp: 2004-08-03
 Scripting Key-Value coding method to access an author by his name
@@ -92,10 +111,8 @@ Getting and setting the selection of the table
 	// debugging revealed that we get an array of NSIndexspecifiers and not of BibItem
 	NSIndexSpecifier * aPub;
 	
-	// do the first one manually to deselect previous selection
-	aPub = [myEnum nextObject]; 
-	if (!aPub) return;
-	[self highlightBib:[publications objectAtIndex:[aPub index]]];
+	// first deselect all pubs
+	[tableView deselectAll:nil];
 	
 	while (aPub = [myEnum nextObject]){
 		

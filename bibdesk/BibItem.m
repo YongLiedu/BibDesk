@@ -363,21 +363,21 @@ void _setupFonts(){
 
 - (NSString *)bibtexAuthorString{
     NSEnumerator *en = [pubAuthors objectEnumerator];
-    NSString *rs;
     BibAuthor *author;
     if([pubAuthors count] == 0) return [NSString stringWithString:@""];
     if([pubAuthors count] == 1){
         author = [pubAuthors objectAtIndex:0];
         return [author name];
     }else{
+		NSMutableString *rs;
         author = [en nextObject];
-        rs = [NSString stringWithString:[author name]];
+        rs = [NSMutableString stringWithString:[author name]];
         // since this method is used for display, BibAuthor -name is right above.
         
         while(author = [en nextObject]){
             [rs appendFormat:@" and %@", [author name]];
         }
-        return rs;
+        return [[rs copy] autorelease];
     }
         
 }

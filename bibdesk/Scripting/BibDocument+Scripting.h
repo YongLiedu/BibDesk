@@ -11,6 +11,11 @@
 
 @interface BibDocument (Scripting) 
 
+- (BibItem *)valueInPublicationsAtIndex:(unsigned int)index;
+- (void)insertInPublications:(BibItem *)pub  atIndex:(unsigned int)index;
+- (void)insertInPublications:(BibItem *)pub;
+- (void)removeFromPublicationsAtIndex:(unsigned int)index;
+
 - (NSString*) filterField;
 - (void)setFilterField:(NSString*) filterterm;
 
