@@ -76,55 +76,6 @@ extern void _objc_resolve_categories_for_class(struct objc_class *cls);
     }
 }
 
-/* ssp: 2004-07-18
-1. Determines whether we are in a cite key context, returns (NSNotFound,0) range otherwise
-This will determine any cite command beginning with \cite as well as \fullcite and \bibentry.
-Are any others needed?
-2. Determines cite key to be completed and returns its range
-The cite key will be the text (no spaces) between the insertion point and the next { or , preceding it.
-	
-The heuristics we use here aren't particularly good. Neither the idea nor the implementation. Basically we simply see whether there was a \cite command recently (within 100 characters) and assume it's ours then. Determining whether we _really_ are in the right context for this seems quite hard as \cite commands can have space, newlines, optional parameters wiht about everything in them.
-However, we will simply add the usual completions after our own for safety...
-*/
-- (NSRange) citeKeyRange {
-    NSString * s = [[self textStorage] string];
-    int sLen = [s length];
-    NSRange r = [self selectedRange];
-    int locDiff = 100 - r.location;
-    if (locDiff < 0 ) { locDiff = 0; }
-    int r2Loc = r.location - 100 + locDiff;
-    int r2Len = 100 - locDiff;
-    NSRange r2 = NSMakeRange(r2Loc, r2Len);
-    
-    NSRange backslash = [s rangeOfString:@"\\" options:NSBackwardsSearch range:r2];
-    if (backslash.location != NSNotFound) {
-	// we've got a backslash
-	NSRange cite;
-	if (backslash.location + 5 <= sLen) {
-	    // string is long enough to avoid range exception
-	    cite = [s rangeOfString:@"\\cite" options:NSAnchoredSearch range:NSMakeRange(backslash.location,5)];
-	    if ((cite.location == NSNotFound) && (backslash.location + 9 <= sLen)) {
-		// make sure there is even more space for matching the longer strings
-		cite = [s rangeOfString:@"\\fullcite" options:NSAnchoredSearch range:NSMakeRange(backslash.location,9)];
-		if (cite.location == NSNotFound) {
-		    // last chance...
-		    cite = [s rangeOfString:@"\\bibentry" options:NSAnchoredSearch range:NSMakeRange(backslash.location,9)];
-		}
-	    }
-	    
-	    if (cite.location != NSNotFound) {
-		// we've found some cite command
-		NSRange comma = [s rangeOfCharacterFromSet:[NSCharacterSet characterSetWithCharactersInString:@", \n{"] options:NSBackwardsSearch range:r2];
-		if (comma.location !=NSNotFound) {
-		    // We're pretty sure now we've got the correct partial citekey
-		    return NSMakeRange(comma.location+1,r.location-comma.location-1);
-		} // comma found
-	    } // cite command found
-	} // string long enough
-    } // backslash found
-    return NSMakeRange(NSNotFound,0);
-}
-
 // ** Check to see if it's TeX
 //  - look back to see if { ; if no brace, return not TeX
 //  - if { found, look back between insertion point and { to find comma; check to see if it's BibTeX, then return the match range
@@ -134,6 +85,7 @@ However, we will simply add the usual completions after our own for safety...
 //  - look back to see if ][ ; if so, set ] range again
 //  - look back to find [ starting from ]
 //  - now we have the last [, see if there is a cite immediately preceding it using rangeOfString:@"cite" || rangeOfString:@"bibentry"
+//  - if there were no brackets, but there was a double curly brace, then check for a jurabib citation
 // ** After all of this, we've searched back to a brace, and then checked for a cite command with two optional parameters
 
 NSRange SafeBackwardSearchRange(NSRange startRange, unsigned seekLength){
@@ -151,7 +103,7 @@ NSRange SafeBackwardSearchRange(NSRange startRange, unsigned seekLength){
     // check for jurabib \citefield, which has two mandatory parameters in curly braces, e.g. \citefield[pagerange]{title}{cite:key}
     NSRange doubleBraceRange = [str rangeOfString:@"}{" options:NSBackwardsSearch | NSLiteralSearch range:SafeBackwardSearchRange( NSMakeRange(braceRange.location + 1, 1), 10)];
     
-    if(rightBracketRange.location == NSNotFound && doubleBraceRange.location == NSNotFound){ // no options, so life is easy; look backwards 10 characters from the brace and see if there's a citecommand
+    if(rightBracketRange.location == NSNotFound && doubleBraceRange.location == NSNotFound){ // no options and not jurabib, so life is easy; look backwards 10 characters from the brace and see if there's a citecommand
         citeSearchRange = SafeBackwardSearchRange(braceRange, 20);
         if([str rangeOfString:@"cite" options:NSBackwardsSearch | NSLiteralSearch range:citeSearchRange].location != NSNotFound ||
            [str rangeOfString:@"bibentry" options:NSBackwardsSearch | NSLiteralSearch range:citeSearchRange].location != NSNotFound){
@@ -203,7 +155,7 @@ NSRange SafeForwardSearchRange( unsigned startLoc, unsigned seekLength, unsigned
     return NSMakeRange(startLoc, seekLength);
 }
             
-- (NSRange)newCiteKeyRange{
+- (NSRange)citeKeyRange{
     NSString *str = [[self textStorage] string];
     NSRange r = [self selectedRange]; // here's the insertion point
     NSRange commaRange;
@@ -248,7 +200,7 @@ Override usual behaviour so we can have dots, colons and hyphens in our cite key
 requires X.3
 */
 - (NSRange)rangeForUserCompletion {
-    NSRange r = [self newCiteKeyRange];
+    NSRange r = [self citeKeyRange];
     if (r.location != NSNotFound) {
 	return r;
     }
@@ -265,9 +217,9 @@ requires X.3
 - (NSArray *)completionsForPartialWordRange:(NSRange)charRange indexOfSelectedItem:(int *)index	{
 	NSString *s = [[self textStorage] string];
         NSRange refLabelRange = [self refLabelRange];
-        NSRange keyRange = ( (refLabelRange.location == NSNotFound) ? [self newCiteKeyRange] : NSMakeRange(NSNotFound, 0) ); // don't bother checking for a citekey if this is a \ref
+        NSRange keyRange = ( (refLabelRange.location == NSNotFound) ? [self citeKeyRange] : NSMakeRange(NSNotFound, 0) ); // don't bother checking for a citekey if this is a \ref
 	
-	if(keyRange.location != NSNotFound){ // if it's a re
+	if(keyRange.location != NSNotFound){
                 
             NSString *end = [[s substringWithRange:keyRange] stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceCharacterSet]];
 		
