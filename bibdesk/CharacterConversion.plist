@@ -4,51 +4,48 @@
 <dict>
 	<key>Roman to TeX</key>
 	<dict>
-		<key>Ä</key>
-		<string>{\"A}</string>
-		<key>Ë</key>
-		<string>{\"E}</string>
-		<key>Ï</key>
-		<string>{\"I}</string>
-		<key>Ö</key>
-		<string>{\"O}</string>
-		<key>Ü</key>
-		<string>{\"U}</string>
-		<key>Ÿ</key>
-		<string>{\"Y}</string>
-
-		<key>Â</key>
-		<string>{\^A}</string>
-		<key>Ê</key>
-		<string>{\^E}</string>
-		<key>Î</key>
-		<string>{\^I}</string>
-		<key>Ô</key>
-		<string>{\^O}</string>
-		<key>Û</key>
-		<string>{\^U}</string>
-
-		<key>Á</key>
-		<string>{\'A}</string>
-		<key>É</key>
-		<string>{\'E}</string>
-		<key>Í</key>
-		<string>{\'I}</string>
-		<key>Ó</key>
-		<string>{\'O}</string>
-		<key>Ú</key>
-		<string>{\'U}</string>
-
 		<key>&amp;</key>
 		<string>{\&amp;}</string>
 		<key>¡</key>
 		<string>{!'}</string>
+		<key>Á</key>
+		<string>{\'A}</string>
+		<key>Â</key>
+		<string>{\^A}</string>
+		<key>Ä</key>
+		<string>{\"A}</string>
 		<key>Å</key>
 		<string>{\AA}</string>
 		<key>Æ</key>
 		<string>{\AE}</string>
+		<key>Ç</key>
+		<string>{\c C}</string>
+		<key>É</key>
+		<string>{\'E}</string>
+		<key>Ê</key>
+		<string>{\^E}</string>
+		<key>Ë</key>
+		<string>{\"E}</string>
+		<key>Í</key>
+		<string>{\'I}</string>
+		<key>Î</key>
+		<string>{\^I}</string>
+		<key>Ï</key>
+		<string>{\"I}</string>
+		<key>Ó</key>
+		<string>{\'O}</string>
+		<key>Ô</key>
+		<string>{\^O}</string>
+		<key>Ö</key>
+		<string>{\"O}</string>
 		<key>Ø</key>
 		<string>{\O}</string>
+		<key>Ú</key>
+		<string>{\'U}</string>
+		<key>Û</key>
+		<string>{\^U}</string>
+		<key>Ü</key>
+		<string>{\"U}</string>
 		<key>à</key>
 		<string>{\`a}</string>
 		<key>á</key>
@@ -64,7 +61,7 @@
 		<key>æ</key>
 		<string>{\ae}</string>
 		<key>ç</key>
-		<string>{\cc}</string>
+		<string>{\c c}</string>
 		<key>è</key>
 		<string>{\`e}</string>
 		<key>é</key>
@@ -107,11 +104,25 @@
 		<string>{\"y}</string>
 		<key>œ</key>
 		<string>{\oe}</string>
+		<key>Ÿ</key>
+		<string>{\"Y}</string>
 	</dict>
 	<key>TeX to Roman</key>
 	<dict>
 		<key>{!'}</key>
 		<string>¡</string>
+		<key>{\"A}</key>
+		<string>Ä</string>
+		<key>{\"E}</key>
+		<string>Ë</string>
+		<key>{\"I}</key>
+		<string>Ï</string>
+		<key>{\"O}</key>
+		<string>Ö</string>
+		<key>{\"U}</key>
+		<string>Ü</string>
+		<key>{\"Y}</key>
+		<string>Ÿ</string>
 		<key>{\"a}</key>
 		<string>ä</string>
 		<key>{\"e}</key>
@@ -126,6 +137,16 @@
 		<string>ÿ</string>
 		<key>{\&amp;}</key>
 		<string>&amp;</string>
+		<key>{\'A}</key>
+		<string>Á</string>
+		<key>{\'E}</key>
+		<string>É</string>
+		<key>{\'I}</key>
+		<string>Í</string>
+		<key>{\'O}</key>
+		<string>Ó</string>
+		<key>{\'U}</key>
+		<string>Ú</string>
 		<key>{\'a}</key>
 		<string>á</string>
 		<key>{\'e}</key>
@@ -144,6 +165,16 @@
 		<string>Œ</string>
 		<key>{\O}</key>
 		<string>Ø</string>
+		<key>{\^A}</key>
+		<string>Â</string>
+		<key>{\^E}</key>
+		<string>Ê</string>
+		<key>{\^I}</key>
+		<string>Î</string>
+		<key>{\^O}</key>
+		<string>Ô</string>
+		<key>{\^U}</key>
+		<string>Û</string>
 		<key>{\^a}</key>
 		<string>â</string>
 		<key>{\^e}</key>
@@ -168,6 +199,10 @@
 		<string>å</string>
 		<key>{\ae}</key>
 		<string>æ</string>
+		<key>{\c C}</key>
+		<string>Ç</string>
+		<key>{\c c}</key>
+		<string>ç</string>
 		<key>{\cc}</key>
 		<string>ç</string>
 		<key>{\oe}</key>
@@ -180,52 +215,6 @@
 		<string>ñ</string>
 		<key>{\~o}</key>
 		<string>õ</string>
-
-
-		<key>{\"A}</key>
-		<string>Ä</string>
-
-
-		<key>{\"E}</key>
-		<string>Ë</string>
-
-
-		<key>{\"I}</key>
-		<string>Ï</string>
-		<key>{\"O}</key>
-		<string>Ö</string>
-
-		<key>{\"U}</key>		
-<string>Ü</string>
-
-
-		<key>{\"Y}</key>
-		<string>Ÿ</string>
-
-
-		<key>{\^A}</key>
-		<string>Â</string>
-		<key>{\^E}</key>
-		<string>Ê</string>
-		<key>{\^I}</key>
-		<string>Î</string>
-		<key>{\^O}</key>
-		<string>Ô</string>
-		<key>{\^U}</key>
-		<string>Û</string>
-
-
-		<key>{\'A}</key>
-		<string>Á</string>
-		<key>{\'E}</key>
-		<string>É</string>
-		<key>{\'I}</key>
-		<string>Í</string>
-
-		<key>{\'O}</key>
-		<string>Ó</string>
-		<key>{\'U}</key>
-		<string>Ú</string>
-</dict>
+	</dict>
 </dict>
 </plist>
