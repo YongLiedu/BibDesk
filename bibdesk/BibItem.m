@@ -1157,6 +1157,9 @@ _setupParagraphStyle()
 	NSString *localUrlFormat = [prefs objectForKey:BDSKLocalUrlFormatKey];
 	NSString *papersFolderPath = [prefs stringForKey:BDSKPapersFolderPathKey];
 	NSString *relativeFile = [self parseFormat:localUrlFormat forField:BDSKLocalUrlString];
+	if ([[OFPreferenceWrapper sharedPreferenceWrapper] boolForKey:BDSKCiteKeyLowercaseKey]) {
+		relativeFile = [relativeFile lowercaseString];
+	}
 	
 	return [papersFolderPath stringByAppendingPathComponent:relativeFile];
 }

@@ -2,13 +2,13 @@
     IBClasses = (
         {
             ACTIONS = {
+                changeLocalUrlLowercase = id; 
                 choosePapersFolderLocationAction = id; 
                 formatHelp = id; 
                 localUrlFormatAdd = id; 
                 localUrlFormatChanged = id; 
                 showLocalUrlFormatWarning = id; 
                 toggleFilePapersAutomaticallyAction = id; 
-                toggleKeepPapersFolderOrganizedAction = id; 
             }; 
             CLASS = "BibPref_AutoFile"; 
             LANGUAGE = ObjC; 
@@ -16,10 +16,10 @@
                 choosePapersFolderLocationButton = NSButton; 
                 filePapersAutomaticallyCheckButton = NSButton; 
                 formatField = NSTextField; 
+                formatLowercaseCheckButton = NSButton; 
                 formatPresetPopUp = NSPopUpButton; 
                 formatRepositoryPopUp = NSPopUpButton; 
                 formatWarningButton = NSButton; 
-                keepPapersFolderOrganizedCheckButton = NSButton; 
                 papersFolderLocationTextField = NSTextField; 
                 previewTextField = NSTextField; 
             }; 

@@ -19,10 +19,10 @@
     NSString * error;
 	
     [filePapersAutomaticallyCheckButton setState:[defaults integerForKey:BDSKFilePapersAutomaticallyKey]];
-    [keepPapersFolderOrganizedCheckButton setState:[defaults integerForKey:BDSKKeepPapersFolderOrganizedKey]];
 
     [papersFolderLocationTextField setStringValue:[[defaults objectForKey:BDSKPapersFolderPathKey] stringByAbbreviatingWithTildeInPath]];
 
+    [formatLowercaseCheckButton setState:[defaults integerForKey:BDSKLocalUrlLowercaseKey]];
 	if ([[BDSKConverter sharedConverter] validateFormat:&formatString forField:BDSKLocalUrlString inFileType:BDSKBibtexString error:&error]) {
 		[self setLocalUrlFormatInvalidWarning:NO message:nil];
 		
@@ -101,11 +101,6 @@
 			   forKey:BDSKFilePapersAutomaticallyKey];
 }
 
-- (IBAction)toggleKeepPapersFolderOrganizedAction:(id)sender{
-	[defaults setBool:[keepPapersFolderOrganizedCheckButton state]
-			   forKey:BDSKKeepPapersFolderOrganizedKey];
-}
-
 #pragma mark Local-Url format stuff
 
 - (IBAction)formatHelp:(id)sender{
@@ -113,6 +108,11 @@
 	//[[NSHelpManager sharedHelpManager] openHelpAnchor:@"citekeyFormat" inBook:@"BibDesk Help"];
 	// ..or we need Carbon/AppleHelp.h
 	AHLookupAnchor((CFStringRef)@"BibDesk Help",(CFStringRef)@"format");
+}
+
+- (IBAction)changeLocalUrlLowercase:(id)sender{
+    [defaults setInteger:[sender state] forKey:BDSKLocalUrlLowercaseKey];
+	[self updateUI];
 }
 
 - (IBAction)localUrlFormatAdd:(id)sender{

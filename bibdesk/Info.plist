@@ -237,6 +237,8 @@
 					<string>%L</string>
 					<key>Local-Url Format Preset</key>
 					<integer>1</integer>
+					<key>Local-Url Generate Lowercase</key>
+					<integer>0</integer>
 					<key>Path to the papers folder</key>
 					<string>~/Documents/Papers</string>
 				</dict>

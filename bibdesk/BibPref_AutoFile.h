@@ -27,18 +27,18 @@
 	IBOutlet NSTextField* papersFolderLocationTextField;
 	IBOutlet NSButton* choosePapersFolderLocationButton;
 	IBOutlet NSButton* filePapersAutomaticallyCheckButton;
-	IBOutlet NSButton* keepPapersFolderOrganizedCheckButton;
     IBOutlet NSTextField *formatField;
     IBOutlet NSPopUpButton *formatPresetPopUp;
     IBOutlet NSPopUpButton *formatRepositoryPopUp;
     IBOutlet NSButton *formatWarningButton;
+    IBOutlet NSButton *formatLowercaseCheckButton;
 	IBOutlet NSTextField *previewTextField;
 }
 
 - (IBAction)choosePapersFolderLocationAction:(id)sender;
 - (IBAction)toggleFilePapersAutomaticallyAction:(id)sender;
-- (IBAction)toggleKeepPapersFolderOrganizedAction:(id)sender;
 - (IBAction)localUrlFormatChanged:(id)sender;
+- (IBAction)changeLocalUrlLowercase:(id)sender;
 - (IBAction)localUrlFormatAdd:(id)sender;
 - (IBAction)formatHelp:(id)sender;
 - (IBAction)showLocalUrlFormatWarning:(id)sender;

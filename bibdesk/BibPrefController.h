@@ -101,6 +101,7 @@ extern NSString *BDSKFilePapersAutomaticallyKey;
 extern NSString *BDSKKeepPapersFolderOrganizedKey;
 extern NSString *BDSKLocalUrlFormatKey;
 extern NSString *BDSKLocalUrlFormatPresetKey;
+extern NSString *BDSKLocalUrlLowercaseKey;
 
 extern NSString *BDSKLastVersionLaunched;
 extern NSString *BDSKSnoopDrawerSavedSize;
