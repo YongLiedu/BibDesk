@@ -496,16 +496,11 @@ NSString *BDSKUrlString = @"Url";
     NSString *title = [sel title];
 	NSString *value = [sel stringValue];
 	NSString *prevValue = [theBib valueOfField:title];
-	NSUndoManager *undoManager = [[self window] undoManager];
 	
     if([sender indexOfSelectedItem] != -1 &&
 	   ![value isEqualToString:prevValue]){
 		
-		[[undoManager prepareWithInvocationTarget:theBib]
-			setField:title toValue:prevValue];
 		[theBib setField:title toValue:value];
-		
-		[undoManager setActionName:NSLocalizedString(@"Edit Pub",@"")];
 		
 	}
 }
@@ -615,16 +610,15 @@ NSString *BDSKUrlString = @"Url";
 }
 
 - (void)windowWillClose:(NSNotification *)notification{
-    [[self window] makeFirstResponder:citeKeyField]; // makes the field check if there is a duplicate field.
+ //@@citekey   [[self window] makeFirstResponder:citeKeyField]; // makes the field check if there is a duplicate field.
     [[self window] makeFirstResponder:[self window]];
-  // @@ full undo support - moving this over now  [theBib setFields:[theBib dict]]; // should really update its own metadata whenever you call setField:forvalue or whatever. Another thing for the to-do list.
-   // [theDoc highlightBib:theBib]; -- do i really want it to do this?
-    [documentSnoopDrawer close];
+	[documentSnoopDrawer close];
 }
 
+// we want to have the same undoManager as our document, so we use this 
+// NSWindow delegate method to return the doc's undomanager.
 - (NSUndoManager *)windowWillReturnUndoManager:(NSWindow *)sender{
 	return [theDocument undoManager];
 }
-
 
 @end
