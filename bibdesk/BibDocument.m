@@ -596,6 +596,7 @@ stringByAppendingPathComponent:@"BibDesk"]; */
     NSString *tempFileName = nil;
     NSString *dataString = [[[NSString alloc] initWithData:data encoding:NSUTF8StringEncoding] autorelease];
     NSString* filePath = [self fileName];
+    NSMutableArray *newPubs = nil;
     
     // Dirty check to see if we guessed the right encoding.  UTF8 will do fine for ASCII and fairly well for MacRoman but fails for
     // ISO-8859-1 and gives a nil string.  This is a problem with ScienceDirect, if your browser is set to accept 8859-1 by default.
@@ -609,10 +610,10 @@ stringByAppendingPathComponent:@"BibDesk"]; */
     }
     dictionary = [NSMutableDictionary dictionaryWithCapacity:10];
     
-    publications = [[PubMedParser itemsFromString:dataString
-                                         error:&hadProblems
-                                   frontMatter:frontMatter
-                                      filePath:filePath] retain];
+    newPubs = [PubMedParser itemsFromString:dataString
+                                    error:&hadProblems
+                              frontMatter:frontMatter
+                                 filePath:filePath];
 
     if(hadProblems){
         // run a modal dialog asking if we want to use partial data or give up
@@ -638,6 +639,7 @@ stringByAppendingPathComponent:@"BibDesk"]; */
         }
     }
     
+    [self setPublications:newPubs];
     [shownPublications setArray:publications];
     
     // since we can't save pubmed files as pubmed files:
