@@ -6,8 +6,6 @@
 	objectVersion = 39;
 	objects = {
 		014CEA420018CDE011CA2923 = {
-			buildRules = (
-			);
 			buildSettings = {
 				COPY_PHASE_STRIP = NO;
 				DEBUGGING_SYMBOLS = YES;
@@ -23,8 +21,6 @@
 			name = Development;
 		};
 		014CEA430018CDE011CA2923 = {
-			buildRules = (
-			);
 			buildSettings = {
 				COPY_PHASE_STRIP = YES;
 				GCC_ENABLE_FIX_AND_CONTINUE = NO;
@@ -82,8 +78,7 @@
 			sourceTree = "<group>";
 		};
 		089C1672FE841209C02AAC07 = {
-			fallbackIsa = PBXFileReference;
-			isa = PBXFrameworkReference;
+			isa = PBXFileReference;
 			lastKnownFileType = wrapper.framework;
 			name = Foundation.framework;
 			path = /System/Library/Frameworks/Foundation.framework;
@@ -121,8 +116,7 @@
 			sourceTree = "<group>";
 		};
 		089C167FFE841241C02AAC07 = {
-			fallbackIsa = PBXFileReference;
-			isa = PBXFrameworkReference;
+			isa = PBXFileReference;
 			lastKnownFileType = wrapper.framework;
 			name = AppKit.framework;
 			path = /System/Library/Frameworks/AppKit.framework;
@@ -157,8 +151,7 @@
 			sourceTree = "<group>";
 		};
 		1058C7ADFEA557BF11CA2CBB = {
-			fallbackIsa = PBXFileReference;
-			isa = PBXFrameworkReference;
+			isa = PBXFileReference;
 			lastKnownFileType = wrapper.framework;
 			name = Cocoa.framework;
 			path = /System/Library/Frameworks/Cocoa.framework;
@@ -349,7 +342,7 @@
 		8D5B49B7048680CD000E48DA = {
 			fileEncoding = 4;
 			isa = PBXFileReference;
-			lastKnownFileType = text.plist.xml;
+			lastKnownFileType = text.xml;
 			path = Info.plist;
 			refType = 4;
 			sourceTree = "<group>";
@@ -379,7 +372,7 @@
 		};
 		F9D86A0006B33E2000F2DE7D = {
 			isa = PBXFileReference;
-			lastKnownFileType = file;
+			lastKnownFileType = sourcecode.scpt;
 			path = Bibdesk.scpt;
 			refType = 4;
 			sourceTree = "<group>";
@@ -449,7 +442,7 @@
 		F9D86A1106B33EFD00F2DE7D = {
 			fileEncoding = 4;
 			isa = PBXFileReference;
-			lastKnownFileType = text.plist.xml;
+			lastKnownFileType = text.xml;
 			path = Info;
 			refType = 4;
 			sourceTree = "<group>";
