@@ -288,7 +288,49 @@
 					<key>TableView Font</key>
 					<string>LucidaGrande</string>
 					<key>TableView Font Size</key>
-					<string>1.293993033330623e-310</string>
+					<string>1.293993033330623e-310</string>  
+					<key>BlueComponentColor of alternating rows Key</key>
+					<string>1.010918794815856e-310</string>
+					<key>Current Publication Type</key>
+					<string>6</string>
+					<key>Current Publication Type String</key>
+					<string>Inproceedings</string>
+					<key>Current Quick Search Key</key>
+					<string>Keywords</string>
+					<key>Current Quick Search Text Dictionary</key>
+					<dict/>
+					<key>GreenComponentColor of alternating rows Key</key>
+					<string>1.093888830242598e-310</string>
+					
+					<key>Quick Search Keys</key>
+					<array>
+					  <string>Keywords</string>
+					  <string>Pub Type</string>
+					</array>
+					<key>RedComponentColor of alternating rows Key</key>
+					<string>1.156487706076073e-310</string>
+					<key>Shown Column Names</key>
+					<array>
+					  <string>Keywords</string>
+					  <string>Type</string>
+					  <string>Cite Key</string>
+					  <string>Title</string>
+					  <string>Date</string>
+					  <string>1st Author</string>
+					  <string>2nd Author</string>
+					  <string>3rd Author</string>
+					</array>
+					<key>Shown Columns</key>
+					<array>
+					  <string>1</string>
+					  <string>1</string>
+					  <string>1</string>
+					  <string>1</string>
+					  <string>0</string>
+					  <string>0</string>
+					</array>
+                                        <key>View-by Field</key>
+                                        <string>Author</string>
 				</dict>
 				<key>icon</key>
 				<string>startup.tiff</string>
