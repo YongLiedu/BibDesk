@@ -32,6 +32,7 @@
     OFPreferenceWrapper *prefs = [OFPreferenceWrapper sharedPreferenceWrapper];
     [encodingPopUp selectItemAtIndex:[self tagForEncoding:[prefs integerForKey:BDSKDefaultStringEncoding]]];
     [defaultParserRadio selectCellWithTag:( [prefs boolForKey:BDSKUseUnicodeBibTeXParser] ? 1 : 0 )];
+    [encodingPopUp setEnabled:[prefs boolForKey:BDSKUseUnicodeBibTeXParser]]; // since btparse is not compatible with other encodings; it can still be used via the File->Open menu
 }
 
 - (IBAction)setDefaultStringEncoding:(id)sender{    
@@ -46,7 +47,11 @@
 }
 
 - (IBAction)setDefaultBibTeXParser:(id)sender{
-    [[OFPreferenceWrapper sharedPreferenceWrapper] setBool:( [[sender selectedCell] tag] == 0 ? NO : YES ) forKey:BDSKUseUnicodeBibTeXParser];
+    BOOL yn = ( [[sender selectedCell] tag] == 0 ? NO : YES );
+    [[OFPreferenceWrapper sharedPreferenceWrapper] setBool:yn forKey:BDSKUseUnicodeBibTeXParser];
+    if(!yn)
+        [[OFPreferenceWrapper sharedPreferenceWrapper] setInteger:NSASCIIStringEncoding forKey:BDSKDefaultStringEncoding];
+    [self updateUI];
     // NSLog(@"use unicode parser is %@", ( [[OFPreferenceWrapper sharedPreferenceWrapper] boolForKey:BDSKUseUnicodeBibTeXParser] ? @"YES" : @"NO" ) );
 }
     

@@ -127,6 +127,9 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
         _autoCompletionDict = [[NSMutableDictionary alloc] initWithCapacity:15]; // arbitrary
 	 	_formatters = [[NSMutableDictionary alloc] initWithCapacity:15]; // arbitrary
         _autocompletePunctuationCharacterSet = [[NSCharacterSet characterSetWithCharactersInString:@",:;"] retain];
+        
+        if(![[OFPreferenceWrapper sharedPreferenceWrapper] boolForKey:BDSKUseUnicodeBibTeXParser]) // in case someone sets their prefs to use btparse and non-ascii by default, which is a Bad Idea.  btparse will work with the File->Open and alternate encodings, since we run them through BDSKConverter before handing off to the parser.
+            [[OFPreferenceWrapper sharedPreferenceWrapper] setInteger:NSASCIIStringEncoding forKey:BDSKDefaultStringEncoding];
 		
 		NSString *formatString = [[OFPreferenceWrapper sharedPreferenceWrapper] objectForKey:BDSKCiteKeyFormatKey];
 		NSString *error = nil;
