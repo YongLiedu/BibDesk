@@ -309,7 +309,7 @@
 										   pressure: [event pressure]];
 	
 	if ([self refreshesMenu]) {
-		[self setMenu:[[self delegate] menuForImagePopUpButton]];
+		[self setMenu:[[self delegate] menuForImagePopUpButtonCell:self]];
 	}
 	[NSMenu popUpContextMenu: [self menu]  withEvent: newEvent  forView: controlView];
 }
