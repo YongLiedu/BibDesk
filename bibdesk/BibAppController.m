@@ -327,7 +327,9 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 
     completionArray = [_autoCompletionDict objectForKey:entry];
     
-    if([entry isEqualToString:@"Local-Url"] || [entry isEqualToString:@"Url"]) return; // don't add Local-Url fields
+    if([entry isEqualToString:@"Local-Url"] || [entry isEqualToString:@"Url"] || 
+       [entry isEqualToString:@"Abstract"] || [entry isEqualToString:@"Annote"]) return; // don't add these
+
     if([entry isEqualToString:@"Title"]){ // add the whole string for title? or add components separated by whitespace?
         [completionArray addObject:string];
         return;
