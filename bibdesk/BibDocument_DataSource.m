@@ -195,10 +195,55 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 }
 
 
-
 // drag and drop support
 
-// This method is called after it has been determined that a drag should begin, but before the drag has been started.  To refuse the drag, return NO.  To start a drag, return YES and place the drag data onto the pasteboard (data, owner, etc...).  The drag image and other drag related information will be set up and provided by the table view once this call returns with YES.  The rows array is the list of row numbers that will be participating in the drag.
+// This method returns the string to draw for dragImageForRows, 
+// to avoid calling tableView:writeRows: twice, which screws up the 
+// draggedItems array.
+- (NSString *)citeStringForSelectedPubsWithTableViewDragSource:(NSTableView *)tv{
+	
+    OFPreferenceWrapper *sud = [OFPreferenceWrapper sharedPreferenceWrapper];
+    NSMutableString *s = [[NSMutableString string] retain];
+    NSString *startCiteBracket = [sud stringForKey:BDSKCiteStartBracketKey]; 
+	NSString *startCite = [NSString stringWithFormat:@"\\%@%@",[sud stringForKey:BDSKCiteStringKey], startCiteBracket];
+	NSString *endCiteBracket = [sud stringForKey:BDSKCiteEndBracketKey]; 
+    NSMutableArray *rows = nil;
+    BOOL sep = ([[OFPreferenceWrapper sharedPreferenceWrapper] integerForKey:BDSKSeparateCiteKey] == NSOnState);
+    NSNumber *idx;
+
+    if(tv == (NSTableView *)ccTableView){
+		// check the publications table to see if an item is selected, otherwise we get an error on dragging from the cite drawer
+		if([tableView numberOfSelectedRows] == 0) return nil;
+        
+        startCite = [NSString stringWithFormat:@"\\%@%@",[customStringArray objectAtIndex:[[rows objectAtIndex:0] intValue]], startCiteBracket];
+		// rows oi:0 is ok because we don't allow multiple selections in ccTV.
+    }  
+    // get rows = the main TV's selected rows,
+
+    rows = [NSMutableArray arrayWithCapacity:10];
+    NSEnumerator *selRowE = [tableView selectedRowEnumerator]; 
+    while(idx = [selRowE nextObject]){
+        [rows addObject:idx];
+    }
+    
+    if(!sep) [s appendString:startCite];
+    
+    int shownCount = [shownPublications count];
+    NSEnumerator *enumerator = [rows objectEnumerator]; 
+    while (idx = [enumerator nextObject]) {
+        int sortedIndex = (sortDescending ? shownCount - 1 - [idx intValue] : [idx intValue]);
+        BibItem *pub = [shownPublications objectAtIndex:sortedIndex];
+        
+        if(sep) [s appendString:startCite];
+        [s appendString:[pub citeKey]];
+        if(sep) [s appendString:endCiteBracket];
+        else [s appendString:@","];
+    }// end while
+    if(!sep)[s replaceCharactersInRange:[s rangeOfString:@"," options:NSBackwardsSearch] withString:endCiteBracket];
+
+    return s;
+    
+}
 
 - (BOOL)tableView:(NSTableView *)tv
         writeRows:(NSArray*)rows
@@ -222,6 +267,9 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
     NSNumber *idx;
     NSMutableArray* newRows;
     int sortedIndex = 0;
+    BibItem *pub = nil;
+
+    [draggedItems removeAllObjects];
     
 	if([tv numberOfSelectedRows] == 0) return NO;
 
@@ -248,18 +296,21 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
     if((dragType == 1) && !sep)
         [s appendString:startCite];
 
+    int shownCount = [shownPublications count];
     enumerator = [rows objectEnumerator]; 
     while (i = [enumerator nextObject]) {
-        sortedIndex = (sortDescending ? [shownPublications count] - 1 - [i intValue] : [i intValue]);
+        sortedIndex = (sortDescending ? shownCount - 1 - [i intValue] : [i intValue]);
+        pub = [shownPublications objectAtIndex:sortedIndex];
         
-        [localPBString appendString:[[shownPublications objectAtIndex:sortedIndex] bibTeXString]];
+        [draggedItems addObject:pub];
+        [localPBString appendString:[pub bibTeXString]];
         if((dragType == 0) ||
            (dragType == 2)){
-            [s appendString:[[shownPublications objectAtIndex:sortedIndex] bibTeXString]];
+            [s appendString:[pub bibTeXString]];
         }
         if(dragType == 1){
             if(sep) [s appendString:startCite];
-            [s appendString:[[shownPublications objectAtIndex:sortedIndex] citeKey]];
+            [s appendString:[pub citeKey]];
             if(sep) [s appendString:endCiteBracket];
             else [s appendString:@","];
         }
@@ -279,10 +330,15 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 		[pboard declareTypes:[NSArray arrayWithObject:NSRTFPboardType] owner:nil];
         yn = [pboard setData:[PDFpreviewer rtfDataPreview] forType:NSRTFPboardType];
     }
-    [localDragPboard declareTypes:[NSArray arrayWithObject:NSStringPboardType] owner:nil];
+    [localDragPboard declareTypes:[NSArray arrayWithObjects:NSStringPboardType, BDSKBibItemLocalDragPboardType, nil] owner:nil];
     lyn = [localDragPboard setString:localPBString forType:NSStringPboardType];
-    return yn && lyn;
 
+    // use dummy data. BDSKBibItemLocalDragPboardType on a pboard *from the same doc*
+    //  means you can incorporate the items in the array draggedItems.
+    
+    lyn &= [localDragPboard setData:[NSData data] forType:BDSKBibItemLocalDragPboardType];
+
+    return yn && lyn;
 }
 
 
@@ -476,25 +532,81 @@ objectValueForTableColumn:(NSTableColumn *)tableColumn
                   validateDrop:(id <NSDraggingInfo>)info 
                   proposedItem:(id)item 
             proposedChildIndex:(int)index{
+    if(olv != sourceList) [NSException raise:NSInvalidArgumentException 
+                                              format:@"OutlineView data source method called by unknown outlineview."];
 
+    id draggingSource = [info draggingSource];
+    
     NSPasteboard *dragPB = [info draggingPasteboard];
     
-    // if we're dropping a bibitem:
-    //  onto library or collections, allow it. 
-    //  onto anywhere else, retarget to library.
+    if(item == nil){
+        // redirect moves onto general space to the library.
+        // note that this might get adjusted in the next if-block
+        // if the drag is bibitems from our own table, in which case
+        // drags back to the library don't make a lot of sense.
+        [olv setDropItem:self dropChildIndex:NSOutlineViewDropOnItemIndex];
+        item = self;
+        index = NSOutlineViewDropOnItemIndex;
+    }
     
-    // if we're dropping text, allow it in library or collections or notes
+    if(draggingSource && [localDragPboard hasType:BDSKBibItemLocalDragPboardType]){
+        // we are dragging bibitems from within bibdesk (and within our own document)
+        // note that draggingSource might be the calling outline view, aka sourceList, aka olv.
+        //  onto a collection, allow it. 
+        //  onto anywhere else, retarget to collections:0, making new collection...
+        if([collections containsObject:item] && index == NSOutlineViewDropOnItemIndex){
+            return NSDragOperationCopy;
+        }else{
+            [olv setDropItem:collections dropChildIndex:0];
+            return NSDragOperationCopy;
+        }
+    }
     
-    // if we're dropping random data (ie, image, etc) allow it on notes only.
-    
+    if([dragPB hasType:NSStringPboardType]){
+        // if we're dropping text, allow it in library or collections or notes
+        if(item == sources){
+            [olv setDropItem:self dropChildIndex:NSOutlineViewDropOnItemIndex];
+        }
+        return NSDragOperationCopy;
+    }else{
+        // if we're dropping random data (ie, image, etc) allow it on notes only.
+        NSLog(@"NON STRING OR LOCAL DATA DROP proposed item:%@ index: %d", item, index);
+        if(item != notes){
+            [olv setDropItem:self dropChildIndex:NSOutlineViewDropOnItemIndex];
+        }
+        return NSDragOperationCopy;
+    }
     return NSDragOperationNone;
 }
 
 
 // This method is called when the mouse is released over an outline view that previously decided to allow a drop via the validateDrop method.  The data source should incorporate the data from the dragging pasteboard at this time.
 - (BOOL)outlineView:(NSOutlineView*)olv acceptDrop:(id <NSDraggingInfo>)info item:(id)item childIndex:(int)index{
-    // see above.
-    return NO;
+    if(olv != sourceList) [NSException raise:NSInvalidArgumentException 
+                                      format:@"OutlineView data source method called by unknown outlineview."];
+    
+    id draggingSource = [info draggingSource];
+    
+    NSPasteboard *dragPB = [info draggingPasteboard];
+        
+    if(draggingSource && [localDragPboard hasType:BDSKBibItemLocalDragPboardType]){
+        if(index == NSOutlineViewDropOnItemIndex){
+            [(BibCollection *) item addPublicationsFromArray:draggedItems];
+        }else{
+            BibCollection *newBC = [[BibCollection alloc] initWithParent:self];
+            [newBC setPublications:draggedItems];
+            [(NSMutableArray *) item addObject:[newBC autorelease]];
+            [self reloadSourceList];
+            [olv expandItem:collections];
+            [olv selectRow:[olv rowForItem:newBC] byExtendingSelection:NO];
+            [olv editColumn:0 row:[olv rowForItem:newBC]
+                  withEvent:nil
+                     select:YES];
+        }
+        [draggedItems removeAllObjects];
+    }
+    
+    return YES;
 }
 
 // Delegate methods:
@@ -539,7 +651,7 @@ objectValueForTableColumn:(NSTableColumn *)tableColumn
 
 @implementation NSPasteboard (JCRDragWellExtensions)
 
-- (BOOL) hasType:aType /*"Returns TRUE if aType is one of the types
+- (BOOL) hasType:(id)aType /*"Returns TRUE if aType is one of the types
 available from the receiving pastebaord."*/
 { return ([[self types] indexOfObject:aType] == NSNotFound ? NO : YES); }
 

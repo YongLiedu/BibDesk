@@ -28,8 +28,9 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 #include <stdio.h>
 char * InputFilename; // This is here because the btparse library can't live without it.
 
-NSString* LocalDragPasteboardName = @"edu.ucsd.cs.mmccrack.bibdesk: Local Publication Drag Pasteboard";
-NSString* BDSKBibTeXStringPboardType = @"edu.ucsd.cs.mmcrack.bibdesk: Local BibTeX String Pasteboard";
+NSString *LocalDragPasteboardName = @"edu.ucsd.cs.mmccrack.bibdesk: Local Publication Drag Pasteboard";
+NSString *BDSKBibTeXStringPboardType = @"edu.ucsd.cs.mmcrack.bibdesk: Local BibTeX String Pasteboard";
+NSString *BDSKBibItemLocalDragPboardType = @"edu.ucsd.cs.mmccrack.bibdesk: Local BibItem Pasteboard type";
 
 
 #import "btparse.h"
@@ -50,7 +51,8 @@ NSString* BDSKBibTeXStringPboardType = @"edu.ucsd.cs.mmcrack.bibdesk: Local BibT
         PDFpreviewer = [BDSKPreviewer sharedPreviewer];
         showColsArray = [[NSMutableArray arrayWithObjects:
             [NSNumber numberWithInt:1],[NSNumber numberWithInt:1],[NSNumber numberWithInt:1],[NSNumber numberWithInt:1],[NSNumber numberWithInt:1],[NSNumber numberWithInt:1],nil] retain];
-        localDragPboard = [NSPasteboard pasteboardWithName:LocalDragPasteboardName];
+        localDragPboard = [[NSPasteboard pasteboardWithName:LocalDragPasteboardName] retain];
+        draggedItems = [[NSMutableArray alloc] initWithCapacity:1];
         tableColumns = [[NSMutableDictionary dictionaryWithCapacity:6] retain];
         fileOrderCount = 1;
 		
@@ -151,6 +153,7 @@ NSString* BDSKBibTeXStringPboardType = @"edu.ucsd.cs.mmcrack.bibdesk: Local BibT
    
     [tableView setDoubleAction:@selector(editPubCmd:)];
     [tableView registerForDraggedTypes:[NSArray arrayWithObjects:NSStringPboardType, NSFilenamesPboardType, nil]];
+    [sourceList registerForDraggedTypes:[NSArray arrayWithObjects:NSStringPboardType, NSFilenamesPboardType, BDSKBibItemLocalDragPboardType, nil]];
 
     [splitView setPositionAutosaveName:[self fileName]];
     
@@ -213,6 +216,8 @@ NSString* BDSKBibTeXStringPboardType = @"edu.ucsd.cs.mmcrack.bibdesk: Local BibT
     [customStringArray release];
     [toolbarItems release];
     [tableColumns release];
+    [localDragPboard release];
+    [draggedItems release];
     [super dealloc];
 }
 
@@ -803,6 +808,11 @@ stringByAppendingPathComponent:@"BibDesk"]; */
     unarchiver = [[NSKeyedUnarchiver alloc] initForReadingWithData:data];
     [self setNewPublicationsFromArchivedArray:[unarchiver decodeObjectForKey:@"publications"]];
     [self setCollections:[unarchiver decodeObjectForKey:@"collections"]];
+    
+    foreach(collection, collections){
+        [collection setParent:self];
+    }
+    
     [self setNotes:[unarchiver decodeObjectForKey:@"notes"]];
     [self setSources:[unarchiver decodeObjectForKey:@"sources"]];
     
@@ -972,10 +982,19 @@ stringByAppendingPathComponent:@"BibDesk"]; */
 }
 
 
+- (void)handleTableViewBackspaceDel{
+    id selectedSource = [sourceList selectedItem];
+    if(selectedSource == self){
+        // we're working with the library, delete pub.
+        [self delPub:nil];
+    }else{
+        if([collections containsObject:selectedSource]){
+            [(BibCollection *) selectedSource removePublicationsInArray:[self selectedPublications]];
+            [self updateUI];
+        }
+    }
+}
 
-/* ssp: 2004-07-19
-Enhanced delete method that uses a sheet instead of a modal dialogue.
-*/
 - (IBAction)delPub:(id)sender{
 	int numSelectedPubs = [self numberOfSelectedPubs];
 	
@@ -1892,18 +1911,21 @@ int generalBibItemCompareFunc(id item1, id item2, void *context){
     
 }
 
+- (NSString *)citeStringForSelection{
+    return [self citeStringForPublications:[self selectedPublications]];
+}
 
--(NSString*) citeStringForSelection{
+- (NSString *)citeStringForPublications:(NSArray *)items{
 	OFPreferenceWrapper *sud = [OFPreferenceWrapper sharedPreferenceWrapper];
 	NSString *startCiteBracket = [sud stringForKey:BDSKCiteStartBracketKey]; 
 	NSString *citeString = [sud stringForKey:BDSKCiteStringKey];
     NSMutableString *s = [NSMutableString stringWithFormat:@"\\%@%@", citeString, startCiteBracket];
 	NSString *endCiteBracket = [sud stringForKey:BDSKCiteEndBracketKey]; 
 	
-    NSEnumerator *e = [self selectedPubEnumerator];
     NSNumber *i;
     BOOL sep = ([sud integerForKey:BDSKSeparateCiteKey] == NSOnState);
     
+    NSEnumerator *e = [items objectEnumerator];
     while(i=[e nextObject]){
         [s appendString:[[shownPublications objectAtIndex:[i intValue]] citeKey]];
         if(sep)
@@ -2518,11 +2540,15 @@ This method always returns YES. Even if some or many operations fail.
 
 
 - (int)numberOfSelectedPubs{
-    return [[[self selectedPubEnumerator] allObjects] count];
+    return [[self selectedPublications] count];
 }
 
 
 - (NSEnumerator *)selectedPubEnumerator{
+    return [[self selectedPublications] objectEnumerator];
+}
+
+- (NSArray *)selectedPublications{
     id item = nil;
     NSEnumerator *itemsE = nil;
     NSMutableArray *itemIndexes = [NSMutableArray arrayWithCapacity:10];
@@ -2534,9 +2560,9 @@ This method always returns YES. Even if some or many operations fail.
 		while(item = [itemsE nextObject]){
 			[itemIndexes addObject:[NSNumber numberWithInt:(count-[item intValue]- 1)]];
 		}
-		return [itemIndexes objectEnumerator];
+		return itemIndexes;
 	}else{
-		return [tableView selectedRowEnumerator];
+		return [[tableView selectedRowEnumerator] allObjects];
 	}
     
 }
@@ -2795,19 +2821,35 @@ The results are quite crappy, but these were low-hanging fruit and people seem t
     [mySources replaceObjectAtIndex:index withObject:anObject];
 }
 
+- (void)outlineViewSelectionDidChange:(NSNotification *)notification{
+    if (sourceList != [notification object]) return;
+    id /*<BibItemSource>*/ item = [sourceList selectedItem];
+    if([item respondsToSelector:@selector(publications)]){
+        [shownPublications setArray:[item publications]];
+    }else if(item == collections){
+        NSMutableSet *totalSet = [NSMutableSet set];
+        foreach(collection, collections){
+            [totalSet addObjectsFromArray:[collection publications]];
+        }
+        [shownPublications setArray:[totalSet allObjects]];
+    }
+    [self updateUI];
+
+}
+
 - (void)reloadSourceList{
     [sourceList reloadData];
 }
 
 - (IBAction)makeNewEmptyCollection:(id)sender{
-    BibCollection *newBC = [[BibCollection alloc] init];
+    BibCollection *newBC = [[BibCollection alloc] initWithParent:self];
     [collections addObject:[newBC autorelease]];
     [self reloadSourceList];
 }
 
 - (IBAction)makeNewCollectionFromSelectedPublications:(id)sender{
     // untested.
-    BibCollection *newBC = [[BibCollection alloc] init];
+    BibCollection *newBC = [[BibCollection alloc] initWithParent:self];
     [newBC setPublications:[[self selectedPubEnumerator] allObjects]];
     [collections addObject:[newBC autorelease]];
     [self reloadSourceList];
@@ -2820,6 +2862,5 @@ The results are quite crappy, but these were low-hanging fruit and people seem t
 - (IBAction)makeNewNotepad:(id)sender{
     
 }
-
 
 @end

@@ -26,7 +26,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 
 @interface NSPasteboard (JCRDragWellExtensions)
 
-- (BOOL) hasType:aType; /*"Returns TRUE if aType is one of the types
+- (BOOL) hasType:(id)aType; /*"Returns TRUE if aType is one of the types
 available from the receiving pastebaord."*/
 
 - (BOOL) containsFiles; /*"Returns TRUE if there are filenames available

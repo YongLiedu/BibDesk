@@ -45,8 +45,13 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 @class BibAuthor;
 @class BibFinder;
 
+// Local drag pasteboard currently stores bibtex string data to drag between open docs
+// and pointer data to drag within a doc. 
+// It might be a good idea sometime to replace cross-doc dragging with archived BibItems
+// due to encoding issues.
 extern NSString* LocalDragPasteboardName;
 extern NSString* BDSKBibTeXStringPboardType;
+extern NSString *BDSKBibItemLocalDragPboardType;
 
 /*!
     @class BibDocument
@@ -148,10 +153,13 @@ extern NSString* BDSKBibTeXStringPboardType;
     IBOutlet NSOutlineView *sourceList;
     IBOutlet NSButton *addSourceListItemButton;
     
+    // model:
     NSMutableArray *collections; // playlist style sub-lists of publications. Can be 'smart'.
     NSMutableArray *notes;       // free-form note storage
     NSMutableArray *sources;     // external sources of publications, not represented in library (aka the publications array)
     
+    // view:
+    NSMutableArray *draggedItems; // an array to temporarily hold references to dragged items used locally.
 }
 
 
@@ -317,6 +325,14 @@ extern NSString* BDSKBibTeXStringPboardType;
 */
 - (IBAction)newPub:(id)sender; // new pub button pressed.
 
+
+/*!
+    @method     handleTableViewBackspaceDel
+    @abstract   does the appropriate thing when backspace or delete are pressed on the tableview.
+    @discussion this means either calling delPub or removing the pub from the selected collection.
+*/
+- (void)handleTableViewBackspaceDel;
+
 /*!
     @method delPub
     @abstract removes a publication (BibItem)
@@ -458,12 +474,21 @@ extern NSString* BDSKBibTeXStringPboardType;
 */
 - (IBAction)copyAsTex:(id)sender;
 
+
 /*!
     @method citeStringForSelection
 	 @abstract auxiliary method for generating cite string
-	 @discussion generates appropriate cite command from the document's current selection 
+	 @discussion generates appropriate cite command from the document's current selection by calling citeStringForPublication.
 */
--(NSString*) citeStringForSelection;
+- (NSString *)citeStringForSelection;
+
+/*!
+    @method citeStringForPublications
+ @abstract  method for generating cite string
+ @discussion generates appropriate cite command from the given items 
+*/
+
+- (NSString *)citeStringForPublications:(NSArray *)items;
 
 /*!
     @method copyAsPDF
@@ -670,7 +695,29 @@ int generalBibItemCompareFunc(id item1, id item2, void *context);
 */
 - (void)handleBibItemChangedNotification:(NSNotification *)notification;
 
+/*!
+    @method     numberOfSelectedPubs
+    @abstract   (description)
+    @discussion (description)
+    @result     the number of currently selected pubs in the doc
+*/
 - (int)numberOfSelectedPubs;
+
+/*!
+    @method     selectedPublications
+    @abstract   (description)
+    @discussion (description)
+    @result     an array of the currently selected pubs in the doc
+*/
+- (NSArray *)selectedPublications;
+
+
+/*!
+    @method     selectedPubEnumerator
+    @abstract   (description)
+    @discussion (description)
+    @result     an enumerator of the selected pubs in the doc
+*/
 - (NSEnumerator *)selectedPubEnumerator;
 
 - (void)highlightBib:(BibItem *)bib;
@@ -831,6 +878,5 @@ int compareSetLengths(NSSet *set1, NSSet *set2, void *context);
      @param      sender anything
      */
 - (IBAction)makeNewNotepad:(id)sender;
-
 
 @end

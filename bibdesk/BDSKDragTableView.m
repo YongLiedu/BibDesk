@@ -29,36 +29,25 @@ static NSColor *sStripeColor = nil;
     NSSize maxSize = NSMakeSize(600,200); // tunable...
     NSSize stringSize;
 
-    if([[self dataSource] tableView:self
-                          writeRows:dragRows
-                       toPasteboard:myPb]){
-        types = [myPb types];
-	if([[myPb availableTypeFromArray:types] isEqualToString:NSStringPboardType] || 
-	   [[myPb availableTypeFromArray:types] isEqualToString:NSRTFPboardType])
-        {
-            // draw the string into image
-            s = [myPb stringForType:NSStringPboardType];
-            string = [[NSAttributedString alloc] initWithString:s];
-            image = [[[NSImage alloc] init] autorelease];
-            stringSize = [string size];
-			if(stringSize.width == 0 || stringSize.height == 0){
-				NSLog(@"string size was zero");
-				stringSize = maxSize; // work around bug in NSAttributedString
-			}
-            if(stringSize.width > maxSize.width)
-                stringSize.width = maxSize.width += 4.0;
-            if(stringSize.height > maxSize.height)
-                stringSize.height = maxSize.height += 4.0; // 4.0 from oakit
-            [image setSize:stringSize];
-            
-            [image lockFocus];
-            [string drawAtPoint:NSZeroPoint];
-            //[s drawWithFont:[NSFont systemFontOfSize:12.0] color:[NSColor textColor] alignment:NSCenterTextAlignment verticallyCenter:YES inRectangle:(NSRect){NSMakePoint(0, -2), stringSize}];
-            [image unlockFocus];
-
-        }else if([[myPb availableTypeFromArray:types] isEqualToString:@"Apple PDF pasteboard type"]){
-		image = [[[NSImage alloc] initWithData:[myPb dataForType:NSPDFPboardType]] autorelease];
-		}
+    if(s = [[self dataSource] citeStringForSelectedPubsWithTableViewDragSource:self]){
+        string = [[NSAttributedString alloc] initWithString:s];
+        image = [[[NSImage alloc] init] autorelease];
+        stringSize = [string size];
+        if(stringSize.width == 0 || stringSize.height == 0){
+            NSLog(@"string size was zero");
+            stringSize = maxSize; // work around bug in NSAttributedString
+        }
+        if(stringSize.width > maxSize.width)
+            stringSize.width = maxSize.width += 4.0;
+        if(stringSize.height > maxSize.height)
+            stringSize.height = maxSize.height += 4.0; // 4.0 from oakit
+        [image setSize:stringSize];
+        
+        [image lockFocus];
+        [string drawAtPoint:NSZeroPoint];
+        //[s drawWithFont:[NSFont systemFontOfSize:12.0] color:[NSColor textColor] alignment:NSCenterTextAlignment verticallyCenter:YES inRectangle:(NSRect){NSMakePoint(0, -2), stringSize}];
+        [image unlockFocus];
+        
 	}else{
         image = [super dragImageForRows:dragRows event:dragEvent dragImageOffset:dragImageOffset];
     }
@@ -134,7 +123,7 @@ static NSColor *sStripeColor = nil;
     NSCharacterSet *alnum = [NSCharacterSet alphanumericCharacterSet];
     if (c == NSDeleteCharacter ||
         c == NSBackspaceCharacter) {
-        [[self delegate] delPub:nil];
+        [[self delegate] handleTableViewBackspaceDel];
     }else if(c == NSNewlineCharacter ||
              c == NSEnterCharacter ||
              c == NSCarriageReturnCharacter){

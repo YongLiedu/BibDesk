@@ -7,6 +7,7 @@
 //
 
 #import <Cocoa/Cocoa.h>
+#import "BibPrefController.h"
 
 /*!
     @header BibCollection
@@ -24,10 +25,40 @@
     NSString *name;
     NSMutableArray *publications;
     NSMutableArray *subCollections;
+    id parent;
 }
+
+/*!
+@method initWithParent:
+ @abstract designated initializer
+
+ */
+- (id)initWithParent:(id)parent;
 
 - (void)encodeWithCoder:(NSCoder *)aCoder;
 - (id)initWithCoder:(NSCoder *)aDecoder;
+
+
+/*
+ @method registerForNotifications
+ @abstract sets up notification handlers
+ @discussion
+ */
+- (void)registerForNotifications;
+
+/*
+ @method parent
+ @abstract accessor for the parent
+*/
+- (id)parent;
+
+/*!
+    @method setParent
+ @abstract sets parent to the param
+ @discussion 
+ @param newParent
+ */
+- (void)setParent:(id)newParent;
 
 /*!
 @method name
@@ -56,11 +87,25 @@
 @method setPublications
 @abstract sets publications to the param
 @discussion 
-@param newPublications 
+@param newPublications - an array of bibitems
 */
 - (void)setPublications:(NSMutableArray *)newPublications;
 
+/*!
+@method addPublicationsFromArray
+@abstract adds the publications in newPublications
+@discussion 
+@param newPublications - an array of bibitems
+*/
+- (void)addPublicationsFromArray:(NSMutableArray *)newPublications;
 
+    /*!
+@method addPublicationsFromArray
+@abstract removes the publications in newPublications
+@discussion 
+@param newPublications - an array of bibitems
+*/
+- (void)removePublicationsInArray:(NSMutableArray *)thePublications;
 
 /*!
 @method count

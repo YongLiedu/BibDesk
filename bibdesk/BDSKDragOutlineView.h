@@ -14,10 +14,6 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 */
 
 #import <Cocoa/Cocoa.h>
-#import <OmniAppKit/OATypeAheadSelectionHelper.h>
-#import "BibDocument_DataSource.h"
-#import "OATypeAheadSelectionHelper_Extensions.h"
-
 
 /*! @category NSOutlineView(MyExtensions) Adds a useful method */
 @interface NSOutlineView (MyExtensions)
@@ -39,8 +35,5 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 */
 @interface BDSKDragOutlineView : NSOutlineView
 {
-    // for supporting type-ahead in the table/outlineViews:
-    // datasource methods to support this are over in BibDocument_DataSource
-    OATypeAheadSelectionHelper *typeAheadHelper;
 }
 @end
