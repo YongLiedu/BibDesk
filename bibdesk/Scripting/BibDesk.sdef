@@ -3,11 +3,15 @@
 
 <!--
 ssp: 2004-07-19
-An experiment in using those modern sdef files to establish Bibdesk's scripting capabilities.
+Scripting definition for BibDesk's scripting support.
+
+Currently this support is for the BibItem (publication), BibAuthor (author) and BibDocument (document) model objects along with the preference for the AutoFile path. There are commands for searching (as used by the BibDeskInputManager autocompletion feature) and opening editor windows for authors and publications.
+
+The command
 
 /Developer/Tools/sdp -f st -i /Developer/Examples/Scripting\ Definitions/NSCoreSuite.sdef -i /Developer/Examples/Scripting\ Definitions/NSTextSuite.sdef BibDesk.sdef
 
-is a good command
+will translate this file into the necessary scriptSuite and scriptTerminology files.
 -->
 
 <dictionary title="BibDesk Terminology">
@@ -41,6 +45,11 @@ is a good command
 			             <cocoa method="publications"/>
 			         </element>
 			     </elements>
+               <responds-to-commands>
+                    <responds-to name="show">
+						<cocoa method=""/>
+					</responds-to>
+                </responds-to-commands>
 			</class>
 
 
@@ -81,9 +90,6 @@ is a good command
 						<cocoa method=""/>
 						<!-- This is necessary for some reason -->
 					</responds-to>
-<!--					<responds-to name="filter">
-						<cocoa method=""/>
-					</responds-to> 					-->
                 </responds-to-commands>
 			</class>
 
@@ -145,7 +151,12 @@ is a good command
 			             <cocoa method="pubAuthors"/>
 			         </element>
 			     </elements>
-			     
+			     <responds-to-commands>
+                    <responds-to name="show">
+						<cocoa method=""/>
+					</responds-to>
+                 </responds-to-commands>
+
 			</class>
 
 
@@ -164,9 +175,6 @@ is a good command
 			         </element>
 			     </elements>
                 <responds-to-commands>
-<!--                    <responds-to name="filter">
-                    	<cocoa method=""/>
-                    </responds-to>							-->
                     <responds-to name="search">
 						<cocoa method=""/>
 					</responds-to>
@@ -175,18 +183,7 @@ is a good command
         </classes>
 
         
-        <commands>
-<!--			<command name="filter" code="BDSKfilt" description="Display only those publications containing the given string. Usage: filter for string.">
-				<cocoa name="Filter" class="BibDeskFilterScriptCommand"/>
-				<direct-parameter type="object" description="The object performing the filtering. Either a document or the application, which will filter in all open documents."/>
-				<parameter name="for" type="string" code="for " description="The string to filter for.">
-					<cocoa key="for"/>
-				</parameter>
-			</command>
-
-The filter command has been dropped and the functionality moved into the 'filter field' property of the document class
--->		
-			
+        <commands>			
 			<command name="bibliography for" code="BDSKbibf" description="Returns bibliography information for the publications passed to the command.">
 				<cocoa name="bibliographyFor" class="BibDeskBibliographyCommand"/>
 				<direct-parameter type="object" description="The list of publications to generate a bibliography for."/>
@@ -199,10 +196,17 @@ The filter command has been dropped and the functionality moved into the 'filter
 				<!-- This is a silly command name. But AppleScript choked on all the reasonable ones as they contained words like copy or bibliography, which are already taken. =&gt; Ugly but less confusing. -->
 			</command>	
 
+
+			<command name="show" code="BDSKshow" description="Shows an author or a publication in a separate window for editing.">
+				<cocoa name="Show" class="BibDeskOpenCommand"/>
+				<direct-parameter type="object" description="The author or publication to show in the new window."/>
+				<!-- type is actually author | publication above -->
+			</command>
+
 		
 			<command name="search" code="BDSKsrch" description="Returns a list of publicatios matching the given string. Typical usage: search for string.">
 				<cocoa name="Search" class="BibDeskSearchForCommand"/>
-				<direct-parameter type="object" description="The object responding to the command. Either the application or a document"/>
+				<direct-parameter type="object" description="The object responding to the command. Either the application or a document."/>
 				<!-- type is actually application | document above -->
 				<parameter name="for" type="string" code="for " description="The string to search for.">
 					<cocoa key="for"/>
