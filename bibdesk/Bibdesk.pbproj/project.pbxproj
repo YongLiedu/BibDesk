@@ -217,6 +217,8 @@
 			dstPath = "BibDesk Help/gfx";
 			dstSubfolderSpec = 7;
 			files = (
+				2777413E06B646E900200533,
+				2777413F06B646EE00200533,
 				F9A008D80638B62E00426F15,
 				F9A008D90638B62E00426F15,
 				F9A008DA0638B62E00426F15,
@@ -811,6 +813,67 @@
 			path = htmlExportTemplate;
 			refType = 4;
 			sourceTree = "<group>";
+		};
+		2777412406B6465100200533 = {
+			fileEncoding = 30;
+			isa = PBXFileReference;
+			lastKnownFileType = text.html;
+			name = autofile.htm;
+			path = "BibDesk Help/autofile.htm";
+			refType = 2;
+			sourceTree = SOURCE_ROOT;
+		};
+		2777412506B6465100200533 = {
+			isa = PBXFileReference;
+			lastKnownFileType = image.png;
+			name = ConsolidateLinkedFiles.png;
+			path = "BibDesk Help/gfx/ConsolidateLinkedFiles.png";
+			refType = 2;
+			sourceTree = SOURCE_ROOT;
+		};
+		2777412606B6465100200533 = {
+			isa = PBXFileReference;
+			lastKnownFileType = image.png;
+			name = ConsolidateLinkedFilesWindow.png;
+			path = "BibDesk Help/gfx/ConsolidateLinkedFilesWindow.png";
+			refType = 2;
+			sourceTree = SOURCE_ROOT;
+		};
+		2777412706B6465100200533 = {
+			fileRef = 2777412406B6465100200533;
+			isa = PBXBuildFile;
+			settings = {
+			};
+		};
+		2777412806B6465100200533 = {
+			fileRef = 2777412506B6465100200533;
+			isa = PBXBuildFile;
+			settings = {
+			};
+		};
+		2777412906B6465100200533 = {
+			fileRef = 2777412606B6465100200533;
+			isa = PBXBuildFile;
+			settings = {
+			};
+		};
+		2777413E06B646E900200533 = {
+			fileRef = 2777412506B6465100200533;
+			isa = PBXBuildFile;
+			settings = {
+			};
+		};
+		2777413F06B646EE00200533 = {
+			fileRef = 2777412606B6465100200533;
+			isa = PBXBuildFile;
+			settings = {
+			};
+		};
+		2777414006B646F200200533 = {
+			fileRef = 2777412406B6465100200533;
+			isa = PBXBuildFile;
+			settings = {
+			};
 		};
 		2786341E05FDB65A004D4F41 = {
 			containerPortal = 2A37F4A9FDCFA73011CA2CEA;
@@ -2001,6 +2064,7 @@
 			dstPath = "BibDesk Help";
 			dstSubfolderSpec = 7;
 			files = (
+				2777414006B646F200200533,
 				F98BF7C5061B866D00367ECB,
 				F96D56A5063204FA0060114C,
 				2722DBC205D3997800352F0B,
@@ -2024,7 +2088,7 @@
 		};
 		27E0AA7D05A7C86C005BA25A = {
 			isa = PBXFileReference;
-			lastKnownFileType = text.plist.xml;
+			lastKnownFileType = text.xml;
 			path = "Info-Bibdesk__Upgraded_.plist";
 			refType = 4;
 			sourceTree = "<group>";
@@ -3462,6 +3526,9 @@
 		F5FB32AB034D689801EF0AD8 = {
 			children = (
 				F96D5694063204650060114C,
+				2777412406B6465100200533,
+				2777412506B6465100200533,
+				2777412606B6465100200533,
 				2711B30E05AD5099005A8084,
 				F5FB32B0034D6D4601EF0AD8,
 				2722DB5A05D398A900352F0B,
@@ -4431,7 +4498,7 @@
 		F9D6C20F06AED0DA00EAEB04 = {
 			fileEncoding = 30;
 			isa = PBXFileReference;
-			lastKnownFileType = text.plist.xml;
+			lastKnownFileType = file;
 			name = BibDesk.sdef;
 			path = Scripting/BibDesk.sdef;
 			refType = 4;
@@ -4440,6 +4507,9 @@
 		F9D6C21906AED26900EAEB04 = {
 			buildActionMask = 2147483647;
 			files = (
+				2777412706B6465100200533,
+				2777412806B6465100200533,
+				2777412906B6465100200533,
 			);
 			inputPaths = (
 				Scripting/BibDesk.sdef,
@@ -4456,7 +4526,7 @@
 		F9D6C21E06AED39F00EAEB04 = {
 			fileEncoding = 30;
 			isa = PBXFileReference;
-			lastKnownFileType = text.plist.xml;
+			lastKnownFileType = file;
 			path = BibDeskSuite.scriptSuite;
 			refType = 4;
 			sourceTree = "<group>";
@@ -4464,7 +4534,7 @@
 		F9D6C21F06AED39F00EAEB04 = {
 			fileEncoding = 30;
 			isa = PBXFileReference;
-			lastKnownFileType = text.plist.xml;
+			lastKnownFileType = file;
 			path = BibDeskSuite.scriptTerminology;
 			refType = 4;
 			sourceTree = "<group>";
