@@ -136,6 +136,7 @@ NSString *BDSKBibDocMacroDefinitionChangedNotification = @"changed the value of 
 NSString *BDSKMacroTextFieldWindowWillCloseNotification = @"Macro TextField Window Will Close Notification";
 NSString *BDSKPreviewPaneFontChangedNotification = @"Changed the RTF preview pane font family";
 NSString *BDSKComplexStringChangedNotification = @"Changed the key or value of a complex string";
+NSString *BDSKBibTypeInfoChangedNotification = @"TypeInfo Changed Notification";
 
 #pragma mark BDSKLibrary notifications
 NSString *BDSKBibLibrarySelectedItemsChangedNotification = @"BibLibraryController's selected items has changed";
