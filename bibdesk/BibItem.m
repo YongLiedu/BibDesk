@@ -974,18 +974,26 @@ void _setupFonts(){
     [s appendString:@"{"];
     [s appendString:[self citeKey]];
     while(k = [e nextObject]){
-        // Get TeX version of each field.
-	// Don't run the converter on Local-Url or Url fields, so we don't trash ~ and % escapes.
-	// Note that NSURLs comply with RFC 2396, and can't contain high-bit characters anyway.
-	if([k isEqualToString:BDSKLocalUrlString] || [k isEqualToString:BDSKUrlString]){
-	    v = [pubFields objectForKey:k];
-	} else {
-	    v = [[BDSKConverter sharedConverter] stringByTeXifyingString:[pubFields objectForKey:k]];
-	}
-	
+        v = [pubFields objectForKey:k];
+        NSString *valString;
+                 
+        if([v isKindOfClass:[BDSKComplexString class]] &&
+           [(BDSKComplexString *)v isComplex]){
+            valString = [(BDSKComplexString *)v nodesAsBibTeXString];
+        }else{    
+            // Don't run the converter on Local-Url or Url fields, so we don't trash ~ and % escapes.
+            // Note that NSURLs comply with RFC 2396, and can't contain high-bit characters anyway.
+            if(![k isEqualToString:BDSKLocalUrlString] &&
+               ![k isEqualToString:BDSKUrlString]){
+                v = [[BDSKConverter sharedConverter] stringByTeXifyingString:v];
+            }
+            valString = [NSString stringWithFormat:@"{%@}", v];
+        }
+        
         if(![v isEqualToString:@""]){
             [s appendString:@",\n\t"];
-            [s appendFormat:@"%@ = {%@}",k,v];
+            [s appendFormat:@"%@ = ",k];
+            [s appendString:valString];
         }
     }
     [s appendString:@"}"];
@@ -1009,10 +1017,25 @@ void _setupFonts(){
     [s appendString:[self citeKey]];
     while(k = [e nextObject]){
         v = [pubFields objectForKey:k];
-	
+        NSString *valString;
+        
+        if([v isKindOfClass:[BDSKComplexString class]] &&
+           [(BDSKComplexString *)v isComplex]){
+            valString = [(BDSKComplexString *)v nodesAsBibTeXString];
+        }else{    
+            // Don't run the converter on Local-Url or Url fields, so we don't trash ~ and % escapes.
+            // Note that NSURLs comply with RFC 2396, and can't contain high-bit characters anyway.
+            if(![k isEqualToString:BDSKLocalUrlString] &&
+               ![k isEqualToString:BDSKUrlString]){
+                v = [[BDSKConverter sharedConverter] stringByTeXifyingString:v];
+            }
+            valString = [NSString stringWithFormat:@"{%@}", v];
+        }
+        
         if(![v isEqualToString:@""]){
             [s appendString:@",\n\t"];
-            [s appendFormat:@"%@ = {%@}",k,v];
+            [s appendFormat:@"%@ = ",k];
+            [s appendString:valString];
         }
     }
     [s appendString:@"}"];
