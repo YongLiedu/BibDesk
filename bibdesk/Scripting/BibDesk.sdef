@@ -236,8 +236,9 @@ will translate this file into the necessary scriptSuite and scriptTerminology fi
 		
 			<command name="search" code="BDSKsrch" description="Returns a list of publications matching the given string. Typical usage: search for string.">
 				<cocoa name="Search" class="BibDeskSearchForCommand"/>
-				<direct-parameter type="application | document" description="The object responding to the command. Either the application or a document."/>
-				<parameter name="for" type="string" code="for " description="The string to search for.">
+				<direct-parameter type="object" description="The object responding to the command. Either the application or a document."/>
+				<!-- type is actually application | document above -->
+                                <parameter name="for" type="string" code="for " description="The string to search for.">
 					<cocoa key="for"/>
 				</parameter>
 				<parameter name="for completion" type="boolean" code="cmpl" optional="optional" description="Specifies whether to return a string for completion rather than a publication.">
