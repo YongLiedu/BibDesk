@@ -519,12 +519,15 @@ void _setupFonts(){
 						numAth = [self numberOfAuthors];
 					}
 					for (i = 0; i < numAth; i++) {
+						if (i > 0) {
+							[citeKeyStr appendString:@";"];
+						}
 						auth = [self authorAtIndex:i];
 						if ([[auth firstName] length] > 0) {
-							string = [NSString stringWithFormat:@"%@-%C;", 
+							string = [NSString stringWithFormat:@"%@.%C", 
 											[auth lastName], [[auth firstName] characterAtIndex:0]];
 						} else {
-							string = [NSString stringWithFormat:@"%@;", [auth lastName]];
+							string = [auth lastName];
 						}
 						string = [converter stringBySanitizingCiteKeyString:string];
 						if ([string length] > number && number > 0) {
