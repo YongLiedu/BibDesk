@@ -84,7 +84,7 @@
 
 - (IBAction)localUrlFormatAdd:(id)sender{
 	NSString *formatString = [formatField stringValue];
-	NSArray *specifierStrings = [NSArray arrayWithObjects:@"", @"%a00", @"%A0", @"%t0", @"%Y", @"%y", @"%m", @"%k0", @"%r2", @"%R2", @"%d2", @"%u0", @"%U0", @"%n0", @"%0", @"%%", @"%{}0", nil];
+	NSArray *specifierStrings = [NSArray arrayWithObjects:@"", @"%a00", @"%A0", @"%t0", @"%Y", @"%y", @"%m", @"%k0", @"%f{}0", @"%c{}", @"%r2", @"%R2", @"%d2", @"%u0", @"%U0", @"%n0", @"%0", @"%%", nil];
 	NSString *newSpecifier = [specifierStrings objectAtIndex:[formatRepositoryPopUp indexOfSelectedItem]];
 	NSRange selRange = NSMakeRange([formatString length] + 2, [newSpecifier length] - 2);
 	
@@ -98,11 +98,12 @@
 	[self localUrlFormatChanged:sender];
 	
 	// select the 'arbitrary' numbers
-	if (newSpecifier == @"%0") {
+	if ([newSpecifier isEqualToString:@"%0"]) {
 		selRange.location -= 1;
 		selRange.length = 1;
 	}
-	else if (newSpecifier == @"%{}0") {
+	else if ([newSpecifier isEqualToString:@"%f{}0"] || [newSpecifier isEqualToString:@"%c{}"]) {
+		selRange.location += 1;
 		selRange.length = 0;
 	}
 	[formatField selectText:self];
@@ -159,11 +160,16 @@
 }
 
 - (IBAction)showLocalUrlFormatWarning:(id)sender{
+	NSString *msg = [sender toolTip];
 	int rv;
-	// do we want to be more informative, i.e. name of offending specifier?
+	
+	if (msg == nil || [msg isEqualToString:@""]) {
+		msg = NSLocalizedString(@"The format string you entered contains invalid format specifiers.",@"");
+	}
 	rv = NSRunCriticalAlertPanel(NSLocalizedString(@"",@""), 
-								 NSLocalizedString(@"The format string you entered contains invalid format specifiers.",@""),
-								 NSLocalizedString(@"OK",@"OK"), nil, nil, nil);
+								 @"%@",
+								 NSLocalizedString(@"OK",@"OK"), nil, nil, 
+								 msg, nil);
 }
 
 - (void)setLocalUrlFormatInvalidWarning:(BOOL)set message:message{
