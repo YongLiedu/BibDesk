@@ -56,21 +56,22 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 }
 
 - (id)outlineView:(NSOutlineView *)oView child:(int)index ofItem:(id)item {
+    BibItem *bi = (BibItem *)item;
     if(item == nil){
         //       //NSLog(@"trying to give it %@",  [allAuthors objectAtIndex:index]);
         return [allAuthors objectAtIndex:index];
     }
     else{
-        return [item pubAtIndex: index];
+        return [bi pubAtIndex: index];
     }
 }
 
 - (id)outlineView:(NSOutlineView *)oView objectValueForTableColumn:(NSTableColumn *)tableColumn byItem:(id)item {
-   
+    BibItem *bi = (BibItem *)item;
     NSMutableString *value = [NSMutableString stringWithString:@""];
     NSString *s;
     
-    if(item == nil) {
+    if(bi == nil) {
 #if DEBUG
         //NSLog(@"objvalue called for nil");
 #endif
@@ -78,27 +79,27 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
     }
     //this needs more work. -- might want to do something entirely special for the column that
     // displays the collapsor...
-    if([item numberOfChildren] > 0){
+    if([bi numberOfChildren] > 0){
         if(tableColumn == [oView outlineTableColumn]){
-            [value appendString: [item name]];
+            [value appendString: [bi name]];
         }else{
             [value appendString: @""];
         }
     }else{
 
         if([[tableColumn identifier] isEqualToString: @"Cite Key"] ){
-            [value appendString: [item citeKey]];
+            [value appendString: [bi citeKey]];
         }else if([[tableColumn identifier] isEqualToString: @"Title"] ){
-            [value appendString: [item title]];
+            [value appendString: [bi title]];
         }else if([[tableColumn identifier] isEqualToString: @"Date"] ){
-            if([item date] == nil)
+            if([bi date] == nil)
                 [value appendString: @"No date"];
-            else if([[item valueOfField:@"Month"] isEqualToString:@""])
-                [value appendString: [[item date] descriptionWithCalendarFormat:@"%Y"]];
-            else [value appendString: [[item date] descriptionWithCalendarFormat:@"%b %Y"]];
+            else if([[bi valueOfField:@"Month"] isEqualToString:@""])
+                [value appendString: [[bi date] descriptionWithCalendarFormat:@"%Y"]];
+            else [value appendString: [[bi date] descriptionWithCalendarFormat:@"%b %Y"]];
         }else{
             // the tableColumn isn't something we handle in a custom way.
-            s = [item valueOfField:[tableColumn identifier]];
+            s = [bi valueOfField:[tableColumn identifier]];
             if(s)
                 [value appendString:s]; // might append nil, should be OK.
         }
@@ -326,10 +327,10 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
             [s appendString:startCite];
 
         while (i = [enumerator nextObject]) {
-            [localPBString appendString:[[shownPublications objectAtIndex:[i intValue]] textValue]];
+            [localPBString appendString:[[shownPublications objectAtIndex:[i intValue]] bibTeXString]];
             if((dragType == 0) ||
                (dragType == 2)){
-                [s appendString:[[shownPublications objectAtIndex:[i intValue]] textValue]];
+                [s appendString:[[shownPublications objectAtIndex:[i intValue]] bibTeXString]];
             }
             if(dragType == 1){
                 if(sep) [s appendString:startCite];
@@ -397,6 +398,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
     NSString *fnStr;
     NSArray *types;
     NSURL *url;
+    BOOL hadProblems = NO;
 
     if(tv == (NSTableView *)ccTableView){
         return NO; // can't drag into that tv.
@@ -444,7 +446,10 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
     }else if([types containsObject:NSStringPboardType]){
         pbString = [pb stringForType:NSStringPboardType];
        // //NSLog(@"<STRING IS>%@ </STRING IS>", pbString);
-        newPubs = [BibItem itemsFromString:pbString];
+        newPubs = [BibTeXParser itemsFromString:pbString
+                                          error:&hadProblems];
+        if(hadProblems) return NO;
+            
         newPubE = [newPubs objectEnumerator];
         
         while(newBI = [newPubE nextObject]){
@@ -456,9 +461,8 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
                 [self updateChangeCount:NSChangeDone];
                 if([[OFPreferenceWrapper sharedPreferenceWrapper] integerForKey:BDSKEditOnPasteKey] == NSOnState)
                     [self editPub:newBI forceChange:YES];
-                //don't return YES;
             }else{
-               // don't  return NO;
+
             }
         }
     }else{

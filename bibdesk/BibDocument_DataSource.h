@@ -15,6 +15,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 
 #import <Cocoa/Cocoa.h>
 #import "BibDocument.h"
+@class BibAuthor;
 
 /*! @category  BibDocument(DataSource)
 @discussion Additions to BibDocument for handling outline & table views.

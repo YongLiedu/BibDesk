@@ -269,13 +269,15 @@ NSString*   LocalDragPasteboardName = @"edu.ucsd.cs.mmccrack.bibdesk: Local Publ
 - (void)savePanelDidEnd:(NSWindow *)sheet returnCode:(int)returnCode contextInfo:(void *)contextInfo{
     NSData *rssData = nil;
     NSString *fileName = nil;
+    NSSavePanel *sp = (NSSavePanel *)sheet;
+    
     if(returnCode == NSOKButton){
-        fileName = [sheet filename];
+        fileName = [sp filename];
         rssData = [self dataRepresentationOfType:@"Rich Site Summary file"];
         [rssData writeToFile:fileName atomically:YES];
     }
-    [sheet setRequiredFileType:@"bib"]; // just in case...
-    [sheet setAccessoryView:nil];
+    [sp setRequiredFileType:@"bib"]; // just in case...
+    [sp setAccessoryView:nil];
 }
 
 
@@ -291,7 +293,7 @@ NSString*   LocalDragPasteboardName = @"edu.ucsd.cs.mmccrack.bibdesk: Local Publ
     // this is an error, maybe also raise an exception?
 }
 
-- (void)saveDependentWindows{
+- (void)saveDependentWindows{ //@@bibeditor transparency - won't need this.
     NSMutableArray *depWins = [NSMutableArray array];
     NSEnumerator *pubE = [publications objectEnumerator]; // yeah, i've got two - so what.
     BibItem *pub;
@@ -318,7 +320,7 @@ stringByAppendingPathComponent:@"BibDesk"]; */
 
     //  NSString *RSSTemplateFileName = [applicationSupportPath stringByAppendingPathComponent:@"rssTemplate.txt"];
     
-    [self saveDependentWindows];
+    [self saveDependentWindows]; //@@bibeditor transparency - won't need this.
 
     // add boilerplate RSS
     //    AddDataFromString(@"<?xml version=\"1.0\" encoding=\"utf-8\"?>\n<rdf:RDF\nxmlns:rdf=\"http://www.w3.org/1999/02/22-rdf-syntax-ns#\"\nxmlns:bt=\"http://purl.org/rss/1.0/modules/bibtex/\"\nxmlns=\"http://purl.org/rss/1.0/\">\n<channel>\n");
@@ -359,7 +361,7 @@ stringByAppendingPathComponent:@"BibDesk"]; */
     NSMutableData *d = [NSMutableData data];
     NSMutableString *templateFile = [NSMutableString stringWithContentsOfFile:[[[OFPreferenceWrapper sharedPreferenceWrapper] stringForKey:BDSKOutputTemplateFileKey] stringByExpandingTildeInPath]];
 
-    [self saveDependentWindows];
+    [self saveDependentWindows];//@@bibeditor transparency - won't need this.
     [templateFile appendFormat:@"\n%%%% Created for %@ at %@ \n\n", NSFullUserName(), [NSCalendarDate calendarDate]];
     
     [d appendData:[templateFile dataUsingEncoding:NSASCIIStringEncoding allowLossyConversion:YES]];
@@ -367,10 +369,13 @@ stringByAppendingPathComponent:@"BibDesk"]; */
 
     while(tmp = [e nextObject]){
         [d appendData:[[NSString stringWithString:@"\n\n"] dataUsingEncoding:NSASCIIStringEncoding  allowLossyConversion:YES]];
-        [d appendData:[[BDSKConverter stringByTeXifyingString:[tmp textValue]] dataUsingEncoding:NSASCIIStringEncoding allowLossyConversion:YES]];
+        [d appendData:[[BDSKConverter stringByTeXifyingString:[tmp bibTeXString]] dataUsingEncoding:NSASCIIStringEncoding allowLossyConversion:YES]];
     }
     return d;
 }
+
+#pragma mark -
+#pragma mark Opening and Loading Files
 
 - (BOOL)loadDataRepresentation:(NSData *)data ofType:(NSString *)aType
 {
@@ -389,149 +394,50 @@ stringByAppendingPathComponent:@"BibDesk"]; */
 }
 
 - (BOOL)loadBibTeXDataRepresentation:(NSData *)data{
-    int ok = 0;
     int rv = 0;
     BOOL hadProblems = NO;
-    FILE *infile = NULL;
-    char *fieldname = "\0";
-    char *fs_path;
-    NSString *s = nil;
-    AST *entry = NULL;
-    AST *field = NULL;
-    BibItem *newBI = nil;
-    unsigned char *buf;
     NSMutableDictionary *dictionary = nil;
-    long cidx = 0; // used to scan through buf for annotes.
-    char annoteDelim = '\0';
-    int braceDepth = 0;
-    // Weird bug: if you try to open a file like mrabbrv.bib, the next line gets exec_bad_access... what is up with that?
-    // NOTE: i'm not sure if that bug exists after 0.6 - we'll see.
-    dictionary = [NSMutableDictionary dictionaryWithCapacity:10];    // yes, 10 is arbitrary.
-    buf = (unsigned char *) malloc(sizeof(unsigned char) * [data length]);
-    
-    [data getBytes:buf];
+    NSString *tempFileName = nil;
+    NSString *dataString = [[[NSString alloc] initWithData:data encoding:NSUTF8StringEncoding] autorelease];
+    NSString* filePath = [self fileName];
 
-    // so, if filename has non ASCII characters, cString isn't enough:
-    // use filesystemrepresentationwithpath: to get something we can pass to fopen.
-    (const char *) fs_path = [[NSFileManager defaultManager] fileSystemRepresentationWithPath:[self fileName]];
-    infile = fopen(fs_path, "r");
+    if(!filePath){
+        filePath = @"Untitled Document";
+    }
+    dictionary = [NSMutableDictionary dictionaryWithCapacity:10];
 
-    bt_initialize();
-    bt_set_stringopts(BTE_PREAMBLE, BTO_EXPAND);
-    bt_set_stringopts(BTE_REGULAR, BTO_MINIMAL); 
-    while (entry = bt_parse_entry (infile, fs_path, 0, &ok))
-    {
-        if (ok)
-        {
-            // Adding a new BibItem
-            if (bt_entry_metatype (entry) != BTE_REGULAR)
-            {
-                // put preambles etc. into the frontmatter string so we carry them along.
-                if ([[NSString stringWithCString:bt_entry_type(entry) ] isEqualToString:@"preamble"]) {
-                    [frontMatter appendString:@"\n@preamble{\""];
-                    [frontMatter appendString:[NSString stringWithCString:bt_get_text(entry) ]];
-                    [frontMatter appendString:@"\"}"];
-                }
-            }
-            else
-            {
-                newBI = [[BibItem alloc] initWithType:[BibItem typeFromString:
-                    [[NSString stringWithCString:bt_entry_type(entry) ] lowercaseString]]
-                                              authors:[NSMutableArray arrayWithCapacity:0]
-                                        defaultFields:[[[OFPreferenceWrapper sharedPreferenceWrapper] stringArrayForKey:BDSKDefaultFieldsKey] mutableCopy]];
-                [newBI setFileOrder:fileOrderCount];
-                fileOrderCount++;
-                field = NULL;
-                while (field = bt_next_field (entry, field, &fieldname))
-                {
-                // ----------------------------------------------------------------------------------------
-                // FIXME  - GENERALIZABLE
-                // we could allow any field to have newlines...
-                // then we'd need to change the test below.
-                // ----------------------------------------------------------------------------------------
-                    if(!strcmp(fieldname, "annote") ||
-                       !strcmp(fieldname, "abstract") ||
-                       !strcmp(fieldname, "rss-description")){
-                        if(field->down){
-                            cidx = field->down->offset;
-                            // the delimiter is at cidx-1
-                            if(buf[cidx-1] == '{'){
-                                // scan up to the balanced brace
-                                for(braceDepth = 1; braceDepth > 0; cidx++){
-                                    if(buf[cidx] == '{') braceDepth++;
-                                    if(buf[cidx] == '}') braceDepth--;
-                                }
-                                cidx--;     // just advanced cidx one past the end of the field.
-                            }else if(buf[cidx-1] == '"'){
-                                // scan up to the next quote.
-                                for(; buf[cidx] != '"'; cidx++);
-                            }
-                            annoteDelim = buf[cidx];
-                            buf[cidx] = '\0';
-                            s = [NSString stringWithCString:&buf[field->down->offset]];
-                            buf[cidx] = annoteDelim;
-                        }else{
-                            hadProblems = YES;
-                        }
-                    }else{
-                        s = [NSString stringWithCString:bt_get_text(field)];
-                    }
-#warning inefficient - tons of unneccessary I/O happening here.
-                    // we should move stringByTeXifyingString out of the inner loop
-                    [dictionary setObject:[BDSKConverter stringByDeTeXifyingString:s]
-                                   forKey:[[NSString stringWithCString: fieldname ] capitalizedString]];
-                    [(BibAppController *)[NSApp delegate] addString:[BDSKConverter stringByDeTeXifyingString:s]
-                             forCompletionEntry:[[NSString stringWithCString: fieldname ] capitalizedString]];
-                }
-                [newBI setCiteKey:[NSString stringWithCString:bt_entry_key(entry) ]];
-                [newBI setFields:dictionary];
-                [publications addObject:[newBI autorelease]];
-                [dictionary removeAllObjects];
-            }
-        }else{
-            // there was an error... don't die, though - btparse will try to recover.
-            hadProblems = YES;
-        }
-    }// now feof(infile) is guaranteed by btparse to be true...
-    
+    publications = [[BibTeXParser itemsFromString:dataString
+                                           error:&hadProblems
+                                     frontMatter:frontMatter
+                                        filePath:filePath] retain]; 
     if(hadProblems){
         // run a modal dialog asking if we want to use partial data or give up
         rv = NSRunAlertPanel(NSLocalizedString(@"Error reading file!",@""),
                              NSLocalizedString(@"There was a problem reading the file. Do you want to use everything that did work (\"Keep Going\"), edit the file to correct the errors, or give up?\n(If you choose \"Keep Going\" and then save the file, you will probably lose data.)",@""),
-                        // Eventually, we should have more options - f/i edit and retry.
-                        // we should also find a way to view the error...
-                        // since we can't do that now, the default is to give up
-                        // so you can edit it somewhere else and retry.
                              NSLocalizedString(@"Give up",@""),
                              NSLocalizedString(@"Keep going",@""),
                              NSLocalizedString(@"Edit file", @""));
         if (rv == NSAlertDefaultReturn) {
             // the user said to give up
-            fclose(infile);
-            bt_cleanup();
-            free(buf);
             return NO;
         }else if (rv == NSAlertAlternateReturn){
             // the user said to keep going, so if they save, they might clobber data...
             // note this by setting the update count:
             [self updateChangeCount:NSChangeDone];
         }else if(rv == NSAlertOtherReturn){
-            [[NSApp delegate] openEditWindowWithFile:[[self fileName] stringByExpandingTildeInPath]];
+            // they said to edit the file.
+            tempFileName = [NSTemporaryDirectory() stringByAppendingPathComponent:[[NSProcessInfo processInfo] globallyUniqueString]];
+            [dataString writeToFile:tempFileName atomically:YES];
+            [[NSApp delegate] openEditWindowWithFile:tempFileName];
             [[NSApp delegate] showErrorPanel:self];
-            fclose(infile);
-            bt_cleanup();
-            free(buf);
             return NO;
         }
     }
-    
+
     [shownPublications setArray:publications];
-    // redundant - it's called in windowcontrollerdidloadnib. [self updateUI];
-    fclose(infile);
-    bt_cleanup();
-    free(buf);
     return YES;
 }
+
 
 - (IBAction)newPub:(id)sender{
     [self createNewBlankPubAndEdit:YES];
@@ -642,7 +548,7 @@ stringByAppendingPathComponent:@"BibDesk"]; */
             // (don't just pass it 'e' - it needs its own enum.)
             
             while(i = [e nextObject]){
-                [bibString appendString:[[shownPublications objectAtIndex:[i intValue]] textValue]];
+                [bibString appendString:[[shownPublications objectAtIndex:[i intValue]] bibTeXString]];
             }// while i is num of selected row
 
             if([[OFPreferenceWrapper sharedPreferenceWrapper] integerForKey:BDSKUsesTeXKey] == NSOnState){
@@ -771,9 +677,8 @@ stringByAppendingPathComponent:@"BibDesk"]; */
 
             }
             if([quickSearchKey isEqualToString:@"Pub Type"]){
-                r = [[BibItem stringFromType:[pub type]]
-                    rangeOfString:prefix
-                          options:NSCaseInsensitiveSearch];
+                r = [[pub type] rangeOfString:prefix
+                                      options:NSCaseInsensitiveSearch];
             }else{
                 r = [[pub valueOfField:quickSearchKey] rangeOfString:prefix
                                                              options:NSCaseInsensitiveSearch];
@@ -819,7 +724,7 @@ stringByAppendingPathComponent:@"BibDesk"]; */
     NSNumber *i;
     [pasteboard declareTypes:[NSArray arrayWithObject:NSStringPboardType] owner:nil];
     while(i=[e nextObject]){
-        [s appendString:[[shownPublications objectAtIndex:[i intValue]] textValue]];
+        [s appendString:[[shownPublications objectAtIndex:[i intValue]] bibTeXString]];
     }
     [pasteboard setString:s forType:NSStringPboardType];
 }
@@ -855,7 +760,7 @@ stringByAppendingPathComponent:@"BibDesk"]; */
 
     [pb declareTypes:[NSArray arrayWithObject:NSPDFPboardType] owner:nil];
     while(i = [e nextObject]){
-        [bibString appendString:[[shownPublications objectAtIndex:[i intValue]] textValue]];
+        [bibString appendString:[[shownPublications objectAtIndex:[i intValue]] bibTeXString]];
     }
     d = [PDFpreviewer PDFDataFromString:bibString];
     [pb setData:d forType:NSPDFPboardType];
@@ -870,9 +775,37 @@ stringByAppendingPathComponent:@"BibDesk"]; */
     NSArray *newPubs;
     NSEnumerator *newPubsE;
     BibItem *newBI;
+    BOOL hadProblems = NO;
+    NSString *tempFileName = nil;
+    NSString *dataString = nil;
+    int rv = 0;
 
     if ([[pasteboard types] containsObject:NSStringPboardType]) {
-        newPubs = [BibItem itemsFromString:[pasteboard stringForType:NSStringPboardType]];
+        dataString = [pasteboard stringForType:NSStringPboardType];
+        newPubs = [BibTeXParser itemsFromString:dataString error:&hadProblems];
+        if(hadProblems) {
+            // run a modal dialog asking if we want to use partial data or give up
+            rv = NSRunAlertPanel(NSLocalizedString(@"Error reading file!",@""),
+                                 NSLocalizedString(@"There was a problem reading the file. Do you want to use everything that did work (\"Keep Going\"), edit the file to correct the errors, or give up?\n(If you choose \"Keep Going\" and then save the file, you will probably lose data.)",@""),
+                                 NSLocalizedString(@"Give up",@""),
+                                 NSLocalizedString(@"Keep going",@""),
+                                 NSLocalizedString(@"Edit data", @""));
+            if (rv == NSAlertDefaultReturn) {
+                // the user said to give up
+              
+            }else if (rv == NSAlertAlternateReturn){
+                // the user said to keep going, so if they save, they might clobber data...
+                // note this by setting the update count:
+                [self updateChangeCount:NSChangeDone];
+            }else if(rv == NSAlertOtherReturn){
+                // they said to edit the file.
+                tempFileName = [NSTemporaryDirectory() stringByAppendingPathComponent:[[NSProcessInfo processInfo] globallyUniqueString]];
+                [dataString writeToFile:tempFileName atomically:YES];
+                [[NSApp delegate] openEditWindowWithFile:tempFileName];
+                [[NSApp delegate] showErrorPanel:self];
+                
+            }
+        }
         newPubsE = [newPubs objectEnumerator];
         while(newBI = [newPubsE nextObject]){
             [publications addObject:newBI];
@@ -894,9 +827,9 @@ stringByAppendingPathComponent:@"BibDesk"]; */
 
 - (void)createNewBlankPubAndEdit:(BOOL)yn{
     OFPreferenceWrapper *pw = [OFPreferenceWrapper sharedPreferenceWrapper];
-    BibItem *newBI = [[BibItem alloc] initWithType:[pw integerForKey:BDSKPubTypeKey]
-                                           authors:[NSMutableArray arrayWithCapacity:0]
-                                     defaultFields:[[pw stringArrayForKey:BDSKDefaultFieldsKey] mutableCopy]];
+    BibItem *newBI = [[BibItem alloc] initWithType:[pw stringForKey:BDSKPubTypeStringKey]
+                                          fileType:@"BibTeX" // Not Sure if this is good.
+                                           authors:[NSMutableArray arrayWithCapacity:0]];
 
     [newBI setFileOrder:fileOrderCount];
     fileOrderCount++;

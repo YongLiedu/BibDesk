@@ -183,7 +183,7 @@ static NSString*	ToggleCiteDrawerToolbarItemIdentifier 	= @"Toggle Cite Drawer I
         [quickSearchBox retain];
         [quickSearchButton retain];
         [quickSearchTextField retain];
-    }else if(removedItem == sortKeyButton){
+    }else if((id)removedItem == (id)sortKeyButton){
         [sortKeyToolbarItem autorelease];
         sortKeyToolbarItem = nil;
         [sortKeyButton retain];
