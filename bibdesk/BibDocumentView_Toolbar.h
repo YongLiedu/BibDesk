@@ -17,6 +17,14 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 #import "BibDocument+Menus.h"
 #import "NSImage+Toolbox.h"
 
+extern NSString* 	BibDocToolbarIdentifier;
+extern NSString*	NewDocToolbarItemIdentifier;
+extern NSString*	SearchFieldDocToolbarItemIdentifier;
+extern NSString*	EditDocToolbarItemIdentifier;
+extern NSString*	DelDocToolbarItemIdentifier;
+extern NSString*	PrvDocToolbarItemIdentifier;
+extern NSString*	ToggleCiteDrawerToolbarItemIdentifier;
+
 @interface BibDocument (Toolbar)
 
 /*!

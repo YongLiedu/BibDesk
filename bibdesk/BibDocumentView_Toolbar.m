@@ -16,13 +16,13 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 
 #import "BibDocumentView_Toolbar.h"
 
-static NSString* 	BibDocToolbarIdentifier 		= @"BibDesk Browser Toolbar Identifier";
-static NSString*	NewDocToolbarItemIdentifier 	= @"New Document Item Identifier";
-static NSString*	SearchFieldDocToolbarItemIdentifier 	= @"NSSearchField Document Item Identifier";
-static NSString*	EditDocToolbarItemIdentifier 	= @"Edit Document Item Identifier";
-static NSString*	DelDocToolbarItemIdentifier 	= @"Del Document Item Identifier";
-static NSString*	PrvDocToolbarItemIdentifier 	= @"Show Preview  Item Identifier";
-static NSString*	ToggleCiteDrawerToolbarItemIdentifier 	= @"Toggle Cite Drawer Identifier";
+NSString* 	BibDocToolbarIdentifier 		= @"BibDesk Browser Toolbar Identifier";
+NSString*	NewDocToolbarItemIdentifier 	= @"New Document Item Identifier";
+NSString*	SearchFieldDocToolbarItemIdentifier 	= @"NSSearchField Document Item Identifier";
+NSString*	EditDocToolbarItemIdentifier 	= @"Edit Document Item Identifier";
+NSString*	DelDocToolbarItemIdentifier 	= @"Del Document Item Identifier";
+NSString*	PrvDocToolbarItemIdentifier 	= @"Show Preview  Item Identifier";
+NSString*	ToggleCiteDrawerToolbarItemIdentifier 	= @"Toggle Cite Drawer Identifier";
 
 @implementation BibDocument (Toolbar)
 

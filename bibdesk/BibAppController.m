@@ -24,12 +24,6 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 #import "NSString_BDSKExtensions.h"
 
 
-
-/* WARNING: THIS STRING BETTER be the same as the one in BibDocumentView_Toolbar
-Perhaps someone can figure out how to share it without making things break.
-*/
-static NSString*	PrvDocToolbarItemIdentifier 	= @"Show Preview  Item Identifier";
-
 // ----------------------------------------------------------------------------------------
 // copy-n-pasted from my version of btparse's error.c:
 // ***Don't change this just here ***//
