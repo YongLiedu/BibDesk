@@ -901,7 +901,7 @@ Enhanced delete method that uses a sheet instead of a modal dialogue.
 	}
 	
 	if(quickSearchTextDict){
-		if([quickSearchTextDict objectForKey:quickSearchKey]){
+/*		if([quickSearchTextDict objectForKey:quickSearchKey]){
 			[searchCellOrTextField setStringValue:
 				[quickSearchTextDict objectForKey:quickSearchKey]];
 			if(BDSK_USING_JAGUAR){
@@ -910,11 +910,12 @@ Enhanced delete method that uses a sheet instead of a modal dialogue.
 		}else{
 			[searchCellOrTextField setStringValue:@""];
 		}
+*/		
 	}else{
 		quickSearchTextDict = [[NSMutableDictionary dictionaryWithCapacity:4] retain];
 	}
 	
-	[self setSelectedSearchFieldKey:quickSearchKey];
+	// [self setSelectedSearchFieldKey:quickSearchKey];
 	
 }
 
@@ -965,7 +966,8 @@ Enhanced delete method that uses a sheet instead of a modal dialogue.
 		}
 		
 	}
-	
+
+	/*
 	NSString *newQueryString = [quickSearchTextDict objectForKey:newKey];
     if(newQueryString){
         [searchCellOrTextField setStringValue:newQueryString];
@@ -973,9 +975,10 @@ Enhanced delete method that uses a sheet instead of a modal dialogue.
         [searchCellOrTextField setStringValue:@""];
 		newQueryString = @"";
     }
+	 */
  
 	// NSLog(@"in setSelectedSearchFieldKey, newQueryString is [%@]", newQueryString);
-	[self hidePublicationsWithoutSubstring:newQueryString
+	[self hidePublicationsWithoutSubstring:[searchCellOrTextField stringValue] //newQueryString
 								   inField:quickSearchKey];
 		
 }
@@ -1054,7 +1057,7 @@ Enhanced delete method that uses a sheet instead of a modal dialogue.
     NSMutableArray *prefsQuickSearchKeysMutableArray = (NSMutableArray *)contextInfo;
 	NSSearchFieldCell *searchFieldCell = [searchField cell];
 	NSMenu *searchFieldMenuTemplate = [searchFieldCell searchMenuTemplate];
-	NSMenuItem *menuItem = nil;
+	// NSMenuItem *menuItem = nil;
 	NSString *delFieldTitle = nil;
 
     if(returnCode == 1){
@@ -1638,8 +1641,7 @@ int generalBibItemCompareFunc(id item1, id item2, void *context){
             }
         }
 		if([colName isEqualToString:@"Local-Url"]){
-			NSImage *pdfImage = [NSImage imageForFileType:@"pdf"];
-			[pdfImage setSize:NSMakeSize(15,15)];
+			NSImage * pdfImage = [NSImage imageNamed:@"TinyFile"];
 			[[tc headerCell] setImage:pdfImage];
 		}else{	
 			[[tc headerCell] setStringValue:NSLocalizedStringFromTable(colName, @"BibTeXKeys", @"")];
@@ -2033,7 +2035,7 @@ The results are quite crappy, but these were low-hanging fruit and people seem t
 
 
 - (IBAction)postItemToWeblog:(id)sender{
-	NSEnumerator *pubE = [self selectedPubEnumerator];
+//	NSEnumerator *pubE = [self selectedPubEnumerator];
 //	BibItem *pub = [pubE nextObject];
 
 	[NSException raise:@"unimplementedFunctionException"
