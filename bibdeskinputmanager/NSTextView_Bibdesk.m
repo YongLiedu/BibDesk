@@ -11,6 +11,8 @@
 #import </usr/include/objc/objc-class.h>
 #import </usr/include/objc/Protocol.h>
 
+static BOOL debug = NO;
+
 NSString *BDSKInputManagerID = @"net.sourceforge.bibdesk.inputmanager";
 
 static NSString *kScriptName = @"Bibdesk";
@@ -23,24 +25,29 @@ static NSString *kHandlerName = @"getcitekeys";
     NSString *bundleID = [[NSBundle mainBundle] bundleIdentifier]; // for the app we are loading into
     NSString *libraryPath = [NSSearchPathForDirectoriesInDomains(NSLibraryDirectory, NSUserDomainMask, YES) objectAtIndex:0];
     NSArray *array = [NSArray arrayWithContentsOfFile:[libraryPath stringByAppendingPathComponent:@"/Application Support/BibDeskInputManager/EnabledApplications.plist"]];
-    
+
+    if(debug) NSLog(@"We should enable for %@", [array description]);
+  
     NSEnumerator *e = [array objectEnumerator];
     NSDictionary *dict;
     BOOL yn = NO;
     
     while(dict = [e nextObject]){
 	if([[dict objectForKey:@"BundleID"] isEqualToString:bundleID]){
+	    if(debug) NSLog(@"Found a match; enabling autocompletion for %@",[dict description]);
 	    yn = YES;
 	    break;
 	}
     }
     
     if(yn && [[self superclass] instancesRespondToSelector:@selector(completionsForPartialWordRange:indexOfSelectedItem:)]){
+	if(debug) NSLog(@"%@ performing posing for %@", [self class], [self superclass]);
 	[self poseAsClass:[NSTextView class]];
+	if(debug) [self printSelectorList:[self superclass]];
     }
 }
 
-+ (void)getSelectorList:(id)anObject{
++ (void)printSelectorList:(id)anObject{
     int i = 0, k = 0;
     void *iterator = 0;
     struct objc_method_list *mlist;
