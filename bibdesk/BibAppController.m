@@ -263,17 +263,25 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 	NSOpenPanel *oPanel = [NSOpenPanel openPanel];
     [oPanel setAccessoryView:openTextEncodingAccessoryView];
 		
-	NSArray *types = [NSArray arrayWithObjects:@"bib", @"fcgi", @"ris", nil];
+	NSArray *types = [NSArray arrayWithObjects:@"bib", @"fcgi", @"ris", @"bdsk", nil];
 	
 	int result = [oPanel runModalForDirectory:nil
                                      file:nil
                                     types:types];
 	if (result == NSOKButton) {
-
         NSString *fileToOpen = [oPanel filename];
-		int index = [openTextEncodingPopupButton indexOfSelectedItem];
-                NSStringEncoding encoding = [[[[self encodingDefinitionDictionary] objectForKey:@"StringEncodings"] objectAtIndex:index] intValue];
-                [self openFile:fileToOpen withEncoding:encoding];		
+        NSString *fileType = [fileToOpen pathExtension];
+        
+        if([fileType isEqualToString:@"bib"]){
+            int index = [openTextEncodingPopupButton indexOfSelectedItem];
+            NSStringEncoding encoding = [[[[self encodingDefinitionDictionary] objectForKey:@"StringEncodings"] objectAtIndex:index] intValue];
+            [self openBibTeXFile:fileToOpen withEncoding:encoding];		
+        }else{
+            // handle other types in the usual way 
+            // This ends up calling NSDocumentController makeDocumentWithContentsOfFile:ofType:
+            // which calls NSDocument (here, most likely BibDocument) initWithcontentsOfFile:ofType:
+            [self openDocumentWithContentsOfFile:fileToOpen display:YES]; 
+        }
 	}
 	
 }
@@ -318,12 +326,12 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 }
 
 
-- (void)openFile:(NSString *)filePath withEncoding:(NSStringEncoding)encoding{
+- (void)openBibTeXFile:(NSString *)filePath withEncoding:(NSStringEncoding)encoding{
 	
 	NSData *data = [NSData dataWithContentsOfFile:filePath];
 	BibDocument *doc = nil;
 	
-	doc = [[NSDocumentController sharedDocumentController] openUntitledDocumentOfType:@"bibTeX database" display:YES];
+	doc = [self openUntitledDocumentOfType:@"bibTeX database" display:YES];
 	[doc loadBibTeXDataRepresentation:data encoding:encoding];
 	//[doc updateChangeCount:NSChangeDone];
 	[doc updateUI];

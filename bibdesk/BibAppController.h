@@ -24,7 +24,6 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 #import <ILCrashReporter/ILCrashReporter.h>
 
 
-
 /*!
     @class BibAppController
     @abstract The application delegate.
@@ -94,11 +93,11 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 - (IBAction)openUsingFilter:(id)sender;
 
 /*!
-    @method openFile:withEncoding:
+    @method openBibTeXFile:withEncoding:
     @abstract Imports a bibtex file with a specific encoding.  Useful if there are non-ASCII characters in the file.
     @discussion
  */
-- (void)openFile:(NSString *)filePath withEncoding:(NSStringEncoding)encoding;
+- (void)openBibTeXFile:(NSString *)filePath withEncoding:(NSStringEncoding)encoding;
 
 
 - (NSArray *)requiredFieldsForCiteKey;
