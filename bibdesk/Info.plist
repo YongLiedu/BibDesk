@@ -235,6 +235,8 @@
 					<string>0</string>
 					<key>Local-Url Format</key>
 					<string>%L</string>
+					<key>Local-Url Format Preset</key>
+					<integer>1</integer>
 					<key>Path to the papers folder</key>
 					<string>~/Documents/Papers</string>
 				</dict>
