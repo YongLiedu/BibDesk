@@ -57,14 +57,19 @@ static NSCharacterSet *macroCharSet = nil;
         
     }else{
         
-        // it doesn't start with a quote, but 
-        
-        // a single macro
+        // it doesn't start with a quote, so it must be a single macro or raw number
         
         NSCharacterSet *nonDigitCharset = [[NSCharacterSet decimalDigitCharacterSet] invertedSet];
         if([s rangeOfCharacterFromSet:nonDigitCharset].location != NSNotFound){
-            // if it contains characters that are not digits, it must be a string
-            [node setType:BSN_MACRODEF];
+            // if it contains characters that are not digits, it must be a macro
+			NSCharacterSet *nonMacroCharset = [macroCharSet invertedSet];
+			if([s rangeOfCharacterFromSet:nonMacroCharset].location != NSNotFound ||
+			   [[NSCharacterSet decimalDigitCharacterSet] characterIsMember:[s characterAtIndex:0]]){
+				// the macro contains an invalid character
+				[NSException raise:@"BDSKComplexStringException" 
+							format:@"Invalid character in macro string: [%@]", s];
+            }
+			[node setType:BSN_MACRODEF];
         }else{
             // if it doesn't contain characters that are not digits, it is a number.
             [node setType:BSN_NUMBER];

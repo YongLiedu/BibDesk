@@ -16,11 +16,52 @@ typedef enum{
     bdsk_stringnodetype type; 
     NSString *value;
 }
+
+/*!
+    @method     nodeWithQuotedString:
+    @abstract   Returns a newly allocated and initialized string node for a quoted string. The string is expected to be valid, i.e. it should not contain unbalanced braces. Error checking is not performed. 
+    @discussion (description)
+    @param		s The string value without the quotes. 
+    @result     A newly allocated string node of string type. 
+*/
 + (BDSKStringNode *)nodeWithQuotedString:(NSString *)s;
+
+/*!
+    @method     nodeWithNumberString:
+    @abstract   Returns a newly allocated and initialized string node for a raw number. The string is expected to be valid, i.e. it should contain only numbers. Error checking is not performed. 
+    @discussion (description)
+    @param		s The number value as a string. 
+    @result     A newly allocated string node of number type. 
+*/
 + (BDSKStringNode *)nodeWithNumberString:(NSString *)s;
+
+/*!
+    @method     nodeWithMacroString:
+    @abstract   Returns a newly allocated and initialized string node for a macro string. The string is expected to be valid, i.e. it should not contain special characters. Error checking is not performed. 
+    @discussion (description)
+    @param		s The macro string. 
+    @result     A newly allocated string node of macro type. 
+*/
 + (BDSKStringNode *)nodeWithMacroString:(NSString *)s;
+
+/*!
+    @method     nodeWithBibTeXString:
+    @abstract   Returns a newly allocated and initialized string node for a BibTeX string. The BibTeX string is checked for errors. 
+    @discussion (description)
+    @param		s The raw BibTeX string value for the node. 
+    @result     A newly allocated string node. 
+*/
 + (BDSKStringNode *)nodeWithBibTeXString:(NSString *)s;
+
 - (id)copyWithZone:(NSZone *)zone;
+
+/*!
+    @method     isEqual:
+    @abstract   Returns YES if the receiver and the argument are a string nodes of the same type with equal values.  
+    @discussion (description)
+    @param		other The string node to compare with.
+    @result     -
+*/
 - (BOOL)isEqual:(BDSKStringNode *)other;
 - (bdsk_stringnodetype)type;
 - (void)setType:(bdsk_stringnodetype)newType;
