@@ -9,7 +9,13 @@
     return self;
 }
 
+- (void)awakeFromNib{    
+    [textField setDelegate:self];
+    originalInfoLineValue = [[infoLine stringValue] retain];
+}
+
 - (void)dealloc{
+    [originalInfoLineValue dealloc];
     [super dealloc];
 }
 
@@ -17,6 +23,8 @@
 - (void)windowDidLoad{
     [[self window] setExcludedFromWindowsMenu:TRUE];
     [[self window] setOneShot:TRUE];
+    [[self window] setDelegate:self];
+    [[self window] setLevel:NSModalPanelWindowLevel];
 }
 
 - (void)startEditingValue:(NSString *) string
@@ -25,7 +33,6 @@
                  withFont:(NSFont*)font
                 fieldName:(NSString *)aFieldName
 			macroResolver:(id<BDSKMacroResolver>)aMacroResolver{
-    NSNotificationCenter *nc;
     NSWindow *win = [self window];
     
     fieldName = aFieldName;
@@ -39,10 +46,13 @@
                              width,
                              currentFrame.size.height)
                     display:YES
-                    animate:YES];
+                    animate:NO];
     
-    
+    startString = string;
     [expandedValueTextField setStringValue:string];
+    // in case we already ran and had an error that wasn't recorded:
+    [infoLine setStringValue:originalInfoLineValue];
+    
     if([string isComplex]){
         [textField setStringValue:[string stringAsBibTeXString]];
     }else{
@@ -50,59 +60,70 @@
     }
     
     if(font) [textField setFont:font];
-    
-    [win makeKeyAndOrderFront:self];
 
-    nc = [NSNotificationCenter defaultCenter];
-    [nc addObserver:self
-           selector:@selector(handleDidResignKeyNotification:)
-               name:@"NSWindowDidResignKeyNotification"
-             object:win];
+    [win makeKeyAndOrderFront:self];
+    notifyingChanges = NO;
+
 }
 
 - (void)controlTextDidEndEditing:(NSNotification *)notification{
-    [self notifyNewValueAndOrderOut];
+    [[self window] resignKeyWindow];
 }
 
-// note that this might get called twice:
-// once from controlTextDidEndEditing and then
-// another time from handleDidResignKey...
-// so don't do anything here that isn't OK to do 
-// more than once without an intervening call to startEditing...
-
-// Any method that uses this class should respond to the 
+// Any object that uses this class should respond to the 
 //  BDSKMacroTextFieldWindowWillCloseNotification by removing itself
 // as an observer for that notification so it doesn't get it multiple times.
 - (void)notifyNewValueAndOrderOut{
     NSNotificationCenter *nc = [NSNotificationCenter defaultCenter];
-    NSDictionary *userInfo = [NSDictionary dictionaryWithObjectsAndKeys:[self stringValue], @"stringValue", fieldName, @"fieldName", nil];
+    NSString *stringValue = nil;
+    NSDictionary *userInfo = nil;
+        
+    NS_DURING
+        stringValue = [self stringValue];
+    NS_HANDLER
+        // if there was a problem building the new string, notify with the old one.
+        userInfo = [NSDictionary dictionaryWithObjectsAndKeys:startString, @"stringValue", fieldName, @"fieldName", nil];
+    NS_ENDHANDLER
+    
+    if(!userInfo)
+        userInfo = [NSDictionary dictionaryWithObjectsAndKeys:stringValue, @"stringValue", fieldName, @"fieldName", nil];
+
     [nc postNotificationName:BDSKMacroTextFieldWindowWillCloseNotification
                       object:self
                     userInfo:userInfo];
 
+    // if we don't record this, we may get sent windowDidResignKey a second time
+    // when we enter this method from that one.
+    notifyingChanges = YES;
     [[self window] orderOut:self];
-    [nc removeObserver:self
-                  name:@"NSWindowDidResignKeyNotification" 
-                object:[self window]];
+    notifyingChanges = NO;
+
 }
 
 - (void)controlTextDidChange:(NSNotification*)aNotification { 
-    NSString *value = [self stringValue];
+    NSString *value = nil;
+    NS_DURING
+        value = [self stringValue];
+    NS_HANDLER
+        [infoLine setStringValue:NSLocalizedString(@"Invalid BibTeX string: this change will not be recorded. Error:", 
+                                                   @"Invalid raw bibtex string error message") ];
+        [expandedValueTextField setStringValue:[localException reason]];
+        return;
+    NS_ENDHANDLER
+
+    [infoLine setStringValue:originalInfoLineValue]; 
     [expandedValueTextField setStringValue:value];
 }
+
 
 - (NSString *)stringValue{
     return [NSString complexStringWithBibTeXString:[textField stringValue] macroResolver:macroResolver];
 }
 
 
-// we might be calling notifyNewValueAndOrderOut for a second time, because 
-// controlTextDidEndEditing calls it too, which then causes this to be called again
-// calling orderOut twice in a row doesn't re-send this notification, so we're safe there
-// we need to be careful not to do things in notifyNewValueAndOrderOut that 
-// assume it is only called once. See also comments above that method.
-- (void)handleDidResignKeyNotification:(NSNotification *)notification{
-    [self notifyNewValueAndOrderOut];
+- (void)windowDidResignKey:(NSNotification *)aNotification{
+    if(!notifyingChanges)
+        [self notifyNewValueAndOrderOut];
 }
 
 @end

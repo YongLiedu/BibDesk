@@ -9,8 +9,12 @@
 @interface MacroTextFieldWindowController : NSWindowController {
     IBOutlet NSTextField *textField;
     IBOutlet NSTextField *expandedValueTextField;
+    IBOutlet NSTextField *infoLine;
+    NSString *originalInfoLineValue;
     NSString *fieldName;
     id macroResolver;
+    NSString *startString;
+    BOOL notifyingChanges;
 }
 // Public
 - (void)startEditingValue:(NSString *) string
