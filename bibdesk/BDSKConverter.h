@@ -55,5 +55,5 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
  @param none
  @result alert panel
 */
-+ (void)runConversionAlertPanel;
++ (void)runConversionAlertPanel:(NSString *)tmpConv;
 @end

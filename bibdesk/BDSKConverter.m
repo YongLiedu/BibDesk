@@ -98,9 +98,9 @@ static NSCharacterSet *SkipSet;
 				offset += [TEXString length] - 1;    // we're adding length-1 characters, so we have to make sure we insert at the right point in the future.
 			}else if(tmpConv != nil){ // if tmpConv is non-nil, we had a character that was accented and not in the dictionary
 			      [NSObject cancelPreviousPerformRequestsWithTarget:self 
-								       selector:@selector(runConversionAlertPanel)
-								         object:nil];
-			      [self performSelector:@selector(runConversionAlertPanel) withObject:nil afterDelay:0.1];
+								       selector:@selector(runConversionAlertPanel:)
+								         object:tmpConv];
+			    [self performSelector:@selector(runConversionAlertPanel:) withObject:tmpConv afterDelay:0.1];
 			     }
 	    }
 		
@@ -114,15 +114,17 @@ static NSCharacterSet *SkipSet;
     return([convertedSoFar autorelease]);
 }
 
-+ (void)runConversionAlertPanel{
++ (void)runConversionAlertPanel:(NSString *)tmpConv{
+    NSString *errorString = [NSString localizedStringWithFormat:@"The accented or Unicode character %@ could not be converted.  Please enter the TeX code directly in your bib file.", tmpConv];
     int i = NSRunAlertPanel(NSLocalizedString(@"Character Conversion Error",
 				              @"Title of alert when an error happens"),
-		            NSLocalizedString(@"An accented or Unicode character could not be converted.  Please enter the TeX code directly in your bibliography and e-mail the developers.  For more information, see the Character Conversion topic of BibDesk Help.",
+		            NSLocalizedString(errorString,
 				              @"Informative alert text when the error happens."),
 			    @"Send e-mail", @"Edit", nil, nil);
     if(i == NSAlertDefaultReturn){
-	NSString *urlString = @"mailto:bibdesk-develop@lists.sourceforge.net?subject=Character%20Conversion%20Error&body=Please%20enter%20the%20accented%20character%20that%20failed%20to%20convert%20and%20its%20TeX%20equivalent.";
-	NSURL *mailURL = [NSURL URLWithString:urlString];
+	NSString *urlString = [NSString stringWithFormat:@"mailto:bibdesk-develop@lists.sourceforge.net?subject=Character Conversion Error&body=Please enter a description of the accented character \"%@\" that failed to convert and its TeX equivalent.", tmpConv];
+	CFStringRef escapedString = CFURLCreateStringByAddingPercentEscapes(kCFAllocatorDefault, (CFStringRef)urlString, NULL, NULL, kCFStringEncodingUTF8);
+	NSURL *mailURL = [NSURL URLWithString:[(NSString *)escapedString autorelease]];
 	[[NSWorkspace sharedWorkspace] openURL:mailURL];
     } else {
     }
