@@ -31,9 +31,6 @@ http://home.planet.nl/~faase009/GNU.txt
 */
 
 
-
-#define DEBUG_P1(X,A1)  printf(X,A1)
-
 /************** ASCII-8 *****************/
 
 #ifdef ASCII8
@@ -47,18 +44,10 @@ http://home.planet.nl/~faase009/GNU.txt
 NSString* TeXStringWithHTMLString(char *str, FILE *freport, char *html_fn, int ln,
               BOOL in_math, BOOL in_verb, BOOL in_alltt);
 
-/************** Program options stored in global variables *******/
-
-BOOL option_info = NO,
-	 option_warn = NO,
-	 option_pedantic = NO,
-	 option_bibliography = NO,
-	 is_html_fn = NO;
-
 /******* Translating special characters to LaTeX characters ******/
 
 // Number of entries in the character table
-#define NR_CH_TABLE 165
+#define NR_CH_TABLE 170
 // ARM:  Not sure what NR_CH_M is for
 #define NR_CH_M     159  
 
@@ -236,8 +225,15 @@ struct {
 		  { "lt",     "$<",       '<' },
 		  { "quot",   "\\\"{}",   '"' },
 // BibDesk additions
-          { "plusmn",   "$\\pm",   '\0' },
-          { "times",   "$\\times",   'x' },
+          { "plusmn", "$\\pm",   '\0' },
+          { "times",  "$\\times",   'x' },
+          { "deg",    "\\ensuremath{^{\\raise1pt\\hbox{$\\scriptstyle\\circ$}}}",   'o'},
+          { "frac",   "/",    '/' },
+		  { "Omicron","O",        0   },
+		  { "epsilon","$\\epsilon",0  },
+          { "middot", "$\\cdot",  0   },
+
+
 };
 
 
