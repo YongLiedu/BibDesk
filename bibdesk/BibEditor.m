@@ -450,7 +450,8 @@ NSString *BDSKUrlString = @"Url";
                                      file:nil
                                     types:nil];
     if (result == NSOKButton) {
-        [theBib setField:@"Local-Url" toValue:[[oPanel filename] stringByAddingPercentEscapesUsingEncoding:NSASCIIStringEncoding]];
+		NSString *fileURLString = [[oPanel filename] stringByAddingPercentEscapesUsingEncoding:NSUTF8StringEncoding];
+        [theBib setField:@"Local-Url" toValue:fileURLString];
 		[self setupForm];
         [self fixURLs];
     }
