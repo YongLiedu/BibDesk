@@ -27,7 +27,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 
 - (id)initWithName:(NSString *)aName andPub:(BibItem *)aPub{
     [self setName:aName];
-    publication = aPub; // don't retain this
+    publication = aPub; // don't retain this, since it retains us
     return self;
 }
 
@@ -47,7 +47,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 
 - (id)copyWithZone:(NSZone *)zone{
     BibAuthor *copy = [[[self class] allocWithZone: zone] initWithName:[self name]
-                                                                andPub:nil];
+                                                                andPub:[self publication]];
     return copy;
 }
 
