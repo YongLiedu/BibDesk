@@ -122,11 +122,78 @@ However, we will simply add the usual completions after our own for safety...
     return NSMakeRange(NSNotFound,0);
 }
 
-- (NSRange)refLabelRange{
-    NSString * s = [[self textStorage] string];
-    NSRange r = [self selectedRange];
+// ** check to see if it's TeX
+// look back to see if { ; if no brace, return not TeX
+
+// if { found, look back between insertion point and { to find comma; check to see if it's BibTeX, then return the match range
+
+// ** check to see if it's BibTeX
+// look back to see if ] ; if no options, then just find the citecommand (or not) by searching back from {
+// look back to see if ][ ; if so, set ] range again
+// look back to find [ starting from ]
+// now we have [, see if there is a cite immediately preceding it (rangeOfString:@"cite" || rangeOfString:@"bibentry"
+
+// now we've search back to a brace, and then checked for a cite command with two optional parameters
+
+- (BOOL)isBibTeXCitation:(NSRange)braceRange{
+    NSString *str = [[self textStorage] string];
+
+    NSRange rightBracketRange = [str rangeOfString:@"]" options:NSBackwardsSearch | NSLiteralSearch range:NSMakeRange(braceRange.location - 1, 1)];
     
-    return [s rangeOfString:@"\\ref{" options:NSBackwardsSearch range:NSMakeRange(r.location - 12, 12)]; // make this a fairly small range, otherwise bad thing can happen when inserting
+    unsigned minLoc = ( (braceRange.location > 10) ? 10 : braceRange.location);
+	NSRange citeSearchRange = NSMakeRange(braceRange.location - minLoc, minLoc); 
+    
+    if(rightBracketRange.location == NSNotFound){
+        if([str rangeOfString:@"cite" options:NSBackwardsSearch | NSLiteralSearch range:citeSearchRange].location != NSNotFound){
+            return YES;
+        } else {
+            return NO;
+        }
+    }
+    
+    NSRange leftBracketRange = [str rangeOfString:@"[" options:NSBackwardsSearch | NSLiteralSearch]; // first occurrence of it, looking backwards
+    NSRange doubleBracketRange = [str rangeOfString:@"][" options:NSBackwardsSearch | NSLiteralSearch range:NSMakeRange(leftBracketRange.location - 2, 3)]; // look back from [ to see if we have ][; allow some slop
+#warning range checks needed    
+    if(doubleBracketRange.location != NSNotFound)
+        leftBracketRange = [str rangeOfString:@"[" options:NSBackwardsSearch | NSLiteralSearch range:NSMakeRange(doubleBracketRange.location - 50, 50)];
+    
+    if(leftBracketRange.location != NSNotFound){
+        minLoc = ( (leftBracketRange.location > 10) ? 10 : leftBracketRange.location);
+		citeSearchRange = NSMakeRange(leftBracketRange.location - minLoc, minLoc);
+        if([str rangeOfString:@"cite" options:NSBackwardsSearch | NSLiteralSearch range:citeSearchRange].location != NSNotFound){
+            return YES;
+        } else {
+            return NO;
+        }
+    }
+    NSLog(@"why am I here?");
+    return NO;
+}
+            
+- (NSRange)newCiteKeyRange{
+    NSString *str = [[self textStorage] string];
+    NSRange r = [self selectedRange]; // here's the insertion point
+    NSRange commaRange;
+
+    unsigned minLoc = ( (r.location > 100) ? 100 : r.location);
+    NSRange braceRange = [str rangeOfString:@"{" options:NSBackwardsSearch | NSLiteralSearch range:NSMakeRange(r.location - minLoc, minLoc)];
+
+    if(braceRange.location != NSNotFound) // may be TeX
+        commaRange = [str rangeOfString:@"," options:NSBackwardsSearch | NSLiteralSearch range:NSUnionRange(braceRange, r)];
+
+    if([self isBibTeXCitation:braceRange]){
+#warning range checks needed
+        return ( (commaRange.location != NSNotFound) ? NSMakeRange(commaRange.location + 1, r.location - commaRange.location - 1) : NSMakeRange(braceRange.location + 1, r.location - braceRange.location - 1)  );
+    } else {
+        return NSMakeRange(NSNotFound, 0);
+    }
+}
+                
+- (NSRange)refLabelRange{
+    NSString *s = [[self textStorage] string];
+    NSRange r = [self selectedRange];
+    unsigned minLoc = ( (r.location > 12) ? 12 : r.location);
+    return [s rangeOfString:@"\\ref{" options:NSBackwardsSearch range:NSMakeRange(r.location - minLoc, minLoc)]; // make this a fairly small range, otherwise bad thing can happen when inserting
 }
 
 /* ssp: 2004-07-18
@@ -152,10 +219,14 @@ requires X.3
 	NSString * s = [[self textStorage] string];
 	NSRange r = [self citeKeyRange];
         NSRange refLabelRange = [self refLabelRange];
+        NSRange newRange = [self newCiteKeyRange];
 	
 	if (r.location != NSNotFound ){
 		//	NSString * beginning = [s substringWithRange:NSMakeRange(charRange.location - 6, 6)];
+#warning debug only
 		NSString * end = [s substringWithRange:r];
+        NSString *newend = [[s substringWithRange:newRange] stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceCharacterSet]];
+        end = newend;
 		
 		// code shamelessly lifted from Buzz Anderson's ASHandlerTest example app
 		// Performance gain if we stored the script permanently? But where to store it?
