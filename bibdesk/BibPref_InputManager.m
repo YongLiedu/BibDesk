@@ -66,6 +66,14 @@ NSString *BDSKInputManagerLoadableApplications = @"Application bundles that we r
     [super dealloc];
 }
 
+- (void)restoreDefaultsNoPrompt{
+    [super restoreDefaultsNoPrompt];
+    // after resetting the preferences, the array is no longer valid, but the table is still using an old copy (needed for add/remove, since we set the whole array in the prefs)
+    [enabledEditorAutocompletionStrings release];
+    enabledEditorAutocompletionStrings = [[defaults objectForKey:BDSKBibEditorAutocompletionFields] mutableCopy];
+    [self updateUI];
+}
+
 - (void)updateUI{
     // NSLog(@"-[%@ %@] 0x%x", [self class], NSStringFromSelector(_cmd), self);
     if([[NSFileManager defaultManager] fileExistsAtPath:inputManagerPath]){
