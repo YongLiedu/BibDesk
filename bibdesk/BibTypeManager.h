@@ -25,6 +25,17 @@
 - (NSArray *)bibTypesForFileType:(NSString *)fileType;
 - (NSString *)fieldNameForPubMedTag:(NSString *)tag;
 - (NSString *)bibtexTypeForPubMedType:(NSString *)type;
+
+    /*!
+@method     MODSGenreForBibTeXType:
+     @abstract   returns the appropriate MODS genre and level (like "Conference Publication") for known bibtex types (like "inproceedings")
+     @discussion 
+     @param      type The bibtex type.
+     @result     A dictionary that includes genre tags organized by whether they belong in the item or its host. The dictionary has two keys: 'self' and 'host', and when not nil, the values of those keys are arrays. See TypeInfo.plist for the whole story.
+     */
+
+- (NSDictionary *)MODSGenresForBibTeXType:(NSString *)type;
+
 /*!
     @method     invalidCharactersForField:inFieldType:
     @abstract   Characters that must not be used in a given key and reference type, currently only for Cite Key in BibTeX.  This is a fairly liberal definition, since it allows

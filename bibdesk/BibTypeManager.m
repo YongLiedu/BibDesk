@@ -97,6 +97,10 @@ static BibTypeManager *sharedInstance = nil;
     return [[typeInfoDict objectForKey:@"BibTeXTypesForPubMedTypes"] objectForKey:type];
 }
 
+- (NSDictionary *)MODSGenresForBibTeXType:(NSString *)type{
+    return [[typeInfoDict objectForKey:@"MODSGenresForBibTeXType"] objectForKey:type];
+}
+
 - (NSCharacterSet *)invalidCharactersForField:(NSString *)fieldName inFileType:(NSString *)type{
 	if( [type isEqualToString:@"BibTeX"] && [fieldName isEqualToString:@"Cite Key"]){
 		return invalidCiteKeyCharSet;
