@@ -240,7 +240,7 @@ requires X.3
             if(hintPossibilities != nil){
                 NSScanner *hintScanner = [[NSScanner alloc] initWithString:hintPossibilities];
                 [hintScanner setCharactersToBeSkipped:nil];
-                [hintScanner scanUpToCharactersFromSet:[NSCharacterSet whitespaceAndNewlineCharacterSet] intoString:&hint];
+                [hintScanner scanUpToCharactersFromSet:[[NSCharacterSet alphanumericCharacterSet] invertedSet] intoString:&hint];
                 [hintScanner release];
             }
             
