@@ -54,11 +54,7 @@
     // in case we already ran and had an error that wasn't recorded:
     [infoLine setStringValue:originalInfoLineValue];
     
-    if([string isComplex]){
-        [textField setStringValue:[string stringAsBibTeXString]];
-    }else{
-        [textField setStringValue:[NSString stringWithFormat:@"{%@}", string]];
-    }
+	[textField setStringValue:[string stringAsBibTeXString]];
     
     if(font) [textField setFont:font];
 
