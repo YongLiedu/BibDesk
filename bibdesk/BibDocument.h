@@ -61,10 +61,7 @@ extern NSString *BDSKBibItemLocalDragPboardType;
 
 @interface BibDocument : NSDocument
 {
-	IBOutlet NSTabView *previewTabView;
     IBOutlet NSTextView *previewField;
-	IBOutlet NSImageView *PDFPreviewView;
-	IBOutlet NSTextView *RTFPreviewView;
     IBOutlet NSWindow* documentWindow;
     IBOutlet NSWindow *bibListViews;
     IBOutlet BDSKDragTableView *tableView;
