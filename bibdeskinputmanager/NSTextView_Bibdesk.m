@@ -239,8 +239,9 @@ requires X.3
             NSString *hint = nil;
             if(hintPossibilities != nil){
                 NSScanner *hintScanner = [[NSScanner alloc] initWithString:hintPossibilities];
+                NSCharacterSet *stopSet = [NSCharacterSet characterSetWithCharactersInString:@"} \n\t"];
                 [hintScanner setCharactersToBeSkipped:nil];
-                [hintScanner scanUpToCharactersFromSet:[[NSCharacterSet alphanumericCharacterSet] invertedSet] intoString:&hint];
+                [hintScanner scanUpToCharactersFromSet:stopSet intoString:&hint];
                 [hintScanner release];
             }
             
