@@ -123,8 +123,8 @@
 - (void)testDisplayTwoNumbers{
     NSArray *a = [NSArray arrayWithObjects:[BDSKStringNode nodeWithBibTeXString:@"14"], 
         [BDSKStringNode nodeWithBibTeXString:@"14"], nil];
-    BDSKComplexString *cs = [NSString complexStringWithArray:a
-											   macroResolver:[[[ResolverMock alloc] init] autorelease]];
+    NSString *cs = [NSString complexStringWithArray:a
+									  macroResolver:[[[ResolverMock alloc] init] autorelease]];
     UKNotNil(cs);
     UKTrue([cs isComplex]);
     UKStringsEqual(@"1414", (NSString *)cs);
@@ -135,8 +135,8 @@
     NSArray *a = [NSArray arrayWithObjects:[BDSKStringNode nodeWithBibTeXString:@"14"], 
         [BDSKStringNode nodeWithBibTeXString:@"14"], 
         [BDSKStringNode nodeWithBibTeXString:@"14"], nil];
-    BDSKComplexString *cs = [NSString complexStringWithArray:a
-											   macroResolver:[[[ResolverMock alloc] init] autorelease]];
+    NSString *cs = [NSString complexStringWithArray:a
+									  macroResolver:[[[ResolverMock alloc] init] autorelease]];
     UKNotNil(cs);
     UKTrue([cs isComplex]);
     UKStringsEqual(@"141414", (NSString *)cs);
@@ -146,8 +146,8 @@
 - (void)testUnquotedStringError{
     // ERROR Here:
     // not sure what I want to get here. Exception?
-//    BDSKComplexString *cs = [BDSKComplexString complexStringWithBibTeXString:@"unquoted string"
-//                                            macroResolver:[[[ResolverMock alloc] init] autorelease]];
+//    NSString *cs = [NSString complexStringWithBibTeXString:@"unquoted string"
+//                                             macroResolver:[[[ResolverMock alloc] init] autorelease]];
 //    UKFail();    
 }
 
