@@ -301,8 +301,7 @@ NSString *BDSKUrlString = @"Url";
     if (lurl && [[NSFileManager defaultManager] fileExistsAtPath:lurl]){
             icon = [[NSWorkspace sharedWorkspace] iconForFile:lurl];
             [viewLocalButton setImage:icon];
-            //            [viewLocalButton setEnabled:YES];
-            [viewLocalButton setBordered:NO]; // @@openLocalURL
+            [viewLocalButton setBordered:NO]; 
             [viewLocalButton setToolTip:@"View File"];
             [viewLocalButton setTitle:@""];
             [viewLocalButton setAction:@selector(viewLocal:)];
@@ -330,9 +329,8 @@ NSString *BDSKUrlString = @"Url";
                 }
             }
     }else{
-        //[viewLocalButton setEnabled:NO];
         [viewLocalButton setImage:nil];
-        [viewLocalButton setBordered:YES]; // @@openLocalURL
+        [viewLocalButton setBordered:YES]; 
         [viewLocalButton setTitle:NSLocalizedString(@"Pick\nFile.", @"Choose file, make sure it fits in the icon")];
         [viewLocalButton setToolTip:NSLocalizedString(@"Bad or Empty Local-Url Field", @"bad/empty local url field")];
         [viewLocalButton setAction:@selector(chooseLocalURL:)];
