@@ -22,6 +22,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 #import "BibDocumentView_Toolbar.h"
 #import "NSTextView_BDSKExtensions.h"
 #import "NSString_BDSKExtensions.h"
+#import "BDSKConverter.h"
 
 
 // ----------------------------------------------------------------------------------------
@@ -121,6 +122,16 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
         _autoCompletionDict = [[NSMutableDictionary alloc] initWithCapacity:15]; // arbitrary
 	 	_formatters = [[NSMutableDictionary alloc] initWithCapacity:15]; // arbitrary
         _autocompletePunctuationCharacterSet = [[NSCharacterSet characterSetWithCharactersInString:@",:;"] retain];
+		
+		NSString *citeKeyFormat = [[OFPreferenceWrapper sharedPreferenceWrapper] objectForKey:BDSKCiteKeyFormatKey];
+		
+		if (![[BDSKConverter sharedConverter] validateFormat:&citeKeyFormat forField:@"Cite Key" inType:@"BibTeX"]) {
+			NSLog(@"Invalid cite key format, restore default.");
+			
+			citeKeyFormat = [[[OFPreferenceWrapper sharedPreferenceWrapper] preferenceForKey:BDSKCiteKeyFormatKey] defaultObjectValue];			
+		}
+		requiredFieldsForCiteKey = [[[BDSKConverter sharedConverter] requiredFieldsForFormat:citeKeyFormat] retain];
+		[[OFPreferenceWrapper sharedPreferenceWrapper] setObject:citeKeyFormat forKey:BDSKCiteKeyFormatKey];
     }
     return self;
 }
@@ -129,6 +140,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 {
     [[NSNotificationCenter defaultCenter] removeObserver:self];
     [_autoCompletionDict release];
+	[requiredFieldsForCiteKey release];
 	[_formatters release];
     [_autocompletePunctuationCharacterSet release];
 	[_finder release];
@@ -308,6 +320,12 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 }
 
 
+
+#pragma mark cite key generation stuff
+
+- (NSArray *)requiredFieldsForCiteKey{
+	return requiredFieldsForCiteKey;
+}
 
 
 #pragma mark Auto-completion stuff

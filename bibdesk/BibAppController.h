@@ -48,7 +48,10 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
     NSMutableDictionary *_autoCompletionDict;
     NSMutableDictionary *_formatters;
     NSCharacterSet *_autocompletePunctuationCharacterSet;
-
+	
+	// for cite key generation
+	NSArray *requiredFieldsForCiteKey;
+	
     // ----------------------------------------------------------------------------------------
     // stuff for the accessory view for openUsingFilter
     IBOutlet NSView* openUsingFilterAccessoryView;
@@ -94,6 +97,8 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
  */
 - (void)openFile:(NSString *)filePath withEncoding:(NSStringEncoding)encoding;
 
+
+- (NSArray *)requiredFieldsForCiteKey;
 
 /*!
 @method addString:forCompletionEntry:

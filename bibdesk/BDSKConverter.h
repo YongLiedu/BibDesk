@@ -113,4 +113,13 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 */
 - (BOOL)validateFormat:(NSString **)formatString forField:(NSString *)fieldName inType:(NSString *)type;
 
+/*!
+ @method requiredFieldsForFormat
+ @abstract Finds all field names used in a format string
+ @discussion -
+ @param formatString The format string to check
+ @result Array of required field names
+*/
+- (NSArray *)requiredFieldsForFormat:(NSString *)formatString;
+
 @end

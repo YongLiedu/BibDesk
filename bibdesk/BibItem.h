@@ -174,6 +174,13 @@
 */
 - (NSString *)suggestedCiteKey;
 
+/*
+    @method canSetCiteKey
+    @abstract Returns a boolean indicating whether all fields required for the generated cite key are set
+    @discussion - 
+*/
+- (BOOL)canSetCiteKey;
+
 /*!
 	@method     setCiteKeyString
 	@abstract   basic setter for the cite key, for initialization only.

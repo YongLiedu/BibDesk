@@ -443,6 +443,20 @@ void _setupFonts(){
 	return [self parseFormat:citeKeyFormat forField:@"Cite Key" inType:@"BibTeX"];
 }
 
+- (BOOL)canSetCiteKey
+{
+	NSEnumerator *fEnum = [[[NSApp delegate] requiredFieldsForCiteKey] objectEnumerator];
+	NSString *fieldName, *fieldValue;
+	
+	while (fieldName = [fEnum nextObject]) {
+		fieldValue = [self valueOfField:fieldName];
+		if (fieldValue == nil || [fieldValue isEqualToString:@""]) {
+			return NO;
+		}
+	}
+	return YES;
+}
+
 - (void)setCiteKey:(NSString *)newCiteKey{
     if(editorObj){
         // NSLog(@"setCiteKey called with a valid editor");

@@ -340,4 +340,34 @@ static BDSKConverter *theConverter;
 	return YES;
 }
 
+- (NSArray *)requiredFieldsForFormat:(NSString *)formatString
+{
+	NSMutableArray *arr = [NSMutableArray arrayWithCapacity:1];
+	NSEnumerator *cEnum = [[formatString componentsSeparatedByString:@"%"] objectEnumerator];
+	NSString *string;
+	
+	[cEnum nextObject];
+	while (string = [cEnum nextObject]) {
+		switch ([string characterAtIndex:0]) {
+			case 'a':
+			case 'A':
+				[arr addObject:@"Author"];
+				break;
+			case 't':
+				[arr addObject:@"Title"];
+				break;
+			case 'y':
+			case 'Y':
+				[arr addObject:@"Year"];
+				break;
+			case 'm':
+				[arr addObject:@"Month"];
+				break;
+			case '{':
+				[arr addObject:[[[string componentsSeparatedByString:@"}"] objectAtIndex:0] substringFromIndex:1]];
+		}
+	}
+	return [[arr copy] autorelease];
+}
+
 @end
