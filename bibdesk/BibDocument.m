@@ -247,7 +247,7 @@ NSString*   LocalDragPasteboardName = @"edu.ucsd.cs.mmccrack.bibdesk: Local Publ
 	if(wasLastRequest){
 		NSLog(@"was last request in handleBibItemAddDel");
 		// This method should also check the publication to see if it's selected?
-		// and maybe also resort it...
+		// and maybe also resort it... - maybe not resort this. 
 		[self updateUI];
 	}
 }
@@ -1224,9 +1224,7 @@ int generalBibItemCompareFunc(id item1, id item2, void *context){
 - (void)editPub:(BibItem *)pub forceChange:(BOOL)force{
     BibEditor *e = [pub editorObj];
     if(e == nil){
-        e = [[BibEditor alloc] initWithBibItem:pub];
-		[e setDocument:self]; 
-		// bibitem overrides the traditional implementation that was not what we wanted.
+        e = [[BibEditor alloc] initWithBibItem:pub document:self];
 
 		[bibEditors addObject:[e autorelease]];// we need to keep track of the bibeditors
     }
