@@ -17,10 +17,14 @@ $bibtag=gettag();
 getsources();
 
 print "\n****************************\n";                     
-print "getBibdeskCVS done.  Now you should open\n";
-print "bibdesk/Bibdesk.pbproj and commence the build.\n";
-print "To Build you must have your Build Preferences set\n";
+print "getBibdeskCVS done.\n";  
+print "To Build properly you must have your Build Preferences set\n";
 print "to \"Separate Location for Build Products\"\n\n";
+print "Remember to build the \"Build me First\" target, well, before\n";
+print "building the bibdesk target.\n";
+
+print "Do you want to open the project file (bibdesk/Bibdesk.xcode) now? (y/n)\n";
+system 'open bibdesk/Bibdesk.xcode' if <STDIN> =~ /^y/;
 
 sub getSFName {
   if (defined $ENV{'SF_USERNAME'} ) { 
