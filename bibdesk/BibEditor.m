@@ -1073,7 +1073,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 	NSSize arrowSize = [arrowImage size];
 	NSRect arrowRect = NSMakeRect(0, 0, arrowSize.width, arrowSize.height);
 	NSRect arrowDrawRect = NSMakeRect((isRight ? 29-arrowSize.width : 3), (32-arrowSize.height)/2, arrowSize.width, arrowSize.height);
-	NSRect badgeDrawRect = NSMakeRect((isRight ? 18 : 2), 0, 12, 12);
+	NSRect badgeDrawRect = NSMakeRect((isRight ? 15 : 1), 0, 16, 16);
 	NSImage *image = [[[NSImage alloc] initWithSize:iconRect.size] autorelease];
 	
 	if (!isRight)
