@@ -29,7 +29,13 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 @interface BibAuthor : NSObject {
     NSMutableArray *pubs;
     NSString *name;
+    NSString *_firstName;
+    NSString *_vonPart;
+    NSString *_lastName;
+    NSString *_jrPart;
 }
+
++ (BibAuthor *)authorWithName:(NSString *)name andPub:(BibItem *)aPub;
 
 // maybe this should be 'and pubs'
 - (id)initWithName:(NSString *)aName andPub:(BibItem *)aPub;
@@ -41,6 +47,12 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 
 - (NSString *)description;
 - (NSString *)name;
+- (NSString *)firstName;
+- (NSString *)vonPart;
+- (NSString *)lastName;
+- (NSString *)jrPart;
+
+
 - (void)setName:(NSString *)newName;
 
 - (BibItem *)pubAtIndex:(int)index;
