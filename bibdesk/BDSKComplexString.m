@@ -166,7 +166,7 @@ static NSDictionary *globalMacroDefs;
 
 - (id)initWithArray:(NSArray *)a macroResolver:(id)theMacroResolver{
     if (self = [super init]) {
-		[self setNodes:[[a copy] autorelease];
+		[self setNodes:[[a copy] autorelease]];
 		if(theMacroResolver)
 			[self setMacroResolver:theMacroResolver];
 		else
