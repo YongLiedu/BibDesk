@@ -10,6 +10,7 @@
 #import "NSAppleScript+HandlerCalls.h"
 
 extern NSString *BDSKInputManagerID;
+extern NSString *BDSKInputManagerLoadableApplications;
 #define noScriptErr 0
 
 #warning Can you #define a localized string?

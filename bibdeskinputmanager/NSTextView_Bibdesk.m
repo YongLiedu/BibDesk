@@ -14,6 +14,7 @@
 static BOOL debug = NO;
 
 NSString *BDSKInputManagerID = @"net.sourceforge.bibdesk.inputmanager";
+NSString *BDSKInputManagerLoadableApplications = @"Application bundles that we recognize";
 
 static NSString *kScriptName = @"Bibdesk";
 static NSString *kScriptType = @"scpt";
@@ -30,22 +31,24 @@ extern void _objc_resolve_categories_for_class(struct objc_class *cls);
     [[self superclass] load];
     
     NSString *bundleID = [[NSBundle mainBundle] bundleIdentifier]; // for the app we are loading into
-    NSString *libraryPath = [NSSearchPathForDirectoriesInDomains(NSLibraryDirectory, NSUserDomainMask, YES) objectAtIndex:0];
-    NSArray *array = [NSArray arrayWithContentsOfFile:[libraryPath stringByAppendingPathComponent:@"/Application Support/BibDeskInputManager/EnabledApplications.plist"]];
+    NSArray *array = [[[NSUserDefaults standardUserDefaults] persistentDomainForName:BDSKInputManagerID] objectForKey:BDSKInputManagerLoadableApplications];
+    if(!array)
+        array = [[[NSArray alloc] init] autorelease];
 
     if(debug) NSLog(@"We should enable for %@", [array description]);
   
     NSEnumerator *e = [array objectEnumerator];
-    NSDictionary *dict;
+    NSString *str;
     BOOL yn = NO;
-    
-    while(dict = [e nextObject]){
-	if([[dict objectForKey:@"BundleID"] isEqualToString:bundleID]){
-	    if(debug) NSLog(@"Found a match; enabling autocompletion for %@",[dict description]);
-	    yn = YES;
-	    break;
-	}
+
+    while(str = [e nextObject]){
+        if([str caseInsensitiveCompare:bundleID] == NSOrderedSame){
+            yn = YES;
+            break;
+        }
     }
+
+    if(debug && yn) NSLog(@"Found a match; enabling autocompletion for %@", bundleID);
 
     if(yn && [[self superclass] instancesRespondToSelector:@selector(completionsForPartialWordRange:indexOfSelectedItem:)]){
 	if(debug) NSLog(@"%@ performing posing for %@", [self class], [self superclass]);
@@ -141,6 +144,7 @@ NSRange SafeBackwardSearchRange(NSRange startRange, unsigned seekLength){
 - (BOOL)isBibTeXCitation:(NSRange)braceRange{
     NSString *str = [[self textStorage] string];
     NSRange citeSearchRange;
+    NSRange doubleBracketRange;
 
     NSRange rightBracketRange = [str rangeOfString:@"]" options:NSBackwardsSearch | NSLiteralSearch range:SafeBackwardSearchRange(braceRange, 1)]; // see if there are any optional parameters
 
@@ -162,8 +166,12 @@ NSRange SafeBackwardSearchRange(NSRange startRange, unsigned seekLength){
     
     NSRange leftBracketRange = [str rangeOfString:@"[" options:NSBackwardsSearch | NSLiteralSearch]; // first occurrence of it, looking backwards
     // next, see if we have two optional parameters; this range is tricky, since we have to go forward one, then do a safe backward search over the previous characters
-    NSRange doubleBracketRange = [str rangeOfString:@"][" options:NSBackwardsSearch | NSLiteralSearch range:SafeBackwardSearchRange( NSMakeRange(leftBracketRange.location + 1, 3), 3)]; 
-
+    if(leftBracketRange.location != NSNotFound){
+        doubleBracketRange = [str rangeOfString:@"][" options:NSBackwardsSearch | NSLiteralSearch range:SafeBackwardSearchRange( NSMakeRange(leftBracketRange.location + 1, 3), 3)]; 
+    } else {
+        doubleBracketRange = NSMakeRange(NSNotFound, 0);
+    }
+    
     if(doubleBracketRange.location != NSNotFound) // if we had two parameters, find the last opening bracket
         leftBracketRange = [str rangeOfString:@"[" options:NSBackwardsSearch | NSLiteralSearch range:SafeBackwardSearchRange(doubleBracketRange, 50)];
     
@@ -176,6 +184,17 @@ NSRange SafeBackwardSearchRange(NSRange startRange, unsigned seekLength){
             return NO;
         }
     }
+    
+    if(doubleBraceRange.location != NSNotFound){ // jurabib with no options on it
+        citeSearchRange = SafeBackwardSearchRange(braceRange, 20); // could be larger
+        if([str rangeOfString:@"cite" options:NSBackwardsSearch | NSLiteralSearch range:citeSearchRange].location != NSNotFound ||
+           [str rangeOfString:@"bibentry" options:NSBackwardsSearch | NSLiteralSearch range:citeSearchRange].location != NSNotFound){
+            return YES;
+        } else {
+            return NO;
+        }
+    }        
+    
     return NO;
 }
 
