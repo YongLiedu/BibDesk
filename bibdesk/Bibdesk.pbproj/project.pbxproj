@@ -1051,7 +1051,8 @@
 		27BF095506D81ABC008AD3AE = {
 			isa = PBXFileReference;
 			lastKnownFileType = image.tiff;
-			path = ArrowPointingDown.tiff;
+			name = ArrowPointingDown.tiff;
+			path = Images/ArrowPointingDown.tiff;
 			refType = 2;
 			sourceTree = SOURCE_ROOT;
 		};
