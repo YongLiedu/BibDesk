@@ -94,6 +94,7 @@
         }, 
         {
             ACTIONS = {
+                consolidateLinkedFiles = id; 
                 copyAsBibTex = id; 
                 copyAsPDF = id; 
                 copyAsRTF = id; 

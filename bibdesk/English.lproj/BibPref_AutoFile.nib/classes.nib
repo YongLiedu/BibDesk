@@ -1,10 +1,19 @@
 {
     IBClasses = (
         {
-            ACTIONS = {changeStartupBehavior = id; toggleShowWarnings = id; }; 
+            ACTIONS = {
+                choosePapersFolderLocationAction = id; 
+                toggleFilePapersAutomaticallyAction = id; 
+                toggleKeepPapersFolderOrganizedAction = id; 
+            }; 
             CLASS = "BibPref_AutoFile"; 
             LANGUAGE = ObjC; 
-            OUTLETS = {}; 
+            OUTLETS = {
+                choosePapersFolderLocationButton = NSButton; 
+                filePapersAutomaticallyCheckButton = NSButton; 
+                keepPapersFolderOrganizedCheckButton = NSButton; 
+                papersFolderLocationTextField = NSTextField; 
+            }; 
             SUPERCLASS = OAPreferenceClient; 
         }, 
         {CLASS = FirstResponder; LANGUAGE = ObjC; SUPERCLASS = NSObject; }, 
