@@ -760,27 +760,26 @@ didClickTableColumn: (NSTableColumn *) tableColumn{
     
     if(![prefix isEqualToString:@""]){
         while(pub = [e nextObject]){
-            if ([quickSearchKey isEqualToString:@"Title"])
+            if ([quickSearchKey isEqualToString:@"Title"]){
                 r = [[pub title]  rangeOfString:prefix
                                         options:NSCaseInsensitiveSearch];
-            if ([quickSearchKey isEqualToString:@"Author"])
+	    }else if ([quickSearchKey isEqualToString:@"Author"]){
                 r = [[pub authorString]  rangeOfString:prefix
                                                options:NSCaseInsensitiveSearch];
-            if ([quickSearchKey isEqualToString:@"Date"]){
+	    }else if ([quickSearchKey isEqualToString:@"Date"]){
                 r = [[[pub date] descriptionWithCalendarFormat:@"%B %Y"] rangeOfString:prefix                                                                                options:NSCaseInsensitiveSearch];
-            }
-            if([quickSearchKey isEqualToString:@"All Fields"]){
+            }else if([quickSearchKey isEqualToString:@"All Fields"]){
                 r = [[pub allFieldsString] rangeOfString:prefix
                                                  options:NSCaseInsensitiveSearch];
 
-            }
-            if([quickSearchKey isEqualToString:@"Pub Type"]){
+            }else if([quickSearchKey isEqualToString:@"Pub Type"]){
                 r = [[pub type] rangeOfString:prefix
                                       options:NSCaseInsensitiveSearch];
             }else{
                 r = [[pub valueOfField:quickSearchKey] rangeOfString:prefix
                                                              options:NSCaseInsensitiveSearch];
             }
+	    
             if(r.location == NSNotFound) [remArray addObject:pub];
         }
         [quickSearchClearButton setEnabled:YES];
