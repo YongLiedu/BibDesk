@@ -68,7 +68,12 @@
 }
 
 - (void)controlTextDidEndEditing:(NSNotification *)notification{
-    [[self window] resignKeyWindow];
+	NS_DURING
+		[self stringValue];
+    NS_HANDLER
+		return;
+    NS_ENDHANDLER
+	[[self window] resignKeyWindow];
 }
 
 // Any object that uses this class should respond to the 
