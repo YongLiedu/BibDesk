@@ -281,23 +281,25 @@ static BDSKConverter *theConverter;
 - (NSString *)composedStringFromTeXString:(NSString *)texString{
     NSDictionary *accents = [NSDictionary dictionaryWithContentsOfFile:[[NSBundle mainBundle] pathForResource:@"Accents" ofType:@"plist"]];
     NSScanner *scanner = [[NSScanner alloc] initWithString:texString];
-    NSString *tmp;
     NSString *accent = nil;
     NSString *character = nil;
+    unichar u;
         
     while(![scanner isAtEnd]){
         if(![scanner scanString:@"{\\" intoString:nil])
             break;
-        if([scanner scanUpToString:@" " intoString:&tmp]){ // if there's no whitespace, we'll end up returning nil
-            NSEnumerator *e = [accents objectEnumerator]; // get all of the objects
-            NSString *str;
-            while(str = [e nextObject]){
-                if([str characterAtIndex:0] == [tmp characterAtIndex:0]){ // each one is a single unichar, and isEqualToString: fails
-                    accent = [[accents allKeysForObject:str] lastObject];
-                    break;
-                }
+        [scanner scanString:@" " intoString:nil]; // if whitespace, get rid of it; this puts the scanner immediately before the base char
+        NSEnumerator *e = [accents objectEnumerator]; // get all of the objects
+        NSString *str;
+        u = [texString characterAtIndex:[scanner scanLocation]]; // this is the accent
+        while(str = [e nextObject]){
+            if([str characterAtIndex:0] == u){ // each one is a single unichar, and isEqualToString: fails
+                accent = [[accents allKeysForObject:str] lastObject];
+                break;
             }
         }
+        if([scanner scanLocation] + 1 < [texString length]) // make sure we don't go out of range
+            [scanner setScanLocation:[scanner scanLocation] + 1]; // go past the accent
         [scanner scanUpToString:@"}" intoString:&character];
         break;
     }
