@@ -22,11 +22,12 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 @implementation BibAuthor
 
 + (BibAuthor *)authorWithName:(NSString *)newName andPub:(BibItem *)aPub{	
-    return [[[BibAuthor alloc] initWithName:newName andPub:nil] autorelease];
+    return [[[BibAuthor alloc] initWithName:newName andPub:aPub] autorelease];
 }
 
 - (id)initWithName:(NSString *)aName andPub:(BibItem *)aPub{
     [self setName:aName];
+    publication = aPub; // don't retain this
     return self;
 }
 
@@ -223,6 +224,14 @@ Note: The strings returned by the bt_split_name function seem to be in the wrong
 	[self refreshNormalizedName];
 	
 	bt_free_name(theName);
+}
+
+- (BibItem *)publication{
+    return publication;
+}
+
+- (void)setPublication:(BibItem *)newPub{
+    publication = newPub;
 }
 
 // Accessors for personController - we don't retain it to avoid cycles.
