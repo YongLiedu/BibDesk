@@ -83,8 +83,11 @@ FIXME
 You can edit a field as raw BibTeX by pressing &#8984;R in the edit
 window when one of the form fields has the keyboard focus.
 
+#### Editing Macro Definitions
 
-### Deleting references
+![Macros Window](gfx/macroWindow.png)
+
+### Deleting References
 
 References can be deleted by selecting the reference and choosing
 "Delete Reference" from the Bibliography menu or pressing the delete
