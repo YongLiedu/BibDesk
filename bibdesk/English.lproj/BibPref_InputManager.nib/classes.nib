@@ -11,6 +11,7 @@
             CLASS = "BibPref_InputManager"; 
             LANGUAGE = ObjC; 
             OUTLETS = {
+                acTabView = NSTabView; 
                 addField = NSTextField; 
                 addFieldSheet = NSPanel; 
                 appList = NSTableView; 

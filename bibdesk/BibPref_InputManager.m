@@ -70,7 +70,6 @@ NSString *BDSKInputManagerLoadableApplications = @"Application bundles that we r
     // NSLog(@"-[%@ %@] 0x%x", [self class], NSStringFromSelector(_cmd), self);
     if([[NSFileManager defaultManager] fileExistsAtPath:inputManagerPath]){
 	[enableButton setTitle:NSLocalizedString(@"Reinstall",@"Reinstall input manager")];
-	[enableButton sizeToFit];
     }
 
     CFPreferencesSetAppValue( (CFStringRef)BDSKInputManagerLoadableApplications,
@@ -214,6 +213,7 @@ NSString *BDSKInputManagerLoadableApplications = @"Application bundles that we r
                           nil, nil, nil, [[OAPreferenceController sharedPreferenceController] window], nil, nil, nil, nil,
                           NSLocalizedString(@"You appear to be using a system version earlier than 10.3.  Cite-key autocompletion requires Mac OS X 10.3 or greater.",
                                             @"You appear to be using a system version earlier than 10.3.  Cite-key autocompletion requires Mac OS X 10.3 or greater.") );
+        return;
     }
     
     NSOpenPanel *op = [NSOpenPanel openPanel];

@@ -22,6 +22,7 @@ extern NSString *BDSKInputManagerLoadableApplications;
     NSMutableArray *enabledEditorAutocompletionStrings;
     IBOutlet NSPanel *addFieldSheet;
     IBOutlet NSTextField *addField;
+    IBOutlet NSTabView *acTabView;
 }
 /*!
     @method     bundleIDForPath:
