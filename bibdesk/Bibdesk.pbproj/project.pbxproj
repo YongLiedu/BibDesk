@@ -106,6 +106,8 @@
 				270C1A6105EFF7C900943DD0,
 				270C1A6305EFF7C900943DD0,
 				2786341F05FDB65A004D4F41,
+				F9A008F20638C00D00426F15,
+				F9A008F40638C01400426F15,
 			);
 			isa = PBXAggregateTarget;
 			name = BuildMeFirst;
@@ -3885,6 +3887,30 @@
 			isa = PBXBuildFile;
 			settings = {
 			};
+		};
+		F9A008F10638C00D00426F15 = {
+			containerPortal = 2A37F4A9FDCFA73011CA2CEA;
+			isa = PBXContainerItemProxy;
+			proxyType = 1;
+			remoteGlobalIDString = F99A21060607DD7A00DF3466;
+			remoteInfo = latex2rtf;
+		};
+		F9A008F20638C00D00426F15 = {
+			isa = PBXTargetDependency;
+			target = F99A21060607DD7A00DF3466;
+			targetProxy = F9A008F10638C00D00426F15;
+		};
+		F9A008F30638C01400426F15 = {
+			containerPortal = 2A37F4A9FDCFA73011CA2CEA;
+			isa = PBXContainerItemProxy;
+			proxyType = 1;
+			remoteGlobalIDString = F9AC17700638709B009399C1;
+			remoteInfo = pdftotext;
+		};
+		F9A008F40638C01400426F15 = {
+			isa = PBXTargetDependency;
+			target = F9AC17700638709B009399C1;
+			targetProxy = F9A008F30638C01400426F15;
 		};
 		F9AC17700638709B009399C1 = {
 			buildPhases = (
