@@ -15,16 +15,26 @@ NSString *BDSKInputManagerID = @"net.sourceforge.bibdesk.inputmanager";
 
 - (void)awakeFromNib{
     [super awakeFromNib];
-    applicationSupportPath = [[NSHomeDirectory() stringByAppendingPathComponent:@"/Library/Application Support/BibDeskInputManager"] retain];
-    inputManagerPath = [[NSHomeDirectory() stringByAppendingPathComponent:@"/Library/InputManagers/BibDeskInputManager"] retain];
-    NSString *textEditPath = [@"/Applications/TextEdit.app" stringByStandardizingPath];
-    if(![[NSFileManager defaultManager] fileExistsAtPath:[applicationSupportPath stringByAppendingPathComponent:@"EnabledApplications.plist"]]){
-	if([[NSFileManager defaultManager] fileExistsAtPath:textEditPath]){
+    NSFileManager *fm = [NSFileManager defaultManager];
+    
+    NSString *libraryPath = [NSSearchPathForDirectoriesInDomains(NSLibraryDirectory, NSUserDomainMask, YES) objectAtIndex:0];
+    applicationSupportPath = [[libraryPath stringByAppendingPathComponent:@"/Application Support/BibDeskInputManager"] retain];
+    inputManagerPath = [[libraryPath stringByAppendingPathComponent:@"/InputManagers/BibDeskInputManager"] retain];
+    
+    // Try to find TextEdit.app so the table isn't empty
+    NSString *textEditPath = nil;
+    textEditPath = [[NSSearchPathForDirectoriesInDomains(NSApplicationDirectory,NSSystemDomainMask,YES) objectAtIndex:0] stringByAppendingPathComponent:@"/TextEdit.app"];
+    if(![fm fileExistsAtPath:textEditPath]){
+	textEditPath = [[NSSearchPathForDirectoriesInDomains(NSApplicationDirectory,NSUserDomainMask,YES) objectAtIndex:0] stringByAppendingPathComponent:@"/TextEdit.app"];
+    }
+
+    if(![fm fileExistsAtPath:[applicationSupportPath stringByAppendingPathComponent:@"EnabledApplications.plist"]]){
+	if([fm fileExistsAtPath:textEditPath]){
 	    appListArray = [[NSMutableArray arrayWithObjects:[NSMutableDictionary dictionaryWithObject:textEditPath forKey:@"Path"], nil] retain];
 	} else {
-	    appListArray = [[NSMutableArray array] retain]; // create an empty one if we don't have TextEdit at the default location
+	    appListArray = [[NSMutableArray array] retain]; // create an empty one if we didn't find TextEdit.app
 	}
-	[[NSFileManager defaultManager] createDirectoryAtPath:applicationSupportPath attributes:nil];
+	[fm createDirectoryAtPath:applicationSupportPath attributes:nil];
     } else { // if we found the plist, use that instead
 	appListArray = [[NSArray arrayWithContentsOfFile:[applicationSupportPath stringByAppendingPathComponent:@"EnabledApplications.plist"]] mutableCopy];
     }
@@ -59,12 +69,32 @@ NSString *BDSKInputManagerID = @"net.sourceforge.bibdesk.inputmanager";
 //    NSLog(@"-[%@ %@] 0x%x", [self class], NSStringFromSelector(_cmd), self);
     NSEnumerator *e = [appListArray objectEnumerator];
     NSMutableDictionary *dict;
+    BOOL err = NO;
     
     while(dict = [e nextObject]){
-	[dict setObject:[self bundleIDForPath:[dict objectForKey:@"Path"]] forKey:@"BundleID"];
+	if([[NSFileManager defaultManager] fileExistsAtPath:[dict objectForKey:@"Path"]]){
+	    [dict setObject:[self bundleIDForPath:[dict objectForKey:@"Path"]] forKey:@"BundleID"];
+	} else {
+	    err = YES;
+	    [dict setObject:[NSNull null] forKey:@"BundleID"];
+	}
     }
 
-    [self cacheAppList];
+    if(!err){
+	[self cacheAppList];
+    } else {
+	// show an alert if an app wasn't found, otherwise we get a writeToFile: failure in cacheAppList
+	NSAlert *anAlert = [NSAlert alertWithMessageText:@"Error!"
+					   defaultButton:nil
+					 alternateButton:nil
+					     otherButton:nil
+			       informativeTextWithFormat:@"The application(s) with a blank icon cannot be found and must be removed from the list."];
+	[anAlert beginSheetModalForWindow:[controlBox window]
+			    modalDelegate:nil
+			   didEndSelector:nil
+			      contextInfo:nil];
+    }
+	
 
 }
 
@@ -86,9 +116,10 @@ NSString *BDSKInputManagerID = @"net.sourceforge.bibdesk.inputmanager";
 - (IBAction)enableAutocompletion:(id)sender{
     NSFileManager *fm = [NSFileManager defaultManager];
     BOOL err = NO;
+    NSString *libraryPath = [NSSearchPathForDirectoriesInDomains(NSLibraryDirectory, NSUserDomainMask, YES) objectAtIndex:0];
     
-    if(![fm fileExistsAtPath:[NSHomeDirectory() stringByAppendingPathComponent:@"/Library/InputManagers"]]){
-	if(![fm createDirectoryAtPath:[NSHomeDirectory() stringByAppendingPathComponent:@"/Library/InputManagers"] attributes:nil]){
+    if(![fm fileExistsAtPath:[libraryPath stringByAppendingPathComponent:@"/InputManagers"]]){
+	if(![fm createDirectoryAtPath:[NSHomeDirectory() stringByAppendingPathComponent:@"/InputManagers"] attributes:nil]){
 	    NSLog(@"unable to create the InputManagers folder in home directory");
 	    err = YES;
 	}
