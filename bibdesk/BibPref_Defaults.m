@@ -30,6 +30,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 
 - (void)dealloc{
     [defaultFieldsArray release];
+    [super dealloc];
 }
 
 
