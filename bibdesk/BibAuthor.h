@@ -25,7 +25,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 /*!
     @class BibAuthor
     @abstract Modeling authors as objects that can have interesting relationships
-    @discussion This isn't really used, but I think it has a lot of potential once I get the outlineview going on.
+    @discussion none.
 */
 @interface BibAuthor : NSObject {
     NSMutableArray *pubs;
@@ -45,8 +45,8 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 - (void)dealloc;
 - (void)setPubs:(NSArray *)newPubs;
 
-- (int)numberOfChildren;
-- (NSArray *)children;
+- (int)numberOfPublications;
+- (NSArray *)publications;
 
 - (NSString *)description;
 - (NSString *)name;

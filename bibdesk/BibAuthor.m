@@ -85,11 +85,11 @@ static NSMutableArray *_authors;
     pubs = [newPubs mutableCopy];
 }
 
-- (int)numberOfChildren{
+- (int)numberOfPublications{
     return [pubs count];
 }
 
-- (NSArray *)children{
+- (NSArray *)publications{
     return pubs;
 }
 
