@@ -8,8 +8,6 @@
 
 #import "PubMedParser.h"
 #import "html2tex.h"
-#import <sys/mman.h>
-#import <sys/fcntl.h>
 
 @implementation PubMedParser
 
@@ -84,6 +82,7 @@
     BibTypeManager *typeManager = [BibTypeManager sharedManager];
     NSCharacterSet *whitespaceNewlineSet = [NSCharacterSet whitespaceAndNewlineCharacterSet];
     NSCharacterSet *newlineSet = [NSCharacterSet characterSetWithCharactersInString:@"\n"];
+    NSCharacterSet *asciiSet = [NSCharacterSet characterSetWithRange:NSMakeRange(0, 127)];
     BOOL haveFAU = NO;
     BOOL usingAU = NO;
     
@@ -124,13 +123,26 @@
 
                 // Run the value string through the HTML2LaTeX conversion, to clean up &theta; and friends.
                 // NB: do this before the regex find/replace on <sub> and <sup> tags, or else your LaTeX math
-                // stuff will get munged.
-                const char *str = [value UTF8String];
-
-                value = TeXStringWithHTMLString(str, stdout, NULL, strlen(str), NO, NO, NO);
-
-                // Do a regex find and replace to put LaTeX subscripts and superscripts in place of the HTML
-                // that Compendex (and possibly others) give us.
+                // stuff will get munged.  Unfortunately, the C code for HTML2LaTeX will destroy accented characters, so we only send it ASCII, and just keep
+                // the accented characters to let BDSKConverter deal with them later.
+                
+                NSScanner *scanner = [NSScanner scannerWithString:value];
+                NSString *asciiAndHTMLChars;
+                NSMutableString *fullString = [NSMutableString string];
+                unsigned index = 0;
+                
+                while(![scanner isAtEnd]){
+                    if([scanner scanCharactersFromSet:asciiSet intoString:&asciiAndHTMLChars]){
+                        index = [scanner scanLocation];
+                        [fullString appendString:TeXStringWithHTMLString([asciiAndHTMLChars UTF8String], stdout, NULL, [asciiAndHTMLChars length], NO, NO, NO)];
+                    } else {
+                        [fullString appendString:[value substringWithRange:NSMakeRange(index, 1)]];
+                        [scanner setScanLocation:(index + 1)];
+                    }
+                }
+                value = [[fullString copy] autorelease];
+                
+                // see if we have nested math modes and try to fix them; see note earlier on findNestedDollar
                 if([findNestedDollar findInString:value] != nil){
                     NSLog(@"WARNING: found nested math mode; trying to repair...");
                      // NSLog(@"Original string was %@", value);
@@ -138,7 +150,9 @@
                                                        inString:value];
                      // NSLog(@"String is now %@", value);
                 }
-                    
+                
+                // Do a regex find and replace to put LaTeX subscripts and superscripts in place of the HTML
+                // that Compendex (and possibly others) give us.
                 value = [findSubscriptLeadingTag replaceWithString:@"\\$_{"
                                                           inString:value];
                 value = [findSuperscriptLeadingTag replaceWithString:@"\\$^{"
@@ -173,18 +187,30 @@
 						// and handle the case where AU occurs before FAU.  The final setObject: forKey: was blowing away
 						// the AU values, otherwise, because it recognized FAU as Author.
 						if([key isEqualToString:@"FAU"] && usingAU==NO){
-						        haveFAU = YES;  // use full author info
-							addStringToDict([[wholeValue copy] autorelease], pubDict, @"Author");
+                                                    haveFAU = YES;  // use full author info
+                                                    [wholeValue replaceOccurrencesOfString:@"." 
+                                                                                withString:@". "
+                                                                                   options:NSLiteralSearch
+                                                                                     range:NSMakeRange(0, [wholeValue length])];
+                                                    addStringToDict([[wholeValue copy] autorelease], pubDict, @"Author");
 						}else{
 						    // If we didn't get a FAU key (shows up first in PubMed), fall back to AU
 						    // AU is not in the dictionary, so we don't get confused with FAU
 						    if([key isEqualToString:@"AU"] && haveFAU==NO){
 							usingAU = YES;  // use AU info, and put FAU in its own field if it occurred too late
+                                                        [wholeValue replaceOccurrencesOfString:@"." 
+                                                                                    withString:@". "
+                                                                                       options:NSLiteralSearch
+                                                                                         range:NSMakeRange(0, [wholeValue length])];
 							addStringToDict([[wholeValue copy] autorelease], pubDict, @"Author");
 						    }else{
 							// If we didn't get a FAU or AU, see if we have A1.  This is yet another variant of RIS.
 							if([key isEqualToString:@"A1"] && haveFAU==NO){
 							    usingAU = YES;  // use A1 info, and put FAU in its own field if it occurred too late
+                                                            [wholeValue replaceOccurrencesOfString:@"." 
+                                                                                        withString:@". "
+                                                                                           options:NSLiteralSearch
+                                                                                             range:NSMakeRange(0, [wholeValue length])];
 							    addStringToDict([[wholeValue copy] autorelease], pubDict, @"Author");
 							}else{
 							    if([key isEqualToString:@"Keywords"]){
