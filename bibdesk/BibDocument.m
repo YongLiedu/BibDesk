@@ -18,9 +18,6 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 #import "BibItem.h"
 #import "BibAuthor.h"
 #import "BibEditor.h"
-#import <OmniAppKit/OAPreferenceController.h>
-#import <OmniAppKit/NSTableView-OAExtensions.h>
-#import <OmniFoundation/NSString-OFExtensions.h>
 #import "BibDocument_DataSource.h"
 #import "BibDocumentView_Toolbar.h"
 #import "BibAppController.h"
@@ -176,7 +173,7 @@ NSString*   LocalDragPasteboardName = @"edu.ucsd.cs.mmccrack.bibdesk: Local Publ
 
 - (void)dealloc{
 #if DEBUG
-    NSLog(@"bibdoc dealloc");
+    //NSLog(@"bibdoc dealloc");
 #endif
     [[NSNotificationCenter defaultCenter] removeObserver:self];
     [publications release]; // these should cause the bibitems to get dealloc'ed
@@ -224,21 +221,20 @@ NSString*   LocalDragPasteboardName = @"edu.ucsd.cs.mmccrack.bibdesk: Local Publ
 }
 
 - (void)windowDidBecomeMain:(NSNotification *)aNotification{
-    //NSLog(@"win did become main");
+    ////NSLog(@"win did become main");
     [self updateUI]; // mostly because the BDSKPreviewer is a singleton class.
 }
 
 #pragma mark || Document Saving and Reading
 
 - (IBAction)saveDocument:(id)sender{
-    NSString *rssFileName;
-    BOOL rssSaveOK;
+
     [super saveDocument:sender];
     if([[OFPreferenceWrapper sharedPreferenceWrapper] integerForKey:BDSKAutoSaveAsRSSKey] == NSOnState
        && ![[self fileType] isEqualToString:@"Rich Site Summary file"]){
         // also save doc as RSS
 #if DEBUG
-        NSLog(@"also save as RSS in saveDoc");
+        //NSLog(@"also save as RSS in saveDoc");
 #endif
         [self exportAsRSS:nil];
     }
@@ -594,7 +590,7 @@ stringByAppendingPathComponent:@"BibDesk"]; */
     NSMutableArray *prefsQuickSearchKeysMutableArray = nil;
 
     if(returnCode == 1){
-        //        NSLog(@"addFieldTextField title is %@", [addFieldTextField stringValue]);
+        //        //NSLog(@"addFieldTextField title is %@", [addFieldTextField stringValue]);
         [quickSearchButton insertItemWithTitle:[addFieldTextField stringValue]
                                        atIndex:0];
         [quickSearchButton selectItemWithTitle:[addFieldTextField stringValue]];
@@ -728,7 +724,7 @@ stringByAppendingPathComponent:@"BibDesk"]; */
     [e show];
     if(force){
 #if DEBUG
-        NSLog(@"updating change count");
+        //NSLog(@"updating change count");
 #endif
         [e updateChangeCount:NSChangeDone];
     }
@@ -1155,7 +1151,7 @@ stringByAppendingPathComponent:@"BibDesk"]; */
     NSTableView *view  = (NSTableView *) [self currentView];
     
     // adjust the height of the rows: (sometimes this isn't quite right. why?)
-    // NSLog(@"default line height is %f, pointsize is %f", [font defaultLineHeightForFont], [font pointSize]);
+    // //NSLog(@"default line height is %f, pointsize is %f", [font defaultLineHeightForFont], [font pointSize]);
     [view setRowHeight:[font defaultLineHeightForFont]+2];
     [view setFont:font];
     [view reloadData];
