@@ -19,6 +19,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 */
 
 #import <Cocoa/Cocoa.h>
+#import <OmniFoundation/OFCharacterScanner.h>
 #import <OmniFoundation/OFStringScanner.h>
 
 /*!
