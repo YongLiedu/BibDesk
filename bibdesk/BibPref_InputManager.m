@@ -136,7 +136,7 @@ NSString *BDSKInputManagerLoadableApplications = @"Application bundles that we r
     [image setSize:NSMakeSize(size, size)];
     [aCell setImage:image];
     [aCell setLeaf:YES];
-    CFRelease(outAppURL);
+    [(NSURL *)outAppURL release];  // CFRelease(nil) causes a crash; bug filed with Apple
 }
 
 - (IBAction)enableAutocompletion:(id)sender{
