@@ -1924,7 +1924,6 @@ This method always returns YES. Even if some or many operations fail.
 
 
 - (void)updateUI{
-
     [self setTableFont];
 	[tableView reloadData];
 
@@ -1946,6 +1945,7 @@ This method always returns YES. Even if some or many operations fail.
 	}
 	
     [self updatePreviews:nil];
+    [self updateActionMenu:nil];
 }
 
 
