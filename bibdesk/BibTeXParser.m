@@ -138,6 +138,7 @@ NSRange SafeBackwardSearchRange(NSRange startRange, unsigned seekLength){
             return YES;
     }
     
+    start = 0; // must reset it!
     range = [string rangeOfString:rightDelim options:NSLiteralSearch range:NSMakeRange(start, [string length] - start)];
     while(range.location != NSNotFound){
         rdelim++;
@@ -183,13 +184,13 @@ NSRange SafeBackwardSearchRange(NSRange startRange, unsigned seekLength){
     
     NSAssert( firstAtRange.location != NSNotFound, @"This does not appear to be a BibTeX entry.  Perhaps due to an incorrect encoding guess?" );
     
-    // if the @ is unbraced, get the next one
+    // if the @ is unbraced, get the next one; only use this method to find the first @ in the file
     while(firstAtRange.location >= 1 && ![self isNewEntryAtRange:firstAtRange inString:fullString])
         firstAtRange = [fullString rangeOfString:@"@" options:NSLiteralSearch range:SafeForwardSearchRange(firstAtRange.location + 1, fullStringLength - firstAtRange.location - 1, fullStringLength)];
 
     NSRange nextAtRange = [fullString rangeOfString:@"@" options:NSLiteralSearch range:SafeForwardSearchRange(firstAtRange.location + 1, fullStringLength - firstAtRange.location - 1, fullStringLength)];    
-    // check this one to make sure the @ is not escaped; make sure there _is_ another one, though
-    while(nextAtRange.location != NSNotFound && ![self isNewEntryAtRange:nextAtRange inString:fullString])
+    // check this one to make sure the @ is not escaped; make sure there _is_ another one, though!  if there are unbalanced braces between the firstAt and this one, we know it's not a new entry (or else the braces in the file are hosed)
+    while(nextAtRange.location != NSNotFound && ![self hasBalancedQuotes:[fullString substringWithRange:NSMakeRange(firstAtRange.location, nextAtRange.location - firstAtRange.location)] usingBraces:YES])
         nextAtRange = [fullString rangeOfString:@"@" options:NSLiteralSearch range:SafeForwardSearchRange(nextAtRange.location + 1, fullStringLength - nextAtRange.location - 1, fullStringLength)];
 
     if(nextAtRange.location == NSNotFound)
@@ -503,7 +504,7 @@ NSRange SafeBackwardSearchRange(NSRange startRange, unsigned seekLength){
         
         nextAtRange = [fullString rangeOfString:@"@" options:NSLiteralSearch range:SafeForwardSearchRange(firstAtRange.location + 1, fullStringLength - firstAtRange.location - 1, fullStringLength)];
         // check for a braced @ string
-        while(nextAtRange.location != NSNotFound && ![self isNewEntryAtRange:nextAtRange inString:fullString])
+        while(nextAtRange.location != NSNotFound && ![self hasBalancedQuotes:[fullString substringWithRange:NSMakeRange(firstAtRange.location, nextAtRange.location - firstAtRange.location)] usingBraces:YES])
             nextAtRange = [fullString rangeOfString:@"@" options:NSLiteralSearch range:SafeForwardSearchRange(nextAtRange.location + 1, fullStringLength - nextAtRange.location - 1, fullStringLength)];
 
         if(nextAtRange.location == NSNotFound)
