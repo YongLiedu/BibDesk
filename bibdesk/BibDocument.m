@@ -1424,9 +1424,37 @@ stringByAppendingPathComponent:@"BibDesk"]; */
 }
 
 - (void)hidePublicationsWithoutSubstring:(NSString *)substring inField:(NSString *)field{
-    
     if([substring isEqualToString:@""]){
+        // if it's an empty string, cache the selected BibItems for later selection, so the items remain selected after clearing the field
+        NSMutableArray *pubsToSelect = nil;
+
+        if([tableView numberOfSelectedRows]){
+            NSEnumerator *selE = [self selectedPubEnumerator]; // this is an array of indices, not pubs
+            pubsToSelect = [NSMutableArray array];
+            NSNumber *row;
+            
+            while(row = [selE nextObject]){ // make an array of BibItems, since the removePublication: method takes those as args; don't remove based on index, as those change after removal!
+                [pubsToSelect addObject:[shownPublications objectAtIndex:[row intValue]]];
+            }
+            
+        }
+        
         [shownPublications setArray:publications];
+
+        if(pubsToSelect){
+            [tableView deselectAll:nil]; // deselect all, or we'll extend the selection to include previously selected row indexes
+            [tableView reloadData]; // have to reload so the rows get set up right, but a full updateUI flashes the preview, which is annoying
+            // now select the items that were previously selected
+            NSEnumerator *oldSelE = [pubsToSelect objectEnumerator];
+            BibItem *anItem;
+            unsigned index;
+            while(anItem = [oldSelE nextObject]){
+                index = (sortDescending ? [shownPublications count] - 1 - [shownPublications indexOfObjectIdenticalTo:anItem] : [shownPublications indexOfObjectIdenticalTo:anItem]);
+                [tableView selectRow:index byExtendingSelection:YES];
+            }
+            
+            [tableView scrollRowToVisible:index]; // just go to the last one
+        }       
         [self updateUI];
         return;
     }
