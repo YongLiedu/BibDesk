@@ -18,7 +18,7 @@ Broken out of BibDocument and split up into smaller parts to make things more ma
 
 - (BOOL) validateMenuItem:(NSMenuItem*)menuItem{
 	SEL act = [menuItem action];
-	
+
 	// handle copy menu items
 	// go through hell
 	if (act == @selector(copyAsTex:)) {
@@ -70,6 +70,10 @@ Broken out of BibDocument and split up into smaller parts to make things more ma
     }else if (act == @selector(makeNewExternalSource:)){
         return [[self fileType] isEqualToString:@"BibDesk Library"];        
     }else if (act == @selector(makeNewNotepad:)){
+        return [[self fileType] isEqualToString:@"BibDesk Library"];        
+    }else if (act == @selector(editExportSettingsAction:)){ 
+        
+        // and selection is a collection:
         return [[self fileType] isEqualToString:@"BibDesk Library"];        
     }else{
 		return [super validateMenuItem:menuItem];
