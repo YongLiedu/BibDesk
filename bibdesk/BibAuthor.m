@@ -211,7 +211,6 @@ Sets all the different variables for partial names and so on from a given string
 Note: The strings returned by the bt_split_name function seem to be in the wrong encoding Ð UTF-8 is treated as ASCII. This is manually fixed for the _firstName, _lastName,  _jrPart and _vonPart variables.
 */
 - (void)setName:(NSString *)newName{
-    NSStringEncoding defaultCStringEncoding = NSUTF8StringEncoding; // should use since we split the name with a UTF8String
     bt_name *theName;
     int i = 0;
     NSMutableString *tmpStr = nil;
@@ -232,7 +231,7 @@ Note: The strings returned by the bt_split_name function seem to be in the wrong
         if(i >= 0 && i < theName->part_len[BTN_FIRST]-1)
             [tmpStr appendString:@" "];
     }
-    _firstName = [[NSString alloc] initWithData:[[tmpStr stringByRemovingCurlyBraces] dataUsingEncoding:defaultCStringEncoding allowLossyConversion:YES]  encoding:NSUTF8StringEncoding]; 
+    _firstName = [[NSString alloc] initWithData:[tmpStr dataUsingEncoding:NSUTF8StringEncoding allowLossyConversion:YES]  encoding:NSUTF8StringEncoding]; 
 		    
     // get tokens from von part
     tmpStr = [NSMutableString string];
@@ -243,7 +242,7 @@ Note: The strings returned by the bt_split_name function seem to be in the wrong
             [tmpStr appendString:@" "];
 
     }
-    _vonPart = [[NSString alloc] initWithData:[[tmpStr stringByRemovingCurlyBraces] dataUsingEncoding:defaultCStringEncoding allowLossyConversion:YES]  encoding:NSUTF8StringEncoding]; 
+    _vonPart = [[NSString alloc] initWithData:[tmpStr dataUsingEncoding:NSUTF8StringEncoding allowLossyConversion:YES]  encoding:NSUTF8StringEncoding]; 
 	
 	// get tokens from last part
     tmpStr = [NSMutableString string];
@@ -253,7 +252,7 @@ Note: The strings returned by the bt_split_name function seem to be in the wrong
         if(i >= 0 && i < theName->part_len[BTN_LAST]-1)
             [tmpStr appendString:@" "];
     }
-    _lastName = [[NSString alloc] initWithData:[[tmpStr stringByRemovingCurlyBraces] dataUsingEncoding:defaultCStringEncoding allowLossyConversion:YES]  encoding:NSUTF8StringEncoding]; 
+    _lastName = [[NSString alloc] initWithData:[tmpStr dataUsingEncoding:NSUTF8StringEncoding allowLossyConversion:YES]  encoding:NSUTF8StringEncoding]; 
 	
     
     // get tokens from jr part
@@ -264,7 +263,7 @@ Note: The strings returned by the bt_split_name function seem to be in the wrong
         if(i >= 0 && i < theName->part_len[BTN_JR]-1)
             [tmpStr appendString:@" "];
     }
-    _jrPart = [[NSString alloc] initWithData:[[tmpStr stringByRemovingCurlyBraces] dataUsingEncoding:defaultCStringEncoding allowLossyConversion:YES]  encoding:NSUTF8StringEncoding]; 
+    _jrPart = [[NSString alloc] initWithData:[tmpStr dataUsingEncoding:NSUTF8StringEncoding allowLossyConversion:YES]  encoding:NSUTF8StringEncoding]; 
 	
     [self refreshNormalizedName];
     [self refreshSortableName];
