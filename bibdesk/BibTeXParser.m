@@ -941,7 +941,7 @@ NSString *stringFromBTField(AST *field, NSString *fieldName, NSString *filePath,
     
     if([stringValueArray count] == 1 &&
        [(BDSKStringNode *)[stringValueArray objectAtIndex:0] type] == BSN_STRING){
-        return [[stringValueArray objectAtIndex:0] value]; // an NSString
+        return [(BDSKStringNode *)[stringValueArray objectAtIndex:0] value]; // an NSString
     }
     
     return [NSString complexStringWithArray:stringValueArray macroResolver:document];
