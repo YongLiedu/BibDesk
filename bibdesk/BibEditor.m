@@ -443,7 +443,7 @@ NSString *BDSKUrlString = @"Url";
     if (lurl && [[NSFileManager defaultManager] fileExistsAtPath:lurl]){
             icon = [[NSWorkspace sharedWorkspace] iconForFile:lurl];
             [viewLocalButton setIconImage:icon];
-			[[viewLocalButton cell] setIconEnabled:YES];
+			[[viewLocalButton cell] seticonActionEnabled:YES];
             [viewLocalButton setToolTip:@"View File"];
 			
 			NSString *ext = [lurl pathExtension];
@@ -476,7 +476,7 @@ NSString *BDSKUrlString = @"Url";
             }
     }else{
         [viewLocalButton setIconImage:noFilesIconImage];
-		[[viewLocalButton cell] setIconEnabled:NO];
+		[[viewLocalButton cell] seticonActionEnabled:NO];
         [viewLocalButton setToolTip:NSLocalizedString(@"Choose a file to link with in the Local-Url Field", @"bad/empty local url field")];
         
         [documentSnoopButton setEnabled:NO];
