@@ -23,7 +23,7 @@
 		[RYZ_buttonCell setHighlightsBy: NSContentsCellMask];
 		[RYZ_buttonCell setImagePosition: NSImageLeft];
 		
-		RYZ_iconSize = NSMakeSize(32, 32);
+		RYZ_iconSize = NSMakeSize(32.0, 32.0);
 		RYZ_showsMenuWhenIconClicked = NO;
 		RYZ_iconActionEnabled = YES;
 		RYZ_alwaysUsesFirstItemAsSelected = NO;
@@ -51,6 +51,9 @@
 		[self setArrowImage:[coder decodeObjectForKey:@"arrowImage"]];
 		
 		[self setDelegate:[coder decodeObjectForKey:@"delegate"]];
+		
+		// hack to always get regular controls in a toolbar customization palette, there should be a better way
+		[self setControlSize:NSRegularControlSize];
 	}
 	return self;
 }
@@ -237,14 +240,18 @@
 		// Mouse event
 		NSPoint mouseLocation = [controlView convertPoint: [event locationInWindow]  fromView: nil];
 		NSSize iconSize = [self iconSize];
-		NSSize arrowSize = NSMakeSize(0,0);
+		NSSize arrowSize = NSMakeSize(0.0,0.0);
 		NSRect arrowRect;
+		
+		if ([self controlSize] != NSRegularControlSize) {
+			iconSize = NSMakeSize(iconSize.width * 0.75, iconSize.height * 0.75);
+		}
 		
 		if ([self arrowImage] != nil) {
 			arrowSize = [[self arrowImage] size];
 		}
 		
-		arrowRect = NSMakeRect(cellFrame.origin.x + iconSize.width + 1, cellFrame.origin.y,
+		arrowRect = NSMakeRect(cellFrame.origin.x + iconSize.width + 1.0, cellFrame.origin.y,
 								arrowSize.width, arrowSize.height);
 		
 		if ([controlView isFlipped]) {
@@ -373,33 +380,49 @@
 		iconImage = [[[[self selectedItem] image] copy] autorelease];
     }
     
-	if ([self controlSize] == NSRegularControlSize) {
-		[iconImage setSize: [self iconSize]];
-	} else {
-		[iconImage setSize: NSMakeSize([self iconSize].width * 0.75, [self iconSize].height * 0.75)];
+	[iconImage setSize: [self iconSize]];
+	
+	NSSize iconSize = [iconImage size];
+	NSRect iconRect = NSMakeRect(0.0, 0.0, iconSize.width, iconSize.height);
+	NSRect iconDrawRect = iconRect;
+	if ([self controlSize] != NSRegularControlSize) {
+		// for small and mini controls we just scale the icon by 75% 
+		iconDrawRect = NSMakeRect(0.0, 0.0, iconSize.width * 0.75, iconSize.height * 0.75);
 	}
-	if ([self arrowImage] == nil) {
-		[RYZ_buttonCell setImage: iconImage];
-		[RYZ_buttonCell setAlternateImage: [self alternateImage]]; // this may be nil, that is OK
-	} else {
-		NSImage *arrowImage = [self arrowImage];
-		NSSize iconSize = [iconImage size];
-		NSSize arrowSize = [arrowImage size];
-		NSImage *popUpImage = [[NSImage alloc] initWithSize: NSMakeSize(iconSize.width + arrowSize.width, iconSize.height)];
-		
-		NSRect iconRect = NSMakeRect(0, 0, iconSize.width, iconSize.height);
-		NSRect arrowRect = NSMakeRect(0, 0, arrowSize.width, arrowSize.height);
-		NSRect iconDrawRect = NSMakeRect(0, 0, iconSize.width, iconSize.height);
-		NSRect arrowDrawRect = NSMakeRect(iconSize.width, 1, arrowSize.width, arrowSize.height);
+	NSImage *arrowImage = [self arrowImage];
+	NSSize arrowSize = NSZeroSize;
+	NSRect arrowRect = NSZeroRect;
+	NSRect arrowDrawRect = NSZeroRect;
+	if (arrowImage) {
+		arrowSize = [arrowImage size];
+		arrowRect.size = arrowSize;
+		arrowDrawRect = NSMakeRect(NSWidth(iconDrawRect), 1.0, arrowSize.width, arrowSize.height);
+	}
+	NSSize drawSize = NSMakeSize(NSWidth(iconDrawRect) + arrowSize.width, NSHeight(iconDrawRect));
+	
+	NSImage *popUpImage = [[NSImage alloc] initWithSize: drawSize];
+	
+	[popUpImage lockFocus];
+	[iconImage drawInRect: iconDrawRect  fromRect: iconRect  operation: NSCompositeSourceOver  fraction: 1.0];
+	if (arrowImage)
+		[arrowImage drawInRect: arrowDrawRect  fromRect: arrowRect  operation: NSCompositeSourceOver  fraction: 1.0];
+	[popUpImage unlockFocus];
+
+	[RYZ_buttonCell setImage: popUpImage];
+	[popUpImage release];
+	
+	if ([self alternateImage]) {
+		popUpImage = [[NSImage alloc] initWithSize: drawSize];
 		
 		[popUpImage lockFocus];
-		[iconImage drawInRect: iconDrawRect  fromRect: iconRect  operation: NSCompositeSourceOver  fraction: 1.0];
-		[arrowImage drawInRect: arrowDrawRect  fromRect: arrowRect  operation: NSCompositeSourceOver  fraction: 1.0];
+		[[self alternateImage] drawInRect: iconDrawRect  fromRect: iconRect  operation: NSCompositeSourceOver  fraction: 1.0];
+		if (arrowImage)
+			[arrowImage drawInRect: arrowDrawRect  fromRect: arrowRect  operation: NSCompositeSourceOver  fraction: 1.0];
 		[popUpImage unlockFocus];
-    
-		[RYZ_buttonCell setImage: popUpImage];
+	
+		[RYZ_buttonCell setAlternateImage: popUpImage];
 		[popUpImage release];
-    }
+	}
 	
     if ( [[controlView window] firstResponder] == controlView &&
 		 [controlView respondsToSelector: @selector(selectedCell)] &&
