@@ -274,6 +274,10 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
     return [super validateToolbarItem:toolbarItem];
 }
 
+- (IBAction)newBDSKLibrary:(id)sender{
+	id doc = [self openUntitledDocumentOfType:@"BibDesk Library" display:YES];
+}
+
 - (IBAction)openDocument:(id)sender{
 	NSOpenPanel *oPanel = [NSOpenPanel openPanel];
     [oPanel setAccessoryView:openTextEncodingAccessoryView];
@@ -301,6 +305,12 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 }
 
 - (void)noteNewRecentDocument:(NSDocument *)aDocument{
+    
+    if(! [aDocument isKindOfClass:[BibDocument class]]){
+        // we don't worry about string encodings for BibLibrary files.
+        return;
+    }
+    
     NSStringEncoding encoding = [(BibDocument *)aDocument documentStringEncoding];
     
     if(encoding == NSASCIIStringEncoding || encoding == [[OFPreferenceWrapper sharedPreferenceWrapper] integerForKey:BDSKDefaultStringEncoding]){

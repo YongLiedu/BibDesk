@@ -85,6 +85,24 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 
 #pragma mark Overridden NSDocumentController methods
 
+
+
+/*!
+    @method     newBDSKLibrary:
+    @abstract   responds to the New Library menu command in File.
+    @discussion (description)
+    @param      sender (description)
+    @result     (description)
+*/
+- (IBAction)newBDSKLibrary:(id)sender;
+
+/*!
+    @method     openDocument:
+    @abstract   responds to the Open menu item in File
+    @discussion (description)
+    @param      sender (description)
+    @result     (description)
+*/
 - (IBAction)openDocument:(id)sender;
 
 
