@@ -273,70 +273,6 @@
 				<key>title</key>
 				<string>Defaults</string>
 			</dict>
-			<key>BibPref_Display</key>
-			<dict>
-				<key>defaultsDictionary</key>
-				<dict>
-					<key>BlueComponentColor of alternating rows Key</key>
-					<string>1.010918794815856e-310</string>
-					<key>Current Publication Type</key>
-					<string>6</string>
-					<key>Current Publication Type String</key>
-					<string>Inproceedings</string>
-					<key>Current Quick Search Key</key>
-					<string>Keywords</string>
-					<key>Current Quick Search Text Dictionary</key>
-					<dict/>
-					<key>GreenComponentColor of alternating rows Key</key>
-					<string>1.093888830242598e-310</string>
-					<key>Preview Pane Displays What?</key>
-					<string>1</string>
-					<key>Quick Search Keys</key>
-					<array>
-						<string>Keywords</string>
-						<string>Pub Type</string>
-					</array>
-					<key>RedComponentColor of alternating rows Key</key>
-					<string>1.156487706076073e-310</string>
-					<key>Shown Column Names</key>
-					<array>
-						<string>Keywords</string>
-						<string>Cite Key</string>
-						<string>Title</string>
-						<string>Date</string>
-						<string>1st Author</string>
-						<string>2nd Author</string>
-						<string>3rd Author</string>
-					</array>
-					<key>Shown Columns</key>
-					<array>
-						<string>1</string>
-						<string>1</string>
-						<string>1</string>
-						<string>1</string>
-						<string>0</string>
-						<string>0</string>
-					</array>
-					<key>TableView Font</key>
-					<string>LucidaGrande</string>
-					<key>TableView Font Size</key>
-					<string>1.293993033330623e-310</string>
-					<key>View-by Field</key>
-					<string>Author</string>
-				</dict>
-				<key>icon</key>
-				<string>display.tiff</string>
-				<key>identifier</key>
-				<string>bp_display</string>
-				<key>nib</key>
-				<string>BibPref_Display</string>
-				<key>ordering</key>
-				<string>10</string>
-				<key>shortTitle</key>
-				<string>Display</string>
-				<key>title</key>
-				<string>Display</string>
-			</dict>
 			<key>BibPref_RSS</key>
 			<dict>
 				<key>defaultsDictionary</key>
@@ -359,7 +295,7 @@
 				<key>title</key>
 				<string>RSS publish &amp; subscribe</string>
 			</dict>
-			<key>BibPref_Startup</key>
+			<key>BibPref_General</key>
 			<dict>
 				<key>defaultsDictionary</key>
 				<dict>
@@ -369,19 +305,25 @@
 					<string>0</string>
 					<key>Startup Behavior</key>
 					<string>0</string>
+					<key>TableView Font</key>
+					<string>LucidaGrande</string>
+					<key>TableView Font Size</key>
+					<string>1.293993033330623e-310</string>
+					<key>Preview Pane Displays What?</key>
+					<string>1</string>
 				</dict>
 				<key>icon</key>
 				<string>startup.tiff</string>
 				<key>identifier</key>
-				<string>bp_startup</string>
+				<string>bp_general</string>
 				<key>nib</key>
-				<string>BibPref_Startup</string>
+				<string>BibPref_General</string>
 				<key>ordering</key>
 				<string>0</string>
 				<key>shortTitle</key>
-				<string>Startup</string>
+				<string>General</string>
 				<key>title</key>
-				<string>Startup Behavior</string>
+				<string>General application behaviour</string>
 			</dict>
 			<key>BibPref_TeX</key>
 			<dict>
