@@ -102,8 +102,8 @@ static BibFiler *sharedFiler = nil;
 	// ...however we want to move aliases, not their targets
     NSString *resolvedNewPath = nil;
     NS_DURING
-	resolvedNewPath = [[fm resolveAliasesInPath:[newPath stringByDeletingLastPathComponent]] 
-                 stringByAppendingPathComponent:[newPath lastPathComponent]];
+		resolvedNewPath = [[fm resolveAliasesInPath:[newPath stringByDeletingLastPathComponent]] 
+					 stringByAppendingPathComponent:[newPath lastPathComponent]];
     NS_HANDLER
         NSLog(@"Ignoring exception %@ raised while resolving aliases in %@", [localException name], newPath);
         status = NSLocalizedString(@"Unable to resolve aliases in path.", @"");
@@ -120,7 +120,7 @@ static BibFiler *sharedFiler = nil;
         statusFlag = statusFlag | BDSKUnableToResolveAliasMask;
     NS_ENDHANDLER
 	
-	if(moveAll || [paper canSetLocalUrl]){
+	if( (moveAll || [paper canSetLocalUrl]) && statusFlag == BDSKNoErrorMask){
 		if([fm fileExistsAtPath:resolvedNewPath]){
 			statusFlag = statusFlag | BDSKGeneratedFileExistsMask;
 			if([fm fileExistsAtPath:resolvedPath]){
@@ -139,17 +139,30 @@ static BibFiler *sharedFiler = nil;
                     status = NSLocalizedString(@"Unable to create the parent directory structure.", @"");
                     statusFlag = statusFlag | BDSKUnableToCreateParentMask;
                 NS_ENDHANDLER
-				// unfortunately NSFileManager cannot reliably move symlinks...
-				if([fileType isEqualToString:NSFileTypeSymbolicLink]){
-					NSString *pathContent = [fm pathContentOfSymbolicLinkAtPath:resolvedPath];
-					if(![pathContent hasPrefix:@"/"]){// it links to a relative path
-						pathContent = [[resolvedPath stringByDeletingLastPathComponent] stringByAppendingPathComponent:pathContent];
-					}
-					if([fm createSymbolicLinkAtPath:resolvedNewPath pathContent:pathContent]){
-						if(![fm removeFileAtPath:resolvedPath handler:self]){
-							status = [errorString autorelease];
+				if(statusFlag == BDSKNoErrorMask){
+					// unfortunately NSFileManager cannot reliably move symlinks...
+					if([fileType isEqualToString:NSFileTypeSymbolicLink]){
+						NSString *pathContent = [fm pathContentOfSymbolicLinkAtPath:resolvedPath];
+						if(![pathContent hasPrefix:@"/"]){// it links to a relative path
+							pathContent = [[resolvedPath stringByDeletingLastPathComponent] stringByAppendingPathComponent:pathContent];
+						}
+						if([fm createSymbolicLinkAtPath:resolvedNewPath pathContent:pathContent]){
+							if(![fm removeFileAtPath:resolvedPath handler:self]){
+								status = [errorString autorelease];
+								statusFlag = statusFlag | BDSKMoveErrorMask;
+							}
+							[paper setField:@"Local-Url" toValue:[[NSURL fileURLWithPath:newPath] absoluteString]];
+							//status = NSLocalizedString(@"Successfully moved.",@"");
+							
+							NSUndoManager *undoManager = [doc undoManager];
+							[[undoManager prepareWithInvocationTarget:self] 
+								movePath:newPath toPath:path forPaper:paper fromDocument:doc moveAll:YES];
+							moveCount++;
+						}else{
+							status = NSLocalizedString(@"Could not move symbolic link.", @"");
 							statusFlag = statusFlag | BDSKMoveErrorMask;
 						}
+					}else if([fm movePath:resolvedPath toPath:resolvedNewPath handler:self]){
 						[paper setField:@"Local-Url" toValue:[[NSURL fileURLWithPath:newPath] absoluteString]];
 						//status = NSLocalizedString(@"Successfully moved.",@"");
 						
@@ -158,20 +171,9 @@ static BibFiler *sharedFiler = nil;
 							movePath:newPath toPath:path forPaper:paper fromDocument:doc moveAll:YES];
 						moveCount++;
 					}else{
-						status = NSLocalizedString(@"Could not move symbolic link.", @"");
+						status = [errorString autorelease];
 						statusFlag = statusFlag | BDSKMoveErrorMask;
 					}
-				}else if([fm movePath:resolvedPath toPath:resolvedNewPath handler:self]){
-					[paper setField:@"Local-Url" toValue:[[NSURL fileURLWithPath:newPath] absoluteString]];
-					//status = NSLocalizedString(@"Successfully moved.",@"");
-					
-					NSUndoManager *undoManager = [doc undoManager];
-					[[undoManager prepareWithInvocationTarget:self] 
-						movePath:newPath toPath:path forPaper:paper fromDocument:doc moveAll:YES];
-					moveCount++;
-				}else{
-					status = [errorString autorelease];
-					statusFlag = statusFlag | BDSKMoveErrorMask;
 				}
 			}else{
 				status = NSLocalizedString(@"The linked file does not exist.", @"");
