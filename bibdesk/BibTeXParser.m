@@ -240,20 +240,24 @@ NSRange SafeForwardSearchRange( unsigned startLoc, unsigned seekLength, unsigned
             
             while(usingBraceDelimiter){ // should put us at the end of a record if we're using brace delimiters
                 braceSearchRange = NSMakeRange(searchStart, rightDelimLocation - searchStart);
-                // NSLog(@"substring in braceSearchRange is %@", [fullString substringWithRange:braceSearchRange] );
+                 NSLog(@"Beginning search: substring in braceSearchRange is %@", [fullString substringWithRange:braceSearchRange] );
                 braceFoundRange = [fullString rangeOfString:leftDelim options:NSLiteralSearch range:braceSearchRange];
+                
+                unsigned tempStart = braceFoundRange.location;
                 
                 // Okay, so we found a left delimiter.  However, it may be nested inside yet another brace pair, so let's look back from the left delimiter and see if we find another left delimiter at a different location.  
                 // Example:  Title = {Physical insight into the {Ergun} and {Wen {\&} Yu} equations for fluid flow in packed and fluidised beds},
                 // In this example, the {Wen {\&} Yu} expression is problematic, because we need to account for both left braces; if we don't, everything after the } is stripped.
                 // WARNING:  this if() has some trickery with resetting the scan location, but not setting the search location as in the next if() statement!
                 
-                if(braceFoundRange.location != [fullString rangeOfString:leftDelim options:NSLiteralSearch | NSBackwardsSearch range:braceSearchRange].location){ // this means we found "{ {" between { and }
+                while(tempStart != [fullString rangeOfString:leftDelim options:NSLiteralSearch | NSBackwardsSearch range:braceSearchRange].location){ // this means we found "{ {" between { and }
+                    tempStart = [fullString rangeOfString:leftDelim options:NSLiteralSearch | NSBackwardsSearch range:braceSearchRange].location;
+                    NSLog(@"Reset tempStart!");
                     [scanner scanString:rightDelim intoString:&logString]; // it wasn't this one, so scan past it
-                    // NSLog(@"scanned rightDelim %@", logString);
+                     NSLog(@"Deep nested brace check, scanned rightDelim %@", logString);
                     if(![scanner scanUpToString:rightDelim intoString:&logString] &&        // find the next right delimiter
-                        [fullString characterAtIndex:([scanner scanLocation] + 1)] != '}'){ // it's not an error if it's terminated by a brace 
-                        // NSLog(@"*** ERROR doubly nested braces");
+                        [fullString characterAtIndex:([scanner scanLocation] )] != '}'){ // it's not an error if it's terminated by a brace 
+                         NSLog(@"*** ERROR doubly nested braces, scanned %@", logString);
                         *hadProblems = YES;
                         [BibTeXParser postParsingErrorNotification:[NSString stringWithFormat:@"Delimiter '%@' not found", rightDelim]
                                                          errorType:@"Parse Error" 
@@ -261,24 +265,25 @@ NSRange SafeForwardSearchRange( unsigned startLoc, unsigned seekLength, unsigned
                                                         errorRange:[fullString lineRangeForRange:NSMakeRange(leftDelimLocation, 0)]];
                     }
                     rightDelimLocation = [scanner scanLocation];
-                    // NSLog(@"scanned up to %@ and found %@", rightDelim, logString);
+                     NSLog(@"Deep nested braces, scanned up to %@ and found %@", rightDelim, logString);
                 }
                 
                 if(braceFoundRange.location != NSNotFound){ // if there's a "{" between { and }
                     [scanner scanString:rightDelim intoString:&logString]; // it wasn't this one, so scan past it
-                    // NSLog(@"scanned rightDelim %@", logString);
+                     NSLog(@"Shallow nested brace check, scanned rightDelim %@", logString);
                     if(![scanner scanUpToString:rightDelim intoString:&logString] &&        // find the next right delimiter
-                        [fullString characterAtIndex:([scanner scanLocation] + 1)] != ','){ // don't call this an error if there is a comma immediately following; may give some false alarms
-                        // NSLog(@"*** ERROR nested braces");
+                        [fullString characterAtIndex:([scanner scanLocation] + 1)] != ',' ){ // don't call this an error if there is a comma immediately following; may give some false alarms
+                         NSLog(@"*** ERROR nested braces");
                         *hadProblems = YES;
                         [BibTeXParser postParsingErrorNotification:[NSString stringWithFormat:@"Delimiter '%@' not found", rightDelim]
                                                          errorType:@"Parse Error" 
                                                           fileName:filePath 
                                                         errorRange:[fullString lineRangeForRange:NSMakeRange(leftDelimLocation, 0)]];
                     }
-                    // NSLog(@"scanned up to %@ and found %@", rightDelim, logString);
+                     NSLog(@"Shallow nested braces, scanned up to %@ and found %@", rightDelim, logString);
                     searchStart = rightDelimLocation + 1; // start from the previous search end
-                    // NSLog(@"string at searchStart is %@", [fullString substringWithRange:NSMakeRange(searchStart, 1)]);
+                    if(searchStart >= entryClosingBraceRange.location) break;
+                     NSLog(@"string at searchStart is %@", [fullString substringWithRange:NSMakeRange(searchStart, 1)]);
                     rightDelimLocation = [scanner scanLocation];
                 } else {
                     break;
