@@ -20,12 +20,12 @@
 	</array>
 	<key>IBOpenObjects</key>
 	<array>
-		<integer>378</integer>
-		<integer>287</integer>
 		<integer>270</integer>
+		<integer>378</integer>
 		<integer>74</integer>
+		<integer>287</integer>
 	</array>
 	<key>IBSystem Version</key>
-	<string>7H46b</string>
+	<string>7H63</string>
 </dict>
 </plist>
