@@ -227,7 +227,7 @@ static void addToolbarItem(NSMutableDictionary *theDict,NSString *identifier,NSS
     // (for example:  of the save items action)
     BOOL enable = YES;
     if ([[toolbarItem itemIdentifier] isEqualToString: NSToolbarPrintItemIdentifier]) {
-        enable = YES;
+		enable = [self validatePrintDocumentMenuItem:nil];
     }else if([[toolbarItem itemIdentifier] isEqualToString: DelDocToolbarItemIdentifier]
              || [[toolbarItem itemIdentifier] isEqualToString: EditDocToolbarItemIdentifier]){
         if([self numberOfSelectedPubs] == 0) enable = NO;
