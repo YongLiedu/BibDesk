@@ -345,7 +345,7 @@ static NSDictionary *globalMacroDefs;
 
 @implementation NSString (ComplexStringExtensions)
 
-+ (NSString *)complexStringWithBibTeXString:(NSString *)btstring macroResolver:(id<BDSKMacroResolver>)theMacroResolver{
++ (id)complexStringWithBibTeXString:(NSString *)btstring macroResolver:(id<BDSKMacroResolver>)theMacroResolver{
     NSMutableArray *returnNodes = [NSMutableArray array];
     
     btstring = [btstring stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]];
@@ -467,7 +467,7 @@ static NSDictionary *globalMacroDefs;
 	return [NSString complexStringWithArray:returnNodes macroResolver:theMacroResolver];
 }
 
-+ (NSString *)complexStringWithArray:(NSArray *)a macroResolver:(id)theMacroResolver{
++ (id)complexStringWithArray:(NSArray *)a macroResolver:(id)theMacroResolver{
     return [[[BDSKComplexString alloc] initWithArray:a macroResolver:theMacroResolver] autorelease];
 }
 
