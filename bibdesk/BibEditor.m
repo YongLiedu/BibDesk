@@ -182,14 +182,9 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
     [bibFields setNeedsDisplay:YES];
 }
 
-- (void)awakeFromNib{
+- (void)setupTypePopUp{
     NSEnumerator *typeNamesE = [[[BibTypeManager sharedManager] bibTypesForFileType:[theBib fileType]] objectEnumerator];
     NSString *typeName = nil;
-    
-	[self setupToolbar];
-    
-    [citeKeyField setFormatter:citeKeyFormatter];
-    [newFieldName setFormatter:fieldNameFormatter];
 
     [bibTypeButton removeAllItems];
     while(typeName = [typeNamesE nextObject]){
@@ -197,6 +192,14 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
     }
 
     [bibTypeButton selectItemWithTitle:currentType];
+}
+
+- (void)awakeFromNib{
+	[self setupToolbar];
+    
+    [citeKeyField setFormatter:citeKeyFormatter];
+    [newFieldName setFormatter:fieldNameFormatter];
+
     [self setupForm]; // gets called in window will load...?
     
 	// The popupbutton needs to be set before fixURLs is called, and -windowDidLoad gets sent after awakeFromNib.
@@ -269,6 +272,10 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 											 selector:@selector(docWindowWillClose:)
 												 name:BDSKDocumentWindowWillCloseNotification
 											   object:theDocument];
+	[[NSNotificationCenter defaultCenter] addObserver:self
+											 selector:@selector(typeInfoDidChange:)
+												 name:BDSKBibTypeInfoChangedNotification
+											   object:[BibTypeManager sharedManager]];
 
 	[authorTableView setDoubleAction:@selector(showPersonDetailCmd:)];
 
@@ -1172,6 +1179,19 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
         // NSLog(@"setting rssdesc to %@", [rssDescriptionView string]);
         [theBib setField:BDSKRssDescriptionString toValue:[rssDescriptionView string]];
     }
+}
+
+- (void)typeInfoDidChange:(NSNotification *)aNotification{
+	NSDictionary *userInfo = [aNotification userInfo];
+	NSString *list = [userInfo objectForKey:@"list"];
+	
+	if ([list isEqualToString:@"typesForFileTypes"]) {
+		[self setupTypePopUp];
+	} else if ([list isEqualToString:@"fieldsForTypes"]) {
+        [theBib makeType:currentType]; // make sure this is done now, and not later
+		[self finalizeChanges];
+		[self setupForm];
+	}
 }
 
 #pragma mark document interaction

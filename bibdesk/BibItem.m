@@ -99,6 +99,11 @@ setupParagraphStyle()
         [self setFileOrder:-1];
 		[self setNeedsToBeFiled:NO];
         setupParagraphStyle();
+		
+		[[NSNotificationCenter defaultCenter] addObserver:self
+												 selector:@selector(typeInfoDidChange:)
+													 name:BDSKBibTypeInfoChangedNotification
+												   object:[BibTypeManager sharedManager]];
     }
 
     //NSLog(@"bibitem init");
@@ -1781,6 +1786,15 @@ setupParagraphStyle()
 	else {
 		[NSException raise:@"unimpl. feat. exc." format:@"stringIsValid:forField: is partly implemented"];
 		return YES;
+	}
+}
+
+- (void)typeInfoDidChange:(NSNotification *)aNotification{
+	NSDictionary *userInfo = [aNotification userInfo];
+	NSString *list = [userInfo objectForKey:@"list"];
+	
+	if ([list isEqualToString:@"fieldsForTypes"]) {
+        [self makeType:[self type]];
 	}
 }
 
