@@ -265,7 +265,7 @@ static BDSKConverter *theConverter;
 {
 	NSCharacterSet *invalidCharSet = [[BibTypeManager sharedManager] strictInvalidCharactersForField:fieldName inFileType:type];
 	
-	if ([fieldName isEqualToString:@"Cite Key"]) {
+	if ([fieldName isEqualToString:@"Cite Key"] || [fieldName isEqualToString:@"Local-Url"]) {
 		NSString *newString;
 		
 		if (string == nil || [string isEqualToString:@""]) {

@@ -12,7 +12,9 @@
 @interface BibTypeManager : NSObject {
     NSDictionary *typeInfoDict;
 	NSCharacterSet *invalidCiteKeyCharSet;
+	NSCharacterSet *invalidLocalUrlCharSet;
 	NSCharacterSet *strictInvalidCiteKeyCharSet;
+	NSCharacterSet *strictInvalidLocalUrlCharSet;
 }
 + (BibTypeManager *)sharedManager;
 - (NSString *)defaultTypeForFileFormat:(NSString *)fileFormat;

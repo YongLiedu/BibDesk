@@ -23,6 +23,9 @@ static BibTypeManager *sharedInstance = nil;
     // this set is used for warning the user on manual entry of a citekey; allows non-ASCII characters and some math symbols
     invalidCiteKeyCharSet = [[NSCharacterSet characterSetWithCharactersInString:@" '\"@,\\#}{~&%$^"] retain];
     
+	// this set is used for warning the user on manual entry of a local-url; allows non-ASCII characters and some math symbols
+    invalidLocalUrlCharSet = [[NSCharacterSet characterSetWithCharactersInString:@" '\"@,\\#}{~&$^:"] retain];
+    
     NSMutableCharacterSet *validSet = [[[NSMutableCharacterSet alloc] init] autorelease];
     [validSet addCharactersInRange:NSMakeRange( (unsigned int)'a', 26)];
     [validSet addCharactersInRange:NSMakeRange( (unsigned int)'A', 26)];
@@ -31,6 +34,12 @@ static BibTypeManager *sharedInstance = nil;
     // this is used for generated cite keys, verys strict!
 	strictInvalidCiteKeyCharSet = [[validSet invert] copy];  // don't release this
     
+	[validSet removeCharactersInString:@":"];
+	[validSet addCharactersInString:@"%"];
+    
+	// this is used for generated local urls, verys strict!
+	strictInvalidLocalUrlCharSet = [[validSet invert] copy];  // don't release this
+	
     return self;
 }
 
@@ -87,17 +96,23 @@ static BibTypeManager *sharedInstance = nil;
 }
 
 - (NSCharacterSet *)invalidCharactersForField:(NSString *)fieldName inFileType:(NSString *)type{
-	if( ! [type isEqualToString:@"BibTeX"] || ! [fieldName isEqualToString:@"Cite Key"]){
-		[NSException raise:@"unimpl. feat. exc." format:@"invalidCharactersForField is partly implemented"];
+	if( [type isEqualToString:@"BibTeX"] && [fieldName isEqualToString:@"Cite Key"]){
+		return invalidCiteKeyCharSet;
 	}
-	return invalidCiteKeyCharSet;
+	if([fieldName isEqualToString:@"Local-Url"]){
+		return invalidLocalUrlCharSet;
+	}
+	[NSException raise:@"unimpl. feat. exc." format:@"invalidCharactersForField is partly implemented"];
 }
 
 - (NSCharacterSet *)strictInvalidCharactersForField:(NSString *)fieldName inFileType:(NSString *)type{
-	if( ! [type isEqualToString:@"BibTeX"] || ! [fieldName isEqualToString:@"Cite Key"]){
-		[NSException raise:@"unimpl. feat. exc." format:@"strictInvalidCharactersForField is partly implemented"];
+	if( [type isEqualToString:@"BibTeX"] && [fieldName isEqualToString:@"Cite Key"]){
+		return strictInvalidCiteKeyCharSet;
 	}
-	return strictInvalidCiteKeyCharSet;
+	if([fieldName isEqualToString:@"Local-Url"]){
+		return invalidLocalUrlCharSet;
+	}
+	[NSException raise:@"unimpl. feat. exc." format:@"strictInvalidCharactersForField is partly implemented"];
 }
 
 @end
