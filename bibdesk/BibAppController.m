@@ -319,6 +319,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 - (void)addString:(NSString *)string forCompletionEntry:(NSString *)entry{
     NSMutableArray *completionArray = nil;
     BOOL keyExists = [[_autoCompletionDict allKeys] containsObject:entry];
+    // NSLog(@"got string %@ for entry %@", string, entry);
     
     if(string == nil) return; // shouldn't happen
     
@@ -332,7 +333,9 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
     if([entry isEqualToString:@"Local-Url"] || [entry isEqualToString:@"Url"] || 
        [entry isEqualToString:@"Abstract"] || [entry isEqualToString:@"Annote"]) return; // don't add these
 
-    if([entry isEqualToString:@"Title"]){ // add the whole string for title? or add components separated by whitespace?
+    if([entry isEqualToString:@"Title"] || 
+       [entry isEqualToString:@"Booktitle"] || 
+       [entry isEqualToString:@"Publisher"]){ // add the whole string 
         [completionArray addObject:string];
         return;
     }
@@ -350,7 +353,8 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 
         while(![scanner isAtEnd]){
             [scanner scanUpToCharactersFromSet:_autocompletePunctuationCharacterSet intoString:&tmp];
-            if(!tmp == nil) [completionArray addObject:tmp];
+            if(!tmp == nil && [tmp length] > 0) 
+		[completionArray addObject:tmp]; // tmp is invalid (zero-length) if the first character was in the punctuation set
             [scanner scanCharactersFromSet:_autocompletePunctuationCharacterSet intoString:nil];
             [scanner scanCharactersFromSet:[NSCharacterSet whitespaceCharacterSet] intoString:nil];
         }
