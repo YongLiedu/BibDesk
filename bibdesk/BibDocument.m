@@ -410,8 +410,9 @@ stringByAppendingPathComponent:@"BibDesk"]; */
 
     while(tmp = [e nextObject]){
         [d appendData:[[NSString stringWithString:@"\n\n"] dataUsingEncoding:NSASCIIStringEncoding  allowLossyConversion:YES]];
-        //    [d appendData:[[BDSKConverter stringByTeXifyingString:[tmp bibTeXString]] dataUsingEncoding:NSASCIIStringEncoding allowLossyConversion:YES]];
-        [d appendData:[[BDSKConverter stringByTeXifyingString:[tmp bibTeXString]] dataUsingEncoding:NSUTF8StringEncoding allowLossyConversion:YES]];
+        //The TeXification is now done in the BibItem bibTeXString method
+        //Where it can be done once per field to handle newlines.
+        [d appendData:[[tmp bibTeXString] dataUsingEncoding:NSUTF8StringEncoding allowLossyConversion:YES]];
     }
     return d;
 }
@@ -602,7 +603,7 @@ stringByAppendingPathComponent:@"BibDesk"]; */
                 [NSThread
                 detachNewThreadSelector:@selector(PDFFromString:)
                                toTarget:PDFpreviewer
-                             withObject:[BDSKConverter stringByTeXifyingString:bibString]];
+                             withObject:bibString];
             }else{
                 // do nothing for now... (later, tell it to nullify the view?)
             }
@@ -696,6 +697,63 @@ didClickTableColumn: (NSTableColumn *) tableColumn{
                    inTableColumn: tableColumn];
     [tableView reloadData];
 }
+
+- (IBAction)emailPubCmd:(id)sender{
+    NSEnumerator *e = [self selectedPubEnumerator];
+    NSNumber *i;
+    BibItem *pub = nil;
+    int row = [tableView selectedRow];
+    int sortedRow = (sortDescending ? [shownPublications count] - 1 - row : row);
+    NSFileWrapper *fw = nil;
+    NSTextAttachment *att = nil;
+    NSFileManager *dfm = [NSFileManager defaultManager];
+    NSString *docPath = [[self fileName] stringByDeletingLastPathComponent];
+    NSString *pubPath = nil;
+    NSMutableAttributedString *body = [[NSMutableAttributedString alloc] init];
+    NSMutableArray *files = [NSMutableArray array];
+    BOOL sent = NO;
+
+    // other way:
+    NSPasteboard *pb = [NSPasteboard pasteboardWithName:@"BDMailPasteboard"];
+    NSArray *types = [NSArray arrayWithObjects:NSFilenamesPboardType,nil];
+        //NSRTFDPboardType,nil];
+    [pb declareTypes:types owner:self];
+    
+    while (i = [e nextObject]) {
+        pub = [shownPublications objectAtIndex:[i intValue]];
+        pubPath = [pub localURLPathRelativeTo:docPath];
+       
+        if([dfm fileExistsAtPath:pubPath]){
+            [files addObject:pubPath];
+            fw = [[NSFileWrapper alloc] initWithPath:pubPath];
+            att = [[NSTextAttachment alloc] initWithFileWrapper:fw];
+
+            [body appendAttributedString:[NSAttributedString attributedStringWithAttachment:att]];
+            [fw release]; [att release];
+        }
+    }
+
+
+    /* This doesn't seem to work:
+        [pb setData:[body RTFDFromRange:NSMakeRange(0,[body length]) documentAttributes:nil]
+            forType:NSRTFDPboardType];*/
+
+    [pb setPropertyList:files forType:NSFilenamesPboardType];
+
+    NSPerformService(@"Mail/Send File",pb); // Note: only works with Mail.app.
+    
+    //sent = [NSMailDelivery deliverMessage:body
+    //                             headers: headers
+     //                             format: NSMIMEMailFormat
+     //                           protocol: nil];
+
+    //if(!sent){
+   //     [NSException raise:@"UnimplementedException" format:@"Can't handle errors in mail sending yet."];
+   // }
+
+    [body release];
+}
+
 
 - (IBAction)editPubCmd:(id)sender{
     NSEnumerator *e = [self selectedPubEnumerator];
