@@ -51,16 +51,21 @@ void _setupFonts(){
     if(_cachedFonts == nil){
         defaultStyle = [[NSMutableParagraphStyle alloc] init];
         [defaultStyle setParagraphStyle:[NSParagraphStyle defaultParagraphStyle]];
-        if([NSFont fontWithName:@"Gill Sans" size:10.0] == nil){
-            [NSException raise:@"FontNotFoundException"
-                        format:@"The font Gill Sans could not be found."];
+        if([NSFont fontWithName:@"Gill Sans" size:10.0] == nil){ // Gill Sans is our preferred font, but we'll fall back on the system font if Gill Sans isn't available
+            _cachedFonts = [[NSDictionary dictionaryWithObjectsAndKeys:
+                [NSFont boldSystemFontOfSize:14.0], @"Title",
+                [NSFont systemFontOfSize:10.0], @"Type",
+                [NSFont boldSystemFontOfSize:12.0], @"Key",
+                [NSFont systemFontOfSize:12.0], @"Body",
+                nil] retain]; // we'll never release this
+        } else {
+            _cachedFonts = [[NSDictionary dictionaryWithObjectsAndKeys:
+                [NSFont fontWithName:@"Gill Sans Bold Italic" size:14.0], @"Title",
+                [NSFont fontWithName:@"Gill Sans" size:10.0], @"Type",
+                [NSFont fontWithName:@"Gill Sans Bold" size:12.0], @"Key",
+                [NSFont fontWithName:@"Gill Sans" size:12.0], @"Body",
+                nil] retain]; // we'll never release this
         }
-        _cachedFonts = [[NSDictionary dictionaryWithObjectsAndKeys:
-            [NSFont fontWithName:@"Gill Sans Bold Italic" size:14.0], @"Title",
-            [NSFont fontWithName:@"Gill Sans" size:10.0], @"Type",
-            [NSFont fontWithName:@"Gill Sans Bold" size:12.0], @"Key",
-            [NSFont fontWithName:@"Gill Sans" size:12.0], @"Body",
-            nil] retain]; // we'll never release this
         
 // ?        [defaultStyle setAlignment:NSLeftTextAlignment];
         _keyParagraphStyle = [defaultStyle copy];
