@@ -18,17 +18,24 @@
 
 /*!
     @class BibCollection
-    @abstract   (description)
+    @abstract a collection of items, which can be any type
     @discussion (description)
 */
 
 @interface BibCollection : NSObject {
     NSString *name;
-    NSMutableArray *publications;
+	NSString *itemClassName;
+    NSMutableArray *items;
     NSMutableArray *subCollections;
     id parent;
     NSMutableArray *exporters;
 }
+
+
+/*! 
+@method description
+*/
+- (NSString *)description;
 
 /*!
 @method initWithParent:
@@ -37,18 +44,25 @@
  */
 - (id)initWithParent:(id)parent;
 
+- (BibCollection *)copyWithZone:(NSZone *)aZone;
 - (void)encodeWithCoder:(NSCoder *)aCoder;
 - (id)initWithCoder:(NSCoder *)aDecoder;
 
 
-/*
+	/*
  @method registerForNotifications
  @abstract sets up notification handlers
  @discussion
  */
 - (void)registerForNotifications;
 
-/*
+/*!
+ @method undoManager
+ @abstract returns the parent's undomanager
+ */
+- (NSUndoManager *)undoManager;
+
+/*!
  @method parent
  @abstract accessor for the parent
 */
@@ -77,37 +91,55 @@
 */
 - (void)setName:(NSString *)newName;
 
-
 /*!
-@method publications
-@abstract the getter corresponding to setPublications
-@result returns value for publications
+* @method itemClassName
+* @abstract the getter corresponding to setItemClassName
+* @result returns value for itemClassName
 */
-- (NSMutableArray *)publications;
+- (NSString *)itemClassName;
 
 /*!
-@method setPublications
-@abstract sets publications to the param
+* @method setItemClassName
+* @abstract sets itemClassName to the param
+* @discussion 
+* @param anItemClassName 
+*/
+- (void)setItemClassName:(NSString *)anItemClassName;
+
+/*!
+@method items
+@abstract the getter corresponding to setitems
+@result returns value for items
+*/
+- (NSMutableArray *)items;
+
+/*!
+@method setitems
+@abstract sets items to the param
 @discussion 
-@param newPublications - an array of bibitems
+@param newitems - an array of bibitems
 */
-- (void)setPublications:(NSArray *)newPublications;
+- (void)setItems:(NSMutableArray *)newitems;
 
 /*!
-@method addPublicationsFromArray
-@abstract adds the publications in newPublications
+@method addItemsFromArray
+@abstract adds the items in newitems
 @discussion 
-@param newPublications - an array of bibitems
+@param newitems - an array of bibitems
 */
-- (void)addPublicationsFromArray:(NSArray *)newPublications;
+- (void)addItemsFromArray:(NSMutableArray *)newitems;
+
+- (void)addItem:(id)newItem;
 
     /*!
-@method addPublicationsFromArray
-@abstract removes the publications in newPublications
+@method addItemsFromArray
+@abstract removes the items in newitems
 @discussion 
-@param newPublications - an array of bibitems
+@param newitems - an array of bibitems
 */
-- (void)removePublicationsInArray:(NSArray *)thePublications;
+- (void)removeItemsInArray:(NSMutableArray *)theItems;
+
+- (void)removeItem:(id)item;
 
 /*!
 @method count
@@ -125,13 +157,21 @@
 */
 - (NSMutableArray *)subCollections;
 
+	/*!
+	@method setSubCollections
+	 @abstract sets subCollections to the param
+	 @discussion 
+	 @param newSubCollections 
+	 */
+- (void)setSubCollections:(NSMutableArray *)newSubCollections;
+	
 /*!
-@method setSubCollections
-@abstract sets subCollections to the param
-@discussion 
-@param newSubCollections 
-*/
-- (void)setSubCollections:(NSArray *)newSubCollections;
+	@method addSubCollection
+	 @abstract sets subCollections to the param
+	 @discussion 
+	 @param addSubCollection
+	 */
+- (void)addSubCollection:(BibCollection *)newSubCollection;
 
     /*!
     @method exporters
@@ -146,7 +186,7 @@
      @discussion 
      @param newExporters 
      */
-- (void)setExporters:(NSArray *)newExporters;
+- (void)setExporters:(NSMutableArray *)newExporters;
 
 - (void)addExporter:(id)exporter;
 - (void)removeExporter:(id)exporter;

@@ -11,24 +11,40 @@
 
 @implementation BibCollection
 
+- (NSString *)description{
+    return [NSString stringWithFormat:@"Collection \"%@\" %d items %d subCollections %d exporters",
+        name, [items count], [subCollections count], [exporters count]];
+}
 
 // init
 - (id)initWithParent:(id)newParent{
     if (self = [super init]) {
-        parent = newParent; // don't retain - they retain us.
+        [self setParent:newParent];
         name = [[NSString alloc] initWithString:NSLocalizedString(@"New Collection", @"New Collection")];
-        publications = [[NSMutableArray alloc] initWithCapacity:1];
+        items = [[NSMutableArray alloc] initWithCapacity:1];
         subCollections = [[NSMutableArray alloc] initWithCapacity:1];
         exporters = [[NSMutableArray alloc] initWithCapacity:1];
+		itemClassName = nil;
 
         [self registerForNotifications];
     }
     return self;
 }
 
+- (BibCollection *)copyWithZone:(NSZone *)aZone{
+    BibCollection *copy = [[BibCollection allocWithZone:aZone] initWithParent:[self parent]];
+    copy->name = [[self name] copyWithZone:aZone];
+    copy->items = [[self items] mutableCopyWithZone:aZone];
+    copy->subCollections = [[self subCollections] mutableCopyWithZone:aZone];
+    copy->exporters = [[self exporters] mutableCopyWithZone:aZone];
+    copy->itemClassName = [[self itemClassName] copyWithZone:aZone];
+    return copy;
+}
+
 - (void)encodeWithCoder:(NSCoder *)coder {
     [coder encodeObject:[self name] forKey:@"name"];
-    [coder encodeObject:[self publications] forKey:@"publications"];
+	[coder encodeObject:[self itemClassName] forKey:@"itemClassName"];
+    [coder encodeObject:[self items] forKey:@"items"];
     [coder encodeObject:[self subCollections] forKey:@"subCollections"];
     [coder encodeObject:[self exporters] forKey:@"exporters"];
 }
@@ -36,18 +52,19 @@
 - (id)initWithCoder:(NSCoder *)coder {
     if (self = [super init]) {
         name = [[coder decodeObjectForKey:@"name"] retain];
-        publications = [[coder decodeObjectForKey:@"publications"] retain];
-        exporters = [[coder decodeObjectForKey:@"exporters"] retain];
+		itemClassName = [[coder decodeObjectForKey:@"itemClassName"] retain];
+        items = [[coder decodeObjectForKey:@"items"] mutableCopy];
+        exporters = [[coder decodeObjectForKey:@"exporters"] mutableCopy];
         if(!exporters){
             exporters = [[NSMutableArray alloc] initWithCapacity:1];
         }
         parent = nil;
-        subCollections = [[coder decodeObjectForKey:@"subCollections"] retain];
+        subCollections = [[coder decodeObjectForKey:@"subCollections"] mutableCopy];
 
         foreach(collection, subCollections){
             [collection setParent:self];
         }
-        
+		
         [self registerForNotifications];
     }
     return self;
@@ -63,10 +80,17 @@
 - (void)handleBibItemDeleteNotification:(NSNotification *)notification{
     NSDictionary *info = [notification userInfo];
     id pub = [info objectForKey:@"pub"];
-    if([publications containsObject:pub]){
-        // should be [self removePublication:pub]; which would do proper undoing.
-        [publications removeObject:pub];
+    if([items containsObject:pub]){
+        // should be [self removeitem:pub]; which would do proper undoing.
+        [items removeObject:pub];
     }
+}
+
+- (NSUndoManager *)undoManager{
+    if(parent)
+        return [parent undoManager];
+    else 
+        return nil;
 }
 
 - (id)parent { return parent; }
@@ -87,32 +111,66 @@
     }
 }
 
+#warning, do we need to make this recurse?
+- (NSString *)itemClassName { return [[itemClassName retain] autorelease]; }
 
-- (NSMutableArray *)publications { return [[publications retain] autorelease]; }
+- (void)setItemClassName:(NSString *)anItemClassName {
+    [itemClassName release];
+    itemClassName = [anItemClassName copy];
+}
+
+- (NSMutableArray *)items { return [[items retain] autorelease]; }
 
 
-- (void)setPublications:(NSArray *)newPublications {
-    //NSLog(@"in -setPublications:, old value of publications: %@, changed to: %@", publications, newPublications);
+- (void)setItems:(NSMutableArray *)newitems {
+    //NSLog(@"in -setitems:, old value of items: %@, changed to: %@", items, newitems);
     
-    if (publications != newPublications) {
-        [publications release];
-        publications = [newPublications mutableCopy];
+    if (items != newitems) {
+        [items release];
+        items = [newitems mutableCopy];
     }
 }
 
-- (void)addPublicationsFromArray:(NSArray *)newPublications {
-    NSSet *existingSet = [NSSet setWithArray:publications];
+- (void)addItem:(id)newItem{
+    NSUndoManager *um = [self undoManager];
+    if(um){
+        [[um prepareWithInvocationTarget:self] removeItem:newItem];
+    }
+    [items addObject:newItem];
+    NSDictionary *notifInfo = [NSDictionary dictionaryWithObjectsAndKeys:newItem, @"item",nil];
+	[[NSNotificationCenter defaultCenter] postNotificationName:BDSKBibCollectionItemAddedNotification
+														object:self
+													  userInfo:notifInfo];
+    
+}
 
-    // note that undo should use the trimmed set.
-    foreach(pub, newPublications){
+- (void)addItemsFromArray:(NSMutableArray *)newitems {
+    NSSet *existingSet = [NSSet setWithArray:items];
+
+    foreach(pub, newitems){
         if(![existingSet containsObject:pub]){
-            [publications addObject:pub];
+            [self addItem:pub];
         }
     }
 }
 
-- (void)removePublicationsInArray:(NSArray *)thePublications {
-    [publications removeObjectsInArray:thePublications];
+- (void)removeItemsInArray:(NSMutableArray *)theItems {
+    foreach(item, theItems){
+        [self removeItem:item];
+    }
+}
+
+- (void)removeItem:(id)item{
+    NSUndoManager *um = [self undoManager];
+    if(um){
+        [[um prepareWithInvocationTarget:self] addItem:item];
+    }
+    [items removeObject:item];
+    NSDictionary *notifInfo = [NSDictionary dictionaryWithObjectsAndKeys:item, @"item",nil];
+	[[NSNotificationCenter defaultCenter] postNotificationName:BDSKBibCollectionItemRemovedNotification
+														object:self
+													  userInfo:notifInfo];
+    
 }
 
 - (unsigned)count { return [subCollections count]; }
@@ -120,7 +178,7 @@
 - (NSMutableArray *)subCollections { return [[subCollections retain] autorelease]; }
 
 
-- (void)setSubCollections:(NSArray *)newSubCollections {
+- (void)setSubCollections:(NSMutableArray *)newSubCollections {
     //NSLog(@"in -setSubCollections:, old value of subCollections: %@, changed to: %@", subCollections, newSubCollections);
     
     if (subCollections != newSubCollections) {
@@ -129,12 +187,15 @@
     }
 }
 
+- (void)addSubCollection:(BibCollection *)newSubCollection{
+	[subCollections addObject:newSubCollection];
+}
 
 
 - (NSMutableArray *)exporters { return [[exporters retain] autorelease]; }
 
 
-- (void)setExporters:(NSArray *)newExporters {
+- (void)setExporters:(NSMutableArray *)newExporters {
     //NSLog(@"in -setExporters:, old value of exporters: %@, changed to: %@", exporters, newExporters);
     
     if (exporters != newExporters) {
@@ -156,7 +217,7 @@
 
 - (void)dealloc {
     [name release];
-    [publications release];
+    [items release];
     [subCollections release];
     [exporters release];
     [super dealloc];
