@@ -1189,6 +1189,7 @@
 				27E0A9F605A7C86B005BA25A,
 				27E0AA1E05A7C86B005BA25A,
 				27E0AA4705A7C86B005BA25A,
+				F9BC92BC06E0F0C700B42137,
 				27E0AA6F05A7C86B005BA25A,
 				27E0AA7605A7C86B005BA25A,
 				27E0AA7A05A7C86B005BA25A,
@@ -1279,6 +1280,7 @@
 				27BF060606D7F097008AD3AE,
 				27BF060806D7F097008AD3AE,
 				27770FD306D94B2D0070C5F0,
+				F9A59EE206DFE7DD00C411CA,
 			);
 			isa = PBXHeadersBuildPhase;
 			runOnlyForDeploymentPostprocessing = 0;
@@ -1593,6 +1595,7 @@
 				6CA69E0906D2A382005F2126,
 				6CA69E0A06D2A388005F2126,
 				6CA69E0B06D2A38D005F2126,
+				F9A59EDB06DFE4B400C411CA,
 			);
 			isa = PBXResourcesBuildPhase;
 			runOnlyForDeploymentPostprocessing = 0;
@@ -1822,6 +1825,7 @@
 				27BF060706D7F097008AD3AE,
 				27BF060906D7F097008AD3AE,
 				27770FD406D94B2D0070C5F0,
+				F9A59EE106DFE7DD00C411CA,
 			);
 			isa = PBXSourcesBuildPhase;
 			runOnlyForDeploymentPostprocessing = 0;
@@ -2240,7 +2244,6 @@
 		2A37F4AAFDCFA73011CA2CEA = {
 			children = (
 				19C28FB0FE9D524F11CA2CBB,
-				6C19F0AE06BF108800B3C7A4,
 				2A37F4ABFDCFA73011CA2CEA,
 				2A37F4AFFDCFA73011CA2CEA,
 				F5A86D8F0398EAB601A80164,
@@ -2355,6 +2358,8 @@
 		};
 		2A37F4B8FDCFA73011CA2CEA = {
 			children = (
+				F9BC920306E0EBB500B42137,
+				F9A59EDA06DFE4B400C411CA,
 				6CE46CB006C03BBB006BD69D,
 				F9D8602306B2FC7D00F2DE7D,
 				F9D6C21E06AED39F00EAEB04,
@@ -2555,15 +2560,6 @@
 			isa = PBXBuildFile;
 			settings = {
 			};
-		};
-		6C19F0AE06BF108800B3C7A4 = {
-			fileEncoding = 30;
-			isa = PBXFileReference;
-			lastKnownFileType = text;
-			name = Bibdesk.crash.log;
-			path = /Users/ssp/Library/Logs/CrashReporter/Bibdesk.crash.log;
-			refType = 0;
-			sourceTree = "<absolute>";
 		};
 		6C19F0E806BF1B9300B3C7A4 = {
 			fileEncoding = 4;
@@ -3613,6 +3609,8 @@
 				F5F7774603E9156E01EF0ABE,
 				F5F7774703E9156E01EF0ABE,
 				F5F7774803E9156E01EF0ABE,
+				F9A59EDF06DFE7DD00C411CA,
+				F9A59EE006DFE7DD00C411CA,
 			);
 			isa = PBXGroup;
 			name = "Appkit extensions";
@@ -4616,6 +4614,48 @@
 			target = F9AC17700638709B009399C1;
 			targetProxy = F9A008F30638C01400426F15;
 		};
+		F9A59EDA06DFE4B400C411CA = {
+			isa = PBXFileReference;
+			lastKnownFileType = wrapper.nib;
+			name = BibPref_InputManager.nib;
+			path = English.lproj/BibPref_InputManager.nib;
+			refType = 4;
+			sourceTree = "<group>";
+		};
+		F9A59EDB06DFE4B400C411CA = {
+			fileRef = F9A59EDA06DFE4B400C411CA;
+			isa = PBXBuildFile;
+			settings = {
+			};
+		};
+		F9A59EDF06DFE7DD00C411CA = {
+			fileEncoding = 30;
+			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.c.objc;
+			path = BibPref_InputManager.m;
+			refType = 4;
+			sourceTree = "<group>";
+		};
+		F9A59EE006DFE7DD00C411CA = {
+			fileEncoding = 30;
+			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.c.h;
+			path = BibPref_InputManager.h;
+			refType = 4;
+			sourceTree = "<group>";
+		};
+		F9A59EE106DFE7DD00C411CA = {
+			fileRef = F9A59EDF06DFE7DD00C411CA;
+			isa = PBXBuildFile;
+			settings = {
+			};
+		};
+		F9A59EE206DFE7DD00C411CA = {
+			fileRef = F9A59EE006DFE7DD00C411CA;
+			isa = PBXBuildFile;
+			settings = {
+			};
+		};
 		F9AC17700638709B009399C1 = {
 			buildPhases = (
 				F9AC1775063870B8009399C1,
@@ -4657,6 +4697,54 @@
 		};
 		F9B5E474062ADE3B00C8A129 = {
 			fileRef = F9B5E472062ADDE700C8A129;
+			isa = PBXBuildFile;
+			settings = {
+			};
+		};
+		F9BC920306E0EBB500B42137 = {
+			children = (
+				F9BC920406E0EBB500B42137,
+				F9BC920506E0EBB500B42137,
+			);
+			isa = PBXGroup;
+			path = BibDeskInputManager;
+			refType = 3;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+		F9BC920406E0EBB500B42137 = {
+			isa = PBXFileReference;
+			lastKnownFileType = "wrapper.plug-in";
+			path = BibDeskInputManager.bundle;
+			refType = 4;
+			sourceTree = "<group>";
+		};
+		F9BC920506E0EBB500B42137 = {
+			fileEncoding = 30;
+			isa = PBXFileReference;
+			lastKnownFileType = text.xml;
+			path = Info;
+			refType = 4;
+			sourceTree = "<group>";
+		};
+		F9BC92BC06E0F0C700B42137 = {
+			buildActionMask = 2147483647;
+			dstPath = BibDeskInputManager;
+			dstSubfolderSpec = 7;
+			files = (
+				F9BC92BE06E0F11200B42137,
+				F9BC92BD06E0F0F200B42137,
+			);
+			isa = PBXCopyFilesBuildPhase;
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		F9BC92BD06E0F0F200B42137 = {
+			fileRef = F9BC920406E0EBB500B42137;
+			isa = PBXBuildFile;
+			settings = {
+			};
+		};
+		F9BC92BE06E0F11200B42137 = {
+			fileRef = F9BC920506E0EBB500B42137;
 			isa = PBXBuildFile;
 			settings = {
 			};
