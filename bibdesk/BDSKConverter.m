@@ -297,16 +297,16 @@ static BDSKConverter *theConverter;
 - (BOOL)validateFormat:(NSString **)formatString forField:(NSString *)fieldName inFileType:(NSString *)type error:(NSString **)error
 {
 	// implemented specifiers, the same for any field and type
-	NSCharacterSet *validSpecifierChars = [NSCharacterSet characterSetWithCharactersInString:@"aAtTmyYlLkrRdc"];
-	NSCharacterSet *validLastSpecifierChars = [NSCharacterSet characterSetWithCharactersInString:@"uUn"];
-	NSCharacterSet *escapeSpecifierChars = [NSCharacterSet characterSetWithCharactersInString:@"0123456789%{}"];
+	NSCharacterSet *validSpecifierChars = [NSCharacterSet characterSetWithCharactersInString:@"aAtTmyYlLekrRdc"];
+	NSCharacterSet *validUniqueSpecifierChars = [NSCharacterSet characterSetWithCharactersInString:@"uUn"];
+	NSCharacterSet *validEscapeSpecifierChars = [NSCharacterSet characterSetWithCharactersInString:@"0123456789%{}"];
 	NSCharacterSet *validArgSpecifierChars = [NSCharacterSet characterSetWithCharactersInString:@"fc"];
 	NSCharacterSet *invalidCharSet = [[BibTypeManager sharedManager] strictInvalidCharactersForField:fieldName inFileType:type];
 	NSScanner *scanner = [NSScanner scannerWithString:*formatString];
 	NSMutableString *sanitizedFormatString = [NSMutableString string];
 	NSString *string = nil;
 	unichar specifier;
-	BOOL mustEnd = NO;
+	BOOL foundUnique = NO;
 	
 	[scanner setCharactersToBeSkipped:nil];
 	
@@ -318,10 +318,6 @@ static BDSKConverter *theConverter;
 		}
 		if (![scanner scanString:@"%" intoString: NULL]) { // we're at the end, so done
 			break;
-		}
-		if (mustEnd) { // a % was found after a 'unique' specifier
-			*error = [NSString stringWithFormat: NSLocalizedString(@"Specifier %%%C may only appear at end of format.", @""), specifier];
-			return NO;
 		}
 		if ([scanner isAtEnd]) {
 			*error = NSLocalizedString(@"Empty specifier % at end of format.", @"");
@@ -343,10 +339,14 @@ static BDSKConverter *theConverter;
 			string = [self stringBySanitizingString:string forField:fieldName inFileType:type];
 			[sanitizedFormatString appendFormat:@"{%@}", [string capitalizedString]]; // we need to have BibTeX field names capitalized
 		}
-		else if ([validLastSpecifierChars characterIsMember:specifier]) {
-			mustEnd = YES;
+		else if ([validUniqueSpecifierChars characterIsMember:specifier]) {
+			if (foundUnique) { // a second 'unique' specifier was found
+				*error = [NSString stringWithFormat: NSLocalizedString(@"specifier %%%C, unique specifiers can appear only once in format.", @""), specifier];
+				return NO;
+			}
+			foundUnique = YES;
 		}
-		else if ([escapeSpecifierChars characterIsMember:specifier]) {
+		else if ([validEscapeSpecifierChars characterIsMember:specifier]) {
 			if ([invalidCharSet characterIsMember:specifier]) {
 				*error = [NSString stringWithFormat: NSLocalizedString(@"Invalid escape specifier %%%C in format.", @""), specifier];
 				return NO;
@@ -394,6 +394,7 @@ static BDSKConverter *theConverter;
 				break;
 			case 'l':
 			case 'L':
+			case 'e':
 				[arr addObject:BDSKLocalUrlString];
 				break;
 			case 'f':

@@ -675,6 +675,10 @@ void _setupFonts(){
         [self setAuthorsFromBibtexString:[pubFields objectForKey: @"Editor" usingLock:bibLock]]; // or what else?
     }
 	
+	if([BDSKLocalUrlString isEqualToString:key]){
+		[self setNeedsToBeFiled:NO];
+	}
+	
     // re-call make type to make sure we still have all the appropriate bibtex defined fields...
     //@@ 3/5/2004: moved why is this here? 
     [self makeType:[self type]];
@@ -1114,11 +1118,8 @@ void _setupFonts(){
 	
 	NSEnumerator *fEnum = [[[NSApp delegate] requiredFieldsForLocalUrl] objectEnumerator];
 	NSString *fieldName;
-	NSString *fieldValue = [self valueOfField:BDSKLocalUrlString];
+	NSString *fieldValue;
 	
-	if (fieldValue != nil && ![fieldValue isEqualToString:@""]) {
-		return NO;
-	}
 	while (fieldName = [fEnum nextObject]) {
 		fieldValue = [self valueOfField:fieldName];
 		if (fieldValue == nil || [fieldValue isEqualToString:@""]) {
@@ -1154,11 +1155,12 @@ void _setupFonts(){
 {
 	BDSKConverter *converter = [BDSKConverter sharedConverter];
 	NSMutableString *parsedStr = [NSMutableString string];
+	NSString *savedStr = nil;
 	NSScanner *scanner = [NSScanner scannerWithString:format];
 	NSCharacterSet *digits = [NSCharacterSet decimalDigitCharacterSet];
 	NSString *string, *numStr;
-	int number, numAuth, i;
-	unichar specifier, nextChar;
+	int number, numAuth, i, uniqueNumber;
+	unichar specifier, nextChar, uniqueSpecifier = 0;
 	BibAuthor *auth;
 	NSMutableArray *arr;
 	NSScanner *wordScanner;
@@ -1362,6 +1364,17 @@ void _setupFonts(){
 						[parsedStr appendString:string];
 					}
 					break;
+				case 'e':
+					// old file extension
+					string = [self localURLPathRelativeTo:[[[self document] fileName] stringByDeletingLastPathComponent]];
+					if (string != nil) {
+						string = [string pathExtension];
+						if (![string isEqualToString:@""]) {
+							string = [converter stringBySanitizingString:string forField:fieldName inFileType:[self fileType]]; 
+							[parsedStr appendFormat:@".%@", string];
+						}
+					}
+					break;
 				case 'f':
 					// arbitrary field
 					if ([scanner scanString:@"{" intoString:NULL] &&
@@ -1450,85 +1463,63 @@ void _setupFonts(){
 					// escaped digit or %
 					[parsedStr appendFormat:@"%C", specifier];
 					break;
-				// the rest is only vallid at the end of the format
 				case 'u':
-					// unique lowercase letters
-					if ([scanner scanCharactersFromSet:digits intoString:&numStr]) {
-						number = [numStr intValue];
-					} else {
-						number = 1;
-					}
-					if ([scanner scanUpToString:@"%" intoString:&string]) {
-						string = [converter stringBySanitizingString:string forField:fieldName inFileType:[self fileType]];
-					}
-					else {
-						string = @"";
-					}
-					if ([scanner isAtEnd]) {
-						[parsedStr setString:[self uniqueString:parsedStr 
-														 suffix:string
-													   forField:fieldName
-												  numberOfChars:number 
-														   from:'a' to:'z' 
-														  force:(number == 0)]];
-					}
-					else {
-						NSLog(@"Specifier %%u can only be used at the end of format.");
-					}
-					break;
 				case 'U':
-					// unique uppercase letters
-					if ([scanner scanCharactersFromSet:digits intoString:&numStr]) {
-						number = [numStr intValue];
-					} else {
-						number = 1;
-					}
-					if ([scanner scanUpToString:@"%" intoString:&string]) {
-						string = [converter stringBySanitizingString:string forField:fieldName inFileType:[self fileType]];
-					}
-					else {
-						string = @"";
-					}
-					if ([scanner isAtEnd]) {
-						[parsedStr setString:[self uniqueString:parsedStr 
-														 suffix:string
-													   forField:fieldName
-												  numberOfChars:number 
-														   from:'A' to:'Z' 
-														  force:(number == 0)]];
-					}
-					else {
-						NSLog(@"Specifier %%U can only be used at the end of the format.");
-					}
-					break;
 				case 'n':
-					// unique number
-					if ([scanner scanCharactersFromSet:digits intoString:&numStr]) {
-						number = [numStr intValue];
-					} else {
-						number = 1;
+					// unique characters, these may only occur once
+					if (uniqueSpecifier == 0) {
+						uniqueSpecifier = specifier;
+						savedStr = parsedStr;
+						parsedStr = [NSMutableString string];
+						if ([scanner scanCharactersFromSet:digits intoString:&numStr]) {
+							uniqueNumber = [numStr intValue];
+						} else {
+							uniqueNumber = 1;
+						}
+					}
+					else {
+						NSLog(@"Specifier %%%C can only be used once in the format.", specifier);
 					}
 					if ([scanner scanUpToString:@"%" intoString:&string]) {
 						string = [converter stringBySanitizingString:string forField:fieldName inFileType:[self fileType]];
-					}
-					else {
-						string = @"";
-					}
-					if ([scanner isAtEnd]) {
-						[parsedStr setString:[self uniqueString:parsedStr 
-														 suffix:string
-													   forField:fieldName
-												  numberOfChars:number 
-														   from:'0' to:'9' 
-														  force:(number == 0)]];
-					}
-					else {
-						NSLog(@"Specifier %%%C can only be used at the end of format.", specifier);
+						[parsedStr appendString:string];
 					}
 					break;
 				default: 
 					NSLog(@"Unknown format specifier %%%C in format.", specifier);
 			}
+		}
+	}
+	
+	if (uniqueSpecifier != 0) {
+		switch (uniqueSpecifier) {
+			case 'u':
+				// unique lowercase letters
+				[parsedStr setString:[self uniqueString:savedStr 
+												 suffix:parsedStr
+											   forField:fieldName
+										  numberOfChars:uniqueNumber 
+												   from:'a' to:'z' 
+												  force:(uniqueNumber == 0)]];
+				break;
+			case 'U':
+				// unique uppercase letters
+				[parsedStr setString:[self uniqueString:savedStr 
+												 suffix:parsedStr
+											   forField:fieldName
+										  numberOfChars:uniqueNumber 
+												   from:'A' to:'Z' 
+												  force:(uniqueNumber == 0)]];
+				break;
+			case 'n':
+				// unique number
+				[parsedStr setString:[self uniqueString:savedStr 
+												 suffix:parsedStr
+											   forField:fieldName
+										  numberOfChars:uniqueNumber 
+												   from:'a' to:'z' 
+												  force:(uniqueNumber == 0)]];
+				break;
 		}
 	}
 	
