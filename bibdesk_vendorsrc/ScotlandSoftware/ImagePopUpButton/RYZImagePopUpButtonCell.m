@@ -8,7 +8,7 @@
 // -----------------------------------------
 
 // this used to be the designated intializer
-- (id)initTextCell:stringValue pullsDown:(BOOL)pullsDown
+- (id)initTextCell:(NSString *)stringValue pullsDown:(BOOL)pullsDown
 {
     self = [self initImageCell:[NSImage imageNamed: @"NSApplicationIcon"]];
     return self;
