@@ -229,8 +229,11 @@
 			<key>optional</key>
 			<array>
 				<string>Editor</string>
+				<string>Number</string>
 				<string>Volume</string>
+				<string>Type</string>
 				<string>Series</string>
+				<string>Month</string>
 				<string>Address</string>
 				<string>Edition</string>
 			</array>
@@ -273,8 +276,11 @@
 			<key>optional</key>
 			<array>
 				<string>Editor</string>
+				<string>Volume</string>
 				<string>Pages</string>
+				<string>Number</string>
 				<string>Organization</string>
+				<string>Series</string>
 				<string>Publisher</string>
 				<string>Address</string>
 				<string>Month</string>
@@ -340,6 +346,7 @@
 			<key>optional</key>
 			<array>
 				<string>Title</string>
+				<string>Howpublished</string>
 				<string>Author</string>
 				<string>Organization</string>
 				<string>Address</string>
