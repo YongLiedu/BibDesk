@@ -78,9 +78,6 @@ will translate this file into the necessary scriptSuite and scriptTerminology fi
 			         <property name="displayed publications" code="disp" type="list of publication" access="r" description="The publications currently displayed. This can differ from all publications depending on the state of the filter field and recently added publications.">
 			         	<cocoa method="displayedPublications"/>
 			         </property>
-			         <property name="auths" code="auth" type="list of author" access="r" description="The authors of publications in this bibliography.">
-			         	<cocoa method="authors"/>
-			         </property>
 			         
                 </properties>
 
