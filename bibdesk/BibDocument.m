@@ -2609,7 +2609,7 @@ This method always returns YES. Even if some or many operations fail.
     [textStorage fixesAttributesLazily];
     [textStorage beginEditing];
 
-    while(i = [enumerator nextObject] && (maxItems == 0 || itemCount < maxItems)){
+    while((i = [enumerator nextObject]) && (maxItems == 0 || itemCount < maxItems)){
 		itemCount++;
 
         switch([[OFPreferenceWrapper sharedPreferenceWrapper] integerForKey:BDSKPreviewDisplayKey]){
