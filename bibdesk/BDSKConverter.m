@@ -87,7 +87,6 @@ static NSDictionary *texifyConversions;
     // s should be in UTF-8 or UTF-16 (i'm not sure which exactly) format (since that's what the property list editor spat)
     // This direction could be faster, since we're comparing characters to the keys, but that'll be left for later.
     NSScanner *scanner = [[NSScanner alloc] initWithString:s];
-    [scanner setCharactersToBeSkipped:nil]; //otherwise it stalls on whitespace
     NSString *tmpConv = nil;
     NSMutableString *convertedSoFar = [s mutableCopy];
 
@@ -111,20 +110,31 @@ static NSDictionary *texifyConversions;
 	tmpConv = [s substringWithRange:NSMakeRange(index, 1)];
 
 	if(TEXString = [texifyConversions objectForKey:tmpConv]){
-		[convertedSoFar replaceCharactersInRange:NSMakeRange((index + offset), 1)
-									  withString:TEXString];
-		[scanner setScanLocation:(index + 1)];
-		offset += [TEXString length] - 1;    // we're adding length-1 characters, so we have to make sure we insert at the right point in the future.
-
+	    [convertedSoFar replaceCharactersInRange:NSMakeRange((index + offset), 1)
+								      withString:TEXString];
+	    [scanner setScanLocation:(index + 1)];
+	    offset += [TEXString length] - 1;    // we're adding length-1 characters, so we have to make sure we insert at the right point in the future.
 	} else {
-	    if(tmpConv != nil){ // if tmpConv is non-nil, we had a character that was accented and not in the dictionary
-		[NSObject cancelPreviousPerformRequestsWithTarget:self 
-							 selector:@selector(runConversionAlertPanel:)
-							   object:tmpConv];
-		[self performSelector:@selector(runConversionAlertPanel:) withObject:tmpConv afterDelay:0.1];
-		[scanner setScanLocation:(index + 1)]; // increment the scanner to go past the character that we don't have in the dict
+	    TEXString = [self convertedStringWithAccentedString:tmpConv];
+
+	    // Check to see if the unicode composition conversion worked.  If it fails, it returns the decomposed string, so we precompose it
+	    // and compare it to tmpConv; if they're the same, we know that the unicode conversion failed.
+	    if(![tmpConv isEqualToString:[TEXString precomposedStringWithCanonicalMapping]]){
+		// NSLog(@"plist didn't work, using unicode magic");
+		[convertedSoFar replaceCharactersInRange:NSMakeRange((index + offset), 1)
+					      withString:TEXString];
+		[scanner setScanLocation:(index + 1)];
+		offset += [TEXString length] - 1;
+	    } else {
+		if(tmpConv != nil){ // if tmpConv is non-nil, we had a character that was accented and not convertable by us
+		    [NSObject cancelPreviousPerformRequestsWithTarget:self 
+							     selector:@selector(runConversionAlertPanel:)
+							       object:tmpConv];
+		    [self performSelector:@selector(runConversionAlertPanel:) withObject:tmpConv afterDelay:0.1];
+		    [scanner setScanLocation:(index + 1)]; // increment the scanner to go past the character that we don't have in the dict
+		}
 	    }
-	}
+        }
     }
 		
     
@@ -133,6 +143,69 @@ static NSDictionary *texifyConversions;
     // shouldn't [tmpConv release]; ? I should look in the omni source code...
     
     return([convertedSoFar autorelease]);
+}
+
+- (NSString *)convertedStringWithAccentedString:(NSString *)s{
+    
+    // decompose into D form, make mutable
+    NSMutableString * t = [[[s decomposedStringWithCanonicalMapping] mutableCopy] autorelease];
+    
+    NSDictionary * accents = [NSDictionary dictionaryWithContentsOfFile:[[NSBundle mainBundle] pathForResource:@"Accents" ofType:@"plist"]];
+    NSArray * accentArray = [accents allKeys];
+    NSString * accentString = [accentArray componentsJoinedByString:@""];
+    NSCharacterSet * accentSet = [NSCharacterSet characterSetWithCharactersInString:accentString];
+    BOOL goOn = YES;
+    NSRange searchRange = NSMakeRange(0,[t length]);
+    NSRange foundRange;
+    NSRange composedRange;
+    NSString * replacementString;
+    
+    while (goOn) {
+	foundRange = [t rangeOfCharacterFromSet:accentSet options:NSLiteralSearch range:searchRange];
+
+	if (foundRange.location == NSNotFound) {
+	    // no more accents => STOP
+	    goOn = NO;
+	} else {
+	    // found an accent => process
+	    composedRange = [t rangeOfComposedCharacterSequenceAtIndex:foundRange.location];
+	    replacementString = [self convertBunch:[t substringWithRange:composedRange] usingDict:accents];
+	    [t replaceCharactersInRange:composedRange withString:replacementString];
+	    
+	    // move searchable range
+	    searchRange.location = composedRange.location;
+	    searchRange.length = [t length] - composedRange.location;
+	}
+    }
+    
+    return [[t copy] autorelease];
+    
+}
+
+
+- (NSString*) convertBunch:(NSString*) s usingDict:(NSDictionary*) accents {
+    // isolate accent
+    NSString * unicodeAccent = [s substringFromIndex:[s length] -1];
+    NSString * accent = [accents objectForKey:unicodeAccent];
+    
+    // isolate character(s)
+    NSString * character = [s substringToIndex:[s length] - 1];
+    
+    // handle i and j (others as well?)
+    if ([character isEqualToString:@"i"] || [character isEqualToString:@"j"]) {
+	if (![accent isEqualToString:@"c"] && ![accent isEqualToString:@"d"] && ![accent isEqualToString:@"b"]) {
+	    character = [@"\\" stringByAppendingString:character];
+	}
+    }
+    
+    /* The following lines might give support for multiply accented characters. These are available in Unicode but don't seem to work in TeX.
+	
+	if ([character length] > 1) {
+	    character = [self convertBunch:character usingDict:accents];
+	}
+    */
+    
+    return [NSString stringWithFormat:@"{\\%@%@}", accent, character];
 }
 
 - (void)runConversionAlertPanel:(NSString *)tmpConv{

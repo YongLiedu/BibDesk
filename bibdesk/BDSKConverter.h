@@ -51,7 +51,23 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
  @result the string converted into ASCI TeX encoding
 */
 - (NSString *)stringByTeXifyingString:(NSString *)s;
-
+/*!
+    @method     convertedStringWithAccentedString:
+    @abstract   Convenience method that uses unicode decomposition to convert accented characters into a TeX sequence.
+    @discussion (comprehensive description)
+    @param      s The string to convert
+    @result     A unicode string consisting of either the proper TeX sequence, or the original string decomposed using canonical mapping if a TeX sequence could not be formed.
+*/
+- (NSString *)convertedStringWithAccentedString:(NSString *)s;
+/*!
+    @method     convertBunch:usingDict:
+    @abstract   Converts a decomposed accented string using a dictionary of accents
+    @discussion (comprehensive description)
+    @param      s Decomposed string (canonical mapping)
+    @param      accents Dictionary of available accents
+    @result     TeX sequence representing the character, or the decomposed character.
+*/
+- (NSString*) convertBunch:(NSString*)s usingDict:(NSDictionary*)accents;
 /*!
  @method stringByDeTeXifyingString:
  @abstract TeX -> UTF-8

@@ -1550,6 +1550,7 @@
 				F9D5D16306E10D44000E02C2,
 				F962B2ED06FF5E1D00003231,
 				F98DD664070CE82200BEC3D2,
+				F959D73C073546C300EC13A4,
 			);
 			isa = PBXResourcesBuildPhase;
 			runOnlyForDeploymentPostprocessing = 0;
@@ -2320,6 +2321,7 @@
 		};
 		2A37F4B8FDCFA73011CA2CEA = {
 			children = (
+				F959D73B073546C300EC13A4,
 				F98DD663070CE82200BEC3D2,
 				F962B2EC06FF5E1D00003231,
 				F9D5D16206E10D44000E02C2,
@@ -4064,6 +4066,20 @@
 		};
 		F94E46110610B17900A61471 = {
 			fileRef = F94E460F0610B17900A61471;
+			isa = PBXBuildFile;
+			settings = {
+			};
+		};
+		F959D73B073546C300EC13A4 = {
+			fileEncoding = 4;
+			isa = PBXFileReference;
+			lastKnownFileType = text.xml;
+			path = Accents.plist;
+			refType = 4;
+			sourceTree = "<group>";
+		};
+		F959D73C073546C300EC13A4 = {
+			fileRef = F959D73B073546C300EC13A4;
 			isa = PBXBuildFile;
 			settings = {
 			};
