@@ -46,7 +46,9 @@ static void addToolbarItem(NSMutableDictionary *theDict,NSString *identifier,NSS
     // (in the itemContent parameter).  Then this next line will do the right thing automatically.
     [item performSelector:settingSelector withObject:itemContent];
     [item setAction:action];
-	[item setMenuFormRepresentation:menuItem];
+    // The menuItem to be shown in text only mode. Don't reset this when we use the default behavior. 
+	if (menuItem)
+		[item setMenuFormRepresentation:menuItem];
     // Now that we've setup all the settings for this new toolbar item, we add it to the dictionary.
     // The dictionary retains the toolbar item for us, which is why we could autorelease it when we created
     // it (above).
@@ -78,7 +80,7 @@ static void addToolbarItem(NSMutableDictionary *theDict,NSString *identifier,NSS
                    self, @selector(setImage:),
 				   [NSImage imageNamed: @"newdoc"], 
 				   @selector(newPub:),
-                   NULL);
+                   nil);
 
     addToolbarItem(toolbarItems, DelDocToolbarItemIdentifier,
                    NSLocalizedString(@"Delete",@""), 
@@ -87,7 +89,7 @@ static void addToolbarItem(NSMutableDictionary *theDict,NSString *identifier,NSS
                    self, @selector(setImage:),  
 				   [NSImage imageWithLargeIconForToolboxCode:kToolbarDeleteIcon],
 				   @selector(delPub:),
-                   NULL);
+                   nil);
 
     addToolbarItem(toolbarItems, EditDocToolbarItemIdentifier,
                    NSLocalizedString(@"Edit",@""),
@@ -96,7 +98,7 @@ static void addToolbarItem(NSMutableDictionary *theDict,NSString *identifier,NSS
                    self, @selector(setImage:), 
 				   [NSImage imageNamed: @"editdoc"],
                    @selector(editPubCmd:), 
-				   NULL);
+				   nil);
 
     addToolbarItem(toolbarItems, EditDocToolbarItemIdentifier,
                    NSLocalizedString(@"Edit",@""),
@@ -105,7 +107,7 @@ static void addToolbarItem(NSMutableDictionary *theDict,NSString *identifier,NSS
                    self, @selector(setImage:), 
 				   [NSImage imageNamed: @"editdoc"],
                    @selector(editPubCmd:), 
-				   NULL);
+				   nil);
 	
 	
 	addToolbarItem(toolbarItems, PrvDocToolbarItemIdentifier,
@@ -123,7 +125,7 @@ static void addToolbarItem(NSMutableDictionary *theDict,NSString *identifier,NSS
                    NSLocalizedString(@"Toggle Custom Citations Drawer",@""),
                    self, @selector(setImage:),
                    [NSImage imageNamed: @"drawerToolbarImage"],
-                   @selector(toggleShowingCustomCiteDrawer:), NULL);
+                   @selector(toggleShowingCustomCiteDrawer:), nil);
 	
 	
 	menuItem = [[[NSMenuItem alloc] initWithTitle:NSLocalizedString(@"Search",@"") 
@@ -168,7 +170,7 @@ static void addToolbarItem(NSMutableDictionary *theDict,NSString *identifier,NSS
 
     [newItem setLabel:[item label]];
     [newItem setPaletteLabel:[item paletteLabel]];
-    if ([item view]!=NULL)
+    if ([item view]!=nil)
     {
         [newItem setView:[item view]];
     }
@@ -187,7 +189,7 @@ static void addToolbarItem(NSMutableDictionary *theDict,NSString *identifier,NSS
         [newItem setMinSize:NSMakeSize(110,NSHeight([[item view] bounds]))];
         [newItem setMaxSize:NSMakeSize(1000,NSHeight([[item view] bounds]))];
     }
-	else if ([newItem view]!=NULL)
+	else if ([newItem view]!=nil)
     {
         [newItem setMinSize:[[item view] bounds].size];
         [newItem setMaxSize:[[item view] bounds].size];
