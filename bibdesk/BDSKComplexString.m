@@ -107,7 +107,7 @@ static NSDictionary *globalMacroDefs;
 		else
 			NSLog(@"Warning: complex string being created without macro resolver. Macros in it will not be resolved.");
 		
-		expandedValue = [[self expandedValueFromArray:[self nodes]] retain];
+		// expandedValue is set and updated by setMacroResolver:
 	}		
     return self;
 }
