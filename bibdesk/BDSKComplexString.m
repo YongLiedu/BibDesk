@@ -200,6 +200,10 @@ static NSDictionary *globalMacroDefs;
     return retStr; 
 }
 
+- (NSString *)stringAsExpandedBibTeXString{
+    return [NSString stringWithFormat:@"{%@}", expandedValue];
+}
+
 #pragma mark complex string methods
 
 - (NSArray *)nodes{
@@ -442,5 +446,10 @@ static NSDictionary *globalMacroDefs;
 - (NSString *)stringAsBibTeXString{
 	return [NSString stringWithFormat:@"{%@}", self];
 }
+
+- (NSString *)stringAsExpandedBibTeXString{
+    return [self stringAsBibTeXString];
+}
+        
 
 @end

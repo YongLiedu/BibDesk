@@ -1631,7 +1631,7 @@ int compareSetLengths(NSSet *set1, NSSet *set2, void *context){
     // (don't just pass it 'e' - it needs its own enum.)
     if([[OFPreferenceWrapper sharedPreferenceWrapper] integerForKey:BDSKUsesTeXKey] == NSOnState){ 
         while(i = [e nextObject]){
-            [bibString appendString:[[shownPublications objectAtIndex:[i intValue]] bibTeXString]];
+            [bibString appendString:[[shownPublications objectAtIndex:[i intValue]] bibTeXStringByExpandingMacros]];
         }// while i is num of selected row                  
         [NSThread detachNewThreadSelector:@selector(PDFFromString:)
                                  toTarget:PDFpreviewer

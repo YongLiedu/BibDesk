@@ -233,4 +233,12 @@ typedef enum{
 */
 - (NSString *)stringAsBibTeXString;
 
+/*!
+    @method     stringAsExpandedBibTeXString
+    @abstract   Returns the value of the string as a BibTeX string value, enclosed in quoting braces.
+    @discussion For complex strings this returns the expanded bibtex string; calls stringAsBibTeXString for non-complex strings.
+    @result     (description)
+*/
+- (NSString *)stringAsExpandedBibTeXString;
+
 @end

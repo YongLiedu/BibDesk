@@ -294,6 +294,14 @@
 - (NSString *)bibTeXString;
 
 /*!
+    @method     bibTeXStringByExpandingMacros
+    @abstract   Returns the BibTeX value of this bib item with macros expanded.  It is TeXified based on default prefs for the application.
+    @discussion (comprehensive description)
+    @result     (description)
+*/
+- (NSString *)bibTeXStringByExpandingMacros;
+
+/*!
     @method RTFValue
     @abstract  returns a pretty RTF display for this bib item.
     @discussion «discussion»

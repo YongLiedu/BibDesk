@@ -1034,7 +1034,7 @@ setupParagraphStyle()
     return [mas autorelease];
 }
 
-- (NSString *)bibTeXStringByTeXifying:(BOOL)shouldTeXify{
+- (NSString *)bibTeXStringByTeXifying:(BOOL)shouldTeXify expandMacros:(BOOL)expand{
     NSString *k;
     NSString *v;
     NSMutableString *s = [[[NSMutableString alloc] init] autorelease];
@@ -1077,7 +1077,10 @@ setupParagraphStyle()
 							
 		}                
 		
-		valString = [v stringAsBibTeXString];
+        if(expand == YES)
+            valString = [v stringAsExpandedBibTeXString];
+        else
+            valString = [v stringAsBibTeXString];
         
         if(![v isEqualToString:@""]){
             [s appendString:@",\n\t"];
@@ -1091,9 +1094,16 @@ setupParagraphStyle()
 
 - (NSString *)bibTeXString{
     if([[OFPreferenceWrapper sharedPreferenceWrapper] boolForKey:BDSKShouldTeXifyWhenSavingAndCopying]){
-        return [self bibTeXStringByTeXifying:YES];
+        return [self bibTeXStringByTeXifying:YES expandMacros:NO];
     } else
-        return [self bibTeXStringByTeXifying:NO];
+        return [self bibTeXStringByTeXifying:NO expandMacros:NO];
+}
+
+- (NSString *)bibTeXStringByExpandingMacros{
+    if([[OFPreferenceWrapper sharedPreferenceWrapper] boolForKey:BDSKShouldTeXifyWhenSavingAndCopying]){
+        return [self bibTeXStringByTeXifying:YES expandMacros:YES];
+    } else
+        return [self bibTeXStringByTeXifying:NO expandMacros:YES];
 }
     
 #warning not currently XML entity-escaped !!
