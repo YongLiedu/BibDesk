@@ -514,7 +514,7 @@ http://home.planet.nl/~faase009/GNU.txt
                     }
                 }
 	}
-    return [[mString copy] autorelease];
+    return mString;
 }
 
 @end

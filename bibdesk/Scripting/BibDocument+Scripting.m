@@ -55,7 +55,7 @@ Scripting Key-Value coding method to access an author by his name
 Accessor to get the current state of the filter field.
 */
 -(NSString*) filterField {
-	return [[[searchField stringValue] copy] autorelease];
+	return [searchField stringValue];
 }
 
 

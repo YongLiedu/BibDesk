@@ -148,7 +148,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 //    while(auth = [authE nextObject]){
 //        [authStringsArray addObject:[auth name]];
 //    }
-//    return [[authStringsArray copy] autorelease];
+//    return authStringsArray;
 //}
 
 - (NSString *)currentlySelectedItem{
