@@ -81,9 +81,9 @@ NSRange SafeForwardSearchRange( unsigned startLoc, unsigned seekLength, unsigned
     return theDocument;
 }
 
-- (void)parseItemsFromString:(NSString *)fullString addToDocument:(BibDocument *)document{
+- (void)parseItemsFromString:(NSString *)fullString addToDocument:(BibDocument *)document frontMatter:(NSMutableString *)frontMatter{
     BOOL hadProblems;
-    [self itemsFromString:fullString error:&hadProblems frontMatter:nil filePath:[document fileName] addToDocument:document];
+    [self itemsFromString:fullString error:&hadProblems frontMatter:frontMatter filePath:[document fileName] addToDocument:document];
 }
 
 NSRange SafeBackwardSearchRange(NSRange startRange, unsigned seekLength){
@@ -208,6 +208,7 @@ NSRange SafeBackwardSearchRange(NSRange startRange, unsigned seekLength){
                                                                    string:fullString
                                                                  filePath:filePath
                                                               hadProblems:&*hadProblems]];
+                NSLog(@"frontMatter is %@", frontMatter);
                 nextAtRange = [fullString rangeOfString:@"@" options:NSLiteralSearch range:SafeForwardSearchRange([scanner scanLocation], fullStringLength - [scanner scanLocation], fullStringLength)];
                 if(nextAtRange.location != NSNotFound){
                     entryClosingBraceRange = [fullString rangeOfString:@"}" options:NSLiteralSearch | NSBackwardsSearch range:NSMakeRange([scanner scanLocation], nextAtRange.location - [scanner scanLocation])];
@@ -467,6 +468,15 @@ NSRange SafeBackwardSearchRange(NSRange startRange, unsigned seekLength){
         [[NSNotificationCenter defaultCenter] postNotificationName:BDSKDocumentUpdateUINotification object:nil]; // tell the doc to update; this will happen on the main thread
     }
 
+#warning FIXME: macros
+    // temporary hack to save @string definitions along with frontmatter
+    NSEnumerator *stringEnum = [stringsDictionary keyEnumerator];
+    NSString *theString = nil;
+    while(theString = [stringEnum nextObject]){
+        [frontMatter appendFormat:@"@string{%@ = %@}\n\n", theString, [stringsDictionary objectForKey:theString]];
+    }
+    // end @string hack
+    
     [bibItemArray retain]; // don't release this when we release the threadPool!
 
     [threadPool release];
@@ -493,8 +503,10 @@ NSRange SafeBackwardSearchRange(NSRange startRange, unsigned seekLength){
     value = [fullString substringWithRange:NSMakeRange([scanner scanLocation], range.location - [scanner scanLocation])];
     value = [value stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceCharacterSet]];
 
-    if([[fullString substringWithRange:NSMakeRange([scanner scanLocation], 1)] isEqualToString:@"\""])
-        value = [value stringByTrimmingCharactersInSet:trimQuoteCharacterSet];
+#warning FIXME: macros
+    // not sure if the macro support will want these quoted or unquoted; in order to save them with the frontmatter, I'm leaving quotes for now, if they exist.
+//    if([[fullString substringWithRange:NSMakeRange([scanner scanLocation], 1)] isEqualToString:@"\""])
+//        value = [value stringByTrimmingCharactersInSet:trimQuoteCharacterSet];
     
     NSAssert( [scanner scanLocation] < range.location, @"Scanner scanned out of range!" );
     

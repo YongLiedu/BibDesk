@@ -1048,7 +1048,7 @@ stringByAppendingPathComponent:@"BibDesk"]; */
 - (void)parseInBackground:(NSString *)fileContents{
     NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
     BibTeXParser *parser = [[BibTeXParser alloc] init];
-    [parser parseItemsFromString:fileContents addToDocument:self];
+    [parser parseItemsFromString:fileContents addToDocument:self frontMatter:frontMatter];
     [parser release];
     [pool release];
 }    
