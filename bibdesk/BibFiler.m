@@ -74,8 +74,7 @@ static BibFiler *_sharedFiler = nil;
 	
 	foreach(paper , papers){
 		path = [paper localURLPath];
-		//newPath = [[NSURL URLWithString:[paper suggestedLocalUrl]] path];
-        newPath = [paper suggestedLocalUrl];
+		newPath = [[NSURL URLWithString:[paper suggestedLocalUrl]] path];
 		[self movePath:path toPath:newPath forPaper:paper fromDocument:doc moveAll:moveAll];
 	}
 	
