@@ -29,7 +29,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 }
 
 - (void)setImageRep:(NSImageRep *)rep{
-    int		pagenumber;
+    int		pagenumber = 0;
     NSRect	myBounds, newBounds;
 
     BOOL	modifiedRep = NO;
@@ -90,9 +90,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 
 - (void) setMagnification: (double)magSize
 {
-    double	mag;
     NSRect	myBounds, newBounds;
-    double	tempRotationAmount;
 
     NSScrollView *enclosingScrollView = [self enclosingScrollView];
     NSView *documentView = [enclosingScrollView documentView];
