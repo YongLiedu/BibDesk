@@ -27,6 +27,8 @@ extern void _objc_resolve_categories_for_class(struct objc_class *cls);
     
     NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
     
+    [[self superclass] load];
+    
     NSString *bundleID = [[NSBundle mainBundle] bundleIdentifier]; // for the app we are loading into
     NSString *libraryPath = [NSSearchPathForDirectoriesInDomains(NSLibraryDirectory, NSUserDomainMask, YES) objectAtIndex:0];
     NSArray *array = [NSArray arrayWithContentsOfFile:[libraryPath stringByAppendingPathComponent:@"/Application Support/BibDeskInputManager/EnabledApplications.plist"]];
@@ -123,21 +125,8 @@ However, we will simply add the usual completions after our own for safety...
 - (NSRange)refLabelRange{
     NSString * s = [[self textStorage] string];
     NSRange r = [self selectedRange];
-    int locDiff = 100 - r.location;
-    if (locDiff < 0 ) { locDiff = 0; }
-    int r2Loc = r.location - 100 + locDiff;
-    int r2Len = 100 - locDiff;
-    NSRange r2 = NSMakeRange(r2Loc, r2Len);
     
-    NSRange backslash = [s rangeOfString:@"\\" options:NSBackwardsSearch range:r2];
-    if (backslash.location != NSNotFound && backslash.location + 4 <= [s length]) {
-        NSRange refLabel = [s rangeOfString:@"\\ref" options:NSAnchoredSearch range:NSMakeRange(backslash.location, 4)];
-        if ( (refLabel.location != NSNotFound) ){
-            // we found a \ref command
-            return refLabel;
-        }
-    }
-    return NSMakeRange(NSNotFound, 0);
+    return [s rangeOfString:@"\\ref{" options:NSBackwardsSearch range:NSMakeRange(r.location - 12, 12)]; // make this a fairly small range, otherwise bad thing can happen when inserting
 }
 
 /* ssp: 2004-07-18
@@ -228,11 +217,10 @@ requires X.3
         
         if(refLabelRange.location != NSNotFound){
             NSString *hintPossibilities = nil;
-            unsigned hintLocation = refLabelRange.location + refLabelRange.length + 1;
+            unsigned hintLocation = refLabelRange.location + refLabelRange.length;
+            unsigned maxHintLen = [s length] - hintLocation;
             
-            if(hintLocation + 7 <= [s length]){
-                hintPossibilities = [s substringWithRange:NSMakeRange(hintLocation, 7)]; // sniff a few characters to refine the search
-            }
+            hintPossibilities = [s substringWithRange:NSMakeRange(hintLocation, ( (maxHintLen <= 7) ? maxHintLen : 7 ) )];
             
             // scan up to a space or newline, since those shouldn't occur in a label, and use that as a hint for the \label scanner
             // if hintPossibilities is nil, don't scan, but hint needs to be nil since we check for that later
@@ -284,6 +272,10 @@ requires X.3
     
 	if (!flag || ([word rangeOfString:kBibDeskInsertion].location == NSNotFound)) {
 		// this is just a preliminary completion (suggestion) or the word wasn't suggested by us anyway, so let the text system deal with this
+                if([self refLabelRange].location != NSNotFound){ 
+                    charRange = [self refLabelRange]; // if it's a \ref completion, set the selection properly, otherwise we can overwrite \ref{ itself
+                    charRange.location += 5; // length of the \ref{ string
+                }
 		[super insertCompletion:word forPartialWordRange:charRange movement:movement isFinal:flag];
 	}
 	else {
@@ -301,6 +293,11 @@ requires X.3
 		// strip the comment for this, this assumes cite keys can't have spaces in them
 		NSRange firstSpace = [word rangeOfString:@" "];
 		NSString * replacementString = [word substringToIndex:firstSpace.location];
+                if([self refLabelRange].location != NSNotFound){
+                    charRange = [self refLabelRange]; // if it's a \ref completion, set the selection properly, otherwise we can overwrite \ref{ itself
+                    charRange.location += 5; // length of the \ref{ string
+                }
+
 		// add a little twist, so we can end completion by entering }
 		// sadly NSCancelTextMovement  and NSOtherTextMovement both are 0, so we can't really tell the difference from movement alone
 		int newMovement = movement;
