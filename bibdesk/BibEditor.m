@@ -291,7 +291,7 @@ NSString *BDSKUrlString = @"Url";
 - (IBAction)showCiteKeyWarning:(id)sender{
 	int rv;
 	rv = NSRunCriticalAlertPanel(NSLocalizedString(@"",@""), 
-								 NSLocalizedString(@"The citation key you entered is either already used in this document or is empty. Please provide an unique one.",@""),
+								 NSLocalizedString(@"The citation key you entered is either already used in this document or is empty. Please provide a unique one.",@""),
 								  NSLocalizedString(@"OK",@"OK"), nil, nil, nil);
 }
 
