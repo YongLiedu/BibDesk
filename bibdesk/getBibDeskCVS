@@ -1,6 +1,6 @@
 #!/usr/bin/perl -w
 
-print "*******************************\n";
+print "\n*******************************\n";
 print "Welcome to BibDesk development.\n";
 print "This script will get the stuff you need from cvs to build bibdesk.\n";
 print "Developers should set SF_USERNAME to use ssh access\n";
@@ -17,14 +17,16 @@ getsources();
 print "\n****************************\n";                     
 print "getBibdeskCVS done.  Now you should open\n";
 print "bibdesk/Bibdesk.pbproj and commence the build.\n";
+print "To Build you must have your Build Preferences set\n";
+print "to \"Separate Location for Build Products\"\n\n";
 
 sub getSFName {
   if (defined $ENV{'SF_USERNAME'} ) { 
 	return $ENV{'SF_USERNAME'};
   } else {
-      print "Are you a developer (y/n)? ";
+      print "Are you a developer using ssh access (y/n)? ";
       $DEV = <STDIN>;
-      if ( $DEV eq "n\n" ) {
+      if ( $DEV =~ /^n/ ) {
 	  return "";
       } else {
          print "What is your sourceforge username (setenv SF_USERNAME for a default)?  ";
@@ -39,7 +41,7 @@ sub prepanon {
   $SFNAME = "anonymous";
   $LOGIN = "cvs -z3 -d:$CVS_METHOD:$SFNAME\@cvs.sourceforge.net:/cvsroot/bibdesk login";
   print "$LOGIN\n";
-  print "Password is empty--just hit return when asked for a password\n";
+  print "\nPassword is empty--just hit return when asked for a password\n";
   system $LOGIN;
 }
 
@@ -50,10 +52,31 @@ sub prepdev {
 
 sub getsources {
    $GETMAIN = "cvs -z3 -d:$CVS_METHOD:$SFNAME\@cvs.sourceforge.net:/cvsroot/bibdesk co bibdesk";
-   print "$GETMAIN\n";
-   system $GETMAIN;
+   tryGet($GETMAIN);
 
    $GETVENDOR = "cvs -z3 -d:$CVS_METHOD:$SFNAME\@cvs.sourceforge.net:/cvsroot/bibdesk co bibdesk_vendorsrc";
-   print "$GETVENDOR\n";
-   system $GETVENDOR;
+   tryGet($GETVENDOR);
+
 }
+
+sub tryGet {
+  $toGet = shift;
+
+  print "Executing: $toGet\n";
+       
+  if ( (system $toGet) != 0) { #return of 0 indicates success
+     print "cvs failed.  Check messages above. Should I try again? (y/n)?";
+     undef $tryAgain;
+     $tryAgain = <STDIN>;
+       
+     if ($tryAgain =~  /^y/) {
+       getsources();
+     } else {
+      print "cvs failed.  Please read messages above and";
+      print " try again in a few moments\n";
+      exit;
+     }
+  } 
+}
+
+
