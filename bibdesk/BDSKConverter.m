@@ -80,12 +80,12 @@ static NSCharacterSet *SkipSet;
 				[convertedSoFar replaceCharactersInRange:NSMakeRange((scannerScanLocation(scanner) + offset - 1), 1)
 											  withString:TEXString];
 				offset += [TEXString length] - 1;    // we're adding length-1 characters, so we have to make sure we insert at the right point in the future.
-			}else{
-			    [NSObject cancelPreviousPerformRequestsWithTarget:self 
-								     selector:@selector(runConversionAlertPanel)
-								       object:nil];
-			    [self performSelector:@selector(runConversionAlertPanel) withObject:nil afterDelay:0.1];
-			}
+			}else if(tmpConv != nil){ // if tmpConv is non-nil, we had a character that was accented and not in the dictionary
+			      [NSObject cancelPreviousPerformRequestsWithTarget:self 
+								       selector:@selector(runConversionAlertPanel)
+								         object:nil];
+			      [self performSelector:@selector(runConversionAlertPanel) withObject:nil afterDelay:0.1];
+			     }
 	    }
 		
     }
