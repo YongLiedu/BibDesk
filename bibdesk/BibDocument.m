@@ -2063,7 +2063,7 @@ This method always returns YES. Even if some or many operations fail.
 
 - (void)handleBibItemChangedNotification:(NSNotification *)notification{
 	// dead simple for now
-	 NSLog(@"got handleBibItemChangedNotification with userinfo %@", [notification userInfo]);
+	// NSLog(@"got handleBibItemChangedNotification with userinfo %@", [notification userInfo]);
 	NSDictionary *userInfo = [notification userInfo];
 	
 	NSString *changedKey = [userInfo objectForKey:@"key"];
