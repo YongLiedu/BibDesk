@@ -75,3 +75,4 @@ extern NSString *BDSKTableViewFontChangedNotification;
 extern NSString *BDSKPreviewDisplayChangedNotification;
 extern NSString *BDSKCustomStringsChangedNotification;
 extern NSString *BDSKTableColumnChangedNotification;
+extern NSString *BDSKBibItemChangedNotification;

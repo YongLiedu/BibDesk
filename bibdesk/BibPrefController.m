@@ -64,3 +64,4 @@ NSString *BDSKTableViewFontChangedNotification = @"Tableview font selection is c
 NSString *BDSKPreviewDisplayChangedNotification = @"Preview Pane Preference Change Notification";
 NSString *BDSKCustomStringsChangedNotification = @"CustomStringsChangedNotification";
 NSString *BDSKTableColumnChangedNotification = @"TableColumnChangedNotification";
+NSString *BDSKBibItemChangedNotification = @"BibItem Changed notification";
