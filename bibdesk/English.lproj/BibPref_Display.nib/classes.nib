@@ -2,7 +2,7 @@
     IBClasses = (
         {
             ACTIONS = {changePreviewDisplay = id; changeShownColumns = id; chooseFont = id; }; 
-            CLASS = BibPref_Display; 
+            CLASS = "BibPref_Display"; 
             LANGUAGE = ObjC; 
             OUTLETS = {
                 displayPrefRadioMatrix = NSMatrix; 
@@ -12,8 +12,32 @@
             SUPERCLASS = OAPreferenceClient; 
         }, 
         {
+            ACTIONS = {
+                changeEditOnPaste = id; 
+                changePreviewDisplay = id; 
+                changeShownColumns = id; 
+                changeStartupBehavior = id; 
+                chooseAutoOpenFile = id; 
+                chooseFont = id; 
+                toggleShowWarnings = id; 
+            }; 
+            CLASS = "BibPref_General"; 
+            LANGUAGE = ObjC; 
+            OUTLETS = {
+                defaultBibFileField = NSTextField; 
+                displayPrefRadioMatrix = NSMatrix; 
+                editOnPasteButton = NSButton; 
+                fontPreviewField = NSTextField; 
+                openSheetAccessoryView = NSView; 
+                showColsButtons = NSMatrix; 
+                showErrorsCheckButton = NSButton; 
+                startupBehaviorRadio = NSMatrix; 
+            }; 
+            SUPERCLASS = OAPreferenceClient; 
+        }, 
+        {
             ACTIONS = {changeStartupBehavior = id; }; 
-            CLASS = BibPref_Startup; 
+            CLASS = "BibPref_Startup"; 
             LANGUAGE = ObjC; 
             OUTLETS = {
                 defaultBibFileField = NSTextField; 
