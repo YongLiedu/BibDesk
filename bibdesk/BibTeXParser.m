@@ -368,6 +368,7 @@ NSRange SafeBackwardSearchRange(NSRange startRange, unsigned seekLength){
                 BOOL balanced = [self hasBalancedQuotes:[fullString substringWithRange:NSMakeRange(leftDelimLocation, hashRange.location)] usingBraces:usingBraceDelimiter]; 
                 if(balanced){
                     NSLog(@"BibTeXParser thinks this should be a complex string");
+                    leftDelimLocation = [scanner scanLocation] - ((isMacro) ? 1 : 2); // rewind so we don't lose the first character
                     isMacro = YES;
                     rightDelim = @",\n"; // only search to the end of the line; if you can concatenate over multiple lines, this won't work
                     usingBraceDelimiter = NO;
