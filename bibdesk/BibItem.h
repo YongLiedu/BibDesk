@@ -140,6 +140,7 @@
 - (NSComparisonResult)pubTypeCompare:(BibItem *)aBI;
 - (NSComparisonResult)keyCompare:(BibItem *)aBI;
 - (NSComparisonResult)titleCompare:(BibItem *)aBI;
+- (NSComparisonResult)titleWithoutBracesCompare:(BibItem *)aBI;
 - (NSComparisonResult)dateCompare:(BibItem *)aBI;
 - (NSComparisonResult)auth1Compare:(BibItem *)aBI;
 - (NSComparisonResult)auth2Compare:(BibItem *)aBI;

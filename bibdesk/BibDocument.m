@@ -1703,8 +1703,8 @@ didClickTableColumn: (NSTableColumn *) tableColumn{
 		[shownPublications sortUsingSelector:@selector(keyCompare:)];
 	}else if([tcID isEqualToString:BDSKTitleString]){
 		
-		[publications sortUsingSelector:@selector(titleCompare:)];
-		[shownPublications sortUsingSelector:@selector(titleCompare:)];
+		[publications sortUsingSelector:@selector(titleWithoutBracesCompare:)];
+		[shownPublications sortUsingSelector:@selector(titleWithoutBracesCompare:)];
 	}else if([tcID isEqualToString:BDSKDateString]){
 		
 		[publications sortUsingSelector:@selector(dateCompare:)];

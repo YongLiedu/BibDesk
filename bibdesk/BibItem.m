@@ -280,6 +280,11 @@ setupParagraphStyle()
     return [[self title] localizedCaseInsensitiveCompare:[aBI title]];
 }
 
+- (NSComparisonResult)titleWithoutBracesCompare:(BibItem *)aBI{
+    NSString *titleNoBraces = [[self title] stringByRemovingCurlyBraces];
+    NSString *aBITitleNoBraces = [[aBI title] stringByRemovingCurlyBraces];
+    return [titleNoBraces localizedCaseInsensitiveCompare:aBITitleNoBraces];
+}
 
 /* Helper method that treats all the special cases of nil values properly, by making them smaller than all other dates.	It is used by the comparison methods for creation, modification and publication date.
 */	
