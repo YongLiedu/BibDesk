@@ -313,8 +313,6 @@ Handle Notifications by the popup button to update its icon and its menu before 
 													  userInfo:notifInfo];	
 	
 	[pub setDocument:nil];
-	// unregister with the publication's authors
-	[[pub pubAuthors] makeObjectsPerformSelector:@selector(removePubFromAuthorList:) withObject:pub];
 	[publications removeObjectIdenticalTo:pub];
 	[shownPublications removeObjectIdenticalTo:pub];
 	
