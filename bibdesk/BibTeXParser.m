@@ -121,7 +121,7 @@ NSRange SafeForwardSearchRange( unsigned startLoc, unsigned seekLength, unsigned
             [stringsDictionary addEntriesFromDictionary:[BibTeXParser macroStringFromScanner:scanner
                                                                                  endingRange:entryClosingBraceRange
                                                                                       string:fullString]];
-            // NSLog(@"stringsDict has %@", [stringsDictionary description]);
+            NSLog(@"stringsDict has %@", [stringsDictionary description]);
         } else {
             isStringValue = NO; // don't forget to reset this!
         }
@@ -325,7 +325,9 @@ NSRange SafeForwardSearchRange( unsigned startLoc, unsigned seekLength, unsigned
 
     value = [fullString substringWithRange:NSMakeRange([scanner scanLocation], range.location - [scanner scanLocation])];
     value = [value stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceCharacterSet]];
-    value = [value stringByTrimmingCharactersInSet:trimQuoteCharacterSet];
+
+    if([[fullString substringWithRange:NSMakeRange([scanner scanLocation], 1)] isEqualToString:@"\""])
+        value = [value stringByTrimmingCharactersInSet:trimQuoteCharacterSet];
     
     NSAssert( [scanner scanLocation] < range.location, @"Scanner scanned out of range!" );
     
