@@ -98,6 +98,7 @@ static BibFiler *_sharedFiler = nil;
 				status = NSLocalizedString(@"Generated file path exists and the linked file does not exist.", @"");
 			}
 		}else{
+                        [fm createPathToFile:newPath attributes:nil]; // create parent directories if necessary (OmniFoundation)
 			if([fm movePath:path toPath:newPath handler:self]){
 				[paper setField:@"Local-Url" toValue:[[NSURL fileURLWithPath:newPath] absoluteString]];
 				//status = NSLocalizedString(@"Successfully moved.",@"");
