@@ -3788,7 +3788,7 @@
 		F920DB22075C2D40000C5FCA = {
 			buildActionMask = 2147483647;
 			files = (
-				F920DB26075C2D8F000C5FCA,
+				F9E1B2C7076BC33200ADAE66,
 			);
 			isa = PBXRezBuildPhase;
 			runOnlyForDeploymentPostprocessing = 0;
@@ -3801,12 +3801,6 @@
 			path = ../BibDeskScripting.r;
 			refType = 4;
 			sourceTree = "<group>";
-		};
-		F920DB26075C2D8F000C5FCA = {
-			fileRef = F920DB25075C2D8F000C5FCA;
-			isa = PBXBuildFile;
-			settings = {
-			};
 		};
 		F988709007580CB4001D4D49 = {
 			children = (
@@ -4165,6 +4159,12 @@
 			);
 			isa = PBXHeadersBuildPhase;
 			runOnlyForDeploymentPostprocessing = 0;
+		};
+		F9E1B2C7076BC33200ADAE66 = {
+			fileRef = F920DB25075C2D8F000C5FCA;
+			isa = PBXBuildFile;
+			settings = {
+			};
 		};
 		F9F14A47075811CF008BA22F = {
 			buildPhases = (

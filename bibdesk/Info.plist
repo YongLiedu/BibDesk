@@ -60,9 +60,9 @@
 	<key>CFBundleExecutable</key>
 	<string>Bibdesk</string>
 	<key>CFBundleGetInfoHTML</key>
-	<string>&lt;B&gt;BibDesk&lt;/B&gt; Version 0.96.2</string>
+	<string>&lt;B&gt;BibDesk&lt;/B&gt; Version 0.97</string>
 	<key>CFBundleGetInfoString</key>
-	<string>version 0.96.2</string>
+	<string>version 0.97</string>
 	<key>CFBundleHelpBookFolder</key>
 	<string>BibDesk Help</string>
 	<key>CFBundleHelpBookName</key>
@@ -78,37 +78,17 @@
 	<key>CFBundlePackageType</key>
 	<string>APPL</string>
 	<key>CFBundleShortVersionString</key>
-	<string>0.96.2</string>
+	<string>0.97</string>
 	<key>CFBundleSignature</key>
 	<string>BDSK</string>
 	<key>CFBundleVersion</key>
-	<string>0.96.2</string>
+	<string>0.97</string>
 	<key>NSAppleScriptEnabled</key>
 	<string>YES</string>
 	<key>NSMainNibFile</key>
 	<string>MainMenu</string>
 	<key>NSPrincipalClass</key>
 	<string>OAApplication</string>
-        <key>UTExportedTypeDeclarations</key>
-                <array>
-		<dict>
-			<key>UTTypeConformsTo</key>
-			<array>
-				<string>public.data</string>
-			</array>
-			<key>UTTypeDescription</key>
-			<string>bibTeX database</string>
-			<key>UTTypeIdentifier</key>
-			<string>edu.ucsd.cs.mmccrack.bibdesk.bib</string>
-			<key>UTTypeTagSpecification</key>
-			<dict>
-				<key>public.filename-extension</key>
-				<array>
-					<string>bib</string>
-				</array>
-			</dict>
-		</dict>
-	</array>
 	<key>NSServices</key>
 	<array>
 		<dict>
@@ -218,10 +198,10 @@
 					<string>0</string>
 					<key>Keep files in the papers folder organized</key>
 					<string>0</string>
-					<key>Path to the papers folder</key>
-					<string>~/Documents/Papers</string>
 					<key>Local-Url Format</key>
 					<string>%a%Y%u.pdf</string>
+					<key>Path to the papers folder</key>
+					<string>~/Documents/Papers</string>
 				</dict>
 				<key>icon</key>
 				<string>autofile.tiff</string>
@@ -326,6 +306,33 @@
 				<dict>
 					<key>BlueComponentColor of alternating rows Key</key>
 					<string>1.010918794815856e-310</string>
+					<key>Column Widths By Name</key>
+					<dict>
+						<key>1st Author</key>
+						<string>80</string>
+						<key>2nd Author</key>
+						<string>80</string>
+						<key>3rd Author</key>
+						<string>80</string>
+						<key>Category</key>
+						<string>50</string>
+						<key>Cite Key</key>
+						<string>85.4439697265625</string>
+						<key>Date</key>
+						<string>50</string>
+						<key>Local-Url</key>
+						<string>18</string>
+						<key>No Identifier</key>
+						<string>176</string>
+						<key>Read</key>
+						<string>29</string>
+						<key>Title</key>
+						<string>300</string>
+						<key>Type</key>
+						<string>55</string>
+						<key>Url</key>
+						<string>23</string>
+					</dict>
 					<key>Current Publication Type</key>
 					<string>6</string>
 					<key>Current Publication Type String</key>
@@ -349,36 +356,9 @@
 					<string>1.156487706076073e-310</string>
 					<key>Show Warnings in Error Panel</key>
 					<string>0</string>
-					<key>Column Widths By Name</key>
-					<dict>
-					  <key>1st Author</key>
-					  <string>80</string>
-					  <key>2nd Author</key>
-					  <string>80</string>
-					  <key>3rd Author</key>
-					  <string>80</string>
-					  <key>Category</key>
-					  <string>50</string>
-					  <key>Cite Key</key>
-					  <string>85.4439697265625</string>
-					  <key>Date</key>
-					  <string>50</string>
-					  <key>Local-Url</key>
-					  <string>18</string>
-					  <key>No Identifier</key>
-					  <string>176</string>
-					  <key>Read</key>
-					  <string>29</string>
-					  <key>Title</key>
-					  <string>300</string>
-					  <key>Type</key>
-					  <string>55</string>
-					  <key>Url</key>
-					  <string>23</string>
-					</dict>
 					<key>Shown Column Names</key>
 					<array>
-					  <string>Local-Url</string>
+						<string>Local-Url</string>
 						<string>Keywords</string>
 						<string>Type</string>
 						<string>Cite Key</string>
@@ -486,5 +466,25 @@
 			</dict>
 		</dict>
 	</dict>
+	<key>UTExportedTypeDeclarations</key>
+	<array>
+		<dict>
+			<key>UTTypeConformsTo</key>
+			<array>
+				<string>public.data</string>
+			</array>
+			<key>UTTypeDescription</key>
+			<string>bibTeX database</string>
+			<key>UTTypeIdentifier</key>
+			<string>edu.ucsd.cs.mmccrack.bibdesk.bib</string>
+			<key>UTTypeTagSpecification</key>
+			<dict>
+				<key>public.filename-extension</key>
+				<array>
+					<string>bib</string>
+				</array>
+			</dict>
+		</dict>
+	</array>
 </dict>
 </plist>
