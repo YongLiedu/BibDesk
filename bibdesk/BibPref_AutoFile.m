@@ -166,7 +166,7 @@
 				formatString = @"%L";
 				break;
 			case 2:
-				formatString = @"%l%n0.pdf";
+				formatString = @"%l%n0%e";
 				break;
 			case 3:
 				formatString = @"%a1/%Y%u0.pdf";
@@ -181,9 +181,8 @@
 		[defaults setObject:formatString forKey:BDSKLocalUrlFormatKey];
 	}
 	else { //changed the text field or added from the repository
-		NSString *formatString = [formatField stringValue];
 		NSString *error;
-		
+		formatString = [formatField stringValue];
 		//if ([formatString isEqualToString:[defaults stringForKey:BDSKLocalUrlFormatKey]]) return; // nothing changed
 		if ([[BDSKConverter sharedConverter] validateFormat:&formatString forField:BDSKLocalUrlString inFileType:BDSKBibtexString error:&error]) {
 			[defaults setObject:formatString forKey:BDSKLocalUrlFormatKey];
