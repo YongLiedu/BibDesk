@@ -795,7 +795,8 @@ void _setupFonts(){
     NSString *k;
     NSString *v;
     NSMutableString *s = [[[NSMutableString alloc] init] autorelease];
-    NSEnumerator *e = [pubFields keyEnumerator];
+    NSArray *keys = [[pubFields allKeys] sortedArrayUsingSelector:@selector(caseInsensitiveCompare:)];
+    NSEnumerator *e = [keys objectEnumerator];
     // @@REfactor: bibtex dependence:
     NSArray *types = [NSArray arrayWithObjects:@"article", @"book", @"booklet", @"inbook", @"incollection", @"inproceedings", @"manual", @"mastersthesis", @"misc", @"phdthesis", @"proceedings", @"techreport", @"unpublished", nil];
     //build BibTeX entry:
