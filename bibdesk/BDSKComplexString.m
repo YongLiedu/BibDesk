@@ -101,7 +101,7 @@ static NSCharacterSet *macroCharSet = nil;
 }
 
 - (void)encodeWithCoder:(NSCoder *)encoder{
-	[encoder encodeBool:type forKey:@"type"];
+	[encoder encodeInt:type forKey:@"type"];
     [encoder encodeObject:value forKey:@"value"];
 }
 
