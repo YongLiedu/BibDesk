@@ -206,6 +206,46 @@ NSString *stringFromBTField(AST *field,
         return [returnArray autorelease];
 }
 
++ (NSArray *)macrosFromBibTeXString:(NSString *)aString hadProblems:(BOOL *)hadProblems{
+    NSMutableArray *retArray = [NSMutableArray array];
+    AST *entry = NULL;
+    AST *field = NULL;
+    char *entryType = NULL;
+    char *fieldName = NULL;
+    
+    bt_initialize();
+    bt_set_stringopts(BTE_PREAMBLE, BTO_EXPAND);
+    bt_set_stringopts(BTE_REGULAR, BTO_MINIMAL);
+    boolean ok;
+    
+    NSString *macroKey;
+    NSString *macroString;
+    
+    FILE *stream = [[aString dataUsingEncoding:NSUTF8StringEncoding] openReadOnlyStandardIOFile];
+    
+    while(entry = bt_parse_entry(stream, NULL, 0, &ok)){
+        if(entry == NULL && ok) // this is the exit condition
+            break;
+        if(!ok){
+            *hadProblems = YES;
+            break;
+        }
+        entryType = bt_entry_type(entry);
+        if(strcmp(entryType, "string") != 0)
+            break;
+        field = bt_next_field(entry, NULL, &fieldName);
+        macroKey = [NSString stringWithBytes: field->text encoding:NSUTF8StringEncoding];
+        macroString = [NSString stringWithBytes: field->down->text encoding:NSUTF8StringEncoding];
+        [retArray addObject:[NSDictionary dictionaryWithObjectsAndKeys:macroKey, @"mkey", macroString, @"mstring", nil]];
+        bt_free_ast(entry);
+        entry = NULL;
+        field = NULL;
+    }
+    bt_cleanup();
+    fclose(stream);
+    return retArray;
+}
+
 + (NSString *)stringFromBibTeXValue:(NSString *)value error:(BOOL *)hadProblems document:(BibDocument *)aDocument{
 	NSString *entryString = [NSString stringWithFormat:@"@dummyentry{dummykey, dummyfield = %@}", value];
 	NSString *valueString = @"";

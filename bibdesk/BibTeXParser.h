@@ -16,6 +16,7 @@
 
 #import "BDSKComplexString.h"
 #import "BibPrefController.h"
+#import <OmniFoundation/NSString-OFExtensions.h>
 
 @interface BibTeXParser : NSObject {
 }
