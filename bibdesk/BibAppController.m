@@ -126,16 +126,27 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 	 	_formatters = [[NSMutableDictionary alloc] initWithCapacity:15]; // arbitrary
         _autocompletePunctuationCharacterSet = [[NSCharacterSet characterSetWithCharactersInString:@",:;"] retain];
 		
-		NSString *citeKeyFormat = [[OFPreferenceWrapper sharedPreferenceWrapper] objectForKey:BDSKCiteKeyFormatKey];
-		NSString *error;
+		NSString *formatString = [[OFPreferenceWrapper sharedPreferenceWrapper] objectForKey:BDSKCiteKeyFormatKey];
+		NSString *error = nil;
 		
-		if (![[BDSKConverter sharedConverter] validateFormat:&citeKeyFormat forField:@"Cite Key" inFileType:@"BibTeX" error:&error]) {
+		if (![[BDSKConverter sharedConverter] validateFormat:&formatString forField:@"Cite Key" inFileType:@"BibTeX" error:&error]) {
 			NSLog(@"Invalid Cite Key format: %@ Restore default.", error);
 			
-			citeKeyFormat = [[[OFPreferenceWrapper sharedPreferenceWrapper] preferenceForKey:BDSKCiteKeyFormatKey] defaultObjectValue];			
+			formatString = [[[OFPreferenceWrapper sharedPreferenceWrapper] preferenceForKey:BDSKCiteKeyFormatKey] defaultObjectValue];			
 		}
-		[self setRequiredFieldsForCiteKey: [[BDSKConverter sharedConverter] requiredFieldsForFormat:citeKeyFormat]];
-		[[OFPreferenceWrapper sharedPreferenceWrapper] setObject:citeKeyFormat forKey:BDSKCiteKeyFormatKey];
+		[self setRequiredFieldsForCiteKey: [[BDSKConverter sharedConverter] requiredFieldsForFormat:formatString]];
+		[[OFPreferenceWrapper sharedPreferenceWrapper] setObject:formatString forKey:BDSKCiteKeyFormatKey];
+		
+		formatString = [[OFPreferenceWrapper sharedPreferenceWrapper] objectForKey:BDSKLocalUrlFormatKey];
+		error = nil;
+		
+		if (![[BDSKConverter sharedConverter] validateFormat:&citeKeyFormat forField:@"Local-Url" inFileType:@"BibTeX" error:&error]) {
+			NSLog(@"Invalid Local-Url format: %@ Restore default.", error);
+			
+			formatString = [[[OFPreferenceWrapper sharedPreferenceWrapper] preferenceForKey:BDSKLocalUrlFormatKey] defaultObjectValue];			
+		}
+		[self setRequiredFieldsForLocalUrl: [[BDSKConverter sharedConverter] requiredFieldsForFormat:formatString]];
+		[[OFPreferenceWrapper sharedPreferenceWrapper] setObject:formatString forKey:BDSKLocalUrlFormatKey];
     }
     return self;
 }
@@ -332,7 +343,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 
 
 
-#pragma mark cite key generation stuff
+#pragma mark Auto generation format stuff
 
 - (NSArray *)requiredFieldsForCiteKey{
 	return requiredFieldsForCiteKey;
@@ -341,6 +352,15 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 - (NSArray *)setRequiredFieldsForCiteKey:(NSArray *)newFields{
 	[requiredFieldsForCiteKey autorelease];
 	requiredFieldsForCiteKey = [newFields retain];
+}
+
+- (NSArray *)requiredFieldsForLocalUrl{
+	return requiredFieldsForLocalUrl;
+}
+
+- (NSArray *)setRequiredFieldsForLocalUrl:(NSArray *)newFields{
+	[requiredFieldsForLocalUrl autorelease];
+	requiredFieldsForLocalUrl = [newFields retain];
 }
 
 

@@ -51,8 +51,9 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
     NSMutableDictionary *_formatters;
     NSCharacterSet *_autocompletePunctuationCharacterSet;
 	
-	// for cite key generation
+	// auto generation format
 	NSArray *requiredFieldsForCiteKey;
+	NSArray *requiredFieldsForLocalUrl;
 	
     // ----------------------------------------------------------------------------------------
     // stuff for the accessory view for openUsingFilter
@@ -102,6 +103,8 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 
 - (NSArray *)requiredFieldsForCiteKey;
 - (NSArray *)setRequiredFieldsForCiteKey:(NSArray *)newFields;
+- (NSArray *)requiredFieldsForLocalUrl;
+- (NSArray *)setRequiredFieldsForLocalUrl:(NSArray *)newFields;
 
 /*!
 @method addString:forCompletionEntry:
