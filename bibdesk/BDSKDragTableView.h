@@ -16,6 +16,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 #import <OmniAppKit/OATypeAheadSelectionHelper.h>
 #import <OmniFoundation/OFPreference.h>
 #import "BibPrefController.h"
+#import "OATypeAheadSelectionHelper_Extensions.h"
 
 /*!
     @class BDSKDragTableView
@@ -34,6 +35,8 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 -(id)init;
 - (void)setOwnedPublications:(NSMutableArray *)pubs;
 - (NSMutableArray *)ownedPublications;
+- (void) highlightSelectionInClipRect:(NSRect)rect;
+- (void) drawStripesInRect:(NSRect)clipRect;
 
 - (void)removeAllTableColumns;
 @end

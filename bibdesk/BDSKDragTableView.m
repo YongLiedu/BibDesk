@@ -156,7 +156,7 @@ static NSColor *sStripeColor = nil;
 // so you can follow the rows easier with your eyes.
 - (void) drawStripesInRect:(NSRect)clipRect {
     NSRect stripeRect;
-    OFPreferenceWrapper *pw = [OFPreferenceWrapper sharedPreferenceWrapper];
+    // UNUSED OFPreferenceWrapper *pw = [OFPreferenceWrapper sharedPreferenceWrapper];
     float fullRowHeight = [self rowHeight] + [self intercellSpacing].height;
     float clipBottom = NSMaxY(clipRect);
     int firstStripe = clipRect.origin.y / fullRowHeight;
