@@ -11,7 +11,7 @@
 static NSString *BDSKDefaultScaleMenuLabels[] = {/* @"Set...", */ @"10%", @"25%", @"50%", @"75%", @"100%", @"128%", @"200%", @"400%", @"800%", @"1600%"};
 static float BDSKDefaultScaleMenuFactors[] = {/* 0.0, */ 0.1, 0.25, 0.5, 0.75, 1.0, 1.28, 2.0, 4.0, 8.0, 16.0};
 static unsigned BDSKDefaultScaleMenuSelectedItemIndex = 4;
-static float BDSKScaleMenuFontSize = 10.0;
+static float BDSKScaleMenuFontSize = 11.0;
 
 #pragma mark Class method for cursor
 
@@ -39,7 +39,6 @@ static float BDSKScaleMenuFontSize = 10.0;
 - (id)initWithFrame:(NSRect)rect {
     if ((self = [super initWithFrame:rect])) {
         // we want to have a horizontal scroller to place the scaling popup
-		[self setHasHorizontalScroller:YES];
 		scaleFactor = 1.0;
     }
     return self;
@@ -65,6 +64,10 @@ static float BDSKScaleMenuFontSize = 10.0;
 
 - (void)awakeFromNib
 {
+	// make sure we have a horizontal scroller to show the popup
+	[self setHasHorizontalScroller:YES];
+	[self setAutohidesScrollers:NO];
+	
 	NSView *clipView = [[self documentView] superview];
 	[clipView setPostsBoundsChangedNotifications:YES];
 	[[NSNotificationCenter defaultCenter] addObserver:self
@@ -148,7 +151,8 @@ static float BDSKScaleMenuFontSize = 10.0;
         scalePopUpButton = [[NSPopUpButton allocWithZone:[self zone]] initWithFrame:NSMakeRect(0.0, 0.0, 1.0, 1.0) pullsDown:NO];
         [[scalePopUpButton cell] setBezelStyle:NSShadowlessSquareBezelStyle];
         [[scalePopUpButton cell] setArrowPosition:NSPopUpArrowAtBottom];
-        
+        [[scalePopUpButton cell] setControlSize:[[self horizontalScroller] controlSize]];
+		
         // fill it
         for (cnt = 0; cnt < numberOfDefaultItems; cnt++) {
             [scalePopUpButton addItemWithTitle:NSLocalizedStringFromTable(BDSKDefaultScaleMenuLabels[cnt], @"ZoomValues", nil)];
@@ -163,8 +167,8 @@ static float BDSKScaleMenuFontSize = 10.0;
         [scalePopUpButton setTarget:self];
         [scalePopUpButton setAction:@selector(scalePopUpAction:)];
 
-        // set a suitable font
-        [scalePopUpButton setFont:[NSFont toolTipsFontOfSize:BDSKScaleMenuFontSize]];
+        // set a suitable font, the control size is 0, 1 or 2
+        [scalePopUpButton setFont:[NSFont toolTipsFontOfSize: BDSKScaleMenuFontSize - [[scalePopUpButton cell] controlSize]]];
 
         // Make sure the popup is big enough to fit the cells.
         [scalePopUpButton sizeToFit];
