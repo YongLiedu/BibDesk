@@ -701,7 +701,7 @@ stringByAppendingPathComponent:@"BibDesk"]; */
     [shownPublications setArray:publications];
     [self refreshAuthors];
     // since we can't save pubmed files as pubmed files:
-    //[self updateChangeCount:NSChangeDone];
+    [self updateChangeCount:NSChangeDone];
     
     return YES;
 }
