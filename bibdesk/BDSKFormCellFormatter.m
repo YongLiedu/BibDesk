@@ -37,7 +37,10 @@
     return YES;
 }
 
-- (BOOL)isPartialStringValid:(NSString **)partialStringPtr     proposedSelectedRange:(NSRangePointer)proposedSelRangePtr  originalString:(NSString *)origString originalSelectedRange:(NSRange)origSelRange
+- (BOOL)isPartialStringValid:(NSString **)partialStringPtr     
+	   proposedSelectedRange:(NSRangePointer)proposedSelRangePtr  
+			  originalString:(NSString *)origString 
+	   originalSelectedRange:(NSRange)origSelRange
             errorDescription:(NSString **)error{
 
 
@@ -70,12 +73,14 @@
 }
 
 - (NSString *)entry{
-    return _entry;
+    return [[_entry retain] autorelease];
 }
 
 - (void)setEntry:(NSString *)entry{
-    [_entry autorelease];
-    _entry = [entry retain];
+	if(_entry != entry){
+		[_entry release];
+		_entry = [entry retain];
+	}
 }
 
 - (void)dealloc{
