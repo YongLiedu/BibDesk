@@ -16,12 +16,12 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 
 #import <Cocoa/Cocoa.h>
 
-
-
 #import "BibPrefController.h";
 #import "BibFinder.h";
 #import "BDSKFormCellFormatter.h";
 #import "BDSKShellTask.h";
+
+
 
 /*!
     @class BibAppController
@@ -30,6 +30,8 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
  as showing & hiding the finder & preferences window, and the preview. <br>
  This class also performs the complete citation service.
 */
+
+
 @interface BibAppController : NSDocumentController {
     BOOL showingPreviewPanel;
     BibFinder *_finder;
@@ -132,7 +134,11 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 
 - (IBAction)showPreferencePanel:(id)sender;
 - (IBAction)showFindPanel:(id)sender;
+
 - (IBAction)toggleShowingPreviewPanel:(id)sender;
+- (IBAction)showPreviewPanel:(id)sender;
+- (IBAction)hidePreviewPanel:(id)sender;
+- (BOOL) isShowingPreviewPanel;
 
 - (void)showReadMeFile;
 

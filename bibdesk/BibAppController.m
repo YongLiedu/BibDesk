@@ -19,10 +19,16 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 #import "BibPrefController.h"
 #import "BDSKPreviewer.h"
 #import "BibDocument.h"
+#import "BibDocumentView_Toolbar.h"
 #import "NSTextView_BDSKExtensions.h"
 #import "NSString_BDSKExtensions.h"
 
 
+
+/* WARNING: THIS STRING BETTER be the same as the one in BibDocumentView_Toolbar
+Perhaps someone can figure out how to share it without making things break.
+*/
+static NSString*	PrvDocToolbarItemIdentifier 	= @"Show Preview  Item Identifier";
 
 // ----------------------------------------------------------------------------------------
 // copy-n-pasted from my version of btparse's error.c:
@@ -173,6 +179,35 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 
 
 #pragma mark Overridden NSDocumentController methods
+
+- (BOOL) validateMenuItem:(NSMenuItem*)menuItem{
+	SEL act = [menuItem action];
+
+	if (act == @selector(toggleShowingPreviewPanel:)){ 
+		// menu item for toggling the preview panel
+		// set the on/off state according to the panel's visibility
+		if ([[NSApp delegate] isShowingPreviewPanel]) {
+			[menuItem setState:NSOnState];
+		}
+		else {
+			[menuItem setState:NSOffState];
+		}
+		return ([[[OFPreferenceWrapper sharedPreferenceWrapper] objectForKey:BDSKUsesTeXKey] intValue] == NSOnState);
+	}
+
+	return [super validateMenuItem:menuItem];
+}
+
+
+- (BOOL) validateToolbarItem: (NSToolbarItem *) toolbarItem {
+
+	if ([[toolbarItem itemIdentifier] isEqualToString:PrvDocToolbarItemIdentifier]) {
+		return ([[[OFPreferenceWrapper sharedPreferenceWrapper] objectForKey:BDSKUsesTeXKey] intValue] == NSOnState);
+	}
+	
+    return [super validateToolbarItem:toolbarItem];
+}
+
 
 - (IBAction)openDocument:(id)sender{
 	NSOpenPanel *oPanel = [NSOpenPanel openPanel];
@@ -549,19 +584,30 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 
 - (IBAction)toggleShowingPreviewPanel:(id)sender{
     if(!showingPreviewPanel){
-        [[BDSKPreviewer sharedPreviewer] showWindow:self];
-        showingPreviewPanel = YES;
-        [[OFPreferenceWrapper sharedPreferenceWrapper] setObject:@"showing" forKey:@"BDSK Showing Preview Key"];
-		// [showHidePreviewMenuItem setTitle:NSLocalizedString(@"Hide Preview",@"hide preview")];
-		[showHidePreviewMenuItem setState:NSOnState];
+		[self showPreviewPanel:sender];
     }else{
-        [[[BDSKPreviewer sharedPreviewer] window] close];
-        showingPreviewPanel = NO; // redundant.
-        [[OFPreferenceWrapper sharedPreferenceWrapper] setObject:@"not showing" forKey:@"BDSK Showing Preview Key"];
-		// [showHidePreviewMenuItem setTitle:NSLocalizedString(@"Show Preview",@"show preview, should be same as title in nib")];
-		[showHidePreviewMenuItem setState:NSOffState];
+		[self hidePreviewPanel:sender];
     }    
 }
+
+
+- (IBAction)showPreviewPanel:(id)sender{
+	[[BDSKPreviewer sharedPreviewer] showWindow:self];
+	showingPreviewPanel = YES;
+	[[OFPreferenceWrapper sharedPreferenceWrapper] setObject:@"showing" forKey:@"BDSK Showing Preview Key"];
+}
+
+- (IBAction)hidePreviewPanel:(id)sender{
+	[[[BDSKPreviewer sharedPreviewer] window] close];
+	showingPreviewPanel = NO; // redundant.
+	[[OFPreferenceWrapper sharedPreferenceWrapper] setObject:@"not showing" forKey:@"BDSK Showing Preview Key"];
+}
+
+
+- (BOOL) isShowingPreviewPanel {
+	return showingPreviewPanel;
+}
+
 
 - (BOOL)applicationShouldOpenUntitledFile:(NSApplication *)sender
 {
