@@ -776,6 +776,14 @@ Uses the tableview argument to determine which actionMenu it should validate.
 - (void)refreshAuthors;
 
 /*!
+    @method     pageDownInPreview:
+    @abstract   Page down in the lower pane of the splitview using spacebar.
+    @discussion Currently sent by the tableview, which gets keyDown: events.
+    @param      sender (description)
+*/
+- (void)pageDownInPreview:(id)sender;
+
+/*!
     @method splitViewDoubleClick:
     @abstract A delegate method of the OASplitView. Handles doubleClicking.
     @discussion \253discussion\273

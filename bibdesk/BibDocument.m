@@ -2699,6 +2699,10 @@ This method always returns YES. Even if some or many operations fail.
     [[NSApp delegate] removeErrorObjsForFileName:[self fileName]];
 }
 
+- (void)pageDownInPreview:(id)sender{
+    [previewField pageDown:sender];
+}    
+
 - (void)splitViewDoubleClick:(OASplitView *)sender{
     [NSException raise:@"UnimplementedException" format:@"splitview %@ was clicked.", sender];
 }
