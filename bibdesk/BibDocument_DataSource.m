@@ -53,8 +53,8 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
     NSString *extension = nil;
     NSString *tcID = [tableColumn identifier];
 	NSString *shortDateFormatString = [[NSUserDefaults standardUserDefaults] stringForKey:NSShortDateFormatString];
-	
-    if(tView == tableView){
+    
+    if(sortedRow >= 0 && tView == tableView){ // sortedRow can be -1 if you delete the last pub and sortDescending is true
         pub = [shownPublications objectAtIndex:sortedRow];
         auths = [pub pubAuthors];
         
