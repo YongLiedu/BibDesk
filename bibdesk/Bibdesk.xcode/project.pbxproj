@@ -353,6 +353,20 @@
 			settings = {
 			};
 		};
+		3D8EA3E30788B9E300AAD253 = {
+			isa = PBXFileReference;
+			lastKnownFileType = image.tiff;
+			name = cornerColumns_Pressed.tiff;
+			path = Images/cornerColumns_Pressed.tiff;
+			refType = 4;
+			sourceTree = "<group>";
+		};
+		3D8EA3E40788B9E300AAD253 = {
+			fileRef = 3D8EA3E30788B9E300AAD253;
+			isa = PBXBuildFile;
+			settings = {
+			};
+		};
 		3D928AAB0778D28B00B2309A = {
 			isa = PBXFileReference;
 			lastKnownFileType = image.tiff;
@@ -600,6 +614,7 @@
 				3D5D34390770C8C3006AF48A,
 				3D928AAC0778D28B00B2309A,
 				3D928AAE0778D2B600B2309A,
+				3D8EA3E40788B9E300AAD253,
 			);
 			isa = PBXResourcesBuildPhase;
 			runOnlyForDeploymentPostprocessing = 0;
@@ -720,9 +735,9 @@
 			sourceTree = "<group>";
 		};
 		8D1107320486CEB800E47090 = {
+			explicitFileType = wrapper.application;
 			includeInIndex = 0;
 			isa = PBXFileReference;
-			lastKnownFileType = wrapper.application;
 			path = Bibdesk.app;
 			refType = 3;
 			sourceTree = BUILT_PRODUCTS_DIR;
@@ -2940,6 +2955,7 @@
 				F9022DA90758088000C3F701,
 				3D928AAB0778D28B00B2309A,
 				3D5D34380770C8C3006AF48A,
+				3D8EA3E30788B9E300AAD253,
 				F9022DAA0758088000C3F701,
 				F9022DAB0758088000C3F701,
 				F9022DAC0758088000C3F701,
