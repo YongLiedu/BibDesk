@@ -86,7 +86,7 @@
 	
 	if ([[condition itemClass] acceptsOtherFilterKeys]) {
 		[menu addItem:[NSMenuItem separatorItem]];
-		menuItem = [[NSMenuItem alloc] initWithTitle:NSLocalizedString(@"Add Other...", @"") action:@selector(addNewKey:) keyEquivalent:@""];
+		menuItem = [[NSMenuItem alloc] initWithTitle:NSLocalizedString(@"Add Other...", @"Add Other... (needs proper ellipsis)") action:@selector(addNewKey:) keyEquivalent:@""];
 		[menuItem setTarget:self];
 		[menu addItem:[menuItem autorelease]];
 	}
@@ -102,6 +102,7 @@
 - (void)updateKeys {
 	[keys autorelease];
 	keys = [[[condition itemClass] filterKeys] mutableCopy];
+	NSAssert1([keys count],@"Filter item class %@ must provide at least one filter key.",[condition itemClassName]);
 	if ([condition key] == nil || [[condition key] isEqualToString:@""]) {
 		[condition setKey:[keys objectAtIndex:0]];
 	} else if (![keys containsObject:[condition key]]) {

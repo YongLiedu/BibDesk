@@ -1110,11 +1110,11 @@ stringByAppendingPathComponent:@"BibDesk"]; */
 	[cellMenu insertItem:item4 atIndex:curIndex++];
 	[item4 release];
 	
-	item4 = [[NSMenuItem alloc] initWithTitle:NSLocalizedString(@"Add Field…",@"Add Field… menu item") action:@selector(quickSearchAddField:) keyEquivalent:@""];
+	item4 = [[NSMenuItem alloc] initWithTitle:NSLocalizedString(@"Add Field...",@"Add Field... menu item (needs proper ellipsis)") action:@selector(quickSearchAddField:) keyEquivalent:@""];
 	[cellMenu insertItem:item4 atIndex:curIndex++];
 	[item4 release];
 	
-	item4 = [[NSMenuItem alloc] initWithTitle:NSLocalizedString(@"Remove Field…",@"Remove Field… menu item") action:@selector(quickSearchRemoveField:) keyEquivalent:@""];
+	item4 = [[NSMenuItem alloc] initWithTitle:NSLocalizedString(@"Remove Field...",@"Remove Field... menu item (needs proper ellipsis)") action:@selector(quickSearchRemoveField:) keyEquivalent:@""];
 	[cellMenu insertItem:item4 atIndex:curIndex++];
 	[item4 release];
 	
