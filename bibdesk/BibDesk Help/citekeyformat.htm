@@ -31,6 +31,7 @@ The format for the cite key is a string containing special format specifiers, wh
 <tr><td><span class="spec">%a</span>[<span class="param">00</span>]</td><td>Author last names, with (optional) maximal number of authors and number of characters</td></tr>
 <tr><td><span class="spec">%A</span>[<span class="param">0</span>]</td><td>Author last names with initials, with (optional) maximal number of authors</td></tr>
 <tr><td><span class="spec">%t</span>[<span class="param">0</span>]</td><td>Title, with (optional) maximal length</td></tr>
+<tr><td><span class="spec">%k</span>[<span class="param">0</span>]</td><td>Keywords concatenated together, with (optional) maximal length.  Keywords must be separated by one of ;:, (semicolon, colon, or comma).</td></tr>
 <tr><td><span class="spec">%Y</span></td><td>Year without century</td></tr>
 <tr><td><span class="spec">%y</span></td><td>Year with century</td></tr>
 <tr><td><span class="spec">%m</span></td><td>Month as decimal number</td></tr>
@@ -42,6 +43,7 @@ The format for the cite key is a string containing special format specifiers, wh
 <tr><td><span class="spec">%n</span>[<span class="param">1</span>]</td><td>Unique lowercase letter, with (optional) number of characters (only at the end)</td></tr>
 <tr><td><span class="spec">%0</span></td><td>Escaped digit (0-9)</td></tr>
 <tr><td><span class="spec">%{</span><span class="param"><i>Field</i></span><span class="spec">}</span>[<span class="param">0</span>]</td><td>Arbitrary field, with (optional) maximal length</td></tr>
+<tr><td><span class="spec">%c{</span><span class="param"><i>Field</i></span><span class="spec">}</span></td><td>Arbitrary field as initials, e.g. &#8216;JCIS&#8217; for &#8216;Journal of Colloid and Interface Science&#8217; in the &#8216;Journal&#8217; BibTeX field</td></tr>
 </table>
 </font></p>
  
