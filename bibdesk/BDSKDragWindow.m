@@ -115,6 +115,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
             // use the Carbon function since [[NSApp currentEvent] modifierFlags] won't work if we're not the front app
             unsigned modifier = GetCurrentKeyModifiers();
             if(modifier == optionKey){
+                [editorBib setCiteKeyString:[tempBI citeKey]];
                 // just setting the citekey won't update the form, so we have to use a notification
                 [[NSNotificationCenter defaultCenter] postNotificationName:BDSKBibItemChangedNotification object:editorBib userInfo:[NSDictionary dictionaryWithObjectsAndKeys:BDSKCiteKeyString, @"key", [tempBI citeKey], @"value", nil]];
             }
@@ -137,6 +138,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
             }
             [editorBib setType:[tempBI type]];
             [[self windowController] updateTypePopup]; // set the popup properly
+            [[self windowController] bibTypeDidChange:nil]; // re-setup the form
         }//for each dragged-in pub
     }
     return YES;
