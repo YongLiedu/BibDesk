@@ -7,12 +7,17 @@
 //
 
 #import "NSTextView_Bibdesk.h"
+#import <Foundation/Foundation.h>
 
 
 @implementation NSTextView_Bibdesk
 
 + (void)load{
-    [self poseAsClass:[NSTextView class]];
+    if([[self superclass] instancesRespondToSelector:@selector(completionsForPartialWordRange:indexOfSelectedItem:)]){
+	if([[NSUserDefaults standardUserDefaults] boolForKey:@"BDSKUseInputManager"]){
+	    [self poseAsClass:[NSTextView class]];
+	}
+    }
 }
 
 /* ssp: 2004-07-18
