@@ -696,30 +696,6 @@
 			settings = {
 			};
 		};
-		27C162B8078BAE91008A4B83 = {
-			children = (
-				27C162B9078BAE91008A4B83,
-			);
-			isa = PBXVariantGroup;
-			name = "BibDocument+SourceList.nib";
-			path = "";
-			refType = 4;
-			sourceTree = "<group>";
-		};
-		27C162B9078BAE91008A4B83 = {
-			isa = PBXFileReference;
-			lastKnownFileType = wrapper.nib;
-			name = English;
-			path = "English.lproj/BibDocument+SourceList.nib";
-			refType = 4;
-			sourceTree = "<group>";
-		};
-		27C162BA078BAE91008A4B83 = {
-			fileRef = 27C162B8078BAE91008A4B83;
-			isa = PBXBuildFile;
-			settings = {
-			};
-		};
 		27C1639C078BF48C008A4B83 = {
 			fileEncoding = 4;
 			isa = PBXFileReference;
@@ -832,6 +808,7 @@
 			buildRules = (
 			);
 			buildSettings = {
+				FRAMEWORK_SEARCH_PATHS = $BUILD_DIR/;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "$(SYSTEM_LIBRARY_DIR)/Frameworks/Foundation.framework/Headers/Foundation.h";
 				GCC_WARN_FOUR_CHARACTER_CONSTANTS = NO;
@@ -1482,7 +1459,6 @@
 				F9022CC0075804A600C3F701,
 				3D8CA0A307CB625300460D07,
 				F9022CC2075804A600C3F701,
-				27C162B8078BAE91008A4B83,
 				F9022CC4075804A600C3F701,
 				F9022CBD0758049200C3F701,
 				8D1107310486CEB800E47090,
@@ -1977,7 +1953,6 @@
 				3D8EA3E40788B9E300AAD253,
 				F92F4E450788DEC5001B8F82,
 				F92F4E470788DEDD001B8F82,
-				27C162BA078BAE91008A4B83,
 				F96E21690794FE3400120AB3,
 				F94A950C079AEE7600D13AB5,
 				3D3EA58A07C170A500DEEAA3,
