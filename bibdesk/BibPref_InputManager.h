@@ -21,7 +21,6 @@ extern NSString *BDSKInputManagerLoadableApplications;
     NSMutableArray *appListArray;
     NSMutableDictionary *mutablePreferences;
 }
-
 /*!
     @method     bundleIDForPath:
     @abstract   Returns the CFBundleIdentifier for a given application bundle path.
@@ -29,7 +28,7 @@ extern NSString *BDSKInputManagerLoadableApplications;
     @result     The CFBundleIdentifier from the application's plist, e.g. com.apple.TextEdit for TextEdit.app.
 */
 - (NSString *)bundleIDForPath:(NSString *)path;
-
+- (BOOL)isInstalledVersionCurrent;
 - (IBAction)enableAutocompletion:(id)sender;
 - (IBAction)addApplication:(id)sender;
 - (IBAction)removeApplication:(id)sender;

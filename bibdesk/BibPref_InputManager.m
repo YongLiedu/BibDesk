@@ -25,7 +25,7 @@ NSString *BDSKInputManagerLoadableApplications = @"Application bundles that we r
     if(![ws respondsToSelector:@selector(absolutePathForAppBundleWithIdentifier:)]){ // check the OS version
         [enableButton setEnabled:NO];
         NSBeginAlertSheet(NSLocalizedString(@"Error!", @"Error!"),
-                          nil, nil, nil, [controlBox window], nil, nil, nil, nil,
+                          nil, nil, nil, [[OAPreferenceController sharedPreferenceController] window], nil, nil, nil, nil,
                           NSLocalizedString(@"You appear to be using a system version earlier than 10.3.  Autocompletion requires Mac OS X 10.3 or greater.",
                                             @"You appear to be using a system version earlier than 10.3.  Autocompletion requires Mac OS X 10.3 or greater.") );
     }
@@ -42,6 +42,20 @@ NSString *BDSKInputManagerLoadableApplications = @"Application bundles that we r
     }
 	
     [[appList tableColumnWithIdentifier:@"AppList"] setDataCell:[[[NSBrowserCell alloc] init] autorelease]];
+
+    if(![self isInstalledVersionCurrent] && 
+       [ws respondsToSelector:@selector(absolutePathForAppBundleWithIdentifier:)] ){ // make sure we're on 10.3, also
+        [enableButton setTitle:@"Update"];
+        NSAlert *anAlert = [NSAlert alertWithMessageText:@"Update Available!"
+                                           defaultButton:NSLocalizedString(@"Update", @"Update")
+                                         alternateButton:NSLocalizedString(@"Cancel", @"Cancel the update")
+                                             otherButton:nil
+                               informativeTextWithFormat:@"You can install a newer version of the autocompletion plugin by clicking the \"Update\" button below."];
+        [anAlert beginSheetModalForWindow:[[OAPreferenceController sharedPreferenceController] window]
+                            modalDelegate:self
+                           didEndSelector:@selector(updateAlertDidEnd:returnCode:contextInfo:)
+                              contextInfo:nil];
+    }
 }
 
 - (void)dealloc{
@@ -56,12 +70,16 @@ NSString *BDSKInputManagerLoadableApplications = @"Application bundles that we r
     if([[NSFileManager defaultManager] fileExistsAtPath:inputManagerPath]){
 	[enableButton setTitle:NSLocalizedString(@"Reinstall",@"Reinstall input manager")];
 	[enableButton sizeToFit];
-    }    
-    // [self setBundleID];
+    }            
     [mutablePreferences setObject:appListArray forKey:BDSKInputManagerLoadableApplications];
     [[NSUserDefaults standardUserDefaults] setPersistentDomain:[[mutablePreferences copy] autorelease] forName:BDSKInputManagerID];
     [[NSUserDefaults standardUserDefaults] synchronize];
     [appList reloadData];
+}
+
+- (void)updateAlertDidEnd:(NSAlert *)alert returnCode:(int)returnCode contextInfo:(void *)contextInfo{
+    if(returnCode == 1) // AppKit bug: NSAlertFirstButtonReturn doesn't work
+        [self enableAutocompletion:nil];
 }
 
 - (NSString *)bundleIDForPath:(NSString *)path{
@@ -155,13 +173,21 @@ NSString *BDSKInputManagerLoadableApplications = @"Application bundles that we r
 					 alternateButton:nil
 					     otherButton:nil
 			       informativeTextWithFormat:@"Unable to install plugin at %@, please check file or directory permissions.", inputManagerPath];
-	[anAlert beginSheetModalForWindow:[controlBox window]
+	[anAlert beginSheetModalForWindow:[[OAPreferenceController sharedPreferenceController] window]
 			    modalDelegate:nil
 			   didEndSelector:nil
 			      contextInfo:nil];    
     }
     [self updateUI]; // change button to "Reinstall"
     
+}
+
+- (BOOL)isInstalledVersionCurrent{
+    NSString *bundlePath = [[[NSBundle mainBundle] resourcePath] stringByAppendingPathComponent:@"BibDeskInputManager/BibDeskInputManager.bundle"];
+    NSString *bundledVersion = [[[NSBundle bundleWithPath:bundlePath] infoDictionary] objectForKey:@"CFBundleVersion"];
+    NSString *installedVersion = [[[NSBundle bundleWithPath:[inputManagerPath stringByAppendingPathComponent:@"BibDeskInputManager.bundle"]] infoDictionary] objectForKey:@"CFBundleVersion"];
+    // if it's not installed, return YES so the user doesn't get confused.
+    return ( (installedVersion == nil) ? YES : [bundledVersion isEqualToString:installedVersion] );
 }
 
 - (IBAction)addApplication:(id)sender{
@@ -171,7 +197,7 @@ NSString *BDSKInputManagerLoadableApplications = @"Application bundles that we r
     [op beginSheetForDirectory:nil
 			  file:nil
 			 types:[NSArray arrayWithObject:@"app"]
-		modalForWindow:[controlBox window]
+		modalForWindow:[[OAPreferenceController sharedPreferenceController] window]
 		 modalDelegate:self
 		didEndSelector:@selector(openPanelDidEnd:returnCode:contextInfo:)
 		   contextInfo:nil];
@@ -192,7 +218,7 @@ NSString *BDSKInputManagerLoadableApplications = @"Application bundles that we r
 					     alternateButton:nil
 						 otherButton:nil
 				   informativeTextWithFormat:@"%@ is not a Cocoa application.", [[sheet filenames] objectAtIndex:0]];
-	    [anAlert beginSheetModalForWindow:[controlBox window]
+	    [anAlert beginSheetModalForWindow:[[OAPreferenceController sharedPreferenceController] window]
 				modalDelegate:nil
 			       didEndSelector:nil
 				  contextInfo:nil];
@@ -207,7 +233,7 @@ NSString *BDSKInputManagerLoadableApplications = @"Application bundles that we r
 					     alternateButton:nil
 						 otherButton:nil
 				   informativeTextWithFormat:@"The selected application does not have a bundle identifier.  Please inform the author of %@.", [[sheet filenames] objectAtIndex:0]];
-	    [anAlert beginSheetModalForWindow:[controlBox window]
+	    [anAlert beginSheetModalForWindow:[[OAPreferenceController sharedPreferenceController] window]
 				modalDelegate:nil
 			       didEndSelector:nil
 				  contextInfo:nil];
