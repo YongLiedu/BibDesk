@@ -887,10 +887,13 @@ void _setupFonts(){
     NSDateFormatter *dateFormatter = [[[NSDateFormatter alloc] initWithDateFormat:[[NSUserDefaults standardUserDefaults] objectForKey:NSDateFormatString]
                                                          allowNaturalLanguage:NO] autorelease];
     
+	NSString *cleanTitle = [[self title] stringByReplacingCharactersInSet:[NSCharacterSet characterSetWithCharactersInString:@"{}"]
+															   withString:@""];
+	
     [aStr appendAttributedString:[[[NSMutableAttributedString alloc] initWithString:
                       [NSString stringWithFormat:@"%@\n",[self citeKey]] attributes:typeAttributes] autorelease]];
     [aStr appendAttributedString:[[[NSMutableAttributedString alloc] initWithString:
-                     [NSString stringWithFormat:@"%@ ",[self title]] attributes:titleAttributes] autorelease]];
+                     [NSString stringWithFormat:@"%@ ",cleanTitle] attributes:titleAttributes] autorelease]];
 
     
     [aStr appendAttributedString:[[[NSMutableAttributedString alloc] initWithString:
@@ -924,6 +927,12 @@ void _setupFonts(){
                 NSCalendarDate *date = [NSCalendarDate dateWithNaturalLanguageString:[pubFields objectForKey:key]];
 
                 [aStr appendAttributedString:[[[NSAttributedString alloc] initWithString:[NSString stringWithFormat:@"%@\n",[dateFormatter stringForObjectValue:date]]
+                                                                              attributes:bodyAttributes] autorelease]];
+
+            }else if([key isEqualToString:BDSKLocalUrlString]){
+                NSString *path = [[self localURLPathRelativeTo:[[[self document] fileName] stringByDeletingLastPathComponent]] stringByAbbreviatingWithTildeInPath];
+
+                [aStr appendAttributedString:[[[NSAttributedString alloc] initWithString:[NSString stringWithFormat:@"%@\n",path]
                                                                               attributes:bodyAttributes] autorelease]];
 
             }else{
