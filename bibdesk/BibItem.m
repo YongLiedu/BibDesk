@@ -410,6 +410,10 @@ void _setupFonts(){
     return [[dateModified retain] autorelease];
 }
 
+- (NSString *)calendarDateDescription{
+    return [pubDate descriptionWithCalendarFormat:@"%B %Y"];
+}
+
 - (void)setDateModified:(NSCalendarDate *)newDateModified {
     if (dateModified != newDateModified) {
         [dateModified release];

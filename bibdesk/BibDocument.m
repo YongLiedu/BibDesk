@@ -1132,8 +1132,7 @@ Enhanced delete method that uses a sheet instead of a modal dialogue.
             selectorString=@"bibtexAuthorString";
         } else {
             if([field isEqualToString:@"Date"]){
-#warning returns NSDate
-                selectorString=@"date";
+                selectorString=@"calendarDateDescription";
             } else {
                 if([field isEqualToString:@"All Fields"]){
                     selectorString=@"allFieldsString";
@@ -1152,9 +1151,7 @@ Enhanced delete method that uses a sheet instead of a modal dialogue.
             }
         }
     }
-    
-//    if(field != nil) NSLog(@"Boolean searching by field is currently not implemented.");
-    
+        
     AGRegex *tip = [AGRegex regexWithPattern:@"^\\S+"]; // match the first word of the string
     AGRegex *andRegex = [AGRegex regexWithPattern:@"AND \\b[^ ]+"]; // match the word following an AND
     NSArray *matchArray = [andRegex findAllInString:searchString]; // an array of AGRegexMatch objects
