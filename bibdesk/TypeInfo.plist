@@ -163,16 +163,27 @@
 		<key>electronic</key>
 		<dict>
 			<key>optional</key>
-			<dict>
-				<key>0</key>
+			<array>
 				<string>Urldate</string>
-				<key>1</key>
 				<string>Author</string>
-				<key>2</key>
 				<string>Title</string>
-			</dict>
+			</array>
 			<key>required</key>
-			<dict/>
+			<array/>
+		</dict>
+		<key>glossdef</key>
+		<dict>
+			<key>optional</key>
+			<array>
+				<string>Sort-Word</string>
+				<string>Short</string>
+				<string>Group</string>
+			</array>
+			<key>required</key>
+			<array>
+				<string>Word</string>
+				<string>Definition</string>
+			</array>
 		</dict>
 		<key>inbook</key>
 		<dict>
@@ -420,6 +431,7 @@
 			<string>book</string>
 			<string>booklet</string>
 			<string>commented</string>
+			<string>glossdef</string>
 			<string>inbook</string>
 			<string>incollection</string>
 			<string>inproceedings</string>
