@@ -336,7 +336,7 @@ NSRange SafeBackwardSearchRange(NSRange startRange, unsigned seekLength){
             
             BOOL keepScanning = YES;
                       
-            while(keepScanning){
+            while(usingBraceDelimiter && keepScanning){
                 braceSearchRange = NSMakeRange(searchStart, fullStringLength - searchStart); // braceSearchRange is the "key = {" <-- brace, up to the first '}'
                 // NSLog(@"Beginning search: substring in braceSearchRange is %@", [fullString substringWithRange:braceSearchRange] );
                 braceFoundRange = [fullString rangeOfString:leftDelim options:NSLiteralSearch range:braceSearchRange]; // this is the first '{' found searching forward in braceSearchRange
