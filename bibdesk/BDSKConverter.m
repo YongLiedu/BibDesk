@@ -28,7 +28,7 @@ static NSCharacterSet *SkipSet;
     NSMutableCharacterSet *workingSet;
     NSRange highCharRange;
     NSMutableCharacterSet *tempSet = [[NSMutableCharacterSet alloc] init];
-    NSString *texReserved = [NSString stringWithString:@"&%~"]; // use this for characters that are ASCII but still need to be converted.
+    NSString *texReserved = [NSString stringWithString:@"%~"]; // use this for characters that are ASCII but still need to be converted.
     
     WholeDict = [[NSDictionary dictionaryWithContentsOfFile:[[[NSBundle mainBundle] resourcePath] stringByAppendingPathComponent:@"CharacterConversion.plist"]] retain];
     EmptySet = [[NSCharacterSet characterSetWithCharactersInString:@""] retain];

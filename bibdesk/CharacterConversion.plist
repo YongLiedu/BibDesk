@@ -31,8 +31,6 @@
 	<dict>
 		<key>%</key>
 		<string>{\%}</string>
-		<key>&amp;</key>
-		<string>{\&amp;}</string>
 		<key>~</key>
 		<string>{\~~}</string>
 		<key>¡</key>
@@ -186,8 +184,6 @@
 		<string>ÿ</string>
 		<key>{\%}</key>
 		<string>%</string>
-		<key>{\&amp;}</key>
-		<string>&amp;</string>
 		<key>{\'A}</key>
 		<string>Á</string>
 		<key>{\'E}</key>
