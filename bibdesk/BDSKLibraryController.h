@@ -5,6 +5,7 @@
 #import "BDSKLibrary.h"
 #import "BDSKItemBibTeXDisplayController.h" / /@@temporary: this is for the hard-coded testing 
 #import "BDSKItemSource.h"
+#import "BibCollection.h"
 
 
 @interface BDSKLibraryController : NSWindowController <BDSKItemSource> {
