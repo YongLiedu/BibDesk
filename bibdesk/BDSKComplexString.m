@@ -6,78 +6,31 @@ static NSCharacterSet *macroCharSet = nil;
 @implementation BDSKStringNode
 
 + (BDSKStringNode *)nodeWithQuotedString:(NSString *)s{
-    BDSKStringNode *node = [[BDSKStringNode alloc] init];
-	[node setType:BSN_STRING];
-	[node setValue:s];
+    BDSKStringNode *node = [[BDSKStringNode alloc] initWithType:BSN_STRING value:s];
 	return [node autorelease];
 }
 
 + (BDSKStringNode *)nodeWithNumberString:(NSString *)s{
-    BDSKStringNode *node = [[BDSKStringNode alloc] init];
-	[node setType:BSN_NUMBER];
-	[node setValue:s];
+    BDSKStringNode *node = [[BDSKStringNode alloc] initWithType:BSN_NUMBER value:s];
 	return [node autorelease];
 }
 
 + (BDSKStringNode *)nodeWithMacroString:(NSString *)s{
-    BDSKStringNode *node = [[BDSKStringNode alloc] init];
-	[node setType:BSN_MACRODEF];
-	[node setValue:s];
+    BDSKStringNode *node = [[BDSKStringNode alloc] initWithType:BSN_MACRODEF value:s];
 	return [node autorelease];
 }
 
-+ (BDSKStringNode *)nodeWithBibTeXString:(NSString *)s{
-    BDSKStringNode *node = [[BDSKStringNode alloc] init];
+- (id)init{
+	self = [self initWithType:BSN_STRING value:@""];
+	return self;
+}
 
-    // a single string - may be a macro or a quoted string.
-    s = [s stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]];
-    
-    // unbalanced brackets are always an error, even if the quote style is quotes!
-    
-    unichar startChar = [s characterAtIndex:0];
-    unichar endChar;
-    if(startChar == '{' || startChar == '"'){        // if it's quoted, strip that and call it a simple string
-        if(startChar == '{') endChar = '}';
-        else endChar = '"';
-        
-        s = [s substringFromIndex:1]; // ignore startChar.
-        
-        if([s length] > 0 &&
-		   [s characterAtIndex:([s length] - 1)] == endChar && 
-		   [s isStringTeXQuotingBalancedWithBraces:YES connected:NO range:NSMakeRange(0,[s length] - 1)]){
-            s = [s substringToIndex:([s length] - 1)];
-        }else{
-            // it's an unbalanced string, so we raise
-            [NSException raise:@"BDSKComplexStringException" 
-                        format:@"Unbalanced string: [%@]", s];
-        }
-        [node setType:BSN_STRING];
-        [node setValue:s];
-        return [node autorelease];
-        
-    }else{
-        
-        // it doesn't start with a quote, so it must be a single macro or raw number
-        
-        NSCharacterSet *nonDigitCharset = [[NSCharacterSet decimalDigitCharacterSet] invertedSet];
-        if([s rangeOfCharacterFromSet:nonDigitCharset].location != NSNotFound){
-            // if it contains characters that are not digits, it must be a macro
-			NSCharacterSet *nonMacroCharset = [macroCharSet invertedSet];
-			if([s rangeOfCharacterFromSet:nonMacroCharset].location != NSNotFound ||
-			   [[NSCharacterSet decimalDigitCharacterSet] characterIsMember:[s characterAtIndex:0]]){
-				// the macro contains an invalid character
-				[NSException raise:@"BDSKComplexStringException" 
-							format:@"Invalid character in macro string: [%@]", s];
-            }
-			[node setType:BSN_MACRODEF];
-        }else{
-            // if it doesn't contain characters that are not digits, it is a number.
-            [node setType:BSN_NUMBER];
-        }
-        [node setValue:s];
-        return [node autorelease];
-    }
-    
+- (id)initWithType:(bdsk_stringnodetype)aType value:(NSString *)s{
+	if (self = [super init]) {
+		type = aType;
+		value = [s copy];
+	}
+	return self;
 }
 
 - (void)dealloc{
@@ -86,16 +39,14 @@ static NSCharacterSet *macroCharSet = nil;
 }
 
 - (id)copyWithZone:(NSZone *)zone{
-    BDSKStringNode *copy = [[BDSKStringNode allocWithZone:zone] init];
-    [copy setType:type];
-    [copy setValue:value];
+    BDSKStringNode *copy = [[BDSKStringNode allocWithZone:zone] initWithType:type value:value];
     return copy;
 }
 
 - (id)initWithCoder:(NSCoder *)coder{
 	if (self = [super init]) {
-		[self setType:[coder decodeIntForKey:@"type"]];
-		[self setValue:[coder decodeObjectForKey:@"value"]];
+		type = [coder decodeIntForKey:@"type"];
+		value = [[coder decodeObjectForKey:@"value"] retain];
 	}
 	return self;
 }
@@ -116,24 +67,8 @@ static NSCharacterSet *macroCharSet = nil;
     return type;
 }
 
-- (void)setType:(bdsk_stringnodetype)newType {
-    type = newType;
-}
-
-
 - (NSString *)value {
     return [[value retain] autorelease];
-}
-
-- (void)setValue:(NSString *)newValue {
-    if (![value isEqualToString:newValue]) {
-        [value release];
-        value = [newValue copy];
-		
-        [[NSNotificationCenter defaultCenter] postNotificationName:BDSKNodeValueChangedNotification
-                                                            object:self
-                                                          userInfo:[NSDictionary dictionary]];
-    }
 }
 
 - (NSString *)description{
@@ -166,7 +101,7 @@ static NSDictionary *globalMacroDefs;
 
 - (id)initWithArray:(NSArray *)a macroResolver:(id)theMacroResolver{
     if (self = [super init]) {
-		[self setNodes:[[a copy] autorelease]];
+		nodes = [a copy];
 		if(theMacroResolver)
 			[self setMacroResolver:theMacroResolver];
 		else
@@ -190,6 +125,7 @@ static NSDictionary *globalMacroDefs;
 	BDSKStringNode *node;
 	NSMutableArray *copiedNodes = [NSMutableArray array];
 	
+	// deep copy the nodes, to be sure...
 	while (node = [nodeEnum nextObject]) {
 		[copiedNodes addObject:[[node copyWithZone:zone] autorelease]];
 	}
@@ -201,7 +137,7 @@ static NSDictionary *globalMacroDefs;
 - (id)initWithCoder:(NSCoder *)coder{
 	if (self = [super initWithCoder:coder]) {
 		expandedValue = [[coder decodeObjectForKey:@"expandedValue"] retain];
-		[self setNodes:[coder decodeObjectForKey:@"nodes"]];
+		nodes = [[coder decodeObjectForKey:@"nodes"] retain];
 		[self setMacroResolver:[coder decodeObjectForKey:@"macroResolver"]];
 	}
 	return self;
@@ -268,31 +204,6 @@ static NSDictionary *globalMacroDefs;
 
 - (NSArray *)nodes{
     return nodes;
-}
-
-- (void)setNodes:(NSArray *)newNodes{
-	NSNotificationCenter *nc = [NSNotificationCenter defaultCenter];
-	NSEnumerator *nodeEnum = [nodes objectEnumerator];
-	BDSKStringNode *node;
-	
-	while (node = [nodeEnum nextObject]) {
-		[nc removeObserver:self
-					  name:BDSKNodeValueChangedNotification
-					object:node];
-		
-	}
-	
-	[nodes autorelease];
-	nodes = [newNodes retain];
-	
-	nodeEnum = [nodes objectEnumerator];
-	while (node = [nodeEnum nextObject]) {
-		[nc addObserver:self
-			   selector:@selector(handleNodeValueChangedNotification:)
-				   name:BDSKNodeValueChangedNotification
-				 object:node];
-		
-	}
 }
 
 - (NSString *)expandedValueFromArray:(NSArray *)a{
@@ -407,9 +318,11 @@ static NSDictionary *globalMacroDefs;
 	NSCharacterSet *bracesCharSet = [NSCharacterSet characterSetWithCharactersInString:@"{}"];
 	
 	if (!macroCharSet) {
-		NSMutableCharacterSet *tmpSet = [[[NSCharacterSet whitespaceAndNewlineCharacterSet] mutableCopy] autorelease];
-		[tmpSet addCharactersInString:@"\"#%'(),={}"];
-		[tmpSet invert];
+		NSMutableCharacterSet *tmpSet = [[[NSMutableCharacterSet alloc] init] autorelease];
+		[tmpSet addCharactersInRange:NSMakeRange(48,10)]; // 0-9
+		[tmpSet addCharactersInRange:NSMakeRange(65,26)]; // A-Z
+		[tmpSet addCharactersInRange:NSMakeRange(97,26)]; // a-z
+		[tmpSet addCharactersInString:@"!$&*+-./:;<>?[]^_`|"]; // see the btparse documentation
 		macroCharSet = [tmpSet copy];
 	}
 	

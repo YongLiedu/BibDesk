@@ -44,13 +44,14 @@ typedef enum{
 + (BDSKStringNode *)nodeWithMacroString:(NSString *)s;
 
 /*!
-    @method     nodeWithBibTeXString:
-    @abstract   Returns a newly allocated and initialized string node for a BibTeX string. The BibTeX string is checked for errors. 
+    @method     initWithType:value:
+    @abstract   Initializes a new string node with the given type and value. This is the designated initializer.
     @discussion (description)
-    @param		s The raw BibTeX string value for the node. 
-    @result     A newly allocated string node. 
+    @param		aType The type.
+    @param		s The value string. 
+    @result     An initialized string node. 
 */
-+ (BDSKStringNode *)nodeWithBibTeXString:(NSString *)s;
+- (id)initWithType:(bdsk_stringnodetype)aType value:(NSString *)s;
 
 - (id)copyWithZone:(NSZone *)zone;
 
@@ -63,9 +64,7 @@ typedef enum{
 */
 - (BOOL)isEqual:(BDSKStringNode *)other;
 - (bdsk_stringnodetype)type;
-- (void)setType:(bdsk_stringnodetype)newType;
 - (NSString *)value;
-- (void)setValue:(NSString *)newValue;
 
 @end
 
@@ -146,15 +145,6 @@ typedef enum{
     @result     -
 */
 - (NSArray *)nodes;
-
-/*!
-    @method     setNodes:
-    @abstract   Sets the nodes of the complex string. Should be used only privately, as it does not update the expanded value.
-    @discussion (description)
-    @param      newNodes an array of BDSKStringNodes
-    @result     -
-*/
-- (void)setNodes:(NSArray *)newNodes;
 
 /*!
     @method     expandedValueFromArray:
