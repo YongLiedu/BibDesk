@@ -1010,9 +1010,26 @@ void _setupFonts(){
 					break;
 				case 'm':
 					// month
-					if ([self date]) {
+					if ([self date] && [self valueOfField:@"Month"] != nil && ![[self valueOfField:@"Month"] isEqualtoString:@""]) {
 						string = [[self date] descriptionWithCalendarFormat:@"%m"];
 						[parsedStr appendString:string];
+					}
+					break;
+				case 'k':
+					// keywords
+					string = [self valueOfFields:@"Keywords"];
+					if (string != nil) {
+						NSArray *arr = [string componentsSeparatedByString:@","];
+						if ([scanner scanCharactersFromSet:digits intoString:&numStr]) {
+							number = [numStr intValue];
+						} else {
+							number = 0;
+						}
+						for (i = 0; i < [arr count] && (number == 0 || i < number); i++) {
+							string = [[arr objectAtIndex:i] stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceCharacterSet]];
+							string = [converter stringBySanitizingString:string forField:fieldName inFileType:[self fileType]];
+							[parsedStr appendString:string];
+						}
 					}
 					break;
 				case '{':
