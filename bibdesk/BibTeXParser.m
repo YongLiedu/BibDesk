@@ -46,6 +46,7 @@
     NSMutableDictionary *dictionary = [NSMutableDictionary dictionaryWithCapacity:6];
     const char * fs_path = NULL;
     NSString *tempFilePath = nil;
+    BOOL usingTempFile = NO;
     FILE *infile = NULL;
 
     NSRange asciiRange;
@@ -60,11 +61,15 @@
     
     if( !([filePath isEqualToString:@"Paste/Drag"]) && [[NSFileManager defaultManager] fileExistsAtPath:filePath]){
         fs_path = [[NSFileManager defaultManager] fileSystemRepresentationWithPath:filePath];
+        usingTempFile = NO;
     }else{
         tempFilePath = [NSTemporaryDirectory() stringByAppendingPathComponent:[[NSProcessInfo processInfo] globallyUniqueString]];
         [itemString writeToFile:tempFilePath atomically:YES];
         fs_path = [[NSFileManager defaultManager] fileSystemRepresentationWithPath:tempFilePath];
+        NSLog(@"using temporary file %@ - was it deleted?",tempFilePath);
+        usingTempFile = YES;
     }
+    
     infile = fopen(fs_path, "r");
 
     *hadProblems = NO;
@@ -212,6 +217,11 @@
             }
         }
         fclose(infile);
+        if(usingTempFile){
+            if(remove(fs_path)){
+                NSLog(@"Error - unable to remove temporary file %@", tempFilePath);
+            }
+        }
         free(buf);
         return returnArray;
 }
