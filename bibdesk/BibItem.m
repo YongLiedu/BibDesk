@@ -481,14 +481,15 @@ void _setupFonts(){
     NSMutableString *s = [[[NSMutableString alloc] init] autorelease];
     NSArray *keys = [[pubFields allKeys] sortedArrayUsingSelector:@selector(caseInsensitiveCompare:)];
     NSEnumerator *e = [keys objectEnumerator];
-   
+
     //build BibTeX entry:
     [s appendString:@"@"];
     [s appendString:pubType];
     [s appendString:@"{"];
     [s appendString:[self citeKey]];
     while(k = [e nextObject]){
-        v = [pubFields objectForKey:k];
+        //Get TeX version of each field.
+        v = [BDSKConverter stringByTeXifyingString:[pubFields objectForKey:k]];
         if(![v isEqualToString:@""]){
             [s appendString:@",\n\t"];
             [s appendFormat:@"%@ = {%@}",k,v];
