@@ -86,6 +86,7 @@ NSString*   LocalDragPasteboardName = @"edu.ucsd.cs.mmccrack.bibdesk: Local Publ
      [customStringArray setArray:[[OFPreferenceWrapper sharedPreferenceWrapper] arrayForKey:BDSKCustomCiteStringsKey]];
 
      tableColumnsChanged = YES;
+
     }
     return self;
 }
@@ -200,6 +201,18 @@ NSString*   LocalDragPasteboardName = @"edu.ucsd.cs.mmccrack.bibdesk: Local Publ
 
 - (NSArray *)allAuthors{
     return allAuthors;
+}
+
+- (BOOL)citeKeyIsUsed:(NSString *)aCiteKey byItemOtherThan:(BibItem *)anItem{
+    NSEnumerator *bibE = [publications objectEnumerator];
+    BibItem *bi = nil;
+    while(bi = [bibE nextObject]){
+        if (bi == anItem) continue;
+        if ([[bi citeKey] isEqualToString:aCiteKey]) {
+            return YES;
+        }
+    }
+    return NO;
 }
 
 - (NSString *)windowNibName

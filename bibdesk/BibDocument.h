@@ -92,21 +92,20 @@ extern NSString* LocalDragPasteboardName;
     // ----------------------------------------------------------------------------------------
     // general dialog used for adding 'fields' (used for adding contextual menus,)
     // and for adding quicksearch sortkeys.)
-
     IBOutlet NSWindow *addFieldSheet;
-    //and its prompt:
+    // and its prompt:
     IBOutlet NSTextField* addFieldPrompt;
     IBOutlet NSTextField* addFieldTextField;
     // --------------------------------------------------------------------------------------
     IBOutlet NSMenu *contextualMenu;
     int fileOrderCount;
-
     // ----------------------------------------------------------------------------------------
     // stuff for the accessory view for the exportAsRSS
     IBOutlet NSView *rssExportAccessoryView;
     IBOutlet NSForm *rssExportForm;
     IBOutlet NSTextField* rssExportTextField;
 }
+
 - (void)awakeFromNib;
 - (id)init;
 - (void)dealloc;
@@ -269,6 +268,15 @@ extern NSString* LocalDragPasteboardName;
     
 */
 - (NSArray *)allAuthors;
+
+    /*!
+@method citeKeyIsUsed:byItemOtherThan
+     @abstract tells whether aCiteKey is in the dict.
+     @discussion ...
+
+     */
+- (BOOL)citeKeyIsUsed:(NSString *)aCiteKey byItemOtherThan:(BibItem *)anItem;
+
 
 // Private methods
 /*!
