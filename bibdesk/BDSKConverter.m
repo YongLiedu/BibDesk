@@ -297,10 +297,11 @@ static BDSKConverter *theConverter;
 - (BOOL)validateFormat:(NSString **)formatString forField:(NSString *)fieldName inFileType:(NSString *)type error:(NSString **)error
 {
 	// implemented specifiers, the same for any field and type
-	NSCharacterSet *validSpecifierChars = [NSCharacterSet characterSetWithCharactersInString:@"aAtTmyYlLekrRdc"];
+	NSCharacterSet *validSpecifierChars = [NSCharacterSet characterSetWithCharactersInString:@"tTmyYlLekrRdc"];
 	NSCharacterSet *validUniqueSpecifierChars = [NSCharacterSet characterSetWithCharactersInString:@"uUn"];
-	NSCharacterSet *validEscapeSpecifierChars = [NSCharacterSet characterSetWithCharactersInString:@"0123456789%{}"];
+	NSCharacterSet *validEscapeSpecifierChars = [NSCharacterSet characterSetWithCharactersInString:@"0123456789%[]"];
 	NSCharacterSet *validArgSpecifierChars = [NSCharacterSet characterSetWithCharactersInString:@"fc"];
+	NSCharacterSet *validOptArgSpecifierChars = [NSCharacterSet characterSetWithCharactersInString:@"aA"];
 	NSCharacterSet *invalidCharSet = [[BibTypeManager sharedManager] strictInvalidCharactersForField:fieldName inFileType:type];
 	NSScanner *scanner = [NSScanner scannerWithString:*formatString];
 	NSMutableString *sanitizedFormatString = [NSMutableString string];
@@ -333,11 +334,30 @@ static BDSKConverter *theConverter;
 				 ![scanner scanString:@"{" intoString: NULL] ||
 				 ![scanner scanUpToString:@"}" intoString:&string] ||
 				 ![scanner scanString:@"}" intoString:NULL]) {
-				*error = [NSString stringWithFormat: NSLocalizedString(@"Specifier %C must be followed by a {'field'} name.", @""), specifier];
+				*error = [NSString stringWithFormat: NSLocalizedString(@"Specifier %%%C must be followed by a {'field'} name.", @""), specifier];
 				return NO;
 			}
 			string = [self stringBySanitizingString:string forField:fieldName inFileType:type];
 			[sanitizedFormatString appendFormat:@"{%@}", [string capitalizedString]]; // we need to have BibTeX field names capitalized
+		}
+		else if ([validOptArgSpecifierChars characterIsMember:specifier]) {
+			if (![scanner isAtEnd]) {
+				int numOpts = ((specifier == 'A')? 3 : 2);
+				while ([scanner scanString:@"[" intoString: NULL]) {
+					if (numOpts-- == 0) {
+						*error = [NSString stringWithFormat: NSLocalizedString(@"Too many optional arguments after specifier %%%C.", @""), specifier];
+						return NO;
+					}
+					if (![scanner scanUpToString:@"]" intoString:&string]) 
+						string = @"";
+					if (![scanner scanString:@"]" intoString:NULL]) {
+						*error = [NSString stringWithFormat: NSLocalizedString(@"Missing \"]\" after specifier %%%C.", @""), specifier];
+						return NO;
+					}
+					string = [self stringBySanitizingString:string forField:fieldName inFileType:type];
+					[sanitizedFormatString appendFormat:@"[%@]", string];
+				}
+			}
 		}
 		else if ([validUniqueSpecifierChars characterIsMember:specifier]) {
 			if (foundUnique) { // a second 'unique' specifier was found

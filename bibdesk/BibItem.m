@@ -1218,7 +1218,7 @@ _setupParagraphStyle()
 	NSString *savedStr = nil;
 	NSScanner *scanner = [NSScanner scannerWithString:format];
 	NSCharacterSet *digits = [NSCharacterSet decimalDigitCharacterSet];
-	NSString *string, *numStr;
+	NSString *string, *numStr, *authSep, *nameSep, *etal;
 	int number, numAuth, i, uniqueNumber;
 	unichar specifier, nextChar, uniqueSpecifier = 0;
 	NSMutableArray *arr;
@@ -1242,46 +1242,36 @@ _setupParagraphStyle()
 			[scanner setScanLocation:[scanner scanLocation]+1];
 			switch (specifier) {
 				case 'a':
-					// author names, optional #names and #chars
-					numAuth = 0;
+					// author names, optional [separator], [etal], #names and #chars
 					number = 0;
+					numAuth = 0;
+					authSep = @"";
+					etal = @"";
 					if (![scanner isAtEnd]) {
-						// look for #names
-						nextChar = [format characterAtIndex:[scanner scanLocation]];
-						if ([digits characterIsMember:nextChar]) {
-							[scanner setScanLocation:[scanner scanLocation]+1];
-							numAuth = (int)(nextChar - '0');
-							// scan for #chars per name
-							if ([scanner scanCharactersFromSet:digits intoString:&numStr]) {
-								number = [numStr intValue];
+						// look for [separator]
+						if ([scanner scanString:@"[" intoString:NULL]) {
+							if ([scanner scanUpToString:@"]" intoString:&string]) {
+								authSep = string;
+							}
+							[scanner scanString:@"]" intoString:NULL];
+							// look for [etal]
+							if ([scanner scanString:@"[" intoString:NULL]) {
+								if ([scanner scanUpToString:@"]" intoString:&string]) {
+									etal = string;
+								}
+								[scanner scanString:@"]" intoString:NULL];
 							}
 						}
-					}
-					if (numAuth == 0 || numAuth > [self numberOfAuthors]) {
-						numAuth = [self numberOfAuthors];
-					}
-					for (i = 0; i < numAuth; i++) {
-						string = [[[self authorAtIndex:i] lastName] stringByRemovingCurlyBraces];
-						string = [converter stringBySanitizingString:string forField:fieldName inFileType:[self fileType]];
-						if ([string length] > number && number > 0) {
-							string = [string substringToIndex:number];
-						}
-						[parsedStr appendString:string];
-					}
-					break;
-				case 'A':
-					// author names with initials, optional #names and #chars
-					numAuth = 0;
-					number = 0;
-					if (![scanner isAtEnd]) {
-						// look for #names
-						nextChar = [format characterAtIndex:[scanner scanLocation]];
-						if ([digits characterIsMember:nextChar]) {
-							[scanner setScanLocation:[scanner scanLocation]+1];
-							numAuth = (int)(nextChar - '0');
-							// scan for #chars per name
-							if ([scanner scanCharactersFromSet:digits intoString:&numStr]) {
-								number = [numStr intValue];
+						if (![scanner isAtEnd]) {
+							// look for #names
+							nextChar = [format characterAtIndex:[scanner scanLocation]];
+							if ([digits characterIsMember:nextChar]) {
+								[scanner setScanLocation:[scanner scanLocation]+1];
+								numAuth = (int)(nextChar - '0');
+								// scan for #chars per name
+								if ([scanner scanCharactersFromSet:digits intoString:&numStr]) {
+									number = [numStr intValue];
+								}
 							}
 						}
 					}
@@ -1290,14 +1280,74 @@ _setupParagraphStyle()
 					}
 					for (i = 0; i < numAuth; i++) {
 						if (i > 0) {
-							[parsedStr appendString:@";"];
+							[parsedStr appendString:authSep];
+						}
+						string = [[[self authorAtIndex:i] lastName] stringByRemovingCurlyBraces];
+						string = [converter stringBySanitizingString:string forField:fieldName inFileType:[self fileType]];
+						if ([string length] > number && number > 0) {
+							string = [string substringToIndex:number];
+						}
+						[parsedStr appendString:string];
+					}
+					if (numAuth < [self numberOfAuthors]) {
+						[parsedStr appendString:etal];
+					}
+					break;
+				case 'A':
+					// author names with initials, optional [author separator], [name separator], [etal], #names and #chars
+					number = 0;
+					int numAuth = 0;
+					authSep = @";";
+					nameSep = @".";
+					etal = @"";
+					if (![scanner isAtEnd]) {
+						// look for [author separator]
+						if ([scanner scanString:@"[" intoString:NULL]) {
+							if ([scanner scanUpToString:@"]" intoString:&string]) {
+								authSep = string;
+							} else {
+								authSep = @"";
+							}
+							[scanner scanString:@"]" intoString:NULL];
+							// look for [name separator]
+							if ([scanner scanString:@"[" intoString:NULL]) {
+								if ([scanner scanUpToString:@"]" intoString:&string]) {
+									nameSep = string;
+								} else {
+									nameSep = @"";
+								}
+								[scanner scanString:@"]" intoString:NULL];
+								// look for [etal]
+								if ([scanner scanString:@"[" intoString:NULL]) {
+									if ([scanner scanUpToString:@"]" intoString:&string]) {
+										etal = string;
+									}
+									[scanner scanString:@"]" intoString:NULL];
+								}
+							}
+						}
+						if (![scanner isAtEnd]) {
+							// look for #names
+							nextChar = [format characterAtIndex:[scanner scanLocation]];
+							if ([digits characterIsMember:nextChar]) {
+								[scanner setScanLocation:[scanner scanLocation]+1];
+								numAuth = (int)(nextChar - '0');
+							}
+						}
+					}
+					if (numAuth == 0 || numAuth > [self numberOfAuthors]) {
+						numAuth = [self numberOfAuthors];
+					}
+					for (i = 0; i < numAuth; i++) {
+						if (i > 0) {
+							[parsedStr appendString:authSep];
 						}
 						BibAuthor *auth = [self authorAtIndex:i];
 						NSString *firstName = [[auth firstName] stringByRemovingCurlyBraces];
 						NSString *lastName = [[auth lastName] stringByRemovingCurlyBraces];
 						if ([firstName length] > 0) {
-							string = [NSString stringWithFormat:@"%@.%C", 
-											lastName, [firstName characterAtIndex:0]];
+							string = [NSString stringWithFormat:@"%@%@%C", 
+											lastName, nameSep, [firstName characterAtIndex:0]];
 						} else {
 							string = lastName;
 						}
@@ -1306,6 +1356,9 @@ _setupParagraphStyle()
 							string = [string substringToIndex:number];
 						}
 						[parsedStr appendString:string];
+					}
+					if (numAuth < [self numberOfAuthors]) {
+						[parsedStr appendString:etal];
 					}
 					break;
 				case 't':
@@ -1527,9 +1580,9 @@ _setupParagraphStyle()
 				case '8':
 				case '9':
 				case '%':
-				case '{':
-				case '}':
-					// escaped digit or %
+				case '[':
+				case ']':
+					// escaped character
 					[parsedStr appendFormat:@"%C", specifier];
 					break;
 				case 'u':
