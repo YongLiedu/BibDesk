@@ -20,8 +20,8 @@
                 revert = id; 
                 save = id; 
                 saveDocument = id; 
-                textFieldDidChange = id; 
                 textFieldDidEndEditing = id; 
+                toggleSnoopDrawer = id; 
                 viewLocal = id; 
                 viewRemote = id; 
             }; 
@@ -40,20 +40,26 @@
                 documentSnoopDrawer = NSDrawer; 
                 documentSnoopImageView = NSImageView; 
                 documentSnoopScrollView = NSScrollView; 
+                documentSnoopTextView = NSTextView; 
+                documentTextSnoopButton = NSButton; 
                 fieldsScrollView = NSScrollView; 
                 newFieldButtonCancel = NSButton; 
                 newFieldButtonOK = NSButton; 
                 newFieldName = NSTextField; 
                 newFieldWindow = NSWindow; 
                 notesView = NSTextView; 
+                pdfSnoopContainerView = NSView; 
                 rssDescriptionView = NSTextView; 
                 tabView = NSTabView; 
+                textSnoopContainerView = NSView; 
                 viewLocalButton = NSButton; 
                 viewRemoteButton = NSButton; 
             }; 
             SUPERCLASS = NSWindowController; 
         }, 
-        {CLASS = FirstResponder; LANGUAGE = ObjC; SUPERCLASS = NSObject; }
+        {CLASS = DraggableScrollView; LANGUAGE = ObjC; SUPERCLASS = NSScrollView; }, 
+        {CLASS = FirstResponder; LANGUAGE = ObjC; SUPERCLASS = NSObject; }, 
+        {CLASS = PDFImageView; LANGUAGE = ObjC; SUPERCLASS = NSImageView; }
     ); 
     IBVersion = 1; 
 }
