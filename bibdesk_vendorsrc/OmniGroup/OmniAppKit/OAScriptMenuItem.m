@@ -10,11 +10,20 @@
 #import <Foundation/Foundation.h>
 #import <AppKit/AppKit.h>
 #import <OmniBase/OmniBase.h>
+#import <OmniFoundation/OmniFoundation.h>
 
 #import "NSImage-OAExtensions.h"
+#import "OAApplication.h"
 #import "OAOSAScript.h"
 
-RCS_ID("$Header: /Network/Source/CVS/OmniGroup/Frameworks/OmniAppKit/OAScriptMenuItem.m,v 1.15 2004/02/10 04:07:31 kc Exp $")
+RCS_ID("$Header: /Source/CVS/OmniGroup/Frameworks/OmniAppKit/OAScriptMenuItem.m,v 1.16.2.1 2004/05/06 23:06:12 neo Exp $")
+
+@interface OAScriptMenuItem (Private)
+- (NSArray *)_scripts;
+- (NSArray *)_scriptPaths;
+@end
+
+#define SCRIPT_REFRESH_TIMEOUT (5.0)
 
 @implementation OAScriptMenuItem
 
@@ -31,6 +40,8 @@ static NSImage *scriptImage;
     [self setImage:scriptImage]; // does nothing on 10.2 and earlier, replaces title with icon on 10.3+
     if ([[NSUserDefaults standardUserDefaults] boolForKey:@"OAScriptMenuDisabled"])
         [[self menu] performSelector:@selector(removeItem:) withObject:self afterDelay:0.1];
+        
+    [self queueSelectorOnce:@selector(updateScripts)];
 }
 
 - initWithTitle:(NSString *)aTitle action:(SEL)anAction keyEquivalent:(NSString *)charCode;
@@ -43,9 +54,7 @@ static NSImage *scriptImage;
 - initWithCoder:(NSCoder *)coder;
 {
     // Init from nib
-    initializing = YES;
     [super initWithCoder:coder];
-    initializing = NO;
     [self _setup];
     return self;
 }
@@ -55,27 +64,6 @@ static NSImage *scriptImage;
     [cachedScripts release];
     [cachedScriptsDate release];
     [super dealloc];
-}
-
-- (NSArray *)scriptPaths;
-{
-    NSString *processName;
-    NSArray *libraries;
-    unsigned libraryIndex, libraryCount;
-    NSMutableArray *result;
-
-    processName = [[NSProcessInfo processInfo] processName];
-    libraries = NSSearchPathForDirectoriesInDomains(NSLibraryDirectory, NSAllDomainsMask, YES);
-    libraryCount = [libraries count];
-    result = [[NSMutableArray alloc] initWithCapacity:libraryCount + 1];
-    for (libraryIndex = 0; libraryIndex < libraryCount; libraryIndex++) {
-        NSString *library;
-
-        library = [libraries objectAtIndex:libraryIndex];
-        [result addObject:[[[library stringByAppendingPathComponent:@"Application Support"] stringByAppendingPathComponent:processName] stringByAppendingPathComponent:@"Scripts"]];
-    }
-    [result addObject:[[[[NSBundle mainBundle] bundlePath] stringByAppendingPathComponent:@"Contents"] stringByAppendingPathComponent:@"Scripts"]];
-    return [result autorelease];
 }
 
 - (IBAction)executeScript:(id)sender;
@@ -112,14 +100,61 @@ static NSImage *scriptImage;
     }
 }
 
-#define SCRIPT_REFRESH_TIMEOUT (5.0)
+- (NSMenu *)submenu;
+{    
+    if ((cachedScriptsDate != nil && [cachedScriptsDate timeIntervalSinceNow] > -SCRIPT_REFRESH_TIMEOUT))
+        [self queueSelectorOnce:@selector(updateScripts)];
+    return [super submenu];
+}
+
+- (void)updateScripts;
+{
+    NSMenu *menu;
+    unsigned int oldMenuItemCount;
+    NSArray *scripts;
+    unsigned int scriptIndex, scriptCount;
+    
+    menu = [super submenu];
+    [menu setAutoenablesItems:NO];
+    oldMenuItemCount = [menu numberOfItems];
+    while (oldMenuItemCount-- != 0)
+        [menu removeItemAtIndex:oldMenuItemCount];
+
+    scripts = [self _scripts];
+    scriptCount = [scripts count];
+    for (scriptIndex = 0; scriptIndex < scriptCount; scriptIndex++) {
+        NSString *scriptFilename;
+        NSString *scriptName;
+        NSMenuItem *item;
+        
+        scriptFilename = [scripts objectAtIndex:scriptIndex];
+        scriptName = [scriptFilename lastPathComponent];
+        // why not use displayNameAtPath: or stringByDeletingPathExtension?
+        // we want to remove the standard script filetype extension even if they're displayed in Finder
+        // but we don't want to truncate a non-extension from a script without a filetype extension.
+        // e.g. "Foo.scpt" -> "Foo" but not "Foo 2.5" -> "Foo 2"
+        scriptName = [scriptName stringByRemovingSuffix:@".scpt"];
+        scriptName = [scriptName stringByRemovingSuffix:@".scptd"];
+        scriptName = [scriptName stringByRemovingSuffix:@".applescript"];
+        item = [[NSMenuItem alloc] initWithTitle:scriptName action:@selector(executeScript:) keyEquivalent:@""];
+        [item setTarget:self];
+        [item setEnabled:YES];
+        [item setRepresentedObject:scriptFilename];
+        [menu addItem:item];
+        [item release];
+    }
+}
+
+@end
+
+@implementation OAScriptMenuItem (Private)
 
 int scriptSort(id script1, id script2, void *context)
 {
     return [[script1 lastPathComponent] compare:[script2 lastPathComponent]];
 }
 
-- (NSArray *)scripts;
+- (NSArray *)_scripts;
 {
     NSMutableArray *scripts;
     NSFileManager *fileManager;
@@ -128,7 +163,7 @@ int scriptSort(id script1, id script2, void *context)
 
     scripts = [[NSMutableArray alloc] init];
     fileManager = [NSFileManager defaultManager];
-    scriptFolders = [self scriptPaths];
+    scriptFolders = [self _scriptPaths];
     scriptFolderCount = [scriptFolders count];
     for (scriptFolderIndex = 0; scriptFolderIndex < scriptFolderCount; scriptFolderIndex++) {
         NSString *scriptFolder;
@@ -158,46 +193,30 @@ int scriptSort(id script1, id script2, void *context)
     return cachedScripts;
 }
 
-- (NSMenu *)submenu;
+- (NSArray *)_scriptPaths;
 {
-    NSMenu *menu;
-    unsigned int oldMenuItemCount;
-    NSArray *scripts;
-    unsigned int scriptIndex, scriptCount;
+    NSString *appSupportDirectory = nil;
     
-    if (initializing || (cachedScriptsDate != nil && [cachedScriptsDate timeIntervalSinceNow] > -SCRIPT_REFRESH_TIMEOUT)) {
-        return [super submenu];
-    }
-    menu = [super submenu];
-    [menu setAutoenablesItems:NO];
-    oldMenuItemCount = [menu numberOfItems];
-    while (oldMenuItemCount-- != 0)
-        [menu removeItemAtIndex:oldMenuItemCount];
+    id appDelegate = [NSApp delegate];
+    if (appDelegate != nil && [appDelegate respondsToSelector:@selector(applicationSupportDirectoryName)])
+        appSupportDirectory = [appDelegate applicationSupportDirectoryName];
+    
+    if (appSupportDirectory == nil)
+        appSupportDirectory = [[NSProcessInfo processInfo] processName];
 
-    scripts = [self scripts];
-    scriptCount = [scripts count];
-    for (scriptIndex = 0; scriptIndex < scriptCount; scriptIndex++) {
-        NSString *scriptFilename;
-        NSString *scriptName;
-        NSMenuItem *item;
-        
-        scriptFilename = [scripts objectAtIndex:scriptIndex];
-        scriptName = [scriptFilename lastPathComponent];
-        // why not use displayNameAtPath: or stringByDeletingPathExtension?
-        // we want to remove the standard script filetype extension even if they're displayed in Finder
-        // but we don't want to truncate a non-extension from a script without a filetype extension.
-        // e.g. "Foo.scpt" -> "Foo" but not "Foo 2.5" -> "Foo 2"
-        scriptName = [scriptName stringByRemovingSuffix:@".scpt"];
-        scriptName = [scriptName stringByRemovingSuffix:@".scptd"];
-        scriptName = [scriptName stringByRemovingSuffix:@".applescript"];
-        item = [[NSMenuItem alloc] initWithTitle:scriptName action:@selector(executeScript:) keyEquivalent:@""];
-        [item setTarget:self];
-        [item setEnabled:YES];
-        [item setRepresentedObject:scriptFilename];
-        [menu addItem:item];
-        [item release];
+    NSArray *libraries = NSSearchPathForDirectoriesInDomains(NSLibraryDirectory, NSAllDomainsMask, YES);
+    unsigned int libraryIndex, libraryCount;
+    libraryCount = [libraries count];
+    NSMutableArray *result = [[NSMutableArray alloc] initWithCapacity:libraryCount + 1];
+    for (libraryIndex = 0; libraryIndex < libraryCount; libraryIndex++) {
+        NSString *library = [libraries objectAtIndex:libraryIndex];        
+
+        [result addObject:[[[library stringByAppendingPathComponent:@"Application Support"] stringByAppendingPathComponent:appSupportDirectory] stringByAppendingPathComponent:@"Scripts"]];
     }
-    return menu;
+    
+    [result addObject:[[[[NSBundle mainBundle] bundlePath] stringByAppendingPathComponent:@"Contents"] stringByAppendingPathComponent:@"Scripts"]];
+    
+    return [result autorelease];
 }
 
 @end
