@@ -665,7 +665,7 @@ objectValueForTableColumn:(NSTableColumn *)tableColumn
 
 // Optional method: needed to allow editing.
 - (void)outlineView:(NSOutlineView *)olv setObjectValue:(id)object forTableColumn:(NSTableColumn *)tableColumn byItem:(id)item  {
-    [item setName: object];
+    [(BibCollection *)item setName: object];
 }
 
 
