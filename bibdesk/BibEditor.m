@@ -34,7 +34,7 @@ NSString *BDSKUrlString = @"Url";
 }
 
 
-- (id)initWithBibItem:(BibItem *)aBib andBibDocument:(BibDocument *)aDoc{
+- (id)initWithBibItem:(BibItem *)aBib{
     self = [super initWithWindowNibName:@"BibEditor"];
     fieldNumbers = [[NSMutableDictionary dictionaryWithCapacity:1] retain];
     citeKeyFormatter = [[BDSKCiteKeyFormatter alloc] init];
@@ -42,7 +42,6 @@ NSString *BDSKUrlString = @"Url";
     
     theBib = aBib;
     [theBib setEditorObj:self];
-    theDoc = aDoc; // don't retain - it owns us.
     currentType = [theBib type];    // do this once in init so it's right at the start.
                                     // has to be before we call [self window] because that calls windowDidLoad:.
     // this should probably be moved around.
@@ -167,6 +166,11 @@ NSString *BDSKUrlString = @"Url";
     [rssDescriptionView setString:[theBib valueOfField:BDSKRssDescriptionString]];
     [citeKeyField setStringValue:[theBib citeKey]];
     [theBib setEditorObj:self];
+	
+	[[NSNotificationCenter defaultCenter] addObserver:self
+											 selector:@selector(bibDidChange:)
+												 name:BDSKBibItemChangedNotification
+											   object:theBib];
 }
 
 - (void)dealloc{
@@ -175,6 +179,7 @@ NSString *BDSKUrlString = @"Url";
 #endif
     // release theBib? no...
     [citeKeyFormatter release];
+	[[NSNotificationCenter defaultCenter] removeObserver:self];
     [super dealloc];
 }
 
@@ -198,7 +203,7 @@ NSString *BDSKUrlString = @"Url";
     // a safety call to be sure that the current field's changes are saved :...
     [self finalizeChanges];
 
-    [theDoc saveDocument:sender];
+    [[self document] saveDocument:sender];
 }
 
 - (IBAction)viewLocal:(id)sender{
@@ -208,7 +213,7 @@ NSString *BDSKUrlString = @"Url";
 
     NS_DURING
 
-        if(![sw openFile:[theBib localURLPathRelativeTo:[[theDoc fileName] stringByDeletingLastPathComponent]]]){
+        if(![sw openFile:[theBib localURLPathRelativeTo:[[[self document] fileName] stringByDeletingLastPathComponent]]]){
                 err = YES;
         }
 
@@ -235,20 +240,28 @@ NSString *BDSKUrlString = @"Url";
 
 - (IBAction)citeKeyDidChange:(id)sender{
     NSString *proposedCiteKey = [sender stringValue];
+	NSString *prevCiteKey = [theBib citeKey];
+	
     int rv;
-
-    if(![self citeKeyIsValid:proposedCiteKey]){
-        rv = NSRunCriticalAlertPanel(NSLocalizedString(@"",@""), NSLocalizedString(@"The citation key you entered is either already used in this document or is empty. Please provide an unique one.",@""),
-                                NSLocalizedString(@"OK",@"OK"), nil, nil, nil);
-        NSLog(@"%d makeFirstResponder",[[self window] makeFirstResponder:citeKeyField]); // why won't this work?
-    }else{
-        [theBib setCiteKey:proposedCiteKey];
-        [self noteChange];
-    }
+	NSUndoManager *undoManager = [[self document] undoManager];
+	if(![proposedCiteKey isEqualToString:prevCiteKey]){
+		if(![self citeKeyIsValid:proposedCiteKey]){
+			rv = NSRunCriticalAlertPanel(NSLocalizedString(@"",@""), 
+										 NSLocalizedString(@"The citation key you entered is either already used in this document or is empty. Please provide an unique one.",@""),
+										 NSLocalizedString(@"OK",@"OK"), nil, nil, nil);
+			NSLog(@"%d makeFirstResponder",[[self window] makeFirstResponder:citeKeyField]); // why won't this work?
+		}else{
+			[[undoManager prepareWithInvocationTarget:theBib] setCiteKey:prevCiteKey];
+			[undoManager setActionName:NSLocalizedString(@"Change Cite Key",@"")];
+			
+			[theBib setCiteKey:proposedCiteKey];
+			[self noteChange];
+		}
+	}
 }
 
 - (BOOL)citeKeyIsValid:(NSString *)proposedCiteKey{
-    return !([theDoc citeKeyIsUsed:proposedCiteKey byItemOtherThan:theBib] || [proposedCiteKey isEqualToString:@""]);
+    return !([[self document] citeKeyIsUsed:proposedCiteKey byItemOtherThan:theBib] || [proposedCiteKey isEqualToString:@""]);
 }
 
 // sent by the notesView and the abstractView
@@ -282,7 +295,7 @@ NSString *BDSKUrlString = @"Url";
 }
 
 - (void)fixURLs{
-    NSString *lurl = [theBib localURLPathRelativeTo:[[theDoc fileName] stringByDeletingLastPathComponent]];
+    NSString *lurl = [theBib localURLPathRelativeTo:[[[self document] fileName] stringByDeletingLastPathComponent]];
     NSString *rurl = [theBib valueOfField:BDSKUrlString];
     NSImage *icon;
     NSURL *remote = [NSURL URLWithString:rurl];
@@ -408,7 +421,7 @@ NSString *BDSKUrlString = @"Url";
             [theBib setField:[newFieldName stringValue] toValue:@""];
             [self setupForm];
             [self makeKeyField:[newFieldName stringValue]];
-            [theDoc updateChangeCount:NSChangeDone];
+            [[self document] updateChangeCount:NSChangeDone];
         }
     }
     // else, nothing.
@@ -465,21 +478,9 @@ NSString *BDSKUrlString = @"Url";
 
         [theBib removeField:[delFieldPopUp titleOfSelectedItem]];
         [self setupForm];
-//        [self updateChangeCount:NSChangeDone];
-        [theDoc updateChangeCount:NSChangeDone];
+        [self noteChange];
     }
     // else, nothing.
-}
-
-- (void)controlTextDidBeginEditing:(NSNotification *)aNotification{
-//    id fieldEditor = [[aNotification userInfo] objectForKey:@"NSFieldEditor"];
-//    NSUndoManager *undoManager = [theDoc undoManager];
-//    id cell = [aNotification object];
- //   [undoManager registerUndoWithTarget:cell
-  //                             selector:@selector(setStringValue:)
-   //                              object:[cell stringValue]];
-    //[undoManager setActionName:NSLocalizedString(@"Edit Cell",@"")];
-    
 }
 
 - (void)controlTextDidEndEditing:(NSNotification *)aNotification{
@@ -490,28 +491,59 @@ NSString *BDSKUrlString = @"Url";
 - (IBAction)textFieldDidEndEditing:(id)sender{
     NSCell *sel = [sender cellAtIndex: [sender indexOfSelectedItem]];
     NSString *title = [sel title];
-
-    if([sender indexOfSelectedItem] != -1){
-        [theBib setField:title toValue:[sel stringValue]];
-        if([title isEqualToString:BDSKUrlString] || [title isEqualToString:BDSKLocalUrlString]){
-            [self fixURLs];
-            [_textSnoopString release];
-            [_pdfSnoopImage release];
-            _textSnoopString = nil;
-            _pdfSnoopImage = nil;
-        }
-        if([title isEqualToString:@"Title"]){
-            [[self window] setTitle:[sel stringValue]];
-        }
-
-        [self noteChange]; // shouldn't get called if there was no change.
-    }
+	NSString *value = [sel stringValue];
+	NSString *prevValue = [theBib valueOfField:title];
+	NSUndoManager *undoManager = [[self document] undoManager];
+	
+    if([sender indexOfSelectedItem] != -1 &&
+	   ![value isEqualToString:prevValue]){
+		
+		[[undoManager prepareWithInvocationTarget:theBib]
+			setField:title toValue:prevValue];
+		[theBib setField:title toValue:value];
+		
+		[undoManager setActionName:NSLocalizedString(@"Edit Pub",@"")];
+		
+	}
 }
+
+- (void)bibDidChange:(NSNotification *)notification{
+	BibItem *notifBib = [notification object];
+	NSDictionary *userInfo = [notification userInfo];
+	NSString *changedTitle = [userInfo objectForKey:@"key"];
+	NSString *newValue = [userInfo objectForKey:@"value"];
+	
+	// essentially a cellWithTitle: for NSForm
+	NSArray *cells = [bibFields cells];
+	NSEnumerator *cellE = [cells objectEnumerator];
+	NSFormCell *entry = nil;
+	while(entry = [cellE nextObject]){
+		if([[entry title] isEqualToString:changedTitle])
+			break;
+	}
+	if(entry)
+		[entry setObjectValue:newValue];
+
+	
+	if([changedTitle isEqualToString:BDSKUrlString] || 
+	   [changedTitle isEqualToString:BDSKLocalUrlString]){
+		[self fixURLs];
+		[_textSnoopString release];
+		[_pdfSnoopImage release];
+		_textSnoopString = nil;
+		_pdfSnoopImage = nil;
+	}
+	if([changedTitle isEqualToString:@"Title"]){
+		[[self window] setTitle:newValue];
+	}
+	
+}
+
 
 // Note for a future refactoring: This should really just
 //  send a notification that "I changed" and let any Doc(/finder) that cares update.
 - (void)noteChange{
-    [theDoc updateChangeCount:NSChangeDone];
+    [[self document] updateChangeCount:NSChangeDone];
 }
 
 #pragma mark -
@@ -580,9 +612,13 @@ NSString *BDSKUrlString = @"Url";
     [[self window] makeFirstResponder:citeKeyField]; // makes the field check if there is a duplicate field.
     [[self window] makeFirstResponder:[self window]];
     [theBib setFields:[theBib dict]]; // should really update its own metadata whenever you call setField:forvalue or whatever. Another thing for the to-do list.
-    [theDoc controlTextDidChange:nil]; // should really just tell them I changed and have them update only if my bib is already highlit...
-    [theDoc highlightBib:theBib];
+   // [theDoc highlightBib:theBib]; -- do i really want it to do this?
     [documentSnoopDrawer close];
 }
+
+- (NSUndoManager *)windowWillReturnUndoManager:(NSWindow *)sender{
+	return [[self document] undoManager];
+}
+
 
 @end

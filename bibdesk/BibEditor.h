@@ -106,9 +106,8 @@ extern NSString *BDSKUrlString;
     @abstract designated Initializer
     @discussion
  @param aBib gives us a bib to edit
- @param aDoc the document to notify of changes
 */
-- (id)initWithBibItem:(BibItem *)aBib andBibDocument:(BibDocument *)aDoc;
+- (id)initWithBibItem:(BibItem *)aBib;
 
 /*!
     @method setupForm
@@ -165,4 +164,5 @@ extern NSString *BDSKUrlString;
 - (void)toggleSnoopDrawer:(id)sender;
 - (BOOL)citeKeyIsValid:(NSString *)proposedCiteKey;
 - (void)makeKeyField:(NSString *)fieldName;
+- (void)bibDidChange:(NSNotification *)notification;
 @end
