@@ -169,6 +169,9 @@ void _setupFonts(){
 
 - (void)dealloc{
 	// NSLog([NSString stringWithFormat:@"bibitem Dealloc, rt: %d", [self retainCount]]);
+    if (undoManager) {
+		[undoManager removeAllActionsWithTarget:self];
+	}
     [pubFields release];
     [requiredFieldNames release];
 	[pubAuthors release];

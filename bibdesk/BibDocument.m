@@ -188,6 +188,9 @@ NSString* BDSKBibTeXStringPboardType = @"edu.ucsd.cs.mmcrack.bibdesk: Local BibT
 #if DEBUG
     //NSLog(@"bibdoc dealloc");
 #endif
+    if ([self undoManager]) {
+		[[self undoManager] removeAllActionsWithTarget:self];
+	}
     [[NSNotificationCenter defaultCenter] removeObserver:self];
     [publications release]; // these should cause the bibitems to get dealloc'ed
     [shownPublications release];
