@@ -2311,6 +2311,11 @@ This method always returns YES. Even if some or many operations fail.
 
 }
 
+- (void)windowDidBecomeMain:(NSNotification *)notification{
+    // handle the update at initial file load
+    [self updateUI];
+}
+
 - (void)splitViewDoubleClick:(OASplitView *)sender{
     [NSException raise:@"UnimplementedException" format:@"splitview %@ was clicked.", sender];
 }
