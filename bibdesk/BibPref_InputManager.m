@@ -16,7 +16,6 @@ NSString *BDSKInputManagerLoadableApplications = @"Application bundles that we r
 
 - (void)awakeFromNib{
     [super awakeFromNib];
-    NSFileManager *fm = [NSFileManager defaultManager];
     NSWorkspace *ws = [NSWorkspace sharedWorkspace];
     
     NSString *libraryPath = [NSSearchPathForDirectoriesInDomains(NSLibraryDirectory, NSUserDomainMask, YES) objectAtIndex:0];
