@@ -353,13 +353,14 @@ NSString *BDSKBibItemLocalDragPboardType = @"edu.ucsd.cs.mmccrack.bibdesk: Local
 	NSUndoManager *undoManager = [self undoManager];
 	[[undoManager prepareWithInvocationTarget:self] removePublication:pub];
 	
-        [publications addObject:pub usingLock:pubsLock];
+    [publications addObject:pub usingLock:pubsLock];
+    
+     // don't add directly to shownPublications if there is a search in action; let the notifications take care of it
+    if([[(BDSK_USING_JAGUAR ? searchFieldTextField : searchField) stringValue] isEqualToString:@""]){
+        // insert at beginning or add at end in order to maintain selection (if any) in tableview, and avoid fouling up the selectedPubEnumerator
+        (sortDescending) ? [shownPublications insertObject:pub atIndex:0 usingLock:pubsLock] : [shownPublications addObject:pub usingLock:pubsLock];
+    }
 
-        if(sortDescending){ // insert at beginning or add at end in order to maintain selection (if any) in tableview
-            [shownPublications insertObject:pub atIndex:0 usingLock:pubsLock];
-        } else {
-            [shownPublications addObject:pub usingLock:pubsLock];
-        }
 	[pub setDocument:self];
 
 	NSDictionary *notifInfo = [NSDictionary dictionaryWithObjectsAndKeys:pub, @"pub",
