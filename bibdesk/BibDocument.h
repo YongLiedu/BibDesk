@@ -35,7 +35,6 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 
 #import "BDSKFileContentsFilter.h"
 #import "ApplicationServices/ApplicationServices.h"
-#import "BDSKPopUpButtonCell.h"
 #import "RYZImagePopUpButton.h"
 
 
