@@ -948,8 +948,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
     
     NSString *value = [theBib valueOfField:[selectedCell title]];
     
-    if([value isKindOfClass:[BDSKComplexString class]] && 
-       [(BDSKComplexString *)value isComplex]){
+    if([value isComplex]){
         [self editFormCellAsMacro:selectedCell];
         return NO;
     }else{
@@ -985,18 +984,15 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
     loc.x = loc.x + titleWidth;
     loc.y = loc.y + 4; // 4 is a magic number based on the nib
     
-    // make sure it's a complex string:
+    // it doesn't need to be a complex string
     NSString *value = [theBib valueOfField:[cell title]];
-    if(![value isKindOfClass:[BDSKComplexString class]]){
-        value = [BDSKComplexString complexStringWithString:value
-                                             macroResolver:theDocument];
-    }
     
-    [macroTextFieldWC startEditingValue:(BDSKComplexString *)value
+    [macroTextFieldWC startEditingValue:value
                              atLocation:loc
                                   width:frame.size.width - titleWidth + 4
                                withFont:nil
-                              fieldName:[cell title]];
+                              fieldName:[cell title]
+						  macroResolver:theDocument];
         
     [[NSNotificationCenter defaultCenter] addObserver:self
                                              selector:@selector(handleMacroTextFieldWindowWillCloseNotification:)
@@ -1008,7 +1004,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 - (void)handleMacroTextFieldWindowWillCloseNotification:(NSNotification *)notification{
     NSDictionary *userInfo = [notification userInfo];
     NSString *fieldName = [userInfo objectForKey:@"fieldName"];
-    NSString *value = [userInfo objectForKey:@"complexStringValue"];
+    NSString *value = [userInfo objectForKey:@"stringValue"];
 	NSString *prevValue = [theBib valueOfField:fieldName];
     
     if(![value isEqualAsComplexString:prevValue]){

@@ -10,17 +10,18 @@
     IBOutlet NSTextField *textField;
     IBOutlet NSTextField *expandedValueTextField;
     NSString *fieldName;
-    BDSKComplexString *currentComplexString;
+    id macroResolver;
 }
 // Public
-- (void)startEditingValue:(BDSKComplexString *) string
+- (void)startEditingValue:(NSString *) string
                atLocation:(NSPoint)point
                     width:(float)width
                  withFont:(NSFont*)font
-                fieldName:(NSString *)aFieldName;
+                fieldName:(NSString *)aFieldName
+			macroResolver:(id<BDSKMacroResolver>)aMacroResolver;
 
 // Private
 - (void)controlTextDidEndEditing:(NSNotification *)aNotification;
 - (void)notifyNewValueAndOrderOut;
-- (BDSKComplexString *)complexStringValue;
+- (NSString *)stringValue;
 @end

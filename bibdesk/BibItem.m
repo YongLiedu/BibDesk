@@ -651,7 +651,7 @@ _setupParagraphStyle()
 	
 	while (field = [fEnum nextObject]) {
 		value = [pubFields objectForKey:field];
-		if ([value isKindOfClass:[BDSKComplexString class]]) {
+		if ([value isComplex]) {
 			complexValue = [[(BDSKComplexString*)value copy] autorelease];
 			[complexValue setMacroResolver:[self document]];
 			[pubFields setObject:complexValue forKey:field];
@@ -666,7 +666,7 @@ _setupParagraphStyle()
 	
 	while (field = [fEnum nextObject]) {
 		value = [pubFields objectForKey:field];
-		if ([value isKindOfClass:[BDSKComplexString class]]) {
+		if ([value isComplex]) {
 			[(BDSKComplexString*)value setMacroResolver:[self document]];
 		}
 	}
@@ -983,9 +983,8 @@ _setupParagraphStyle()
         v = [pubFields objectForKey:k];
         NSString *valString;
                  
-        if([v isKindOfClass:[BDSKComplexString class]] &&
-           [(BDSKComplexString *)v isComplex]){
-            valString = [(BDSKComplexString *)v nodesAsBibTeXString];
+        if([v isComplex]){
+            valString = [v stringAsBibTeXString];
         }else{    
             // Don't run the converter on Local-Url or Url fields, so we don't trash ~ and % escapes.
             // Note that NSURLs comply with RFC 2396, and can't contain high-bit characters anyway.
@@ -1025,9 +1024,8 @@ _setupParagraphStyle()
         v = [pubFields objectForKey:k];
         NSString *valString;
         
-        if([v isKindOfClass:[BDSKComplexString class]] &&
-           [(BDSKComplexString *)v isComplex]){
-            valString = [(BDSKComplexString *)v nodesAsBibTeXString];
+        if([v isComplex]){
+            valString = [v stringAsBibTeXString];
         }else{    
             valString = [NSString stringWithFormat:@"{%@}", v];
         }

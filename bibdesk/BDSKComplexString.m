@@ -152,8 +152,197 @@ static NSDictionary *globalMacroDefs;
     }
 }
 
-+ (BDSKComplexString *)complexStringWithBibTeXString:(NSString *)btstring macroResolver:(id<BDSKMacroResolver>)theMacroResolver{
-    BDSKComplexString *cs = nil;
+- (id)init{
+    self = [self initWithArray:nil macroResolver:nil];
+	return self;
+}
+
+- (id)initWithArray:(NSArray *)a macroResolver:(id)theMacroResolver{
+    if (self = [super init]) {
+		nodes = [a copy];
+		if(theMacroResolver)
+			[self setMacroResolver:theMacroResolver];
+		else
+			NSLog(@"Warning: complex string being created without macro resolver. Macros in it will not be resolved.");
+		
+		expandedValue = [[self expandedValueFromArray:[self nodes]] retain];
+	}		
+    return self;
+}
+
+- (void)dealloc{
+    [expandedValue release];
+	[nodes release];
+	if (macroResolver)
+		[[NSNotificationCenter defaultCenter] removeObserver:self];
+    [super dealloc];
+}
+
+- (id)copyWithZone:(NSZone *)zone{
+    BDSKComplexString *cs = [[BDSKComplexString allocWithZone:zone] initWithArray:[[nodes copy] autorelease] 
+																	macroResolver:macroResolver];
+    return cs;
+}
+
+- (id)initWithCoder:(NSCoder *)coder{
+	if (self = [super initWithCoder:coder]) {
+		nodes = [[coder decodeObjectForKey:@"nodes"] retain];
+		expandedValue = [[coder decodeObjectForKey:@"expandedValue"] retain];
+		[self setMacroResolver:[coder decodeObjectForKey:@"macroResolver"]];
+	}
+	return self;
+}
+
+- (void)encodeWithCoder:(NSCoder *)coder{
+	[super encodeWithCoder:coder];
+    [coder encodeObject:nodes forKey:@"nodes"];
+    [coder encodeObject:expandedValue forKey:@"expandedValue"];
+    [coder encodeConditionalObject:macroResolver forKey:@"macroResolver"];
+}
+
+#pragma mark overridden NSString Methods
+
+- (unsigned int)length{
+    return [expandedValue length];
+}
+
+- (unichar)characterAtIndex:(unsigned)index{
+    return [expandedValue characterAtIndex:index];
+}
+
+- (void)getCharacters:(unichar *)buffer{
+    [expandedValue getCharacters:buffer];
+}
+
+- (void)getCharacters:(unichar *)buffer range:(NSRange)aRange{
+    [expandedValue getCharacters:buffer range:aRange];
+}
+
+#pragma mark overridden methods from the BDSKComplexStringExtensions
+
+- (BOOL)isComplex{
+    return YES;
+}
+
+- (BOOL)isEqualAsComplexString:(NSString *)other{
+	if (![other isComplex])
+		return NO;
+	return [[self nodes] isEqualToArray:[(BDSKComplexString*)other nodes]];
+}
+
+// Returns the bibtex value of the string.
+- (NSString *)stringAsBibTeXString{
+    BDSKConverter *conv = [BDSKConverter sharedConverter];
+    int i = 0;
+    NSMutableString *retStr = [NSMutableString string];
+        
+    for( i = 0; i < [nodes count]; i++){
+        BDSKStringNode *valNode = [nodes objectAtIndex:i];
+        if (i != 0){
+            [retStr appendString:@" # "];
+        }
+        
+        if([valNode type] == BSN_STRING){
+            [retStr appendFormat:@"{%@}", [conv stringByTeXifyingString:[valNode value]]];
+        }else{
+            [retStr appendString:[conv stringByTeXifyingString:[valNode value]]];
+        }
+    }
+    
+    return retStr; 
+}
+
+#pragma mark complex string methods
+
+- (NSArray *)nodes{
+    return nodes;
+}
+
+- (NSString *)expandedValueFromArray:(NSArray *)a{
+    NSMutableString *s = [[NSMutableString alloc] initWithCapacity:10];
+    int i =0;
+    
+	if (a == nil)
+		return nil;
+	
+    for(i = 0 ; i < [a count]; i++){
+        BDSKStringNode *node = [a objectAtIndex:i];
+        if([node type] == BSN_MACRODEF){
+            NSString *exp = nil;
+            if(macroResolver)
+                exp = [macroResolver valueOfMacro:[node value]];
+            if (exp){
+                [s appendString:exp];
+            }else{
+                // there was no expansion. Check the system global dict first.
+                NSString *globalExp = [globalMacroDefs objectForKey:[node value]];
+                if(globalExp) 
+                    [s appendString:globalExp];
+                else 
+                    [s appendString:[node value]];
+            }
+        }else{
+            [s appendString:[node value]];
+        }
+    }
+    [s autorelease];
+    return [[s copy] autorelease];
+}
+
+- (id <BDSKMacroResolver>)macroResolver{
+    return macroResolver;
+}
+
+- (void)setMacroResolver:(id <BDSKMacroResolver>)newMacroResolver{
+	if (newMacroResolver != macroResolver) {
+		NSNotificationCenter *nc = [NSNotificationCenter defaultCenter];
+		if (macroResolver) {
+			[nc removeObserver:self];
+		}
+		macroResolver = newMacroResolver;
+		
+		[expandedValue autorelease];
+		expandedValue = [[self expandedValueFromArray:nodes] retain];
+		
+		if (newMacroResolver) {
+			[nc addObserver:self
+				   selector:@selector(handleMacroKeyChangedNotification:)
+					   name:BDSKBibDocMacroKeyChangedNotification
+					 object:newMacroResolver];
+			[nc addObserver:self
+				   selector:@selector(handleMacroDefinitionChangedNotification:)
+					   name:BDSKBibDocMacroDefinitionChangedNotification
+					 object:newMacroResolver];
+		}
+	}
+}
+
+- (void)handleMacroKeyChangedNotification:(NSNotification *)notification{
+	NSDictionary *userInfo = [notification userInfo];
+	BDSKStringNode *oldMacroNode = [BDSKStringNode nodeWithBibTeXString:[userInfo objectForKey:@"oldKey"]];
+	BDSKStringNode *newMacroNode = [BDSKStringNode nodeWithBibTeXString:[userInfo objectForKey:@"newKey"]];
+	
+	if ([nodes containsObject:oldMacroNode] || [nodes containsObject:newMacroNode]) {
+		[expandedValue autorelease];
+		expandedValue = [[self expandedValueFromArray:nodes] retain];
+	}
+}
+
+- (void)handleMacroDefinitionChangedNotification:(NSNotification *)notification{
+	NSDictionary *userInfo = [notification userInfo];
+	BDSKStringNode *macroNode = [BDSKStringNode nodeWithBibTeXString:[userInfo objectForKey:@"macroKey"]];
+	
+	if ([nodes containsObject:macroNode]) {
+		[expandedValue autorelease];
+		expandedValue = [[self expandedValueFromArray:nodes] retain];
+	}
+}
+
+@end
+
+@implementation NSString (BDSKComplexStringExtensions)
+
++ (NSString *)complexStringWithBibTeXString:(NSString *)btstring macroResolver:(id<BDSKMacroResolver>)theMacroResolver{
     NSMutableArray *returnNodes = [NSMutableArray array];
     
     btstring = [btstring stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]];
@@ -272,231 +461,26 @@ static NSDictionary *globalMacroDefs;
 	if ([returnNodes count] == 1 && [(BDSKStringNode*)[returnNodes objectAtIndex:0] type] == BSN_STRING) {
 		return [[returnNodes objectAtIndex:0] value];
 	}
-	return [BDSKComplexString complexStringWithArray:returnNodes macroResolver:theMacroResolver];
+	return [NSString complexStringWithArray:returnNodes macroResolver:theMacroResolver];
 }
 
-// todo: instead, should I override stringWithString?
-// using this makes it explicit, which is probably good...
-+ (BDSKComplexString *)complexStringWithString:(NSString *)s macroResolver:(id)theMacroResolver{
-	BDSKComplexString *cs = [[BDSKComplexString alloc] init];
-	cs->isComplex = NO;
-	cs->nodes = nil;
-	if(theMacroResolver)
-		[cs setMacroResolver:theMacroResolver];
-    else
-        NSLog(@"Warning: complex string being created without macro resolver. Macros in it will not be resolved.");
-    
-	cs->expandedValue = [s copy]; 
-	return [cs autorelease];
++ (NSString *)complexStringWithArray:(NSArray *)a macroResolver:(id)theMacroResolver{
+    return [[[BDSKComplexString alloc] initWithArray:a macroResolver:theMacroResolver] autorelease];
 }
 
-+ (BDSKComplexString *)complexStringWithArray:(NSArray *)a macroResolver:(id)theMacroResolver{
-    BDSKComplexString *cs = [[BDSKComplexString alloc] init];
-    cs->isComplex = YES;
-    cs->nodes = [a copy];
-    if(theMacroResolver)
-        [cs setMacroResolver:theMacroResolver];
-    else
-        NSLog(@"Warning: complex string being created without macro resolver. Macros in it will not be resolved.");
-    
-    cs->expandedValue = [[cs expandedValueFromArray:[cs nodes]] retain];
-        
-    return [cs autorelease];
-
+- (BOOL)isComplex{
+	return NO;
 }
-
-- (id)init{
-    self = [super init];
-    if(self){
-        expandedValue = nil;
-        isComplex = NO;
-    }
-    return self;
-}
-
-- (void)dealloc{
-    [expandedValue release];
-	[nodes release];
-	if (isComplex && macroResolver)
-		[[NSNotificationCenter defaultCenter] removeObserver:self];
-    [super dealloc];
-}
-
-- (id)copyWithZone:(NSZone *)zone{
-    BDSKComplexString *cs = [[BDSKComplexString allocWithZone:zone] init];
-    cs->isComplex = isComplex;
-    cs->expandedValue = [expandedValue copy];
-    cs->nodes = [nodes copy];
-	[cs setMacroResolver:macroResolver];
-    return cs;
-}
-
-- (id)initWithCoder:(NSCoder *)coder{
-	if (self = [super initWithCoder:coder]) {
-		isComplex = [coder decodeBoolForKey:@"isComplex"];
-		nodes = [[coder decodeObjectForKey:@"nodes"] retain];
-		expandedValue = [[coder decodeObjectForKey:@"expandedValue"] retain];
-		[self setMacroResolver:[coder decodeObjectForKey:@"macroResolver"]];
-	}
-	return self;
-}
-
-- (void)encodeWithCoder:(NSCoder *)coder{
-	[super encodeWithCoder:coder];
-    [coder encodeBool:isComplex forKey:@"isComplex"];
-    [coder encodeObject:nodes forKey:@"nodes"];
-    [coder encodeObject:expandedValue forKey:@"expandedValue"];
-    [coder encodeConditionalObject:macroResolver forKey:@"macroResolver"];
-}
-
-#pragma mark overridden NSString Methods
-
-- (unsigned int)length{
-    return [expandedValue length];
-}
-
-- (unichar)characterAtIndex:(unsigned)index{
-    return [expandedValue characterAtIndex:index];
-}
-
-- (void)getCharacters:(unichar *)buffer{
-    [expandedValue getCharacters:buffer];
-}
-
-- (void)getCharacters:(unichar *)buffer range:(NSRange)aRange{
-    [expandedValue getCharacters:buffer range:aRange];
-}
-
-
-#pragma mark complex string methods
-
-- (BOOL)isComplex {
-    return isComplex;
-}
-
-- (NSArray *)nodes{
-    return nodes;
-}
-
-- (id <BDSKMacroResolver>)macroResolver{
-    return macroResolver;
-}
-
-- (void)setMacroResolver:(id <BDSKMacroResolver>)newMacroResolver{
-	if (newMacroResolver != macroResolver) {
-		NSNotificationCenter *nc = [NSNotificationCenter defaultCenter];
-		if (isComplex && macroResolver) {
-			[nc removeObserver:self];
-		}
-		macroResolver = newMacroResolver;
-		if (isComplex) {
-			[expandedValue autorelease];
-			expandedValue = [[self expandedValueFromArray:nodes] retain];
-			if (newMacroResolver) {
-				[nc addObserver:self
-					   selector:@selector(handleMacroKeyChangedNotification:)
-						   name:BDSKBibDocMacroKeyChangedNotification
-						 object:newMacroResolver];
-				[nc addObserver:self
-					   selector:@selector(handleMacroDefinitionChangedNotification:)
-						   name:BDSKBibDocMacroDefinitionChangedNotification
-						 object:newMacroResolver];
-			}
-		}
-	}
-}
-
-// Returns the bibtex value of the string.
-- (NSString *)nodesAsBibTeXString{
-    BDSKConverter *conv = [BDSKConverter sharedConverter];
-    int i = 0;
-    NSMutableString *retStr = [NSMutableString string];
-    if(!isComplex){
-        [retStr appendFormat:@"{%@}", expandedValue];
-        return [conv stringByTeXifyingString:retStr];
-    }
-        
-    for( i = 0; i < [nodes count]; i++){
-        BDSKStringNode *valNode = [nodes objectAtIndex:i];
-        if (i != 0){
-            [retStr appendString:@" # "];
-        }
-        
-        if([valNode type] == BSN_STRING){
-            [retStr appendFormat:@"{%@}", [conv stringByTeXifyingString:[valNode value]]];
-        }else{
-            [retStr appendString:[conv stringByTeXifyingString:[valNode value]]];
-        }
-    }
-    
-    return retStr; 
-}
-
-- (NSString *)expandedValueFromArray:(NSArray *)a{
-    NSMutableString *s = [[NSMutableString alloc] initWithCapacity:10];
-    int i =0;
-    
-    for(i = 0 ; i < [a count]; i++){
-        BDSKStringNode *node = [a objectAtIndex:i];
-        if([node type] == BSN_MACRODEF){
-            NSString *exp = nil;
-            if(macroResolver)
-                exp = [macroResolver valueOfMacro:[node value]];
-            if (exp){
-                [s appendString:exp];
-            }else{
-                // there was no expansion. Check the system global dict first.
-                NSString *globalExp = [globalMacroDefs objectForKey:[node value]];
-                if(globalExp) 
-                    [s appendString:globalExp];
-                else 
-                    [s appendString:[node value]];
-            }
-        }else{
-            [s appendString:[node value]];
-        }
-    }
-    [s autorelease];
-    return [[s copy] autorelease];
-}
-
-- (void)handleMacroKeyChangedNotification:(NSNotification *)notification{
-	NSDictionary *userInfo = [notification userInfo];
-	BDSKStringNode *oldMacroNode = [BDSKStringNode nodeWithBibTeXString:[userInfo objectForKey:@"oldKey"]];
-	BDSKStringNode *newMacroNode = [BDSKStringNode nodeWithBibTeXString:[userInfo objectForKey:@"newKey"]];
-	
-	if (isComplex && ([nodes containsObject:oldMacroNode] || [nodes containsObject:newMacroNode])) {
-		[expandedValue autorelease];
-		expandedValue = [[self expandedValueFromArray:nodes] retain];
-	}
-}
-
-- (void)handleMacroDefinitionChangedNotification:(NSNotification *)notification{
-	NSDictionary *userInfo = [notification userInfo];
-	BDSKStringNode *macroNode = [BDSKStringNode nodeWithBibTeXString:[userInfo objectForKey:@"macroKey"]];
-	
-	if (isComplex && [nodes containsObject:macroNode]) {
-		[expandedValue autorelease];
-		expandedValue = [[self expandedValueFromArray:nodes] retain];
-	}
-}
-
-@end
-
-@implementation NSString (ComplexStringEquivalence)
 
 - (BOOL)isEqualAsComplexString:(NSString *)other{
-	// simple = NSString or not complex
-	BOOL isSelfSimple = !([self isKindOfClass:[BDSKComplexString class]] &&
-						  [(BDSKComplexString*)self isComplex]);
-	BOOL isOtherSimple = !([other isKindOfClass:[BDSKComplexString class]] &&
-						   [(BDSKComplexString*)other isComplex]);
-	if (isSelfSimple != isOtherSimple)
-		return NO; // really complex strings are never equivalent to simple strings
-	if (isSelfSimple)
-		return [self isEqualToString:other]; // this compares (expanded) values
-	// now both have to be really complex
-	return [[(BDSKComplexString*)self nodes] isEqualToArray:[(BDSKComplexString*)other nodes]];
+	// we can assume that we are not complex, as BDSKComplexString overrides this
+	if ([other isComplex])
+		return NO;
+	return [self isEqualToString:other];
+}
+
+- (NSString *)stringAsBibTeXString{
+	return [NSString stringWithFormat:@"{%@}", self];
 }
 
 @end

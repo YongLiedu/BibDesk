@@ -10,7 +10,6 @@
 }
 
 - (void)dealloc{
-    [currentComplexString release];
     [super dealloc];
 }
 
@@ -20,16 +19,17 @@
     [[self window] setOneShot:TRUE];
 }
 
-- (void)startEditingValue:(BDSKComplexString *) string
+- (void)startEditingValue:(NSString *) string
                atLocation:(NSPoint)point
                     width:(float)width
                  withFont:(NSFont*)font
-                fieldName:(NSString *)aFieldName{
+                fieldName:(NSString *)aFieldName
+			macroResolver:(id<BDSKMacroResolver>)aMacroResolver{
     NSNotificationCenter *nc;
     NSWindow *win = [self window];
     
     fieldName = aFieldName;
-    currentComplexString = [string retain];
+    macroResolver = aMacroResolver; // should we retain?
     NSRect currentFrame = [[self window] frame];
     
     // make sure the window starts out at the small size
@@ -44,7 +44,7 @@
     
     [expandedValueTextField setStringValue:string];
     if([string isComplex]){
-        [textField setStringValue:[string nodesAsBibTeXString]];
+        [textField setStringValue:[string stringAsBibTeXString]];
     }else{
         [textField setStringValue:[NSString stringWithFormat:@"{%@}", string]];
     }
@@ -75,7 +75,7 @@
 // as an observer for that notification so it doesn't get it multiple times.
 - (void)notifyNewValueAndOrderOut{
     NSNotificationCenter *nc = [NSNotificationCenter defaultCenter];
-    NSDictionary *userInfo = [NSDictionary dictionaryWithObjectsAndKeys:[self complexStringValue], @"complexStringValue", fieldName, @"fieldName", nil];
+    NSDictionary *userInfo = [NSDictionary dictionaryWithObjectsAndKeys:[self stringValue], @"stringValue", fieldName, @"fieldName", nil];
     [nc postNotificationName:BDSKMacroTextFieldWindowWillCloseNotification
                       object:self
                     userInfo:userInfo];
@@ -87,12 +87,12 @@
 }
 
 - (void)controlTextDidChange:(NSNotification*)aNotification { 
-    BDSKComplexString *value = [self complexStringValue];
+    NSString *value = [self stringValue];
     [expandedValueTextField setStringValue:value];
 }
 
-- (BDSKComplexString *)complexStringValue{
-    return [BDSKComplexString complexStringWithBibTeXString:[textField stringValue] macroResolver:[currentComplexString macroResolver]];
+- (NSString *)stringValue{
+    return [NSString complexStringWithBibTeXString:[textField stringValue] macroResolver:macroResolver];
 }
 
 

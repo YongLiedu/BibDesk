@@ -50,7 +50,6 @@ typedef enum{
 
 
 @interface BDSKComplexString : NSString <NSCopying, NSCoding>{
-  bool isComplex;		/* If we are not complex, nodes is nil. */
   NSArray *nodes;			/* an array of bdsk_stringnodes. */
 
   NSString *expandedValue;
@@ -61,6 +60,16 @@ typedef enum{
 * in a concrete subclass of NSString
 */
 - (id)init;
+/*!
+    @method     initWithArray
+    @abstract   Initializes a complex string with an array of string nodes and a macroresolver. This is the designated initializer. 
+    @discussion (description)
+    @param		a An array of BDSKStringNodes
+    @param		macroResolver The macro resolver used to resolve macros in the complex string.
+    @result     -
+*/
+- (id)initWithArray:(NSArray *)a macroResolver:(id)theMacroResolver;
+
 /*
  Docs say we should override this one, but I am not sure how, and it seems to work OK without it.
   + (id)allocWithZone:(NSZone *)aZone;
@@ -79,24 +88,26 @@ typedef enum{
 - (unsigned int)length;
 - (unichar)characterAtIndex:(unsigned)index;
 
-    /*" Overridden NSString performance methods "*/
+/* Overridden NSString performance methods */
 - (void)getCharacters:(unichar *)buffer;
 - (void)getCharacters:(unichar *)buffer range:(NSRange)aRange;
 
-
-+ (BDSKComplexString *)complexStringWithString:(NSString *)s macroResolver:(id<BDSKMacroResolver>)macroResolver;
-
-+ (BDSKComplexString *)complexStringWithArray:(NSArray *)a  macroResolver:(id<BDSKMacroResolver>)macroResolver;
-
-+ (BDSKComplexString *)complexStringWithBibTeXString:(NSString *)btstring macroResolver:(id<BDSKMacroResolver>)theMacroResolver;
-
 - (id)copyWithZone:(NSZone *)zone;
 
+/* Overridden BDSKComplexStringExtensions methods */
 - (BOOL)isComplex;
+- (BOOL)isEqualAsComplexString:(NSString *)other;
+- (NSString *)stringAsBibTeXString;
+
+/* Complex string methods */
+
+/*!
+    @method     nodes
+    @abstract   The nodes of the complex string
+    @discussion (description)
+    @result     -
+*/
 - (NSArray *)nodes;
-- (id <BDSKMacroResolver>)macroResolver;
-- (void)setMacroResolver:(id <BDSKMacroResolver>)newMacroResolver;
-- (NSString *)nodesAsBibTeXString;
 
 /*!
     @method     expandedValueFromArray:
@@ -107,12 +118,57 @@ typedef enum{
 */
 - (NSString *)expandedValueFromArray:(NSArray *)nodes;
 
+/*!
+    @method     macroResolver
+    @abstract   Returns the object used to resolve macros in the complex string
+    @discussion (description)
+    @result     -
+*/
+- (id <BDSKMacroResolver>)macroResolver;
+
+/*!
+    @method     setMacroResolver:
+    @abstract   Sets the object used to resolve macros in the complex string.
+    @discussion (description)
+	@param		newMacroResolver The new macro resolver, should implement the BDSKMacroResolver protocol.
+    @result     -
+*/
+- (void)setMacroResolver:(id <BDSKMacroResolver>)newMacroResolver;
+
 - (void)handleMacroKeyChangedNotification:(NSNotification *)notification;
 - (void)handleMacroDefinitionChangedNotification:(NSNotification *)notification;
 
 @end
 
-@interface NSString (ComplexStringEquivalence)
+@interface NSString (BDSKComplexStringExtensions)
+
+/*!
+    @method     complexStringWithArray:macroResolver:
+    @abstract   Returns a newly allocated and initialized complex string build with an array of BDSKStringNodes as its nodes.
+    @discussion -
+    @param		a An array of BDSKStringNodes
+    @param		macroResolver The macro resolver used to resolve macros in the complex string.
+    @result     - 
+*/
++ (NSString *)complexStringWithArray:(NSArray *)a  macroResolver:(id<BDSKMacroResolver>)macroResolver;
+
+/*!
+    @method     complexStringWithBibTeXString:macroResolver:
+    @abstract   Returns a newly allocated and initialized complex or simple string build from the BibTeX string value.
+    @discussion -
+    @param		btstring A BibTeX string value
+    @param		macroResolver The macro resolver used to resolve macros in the complex string.
+    @result     - 
+*/
++ (NSString *)complexStringWithBibTeXString:(NSString *)btstring macroResolver:(id<BDSKMacroResolver>)theMacroResolver;
+
+/*!
+    @method     isComplex
+    @abstract   Boolean indicating whether the receiver is a complex string.
+    @discussion -
+    @result     - 
+*/
+- (BOOL)isComplex;
 
 /*!
     @method     isEqualAsComplexString:
@@ -122,5 +178,13 @@ typedef enum{
     @result     Boolean indicating if the strings are equal as complex strings
 */
 - (BOOL)isEqualAsComplexString:(NSString *)other;
+
+/*!
+    @method     stringAsBibTeXString
+    @abstract   Returns the value of the string as a BibTeX string value. 
+    @discussion For complex strings this returns the unexpanded bibtex string, while for a simple string it returns the receiver enclosed by quoting braces.
+    @result     - 
+*/
+- (NSString *)stringAsBibTeXString;
 
 @end
