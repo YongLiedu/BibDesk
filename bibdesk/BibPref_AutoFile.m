@@ -23,15 +23,26 @@
 }
 
 - (void)updateUI{
+    BibItem *tmpBI = [[BibItem alloc] init];
+    [tmpBI setField:@"Title" toValue:@"Bibdesk, a great application to manage your bibliographies"];
+    [tmpBI setField:@"Author" toValue:@"McCracken, M. and Maxwell, A. and Howison, J. and Routley, M. and Spiegel, S.  and Porst, S. S. and Hofman, C. M."];
+    [tmpBI setField:@"Year" toValue:@"2004"];
+    [tmpBI setField:@"Month" toValue:@"11"];
+    [tmpBI setField:@"Journal" toValue:@"SourceForge"];
+    [tmpBI setField:@"Volume" toValue:@"1"];
+    [tmpBI setField:@"Pages" toValue:@"96"];
+    
     NSString *formatString = [defaults stringForKey:BDSKLocalUrlFormatKey];
 	
     [filePapersAutomaticallyCheckButton setState:[defaults integerForKey:BDSKFilePapersAutomaticallyKey]];
-	[keepPapersFolderOrganizedCheckButton setState:[defaults integerForKey:BDSKKeepPapersFolderOrganizedKey]];
+    [keepPapersFolderOrganizedCheckButton setState:[defaults integerForKey:BDSKKeepPapersFolderOrganizedKey]];
 
     [papersFolderLocationTextField setStringValue:[[defaults objectForKey:BDSKPapersFolderPathKey] stringByAbbreviatingWithTildeInPath]];
 
-	[self setLocalUrlFormatInvalidWarning:NO message:NSLocalizedString(@"The local-url format is invalid.",@"")]; // the format in defaults is always valid, right?
-	[formatField setStringValue:formatString];
+    [self setLocalUrlFormatInvalidWarning:NO message:NSLocalizedString(@"The local-url format is invalid.",@"")]; // the format in defaults is always valid, right?
+    [formatField setStringValue:formatString];
+    [previewTextField setStringValue:[[tmpBI suggestedLocalUrl] stringByAbbreviatingWithTildeInPath]];
+    [tmpBI release];
 }
 
 - (IBAction)choosePapersFolderLocationAction:(id)sender{

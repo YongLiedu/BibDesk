@@ -32,6 +32,7 @@
     IBOutlet NSPopUpButton *formatRepositoryPopUp;
     IBOutlet NSButton *formatWarningButton;
 	NSImage *cautionIconImage;
+        IBOutlet NSTextField *previewTextField;
 }
 
 - (IBAction)choosePapersFolderLocationAction:(id)sender;

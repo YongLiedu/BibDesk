@@ -20,6 +20,7 @@
                 formatWarningButton = NSButton; 
                 keepPapersFolderOrganizedCheckButton = NSButton; 
                 papersFolderLocationTextField = NSTextField; 
+                previewTextField = NSTextField; 
             }; 
             SUPERCLASS = OAPreferenceClient; 
         }, 
