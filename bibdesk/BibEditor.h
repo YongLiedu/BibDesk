@@ -29,6 +29,8 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 #import "PDFImageView.h"
 #import "BDSKFieldNameFormatter.h"
 #import "BibPersonController.h"
+#import "RYZImagePopUpButton.h"
+#import "RYZImagePopUpButtonCell.h"
 
 
 extern NSString *BDSKAnnoteString;
@@ -51,7 +53,10 @@ extern NSString *BDSKUrlString;
     IBOutlet NSTextView *abstractView;
     IBOutlet NSTextView* rssDescriptionView;
     IBOutlet NSTextField* citeKeyField;
-    IBOutlet NSButton* viewLocalButton;
+//    IBOutlet NSButton* viewLocalButton;
+	IBOutlet RYZImagePopUpButton *viewLocalButton;
+	NSMenu *viewLocalMenu;
+	NSImage *noFilesIconImage;
     IBOutlet NSButton* viewRemoteButton;
     IBOutlet NSScrollView* fieldsScrollView;
     // ----------------------------------------------------------------------------------------
@@ -163,6 +168,9 @@ extern NSString *BDSKUrlString;
 - (void)finalizeChanges;
 
 - (IBAction)viewLocal:(id)sender;
+- (void)setupViewLocalMenu;
+- (void)setupNoFilesIcon;
+
 - (IBAction)viewRemote:(id)sender;
 
 - (void)setupCautionIcon;

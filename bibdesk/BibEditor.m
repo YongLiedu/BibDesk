@@ -39,6 +39,8 @@ NSString *BDSKUrlString = @"Url";
     fieldNumbers = [[NSMutableDictionary dictionaryWithCapacity:1] retain];
     citeKeyFormatter = [[BDSKCiteKeyFormatter alloc] init];
     fieldNameFormatter = [[BDSKFieldNameFormatter alloc] init];
+	
+	[self setupViewLocalMenu];
     
     theBib = aBib;
     [theBib setEditorObj:self];
@@ -47,12 +49,14 @@ NSString *BDSKUrlString = @"Url";
 	theDocument = doc; // don't retain - it retains us.
 	
 	[self setupCautionIcon];
+	[self setupNoFilesIcon];
 
     // this should probably be moved around.
     [[self window] setTitle:[theBib title]];
     [[self window] setDelegate:self];
     [[self window] registerForDraggedTypes:[NSArray arrayWithObjects:
-            NSStringPboardType, NSFilenamesPboardType, nil]];						   
+            NSStringPboardType, NSFilenamesPboardType, nil]];					
+
 
 #if DEBUG
     NSLog(@"BibEditor alloc");
@@ -173,7 +177,23 @@ NSString *BDSKUrlString = @"Url";
 
     [bibTypeButton selectItemWithTitle:currentType];
     [self setupForm]; // gets called in window will load...?
-    [self fixURLs];
+    
+	// The popupbutton needs to be set before fixURLs is called.
+	RYZImagePopUpButton *newViewLocalButton = [[RYZImagePopUpButton alloc] initWithFrame:[viewLocalButton frame]];
+	[[[self window] contentView] replaceSubview:viewLocalButton
+										   with:newViewLocalButton];
+	viewLocalButton = newViewLocalButton;
+
+	[viewLocalButton setArrowImage:[NSImage imageNamed:@"ArrowPointingDown"]];
+	[viewLocalButton setShowsMenuWhenIconClicked:NO];
+	[[viewLocalButton cell] setAltersStateOfSelectedItem:NO];
+
+	[[viewLocalButton cell] setUsesItemFromMenu:NO];	 
+	
+	[viewLocalButton setMenu:viewLocalMenu];
+	
+	
+	[self fixURLs];
     [notesView setString:[theBib valueOfField:BDSKAnnoteString]];
     [abstractView setString:[theBib valueOfField:BDSKAbstractString]];
     [rssDescriptionView setString:[theBib valueOfField:BDSKRssDescriptionString]];
@@ -190,7 +210,7 @@ NSString *BDSKUrlString = @"Url";
 											   object:theBib];
 
 	[authorTableView setDoubleAction:@selector(showPersonDetailCmd:)];
-	
+		
 }
 
 - (void)dealloc{
@@ -201,6 +221,8 @@ NSString *BDSKUrlString = @"Url";
     [citeKeyFormatter release];
 	[[NSNotificationCenter defaultCenter] removeObserver:self];
 	[cautionIconImage release]; 
+	[noFilesIconImage release];
+	[viewLocalMenu release];
     [super dealloc];
 }
 
@@ -250,6 +272,56 @@ NSString *BDSKUrlString = @"Url";
                                                 @"explanation of why the local-url failed to open"), nil);
 
 }
+
+- (void)setupViewLocalMenu{
+	[viewLocalMenu autorelease];
+	viewLocalMenu = [[NSMenu alloc] init];
+	// the first one has to be view file, since it's also the button's action when you're clicking on the icon.
+	NSMenuItem *viewLocalMenuItem = [[[NSMenuItem alloc] initWithTitle:NSLocalizedString(@"View File",@"View file string")
+																action:@selector(viewLocal:)
+														 keyEquivalent:@""] autorelease];
+	[viewLocalMenu addItem:viewLocalMenuItem];
+	
+	NSMenuItem *chooseFileMenuItem = [[[NSMenuItem alloc] initWithTitle:NSLocalizedString(@"Choose File...",@"Choose file string")
+																 action:@selector(chooseLocalURL:)
+														  keyEquivalent:@""] autorelease];
+	[viewLocalMenu addItem:chooseFileMenuItem];
+	
+	[viewLocalMenu addItem:[NSMenuItem separatorItem]];
+	
+}
+
+
+- (void)setupNoFilesIcon{
+	IconRef noFilesIconRef;
+	OSErr err = GetIconRef(kOnSystemDisk,
+						   kSystemIconsCreator,
+						   kNoFilesIcon,
+						   &noFilesIconRef);
+	if(err){
+		[NSException raise:@"BDSK No Icon Exception"  
+					format:@"Error getting the caution badge icon. To decipher the error number (%d),\n see file:///Developer/Documentation/Carbon/Reference/IconServices/index.html#//apple_ref/doc/uid/TP30000239", err];
+	}
+	
+	int size = 32;
+	
+	noFilesIconImage = [[NSImage alloc] initWithSize:NSMakeSize(size,size)]; 
+	CGRect iconCGRect = CGRectMake(0,0,size,size);
+	
+	[noFilesIconImage lockFocus]; 
+	
+	PlotIconRefInContext((CGContextRef)[[NSGraphicsContext currentContext] 
+		graphicsPort],
+						 &iconCGRect,
+						 kAlignAbsoluteCenter, //kAlignNone,
+						 kTransformNone,
+						 NULL /*inLabelColor*/,
+						 kPlotIconRefNormalFlags,
+						 noFilesIconRef); 
+	
+	[noFilesIconImage unlockFocus]; 
+}
+
 
 - (IBAction)viewRemote:(id)sender{
     NSWorkspace *sw = [NSWorkspace sharedWorkspace];
@@ -370,11 +442,9 @@ NSString *BDSKUrlString = @"Url";
     
     if (lurl && [[NSFileManager defaultManager] fileExistsAtPath:lurl]){
             icon = [[NSWorkspace sharedWorkspace] iconForFile:lurl];
-            [viewLocalButton setImage:icon];
-            [viewLocalButton setBordered:NO]; 
+            [viewLocalButton setIconImage:icon];
+			[[viewLocalButton cell] setIconEnabled:YES];
             [viewLocalButton setToolTip:@"View File"];
-            [viewLocalButton setTitle:@""];
-            [viewLocalButton setAction:@selector(viewLocal:)];
 			
 			NSString *ext = [lurl pathExtension];
 			BOOL fileIsPSOrPDF = ([ext isEqualToString:@"ps"] || [ext isEqualToString:@"pdf"]);
@@ -405,11 +475,9 @@ NSString *BDSKUrlString = @"Url";
                 }
             }
     }else{
-        [viewLocalButton setImage:nil];
-        [viewLocalButton setBordered:YES]; 
-        [viewLocalButton setTitle:NSLocalizedString(@"Pick\nFile", @"Choose file, make sure it fits in the icon")];
+        [viewLocalButton setIconImage:noFilesIconImage];
+		[[viewLocalButton cell] setIconEnabled:NO];
         [viewLocalButton setToolTip:NSLocalizedString(@"Choose a file to link with in the Local-Url Field", @"bad/empty local url field")];
-        [viewLocalButton setAction:@selector(chooseLocalURL:)];
         
         [documentSnoopButton setEnabled:NO];
         [documentSnoopButton setToolTip:NSLocalizedString(@"Bad or Empty Local-Url Field", @"bad/empty local field")];

@@ -771,6 +771,10 @@
 		};
 		2773D35B058C410500C5ABDA = {
 			children = (
+				27BF060206D7F097008AD3AE,
+				27BF060306D7F097008AD3AE,
+				27BF060406D7F097008AD3AE,
+				27BF060506D7F097008AD3AE,
 				27639CEF068C94D8000EFFCB,
 				27639CF0068C94D8000EFFCB,
 				2773D360058C414A00C5ABDA,
@@ -984,6 +988,85 @@
 			shellPath = /usr/bin/python;
 			shellScript = "import os,sys\nbuildpath = os.environ[\"SOURCE_ROOT\"]\nos.environ[\"OTEST\"] = \"/Users/mike/Code/customizedLibs/OCUnit/tools/otest\"\nif os.environ.has_key(\"TEST_AFTER_BUILD\") and os.environ[\"TEST_AFTER_BUILD\"] == \"YES\":\n\tprint \"running tests.\"\n#\tos.popen(buildpath + \"RunTargetUnitTests\")\n\tos.popen(\"/Users/mike/Code/customizedLibs/OCUnit/tools/RunTargetUnitTests\")\nsys.exit(0)";
 		};
+		27BF060206D7F097008AD3AE = {
+			fileEncoding = 30;
+			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.c.h;
+			name = RYZImagePopUpButton.h;
+			path = ../bibdesk_vendorsrc/ScotlandSoftware/ImagePopUpButton/RYZImagePopUpButton.h;
+			refType = 2;
+			sourceTree = SOURCE_ROOT;
+		};
+		27BF060306D7F097008AD3AE = {
+			fileEncoding = 30;
+			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.c.objc;
+			name = RYZImagePopUpButton.m;
+			path = ../bibdesk_vendorsrc/ScotlandSoftware/ImagePopUpButton/RYZImagePopUpButton.m;
+			refType = 2;
+			sourceTree = SOURCE_ROOT;
+		};
+		27BF060406D7F097008AD3AE = {
+			fileEncoding = 30;
+			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.c.h;
+			name = RYZImagePopUpButtonCell.h;
+			path = ../bibdesk_vendorsrc/ScotlandSoftware/ImagePopUpButton/RYZImagePopUpButtonCell.h;
+			refType = 2;
+			sourceTree = SOURCE_ROOT;
+		};
+		27BF060506D7F097008AD3AE = {
+			fileEncoding = 30;
+			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.c.objc;
+			name = RYZImagePopUpButtonCell.m;
+			path = ../bibdesk_vendorsrc/ScotlandSoftware/ImagePopUpButton/RYZImagePopUpButtonCell.m;
+			refType = 2;
+			sourceTree = SOURCE_ROOT;
+		};
+		27BF060606D7F097008AD3AE = {
+			fileRef = 27BF060206D7F097008AD3AE;
+			isa = PBXBuildFile;
+			settings = {
+			};
+		};
+		27BF060706D7F097008AD3AE = {
+			fileRef = 27BF060306D7F097008AD3AE;
+			isa = PBXBuildFile;
+			settings = {
+			};
+		};
+		27BF060806D7F097008AD3AE = {
+			fileRef = 27BF060406D7F097008AD3AE;
+			isa = PBXBuildFile;
+			settings = {
+			};
+		};
+		27BF060906D7F097008AD3AE = {
+			fileRef = 27BF060506D7F097008AD3AE;
+			isa = PBXBuildFile;
+			settings = {
+			};
+		};
+		27BF095506D81ABC008AD3AE = {
+			isa = PBXFileReference;
+			lastKnownFileType = image.tiff;
+			path = ArrowPointingDown.tiff;
+			refType = 2;
+			sourceTree = SOURCE_ROOT;
+		};
+		27BF095606D81ABC008AD3AE = {
+			fileRef = 27BF095506D81ABC008AD3AE;
+			isa = PBXBuildFile;
+			settings = {
+			};
+		};
+		27BF095E06D81B39008AD3AE = {
+			fileRef = 27BF095506D81ABC008AD3AE;
+			isa = PBXBuildFile;
+			settings = {
+			};
+		};
 		27CB67A405680FC0001D2AC3 = {
 			fileEncoding = 4;
 			isa = PBXFileReference;
@@ -1140,6 +1223,8 @@
 				6CF8863306BA9067000AC4FC,
 				6C19F0EA06BF1B9300B3C7A4,
 				6CA69B9106D1F780005F2126,
+				27BF060606D7F097008AD3AE,
+				27BF060806D7F097008AD3AE,
 			);
 			isa = PBXHeadersBuildPhase;
 			runOnlyForDeploymentPostprocessing = 0;
@@ -1441,6 +1526,7 @@
 				276A500C069F6FC80090D522,
 				276A500E069F6FF90090D522,
 				F9D8602406B2FC7D00F2DE7D,
+				27BF095E06D81B39008AD3AE,
 				6CF888E006BB35A7000AC4FC,
 				6CF888E106BB35A7000AC4FC,
 				6CF888E206BB35A7000AC4FC,
@@ -1678,6 +1764,8 @@
 				6CF8863406BA9067000AC4FC,
 				6C19F0EB06BF1B9300B3C7A4,
 				6CA69B9206D1F780005F2126,
+				27BF060706D7F097008AD3AE,
+				27BF060906D7F097008AD3AE,
 			);
 			isa = PBXSourcesBuildPhase;
 			runOnlyForDeploymentPostprocessing = 0;
@@ -3761,6 +3849,7 @@
 		F5CE4C220228994301EF0ACB = {
 			children = (
 				F508016802F9E9C201A8020B,
+				27BF095506D81ABC008AD3AE,
 				F946E34206135F2800AB29EA,
 				6CF888DC06BB35A7000AC4FC,
 				6CF888DD06BB35A7000AC4FC,
@@ -4811,6 +4900,7 @@
 				2777412706B6465100200533,
 				2777412806B6465100200533,
 				2777412906B6465100200533,
+				27BF095606D81ABC008AD3AE,
 			);
 			inputPaths = (
 				Scripting/BibDesk.sdef,
