@@ -966,6 +966,9 @@ void _setupFonts(){
     
     //build BibTeX entry:
     [s appendString:@"@"];
+    
+    NSAssert1(pubType != nil, @"Tried to append a nil pubtype in %@.  You will need to quit and relaunch BibDesk after fixing the error manually.", self );
+    
     [s appendString:pubType];
     [s appendString:@"{"];
     [s appendString:[self citeKey]];
