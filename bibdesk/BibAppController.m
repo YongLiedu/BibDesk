@@ -311,17 +311,45 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 #pragma mark Auto-completion stuff
 
 - (void)addString:(NSString *)string forCompletionEntry:(NSString *)entry{
-	NSMutableArray *completionArray = nil;
+    NSMutableArray *completionArray = nil;
     BOOL keyExists = [[_autoCompletionDict allKeys] containsObject:entry];
-	if (!keyExists) {
+    
+    if (!keyExists) {
         completionArray = [NSMutableArray arrayWithCapacity:5];
-	}else{
-		completionArray = [_autoCompletionDict objectForKey:entry];
-    }
-    [completionArray addObject:string];
-    if(!keyExists){
         [_autoCompletionDict setObject:completionArray forKey:entry];
     }
+
+    completionArray = [_autoCompletionDict objectForKey:entry];
+    
+    if([entry isEqualToString:@"Local-Url"]) return; // don't add Local-Url fields
+    if([entry isEqualToString:@"Title"]){ // add the whole string for title? or add components separated by whitespace?
+        [completionArray addObject:string];
+        return;
+    }
+    if([entry isEqualToString:@"Author"]){
+        [completionArray addObjectsFromArray:[string componentsSeparatedByString:@" and "]];
+        return;
+    }
+    
+    NSRange r = [string rangeOfCharacterFromSet:[NSCharacterSet punctuationCharacterSet]];
+    
+    if(r.location != NSNotFound){
+        NSScanner *scanner = [[NSScanner alloc] initWithString:string];
+        [scanner setCharactersToBeSkipped:nil];
+        NSString *tmp;
+
+        while(![scanner isAtEnd]){
+            [scanner scanUpToCharactersFromSet:[NSCharacterSet punctuationCharacterSet] intoString:&tmp];
+            [completionArray addObject:tmp];
+            [scanner scanCharactersFromSet:[NSCharacterSet punctuationCharacterSet] intoString:nil];
+            [scanner scanCharactersFromSet:[NSCharacterSet whitespaceCharacterSet] intoString:nil];
+        }
+        [scanner release];
+    } else {
+        [completionArray addObject:string];
+    }
+    
+    // NSLog(@"completionArray is %@", [completionArray description]);
 }
 
 - (NSFormatter *)formatterForEntry:(NSString *)entry{

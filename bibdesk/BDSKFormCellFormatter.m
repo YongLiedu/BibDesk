@@ -48,25 +48,41 @@
     NSEnumerator *stringE = [strings objectEnumerator];
     NSString *string = nil;
 	
-	// If this would not move the cursor forward, it is a delete.
-	if(origSelRange.location == proposedSelRangePtr->location) return YES;
+    // If this would not move the cursor forward, it is a delete.
+    if(origSelRange.location == proposedSelRangePtr->location) return YES;
     
-	while(string = [stringE nextObject]){
-        if ([string isKindOfClass:[NSString class]] && [string hasPrefix:*partialStringPtr]) { // it will occasionally get here with an invalid 'string'. 'strings' is ok though... this is an evil hack, but trying to fix it opened up a huge can of worms... ouch
+    // find the first whitespace preceding the current word being entered
+    NSRange whiteSpaceRange = [*partialStringPtr rangeOfString:@" "
+                                                       options:NSBackwardsSearch | NSLiteralSearch];
+    NSString *matchString = nil;
+    unsigned lengthToEnd = [*partialStringPtr length] - whiteSpaceRange.location;
+    NSString *firstPart = [NSString stringWithString:@""]; // we'll use this as a base for appending the completion to
+    
+    if(whiteSpaceRange.location != NSNotFound){
+        matchString = [*partialStringPtr substringWithRange:NSMakeRange(whiteSpaceRange.location + 1, lengthToEnd - 1)]; // everything after the last whitespace
+        firstPart = [*partialStringPtr substringWithRange:NSMakeRange(0, whiteSpaceRange.location + 1)]; // everything through the last whitespace
+    } else {
+        matchString = *partialStringPtr; // first word being entered, so use it
+    }
+    
+    while(string = [stringE nextObject]){
+        if ([string hasPrefix:matchString]) {
             break;
         }
     }
+    
+    NSLog(@"string is %@", string);
     
     // also allow to keep typing for no match - new entries are OK.
     if (!string) return YES;
 
     // If the partial string is shorter than the
     // match,  provide the match and set the selection
-    if ([string length] > [*partialStringPtr length]) {
+    if ([string length] > [matchString length]) {
 
         proposedSelRangePtr->location = [*partialStringPtr length];
-        proposedSelRangePtr->length = [string length] - [*partialStringPtr length];
-        *partialStringPtr = string;
+        proposedSelRangePtr->length = [string length] - [matchString length] + 1;
+        *partialStringPtr = [firstPart stringByAppendingString:string];
         return NO;
     }
     return YES;
