@@ -1178,7 +1178,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 }
 
 - (IBAction)showMacrosWindow:(id)sender{
-    [[self document] showMacrosWindow:self];
+    [theDocument showMacrosWindow:self];
 }
 
 // Note:  implementing setDocument or -document can have strange side effects with our document window controller array at present.
