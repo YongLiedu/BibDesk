@@ -30,18 +30,13 @@ GNU General Public License:
 http://home.planet.nl/~faase009/GNU.txt
 */
 
-
 /************** ASCII-8 *****************/
 
-#ifdef ASCII8
-#define HIGHASCII 255
-#else
 #define HIGHASCII 126
-#endif
 
 /************** prototypes ***************/
 
-NSString* TeXStringWithHTMLString(char *str, FILE *freport, char *html_fn, int ln,
+NSString* TeXStringWithHTMLString(const char *str, FILE *freport, char *html_fn, int ln,
               BOOL in_math, BOOL in_verb, BOOL in_alltt);
 
 /******* Translating special characters to LaTeX characters ******/

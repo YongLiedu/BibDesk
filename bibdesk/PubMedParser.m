@@ -319,7 +319,7 @@ void mergePageNumbers(NSMutableDictionary *dict){
 }
 
 
-NSString* TeXStringWithHTMLString(char *str, FILE *freport, char *html_fn, int ln,
+NSString* TeXStringWithHTMLString(const char *str, FILE *freport, char *html_fn, int ln,
 			   BOOL in_math, BOOL in_verb, BOOL in_alltt)
 {  
     
@@ -362,15 +362,7 @@ http://home.planet.nl/~faase009/GNU.txt
 		char ch = '\0';
 		char html_ch[10];
 		html_ch[0] = '\0';
-        
-#ifndef ASCII8
-		if ((unsigned char)*str >= 160 && (unsigned char)*str <= 255)
-		{   special = YES;
-			v = (unsigned char)*str - 160;
-			ch = ch_table[v].ch;
-		}
-		else
-#endif 
+
             if (*str == '&')
             {   int i = 0;
                 BOOL correct = NO;
