@@ -31,6 +31,8 @@
 	NSString *currentType;
 }
 
++ (BDSKTypeInfoEditor *)sharedTypeInfoEditor;
+
 - (void)addType:(NSString *)newType withFields:(NSDictionary *)fieldsDict;
 - (void)setCurrentType:(NSString *)newCurrentType;
 

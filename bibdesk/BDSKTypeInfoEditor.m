@@ -9,15 +9,26 @@
 #import "BDSKTypeInfoEditor.h"
 #import "BDSKFieldNameFormatter.h"
 #import "BibAppController.h"
+#import "BibTypeManager.h"
 
 #define BDSKTypeInfoRowsPboardType	@"BDSKTypeInfoRowsPboardType"
 #define REQUIRED_KEY				@"required"
 #define OPTIONAL_KEY				@"optional"
 #define FIELDS_FOR_TYPES_KEY		@"FieldsForTypes"
 #define TYPES_FOR_FILE_TYPE_KEY		@"TypesForFileType"
+#define ALL_FIELDS_KEY				@"AllFields"
 #define TYPE_INFO_FILENAME			@"TypeInfo.plist"
 
+static BDSKTypeInfoEditor *sharedTypeInfoEditor;
+
 @implementation BDSKTypeInfoEditor
+
++ (BDSKTypeInfoEditor *)sharedTypeInfoEditor{
+    if (!sharedTypeInfoEditor) {
+        sharedTypeInfoEditor = [[BDSKTypeInfoEditor alloc] init];
+    }
+    return sharedTypeInfoEditor;
+}
 
 - (id)init
 {
@@ -69,7 +80,7 @@
     [super dealloc];
 }
 
-- (void)awakeFromNib:(NSWindowController *) aController
+- (void)awakeFromNib
 {
     // we want to be able to reorder the items
 	[typeTableView registerForDraggedTypes:[NSArray arrayWithObject:BDSKTypeInfoRowsPboardType]];
@@ -145,12 +156,29 @@
 }
 
 - (IBAction)saveChanges:(id)sender {
+	NSMutableSet *allFields = [NSMutableSet setWithCapacity:24];
+	NSEnumerator *typeEnum = [types objectEnumerator];
+	NSEnumerator *fieldEnum;
+	NSString *type;
+	NSString *field;
+	
+	while (type = [typeEnum nextObject]) {
+		fieldEnum = [[[fieldsForTypesDict objectForKey:type] objectForKey:REQUIRED_KEY] objectEnumerator];
+		while (field = [fieldEnum nextObject]) {
+			[allFields addObject:field];
+		}
+		fieldEnum = [[[fieldsForTypesDict objectForKey:type] objectForKey:OPTIONAL_KEY] objectEnumerator];
+		while (field = [fieldEnum nextObject]) {
+			[allFields addObject:field];
+		}
+	}
+	
 	NSString *error = nil;
 	NSPropertyListFormat format = NSPropertyListXMLFormat_v1_0;
-	
 	NSDictionary *dict = [NSDictionary dictionaryWithObjectsAndKeys: 
 				fieldsForTypesDict, FIELDS_FOR_TYPES_KEY, 
-				[NSDictionary dictionaryWithObject:types forKey:BDSKBibtexString], TYPES_FOR_FILE_TYPE_KEY, nil];
+				[NSDictionary dictionaryWithObject:types forKey:BDSKBibtexString], TYPES_FOR_FILE_TYPE_KEY, 
+				[allFields allObjects], ALL_FIELDS_KEY, nil];
 	
 	NSData *data = [NSPropertyListSerialization dataFromPropertyList:dict
 															  format:format 
