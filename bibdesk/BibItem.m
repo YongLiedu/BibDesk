@@ -36,8 +36,7 @@
 
 #import "BibItem.h"
 
-#define addokey(s) if([pubFields objectForKey: s] == nil){[pubFields setObject:@"" forKey: s];} if([requiredFieldNames containsObject:s]){[requiredFieldNames removeObject: s];} [removeKeys removeObject: s];
-#define addrkey(s) if([pubFields objectForKey: s] == nil){[pubFields setObject:@"" forKey: s];} if(![requiredFieldNames containsObject:s]){[requiredFieldNames addObject: s];} [removeKeys removeObject: s];
+#define addkey(s) if([pubFields objectForKey: s] == nil){[pubFields setObject:@"" forKey: s];} [removeKeys removeObject: s];
 
 #define isEmptyField(s) ([[[pubFields objectForKey:s] stringValue] isEqualToString:@""])
 
@@ -131,20 +130,19 @@ void _setupFonts(){
     NSEnumerator *reqFieldsE = [[typeMan requiredFieldsForType:type] objectEnumerator];
     NSEnumerator *optFieldsE = [[typeMan optionalFieldsForType:type] objectEnumerator];
     NSEnumerator *defFieldsE = [[typeMan userDefaultFieldsForType:type] objectEnumerator];
-
   
     while(fieldString = [reqFieldsE nextObject]){
-        addrkey(fieldString)
+        addkey(fieldString)
     }
     while(fieldString = [optFieldsE nextObject]){
-        addokey(fieldString)
+        addkey(fieldString)
     }
     while(fieldString = [defFieldsE nextObject]){
-        addokey(fieldString)
+        addkey(fieldString)
     }    
     
     //I don't enforce Keywords, but since there's GUI depending on them, I will enforce these others:
-    addokey(@"Url") addokey(@"Local-Url") addokey(@"Annote") addokey(@"Abstract") addokey(@"Rss-Description")
+    addkey(@"Url") addkey(@"Local-Url") addkey(@"Annote") addkey(@"Abstract") addkey(@"Rss-Description")
 
         // remove from removeKeys things that aren't == @"" in pubFields
         // this includes things left over from the previous bibtype - that's good.
@@ -160,6 +158,7 @@ void _setupFonts(){
     [removeKeys release];
     // and don't forget to set what we say our type is:
     [self setType:type];
+	[self setRequiredFieldNames:[typeMan requiredFieldsForType:type]];
 }
 
 //@@ type - move to type class
