@@ -1979,6 +1979,12 @@ int generalBibItemCompareFunc(id item1, id item2, void *context){
     [e show];
 }
 
+- (IBAction)cut:(id)sender{ // puts the pubs on the pasteboard, using the default implementation, then deletes them
+    [self copy:self];
+    [self deleteSheetDidEnd:nil returnCode:NSAlertDefaultReturn contextInfo:nil]; // use this method directly, so you don't get the warning (if it was a mistake, paste them back)
+    [self delPub:self];
+}
+
 - (IBAction)copy:(id)sender{
     OFPreferenceWrapper *sud = [OFPreferenceWrapper sharedPreferenceWrapper];
     if([[sud objectForKey:BDSKDragCopyKey] intValue] == 0){
