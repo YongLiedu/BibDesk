@@ -28,6 +28,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 #import "BibAppController.h"
 #import "PDFImageView.h"
 #import "BDSKFieldNameFormatter.h"
+#import "BibPersonController.h"
 
 
 extern NSString *BDSKAnnoteString;
@@ -179,6 +180,16 @@ extern NSString *BDSKUrlString;
 - (BOOL)citeKeyIsValid:(NSString *)proposedCiteKey;
 - (void)makeKeyField:(NSString *)fieldName;
 - (void)bibDidChange:(NSNotification *)notification;
+
+
+/*!
+    @method     showPersonDetail:
+	 @abstract   opens a BibPersonController to show details of a pub
+	 @discussion (description)
+*/
+- (IBAction)showPersonDetailCmd:(id)sender;
+
+- (void)showPersonDetail:(BibAuthor *)person;
 
 /*!
     @method     addAuthors:

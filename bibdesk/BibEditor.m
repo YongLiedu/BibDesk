@@ -186,6 +186,9 @@ NSString *BDSKUrlString = @"Url";
 											 selector:@selector(bibDidChange:)
 												 name:BDSKBibItemChangedNotification
 											   object:theBib];
+
+	[authorTableView setDoubleAction:@selector(showPersonDetailCmd:)];
+	
 }
 
 - (void)dealloc{
@@ -696,6 +699,28 @@ NSString *BDSKUrlString = @"Url";
 		return @"";
 	}
 }
+
+
+- (IBAction)showPersonDetailCmd:(id)sender{
+	// find selected author
+    NSEnumerator *e = [authorTableView selectedRowEnumerator]; //@@ 10.3 deprecated for IndexSets
+	NSNumber *idx = nil;
+	while (idx = [e nextObject]){
+		int i = [idx intValue];
+		BibAuthor *auth = [theBib authorAtIndex:i];
+		[self showPersonDetail:auth];
+	}
+}
+
+- (void)showPersonDetail:(BibAuthor *)person{
+	BibPersonController *pc = [person personController];
+	if(pc == nil){
+		pc = [[BibPersonController alloc] initWithPerson:person];
+		NSLog(@"editing person [%@]", person);
+	}
+	[pc show];
+}
+
 
 - (IBAction)addAuthors:(id)sender{
 	[NSApp beginSheet:addAuthorSheet
