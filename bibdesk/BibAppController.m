@@ -47,8 +47,9 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
     NSString *applicationSupportPath;
     NSFileManager *DFM = [NSFileManager defaultManager];
     
-    // start the crash reporter
-    [[ILCrashReporter defaultReporter] launchReporterForCompany:@"BibDesk Project" reportAddr:@"bibdesk-crashes@lists.sourceforge.net"];
+    // start the crash reporter; 10.3+ only
+    if(!BDSK_USING_JAGUAR)
+        [[ILCrashReporter defaultReporter] launchReporterForCompany:@"BibDesk Project" reportAddr:@"bibdesk-crashes@lists.sourceforge.net"];
 
     // now check if the application support directory is there...
     applicationSupportPath = [[[NSHomeDirectory() stringByAppendingPathComponent:@"Library"]

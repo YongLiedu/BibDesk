@@ -45,7 +45,8 @@
 	[formatField setStringValue:citeKeyFormat];
 	[citeKeyLine setStringValue:[tmpBI suggestedCiteKey]];
 	[formatField setEnabled:custom]; // or hidden?
-	[formatRepositoryPopUp setHidden:!custom];
+        if([formatRepositoryPopUp respondsToSelector:@selector(setHidden:)])
+	    [formatRepositoryPopUp setHidden:!custom];
 	[tmpBI release];
 }
 
