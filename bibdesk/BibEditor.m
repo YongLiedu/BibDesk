@@ -776,14 +776,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
         [viewRemoteButton setToolTip:NSLocalizedString(@"Choose a URL to link with in the Url Field", @"bad/empty url field tooltip")];
     }
 	
-	if ( (lurl && [[NSFileManager defaultManager] fileExistsAtPath:lurl]) ||
-		 ([NSURL URLWithString:rurl] && ![rurl isEqualToString:@""]) ){
-		[self updateDocumentSnoopButton];
-		[documentSnoopButton setIconActionEnabled:YES];
-	}else{
-        [documentSnoopButton setIconImage:[NSImage imageNamed:@"drawerDisabled"]];
-		[documentSnoopButton setIconActionEnabled:NO];
-	}
+	[self updateDocumentSnoopButton];
 }
 
 #pragma mark choose local-url or url support
@@ -1060,37 +1053,57 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 					  [documentSnoopDrawer state] == NSDrawerOpeningState) );
 	BOOL isText = (requiredSnoopContainerView == textSnoopContainerView);
 	BOOL isWeb = (requiredSnoopContainerView == webSnoopContainerView);
+    NSString *lurl = [theBib localURLPathRelativeTo:[[theDocument fileName] stringByDeletingLastPathComponent]];
+    NSString *rurl = [theBib valueOfField:BDSKUrlString];
 	NSImage *drawerImage = [NSImage imageNamed:@"drawerRight"];
-	NSImage *arrowImage = [NSImage imageNamed:@"drawerArrow"];
-	NSImage *badgeImage = [[NSWorkspace sharedWorkspace] iconForFileType:(isWeb ? @"webloc" : (isText ? @"txt" : @"pdf"))];
-	NSRect iconRect = NSMakeRect(0, 0, 32, 32);
-	NSSize arrowSize = [arrowImage size];
-	NSRect arrowRect = NSMakeRect(0, 0, arrowSize.width, arrowSize.height);
-	NSRect arrowDrawRect = NSMakeRect((isRight ? 29-arrowSize.width : 3), (32-arrowSize.height)/2, arrowSize.width, arrowSize.height);
-	NSRect badgeDrawRect = NSMakeRect((isRight ? 15 : 1), 0, 16, 16);
-	NSImage *image = [[[NSImage alloc] initWithSize:iconRect.size] autorelease];
 	
-	if (!isRight)
-		drawerImage = [self flipHorizontal:drawerImage];
-	if (isRight == isClose)
-		arrowImage = [self flipHorizontal:arrowImage];
-	
-	[image lockFocus];
-	[drawerImage drawInRect:iconRect fromRect:iconRect  operation:NSCompositeSourceOver  fraction: 1.0];
-	[badgeImage drawInRect:badgeDrawRect fromRect:iconRect  operation:NSCompositeSourceOver  fraction: 1.0];
-	[arrowImage drawInRect:arrowDrawRect fromRect:arrowRect  operation:NSCompositeSourceOver  fraction: 1.0];
-	[image unlockFocus];
-	
-	[documentSnoopButton setIconImage:image];
-	
-	if (isClose) {
-		[documentSnoopButton setToolTip:NSLocalizedString(@"Close Drawer", @"Close drawer tooltip")];
-	} else if (isWeb) {
-		[documentSnoopButton setToolTip:NSLocalizedString(@"Show Remote URL in Drawer", @"Show remote URL in drawer tooltip")];
-	} else if (isText) {
-		[documentSnoopButton setToolTip:NSLocalizedString(@"Show File as Text in Drawer", @"Show file as Text in drawer tooltip")];
-	} else {
-		[documentSnoopButton setToolTip:NSLocalizedString(@"Show File in Drawer", @"Show file in drawer tooltip")];
+	if ( (isWeb && [NSURL URLWithString:rurl] && ![rurl isEqualToString:@""]) ||
+		 (!isWeb && lurl && [[NSFileManager defaultManager] fileExistsAtPath:lurl]) ) {
+		
+		NSImage *arrowImage = [NSImage imageNamed:@"drawerArrow"];
+		NSImage *badgeImage = [[NSWorkspace sharedWorkspace] iconForFileType:(isWeb ? @"webloc" : (isText ? @"txt" : @"pdf"))];
+		NSRect iconRect = NSMakeRect(0, 0, 32, 32);
+		NSSize arrowSize = [arrowImage size];
+		NSRect arrowRect = NSMakeRect(0, 0, arrowSize.width, arrowSize.height);
+		NSRect arrowDrawRect = NSMakeRect((isRight ? 29-arrowSize.width : 3), (32-arrowSize.height)/2, arrowSize.width, arrowSize.height);
+		NSRect badgeDrawRect = NSMakeRect((isRight ? 15 : 1), 0, 16, 16);
+		NSImage *image = [[[NSImage alloc] initWithSize:iconRect.size] autorelease];
+		
+		if (!isRight)
+			drawerImage = [self flipHorizontal:drawerImage];
+		if (isRight == isClose)
+			arrowImage = [self flipHorizontal:arrowImage];
+		
+		[image lockFocus];
+		[drawerImage drawInRect:iconRect fromRect:iconRect  operation:NSCompositeSourceOver  fraction: 1.0];
+		[badgeImage drawInRect:badgeDrawRect fromRect:iconRect  operation:NSCompositeSourceOver  fraction: 1.0];
+		[arrowImage drawInRect:arrowDrawRect fromRect:arrowRect  operation:NSCompositeSourceOver  fraction: 1.0];
+		[image unlockFocus];
+		
+		[documentSnoopButton setIconImage:image];
+		
+		if (isClose) {
+			[documentSnoopButton setToolTip:NSLocalizedString(@"Close Drawer", @"Close drawer tooltip")];
+		} else if (isWeb) {
+			[documentSnoopButton setToolTip:NSLocalizedString(@"Show Remote URL in Drawer", @"Show remote URL in drawer tooltip")];
+		} else if (isText) {
+			[documentSnoopButton setToolTip:NSLocalizedString(@"Show File as Text in Drawer", @"Show file as Text in drawer tooltip")];
+		} else {
+			[documentSnoopButton setToolTip:NSLocalizedString(@"Show File in Drawer", @"Show file in drawer tooltip")];
+		}
+		
+		[documentSnoopButton setIconActionEnabled:YES];
+	}
+	else {
+        [documentSnoopButton setIconImage:drawerImage];
+		
+		if (isClose) {
+			[documentSnoopButton setToolTip:NSLocalizedString(@"Close Drawer", @"Close drawer tooltip")];
+		} else {
+			[documentSnoopButton setToolTip:NSLocalizedString(@"Choose Content to View in Drawer", @"Choose content to view in drawer")];
+		}
+		
+		[documentSnoopButton setIconActionEnabled:NO];
 	}
 }
 
