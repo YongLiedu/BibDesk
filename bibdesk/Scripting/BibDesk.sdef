@@ -40,8 +40,13 @@ will translate this file into the necessary scriptSuite and scriptTerminology fi
                     <property name="jr part" code="aujr" type="string" description="The 'Jr' part of the author's name." access="r">
                         <cocoa method="jrPart"/>
                     </property>  
-			     </properties>
-               <responds-to-commands>
+				</properties>
+				<elements>
+					<element type="publication" description="Publications of the author." access="r">
+						<cocoa method="publications"/>
+					</element>
+			    </elements>
+                <responds-to-commands>
                     <responds-to name="show">
 						<cocoa method=""/>
 					</responds-to>

@@ -33,5 +33,11 @@ ssp 2004-07-10
 */	
 }
 
+- (NSArray *)publications {
+	BibDocument * myDoc = [[self publication] document];
+	if (myDoc)
+		return [myDoc publicationsForAuthor:self];
+	return [NSArray array];
+}
 
 @end

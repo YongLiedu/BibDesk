@@ -12,5 +12,6 @@
 
 @interface BibAuthor (Scripting)
 
+- (NSArray *)publications;
 
 @end
