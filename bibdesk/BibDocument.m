@@ -510,10 +510,6 @@ NSString *BDSKBibItemLocalDragPboardType = @"edu.ucsd.cs.mmccrack.bibdesk: Local
 #endif
         [self exportAsRSS:nil];
     }
-    if([[OFPreferenceWrapper sharedPreferenceWrapper] integerForKey:BDSKExportBibTeXWithBDSKDocument] == NSOnState
-       && ![[self fileType] isEqualToString:@"bib"]){
-        [self exportEncodedBib:nil];
-    }
 }
 
 - (IBAction)exportAsAtom:(id)sender{
@@ -962,7 +958,7 @@ stringByAppendingPathComponent:@"BibDesk"]; */
         NSAssert( fileContentString != nil, @"File contents returned a nil string, probably due to incorrect encoding choice.");
                 
 #warning ARM: Need to save document ivar for string encoding in binary file
-        NSLog(@"*** WARNING: using new parser.  To disable, use `defaults write edu.ucsd.cs.mmccrack.bibdesk \"Use Unicode BibTeX Parser\" 'NO'` and relaunch BibDesk.");
+        // NSLog(@"*** WARNING: using new parser.  To disable, use `defaults write edu.ucsd.cs.mmccrack.bibdesk \"Use Unicode BibTeX Parser\" 'NO'` and relaunch BibDesk.");
         newPubs = [BibTeXParser itemsFromString:fileContentString
                                           error:&hadProblems
                                     frontMatter:frontMatter

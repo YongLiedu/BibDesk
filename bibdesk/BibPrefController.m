@@ -18,7 +18,6 @@ NSString *BDSKStartupBehaviorKey = @"Startup Behavior";
 
 NSString *BDSKUseUnicodeBibTeXParser = @"Use Unicode BibTeX Parser";
 NSString *BDSKDefaultStringEncoding = @"Default string encoding for opening and saving";
-NSString *BDSKExportBibTeXWithBDSKDocument = @"Export BibTeX document when saving BibDesk document";
 
 NSString *BDSKTeXBinPathKey = @"TeX Binary Path";
 NSString *BDSKBibTeXBinPathKey = @"BibTeX Binary Path";

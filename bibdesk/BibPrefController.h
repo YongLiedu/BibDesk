@@ -48,7 +48,6 @@ extern NSString *BDSKBibTeXBinPathKey;
 extern NSString *BDSKBTStyleKey;
 extern NSString *BDSKUseUnicodeBibTeXParser;
 extern NSString *BDSKDefaultStringEncoding;
-extern NSString *BDSKExportBibTeXWithBDSKDocument;
 extern NSString *BDSKDefaultBibFilePathKey;
 extern NSString *BDSKStartupBehaviorKey;
 extern NSString *BDSKDragCopyKey;

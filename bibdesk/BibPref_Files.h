@@ -11,14 +11,12 @@
 
 
 @interface BibPref_Files : OAPreferenceClient {
-    IBOutlet NSMatrix *exportBibTeXAutomaticallyRadio;
     IBOutlet NSPopUpButton *encodingPopUp;
     IBOutlet NSMatrix *defaultParserRadio;
     NSArray *encodingsArray;
     NSArray *encodingNames;
 }
 
-- (IBAction)setExportBibTeXAutomatically:(id)sender;
 - (IBAction)setDefaultStringEncoding:(id)sender;
 - (unsigned)tagForEncoding:(NSStringEncoding)encoding;
 - (IBAction)setDefaultBibTeXParser:(id)sender;

@@ -30,13 +30,8 @@
 
 - (void)updateUI{
     OFPreferenceWrapper *prefs = [OFPreferenceWrapper sharedPreferenceWrapper];
-    [exportBibTeXAutomaticallyRadio selectCellWithTag:( [prefs boolForKey:BDSKExportBibTeXWithBDSKDocument] ? 0 : 1)];
     [encodingPopUp selectItemAtIndex:[self tagForEncoding:[prefs integerForKey:BDSKDefaultStringEncoding]]];
     [defaultParserRadio selectCellWithTag:( [prefs boolForKey:BDSKUseUnicodeBibTeXParser] ? 1 : 0 )];
-}
-
-- (IBAction)setExportBibTeXAutomatically:(id)sender{
-    [[OFPreferenceWrapper sharedPreferenceWrapper] setInteger:( [[sender selectedCell] tag] == 0 ? YES : NO ) forKey:BDSKExportBibTeXWithBDSKDocument];
 }
 
 - (IBAction)setDefaultStringEncoding:(id)sender{    
@@ -47,7 +42,6 @@
 }
 
 - (unsigned)tagForEncoding:(NSStringEncoding)encoding{
-
     return [encodingsArray indexOfObject:[NSNumber numberWithInt:encoding]];
 }
 
