@@ -16,6 +16,7 @@
 
 - (void)dealloc{
     [originalInfoLineValue dealloc];
+	[startString release];
     [super dealloc];
 }
 
@@ -48,7 +49,7 @@
                     display:YES
                     animate:NO];
     
-    startString = string;
+    startString = [string retain];
     [expandedValueTextField setStringValue:string];
     // in case we already ran and had an error that wasn't recorded:
     [infoLine setStringValue:originalInfoLineValue];
