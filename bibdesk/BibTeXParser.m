@@ -302,6 +302,13 @@ NSRange SafeBackwardSearchRange(NSRange startRange, unsigned seekLength){
             if(![possibleLeftDelimiters characterIsMember:[fullString characterAtIndex:[scanner scanLocation]]]){
                 leftDelimLocation = [scanner scanLocation] - 1; // rewind so we don't lose the first character
                 rightDelim = @",\n"; // set the delimiter appropriately for an unquoted value
+#warning FIXME: macros
+                // remove this error message when macro support is finished
+                *hadProblems = YES;
+                [self postParsingErrorNotification:[NSString stringWithFormat:@"Macros are not handled properly!", leftDelim]
+                                         errorType:@"Macro Error"
+                                          fileName:filePath
+                                        errorRange:[fullString lineRangeForRange:NSMakeRange([scanner scanLocation], 0)]];                
             } else {
                 [scanner setScanLocation:leftDelimLocation + 1];
             }
