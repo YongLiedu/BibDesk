@@ -21,7 +21,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 #import "BibDocument_DataSource.h"
 #import "BibDocumentView_Toolbar.h"
 #import "BibAppController.h"
-
+#import "RYZImagePopUpButtonCell.h"
 
 
 #include <stdio.h>
@@ -172,9 +172,11 @@ NSString*   LocalDragPasteboardName = @"edu.ucsd.cs.mmccrack.bibdesk: Local Publ
 	[myCell setArrowPosition:NSPopUpNoArrow];
 	[myCell setPullsDown:YES];
 	[myCell setBordered:NO];
-	[myCell setBezelStyle:NSRegularSquareBezelStyle];
+ 	[myCell setBezelStyle:NSRegularSquareBezelStyle];
 	
 	[self updateActionMenu:nil];
+    
+
 	[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(popup:) name:NSPopUpButtonWillPopUpNotification object:actionMenuButton];
 	[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(dismiss:) name:BDSKPopUpDismissedNotification object:actionMenuButton];
 	
@@ -219,7 +221,7 @@ Handle Notifications by the popup button to update its icon and its menu before 
 	NSMenu * menu = [self menuForSelection];
 	NSMenuItem * menuItem = [[[NSMenuItem alloc] initWithTitle:@"" action:NULL keyEquivalent:@""] autorelease];
 	[menuItem setImage:[NSImage imageNamed:@"Action"]];
-	[menu insertItem:menuItem atIndex:0];
+	[menu insertItem:menuItem atIndex:0]; 
 	[actionMenuButton setMenu:menu];
 	
 	[actionMenuButton setEnabled:([self numberOfSelectedPubs] != 0)];
@@ -1821,7 +1823,8 @@ int generalBibItemCompareFunc(id item1, id item2, void *context){
     NSFont *font = [NSFont fontWithName:[[OFPreferenceWrapper sharedPreferenceWrapper] objectForKey:BDSKTableViewFontKey]
                                    size:
         [[OFPreferenceWrapper sharedPreferenceWrapper] floatForKey:BDSKTableViewFontSizeKey]];
-
+	
+	[tableView setRowHeight:[font defaultLineHeightForFont]+2];
 	[tableView setFont:font];
 	[tableView tile];
 }
