@@ -16,6 +16,162 @@
     return [BibTeXParser itemsFromData:inData error:hadProblems frontMatter:nil filePath:@"Paste/Drag"];
 }
 
+NSRange SafeForwardSearchRange( unsigned startLoc, unsigned seekLength, unsigned maxLoc ){
+    seekLength = ( (startLoc + seekLength > maxLoc) ? maxLoc - startLoc : seekLength );
+    return NSMakeRange(startLoc, seekLength);
+}
+
++ (NSMutableArray *)itemsFromString:(NSString *)fullString
+                              error:(BOOL *)hadProblems
+                        frontMatter:(NSMutableString *)frontMatter
+                           filePath:(NSString *)filePath{
+//    - Input string
+//    - Scan %-EOL as a comment, store in preamble
+#warning ARM: Scan comments into preamble
+#warning ARM: Scan strings into a separate container?  Ask mmcc about this.
+
+    NSScanner *scanner = [[NSScanner alloc] initWithString:fullString];
+    [scanner setCharactersToBeSkipped:nil];
+    NSMutableDictionary *dict = [NSMutableDictionary dictionary];
+    NSCharacterSet *newlineCharacterSet = [NSCharacterSet characterSetWithCharactersInString:@"\n"];
+    unsigned fullStringLength = [fullString length];
+    unsigned fileOrder = 0;
+    
+    BibItem *newBI;
+    NSMutableArray *bibItemArray = [NSMutableArray array];
+    
+    NSRange firstAtRange = [fullString rangeOfString:@"@" options:NSLiteralSearch range:NSMakeRange(0, [fullString length])];
+    NSRange nextAtRange = [fullString rangeOfString:@"@" options:NSLiteralSearch range:SafeForwardSearchRange(firstAtRange.location + 1, fullStringLength - firstAtRange.location - 1, fullStringLength)];    
+
+    NSLog(@"Creating a new bibitem, first one is at %i, second is at %@", firstAtRange.location, ( nextAtRange.location != NSNotFound ? [NSString stringWithFormat:@"%i", nextAtRange.location] : @"NSNotFound" ) );
+    
+    while(![scanner isAtEnd]){
+        
+        // get the type and citekey
+        NSString *type = nil;
+        NSString *citekey = nil;
+                
+        [scanner setScanLocation:(firstAtRange.location + 1)];
+        [scanner scanUpToString:@"{" intoString:&type];
+        
+        [scanner scanString:@"{" intoString:nil];
+        
+        [scanner scanUpToString:@"," intoString:&citekey];
+        
+        NSAssert( citekey != nil && type != nil, @"Missing a citekey or type" );
+        
+        newBI = [[BibItem alloc] initWithType:type
+                                     fileType:@"BibTeX"
+                                      authors:[NSMutableArray array]];        
+        
+        [newBI setCiteKeyString:citekey];
+        
+        if(nextAtRange.location == NSNotFound)
+          nextAtRange = NSMakeRange(fullStringLength, 0);
+        
+        while([scanner scanLocation] < nextAtRange.location){ // while we are within bounds of a single bibitem
+            NSString *key = nil;
+            NSString *value = nil;
+            NSRange quoteRange;
+            NSRange braceRange;
+            BOOL usingBraceDelimiter = YES; // assume BibDesk; double quote also works, though
+            NSString *leftDelim = @"{";
+            NSString *rightDelim = @"}";
+            unsigned leftDelimLocation;
+                        
+            [scanner scanUpToString:@"," intoString:nil]; // find the comma
+            [scanner scanString:@"," intoString:nil]; // get rid of the comma
+            [scanner scanUpToString:@"=" intoString:&key]; // this should be our key
+            [scanner scanString:@"=" intoString:nil];
+            
+            quoteRange = [fullString rangeOfString:@"\"" options:NSLiteralSearch range:SafeForwardSearchRange([scanner scanLocation], 100, fullStringLength)];
+            braceRange = [fullString rangeOfString:@"{" options:NSLiteralSearch range:SafeForwardSearchRange([scanner scanLocation], 100, fullStringLength)];
+
+            if(quoteRange.location != NSNotFound){
+                usingBraceDelimiter = NO;
+                leftDelim = @"\"";
+                rightDelim = leftDelim;
+            }
+
+            if(braceRange.location != NSNotFound && quoteRange.location != NSNotFound && braceRange.location < quoteRange.location){
+                usingBraceDelimiter = YES;
+                leftDelim = @"{";
+                rightDelim = @"}";
+            }
+
+            leftDelimLocation = ( usingBraceDelimiter ? braceRange.location : quoteRange.location );
+            
+            if([scanner scanLocation] >= nextAtRange.location)
+                break; // either at EOF or scanned into the next bibitem
+
+            NSAssert ( leftDelimLocation != NSNotFound, @"Can't find a delimiter.");
+            
+            if(leftDelimLocation + 1 >= nextAtRange.location)
+                break;
+
+            [scanner setScanLocation:leftDelimLocation + 1];
+            
+            if([scanner scanLocation] >= nextAtRange.location)
+                break;
+                        
+            unsigned rightDelimLocation = 0;
+            if([scanner scanUpToString:rightDelim intoString:nil])
+                rightDelimLocation = [scanner scanLocation];
+
+#warning ARM: Need more testing for nested braces
+            unsigned searchStart = leftDelimLocation + 1;
+            NSRange braceSearchRange;
+            NSRange braceFoundRange;
+            
+            while(usingBraceDelimiter){ // should put us at the end of a record if we're using brace delimiters
+                braceSearchRange = NSMakeRange(searchStart, rightDelimLocation - searchStart);
+                braceFoundRange = [fullString rangeOfString:leftDelim options:NSLiteralSearch range:braceSearchRange];
+                
+                if(braceFoundRange.location != NSNotFound){ // if there's a "{" between { and }
+                    [scanner scanString:rightDelim intoString:nil]; // it wasn't this one, so scan past it
+                    [scanner scanUpToString:rightDelim intoString:nil];  // find the next one
+                    searchStart = rightDelimLocation + 1; // start from the previous search end
+                    rightDelimLocation = [scanner scanLocation];
+                } else {
+                    break;
+                }
+            }
+            
+            // bogus check if([scanner scanString:@"," intoString:nil] || [scanner scanString:@"}" intoString:nil]) // must be at end of a value line or bibitem?
+            
+            value = [fullString substringWithRange:NSMakeRange(leftDelimLocation + 1, [scanner scanLocation] - leftDelimLocation - 1)]; // here's the "bar" part of foo = bar
+
+            NSAssert( NSMakeRange(leftDelimLocation + 1, [scanner scanLocation] - leftDelimLocation - 1).location <= nextAtRange.location, @"The parser scanned into the next bibitem");
+
+            value = [value stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]];
+            key = [[key stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]] capitalizedString];
+            
+            NSAssert( value != nil, @"Found a nil value string");
+            NSAssert( key != nil, @"Found a nil key string");
+            
+            [dict setObject:value forKey:key];
+        }
+        
+        [newBI setFileOrder:fileOrder];
+        [newBI setPubFields:dict];
+        [bibItemArray addObject:[newBI autorelease]];
+
+        fileOrder ++;
+        
+        [dict removeAllObjects];
+        
+        firstAtRange = nextAtRange;
+        nextAtRange = [fullString rangeOfString:@"@" options:NSLiteralSearch range:SafeForwardSearchRange(firstAtRange.location + 1, fullStringLength - firstAtRange.location - 1, fullStringLength)];
+        if(nextAtRange.location != NSNotFound)
+            [scanner setScanLocation:nextAtRange.location];
+        
+        NSLog(@"Finished a bibitem, next one is at %i, following is at %@", firstAtRange.location, ( nextAtRange.location != NSNotFound ? [NSString stringWithFormat:@"%i", nextAtRange.location] : @"NSNotFound" ) );
+
+        
+    }
+    return bibItemArray;    
+}
+
 + (NSMutableArray *)itemsFromData:(NSData *)inData
                               error:(BOOL *)hadProblems
                         frontMatter:(NSMutableString *)frontMatter
