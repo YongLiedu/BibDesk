@@ -1,9 +1,9 @@
-// Copyright 2001-2003 Omni Development, Inc.  All rights reserved.
+// Copyright 2001-2004 Omni Development, Inc.  All rights reserved.
 //
 // This software may only be used and reproduced according to the
 // terms in the file OmniSourceLicense.html, which should be
 // distributed with this project and can also be found at
-// http://www.omnigroup.com/DeveloperResources/OmniSourceLicense.html.
+// <http://www.omnigroup.com/developer/sourcecode/sourcelicense/>.
 
 #import "NSException-OBExtensions.h"
 
@@ -13,7 +13,7 @@
 #import "OBUtilities.h"
 #import "rcsid.h"
 
-RCS_ID("$Header: /Network/Source/CVS/OmniGroup/Frameworks/OmniBase/NSException-OBExtensions.m,v 1.6 2003/02/08 00:54:59 wiml Exp $");
+RCS_ID("$Header: /Network/Source/CVS/OmniGroup/Frameworks/OmniBase/NSException-OBExtensions.m,v 1.9 2004/02/10 04:07:39 kc Exp $");
 
 @implementation NSException (OBExtensions)
 
@@ -26,6 +26,17 @@ RCS_ID("$Header: /Network/Source/CVS/OmniGroup/Frameworks/OmniBase/NSException-O
     formattedString = [[[NSString alloc] initWithFormat:format arguments:argList] autorelease];
     va_end(argList);
     [[NSException exceptionWithName:exceptionName reason:formattedString userInfo:[NSDictionary dictionaryWithObject:[NSNumber numberWithInt:posixErrorNumber] forKey:OBExceptionPosixErrorNumberKey]] raise];
+}
+
++ (NSException *)exceptionWithName:(NSString *)exceptionName posixErrorNumber:(int)posixErrorNumber format:(NSString *)format, ...;
+{
+    va_list argList;
+    NSString *formattedString;
+
+    va_start(argList, format);
+    formattedString = [[[NSString alloc] initWithFormat:format arguments:argList] autorelease];
+    va_end(argList);
+    return [NSException exceptionWithName:exceptionName reason:formattedString userInfo:[NSDictionary dictionaryWithObject:[NSNumber numberWithInt:posixErrorNumber] forKey:OBExceptionPosixErrorNumberKey]];
 }
 
 - (int)posixErrorNumber;

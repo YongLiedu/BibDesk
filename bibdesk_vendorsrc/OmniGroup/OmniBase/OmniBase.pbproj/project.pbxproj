@@ -9,6 +9,7 @@
 			buildStyles = (
 				07F45147FEDD7C5311CB188F,
 				07F45148FEDD7C5311CB188F,
+				34A1593B0563FE300097A113,
 			);
 			hasScannedForEncodings = 1;
 			isa = PBXProject;
@@ -32,6 +33,7 @@
 		};
 		00E51C1DFE8AAE2511C9CC38 = {
 			children = (
+				34A159450564081F0097A113,
 				00E51C2CFE8AAE2511C9CC38,
 				00E51C24FE8AAE2511C9CC38,
 				00E51C27FE8AAE2511C9CC38,
@@ -231,8 +233,8 @@
 				PREBINDING = NO;
 				PRINCIPAL_CLASS = "";
 				PRODUCT_NAME = OmniBase;
-				SECTORDER_FLAGS = "";
-				WARNING_CFLAGS = "-Wall -Werror";
+				SECTORDER_FLAGS = "-sectorder __TEXT __text OmniBase.order";
+				WARNING_CFLAGS = "-Wall -Werror -Wno-#warnings";
 				WRAPPER_EXTENSION = framework;
 			};
 			dependencies = (
@@ -585,6 +587,33 @@
 			};
 			isa = PBXBuildStyle;
 			name = Deployment;
+		};
+//070
+//071
+//072
+//073
+//074
+//340
+//341
+//342
+//343
+//344
+		34A1593B0563FE300097A113 = {
+			buildRules = (
+			);
+			buildSettings = {
+				COPY_PHASE_STRIP = NO;
+				OPTIMIZATION_CFLAGS = "\U0001-O0";
+				OTHER_CFLAGS = "\U0001-fprofile-arcs -ftest-coverage";
+			};
+			isa = PBXBuildStyle;
+			name = Coverage;
+		};
+		34A159450564081F0097A113 = {
+			fileEncoding = 4;
+			isa = PBXFileReference;
+			path = OmniBase.order;
+			refType = 4;
 		};
 	};
 	rootObject = 00E51C1BFE8AAE2511C9CC38;

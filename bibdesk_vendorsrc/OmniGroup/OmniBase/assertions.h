@@ -1,11 +1,11 @@
-// Copyright 1997-2003 Omni Development, Inc.  All rights reserved.
+// Copyright 1997-2004 Omni Development, Inc.  All rights reserved.
 //
 // This software may only be used and reproduced according to the
 // terms in the file OmniSourceLicense.html, which should be
 // distributed with this project and can also be found at
-// http://www.omnigroup.com/DeveloperResources/OmniSourceLicense.html.
+// <http://www.omnigroup.com/developer/sourcecode/sourcelicense/>.
 //
-// $Header: /Network/Source/CVS/OmniGroup/Frameworks/OmniBase/assertions.h,v 1.23 2003/01/15 22:51:47 kc Exp $
+// $Header: /Network/Source/CVS/OmniGroup/Frameworks/OmniBase/assertions.h,v 1.29 2004/02/10 04:07:39 kc Exp $
 
 #ifndef _OmniBase_assertions_h_
 #define _OmniBase_assertions_h_
@@ -13,12 +13,12 @@
 #import <OmniBase/FrameworkDefines.h>
 #import <objc/objc.h>
 
-#if defined(DEBUG) || defined(OMNIMAKE_FORCE_ASSERTIONS)
+#if defined(DEBUG) || defined(OMNI_FORCE_ASSERTIONS)
 #define OMNI_ASSERTIONS_ON
 #endif
 
 // This allows you to turn off assertions when debugging
-#if defined(OMNIMAKE_FORCE_ASSERTIONS_OFF)
+#if defined(OMNI_FORCE_ASSERTIONS_OFF)
 #undef OMNI_ASSERTIONS_ON
 #warning Forcing assertions off!
 #endif
@@ -64,7 +64,7 @@ typedef void (*OBAssertionFailureHandler)(const char *type, const char *expressi
 
     #define OBASSERT_NOT_REACHED(reason)                                        \
     do {                                                                        \
-        OBAssertFailed("NOTREACHED", #reason, __FILE__, __LINE__);              \
+        OBAssertFailed("NOTREACHED", reason, __FILE__, __LINE__);              \
     } while (NO)
 
 

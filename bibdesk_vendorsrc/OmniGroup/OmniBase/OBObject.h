@@ -1,13 +1,13 @@
-// Copyright 1997-2003 Omni Development, Inc.  All rights reserved.
+// Copyright 1997-2004 Omni Development, Inc.  All rights reserved.
 //
 // This software may only be used and reproduced according to the
 // terms in the file OmniSourceLicense.html, which should be
 // distributed with this project and can also be found at
-// http://www.omnigroup.com/DeveloperResources/OmniSourceLicense.html.
+// <http://www.omnigroup.com/developer/sourcecode/sourcelicense/>.
 //
-// $Header: /Network/Source/CVS/OmniGroup/Frameworks/OmniBase/OBObject.h,v 1.25 2003/01/15 22:51:47 kc Exp $
-/* $Header: /Network/Source/CVS/OmniGroup/Frameworks/OmniBase/OBObject.h,v 1.25 2003/01/15 22:51:47 kc Exp $ */
-/* $Id: OBObject.h,v 1.25 2003/01/15 22:51:47 kc Exp $ */
+// $Header: /Network/Source/CVS/OmniGroup/Frameworks/OmniBase/OBObject.h,v 1.29 2004/02/10 04:07:39 kc Exp $
+/* $Header: /Network/Source/CVS/OmniGroup/Frameworks/OmniBase/OBObject.h,v 1.29 2004/02/10 04:07:39 kc Exp $ */
+/* $Id: OBObject.h,v 1.29 2004/02/10 04:07:39 kc Exp $ */
 
 #ifndef _OmniBase_OBObject_h_
 #define _OmniBase_OBObject_h_
@@ -26,7 +26,9 @@
 + allocWithZone:(NSZone *)zone;
 #endif
 
+#if defined(DEBUG_ALLOC)
 - (void)dealloc;
+#endif
 
 @end
 
@@ -63,7 +65,7 @@ OmniBase_EXTERN NSString *OBShortObjectDescription(id anObject);
 
 // OmniBase Symbols
 
-#import <OmniBase/SystemType.h> // Defines YELLOW_BOX and/or RHAPSODY when appropriate
+#import <OmniBase/SystemType.h> // Defines OBOperatingSystem{Major,Minor}Version
 
 
 #endif // _OmniBase_OBObject_h_

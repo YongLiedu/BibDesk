@@ -1,9 +1,9 @@
-// Copyright 1997-2003 Omni Development, Inc.  All rights reserved.
+// Copyright 1997-2004 Omni Development, Inc.  All rights reserved.
 //
 // This software may only be used and reproduced according to the
 // terms in the file OmniSourceLicense.html, which should be
 // distributed with this project and can also be found at
-// http://www.omnigroup.com/DeveloperResources/OmniSourceLicense.html.
+// <http://www.omnigroup.com/developer/sourcecode/sourcelicense/>.
 
 #import <OmniBase/OBObject.h>
 
@@ -15,7 +15,7 @@
 #import <OmniBase/rcsid.h>
 #import <OmniBase/OBPostLoader.h>
 
-RCS_ID("$Header: /Network/Source/CVS/OmniGroup/Frameworks/OmniBase/OBObject.m,v 1.19 2003/01/15 22:51:47 kc Exp $")
+RCS_ID("$Header: /Network/Source/CVS/OmniGroup/Frameworks/OmniBase/OBObject.m,v 1.22 2004/02/10 04:07:39 kc Exp $")
 
 @implementation OBObject
 /*" OBObject is an immediate subclass of NSObject, and adds common functionality which Omni has found to be valuable in its own development. OBObject is a superclass for virtually all (if not all) of the classes in Omni's Frameworks (such as OmniFoundation, OmniAppkit, and the publically available OmniNetworking frameworks) as well as in Omni's commercial applications (including OmniWeb and OmniPDF). Also, the class header file includes a couple of other header files which are used in many to virtually all of our classes, and recommended for your use as well. This way you need not include these utility headers everywhere.
@@ -104,17 +104,19 @@ If DEBUG_ALLOC is defined, then this method can log a message whenever -dealloc 
 
 This method calls NSDeallocateObject(self) rather than calling the superclass implementation of -dealloc, to avoid the performance overhead of an extra method invocation (especially important if DEBUG_ALLOC is not defined). If Apple ever for some reason extend the implementation of [NSObject -dealloc] to do anything more than call NSDeallocateObject(self), this implementation will need to change to call the superclass implementation (or duplicate it's additional functionality).
 
+If DEBUG_ALLOC is not defined, then this method is not compiled at all, thus avoiding any performance penalty.
+
 See also: - dealloc (NSObject)
 "*/
 
+#ifdef DEBUG_ALLOC
 - (void)dealloc;
 {
-#ifdef DEBUG_ALLOC
     if (OBObjectDebug)
 	NSLog(@"dealloc: %@", OBShortObjectDescription(self));
-#endif
     NSDeallocateObject(self);
 }
+#endif
 
 @end
 

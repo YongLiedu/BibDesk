@@ -1,15 +1,15 @@
-// Copyright 1997-2003 Omni Development, Inc.  All rights reserved.
+// Copyright 1997-2004 Omni Development, Inc.  All rights reserved.
 //
 // This software may only be used and reproduced according to the
 // terms in the file OmniSourceLicense.html, which should be
 // distributed with this project and can also be found at
-// http://www.omnigroup.com/DeveloperResources/OmniSourceLicense.html.
+// <http://www.omnigroup.com/developer/sourcecode/sourcelicense/>.
 
 #import <OmniBase/assertions.h>
 #import <Foundation/Foundation.h>
 #import <OmniBase/rcsid.h>
 
-RCS_ID("$Header: /Network/Source/CVS/OmniGroup/Frameworks/OmniBase/assertions.m,v 1.23 2003/03/24 23:05:04 neo Exp $")
+RCS_ID("$Header: /Network/Source/CVS/OmniGroup/Frameworks/OmniBase/assertions.m,v 1.27 2004/02/10 04:07:39 kc Exp $")
 
 #ifdef OMNI_ASSERTIONS_ON
 #warning (Assertions enabled.  To disable, undefine OMNI_ASSERTIONS_ON.)
@@ -64,6 +64,7 @@ void OBAssertFailed(const char *type, const char *expression, const char *file, 
 // Unless OMNI_PRODUCTION_BUILD is specified, log a message about whether assertions are enabled or not.
 #ifndef OMNI_PRODUCTION_BUILD
 
+#if defined(OMNI_ASSERTIONS_ON) || defined(DEBUG)
 @interface _OBAssertionWarning : NSObject
 @end
 
@@ -77,13 +78,17 @@ void OBAssertFailed(const char *type, const char *expression, const char *file, 
     userDefaults = [NSUserDefaults standardUserDefaults];
     if ([userDefaults boolForKey:OBShouldAbortOnAssertFailureEnabled])
         OBSetAssertionFailureHandler(OBAbort);
-#else
-#ifdef DEBUG
+    else if (NSClassFromString(@"SenTestCase")) {
+        // If we are running unit tests, abort on assertion failure.  We could make assertions throw exceptions, but note that this wouldn't  catch cases where you are using 'shouldRaise' and hit an assertion.
+        OBSetAssertionFailureHandler(OBAbort);
+    }
+    
+#elif DEBUG
     fprintf(stderr, "*** Assertions are OFF ***\n");
-#endif
 #endif
 }
 @end
+#endif
 
 #endif // OMNI_PRODUCTION_BUILD
 

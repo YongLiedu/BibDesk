@@ -1,9 +1,9 @@
-// Copyright 1997-2003 Omni Development, Inc.  All rights reserved.
+// Copyright 1997-2004 Omni Development, Inc.  All rights reserved.
 //
 // This software may only be used and reproduced according to the
 // terms in the file OmniSourceLicense.html, which should be
 // distributed with this project and can also be found at
-// http://www.omnigroup.com/DeveloperResources/OmniSourceLicense.html.
+// <http://www.omnigroup.com/developer/sourcecode/sourcelicense/>.
 
 #import <OmniBase/OBUtilities.h>
 
@@ -13,7 +13,7 @@
 #import <OmniBase/assertions.h>
 #import <OmniBase/rcsid.h>
 
-RCS_ID("$Header: /Network/Source/CVS/OmniGroup/Frameworks/OmniBase/OBUtilities.m,v 1.18 2003/01/15 22:51:47 kc Exp $")
+RCS_ID("$Header: /Network/Source/CVS/OmniGroup/Frameworks/OmniBase/OBUtilities.m,v 1.26 2004/02/10 04:07:39 kc Exp $")
 
 static void _OBRegisterMethod(IMP methodImp, Class class, const char *methodTypes, SEL selector)
 {
@@ -83,34 +83,34 @@ IMP OBReplaceMethodImplementationWithSelectorOnClass(Class destClass, SEL oldSel
 
 void OBRequestConcreteImplementation(id self, SEL _cmd)
 {
-    OBASSERT(NO);
+    OBASSERT_NOT_REACHED("Concrete implementation needed");
     [NSException raise:OBAbstractImplementation format:@"%@ needs a concrete implementation of %c%s", [self class], OBPointerIsClass(self) ? '+' : '-', sel_getName(_cmd)];
+    exit(1);  // notreached, but needed to pacify the compiler
 }
 
 void OBRejectUnusedImplementation(id self, SEL _cmd)
 {
-    OBASSERT(NO);
+    OBASSERT_NOT_REACHED("Subclass rejects unused implementation");
     [NSException raise:OBUnusedImplementation format:@"%c[%@ %s] should not be invoked", OBPointerIsClass(self) ? '+' : '-', OBClassForPointer(self), sel_getName(_cmd)];
+    exit(1);  // notreached, but needed to pacify the compiler
+}
+
+void OBRejectInvalidCall(id self, SEL _cmd, NSString *format, ...)
+{
+    const char *className, *methodName;
+    NSString *complaint, *reasonString;
+    va_list argv;
+
+    className = OBClassForPointer(self)->name;
+    methodName = sel_getName(_cmd);
+    va_start(argv, format);
+    complaint = [[NSString alloc] initWithFormat:format arguments:argv];
+    va_end(argv);
+    reasonString = [NSString stringWithFormat:@"%c[%s %s] %@", OBPointerIsClass(self) ? '+' : '-', className, methodName, complaint];
+    [complaint release];
+    [[NSException exceptionWithName:NSInvalidArgumentException reason:reasonString userInfo:nil] raise];
+    exit(1);  // notreached, but needed to pacify the compiler
 }
 
 DEFINE_NSSTRING(OBAbstractImplementation);
 DEFINE_NSSTRING(OBUnusedImplementation);
-
-
-// BSD stuff that NT doesn't have
-
-#ifdef WIN32
-
-#warning TJW - This probably does not meet the IEEE754 standard on rounding, but should be sufficient for us
-double rint(double a)
-{
-    double c;
-
-    c = ceil(a);
-    if (c - a > 0.5)
-        return c - 1.0;
-    else
-        return c;
-}
-
-#endif
