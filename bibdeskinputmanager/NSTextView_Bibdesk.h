@@ -12,7 +12,7 @@
 extern NSString *BDSKInputManagerID;
 #define noScriptErr 0
 
-#warning Can you #define a localized (non-constant) string?
+#warning Can you #define a localized string?
 // string to reconise the string we inserted
 #define kBibDeskInsertion NSLocalizedString(@" (Bibdesk insertion)", @" (Bibdesk insertion)")
 // hint string 

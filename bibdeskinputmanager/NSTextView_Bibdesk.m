@@ -8,9 +8,11 @@
 
 #import "NSTextView_Bibdesk.h"
 #import <Foundation/Foundation.h>
+#import </usr/include/objc/objc-class.h>
+#import </usr/include/objc/Protocol.h>
 
 NSString *BDSKInputManagerID = @"net.sourceforge.bibdesk.inputmanager";
-#warning  should be extern?  why were these #defined?
+
 static NSString *kScriptName = @"Bibdesk";
 static NSString *kScriptType = @"scpt";
 static NSString *kHandlerName = @"getcitekeys";
@@ -19,8 +21,9 @@ static NSString *kHandlerName = @"getcitekeys";
 
 + (void)load{
     NSString *bundleID = [[NSBundle mainBundle] bundleIdentifier]; // for the app we are loading into
-    NSArray *array = [NSArray arrayWithContentsOfFile:[NSHomeDirectory() stringByAppendingPathComponent:@"/Library/Application Support/BibDeskInputManager/EnabledApplications.plist"]];
-
+    NSString *libraryPath = [NSSearchPathForDirectoriesInDomains(NSLibraryDirectory, NSUserDomainMask, YES) objectAtIndex:0];
+    NSArray *array = [NSArray arrayWithContentsOfFile:[libraryPath stringByAppendingPathComponent:@"/Application Support/BibDeskInputManager/EnabledApplications.plist"]];
+    
     NSEnumerator *e = [array objectEnumerator];
     NSDictionary *dict;
     BOOL yn = NO;
@@ -34,6 +37,19 @@ static NSString *kHandlerName = @"getcitekeys";
     
     if(yn && [[self superclass] instancesRespondToSelector:@selector(completionsForPartialWordRange:indexOfSelectedItem:)]){
 	[self poseAsClass:[NSTextView class]];
+    }
+}
+
++ (void)getSelectorList:(id)anObject{
+    int i = 0, k = 0;
+    void *iterator = 0;
+    struct objc_method_list *mlist;
+    while( mlist = class_nextMethodList( [anObject class], &iterator ) ){
+	for(k=0; k<mlist->method_count; k++){
+	    NSLog(@"%@ implements %@",[anObject class], NSStringFromSelector(mlist->method_list[k].method_name));
+	}
+	NSLog(@"count %i", i);
+	i++;
     }
 }
 
