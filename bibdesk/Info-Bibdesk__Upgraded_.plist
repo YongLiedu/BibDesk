@@ -305,8 +305,36 @@
 					<string>1.156487706076073e-310</string>
 					<key>Show Warnings in Error Panel</key>
 					<string>0</string>
+					<key>Column Widths By Name</key>
+					<dict>
+					  <key>1st Author</key>
+					  <string>80</string>
+					  <key>2nd Author</key>
+					  <string>80</string>
+					  <key>3rd Author</key>
+					  <string>80</string>
+					  <key>Category</key>
+					  <string>50</string>
+					  <key>Cite Key</key>
+					  <string>85.4439697265625</string>
+					  <key>Date</key>
+					  <string>50</string>
+					  <key>Local-Url</key>
+					  <string>18</string>
+					  <key>No Identifier</key>
+					  <string>176</string>
+					  <key>Read</key>
+					  <string>29</string>
+					  <key>Title</key>
+					  <string>300</string>
+					  <key>Type</key>
+					  <string>55</string>
+					  <key>Url</key>
+					  <string>23</string>
+					</dict>
 					<key>Shown Column Names</key>
 					<array>
+					  <string>Local-Url</string>
 						<string>Keywords</string>
 						<string>Type</string>
 						<string>Cite Key</string>
