@@ -196,8 +196,11 @@ NSString*   LocalDragPasteboardName = @"edu.ucsd.cs.mmccrack.bibdesk: Local Publ
     return [[publications retain] autorelease];
 }
 
-
 - (void)addPublication:(BibItem *)pub{
+	[self addPublication:pub lastRequest:YES];
+}
+
+- (void)addPublication:(BibItem *)pub lastRequest:(BOOL)last{
 	NSUndoManager *undoManager = [self undoManager];
 	[[undoManager prepareWithInvocationTarget:self] removePublication:pub];
 	[undoManager setActionName:NSLocalizedString(@"Add Publication",@"")];
@@ -205,16 +208,18 @@ NSString*   LocalDragPasteboardName = @"edu.ucsd.cs.mmccrack.bibdesk: Local Publ
 	[publications addObject:pub];
 	[shownPublications addObject:pub];
 
-	NSDictionary *notifInfo = [NSDictionary dictionaryWithObjectsAndKeys:pub, @"pub",nil];
+	NSDictionary *notifInfo = [NSDictionary dictionaryWithObjectsAndKeys:pub, @"pub",
+		(last ? @"YES" : @"NO"), @"lastRequest", nil];
 	[[NSNotificationCenter defaultCenter] postNotificationName:BDSKDocAddItemNotification
 														object:self
 													  userInfo:notifInfo];
-	
-	//@@ still need to add listener functions for both notifications. (maybe one for both for now)
-	
 }
 
 - (void)removePublication:(BibItem *)pub{
+	[self removePublication:pub lastRequest:YES];
+}
+
+- (void)removePublication:(BibItem *)pub lastRequest:(BOOL)last{
 	NSUndoManager *undoManager = [self undoManager];
 	[[undoManager prepareWithInvocationTarget:self] addPublication:pub];
 	[undoManager setActionName:NSLocalizedString(@"Delete Publication",@"")];
@@ -227,15 +232,24 @@ NSString*   LocalDragPasteboardName = @"edu.ucsd.cs.mmccrack.bibdesk: Local Publ
 	[publications removeObjectIdenticalTo:pub];
 	[shownPublications removeObjectIdenticalTo:pub];
 	
-	NSDictionary *notifInfo = [NSDictionary dictionaryWithObjectsAndKeys:pub, @"pub",nil];
+	NSDictionary *notifInfo = [NSDictionary dictionaryWithObjectsAndKeys:pub, @"pub",
+		(last ? @"YES" : @"NO"), @"lastRequest", nil];
 	[[NSNotificationCenter defaultCenter] postNotificationName:BDSKDocDelItemNotification
 														object:self
 													  userInfo:notifInfo];	
 }
 
 - (void)handleBibItemAddDelNotification:(NSNotification *)notification{
-	NSLog(@"handle bibitem add/del notif");
-	[self updateUI];
+	NSDictionary *userInfo = [notification userInfo];
+	BibItem *pub = [userInfo objectForKey:@"pub"];
+	BOOL wasLastRequest = [[userInfo objectForKey:@"lastRequest"] isEqualToString:@"YES"];
+
+	if(wasLastRequest){
+		NSLog(@"was last request in handleBibItemAddDel");
+		// This method should also check the publication to see if it's selected?
+		// and maybe also resort it...
+		[self updateUI];
+	}
 }
 
 
@@ -638,8 +652,11 @@ stringByAppendingPathComponent:@"BibDesk"]; */
     NSEnumerator *delEnum = nil;
     NSNumber *rowToDelete;
     id objToDelete; 
+	int numSelectedPubs = [self numberOfSelectedPubs];
+	int numDeletedPubs = 0;
     int rv = 0;
-    if ([self numberOfSelectedPubs] == 0) {
+	
+    if (numSelectedPubs == 0) {
         return;
     }
     rv = NSRunCriticalAlertPanel(NSLocalizedString(@"Publication delete",@""),
@@ -651,7 +668,12 @@ stringByAppendingPathComponent:@"BibDesk"]; */
         delEnum = [self selectedPubEnumerator];
         while (rowToDelete = [delEnum nextObject]) {
             objToDelete = [shownPublications objectAtIndex:[rowToDelete intValue]];
-            [self removePublication:objToDelete];
+			numDeletedPubs++;
+			if(numDeletedPubs == numSelectedPubs){
+				[self removePublication:objToDelete lastRequest:YES];
+			}else{
+				[self removePublication:objToDelete lastRequest:NO];
+			}
         }
         [self updateChangeCount:NSChangeDone];
         [[self currentView] deselectAll:nil];
@@ -1198,7 +1220,7 @@ int generalBibItemCompareFunc(id item1, id item2, void *context){
     [self editPub:pub forceChange:NO];
 }
 
-// @@- what does forceChange do? Where does this get called?
+//@@ notifications - when adding pub notifications is fully implemented we won't need this.
 - (void)editPub:(BibItem *)pub forceChange:(BOOL)force{
     BibEditor *e = [pub editorObj];
     if(e == nil){
