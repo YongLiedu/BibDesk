@@ -187,10 +187,10 @@ static NSDictionary *globalMacroDefs;
 			while (nesting > 0 && ![sc isAtEnd]) {
 				if ([sc scanUpToCharactersFromSet:bracesCharSet intoString:&s])
 					[nodeStr appendString:s];
-				if ([btstring characterAtIndex:[sc scanLocation] - 1] != '\\' && ![sc isAtEnd]) {
+				if ([sc isAtEnd]) break;
+				if ([btstring characterAtIndex:[sc scanLocation] - 1] != '\\') {
 					// we found an unquoted brace
 					ch = [btstring characterAtIndex:[sc scanLocation]];
-					[sc setScanLocation:[sc scanLocation] + 1];
 					if (ch == '}') {
 						--nesting;
 					} else {
@@ -199,6 +199,7 @@ static NSDictionary *globalMacroDefs;
 					if (nesting > 0) // we don't include the outer braces
 						[nodeStr appendFormat:@"%C",ch];
 				}
+				[sc setScanLocation:[sc scanLocation] + 1];
 			}
 			if (nesting > 0) {
 				[NSException raise:@"BDSKComplexStringException" 
