@@ -91,7 +91,7 @@
 - (NSMutableArray *)publications { return [[publications retain] autorelease]; }
 
 
-- (void)setPublications:(NSMutableArray *)newPublications {
+- (void)setPublications:(NSArray *)newPublications {
     //NSLog(@"in -setPublications:, old value of publications: %@, changed to: %@", publications, newPublications);
     
     if (publications != newPublications) {
@@ -100,7 +100,7 @@
     }
 }
 
-- (void)addPublicationsFromArray:(NSMutableArray *)newPublications {
+- (void)addPublicationsFromArray:(NSArray *)newPublications {
     NSSet *existingSet = [NSSet setWithArray:publications];
 
     // note that undo should use the trimmed set.
@@ -111,7 +111,7 @@
     }
 }
 
-- (void)removePublicationsInArray:(NSMutableArray *)thePublications {
+- (void)removePublicationsInArray:(NSArray *)thePublications {
     [publications removeObjectsInArray:thePublications];
 }
 
@@ -120,7 +120,7 @@
 - (NSMutableArray *)subCollections { return [[subCollections retain] autorelease]; }
 
 
-- (void)setSubCollections:(NSMutableArray *)newSubCollections {
+- (void)setSubCollections:(NSArray *)newSubCollections {
     //NSLog(@"in -setSubCollections:, old value of subCollections: %@, changed to: %@", subCollections, newSubCollections);
     
     if (subCollections != newSubCollections) {
@@ -134,7 +134,7 @@
 - (NSMutableArray *)exporters { return [[exporters retain] autorelease]; }
 
 
-- (void)setExporters:(NSMutableArray *)newExporters {
+- (void)setExporters:(NSArray *)newExporters {
     //NSLog(@"in -setExporters:, old value of exporters: %@, changed to: %@", exporters, newExporters);
     
     if (exporters != newExporters) {

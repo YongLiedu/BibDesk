@@ -46,12 +46,11 @@ static NSMutableArray *availableExporterClassNames;
 }
 
 - (void)encodeWithCoder:(NSCoder *)coder {
-    [super encodeWithCoder:coder];
     [coder encodeObject:[self data] forKey:@"data"];
 }
 
 - (id)initWithCoder:(NSCoder *)coder {
-    if ([super initWithCoder:coder]) {
+    if (self = [super init]) {
         [self setData:[coder decodeObjectForKey:@"data"]];
     }
     return self;

@@ -472,7 +472,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
         if(item == self){
             return NO;
         }else{
-            return ([item count] > 0);
+            return ([(NSArray *)item count] > 0);
         }
     }        
 }
@@ -487,7 +487,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
         if(item == self){
             return 0;
         }else{
-            return [item count];
+            return [(NSArray *)item count];
         }
     }        
 }

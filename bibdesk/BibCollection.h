@@ -91,7 +91,7 @@
 @discussion 
 @param newPublications - an array of bibitems
 */
-- (void)setPublications:(NSMutableArray *)newPublications;
+- (void)setPublications:(NSArray *)newPublications;
 
 /*!
 @method addPublicationsFromArray
@@ -99,7 +99,7 @@
 @discussion 
 @param newPublications - an array of bibitems
 */
-- (void)addPublicationsFromArray:(NSMutableArray *)newPublications;
+- (void)addPublicationsFromArray:(NSArray *)newPublications;
 
     /*!
 @method addPublicationsFromArray
@@ -107,7 +107,7 @@
 @discussion 
 @param newPublications - an array of bibitems
 */
-- (void)removePublicationsInArray:(NSMutableArray *)thePublications;
+- (void)removePublicationsInArray:(NSArray *)thePublications;
 
 /*!
 @method count
@@ -131,7 +131,7 @@
 @discussion 
 @param newSubCollections 
 */
-- (void)setSubCollections:(NSMutableArray *)newSubCollections;
+- (void)setSubCollections:(NSArray *)newSubCollections;
 
     /*!
     @method exporters
@@ -146,7 +146,7 @@
      @discussion 
      @param newExporters 
      */
-- (void)setExporters:(NSMutableArray *)newExporters;
+- (void)setExporters:(NSArray *)newExporters;
 
 - (void)addExporter:(id)exporter;
 - (void)removeExporter:(id)exporter;

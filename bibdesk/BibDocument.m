@@ -2850,7 +2850,7 @@ The results are quite crappy, but these were low-hanging fruit and people seem t
 }
 
 - (id)objectInCollectionsAtIndex:(unsigned int)index {
-    id myCollections = [self collections];
+    NSMutableArray *myCollections = [self collections];
     unsigned int collectionsCount = [myCollections count];
     if ( collectionsCount == 0 || index > (collectionsCount - 1) ) return nil;
     
@@ -2858,7 +2858,7 @@ The results are quite crappy, but these were low-hanging fruit and people seem t
 }
 
 - (void)insertObject:(id)anObject inCollectionsAtIndex:(unsigned int)index {
-    id myCollections = [self collections];
+    NSMutableArray *myCollections = [self collections];
     unsigned int collectionsCount = [myCollections count];
     if (index > collectionsCount) return;
     
@@ -2866,7 +2866,7 @@ The results are quite crappy, but these were low-hanging fruit and people seem t
 }
 
 - (void)removeObjectFromCollectionsAtIndex:(unsigned int)index {
-    id myCollections = [self collections];
+    NSMutableArray *myCollections = [self collections];
     unsigned int collectionsCount = [myCollections count];
     if ( collectionsCount == 0 || index > (collectionsCount - 1) ) return;
     
@@ -2874,7 +2874,7 @@ The results are quite crappy, but these were low-hanging fruit and people seem t
 }
 
 - (void)replaceObjectInCollectionsAtIndex:(unsigned int)index withObject:(id)anObject {
-    id myCollections = [self collections];
+    NSMutableArray *myCollections = [self collections];
     unsigned int collectionsCount = [myCollections count];
     if ( collectionsCount == 0 || index > (collectionsCount - 1) ) return;
     
@@ -2890,7 +2890,7 @@ The results are quite crappy, but these were low-hanging fruit and people seem t
 }
 
 - (id)objectInNotesAtIndex:(unsigned int)index {
-    id myNotes = [self notes];
+    NSMutableArray *myNotes = [self notes];
     unsigned int notesCount = [myNotes count];
     if ( notesCount == 0 || index > (notesCount - 1) ) return nil;
     
@@ -2898,7 +2898,7 @@ The results are quite crappy, but these were low-hanging fruit and people seem t
 }
 
 - (void)insertObject:(id)anObject inNotesAtIndex:(unsigned int)index {
-    id myNotes = [self notes];
+    NSMutableArray *myNotes = [self notes];
     unsigned int notesCount = [myNotes count];
     if (index > notesCount) return;
     
@@ -2906,7 +2906,7 @@ The results are quite crappy, but these were low-hanging fruit and people seem t
 }
 
 - (void)removeObjectFromNotesAtIndex:(unsigned int)index {
-    id myNotes = [self notes];
+    NSMutableArray *myNotes = [self notes];
     unsigned int notesCount = [myNotes count];
     if ( notesCount == 0 || index > (notesCount - 1) ) return;
     
@@ -2914,7 +2914,7 @@ The results are quite crappy, but these were low-hanging fruit and people seem t
 }
 
 - (void)replaceObjectInNotesAtIndex:(unsigned int)index withObject:(id)anObject {
-    id myNotes = [self notes];
+    NSMutableArray *myNotes = [self notes];
     unsigned int notesCount = [myNotes count];
     if ( notesCount == 0 || index > (notesCount - 1) ) return;
     
