@@ -338,7 +338,7 @@ extern NSString* BDSKBibTeXStringPboardType;
     @discussion Simply replaces the publications array
     @param newPubs The new array.
 */
-- (void)setPublications:(NSMutableArray *)newPubs;
+- (void)setPublications:(NSArray *)newPubs;
 
 /*!
     @method publications

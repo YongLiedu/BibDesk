@@ -229,10 +229,19 @@ Handle Notifications by the popup button to update its icon and its menu before 
 }
 
 
-- (void)setPublications:(NSMutableArray *)newPubs{
+- (void)setPublications:(NSArray *)newPubs{
 	if(newPubs != publications){
+		NSUndoManager *undoManager = [self undoManager];
+		[[undoManager prepareWithInvocationTarget:self] setPublications:publications];
+		[undoManager setActionName:NSLocalizedString(@"Set Publications",@"")];
+		
 		[publications autorelease];
 		publications = [newPubs mutableCopy];
+		
+		NSDictionary *notifInfo = [NSDictionary dictionaryWithObjectsAndKeys:newPubs, @"pubs", nil];
+		[[NSNotificationCenter defaultCenter] postNotificationName:@"Set the publications in document"
+															object:self
+														  userInfo:notifInfo];
     }
 }
 
