@@ -232,7 +232,7 @@ extern NSString* BDSKBibTeXStringPboardType;
     @discussion This manipulates the shownPublications array.
 */
 
-- (void)hidePublicationsWithoutSubstring:(NSString *)substring inField:(NSString *)field;
+- (void)hidePublicationsWithoutSubstring:(NSString *)searchString inField:(NSString *)field;
 
 /*!
     @method updatePreviews
@@ -550,6 +550,6 @@ int generalBibItemCompareFunc(id item1, id item2, void *context);
 - (IBAction)doAdvancedSearch:(id)sender;
 
 int compareSetLengths(NSSet *set1, NSSet *set2, void *context);
-- (void)showPublicationsForBooleanString:(NSString *)searchString inField:(NSString *)field;
+//- (void)showPublicationsForBooleanString:(NSString *)searchString inField:(NSString *)field;
 
 @end

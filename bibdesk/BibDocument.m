@@ -1115,7 +1115,7 @@ Enhanced delete method that uses a sheet instead of a modal dialogue.
     }
 }
 
-- (void)showPublicationsForBooleanString:(NSString *)searchString inField:(NSString *)field{
+- (void)hidePublicationsWithoutSubstring:(NSString *)searchString inField:(NSString *)field{
     
     if([searchString isEqualToString:@""]){
         [shownPublications setArray:publications];
@@ -1123,7 +1123,37 @@ Enhanced delete method that uses a sheet instead of a modal dialogue.
         return;
     }
     
-    if(field != nil) NSLog(@"Boolean searching by field is currently not implemented.");
+    NSString *selectorString = [[[NSString alloc] init] autorelease];
+    
+    if([field isEqualToString:@"Title"]){
+        selectorString=@"title";
+    } else {
+        if([field isEqualToString:@"Author"]){
+            selectorString=@"bibtexAuthorString";
+        } else {
+            if([field isEqualToString:@"Date"]){
+#warning returns NSDate
+                selectorString=@"date";
+            } else {
+                if([field isEqualToString:@"All Fields"]){
+                    selectorString=@"allFieldsString";
+                } else {
+                    if([field isEqualToString:@"Pub Type"]){
+                        selectorString=@"type";
+                    } else {
+                        if([field isEqualToString:@"Cite Key"]){
+                            selectorString=@"citekey";
+                        } else {
+#warning need a generic method
+                            return;
+                        }
+                    }
+                }
+            }
+        }
+    }
+    
+//    if(field != nil) NSLog(@"Boolean searching by field is currently not implemented.");
     
     AGRegex *tip = [AGRegex regexWithPattern:@"^\\S+"]; // match the first word of the string
     AGRegex *andRegex = [AGRegex regexWithPattern:@"AND \\b[^ ]+"]; // match the word following an AND
@@ -1168,8 +1198,8 @@ Enhanced delete method that uses a sheet instead of a modal dialogue.
     while(substring = [andEnum nextObject]){
         pubEnum = [publications objectEnumerator];
         while(pub = [pubEnum nextObject]){
-            r = [[pub allFieldsString] rangeOfString:substring
-                                             options:NSCaseInsensitiveSearch];
+            r = [[pub performSelector:NSSelectorFromString(selectorString) withObject:nil] rangeOfString:substring
+                                                                                                 options:NSCaseInsensitiveSearch];
             if(r.location != NSNotFound){
                 // NSLog(@"Found %@ in %@", substring, [pub citeKey]);
                 [aSet addObject:pub];
@@ -1180,12 +1210,12 @@ Enhanced delete method that uses a sheet instead of a modal dialogue.
     }
     
     NSMutableArray *orResultsArray = [NSMutableArray array];
-    // get all of the OR matches, each in a separate set, and add the sets to the dictionary
+    // get all of the OR matches, each in a separate set
     while(substring = [orEnum nextObject]){
         pubEnum = [publications objectEnumerator];
         while(pub = [pubEnum nextObject]){
-            r = [[pub allFieldsString] rangeOfString:substring
-                                             options:NSCaseInsensitiveSearch];
+            r = [[pub performSelector:NSSelectorFromString(selectorString) withObject:nil] rangeOfString:substring
+                                                                                                 options:NSCaseInsensitiveSearch];
             if(r.location != NSNotFound){
                 [aSet addObject:pub];
             }
@@ -1199,13 +1229,6 @@ Enhanced delete method that uses a sheet instead of a modal dialogue.
 
     // we need to sort the set so we always start with the shortest one
     [andResultsArray sortUsingFunction:compareSetLengths context:nil];
-    
-    e = [andResultsArray objectEnumerator];
-    unsigned count = 0;
-    while(tmpSet = [e nextObject]){
-        // NSLog(@"object at index %i has %i length", count, [tmpSet count]);
-        count ++;
-    }
 
     [newSet setSet:[andResultsArray objectAtIndex:0]];
     // NSLog(@"newSet count is %i", [newSet count]);
@@ -1226,7 +1249,18 @@ Enhanced delete method that uses a sheet instead of a modal dialogue.
     NSArray *foundArray = [[[newSet copy] autorelease] allObjects];
     
     [shownPublications setArray:foundArray];
-    [self updateUI];
+
+    [quickSearchTextDict setObject:searchString
+                            forKey:field];
+    
+    [[OFPreferenceWrapper sharedPreferenceWrapper] setObject:[[quickSearchTextDict copy] autorelease]
+                                                      forKey:BDSKCurrentQuickSearchTextDict];
+    [[OFPreferenceWrapper sharedPreferenceWrapper] autoSynchronize];
+    
+    [self updateUI]; // calls reloadData
+    if([shownPublications count] == 1)
+        [tableView selectAll:self];
+    
 }
 
 int compareSetLengths(NSSet *set1, NSSet *set2, void *context){
@@ -1235,73 +1269,73 @@ int compareSetLengths(NSSet *set1, NSSet *set2, void *context){
     return [n1 compare:n2];
 }
     
-- (void)hidePublicationsWithoutSubstring:(NSString *)substring inField:(NSString *)field{
-    NSMutableArray *remArray = [NSMutableArray arrayWithCapacity:1];
-    NSEnumerator *e = [publications objectEnumerator];
-    BibItem *pub;
-
-    NSRange r;
-	
-    [tableView deselectAll:self];
-	
-	// NSLog(@"looking for [%@] in [%@]",substring, field);
-    
-    if(![substring isEqualToString:@""]){
-        while(pub = [e nextObject]){
-            if ([field isEqualToString:@"Title"]){
-                r = [[pub title]  rangeOfString:substring
-                                        options:NSCaseInsensitiveSearch];
-			}else if ([field isEqualToString:@"Author"]){
-                r = [[pub bibtexAuthorString]  rangeOfString:substring
-                                               options:NSCaseInsensitiveSearch];
-			}else if ([field isEqualToString:@"Date"]){
-				NSCalendarDate *pubDate = [pub date];
-				if(pubDate){
-					r = [[pubDate descriptionWithCalendarFormat:@"%B %Y"] rangeOfString:substring
-																				options:NSCaseInsensitiveSearch];
-				}else{
-					r = [@"No Date" rangeOfString:substring
-										  options:NSCaseInsensitiveSearch];
-					// if there's no good date, we use "no date" because that's what we display.
-				}
-            }else if([field isEqualToString:@"All Fields"]){
-                r = [[pub allFieldsString] rangeOfString:substring
-                                                 options:NSCaseInsensitiveSearch];
-				
-            }else if([field isEqualToString:@"Pub Type"]){
-                r = [[pub type] rangeOfString:substring
-                                      options:NSCaseInsensitiveSearch];
-            }else if([field isEqualToString:@"Cite Key"]){
-				NSString *pubCiteKey = [pub citeKey];
-				r = [pubCiteKey rangeOfString:substring
-									  options:NSCaseInsensitiveSearch];
-			}else{
-				NSString *value = [pub valueOfField:quickSearchKey];
-				if(!value)
-					r.location = NSNotFound;
-				else
-					r = [value rangeOfString:substring options:NSCaseInsensitiveSearch];
-            }
-			
-            if(r.location == NSNotFound) [remArray addObject:pub];
-        }
-    }else{
-		// do nothing
-    }
-    [shownPublications setArray:publications];
-    [shownPublications removeObjectsInArray:remArray];
-	
-    [quickSearchTextDict setObject:substring
-                            forKey:field];
-	
-    [[OFPreferenceWrapper sharedPreferenceWrapper] setObject:[[quickSearchTextDict copy] autorelease]
-                                                      forKey:BDSKCurrentQuickSearchTextDict];
-    [[OFPreferenceWrapper sharedPreferenceWrapper] autoSynchronize];
-	
-    [self updateUI]; // calls reloadData
-    if([shownPublications count] == 1)
-        [tableView selectAll:self];
-}
+//- (void)hidePublicationsWithoutSubstring:(NSString *)substring inField:(NSString *)field{
+//    NSMutableArray *remArray = [NSMutableArray arrayWithCapacity:1];
+//    NSEnumerator *e = [publications objectEnumerator];
+//    BibItem *pub;
+//
+//    NSRange r;
+//	
+//    [tableView deselectAll:self];
+//	
+//	// NSLog(@"looking for [%@] in [%@]",substring, field);
+//    
+//    if(![substring isEqualToString:@""]){
+//        while(pub = [e nextObject]){
+//            if ([field isEqualToString:@"Title"]){
+//                r = [[pub title]  rangeOfString:substring
+//                                        options:NSCaseInsensitiveSearch];
+//			}else if ([field isEqualToString:@"Author"]){
+//                r = [[pub bibtexAuthorString]  rangeOfString:substring
+//                                               options:NSCaseInsensitiveSearch];
+//			}else if ([field isEqualToString:@"Date"]){
+//				NSCalendarDate *pubDate = [pub date];
+//				if(pubDate){
+//					r = [[pubDate descriptionWithCalendarFormat:@"%B %Y"] rangeOfString:substring
+//																				options:NSCaseInsensitiveSearch];
+//				}else{
+//					r = [@"No Date" rangeOfString:substring
+//										  options:NSCaseInsensitiveSearch];
+//					// if there's no good date, we use "no date" because that's what we display.
+//				}
+//            }else if([field isEqualToString:@"All Fields"]){
+//                r = [[pub allFieldsString] rangeOfString:substring
+//                                                 options:NSCaseInsensitiveSearch];
+//				
+//            }else if([field isEqualToString:@"Pub Type"]){
+//                r = [[pub type] rangeOfString:substring
+//                                      options:NSCaseInsensitiveSearch];
+//            }else if([field isEqualToString:@"Cite Key"]){
+//				NSString *pubCiteKey = [pub citeKey];
+//				r = [pubCiteKey rangeOfString:substring
+//									  options:NSCaseInsensitiveSearch];
+//			}else{
+//				NSString *value = [pub valueOfField:quickSearchKey];
+//				if(!value)
+//					r.location = NSNotFound;
+//				else
+//					r = [value rangeOfString:substring options:NSCaseInsensitiveSearch];
+//            }
+//			
+//            if(r.location == NSNotFound) [remArray addObject:pub];
+//        }
+//    }else{
+//		// do nothing
+//    }
+//    [shownPublications setArray:publications];
+//    [shownPublications removeObjectsInArray:remArray];
+//	
+//    [quickSearchTextDict setObject:substring
+//                            forKey:field];
+//	
+//    [[OFPreferenceWrapper sharedPreferenceWrapper] setObject:[[quickSearchTextDict copy] autorelease]
+//                                                      forKey:BDSKCurrentQuickSearchTextDict];
+//    [[OFPreferenceWrapper sharedPreferenceWrapper] autoSynchronize];
+//	
+//    [self updateUI]; // calls reloadData
+//    if([shownPublications count] == 1)
+//        [tableView selectAll:self];
+//}
 
 
 #pragma mark -
