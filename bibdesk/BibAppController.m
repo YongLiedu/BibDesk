@@ -365,10 +365,11 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 	BibDocument *doc = nil;
 	
     // make a fresh document, and don't display it until we can set its name.
-	doc = [self openUntitledDocumentOfType:@"bibTeX database" display:NO];
+    doc = [self openUntitledDocumentOfType:@"bibTeX database" display:NO];
     [doc setFileName:filePath]; // this effectively makes it not an untitled document anymore.
-    [doc showWindows];
+    [doc setFileType:@"bibTeX database"];  // this looks redundant, but it's necessary to enable saving the file (at least on AppKit == 10.3)
     [doc loadBibTeXDataRepresentation:data encoding:encoding];
+    [doc showWindows];
     [doc updateUI];  
     
 }
@@ -580,7 +581,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 
 - (id)tableView:(NSTableView *)tableView objectValueForTableColumn:(NSTableColumn *)tableColumn row:(int)row{
     if ([[tableColumn identifier] isEqualToString:@"lineNumber"]) {
-        return [NSString stringWithFormat:@"%@", [[_errors objectAtIndex:row] valueForKey:@"lineNumber"]];
+        return ([[_errors objectAtIndex:row] valueForKey:@"lineNumber"] != [NSNull null] ? [NSString stringWithFormat:@"%@", [[_errors objectAtIndex:row] valueForKey:@"lineNumber"]] : @"" ); // return empty string if it was null, which the Unicode parser returns.
     }
     if ([[tableColumn identifier] isEqualToString:@"errorClass"]) {
         return [NSString stringWithFormat:@"%@", [[_errors objectAtIndex:row] valueForKey:@"errorClassName"]];
