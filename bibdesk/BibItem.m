@@ -85,7 +85,6 @@ void _setupFonts(){
 
 - (id)initWithType:(NSString *)type fileType:(NSString *)inFileType authors:(NSMutableArray *)authArray{ // this is the designated initializer.
     if (self = [super init]){
-		NSCalendarDate *currentDate = [NSCalendarDate calendarDate];
         pubFields = [[NSMutableDictionary alloc] init];
         requiredFieldNames = [[NSMutableArray alloc] init];
         pubAuthors = [authArray mutableCopy];     // copy, it's mutable
@@ -96,8 +95,8 @@ void _setupFonts(){
         [self makeType:type];
         [self setCiteKeyString: @"cite-key"];
         [self setDate: nil];
-		[self setDateCreated: currentDate];
-		[self setDateModified: currentDate];
+		[self setDateCreated: nil];
+		[self setDateModified: nil];
         [self setFileOrder:-1];
         _setupFonts();
     }
@@ -589,12 +588,16 @@ void _setupFonts(){
 	NSString *dateCreatedValue = [pubFields objectForKey:BDSKDateCreatedString];
     if (dateCreatedValue && ![dateCreatedValue isEqualToString:@""]) {
 		[self setDateCreated:[NSCalendarDate dateWithNaturalLanguageString:dateCreatedValue]];
+	}else{
+		[self setDateCreated:nil];
 	}
 	
 	NSString *dateModValue = [pubFields objectForKey:BDSKDateModifiedString];
     if (dateModValue && ![dateModValue isEqualToString:@""]) {
 		// NSLog(@"updating date %@", dateModValue);
 		[self setDateModified:[NSCalendarDate dateWithNaturalLanguageString:dateModValue]];
+	}else{
+		[self setDateModified:nil];
 	}
 	
 }
@@ -620,8 +623,9 @@ void _setupFonts(){
 	}
 	
     [pubFields setObject: value forKey: key];
-	NSString *dateString = [date description];
-	[pubFields setObject:dateString forKey:BDSKDateModifiedString];
+	if (date != nil) {
+		[pubFields setObject:[date description] forKey:BDSKDateModifiedString];
+	}
 	[self updateMetadataForKey:key];
 	
 	NSDictionary *notifInfo = [NSDictionary dictionaryWithObjectsAndKeys:value, @"value", key, @"key", @"Change", @"type",nil];
