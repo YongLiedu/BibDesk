@@ -160,7 +160,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 			name:BDSKPreviewNeedsUpdateNotification
 			object:nil];
         
-        // Add a Scripts menu; should display the script graphic on 10.3+.  Searches in (mainbundle)/Resources/Scripts and (Library domains)/Application Support/Bibdesk/Scripts
+        // Add a Scripts menu; should display the script graphic on 10.3+.  Searches in (mainbundle)/Contents/Scripts and (Library domains)/Application Support/Bibdesk/Scripts
         NSMenu *newMenu = [[NSMenu allocWithZone:[NSMenu menuZone]] initWithTitle:@"Scripts"];
         OAScriptMenuItem *scriptItem = [[OAScriptMenuItem allocWithZone:[NSMenu menuZone]] initWithTitle:@"Scripts" action:NULL keyEquivalent:@""];
         [scriptItem setSubmenu:newMenu];
