@@ -236,7 +236,9 @@ NSString* BDSKBibTeXStringPboardType = @"edu.ucsd.cs.mmcrack.bibdesk: Local BibT
 	[[undoManager prepareWithInvocationTarget:self] removePublication:pub];
 	
 	[publications insertObject:pub atIndex:index];
-	[shownPublications insertObject:pub atIndex:index];
+	// always add new pubs to the shown array
+	// I do not know how to add it at the right place when satisfies the search
+	[shownPublications addObject:pub];
 	[pub setDocument:self];
 	
 	NSDictionary *notifInfo = [NSDictionary dictionaryWithObjectsAndKeys:pub, @"pub",
@@ -1734,7 +1736,7 @@ int generalBibItemCompareFunc(id item1, id item2, void *context){
     fileOrderCount++;
     [self addPublication:newBI];
 	[[self undoManager] setActionName:NSLocalizedString(@"Add Publication",@"")];
-    [self updateUI];
+    
     if(yn == YES)
     {
         [self editPub:newBI];
@@ -1833,8 +1835,6 @@ Shouldn't there be some kind of safeguard against opening too many pub editors?
 
 	while(newBI = [newPubE nextObject]){		
 		[self addPublication:newBI];
-			
-		[self updateUI];
 		
 		if([[OFPreferenceWrapper sharedPreferenceWrapper] integerForKey:BDSKEditOnPasteKey] == NSOnState) {
 			[self editPub:newBI];
