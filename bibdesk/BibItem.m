@@ -47,9 +47,14 @@ static NSParagraphStyle* _bodyParagraphStyle = nil;
 // private function to get the cached Font.
 void _setupFonts(){
     NSMutableParagraphStyle* defaultStyle = nil;
+    NSLog(@"called _setupFonts()");
     if(_cachedFonts == nil){
         defaultStyle = [[NSMutableParagraphStyle alloc] init];
         [defaultStyle setParagraphStyle:[NSParagraphStyle defaultParagraphStyle]];
+        if([NSFont fontWithName:@"Gill Sans" size:10.0] == nil){
+            [NSException raise:@"FontNotFoundException"
+                        format:@"The font Gill Sans could not be found."];
+        }
         _cachedFonts = [[NSDictionary dictionaryWithObjectsAndKeys:
             [NSFont fontWithName:@"Gill Sans Bold Italic" size:14.0], @"Title",
             [NSFont fontWithName:@"Gill Sans" size:10.0], @"Type",
@@ -187,6 +192,10 @@ void _setupFonts(){
     return ([pubType isEqualToString:[aBI type]]) && 
 	([citeKey isEqualToString:[aBI citeKey]]) &&
 	([pubFields isEqual:[aBI pubFields]]);
+}
+
+- (unsigned)hash{
+    return [[self allFieldsString] hash];
 }
 
 #pragma mark Comparison functions
