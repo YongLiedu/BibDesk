@@ -25,7 +25,9 @@ You will need to install the input manager as described in the <a href="prefs.ht
 <img src="gfx/autocompleteExample.png" alt="" >
 
 <p><font size="-1" face="Lucida Grande,Geneva,Arial">
-Autocompletion ties into the regular dictionary autocompletion of words on Mac OS X 10.3 and greater.  In Cocoa applications (such as TextEdit), you can start typing a word and hit the F5 function key to get a list of possible autocompletion entries; the arrow keys can be used to scroll the list, and tab or return to select an item.  BibDesk's autocompletion provides possible matches based on the Title, Author, Citekey, and Keywords of your currently open BibTeX files.  To select in item, hit tab, return, comma, or closing brace as appropriate.
+Autocompletion ties into the regular dictionary autocompletion of words on Mac OS X 10.3 and greater.  In Cocoa applications (such as TextEdit), you can start typing a word and hit the F5 function key to get a list of possible autocompletion entries; the arrow keys can be used to scroll the list, and tab or return to select an item.  BibDesk's autocompletion provides possible matches based on the Title, Author, Citekey, and Keywords of your currently open BibTeX files.  To select in item, hit tab, return, comma, or closing brace as appropriate.</p>
+<p>
+Note that on laptop keyboards, the "fn" key must be used to get the actual F5 key behavior with the default keyboard preferences.  Alternatives are to use option-escape, which will also trigger autocompletion, or to set up a key binding for the <tt>complete:</tt> selector (TextExtras can be used for this, but see the caveat below).
 </font></p>
 
 <p><font size="+1"  face="Lucida Grande,Helvetica,Geneva"><b>
@@ -42,8 +44,22 @@ The autocompletion input manager will also provide completion for TeX "\ref{" co
 </b></font></p>
 
 <p><font size="-1" face="Lucida Grande,Geneva,Arial">
-There is a conflict with the <a href="http://www.lorax.com/FreeStuff/TextExtras.html">TextExtras 1.7</a> input manager at present.  The author of TextExtras is aware of the issue and working on a fix, but the only solution at present is to remove TextExtras or install an unsupported <a href="http://bibdesk.sourceforge.net/TextExtras_1.7BDSK.dmg">modified version</a>.<br>By default, <a href="http://itexmac.sourceforge.net/">iTeXMac</a> does not support the keybinding for autocompletion, but the <a href="http://bibdesk.sourceforge.net/wiki/index.php/EditorIntegration">BibDesk Wiki</a> has information on how to make it work.
+There is a conflict with the <a href="http://www.lorax.com/FreeStuff/TextExtras.html">TextExtras 1.7</a> input manager at present.  The author of TextExtras is aware of the issue and working on a fix, but the only solution at present is to remove TextExtras or install an unsupported <a href="http://bibdesk.sourceforge.net/TextExtras_1.7BDSK.dmg">modified version</a>.
+
+<p>By default, <a href="http://itexmac.sourceforge.net/">iTeXMac</a> does not support the keybinding for autocompletion, but it can easily be made to work by adding a <tt>complete:</tt> keybinding to <tt>~/Library/Application Support/iTeXMac/Key Bindings/TextKeyBinding.dict</tt>.  The following snippet binds control-u to autocompletion:
+<blockquote class="tightenable top bottom"><pre class="tightenable top bottom">
+&lt;key&gt;^u&lt;/key&gt;
+&lt;string&gt;complete:&lt;/string&gt;</pre>
+</blockquote>
 </font></p>
+
+<p><font size="+1"  face="Lucida Grande,Helvetica,Geneva"><b>
+<a name="caveats"></a>Alternatives
+</b></font></p>
+
+<p><font size="-1" face="Lucida Grande,Geneva,Arial">
+For <a href="http://barebones.com/">BBEdit</a> users, Curt Clifton has written an AppleScript to provide similar functionality.  It can be obtained from <a href="http://www.cs.iastate.edu/~cclifton/software.shtml">http://www.cs.iastate.edu/~cclifton/software.shtml</a>.  Users who develop similar functionality for other applications are encouraged to post their scripts and e-mail a link to the <a href="mailto:bibdesk-users@lists.sourceforge.net">BibDesk users's list</a> for inclusion in this list.
+</p>
 
 </body>
 </html>
