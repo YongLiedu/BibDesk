@@ -380,14 +380,15 @@ void _setupFonts(){
     {
         [self setAuthorsFromString:[pubFields objectForKey: @"Author"]];
         if ([[self citeKey] isEqualToString:@""]) {
-            [self setCiteKey:[NSString stringWithFormat:@"%@:%@",[[self authorAtIndex:0] substringToIndex:3],[[self date] descriptionWithCalendarFormat:@"%y"]]];
+            [self setCiteKey:[NSString stringWithFormat:@"%@:%@",[[self authorAtIndex:0] lastName],
+                [[self date] descriptionWithCalendarFormat:@"%y"]]];
         }
     }else{
         [self setAuthorsFromString:[pubFields objectForKey: @"Editor"]]; // or what else?
         if ([[self citeKey] isEqualToString:@""]){
             [self setCiteKey:
                 [NSString stringWithFormat:@"%@:%@",
-                    [[self authorAtIndex:0] substringToIndex:3],
+                    [[self authorAtIndex:0] lastName],
                     [[self date] descriptionWithCalendarFormat:@"%y"]]];
         }
     }// FIXME: set new citeKeys to something more reasonable (make it a user default?)
