@@ -18,7 +18,7 @@
 	
 	_iconSize = NSMakeSize(32, 32);
 	_showsMenuWhenIconClicked = NO;
-	_iconActionEnabled = NO;
+	_iconActionEnabled = YES;
 
 	[self setIconImage: [NSImage imageNamed: @"NSApplicationIcon"]];	
 	[self setArrowImage: [NSImage imageNamed: @"ArrowPointingDown"]];
