@@ -2183,7 +2183,16 @@ Shouldn't there be some kind of safeguard against opening too many pub editors?
 */
 - (BOOL) addPublicationsForData:(NSData*) data error:(NSString**) error {
 	BOOL hadProblems = NO;
-	NSArray * newPubs = [BibTeXParser itemsFromData:data error:&hadProblems];
+	NSArray * newPubs = nil;
+    
+    if([[OFPreferenceWrapper sharedPreferenceWrapper] boolForKey:BDSKUseUnicodeBibTeXParser]){
+        NSString *aString = [[NSString alloc] initWithData:data encoding:[[OFPreferenceWrapper sharedPreferenceWrapper] integerForKey:BDSKDefaultStringEncoding]];
+        if(aString == nil) // bad encoding choice; fall back to latin1
+            aString = [[NSString alloc] initWithData:data encoding:NSISOLatin1StringEncoding];
+        newPubs = [BibTeXParser itemsFromString:aString error:&hadProblems];
+    } else { // using libbtparse
+        newPubs = [BibTeXParser itemsFromData:data error:&hadProblems];
+    }
 
 	if(hadProblems) {
 		// original code follows:
