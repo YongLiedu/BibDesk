@@ -11,11 +11,27 @@
 
 @implementation BibPref_AutoFile
 
+- (void)awakeFromNib{
+    [super awakeFromNib];
+	
+	[self setupCautionIcon];
+}
+
+- (void)dealloc{
+	[cautionIconImage release]; 
+    [super dealloc];
+}
+
 - (void)updateUI{
+    NSString *formatString = [defaults stringForKey:BDSKLocalUrlFormatKey];
+	
     [filePapersAutomaticallyCheckButton setState:[defaults integerForKey:BDSKFilePapersAutomaticallyKey]];
 	[keepPapersFolderOrganizedCheckButton setState:[defaults integerForKey:BDSKKeepPapersFolderOrganizedKey]];
 
     [papersFolderLocationTextField setStringValue:[[defaults objectForKey:BDSKPapersFolderPathKey] stringByAbbreviatingWithTildeInPath]];
+
+	[self setLocalUrlFormatInvalidWarning:NO message:NSLocalizedString(@"The local-url format is invalid.",@"")]; // the format in defaults is always valid, right?
+	[formatField setStringValue:formatString];
 }
 
 - (IBAction)choosePapersFolderLocationAction:(id)sender{
