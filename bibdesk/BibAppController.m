@@ -847,7 +847,8 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
                 // FIXME? does this leak memory? is the intoString: argument autoreleased?
             }
             [scanner scanCharactersFromSet:ampersandSet intoString:nil]; // scan the ampersands away.
-            [searchConstraints setObject:queryString forKey:queryKey];
+            if(queryKey)
+                [searchConstraints setObject:queryString forKey:queryKey];
             if(![scanner isAtEnd]) // do i have to do this?
                 [scanner scanCharactersFromSet:[NSCharacterSet alphanumericCharacterSet] intoString:&queryKey];// scan another
         }
@@ -855,7 +856,11 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
     }else{
         // if it was at end, we are done, and we'll scan in the title:
         // items = [_finder itemsMatchingText:queryKey inKey:BDSKTitleString];
-        [searchConstraints setObject:queryKey forKey:BDSKTitleString];
+        if(queryKey){
+            [searchConstraints setObject:queryKey forKey:BDSKTitleString];
+        } else {
+            searchConstraints = nil;
+        }
     }
     
     return searchConstraints;
@@ -892,6 +897,12 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
     }
 
     NSDictionary *searchConstraints = [self _constraintsFromString:pboardString];
+    
+    if(searchConstraints == nil){
+        *error = NSLocalizedString(@"Error: invalid search constraints.",
+                                   @"search constraints not valid.");
+        return;
+    }        
     
     items = [_finder itemsMatchingConstraints:searchConstraints];
     
