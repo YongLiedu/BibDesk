@@ -15,22 +15,18 @@
 - (void)awakeFromNib{
     [super awakeFromNib];
     
-    encodingsArray = [[[(BibAppController *)[NSApp delegate] encodingDefinitionDictionary] objectForKey:@"StringEncodings"] retain];
-    encodingNames = [[[(BibAppController *)[NSApp delegate] encodingDefinitionDictionary] objectForKey:@"DisplayNames"] retain];
-
+    encodingManager = [BDSKStringEncodingManager sharedEncodingManager];
     [encodingPopUp removeAllItems];
-    [encodingPopUp addItemsWithTitles:encodingNames];
+    [encodingPopUp addItemsWithTitles:[encodingManager availableEncodingDisplayedNames]];
 }
 
 - (void)dealloc{
-    [encodingsArray release];
-    [encodingNames release];
     [super dealloc];
 }
 
 - (void)updateUI{
     OFPreferenceWrapper *prefs = [OFPreferenceWrapper sharedPreferenceWrapper];
-    [encodingPopUp selectItemAtIndex:[self tagForEncoding:[prefs integerForKey:BDSKDefaultStringEncoding]]];
+    [encodingPopUp selectItemWithTitle:[encodingManager displayedNameForStringEncoding:[prefs integerForKey:BDSKDefaultStringEncoding]]];
     [defaultParserRadio selectCellWithTag:( [prefs boolForKey:BDSKUseUnicodeBibTeXParser] ? 1 : 0 )];
     [encodingPopUp setEnabled:[prefs boolForKey:BDSKUseUnicodeBibTeXParser]]; // since btparse is not compatible with other encodings; it can still be used via the File->Open menu
     [backgroundLoadCheckbox setEnabled:[prefs boolForKey:BDSKUseUnicodeBibTeXParser]];
@@ -38,14 +34,10 @@
 }
 
 - (IBAction)setDefaultStringEncoding:(id)sender{    
-    NSStringEncoding encoding = [[encodingsArray objectAtIndex:[sender indexOfSelectedItem]] intValue];
+    NSStringEncoding encoding = [encodingManager stringEncodingForDisplayedName:[[sender selectedItem] title]];
     
     // NSLog(@"set encoding to %i for tag %i", [[encodingsArray objectAtIndex:[sender indexOfSelectedItem]] intValue], [sender indexOfSelectedItem]);    
     [[OFPreferenceWrapper sharedPreferenceWrapper] setInteger:encoding forKey:BDSKDefaultStringEncoding];    
-}
-
-- (unsigned)tagForEncoding:(NSStringEncoding)encoding{
-    return [encodingsArray indexOfObject:[NSNumber numberWithInt:encoding]];
 }
 
 - (IBAction)setDefaultBibTeXParser:(id)sender{

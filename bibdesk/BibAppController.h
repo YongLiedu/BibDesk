@@ -24,6 +24,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 #import <ILCrashReporter/ILCrashReporter.h>
 #import "NSMutableArray+ThreadSafety.h"
 #import "NSMutableDictionary+ThreadSafety.h"
+#import "BDSKStringEncodingManager.h"
 
 
 /*!
@@ -101,15 +102,6 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
     @discussion
  */
 - (void)openBibTeXFile:(NSString *)filePath withEncoding:(NSStringEncoding)encoding;
-
-/*!
-    @method     encodingDefinitionDictionary
-    @abstract   Returns a dictionary which contains two arrays, with corresponding objects at each index.  The arrays are used
-                for displaying lists of possible string encodings in a popup button, and synchronizing a human-readable name with
-                the actual NSStringEncoding values.
-    @discussion
-*/
-- (NSDictionary *)encodingDefinitionDictionary;
 
 - (NSArray *)requiredFieldsForCiteKey;
 - (void)setRequiredFieldsForCiteKey:(NSArray *)newFields;

@@ -89,12 +89,9 @@
     
     [templateFile appendFormat:@"\n%%%% Created for %@ at %@ \n\n", NSFullUserName(), [NSCalendarDate calendarDate]];
     
-    NSArray *encodingsArray = [[[NSApp delegate] encodingDefinitionDictionary] objectForKey:@"StringEncodings"];
-    NSArray *encodingNames = [[[NSApp delegate] encodingDefinitionDictionary] objectForKey:@"DisplayNames"];
-    
     NSAssert ( outputEncoding != nil, @"Document does not have a specified string encoding." );
     
-    NSString *encodingName = [encodingNames objectAtIndex:[encodingsArray indexOfObject:[NSNumber numberWithInt:outputEncoding]]];
+    NSString *encodingName = [[BDSKStringEncodingManager sharedEncodingManager] displayedNameForStringEncoding:outputEncoding];
     
     [templateFile appendFormat:@"\n%%%% Saved with string encoding %@ \n\n", encodingName];
     

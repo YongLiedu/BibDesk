@@ -209,7 +209,7 @@ NSString *BDSKBibItemLocalDragPboardType = @"edu.ucsd.cs.mmccrack.bibdesk: Local
 	[cornerViewButton setMenu:columnsMenu];
     
     [saveTextEncodingPopupButton removeAllItems];
-    [saveTextEncodingPopupButton addItemsWithTitles:[[[NSApp delegate] encodingDefinitionDictionary] objectForKey:@"DisplayNames"]];
+    [saveTextEncodingPopupButton addItemsWithTitles:[[BDSKStringEncodingManager sharedEncodingManager] availableEncodingDisplayedNames]];
     
 }
 
@@ -595,9 +595,8 @@ NSString *BDSKBibItemLocalDragPboardType = @"edu.ucsd.cs.mmccrack.bibdesk: Local
             fileData = [self dataRepresentationOfType:@"MODS"];
         }else if([fileType isEqualToString:@"atom"]){
             fileData = [self dataRepresentationOfType:@"ATOM"];
-        }else if([fileType isEqualToString:@"bib"]){
-            int index = [saveTextEncodingPopupButton indexOfSelectedItem];
-            NSStringEncoding encoding = [[[[[NSApp delegate] encodingDefinitionDictionary] objectForKey:@"StringEncodings"] objectAtIndex:index] intValue];
+        }else if([fileType isEqualToString:@"bib"]){            
+            NSStringEncoding encoding = [[BDSKStringEncodingManager sharedEncodingManager] stringEncodingForDisplayedName:[saveTextEncodingPopupButton titleOfSelectedItem]];
             fileData = [self bibTeXDataWithEncoding:encoding];
         }
         [fileData writeToFile:fileName atomically:YES];
@@ -758,9 +757,7 @@ stringByAppendingPathComponent:@"BibDesk"]; */
         
         [templateFile appendFormat:@"\n%%%% Created for %@ at %@ \n\n", NSFullUserName(), [NSCalendarDate calendarDate]];
 
-        NSArray *encodingsArray = [[[NSApp delegate] encodingDefinitionDictionary] objectForKey:@"StringEncodings"];
-        NSArray *encodingNames = [[[NSApp delegate] encodingDefinitionDictionary] objectForKey:@"DisplayNames"];
-        NSString *encodingName = [encodingNames objectAtIndex:[encodingsArray indexOfObject:[NSNumber numberWithInt:[self documentStringEncoding]]]];
+        NSString *encodingName = [[BDSKStringEncodingManager sharedEncodingManager] displayedNameForStringEncoding:[self documentStringEncoding]];
         
         [templateFile appendFormat:@"\n%%%% Saved with string encoding %@ \n\n", encodingName];
         
@@ -852,10 +849,8 @@ stringByAppendingPathComponent:@"BibDesk"]; */
         
         [templateFile appendFormat:@"\n%%%% Created for %@ at %@ \n\n", NSFullUserName(), [NSCalendarDate calendarDate]];
 
-        NSArray *encodingsArray = [[[NSApp delegate] encodingDefinitionDictionary] objectForKey:@"StringEncodings"];
-        NSArray *encodingNames = [[[NSApp delegate] encodingDefinitionDictionary] objectForKey:@"DisplayNames"];
-        NSString *encodingName = [encodingNames objectAtIndex:[encodingsArray indexOfObject:[NSNumber numberWithInt:encoding]]];
-        
+        NSString *encodingName = [[BDSKStringEncodingManager sharedEncodingManager] displayedNameForStringEncoding:encoding];
+
         [templateFile appendFormat:@"\n%%%% Saved with string encoding %@ \n\n", encodingName];
         
         [d appendData:[templateFile dataUsingEncoding:encoding allowLossyConversion:YES]];

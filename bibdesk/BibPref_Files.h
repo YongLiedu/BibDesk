@@ -8,18 +8,17 @@
 
 #import <Cocoa/Cocoa.h>
 #import "BibPrefController.h"
+#import "BDSKStringEncodingManager.h"
 
 
 @interface BibPref_Files : OAPreferenceClient {
     IBOutlet NSPopUpButton *encodingPopUp;
     IBOutlet NSMatrix *defaultParserRadio;
-    NSArray *encodingsArray;
-    NSArray *encodingNames;
     IBOutlet NSButton *backgroundLoadCheckbox;
+    BDSKStringEncodingManager *encodingManager;
 }
 
 - (IBAction)setDefaultStringEncoding:(id)sender;
-- (unsigned)tagForEncoding:(NSStringEncoding)encoding;
 - (IBAction)setDefaultBibTeXParser:(id)sender;
 - (IBAction)setLoadFilesInBackground:(id)sender;
 

@@ -182,24 +182,6 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
     return self;
 }
 
-- (NSDictionary *)encodingDefinitionDictionary{
-    // From a model standpoint, it probably would make more sense to have an array of dictionaries, but the arrays are directly useful for
-    // populating the popup menus.  Just remember to add a displayName _and_ a corresponding NSStringEncoding if you need to add another one.
-    // This is used in the Files pref pane, and in the open/save accessory views at present (0.97.2+).
-    NSArray *displayNames = [NSArray arrayWithObjects:@"ASCII (TeX)", @"NEXTSTEP", @"Japanese EUC", @"UTF-8", @"ISO Latin 1", @"Non-lossy ASCII",
-        @"ISO Latin 2", @"Unicode", @"Cyrillic", @"Windows Latin 1", @"Greek", @"Turkish", @"Windows Latin 2", @"Mac OS Roman", @"Shift JIS", @"ISO 2022", nil];
-    NSArray *encodings = [NSArray arrayWithObjects:[NSNumber numberWithInt:NSASCIIStringEncoding], [NSNumber numberWithInt:NSNEXTSTEPStringEncoding],
-        [NSNumber numberWithInt:NSJapaneseEUCStringEncoding], [NSNumber numberWithInt:NSUTF8StringEncoding], [NSNumber numberWithInt:NSISOLatin1StringEncoding],
-        [NSNumber numberWithInt:NSNonLossyASCIIStringEncoding], [NSNumber numberWithInt:NSISOLatin2StringEncoding], [NSNumber numberWithInt:NSUnicodeStringEncoding],
-        [NSNumber numberWithInt:NSWindowsCP1251StringEncoding], [NSNumber numberWithInt:NSWindowsCP1252StringEncoding], [NSNumber numberWithInt:NSWindowsCP1253StringEncoding],
-        [NSNumber numberWithInt:NSWindowsCP1254StringEncoding], [NSNumber numberWithInt:NSWindowsCP1250StringEncoding], [NSNumber numberWithInt:NSMacOSRomanStringEncoding], 
-        [NSNumber numberWithInt:NSShiftJISStringEncoding], [NSNumber numberWithInt:NSISO2022JPStringEncoding], nil];
-    
-    NSAssert( [displayNames count] == [encodings count], @"Number of encoding names displayed does not match number of string encodings defined" );
-    
-    return [NSDictionary dictionaryWithObjectsAndKeys:displayNames, @"DisplayNames", encodings, @"StringEncodings", nil];
-}
-
 - (void)dealloc
 {
     [[NSNotificationCenter defaultCenter] removeObserver:self];
@@ -233,7 +215,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
         [[NSApp mainMenu] insertItem:scriptItem atIndex:[[NSApp mainMenu] indexOfItemWithTitle:@"Help"]];
         [scriptItem release];
         [openTextEncodingPopupButton removeAllItems];
-        [openTextEncodingPopupButton addItemsWithTitles:[[self encodingDefinitionDictionary] objectForKey:@"DisplayNames"]];
+        [openTextEncodingPopupButton addItemsWithTitles:[[BDSKStringEncodingManager sharedEncodingManager] availableEncodingDisplayedNames]];
      
         if([[OFPreferenceWrapper sharedPreferenceWrapper] boolForKey:BDSKAutoCheckForUpdates])
             [NSThread detachNewThreadSelector:@selector(checkForUpdatesInBackground) toTarget:self withObject:nil];
@@ -309,8 +291,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
         NSString *fileType = [fileToOpen pathExtension];
         
         if([fileType isEqualToString:@"bib"]){
-            int index = [openTextEncodingPopupButton indexOfSelectedItem];
-            NSStringEncoding encoding = [[[[self encodingDefinitionDictionary] objectForKey:@"StringEncodings"] objectAtIndex:index] intValue];
+            NSStringEncoding encoding = [[BDSKStringEncodingManager sharedEncodingManager] stringEncodingForDisplayedName:[openTextEncodingPopupButton titleOfSelectedItem]];
             [self openBibTeXFile:fileToOpen withEncoding:encoding];		
         }else{
             // handle other types in the usual way 
