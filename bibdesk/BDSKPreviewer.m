@@ -151,6 +151,12 @@ static unsigned threadCount = 0;
     
     // Now start the tex task fun.
 
+    // fix the environment
+    NSString *binPathDir = [pdftexbinpath stringByDeletingLastPathComponent];
+    NSString *original_path = [NSString stringWithCString: getenv("PATH")];
+    NSString *new_path = [NSString stringWithFormat: @"%@:%@", original_path, binPathDir];
+    setenv("PATH", [new_path cString], 1);
+
     //FIXME = we need to deal with errors better...
 
     pdftex1 = [[NSTask alloc] init];
