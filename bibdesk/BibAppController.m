@@ -462,6 +462,48 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 
 #pragma mark || Service code
 
+- (NSDictionary *)_constraintsFromString:(NSString *)string{
+    NSScanner *scanner;
+    NSMutableDictionary *searchConstraints = [NSMutableDictionary dictionary];
+    NSString *queryString;
+    NSMutableString *queryKey;
+    NSCharacterSet *delimiterSet = [NSCharacterSet characterSetWithCharactersInString:@":="];
+    //NSCharacterSet *emptySet =  [NSCharacterSet characterSetWithCharactersInString:@""];
+    NSCharacterSet *ampersandSet =  [NSCharacterSet characterSetWithCharactersInString:@"&"];
+
+    scanner = [NSScanner scannerWithString:string];
+    
+    // Now split the string into a key and value pair by looking for a delimiter
+    // (we'll use a bunch of handy delimiters, including the first space, so it's flexible.)
+    // alternatively we can just type the title, like we used to.
+
+    [scanner scanCharactersFromSet:[NSCharacterSet alphanumericCharacterSet] intoString:&queryKey];
+    // scan the first key (also might be a simple title for original style search)
+
+    if (![scanner isAtEnd]){
+        while(![scanner isAtEnd]){
+            [scanner scanCharactersFromSet:delimiterSet intoString:nil]; // scan the delimiters away
+            [scanner scanUpToCharactersFromSet:ampersandSet intoString:&queryString]; // scan to either the end, or the next query key.
+                                                                                      // might have to remove a trailing space:
+            if([[queryString substringWithRange:NSMakeRange([queryString length]-1,1)] isEqualToString:@" "]){
+                queryString = [queryString substringWithRange:NSMakeRange(0,[queryString length]-1)];
+                // FIXME? does this leak memory? is the intoString: argument autoreleased?
+            }
+            [scanner scanCharactersFromSet:ampersandSet intoString:nil]; // scan the ampersands away.
+            [searchConstraints setObject:queryString forKey:queryKey];
+            if(![scanner isAtEnd]) // do i have to do this?
+                [scanner scanCharactersFromSet:[NSCharacterSet alphanumericCharacterSet] intoString:&queryKey];// scan another
+        }
+
+    }else{
+        // if it was at end, we are done, and we'll scan in the title:
+        // items = [_finder itemsMatchingText:queryKey inKey:@"Title"];
+        [searchConstraints setObject:queryKey forKey:@"Title"];
+    }
+    
+    return searchConstraints;
+}
+
 - (void)completeCitationFromSelection:(NSPasteboard *)pboard
                              userData:(NSString *)userData
                                 error:(NSString **)error{
@@ -473,13 +515,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
     BOOL yn;
     NSMutableString *keys = [NSMutableString string];
     NSMutableString *commentString = [NSMutableString string];
-    NSString *queryString;
-    NSMutableString *queryKey;
-    NSCharacterSet *delimiterSet = [NSCharacterSet characterSetWithCharactersInString:@":="];
-    //NSCharacterSet *emptySet =  [NSCharacterSet characterSetWithCharactersInString:@""];
-    NSCharacterSet *ampersandSet =  [NSCharacterSet characterSetWithCharactersInString:@"&"];
-    NSScanner *scanner;
-    NSMutableDictionary *searchConstraints = [NSMutableDictionary dictionary];
+    
     NSString *citeString = [NSString stringWithFormat:@"\\%@{",[[OFPreferenceWrapper sharedPreferenceWrapper] stringForKey:BDSKCiteStringKey]];
     
     types = [pboard types];
@@ -495,33 +531,9 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
         return;
     }
 
-    scanner = [NSScanner scannerWithString:pboardString];
-    // Now split the string into a key and value pair by looking for a delimiter
-    // (we'll use a bunch of handy delimiters, including the first space, so it's flexible.)
-    // alternatively we can just type the title, like we used to.
-
-    [scanner scanCharactersFromSet:[NSCharacterSet alphanumericCharacterSet] intoString:&queryKey];
-    // scan the first key (also might be a simple title for original style search)
+    NSDictionary *searchConstraints = [self _constraintsFromString:pboardString];
     
-    if (![scanner isAtEnd]){
-        while(![scanner isAtEnd]){
-            [scanner scanCharactersFromSet:delimiterSet intoString:nil]; // scan the delimiters away
-            [scanner scanUpToCharactersFromSet:ampersandSet intoString:&queryString]; // scan to either the end, or the next query key.
-                                                                                  // might have to remove a trailing space:
-            if([[queryString substringWithRange:NSMakeRange([queryString length]-1,1)] isEqualToString:@" "]){
-                queryString = [queryString substringWithRange:NSMakeRange(0,[queryString length]-1)];
-                // FIXME? does this leak memory? is the intoString: argument autoreleased?
-            }
-            [scanner scanCharactersFromSet:ampersandSet intoString:nil]; // scan the ampersands away.
-            [searchConstraints setObject:queryString forKey:queryKey];
-            if(![scanner isAtEnd]) // do i have to do this?
-                [scanner scanCharactersFromSet:[NSCharacterSet alphanumericCharacterSet] intoString:&queryKey];// scan another 
-        }
-        items = [_finder itemsMatchingConstraints:searchConstraints];
-    }else{
-        // if it was at end, we are done, and we'll scan in the title:
-        items = [_finder itemsMatchingText:queryKey inKey:@"Title"];
-    }
+    items = [_finder itemsMatchingConstraints:searchConstraints];
     
     e = [items objectEnumerator];
     if([items count] > 0){
@@ -566,6 +578,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
     BibItem *item;
     NSMutableString *retStr = [NSMutableString string];
     BOOL yn = NO;    
+    NSLog(@"items is %@", items);
     while(item = [[items objectEnumerator] nextObject]){
         [retStr appendString:@" "];
         [retStr appendString:[item citeKey]];

@@ -110,6 +110,9 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 // Alternately, you can write key = text , and have it search for text in key.
 // ----------------------------------------------------------------------------------------
 
+// helper method
+- (NSDictionary *)_constraintsFromString:(NSString *)string;
+
 /*!
 @method completeCitationFromSelection:userData:error
  @abstract The service method
