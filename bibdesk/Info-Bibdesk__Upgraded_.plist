@@ -142,7 +142,7 @@
 				<string>NSStringPboardType</string>
 				<string>NSFilenamesPboardType</string>
 			</array>
-		</dict>		
+		</dict>
 		<dict>
 			<key>NSKeyEquivalent</key>
 			<dict>
@@ -273,6 +273,58 @@
 				<key>title</key>
 				<string>Defaults</string>
 			</dict>
+			<key>BibPref_General</key>
+			<dict>
+				<key>defaultsDictionary</key>
+				<dict>
+					<key>Default Bib File</key>
+					<string></string>
+					<key>Preview Pane Displays What?</key>
+					<string>1</string>
+					<key>Show Warnings in Error Panel</key>
+					<string>0</string>
+					<key>Startup Behavior</key>
+					<string>0</string>
+					<key>TableView Font</key>
+					<string>LucidaGrande</string>
+					<key>TableView Font Size</key>
+					<string>1.293993033330623e-310</string>
+				</dict>
+				<key>icon</key>
+				<string>startup.tiff</string>
+				<key>identifier</key>
+				<string>bp_general</string>
+				<key>nib</key>
+				<string>BibPref_General</string>
+				<key>ordering</key>
+				<string>0</string>
+				<key>shortTitle</key>
+				<string>General</string>
+				<key>title</key>
+				<string>General application behaviour</string>
+			</dict>
+			<key>BibPref_InputManager</key>
+			<dict>
+				<key>defaultsDictionary</key>
+				<dict>
+					<key>bundleIdentifiers</key>
+					<array>
+						<string>com.apple.textedit</string>
+					</array>
+				</dict>
+				<key>icon</key>
+				<string>palm.icns</string>
+				<key>identifier</key>
+				<string>bp_inputmanager</string>
+				<key>nib</key>
+				<string>BibPref_InputManager</string>
+				<key>ordering</key>
+				<string>50</string>
+				<key>shortTitle</key>
+				<string>Autocompletion</string>
+				<key>title</key>
+				<string>Autocompletion InputManager</string>
+			</dict>
 			<key>BibPref_RSS</key>
 			<dict>
 				<key>defaultsDictionary</key>
@@ -294,36 +346,6 @@
 				<string>RSS</string>
 				<key>title</key>
 				<string>RSS publish &amp; subscribe</string>
-			</dict>
-			<key>BibPref_General</key>
-			<dict>
-				<key>defaultsDictionary</key>
-				<dict>
-					<key>Default Bib File</key>
-					<string></string>
-					<key>Show Warnings in Error Panel</key>
-					<string>0</string>
-					<key>Startup Behavior</key>
-					<string>0</string>
-					<key>TableView Font</key>
-					<string>LucidaGrande</string>
-					<key>TableView Font Size</key>
-					<string>1.293993033330623e-310</string>
-					<key>Preview Pane Displays What?</key>
-					<string>1</string>
-				</dict>
-				<key>icon</key>
-				<string>startup.tiff</string>
-				<key>identifier</key>
-				<string>bp_general</string>
-				<key>nib</key>
-				<string>BibPref_General</string>
-				<key>ordering</key>
-				<string>0</string>
-				<key>shortTitle</key>
-				<string>General</string>
-				<key>title</key>
-				<string>General application behaviour</string>
 			</dict>
 			<key>BibPref_TeX</key>
 			<dict>
