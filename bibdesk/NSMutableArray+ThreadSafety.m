@@ -49,7 +49,7 @@
 - (void)removeObject:(id)anObject usingLock:(NSLock *)aLock{
     
     [aLock lock];
-    [self removeObject];
+    [self removeObject:anObject];
     [aLock unlock];
 }
 
