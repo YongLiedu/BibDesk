@@ -83,14 +83,15 @@ void _setupFonts(){
 	OFPreferenceWrapper *pw = [OFPreferenceWrapper sharedPreferenceWrapper];
 	self = [self initWithType:[pw stringForKey:BDSKPubTypeStringKey]
 									  fileType:BDSKBibtexString // Not Sure if this is good.
-									   authors:[NSMutableArray arrayWithCapacity:0]];
-        bibLock = [[NSLock alloc] init];
+									   authors:[NSMutableArray arrayWithCapacity:0]
+								   createdDate:[NSCalendarDate calendarDate]];
 	return self;
 }
 
 - (id)initWithType:(NSString *)type fileType:(NSString *)inFileType authors:(NSMutableArray *)authArray createdDate:(NSCalendarDate *)date{ // this is the designated initializer.
     if (self = [super init]){
-        [bibLock lock];
+		bibLock = [[NSLock alloc] init];
+		[bibLock lock];
 		if (date == nil){
 			pubFields = [[NSMutableDictionary alloc] init];
 		}else{
