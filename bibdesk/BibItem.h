@@ -242,6 +242,20 @@
 - (void)setFields: (NSDictionary *)newFields;
 
 /*!
+	@method    copyComplexStringValues 
+	@abstract  Copies all field values which are complex strings. 
+	@discussion -
+*/
+- (void)copyComplexStringValues;
+
+/*!
+	@method    updateComplexStringValues 
+	@abstract  Updates the macroResolver for all field values which are complex strings. 
+	@discussion -
+*/
+- (void)updateComplexStringValues;
+
+/*!
     @method     updateMetadataForKey
     @abstract   updates derived info from the dictionary
     @discussion -

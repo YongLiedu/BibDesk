@@ -109,7 +109,10 @@ _setupParagraphStyle()
     [theCopy setDate: pubDate];
 	
     [theCopy setPubFields: pubFields];
+	[theCopy copyComplexStringValues];
+	
     [theCopy setRequiredFieldNames: requiredFieldNames];
+	
     return theCopy;
 }
 
@@ -219,7 +222,10 @@ _setupParagraphStyle()
 }
 
 - (void)setDocument:(BibDocument *)newDocument {
-    document = newDocument;
+    if (document != newDocument) {
+		document = newDocument;
+		[self updateComplexStringValues];
+	}
 }
 
 - (NSUndoManager *)undoManager { // this may be nil
@@ -649,6 +655,35 @@ _setupParagraphStyle()
 															object:self
 														  userInfo:notifInfo];
     }
+}
+
+- (void)copyComplexStringValues{
+	NSEnumerator *fEnum = [pubFields keyEnumerator];
+	NSString *field;
+	NSString *value;
+	BDSKComplexString *complexValue;
+	
+	while (field = [fEnum nextObject]) {
+		value = [pubFields objectForKey:field];
+		if ([value isKindOfClass:[BDSKComplexString class]]) {
+			complexValue = [[(BDSKComplexString*)value copy] autorelease];
+			[complexValue setMacroResolver:[self document]];
+			[pubFields setObject:complexValue forKey:field];
+		}
+	}
+}
+
+- (void)updateComplexStringValues{
+	NSEnumerator *fEnum = [pubFields keyEnumerator];
+	NSString *field;
+	NSString *value;
+	
+	while (field = [fEnum nextObject]) {
+		value = [pubFields objectForKey:field];
+		if ([value isKindOfClass:[BDSKComplexString class]]) {
+			[(BDSKComplexString*)value setMacroResolver:[self document]];
+		}
+	}
 }
 
 - (void)updateMetadataForKey:(NSString *)key{
