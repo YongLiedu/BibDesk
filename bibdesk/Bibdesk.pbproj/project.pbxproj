@@ -237,6 +237,7 @@
 				F5A9B9300225EE6201EF0ACB,
 				F54EFE9E02500B7C01709AC4,
 				F5FCEF9C02AC15D801C59A92,
+				F5FB32AB034D689801EF0AD8,
 			);
 			isa = PBXGroup;
 			name = Resources;
@@ -260,12 +261,12 @@
 		};
 		2A37F4C3FDCFA73011CA2CEA = {
 			children = (
-				F561F4A1025863A001709AC4,
-				F561F4A2025863A001709AC4,
-				F51C6ED702A98010010DDB27,
 				F578BF890253B5AD0138D078,
 				1058C7A6FEA54F5311CA2CBB,
 				1058C7A8FEA54F5311CA2CBB,
+				F5941276037E3B5401A80166,
+				F5941277037E3B5401A80166,
+				F5941278037E3B5401A80166,
 			);
 			isa = PBXGroup;
 			name = Frameworks;
@@ -291,11 +292,12 @@
 				2A37F4CEFDCFA73011CA2CEA,
 				2A37F4D1FDCFA73011CA2CEA,
 				F578BF8D0253B9B90138D078,
+				F5FB32B2034D6D5901EF0AD8,
 			);
 			buildSettings = {
-				FRAMEWORK_SEARCH_PATHS = "";
+				FRAMEWORK_SEARCH_PATHS = /Users/mike/Code/bibdesk;
 				HEADER_SEARCH_PATHS = "";
-				LIBRARY_SEARCH_PATHS = /Users/mike/Code/CVS/Other/Bibdesk;
+				LIBRARY_SEARCH_PATHS = /Users/mike/Code/bibdesk;
 				OPTIMIZATION_CFLAGS = "-O0";
 				OTHER_CFLAGS = "-pipe";
 				OTHER_LDFLAGS = "-pipe";
@@ -352,6 +354,10 @@
 	<string>Bibdesk</string>
 	<key>CFBundleGetInfoString</key>
 	<string>version 0.80 beta</string>
+	<key>CFBundleHelpBookFolder</key>
+	<string>BibDesk Help</string>
+	<key>CFBundleHelpBookName</key>
+	<string>BibDesk Help</string>
 	<key>CFBundleIconFile</key>
 	<string>FolderPenIcon.icns</string>
 	<key>CFBundleIdentifier</key>
@@ -465,12 +471,16 @@
 			<dict>
 				<key>defaultsDictionary</key>
 				<dict>
+					<key>BlueComponentColor of alternating rows Key</key>
+					<real>8.8359904735793939e-311</real>
 					<key>Current Publication Type</key>
 					<integer>6</integer>
 					<key>Current Quick Search Key</key>
 					<string>Keywords</string>
 					<key>Current Quick Search Text Dictionary</key>
 					<dict/>
+					<key>GreenComponentColor of alternating rows Key</key>
+					<real>9.4874431814057325e-311</real>
 					<key>Preview Pane Displays What?</key>
 					<integer>1</integer>
 					<key>Quick Search Keys</key>
@@ -478,6 +488,8 @@
 						<string>Keywords</string>
 						<string>Pub Type</string>
 					</array>
+					<key>RedComponentColor of alternating rows Key</key>
+					<real>1.0113431939740488e-310</real>
 					<key>Shown Column Names</key>
 					<array>
 						<string>Keywords</string>
@@ -500,7 +512,7 @@
 					<key>TableView Font</key>
 					<string>LucidaGrande</string>
 					<key>TableView Font Size</key>
-					<real>12</real>
+					<real>1.1488485212285984e-310</real>
 					<key>View-by Field</key>
 					<string>Title</string>
 				</dict>
@@ -666,12 +678,12 @@
 				F56FDB9002AAE0D801980570,
 				F56FDCA502AB079201980570,
 				F5FCEF9D02AC15D801C59A92,
-				F547D7F902C26EC101EF0AD2,
 				F5C8121A02C2BCDA01EF0AD2,
 				F5385A1502EC07DE014378E3,
 				F5F83F6E02EF7C7501EF0A84,
 				F508016702F9E9A301A8020B,
 				F508016902F9E9C201A8020B,
+				F5FB32B1034D6D4601EF0AD8,
 			);
 			isa = PBXResourcesBuildPhase;
 			runOnlyForDeploymentPostprocessing = 0;
@@ -732,10 +744,10 @@
 			buildActionMask = 2147483647;
 			files = (
 				F5C9F39701DAA4FF0132B56E,
-				F59EC6A801F631EE015EB35F,
-				F561F4A3025863A001709AC4,
-				F561F4A4025863A001709AC4,
-				F51C6F4E02A98010010DDB27,
+				F5FB32AF034D6B6901EF0AD8,
+				F565BCEA038CAC0F01EF0A93,
+				F565BD61038CAC1601EF0A93,
+				F565BCFE038CAC1301EF0A93,
 			);
 			isa = PBXFrameworksBuildPhase;
 			runOnlyForDeploymentPostprocessing = 0;
@@ -772,8 +784,8 @@
 //F54
 		F50730EC01F235880174A366 = {
 			children = (
-				F59EC6A701F631EE015EB35F,
 				F50730F201F235D50174A366,
+				F5FB32AE034D6B6901EF0AD8,
 			);
 			isa = PBXGroup;
 			name = btparse;
@@ -881,23 +893,6 @@
 		};
 		F5084A4B02D954C801C8CAB4 = {
 			fileRef = F5084A4902D954C801C8CAB4;
-			isa = PBXBuildFile;
-			settings = {
-			};
-		};
-		F51C6ED702A98010010DDB27 = {
-			isa = PBXFrameworkReference;
-			path = OmniAppKit.framework;
-			refType = 3;
-		};
-		F51C6F4E02A98010010DDB27 = {
-			fileRef = F51C6ED702A98010010DDB27;
-			isa = PBXBuildFile;
-			settings = {
-			};
-		};
-		F51C6F5402A9802B010DDB27 = {
-			fileRef = F51C6ED702A98010010DDB27;
 			isa = PBXBuildFile;
 			settings = {
 			};
@@ -1065,17 +1060,6 @@
 			settings = {
 			};
 		};
-		F547D7F802C26EC101EF0AD2 = {
-			isa = PBXFileReference;
-			path = psicon.icns;
-			refType = 4;
-		};
-		F547D7F902C26EC101EF0AD2 = {
-			fileRef = F547D7F802C26EC101EF0AD2;
-			isa = PBXBuildFile;
-			settings = {
-			};
-		};
 		F547D7FA02C2752001EF0AD2 = {
 			isa = PBXFileReference;
 			path = BDSKCustomCiteTableView.h;
@@ -1145,7 +1129,7 @@
 		F54EFE9E02500B7C01709AC4 = {
 			isa = PBXFileReference;
 			path = CharacterConversion.plist;
-			refType = 4;
+			refType = 2;
 		};
 		F54EFE9F02500B7C01709AC4 = {
 			fileRef = F54EFE9E02500B7C01709AC4;
@@ -1188,12 +1172,6 @@
 			settings = {
 			};
 		};
-		F55B9B6C02A0E97701EF0AED = {
-			isa = PBXFileReference;
-			name = PicIcon.icns;
-			path = Images/PicIcon.icns;
-			refType = 4;
-		};
 		F55B9B6E02A0EC6001EF0AED = {
 			buildRules = (
 			);
@@ -1205,40 +1183,6 @@
 			};
 			isa = PBXBuildStyle;
 			name = Deployment;
-		};
-		F561F4A1025863A001709AC4 = {
-			isa = PBXFrameworkReference;
-			path = OmniBase.framework;
-			refType = 3;
-		};
-		F561F4A2025863A001709AC4 = {
-			isa = PBXFrameworkReference;
-			path = OmniFoundation.framework;
-			refType = 3;
-		};
-		F561F4A3025863A001709AC4 = {
-			fileRef = F561F4A1025863A001709AC4;
-			isa = PBXBuildFile;
-			settings = {
-			};
-		};
-		F561F4A4025863A001709AC4 = {
-			fileRef = F561F4A2025863A001709AC4;
-			isa = PBXBuildFile;
-			settings = {
-			};
-		};
-		F561F4A5025863A001709AC4 = {
-			fileRef = F561F4A1025863A001709AC4;
-			isa = PBXBuildFile;
-			settings = {
-			};
-		};
-		F561F4A6025863A001709AC4 = {
-			fileRef = F561F4A2025863A001709AC4;
-			isa = PBXBuildFile;
-			settings = {
-			};
 		};
 		F561F4B0025893FC01709AC4 = {
 			isa = PBXFileReference;
@@ -1263,6 +1207,42 @@
 			isa = PBXGroup;
 			name = "Preference Panes";
 			refType = 4;
+		};
+		F565BCEA038CAC0F01EF0A93 = {
+			fileRef = F5941276037E3B5401A80166;
+			isa = PBXBuildFile;
+			settings = {
+			};
+		};
+		F565BCFE038CAC1301EF0A93 = {
+			fileRef = F5941277037E3B5401A80166;
+			isa = PBXBuildFile;
+			settings = {
+			};
+		};
+		F565BD61038CAC1601EF0A93 = {
+			fileRef = F5941278037E3B5401A80166;
+			isa = PBXBuildFile;
+			settings = {
+			};
+		};
+		F565BD62038CAD4901EF0A93 = {
+			fileRef = F5941276037E3B5401A80166;
+			isa = PBXBuildFile;
+			settings = {
+			};
+		};
+		F565BD63038CAD4901EF0A93 = {
+			fileRef = F5941277037E3B5401A80166;
+			isa = PBXBuildFile;
+			settings = {
+			};
+		};
+		F565BD64038CAD4901EF0A93 = {
+			fileRef = F5941278037E3B5401A80166;
+			isa = PBXBuildFile;
+			settings = {
+			};
 		};
 		F568CBDA025BBCB801709AC4 = {
 			isa = PBXExecutableFileReference;
@@ -1655,9 +1635,9 @@
 			dstPath = "";
 			dstSubfolderSpec = 10;
 			files = (
-				F51C6F5402A9802B010DDB27,
-				F561F4A5025863A001709AC4,
-				F561F4A6025863A001709AC4,
+				F565BD62038CAD4901EF0A93,
+				F565BD63038CAD4901EF0A93,
+				F565BD64038CAD4901EF0A93,
 			);
 			isa = PBXCopyFilesBuildPhase;
 			runOnlyForDeploymentPostprocessing = 0;
@@ -1673,6 +1653,21 @@
 			isa = PBXBuildFile;
 			settings = {
 			};
+		};
+		F5941276037E3B5401A80166 = {
+			isa = PBXFrameworkReference;
+			path = OmniAppKit.framework;
+			refType = 2;
+		};
+		F5941277037E3B5401A80166 = {
+			isa = PBXFrameworkReference;
+			path = OmniBase.framework;
+			refType = 2;
+		};
+		F5941278037E3B5401A80166 = {
+			isa = PBXFrameworkReference;
+			path = OmniFoundation.framework;
+			refType = 2;
 		};
 		F59CA11B02F06A7701EF0A84 = {
 			isa = PBXFileReference;
@@ -1692,17 +1687,6 @@
 		};
 		F59CA11E02F06A7701EF0A84 = {
 			fileRef = F59CA11C02F06A7701EF0A84;
-			isa = PBXBuildFile;
-			settings = {
-			};
-		};
-		F59EC6A701F631EE015EB35F = {
-			isa = PBXFileReference;
-			path = libbtparse.a;
-			refType = 2;
-		};
-		F59EC6A801F631EE015EB35F = {
-			fileRef = F59EC6A701F631EE015EB35F;
 			isa = PBXBuildFile;
 			settings = {
 			};
@@ -2026,20 +2010,11 @@
 				F5A9B9370226F91701EF0ACB,
 				F5A9B9380226F91701EF0ACB,
 				F5A9B9390226F91701EF0ACB,
-				F55B9B6C02A0E97701EF0AED,
-				F5F6EEC002A0F2BF01EF0AED,
-				F547D7F802C26EC101EF0AD2,
 				F5F83F6D02EF7C7501EF0A84,
 				F508016802F9E9C201A8020B,
 			);
 			isa = PBXGroup;
 			name = Icons;
-			refType = 4;
-		};
-		F5F6EEC002A0F2BF01EF0AED = {
-			isa = PBXFileReference;
-			name = PicIcon2.icns;
-			path = Images/PicIcon2.icns;
 			refType = 4;
 		};
 		F5F83F6D02EF7C7501EF0A84 = {
@@ -2054,11 +2029,70 @@
 			settings = {
 			};
 		};
+		F5FB32AB034D689801EF0AD8 = {
+			children = (
+				F5FB32BD034D714901EF0AD8,
+				F5FB32BE034D714901EF0AD8,
+				F5FB32B0034D6D4601EF0AD8,
+			);
+			isa = PBXGroup;
+			path = "BibDesk Help";
+			refType = 2;
+		};
+		F5FB32AE034D6B6901EF0AD8 = {
+			isa = PBXFileReference;
+			path = libbtparse.a;
+			refType = 4;
+		};
+		F5FB32AF034D6B6901EF0AD8 = {
+			fileRef = F5FB32AE034D6B6901EF0AD8;
+			isa = PBXBuildFile;
+			settings = {
+			};
+		};
+		F5FB32B0034D6D4601EF0AD8 = {
+			isa = PBXFileReference;
+			name = index.htm;
+			path = "BibDesk Help/index.htm";
+			refType = 2;
+		};
+		F5FB32B1034D6D4601EF0AD8 = {
+			fileRef = F5FB32B0034D6D4601EF0AD8;
+			isa = PBXBuildFile;
+			settings = {
+			};
+		};
+		F5FB32B2034D6D5901EF0AD8 = {
+			buildActionMask = 2147483647;
+			dstPath = "BibDesk Help";
+			dstSubfolderSpec = 7;
+			files = (
+				F5FB32B3034D6D7201EF0AD8,
+			);
+			isa = PBXCopyFilesBuildPhase;
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		F5FB32B3034D6D7201EF0AD8 = {
+			fileRef = F5FB32B0034D6D4601EF0AD8;
+			isa = PBXBuildFile;
+			settings = {
+			};
+		};
+		F5FB32BD034D714901EF0AD8 = {
+			isa = PBXFileReference;
+			path = TOCTemplate.htm;
+			refType = 4;
+		};
+		F5FB32BE034D714901EF0AD8 = {
+			isa = PBXFileReference;
+			path = TopicTemplate.htm;
+			refType = 4;
+		};
 		F5FCEF9C02AC15D801C59A92 = {
 			isa = PBXFileReference;
 			name = typesetting.pdf;
 			path = Images/typesetting.pdf;
-			refType = 4;
+			refType = 2;
 		};
 		F5FCEF9D02AC15D801C59A92 = {
 			fileRef = F5FCEF9C02AC15D801C59A92;
