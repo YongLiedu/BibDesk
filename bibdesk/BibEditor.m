@@ -40,6 +40,9 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
     currentType = [theBib type];    // do this once in init so it's right at the start.
                                     // has to be before we call [self window] because that calls windowDidLoad:.
 	theDocument = doc; // don't retain - it retains us.
+
+	pdfSnoopViewLoaded = NO;
+	textSnoopViewLoaded = NO;
 	
     // this should probably be moved around.
     [[self window] setTitle:[theBib title]];
@@ -279,8 +282,6 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
     [citeKeyFormatter release];
     [[NSNotificationCenter defaultCenter] removeObserver:self];
     [fieldNumbers release];
-    [_pdfSnoopImage release];
-    [_textSnoopString release];
     [fieldNameFormatter release];
     [theBib setEditorObj:nil];
     [super dealloc];
@@ -723,14 +724,11 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
     NSString *lurl = [theBib localURLPathRelativeTo:[[theDocument fileName] stringByDeletingLastPathComponent]];
     NSString *rurl = [theBib valueOfField:BDSKUrlString];
     NSImage *icon;
-
-    BOOL drawerWasOpen = ([documentSnoopDrawer state] == NSDrawerOpenState);
-    BOOL drawerIsOpening = ([documentSnoopDrawer state] == NSDrawerOpeningState);
-
+    BOOL drawerWasOpen = ([documentSnoopDrawer state] == NSDrawerOpenState ||
+						 [documentSnoopDrawer state] == NSDrawerOpeningState);
+	
+	// we need to reopen with the correct content
     if(drawerWasOpen) [documentSnoopDrawer close];
-    //local is either a file:// URL -or a path
-    // How to use stringByExpandingTildeInPath to expand the URL? get the url, get its path, then expand that, then replace it as the url? ugly. 
-
     
     if (lurl && [[NSFileManager defaultManager] fileExistsAtPath:lurl]){
 		icon = [[NSWorkspace sharedWorkspace] iconForFile:lurl];
@@ -742,24 +740,9 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 		[self updateDocumentSnoopButton];
 		[documentSnoopButton setIconActionEnabled:YES];
 		
-		if(drawerWasOpen || drawerIsOpening){
-			if(!_pdfSnoopImage){
-				_pdfSnoopImage = [[NSImage alloc] initWithContentsOfFile:lurl];
-			}
-
-			//NSLog(@"setting snoop to %@ from file %@", _pdfSnoopImage, lurl);
-
-			if(_pdfSnoopImage){
-				// [documentSnoopImageView setImage:_pdfSnoopImage];
-				[documentSnoopImageView loadFromPath:lurl];
-				[_pdfSnoopImage setBackgroundColor:[NSColor whiteColor]];
-				
-				[documentSnoopScrollView setDocumentViewAlignment:NSImageAlignTopLeft];
-				if(drawerWasOpen) // open it again.
-					[documentSnoopDrawer open];
-				
-			}
-		}
+		// reopen; notification takes care of updating the drawer content
+		if(drawerWasOpen)
+			[documentSnoopDrawer open];
     }else{
         [viewLocalButton setIconImage:[NSImage imageNamed:@"QuestionMarkFile"]];
 		[viewLocalButton setIconActionEnabled:NO];
@@ -991,14 +974,9 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 	
 	if([changedTitle isEqualToString:BDSKUrlString] || 
 	   [changedTitle isEqualToString:BDSKLocalUrlString]){
-            [self fixURLs];
-            // ARM: This is a hack to get the icon to show up immediately; perhaps the button should do this itself?  I think it's unable to set the image in fixURLs because of the drag op
-            [[viewLocalButton cell] drawWithFrame:[viewLocalButton frame]
-                                           inView:[viewLocalButton superview]];      
-		[_textSnoopString release];
-		[_pdfSnoopImage release];
-		_textSnoopString = nil;
-		_pdfSnoopImage = nil;
+		pdfSnoopViewLoaded = NO;
+		textSnoopViewLoaded = NO;
+		[self fixURLs];
 	}
 	
 	if([changedTitle isEqualToString:BDSKTitleString]){
@@ -1103,6 +1081,28 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 	}
 }
 
+- (void)updateSnoopDrawerContent{
+    NSString *lurl = [theBib localURLPathRelativeTo:[[theDocument fileName] stringByDeletingLastPathComponent]];
+	
+	if (!lurl) return;
+	
+	if ([documentSnoopDrawer contentView] == pdfSnoopContainerView) {
+		if (!pdfSnoopViewLoaded) {
+			[documentSnoopImageView loadFromPath:lurl];
+			[documentSnoopScrollView setDocumentViewAlignment:NSImageAlignTopLeft];
+			pdfSnoopViewLoaded = YES;
+		}
+	}
+	else if ([documentSnoopDrawer contentView] == textSnoopContainerView) {
+        if (!textSnoopViewLoaded) {
+			NSString *cmdString = [NSString stringWithFormat:@"%@/pdftotext -f 1 -l 1 \"%@\" -",[[NSBundle mainBundle] resourcePath], lurl, nil];
+            NSString *textSnoopString = [[[BDSKShellTask shellTask] runShellCommand:cmdString withInputString:nil] retain];
+			[documentSnoopTextView setString:textSnoopString];
+			textSnoopViewLoaded = YES;
+        }
+	}
+}
+
 - (void)toggleSnoopDrawer:(id)sender{
 	NSView *requiredSnoopContainerView = (NSView *)[sender representedObject];
 	
@@ -1119,35 +1119,9 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 }
 
 - (void)drawerWillOpen:(NSNotification *)notification{
-    //@@snoop text: these variables all go with the refactoring
-    NSString *cmdString = nil;
-    NSString *lurl = [theBib valueOfField:BDSKLocalUrlString];
-    NSURL *local = nil;
-    
-    [self fixURLs]; //no this won't cause a loop - see fixURLs. Please don't break that though. Boy it's fragile.
-
-    // @@snoop text - refactor this into a separate method later
-    // @@URL handling refactor this
-    if(![@"" isEqualToString:lurl]){
-        local = [NSURL URLWithString:lurl];
-        if(!local){
-            local = [NSURL fileURLWithPath:[lurl stringByExpandingTildeInPath]];
-        }
-    }else{
-        return;
-    }
-
-    if([documentSnoopDrawer contentView] == textSnoopContainerView){
-
-    cmdString = [NSString stringWithFormat:@"%@/pdftotext -f 1 -l 1 \"%@\" -",[[NSBundle mainBundle] resourcePath], [local path],
-        nil];
-
-        if(!_textSnoopString){
-            _textSnoopString = [[[BDSKShellTask shellTask] runShellCommand:cmdString withInputString:nil] retain];
-        }
-        [documentSnoopTextView setString:_textSnoopString];
-    }
-    if([[OFPreferenceWrapper sharedPreferenceWrapper] objectForKey:BDSKSnoopDrawerSavedSize] != nil)
+	[self updateSnoopDrawerContent];
+	
+	if([[OFPreferenceWrapper sharedPreferenceWrapper] objectForKey:BDSKSnoopDrawerSavedSize] != nil)
         [documentSnoopDrawer setContentSize:NSSizeFromString([[OFPreferenceWrapper sharedPreferenceWrapper] objectForKey:BDSKSnoopDrawerSavedSize])];
     [documentSnoopScrollView scrollToTop];
 }

@@ -79,13 +79,13 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
     IBOutlet PDFImageView *documentSnoopImageView;
     IBOutlet NSScrollView* documentSnoopScrollView;
     IBOutlet NSView* pdfSnoopContainerView;
-    NSImage *_pdfSnoopImage;
+	BOOL pdfSnoopViewLoaded;
 // ----------------------------------------------------------------------------------------
 // doc textpreview stuff
 // ----------------------------------------------------------------------------------------
     IBOutlet NSTextView *documentSnoopTextView;
     IBOutlet NSView* textSnoopContainerView;
-    NSString *_textSnoopString;
+	BOOL textSnoopViewLoaded;
     
 // Autocompletion stuff
     NSDictionary *completionMatcherDict;
@@ -126,16 +126,33 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 
 - (BibItem *)currentBib;
 - (void)setupForm;
+
+/*!
+    @method     show
+    @abstract   Shows the window.
+    @discussion (comprehensive description)
+*/
 - (void)show;
+
 /*!
     @method     setDocument:
     @discussion   overrides the default impl. to just save a ref to the doc and not mess with the title.
 */
-
 - (void)setDocument:(NSDocument *)d;
 //- (NSDocument *)document; is intentionally unimplemented.
 
+/*!
+    @method     fixURLs
+    @abstract   Updates the views for changes in either local or remote URLs. Updates the popup buttons and the drawer contents, if necessary. 
+    @discussion (comprehensive description)
+*/
 - (void)fixURLs;
+
+/*!
+    @method     chooseLocalURL:
+    @abstract   Action to choose a local file using the Open dialog. 
+    @discussion (comprehensive description)
+*/
 - (IBAction)chooseLocalURL:(id)sender;
 
 
@@ -158,24 +175,95 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
                 contextInfo:(void *)contextInfo;
 
 
+/*!
+    @method     finalizeChanges
+    @abstract   Makes sure that edits of fields are submitted.
+    @discussion (comprehensive description)
+*/
 - (void)finalizeChanges;
 
+/*!
+    @method     viewLocal
+    @abstract   Action to view the local file in the default viewer.
+    @discussion (comprehensive description)
+*/
 - (IBAction)viewLocal:(id)sender;
+
+/*!
+    @method     menuForImagePopUpButtonCell:
+    @abstract   Delegate method to get the current menu for the image popup button cell.
+    @discussion (comprehensive description)
+*/
 - (NSMenu *)menuForImagePopUpButtonCell:(RYZImagePopUpButtonCell *)cell;
+
+/*!
+    @method     getSafariRecentDownloadsMenu
+    @abstract   Returns an array of menuItem's for local paths of recent downloads from Safari.
+    @discussion (comprehensive description)
+*/
 - (NSArray *)getSafariRecentDownloadsMenu;
+
+/*!
+    @method     getSafariRecentURLsMenu
+    @abstract   Returns an array of menuItem's for remote URLs of recent downloads from Safari.
+    @discussion (comprehensive description)
+*/
 - (NSArray *)getSafariRecentURLsMenu;
+
+/*!
+    @method     getSafariRecentURLsMenu
+    @abstract   Returns an array of menuItem's for remote URLs of recent downloads from Safari.
+    @discussion (comprehensive description)
+*/
 - (NSArray *)getPreviewRecentDocumentsMenu;
+
+/*!
+    @method     setLocalURLPathFromMenuItem
+    @abstract   Action to select a local file path from a menu item.
+    @discussion (comprehensive description)
+*/
 - (void)setLocalURLPathFromMenuItem:(NSMenuItem *)sender;
+
+/*!
+    @method     setRemoteURLFromMenuItem
+    @abstract   Action to select a remote URL from a menu item.
+    @discussion (comprehensive description)
+*/
 - (void)setRemoteURLFromMenuItem:(NSMenuItem *)sender;
 
-
+/*!
+    @method     viewRemote
+    @abstract   Action to view the remote URL in the default browser.
+    @discussion (comprehensive description)
+*/
 - (IBAction)viewRemote:(id)sender;
 
+/*!
+    @method     showCiteKeyWarning:
+    @abstract   Action of the cite-key warning button. Shows the error string in an alert panel.
+    @discussion (comprehensive description)
+*/
 - (IBAction)showCiteKeyWarning:(id)sender;
+
+/*!
+    @method     citeKeyDidChange:
+    @abstract   Action of the cite-key field to set a new cite-key.
+    @discussion (comprehensive description)
+*/
 - (IBAction)citeKeyDidChange:(id)sender;
+
+/*!
+    @method     setCiteKeyDuplicateWarning
+    @abstract   Method to (un)set a warning to the user that the cite-key is a duplicate in te document. 
+    @discussion (comprehensive description)
+*/
 - (void)setCiteKeyDuplicateWarning:(BOOL)set;
 
-
+/*!
+    @method     bibTypeDidChange:
+    @abstract   Action of a form field to set a new value for a bibliography field.
+    @discussion (comprehensive description)
+*/
 - (IBAction)bibTypeDidChange:(id)sender;
 /*!
     @method     updateTypePopup
@@ -187,12 +275,49 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 - (IBAction)textFieldDidEndEditing:(id)sender;
 //- (void)closeSheetDidEnd:(NSWindow *)sheet returnCode:(int)returnCode contextInfo:(void  *)contextInfo;
 
+/*!
+    @method     updateDocumentSnoopButton
+    @abstract   Updates the icon for the document snoop button. 
+    @discussion (comprehensive description)
+*/
 - (void)updateDocumentSnoopButton;
+
+/*!
+    @method     updateSnoopDrawerContent
+    @abstract   Updates the content of the document snoop drawer. This should be called just before opening the drawer. 
+    @discussion (comprehensive description)
+*/
+- (void)updateSnoopDrawerContent;
+
+/*!
+    @method     toggleSnoopDrawer:
+    @abstract   Action to toggle the state or contents of the document snoop drawer. The content view is taken from the represented object of the sender menu item.
+    @discussion (comprehensive description)
+*/
 - (void)toggleSnoopDrawer:(id)sender;
 
+
+/*!
+    @method     citeKeyIsValid:
+    @abstract   Checkes whether the proposed cite key is valid, i.e. unique. It just calls the one of the document.
+    @discussion (comprehensive description)
+*/
 - (BOOL)citeKeyIsValid:(NSString *)proposedCiteKey;
+
+/*!
+    @method     generateCiteKey:
+    @abstract   Action to generate a cite-key for the bibitem, using the cite-key format string. 
+    @discussion (comprehensive description)
+*/
 - (IBAction)generateCiteKey:(id)sender;
+
+/*!
+    @method     makeKeyField:
+    @abstract   Selects the field and makes it key. 
+    @discussion (comprehensive description)
+*/
 - (void)makeKeyField:(NSString *)fieldName;
+
 - (void)bibDidChange:(NSNotification *)notification;
 
 - (void)docWillSave:(NSNotification *)notification;
