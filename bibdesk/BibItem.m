@@ -446,8 +446,12 @@ void _setupFonts(){
 - (BOOL)canSetCiteKey
 {
 	NSEnumerator *fEnum = [[[NSApp delegate] requiredFieldsForCiteKey] objectEnumerator];
-	NSString *fieldName, *fieldValue;
+	NSString *fieldName;
+	NSString *fieldValue = [self citeKey];
 	
+	if (fieldValue != nil && ![fieldValue isEqualToString:@""] && ![fieldValue isEqualToString:@"cite-key"]) {
+		return NO;
+	}
 	while (fieldName = [fEnum nextObject]) {
 		fieldValue = [self valueOfField:fieldName];
 		if (fieldValue == nil || [fieldValue isEqualToString:@""]) {
@@ -484,17 +488,12 @@ void _setupFonts(){
 - (void)setCiteKeyString:(NSString *)newCiteKey{
     [citeKey autorelease];
 		
-    if([newCiteKey isEqualToString:@""]){
-        citeKey = [[self suggestedCiteKey] retain];
-    } else {
-        citeKey = [newCiteKey copy];
-    }
+    citeKey = [newCiteKey copy];
 }
 
 - (NSString *)citeKey{
-    if(!citeKey || [@"" isEqualToString:citeKey]){
-		// NSLog(@"setting suggested to %@",[self suggestedCiteKey]);
-        [self setCiteKey:[self suggestedCiteKey]]; 
+    if(!citeKey){
+        [self setCiteKey:@""]; 
     }
     return citeKey;
 }
@@ -544,7 +543,12 @@ void _setupFonts(){
     }else{
         [self setAuthorsFromBibtexString:[pubFields objectForKey: @"Editor"]]; // or what else?
     }
-
+	
+	// autogenerate cite key if we have enough information
+	if ([self canSetCiteKey]) {
+		[self setCiteKey:[self suggestedCiteKey]];
+	}
+	
     // re-call make type to make sure we still have all the appropriate bibtex defined fields...
 	//@@ 3/5/2004: moved why is this here? 
 	[self makeType:[self type]];
