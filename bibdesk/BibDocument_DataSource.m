@@ -83,9 +83,10 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 			
         }else if([tcID isEqualToString: @"Date"] ){
             NSCalendarDate *date = [pub date];
+			NSString *monthStr = [pub valueOfField:@"Month"];
 			if(date == nil)
                 return @"No date";
-            else if([[pub valueOfField:@"Month"] isEqualToString:@""])
+            else if( !monthStr ||  [monthStr isEqualToString:@""])
                 return [date descriptionWithCalendarFormat:NSLocalizedString(@"%Y", @"Date format for only year inside table views")];
             else
                 return [date descriptionWithCalendarFormat:NSLocalizedString(@"%b %Y", @"Date format for month and year inside table views")];
