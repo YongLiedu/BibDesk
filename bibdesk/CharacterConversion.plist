@@ -6,6 +6,8 @@
 	<dict>
 		<key> </key>
 		<string> </string>
+		<key>°</key>
+		<string>$\,^{\circ}$</string>
 		<key>±</key>
 		<string>$\pm$</string>
 		<key>–</key>
