@@ -7,7 +7,9 @@
 //
 
 #import "MacroWindowController.h"
-
+#import "btparse.h"
+#import "NSString_BDSKExtensions.h"
+#import "OmniFoundation/NSData-OFExtensions.h"
 
 @implementation MacroWindowController
 - (id) init {
@@ -32,6 +34,7 @@
     if([[self macroDataSource] respondsToSelector:@selector(displayName)])
         [[self window] setTitle:[NSString stringWithFormat:@"%@: %@", [[self window] title], [[self macroDataSource] displayName]]];
   //  [[tc dataCell] setFormatter:[[[MacroKeyFormatter alloc] init] autorelease]];
+    [tableView registerForDraggedTypes:[NSArray arrayWithObject:NSStringPboardType]];
     [tableView reloadData];
 }
 
@@ -188,6 +191,105 @@
     }
 }
 
+#pragma mark || dragging operations
+
+- (BOOL)tableView:(NSTableView *)tv writeRows:(NSArray *)rows toPasteboard:(NSPasteboard *)pboard{
+    NSEnumerator *e = [rows objectEnumerator];
+    NSNumber *row;
+    NSString *key;
+    NSMutableString *pboardStr = [NSMutableString string];
+    NSDictionary *macroDefinitions = [(id <BDSKMacroResolver>)macroDataSource macroDefinitions];
+    [pboard declareTypes:[NSArray arrayWithObject:NSStringPboardType] owner:nil];
+
+    while(row = [e nextObject]){
+        key = [macros objectAtIndex:[row intValue]];
+        [pboardStr appendFormat:@"@STRING{%@ = \"%@\"}\n", key, [macroDefinitions objectForKey:key]];
+    }
+    return [pboard setString:pboardStr forType:NSStringPboardType];
+    
+}
+
+- (IBAction)copy:(id)sender{
+    NSArray *rows = [[tableView selectedRowEnumerator] allObjects];
+    NSPasteboard *pboard = [NSPasteboard generalPasteboard];
+    [self tableView:tableView writeRows:rows toPasteboard:pboard];
+}
+
+- (IBAction)paste:(id)sender{
+    NSPasteboard *pboard = [NSPasteboard generalPasteboard];
+    if(![[pboard types] containsObject:NSStringPboardType])
+        return;
+    
+    NSString *pboardStr = [pboard stringForType:NSStringPboardType];
+    [self addMacrosFromBibTeXString:pboardStr];
+}    
+
+- (BOOL)tableView:(NSTableView *)tv acceptDrop:(id <NSDraggingInfo> )info row:(int)row dropOperation:(NSTableViewDropOperation)op{
+    NSPasteboard *pboard = [info draggingPasteboard];
+
+    if(![[pboard types] containsObject:NSStringPboardType])
+        return NO;
+
+    NSString *pboardStr = [pboard stringForType:NSStringPboardType];
+    return [self addMacrosFromBibTeXString:pboardStr];
+}
+
+- (BOOL)addMacrosFromBibTeXString:(NSString *)aString{
+    AST *entry = NULL;
+    AST *field = NULL;
+    char *entryType = NULL;
+    char *fieldName = NULL;
+    
+    bt_initialize();
+    bt_set_stringopts(BTE_PREAMBLE, BTO_EXPAND);
+    bt_set_stringopts(BTE_REGULAR, BTO_MINIMAL);
+    boolean ok;
+    
+    NSString *macroKey;
+    NSString *macroString;
+    
+    FILE *stream = [[aString dataUsingEncoding:NSUTF8StringEncoding] openReadOnlyStandardIOFile];
+    
+    while(entry = bt_parse_entry(stream, NULL, 0, &ok)){
+        if(entry == NULL && ok)
+            break;
+        if(!ok)
+            break;
+        entryType = bt_entry_type(entry);
+        if(strcmp(entryType, "string") != 0)
+            break;
+        field = bt_next_field(entry, NULL, &fieldName);
+        NSString *macroKey = [NSString stringWithBytes: field->text encoding:NSUTF8StringEncoding];
+        NSString *macroString = [NSString stringWithBytes: field->down->text encoding:NSUTF8StringEncoding];                      
+        [(id <BDSKMacroResolver>)macroDataSource setMacroDefinition:macroString forMacro:macroKey];
+        bt_free_ast(entry);
+        entry = NULL;
+        field = NULL;
+    }
+    bt_cleanup();
+    fclose(stream);
+    [self refreshMacros];
+    [tableView reloadData];
+    return ok;
+}
+
+- (NSDragOperation)tableView:(NSTableView*)tv validateDrop:(id <NSDraggingInfo>)info proposedRow:(int)row proposedDropOperation:(NSTableViewDropOperation)op{
+    if ([info draggingSource]) {
+        if([info draggingSource] == tableView)
+        {
+            // can't copy onto same table
+            return NSDragOperationNone;
+        }
+        [tv setDropRow:[tv numberOfRows] dropOperation:NSDragOperationCopy];
+        return NSDragOperationCopy;    
+    }else{
+        //it's not from me
+        [tv setDropRow:[tv numberOfRows] dropOperation:NSDragOperationCopy];
+        return NSDragOperationEvery; // if it's not from me, copying is OK
+    }
+}
+
+
 @end
 
 @implementation MacroKeyFormatter
@@ -218,5 +320,13 @@
     
 }
 
+
+@end
+
+@implementation MacroDragTableView
+
+- (NSDragOperation)draggingSourceOperationMaskForLocal:(BOOL)isLocal {
+    return NSDragOperationCopy;
+}
 
 @end

@@ -24,6 +24,7 @@
 
 - (IBAction)addMacro:(id)sender;
 - (IBAction)removeSelectedMacros:(id)sender;
+- (BOOL)addMacrosFromBibTeXString:(NSString *)aString;
 
 @end
 
@@ -31,4 +32,8 @@
 
 }
 
+@end
+
+@interface MacroDragTableView : NSTableView{
+}
 @end
