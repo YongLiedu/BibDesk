@@ -56,13 +56,13 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 }
 
 - (id)outlineView:(NSOutlineView *)oView child:(int)index ofItem:(id)item {
-    BibItem *bi = (BibItem *)item;
+    BibAuthor *auth = (BibAuthor *)item;
     if(item == nil){
         //       //NSLog(@"trying to give it %@",  [allAuthors objectAtIndex:index]);
         return [allAuthors objectAtIndex:index];
     }
     else{
-        return [bi pubAtIndex: index];
+        return [auth pubAtIndex: index];
     }
 }
 
@@ -194,46 +194,61 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 - (id)tableView:(NSTableView *)tView objectValueForTableColumn:(NSTableColumn *)tableColumn row:(int)row{
     BibItem* pub = nil;
     NSArray *auths = nil;
-
-    NSMutableString *value = [NSMutableString stringWithString:@""];
-    NSString *s;
-      
+     
     if(tView == tableView){
         pub = [shownPublications objectAtIndex:row];
         auths = [pub pubAuthors];
+        
         if([[tableColumn identifier] isEqualToString: @"Cite Key"] ){
-            [value appendString: [pub citeKey]];
+            return [pub citeKey];
+            
         }else if([[tableColumn identifier] isEqualToString: @"Title"] ){
-            [value appendString: [pub title]];
+            return [pub title];
+            
         }else if([[tableColumn identifier] isEqualToString: @"Date"] ){
             if([pub date] == nil)
-                [value appendString: @"No date"];
+                return @"No date";
             else if([[pub valueOfField:@"Month"] isEqualToString:@""])
-                [value appendString: [[pub date] descriptionWithCalendarFormat:@"%Y"]];
-            else [value appendString: [[pub date] descriptionWithCalendarFormat:@"%b %Y"]];
+                return [[pub date] descriptionWithCalendarFormat:@"%Y"];
+            else
+                return [[pub date] descriptionWithCalendarFormat:@"%b %Y"];
+            
         }else if([[tableColumn identifier] isEqualToString: @"1st Author"] ){
             if([auths count] > 0)
-                [value appendString: [pub authorAtIndex:0]];
+                return [pub authorAtIndex:0];
             else
-                [value appendString: @"-"];
+                return @"-";
+            
         }else if([[tableColumn identifier] isEqualToString: @"2nd Author"] ){
             if([auths count] > 1)
-                [value appendString: [pub authorAtIndex:1]];
+                return [pub authorAtIndex:1]; 
             else
-                [value appendString: @"-"];
+                return @"-";
+            
         }else if([[tableColumn identifier] isEqualToString: @"3rd Author"] ){
             if([auths count] > 2)
-                [value appendString: [pub authorAtIndex:2]];
+                return [pub authorAtIndex:2];
             else
-                [value appendString: @"-"];
+                return @"-";
+            
+        }else if ([[tableColumn identifier] isEqualToString:@"Local-URL"]){
+            NSLog(@"local-url tablecolumn shown");
+            // @@refactor - this stuff should be in a single method in BibItem, not here and in BibEditor. Ouch.
+            //return [pub valueOfField:[tableColumn identifier]];
+            return [[NSWorkspace sharedWorkspace] iconForFile:
+                [pub valueOfField:[tableColumn identifier]]];
+            //            return @"placeholder";
+            /* icon = [[NSWorkspace sharedWorkspace] iconForFile:
+                [local path]];
+[viewLocalButton setImage:icon];
+[viewLocalButton setEnabled:YES];
+[viewLocalButton setToolTip:@"View File"];
+[viewLocalButton setTitle:@""];*/
         }else{
             // the tableColumn isn't something we handle in a custom way.
-            s = [pub valueOfField:[tableColumn identifier]];
-            if(s)
-                [value appendString:s]; // might append nil, should be OK.
+            return [pub valueOfField:[tableColumn identifier]];
         }
 
-        return value;
     }else if(tView == (NSTableView *)ccTableView){
         return [customStringArray objectAtIndex:row];
     }
@@ -336,12 +351,12 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
                 if(sep) [s appendString:startCite];
                 [s appendString:[[shownPublications objectAtIndex:[i intValue]] citeKey]];
                 if(sep) [s appendString:@"}"];
-                else [s appendString:@", "];
+                else [s appendString:@","];
             }
         }// end while
 
         if(dragType == 1){
-            if(!sep)[s replaceCharactersInRange:[s rangeOfString:@", " options:NSBackwardsSearch] withString:@"}"];
+            if(!sep)[s replaceCharactersInRange:[s rangeOfString:@"," options:NSBackwardsSearch] withString:@"}"];
         }
         if((dragType == 0) ||
            (dragType == 1)){
@@ -399,6 +414,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
     NSArray *types;
     NSURL *url;
     BOOL hadProblems = NO;
+    OFPreferenceWrapper *pw = [OFPreferenceWrapper sharedPreferenceWrapper];
 
     if(tv == (NSTableView *)ccTableView){
         return NO; // can't drag into that tv.
@@ -418,7 +434,6 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
     
 
     if([pb containsFiles]){
-        // won't handle more than one right away! ? sure we wll, why not...
         newBIs = [NSMutableArray array];
         pbArray = [pb propertyListForType:NSFilenamesPboardType]; // we will get an array
         pbString = [pb stringForType:NSURLPboardType]; // we will get an array
@@ -428,7 +443,9 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
         fileNameEnum = [pbArray objectEnumerator];
         while(fnStr = [fileNameEnum nextObject]){
             if(url = [NSURL fileURLWithPath:fnStr]){
-                newBI = [[BibItem alloc] init];
+                newBI = [[BibItem alloc] initWithType:[pw stringForKey:BDSKPubTypeStringKey]
+                                             fileType:@"BibTeX"
+                                              authors:[NSMutableArray arrayWithCapacity:0]];
                 [publications addObject:newBI];
                 [shownPublications addObject:newBI];
                 [newBI setField:@"Local-Url" toValue:[[NSURL fileURLWithPath:
@@ -436,7 +453,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
                 [self updateUI];
                 [self updateChangeCount:NSChangeDone];
 
-                if([[OFPreferenceWrapper sharedPreferenceWrapper] integerForKey:BDSKEditOnPasteKey] == NSOnState){
+                if([pw integerForKey:BDSKEditOnPasteKey] == NSOnState){
                     [self editPub:newBI forceChange:YES];
                     //[[newBI editorObj] fixEditedStatus];  - deprecated
                 }
