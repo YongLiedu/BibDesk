@@ -481,9 +481,23 @@ NSString *BDSKDateModifiedString = @"Date-Modified";
 - (IBAction)viewRemote:(id)sender{
     NSWorkspace *sw = [NSWorkspace sharedWorkspace];
     NSString *rurl = [theBib valueOfField:BDSKUrlString];
-    if ([@"" caseInsensitiveCompare:rurl] != NSOrderedSame) {
-        [sw openURL:[NSURL URLWithString:rurl]];
-    }
+    
+    if([rurl isEqualToString:@""])
+        return;
+    
+    if([rurl rangeOfString:@"://"].location == NSNotFound)
+        rurl = [@"http://" stringByAppendingString:rurl];
+
+    NSURL *url = [NSURL URLWithString:rurl];
+    
+    if(url != nil)
+        [sw openURL:url];
+    else
+        NSBeginAlertSheet(NSLocalizedString(@"Error!", @"Error!"),
+                          nil, nil, nil, [self window], nil, nil, nil, nil,
+                          NSLocalizedString(@"Mac OS X does not recognize this as a valid URL.  Please check the URL field and try again.",
+                                            @"Unrecognized URL, edit it and try again.") );
+    
 }
 
 #pragma mark Cite Key handling methods
