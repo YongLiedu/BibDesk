@@ -50,4 +50,11 @@
     return result;
 }
 
+- (void)removeObjectsForKeys:(NSArray *)keyArray usingLock:(NSLock *)aLock{
+    
+    [aLock lock];
+    [self removeObjectsForKeys:keyArray];
+    [aLock unlock];
+}
+
 @end

@@ -17,5 +17,6 @@
 - (void)removeObjectForKey:(id)aKey usingLock:(NSLock *)aLock;
 - (void)setObject:(id)anObject forKey:(id)aKey usingLock:(NSLock *)aLock;
 - (NSArray *)allKeysUsingLock:(NSLock *)aLock;
+- (void)removeObjectsForKeys:(NSArray *)keyArray usingLock:(NSLock *)aLock;
 
 @end

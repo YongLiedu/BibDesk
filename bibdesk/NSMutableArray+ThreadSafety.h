@@ -21,5 +21,6 @@
 - (BOOL)containsObject:(id)anObject usingLock:(NSLock *)aLock;
 - (void)removeObjectIdenticalTo:(id)anObject usingLock:(NSLock *)aLock;
 - (void)addObjectsFromArray:(NSArray *)anArray usingLock:(NSLock *)aLock;
+- (void)removeAllObjectsUsingLock:(NSLock *)aLock;
 
 @end

@@ -58,7 +58,7 @@
     BOOL yn;
     
     [aLock lock];
-#warning should retain anObject?
+    [[anObject retain] autorelease];
     yn = [self containsObject:anObject];
     [aLock unlock];
     
@@ -80,5 +80,11 @@
     [aLock unlock];
 }
 
+- (void)removeAllObjectsUsingLock:(NSLock *)aLock{
+    
+    [aLock lock];
+    [self removeAllObjects];
+    [aLock unlock];
+}
     
 @end
