@@ -20,6 +20,32 @@
 #define addokey(s) if([pubFields objectForKey: s] == nil){[pubFields setObject:@"" forKey: s];} [removeKeys removeObject: s];
 #define addrkey(s) if([pubFields objectForKey: s] == nil){[pubFields setObject:@"" forKey: s];} [requiredFieldNames addObject: s]; [removeKeys removeObject: s];
 
+/* Fonts and paragraph styles cached for efficiency. */
+static NSDictionary* _cachedFonts = nil; // font cached across all BibItems for speed.
+static NSParagraphStyle* _keyParagraphStyle = nil;
+static NSParagraphStyle* _bodyParagraphStyle = nil;
+
+// private function to get the cached Font.
+void _setupFonts(){
+    NSMutableParagraphStyle* defaultStyle = nil;
+    if(_cachedFonts == nil){
+        defaultStyle = [[NSMutableParagraphStyle alloc] init];
+        [defaultStyle setParagraphStyle:[NSParagraphStyle defaultParagraphStyle]];
+        _cachedFonts = [[NSDictionary dictionaryWithObjectsAndKeys:
+            [NSFont fontWithName:@"Gill Sans Bold Italic" size:14.0], @"Title",
+            [NSFont fontWithName:@"Gill Sans" size:10.0], @"Type",
+            [NSFont fontWithName:@"Gill Sans Bold" size:12.0], @"Key",
+            [NSFont fontWithName:@"Gill Sans" size:12.0], @"Body",
+            nil] retain]; // we'll never release this
+        
+// ?        [defaultStyle setAlignment:NSLeftTextAlignment];
+        _keyParagraphStyle = [defaultStyle copy];
+        [defaultStyle setHeadIndent:50];
+        [defaultStyle setFirstLineHeadIndent:50];
+        [defaultStyle setTailIndent:-30];
+        _bodyParagraphStyle = [defaultStyle copy];
+    }
+}
 
 @implementation BibItem
 
@@ -45,8 +71,10 @@
         [self makeType:type];
         [self setCiteKey:@""];
         [self setDate: nil];
-        [self setFileOrder:-1]; 
+        [self setFileOrder:-1];
+        _setupFonts();
     }
+
     //NSLog(@"bibitem init");
     return self;
 }
@@ -132,6 +160,10 @@
         case UNPUBLISHED:
             addrkey(@"Author") addrkey(@"Title")
             addokey(@"Month") addokey(@"Year")
+            break;
+        case NOTYPE:
+
+        default:
             break;
     }
     // remove from removeKeys things that aren't == @"" in pubFields
@@ -694,24 +726,34 @@
 - (NSData *)RTFValue{
     NSString *key;
     NSEnumerator *e = [[[pubFields allKeys] sortedArrayUsingSelector:@selector(caseInsensitiveCompare:)] objectEnumerator];
-    NSDictionary *titleAttributes = [NSDictionary dictionaryWithObjects:[NSArray arrayWithObjects:[NSNumber numberWithInt:1], nil]
-                                                              forKeys:[NSArray arrayWithObjects:NSUnderlineStyleAttributeName,  nil]];
-//,[NSFont fontWithName:@"Helvetica-Bold" size:14.0] for NSFontAttributeName,
 
-    
-   // NSDictionary *keyAttributes = [NSDictionary dictionaryWithObjects:[NSArray arrayWithObjects:[NSFont fontWithName:@"Helvetica-Bold" size:12.0],nil]
-// forKeys:[NSArray arrayWithObjects:NSFontAttributeName,nil]];
-    
-    NSDictionary *bodyAttributes = [NSDictionary dictionaryWithObjects:[NSArray arrayWithObjects:[NSColor colorWithCalibratedWhite:0.9 alpha:0.0], nil]
-                                                               forKeys:[NSArray arrayWithObjects:NSBackgroundColorAttributeName, nil]];
+    NSDictionary *titleAttributes =
+        [NSDictionary dictionaryWithObjects:[NSArray arrayWithObjects:[_cachedFonts objectForKey:@"Title"], _keyParagraphStyle, nil]
+                                    forKeys:[NSArray arrayWithObjects:NSFontAttributeName,  NSParagraphStyleAttributeName, nil]];
 
-    NSMutableAttributedString* aStr = [[[NSMutableAttributedString alloc] initWithString:[NSString stringWithFormat:@"%@\n\n",[self title]] attributes:titleAttributes] autorelease];
+    NSDictionary *typeAttributes =
+        [NSDictionary dictionaryWithObjects:[NSArray arrayWithObjects:[_cachedFonts objectForKey:@"Type"], [NSColor colorWithCalibratedWhite:0.4 alpha:0.0], nil]
+                                    forKeys:[NSArray arrayWithObjects:NSFontAttributeName, NSForegroundColorAttributeName, nil]];
+
+    NSDictionary *keyAttributes =
+        [NSDictionary dictionaryWithObjects:[NSArray arrayWithObjects:[_cachedFonts objectForKey:@"Key"], _keyParagraphStyle, nil]
+                                    forKeys:[NSArray arrayWithObjects:NSFontAttributeName, NSParagraphStyleAttributeName, nil]];
+
+    NSDictionary *bodyAttributes =
+        [NSDictionary dictionaryWithObjects:[NSArray arrayWithObjects:[_cachedFonts objectForKey:@"Body"],
+          /*  [NSColor colorWithCalibratedWhite:0.9 alpha:0.0], */
+            _bodyParagraphStyle, nil]
+                                    forKeys:[NSArray arrayWithObjects:NSFontAttributeName, /*NSBackgroundColorAttributeName, */NSParagraphStyleAttributeName, nil]];
+
+    NSMutableAttributedString* aStr = [[[NSMutableAttributedString alloc] initWithString:
+                              [NSString stringWithFormat:@"%@ ",[self title]] attributes:titleAttributes] autorelease];
+    
     NSMutableArray *nonReqKeys = [NSMutableArray arrayWithCapacity:5]; // yep, arbitrary
 
 
     [aStr appendAttributedString:[[[NSMutableAttributedString alloc] initWithString:
-    [NSString stringWithFormat:@"%@\n",[BibItem stringFromType:[self type]]]
-                                                                     attributes:nil]
+    [NSString stringWithFormat:@"(%@)\n",[BibItem stringFromType:[self type]]]
+                                                                     attributes:typeAttributes]
     autorelease]];
 
     while(key = [e nextObject]){
@@ -719,9 +761,9 @@
            ![key isEqualToString:@"Title"]){
             if([self isRequired:key]){
                 [aStr appendAttributedString:[[[NSAttributedString alloc] initWithString:[NSString stringWithFormat:@"%@\n",key]
-                                                                              attributes:nil] autorelease]]; // nil was keyAttributes
+                                                                              attributes:keyAttributes] autorelease]];
 
-                [aStr appendAttributedString:[[[NSAttributedString alloc] initWithString:[NSString stringWithFormat:@"\t%@\n",[pubFields objectForKey:key]]
+                [aStr appendAttributedString:[[[NSAttributedString alloc] initWithString:[NSString stringWithFormat:@"%@\n",[pubFields objectForKey:key]]
                                                                               attributes:bodyAttributes] autorelease]];
             }else{
                 [nonReqKeys addObject:key];
@@ -733,9 +775,9 @@
     while(key = [e nextObject]){
         if(![[pubFields objectForKey:key] isEqualToString:@""]){
             [aStr appendAttributedString:[[[NSAttributedString alloc] initWithString:[NSString stringWithFormat:@"%@\n",key]
-                                                                          attributes:nil] autorelease]]; // nil was keyAttributes
+                                                                          attributes:keyAttributes] autorelease]];
 
-            [aStr appendAttributedString:[[[NSAttributedString alloc] initWithString:[NSString stringWithFormat:@"\t%@\n",[pubFields objectForKey:key]]
+            [aStr appendAttributedString:[[[NSAttributedString alloc] initWithString:[NSString stringWithFormat:@"%@\n",[pubFields objectForKey:key]]
                                                                           attributes:bodyAttributes] autorelease]];
 
         }
@@ -748,11 +790,13 @@
     return [aStr RTFFromRange:NSMakeRange(0,[aStr length]) documentAttributes:nil];
 }
 
+//@@ Refactor: textValue should be 'bibtex value'
 - (NSString *)textValue{
     NSString *k;
     NSString *v;
     NSMutableString *s = [[[NSMutableString alloc] init] autorelease];
     NSEnumerator *e = [pubFields keyEnumerator];
+    // @@REfactor: bibtex dependence:
     NSArray *types = [NSArray arrayWithObjects:@"article", @"book", @"booklet", @"inbook", @"incollection", @"inproceedings", @"manual", @"mastersthesis", @"misc", @"phdthesis", @"proceedings", @"techreport", @"unpublished", nil];
     //build BibTeX entry:
     [s appendString:@"@"];
