@@ -1,0 +1,40 @@
+{
+    AppleEventCode = BDSK; 
+    Classes = {
+        NSApplication = {
+            AppleEventCode = capp; 
+            Superclass = "NSCoreSuite.NSApplication"; 
+            SupportedCommands = {"BibDesk.Filter" = ""; }; 
+            ToManyRelationships = {
+	    		"orderedDocuments" = {
+		    		"Type" = "BibDocument";
+		    		"AppleEventCode" = "docu";
+		    };
+	     }; 
+        };
+		"BibItem" = {
+			"Superclass" = "NSCoreSuite.AbstractObject";
+			"AppleEventCode" = "bd01";
+			Attributes = { citeKey = { Type = NSString; AppleEventCode = "bdck";}; };
+		};
+
+		"BibDocument" = {
+			"Superclass" = "NSCoreSuite.NSDocument";
+			"AppleEventCode" = "docu";
+			"ToManyRelationships" = {
+				"publications" = {
+					AppleEventCode = "bd02";
+					Type = "BibItem";
+				};
+			};
+			
+		};
+    }; 
+    Commands = {
+        Filter = {
+		AppleEventCode = filt; 
+		CommandClass = BibDeskFilterScriptCommand; 
+	}; 
+    }; 
+    Name = BibDesk; 
+}
