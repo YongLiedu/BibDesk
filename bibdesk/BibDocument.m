@@ -1384,7 +1384,7 @@ stringByAppendingPathComponent:@"BibDesk"]; */
 	NSString *newFieldTitle = nil;
 	
     if(returnCode == 1){
-        newFieldTitle = [addFieldTextField stringValue];
+        newFieldTitle = [[addFieldTextField stringValue] capitalizedString];
 
         if(BDSK_USING_JAGUAR)
             [quickSearchButton insertItemWithTitle:newFieldTitle atIndex:0];
@@ -1527,32 +1527,29 @@ stringByAppendingPathComponent:@"BibDesk"]; */
     
     if([field isEqualToString:BDSKTitleString]){
         selectorString=@"title";
-    } else {
-        if([field isEqualToString:BDSKAuthorString]){
-            selectorString=@"bibtexAuthorString";
-        } else {
-            if([field isEqualToString:BDSKDateString]){
-                selectorString=@"calendarDateDescription";
-            } else {
-                if([field isEqualToString:@"All Fields"]){
-                    selectorString=@"allFieldsString";
-                } else {
-                    if([field isEqualToString:@"Type"] || 
-					   [field isEqualToString:@"Pub Type"]){
-                        selectorString=@"type";
-                    } else {
-                        if([field caseInsensitiveCompare:@"Cite Key"] == NSOrderedSame ||
-                           [field caseInsensitiveCompare:@"CiteKey"] == NSOrderedSame ||
-                           [field caseInsensitiveCompare:@"Cite-Key"] == NSOrderedSame ||
-                           [field caseInsensitiveCompare:@"Key"] == NSOrderedSame){
-                            selectorString=@"citeKey";
-                        } else {
-                            isGeneric = YES; // this means that we don't have an accessor for it in BibItem
-                        }
-                    }
-                }
-            }
-        }
+    } else if([field isEqualToString:BDSKAuthorString]){
+		selectorString=@"bibtexAuthorString";
+	} else if([field isEqualToString:BDSKDateString]){
+		selectorString=@"calendarDateDescription";
+	} else if([field isEqualToString:BDSKDateModifiedString] ||
+			  [field isEqualToString:@"Modified"]){
+		selectorString=@"calendarDateModifiedDescription";
+	} else if([field isEqualToString:BDSKDateCreatedString] ||
+			  [field isEqualToString:@"Added"] ||
+			  [field isEqualToString:@"Created"]){
+		selectorString=@"calendarDateCreatedDescription";
+	} else if([field isEqualToString:@"All Fields"]){
+		selectorString=@"allFieldsString";
+	} else if([field isEqualToString:@"Type"] || 
+			  [field isEqualToString:@"Pub Type"]){
+		selectorString=@"type";
+	} else  if([field caseInsensitiveCompare:@"Cite Key"] == NSOrderedSame ||
+			   [field caseInsensitiveCompare:@"CiteKey"] == NSOrderedSame ||
+			   [field caseInsensitiveCompare:@"Cite-Key"] == NSOrderedSame ||
+			   [field caseInsensitiveCompare:@"Key"] == NSOrderedSame){
+		selectorString=@"citeKey";
+	} else {
+        isGeneric = YES; // this means that we don't have an accessor for it in BibItem
     }
         
     AGRegex *tip = [AGRegex regexWithPattern:@"(?(?=^.+(AND|OR))(^.+(?= AND| OR))|^.+)"]; // match the any words up to but not including AND or OR if they exist (see "Lookahead assertions" and "CONDITIONAL SUBPATTERNS" in pcre docs)
@@ -2475,7 +2472,7 @@ This method always returns YES. Even if some or many operations fail.
     NSMutableArray *prefsShownColNamesMutableArray = nil;
 
     if(returnCode == 1){
-        [self columnsMenuAddTableColumnName:[addFieldTextField stringValue] enabled:YES];
+        [self columnsMenuAddTableColumnName:[[addFieldTextField stringValue] capitalizedString] enabled:YES];
         tc = [[[NSTableColumn alloc] initWithIdentifier:[addFieldTextField stringValue]] autorelease];
         [tc setResizable:YES];
         [tableColumns setObject:tc forKey:[tc identifier]];
