@@ -927,9 +927,10 @@ NSString *BDSKDateModifiedString = @"Date-Modified";
     }
 	
 	if (oldContentView == [documentSnoopDrawer contentView]) {
-		[documentSnoopDrawer toggle:sender ];
+		[documentSnoopDrawer toggle:sender];
 	}
 	else {
+		[documentSnoopDrawer close:sender];
 		[documentSnoopDrawer open:sender];
 	}
 }
@@ -942,8 +943,11 @@ NSString *BDSKDateModifiedString = @"Date-Modified";
     
 
     [self fixURLs]; //no this won't cause a loop - see fixURLs. Please don't break that though. Boy it's fragile.
-    [documentSnoopButton setToolTip:NSLocalizedString(@"Close drawer", @"")];
-    [documentTextSnoopButton setToolTip:NSLocalizedString(@"Close drawer", @"")];
+    if ([documentSnoopDrawer contentView] == pdfSnoopContainerView) {
+		[documentSnoopButton setToolTip:NSLocalizedString(@"Close drawer", @"")];
+	} else {
+		[documentTextSnoopButton setToolTip:NSLocalizedString(@"Close drawer", @"")];
+	}
 
     // @@snoop text - refactor this into a separate method later
     // @@URL handling refactor this
