@@ -12,12 +12,14 @@
                 openEditWindowWithFile = id; 
                 openUsingFilter = id; 
                 reopenDocument = id; 
+                showConversionEditor = id; 
                 showErrorPanel = id; 
                 showFindPanel = id; 
                 showPreferencePanel = id; 
                 showPreviewPanel = id; 
                 showReadMeFile = id; 
                 showRelNotes = id; 
+                showTypeInfoEditor = id; 
                 toggleShowingErrorPanel = id; 
                 toggleShowingPreviewPanel = id; 
                 visitWebSite = id; 
