@@ -1591,26 +1591,14 @@ int generalBibItemCompareFunc(id item1, id item2, void *context){
 	// otherwise do nothing
 }
 
-
-- (void)editPub:(BibItem *)pub{
-    [self editPub:pub forceChange:NO];
-}
-
 //@@ notifications - when adding pub notifications is fully implemented we won't need this.
-- (void)editPub:(BibItem *)pub forceChange:(BOOL)force{
+- (void)editPub:(BibItem *)pub{
     BibEditor *e = [pub editorObj];
     if(e == nil){
-        e = [[BibEditor alloc] initWithBibItem:pub document:self];
+        e = [[[BibEditor alloc] initWithBibItem:pub document:self] autorelease];
         [self addCustomWindowController:e];
-        [e release];
     }
-    [e show];    //    [e showWindow:self];
-    if(force){
-#if DEBUG
-        //NSLog(@"updating change count");
-#endif
-        //[self updateChangeCount:NSChangeDone]; // used to be 'e' updateChangeCount.
-    }
+    [e show];
 }
 
 - (IBAction)copy:(id)sender{
@@ -1868,7 +1856,7 @@ Shouldn't there be some kind of safeguard against opening too many pub editors?
 		[self updateUI];
 		//[self updateChangeCount:NSChangeDone];
 		if([[OFPreferenceWrapper sharedPreferenceWrapper] integerForKey:BDSKEditOnPasteKey] == NSOnState) {
-			[self editPub:newBI forceChange:YES];
+			[self editPub:newBI];
 		}
 	}
 	[[self undoManager] setActionName:NSLocalizedString(@"Add Publication",@"")];
@@ -1912,7 +1900,7 @@ This method always returns YES. Even if some or many operations fail.
 			//[self updateChangeCount:NSChangeDone];
 			
 			if([pw integerForKey:BDSKEditOnPasteKey] == NSOnState){
-				[self editPub:newBI forceChange:YES];
+				[self editPub:newBI];
 				//[[newBI editorObj] fixEditedStatus];  - deprecated
 			}
 		}

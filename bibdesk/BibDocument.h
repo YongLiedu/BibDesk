@@ -280,19 +280,10 @@ extern NSString* BDSKBibTeXStringPboardType;
 /*!
     @method editPub
  @abstract Opens the edit window
- @discussion Creates a bibeditor if one doesn't exist, and tells it to show itself. calls editpub:forcechange = NO
+ @discussion Creates a bibeditor if one doesn't exist, and tells it to show itself. 
  @param pub The BibItem that should be edited.
 */
 - (void)editPub:(BibItem *)pub;
-
-/*!
-@method editPub:forceChange:
- @abstract Opens the edit window
- @discussion Creates a bibeditor if one doesn't exist, and tells it to show itself. 
- @param pub The BibItem that should be edited.
- @param force forces the bib to be marked as changed (useful for drag ins) <em> This method is not neccessarily permanent - this interface might be changed!</em>
- */
-- (void)editPub:(BibItem *)pub forceChange:(BOOL)force;
 
 /*!
     @method copyAsBibTex
