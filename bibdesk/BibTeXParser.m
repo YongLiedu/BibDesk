@@ -94,7 +94,9 @@ NSRange SafeBackwardSearchRange(NSRange startRange, unsigned seekLength){
 - (BOOL)isNewEntryAtRange:(NSRange)theRange inString:(NSString *)fullString{ // use this to determine if an '@' is inside braces or not
     NSRange rbRange = [fullString rangeOfString:@"}" options:NSLiteralSearch | NSBackwardsSearch range:SafeBackwardSearchRange(theRange, theRange.location)];
     NSRange lbRange = [fullString rangeOfString:@"{" options:NSLiteralSearch | NSBackwardsSearch range:SafeBackwardSearchRange(theRange, theRange.location)];
-    if(rbRange.location >= lbRange.location && rbRange.location != NSNotFound){ // it's an unbraced @, so should be a new entry ( '=' handles NSNotFound for both, as in the initial @ )
+    if(rbRange.location >= lbRange.location && rbRange.location != NSNotFound){ // it's an unbraced @, so should be a new entry
+        return YES;
+    } else if(rbRange.location == NSNotFound && lbRange.location == NSNotFound){ //( handles NSNotFound for both, as in the initial @ )
         return YES;
     } else {
         return NO;
