@@ -37,7 +37,8 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 - (BOOL)isPartialStringValid:(NSString *)partialString
             newEditingString:(NSString **)newString
             errorDescription:(NSString **)error{
-    NSRange r = [partialString rangeOfCharacterFromSet:[NSCharacterSet characterSetWithCharactersInString:@" '@,\\#}{~"]];
+	NSCharacterSet *invalidSet = [[BibTypeManager sharedManager] invalidCharactersForField:@"Cite Key" inType:@"BibTeX"];
+    NSRange r = [partialString rangeOfCharacterFromSet:invalidSet];
     if ( r.location != NSNotFound) {
         return NO;
     }else

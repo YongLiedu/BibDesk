@@ -136,6 +136,8 @@
 - (NSString *)type;
 
 - (void)setCiteKeyFormat: (NSString *)newKeyFormat; // @@unimplemented
+- (NSString *)sanitizedCiteKeyString:(NSString *)key;
+- (NSString *)suggestedCiteKey;
 - (void)setCiteKey:(NSString *)newCiteKey;
 - (NSString *)citeKey;
 
@@ -148,11 +150,11 @@
 - (void)setFields: (NSMutableDictionary *)newFields;
 
 /*!
-    @method     updateMetadata
+    @method     updateMetadataForKey
     @abstract   updates derived info from the dictionary
     @discussion -
 */
-- (void)updateMetadata;
+- (void)updateMetadataForKey:(NSString *)key;
 
 - (void)setRequiredFieldNames: (NSMutableArray *)newRequiredFieldNames;
 - (void)setField: (NSString *)key toValue: (NSString *)value;

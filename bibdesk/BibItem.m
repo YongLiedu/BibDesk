@@ -56,7 +56,7 @@ void _setupFonts(){
 		undoManager = nil;
         [self setFileType:inFileType];
         [self makeType:type];
-        [self setCiteKey:@""];
+        [self setCiteKey:@"cite-key"];
         [self setDate: nil];
         [self setFileOrder:-1];
         _setupFonts();
@@ -346,6 +346,41 @@ void _setupFonts(){
     // in the future, this will allow us to set how we want the citeKey computed
 }
 
+- (NSString *)sanitizedCiteKeyString:(NSString *)key{
+	NSCharacterSet *invalidSet = [[BibTypeManager sharedManager] invalidCharactersForField:@"Cite Key" inType:@"BibTeX"];
+		
+	NSString *newCiteKey = [key stringByReplacingCharactersInSet:[NSCharacterSet whitespaceCharacterSet]
+												   withString:@"_"];
+	newCiteKey = [newCiteKey stringByReplacingCharactersInSet:invalidSet withString:@""];
+	
+	return newCiteKey;
+}
+
+- (NSString *)suggestedCiteKey{
+	NSString *authString = @"";
+    NSString *yearString = @"";
+    NSString *titleString = @"";
+	
+	if([self numberOfAuthors] > 0){
+		authString = [[self authorAtIndex:0] lastName];
+		if(!authString) 
+			authString = @"";
+	}
+	if([self date]){
+		yearString = [[self date] descriptionWithCalendarFormat:@"%y"];
+	}
+	if([self title]){
+		titleString = [self title];
+	}
+	NSString *cs = [NSString stringWithFormat:@"%@%@%@", authString, yearString, titleString];
+	cs = [self sanitizedCiteKeyString:cs];
+	if([cs isEqualToString:@""]){
+		return @"empty";
+	}else{
+	   return cs;
+	}
+}
+
 - (void)setCiteKey:(NSString *)newCiteKey{
 	if(editorObj){
 		// NSLog(@"setCiteKey called with a valid editor");
@@ -356,7 +391,14 @@ void _setupFonts(){
 	}
 	
     [citeKey autorelease];
-    citeKey = [newCiteKey retain];
+	
+	citeKey = [self sanitizedCiteKeyString:newCiteKey];
+	
+	if([citeKey isEqualToString:@""]){
+		citeKey = [self suggestedCiteKey];
+	}
+	
+    citeKey = [citeKey retain];
 	
 	NSDictionary *notifInfo = [NSDictionary dictionaryWithObjectsAndKeys:citeKey, @"value", @"Cite Key", @"key",nil];
 	[[NSNotificationCenter defaultCenter] postNotificationName:BDSKBibItemChangedNotification
@@ -365,22 +407,9 @@ void _setupFonts(){
 }
 
 - (NSString *)citeKey{
-    NSString *authString = @"";
-    NSString *yearString = @"_";
-    NSString *titleString = @"";
-
-    if(!citeKey){
-        if([self numberOfAuthors] > 0){
-            authString = [[self authorAtIndex:0] lastName];
-            // [BibAuthor lastNameFromString:
-        }
-        if([self date]){
-            yearString = [[self date] descriptionWithCalendarFormat:@"%y"];
-        }
-        if([self title]){
-            titleString = [self title];
-        }
-        [self setCiteKey:[NSString stringWithFormat:@"%@%@%@", authString, yearString, titleString]];
+    if(!citeKey || [@"" isEqualToString:citeKey]){
+		NSLog(@"setting suggested to %@",[self suggestedCiteKey]);
+        [self setCiteKey:[self suggestedCiteKey]]; 
     }
     return citeKey;
 }
@@ -389,34 +418,31 @@ void _setupFonts(){
 	if(newFields != pubFields){
 		[pubFields release];
 		pubFields = [newFields mutableCopy];
-		[self updateMetadata];
+		[self updateMetadataForKey:nil];
     }
 }
 
-- (void)updateMetadata{
+- (void)updateMetadataForKey:(NSString *)key{
     NSMutableString *tmp = [NSMutableString string];
+	
+	if([key isEqualToString:@"Annote"] || 
+	   [key isEqualToString:@"Abstract"] || 
+	   [key isEqualToString:@"Rss-Description"]){
+		// don't do anything for fields we don't need to update.
+		return;
+	}
 
     if((![@"" isEqualToString:[pubFields objectForKey: @"Author"]]) && 
 	   ([pubFields objectForKey: @"Author"] != nil))
     {
         [self setAuthorsFromBibtexString:[pubFields objectForKey: @"Author"]];
-        if ([[self citeKey] isEqualToString:@""]) {
-            [self setCiteKey:[NSString stringWithFormat:@"%@:%@",[[self authorAtIndex:0] lastName],
-                [[self date] descriptionWithCalendarFormat:@"%y"]]];
-        }
     }else{
         [self setAuthorsFromBibtexString:[pubFields objectForKey: @"Editor"]]; // or what else?
-        if ([[self citeKey] isEqualToString:@""]){
-            [self setCiteKey:
-                [NSString stringWithFormat:@"%@:%@",
-                    [[self authorAtIndex:0] lastName],
-                    [[self date] descriptionWithCalendarFormat:@"%y"]]];
-        }
     }
-	// FIXME: set new citeKeys to something more reasonable (make it a user default?)
+
     // re-call make type to make sure we still have all the appropriate bibtex defined fields...
 	//@@ 3/5/2004: moved why is this here? 
-	   [self makeType:[self type]];
+	[self makeType:[self type]];
 
     if (([pubFields objectForKey:@"Year"] != nil) &&
 		(![[pubFields objectForKey:@"Year"] isEqualToString:@""] )) {
@@ -443,13 +469,13 @@ void _setupFonts(){
 - (void)setField: (NSString *)key toValue: (NSString *)value{
 	if(!undoManager) undoManager = [[editorObj window] undoManager];
 
-	id	oldValue = [pubFields objectForKey:key];
+	id oldValue = [pubFields objectForKey:key];
 	[[undoManager prepareWithInvocationTarget:self] setField:key 
 													 toValue:oldValue];
 	[undoManager setActionName:NSLocalizedString(@"Edit publication",@"")];
 	
     [pubFields setObject: value forKey: key];
-	[self updateMetadata];
+	[self updateMetadataForKey:key];
 	
 	NSDictionary *notifInfo = [NSDictionary dictionaryWithObjectsAndKeys:value, @"value", key, @"key",nil];
 	[[NSNotificationCenter defaultCenter] postNotificationName:BDSKBibItemChangedNotification

@@ -11,6 +11,7 @@
 
 @interface BibTypeManager : NSObject {
     NSDictionary *_typeInfoDict;
+	NSCharacterSet *_invalidCiteKeyCharSet;
 }
 + (BibTypeManager *)sharedManager;
 - (NSString *)defaultTypeForFileFormat:(NSString *)fileFormat;
@@ -20,4 +21,5 @@
 - (NSArray *)userDefaultFieldsForType:(NSString *)type;
 - (NSArray *)bibTypesForFileType:(NSString *)fileType;
 - (NSString *)fieldNameForPubMedTag:(NSString *)tag;
+- (NSCharacterSet *)invalidCharactersForField:(NSString *)fieldName inType:(NSString *)type;
 @end

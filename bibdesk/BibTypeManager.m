@@ -19,6 +19,7 @@ static BibTypeManager *_sharedInstance = nil;
 - (id)init{
     self = [super init];
     _typeInfoDict = [[NSDictionary dictionaryWithContentsOfFile:[[[NSBundle mainBundle] resourcePath] stringByAppendingPathComponent:@"TypeInfo.plist"]] retain];
+	_invalidCiteKeyCharSet = [[NSCharacterSet characterSetWithCharactersInString:@" '@,\\#}{~"] retain];
     return self;
 }
 
@@ -63,4 +64,12 @@ static BibTypeManager *_sharedInstance = nil;
 - (NSString *)fieldNameForPubMedTag:(NSString *)tag{
     return [[_typeInfoDict objectForKey:@"BibTeXFieldNamesForPubMedTags"] objectForKey:tag];
 }
+
+- (NSCharacterSet *)invalidCharactersForField:(NSString *)fieldName inType:(NSString *)type{
+	if( ! [type isEqualToString:@"BibTeX"] || ! [fieldName isEqualToString:@"Cite Key"]){
+		[NSException raise:@"unimpl. feat. exc." format:@"invalidCharactersForField is partly implemented"];
+	}
+	return _invalidCiteKeyCharSet;
+}
+
 @end
