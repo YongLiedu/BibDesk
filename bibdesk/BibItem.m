@@ -1271,15 +1271,13 @@ void _setupFonts(){
 					}
 					if (string != nil) {
 						arr = [NSMutableArray array];
-						NSSet *ignoredWords = [NSSet setWithObjects:@"", @"a", @"A", @"an", @"An", @"the", @"The", nil];
 						// split the title into words using the same methodology as addString:forCompletionEntry:
 						NSRange wordSpacingRange = [string rangeOfCharacterFromSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]];
 						if (wordSpacingRange.location != NSNotFound) {
 							wordScanner = [NSScanner scannerWithString:string];
 							
 							while (![wordScanner isAtEnd]) {
-								if ([wordScanner scanUpToCharactersFromSet:[NSCharacterSet whitespaceAndNewlineCharacterSet] intoString:&string] && 
-									![ignoredWords containsObject:string]){
+								if ([wordScanner scanUpToCharactersFromSet:[NSCharacterSet whitespaceAndNewlineCharacterSet] intoString:&string]){
 									[arr addObject:string];
 								}
 								[wordScanner scanCharactersFromSet:[NSCharacterSet whitespaceAndNewlineCharacterSet] intoString:NULL];
@@ -1287,10 +1285,12 @@ void _setupFonts(){
 						} else {
 							[arr addObject:string];
 						}
-						for (i = 0; i < [arr count] && (number == 0 || i < number); i++) { 
-							if (i > 0) [parsedStr appendString:@"-"]; 
+						if (number == 0) number = [arr count];
+						for (i = 0; i < [arr count] && number > 0; i++) { 
+							if (i > 0) [parsedStr appendString:[converter stringBySanitizingString:@" " forField:fieldName inFileType:[self fileType]]]; 
 							string = [converter stringBySanitizingString:[arr objectAtIndex:i] forField:fieldName inFileType:[self fileType]]; 
 							[parsedStr appendString:string]; 
+							if ([string length] > 3) --number;
 						}
 					}
 					break;
