@@ -118,6 +118,8 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
                                 toValue:[bibDict objectForKey:key]];
                 }
             }
+            [editorBib setType:[tempBI type]];
+            [[self windowController] updateTypePopup]; // set the popup properly
         }//for each dragged-in pub
     }
     return YES;

@@ -584,6 +584,11 @@ NSString *BDSKDateModifiedString = @"Date-Modified";
     }
 }
 
+- (void)updateTypePopup{ // used to update UI after dragging into the editor
+    [bibTypeButton selectItemWithTitle:[theBib type]];
+}
+    
+
 - (void)fixURLs{
     NSString *lurl = [theBib localURLPathRelativeTo:[[theDocument fileName] stringByDeletingLastPathComponent]];
     NSString *rurl = [theBib valueOfField:BDSKUrlString];
