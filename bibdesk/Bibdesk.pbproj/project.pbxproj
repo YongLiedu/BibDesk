@@ -1221,6 +1221,8 @@
 				F9A008D20638B5CD00426F15,
 				F9A008D30638B5CD00426F15,
 				F91E6D2E06459E5B004345B7,
+				F9675026068BA41D00CC0663,
+				F967505D068BA8A400CC0663,
 			);
 			isa = PBXResourcesBuildPhase;
 			runOnlyForDeploymentPostprocessing = 0;
@@ -2028,6 +2030,7 @@
 		};
 		2A37F4B8FDCFA73011CA2CEA = {
 			children = (
+				F967505C068BA8A400CC0663,
 				2762924C06384763008D783C,
 				F94E460F0610B17900A61471,
 				F561F4B0025893FC01709AC4,
@@ -2057,6 +2060,7 @@
 				F58886DB03ABFA7101A80167,
 				F544DC42042AD4E001499425,
 				F544DC43042AD4E001499425,
+				F9675024068BA41D00CC0663,
 			);
 			isa = PBXGroup;
 			name = Resources;
@@ -3444,6 +3448,43 @@
 		};
 		F94E46110610B17900A61471 = {
 			fileRef = F94E460F0610B17900A61471;
+			isa = PBXBuildFile;
+			settings = {
+			};
+		};
+		F9675024068BA41D00CC0663 = {
+			children = (
+				F9675025068BA41D00CC0663,
+			);
+			isa = PBXVariantGroup;
+			name = ReadMe.nib;
+			path = "";
+			refType = 4;
+			sourceTree = "<group>";
+		};
+		F9675025068BA41D00CC0663 = {
+			isa = PBXFileReference;
+			lastKnownFileType = wrapper.nib;
+			name = English;
+			path = English.lproj/ReadMe.nib;
+			refType = 4;
+			sourceTree = "<group>";
+		};
+		F9675026068BA41D00CC0663 = {
+			fileRef = F9675024068BA41D00CC0663;
+			isa = PBXBuildFile;
+			settings = {
+			};
+		};
+		F967505C068BA8A400CC0663 = {
+			isa = PBXFileReference;
+			lastKnownFileType = text.rtf;
+			path = README.rtf;
+			refType = 4;
+			sourceTree = "<group>";
+		};
+		F967505D068BA8A400CC0663 = {
+			fileRef = F967505C068BA8A400CC0663;
 			isa = PBXBuildFile;
 			settings = {
 			};

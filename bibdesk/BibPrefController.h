@@ -86,6 +86,8 @@ extern NSString *BDSKPapersFolderPathKey;
 extern NSString *BDSKFilePapersAutomaticallyKey;
 extern NSString *BDSKKeepPapersFolderOrganizedKey;
 
+extern NSString *BDSKLastVersionLaunched;
+
 #pragma mark ||  Notification name strings
 extern NSString *BDSKDocumentUpdateUINotification;
 extern NSString *BDSKTableViewFontChangedNotification;

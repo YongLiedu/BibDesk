@@ -483,8 +483,22 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
     if([@"showing" isEqualToString:[[OFPreferenceWrapper sharedPreferenceWrapper] objectForKey:@"BDSK Showing Preview Key"]]){
         [self showPreviewPanel:self];
     }
+   
+    NSString *versionString = [[[NSBundle mainBundle] infoDictionary] objectForKey:@"CFBundleVersion"];
+    if( ([[OFPreferenceWrapper sharedPreferenceWrapper] objectForKey:BDSKLastVersionLaunched] == nil) ||
+        ([versionString floatValue] > [[[OFPreferenceWrapper sharedPreferenceWrapper] objectForKey:BDSKLastVersionLaunched] floatValue]) ){
+	[self showReadMeFile];
+    }
+    [[OFPreferenceWrapper sharedPreferenceWrapper] setObject:versionString forKey:BDSKLastVersionLaunched];
   
 }
+
+- (void)showReadMeFile{
+    [NSBundle loadNibNamed:@"ReadMe" owner:self];
+    [readmeWindow makeKeyAndOrderFront:self];
+    [readmeTextView replaceCharactersInRange:[readmeTextView selectedRange]
+				     withRTF:[NSData dataWithContentsOfFile:[[[NSBundle mainBundle] resourcePath] stringByAppendingPathComponent:@"README.rtf"]]];	
+} 
 
 #pragma mark || Service code
 
