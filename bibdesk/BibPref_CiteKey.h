@@ -19,12 +19,14 @@
     IBOutlet NSPopUpButton *formatRepositoryPopUp;
     IBOutlet NSButton *formatWarningButton;
     IBOutlet NSButton* citeKeyAutogenerateCheckButton;
+    IBOutlet NSButton* citeKeyLowercaseCheckButton;
 }
 
 - (IBAction)citeKeyFormatChanged:(id)sender;
 - (IBAction)citeKeyFormatAdd:(id)sender;
 - (IBAction)formatHelp:(id)sender;
 - (IBAction)changeCiteKeyAutogenerate:(id)sender;
+- (IBAction)changeCiteKeyLowercase:(id)sender;
 - (void)updateUI;
 - (IBAction)showCiteKeyFormatWarning:(id)sender;
 - (void)setCiteKeyFormatInvalidWarning:(BOOL)set message:message;

@@ -29,6 +29,7 @@
 	
 	// update the UI elements
     [citeKeyAutogenerateCheckButton setState:[defaults integerForKey:BDSKCiteKeyAutogenerateKey]];
+    [citeKeyLowercaseCheckButton setState:[defaults integerForKey:BDSKCiteKeyLowercaseKey]];
 	if ([[BDSKConverter sharedConverter] validateFormat:&citeKeyFormat forField:BDSKCiteKeyString inFileType:BDSKBibtexString error:&error]) {
 		[self setCiteKeyFormatInvalidWarning:NO message:nil];
 		
@@ -91,6 +92,11 @@
 
 - (IBAction)changeCiteKeyAutogenerate:(id)sender{
     [defaults setInteger:[sender state] forKey:BDSKCiteKeyAutogenerateKey];
+	[self updateUI];
+}
+
+- (IBAction)changeCiteKeyLowercase:(id)sender{
+    [defaults setInteger:[sender state] forKey:BDSKCiteKeyLowercaseKey];
 	[self updateUI];
 }
 

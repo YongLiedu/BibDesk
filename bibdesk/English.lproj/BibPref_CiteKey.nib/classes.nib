@@ -3,6 +3,7 @@
         {
             ACTIONS = {
                 changeCiteKeyAutogenerate = id; 
+                changeCiteKeyLowercase = id; 
                 citeKeyFormatAdd = id; 
                 citeKeyFormatChanged = id; 
                 formatHelp = id; 
@@ -13,6 +14,7 @@
             OUTLETS = {
                 citeKeyAutogenerateCheckButton = NSButton; 
                 citeKeyLine = NSTextField; 
+                citeKeyLowercaseCheckButton = NSButton; 
                 formatField = NSTextField; 
                 formatPresetPopUp = NSPopUpButton; 
                 formatRepositoryPopUp = NSPopUpButton; 
