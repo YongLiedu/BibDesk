@@ -81,6 +81,7 @@
 - (void)setIconImage:(NSImage *)iconImage
 {
     [[self cell] setIconImage: iconImage];
+	[self setNeedsDisplay:YES];
 }
 
 
@@ -91,6 +92,7 @@
 - (NSImage *)arrowImage
 {
     return [[self cell] arrowImage];
+	[self setNeedsDisplay:YES];
 }
 
 
