@@ -15,6 +15,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 @class BibItem;
 @class BibAuthor;
 #import <OmniBase/OmniBase.h>
+#import "BibDocument.h"
 
 @implementation NSOutlineView (MyExtensions)
 - (NSArray*)allSelectedItems {
@@ -44,7 +45,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 - (NSImage*)dragImageForRows:(NSArray*)dragRows event:(NSEvent*)dragEvent dragImageOffset:(NSPointPointer)dragImageOffset{
     NSPasteboard *myPb = [NSPasteboard pasteboardWithUniqueName];
     NSArray *types;
-    NSImage *image;
+    NSImage *image = nil;
     NSAttributedString *string;
     NSString *s;
     NSSize maxSize = NSMakeSize(600,200); // tunable...
@@ -140,15 +141,15 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 }
 
 #pragma mark || Methods to support the type-ahead selector.
-- (NSArray *)typeAheadSelectionItems{
-    NSEnumerator *authE = [[[self delegate] authors] objectEnumerator];
-    NSMutableArray *authStringsArray = [NSMutableArray arrayWithCapacity:15];
-    id auth = nil;
-    while(auth = [authE nextObject]){
-        [authStringsArray addObject:[auth name]];
-    }
-    return [[authStringsArray copy] autorelease];
-}
+//- (NSArray *)typeAheadSelectionItems{
+//    NSEnumerator *authE = [[[self delegate] authors] objectEnumerator];
+//    NSMutableArray *authStringsArray = [NSMutableArray arrayWithCapacity:15];
+//    id auth = nil;
+//    while(auth = [authE nextObject]){
+//        [authStringsArray addObject:[auth name]];
+//    }
+//    return [[authStringsArray copy] autorelease];
+//}
 
 - (NSString *)currentlySelectedItem{
     int selRow = [self selectedRow];
@@ -172,9 +173,9 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
     }
 }
 
-- (void)typeAheadSelectItemAtIndex:(int)itemIndex{
-    NSString *itemToSelect = [[[self delegate] authors] objectAtIndex:itemIndex];
-    int  rowToSelect = [self rowForItem:itemToSelect];
-    [self selectRow:rowToSelect byExtendingSelection:NO];
-}
+//- (void)typeAheadSelectItemAtIndex:(int)itemIndex{
+//    NSString *itemToSelect = [[[self delegate] authors] objectAtIndex:itemIndex];
+//    int  rowToSelect = [self rowForItem:itemToSelect];
+//    [self selectRow:rowToSelect byExtendingSelection:NO];
+//}
 @end
