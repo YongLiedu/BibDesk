@@ -48,14 +48,14 @@
     NSString *tempFilePath = nil;
     FILE *infile = NULL;
 
-    NSRange EnglishRange;
-    NSMutableCharacterSet *EnglishLetters;
+    NSRange asciiRange;
+    NSCharacterSet *asciiLetters;
 
-    //This range defines ASCII without most of the control characters (or should).
-    EnglishRange.location = (unsigned int)' '; //Begin at space
-    EnglishRange.length = 95; //This should get everything through tilde
-    EnglishLetters = [NSMutableCharacterSet characterSetWithRange:EnglishRange];
-    [EnglishLetters addCharactersInString:@"\n\t"];
+    //This range defines ASCII, used for the invalid character check during file read
+    //we include all the control characters, since anything bad in here should be caught by btparse
+    asciiRange.location = 0;
+    asciiRange.length = 127; //This should get everything through tilde
+    asciiLetters = [NSCharacterSet characterSetWithRange:asciiRange];
     
     
     if( !([filePath isEqualToString:@"Paste/Drag"]) && [[NSFileManager defaultManager] fileExistsAtPath:filePath]){
@@ -146,8 +146,7 @@
                         // Now that we have the string from the file, check for invalid characters:
                         
                         //Begin check for valid characters (ASCII); otherwise we mangle the .bib file every time we write out
-                        //by inserting two characters for every extended character.  All we do is pop up the corrupted file
-                        //dialog and give the user the option to continue; it would be nice if we could pass the line no. too.
+                        //by inserting two characters for every extended character.
 
                         // Note (mmcc) : This is necessary only when CharacterConversion.plist doesn't cover a character that's in the file - this may be fixable in BDSKConverter also.
                         
@@ -156,7 +155,7 @@
                                                 
                         validscan = [NSScanner scannerWithString:s];  //Scan string s after we get it from bt
 
-                        [validscan scanCharactersFromSet:EnglishLetters intoString:&validscanstring];
+                        [validscan scanCharactersFromSet:asciiLetters intoString:&validscanstring];
                         
                         if([validscanstring length] != [s length]) //Compare it to the original string
                         {
