@@ -57,6 +57,19 @@
     return copy;
 }
 
+- (id)initWithCoder:(NSCoder *)coder{
+	if (self = [super init]) {
+		[self setType:[coder decodeIntForKey:@"type"]];
+		[self setValue:[coder decodeObjectForKey:@"value"]];
+	}
+	return self;
+}
+
+- (void)encodeWithCoder:(NSCoder *)encoder{
+	[encoder encodeBool:type forKey:@"type"];
+    [encoder encodeObject:value forKey:@"value"];
+}
+
 - (BOOL)isEqual:(BDSKStringNode *)other{
     if(type == [other type] &&
        [value isEqualToString:[other value]])
@@ -234,10 +247,29 @@ static NSDictionary *globalMacroDefs;
 
 - (id)copyWithZone:(NSZone *)zone{
     BDSKComplexString *cs = [[BDSKComplexString allocWithZone:zone] init];
-    [cs setIsComplex:isComplex];
+    cs->isComplex = isComplex;
     cs->expandedValue = [expandedValue copy];
     cs->nodes = [nodes copy];
+	[cs setMacroResolver:macroResolver];
     return cs;
+}
+
+- (id)initWithCoder:(NSCoder *)coder{
+	if (self = [super initWithCoder:coder]) {
+		isComplex = [coder decodeBoolForKey:@"isComplex"];
+		nodes = [[coder decodeObjectForKey:@"nodes"] retain];
+		expandedValue = [[coder decodeObjectForKey:@"expandedValue"] retain];
+		[self setMacroResolver:[coder encodeConditionalObject:macroResolver forKey:@"macroResolver"]];
+	}
+	return self;
+}
+
+- (void)encodeWithCoder:(NSCoder *)coder{
+	[super encodeWithCoder:coder];
+    [coder encodeBool:isComplex forKey:@"isComplex"];
+    [coder encodeObject:nodes forKey:@"nodes"];
+    [coder encodeObject:expandedValue forKey:@"expandedValue"];
+    [coder encodeConditionalObject:macroResolver forKey:@"macroResolver"];
 }
 
 #pragma mark overridden NSString Methods
@@ -258,28 +290,11 @@ static NSDictionary *globalMacroDefs;
     [expandedValue getCharacters:buffer range:aRange];
 }
 
-- (BOOL)isEqualToString:(NSString *)s{
-	if (![s isKindOfClass:[BDSKComplexString class]])
-		return ![self isComplex] && 
-				[expandedValue isEqualToString:s];
-	
-	BDSKComplexString *cs = (BDSKComplexString *)s;
-	if ([self isComplex] != [cs isComplex])
-		return NO;
-	if ([self isComplex]) 
-		return [[self nodes] isEqualToArray:[cs nodes]];	
-	return [expandedValue isEqualToString:cs->expandedValue];
-}
-
 
 #pragma mark complex string methods
 
 - (BOOL)isComplex {
     return isComplex;
-}
-
-- (void)setIsComplex:(bool)newIsComplex {
-    isComplex = newIsComplex;
 }
 
 - (NSArray *)nodes{
@@ -288,6 +303,10 @@ static NSDictionary *globalMacroDefs;
 
 - (id <BDSKMacroResolver>)macroResolver{
     return macroResolver;
+}
+
+- (void)setMacroResolver:(id <BDSKMacroResolver>)newMacroResolver{
+	macroResolver = newMacroResolver;
 }
 
 // Returns the bibtex value of the string.
@@ -341,3 +360,20 @@ static NSDictionary *globalMacroDefs;
 
 @end
 
+@implementation NSString (ComplexStringEquivalence)
+
+- (BOOL)isEqualAsComplexString:(NSString *)other{
+	// simple = NSString or not complex
+	BOOL isSelfSimple = !([self isKindOfClass:[BDSKComplexString class]] &&
+						  [(BDSKComplexString*)self isComplex]);
+	BOOL isOtherSimple = !([other isKindOfClass:[BDSKComplexString class]] &&
+						   [(BDSKComplexString*)other isComplex]);
+	if (isSelfSimple != isOtherSimple)
+		return NO; // really complex strings are never equivalent to simple strings
+	if (isSelfSimple)
+		return [self isEqualToString:other]; // this compares (expanded) values
+	// now both have to be really complex
+	return [[(BDSKComplexString*)self nodes] isEqualToArray:[(BDSKComplexString*)other nodes]];
+}
+
+@end

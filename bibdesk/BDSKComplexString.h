@@ -6,12 +6,12 @@
 #import "BDSKConverter.h"
 
 typedef enum{
-    BSN_STRING,
-    BSN_NUMBER,
-    BSN_MACRODEF
+    BSN_STRING = 0,
+    BSN_NUMBER = 1,
+    BSN_MACRODEF = 2
 } bdsk_stringnodetype;
 
-@interface BDSKStringNode : NSObject{
+@interface BDSKStringNode : NSObject <NSCopying, NSCoding>{
     bdsk_stringnodetype type; 
     NSString *value;
 }
@@ -45,7 +45,7 @@ typedef enum{
 //  is either the expanded value or the value of the macro itself.
 
 
-@interface BDSKComplexString : NSString {
+@interface BDSKComplexString : NSString <NSCopying, NSCoding>{
   bool isComplex;		/* If we are not complex, nodes is nil. */
   NSArray *nodes;			/* an array of bdsk_stringnodes. */
 
@@ -78,8 +78,6 @@ typedef enum{
     /*" Overridden NSString performance methods "*/
 - (void)getCharacters:(unichar *)buffer;
 - (void)getCharacters:(unichar *)buffer range:(NSRange)aRange;
-/* a NSString can be equal if the receiver is not complex and the NSString is equal to the expandedValue */
-- (BOOL)isEqualToString:(NSString *)s;
 
 
 + (BDSKComplexString *)complexStringWithString:(NSString *)s macroResolver:(id<BDSKMacroResolver>)macroResolver;
@@ -91,10 +89,9 @@ typedef enum{
 - (id)copyWithZone:(NSZone *)zone;
 
 - (BOOL)isComplex;
-- (void)setIsComplex:(bool)newIsComplex;
-
 - (NSArray *)nodes;
 - (id <BDSKMacroResolver>)macroResolver;
+- (void)setMacroResolver:(id <BDSKMacroResolver>)newMacroResolver;
 - (NSString *)nodesAsBibTeXString;
 
 /*!
@@ -105,5 +102,18 @@ typedef enum{
     @result     the string with expanded values for nodes that have them
 */
 - (NSString *)expandedValueFromArray:(NSArray *)nodes;
+
+@end
+
+@interface NSString (ComplexStringEquivalence)
+
+/*!
+    @method     isEqualAsComplexString:
+    @abstract   Returns YES if both are to be considered the same as complex strings
+    @discussion Returns YES if the receiver and other are both simple strings (i.e. either an NSString or simple BDSKComplexString, not necessarily the same class) with the same value, or both BDSKComplexStrings with the same nodes. 
+    @param      other The string to compare with
+    @result     Boolean indicating if the strings are equal as complex strings
+*/
+- (BOOL)isEqualAsComplexString:(NSString *)other;
 
 @end
