@@ -931,27 +931,21 @@ NSString *stringFromBTField(AST *field, NSString *fieldName, NSString *filePath,
             switch (simple_value->nodetype){
                 case BTAST_MACRO:
 					s = [[NSString alloc] initWithCString:simple_value->text];
-                    sNode = [[BDSKStringNode alloc] init];
                     
                     // We parse the macros in itemsFromData, but for reference, if we wanted to get the 
                     // macro value we could do this:
 					// expanded_text = bt_macro_text (simple_value->text, (char *)[filePath cString], simple_value->line);
-                    [sNode setType:BSN_MACRODEF];
-                    [sNode setValue:s];
+                    sNode = [BDSKStringNode nodeWithMacroString:s];
                     
                     break;
                 case BTAST_STRING:
 					s = [[NSString alloc] initWithCString:simple_value->text];
-                    sNode = [[BDSKStringNode alloc] init];
-                    [sNode setType:BSN_STRING];
-                    [sNode setValue:checkAndTranslateString(s, field->line, filePath)];
+                    sNode = [BDSKStringNode nodeWithQuotedString:checkAndTranslateString(s, field->line, filePath)];
                     
                     break;
                 case BTAST_NUMBER:
 					s = [[NSString alloc] initWithCString:simple_value->text];
-                    sNode = [[BDSKStringNode alloc] init];
-                    [sNode setType:BSN_NUMBER];
-                    [sNode setValue:s];
+                    sNode = [BDSKStringNode nodeWithNumberString:s];
                     
                     break;
                 default:
