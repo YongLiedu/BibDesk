@@ -194,11 +194,18 @@
 - (void)setCiteKeyString:(NSString *)newCiteKey;
 
 /*!
-	@method     setCiteKey
-	@abstract   basic setter for the cite key, with notification and undo.
+	@method     setCiteKey:
+	@abstract   basic setter for the cite key, with notification and undo and current modified date. 
 	@discussion -
 */
 - (void)setCiteKey:(NSString *)newCiteKey;
+
+/*!
+	@method     setCiteKey:withModDate:
+	@abstract   basic setter for the cite key, with notification and undo.
+	@discussion -
+*/
+- (void)setCiteKey:(NSString *)newCiteKey withModDate:(NSCalendarData *)date;
 
 /*!
 	@method     citeKey

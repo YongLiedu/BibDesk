@@ -555,12 +555,20 @@ void _setupFonts(){
 }
 
 - (void)setCiteKey:(NSString *)newCiteKey{
+    [self setCiteKey:newCiteKey withModDate:[NSCalendarDate date]];
+}
+
+- (void)setCiteKey:(NSString *)newCiteKey{
     if ([self undoManager]) {
         [[[self undoManager] prepareWithInvocationTarget:self] setCiteKey:citeKey];
         [[self undoManager] setActionName:NSLocalizedString(@"Change Cite Key",@"")];
     }
 	
     [self setCiteKeyString:newCiteKey];
+	if (date != nil) {
+		[pubFields setObject:[date description] forKey:BDSKDateModifiedString];
+	}
+	[self updateMetadataForKey:@"Cite Key"];
 		
     NSDictionary *notifInfo = [NSDictionary dictionaryWithObjectsAndKeys:citeKey, @"value", @"Cite Key", @"key",nil];
     NSNotification *aNotification = [NSNotification notificationWithName:BDSKBibItemChangedNotification
