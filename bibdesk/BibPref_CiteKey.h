@@ -29,6 +29,6 @@
 - (void)updateUI;
 - (void)setupCautionIcon;
 - (IBAction)showCiteKeyFormatWarning:(id)sender;
-- (void)setCiteKeyFormatInvalidWarning:(BOOL)set;
+- (void)setCiteKeyFormatInvalidWarning:(BOOL)set message:message;
 
 @end

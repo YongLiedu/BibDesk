@@ -117,13 +117,14 @@
 		[defaults setObject:formatString forKey:BDSKCiteKeyFormatKey];
 	}
 	else { //changed the text field or added from the repository
+		NSString *error;
 		formatString = [formatField stringValue];
 		//if ([formatString isEqualToString:[defaults stringForKey:BDSKCiteKeyFormatKey]]) return; // nothing changed
-		if ([[BDSKConverter sharedConverter] validateFormat:&formatString forField:@"Cite Key" inFileType:@"BibTeX"]) {
+		if ([[BDSKConverter sharedConverter] validateFormat:&formatString forField:@"Cite Key" inFileType:@"BibTeX" error:&error]) {
 			[defaults setObject:formatString forKey:BDSKCiteKeyFormatKey];
 		}
 		else {
-			[self setCiteKeyFormatInvalidWarning:YES];
+			[self setCiteKeyFormatInvalidWarning:YES message:error];
 			return;
 		}
 	}
@@ -170,10 +171,10 @@
 								 NSLocalizedString(@"OK",@"OK"), nil, nil, nil);
 }
 
-- (void)setCiteKeyFormatInvalidWarning:(BOOL)set{
+- (void)setCiteKeyFormatInvalidWarning:(BOOL)set message:message{
 	if(set){
 		[formatWarningButton setImage:cautionIconImage];
-		[formatWarningButton setToolTip:NSLocalizedString(@"The format is invalid",@"")];
+		[formatWarningButton setToolTip:message];
 	}else{
 		[formatWarningButton setImage:nil];
 		[formatWarningButton setToolTip:NSLocalizedString(@"",@"")]; // @@ this should be nil?

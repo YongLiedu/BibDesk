@@ -286,11 +286,12 @@ static BDSKConverter *theConverter;
 	}
 }
 
-- (BOOL)validateFormat:(NSString **)formatString forField:(NSString *)fieldName inFileType:(NSString *)type
+- (BOOL)validateFormat:(NSString **)formatString forField:(NSString *)fieldName inFileType:(NSString *)type error:(NSString **)error
 {
 	// implemented specifiers, the same for any field and type
 	NSCharacterSet *validSpecifierChars = [NSCharacterSet characterSetWithCharactersInString:@"0123456789aAtmyYrRd"];
 	NSCharacterSet *validLastSpecifierChars = [NSCharacterSet characterSetWithCharactersInString:@"uUn"];
+	NSCharacterSet *invalidCharSet = [[BibTypeManager sharedManager] strictInvalidCharactersForField:fieldName inFileType:type];
 	NSArray *components = [*formatString componentsSeparatedByString:@"%"];
 	NSString *string;
 	NSArray *arr;
@@ -304,15 +305,19 @@ static BDSKConverter *theConverter;
 		if (i > 0) { //first part can be anything
 			[sanitizedFormatString appendString:@"%"];
 			if ([string isEqualToString:@""]) {
-				NSLog(@"Missing specifier character in format.");
-				return NO;
+				// we found a %% escape
+				if ([invalidCharSet characterIsMember:'%']) {
+					*error = [NSString stringWithFormat: NSLocalizedString(@"Invalid specifier %%%C in format.", @""), '%'];
+					return NO;
+				}
+				continue;
 			}
 			specifier = [string characterAtIndex:0];
 			if (![validSpecifierChars characterIsMember:specifier]) {
 				if (specifier == '{') {
 					arr = [string componentsSeparatedByString:@"}"];
 					if ([arr count] != 2) {
-						NSLog(@"Incomplete specifier {'field'} in format.");
+						*error = NSLocalizedString(@"Incomplete specifier {'field'} in format.", @"");
 						return NO;
 					}
 					string = [self stringBySanitizingString:[arr objectAtIndex:0] forField:fieldName inFileType:type];
@@ -322,7 +327,7 @@ static BDSKConverter *theConverter;
 				else if (	i < [components count] - 1 || 
 							![validLastSpecifierChars characterIsMember:specifier] ) {
 				
-					NSLog(@"Invalid specifier %%%C in format.", specifier);
+					*error = [NSString stringWithFormat: NSLocalizedString(@"Invalid specifier %%%C in format.", @""), specifier];
 					return NO;
 				}
 			}

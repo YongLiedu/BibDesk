@@ -1077,7 +1077,8 @@ void _setupFonts(){
 				case '7':
 				case '8':
 				case '9':
-					// escaped digit
+				case '%':
+					// escaped digit or %
 					[parsedStr appendFormat:@"%C", specifier];
 					break;
 				// the rest is only vallid at the end of the format

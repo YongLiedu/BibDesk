@@ -109,9 +109,10 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
  @param formatString The format string to check
  @param fieldName The name of the field (e.g. "Author")
  @param type The reference type (e.g. BibTeX, RIS)
+ @param error An error string returned when the format is not valid
  @result The sanitized string
 */
-- (BOOL)validateFormat:(NSString **)formatString forField:(NSString *)fieldName inFileType:(NSString *)type;
+- (BOOL)validateFormat:(NSString **)formatString forField:(NSString *)fieldName inFileType:(NSString *)type error:(NSString **)error;
 
 /*!
  @method requiredFieldsForFormat
