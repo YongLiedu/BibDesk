@@ -346,7 +346,9 @@ NSString *BDSKUrlString = @"Url";
 												   keyEquivalent:@""];
 			[item setRepresentedObject:filePath];
 			[item setImage:image];
-			[item setIndentationLevel:1];
+			if([item respondsToSelector:@selector(setIndentationLevel:)]){
+			    [item setIndentationLevel:1];
+			}
 			[array addObject:[item autorelease]];
 		}
 	}
@@ -403,7 +405,9 @@ NSString *BDSKUrlString = @"Url";
 												   keyEquivalent:@""];
 			[item setRepresentedObject:filePath];
 			[item setImage:image];
-			[item setIndentationLevel:1];
+			if([item respondsToSelector:@selector(setIndentationLevel:)]){
+			    [item setIndentationLevel:1];
+			}
 			[array addObject:[item autorelease]];
 		}
 	}
