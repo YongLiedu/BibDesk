@@ -46,17 +46,21 @@ static AGRegex *regexForTeX = nil;
 /* Fonts and paragraph styles cached for efficiency. */
 static NSParagraphStyle* keyParagraphStyle = nil;
 static NSParagraphStyle* bodyParagraphStyle = nil;
+static BOOL paragraphStyleIsSetup = NO;
 
 setupParagraphStyle()
 {
-    NSMutableParagraphStyle *defaultStyle = [[NSMutableParagraphStyle alloc] init];
-    [defaultStyle setParagraphStyle:[NSParagraphStyle defaultParagraphStyle]];
-    // ?        [defaultStyle setAlignment:NSLeftTextAlignment];
-    keyParagraphStyle = [defaultStyle copy];
-    [defaultStyle setHeadIndent:50];
-    [defaultStyle setFirstLineHeadIndent:50];
-    [defaultStyle setTailIndent:-30];
-    bodyParagraphStyle = [defaultStyle copy];
+    if(paragraphStyleIsSetup == NO){
+        NSMutableParagraphStyle *defaultStyle = [[NSMutableParagraphStyle alloc] init];
+        [defaultStyle setParagraphStyle:[NSParagraphStyle defaultParagraphStyle]];
+        // ?        [defaultStyle setAlignment:NSLeftTextAlignment];
+        keyParagraphStyle = [defaultStyle copy];
+        [defaultStyle setHeadIndent:50];
+        [defaultStyle setFirstLineHeadIndent:50];
+        [defaultStyle setTailIndent:-30];
+        bodyParagraphStyle = [defaultStyle copy];
+        paragraphStyleIsSetup = YES;
+    }
 }
 
 @implementation BibItem
