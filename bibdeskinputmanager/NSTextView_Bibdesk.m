@@ -130,9 +130,8 @@ However, we will simply add the usual completions after our own for safety...
     NSRange r2 = NSMakeRange(r2Loc, r2Len);
     
     NSRange backslash = [s rangeOfString:@"\\" options:NSBackwardsSearch range:r2];
-    if (backslash.location != NSNotFound) {
-        NSRange refLabel;
-        refLabel = [s rangeOfString:@"\\ref{" options:NSAnchoredSearch range:NSMakeRange(backslash.location, 5)];
+    if (backslash.location != NSNotFound && backslash.location + 4 <= [s length]) {
+        NSRange refLabel = [s rangeOfString:@"\\ref" options:NSAnchoredSearch range:NSMakeRange(backslash.location, 4)];
         if ( (refLabel.location != NSNotFound) ){
             // we found a \ref command
             return refLabel;
@@ -228,38 +227,43 @@ requires X.3
 	// if in doubt just stick to ordinary completion dictionary
         
         if(refLabelRange.location != NSNotFound){
+            NSString *hintPossibilities = nil;
+            unsigned hintLocation = refLabelRange.location + refLabelRange.length + 1;
+            
+            if(hintLocation + 7 <= [s length]){
+                hintPossibilities = [s substringWithRange:NSMakeRange(hintLocation, 7)]; // sniff a few characters to refine the search
+            }
+            
+            // scan up to a space or newline, since those shouldn't occur in a label, and use that as a hint for the \label scanner
+            // if hintPossibilities is nil, don't scan, but hint needs to be nil since we check for that later
             NSString *hint = nil;
-            unsigned hintLocation = refLabelRange.location + refLabelRange.length;
-            
-            if(hintLocation < [s length]){
-                hint = [s substringWithRange:NSMakeRange(hintLocation, 1)];
+            if(hintPossibilities != nil){
+                NSScanner *hintScanner = [[NSScanner alloc] initWithString:hintPossibilities];
+                [hintScanner setCharactersToBeSkipped:nil];
+                [hintScanner scanUpToCharactersFromSet:[NSCharacterSet whitespaceAndNewlineCharacterSet] intoString:&hint];
+                [hintScanner release];
             }
             
-            // keep from getting an out of range
-            if(![[NSScanner scannerWithString:hint] scanCharactersFromSet:[NSCharacterSet letterCharacterSet] intoString:nil]){
-                hint = [NSString stringWithString:@"*"];
-            }
-
-            NSScanner *scanner = [[NSScanner alloc] initWithString:s];
-            [scanner setCharactersToBeSkipped:nil];
-            NSString *scanned;
+            NSScanner *labelScanner = [[NSScanner alloc] initWithString:s];
+            [labelScanner setCharactersToBeSkipped:nil];
+            NSString *scanned = nil;
             NSMutableSet *setOfLabels = [NSMutableSet setWithCapacity:10];
             NSString *scanFormat;
 
-            if([hint isEqualToString:@"*"]){
+            if(hint == nil){
                 scanFormat = [NSString stringWithString:@"\\label{"];
             } else {
                 scanFormat = [@"\\label{" stringByAppendingString:hint];
             }
             
-            while(![scanner isAtEnd]){
-                [scanner scanUpToString:scanFormat intoString:nil];
-                [scanner scanString:@"\\label{" intoString:nil];
-                [scanner scanUpToString:@"}" intoString:&scanned];
-                [setOfLabels addObject:scanned];
+            while(![labelScanner isAtEnd]){
+                [labelScanner scanUpToString:scanFormat intoString:nil]; // scan for strings with \label{hint in them
+                [labelScanner scanString:@"\\label{" intoString:nil];    // scan away the \label{
+                [labelScanner scanUpToString:@"}" intoString:&scanned];  // scan up to the next brace
+                if(scanned != nil) [setOfLabels addObject:[scanned stringByAppendingString:kBibDeskInsertion]]; // add it to the set
             }
-            [scanner release];
-            return [[setOfLabels allObjects] sortedArrayUsingFunction:arraySort context:NULL];
+            [labelScanner release];
+            return [[setOfLabels allObjects] sortedArrayUsingFunction:arraySort context:NULL]; // return the set as an array, sorted alphabetically
         }
             
         
