@@ -1056,26 +1056,41 @@ stringByAppendingPathComponent:@"BibDesk"]; */
 - (void) deleteSheetDidEnd:(NSWindow *)sheet returnCode:(int)rv contextInfo:(void *)contextInfo {
     if (rv == NSAlertDefaultReturn) {
         //the user said to delete.
-        NSEnumerator * delEnum = [self selectedPubEnumerator];
-		NSNumber * rowToDelete;
-		id objToDelete;
-		int numSelectedPubs = [self numberOfSelectedPubs];
-		int numDeletedPubs = 0;
-		
-        while (rowToDelete = [delEnum nextObject]) {
-            objToDelete = [shownPublications objectAtIndex:[rowToDelete intValue]];
-			numDeletedPubs++;
-			if(numDeletedPubs == numSelectedPubs){
-				[self removePublication:objToDelete lastRequest:YES];
-			}else{
-				[self removePublication:objToDelete lastRequest:NO];
-			}
+        NSEnumerator *delEnum = [self selectedPubEnumerator]; // this is an array of indices, not pubs
+        NSMutableArray *pubsToDelete = [NSMutableArray array];
+        NSNumber *row;
+
+        while(row = [delEnum nextObject]){ // make an array of BibItems, since the removePublication: method takes those as args; don't remove based on index, as those change after removal!
+            [pubsToDelete addObject:[shownPublications objectAtIndex:[row intValue]]];
         }
-		if (numDeletedPubs > 0) {
-			[[self undoManager] setActionName:NSLocalizedString(@"Remove Publication",@"")];
-			[tableView deselectAll:nil];
-			[self updateUI];
-		}
+        
+        delEnum = [pubsToDelete objectEnumerator];
+        BibItem *aBibItem = nil;
+        int numSelectedPubs = [self numberOfSelectedPubs];
+        int numDeletedPubs = 0;
+        
+        while(aBibItem = [delEnum nextObject]){
+            numDeletedPubs ++;
+            if(numDeletedPubs == numSelectedPubs){
+                [self removePublication:aBibItem lastRequest:YES];
+            }else{
+                [self removePublication:aBibItem lastRequest:NO];
+            }
+        }
+        
+        NSString * pubSingularPlural;
+	if (numSelectedPubs == 1) {
+            pubSingularPlural= NSLocalizedString(@"Remove Publication", @"");
+	} else {
+            pubSingularPlural = NSLocalizedString(@"Remove Publications", @"");
+	}
+        
+        if (numDeletedPubs > 0) { // why is this test here?
+            [[self undoManager] setActionName:pubSingularPlural];
+            [tableView deselectAll:nil];
+            [self updateUI];
+        }
+        
     }else{
         //the user canceled, do nothing.
     }
