@@ -760,7 +760,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
         [[viewRemoteButton cell] setIconActionEnabled:YES];
         [viewRemoteButton setToolTip:rurl];
     }else{
-        [viewRemoteButton setIconImage:[NSImage imageNamed:@"QuestionMarkFile"]]; // this should be a different image
+        [viewRemoteButton setIconImage:[NSImage imageNamed:@"WeblocFile_Disabled"]];
 		[[viewRemoteButton cell] setIconActionEnabled:NO];
         [viewRemoteButton setToolTip:NSLocalizedString(@"Choose a URL to link with in the Url Field", @"bad/empty url field")];
     }
