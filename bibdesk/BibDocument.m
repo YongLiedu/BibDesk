@@ -336,8 +336,8 @@ Handle Notifications by the popup button to update its icon and its menu before 
 
 - (void)refreshAuthors{
     NSEnumerator *pubE = [shownPublications objectEnumerator];
-    BibItem *pub;
-
+    BibItem *pub = nil;
+    
     while (pub = [pubE nextObject]) {
         // for each pub, get its authors and add them to the set
         [authors addObjectsFromArray:[pub pubAuthors]];
@@ -345,6 +345,15 @@ Handle Notifications by the popup button to update its icon and its menu before 
     
 }
 
+- (void)removeAllAuthors{ // send before closing the document
+    NSEnumerator *pubE = [shownPublications objectEnumerator];
+    BibItem *pub = nil;
+    
+    while (pub = [pubE nextObject]) {
+        // for each pub, get its authors and remove them from the global counted set, which either removes the object or decrements its retaincount
+        [[pub authorAtIndex:0] removeAuthorsFromGlobalAuthors:[pub pubAuthors]];
+    }
+}
 
 - (BOOL)citeKeyIsUsed:(NSString *)aCiteKey byItemOtherThan:(BibItem *)anItem{
     NSEnumerator *bibE = [publications objectEnumerator];
@@ -676,7 +685,7 @@ stringByAppendingPathComponent:@"BibDesk"]; */
         }
     }
     [shownPublications setArray:publications];
-    
+    [self refreshAuthors];
     // since we can't save pubmed files as pubmed files:
     [self updateChangeCount:NSChangeDone];
     
@@ -737,6 +746,7 @@ stringByAppendingPathComponent:@"BibDesk"]; */
         }
     }
     [shownPublications setArray:publications];
+    [self refreshAuthors];
     return YES;
 }
 
@@ -2296,6 +2306,7 @@ This method always returns YES. Even if some or many operations fail.
     }
     [depWins makeObjectsPerformSelector:@selector(close)];
     [customCiteDrawer close];
+    [self removeAllAuthors];
     [[NSApp delegate] removeErrorObjsForFileName:[self fileName]];
 
 }
