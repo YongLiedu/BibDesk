@@ -21,6 +21,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 #import "BibDocument_DataSource.h"
 #import "BibDocumentView_Toolbar.h"
 #import "BibAppController.h"
+#import "BDSKUndoManager.h"
 #import "RYZImagePopUpButtonCell.h"
 
 
