@@ -116,6 +116,63 @@
 //192
 //193
 //194
+//270
+//271
+//272
+//273
+//274
+		272263B70471E64200FD5AE3 = {
+			children = (
+				272263B80471E64200FD5AE3,
+			);
+			isa = PBXVariantGroup;
+			name = MultiEditor.nib;
+			path = "";
+			refType = 4;
+		};
+		272263B80471E64200FD5AE3 = {
+			isa = PBXFileReference;
+			name = English;
+			path = English.lproj/MultiEditor.nib;
+			refType = 4;
+		};
+		272263B90471E64200FD5AE3 = {
+			fileRef = 272263B70471E64200FD5AE3;
+			isa = PBXBuildFile;
+			settings = {
+			};
+		};
+		272263BA0471E6D300FD5AE3 = {
+			fileEncoding = 4;
+			isa = PBXFileReference;
+			name = BDSKMultiEditor.h;
+			path = /Users/mike/Code/EditorTest/BDSKMultiEditor.h;
+			refType = 0;
+		};
+		272263BB0471E6D300FD5AE3 = {
+			fileEncoding = 4;
+			isa = PBXFileReference;
+			name = BDSKMultiEditor.m;
+			path = /Users/mike/Code/EditorTest/BDSKMultiEditor.m;
+			refType = 0;
+		};
+		272263BC0471E6D300FD5AE3 = {
+			fileRef = 272263BA0471E6D300FD5AE3;
+			isa = PBXBuildFile;
+			settings = {
+			};
+		};
+		272263BD0471E6D300FD5AE3 = {
+			fileRef = 272263BB0471E6D300FD5AE3;
+			isa = PBXBuildFile;
+			settings = {
+			};
+		};
+//270
+//271
+//272
+//273
+//274
 //2A0
 //2A1
 //2A2
@@ -127,6 +184,7 @@
 				F55B9B6E02A0EC6001EF0AED,
 				F5AD2C780396E97C01A80164,
 			);
+			hasScannedForEncodings = 1;
 			isa = PBXProject;
 			mainGroup = 2A37F4AAFDCFA73011CA2CEA;
 			projectDirPath = "";
@@ -142,6 +200,7 @@
 				2A37F4AFFDCFA73011CA2CEA,
 				2A37F4B8FDCFA73011CA2CEA,
 				2A37F4C3FDCFA73011CA2CEA,
+				F561A4AC04577CDE01C78117,
 			);
 			isa = PBXGroup;
 			name = Bibdesk;
@@ -166,6 +225,7 @@
 			refType = 4;
 		};
 		2A37F4ACFDCFA73011CA2CEA = {
+			fileEncoding = 30;
 			isa = PBXFileReference;
 			path = BibDocument.m;
 			refType = 4;
@@ -187,6 +247,7 @@
 			refType = 4;
 		};
 		2A37F4B0FDCFA73011CA2CEA = {
+			fileEncoding = 30;
 			isa = PBXFileReference;
 			path = main.m;
 			refType = 4;
@@ -226,6 +287,7 @@
 				F561F4B0025893FC01709AC4,
 				F5385A1402EC07DE014378E3,
 				F5C8DE480207E53E01731AA0,
+				272263B70471E64200FD5AE3,
 				F5CE4C220228994301EF0ACB,
 				2A37F4B9FDCFA73011CA2CEA,
 				2A37F4B6FDCFA73011CA2CEA,
@@ -245,6 +307,8 @@
 				F5A86D2003976CDF01A80164,
 				F5A86D8F0398EAB601A80164,
 				F58886DB03ABFA7101A80167,
+				F544DC42042AD4E001499425,
+				F544DC43042AD4E001499425,
 			);
 			isa = PBXGroup;
 			name = Resources;
@@ -362,7 +426,7 @@
 	<key>CFBundleExecutable</key>
 	<string>Bibdesk</string>
 	<key>CFBundleGetInfoString</key>
-	<string>version 0.82 ALPHA 2</string>
+	<string>version 0.82 ALPHA 3</string>
 	<key>CFBundleHelpBookFolder</key>
 	<string>BibDesk Help</string>
 	<key>CFBundleHelpBookName</key>
@@ -378,11 +442,11 @@
 	<key>CFBundlePackageType</key>
 	<string>APPL</string>
 	<key>CFBundleShortVersionString</key>
-	<string>0.82a2</string>
+	<string>0.82a3</string>
 	<key>CFBundleSignature</key>
 	<string>MMcC</string>
 	<key>CFBundleVersion</key>
-	<string>0.82a2</string>
+	<string>0.82a3</string>
 	<key>NSAppleScriptEnabled</key>
 	<string>YES</string>
 	<key>NSMainNibFile</key>
@@ -391,6 +455,30 @@
 	<string>OAApplication</string>
 	<key>NSServices</key>
 	<array>
+		<dict>
+			<key>NSKeyEquivalent</key>
+			<dict>
+				<key>default</key>
+				<string>H</string>
+			</dict>
+			<key>NSMenuItem</key>
+			<dict>
+				<key>New item</key>
+				<string>Bibdesk/Complete Cite Key</string>
+			</dict>
+			<key>NSMessage</key>
+			<string>completeCiteKeyFromSelection</string>
+			<key>NSPortName</key>
+			<string>Bibdesk</string>
+			<key>NSReturnTypes</key>
+			<array>
+				<string>NSStringPboardType</string>
+			</array>
+			<key>NSSendTypes</key>
+			<array>
+				<string>NSStringPboardType</string>
+			</array>
+		</dict>
 		<dict>
 			<key>NSKeyEquivalent</key>
 			<dict>
@@ -483,7 +571,7 @@
 				<key>defaultsDictionary</key>
 				<dict>
 					<key>BlueComponentColor of alternating rows Key</key>
-					<real>8.9548222378734492e-311</real>
+					<real>1.0109187948158557e-310</real>
 					<key>Current Publication Type</key>
 					<integer>6</integer>
 					<key>Current Publication Type String</key>
@@ -493,7 +581,7 @@
 					<key>Current Quick Search Text Dictionary</key>
 					<dict/>
 					<key>GreenComponentColor of alternating rows Key</key>
-					<real>9.7845225921408706e-311</real>
+					<real>1.0938888302425979e-310</real>
 					<key>Preview Pane Displays What?</key>
 					<integer>1</integer>
 					<key>Quick Search Keys</key>
@@ -502,7 +590,7 @@
 						<string>Pub Type</string>
 					</array>
 					<key>RedComponentColor of alternating rows Key</key>
-					<real>1.0410511350475626e-310</real>
+					<real>1.1564877060760734e-310</real>
 					<key>Shown Column Names</key>
 					<array>
 						<string>Keywords</string>
@@ -525,9 +613,9 @@
 					<key>TableView Font</key>
 					<string>LucidaGrande</string>
 					<key>TableView Font Size</key>
-					<real>1.1785564623021122e-310</real>
+					<real>1.2939930333306231e-310</real>
 					<key>View-by Field</key>
-					<string>Title</string>
+					<string>Author</string>
 				</dict>
 				<key>icon</key>
 				<string>palm.icns</string>
@@ -619,7 +707,6 @@
 </dict>
 </plist>
 ";
-			shouldUseHeadermap = 1;
 		};
 		2A37F4C7FDCFA73011CA2CEA = {
 			buildActionMask = 2147483647;
@@ -658,6 +745,7 @@
 				F58886D703ABF2D601A80167,
 				F5F7774903E9156E01EF0ABE,
 				F5F7774B03E9156E01EF0ABE,
+				272263BC0471E6D300FD5AE3,
 			);
 			isa = PBXHeadersBuildPhase;
 			runOnlyForDeploymentPostprocessing = 0;
@@ -705,6 +793,9 @@
 				F5AD2CBF03970F0401A80164,
 				F5A86D2103976CDF01A80164,
 				F58886DC03ABFA7101A80167,
+				F544DC44042AD4E001499425,
+				F544DC45042AD4E001499425,
+				272263B90471E64200FD5AE3,
 			);
 			isa = PBXResourcesBuildPhase;
 			runOnlyForDeploymentPostprocessing = 0;
@@ -746,6 +837,7 @@
 				F58886D803ABF2D601A80167,
 				F5F7774A03E9156E01EF0ABE,
 				F5F7774C03E9156E01EF0ABE,
+				272263BD0471E6D300FD5AE3,
 			);
 			isa = PBXSourcesBuildPhase;
 			runOnlyForDeploymentPostprocessing = 0;
@@ -793,7 +885,7 @@
 			);
 			buildSettings = {
 				COPY_PHASE_STRIP = NO;
-				OPTIMIZATION_CFLAGS = "-O0";
+				OPTIMIZATION_CFLAGS = "-O2";
 			};
 			isa = PBXBuildStyle;
 			name = Development;
@@ -818,6 +910,7 @@
 			refType = 4;
 		};
 		F50730F201F235D50174A366 = {
+			fileEncoding = 30;
 			isa = PBXFileReference;
 			path = btparse.h;
 			refType = 4;
@@ -841,11 +934,13 @@
 			};
 		};
 		F507318601F551780174A366 = {
+			fileEncoding = 30;
 			isa = PBXFileReference;
 			path = BibPrefController.h;
 			refType = 4;
 		};
 		F507318701F551780174A366 = {
+			fileEncoding = 30;
 			isa = PBXFileReference;
 			path = BibPrefController.m;
 			refType = 4;
@@ -902,11 +997,13 @@
 			};
 		};
 		F5084A4802D954C801C8CAB4 = {
+			fileEncoding = 30;
 			isa = PBXFileReference;
 			path = OATypeAheadSelectionHelper_Extensions.m;
 			refType = 4;
 		};
 		F5084A4902D954C801C8CAB4 = {
+			fileEncoding = 30;
 			isa = PBXFileReference;
 			path = OATypeAheadSelectionHelper_Extensions.h;
 			refType = 4;
@@ -924,11 +1021,13 @@
 			};
 		};
 		F51C6FE702A98BE5010DDB27 = {
+			fileEncoding = 30;
 			isa = PBXFileReference;
 			path = BibPref_Startup.m;
 			refType = 4;
 		};
 		F51C6FE802A98BE5010DDB27 = {
+			fileEncoding = 30;
 			isa = PBXFileReference;
 			path = BibPref_Startup.h;
 			refType = 4;
@@ -988,11 +1087,13 @@
 			};
 		};
 		F522132B0238508E01EF0AD7 = {
+			fileEncoding = 30;
 			isa = PBXFileReference;
 			path = BDSKConverter.h;
 			refType = 4;
 		};
 		F522132C0238508E01EF0AD7 = {
+			fileEncoding = 30;
 			isa = PBXFileReference;
 			path = BDSKConverter.m;
 			refType = 4;
@@ -1010,11 +1111,13 @@
 			};
 		};
 		F523AC2502E7972901EF0AD1 = {
+			fileEncoding = 30;
 			isa = PBXFileReference;
 			path = NSTextView_BDSKExtensions.m;
 			refType = 4;
 		};
 		F523AC2602E7972901EF0AD1 = {
+			fileEncoding = 30;
 			isa = PBXFileReference;
 			path = NSTextView_BDSKExtensions.h;
 			refType = 4;
@@ -1032,6 +1135,7 @@
 			};
 		};
 		F5385A1402EC07DE014378E3 = {
+			fileEncoding = 30;
 			isa = PBXFileReference;
 			path = rssTemplate.txt;
 			refType = 4;
@@ -1043,11 +1147,13 @@
 			};
 		};
 		F5385A1602EC140E014378E3 = {
+			fileEncoding = 30;
 			isa = PBXFileReference;
 			path = BDSKFormCellFormatter.m;
 			refType = 4;
 		};
 		F5385A1702EC140E014378E3 = {
+			fileEncoding = 30;
 			isa = PBXFileReference;
 			path = BDSKFormCellFormatter.h;
 			refType = 4;
@@ -1065,11 +1171,13 @@
 			};
 		};
 		F5385A8702ECE98D014378E3 = {
+			fileEncoding = 30;
 			isa = PBXFileReference;
 			path = BDSKZoomImageView.m;
 			refType = 4;
 		};
 		F5385A8802ECE98D014378E3 = {
+			fileEncoding = 30;
 			isa = PBXFileReference;
 			path = BDSKZoomImageView.h;
 			refType = 4;
@@ -1086,12 +1194,36 @@
 			settings = {
 			};
 		};
+		F544DC42042AD4E001499425 = {
+			isa = PBXFileReference;
+			path = "sort-down.tiff";
+			refType = 4;
+		};
+		F544DC43042AD4E001499425 = {
+			isa = PBXFileReference;
+			path = "sort-up.tiff";
+			refType = 4;
+		};
+		F544DC44042AD4E001499425 = {
+			fileRef = F544DC42042AD4E001499425;
+			isa = PBXBuildFile;
+			settings = {
+			};
+		};
+		F544DC45042AD4E001499425 = {
+			fileRef = F544DC43042AD4E001499425;
+			isa = PBXBuildFile;
+			settings = {
+			};
+		};
 		F547D7FA02C2752001EF0AD2 = {
+			fileEncoding = 30;
 			isa = PBXFileReference;
 			path = BDSKCustomCiteTableView.h;
 			refType = 4;
 		};
 		F547D7FB02C2752001EF0AD2 = {
+			fileEncoding = 30;
 			isa = PBXFileReference;
 			path = BDSKCustomCiteTableView.m;
 			refType = 4;
@@ -1109,11 +1241,13 @@
 			};
 		};
 		F549BA3402D3E09801EF0AD2 = {
+			fileEncoding = 30;
 			isa = PBXFileReference;
 			path = BibDocumentView_Toolbar.m;
 			refType = 4;
 		};
 		F549BA3502D3E09801EF0AD2 = {
+			fileEncoding = 30;
 			isa = PBXFileReference;
 			path = BibDocumentView_Toolbar.h;
 			refType = 4;
@@ -1131,11 +1265,13 @@
 			};
 		};
 		F54EB3F902669789013FAB70 = {
+			fileEncoding = 30;
 			isa = PBXFileReference;
 			path = BDSKDragWindow.h;
 			refType = 4;
 		};
 		F54EB3FA02669789013FAB70 = {
+			fileEncoding = 30;
 			isa = PBXFileReference;
 			path = BDSKDragWindow.m;
 			refType = 4;
@@ -1153,6 +1289,7 @@
 			};
 		};
 		F54EFE9E02500B7C01709AC4 = {
+			fileEncoding = 30;
 			isa = PBXFileReference;
 			path = CharacterConversion.plist;
 			refType = 2;
@@ -1177,11 +1314,13 @@
 			refType = 4;
 		};
 		F54EFEAF0251699501709AC4 = {
+			fileEncoding = 30;
 			isa = PBXFileReference;
 			path = BibDocument_DataSource.h;
 			refType = 4;
 		};
 		F54EFEB00251699501709AC4 = {
+			fileEncoding = 30;
 			isa = PBXFileReference;
 			path = BibDocument_DataSource.m;
 			refType = 4;
@@ -1210,7 +1349,14 @@
 			isa = PBXBuildStyle;
 			name = Deployment;
 		};
+		F561A4AC04577CDE01C78117 = {
+			isa = PBXFileReference;
+			name = Hacking.tex;
+			path = /Users/mike/Code/bibdesk/Manual/Hacking.tex;
+			refType = 0;
+		};
 		F561F4B0025893FC01709AC4 = {
+			fileEncoding = 30;
 			isa = PBXFileReference;
 			path = template.txt;
 			refType = 4;
@@ -1309,7 +1455,6 @@
 			productInstallPath = /usr/local/bin;
 			productName = Documentation;
 			productReference = F568CBDA025BBCB801709AC4;
-			shouldUseHeadermap = 0;
 		};
 		F568CBDC025BBCB801709AC4 = {
 			buildActionMask = 2147483647;
@@ -1338,21 +1483,25 @@
 			shellScript = "/Users/mike/Code/Applications/headerdoc-6/gatherHeaderDoc.pl /Users/mike/Code/CVS/Other/Bibdesk/doc \n";
 		};
 		F56DCB5601CFE5EF01227D25 = {
+			fileEncoding = 30;
 			isa = PBXFileReference;
 			path = BibItem.h;
 			refType = 4;
 		};
 		F56DCB5701CFE5EF01227D25 = {
+			fileEncoding = 30;
 			isa = PBXFileReference;
 			path = BibItem.m;
 			refType = 4;
 		};
 		F56DCB5D01D14B8601227D25 = {
+			fileEncoding = 30;
 			isa = PBXFileReference;
 			path = BibAuthor.h;
 			refType = 4;
 		};
 		F56DCB5E01D14B8601227D25 = {
+			fileEncoding = 30;
 			isa = PBXFileReference;
 			path = BibAuthor.m;
 			refType = 4;
@@ -1391,11 +1540,13 @@
 			};
 		};
 		F56DCB7601D7B21701227D25 = {
+			fileEncoding = 30;
 			isa = PBXFileReference;
 			path = BibEditor.h;
 			refType = 4;
 		};
 		F56DCB7701D7B21701227D25 = {
+			fileEncoding = 30;
 			isa = PBXFileReference;
 			path = BibEditor.m;
 			refType = 4;
@@ -1427,6 +1578,8 @@
 		};
 		F56DCB7B01D7C96B01227D25 = {
 			children = (
+				272263BA0471E6D300FD5AE3,
+				272263BB0471E6D300FD5AE3,
 				F5C8DE400207CC5B01731AA0,
 				F5C8DE410207CC5B01731AA0,
 				F54EFEAE0251690501709AC4,
@@ -1451,11 +1604,13 @@
 			refType = 4;
 		};
 		F56F2B2002D7BDA401F7F7FA = {
+			fileEncoding = 30;
 			isa = PBXFileReference;
 			path = BDSKCiteKeyFormatter.m;
 			refType = 4;
 		};
 		F56F2B2102D7BDA401F7F7FA = {
+			fileEncoding = 30;
 			isa = PBXFileReference;
 			path = BDSKCiteKeyFormatter.h;
 			refType = 4;
@@ -1494,11 +1649,13 @@
 			};
 		};
 		F56FDB8102AACA4C01980570 = {
+			fileEncoding = 30;
 			isa = PBXFileReference;
 			path = BibPref_Cite.h;
 			refType = 4;
 		};
 		F56FDB8202AACA4C01980570 = {
+			fileEncoding = 30;
 			isa = PBXFileReference;
 			path = BibPref_Cite.m;
 			refType = 4;
@@ -1537,11 +1694,13 @@
 			};
 		};
 		F56FDB8A02AAD8D601980570 = {
+			fileEncoding = 30;
 			isa = PBXFileReference;
 			path = BibPref_TeX.h;
 			refType = 4;
 		};
 		F56FDB8B02AAD8D601980570 = {
+			fileEncoding = 30;
 			isa = PBXFileReference;
 			path = BibPref_TeX.m;
 			refType = 4;
@@ -1580,11 +1739,13 @@
 			};
 		};
 		F56FDB9102AAE0F601980570 = {
+			fileEncoding = 30;
 			isa = PBXFileReference;
 			path = BibPref_Display.h;
 			refType = 4;
 		};
 		F56FDB9202AAE0F601980570 = {
+			fileEncoding = 30;
 			isa = PBXFileReference;
 			path = BibPref_Display.m;
 			refType = 4;
@@ -1623,11 +1784,13 @@
 			};
 		};
 		F56FDCA602AB07B101980570 = {
+			fileEncoding = 30;
 			isa = PBXFileReference;
 			path = BibPref_Defaults.h;
 			refType = 4;
 		};
 		F56FDCA702AB07B101980570 = {
+			fileEncoding = 30;
 			isa = PBXFileReference;
 			path = BibPref_Defaults.m;
 			refType = 4;
@@ -1645,11 +1808,13 @@
 			};
 		};
 		F56FE1D602EB78D101EF0AD1 = {
+			fileEncoding = 30;
 			isa = PBXFileReference;
 			path = NSString_BDSKExtensions.m;
 			refType = 4;
 		};
 		F56FE1D702EB78D101EF0AD1 = {
+			fileEncoding = 30;
 			isa = PBXFileReference;
 			path = NSString_BDSKExtensions.h;
 			refType = 4;
@@ -1698,11 +1863,13 @@
 			};
 		};
 		F58886D503ABF2D601A80167 = {
+			fileEncoding = 30;
 			isa = PBXFileReference;
 			path = BDSKShellTask.h;
 			refType = 4;
 		};
 		F58886D603ABF2D601A80167 = {
+			fileEncoding = 30;
 			isa = PBXFileReference;
 			path = BDSKShellTask.m;
 			refType = 4;
@@ -1746,11 +1913,13 @@
 			refType = 2;
 		};
 		F59CA11B02F06A7701EF0A84 = {
+			fileEncoding = 30;
 			isa = PBXFileReference;
 			path = BDSKLinkButton.m;
 			refType = 4;
 		};
 		F59CA11C02F06A7701EF0A84 = {
+			fileEncoding = 30;
 			isa = PBXFileReference;
 			path = BDSKLinkButton.h;
 			refType = 4;
@@ -1768,11 +1937,13 @@
 			};
 		};
 		F59F40AF01FE890401F4F503 = {
+			fileEncoding = 30;
 			isa = PBXFileReference;
 			path = BibFinder.h;
 			refType = 4;
 		};
 		F59F40B001FE890401F4F503 = {
+			fileEncoding = 30;
 			isa = PBXFileReference;
 			path = BibFinder.m;
 			refType = 4;
@@ -1843,11 +2014,13 @@
 			refType = 4;
 		};
 		F59F40B701FEC3CA01F4F503 = {
+			fileEncoding = 30;
 			isa = PBXFileReference;
 			path = BDSKDragTableView.m;
 			refType = 4;
 		};
 		F59F40B801FEC3CA01F4F503 = {
+			fileEncoding = 30;
 			isa = PBXFileReference;
 			path = BDSKDragTableView.h;
 			refType = 4;
@@ -1865,6 +2038,7 @@
 			};
 		};
 		F5A86D2003976CDF01A80164 = {
+			fileEncoding = 30;
 			isa = PBXFileReference;
 			path = TypeInfo.plist;
 			refType = 4;
@@ -1916,11 +2090,13 @@
 			refType = 0;
 		};
 		F5A86DCD0398EC9401A80164 = {
+			fileEncoding = 30;
 			isa = PBXFileReference;
 			path = TestBibItem.h;
 			refType = 2;
 		};
 		F5A86DCE0398EC9401A80164 = {
+			fileEncoding = 30;
 			isa = PBXFileReference;
 			path = TestBibItem.m;
 			refType = 2;
@@ -1995,11 +2171,13 @@
 			};
 		};
 		F5A9B93E022720E701EF0ACB = {
+			fileEncoding = 30;
 			isa = PBXFileReference;
 			path = BDSKDragOutlineView.m;
 			refType = 4;
 		};
 		F5A9B93F022720E701EF0ACB = {
+			fileEncoding = 30;
 			isa = PBXFileReference;
 			path = BDSKDragOutlineView.h;
 			refType = 4;
@@ -2039,11 +2217,13 @@
 			shellScript = $SYSTEM_DEVELOPER_DIR/Makefiles/Resources/OCUnit/RunTargetUnitTests;
 		};
 		F5AD2CBA0396F01101A80164 = {
+			fileEncoding = 30;
 			isa = PBXFileReference;
 			path = BibTypeManager.h;
 			refType = 4;
 		};
 		F5AD2CBB0396F01101A80164 = {
+			fileEncoding = 30;
 			isa = PBXFileReference;
 			path = BibTypeManager.m;
 			refType = 4;
@@ -2061,6 +2241,7 @@
 			};
 		};
 		F5AD2CBE03970F0401A80164 = {
+			fileEncoding = 30;
 			isa = PBXFileReference;
 			path = Notes;
 			refType = 4;
@@ -2072,11 +2253,13 @@
 			};
 		};
 		F5AD2CC00397226201A80164 = {
+			fileEncoding = 30;
 			isa = PBXFileReference;
 			path = BibTeXParser.h;
 			refType = 4;
 		};
 		F5AD2CC10397226201A80164 = {
+			fileEncoding = 30;
 			isa = PBXFileReference;
 			path = BibTeXParser.m;
 			refType = 4;
@@ -2094,11 +2277,13 @@
 			};
 		};
 		F5B5806401F996C001D64482 = {
+			fileEncoding = 30;
 			isa = PBXFileReference;
 			path = BibAppController.h;
 			refType = 4;
 		};
 		F5B5806501F996C001D64482 = {
+			fileEncoding = 30;
 			isa = PBXFileReference;
 			path = BibAppController.m;
 			refType = 4;
@@ -2137,11 +2322,13 @@
 			};
 		};
 		F5C8121B02C2BCF101EF0AD2 = {
+			fileEncoding = 30;
 			isa = PBXFileReference;
 			path = BibPref_RSS.h;
 			refType = 4;
 		};
 		F5C8121C02C2BCF101EF0AD2 = {
+			fileEncoding = 30;
 			isa = PBXFileReference;
 			path = BibPref_RSS.m;
 			refType = 4;
@@ -2159,11 +2346,13 @@
 			};
 		};
 		F5C8DE400207CC5B01731AA0 = {
+			fileEncoding = 30;
 			isa = PBXFileReference;
 			path = BDSKPreviewer.h;
 			refType = 4;
 		};
 		F5C8DE410207CC5B01731AA0 = {
+			fileEncoding = 30;
 			isa = PBXFileReference;
 			path = BDSKPreviewer.m;
 			refType = 4;
@@ -2236,21 +2425,25 @@
 			refType = 4;
 		};
 		F5F7774503E9156E01EF0ABE = {
+			fileEncoding = 30;
 			isa = PBXFileReference;
 			path = DraggableScrollView.h;
 			refType = 4;
 		};
 		F5F7774603E9156E01EF0ABE = {
+			fileEncoding = 30;
 			isa = PBXFileReference;
 			path = DraggableScrollView.m;
 			refType = 4;
 		};
 		F5F7774703E9156E01EF0ABE = {
+			fileEncoding = 30;
 			isa = PBXFileReference;
 			path = PDFImageView.h;
 			refType = 4;
 		};
 		F5F7774803E9156E01EF0ABE = {
+			fileEncoding = 30;
 			isa = PBXFileReference;
 			path = PDFImageView.m;
 			refType = 4;
@@ -2313,6 +2506,7 @@
 			};
 		};
 		F5FB32B0034D6D4601EF0AD8 = {
+			fileEncoding = 30;
 			isa = PBXFileReference;
 			name = index.htm;
 			path = "BibDesk Help/index.htm";
@@ -2341,11 +2535,13 @@
 			};
 		};
 		F5FB32BD034D714901EF0AD8 = {
+			fileEncoding = 30;
 			isa = PBXFileReference;
 			path = TOCTemplate.htm;
 			refType = 4;
 		};
 		F5FB32BE034D714901EF0AD8 = {
+			fileEncoding = 30;
 			isa = PBXFileReference;
 			path = TopicTemplate.htm;
 			refType = 4;
