@@ -413,6 +413,20 @@ void _setupFonts(){
 }
 
 - (void)setAuthorsFromBibtexString:(NSString *)aString{
+    
+    if([[OFPreferenceWrapper sharedPreferenceWrapper] boolForKey:BDSKUseUnicodeBibTeXParser]){
+        NSArray *auths = [aString componentsSeparatedByString:@" and "];
+        NSEnumerator *e = [auths objectEnumerator];
+        NSString *aString = nil;
+        
+        [pubAuthors removeAllObjects];
+        
+        while(aString = [e nextObject]){
+            [self addAuthorWithName:[aString stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceCharacterSet]]];
+        }
+        return;
+    }
+            
     char *str = nil;
 
     if (aString == nil) return;
