@@ -398,13 +398,13 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 										  action:@selector(toggleSnoopDrawer:)
 								   keyEquivalent:@""];
 		[item setRepresentedObject:textSnoopContainerView];
-		[menu addItem:item];
+		[menu addItem:[item autorelease]];
 		
 		item = [[NSMenuItem alloc] initWithTitle:NSLocalizedString(@"View Remote URL in Drawer",@"View remote URL in drawer menu item")
 										  action:@selector(toggleSnoopDrawer:)
 								   keyEquivalent:@""];
 		[item setRepresentedObject:webSnoopContainerView];
-		[menu addItem:item];
+		[menu addItem:[item autorelease]];
 	}
 	
 	return [menu autorelease];
