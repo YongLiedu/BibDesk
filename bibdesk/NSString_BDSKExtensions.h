@@ -86,4 +86,12 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 */
 - (BOOL)isRISString;
 
+/*!
+    @method     stringByRemovingTeX
+    @abstract   Removes TeX commands and curly braces from the reciever.
+    @discussion May return a different instance.  A TeX command is considered to match a regex of the form "\\[a-z].+\{", with the AGRegexLazy option.
+    @result     (description)
+*/
+- (NSString *)stringByRemovingTeX;
+
 @end

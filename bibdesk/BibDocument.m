@@ -1529,7 +1529,7 @@ stringByAppendingPathComponent:@"BibDesk"]; */
                 if(!value){
                     r.location = NSNotFound;
                 } else {
-                    value = [NSString lossyASCIIStringWithString:[value stringByRemovingCurlyBraces]];
+                    value = [NSString lossyASCIIStringWithString:[value stringByRemovingTeX]];
                     r = [value rangeOfString:componentSubstring
                                      options:NSCaseInsensitiveSearch];
                 }
@@ -1548,7 +1548,7 @@ stringByAppendingPathComponent:@"BibDesk"]; */
             pubEnum = [arrayToSearch objectEnumerator];
             while(pub = [pubEnum nextObject]){
                 accessorResult = [pub performSelector:NSSelectorFromString(selectorString) withObject:nil];
-                accessorResult = [[NSString lossyASCIIStringWithString:accessorResult] stringByRemovingCurlyBraces];
+                accessorResult = [[NSString lossyASCIIStringWithString:accessorResult] stringByRemovingTeX];
                 r = [accessorResult rangeOfString:componentSubstring
                                           options:NSCaseInsensitiveSearch];
                 if(r.location != NSNotFound){
@@ -1575,7 +1575,7 @@ stringByAppendingPathComponent:@"BibDesk"]; */
                 if(!value){
                     r.location = NSNotFound;
                 } else {
-                    value = [NSString lossyASCIIStringWithString:[value stringByRemovingCurlyBraces]];
+                    value = [NSString lossyASCIIStringWithString:[value stringByRemovingTeX]];
                     r = [value rangeOfString:componentSubstring
                                      options:NSCaseInsensitiveSearch];
                 }

@@ -17,6 +17,8 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 #import "NSString_BDSKExtensions.h"
 #import <OmniFoundation/NSString-OFExtensions.h>
 #import <Cocoa/Cocoa.h>
+#import <AGRegex/AGRegex.h>
+#import <OmniFoundation/OFCharacterSet.h>
 
 
 @implementation NSString (BDSKExtensions)
@@ -228,5 +230,22 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
     return isRIS;
 }
 
+- (NSString *)stringByRemovingTeX{
+    static AGRegex *command = nil;
+    static OFCharacterSet *braceSet = nil;
+
+    if(command == nil)
+        command = [[AGRegex alloc] initWithPattern:@"\\\\[a-z].+\\{" options:AGRegexLazy];
+
+    //NSAssert(command != nil, @"AGRegex must not be nil.");
+
+    if(braceSet == nil)
+        braceSet = [[OFCharacterSet alloc] initWithString:@"{}"];
+    
+    //NSAssert(braceSet != nil, @"OFCharacterSet must not be nil.");
+    
+    self = [command replaceWithString:@"" inString:self];
+    return [self stringByRemovingCharactersInOFCharacterSet:braceSet];
+}
 
 @end
