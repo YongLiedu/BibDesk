@@ -121,27 +121,6 @@
 //272
 //273
 //274
-		272263B70471E64200FD5AE3 = {
-			children = (
-				272263B80471E64200FD5AE3,
-			);
-			isa = PBXVariantGroup;
-			name = MultiEditor.nib;
-			path = "";
-			refType = 4;
-		};
-		272263B80471E64200FD5AE3 = {
-			isa = PBXFileReference;
-			name = English;
-			path = English.lproj/MultiEditor.nib;
-			refType = 4;
-		};
-		272263B90471E64200FD5AE3 = {
-			fileRef = 272263B70471E64200FD5AE3;
-			isa = PBXBuildFile;
-			settings = {
-			};
-		};
 		27730C30049B13ED00231206 = {
 			fileEncoding = 4;
 			isa = PBXFileReference;
@@ -322,7 +301,6 @@
 				F561F4B0025893FC01709AC4,
 				F5385A1402EC07DE014378E3,
 				F5C8DE480207E53E01731AA0,
-				272263B70471E64200FD5AE3,
 				F5CE4C220228994301EF0ACB,
 				2A37F4B9FDCFA73011CA2CEA,
 				2A37F4B6FDCFA73011CA2CEA,
@@ -402,7 +380,7 @@
 				F5AD2C7E0396EAA101A80164,
 			);
 			buildSettings = {
-				FRAMEWORK_SEARCH_PATHS = ". /Users/mike/Code/bibdesk";
+				FRAMEWORK_SEARCH_PATHS = .;
 				HEADER_SEARCH_PATHS = .;
 				LIBRARY_SEARCH_PATHS = .;
 				OTHER_CFLAGS = "-pipe";
@@ -830,7 +808,6 @@
 				F58886DC03ABFA7101A80167,
 				F544DC44042AD4E001499425,
 				F544DC45042AD4E001499425,
-				272263B90471E64200FD5AE3,
 			);
 			isa = PBXResourcesBuildPhase;
 			runOnlyForDeploymentPostprocessing = 0;
@@ -1389,8 +1366,8 @@
 		F561A4AC04577CDE01C78117 = {
 			isa = PBXFileReference;
 			name = Hacking.tex;
-			path = /Users/mike/Code/bibdesk/Manual/Hacking.tex;
-			refType = 0;
+			path = Manual/Hacking.tex;
+			refType = 2;
 		};
 		F561F4B0025893FC01709AC4 = {
 			fileEncoding = 30;
