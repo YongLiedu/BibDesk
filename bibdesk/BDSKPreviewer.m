@@ -168,14 +168,8 @@ static unsigned threadCount = 0;
             [self performSelectorOnMainThread:@selector(performDrawing)
                                                          withObject:nil
                                                   waitUntilDone:YES];
-        } else {
-            NSLog(@"unable to draw");
-            [workingLock lock];
-            working = NO;
-            [workingLock unlock];          
-            [pool release];
-            return NO;
         }
+        
     } else {
         NSLog(@"Task failure in -[%@ %@]", [self class], NSStringFromSelector(_cmd));
     }
@@ -344,135 +338,11 @@ static unsigned threadCount = 0;
 
 }
 
-#warning PDFDataFromString is not properly threaded!
 - (NSData *)PDFDataFromString:(NSString *)str{
-    // pool for MT
-    NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
-
-    NSString *texFile = [NSString stringWithContentsOfFile:usertexTemplatePath];
-    NSMutableString *bibTemplate = [NSMutableString stringWithContentsOfFile:
-        [[[OFPreferenceWrapper sharedPreferenceWrapper] stringForKey:BDSKOutputTemplateFileKey] stringByExpandingTildeInPath]];
-
-	int rv;
-    NSString *prefix;
-    NSString *postfix;
-    NSString *style;
-    NSMutableString *finalTexFile = [NSMutableString string];
-    NSScanner *s = [NSScanner scannerWithString:texFile];
-    NSTask *pdftex1;
-    NSTask *pdftex2;
-    NSTask *bibtex;
-    NSString *pdftexbinpath = [[OFPreferenceWrapper sharedPreferenceWrapper] objectForKey:BDSKTeXBinPathKey];
-    NSString *bibtexbinpath = [[OFPreferenceWrapper sharedPreferenceWrapper] objectForKey:BDSKBibTeXBinPathKey];
-    
-    if(![[pdftexbinpath stringByDeletingLastPathComponent] isEqualToString:binPathDir]){
-        [binPathDir release];
-        binPathDir = [[pdftexbinpath stringByDeletingLastPathComponent] retain];
-        NSString *original_path = [NSString stringWithCString: getenv("PATH")];
-        NSString *new_path = [NSString stringWithFormat: @"%@:%@", original_path, binPathDir];
-        setenv("PATH", [new_path cString], 1);
-    }
-    
-    unsigned myThreadCount;
-
-    [countLock lock];
-    threadCount++;
-    myThreadCount = threadCount;
-    [countLock unlock];
-
-    if(working){
-        // if someone else is working and i'm the top go to sleep for a bit
-        [NSThread sleepUntilDate:[[NSDate date] addTimeInterval:2.0]];
-    }
-    
-    
-    if(![[NSFileManager defaultManager] fileExistsAtPath:pdftexbinpath]){
-        [NSException raise:@"BDSKPreviewerPathNotFound" format:@"File does not exist at %@", pdftexbinpath];
-        [workingLock lock];
-        working = NO;
-        [workingLock unlock];        
-        [pool release];
+    if([self PDFFromString:str])
+        return [NSData dataWithContentsOfFile:finalPDFPath];
+    else
         return nil;
-    }
-    if(![[NSFileManager defaultManager] fileExistsAtPath:bibtexbinpath]){        
-        [NSException raise:@"BDSKPreviewerPathNotFound" format:@"File does not exist at %@", bibtexbinpath];
-        [workingLock lock];
-        working = NO;
-        [workingLock unlock];        
-        [pool release];
-        return nil;
-    }
-    
-    if(working) return nil;
-
-    [workingLock lock];
-    working = YES;
-    [workingLock unlock];
-
-    // replace the appropriate style & bib files.
-    style = [[OFPreferenceWrapper sharedPreferenceWrapper] objectForKey:BDSKBTStyleKey];
-    [s scanUpToString:@"bibliographystyle{" intoString:&prefix];
-    [s scanUpToString:@"}" intoString:nil];
-    [s scanUpToString:@"\bye" intoString:&postfix];
-    [finalTexFile appendFormat:@"%@bibliographystyle{%@%@", prefix, style, postfix];
-    if(![finalTexFile writeToFile:texTemplatePath atomically:YES]){
-        NSLog(@"error replacing texfile");
-        [pool release];
-        return nil;
-    }
-
-    // write out the bib file with the template attached:
-    [bibTemplate appendFormat:@"\n%@",str];
-    if(![bibTemplate writeToFile:tmpBibFilePath atomically:YES]){
-        NSLog(@"Error replacing bibfile.");
-        [pool release];
-        return nil;
-    }
-
-    // remove the old pdf file.
-    [[NSFileManager defaultManager] removeFileAtPath:[applicationSupportPath stringByAppendingPathComponent:@"bibpreview.pdf"]
-                                             handler:nil];
-
-    // Now start the tex task fun.
-
-    //FIXME = we need to deal with errors better...
-
-    pdftex1 = [[NSTask alloc] init];
-    [pdftex1 setCurrentDirectoryPath:applicationSupportPath];
-    [pdftex1 setLaunchPath:pdftexbinpath];
-    [pdftex1 setArguments:[NSArray arrayWithObjects:@"-interaction=batchmode", [NSString stringWithString:@"bibpreview.tex"],
-        nil ]];
-    [pdftex1 setStandardOutput:[NSFileHandle fileHandleWithNullDevice]];
-    [pdftex1 launch];
-    [pdftex1 waitUntilExit];
-
-    bibtex = [[NSTask alloc] init];
-    [bibtex setCurrentDirectoryPath:applicationSupportPath];
-    [bibtex setLaunchPath:bibtexbinpath];
-    [bibtex setArguments:[NSArray arrayWithObjects:[NSString stringWithString:@"bibpreview"],nil ]];
-    [bibtex setStandardOutput:[NSFileHandle fileHandleWithNullDevice]];
-    [bibtex launch];
-    [bibtex waitUntilExit];
-
-    pdftex2 = [[NSTask alloc] init];
-    [pdftex2 setCurrentDirectoryPath:applicationSupportPath];
-    [pdftex2 setLaunchPath:pdftexbinpath];
-    [pdftex2 setArguments:[NSArray arrayWithObjects:@"-interaction=batchmode",[NSString stringWithString:@"bibpreview.tex"],
-        nil ]];
-    [pdftex2 setStandardOutput:[NSFileHandle fileHandleWithNullDevice]];
-    [pdftex2 launch];
-    [pdftex2 waitUntilExit];
-
-    [pdftex1 release];
-    [bibtex release];
-    [pdftex2 release];
-
-    // pool for MT
-    [pool release];
-
-    
-    working = NO;
-    return [NSData dataWithContentsOfFile:finalPDFPath];
 }
 
 - (NSAttributedString *)rtfStringPreview:(NSString *)filePath{      // RTF Preview support
