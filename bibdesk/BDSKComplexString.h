@@ -3,6 +3,7 @@
    or as nodes by themselves. */
 
 #import <Foundation/Foundation.h>
+#import "BibPrefController.h"
 
 typedef enum{
     BSN_STRING = 0,

@@ -10,6 +10,7 @@
 #import "BDSKComplexString.h" // for BDSKMacroResolver protocol
 #import "BibPrefController.h" // for notification name declarations
 #import <OmniFoundation/NSUndoManager-OFExtensions.h> // for isUndoingOrRedoing
+#import <OmniFoundation/NSString-OFExtensions.h>
 
 @interface MacroWindowController : NSWindowController {
     id macroDataSource;
