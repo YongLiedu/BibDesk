@@ -274,6 +274,18 @@
 */
 - (NSData *)RTFValue;
 
+
+
+    /*!
+    @method RSSValue
+     @abstract returns an MODS XML string
+     @discussion «discussion»
+     
+     */
+
+- (NSString *)MODSString;
+
+
 /*!
     @method RSSValue
     @abstract returns an rss XML entry suitable for embedding in an rss file.

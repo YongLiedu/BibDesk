@@ -89,6 +89,21 @@
 		<key>Y1</key>
 		<string>Year</string>
 	</dict>
+	<key>BibTeXTypesForMODSGenres</key>
+	<dict>
+		<key>academic journal</key>
+		<string>article</string>
+		<key>book</key>
+		<string>book</string>
+		<key>conference publication</key>
+		<string>inproceedings</string>
+		<key>instruction</key>
+		<string>manual</string>
+		<key>report</key>
+		<string>techreport</string>
+		<key>unpublished</key>
+		<string>unpublished</string>
+	</dict>
 	<key>BibTeXTypesForPubMedTypes</key>
 	<dict>
 		<key>BOOK</key>
@@ -103,6 +118,8 @@
 		<string>misc</string>
 		<key>JOUR</key>
 		<string>article</string>
+		<key>Journal Article</key>
+		<string>article</string>
 		<key>MGZN</key>
 		<string>article</string>
 		<key>RPRT</key>
@@ -111,8 +128,6 @@
 		<string>incollection</string>
 		<key>UNPB</key>
 		<string>unpublished</string>
-                <key>Journal Article</key>
-                <string>article</string>
 	</dict>
 	<key>FieldsForTypes</key>
 	<dict>
@@ -431,12 +446,12 @@
 			<key>FileExtension</key>
 			<string>.bib</string>
 		</dict>
-		<key>BibX XML</key>
+		<key>MODS XML</key>
 		<dict>
 			<key>DefaultType</key>
 			<string>Article</string>
 			<key>FileExtension</key>
-			<string>.xml</string>
+			<string>.mods</string>
 		</dict>
 		<key>RIS</key>
 		<dict>
@@ -444,6 +459,128 @@
 			<string>Article</string>
 			<key>FileExtension</key>
 			<string>.ris</string>
+		</dict>
+	</dict>
+	<key>MODSGenresForBibTeXType</key>
+	<dict>
+		<key>article</key>
+		<dict>
+			<key>host</key>
+			<array>
+				<string>periodical</string>
+				<string>academic journal</string>
+			</array>
+		</dict>
+		<key>book</key>
+		<dict>
+			<key>self</key>
+			<array>
+				<string>book</string>
+			</array>
+		</dict>
+		<key>booklet</key>
+		<dict>
+			<key>self</key>
+			<array>
+				<string>book</string>
+			</array>
+		</dict>
+		<key>commented</key>
+		<dict/>
+		<key>electronic</key>
+		<dict>
+			<key>self</key>
+			<array>
+				<string>online system or service</string>
+			</array>
+		</dict>
+		<key>glossdef</key>
+		<dict/>
+		<key>inbook</key>
+		<dict>
+			<key>host</key>
+			<array>
+				<string>book</string>
+			</array>
+		</dict>
+		<key>incollection</key>
+		<dict>
+			<key>host</key>
+			<array>
+				<string>multivolume monograph</string>
+			</array>
+		</dict>
+		<key>inproceedings</key>
+		<dict>
+			<key>host</key>
+			<array>
+				<string>conference publication</string>
+			</array>
+		</dict>
+		<key>jurthesis</key>
+		<dict>
+			<key>self</key>
+			<array>
+				<string>theses</string>
+			</array>
+		</dict>
+		<key>manual</key>
+		<dict>
+			<key>self</key>
+			<array>
+				<string>instruction</string>
+			</array>
+		</dict>
+		<key>mastersthesis</key>
+		<dict>
+			<key>self</key>
+			<array>
+				<string>theses</string>
+			</array>
+		</dict>
+		<key>misc</key>
+		<dict/>
+		<key>periodical</key>
+		<dict>
+			<key>self</key>
+			<array>
+				<string>periodical</string>
+			</array>
+		</dict>
+		<key>phdthesis</key>
+		<dict>
+			<key>self</key>
+			<array>
+				<string>theses</string>
+			</array>
+		</dict>
+		<key>proceedings</key>
+		<dict>
+			<key>self</key>
+			<array>
+				<string>conference publication</string>
+			</array>
+		</dict>
+		<key>techreport</key>
+		<dict>
+			<key>self</key>
+			<array>
+				<string>report</string>
+			</array>
+		</dict>
+		<key>unpublished</key>
+		<dict>
+			<key>self</key>
+			<array>
+				<string>unpublished</string>
+			</array>
+		</dict>
+		<key>url</key>
+		<dict>
+			<key>self</key>
+			<array>
+				<string>web site</string>
+			</array>
 		</dict>
 	</dict>
 	<key>TypesForFileType</key>

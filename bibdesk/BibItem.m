@@ -924,6 +924,57 @@ void _setupFonts(){
     return s;
 }
     
+#warning not currently XML entity-escaped !!
+- (NSString *)MODSString{
+    NSDictionary *genreForTypeDict = [[BibTypeManager sharedManager] MODSGenresForBibTeXType:pubType];
+    NSMutableString *s = [NSMutableString stringWithString:@"<mods>"];
+    int i = 0;
+    
+    [s appendFormat:@"<titleInfo> <title>%@ </title>", [self valueOfField:@"Title"]];
+    
+    // note: may in the future want to output subtitles.
+
+    [s appendString:@"</titleInfo>\n"];
+    
+    foreach (author, pubAuthors){
+        [s appendString:[author MODSStringWithRole:@"author"]];
+        [s appendString:@"\n"];
+    }
+
+    // NOTE: this isn't always text. what are the special case pubtypes?
+    [s appendString:@"<typeOfResource>text</typeOfResource>"];
+    
+    NSArray *genresForSelf = [genreForTypeDict objectForKey:@"self"];
+    if(genresForSelf){
+        for(i = 0; i < [genresForSelf count]; i++){
+            [s appendFormat:@"<genre>%@</genre>", [genresForSelf objectAtIndex:i]];
+        }
+    }
+
+    // HOST INFO
+    NSArray *genresForHost = [genreForTypeDict objectForKey:@"host"];
+    if(genresForHost){
+        [s appendString:@"<relatedItem type=\"host\">"];
+        
+        NSString *hostTitle = nil;
+        
+        if([pubType isEqualToString:@"inproceedings"] || 
+           [pubType isEqualToString:@"article"] || 
+           [pubType isEqualToString:@"incollection"]){
+            hostTitle = [self valueOfField:@"booktitle"];
+        }else if([pubType isEqualToString:@"article"]){
+            hostTitle = [self valueOfField:@"Journal"];
+        }
+        [s appendFormat:@"<titleInfo><title>%@</title></titleInfo>", (hostTitle ? hostTitle : @"unknown")];
+        
+        [s appendString:@"</relatedItem>"];
+    }
+
+    [s appendFormat:@"<identifier type=\"citekey\">%@</identifier>", [self citeKey]];
+    
+    [s appendString:@"</mods>"];
+    return [[s copy] autorelease];
+}
 
 - (NSString *)RSSValue{
     NSMutableString *s = [[[NSMutableString alloc] init] autorelease];
