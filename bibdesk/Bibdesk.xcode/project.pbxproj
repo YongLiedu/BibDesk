@@ -699,6 +699,919 @@
 			settings = {
 			};
 		};
+		27AF74ED08021E47006A6ADE = {
+			children = (
+				27AF74F108021E93006A6ADE,
+				27AF74EF08021E93006A6ADE,
+				27AF74F008021E93006A6ADE,
+				27AF74F208021E93006A6ADE,
+				27AF74F308021E93006A6ADE,
+				27AF74F408021E93006A6ADE,
+				27AF74EE08021E93006A6ADE,
+				27AF74F508021E93006A6ADE,
+				27AF74F608021E93006A6ADE,
+				27AF74F708021E93006A6ADE,
+				27AF74F808021E93006A6ADE,
+				27AF74F908021E93006A6ADE,
+				27AF74FA08021E93006A6ADE,
+				27AF74FB08021E93006A6ADE,
+				27AF74FC08021E93006A6ADE,
+				27AF74FD08021E93006A6ADE,
+			);
+			isa = PBXGroup;
+			name = "Help Sources";
+			path = "";
+			refType = 4;
+			sourceTree = "<group>";
+		};
+		27AF74EE08021E93006A6ADE = {
+			fileEncoding = 30;
+			isa = PBXFileReference;
+			lastKnownFileType = text;
+			name = managing.txt;
+			path = "BibDesk Help/managing.txt";
+			refType = 4;
+			sourceTree = "<group>";
+		};
+		27AF74EF08021E93006A6ADE = {
+			fileEncoding = 30;
+			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.make;
+			name = Makefile;
+			path = "BibDesk Help/Makefile";
+			refType = 4;
+			sourceTree = "<group>";
+		};
+		27AF74F008021E93006A6ADE = {
+			fileEncoding = 30;
+			isa = PBXFileReference;
+			lastKnownFileType = text;
+			name = appleHelp.css;
+			path = "BibDesk Help/appleHelp.css";
+			refType = 4;
+			sourceTree = "<group>";
+		};
+		27AF74F108021E93006A6ADE = {
+			fileEncoding = 30;
+			isa = PBXFileReference;
+			lastKnownFileType = text;
+			name = index.txt;
+			path = "BibDesk Help/index.txt";
+			refType = 4;
+			sourceTree = "<group>";
+		};
+		27AF74F208021E93006A6ADE = {
+			fileEncoding = 30;
+			isa = PBXFileReference;
+			lastKnownFileType = text;
+			name = prefs.txt;
+			path = "BibDesk Help/prefs.txt";
+			refType = 4;
+			sourceTree = "<group>";
+		};
+		27AF74F308021E93006A6ADE = {
+			fileEncoding = 30;
+			isa = PBXFileReference;
+			lastKnownFileType = text;
+			name = "open-import.txt";
+			path = "BibDesk Help/open-import.txt";
+			refType = 4;
+			sourceTree = "<group>";
+		};
+		27AF74F408021E93006A6ADE = {
+			fileEncoding = 30;
+			isa = PBXFileReference;
+			lastKnownFileType = text;
+			name = morehelp.txt;
+			path = "BibDesk Help/morehelp.txt";
+			refType = 4;
+			sourceTree = "<group>";
+		};
+		27AF74F508021E93006A6ADE = {
+			fileEncoding = 30;
+			isa = PBXFileReference;
+			lastKnownFileType = text;
+			name = autocompletion.txt;
+			path = "BibDesk Help/autocompletion.txt";
+			refType = 4;
+			sourceTree = "<group>";
+		};
+		27AF74F608021E93006A6ADE = {
+			fileEncoding = 30;
+			isa = PBXFileReference;
+			lastKnownFileType = text;
+			name = tex.txt;
+			path = "BibDesk Help/tex.txt";
+			refType = 4;
+			sourceTree = "<group>";
+		};
+		27AF74F708021E93006A6ADE = {
+			fileEncoding = 30;
+			isa = PBXFileReference;
+			lastKnownFileType = text;
+			name = autofile.txt;
+			path = "BibDesk Help/autofile.txt";
+			refType = 4;
+			sourceTree = "<group>";
+		};
+		27AF74F808021E93006A6ADE = {
+			fileEncoding = 30;
+			isa = PBXFileReference;
+			lastKnownFileType = text;
+			name = bibtex.txt;
+			path = "BibDesk Help/bibtex.txt";
+			refType = 4;
+			sourceTree = "<group>";
+		};
+		27AF74F908021E93006A6ADE = {
+			fileEncoding = 30;
+			isa = PBXFileReference;
+			lastKnownFileType = text;
+			name = quickstart.txt;
+			path = "BibDesk Help/quickstart.txt";
+			refType = 4;
+			sourceTree = "<group>";
+		};
+		27AF74FA08021E93006A6ADE = {
+			fileEncoding = 30;
+			isa = PBXFileReference;
+			lastKnownFileType = text;
+			name = "cite-key-format.txt";
+			path = "BibDesk Help/cite-key-format.txt";
+			refType = 4;
+			sourceTree = "<group>";
+		};
+		27AF74FB08021E93006A6ADE = {
+			fileEncoding = 30;
+			isa = PBXFileReference;
+			lastKnownFileType = text;
+			name = "char-convert.txt";
+			path = "BibDesk Help/char-convert.txt";
+			refType = 4;
+			sourceTree = "<group>";
+		};
+		27AF74FC08021E93006A6ADE = {
+			fileEncoding = 30;
+			isa = PBXFileReference;
+			lastKnownFileType = text;
+			name = searching.txt;
+			path = "BibDesk Help/searching.txt";
+			refType = 4;
+			sourceTree = "<group>";
+		};
+		27AF74FD08021E93006A6ADE = {
+			fileEncoding = 30;
+			isa = PBXFileReference;
+			lastKnownFileType = text;
+			name = "cite-key.txt";
+			path = "BibDesk Help/cite-key.txt";
+			refType = 4;
+			sourceTree = "<group>";
+		};
+		27AF74FE08021E93006A6ADE = {
+			fileRef = 27AF74EE08021E93006A6ADE;
+			isa = PBXBuildFile;
+			settings = {
+			};
+		};
+		27AF74FF08021E93006A6ADE = {
+			fileRef = 27AF74EF08021E93006A6ADE;
+			isa = PBXBuildFile;
+			settings = {
+			};
+		};
+		27AF750008021E93006A6ADE = {
+			fileRef = 27AF74F008021E93006A6ADE;
+			isa = PBXBuildFile;
+			settings = {
+			};
+		};
+		27AF750108021E93006A6ADE = {
+			fileRef = 27AF74F108021E93006A6ADE;
+			isa = PBXBuildFile;
+			settings = {
+			};
+		};
+		27AF750208021E93006A6ADE = {
+			fileRef = 27AF74F208021E93006A6ADE;
+			isa = PBXBuildFile;
+			settings = {
+			};
+		};
+		27AF750308021E93006A6ADE = {
+			fileRef = 27AF74F308021E93006A6ADE;
+			isa = PBXBuildFile;
+			settings = {
+			};
+		};
+		27AF750408021E93006A6ADE = {
+			fileRef = 27AF74F408021E93006A6ADE;
+			isa = PBXBuildFile;
+			settings = {
+			};
+		};
+		27AF750508021E93006A6ADE = {
+			fileRef = 27AF74F508021E93006A6ADE;
+			isa = PBXBuildFile;
+			settings = {
+			};
+		};
+		27AF750608021E93006A6ADE = {
+			fileRef = 27AF74F608021E93006A6ADE;
+			isa = PBXBuildFile;
+			settings = {
+			};
+		};
+		27AF750708021E93006A6ADE = {
+			fileRef = 27AF74F708021E93006A6ADE;
+			isa = PBXBuildFile;
+			settings = {
+			};
+		};
+		27AF750808021E93006A6ADE = {
+			fileRef = 27AF74F808021E93006A6ADE;
+			isa = PBXBuildFile;
+			settings = {
+			};
+		};
+		27AF750908021E93006A6ADE = {
+			fileRef = 27AF74F908021E93006A6ADE;
+			isa = PBXBuildFile;
+			settings = {
+			};
+		};
+		27AF750A08021E93006A6ADE = {
+			fileRef = 27AF74FA08021E93006A6ADE;
+			isa = PBXBuildFile;
+			settings = {
+			};
+		};
+		27AF750B08021E93006A6ADE = {
+			fileRef = 27AF74FB08021E93006A6ADE;
+			isa = PBXBuildFile;
+			settings = {
+			};
+		};
+		27AF750C08021E93006A6ADE = {
+			fileRef = 27AF74FC08021E93006A6ADE;
+			isa = PBXBuildFile;
+			settings = {
+			};
+		};
+		27AF750D08021E93006A6ADE = {
+			fileRef = 27AF74FD08021E93006A6ADE;
+			isa = PBXBuildFile;
+			settings = {
+			};
+		};
+		27AF751308021F4D006A6ADE = {
+			buildActionMask = 12;
+			comments = "Building the help files with Markdown then copying them into the app wrapper. Uses a makefile.";
+			files = (
+			);
+			inputPaths = (
+			);
+			isa = PBXShellScriptBuildPhase;
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "cd ${SOURCE_ROOT}/BibDesk\\ Help/\nmkdir ${BUILD_ROOT}/${UNLOCALIZED_RESOURCES_FOLDER_PATH}/BibDesk\\ Help/\nmkdir ${BUILD_ROOT}/${UNLOCALIZED_RESOURCES_FOLDER_PATH}/BibDesk\\ Help/gfx/\nmake\n";
+		};
+		27AF75A808022447006A6ADE = {
+			children = (
+				27AF75A908022447006A6ADE,
+				27AF75AA08022447006A6ADE,
+				27AF75AB08022447006A6ADE,
+				27AF75AC08022447006A6ADE,
+				27AF75AD08022447006A6ADE,
+				27AF75AE08022447006A6ADE,
+				27AF75AF08022447006A6ADE,
+				27AF75B008022447006A6ADE,
+				27AF75CD08022447006A6ADE,
+				27AF75CE08022447006A6ADE,
+				27AF75CF08022447006A6ADE,
+				27AF75D008022447006A6ADE,
+				27AF75D108022447006A6ADE,
+				27AF75D208022447006A6ADE,
+				27AF75D308022447006A6ADE,
+				27AF75D408022447006A6ADE,
+			);
+			isa = PBXGroup;
+			path = "BibDesk Help";
+			refType = 3;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+		27AF75A908022447006A6ADE = {
+			fileEncoding = 30;
+			isa = PBXFileReference;
+			lastKnownFileType = text;
+			path = appleHelp.css;
+			refType = 4;
+			sourceTree = "<group>";
+		};
+		27AF75AA08022447006A6ADE = {
+			fileEncoding = 30;
+			isa = PBXFileReference;
+			lastKnownFileType = text.html;
+			path = autocompletion.html;
+			refType = 4;
+			sourceTree = "<group>";
+		};
+		27AF75AB08022447006A6ADE = {
+			fileEncoding = 30;
+			isa = PBXFileReference;
+			lastKnownFileType = text.html;
+			path = autofile.html;
+			refType = 4;
+			sourceTree = "<group>";
+		};
+		27AF75AC08022447006A6ADE = {
+			fileEncoding = 30;
+			isa = PBXFileReference;
+			lastKnownFileType = text.html;
+			path = bibtex.html;
+			refType = 4;
+			sourceTree = "<group>";
+		};
+		27AF75AD08022447006A6ADE = {
+			fileEncoding = 30;
+			isa = PBXFileReference;
+			lastKnownFileType = text.html;
+			path = "char-convert.html";
+			refType = 4;
+			sourceTree = "<group>";
+		};
+		27AF75AE08022447006A6ADE = {
+			fileEncoding = 30;
+			isa = PBXFileReference;
+			lastKnownFileType = text.html;
+			path = "cite-key-format.html";
+			refType = 4;
+			sourceTree = "<group>";
+		};
+		27AF75AF08022447006A6ADE = {
+			fileEncoding = 30;
+			isa = PBXFileReference;
+			lastKnownFileType = text.html;
+			path = "cite-key.html";
+			refType = 4;
+			sourceTree = "<group>";
+		};
+		27AF75B008022447006A6ADE = {
+			children = (
+				27AF75B108022447006A6ADE,
+				27AF75B208022447006A6ADE,
+				27AF75B308022447006A6ADE,
+				27AF75B408022447006A6ADE,
+				27AF75B508022447006A6ADE,
+				27AF75B608022447006A6ADE,
+				27AF75B708022447006A6ADE,
+				27AF75B808022447006A6ADE,
+				27AF75B908022447006A6ADE,
+				27AF75BA08022447006A6ADE,
+				27AF75BB08022447006A6ADE,
+				27AF75BC08022447006A6ADE,
+				27AF75BD08022447006A6ADE,
+				27AF75BE08022447006A6ADE,
+				27AF75BF08022447006A6ADE,
+				27AF75C008022447006A6ADE,
+				27AF75C108022447006A6ADE,
+				27AF75C208022447006A6ADE,
+				27AF75C308022447006A6ADE,
+				27AF75C408022447006A6ADE,
+				27AF75C508022447006A6ADE,
+				27AF75C608022447006A6ADE,
+				27AF75C708022447006A6ADE,
+				27AF75C808022447006A6ADE,
+				27AF75C908022447006A6ADE,
+				27AF75CA08022447006A6ADE,
+				27AF75CB08022447006A6ADE,
+				27AF75CC08022447006A6ADE,
+			);
+			isa = PBXGroup;
+			path = gfx;
+			refType = 4;
+			sourceTree = "<group>";
+		};
+		27AF75B108022447006A6ADE = {
+			isa = PBXFileReference;
+			lastKnownFileType = image.png;
+			path = accents.png;
+			refType = 4;
+			sourceTree = "<group>";
+		};
+		27AF75B208022447006A6ADE = {
+			isa = PBXFileReference;
+			lastKnownFileType = image.png;
+			path = autocompleteExample.png;
+			refType = 4;
+			sourceTree = "<group>";
+		};
+		27AF75B308022447006A6ADE = {
+			isa = PBXFileReference;
+			lastKnownFileType = image.png;
+			path = autocompletePrefs.png;
+			refType = 4;
+			sourceTree = "<group>";
+		};
+		27AF75B408022447006A6ADE = {
+			isa = PBXFileReference;
+			lastKnownFileType = image.png;
+			path = autoFilePrefs.png;
+			refType = 4;
+			sourceTree = "<group>";
+		};
+		27AF75B508022447006A6ADE = {
+			isa = PBXFileReference;
+			lastKnownFileType = image.png;
+			path = BibDeskIcon.png;
+			refType = 4;
+			sourceTree = "<group>";
+		};
+		27AF75B608022447006A6ADE = {
+			isa = PBXFileReference;
+			lastKnownFileType = image.png;
+			path = citationPrefs.png;
+			refType = 4;
+			sourceTree = "<group>";
+		};
+		27AF75B708022447006A6ADE = {
+			isa = PBXFileReference;
+			lastKnownFileType = image.png;
+			path = citeDrawer.png;
+			refType = 4;
+			sourceTree = "<group>";
+		};
+		27AF75B808022447006A6ADE = {
+			isa = PBXFileReference;
+			lastKnownFileType = image.png;
+			path = citeKeyPrefs.png;
+			refType = 4;
+			sourceTree = "<group>";
+		};
+		27AF75B908022447006A6ADE = {
+			isa = PBXFileReference;
+			lastKnownFileType = image.png;
+			path = ConsolidateLinkedFiles.png;
+			refType = 4;
+			sourceTree = "<group>";
+		};
+		27AF75BA08022447006A6ADE = {
+			isa = PBXFileReference;
+			lastKnownFileType = image.png;
+			path = ConsolidateLinkedFilesWindow.png;
+			refType = 4;
+			sourceTree = "<group>";
+		};
+		27AF75BB08022447006A6ADE = {
+			isa = PBXFileReference;
+			lastKnownFileType = image.png;
+			path = defaultsPrefs.png;
+			refType = 4;
+			sourceTree = "<group>";
+		};
+		27AF75BC08022447006A6ADE = {
+			isa = PBXFileReference;
+			lastKnownFileType = image.png;
+			path = dragIntoBib.png;
+			refType = 4;
+			sourceTree = "<group>";
+		};
+		27AF75BD08022447006A6ADE = {
+			isa = PBXFileReference;
+			lastKnownFileType = image.png;
+			path = editWindow.png;
+			refType = 4;
+			sourceTree = "<group>";
+		};
+		27AF75BE08022447006A6ADE = {
+			isa = PBXFileReference;
+			lastKnownFileType = image.png;
+			path = errorWindow.png;
+			refType = 4;
+			sourceTree = "<group>";
+		};
+		27AF75BF08022447006A6ADE = {
+			isa = PBXFileReference;
+			lastKnownFileType = image.png;
+			path = export.png;
+			refType = 4;
+			sourceTree = "<group>";
+		};
+		27AF75C008022447006A6ADE = {
+			isa = PBXFileReference;
+			lastKnownFileType = image.png;
+			path = filesPrefs.png;
+			refType = 4;
+			sourceTree = "<group>";
+		};
+		27AF75C108022447006A6ADE = {
+			isa = PBXFileReference;
+			lastKnownFileType = image.png;
+			path = findWindow.png;
+			refType = 4;
+			sourceTree = "<group>";
+		};
+		27AF75C208022447006A6ADE = {
+			isa = PBXFileReference;
+			lastKnownFileType = image.png;
+			path = generalPrefs.png;
+			refType = 4;
+			sourceTree = "<group>";
+		};
+		27AF75C308022447006A6ADE = {
+			isa = PBXFileReference;
+			lastKnownFileType = image.png;
+			path = outlineView.png;
+			refType = 4;
+			sourceTree = "<group>";
+		};
+		27AF75C408022447006A6ADE = {
+			isa = PBXFileReference;
+			lastKnownFileType = image.png;
+			path = previewPrefs.png;
+			refType = 4;
+			sourceTree = "<group>";
+		};
+		27AF75C508022447006A6ADE = {
+			isa = PBXFileReference;
+			lastKnownFileType = image.png;
+			path = pubmed.png;
+			refType = 4;
+			sourceTree = "<group>";
+		};
+		27AF75C608022447006A6ADE = {
+			isa = PBXFileReference;
+			lastKnownFileType = image.png;
+			path = quickSearchField.png;
+			refType = 4;
+			sourceTree = "<group>";
+		};
+		27AF75C708022447006A6ADE = {
+			isa = PBXFileReference;
+			lastKnownFileType = image.png;
+			path = recentSearches.png;
+			refType = 4;
+			sourceTree = "<group>";
+		};
+		27AF75C808022447006A6ADE = {
+			isa = PBXFileReference;
+			lastKnownFileType = image.png;
+			path = rssPrefs.png;
+			refType = 4;
+			sourceTree = "<group>";
+		};
+		27AF75C908022447006A6ADE = {
+			isa = PBXFileReference;
+			lastKnownFileType = image.png;
+			path = serviceAfter.png;
+			refType = 4;
+			sourceTree = "<group>";
+		};
+		27AF75CA08022447006A6ADE = {
+			isa = PBXFileReference;
+			lastKnownFileType = image.png;
+			path = serviceBefore.png;
+			refType = 4;
+			sourceTree = "<group>";
+		};
+		27AF75CB08022447006A6ADE = {
+			isa = PBXFileReference;
+			lastKnownFileType = image.png;
+			path = tableView.png;
+			refType = 4;
+			sourceTree = "<group>";
+		};
+		27AF75CC08022447006A6ADE = {
+			isa = PBXFileReference;
+			lastKnownFileType = image.png;
+			path = typesetPreview.png;
+			refType = 4;
+			sourceTree = "<group>";
+		};
+		27AF75CD08022447006A6ADE = {
+			fileEncoding = 30;
+			isa = PBXFileReference;
+			lastKnownFileType = text.html;
+			path = index.html;
+			refType = 4;
+			sourceTree = "<group>";
+		};
+		27AF75CE08022447006A6ADE = {
+			fileEncoding = 30;
+			isa = PBXFileReference;
+			lastKnownFileType = text.html;
+			path = managing.html;
+			refType = 4;
+			sourceTree = "<group>";
+		};
+		27AF75CF08022447006A6ADE = {
+			fileEncoding = 30;
+			isa = PBXFileReference;
+			lastKnownFileType = text.html;
+			path = morehelp.html;
+			refType = 4;
+			sourceTree = "<group>";
+		};
+		27AF75D008022447006A6ADE = {
+			fileEncoding = 30;
+			isa = PBXFileReference;
+			lastKnownFileType = text.html;
+			path = "open-import.html";
+			refType = 4;
+			sourceTree = "<group>";
+		};
+		27AF75D108022447006A6ADE = {
+			fileEncoding = 30;
+			isa = PBXFileReference;
+			lastKnownFileType = text.html;
+			path = prefs.html;
+			refType = 4;
+			sourceTree = "<group>";
+		};
+		27AF75D208022447006A6ADE = {
+			fileEncoding = 30;
+			isa = PBXFileReference;
+			lastKnownFileType = text.html;
+			path = quickstart.html;
+			refType = 4;
+			sourceTree = "<group>";
+		};
+		27AF75D308022447006A6ADE = {
+			fileEncoding = 30;
+			isa = PBXFileReference;
+			lastKnownFileType = text.html;
+			path = searching.html;
+			refType = 4;
+			sourceTree = "<group>";
+		};
+		27AF75D408022447006A6ADE = {
+			fileEncoding = 30;
+			isa = PBXFileReference;
+			lastKnownFileType = text.html;
+			path = tex.html;
+			refType = 4;
+			sourceTree = "<group>";
+		};
+		27AF75D508022447006A6ADE = {
+			fileRef = 27AF75A908022447006A6ADE;
+			isa = PBXBuildFile;
+			settings = {
+			};
+		};
+		27AF75D608022447006A6ADE = {
+			fileRef = 27AF75AA08022447006A6ADE;
+			isa = PBXBuildFile;
+			settings = {
+			};
+		};
+		27AF75D708022447006A6ADE = {
+			fileRef = 27AF75AB08022447006A6ADE;
+			isa = PBXBuildFile;
+			settings = {
+			};
+		};
+		27AF75D808022447006A6ADE = {
+			fileRef = 27AF75AC08022447006A6ADE;
+			isa = PBXBuildFile;
+			settings = {
+			};
+		};
+		27AF75D908022447006A6ADE = {
+			fileRef = 27AF75AD08022447006A6ADE;
+			isa = PBXBuildFile;
+			settings = {
+			};
+		};
+		27AF75DA08022447006A6ADE = {
+			fileRef = 27AF75AE08022447006A6ADE;
+			isa = PBXBuildFile;
+			settings = {
+			};
+		};
+		27AF75DB08022447006A6ADE = {
+			fileRef = 27AF75AF08022447006A6ADE;
+			isa = PBXBuildFile;
+			settings = {
+			};
+		};
+		27AF75DC08022447006A6ADE = {
+			fileRef = 27AF75B108022447006A6ADE;
+			isa = PBXBuildFile;
+			settings = {
+			};
+		};
+		27AF75DD08022447006A6ADE = {
+			fileRef = 27AF75B208022447006A6ADE;
+			isa = PBXBuildFile;
+			settings = {
+			};
+		};
+		27AF75DE08022447006A6ADE = {
+			fileRef = 27AF75B308022447006A6ADE;
+			isa = PBXBuildFile;
+			settings = {
+			};
+		};
+		27AF75DF08022447006A6ADE = {
+			fileRef = 27AF75B408022447006A6ADE;
+			isa = PBXBuildFile;
+			settings = {
+			};
+		};
+		27AF75E008022447006A6ADE = {
+			fileRef = 27AF75B508022447006A6ADE;
+			isa = PBXBuildFile;
+			settings = {
+			};
+		};
+		27AF75E108022447006A6ADE = {
+			fileRef = 27AF75B608022447006A6ADE;
+			isa = PBXBuildFile;
+			settings = {
+			};
+		};
+		27AF75E208022447006A6ADE = {
+			fileRef = 27AF75B708022447006A6ADE;
+			isa = PBXBuildFile;
+			settings = {
+			};
+		};
+		27AF75E308022447006A6ADE = {
+			fileRef = 27AF75B808022447006A6ADE;
+			isa = PBXBuildFile;
+			settings = {
+			};
+		};
+		27AF75E408022447006A6ADE = {
+			fileRef = 27AF75B908022447006A6ADE;
+			isa = PBXBuildFile;
+			settings = {
+			};
+		};
+		27AF75E508022447006A6ADE = {
+			fileRef = 27AF75BA08022447006A6ADE;
+			isa = PBXBuildFile;
+			settings = {
+			};
+		};
+		27AF75E608022447006A6ADE = {
+			fileRef = 27AF75BB08022447006A6ADE;
+			isa = PBXBuildFile;
+			settings = {
+			};
+		};
+		27AF75E708022447006A6ADE = {
+			fileRef = 27AF75BC08022447006A6ADE;
+			isa = PBXBuildFile;
+			settings = {
+			};
+		};
+		27AF75E808022447006A6ADE = {
+			fileRef = 27AF75BD08022447006A6ADE;
+			isa = PBXBuildFile;
+			settings = {
+			};
+		};
+		27AF75E908022447006A6ADE = {
+			fileRef = 27AF75BE08022447006A6ADE;
+			isa = PBXBuildFile;
+			settings = {
+			};
+		};
+		27AF75EA08022447006A6ADE = {
+			fileRef = 27AF75BF08022447006A6ADE;
+			isa = PBXBuildFile;
+			settings = {
+			};
+		};
+		27AF75EB08022447006A6ADE = {
+			fileRef = 27AF75C008022447006A6ADE;
+			isa = PBXBuildFile;
+			settings = {
+			};
+		};
+		27AF75EC08022447006A6ADE = {
+			fileRef = 27AF75C108022447006A6ADE;
+			isa = PBXBuildFile;
+			settings = {
+			};
+		};
+		27AF75ED08022447006A6ADE = {
+			fileRef = 27AF75C208022447006A6ADE;
+			isa = PBXBuildFile;
+			settings = {
+			};
+		};
+		27AF75EE08022447006A6ADE = {
+			fileRef = 27AF75C308022447006A6ADE;
+			isa = PBXBuildFile;
+			settings = {
+			};
+		};
+		27AF75EF08022447006A6ADE = {
+			fileRef = 27AF75C408022447006A6ADE;
+			isa = PBXBuildFile;
+			settings = {
+			};
+		};
+		27AF75F008022447006A6ADE = {
+			fileRef = 27AF75C508022447006A6ADE;
+			isa = PBXBuildFile;
+			settings = {
+			};
+		};
+		27AF75F108022447006A6ADE = {
+			fileRef = 27AF75C608022447006A6ADE;
+			isa = PBXBuildFile;
+			settings = {
+			};
+		};
+		27AF75F208022447006A6ADE = {
+			fileRef = 27AF75C708022447006A6ADE;
+			isa = PBXBuildFile;
+			settings = {
+			};
+		};
+		27AF75F308022447006A6ADE = {
+			fileRef = 27AF75C808022447006A6ADE;
+			isa = PBXBuildFile;
+			settings = {
+			};
+		};
+		27AF75F408022447006A6ADE = {
+			fileRef = 27AF75C908022447006A6ADE;
+			isa = PBXBuildFile;
+			settings = {
+			};
+		};
+		27AF75F508022447006A6ADE = {
+			fileRef = 27AF75CA08022447006A6ADE;
+			isa = PBXBuildFile;
+			settings = {
+			};
+		};
+		27AF75F608022447006A6ADE = {
+			fileRef = 27AF75CB08022447006A6ADE;
+			isa = PBXBuildFile;
+			settings = {
+			};
+		};
+		27AF75F708022447006A6ADE = {
+			fileRef = 27AF75CC08022447006A6ADE;
+			isa = PBXBuildFile;
+			settings = {
+			};
+		};
+		27AF75F808022447006A6ADE = {
+			fileRef = 27AF75CD08022447006A6ADE;
+			isa = PBXBuildFile;
+			settings = {
+			};
+		};
+		27AF75F908022447006A6ADE = {
+			fileRef = 27AF75CE08022447006A6ADE;
+			isa = PBXBuildFile;
+			settings = {
+			};
+		};
+		27AF75FA08022447006A6ADE = {
+			fileRef = 27AF75CF08022447006A6ADE;
+			isa = PBXBuildFile;
+			settings = {
+			};
+		};
+		27AF75FB08022447006A6ADE = {
+			fileRef = 27AF75D008022447006A6ADE;
+			isa = PBXBuildFile;
+			settings = {
+			};
+		};
+		27AF75FC08022447006A6ADE = {
+			fileRef = 27AF75D108022447006A6ADE;
+			isa = PBXBuildFile;
+			settings = {
+			};
+		};
+		27AF75FD08022447006A6ADE = {
+			fileRef = 27AF75D208022447006A6ADE;
+			isa = PBXBuildFile;
+			settings = {
+			};
+		};
+		27AF75FE08022447006A6ADE = {
+			fileRef = 27AF75D308022447006A6ADE;
+			isa = PBXBuildFile;
+			settings = {
+			};
+		};
+		27AF75FF08022447006A6ADE = {
+			fileRef = 27AF75D408022447006A6ADE;
+			isa = PBXBuildFile;
+			settings = {
+			};
+		};
 		27C1639C078BF48C008A4B83 = {
 			fileEncoding = 4;
 			isa = PBXFileReference;
@@ -1379,6 +2292,7 @@
 				275E26FA07838E150070398A,
 				080E96DDFE201D6D7F000001,
 				29B97315FDCFA39411CA2CEA,
+				27AF74ED08021E47006A6ADE,
 				29B97317FDCFA39411CA2CEA,
 				29B97323FDCFA39411CA2CEA,
 				19C28FACFE9D520D11CA2CBB,
@@ -1417,6 +2331,7 @@
 		};
 		29B97317FDCFA39411CA2CEA = {
 			children = (
+				27AF75A808022447006A6ADE,
 				F994B8F607F5F65F00751DA1,
 				27D4FA5D07DE5CF5001CAB00,
 				27D4FA5F07DE5CF5001CAB00,
@@ -1447,7 +2362,6 @@
 				F9022D190758066000C3F701,
 				F9022D1A0758066000C3F701,
 				F9022D1B0758066000C3F701,
-				F9022CFB075805E100C3F701,
 				F9022CDB0758050E00C3F701,
 				F9022CDD0758050E00C3F701,
 				F9022CDF0758050E00C3F701,
@@ -2129,6 +3043,7 @@
 				F9022E8B07580A7C00C3F701,
 				F920DB22075C2D40000C5FCA,
 				F91B5C4E076412A10011ED22,
+				27AF751308021F4D006A6ADE,
 			);
 			buildRules = (
 			);
@@ -2178,7 +3093,6 @@
 				F9022CED0758050E00C3F701,
 				F9022CEE0758050E00C3F701,
 				F9022CEF0758050E00C3F701,
-				F9022CFD075805E100C3F701,
 				F9022D1C0758066000C3F701,
 				F9022D1D0758066000C3F701,
 				F9022D1E0758066000C3F701,
@@ -2355,6 +3269,7 @@
 				3D6D748407EE1F1E00E8A7EF,
 				3DE3916807FEF5E600BE3AE7,
 				3DE391F307FF260D00BE3AE7,
+				27AF74FF08021E93006A6ADE,
 			);
 			isa = PBXSourcesBuildPhase;
 			runOnlyForDeploymentPostprocessing = 0;
@@ -3911,19 +4826,6 @@
 			settings = {
 			};
 		};
-		F9022CFB075805E100C3F701 = {
-			isa = PBXFileReference;
-			lastKnownFileType = folder;
-			path = "BibDesk Help";
-			refType = 4;
-			sourceTree = "<group>";
-		};
-		F9022CFD075805E100C3F701 = {
-			fileRef = F9022CFB075805E100C3F701;
-			isa = PBXBuildFile;
-			settings = {
-			};
-		};
 		F9022D100758066000C3F701 = {
 			fileEncoding = 30;
 			isa = PBXFileReference;
@@ -5472,6 +6374,64 @@
 				27D4FB5A07DE7A97001CAB00,
 				27D4FB5B07DE7A97001CAB00,
 				27D4FB5C07DE7A97001CAB00,
+				27AF74FE08021E93006A6ADE,
+				27AF750008021E93006A6ADE,
+				27AF750108021E93006A6ADE,
+				27AF750208021E93006A6ADE,
+				27AF750308021E93006A6ADE,
+				27AF750408021E93006A6ADE,
+				27AF750508021E93006A6ADE,
+				27AF750608021E93006A6ADE,
+				27AF750708021E93006A6ADE,
+				27AF750808021E93006A6ADE,
+				27AF750908021E93006A6ADE,
+				27AF750A08021E93006A6ADE,
+				27AF750B08021E93006A6ADE,
+				27AF750C08021E93006A6ADE,
+				27AF750D08021E93006A6ADE,
+				27AF75D508022447006A6ADE,
+				27AF75D608022447006A6ADE,
+				27AF75D708022447006A6ADE,
+				27AF75D808022447006A6ADE,
+				27AF75D908022447006A6ADE,
+				27AF75DA08022447006A6ADE,
+				27AF75DB08022447006A6ADE,
+				27AF75DC08022447006A6ADE,
+				27AF75DD08022447006A6ADE,
+				27AF75DE08022447006A6ADE,
+				27AF75DF08022447006A6ADE,
+				27AF75E008022447006A6ADE,
+				27AF75E108022447006A6ADE,
+				27AF75E208022447006A6ADE,
+				27AF75E308022447006A6ADE,
+				27AF75E408022447006A6ADE,
+				27AF75E508022447006A6ADE,
+				27AF75E608022447006A6ADE,
+				27AF75E708022447006A6ADE,
+				27AF75E808022447006A6ADE,
+				27AF75E908022447006A6ADE,
+				27AF75EA08022447006A6ADE,
+				27AF75EB08022447006A6ADE,
+				27AF75EC08022447006A6ADE,
+				27AF75ED08022447006A6ADE,
+				27AF75EE08022447006A6ADE,
+				27AF75EF08022447006A6ADE,
+				27AF75F008022447006A6ADE,
+				27AF75F108022447006A6ADE,
+				27AF75F208022447006A6ADE,
+				27AF75F308022447006A6ADE,
+				27AF75F408022447006A6ADE,
+				27AF75F508022447006A6ADE,
+				27AF75F608022447006A6ADE,
+				27AF75F708022447006A6ADE,
+				27AF75F808022447006A6ADE,
+				27AF75F908022447006A6ADE,
+				27AF75FA08022447006A6ADE,
+				27AF75FB08022447006A6ADE,
+				27AF75FC08022447006A6ADE,
+				27AF75FD08022447006A6ADE,
+				27AF75FE08022447006A6ADE,
+				27AF75FF08022447006A6ADE,
 			);
 			inputPaths = (
 				../bibdesk_vendorsrc/infinite_loop/ILCrashReporter.framework.tgz,
