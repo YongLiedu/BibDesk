@@ -212,14 +212,29 @@ Extra wrapping of the created and modified date methods to
 	// "Texify" - whatever that is
     NSString *texstr = [[BDSKConverter sharedConverter] stringByTeXifyingString:btString];
     NSData *data = [texstr dataUsingEncoding:NSUTF8StringEncoding];
+	NSScriptCommand * cmd = [NSScriptCommand currentCommand];
+
+	NSEnumerator *fnEnum = [pubFields keyEnumerator];
+	NSString *fn;
+	while (fn = [fnEnum nextObject]) {
+		if (!([[self valueOfField:fn] isEqualToString:@""] || [fn isEqualToString:@"Date-Modified"] || [fn isEqualToString:@"Date-Added"])) {
+			if (cmd) {
+				[cmd setScriptErrorNumber:NSReceiversCantHandleCommandScriptError];
+				[cmd setScriptErrorString:[NSString stringWithFormat:NSLocalizedString(@"Cannot set BibTeX string after initialization.",@"Cannot set BibTeX string after initialization.")]];
+			}
+			return;
+		}
+	}
 
 	BOOL hadProblems = NO;
     NSArray * newPubs = [BibTeXParser itemsFromData:data error:&hadProblems];
 	
 	// try to do some error handling for AppleScript
-	NSScriptCommand * cmd = [NSScriptCommand currentCommand];
-	if(hadProblems && cmd) {
-		[cmd setScriptErrorString:[NSString stringWithFormat:NSLocalizedString(@"Bibdesk failed to process the BibTeX entry %@. It may be malformed.",@"Bibdesk failed to process the BibTeX entry %@. It may be malformed."), btString]];
+	if(hadProblems) {
+		if (cmd) {
+			[cmd setScriptErrorNumber:NSInternalScriptError];
+			[cmd setScriptErrorString:[NSString stringWithFormat:NSLocalizedString(@"Bibdesk failed to process the BibTeX entry %@. It may be malformed.",@"Bibdesk failed to process the BibTeX entry %@. It may be malformed."), btString]];
+		}
 		return;
 	}
 		
