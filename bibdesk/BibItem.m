@@ -580,7 +580,9 @@ void _setupFonts(){
 			[tmp appendString:@"1 1 "];
     	}
         [tmp appendString:[pubFields objectForKey:@"Year"]];
-        [self setDate:[NSCalendarDate dateWithNaturalLanguageString:tmp locale:[NSDictionary dictionaryWithObject:@"MDYH" forKey:NSDateTimeOrdering]]];
+		NSMutableDictionary *locale = [[[[NSUserDefaults standardUserDefaults] persistentDomainForName:NSGlobalDomain] mutableCopy] autorelease];
+		[locale setValue:@"MDYH" forKey:NSDateTimeOrdering];
+        [self setDate:[NSCalendarDate dateWithNaturalLanguageString:tmp locale:locale]];
     }else{
         [self setDate:nil];    // nil means we don't have a good date.
     }
