@@ -42,7 +42,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 
 - (int)outlineView:(NSOutlineView *)oView numberOfChildrenOfItem:(id)item {
     if(item == nil){
-        return [allAuthors count];
+        return [[self currentSortFieldArray] count];
     }else{
         return [item numberOfChildren];
     }
@@ -58,8 +58,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 - (id)outlineView:(NSOutlineView *)oView child:(int)index ofItem:(id)item {
     BibAuthor *auth = (BibAuthor *)item;
     if(item == nil){
-        //       //NSLog(@"trying to give it %@",  [allAuthors objectAtIndex:index]);
-        return [allAuthors objectAtIndex:index];
+        return [[self currentSortFieldArray] objectAtIndex:index];
     }
     else{
         return [auth pubAtIndex: index];
@@ -175,9 +174,13 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 //
 
 - (void)tableView: (NSTableView *)aTableView willDisplayCell: (id)aCell
-   forTableColumn: (NSTableColumn *)aTableColumn row: (int)aRowIndex
+   forTableColumn: (NSTableColumn *)aTableColumn
+              row:(int)row
 {
-    [aCell setDrawsBackground: ((aRowIndex % 2) == 0)];
+    if([aCell class] != [NSImageCell class]){
+
+        [aCell setDrawsBackground: ((row % 2) == 0)];
+    }
 }
 
 - (int)numberOfRowsInTableView:(NSTableView *)tView{
@@ -194,9 +197,11 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 - (id)tableView:(NSTableView *)tView objectValueForTableColumn:(NSTableColumn *)tableColumn row:(int)row{
     BibItem* pub = nil;
     NSArray *auths = nil;
-     
+    int sortedRow = (sortDescending ? [shownPublications count] - 1 - row : row);
+    NSString *path = nil;
+    
     if(tView == tableView){
-        pub = [shownPublications objectAtIndex:row];
+        pub = [shownPublications objectAtIndex:sortedRow];
         auths = [pub pubAuthors];
         
         if([[tableColumn identifier] isEqualToString: @"Cite Key"] ){
@@ -231,19 +236,14 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
             else
                 return @"-";
             
-        }else if ([[tableColumn identifier] isEqualToString:@"Local-URL"]){
-            NSLog(@"local-url tablecolumn shown");
-            // @@refactor - this stuff should be in a single method in BibItem, not here and in BibEditor. Ouch.
-            //return [pub valueOfField:[tableColumn identifier]];
-            return [[NSWorkspace sharedWorkspace] iconForFile:
-                [pub valueOfField:[tableColumn identifier]]];
-            //            return @"placeholder";
-            /* icon = [[NSWorkspace sharedWorkspace] iconForFile:
-                [local path]];
-[viewLocalButton setImage:icon];
-[viewLocalButton setEnabled:YES];
-[viewLocalButton setToolTip:@"View File"];
-[viewLocalButton setTitle:@""];*/
+        }else if ([[tableColumn identifier] isEqualToString:@"Local-Url"]){
+            path = [pub localURLPath];
+            if(path && [[NSFileManager defaultManager] fileExistsAtPath:path]){
+                return [[NSWorkspace sharedWorkspace] iconForFile:path];
+            }else{
+                return nil;
+            }
+
         }else{
             // the tableColumn isn't something we handle in a custom way.
             return [pub valueOfField:[tableColumn identifier]];
