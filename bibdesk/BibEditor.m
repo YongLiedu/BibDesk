@@ -74,10 +74,7 @@ NSString *BDSKDateModifiedString = @"Date-Modified";
 }
 
 - (void)windowDidLoad{
-    
-	if(![self citeKeyIsValid:[theBib citeKey]]){
-		[self setCiteKeyDuplicateWarning:YES];
-	} 	
+	[self setCiteKeyDuplicateWarning:![self citeKeyIsValid:[theBib citeKey]]];
     [self fixURLs];
 }
 
