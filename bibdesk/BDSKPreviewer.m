@@ -227,9 +227,7 @@ static unsigned threadCount = 0;
 }	
 
 - (BOOL)previewTexTasks:(NSString *)fileName{ // we set working dir in NSTask
-    
-    NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
-    
+        
     NSTask *pdftex1;
     NSTask *pdftex2;
     NSTask *bibtex;
@@ -248,13 +246,9 @@ static unsigned threadCount = 0;
     
     if(![[NSFileManager defaultManager] fileExistsAtPath:pdftexbinpath]){
         [NSException raise:@"BDSKPreviewerPathNotFound" format:@"File does not exist at %@", pdftexbinpath];    
-        [pool release];
-        return NO;
     }
     if(![[NSFileManager defaultManager] fileExistsAtPath:bibtexbinpath]){        
         [NSException raise:@"BDSKPreviewerPathNotFound" format:@"File does not exist at %@", bibtexbinpath];     
-        [pool release];
-        return NO;
     }
 
     // remove the old pdf file.
@@ -278,7 +272,6 @@ static unsigned threadCount = 0;
             [pdftex1 terminate];
         NSLog(@"%@ %@ failed", [pdftex1 description], [pdftex1 launchPath]);
         [pdftex1 release];
-        [pool release];
         return NO;
     NS_ENDHANDLER
     
@@ -298,7 +291,6 @@ static unsigned threadCount = 0;
             [bibtex terminate];
         NSLog(@"%@ %@ failed", [bibtex description], [bibtex launchPath]);
         [bibtex release];
-        [pool release];
         return NO;
     NS_ENDHANDLER
     
@@ -319,7 +311,6 @@ static unsigned threadCount = 0;
             [pdftex2 terminate];
         NSLog(@"%@ %@ failed", [pdftex2 description], [pdftex2 launchPath]);
         [pdftex2 release];
-        [pool release];
         return NO;
     NS_ENDHANDLER
     
@@ -344,12 +335,11 @@ static unsigned threadCount = 0;
             [latex2rtf terminate];
         NSLog(@"%@ %@ failed", [latex2rtf description], [latex2rtf launchPath]);
         [latex2rtf release];
-        [pool release];
         return NO;
     NS_ENDHANDLER
 
     [latex2rtf release];
-    [pool release];
+
     return YES;
 
 }
