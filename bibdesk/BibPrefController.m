@@ -63,6 +63,7 @@ NSString *BDSKRowColorBlueKey = @"BlueComponentColor of alternating rows Key";
 NSString *BDSKPapersFolderPathKey = @"Path to the papers folder";
 NSString *BDSKFilePapersAutomaticallyKey = @"File papers into the papers folder automatically";
 NSString *BDSKKeepPapersFolderOrganizedKey = @"Keep files in the papers folder organized";
+NSString *BDSKLocalUrlFormatKey = @"Local-Url Format";
 
 NSString *BDSKLastVersionLaunched = @"Last launched version number";
 

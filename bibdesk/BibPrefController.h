@@ -89,6 +89,7 @@ extern NSString *BDSKRowColorBlueKey;
 extern NSString *BDSKPapersFolderPathKey;
 extern NSString *BDSKFilePapersAutomaticallyKey;
 extern NSString *BDSKKeepPapersFolderOrganizedKey;
+extern NSString *BDSKLocalUrlFormatKey;
 
 extern NSString *BDSKLastVersionLaunched;
 
