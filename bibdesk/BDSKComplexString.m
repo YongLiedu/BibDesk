@@ -105,7 +105,6 @@ static NSDictionary *globalMacroDefs;
 		if(theMacroResolver) {
             NSNotificationCenter *nc = [NSNotificationCenter defaultCenter];
 			macroResolver = theMacroResolver;
-                        NSNotificationCenter *nc = [NSNotificationCenter defaultCenter];
 			[nc addObserver:self
 				   selector:@selector(handleMacroKeyChangedNotification:)
 					   name:BDSKBibDocMacroKeyChangedNotification
