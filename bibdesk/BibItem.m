@@ -423,7 +423,7 @@ void _setupFonts(){
 - (NSString *)sanitizedCiteKeyString:(NSString *)key{
 	NSCharacterSet *invalidSet = [[BibTypeManager sharedManager] invalidCharactersForField:@"Cite Key" inType:@"BibTeX"];
 		
-	NSString *newCiteKey = [key stringByReplacingCharactersInSet:[NSCharacterSet whitespaceCharacterSet]
+	NSString *newCiteKey = [key stringByReplacingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]
 												   withString:@"_"];
 	newCiteKey = [newCiteKey stringByReplacingCharactersInSet:invalidSet withString:@""];
 	
