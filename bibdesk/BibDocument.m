@@ -1202,8 +1202,6 @@ int generalBibItemCompareFunc(id item1, id item2, void *context){
 
 
 - (IBAction)editPubCmd:(id)sender{
-    NSEnumerator *e = [self selectedPubEnumerator];
-    NSNumber *i;
     NSString *colID = nil;
     BibItem *pub = nil;
     int row = [tableView selectedRow];// was : [tableView clickedRow];
@@ -1223,11 +1221,30 @@ int generalBibItemCompareFunc(id item1, id item2, void *context){
         [[NSWorkspace sharedWorkspace] openURL:[NSURL URLWithString:[pub valueOfField:@"Url"]]];
         // @@ http-adding: change valueOfField to [pub url] and have it auto-add http://
     }else{
-        while (i = [e nextObject]) {
-            [self editPub:[shownPublications objectAtIndex:[i intValue]]];
-        }
-    }
+		int n = [self numberOfSelectedPubs];
+		if ( n > 6) {
+		// Do we really want a gazillion of editor windows?
+			NSBeginAlertSheet(NSLocalizedString(@"Edit publications", @"Edit publications (multiple open warning)"), NSLocalizedString(@"Cancel", @"Cancel"), NSLocalizedString(@"Open", @"multiple open warning Open button"), nil, documentWindow, self, @selector(multipleEditSheetDidEnd:returnCode:contextInfo:), NULL, nil, NSLocalizedString(@"Bibdesk is about to open %i editor windows. Do you want to proceed?" , @"mulitple open warning question"), n);
+		}
+		else {
+			[self multipleEditSheetDidEnd:nil returnCode:NSAlertAlternateReturn contextInfo:nil];
+		}
+	}
 }
+
+-(void) multipleEditSheetDidEnd:(NSWindow *)sheet returnCode:(int)returnCode contextInfo:(void *)contextInfo {
+	NSEnumerator *e = [self selectedPubEnumerator];
+	NSNumber * i;
+	
+	if (returnCode == NSAlertAlternateReturn ) {
+		// the user said to go ahead
+		while (i = [e nextObject]) {
+			[self editPub:[shownPublications objectAtIndex:[i intValue]]];
+		}
+	}
+	// otherwise do nothing
+}
+
 
 - (void)editPub:(BibItem *)pub{
     [self editPub:pub forceChange:NO];

@@ -22,4 +22,6 @@
 - (BOOL) validateDeleteSelectionMenuItem:(NSMenuItem*) menuItem;
 - (BOOL) validatePrintDocumentMenuItem:(NSMenuItem*) menuItem;
 
+
+- (IBAction) clear:(id) sender;
 @end

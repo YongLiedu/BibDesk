@@ -288,4 +288,11 @@ Broken out of BibDocument and split up into smaller parts to make things more ma
 
 
 
+/* respond to the clear: action, so we can validate the Delete item in the edit menu.
+*/
+- (IBAction) clear:(id) sender {
+	[self delPub:sender];
+}
+
+
 @end

@@ -244,6 +244,16 @@ extern NSString* LocalDragPasteboardName;
 */
 - (IBAction)editPubCmd:(id)sender;
 
+
+/*!
+    @method multipleEditSheetDidEnd:retrunCode:contextInfo:
+	@abstract evaluates answer to the sheet whether we want to open many editor windows 
+	@discussion only opens the windows when NSAlertAlternateReturn is passed, we also call this for cases with few open windows to do the opening
+	@param sheet (not used), returnCode (used to evaluate answer), contextInfo (not used)
+*/
+-(void) multipleEditSheetDidEnd:(NSWindow *)sheet returnCode:(int)returnCode contextInfo:(void *)contextInfo;
+
+
 /*!
     @method editPub
  @abstract Opens the edit window
