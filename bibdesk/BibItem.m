@@ -47,7 +47,6 @@ static NSParagraphStyle* _bodyParagraphStyle = nil;
 // private function to get the cached Font.
 void _setupFonts(){
     NSMutableParagraphStyle* defaultStyle = nil;
-    NSLog(@"called _setupFonts()");
     if(_cachedFonts == nil){
         defaultStyle = [[NSMutableParagraphStyle alloc] init];
         [defaultStyle setParagraphStyle:[NSParagraphStyle defaultParagraphStyle]];
