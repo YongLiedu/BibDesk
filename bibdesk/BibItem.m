@@ -47,13 +47,12 @@ void _setupFonts(){
 
 @implementation BibItem
 
-- (id)initWithType:(NSString *)type fileType:(NSString *)inFileType authors:(NSMutableArray *)authArray { // this is the designated initializer.
+- (id)initWithType:(NSString *)type fileType:(NSString *)inFileType authors:(NSMutableArray *)authArray{ // this is the designated initializer.
     if (self = [super init]){
-        pubFields = [[NSMutableDictionary alloc] init]; // do i need a retain];
+        pubFields = [[NSMutableDictionary alloc] init];
         requiredFieldNames = [[NSMutableArray alloc] init];
         pubAuthors = [authArray mutableCopy];     // copy, it's mutable
         editorObj = nil;
-
         [self setFileType:inFileType];
         [self setTitle:[[NSString stringWithString:@"BibTeX Publication"] retain]];
         [self makeType:type];
@@ -119,7 +118,8 @@ void _setupFonts(){
     // and don't forget to set what we say our type is:
     [self setType:type];
 }
-       
+
+//@@ type - move to type class
 - (BOOL)isRequired:(NSString *)rString{
     if([requiredFieldNames indexOfObject:rString] == NSNotFound)
         return NO;
@@ -248,9 +248,12 @@ void _setupFonts(){
 }
 
 - (void)setAuthorsFromString:(NSString *)aString{
-    char *str = (char *)malloc(sizeof(char)*[aString cStringLength]);
+    const char *str = nil;
 
-    [aString getCString:str]; // str will be autoreleased. (freed?)
+    if (aString == nil) return;
+    str = [aString cString];
+    
+//    [aString getCString:str]; // str will be autoreleased. (freed?)
     bt_stringlist *sl = nil;
     int i=0;
 #warning - Exception - might want to add an exception handler that notifies the user of the warning...
@@ -258,8 +261,10 @@ void _setupFonts(){
     sl = bt_split_list(str, "and", "BibTex Name", 1, "inside setAuthorsFromString");
     if (sl != nil) {
         for(i=0; i < sl->num_items; i++){
-            if(sl->items[i] != nil)
+            if(sl->items[i] != nil){
                 [self addAuthor:[NSString stringWithCString: sl->items[i]]];
+                
+            }
         }
         bt_free_list(sl); // hey! got to free the memory!
     }
@@ -525,10 +530,18 @@ void _setupFonts(){
     return [[result copy] autorelease];
 }
 
-- (NSString *)localURLPath{
+- (NSString *)localURLPathRelativeTo:(NSString *)base{
     NSURL *local = nil;
     NSString *lurl = [self valueOfField:@"Local-Url"];
+
+    if (!lurl || [lurl isEqualToString:@""]) return nil;
     
+    if(base && 
+       ![lurl containsString:@"file://"] &&
+       ![[lurl substringWithRange:NSMakeRange(0,1)] isEqualToString:@"/"]){
+        lurl = [base stringByAppendingPathComponent:lurl];
+    }
+//    NSLog(@"base is %@ lurl is %@", base, lurl);
     if(![@"" isEqualToString:lurl]){
         local = [NSURL URLWithString:lurl];
         if(!local){
@@ -539,6 +552,6 @@ void _setupFonts(){
     }
 
     if (local) return [local path];
-    else return nil;
+    else return lurl;
 }
 @end

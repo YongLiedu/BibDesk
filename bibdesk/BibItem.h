@@ -23,6 +23,7 @@
 #import "BibTypeManager.h"
 
 @class BibEditor;
+@class BibDocument;
 
 /*!
 @class BibItem
@@ -30,8 +31,7 @@
 @discussion This is the data model class that encapsulates each Bibtex entry. BibItems are created for each entry in a file, and a BibDocument keeps collections of BibItems. They are also created in response to drag-in or paste operations containing BibTeX source. Their textvalue method is used to provide the text that is written to a file on saves.
 
 */
-@interface BibItem : NSObject <NSCopying>{ 
-
+@interface BibItem : NSObject <NSCopying>{
     NSString *fileType;
     NSString *title;     /*! @var title the title of the bibitem. */
     NSString *citeKey;    /*! @var citeKey the citeKey of the bibItem */
@@ -45,7 +45,7 @@
 }
 
 /*!
-    @method initWithType:fileType:authors:
+     @method initWithType:fileType:authors:doc:
      @abstract Initializes an alloc'd BibItem to a type and allows to set the authors.
      @discussion This lets you set the type and the Authors array at initialization time. Call it with an empty array for authArray if you don't want to do that -<em>Don't use nil</em> The authors array is kept up but isn't used much right now. This will change.
  @param fileType A string representing which kind of file this item was read from.
@@ -184,7 +184,7 @@
 */
 - (NSString *)allFieldsString; 
 
-- (NSString *)localURLPath; 
+- (NSString *)localURLPathRelativeTo:(NSString *)base; 
 @end
 
 
