@@ -1583,6 +1583,20 @@
 			settings = {
 			};
 		};
+		3D4373AC07FB3E960007BA84 = {
+			isa = PBXFileReference;
+			lastKnownFileType = image.tiff;
+			name = gear.tiff;
+			path = Images/gear.tiff;
+			refType = 4;
+			sourceTree = "<group>";
+		};
+		3D4373AD07FB3E960007BA84 = {
+			fileRef = 3D4373AC07FB3E960007BA84;
+			isa = PBXBuildFile;
+			settings = {
+			};
+		};
 		3D5D34380770C8C3006AF48A = {
 			isa = PBXFileReference;
 			lastKnownFileType = image.tiff;
@@ -2163,6 +2177,7 @@
 				3D6D748A07EE1F8F00E8A7EF,
 				3D6D748B07EE1F8F00E8A7EF,
 				F994B8F707F5F65F00751DA1,
+				3D4373AD07FB3E960007BA84,
 			);
 			isa = PBXResourcesBuildPhase;
 			runOnlyForDeploymentPostprocessing = 0;
@@ -4538,6 +4553,7 @@
 				F9022DAD0758088000C3F701,
 				F9022DAE0758088000C3F701,
 				F9022DAF0758088000C3F701,
+				3D4373AC07FB3E960007BA84,
 				F9022DB00758088000C3F701,
 				F9022DB10758088000C3F701,
 				F9022DB20758088000C3F701,
