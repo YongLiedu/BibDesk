@@ -19,8 +19,9 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 
     customStringArray = [[NSMutableArray arrayWithCapacity:6] retain];
     [customStringArray setArray:[defaults arrayForKey:BDSKCustomCiteStringsKey]];
-
 }
+
+
 - (void)updateUI{
     NSString *citeString = [defaults stringForKey:BDSKCiteStringKey];
 	NSString *startCiteBracket = [defaults stringForKey:BDSKCiteStartBracketKey]; 
@@ -39,7 +40,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 	}else{
 		[citeBehaviorLine setStringValue:[NSString stringWithFormat:@"\\%@%@key1, key2%@" ,citeString, startCiteBracket, endCiteBracket]];
 	}
-    [editOnPasteButton setState:[defaults integerForKey:BDSKEditOnPasteKey]];
+  //  [editOnPasteButton setState:[defaults integerForKey:BDSKEditOnPasteKey]];
 }
 
 - (IBAction)changeCopyBehavior:(id)sender{
@@ -55,9 +56,11 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
     [self changeSeparateCite:separateCiteCheckButton];
 }
 
-- (IBAction)changeEditOnPaste:(id)sender{
+/*
+ - (IBAction)changeEditOnPaste:(id)sender{
     [defaults setInteger:[sender state] forKey:BDSKEditOnPasteKey];
 }
+*/
 
 #pragma mark ||  Methods to support table view of custom strings.
 
