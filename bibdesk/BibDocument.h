@@ -65,7 +65,6 @@ extern NSString *BDSKBibItemLocalDragPboardType;
 {
     IBOutlet NSTextView *previewField;
     IBOutlet NSWindow* documentWindow;
-    IBOutlet NSWindow *bibListViews;
     IBOutlet BDSKDragTableView *tableView;
     IBOutlet NSMenuItem *ctxCopyBibTex;
     IBOutlet NSMenuItem *ctxCopyTex;

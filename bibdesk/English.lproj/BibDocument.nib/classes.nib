@@ -62,7 +62,6 @@
                 addFieldSheet = NSWindow; 
                 addFieldTextField = NSTextField; 
                 addSourceListItemButton = NSButton; 
-                bibListViews = NSWindow; 
                 ccTableView = BDSKCustomCiteTableView; 
                 columnsMenu = NSMenu; 
                 ctxCopyBibTex = NSMenuItem; 
