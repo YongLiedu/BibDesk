@@ -419,30 +419,32 @@ NSString*   LocalDragPasteboardName = @"edu.ucsd.cs.mmccrack.bibdesk: Local Publ
 }
 
 - (BOOL)readFromFile:(NSString *)fileName ofType:(NSString *)docType{
-    [super readFromFile:fileName ofType:docType];
+    if([super readFromFile:fileName ofType:docType]){
+	NSFileManager *fm = [NSFileManager defaultManager];
+	NSString *newName = [[[self fileName] stringByDeletingPathExtension] stringByAppendingPathExtension:@"bib"];
+	int i = 0;
+	NSArray *writableTypesArray = [[self class] writableTypes];
+	NSString *finalName = [NSString stringWithString:newName];
+	
+	if(![writableTypesArray containsObject:[self fileType]]){
+	    // this sets the file type and name if we open a type for which we are a viewer
+	    // we don't want to overwrite an existing file, though
+	    while([fm fileExistsAtPath:finalName]){
+		i++;
+		finalName = [[[newName stringByDeletingPathExtension] stringByAppendingFormat:@"%i",i] stringByAppendingPathExtension:@"bib"];
+	    }
+	    NSRunAlertPanel(NSLocalizedString(@"Import Successful",
+					      "alert title"),
+			    NSLocalizedString(@"Your file has been converted to BibTeX and assigned a unique name.  To save the file or change the name, please use the Save As command.",
+					      "file has been converted and assigned a unique name, can be saved with save as"),
+			    nil,nil, nil, nil);
+	    [self setFileName:finalName];
+	    [self setFileType:@"bibTeX database"];  // this is the only type we support via the save command
+
+	} return YES;
     
-    NSFileManager *fm = [NSFileManager defaultManager];
-    NSString *newName = [[[self fileName] stringByDeletingPathExtension] stringByAppendingPathExtension:@"bib"];
-    int i = 0;
-    NSArray *writableTypesArray = [[self class] writableTypes];
-    NSString *finalName = [NSString stringWithString:newName];
-    
-    if(![writableTypesArray containsObject:[self fileType]]){
-	// this sets the file type and name if we open a type for which we are a viewer
-	// we don't want to overwrite an existing file, though
-	while([fm fileExistsAtPath:finalName]){
-	    i++;
-	    finalName = [[[newName stringByDeletingPathExtension] stringByAppendingFormat:@"%i",i] stringByAppendingPathExtension:@"bib"];
-	}
-	NSRunAlertPanel(NSLocalizedString(@"Import Successful",
-					  "alert title"),
-			NSLocalizedString(@"Your file has been converted to BibTeX and assigned a unique name.  To save the file or change the name, please use the Save As command.",
-					  "file has been converted and assigned a unique name, can be saved with save as"),
-			nil,nil, nil, nil);
-	[self setFileName:finalName];
-	[self setFileType:@"bibTeX database"];  // this is the only type we support via the save command
-    }
-    return YES;
+    } else return NO;  // if super failed
+
 }
     
 
@@ -641,7 +643,7 @@ stringByAppendingPathComponent:@"BibDesk"]; */
                                         filePath:filePath] retain]; 
 
     // NSLog(@"end %@ elapsed: %f", [NSDate date], [start timeIntervalSinceNow]);
-    
+
     if(hadProblems){
         // run a modal dialog asking if we want to use partial data or give up
         rv = NSRunAlertPanel(NSLocalizedString(@"Error reading file!",@""),
