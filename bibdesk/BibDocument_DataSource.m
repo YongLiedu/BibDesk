@@ -406,8 +406,21 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
         pb = [info draggingPasteboard];
     }
 	
-	NSString * myError;
-	BOOL result = [self addPublicationsFromPasteboard:pb error:&myError];
+    if([[pb types] containsObject:@"CorePasteboardFlavorType 0x57454253"]){ // pasteboard type from Reference Miner, determined using Pasteboard Peeker
+        BOOL yn;
+        NSMutableArray *pubs = [PubMedParser itemsFromString:[pb stringForType:@"CorePasteboardFlavorType 0x57454253"] error:&yn];
+        if(!yn){
+            BibItem *newBI;
+            NSEnumerator *e = [pubs objectEnumerator];
+            while(newBI = [e nextObject]){
+                [self addPublication:newBI];
+            }
+        }
+        return !yn;
+    }
+            
+    NSString * myError;
+    BOOL result = [self addPublicationsFromPasteboard:pb error:&myError];
     
     if (result) [self updateUI];
     return result;

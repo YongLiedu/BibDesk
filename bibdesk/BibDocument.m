@@ -164,7 +164,7 @@ NSString *BDSKBibItemLocalDragPboardType = @"edu.ucsd.cs.mmccrack.bibdesk: Local
     }
    
     [tableView setDoubleAction:@selector(editPubCmd:)];
-    [tableView registerForDraggedTypes:[NSArray arrayWithObjects:NSStringPboardType, NSFilenamesPboardType, nil]];
+    [tableView registerForDraggedTypes:[NSArray arrayWithObjects:NSStringPboardType, NSFilenamesPboardType, @"CorePasteboardFlavorType 0x57454253", nil]];
     [sourceList registerForDraggedTypes:[NSArray arrayWithObjects:NSStringPboardType, NSFilenamesPboardType, BDSKBibItemLocalDragPboardType, nil]];
 
     [splitView setPositionAutosaveName:[self fileName]];
