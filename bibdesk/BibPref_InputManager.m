@@ -25,18 +25,13 @@ NSString *BDSKInputManagerID = @"net.sourceforge.bibdesk.inputmanager";
     // Try to find TextEdit.app so the table isn't empty
     NSString *textEditPath = nil;
     if([ws respondsToSelector:@selector(absolutePathForAppBundleWithIdentifier:)]){
-	textEditPath = [ws absolutePathForAppBundleWithIdentifier:@"com.apple.textedit"];
+	    textEditPath = [ws absolutePathForAppBundleWithIdentifier:@"com.apple.textedit"];
     } else {
-	[enableButton setEnabled:NO];
-	NSAlert *anAlert = [NSAlert alertWithMessageText:@"Error!"
-					   defaultButton:nil
-					 alternateButton:nil
-					     otherButton:nil
-			       informativeTextWithFormat:@"You appear to be using a system version earlier than 10.3.  Autocompletion will not work on systems prior to 10.3."];
-	[anAlert beginSheetModalForWindow:[controlBox window]
-			    modalDelegate:nil
-			   didEndSelector:nil
-			      contextInfo:nil];
+	    [enableButton setEnabled:NO];
+        NSBeginAlertSheet(NSLocalizedString(@"Error!", @"Error!"),
+                          nil, nil, nil, [controlBox window], nil, nil, nil, nil,
+                          NSLocalizedString(@"You appear to be using a system version earlier than 10.3.  Autocompletion requires Mac OS X 10.3 or greater.",
+                                            @"You appear to be using a system version earlier than 10.3.  Autocompletion requires Mac OS X 10.3 or greater.") );
     }
 	
     if(![fm fileExistsAtPath:[applicationSupportPath stringByAppendingPathComponent:@"EnabledApplications.plist"]]){
@@ -47,7 +42,7 @@ NSString *BDSKInputManagerID = @"net.sourceforge.bibdesk.inputmanager";
 	}
 	[fm createDirectoryAtPath:applicationSupportPath attributes:nil];
     } else { // if we found the plist, use that instead
-	appListArray = [[NSArray arrayWithContentsOfFile:[applicationSupportPath stringByAppendingPathComponent:@"EnabledApplications.plist"]] mutableCopy];
+	    appListArray = [[NSArray arrayWithContentsOfFile:[applicationSupportPath stringByAppendingPathComponent:@"EnabledApplications.plist"]] mutableCopy];
     }
     [[appList tableColumnWithIdentifier:@"AppList"] setDataCell:[[[NSBrowserCell alloc] init] autorelease]];
 }
