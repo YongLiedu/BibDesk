@@ -305,7 +305,7 @@ find_commas (name_loc * loc, char *name, int max_commas)
          {
             if (! warned)
             {
-               name_warning (loc, "too many commas in name (removing extras)");
+               name_warning (loc, "too many commas in name \"%s\" (removing extras)", name);
                warned = TRUE;
             }
             name[i] = ' ';
@@ -356,7 +356,7 @@ find_commas (name_loc * loc, char *name, int max_commas)
 
    if (name[j] == ',') 
    {
-      name_warning (loc, "comma(s) at end of name (removing)");
+      name_warning (loc, "comma(s) at end of name \"%s\" (removing)", name);
       while (name[j] == ',')
       {
          name[j--] = (char) 0;
