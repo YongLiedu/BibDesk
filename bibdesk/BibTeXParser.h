@@ -10,7 +10,7 @@
 #import <Cocoa/Cocoa.h>
 #import "btparse.h"
 #import "BibAppController.h"
-#import "BibItem.h"
+@class BibItem;
 #import "BDSKConverter.h"
 
 @interface BibTeXParser : NSObject {
