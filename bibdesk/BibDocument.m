@@ -37,6 +37,7 @@ NSString* BDSKBibTeXStringPboardType = @"edu.ucsd.cs.mmcrack.bibdesk: Local BibT
 
 - (id)init{
     if(self = [super init]){
+        wcArray = [[NSMutableArray alloc] initWithCapacity:1];
         publications = [[NSMutableArray alloc] initWithCapacity:1];
         shownPublications = [[NSMutableArray alloc] initWithCapacity:1];
         frontMatter = [[NSMutableString alloc] initWithString:@""];
@@ -185,11 +186,12 @@ NSString* BDSKBibTeXStringPboardType = @"edu.ucsd.cs.mmcrack.bibdesk: Local BibT
 
 - (void)dealloc{
 #if DEBUG
-    //NSLog(@"bibdoc dealloc");
+    NSLog(@"bibdoc dealloc");
 #endif
     if ([self undoManager]) {
 		[[self undoManager] removeAllActionsWithTarget:self];
 	}
+    [wcArray release];
     [[NSNotificationCenter defaultCenter] removeObserver:self];
     [publications release]; // these should cause the bibitems to get dealloc'ed
     [shownPublications release];
@@ -217,6 +219,9 @@ Handle Notifications by the popup button to update its icon and its menu before 
 	[[[actionMenuButton menu] itemAtIndex:0] setImage:[NSImage imageNamed:@"Action"]];
 }
 
+- (void)addCustomWindowController:(NSWindowController *)windowController{
+    [wcArray addObject:windowController];
+}
 
 
 - (void) updateActionMenu:(id) aNotification {
@@ -1593,6 +1598,8 @@ int generalBibItemCompareFunc(id item1, id item2, void *context){
     BibEditor *e = [pub editorObj];
     if(e == nil){
         e = [[BibEditor alloc] initWithBibItem:pub document:self];
+        [self addCustomWindowController:e];
+        [e release];
     }
     [e show];    //    [e showWindow:self];
     if(force){

@@ -39,7 +39,9 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 	[_jrPart release];
 	[_normalizedName release];
     [[NSNotificationCenter defaultCenter] removeObserver:self];
-    // NSLog(@"bibauthor dealloc");
+#if DEBUG
+    NSLog(@"bibauthor dealloc");
+#endif
     [super dealloc];
 }
 

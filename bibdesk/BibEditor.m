@@ -208,7 +208,8 @@ NSString *BDSKDateModifiedString = @"Date-Modified";
 	// So we still create it there, we just replace it here with a proper one:
 	RYZImagePopUpButton *newViewLocalButton = [[RYZImagePopUpButton alloc] initWithFrame:[viewLocalButton frame]];
 	[[[self window] contentView] replaceSubview:viewLocalButton
-										   with:newViewLocalButton];
+                                               with:newViewLocalButton];
+        [newViewLocalButton release]; // retained by the view
 
 	// copy the 'springs' from the placeholder in IB:
 	[newViewLocalButton setAutoresizingMask:[viewLocalButton autoresizingMask]];
@@ -505,7 +506,7 @@ NSString *BDSKDateModifiedString = @"Date-Modified";
 						 kPlotIconRefNormalFlags,
 						 cautionIconRef); 
 	
-	[cautionIconImage unlockFocus]; 
+	[cautionIconImage unlockFocus];
 }
 
 - (IBAction)showCiteKeyWarning:(id)sender{
@@ -1022,6 +1023,8 @@ NSString *BDSKDateModifiedString = @"Date-Modified";
 	BibPersonController *pc = [person personController];
 	if(pc == nil){
             pc = [[BibPersonController alloc] initWithPerson:person document:theDocument];
+            [theDocument addCustomWindowController:pc];
+            [pc release];
 	}
 	[pc show];
 }

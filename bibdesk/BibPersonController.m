@@ -33,7 +33,9 @@
 }
 
 - (void)dealloc{
-    // NSLog(@"personcontroller dealloc");
+#if DEBUG
+    NSLog(@"personcontroller dealloc");
+#endif
     [_person release];
     [publications release];
     [super dealloc];
