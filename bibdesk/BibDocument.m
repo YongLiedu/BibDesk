@@ -531,7 +531,7 @@ stringByAppendingPathComponent:@"BibDesk"]; */
         return [self loadBibTeXDataRepresentation:data];
     }else if([aType isEqualToString:@"Rich Site Summary File"]){
         return [self loadRSSDataRepresentation:data];
-    }else if([aType isEqualToString:@"PubMed File"]){
+    }else if([aType isEqualToString:@"RIS/Medline File"]){
         return [self loadPubMedDataRepresentation:data];
     }
     return NO;
