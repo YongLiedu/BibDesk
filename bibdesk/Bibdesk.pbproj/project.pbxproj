@@ -1548,6 +1548,7 @@
 				6CA69E0B06D2A38D005F2126,
 				F9A59EDB06DFE4B400C411CA,
 				F9D5D16306E10D44000E02C2,
+				F962B2ED06FF5E1D00003231,
 			);
 			isa = PBXResourcesBuildPhase;
 			runOnlyForDeploymentPostprocessing = 0;
@@ -2318,6 +2319,7 @@
 		};
 		2A37F4B8FDCFA73011CA2CEA = {
 			children = (
+				F962B2EC06FF5E1D00003231,
 				F9D5D16206E10D44000E02C2,
 				F9BC920306E0EBB500B42137,
 				F9A59EDA06DFE4B400C411CA,
@@ -4064,6 +4066,20 @@
 			settings = {
 			};
 		};
+		F962B2EC06FF5E1D00003231 = {
+			isa = PBXFileReference;
+			lastKnownFileType = image.gif;
+			name = TinyFile.gif;
+			path = Images/TinyFile.gif;
+			refType = 4;
+			sourceTree = "<group>";
+		};
+		F962B2ED06FF5E1D00003231 = {
+			fileRef = F962B2EC06FF5E1D00003231;
+			isa = PBXBuildFile;
+			settings = {
+			};
+		};
 		F96D5694063204650060114C = {
 			fileEncoding = 30;
 			isa = PBXFileReference;
@@ -5046,7 +5062,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "/bin/cp $PROJECT_NAME.dmg /tmp\n/usr/bin/hdiutil attach /tmp/$PROJECT_NAME.dmg\n$SYSTEM_DEVELOPER_DIR/Tools/CpMac -r $BUILT_PRODUCTS_DIR/$PROJECT_NAME.app /Volumes/$PROJECT_NAME\nosascript -e \"tell application \\\"Finder\\\"\" -e \"set the position of item 1 of the disk named \\\"$PROJECT_NAME\\\" to {204, 148}\" -e \"end tell\"\n/usr/sbin/diskutil eject /Volumes/$PROJECT_NAME\n/usr/bin/hdiutil convert /tmp/$PROJECT_NAME.dmg -format UDZO -o $HOME/Desktop/$PROJECT_NAME.dmg";
+			shellScript = "/bin/cp $PROJECT_NAME.dmg /tmp\n/usr/bin/hdiutil attach /tmp/$PROJECT_NAME.dmg\n$SYSTEM_DEVELOPER_DIR/Tools/CpMac -r $BUILT_PRODUCTS_DIR/$PROJECT_NAME.app /Volumes/$PROJECT_NAME\nosascript -e \"tell application \\\"Finder\\\"\" -e \"set the position of item 1 of the disk named \\\"$PROJECT_NAME\\\" to {204, 148}\" -e \"end tell\"\n/usr/sbin/diskutil eject /Volumes/$PROJECT_NAME\n/usr/bin/hdiutil convert /tmp/$PROJECT_NAME.dmg -format UDZO -imagekey zlib-level=9 -o $HOME/Desktop/$PROJECT_NAME.dmg\n/usr/bin/hdiutil internet-enable -YES $HOME/Desktop/$PROJECT_NAME.dmg";
 		};
 		F9FC662A06A9C6750016151E = {
 			buildPhases = (
