@@ -137,14 +137,16 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
               // auto-completion stuff
 - (void)addString:(NSString *)string forCompletionEntry:(NSString *)entry{
     NSMutableArray *completionArray = nil;
-    if (![[_autoCompletionDict allKeys] containsObject:entry]) {
-        completionArray = [[NSMutableArray alloc] initWithCapacity:5];
+    BOOL keyExists = [[_autoCompletionDict allKeys] containsObject:entry];
+    if (!keyExists) {
+        completionArray = [NSMutableArray arrayWithCapacity:5];
     }else{
-        completionArray = [[_autoCompletionDict objectForKey:entry] mutableCopy];
+        completionArray = [_autoCompletionDict objectForKey:entry];
     }
     [completionArray addObject:string];
-    [completionArray autorelease];
-    [_autoCompletionDict setObject:[completionArray copy] forKey:entry];
+    if(!keyExists){
+        [_autoCompletionDict setObject:completionArray forKey:entry];
+    }
 }
 
 - (NSFormatter *)formatterForEntry:(NSString *)entry{
