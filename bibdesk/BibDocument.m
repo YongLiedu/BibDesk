@@ -448,6 +448,7 @@ NSString *BDSKBibItemLocalDragPboardType = @"edu.ucsd.cs.mmccrack.bibdesk: Local
 		aPub = [shownPublications objectAtIndex:[row intValue]];
 		[aPub setCiteKey:[aPub suggestedCiteKey]];
 	}
+    [self updateUI];
 }
 
 - (NSString *)windowNibName{

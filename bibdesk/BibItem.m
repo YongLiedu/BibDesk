@@ -751,7 +751,8 @@ void _setupFonts(){
     NSString *component = nil;
     
     while(component = [e nextObject]){
-        component = [component stringByTrimmingCharactersInSet:[[NSCharacterSet alphanumericCharacterSet] invertedSet]];
+        if(![component isEqualToString:@""]) // stringByTrimmingCharactersInSet will choke on an empty string
+            component = [component stringByTrimmingCharactersInSet:[[NSCharacterSet alphanumericCharacterSet] invertedSet]];
         if([component length] > 3){
             [result appendString:[[component substringToIndex:1] uppercaseString]];
         }
