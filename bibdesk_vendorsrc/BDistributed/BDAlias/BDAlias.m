@@ -282,6 +282,42 @@ static CFStringRef FSRefToPathCopy(const FSRef *inRef)
     return [result autorelease];
 }
 
+- (NSString *)fullPathRelativeToPathNoUI:(NSString *)relPath
+{
+    OSStatus	anErr = noErr;
+    FSRef	relPathRef;
+    FSRef	tempRef;
+    NSString	*result = nil;
+    Boolean	wasChanged;
+    
+    if (_alias != NULL) {
+        if (relPath != nil) {
+            anErr = PathToFSRef((CFStringRef)relPath, &relPathRef);
+            
+            if (anErr != noErr) {
+                return NULL;
+            }
+            
+            anErr = FSResolveAliasWithMountFlags(&relPathRef, _alias, &tempRef, &wasChanged, kResolveAliasFileNoUI);
+        } else {
+            anErr = FSResolveAliasWithMountFlags(NULL, _alias, &tempRef, &wasChanged, kResolveAliasFileNoUI);
+        }
+        
+        if (anErr != noErr) {
+            return NULL;
+        }
+        
+        result = (NSString *)FSRefToPathCopy(&tempRef);
+    }
+    
+    return [result autorelease];
+}
+
+- (NSString *)fullPathNoUI
+{
+    return [self fullPathRelativeToPathNoUI:nil];
+}
+
 + (BDAlias *)aliasWithAliasHandle:(AliasHandle)alias
 {
     return [[[BDAlias alloc] initWithAliasHandle:alias] autorelease];

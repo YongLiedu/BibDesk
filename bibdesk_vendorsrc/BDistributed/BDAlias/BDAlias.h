@@ -61,6 +61,17 @@
 - (NSString *)fullPath;
 - (NSString *)fullPathRelativeToPath:(NSString *)relPath;
 
+- (NSString *)fullPathNoUI;
+/*!
+    @method     fullPathRelativeToPathNoUI:
+    @abstract   Identical to fullPathRelativeToPath:, except this method won't mount disk images or remote volumes automatically
+                to resolve an alias reference.
+    @discussion (comprehensive description)
+    @param      relPath
+    @result     Full path to the file
+*/
+- (NSString *)fullPathRelativeToPathNoUI:(NSString *)relPath;
+
 + (BDAlias *)aliasWithAliasHandle:(AliasHandle)alias;
 + (BDAlias *)aliasWithData:(NSData *)data;
 + (BDAlias *)aliasWithPath:(NSString *)fullPath;
