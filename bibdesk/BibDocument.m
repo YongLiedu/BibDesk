@@ -2671,6 +2671,7 @@ This method always returns YES. Even if some or many operations fail.
 }
 
 - (void)setTableFont{
+    // NSLog(@"[%@ %@]", NSStringFromSelector(_cmd));
     // The font we're using now
     NSFont *font = [NSFont fontWithName:[[OFPreferenceWrapper sharedPreferenceWrapper] objectForKey:BDSKTableViewFontKey]
                                    size:
@@ -2679,6 +2680,7 @@ This method always returns YES. Even if some or many operations fail.
 	[tableView setRowHeight:[font defaultLineHeightForFont]+2];
 	[tableView setFont:font];
 	[tableView tile];
+        [tableView reloadData]; // othewise the change isn't immediately visible
 }
 
 - (void)highlightBib:(BibItem *)bib{

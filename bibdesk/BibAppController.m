@@ -576,28 +576,6 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
     }
 }
 
-// this is stolen from the preferences because i'm not sure how to make my view a first responder.
-- (void)changeFont:(id)fontManager{
-    NSFont *newFont;
-    OFPreferenceWrapper *pw = [OFPreferenceWrapper sharedPreferenceWrapper];
-    NSFont *oldFont =
-        [NSFont fontWithName:[pw objectForKey:BDSKTableViewFontKey]
-                        size:[pw floatForKey:BDSKTableViewFontSizeKey]];
-
-    newFont = [[NSFontPanel sharedFontPanel] panelConvertFont:oldFont];
-    [pw setObject:[newFont fontName] forKey:BDSKTableViewFontKey];
-    [pw setFloat:[newFont pointSize] forKey:BDSKTableViewFontSizeKey];
-    //    [fontPreviewField setStringValue:
-    //        [[newFont displayName] stringByAppendingFormat:@" %.0f",[newFont pointSize]]];
-    // make it have live updates:
-    //  [[[NSDocumentController sharedDocumentController] documents]
-    //makeObjectsPerformSelector:@selector(updateUI)];
-        [pw synchronize];
-        [[NSNotificationCenter defaultCenter] postNotificationName:BDSKTableViewFontChangedNotification
-                                                            object:nil];
-}
-
-
 - (IBAction)showPreferencePanel:(id)sender{
     [[OAPreferenceController sharedPreferenceController] showPreferencesPanel:nil];
 }
