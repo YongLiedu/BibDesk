@@ -21,7 +21,10 @@ This will determine any cite command beginning with \cite as well as \fullcite a
 Are any others needed?
 2. Determines cite key to be completed and returns its range
 The cite key will be the text (no spaces) between the insertion point and the next { or , preceding it.
-    */
+	
+The heuristics we use here aren't particularly good. Neither the idea nor the implementation. Basically we simply see whether there was a \cite command recently (within 100 characters) and assume it's ours then. Determining whether we _really_ are in the right context for this seems quite hard as \cite commands can have space, newlines, optional parameters wiht about everything in them.
+However, we will simply add the usual completions after our own for safety...
+*/
 - (NSRange) citeKeyRange {
     NSString * s = [[self textStorage] string];
     int sLen = [s length];
@@ -118,7 +121,7 @@ requires X.3
 		    NSMutableArray * returnArray = [NSMutableArray arrayWithCapacity:2];
 		    if (n == 1) {
 			// if we have only one item for completion, artificially add a second one, so the user can review the full information before adding it to the document.
-			[returnArray addObject:NSLocalizedString(@"Hint: Just type } or , to insert the current item.",@"Hint: Just type } or , to insert the current item.")];
+			[returnArray addObject:kHint];
 			//  also set the index to 1, so the 'heading' line isn't selected initially.
 			// THIS DOESN'T SEEM TO WORK!
 			*index = 1;
@@ -130,12 +133,15 @@ requires X.3
 		    while (n) {
 			// run through the list top to bottom, keeping in mind it is 1 based.
 			stringAEDesc = [result descriptorAtIndex:n];
-			completionString = [stringAEDesc stringValue];
+			// insert 'identification string at end so we'll recognise our own completions in -insertCompletion:for...
+			completionString = [[stringAEDesc stringValue] stringByAppendingString:kBibDeskInsertion];
 			
 			n--;
 			
 			[returnArray insertObject:completionString atIndex:0];
 		    }
+			// also add standard completion
+			[returnArray addObjectsFromArray:[super completionsForPartialWordRange:charRange indexOfSelectedItem:index]];
 		    return returnArray;
 		} 
 	    } // no script running error	
@@ -153,33 +159,25 @@ requires X.3
 */
 - (void)insertCompletion:(NSString *)word forPartialWordRange:(NSRange)charRange movement:(int)movement isFinal:(BOOL)flag {
     
-    if (!flag) {
-	// this is just a preliminary completion (suggestion)
-	[super insertCompletion:word forPartialWordRange:charRange movement:movement isFinal:flag];
-    } 
-    else {
-	// final step
-	if([word isEqualToString:NSLocalizedString(@"Matching publications:",@"Matching publications:")]) {
-	    // don't do anything if we get the heading
-	    [super insertCompletion:@"" forPartialWordRange:charRange movement:NSCancelTextMovement isFinal:YES];
-	    return;
-	}
-	
-	if ((movement == NSReturnTextMovement) || (movement == NSRightTextMovement) || (movement == NSLeftTextMovement) || ( movement == NSTabTextMovement) || ( movement == NSBacktabTextMovement) ||[[[NSApp currentEvent] characters] isEqualToString:@"}"]) {
-	    // we actually want to insert
-	    
-	    // strip the comment for this, this assumes cite keys can't have spaces in them
-	    NSRange firstSpace = [word rangeOfString:@" "];
-	    NSString * replacementString = [word substringToIndex:firstSpace.location];
-	    
-	    // [[[self textStorage] mutableString] replaceCharactersInRange:NSMakeRange(charRange.location,[word length]) withString:replacementString];
-	    [super insertCompletion:replacementString forPartialWordRange:charRange movement:movement isFinal:flag];
+	if (!flag || ([word rangeOfString:kBibDeskInsertion].location == NSNotFound)) {
+		// this is just a preliminary completion (suggestion) or the word wasn't suggested by us anyway, so let the text system deal with this
+		[super insertCompletion:word forPartialWordRange:charRange movement:movement isFinal:flag];
 	}
 	else {
-	    // in case of cancellation act as usual.
-	    [super insertCompletion:word forPartialWordRange:charRange movement:movement isFinal:flag];
+		// final step
+		if([word isEqualToString:kHint]) {
+			// don't do anything if we get the heading 
+			[super insertCompletion:@"" forPartialWordRange:charRange movement:NSCancelTextMovement isFinal:YES];
+			return;
+		}
+	
+		// strip the comment for this, this assumes cite keys can't have spaces in them
+		NSRange firstSpace = [word rangeOfString:@" "];
+		NSString * replacementString = [word substringToIndex:firstSpace.location];
+
+		[super insertCompletion:replacementString forPartialWordRange:charRange movement:movement isFinal:flag];
 	}
-    }
+
 }
 
 @end

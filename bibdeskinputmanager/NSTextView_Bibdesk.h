@@ -14,6 +14,11 @@
 #define kHandlerName (@"getcitekeys")
 #define noScriptErr 0
 
+// string to reconise the string we inserted
+#define kBibDeskInsertion NSLocalizedString(@" (Bibdesk insertion)", @" (Bibdesk insertion)")
+// hint string 
+#define kHint NSLocalizedString(@"Hint: Just type } or , to insert the current item.",@"Hint: Just type } or , to insert the current item.")
+
 
 @interface NSTextView_Bibdesk: NSTextView
 - (NSRange) citeKeyRange;
