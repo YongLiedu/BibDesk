@@ -100,7 +100,7 @@ extern NSString* BDSKBibTeXStringPboardType;
     // All display related operations should use shownPublications
     // in aspect oriented objective c i could have coded that assertion!
 	
-	NSMutableArray *authors;
+	NSMutableSet *authors;
 
     NSMutableArray *bibEditors;
     NSString *quickSearchKey;

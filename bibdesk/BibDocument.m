@@ -105,7 +105,6 @@ NSString* BDSKBibTeXStringPboardType = @"edu.ucsd.cs.mmcrack.bibdesk: Local BibT
 
      tableColumnsChanged = YES;
      sortDescending = YES;
-	 [self refreshAuthors];
     }
     return self;
 }
@@ -292,7 +291,8 @@ Handle Notifications by the popup button to update its icon and its menu before 
 	if(wasLastRequest){
 	//	NSLog(@"was last request in handleBibItemAddDel");
 		// This method should also check the publication to see if it's selected?
-		// and maybe also resort it... - maybe not resort this. 
+		// and maybe also resort it... - maybe not resort this.
+        [self refreshAuthors];
 		[self updateUI];
 	}
 }
@@ -300,37 +300,17 @@ Handle Notifications by the popup button to update its icon and its menu before 
 
 // accessor method used by AppleScript (at least)
 - (NSArray*) authors {
-	return authors;
+	return [authors allObjects];
 }
 
 
 - (void)refreshAuthors{
     NSEnumerator *pubE = [shownPublications objectEnumerator];
-    NSEnumerator *authE;
-    BibAuthor *auth;
-    NSArray *authArray;
-    NSMutableArray *tmpTotalAuths = [NSMutableArray arrayWithCapacity:6];
     BibItem *pub;
-    BibAuthor *bibAuthor = nil;
-    unsigned i;
-
-    [tmpTotalAuths  setArray:authors];
 
     while (pub = [pubE nextObject]) {
-        // for each pub, get its authors
-        authArray = [pub pubAuthors];
-        authE = [authArray objectEnumerator];
-        while(auth = [authE nextObject]){
-            // for each author auth, set i to be the index of auth in the temp. array.
-            i = [tmpTotalAuths indexOfObject:auth];
-            if(i == NSNotFound){
-                bibAuthor = [BibAuthor  authorWithName:[auth name] andPub:pub]; 
-                [authors addObject:bibAuthor];
-                [tmpTotalAuths addObject:auth];
-            }else{
-                [[authors objectAtIndex:i] addPub:pub];
-            }
-        }
+        // for each pub, get its authors and add them to the set
+        [authors addObjectsFromArray:[pub pubAuthors]];
     }
     
 }
@@ -1858,7 +1838,6 @@ This method always returns YES. Even if some or many operations fail.
 
 - (void)updateUI{
 
-	[self refreshAuthors];
     [self setTableFont];
 	[tableView reloadData];
 
@@ -2084,10 +2063,13 @@ This method always returns YES. Even if some or many operations fail.
 
 - (void)handleBibItemChangedNotification:(NSNotification *)notification{
 	// dead simple for now
-	// NSLog(@"got handleBibItemChangedNotification with userinfo %@", [notification userInfo]);
+	 NSLog(@"got handleBibItemChangedNotification with userinfo %@", [notification userInfo]);
 	NSDictionary *userInfo = [notification userInfo];
 	
 	NSString *changedKey = [userInfo objectForKey:@"key"];
+    
+    [self refreshAuthors];
+    
 	if(!changedKey){
 		[tableView  reloadData];
 		return;
