@@ -36,16 +36,15 @@ static NSCharacterSet *SkipSet;
     workingSet = [[NSCharacterSet decomposableCharacterSet] mutableCopy];
     [workingSet addCharactersInRange:highCharRange];
     FinalCharSet = [workingSet copy];
-    
+    [workingSet release];
+	
     // build a character set SkipSet of stuff that we do not need to convert
     // making the static NSCharacterSet cuts another second off save time with tugboat.bib
     NSRange skipRange;
     skipRange.location = 0;
     skipRange.length = 127;
-    workingSet = [[NSCharacterSet characterSetWithRange:skipRange] mutableCopy];// Why is this necessary? (amaxwell)
-    SkipSet = [workingSet copy];
+    SkipSet = [[NSCharacterSet characterSetWithRange:skipRange] retain];
 
-    [workingSet release];
 }
 
 + (NSString *)stringByTeXifyingString:(NSString *)s{
@@ -73,21 +72,21 @@ static NSCharacterSet *SkipSet;
     // tell fastScan to skip characters we know how to convert, then if
     // it picks up something that is not in that range, run OFCharacterScanner
     [fastScan setCharactersToBeSkipped:SkipSet];
-     if([fastScan scanCharactersFromSet:FinalCharSet intoString:nil]){
+	if([fastScan scanCharactersFromSet:FinalCharSet intoString:nil]){
 	    while(scannerHasData(scanner)){
-		[scanner scanUpToCharacterInSet:FinalCharSet];
-		tmpConv = [scanner readCharacterCount:1];
-		if(TEXString = [conversions objectForKey:tmpConv]){
-		    [convertedSoFar replaceCharactersInRange:NSMakeRange((scannerScanLocation(scanner) + offset - 1), 1)
-						  withString:TEXString];
-		    offset += [TEXString length] - 1;    // we're adding length-1 characters, so we have to make sure we insert at the right point in the future.
-		}else{
-
-		}
+			[scanner scanUpToCharacterInSet:FinalCharSet];
+			tmpConv = [scanner readCharacterCount:1];
+			if(TEXString = [conversions objectForKey:tmpConv]){
+				[convertedSoFar replaceCharactersInRange:NSMakeRange((scannerScanLocation(scanner) + offset - 1), 1)
+											  withString:TEXString];
+				offset += [TEXString length] - 1;    // we're adding length-1 characters, so we have to make sure we insert at the right point in the future.
+			}else{
+				
+			}
 	    }
-     
+		
     }
-
+	
     //clean up
     [scanner release];
     [fastScan release];
@@ -108,7 +107,7 @@ static NSCharacterSet *SkipSet;
                                     withString:@"{\\newline}" options: NSCaseInsensitiveSearch
                                          range:NSMakeRange(0, [convertedSoFar length])];
     
-    return([convertedSoFar autorelease]); // was stringWithString:convertedSoFar - this should be faster by a lot
+    return([convertedSoFar autorelease]);
 }
 
 
