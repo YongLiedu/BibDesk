@@ -417,7 +417,7 @@ int generalBibItemCompareFunc(id item1, id item2, void *context);
  @discussion \253discussion\273
  
 */
-//- (NSMenu *)menuForTableColumn:(NSTableColumn *)tc row:(int)row;
+- (NSMenu *)menuForTableColumn:(NSTableColumn *)tc row:(int)row;
 
 /*!
 @method columnsMenuAddTableColumnName:enabled:

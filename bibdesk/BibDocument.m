@@ -2015,13 +2015,11 @@ This method always returns YES. Even if some or many operations fail.
     [NSApp endSheet:addFieldSheet returnCode:[sender tag]];
 }
 
-/*
 - (NSMenu *)menuForTableColumn:(NSTableColumn *)tc row:(int)row{
 	// for now, just returns the same all the time.
 	// Could customize menu for details of selected item.
 	return columnsMenu;
 }
-*/
 
 #define ADD_MENUITEM_TAG 47
 - (void)columnsMenuAddTableColumnName:(NSString *)name enabled:(BOOL)yn{
