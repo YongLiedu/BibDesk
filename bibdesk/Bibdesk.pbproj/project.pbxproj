@@ -500,7 +500,7 @@
 					<key>TableView Font</key>
 					<string>LucidaGrande</string>
 					<key>TableView Font Size</key>
-					<real>1.200000000000000e+01</real>
+					<real>12</real>
 					<key>View-by Field</key>
 					<string>Title</string>
 				</dict>
@@ -630,6 +630,7 @@
 				F59CA11E02F06A7701EF0A84,
 			);
 			isa = PBXHeadersBuildPhase;
+			runOnlyForDeploymentPostprocessing = 0;
 		};
 		2A37F4C8FDCFA73011CA2CEA = {
 			fileRef = 2A37F4AEFDCFA73011CA2CEA;
@@ -673,6 +674,7 @@
 				F508016902F9E9C201A8020B,
 			);
 			isa = PBXResourcesBuildPhase;
+			runOnlyForDeploymentPostprocessing = 0;
 		};
 		2A37F4CEFDCFA73011CA2CEA = {
 			buildActionMask = 2147483647;
@@ -708,6 +710,7 @@
 				F59CA11D02F06A7701EF0A84,
 			);
 			isa = PBXSourcesBuildPhase;
+			runOnlyForDeploymentPostprocessing = 0;
 		};
 		2A37F4CFFDCFA73011CA2CEA = {
 			fileRef = 2A37F4ACFDCFA73011CA2CEA;
@@ -735,6 +738,7 @@
 				F51C6F4E02A98010010DDB27,
 			);
 			isa = PBXFrameworksBuildPhase;
+			runOnlyForDeploymentPostprocessing = 0;
 		};
 //2A0
 //2A1
@@ -1297,6 +1301,7 @@
 			isa = PBXShellScriptBuildPhase;
 			neededFileNames = (
 			);
+			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
 			shellScript = "/Users/mike/Code/Applications/headerdoc-6/customheaderDoc2HTML.pl -o /Users/mike/Code/CVS/Other/Bibdesk/doc /Users/mike/Code/CVS/Other/Bibdesk";
 		};
@@ -1309,6 +1314,7 @@
 			isa = PBXShellScriptBuildPhase;
 			neededFileNames = (
 			);
+			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
 			shellScript = "/Users/mike/Code/Applications/headerdoc-6/gatherHeaderDoc.pl /Users/mike/Code/CVS/Other/Bibdesk/doc \n";
 		};
@@ -1654,6 +1660,7 @@
 				F561F4A6025863A001709AC4,
 			);
 			isa = PBXCopyFilesBuildPhase;
+			runOnlyForDeploymentPostprocessing = 0;
 		};
 		F57F2CC001DAA29301E0D44B = {
 			fileRef = F56DCB5601CFE5EF01227D25;
