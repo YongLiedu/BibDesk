@@ -1,9 +1,9 @@
-// Copyright 1997-2003 Omni Development, Inc.  All rights reserved.
+// Copyright 1997-2004 Omni Development, Inc.  All rights reserved.
 //
 // This software may only be used and reproduced according to the
 // terms in the file OmniSourceLicense.html, which should be
 // distributed with this project and can also be found at
-// http://www.omnigroup.com/DeveloperResources/OmniSourceLicense.html.
+// <http://www.omnigroup.com/developer/sourcecode/sourcelicense/>.
 
 #import <OmniAppKit/OAScrollView.h>
 
@@ -19,7 +19,7 @@
 #import "OAPageSelectableDocumentProtocol.h"
 #import "OAZoomableViewProtocol.h"
 
-RCS_ID("$Header: /Network/Source/CVS/OmniGroup/Frameworks/OmniAppKit/Widgets.subproj/OAScrollView.m,v 1.46 2003/04/15 03:52:18 kc Exp $")
+RCS_ID("$Header: /Network/Source/CVS/OmniGroup/Frameworks/OmniAppKit/Widgets.subproj/OAScrollView.m,v 1.55 2004/02/10 04:07:38 kc Exp $")
 
 @interface OAScrollView (Private)
 - (void)_setupScrollView;
@@ -30,14 +30,9 @@ RCS_ID("$Header: /Network/Source/CVS/OmniGroup/Frameworks/OmniAppKit/Widgets.sub
 - (void)zoomOut:(id)sender;
 - (void)addOrRemoveScrollersIfNeeded;
 - (void)autoScrollTile;
-- (NSSize)contentSizeForHorizontalScroller:(BOOL)hasHorizontalScroller verticalScroller:(BOOL)hasVerticalScroller;
 @end
 
 @implementation OAScrollView
-
-#if defined(RHAPSODY) || defined(WIN32)
-#define SCROLLERS_ON_RIGHT
-#endif
 
 static int startingScales[] = {50, 75, 100, 125, 150, 200, 400, 0};
 static NSFont *smallSystemFont;
@@ -92,23 +87,34 @@ static NSFont *smallSystemFont;
     [super dealloc];
 }
 
-- (NSSize)contentSizeForFrameSize:(NSSize)fSize;
+- (NSSize)contentSizeForFrameSize:(NSSize)frameSize hasHorizontalScroller:(BOOL)hasHorizontalScroller hasVerticalScroller:(BOOL)hasVerticalScroller;
 {
     NSSize contentSize;
     float scrollerWidthDifference;
 
-    contentSize = [isa contentSizeForFrameSize:fSize hasHorizontalScroller:[self hasHorizontalScroller] hasVerticalScroller:[self hasVerticalScroller] borderType:[self borderType]];
-    
-    if ([self hasVerticalScroller]) {
+    contentSize = [isa contentSizeForFrameSize:frameSize hasHorizontalScroller:hasHorizontalScroller hasVerticalScroller:hasVerticalScroller borderType:[self borderType]];
+
+    if (hasVerticalScroller) {
         scrollerWidthDifference = [NSScroller scrollerWidthForControlSize:NSRegularControlSize] - [NSScroller scrollerWidthForControlSize:[[self verticalScroller] controlSize]];
         contentSize.width += scrollerWidthDifference;
     }
-    if ([self hasHorizontalScroller]) {
+
+    if (hasHorizontalScroller) {
         scrollerWidthDifference = [NSScroller scrollerWidthForControlSize:NSRegularControlSize] - [NSScroller scrollerWidthForControlSize:[[self horizontalScroller] controlSize]];
         contentSize.height += scrollerWidthDifference;
     }
-    
+
     return contentSize;
+}
+
+- (NSSize)contentSizeForFrameSize:(NSSize)fSize;
+{
+    return [self contentSizeForFrameSize:fSize hasHorizontalScroller:[self hasHorizontalScroller] hasVerticalScroller:[self hasVerticalScroller]];
+}
+
+- (NSSize)contentSizeForHorizontalScroller:(BOOL)hasHorizontalScroller verticalScroller:(BOOL)hasVerticalScroller;
+{
+    return [self contentSizeForFrameSize:[self frame].size hasHorizontalScroller:hasHorizontalScroller hasVerticalScroller:hasVerticalScroller];
 }
 
 - (void)zoomToScale:(double)newZoomFactor;
@@ -193,6 +199,11 @@ static NSFont *smallSystemFont;
     [self tile];
 }
 
+- (ScrollingBehavior)scrollBehavior;
+{
+    return scrollBehavior;
+}
+
 - (void)setScrollBehavior:(ScrollingBehavior)behavior;
 {
     scrollBehavior = behavior;
@@ -206,6 +217,11 @@ static NSFont *smallSystemFont;
             [self setHasVerticalScroller:NO];
             break;
         case AUTO_SCROLL:
+        case VERTICAL_SCROLL:
+            // Scrollers will be dynamically adjusted as needed
+            break;
+        case MANUAL_SCROLL:
+            // Someone else will control the scrollers
             break;
     }
 }
@@ -352,10 +368,7 @@ static NSFont *smallSystemFont;
     if (docView == nil)
         docViewSize = NSZeroSize;
     else if ([docView respondsToSelector:@selector(idealSizeForAvailableSize:)])
-        docViewSize = [(id)docView idealSizeForAvailableSize:[isa contentSizeForFrameSize:availableSize
-                                                                    hasHorizontalScroller:(scrollBehavior == YES_SCROLL)
-                                                                    hasVerticalScroller:(scrollBehavior == YES_SCROLL)
-                                                                    borderType:[self borderType]]];
+        docViewSize = [(id)docView idealSizeForAvailableSize:[self contentSizeForFrameSize:availableSize hasHorizontalScroller:(scrollBehavior == YES_SCROLL) hasVerticalScroller:(scrollBehavior == YES_SCROLL)]];
     else
         docViewSize = [docView frame].size;
 
@@ -368,12 +381,21 @@ static NSFont *smallSystemFont;
             hasHorizontalScroller = NO;
             hasVerticalScroller = NO;
             break;
+        case VERTICAL_SCROLL:
+            scrollViewSize = [isa frameSizeForContentSize:docViewSize hasHorizontalScroller:NO hasVerticalScroller:NO borderType:[self borderType]];
+            hasVerticalScroller = scrollViewSize.height > availableSize.height;
+            hasHorizontalScroller = NO;
+            break;
         default:
         case AUTO_SCROLL:
             scrollViewSize = [isa frameSizeForContentSize:docViewSize hasHorizontalScroller:NO hasVerticalScroller:NO borderType:[self borderType]];
             hasVerticalScroller = scrollViewSize.height > availableSize.height;
             scrollViewSize = [isa frameSizeForContentSize:docViewSize hasHorizontalScroller:NO hasVerticalScroller:hasVerticalScroller borderType:[self borderType]];
             hasHorizontalScroller = scrollViewSize.width > availableSize.width;
+            break;
+        case MANUAL_SCROLL:
+            hasHorizontalScroller = [self hasHorizontalScroller];
+            hasVerticalScroller = [self hasVerticalScroller];
             break;
     }
     scrollViewSize = [isa frameSizeForContentSize:docViewSize hasHorizontalScroller:hasHorizontalScroller hasVerticalScroller:hasVerticalScroller borderType:[self borderType]];
@@ -423,7 +445,7 @@ static NSFont *smallSystemFont;
         [scalePopUpButton setFont:[NSFont systemFontOfSize:10]];
 	for (scaleIndex = 0; startingScales[scaleIndex] != 0; scaleIndex++) {
 	    NSString *title;
-	    NSMenuItem *scaleCell;
+	    id <NSMenuItem> scaleCell;
 
 	    title = [NSString stringWithFormat:@"%d%%", startingScales[scaleIndex]];
 	    [scalePopUpButton addItemWithTitle:title];
@@ -460,7 +482,7 @@ static NSFont *smallSystemFont;
     clipView = [self contentView];
     docView = [clipView documentView];
 
-    if (scrollBehavior == AUTO_SCROLL)
+    if (scrollBehavior == AUTO_SCROLL || scrollBehavior == VERTICAL_SCROLL)
         [self autoScrollTile];
     else
         [super tile];
@@ -480,42 +502,25 @@ static NSFont *smallSystemFont;
 
         if (scalePopUpButton) {
             NSDivideRect(widgetsAreaRect, &widgetRect, &widgetsAreaRect, 80.0, NSMinXEdge);
-#ifndef RHAPSODY
-            widgetRect = NSInsetRect(widgetRect, 1.0, 1.0);
-#else
             widgetRect = NSInsetRect(widgetRect, 1.0, -1.0);
-#endif
             [scalePopUpButton setFrame:widgetRect];
         }
 
         if (pagePromptTextField && hasMultiplePages) {
             NSDivideRect(widgetsAreaRect, &widgetRect, &widgetsAreaRect, 39, NSMinXEdge);
             widgetRect = NSInsetRect(widgetRect, 1.0, 0.0);
-#ifndef RHAPSODY
-            widgetRect.origin.y -= 3.0;
-#else
             widgetRect.origin.y -= 1.0;
-#endif
             [pagePromptTextField setFrame:widgetRect];
 
             NSDivideRect(widgetsAreaRect, &widgetRect, &widgetsAreaRect, 37, NSMinXEdge);
             widgetRect = NSInsetRect(widgetRect, 1.0, 0.0);
-#ifndef RHAPSODY
-            widgetRect.origin.y += 1.0;
-            widgetRect.size.height -= 1.0;
-#else
             widgetRect.origin.y -= 1.0;
             widgetRect.size.height += 2.0;
-#endif
             [pageNumberTextField setFrame:widgetRect];
 
             NSDivideRect(widgetsAreaRect, &widgetRect, &widgetsAreaRect, 40, NSMinXEdge);
             widgetRect = NSInsetRect(widgetRect, 1.0, 0.0);
-#ifndef RHAPSODY
-            widgetRect.origin.y -= 3.0;
-#else
             widgetRect.origin.y -= 1.0;
-#endif
             [pagesCountTextField setFrame:widgetRect];
         }
 
@@ -748,7 +753,7 @@ static NSFont *smallSystemFont;
     }
 
     [self displayIfNeeded];
-#warning Need to collapse keyboard input events here
+    // TODO: Need to collapse keyboard input events here
     // Used to call:
     // PSWait();
 }
@@ -807,13 +812,10 @@ static NSFont *smallSystemFont;
 	aRect = [[self verticalScroller] frame];
 	if (!NSIsEmptyRect(NSIntersectionRect(aRect, rect))) {
 	    somethingToDraw = YES;
-#ifndef SCROLLERS_ON_RIGHT
-            CGContextMoveToPoint(context, NSMaxX(aRect) + 1.0, NSMinY(aRect) + border);
-            CGContextAddLineToPoint(context, NSMaxX(aRect) + 1.0, NSMaxY(aRect) - 2.0 * border);
-#else
+
+            // Scrollers are on the right
             CGContextMoveToPoint(context, NSMinX(aRect) - 1.0, NSMinY(aRect) + border);
             CGContextAddLineToPoint(context, NSMinX(aRect) - 1.0, NSMaxY(aRect) - 2.0 * border);
-#endif
         }
     }
     if (somethingToDraw) {
@@ -903,7 +905,7 @@ static NSFont *smallSystemFont;
 
 - (void)addOrRemoveScrollersIfNeeded;
 {
-    if (scrollBehavior == AUTO_SCROLL) {
+    if (scrollBehavior == AUTO_SCROLL || scrollBehavior == VERTICAL_SCROLL) {
         NSRect docViewFrame;
         NSSize potentialContentSize;
         BOOL needsVerticalScroller, needsHorizontalScroller;
@@ -914,7 +916,7 @@ static NSFont *smallSystemFont;
         if (!needsVerticalScroller) {
             potentialContentSize = [self contentSizeForHorizontalScroller:NO verticalScroller:NO];
         }
-        needsHorizontalScroller = NSWidth(docViewFrame) > potentialContentSize.width;
+        needsHorizontalScroller = (NSWidth(docViewFrame) > potentialContentSize.width) && scrollBehavior != VERTICAL_SCROLL;
         if ([self hasVerticalScroller] != needsVerticalScroller ||
             [self hasHorizontalScroller] != needsHorizontalScroller) {
             [self tile];
@@ -952,7 +954,7 @@ static NSFont *smallSystemFont;
         [super tile];
     }
 
-    needsHorizontalScroller = NSWidth([docView frame]) > [self contentSize].width;
+    needsHorizontalScroller = (NSWidth([docView frame]) > [self contentSize].width) && scrollBehavior != VERTICAL_SCROLL;
     if (needsHorizontalScroller != [self hasHorizontalScroller]) {
 #if 0
         NSLog(@"%@ needsHorizontalScroller? %.1f > %.1f = %d", OBShortObjectDescription(self), NSWidth([docView frame]), [self contentSize].width, needsHorizontalScroller);
@@ -960,11 +962,6 @@ static NSFont *smallSystemFont;
         [self setHasHorizontalScroller:needsHorizontalScroller];
         [super tile];
     }
-}
-
-- (NSSize)contentSizeForHorizontalScroller:(BOOL)hasHorizontalScroller verticalScroller:(BOOL)hasVerticalScroller;
-{
-    return [isa contentSizeForFrameSize:[self frame].size hasHorizontalScroller:hasHorizontalScroller hasVerticalScroller:hasVerticalScroller borderType:[self borderType]];
 }
 
 @end

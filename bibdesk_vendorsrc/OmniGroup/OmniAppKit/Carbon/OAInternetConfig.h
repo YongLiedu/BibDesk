@@ -1,11 +1,11 @@
-// Copyright 2000-2003 Omni Development, Inc.  All rights reserved.
+// Copyright 2000-2004 Omni Development, Inc.  All rights reserved.
 //
 // This software may only be used and reproduced according to the
 // terms in the file OmniSourceLicense.html, which should be
 // distributed with this project and can also be found at
-// http://www.omnigroup.com/DeveloperResources/OmniSourceLicense.html.
+// <http://www.omnigroup.com/developer/sourcecode/sourcelicense/>.
 //
-// $Header: /Network/Source/CVS/OmniGroup/Frameworks/OmniAppKit/Carbon/OAInternetConfig.h,v 1.14 2003/04/15 20:50:57 ryan Exp $
+// $Header: /Network/Source/CVS/OmniGroup/Frameworks/OmniAppKit/Carbon/OAInternetConfig.h,v 1.17 2004/02/10 04:07:31 kc Exp $
 
 #import <OmniFoundation/OFObject.h>
 
@@ -61,5 +61,7 @@
 
 - (void)launchMailTo:(NSString *)receiver carbonCopy:(NSString *)carbonCopy subject:(NSString *)subject body:(NSString *)body;
 - (void)launchMailTo:(NSString *)receiver carbonCopy:(NSString *)carbonCopy blindCarbonCopy:(NSString *)blindCarbonCopy subject:(NSString *)subject body:(NSString *)body;
-               
+
+- (BOOL)launchMailTo:(NSString *)receiver carbonCopy:(NSString *)carbonCopy blindCarbonCopy:(NSString *)blindCarbonCopy subject:(NSString *)subject body:(NSString *)body attachments:(NSArray *)attachmentFilenames;
+
 @end

@@ -1,18 +1,18 @@
-// Copyright 1997-2003 Omni Development, Inc.  All rights reserved.
+// Copyright 1997-2004 Omni Development, Inc.  All rights reserved.
 //
 // This software may only be used and reproduced according to the
 // terms in the file OmniSourceLicense.html, which should be
 // distributed with this project and can also be found at
-// http://www.omnigroup.com/DeveloperResources/OmniSourceLicense.html.
+// <http://www.omnigroup.com/developer/sourcecode/sourcelicense/>.
 //
-// $Header: /Network/Source/CVS/OmniGroup/Frameworks/OmniAppKit/Widgets.subproj/OAScrollView.h,v 1.20 2003/03/14 05:50:38 neo Exp $
+// $Header: /Network/Source/CVS/OmniGroup/Frameworks/OmniAppKit/Widgets.subproj/OAScrollView.h,v 1.26 2004/02/10 04:07:38 kc Exp $
 
 #import <AppKit/NSScrollView.h>
 #import <AppKit/NSCell.h> // For NSControlSize
 
 @class NSButton, NSMenuItem, NSPopUpButton, NSTextField;
 
-typedef enum { YES_SCROLL, NO_SCROLL, AUTO_SCROLL } ScrollingBehavior;
+typedef enum { YES_SCROLL, NO_SCROLL, VERTICAL_SCROLL, AUTO_SCROLL, MANUAL_SCROLL } ScrollingBehavior;
 
 #import <Foundation/NSString.h> // For unichar
 
@@ -36,12 +36,15 @@ typedef enum { YES_SCROLL, NO_SCROLL, AUTO_SCROLL } ScrollingBehavior;
     } flags;
 }
 
+- (NSSize)contentSizeForFrameSize:(NSSize)frameSize hasHorizontalScroller:(BOOL)hasHorizontalScroller hasVerticalScroller:(BOOL)hasVerticalScroller;
 - (NSSize)contentSizeForFrameSize:(NSSize)fSize;
+- (NSSize)contentSizeForHorizontalScroller:(BOOL)hasHorizontalScroller verticalScroller:(BOOL)hasVerticalScroller;
 
 - (void)zoomToScale:(double)newZoomFactor;
 - (void)zoomFromSender:(NSMenuItem *)sender;
 - (float)zoomFactor;
 - (void)setDelegate:(id)newNonretainedDelegate;
+- (ScrollingBehavior)scrollBehavior;
 - (void)setScrollBehavior:(ScrollingBehavior)behavior;
 - (void)showingPageNumber:(int)pageNumber of:(unsigned int)pagesCount;
 - (void)gotoPage:(id)sender;

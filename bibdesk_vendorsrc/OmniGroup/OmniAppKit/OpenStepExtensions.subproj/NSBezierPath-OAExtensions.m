@@ -1,16 +1,16 @@
-// Copyright 2000-2003 Omni Development, Inc.  All rights reserved.
+// Copyright 2000-2004 Omni Development, Inc.  All rights reserved.
 //
 // This software may only be used and reproduced according to the
 // terms in the file OmniSourceLicense.html, which should be
 // distributed with this project and can also be found at
-// http://www.omnigroup.com/DeveloperResources/OmniSourceLicense.html.
+// <http://www.omnigroup.com/developer/sourcecode/sourcelicense/>.
 
 #import "NSBezierPath-OAExtensions.h"
 
 #import <AppKit/AppKit.h>
 #import <OmniBase/OmniBase.h>
 
-RCS_ID("$Header: /Network/Source/CVS/OmniGroup/Frameworks/OmniAppKit/OpenStepExtensions.subproj/NSBezierPath-OAExtensions.m,v 1.12 2003/04/28 21:10:41 kevin Exp $")
+RCS_ID("$Header: /Network/Source/CVS/OmniGroup/Frameworks/OmniAppKit/OpenStepExtensions.subproj/NSBezierPath-OAExtensions.m,v 1.22 2004/02/10 04:07:33 kc Exp $")
 
 
 @interface NSBezierPath (PrivateOAExtensions)
@@ -25,14 +25,14 @@ int _solveCubic(double *c, double *roots);
 void _parameterizeLine(NSPoint *coefficients, NSPoint startPoint, NSPoint endPoint);
 void _parameterizeCurve(NSPoint *coefficients, NSPoint startPoint, NSPoint endPoint, NSPoint controlPoint1, NSPoint controlPoint2);
 
-- (BOOL)_curvedIntersection:(float *)length curve:(NSPoint *)c line:(NSPoint *)a;
+- (BOOL)_curvedIntersection:(float *)length time:(float *)time curve:(NSPoint *)c line:(NSPoint *)a;
 
 BOOL _straightLineIntersectsRect(NSPoint *a, NSRect rect);
 void _splitCurve(NSPoint*c, NSPoint*left, NSPoint*right); 
 BOOL _curvedLineIntersectsRect(NSPoint *c, NSRect rect, float tolerance);
 
 - (BOOL)_curvedLineHit:(NSPoint)point startPoint:(NSPoint)startPoint endPoint:(NSPoint)endPoint controlPoint1:(NSPoint)controlPoint1 controlPoint2:(NSPoint)controlPoint2 position:(float *)position padding:(float)padding;
-- (BOOL)_straightLineIntersection:(float *)length segment:(NSPoint *)s line:(NSPoint *)l;
+- (BOOL)_straightLineIntersection:(float *)length time:(float *)time segment:(NSPoint *)s line:(NSPoint *)l;
 - (BOOL)_straightLineHit:(NSPoint)startPoint :(NSPoint)endPoint :(NSPoint)point  :(float *)position padding:(float)padding;
 - (int)_segmentHitByPoint:(NSPoint)point position:(float *)position padding:(float)padding;
 - (NSPoint)_endPointForSegment:(int)i;
@@ -192,12 +192,11 @@ BOOL _curvedLineIntersectsRect(NSPoint *c, NSRect rect, float tolerance);
 
     if (count == 0)
         return NO;
-
+        
     element = [self elementAtIndex:0 associatedPoints:points];
 
-    if (element != NSMoveToBezierPathElement) {
+    if (element != NSMoveToBezierPathElement) 
         return NO;  // must start with a moveTo
-    }
 
     _parameterizeLine(lineCoefficients,lineStart,lineEnd);
     
@@ -205,7 +204,7 @@ BOOL _curvedLineIntersectsRect(NSPoint *c, NSRect rect, float tolerance);
     needANewStartPoint = NO;
     
     for(i=1;i<count;i++) {
-        float currentLength = 1.0;
+        float ignored, currentLength = 1.0;
 
         element = [self elementAtIndex:i associatedPoints:points];
         switch(element) {
@@ -218,7 +217,7 @@ BOOL _curvedLineIntersectsRect(NSPoint *c, NSRect rect, float tolerance);
                 break;
             case NSClosePathBezierPathElement:
                 _parameterizeLine(segmentCoefficients,currentPoint,startPoint);
-                if ([self _straightLineIntersection:&currentLength segment:segmentCoefficients line:lineCoefficients]) {
+                if ([self _straightLineIntersection:&currentLength time:&ignored segment:segmentCoefficients line:lineCoefficients]) {
                     if (currentLength < minimumLength) {
                         minimumLength = currentLength;
                     }
@@ -228,7 +227,7 @@ BOOL _curvedLineIntersectsRect(NSPoint *c, NSRect rect, float tolerance);
                 break;
             case NSLineToBezierPathElement:
                 _parameterizeLine(segmentCoefficients, currentPoint, points[0]);
-                if ([self _straightLineIntersection:&currentLength segment:segmentCoefficients line:lineCoefficients]) {
+                if ([self _straightLineIntersection:&currentLength time:&ignored segment:segmentCoefficients line:lineCoefficients]) {
                     if (currentLength < minimumLength) {
                         minimumLength = currentLength;
                     }
@@ -237,7 +236,7 @@ BOOL _curvedLineIntersectsRect(NSPoint *c, NSRect rect, float tolerance);
                 break;
             case NSCurveToBezierPathElement:
                 _parameterizeCurve(curveCoefficients, currentPoint, points[2], points[0], points[1]);
-                if ([self _curvedIntersection:&currentLength curve:curveCoefficients line:lineCoefficients]) {
+                if ([self _curvedIntersection:&currentLength time:&ignored curve:curveCoefficients line:lineCoefficients]) {
                     if (currentLength < minimumLength) {
                         minimumLength = currentLength;
                     }
@@ -253,6 +252,277 @@ BOOL _curvedLineIntersectsRect(NSPoint *c, NSRect rect, float tolerance);
         return YES;
     }
     return NO;
+}
+
+- (void)addIntersectionsWithLineStart:(NSPoint)lineStart lineEnd:(NSPoint)lineEnd toArray:(NSMutableArray *)array;
+{
+    NSPoint points[3];
+    NSPoint segmentCoefficients[2];
+    NSPoint curveCoefficients[4];
+    NSPoint lineCoefficients[2];
+    NSPoint startPoint;
+    NSPoint currentPoint;
+    int element;
+    int count = [self elementCount];
+    int i;
+    BOOL needANewStartPoint;
+    float ignored, time;
+    float positionPerSegment = 1.0 / (float)(count - 1);
+    
+    if (count == 0)
+        return;
+        
+    element = [self elementAtIndex:0 associatedPoints:points];
+
+    if (element != NSMoveToBezierPathElement)
+        return;  // must start with a moveTo
+
+    _parameterizeLine(lineCoefficients,lineStart,lineEnd);
+    
+    startPoint = currentPoint = points[0];
+    needANewStartPoint = NO;
+    
+    for(i=1;i<count;i++) {
+        element = [self elementAtIndex:i associatedPoints:points];
+        switch(element) {
+            case NSMoveToBezierPathElement:
+                currentPoint = points[0];
+                if (needANewStartPoint) {
+                    startPoint = currentPoint;
+                    needANewStartPoint = NO;
+                }
+                break;
+            case NSClosePathBezierPathElement:
+                _parameterizeLine(segmentCoefficients,currentPoint,startPoint);
+                if ([self _straightLineIntersection:&ignored time:&time segment:segmentCoefficients line:lineCoefficients]) 
+                    [array addObject:[NSNumber numberWithFloat:positionPerSegment * ((float)i - 1 + time)]];
+                currentPoint = startPoint;
+                needANewStartPoint = YES;
+                break;
+            case NSLineToBezierPathElement:
+                _parameterizeLine(segmentCoefficients, currentPoint, points[0]);
+                if ([self _straightLineIntersection:&ignored time:&time segment:segmentCoefficients line:lineCoefficients])
+                    [array addObject:[NSNumber numberWithFloat:positionPerSegment * ((float)i - 1 + time)]];
+                currentPoint = points[0];
+                break;
+            case NSCurveToBezierPathElement:
+                _parameterizeCurve(curveCoefficients, currentPoint, points[2], points[0], points[1]);
+                if ([self _curvedIntersection:&ignored time:&time curve:curveCoefficients line:lineCoefficients])
+                    [array addObject:[NSNumber numberWithFloat:positionPerSegment * ((float)i - 1 + time)]];
+                currentPoint = points[2];
+                break;
+        }
+    }
+}
+
+void splitBezierCurveTo(NSPoint *c, float t, NSPoint *l, NSPoint *r)
+{
+    NSPoint mid;
+    float oneMinusT = 1.0 - t;
+    
+    l[0] = c[0];
+    r[3] = c[3];
+    l[1].x = c[0].x * oneMinusT + c[1].x * t;
+    l[1].y = c[0].y * oneMinusT + c[1].y * t;
+    r[2].x = c[2].x * oneMinusT + c[3].x * t;
+    r[2].y = c[2].y * oneMinusT + c[3].y * t;
+    mid.x = c[1].x * oneMinusT + c[2].x * t;
+    mid.y = c[1].y * oneMinusT + c[2].y * t;
+    l[2].x = l[1].x * oneMinusT + mid.x * t;
+    l[2].y = l[1].y * oneMinusT + mid.y * t;
+    r[1].x = mid.x * oneMinusT + r[2].x * t;
+    r[1].y = mid.y * oneMinusT + r[2].y * t;
+    l[3].x = l[2].x * oneMinusT + r[1].x * t;
+    l[3].y = l[2].y * oneMinusT + r[1].y * t;
+    r[0] = l[3];
+}
+
+NSRect _bezierCurveToBounds(NSPoint *c)
+{
+    NSPoint low, high;
+    
+    low.x = MIN(MIN(c[0].x, c[1].x), MIN(c[2].x, c[3].x));
+    low.y = MIN(MIN(c[0].y, c[1].y), MIN(c[2].y, c[3].y));
+    high.x = MAX(MAX(c[0].x, c[1].x), MAX(c[2].x, c[3].x));
+    high.y = MAX(MAX(c[0].y, c[1].y), MAX(c[2].y, c[3].y));
+    
+    return NSMakeRect(low.x, low.y, high.x - low.x, high.y - low.y);
+}
+
+- (void)_addCurveToCurveIntersections:(NSMutableArray *)array onCurve:(NSPoint *)c otherCurve:(NSPoint *)o bezierLowPosition:(float)low bezierInterval:(float)interval cubicLowPosition:(float)cubicLow cubicInterval:(float)cubicInterval originalCubic:(NSPoint *)originalCurve;
+{
+    float ignored, time;
+    NSPoint lineCoefficients[2];
+    NSPoint curveCoefficients[4];
+
+    if (!NSIntersectsRect(_bezierCurveToBounds(c), _bezierCurveToBounds(o)))
+        return;
+/*
+    if ([self _straightLineHit:c[0] :c[3] :c[1] :&ignored padding:1.0] && [self _straightLineHit:c[0] :c[3] :c[2] :&ignored padding:1.0]) {
+        // curve is close enough to being a line
+        _parameterizeLine(lineCoefficients, c[0], c[3]);
+        _parameterizeCurve(curveCoefficients, o[0], o[3], o[1], o[2]);
+        if ([self _curvedIntersection:&ignored time:&time curve:curveCoefficients line:lineCoefficients]) {
+            float splittingMethod = low + time * interval;
+            NSPoint intersectionPoint = _getCurvePoint(curveCoefficients, time, 0.0);
+        
+            NSLog(@"splitting = low:%f + time:%f * interval:%f = %f", low, time, interval, splittingMethod);
+
+            if ([self _curvedLineHit:intersectionPoint startPoint:originalCurve[0] endPoint:originalCurve[3] controlPoint1:originalCurve[1] controlPoint2:originalCurve[2] position:&time padding:1.0]) {
+                float cubicMethod = cubicLow + time * cubicInterval;
+                NSLog(@"cubic = %f splitting = %f", cubicMethod, splittingMethod);
+                [array addObject:[NSNumber numberWithFloat:splittingMethod]];
+            }
+        }
+    } else
+*/
+    if ([self _straightLineHit:o[0] :o[3] :o[1] :&ignored padding:1.0] && [self _straightLineHit:o[0] :o[3] :o[2] :&ignored padding:1.0]) {
+        // other is close enough to being a line
+        _parameterizeLine(lineCoefficients, o[0], o[3]);
+        _parameterizeCurve(curveCoefficients, c[0], c[3], c[1], c[2]);
+        if ([self _curvedIntersection:&ignored time:&time curve:curveCoefficients line:lineCoefficients]) 
+            [array addObject:[NSNumber numberWithFloat:low + time * interval]];
+    } else {
+        NSPoint cl[4], cr[4], ol[4], or[4];
+        
+        splitBezierCurveTo(c, 0.5, cl, cr);
+        splitBezierCurveTo(o, 0.5, ol, or);
+        interval /= 2.0;
+        [self _addCurveToCurveIntersections:array onCurve:cl otherCurve:ol bezierLowPosition:low bezierInterval:interval cubicLowPosition:cubicLow cubicInterval:cubicInterval originalCubic:originalCurve];
+        [self _addCurveToCurveIntersections:array onCurve:cl otherCurve:or bezierLowPosition:low bezierInterval:interval cubicLowPosition:cubicLow cubicInterval:cubicInterval originalCubic:originalCurve];
+        low += interval;
+        [self _addCurveToCurveIntersections:array onCurve:cr otherCurve:ol bezierLowPosition:low bezierInterval:interval cubicLowPosition:cubicLow cubicInterval:cubicInterval originalCubic:originalCurve];
+        [self _addCurveToCurveIntersections:array onCurve:cr otherCurve:or bezierLowPosition:low bezierInterval:interval cubicLowPosition:cubicLow cubicInterval:cubicInterval originalCubic:originalCurve];
+    }    
+}
+
+- (void)addIntersectionsWithCurveTo:(NSPoint *)curve toArray:(NSMutableArray *)array;
+{
+    NSPoint points[3];
+    NSPoint segmentCoefficients[2];
+    NSPoint curveCoefficients[4];
+    NSPoint startPoint;
+    NSPoint currentPoint;
+    NSPoint intersectionPoint;
+    int element;
+    int count = [self elementCount];
+    int i;
+    BOOL needANewStartPoint;
+    float ignored, time;
+    float positionPerSegment = 1.0 / (float)(count - 1);
+    
+    if (count == 0)
+        return;
+        
+    element = [self elementAtIndex:0 associatedPoints:points];
+
+    if (element != NSMoveToBezierPathElement)
+        return;  // must start with a moveTo
+
+    startPoint = currentPoint = points[0];
+    needANewStartPoint = NO;
+    _parameterizeCurve(curveCoefficients, curve[0], curve[3], curve[1], curve[2]);
+    
+    for(i=1;i<count;i++) {
+        element = [self elementAtIndex:i associatedPoints:points];
+        switch(element) {
+            case NSMoveToBezierPathElement:
+                currentPoint = points[0];
+                if (needANewStartPoint) {
+                    startPoint = currentPoint;
+                    needANewStartPoint = NO;
+                }
+                break;
+            case NSClosePathBezierPathElement:
+                _parameterizeLine(segmentCoefficients,currentPoint,startPoint);
+                if ([self _curvedIntersection:&ignored time:&time curve:curveCoefficients line:segmentCoefficients]) {
+                    intersectionPoint = _getCurvePoint(curveCoefficients, time, 0.0);
+                    if ([self _straightLineHit:currentPoint :startPoint :intersectionPoint :&time padding:1.0])
+                        [array addObject:[NSNumber numberWithFloat:positionPerSegment * ((float)i - 1 + time)]];
+                }
+                currentPoint = startPoint;
+                needANewStartPoint = YES;
+                break;
+            case NSLineToBezierPathElement:
+                _parameterizeLine(segmentCoefficients, currentPoint, points[0]);
+                if ([self _curvedIntersection:&ignored time:&time curve:curveCoefficients line:segmentCoefficients]) {
+                    intersectionPoint = _getCurvePoint(curveCoefficients, time, 0.0);
+                    if ([self _straightLineHit:currentPoint :points[0] :intersectionPoint :&time padding:1.0])
+                        [array addObject:[NSNumber numberWithFloat:positionPerSegment * ((float)i - 1 + time)]];
+                }
+                currentPoint = points[0];
+                break;
+            case NSCurveToBezierPathElement: {
+                NSPoint thisCurve[4];
+                float lowPosition = positionPerSegment * ((float)i - 1);
+                thisCurve[0] = currentPoint;
+                thisCurve[1] = points[0];
+                thisCurve[2] = points[1];
+                thisCurve[3] = points[2];
+                [self _addCurveToCurveIntersections:array onCurve:thisCurve otherCurve:curve bezierLowPosition:lowPosition bezierInterval:positionPerSegment cubicLowPosition:lowPosition cubicInterval:positionPerSegment originalCubic:thisCurve];
+                currentPoint = points[2];
+                break;
+            }
+        }
+    }
+}
+
+- (NSArray *)intersectionsWithPath:(NSBezierPath *)other;
+{    
+    NSMutableArray *array = [NSMutableArray array];
+    NSPoint points[3];
+    NSPoint startPoint;
+    NSPoint currentPoint;
+    int element;
+    int count = [other elementCount];
+    int i;
+    BOOL needANewStartPoint;
+
+    if (count == 0)
+        return NO;
+
+    element = [other elementAtIndex:0 associatedPoints:points];
+
+    if (element != NSMoveToBezierPathElement) 
+        return nil;  // must start with a moveTo
+        
+    startPoint = currentPoint = points[0];
+    needANewStartPoint = NO;
+    
+    for(i=1;i<count;i++) {
+        element = [other elementAtIndex:i associatedPoints:points];
+        switch(element) {
+            case NSMoveToBezierPathElement:
+                currentPoint = points[0];
+                if (needANewStartPoint) {
+                    startPoint = currentPoint;
+                    needANewStartPoint = NO;
+                }
+                break;
+            case NSClosePathBezierPathElement:
+                [self addIntersectionsWithLineStart:currentPoint lineEnd:startPoint toArray:array];
+                currentPoint = startPoint;
+                needANewStartPoint = YES;
+                break;
+            case NSLineToBezierPathElement:
+                [self addIntersectionsWithLineStart:currentPoint lineEnd:points[0] toArray:array];
+                currentPoint = points[0];
+                break;
+            case NSCurveToBezierPathElement: {
+                NSPoint curve[4];
+                
+                curve[0] = currentPoint;
+                curve[1] = points[0];
+                curve[2] = points[1];
+                curve[3] = points[2];
+                [self addIntersectionsWithCurveTo:curve toArray:array];
+                currentPoint = points[2];
+                break;
+                
+            }
+        }
+    }
+    return array;
 }
 
 - (int)segmentHitByPoint:(NSPoint)point padding:(float)padding {
@@ -275,6 +545,24 @@ BOOL _curvedLineIntersectsRect(NSPoint *c, NSRect rect, float tolerance);
 {
     int segment = [self segmentHitByPoint:point padding:5.0];
     return (segment);
+}
+
+//
+
+// From Scott Anguish's Cocoa book, I believe.
+- (void)appendBezierPathWithRoundedRectangle:(NSRect)aRect withRadius:(float)radius;
+{
+    NSPoint topMid = NSMakePoint(NSMidX(aRect), NSMaxY(aRect));
+    NSPoint topLeft = NSMakePoint(NSMinX(aRect), NSMaxY(aRect));
+    NSPoint topRight = NSMakePoint(NSMaxX(aRect), NSMaxY(aRect));
+    NSPoint bottomRight = NSMakePoint(NSMaxX(aRect), NSMinY(aRect));
+
+    [self moveToPoint:topMid];
+    [self appendBezierPathWithArcFromPoint:topLeft toPoint:aRect.origin radius:radius];
+    [self appendBezierPathWithArcFromPoint:aRect.origin toPoint:bottomRight radius:radius];
+    [self appendBezierPathWithArcFromPoint:bottomRight toPoint:topRight radius:radius];
+    [self appendBezierPathWithArcFromPoint:topRight toPoint:topLeft radius:radius];
+    [self closePath];
 }
 
 //
@@ -421,7 +709,7 @@ BOOL _curvedLineIntersectsRect(NSPoint *c, NSRect rect, float tolerance);
     if (![otherBezierPath isMemberOfClass:[self class]])
         return NO;
 
-    if ([otherBezierPath elementCount] != elementCount)
+    if ((unsigned)[otherBezierPath elementCount] != elementCount)
         return NO;
     
     for(elementIndex=0; elementIndex<elementCount; elementIndex++) {
@@ -738,7 +1026,7 @@ void _parameterizeCurve(NSPoint *coefficients, NSPoint startPoint, NSPoint endPo
     coefficients[3].y = 2.0 * (startPoint.y - endPoint.y) + coefficients[1].y + tangent2.y;
 }
 
-- (BOOL)_curvedIntersection:(float *)length curve:(NSPoint *)c line:(NSPoint *)a {
+- (BOOL)_curvedIntersection:(float *)length time:(float *)time curve:(NSPoint *)c line:(NSPoint *)a {
     int i;
     double cubic[4];
     double roots[3];
@@ -782,6 +1070,7 @@ void _parameterizeCurve(NSPoint *coefficients, NSPoint startPoint, NSPoint endPo
         foundOne = YES;
         if (t < minT) {
             minT = t;
+            *time = u;
         }
     }
 
@@ -956,18 +1245,17 @@ BOOL _curvedLineIntersectsRect(NSPoint *c, NSRect rect, float tolerance) {
         delta = (((((c[6] * u + c[5]) * u + c[4]) * u + c[3]) * u + c[2]) * u + c[1]) * u + c[0];
         if (delta < minDelta) {
             minDelta = delta;
-            bestU = u;
+            *position = u;
         }
 
         if (i==11 && minDelta <= tolerance) {
-            *position = bestU;
             return YES;
         } else {
             double slope = ((((( 6 * c[6] * u + 5 * c[5]) * u + 4 * c[4]) * u + 3 * c[3]) * u + 2 * c[2]) * u + c[1]);
             double deltaU = delta/slope;
 
             if ((u==0 && delta > 0) || (u==1 && delta < 0)) {
-                return NO;
+                return minDelta <= tolerance;
             }
             u -= 0.75 * deltaU; // Used to be just deltaU, but we're damping it a bit
             if (u<0.0) {
@@ -982,7 +1270,7 @@ BOOL _curvedLineIntersectsRect(NSPoint *c, NSRect rect, float tolerance) {
     return NO;
 }
 
-- (BOOL)_straightLineIntersection:(float *)length segment:(NSPoint *)s line:(NSPoint *)l {
+- (BOOL)_straightLineIntersection:(float *)length time:(float *)time segment:(NSPoint *)s line:(NSPoint *)l {
     // PENDING: should optimize this for the most common cases (s[1] == 0);
     float u;
     float t;
@@ -1012,12 +1300,12 @@ BOOL _curvedLineIntersectsRect(NSPoint *c, NSRect rect, float tolerance) {
     } else {
         t = (l[1].x * u + (l[0].x - s[0].x)) / s[1].x;
     }
-    if (t < -0.0001 || t > 1.0001) {
+    if (t < -0.0001 || t > 1.0001 || isnan(t)) {
         return NO;
     }
     
     *length = u;
-    
+    *time = t;
     return YES;
 }
 

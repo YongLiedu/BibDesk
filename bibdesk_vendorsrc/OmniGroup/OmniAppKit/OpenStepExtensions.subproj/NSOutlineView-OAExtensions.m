@@ -1,9 +1,9 @@
-// Copyright 1999-2003 Omni Development, Inc.  All rights reserved.
+// Copyright 1999-2004 Omni Development, Inc.  All rights reserved.
 //
 // This software may only be used and reproduced according to the
 // terms in the file OmniSourceLicense.html, which should be
 // distributed with this project and can also be found at
-// http://www.omnigroup.com/DeveloperResources/OmniSourceLicense.html.
+// <http://www.omnigroup.com/developer/sourcecode/sourcelicense/>.
 
 
 #import <OmniAppKit/NSOutlineView-OAExtensions.h>
@@ -15,7 +15,16 @@
 #import <OmniBase/OmniBase.h>
 #import <OmniFoundation/OmniFoundation.h>
 
-RCS_ID("$Header: /Network/Source/CVS/OmniGroup/Frameworks/OmniAppKit/OpenStepExtensions.subproj/NSOutlineView-OAExtensions.m,v 1.20 2003/04/23 06:19:52 rick Exp $")
+RCS_ID("$Header: /Network/Source/CVS/OmniGroup/Frameworks/OmniAppKit/OpenStepExtensions.subproj/NSOutlineView-OAExtensions.m,v 1.26 2004/02/11 20:11:23 wiml Exp $")
+
+@interface NSTableView (OAKeyDownExtensions)
+- (BOOL)_processKeyDownCharacter:(unichar)character;
+@end
+
+@interface NSOutlineView (OAExtensionsPrivate)
+- (void)_expandItems:(NSArray *)items andChildren:(BOOL)andChildren;
+- (void)_collapseItems:(NSArray *)items andChildren:(BOOL)andChildren;
+@end
 
 @implementation NSOutlineView (OAExtensions)
 
@@ -34,6 +43,11 @@ RCS_ID("$Header: /Network/Source/CVS/OmniGroup/Frameworks/OmniAppKit/OpenStepExt
 
 - (void)setSelectedItem:(id)item visibility:(OATableViewRowVisibility)visibility;
 {
+    if (item == nil) {
+        [self deselectAll:nil];
+        return;
+    }
+        
     [self setSelectedItems:[NSArray arrayWithObject:item] visibility:visibility];
 }
 
@@ -67,7 +81,7 @@ RCS_ID("$Header: /Network/Source/CVS/OmniGroup/Frameworks/OmniAppKit/OpenStepExt
     if (!itemCount)
         return;
         
-    // Build a has table of the objects to select to avoid a O(N^2) loop.
+    // Build a hash table of the objects to select to avoid a O(N^2) loop.
     // This also uniques the list of objects nicely, should it not already be.
     itemTable = NSCreateHashTable(NSNonOwnedPointerHashCallBacks, itemCount);
     itemIndex = itemCount;
@@ -116,7 +130,7 @@ RCS_ID("$Header: /Network/Source/CVS/OmniGroup/Frameworks/OmniAppKit/OpenStepExt
     
     rowCount = [self numberOfRows];
     for (rowIndex = 0; rowIndex < rowCount; rowIndex++) {
-        if ([self levelForRow: rowIndex] == level) {
+        if ((unsigned)[self levelForRow: rowIndex] == level) {
             id item;
             
             item = [self itemAtRow: rowIndex];
@@ -158,6 +172,48 @@ RCS_ID("$Header: /Network/Source/CVS/OmniGroup/Frameworks/OmniAppKit/OpenStepExt
 }
 
 //
+// NSResponder subclass
+//
+
+- (void)moveLeft:(id)sender
+{
+    [self _collapseItems:[self selectedItems] andChildren:NO];
+}
+
+- (void)moveRight:(id)sender;
+{
+    [self _expandItems:[self selectedItems] andChildren:NO];
+}
+
+//
+// NSTableView subclass (OAExtensions)
+//
+
+- (BOOL)_processKeyDownCharacter:(unichar)character;
+{
+    unsigned int modifierFlags = [[NSApp currentEvent] modifierFlags];
+    
+    switch (character) {
+        case NSLeftArrowFunctionKey:
+            if (modifierFlags & NSAlternateKeyMask) {
+                [self _collapseItems:[self selectedItems] andChildren:YES];
+                return YES;
+            }
+            break;
+        case NSRightArrowFunctionKey:
+            if (modifierFlags & NSAlternateKeyMask) {
+                [self _expandItems:[self selectedItems] andChildren:YES];
+                return YES;
+            }
+            break;
+        default:
+            break;
+    }
+    
+    return [super _processKeyDownCharacter:character];
+}
+
+//
 // Actions
 //
 
@@ -177,6 +233,46 @@ RCS_ID("$Header: /Network/Source/CVS/OmniGroup/Frameworks/OmniAppKit/OpenStepExt
     selectedItems = [self selectedItems];
     [self collapseItemAndChildren:nil];
     [self setSelectedItems:selectedItems];
+}
+
+@end
+
+@implementation NSOutlineView (OAExtensionsPrivate)
+
+- (void)_expandItems:(NSArray *)items andChildren:(BOOL)andChildren;
+{
+    unsigned int itemCount, itemIndex;
+    
+    itemCount = [items count];
+    for (itemIndex = 0; itemIndex < itemCount; itemIndex++) {
+        id selectedItem;
+        
+        selectedItem = [items objectAtIndex:itemIndex];
+        if ([_dataSource outlineView:self isItemExpandable:selectedItem]) {
+            if (andChildren)
+                [self expandItemAndChildren:selectedItem];
+            else
+                [self expandItem:selectedItem];
+        }
+    }
+}
+
+- (void)_collapseItems:(NSArray *)items andChildren:(BOOL)andChildren;
+{
+    unsigned int itemCount, itemIndex;
+    
+    itemCount = [items count];
+    for (itemIndex = 0; itemIndex < itemCount; itemIndex++) {
+        id selectedItem;
+        
+        selectedItem = [items objectAtIndex:itemIndex];
+        if ([_dataSource outlineView:self isItemExpandable:selectedItem]) {
+            if (andChildren)
+                [self collapseItemAndChildren:selectedItem];
+            else
+                [self collapseItem:selectedItem];
+        }
+    }
 }
 
 @end

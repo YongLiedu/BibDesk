@@ -1,9 +1,9 @@
-// Copyright 2000-2003 Omni Development, Inc.  All rights reserved.
+// Copyright 2000-2004 Omni Development, Inc.  All rights reserved.
 //
 // This software may only be used and reproduced according to the
 // terms in the file OmniSourceLicense.html, which should be
 // distributed with this project and can also be found at
-// http://www.omnigroup.com/DeveloperResources/OmniSourceLicense.html.
+// <http://www.omnigroup.com/developer/sourcecode/sourcelicense/>.
 
 #import "OAExtendedOutlineView.h"
 
@@ -16,11 +16,11 @@
 #import "NSOutlineView-OAExtensions.h"
 #import "NSString-OAExtensions.h"
 #import "NSView-OAExtensions.h"
-#import "OAInspector.h"
+#import "OAInspectorRegistry.h"
 #import "OAOutlineViewEnumerator.h"
 #import "OATypeAheadSelectionHelper.h"
 
-RCS_ID("$Header: /Network/Source/CVS/OmniGroup/Frameworks/OmniAppKit/Widgets.subproj/OAExtendedOutlineView.m,v 1.91 2003/03/27 07:38:13 rick Exp $")
+RCS_ID("$Header: /Network/Source/CVS/OmniGroup/Frameworks/OmniAppKit/Widgets.subproj/OAExtendedOutlineView.m,v 1.97 2004/02/10 04:07:37 kc Exp $")
 
 @interface NSOutlineView (PrivateAPIThatWeShouldNotHaveToCallDammit)
 - (void)_collapseItem:(id)item collapseChildren:(BOOL)collapseChildren clearExpandState:(BOOL)clearExpandState;
@@ -847,7 +847,7 @@ RCS_ID("$Header: /Network/Source/CVS/OmniGroup/Frameworks/OmniAppKit/Widgets.sub
 - (void)buildTooltips;
 {
     NSRange range;
-    int index;
+    unsigned int index;
 
     if (![_dataSource respondsToSelector:@selector(outlineView:tooltipForItem:)])
         return;
@@ -1165,7 +1165,7 @@ RCS_ID("$Header: /Network/Source/CVS/OmniGroup/Frameworks/OmniAppKit/Widgets.sub
 }
 
 
-#warning TJW -- In DP4 NSOutlineView does not call the public method when collapsing.  Thus, we are subclassing the private method
+// TJW -- In DP4 NSOutlineView does not call the public method when collapsing.  Thus, we are subclassing the private method
 // When we can subclass the public method, don't forget to also fix the [super _collapseItem:...] calls below!
 
 - (void)_collapseItem:(id)item collapseChildren:(BOOL)collapseChildren clearExpandState:(BOOL)clearExpandState;
@@ -1474,7 +1474,7 @@ RCS_ID("$Header: /Network/Source/CVS/OmniGroup/Frameworks/OmniAppKit/Widgets.sub
 }
 
 //- (void)draggedImage:(NSImage *)image beganAt:(NSPoint)screenPoint;
-//- (void)draggedImage:(NSImage *)image endedAt:(NSPoint)screenPoint deposited:(BOOL)flag;
+//- (void)draggedImage:(NSImage *)image endedAt:(NSPoint)screenPoint operation:(NSDragOperation)operation;
 //- (BOOL)ignoreModifierKeysWhileDragging;
 
 //

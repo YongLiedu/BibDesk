@@ -1,9 +1,9 @@
-// Copyright 2002-2003 Omni Development, Inc.  All rights reserved.
+// Copyright 2002-2004 Omni Development, Inc.  All rights reserved.
 //
 // This software may only be used and reproduced according to the
 // terms in the file OmniSourceLicense.html, which should be
 // distributed with this project and can also be found at
-// http://www.omnigroup.com/DeveloperResources/OmniSourceLicense.html.
+// <http://www.omnigroup.com/developer/sourcecode/sourcelicense/>.
 
 #import "OAInspectorResizer.h"
 
@@ -14,7 +14,7 @@
 
 #import "NSImage-OAExtensions.h"
 
-RCS_ID("$Header: /Network/Source/CVS/OmniGroup/Frameworks/OmniAppKit/Inspector.subproj/OAInspectorResizer.m,v 1.2 2003/02/12 22:00:56 kc Exp $")
+RCS_ID("$Header: /Network/Source/CVS/OmniGroup/Frameworks/OmniAppKit/Inspector.subproj/OAInspectorResizer.m,v 1.4 2004/02/10 04:07:33 kc Exp $")
 
 @implementation OAInspectorResizer
 

@@ -1,15 +1,16 @@
-// Copyright 2002-2003 Omni Development, Inc.  All rights reserved.
+// Copyright 2002-2004 Omni Development, Inc.  All rights reserved.
 //
 // This software may only be used and reproduced according to the
 // terms in the file OmniSourceLicense.html, which should be
 // distributed with this project and can also be found at
-// http://www.omnigroup.com/DeveloperResources/OmniSourceLicense.html.
+// <http://www.omnigroup.com/developer/sourcecode/sourcelicense/>.
 
 #import "OAInspectorController.h"
 
 #import <Cocoa/Cocoa.h>
 #import <OmniFoundation/OmniFoundation.h>
 #import <OmniBase/OmniBase.h>
+#import <Carbon/Carbon.h>
 
 #import "OAInspectorRegistry.h"
 #import "OAInspectorHeaderView.h"
@@ -17,17 +18,18 @@
 #import "OAInspectorGroup.h"
 #import "OAInspectorWindow.h"
 #import "OAInspectorGroupAnimatedMergeController.h"
+#import "NSImage-OAExtensions.h"
 
-RCS_ID("$Header: /Network/Source/CVS/OmniGroup/Frameworks/OmniAppKit/Inspector.subproj/OAInspectorController.m,v 1.72 2003/03/30 10:32:59 wjs Exp $");
+RCS_ID("$Header: /Network/Source/CVS/OmniGroup/Frameworks/OmniAppKit/Inspector.subproj/OAInspectorController.m,v 1.90 2004/02/10 04:07:32 kc Exp $");
 
 @interface OAInspectorController (Private) <OAInspectorHeaderViewDelegateProtocol>
 - (void)toggleDisplayAction:sender;
 - (void)_buildHeadingView;
 - (void)_buildWindow;
 - (NSView *)_inspectorView;
+- (void)_setExpandedness:(BOOL)expanded updateInspector:(BOOL)updateInspector withNewTopLeftPoint:(NSPoint)topLeftPoint animate:(BOOL)animate;
+- (void)_saveInspectorSize;
 @end
-
-#warning This class uses Jaguar-specific NSWindow move group API
 
 @interface NSWindow (JaguarAPI)
 - (NSArray *)childWindows;
@@ -37,6 +39,24 @@ RCS_ID("$Header: /Network/Source/CVS/OmniGroup/Frameworks/OmniAppKit/Inspector.s
 @implementation OAInspectorController
 
 // Init and dealloc
+
+static BOOL animateInspectorToggles;
+
++ (void)initialize;
+{
+    NSNumber *number;
+    
+    OBINITIALIZE;
+    
+    number = [[NSUserDefaults standardUserDefaults] objectForKey:@"AnimateInspectorToggles"];
+    if (number) {
+        animateInspectorToggles = [number boolValue];
+    } else {
+        long cpuAttributes;                                                                                                                                                	
+        Gestalt(gestaltPowerPCProcessorFeatures, &cpuAttributes);                                                                 
+        animateInspectorToggles = ( 1 << gestaltPowerPCHasVectorInstructions) & cpuAttributes;
+    }
+}
 
 - initWithInspector:(NSObject <OAGroupedInspector> *)anInspector;
 {
@@ -58,7 +78,8 @@ RCS_ID("$Header: /Network/Source/CVS/OmniGroup/Frameworks/OmniAppKit/Inspector.s
 {
     if (group != aGroup) {
         group = aGroup;
-        [headingButton setNeedsDisplay:YES];
+        if (group != nil)
+            [headingButton setNeedsDisplay:YES];
     }
 }
 
@@ -91,16 +112,20 @@ RCS_ID("$Header: /Network/Source/CVS/OmniGroup/Frameworks/OmniAppKit/Inspector.s
 {
     if (!menuItem) {
         NSString *keyEquivalent = [inspector keyEquivalent];
-        NSImage *menuImage;
+        NSString *imageName;
         
         if (keyEquivalent == nil)
             keyEquivalent = @"";
         menuItem = [[NSMenuItem alloc] initWithTitle:[inspector inspectorName] action:@selector(toggleDisplayAction:) keyEquivalent:keyEquivalent];
         [menuItem setTarget:self];
 
-        menuImage = [NSImage imageNamed:[inspector imageName]];
-        [menuImage setSize:NSMakeSize(rint([menuImage size].width), rint([menuImage size].height))]; // Workaround 10.2 NSMenu bug because our images are bizarrely returning 13.00058 as their height, and this causes NSMenu to clip the bottom pixel of our image. 
-        [menuItem setImage:menuImage];
+        imageName = [inspector imageName];
+        if (imageName) {
+            NSImage *menuImage;
+            menuImage = [NSImage imageNamed:imageName inBundleForClass: [inspector class]];
+            [menuImage setSize:NSMakeSize(rint([menuImage size].width), rint([menuImage size].height))]; // Workaround 10.2 NSMenu bug because our images are bizarrely returning 13.00058 as their height, and this causes NSMenu to clip the bottom pixel of our image.
+            [menuItem setImage:menuImage];
+        }
         if ([keyEquivalent length])
             [menuItem setKeyEquivalentModifierMask:[inspector keyEquivalentModifierMask]];
     }
@@ -119,22 +144,27 @@ RCS_ID("$Header: /Network/Source/CVS/OmniGroup/Frameworks/OmniAppKit/Inspector.s
 
 - (float)minimumWidth;
 {
-    if (isExpanded)
-        return minimumSize.width;
-    else    
-        return [headingButton minimumWidth];
+    [self _inspectorView];// force loading of inspector view to set minimumSize
+    return minimumSize.width;
 }
 
 - (float)desiredWidth;
 {
-    if (isExpanded && !collapseOnTakeNewPosition)
-        return desiredWidth;
-    else
-        return [headingButton minimumWidth];
+    [self _inspectorView];// force loading of inspector view to set minimumSize
+
+    if ([inspector respondsToSelector:@selector(inspectorDesiredWidth)])
+        return [inspector inspectorDesiredWidth];
+    return _initialInspectorWidth;
+}
+
+- (float)headingHeight;
+{
+    return NSHeight([headingButton frame]);
 }
 
 - (float)desiredHeightWhenExpanded;
 {
+    OBPRECONDITION(headingButton); // That is, -loadInterface must have been called.
     return NSHeight([[self _inspectorView] frame]) + NSHeight([headingButton frame]);
 }
 
@@ -167,82 +197,19 @@ RCS_ID("$Header: /Network/Source/CVS/OmniGroup/Frameworks/OmniAppKit/Inspector.s
         
         headingFrame.origin = NSMakePoint(0, isBottommostInGroup ? 0.0 : OAInspectorSpaceBetweenButtons);
         headingFrame.size = [headingButton frame].size;
-        [window setFrame:NSMakeRect(NSMinX(windowFrame), NSMaxY(windowFrame) - NSMaxY(headingFrame), NSWidth(headingFrame), NSMaxY(headingFrame)) display:YES animate:YES];
+        [window setFrame:NSMakeRect(NSMinX(windowFrame), NSMaxY(windowFrame) - NSMaxY(headingFrame), NSWidth(headingFrame), NSMaxY(headingFrame)) display:YES animate:NO];
     }
 }
 
 - (void)toggleExpandednessWithNewTopLeftPoint:(NSPoint)topLeftPoint animate:(BOOL)animate;
 {
-    NSRect windowFrame;
-    NSView *view = [self _inspectorView];
-    
-    isExpanded = !isExpanded;   
-    isToggling = YES; 
-    [group setScreenChangesEnabled:NO];
-    [headingButton setExpanded:isExpanded];
+    [self _setExpandedness:!isExpanded updateInspector:YES withNewTopLeftPoint:topLeftPoint animate:animate];
+}
 
-    if (isExpanded) {
-        NSRect viewFrame;
-        float newHeight;
-        
-        [self updateInspector]; // call this first because the view could change sizes based on the selection in -updateInspector
-
-        viewFrame = [view frame];
-        newHeight = NSHeight([headingButton frame]) + NSHeight(viewFrame);
-        windowFrame = NSMakeRect(topLeftPoint.x, topLeftPoint.y - newHeight, NSWidth([headingButton frame]), newHeight);
-        if (forceResizeWidget) {
-            windowFrame.size.width = MAX(NSWidth(viewFrame), NSWidth(windowFrame));
-        } else {
-            windowFrame.size.width = MAX(desiredWidth, NSWidth(windowFrame));
-        }  
-        windowFrame = [self windowWillResizeFromFrame:[window frame] toFrame:windowFrame];
-        
-        if (forceResizeWidget) {
-            viewFrame = NSMakeRect(0, 0, NSWidth(windowFrame), NSHeight(viewFrame));
-        } else if (widthSizable) {
-            viewFrame = NSMakeRect(0, 0, NSWidth(windowFrame), NSHeight(viewFrame));
-        } else {
-            if (NSWidth(viewFrame) > NSWidth(windowFrame))
-                viewFrame.origin.x = 0;
-            else
-                viewFrame.origin.x = floor((NSWidth(windowFrame) - NSWidth(viewFrame)) / 2.0);
-            viewFrame.origin.y = 0;
-        }
-
-        [view setFrame:viewFrame];
-        [view setAutoresizingMask:NSViewNotSizable];
-        [[window contentView] addSubview:view positioned:NSWindowBelow relativeTo:headingButton];
-        [window setFrame:windowFrame display:YES animate:animate];
-        if (forceResizeWidget || widthSizable || heightSizable) {
-            if (!resizerView) {
-                resizerView = [[OAInspectorResizer alloc] initWithFrame:NSMakeRect(0, 0, OAInspectorResizerWidth, OAInspectorResizerWidth)];
-                [resizerView setAutoresizingMask:NSViewMinXMargin | NSViewMaxYMargin];
-            }
-            [resizerView setFrameOrigin:NSMakePoint(NSWidth(windowFrame) - OAInspectorResizerWidth, 0)];
-            [[window contentView] addSubview:resizerView];
-        }
-        [view setAutoresizingMask:NSViewHeightSizable | (widthSizable ? NSViewWidthSizable : (NSViewMinXMargin | NSViewMaxXMargin))];
-        [[[OAInspectorRegistry sharedInspector] workspaceDefaults] setObject:@"YES" forKey:[self identifier]];
-    } else {
-        NSRect headingFrame;
-        
-        [resizerView removeFromSuperview];
-        [view setAutoresizingMask:NSViewNotSizable];
-        windowFrame = [window frame];
-        headingFrame.origin = NSMakePoint(0, isBottommostInGroup ? 0.0 : OAInspectorSpaceBetweenButtons);
-        if (group == nil)
-            headingFrame.size = [headingButton frame].size;
-        else
-            headingFrame.size = NSMakeSize([group desiredWidth], [headingButton frame].size.height);
-        [window setFrame:NSMakeRect(topLeftPoint.x, topLeftPoint.y - NSMaxY(headingFrame), NSWidth(headingFrame), NSMaxY(headingFrame)) display:YES animate:animate];
-        [view removeFromSuperview];
-        [self inspectNothing];
-        [[[OAInspectorRegistry sharedInspector] workspaceDefaults] removeObjectForKey:[self identifier]];
-    }
-    [[OAInspectorRegistry sharedInspector] defaultsDidChange];
-    [window makeFirstResponder:window];
-    [group setScreenChangesEnabled:YES];
-    isToggling = NO; 
+- (void)updateExpandedness; // call when the inspector sets its size internally by itself
+{
+    NSRect windowFrame = [window frame];
+    [self _setExpandedness:isExpanded updateInspector:NO withNewTopLeftPoint:NSMakePoint(NSMinX(windowFrame), NSMaxY(windowFrame)) animate:animateInspectorToggles];
 }
 
 - (void)setNewPosition:(NSPoint)aPosition;
@@ -274,8 +241,8 @@ RCS_ID("$Header: /Network/Source/CVS/OmniGroup/Frameworks/OmniAppKit/Inspector.s
         frame.origin.y = newPosition.y - frame.size.height;
         frame.size.width = aWidth;
         [window setFrame:frame display:YES];
-        if (isExpanded && !isToggling && resizerView != nil)
-            desiredWidth = aWidth;
+        if (isExpanded && !isSettingExpansion && resizerView != nil)
+            _initialInspectorWidth = aWidth;
     }
     collapseOnTakeNewPosition = NO;
 }
@@ -284,16 +251,24 @@ RCS_ID("$Header: /Network/Source/CVS/OmniGroup/Frameworks/OmniAppKit/Inspector.s
 {
     if (!window)
         [self _buildWindow];
+    needsToggleBeforeDisplay = ([[[OAInspectorRegistry sharedInspector] workspaceDefaults] objectForKey:[self identifier]] != nil) != isExpanded;
+}
 
-    if (([[[OAInspectorRegistry sharedInspector] workspaceDefaults] objectForKey:[self identifier]] != nil) != isExpanded) {
+- (void)prepareWindowForDisplay;
+{
+    OBPRECONDITION(window);  // -loadInterface should have been called by this point.
+    if (needsToggleBeforeDisplay) {
         NSRect windowFrame = [window frame];
         [self toggleExpandednessWithNewTopLeftPoint:NSMakePoint(NSMinX(windowFrame), NSMaxY(windowFrame)) animate:NO];
+        needsToggleBeforeDisplay = NO;
     }
+    [self updateInspector];
 }
 
 - (void)displayWindow;
 {
     [window orderFront:self];
+    [window resetCursorRects];
 }
 
 - (void)updateInspector;
@@ -351,16 +326,12 @@ RCS_ID("$Header: /Network/Source/CVS/OmniGroup/Frameworks/OmniAppKit/Inspector.s
     if ([group isHeadOfGroup:self] && [group screenChangesEnabled]) {
         NSScreen *screen = [window screen];
         NSRect groupRect = [group groupFrame];
-        NSRect result, windowFrame;
+        NSRect result;
         
         if (screen == nil) 
             screen = [NSScreen mainScreen];
         result = [group fitFrame:groupRect onScreen:screen];
-        windowFrame = [window frame];
-        
-        result.origin.y = NSMaxY(result) - NSHeight(windowFrame);
-        result.size.height = NSHeight(windowFrame);
-        [window setFrame:result display:YES animate:NO];
+        [group setTopLeftPoint:NSMakePoint(NSMinX(result), NSMaxY(result))];
     }
 }
 
@@ -398,10 +369,14 @@ RCS_ID("$Header: /Network/Source/CVS/OmniGroup/Frameworks/OmniAppKit/Inspector.s
 - (void)_buildHeadingView;
 {
     NSString *keyEquivalent;
+    NSString *imageName;
     
     headingButton = [[OAInspectorHeaderView alloc] initWithFrame:NSZeroRect];
     [headingButton setTitle:[inspector inspectorName]];
-    [headingButton setImage:[NSImage imageNamed:[inspector imageName]]];
+
+    imageName = [inspector imageName];
+    if (imageName)
+        [headingButton setImage:[NSImage imageNamed:imageName inBundleForClass: [inspector class]]];
     
     keyEquivalent = [inspector keyEquivalent];
     if ([keyEquivalent length]) {
@@ -435,7 +410,7 @@ RCS_ID("$Header: /Network/Source/CVS/OmniGroup/Frameworks/OmniAppKit/Inspector.s
     
     if (!loadedInspectorView) {
         NSString *savedSize;
-
+        
         forceResizeWidget = [inspector respondsToSelector:@selector(inspectorWillResizeToSize:)]; 
         heightSizable = [inspectorView autoresizingMask] & NSViewHeightSizable ? YES : NO;
         widthSizable = [inspectorView autoresizingMask] & NSViewWidthSizable ? YES : NO;
@@ -450,10 +425,91 @@ RCS_ID("$Header: /Network/Source/CVS/OmniGroup/Frameworks/OmniAppKit/Inspector.s
         savedSize = [[[OAInspectorRegistry sharedInspector] workspaceDefaults] objectForKey:[NSString stringWithFormat:@"%@-Size", [self identifier]]];
         if (savedSize != nil)
             [inspectorView setFrameSize:NSSizeFromString(savedSize)];        
-        desiredWidth = [inspectorView frame].size.width;
+        _initialInspectorWidth = [inspectorView frame].size.width;
         loadedInspectorView = YES;
     }
     return inspectorView;
+}
+
+- (void)_setExpandedness:(BOOL)expanded updateInspector:(BOOL)updateInspector withNewTopLeftPoint:(NSPoint)topLeftPoint animate:(BOOL)animate;
+{
+    NSRect windowFrame;
+    NSView *view = [self _inspectorView];
+
+    if (!animateInspectorToggles)
+        animate = NO;
+
+    isExpanded = expanded;
+    isSettingExpansion = YES;
+    [group setScreenChangesEnabled:NO];
+    [headingButton setExpanded:isExpanded];
+
+    if (isExpanded) {
+        NSRect viewFrame;
+        float newHeight;
+
+        if (updateInspector)
+            [self updateInspector]; // call this first because the view could change sizes based on the selection in -updateInspector
+
+        viewFrame = [view frame];
+        newHeight = NSHeight([headingButton frame]) + NSHeight(viewFrame);
+        windowFrame = NSMakeRect(topLeftPoint.x, topLeftPoint.y - newHeight, NSWidth(viewFrame), newHeight);
+        if (forceResizeWidget) {
+            windowFrame.size.width = MAX(NSWidth(viewFrame), NSWidth(windowFrame));
+        } else {
+            windowFrame.size.width = MAX(_initialInspectorWidth, NSWidth(windowFrame));
+        }
+        windowFrame = [self windowWillResizeFromFrame:[window frame] toFrame:windowFrame];
+
+        if (forceResizeWidget) {
+            viewFrame = NSMakeRect(0, 0, NSWidth(windowFrame), NSHeight(viewFrame));
+        } else if (widthSizable) {
+            viewFrame = NSMakeRect(0, 0, NSWidth(windowFrame), NSHeight(viewFrame));
+        } else {
+            if (NSWidth(viewFrame) > NSWidth(windowFrame))
+                viewFrame.origin.x = 0;
+            else
+                viewFrame.origin.x = floor((NSWidth(windowFrame) - NSWidth(viewFrame)) / 2.0);
+            viewFrame.origin.y = 0;
+        }
+
+        [view setFrame:viewFrame];
+        [view setAutoresizingMask:NSViewNotSizable];
+        [[window contentView] addSubview:view positioned:NSWindowBelow relativeTo:headingButton];
+        [window setFrame:windowFrame display:YES animate:animate];
+        if (forceResizeWidget || widthSizable || heightSizable) {
+            if (!resizerView) {
+                resizerView = [[OAInspectorResizer alloc] initWithFrame:NSMakeRect(0, 0, OAInspectorResizerWidth, OAInspectorResizerWidth)];
+                [resizerView setAutoresizingMask:NSViewMinXMargin | NSViewMaxYMargin];
+            }
+            [resizerView setFrameOrigin:NSMakePoint(NSWidth(windowFrame) - OAInspectorResizerWidth, 0)];
+            [[window contentView] addSubview:resizerView];
+        }
+        [view setAutoresizingMask:NSViewHeightSizable | (widthSizable ? NSViewWidthSizable : (NSViewMinXMargin | NSViewMaxXMargin))];
+        [[[OAInspectorRegistry sharedInspector] workspaceDefaults] setObject:@"YES" forKey:[self identifier]];
+    } else {
+        NSRect headingFrame;
+
+        [resizerView removeFromSuperview];
+        [view setAutoresizingMask:NSViewNotSizable];
+        windowFrame = [window frame];
+        headingFrame.origin = NSMakePoint(0, isBottommostInGroup ? 0.0 : OAInspectorSpaceBetweenButtons);
+        if (group == nil)
+            headingFrame.size = [headingButton frame].size;
+        else
+            headingFrame.size = NSMakeSize([group desiredWidth], [headingButton frame].size.height);
+        [window setFrame:NSMakeRect(topLeftPoint.x, topLeftPoint.y - NSMaxY(headingFrame), NSWidth(headingFrame), NSMaxY(headingFrame)) display:YES animate:animate];
+        [view removeFromSuperview];
+
+        if (updateInspector)
+            [self inspectNothing];
+        
+        [[[OAInspectorRegistry sharedInspector] workspaceDefaults] removeObjectForKey:[self identifier]];
+    }
+    [[OAInspectorRegistry sharedInspector] defaultsDidChange];
+    [window makeFirstResponder:window];
+    [group setScreenChangesEnabled:YES];
+    isSettingExpansion = NO;
 }
 
 - (void)_saveInspectorSize;
@@ -461,7 +517,7 @@ RCS_ID("$Header: /Network/Source/CVS/OmniGroup/Frameworks/OmniAppKit/Inspector.s
     OAInspectorRegistry *registry = [OAInspectorRegistry sharedInspector];
     NSSize size = [[self _inspectorView] frame].size;
     
-    desiredWidth = size.width;
+    _initialInspectorWidth = size.width;
     [[registry workspaceDefaults] setObject:NSStringFromSize(size) forKey:[NSString stringWithFormat:@"%@-Size", [self identifier]]];
     [registry defaultsDidChange];
 }
@@ -473,7 +529,7 @@ RCS_ID("$Header: /Network/Source/CVS/OmniGroup/Frameworks/OmniAppKit/Inspector.s
     if ([group ignoreResizing])
         return toRect;
         
-    if (isExpanded && !isToggling) {
+    if (isExpanded && !isSettingExpansion) {
         float groupMinimumWidth;
         
         if ([inspector respondsToSelector:@selector(inspectorMinimumSize)])
@@ -503,11 +559,11 @@ RCS_ID("$Header: /Network/Source/CVS/OmniGroup/Frameworks/OmniAppKit/Inspector.s
     }
     
     if (group != nil)
-        result = [group inspector:self willResizeToFrame:toRect isToggling:isToggling];
+        result = [group inspector:self willResizeToFrame:toRect isSettingExpansion:isSettingExpansion];
     else
         result = toRect;
     
-    if (isExpanded && !isToggling && resizerView != nil)
+    if (isExpanded && !isSettingExpansion && resizerView != nil)
         [self queueSelectorOnce:@selector(_saveInspectorSize)];
     return result;
 }

@@ -1,9 +1,9 @@
-// Copyright 2000-2003 Omni Development, Inc.  All rights reserved.
+// Copyright 2000-2004 Omni Development, Inc.  All rights reserved.
 //
 // This software may only be used and reproduced according to the
 // terms in the file OmniSourceLicense.html, which should be
 // distributed with this project and can also be found at
-// http://www.omnigroup.com/DeveloperResources/OmniSourceLicense.html.
+// <http://www.omnigroup.com/developer/sourcecode/sourcelicense/>.
 
 #import "NSColor-OAExtensions.h"
 
@@ -15,7 +15,9 @@
 #import "OAColorProfile.h"
 #import "NSImage-OAExtensions.h"
 
-RCS_ID("$Header: /Network/Source/CVS/OmniGroup/Frameworks/OmniAppKit/OpenStepExtensions.subproj/NSColor-OAExtensions.m,v 1.24 2003/04/04 00:19:31 toon Exp $")
+RCS_ID("$Header: /Network/Source/CVS/OmniGroup/Frameworks/OmniAppKit/OpenStepExtensions.subproj/NSColor-OAExtensions.m,v 1.34 2004/02/10 04:07:34 kc Exp $")
+
+NSString *OAColorXMLAdditionalColorSpace = @"OAColorXMLAdditionalColorSpace";
 
 @implementation NSColor (OAExtensions)
 
@@ -69,7 +71,7 @@ RCS_ID("$Header: /Network/Source/CVS/OmniGroup/Frameworks/OmniAppKit/OpenStepExt
 
         bitmapImageRep = (id)[NSBitmapImageRep imageRepWithData:obj];
         imageSize = [bitmapImageRep size];
-        if (NSEqualSizes(imageSize, NSZeroSize)) {
+        if (bitmapImageRep == nil || NSEqualSizes(imageSize, NSZeroSize)) {
             NSLog(@"Warning, could not rebuild pattern color from image rep %@, data %@", bitmapImageRep, obj);
             return [NSColor whiteColor];
         }
@@ -211,7 +213,7 @@ RCS_ID("$Header: /Network/Source/CVS/OmniGroup/Frameworks/OmniAppKit/OpenStepExt
     if ([[self colorSpaceName] isEqualToString:NSNamedColorSpace])
         return [self localizedColorNameComponent];
     else if ([[self colorSpaceName] isEqualToString:NSPatternColorSpace])
-        return NSLocalizedStringFromTableInBundle(@"Pattern", @"OmniAppKit", [OAColorProfile bundle], "generic color name for pattern colors");
+        return NSLocalizedStringFromTableInBundle(@"Image", @"OmniAppKit", [OAColorProfile bundle], "generic color name for pattern colors");
     else if ([[self colorSpaceName] isEqualToString:NSCustomColorSpace])
         return NSLocalizedStringFromTableInBundle(@"Custom", @"OmniAppKit", [OAColorProfile bundle], "generic color name for custom colors");
     
@@ -342,7 +344,7 @@ RCS_ID("$Header: /Network/Source/CVS/OmniGroup/Frameworks/OmniAppKit/OpenStepExt
     NSArray *allColorKeys = [combinedColorList allKeys];
     unsigned int colorIndex, colorCount = [allColorKeys count];
     NSColor *baseColor = nil;
-    int longestMatch = 0;
+    unsigned int longestMatch = 0;
 
     // special case clear
     if ([aName isEqualToString:@"Clear"])
@@ -351,7 +353,7 @@ RCS_ID("$Header: /Network/Source/CVS/OmniGroup/Frameworks/OmniAppKit/OpenStepExt
     // find base color
     for (colorIndex = 0; colorIndex < colorCount; colorIndex++) {
         NSString *colorKey = [allColorKeys objectAtIndex:colorIndex];
-        int length;
+        unsigned int length;
         
         if ([aName hasSuffix:colorKey] && (length = [colorKey length]) > longestMatch) {
             baseColor = [combinedColorList colorWithKey:colorKey];
@@ -384,4 +386,131 @@ RCS_ID("$Header: /Network/Source/CVS/OmniGroup/Frameworks/OmniAppKit/OpenStepExt
 
 #endif
 
+//
+// XML Archiving
+//
+
+static NSString *XMLElementName = @"color";
+
++ (NSString *)xmlElementName;
+{
+    return XMLElementName;
+}
+
+- (void)_appendXML:(OFXMLDocument *)doc;
+{
+    NSString *colorSpace;
+    BOOL hasAlpha = NO;
+
+    colorSpace = [self colorSpaceName];
+    if ([colorSpace isEqualToString:NSCalibratedWhiteColorSpace] || [colorSpace isEqualToString:NSDeviceWhiteColorSpace]) {
+        [doc setAttribute: @"w" real:[self whiteComponent]];
+        hasAlpha = YES;
+    } else if ([colorSpace isEqualToString:NSCalibratedRGBColorSpace] || [colorSpace isEqualToString:NSDeviceRGBColorSpace]) {
+        [doc setAttribute: @"r" real:[self redComponent]];
+        [doc setAttribute: @"g" real:[self greenComponent]];
+        [doc setAttribute: @"b" real:[self blueComponent]];
+        hasAlpha = YES;
+    } else if ([colorSpace isEqualToString:NSNamedColorSpace]) {
+        [doc setAttribute: @"catalog" string:[self catalogNameComponent]];
+        [doc setAttribute: @"name" string:[self colorNameComponent]];
+    } else if ([colorSpace isEqualToString:NSDeviceCMYKColorSpace]) {
+        [doc setAttribute: @"c" real:[self cyanComponent]];
+        [doc setAttribute: @"m" real:[self magentaComponent]];
+        [doc setAttribute: @"y" real:[self yellowComponent]];
+        [doc setAttribute: @"k" real:[self blackComponent]];
+        hasAlpha = YES;
+    } else if ([colorSpace isEqualToString:NSPatternColorSpace]) {
+        // TJW: Is there a length limit on attribute data.  It seems pretty lame to put the tiff in an attribute.
+        // Maybe should switch to <color image="tiff">data</color>.  Could then add 'png' and such.
+        NSString *tiffString = [[[self patternImage] TIFFRepresentation] base64String];
+        [doc setAttribute: @"tiff" string:tiffString];
+    }
+    if (hasAlpha) {
+        float alpha;
+
+        alpha = [self alphaComponent];
+        if (alpha != 1.0)
+            [doc setAttribute: @"a" real:alpha];
+    }
+}
+
+- (void) appendXML:(OFXMLDocument *)doc;
+{
+    [doc pushElement: XMLElementName];
+    {
+        [self _appendXML:doc];
+
+        // This is used in cases where you want to export both the real colorspace AND something that might be understandable to other XML readers (who won't be able to understand catalog colors).
+        NSString *additionalColorSpace = [doc userObjectForKey:OAColorXMLAdditionalColorSpace];
+        if (additionalColorSpace && OFNOTEQUAL(additionalColorSpace, [self colorSpaceName]))
+            [[self colorUsingColorSpaceName:additionalColorSpace] _appendXML:doc];
+    }
+    [doc popElement];
+}
+
++ (NSColor *)colorFromXML:(OFXMLCursor *)cursor;
+{
+    OBPRECONDITION([[cursor name] isEqualToString: XMLElementName]);
+    
+    id obj;
+    id obj1, obj2, obj3;
+    float alpha;
+
+    obj = [cursor attributeNamed:@"a"];
+    if (obj)
+        alpha = [obj floatValue];
+    else
+        alpha = 1.0;
+
+    obj = [cursor attributeNamed:@"w"];
+    if (obj) {
+        return [NSColor colorWithCalibratedWhite:[obj floatValue] alpha:alpha];
+    }
+
+    obj = [cursor attributeNamed:@"catalog"];
+    if (obj) {
+        NSColor *color;
+        obj1 = [cursor attributeNamed:@"name"];
+        color = [NSColor colorWithCatalogName:obj colorName:obj1];
+        if (!color)
+            color = [NSColor whiteColor];
+        return color;
+    }
+    obj = [cursor attributeNamed:@"r"];
+    if (obj) {
+        obj1 = [cursor attributeNamed:@"g"];
+        obj2 = [cursor attributeNamed:@"b"];
+        return [NSColor colorWithCalibratedRed:[obj floatValue] green:[obj1 floatValue] blue:[obj2 floatValue] alpha:alpha];
+    }
+    obj = [cursor attributeNamed:@"c"];
+    if (obj) {
+        obj1 = [cursor attributeNamed:@"m"];
+        obj2 = [cursor attributeNamed:@"y"];
+        obj3 = [cursor attributeNamed:@"k"];
+        return [NSColor colorWithDeviceCyan:[obj floatValue] magenta:[obj1 floatValue] yellow:[obj2 floatValue] black:[obj3 floatValue] alpha:alpha];
+    }
+
+    obj = [cursor attributeNamed:@"png"];
+    if (!obj)
+        obj = [cursor attributeNamed:@"tiff"];
+    if (obj) {
+        NSImage *patternImage;
+        NSBitmapImageRep *bitmapImageRep;
+        NSSize imageSize;
+
+        NSData *data = [[[NSData alloc] initWithBase64String:obj] autorelease];
+        bitmapImageRep = (id)[NSBitmapImageRep imageRepWithData:data];
+        imageSize = [bitmapImageRep size];
+        if (bitmapImageRep == nil || NSEqualSizes(imageSize, NSZeroSize)) {
+            NSLog(@"Warning, could not rebuild pattern color from image rep %@, data %@", bitmapImageRep, obj);
+            return [NSColor whiteColor];
+        }
+        patternImage = [[NSImage alloc] initWithSize:imageSize];
+        [patternImage addRepresentation:bitmapImageRep];
+        return [NSColor colorWithPatternImage:[patternImage autorelease]];
+    }
+
+    return [NSColor whiteColor];
+}
 @end

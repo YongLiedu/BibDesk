@@ -1,11 +1,11 @@
-// Copyright 2002-2003 Omni Development, Inc.  All rights reserved.
+// Copyright 2002-2004 Omni Development, Inc.  All rights reserved.
 //
 // This software may only be used and reproduced according to the
 // terms in the file OmniSourceLicense.html, which should be
 // distributed with this project and can also be found at
-// http://www.omnigroup.com/DeveloperResources/OmniSourceLicense.html.
+// <http://www.omnigroup.com/developer/sourcecode/sourcelicense/>.
 //
-// $Header: /Network/Source/CVS/OmniGroup/Frameworks/OmniAppKit/Inspector.subproj/OAInspectorController.h,v 1.30 2003/03/30 00:19:39 toon Exp $
+// $Header: /Network/Source/CVS/OmniGroup/Frameworks/OmniAppKit/Inspector.subproj/OAInspectorController.h,v 1.35 2004/02/10 04:07:32 kc Exp $
 
 #import <Foundation/NSObject.h>
 
@@ -30,8 +30,8 @@
     OAInspectorResizer *resizerView;
     NSMenuItem *menuItem;
     NSView *controlsView;
-    BOOL loadedInspectorView, isExpanded, isToggling, isBottommostInGroup, collapseOnTakeNewPosition, widthSizable, heightSizable, forceResizeWidget;
-    float desiredWidth;
+    BOOL loadedInspectorView, isExpanded, isSettingExpansion, isBottommostInGroup, collapseOnTakeNewPosition, widthSizable, heightSizable, forceResizeWidget, needsToggleBeforeDisplay;
+    float _initialInspectorWidth; // Use the -desiredWidth method to make sure you go through the inspector hook
     NSSize minimumSize;
     NSPoint newPosition;
 }
@@ -48,14 +48,19 @@
 - (NSMenuItem *)menuItem;
 - (float)minimumWidth;
 - (float)desiredWidth;
+- (float)headingHeight;
 - (float)desiredHeightWhenExpanded;
 
+- (void)prepareWindowForDisplay;
+- (void)displayWindow;
 - (void)toggleDisplay;
 - (void)showInspector;
 
 - (void)setBottommostInGroup:(BOOL)isBottom;
 
-- (void)toggleExpandednessWithNewTopLeftPoint:(NSPoint)topLeftPoint animate:(BOOL)yn;
+- (void)toggleExpandednessWithNewTopLeftPoint:(NSPoint)topLeftPoint animate:(BOOL)animate;
+- (void)updateExpandedness; // call when the inspector sets its size internally by itself
+
 - (void)setNewPosition:(NSPoint)aPosition;
 - (void)setCollapseOnTakeNewPosition:(BOOL)yn;
 - (float)heightAfterTakeNewPosition;

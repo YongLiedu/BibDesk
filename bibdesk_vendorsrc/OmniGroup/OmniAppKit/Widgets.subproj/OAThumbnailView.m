@@ -1,9 +1,9 @@
-// Copyright 1997-2003 Omni Development, Inc.  All rights reserved.
+// Copyright 1997-2004 Omni Development, Inc.  All rights reserved.
 //
 // This software may only be used and reproduced according to the
 // terms in the file OmniSourceLicense.html, which should be
 // distributed with this project and can also be found at
-// http://www.omnigroup.com/DeveloperResources/OmniSourceLicense.html.
+// <http://www.omnigroup.com/developer/sourcecode/sourcelicense/>.
 
 #import <OmniAppKit/OAThumbnailView.h>
 
@@ -16,7 +16,7 @@
 #import <OmniAppKit/NSString-OAExtensions.h>
 #import <OmniAppKit/NSView-OAExtensions.h>
 
-RCS_ID("$Header: /Network/Source/CVS/OmniGroup/Frameworks/OmniAppKit/Widgets.subproj/OAThumbnailView.m,v 1.17 2003/01/15 22:51:46 kc Exp $")
+RCS_ID("$Header: /Network/Source/CVS/OmniGroup/Frameworks/OmniAppKit/Widgets.subproj/OAThumbnailView.m,v 1.20 2004/02/10 04:07:38 kc Exp $")
 
 @interface OAThumbnailView (Internal)
 - (void)getMaximumThumbnailSize;
@@ -81,7 +81,7 @@ static NSFont *labelFont = nil;
     columnCount = MAX(superBounds.size.width / cellSize.width, 1);
     rowCount = [provider thumbnailCount] / columnCount
         + (([provider thumbnailCount] % columnCount) ? 1 : 0);
-    rowCount = MAX(1,rowCount);
+    rowCount = MAX(1U, rowCount);
     horizontalMargin = ceil((superBounds.size.width 
                              - columnCount * cellSize.width)
                             / (columnCount+1.0));
@@ -103,7 +103,7 @@ static NSFont *labelFont = nil;
     endRow = MIN(NSMaxY(rect) / cellSize.height, rowCount);
 
     for (row = startRow; row <= endRow; row++) {
-        int	column;
+        unsigned int column;
 	float	y;
 	
 	y = cellSize.height * row;
@@ -288,13 +288,13 @@ static NSFont *labelFont = nil;
 - (void)mouseDown:(NSEvent *)event;
 {
     NSPoint mousePoint;
-    int row, column, index;
+    unsigned int row, column, index;
 
     mousePoint = [self convertPoint:[event locationInWindow] fromView:nil];
     row = MAX(0, mousePoint.y / cellSize.height);
     column = (mousePoint.x - horizontalMargin/2)
                    / (horizontalMargin + cellSize.width);
-    column = MIN(MAX(0, column), columnCount-1);
+    column = MIN(MAX(0U, column), columnCount-1);
     
     index = row * columnCount + column;
     if (index >= [provider thumbnailCount])

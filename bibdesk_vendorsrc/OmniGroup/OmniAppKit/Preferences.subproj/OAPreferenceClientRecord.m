@@ -1,21 +1,22 @@
-// Copyright 1997-2003 Omni Development, Inc.  All rights reserved.
+// Copyright 1997-2004 Omni Development, Inc.  All rights reserved.
 //
 // This software may only be used and reproduced according to the
 // terms in the file OmniSourceLicense.html, which should be
 // distributed with this project and can also be found at
-// http://www.omnigroup.com/DeveloperResources/OmniSourceLicense.html.
+// <http://www.omnigroup.com/developer/sourcecode/sourcelicense/>.
 
-#import <OmniAppKit/OAPreferenceClientRecord.h>
+#import "OAPreferenceClientRecord.h"
 
 #import <Foundation/Foundation.h>
 #import <AppKit/AppKit.h>
 #import <OmniBase/OmniBase.h>
 #import <OmniFoundation/OmniFoundation.h>
 
-#import <OmniAppKit/OAPreferenceClient.h>
-#import <OmniAppKit/OAPreferenceController.h>
+#import "NSImage-OAExtensions.h"
+#import "OAPreferenceClient.h"
+#import "OAPreferenceController.h"
 
-RCS_ID("$Header: /Network/Source/CVS/OmniGroup/Frameworks/OmniAppKit/Preferences.subproj/OAPreferenceClientRecord.m,v 1.25 2003/03/27 07:38:13 rick Exp $")
+RCS_ID("$Header: /Network/Source/CVS/OmniGroup/Frameworks/OmniAppKit/Preferences.subproj/OAPreferenceClientRecord.m,v 1.28 2004/02/10 04:07:36 kc Exp $")
 
 @implementation OAPreferenceClientRecord
 
@@ -52,14 +53,18 @@ RCS_ID("$Header: /Network/Source/CVS/OmniGroup/Frameworks/OmniAppKit/Preferences
 - (NSImage *)iconImage;
 {
     NSBundle *bundle;
-    NSString *path;
     
-    if (iconImage)
+    if (iconImage != nil)
         return iconImage;
 
     bundle = [OFBundledClass bundleForClassNamed:className];
-    path = [bundle pathForImageResource:iconName];
-    iconImage = [[NSImage alloc] initWithContentsOfFile:path];
+    iconImage = [NSImage imageNamed:iconName inBundle:bundle];
+
+#ifdef DEBUG
+    if (iconImage == nil)
+        NSLog(@"OAPreferenceClientRecord '%@' is missing its icon (%@)", identifier, iconName);
+#endif
+
     return iconImage;
 }
 

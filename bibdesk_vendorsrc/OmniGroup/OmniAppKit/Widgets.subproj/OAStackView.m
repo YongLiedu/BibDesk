@@ -1,9 +1,9 @@
-// Copyright 1997-2003 Omni Development, Inc.  All rights reserved.
+// Copyright 1997-2004 Omni Development, Inc.  All rights reserved.
 //
 // This software may only be used and reproduced according to the
 // terms in the file OmniSourceLicense.html, which should be
 // distributed with this project and can also be found at
-// http://www.omnigroup.com/DeveloperResources/OmniSourceLicense.html.
+// <http://www.omnigroup.com/developer/sourcecode/sourcelicense/>.
 
 #import <OmniAppKit/OAStackView.h>
 
@@ -14,7 +14,7 @@
 #import <Foundation/NSInvocation.h>
 #import <OmniBase/OmniBase.h>
 
-RCS_ID("$Header: /Network/Source/CVS/OmniGroup/Frameworks/OmniAppKit/Widgets.subproj/OAStackView.m,v 1.22 2003/04/03 00:09:15 kc Exp $")
+RCS_ID("$Header: /Network/Source/CVS/OmniGroup/Frameworks/OmniAppKit/Widgets.subproj/OAStackView.m,v 1.25 2004/02/10 04:07:38 kc Exp $")
 
 
 NSString *OAStackViewDidLayoutSubviews = @"OAStackViewDidLayoutSubviews";
@@ -61,6 +61,13 @@ OAStackView assumes that all of its subviews line up in one direction (only vert
     //NSLog(@"subviewSizeChanged");
     flags.needsLayout = 1;
     [self setNeedsDisplay: YES];
+}
+
+- (void)setLayoutEnabled:(BOOL)layoutEnabled display:(BOOL)display;
+{
+    flags.layoutDisabled = !layoutEnabled;
+    if (display)
+        [self setNeedsDisplay:YES];
 }
 
 //
@@ -187,7 +194,10 @@ Goes through the subviews and finds the first subview that is willing to stretch
     NSRect subviewFrame;
     BOOL oldAutodisplay;
     float stretchyHeight;
-    
+
+    if (flags.layoutDisabled)
+        return;
+        
     flags.needsLayout = 0;
 
     spaceLeft = [self bounds];

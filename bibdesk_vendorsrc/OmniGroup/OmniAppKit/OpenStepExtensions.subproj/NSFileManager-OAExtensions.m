@@ -1,9 +1,9 @@
-// Copyright 2002-2003 Omni Development, Inc.  All rights reserved.
+// Copyright 2002-2004 Omni Development, Inc.  All rights reserved.
 //
 // This software may only be used and reproduced according to the
 // terms in the file OmniSourceLicense.html, which should be
 // distributed with this project and can also be found at
-// http://www.omnigroup.com/DeveloperResources/OmniSourceLicense.html.
+// <http://www.omnigroup.com/developer/sourcecode/sourcelicense/>.
 
 #import "NSFileManager-OAExtensions.h"
 
@@ -16,7 +16,7 @@
 #import "IconFamily.h"
 #import "NSImage-OAExtensions.h"
 
-RCS_ID("$Header: /Network/Source/CVS/OmniGroup/Frameworks/OmniAppKit/OpenStepExtensions.subproj/NSFileManager-OAExtensions.m,v 1.11 2003/03/24 23:06:54 neo Exp $")
+RCS_ID("$Header: /Network/Source/CVS/OmniGroup/Frameworks/OmniAppKit/OpenStepExtensions.subproj/NSFileManager-OAExtensions.m,v 1.14 2004/02/10 04:07:34 kc Exp $")
 
 @interface NSAppleEventDescriptor (JaguarAPI)
 + (NSAppleEventDescriptor *)descriptorWithString:(NSString *)string;
@@ -77,7 +77,7 @@ static void doSetFileComment(FSRef *fileRef,
         "  from: 'obj '{ "         // It's the property of an object...
         "      form: enum(indx), "
         "      want: type(file), " //  ... of type 'file' ...
-        "      seld: @,"           //  ... selected by an FSSpec ...
+        "      seld: @,"           //  ... selected by an alias ...
         "      from: null() "      //  ... according to the receiving application.
         "              }"
         "             }, "
@@ -96,10 +96,10 @@ static void doSetFileComment(FSRef *fileRef,
     AEReplaceDescData (typeFSRef, fileRef, sizeof(*fileRef), &fileRefDesc);
 
     /* The Finder isn't very good at coercions, so we have to do this ourselves */
-    err = AECoerceDesc(&fileRefDesc, typeFSS, &fileRefDesc);
+    err = AECoerceDesc(&fileRefDesc, typeAlias, &fileRefDesc);
     if (err != noErr) {
         AEDisposeDesc(&fileRefDesc);
-        [NSException raise:NSInternalInconsistencyException format:@"Unable to coerce FSRef to FSSpec: %d", err];
+        [NSException raise:NSInternalInconsistencyException format:@"Unable to coerce FSRef to Alias: %d", err];
     }
 
     AEInitializeDesc(&builtEvent);

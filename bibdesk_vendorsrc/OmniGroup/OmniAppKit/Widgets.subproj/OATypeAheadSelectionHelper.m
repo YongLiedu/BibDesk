@@ -1,9 +1,9 @@
-// Copyright 2001-2003 Omni Development, Inc.  All rights reserved.
+// Copyright 2001-2004 Omni Development, Inc.  All rights reserved.
 //
 // This software may only be used and reproduced according to the
 // terms in the file OmniSourceLicense.html, which should be
 // distributed with this project and can also be found at
-// http://www.omnigroup.com/DeveloperResources/OmniSourceLicense.html.
+// <http://www.omnigroup.com/developer/sourcecode/sourcelicense/>.
 
 #import "OATypeAheadSelectionHelper.h"
 
@@ -11,11 +11,11 @@
 #import <OmniFoundation/OmniFoundation.h>
 #import <OmniBase/OmniBase.h>
 
-RCS_ID("$Header: /Network/Source/CVS/OmniGroup/Frameworks/OmniAppKit/Widgets.subproj/OATypeAheadSelectionHelper.m,v 1.7 2003/05/02 04:23:16 rick Exp $");
+RCS_ID("$Header: /Network/Source/CVS/OmniGroup/Frameworks/OmniAppKit/Widgets.subproj/OATypeAheadSelectionHelper.m,v 1.12 2004/02/10 04:07:38 kc Exp $");
 
 @interface OATypeAheadSelectionHelper (Private)
 - (void)_typeAheadSearchTimeout;
-- (int)_indexOfItemWithPrefix:(NSString *)prefix afterIndex:(int)selectedIndex;
+- (int)_indexOfItemWithPrefix:(NSString *)prefix afterIndex:(unsigned int)selectedIndex;
 @end
 
 @implementation OATypeAheadSelectionHelper
@@ -129,8 +129,8 @@ RCS_ID("$Header: /Network/Source/CVS/OmniGroup/Frameworks/OmniAppKit/Widgets.sub
     typeAheadSearchString = nil;
 }
 
-#warning TODO: extend this algorithm so it will select the next item alphabetically if there's not an exact match, like Finder does
-- (int)_indexOfItemWithPrefix:(NSString *)prefix afterIndex:(int)selectedIndex;
+// TODO: extend this algorithm so it will select the next item alphabetically if there is not an exact match, like Finder does
+- (int)_indexOfItemWithPrefix:(NSString *)prefix afterIndex:(unsigned int)selectedIndex;
 {
     unsigned int labelIndex, foundIndex, labelCount;
     unsigned int prefixLength;

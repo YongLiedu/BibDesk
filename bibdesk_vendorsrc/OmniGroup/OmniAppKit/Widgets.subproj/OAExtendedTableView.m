@@ -1,9 +1,9 @@
-// Copyright 2001-2003 Omni Development, Inc.  All rights reserved.
+// Copyright 2001-2004 Omni Development, Inc.  All rights reserved.
 //
 // This software may only be used and reproduced according to the
 // terms in the file OmniSourceLicense.html, which should be
 // distributed with this project and can also be found at
-// http://www.omnigroup.com/DeveloperResources/OmniSourceLicense.html.
+// <http://www.omnigroup.com/developer/sourcecode/sourcelicense/>.
 
 #import "OAExtendedTableView.h"
 
@@ -11,7 +11,7 @@
 #import <AppKit/AppKit.h>
 #import <OmniBase/rcsid.h>
 
-RCS_ID("$Header: /Network/Source/CVS/OmniGroup/Frameworks/OmniAppKit/Widgets.subproj/OAExtendedTableView.m,v 1.5 2003/01/15 22:51:43 kc Exp $");
+RCS_ID("$Header: /Network/Source/CVS/OmniGroup/Frameworks/OmniAppKit/Widgets.subproj/OAExtendedTableView.m,v 1.9 2004/02/10 04:07:37 kc Exp $");
 
 @interface OAExtendedTableView (Private)
 - (void)_initExtendedTableView;
@@ -125,6 +125,24 @@ RCS_ID("$Header: /Network/Source/CVS/OmniGroup/Frameworks/OmniAppKit/Widgets.sub
     [cachedImageRep release];
     
     return dragImage;
+}
+
+- (void)editColumn:(int)column row:(int)row withEvent:(NSEvent *)theEvent select:(BOOL)select;
+{
+    NSTableColumn *tableColumn;
+    id dataCell;
+
+    [super editColumn:column row:row withEvent:theEvent select:select];
+    
+    tableColumn = [[self tableColumns] objectAtIndex:column];
+    dataCell = [tableColumn dataCellForRow:row];
+    if ([dataCell respondsToSelector:@selector(modifyFieldEditor:forTableView:column:row:)]) {
+        NSResponder *firstResponder;
+
+        firstResponder = [[self window] firstResponder]; // This should be the field editor
+        if ([firstResponder isKindOfClass:[NSText class]]) // ...but let's just double-check
+            [dataCell modifyFieldEditor:(NSText *)firstResponder forTableView:self column:column row:row];
+    }
 }
 
 @end

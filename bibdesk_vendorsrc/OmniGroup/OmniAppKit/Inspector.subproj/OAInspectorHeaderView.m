@@ -1,9 +1,9 @@
-// Copyright 2002-2003 Omni Development, Inc.  All rights reserved.
+// Copyright 2002-2004 Omni Development, Inc.  All rights reserved.
 //
 // This software may only be used and reproduced according to the
 // terms in the file OmniSourceLicense.html, which should be
 // distributed with this project and can also be found at
-// http://www.omnigroup.com/DeveloperResources/OmniSourceLicense.html.
+// <http://www.omnigroup.com/developer/sourcecode/sourcelicense/>.
 
 #import "OAInspectorHeaderView.h"
 
@@ -15,7 +15,7 @@
 #import "NSImage-OAExtensions.h"
 #import "OAAquaButton.h"
 
-RCS_ID("$Header: /Network/Source/CVS/OmniGroup/Frameworks/OmniAppKit/Inspector.subproj/OAInspectorHeaderView.m,v 1.22 2003/03/25 08:24:21 wjs Exp $")
+RCS_ID("$Header: /Network/Source/CVS/OmniGroup/Frameworks/OmniAppKit/Inspector.subproj/OAInspectorHeaderView.m,v 1.25 2004/02/10 04:07:33 kc Exp $")
 
 
 @implementation OAInspectorHeaderView
@@ -191,10 +191,9 @@ static BOOL omitTextAndStateWhenCollapsed;
     NSDivideRect(_bounds, &leftCapRect, &washRect, _leftCapImageSize.width, NSMinXEdge);
     NSDivideRect(washRect, &rightCapRect, &washRect, _rightCapImageSize.width, NSMaxXEdge);
 
-    [_headerImages[OAInspectorHeaderImagePartLeftCap][imageTint][isClicking ? OAInspectorHeaderImageStatePressed : OAInspectorHeaderImageStateNormal] drawFlippedInRect:leftCapRect operation:NSCompositeCopy fraction:1.0];
-    [_headerImages[OAInspectorHeaderImagePartWash][imageTint][isClicking ? OAInspectorHeaderImageStatePressed : OAInspectorHeaderImageStateNormal] drawFlippedInRect:washRect operation:NSCompositeCopy fraction:1.0];
-    [_headerImages[OAInspectorHeaderImagePartRightCap][imageTint][isClicking ? OAInspectorHeaderImageStatePressed : OAInspectorHeaderImageStateNormal] drawFlippedInRect:rightCapRect operation:NSCompositeCopy fraction:1.0];
-//    [_headerImages[OAInspectorHeaderImagePartWash][imageTint][isClicking ? OAInspectorHeaderImageStatePressed : OAInspectorHeaderImageStateNormal] drawFlippedInRect:_bounds operation:NSCompositeCopy fraction:1.0];
+    [_headerImages[OAInspectorHeaderImagePartLeftCap][imageTint][isClicking && !overClose ? OAInspectorHeaderImageStatePressed : OAInspectorHeaderImageStateNormal] drawFlippedInRect:leftCapRect operation:NSCompositeCopy fraction:1.0];
+    [_headerImages[OAInspectorHeaderImagePartWash][imageTint][isClicking && !overClose ? OAInspectorHeaderImageStatePressed : OAInspectorHeaderImageStateNormal] drawFlippedInRect:washRect operation:NSCompositeCopy fraction:1.0];
+    [_headerImages[OAInspectorHeaderImagePartRightCap][imageTint][isClicking && !overClose ? OAInspectorHeaderImageStatePressed : OAInspectorHeaderImageStateNormal] drawFlippedInRect:rightCapRect operation:NSCompositeCopy fraction:1.0];
     
     if ([delegate headerViewShouldDisplayCloseButton:self]) {
         NSPoint closeImagePoint = NSMakePoint(NSMinX(_bounds) + 6.0, NSMaxY(_bounds)-1.0);
@@ -209,7 +208,7 @@ static BOOL omitTextAndStateWhenCollapsed;
 
         [disclosureImage compositeToPoint:disclosureImagePoint operation:NSCompositeSourceOver];
 
-        if (isClicking && !isDragging) // our triangle images are 100% black, but about 50% opaque, so we just draw it again over itself
+        if (isClicking && !overClose && !isDragging) // our triangle images are 100% black, but about 50% opaque, so we just draw it again over itself
             [disclosureImage compositeToPoint:disclosureImagePoint operation:NSCompositeSourceOver fraction:0.6666];
     }
     
@@ -246,33 +245,31 @@ static BOOL omitTextAndStateWhenCollapsed;
 
     isDragging = NO;
     isClicking = YES;
-    clickingClose = [delegate headerViewShouldDisplayCloseButton:self] && NSMouseInRect(click, closeRect, NO);
+    overClose = clickingClose = [delegate headerViewShouldDisplayCloseButton:self] && NSMouseInRect(click, closeRect, NO);
     [self display];
     
     do {
         theEvent = [window nextEventMatchingMask:(NSLeftMouseDraggedMask | NSLeftMouseUpMask)];
         click = [NSEvent mouseLocation];
         
-        if (!isDragging) {
-            if (!NSMouseInRect(click, hysterisisRect, NO)) {
-                if ([theEvent clickCount] > 1) // don't drag on double-clicks
-                    break; 
-                dragWindowHeight = [delegate headerViewDraggingHeight:self];
-                isDragging = YES;
-                clickingClose = NO;
-                [delegate headerViewDidBeginDragging:self];     
-                windowFrame.size.width = [window frame].size.width; // because width may change due to disconnection
+        if (overClose) {
+            BOOL newCloseState;
+            
+            click = [self convertPoint:[theEvent locationInWindow] fromView:nil];
+            newCloseState = NSMouseInRect(click, closeRect, NO);
+            if (newCloseState != clickingClose) {
+                clickingClose = newCloseState;
                 [self display];
-            } else if ([delegate headerViewShouldDisplayCloseButton:self]) {
-                BOOL newCloseState;
-                
-                click = [self convertPoint:[theEvent locationInWindow] fromView:nil];
-                newCloseState = NSMouseInRect(click, closeRect, NO);
-                if (newCloseState != clickingClose) {
-                    clickingClose = newCloseState;
-                    [self display];
-                }
             }
+        } else if (!isDragging && !NSMouseInRect(click, hysterisisRect, NO)) {
+            if ([theEvent clickCount] > 1) // don't drag on double-clicks
+                break; 
+            dragWindowHeight = [delegate headerViewDraggingHeight:self];
+            isDragging = YES;
+            clickingClose = NO;
+            [delegate headerViewDidBeginDragging:self];     
+            windowFrame.size.width = [window frame].size.width; // because width may change due to disconnection
+            [self display];
         }
         
         if (isDragging) {
@@ -307,10 +304,11 @@ static BOOL omitTextAndStateWhenCollapsed;
         [delegate headerViewDidEndDragging:self toFrame:NSMakeRect(newTopLeft.x, newTopLeft.y - dragWindowHeight, windowFrame.size.width, dragWindowHeight)];
     else if (clickingClose)
         [delegate headerViewDidClose:self];
-    else
+    else if (!overClose)
         [delegate headerViewDidToggleExpandedness:self];
     isDragging = NO;
     isClicking = NO;
+    overClose = NO;
     clickingClose = NO;
     [self display];
 }

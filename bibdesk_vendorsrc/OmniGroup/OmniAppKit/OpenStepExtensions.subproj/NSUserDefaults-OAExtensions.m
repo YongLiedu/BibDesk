@@ -1,9 +1,9 @@
-// Copyright 1997-2003 Omni Development, Inc.  All rights reserved.
+// Copyright 1997-2004 Omni Development, Inc.  All rights reserved.
 //
 // This software may only be used and reproduced according to the
 // terms in the file OmniSourceLicense.html, which should be
 // distributed with this project and can also be found at
-// http://www.omnigroup.com/DeveloperResources/OmniSourceLicense.html.
+// <http://www.omnigroup.com/developer/sourcecode/sourcelicense/>.
 
 #import "NSUserDefaults-OAExtensions.h"
 
@@ -12,7 +12,7 @@
 #import <OmniBase/OmniBase.h>
 #import <OmniFoundation/OmniFoundation.h>
 
-RCS_ID("$Header: /Network/Source/CVS/OmniGroup/Frameworks/OmniAppKit/OpenStepExtensions.subproj/NSUserDefaults-OAExtensions.m,v 1.8 2003/01/15 22:51:39 kc Exp $")
+RCS_ID("$Header: /Network/Source/CVS/OmniGroup/Frameworks/OmniAppKit/OpenStepExtensions.subproj/NSUserDefaults-OAExtensions.m,v 1.11 2004/02/10 04:07:35 kc Exp $")
 
 @implementation NSUserDefaults (OAExtensions)
 
@@ -62,6 +62,42 @@ RCS_ID("$Header: /Network/Source/CVS/OmniGroup/Frameworks/OmniAppKit/OpenStepExt
 
 @end
 
+
+@implementation OFPreference (OAExtensions)
+
+- (NSColor *)colorValue;
+{
+#warning TODO - [wiml nov2003] factor out this thrice-repeated code
+    NSString *value;
+    float r = 0.0, g = 0.0, b = 0.0, a = 1.0;
+
+    value = [self stringValue];
+    if ([value length] > 1) {
+        sscanf([value cString], "%f%f%f%f", &r, &g, &b, &a);
+        return [NSColor colorWithCalibratedRed:r green:g blue:b alpha:a];
+    } else
+        return nil;
+}
+
+- (void)setColorValue:(NSColor *)color;
+{
+    NSString *value;
+    float r, g, b, a;
+
+    if (color == nil) {
+        [self setObjectValue:nil];
+        return;
+    }
+
+    [[color colorUsingColorSpaceName:NSCalibratedRGBColorSpace] getRed:&r green:&g blue:&b alpha:&a];
+    if (a == 1.0)
+        value = [NSString stringWithFormat:@"%g %g %g", r, g, b];
+    else
+        value = [NSString stringWithFormat:@"%g %g %g %g", r, g, b, a];
+    [self setStringValue:value];
+}
+
+@end
 
 @implementation OFPreferenceWrapper (OAExtensions)
 

@@ -1,9 +1,9 @@
-// Copyright 1997-2003 Omni Development, Inc.  All rights reserved.
+// Copyright 1997-2004 Omni Development, Inc.  All rights reserved.
 //
 // This software may only be used and reproduced according to the
 // terms in the file OmniSourceLicense.html, which should be
 // distributed with this project and can also be found at
-// http://www.omnigroup.com/DeveloperResources/OmniSourceLicense.html.
+// <http://www.omnigroup.com/developer/sourcecode/sourcelicense/>.
 
 #import <OmniAppKit/OAApplication.h>
 
@@ -17,12 +17,14 @@
 #import "NSView-OAExtensions.h"
 #import "NSImage-OAExtensions.h"
 #import "OAAppKitQueueProcessor.h"
-#import "OAInspector.h"
+#import "OAInspectorGroup.h"
+#import "OAInspectorRegistry.h"
 #import "OAPreferenceController.h"
+#import "OASheetRequest.h"
 
-RCS_ID("$Header: /Network/Source/CVS/OmniGroup/Frameworks/OmniAppKit/OAApplication.m,v 1.86 2003/04/17 01:50:00 rick Exp $")
+RCS_ID("$Header: /Network/Source/CVS/OmniGroup/Frameworks/OmniAppKit/OAApplication.m,v 1.102 2004/02/10 04:07:30 kc Exp $")
 
-DEFINE_NSSTRING(OAFlagsChangedNotification);
+NSString *OAFlagsChangedNotification = @"OAFlagsChangedNotification";
 
 static OFBundledClass *SoftwareUpdateUIClass;
 
@@ -52,34 +54,46 @@ static OFBundledClass *SoftwareUpdateUIClass;
         return omniApplication;
 
     omniApplication = (id)[super sharedApplication];
-    [OAApplication setupOmniApplication];
+    [self setupOmniApplication];
     return omniApplication;
+}
+
+- (void)dealloc;
+{
+    [exceptionCheckpointDate release];
+    [windowsForSheets release];
+    [sheetQueue release];
+    [super dealloc];
 }
 
 - (void)finishLaunching;
 {
+    windowsForSheets = [[NSMutableDictionary alloc] init];
+    sheetQueue = [[NSMutableArray alloc] init];
+
     // If nobody is registering to handle software update notifications, we shouldn't schedule them.
     if (SoftwareUpdateUIClass != nil)
         [[OFSoftwareUpdateChecker sharedUpdateChecker] setTarget:self];
 
-    [[OFController sharedController] addObserver:[OAApplication class]];
+    [[OFController sharedController] addObserver:(id)[OAApplication class]];
     [super finishLaunching];
 }
 
 - (void)run;
 {
-    BOOL stillRunning = YES;
-
     exceptionCount = 0;
     exceptionCheckpointDate = [[NSDate alloc] init];
     do {
         NS_DURING {
             [super run];
-            stillRunning = NO;
+            NS_VOIDRETURN;
         } NS_HANDLER {
-            if (++exceptionCount % 300 == 0) {
-                if ([exceptionCheckpointDate timeIntervalSinceNow] > -3.0)
-                    stillRunning = NO; // 300 exceptions in 3 seconds: abort
+            if (++exceptionCount >= 300) {
+                if ([exceptionCheckpointDate timeIntervalSinceNow] >= -3.0) {
+                    // 300 unhandled exceptions in 3 seconds: abort
+                    fprintf(stderr, "Caught 300 unhandled exceptions in 3 seconds, aborting\n");
+                    return;
+                }
                 [exceptionCheckpointDate release];
                 exceptionCheckpointDate = [[NSDate alloc] init];
                 exceptionCount = 0;
@@ -91,7 +105,51 @@ static OFBundledClass *SoftwareUpdateUIClass;
                     [self handleInitException:localException];
             }
         } NS_ENDHANDLER;
-    } while (stillRunning && _appFlags._hasBeenRun);
+    } while (_appFlags._hasBeenRun);
+}
+
+- (void)beginSheet:(NSWindow *)sheet modalForWindow:(NSWindow *)docWindow modalDelegate:(id)modalDelegate didEndSelector:(SEL)didEndSelector contextInfo:(void *)contextInfo;
+{
+    if ([[windowsForSheets allValues] indexOfObjectIdenticalTo:docWindow] != NSNotFound) {
+        // This window already has a sheet, we need to wait for it to finish
+        [sheetQueue addObject:[OASheetRequest sheetRequestWithSheet:sheet modalForWindow:docWindow modalDelegate:modalDelegate didEndSelector:didEndSelector contextInfo:contextInfo]];
+    } else {
+        if (docWindow != nil)
+            [windowsForSheets setObject:docWindow forKey:sheet];
+        [super beginSheet:sheet modalForWindow:docWindow modalDelegate:modalDelegate didEndSelector:didEndSelector contextInfo:contextInfo];
+    }
+}
+
+- (void)endSheet:(NSWindow *)sheet returnCode:(int)returnCode;
+{
+    NSWindow *docWindow;
+    OASheetRequest *queuedSheet = nil;
+    unsigned int requestIndex, requestCount;
+
+    // End this sheet
+    [super endSheet:sheet returnCode:returnCode]; // Note: This runs the event queue itself until the sheet finishes retracting
+
+    // Find the document window associated with the sheet we just ended
+    docWindow = [[windowsForSheets objectForKey:sheet] retain];
+    [windowsForSheets removeObjectForKey:sheet];
+
+    // See if we have another sheet queued for this document window
+    requestCount = [sheetQueue count];
+    for (requestIndex = 0; requestIndex < requestCount; requestIndex++) {
+        OASheetRequest *request;
+
+        request = [sheetQueue objectAtIndex:requestIndex];
+        if ([request docWindow] == docWindow) {
+            queuedSheet = [request retain];
+            [sheetQueue removeObjectAtIndex:requestIndex];
+            break;
+        }
+    }
+    [docWindow release];
+
+    // Start the queued sheet
+    [queuedSheet beginSheet];
+    [queuedSheet release];
 }
 
 #define MAXIMUM_LINE_FACTOR 12.0
@@ -302,6 +360,7 @@ static float OAScrollFactorForWheelEvent(NSEvent *event)
 - (BOOL)checkForModifierFlags:(unsigned int)flags;
 {
     NSEvent *myEvent;
+    NSEventType eventType;
     BOOL gotFlags = NO;
     
     // post fake shift-down an shift-up events so we can find out what other modifers are down "right now".
@@ -317,6 +376,9 @@ static float OAScrollFactorForWheelEvent(NSEvent *event)
 
         // see if our shift down event has the other flags we want
         [NSApp sendEvent:myEvent];
+        eventType = [myEvent type];
+        if (eventType != NSKeyDown && eventType != NSKeyUp && eventType != NSFlagsChanged)
+            continue;
         if ([myEvent keyCode] == 56 && [myEvent modifierFlags] & flags)
             gotFlags = YES;
     }
@@ -335,8 +397,8 @@ static float OAScrollFactorForWheelEvent(NSEvent *event)
     } else {
         NSString *bookName;
 
-        bookName = NSLocalizedStringFromTable(@"CFBundleHelpBookName", @"InfoPlist", "localized version of the help book name");
-        if (bookName != nil) {
+        bookName = [[NSBundle mainBundle] localizedStringForKey:@"CFBundleHelpBookName" value:@"" table:@"InfoPlist"];
+        if (![bookName isEqualToString:@"CFBundleHelpBookName"]) {
             // We've got Apple Help
             OSStatus err;
 
@@ -430,18 +492,9 @@ static float OAScrollFactorForWheelEvent(NSEvent *event)
     [mainWindow makeKeyAndOrderFront:nil];
 }
 
-- (IBAction)showInspectorPanel:(id)sender;
-{
-    [OAInspector showInspector];
-}
-
 - (IBAction)toggleInspectorPanel:(id)sender;
 {
-    if ([OAInspector isInspectorVisible]) {
-        [OAInspector hideInspector];
-    } else {
-        [OAInspector showInspector];
-    }
+    [OAInspectorRegistry toggleAllInspectors];
 }
 
 - (IBAction)showPreferencesPanel:(id)sender;
@@ -486,18 +539,20 @@ static float OAScrollFactorForWheelEvent(NSEvent *event)
 
 - (BOOL)validateMenuItem:(NSMenuItem *)item;
 {
-    SEL action;
+    SEL action = [item action];
 
-    action = [item action];
     if (action == @selector(toggleInspectorPanel:)) {
-        if (![OAInspector isInspectorVisible]) {
-            [item setTitle:NSLocalizedStringFromTableInBundle(@"Show Info", @"OmniAppKit", [self bundle], "show the info panel")];
+        NSString *showString = NSLocalizedStringFromTableInBundle(@"Show Inspectors", @"OmniAppKit", [OAApplication bundle], "menu title");
+        NSString *hideString = NSLocalizedStringFromTableInBundle(@"Hide Inspectors", @"OmniAppKit", [OAApplication bundle], "menu title");
+
+        if ([[OAInspectorGroup visibleGroups] count] > 0) {
+            [item setTitle:hideString];
         } else {
-            [item setTitle:NSLocalizedStringFromTableInBundle(@"Hide Info", @"OmniAppKit", [self bundle], "hide the info panel")];
+            [item setTitle:showString];
         }
         return YES;
     }
-
+    
     return [super validateMenuItem:item];
 }
 
@@ -518,7 +573,7 @@ static float OAScrollFactorForWheelEvent(NSEvent *event)
     dynamicItemGroupRange = NSMakeRange(0, 0);
     itemCount = [aMenu numberOfItems];
     for (itemIndex = 0; itemIndex < itemCount; itemIndex++) {
-        NSMenuItem *currentItem;
+        id <NSMenuItem> currentItem;
 
         currentItem = [aMenu itemAtIndex:itemIndex];
         if ([currentItem hasSubmenu])
@@ -543,7 +598,7 @@ static float OAScrollFactorForWheelEvent(NSEvent *event)
 {
     extern MenuRef _NSGetCarbonMenu(NSMenu *);
     MenuRef menu;
-    int item;
+    unsigned int item;
     
     menu = _NSGetCarbonMenu(aMenu);
     aRange.location++; // Carbon menu indices include the menu itself at index 0:  skip past it

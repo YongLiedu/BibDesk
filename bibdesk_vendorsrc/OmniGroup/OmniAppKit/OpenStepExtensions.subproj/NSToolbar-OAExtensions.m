@@ -1,16 +1,16 @@
-// Copyright 2001-2003 Omni Development, Inc.  All rights reserved.
+// Copyright 2001-2004 Omni Development, Inc.  All rights reserved.
 //
 // This software may only be used and reproduced according to the
 // terms in the file OmniSourceLicense.html, which should be
 // distributed with this project and can also be found at
-// http://www.omnigroup.com/DeveloperResources/OmniSourceLicense.html.
+// <http://www.omnigroup.com/developer/sourcecode/sourcelicense/>.
 
 #import "NSToolbar-OAExtensions.h"
 
 #import <Foundation/Foundation.h>
 #import <OmniBase/rcsid.h>
 
-RCS_ID("$Header: /Network/Source/CVS/OmniGroup/Frameworks/OmniAppKit/OpenStepExtensions.subproj/NSToolbar-OAExtensions.m,v 1.6 2003/02/05 23:50:08 rick Exp $");
+RCS_ID("$Header: /Network/Source/CVS/OmniGroup/Frameworks/OmniAppKit/OpenStepExtensions.subproj/NSToolbar-OAExtensions.m,v 1.8 2004/02/10 04:07:35 kc Exp $");
 
 @implementation NSToolbar (OAExtensions)
 

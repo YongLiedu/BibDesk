@@ -1,11 +1,11 @@
-// Copyright 1997-2003 Omni Development, Inc.  All rights reserved.
+// Copyright 1997-2004 Omni Development, Inc.  All rights reserved.
 //
 // This software may only be used and reproduced according to the
 // terms in the file OmniSourceLicense.html, which should be
 // distributed with this project and can also be found at
-// http://www.omnigroup.com/DeveloperResources/OmniSourceLicense.html.
+// <http://www.omnigroup.com/developer/sourcecode/sourcelicense/>.
 //
-// $Header: /Network/Source/CVS/OmniGroup/Frameworks/OmniAppKit/Preferences.subproj/OAPreferenceController.h,v 1.33 2003/03/06 02:41:52 wjs Exp $
+// $Header: /Network/Source/CVS/OmniGroup/Frameworks/OmniAppKit/Preferences.subproj/OAPreferenceController.h,v 1.38 2004/02/10 04:07:36 kc Exp $
 
 #import <OmniFoundation/OFObject.h>
 #import <Foundation/NSGeometry.h>
@@ -52,6 +52,9 @@ typedef enum OAPreferencesViewStyle {
 }
 
 + (OAPreferenceController *)sharedPreferenceController;
+// For subclassers
++ (NSString *)overrideNameForCategoryName:(NSString *)categoryName;
++ (NSString *)overrideLocalizedNameForCategoryName:(NSString *)categoryName bundle:(NSBundle *)bundle;
 
 // API
 - (void)close;
@@ -63,6 +66,7 @@ typedef enum OAPreferencesViewStyle {
 - (OAPreferenceClientRecord *)clientRecordWithIdentifier:(NSString *)identifier;
 - (OAPreferenceClient *)clientWithShortTitle:(NSString *)shortTitle;
 - (OAPreferenceClient *)clientWithIdentifier:(NSString *)identifier;
+- (OAPreferenceClient *)currentClient;
 - (void)iconView:(OAPreferencesIconView *)iconView buttonHitAtIndex:(unsigned int)index;
 
 // Actions
@@ -75,4 +79,3 @@ typedef enum OAPreferencesViewStyle {
 
 
 @end
-

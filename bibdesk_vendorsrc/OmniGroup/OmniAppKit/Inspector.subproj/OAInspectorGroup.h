@@ -1,11 +1,11 @@
-// Copyright 2002-2003 Omni Development, Inc.  All rights reserved.
+// Copyright 2002-2004 Omni Development, Inc.  All rights reserved.
 //
 // This software may only be used and reproduced according to the
 // terms in the file OmniSourceLicense.html, which should be
 // distributed with this project and can also be found at
-// http://www.omnigroup.com/DeveloperResources/OmniSourceLicense.html.
+// <http://www.omnigroup.com/developer/sourcecode/sourcelicense/>.
 //
-// $Header: /Network/Source/CVS/OmniGroup/Frameworks/OmniAppKit/Inspector.subproj/OAInspectorGroup.h,v 1.32 2003/03/28 20:51:39 toon Exp $
+// $Header: /Network/Source/CVS/OmniGroup/Frameworks/OmniAppKit/Inspector.subproj/OAInspectorGroup.h,v 1.37 2004/02/10 04:07:32 kc Exp $
 
 #import <Foundation/NSObject.h>
 #import <Foundation/NSGeometry.h> // for NSRect
@@ -16,7 +16,8 @@
 @interface OAInspectorGroup : NSObject
 {
     NSMutableArray *inspectors;
-    BOOL isResizing, isToggling, ignoreResizing, isShowing, screenChangesEnabled;
+    BOOL isResizing, isSettingExpansion, ignoreResizing, isShowing, screenChangesEnabled;
+    BOOL _hasPositionedWindows;
     void *_private;
 }
 
@@ -35,11 +36,12 @@
 - (void)orderFrontGroup;
 
 - (void)addInspector:(OAInspectorController *)aController;
-- (NSRect)inspector:(OAInspectorController *)aController willResizeToFrame:(NSRect)aFrame isToggling:(BOOL)isToggling;
+- (NSRect)inspector:(OAInspectorController *)aController willResizeToFrame:(NSRect)aFrame isSettingExpansion:(BOOL)isSettingExpansion;
 
 - (void)detachFromGroup:(OAInspectorController *)aController;
 - (NSRect)snapToOtherGroupWithFrame:(NSRect)aRect;
 - (NSRect)fitFrame:(NSRect)aFrame onScreen:(NSScreen *)aScreen;
+- (void)setTopLeftPoint:(NSPoint)aPoint;
 - (void)windowsDidMoveToFrame:(NSRect)aFrame;
 
 - (BOOL)isHeadOfGroup:(OAInspectorController *)aController;

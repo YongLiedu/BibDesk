@@ -1,9 +1,9 @@
-// Copyright 2002-2003 Omni Development, Inc.  All rights reserved.
+// Copyright 2002-2004 Omni Development, Inc.  All rights reserved.
 //
 // This software may only be used and reproduced according to the
 // terms in the file OmniSourceLicense.html, which should be
 // distributed with this project and can also be found at
-// http://www.omnigroup.com/DeveloperResources/OmniSourceLicense.html.
+// <http://www.omnigroup.com/developer/sourcecode/sourcelicense/>.
 
 #import "OAScriptToolbarHelper.h"
 
@@ -15,7 +15,7 @@
 #import "NSToolbar-OAExtensions.h"
 #import "OAOSAScript.h"
 
-RCS_ID("$Header: /Network/Source/CVS/OmniGroup/Frameworks/OmniAppKit/OAScriptToolbarHelper.m,v 1.9 2003/01/15 22:51:31 kc Exp $")
+RCS_ID("$Header: /Network/Source/CVS/OmniGroup/Frameworks/OmniAppKit/OAScriptToolbarHelper.m,v 1.14 2004/02/10 04:07:31 kc Exp $")
 
 @implementation OAScriptToolbarHelper
 
@@ -60,7 +60,7 @@ RCS_ID("$Header: /Network/Source/CVS/OmniGroup/Frameworks/OmniAppKit/OAScriptToo
             
             path = [scriptFolder stringByAppendingPathComponent:filename];
             attributes = [fileManager fileAttributesAtPath:path traverseLink:YES];
-            if (([[attributes objectForKey:NSFileHFSTypeCode] longValue] != 'osas') && ![filename hasSuffix:@".scpt"])
+            if (([[attributes objectForKey:NSFileHFSTypeCode] longValue] != 'osas') && ![filename hasSuffix:@".scpt"] && ![filename hasSuffix:@".scptd"])
                 continue;
             [results addObject:[path stringByAppendingPathExtension:@"osascript"]];
         } 
@@ -100,11 +100,41 @@ RCS_ID("$Header: /Network/Source/CVS/OmniGroup/Frameworks/OmniAppKit/OAScriptToo
 
 - (void)executeScriptItem:sender;
 {
-    OAOSAScript *script;
+    NSString *scriptFilename, *scriptName;
+    NSAppleScript *script;
+    NSDictionary *errorDictionary;
+    NSAppleEventDescriptor *result;
     
-    script = [[OAOSAScript alloc] initWithPath:[self pathForItem:sender]];
-    [script executeWithInterfaceOnWindow:[[sender toolbar] window]];
-    [script release];
+    scriptFilename = [self pathForItem:sender];
+    scriptName = [[NSFileManager defaultManager] displayNameAtPath:scriptFilename];
+    script = [[[NSAppleScript alloc] initWithContentsOfURL:[NSURL fileURLWithPath:scriptFilename] error:&errorDictionary] autorelease];
+    if (script == nil) {
+        NSString *errorText, *messageText, *okButton;
+        
+        errorText = [NSString stringWithFormat:NSLocalizedStringFromTableInBundle(@"The script file '%@' could not be opened.", @"OmniAppKit", [OAScriptToolbarHelper bundle], "script loading error"), scriptName];
+        messageText = [NSString stringWithFormat:NSLocalizedStringFromTableInBundle(@"AppleScript reported the following error:\n%@", @"OmniAppKit", [OAScriptToolbarHelper bundle], "script loading error message"), [errorDictionary objectForKey:NSAppleScriptErrorMessage]];
+        okButton = NSLocalizedStringFromTableInBundle(@"OK", @"OmniAppKit", [OAScriptToolbarHelper bundle], "script error panel button");
+        NSBeginAlertSheet(errorText, okButton, nil, nil, [[sender toolbar] window], self, NULL, NULL, NULL, messageText);                                     
+        return;
+    }
+    result = [script executeAndReturnError:&errorDictionary];
+    if (result == nil) {
+        NSString *errorText, *messageText, *okButton, *editButton;
+        
+        errorText = [NSString stringWithFormat:NSLocalizedStringFromTableInBundle(@"The script '%@' could not complete.", @"OmniAppKit", [OAScriptToolbarHelper bundle], "script execute error"), scriptName];
+        messageText = [NSString stringWithFormat:NSLocalizedStringFromTableInBundle(@"AppleScript reported the following error:\n%@", @"OmniAppKit", [OAScriptToolbarHelper bundle], "script execute error message"), [errorDictionary objectForKey:NSAppleScriptErrorMessage]];
+        okButton = NSLocalizedStringFromTableInBundle(@"OK", @"OmniAppKit", [OAScriptToolbarHelper bundle], "script error panel button");
+        editButton = NSLocalizedStringFromTableInBundle(@"Edit Script", @"OmniAppKit", [OAScriptToolbarHelper bundle], "script error panel button");
+        NSBeginAlertSheet(errorText, okButton, editButton, nil, [[sender toolbar] window], self, @selector(errorSheetDidEnd:returnCode:contextInfo:), NULL, [scriptFilename retain], messageText);                                     
+        
+        return;
+    }
+}
+
+- (void)errorSheetDidEnd:(NSWindow *)sheet returnCode:(int)returnCode contextInfo:(void *)contextInfo;
+{
+    if (returnCode == NSAlertAlternateReturn)
+        [[NSWorkspace sharedWorkspace] openFile:[(NSString *)contextInfo autorelease]];
 }
 
 @end

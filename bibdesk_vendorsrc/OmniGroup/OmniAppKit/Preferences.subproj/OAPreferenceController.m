@@ -1,9 +1,9 @@
-// Copyright 1997-2003 Omni Development, Inc.  All rights reserved.
+// Copyright 1997-2004 Omni Development, Inc.  All rights reserved.
 //
 // This software may only be used and reproduced according to the
 // terms in the file OmniSourceLicense.html, which should be
 // distributed with this project and can also be found at
-// http://www.omnigroup.com/DeveloperResources/OmniSourceLicense.html.
+// <http://www.omnigroup.com/developer/sourcecode/sourcelicense/>.
 
 #import <OmniAppKit/OAPreferenceController.h>
 
@@ -23,7 +23,7 @@
 #import "OAPreferencesToolbar.h"
 #import "OAPreferencesWindow.h"
 
-RCS_ID("$Header: /Network/Source/CVS/OmniGroup/Frameworks/OmniAppKit/Preferences.subproj/OAPreferenceController.m,v 1.79 2003/05/06 23:15:50 kc Exp $") 
+RCS_ID("$Header: /Network/Source/CVS/OmniGroup/Frameworks/OmniAppKit/Preferences.subproj/OAPreferenceController.m,v 1.88 2004/02/10 04:07:36 kc Exp $") 
 
 @interface OAPreferenceController (Private)
 - (void)_loadInterface;
@@ -46,6 +46,7 @@ RCS_ID("$Header: /Network/Source/CVS/OmniGroup/Frameworks/OmniAppKit/Preferences
 
 @interface NSToolbar (KnownPrivateMethods)
 - (NSView *)_toolbarView;
+- (void)setSelectedItemIdentifier:(NSString *)itemIdentifier; // Panther only
 @end
 
 @implementation OAPreferenceController
@@ -54,6 +55,16 @@ static NSString *windowFrameSaveName = @"Preferences";
 static OAPreferenceController *sharedPreferenceController = nil;
 
 // OFBundleRegistryTarget informal protocol
+
++ (NSString *)overrideNameForCategoryName:(NSString *)categoryName;
+{
+    return categoryName;
+}
+
++ (NSString *)overrideLocalizedNameForCategoryName:(NSString *)categoryName bundle:(NSBundle *)bundle;
+{
+    return [bundle localizedStringForKey:categoryName value:@"" table:@"Preferences"];
+}
 
 + (void)registerItemName:(NSString *)itemName bundle:(NSBundle *)bundle description:(NSDictionary *)description;
 {
@@ -66,7 +77,11 @@ static OAPreferenceController *sharedPreferenceController = nil;
         categoryName = @"UNKNOWN";
 
     controller = [self sharedPreferenceController];
-    [controller _registerCategoryName:categoryName localizedName:[bundle localizedStringForKey:categoryName value:@"" table:@"Preferences"] priorityNumber:[description objectForKey:@"categoryPriority"]];
+    
+    categoryName = [self overrideNameForCategoryName:categoryName];
+    NSString *localizedCategoryName = [self overrideLocalizedNameForCategoryName:categoryName bundle:bundle];
+        
+    [controller _registerCategoryName:categoryName localizedName:localizedCategoryName priorityNumber:[description objectForKey:@"categoryPriority"]];
     [controller _registerClassName:itemName inCategoryNamed:categoryName description:description];
 }
 
@@ -184,6 +199,11 @@ static OAPreferenceController *sharedPreferenceController = nil;
     return [[self clientRecordWithIdentifier: identifier] clientInstanceInController: self];
 }
 
+- (OAPreferenceClient *)currentClient;
+{
+    return nonretained_currentClient;
+}
+
 - (void)iconView:(OAPreferencesIconView *)iconView buttonHitAtIndex:(unsigned int)index;
 {
     [self _setCurrentClientRecord:[[iconView preferenceClientRecords] objectAtIndex:index]];
@@ -239,7 +259,7 @@ static OAPreferenceController *sharedPreferenceController = nil;
     NSMutableArray *sortedClientRecords;
     NSEnumerator *enumerator;
     NSString *key;
-    int newIndex;
+    unsigned int newIndex;
 
     sortedClientRecords = [[NSMutableArray alloc] init];
     enumerator = [[self _categoryNames] objectEnumerator];
@@ -339,12 +359,17 @@ static OAPreferenceController *sharedPreferenceController = nil;
     return newItem;
 }
 
-- (NSArray *)toolbarDefaultItemIdentifiers:(NSToolbar*)toolbar;
+- (NSArray *)toolbarDefaultItemIdentifiers:(NSToolbar *)toolbar;
 {
     return defaultToolbarItems;
 }
 
-- (NSArray *)toolbarAllowedItemIdentifiers:(NSToolbar*)toolbar;
+- (NSArray *)toolbarAllowedItemIdentifiers:(NSToolbar *)toolbar;
+{
+    return allowedToolbarItems;
+}
+
+- (NSArray *)toolbarSelectableItemIdentifiers:(NSToolbar *)toolbar;
 {
     return allowedToolbarItems;
 }
@@ -548,8 +573,15 @@ static OAPreferenceController *sharedPreferenceController = nil;
 {
     NSString *name = nil;
     
-    if (viewStyle == OAPreferencesViewCustomizable)
+    if (viewStyle != OAPreferencesViewSingle) {
         name = [nonretained_currentClientRecord title];
+        if ([toolbar respondsToSelector:@selector(setSelectedItemIdentifier:)]) {
+            if (nonretained_currentClientRecord != nil)
+                [toolbar setSelectedItemIdentifier:[nonretained_currentClientRecord identifier]];
+            else
+                [toolbar setSelectedItemIdentifier:@"OAPreferencesShowAll"];
+        }
+    }
     if (name == nil || [name isEqualToString:@""])
         name = [[NSProcessInfo processInfo] processName];
     [window setTitle:[NSString stringWithFormat:NSLocalizedStringFromTableInBundle(@"%@ Preferences", @"OmniAppKit", [OAPreferenceController bundle], "preferences panel title format"), name]];
@@ -768,8 +800,9 @@ static int _OAPreferenceControllerCompareCategoryNames(id name1, id name2, void 
     NSMutableArray *categoryClientRecords;
     OAPreferenceClientRecord *newRecord;
     NSDictionary *defaultsDictionary;
-    NSString *title, *iconName, *nibName, *identifier, *shortTitle;
-    
+    NSString *titleEnglish, *title, *iconName, *nibName, *identifier, *shortTitleEnglish, *shortTitle;
+    NSBundle *classBundle = [OFBundledClass bundleForClassNamed:className];
+
     categoryClientRecords = [categoryNamesToClientRecordsArrays objectForKey:categoryName];
     if (categoryClientRecords == nil) {
         categoryClientRecords = [NSMutableArray array];
@@ -782,7 +815,10 @@ static int _OAPreferenceControllerCompareCategoryNames(id name1, id name2, void 
     else
         defaultsDictionary = [NSDictionary dictionary]; // placeholder
 
-    title = [[OFBundledClass bundleForClassNamed:className] localizedStringForKey:[description objectForKey:@"title"] value:@"" table:@"Preferences"];
+    titleEnglish = [description objectForKey:@"title"];
+    if (titleEnglish == nil)
+        titleEnglish = [NSString stringWithFormat:@"Localized Title for Preference Class %@", className];
+    title = [classBundle localizedStringForKey:titleEnglish value:@"" table:@"Preferences"];
 
     if (!(className && title))
         return;
@@ -793,18 +829,27 @@ static int _OAPreferenceControllerCompareCategoryNames(id name1, id name2, void 
     nibName = [description objectForKey:@"nib"];
     if (nibName == nil || [nibName isEqualToString:@""])
         nibName = className;
+
+    shortTitleEnglish = [description objectForKey:@"shortTitle"];
+    if (shortTitleEnglish == nil) {
+        shortTitleEnglish = [NSString stringWithFormat:@"Localized Short Title for Preference Class %@", className];
+        shortTitle = [classBundle localizedStringForKey:shortTitleEnglish value:@"" table:@"Preferences"];
+        if ([shortTitle isEqualToString:shortTitleEnglish])
+            shortTitle = nil; // there's no localization for the short title specifically, so we'll let it client class default the short title to the localized version of the @"title" key's value
+    } else
+        shortTitle = [classBundle localizedStringForKey:shortTitleEnglish value:@"" table:@"Preferences"];
+    
     identifier = [description objectForKey:@"identifier"];
     if (identifier == nil) {
         // Before we introduced a separate notion of identifiers, we simply used the short title (which defaulted to the title)
-        identifier = [description objectForKey:@"shortTitle" defaultObject:[description objectForKey:@"title"]];
+        identifier = [description objectForKey:@"shortTitle" defaultObject:titleEnglish];
     }
-    shortTitle = [description objectForKey:@"shortTitle"];
 
     newRecord = [[OAPreferenceClientRecord alloc] initWithCategoryName:categoryName];
     [newRecord setIdentifier:identifier];
     [newRecord setClassName:className];
     [newRecord setTitle:title];
-    [newRecord setShortTitle:shortTitle != nil ? [[OFBundledClass bundleForClassNamed:className] localizedStringForKey:shortTitle value:@"" table:@"Preferences"] : nil];
+    [newRecord setShortTitle:shortTitle];
     [newRecord setIconName:iconName];
     [newRecord setNibName:nibName];
     [newRecord setHelpURL:[description objectForKey:@"helpURL"]];

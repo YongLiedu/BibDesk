@@ -1,9 +1,9 @@
-// Copyright 2000-2003 Omni Development, Inc.  All rights reserved.
+// Copyright 2000-2004 Omni Development, Inc.  All rights reserved.
 //
 // This software may only be used and reproduced according to the
 // terms in the file OmniSourceLicense.html, which should be
 // distributed with this project and can also be found at
-// http://www.omnigroup.com/DeveloperResources/OmniSourceLicense.html.
+// <http://www.omnigroup.com/developer/sourcecode/sourcelicense/>.
 
 #import "OAGridView.h"
 
@@ -11,7 +11,7 @@
 #import <AppKit/AppKit.h>
 #import <OmniBase/OmniBase.h>
 
-RCS_ID("$Header: /Network/Source/CVS/OmniGroup/Frameworks/OmniAppKit/Widgets.subproj/OAGridView.m,v 1.9 2003/01/15 22:51:43 kc Exp $");
+RCS_ID("$Header: /Network/Source/CVS/OmniGroup/Frameworks/OmniAppKit/Widgets.subproj/OAGridView.m,v 1.11 2004/02/10 04:07:37 kc Exp $");
 
 // This puts views in rows and columns, and makes sure they all have the same size.  You can set the left, right, top and bottom margins, and the interrow and intercolumn spacing.
 

@@ -1,9 +1,9 @@
-// Copyright 2001-2003 Omni Development, Inc.  All rights reserved.
+// Copyright 2001-2004 Omni Development, Inc.  All rights reserved.
 //
 // This software may only be used and reproduced according to the
 // terms in the file OmniSourceLicense.html, which should be
 // distributed with this project and can also be found at
-// http://www.omnigroup.com/DeveloperResources/OmniSourceLicense.html.
+// <http://www.omnigroup.com/developer/sourcecode/sourcelicense/>.
 
 #import "OAToolbarItem.h"
 
@@ -13,7 +13,7 @@
 
 #import "OAApplication.h"
 
-RCS_ID("$Header: /Network/Source/CVS/OmniGroup/Frameworks/OmniAppKit/Widgets.subproj/OAToolbarItem.m,v 1.7 2003/02/10 08:38:27 kevin Exp $");
+RCS_ID("$Header: /Network/Source/CVS/OmniGroup/Frameworks/OmniAppKit/Widgets.subproj/OAToolbarItem.m,v 1.10 2004/02/10 04:07:38 kc Exp $");
 
 @interface OAToolbarItem (Private)
 - (void)_swapImage;
@@ -127,7 +127,7 @@ RCS_ID("$Header: /Network/Source/CVS/OmniGroup/Frameworks/OmniAppKit/Widgets.sub
 {
     BOOL optionDown = ([[note object] modifierFlags] & NSAlternateKeyMask) ? YES : NO;
 
-    if (optionDown && !inOptionKeyState) {
+    if (optionDown != inOptionKeyState) {
         if ([self optionKeyImage])
             [self _swapImage];
         if ([self optionKeyLabel])
@@ -136,18 +136,8 @@ RCS_ID("$Header: /Network/Source/CVS/OmniGroup/Frameworks/OmniAppKit/Widgets.sub
             [self _swapToolTip];
         if ([self optionKeyAction])
             [self _swapAction];
-        inOptionKeyState = YES;
-    } else if (!optionDown && inOptionKeyState) {
-        if ([self optionKeyImage])
-            [self _swapImage];
-        if ([self optionKeyLabel])
-            [self _swapLabel];
-        if ([self optionKeyToolTip])
-            [self _swapToolTip];
-        if ([self optionKeyAction])
-            [self _swapAction];
-        inOptionKeyState = NO;
-    }
+        inOptionKeyState = optionDown;
+    } 
 }
 
 @end

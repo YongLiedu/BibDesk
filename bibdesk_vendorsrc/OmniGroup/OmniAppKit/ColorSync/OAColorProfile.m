@@ -1,9 +1,9 @@
-// Copyright 2002-2003 Omni Development, Inc.  All rights reserved.
+// Copyright 2002-2004 Omni Development, Inc.  All rights reserved.
 //
 // This software may only be used and reproduced according to the
 // terms in the file OmniSourceLicense.html, which should be
 // distributed with this project and can also be found at
-// http://www.omnigroup.com/DeveloperResources/OmniSourceLicense.html.
+// <http://www.omnigroup.com/developer/sourcecode/sourcelicense/>.
 
 #import "OAColorProfile.h"
 #import "NSColor-ColorSyncExtensions.h"
@@ -13,7 +13,7 @@
 #import <OmniFoundation/OmniFoundation.h>
 #import <OmniBase/assertions.h>
 
-RCS_ID("$Header: /Network/Source/CVS/OmniGroup/Frameworks/OmniAppKit/ColorSync/OAColorProfile.m,v 1.5 2003/04/02 16:06:18 toon Exp $");
+RCS_ID("$Header: /Network/Source/CVS/OmniGroup/Frameworks/OmniAppKit/ColorSync/OAColorProfile.m,v 1.11 2004/02/10 04:07:32 kc Exp $");
 
 @interface OAColorProfile (Private)
 + (void)_deviceNotification:(NSNotification *)notification;
@@ -24,6 +24,8 @@ RCS_ID("$Header: /Network/Source/CVS/OmniGroup/Frameworks/OmniAppKit/ColorSync/O
 - (NSString *)_getProfileName:(void *)aProfile;
 - (void *)_anyProfile;
 - (void)_updateConversionCacheForOutput:(OAColorProfile *)outputProfile;
+- (NSData *)_dataForRawProfile:(void *)rawProfile;
+- (BOOL)_rawProfileIsBuiltIn:(void *)rawProfile;
 @end
 
 NSString *DefaultDocumentColorProfileDidChangeNotification = @"DefaultDocumentColorProfileDidChangeNotification";
@@ -263,18 +265,30 @@ OSErr nameListIterator(CMProfileIterateData *iterateData, void *refCon)
 + (OAColorProfile *)colorProfileWithRGBNamed:(NSString *)rgbName cmykNamed:(NSString *)cmykName grayNamed:(NSString *)grayName;
 {
     OAColorProfile *profile = [[OAColorProfile alloc] init];
+    OAColorProfile *match;
 
+    [self _iterateAvailableProfiles];
+    
     if (rgbName) {
-        profile->rgbProfile = ((OAColorProfile *)[rgbProfileDictionary objectForKey:rgbName])->rgbProfile;
-        CMCloneProfileRef((CMProfileRef)profile->rgbProfile);
+        match = [rgbProfileDictionary objectForKey:rgbName];
+        if (match) {
+            profile->rgbProfile = match->rgbProfile;
+            CMCloneProfileRef((CMProfileRef)profile->rgbProfile);
+        }
     }
     if (cmykName) {
-        profile->cmykProfile = ((OAColorProfile *)[cmykProfileDictionary objectForKey:cmykName])->cmykProfile;
-        CMCloneProfileRef((CMProfileRef)profile->cmykProfile);
+        match = [cmykProfileDictionary objectForKey:cmykName];
+        if (match) {
+            profile->cmykProfile = match->cmykProfile;
+            CMCloneProfileRef((CMProfileRef)profile->cmykProfile);
+        }
     }
     if (grayName) {
-        profile->grayProfile = ((OAColorProfile *)[grayProfileDictionary objectForKey:grayName])->grayProfile;
-        CMCloneProfileRef((CMProfileRef)profile->grayProfile);
+        match = [grayProfileDictionary objectForKey:grayName];
+        if (match) {
+            profile->grayProfile = match->grayProfile;
+            CMCloneProfileRef((CMProfileRef)profile->grayProfile);
+        }
     }
     return [profile autorelease];
 }
@@ -282,28 +296,55 @@ OSErr nameListIterator(CMProfileIterateData *iterateData, void *refCon)
 + (OAColorProfile *)colorProfileFromPropertyListRepresentation:(NSDictionary *)dict;
 {
     OAColorProfile *colorProfile;
+    OAColorProfile *match;
     NSData *data;
+    NSString *name;
     CMProfileLocation profileLocation;
     
+    [self _iterateAvailableProfiles];
     colorProfile = [[[self alloc] init] autorelease];
     
     data = [dict objectForKey:@"rgb"];
-    profileLocation.locType = cmBufferBasedProfile;
-    profileLocation.u.bufferLoc.buffer = (void *)[data bytes];
-    profileLocation.u.bufferLoc.size = [data length];
-    CMOpenProfile((CMProfileRef *)&colorProfile->rgbProfile, &profileLocation);
+    if (data) {
+        profileLocation.locType = cmBufferBasedProfile;
+        profileLocation.u.bufferLoc.buffer = (void *)[data bytes];
+        profileLocation.u.bufferLoc.size = [data length];
+        CMOpenProfile((CMProfileRef *)&colorProfile->rgbProfile, &profileLocation);
+    } else if ((name = [dict objectForKey:@"rgbName"])) {
+        match = [rgbProfileDictionary objectForKey:name];
+        if (match) {
+            colorProfile->rgbProfile = match->rgbProfile;
+            CMCloneProfileRef((CMProfileRef)colorProfile->rgbProfile);
+        }
+    }
     
     data = [dict objectForKey:@"cmyk"];
-    profileLocation.locType = cmBufferBasedProfile;
-    profileLocation.u.bufferLoc.buffer = (void *)[data bytes];
-    profileLocation.u.bufferLoc.size = [data length];
-    CMOpenProfile((CMProfileRef *)&colorProfile->cmykProfile, &profileLocation);
+    if (data) {
+        profileLocation.locType = cmBufferBasedProfile;
+        profileLocation.u.bufferLoc.buffer = (void *)[data bytes];
+        profileLocation.u.bufferLoc.size = [data length];
+        CMOpenProfile((CMProfileRef *)&colorProfile->cmykProfile, &profileLocation);
+    } else if ((name = [dict objectForKey:@"cmykName"])) {
+        match = [cmykProfileDictionary objectForKey:name];
+        if (match) {
+            colorProfile->cmykProfile = match->cmykProfile;
+            CMCloneProfileRef((CMProfileRef)colorProfile->cmykProfile);
+        }
+    }
 
     data = [dict objectForKey:@"gray"];
-    profileLocation.locType = cmBufferBasedProfile;
-    profileLocation.u.bufferLoc.buffer = (void *)[data bytes];
-    profileLocation.u.bufferLoc.size = [data length];
-    CMOpenProfile((CMProfileRef *)&colorProfile->grayProfile, &profileLocation);
+    if (data) {
+        profileLocation.locType = cmBufferBasedProfile;
+        profileLocation.u.bufferLoc.buffer = (void *)[data bytes];
+        profileLocation.u.bufferLoc.size = [data length];
+        CMOpenProfile((CMProfileRef *)&colorProfile->grayProfile, &profileLocation);
+    } else if ((name = [dict objectForKey:@"grayName"])) {
+        match = [grayProfileDictionary objectForKey:name];
+        if (match) {
+            colorProfile->grayProfile = match->grayProfile;
+            CMCloneProfileRef((CMProfileRef)colorProfile->grayProfile);
+        }
+    }
     
     return colorProfile;
 }
@@ -350,44 +391,20 @@ OSErr nameListIterator(CMProfileIterateData *iterateData, void *refCon)
 
 - (NSMutableDictionary *)propertyListRepresentation;
 {
-    NSMutableDictionary *result;
-    CMProfileRef targetRef;
-    CMAppleProfileHeader header;
-    CMProfileLocation profileLocation;
-    NSMutableData *data;
-    
-    result = [NSMutableDictionary dictionary];
+    NSMutableDictionary *result = [NSMutableDictionary dictionary];
 
-    CMGetProfileHeader(rgbProfile, &header);
-    data = [[NSMutableData alloc] initWithLength:header.cm1.size];
-    profileLocation.locType = cmBufferBasedProfile;
-    profileLocation.u.bufferLoc.buffer = [data mutableBytes];
-    profileLocation.u.bufferLoc.size = header.cm1.size;
-    CMCopyProfile(&targetRef, &profileLocation, rgbProfile);
-    CMCloseProfile(targetRef);
-    [result setObject:data forKey:@"rgb"];
-    [data release];
-    
-    CMGetProfileHeader(cmykProfile, &header);
-    data = [[NSMutableData alloc] initWithLength:header.cm1.size];
-    profileLocation.locType = cmBufferBasedProfile;
-    profileLocation.u.bufferLoc.buffer = [data mutableBytes];
-    profileLocation.u.bufferLoc.size = header.cm1.size;
-    CMCopyProfile(&targetRef, &profileLocation, cmykProfile);
-    CMCloseProfile(targetRef);
-    [result setObject:data forKey:@"cmyk"];
-    [data release];
-     
-    CMGetProfileHeader(grayProfile, &header);
-    data = [[NSMutableData alloc] initWithLength:header.cm1.size];
-    profileLocation.locType = cmBufferBasedProfile;
-    profileLocation.u.bufferLoc.buffer = [data mutableBytes];
-    profileLocation.u.bufferLoc.size = header.cm1.size;
-    CMCopyProfile(&targetRef, &profileLocation, grayProfile);
-    CMCloseProfile(targetRef);
-    [result setObject:data forKey:@"gray"];
-    [data release];
-    
+    if ([self _rawProfileIsBuiltIn:rgbProfile])
+        [result setObject:[self _getProfileName:rgbProfile] forKey:@"rgbName"];
+    else
+        [result setObject:[self _dataForRawProfile:rgbProfile] forKey:@"rgb"];
+    if ([self _rawProfileIsBuiltIn:cmykProfile])
+        [result setObject:[self _getProfileName:cmykProfile] forKey:@"cmykName"];
+    else
+        [result setObject:[self _dataForRawProfile:cmykProfile] forKey:@"cmyk"];
+    if ([self _rawProfileIsBuiltIn:grayProfile])
+        [result setObject:[self _getProfileName:grayProfile] forKey:@"grayName"];
+    else
+        [result setObject:[self _dataForRawProfile:grayProfile] forKey:@"gray"];
     return result;
 }
 
@@ -416,16 +433,28 @@ OSErr nameListIterator(CMProfileIterateData *iterateData, void *refCon)
 {
     return rgbProfile ? [self _getProfileName:rgbProfile] : @"-";
 }
-
 - (NSString *)cmykName;
 {
     return cmykProfile ? [self _getProfileName:cmykProfile] : @"-";
 }
-
 - (NSString *)grayName;
 {
     return grayProfile ? [self _getProfileName:grayProfile] : @"-";
 }
+
+- (NSData *)rgbData;
+{
+    return (rgbProfile == nil) ? nil : [self _dataForRawProfile:rgbProfile];
+}
+- (NSData *)cmykData;
+{
+    return (cmykProfile == nil) ? nil : [self _dataForRawProfile:cmykProfile];
+}
+- (NSData *)grayData;
+{
+    return (grayProfile == nil) ? nil : [self _dataForRawProfile:grayProfile];
+}
+
 
 - (NSString *)description;
 {
@@ -449,9 +478,7 @@ OSErr nameListIterator(CMProfileIterateData *iterateData, void *refCon)
     return grayProfile != NULL;
 }
 
-#warning Assumes display profile is always RGB
-
-
+// TODO: Assumes display profile is always RGB
 - (void)_setRGBColor:(NSColor *)aColor;
 {
     static CGColorSpaceRef deviceRGBColorSpace = NULL;
@@ -726,6 +753,48 @@ OSErr nameListIterator(CMProfileIterateData *iterateData, void *refCon)
         return cmykProfile;
     else 
         return grayProfile;
+}
+
+- (NSData *)_dataForRawProfile:(void *)rawProfile;
+{
+    CMProfileRef targetRef;
+    CMAppleProfileHeader header;
+    CMProfileLocation profileLocation;
+    NSMutableData *data;
+
+    CMGetProfileHeader(rawProfile, &header);
+    data = [[NSMutableData alloc] initWithLength:header.cm1.size];
+    profileLocation.locType = cmBufferBasedProfile;
+    profileLocation.u.bufferLoc.buffer = [data mutableBytes];
+    profileLocation.u.bufferLoc.size = header.cm1.size;
+    CMCopyProfile(&targetRef, &profileLocation, rawProfile);
+    CMCloseProfile(targetRef);
+    return [data autorelease];
+}
+
+- (BOOL)_rawProfileIsBuiltIn:(void *)rawProfile;
+{
+    CMProfileLocation profileLocation;
+
+    CMGetProfileLocation(rawProfile, &profileLocation);
+    if (profileLocation.locType == cmFileBasedProfile) {
+        FSRef fsRef;
+        CFURLRef url;
+        CFStringRef string;
+        BOOL result;
+        
+        FSpMakeFSRef(&profileLocation.u.fileLoc.spec, &fsRef);
+        url = CFURLCreateFromFSRef(NULL, &fsRef);
+        string = CFURLCopyPath(url);
+        result = [(NSString *)string hasPrefix:@"/System/Library/ColorSync/Profiles"];
+        CFRelease(url);
+        CFRelease(string);
+        return result;
+    } else if (profileLocation.locType == cmPathBasedProfile) {
+        return !strncmp(profileLocation.u.pathLoc.path, "/System/Library/ColorSync/Profiles/", 35);
+    } else {
+        return NO;
+    }
 }
 
 @end

@@ -1,9 +1,9 @@
-// Copyright 1997-2003 Omni Development, Inc.  All rights reserved.
+// Copyright 1997-2004 Omni Development, Inc.  All rights reserved.
 //
 // This software may only be used and reproduced according to the
 // terms in the file OmniSourceLicense.html, which should be
 // distributed with this project and can also be found at
-// http://www.omnigroup.com/DeveloperResources/OmniSourceLicense.html.
+// <http://www.omnigroup.com/developer/sourcecode/sourcelicense/>.
 
 #import <OmniAppKit/NSView-OAExtensions.h>
 
@@ -16,7 +16,7 @@
 #import <OmniAppKit/NSFont-OAExtensions.h>
 #import <OmniAppKit/NSApplication-OAExtensions.h>
 
-RCS_ID("$Header: /Network/Source/CVS/OmniGroup/Frameworks/OmniAppKit/OpenStepExtensions.subproj/NSView-OAExtensions.m,v 1.49 2003/04/17 22:11:17 len Exp $")
+RCS_ID("$Header: /Network/Source/CVS/OmniGroup/Frameworks/OmniAppKit/OpenStepExtensions.subproj/NSView-OAExtensions.m,v 1.53 2004/02/10 04:07:35 kc Exp $")
 
 //#define TIME_LIMIT
 
@@ -622,8 +622,8 @@ The approach taken in both -fadeInSubview: and -fadeOutAndRemoveFromSuperview is
         [NSException raise: NSInvalidArgumentException
                     format: @"-[NSView imageForRect:] -- Requested rect %@ is not totally contained in the bounds rect %@", NSStringFromRect(rect), NSStringFromRect(boundsRect)];
     }
-    
-#warning This does not include subviews
+
+    // Note: This does not include subviews
     [self lockFocus];
     imageRep = [[NSBitmapImageRep alloc] initWithFocusedViewRect:rect];
     [self unlockFocus];
@@ -644,217 +644,6 @@ The approach taken in both -fadeInSubview: and -fadeOutAndRemoveFromSuperview is
     
     return image;
 }
-
-
-
-#ifdef USE_OPENGL
-
-#import <OmniAppKit/OAGLBitmapPartition.h>
-
-static inline void _setupSlideContext(NSRect visibleRect)
-{
-    glViewport (0, 0, visibleRect.size.width, visibleRect.size.height);
-    glMatrixMode (GL_PROJECTION);
-    glLoadIdentity();
-    glOrtho(0.0, visibleRect.size.width, 0.0, visibleRect.size.height, 0.0, 1.0);
-
-    glMatrixMode(GL_MODELVIEW);
-    glLoadIdentity();
-}
-
-/*" oldImage should have the same size as the visible rect of the receiver.  Starts oldImage in the visible rect and slides it so that it moves in the specified direction.  The exposed edge of the view is filled with progressively greater slices of newImage.  newImage need not be the same size as the visible rect of the receiver, but it must be the same length along the axis perpendicular to the movement direction. "*/
-
-#warning This should really take a target subrect in the view in which all the activity will happen.  This would allow us to do some of the OAExtenededOutlineView stuff in terms of this.
-- (void)slideOutOldBitmapImageRep:(NSBitmapImageRep *)oldImageRep newBitmapImageRep:(NSBitmapImageRep *)newImageRep slideDirection:(OAImageSlideDirection)direction overTimeInterval:(NSTimeInterval)slideInterval;
-{
-    NSSize oldSize, newSize;
-//    NSTimeInterval start, current, elapsed;
-    unsigned int slideDistance;
-    static NSOpenGLContext *glContext = nil;
-    NSRect visibleRect, windowRect;
-    OAGLBitmapPartition *oldBitmap, *newBitmap;
-    float pixels;
-    NSWindow *glWindow;
-    NSRect glRect;
-
-//    start = [NSDate timeIntervalSinceReferenceDate];
-    
-    oldSize = [oldImageRep size];
-    newSize = [newImageRep size];
-    visibleRect = [self visibleRect];
-    windowRect = [self convertRect: visibleRect toView: nil];
-
-    if (!glContext) {
-        NSOpenGLPixelFormatAttribute attributes[128], *attr = attributes;
-        NSOpenGLPixelFormat *pixelFormat;
-        
-        *attr++ = NSOpenGLPFAAccelerated;
-        *attr++ = NSOpenGLPFADoubleBuffer;
-        *attr++ = 0;
-        
-        pixelFormat = [[NSOpenGLPixelFormat alloc] initWithAttributes: attributes];
-        if (!pixelFormat) {
-            OAGLCheckError(@"-[NSView(OAExtensions) slideOutOldBitmapImageRep:newBitmapImageRep:slideDirection:] -- pixel format creation");
-            NSLog(@"No suitable pixel format found");
-            return;
-        }
-    
-        glContext = [[NSOpenGLContext alloc] initWithFormat: pixelFormat shareContext: nil];
-        [pixelFormat release];
-        if (!glContext) {
-            OAGLCheckError(@"-[NSView(OAExtensions) slideOutOldBitmapImageRep:newBitmapImageRep:slideDirection:] -- context creation");
-            NSLog(@"Unable to create OpenGL context");
-            return;
-        }
-    }
-    
-    // In DP4, when a GL context is bound to a window, a CGS surface is created and
-    // ordered front.  This has two effects.  First, the window is flushed unconditionally.
-    // Second, the contents of the surface are undefined.  They seem to come from some random
-    // back buffer.  Bob Beretta sez that there are currently discussions about changing
-    // some of this behavior.  I suggested to him that at a minimum, the surface should be
-    // initialized with the contents of the frame buffer from the area that it is going to
-    // overlay.
-    // We'll hack around this by creating a window, drawing our first frame into it and
-    // then repointing our gl context at the real area we want to draw into.  This will
-    // have the effect of putting the right bits in the off screen buffer so that we
-    // won't get a weird flickering effect.
-    glRect = windowRect;
-    glRect.origin = [_window convertBaseToScreen: windowRect.origin];
-    glWindow = [[NSWindow alloc] initWithContentRect: glRect
-                                           styleMask: NSBorderlessWindowMask
-                                             backing: NSBackingStoreBuffered
-                                               defer: NO];
-    [glWindow setViewsNeedDisplay: NO];
-    [glWindow orderWindow: NSWindowBelow relativeTo: [_window windowNumber]];
-    
-    [glContext setView: [glWindow contentView]];
-    [glContext makeCurrentContext];
-
-//    current = [NSDate timeIntervalSinceReferenceDate];
-//    NSLog(@"create = %f", current - start);
-
-//    start = [NSDate timeIntervalSinceReferenceDate];
-#warning TJW: We need to make sure that these get deallocated before the context is cleared.  We also need to handle the case where there is not enough texture memory
-    oldBitmap = [[OAGLBitmapPartition alloc] initWithBitmap: oldImageRep];
-    newBitmap = [[OAGLBitmapPartition alloc] initWithBitmap: newImageRep];
-//    current = [NSDate timeIntervalSinceReferenceDate];
-//    NSLog(@"bitmaps = %f", current - start);
-
-//    start = [NSDate timeIntervalSinceReferenceDate];
-
-    _setupSlideContext(visibleRect);
-
-    glEnable(GL_TEXTURE_2D);
-    [oldBitmap draw];
-    glDisable(GL_TEXTURE_2D);
-    [glContext flushBuffer];
-
-    // Now that we have decent contents in the window, bring it right in front
-    // of the window that is scrolling
-    [glWindow setViewsNeedDisplay: NO];
-    [glWindow orderWindow: NSWindowAbove relativeTo: [_window windowNumber]];
-    
-//    current = [NSDate timeIntervalSinceReferenceDate];
-//    NSLog(@"setup = %f", current - start);
-
-    _setupSlideContext(visibleRect);
-    
-    glEnable(GL_TEXTURE_2D);
-    slideDistance = newSize.height;
-#ifdef TIME_LIMIT
-    start = [NSDate timeIntervalSinceReferenceDate];    
-#else
-//    start = [NSDate timeIntervalSinceReferenceDate];    
-    pixels = 0.0;
-#endif
-    do {
-#warning TJW: Just want to test the setup/tear down code performance
-        break;
-        
-#ifdef TIME_LIMIT        
-        current = [NSDate timeIntervalSinceReferenceDate];
-        elapsed = current - start;
-        
-        pixels = floor((elapsed / slideInterval) * slideDistance);
-        if (pixels > slideDistance /*|| [NSApp peekEvent]*/)
-            pixels = slideDistance;
-#else
-        pixels++;
-#endif
-
-        // Save the current matrix
-        glPushMatrix();
-        
-        // Translate the current number of pixels in the direction
-        // we want the images to move
-        switch (direction) {
-            case OALeftSlideDirection:
-                glTranslatef(-pixels, 0, 0);
-                break;
-            case OARightSlideDirection:
-                glTranslatef(pixels, 0, 0);
-                break;
-            case OAUpSlideDirection:
-                glTranslatef(0, pixels, 0);
-                break;
-            case OADownSlideDirection:
-            default:
-                glTranslatef(0, -pixels, 0);
-                break;
-        }
-        
-        [oldBitmap draw];
-        
-        // Translate the origin so that the new image is 'after' the old one
-        switch (direction) {
-            case OALeftSlideDirection:
-                glTranslatef(oldSize.width, 0, 0);
-                break;
-            case OARightSlideDirection:
-                glTranslatef(-oldSize.width, 0, 0);
-                break;
-            case OAUpSlideDirection:
-                glTranslatef(0, -oldSize.height, 0);
-                break;
-            case OADownSlideDirection:
-            default:
-                glTranslatef(0, oldSize.height, 0);
-                break;
-        }
-        
-        [newBitmap draw];
-        
-        // Restore the old matrix for the next frame
-        glPopMatrix();
-        
-        [glContext flushBuffer];
-    } while (pixels < slideDistance);
-
-#ifndef TIME_LIMIT    
-//    current = [NSDate timeIntervalSinceReferenceDate];
-//    elapsed = current - start;
-//    NSLog(@"%f fps", pixels/elapsed);
-#endif
-
-    // Update our window while the glWindow is hiding the part that will change.
-    // Then move the glWindow behind our window before tearing down (since that
-    // will cause flickering).
-    [_window setViewsNeedDisplay: NO];
-//    [_window display];
-    [_window flushWindow];
-    [glWindow orderWindow: NSWindowBelow relativeTo: [_window windowNumber]];
-
-    glDisable(GL_TEXTURE_2D);
-    OAGLCheckError(@"-[NSView glSlideOutOldImageRep:newImageRep:slideDirection:]");
-    [oldBitmap release];
-    [newBitmap release];
-    [NSOpenGLContext clearCurrentContext];
-    [glContext clearDrawable];
-    [glWindow release];
-}
-
-#endif
 
 // Debugging
 

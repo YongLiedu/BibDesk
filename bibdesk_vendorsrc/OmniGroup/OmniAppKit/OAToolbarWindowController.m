@@ -1,9 +1,9 @@
-// Copyright 2002-2003 Omni Development, Inc.  All rights reserved.
+// Copyright 2002-2004 Omni Development, Inc.  All rights reserved.
 //
 // This software may only be used and reproduced according to the
 // terms in the file OmniSourceLicense.html, which should be
 // distributed with this project and can also be found at
-// http://www.omnigroup.com/DeveloperResources/OmniSourceLicense.html.
+// <http://www.omnigroup.com/developer/sourcecode/sourcelicense/>.
 
 #import "OAToolbarWindowController.h"
 
@@ -15,7 +15,7 @@
 #import "OAScriptToolbarHelper.h"
 #import "OAToolbarItem.h"
 
-RCS_ID("$Header: /Network/Source/CVS/OmniGroup/Frameworks/OmniAppKit/OAToolbarWindowController.m,v 1.14 2003/04/10 09:39:39 wjs Exp $")
+RCS_ID("$Header: /Network/Source/CVS/OmniGroup/Frameworks/OmniAppKit/OAToolbarWindowController.m,v 1.17 2004/02/10 04:07:31 kc Exp $")
 
 @interface OAToolbarWindowController (Private)
 + (void)_loadToolbarNamed:(NSString *)toolbarName;
@@ -88,7 +88,7 @@ static NSMutableDictionary *helpersByExtension = nil;
 
 - (NSString *)toolbarConfigurationName;
 {
-#warning TJW: This should really default to something useful (like the name of the class)
+    // TODO: This should really default to something useful (like the name of the class)
     return @"Toolbar";
 }
 

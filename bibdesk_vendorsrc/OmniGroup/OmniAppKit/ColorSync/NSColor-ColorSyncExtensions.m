@@ -1,29 +1,31 @@
-// Copyright 2003 Omni Development, Inc.  All rights reserved.
+// Copyright 2003-2004 Omni Development, Inc.  All rights reserved.
 //
 // This software may only be used and reproduced according to the
 // terms in the file OmniSourceLicense.html, which should be
 // distributed with this project and can also be found at
-// http://www.omnigroup.com/DeveloperResources/OmniSourceLicense.html.
+// <http://www.omnigroup.com/developer/sourcecode/sourcelicense/>.
 
 #import "NSColor-ColorSyncExtensions.h"
 #import "OAColorProfile.h"
 #import "NSImage-ColorSyncExtensions.h"
 
+#import "OAVersion.h"
+
 #import <AppKit/AppKit.h>
 #import <OmniBase/OmniBase.h>
 
-RCS_ID("$Header: /Network/Source/CVS/OmniGroup/Frameworks/OmniAppKit/ColorSync/NSColor-ColorSyncExtensions.m,v 1.2 2003/04/08 20:44:53 kc Exp $");
+RCS_ID("$Header: /Network/Source/CVS/OmniGroup/Frameworks/OmniAppKit/ColorSync/NSColor-ColorSyncExtensions.m,v 1.6 2004/02/10 04:07:32 kc Exp $");
 
 @implementation NSColor (ColorSyncExtensions)
 
 static IMP originalPatternImp, originalCalibratedRGBImp, originalCalibratedGrayImp, originalDeviceRGBImp, originalDeviceGrayImp, originalDeviceCMYKImp;
 
-+ (void)load;
++ (void)performPosing;
 {
     BOOL alphaSupportForPrinting;
     
     // Version 663 is the value for a new 10.2 installation without patches (6C115).
-    alphaSupportForPrinting = floor(NSAppKitVersionNumber) >= 663;
+    alphaSupportForPrinting = floor(NSAppKitVersionNumber) >= OAAppKitVersionNumber10_2;
     
     if (alphaSupportForPrinting) {	
         originalPatternImp = OBReplaceMethodImplementationWithSelectorOnClass(NSClassFromString(@"NSPatternColor"), @selector(set), self, @selector(_setPattern));

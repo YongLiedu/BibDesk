@@ -1,9 +1,9 @@
-// Copyright 1997-2003 Omni Development, Inc.  All rights reserved.
+// Copyright 1997-2004 Omni Development, Inc.  All rights reserved.
 //
 // This software may only be used and reproduced according to the
 // terms in the file OmniSourceLicense.html, which should be
 // distributed with this project and can also be found at
-// http://www.omnigroup.com/DeveloperResources/OmniSourceLicense.html.
+// <http://www.omnigroup.com/developer/sourcecode/sourcelicense/>.
 
 #import <OmniAppKit/NSImage-OAExtensions.h>
 
@@ -12,7 +12,10 @@
 #import <OmniBase/OmniBase.h>
 #import <OmniFoundation/OmniFoundation.h>
 
-RCS_ID("$Header: /Network/Source/CVS/OmniGroup/Frameworks/OmniAppKit/OpenStepExtensions.subproj/NSImage-OAExtensions.m,v 1.23 2003/02/26 00:48:27 rick Exp $")
+#import "IconFamily.h"
+#import "OAImageManager.h"
+
+RCS_ID("$Header: /Network/Source/CVS/OmniGroup/Frameworks/OmniAppKit/OpenStepExtensions.subproj/NSImage-OAExtensions.m,v 1.37 2004/02/11 22:14:27 wiml Exp $")
 
 @implementation NSImage (OAImageExtensions)
 + (NSImage *)imageInClassBundleNamed:(NSString *)imageName;
@@ -23,28 +26,89 @@ RCS_ID("$Header: /Network/Source/CVS/OmniGroup/Frameworks/OmniAppKit/OpenStepExt
 
 @implementation NSImage (OAExtensions)
 
+#ifdef DEBUG
+
+// Photoshop likes to save files with non-integral DPI.  This can cause hard to find bugs later on, so lets just find out about this right away.
+static id (*original_initWithContentsOfFile)(id self, SEL _cmd, NSString *fileName);
+static id (*original_initByReferencingFile)(id self, SEL _cmd, NSString *fileName);
+static id (*original_initWithSize)(id self, SEL _cmd, NSSize size);
+static id (*original_setSize)(id self, SEL _cmd, NSSize size);
+
++ (void)performPosing;
+{
+    original_initByReferencingFile = (typeof(original_initWithContentsOfFile))OBReplaceMethodImplementationWithSelector(self, @selector(initByReferencingFile:), @selector(replacement_initByReferencingFile:));
+    original_initWithContentsOfFile = (typeof(original_initWithContentsOfFile))OBReplaceMethodImplementationWithSelector(self, @selector(initWithContentsOfFile:), @selector(replacement_initWithContentsOfFile:));
+    original_initWithSize = (typeof(original_initWithSize))OBReplaceMethodImplementationWithSelector(self, @selector(initWithSize:), @selector(replacement_initWithSize:));
+    original_setSize = (typeof(original_setSize))OBReplaceMethodImplementationWithSelector(self, @selector(setSize:), @selector(replacement_setSize:));
+}
+
+// If you run into these assertions, consider running the OAMakeImageSizeIntegral command line tool in your image (probably only reasonable for TIFF right now).
+
+- (id)replacement_initWithContentsOfFile:(NSString *)fileName;
+{
+    OBPRECONDITION(fileName != nil);
+    self = original_initWithContentsOfFile(self, _cmd, fileName);
+
+    if (self == nil) {
+        NSLog(@"%@: image unreadable", fileName);
+        return nil;
+    }
+    
+    NSSize size = [self size];
+
+    if (size.width != rint(size.width) || size.height != rint(size.height))
+        NSLog(@"Image %@ has non-integral size %@", fileName, NSStringFromSize(size));
+
+    OBPOSTCONDITION(size.width == rint(size.width));
+    OBPOSTCONDITION(size.height == rint(size.height));
+    return self;
+}
+
+// Called by +[NSImage imageNamed:]
+- (id)replacement_initByReferencingFile:(NSString *)fileName;
+{
+    OBPRECONDITION(fileName != nil);
+    self = original_initByReferencingFile(self, _cmd, fileName);
+
+    if (self == nil) {
+        NSLog(@"%@: image unreadable", fileName);
+        return nil;
+    }
+
+    NSSize size = [self size];
+
+    if (size.width != rint(size.width) || size.height != rint(size.height))
+        NSLog(@"Image %@ has non-integral size %@", fileName, NSStringFromSize(size));
+
+    OBPOSTCONDITION(size.width == rint(size.width));
+    OBPOSTCONDITION(size.height == rint(size.height));
+    return self;
+}
+
+- (id)replacement_initWithSize:(NSSize)size;
+{
+    OBPRECONDITION(size.width == rint(size.width));
+    OBPRECONDITION(size.height == rint(size.height));
+    return original_initWithSize(self, _cmd, size);
+}
+
+- (void)replacement_setSize:(NSSize)size;
+{
+    OBPRECONDITION(size.width == rint(size.width));
+    OBPRECONDITION(size.height == rint(size.height));
+    original_setSize(self, _cmd, size);
+}
+
+#endif
+
 + (NSImage *)imageNamed:(NSString *)imageName inBundleForClass:(Class)aClass;
 {
-    return [self imageNamed:imageName inBundle:[NSBundle bundleForClass:aClass]];
+    return [[OAImageManager sharedImageManager] imageNamed:imageName inBundle:[NSBundle bundleForClass:aClass]];
 }
 
 + (NSImage *)imageNamed:(NSString *)imageName inBundle:(NSBundle *)aBundle;
 {
-    NSImage *image;
-    NSString *path;
-
-    image = [self imageNamed:imageName];
-    if (image && [image size].width != 0)
-        return image;
-
-    path = [aBundle pathForImageResource:imageName];
-    if (!path)
-        return nil;
-
-    image = [[NSImage alloc] initWithContentsOfFile:path];
-    [image setName:imageName];
-
-    return image;
+    return [[OAImageManager sharedImageManager] imageNamed:imageName inBundle:aBundle];
 }
 
 + (NSImage *)imageForFileType:(NSString *)fileType;
@@ -101,10 +165,10 @@ static NSDictionary *titleFontAttributes;
     titleSize = [title sizeWithAttributes:titleFontAttributes];
     titleBoxSize = NSMakeSize(titleSize.width + 2.0 * X_TEXT_BOX_BORDER, titleSize.height + Y_TEXT_BOX_BORDER);
 
-    totalSize = NSMakeSize(imageSize.width + X_SPACE_BETWEEN_ICON_AND_TEXT_BOX + titleBoxSize.width, MAX(imageSize.height, titleBoxSize.height));
+    totalSize.width = ceil(imageSize.width + X_SPACE_BETWEEN_ICON_AND_TEXT_BOX + titleBoxSize.width);
+    totalSize.height = ceil(MAX(imageSize.height, titleBoxSize.height));
 
     drawImage = [[NSImage alloc] initWithSize:totalSize];
-    [drawImage setFlipped:YES];
 
     [drawImage lockFocus];
 
@@ -113,10 +177,12 @@ static NSDictionary *titleFontAttributes;
     NSRectFill(NSMakeRect(0, 0, totalSize.width, totalSize.height));
 
     // Draw icon
-    [image compositeToPoint:NSMakePoint(0.0, rint(totalSize.height / 2.0 + imageSize.height / 2.0)) operation:NSCompositeSourceOver];
+    [image compositeToPoint:NSMakePoint(0.0, totalSize.height - rint(totalSize.height / 2.0 + imageSize.height / 2.0)) operation:NSCompositeSourceOver];
     
     // Draw box around title
-    titleBox = NSMakeRect(imageSize.width + X_SPACE_BETWEEN_ICON_AND_TEXT_BOX, floor((totalSize.height - titleBoxSize.height)/2.0), titleBoxSize.width, titleBoxSize.height);
+    titleBox.origin.x = imageSize.width + X_SPACE_BETWEEN_ICON_AND_TEXT_BOX;
+    titleBox.origin.y = floor( (totalSize.height - titleBoxSize.height)/2.0 );
+    titleBox.size = titleBoxSize;
     [[[NSColor selectedTextBackgroundColor] colorWithAlphaComponent:0.5] set];
     NSRectFill(titleBox);
 
@@ -132,7 +198,7 @@ static NSDictionary *titleFontAttributes;
 
 //
 
-- (void)drawFlippedInRect:(NSRect)rect operation:(NSCompositingOperation)op fraction:(float)delta;
+- (void)drawFlippedInRect:(NSRect)rect fromRect:(NSRect)sourceRect operation:(NSCompositingOperation)op fraction:(float)delta;
 {
     CGContextRef context;
 
@@ -142,7 +208,7 @@ static NSDictionary *titleFontAttributes;
         CGContextScaleCTM(context, 1, -1);
         
         rect.origin.y = 0; // We've translated ourselves so it's zero
-        [self drawInRect:rect fromRect:NSZeroRect operation:op fraction:delta];
+        [self drawInRect:rect fromRect:sourceRect operation:op fraction:delta];
     } CGContextRestoreGState(context);
 
     /*
@@ -161,7 +227,17 @@ static NSDictionary *titleFontAttributes;
         [anImage drawInRect:transformedRect fromRect:NSZeroRect operation:NSCompositeSourceOver fraction:1.0];
         [flipTransform concat];
         [flipTransform release];
-        */
+     */
+}
+
+- (void)drawFlippedInRect:(NSRect)rect fromRect:(NSRect)sourceRect operation:(NSCompositingOperation)op;
+{
+    [self drawFlippedInRect:rect fromRect:sourceRect operation:op fraction:1.0];
+}
+
+- (void)drawFlippedInRect:(NSRect)rect operation:(NSCompositingOperation)op fraction:(float)delta;
+{
+    [self drawFlippedInRect:rect fromRect:NSZeroRect operation:op fraction:delta];
 }
 
 - (void)drawFlippedInRect:(NSRect)rect operation:(NSCompositingOperation)op;
@@ -451,6 +527,52 @@ static NSDictionary *titleFontAttributes;
     [newImage addRepresentation:[[tinyImage representations] objectAtIndex:0]];
 
     return [newImage autorelease];
+}
+
+//
+// System Images
+//
+
+#define OA_SYSTEM_IMAGE(x, flip) \
+do { \
+    static NSImage *image = nil; \
+    if (!image) { \
+        IconFamily *iconFamily = [[IconFamily alloc] initWithSystemIcon:x]; \
+        image = [[iconFamily imageWithAllReps] retain]; \
+        [image setFlipped:flip]; \
+        [iconFamily release]; \
+    } \
+    return image; \
+} while(0)
+
++ (NSImage *)httpInternetLocationImage;
+{
+    OA_SYSTEM_IMAGE(kInternetLocationHTTPIcon, NO);
+}
+
++ (NSImage *)ftpInternetLocationImage;
+{
+    OA_SYSTEM_IMAGE(kInternetLocationFTPIcon, NO);
+}
+
++ (NSImage *)mailInternetLocationImage;
+{
+    OA_SYSTEM_IMAGE(kInternetLocationMailIcon, NO);
+}
+
++ (NSImage *)newsInternetLocationImage;
+{
+    OA_SYSTEM_IMAGE(kInternetLocationNewsIcon, NO);
+}
+
++ (NSImage *)genericInternetLocationImage;
+{
+    OA_SYSTEM_IMAGE(kInternetLocationGenericIcon, NO);
+}
+
++ (NSImage *)aliasBadgeImage;
+{
+    OA_SYSTEM_IMAGE(kAliasBadgeIcon, YES);
 }
 
 @end

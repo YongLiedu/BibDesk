@@ -1,9 +1,9 @@
-// Copyright 2003 Omni Development, Inc.  All rights reserved.
+// Copyright 2003-2004 Omni Development, Inc.  All rights reserved.
 //
 // This software may only be used and reproduced according to the
 // terms in the file OmniSourceLicense.html, which should be
 // distributed with this project and can also be found at
-// http://www.omnigroup.com/DeveloperResources/OmniSourceLicense.html.
+// <http://www.omnigroup.com/developer/sourcecode/sourcelicense/>.
 
 #import "NSWorkspace-OAExtensions.h"
 
@@ -11,7 +11,7 @@
 #import <AppKit/AppKit.h>
 #import <OmniBase/OmniBase.h>
 
-RCS_ID("$Header: /Network/Source/CVS/OmniGroup/Frameworks/OmniAppKit/OpenStepExtensions.subproj/NSWorkspace-OAExtensions.m,v 1.2 2003/02/26 03:49:13 andrew Exp $");
+RCS_ID("$Header: /Network/Source/CVS/OmniGroup/Frameworks/OmniAppKit/OpenStepExtensions.subproj/NSWorkspace-OAExtensions.m,v 1.4 2004/02/10 04:07:35 kc Exp $");
 
 @implementation NSWorkspace (OAExtensions)
 

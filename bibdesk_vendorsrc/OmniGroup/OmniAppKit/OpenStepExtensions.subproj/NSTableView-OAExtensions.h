@@ -1,11 +1,11 @@
-// Copyright 1997-2003 Omni Development, Inc.  All rights reserved.
+// Copyright 1997-2004 Omni Development, Inc.  All rights reserved.
 //
 // This software may only be used and reproduced according to the
 // terms in the file OmniSourceLicense.html, which should be
 // distributed with this project and can also be found at
-// http://www.omnigroup.com/DeveloperResources/OmniSourceLicense.html.
+// <http://www.omnigroup.com/developer/sourcecode/sourcelicense/>.
 //
-// $Header: /Network/Source/CVS/OmniGroup/Frameworks/OmniAppKit/OpenStepExtensions.subproj/NSTableView-OAExtensions.h,v 1.9 2003/05/02 04:42:55 rick Exp $
+// $Header: /Network/Source/CVS/OmniGroup/Frameworks/OmniAppKit/OpenStepExtensions.subproj/NSTableView-OAExtensions.h,v 1.14 2004/02/10 23:29:13 toon Exp $
 
 #import <AppKit/NSTableView.h>
 #import <AppKit/NSNibDeclarations.h>
@@ -34,19 +34,21 @@ typedef enum _OATableViewRowVisibility {
 - (IBAction)copy:(id)sender; // If you support dragging out, you'll automatically support copy.
 - (IBAction)delete:(id)sender; // Data source must support -tableView:deleteRows:.
 - (IBAction)cut:(id)sender; // cut == copy + delete
-- (IBAction)paste:(id)sender; // Data source must support -tableView:addItemFromPasteboard:atRow:.
+- (IBAction)paste:(id)sender; // Data source must support -tableView:addItemsFromPasteboard:.
 - (IBAction)duplicate:(id)sender; // duplicate == copy + paste (without using the general pasteboard)
 
 @end
 
 @interface NSObject (NSTableViewOAExtendedDataSource)
 
+// Searching
 - (BOOL)tableView:(NSTableView *)tableView itemAtRow:(int)row matchesPattern:(id <OAFindPattern>)pattern;
     // Implement this if you want find support.
 - (NSTableColumn *)tableViewTypeAheadSelectionColumn:(NSTableView *)tableView;
     // Return non-nil to enable type-ahead selection. Needs a column whose values are strings (or respond to -stringValue)... presumably the names of your rows' represented objects. If your table has only one column, we'll choose it by default unless you implement this method to return nil.
 
-- (BOOL)tableView:(NSTableView *)tableView addItemsFromPasteboard:(NSPasteboard *)pasteboard atRow:(int)row;
+// Content editing actions
+- (BOOL)tableView:(NSTableView *)tableView addItemsFromPasteboard:(NSPasteboard *)pasteboard;
     // Called by paste & duplicate. Return NO to disallow, YES if successful.
 - (void)tableView:(NSTableView *)tableView deleteRows:(NSArray *)rows;
     // Called by -delete:, keyboard delete keys, and drag-to-trash. 'rows' is an array of NSNumbers containing row indices.
@@ -57,9 +59,16 @@ typedef enum _OATableViewRowVisibility {
 - (BOOL)tableView:(NSTableView *)tableView shouldShowDragImageForRow:(int)row;
     // If you'd like to support dragging of multiple-row selections, but want to control which of the selected rows is valid for dragging, implement this method in addition to -tableView:writeRows:toPasteboard:. If none of the selected rows are valid, return NO in -tableView:writeRows:toPasteboard:. If some of them are, write the valid ones to the pasteboard and return YES in -tableView:writeRows:toPasteboard:, and implement this method to return NO for the invalid ones. This prevents them from being drawn as part of the drag image, so that the items the user appears to be dragging are in sync with the items she's actually dragging.
 
+- (BOOL)tableViewAllowDragsToNonLocal:(NSTableView *)tableView;
+
+// Additional editing actions
 - (void)tableView:(NSTableView *)tableView insertNewline:(id)sender;
     // You may want to edit the currently selected item or insert a new item when Return is pressed.
+- (BOOL)tableViewShouldEditNextItemWhenEditingEnds:(NSTableView *)tableView;
+    // Normally tables like to move you to the next row when you hit return after editing a cell, but that's not always desirable.
 
+// Context menus and tooltips
 - (NSMenu *)tableView:(NSTableView *)tableView contextMenuForRow:(int)row column:(int)column;
+- (NSString *)tableView:(NSTableView *)tableView tooltipForRow:(int)row column:(int)column;
 
 @end

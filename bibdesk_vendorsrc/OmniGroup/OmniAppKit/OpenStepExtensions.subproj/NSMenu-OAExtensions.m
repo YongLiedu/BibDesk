@@ -1,9 +1,9 @@
-// Copyright 1997-2003 Omni Development, Inc.  All rights reserved.
+// Copyright 1997-2004 Omni Development, Inc.  All rights reserved.
 //
 // This software may only be used and reproduced according to the
 // terms in the file OmniSourceLicense.html, which should be
 // distributed with this project and can also be found at
-// http://www.omnigroup.com/DeveloperResources/OmniSourceLicense.html.
+// <http://www.omnigroup.com/developer/sourcecode/sourcelicense/>.
 
 #import <OmniAppKit/NSMenu-OAExtensions.h>
 
@@ -14,7 +14,7 @@
 #import <OmniBase/rcsid.h>
 #import <OmniFoundation/NSString-OFExtensions.h>
 
-RCS_ID("$Header: /Network/Source/CVS/OmniGroup/Frameworks/OmniAppKit/OpenStepExtensions.subproj/NSMenu-OAExtensions.m,v 1.6 2003/01/15 22:51:37 kc Exp $")
+RCS_ID("$Header: /Network/Source/CVS/OmniGroup/Frameworks/OmniAppKit/OpenStepExtensions.subproj/NSMenu-OAExtensions.m,v 1.9 2004/02/10 04:07:34 kc Exp $")
 
 static NSString *OAContextMenuLayoutDefaultKey = @"ContextMenuLayout";
 
@@ -84,6 +84,17 @@ static NSString *OAContextMenuLayoutDefaultKey = @"ContextMenuLayout";
 {
     while ([self numberOfItems])
         [self removeItemAtIndex: 0];
+}
+
+- (NSMenuItem *)itemWithAction:(SEL)action;
+{
+    unsigned int itemIndex = [self numberOfItems];
+    while (itemIndex--) {
+        NSMenuItem *item = [self itemAtIndex:itemIndex];
+        if ([item action] == action)
+            return item;
+    }
+    return nil;
 }
 
 @end

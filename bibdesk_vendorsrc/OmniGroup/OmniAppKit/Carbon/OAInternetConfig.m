@@ -1,9 +1,9 @@
-// Copyright 2000-2003 Omni Development, Inc.  All rights reserved.
+// Copyright 2000-2004 Omni Development, Inc.  All rights reserved.
 //
 // This software may only be used and reproduced according to the
 // terms in the file OmniSourceLicense.html, which should be
 // distributed with this project and can also be found at
-// http://www.omnigroup.com/DeveloperResources/OmniSourceLicense.html.
+// <http://www.omnigroup.com/developer/sourcecode/sourcelicense/>.
 
 #import "OAInternetConfig.h"
 
@@ -16,7 +16,7 @@
 
 #import "OAOSAScript.h"
 
-RCS_ID("$Header: /Network/Source/CVS/OmniGroup/Frameworks/OmniAppKit/Carbon/OAInternetConfig.m,v 1.30 2003/05/01 06:08:11 rick Exp $")
+RCS_ID("$Header: /Network/Source/CVS/OmniGroup/Frameworks/OmniAppKit/Carbon/OAInternetConfig.m,v 1.36 2004/02/10 04:07:31 kc Exp $")
 
 // The InternetConfig documentation can be found at http://www.quinn.echidna.id.au/Quinn/Config/.
 
@@ -198,75 +198,62 @@ static NSString *helperKeyPrefix = nil;
 
 - (NSString *)downloadFolderPath;
 {
-    // NSData *data;
-    ICAttr attribute;
-    struct ICFileSpec *downloadFolderICFileSpecPtr;
-    long downloadFolderICFileSpecSize;
-    AliasPtr downloadFolderAliasPointer;
-    Boolean aliasUpdated;
-    FSSpec downloadFolderFSSpec;
+    NSData *icPrefData;
+    const struct ICFileSpec *downloadFolderICFileSpecPtr;
     OSStatus error;
+    const char *errorFunc;
+    FSRef downloadFolderFSRef;
+    Boolean didSearch;
     UInt8 path[PATH_MAX + 1];
-    FSRef downloadFolderReference;
 
-    // data = [self dataForPreferenceKey:kICDownloadFolder];
-    error = ICGetPref(internetConfigInstance, kICDownloadFolder, &attribute, NULL, &downloadFolderICFileSpecSize);
-    switch (error) {
-        case noErr:
-            break;
-        case icPrefNotFoundErr:
-            // No preference found
-            return nil;
-        default:
-            NSLog(@"OAInternetConfig: ICGetPref returned an error while getting key %s: %@", kICDownloadFolder + 1, OANameForInternetConfigErrorCode(error));
-            // No preference found
-            return nil;
-    }
-    downloadFolderICFileSpecPtr = malloc(downloadFolderICFileSpecSize);
-    error = ICGetPref(internetConfigInstance, kICDownloadFolder, &attribute, downloadFolderICFileSpecPtr, &downloadFolderICFileSpecSize);
-    switch (error) {
-        case noErr:
-            break;
-        case icPrefNotFoundErr:
-            // No preference found
-            return nil;
-        default:
-            NSLog(@"OAInternetConfig: ICGetPref returned an error while getting key %s: %@", kICDownloadFolder + 1, OANameForInternetConfigErrorCode(error));
-            // No preference found
-            return nil;
-    }
+    icPrefData = [self dataForPreferenceKey:@"DownloadFolder"];
+    
+    if (icPrefData == nil || [icPrefData length] < kICFileSpecHeaderSize)
+        return nil;
 
-    downloadFolderAliasPointer = &downloadFolderICFileSpecPtr->alias;
-    error = ResolveAlias(NULL, &downloadFolderAliasPointer, &downloadFolderFSSpec, &aliasUpdated);
+    downloadFolderICFileSpecPtr = [icPrefData bytes];
+
+    bzero(&downloadFolderFSRef, sizeof(downloadFolderFSRef));
+    error = FSpMakeFSRef(&(downloadFolderICFileSpecPtr->fss), &downloadFolderFSRef);
+    errorFunc = "FSpMakeFSRef";
+
+    if ([icPrefData length] > kICFileSpecHeaderSize) {
+        const FSRef *inRef;
+        const AliasRecord * const aliasPointer = &(downloadFolderICFileSpecPtr->alias);
+        
+        // Resolve the alias record.
+        
+        if (error == noErr) {
+            // We have an FSRef available to us, so pass it to ResolveAlias
+            inRef = &downloadFolderFSRef;
+        } else {
+            inRef = NULL;
+        }
+
+        error = FSResolveAlias(inRef, (AliasHandle)&aliasPointer, &downloadFolderFSRef, &didSearch);
+        errorFunc = "FSResolveAlias";
+    }
+    
     if (error != noErr) {
-        NSLog(@"-[OAInternetConfig downloadFolderPath]: Error resolving alias: ResolveAlias() failed: %@", OANameForInternetConfigErrorCode(error));
-        free(downloadFolderICFileSpecPtr);
+        NSLog(@"-[OAInternetConfig downloadFolderPath]: Error resolving download path: %s() failed: %@", errorFunc, OANameForInternetConfigErrorCode(error));
         return nil;
     }
-    error = FSpMakeFSRef(&downloadFolderFSSpec, &downloadFolderReference);
-    if (error != noErr) {
-        NSString *name;
-
-        name = (NSString *)CFStringCreateWithPascalString(NULL, downloadFolderFSSpec.name, kCFStringEncodingMacRoman);
-        NSLog(@"-[OAInternetConfig downloadFolderPath]: Error converting FSSpec (%d,%d,\"%@\") to FSRef: FSpMakeFSRef() failed: %@", downloadFolderFSSpec.vRefNum, downloadFolderFSSpec.parID, name, OANameForInternetConfigErrorCode(error));
-        [name release];
-        free(downloadFolderICFileSpecPtr);
-        return nil;
-    }
-    error = FSRefMakePath(&downloadFolderReference, path, sizeof(path));
+    
+    error = FSRefMakePath(&downloadFolderFSRef, path, sizeof(path));
     if (error != noErr) {
         NSLog(@"-[OAInternetConfig downloadFolderPath]: Error converting FSRef to Path: FSRefMakePath() failed: %@", OANameForInternetConfigErrorCode(error));
-        free(downloadFolderICFileSpecPtr);
         return nil;
     }
-    return [NSString stringWithCString:path];
+    
+    // FSRefMakePath() is documented to return a UTF8 string (in Files.h and in Apple TN2078). It's not clear whether this is just because it returns a filesystem representation and filesystem representations are UTF8, or whether it would continue to return UTF8 strings even if NSFileManager's fileSystemRepresentation were to change.
+    return [NSString stringWithUTF8String:path];
 }
 
 // Mappings between type/creator codes and filename extensions
 
 - (NSArray *)mapEntries;
 {
-#warning -mapEntries not finished
+    // TODO: -mapEntries not finished
     return nil;
 }
 
@@ -280,13 +267,13 @@ static NSString *helperKeyPrefix = nil;
     error = ICMapFilename(internetConfigInstance, filenamePascalString, &mapEntry);
     if (error != noErr)
         [NSException raise:@"OAInternetConfigException" format:NSLocalizedStringFromTableInBundle(@"ICMapFilename returned an error for file %@: %@", @"OmniAppKit", [OAInternetConfig bundle], "internet config error"), filename, OANameForInternetConfigErrorCode(error)];
-#warning -mapEntryForFilename: not finished
+    // TODO: -mapEntryForFilename: not finished
     return nil;
 }
 
 - (OAInternetConfigMapEntry *)mapEntryForTypeCode:(long)fileTypeCode creatorCode:(long)fileCreatorCode hintFilename:(NSString *)filename;
 {
-#warning -mapEntryForTypeCode:creatorCode:hintFilename: not finished
+    // TODO: -mapEntryForTypeCode:creatorCode:hintFilename: not finished
     return nil;
 }
 
@@ -437,6 +424,41 @@ static NSString *helperKeyPrefix = nil;
     }
 }
 
+- (BOOL)launchMailTo:(NSString *)receiver carbonCopy:(NSString *)carbonCopy blindCarbonCopy:(NSString *)blindCarbonCopy subject:(NSString *)subject body:(NSString *)body attachments:(NSArray *)attachmentFilenames;
+{
+    NSString *mailApp;
+    NSMutableString *script;
+    int index, count;
+    
+    mailApp = [self helperApplicationForScheme:@"mailto"];
+    if (mailApp == nil)
+        mailApp = @"Mail";
+
+    // only support attachments via Mail.app right now
+    if (![mailApp isEqualToString:@"Mail"])
+        return NO;
+    
+    script = [NSMutableString stringWithFormat:@"tell application \"%@\"\n set m to a reference to (make new outgoing message at beginning of outgoing messages)\rtell m\n", mailApp];
+    [script appendFormat:@"make new to recipient at beginning of to recipients with properties {address: \"%@\"}\n", receiver];
+    if (carbonCopy != nil) 
+        [script appendFormat:@"make new cc recipient at beginning of cc recipients with properties {address: \"%@\"}\n", carbonCopy];
+    if (blindCarbonCopy != nil)
+        [script appendFormat:@"make new bcc recipient at beginning of bcc recipients with properties {address: \"%@\"}\n", blindCarbonCopy];
+    [script appendFormat:@"set subject to \"%@\"\n", subject];
+    [script appendFormat:@"set content to \"%@\"\n", body];
+    count = [attachmentFilenames count];
+    if (count) {
+        [script appendString:@"tell content\n"];
+        for (index = 0; index < count; index++) {
+            [script appendFormat:@"make new attachment with properties {file name: \"%@\"} at after last character\n", [attachmentFilenames objectAtIndex:index]];
+        }
+        [script appendString:@"end tell\n"];
+    }
+    [script appendString:@"set visible to true\n end tell\n activate\n end tell\n"];
+    [OAOSAScript executeScriptString:script];
+    return YES;
+}
+
 @end
 
 @implementation OAInternetConfig (Private)
@@ -562,7 +584,7 @@ static NSString *OAFragmentedAppleScriptStringForString(NSString *string)
 {
     // AppleScript does not handle string constants longer than 32K.  This can be avoided by using the string concatenation operator.  We'll concatenate the body text with the rest of the URL string to make sure that the rest of the URL doesn't blow the 32K limit in conjunction with the first chunk of body text.
     // We'll be a little more conservative and only use 16k character strings.
-#define APPLE_SCRIPT_MAX_STRING_LENGTH (16*1024)
+#define APPLE_SCRIPT_MAX_STRING_LENGTH (unsigned)(16*1024)
 
     NSMutableString *fragmentedString;
     unsigned int stringLength, stringIndex;

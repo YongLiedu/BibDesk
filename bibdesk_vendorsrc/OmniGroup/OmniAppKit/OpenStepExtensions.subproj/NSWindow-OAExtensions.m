@@ -1,9 +1,9 @@
-// Copyright 1997-2003 Omni Development, Inc.  All rights reserved.
+// Copyright 1997-2004 Omni Development, Inc.  All rights reserved.
 //
 // This software may only be used and reproduced according to the
 // terms in the file OmniSourceLicense.html, which should be
 // distributed with this project and can also be found at
-// http://www.omnigroup.com/DeveloperResources/OmniSourceLicense.html.
+// <http://www.omnigroup.com/developer/sourcecode/sourcelicense/>.
 
 #import <OmniAppKit/NSWindow-OAExtensions.h>
 
@@ -12,7 +12,7 @@
 #import <OmniBase/OmniBase.h>
 #import <OmniFoundation/OmniFoundation.h>
 
-RCS_ID("$Header: /Network/Source/CVS/OmniGroup/Frameworks/OmniAppKit/OpenStepExtensions.subproj/NSWindow-OAExtensions.m,v 1.23 2003/03/24 23:05:10 neo Exp $")
+RCS_ID("$Header: /Network/Source/CVS/OmniGroup/Frameworks/OmniAppKit/OpenStepExtensions.subproj/NSWindow-OAExtensions.m,v 1.27 2004/02/10 04:07:35 kc Exp $")
 
 
 static void (*oldMakeKeyAndOrderFront)(id self, SEL _cmd, id sender);
@@ -59,8 +59,8 @@ static NSMutableArray *zOrder;
 - (void)replacement_dealloc;
 {
     OBPRECONDITION([NSThread inMainThread]);
-    
-#warning TJW: DP4 leaks the default button cell in NSWindow.  Check whether this is needed when we get Public Beta
+
+    // TJW: DP4 leaks the default button cell in NSWindow.  Check whether this is needed when we get Public Beta
     [_defaultButtonCell release];
     _defaultButtonCell = nil;
     oldDealloc(self, _cmd);
@@ -160,6 +160,13 @@ static NSMutableArray *zOrder;
     windowRef = [self _windowRef];
     _SetWindowCGOrderingEnabled(windowRef, false);
     return windowRef;
+}
+
+// NSCopying protocol
+
+- (id)copyWithZone:(NSZone *)zone;
+{
+    return [self retain];
 }
 
 @end

@@ -5,7 +5,7 @@
             ACTIONS = {
                 cancelWorkspacePanel = id; 
                 deleteWorkspace = id; 
-                deleteWorkspaceConfirmed = id; 
+                editWorkspace = id; 
                 saveWorkspace = id; 
                 saveWorkspaceConfirmed = id; 
                 switchToDefault = id; 
@@ -13,7 +13,11 @@
             }; 
             CLASS = OAInspectorRegistry; 
             LANGUAGE = ObjC; 
-            OUTLETS = {deleteWorkspacePopup = NSPopUpButton; newWorkspaceTextField = NSTextField; }; 
+            OUTLETS = {
+                deleteWorkspaceButton = NSButton; 
+                editWorkspaceTable = NSTableView; 
+                newWorkspaceTextField = NSTextField; 
+            }; 
             SUPERCLASS = NSObject; 
         }
     ); 

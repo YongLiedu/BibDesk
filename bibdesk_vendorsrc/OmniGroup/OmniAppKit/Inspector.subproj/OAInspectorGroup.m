@@ -1,9 +1,9 @@
-// Copyright 2002-2003 Omni Development, Inc.  All rights reserved.
+// Copyright 2002-2004 Omni Development, Inc.  All rights reserved.
 //
 // This software may only be used and reproduced according to the
 // terms in the file OmniSourceLicense.html, which should be
 // distributed with this project and can also be found at
-// http://www.omnigroup.com/DeveloperResources/OmniSourceLicense.html.
+// <http://www.omnigroup.com/developer/sourcecode/sourcelicense/>.
 
 #import "OAInspectorGroup.h"
 
@@ -17,7 +17,7 @@
 #import "OAInspectorGroupAnimatedMergeController.h"
 #import "NSWindow-OAExtensions.h"
 
-RCS_ID("$Header: /Network/Source/CVS/OmniGroup/Frameworks/OmniAppKit/Inspector.subproj/OAInspectorGroup.m,v 1.93 2003/04/01 01:49:28 toon Exp $");
+RCS_ID("$Header: /Network/Source/CVS/OmniGroup/Frameworks/OmniAppKit/Inspector.subproj/OAInspectorGroup.m,v 1.107 2004/02/10 04:07:33 kc Exp $");
 
 @interface OAInspectorGroup (Private)
 - (void)_showGroup;
@@ -27,7 +27,6 @@ RCS_ID("$Header: /Network/Source/CVS/OmniGroup/Frameworks/OmniAppKit/Inspector.s
 - (NSString *)identifier;
 - (NSPoint)topLeftPoint;
 - (NSRect)firstFrame;
-- (void)setTopLeftPoint:(NSPoint)aPoint;
 - (float)_horizontalPortionOfMungedDistanceToGroup:(OAInspectorGroup *)otherGroup withFrame:(NSRect)ourFrame;
 - (float)_mungedDistanceToTopOfGroup:(OAInspectorGroup *)otherGroup withFrame:(NSRect)ourFrame;
 - (float)_mungedDistanceToBottomOfGroup:(OAInspectorGroup *)otherGroup withFrame:(NSRect)ourFrame;
@@ -51,14 +50,6 @@ RCS_ID("$Header: /Network/Source/CVS/OmniGroup/Frameworks/OmniAppKit/Inspector.s
 @interface OAInspectorGroup (UnpublishedAnimations)
 - (void)_animatedShowGroup;
 - (void)_animatedHideGroup;
-@end
-
-#warning This class uses Jaguar-specific NSWindow move group API
-
-@interface NSWindow (JaguarAPI)
-- (void)addChildWindow:(NSWindow *)childWin ordered:(NSWindowOrderingMode)place;
-- (void)removeChildWindow:(NSWindow *)childWin;
-- (NSArray *)childWindows;
 @end
 
 @implementation OAInspectorGroup
@@ -131,13 +122,7 @@ static NSComparisonResult sortGroupByGroupNumber(OAInspectorGroup *a, OAInspecto
     // load controllers
     for (index = 0; index < count; index++) {
         OAInspectorController *controller = [inspectorList objectAtIndex:index];
-        
-        NS_DURING {
-            [controller loadInterface];
-            if ([controller window] != nil) 
-                [inspectorById setObject:controller forKey:[controller identifier]];
-        } NS_HANDLER {
-        } NS_ENDHANDLER;
+        [inspectorById setObject:controller forKey:[controller identifier]];
     }
     
     // restore existing groups from defaults
@@ -160,6 +145,9 @@ static NSComparisonResult sortGroupByGroupNumber(OAInspectorGroup *a, OAInspecto
             OAInspectorGroup *group;
             NSNumber *groupKey;
             OAInspectorController *controller = [inspectorListSorted objectAtIndex:index];
+
+            // Make sure we have our window set up for the size computations below.
+            [controller loadInterface];
             
             groupKey = [NSNumber numberWithInt:[[controller inspector] defaultDisplayGroupNumber]];
             group = [inspectorGroupsByNumber objectForKey:groupKey];
@@ -253,7 +241,6 @@ static NSComparisonResult sortGroupByGroupNumber(OAInspectorGroup *a, OAInspecto
 + (void)clearAllGroups;
 {
     [existingGroups makeObjectsPerformSelector:@selector(disconnectWindows)];
-    [existingGroups makeObjectsPerformSelector:@selector(_hideGroup)];
     [existingGroups makeObjectsPerformSelector:@selector(_removeAllInspectors)];
     [existingGroups removeAllObjects];
 }
@@ -377,7 +364,7 @@ static NSComparisonResult sortGroupByWindowZOrder(OAInspectorGroup *a, OAInspect
     [inspectors addObject:aController];
 }
 
-- (NSRect)inspector:(OAInspectorController *)aController willResizeToFrame:(NSRect)aFrame isToggling:(BOOL)calledIsToggling;
+- (NSRect)inspector:(OAInspectorController *)aController willResizeToFrame:(NSRect)aFrame isSettingExpansion:(BOOL)calledIsSettingExpansion;
 {
     NSRect result;
     float desired;
@@ -386,19 +373,20 @@ static NSComparisonResult sortGroupByWindowZOrder(OAInspectorGroup *a, OAInspect
         return aFrame;
         
     result = [self calculateForInspector:aController willResizeToFrame:aFrame moveOthers:NO];
-    isToggling = calledIsToggling;
-    if (isToggling) {
+    isSettingExpansion = calledIsSettingExpansion;
+    if (isSettingExpansion) {
         desired = [self desiredWidth];
         if (desired < NSWidth(result))
             result.size.width = desired;
-    }
-    
+    } 
+   
     if (!isResizing) {
         isResizing = YES;
         [self disconnectWindows];
         [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(controllerWindowDidResize:) name:NSWindowDidResizeNotification object:[aController window]];
         [self performSelector:@selector(completeResize:) withObject:aController afterDelay:([[aController window]  animationResizeTime:result]  + 0.01)];
     }
+  
     return result;
 }
 
@@ -571,6 +559,22 @@ static NSComparisonResult sortGroupByWindowZOrder(OAInspectorGroup *a, OAInspect
         aFrame.origin.x = ceil(NSMinX(screenRect));
     
     return aFrame;
+}
+
+- (void)setTopLeftPoint:(NSPoint)aPoint;
+{
+    NSWindow *topWindow = [[inspectors objectAtIndex:0] window];
+    int index, count = [inspectors count];
+
+    [topWindow setFrameTopLeftPoint:aPoint];
+    for (index = 1; index < count; index++) {
+        NSWindow *bottomWindow = [[inspectors objectAtIndex:index] window];
+        
+        [bottomWindow setFrameTopLeftPoint:[topWindow frame].origin];
+        topWindow = bottomWindow;
+    }
+    [[[OAInspectorRegistry sharedInspector] workspaceDefaults] setObject:NSStringFromPoint(aPoint)  forKey:[NSString stringWithFormat:@"%@-Position", [self identifier]]];
+    [[OAInspectorRegistry sharedInspector] defaultsDidChange];
 }
 
 - (NSRect)snapToOtherGroupWithFrame:(NSRect)aRect;
@@ -773,21 +777,53 @@ static NSComparisonResult sortGroupByWindowZOrder(OAInspectorGroup *a, OAInspect
 
 - (void)_showGroup;
 {
-    int index = [inspectors count];
-        
+    int index, count = [inspectors count];
+
     isShowing = YES;
-    while (index--) {
-        OAInspectorController *controller = [inspectors objectAtIndex:index];
-        NSWindow *window = [controller window];
+
+    // Remember whether there were previously any visible inspectors
+    BOOL hadVisibleInspector = [OAInspectorRegistry hasVisibleInspector];
+    
+    // Position windows if we haven't already
+    if (!_hasPositionedWindows) {
+        _hasPositionedWindows = YES;
         
-        [controller updateInspector];
-        [window orderFront:nil];
-        [window resetCursorRects];
+        NSDictionary *defaults = [[OAInspectorRegistry sharedInspector] workspaceDefaults];
+        for (index = 0; index < count; index++) {
+            OAInspectorController *controller = [inspectors objectAtIndex:index];
+            NSString *identifier = [controller identifier];
+
+            [controller loadInterface];
+            NSWindow *window = [controller window];
+            OBASSERT(window);
+            if (!index) {
+                NSString *position = [defaults objectForKey:[NSString stringWithFormat:@"%@-Position", identifier]];
+                if (position)
+                    [window setFrameTopLeftPoint:NSPointFromString(position)];
+            }
+        }
     }
+    
+    // Doing this here instead of in -restoreFromIdentifier:withInspectors: to avoid loading the nib until we are *really* going on screen
+    [self matchWidths];
+
+    index = count;
+    while (index--) 
+        [[inspectors objectAtIndex:index] prepareWindowForDisplay];
+    [self setTopLeftPoint:[self topLeftPoint]];
+
+    // to make sure they are placed visibly and ordered correctly
+    [[inspectors objectAtIndex:0] windowDidChangeScreen:nil];  
+      
+    for (index = 0; index < count; index++)
+        [[inspectors objectAtIndex:index] displayWindow];
+        
+    [self connectWindows];
     isShowing = NO;
 
-    // to make sure they are placed visibly
-    [[inspectors objectAtIndex:0] windowDidChangeScreen:nil];    
+    // Finally, if there were previously no visible inspectors, poke the update
+    if (!hadVisibleInspector)
+        [OAInspectorRegistry updateInspector];
 }
 
 - (void)disconnectWindows;
@@ -804,13 +840,14 @@ static NSComparisonResult sortGroupByWindowZOrder(OAInspectorGroup *a, OAInspect
     int index, count = [inspectors count];
     NSWindow *topWindow = [[inspectors objectAtIndex:0] window];
     NSWindow *lastWindow = topWindow;
-    BOOL orderWindows = [topWindow isVisible];
+    
+    if (![topWindow isVisible])
+        return;
     
     for (index = 1; index < count; index++) {
         NSWindow *window = [[inspectors objectAtIndex:index] window];
         
-        if (orderWindows)
-            [window orderWindow:NSWindowAbove relativeTo:[lastWindow windowNumber]];
+        [window orderWindow:NSWindowAbove relativeTo:[lastWindow windowNumber]];
         [topWindow addChildWindow:window ordered:NSWindowAbove];
         lastWindow = window;
     }
@@ -839,22 +876,6 @@ static NSComparisonResult sortGroupByWindowZOrder(OAInspectorGroup *a, OAInspect
 - (NSRect)firstFrame;
 {
     return [[[inspectors objectAtIndex:0] window] frame];
-}
-
-- (void)setTopLeftPoint:(NSPoint)aPoint;
-{
-    NSWindow *topWindow = [[inspectors objectAtIndex:0] window];
-    int index, count = [inspectors count];
-
-    [topWindow setFrameTopLeftPoint:aPoint];
-    for (index = 1; index < count; index++) {
-        NSWindow *bottomWindow = [[inspectors objectAtIndex:index] window];
-        
-        [bottomWindow setFrameTopLeftPoint:[topWindow frame].origin];
-        topWindow = bottomWindow;
-    }
-    [[[OAInspectorRegistry sharedInspector] workspaceDefaults] setObject:NSStringFromPoint(aPoint)  forKey:[NSString stringWithFormat:@"%@-Position", [self identifier]]];
-    [[OAInspectorRegistry sharedInspector] defaultsDidChange];
 }
 
 - (float)_horizontalPortionOfMungedDistanceToGroup:(OAInspectorGroup *)otherGroup withFrame:(NSRect)ourFrame;
@@ -996,20 +1017,28 @@ static NSComparisonResult sortGroupByWindowZOrder(OAInspectorGroup *a, OAInspect
     NSDictionary *defaults = [[OAInspectorRegistry sharedInspector] workspaceDefaults];
     NSArray *identifiers = [defaults objectForKey:[NSString stringWithFormat:@"%@-Order", identifier]];
     int index, count = [identifiers count];
+    BOOL willBeVisible = [defaults objectForKey:[NSString stringWithFormat:@"%@-Visible", identifier]] != nil;
     
     for (index = 0; index < count; index++) {
         NSString *identifier = [identifiers objectAtIndex:index];
         OAInspectorController *controller = [inspectorsById objectForKey:identifier];
+
+        // The controller might not have a window yet if its never been displayed.  On the other hand, we might be switching workspaces, so we can't assume it doesn't have a window.
         NSWindow *window = [controller window];
 
         if (controller == nil) // new version of program with inspector names changed
             continue;
+
+        if (!willBeVisible)
+            [window orderOut:self];
     
         [inspectorsById removeObjectForKey:identifier];
         [self addInspector:controller];
-        [window orderOut:self];
-        if (!index)
-            [window setFrameTopLeftPoint:NSPointFromString([defaults objectForKey:[NSString stringWithFormat:@"%@-Position", identifier]])];
+        if (!index) {
+            NSString *position = [defaults objectForKey:[NSString stringWithFormat:@"%@-Position", identifier]];
+            if (position)
+                [window setFrameTopLeftPoint:NSPointFromString(position)];
+        }
     }
     if (![inspectors count]) {
         [existingGroups removeObject:self];
@@ -1017,9 +1046,8 @@ static NSComparisonResult sortGroupByWindowZOrder(OAInspectorGroup *a, OAInspect
     }
     
     [self setInitialBottommostInspector];
-    [self matchWidths];
     
-    if ([defaults objectForKey:[NSString stringWithFormat:@"%@-Visible", [self identifier]]] != nil) 
+    if (willBeVisible) 
         [self _showGroup];
     else
         [self _hideGroup];
@@ -1050,7 +1078,7 @@ static NSComparisonResult sortGroupByWindowZOrder(OAInspectorGroup *a, OAInspect
     topLeft.y = NSMaxY(firstWindowFrame);
     
     // If the controller involved is shrinking vertically, we don't want to do anything complicated like collapse other panes
-    if (isToggling && NSHeight(aFrame) > (aController ? NSHeight([[aController window] frame]) : 0.0)) {
+    if (isSettingExpansion && NSHeight(aFrame) > (aController ? NSHeight([[aController window] frame]) : 0.0)) {
         // Calculate height and max height
         for (index = 0; index < count; index++) {
             OAInspectorController *controller = [inspectors objectAtIndex:index];
@@ -1191,7 +1219,7 @@ extern MenuRef _NSGetCarbonMenu(NSMenu *);
     int index, count, itemIndex;
     NSMutableArray *dynamicIndexes = [NSMutableArray array];
     MenuRef menu;
-    int lastGroupIdentifier, itemsInGroup;
+    unsigned int lastGroupIdentifier, itemsInGroup;
     NSMenuItem *item;
     NSBundle *bundle = [self bundle];
     

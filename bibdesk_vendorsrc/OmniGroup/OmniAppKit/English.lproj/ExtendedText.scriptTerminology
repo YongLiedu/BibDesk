@@ -62,6 +62,15 @@
 					<key>Name</key>
 					<string>underlined</string>
 				</dict>
+				<key>scriptStyle</key>
+				<dict>
+					<key>Description</key>
+					<string>The style of the text.</string>
+					<key>Name</key>
+					<string>qstyle</string>
+					<key>Sex</key>
+					<string>none</string>
+				</dict>
 				<key>superscriptLevel</key>
 				<dict>
 					<key>Description</key>
@@ -186,6 +195,11 @@
 			<dict>
 				<key>Name</key>
 				<string>left</string>
+			</dict>
+			<key>natural</key>
+			<dict>
+				<key>Name</key>
+				<string>natural</string>
 			</dict>
 			<key>right</key>
 			<dict>

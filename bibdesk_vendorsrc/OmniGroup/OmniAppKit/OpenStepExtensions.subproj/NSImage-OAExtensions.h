@@ -1,11 +1,11 @@
-// Copyright 1997-2003 Omni Development, Inc.  All rights reserved.
+// Copyright 1997-2004 Omni Development, Inc.  All rights reserved.
 //
 // This software may only be used and reproduced according to the
 // terms in the file OmniSourceLicense.html, which should be
 // distributed with this project and can also be found at
-// http://www.omnigroup.com/DeveloperResources/OmniSourceLicense.html.
+// <http://www.omnigroup.com/developer/sourcecode/sourcelicense/>.
 //
-// $Header: /Network/Source/CVS/OmniGroup/Frameworks/OmniAppKit/OpenStepExtensions.subproj/NSImage-OAExtensions.h,v 1.20 2003/02/26 00:48:10 rick Exp $
+// $Header: /Network/Source/CVS/OmniGroup/Frameworks/OmniAppKit/OpenStepExtensions.subproj/NSImage-OAExtensions.h,v 1.27 2004/02/10 04:07:34 kc Exp $
 
 #import <AppKit/NSImage.h>
 
@@ -23,6 +23,8 @@
     // Caching wrapper for -[NSWorkspace iconForFileType:].  This method is not thread-safe at the moment.
 + (NSImage *)draggingIconWithTitle:(NSString *)title andImage:(NSImage *)image;
 
+- (void)drawFlippedInRect:(NSRect)rect fromRect:(NSRect)sourceRect operation:(NSCompositingOperation)op fraction:(float)delta;
+- (void)drawFlippedInRect:(NSRect)rect fromRect:(NSRect)sourceRect operation:(NSCompositingOperation)op;
 - (void)drawFlippedInRect:(NSRect)rect operation:(NSCompositingOperation)op fraction:(float)delta;
 - (void)drawFlippedInRect:(NSRect)rect operation:(NSCompositingOperation)op;
 
@@ -46,5 +48,14 @@
     // Assumes images named "DocumentIconTemplate" and "DocumentIconMask" exist in your app wrapper.
 + (NSImage *)documentIconWithTemplate:(NSImage *)templateImage content:(NSImage *)contentImage contentMask:(NSImage *)contentMask;
     // Lets you provide your own template images.
+
+// System Images
++ (NSImage *)httpInternetLocationImage;
++ (NSImage *)ftpInternetLocationImage;
++ (NSImage *)mailInternetLocationImage;
++ (NSImage *)newsInternetLocationImage;
++ (NSImage *)genericInternetLocationImage;
+
++ (NSImage *)aliasBadgeImage;
 
 @end

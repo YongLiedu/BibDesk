@@ -1,9 +1,9 @@
-// Copyright 2000-2003 Omni Development, Inc.  All rights reserved.
+// Copyright 2000-2004 Omni Development, Inc.  All rights reserved.
 //
 // This software may only be used and reproduced according to the
 // terms in the file OmniSourceLicense.html, which should be
 // distributed with this project and can also be found at
-// http://www.omnigroup.com/DeveloperResources/OmniSourceLicense.html.
+// <http://www.omnigroup.com/developer/sourcecode/sourcelicense/>.
 
 #import "OAPreferencesIconView.h"
 
@@ -18,7 +18,7 @@
 #import "OAPreferenceClientRecord.h"
 #import "OAPreferenceController.h"
 
-RCS_ID("$Header: /Network/Source/CVS/OmniGroup/Frameworks/OmniAppKit/Preferences.subproj/OAPreferencesIconView.m,v 1.11 2003/01/15 22:51:41 kc Exp $")
+RCS_ID("$Header: /Network/Source/CVS/OmniGroup/Frameworks/OmniAppKit/Preferences.subproj/OAPreferencesIconView.m,v 1.15 2004/02/10 04:07:36 kc Exp $")
 
 @interface OAPreferencesIconView (Private)
 @end
@@ -125,7 +125,7 @@ const unsigned int iconBaseline = 18;
 }
 
 
-// NSView
+// NSView subclass
 
 - (void)drawRect:(NSRect)rect;
 {
@@ -143,6 +143,12 @@ const unsigned int iconBaseline = 18;
 
 - (BOOL)isOpaque;
 {
+    return NO;
+}
+
+- (BOOL)mouseDownCanMoveWindow;
+{
+    // Mouse drags should drag our icons, not the window (even though we're not opaque).
     return NO;
 }
 
@@ -221,6 +227,10 @@ const unsigned int iconBaseline = 18;
     *image = [clientRecord iconImage];
     *name = [clientRecord shortTitle];
     *identifier = [clientRecord identifier];
+
+    OBPOSTCONDITION(*image != nil);
+    OBPOSTCONDITION(*name != nil);
+    OBPOSTCONDITION(*identifier != nil);
     
     return YES;
 }
@@ -335,7 +345,8 @@ const unsigned int iconBaseline = 18;
        
     pasteboard = [NSPasteboard pasteboardWithName:NSDragPboard];
     [pasteboard declareTypes:[NSArray arrayWithObject:@"NSToolbarIndividualItemDragType"] owner:nil];
-    [pasteboard setString:identifier forType:@"NSToolbarItemIdentiferPboardType"];
+    [pasteboard setString:identifier forType:@"NSToolbarItemIdentifierPboardType"];
+    [pasteboard setString:identifier forType:@"NSToolbarItemIdentiferPboardType"]; // Apple misspelled this type in 10.1
     
     dragPoint = [self convertPoint:[event locationInWindow] fromView:nil];
     startPoint = NSMakePoint(dragPoint.x - buttonSize.width / 2.0, dragPoint.y + buttonSize.height / 2.0);
