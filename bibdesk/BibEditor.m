@@ -671,12 +671,12 @@ NSString *BDSKDateModifiedString = @"Date-Modified";
                 contextInfo:(void *)contextInfo{
     if(returnCode == 0){
         if(![[[theBib pubFields] allKeys] containsObject:[newFieldName stringValue]]){
-			NSString *name = [newFieldName stringValue];
-			
-			[theBib addField:name];
-            [self setupForm];
-            [self makeKeyField:[newFieldName stringValue]];
-            [self noteChange];
+		NSString *name = [[newFieldName stringValue] capitalizedString]; // add it as a capitalized string to avoid duplicates
+
+		[theBib addField:name];
+		[self setupForm];
+		[self makeKeyField:name];
+		[self noteChange];
         }
     }
     // else, nothing.
