@@ -32,7 +32,7 @@ static NSCharacterSet *SkipSet;
     EmptySet = [[NSCharacterSet characterSetWithCharactersInString:@""] retain];
     
     highCharRange.location = (unsigned int) '~';
-    highCharRange.length = 128; //this should get all the characters in the upper-range.
+    highCharRange.length = 256; //this should get all the characters in the upper-range.
     workingSet = [[NSCharacterSet decomposableCharacterSet] mutableCopy];
     [workingSet addCharactersInRange:highCharRange];
     FinalCharSet = [workingSet copy];
