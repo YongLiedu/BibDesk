@@ -86,12 +86,18 @@ extern NSString* LocalDragPasteboardName;
     NSMutableArray *bibEditors;
     NSString *quickSearchKey;
     NSMutableDictionary *quickSearchTextDict;
-    NSMutableArray *allAuthors;
+    
+    NSMutableDictionary *fieldsSortDict;
+    NSString *currentSortField; // which field we sort by in the outlineview
+    
     NSMutableString *frontMatter;    // for preambles, and stuff
     BDSKPreviewer *PDFpreviewer;
     NSMutableArray *showColsArray;
     NSMutableDictionary *tableColumns;
     BOOL tableColumnsChanged;
+    NSTableColumn *lastSelectedColumnForSort;
+    BOOL sortDescending;
+
     NSPasteboard *localDragPboard;
     // ----------------------------------------------------------------------------------------
     // general dialog used for adding 'fields' (used for adding contextual menus,)
@@ -193,14 +199,6 @@ extern NSString* LocalDragPasteboardName;
 */
 - (void)displayPreviewForItems:(NSEnumerator *)enumerator;
 
-/*!
-    @method sortPubsByColumn   
-    @abstract \253Abstract\273
-    @discussion \253discussion\273
-    
-*/
-- (IBAction)sortPubsByColumn:(id)sender;
-
 
 /*!
     @method editPubCmd
@@ -266,13 +264,6 @@ extern NSString* LocalDragPasteboardName;
 */
 - (NSMutableArray *)publications;
 
-/*!
-@method allAuthors
-    @abstract returns the allAuthors array
-    @discussion \253discussion\273
-    
-*/
-- (NSArray *)allAuthors;
 
     /*!
 @method citeKeyIsUsed:byItemOtherThan
@@ -398,6 +389,9 @@ extern NSString* LocalDragPasteboardName;
 
 - (IBAction)openCustomCitePrefPane:(id)sender;
 - (IBAction)toggleShowingCustomCiteDrawer:(id)sender;
+
+- (void)setupSortDict;
+- (NSArray *)currentSortFieldArray;
 
 /*!
     @method currentView

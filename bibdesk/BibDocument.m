@@ -38,7 +38,7 @@ NSString*   LocalDragPasteboardName = @"edu.ucsd.cs.mmccrack.bibdesk: Local Publ
     if(self = [super init]){
         publications = [[NSMutableArray alloc] initWithCapacity:1];
         shownPublications = [[NSMutableArray alloc] initWithCapacity:1];
-        allAuthors = [[NSMutableArray alloc] initWithCapacity:1];
+        fieldsSortDict = [[NSMutableDictionary alloc] init];
         frontMatter = [[NSMutableString alloc] initWithString:@""];
 
         quickSearchKey = [[[OFPreferenceWrapper sharedPreferenceWrapper] objectForKey:BDSKCurrentQuickSearchKey] retain];
@@ -85,7 +85,8 @@ NSString*   LocalDragPasteboardName = @"edu.ucsd.cs.mmccrack.bibdesk: Local Publ
      [customStringArray setArray:[[OFPreferenceWrapper sharedPreferenceWrapper] arrayForKey:BDSKCustomCiteStringsKey]];
 
      tableColumnsChanged = YES;
-
+     currentSortField = [[OFPreferenceWrapper sharedPreferenceWrapper] stringForKey:BDSKViewByKey];
+     [self setupSortDict];
     }
     return self;
 }
@@ -181,7 +182,7 @@ NSString*   LocalDragPasteboardName = @"edu.ucsd.cs.mmccrack.bibdesk: Local Publ
     [publications release]; // these should cause the bibitems to get dealloc'ed
     [shownPublications release];
     [bibEditors release]; // gets rid of all the bibeditors.
-    [allAuthors release];
+    [fieldsSortDict release];
     [frontMatter release];
     [quickSearchTextDict release];
     [quickSearchKey release];
@@ -200,8 +201,45 @@ NSString*   LocalDragPasteboardName = @"edu.ucsd.cs.mmccrack.bibdesk: Local Publ
     return publications; // was: publications retain
 }
 
-- (NSArray *)allAuthors{
-    return allAuthors;
+- (void)setupSortDict{
+    // Sub for allAuthors
+    [fieldsSortDict setObject:[NSMutableArray array]
+                       forKey:@"Author"];
+}
+
+- (NSArray *)currentSortFieldArray{
+    // in the future, this should build the array on demand.
+    return [fieldsSortDict objectForKey:currentSortField];
+}
+
+// should become part of above method.
+- (void)refreshAuthors{
+    NSMutableArray *authors = [fieldsSortDict objectForKey:@"Author"];
+    NSEnumerator *pubE = [shownPublications objectEnumerator];
+    NSEnumerator *authE;
+    NSString *auth;
+    NSArray *authStringArray;
+    NSMutableArray *tmpTotalAuthStrings = [NSMutableArray arrayWithCapacity:6];
+    BibItem *pub;
+    unsigned i;
+
+
+    [authors removeAllObjects];
+
+    while (pub = [pubE nextObject]) {
+        authStringArray = [pub pubAuthors];
+        authE = [authStringArray objectEnumerator];
+        while(auth = [authE nextObject]){
+            i = [tmpTotalAuthStrings indexOfObject:auth];
+            if(i != NSNotFound){
+                [[authors objectAtIndex:i] addPub:pub];
+            }else{
+                [authors addObject:[[[BibAuthor alloc] initWithName:auth andPub:pub] autorelease]];
+                [tmpTotalAuthStrings addObject:auth];
+            }
+        }
+    }
+    
 }
 
 - (BOOL)citeKeyIsUsed:(NSString *)aCiteKey byItemOtherThan:(BibItem *)anItem{
@@ -227,8 +265,7 @@ NSString*   LocalDragPasteboardName = @"edu.ucsd.cs.mmccrack.bibdesk: Local Publ
     [self setupToolbar];
     [[aController window] setFrameAutosaveName:[self displayName]];
     [documentWindow makeFirstResponder:[self currentView]];
-    //[tableView selectColumn:[tableView columnWithIdentifier:@"Title"] byExtendingSelection:NO];
-    //[self sortPubsByColumn:tableView];
+
     [self setupTableColumns]; // calling it here mostly just makes sure that the menu is set up.
 
     [self controlTextDidChange:nil]; // calls updateUI.
@@ -590,50 +627,81 @@ stringByAppendingPathComponent:@"BibDesk"]; */
         [self setupTableColumns];
         [self updateUIAndRefreshOutline:YES];
     }
-   // [[OFPreferenceWrapper sharedPreferenceWrapper] setObject:currentSortKey forKey:BDSKViewByKey];
+    [[OFPreferenceWrapper sharedPreferenceWrapper] setObject:currentSortField forKey:BDSKViewByKey];
 }
 
-- (IBAction)sortPubsByColumn:(id)sender{
-    NSTableColumn *stc;
-    
-    if([tableView selectedColumn] != -1){
-        stc = [[tableView tableColumns] objectAtIndex:[tableView selectedColumn]];
-        [tableView setHighlightedTableColumn:stc];
-        if([[stc identifier] isEqualToString:@"Cite Key"]){
+// replaces sortPubsByColumn
+- (void) tableView: (NSTableView *) theTableView
+didClickTableColumn: (NSTableColumn *) tableColumn{
+    if (tableView != (BDSKDragTableView *) theTableView) return;
+    if (lastSelectedColumnForSort == tableColumn) {
+        // User clicked same column, change sort order
+        sortDescending = !sortDescending;
+    } else {
+        // User clicked new column, change old/new column headers,
+        // save new sorting selector, and re-sort the array.
+        sortDescending = NO;
+        if (lastSelectedColumnForSort) {
+            [tableView setIndicatorImage: nil
+                           inTableColumn: lastSelectedColumnForSort];
+            [lastSelectedColumnForSort release];
+        }
+        lastSelectedColumnForSort = [tableColumn retain];
+        [tableView setHighlightedTableColumn: tableColumn]; //do I want to do that?
+
+        if([[tableColumn identifier] isEqualToString:@"Cite Key"]){
 
             [publications sortUsingSelector:@selector(keyCompare:)];
             [shownPublications sortUsingSelector:@selector(keyCompare:)];
-        }else if([[stc identifier] isEqualToString:@"Title"]){
+        }else if([[tableColumn identifier] isEqualToString:@"Title"]){
 
             [publications sortUsingSelector:@selector(titleCompare:)];
             [shownPublications sortUsingSelector:@selector(titleCompare:)];
-        }else if([[stc identifier] isEqualToString:@"Date"]){
+        }else if([[tableColumn identifier] isEqualToString:@"Date"]){
 
             [publications sortUsingSelector:@selector(dateCompare:)];
             [shownPublications sortUsingSelector:@selector(dateCompare:)];
-        }else if([[stc identifier] isEqualToString:@"1st Author"]){
+        }else if([[tableColumn identifier] isEqualToString:@"1st Author"]){
 
             [publications sortUsingSelector:@selector(auth1Compare:)];
             [shownPublications sortUsingSelector:@selector(auth1Compare:)];
-        }else if([[stc identifier] isEqualToString:@"2nd Author"]){
+        }else if([[tableColumn identifier] isEqualToString:@"2nd Author"]){
 
             [publications sortUsingSelector:@selector(auth2Compare:)];
             [shownPublications sortUsingSelector:@selector(auth2Compare:)];
-        }else if([[stc identifier] isEqualToString:@"3rd Author"]){
+        }else if([[tableColumn identifier] isEqualToString:@"3rd Author"]){
 
             [publications sortUsingSelector:@selector(auth3Compare:)];
             [shownPublications sortUsingSelector:@selector(auth3Compare:)];
+        }else{
+            // don't handle sorting generally yet
         }
-        [tableView reloadData];
+
     }
+
+    // Set the graphic for the new column header
+    [tableView setIndicatorImage: (sortDescending ?
+                                   [NSImage imageNamed:@"sort-down"] :
+                                   [NSImage imageNamed:@"sort-up"])
+                   inTableColumn: tableColumn];
+    [tableView reloadData];
 }
 
 - (IBAction)editPubCmd:(id)sender{
     NSEnumerator *e = [self selectedPubEnumerator];
     NSNumber *i;
-
-    while (i = [e nextObject]) {
-        [self editPub:[shownPublications objectAtIndex:[i intValue]]];
+    NSString *colID = [[[tableView tableColumns] objectAtIndex:[tableView clickedColumn]] identifier];
+    BibItem *pub = nil;
+    int row = [tableView clickedRow];
+    int sortedRow = (sortDescending ? [shownPublications count] - 1 - row : row);
+    
+    if([colID isEqualToString:@"Local-Url"]){
+        pub = [shownPublications objectAtIndex:sortedRow];
+        [[NSWorkspace sharedWorkspace] openFile:[pub localURLPath]];
+    }else{
+        while (i = [e nextObject]) {
+            [self editPub:[shownPublications objectAtIndex:[i intValue]]];
+        }
     }
 }
 
@@ -858,30 +926,7 @@ stringByAppendingPathComponent:@"BibDesk"]; */
 }
 
 - (void)updateUIAndRefreshOutline:(BOOL)refresh{
-    NSEnumerator *pubE = [shownPublications objectEnumerator];
-    NSEnumerator *authE;
-    NSString *auth;
-    NSArray *authStringArray;
-    NSMutableArray *tmpTotalAuthStrings = [NSMutableArray arrayWithCapacity:6];
-    BibItem *pub;
-    unsigned i;
-
-    [allAuthors removeAllObjects];
-        
-    while (pub = [pubE nextObject]) {
-        authStringArray = [pub pubAuthors];
-        authE = [authStringArray objectEnumerator];
-        while(auth = [authE nextObject]){
-            i = [tmpTotalAuthStrings indexOfObject:auth];
-            if(i != NSNotFound){
-                [[allAuthors objectAtIndex:i] addPub:pub];
-            }else{
-                [allAuthors addObject:[[[BibAuthor alloc] initWithName:auth andPub:pub] autorelease]];
-                [tmpTotalAuthStrings addObject:auth];
-            }
-        }
-    }
-
+    [self refreshAuthors];
     [self handleFontChangedNotification:nil]; // calls reloadData.
 /*    if((NSTableView *)[self currentView] == tableView){
         [tableView reloadData];
@@ -905,6 +950,7 @@ stringByAppendingPathComponent:@"BibDesk"]; */
 
 }
 
+
 //note - ********** the notification handling method will add NSTableColumn instances to the tableColumns dictionary.
 - (void)setupTableColumns{
     NSArray *prefsShownColNamesArray = [[OFPreferenceWrapper sharedPreferenceWrapper] arrayForKey:BDSKShownColsNamesKey];
@@ -914,6 +960,7 @@ stringByAppendingPathComponent:@"BibDesk"]; */
     BDSKDragTableView *view = (BDSKDragTableView *)[self currentView];
     NSDictionary *tcWidthsByIdentifier = [[OFPreferenceWrapper sharedPreferenceWrapper] objectForKey:BDSKColumnWidthsKey];
     NSNumber *tcWidth = nil;
+    NSImageCell *localURLImageCell = [[[NSImageCell alloc] init] autorelease];
 
     [view removeAllTableColumns];
     
@@ -934,8 +981,14 @@ stringByAppendingPathComponent:@"BibDesk"]; */
             // I should probably set it up better in the nib, or something.
         }else{
             [view addTableColumn:tc];
-            if(![[tc identifier] isEqualToString:@"Title"])
-                [self contextualMenuAddTableColumnName:[tc identifier] enabled:YES]; // OK to add multiple times.
+            if([[tc identifier] isEqualToString:@"Local-Url"]){
+                [tc setDataCell:localURLImageCell];
+                
+            }
+            if(![[tc identifier] isEqualToString:@"Title"]){
+                [self contextualMenuAddTableColumnName:[tc identifier] enabled:YES];
+                // OK to add multiple times.
+            }
         }
     }
 }
@@ -1141,7 +1194,7 @@ stringByAppendingPathComponent:@"BibDesk"]; */
 
 
 
-// returns the current view we're using. (not well tested)
+// returns the current view we're using. 
 - (id)currentView{
    if([dummyView contentView] == tableBox){
         return (id) tableView;
