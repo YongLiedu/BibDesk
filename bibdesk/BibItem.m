@@ -1054,17 +1054,33 @@ void _setupFonts(){
 					// keywords
 					string = [self valueOfField:@"Keywords"];
 					if (string != nil) {
-						NSArray *arr = [string componentsSeparatedByString:@","];
+						NSMutableArray *arr = [NSMutableArray array];
+                        // split the keyword string using the same methodology as addString:forCompletionEntry:, treating ,:; as possible dividers
+                        NSRange keywordPunctuationRange = [string rangeOfCharacterFromSet:[[NSApp delegate] autoCompletePunctuationCharacterSet]];
+                        if(keywordPunctuationRange.location != NSNotFound){
+                            NSScanner *keywordScanner = [[NSScanner alloc] initWithString:string];
+                            [keywordScanner setCharactersToBeSkipped:nil];
+                            NSString *tmp = nil;
+                            
+                            while(![keywordScanner isAtEnd]){
+                                [keywordScanner scanUpToCharactersFromSet:[[NSApp delegate] autoCompletePunctuationCharacterSet] intoString:&tmp];
+                                if(tmp != nil)
+                                    [arr addObject:tmp];
+                                [keywordScanner scanCharactersFromSet:[[NSApp delegate] autoCompletePunctuationCharacterSet] intoString:nil];
+                                [keywordScanner scanCharactersFromSet:[NSCharacterSet whitespaceCharacterSet] intoString:nil];
+                            }
+                            [keywordScanner release];
+                        } else {
+                            [arr addObject:string];
+                        }
+                            
 						if ([scanner scanCharactersFromSet:digits intoString:&numStr]) {
 							number = [numStr intValue];
 						} else {
 							number = 0;
 						}
-						for (i = 0; i < [arr count] && (number == 0 || i < number); i++) {
-							string = [[arr objectAtIndex:i] stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceCharacterSet]];
-							string = [converter stringBySanitizingString:string forField:fieldName inFileType:[self fileType]];
-							[parsedStr appendString:string];
-						}
+                        if(number < [arr count])
+                            [parsedStr appendString:[arr objectAtIndex:number]];
 					}
 					break;
 				case '{':
