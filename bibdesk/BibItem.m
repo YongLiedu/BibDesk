@@ -147,7 +147,7 @@ void _setupFonts(){
     return [NSString stringWithFormat:@"%@ %@", [self citeKey], [pubFields description]];
 }
 
-#warning does not always seem to work? specifically when changing updatecounts from changing the pubtype
+
 - (BOOL)isEqual:(BibItem *)aBI{
     return ([pubType isEqualToString:[aBI type]]) && ([citeKey isEqualToString:[aBI citeKey]]) &&
     ([pubFields isEqual:[aBI dict]]);
@@ -265,7 +265,7 @@ void _setupFonts(){
 }
 
 - (void)setAuthorsFromString:(NSString *)aString{
-    const char *str = nil;
+     char *str = nil;
 
     if (aString == nil) return;
     str = [aString cString];
@@ -352,7 +352,7 @@ void _setupFonts(){
 
     if(!citeKey){
         if([self numberOfAuthors] > 0){
-            authString = [self authorAtIndex:0];
+            authString = [[self authorAtIndex:0] lastName];
             // [BibAuthor lastNameFromString:
         }
         if([self date]){
@@ -507,8 +507,8 @@ void _setupFonts(){
     [aStr appendAttributedString:[[[NSAttributedString alloc] initWithString:@" "
                                                                   attributes:nil] autorelease]];
 
-    
-    return [aStr RTFFromRange:NSMakeRange(0,[aStr length]) documentAttributes:nil];
+
+    return 	[aStr RTFFromRange:NSMakeRange(0,[aStr length]) documentAttributes:nil];
 }
 
 - (NSString *)bibTeXString{
@@ -553,8 +553,13 @@ void _setupFonts(){
     //    [s appendString:[[self bibTeXString] xmlString]];
     //    [s appendString:@"]]></bt:source>\n"];
     [s appendString:@"</item>\n"];
-    return [[s copy] autorelease];
+    return s;
 }
+
+- (NSString *)HTMLValueUsingTemplateString:(NSString *)templateString{
+    return [templateString stringByParsingTagsWithStartDelimeter:@"<$" endDelimeter:@"/>" usingObject:self];
+}
+
 
 - (NSString *)allFieldsString{
     NSMutableString *result = [[[NSMutableString alloc] init] autorelease];
