@@ -45,6 +45,7 @@
 #import "NSString+Templating.h"
 #import "BibPrefController.h"
 #import "NSString_BDSKExtensions.h"
+#import "BDSKConverter.h"
 
 @class BibEditor;
 @class BibDocument;
@@ -167,7 +168,36 @@
 
 - (void)setCiteKeyFormat: (NSString *)newKeyFormat; // @@unimplemented
 - (NSString *)sanitizedCiteKeyString:(NSString *)key;
+
+/*!
+    @method suggestedCiteKey
+    @abstract Returns a suggested cite key based on the receiver
+    @discussion Returns a suggested cite key based on the cite key format and the receivers publication  data. 
+    @result The suggested cite key string
+*/
 - (NSString *)suggestedCiteKey;
+
+/*!
+    @method uniqueCiteKey:numberOfChars:from:to:force:
+    @abstract Tries to return a unique cite key
+    @discussion Tries to return a cite key that is unique in the receivers document by adding characters from a range of characters. 
+    @param citeKeyString The cite key string to base the unique cite key on
+	@param number The number of characters to add, when force is YES the minimal number
+	@param fromChar The first character in the range to use
+	@param toChar The last character of the range to use
+	@param force Determines whether to allow for more characters to force a unique key
+	@result A cite key that starts with citeKeyString and is unique when force is YES
+*/
+- (NSString *)uniqueCiteKey:(NSString *)citeKeyString numberOfChars:(unsigned int)number from:(unichar)fromChar to:(unichar)toChar force:(BOOL)force;
+
+/*!
+    @method citeKeyIsValid:
+    @abstract Returns whether a cite key is a valid cite key
+    @discussion This essentially calls the corresponding method of BibEditor. 
+	@param proposedCiteKey The trial cite key to check for validity
+*/
+- (BOOL)citeKeyIsValid:(NSString *)proposedCiteKey;
+
 - (void)setCiteKey:(NSString *)newCiteKey;
 - (NSString *)citeKey;
 

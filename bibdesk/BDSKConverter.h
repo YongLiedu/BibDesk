@@ -19,8 +19,8 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 */
 
 #import <Cocoa/Cocoa.h>
-#import <OmniFoundation/OFCharacterScanner.h>
-#import <OmniFoundation/OFStringScanner.h>
+#import <OmniFoundation/NSString-OFExtensions.h>
+
 
 /*!
  @class BDSKConverter
@@ -85,4 +85,13 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
  @result alert panel
 */
 - (void)runConversionAlertPanel:(NSString *)tmpConv;
+
+/*!
+ @method stringBySanitizedCiteKeyString
+ @abstract Sanitize cite key string
+ @discussion Creates a string containing only a strict set of characters (alphanumeric and :;-) by removing TeX, unaccenting characters and removing others
+ @param key The unsanitized cite key
+ @result The sanitized string
+*/
+- (NSString *)stringBySanitizingCiteKeyString:(NSString *)key;
 @end
