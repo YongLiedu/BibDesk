@@ -14,6 +14,24 @@ Category on BibDocument to implement a few additional functions needed for scrip
 */
 @implementation BibDocument (Scripting)
 
+
+/* ssp: 2004-08-03
+Scripting Key-Value coding method to  access an author by its name
+*/
+- (BibAuthor*) valueInAuthorsWithName:(NSString*) name {
+	NSEnumerator * myEnum = [authors objectEnumerator];
+	BibAuthor * auth = nil;
+	NSLog (@"valueInAuthtors...");
+	while (auth = [myEnum nextObject]) {
+		if ([[auth name] isEqualToString:name]) {
+			return auth;
+		}
+	}
+	return nil;
+}
+
+
+
 /* ssp: 2004-07-22
 Accessor to get the current state of the filter field.
 */

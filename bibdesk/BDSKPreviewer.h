@@ -122,6 +122,17 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 - (BOOL)rtfPreviewFromData:(NSData *)rtfdata;
 
 
+- (NSImageView*) pdfView;
+/*!
+	@method pdfView:
+	 @abstract accessor for pdfView outlet
+	 @discussion returns pdfView (used for printing)
+	 @result pdfView
+*/
+
+
+
+
 @end
 
 

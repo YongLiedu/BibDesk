@@ -25,8 +25,15 @@ ssp 2004-07-10
 	BibDocument * myDoc = [myPub document];
 	NSScriptObjectSpecifier *containerRef = [myDoc objectSpecifier];
 		
-	return [[[NSNameSpecifier allocWithZone:[self zone]] initWithContainerClassDescription:[containerRef keyClassDescription] containerSpecifier:containerRef key:@"authors" name:[self normalizedName]] autorelease];
-
+	return [[[NSNameSpecifier allocWithZone:[self zone]] initWithContainerClassDescription:[containerRef keyClassDescription] containerSpecifier:containerRef key:@"authors" name:[self name]] autorelease];
+/*	unsigned index = [ar indexOfObjectIdenticalTo:self];
+    if (index != NSNotFound) {
+        NSScriptObjectSpecifier *containerRef = [[self document] objectSpecifier];
+        return [[[NSIndexSpecifier allocWithZone:[self zone]] initWithContainerClassDescription:[containerRef keyClassDescription] containerSpecifier:containerRef key:@"publications" index:index] autorelease];
+    } else {
+        return nil;
+    }
+*/	
 }
 
 

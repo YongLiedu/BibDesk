@@ -290,6 +290,9 @@ else if(([_lastName rangeOfString:@" "].location != NSNotFound) && VON){
 	
 }
 
+
+
+
 - (BibItem *)pubAtIndex:(int)index{
     return [pubs objectAtIndex: index];
 }

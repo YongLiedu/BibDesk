@@ -356,6 +356,13 @@ static unsigned threadCount = 0;
     return d;
 }
 
+
+// accessor
+- (NSImageView*) pdfView { 
+	return imagePreviewView;
+}
+
+
 - (BOOL)rtfPreviewFromData:(NSData *)rtfdata{  // This draws the RTF in a textview
     NSSize inset = NSMakeSize(20,20); // set this for the margin
     [rtfPreviewView setString:@""];   // clean the view

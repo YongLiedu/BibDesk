@@ -25,22 +25,10 @@
 	
 @end
 
-@interface BibDocument (Improvements)
-- (void) printDocument:(id)sender;
-- (IBAction)delPub:(id)sender;
-- (void) deleteSheetDidEnd:(NSWindow *)sheet returnCode:(int)rv contextInfo:(void *)contextInfo;
-
-@end
-
 
 @interface BibAppController (BibImportService)
 - (void)addPublicationsFromSelection:(NSPasteboard *)pboard
 						   userData:(NSString *)userData
 							  error:(NSString **)error;
 	
-@end
-
-
-@interface BDSKPreviewer (Printing)
-- (NSImageView*) pdfView;
 @end

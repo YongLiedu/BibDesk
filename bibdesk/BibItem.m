@@ -127,10 +127,12 @@ void _setupFonts(){
 }
 
 - (void)dealloc{
-	// NSLog(@"bibitem Dealloc");
+	// NSLog([NSString stringWithFormat:@"bibitem Dealloc, rt: %d", [self retainCount]]);
     [pubDate release];
     [requiredFieldNames release];
+
 	[pubAuthors release];
+
 	[pubType release];
 	[fileType release];
 	[citeKey release];

@@ -269,6 +269,8 @@ Handle Notifications by the popup button to update its icon and its menu before 
 		[editor close];
 		[bibEditors removeObjectIdenticalTo:editor];
 	}
+	// unregister with the publication's authors
+	[[pub pubAuthors] makeObjectsPerformSelector:@selector(removePubFromAuthorList:) withObject:pub];
 	[publications removeObjectIdenticalTo:pub];
 	[shownPublications removeObjectIdenticalTo:pub];
 	
@@ -719,24 +721,40 @@ stringByAppendingPathComponent:@"BibDesk"]; */
     [self createNewBlankPubAndEdit:YES];
 }
 
+
+
+/* ssp: 2004-07-19
+Enhanced delete method that uses a sheet instead of a modal dialogue.
+*/
 - (IBAction)delPub:(id)sender{
-    NSEnumerator *delEnum = nil;
-    NSNumber *rowToDelete;
-    id objToDelete; 
 	int numSelectedPubs = [self numberOfSelectedPubs];
-	int numDeletedPubs = 0;
-    int rv = 0;
 	
     if (numSelectedPubs == 0) {
         return;
     }
-    rv = NSRunCriticalAlertPanel(NSLocalizedString(@"Publication delete",@""),
-                                 NSLocalizedString(@"Are you sure you want to delete?",@""),
-                                 NSLocalizedString(@"Delete",@""),
-                                 NSLocalizedString(@"Cancel",@""), nil, nil, nil);
+	
+	NSString * pubSingularPlural;
+	if (numSelectedPubs == 1) {
+		pubSingularPlural= NSLocalizedString(@"publication", @"publication");
+	} else {
+		pubSingularPlural = NSLocalizedString(@"publications", @"publications");
+	}
+	
+	
+	NSBeginCriticalAlertSheet([NSString stringWithFormat:NSLocalizedString(@"Delete %@",@"Delete %@"), pubSingularPlural],NSLocalizedString(@"Delete",@"Delete"),NSLocalizedString(@"Cancel",@"Cancel"),nil,documentWindow,self,@selector(deleteSheetDidEnd:returnCode:contextInfo:),NULL,nil,NSLocalizedString(@"Delete %i %@?",@"Delete %i %@? [i-> number, @-> publication(s)]"),numSelectedPubs, pubSingularPlural);
+	
+}
+
+
+- (void) deleteSheetDidEnd:(NSWindow *)sheet returnCode:(int)rv contextInfo:(void *)contextInfo {
     if (rv == NSAlertDefaultReturn) {
         //the user said to delete.
-        delEnum = [self selectedPubEnumerator];
+        NSEnumerator * delEnum = [self selectedPubEnumerator];
+		NSNumber * rowToDelete;
+		id objToDelete;
+		int numSelectedPubs = [self numberOfSelectedPubs];
+		int numDeletedPubs = 0;
+		
         while (rowToDelete = [delEnum nextObject]) {
             objToDelete = [shownPublications objectAtIndex:[rowToDelete intValue]];
 			numDeletedPubs++;
@@ -752,6 +770,8 @@ stringByAppendingPathComponent:@"BibDesk"]; */
         //the user canceled, do nothing.
     }
 }
+
+
 
 #pragma mark -
 #pragma mark Search Field methods
@@ -1542,7 +1562,7 @@ int generalBibItemCompareFunc(id item1, id item2, void *context){
                 [tc setWidth:[tcWidth floatValue]];
             }
         }
-        [[tc headerCell] setStringValue:colName];
+        [[tc headerCell] setStringValue:NSLocalizedStringFromTable(colName, @"BibTeXKeys", @"")];
         [tc setEditable:NO];
 
         if([[tc identifier] isEqualToString:@"No Identifier"]){
@@ -1889,6 +1909,18 @@ int generalBibItemCompareFunc(id item1, id item2, void *context){
 - (NSView *)printableView{
 	return previewField; // random hack for now. - this will only print the selected items.
 }
+
+
+/* ssp: 2004-07-19
+Basic printing of the preview
+Along with new menu validation code in the main file.
+Requires improved version of BDSKPreviewer class with accessor function
+The results are quite crappy, but these were low-hanging fruit and people seem to want the feature.
+*/
+- (void) printDocument:(id)sender {
+	[[[BDSKPreviewer sharedPreviewer] pdfView] print:sender];
+}
+
 
 - (void)printShowingPrintPanel:(BOOL)showPanels {
     // Obtain a custom view that will be printed

@@ -176,76 +176,6 @@ Stripped down version from BibDocument
 @end
 
 
-/* ssp: 2004-07-19
-A category containing misc improvements to the BibDocument class
-Probably these are best merged into the class itself once they are good enough.
-*/
-@implementation BibDocument (Improvements)
-
-/* ssp: 2004-07-19
-Enhanced delete method that uses a sheet instead of a modal dialogue.
-*/
-- (IBAction)delPub:(id)sender{
-	int numSelectedPubs = [self numberOfSelectedPubs];
-	
-    if (numSelectedPubs == 0) {
-        return;
-    }
-	
-	NSString * pubSingularPlural;
-	if (numSelectedPubs == 1) {
-		pubSingularPlural= NSLocalizedString(@"publication", @"publication");
-	} else {
-		pubSingularPlural = NSLocalizedString(@"publications", @"publications");
-	}
-
-	
-	NSBeginCriticalAlertSheet([NSString stringWithFormat:NSLocalizedString(@"Delete %@",@"Delete %@"), pubSingularPlural],NSLocalizedString(@"Delete",@"Delete"),NSLocalizedString(@"Cancel",@"Cancel"),nil,documentWindow,self,@selector(deleteSheetDidEnd:returnCode:contextInfo:),NULL,nil,NSLocalizedString(@"Delete %i %@?",@"Delete %i %@?"),numSelectedPubs, pubSingularPlural);
-	
-}
-
-
-- (void) deleteSheetDidEnd:(NSWindow *)sheet returnCode:(int)rv contextInfo:(void *)contextInfo {
-    if (rv == NSAlertDefaultReturn) {
-        //the user said to delete.
-        NSEnumerator * delEnum = [self selectedPubEnumerator];
-		NSNumber * rowToDelete;
-		id objToDelete;
-		int numSelectedPubs = [self numberOfSelectedPubs];
-		int numDeletedPubs = 0;
-
-        while (rowToDelete = [delEnum nextObject]) {
-            objToDelete = [shownPublications objectAtIndex:[rowToDelete intValue]];
-			numDeletedPubs++;
-			if(numDeletedPubs == numSelectedPubs){
-				[self removePublication:objToDelete lastRequest:YES];
-			}else{
-				[self removePublication:objToDelete lastRequest:NO];
-			}
-        }
-        [tableView deselectAll:nil];
-        [self updateUI];
-    }else{
-        //the user canceled, do nothing.
-    }
-}
-
-
-
-/* ssp: 2004-07-19
-Basic printing of the preview
-Along with new menu validation code in the main file.
-Requires improved version of BDSKPreviewer class with accessor function
-The results are quite crappy, but these were low-hanging fruit and people seem to want the feature.
-*/
-- (void) printDocument:(id)sender {
-	[[[BDSKPreviewer sharedPreviewer] pdfView] print:sender];
-}
-
-
-@end
-
-
 
 /* ssp: 2004-07-18
 Service to import selected BibTeX entry
@@ -275,16 +205,4 @@ Implements service to import selection
 	[doc addPublicationsFromPasteboard:pboard error:error];
 }
 
-@end
-
-
-/* ssp:2004-07-09
-Category to make the PDF Preview view accessible
-*/
-@implementation BDSKPreviewer (Printing)
-
-/* ssp: 2004-07-19
-accessor 
-*/
-- (NSImageView*) pdfView { return imagePreviewView;}
 @end
