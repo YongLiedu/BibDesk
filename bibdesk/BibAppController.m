@@ -236,10 +236,13 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
  if the preview needs to be updated, get the first document and make it do the updating
 */
 - (void) handlePreviewNeedsUpdate:(id)sender {
+    NSArray *docArray = [NSApp orderedDocuments];
+    if([docArray count]){ // avoid exception when no docs open
 	BibDocument * firstDoc = [[NSApp orderedDocuments] objectAtIndex:0];
 	if (firstDoc) {
 		[firstDoc updatePreviews:nil];
 	}
+    }
 }
 
 
