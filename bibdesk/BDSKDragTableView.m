@@ -91,10 +91,11 @@ static NSColor *sStripeColor = nil;
 -(NSMenu*)menuForEvent:(NSEvent*)evt {
 	NSPoint pt=[self convertPoint:[evt locationInWindow] fromView:nil]; 
 	int column=[self columnAtPoint:pt];
-	int row=[self rowAtPoint:pt]; 
+	int row=[self rowAtPoint:pt];
 	
 	if (column>=0 && row>=0 &&
 		[[self delegate] respondsToSelector:@selector(menuForTableColumn:row:)]){
+		[self selectRow:row byExtendingSelection:NO];
 		return [[self delegate] menuForTableColumn:[[self tableColumns] objectAtIndex:column] row:row];
 	}
 	return nil; 
