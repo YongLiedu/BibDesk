@@ -9,9 +9,9 @@ Currently this support is for the BibItem (publication), BibAuthor (author) and 
 
 The command
 
-/Developer/Tools/sdp -f st -i /Developer/Examples/Scripting\ Definitions/NSCoreSuite.sdef -i /Developer/Examples/Scripting\ Definitions/NSTextSuite.sdef BibDesk.sdef
+/Developer/Tools/sdp -f ast -i /Developer/Examples/Scripting\ Definitions/NSCoreSuite.sdef -i /Developer/Examples/Scripting\ Definitions/NSTextSuite.sdef BibDesk.sdef
 
-will translate this file into the necessary scriptSuite and scriptTerminology files.
+will translate this file into the necessary scriptSuite and scriptTerminology files and an additional .r file with an aete resource. Having all three of these seems to work best for some reason.
 -->
 
 <dictionary title="BibDesk Terminology">
@@ -21,22 +21,21 @@ will translate this file into the necessary scriptSuite and scriptTerminology fi
         <classes>		
 			<class name="author" plural="authors" code="auth" description="Contains the name of an author, tries to analyse it and list all publications of that author. Author names can be split into four E.g. '(Jean) (de la) (Fontaine) (Jr.)'">
                 <cocoa class="BibAuthor"/>
-                <!-- experimental -->
-                <contents name="full name" type="string" code="aunm" description="The author's full name">
-                	<cocoa method="name"/>
-                </contents>
                 <properties>
-                    <property name="first name" code="aufn" type="string" description="The author's first name (hopefully)" access="r">
+	                <property name="full name" type="string" code="aunm" description="The author's full name.">
+    	            	<cocoa method="name"/>
+        	        </property>
+                    <property name="first name" code="aufn" type="string" description="The author's first name." access="r">
                         <cocoa method="firstName"/>
                     </property>  
-                    <property name="jr part" code="aujr" type="string" description="The 'Jr' part of the author's name (hopefully)" access="r">
-                        <cocoa method="jrPart"/>
+                    <property name="von name part" code="auvp" type="string" description="'von' part of the author's name." access="r">
+                        <cocoa method="vonPart"/>
                     </property>  
-                    <property name="last name" code="auln" type="string" description="The author's last name (hopefully)" access="r">
+                    <property name="last name" code="auln" type="string" description="The author's last name." access="r">
                         <cocoa method="lastName"/>
                     </property>  
-                    <property name="von name part" code="auvp" type="string" description="'von' part of the author's name (hopefully)" access="r">
-                        <cocoa method="vonPart"/>
+                    <property name="jr part" code="aujr" type="string" description="The 'Jr' part of the author's name." access="r">
+                        <cocoa method="jrPart"/>
                     </property>  
 			     </properties>
 			     <!-- Couldn't figure how to do the inverse relationships -->
@@ -73,17 +72,20 @@ will translate this file into the necessary scriptSuite and scriptTerminology fi
 			<class name="document" plural="documents" code="docu" description="A Bibdesk bibliography document." inherits="document">
                 <cocoa class="BibDocument"/>
                 <properties>
-                    <property name="selection" code="sele" type="list of publication" description="The selected publications.">
-                        <cocoa method="selection"/>
-                    </property>
 					<property name="filter field" code="filt" type="string" description="Only publications matching this property will be displayed">
 						<cocoa method="filterField"/>
 					</property>
+                    <property name="selection" code="sele" type="list of publication" description="The selected publications.">
+                        <cocoa method="selection"/>
+                    </property>
 			         <property name="displayed publications" code="disp" type="list of publication" access="r" description="The publications currently displayed. This can differ from all publications depending on the state of the filter field and recently added publications.">
 			         	<cocoa method="displayedPublications"/>
 			         </property>
+			         <property name="auths" code="auth" type="list of author" access="r" description="The authors of publications in this bibliography.">
+			         	<cocoa method="authors"/>
+			         </property>
+			         
                 </properties>
-
 
 				<elements>
 			         <element type="publication" description="Publications in the bibliography">
@@ -95,8 +97,7 @@ will translate this file into the necessary scriptSuite and scriptTerminology fi
 			         </element>
 			    </elements>
 			     
-			     
-                <responds-to-commands>
+            	<responds-to-commands>
                     <responds-to name="bibliography for"/>
                     <responds-to name="selectionToClipboard">
                         <cocoa method="copyAsRTF:"/>
@@ -113,27 +114,29 @@ will translate this file into the necessary scriptSuite and scriptTerminology fi
 			<class name="publication" plural="publications" code="bibi" description="A publication.">
                 <cocoa class="BibItem"/>
                 <properties>
-                    <property name="RSS description" code="RSSd" type="string" description="The publication's RSS description as seen in the RSS Description tab.">
-                        <cocoa method="RSSDescription"/>
-                    </property>  
-                    <property name="RSS string" code="RSSv" type="string" description="RSS entry for the publication." access="r">
-                        <cocoa method="RSSValue"/>
-                    </property>  
-                    <property name="abstract" code="abst" type="string" description="The publication's abstract.">
-                        <cocoa method="abstract"/>
-                    </property>  
-                    <property name="note" code="note" type="string" description="Annotations for the publication as seen in the “Annote” tab.">
-                        <cocoa method="annotation"/>
-                    </property>  
-					<property name="text" code="ctxt" type="text" description="Styled string containing bibliography entry for the publication." access="r">
-						<cocoa method="attributedString"/>
-					</property>  
-					<property name="BibTeX string" code="BTeX" type="string" description="String for BibTeX entry. Can be set only at or immediately after initialization.">
-						<cocoa method="bibTeXString"/>
-					</property>  
 					<property name="cite key" code="ckey" type="string" description="Key for citing the publication.">
 						<cocoa method="citeKey"/>
 					</property>  
+					<property name="title" code="titl" type="string" description="The publication's title.">
+						<cocoa method="title"/>
+					</property>  
+                    <property name="abstract" code="abst" type="string" description="The publication's abstract.">
+                        <cocoa method="abstract"/>
+                    </property>  
+					<property name="keywords" code="keyw" type="string" description="The publication's keywords.">
+						<cocoa method="keywords"/>
+					</property>
+					<property name="local file" code="lURL" type="file" description="Location of a file containing the publication.">
+						<cocoa method="localURL"/>
+					</property>  
+					<property name="URL" code="rURL" type="string" description="URL pointing to the publication.">
+						<cocoa method="remoteURL"/>
+					</property>  
+					<property name="type" code="type" type="string" description="The publication's type. E.g. article, book, unpublished.">
+						<cocoa method="type"/>
+						<!-- Provide constants for these? This might be bad wrt to using types which aren't provided as constants. -->
+					</property>  
+					
 					<property name="publication date" code="pdat" type="date" description="Deprecated. Use publication year and publication month instead." hidden="">
 						<cocoa method="date"/>
 					</property>  
@@ -143,33 +146,33 @@ will translate this file into the necessary scriptSuite and scriptTerminology fi
 					<property name="publication year" code="pyer" type="string" description="Year of publication.">
 						<cocoa method="year"/>
 					</property>  
-					<property name="publication date" code="pdat" type="date" description="Date of publication.">
-						<cocoa method="date"/>
-					</property>  
 					<property name="added date" code="adat" type="date" description="Date on which the publication's record was added to the bibliography.">
 						<cocoa method="ASDateCreated"/>
 					</property>
 					<property name="modified date" code="mdat" type="date" description="Date on which the publication's record was last modified in the bibliography.">
 						<cocoa method="ASDateModified"/>
 					</property>
-					<property name="fields record" code="flds" type="record" description="Fields with data about the publication. These may vary from publication to publication.">
+					
+                    <property name="RSS description" code="RSSd" type="string" description="The publication's RSS description as seen in the RSS Description tab.">
+                        <cocoa method="RSSDescription"/>
+                    </property>  
+                    <property name="RSS string" code="RSSv" type="string" description="RSS entry for the publication." access="r">
+                        <cocoa method="RSSValue"/>
+                    </property>  
+					<property name="text" code="ctxt" type="text" description="Styled string containing bibliography entry for the publication." access="r">
+						<cocoa method="attributedString"/>
+					</property>                      
+					
+					<property name="note" code="note" type="string" description="Annotations for the publication as seen in the “Annote” tab.">
+                        <cocoa method="annotation"/>
+                    </property>  
+
+					<property name="BibTeX string" code="BTeX" type="string" description="String for BibTeX entry. Can be set only at or immediately after initialization.">
+						<cocoa method="bibTeXString"/>
+					</property>  
+					
+					<property name="fields record" code="flds" type="record" description="Fields with data about the publication. These may vary from publication to publication." hidden="">
 						<cocoa method="fields"/>
-					</property>  
-					<property name="local file" code="lURL" type="file" description="Location of a file containing the publication.">
-						<cocoa method="localURL"/>
-					</property>  
-					<property name="URL" code="rURL" type="string" description="URL pointing to the publication.">
-						<cocoa method="remoteURL"/>
-					</property>  
-					<property name="title" code="titl" type="string" description="The publication's title.">
-						<cocoa method="title"/>
-					</property>  
-					<property name="keywords" code="keyw" type="string" description="The publication's keywords.">
-						<cocoa method="keywords"/>
-					</property>
-					<property name="type" code="type" type="string" description="The publication's type. E.g. article, book, unpublished.">
-						<cocoa method="type"/>
-						<!-- Provide constants for these? This might be bad wrt to using types which aren't provided as constants. -->
 					</property>  
 					<property name="document" code="docu" type="document" description="The bibliography containing this publication record." access="r">
 						<cocoa method="document"/>
@@ -216,11 +219,12 @@ will translate this file into the necessary scriptSuite and scriptTerminology fi
         </classes>
 
         
+        
+        
         <commands>			
 			<command name="bibliography for" code="BDSKbibf" description="Returns bibliography information for the publications passed to the command.">
 				<cocoa name="bibliographyFor" class="BibDeskBibliographyCommand"/>
-				<direct-parameter type="object" description="The list of publications to generate a bibliography for."/>
-				<!-- type is actually list of publication above -->
+				<direct-parameter type="list of publication" description="The list of publications to generate a bibliography for."/>
 				<result type="text" description="Bibliography as styled text"/>
 			</command>
 			
@@ -232,15 +236,13 @@ will translate this file into the necessary scriptSuite and scriptTerminology fi
 
 			<command name="show" code="BDSKshow" description="Shows an author or a publication in a separate window for editing.">
 				<cocoa name="Show" class="BibDeskOpenCommand"/>
-				<direct-parameter type="object" description="The author or publication to show in the new window."/>
-				<!-- type is actually author | publication above -->
+				<direct-parameter type="author | publication" description="The author or publication to show in the new window."/>
 			</command>
 
 		
-			<command name="search" code="BDSKsrch" description="Returns a list of publicatios matching the given string. Typical usage: search for string.">
+			<command name="search" code="BDSKsrch" description="Returns a list of publications matching the given string. Typical usage: search for string.">
 				<cocoa name="Search" class="BibDeskSearchForCommand"/>
-				<direct-parameter type="object" description="The object responding to the command. Either the application or a document."/>
-				<!-- type is actually application | document above -->
+				<direct-parameter type="application | document" description="The object responding to the command. Either the application or a document."/>
 				<parameter name="for" type="string" code="for " description="The string to search for.">
 					<cocoa key="for"/>
 				</parameter>
