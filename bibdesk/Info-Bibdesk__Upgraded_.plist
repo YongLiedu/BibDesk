@@ -45,7 +45,7 @@
 				<string>application/x-Research-Info-Systems</string>
 			</array>
 			<key>CFBundleTypeName</key>
-			<string>PubMed File</string>
+			<string>RIS/Medline File</string>
 			<key>CFBundleTypeRole</key>
 			<string>Viewer</string>
 			<key>NSDocumentClass</key>
