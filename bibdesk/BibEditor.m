@@ -784,6 +784,12 @@ NSString *BDSKDateModifiedString = @"Date-Modified";
 	
 	if([changedTitle isEqualToString:@"Cite Key"]){
 		[citeKeyField setStringValue:newValue];
+		// still need to check duplicates ourselves:
+		if(![self citeKeyIsValid:newValue]){
+			[self setCiteKeyDuplicateWarning:YES];
+		}else{
+			[self setCiteKeyDuplicateWarning:NO];
+		}
 	}else{
 		// essentially a cellWithTitle: for NSForm
 		NSArray *cells = [bibFields cells];
