@@ -355,13 +355,21 @@ NSString *BDSKUrlString = @"Url";
 }
 
 - (NSArray *)getPreviewRecentDocumentsMenu{
-	BOOL yn = CFPreferencesSynchronize( (CFStringRef)@"com.apple.Preview",
+	BOOL success = CFPreferencesSynchronize((CFStringRef)@"com.apple.Preview",
 									   kCFPreferencesCurrentUser,
 									   kCFPreferencesCurrentHost);
 	
-	CFArrayRef historyArray = CFPreferencesCopyAppValue( (CFStringRef)@"NSRecentDocumentRecords",
-							   (CFStringRef)@"com.apple.Preview");
+	if(!success){
+		NSLog(@"error syncing preview's prefs!");
+	}
+	
+	NSArray *historyArray = (NSArray *) CFPreferencesCopyAppValue((CFStringRef) @"NSRecentDocumentRecords",
+								      (CFStringRef) @"com.apple.Preview");
+
 	NSMutableArray *array = [NSMutableArray array];
+	
+	if (!historyArray) return array;
+	
 	int i = 0;
 	BOOL separatorAdded = NO;
 	
