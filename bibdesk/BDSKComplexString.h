@@ -120,4 +120,21 @@ typedef enum{
 */
 - (BOOL)isEqualAsComplexString:(NSString *)other;
 
+/*!
+    @method     isStringTeXQuotingBalanced:
+    @abstract   Invokes isStringTeXQuotingBalanced:range: with the entire extent of the receiver for range. 
+    @discussion - 
+    @result     Boolean indicating if curly braces are balanced. 
+*/
+- (BOOL)isStringTeXQuotingBalanced:(int *)balance;
+
+/*!
+    @method     isStringTeXQuotingBalanced:range:
+    @abstract   Returns YES if unescaped curly braces are balanced inside range of the receiver. 
+    @discussion - 
+    @param      balance Set to the overall balance of unescaped curly braces in the range. It is negative for too many closing braces, positive for too many opening braces. 
+    @result     Boolean indicating if curly braces are balanced inside the range. 
+*/
+- (BOOL)isStringTeXQuotingBalanced:(int *)balance range:(NSRange)range;
+
 @end

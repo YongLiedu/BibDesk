@@ -438,4 +438,39 @@ static NSDictionary *globalMacroDefs;
 	return [[(BDSKComplexString*)self nodes] isEqualToArray:[(BDSKComplexString*)other nodes]];
 }
 
+- (BOOL)isStringTeXQuotingBalanced:(int *)balance{
+	return [self isStringTeXQuotingBalanced:balance range:NSMakeRange(0,[self length])];
+}
+
+- (BOOL)isStringTeXQuotingBalanced:(int *)balance range:(NSRange)range{
+	int nesting = 0;
+	BOOL isBalanced = YES;
+	NSRange braceRange;
+	int braceLoc;
+	unichar ch;
+	NSCharacterSet *bracesCharSet = [NSCharacterSet characterSetWithCharactersInString:@"{}"];
+	
+	braceRange = [self rangeOfCharacterFromSet:bracesCharSet options:0 range:range];
+	braceLoc = braceRange.location;
+	while (braceLoc != NSNotFound && range.length > 0) {
+		if (braceLoc > 0 && [self characterAtIndex:braceLoc - 1] != '\\') {
+			ch = [self characterAtIndex:braceLoc];
+			if (ch == '}')
+				--nesting;
+			else
+				++nesting;
+			if (nesting < 0) 
+				isBalanced = NO;
+		}
+		braceRange = [self rangeOfCharacterFromSet:bracesCharSet options:0 range:range];
+		braceLoc = braceRange.location;
+		range.length = range.length - braceLoc + range.location + 1;
+		range.location = braceLoc + 1;
+	}
+	if (nesting != 0) 
+		isBalanced = NO;
+	*balance = nesting;
+	return isBalanced;
+}
+
 @end
