@@ -16,6 +16,13 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 #import <OmniFoundation/OFPreference.h>
 #import <OmniAppKit/OmniAppKit.h>
 
+#pragma mark Global CPP macros
+// set to YES if testing on non-Jaguar system...
+// YES
+#define BDSK_USING_JAGUAR YES
+// (floor(NSAppKitVersionNumber) <= NSAppKitVersionNumber10_2)
+// otherwise
+
 #pragma mark ||  User Defaults Key String Declarations
 
 /*! @const BDSKTeXBinPathKey
