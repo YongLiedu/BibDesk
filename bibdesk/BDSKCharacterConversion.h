@@ -31,8 +31,8 @@
 
 - (int)listType;
 - (void)setListType:(int)newListType;
-- (NSMutableDictionary *)oneWayDict;
-- (void)setOneWayDict:(NSMutableDictionary *)newOneWayDict;
+- (NSDictionary *)oneWayDict;
+- (void)setOneWayDict:(NSDictionary *)newOneWayDict;
 - (NSDictionary *)twoWayDict;
 - (void)setTwoWayDict:(NSDictionary *)newTwoWayDict;
 
