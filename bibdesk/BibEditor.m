@@ -39,7 +39,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
     [theBib setEditorObj:self];
     currentType = [theBib type];    // do this once in init so it's right at the start.
                                     // has to be before we call [self window] because that calls windowDidLoad:.
-	theDocument = doc; // don't retain - it retains us.
+    [self setDocument:doc];
 
 	pdfSnoopViewLoaded = NO;
 	textSnoopViewLoaded = NO;
@@ -1156,6 +1156,8 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
     }
 }
 
+#pragma mark document interaction
+
 - (void)docWillSave:(NSNotification *)notification{
 	// NSDictionary *userInfo = [notification userInfo];
 	
@@ -1174,6 +1176,17 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 	// NSDictionary *userInfo = [notification userInfo];
 	
 	[[self window] close];
+}
+
+- (IBAction)showMacrosWindow:(id)sender{
+    [[self document] showMacrosWindow:self];
+}
+
+- (void)setDocument:(NSDocument *)d{
+}
+
+- (id)document{
+    return theDocument;
 }
 
 #pragma mark snoop drawer stuff
@@ -1496,10 +1509,6 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 		// do nothing, user cancelled
 	}
 	[addAuthorTextView setString:@""];
-}
-
-- (void)setDocument:(NSDocument *)d{
-	
 }
 
 

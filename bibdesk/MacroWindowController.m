@@ -29,6 +29,8 @@
 
 - (void)awakeFromNib{
     NSTableColumn *tc = [tableView tableColumnWithIdentifier:@"macro"];
+    if([[self macroDataSource] respondsToSelector:@selector(displayName)])
+        [[self window] setTitle:[NSString stringWithFormat:@"%@: %@", [[self window] title], [[self macroDataSource] displayName]]];
   //  [[tc dataCell] setFormatter:[[[MacroKeyFormatter alloc] init] autorelease]];
     [tableView reloadData];
 }
@@ -112,6 +114,7 @@
     [tableView reloadData];
 
     int row = [macros indexOfObject:newKey];
+#warning FIXME: NSIndexSet is 10.3 only
     NSIndexSet *indexes = [NSIndexSet indexSetWithIndex:row];
     [tableView selectRowIndexes:indexes byExtendingSelection:NO];
     [tableView editColumn:0
@@ -121,6 +124,7 @@
 }
 
 - (IBAction)removeSelectedMacros:(id)sender{
+#warning FIXME: NSIndexSet is 10.3 only
     NSIndexSet *indexes = [tableView selectedRowIndexes];
     unsigned int i = [indexes firstIndex];
     NSDictionary *macroDefinitions = [(id <BDSKMacroResolver>)macroDataSource macroDefinitions];

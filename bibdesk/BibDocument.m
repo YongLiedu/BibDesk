@@ -236,6 +236,7 @@ NSString *BDSKBibItemLocalDragPboardType = @"edu.ucsd.cs.mmccrack.bibdesk: Local
     [localDragPboard release];
     [draggedItems release];
     [macroDefinitions release];
+    [macroWC release];
     [tipRegex release];
     [andRegex release];
     [orRegex release];
