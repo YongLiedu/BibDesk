@@ -2443,7 +2443,7 @@ This method always returns YES. Even if some or many operations fail.
     // first we fill the popup
 	NSArray *prefsShownColNamesArray = [[OFPreferenceWrapper sharedPreferenceWrapper] arrayForKey:BDSKShownColsNamesKey];
 	NSMutableArray *colNames = [[[[BibTypeManager sharedManager] allRemovableFieldNames] mutableCopy] autorelease];
-	[colNames addObjectsFromArray:[NSArray arrayWithObjects:BDSKUrlString, BDSKLocalUrlString, BDSKCiteKeyString, @"Date", @"Added", @"Modified", @"1st Author", @"2nd Author", @"3rd Author", nil]];
+	[colNames addObjectsFromArray:[NSArray arrayWithObjects:BDSKUrlString, BDSKLocalUrlString, BDSKCiteKeyString, BDSKKeywordsString, BDSKDateString, @"Added", @"Modified", @"1st Author", @"2nd Author", @"3rd Author", nil]];
 	[colNames removeObjectsInArray:prefsShownColNamesArray];
 	[colNames sortUsingSelector:@selector(caseInsensitiveCompare:)];
 	[colNames insertObject:NSLocalizedString(@"Choose a Column:",@"") atIndex:0];
