@@ -248,17 +248,55 @@ static BDSKConverter *theConverter;
             if(TEXString = [detexifyConversions objectForKey:tmpConvB]){
                 [convertedSoFar appendString:TEXString];
                 [scanner scanString:@"}" intoString:nil];
-            }else{
-                [convertedSoFar appendString:tmpConvB];
-                // if there's another rightbracket hanging around, we want to scan past it:
-                [scanner scanString:@"}" intoString:nil];
-                // but what if that was the end?
+            } else {
+                TEXString = [self composedStringFromTeXString:tmpConvB];
+                if(TEXString != nil){
+                    [convertedSoFar appendString:TEXString];
+                    [scanner scanString:@"}" intoString:nil];
+                } else {
+                    [convertedSoFar appendString:tmpConvB];
+                    // if there's another rightbracket hanging around, we want to scan past it:
+                    [scanner scanString:@"}" intoString:nil];
+                    // but what if that was the end?
+                }
             }
         }
     }
     
   return [convertedSoFar autorelease]; 
 }
+
+- (NSString *)composedStringFromTeXString:(NSString *)texString{
+    NSDictionary *accents = [NSDictionary dictionaryWithContentsOfFile:[[NSBundle mainBundle] pathForResource:@"Accents" ofType:@"plist"]];
+    NSScanner *scanner = [[NSScanner alloc] initWithString:texString];
+    NSString *tmp;
+    NSString *accent;
+    NSString *character;
+        
+    while(![scanner isAtEnd]){
+        if(![scanner scanString:@"{\\" intoString:nil])
+            break;
+        if([scanner scanUpToString:@" " intoString:&tmp]){ // if there's no whitespace, we'll end up returning nil
+            NSEnumerator *e = [accents objectEnumerator]; // get all of the objects
+            NSString *str;
+            while(str = [e nextObject]){
+                if([str characterAtIndex:0] == [tmp characterAtIndex:0]){ // each one is a single unichar, and isEqualToString: fails
+                    accent = [[accents allKeysForObject:str] lastObject];
+                    break;
+                }
+            }
+        }
+        [scanner scanUpToString:@"}" intoString:&character];
+        break;
+    }
+    
+    [scanner release];
+    if(character && accent)
+        return [[NSString stringWithFormat:@"%@%@", character, accent] precomposedStringWithCanonicalMapping];
+    else
+        return nil;
+}
+
 
 - (NSString *)stringBySanitizingString:(NSString *)string forField:(NSString *)fieldName inFileType:(NSString *)type
 {

@@ -83,6 +83,16 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 - (NSString *)stringByDeTeXifyingString:(NSString *)s;
 
 /*!
+    @method     composedStringFromTeXString:
+    @abstract   Returns a composed string with canonical mapping (Unicode normalization form C) based on a given TeX accent sequence, if possible.  Used as a fallback
+                if CharacterConversion.plist doesn't have a match when deTeXifying a string.
+    @discussion (comprehensive description)
+    @param      texString A TeX accent fragment as {\u g}.
+    @result     (description)
+*/
+- (NSString *)composedStringFromTeXString:(NSString *)texString;
+
+/*!
  @method runConversionAlertPanel
  @abstract NSRunAlertPanel
  @discussion Gives options to send e-mail if stringByTeXifyingString encounters a character not in the dictionary
