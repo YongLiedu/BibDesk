@@ -203,6 +203,7 @@ static unsigned threadCount = 0;
     if([tabView lockFocusIfCanDraw]){
         [imagePreviewView loadFromPath:finalPDFPath];
         [self rtfPreviewFromData:[self rtfDataPreview]];
+        [tabView unlockFocus];
     }
     [pool release];
 }	
