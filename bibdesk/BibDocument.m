@@ -26,7 +26,6 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 #import "MultiplePageView.h"
 
 #include <stdio.h>
-char * InputFilename; // This is here because the btparse library can't live without it.
 
 NSString *LocalDragPasteboardName = @"edu.ucsd.cs.mmccrack.bibdesk: Local Publication Drag Pasteboard";
 NSString *BDSKBibTeXStringPboardType = @"edu.ucsd.cs.mmcrack.bibdesk: Local BibTeX String Pasteboard";
@@ -1458,6 +1457,7 @@ stringByAppendingPathComponent:@"BibDesk"]; */
         [self updateUI];
         return;
     }
+    [tableView deselectAll:nil]; // selection is meaningless when we're searching, right?
     [shownPublications setArray:[self publicationsWithSubstring:substring
                                                         inField:field
                                                        forArray:publications]];
