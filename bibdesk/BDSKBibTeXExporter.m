@@ -92,16 +92,16 @@
     NSArray *encodingsArray = [[[NSApp delegate] encodingDefinitionDictionary] objectForKey:@"StringEncodings"];
     NSArray *encodingNames = [[[NSApp delegate] encodingDefinitionDictionary] objectForKey:@"DisplayNames"];
     
-    NSAssert ( [self documentStringEncoding] != nil, @"Document does not have a specified string encoding." );
+    NSAssert ( outputEncoding != nil, @"Document does not have a specified string encoding." );
     
-    NSString *encodingName = [encodingNames objectAtIndex:[encodingsArray indexOfObject:[NSNumber numberWithInt:[self documentStringEncoding]]]];
+    NSString *encodingName = [encodingNames objectAtIndex:[encodingsArray indexOfObject:[NSNumber numberWithInt:outputEncoding]]];
     
     [templateFile appendFormat:@"\n%%%% Saved with string encoding %@ \n\n", encodingName];
     
     [d appendData:[templateFile dataUsingEncoding:NSASCIIStringEncoding allowLossyConversion:YES]];
    // [d appendData:[frontMatter dataUsingEncoding:NSASCIIStringEncoding allowLossyConversion:YES]];
     
-    if([self documentStringEncoding] == NSASCIIStringEncoding){
+    if(outputEncoding == NSASCIIStringEncoding){
         while(tmp = [e nextObject]){
             [d appendData:[[NSString stringWithString:@"\n\n"] dataUsingEncoding:NSASCIIStringEncoding  allowLossyConversion:YES]];
             //The TeXification is now done in the BibItem bibTeXString method
@@ -110,8 +110,8 @@
         }
     } else {
         while(tmp = [e nextObject]){
-            [d appendData:[[NSString stringWithString:@"\n\n"] dataUsingEncoding:[self documentStringEncoding]  allowLossyConversion:YES]];
-            [d appendData:[[tmp unicodeBibTeXString] dataUsingEncoding:[self documentStringEncoding] allowLossyConversion:YES]];
+            [d appendData:[[NSString stringWithString:@"\n\n"] dataUsingEncoding:outputEncoding  allowLossyConversion:YES]];
+            [d appendData:[[tmp unicodeBibTeXString] dataUsingEncoding:outputEncoding allowLossyConversion:YES]];
         }
     }
     
