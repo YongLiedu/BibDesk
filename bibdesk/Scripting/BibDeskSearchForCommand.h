@@ -9,6 +9,7 @@
 #import <Foundation/Foundation.h>
 #import "BibDocument.h"
 #import "BibItem.h"
+#import "BibItem+Scripting.h"
 
 
 @interface BibDeskSearchForCommand : NSScriptCommand {

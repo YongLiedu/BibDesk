@@ -172,7 +172,7 @@ We are a bit rough here, so simply concatenate all the relevant strings and sear
 	}
 	
 	// compile concatenated string
-	NSString * s = [citeKey stringByAppendingFormat:@" %@ %@", authorlastnames,  [self title]];
+	NSString * s = [citeKey stringByAppendingFormat:@" %@ %@ %@", authorlastnames,  [self title], [self keywords]];
 	
 	// look for searchterm
 	return([s rangeOfString:searchterm options:NSCaseInsensitiveSearch].location != NSNotFound);
