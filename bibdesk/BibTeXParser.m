@@ -102,6 +102,31 @@
                     {
                         //get the text of the field from the file.
                         s = [NSString stringWithCString:bt_get_text(field)];
+
+                        //Begin check for valid characters (ASCII); otherwise we mangle the .bib file every time we write out
+                        //by inserting two characters for every extended character.  All we do is pop up the corrupted file
+                        //dialog and give the user the option to continue; it would be nice if we could pass the line no. too.
+                        NSScanner *validscan;
+                        NSString *validscanstring = nil;
+                        NSRange EnglishRange;
+                        NSCharacterSet *EnglishLetters;
+                        
+                        //This range defines ASCII without the control characters (or should).
+                        EnglishRange.location = (unsigned int)' '; //Begin at space
+                        EnglishRange.length = 95; //This should get everything through tilde
+                        EnglishLetters = [NSCharacterSet characterSetWithRange:EnglishRange];
+
+                        validscan = [NSScanner scannerWithString:s];  //Scan string s after we get it from bt
+
+                        [validscan scanCharactersFromSet:EnglishLetters intoString:&validscanstring];
+                                 if([validscanstring length] != [s length]) //Compare it to the original string
+                            {
+                                //NSLog(@"I am string s: %@",s);
+                                //NSLog(@"I am validscanstring: %@",validscanstring);
+                                *hadProblems = YES;                                
+                            }
+                        //End check for valid characters.
+
                         //deDetify it (includes conversion of /par to \n\n.
                         sDeTexified = [BDSKConverter stringByDeTeXifyingString:s];
                         //Get fieldname as a capitalized NSString
