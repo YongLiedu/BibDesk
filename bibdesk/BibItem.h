@@ -21,6 +21,7 @@
 #import <Cocoa/Cocoa.h>
 #import "BibEditor.h"
 #import "BibTypeManager.h"
+#import "BibAuthor.h"
 
 @class BibEditor;
 @class BibDocument;
@@ -111,15 +112,15 @@
 
 - (int)numberOfAuthors;
 - (NSArray *)pubAuthors;
-- (void)addAuthor:(NSString *)newAuthor;
+- (void)addAuthorWithName:(NSString *)newAuthorName;
 
 /*!
     @method authorAtIndex
-    @abstract returns the string of the author at index index.
+    @abstract returns the author at index index.
     @discussion zero-based indexing
     
 */
-- (NSString *)authorAtIndex:(int)index;
+- (BibAuthor *)authorAtIndex:(int)index;
 
 - (NSString *)authorString;
 - (void)setAuthorsFromString:(NSString *)aString;

@@ -166,7 +166,8 @@ void _setupFonts(){
 - (NSComparisonResult)auth1Compare:(BibItem *)aBI{
     if([pubAuthors count] > 0){
         if([aBI numberOfAuthors] > 0){
-            return [[self authorAtIndex:0] caseInsensitiveCompare:[aBI authorAtIndex:0]];
+            return [[[self authorAtIndex:0] lastName] caseInsensitiveCompare:
+                [[aBI authorAtIndex:0] lastName]];
         }
         return NSOrderedAscending;
     }else{
@@ -176,7 +177,8 @@ void _setupFonts(){
 - (NSComparisonResult)auth2Compare:(BibItem *)aBI{
     if([pubAuthors count] > 1){
         if([aBI numberOfAuthors] > 1){
-            return [[self authorAtIndex:1] caseInsensitiveCompare:[aBI authorAtIndex:1]];
+            return [[[self authorAtIndex:1] lastName] caseInsensitiveCompare:
+                [[aBI authorAtIndex:1] lastName]];
         }
         return NSOrderedAscending;
     }else{
@@ -186,7 +188,8 @@ void _setupFonts(){
 - (NSComparisonResult)auth3Compare:(BibItem *)aBI{
     if([pubAuthors count] > 2){
         if([aBI numberOfAuthors] > 2){
-            return [[self authorAtIndex:2] caseInsensitiveCompare:[aBI authorAtIndex:2]];
+            return [[[self authorAtIndex:2] lastName] caseInsensitiveCompare:
+                [[aBI authorAtIndex:2] lastName]];
         }
         return NSOrderedAscending;
     }else{
@@ -232,15 +235,29 @@ void _setupFonts(){
     return 0;     // for now. Later, we might have it tell us how many x-ref's it has
 }
 
-- (void)addAuthor:(NSString *)newAuthor{
-    [pubAuthors addObject:newAuthor];
+- (void)addAuthorWithName:(NSString *)newAuthorName{
+    NSEnumerator *presentAuthE = nil;
+    BibAuthor *bibAuthor = nil;
+    BibAuthor *existingAuthor = nil;
+  
+    presentAuthE = [pubAuthors objectEnumerator];
+    while(bibAuthor = [presentAuthE nextObject]){
+        if([[bibAuthor name] isEqualToString:newAuthorName]){
+            existingAuthor = bibAuthor;
+        }
+    }
+    if(!existingAuthor){
+        existingAuthor =  [BibAuthor authorWithName:newAuthorName andPub:nil];
+        [pubAuthors addObject:existingAuthor];
+    }
+    return;
 }
 
 - (NSArray *)pubAuthors{
     return pubAuthors;
 }
 
-- (NSString *)authorAtIndex:(int)index{
+- (BibAuthor *)authorAtIndex:(int)index{ 
     if ([pubAuthors count] > index)
         return [pubAuthors objectAtIndex:index];
     else
@@ -262,7 +279,7 @@ void _setupFonts(){
     if (sl != nil) {
         for(i=0; i < sl->num_items; i++){
             if(sl->items[i] != nil){
-                [self addAuthor:[NSString stringWithCString: sl->items[i]]];
+                [self addAuthorWithName:[NSString stringWithCString: sl->items[i]]];
                 
             }
         }
@@ -277,9 +294,10 @@ void _setupFonts(){
     NSString *tmp;
     if([pubAuthors count] == 0) return @"";
     if([pubAuthors count] == 1){
-        return [pubAuthors objectAtIndex:0];
+        return [[pubAuthors objectAtIndex:0] name];
     }else{
-        rs = [[NSString alloc] initWithString:[en nextObject]];
+        rs = [[NSString alloc] initWithString:[[en nextObject] name]];
+        // since this method is used for display, BibAuthor -name is right above.
         while(tmp = [en nextObject]){
             rs = [rs stringByAppendingString:@" and "];
             rs = [rs stringByAppendingString:tmp];
@@ -325,10 +343,24 @@ void _setupFonts(){
 }
 
 - (NSString *)citeKey{
-    //[citeKey retain];
+    NSString *authString = @"";
+    NSString *yearString = @"_";
+    NSString *titleString = @"";
+
+    if(!citeKey){
+        if([self numberOfAuthors] > 0){
+            authString = [self authorAtIndex:0];
+            // [BibAuthor lastNameFromString:
+        }
+        if([self date]){
+            yearString = [[self date] descriptionWithCalendarFormat:@"%y"];
+        }
+        if([self title]){
+            titleString = [self title];
+        }
+        [self setCiteKey:[NSString stringWithFormat:@"%@%@%@", authString, yearString, titleString]];
+    }
     return citeKey;
-    // this is left over from a temporary auto-generation of keys.
-    //return [NSString stringWithFormat:@"%@:%@",[[self authorAtIndex:0] substringToIndex:3],[[self date] descriptionWithCalendarFormat:@"%y"]];
 }
 
 - (void)setFields: (NSMutableDictionary *)newFields{
