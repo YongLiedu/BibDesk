@@ -270,7 +270,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
     BibItem *pub = nil;
 
     [draggedItems removeAllObjects];
-    
+        
     if(tv == (NSTableView *)ccTableView){
 		// check the publications table to see if an item is selected, otherwise we get an error on dragging from the cite drawer
 		if([tableView numberOfSelectedRows] == 0) return NO;
@@ -291,10 +291,30 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
     }// ccTableView
 
 
+    // see where we clicked in the table; if we clicked on a local-url column that has a file, we'll copy that file
+    // but only if we were passed a single row for now
+    NSPoint dragPosition = [tv convertPoint:[[tv window] convertScreenToBase:[NSEvent mouseLocation]] fromView:nil];
+    NSTableColumn *clickedColumn = [[tv tableColumns] objectAtIndex:[tv columnAtPoint:dragPosition]];
+    int shownCount = [shownPublications count];
+    
+    // we want the drag to occur for the row that is clicked, not the row that is selected
+    if([tv columnAtPoint:dragPosition] != -1 && [[clickedColumn identifier] isEqualToString:BDSKLocalUrlString] &&
+       [rows count] == 1){
+        i = [rows objectAtIndex:0];
+        sortedIndex = (sortDescending ? shownCount - 1 - [i intValue] : [i intValue]);
+        pub = [shownPublications objectAtIndex:sortedIndex];
+        NSString *path = [pub localURLPathRelativeTo:nil];
+        if(path != nil){
+            yn = [pboard writeFileContents:path];
+            [pboard setPropertyList:[NSArray arrayWithObject:path] forType:NSFilenamesPboardType];
+            // NSLog(@"writeFileContents to path %@", (yn ? @"succeeded" : @"failed") );
+            dragType = -1; // won't be in defaults
+        }
+    }
+    
     if((dragType == 1) && !sep)
         [s appendString:startCite];
 
-    int shownCount = [shownPublications count];
     enumerator = [rows objectEnumerator]; 
     while (i = [enumerator nextObject]) {
         sortedIndex = (sortDescending ? shownCount - 1 - [i intValue] : [i intValue]);
@@ -335,6 +355,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
     //  means you can incorporate the items in the array draggedItems.
     
     lyn &= [localDragPboard setData:[NSData data] forType:BDSKBibItemLocalDragPboardType];
+    // NSLog(@"returning %@", (yn && lyn ? @"succeeded" : @"failed") );
 
     return yn && lyn;
 }

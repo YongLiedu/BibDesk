@@ -31,6 +31,12 @@ static NSColor *sStripeColor = nil;
     NSPasteboard *pb = [NSPasteboard pasteboardWithName:NSDragPboard];
     NSArray *types = [pb types];
     
+    if([[pb types] containsObject:NSFileContentsPboardType]){
+        NSString *path = [[pb propertyListForType:NSFilenamesPboardType] objectAtIndex:0];
+        // NSLog(@"types has %@", types);
+        return [[NSWorkspace sharedWorkspace] iconForFile:path];
+    }
+    
     if([[pb availableTypeFromArray:types] isEqualToString:NSStringPboardType]){
         s = [pb stringForType:NSStringPboardType];  // draw the string from the drag pboard, if it's available
     } else {
