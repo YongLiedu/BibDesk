@@ -59,6 +59,7 @@ NSString *BDSKBibItemLocalDragPboardType = @"edu.ucsd.cs.mmccrack.bibdesk: Local
         collections = [[NSMutableArray alloc] initWithCapacity:1];
         notes = [[NSMutableArray alloc] initWithCapacity:1];
         sources = [[NSMutableArray alloc] initWithCapacity:1];
+        BD_windowControllers = [[NSMutableArray alloc] initWithCapacity:1];
         
         
         BDSKUndoManager *newUndoManager = [[[BDSKUndoManager alloc] init] autorelease];
@@ -226,6 +227,7 @@ NSString *BDSKBibItemLocalDragPboardType = @"edu.ucsd.cs.mmccrack.bibdesk: Local
     [toolbarItems release];
     [tableColumns release];
     [collections release];
+    [BD_windowControllers release];
     [notes release];
     [sources release];
     [localDragPboard release];
@@ -453,6 +455,28 @@ NSString *BDSKBibItemLocalDragPboardType = @"edu.ucsd.cs.mmccrack.bibdesk: Local
     [self setTableFont];
     [self updateUI];
 
+}
+
+- (void)addWindowController:(NSWindowController *)windowController{
+    // ARM:  if the window controller being added to the document's list only has a weak reference to the document (i.e. it doesn't retain its document/data), it needs to be added to the private BD_windowControllers ivar,
+    // rather than using the NSDocument implementation.  NSDocument assumes that your windowcontrollers retain the document, and this causes problems when we close a doc window while an auxiliary windowcontroller (e.g. BibEditor)
+    // is open, since we close those in doc windowWillClose:.  The AppKit allows the document to close, even if it's dirty, since it thinks your other windowcontroller is still hanging around with the data!
+    if([windowController isKindOfClass:[BibEditor class]] ||
+       [windowController isKindOfClass:[BibPersonController class]]){
+        [BD_windowControllers addObject:windowController];
+    } else {
+        [super addWindowController:windowController];
+    }
+}
+
+- (void)removeWindowController:(NSWindowController *)windowController{
+    // see note in addWindowController: override
+    if([windowController isKindOfClass:[BibEditor class]] ||
+       [windowController isKindOfClass:[BibPersonController class]]){
+        [BD_windowControllers removeObject:windowController];
+    } else {
+        [super removeWindowController:windowController];
+    }
 }
 
 #pragma mark -

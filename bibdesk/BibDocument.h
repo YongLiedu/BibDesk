@@ -117,6 +117,7 @@ extern NSString *BDSKBibItemLocalDragPboardType;
     BOOL tableColumnsChanged;
     NSTableColumn *lastSelectedColumnForSort;
     BOOL sortDescending;
+    NSMutableArray *BD_windowControllers; // private ivar for maintaining relationship with the docs windowcontrollers
 
     NSPasteboard *localDragPboard;
     // ----------------------------------------------------------------------------------------
