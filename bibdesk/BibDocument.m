@@ -1833,14 +1833,15 @@ Shouldn't there be some kind of safeguard against opening too many pub editors?
 	BibItem * newBI = nil;
 
 	while(newBI = [newPubE nextObject]){		
-		[publications addObject:newBI];
-		[shownPublications addObject:newBI];
+		[self addPublication:newBI];
+			
 		[self updateUI];
 		[self updateChangeCount:NSChangeDone];
 		if([[OFPreferenceWrapper sharedPreferenceWrapper] integerForKey:BDSKEditOnPasteKey] == NSOnState) {
 			[self editPub:newBI forceChange:YES];
 		}
 	}
+	[[self undoManager] setActionName:NSLocalizedString(@"Add Publication",@"")];
 	return YES;
 }
 
@@ -1866,7 +1867,6 @@ This method always returns YES. Even if some or many operations fail.
 										  authors:[NSMutableArray arrayWithCapacity:0]];
 			
 			[self addPublication:[newBI autorelease]];
-			[[self undoManager] setActionName:NSLocalizedString(@"Insert Publication",@"")];
 			
 			NSString *newUrl = [[NSURL fileURLWithPath:
 				[fnStr stringByExpandingTildeInPath]]absoluteString];
@@ -1886,6 +1886,9 @@ This method always returns YES. Even if some or many operations fail.
 				//[[newBI editorObj] fixEditedStatus];  - deprecated
 			}
 		}
+	}
+	if ([filenames count] > 0) {
+		[[self undoManager] setActionName:NSLocalizedString(@"Add Publication",@"")];
 	}
 	return YES;
 }
