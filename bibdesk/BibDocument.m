@@ -175,13 +175,27 @@ NSString*   LocalDragPasteboardName = @"edu.ucsd.cs.mmccrack.bibdesk: Local Publ
 }
 
 - (void)setPublications:(NSMutableArray *)newPubs{
-    [publications autorelease];
-    publications = newPubs;
+	if(newPubs != publications){
+		[publications autorelease];
+		publications = [newPubs mutableCopy];
+    }
 }
 
 - (NSMutableArray *) publications{
-    return publications; // was: publications retain
+    return [[publications retain] autorelease];
 }
+
+- (void)addPublication:(BibItem *)pub{
+	[publications addObject:pub];
+	[shownPublications addObject:pub];
+	//@@ accessors: need to send notif, register for undo
+}
+
+- (void)removePublication:(BibItem *)pub{
+	[publications removeObjectIdenticalTo:pub];
+	[shownPublications removeObjectIdenticalTo:pub];
+}
+
 
 - (void)setupSortDict{
     // Sub for allAuthors
@@ -600,9 +614,8 @@ stringByAppendingPathComponent:@"BibDesk"]; */
                 [editor close];
                 [bibEditors removeObjectIdenticalTo:editor];
             }
-            [publications removeObjectIdenticalTo:objToDelete];
+            [self removePublication:objToDelete];
         }
-        [shownPublications setArray:publications];
         [self updateChangeCount:NSChangeDone];
         [[self currentView] deselectAll:nil];
         [self updateUI];
@@ -700,9 +713,10 @@ stringByAppendingPathComponent:@"BibDesk"]; */
 		[quickSearchClearButton setToolTip:NSLocalizedString(@"Clear the Quicksearch Field",@"")];
 		
 	} else {
-		searchField = (id) [[NSSearchField alloc] initWithFrame:[searchFieldTextField frame]];
+		searchField = (id) [[NSSearchField alloc] initWithFrame:[[searchFieldBox contentView] frame]];
 
-		[searchFieldBox replaceSubview:searchFieldTextField with:searchField];
+		[searchFieldBox setContentView:searchField];
+				
 		searchCellOrTextField = [searchField cell];
 		[searchCellOrTextField setSendsWholeSearchString:NO]; // don't wait for Enter key press.
 		[searchCellOrTextField setSearchMenuTemplate:[self searchFieldMenu]];
