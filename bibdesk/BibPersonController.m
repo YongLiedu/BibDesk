@@ -16,16 +16,17 @@
 
 - (NSString *)windowNibName{return @"BibPersonView";}
 
-- (id)initWithPerson:(BibAuthor *)person{
-    // NSLog(@"personcontroller init");
+- (id)initWithPerson:(BibAuthor *)person document:(BibDocument *)doc{
+   //  NSLog(@"personcontroller init");
     self = [super initWithWindowNibName:@"BibPersonView"];
 	if(self){
-		[self setPerson:person];
-		
-		[person setPersonController:self];
-		
-		[[self window] setTitle:[[self person] name]];
-		[[self window] setDelegate:self];
+            [self setPerson:person];
+            publications = [[self publicationsForAuthor:person document:doc] copy];
+            
+            [person setPersonController:self];
+            
+            [[self window] setTitle:[[self person] name]];
+            [[self window] setDelegate:self];
 	}
 	return self;
 
@@ -34,6 +35,7 @@
 - (void)dealloc{
     // NSLog(@"personcontroller dealloc");
     [_person release];
+    [publications release];
     [super dealloc];
 }
 
@@ -59,6 +61,23 @@
 	_person = [newPerson retain];
 }
 
+- (NSMutableArray *)publicationsForAuthor:(BibAuthor *)person document:(BibDocument *)doc{
+    NSArray *pubs = [doc publications];
+    NSMutableSet *auths = [NSMutableSet set];
+    NSEnumerator *pubEnum = [pubs objectEnumerator];
+    BibItem *bi;
+    NSMutableArray *personsPubs = [NSMutableArray array];
+    
+    while(bi = [pubEnum nextObject]){
+        [auths addObjectsFromArray:[bi pubAuthors]];
+        if([auths member:person] != nil){
+            [personsPubs addObject:bi];
+        }
+        [auths removeAllObjects];
+    }
+    return personsPubs;
+}
+
 #pragma mark actions
 
 - (void)show{
@@ -77,13 +96,13 @@
 
 #pragma mark  table view datasource methods
 - (int)numberOfRowsInTableView:(NSTableView *)tableView{
-	return [[self person] numberOfPublications]; 
+	return [publications count]; 
 }
 
 - (id)tableView:(NSTableView *)tableView objectValueForTableColumn:(NSTableColumn *)tableColumn 
 			row:(int)row{
 	NSString *tcid = [tableColumn identifier];
-	BibItem *pub = [[self person] pubAtIndex:row];
+	BibItem *pub = [publications objectAtIndex:row];
 
 	return [pub valueOfField:tcid];
 }

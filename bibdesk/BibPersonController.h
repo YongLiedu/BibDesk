@@ -12,16 +12,17 @@
 
 
 @interface BibPersonController : NSWindowController {
-	BibAuthor *_person;
-	
-	IBOutlet NSTextField *nameTextField;
-	IBOutlet NSImageView *imageView;
-	IBOutlet NSTableView *pubsTableView;
+    BibAuthor *_person;
+    NSArray *publications;
+    IBOutlet NSTextField *nameTextField;
+    IBOutlet NSImageView *imageView;
+    IBOutlet NSTableView *pubsTableView;
 }
 
 #pragma mark initialization
-- (id)initWithPerson:(BibAuthor *)person;
+- (id)initWithPerson:(BibAuthor *)person document:(BibDocument *)doc;
 - (void)awakeFromNib;
+- (NSMutableArray *)publicationsForAuthor:(BibAuthor *)person document:(BibDocument *)doc;
 
 #pragma mark accessors
 - (BibAuthor *)person;
