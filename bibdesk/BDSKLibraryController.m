@@ -54,7 +54,7 @@
 	
 	[mainSplitView replaceSubview:currentItemDisplayView with:[c view]];
 	currentItemDisplayView = [c view];
-	currentCollection = [[self document] publications]; 
+	currentCollection = [(BDSKLibrary*)[self document] publications]; 
     [self setSelectedItems:[currentCollection items]];
     [self registerForNotifications];
     [self updateInfoLine];
@@ -87,24 +87,24 @@
 
 - (IBAction)makeNewPublicationCollection:(id)sender{
     BibCollection *newBC = [[BibCollection alloc] initWithParent:self];
-    [[[self document] publications] addSubCollection:[newBC autorelease]];
+    [[(BDSKLibrary*)[self document] publications] addSubCollection:[newBC autorelease]];
     [self reloadSourceList];
 }
 
 - (IBAction)makeNewAuthorCollection:(id)sender{
 	BibCollection *newBC = [[BibCollection alloc] initWithParent:self];
-    [[[self document] authors] addSubCollection:[newBC autorelease]];
+    [[(BDSKLibrary*)[self document] authors] addSubCollection:[newBC autorelease]];
     [self reloadSourceList];
 }
 - (IBAction)makeNewExternalSourceCollection:(id)sender{
 	BibCollection *newBC = [[BibCollection alloc] initWithParent:self];
-    [[[self document] sources] addSubCollection:[newBC autorelease]];
+    [[(BDSKLibrary*)[self document] sources] addSubCollection:[newBC autorelease]];
     [self reloadSourceList];
 }
 
 - (IBAction)makeNewNoteCollection:(id)sender{
 	BibCollection *newBC = [[BibCollection alloc] initWithParent:self];
-    [[[self document] notes] addSubCollection:[newBC autorelease]];
+    [[(BDSKLibrary*)[self document] notes] addSubCollection:[newBC autorelease]];
     [self reloadSourceList];
 }
 
@@ -116,7 +116,7 @@
     
     //@@todo: should find current collection and add to it, not just always to top level.
     
-    [[self document] addPublicationToLibrary:newBI];
+    [(BDSKLibrary*)[self document] addPublicationToLibrary:newBI];
     
 }
 
@@ -171,8 +171,8 @@
 	
     id item = [sourceList selectedItem];
     if([item respondsToSelector:@selector(items)]){
-		currentCollection = item;
-        [self setSelectedItems:[item items]];
+		currentCollection = (BibCollection*)item;
+        [self setSelectedItems:[currentCollection items]];
     }else{
 		[NSException raise:NSInternalInconsistencyException 
 					format:@"Selected an item that doesn't yield items"];
@@ -185,7 +185,7 @@
     if(outlineView != sourceList) [NSException raise:NSInvalidArgumentException 
                                               format:@"OutlineView data source method called by unknown outlineview."];
 	
-	BDSKLibrary *doc = [self document];
+	BDSKLibrary *doc = (BDSKLibrary*)[self document];
     if(item == nil){ // root item is nil
         switch (index){
             case 0: 
@@ -269,7 +269,7 @@ objectValueForTableColumn:(NSTableColumn *)tableColumn
     id draggingSource = [info draggingSource];
     
     NSPasteboard *dragPB = [info draggingPasteboard];
-	BDSKLibrary *doc = [self document];
+	BDSKLibrary *doc = (BDSKLibrary*)[self document];
     
     if(item == nil){
         // redirect moves onto general space to the library.
@@ -298,7 +298,7 @@ objectValueForTableColumn:(NSTableColumn *)tableColumn
         }
     }
     
-    if([dragPB hasType:NSStringPboardType]){
+    if([[dragPB types] containsObject:NSStringPboardType]){
         // if we're dropping text, allow it in library or collections or notes
         if(item == [doc sources]){
             [olv setDropItem:[doc publications] dropChildIndex:NSOutlineViewDropOnItemIndex];
@@ -324,7 +324,7 @@ objectValueForTableColumn:(NSTableColumn *)tableColumn
     id draggingSource = [info draggingSource];
     
     NSPasteboard *dragPB = [info draggingPasteboard];
-	BDSKLibrary *doc = [self document];
+	BDSKLibrary *doc = (BDSKLibrary*)[self document];
 
     if(draggingSource ){//fixme!!
 	   //&& [localDragPboard hasType:BDSKBibItemLocalDragPboardType]){
@@ -353,7 +353,7 @@ objectValueForTableColumn:(NSTableColumn *)tableColumn
 //- (void)outlineView:(NSOutlineView *)outlineView willDisplayCell:(id)cell forTableColumn:(NSTableColumn *)tableColumn item:(id)item;
 
 - (BOOL)outlineView:(NSOutlineView *)outlineView shouldEditTableColumn:(NSTableColumn *)tableColumn item:(id)item{
-    BDSKLibrary *doc = [self document];
+    BDSKLibrary *doc = (BDSKLibrary*)[self document];
 	if (item == nil || 
         item == [doc publications] ||
         item == [doc authors] ||

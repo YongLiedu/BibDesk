@@ -21,13 +21,12 @@
 }
 
 - (void)encodeWithCoder:(NSCoder *)coder {
-    [super encodeWithCoder:coder];
     [coder encodeObject:[self name] forKey:@"name"];
     [coder encodeObject:[self data] forKey:@"data"];
 }
 
 - (id)initWithCoder:(NSCoder *)coder {
-    if ([super initWithCoder:coder]) {
+    if (self = [super init]) {
         [self setName:[coder decodeObjectForKey:@"name"]];
         [self setData:[coder decodeObjectForKey:@"data"]];
     }

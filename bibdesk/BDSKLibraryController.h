@@ -44,6 +44,9 @@
 */
 - (void)reloadSourceList;
 
+- (NSArray *)selectedItems;
+- (void)setSelectedItems:(NSArray *)newItems;
+
 #pragma mark UI actions
 
 /*!

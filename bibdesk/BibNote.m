@@ -24,7 +24,6 @@
 }
 
 - (void)encodeWithCoder:(NSCoder *)coder {
-    [super encodeWithCoder:coder];
     [coder encodeObject:[self title] forKey:@"title"];
     [coder encodeObject:[self string] forKey:@"string"];
     [coder encodeObject:[self keywords] forKey:@"keywords"];
@@ -32,7 +31,7 @@
 }
 
 - (id)initWithCoder:(NSCoder *)coder {
-    if ([super initWithCoder:coder]) {
+    if (self = [super init]) {
         [self setTitle:[coder decodeObjectForKey:@"title"]];
         [self setString:[coder decodeObjectForKey:@"string"]];
         [self setKeywords:[coder decodeObjectForKey:@"keywords"]];
