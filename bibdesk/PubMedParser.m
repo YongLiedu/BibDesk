@@ -196,20 +196,17 @@
 						    }
 						}
                     }
-
-                    [wholeValue setString:value];
                     
                     bibTeXKey = [typeManager fieldNameForPubMedTag:prefix];
                     
                     if([bibTeXKey isEqualToString:@"Year"]){ 
                         // Scopus returns a PY with //// after it.  Others may return a full date, where BibTeX wants a year.  
                         // Use a regex to find a substring with four consecutive digits and use that instead.  Not sure how robust this is.
-                        // NSLog(@"year is %@", value);
                         value = [findYearString replaceWithString:@"$2"
                                                          inString:value];
-                        // NSLog(@"year is %@", value);
                     }                      
-                        
+
+                    [wholeValue setString:value];
                     
                     if(bibTeXKey){
                         key = bibTeXKey;
