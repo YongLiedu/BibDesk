@@ -99,6 +99,8 @@ extern NSString *BDSKLocalUrlFormatKey;
 extern NSString *BDSKLastVersionLaunched;
 extern NSString *BDSKSnoopDrawerSavedSize;
 
+#pragma mark Field name strings
+
 extern NSString *BDSKCiteKeyString;
 extern NSString *BDSKAnnoteString;
 extern NSString *BDSKAbstractString;
@@ -117,6 +119,7 @@ extern NSString *BDSKBooktitleString;
 extern NSString *BDSKPublisherString;
 extern NSString *BDSKDateCreatedString;
 extern NSString *BDSKDateModifiedString;
+extern NSString *BDSKBibtexString;
 
 
 #pragma mark ||  Notification name strings

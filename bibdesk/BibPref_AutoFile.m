@@ -31,7 +31,7 @@
 
     [papersFolderLocationTextField setStringValue:[[defaults objectForKey:BDSKPapersFolderPathKey] stringByAbbreviatingWithTildeInPath]];
 
-	if ([[BDSKConverter sharedConverter] validateFormat:&formatString forField:BDSKLocalUrlString inFileType:@"BibTeX" error:&error]) {
+	if ([[BDSKConverter sharedConverter] validateFormat:&formatString forField:BDSKLocalUrlString inFileType:BDSKBibtexString error:&error]) {
 		[self setLocalUrlFormatInvalidWarning:NO message:nil];
 		
 		// use a BibItem with some data to build the preview local-url
@@ -59,9 +59,9 @@
 	NSString *alternateButton = nil;
 	int rv;
 	
-	if (![[BDSKConverter sharedConverter] validateFormat:&formatString forField:BDSKLocalUrlString inFileType:@"BibTeX" error:&error]) {
+	if (![[BDSKConverter sharedConverter] validateFormat:&formatString forField:BDSKLocalUrlString inFileType:BDSKBibtexString error:&error]) {
 		formatString = [defaults stringForKey:BDSKLocalUrlFormatKey];
-		if ([[BDSKConverter sharedConverter] validateFormat:&formatString forField:BDSKLocalUrlString inFileType:@"BibTeX" error:NULL]) {
+		if ([[BDSKConverter sharedConverter] validateFormat:&formatString forField:BDSKLocalUrlString inFileType:BDSKBibtexString error:NULL]) {
 			// The currently set local-url format is valid, so we can keep it 
 			alternateButton = NSLocalizedString(@"Revert to Last", @"Revert to Last Valid Local-Url Format");
 		}
@@ -149,7 +149,7 @@
 	NSString *error;
 	
 	//if ([formatString isEqualToString:[defaults stringForKey:BDSKLocalUrlFormatKey]]) return; // nothing changed
-	if ([[BDSKConverter sharedConverter] validateFormat:&formatString forField:BDSKLocalUrlString inFileType:@"BibTeX" error:&error]) {
+	if ([[BDSKConverter sharedConverter] validateFormat:&formatString forField:BDSKLocalUrlString inFileType:BDSKBibtexString error:&error]) {
 		[defaults setObject:formatString forKey:BDSKLocalUrlFormatKey];
 	}
 	else {

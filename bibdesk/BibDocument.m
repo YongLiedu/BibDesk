@@ -2254,7 +2254,7 @@ This method always returns YES. Even if some or many operations fail.
 	while(fnStr = [fileNameEnum nextObject]){
 		if(url = [NSURL fileURLWithPath:fnStr]){
 			BibItem * newBI = [[BibItem alloc] initWithType:[pw stringForKey:BDSKPubTypeStringKey]
-										 fileType:@"BibTeX"
+										 fileType:BDSKBibtexString
 										  authors:[NSMutableArray arrayWithCapacity:0]];
 			
 			NSString *newUrl = [[NSURL fileURLWithPath:

@@ -308,7 +308,7 @@ void mergePageNumbers(NSMutableDictionary *dict){
     mergePageNumbers(pubDict);
     
     newBI = [[BibItem alloc] initWithType:@"misc"
-				 fileType:@"BibTeX"
+				 fileType:BDSKBibtexString
 				  authors:[NSMutableArray arrayWithCapacity:0]];
 
     [newBI setFileOrder:itemOrder];

@@ -184,7 +184,7 @@ NSRange SafeForwardSearchRange( unsigned startLoc, unsigned seekLength, unsigned
             // NSAssert( citekey != nil && type != nil, @"Missing a citekey or type" );
             
             newBI = [[BibItem alloc] initWithType:type
-                                         fileType:@"BibTeX"
+                                         fileType:BDSKBibtexString
                                           authors:[NSMutableArray array]];        
             
             [newBI setCiteKeyString:[citekey stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]]];
@@ -551,7 +551,7 @@ NSRange SafeForwardSearchRange( unsigned startLoc, unsigned seekLength, unsigned
                 }else{
                     newBI = [[BibItem alloc] initWithType:
                         [[NSString stringWithCString:bt_entry_type(entry)] lowercaseString]
-                                                 fileType:@"BibTeX"
+                                                 fileType:BDSKBibtexString
                                                   authors:
                         [NSMutableArray arrayWithCapacity:0]];
 					[newBI setFileOrder:itemOrder];

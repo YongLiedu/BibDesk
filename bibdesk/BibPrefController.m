@@ -75,6 +75,7 @@ NSString *BDSKLocalUrlFormatKey = @"Local-Url Format";
 NSString *BDSKLastVersionLaunched = @"Last launched version number";
 NSString *BDSKSnoopDrawerSavedSize = @"Saved size of BibEditor document snoop drawer";
 
+#pragma mark Field name strings
 
 NSString *BDSKCiteKeyString = @"Cite Key";
 NSString *BDSKAnnoteString = @"Annote";
@@ -94,6 +95,7 @@ NSString *BDSKBooktitleString = @"Booktitle";
 NSString *BDSKPublisherString = @"Publisher";
 NSString *BDSKDateCreatedString = @"Date-Added";
 NSString *BDSKDateModifiedString = @"Date-Modified";
+NSString *BDSKBibtexString = @"BibTeX";
 
 
 #pragma mark ||  Notification name strings

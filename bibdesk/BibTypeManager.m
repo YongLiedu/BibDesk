@@ -100,7 +100,7 @@ static BibTypeManager *sharedInstance = nil;
 }
 
 - (NSCharacterSet *)invalidCharactersForField:(NSString *)fieldName inFileType:(NSString *)type{
-	if( [type isEqualToString:@"BibTeX"] && [fieldName isEqualToString:BDSKCiteKeyString]){
+	if( [type isEqualToString:BDSKBibtexString] && [fieldName isEqualToString:BDSKCiteKeyString]){
 		return invalidCiteKeyCharSet;
 	}
 	if([fieldName isEqualToString:BDSKLocalUrlString]){
@@ -110,7 +110,7 @@ static BibTypeManager *sharedInstance = nil;
 }
 
 - (NSCharacterSet *)strictInvalidCharactersForField:(NSString *)fieldName inFileType:(NSString *)type{
-	if( [type isEqualToString:@"BibTeX"] && [fieldName isEqualToString:BDSKCiteKeyString]){
+	if( [type isEqualToString:BDSKBibtexString] && [fieldName isEqualToString:BDSKCiteKeyString]){
 		return strictInvalidCiteKeyCharSet;
 	}
 	if([fieldName isEqualToString:BDSKLocalUrlString]){

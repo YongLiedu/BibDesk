@@ -82,7 +82,7 @@ void _setupFonts(){
 {
 	OFPreferenceWrapper *pw = [OFPreferenceWrapper sharedPreferenceWrapper];
 	self = [self initWithType:[pw stringForKey:BDSKPubTypeStringKey]
-									  fileType:@"BibTeX" // Not Sure if this is good.
+									  fileType:BDSKBibtexString // Not Sure if this is good.
 									   authors:[NSMutableArray arrayWithCapacity:0]];
 	return self;
 }

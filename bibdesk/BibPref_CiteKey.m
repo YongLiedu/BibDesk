@@ -31,7 +31,7 @@
 	
 	// update the UI elements
     [citeKeyAutogenerateCheckButton setState:[defaults integerForKey:BDSKCiteKeyAutogenerateKey]];
-	if ([[BDSKConverter sharedConverter] validateFormat:&citeKeyFormat forField:BDSKCiteKeyString inFileType:@"BibTeX" error:&error]) {
+	if ([[BDSKConverter sharedConverter] validateFormat:&citeKeyFormat forField:BDSKCiteKeyString inFileType:BDSKBibtexString error:&error]) {
 		[self setCiteKeyFormatInvalidWarning:NO message:nil];
 		
 		// use a BibItem with some data to build the preview cite key
@@ -65,9 +65,9 @@
 	NSString *alternateButton = nil;
 	int rv;
 	
-	if (![[BDSKConverter sharedConverter] validateFormat:&formatString forField:BDSKCiteKeyString inFileType:@"BibTeX" error:&error]) {
+	if (![[BDSKConverter sharedConverter] validateFormat:&formatString forField:BDSKCiteKeyString inFileType:BDSKBibtexString error:&error]) {
 		formatString = [defaults stringForKey:BDSKCiteKeyFormatKey];
-		if ([[BDSKConverter sharedConverter] validateFormat:&formatString forField:BDSKCiteKeyString inFileType:@"BibTeX" error:NULL]) {
+		if ([[BDSKConverter sharedConverter] validateFormat:&formatString forField:BDSKCiteKeyString inFileType:BDSKBibtexString error:NULL]) {
 			// The currently set cite-key format is valid, so we can keep it 
 			alternateButton = NSLocalizedString(@"Revert to Last", @"Revert to Last Valid Cite Key Format");
 		}
@@ -156,7 +156,7 @@
 		NSString *error;
 		formatString = [formatField stringValue];
 		//if ([formatString isEqualToString:[defaults stringForKey:BDSKCiteKeyFormatKey]]) return; // nothing changed
-		if ([[BDSKConverter sharedConverter] validateFormat:&formatString forField:BDSKCiteKeyString inFileType:@"BibTeX" error:&error]) {
+		if ([[BDSKConverter sharedConverter] validateFormat:&formatString forField:BDSKCiteKeyString inFileType:BDSKBibtexString error:&error]) {
 			[defaults setObject:formatString forKey:BDSKCiteKeyFormatKey];
 		}
 		else {

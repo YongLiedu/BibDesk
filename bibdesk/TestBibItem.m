@@ -13,7 +13,7 @@ static NSString *twoItems = @"@inproceedings{Lee96RTOptML,\nYear = {1996},\nUrl 
 @implementation TestBibItem
 - (void)testInitWithType{
     BibItem *b = [[BibItem alloc] initWithType:@"incollection"
-                                      fileType:@"BibTeX"
+                                      fileType:BDSKBibtexString
                                        authors:[NSMutableArray arrayWithObjects:@"Less, von More, Jr.",nil]];
     UKIntsEqual(1, [b numberOfAuthors]);
 
@@ -70,7 +70,7 @@ static NSString *twoItems = @"@inproceedings{Lee96RTOptML,\nYear = {1996},\nUrl 
 												   filePath:@"testFieldOrder"];
     BibItem *item1 = [testArray objectAtIndex:0];
     NSString *firstType = [item1 type];
-    NSEnumerator *typeE = [[[BibTypeManager sharedManager] bibTypesForFileType:@"BibTeX"] objectEnumerator];
+    NSEnumerator *typeE = [[[BibTypeManager sharedManager] bibTypesForFileType:BDSKBibtexString] objectEnumerator];
     NSString *aType = nil;
     NSString *beforeString = [item1 bibTeXString];
     
