@@ -838,6 +838,7 @@ sub _DoCodeSpans {
 #
 
 	my $text = shift;
+	my $backtick_count;
 
 	$text =~ s@
 			(`+)		# Opening run of `
