@@ -16,6 +16,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 
 #import <Cocoa/Cocoa.h>
 #import "BibPrefController.h"
+#import "BibAppController.h"
 
 @interface BibPref_Startup : OAPreferenceClient {
     IBOutlet NSMatrix *startupBehaviorRadio;
