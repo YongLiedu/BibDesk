@@ -25,7 +25,9 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 #import "BibItem.h"
 #import "BibDocument.h"
 #import "BDSKCiteKeyFormatter.h"
-#import "BibAppController.h";
+#import "BibAppController.h"
+#import "PDFImageView.h"
+
 
 extern NSString *BDSKAnnoteString;
 extern NSString *BDSKAbstractString;
@@ -68,18 +70,28 @@ extern NSString *BDSKUrlString;
     // ----------------------------------------------------------------------------------------
     NSString *currentType;
     BibItem *theBib;
-    BibItem *tmpBib;
+    // Killed for write-through:    BibItem *tmpBib;
     BibDocument *theDoc;
     NSEnumerator *e;
     NSMutableDictionary *fieldNumbers;
-    BOOL needsRefresh;
+    // Killed for write-through:    BOOL needsRefresh;
 // ----------------------------------------------------------------------------------------
 // doc preview stuff
 // ----------------------------------------------------------------------------------------
     IBOutlet NSDrawer* documentSnoopDrawer;
-    IBOutlet NSImageView *documentSnoopImageView;
+    IBOutlet PDFImageView *documentSnoopImageView;
     IBOutlet NSButton* documentSnoopButton;
     IBOutlet NSScrollView* documentSnoopScrollView;
+    IBOutlet NSView* pdfSnoopContainerView;
+    NSImage *_pdfSnoopImage;
+// ----------------------------------------------------------------------------------------
+// doc textpreview stuff
+// ----------------------------------------------------------------------------------------
+    IBOutlet NSButton* documentTextSnoopButton;
+    IBOutlet NSTextView *documentSnoopTextView;
+    IBOutlet NSView* textSnoopContainerView;
+    NSString *_textSnoopString;
+    
 // Autocompletion stuff
     NSDictionary *completionMatcherDict;
 // cite string formatter
@@ -110,13 +122,10 @@ extern NSString *BDSKUrlString;
 - (void)show;
 
 - (void)fixURLs;
-- (void)fixEditedStatus;
-- (void)updateChangeCount:(NSDocumentChangeType)changeType;
-- (BOOL)isEdited;
 
 
 // ----------------------------------------------------------------------------------------
-// Add field sheet support
+// Add-field sheet support
 // ----------------------------------------------------------------------------------------
 - (IBAction)raiseAddField:(id)sender;
 - (IBAction)dismissAddField:(id)sender;
@@ -125,7 +134,7 @@ extern NSString *BDSKUrlString;
                 contextInfo:(void *)contextInfo;
 
 // ----------------------------------------------------------------------------------------
-// Add field sheet support
+// Delete-field sheet support
 // ----------------------------------------------------------------------------------------
 - (IBAction)raiseDelField:(id)sender;
 - (IBAction)dismissDelField:(id)sender;
@@ -133,10 +142,11 @@ extern NSString *BDSKUrlString;
                  returnCode:(int) returnCode
                 contextInfo:(void *)contextInfo;
 
-- (IBAction)revert:(id)sender;
-- (IBAction)saveDocument:(id)sender;
-- (IBAction)save:(id)sender;
-- (IBAction)cancel:(id)sender;
+// deprecated - (IBAction)revert:(id)sender;
+//- (IBAction)saveDocument:(id)sender;
+//- (IBAction)save:(id)sender;
+//- (IBAction)cancel:(id)sender;
+- (void)finalizeChanges;
 
 - (IBAction)viewLocal:(id)sender;
 - (IBAction)viewRemote:(id)sender;
@@ -145,6 +155,10 @@ extern NSString *BDSKUrlString;
 - (IBAction)bibTypeDidChange:(id)sender;
 //- (IBAction)textFieldDidChange:(id)sender;
 - (IBAction)textFieldDidEndEditing:(id)sender;
+- (void)noteChange;
+//- (void)closeSheetDidEnd:(NSWindow *)sheet returnCode:(int)returnCode contextInfo:(void  *)contextInfo;
 
-- (void)closeSheetDidEnd:(NSWindow *)sheet returnCode:(int)returnCode contextInfo:(void  *)contextInfo;
+- (void)toggleSnoopDrawer:(id)sender;
+- (BOOL)citeKeyIsValid:(NSString *)proposedCiteKey;
+- (void)makeKeyField:(NSString *)fieldName;
 @end

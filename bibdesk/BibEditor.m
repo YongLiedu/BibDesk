@@ -53,34 +53,23 @@ NSString *BDSKUrlString = @"Url";
 #if DEBUG
     NSLog(@"BibEditor alloc");
 #endif
-    needsRefresh = YES;
     changeCount = 0;
     return self;
 }
-
-- (void)windowDidBecomeMain:(NSNotification *)aNotification{
-    // read the data and initialize the tmpBib.
-    // this is in windowDidBecomeMain because it has to be re-done
-    // in case we are reopening the window after a cancel.
-    if(needsRefresh){
-        if(tmpBib) [tmpBib release];
-        tmpBib = [theBib copy];
-        currentType = [tmpBib type];
-        [tmpBib setEditorObj:self];
-        [citeKeyField setStringValue:[tmpBib citeKey]];
-        [self setupForm];
-        [notesView setString:[tmpBib valueOfField:BDSKAnnoteString]];
-        [abstractView setString:[tmpBib valueOfField:BDSKAbstractString]];
-        [rssDescriptionView setString:[tmpBib valueOfField:BDSKRssDescriptionString]];
-        [[self window] setTitle:[theBib title]];
-        // [[self window] setDocumentEdited:NO];
-        [self fixURLs];
-    }
-    needsRefresh = NO;
+- (void)windowWillLoad{
+    [theBib setEditorObj:self];
+    [citeKeyField setStringValue:[theBib citeKey]];
+    [self setupForm];
+    [notesView setString:[theBib valueOfField:BDSKAnnoteString]];
+    [abstractView setString:[theBib valueOfField:BDSKAbstractString]];
+    [rssDescriptionView setString:[theBib valueOfField:BDSKRssDescriptionString]];
+    [self fixURLs];
+    NSLog(@"BibEditor gets willLoad.");
 }
 
+
 - (BibItem *)currentBib{
-    return tmpBib;
+    return theBib;
 }
 
 - (void)setupForm{
@@ -110,10 +99,10 @@ NSString *BDSKUrlString = @"Url";
     // make two passes to get the required entries at top.
     // there's got to be a better way to do this but i was lazy when i wrote this.
     i=0;
-    sKeys = [[[tmpBib dict] allKeys] sortedArrayUsingSelector:@selector(caseInsensitiveCompare:)];
+    sKeys = [[[theBib dict] allKeys] sortedArrayUsingSelector:@selector(caseInsensitiveCompare:)];
     e = [sKeys objectEnumerator];
     while(tmp = [e nextObject]){
-        if ([tmpBib isRequired:tmp] &&
+        if ([theBib isRequired:tmp] &&
             ![tmp isEqualToString:BDSKAnnoteString] && 
             ![tmp isEqualToString:BDSKAbstractString] &&
             ![tmp isEqualToString:BDSKRssDescriptionString]){
@@ -122,7 +111,7 @@ NSString *BDSKUrlString = @"Url";
             [entry setTarget:self];
             [entry setAction:@selector(textFieldDidEndEditing:)];
             [entry setTag:i];
-            [entry setObjectValue:[tmpBib valueOfField:tmp]];
+            [entry setObjectValue:[theBib valueOfField:tmp]];
             [entry setTitleFont:requiredFont];
             [entry setAttributedTitle:[[[NSAttributedString alloc] initWithString:tmp
                                                                        attributes:reqAtt] autorelease]];
@@ -135,7 +124,7 @@ NSString *BDSKUrlString = @"Url";
 
     e = [sKeys objectEnumerator];
     while(tmp = [e nextObject]){
-        if(![tmpBib isRequired:tmp] &&
+        if(![theBib isRequired:tmp] &&
            ![tmp isEqualToString:BDSKAnnoteString] &&
            ![tmp isEqualToString:BDSKAbstractString] &&
            ![tmp isEqualToString:BDSKRssDescriptionString]){
@@ -144,7 +133,7 @@ NSString *BDSKUrlString = @"Url";
             [entry setTarget:self];
             [entry setAction:@selector(textFieldDidEndEditing:)];
             [entry setTag:i];
-            [entry setObjectValue:[tmpBib valueOfField:tmp]];
+            [entry setObjectValue:[theBib valueOfField:tmp]];
             [entry setTitleAlignment:NSLeftTextAlignment];
             // Autocompletion stuff
             [entry setFormatter:[appController formatterForEntry:tmp]];
@@ -169,14 +158,20 @@ NSString *BDSKUrlString = @"Url";
     }
 
     [bibTypeButton selectItemWithTitle:currentType];
-    [self setupForm];
+    [self setupForm]; // gets called in window will load...?
+    [self fixURLs];
+    [notesView setString:[theBib valueOfField:BDSKAnnoteString]];
+    [abstractView setString:[theBib valueOfField:BDSKAbstractString]];
+    [rssDescriptionView setString:[theBib valueOfField:BDSKRssDescriptionString]];
+    [citeKeyField setStringValue:[theBib citeKey]];
+    [theBib setEditorObj:self];
 }
 
 - (void)dealloc{
 #if DEBUG
     NSLog(@"BibEditor dealloc");
 #endif
-    if(tmpBib)[tmpBib release];
+    // release theBib? no...
     [citeKeyFormatter release];
     [super dealloc];
 }
@@ -185,97 +180,28 @@ NSString *BDSKUrlString = @"Url";
     [self showWindow:self];
 }
 
-- (void)windowWillLoad{
-#warning - hack seems like i should do it a better way.
-#warning   Use a notification instead.
-    // use this to make form show up right away when dragging in while bd is in background.
-    // needsRefresh = YES;
-    //[self windowDidBecomeMain:nil]; // OK for now because we don't use the notification in windowDidBecomeMain.
-    //  NSLog(@"windowwillload");
-    // i think at least it's better than the way we did it before: this messed up the changeCount
-    //    [self bibTypeDidChange:self];
-}
-     
-// NOTE FIXME revert and cancel need to change the fields too... ?
-- (IBAction)revert:(id)sender{
-    //kill changes by making the temp bib a copy of the original bib and keep the window open
-    // (ADD Alert Window) to check if the user is sure.
-    [tmpBib release];
-    tmpBib = [theBib copy];
-    currentType = [tmpBib type];
-    [tmpBib setEditorObj:self];
-    [self setupForm];
-    [notesView setString:[tmpBib valueOfField:BDSKAnnoteString]];
-    [abstractView setString:[tmpBib valueOfField:BDSKAbstractString]];
-    [rssDescriptionView setString:[tmpBib valueOfField:BDSKRssDescriptionString]];
-    [bibTypeButton selectItemWithTitle: currentType];
-}
 
-- (IBAction)saveDocument:(id)sender{
+
+- (void)finalizeChanges{
     if ([[self window] makeFirstResponder:[self window]]) {
-        /* All fields are now valid; it's safe to use fieldEditor:forObject:
-        to claim the field editor. */
-    }
-    else {
+    /* All fields are now valid; it's safe to use fieldEditor:forObject:
+    to claim the field editor. */
+    }else{
         /* Force first responder to resign. */
         [[self window] endEditingFor:nil];
     }
-
-    [theBib setFields:[tmpBib dict]]; // Set fields handles some metadata updating.
-    [theBib setType:[tmpBib type]];
-    [theBib setCiteKey:[tmpBib citeKey]];
-    [theDoc updateChangeCount:NSChangeDone];
-    [theDoc controlTextDidChange:nil];
-    [self updateChangeCount:NSChangeCleared];
-    [theDoc highlightBib:theBib];
-    // no close for the menu item.
 }
 
-- (IBAction)save:(id)sender{
+- (IBAction)saveDocument:(id)sender{
     // a safety call to be sure that the current field's changes are saved :...
-    [self textFieldDidEndEditing:bibFields];
-    [self citeKeyDidChange:citeKeyField];
-    /* can't use a sheet within a sheet: find a better way
-    if([[tmpBib valueOfField:@"Title"] isEqualToString:@""]){
-        NSBeginCriticalAlertSheet(@"The Title Field is Required.",
-                                  nil,nil,nil,
-                                  [self window],self,
-                                  NULL, NULL,[self window],
-                                  @"If you have already entered a title, be sure to confirm your change by pressing Enter.",nil
-                          );
-        return;
-    }*/
-    // FIXME: Only do this if we did change something...
-    if ([bibFields indexOfSelectedItem] != -1) {
-        [self textFieldDidEndEditing:bibFields];
-    }
-    [theBib setFields:[tmpBib dict]]; // Set fields handles some metadata updating.
-    [theBib setType:[tmpBib type]];
-    [theBib setCiteKey:[tmpBib citeKey]];
-    [self updateChangeCount:NSChangeCleared];
-    [self close];
-    [theDoc updateChangeCount:NSChangeDone];
-    [theDoc controlTextDidChange:nil]; // so we catch new bibs into shownPubs (this calls updateUI also)
+    [self finalizeChanges];
 
-    //  note that needsRefresh should be set to NO after a save. it always will, though, so we don't bother.
-}
-
-- (IBAction)cancel:(id)sender{
-    //Just close the window - we will re read the info if we need to reopen.
-    // (ADD Alert Window) to check if user is sure.?
-    [self close];
-    needsRefresh = YES;
-    [tmpBib release]; // need to do this because windowWillLoad creates a new one.
-    tmpBib = nil;     // need to do this because windowWillLoad doesn't get called as soon as we'd like
-    [self updateChangeCount:NSChangeCleared];
-    [theDoc updateChangeCount:NSChangeUndone]; // testing this now
-
-    [theDoc controlTextDidChange:nil];
+    [theDoc saveDocument:sender];
 }
 
 - (IBAction)viewLocal:(id)sender{
     NSWorkspace *sw = [NSWorkspace sharedWorkspace];
-    NSString *lurl = [tmpBib valueOfField:BDSKLocalUrlString];
+    NSString *lurl = [theBib valueOfField:BDSKLocalUrlString];
     BOOL err = NO;
     NSURL *local;
 
@@ -304,7 +230,7 @@ NSString *BDSKUrlString = @"Url";
 
 - (IBAction)viewRemote:(id)sender{
     NSWorkspace *sw = [NSWorkspace sharedWorkspace];
-    NSString *rurl = [tmpBib valueOfField:BDSKUrlString];
+    NSString *rurl = [theBib valueOfField:BDSKUrlString];
     if ([@"" caseInsensitiveCompare:rurl] != NSOrderedSame) {
         [sw openURL:[NSURL URLWithString:rurl]];
     }
@@ -312,38 +238,36 @@ NSString *BDSKUrlString = @"Url";
 
 - (IBAction)citeKeyDidChange:(id)sender{
     NSString *proposedCiteKey = [sender stringValue];
+    int rv;
 
-    if([theDoc citeKeyIsUsed:proposedCiteKey byItemOtherThan:theBib]){
-        NSBeginCriticalAlertSheet(NSLocalizedString(@"",@""), NSLocalizedString(@"OK",@"OK"), nil, nil, [self window], self, NULL, NULL, NULL,
-                                  NSLocalizedString(@"The citation key you entered is already used in this document. Please change it.",@""), nil);
+    if(![self citeKeyIsValid:proposedCiteKey]){
+        rv = NSRunCriticalAlertPanel(NSLocalizedString(@"",@""), NSLocalizedString(@"The citation key you entered is either already used in this document or is empty. Please provide an unique one.",@""),
+                                NSLocalizedString(@"OK",@"OK"), nil, nil, nil);
+        NSLog(@"%d makeFirstResponder",[[self window] makeFirstResponder:citeKeyField]); // why won't this work?
+    }else{
+        [theBib setCiteKey:proposedCiteKey];
+        [self noteChange];
     }
-    if(tmpBib){
-        [tmpBib setCiteKey:proposedCiteKey];
-        if(![tmpBib isEqual: theBib]){
-            [self updateChangeCount:NSChangeDone];
-            [theDoc updateChangeCount:NSChangeDone];
-        }
-        //[self fixEditedStatus];
-    }        
+}
+
+- (BOOL)citeKeyIsValid:(NSString *)proposedCiteKey{
+    return !([theDoc citeKeyIsUsed:proposedCiteKey byItemOtherThan:theBib] || [proposedCiteKey isEqualToString:@""]);
 }
 
 // sent by the notesView and the abstractView
 - (void)textDidChange:(NSNotification *)aNotification{
     if([aNotification object] == notesView){
-        [tmpBib setField:BDSKAnnoteString toValue:[[notesView string] copy]];
+        [theBib setField:BDSKAnnoteString toValue:[[notesView string] copy]];
     }
     else if([aNotification object] == abstractView){
-        [tmpBib setField:BDSKAbstractString toValue:[[abstractView string] copy]];
+        [theBib setField:BDSKAbstractString toValue:[[abstractView string] copy]];
     }
     else if([aNotification object] == rssDescriptionView){
         // NSLog(@"setting rssdesc to %@", [rssDescriptionView string]);
-        [tmpBib setField:BDSKRssDescriptionString toValue:[[rssDescriptionView string] copy]];
+        [theBib setField:BDSKRssDescriptionString toValue:[[rssDescriptionView string] copy]];
     }
 
-    [self updateChangeCount:NSChangeDone];
-    [theDoc updateChangeCount:NSChangeDone];
-
-    //[self fixEditedStatus];
+    [self noteChange];
 }
 
 - (IBAction)bibTypeDidChange:(id)sender{
@@ -351,26 +275,24 @@ NSString *BDSKUrlString = @"Url";
         [[self window] endEditingFor:nil];
     }
     currentType = [bibTypeButton titleOfSelectedItem];
-    if([tmpBib type] != currentType){
-        [tmpBib makeType:currentType];
+    if([theBib type] != currentType){
+        [theBib makeType:currentType];
         [self setupForm];
-        [self updateChangeCount:NSChangeDone];
-        [theDoc updateChangeCount:NSChangeDone];
         [[OFPreferenceWrapper sharedPreferenceWrapper] setObject:currentType
                                                            forKey:BDSKPubTypeStringKey];
-        //[self fixEditedStatus];
+        [self noteChange];
     }
 }
 
 - (void)fixURLs{
-    NSString *lurl = [tmpBib valueOfField:BDSKLocalUrlString];
-    NSString *rurl = [tmpBib valueOfField:BDSKUrlString];
+    NSString *lurl = [theBib valueOfField:BDSKLocalUrlString];
+    NSString *rurl = [theBib valueOfField:BDSKUrlString];
     NSImage *icon;
     NSURL *local;
     NSURL *remote = [NSURL URLWithString:rurl];
     NSDictionary *linkAttributes;
     NSMutableAttributedString *link = [[NSMutableAttributedString alloc] initWithString:rurl];
-    NSImage *snoopImage;
+
 
     BOOL drawerWasOpen = ([documentSnoopDrawer state] == NSDrawerOpenState);
     BOOL drawerIsOpening = ([documentSnoopDrawer state] == NSDrawerOpeningState);
@@ -397,14 +319,20 @@ NSString *BDSKUrlString = @"Url";
             [viewLocalButton setTitle:@""];
             [documentSnoopButton setEnabled:YES];
             [documentSnoopButton setToolTip:NSLocalizedString(@"Show first page in a drawer.", @"show first page in a drawer")];
+            [documentTextSnoopButton setEnabled:YES];
+            [documentTextSnoopButton setToolTip:NSLocalizedString(@"Show first page as text in a drawer.", @"show first page as text in a drawer")];
+            
             if(drawerWasOpen || drawerIsOpening){
-                snoopImage = [[[NSImage alloc] initWithContentsOfFile:[local path]] autorelease];
+                if(!_pdfSnoopImage){
+                    _pdfSnoopImage = [[NSImage alloc] initWithContentsOfFile:[local path]];
+                }
 #if DEBUG
-                NSLog(@"setting snoop to %@ from file %@", snoopImage, lurl);
+                NSLog(@"setting snoop to %@ from file %@", _pdfSnoopImage, lurl);
 #endif
-                if(snoopImage){
-                    [documentSnoopImageView setImage:snoopImage];
-                    [snoopImage setBackgroundColor:[NSColor whiteColor]];
+                if(_pdfSnoopImage){
+                    // [documentSnoopImageView setImage:_pdfSnoopImage];
+                    [documentSnoopImageView loadFromPath:[local path]];
+                    [_pdfSnoopImage setBackgroundColor:[NSColor whiteColor]];
                     
                     [documentSnoopScrollView setDocumentViewAlignment:NSImageAlignTopLeft];
                     if(drawerWasOpen) // open it again.
@@ -420,6 +348,9 @@ NSString *BDSKUrlString = @"Url";
 
         [documentSnoopButton setEnabled:NO];
         [documentSnoopButton setToolTip:NSLocalizedString(@"Bad or Empty Local-Url Field", @"bad/empty local field")];
+        [documentTextSnoopButton setEnabled:NO];
+        [documentTextSnoopButton setToolTip:NSLocalizedString(@"Bad or Empty Local-Url Field", @"bad/empty local field")];
+        
     }
 
     if(remote && ![rurl isEqualToString:@""]){
@@ -440,36 +371,6 @@ NSString *BDSKUrlString = @"Url";
     [link release];
 }
 
-- (void)fixEditedStatus{
-    if(changeCount != 0){
-        [[self window] setDocumentEdited:YES];
-        [theDoc updateChangeCount:NSChangeDone];
-    }else{
-        [[self window] setDocumentEdited:NO];
-        if([theDoc isDocumentEdited])// if this isn't a bug, at least it's undocumented
-            [theDoc updateChangeCount:NSChangeUndone];
-    }
-}
-
-- (void)updateChangeCount:(NSDocumentChangeType)changeType{
-    switch(changeType){
-        case NSChangeDone: changeCount++;
-            break;
-        case NSChangeUndone: changeCount--;
-            break;
-        case NSChangeCleared: changeCount = 0;
-            break;
-    }
-    if(changeCount != 0){
-        [[self window] setDocumentEdited:YES];
-    }else{
-        [[self window] setDocumentEdited:NO];
-    }
-}
-
-- (BOOL)isEdited{
-    return (changeCount != 0);
-}
 
 // ----------------------------------------------------------------------------------------
 #pragma mark ||  add-Field-Sheet Support
@@ -497,26 +398,36 @@ NSString *BDSKUrlString = @"Url";
                  returnCode:(int) returnCode
                 contextInfo:(void *)contextInfo{
     if(returnCode == 0){
-        if(![[[tmpBib dict] allKeys] containsObject:[newFieldName stringValue]]){
-            [tmpBib setField:[newFieldName stringValue] toValue:@""];
+        if(![[[theBib dict] allKeys] containsObject:[newFieldName stringValue]]){
+            [theBib setField:[newFieldName stringValue] toValue:@""];
             [self setupForm];
-            [self updateChangeCount:NSChangeDone];
+            [self makeKeyField:[newFieldName stringValue]];
             [theDoc updateChangeCount:NSChangeDone];
-            //[self fixEditedStatus];
         }
     }
     // else, nothing.
 }
 
+- (void)makeKeyField:(NSString *)fieldName{
+    int sel = -1;
+    int i = 0;
+
+    for (i = 0; i < [bibFields numberOfRows]; i++) {
+        if ([[[bibFields cellAtIndex:i] title] isEqualToString:fieldName]) {
+            sel = i;
+        }
+    }
+    if(sel > -1) [bibFields selectTextAtIndex:sel];
+}
+
 // ----------------------------------------------------------------------------------------
 #pragma mark ||  delete-Field-Sheet Support
-// delete- field -sheet support
 // ----------------------------------------------------------------------------------------
 
 // raises the del field sheet
 - (IBAction)raiseDelField:(id)sender{
     // populate the popupbutton
-    NSEnumerator *keyE = [[[[tmpBib dict] allKeys] sortedArrayUsingSelector:@selector(caseInsensitiveCompare:)]objectEnumerator];
+    NSEnumerator *keyE = [[[[theBib dict] allKeys] sortedArrayUsingSelector:@selector(caseInsensitiveCompare:)]objectEnumerator];
     NSString *k;
     [delFieldPopUp removeAllItems];
     while(k = [keyE nextObject]){
@@ -532,6 +443,7 @@ NSString *BDSKUrlString = @"Url";
        didEndSelector:@selector(delFieldSheetDidEnd:returnCode:contextInfo:)
           contextInfo:nil];
 }
+
 //dismisses it
 - (IBAction)dismissDelField:(id)sender{
     [delFieldWindow orderOut:sender];
@@ -545,13 +457,14 @@ NSString *BDSKUrlString = @"Url";
                 contextInfo:(void *)contextInfo{
     if(returnCode == 0){
 
-        [tmpBib removeField:[delFieldPopUp titleOfSelectedItem]];
+        [theBib removeField:[delFieldPopUp titleOfSelectedItem]];
         [self setupForm];
-        [self updateChangeCount:NSChangeDone];
+//        [self updateChangeCount:NSChangeDone];
         [theDoc updateChangeCount:NSChangeDone];
     }
     // else, nothing.
 }
+
 - (void)controlTextDidBeginEditing:(NSNotification *)aNotification{
 //    id fieldEditor = [[aNotification userInfo] objectForKey:@"NSFieldEditor"];
 //    NSUndoManager *undoManager = [theDoc undoManager];
@@ -564,91 +477,105 @@ NSString *BDSKUrlString = @"Url";
 }
 
 - (void)controlTextDidEndEditing:(NSNotification *)aNotification{
+    // here for undo
 }
 
-// This does nothing right now because I can't seem to get a notification about changes in an nsformcell
-/*- (IBAction)controlTextDidChange:(NSNotification *)notification{
-    NSForm *form = [notification object];
-    NSCell *sel = [form cellAtIndex: [form indexOfSelectedItem]];
-    NSString *title = [sel title];
-#if DEBUG
-    NSLog(@"controlTextDidChange -  %@", [notification object]);
-#endif
-}*/
-
-#warning - why does this sometimes get called with no tmpBib?
-// I know the answer - it gets called before windowWillLoad... but why?!
 // sent by the NSForm
 - (IBAction)textFieldDidEndEditing:(id)sender{
     NSCell *sel = [sender cellAtIndex: [sender indexOfSelectedItem]];
     NSString *title = [sel title];
-    if(tmpBib && [sender indexOfSelectedItem] != -1){
-        [tmpBib setField:title toValue:[sel stringValue]];
+    NSLog(@"textFieldDidEndEditing sent by %@ ", title);
+    if([sender indexOfSelectedItem] != -1){
+        [theBib setField:title toValue:[sel stringValue]];
         if([title isEqualToString:BDSKUrlString] || [title isEqualToString:BDSKLocalUrlString]){
             [self fixURLs];
+            [_textSnoopString release];
+            [_pdfSnoopImage release];
+            _textSnoopString = nil;
+            _pdfSnoopImage = nil;
         }
         if([title isEqualToString:@"Title"]){
             [[self window] setTitle:[sel stringValue]];
         }
-        if(![[theBib dict] isEqual:[tmpBib dict]]){
-            [self updateChangeCount:NSChangeDone];
-            [theDoc updateChangeCount:NSChangeDone];
-        }
-        //        [self fixEditedStatus];
+        [self noteChange]; // shouldn't get called if there was no change.
     }
 }
 
-#pragma mark ||  drawer delegate stuff
+// Note for a future refactoring: This should really just
+//  send a notification that "I changed" and let any Doc(/finder) that cares update.
+- (void)noteChange{
+    [theDoc updateChangeCount:NSChangeDone];
+
+}
+
+#pragma mark -
+#pragma mark snoop drawer stuff
+
+- (void)toggleSnoopDrawer:(id)sender{
+    if (sender == documentSnoopButton) {
+        [documentSnoopDrawer setContentView:pdfSnoopContainerView];
+    }else{
+        [documentSnoopDrawer setContentView:textSnoopContainerView];
+    }
+    [documentSnoopDrawer toggle:sender];
+}
 
 - (void)drawerWillOpen:(NSNotification *)notification{
+    //@@snoop text: these variables all go with the refactoring
+    NSString *cmdString = nil;
+    NSString *lurl = [theBib valueOfField:BDSKLocalUrlString];
+    NSURL *local = nil;
+    
+
     [self fixURLs]; //no this won't cause a loop - see fixURLs. Please don't break that though. Boy it's fragile.
     [documentSnoopButton setToolTip:NSLocalizedString(@"Close drawer", @"")];
+    [documentTextSnoopButton setToolTip:NSLocalizedString(@"Close drawer", @"")];
+
+    // @@snoop text - refactor this into a separate method later
+    // @@URL handling refactor this
+    if(![@"" isEqualToString:lurl]){
+        local = [NSURL URLWithString:lurl];
+        if(!local){
+            local = [NSURL fileURLWithPath:[lurl stringByExpandingTildeInPath]];
+        }
+    }else{
+        return;
+    }
+
+    if([documentSnoopDrawer contentView] == textSnoopContainerView){
+
+    cmdString = [NSString stringWithFormat:@"%@/pdftotext -f 1 -l 1 %@ -",[[NSBundle mainBundle] resourcePath], [local path],
+        nil];
+
+        if(!_textSnoopString){
+            _textSnoopString = [[[BDSKShellTask shellTask] runShellCommand:cmdString withInputString:nil] retain];
+        }
+        [documentSnoopTextView setString:_textSnoopString];
+    }
 }
 
 
 - (void)drawerWillClose:(NSNotification *)notification{
-    [documentSnoopButton setToolTip:NSLocalizedString(@"Show the first page in a drawer.", @"")];
+    [documentSnoopButton setToolTip:NSLocalizedString(@"Show the first page as PDF in a drawer.", @"")];
+    [documentTextSnoopButton setToolTip:NSLocalizedString(@"Show the first page as Text in a drawer.", @"")];
+}
+
+- (BOOL)windowShouldClose:(id)sender{
+    int rv = 0;
+    if (![self citeKeyIsValid:[citeKeyField stringValue]]) {
+        rv = NSRunCriticalAlertPanel(NSLocalizedString(@"",@""), NSLocalizedString(@"The citation key you entered is either already used in this document or is empty. Please provide an unique one.",@""),
+                                     NSLocalizedString(@"OK",@"OK"), nil, nil, nil);
+        return NO;
+    }
+    return YES;
 }
 
 - (void)windowWillClose:(NSNotification *)notification{
-
+    [[self window] makeFirstResponder:citeKeyField]; // makes the field check if there is a duplicate field.
+    [[self window] makeFirstResponder:[self window]];
+    [theDoc controlTextDidChange:nil]; // should really just tell them I changed and have them update only if my bib is already highlit...
+    [theDoc highlightBib:theBib];
     [documentSnoopDrawer close];
-}
-
-#pragma mark ||  edited status support
-- (BOOL)windowShouldClose:(id)sender{
-    if ([[self window] makeFirstResponder:[self window]]) {
-        /* All fields are now valid; it's safe to use fieldEditor:forObject:
-        to claim the field editor. */
-    }
-    else {
-        /* Force first responder to resign. */
-        [[self window] endEditingFor:nil];
-    }
-    //[self fixEditedStatus]; - endEditingFor in the line above will cause all relevant messages to be sent. don't need this.
-    if([[self window] isDocumentEdited]){
-        NSBeginAlertSheet(@"Do you want to save changes to this publication before closing?",    // title
-                          @"Save",    // default button
-                          @"Cancel",    // alt. button
-                          @"Don't Save",    // other button
-                          sender,    // the window
-                          self,    // modal delegate
-                          @selector(closeSheetDidEnd:returnCode:contextInfo:), nil, nil,
-                          @"If you don't save, your changes will be lost.", nil);
-    }
-    return ![[self window] isDocumentEdited];
-}
-
-- (void)closeSheetDidEnd:(NSWindow *)sheet returnCode:(int)returnCode contextInfo:(void  *)contextInfo{
-    if(returnCode == NSAlertDefaultReturn){
-        [self save:nil];
-    }
-    else if(returnCode == NSAlertAlternateReturn){
-        // do nothing...
-    }
-    else if(returnCode == NSAlertOtherReturn){
-        [self cancel:nil];
-    }
 }
 
 @end
