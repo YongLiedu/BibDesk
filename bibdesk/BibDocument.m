@@ -2340,6 +2340,7 @@ This method always returns YES. Even if some or many operations fail.
         [[OFPreferenceWrapper sharedPreferenceWrapper] setObject:prefsShownColNamesMutableArray
                                                           forKey:BDSKShownColsNamesKey];
         [self setupTableColumns];
+        [self setTableFont];
         [self updateUI];
         [[NSNotificationCenter defaultCenter] postNotificationName:BDSKTableColumnChangedNotification
                                                             object:[tc identifier]
