@@ -215,30 +215,33 @@ NSString*   LocalDragPasteboardName = @"edu.ucsd.cs.mmccrack.bibdesk: Local Publ
     return [fieldsSortDict objectForKey:currentSortField];
 }
 
-// should become part of above method.
+// should become part of above method, when we start allowing sorting by keys other than author.
 - (void)refreshAuthors{
     NSMutableArray *authors = [fieldsSortDict objectForKey:@"Author"];
     NSEnumerator *pubE = [shownPublications objectEnumerator];
     NSEnumerator *authE;
-    NSString *auth;
-    NSArray *authStringArray;
-    NSMutableArray *tmpTotalAuthStrings = [NSMutableArray arrayWithCapacity:6];
+    BibAuthor *auth;
+    NSArray *authArray;
+    NSMutableArray *tmpTotalAuths = [NSMutableArray arrayWithCapacity:6];
     BibItem *pub;
+    BibAuthor *bibAuthor = nil;
     unsigned i;
 
-
-    [authors removeAllObjects];
+    [tmpTotalAuths  setArray:authors];
 
     while (pub = [pubE nextObject]) {
-        authStringArray = [pub pubAuthors];
-        authE = [authStringArray objectEnumerator];
+        // for each pub, get its authors
+        authArray = [pub pubAuthors];
+        authE = [authArray objectEnumerator];
         while(auth = [authE nextObject]){
-            i = [tmpTotalAuthStrings indexOfObject:auth];
-            if(i != NSNotFound){
-                [[authors objectAtIndex:i] addPub:pub];
+            // for each author auth, set i to be the index of auth in the temp. array.
+            i = [tmpTotalAuths indexOfObject:auth];
+            if(i == NSNotFound){
+                bibAuthor = [[[BibAuthor alloc] initWithName:[auth name] andPub:pub] autorelease];
+                [authors addObject:bibAuthor];
+                [tmpTotalAuths addObject:auth];
             }else{
-                [authors addObject:[[[BibAuthor alloc] initWithName:auth andPub:pub] autorelease]];
-                [tmpTotalAuthStrings addObject:auth];
+                [[authors objectAtIndex:i] addPub:pub];
             }
         }
     }
@@ -271,7 +274,7 @@ NSString*   LocalDragPasteboardName = @"edu.ucsd.cs.mmccrack.bibdesk: Local Publ
 
     [self setupTableColumns]; // calling it here mostly just makes sure that the menu is set up.
 
-    [self controlTextDidChange:nil]; // calls updateUI.
+    [self controlTextDidChange:nil]; // calls updateUI, makes sure the quicksearch filter is loaded appropriately when we open a file.
 }
 
 - (void)windowDidBecomeMain:(NSNotification *)aNotification{
