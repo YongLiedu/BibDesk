@@ -160,6 +160,8 @@ NSString *BDSKUrlString = @"Url";
     // This is here because I don't know how to make an empty popupbutton in IB.
     [bibTypeButton removeAllItems];
 
+    // 10/2002: See "refactoring plan" in BibItem.h.
+
     // Now we add items. The indexes are the enum values we'll use later to set the selected item.
     // Using them here guarantees that we'll have the right values later.
     // ?? Bad comment?? - because we don't know what index they'll be put at if we don't explicitly change them...
@@ -284,10 +286,30 @@ NSString *BDSKUrlString = @"Url";
 - (IBAction)viewLocal:(id)sender{
     NSWorkspace *sw = [NSWorkspace sharedWorkspace];
     NSString *lurl = [tmpBib valueOfField:BDSKLocalUrlString];
-#warning - want to change this to use fileURLWIthPath?
-    if (![@"" isEqualToString:lurl]) {
-        [sw openURL:[NSURL URLWithString:[lurl stringByExpandingTildeInPath]]];
-    }
+    BOOL err = NO;
+    NSURL *local;
+
+    NS_DURING
+        if (![@"" isEqualToString:lurl]) {
+            local = [NSURL URLWithString:lurl];
+            if(!local){
+                local = [NSURL fileURLWithPath:[lurl stringByExpandingTildeInPath]];
+            }
+            if(![sw openFile:[local path]]){
+                err = YES;
+            }
+        }
+        NS_HANDLER
+            err=YES;
+        NS_ENDHANDLER
+        
+        if(err)
+            NSBeginAlertSheet(NSLocalizedString(@"Can't open local file", @"can't open local file"),
+                              NSLocalizedString(@"OK", @"OK"),
+                              nil,nil, [self window],self, NULL, NULL, NULL,
+                              NSLocalizedString(@"Sorry, the contents of the Local-Url Field are neither a valid file path nor a valid URL.",
+                                                @"explanation of why the local-url failed to open"), nil);
+
 }
 
 - (IBAction)viewRemote:(id)sender{
@@ -356,14 +378,17 @@ NSString *BDSKUrlString = @"Url";
     BOOL drawerIsOpening = ([documentSnoopDrawer state] == NSDrawerOpeningState);
 
     if(drawerWasOpen) [documentSnoopDrawer close];
-    //local is either a file:// URL -or a path
+    //local is either a file:// URL -or a path 
     if(![@"" isEqualToString:lurl]){
-        local = [NSURL fileURLWithPath:[lurl stringByExpandingTildeInPath]];
+        local = [NSURL URLWithString:lurl];
+        if(!local){
+            local = [NSURL fileURLWithPath:[lurl stringByExpandingTildeInPath]];
+        }
     }else{
         local = nil;
     }
 
-    if (local && [[NSFileManager defaultManager] fileExistsAtPath:[lurl stringByExpandingTildeInPath]]){
+    if (local && [[NSFileManager defaultManager] fileExistsAtPath:[local path]]){
             icon = [[NSWorkspace sharedWorkspace] iconForFile:
                 [local path]];
             [viewLocalButton setImage:icon];

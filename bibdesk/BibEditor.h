@@ -16,7 +16,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 
 /*! @header BibEditor.h
     @discussion The class for editing BibItems. Handles the UI for the fields and notes.
-*/
+*/ 
 
 #import <Cocoa/Cocoa.h>
 
@@ -123,9 +123,9 @@ extern NSString *BDSKUrlString;
                  returnCode:(int) returnCode
                 contextInfo:(void *)contextInfo;
 
-    // ----------------------------------------------------------------------------------------
-    // Add field sheet support
-    // ----------------------------------------------------------------------------------------
+// ----------------------------------------------------------------------------------------
+// Add field sheet support
+// ----------------------------------------------------------------------------------------
 - (IBAction)raiseDelField:(id)sender;
 - (IBAction)dismissDelField:(id)sender;
 - (void)delFieldSheetDidEnd:(NSWindow *)sheet
