@@ -6,7 +6,7 @@
                 delSelectedDefaultField = id; 
                 outputTemplateButtonPressed = id; 
             }; 
-            CLASS = BibPref_Defaults; 
+            CLASS = "BibPref_Defaults"; 
             LANGUAGE = ObjC; 
             OUTLETS = {
                 addFieldButton = NSButton; 
@@ -19,7 +19,7 @@
         }, 
         {
             ACTIONS = {changeStartupBehavior = id; }; 
-            CLASS = BibPref_Startup; 
+            CLASS = "BibPref_Startup"; 
             LANGUAGE = ObjC; 
             OUTLETS = {
                 defaultBibFileField = NSTextField; 
