@@ -165,7 +165,7 @@ static void addToolbarItem(NSMutableDictionary *theDict,NSString *identifier,NSS
       itemForItemIdentifier: (NSString *)itemIdent
   willBeInsertedIntoToolbar:(BOOL) willBeInserted {
 
-    NSToolbarItem *newItem = [[[NSToolbarItem alloc] initWithItemIdentifier:itemIdent] autorelease];
+    OAToolbarItem *newItem = [[[OAToolbarItem alloc] initWithItemIdentifier:itemIdent] autorelease];
     NSToolbarItem *item=[toolbarItems objectForKey:itemIdent];
 
     [newItem setLabel:[item label]];
@@ -173,6 +173,7 @@ static void addToolbarItem(NSMutableDictionary *theDict,NSString *identifier,NSS
     if ([item view]!=nil)
     {
         [newItem setView:[item view]];
+		[newItem setDelegate:self];
     }
     else
     {
