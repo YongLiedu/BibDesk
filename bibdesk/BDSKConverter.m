@@ -15,13 +15,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 
 #import "BDSKConverter.h"
 
-static NSDictionary *WholeDict;
-static NSCharacterSet *EmptySet;
-static NSCharacterSet *FinalCharSet;
 static BDSKConverter *theConverter;
-static NSDictionary *detexifyConversions;
-static NSDictionary *texifyConversions;
-static NSCharacterSet *strictInvalidCharSet;
 
 @implementation BDSKConverter
 
@@ -39,14 +33,25 @@ static NSCharacterSet *strictInvalidCharSet;
     return self;
 }
 
+- (void)dealloc{
+    [wholeDict release];
+    [emptySet release];
+    [finalCharSet release];
+    [texifyConversions release];
+    [detexifyConversions release];
+    [strictInvalidCharSet release];
+    [super dealloc];
+}
+    
+
 - (void)loadDict{
     
     //create a characterset from the characters we know how to convert
     NSMutableCharacterSet *workingSet;
     NSRange highCharRange;
     
-    WholeDict = [[NSDictionary dictionaryWithContentsOfFile:[[[NSBundle mainBundle] resourcePath] stringByAppendingPathComponent:@"CharacterConversion.plist"]] retain];
-    EmptySet = [[NSCharacterSet characterSetWithCharactersInString:@""] retain];
+    wholeDict = [[NSDictionary dictionaryWithContentsOfFile:[[[NSBundle mainBundle] resourcePath] stringByAppendingPathComponent:@"CharacterConversion.plist"]] retain];
+    emptySet = [[NSCharacterSet characterSetWithCharactersInString:@""] retain];
     
     highCharRange.location = (unsigned int) '~' + 1; //exclude tilde, or we'll get an alert on it
     highCharRange.length = 256; //this should get all the characters in the upper-range.
@@ -54,26 +59,26 @@ static NSCharacterSet *strictInvalidCharSet;
     [workingSet addCharactersInRange:highCharRange];
 
     // Build a dictionary of one-way conversions that we know how to do, then add these to the character set
-    NSDictionary *oneWayCharacters = [WholeDict objectForKey:@"One-Way Conversions"];
+    NSDictionary *oneWayCharacters = [wholeDict objectForKey:@"One-Way Conversions"];
     NSEnumerator *e = [oneWayCharacters keyEnumerator];
     NSString *oneWayKey;
       while(oneWayKey = [e nextObject]){
 	  [workingSet addCharactersInString:oneWayKey];
       }
 
-    FinalCharSet = [workingSet copy];
+    finalCharSet = [workingSet copy];
     [workingSet release];
     
     // set up the dictionaries
-    NSMutableDictionary *tmpConversions = [WholeDict objectForKey:@"Roman to TeX"];
-    [tmpConversions addEntriesFromDictionary:[WholeDict objectForKey:@"One-Way Conversions"]];
+    NSMutableDictionary *tmpConversions = [wholeDict objectForKey:@"Roman to TeX"];
+    [tmpConversions addEntriesFromDictionary:[wholeDict objectForKey:@"One-Way Conversions"]];
     texifyConversions = [tmpConversions copy];
     
     if(!texifyConversions){
-        texifyConversions = [NSDictionary dictionary]; // an empty one won't break the code.
+        texifyConversions = [[NSDictionary dictionary] retain]; // an empty one won't break the code.
     }
     
-    detexifyConversions = [[WholeDict objectForKey:@"TeX to Roman"] retain];
+    detexifyConversions = [[wholeDict objectForKey:@"TeX to Roman"] retain];
     
     if(!detexifyConversions){
         detexifyConversions = [[NSDictionary dictionary] retain]; // an empty one won't break the code.
@@ -107,7 +112,7 @@ static NSCharacterSet *strictInvalidCharSet;
 
     while(![scanner isAtEnd]){
 
-	[scanner scanUpToCharactersFromSet:FinalCharSet intoString:nil];
+	[scanner scanUpToCharactersFromSet:finalCharSet intoString:nil];
 	index = [scanner scanLocation];
 
 	if(index >= sLength) // don't go past the end
@@ -146,7 +151,6 @@ static NSCharacterSet *strictInvalidCharSet;
     
     //clean up
     [scanner release];
-    // shouldn't [tmpConv release]; ? I should look in the omni source code...
     
     return([convertedSoFar autorelease]);
 }
@@ -241,10 +245,11 @@ static NSCharacterSet *strictInvalidCharSet;
     NSMutableString *convertedSoFar = [[NSMutableString alloc] initWithCapacity:10];
 
     if(!s || [s isEqualToString:@""]){
-		return [NSString string];
+        [convertedSoFar release];
+        return [NSString string];
     }
     
-    [scanner setCharactersToBeSkipped:EmptySet];
+    [scanner setCharactersToBeSkipped:emptySet];
     //    NSLog(@"scanning string: %@",s);
     while(![scanner isAtEnd]){
         if([scanner scanUpToString:@"{\\" intoString:&tmpPass])

@@ -15,7 +15,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 */
 
 /*! @header BDSKConverter.h
-    @discussion Declares a class that has no instances and just does the TeX encoding conversions.
+    @discussion Declares a class that has a shared instance and just does the TeX encoding conversions.
 */
 
 #import <Cocoa/Cocoa.h>
@@ -28,6 +28,12 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
  @discussion This was a pain to write, and more of a pain to link. :)
 */
 @interface BDSKConverter : NSObject {
+     NSDictionary *wholeDict;
+     NSCharacterSet *emptySet;
+     NSCharacterSet *finalCharSet;
+     NSDictionary *detexifyConversions;
+     NSDictionary *texifyConversions;
+     NSCharacterSet *strictInvalidCharSet;
 }
 /*!
     @method     sharedConverter

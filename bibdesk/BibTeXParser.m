@@ -194,7 +194,7 @@
 
                         [dictionary setObject:sDeTexified forKey:sFieldName];
 
-						[appController addString:sDeTexified forCompletionEntry:sFieldName];
+                        [appController addString:sDeTexified forCompletionEntry:sFieldName];
                         
                     }// end while field - process next bt field                    
                    

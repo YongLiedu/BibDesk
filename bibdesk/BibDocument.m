@@ -40,7 +40,7 @@ NSString* BDSKBibTeXStringPboardType = @"edu.ucsd.cs.mmcrack.bibdesk: Local BibT
         publications = [[NSMutableArray alloc] initWithCapacity:1];
         shownPublications = [[NSMutableArray alloc] initWithCapacity:1];
         frontMatter = [[NSMutableString alloc] initWithString:@""];
-		authors = [[NSMutableArray alloc] init];
+        authors = [[NSMutableSet alloc] init];
 
         quickSearchKey = [[[OFPreferenceWrapper sharedPreferenceWrapper] objectForKey:BDSKCurrentQuickSearchKey] retain];
         if(!quickSearchKey){
@@ -134,7 +134,7 @@ NSString* BDSKBibTeXStringPboardType = @"edu.ucsd.cs.mmcrack.bibdesk: Local BibT
     tc = nil;
     // next, add tablecolumns that show up in the system prefs.
     while (tcName = [prefTCNamesE nextObject]) {
-        tc = [[NSTableColumn alloc] initWithIdentifier:tcName];
+        tc = [[[NSTableColumn alloc] initWithIdentifier:tcName] autorelease];
         [tc setResizable:YES];
 
         [tableColumns setObject:tc forKey:[tc identifier]];
@@ -657,6 +657,7 @@ stringByAppendingPathComponent:@"BibDesk"]; */
     NSMutableDictionary *dictionary = nil;
     NSString *tempFileName = nil;
     NSString* filePath = [self fileName];
+    NSMutableArray *newPubs;
 
     if(!filePath){
         filePath = @"Untitled Document";
@@ -666,10 +667,10 @@ stringByAppendingPathComponent:@"BibDesk"]; */
     // to enable some cheapo timing, uncomment these:
 //    NSDate *start = [NSDate date];
 //    NSLog(@"start: %@", [start description]);
-    publications = [[BibTeXParser itemsFromData:data
+    newPubs = [BibTeXParser itemsFromData:data
                                            error:&hadProblems
                                      frontMatter:frontMatter
-                                        filePath:filePath] retain]; 
+                                        filePath:filePath];
 
 //    NSLog(@"end %@ elapsed: %f", [[NSDate date] description], [start timeIntervalSinceNow]);
 
@@ -696,7 +697,7 @@ stringByAppendingPathComponent:@"BibDesk"]; */
             return NO;
         }
     }
-
+    [self setPublications:newPubs];
     [shownPublications setArray:publications];
     return YES;
 }
@@ -770,7 +771,7 @@ Enhanced delete method that uses a sheet instead of a modal dialogue.
 }
 
 - (NSMenu *)searchFieldMenu{
-	NSMenu *cellMenu = [[NSMenu alloc] initWithTitle:@"Search Menu"];
+	NSMenu *cellMenu = [[[NSMenu alloc] initWithTitle:@"Search Menu"] autorelease];
 	NSMenuItem *item1, *item2, *item3, *item4, *anItem;
 	int curIndex = 0;
 	
@@ -1670,7 +1671,7 @@ int generalBibItemCompareFunc(id item1, id item2, void *context){
 	[newBI setFields:dictWithDates];	
 	
     fileOrderCount++;
-    [self addPublication:newBI];
+    [self addPublication:[newBI autorelease]];
     [self updateUI];
     if(yn == YES)
     {
@@ -1803,7 +1804,7 @@ This method always returns YES. Even if some or many operations fail.
 										 fileType:@"BibTeX"
 										  authors:[NSMutableArray arrayWithCapacity:0]];
 			
-			[self addPublication:newBI];
+			[self addPublication:[newBI autorelease]];
 			
 			NSString *newUrl = [[NSURL fileURLWithPath:
 				[fnStr stringByExpandingTildeInPath]]absoluteString];
@@ -1952,7 +1953,7 @@ This method always returns YES. Even if some or many operations fail.
         [prefsShownColNamesMutableArray removeObject:[sender title]];
         [sender setState:NSOffState];
     }else{
-        tc = [[NSTableColumn alloc] initWithIdentifier:[sender title]];
+        tc = [[[NSTableColumn alloc] initWithIdentifier:[sender title]] autorelease];
         [tc setResizable:YES];
         [tableColumns setObject:tc forKey:[tc identifier]];
         if(![prefsShownColNamesMutableArray containsObject:[tc identifier]]){
@@ -1991,7 +1992,7 @@ This method always returns YES. Even if some or many operations fail.
 
     if(returnCode == 1){
         [self contextualMenuAddTableColumnName:[addFieldTextField stringValue] enabled:YES];
-        tc = [[NSTableColumn alloc] initWithIdentifier:[addFieldTextField stringValue]];
+        tc = [[[NSTableColumn alloc] initWithIdentifier:[addFieldTextField stringValue]] autorelease];
         [tc setResizable:YES];
         [tableColumns setObject:tc forKey:[tc identifier]];
         prefsShownColNamesMutableArray = [[[OFPreferenceWrapper sharedPreferenceWrapper] arrayForKey:BDSKShownColsNamesKey] mutableCopy];
