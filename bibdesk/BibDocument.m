@@ -630,7 +630,7 @@ stringByAppendingPathComponent:@"BibDesk"]; */
 }
 
 - (NSData *)htmlDataRepresentation{
-    NSString *applicationSupportPath = [NSHomeDirectory() stringByAppendingPathComponent:@"Library/Application Support/BibDesk"]; 
+    NSString *applicationSupportPath = [[[NSFileManager defaultManager] applicationSupportDirectory:kUserDomain] stringByAppendingPathComponent:@"BibDesk"]; 
 
 
     NSString *fileTemplate = [NSString stringWithContentsOfFile:[applicationSupportPath stringByAppendingPathComponent:@"htmlExportTemplate"]];
@@ -642,7 +642,7 @@ stringByAppendingPathComponent:@"BibDesk"]; */
 
 - (NSString *)publicationsAsHTML{
     NSMutableString *s = [NSMutableString stringWithString:@""];
-    NSString *applicationSupportPath = [NSHomeDirectory() stringByAppendingPathComponent:@"Library/Application Support/BibDesk"]; 
+    NSString *applicationSupportPath = [[[NSFileManager defaultManager] applicationSupportDirectory:kUserDomain] stringByAppendingPathComponent:@"BibDesk"]; 
     NSString *itemTemplate = [NSString stringWithContentsOfFile:[applicationSupportPath stringByAppendingPathComponent:@"htmlItemExportTemplate"]];
     BibItem *tmp;
     NSEnumerator *e = [publications objectEnumerator];

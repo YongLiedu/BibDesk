@@ -21,9 +21,7 @@ static BDSKFileContentsFilter *_sharedFileContentsFilter = nil;
 
 - (void)setupIndex{
 	NSFileManager *fm = [NSFileManager defaultManager];
-	NSString *applicationSupportPath = [[[NSHomeDirectory() stringByAppendingPathComponent:@"Library"]
-        stringByAppendingPathComponent:@"Application Support"]
-        stringByAppendingPathComponent:@"BibDesk"];
+	NSString *applicationSupportPath = [[[NSFileManager defaultManager] applicationSupportDirectory:kUserDomain] stringByAppendingPathComponent:@"BibDesk"] ;
 
 	NSString *indexFileName = [applicationSupportPath stringByAppendingPathComponent:@"File Contents Index"];
 	NSURL *indexFileURL = [NSURL fileURLWithPath:indexFileName];

@@ -455,7 +455,8 @@
 				GCC_ENABLE_FIX_AND_CONTINUE = YES;
 				GCC_GENERATE_DEBUGGING_SYMBOLS = YES;
 				GCC_OPTIMIZATION_LEVEL = 0;
-				OTHER_CFLAGS = "-DDEALLOCDEBUG -DNOCRASHREPORTER";
+				GCC_PREPROCESSOR_DEFINITIONS = "";
+				OTHER_CFLAGS = "";
 				ZERO_LINK = YES;
 			};
 			isa = PBXBuildStyle;
@@ -465,6 +466,7 @@
 			buildSettings = {
 				COPY_PHASE_STRIP = YES;
 				GCC_ENABLE_FIX_AND_CONTINUE = NO;
+				GCC_PREPROCESSOR_DEFINITIONS = "-DUSECRASHREPORTER";
 				ZERO_LINK = NO;
 			};
 			isa = PBXBuildStyle;
@@ -626,7 +628,6 @@
 				F9022C4A0758027800C3F701,
 				F9022C4B0758027800C3F701,
 				F9022C4C0758027800C3F701,
-				F9022C4D0758027800C3F701,
 				F9022C4E0758027800C3F701,
 				F9022C4F0758027800C3F701,
 				F9022C500758027800C3F701,
@@ -674,6 +675,7 @@
 				F9022FD407580B9400C3F701,
 				3DD300F6075C054D003FD2D7,
 				3DAEA2EE07703F6000AF111A,
+				F965D0A9077B8C0500628BD0,
 			);
 			isa = PBXSourcesBuildPhase;
 			runOnlyForDeploymentPostprocessing = 0;
@@ -718,9 +720,9 @@
 			sourceTree = "<group>";
 		};
 		8D1107320486CEB800E47090 = {
-			explicitFileType = wrapper.application;
 			includeInIndex = 0;
 			isa = PBXFileReference;
+			lastKnownFileType = wrapper.application;
 			path = Bibdesk.app;
 			refType = 3;
 			sourceTree = BUILT_PRODUCTS_DIR;
@@ -1030,12 +1032,6 @@
 		};
 		F9022C4C0758027800C3F701 = {
 			fileRef = F9022C3D0758027800C3F701;
-			isa = PBXBuildFile;
-			settings = {
-			};
-		};
-		F9022C4D0758027800C3F701 = {
-			fileRef = F9022C3F0758027800C3F701;
 			isa = PBXBuildFile;
 			settings = {
 			};
@@ -3843,6 +3839,12 @@
 			path = ../BibDeskScripting.r;
 			refType = 4;
 			sourceTree = "<group>";
+		};
+		F965D0A9077B8C0500628BD0 = {
+			fileRef = F9022C3F0758027800C3F701;
+			isa = PBXBuildFile;
+			settings = {
+			};
 		};
 		F988709007580CB4001D4D49 = {
 			children = (

@@ -14,7 +14,6 @@ extern NSString *BDSKInputManagerLoadableApplications;
 
 @interface BibPref_InputManager : OAPreferenceClient
 {
-    NSString *applicationSupportPath;
     NSString *inputManagerPath;
     IBOutlet NSTableView *appList;
     IBOutlet NSButton *enableButton;

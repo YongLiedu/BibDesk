@@ -16,6 +16,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 
 #import "BDSKPreviewer.h"
 #import "BibPrefController.h"
+#import "BibAppController.h"
 
 
 /*! @const BDSKPreviewer helps to enforce a single object of this class */
@@ -33,9 +34,7 @@ static unsigned threadCount = 0;
 }
 
 - (id)init{
-    applicationSupportPath = [[[[NSHomeDirectory() stringByAppendingPathComponent:@"Library"]
-        stringByAppendingPathComponent:@"Application Support"]
-        stringByAppendingPathComponent:@"BibDesk"] retain];
+    applicationSupportPath = [[[[NSFileManager defaultManager] applicationSupportDirectory:kUserDomain] stringByAppendingPathComponent:@"BibDesk"] retain];
 
     if(self = [super init]){
         bundle = [NSBundle mainBundle];

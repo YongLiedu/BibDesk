@@ -199,3 +199,9 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 							  error:(NSString **)error;
 
 @end
+
+@interface NSFileManager (BibDeskAdditions)
+
+- (NSString *)applicationSupportDirectory:(SInt16)domain;
+
+@end

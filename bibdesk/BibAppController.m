@@ -24,6 +24,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 #import "NSString_BDSKExtensions.h"
 #import "BDSKConverter.h"
 
+#import <Carbon/Carbon.h>
 
 // ----------------------------------------------------------------------------------------
 // copy-n-pasted from my version of btparse's error.c:
@@ -46,16 +47,16 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
     BOOL isDir;
     NSString *applicationSupportPath;
     NSFileManager *DFM = [NSFileManager defaultManager];
-    
+
+#ifdef USECRASHREPORTER
     // start the crash reporter; 10.3+ only
     if(!BDSK_USING_JAGUAR)
         [[ILCrashReporter defaultReporter] launchReporterForCompany:@"BibDesk Project" reportAddr:@"bibdesk-crashes@lists.sourceforge.net"];
-
+#endif
+    
     // now check if the application support directory is there...
-    applicationSupportPath = [[[NSHomeDirectory() stringByAppendingPathComponent:@"Library"]
-        stringByAppendingPathComponent:@"Application Support"]
-        stringByAppendingPathComponent:@"BibDesk"];
-
+    applicationSupportPath = [[DFM applicationSupportDirectory:kUserDomain] stringByAppendingPathComponent:@"BibDesk"];
+    
     if (![DFM fileExistsAtPath:applicationSupportPath
                    isDirectory:&isDir]){
         // create it
@@ -956,5 +957,29 @@ Implements service to import selection
 	
 	[doc addPublicationsFromPasteboard:pboard error:error];
 }
+
+@end
+
+@implementation NSFileManager (BibDeskAdditions)
+
+- (NSString *)applicationSupportDirectory:(SInt16)domain{
+    FSRef foundRef;
+    OSStatus err = noErr;
+
+    err = FSFindFolder(domain,
+                       kApplicationSupportFolderType,
+                       kCreateFolder,
+                       &foundRef);
+    NSAssert1( err == noErr, @"Error %d:  the system was unable to find your Application Support folder.", err);
+    
+    CFURLRef url = CFURLCreateFromFSRef(kCFAllocatorDefault, &foundRef);
+    
+    if(url != nil){
+        return [(NSURL *)url path];
+    } else {
+        return nil; 
+    }
+}
+                             
 
 @end

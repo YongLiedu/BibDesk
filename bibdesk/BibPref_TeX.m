@@ -59,9 +59,8 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 
 - (IBAction)openTeXpreviewFile:(id)sender{
     // Edit the TeX template in the Application Support folder
-    NSString *applicationSupportPath = [[[NSHomeDirectory() stringByAppendingPathComponent:@"Library"]
-                                                             stringByAppendingPathComponent:@"Application Support"]
-                                                             stringByAppendingPathComponent:@"BibDesk"];
+    NSString *applicationSupportPath = [[[NSFileManager defaultManager] applicationSupportDirectory:kUserDomain] stringByAppendingPathComponent:@"BibDesk"];
+    
     // edit the previewtemplate.tex file, so the bibpreview.tex is only edited by PDFPreviewer
     NSString *path = [applicationSupportPath stringByAppendingPathComponent:@"previewtemplate.tex"];
     NSURL *url = nil;
