@@ -46,6 +46,8 @@
 		<string>{\^U}</string>
 		<key>Ü</key>
 		<string>{\"U}</string>
+		<key>ß</key>
+		<string>{\ss}</string>
 		<key>à</key>
 		<string>{\`a}</string>
 		<key>á</key>
@@ -131,6 +133,8 @@
 		<string>ï</string>
 		<key>{\"o}</key>
 		<string>ö</string>
+		<key>{\"s}</key>
+		<string>ß</string>
 		<key>{\"u}</key>
 		<string>ü</string>
 		<key>{\"y}</key>
