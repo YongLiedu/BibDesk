@@ -15,7 +15,13 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 
 #import "BDSKConverter.h"
 
+static NSDictionary *WholeDict;
+
 @implementation BDSKConverter
++ (void)loadDict{
+    WholeDict = [[NSDictionary dictionaryWithContentsOfFile:[[[NSBundle mainBundle] resourcePath] stringByAppendingPathComponent:@"CharacterConversion.plist"]] retain];
+}
+
 + (NSString *)stringByTeXifyingString:(NSString *)s{
     // s should be in UTF-8 or UTF-16 (i'm not sure which exactly) format (since that's what the property list editor spat)
     // This direction could be faster, since we're comparing characters to the keys, but that'll be left for later.
@@ -32,7 +38,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
     NSString *TEXString;
 
     // get the dictionary
-    NSDictionary *WholeDict = [NSDictionary dictionaryWithContentsOfFile:[[[NSBundle mainBundle] resourcePath] stringByAppendingPathComponent:@"CharacterConversion.plist"]];
+    if(!WholeDict)[self loadDict];
     NSDictionary *conversions = [WholeDict objectForKey:@"Roman to TeX"];
     if(!conversions){
         conversions = [NSDictionary dictionary]; // an empty one won't break the code.
@@ -83,13 +89,12 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
     NSCharacterSet *emptySet = [NSCharacterSet characterSetWithCharactersInString:@""];
 
     // get the dictionary
-    NSDictionary *WholeDict;
     NSDictionary *conversions;
 
     if(!s || [s isEqualToString:@""])
         return [NSString stringWithString:@""];
-    
-    WholeDict = [NSDictionary dictionaryWithContentsOfFile:[[[NSBundle mainBundle] resourcePath] stringByAppendingPathComponent:@"CharacterConversion.plist"]];
+
+    if(!WholeDict)[self loadDict];
     conversions = [WholeDict objectForKey:@"TeX to Roman"];
 
     if(!conversions){
