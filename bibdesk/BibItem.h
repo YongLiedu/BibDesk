@@ -31,6 +31,11 @@ typedef enum BibType {
   UNPUBLISHED, NOTYPE
 } BibType;
 
+// REFACTORING PLAN: change BibType from an enum to a class.
+// provide methods for - (NSArray *) types; 
+// - (int)indexOfType:(NSString *)type;
+// - (NSString *)defaultType;
+
 
 @class BibEditor;
 
