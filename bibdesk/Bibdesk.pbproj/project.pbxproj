@@ -1215,6 +1215,7 @@
 				ZERO_LINK = YES;
 			};
 			dependencies = (
+				F9BFE16806FA97910019E8AB,
 			);
 			isa = PBXNativeTarget;
 			name = "Bibdesk (Upgraded)";
@@ -2230,6 +2231,12 @@
 			isa = PBXProject;
 			mainGroup = 2A37F4AAFDCFA73011CA2CEA;
 			projectDirPath = "";
+			projectReferences = (
+				{
+					ProductGroup = F9BFE16406FA97380019E8AB;
+					ProjectRef = F9BFE14806FA96280019E8AB;
+				},
+			);
 			targets = (
 				F99A21060607DD7A00DF3466,
 				270C1A5F05EFF7BF00943DD0,
@@ -2242,11 +2249,11 @@
 				274C84F705DF720A0020EEFF,
 				F9AC17700638709B009399C1,
 				F9FC662A06A9C6750016151E,
-				F992AB6A06FA8FB600B3747A,
 			);
 		};
 		2A37F4AAFDCFA73011CA2CEA = {
 			children = (
+				F9BFE14806FA96280019E8AB,
 				19C28FB0FE9D524F11CA2CBB,
 				2A37F4ABFDCFA73011CA2CEA,
 				2A37F4AFFDCFA73011CA2CEA,
@@ -4155,28 +4162,6 @@
 			settings = {
 			};
 		};
-		F992AB6A06FA8FB600B3747A = {
-			buildArgumentsString = "$(ACTION) -buildstyle Deployment";
-			buildPhases = (
-			);
-			buildSettings = {
-				OPTIMIZATION_CFLAGS = "";
-				OTHER_CFLAGS = "";
-				OTHER_LDFLAGS = "";
-				OTHER_REZFLAGS = "";
-				PRODUCT_NAME = BibDeskInputManager;
-				SECTORDER_FLAGS = "";
-				WARNING_CFLAGS = "-Wmost -Wno-four-char-constants -Wno-unknown-pragmas";
-			};
-			buildToolPath = /usr/bin/xcodebuild;
-			buildWorkingDirectory = ../bibdeskinputmanager;
-			dependencies = (
-			);
-			isa = PBXLegacyTarget;
-			name = BibDeskInputManager;
-			passBuildSettingsInEnvironment = 1;
-			productName = BibDeskInputManager;
-		};
 		F992AB6E06FA903600B3747A = {
 			containerPortal = 2A37F4A9FDCFA73011CA2CEA;
 			isa = PBXContainerItemProxy;
@@ -4186,7 +4171,6 @@
 		};
 		F992AB6F06FA903600B3747A = {
 			isa = PBXTargetDependency;
-			target = F992AB6A06FA8FB600B3747A;
 			targetProxy = F992AB6E06FA903600B3747A;
 		};
 		F99A21050607DD7A00DF3466 = {
@@ -4815,6 +4799,50 @@
 			isa = PBXBuildFile;
 			settings = {
 			};
+		};
+		F9BFE14806FA96280019E8AB = {
+			isa = PBXFileReference;
+			lastKnownFileType = "wrapper.pb-project";
+			name = BibDeskInputManager.xcode;
+			path = ../bibdeskinputmanager/BibDeskInputManager.xcode;
+			refType = 2;
+			sourceTree = SOURCE_ROOT;
+		};
+		F9BFE16406FA97380019E8AB = {
+			children = (
+				F9BFE16506FA97380019E8AB,
+			);
+			isa = PBXGroup;
+			name = Products;
+			refType = 4;
+			sourceTree = "<group>";
+		};
+		F9BFE16506FA97380019E8AB = {
+			fileType = wrapper.cfbundle;
+			isa = PBXReferenceProxy;
+			path = BibDeskInputManager.bundle;
+			refType = 3;
+			remoteRef = F9BFE16606FA97420019E8AB;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+		F9BFE16606FA97420019E8AB = {
+			containerPortal = F9BFE14806FA96280019E8AB;
+			isa = PBXContainerItemProxy;
+			proxyType = 2;
+			remoteGlobalIDString = 8D5B49B6048680CD000E48DA;
+			remoteInfo = BibDeskInputManager;
+		};
+		F9BFE16706FA97910019E8AB = {
+			containerPortal = F9BFE14806FA96280019E8AB;
+			isa = PBXContainerItemProxy;
+			proxyType = 1;
+			remoteGlobalIDString = 8D5B49AC048680CD000E48DA;
+			remoteInfo = BibDeskInputManager;
+		};
+		F9BFE16806FA97910019E8AB = {
+			isa = PBXTargetDependency;
+			name = "BibDeskInputManager (from BibDeskInputManager.xcode)";
+			targetProxy = F9BFE16706FA97910019E8AB;
 		};
 		F9C340F8061363A600F55DFE = {
 			isa = PBXFileReference;
