@@ -90,6 +90,4 @@ and defines class methods that let you find a list of available exporters.
 */
 + (NSArray *)availableExporterNames;
 
-+ (void)registerExporterClassName:(NSString *)className;
-
 @end

@@ -12,7 +12,7 @@ static NSMutableArray *availableExporterClassNames;
 @implementation BDSKExporter
 
 + (void)initialize{
-    // add class names for the available exporters to this array:
+    // add class names for any new available exporters to this array:
     availableExporterClassNames = [[NSArray alloc] initWithObjects:@"BDSKBibTeXExporter", nil];
 }
 
