@@ -57,9 +57,9 @@
 	<key>CFBundleExecutable</key>
 	<string>Bibdesk</string>
 	<key>CFBundleGetInfoHTML</key>
-	<string>&lt;B&gt;BibDesk&lt;/B&gt; Version 0.90</string>
+	<string>&lt;B&gt;BibDesk&lt;/B&gt; Version 0.92</string>
 	<key>CFBundleGetInfoString</key>
-	<string>version 0.90</string>
+	<string>version 0.92</string>
 	<key>CFBundleHelpBookFolder</key>
 	<string>BibDesk Help</string>
 	<key>CFBundleHelpBookName</key>
@@ -75,11 +75,11 @@
 	<key>CFBundlePackageType</key>
 	<string>APPL</string>
 	<key>CFBundleShortVersionString</key>
-	<string>0.90</string>
+	<string>0.92</string>
 	<key>CFBundleSignature</key>
 	<string>MMcC</string>
 	<key>CFBundleVersion</key>
-	<string>0.90</string>
+	<string>0.92</string>
 	<key>NSAppleScriptEnabled</key>
 	<string>YES</string>
 	<key>NSMainNibFile</key>
