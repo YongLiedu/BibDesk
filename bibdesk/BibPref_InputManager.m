@@ -58,6 +58,10 @@ NSString *BDSKInputManagerLoadableApplications = @"Application bundles that we r
         enabledEditorAutocompletionStrings = [[NSMutableArray array] retain];
     }
     [[editorAutocompletionStringsTableView tableColumnWithIdentifier:@"CompList"] setDataCell:[[[NSTextFieldCell alloc] init] autorelease]];
+    [appList setRowHeight:(16 + 2)]; // icon is 16x16
+    NSLayoutManager *lm = [[NSLayoutManager alloc] init];
+    [editorAutocompletionStringsTableView setRowHeight:[lm defaultLineHeightForFont:[NSFont systemFontOfSize:[NSFont systemFontSize]]]];
+    [lm release];
 }
 
 - (void)dealloc{
