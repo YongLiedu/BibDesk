@@ -17,7 +17,7 @@
 - (NSString *)windowNibName{return @"BibPersonView";}
 
 - (id)initWithPerson:(BibAuthor *)person{
-    self = [super initWithWindowNibName:@"BibEditor"];
+    self = [super initWithWindowNibName:@"BibPersonView"];
 	if(self){
 		[self setPerson:person];
 		
