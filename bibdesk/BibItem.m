@@ -72,6 +72,15 @@ void _setupFonts(){
 
 @implementation BibItem
 
+- (id)init
+{
+	OFPreferenceWrapper *pw = [OFPreferenceWrapper sharedPreferenceWrapper];
+	self = [self initWithType:[pw stringForKey:BDSKPubTypeStringKey]
+									  fileType:@"BibTeX" // Not Sure if this is good.
+									   authors:[NSMutableArray arrayWithCapacity:0]];
+	return self;
+}
+
 - (id)initWithType:(NSString *)type fileType:(NSString *)inFileType authors:(NSMutableArray *)authArray{ // this is the designated initializer.
     if (self = [super init]){
         pubFields = [[NSMutableDictionary alloc] init];
@@ -81,7 +90,7 @@ void _setupFonts(){
 		undoManager = nil;
         [self setFileType:inFileType];
         [self makeType:type];
-        [self setCiteKey:@"cite-key"];
+        citeKey = [@"cite-key" retain];
         [self setDate: nil];
 		[self setDateCreated: nil];
 		[self setDateModified: nil];
@@ -518,9 +527,9 @@ void _setupFonts(){
 - (void)updateMetadataForKey:(NSString *)key{
     NSMutableString *tmp = [NSMutableString string];
 	
-	if([key isEqualToString:@"Annote"] || 
-	   [key isEqualToString:@"Abstract"] || 
-	   [key isEqualToString:@"Rss-Description"]){
+	if([@"Annote" isEqualToString:key] || 
+	   [@"Abstract" isEqualToString:key] || 
+	   [@"Rss-Description" isEqualToString:key]){
 		// don't do anything for fields we don't need to update.
 		return;
 	}
@@ -542,12 +551,13 @@ void _setupFonts(){
 		
 		NSString *monthValue = [pubFields objectForKey:@"Month"];
         if (monthValue && ![monthValue isEqualToString:@""]) {
-			
-            [tmp appendString:monthValue];
-            [tmp appendString:@" "];
+			[tmp appendString:monthValue];
+			[tmp appendString:@" 1 "];
+		}else{
+			[tmp appendString:@"1 1 "];
     	}
         [tmp appendString:[pubFields objectForKey:@"Year"]];
-        [self setDate:[NSCalendarDate dateWithNaturalLanguageString:tmp]];
+        [self setDate:[NSCalendarDate dateWithNaturalLanguageString:tmp locale:[NSDictionary dictionaryWithObject:@"MDYH" forKey:NSDateTimeOrdering]]];
     }else{
         [self setDate:nil];    // nil means we don't have a good date.
     }
