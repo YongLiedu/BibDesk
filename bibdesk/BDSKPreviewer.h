@@ -38,7 +38,6 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
     NSImage *image;
     NSBundle *bundle;
     BOOL working;
-    int bibStep;
     BibDocument *theDoc;
     NSString *applicationSupportPath;
     NSLock *countLock;

@@ -114,9 +114,6 @@ static unsigned threadCount = 0;
     s = [NSScanner scannerWithString:texFile];
 
     //[imagePreviewView setImage:[NSImage imageNamed:@"typesetting.pdf"]];
-    
-#warning ARM: where is this used?
-    bibStep = 0;
 
     // replace the appropriate style & bib files.
     style = [[OFPreferenceWrapper sharedPreferenceWrapper] objectForKey:BDSKBTStyleKey];
@@ -182,7 +179,6 @@ static unsigned threadCount = 0;
     }
 
     // remove the old pdf file.
-#warning ARM: why is this necessary?
     [[NSFileManager defaultManager] removeFileAtPath:[applicationSupportPath stringByAppendingPathComponent:@"bibpreview.pdf"]
                                              handler:nil];
     
@@ -280,7 +276,6 @@ static unsigned threadCount = 0;
     [workingLock lock];
     working = YES;
     [workingLock unlock];
-    bibStep = 0;
 
     // replace the appropriate style & bib files.
     style = [[OFPreferenceWrapper sharedPreferenceWrapper] objectForKey:BDSKBTStyleKey];
