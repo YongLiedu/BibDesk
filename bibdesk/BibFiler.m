@@ -36,9 +36,31 @@ static BibFiler *_sharedFiler = nil;
 
 - (void)showPreviewForPapers:(NSArray *)papers fromDocument:(BibDocument *)doc{
 	
+	NSString *papersFolderPath = [[OFPreferenceWrapper sharedPreferenceWrapper] stringForKey:BDSKPapersFolderPathKey];
+	papersFolderPath = [papersFolderPath stringByAbbreviatingWithTildeInPath];
+
+	NSFileManager *fm = [NSFileManager defaultManager];
+	BOOL isDir;
+	
+	if(!([fm fileExistsAtPath:papersFolderPath isDirectory:&isDir] && isDir)){
+		// The directory isn't there or isn't a directory, so pop up an alert.
+		int rv = NSRunAlertPanel(NSLocalizedString(@"Papers Folder doesn't exist",@""),
+								 NSLocalizedString(@"The Papers Folder you've chosen either doesn't exist or isn't a folder. Press \"Go to Preferences\" to set the Papers Folder.",@""),
+								 NSLocalizedString(@"OK",@""),NSLocalizedString(@"Go to Preferences",@""),nil);
+		if (rv == NSAlertAlternateReturn){
+			[[OAPreferenceController sharedPreferenceController] showPreferencesPanel:self];
+			[[OAPreferenceController sharedPreferenceController] setCurrentClientByClassName:@"BibPref_AutoFile"];
+		}
+		return;
+	}
+	
+	
 	BOOL success = [NSBundle loadNibNamed:@"AutoFile" owner:self];
 	if(!success){
-		// @@ throw up error boxs
+		NSRunCriticalAlertPanel(NSLocalizedString(@"Error loading AutoFile window module.",@""),
+								NSLocalizedString(@"There was an error loading the AutoFile window module. BibDesk will still run, and automatically filing papers that are dragged in should still work fine. Please report this error to the developers. Sorry!",@""),
+								NSLocalizedString(@"OK",@""),nil,nil);
+		return;
 	}
 	_currentPapers = papers;
 	_currentDocument = doc;
@@ -52,8 +74,6 @@ static BibFiler *_sharedFiler = nil;
 	}
 	
 	[tv reloadData];
-	NSString *papersFolderPath = [[OFPreferenceWrapper sharedPreferenceWrapper] stringForKey:BDSKPapersFolderPathKey];
-	papersFolderPath = [papersFolderPath stringByAbbreviatingWithTildeInPath];
 	
 	[infoTextField setStringValue:[NSString stringWithFormat:
 		NSLocalizedString(@"These files that will be moved to %@.\nScan this list for errors, because this operation cannot be undone.",@"description string"), papersFolderPath]];
@@ -82,7 +102,26 @@ static BibFiler *_sharedFiler = nil;
 }
 
 - (void)file:(BOOL)doFile papers:(NSArray *)papers fromDocument:(BibDocument *)doc{
+
 	NSFileManager *fm = [NSFileManager defaultManager];
+	NSString *papersFolderPath = [[OFPreferenceWrapper sharedPreferenceWrapper] stringForKey:BDSKPapersFolderPathKey];
+	
+	BOOL isDir;
+	// Because we don't call file:papers: from the preview window unless the directory exists,
+	// this will only be executed if we're not coming from there. We won't get a repeat error.
+	
+	if(!([fm fileExistsAtPath:papersFolderPath isDirectory:&isDir] && isDir)){
+		// The directory isn't there or isn't a directory, so pop up an alert.
+		int rv = NSRunAlertPanel(NSLocalizedString(@"Papers Folder doesn't exist",@""),
+								 NSLocalizedString(@"The Papers Folder you've chosen either doesn't exist or isn't a folder. Any files you have dragged in will be linked to in their original location. Press \"Go to Preferences\" to set the Papers Folder.",@""),
+								 NSLocalizedString(@"OK",@""),NSLocalizedString(@"Go to Preferences",@""),nil);
+		if (rv == NSAlertAlternateReturn){
+			[[OAPreferenceController sharedPreferenceController] showPreferencesPanel:self];
+			[[OAPreferenceController sharedPreferenceController] setCurrentClientByClassName:@"BibPref_AutoFile"];
+		}
+		return;
+		
+	}
 	
 	_moveCount = 0;
 	_movableCount = 0;
@@ -93,8 +132,7 @@ static BibFiler *_sharedFiler = nil;
 	foreach(paper , papers){
 		NSString *path = [paper localURLPathRelativeTo:[[(NSDocument *)doc fileName] stringByDeletingLastPathComponent]];
 		NSString *fileName = [path lastPathComponent];
-		NSString *newPath = [[OFPreferenceWrapper sharedPreferenceWrapper] stringForKey:BDSKPapersFolderPathKey];
-		newPath = [newPath stringByAppendingPathComponent:fileName];
+		NSString *newPath = [papersFolderPath stringByAppendingPathComponent:fileName];
 		
 		NSMutableDictionary *info = [NSMutableDictionary dictionaryWithObjectsAndKeys:[path stringByAbbreviatingWithTildeInPath], @"oloc", 
 			newPath, @"nloc", nil];
