@@ -2,6 +2,7 @@
 %%  Adam Maxwell <amaxwell@wsu.edu> is responsible for the initial revision of this document.
 %%  10 March 2003  1st draft
 %%  Revised 13 July 2003
+%%  Panther--specific section added 1 November 2003
 %%
 
 \documentclass[11pt]{article}
@@ -83,6 +84,21 @@ like this:  \begin{verbatim}
   @executable_path/../Frameworks/OmniAppKit.framework/Versions/2001A/OmniA
   ppKit (compatibility version 1.0.0, current version 1.0.0)
 \end{verbatim}  This tip is from the cocoadev article.
+\end{enumerate}
+
+\section{Panther--specific notes}
+\begin{enumerate}
+\item To rebuild the Omni frameworks (August 2003 release), you need to double--click the
+target for the framework and uncheck ``Treat all warnings as errors'' under GCC Compiler
+Settings.  Since this is also set explicitly in Expert View, go to Expert View and delete
+\tt{-Werror} \rm from the \tt WARNING\_CFLAGS \rm option.
+\item You must set up a native target for Bibdesk in order to use the new ``Fix'' debugging
+option.  To do this, select the Bibdesk target and choose ``Upgrade Target to Native'' from
+the Project menu in XCode.
+\item You may have to add the Omni frameworks to the ``Copy Files'' build phase in your
+target.  To do this, drag them from the Groups \& Files inspector into the first ``Copy
+Files'' phase, then get info on ``Copy Files'' to make sure that the destination is set to
+``Frameworks.''
 \end{enumerate}
 
 
