@@ -58,7 +58,10 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
         pub = [shownPublications objectAtIndex:sortedRow];
         auths = [pub pubAuthors];
         
-        if([tcID isEqualToString: @"Cite Key"] ){
+        if([tcID caseInsensitiveCompare:@"Cite Key"] == NSOrderedSame ||
+		   [tcID caseInsensitiveCompare:@"CiteKey"] == NSOrderedSame ||
+		   [tcID caseInsensitiveCompare:@"Cite-Key"] == NSOrderedSame ||
+		   [tcID caseInsensitiveCompare:@"Key"]== NSOrderedSame){
             return [pub citeKey];
             
         }else if([tcID isEqualToString: @"Title"] ){
