@@ -73,7 +73,7 @@ static BDSKFileContentsFilter *_sharedFileContentsFilter = nil;
 - (NSArray *)filesMatchingQuery:(NSString *)query inDocument:(BibDocument *)doc{
 	int maxResults = 15;  // @@ pref
 	
-	if(!index){
+	if(!_index){
 		[NSException raise:@"IndexNotThereException" 
 					format:@"There is no index in filesMatchingQuery"];
 	}
