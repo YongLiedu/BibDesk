@@ -1,5 +1,7 @@
 #import "BDSKComplexString.h"
 
+static AGRegex *unquotedHashRegex = nil;
+
 @implementation BDSKStringNode
 
 + (BDSKStringNode *)nodeWithBibTeXString:(NSString *)s{
@@ -8,27 +10,38 @@
     // a single string - may be a macro or a quoted string.
     s = [s stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]];
     
-    if([s characterAtIndex:0] == '{'){
-        // if it's quoted, strip that and call it a simple string
-        s = [s substringFromIndex:1];
-        if([s characterAtIndex:([s length] - 1)] == '}'){
-            s = [s substringToIndex:([s length] - 1)];
-        }
-        [node setType:BSN_STRING];
-        [node setValue:[[BDSKConverter sharedConverter] stringByDeTeXifyingString:s]];
-        return [node autorelease];
+    // check that there isn't an unquoted hash mark in there.
+    // it's really a latex error, but it's likely to happen here so we check for it.
+    if(!unquotedHashRegex) unquotedHashRegex = [[AGRegex alloc] initWithPattern:@"[^\\\\]#"];
+
+    // check for unquoted hash marks:
+    //@@todo
+    
+    // other errors to check for - unbalanced brackets are always an error, even if the quote style is quotes!
+    
+    unichar startChar = [s characterAtIndex:0];
+    unichar endChar;
+    if(startChar == '{' || startChar == '"'){        // if it's quoted, strip that and call it a simple string
+        if(startChar == '{') endChar = '}';
+        else endChar = '"';
         
-    }else if([s characterAtIndex:0] == '"'){
-        // if it's quoted, strip that and call it a simple string
-        s = [s substringFromIndex:1];
-        if([s characterAtIndex:([s length] - 1)] == '"'){
+        s = [s substringFromIndex:1]; // ignore startChar.
+        
+        if([s characterAtIndex:([s length] - 1)] == endChar){
             s = [s substringToIndex:([s length] - 1)];
+        }else{
+            // it's an unbalanced string, so we raise
+            [NSException raise:@"BDSKComplexStringException" 
+                        format:@"Unbalanced string: [%@]", s];
         }
         [node setType:BSN_STRING];
         [node setValue:[[BDSKConverter sharedConverter] stringByDeTeXifyingString:s]];
         return [node autorelease];
         
     }else{
+        
+        // it doesn't start with a quote, but 
+        
         // a single macro
         
         NSCharacterSet *nonDigitCharset = [[NSCharacterSet decimalDigitCharacterSet] invertedSet];
@@ -103,21 +116,16 @@
 
 @end
 
-// stores system-defined macros
-// found in a config plist.
+// stores system-defined macros for the months.
+// we grab their localized versions for display.
 static NSDictionary *globalMacroDefs; 
 
 @implementation BDSKComplexString
 
 + (void)initialize{
     if (globalMacroDefs == nil){
-        NSString *applicationSupportPath = [[[NSHomeDirectory() stringByAppendingPathComponent:@"Library"]
-        stringByAppendingPathComponent:@"Application Support"]
-        stringByAppendingPathComponent:@"BibDesk"];
-        
-        NSString *macroDefFile = [applicationSupportPath stringByAppendingPathComponent:@"macroDefinitions.plist"];
-
-        globalMacroDefs = [NSDictionary dictionaryWithContentsOfFile:macroDefFile];
+        globalMacroDefs = [[NSMutableDictionary alloc] initWithObjects:[[NSUserDefaults standardUserDefaults] objectForKey:NSMonthNameArray]
+                                                               forKeys:[NSArray arrayWithObjects:@"jan", @"feb", @"mar", @"apr", @"may", @"jun", @"jul", @"aug", @"sep", @"oct", @"nov", @"dec", nil]];
     }
 }
 
@@ -178,13 +186,18 @@ static NSDictionary *globalMacroDefs;
     if(![sc isAtEnd]){
         [sc setScanLocation:([sc scanLocation] + 1)];
         
-        while([sc scanUpToString:@"#" intoString:&s]){
-            [returnNodes addObject:[BDSKStringNode nodeWithBibTeXString:s]];
-            unsigned loc = [sc scanLocation];
-            if(loc == [btstring length]){
-                break;
-            }
-            [sc setScanLocation:([sc scanLocation] + 1)];
+        while(![sc isAtEnd]){
+            // look for hash marks
+            if([sc scanUpToString:@"#" intoString:&s]){
+                // found one, add the string before it as a node
+                BDSKStringNode *node = [BDSKStringNode nodeWithBibTeXString:s];
+                [returnNodes addObject:node];
+            }   
+            // set scan location past the hash, even if we didn't find a string before it.
+            // (this is necessary to get ## right.)
+            if(![sc isAtEnd])
+                [sc setScanLocation:([sc scanLocation] + 1)];
+            
         }
     }
 
@@ -371,7 +384,12 @@ static NSDictionary *globalMacroDefs;
             if (exp){
                 [s appendString:exp];
             }else{
-                [s appendString:[node value]];
+                // there was no expansion. Check the system global dict first.
+                NSString *globalExp = [globalMacroDefs objectForKey:[node value]];
+                if(globalExp) 
+                    [s appendString:globalExp];
+                else 
+                    [s appendString:[node value]];
             }
         }else{
             [s appendString:[node value]];
