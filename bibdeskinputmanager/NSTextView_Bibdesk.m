@@ -122,18 +122,15 @@ However, we will simply add the usual completions after our own for safety...
     return NSMakeRange(NSNotFound,0);
 }
 
-// ** check to see if it's TeX
+// ** Check to see if it's TeX
 // look back to see if { ; if no brace, return not TeX
-
 // if { found, look back between insertion point and { to find comma; check to see if it's BibTeX, then return the match range
-
-// ** check to see if it's BibTeX
+// ** Check to see if it's BibTeX
 // look back to see if ] ; if no options, then just find the citecommand (or not) by searching back from {
 // look back to see if ][ ; if so, set ] range again
 // look back to find [ starting from ]
-// now we have [, see if there is a cite immediately preceding it (rangeOfString:@"cite" || rangeOfString:@"bibentry"
-
-// after all of this, we've searched back to a brace, and then checked for a cite command with two optional parameters
+// now we have the last [, see if there is a cite immediately preceding it using rangeOfString:@"cite" || rangeOfString:@"bibentry"
+// ** After all of this, we've searched back to a brace, and then checked for a cite command with two optional parameters
 
 NSRange SafeBackwardSearchRange(NSRange startRange, unsigned seekLength){
     unsigned minLoc = ( (startRange.location > seekLength) ? seekLength : startRange.location);
@@ -144,10 +141,10 @@ NSRange SafeBackwardSearchRange(NSRange startRange, unsigned seekLength){
     NSString *str = [[self textStorage] string];
     NSRange citeSearchRange;
 
-    NSRange rightBracketRange = [str rangeOfString:@"]" options:NSBackwardsSearch | NSLiteralSearch range:SafeBackwardSearchRange(braceRange, 1)];
+    NSRange rightBracketRange = [str rangeOfString:@"]" options:NSBackwardsSearch | NSLiteralSearch range:SafeBackwardSearchRange(braceRange, 1)]; // see if there are any optional parameters
     
-    if(rightBracketRange.location == NSNotFound){
-        citeSearchRange = SafeBackwardSearchRange(braceRange, 10);
+    if(rightBracketRange.location == NSNotFound){ // no options, so life is easy; look backwards 10 characters from the brace and see if there's a citecommand
+        citeSearchRange = SafeBackwardSearchRange(braceRange, 20);
         if([str rangeOfString:@"cite" options:NSBackwardsSearch | NSLiteralSearch range:citeSearchRange].location != NSNotFound ||
            [str rangeOfString:@"bibentry" options:NSBackwardsSearch | NSLiteralSearch range:citeSearchRange].location != NSNotFound){
             return YES;
@@ -157,13 +154,14 @@ NSRange SafeBackwardSearchRange(NSRange startRange, unsigned seekLength){
     }
     
     NSRange leftBracketRange = [str rangeOfString:@"[" options:NSBackwardsSearch | NSLiteralSearch]; // first occurrence of it, looking backwards
-    NSRange doubleBracketRange = [str rangeOfString:@"][" options:NSBackwardsSearch | NSLiteralSearch range:SafeBackwardSearchRange( NSMakeRange(leftBracketRange.location + 1, 3), 3)];
+    // next, see if we have two optional parameters; this range is tricky, since we have to go forward one, then do a safe backward search over the previous characters
+    NSRange doubleBracketRange = [str rangeOfString:@"][" options:NSBackwardsSearch | NSLiteralSearch range:SafeBackwardSearchRange( NSMakeRange(leftBracketRange.location + 1, 3), 3)]; 
 
-    if(doubleBracketRange.location != NSNotFound)
+    if(doubleBracketRange.location != NSNotFound) // if we had two parameters, find the last opening bracket
         leftBracketRange = [str rangeOfString:@"[" options:NSBackwardsSearch | NSLiteralSearch range:SafeBackwardSearchRange(doubleBracketRange, 50)];
     
     if(leftBracketRange.location != NSNotFound){
-        citeSearchRange = SafeBackwardSearchRange(leftBracketRange, 10);
+        citeSearchRange = SafeBackwardSearchRange(leftBracketRange, 20); // could be larger
         if([str rangeOfString:@"cite" options:NSBackwardsSearch | NSLiteralSearch range:citeSearchRange].location != NSNotFound ||
            [str rangeOfString:@"bibentry" options:NSBackwardsSearch | NSLiteralSearch range:citeSearchRange].location != NSNotFound){
             return YES;
@@ -186,10 +184,17 @@ NSRange SafeForwardSearchRange( unsigned startLoc, unsigned seekLength, unsigned
     NSRange finalRange;
     unsigned maxLoc;
 
-    NSRange braceRange = [str rangeOfString:@"{" options:NSBackwardsSearch | NSLiteralSearch range:SafeBackwardSearchRange(r, 100)];
+    NSRange braceRange = [str rangeOfString:@"{" options:NSBackwardsSearch | NSLiteralSearch range:SafeBackwardSearchRange(r, 100)]; // look for an opening brace
+    NSRange closingBraceRange = [str rangeOfString:@"}" options:NSBackwardsSearch | NSLiteralSearch range:SafeBackwardSearchRange(r, 100)];
+    
+    if(closingBraceRange.location != NSNotFound && closingBraceRange.location > braceRange.location) // if our { has a matching }, don't bother
+        return finalRange = NSMakeRange(NSNotFound, 0);
 
-    if(braceRange.location != NSNotFound) // may be TeX
+    if(braceRange.location != NSNotFound){ // may be TeX
         commaRange = [str rangeOfString:@"," options:NSBackwardsSearch | NSLiteralSearch range:NSUnionRange(braceRange, r)]; // exclude commas in the optional parameters
+    } else { // definitely not TeX
+         return finalRange = NSMakeRange(NSNotFound, 0);
+    }
 
     if([self isBibTeXCitation:braceRange]){
         if(commaRange.location != NSNotFound){
@@ -217,7 +222,7 @@ Override usual behaviour so we can have dots, colons and hyphens in our cite key
 requires X.3
 */
 - (NSRange)rangeForUserCompletion {
-    NSRange r = [self citeKeyRange];
+    NSRange r = [self newCiteKeyRange];
     if (r.location != NSNotFound) {
 	return r;
     }
@@ -239,8 +244,8 @@ requires X.3
 	if(keyRange.location != NSNotFound){ // if it's a re
 		//	NSString * beginning = [s substringWithRange:NSMakeRange(charRange.location - 6, 6)];
 #warning debug only
-               // NSString * end = [s substringWithRange:r];
-               NSString *end = [[s substringWithRange:keyRange] stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceCharacterSet]];
+        // NSString * end = [s substringWithRange:r];
+        NSString *end = [[s substringWithRange:keyRange] stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceCharacterSet]];
 		
 		// code shamelessly lifted from Buzz Anderson's ASHandlerTest example app
 		// Performance gain if we stored the script permanently? But where to store it?
