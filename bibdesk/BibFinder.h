@@ -53,6 +53,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 */
 - (NSMutableArray *)itemsMatchingConstraints:(NSDictionary *)constraints;
 - (NSMutableArray *)itemsMatchingText:(NSString *)s inKey:(NSString *)key;
+- (NSMutableArray *)itemsMatchingCiteKey:(NSString *)key;
 - (BOOL)searchForText:(NSString *)s inKey:(NSString *)key;
 - (id)init;
 - (void)addKey:(NSString *)key;

@@ -147,6 +147,32 @@ static BibFinder *_sharedFinder = nil;
     return returnArray;
 }
 
+- (NSMutableArray *)itemsMatchingCiteKey:(NSString *)key{
+    NSDocumentController *dc = [NSDocumentController sharedDocumentController];
+    NSEnumerator *docEnum = [[dc documents] objectEnumerator];
+    NSEnumerator *bibEnum;
+    BibDocument *doc;
+    BibItem *bib;
+    NSRange r;
+    NSString *val;
+    NSMutableArray *returnArray = [NSMutableArray arrayWithCapacity:1];
+
+    while (doc = [docEnum nextObject]) {
+        bibEnum = [[doc publications] objectEnumerator];
+
+        while(bib = [bibEnum nextObject]){
+            val = [bib citeKey];
+            if((val != nil) && (![@"" isEqualToString:val])) {
+                r = [val rangeOfString:key options:NSCaseInsensitiveSearch];
+                if(r.location != NSNotFound){
+                    [returnArray addObject:bib];
+                }
+            }
+        }
+    }
+    return returnArray;
+}
+
 - (BOOL)searchForText:(NSString *)s inKey:(NSString *)key{
     NSDocumentController *dc = [NSDocumentController sharedDocumentController];
     NSEnumerator *docEnum = [[dc documents] objectEnumerator];
