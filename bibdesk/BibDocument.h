@@ -117,7 +117,9 @@ extern NSString* LocalDragPasteboardName;
     IBOutlet NSTextField* addFieldPrompt;
     IBOutlet NSTextField* addFieldTextField;
     // --------------------------------------------------------------------------------------
-    IBOutlet NSMenu *contextualMenu;
+    IBOutlet NSMenu * contextualMenu;
+	IBOutlet NSMenu * actionMenu;
+	IBOutlet NSPopUpButton * actionMenuButton;
     int fileOrderCount;
     // ----------------------------------------------------------------------------------------
     // stuff for the accessory view for the exportAsRSS
@@ -276,6 +278,13 @@ extern NSString* LocalDragPasteboardName;
 - (IBAction)copyAsTex:(id)sender;
 
 /*!
+    @method citeStringForSelection
+	 @abstract auxiliary method for generating cite string
+	 @discussion generates appropriate cite command from the document's current selection 
+*/
+-(NSString*) citeStringForSelection;
+
+/*!
     @method copyAsPDF
  @abstract copy as PDF typeset image
  @discussion puts the typeset image of the currently selected publications onto the general pasteboard rendered using tex and bibtex and the user's selected style file.
@@ -415,6 +424,15 @@ int generalBibItemCompareFunc(id item1, id item2, void *context);
 - (void)addTableColumnSheetDidEnd:(NSWindow *)sheet
                        returnCode:(int) returnCode
                       contextInfo:(void *)contextInfo;
+
+/*!
+    @method menuForSelection...
+	@abstract called when an action/contextual menu is needed
+	@discussion uses the menu wired up as actionMenu and removes every item that doesn't validate.
+*/
+- (NSMenu*) menuForSelection;
+
+
 
 /*!
     @method handleTableColumnChangedNotification

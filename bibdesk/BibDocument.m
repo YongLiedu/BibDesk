@@ -159,6 +159,15 @@ NSString*   LocalDragPasteboardName = @"edu.ucsd.cs.mmccrack.bibdesk: Local Publ
 	
     // finally, make sure the font is correct initially:
     [self handleFontChangedNotification:nil];
+	
+	/*
+	// set up the action menu - ssp: 2004-07-30 --- upcoming
+	NSPopUpButtonCell * c = [actionMenuButton cell];
+	[c setUsesItemFromMenu:NO];
+	[c setArrowPosition:NSPopUpNoArrow];
+	[c setMenu:actionMenu];
+	[actionMenuButton setAlternateImage:[NSImage imageNamed:@"Action_Pressed"]];
+	 */
 }
 
 - (void)dealloc{
@@ -277,6 +286,7 @@ NSString*   LocalDragPasteboardName = @"edu.ucsd.cs.mmccrack.bibdesk: Local Publ
     
 }
 
+
 - (BOOL)citeKeyIsUsed:(NSString *)aCiteKey byItemOtherThan:(BibItem *)anItem{
     NSEnumerator *bibE = [publications objectEnumerator];
     BibItem *bi = nil;
@@ -288,6 +298,8 @@ NSString*   LocalDragPasteboardName = @"edu.ucsd.cs.mmccrack.bibdesk: Local Publ
     }
     return NO;
 }
+
+
 
 - (NSString *)windowNibName
 {
@@ -1060,10 +1072,13 @@ stringByAppendingPathComponent:@"BibDesk"]; */
 }
 
 
+
 // replaces sortPubsByColumn
 - (void) tableView: (NSTableView *) theTableView
 didClickTableColumn: (NSTableColumn *) tableColumn{
-    if (tableView != (BDSKDragTableView *) theTableView) return;
+	// check whether this is the right kind of table view and don't re-sort when we have a contextual menu click
+    if (tableView != (BDSKDragTableView *) theTableView || 	[[NSApp currentEvent] type] == NSRightMouseDown
+) return;
     if (lastSelectedColumnForSort == tableColumn) {
         // User clicked same column, change sort order
         sortDescending = !sortDescending;
@@ -1261,6 +1276,14 @@ int generalBibItemCompareFunc(id item1, id item2, void *context){
 }
 
 - (IBAction)copyAsTex:(id)sender{
+    NSPasteboard *pasteboard = [NSPasteboard pasteboardWithName:NSGeneralPboard];
+
+    [pasteboard declareTypes:[NSArray arrayWithObject:NSStringPboardType] owner:nil];
+    [pasteboard setString:[self citeStringForSelection] forType:NSStringPboardType];
+}
+
+
+-(NSString*) citeStringForSelection{
 	OFPreferenceWrapper *sud = [OFPreferenceWrapper sharedPreferenceWrapper];
 	NSString *startCiteBracket = [sud stringForKey:BDSKCiteStartBracketKey]; 
 	NSString *citeString = [sud stringForKey:BDSKCiteStringKey];
@@ -1268,11 +1291,9 @@ int generalBibItemCompareFunc(id item1, id item2, void *context){
 	NSString *endCiteBracket = [sud stringForKey:BDSKCiteEndBracketKey]; 
 	
     NSEnumerator *e = [self selectedPubEnumerator];
-    NSPasteboard *pasteboard = [NSPasteboard pasteboardWithName:NSGeneralPboard];
     NSNumber *i;
     BOOL sep = ([sud integerForKey:BDSKSeparateCiteKey] == NSOnState);
     
-    [pasteboard declareTypes:[NSArray arrayWithObject:NSStringPboardType] owner:nil];
     while(i=[e nextObject]){
         [s appendString:[[shownPublications objectAtIndex:[i intValue]] citeKey]];
         if(sep)
@@ -1285,8 +1306,12 @@ int generalBibItemCompareFunc(id item1, id item2, void *context){
 											 options:NSBackwardsSearch] withString:endCiteBracket];
     else
         [s replaceCharactersInRange:[s rangeOfString:@"," options:NSBackwardsSearch] withString:endCiteBracket];
-    [pasteboard setString:s forType:NSStringPboardType];
+	
+	
+	return s;
 }
+
+
 
 - (IBAction)copyAsPDF:(id)sender{
     NSPasteboard *pb = [NSPasteboard pasteboardWithName:NSGeneralPboard];
@@ -1562,6 +1587,43 @@ int generalBibItemCompareFunc(id item1, id item2, void *context){
     }
 }
 
+
+
+
+
+
+/*
+ Returns action/contextual menu that contains items appropriate for the current selection.
+ The code may need to be revised if the menu's contents are changed.
+*/
+- (NSMenu*) menuForSelection {
+	NSMenu * myMenu = [[actionMenu copy] autorelease];
+	
+	// kick out every item we won't need:
+	NSEnumerator * itemEnum = [[myMenu itemArray] objectEnumerator];
+	NSMenuItem * theItem = nil;
+	
+	while (theItem = (NSMenuItem*) [itemEnum nextObject]) {
+		if (![self validateMenuItem:theItem]) {
+			[myMenu removeItem:theItem];
+		}
+	}
+	
+	int n = [myMenu numberOfItems] -1;
+	
+	if ([[myMenu itemAtIndex:n] isSeparatorItem]) {
+		// last item is separator => remove
+		[myMenu removeItemAtIndex:n];
+	}	
+	return myMenu;
+}
+
+
+
+
+
+
+
 - (void)handleTableColumnChangedNotification:(NSNotification *)notification{
     id menuItem = nil;
     NSString *colName = [notification object];
@@ -1699,36 +1761,6 @@ int generalBibItemCompareFunc(id item1, id item2, void *context){
 	}
 }
 
-- (BOOL)validateMenuItem:(id <NSMenuItem>)menuItem{
-    if([[menuItem title] isEqualToString:@"Copy BibTex"] ||
-       [[menuItem title] isEqualToString:@"Copy Tex Citation"] ||
-       [[menuItem title] isEqualToString:@"Copy PDF Citation"] ||
-       [[menuItem title] isEqualToString:@"Copy RTF Citation"] ||
-       [[menuItem title] isEqualToString:@"Edit Reference"] ||
-       [[menuItem title] isEqualToString:@"Delete Reference"]){
-        if([self numberOfSelectedPubs] != 0)
-            return YES;
-        else
-            return NO;
-
-    }else if([[menuItem title] isEqualToString:@"Send via email"]&& [self numberOfSelectedPubs] != 1){
-        // Localization note: does using this string work under localizations?
-        return NO;
-    }else if([[menuItem representedObject] isEqualToString:@"showHideCustomCiteMenuItem"] ){
-
-		if(showingCustomCiteDrawer){
-			[menuItem setTitle:NSLocalizedString(@"Hide Custom Citation Strings",@"")];
-		}else{
-			[menuItem setTitle:NSLocalizedString(@"Show Custom Citation Strings",@"should be the same as in the nib")];
-		}
-	}else{
-        return YES;
-    }
- /*   if([@@ [menuItem title] isEqualToString:@"the one for blogging the item"]){
-      if(BDSK_USING_JAGUAR){return NO}; @@@@@ -- even better, get IBOutlet to that item, then in awakeFromNib, remove it if BDSK_USING_JAGUAR.
-    } */
-
-}
 
 
 - (int)numberOfSelectedPubs{
@@ -1797,10 +1829,8 @@ int generalBibItemCompareFunc(id item1, id item2, void *context){
     }
 	
     // Run operation, which shows the Print panel if showPanels was YES
-    [self runModalPrintOperation:op
-						delegate:nil
-				  didRunSelector:NULL
-					 contextInfo:NULL];
+    // [self runModalPrintOperation:op						delegate:nil				  didRunSelector:NULL					 contextInfo:NULL];
+	[op runOperationModalForWindow:documentWindow delegate:nil didRunSelector:NULL contextInfo:NULL];
 }
 
 #pragma mark 
