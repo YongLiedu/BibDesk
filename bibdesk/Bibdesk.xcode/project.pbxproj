@@ -48,6 +48,10 @@
 				F9022C490758027800C3F701,
 				F9022C470758027800C3F701,
 				3DAEA2EC07703F6000AF111A,
+				F916E68A07A9F9AA009EF011,
+				F916E68F07A9F9AA009EF011,
+				F916E6A007A9FB56009EF011,
+				F916E6A507A9FB56009EF011,
 			);
 			isa = PBXGroup;
 			name = Classes;
@@ -1153,6 +1157,8 @@
 				27C1639F078BF48C008A4B83,
 				F94A9500079AEE5800D13AB5,
 				F94A9502079AEE5800D13AB5,
+				F916E69607A9F9AB009EF011,
+				F916E6AC07A9FB56009EF011,
 			);
 			isa = PBXSourcesBuildPhase;
 			runOnlyForDeploymentPostprocessing = 0;
@@ -3732,6 +3738,62 @@
 			settings = {
 			};
 		};
+		F916E68A07A9F9AA009EF011 = {
+			fileEncoding = 4;
+			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.c.h;
+			path = "NSMutableDictionary+ThreadSafety.h";
+			refType = 4;
+			sourceTree = "<group>";
+		};
+		F916E68F07A9F9AA009EF011 = {
+			fileEncoding = 4;
+			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.c.objc;
+			path = "NSMutableDictionary+ThreadSafety.m";
+			refType = 4;
+			sourceTree = "<group>";
+		};
+		F916E69407A9F9AB009EF011 = {
+			fileRef = F916E68A07A9F9AA009EF011;
+			isa = PBXBuildFile;
+			settings = {
+			};
+		};
+		F916E69607A9F9AB009EF011 = {
+			fileRef = F916E68F07A9F9AA009EF011;
+			isa = PBXBuildFile;
+			settings = {
+			};
+		};
+		F916E6A007A9FB56009EF011 = {
+			fileEncoding = 4;
+			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.c.h;
+			path = "NSMutableArray+ThreadSafety.h";
+			refType = 4;
+			sourceTree = "<group>";
+		};
+		F916E6A507A9FB56009EF011 = {
+			fileEncoding = 4;
+			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.c.objc;
+			path = "NSMutableArray+ThreadSafety.m";
+			refType = 4;
+			sourceTree = "<group>";
+		};
+		F916E6AA07A9FB56009EF011 = {
+			fileRef = F916E6A007A9FB56009EF011;
+			isa = PBXBuildFile;
+			settings = {
+			};
+		};
+		F916E6AC07A9FB56009EF011 = {
+			fileRef = F916E6A507A9FB56009EF011;
+			isa = PBXBuildFile;
+			settings = {
+			};
+		};
 		F918100E07583A5B00CF822D = {
 			fileRef = F9022C1B0758013E00C3F701;
 			isa = PBXBuildFile;
@@ -4845,6 +4907,8 @@
 				F9273968078E58A600609739,
 				F94A94FF079AEE5800D13AB5,
 				F94A9501079AEE5800D13AB5,
+				F916E69407A9F9AB009EF011,
+				F916E6AA07A9FB56009EF011,
 			);
 			isa = PBXHeadersBuildPhase;
 			runOnlyForDeploymentPostprocessing = 0;
