@@ -286,7 +286,7 @@ NSString*   LocalDragPasteboardName = @"edu.ucsd.cs.mmccrack.bibdesk: Local Publ
             // for each author auth, set i to be the index of auth in the temp. array.
             i = [tmpTotalAuths indexOfObject:auth];
             if(i == NSNotFound){
-                bibAuthor = [[[BibAuthor alloc] initWithName:[auth name] andPub:pub] autorelease];
+                bibAuthor = [BibAuthor  authorWithName:[auth name] andPub:pub]; 
                 [authors addObject:bibAuthor];
                 [tmpTotalAuths addObject:auth];
             }else{
