@@ -19,57 +19,19 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 
 #define emptyStr(x) ([x isEqualToString:@""] || !(x))
 
-static NSCountedSet *_authors;  //use a counted set so the same object can be retained each time it's added
-
 @implementation BibAuthor
 
-+ (void)initialize{
-	static BOOL alreadyInit= NO;
-    if ( !alreadyInit ) {
-		_authors = [[NSMutableSet alloc] initWithCapacity:10];
-		
-        alreadyInit = YES;
-    }
-}
-
 + (BibAuthor *)authorWithName:(NSString *)newName andPub:(BibItem *)aPub{	
-	BibAuthor *newAuth = [[[BibAuthor alloc] initWithName:newName andPub:aPub] autorelease];
-    BibAuthor *auth = [_authors member:newAuth];
-    
-    if(auth != nil){
-        [auth addPub:aPub];
-        NSNotification *notif = [NSNotification notificationWithName:BDSKAuthorPubListChangedNotification
-                                                              object:auth];
-        [[NSNotificationQueue defaultQueue] enqueueNotification:notif
-                                                   postingStyle:NSPostWhenIdle
-                                                   coalesceMask:NSNotificationCoalescingOnSender
-                                                       forModes:nil];
-        [_authors addObject:auth]; // increment its retain count in the set for each pub
-        return auth;
-    }
-        	
-	[_authors addObject:newAuth];
-	return newAuth;
+    return [[[BibAuthor alloc] initWithName:newName andPub:nil] autorelease];
 }
 
 - (id)initWithName:(NSString *)aName andPub:(BibItem *)aPub{
     [self setName:aName];
-    if(aPub)
-        pubs = [[NSMutableSet setWithObject:aPub] retain];
-    else
-        pubs = [[NSMutableSet alloc] init];
-	
-	[[NSNotificationCenter defaultCenter] addObserver:self
-                                                 selector:@selector(handleBibItemChangeNotification:)
-                                                     name:BDSKBibItemChangedNotification
-                                                   object:nil];
-	
     return self;
 }
 
 - (void)dealloc{
     [name release];
-    [pubs release];
 	[_firstName release];
 	[_vonPart release];
 	[_lastName release];
@@ -80,17 +42,9 @@ static NSCountedSet *_authors;  //use a counted set so the same object can be re
     [super dealloc];
 }
 
-
-- (void)removeAuthorsFromGlobalAuthors:(NSArray *)authArray{
-    NSSet *setToRemove = [NSSet setWithArray:authArray];
-    [_authors minusSet:setToRemove]; // this is sent on a per-bibitem basis from BibDocument
-    // NSLog(@"removing %@, _authors has %i", [setToRemove description], [_authors count]);
-}
-
 - (id)copyWithZone:(NSZone *)zone{
     BibAuthor *copy = [[[self class] allocWithZone: zone] initWithName:[self name]
                                                                 andPub:nil];
-    [copy setPubs:pubs];
     return copy;
 }
 
@@ -100,20 +54,6 @@ static NSCountedSet *_authors;  //use a counted set so the same object can be re
 
 - (unsigned)hash{
     return [name hash];
-}
-
-
-- (void)setPubs:(NSSet *)newPubs{
-    [pubs autorelease];
-    pubs = [newPubs mutableCopy];
-}
-
-- (int)numberOfPublications{
-    return [pubs count];
-}
-
-- (NSArray *)publications{
-    return [pubs allObjects];
 }
 
 #pragma mark Comparison
@@ -294,29 +234,4 @@ Note: The strings returned by the bt_split_name function seem to be in the wrong
 	_personController = newPersonController;
 }
 
-- (void)handleBibItemChangeNotification:(NSNotification *)notification{
-	BibItem *pub = [notification object];
-
-	// if a pub changes and it's in our pubs list, we have to check that we're still an author.
-	if([pubs containsObject:pub] &&
-	   ![[pub pubAuthors] containsObjectIdenticalTo:self]){
-		[self removePubFromAuthorList:pub];
-	}
-	
-}
-
-
-
-
-- (BibItem *)pubAtIndex:(int)index{
-    return [[pubs allObjects] objectAtIndex: index];
-}
-- (void)addPub:(BibItem *)pub{
-    [pubs addObject: pub];
-}
-- (void)removePubFromAuthorList:(BibItem *)pub{
-    [pubs removeObject:pub];
-	[[NSNotificationCenter defaultCenter] postNotificationName:BDSKAuthorPubListChangedNotification
-														object:self];
-}
 @end

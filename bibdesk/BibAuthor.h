@@ -31,7 +31,6 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
     @discussion none.
 */
 @interface BibAuthor : NSObject {
-    NSMutableSet *pubs;
     NSString *name;
     NSString *_firstName;
     NSString *_vonPart;
@@ -46,11 +45,6 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 // maybe this should be 'and pubs'
 - (id)initWithName:(NSString *)aName andPub:(BibItem *)aPub;
 - (void)dealloc;
-- (void)setPubs:(NSSet *)newPubs;
-- (void)removeAuthorsFromGlobalAuthors:(NSArray *)authArray;
-
-- (int)numberOfPublications;
-- (NSArray *)publications;
 
 - (NSComparisonResult)compare:(BibAuthor *)otherAuth;
 - (NSComparisonResult)fuzzyCompare:(BibAuthor *)otherAuth;
@@ -68,9 +62,5 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 - (void)setPersonController:(BibPersonController *)newPersonController;
 
 - (void)setName:(NSString *)newName;
-- (void)handleBibItemChangeNotification:(NSNotification *)notification;
-- (BibItem *)pubAtIndex:(int)index;
-- (void)addPub:(BibItem *)pub;
-- (void)removePubFromAuthorList:(BibItem *)pub;
 @end
 
