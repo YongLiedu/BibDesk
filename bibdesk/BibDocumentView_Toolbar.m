@@ -32,7 +32,7 @@ NSString*	ToggleCiteDrawerToolbarItemIdentifier 	= @"Toggle Cite Drawer Identifi
 // ----------------------------------------------------------------------------------------
 
 // label, palettelabel, toolTip, action, and menu can all be NULL, depending upon what you want the item to do
-static void addToolbarItem(NSMutableDictionary *theDict,NSString *identifier,NSString *label,NSString *paletteLabel,NSString *toolTip,id target,SEL settingSelector, id itemContent,SEL action, NSMenu * menu)
+static void addToolbarItem(NSMutableDictionary *theDict,NSString *identifier,NSString *label,NSString *paletteLabel,NSString *toolTip,id target,SEL settingSelector, id itemContent,SEL action, NSMenuItem *menuItem)
 {
     NSMenuItem *mItem;
     // here we create the NSToolbarItem and setup its attributes in line with the parameters
@@ -46,28 +46,18 @@ static void addToolbarItem(NSMutableDictionary *theDict,NSString *identifier,NSS
     // (in the itemContent parameter).  Then this next line will do the right thing automatically.
     [item performSelector:settingSelector withObject:itemContent];
     [item setAction:action];
-    // If this NSToolbarItem is supposed to have a menu "form representation" associated with it (for text-only mode),
-    // we set it up here.  Actually, you have to hand an NSMenuItem (not a complete NSMenu) to the toolbar item,
-    // so we create a dummy NSMenuItem that has our real menu as a submenu.
-    if (menu!=NULL)
-    {
-        // we actually need an NSMenuItem here, so we construct one
-        mItem=[[[NSMenuItem alloc] init] autorelease];
-        [mItem setSubmenu: menu];
-        [mItem setTitle: label];
-        [item setMenuFormRepresentation:mItem];
-    }
+	[item setMenuFormRepresentation:menuItem];
     // Now that we've setup all the settings for this new toolbar item, we add it to the dictionary.
     // The dictionary retains the toolbar item for us, which is why we could autorelease it when we created
     // it (above).
     [theDict setObject:item forKey:identifier];
 }
 
-
 // called from WindowControllerDidLoadNib.
 - (void) setupToolbar {
     // Create a new toolbar instance, and attach it to our document window
     NSToolbar *toolbar = [[[NSToolbar alloc] initWithIdentifier:BibDocToolbarIdentifier] autorelease];
+    NSMenuItem *menuItem;
 
     toolbarItems=[[NSMutableDictionary dictionary] retain];
     
@@ -136,22 +126,32 @@ static void addToolbarItem(NSMutableDictionary *theDict,NSString *identifier,NSS
                    @selector(toggleShowingCustomCiteDrawer:), NULL);
 	
 	
+	menuItem = [[[NSMenuItem alloc] initWithTitle:NSLocalizedString(@"Search",@"") 
+										   action:@selector(showFindPanel:)
+									keyEquivalent:@""] autorelease];
+	[menuItem setTarget:[NSApp delegate]];
     addToolbarItem(toolbarItems, SearchFieldDocToolbarItemIdentifier,
                    NSLocalizedString(@"Search",@""),
                    NSLocalizedString(@"Search",@""),
                    NSLocalizedString(@"Search Publication",@""),
                    self, @selector(setView:),
                    searchFieldView,
-                   NULL, NULL);
+                   NULL, 
+				   menuItem);
 	
 	
+	menuItem = [[[NSMenuItem alloc] initWithTitle:NSLocalizedString(@"Action",@"") 
+										   action:NULL 
+									keyEquivalent:@""] autorelease];
+	[menuItem setSubmenu: actionMenu];
     addToolbarItem(toolbarItems, ActionMenuToolbarItemIdentifier,
                    NSLocalizedString(@"Action",@""),
                    NSLocalizedString(@"Action",@""),
                    NSLocalizedString(@"Action for Selection",@""),
                    self, @selector(setView:),
                    actionMenuView,
-                   NULL, actionMenu);
+                   NULL, 
+				   menuItem);
     
     // Attach the toolbar to the document window
     [documentWindow setToolbar: toolbar];
