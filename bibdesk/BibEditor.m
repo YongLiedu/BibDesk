@@ -313,7 +313,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 
 - (IBAction)revealLocal:(id)sender{
     NSWorkspace *sw = [NSWorkspace sharedWorkspace];
-	NSString *path = [theBib localURLPathRelativeTo:[[theDocument fileName] stringByDeletingLastPathComponent]];
+	NSString *path = [theBib localURLPath];
 	[sw selectFile:path inFileViewerRootedAtPath:nil];
 }
 
@@ -324,7 +324,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 
     NS_DURING
 
-        if(![sw openFile:[theBib localURLPathRelativeTo:[[theDocument fileName] stringByDeletingLastPathComponent]]]){
+        if(![sw openFile:[theBib localURLPath]]){
                 err = YES;
         }
 
@@ -576,7 +576,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 	else if ([menuItem action] == @selector(generateLocalUrl:) ||
 			 [menuItem action] == @selector(viewLocal:) ||
 			 [menuItem action] == @selector(revealLocal:)) {
-		NSString *lurl = [theBib localURLPathRelativeTo:[[theDocument fileName] stringByDeletingLastPathComponent]];
+		NSString *lurl = [theBib localURLPath];
 		return (lurl && [[NSFileManager defaultManager] fileExistsAtPath:lurl]);
 	}
 	else if ([menuItem action] == @selector(toggleSnoopDrawer:)) {
@@ -600,7 +600,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 			NSString *rurl = [theBib valueOfField:BDSKUrlString];
 			return (![rurl isEqualToString:@""] && [NSURL URLWithString:rurl]);
 		} else {
-			NSString *lurl = [theBib localURLPathRelativeTo:[[theDocument fileName] stringByDeletingLastPathComponent]];
+			NSString *lurl = [theBib localURLPath];
 			return (lurl && [[NSFileManager defaultManager] fileExistsAtPath:lurl]);
 		}
 	}
@@ -752,7 +752,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
     
 
 - (void)fixURLs{
-    NSString *lurl = [theBib localURLPathRelativeTo:[[theDocument fileName] stringByDeletingLastPathComponent]];
+    NSString *lurl = [theBib localURLPath];
     NSString *rurl = [theBib valueOfField:BDSKUrlString];
     NSImage *icon;
     BOOL drawerWasOpen = ([documentSnoopDrawer state] == NSDrawerOpenState ||
@@ -805,7 +805,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 										 file:nil
 										types:nil];
     if (result == NSOKButton) {
-		NSString *fileURLString = [[NSURL fileURLWithPath:[[oPanel filename] stringByStandardizingPath]] absoluteString];
+		NSString *fileURLString = [[NSURL fileURLWithPath:[oPanel filename]] absoluteString];
         
 		[theBib setField:BDSKLocalUrlString toValue:fileURLString];
 		[theBib autoFilePaper];
@@ -816,7 +816,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 - (void)setLocalURLPathFromMenuItem:(NSMenuItem *)sender{
 	NSString *path = [sender representedObject];
 	
-	[theBib setField:BDSKLocalUrlString toValue:[[NSURL fileURLWithPath:[path stringByStandardizingPath]] absoluteString]];
+	[theBib setField:BDSKLocalUrlString toValue:[[NSURL fileURLWithPath:path] absoluteString]];
 	[theBib autoFilePaper];
 }
 
@@ -1069,7 +1069,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 					  [documentSnoopDrawer state] == NSDrawerOpeningState) );
 	BOOL isText = (requiredSnoopContainerView == textSnoopContainerView);
 	BOOL isWeb = (requiredSnoopContainerView == webSnoopContainerView);
-    NSString *lurl = [theBib localURLPathRelativeTo:[[theDocument fileName] stringByDeletingLastPathComponent]];
+    NSString *lurl = [theBib localURLPath];
     NSString *rurl = [theBib valueOfField:BDSKUrlString];
 	NSImage *drawerImage = [NSImage imageNamed:@"drawerRight"];
 	
@@ -1126,7 +1126,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 
 - (void)updateSnoopDrawerContent{
 	if ([documentSnoopDrawer contentView] == pdfSnoopContainerView) {
-		NSString *lurl = [theBib localURLPathRelativeTo:[[theDocument fileName] stringByDeletingLastPathComponent]];
+		NSString *lurl = [theBib localURLPath];
 		if (!lurl) return;
 		if (!pdfSnoopViewLoaded) {
 			[documentSnoopImageView loadFromPath:lurl];
@@ -1135,7 +1135,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 		}
 	}
 	else if ([documentSnoopDrawer contentView] == textSnoopContainerView) {
-		NSString *lurl = [theBib localURLPathRelativeTo:[[theDocument fileName] stringByDeletingLastPathComponent]];
+		NSString *lurl = [theBib localURLPath];
 		if (!lurl) return;
         if (!textSnoopViewLoaded) {
 			NSString *cmdString = [NSString stringWithFormat:@"%@/pdftotext -f 1 -l 1 \"%@\" -",[[NSBundle mainBundle] resourcePath], lurl, nil];
@@ -1274,7 +1274,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
     int result = [sPanel runModalForDirectory:nil file:fileName];
     if (result == NSOKButton) {
 		if ([[dataSource data] writeToFile:[sPanel filename] atomically:YES]) {
-			NSString *fileURLString = [[NSURL fileURLWithPath:[[sPanel filename] stringByStandardizingPath]] absoluteString];
+			NSString *fileURLString = [[NSURL fileURLWithPath:[sPanel filename]] absoluteString];
 			
 			[theBib setField:BDSKLocalUrlString toValue:fileURLString];
 			[theBib autoFilePaper];
