@@ -199,6 +199,8 @@ static BDSKConverter *theConverter;
 		} else {
 			// found an accent => process
 			composedRange = [t rangeOfComposedCharacterSequenceAtIndex:foundRange.location];
+                        if(composedRange.length > 2) // rangeOfComposedCharacterSequence returns base+N accents; if N>1, we can't convert
+                            return nil;
 			if(replacementString = [self convertBunch:[t substringWithRange:composedRange]])
 					[t replaceCharactersInRange:composedRange withString:replacementString];
 			else
@@ -221,8 +223,10 @@ static BDSKConverter *theConverter;
     
     // isolate character(s)
     NSString * character = [s substringToIndex:[s length] - 1];
-    if(![baseCharacterSetForTeX characterIsMember:[character characterAtIndex:0]]) // length 1 string
+    NSString *hexString = [NSString stringWithFormat:@"%X", [character characterAtIndex:0]];
+    if(![baseCharacterSetForTeX characterIsMember:[character characterAtIndex:0]]){ // length 1 string
         return nil;
+    }
     // handle i and j (others as well?)
     if (([character isEqualToString:@"i"] || [character isEqualToString:@"j"]) &&
 		![accent isEqualToString:@"c"] && ![accent isEqualToString:@"d"] && ![accent isEqualToString:@"b"]) {
