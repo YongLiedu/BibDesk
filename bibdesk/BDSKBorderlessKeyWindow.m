@@ -17,7 +17,9 @@
                                 styleMask:NSBorderlessWindowMask
                                   backing:NSBackingStoreBuffered
                                     defer:flag]) {
-        
+		// we make the window transparent, the highlight is bigger than the textfield
+		[self setBackgroundColor:[NSColor clearColor]];
+		[self setOpaque:NO];
         return self;
     }
     
