@@ -123,6 +123,7 @@
                 makeNewNotepad = id; 
                 makeSearchFieldKey = id; 
                 myAction = id; 
+                newBDSKLibrary = id; 
                 newPub = id; 
                 saveAsBDSKDocument = id; 
                 showMacrosWindow = id; 
