@@ -18,6 +18,10 @@ extern NSString *BDSKInputManagerLoadableApplications;
     IBOutlet NSTableView *appList;
     IBOutlet NSButton *enableButton;
     NSMutableArray *appListArray;
+    IBOutlet NSTableView *editorAutocompletionStringsTableView;
+    NSMutableArray *enabledEditorAutocompletionStrings;
+    IBOutlet NSPanel *addFieldSheet;
+    IBOutlet NSTextField *addField;
 }
 /*!
     @method     bundleIDForPath:
@@ -30,5 +34,6 @@ extern NSString *BDSKInputManagerLoadableApplications;
 - (IBAction)enableAutocompletion:(id)sender;
 - (IBAction)addApplication:(id)sender;
 - (IBAction)removeApplication:(id)sender;
-
+- (IBAction)addAutocompleteString:(id)sender;
+- (IBAction)removeAutocompleteString:(id)sender;
 @end

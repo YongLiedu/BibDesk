@@ -18,6 +18,7 @@ NSString *BDSKStartupBehaviorKey = @"Startup Behavior";
 NSString *BDSKAutoCheckForUpdates = @"Check for updates when starting";
 NSString *BDSKShouldUseTemplateFile = @"Write template file when saving";
 NSString *BDSKSnoopDrawerContentKey = @"Snoop Drawer Content";
+NSString *BDSKBibEditorAutocompletionFields = @"Enabled for autocompletion in BibEditor";
 
 NSString *BDSKUseUnicodeBibTeXParser = @"Use Unicode BibTeX Parser";
 NSString *BDSKUseThreadedFileLoading = @"Load files in background";

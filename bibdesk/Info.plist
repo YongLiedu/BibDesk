@@ -471,7 +471,14 @@
 			<key>BibPref_InputManager</key>
 			<dict>
 				<key>defaultsDictionary</key>
-				<dict/>
+                                <dict>
+                                        <key>Enabled for autocompletion in BibEditor</key>
+                                        <array>
+                                            <string>Author</string>
+                                            <string>Title</string>
+                                            <string>Keywords</string>
+                                        </array>
+				</dict>
 				<key>icon</key>
 				<string>inputmanager.tiff</string>
 				<key>identifier</key>

@@ -23,10 +23,6 @@ NSString *BDSKInputManagerLoadableApplications = @"Application bundles that we r
     
     if(![ws respondsToSelector:@selector(absolutePathForAppBundleWithIdentifier:)]){ // check the OS version
         [enableButton setEnabled:NO];
-        NSBeginAlertSheet(NSLocalizedString(@"Error!", @"Error!"),
-                          nil, nil, nil, [[OAPreferenceController sharedPreferenceController] window], nil, nil, nil, nil,
-                          NSLocalizedString(@"You appear to be using a system version earlier than 10.3.  Autocompletion requires Mac OS X 10.3 or greater.",
-                                            @"You appear to be using a system version earlier than 10.3.  Autocompletion requires Mac OS X 10.3 or greater.") );
     }
         
     CFPropertyListRef prefs = CFPreferencesCopyAppValue( (CFStringRef)BDSKInputManagerLoadableApplications,
@@ -54,11 +50,19 @@ NSString *BDSKInputManagerLoadableApplications = @"Application bundles that we r
                            didEndSelector:@selector(updateAlertDidEnd:returnCode:contextInfo:)
                               contextInfo:nil];
     }
+    
+    if([defaults objectForKey:BDSKBibEditorAutocompletionFields]){
+        enabledEditorAutocompletionStrings = [[defaults objectForKey:BDSKBibEditorAutocompletionFields] mutableCopy];
+    } else {
+        enabledEditorAutocompletionStrings = [[NSMutableArray array] retain];
+    }
+    [[editorAutocompletionStringsTableView tableColumnWithIdentifier:@"CompList"] setDataCell:[[[NSTextFieldCell alloc] init] autorelease]];
 }
 
 - (void)dealloc{
     [inputManagerPath release];
     [appListArray release];
+    [enabledEditorAutocompletionStrings release];
     [super dealloc];
 }
 
@@ -76,6 +80,7 @@ NSString *BDSKInputManagerLoadableApplications = @"Application bundles that we r
     NSAssert1( success, @"Failed to synchronize preferences for %@", BDSKInputManagerID);
 
     [appList reloadData];
+    [editorAutocompletionStringsTableView reloadData];
 }
 
 - (void)updateAlertDidEnd:(NSAlert *)alert returnCode:(int)returnCode contextInfo:(void *)contextInfo{
@@ -91,10 +96,16 @@ NSString *BDSKInputManagerLoadableApplications = @"Application bundles that we r
 }
 
 - (int)numberOfRowsInTableView:(NSTableView *)tableView{
-    return [appListArray count];
+    return (tableView == appList) ? [appListArray count] : [enabledEditorAutocompletionStrings count];
 }
-
+    
 - (void)tableView:(NSTableView *)aTableView willDisplayCell:(id)aCell forTableColumn:(NSTableColumn *)aTableColumn row:(int)rowIndex{
+    
+    if(aTableView != appList){ // we have two tables, and this isn't the right one
+        [aCell setStringValue:[enabledEditorAutocompletionStrings objectAtIndex:rowIndex]];
+        return;
+    }
+    
     NSString *inBundleID = [appListArray objectAtIndex:rowIndex];
     CFURLRef outAppURL = nil;
     NSImage *image = nil;
@@ -192,6 +203,14 @@ NSString *BDSKInputManagerLoadableApplications = @"Application bundles that we r
 }
 
 - (IBAction)addApplication:(id)sender{
+    if(![[NSWorkspace sharedWorkspace] respondsToSelector:@selector(absolutePathForAppBundleWithIdentifier:)]){ // check the OS version
+        [sender setEnabled:NO];
+        NSBeginAlertSheet(NSLocalizedString(@"Error!", @"Error!"),
+                          nil, nil, nil, [[OAPreferenceController sharedPreferenceController] window], nil, nil, nil, nil,
+                          NSLocalizedString(@"You appear to be using a system version earlier than 10.3.  Cite-key autocompletion requires Mac OS X 10.3 or greater.",
+                                            @"You appear to be using a system version earlier than 10.3.  Cite-key autocompletion requires Mac OS X 10.3 or greater.") );
+    }
+    
     NSOpenPanel *op = [NSOpenPanel openPanel];
     [op setCanChooseDirectories:NO];
     [op setAllowsMultipleSelection:NO];
@@ -251,8 +270,39 @@ NSString *BDSKInputManagerLoadableApplications = @"Application bundles that we r
 }
 
 - (IBAction)removeApplication:(id)sender{
-    [appListArray removeObjectAtIndex:[appList selectedRow]];
+    if([appList selectedRow] != -1)
+        [appListArray removeObjectAtIndex:[appList selectedRow]];
     [self updateUI];
+}
+
+- (IBAction)addAutocompleteString:(id)sender{
+    [NSApp beginSheet:addFieldSheet
+       modalForWindow:[[OAPreferenceController sharedPreferenceController] window]
+        modalDelegate:self
+       didEndSelector:@selector(addFieldSheetDidEnd:returnCode:contextInfo:)
+          contextInfo:nil];
+}
+
+- (void)addFieldSheetDidEnd:(NSWindow *)sheet returnCode:(int)returnCode contextInfo:(void *)contextInfo{
+    if(returnCode == 1){
+        [enabledEditorAutocompletionStrings addObject:[[addField stringValue] capitalizedString]];
+        [defaults setObject:enabledEditorAutocompletionStrings forKey:BDSKBibEditorAutocompletionFields];
+    }
+    [self updateUI];
+}
+
+- (IBAction)dismissAddFieldSheet:(id)sender{
+    [addFieldSheet orderOut:sender];
+    [NSApp endSheet:addFieldSheet returnCode:[sender tag]];
+}
+
+
+- (IBAction)removeAutocompleteString:(id)sender{
+    if([editorAutocompletionStringsTableView selectedRow] != -1){
+        [enabledEditorAutocompletionStrings removeObjectAtIndex:[editorAutocompletionStringsTableView selectedRow]];
+        [defaults setObject:enabledEditorAutocompletionStrings forKey:BDSKBibEditorAutocompletionFields];
+    }
+    [self updateUI];    
 }
 
 @end
