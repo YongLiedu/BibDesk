@@ -34,10 +34,20 @@ NSRange SafeForwardSearchRange( unsigned startLoc, unsigned seekLength, unsigned
                               error:(BOOL *)hadProblems
                         frontMatter:(NSMutableString *)frontMatter
                            filePath:(NSString *)filePath{
-//    - Input string
-//    - Scan %-EOL as a comment, store in preamble
+
+// Potential problems with this method:
+//
+// Error checking is almost non-existent; it's basically just using ad hoc pattern-matching heuristics to scan fragments of text.  The plus side to this is that
+// we can read some sloppy (or even incorrect) BibTeX and probably correct it by saving, since BibItem will clean things up for us when it writes out a BibTeX string.
+//
+// Nested double quotes are bound to cause problems if the entries use the key = "value", instead of key = {value}, approach.  I can't do anything about this; if you're using TeX,
+// you shouldn't have double quotes in your files.  This is a non-issue for BibDesk-created files, as BibItem uses curly braces instead of double quotes; JabRef-1.6 appears to use braces, also.
+// This problem will only munge a single entry, though, since we scan between @ != \@ markers as entry delimiters; the larger problem is that there is no warning for this case.
+
 #warning ARM: Scan comments into preamble
 #warning ARM: Scan strings into a separate container?  Ask mmcc about this.
+    
+    NSAssert( fullString != nil, @"A nil string was passed to the parser.  This is probably due to an incorrect guess at the string encoding." );
 
     NSScanner *scanner = [[NSScanner alloc] initWithString:fullString];
     [scanner setCharactersToBeSkipped:nil];
@@ -49,11 +59,23 @@ NSRange SafeForwardSearchRange( unsigned startLoc, unsigned seekLength, unsigned
     NSMutableArray *bibItemArray = [NSMutableArray array];
     
     NSRange firstAtRange = [fullString rangeOfString:@"@" options:NSLiteralSearch range:NSMakeRange(0, [fullString length])];
+    
+    NSAssert( firstAtRange != NSNotFound, @"This does not appear to be a BibTeX entry.  Perhaps due to an incorrect encoding guess?" );
+    
+    // if the @ is escaped, get the next one
+    while(firstAtRange.location >= 1 && [[fullString substringWithRange:NSMakeRange(firstAtRange.location - 1, 1)] isEqualToString:@"\\"])
+        firstAtRange = [fullString rangeOfString:@"@" options:NSLiteralSearch range:SafeForwardSearchRange(firstAtRange.location + 1, fullStringLength - firstAtRange.location - 1, fullStringLength)];
+
     NSRange nextAtRange = [fullString rangeOfString:@"@" options:NSLiteralSearch range:SafeForwardSearchRange(firstAtRange.location + 1, fullStringLength - firstAtRange.location - 1, fullStringLength)];    
+    // check this one to make sure the @ is not escaped; make sure there _is_ another one, though
+    while(nextAtRange.location != NSNotFound && [[fullString substringWithRange:NSMakeRange(nextAtRange.location - 1, 1)] isEqualToString:@"\\"])
+        nextAtRange = [fullString rangeOfString:@"@" options:NSLiteralSearch range:SafeForwardSearchRange(nextAtRange.location + 1, fullStringLength - nextAtRange.location - 1, fullStringLength)];
 
     // NSLog(@"Creating a new bibitem, first one is at %i, second is at %@", firstAtRange.location, ( nextAtRange.location != NSNotFound ? [NSString stringWithFormat:@"%i", nextAtRange.location] : @"NSNotFound" ) );
     
     while(![scanner isAtEnd]){
+        
+        NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
         
         // get the type and citekey
         NSString *type = nil;
@@ -107,40 +129,20 @@ NSRange SafeForwardSearchRange( unsigned startLoc, unsigned seekLength, unsigned
             NSString *leftDelim = @"{";
             NSString *rightDelim = @"}";
             unsigned leftDelimLocation;
-              
+            
             [scanner scanUpToString:@"," intoString:nil]; // find the comma
-
+              
             if([scanner scanLocation] >= nextAtRange.location){
                 // NSLog(@"End of file or reached the next bibitem...breaking");
                 break; // either at EOF or scanned into the next bibitem
             }
 
-
-            if(![scanner scanString:@"," intoString:nil]){// get rid of the comma
-                *hadProblems = YES;
-                [BibTeXParser postParsingErrorNotification:@"Comma not found" 
-                                                 errorType:@"Parse Error" 
-                                                  fileName:filePath 
-                                                errorRange:[fullString lineRangeForRange:NSMakeRange([scanner scanLocation], 0)]];
-            }
+            [scanner scanString:@"," intoString:nil];// get rid of the comma
             
-            if(![scanner scanUpToString:@"=" intoString:&key]){ // this should be our key
-                *hadProblems = YES;
-                [BibTeXParser postParsingErrorNotification:@"Field not found" 
-                                                 errorType:@"Warning" 
-                                                  fileName:filePath 
-                                                errorRange:[fullString lineRangeForRange:NSMakeRange([scanner scanLocation], 0)]];
-            }
-               
-           if(![scanner scanString:@"=" intoString:nil]){
-               *hadProblems = YES;
-               [BibTeXParser postParsingErrorNotification:@"= not found" 
-                                                errorType:@"Warning" 
-                                                 fileName:filePath 
-                                               errorRange:[fullString lineRangeForRange:NSMakeRange([scanner scanLocation], 0)]];
-           }
-           
-            
+            [scanner scanUpToString:@"=" intoString:&key]; // this should be our key
+                           
+            [scanner scanString:@"=" intoString:nil];
+                       
             quoteRange = [fullString rangeOfString:@"\"" options:NSLiteralSearch range:SafeForwardSearchRange([scanner scanLocation], 100, fullStringLength)];
             braceRange = [fullString rangeOfString:@"{" options:NSLiteralSearch range:SafeForwardSearchRange([scanner scanLocation], 100, fullStringLength)];
 
@@ -158,7 +160,16 @@ NSRange SafeForwardSearchRange( unsigned startLoc, unsigned seekLength, unsigned
 
             leftDelimLocation = ( usingBraceDelimiter ? braceRange.location : quoteRange.location );
             
-            NSAssert ( nextAtRange.location >= [scanner scanLocation], @"Scanner tried to enter the next bibitem too early." );
+            if([scanner scanLocation] >= nextAtRange.location){ // this is a lousy warning, but I can't pick it up earlier
+                *hadProblems = YES;
+                [BibTeXParser postParsingErrorNotification:@"Possible extra comma in previous entry."
+                                                 errorType:@"Parse Warning"
+                                                  fileName:filePath
+                                                errorRange:[fullString lineRangeForRange:NSMakeRange([scanner scanLocation], 0)]];
+            }                
+            
+            // NSAssert ( nextAtRange.location >= [scanner scanLocation], @"Scanner tried to enter the next bibitem too early." );
+#warning ARM: JabRef incompatibility
             NSAssert ( leftDelimLocation != NSNotFound, @"Can't find a delimiter.");
             
             if(leftDelimLocation + 1 >= nextAtRange.location)
@@ -212,6 +223,7 @@ NSRange SafeForwardSearchRange( unsigned startLoc, unsigned seekLength, unsigned
             NSAssert( key != nil, @"Found a nil key string");
             
             [dict setObject:value forKey:key];
+            
         }
         
         [newBI setFileOrder:fileOrder];
@@ -222,15 +234,18 @@ NSRange SafeForwardSearchRange( unsigned startLoc, unsigned seekLength, unsigned
         
         [dict removeAllObjects];
         
-        firstAtRange = nextAtRange;
+        firstAtRange = nextAtRange; // we know the next one is safe (unescaped)
         nextAtRange = [fullString rangeOfString:@"@" options:NSLiteralSearch range:SafeForwardSearchRange(firstAtRange.location + 1, fullStringLength - firstAtRange.location - 1, fullStringLength)];
+        // check for an escaped @ string...they're deadly when provoked
+        while(nextAtRange.location != NSNotFound && [[fullString substringWithRange:NSMakeRange(nextAtRange.location - 1, 1)] isEqualToString:@"\\"])
+            nextAtRange = [fullString rangeOfString:@"@" options:NSLiteralSearch range:SafeForwardSearchRange(nextAtRange.location + 1, fullStringLength - nextAtRange.location - 1, fullStringLength)];
 
         if(firstAtRange.location != NSNotFound)
             [scanner setScanLocation:firstAtRange.location];
         
         // NSLog(@"Finished a bibitem, next one is at %i, following is at %@", firstAtRange.location, ( nextAtRange.location != NSNotFound ? [NSString stringWithFormat:@"%i", nextAtRange.location] : @"NSNotFound" ) );
 
-        
+        [pool release];
     }
     return bibItemArray;    
 }
