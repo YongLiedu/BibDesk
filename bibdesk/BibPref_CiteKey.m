@@ -29,30 +29,60 @@
 	BOOL custom = (citeKeyPresetChoice == 0);
 	NSString *error;
 	
-	// use a BibItem with some data to build the preview cite key
-	BibItem *tmpBI = [[BibItem alloc] init];
-	[tmpBI setField:@"Title" toValue:@"Bibdesk, a great application to manage your bibliographies"];
-	[tmpBI setField:@"Author" toValue:@"McCracken, M. and Maxwell, A. and Howison, J. and Routley, M. and Spiegel, S.  and Porst, S. S. and Hofman, C. M."];
-	[tmpBI setField:@"Year" toValue:@"2004"];
-	[tmpBI setField:@"Month" toValue:@"11"];
-	[tmpBI setField:@"Journal" toValue:@"SourceForge"];
-	[tmpBI setField:@"Volume" toValue:@"1"];
-	[tmpBI setField:@"Pages" toValue:@"96"];
-	
 	// update the UI elements
     [citeKeyAutogenerateCheckButton setState:[defaults integerForKey:BDSKCiteKeyAutogenerateKey]];
 	if ([[BDSKConverter sharedConverter] validateFormat:&citeKeyFormat forField:@"Cite Key" inFileType:@"BibTeX" error:&error]) {
 		[self setCiteKeyFormatInvalidWarning:NO message:nil];
+		
+		// use a BibItem with some data to build the preview cite key
+		BibItem *tmpBI = [[BibItem alloc] init];
+		[tmpBI setField:@"Title" toValue:@"Bibdesk, a great application to manage your bibliographies"];
+		[tmpBI setField:@"Author" toValue:@"McCracken, M. and Maxwell, A. and Howison, J. and Routley, M. and Spiegel, S.  and Porst, S. S. and Hofman, C. M."];
+		[tmpBI setField:@"Year" toValue:@"2004"];
+		[tmpBI setField:@"Month" toValue:@"11"];
+		[tmpBI setField:@"Journal" toValue:@"SourceForge"];
+		[tmpBI setField:@"Volume" toValue:@"1"];
+		[tmpBI setField:@"Pages" toValue:@"96"];
+		[tmpBI setField:@"Keywords" toValue:@"Keyword1,Keyword2"];
+		[citeKeyLine setStringValue:[tmpBI suggestedCiteKey]];
+		[tmpBI release];
 	} else {
 		[self setCiteKeyFormatInvalidWarning:YES message:error];
+		[citeKeyLine setStringValue:NSLocalizedString(@"Invalid Format", @"Cite key preview for invalid format")];
 	}
 	[formatPresetPopUp selectItemAtIndex:[formatPresetPopUp indexOfItemWithTag:citeKeyPresetChoice]];
 	[formatField setStringValue:citeKeyFormat];
-	[citeKeyLine setStringValue:[tmpBI suggestedCiteKey]];
-	[formatField setEnabled:custom]; // or hidden?
-        if([formatRepositoryPopUp respondsToSelector:@selector(setHidden:)])
+	[formatField setEnabled:custom];
+	if([formatRepositoryPopUp respondsToSelector:@selector(setHidden:)])
 	    [formatRepositoryPopUp setHidden:!custom];
-	[tmpBI release];
+	else 
+		[formatRepositoryPopUp setEnabled:custom];
+}
+
+- (void)resignCurrentPreferenceClient{
+	NSString *formatString = [formatField stringValue];
+	NSString *error;
+	NSString *alternateButton = nil;
+	int rv;
+	
+	if (![[BDSKConverter sharedConverter] validateFormat:&formatString forField:@"Cite Key" inFileType:@"BibTeX" error:&error]) {
+		formatString = [defaults stringForKey:BDSKCiteKeyFormatKey];
+		if ([[BDSKConverter sharedConverter] validateFormat:&formatString forField:@"Cite Key" inFileType:@"BibTeX" error:NULL]) {
+			// The currently set cite-key format is valid, so we can keep it 
+			alternateButton = NSLocalizedString(@"Revert to Last", @"Revert to Last Valid Cite Key Format");
+		}
+		rv = NSRunCriticalAlertPanel(NSLocalizedString(@"Invalid Cite Key Format",@""), 
+									 @"%@",
+									 NSLocalizedString(@"Revert to Default", @"Revert to Default Cite Key Format"), 
+									 alternateButton, 
+									 nil,
+									 error, nil);
+		if (rv == NSAlertDefaultReturn){
+			formatString = [[[OFPreferenceWrapper sharedPreferenceWrapper] preferenceForKey:BDSKCiteKeyFormatKey] defaultObjectValue];
+			[[OFPreferenceWrapper sharedPreferenceWrapper] setObject:formatString forKey:BDSKCiteKeyFormatKey];
+			[[NSApp delegate] setRequiredFieldsForCiteKey: [[BDSKConverter sharedConverter] requiredFieldsForFormat:formatString]];
+		}
+	}
 }
 
 - (IBAction)formatHelp:(id)sender{

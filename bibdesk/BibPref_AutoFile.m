@@ -23,15 +23,6 @@
 }
 
 - (void)updateUI{
-	BibItem *tmpBI = [[BibItem alloc] init];
-    [tmpBI setField:@"Title" toValue:@"Bibdesk, a great application to manage your bibliographies"];
-    [tmpBI setField:@"Author" toValue:@"McCracken, M. and Maxwell, A. and Howison, J. and Routley, M. and Spiegel, S.  and Porst, S. S. and Hofman, C. M."];
-    [tmpBI setField:@"Year" toValue:@"2004"];
-    [tmpBI setField:@"Month" toValue:@"11"];
-    [tmpBI setField:@"Journal" toValue:@"SourceForge"];
-    [tmpBI setField:@"Volume" toValue:@"1"];
-    [tmpBI setField:@"Pages" toValue:@"96"];
-    
     NSString *formatString = [defaults stringForKey:BDSKLocalUrlFormatKey];
     NSString * error;
 	
@@ -42,12 +33,50 @@
 
 	if ([[BDSKConverter sharedConverter] validateFormat:&formatString forField:@"Local-Url" inFileType:@"BibTeX" error:&error]) {
 		[self setLocalUrlFormatInvalidWarning:NO message:nil];
+		
+		// use a BibItem with some data to build the preview local-url
+		BibItem *tmpBI = [[BibItem alloc] init];
+		[tmpBI setField:@"Title" toValue:@"Bibdesk, a great application to manage your bibliographies"];
+		[tmpBI setField:@"Author" toValue:@"McCracken, M. and Maxwell, A. and Howison, J. and Routley, M. and Spiegel, S.  and Porst, S. S. and Hofman, C. M."];
+		[tmpBI setField:@"Year" toValue:@"2004"];
+		[tmpBI setField:@"Month" toValue:@"11"];
+		[tmpBI setField:@"Journal" toValue:@"SourceForge"];
+		[tmpBI setField:@"Volume" toValue:@"1"];
+		[tmpBI setField:@"Pages" toValue:@"96"];
+		[tmpBI setField:@"Keywords" toValue:@"Keyword1,Keyword2"];
+		[previewTextField setStringValue:[[tmpBI suggestedLocalUrl] stringByAbbreviatingWithTildeInPath]];
+		[tmpBI release];
 	} else {
 		[self setLocalUrlFormatInvalidWarning:YES message:error];
+		[previewTextField setStringValue:NSLocalizedString(@"Invalid Format", @"Local-url preview for invalid format")];
 	}
     [formatField setStringValue:formatString];
-    [previewTextField setStringValue:[[tmpBI suggestedLocalUrl] stringByAbbreviatingWithTildeInPath]];
-    [tmpBI release];
+}
+
+- (void)resignCurrentPreferenceClient{
+	NSString *formatString = [formatField stringValue];
+	NSString *error;
+	NSString *alternateButton = nil;
+	int rv;
+	
+	if (![[BDSKConverter sharedConverter] validateFormat:&formatString forField:@"Local-Url" inFileType:@"BibTeX" error:&error]) {
+		formatString = [defaults stringForKey:BDSKLocalUrlFormatKey];
+		if ([[BDSKConverter sharedConverter] validateFormat:&formatString forField:@"Local-Url" inFileType:@"BibTeX" error:NULL]) {
+			// The currently set local-url format is valid, so we can keep it 
+			alternateButton = NSLocalizedString(@"Revert to Last", @"Revert to Last Valid Local-Url Format");
+		}
+		rv = NSRunCriticalAlertPanel(NSLocalizedString(@"Invalid Local-Url Format",@""), 
+									 @"%@",
+									 NSLocalizedString(@"Revert to Default", @"Revert to Default Local-Url Format"), 
+									 alternateButton, 
+									 nil,
+									 error, nil);
+		if (rv == NSAlertDefaultReturn){
+			formatString = [[[OFPreferenceWrapper sharedPreferenceWrapper] preferenceForKey:BDSKLocalUrlFormatKey] defaultObjectValue];
+			[[OFPreferenceWrapper sharedPreferenceWrapper] setObject:formatString forKey:BDSKLocalUrlFormatKey];
+			[[NSApp delegate] setRequiredFieldsForLocalUrl: [[BDSKConverter sharedConverter] requiredFieldsForFormat:formatString]];
+		}
+	}
 }
 
 - (IBAction)choosePapersFolderLocationAction:(id)sender{
