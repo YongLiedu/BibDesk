@@ -55,6 +55,7 @@ NSRange SafeForwardSearchRange( unsigned startLoc, unsigned seekLength, unsigned
     unsigned fileOrder = 0;
     NSCharacterSet *possibleLeftDelimiters = [NSCharacterSet characterSetWithCharactersInString:@"\"{"];
     BOOL isStringValue = NO;
+    BOOL showWarning = NO;
     NSMutableDictionary *stringsDictionary = [NSMutableDictionary dictionary];
     
     BibItem *newBI;
@@ -265,7 +266,7 @@ NSRange SafeForwardSearchRange( unsigned startLoc, unsigned seekLength, unsigned
                     // If there are no more leftDelims hanging around, we're done; bail out and go to the next key-value line in the parent while(); don't do the shallow brace check,
                     // since that puts us past the end.
                     if(braceSearchRange.location == NSNotFound){
-                        // NSLog(@"braceSearchRange.location is not found, breaking out.");
+                        // NSLog(@"braceSearchRange.location is not found, breaking out.");                        
                         doShallow = NO;
                         break;
                     }
@@ -274,12 +275,13 @@ NSRange SafeForwardSearchRange( unsigned startLoc, unsigned seekLength, unsigned
                     //NSLog(@"Deep nested brace check, scanned rightDelim %@", logString);
                      
                     if(![scanner scanUpToString:rightDelim intoString:&logString] && // find the next right delimiter
-                       [fullString rangeOfString:@"=" options:NSLiteralSearch range:NSMakeRange(tempStart + 1, [scanner scanLocation] - tempStart - 1)].location != NSNotFound ){ // see if there's an equal sign, which means we probably went too far and hit another key/value 
+                       [fullString rangeOfString:@"},\n" options:NSLiteralSearch range:NSMakeRange(tempStart + 1, [scanner scanLocation] - tempStart - 1)].location != NSNotFound ){ // see if there's an equal sign, which means we probably went too far and hit another key/value 
                         //NSLog(@"*** ERROR doubly nested braces");
                         //NSLog(@"the substring was %@", [fullString substringWithRange:NSMakeRange(tempStart + 1, [scanner scanLocation] - tempStart - 1)]);
-                        *hadProblems = YES;
-                        [BibTeXParser postParsingErrorNotification:[NSString stringWithFormat:@"Delimiter '%@' not found", rightDelim]
-                                                         errorType:@"Parse Error" 
+                        // *hadProblems = YES; // May not be an error, since these tests are sort of bogus
+                        showWarning = YES;
+                        [BibTeXParser postParsingErrorNotification:[NSString stringWithFormat:@"I am puzzled: delimiter '%@' may be missing", rightDelim]
+                                                         errorType:@"Parse Warning" 
                                                           fileName:filePath 
                                                         errorRange:[fullString lineRangeForRange:NSMakeRange(leftDelimLocation, 0)]];
                     }
@@ -371,6 +373,9 @@ NSRange SafeForwardSearchRange( unsigned startLoc, unsigned seekLength, unsigned
 
         [pool release];
     }
+#warning ARM: prefs override
+    if(!*hadProblems && showWarning)
+        [[NSApp delegate] showErrorPanel:nil]; // this isn't nice, but I'm going to override the warning preference until the parser has been tested
     return bibItemArray;    
 }
 
