@@ -380,11 +380,17 @@ NSString *BDSKUrlString = @"Url";
             [viewLocalButton setToolTip:@"View File"];
             [viewLocalButton setTitle:@""];
             [viewLocalButton setAction:@selector(viewLocal:)];
-            [documentSnoopButton setEnabled:YES];
-            [documentSnoopButton setToolTip:NSLocalizedString(@"Show first page in a drawer.", @"show first page in a drawer")];
-            [documentTextSnoopButton setEnabled:YES];
-            [documentTextSnoopButton setToolTip:NSLocalizedString(@"Show first page as text in a drawer.", @"show first page as text in a drawer")];
-            
+			
+			NSString *ext = [lurl pathExtension];
+			BOOL fileIsPSOrPDF = ([ext isEqualToString:@"ps"] || [ext isEqualToString:@"pdf"]);
+			
+			if(fileIsPSOrPDF){
+				[documentSnoopButton setEnabled:YES];
+				[documentSnoopButton setToolTip:NSLocalizedString(@"Show first page in a drawer.", @"show first page in a drawer")];
+				[documentTextSnoopButton setEnabled:YES];
+				[documentTextSnoopButton setToolTip:NSLocalizedString(@"Show first page as text in a drawer.", @"show first page as text in a drawer")];
+            }
+			
             if(drawerWasOpen || drawerIsOpening){
                 if(!_pdfSnoopImage){
                     _pdfSnoopImage = [[NSImage alloc] initWithContentsOfFile:lurl];
@@ -445,8 +451,7 @@ NSString *BDSKUrlString = @"Url";
                                     types:nil];
     if (result == NSOKButton) {
         [theBib setField:@"Local-Url" toValue:[[oPanel filename] stringByAddingPercentEscapesUsingEncoding:NSASCIIStringEncoding]];
-        [self noteChange];
-        [self setupForm];
+		[self setupForm];
         [self fixURLs];
     }
     
