@@ -14,7 +14,8 @@
             LANGUAGE = ObjC; 
             SUPERCLASS = NSObject; 
         }, 
-        {CLASS = FirstResponder; LANGUAGE = ObjC; SUPERCLASS = NSObject; }
+        {CLASS = FirstResponder; LANGUAGE = ObjC; SUPERCLASS = NSObject; }, 
+        {CLASS = PDFImageView; LANGUAGE = ObjC; SUPERCLASS = NSImageView; }
     ); 
     IBVersion = 1; 
 }

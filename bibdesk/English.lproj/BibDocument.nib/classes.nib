@@ -20,7 +20,7 @@
                 newPub = id; 
                 openCustomCitePrefPane = id; 
                 quickSearchAddField = id; 
-                sortPubsByColumn = id; 
+                splitViewDoubleClick = id; 
                 toggleShowingCustomCiteDrawer = id; 
             }; 
             CLASS = BibDocument; 
@@ -52,12 +52,14 @@
                 rssExportTextField = NSTextField; 
                 sortKeyButton = NSPopUpButton; 
                 sortKeyView = NSView; 
+                splitView = OASplitView; 
                 tableBox = NSView; 
                 tableView = BDSKDragTableView; 
             }; 
             SUPERCLASS = NSDocument; 
         }, 
-        {CLASS = FirstResponder; LANGUAGE = ObjC; SUPERCLASS = NSObject; }
+        {CLASS = FirstResponder; LANGUAGE = ObjC; SUPERCLASS = NSObject; }, 
+        {CLASS = OASplitView; LANGUAGE = ObjC; SUPERCLASS = NSSplitView; }
     ); 
     IBVersion = 1; 
 }
