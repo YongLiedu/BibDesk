@@ -11,6 +11,19 @@
 
 @implementation BDSKUndoManager
 
+- (id)init
+{
+	if (self = [super init]) {
+		delegate = nil;
+	}
+	return self;
+}
+
+- (void)dealloc
+{
+	delegate = nil;
+}
+
 - (id)delegate
 {
 	return delegate;
