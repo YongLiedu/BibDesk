@@ -1109,15 +1109,9 @@ Enhanced delete method that uses a sheet instead of a modal dialogue.
     }
 }
 
-- (IBAction)doAdvancedSearch:(id)sender{
-    if([sender stringValue] != nil){
-        [self showPublicationsForBooleanString:[sender stringValue] inField:nil];
-    }
-}
-
-- (void)hidePublicationsWithoutSubstring:(NSString *)searchString inField:(NSString *)field{
+- (void)hidePublicationsWithoutSubstring:(NSString *)substring inField:(NSString *)field{
     
-    if([searchString isEqualToString:@""]){
+    if([substring isEqualToString:@""]){
         [shownPublications setArray:publications];
         [self updateUI];
         return;
@@ -1152,14 +1146,14 @@ Enhanced delete method that uses a sheet instead of a modal dialogue.
         }
     }
         
-    AGRegex *tip = [AGRegex regexWithPattern:@"^\\S+"]; // match the first word of the string
+    AGRegex *tip = [AGRegex regexWithPattern:@"(?(?=^.+(AND|OR))(^.+(?= AND| OR))|^.+)"]; // match the any words up to but not including AND or OR if they exist (see "Lookahead assertions" and "CONDITIONAL SUBPATTERNS" in pcre docs)
     AGRegex *andRegex = [AGRegex regexWithPattern:@"AND \\b[^ ]+"]; // match the word following an AND
-    NSArray *matchArray = [andRegex findAllInString:searchString]; // an array of AGRegexMatch objects
+    NSArray *matchArray = [andRegex findAllInString:substring]; // an array of AGRegexMatch objects
     
     NSMutableArray *andArray = [NSMutableArray array]; // and array of all the AND terms we're looking for
     
-    // get the tip first (always an &&)
-    [andArray addObject:[[tip findInString:searchString] group]];
+    // get the tip first (always an AND)
+    [andArray addObject:[[tip findInString:substring] group]];
 
     NSEnumerator *e = [matchArray objectEnumerator];
     AGRegexMatch *m;
@@ -1172,7 +1166,7 @@ Enhanced delete method that uses a sheet instead of a modal dialogue.
     AGRegex *orRegex = [AGRegex regexWithPattern:@"OR \\b([^ ]+)"]; // match the first word following an OR
     NSMutableArray *orArray = [NSMutableArray array]; // an array of all the OR terms we're looking for
     
-    matchArray = [orRegex findAllInString:searchString];
+    matchArray = [orRegex findAllInString:substring];
     e = [matchArray objectEnumerator];
     
     while(m = [e nextObject]){ // now get all of the OR strings and strip the OR from them
@@ -1185,17 +1179,17 @@ Enhanced delete method that uses a sheet instead of a modal dialogue.
     NSEnumerator *orEnum = [orArray objectEnumerator];
 
     NSRange r;
-    NSString *substring = nil;
+    NSString *componentSubstring = nil;
     BibItem *pub = nil;
     NSEnumerator *pubEnum;
         
     NSMutableArray *andResultsArray = [NSMutableArray array];
     
     // for each AND term, enumerate the entire publications array and search for a match; if we get a match, add it to a mutable set
-    while(substring = [andEnum nextObject]){
+    while(componentSubstring = [andEnum nextObject]){
         pubEnum = [publications objectEnumerator];
         while(pub = [pubEnum nextObject]){
-            r = [[pub performSelector:NSSelectorFromString(selectorString) withObject:nil] rangeOfString:substring
+            r = [[pub performSelector:NSSelectorFromString(selectorString) withObject:nil] rangeOfString:componentSubstring
                                                                                                  options:NSCaseInsensitiveSearch];
             if(r.location != NSNotFound){
                 // NSLog(@"Found %@ in %@", substring, [pub citeKey]);
@@ -1208,10 +1202,10 @@ Enhanced delete method that uses a sheet instead of a modal dialogue.
     
     NSMutableArray *orResultsArray = [NSMutableArray array];
     // get all of the OR matches, each in a separate set
-    while(substring = [orEnum nextObject]){
+    while(componentSubstring = [orEnum nextObject]){
         pubEnum = [publications objectEnumerator];
         while(pub = [pubEnum nextObject]){
-            r = [[pub performSelector:NSSelectorFromString(selectorString) withObject:nil] rangeOfString:substring
+            r = [[pub performSelector:NSSelectorFromString(selectorString) withObject:nil] rangeOfString:componentSubstring
                                                                                                  options:NSCaseInsensitiveSearch];
             if(r.location != NSNotFound){
                 [aSet addObject:pub];
@@ -1247,7 +1241,7 @@ Enhanced delete method that uses a sheet instead of a modal dialogue.
     
     [shownPublications setArray:foundArray];
 
-    [quickSearchTextDict setObject:searchString
+    [quickSearchTextDict setObject:substring
                             forKey:field];
     
     [[OFPreferenceWrapper sharedPreferenceWrapper] setObject:[[quickSearchTextDict copy] autorelease]
