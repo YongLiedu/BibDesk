@@ -82,14 +82,15 @@ void _setupFonts(){
 {
 	OFPreferenceWrapper *pw = [OFPreferenceWrapper sharedPreferenceWrapper];
 	self = [self initWithType:[pw stringForKey:BDSKPubTypeStringKey]
-					 fileType:BDSKBibtexString // Not Sure if this is good.
-					  authors:[NSMutableArray arrayWithCapacity:0]
-				  createdDate:[NSCalendarDate calendarDate]];
+									  fileType:BDSKBibtexString // Not Sure if this is good.
+									   authors:[NSMutableArray arrayWithCapacity:0]];
+        bibLock = [[NSLock alloc] init];
 	return self;
 }
 
 - (id)initWithType:(NSString *)type fileType:(NSString *)inFileType authors:(NSMutableArray *)authArray createdDate:(NSCalendarDate *)date{ // this is the designated initializer.
     if (self = [super init]){
+        [bibLock lock];
 		if (date == nil){
 			pubFields = [[NSMutableDictionary alloc] init];
 		}else{
@@ -100,6 +101,7 @@ void _setupFonts(){
         pubAuthors = [authArray mutableCopy];     // copy, it's mutable
         document = nil;
         editorObj = nil;
+        [bibLock unlock];
         [self setFileType:inFileType];
         [self makeType:type];
         [self setCiteKeyString: @"cite-key"];
@@ -107,7 +109,7 @@ void _setupFonts(){
         [self setDateCreated: date];
         [self setDateModified: date];
         [self setFileOrder:-1];
-        _setupFonts();
+        if(_cachedFonts == nil) _setupFonts();
     }
 
     //NSLog(@"bibitem init");
@@ -161,7 +163,6 @@ void _setupFonts(){
 }
 
 - (void)makeType:(NSString *)type{
-    
     NSString *fieldString;
     NSEnumerator *e;
     NSString *tmp;
@@ -184,21 +185,21 @@ void _setupFonts(){
     //I don't enforce Keywords, but since there's GUI depending on them, I will enforce these others:
     addkey(BDSKUrlString) addkey(BDSKLocalUrlString) addkey(BDSKAnnoteString) addkey(BDSKAbstractString) addkey(BDSKRssDescriptionString)
 
-        // remove from removeKeys things that aren't == @"" in pubFields
-        // this includes things left over from the previous bibtype - that's good.
-        e = [[pubFields allKeys] objectEnumerator];
+    // remove from removeKeys things that aren't == @"" in pubFields
+    // this includes things left over from the previous bibtype - that's good.
+    e = [[pubFields allKeysUsingLock:bibLock] objectEnumerator];
 
     while (tmp = [e nextObject]) {
-        if (![[pubFields objectForKey:tmp] isEqualToString:@""]) {
-            [removeKeys removeObject:tmp];
+        if (![[pubFields objectForKey:tmp usingLock:bibLock] isEqualToString:@""]) {
+            [removeKeys removeObject:tmp usingLock:bibLock];
         }
     }
     // now remove everything that's left in remove keys from pubfields
-    [pubFields removeObjectsForKeys:removeKeys];
+    [pubFields removeObjectsForKeys:removeKeys usingLock:bibLock];
     [removeKeys release];
     // and don't forget to set what we say our type is:
     [self setType:type];
-	[self setRequiredFieldNames:[typeMan requiredFieldsForType:type]];
+    [self setRequiredFieldNames:[typeMan requiredFieldsForType:type]];
 }
 
 //@@ type - move to type class
@@ -224,7 +225,7 @@ void _setupFonts(){
     [pubDate release];
     [dateCreated release];
     [dateModified release];
-	
+    [bibLock release];
     [super dealloc];
 }
 
@@ -272,15 +273,15 @@ void _setupFonts(){
 
 #pragma mark Comparison functions
 - (NSComparisonResult)pubTypeCompare:(BibItem *)aBI{
-	return [[self type] caseInsensitiveCompare:[aBI type]];
+	return [[self type] localizedCaseInsensitiveCompare:[aBI type]];
 }
 
 - (NSComparisonResult)keyCompare:(BibItem *)aBI{
-    return [citeKey caseInsensitiveCompare:[aBI citeKey]];
+    return [citeKey localizedCaseInsensitiveCompare:[aBI citeKey]];
 }
 
 - (NSComparisonResult)titleCompare:(BibItem *)aBI{
-    return [[self title] caseInsensitiveCompare:[aBI title]];
+    return [[self title] localizedCaseInsensitiveCompare:[aBI title]];
 }
 
 
@@ -382,14 +383,18 @@ void _setupFonts(){
 }
 
 - (void)setFileOrder:(int)ord{
+    [bibLock lock];
     _fileOrder = ord;
+    [bibLock unlock];
 }
 - (NSString *)fileType { return fileType; }
 
 - (void)setFileType:(NSString *)someFileType {
+    [bibLock lock];
     [someFileType retain];
     [fileType release];
     fileType = someFileType;
+    [bibLock unlock];
 }
 
 #pragma mark Author Handling code
@@ -403,15 +408,17 @@ void _setupFonts(){
     BibAuthor *bibAuthor = nil;
     BibAuthor *existingAuthor = nil;
   
-    presentAuthE = [pubAuthors objectEnumerator];
+    presentAuthE = [[[pubAuthors copy] autorelease] objectEnumerator];
     while(bibAuthor = [presentAuthE nextObject]){
         if([[bibAuthor name] isEqualToString:newAuthorName]){ // @@ TODO: fuzzy author handling
+            [bibLock lock];
             existingAuthor = bibAuthor;
+            [bibLock unlock];
         }
     }
     if(!existingAuthor){
         existingAuthor =  [BibAuthor authorWithName:newAuthorName andPub:self]; //@@author - why was andPub:nil before?!
-        [pubAuthors addObject:existingAuthor];
+        [pubAuthors addObject:existingAuthor usingLock:bibLock];
     }
     return;
 }
@@ -422,7 +429,7 @@ void _setupFonts(){
 
 - (BibAuthor *)authorAtIndex:(int)index{ 
     if ([pubAuthors count] > index)
-        return [pubAuthors objectAtIndex:index];
+        return [pubAuthors objectAtIndex:index usingLock:bibLock];
     else
         return nil;
 }
@@ -434,7 +441,7 @@ void _setupFonts(){
         NSEnumerator *e = [auths objectEnumerator];
         NSString *aString = nil;
         
-        [pubAuthors removeAllObjects];
+        [pubAuthors removeAllObjectsUsingLock:bibLock];
         
         while(aString = [e nextObject]){
             [self addAuthorWithName:[aString stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceCharacterSet]]];
@@ -493,7 +500,7 @@ void _setupFonts(){
 }
 
 - (NSString *)title{
-  NSString *t = [pubFields objectForKey: BDSKTitleString];
+    NSString *t = [pubFields objectForKey: BDSKTitleString usingLock:bibLock];
   if(t == nil)
     return @"Empty Title";
   else
@@ -505,8 +512,10 @@ void _setupFonts(){
 }
 
 - (void)setDate: (NSCalendarDate *)newDate{
+    [bibLock lock];
     [pubDate autorelease];
     pubDate = [newDate copy];
+    [bibLock unlock];
     
 }
 - (NSCalendarDate *)date{
@@ -518,10 +527,12 @@ void _setupFonts(){
 }
 
 - (void)setDateCreated:(NSCalendarDate *)newDateCreated {
+    [bibLock lock];
     if (dateCreated != newDateCreated) {
         [dateCreated release];
         dateCreated = [newDateCreated copy];
     }
+    [bibLock unlock];
 }
 
 - (NSCalendarDate *)dateModified {
@@ -533,15 +544,19 @@ void _setupFonts(){
 }
 
 - (void)setDateModified:(NSCalendarDate *)newDateModified {
+    [bibLock lock];
     if (dateModified != newDateModified) {
         [dateModified release];
         dateModified = [newDateModified copy];
     }
+    [bibLock unlock];
 }
 
 - (void)setType: (NSString *)newType{
+    [bibLock lock];
     [pubType autorelease];
-    pubType = [newType retain];
+    pubType = [[newType lowercaseString] retain];
+    [bibLock unlock];
 }
 - (NSString *)type{
     return pubType;
@@ -586,7 +601,7 @@ void _setupFonts(){
 	
     [self setCiteKeyString:newCiteKey];
 	if (date != nil) {
-		[pubFields setObject:[date description] forKey:BDSKDateModifiedString];
+            [pubFields setObject:[date description] forKey:BDSKDateModifiedString usingLock:bibLock];
 	}
 	[self updateMetadataForKey:BDSKCiteKeyString];
 		
@@ -602,9 +617,10 @@ void _setupFonts(){
 }
 
 - (void)setCiteKeyString:(NSString *)newCiteKey{
+    [bibLock lock];
     [citeKey autorelease];
-		
     citeKey = [newCiteKey copy];
+    [bibLock unlock];
 }
 
 - (NSString *)citeKey{
@@ -615,10 +631,12 @@ void _setupFonts(){
 }
 
 - (void)setPubFields: (NSDictionary *)newFields{
-	if(newFields != pubFields){
-		[pubFields release];
-		pubFields = [newFields mutableCopy];
-		[self updateMetadataForKey:nil];
+    if(newFields != pubFields){
+        [bibLock lock];
+        [pubFields release];
+        pubFields = [newFields mutableCopy];
+        [bibLock unlock];
+        [self updateMetadataForKey:nil];
     }
 }
 
@@ -647,39 +665,39 @@ void _setupFonts(){
 		return;
 	}
 
-    if((![@"" isEqualToString:[pubFields objectForKey: BDSKAuthorString]]) && 
-	   ([pubFields objectForKey: BDSKAuthorString] != nil))
+    if((![@"" isEqualToString:[pubFields objectForKey: BDSKAuthorString usingLock:bibLock]]) && 
+       ([pubFields objectForKey: BDSKAuthorString usingLock:bibLock] != nil))
     {
-        [self setAuthorsFromBibtexString:[pubFields objectForKey: BDSKAuthorString]];
+        [self setAuthorsFromBibtexString:[pubFields objectForKey: BDSKAuthorString usingLock:bibLock]];
     }else{
-        [self setAuthorsFromBibtexString:[pubFields objectForKey: @"Editor"]]; // or what else?
+        [self setAuthorsFromBibtexString:[pubFields objectForKey: @"Editor" usingLock:bibLock]]; // or what else?
     }
 	
     // re-call make type to make sure we still have all the appropriate bibtex defined fields...
-	//@@ 3/5/2004: moved why is this here? 
-	[self makeType:[self type]];
+    //@@ 3/5/2004: moved why is this here? 
+    [self makeType:[self type]];
 
-	NSString *yearValue = [pubFields objectForKey:BDSKYearString];
+    NSString *yearValue = [pubFields objectForKey:BDSKYearString usingLock:bibLock];
     if (yearValue && ![yearValue isEqualToString:@""]) {
-		NSString *monthValue = [pubFields objectForKey:BDSKMonthString];
-		if (!monthValue) monthValue = @"";
-		NSString *dateStr = [NSString stringWithFormat:@"%@ 1 %@", monthValue, [pubFields objectForKey:BDSKYearString]];
-		NSDictionary *locale = [NSDictionary dictionaryWithObjectsAndKeys:@"MDYH", NSDateTimeOrdering, 
-			[NSArray arrayWithObjects:@"January", @"February", @"March", @"April", @"May", @"June", @"July", @"August", @"September", @"October", @"November", @"December", nil], NSMonthNameArray,
-			[NSArray arrayWithObjects:@"Jan", @"Feb", @"Mar", @"Apr", @"May", @"Jun", @"Jul", @"Aug", @"Sep", @"Oct", @"Nov", @"Dec", nil], NSShortMonthNameArray, nil];
+        NSString *monthValue = [pubFields objectForKey:BDSKMonthString usingLock:bibLock];
+        if (!monthValue) monthValue = @"";
+        NSString *dateStr = [NSString stringWithFormat:@"%@ 1 %@", monthValue, [pubFields objectForKey:BDSKYearString usingLock:bibLock]];
+        NSDictionary *locale = [NSDictionary dictionaryWithObjectsAndKeys:@"MDYH", NSDateTimeOrdering, 
+        [NSArray arrayWithObjects:@"January", @"February", @"March", @"April", @"May", @"June", @"July", @"August", @"September", @"October", @"November", @"December", nil], NSMonthNameArray,
+        [NSArray arrayWithObjects:@"Jan", @"Feb", @"Mar", @"Apr", @"May", @"Jun", @"Jul", @"Aug", @"Sep", @"Oct", @"Nov", @"Dec", nil], NSShortMonthNameArray, nil];
         [self setDate:[NSCalendarDate dateWithNaturalLanguageString:dateStr locale:locale]];
     }else{
         [self setDate:nil];    // nil means we don't have a good date.
     }
 	
-	NSString *dateCreatedValue = [pubFields objectForKey:BDSKDateCreatedString];
+    NSString *dateCreatedValue = [pubFields objectForKey:BDSKDateCreatedString usingLock:bibLock];
     if (dateCreatedValue && ![dateCreatedValue isEqualToString:@""]) {
 		[self setDateCreated:[NSCalendarDate dateWithNaturalLanguageString:dateCreatedValue]];
 	}else{
 		[self setDateCreated:nil];
 	}
 	
-	NSString *dateModValue = [pubFields objectForKey:BDSKDateModifiedString];
+    NSString *dateModValue = [pubFields objectForKey:BDSKDateModifiedString usingLock:bibLock];
     if (dateModValue && ![dateModValue isEqualToString:@""]) {
 		// NSLog(@"updating date %@", dateModValue);
 		[self setDateModified:[NSCalendarDate dateWithNaturalLanguageString:dateModValue]];
@@ -690,8 +708,10 @@ void _setupFonts(){
 }
 
 - (void)setRequiredFieldNames: (NSArray *)newRequiredFieldNames{
+    [bibLock lock];
     [requiredFieldNames autorelease];
     requiredFieldNames = [newRequiredFieldNames mutableCopy];
+    [bibLock unlock];
 }
 
 - (void)setField: (NSString *)key toValue: (NSString *)value{
@@ -700,7 +720,7 @@ void _setupFonts(){
 
 - (void)setField:(NSString *)key toValue:(NSString *)value withModDate:(NSCalendarDate *)date{
 	if ([self undoManager]) {
-		id oldValue = [pubFields objectForKey:key];
+		id oldValue = [pubFields objectForKey:key usingLock:bibLock];
 		NSCalendarDate *oldModDate = [self dateModified];
 		
 		[[[self undoManager] prepareWithInvocationTarget:self] setField:key 
@@ -709,9 +729,9 @@ void _setupFonts(){
 		[[self undoManager] setActionName:NSLocalizedString(@"Edit publication",@"")];
 	}
 	
-    [pubFields setObject: value forKey: key];
+    [pubFields setObject:value forKey:key usingLock:bibLock];
 	if (date != nil) {
-		[pubFields setObject:[date description] forKey:BDSKDateModifiedString];
+		[pubFields setObject:[date description] forKey:BDSKDateModifiedString usingLock:bibLock];
 	}
 	[self updateMetadataForKey:key];
 	
@@ -729,7 +749,7 @@ void _setupFonts(){
 }
 
 - (id)valueForUndefinedKey:(NSString *)key{
-    id obj = [pubFields objectForKey:key];
+    id obj = [pubFields objectForKey:key usingLock:bibLock];
     if (obj != nil){
         return obj;
     }else{
@@ -743,7 +763,7 @@ void _setupFonts(){
 }
 
 - (NSString *)valueOfField: (NSString *)key{
-    NSString* value = [pubFields objectForKey:key];
+    NSString* value = [pubFields objectForKey:key usingLock:bibLock];
 	return [[value retain] autorelease];
 }
 
@@ -775,10 +795,10 @@ void _setupFonts(){
 	
 	NSString *msg = [NSString stringWithFormat:@"%@ %@",
 		NSLocalizedString(@"Add data for field:", @""), key];
-	[pubFields setObject:msg forKey:key];
+	[pubFields setObject:msg forKey:key usingLock:bibLock];
 	
 	NSString *dateString = [date description];
-	[pubFields setObject:dateString forKey:BDSKDateModifiedString];
+	[pubFields setObject:dateString forKey:BDSKDateModifiedString usingLock:bibLock];
 	[self updateMetadataForKey:key];
 	
 	NSDictionary *notifInfo = [NSDictionary dictionaryWithObjectsAndKeys:@"Add/Del Field", @"type",nil];
@@ -799,10 +819,10 @@ void _setupFonts(){
 													 withModDate:[self dateModified]];
 	}
 	
-    [pubFields removeObjectForKey:key];
+    [pubFields removeObjectForKey:key usingLock:bibLock];
 	
 	NSString *dateString = [date description];
-	[pubFields setObject:dateString forKey:BDSKDateModifiedString];
+	[pubFields setObject:dateString forKey:BDSKDateModifiedString usingLock:bibLock];
 	[self updateMetadataForKey:key];
 
 	NSDictionary *notifInfo = [NSDictionary dictionaryWithObjectsAndKeys:@"Add/Del Field", @"type",nil];
