@@ -187,8 +187,20 @@
     }
 }
 
+- (void)insertSubCollection:(BibCollection *)newSubCollection atIndex:(unsigned int)index{
+	[subCollections insertObject:newSubCollection atIndex:index];
+}
+
 - (void)addSubCollection:(BibCollection *)newSubCollection{
 	[subCollections addObject:newSubCollection];
+}
+
+- (void)removeSubCollection:(BibCollection *)subCollection{
+	[subCollections removeObject:subCollection];
+}
+
+- (BibCollection *)subCollectionAtIndex:(unsigned int)index{
+	[subCollections objectAtIndex:index];
 }
 
 

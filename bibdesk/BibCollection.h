@@ -161,17 +161,42 @@
 	@method setSubCollections
 	 @abstract sets subCollections to the param
 	 @discussion 
-	 @param newSubCollections 
+	 @param newSubCollections The new array of subcollections
 	 */
 - (void)setSubCollections:(NSMutableArray *)newSubCollections;
 	
 /*!
-	@method addSubCollection
-	 @abstract sets subCollections to the param
+	@method insertSubCollection:atIndex:
+	 @abstract insets a new subCollection at the index
 	 @discussion 
-	 @param addSubCollection
+	 @param newSubCollection The new subcollection to add
+	 @param index The location in the subcollections array to insert the new subcollection
+	 */
+- (void)insertSubCollection:(BibCollection *)newSubCollection atIndex:(unsigned int)index;
+
+/*!
+	@method addSubCollection:
+	 @abstract Adds a subCollection
+	 @discussion 
+	 @param newSubCollection The new subcollection to add
 	 */
 - (void)addSubCollection:(BibCollection *)newSubCollection;
+
+/*!
+	@method removeSubCollection:
+	 @abstract Removes a subCollection
+	 @discussion 
+	 @param subCollection The subcollection to remove
+	 */
+- (void)removeSubCollection:(BibCollection *)subCollection;
+
+/*!
+	@method subCollectionAtIndex:
+	 @abstract Returns the subcollection at the given location in the array of subcollections
+	 @discussion 
+	 @param index The index for the requested subcollection
+	 */
+- (BibCollection *)subCollectionAtIndex:(unsigned int)index;
 
     /*!
     @method exporters

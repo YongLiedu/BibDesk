@@ -203,7 +203,7 @@
                 return nil;
         }
     }else{
-		return [item objectAtIndex:index];
+		return [(BibCollection*)item subCollectionAtIndex:index];
     }
 	
 }
