@@ -554,9 +554,10 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
             [commentString appendString:@" = "];
             [commentString appendString:[key title]];
         }
-        [keys appendString:@"} %% "];
-        // let people set this as a pref?s
-        [keys appendString:commentString];
+        [keys appendString:@"} "];
+        //        [keys appendString:@"%% "];
+        // @@ bug let people set this as a pref? 
+        //        [keys appendString:commentString];
         types = [NSArray arrayWithObject:NSStringPboardType];
         [pboard declareTypes:types owner:nil];
 
