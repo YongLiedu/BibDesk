@@ -90,9 +90,10 @@
     NSString *prefix = nil;
     
     // set these up here, so we don't autorelease them every time we parse an entry
-    AGRegex *findSubscriptLeadingTag = [AGRegex regexWithPattern:@"<sub>"];
-    AGRegex *findSubscriptOrSuperscriptTrailingTag = [AGRegex regexWithPattern:@"</su[bp]>"];
-    AGRegex *findSuperscriptLeadingTag = [AGRegex regexWithPattern:@"<sup>"];
+    // Some entries from Compendex have spaces in the tags, which is why we match 0-1 spaces between each character.
+    AGRegex *findSubscriptLeadingTag = [AGRegex regexWithPattern:@"< ?s ?u ?b ?>"];
+    AGRegex *findSubscriptOrSuperscriptTrailingTag = [AGRegex regexWithPattern:@"< ?/ ?s ?u ?[bp] ?>"];
+    AGRegex *findSuperscriptLeadingTag = [AGRegex regexWithPattern:@"< ?s ?u ?p ?>"];
     
     // This one might require some explanation.  An entry with TI of "Flapping flight as a bifurcation in Re<sub>&omega;</sub>"
     // was run through the html conversion to give "...Re<sub>$\omega$</sub>", then the find sub/super regex replaced the sub tags to give
@@ -100,7 +101,7 @@
     // dollar signs, since we'll use the dollar signs from our subsequent regex search and replace; however, we have to
     // reject the case where there is a <sub><\sub> by matching [^<]+ (at least one character which is not <), or else it goes to the next </sub> tag
     // and deletes dollar signs that it shouldn't touch.  Yuck.
-    AGRegex *findNestedDollar = [AGRegex regexWithPattern:@"(<su[bp]>[^<]+)(\\$)(.*)(\\$)(.*</su[bp]>)"];
+    AGRegex *findNestedDollar = [AGRegex regexWithPattern:@"(< ?s ?u ?[bp] ?>[^<]+)(\\$)(.*)(\\$)(.*< ?/ ?s ?u ?[bp] ?>)"];
     
     NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
     
@@ -129,10 +130,10 @@
                 // that Compendex (and possibly others) give us.
                 if([findNestedDollar findInString:value] != nil){
                     NSLog(@"WARNING: found nested math mode; trying to repair...");
-                    NSLog(@"Original string was %@", value);
+                     // NSLog(@"Original string was %@", value);
                     value = [findNestedDollar replaceWithString:@"$1$3$5"
                                                        inString:value];
-                    NSLog(@"String is now %@", value);
+                     // NSLog(@"String is now %@", value);
                 }
                     
                 value = [findSubscriptLeadingTag replaceWithString:@"\\$_{"
