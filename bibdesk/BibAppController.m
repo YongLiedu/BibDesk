@@ -161,15 +161,16 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
                                     NSLocalizedString(@"Either we couldn't load the file or there was no shell command. Please try again.",@""),
                                     NSLocalizedString(@"OK",@""),
                                     nil, nil, nil, nil);
-        }
-        filterOutput = [[BDSKShellTask shellTask] runShellCommand:shellCommand
-                                                  withInputString:fileInputString];
-        // @@ REFACTOR:
-        // I suppose in the future, bibTeX database won't be the default? 
-        bibDoc = [[NSDocumentController sharedDocumentController] openUntitledDocumentOfType:@"bibTeX database" display:YES]; // #retain?
-        [bibDoc loadDataRepresentation:[filterOutput dataUsingEncoding:NSUTF8StringEncoding] ofType:@"bibTeX database"];
-        [bibDoc updateChangeCount:NSChangeDone];
-        [bibDoc updateUI];
+        }else{
+			filterOutput = [[BDSKShellTask shellTask] runShellCommand:shellCommand
+													  withInputString:fileInputString];
+			// @@ REFACTOR:
+			// I suppose in the future, bibTeX database won't be the default? 
+			bibDoc = [[NSDocumentController sharedDocumentController] openUntitledDocumentOfType:@"bibTeX database" display:YES]; // #retain?
+			[bibDoc loadDataRepresentation:[filterOutput dataUsingEncoding:NSUTF8StringEncoding] ofType:@"bibTeX database"];
+			[bibDoc updateChangeCount:NSChangeDone];
+			[bibDoc updateUI];
+		}
     }
 }
 
