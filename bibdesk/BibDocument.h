@@ -27,6 +27,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 #import "BDSKCustomCiteTableView.h"
 #import "BDSKConverter.h"
 #import "BibTeXParser.h"
+#import <OmniAppKit/OASplitView.h>
 
 @class BDSKCustomCiteTableView;
 @class BibItem;
@@ -57,6 +58,7 @@ extern NSString* LocalDragPasteboardName;
     IBOutlet NSMenuItem *ctxCopyBibTex;
     IBOutlet NSMenuItem *ctxCopyTex;
     IBOutlet NSMenuItem *ctxCopyPDF;
+    IBOutlet OASplitView* splitView;
 
 #pragma mark || Toolbar stuff
     NSMutableDictionary *toolbarItems;
@@ -392,6 +394,14 @@ extern NSString* LocalDragPasteboardName;
 
 - (void)setupSortDict;
 - (NSArray *)currentSortFieldArray;
+
+/*!
+    @method splitViewDoubleClick:
+    @abstract A delegate method of the OASplitView. Handles doubleClicking.
+    @discussion \253discussion\273
+    
+*/
+- (void)splitViewDoubleClick:(OASplitView *)sender;
 
 /*!
     @method currentView

@@ -164,6 +164,8 @@ NSString*   LocalDragPasteboardName = @"edu.ucsd.cs.mmccrack.bibdesk: Local Publ
     [quickSearchClearButton setEnabled:NO];
     [quickSearchClearButton setToolTip:NSLocalizedString(@"Clear the Quicksearch Field",@"")];
 
+    [splitView setPositionAutosaveName:[self fileName]];
+    
     // 1:I'm using this as a catch-all.
     // 2:this gets called lots of other places, no need to. [self updateUI]; 
 
@@ -486,7 +488,7 @@ stringByAppendingPathComponent:@"BibDesk"]; */
 - (IBAction)delPub:(id)sender{
     NSEnumerator *delEnum = nil;
     NSNumber *rowToDelete;
-    id objToDelete;
+    id objToDelete; 
     int rv = 0;
     if ([self numberOfSelectedPubs] == 0) {
         return;
@@ -500,6 +502,11 @@ stringByAppendingPathComponent:@"BibDesk"]; */
         delEnum = [self selectedPubEnumerator];
         while (rowToDelete = [delEnum nextObject]) {
             objToDelete = [shownPublications objectAtIndex:[rowToDelete intValue]];
+            BibEditor *editor = [objToDelete editorObj];
+            if(editor){
+                [editor close];
+                [bibEditors removeObjectIdenticalTo:editor];
+            }
             [publications removeObjectIdenticalTo:objToDelete];
         }
         [shownPublications setArray:publications];
@@ -720,10 +727,12 @@ didClickTableColumn: (NSTableColumn *) tableColumn{
 - (void)editPub:(BibItem *)pub forceChange:(BOOL)force{
     BibEditor *e = [pub editorObj];
     if(e == nil){
-        e = [[BibEditor alloc] initWithBibItem:pub andBibDocument:self];
+        e = [[BibEditor alloc] initWithBibItem:pub
+                                andBibDocument:self];
+        //       e = [[BDSKMultiEditor alloc] initWithBibItems:[NSArray arrayWithObjects:pub,nil] andBibDocument:self];
         [bibEditors addObject:[e autorelease]];// we need to keep track of the bibeditors
     }
-    [e show];
+    [e show];    //    [e showWindow:self];
     if(force){
 #if DEBUG
         //NSLog(@"updating change count");
@@ -1180,6 +1189,8 @@ didClickTableColumn: (NSTableColumn *) tableColumn{
 - (void)highlightBib:(BibItem *)bib byExtendingSelection:(BOOL)yn{
     NSTableView *view  = (NSTableView *) [self currentView];
     int i = [shownPublications indexOfObjectIdenticalTo:bib];
+    i = (sortDescending ? [shownPublications count] - 1 - i : i);
+    
 
     if ([view isKindOfClass:[BDSKDragOutlineView class]]){
         i = (int) [(BDSKDragOutlineView *)view rowForItem:bib];
@@ -1190,7 +1201,7 @@ didClickTableColumn: (NSTableColumn *) tableColumn{
     }
 }
 
-
+#pragma mark
 #pragma mark || Custom cite drawer stuff
 
 - (IBAction)openCustomCitePrefPane:(id)sender{
@@ -1304,6 +1315,11 @@ didClickTableColumn: (NSTableColumn *) tableColumn{
 
 }
 
+- (void)splitViewDoubleClick:(OASplitView *)sender{
+    [NSException raise:@"UnimplementedException" format:@"splitview %@ was clicked.", sender];
+}
+
+#pragma mark
 #pragma mark || printing support
 
 - (void)printShowingPrintPanel:(BOOL)flag{
