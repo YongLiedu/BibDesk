@@ -902,6 +902,7 @@
 				27E0AA1C05A7C86B005BA25A,
 				27E0AA1D05A7C86B005BA25A,
 				F94E460B06109C0C00A61471,
+				F91E6D0E0645263C004345B7,
 			);
 			isa = PBXHeadersBuildPhase;
 			runOnlyForDeploymentPostprocessing = 0;
@@ -1219,6 +1220,7 @@
 				F9A008D10638B5CD00426F15,
 				F9A008D20638B5CD00426F15,
 				F9A008D30638B5CD00426F15,
+				F91E6D2E06459E5B004345B7,
 			);
 			isa = PBXResourcesBuildPhase;
 			runOnlyForDeploymentPostprocessing = 0;
@@ -1488,6 +1490,7 @@
 				27E0AA6D05A7C86B005BA25A,
 				27E0AA6E05A7C86B005BA25A,
 				F94E460C06109C0C00A61471,
+				F91E6D0F0645263C004345B7,
 			);
 			isa = PBXSourcesBuildPhase;
 			runOnlyForDeploymentPostprocessing = 0;
@@ -1930,6 +1933,8 @@
 		};
 		2A37F4ABFDCFA73011CA2CEA = {
 			children = (
+				F91E6D0D0645263C004345B7,
+				F91E6D0C0645263C004345B7,
 				F94E460906109C0C00A61471,
 				F94E460A06109C0C00A61471,
 				F58886D503ABF2D601A80167,
@@ -3209,6 +3214,7 @@
 		};
 		F5CE4C220228994301EF0ACB = {
 			children = (
+				F91E6D2D06459E5B004345B7,
 				F9C340F8061363A600F55DFE,
 				F9C340F9061363A600F55DFE,
 				F9C340FA061363A600F55DFE,
@@ -3334,6 +3340,48 @@
 //F92
 //F93
 //F94
+		F91E6D0C0645263C004345B7 = {
+			fileEncoding = 30;
+			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.c.h;
+			path = BibFiler.h;
+			refType = 4;
+			sourceTree = "<group>";
+		};
+		F91E6D0D0645263C004345B7 = {
+			fileEncoding = 30;
+			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.c.objc;
+			path = BibFiler.m;
+			refType = 4;
+			sourceTree = "<group>";
+		};
+		F91E6D0E0645263C004345B7 = {
+			fileRef = F91E6D0C0645263C004345B7;
+			isa = PBXBuildFile;
+			settings = {
+			};
+		};
+		F91E6D0F0645263C004345B7 = {
+			fileRef = F91E6D0D0645263C004345B7;
+			isa = PBXBuildFile;
+			settings = {
+			};
+		};
+		F91E6D2D06459E5B004345B7 = {
+			isa = PBXFileReference;
+			lastKnownFileType = image.tiff;
+			name = autofile.tiff;
+			path = Images/autofile.tiff;
+			refType = 4;
+			sourceTree = "<group>";
+		};
+		F91E6D2E06459E5B004345B7 = {
+			fileRef = F91E6D2D06459E5B004345B7;
+			isa = PBXBuildFile;
+			settings = {
+			};
+		};
 		F946E34206135F2800AB29EA = {
 			isa = PBXFileReference;
 			lastKnownFileType = image.icns;

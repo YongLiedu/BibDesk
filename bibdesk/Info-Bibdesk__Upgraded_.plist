@@ -168,7 +168,7 @@
 					<string>~/Documents/Papers</string>
 				</dict>
 				<key>icon</key>
-				<string>palm.icns</string>
+				<string>autofile.tiff</string>
 				<key>identifier</key>
 				<string>bp_autofile</string>
 				<key>nib</key>
