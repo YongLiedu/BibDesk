@@ -298,8 +298,9 @@ static BDSKConverter *theConverter;
 - (BOOL)validateFormat:(NSString **)formatString forField:(NSString *)fieldName inFileType:(NSString *)type error:(NSString **)error
 {
 	// implemented specifiers, the same for any field and type
-	NSCharacterSet *validSpecifierChars = [NSCharacterSet characterSetWithCharactersInString:@"0123456789aAtmyYkrRdc"];
+	NSCharacterSet *validSpecifierChars = [NSCharacterSet characterSetWithCharactersInString:@"aAtmyYkrRdc"];
 	NSCharacterSet *validLastSpecifierChars = [NSCharacterSet characterSetWithCharactersInString:@"uUn"];
+	NSCharacterSet *escapeSpecifierChars = [NSCharacterSet characterSetWithCharactersInString:@"0123456789%{}"];
 	NSCharacterSet *invalidCharSet = [[BibTypeManager sharedManager] strictInvalidCharactersForField:fieldName inFileType:type];
 	NSArray *components = [*formatString componentsSeparatedByString:@"%"];
 	NSString *string;
@@ -314,40 +315,41 @@ static BDSKConverter *theConverter;
 		if (i > 0) { //first part can be anything
 			[sanitizedFormatString appendString:@"%"];
 			if ([string isEqualToString:@""]) {
-				// we found a %% escape
-				if ([invalidCharSet characterIsMember:'%']) {
-					*error = [NSString stringWithFormat: NSLocalizedString(@"Invalid specifier %%%C in format.", @""), '%'];
+				// we might have found a %% escape
+				if (i == [components count] - 1) {
+					*error = NSLocalizedString(@"Empty specifier % at end of format.", @"");
 					return NO;
 				}
-				continue;
+				string = [NSString stringWithFormat:@"%%%@", [components objectAtIndex:++i]];
 			}
+			
 			specifier = [string characterAtIndex:0];
-                        if (specifier == 'c'){
-                            [sanitizedFormatString appendFormat:@"%C", specifier];  // we know that c is okay, but what about the rest?
-                            if([string length] < 2){
-                                *error = NSLocalizedString(@"Specifier %c must be followed by a {'field'} name.", @"");
-                                return NO;
-                            }
-                            specifier = [string characterAtIndex:1]; // move it up to where the { should be, then check between the braces later
-                                if (specifier != '{'){
-                                    *error = NSLocalizedString(@"Specifier %c must be followed by a {'field'} name.", @"");
-                                    return NO;
-                                }
-                            }
-			if (![validSpecifierChars characterIsMember:specifier]) {
-				if (specifier == '{') {
-					arr = [[string substringFromIndex:1] componentsSeparatedByString:@"}"];
+			
+			if (specifier == 'f' || specifier == 'c') {
+				if ([string length] < 3 || [string characterAtIndex:1] != '{') {
+					*error = [NSString stringWithFormat: NSLocalizedString(@"Specifier %C must be followed by a {'field'} name.", @""), specifier];
+					return NO;
+				}
+				arr = [[string substringFromIndex:2] componentsSeparatedByString:@"}"];
 
-					if ([arr count] != 2) {
-						*error = NSLocalizedString(@"Incomplete specifier {'field'} in format.", @"");
+				if ([arr count] != 2) {
+					*error = [NSString stringWithFormat: NSLocalizedString(@"Specifier %C must be followed by a {'field'} name.", @""), specifier];
+					return NO;
+				}
+				string = [self stringBySanitizingString:[arr objectAtIndex:0] forField:fieldName inFileType:type];
+				[sanitizedFormatString appendFormat:@"%C{%@}", specifier, [string capitalizedString]]; // we need to have BibTeX field names capitalized
+				string = [self stringBySanitizingString:[arr objectAtIndex:1] forField:fieldName inFileType:type];
+			}
+			else if (![validSpecifierChars characterIsMember:specifier]) {
+				if ([escapeSpecifierChars characterIsMember:specifier]) {
+					if ([invalidCharSet characterIsMember:specifier]) {
+					
+						*error = [NSString stringWithFormat: NSLocalizedString(@"Invalid escape specifier %%%C in format.", @""), specifier];
 						return NO;
 					}
-					string = [self stringBySanitizingString:[arr objectAtIndex:0] forField:fieldName inFileType:type];
-					[sanitizedFormatString appendFormat:@"{%@}", [string capitalizedString]]; // we need to have BibTeX field names capitalized
-					string = [self stringBySanitizingString:[arr objectAtIndex:1] forField:fieldName inFileType:type];
 				}
-				else if (	i < [components count] - 1 || 
-							![validLastSpecifierChars characterIsMember:specifier] ) {
+				else if ( i < [components count] - 1 || 
+						  ![validLastSpecifierChars characterIsMember:specifier] ) {
 				
 					*error = [NSString stringWithFormat: NSLocalizedString(@"Invalid specifier %%%C in format.", @""), specifier];
 					return NO;
@@ -373,6 +375,10 @@ static BDSKConverter *theConverter;
 	
 	[cEnum nextObject];
 	while (string = [cEnum nextObject]) {
+		if ([string length] == 0) {
+			string = [cEnum nextObject];
+			continue;
+		}
 		switch ([string characterAtIndex:0]) {
 			case 'a':
 			case 'A':
@@ -388,8 +394,9 @@ static BDSKConverter *theConverter;
 			case 'm':
 				[arr addObject:@"Month"];
 				break;
-			case '{':
-				[arr addObject:[[[string componentsSeparatedByString:@"}"] objectAtIndex:0] substringFromIndex:1]];
+			case 'f':
+			case 'c':
+				[arr addObject:[[[string componentsSeparatedByString:@"}"] objectAtIndex:0] substringFromIndex:2]];
 		}
 	}
 	return arr;

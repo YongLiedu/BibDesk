@@ -1239,10 +1239,12 @@ void _setupFonts(){
 						}
 					}
 					break;
-				case '{':
+				case 'f':
 					// arbitrary field
-					[scanner scanUpToCharactersFromSet:[NSCharacterSet characterSetWithCharactersInString:@"}"] intoString:&string];
-					[scanner scanString:@"}" intoString:NULL];
+					NSAssert( [scanner scanString:@"{" intoString:NULL], @"Failed to scan {." ); // these errors will be handled gracefully by the BDSKConverter
+					[scanner scanUpToString:@"}" intoString:&string]; // it isn't really an error if there's no content
+					NSAssert( [scanner scanString:@"}" intoString:NULL], @"Failed to scan }." );
+					
 					if ([scanner scanCharactersFromSet:digits intoString:&numStr]) {
 						number = [numStr intValue];
 					} else {
@@ -1257,6 +1259,16 @@ void _setupFonts(){
 							[parsedStr appendString:string];
 						}
 					}
+					break;
+				case 'c':
+					// This handles acronym specifiers of the form %c{FieldName}
+					NSAssert( [scanner scanString:@"{" intoString:NULL], @"Failed to scan {." ); // these errors will be handled gracefully by the BDSKConverter
+					[scanner scanUpToString:@"}" intoString:&string]; // it isn't really an error if there's no content
+					NSAssert( [scanner scanString:@"}" intoString:NULL], @"Failed to scan }." );
+					
+					string = [self acronymValueOfField:string];
+					string = [converter stringBySanitizingString:string forField:fieldName inFileType:[self fileType]];
+					[parsedStr appendString:string];
 					break;
 				case 'r':
 					// random lowercase letters
@@ -1302,6 +1314,8 @@ void _setupFonts(){
 				case '8':
 				case '9':
 				case '%':
+				case '{':
+				case '}':
 					// escaped digit or %
 					[parsedStr appendFormat:@"%C", specifier];
 					break;
@@ -1381,16 +1395,6 @@ void _setupFonts(){
 						NSLog(@"Specifier %%%C can only be used at the end of format.", specifier);
 					}
 					break;
-                                case 'c':
-                                    // This handles acronym specifiers of the form %c{FieldName}
-                                    NSAssert( [scanner scanString:@"{" intoString:nil], @"Failed to scan {." ); // these errors will be handled gracefully by the BDSKConverter
-                                    [scanner scanUpToString:@"}" intoString:&string]; // it isn't really an error if there's no content
-                                    NSAssert( [scanner scanString:@"}" intoString:nil], @"Failed to scan }." );
-                                    
-                                    string = [self acronymValueOfField:string];
-                                    string = [converter stringBySanitizingString:string forField:fieldName inFileType:[self fileType]];
-                                    [parsedStr appendString:string];
-                                    break;
 				default: 
 					NSLog(@"Unknown format specifier %%%C in format.", specifier);
 			}
