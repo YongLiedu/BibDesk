@@ -341,8 +341,18 @@ void _setupFonts(){
 }
 
 - (void)setCiteKey:(NSString *)newCiteKey{
+	// This could be a problem if we try to setCiteKey before we have an editorObj
+	NSUndoManager *undoManager = [[editorObj window] undoManager];
+	[[undoManager prepareWithInvocationTarget:self] setCiteKey:citeKey];
+	[undoManager setActionName:NSLocalizedString(@"Change Cite Key",@"")];
+	
     [citeKey autorelease];
     citeKey = [newCiteKey retain];
+	
+	NSDictionary *notifInfo = [NSDictionary dictionaryWithObjectsAndKeys:citeKey, @"value", @"Cite Key", @"key",nil];
+	[[NSNotificationCenter defaultCenter] postNotificationName:BDSKBibItemChangedNotification
+														object:self
+													  userInfo:notifInfo];
 }
 
 - (NSString *)citeKey{
@@ -366,6 +376,8 @@ void _setupFonts(){
     return citeKey;
 }
 
+
+//@@ BibItem Memory fix: setFields should be separate from updateMetadata
 - (void)setFields: (NSMutableDictionary *)newFields{
     NSMutableString *tmp = [NSMutableString string];
     // this is what gets called when we make changes, so it has to keep the metadata intact.
@@ -415,7 +427,8 @@ void _setupFonts(){
 
 - (void)setField: (NSString *)key toValue: (NSString *)value{
     [pubFields setObject: value forKey: key];
-
+	[self setFields:[self dict]]; // update metadata. could have a better name
+	
 	NSDictionary *notifInfo = [NSDictionary dictionaryWithObjectsAndKeys:value, @"value", key, @"key",nil];
 	[[NSNotificationCenter defaultCenter] postNotificationName:BDSKBibItemChangedNotification
 														object:self
