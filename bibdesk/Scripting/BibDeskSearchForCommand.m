@@ -105,6 +105,8 @@ A further improvement could extend this work on lists as well. But would anybody
 			[results replaceObjectAtIndex:i withObject:resultObject];
 			i++;
 		}
+		// sort alphabetically
+		[results sortUsingSelector:@selector(caseInsensitiveCompare:)];
 	}
 	
 	
@@ -165,7 +167,7 @@ We are a bit rough here, so simply concatenate all the relevant strings and sear
 	NSEnumerator * authEnum = [pubAuthors objectEnumerator];
 	BibAuthor * auth = nil;
 	NSMutableString * authorlastnames = [NSMutableString string];	
-	
+
 	// compile author surname string
 	while (auth = [authEnum nextObject]) {
 		[authorlastnames appendFormat:@"%@ ", [auth lastName]];
@@ -190,11 +192,13 @@ The string is of the form citeKey % author1surname-author2surname, title.
 	BibAuthor * auth = nil;
 	NSMutableString * surnames = [NSMutableString string];
 	auth = [authEnum nextObject];
-	[surnames appendString:[auth lastName]];	
-	while (auth = [authEnum nextObject]) {
-		[surnames appendFormat:@"-%@", [auth lastName]];
+	if (auth) {
+		[surnames appendString:[auth lastName]];	
+		while (auth = [authEnum nextObject]) {
+			[surnames appendFormat:@"-%@", [auth lastName]];
+		}
 	}
-		
+	
 	return [[self citeKey] stringByAppendingFormat: @" %% %@, %@", surnames, [self title]];
 	// return [NSDictionary dictionaryWithObjectsAndKeys:[self citeKey], @"citeKey", surnames, @"surnames", [self title], @"title",nil];	
 }
