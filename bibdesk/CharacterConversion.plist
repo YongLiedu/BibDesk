@@ -133,8 +133,6 @@
 		<string>ï</string>
 		<key>{\"o}</key>
 		<string>ö</string>
-		<key>{\"s}</key>
-		<string>ß</string>
 		<key>{\"u}</key>
 		<string>ü</string>
 		<key>{\"y}</key>
@@ -213,6 +211,8 @@
 		<string>œ</string>
 		<key>{\o}</key>
 		<string>ø</string>
+		<key>{\ss}</key>
+		<string>ß</string>
 		<key>{\~a}</key>
 		<string>ã</string>
 		<key>{\~n}</key>
