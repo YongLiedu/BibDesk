@@ -29,7 +29,7 @@
 \f3\b0\fs24 \cf0  \'a5  Profiling and optimizing code resulted in significant speed increases in opening/saving files\
  \'a5  'View as text' in BibEditor now works for local-urls with spaces in the paths\
  \'a5  Column widths are now saved properly\
-\cf0  \'a5  Capitalize BibTeX fields when adding in BibEditor, in order to avoid potential conflicts\cf0 \
+ \'a5  Capitalize BibTeX fields when adding in BibEditor, in order to avoid potential conflicts\
  \'a5  Some character conversions (Bookends import improved)\
  \'a5  Opening MacRoman files as UTF8 won't cause a crash anymore\
  \'a5  BibEditor tab-keyloop (hopefully fixed for real this time)\
@@ -60,9 +60,15 @@
  \'a5  Added new 'proxy' objects BibField to access arbitrary fields from AppleScript\
  \'a5  Force capitalization for field names in AppleScript for internal consistency's sake\
  \'a5  Moved setting of some undo action name to controller layer to get correct action name in redo menu item\
- \'a5  Allow for multiple editors in RIS imports\
-\cf0  \'a5  Bug #1080931, data loss when adding a new field
-\f1\b\fs28 \cf0 \
+ \'a5  BibEditor now orders the fields in the form in the following way:  \
+
+\fs22 \cf0      1. Required fields in the order they are found in the Typeinfo.plist file.\
+     2. Optional fields in the order ""\
+     3. Any other fields, in alphabetical order.\
+
+\fs24 \cf0  \'a5  Allow for multiple editors in RIS imports\
+ \'a5  Bug #1080931, data loss when adding a new field
+\f1\b\fs28 \
 \pard\tx1440\tx2880\tx4320\tx5760\tx7200\ql\qnatural
 
 \f4\b0\fs36 \cf0 \
