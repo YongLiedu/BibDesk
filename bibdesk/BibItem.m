@@ -1391,7 +1391,7 @@ void _setupFonts(){
                                 case 'c':
                                     // This handles acronym specifiers of the form %c{FieldName}
                                     NSAssert( [scanner scanString:@"{" intoString:nil], @"Failed to scan {." ); // these errors will be handled gracefully by the BDSKConverter
-                                    NSAssert( [scanner scanUpToString:@"}" intoString:&string], @"Nothing found after {." );
+                                    [scanner scanUpToString:@"}" intoString:&string]; // it isn't really an error if there's no content
                                     NSAssert( [scanner scanString:@"}" intoString:nil], @"Failed to scan }." );
                                     
                                     string = [self acronymValueOfField:string];

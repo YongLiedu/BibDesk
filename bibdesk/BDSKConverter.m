@@ -324,6 +324,10 @@ static BDSKConverter *theConverter;
 			specifier = [string characterAtIndex:0];
                         if (specifier == 'c'){
                             [sanitizedFormatString appendFormat:@"%C", specifier];  // we know that c is okay, but what about the rest?
+                            if([string length] < 2){
+                                *error = NSLocalizedString(@"Specifier %c must be followed by a {'field'} name.", @"");
+                                return NO;
+                            }
                             specifier = [string characterAtIndex:1]; // move it up to where the { should be, then check between the braces later
                                 if (specifier != '{'){
                                     *error = NSLocalizedString(@"Specifier %c must be followed by a {'field'} name.", @"");
