@@ -999,8 +999,11 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
     NSDictionary *userInfo = [notification userInfo];
     NSString *fieldName = [userInfo objectForKey:@"fieldName"];
     NSString *value = [userInfo objectForKey:@"complexStringValue"];
+	NSString *prevValue = [theBib valueOfField:fieldName];
     
-    [self recordChangingField:fieldName toValue:value];
+    if(![value isEqualToString:prevValue]){ // order is important, as prevValue can be a proper NSString
+		[self recordChangingField:fieldName toValue:value];
+	}
 
     
     [[NSNotificationCenter defaultCenter] removeObserver:self
@@ -1020,7 +1023,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 	NSString *prevValue = [theBib valueOfField:title];
 	
     if([sender indexOfSelectedItem] != -1 &&
-	   ![value isEqualToString:prevValue]){
+	   ![prevValue isEqualToString:value]){ // order is important, as prevValue can be complex
 		[self recordChangingField:title toValue:value];
     }
 }
