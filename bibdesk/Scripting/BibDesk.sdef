@@ -26,7 +26,7 @@ will translate this file into the necessary scriptSuite and scriptTerminology fi
                 	<cocoa method="name"/>
                 </contents>
                 <properties>
-                    <property name="first Name" code="aufn" type="string" description="The author's first name (hopefully)" access="r">
+                    <property name="first name" code="aufn" type="string" description="The author's first name (hopefully)" access="r">
                         <cocoa method="firstName"/>
                     </property>  
                     <property name="jr part" code="aujr" type="string" description="The 'Jr' part of the author's name (hopefully)" access="r">
