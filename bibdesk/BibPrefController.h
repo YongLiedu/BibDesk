@@ -50,6 +50,7 @@ extern NSString *BDSKUseUnicodeBibTeXParser;
 extern NSString *BDSKDefaultStringEncoding;
 extern NSString *BDSKDefaultBibFilePathKey;
 extern NSString *BDSKStartupBehaviorKey;
+extern NSString *BDSKAutoCheckForUpdates;
 extern NSString *BDSKDragCopyKey;
 extern NSString *BDSKUsesTeXKey;
 extern NSString *BDSKEditOnPasteKey;

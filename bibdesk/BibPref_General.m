@@ -52,6 +52,8 @@ addObserver:self
 		
 		[editOnPasteButton setState:[defaults integerForKey:BDSKEditOnPasteKey]];
 
+        [checkForUpdatesButton setState:([defaults boolForKey:BDSKAutoCheckForUpdates] == YES) ? NSOnState : NSOffState];
+
 }
 
 
@@ -76,6 +78,10 @@ addObserver:self
     }else{
         [ac hideErrorPanel:self];
     }        
+}
+
+- (IBAction)toggleAutoCheckForUpdates:(id)sender{
+    [defaults setBool:([sender state] == NSOnState) ? YES : NO forKey:BDSKAutoCheckForUpdates];
 }
 
 - (IBAction)changeStartupBehavior:(id)sender{

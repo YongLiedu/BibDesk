@@ -19,11 +19,13 @@
                 changeStartupBehavior = id; 
                 chooseAutoOpenFile = id; 
                 chooseFont = id; 
+                toggleAutoCheckForUpdates = id; 
                 toggleShowWarnings = id; 
             }; 
             CLASS = "BibPref_General"; 
             LANGUAGE = ObjC; 
             OUTLETS = {
+                checkForUpdatesButton = NSButton; 
                 defaultBibFileField = NSTextField; 
                 displayPrefRadioMatrix = NSMatrix; 
                 editOnPasteButton = NSButton; 

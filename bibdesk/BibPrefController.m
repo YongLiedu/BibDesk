@@ -15,6 +15,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 
 NSString *BDSKDefaultBibFilePathKey = @"Default Bib File";
 NSString *BDSKStartupBehaviorKey = @"Startup Behavior";
+NSString *BDSKAutoCheckForUpdates = @"Check for updates when starting";
 NSString *BDSKShouldUseTemplateFile = @"Write template file when saving";
 
 

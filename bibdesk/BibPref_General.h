@@ -26,7 +26,7 @@
 	
     IBOutlet NSButton* showErrorsCheckButton;
 	IBOutlet NSButton* editOnPasteButton;
-
+    IBOutlet NSButton *checkForUpdatesButton;
 
     IBOutlet NSMatrix* showColsButtons;
     NSMutableArray *showColsArray;    //" the columns to show"
@@ -41,7 +41,7 @@
 - (IBAction) chooseAutoOpenFile:(id) sender;
 - (void) updateButtonForAutoOpenFile:(NSString*) path;
 
-
+- (IBAction)toggleAutoCheckForUpdates:(id)sender;
 
 - (IBAction)changeEditOnPaste:(id)sender;
 

@@ -446,6 +446,8 @@
 					<string>1.293993033330623e-310</string>
 					<key>View-by Field</key>
 					<string>Author</string>
+                    <key>Check for updates when starting</key>
+                    <string>1</string>
 				</dict>
 				<key>icon</key>
 				<string>startup.tiff</string>

@@ -224,6 +224,9 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
         [scriptItem release];
         [openTextEncodingPopupButton removeAllItems];
         [openTextEncodingPopupButton addItemsWithTitles:[[self encodingDefinitionDictionary] objectForKey:@"DisplayNames"]];
+     
+        if([[OFPreferenceWrapper sharedPreferenceWrapper] boolForKey:BDSKAutoCheckForUpdates])
+            [NSThread detachNewThreadSelector:@selector(checkForUpdatesInBackground) toTarget:self withObject:nil];
 
 }
 
@@ -474,7 +477,38 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 		return nil;
 }
 
+- (void)checkForUpdatesInBackground{
+    NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
+    
+    NSString *currVersionNumber = [[[NSBundle bundleForClass:[self class]]
+        infoDictionary] objectForKey:@"CFBundleVersion"];
+    
+    NSDictionary *productVersionDict = [NSDictionary dictionaryWithContentsOfURL:
+        [NSURL URLWithString:@"http://bibdesk.sourceforge.net/bibdesk-versions-xml.txt"]];
+    
+    NSString *latestVersionNumber = [productVersionDict valueForKey:@"BibDesk"];
+    
+    if(productVersionDict != nil && ([latestVersionNumber caseInsensitiveCompare: currVersionNumber] == NSOrderedDescending) )
+        [self performSelectorOnMainThread:@selector(displayUpdateAvailableWindow:)
+                               withObject:latestVersionNumber
+                            waitUntilDone:NO];
+    [pool release];
 
+}
+
+- (void)displayUpdateAvailableWindow:(NSString *)latestVersionNumber{
+    int button;
+    button = NSRunAlertPanel(NSLocalizedString(@"A New Version is Available",
+                                               @"Alert when new version is available"),
+                             [NSString stringWithFormat:
+                                 NSLocalizedString(@"A new version of BibDesk is available (version %@). Would you like to download the new version now?",
+                                                   @"format string asking if the user would like to get the new version"), latestVersionNumber],
+                             @"OK", @"Cancel", nil);
+    if (button == NSOKButton) {
+        [[NSWorkspace sharedWorkspace] openURL:[NSURL URLWithString:@"http://bibdesk.sourceforge.net/"]];
+    }
+    
+}
 
 - (IBAction)checkForUpdates:(id)sender{
     NSString *currVersionNumber = [[[NSBundle bundleForClass:[self class]]
