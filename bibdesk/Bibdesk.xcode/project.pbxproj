@@ -7,6 +7,8 @@
 	objects = {
 		080E96DDFE201D6D7F000001 = {
 			children = (
+				F9F78CD207D5320D004B68AF,
+				F9F78CD307D5320D004B68AF,
 				F9A6772B07D2D57F00782ACD,
 				F9A6772C07D2D57F00782ACD,
 				F9022FB707580B9400C3F701,
@@ -1482,6 +1484,7 @@
 				F9A6742B07D04E8000782ACD,
 				3D824AA907D099C300FB2F67,
 				F9A6772E07D2D57F00782ACD,
+				F9F78CD507D5320D004B68AF,
 			);
 			isa = PBXSourcesBuildPhase;
 			runOnlyForDeploymentPostprocessing = 0;
@@ -5240,6 +5243,7 @@
 				F9A6742A07D04E8000782ACD,
 				3D824AA807D099C300FB2F67,
 				F9A6772D07D2D57F00782ACD,
+				F9F78CD407D5320D004B68AF,
 			);
 			isa = PBXHeadersBuildPhase;
 			runOnlyForDeploymentPostprocessing = 0;
@@ -5488,6 +5492,34 @@
 			isa = PBXTargetDependency;
 			target = F98870B007580DAF001D4D49;
 			targetProxy = F9F14A690758126C008BA22F;
+		};
+		F9F78CD207D5320D004B68AF = {
+			fileEncoding = 4;
+			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.c.h;
+			path = BDSKStringEncodingManager.h;
+			refType = 4;
+			sourceTree = "<group>";
+		};
+		F9F78CD307D5320D004B68AF = {
+			fileEncoding = 4;
+			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.c.objc;
+			path = BDSKStringEncodingManager.m;
+			refType = 4;
+			sourceTree = "<group>";
+		};
+		F9F78CD407D5320D004B68AF = {
+			fileRef = F9F78CD207D5320D004B68AF;
+			isa = PBXBuildFile;
+			settings = {
+			};
+		};
+		F9F78CD507D5320D004B68AF = {
+			fileRef = F9F78CD307D5320D004B68AF;
+			isa = PBXBuildFile;
+			settings = {
+			};
 		};
 	};
 	rootObject = 29B97313FDCFA39411CA2CEA;
