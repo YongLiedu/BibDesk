@@ -149,7 +149,7 @@ static void addToolbarItem(NSMutableDictionary *theDict,NSString *identifier,NSS
                    NSLocalizedString(@"Action",@""),
                    NSLocalizedString(@"Action for Selection",@""),
                    self, @selector(setView:),
-                   actionMenuView,
+                   actionMenuButton,
                    NULL, 
 				   menuItem);
     
