@@ -27,13 +27,34 @@
 		<dict>
 			<key>CFBundleTypeExtensions</key>
 			<array>
-				<string>rss</string>
+				<string>mods</string>
 				<string>xml</string>
 			</array>
+			<key>CFBundleTypeMIMETypes</key>
+			<array>
+				<string>text/xml</string>
+			</array>
 			<key>CFBundleTypeName</key>
-			<string>Rich Site Summary file</string>
+			<string>MODS XML Database</string>
 			<key>CFBundleTypeRole</key>
-			<string>Viewer</string>
+			<string>Editor</string>
+			<key>NSDocumentClass</key>
+			<string>BibDocument</string>
+		</dict>
+		<dict>
+			<key>CFBundleTypeExtensions</key>
+			<array>
+				<string>atom</string>
+				<string>xml</string>
+			</array>
+			<key>CFBundleTypeMIMETypes</key>
+			<array>
+				<string>application/xml+atom</string>
+			</array>
+			<key>CFBundleTypeName</key>
+			<string>Atom Syndication File</string>
+			<key>CFBundleTypeRole</key>
+			<string>Editor</string>
 			<key>NSDocumentClass</key>
 			<string>BibDocument</string>
 		</dict>
@@ -64,7 +85,7 @@
 			<key>CFBundleTypeIconFile</key>
 			<string>bibDocIcon.icns</string>
 			<key>CFBundleTypeName</key>
-			<string>BibDocument File</string>
+			<string>BibDesk Library</string>
 			<key>CFBundleTypeRole</key>
 			<string>Editor</string>
 			<key>NSDocumentClass</key>
