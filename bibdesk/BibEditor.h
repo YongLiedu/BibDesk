@@ -135,6 +135,7 @@ extern NSString *BDSKUrlString;
 */
 
 - (void)setDocument:(NSDocument *)d;
+- (NSDocument *)document;
 
 - (void)fixURLs;
 - (IBAction)chooseLocalURL:(id)sender;

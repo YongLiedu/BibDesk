@@ -71,9 +71,18 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
         fileNames = [pboard propertyListForType:NSFilenamesPboardType];
 
         if (sourceDragMask & NSDragOperationCopy) {
+			NSString *fileUrlString = [[NSURL fileURLWithPath:
+				[[fileNames objectAtIndex:0] stringByExpandingTildeInPath]]absoluteString];
+			
             [editorBib setField:@"Local-Url"
-                        toValue:[[NSURL fileURLWithPath:
-                            [[fileNames objectAtIndex:0] stringByExpandingTildeInPath]]absoluteString]];
+                        toValue:fileUrlString];
+			
+			if([[OFPreferenceWrapper sharedPreferenceWrapper] boolForKey:BDSKFilePapersAutomaticallyKey]){
+				[[BibFiler sharedFiler] filePapers:[NSArray arrayWithObject:editorBib]
+									  fromDocument:[[self windowController] document]];
+			}
+			
+			
             [[self windowController] noteChange];
         }
     }else if([[pboard types] containsObject:NSURLPboardType]){

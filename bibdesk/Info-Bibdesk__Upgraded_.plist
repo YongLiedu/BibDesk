@@ -160,12 +160,12 @@
 			<dict>
 				<key>defaultsDictionary</key>
 				<dict>
-					<key>Auto Rename</key>
-					<false/>
-					<key>File Directory</key>
+					<key>File papers into the papers folder automatically</key>
+					<string>0</string>
+					<key>Keep files in the papers folder organized</key>
+					<string>0</string>
+					<key>Path to the papers folder</key>
 					<string>~/Documents/Papers</string>
-					<key>Use AutoFile</key>
-					<false/>
 				</dict>
 				<key>icon</key>
 				<string>palm.icns</string>
@@ -174,7 +174,7 @@
 				<key>nib</key>
 				<string>BibPref_AutoFile</string>
 				<key>ordering</key>
-				<integer>9</integer>
+				<string>9</string>
 				<key>shortTitle</key>
 				<string>AutoFile</string>
 				<key>title</key>
@@ -199,11 +199,11 @@
 						<string>citeauthor</string>
 					</array>
 					<key>Drag and Copy</key>
-					<integer>1</integer>
+					<string>1</string>
 					<key>Edit on Paste</key>
-					<integer>0</integer>
+					<string>0</string>
 					<key>Separate Cite</key>
-					<integer>0</integer>
+					<string>0</string>
 				</dict>
 				<key>icon</key>
 				<string>citation.tiff</string>
@@ -212,7 +212,7 @@
 				<key>nib</key>
 				<string>BibPref_Cite</string>
 				<key>ordering</key>
-				<integer>1</integer>
+				<string>1</string>
 				<key>shortTitle</key>
 				<string>Citation</string>
 				<key>title</key>
@@ -236,7 +236,7 @@
 				<key>nib</key>
 				<string>BibPref_Defaults</string>
 				<key>ordering</key>
-				<integer>20</integer>
+				<string>20</string>
 				<key>shortTitle</key>
 				<string>Defaults</string>
 				<key>title</key>
@@ -247,9 +247,9 @@
 				<key>defaultsDictionary</key>
 				<dict>
 					<key>BlueComponentColor of alternating rows Key</key>
-					<real>1.0109187948158557e-310</real>
+					<string>1.010918794815856e-310</string>
 					<key>Current Publication Type</key>
-					<integer>6</integer>
+					<string>6</string>
 					<key>Current Publication Type String</key>
 					<string>Inproceedings</string>
 					<key>Current Quick Search Key</key>
@@ -257,16 +257,16 @@
 					<key>Current Quick Search Text Dictionary</key>
 					<dict/>
 					<key>GreenComponentColor of alternating rows Key</key>
-					<real>1.0938888302425979e-310</real>
+					<string>1.093888830242598e-310</string>
 					<key>Preview Pane Displays What?</key>
-					<integer>1</integer>
+					<string>1</string>
 					<key>Quick Search Keys</key>
 					<array>
 						<string>Keywords</string>
 						<string>Pub Type</string>
 					</array>
 					<key>RedComponentColor of alternating rows Key</key>
-					<real>1.1564877060760734e-310</real>
+					<string>1.156487706076073e-310</string>
 					<key>Shown Column Names</key>
 					<array>
 						<string>Keywords</string>
@@ -279,17 +279,17 @@
 					</array>
 					<key>Shown Columns</key>
 					<array>
-						<integer>1</integer>
-						<integer>1</integer>
-						<integer>1</integer>
-						<integer>1</integer>
-						<integer>0</integer>
-						<integer>0</integer>
+						<string>1</string>
+						<string>1</string>
+						<string>1</string>
+						<string>1</string>
+						<string>0</string>
+						<string>0</string>
 					</array>
 					<key>TableView Font</key>
 					<string>LucidaGrande</string>
 					<key>TableView Font Size</key>
-					<real>1.2939930333306231e-310</real>
+					<string>1.293993033330623e-310</string>
 					<key>View-by Field</key>
 					<string>Author</string>
 				</dict>
@@ -300,7 +300,7 @@
 				<key>nib</key>
 				<string>BibPref_Display</string>
 				<key>ordering</key>
-				<integer>10</integer>
+				<string>10</string>
 				<key>shortTitle</key>
 				<string>Display</string>
 				<key>title</key>
@@ -311,7 +311,7 @@
 				<key>defaultsDictionary</key>
 				<dict>
 					<key>Auto-save as RSS</key>
-					<integer>0</integer>
+					<string>0</string>
 					<key>Field to use as Description in RSS</key>
 					<string>Rss-Description</string>
 				</dict>
@@ -322,7 +322,7 @@
 				<key>nib</key>
 				<string>BibPref_RSS</string>
 				<key>ordering</key>
-				<integer>25</integer>
+				<string>25</string>
 				<key>shortTitle</key>
 				<string>RSS</string>
 				<key>title</key>
@@ -335,9 +335,9 @@
 					<key>Default Bib File</key>
 					<string></string>
 					<key>Show Warnings in Error Panel</key>
-					<false/>
+					<string>0</string>
 					<key>Startup Behavior</key>
-					<integer>0</integer>
+					<string>0</string>
 				</dict>
 				<key>icon</key>
 				<string>startup.tiff</string>
@@ -346,7 +346,7 @@
 				<key>nib</key>
 				<string>BibPref_Startup</string>
 				<key>ordering</key>
-				<integer>0</integer>
+				<string>0</string>
 				<key>shortTitle</key>
 				<string>Startup</string>
 				<key>title</key>
@@ -363,7 +363,7 @@
 					<key>TeX Binary Path</key>
 					<string>/usr/local/teTeX/bin/powerpc-apple-darwin-current/pdflatex</string>
 					<key>Uses TeX</key>
-					<integer>0</integer>
+					<string>0</string>
 				</dict>
 				<key>icon</key>
 				<string>preview.tiff</string>
@@ -372,7 +372,7 @@
 				<key>nib</key>
 				<string>BibPref_TeX</string>
 				<key>ordering</key>
-				<integer>2</integer>
+				<string>2</string>
 				<key>shortTitle</key>
 				<string>Preview</string>
 				<key>title</key>

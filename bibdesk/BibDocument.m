@@ -1780,4 +1780,21 @@ int generalBibItemCompareFunc(id item1, id item2, void *context){
 					 contextInfo:NULL];
 }
 
+#pragma mark 
+#pragma mark AutoFile stuff
+- (IBAction)consolidateLinkedFiles:(id)sender{
+	
+	NSString *papersFolderPath = [[[OFPreferenceWrapper sharedPreferenceWrapper] stringForKey:BDSKPapersFolderPathKey] stringByAbbreviatingWithTildeInPath];
+	
+	int rv = NSRunAlertPanel(NSLocalizedString(@"Consolidate files", @""),
+							 NSLocalizedString(@"This command will move all linked files to the following directory: \n%@\n The operation cannot be undone. Do you wish to continue?",@""),
+							 NSLocalizedString(@"OK",@""),
+							 NSLocalizedString(@"Cancel",@""),nil, 
+							 papersFolderPath);
+	
+	if(rv != NSAlertDefaultReturn) return;
+	
+	[[BibFiler sharedFiler] filePapers:[self publications] fromDocument:self]; // @@ todo - selected pubs only?
+}
+
 @end

@@ -315,10 +315,19 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
                 newBI = [[BibItem alloc] initWithType:[pw stringForKey:BDSKPubTypeStringKey]
                                              fileType:@"BibTeX"
                                               authors:[NSMutableArray arrayWithCapacity:0]];
-                [publications addObject:newBI];
-                [shownPublications addObject:newBI];
-                [newBI setField:@"Local-Url" toValue:[[NSURL fileURLWithPath:
-                    [fnStr stringByExpandingTildeInPath]]absoluteString]];
+              
+				[self addPublication:newBI];
+				
+				NSString *newUrl = [[NSURL fileURLWithPath:
+                    [fnStr stringByExpandingTildeInPath]]absoluteString];
+				
+				[newBI setField:@"Local-Url" toValue:newUrl];	
+
+				if([[OFPreferenceWrapper sharedPreferenceWrapper] boolForKey:BDSKFilePapersAutomaticallyKey]){
+					[[BibFiler sharedFiler] filePapers:[NSArray arrayWithObject:newBI]
+										  fromDocument:self];
+				}
+				
                 [self updateUI];
                 [self updateChangeCount:NSChangeDone];
 

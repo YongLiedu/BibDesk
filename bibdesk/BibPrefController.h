@@ -22,6 +22,15 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 #define BDSK_USING_JAGUAR (floor(NSAppKitVersionNumber) <= NSAppKitVersionNumber10_2)
 // otherwise
 
+#define foreach(object, enumerator) \
+id mjtForeachEnumerator ## object = (enumerator); \
+if ( [mjtForeachEnumerator ## object respondsToSelector:@selector(objectEnumerator)] ) \
+mjtForeachEnumerator ## object = [mjtForeachEnumerator ## object objectEnumerator]; \
+SEL mjtNextObjectSEL ## object = @selector(nextObject); \
+IMP mjtNextObjectIMP ## object = [mjtForeachEnumerator ## object methodForSelector:mjtNextObjectSEL ## object]; \
+id object; \
+while ( object = mjtNextObjectIMP ## object(mjtForeachEnumerator ## object, mjtNextObjectSEL ## object) )
+
 #pragma mark ||  User Defaults Key String Declarations
 
 /*! @const BDSKTeXBinPathKey
@@ -72,6 +81,10 @@ extern NSString *BDSKQuickSearchKeys;
 extern NSString *BDSKRowColorRedKey;
 extern NSString *BDSKRowColorGreenKey;
 extern NSString *BDSKRowColorBlueKey;
+
+extern NSString *BDSKPapersFolderPathKey;
+extern NSString *BDSKFilePapersAutomaticallyKey;
+extern NSString *BDSKKeepPapersFolderOrganizedKey;
 
 #pragma mark ||  Notification name strings
 extern NSString *BDSKDocumentUpdateUINotification;

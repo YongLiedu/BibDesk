@@ -416,7 +416,7 @@ NSString *BDSKUrlString = @"Url";
         [viewLocalButton setImage:nil];
         [viewLocalButton setBordered:YES]; 
         [viewLocalButton setTitle:NSLocalizedString(@"Pick\nFile", @"Choose file, make sure it fits in the icon")];
-        [viewLocalButton setToolTip:NSLocalizedString(@"Bad or Empty Local-Url Field", @"bad/empty local url field")];
+        [viewLocalButton setToolTip:NSLocalizedString(@"Choose a file to link with in the Local-Url Field", @"bad/empty local url field")];
         [viewLocalButton setAction:@selector(chooseLocalURL:)];
         
         [documentSnoopButton setEnabled:NO];
@@ -450,11 +450,16 @@ NSString *BDSKUrlString = @"Url";
     NSOpenPanel *oPanel = [NSOpenPanel openPanel];
     [oPanel setAllowsMultipleSelection:NO];
     int result = [oPanel runModalForDirectory:nil
-                                     file:nil
-                                    types:nil];
+										 file:nil
+										types:nil];
     if (result == NSOKButton) {
-	NSString *fileURLString = [[NSURL fileURLWithPath:[[oPanel filename] stringByStandardizingPath]] absoluteString];
+		NSString *fileURLString = [[NSURL fileURLWithPath:[[oPanel filename] stringByStandardizingPath]] absoluteString];
         [theBib setField:@"Local-Url" toValue:fileURLString];
+		if([[OFPreferenceWrapper sharedPreferenceWrapper] boolForKey:BDSKFilePapersAutomaticallyKey]){
+			[[BibFiler sharedFiler] filePapers:[NSArray arrayWithObject:theBib]
+								  fromDocument:theDocument];
+		}
+		
 		[self setupForm];
         [self fixURLs];
     }
@@ -756,6 +761,13 @@ NSString *BDSKUrlString = @"Url";
 	[addAuthorTextView setString:@""];
 }
 
-- (void)setDocument:(NSDocument *)d;{
+- (void)setDocument:(NSDocument *)d{
+	
 }
+
+- (NSDocument *)document{
+	return theDocument;
+}
+
+
 @end

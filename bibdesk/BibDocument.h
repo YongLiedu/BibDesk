@@ -31,6 +31,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 #import <OmniAppKit/OASplitView.h>
 #import "NSString+Templating.h"
 #import "AvailabilityMacros.h"
+#import "BibFiler.h"
 
 
 @class BDSKCustomCiteTableView;
@@ -454,5 +455,13 @@ int generalBibItemCompareFunc(id item1, id item2, void *context);
     
 */
 - (void)splitViewDoubleClick:(OASplitView *)sender;
+
+/*!
+    @method     consolidateLinkedFiles:
+    @abstract   (description)
+    @discussion (description)
+*/
+
+- (IBAction)consolidateLinkedFiles:(id)sender;
 
 @end
