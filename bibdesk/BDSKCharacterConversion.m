@@ -143,6 +143,9 @@ static BDSKCharacterConversion *sharedConversionEditor;
 		[data writeToFile:charConvPath atomically:YES];
 	}
 	
+	// tell the converter to reload its dictionaries
+	[[BDSKConverter sharedConverter] loadDict];
+	
 	[self close];
 }
 

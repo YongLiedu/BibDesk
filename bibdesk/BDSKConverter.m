@@ -16,6 +16,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 #import "BDSKConverter.h"
 #import "NSString_BDSKExtensions.h"
 #import "BDSKComplexString.h"
+#import "BibAppController.h"
 
 static BDSKConverter *theConverter;
 
@@ -37,6 +38,7 @@ static BDSKConverter *theConverter;
 
 - (void)dealloc{
     [wholeDict release];
+    [userWholeDict release];
     [emptySet release];
     [finalCharSet release];
     [accentCharSet release];
@@ -50,14 +52,36 @@ static BDSKConverter *theConverter;
     
 
 - (void)loadDict{
-    
-    //create a characterset from the characters we know how to convert
-    NSMutableCharacterSet *workingSet;
-    NSRange highCharRange;
+    // first make sure that we release, as this may be called by the character conversion editor
+	[wholeDict release];
+    [userWholeDict release];
+    [emptySet release];
+    [finalCharSet release];
+    [accentCharSet release];
+    [texifyConversions release];
+    [detexifyConversions release];
+    [texifyAccents release];
+    [detexifyAccents release];
+    [baseCharacterSetForTeX release];
     
     wholeDict = [[NSDictionary dictionaryWithContentsOfFile:[[[NSBundle mainBundle] resourcePath] stringByAppendingPathComponent:@"CharacterConversion.plist"]] retain];
     emptySet = [[NSCharacterSet characterSetWithCharactersInString:@""] retain];
+	
+	// look for the user file
+	NSFileManager *fm = [NSFileManager defaultManager];
+	NSString *applicationSupportPath = [[fm applicationSupportDirectory:kUserDomain] stringByAppendingPathComponent:@"BibDesk"];
+	NSString *charConvPath = [applicationSupportPath stringByAppendingPathComponent:@"CharacterConversion.plist"];
+	
+	if ([fm fileExistsAtPath:charConvPath]) {
+		userWholeDict = [NSDictionary dictionaryWithContentsOfFile:charConvPath];
+    } else {
+		userWholeDict = nil;
+	}
     
+	//create a characterset from the characters we know how to convert
+    NSMutableCharacterSet *workingSet;
+    NSRange highCharRange;
+	
     highCharRange.location = (unsigned int) '~' + 1; //exclude tilde, or we'll get an alert on it
     highCharRange.length = 256; //this should get all the characters in the upper-range.
     workingSet = [[NSCharacterSet decomposableCharacterSet] mutableCopy];
@@ -70,24 +94,38 @@ static BDSKConverter *theConverter;
 	while(oneWayKey = [e nextObject]){
 		[workingSet addCharactersInString:oneWayKey];
 	}
-
-    finalCharSet = [workingSet copy];
-    [workingSet release];
     
     // set up the dictionaries
-    NSMutableDictionary *tmpConversions = [wholeDict objectForKey:@"Roman to TeX"];
-    [tmpConversions addEntriesFromDictionary:[wholeDict objectForKey:@"One-Way Conversions"]];
-    texifyConversions = [tmpConversions copy];
+    NSMutableDictionary *tmpDetexifyDict = [NSMutableDictionary dictionaryWithDictionary:[wholeDict objectForKey:@"TeX to Roman"]];
+    NSMutableDictionary *tmpTexifyDict = [NSMutableDictionary dictionaryWithDictionary:[wholeDict objectForKey:@"Roman to TeX"]];
+    [tmpTexifyDict addEntriesFromDictionary:[wholeDict objectForKey:@"One-Way Conversions"]];
+    
+	if (userWholeDict) {
+		oneWayCharacters = [userWholeDict objectForKey:@"One-Way Conversions"];
+		e = [oneWayCharacters keyEnumerator];
+		oneWayKey;
+		while(oneWayKey = [e nextObject]){
+			[workingSet addCharactersInString:oneWayKey];
+		}
+		
+		[tmpTexifyDict addEntriesFromDictionary:[wholeDict objectForKey:@"Roman to TeX"]];
+		[tmpTexifyDict addEntriesFromDictionary:[wholeDict objectForKey:@"One-Way Conversions"]];
+		[tmpDetexifyDict addEntriesFromDictionary:[wholeDict objectForKey:@"TeX to Roman"]];
+    }
+	
+	// set the ivars
+    finalCharSet = [workingSet copy];
+	texifyConversions = [tmpTexifyDict copy];
+	detexifyConversions = [tmpDetexifyDict copy];
     
     if(!texifyConversions){
         texifyConversions = [[NSDictionary dictionary] retain]; // an empty one won't break the code.
     }
-    
-    detexifyConversions = [[wholeDict objectForKey:@"TeX to Roman"] retain];
-    
-    if(!detexifyConversions){
+	if(!detexifyConversions){
         detexifyConversions = [[NSDictionary dictionary] retain]; // an empty one won't break the code.
     }
+    
+	[workingSet release];
     
 	// build a character set of [a-z][A-Z] representing the base character set that we can decompose and recompose as TeX
     NSRange ucRange = NSMakeRange('A', 26);
