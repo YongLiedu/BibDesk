@@ -16,6 +16,7 @@ NSString *BDSKInputManagerID = @"net.sourceforge.bibdesk.inputmanager";
 - (void)awakeFromNib{
     [super awakeFromNib];
     NSFileManager *fm = [NSFileManager defaultManager];
+    NSWorkspace *ws = [NSWorkspace sharedWorkspace];
     
     NSString *libraryPath = [NSSearchPathForDirectoriesInDomains(NSLibraryDirectory, NSUserDomainMask, YES) objectAtIndex:0];
     applicationSupportPath = [[libraryPath stringByAppendingPathComponent:@"/Application Support/BibDeskInputManager"] retain];
@@ -23,11 +24,20 @@ NSString *BDSKInputManagerID = @"net.sourceforge.bibdesk.inputmanager";
     
     // Try to find TextEdit.app so the table isn't empty
     NSString *textEditPath = nil;
-    textEditPath = [[NSSearchPathForDirectoriesInDomains(NSApplicationDirectory,NSSystemDomainMask,YES) objectAtIndex:0] stringByAppendingPathComponent:@"/TextEdit.app"];
-    if(![fm fileExistsAtPath:textEditPath]){
-	textEditPath = [[NSSearchPathForDirectoriesInDomains(NSApplicationDirectory,NSUserDomainMask,YES) objectAtIndex:0] stringByAppendingPathComponent:@"/TextEdit.app"];
+    if([ws respondsToSelector:@selector(absolutePathForAppBundleWithIdentifier:)]){
+	textEditPath = [ws absolutePathForAppBundleWithIdentifier:@"com.apple.textedit"];
+    } else {
+	NSAlert *anAlert = [NSAlert alertWithMessageText:@"Error!"
+					   defaultButton:nil
+					 alternateButton:nil
+					     otherButton:nil
+			       informativeTextWithFormat:@"You appear to be using a system version earlier than 10.3.  Autocompletion will not work on systems prior to 10.3."];
+	[anAlert beginSheetModalForWindow:[controlBox window]
+			    modalDelegate:nil
+			   didEndSelector:nil
+			      contextInfo:nil];
     }
-
+	
     if(![fm fileExistsAtPath:[applicationSupportPath stringByAppendingPathComponent:@"EnabledApplications.plist"]]){
 	if([fm fileExistsAtPath:textEditPath]){
 	    appListArray = [[NSMutableArray arrayWithObjects:[NSMutableDictionary dictionaryWithObject:textEditPath forKey:@"Path"], nil] retain];
