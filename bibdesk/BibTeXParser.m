@@ -36,7 +36,7 @@ NSString *stringFromBTField(AST *field,
     if(![inData length]) // btparse chokes on non-BibTeX or empty data, so we'll at least check for zero length
         return [NSMutableArray array];
 	
-	NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
+    NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
 	
     int ok = 1;
     long cidx = 0; // used to scan through buf for annotes.
@@ -168,7 +168,8 @@ NSString *stringFromBTField(AST *field,
 					
                     [newBI setCiteKeyString:[NSString stringWithBytes:bt_entry_key(entry) encoding:parserEncoding]];
                     [newBI setPubFields:dictionary];
-                    [returnArray addObject:[newBI autorelease]];
+                    [returnArray addObject:newBI];
+                    [newBI release];
                     
                     [dictionary removeAllObjects];
                 } // end generate BibItem from ENTRY metatype.
@@ -185,7 +186,7 @@ NSString *stringFromBTField(AST *field,
         fclose(infile);
         // @@readonly free(buf);
 		
-		[pool release];
+        [pool release];
         return [returnArray autorelease];
 }
 
@@ -279,7 +280,7 @@ NSString * checkAndTranslateString(NSString *s, int line, NSString *filePath, NS
 
 NSString *stringFromBTField(AST *field, NSString *fieldName, NSString *filePath, BibDocument* document){
     BibAppController *appController = (BibAppController *)[NSApp delegate];
-    NSMutableArray *stringValueArray = [[NSMutableArray alloc] initWithCapacity:10];
+    NSMutableArray *stringValueArray = [NSMutableArray array];
     NSString *s = NULL;
     BDSKStringNode *sNode;
     AST *simple_value;
@@ -312,7 +313,7 @@ NSString *stringFromBTField(AST *field, NSString *fieldName, NSString *filePath,
                 case BTAST_STRING:
                     s = [[NSString alloc] initWithBytes:simple_value->text encoding:parserEncoding];
                     sNode = [BDSKStringNode nodeWithQuotedString:checkAndTranslateString(s, field->line, filePath, parserEncoding)];
-                    
+
                     break;
                 case BTAST_NUMBER:
                     s = [[NSString alloc] initWithBytes:simple_value->text encoding:parserEncoding];
@@ -327,7 +328,6 @@ NSString *stringFromBTField(AST *field, NSString *fieldName, NSString *filePath,
             // if we have multiple strings for one field, we add them separately.
             [appController addString:s forCompletionEntry:fieldName]; 
             [s release];
-            [sNode release];
         }
         
             simple_value = simple_value->right;
