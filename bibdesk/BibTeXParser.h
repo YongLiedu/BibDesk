@@ -18,7 +18,6 @@
 #import "BibPrefController.h"
 
 @interface BibTeXParser : NSObject {
-    BibDocument *theDocument;
 }
 
 /*!
@@ -33,7 +32,7 @@
 
 /*!
     @method     itemsFromData:error:frontMatter:filePath:document:
-    @abstract   Convenience method that returns an array of BibItems from data, using libbtparse; needs a document to act as macro resolver.
+    @abstract   Parsing method that returns an array of BibItems from data, using libbtparse; needs a document to act as macro resolver.
     @discussion (comprehensive description)
     @param      inData (description)
     @param      hadProblems (description)
@@ -49,32 +48,14 @@
                  document:(BibDocument *)aDocument;
 
 /*!
-    @method     itemsFromData:error:frontMatter:filePath:document:
-    @abstract   The actual parsing work using libbtparse is done in this method.  It returns an array of BibItems.
+    @method     stringFromBibTeXValue:error:frontMatter:document:
+    @abstract   Parsing method that returns a complex nor simple string for a value entered as BibTeX string, using libbtparse; needs a document to act as macro resolver.
     @discussion (comprehensive description)
-    @param      inData (description)
+    @param      value (description)
     @param      hadProblems (description)
-    @param      frontMatter (description)
-    @param      filePath (description)
-    @param      document (description)
-    @result     (description)
-*/
-- (NSMutableArray *)itemsFromData:(NSData *)inData error:(BOOL *)hadProblems frontMatter:(NSMutableString *)frontMatter filePath:(NSString *)filePath document:(BibDocument *)document;
-
-/*!
-    @method     document
-    @abstract   Returns the document for this instance of the parser.
-    @discussion (comprehensive description)
-    @result     (description)
-*/
-- (BibDocument *)document;
-
-/*!
-    @method     setDocument:
-    @abstract   Sets the document for this instance of the parser.
-    @discussion (comprehensive description)
     @param      aDocument (description)
+    @result     (description)
 */
-- (void)setDocument:(BibDocument *)aDocument;
++ (NSString *)stringFromBibTeXValue:(NSString *)value error:(BOOL *)hadProblems document:(BibDocument *)aDocument;
 
 @end

@@ -22,50 +22,19 @@ NSString *stringFromBTField(AST *field,
 							NSString *filePath,
 							BibDocument* theDocument);
 
-- (void)postParsingErrorNotification:(NSString *)message errorType:(NSString *)type fileName:(NSString *)name errorRange:(NSRange)range;
-
 @end
 
 @implementation BibTeXParser
 
-- (id)init{
-    if(self = [super init])
-    return self;
-}
-
-- (void)dealloc{
-    [super dealloc];
-}
-
 /// libbtparse methods
 + (NSMutableArray *)itemsFromData:(NSData *)inData
                               error:(BOOL *)hadProblems{
-    if(![inData length]) // btparse chokes on non-BibTeX or empty data, so we'll at least check for zero length
-        return [NSMutableArray array];
-    BibTeXParser *parser = [[[BibTeXParser alloc] init] autorelease];
-    return [parser itemsFromData:inData error:hadProblems frontMatter:nil filePath:@"Paste/Drag" document:nil];
+    return [self itemsFromData:inData error:hadProblems frontMatter:nil filePath:@"Paste/Drag" document:nil];
 }
 
 + (NSMutableArray *)itemsFromData:(NSData *)inData error:(BOOL *)hadProblems frontMatter:(NSMutableString *)frontMatter filePath:(NSString *)filePath document:(BibDocument *)aDocument{
     if(![inData length]) // btparse chokes on non-BibTeX or empty data, so we'll at least check for zero length
         return [NSMutableArray array];
-    BibTeXParser *parser = [[[BibTeXParser alloc] init] autorelease];
-    return [parser itemsFromData:inData error:hadProblems frontMatter:frontMatter filePath:filePath document:aDocument];
-}
-
-- (void)setDocument:(BibDocument *)aDocument{
-    theDocument = aDocument;
-}
-
-- (BibDocument *)document{
-    return theDocument;
-}
-
-- (NSMutableArray *)itemsFromData:(NSData *)inData
-                            error:(BOOL *)hadProblems
-                      frontMatter:(NSMutableString *)frontMatter
-                         filePath:(NSString *)filePath
-                         document:(BibDocument *)aDocument{
 	
 	NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
 	
@@ -97,12 +66,11 @@ NSString *stringFromBTField(AST *field,
     BOOL usingTempFile = NO;
     FILE *infile = NULL;
     
-    [self setDocument:aDocument];
     NSStringEncoding parserEncoding;
     if(!aDocument)
         parserEncoding = [NSString defaultCStringEncoding]; // is this a good assumption?  only used for pasteboard stuff.
     else
-        parserEncoding = [[self document] documentStringEncoding]; 
+        parserEncoding = [aDocument documentStringEncoding]; 
     
     if( !([filePath isEqualToString:@"Paste/Drag"]) && [[NSFileManager defaultManager] fileExistsAtPath:filePath]){
         fs_path = [[NSFileManager defaultManager] fileSystemRepresentationWithPath:filePath];
@@ -155,8 +123,8 @@ NSString *stringFromBTField(AST *field,
 						field = bt_next_field (entry, NULL, &fieldname);
 						NSString *macroKey = [NSString stringWithBytes: field->text encoding:parserEncoding];
 						NSString *macroString = [NSString stringWithBytes: field->down->text encoding:parserEncoding];                        
-                        if(theDocument)
-                            [theDocument addMacroDefinitionWithoutUndo:macroString
+                        if(aDocument)
+                            [aDocument addMacroDefinitionWithoutUndo:macroString
                                                    forMacro:macroKey];
 					}
                 }else{
@@ -197,7 +165,7 @@ NSString *stringFromBTField(AST *field,
                                 *hadProblems = YES;
                             }
                         }else{
-                            complexString = stringFromBTField(field, sFieldName, filePath, theDocument);
+                            complexString = stringFromBTField(field, sFieldName, filePath, aDocument);
                         }
                         
                         [dictionary setObject:complexString forKey:sFieldName];
@@ -237,14 +205,31 @@ NSString *stringFromBTField(AST *field,
         return [returnArray autorelease];
 }
 
-- (void)postParsingErrorNotification:(NSString *)message errorType:(NSString *)type fileName:(NSString *)name errorRange:(NSRange)range{
-    NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
-    
-    NSDictionary *errorDict = [NSDictionary dictionaryWithObjects:[NSArray arrayWithObjects:name, [NSNull null], type, message, [NSValue valueWithRange:range], nil]
-                                                          forKeys:[NSArray arrayWithObjects:@"fileName", @"lineNumber", @"errorClassName", @"errorMessage", @"errorRange", nil]];
-    [[NSNotificationCenter defaultCenter] postNotificationName:BDSKParserErrorNotification
-                                                        object:errorDict];
-    [pool release];
++ (NSString *)stringFromBibTeXValue:(NSString *)value error:(BOOL *)hadProblems document:(BibDocument *)aDocument{
+	NSString *entryString = [NSString stringWithFormat:@"@dummyentry{dummykey, dummyfield = %@}", value];
+	NSString *valueString = @"";
+    AST *entry = NULL;
+    AST *field = NULL;
+    char *fieldname = "\0";
+	ushort options = BTO_MINIMAL;
+	boolean ok;
+	
+	bt_initialize();
+	
+	entry = bt_parse_entry_s((char *)[entryString UTF8String], NULL, 1, options, &ok);
+	if(ok){
+		field = bt_next_field(entry, NULL, &fieldname);
+		valueString = stringFromBTField(field, nil, nil, aDocument);
+		*hadProblems = NO;
+	}else{
+		*hadProblems = YES;
+	}
+	
+	bt_parse_entry_s(NULL, NULL, 1, options, NULL);
+	bt_free_ast(entry);
+	bt_cleanup();
+	
+	return valueString;
 }
 
 @end
