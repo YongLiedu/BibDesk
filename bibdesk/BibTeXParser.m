@@ -154,7 +154,8 @@
                         NSString *validscanstring = nil;
                                                 
                         validscan = [NSScanner scannerWithString:s];  //Scan string s after we get it from bt
-
+                        
+                        [validscan setCharactersToBeSkipped:nil]; //If the first character is a newline or whitespace, NSScanner will skip it by default, which gives a bad length value
                         [validscan scanCharactersFromSet:asciiLetters intoString:&validscanstring];
                         
                         if([validscanstring length] != [s length]) //Compare it to the original string
