@@ -185,6 +185,7 @@
 		};
 		29B97315FDCFA39411CA2CEA = {
 			children = (
+				F91B5C510764135B0011ED22,
 				F9022C31075801D100C3F701,
 				F9022C2A075801AC00C3F701,
 				F9022C2C075801AC00C3F701,
@@ -380,6 +381,7 @@
 				GCC_ENABLE_FIX_AND_CONTINUE = YES;
 				GCC_GENERATE_DEBUGGING_SYMBOLS = YES;
 				GCC_OPTIMIZATION_LEVEL = 0;
+				OTHER_CFLAGS = "";
 				ZERO_LINK = YES;
 			};
 			isa = PBXBuildStyle;
@@ -413,6 +415,7 @@
 				8D11072E0486CEB800E47090,
 				F9022E8B07580A7C00C3F701,
 				F920DB22075C2D40000C5FCA,
+				F91B5C4E076412A10011ED22,
 			);
 			buildRules = (
 			);
@@ -3562,6 +3565,31 @@
 			path = "";
 			refType = 4;
 			sourceTree = "<group>";
+		};
+		F91B5C4E076412A10011ED22 = {
+			buildActionMask = 2147483647;
+			dstPath = Contents/Scripts;
+			dstSubfolderSpec = 1;
+			files = (
+				F91B5C53076413620011ED22,
+			);
+			isa = PBXCopyFilesBuildPhase;
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		F91B5C510764135B0011ED22 = {
+			fileEncoding = 30;
+			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.scpt;
+			name = "About the Scripts Menu.scpt";
+			path = "Scripting/About the Scripts Menu.scpt";
+			refType = 2;
+			sourceTree = SOURCE_ROOT;
+		};
+		F91B5C53076413620011ED22 = {
+			fileRef = F91B5C510764135B0011ED22;
+			isa = PBXBuildFile;
+			settings = {
+			};
 		};
 		F920DAFA075C2B69000C5FCA = {
 			fileEncoding = 30;
