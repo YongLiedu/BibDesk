@@ -323,7 +323,7 @@ static BDSKConverter *theConverter;
 			specifier = [string characterAtIndex:0];
 			if (![validSpecifierChars characterIsMember:specifier]) {
 				if (specifier == '{') {
-					arr = [string componentsSeparatedByString:@"}"];
+					arr = [[string substringFromIndex:1] componentsSeparatedByString:@"}"];
 					if ([arr count] != 2) {
 						*error = NSLocalizedString(@"Incomplete specifier {'field'} in format.", @"");
 						return NO;
