@@ -114,7 +114,7 @@ static BDSKConverter *theConverter;
 			if([node type] == BSN_STRING)
 				newNode = [BDSKStringNode nodeWithQuotedString:[self stringByTeXifyingString:[node value]]];
 			else 
-				newNode = [node copy];
+				newNode = [[node copy] autorelease];
 			[nodes addObject:newNode];
 		}
 		return [NSString complexStringWithArray:nodes macroResolver:[cs macroResolver]];
@@ -248,7 +248,7 @@ static BDSKConverter *theConverter;
 			if([node type] == BSN_STRING)
 				newNode = [BDSKStringNode nodeWithQuotedString:[self stringByDeTeXifyingString:[node value]]];
 			else 
-				newNode = [node copy];
+				newNode = [[node copy] autorelease];
 			[nodes addObject:newNode];
 		}
 		return [NSString complexStringWithArray:nodes macroResolver:[cs macroResolver]];
