@@ -8,7 +8,7 @@ static NSCharacterSet *macroCharSet = nil;
 + (BDSKStringNode *)nodeWithQuotedString:(NSString *)s{
     BDSKStringNode *node = [[BDSKStringNode alloc] init];
 	[node setType:BSN_STRING];
-	[node setValue:[[BDSKConverter sharedConverter] stringByDeTeXifyingString:s]];
+	[node setValue:s];
 	return [node autorelease];
 }
 
@@ -52,7 +52,7 @@ static NSCharacterSet *macroCharSet = nil;
                         format:@"Unbalanced string: [%@]", s];
         }
         [node setType:BSN_STRING];
-        [node setValue:[[BDSKConverter sharedConverter] stringByDeTeXifyingString:s]];
+        [node setValue:s];
         return [node autorelease];
         
     }else{
@@ -244,18 +244,11 @@ static NSDictionary *globalMacroDefs;
         if (i != 0){
             [retStr appendString:@" # "];
         }
-        NS_DURING
         if([valNode type] == BSN_STRING){
-            [retStr appendFormat:@"{%@}", [conv stringByTeXifyingString:[valNode value]]];
+            [[valNode value] stringAsBibTeXString];
         }else{
-            [retStr appendString:[conv stringByTeXifyingString:[valNode value]]];
+            [retStr appendString:[valNode value]];
         }
-        NS_HANDLER
-            if([[localException name] isEqualToString:@"BDSKTeXifyException"])
-                [NSException raise:@"BDSKComplexStringTeXifyException" format:@"An error occurred while TeXifying %@", [valNode value]];
-            else
-                [localException raise];
-        NS_ENDHANDLER
     }
     
     return retStr; 
