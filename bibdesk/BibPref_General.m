@@ -143,7 +143,7 @@
 	NSCell * autoOpenRadioButton = [startupBehaviorRadio cellWithTag:3];
 
 	// change title to reflect the file name
-	[autoOpenRadioButton setTitle:[NSString stringWithFormat:NSLocalizedString(@"Open Bibliography \"%@\"",@"Open bibliography %@ (should be the same as the radio button in the general preference, don't forget to use curly quotes)"), [path lastPathComponent]]];
+	[autoOpenRadioButton setTitle:[NSString stringWithFormat:NSLocalizedString(@"Open Bibliography \"%@\"",@"Open bibliography %@ (should be the same as the radio button in the general preference, don't forget to use curly quotes)"), [path stringByAbbreviatingWithTildeInPath]]];
 	
 	// change the tool tip to reflect the whole path
 	[startupBehaviorRadio setToolTip:path forCell:autoOpenRadioButton];
