@@ -29,7 +29,7 @@ static BibTypeManager *sharedInstance = nil;
     [validSet addCharactersInRange:NSMakeRange( (unsigned int)'-', 15)];  //  -./0123456789:;
     
     // this is used for generated cite keys, verys strict!
-	strictInvalidCiteKeyCharSet = [[validSet invert] copy];  // don't release this
+	strictInvalidCiteKeyCharSet = [[validSet invertedSet] copy];  // don't release this
     
 	[validSet removeCharactersInString:@":"];
 	[validSet addCharactersInString:@"%"];
