@@ -116,6 +116,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 	    extension = [path pathExtension];
             if(path && [[NSFileManager defaultManager] fileExistsAtPath:path]){
 		if(![extension isEqualToString:@""]){
+		    // use the NSImage method, as it seems to be faster, but only for files with extensions
 		    return [NSImage imageForFileType:extension];
 		} else {
 		    return [[NSWorkspace sharedWorkspace] iconForFile:path];
@@ -213,7 +214,8 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
     NSNumber *idx;
     NSMutableArray* newRows;
     int sortedIndex = 0;
-
+    
+    // check the publications table to see if an item is selected, otherwise we get an error on dragging from the cite drawer
     if([tableView numberOfSelectedRows] == 0) return NO;
 
     if(tv == (NSTableView *)ccTableView){
