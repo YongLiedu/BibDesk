@@ -148,10 +148,10 @@ static NSColor *sStripeColor = nil;
 
 - (void)mouseDown:(NSEvent *)theEvent{
     
-    if(![[self window] isKeyWindow]){
-	NSPoint pt=[self convertPoint:[theEvent locationInWindow] fromView:nil];
-	int row=[self rowAtPoint:pt];
-	[self selectRow:row byExtendingSelection:NO];
+    if(![[self window] isKeyWindow] && [self selectedRow] == -1 ){ // preserve the selection if present, else select the row at the pointer
+        NSPoint pt=[self convertPoint:[theEvent locationInWindow] fromView:nil];
+        int row=[self rowAtPoint:pt];
+        [self selectRow:row byExtendingSelection:NO];
     }
     [super mouseDown:theEvent];
 }
