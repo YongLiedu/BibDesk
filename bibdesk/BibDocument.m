@@ -683,6 +683,14 @@ stringByAppendingPathComponent:@"BibDesk"]; */
 #pragma mark -
 #pragma mark Search Field methods
 
+- (IBAction)makeSearchFieldKey:(id)sender{
+	if(BDSK_USING_JAGUAR){
+		[documentWindow makeFirstResponder:searchFieldTextField];
+	}else{
+		[documentWindow makeFirstResponder:searchField];
+	}
+}
+
 - (NSMenu *)searchFieldMenu{
 	NSMenu *cellMenu = [[NSMenu alloc] initWithTitle:@"Search Menu"];
 	NSMenuItem *item1, *item2, *item3, *item4, *anItem;

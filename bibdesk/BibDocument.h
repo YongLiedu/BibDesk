@@ -169,6 +169,14 @@ extern NSString* LocalDragPasteboardName;
 */
 - (IBAction)delPub:(id)sender;
 
+#pragma mark searchField functions
+
+/*!
+    @method     makeSearchFieldKey:
+    @abstract   action to highlight the search field
+*/
+- (IBAction)makeSearchFieldKey:(id)sender;
+
 /*!
 @method searchFieldChangeKey
  @abstract Changed what we look for in quicksearch
