@@ -105,12 +105,9 @@ NSRange SafeBackwardSearchRange(NSRange startRange, unsigned seekLength){
 
 // Potential problems with this method:
 //
-// Error checking is almost non-existent; it's basically just using ad hoc pattern-matching heuristics to scan fragments of text.  The plus side to this is that
-// we can read some sloppy (or even incorrect) BibTeX and probably correct it by saving, since BibItem will clean things up for us when it writes out a BibTeX string.
-//
 // Nested double quotes are bound to cause problems if the entries use the key = "value", instead of key = {value}, approach.  I can't do anything about this; if you're using TeX,
 // you shouldn't have double quotes in your files.  This is a non-issue for BibDesk-created files, as BibItem uses curly braces instead of double quotes; JabRef-1.6 appears to use braces, also.
-// This problem will only munge a single entry, though, since we scan between @ != \@ markers as entry delimiters; the larger problem is that there is no warning for this case.
+// This problem will only munge a single entry, though, since we scan between @ markers as entry delimiters; the larger problem is that there is no warning for this case.
     
     NSAutoreleasePool *threadPool = [[NSAutoreleasePool alloc] init];
     BOOL isThreadedLoad = NO;
@@ -308,7 +305,7 @@ NSRange SafeBackwardSearchRange(NSRange startRange, unsigned seekLength){
             
             if(leftDelimLocation == NSNotFound){
                 *hadProblems = YES;
-                [self postParsingErrorNotification:@"Delimiter not found."
+                [self postParsingErrorNotification:[NSString stringWithFormat:@"Delimiter '%@' not found", leftDelim]
                                                  errorType:@"Parse Error"
                                                   fileName:filePath
                                                 errorRange:[fullString lineRangeForRange:NSMakeRange([scanner scanLocation], 0)]];
@@ -398,15 +395,14 @@ NSRange SafeBackwardSearchRange(NSRange startRange, unsigned seekLength){
             NSAssert( NSMakeRange(leftDelimLocation + 1, [scanner scanLocation] - leftDelimLocation - 1).location <= nextAtRange.location, @"The parser scanned into the next bibitem");
 
             value = [value stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]];
-#warning Enable this if doc uses ASCII encoding?
-            // value = [[BDSKConverter sharedConverter] stringByDeTeXifyingString:value];
+
             key = [[key stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]] capitalizedString];
             
             NSAssert( value != nil, @"Found a nil value string");
             NSAssert( key != nil, @"Found a nil key string");
             
             [dict setObject:value forKey:[key capitalizedString]];
-            //[[NSApp delegate] addString:value forCompletionEntry:key];
+            [[NSApp delegate] addString:value forCompletionEntry:key];
             
         }
         
