@@ -871,7 +871,7 @@ NSString *BDSKDateModifiedString = @"Date-Modified";
 
     if([documentSnoopDrawer contentView] == textSnoopContainerView){
 
-    cmdString = [NSString stringWithFormat:@"%@/pdftotext -f 1 -l 1 %@ -",[[NSBundle mainBundle] resourcePath], [local path],
+    cmdString = [NSString stringWithFormat:@"%@/pdftotext -f 1 -l 1 \"%@\" -",[[NSBundle mainBundle] resourcePath], [local path],
         nil];
 
         if(!_textSnoopString){
