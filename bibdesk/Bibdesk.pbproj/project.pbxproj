@@ -817,6 +817,170 @@
 			settings = {
 			};
 		};
+		274C83B505DF2BFF0020EEFF = {
+			buildArgumentsString = "$(ACTION)";
+			buildPhases = (
+			);
+			buildSettings = {
+				OTHER_CFLAGS = "";
+				OTHER_LDFLAGS = "";
+				OTHER_REZFLAGS = "";
+				PRODUCT_NAME = btparse;
+				SECTORDER_FLAGS = "";
+				WARNING_CFLAGS = "-Wmost -Wno-four-char-constants -Wno-unknown-pragmas";
+			};
+			buildToolPath = /usr/bin/make;
+			buildWorkingDirectory = ../bibdesk_vendorsrc/gward/btparse;
+			dependencies = (
+			);
+			isa = PBXLegacyTarget;
+			name = btparse;
+			passBuildSettingsInEnvironment = 0;
+			productName = btparse;
+		};
+		274C83B605DF2E500020EEFF = {
+			containerPortal = 2A37F4A9FDCFA73011CA2CEA;
+			isa = PBXContainerItemProxy;
+			proxyType = 1;
+			remoteGlobalIDString = 274C83B505DF2BFF0020EEFF;
+			remoteInfo = btparse;
+		};
+		274C83B705DF2E500020EEFF = {
+			isa = PBXTargetDependency;
+			target = 274C83B505DF2BFF0020EEFF;
+			targetProxy = 274C83B605DF2E500020EEFF;
+		};
+		274C83BA05DF2F850020EEFF = {
+			buildPhases = (
+			);
+			buildSettings = {
+				OTHER_CFLAGS = "";
+				OTHER_LDFLAGS = "";
+				OTHER_REZFLAGS = "";
+				PRODUCT_NAME = OmniFrameworks;
+				SECTORDER_FLAGS = "";
+				WARNING_CFLAGS = "-Wmost -Wno-four-char-constants -Wno-unknown-pragmas";
+			};
+			dependencies = (
+				274C84F905DF77720020EEFF,
+				274C84FB05DF77720020EEFF,
+				274C84FD05DF77720020EEFF,
+			);
+			isa = PBXAggregateTarget;
+			name = OmniFrameworks;
+			productName = OmniFrameworks;
+		};
+		274C83BD05DF2FCA0020EEFF = {
+			containerPortal = 2A37F4A9FDCFA73011CA2CEA;
+			isa = PBXContainerItemProxy;
+			proxyType = 1;
+			remoteGlobalIDString = 274C83BA05DF2F850020EEFF;
+			remoteInfo = OmniFrameworks;
+		};
+		274C83BE05DF2FCA0020EEFF = {
+			isa = PBXTargetDependency;
+			target = 274C83BA05DF2F850020EEFF;
+			targetProxy = 274C83BD05DF2FCA0020EEFF;
+		};
+		274C83C105DF2FD40020EEFF = {
+			buildArgumentsString = "-project OmniBase.xcode \"OMNI_INSTALLED_PRODUCTS=@executable_path/../Frameworks\" $ACTION";
+			buildPhases = (
+			);
+			buildSettings = {
+				OTHER_CFLAGS = "";
+				OTHER_LDFLAGS = "";
+				OTHER_REZFLAGS = "";
+				PRODUCT_NAME = OmniBase;
+				SECTORDER_FLAGS = "";
+				WARNING_CFLAGS = "-Wmost -Wno-four-char-constants -Wno-unknown-pragmas";
+			};
+			buildToolPath = /usr/bin/xcodebuild;
+			buildWorkingDirectory = ../bibdesk_vendorsrc/OmniGroup/OmniBase;
+			dependencies = (
+			);
+			isa = PBXLegacyTarget;
+			name = OmniBase;
+			passBuildSettingsInEnvironment = 1;
+			productName = OmniBase;
+		};
+		274C83F205DF612E0020EEFF = {
+			buildArgumentsString = "\"OMNI_INSTALLED_PRODUCTS=@executable_path/../Frameworks\" $ACTION";
+			buildPhases = (
+			);
+			buildSettings = {
+				OTHER_CFLAGS = "";
+				OTHER_LDFLAGS = "";
+				OTHER_REZFLAGS = "";
+				PRODUCT_NAME = OmniFoundation;
+				SECTORDER_FLAGS = "";
+				WARNING_CFLAGS = "-Wmost -Wno-four-char-constants -Wno-unknown-pragmas";
+			};
+			buildToolPath = /usr/bin/xcodebuild;
+			buildWorkingDirectory = ../bibdesk_vendorsrc/OmniGroup/OmniFoundation;
+			dependencies = (
+			);
+			isa = PBXLegacyTarget;
+			name = OmniFoundation;
+			passBuildSettingsInEnvironment = 1;
+			productName = OmniFoundation;
+		};
+		274C84F705DF720A0020EEFF = {
+			buildArgumentsString = "\"OMNI_INSTALLED_PRODUCTS=@executable_path/../Frameworks\" $ACTION";
+			buildPhases = (
+			);
+			buildSettings = {
+				OTHER_CFLAGS = "";
+				OTHER_LDFLAGS = "";
+				OTHER_REZFLAGS = "";
+				PRODUCT_NAME = OmniAppKit;
+				SECTORDER_FLAGS = "";
+				WARNING_CFLAGS = "-Wmost -Wno-four-char-constants -Wno-unknown-pragmas";
+			};
+			buildToolPath = /usr/bin/xcodebuild;
+			buildWorkingDirectory = ../bibdesk_vendorsrc/OmniGroup/OmniAppKit;
+			dependencies = (
+			);
+			isa = PBXLegacyTarget;
+			name = OmniAppKit;
+			passBuildSettingsInEnvironment = 1;
+			productName = OmniAppKit;
+		};
+		274C84F805DF77720020EEFF = {
+			containerPortal = 2A37F4A9FDCFA73011CA2CEA;
+			isa = PBXContainerItemProxy;
+			proxyType = 1;
+			remoteGlobalIDString = 274C83C105DF2FD40020EEFF;
+			remoteInfo = OmniBase;
+		};
+		274C84F905DF77720020EEFF = {
+			isa = PBXTargetDependency;
+			target = 274C83C105DF2FD40020EEFF;
+			targetProxy = 274C84F805DF77720020EEFF;
+		};
+		274C84FA05DF77720020EEFF = {
+			containerPortal = 2A37F4A9FDCFA73011CA2CEA;
+			isa = PBXContainerItemProxy;
+			proxyType = 1;
+			remoteGlobalIDString = 274C83F205DF612E0020EEFF;
+			remoteInfo = OmniFoundation;
+		};
+		274C84FB05DF77720020EEFF = {
+			isa = PBXTargetDependency;
+			target = 274C83F205DF612E0020EEFF;
+			targetProxy = 274C84FA05DF77720020EEFF;
+		};
+		274C84FC05DF77720020EEFF = {
+			containerPortal = 2A37F4A9FDCFA73011CA2CEA;
+			isa = PBXContainerItemProxy;
+			proxyType = 1;
+			remoteGlobalIDString = 274C84F705DF720A0020EEFF;
+			remoteInfo = OmniAppKit;
+		};
+		274C84FD05DF77720020EEFF = {
+			isa = PBXTargetDependency;
+			target = 274C84F705DF720A0020EEFF;
+			targetProxy = 274C84FC05DF77720020EEFF;
+		};
 		2758D08E05264CA900825D64 = {
 			fileEncoding = 4;
 			isa = PBXFileReference;
@@ -2276,7 +2440,6 @@
 		};
 		27E0A9F405A7C86B005BA25A = {
 			buildPhases = (
-				27E0A9F505A7C86B005BA25A,
 				27E0A9F605A7C86B005BA25A,
 				27E0AA1E05A7C86B005BA25A,
 				27E0AA4705A7C86B005BA25A,
@@ -2290,6 +2453,7 @@
 			buildSettings = {
 				FRAMEWORK_SEARCH_PATHS = .;
 				GCC_PRECOMPILE_PREFIX_HEADER = NO;
+				GCC_TREAT_WARNINGS_AS_ERRORS = NO;
 				HEADER_SEARCH_PATHS = .;
 				INFOPLIST_FILE = "Info-Bibdesk__Upgraded_.plist";
 				LIBRARY_SEARCH_PATHS = .;
@@ -2303,21 +2467,14 @@
 			};
 			dependencies = (
 				27EAC2A305D46044009CE0E9,
+				274C83B705DF2E500020EEFF,
+				274C83BE05DF2FCA0020EEFF,
 			);
 			isa = PBXNativeTarget;
 			name = "Bibdesk (Upgraded)";
 			productName = Bibdesk;
 			productReference = 27E0AA7E05A7C86C005BA25A;
 			productType = "com.apple.product-type.application";
-		};
-		27E0A9F505A7C86B005BA25A = {
-			buildActionMask = 2147483647;
-			files = (
-			);
-			isa = PBXShellScriptBuildPhase;
-			runOnlyForDeploymentPostprocessing = 0;
-			shellPath = /bin/sh;
-			shellScript = "echo \"running\"\nranlib libbtparse.a";
 		};
 		27E0A9F605A7C86B005BA25A = {
 			buildActionMask = 2147483647;
@@ -3398,6 +3555,11 @@
 				27E0A9F405A7C86B005BA25A,
 				F568CBDB025BBCB801709AC4,
 				27C41F3F04BE8818007932DC,
+				274C83B505DF2BFF0020EEFF,
+				274C83BA05DF2F850020EEFF,
+				274C83C105DF2FD40020EEFF,
+				274C83F205DF612E0020EEFF,
+				274C84F705DF720A0020EEFF,
 			);
 		};
 		2A37F4AAFDCFA73011CA2CEA = {
@@ -3564,9 +3726,9 @@
 				F578BF890253B5AD0138D078,
 				1058C7A6FEA54F5311CA2CBB,
 				1058C7A8FEA54F5311CA2CBB,
-				F5941276037E3B5401A80166,
 				F5941277037E3B5401A80166,
 				F5941278037E3B5401A80166,
+				F5941276037E3B5401A80166,
 			);
 			isa = PBXGroup;
 			name = Frameworks;
@@ -4343,24 +4505,24 @@
 			isa = PBXFrameworkReference;
 			lastKnownFileType = wrapper.framework;
 			path = OmniAppKit.framework;
-			refType = 2;
-			sourceTree = SOURCE_ROOT;
+			refType = 3;
+			sourceTree = BUILT_PRODUCTS_DIR;
 		};
 		F5941277037E3B5401A80166 = {
 			fallbackIsa = PBXFileReference;
 			isa = PBXFrameworkReference;
 			lastKnownFileType = wrapper.framework;
 			path = OmniBase.framework;
-			refType = 2;
-			sourceTree = SOURCE_ROOT;
+			refType = 3;
+			sourceTree = BUILT_PRODUCTS_DIR;
 		};
 		F5941278037E3B5401A80166 = {
 			fallbackIsa = PBXFileReference;
 			isa = PBXFrameworkReference;
 			lastKnownFileType = wrapper.framework;
 			path = OmniFoundation.framework;
-			refType = 2;
-			sourceTree = SOURCE_ROOT;
+			refType = 3;
+			sourceTree = BUILT_PRODUCTS_DIR;
 		};
 		F59CA11B02F06A7701EF0A84 = {
 			fileEncoding = 30;
@@ -4821,9 +4983,10 @@
 		F5FB32AE034D6B6901EF0AD8 = {
 			isa = PBXFileReference;
 			lastKnownFileType = archive.ar;
-			path = libbtparse.a;
-			refType = 4;
-			sourceTree = "<group>";
+			name = libbtparse.a;
+			path = ../bibdesk_vendorsrc/gward/btparse/libbtparse.a;
+			refType = 2;
+			sourceTree = SOURCE_ROOT;
 		};
 		F5FB32B0034D6D4601EF0AD8 = {
 			fileEncoding = 30;
