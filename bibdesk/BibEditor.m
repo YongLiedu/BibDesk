@@ -799,10 +799,6 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
         
 		[theBib setField:BDSKLocalUrlString toValue:fileURLString];
 		[theBib autoFilePaper];
-		
-		[self finalizeChanges];
-		[self setupForm];
-        [self fixURLs];
     }
     
 }
@@ -812,18 +808,10 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 	
 	[theBib setField:BDSKLocalUrlString toValue:[[NSURL fileURLWithPath:[path stringByStandardizingPath]] absoluteString]];
 	[theBib autoFilePaper];
-		
-	[self finalizeChanges];
-	[self setupForm];
-	[self fixURLs];
 }
 
 - (void)setRemoteURLFromMenuItem:(NSMenuItem *)sender{
 	[theBib setField:BDSKUrlString toValue:[sender representedObject]];
-		
-	[self finalizeChanges];
-	[self setupForm];
-	[self fixURLs];
 }
 
 // ----------------------------------------------------------------------------------------
@@ -1187,19 +1175,11 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 	
 	NSEnumerator *iEnum = [defaultMenuItems objectEnumerator];
 	while (item = [iEnum nextObject]) { 
-		if ([item tag] != WebMenuItemTagOpenLinkInNewWindow &&
-			[item tag] != WebMenuItemTagOpenImageInNewWindow &&
-			[item tag] != WebMenuItemTagOpenFrameInNewWindow) {
+		if ([item tag] == WebMenuItemTagCopy ||
+			[item tag] == WebMenuItemTagCopyLinkToClipboard ||
+			[item tag] == WebMenuItemTagCopyImageToClipboard) {
 			
 			[menuItems addObject:item];
-			
-			if ([item tag] == WebMenuItemTagDownloadLinkToDisk) {
-				item = [[NSMenuItem alloc] initWithTitle:NSLocalizedString(@"Download Linked File as Local File",@"Download linked file as local file")
-												  action:@selector(downloadLinkedFileAsLocalUrl:)
-										   keyEquivalent:@""];
-				[item setTarget:self];
-				[menuItems addObject:[item autorelease]];
-			}
 		}
 	}
 	if ([menuItems count] > 0) 
@@ -1264,10 +1244,6 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 			
 			[theBib setField:BDSKLocalUrlString toValue:fileURLString];
 			[theBib autoFilePaper];
-			
-			[self finalizeChanges];
-			[self setupForm];
-			[self fixURLs];
 		} else {
 			NSLog(@"Could not write downloaded file.");
 		}
@@ -1275,6 +1251,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 }
 
 - (void)downloadLinkedFileAsLocalUrl:(id)sender{
+	NSURL *linkURL = (NSURL *)[sender representedObject];
 	// not yet implemented 
 }
 
