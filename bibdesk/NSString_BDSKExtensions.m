@@ -149,4 +149,9 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
     return [rv autorelease];
 }
 
++ (NSString *)lossyASCIIStringWithString:(NSString *)aString{
+    return [[[NSString alloc] initWithData:[aString dataUsingEncoding:NSASCIIStringEncoding allowLossyConversion:YES] 
+                                  encoding:NSASCIIStringEncoding] autorelease];
+}
+
 @end

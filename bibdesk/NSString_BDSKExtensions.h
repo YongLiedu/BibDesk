@@ -22,4 +22,11 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 - (NSString *)uniquePathByAddingNumber;
 - (NSString *)xmlString;
 - (NSString *)stringByConvertingHTMLLineBreaks;
+/*!
+    @method     lossyASCIIStringWithString:
+    @abstract   Returns a lossy ASCII version of the input string.
+    @discussion Useful for stripping accents from accented characters.  Returns an autoreleased string.
+    @param      aString (description)
+*/
++ (NSString *)lossyASCIIStringWithString:(NSString *)aString;
 @end
