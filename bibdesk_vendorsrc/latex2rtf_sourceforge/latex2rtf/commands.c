@@ -55,6 +55,7 @@ static CommandArray *Environments[100];	/* list of active environments */
 static int g_par_indent_array[100];
 static int g_left_indent_array[100];
 static int g_right_indent_array[100];
+static char g_align_array[100];
 
 static CommandArray commands[] = {
 	{"begin", CmdBeginEnd, CMD_BEGIN},
@@ -220,6 +221,7 @@ static CommandArray commands[] = {
 	{"footnotemark", CmdIgnoreParameter, One_Opt_No_NormParam},
 	{"label", CmdLabel, LABEL_LABEL},
 	{"ref", CmdLabel, LABEL_REF},
+	{"eqref", CmdLabel, LABEL_EQREF},
 	{"pageref", CmdLabel, LABEL_PAGEREF},
 	{"cite", CmdCite, CITE_CITE},
 	{"bibliography", CmdBibliography, 0},
@@ -244,7 +246,6 @@ static CommandArray commands[] = {
 	{"addvspace", CmdIgnoreParameter, No_Opt_One_NormParam},
 	{"addcontentsline", CmdIgnoreParameter, No_Opt_Three_NormParam},
 	{"addcontents", CmdIgnoreParameter, No_Opt_Two_NormParam},
-	{"numberline", CmdIgnoreParameter, No_Opt_Two_NormParam},
 	{"stretch", CmdIgnoreParameter, No_Opt_One_NormParam},
 	{"typeaout", CmdIgnoreParameter, No_Opt_One_NormParam},
 	{"index", CmdIndex, 0},
@@ -322,6 +323,12 @@ static CommandArray commands[] = {
 	{"textcolor", CmdTextColor, 0},
 	{"citename", CmdCiteName, 0},
 	{"shortcite", CmdCite, CITE_SHORT},
+	{"tableofcontents", CmdListOf, TABLE_OF_CONTENTS},
+	{"listoffigures", CmdListOf, LIST_OF_FIGURES},
+	{"listoftables", CmdListOf, LIST_OF_TABLES},
+	{"numberline", CmdNumberLine, 0},
+	{"contentsline", CmdContentsLine, 0},
+	{"centering", CmdAlign, PAR_CENTERING},
 
 	{"", NULL, 0}
 };
@@ -823,6 +830,7 @@ globals: changes Environment - array of active environments
 	g_par_indent_array[iEnvCount] = getLength("parindent");
 	g_left_indent_array[iEnvCount] = g_left_margin_indent;
 	g_right_indent_array[iEnvCount] = g_right_margin_indent;
+	g_align_array[iEnvCount]        = alignment;
 	
 	switch (code) {
 	case PREAMBLE:
@@ -913,6 +921,7 @@ globals: changes Environment - array of active environments
 	setLength("parindent",g_par_indent_array[iEnvCount]);
 	g_left_margin_indent=g_left_indent_array[iEnvCount];
 	g_right_margin_indent=g_right_indent_array[iEnvCount];
+	alignment = g_align_array[iEnvCount];
 
 	/*
 	 * overlapping environments are not allowed !!! example:

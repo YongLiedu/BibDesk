@@ -35,6 +35,7 @@ Authors:
 #include "preamble.h"
 #include "lengths.h"
 #include "l2r_fonts.h"
+#include "style.h"
 
 char * g_figure_label = NULL;
 char * g_table_label = NULL;
@@ -53,7 +54,8 @@ static int g_last_citation=0;
 static int g_current_cite_type = 0;
 static int g_current_cite_seen = 0;
 static int g_current_cite_paren = 0;
-static char g_last_author_cited[101];
+static char g_last_author_cited[201];
+static char g_last_year_cited[51];
 static int g_citation_longnamesfirst = 0;
 static int 	g_current_cite_item=0;
 
@@ -88,8 +90,9 @@ ScanAux(char *token, char * reference, int code)
 /*************************************************************************
 purpose: obtains a reference from .aux file
 
-code=0 means \token{reference}{number}       -> "number"
-code=1 means \token{reference}{{sect}{line}} -> "sect"
+code==0 means \token{reference}{number}       -> "number"
+code==1 means \token{reference}{{sect}{line}} -> "sect"
+
  ************************************************************************/
 {
 	static FILE    *fAux = NULL;
@@ -423,8 +426,10 @@ purpose: handles \label \ref \pageref \cite
 		
 		case LABEL_HYPERREF:
 		case LABEL_REF:
+		case LABEL_EQREF:
 			signet = strdup_nobadchars(text);
 			s = ScanAux("newlabel", text, 1);
+			if (code==LABEL_EQREF) fprintRTF("(");
 			if (g_fields_use_REF) {
 				fprintRTF("{\\field{\\*\\fldinst{\\lang1024 REF BM%s \\\\* MERGEFORMAT }}",signet);
 				fprintRTF("{\\fldrslt{");
@@ -434,6 +439,7 @@ purpose: handles \label \ref \pageref \cite
 			else
 				fprintRTF("?");
 			if (g_fields_use_REF) fprintRTF("}}}");
+			if (code==LABEL_EQREF) fprintRTF(")");
 				
 			free(signet);
 			if (s) free(s);
@@ -506,16 +512,19 @@ static int isEmptyName(char *s)
 	return 0;
 } 
 
-static void ConvertNatbib(char *s, int code, char *pre, char *post)
+static void ConvertNatbib(char *s, int code, char *pre, char *post, int first)
 {
 	char *n, *year, *abbv, *full, *v;
+	int author_repeated, year_repeated;
 	PushSource(NULL,s);
 	n=getBraceParam();
 	year=getBraceParam();
 	abbv=getBraceParam();
 	full=getBraceParam();
 	PopSource();
-	diagnostics(5,"natbib [%s] <%s> <%s> <%s> <%s>",pre,n,year,abbv,full);
+	diagnostics(6,"natbib [%s] <%s> <%s> <%s> <%s>",pre,n,year,abbv,full);
+	author_repeated=FALSE;
+	year_repeated=FALSE;
 	switch (code) {
 		case CITE_CITE:
 		case CITE_T:
@@ -528,7 +537,16 @@ static void ConvertNatbib(char *s, int code, char *pre, char *post)
 			if (CITE_CITE==code && g_citation_longnamesfirst)
 				if (!isEmptyName(full)) v = full;
 
-			ConvertString(v);
+			if (strcmp(v,g_last_author_cited)==0) 
+				author_repeated=TRUE;
+				
+			if (!first && !author_repeated) fprintRTF("; ");	/* punctuation between citations */
+			
+			if (!author_repeated) {  /*suppress repeated names */
+				ConvertString(v);
+				strcpy(g_last_author_cited,v);
+				strcpy(g_last_year_cited,year);
+			}
 
 			fprintRTF(" (");
 			ConvertString(year);
@@ -545,14 +563,43 @@ static void ConvertNatbib(char *s, int code, char *pre, char *post)
 			if (CITE_P_STAR==code)
 				if (!isEmptyName(full)) v = full;
 
-			if (pre && g_current_cite_item==1){ ConvertString(pre); fprintRTF(" "); }
+			if (strcmp(v,g_last_author_cited)==0) 
+				author_repeated=TRUE;
+				
+			if (strncmp(year,g_last_year_cited,4)==0) /* over simplistic test ... */
+				year_repeated=TRUE;
 
-			if (strcmp(v,g_last_author_cited)!=0) {  /*suppress repeated names */
+			if (pre && !isEmptyName(post) && g_current_cite_item==1){ 
+				ConvertString(pre); 
+				fprintRTF(" "); 
+			}
+
+			if (!first && !author_repeated) fprintRTF("; ");	/* punctuation between citations */
+			
+			if (!author_repeated) {  /*suppress repeated names */
 				ConvertString(v);
 				strcpy(g_last_author_cited,v);
+				strcpy(g_last_year_cited,year);
+				fprintRTF(", ");
+				ConvertString(year);
+			} else {
+				if (!year_repeated) {
+					fprintRTF(", ");
+					ConvertString(year);
+				} else {
+					char *s = strdup(year+4);
+					fprintRTF(",");
+					ConvertString(s);
+					free(s);
+				}
 			}
-			fprintRTF(", ");
-			ConvertString(year);
+
+			if (pre && isEmptyName(post)){ 
+				fprintRTF(", ");
+				ConvertString(pre);
+				fprintRTF(" ");
+			}
+
 			if (post && *post !='\0') {
 				fprintRTF(", ");
 				ConvertString(post);
@@ -563,18 +610,37 @@ static void ConvertNatbib(char *s, int code, char *pre, char *post)
 		case CITE_AUTHOR:
 		case CITE_AUTHOR_STAR:
 			v=abbv;
+			if (!first) fprintRTF("; ");	/* punctuation between citations */
 			if (CITE_AUTHOR==code && g_citation_longnamesfirst && !g_current_cite_seen)
 				v = full;
+
 			if (CITE_AUTHOR_STAR==code)
-				v = full;
+				if (!isEmptyName(full)) v = full;
 			ConvertString(v);
 			break;
 
 		case CITE_YEAR:
 		case CITE_YEAR_P:
-			if (pre){ ConvertString(pre); fprintRTF(" "); }
+			if (!first) fprintRTF("; ");	/* punctuation between citations */
+
+			if (CITE_YEAR != code && pre && !isEmptyName(post) && g_current_cite_item==1){ 
+				ConvertString(pre); 
+				fprintRTF(" "); 
+			}
+
 			ConvertString(year);
-			if (post) { fprintRTF(", "); ConvertString(post); }
+
+			if (pre && isEmptyName(post)){ 
+				fprintRTF(", ");
+				ConvertString(pre);
+				fprintRTF(" ");
+			}
+
+			if (post && *post !='\0') {
+				fprintRTF(", ");
+				ConvertString(post);
+				fprintRTF(" ");
+			}
 			break;
 	}
 	free(n);
@@ -593,10 +659,12 @@ purpose: handles \cite
 	char *keys, *key, *next_keys;
 	char *option = NULL;
 	char *pretext = NULL;
+	int  first_key = TRUE;
 	
 	/* Setup punctuation and read options before citation */
 	g_current_cite_paren=TRUE;
-	*g_last_author_cited='\0';
+	g_last_author_cited[0] = '\0';
+	g_last_year_cited[0]   = '\0';
 	
 	if (g_document_bibstyle == BIBSTYLE_STANDARD){
 		option  = getBracketParam();
@@ -663,13 +731,15 @@ purpose: handles \cite
 		g_current_cite_item++;
 		
 		s = ScanAux("bibcite", key, 0);				/* look up bibliographic reference */
-
-		if (g_document_bibstyle == BIBSTYLE_APALIKE) {  /* can't use Word refs for APALIKE or APACITE*/
+		
+		if (g_document_bibstyle == BIBSTYLE_APALIKE) {  	/* can't use Word refs for APALIKE or APACITE*/
 			t = s ? s : key;							
+			if (!first_key) fprintRTF("%c ",punct[2]);		/* punctuation between citations */
 			ConvertString(t);
 		}
 		
 		if (g_document_bibstyle == BIBSTYLE_AUTHORDATE) { 
+			if (!first_key) fprintRTF("%c ",punct[2]);		/* punctuation between citations */
 			t = s ? s : key;							
 			if (code==CITE_SHORT) 
 				g_suppress_name=TRUE;
@@ -678,24 +748,28 @@ purpose: handles \cite
 				g_suppress_name=FALSE;
 		}
 		
-		if (g_document_bibstyle == BIBSTYLE_APACITE) {  /*  */
+		if (g_document_bibstyle == BIBSTYLE_APACITE) { 
+			if (!first_key) fprintRTF("%c ",punct[2]);		/* punctuation between citations */
 			t = s ? s : key;							
 			g_current_cite_seen=citation_used(key);
 			ConvertString(t);
 		} 
 
 		if (g_document_bibstyle == BIBSTYLE_NATBIB) {
-			diagnostics(2,"natbib key=[%s] <%s>",key, s);
+			diagnostics(2,"natbib key=[%s] <%s> ",key, s);
 			if (s) {
 				g_current_cite_seen=citation_used(key);
-				ConvertNatbib(s,code,pretext,option);
-			} else
+				ConvertNatbib(s,code,pretext,option,first_key);
+			} else {
+				if (!first_key) fprintRTF("%c ",punct[2]);	/* punctuation between citations */
 				ConvertString(key);
+			}
 		} 
 
-		if (g_document_bibstyle == BIBSTYLE_STANDARD) {  /*  */
+		if (g_document_bibstyle == BIBSTYLE_STANDARD) { 
 			char *signet = strdup_nobadchars(key);			
-			t = s ? s : signet;							/* if .aux is missing or incomplete use original citation */
+			if (!first_key) fprintRTF("%c ",punct[2]);		/* punctuation between citations */
+			t = s ? s : signet;								/* if .aux is missing or incomplete use original citation */
 			if (g_fields_use_REF) {
 				fprintRTF("{\\field{\\*\\fldinst{\\lang1024 REF BIB_%s \\\\* MERGEFORMAT }}",signet);
 				fprintRTF("{\\fldrslt{");
@@ -705,7 +779,7 @@ purpose: handles \cite
 			if (signet) free(signet);
 		}
 			
-		if (next_keys) fprintRTF("%c ",punct[2]);		/* punctuation between citations */
+		first_key = FALSE;
 		key=next_keys;
 		next_keys=popCommaName(key);					/* key modified to be a single key */
 		if (s) free(s);
@@ -784,6 +858,7 @@ CmdBCAY(int code)
 			if (strcmp(v,g_last_author_cited)!=0) {  /*suppress repeated names */
 				ConvertString(v);
 				strcpy(g_last_author_cited,v);
+				strcpy(g_last_year_cited,year);
 	
 				if (g_current_cite_type==CITE_CITE_A) 
 					fprintRTF(" (");
@@ -912,4 +987,102 @@ purpose: handles \citename from authordate bib style
 	
 	free(s);
 	
+}
+
+void
+CmdNumberLine(int code)
+/******************************************************************************
+purpose: handles \numberline{3.2.1}
+******************************************************************************/
+{		
+	char *number;
+	number = getBraceParam();
+	diagnostics(4,"Entering CmdNumberLine [%s]", number);
+	ConvertString(number);
+	fprintRTF("\\tab ");
+	free(number);
+}
+
+void
+CmdContentsLine(int code)
+/******************************************************************************
+purpose: handles \citename from authordate bib style
+******************************************************************************/
+{		
+	char *type, *text, *num, *contents_type;
+	
+	type = getBraceParam();
+	text = getBraceParam();
+	num = getBraceParam();
+	
+	diagnostics(1,"Entering CmdContentsLine %s [%s]", type, text);
+
+	CmdStartParagraph(TITLE_PAR);
+	fprintRTF("{");
+	contents_type=strdup_together("contents_",type);
+	InsertStyle(contents_type);
+	fprintRTF(" ");
+	ConvertString(text);
+	CmdEndParagraph(0);
+	fprintRTF("}");
+
+	free(type);
+	free(text);
+	free(num);
+	free(contents_type);
+}
+
+
+void
+CmdListOf(int code)
+/******************************************************************************
+purpose: handles \listoffigures \tableofcontents \listoftables
+******************************************************************************/
+{		
+/*	FILE *fp=NULL;
+	char *name; */
+	
+	diagnostics(4,"Entering CmdListOf");
+	
+/* this it probably the wrong way to implement \tableofcontents ! */
+
+/* print appropriate heading 
+	CmdVspace(VSPACE_BIG_SKIP);
+	CmdStartParagraph(TITLE_PAR);
+	fprintRTF("{");
+	if (g_document_type == FORMAT_BOOK || g_document_type == FORMAT_REPORT)
+		InsertStyle("chapter");
+	else
+		InsertStyle("section");
+	fprintRTF(" ");
+	
+	if (code == LIST_OF_FIGURES) {
+		ConvertBabelName("LISTFIGURENAME");
+	}
+	
+	if (code == LIST_OF_TABLES) {
+		name = g_lot_name;
+		ConvertBabelName("LISTTABLENAME");
+	}
+
+	if (code == TABLE_OF_CONTENTS) {
+		name = g_toc_name;
+		ConvertBabelName("CONTENTSNAME");
+	}
+
+	CmdEndParagraph(0);
+	fprintRTF("}");
+	CmdVspace(VSPACE_SMALL_SKIP);
+
+ now set things up so that we start reading from the appropriate auxiliary file 
+	fp = my_fopen(name, "r");
+	if (fp == NULL) {
+		diagnostics(WARNING, "Missing latex .lot/.lof/.toc file.  Run LaTeX to create %s\n", name);
+		return;
+	} else 
+		fclose(fp);		testing for existence to give better error message 
+	
+	PushSource(name,NULL);	
+	
+*/
 }
