@@ -11,6 +11,14 @@
 #import "BibItem.h"
 @class BibDocument;
 
+enum {
+	BDSKNoErrorMask = 0,
+	BDSKOldFileDoesNotExistMask = 1,
+	BDSKGeneratedFileExistsMask = 2,
+	BDSKIncompleteFieldsMask = 4,
+	BDSKMoveErrorMask = 8
+};
+
 @interface BibFiler : NSObject {
 	NSMutableArray *_fileInfoDicts;
 	
