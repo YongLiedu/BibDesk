@@ -283,6 +283,12 @@ extern NSString *BDSKBibItemLocalDragPboardType;
 - (void)savePanelDidEnd:(NSWindow *)sheet returnCode:(int)returnCode contextInfo:(void *)contextInfo;
 
 - (NSData *)rssDataRepresentation;
+/*!
+    @method     bibDataRepresentation
+    @abstract   BibTeX representation of the entire document.
+    @discussion Uses the document's string encoding as returned by -[BibDocument documentStringEncoding], which is the encoding used when opening the document.
+    @result     (description)
+*/
 - (NSData *)bibDataRepresentation;
 
 /*!
@@ -311,6 +317,13 @@ extern NSString *BDSKBibItemLocalDragPboardType;
 
 - (NSData *)atomDataRepresentation;
 - (NSData *)MODSDataRepresentation;
+/*!
+    @method     bibTeXDataWithEncoding:
+    @abstract   Returns all of the BibItems as BibTeX with the specified string encoding.
+    @discussion Used for export operations (saving with a specified string encoding, which is not necessarily the document's string encoding).
+    @param      encoding (description)
+    @result     (description)
+*/
 - (NSData *)bibTeXDataWithEncoding:(NSStringEncoding)encoding;
 
 
