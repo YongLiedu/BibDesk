@@ -20,6 +20,7 @@
 - (BOOL) validateCopyAsRTFMenuItem:(NSMenuItem*) menuItem;
 - (BOOL) validateEditSelectionMenuItem:(NSMenuItem*) menuItem;
 - (BOOL) validateGenerateCiteKeyMenuItem:(NSMenuItem*) menuItem;
+- (BOOL) validateConsolidateLinkedFilesMenuItem:(NSMenuItem*) menuItem;
 - (BOOL) validateDeleteSelectionMenuItem:(NSMenuItem*) menuItem;
 - (BOOL) validatePrintDocumentMenuItem:(NSMenuItem*) menuItem;
 

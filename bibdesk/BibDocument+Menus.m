@@ -39,6 +39,9 @@ Broken out of BibDocument and split up into smaller parts to make things more ma
 	else if (act == @selector(generateCiteKey:)) {
 		return [self validateGenerateCiteKeyMenuItem:menuItem];
 	}
+	else if (act == @selector(consolidateLinkedFiles:)) {
+		return [self validateConsolidateLinkedFilesMenuItem:menuItem];
+	}
 	else if (act == @selector(delPub:)) {
 		return [self validateDeleteSelectionMenuItem:menuItem];
 	}
@@ -287,6 +290,31 @@ Broken out of BibDocument and split up into smaller parts to make things more ma
 	}
 	else {
 		s = NSLocalizedString(@"Generate %i Cite Keys", @"Generate %i Cite Keys");
+		[menuItem setTitle:[NSString stringWithFormat:s, [self numberOfSelectedPubs]]];
+		return YES;
+	}
+}	
+
+
+
+- (BOOL) validateConsolidateLinkedFilesMenuItem:(NSMenuItem*) menuItem {
+	NSString * s;
+	
+	if ([self numberOfSelectedPubs] == 0) {
+		// no selection
+		s = NSLocalizedString(@"Consolidate Linked Files…", @"Consolidate Linked Files… (needs proper ellipsis)");
+		[menuItem setTitle:s];
+		return NO;
+	}
+	else if ([self numberOfSelectedPubs] == 1) {
+		// single selection
+		NSString * citeKey = [(BibItem*)[shownPublications objectAtIndex:[[[self selectedPubEnumerator] nextObject] intValue]] citeKey];
+		s = NSLocalizedString(@"Consolidate Linked File for %@…", @"Consolidate Linked File for %@… (needs proper ellipsis)");
+		[menuItem setTitle:[NSString stringWithFormat:s, citeKey]];
+		return YES;
+	}
+	else {
+		s = NSLocalizedString(@"Consolidate %i Linked Files…", @"Consolidate %i Linked Files… (needs proper ellipsis)");
 		[menuItem setTitle:[NSString stringWithFormat:s, [self numberOfSelectedPubs]]];
 		return YES;
 	}
