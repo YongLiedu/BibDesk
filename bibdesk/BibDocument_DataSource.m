@@ -224,10 +224,12 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
     NSMutableArray* newRows;
     int sortedIndex = 0;
     
-    // check the publications table to see if an item is selected, otherwise we get an error on dragging from the cite drawer
-    if([tableView numberOfSelectedRows] == 0) return NO;
+	if([tv numberOfSelectedRows] == 0) return NO;
 
     if(tv == (NSTableView *)ccTableView){
+		// check the publications table to see if an item is selected, otherwise we get an error on dragging from the cite drawer
+		if([tableView numberOfSelectedRows] == 0) return NO;
+
         startCite = [NSString stringWithFormat:@"\\%@%@",[customStringArray objectAtIndex:[[rows objectAtIndex:0] intValue]], startCiteBracket];
 		// rows oi:0 is ok because we don't allow multiple selections in ccTV.
 
