@@ -41,7 +41,6 @@ NSString*   LocalDragPasteboardName = @"edu.ucsd.cs.mmccrack.bibdesk: Local Publ
         frontMatter = [[NSMutableString alloc] initWithString:@""];
 		authors = [[NSMutableArray alloc] init];
 
-
         quickSearchKey = [[[OFPreferenceWrapper sharedPreferenceWrapper] objectForKey:BDSKCurrentQuickSearchKey] retain];
         if(!quickSearchKey){
             quickSearchKey = [[NSString alloc] initWithString:@"Title"];
@@ -160,6 +159,7 @@ NSString*   LocalDragPasteboardName = @"edu.ucsd.cs.mmccrack.bibdesk: Local Publ
     // finally, make sure the font is correct initially:
     [self handleFontChangedNotification:nil];
 	
+	
 	/* ssp: 2004-08-02
 		Setup the action menu button. Thanks to Steffen for his help.
 		This isn't really good. You can click slightly left of the button and it will still be activated. I couldn't get Popup buttons to work in a way that I could set the button's look independently from the attached menu. 
@@ -176,6 +176,8 @@ NSString*   LocalDragPasteboardName = @"edu.ucsd.cs.mmccrack.bibdesk: Local Publ
 	[self updateActionMenu:nil];
 	[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(popup:) name:NSPopUpButtonWillPopUpNotification object:actionMenuButton];
 	[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(dismiss:) name:BDSKPopUpDismissedNotification object:actionMenuButton];
+	
+	contextualMenu = [[[NSApp delegate] displayMenuItem] submenu];		// better retain this?
 }
 
 

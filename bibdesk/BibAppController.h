@@ -57,11 +57,18 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
     IBOutlet NSTextView* readmeTextView;
     IBOutlet NSWindow* readmeWindow;
 	
+	IBOutlet NSMenuItem * displayMenuItem;
+	
 	IBOutlet NSMenuItem* showHidePreviewMenuItem;
 	IBOutlet NSMenuItem* showHideCustomCiteStringsMenuItem;
 	IBOutlet NSMenuItem* showHideErrorsMenuItem;
 
 }
+
+/* Accessor methods for the displayMenuItem */
+- (NSMenuItem*) displayMenuItem;
+- (void) setDisplayMenuItem:(NSMenuItem*) item;
+	
 
 #pragma mark Overridden NSDocumentController methods
 

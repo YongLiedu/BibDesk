@@ -134,11 +134,24 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 
 
 - (void)awakeFromNib{
-
     [errorTableView setDoubleAction:@selector(gotoError:)];
     [openUsingFilterAccessoryView retain];
 	[showHideCustomCiteStringsMenuItem setRepresentedObject:@"showHideCustomCiteMenuItem"];
 }
+
+
+
+- (NSMenuItem*) displayMenuItem {
+	return displayMenuItem;
+}
+
+- (void) setDisplayMenuItem:(NSMenuItem*) item {
+	NSMenuItem * temp = displayMenuItem;
+	displayMenuItem = [item retain];
+	[temp release];
+}
+	
+
 
 #pragma mark Overridden NSDocumentController methods
 
@@ -402,6 +415,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 
 #pragma mark || error reporting and editing stuff
 
+
 - (IBAction)toggleShowingErrorPanel:(id)sender{
     if (![errorPanel isVisible]) {
         [self showErrorPanel:sender];
@@ -412,12 +426,14 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 
 - (IBAction)hideErrorPanel:(id)sender{
     [errorPanel orderOut:sender];
-	[showHideErrorsMenuItem setTitle:NSLocalizedString(@"Show Errors",@"show errors - should be same as menu title in nib")];
+	[showHideErrorsMenuItem setState:NSOffState];
+	//	[showHideErrorsMenuItem setTitle:NSLocalizedString(@"Show Errors",@"show errors - should be same as menu title in nib")];
 }
 
 - (IBAction)showErrorPanel:(id)sender{
     [errorPanel makeKeyAndOrderFront:sender];
-	[showHideErrorsMenuItem setTitle:NSLocalizedString(@"Hide Errors",@"hide errors")];
+	[showHideErrorsMenuItem setState:NSOnState];
+	//[showHideErrorsMenuItem setTitle:NSLocalizedString(@"Hide Errors",@"hide errors")];
 }
 
 - (void)handleErrorNotification:(NSNotification *)notification{
@@ -517,12 +533,14 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
         [[BDSKPreviewer sharedPreviewer] showWindow:self];
         showingPreviewPanel = YES;
         [[OFPreferenceWrapper sharedPreferenceWrapper] setObject:@"showing" forKey:@"BDSK Showing Preview Key"];
-		[showHidePreviewMenuItem setTitle:NSLocalizedString(@"Hide Preview",@"hide preview")];
+		// [showHidePreviewMenuItem setTitle:NSLocalizedString(@"Hide Preview",@"hide preview")];
+		[showHidePreviewMenuItem setState:NSOnState];
     }else{
         [[[BDSKPreviewer sharedPreviewer] window] close];
         showingPreviewPanel = NO; // redundant.
         [[OFPreferenceWrapper sharedPreferenceWrapper] setObject:@"not showing" forKey:@"BDSK Showing Preview Key"];
-		[showHidePreviewMenuItem setTitle:NSLocalizedString(@"Show Preview",@"show preview, should be same as title in nib")];
+		// [showHidePreviewMenuItem setTitle:NSLocalizedString(@"Show Preview",@"show preview, should be same as title in nib")];
+		[showHidePreviewMenuItem setState:NSOffState];
     }    
 }
 
