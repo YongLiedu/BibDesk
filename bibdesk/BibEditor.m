@@ -300,14 +300,20 @@ NSString *BDSKUrlString = @"Url";
 	NSString *prevCiteKey = [theBib citeKey];
 	
    	if(![proposedCiteKey isEqualToString:prevCiteKey]){
-		if(![self citeKeyIsValid:proposedCiteKey]){
-			
+		// if proposedCiteKey is empty or invalid (bad chars only)
+		//  this call will set & sanitize citeKey (and invalidate our display)
+		[theBib setCiteKey:proposedCiteKey];
+		NSString *newKey = [theBib citeKey];
+		
+		[sender setStringValue:newKey];
+
+		// still need to check duplicates ourselves:
+		if(![self citeKeyIsValid:newKey]){
 			[self setCiteKeyDuplicateWarning:YES];
-	
 		}else{
 			[self setCiteKeyDuplicateWarning:NO];
-			[theBib setCiteKey:proposedCiteKey];
 		}
+				
 	}
 }
 
@@ -327,22 +333,6 @@ NSString *BDSKUrlString = @"Url";
 	
     return !([(BibDocument *)theDocument citeKeyIsUsed:proposedCiteKey byItemOtherThan:theBib] ||
 			 [proposedCiteKey isEqualToString:@""]);
-}
-
-// sent by the notesView and the abstractView
-- (void)textDidChange:(NSNotification *)aNotification{
-    if([aNotification object] == notesView){
-        [theBib setField:BDSKAnnoteString toValue:[[notesView string] copy]];
-    }
-    else if([aNotification object] == abstractView){
-        [theBib setField:BDSKAbstractString toValue:[[abstractView string] copy]];
-    }
-    else if([aNotification object] == rssDescriptionView){
-        // NSLog(@"setting rssdesc to %@", [rssDescriptionView string]);
-        [theBib setField:BDSKRssDescriptionString toValue:[[rssDescriptionView string] copy]];
-    }
-
-    [self noteChange];
 }
 
 - (IBAction)bibTypeDidChange:(id)sender{
@@ -623,6 +613,21 @@ NSString *BDSKUrlString = @"Url";
 	
 }
 
+// sent by the notesView and the abstractView
+- (void)textDidChange:(NSNotification *)aNotification{
+    if([aNotification object] == notesView){
+        [theBib setField:BDSKAnnoteString toValue:[notesView string]];
+    }
+    else if([aNotification object] == abstractView){
+        [theBib setField:BDSKAbstractString toValue:[abstractView string]];
+    }
+    else if([aNotification object] == rssDescriptionView){
+        // NSLog(@"setting rssdesc to %@", [rssDescriptionView string]);
+        [theBib setField:BDSKRssDescriptionString toValue:[rssDescriptionView string]];
+    }
+	
+    [self noteChange];
+}
 
 // Note for a future refactoring: This should really just
 //  send a notification that "I changed" and let any Doc(/finder) that cares update.
@@ -765,9 +770,7 @@ NSString *BDSKUrlString = @"Url";
 	
 }
 
-- (NSDocument *)document{
-	return theDocument;
-}
+
 
 
 @end

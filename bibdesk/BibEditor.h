@@ -135,7 +135,7 @@ extern NSString *BDSKUrlString;
 */
 
 - (void)setDocument:(NSDocument *)d;
-- (NSDocument *)document;
+//- (NSDocument *)document; is intentionally unimplemented.
 
 - (void)fixURLs;
 - (IBAction)chooseLocalURL:(id)sender;
