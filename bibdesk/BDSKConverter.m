@@ -98,14 +98,14 @@ static NSCharacterSet *SkipSet;
     //unicode chars for newline work as consistently as the code below.
 
     //Added to convert double new line to {\par}
-    [convertedSoFar replaceOccurrencesOfString:@"\n\n" withString:@"{\\par}"
-                                       options: NSCaseInsensitiveSearch
-                                         range:NSMakeRange(0, [convertedSoFar length])];
+    //[convertedSoFar replaceOccurrencesOfString:@"\n\n" withString:@"{\\par}"
+                                     //  options: NSCaseInsensitiveSearch
+                                       //  range:NSMakeRange(0, [convertedSoFar length])];
 
     //Added to convert \newline to single new line
-    [convertedSoFar replaceOccurrencesOfString:@"\n"
-                                    withString:@"{\\newline}" options: NSCaseInsensitiveSearch
-                                         range:NSMakeRange(0, [convertedSoFar length])];
+    //[convertedSoFar replaceOccurrencesOfString:@"\n"
+                                    //withString:@"{\\newline}" options: NSCaseInsensitiveSearch
+                                      //   range:NSMakeRange(0, [convertedSoFar length])];
     
     return([convertedSoFar autorelease]);
 }
@@ -156,14 +156,14 @@ static NSCharacterSet *SkipSet;
     //how to make it return just \n.  It always returns "\\n".
     
     //Added to convert \par to double new line
-    [convertedSoFar replaceOccurrencesOfString:@"{\\par}"
-                                    withString:@"\n\n" options: NSCaseInsensitiveSearch
-                                         range:NSMakeRange(0, [convertedSoFar length])];
+    //[convertedSoFar replaceOccurrencesOfString:@"{\\par}"
+      //                           withString:@"\n\n" options: NSCaseInsensitiveSearch
+        //                         range:NSMakeRange(0, [convertedSoFar length])];
 
     //Added to convert \newline to single new line
-    [convertedSoFar replaceOccurrencesOfString:@"{\\newline}"
-                                    withString:@"\n" options: NSCaseInsensitiveSearch
-                                         range:NSMakeRange(0, [convertedSoFar length])];
+    //[convertedSoFar replaceOccurrencesOfString:@"{\\newline}"
+      //                              withString:@"\n" options: NSCaseInsensitiveSearch
+        //                                 range:NSMakeRange(0, [convertedSoFar length])];
     
     return [convertedSoFar autorelease]; 
 }
