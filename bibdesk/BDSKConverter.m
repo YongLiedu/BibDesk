@@ -481,6 +481,9 @@ static BDSKConverter *theConverter;
 				[arr addObject:BDSKLocalUrlString];
 				break;
 			case 'f':
+            case 'k':
+                [arr addObject:BDSKKeywordsString];
+                break;
 			case 'c':
 				[arr addObject:[[[string componentsSeparatedByString:@"}"] objectAtIndex:0] substringFromIndex:2]];
 		}
