@@ -619,7 +619,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 		return NO;
 	}
     else if ([menuItem action] == @selector(editSelectedFieldAsRawBibTeX:)) {
-        return ([bibFields selectedCell] != nil);
+        return ([bibFields selectedCell] != nil && [bibFields currentEditor] != nil);
     }
 	return YES;
 }
