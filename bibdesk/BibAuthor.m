@@ -53,6 +53,18 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
     return copy;
 }
 
+- (id)initWithCoder:(NSCoder *)coder{
+    self = [super init];
+    [self setName:[coder decodeObjectForKey:@"name"]]; // this should take care of the rest of the ivars, right?
+    publication = [coder decodeObjectForKey:@"publication"];
+    return self;
+}
+
+- (void)encodeWithCoder:(NSCoder *)coder{
+    [coder encodeObject:name forKey:@"name"];
+    [coder encodeConditionalObject:publication forKey:@"publication"];
+}
+
 - (BOOL)isEqual:(BibAuthor *)otherAuth{
     return [name isEqualToString:[otherAuth name]];
 }

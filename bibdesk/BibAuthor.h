@@ -30,7 +30,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
     @abstract Modeling authors as objects that can have interesting relationships
     @discussion none.
 */
-@interface BibAuthor : NSObject {
+@interface BibAuthor : NSObject <NSCopying, NSCoding> {
     NSString *name;
     NSString *_firstName;
     NSString *_vonPart;
