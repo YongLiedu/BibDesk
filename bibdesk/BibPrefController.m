@@ -72,3 +72,4 @@ NSString *BDSKTableColumnChangedNotification = @"TableColumnChangedNotification"
 NSString *BDSKBibItemChangedNotification = @"BibItem Changed notification";
 NSString *BDSKDocAddItemNotification = @"Added a bibitem to a document";
 NSString *BDSKDocDelItemNotification = @"removed a bibitem from a document";
+NSString *BDSKAuthorPubListChangedNotification = @"added to or deleted a pub from an author";

@@ -33,8 +33,12 @@
 - (void)awakeFromNib{
 	if ([[self superclass] instancesRespondToSelector:@selector(awakeFromNib)]){
         [super awakeFromNib];
-    }
+	}
 	
+	[[NSNotificationCenter defaultCenter] addObserver:self
+											 selector:@selector(handlePubListChanged:)
+												 name:BDSKAuthorPubListChangedNotification
+											   object:nil]; 
 	[self _updateUI];
 }
 
@@ -56,7 +60,12 @@
 
 - (void)_updateUI{
 	[nameTextField setStringValue:[_person name]];
+	[pubsTableView reloadData];
 	// TODO: get picture from AB
+}
+
+- (void)handlePubListChanged:(NSNotification *)notification{
+	[self _updateUI]; 
 }
 
 #pragma mark  table view datasource methods

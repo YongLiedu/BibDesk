@@ -30,6 +30,7 @@
 #pragma mark actions
 - (void)show;
 - (void)_updateUI;
+- (void)handlePubListChanged:(NSNotification *)notification;
 
 #pragma mark table view datasource methods
 // those methods are overridden in the implementation file

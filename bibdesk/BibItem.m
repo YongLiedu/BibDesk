@@ -170,8 +170,8 @@ void _setupFonts(){
 - (NSComparisonResult)auth1Compare:(BibItem *)aBI{
     if([pubAuthors count] > 0){
         if([aBI numberOfAuthors] > 0){
-            return [[[self authorAtIndex:0] lastName] caseInsensitiveCompare:
-                [[aBI authorAtIndex:0] lastName]];
+            return [[self authorAtIndex:0] compare:
+                [aBI authorAtIndex:0]];
         }
         return NSOrderedAscending;
     }else{
@@ -181,8 +181,8 @@ void _setupFonts(){
 - (NSComparisonResult)auth2Compare:(BibItem *)aBI{
     if([pubAuthors count] > 1){
         if([aBI numberOfAuthors] > 1){
-            return [[[self authorAtIndex:1] lastName] caseInsensitiveCompare:
-                [[aBI authorAtIndex:1] lastName]];
+            return [[self authorAtIndex:1] compare:
+                [aBI authorAtIndex:1]];
         }
         return NSOrderedAscending;
     }else{
@@ -192,8 +192,8 @@ void _setupFonts(){
 - (NSComparisonResult)auth3Compare:(BibItem *)aBI{
     if([pubAuthors count] > 2){
         if([aBI numberOfAuthors] > 2){
-            return [[[self authorAtIndex:2] lastName] caseInsensitiveCompare:
-                [[aBI authorAtIndex:2] lastName]];
+            return [[self authorAtIndex:2] compare:
+                [aBI authorAtIndex:2]];
         }
         return NSOrderedAscending;
     }else{
@@ -243,7 +243,7 @@ void _setupFonts(){
   
     presentAuthE = [pubAuthors objectEnumerator];
     while(bibAuthor = [presentAuthE nextObject]){
-        if([[bibAuthor name] isEqualToString:newAuthorName]){
+        if([[bibAuthor name] isEqualToString:newAuthorName]){ // @@ fuzzy author handling
             existingAuthor = bibAuthor;
         }
     }
@@ -384,7 +384,9 @@ void _setupFonts(){
 - (void)setCiteKey:(NSString *)newCiteKey{
 	if(editorObj){
 		// NSLog(@"setCiteKey called with a valid editor");
-		if(!undoManager) undoManager = [[editorObj window] undoManager];
+		if(!undoManager){
+				undoManager = [[editorObj window] undoManager];
+		}
 
 		[[undoManager prepareWithInvocationTarget:self] setCiteKey:citeKey];
 		[undoManager setActionName:NSLocalizedString(@"Change Cite Key",@"")];
@@ -467,7 +469,9 @@ void _setupFonts(){
 }
 
 - (void)setField: (NSString *)key toValue: (NSString *)value{
-	if(!undoManager) undoManager = [[editorObj window] undoManager];
+	if(!undoManager){
+		undoManager = [[editorObj window] undoManager];
+	}
 
 	id oldValue = [pubFields objectForKey:key];
 	[[undoManager prepareWithInvocationTarget:self] setField:key 
