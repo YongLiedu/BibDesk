@@ -115,7 +115,7 @@ static NSCharacterSet *SkipSet;
 }
 
 + (void)runConversionAlertPanel:(NSString *)tmpConv{
-    NSString *errorString = [NSString localizedStringWithFormat:@"The accented or Unicode character %@ could not be converted.  Please enter the TeX code directly in your bib file.", tmpConv];
+    NSString *errorString = [NSString localizedStringWithFormat:@"The accented or Unicode character \"%@\" could not be converted.  Please enter the TeX code directly in your bib file.", tmpConv];
     int i = NSRunAlertPanel(NSLocalizedString(@"Character Conversion Error",
 				              @"Title of alert when an error happens"),
 		            NSLocalizedString(errorString,
