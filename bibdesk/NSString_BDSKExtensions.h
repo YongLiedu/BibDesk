@@ -88,10 +88,19 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 
 /*!
     @method     stringByRemovingTeX
-    @abstract   Removes TeX commands and curly braces from the reciever.
+    @abstract   Removes TeX commands and curly braces from the receiver.
     @discussion May return a different instance.  A TeX command is considered to match a regex of the form "\\[a-z].+\{", with the AGRegexLazy option.
     @result     (description)
 */
 - (NSString *)stringByRemovingTeX;
+
+
+/*!
+    @method     stringByRemovingTeXForSorting
+    @abstract   Removes TeX commands and leading curly braces from the receiver, as well as single backquotes and backslashes.
+    @discussion Tries to make a TeX string suitable for sorting commands.
+    @result     (description)
+*/
+- (NSString *)stringByRemovingTeXForSorting;
 
 @end

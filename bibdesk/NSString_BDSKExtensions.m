@@ -157,12 +157,14 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 }
 
 - (NSString *)stringByRemovingCurlyBraces{
-    NSMutableString *mStr = [self mutableCopy];
+    static OFCharacterSet *braceSet = nil;
     
-    [mStr replaceOccurrencesOfString:@"{" withString:@"" options:nil range:NSMakeRange(0, [mStr length])];
-    [mStr replaceOccurrencesOfString:@"}" withString:@"" options:nil range:NSMakeRange(0, [mStr length])];
+    if(braceSet == nil)
+        braceSet = [[OFCharacterSet alloc] initWithString:@"{}"];
     
-    return [mStr autorelease];
+    //NSAssert(braceSet != nil, @"OFCharacterSet must not be nil.");
+    
+    return [self stringByRemovingCharactersInOFCharacterSet:braceSet];
 }
  
 + (NSString *)stringWithBytes:(const char *)byteString encoding:(NSStringEncoding)encoding{
@@ -233,6 +235,25 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 - (NSString *)stringByRemovingTeX{
     static AGRegex *command = nil;
     static OFCharacterSet *braceSet = nil;
+    
+    if(command == nil)
+        command = [[AGRegex alloc] initWithPattern:@"\\\\[a-z].+\\{" options:AGRegexLazy];
+    
+    //NSAssert(command != nil, @"AGRegex must not be nil.");
+    
+    if(braceSet == nil)
+        braceSet = [[OFCharacterSet alloc] initWithString:@"{}"];
+
+    //NSAssert(braceSet != nil, @"OFCharacterSet must not be nil.");
+
+    self = [command replaceWithString:@"" inString:self];
+    return [self stringByRemovingCharactersInOFCharacterSet:braceSet];
+
+}
+
+- (NSString *)stringByRemovingTeXForSorting{
+    static AGRegex *command = nil;
+    static OFCharacterSet *braceSet = nil;
 
     if(command == nil)
         command = [[AGRegex alloc] initWithPattern:@"\\\\[a-z].+\\{" options:AGRegexLazy];
@@ -240,7 +261,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
     //NSAssert(command != nil, @"AGRegex must not be nil.");
 
     if(braceSet == nil)
-        braceSet = [[OFCharacterSet alloc] initWithString:@"{}"];
+        braceSet = [[OFCharacterSet alloc] initWithString:@"{`$\\"];
     
     //NSAssert(braceSet != nil, @"OFCharacterSet must not be nil.");
     
