@@ -89,6 +89,13 @@
     
     NSString *prefix = nil;
     
+    // set these up here, so we don't autorelease them every time we parse an entry
+    AGRegex *findSubscriptLeadingTag = [AGRegex regexWithPattern:@"<sub>"];
+    AGRegex *findSubscriptOrSuperscriptTrailingTag = [AGRegex regexWithPattern:@"</su[bp]>"];
+    AGRegex *findSuperscriptLeadingTag = [AGRegex regexWithPattern:@"<sup>"];
+    
+    NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
+    
     while(sourceLine = [sourceLineE nextObject]){
         sourceLine = [sourceLine stringByTrimmingCharactersInSet:newlineSet];
 //        NSLog(@" = [%@]",sourceLine);        
@@ -107,14 +114,11 @@
                 // NB: do this before the regex find/replace on <sub> and <sup> tags, or else your LaTeX math
                 // stuff will get munged.
                 const char *str = [value UTF8String];
+
                 value = TeXStringWithHTMLString(str, stdout, NULL, strlen(str), NO, NO, NO);
 
                 // Do a regex find and replace to put LaTeX subscripts and superscripts in place of the HTML
                 // that Compendex (and possibly others) give us.
-                AGRegex *findSubscriptLeadingTag = [AGRegex regexWithPattern:@"<sub>"];
-                AGRegex *findSubscriptOrSuperscriptTrailingTag = [AGRegex regexWithPattern:@"</su[bp]>"];
-                AGRegex *findSuperscriptLeadingTag = [AGRegex regexWithPattern:@"<sup>"];
-                
                 value = [findSubscriptLeadingTag replaceWithString:@"\\$_{"
                                                           inString:value];
                 value = [findSuperscriptLeadingTag replaceWithString:@"\\$^{"
@@ -193,6 +197,9 @@
             
         }
     }
+    
+    [pool release];
+    
     if([[pubDict allKeys] count] > 0){
 	newBI = [self bibitemWithPubMedDictionary:pubDict fileOrder:itemOrder];
 	itemOrder ++;
@@ -284,8 +291,7 @@ http://home.planet.nl/~faase009/GNU.txt
 
     NSMutableString *mString = [NSMutableString string];
     
-    DEBUG_P1("print_str(, %s)\n", str);
-    BOOL option_warn = NO;
+    BOOL option_warn = YES;
     
 	for(; *str; str++)
 	{   BOOL special = NO;
