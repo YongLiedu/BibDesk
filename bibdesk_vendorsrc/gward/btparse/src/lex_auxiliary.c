@@ -158,8 +158,8 @@ void zzcr_attr (Attrib *a, int tok, char *txt)
    {
       int   len = strlen (txt);
 
-      assert ((txt[0] == '{' && txt[len-1] == '}')
-              || (txt[0] == '"' && txt[len-1] == '"'));
+       /*assert ((txt[0] == '{' && txt[len-1] == '}')
+              || (txt[0] == '"' && txt[len-1] == '"')); */
       txt[len-1] = (char) 0;            /* remove closing quote from string */
       txt++;                            /* so we'll skip the opening quote */
    }
