@@ -160,8 +160,8 @@
                         
                         if([validscanstring length] != [s length]) //Compare it to the original string
                         {
-                            NSLog(@"I am string s: [%@]",s);
-                            NSLog(@"I am validscanstring: [%@]",validscanstring);
+                            NSLog(@"This string was in the file: [%@]",s);
+                            NSLog(@"This is the part we can read: [%@]",validscanstring);
                             int errorLine = field->line;
                             NSLog(@"Invalid characters at line [%i]",errorLine);
                             
