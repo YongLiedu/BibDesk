@@ -275,8 +275,8 @@ NSRange SafeForwardSearchRange( unsigned startLoc, unsigned seekLength, unsigned
                      
                     if(![scanner scanUpToString:rightDelim intoString:&logString] && // find the next right delimiter
                        [fullString rangeOfString:@"=" options:NSLiteralSearch range:NSMakeRange(tempStart + 1, [scanner scanLocation] - tempStart - 1)].location != NSNotFound ){ // see if there's an equal sign, which means we probably went too far and hit another key/value 
-                        NSLog(@"*** ERROR doubly nested braces");
-                        NSLog(@"the substring was %@", [fullString substringWithRange:NSMakeRange(tempStart + 1, [scanner scanLocation] - tempStart - 1)]);
+                        //NSLog(@"*** ERROR doubly nested braces");
+                        //NSLog(@"the substring was %@", [fullString substringWithRange:NSMakeRange(tempStart + 1, [scanner scanLocation] - tempStart - 1)]);
                         *hadProblems = YES;
                         [BibTeXParser postParsingErrorNotification:[NSString stringWithFormat:@"Delimiter '%@' not found", rightDelim]
                                                          errorType:@"Parse Error" 
