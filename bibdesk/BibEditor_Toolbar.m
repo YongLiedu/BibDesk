@@ -176,6 +176,25 @@ static void addToolbarItem(NSMutableDictionary *theDict,NSString *identifier,NSS
 
 - (void) toolbarWillAddItem: (NSNotification *) notif {
     NSToolbarItem *addedItem = [[notif userInfo] objectForKey: @"item"];
+    
+	if([[addedItem itemIdentifier] isEqualToString: ViewLocalEditorToolbarItemIdentifier]) {
+		if (viewLocalToolbarItem != addedItem) {
+			[viewLocalToolbarItem autorelease];
+			viewLocalToolbarItem = [addedItem retain];
+		}
+    }
+	else if([[addedItem itemIdentifier] isEqualToString: ViewRemoteEditorToolbarItemIdentifier]) {
+		if (viewRemoteToolbarItem != addedItem) {
+			[viewRemoteToolbarItem autorelease];
+			viewRemoteToolbarItem = [addedItem retain];
+		}
+    }
+	else if([[addedItem itemIdentifier] isEqualToString: ToggleSnoopDrawerToolbarItemIdentifier]) {
+		if (documentSnoopToolbarItem != addedItem) {
+			[documentSnoopToolbarItem autorelease];
+			documentSnoopToolbarItem = [addedItem retain];
+		}
+    }
 
 }
 

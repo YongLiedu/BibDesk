@@ -293,6 +293,9 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
     [fieldNumbers release];
     [fieldNameFormatter release];
     [theBib setEditorObj:nil];
+	[viewLocalToolbarItem release];
+	[viewRemoteToolbarItem release];
+	[documentSnoopToolbarItem release];
 	[toolbarItems release];
     [super dealloc];
 }
@@ -780,13 +783,13 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 		icon = [[NSWorkspace sharedWorkspace] iconForFile:lurl];
 		[viewLocalButton setIconImage:icon];      
 		[viewLocalButton setIconActionEnabled:YES];
-		[viewLocalButton setToolTip:NSLocalizedString(@"View File",@"View file tooltip")];
+		[viewLocalToolbarItem setToolTip:NSLocalizedString(@"View File",@"View file tooltip")];
 		[[self window] setRepresentedFilename:lurl];
 		drawerShouldReopen = drawerWasOpen && ([documentSnoopDrawer contentView] != webSnoopContainerView);
     }else{
         [viewLocalButton setIconImage:[NSImage imageNamed:@"QuestionMarkFile"]];
 		[viewLocalButton setIconActionEnabled:NO];
-        [viewLocalButton setToolTip:NSLocalizedString(@"Choose a file to link with in the Local-Url Field", @"bad/empty local url field tooltip")];
+        [viewLocalToolbarItem setToolTip:NSLocalizedString(@"Choose a file to link with in the Local-Url Field", @"bad/empty local url field tooltip")];
         [[self window] setRepresentedFilename:@""];
     }
 
@@ -794,12 +797,12 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 		icon = [[NSWorkspace sharedWorkspace] iconForFileType:@"webloc"];
 		[viewRemoteButton setIconImage:icon];
         [viewRemoteButton setIconActionEnabled:YES];
-        [viewRemoteButton setToolTip:rurl];
+        [viewRemoteToolbarItem setToolTip:rurl];
 		drawerShouldReopen = drawerWasOpen && [documentSnoopDrawer contentView] == webSnoopContainerView;
     }else{
         [viewRemoteButton setIconImage:[NSImage imageNamed:@"WeblocFile_Disabled"]];
 		[viewRemoteButton setIconActionEnabled:NO];
-        [viewRemoteButton setToolTip:NSLocalizedString(@"Choose a URL to link with in the Url Field", @"bad/empty url field tooltip")];
+        [viewRemoteToolbarItem setToolTip:NSLocalizedString(@"Choose a URL to link with in the Url Field", @"bad/empty url field tooltip")];
     }
 	
     if (drawerShouldReopen){
@@ -1248,13 +1251,13 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 		[documentSnoopButton setIconImage:image];
 		
 		if (isClose) {
-			[documentSnoopButton setToolTip:NSLocalizedString(@"Close Drawer", @"Close drawer tooltip")];
+			[documentSnoopToolbarItem setToolTip:NSLocalizedString(@"Close Drawer", @"Close drawer tooltip")];
 		} else if (isWeb) {
-			[documentSnoopButton setToolTip:NSLocalizedString(@"View Remote URL in Drawer", @"View remote URL in drawer tooltip")];
+			[documentSnoopToolbarItem setToolTip:NSLocalizedString(@"View Remote URL in Drawer", @"View remote URL in drawer tooltip")];
 		} else if (isText) {
-			[documentSnoopButton setToolTip:NSLocalizedString(@"View File as Text in Drawer", @"View file as Text in drawer tooltip")];
+			[documentSnoopToolbarItem setToolTip:NSLocalizedString(@"View File as Text in Drawer", @"View file as Text in drawer tooltip")];
 		} else {
-			[documentSnoopButton setToolTip:NSLocalizedString(@"View File in Drawer", @"View file in drawer tooltip")];
+			[documentSnoopToolbarItem setToolTip:NSLocalizedString(@"View File in Drawer", @"View file in drawer tooltip")];
 		}
 		
 		[documentSnoopButton setIconActionEnabled:YES];
@@ -1263,9 +1266,9 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
         [documentSnoopButton setIconImage:[NSImage imageNamed:@"drawerDisabled"]];
 		
 		if (isClose) {
-			[documentSnoopButton setToolTip:NSLocalizedString(@"Close Drawer", @"Close drawer tooltip")];
+			[documentSnoopToolbarItem setToolTip:NSLocalizedString(@"Close Drawer", @"Close drawer tooltip")];
 		} else {
-			[documentSnoopButton setToolTip:NSLocalizedString(@"Choose Content to View in Drawer", @"Choose content to view in drawer")];
+			[documentSnoopToolbarItem setToolTip:NSLocalizedString(@"Choose Content to View in Drawer", @"Choose content to view in drawer")];
 		}
 		
 		[documentSnoopButton setIconActionEnabled:NO];

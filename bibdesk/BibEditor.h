@@ -51,6 +51,9 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 	IBOutlet RYZImagePopUpButton *viewLocalButton;
     IBOutlet RYZImagePopUpButton *viewRemoteButton;
     IBOutlet RYZImagePopUpButton *documentSnoopButton;
+	NSToolbarItem *viewLocalToolbarItem;
+	NSToolbarItem *viewRemoteToolbarItem;
+	NSToolbarItem *documentSnoopToolbarItem;
     IBOutlet NSScrollView *fieldsScrollView;
 	IBOutlet RYZImagePopUpButton *actionMenuButton;
     // ----------------------------------------------------------------------------------------
