@@ -179,6 +179,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 - (BOOL) isShowingPreviewPanel;
 
 - (IBAction)showReadMeFile:(id)sender;
+- (IBAction)showRelNotes:(id)sender;
 
 // ----------------------------------------------------------------------------------------
 // A first attempt at a service.

@@ -17,6 +17,7 @@
                 showPreferencePanel = id; 
                 showPreviewPanel = id; 
                 showReadMeFile = id; 
+                showRelNotes = id; 
                 toggleShowingErrorPanel = id; 
                 toggleShowingPreviewPanel = id; 
                 visitWebSite = id; 
@@ -132,6 +133,7 @@
                 saveAsBDSKDocument = id; 
                 showMacrosWindow = id; 
                 showReadMe = id; 
+                showRelNotes = id; 
                 toggle = id; 
                 toggleShowingCustomCiteDrawer = id; 
             }; 

@@ -206,13 +206,6 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 			name:BDSKPreviewNeedsUpdateNotification
 			object:nil];
         
-        // Add a Scripts menu; should display the script graphic on 10.3+.  Searches in (mainbundle)/Contents/Scripts and (Library domains)/Application Support/Bibdesk/Scripts
-        NSMenu *newMenu = [[NSMenu allocWithZone:[NSMenu menuZone]] initWithTitle:@"Scripts"];
-        OAScriptMenuItem *scriptItem = [[OAScriptMenuItem allocWithZone:[NSMenu menuZone]] initWithTitle:@"Scripts" action:NULL keyEquivalent:@""];
-        [scriptItem setSubmenu:newMenu];
-        [newMenu release];
-        [[NSApp mainMenu] insertItem:scriptItem atIndex:[[NSApp mainMenu] indexOfItemWithTitle:@"Help"]];
-        [scriptItem release];
         [openTextEncodingPopupButton removeAllItems];
         [openTextEncodingPopupButton addItemsWithTitles:[[BDSKStringEncodingManager sharedEncodingManager] availableEncodingDisplayedNames]];
      
@@ -800,22 +793,43 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
     if([@"showing" isEqualToString:[[OFPreferenceWrapper sharedPreferenceWrapper] objectForKey:@"BDSK Showing Preview Key"]]){
         [self toggleShowingPreviewPanel:self];
     }
+    
+    // Add a Scripts menu; should display the script graphic on 10.3+.  Searches in (mainbundle)/Contents/Scripts and (Library domains)/Application Support/Bibdesk/Scripts
+    // ARM:  if we add this in -awakeFromNib, we get another script menu each time we show release notes or readme; whatever.
+    NSMenu *newMenu = [[NSMenu allocWithZone:[NSMenu menuZone]] initWithTitle:@"Scripts"];
+    OAScriptMenuItem *scriptItem = [[OAScriptMenuItem allocWithZone:[NSMenu menuZone]] initWithTitle:@"Scripts" action:NULL keyEquivalent:@""];
+    [scriptItem setSubmenu:newMenu];
+    [newMenu release];
+    [[NSApp mainMenu] insertItem:scriptItem atIndex:[[NSApp mainMenu] indexOfItemWithTitle:@"Help"]];
+    [scriptItem release];
+    
    
     NSString *versionString = [[[NSBundle mainBundle] infoDictionary] objectForKey:@"CFBundleVersion"];
-    if( ([[OFPreferenceWrapper sharedPreferenceWrapper] objectForKey:BDSKLastVersionLaunched] == nil) ||
-        (![versionString isEqualToString:[[OFPreferenceWrapper sharedPreferenceWrapper] objectForKey:BDSKLastVersionLaunched]]) ){
+    if([[OFPreferenceWrapper sharedPreferenceWrapper] objectForKey:BDSKLastVersionLaunched] == nil) // show new users the readme file; others just see the release notes
         [self showReadMeFile:nil];
-    }
+    if(![versionString isEqualToString:[[OFPreferenceWrapper sharedPreferenceWrapper] objectForKey:BDSKLastVersionLaunched]])
+        [self showRelNotes:nil];
     [[OFPreferenceWrapper sharedPreferenceWrapper] setObject:versionString forKey:BDSKLastVersionLaunched];
   
 }
 
 - (IBAction)showReadMeFile:(id)sender{
     [NSBundle loadNibNamed:@"ReadMe" owner:self];
+    [readmeWindow setTitle:NSLocalizedString(@"ReadMe", "ReadMe")];
     [readmeWindow makeKeyAndOrderFront:self];
+    [readmeTextView setString:@""];
     [readmeTextView replaceCharactersInRange:[readmeTextView selectedRange]
 				     withRTF:[NSData dataWithContentsOfFile:[[[NSBundle mainBundle] resourcePath] stringByAppendingPathComponent:@"README.rtf"]]];	
-} 
+}
+
+- (IBAction)showRelNotes:(id)sender{
+    [NSBundle loadNibNamed:@"ReadMe" owner:self];
+    [readmeWindow setTitle:NSLocalizedString(@"Release Notes", "Release Notes")];
+    [readmeWindow makeKeyAndOrderFront:self];
+    [readmeTextView setString:@""];
+    [readmeTextView replaceCharactersInRange:[readmeTextView selectedRange]
+                                     withRTF:[NSData dataWithContentsOfFile:[[[NSBundle mainBundle] resourcePath] stringByAppendingPathComponent:@"RelNotes.rtf"]]];
+}
 
 #pragma mark || Service code
 
