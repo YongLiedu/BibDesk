@@ -167,11 +167,10 @@ void print_error (bt_error *err)
 
    NSNotification *errNotif = [NSNotification notificationWithName:@"A parsing error occurred"
 			       object:errObj];
-
    
    [[NSNotificationQueue defaultQueue] enqueueNotification:errNotif
     postingStyle:NSPostWhenIdle
-    coalesceMask:NSNotificationCoalescingOnName
+    coalesceMask:NSNotificationCoalescingOnSender
     forModes:nil];
 
 } /* print_error() */
