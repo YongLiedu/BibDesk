@@ -16,6 +16,9 @@ typedef enum{
     bdsk_stringnodetype type; 
     NSString *value;
 }
++ (BDSKStringNode *)nodeWithQuotedString:(NSString *)s;
++ (BDSKStringNode *)nodeWithNumberString:(NSString *)s;
++ (BDSKStringNode *)nodeWithMacroString:(NSString *)s;
 + (BDSKStringNode *)nodeWithBibTeXString:(NSString *)s;
 - (id)copyWithZone:(NSZone *)zone;
 - (BOOL)isEqual:(BDSKStringNode *)other;

@@ -1,8 +1,30 @@
 #import "BDSKComplexString.h"
 
 static AGRegex *unquotedHashRegex = nil;
+static NSCharacterSet *macroCharSet = nil;
 
 @implementation BDSKStringNode
+
++ (BDSKStringNode *)nodeWithQuotedString:(NSString *)s{
+    BDSKStringNode *node = [[BDSKStringNode alloc] init];
+	[node setType:BSN_STRING];
+	[node setValue:[[BDSKConverter sharedConverter] stringByDeTeXifyingString:s]];
+	return [node autorelease];
+}
+
++ (BDSKStringNode *)nodeWithNumberString:(NSString *)s{
+    BDSKStringNode *node = [[BDSKStringNode alloc] init];
+	[node setType:BSN_NUMBER];
+	[node setValue:s];
+	return [node autorelease];
+}
+
++ (BDSKStringNode *)nodeWithMacroString:(NSString *)s{
+    BDSKStringNode *node = [[BDSKStringNode alloc] init];
+	[node setType:BSN_MACRODEF];
+	[node setValue:s];
+	return [node autorelease];
+}
 
 + (BDSKStringNode *)nodeWithBibTeXString:(NSString *)s{
     BDSKStringNode *node = [[BDSKStringNode alloc] init];
@@ -141,77 +163,114 @@ static NSDictionary *globalMacroDefs;
         return [BDSKComplexString complexStringWithString:@"" macroResolver:theMacroResolver];
     }
     
-    NSScanner *sc = [NSScanner scannerWithString:btstring];    
+    NSScanner *sc = [NSScanner scannerWithString:btstring];
+	[sc setCharactersToBeSkipped:nil];
     NSString *s = nil;
-    BOOL scannedSomething = [sc scanUpToString:@"#" intoString:&s];
-    if(scannedSomething){
-        if([sc isAtEnd]){
-            // a single string - may be a macro or a quoted string.
-
-            if([s characterAtIndex:0] == '{'){
-                // if it's quoted, strip that and call it a simple string
-                s = [s substringFromIndex:1];
-                if([s characterAtIndex:[s length] -1 ] == '}'){
-                    s = [s substringToIndex:([s length] - 1)];
-                }
-                
-                return [BDSKComplexString complexStringWithString:s macroResolver:theMacroResolver];
-
-           }else if([s characterAtIndex:0] == '"'){
-                // if it's quoted, strip that and call it a simple string
-                s = [s substringFromIndex:1];
-                if([s characterAtIndex:[s length] -1 ] == '"'){
-                    s = [s substringToIndex:([s length] - 1)];
-                }
-                
-                return [BDSKComplexString complexStringWithString:s macroResolver:theMacroResolver];
-
-            }else{
-                // s must be a single macro
-                BDSKStringNode *node = [BDSKStringNode nodeWithBibTeXString:s];
-                return [BDSKComplexString complexStringWithArray:[NSArray arrayWithObjects:node, nil] macroResolver:theMacroResolver];
-            }
-            
-        }else{
-            // not at end yet, need to build them up:
-            BDSKStringNode *node = [BDSKStringNode nodeWithBibTeXString:s];
-            [returnNodes addObject:node];
-        }
-    }else{
-        // we found a # as the first char, ignore it.
-    }
-    
-    // if we get to here, we've either added the first node or ignored a leading #.
-    // either way, the char at scanLocation is '#' so we skip it:
-    if(![sc isAtEnd]){
-        [sc setScanLocation:([sc scanLocation] + 1)];
-        
-        while(![sc isAtEnd]){
-            // look for hash marks
-            if([sc scanUpToString:@"#" intoString:&s]){
-                // found one, add the string before it as a node
-                BDSKStringNode *node = [BDSKStringNode nodeWithBibTeXString:s];
-                [returnNodes addObject:node];
-            }   
-            // set scan location past the hash, even if we didn't find a string before it.
-            // (this is necessary to get ## right.)
-            if(![sc isAtEnd])
-                [sc setScanLocation:([sc scanLocation] + 1)];
-            
-        }
-    }
-
-    cs = [[BDSKComplexString alloc] init];    
-    cs->isComplex = YES;
-    cs->nodes = [returnNodes copy];
-	if(theMacroResolver)
-		[cs setMacroResolver:theMacroResolver];
-    else
-        NSLog(@"Warning: complex string being created without macro resolver. Macros in it will not be resolved.");
-
-    cs->expandedValue = [[cs expandedValueFromArray:[cs nodes]] retain];
-    return [cs autorelease];
-    
+	int nesting;
+	unichar ch;
+	NSCharacterSet *bracesCharSet = [NSCharacterSet characterSetWithCharactersInString:@"{}"];
+	
+	if (!macroCharSet) {
+		NSMutableCharacterSet *tmpSet = [[[NSCharacterSet whitespaceAndNewlineCharacterSet] mutableCopy] autorelease];
+		[tmpSet addCharactersInString:@"\"#%'(),={}"];
+		[tmpSet invert];
+		macroCharSet = [tmpSet copy];
+	}
+	
+	while (![sc isAtEnd]) {
+		ch = [btstring characterAtIndex:[sc scanLocation]];
+		if (ch == '{') {
+			// a brace-quoted string, we look for the corresponding closing brace
+			NSMutableString *nodeStr = [NSMutableString string];
+			[sc setScanLocation:[sc scanLocation] + 1];
+			nesting = 1;
+			while (nesting > 0 && ![sc isAtEnd]) {
+				if ([sc scanUpToCharactersFromSet:bracesCharSet intoString:&s])
+					[nodeStr appendString:s];
+				if ([btstring characterAtIndex:[sc scanLocation] - 1] != '\\' && ![sc isAtEnd]) {
+					// we found an unquoted brace
+					ch = [btstring characterAtIndex:[sc scanLocation]];
+					[sc setScanLocation:[sc scanLocation] + 1];
+					if (ch == '}') {
+						--nesting;
+					} else {
+						++nesting;
+					}
+					if (nesting > 0) // we don't include the outer braces
+						[nodeStr appendFormat:@"%C",ch];
+				}
+			}
+			if (nesting > 0) {
+				[NSException raise:@"BDSKComplexStringException" 
+							format:@"Unbalanced string: [%@]", nodeStr];
+			}
+			[returnNodes addObject:[BDSKStringNode nodeWithQuotedString:nodeStr]];
+		} 
+		else if (ch == '"') {
+			// a doublequote-quoted string
+			NSMutableString *nodeStr = [NSMutableString string];
+			[sc setScanLocation:[sc scanLocation] + 1];
+			nesting = 1;
+			while (nesting > 0 && ![sc isAtEnd]) {
+				if ([sc scanUpToString:@"\"" intoString:&s])
+					[nodeStr appendString:s];
+				if (![sc isAtEnd]) {
+					[sc setScanLocation:[sc scanLocation] + 1];
+					if ([btstring characterAtIndex:[sc scanLocation] - 1] == '\\')
+						[nodeStr appendString:@"\""];
+					else 
+						nesting = 0;
+				}
+			}
+			// we don't accept unbalanced braces, as we always quote with braces
+			// do we want to be more permissive and try to use "-quoted fields?
+			if (nesting > 0 || ![nodeStr isStringTeXQuotingBalanced:&nesting]) {
+				[NSException raise:@"BDSKComplexStringException" 
+							format:@"Unbalanced string: [%@]", nodeStr];
+			}
+			[returnNodes addObject:[BDSKStringNode nodeWithQuotedString:nodeStr]];
+		} 
+		else if ([[NSCharacterSet decimalDigitCharacterSet] characterIsMember:ch]) {
+			// this should be all numbers
+			[sc scanCharactersFromSet:[NSCharacterSet decimalDigitCharacterSet] intoString:&s];
+			[returnNodes addObject:[BDSKStringNode nodeWithNumberString:s]];
+		} 
+		else if ([macroCharSet characterIsMember:ch]) {
+			// a macro
+			if ([sc scanCharactersFromSet:macroCharSet intoString:&s])
+				[returnNodes addObject:[BDSKStringNode nodeWithMacroString:s]];
+		}
+		else if (ch == '#') {
+			// we found 2 # or a # at the beginning
+			[NSException raise:@"BDSKComplexStringException" 
+						format:@"Missing component"];
+		} 
+		else {
+			[NSException raise:@"BDSKComplexStringException" 
+						format:@"Invalid first character in component"];
+		}
+		
+		// look for the next #-character, removing spaces around it
+		[sc scanCharactersFromSet:[NSCharacterSet whitespaceAndNewlineCharacterSet] intoString:NULL];
+		if (![sc isAtEnd]) {
+			if (![sc scanString:@"#" intoString:NULL]) {
+				[NSException raise:@"BDSKComplexStringException" 
+							format:@"Missing # character"];
+			}
+			[sc scanCharactersFromSet:[NSCharacterSet whitespaceAndNewlineCharacterSet] intoString:NULL];
+			if ([sc isAtEnd]) {
+				// we found a # at the end
+				[NSException raise:@"BDSKComplexStringException" 
+							format:@"Empty component"];
+			}
+		}
+	}
+	
+	// if we have a single string-type node, we make a simple complexstring
+	if ([returnNodes count] == 1 && [(BDSKStringNode*)[returnNodes objectAtIndex:0] type] == BSN_STRING) {
+		return [BDSKComplexString complexStringWithString:[[returnNodes objectAtIndex:0] value] macroResolver:theMacroResolver];
+	}
+	return [BDSKComplexString complexStringWithArray:returnNodes macroResolver:theMacroResolver];
 }
 
 // todo: instead, should I override stringWithString?
@@ -450,22 +509,25 @@ static NSDictionary *globalMacroDefs;
 	unichar ch;
 	NSCharacterSet *bracesCharSet = [NSCharacterSet characterSetWithCharactersInString:@"{}"];
 	
-	braceRange = [self rangeOfCharacterFromSet:bracesCharSet options:0 range:range];
+	braceRange = [self rangeOfCharacterFromSet:bracesCharSet options:NSLiteralSearch range:range];
 	braceLoc = braceRange.location;
-	while (braceLoc != NSNotFound && range.length > 0) {
-		if (braceLoc > 0 && [self characterAtIndex:braceLoc - 1] != '\\') {
+	while (braceLoc != NSNotFound) {
+		// set the range to the part of the range after the last found brace
+		range.length = range.length - braceLoc + range.location - 1;
+		range.location = braceLoc + 1;
+		if (braceLoc == 0 || [self characterAtIndex:braceLoc - 1] != '\\') {
+			// we found an unescaped brace
 			ch = [self characterAtIndex:braceLoc];
 			if (ch == '}')
 				--nesting;
 			else
 				++nesting;
-			if (nesting < 0) 
+			if (nesting < 0) // we should never get a negative nesting
 				isBalanced = NO;
 		}
-		braceRange = [self rangeOfCharacterFromSet:bracesCharSet options:0 range:range];
+		// search for the next brace
+		braceRange = [self rangeOfCharacterFromSet:bracesCharSet options:NSLiteralSearch range:range];
 		braceLoc = braceRange.location;
-		range.length = range.length - braceLoc + range.location + 1;
-		range.location = braceLoc + 1;
 	}
 	if (nesting != 0) 
 		isBalanced = NO;
