@@ -1045,7 +1045,10 @@ Enhanced delete method that uses a sheet instead of a modal dialogue.
 	NSString *newFieldTitle = nil;
 	
     if(returnCode == 1){
-		newFieldTitle = [addFieldTextField stringValue];
+        newFieldTitle = [addFieldTextField stringValue];
+
+        if(BDSK_USING_JAGUAR)
+            [quickSearchButton insertItemWithTitle:newFieldTitle atIndex:0];
 		
         [self setSelectedSearchFieldKey:newFieldTitle];
 		
@@ -1103,9 +1106,12 @@ Enhanced delete method that uses a sheet instead of a modal dialogue.
 	NSString *delFieldTitle = nil;
 
     if(returnCode == 1){
-		delFieldTitle = [[delFieldPopupButton selectedItem] title];
+        delFieldTitle = [[delFieldPopupButton selectedItem] title];
+
+        if(BDSK_USING_JAGUAR)
+            [quickSearchButton removeItemWithTitle:delFieldTitle];
 		
-		// if we were using that key, select another?
+        // if we were using that key, select another?
 
         prefsQuickSearchKeysMutableArray = [[[[OFPreferenceWrapper sharedPreferenceWrapper] arrayForKey:BDSKQuickSearchKeys] mutableCopy] autorelease];
 
