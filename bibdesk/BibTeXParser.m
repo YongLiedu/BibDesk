@@ -188,7 +188,7 @@
                         //End check for valid characters.
                         
                         //deTeXify it (includes conversion of /par to \n\n.)
-                        sDeTexified = [BDSKConverter stringByDeTeXifyingString:s];
+                        sDeTexified = [[BDSKConverter sharedConverter] stringByDeTeXifyingString:s];
                         //Get fieldname as a capitalized NSString
                         sFieldName = [[NSString stringWithCString: fieldname] capitalizedString];
 

@@ -19,12 +19,29 @@ static NSDictionary *WholeDict;
 static NSCharacterSet *EmptySet;
 static NSCharacterSet *FinalCharSet;
 static NSCharacterSet *SkipSet;
+static BDSKConverter *theConverter;
+static NSDictionary *detexifyConversions;
+static NSDictionary *texifyConversions;
 
 @implementation BDSKConverter
-+ (void)loadDict{
+
++ (BDSKConverter *)sharedConverter{
+    if(!theConverter){
+	theConverter = [[[BDSKConverter alloc] init] retain];
+    }
+    return theConverter;
+}
+
+- (id)init{
+    if(self = [super init]){
+	[self loadDict];
+    }
+    return self;
+}
+
+- (void)loadDict{
     
     //create a characterset from the characters we know how to convert
-
     NSMutableCharacterSet *workingSet;
     NSRange highCharRange;
     NSMutableCharacterSet *tempSet = [[NSMutableCharacterSet alloc] init];
@@ -59,28 +76,39 @@ static NSCharacterSet *SkipSet;
     [tempSet removeCharactersInString:texReserved];
     SkipSet = [tempSet copy];
     [tempSet release];
+    
+    // set up the dictionaries
+    NSMutableDictionary *tmpConversions = [WholeDict objectForKey:@"Roman to TeX"];
+    [tmpConversions addEntriesFromDictionary:[WholeDict objectForKey:@"One-Way Conversions"]];
+    texifyConversions = [tmpConversions copy];
+    
+    if(!texifyConversions){
+        texifyConversions = [NSDictionary dictionary]; // an empty one won't break the code.
+    }
+    
+    detexifyConversions = [[WholeDict objectForKey:@"TeX to Roman"] retain];
+    
+    if(!detexifyConversions){
+        detexifyConversions = [[NSDictionary dictionary] retain]; // an empty one won't break the code.
+    }
+    
 
 }
 
-+ (NSString *)stringByTeXifyingString:(NSString *)s{
+- (NSString *)stringByTeXifyingString:(NSString *)s{
     // s should be in UTF-8 or UTF-16 (i'm not sure which exactly) format (since that's what the property list editor spat)
     // This direction could be faster, since we're comparing characters to the keys, but that'll be left for later.
-    OFCharacterScanner *scanner = [[OFStringScanner alloc] initWithString:s];
+    NSScanner *scanner = [[NSScanner alloc] initWithString:s];
+    [scanner setCharactersToBeSkipped:nil]; //otherwise it stalls on whitespace
     NSString *tmpConv = nil;
     NSMutableString *convertedSoFar = [s mutableCopy];
     NSScanner *fastScan = [[NSScanner alloc] initWithString:s];
-
+    unsigned sLength = [s length];
+    
     int offset=0;
+    unsigned index = 0;
     NSString *TEXString;
-
-    // get the dictionary
-    if(!WholeDict)[self loadDict];
-    NSMutableDictionary *conversions = [WholeDict objectForKey:@"Roman to TeX"];
-    [conversions addEntriesFromDictionary:[WholeDict objectForKey:@"One-Way Conversions"]];
-    if(!conversions){
-        conversions = [NSDictionary dictionary]; // an empty one won't break the code.
-    }
-
+    
     // convertedSoFar has s to begin with.
     // while scanner's not at eof, scan up to characters from that set into tmpOut
 
@@ -89,24 +117,34 @@ static NSCharacterSet *SkipSet;
     // it picks up something that is not in that range, run OFCharacterScanner
     [fastScan setCharactersToBeSkipped:SkipSet];
 	if([fastScan scanCharactersFromSet:FinalCharSet intoString:nil]){
-	    while(scannerHasData(scanner)){
-			[scanner scanUpToCharacterInSet:FinalCharSet];
-			tmpConv = [scanner readCharacterCount:1];
-			if(TEXString = [conversions objectForKey:tmpConv]){
-				[convertedSoFar replaceCharactersInRange:NSMakeRange((scannerScanLocation(scanner) + offset - 1), 1)
+
+	    while(index < sLength){
+
+		[scanner scanUpToCharactersFromSet:FinalCharSet intoString:nil];
+		index = [scanner scanLocation];
+
+		if(index >= sLength) // don't go past the end
+		    break;
+		tmpConv = [s substringWithRange:NSMakeRange(index, 1)];
+			if(TEXString = [texifyConversions objectForKey:tmpConv]){
+				[convertedSoFar replaceCharactersInRange:NSMakeRange((index + offset), 1)
 											  withString:TEXString];
+				[scanner setScanLocation:(index + 1)];
 				offset += [TEXString length] - 1;    // we're adding length-1 characters, so we have to make sure we insert at the right point in the future.
-			}else if(tmpConv != nil){ // if tmpConv is non-nil, we had a character that was accented and not in the dictionary
-			      [NSObject cancelPreviousPerformRequestsWithTarget:self 
-								       selector:@selector(runConversionAlertPanel:)
-								         object:tmpConv];
-			    [self performSelector:@selector(runConversionAlertPanel:) withObject:tmpConv afterDelay:0.1];
-			     }
-	    }
-		
+
+			} else {
+			    if(tmpConv != nil){ // if tmpConv is non-nil, we had a character that was accented and not in the dictionary
+				[NSObject cancelPreviousPerformRequestsWithTarget:self 
+									 selector:@selector(runConversionAlertPanel:)
+									   object:tmpConv];
+				[self performSelector:@selector(runConversionAlertPanel:) withObject:tmpConv afterDelay:0.1];
+			    }
+			}
+		}
     }
-	
+    
     //clean up
+//	NSLog(@"cleaning up...returning %@", convertedSoFar);
     [scanner release];
     [fastScan release];
     // shouldn't [tmpConv release]; ? I should look in the omni source code...
@@ -114,7 +152,7 @@ static NSCharacterSet *SkipSet;
     return([convertedSoFar autorelease]);
 }
 
-+ (void)runConversionAlertPanel:(NSString *)tmpConv{
+- (void)runConversionAlertPanel:(NSString *)tmpConv{
     NSString *errorString = [NSString localizedStringWithFormat:@"The accented or Unicode character \"%@\" could not be converted.  Please enter the TeX code directly in your bib file.", tmpConv];
     int i = NSRunAlertPanel(NSLocalizedString(@"Character Conversion Error",
 				              @"Title of alert when an error happens"),
@@ -131,7 +169,7 @@ static NSCharacterSet *SkipSet;
 }
 
 
-+ (NSString *)stringByDeTeXifyingString:(NSString *)s{
+- (NSString *)stringByDeTeXifyingString:(NSString *)s{
     NSScanner *scanner = [NSScanner scannerWithString:s];
     NSString *tmpPass;
     NSString *tmpConv;
@@ -139,19 +177,10 @@ static NSCharacterSet *SkipSet;
     NSString *TEXString;
     NSMutableString *convertedSoFar = [[NSMutableString alloc] initWithCapacity:10];
 
-    // get the dictionary
-    NSDictionary *conversions;
-
     if(!s || [s isEqualToString:@""]){
 		return [NSString string];
     }
     
-    if(!WholeDict)[self loadDict];
-    conversions = [WholeDict objectForKey:@"TeX to Roman"];
-
-    if(!conversions){
-        conversions = [NSDictionary dictionary]; // an empty one won't break the code.
-    }
     [scanner setCharactersToBeSkipped:EmptySet];
     //    NSLog(@"scanning string: %@",s);
     while(![scanner isAtEnd]){
@@ -159,7 +188,7 @@ static NSCharacterSet *SkipSet;
             [convertedSoFar appendString:tmpPass];
         if([scanner scanUpToString:@"}" intoString:&tmpConv]){
             tmpConvB = [NSString stringWithFormat:@"%@}", tmpConv];
-            if(TEXString = [conversions objectForKey:tmpConvB]){
+            if(TEXString = [detexifyConversions objectForKey:tmpConvB]){
                 [convertedSoFar appendString:TEXString];
                 [scanner scanString:@"}" intoString:nil];
             }else{

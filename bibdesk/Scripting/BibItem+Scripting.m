@@ -190,7 +190,7 @@ Extra wrapping of the created and modified date methods to
 */
 - (void) setBibTeXString:(NSString*) btString {
 	// "Texify" - whatever that is
-    NSString *texstr = [BDSKConverter stringByTeXifyingString:btString];
+    NSString *texstr = [[BDSKConverter sharedConverter] stringByTeXifyingString:btString];
     NSData *data = [texstr dataUsingEncoding:NSUTF8StringEncoding];
 
 	BOOL hadProblems = NO;

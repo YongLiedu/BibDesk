@@ -298,7 +298,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 	}	    
 	
 	doc = [[NSDocumentController sharedDocumentController] openUntitledDocumentOfType:@"bibTeX database" display:YES];
-	[doc loadBibTeXDataRepresentation:[[BDSKConverter stringByTeXifyingString:content] dataUsingEncoding:NSUTF8StringEncoding]];
+	[doc loadBibTeXDataRepresentation:[[[BDSKConverter sharedConverter] stringByTeXifyingString:content] dataUsingEncoding:NSUTF8StringEncoding]];
 	[doc updateChangeCount:NSChangeDone];
 	[doc updateUI];
 }

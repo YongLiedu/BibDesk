@@ -721,7 +721,7 @@ void _setupFonts(){
 	if([k isEqualToString:@"Local-Url"] || [k isEqualToString:@"Url"]){
 	    v = [pubFields objectForKey:k];
 	} else {
-	    v = [BDSKConverter stringByTeXifyingString:[pubFields objectForKey:k]];
+	    v = [[BDSKConverter sharedConverter] stringByTeXifyingString:[pubFields objectForKey:k]];
 	}
 	
         if(![v isEqualToString:@""]){

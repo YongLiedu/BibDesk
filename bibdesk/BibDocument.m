@@ -542,7 +542,7 @@ stringByAppendingPathComponent:@"BibDesk"]; */
     AddDataFromString(@"</lastBuildDate>\n");
     while(tmp = [e nextObject]){
       [d appendData:[[NSString stringWithString:@"\n\n"] dataUsingEncoding:NSASCIIStringEncoding  allowLossyConversion:YES]];
-      [d appendData:[[BDSKConverter stringByTeXifyingString:[tmp RSSValue]] dataUsingEncoding:NSASCIIStringEncoding allowLossyConversion:YES]];
+      [d appendData:[[[BDSKConverter sharedConverter] stringByTeXifyingString:[tmp RSSValue]] dataUsingEncoding:NSASCIIStringEncoding allowLossyConversion:YES]];
     }
     [d appendData:[@"</channel>\n</rss>" dataUsingEncoding:NSASCIIStringEncoding  allowLossyConversion:YES]];
     //    [d appendData:[@"</channel>\n</rdf:RDF>" dataUsingEncoding:NSASCIIStringEncoding  allowLossyConversion:YES]];
@@ -1526,7 +1526,7 @@ int generalBibItemCompareFunc(id item1, id item2, void *context){
     if ([[pasteboard types] containsObject:NSStringPboardType]) {
 	
 	// TeXify the string before passing it to BibTeXParser as data
-	texstr = [BDSKConverter stringByTeXifyingString:[pasteboard stringForType:NSStringPboardType]];
+	texstr = [[BDSKConverter sharedConverter] stringByTeXifyingString:[pasteboard stringForType:NSStringPboardType]];
 	data = [texstr dataUsingEncoding:NSUTF8StringEncoding];
 	
 	newPubs = [BibTeXParser itemsFromData:data error:&hadProblems];

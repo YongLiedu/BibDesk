@@ -29,6 +29,19 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 */
 @interface BDSKConverter : NSObject {
 }
+/*!
+    @method     sharedConverter
+    @abstract   Returns a shared instance of the BDSKConverter
+    @discussion (comprehensive description)
+    @result     (description)
+*/
++ (BDSKConverter *)sharedConverter;
+/*!
+    @method     loadDict
+    @abstract   Initialize the converter
+    @discussion (comprehensive description)
+*/
+- (void)loadDict;
 
 /*!
  @method stringByTeXifyingString:
@@ -37,7 +50,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
  @param s the string to convert into ASCII TeX encoding
  @result the string converted into ASCI TeX encoding
 */
-+ (NSString *)stringByTeXifyingString:(NSString *)s;
+- (NSString *)stringByTeXifyingString:(NSString *)s;
 
 /*!
  @method stringByDeTeXifyingString:
@@ -46,7 +59,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
  @param s the string to convert from ASCII TeX encoding
  @result the string converted from ASCI TeX encoding
 */
-+ (NSString *)stringByDeTeXifyingString:(NSString *)s;
+- (NSString *)stringByDeTeXifyingString:(NSString *)s;
 
 /*!
  @method runConversionAlertPanel
@@ -55,5 +68,5 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
  @param none
  @result alert panel
 */
-+ (void)runConversionAlertPanel:(NSString *)tmpConv;
+- (void)runConversionAlertPanel:(NSString *)tmpConv;
 @end

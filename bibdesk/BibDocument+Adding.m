@@ -44,7 +44,7 @@ I hope this is the right thing to do.
 There may be a bit too much conversion Data->String->Data going on.
 */
 - (BOOL) addPublicationsForString:(NSString*) string error:(NSString**) error {
-	NSString * TeXifiedString = [BDSKConverter stringByTeXifyingString:string];
+	NSString * TeXifiedString = [[BDSKConverter sharedConverter] stringByTeXifyingString:string];
 	NSData * data = [TeXifiedString dataUsingEncoding:NSUTF8StringEncoding];
 
 	return [self addPublicationsForData:data error:error];
