@@ -368,6 +368,7 @@ extern NSString* BDSKBibTeXStringPboardType;
      */
 - (BOOL)citeKeyIsUsed:(NSString *)aCiteKey byItemOtherThan:(BibItem *)anItem;
 
+- (IBAction)generateCiteKeys:(id)sender;
 
 /* Paste related methods */
 - (BOOL) addPublicationsFromPasteboard:(NSPasteboard*) pb error:(NSString**) error;

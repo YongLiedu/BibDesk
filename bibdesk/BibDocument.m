@@ -357,7 +357,17 @@ Handle Notifications by the popup button to update its icon and its menu before 
     return NO;
 }
 
-
+- (IBAction)generateCiteKeys:(id)sender
+{
+	NSEnumerator *selEnum = [self selectedPubEnumerator];
+	NSNumber *row;
+	BibItem *aPub;
+	
+	while (row = [myEnum nextObject]) {
+		aPub = [shownPublications objectAtIndex:[row intValue]];
+		[aPub setCitekey[aPub suggestedCiteKey]];
+	}
+}
 
 - (NSString *)windowNibName
 {

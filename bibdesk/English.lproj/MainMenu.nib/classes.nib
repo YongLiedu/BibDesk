@@ -113,6 +113,7 @@
                 emailPubCmd = id; 
                 exportAsHTML = id; 
                 exportAsRSS = id; 
+                generateCiteKeys = id; 
                 makeSearchFieldKey = id; 
                 myAction = id; 
                 newPub = id; 

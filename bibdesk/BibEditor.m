@@ -512,6 +512,11 @@ NSString *BDSKDateModifiedString = @"Date-Modified";
 			 [proposedCiteKey isEqualToString:@""]);
 }
 
+- (IBAction)generateCiteKey:(id)sender
+{
+	[theBib setCiteKey:[theBib suggestedCiteKey]];
+}
+
 - (IBAction)bibTypeDidChange:(id)sender{
     if (![[self window] makeFirstResponder:[self window]]){
         [[self window] endEditingFor:nil];

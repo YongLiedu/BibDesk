@@ -17,6 +17,7 @@
                 dismissAddAuthorSheet = id; 
                 dismissAddField = id; 
                 dismissDelField = id; 
+                generateCiteKey = id; 
                 raiseAddField = id; 
                 raiseDelField = id; 
                 showCiteKeyWarning = id; 

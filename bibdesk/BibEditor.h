@@ -191,6 +191,7 @@ extern NSString *BDSKDateModifiedString;
 
 - (void)toggleSnoopDrawer:(id)sender;
 - (BOOL)citeKeyIsValid:(NSString *)proposedCiteKey;
+- (IBAction)generateCiteKey:(id)sender;
 - (void)makeKeyField:(NSString *)fieldName;
 - (void)bibDidChange:(NSNotification *)notification;
 
