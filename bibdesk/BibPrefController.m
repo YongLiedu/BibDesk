@@ -28,6 +28,9 @@ NSString *BDSKCiteStringKey = @"Cite String";
 NSString *BDSKCiteStartBracketKey = @"Citation Start Bracket";
 NSString *BDSKCiteEndBracketKey = @"Citation End Bracket";
 
+NSString *BDSKCiteKeyFormatKey = @"Cite Key Format";
+NSString *BDSKCiteKeyFormatPresetKey = @"Cite Key Format Preset";
+
 NSString *BDSKShowColsKey = @"Shown Columns";
 NSString *BDSKShownColsNamesKey = @"Shown Column Names";
 NSString *BDSKColumnWidthsKey = @"Column Widths by Name";

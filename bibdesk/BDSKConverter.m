@@ -21,6 +21,7 @@ static NSCharacterSet *FinalCharSet;
 static BDSKConverter *theConverter;
 static NSDictionary *detexifyConversions;
 static NSDictionary *texifyConversions;
+static NSCharacterSet *strictInvalidCharSet;
 
 @implementation BDSKConverter
 
@@ -78,7 +79,14 @@ static NSDictionary *texifyConversions;
         detexifyConversions = [[NSDictionary dictionary] retain]; // an empty one won't break the code.
     }
     
-
+    // moved from BibTypeManager, should be removed there
+	NSMutableCharacterSet *validSet = [[NSMutableCharacterSet alloc] init];
+    [validSet addCharactersInRange:NSMakeRange( (unsigned int)'a', 26)];
+    [validSet addCharactersInRange:NSMakeRange( (unsigned int)'A', 26)];
+    [validSet addCharactersInRange:NSMakeRange( (unsigned int)'0', 12)];  // get everything through semicolon
+    [validSet addCharactersInString:@"-"];
+    
+    strictInvalidCharSet = [[validSet invert] copy];  // don't release this
 }
 
 - (NSString *)stringByTeXifyingString:(NSString *)s{
@@ -257,4 +265,27 @@ static NSDictionary *texifyConversions;
     
   return [convertedSoFar autorelease]; 
 }
+
+- (NSString *)stringBySanitizingCiteKeyString:(NSString *)key{
+    // only call this for keys that we generate internally, as it uses a restrictive character set
+	NSString *newCiteKey;
+	
+    if(!key || [key isEqualToString:@""]){
+		return [NSString string];
+    }
+	
+	newCiteKey = [self stringByDeTeXifyingString:key];
+	
+	newCiteKey = [newCiteKey stringByReplacingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]
+												   withString:@"-"];
+	
+	newCiteKey = [[[NSString alloc] initWithData:[newCiteKey dataUsingEncoding:NSASCIIStringEncoding allowLossyConversion:YES] 
+										encoding:NSASCIIStringEncoding] autorelease];
+	
+	// can we include this in unaccentConversions?
+	newCiteKey = [newCiteKey stringByReplacingCharactersInSet:strictInvalidCharSet withString:@""];
+	
+	return newCiteKey;
+}
+
 @end
