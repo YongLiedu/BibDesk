@@ -1217,23 +1217,23 @@ void _setupFonts(){
 					string = [self valueOfField:@"Keywords"];
 					if (string != nil) {
 						NSMutableArray *arr = [NSMutableArray array];
-                        // split the keyword string using the same methodology as addString:forCompletionEntry:, treating ,:; as possible dividers
-                        NSRange keywordPunctuationRange = [string rangeOfCharacterFromSet:[[NSApp delegate] autoCompletePunctuationCharacterSet]];
-                        if (keywordPunctuationRange.location != NSNotFound) {
-                            NSScanner *keywordScanner = [[NSScanner alloc] initWithString:string];
-                            [keywordScanner setCharactersToBeSkipped:nil];
-                            
-                            while (![keywordScanner isAtEnd]) {
-                                if ([keywordScanner scanUpToCharactersFromSet:[[NSApp delegate] autoCompletePunctuationCharacterSet] intoString:&string])
-                                    [arr addObject:string];
-                                [keywordScanner scanCharactersFromSet:[[NSApp delegate] autoCompletePunctuationCharacterSet] intoString:nil];
-                                [keywordScanner scanCharactersFromSet:[NSCharacterSet whitespaceCharacterSet] intoString:nil];
-                            }
-                            [keywordScanner release];
-                        } else {
-                            [arr addObject:string];
-                        }
-						
+                                                // split the keyword string using the same methodology as addString:forCompletionEntry:, treating ,:; as possible dividers
+                                                NSRange keywordPunctuationRange = [string rangeOfCharacterFromSet:[[NSApp delegate] autoCompletePunctuationCharacterSet]];
+                                                if (keywordPunctuationRange.location != NSNotFound) {
+                                                    NSScanner *keywordScanner = [[NSScanner alloc] initWithString:string];
+                                                    [keywordScanner setCharactersToBeSkipped:nil];
+                                                    
+                                                    while (![keywordScanner isAtEnd]) {
+                                                        if ([keywordScanner scanUpToCharactersFromSet:[[NSApp delegate] autoCompletePunctuationCharacterSet] intoString:&string])
+                                                            [arr addObject:string];
+                                                        [keywordScanner scanCharactersFromSet:[[NSApp delegate] autoCompletePunctuationCharacterSet] intoString:nil];
+                                                        [keywordScanner scanCharactersFromSet:[NSCharacterSet whitespaceCharacterSet] intoString:nil];
+                                                    }
+                                                    [keywordScanner release];
+                                                } else {
+                                                    [arr addObject:string];
+                                                }
+                                                                        
 						if ([scanner scanCharactersFromSet:digits intoString:&numStr]) {
 							number = [numStr intValue];
 						} else {
@@ -1394,7 +1394,9 @@ void _setupFonts(){
                                     NSAssert( [scanner scanUpToString:@"}" intoString:&string], @"Nothing found after {." );
                                     NSAssert( [scanner scanString:@"}" intoString:nil], @"Failed to scan }." );
                                     
-                                    [parsedStr appendString:[self acronymValueOfField:string]];
+                                    string = [self acronymValueOfField:string];
+                                    string = [converter stringBySanitizingString:string forField:fieldName inFileType:[self fileType]];
+                                    [parsedStr appendString:string];
                                     break;
 				default: 
 					NSLog(@"Unknown format specifier %%%C in format.", specifier);
