@@ -27,7 +27,6 @@ static NSString *kHandlerName = @"getcitekeys";
     
     while(dict = [e nextObject]){
 	if([[dict objectForKey:@"BundleID"] isEqualToString:bundleID]){
-	    NSLog(@"match found");
 	    yn = YES;
 	    break;
 	}
