@@ -1,15 +1,15 @@
-// Copyright 1997-2003 Omni Development, Inc.  All rights reserved.
+// Copyright 1997-2004 Omni Development, Inc.  All rights reserved.
 //
 // This software may only be used and reproduced according to the
 // terms in the file OmniSourceLicense.html, which should be
 // distributed with this project and can also be found at
-// http://www.omnigroup.com/DeveloperResources/OmniSourceLicense.html.
+// <http://www.omnigroup.com/developer/sourcecode/sourcelicense/>.
 //
-// $Header: /Network/Source/CVS/OmniGroup/Frameworks/OmniAppKit/OAApplication.h,v 1.27 2003/04/17 01:50:00 rick Exp $
+// $Header: /Network/Source/CVS/OmniGroup/Frameworks/OmniAppKit/OAApplication.h,v 1.33 2004/02/10 04:07:30 kc Exp $
 
 #import <AppKit/NSApplication.h>
 
-@class NSDate, NSException;
+@class NSDate, NSException, NSMutableArray, NSMutableDictionary;
 @class OFSoftwareUpdateChecker;
 
 #import <Foundation/NSDate.h> // For NSTimeInterval
@@ -21,6 +21,8 @@
     unsigned int exceptionCount;
     NSTimeInterval lastEventTimeInterval;
     unsigned int mouseButtonState;
+    NSMutableDictionary *windowsForSheets;
+    NSMutableArray *sheetQueue;
 }
 
 - (void)handleInitException:(NSException *)anException;
@@ -43,7 +45,6 @@
 - (IBAction)miniaturizeAll:(id)sender;
 - (IBAction)cycleToNextMainWindow:(id)sender;
 - (IBAction)cycleToPreviousMainWindow:(id)sender;
-- (IBAction)showInspectorPanel:(id)sender;
 - (IBAction)toggleInspectorPanel:(id)sender;
 - (IBAction)showPreferencesPanel:(id)sender;
 
