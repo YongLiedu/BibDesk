@@ -19,23 +19,8 @@
  */
 
 #import <Cocoa/Cocoa.h>
-
-/*!
-@typedef BibType
- @abstract Enumerates the various possible types
- @discussion This could be more flexible, but for now an enum is fine. I'm not going to describe each enum, except that NOTYPE is used as a return value to determine when there is no matching type.
- */
-typedef enum BibType {
-    ARTICLE = 0, BOOK, BOOKLET, INBOOK, INCOLLECTION, INPROCEEDINGS,
-    MANUAL, MASTERSTHESIS, MISC, PHDTHESIS, PROCEEDINGS, TECHREPORT,
-  UNPUBLISHED, NOTYPE
-} BibType;
-
-// REFACTORING PLAN: change BibType from an enum to a class.
-// provide methods for - (NSArray *) types; 
-// - (int)indexOfType:(NSString *)type;
-// - (NSString *)defaultType;
-
+#import "BibEditor.h"
+#import "BibTypeManager.h"
 
 @class BibEditor;
 
@@ -47,45 +32,38 @@ typedef enum BibType {
 */
 @interface BibItem : NSObject <NSCopying>{ 
 
-    
+    NSString *fileType;
     NSString *title;     /*! @var title the title of the bibitem. */
     NSString *citeKey;    /*! @var citeKey the citeKey of the bibItem */
     NSCalendarDate *pubDate;
-    BibType pubType;
+    NSString *pubType;
     NSMutableDictionary *pubFields;
     NSMutableArray *pubAuthors;
     NSMutableArray *requiredFieldNames;     /*! @var  this is for 'bibtex required fields'*/
-    NSMutableArray *defaultFieldsArray;    /*! @var this, on the other hand, is set by the user for fields they want to always add.*/
     BibEditor *editorObj; /*! @var if we have an editor, don't create a new one. */
     unsigned _fileOrder;
 }
 
 /*!
-@method init
- @discussion  Calls initWithType:INPROCEEDINGS authors:"" defaultFields: "Keywords", etc...
- */
-- (id)init;
-
-    /*!
-    @method initWithType:authors:defaultFields:
+    @method initWithType:fileType:authors:
      @abstract Initializes an alloc'd BibItem to a type and allows to set the authors.
      @discussion This lets you set the type and the Authors array at initialization time. Call it with an empty array for authArray if you don't want to do that -<em>Don't use nil</em> The authors array is kept up but isn't used much right now. This will change.
-     @param type A BibType {INPROCEEDINGS, MISC ...} - used to make the BibItem have the right entries in its dictionary.
+ @param fileType A string representing which kind of file this item was read from.
+     @param type A string representing the type of entry this item is - used to make the BibItem have the right entries in its dictionary.
      @param authArray A NSMutableArray of NSStrings, one for each author.
-     @param defaultFieldsArray An NSArray of NSStrings which are to be added no matter what type the bibitem is.
   result The receiver, initialized to type and containing authors authArray.
 */
-- (id)initWithType: (BibType)type authors:(NSMutableArray *)authArray defaultFields:(NSMutableArray *)defaultFieldsArray;
+- (id)initWithType:(NSString *)type fileType:(NSString *)inFileType authors:(NSMutableArray *)authArray;
 
 /*!
   @method makeType:
     @abstract Change the type of a BibItem.
     @discussion Changes the type of a BibItem, and rearranges the dictionary. Currently it keeps all the fields that have any text in them, so changing from one type to another with all fields filled in will give you the union of their entries.
 
- @param type the type (as a BibType) that you want to make the receiver.
+ @param type the type (as a NSString *) that you want to make the receiver.
     
 */
-- (void)makeType:(BibType)type;
+- (void)makeType:(NSString *)type;
 
 /*!
     @method dealloc
@@ -102,50 +80,7 @@ typedef enum BibType {
  @result Whether or not rString was required
     
 */
-- (BOOL)isRequired:(NSString *)rString;
-
-/*!
-@method itemFromString:
-    @abstract Convenience Constructor
-    @discussion builds and returns a BibItem that corresponds to the text in entry.
-
- @param entry A bibtex entry
- @result An autoreleased bibItem (or null if the parsing failed.)
-    
-*/
-+ (BibItem *)itemFromString:(NSString *)itemString;
-
-/*!
-     @method itemsFromString:
- @abstract Convenience Constructor
- @discussion builds and returns the BibItems that correspond to the text in entry.
-
- @param entry A string of bibtex entries
- @result An array where each entry is anautoreleased bibItem (or null if the parsing failed.)
-
- */
-+ (NSArray *)itemsFromString:(NSString *)itemString;
-
-/*!
-    @method typeFromString
- @abstract typeFromString is a function typeFromString : string -> BibType
- @discussion This is just a convenience function that maps strings into BibTypes.
- @param typeString the string you wish to convert
- @result the BibType corresponding to that string (or NOTYPE if the string is not recognized.)
-    
-*/
-+ (BibType)typeFromString:(NSString *)typeString;
-
-    /*!
-    @method typeFromString
-     @abstract typeFromString is a function typeFromString : string -> BibType
-     @discussion This is just a convenience function that maps BibTypes into strings.
-     @param type the bibtype you wish to get a string for
-     @result the string corresponding to that bibtype 
-
-     */
-+ (NSString *)stringFromType:(BibType)type;
-
+- (BOOL)isRequired:(NSString *)rString; // @@type - move to type class.
     
 - (BibEditor *)editorObj;
 - (void)setEditorObj:(BibEditor *)editor;
@@ -169,6 +104,8 @@ typedef enum BibType {
 // accessors for fileorder
 - (int)fileOrder;
 - (void)setFileOrder:(int)ord;
+- (NSString *)fileType;
+- (void)setFileType:(NSString *)someFileType;
 
 - (int)numberOfChildren;
 
@@ -193,10 +130,10 @@ typedef enum BibType {
 - (void)setDate: (NSCalendarDate *)newDate;
 - (NSCalendarDate *)date;
 
-- (void)setType: (BibType)newType;
-- (BibType)type;
+- (void)setType: (NSString *)newType;
+- (NSString *)type;
 
-- (void)setCiteKeyFormat: (NSString *)newKeyFormat;
+- (void)setCiteKeyFormat: (NSString *)newKeyFormat; // @@unimplemented
 - (void)setCiteKey:(NSString *)newCiteKey;
 - (NSString *)citeKey;
 
@@ -216,12 +153,12 @@ typedef enum BibType {
 - (NSData *)PDFValue;
 
 /*!
-    @method textValue
+    @method bibTeXString
  @abstract  returns the bibtex source for this bib item.
     @discussion «discussion»
     
 */
-- (NSString *)textValue;
+- (NSString *)bibTeXString;
 
 /*!
     @method RTFValue

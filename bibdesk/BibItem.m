@@ -14,8 +14,6 @@
  */
 
 #import "BibItem.h"
-#import "BibEditor.h"
-#import "btparse.h"
 
 #define addokey(s) if([pubFields objectForKey: s] == nil){[pubFields setObject:@"" forKey: s];} [removeKeys removeObject: s];
 #define addrkey(s) if([pubFields objectForKey: s] == nil){[pubFields setObject:@"" forKey: s];} [requiredFieldNames addObject: s]; [removeKeys removeObject: s];
@@ -49,24 +47,14 @@ void _setupFonts(){
 
 @implementation BibItem
 
-- (id)init{
-    return [self initWithType: INPROCEEDINGS
-                      authors:[NSMutableArray arrayWithCapacity:3]
-                defaultFields:[NSArray arrayWithObjects:@"Keywords", nil]];
-    // The capacity is zero by default for no good reason.
-    // default is inproceedings.
-    // while the other defaults are arbitrary, defaultFields is at least responsible.
-    // I think this shouldn't ever get called. don't know why i wrote it.
-}
-
-- (id)initWithType: (BibType)type authors:(NSMutableArray *)authArray defaultFields:(NSMutableArray *)defaultFields{ // this is the designated initializer.
+- (id)initWithType:(NSString *)type fileType:(NSString *)inFileType authors:(NSMutableArray *)authArray { // this is the designated initializer.
     if (self = [super init]){
         pubFields = [[NSMutableDictionary alloc] init]; // do i need a retain];
         requiredFieldNames = [[NSMutableArray alloc] init];
-        defaultFieldsArray = [defaultFields mutableCopy];    // copy.
         pubAuthors = [authArray mutableCopy];     // copy, it's mutable
         editorObj = nil;
 
+        [self setFileType:inFileType];
         [self setTitle:[[NSString stringWithString:@"BibTeX Publication"] retain]];
         [self makeType:type];
         [self setCiteKey:@""];
@@ -81,8 +69,8 @@ void _setupFonts(){
 
 - (id)copyWithZone:(NSZone *)zone{
     BibItem *theCopy = [[[self class] allocWithZone: zone] initWithType:pubType
-                                                                authors:[pubAuthors mutableCopy]
-                                                          defaultFields:[defaultFieldsArray retain]];
+                                                               fileType:fileType
+                                                                authors:[pubAuthors mutableCopy]];
     [theCopy setCiteKey: [citeKey copy]];
     [theCopy setDate: [pubDate copy]];
     [theCopy setTitle: [title copy]];
@@ -91,85 +79,35 @@ void _setupFonts(){
     return theCopy;
 }
 
-- (void)makeType:(BibType)type{
-    NSEnumerator *defFieldsE;
-    NSString *defFieldString;
+- (void)makeType:(NSString *)type{
+    
+    NSString *fieldString;
     NSEnumerator *e;
     NSString *tmp;
-    NSMutableArray *removeKeys = [NSMutableArray arrayWithObjects: @"Address", @"Author", @"Booktitle", @"Chapter", @"Edition", @"Editor", @"Howpublished", @"Institution", @"Journal", @"Month", @"Number", @"Organization", @"Pages", @"Publisher", @"School", @"Series", @"Title", @"Type", @"Volume", @"Year", @"Note", @"Code",  @"Crossref", nil];
-    //@"Url", @"Local-Url",, @"Annote", @"Abstract"
-    defFieldsE = [defaultFieldsArray objectEnumerator];
-    while(defFieldString = [defFieldsE nextObject]){
-        addokey(defFieldString)
+    BibTypeManager *typeMan = [BibTypeManager sharedManager];
+    NSMutableArray *removeKeys = [[typeMan allRemovableFieldNames] mutableCopy];
+    NSEnumerator *reqFieldsE = [[typeMan requiredFieldsForType:type] objectEnumerator];
+    NSEnumerator *optFieldsE = [[typeMan optionalFieldsForType:type] objectEnumerator];
+    NSEnumerator *defFieldsE = [[typeMan userDefaultFieldsForType:type] objectEnumerator];
+
+  
+    while(fieldString = [reqFieldsE nextObject]){
+        addrkey(fieldString)
     }
+    while(fieldString = [optFieldsE nextObject]){
+        addokey(fieldString)
+    }
+    while(fieldString = [defFieldsE nextObject]){
+        addokey(fieldString)
+    }    
+    
     //I don't enforce Keywords, but since there's GUI depending on them, I will enforce these others:
     addokey(@"Url") addokey(@"Local-Url") addokey(@"Annote") addokey(@"Abstract") addokey(@"Rss-Description")
-        // yeah, i know it's skanky to let the GUI influence the model class like this, but whatever.
-    switch(type){
-        case ARTICLE:
-            addrkey(@"Author") addrkey(@"Title") addrkey(@"Journal") addrkey(@"Year")
-            addokey(@"Volume") addokey(@"Number") addokey(@"Pages") addokey(@"Month")
-            break;
-        case BOOK:
-            addrkey(@"Author") addrkey(@"Title") addrkey(@"Publisher") addrkey(@"Year")
-            addokey(@"Editor") addokey(@"Volume") addokey(@"Number") addokey(@"Series")
-            addokey(@"Address") addokey(@"Edition") addokey(@"Month")
-            break;
-        case BOOKLET:
-            addrkey(@"Title")
-            addokey(@"Author") addokey(@"Howpublished") addokey(@"Address") addokey(@"Month") addokey(@"Year")
-            break;
-        case INBOOK:
-            addrkey(@"Author") addrkey(@"Title") addrkey(@"Chapter") addrkey(@"Pages") addrkey(@"Publisher") addrkey(@"Year")
-            addokey(@"Editor") addokey(@"Volume") addokey(@"Series")
-            addokey(@"Address") addokey(@"Edition")
-            break;
-        case INCOLLECTION:
-            addrkey(@"Author") addrkey(@"Title") addrkey(@"Booktitle") addrkey(@"Publisher") addrkey(@"Year")
-            addokey(@"Editor") addokey(@"Volume") addokey(@"Number") addokey(@"Series") addokey(@"Type") addokey(@"Chapter")
-            addokey(@"Pages") addokey(@"Address") addokey(@"Edition") addokey(@"Month")
-            break;
-        case INPROCEEDINGS:
-            addrkey(@"Author") addrkey(@"Title") addrkey(@"Booktitle") addrkey(@"Year")
-            addokey(@"Editor") addokey(@"Pages") addokey(@"Organization") addokey(@"Publisher") addokey(@"Address") addokey(@"Month")
-            break;
-        case MANUAL:
-            addrkey(@"Title")
-            addokey(@"Author") addokey(@"Organization") addokey(@"Address") addokey(@"Edition") addokey(@"Month") addokey(@"Year")
-            break;
-        case MISC:
-            addokey(@"Title") addokey(@"Author") addokey(@"Organization") addokey(@"Address") addokey(@"Edition")
-            addokey(@"Month") addokey(@"Year")
-            break;
-        case MASTERSTHESIS:
-            addrkey(@"Author") addrkey(@"Title") addrkey(@"School") addrkey(@"Year")
-            addokey(@"Address") addokey(@"Month") addokey(@"Type")
-            break;
-        case PHDTHESIS:
-            addrkey(@"Author") addrkey(@"Title") addrkey(@"School") addrkey(@"Year")
-            addokey(@"Address") addokey(@"Month") addokey(@"Type")
-            break;
-        case PROCEEDINGS:
-            addrkey(@"Title") addrkey(@"Year")
-            addokey(@"Editor") addokey(@"Publisher") addokey(@"Organization") addokey(@"Address")  addokey(@"Month")
-            break;
-        case TECHREPORT:
-            addrkey(@"Author") addrkey(@"Title") addrkey(@"Institution") addrkey(@"Year")
-            addokey(@"Type") addokey(@"Number") addokey(@"Address")
-            break;
-        case UNPUBLISHED:
-            addrkey(@"Author") addrkey(@"Title")
-            addokey(@"Month") addokey(@"Year")
-            break;
-        case NOTYPE:
 
-        default:
-            break;
-    }
-    // remove from removeKeys things that aren't == @"" in pubFields
-    // this includes things left over from the previous bibtype - that's good.
-    e = [[pubFields allKeys] objectEnumerator];
-    
+        // remove from removeKeys things that aren't == @"" in pubFields
+        // this includes things left over from the previous bibtype - that's good.
+        e = [[pubFields allKeys] objectEnumerator];
+
     while (tmp = [e nextObject]) {
         if (![[pubFields objectForKey:tmp] isEqualToString:@""]) {
             [removeKeys removeObject:tmp];
@@ -177,294 +115,16 @@ void _setupFonts(){
     }
     // now remove everything that's left in remove keys from pubfields
     [pubFields removeObjectsForKeys:removeKeys];
+    [removeKeys release];
     // and don't forget to set what we say our type is:
-    pubType = type;
+    [self setType:type];
 }
+       
 - (BOOL)isRequired:(NSString *)rString{
     if([requiredFieldNames indexOfObject:rString] == NSNotFound)
         return NO;
     else
         return YES;
-}
-
-+ (BibItem *)itemFromString:(NSString *)itemString{
-
-    AST *entry, *field;
-    int ok = 0;
-    long cidx = 0; // used to scan through buf for annotes.
-    char annoteDelim = '\0';
-    int braceDepth = 0;    
-
-    BibItem *newBI;
-    char *fieldname;
-    NSString *s;
-    NSMutableDictionary *dictionary = [NSMutableDictionary dictionaryWithCapacity:6];
-    char *buf = (char *) malloc(sizeof(char) * [itemString cStringLength]);
-    [itemString getCString:buf];
-    
-    bt_initialize();
-    entry =  bt_parse_entry_s ([itemString cString],
-                            "input from paste or drag",
-                            47,
-                            0,
-                            &ok);
-
-    if (ok && (bt_entry_metatype(entry) == BTE_REGULAR)) {
-        newBI = [[BibItem alloc] initWithType:
-            [BibItem typeFromString:[[NSString stringWithCString:bt_entry_type(entry)] lowercaseString]]
-                                   authors:[NSMutableArray arrayWithCapacity:0]
-                                defaultFields:[[[OFPreferenceWrapper sharedPreferenceWrapper] stringArrayForKey:BDSKDefaultFieldsKey] mutableCopy]];
-        // above, yet another unhealthy mixing of model and view (or is it?)
-        field = NULL;
-        while (field = bt_next_field (entry, field, &fieldname))
-        {
-            if(!strcmp(fieldname, "annote") || !strcmp(fieldname, "abstract")){
-                if(field->down){
-                    cidx = field->down->offset;
-                    // the delimiter is at cidx-1
-                    if(buf[cidx-1] == '{'){
-                        // scan up to the balanced brace
-                        for(braceDepth = 1; braceDepth > 0; cidx++){
-                            if(buf[cidx] == '{') braceDepth++;
-                            if(buf[cidx] == '}') braceDepth--;
-                        }
-                        cidx--;     // just advanced cidx one past the end of the field.
-                    }else if(buf[cidx-1] == '"'){
-                        // scan up to the next quote.
-                        for(; buf[cidx] != '"'; cidx++);
-                    }
-                    annoteDelim = buf[cidx];
-                    buf[cidx] = '\0';
-                    s = [NSString stringWithCString:&buf[field->down->offset]];
-                    buf[cidx] = annoteDelim;
-                }else{
-                    // field->down was null (shouldn't happen)
-                    return NULL;
-                }
-            }else{
-                // fieldname wasn't annote or abstract, just get bt's version:
-                s = [NSString stringWithCString:bt_get_text(field)];
-            }
-
-            [dictionary setObject:[NSString stringWithString:s]
-                           forKey:[[NSString stringWithCString: fieldname] capitalizedString]];
-        }// end while field = bt next field
-        [newBI setCiteKey:[NSString stringWithCString:bt_entry_key(entry)]];
-        [newBI setFields:dictionary];
-    }else{
-        // wasn't regular
-        bt_parse_entry_s (NULL, "cleanup", 47, 0, &ok);
-        bt_cleanup();
-               
-        return NULL;
-    }
-    bt_parse_entry_s (NULL, "cleanup", 47, 0, &ok);
-    bt_cleanup();
-    return [newBI autorelease];
-}
-
-+ (NSArray *)itemsFromString:(NSString *)itemString{
-
-    AST *entry, *field;
-    int ok = 1;
-    long cidx = 0; // used to scan through buf for annotes.
-    char annoteDelim = '\0';
-    int braceDepth = 0;
-    NSMutableArray *returnArray = [NSMutableArray arrayWithCapacity:1];
-    BibItem *newBI;
-    char *fieldname;
-    NSString *s;
-    int cursor = 0; // used to keep the index so we can start the parsing after the previous entry.
-    int readOffset = 0; // same as above. cursor keeps track within entries, readOffset keeps track within the string overall.
-    NSMutableDictionary *dictionary = [NSMutableDictionary dictionaryWithCapacity:6];
-    char *buf = (char *) malloc(sizeof(char) * [itemString cStringLength]);
-    NS_DURING
-        [itemString getCString:buf];
-    NS_HANDLER
-        // if we couldn't convert it, we won't be able to read it: just give up.
-        if ([[localException name] isEqualToString:NSCharacterConversionException]) {
-            NSLog(@"Exception %@ raised in BibItem itemsFromString:, handled by giving up.", [localException name]);
-            itemString = @"";
-            NSBeep();
-        }else{
-            [localException raise];
-        }
-    NS_ENDHANDLER
-        
-    bt_initialize();
-
-    while(ok){
-
-
-        entry =  bt_parse_entry_s (buf+readOffset,
-                                   "input from paste or drag",
-                                   47,
-                                   0,
-                                   &ok);
-
-        if (ok && (bt_entry_metatype(entry) == BTE_REGULAR)) {
-            newBI = [[BibItem alloc] initWithType:
-                [BibItem typeFromString:[[NSString stringWithCString:bt_entry_type(entry)] lowercaseString]]
-                                          authors:
-                [NSMutableArray arrayWithCapacity:0]
-                                    defaultFields:
-                [[[OFPreferenceWrapper sharedPreferenceWrapper] stringArrayForKey:BDSKDefaultFieldsKey] mutableCopy]];
-            // above, yet another unhealthy mixing of model and view (or is it?)
-            
-            field = NULL;
-            while (field = bt_next_field (entry, field, &fieldname))
-            {
-                if(!strcmp(fieldname, "annote") || !strcmp(fieldname, "abstract")){
-                    if(field->down){
-                        cidx = field->down->offset;
-                        
-                        // the delimiter is at cidx-1
-                        if(buf[cidx-1] == '{'){
-                            // scan up to the balanced brace
-                            for(braceDepth = 1; braceDepth > 0; cidx++){
-                                if(buf[cidx] == '{') braceDepth++;
-                                if(buf[cidx] == '}') braceDepth--;
-                            }
-                            cidx--;     // just advanced cidx one past the end of the field.
-                        }else if(buf[cidx-1] == '"'){
-                            // scan up to the next quote.
-                            for(; buf[cidx] != '"'; cidx++);
-                        }
-                        annoteDelim = buf[cidx];
-                        buf[cidx] = '\0';
-                        s = [NSString stringWithCString:&buf[field->down->offset]];
-                        buf[cidx] = annoteDelim;
-                       
-                    }else{
-                        // field->down was null (shouldn't happen)
-                        return NULL;
-                    }
-                }else{
-                    // fieldname wasn't annote or abstract, just get bt's version:
-                    s = [NSString stringWithCString:bt_get_text(field)];
-                }
-                if(field->down){
-                    cursor = field->down->offset;
-                    // we find the beginning of each entry, then if it's the last, we will scan ahead to the next pub later
-                }
-                [dictionary setObject:[NSString stringWithString:s]
-                               forKey:[[NSString stringWithCString: fieldname] capitalizedString]];
-                
-            }// end while field = bt next field
-             // Got all the fields, now we insert it and scan cursor up to the next one
-            [newBI setCiteKey:[NSString stringWithCString:bt_entry_key(entry)]];
-            [newBI setFields:dictionary];
-            [dictionary removeAllObjects];
-            
-            [returnArray addObject:newBI];
-            
-            while(buf[cursor] && buf[cursor] != '@'){
-                cursor++;
-            }
-            readOffset += cursor - 1; // back up one
-        }else{
-            // wasn't ok or wasn't regular
-            /* here's what we do in itemfromstring:
-            bt_parse_entry_s (NULL, "cleanup", 47, 0, &ok);
-            bt_cleanup();
-            return NULL;*/
-        }
-        
-    } // while scanning through string
-    bt_parse_entry_s (NULL, "cleanup", 47, 0, &ok);
-    bt_cleanup();
-    return [NSArray arrayWithArray:returnArray];
-}
-
-+ (NSString *)stringFromType:(BibType)type{
-    switch(type){
-        case ARTICLE:
-            return @"article";
-            break;
-        case BOOK:
-            return @"book";
-            break;
-        case BOOKLET:
-            return @"booklet";
-            break;
-        case INBOOK:
-            return @"inbook";
-            break;
-        case INCOLLECTION:
-            return @"incollection";
-            break;
-        case INPROCEEDINGS:
-            return @"inproceedings";
-            break;
-        case MANUAL:
-            return @"manual";
-            break;
-        case MISC:
-            return @"misc";
-            break;
-        case MASTERSTHESIS:
-            return @"mastersthesis";
-            break;
-        case PHDTHESIS:
-            return @"phdthesis";
-            break;
-        case PROCEEDINGS:
-            return @"proceedings";
-            break;
-        case TECHREPORT:
-            return @"techreport";
-            break;
-        case UNPUBLISHED:
-            return @"unpublished";
-            break;
-        case NOTYPE:
-            return @"no type";
-            break;
-    }
-}
-// This is written with the constants so that it works with btparse's bt_entry_type() output.
-// That means all lowercase.
-+ (BibType)typeFromString:(NSString *)typeString{
-    if ([[typeString lowercaseString] isEqualToString:@"article"]) {
-    	return ARTICLE;
-    }
-    if ([[typeString lowercaseString] isEqualToString:@"book"]) {
-        return BOOK;
-    }
-    if ([[typeString lowercaseString] isEqualToString:@"booklet"]) {
-        return BOOKLET;
-    }
-    if ([[typeString lowercaseString] isEqualToString:@"inbook"]) {
-        return INBOOK;
-    }
-    if ([[typeString lowercaseString] isEqualToString:@"incollection"]) {
-        return INCOLLECTION;
-    }
-    if ([[typeString lowercaseString] isEqualToString:@"inproceedings"]) {
-        return INPROCEEDINGS;
-    }
-    if ([[typeString lowercaseString] isEqualToString:@"manual"]) {
-        return MANUAL;
-    }
-    if ([[typeString lowercaseString] isEqualToString:@"misc"]) {
-        return MISC;
-    }
-    if ([[typeString lowercaseString] isEqualToString:@"mastersthesis"]) {
-        return MASTERSTHESIS;
-    }
-    if ([[typeString lowercaseString] isEqualToString:@"phdthesis"]) {
-        return PHDTHESIS;
-    }
-    if ([[typeString lowercaseString] isEqualToString:@"proceedings"]) {
-        return PROCEEDINGS;
-    }
-    if ([[typeString lowercaseString] isEqualToString:@"techreport"]) {
-        return TECHREPORT;
-    }
-    if ([[typeString lowercaseString] isEqualToString:@"unpublished"]) {
-        return UNPUBLISHED;
-    }
-    else return NOTYPE;
 }
 
 - (void)dealloc{
@@ -489,7 +149,7 @@ void _setupFonts(){
 
 #warning doesn't always seem to work? specifically when changing updatecounts from changing the pubtype
 - (BOOL)isEqual:(BibItem *)aBI{
-    return (pubType == [aBI type]) && ([citeKey isEqualToString:[aBI citeKey]]) &&
+    return ([pubType isEqualToString:[aBI type]]) && ([citeKey isEqualToString:[aBI citeKey]]) &&
     ([pubFields isEqual:[aBI dict]]);
 }
 
@@ -555,6 +215,13 @@ void _setupFonts(){
 - (void)setFileOrder:(int)ord{
     _fileOrder = ord;
 }
+- (NSString *)fileType { return fileType; }
+
+- (void)setFileType:(NSString *)someFileType {
+    [someFileType retain];
+    [fileType release];
+    fileType = someFileType;
+}
 
 - (int)numberOfAuthors{
     return [pubAuthors count];
@@ -581,7 +248,9 @@ void _setupFonts(){
 }
 
 - (void)setAuthorsFromString:(NSString *)aString{
-    char *str = [aString cString]; // str will be autoreleased. (freed?)
+    char *str = (char *)malloc(sizeof(char)*[aString cStringLength]);
+
+    [aString getCString:str]; // str will be autoreleased. (freed?)
     bt_stringlist *sl = nil;
     int i=0;
 #warning - Exception - might want to add an exception handler that notifies the user of the warning...
@@ -633,10 +302,11 @@ void _setupFonts(){
     return pubDate;
 }
 
-- (void)setType: (BibType)newType{
-    pubType = newType;
+- (void)setType: (NSString *)newType{
+    [pubType autorelease];
+    pubType = [newType retain];
 }
-- (BibType)type{
+- (NSString *)type{
     return pubType;
 }
 
@@ -752,9 +422,7 @@ void _setupFonts(){
 
 
     [aStr appendAttributedString:[[[NSMutableAttributedString alloc] initWithString:
-    [NSString stringWithFormat:@"(%@)\n",[BibItem stringFromType:[self type]]]
-                                                                     attributes:typeAttributes]
-    autorelease]];
+    [NSString stringWithFormat:@"(%@)\n",[self type]] attributes:typeAttributes] autorelease]];
 
     while(key = [e nextObject]){
         if(![[pubFields objectForKey:key] isEqualToString:@""] &&
@@ -790,19 +458,16 @@ void _setupFonts(){
     return [aStr RTFFromRange:NSMakeRange(0,[aStr length]) documentAttributes:nil];
 }
 
-//@@ Refactor: textValue should be 'bibtex value'
-- (NSString *)textValue{
+- (NSString *)bibTeXString{
     NSString *k;
     NSString *v;
     NSMutableString *s = [[[NSMutableString alloc] init] autorelease];
     NSArray *keys = [[pubFields allKeys] sortedArrayUsingSelector:@selector(caseInsensitiveCompare:)];
     NSEnumerator *e = [keys objectEnumerator];
-    // @@REfactor: bibtex dependence:
-    NSArray *types = [NSArray arrayWithObjects:@"article", @"book", @"booklet", @"inbook", @"incollection", @"inproceedings", @"manual", @"mastersthesis", @"misc", @"phdthesis", @"proceedings", @"techreport", @"unpublished", nil];
+   
     //build BibTeX entry:
     [s appendString:@"@"];
-#warning this breaks non-standard publication types...
-    [s appendString:[types objectAtIndex:pubType]];
+    [s appendString:pubType];
     [s appendString:@"{"];
     [s appendString:[self citeKey]];
     while(k = [e nextObject]){
@@ -831,7 +496,7 @@ void _setupFonts(){
 [s appendString:[self valueOfField:@"Url"]];
 [s appendString:@"</link>\n"];
 //[s appendString:@"<bt:source><![CDATA[\n"];
-//    [s appendString:[[self textValue] xmlString]];
+//    [s appendString:[[self bibTeXString] xmlString]];
 //    [s appendString:@"]]></bt:source>\n"];
     [s appendString:@"</item>\n"];
     return [[s copy] autorelease];
