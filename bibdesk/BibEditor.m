@@ -222,6 +222,10 @@ NSString *BDSKDateModifiedString = @"Date-Modified";
     [citeKeyFormatter release];
 	[[NSNotificationCenter defaultCenter] removeObserver:self];
 	[cautionIconImage release]; 
+    [fieldNumbers release];
+    [_pdfSnoopImage release];
+    [_textSnoopString release];
+    [fieldNameFormatter release];
     [super dealloc];
 }
 
