@@ -97,16 +97,22 @@
 }
 
 - (IBAction)citeKeyFormatAdd:(id)sender{
-	NSString *formatString = [formatField stringValue];
 	NSArray *specifierStrings = [NSArray arrayWithObjects:@"", @"%a00", @"%A0", @"%t0", @"%T0", @"%Y", @"%y", @"%m", @"%k0", @"%f{}0", @"%c{}", @"%r2", @"%R2", @"%d2", @"%u0", @"%U0", @"%n0", @"%0", nil];
 	NSString *newSpecifier = [specifierStrings objectAtIndex:[formatRepositoryPopUp indexOfSelectedItem]];
     NSText *fieldEditor = [formatField currentEditor];
-	NSRange selRange = NSMakeRange([fieldEditor selectedRange].location + 2, [newSpecifier length] - 2);
+	NSRange selRange;
 	
 	if (!newSpecifier || [newSpecifier isEqualToString:@""])
 		return;
 	
-    [fieldEditor replaceCharactersInRange:NSMakeRange([fieldEditor selectedRange].location, 0) withString:newSpecifier];
+    if (fieldEditor) {
+		selRange = NSMakeRange([fieldEditor selectedRange].location + 2, [newSpecifier length] - 2);
+		[fieldEditor insertText:newSpecifier];
+	} else {
+		NSString *formatString = [formatField stringValue];
+		selRange = NSMakeRange([formatString length] + 2, [newSpecifier length] - 2);
+		[formatField setStringValue:[formatString stringByAppendingString:newSpecifier]];
+	}
 	
 	// this handles the new defaults and the UI update
 	[self citeKeyFormatChanged:sender];
