@@ -337,8 +337,10 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
      toPasteboard:(NSPasteboard*)pboard{
     OFPreferenceWrapper *sud = [OFPreferenceWrapper sharedPreferenceWrapper];
     BOOL yn;
-    NSString *startCite = [NSString stringWithFormat:@"\\%@{",[[OFPreferenceWrapper sharedPreferenceWrapper] stringForKey:BDSKCiteStringKey]];
-#warning - extra spurious retain? not sure.
+	NSString *startCiteBracket = [sud stringForKey:BDSKCiteStartBracketKey]; 
+	NSString *startCite = [NSString stringWithFormat:@"\\%@%@",[sud stringForKey:BDSKCiteStringKey], startCiteBracket];
+	NSString *endCiteBracket = [sud stringForKey:BDSKCiteEndBracketKey]; 
+
     NSMutableString *s = [[NSMutableString string] retain];
     NSMutableString *localPBString = [NSMutableString string];
     NSEnumerator *enumerator;
@@ -355,7 +357,8 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
     if([tv numberOfSelectedRows] == 0) return NO;
 
     if(tv == (NSTableView *)ccTableView){
-        startCite = [NSString stringWithFormat:@"\\%@{",[customStringArray objectAtIndex:[[rows objectAtIndex:0] intValue]]]; // rows oi:0 is ok because we don't allow multiple selections in ccTV.
+        startCite = [NSString stringWithFormat:@"\\%@%@",[customStringArray objectAtIndex:[[rows objectAtIndex:0] intValue]], startCiteBracket];
+		// rows oi:0 is ok because we don't allow multiple selections in ccTV.
 
         // if it's the ccTableView, then rows has the rows of the ccTV.
         // we need to change rows to be the main TV's selected rows,
@@ -385,13 +388,13 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
         if(dragType == 1){
             if(sep) [s appendString:startCite];
             [s appendString:[[shownPublications objectAtIndex:sortedIndex] citeKey]];
-            if(sep) [s appendString:@"}"];
+            if(sep) [s appendString:endCiteBracket];
             else [s appendString:@","];
         }
     }// end while
 
     if(dragType == 1){
-        if(!sep)[s replaceCharactersInRange:[s rangeOfString:@"," options:NSBackwardsSearch] withString:@"}"];
+        if(!sep)[s replaceCharactersInRange:[s rangeOfString:@"," options:NSBackwardsSearch] withString:endCiteBracket];
     }
     if((dragType == 0) ||
        (dragType == 1)){
