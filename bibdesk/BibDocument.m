@@ -57,9 +57,6 @@ NSString *BDSKBibItemLocalDragPboardType = @"edu.ucsd.cs.mmccrack.bibdesk: Local
         tableColumns = [[NSMutableDictionary dictionaryWithCapacity:6] retain];
         fileOrderCount = 1;
 		
-        collections = [[NSMutableArray alloc] initWithCapacity:1];
-        notes = [[NSMutableArray alloc] initWithCapacity:1];
-        sources = [[NSMutableArray alloc] initWithCapacity:1];
         BD_windowControllers = [[NSMutableArray alloc] initWithCapacity:1];
         
         macroDefinitions = [[NSMutableDictionary alloc] initWithCapacity:10];
@@ -237,10 +234,7 @@ NSString *BDSKBibItemLocalDragPboardType = @"edu.ucsd.cs.mmccrack.bibdesk: Local
     [customStringArray release];
     [toolbarItems release];
     [tableColumns release];
-    [collections release];
     [BD_windowControllers release];
-    [notes release];
-    [sources release];
     [localDragPboard release];
     [draggedItems release];
     [macroDefinitions release];
@@ -292,26 +286,6 @@ NSString *BDSKBibItemLocalDragPboardType = @"edu.ucsd.cs.mmccrack.bibdesk: Local
 														  userInfo:notifInfo];
     }
 }
-
-
-// use this for new documents, so we don't mark the document dirty as in the standard setPublications method
-- (void)setNewPublicationsFromArchivedArray:(NSArray *)newPubs{ 
-    [publications autorelease];
-    publications = [newPubs mutableCopy];
-    NSEnumerator *pubEnum = [publications objectEnumerator];
-    BibItem *pub;
-    while (pub = [pubEnum nextObject]) {
-        [pub setDocument:self];
-    }
-    [shownPublications setArray:publications];
-    [self refreshAuthors];
-    
-    NSDictionary *notifInfo = [NSDictionary dictionaryWithObjectsAndKeys:newPubs, @"pubs", nil];
-    [[NSNotificationCenter defaultCenter] postNotificationName:@"Set the publications in document"
-                                                        object:self
-                                                      userInfo:notifInfo];
-}    
-    
 
 - (NSMutableArray *) publications{
     return [[publications retain] autorelease];
@@ -468,11 +442,7 @@ NSString *BDSKBibItemLocalDragPboardType = @"edu.ucsd.cs.mmccrack.bibdesk: Local
 }
 
 - (NSString *)windowNibName{
-    if ([[self fileType] isEqualToString:@"BibDesk Library"]){
-        return @"BibDocument+SourceList";
-    }else{
         return @"BibDocument";
-    }
 }
 
 - (void)windowControllerDidLoadNib:(NSWindowController *) aController
@@ -512,23 +482,6 @@ NSString *BDSKBibItemLocalDragPboardType = @"edu.ucsd.cs.mmccrack.bibdesk: Local
 
 #pragma mark -
 #pragma mark  Document Saving and Reading
-
-// NSCoding support for .bdsk-style files:
-- (NSData *)archivedDataRepresentation{
-    NSKeyedArchiver *archiver;
-    NSMutableData *data = [NSMutableData data];
-    
-    archiver = [[NSKeyedArchiver alloc] initForWritingWithMutableData:data];
-    [archiver encodeObject:[self publications] forKey:@"publications"];
-    [archiver encodeObject:[self collections] forKey:@"collections"];
-    [archiver encodeInt:[self documentStringEncoding] forKey:@"stringEncoding"];
-    [archiver encodeObject:[self notes] forKey:@"notes"];
-    [archiver encodeObject:[self sources] forKey:@"sources"];
-    
-    [archiver finishEncoding];
-    [archiver release];
-    return data;
-}
 
 
 - (IBAction)saveDocument:(id)sender{
@@ -645,8 +598,6 @@ NSString *BDSKBibItemLocalDragPboardType = @"edu.ucsd.cs.mmccrack.bibdesk: Local
         return [self MODSDataRepresentation];
     }else if ([aType isEqualToString:@"ATOM"]){
         return [self atomDataRepresentation];
-    }else if([aType isEqualToString:@"BibDesk Library"]){
-        return [self archivedDataRepresentation];
     }else
         return nil;
 }
@@ -866,31 +817,10 @@ stringByAppendingPathComponent:@"BibDesk"]; */
         return [self loadRSSDataRepresentation:data];
     }else if([aType isEqualToString:@"RIS/Medline File"]){
         return [self loadPubMedDataRepresentation:data];
-    }else if([aType isEqualToString:@"BibDesk Library"]){
-        return [self loadArchivedDataRepresentation:data];
     }else
         return NO;
 }
 
-- (BOOL)loadArchivedDataRepresentation:(NSData *)data{
-    NSKeyedUnarchiver *unarchiver;
-    
-    unarchiver = [[NSKeyedUnarchiver alloc] initForReadingWithData:data];
-    [self setNewPublicationsFromArchivedArray:[unarchiver decodeObjectForKey:@"publications"]];
-    [self setCollections:[unarchiver decodeObjectForKey:@"collections"]];
-    [self setDocumentStringEncoding:[unarchiver decodeIntForKey:@"stringEncoding"]];
-    
-    foreach(collection, collections){
-        [collection setParent:self];
-    }
-    
-    [self setNotes:[unarchiver decodeObjectForKey:@"notes"]];
-    [self setSources:[unarchiver decodeObjectForKey:@"sources"]];
-    
-    [unarchiver finishDecoding];
-    [unarchiver release];
-    return YES;
-}
 
 - (BOOL)loadPubMedDataRepresentation:(NSData *)data{
     int rv = 0;
@@ -1078,19 +1008,6 @@ stringByAppendingPathComponent:@"BibDesk"]; */
 
 - (IBAction)newPub:(id)sender{
     [self createNewBlankPubAndEdit:YES];
-}
-
-- (void)handleTableViewBackspaceDel{
-    id selectedSource = [sourceList selectedItem];
-    if(selectedSource == self || selectedSource == nil){
-        // we're working with the library, delete pub.
-        [self delPub:nil];
-    }else{
-        if([collections containsObject:selectedSource]){
-            [(BibCollection *) selectedSource removePublicationsInArray:[self selectedPublications]];
-            [self updateUI];
-        }
-    }
 }
 
 - (IBAction)delPub:(id)sender{
@@ -3006,281 +2923,6 @@ This method always returns YES. Even if some or many operations fail.
 				  AEFilterUPP filterProc
 				  );
 #endif
-}
-
-// only sent if we are a .bdsk file.
-// Note that we don't expect a lot of collections, so all this iteration should be OK.
-
-- (IBAction)editExportSettingsAction:(id)sender{
-    if(![collections containsObject:[sourceList selectedItem]]){
-        [NSException raise:NSInternalInconsistencyException format:@"editExportSettingsAction called with invalid selectedItem"];
-    }
-    
-    [exporterSelectionPopUp removeAllItems];
-    currentCollection = [sourceList selectedItem];
-    
-    NSEnumerator *e = [[BDSKExporter availableExporterClassNames] objectEnumerator];
-    id className;
-    while(className = [e nextObject]){
-        NSString *name = [NSClassFromString(className) displayName];
-        [exporterSelectionPopUp addItemWithTitle:name];
-        id item = [exporterSelectionPopUp itemWithTitle:name];
-        [item setRepresentedObject:className];
-    }
-    [exporterSelectionPopUp synchronizeTitleAndSelectedItem];
-    // find currently selected item and set the subview to it.
-    // resize window with zoom.
-
-    [self  setEditExportViewForClassName:[[exporterSelectionPopUp selectedItem] representedObject]];
- 	[NSApp beginSheet:editExportSettingsWindow
-       modalForWindow:documentWindow
-        modalDelegate:self
-       didEndSelector:@selector(editExportSettingsSheetDidEnd:returnCode:contextInfo:)
-          contextInfo:nil];
-    
-}
-
-
-
-- (IBAction)dismissEditExportSettingsSheet:(id)sender{
-    [editExportSettingsWindow orderOut:sender];
-    [NSApp endSheet:editExportSettingsWindow returnCode:[sender tag]];
-    currentCollection = nil;
-}
-
-// called upon dismissal
-- (void)editExportSettingsSheetDidEnd:(NSWindow *)sheet
-                  returnCode:(int) returnCode
-                 contextInfo:(void *)contextInfo{
-    if(returnCode == 0) return;
-    // TODO
-}
-
-- (IBAction)handleExportChooserPopupChange:(id)sender{
-    NSLog(@"%@", [[sender selectedItem] representedObject]);
-    [self setEditExportViewForClassName:[[sender selectedItem] representedObject]];
-}
-
-
-- (void)setEditExportViewForClassName:(NSString *)className{
-    Class exporterClass = NSClassFromString(className);
-    // if currentCollection has one of these, use it:
-    id existingExporter = nil;
-    foreach(exp, [currentCollection exporters]){
-        if([exp isKindOfClass:exporterClass]){
-            existingExporter = exp;
-        }
-    }
-    if(!existingExporter){
-        //make a new one:
-        existingExporter = [[[exporterClass alloc] init] autorelease];
-        [currentCollection addExporter:existingExporter];
-    }
-    
-    [[editExportSettingsWindow contentView] replaceSubview:exporterSubView with:[existingExporter settingsView]];
-}
-
-#pragma mark methods to support the source list for .bdsk style files
-
-- (NSMutableArray *)collections { return [[collections retain] autorelease]; }
-
-
-- (void)setCollections:(NSMutableArray *)newCollections {
-    //NSLog(@"in -setCollections:, old value of collections: %@, changed to: %@", collections, newCollections);
-    
-    if (collections != newCollections) {
-        [collections release];
-        collections = [newCollections mutableCopy];
-    }
-}
-
-
-- (NSMutableArray *)notes { return [[notes retain] autorelease]; }
-
-
-- (void)setNotes:(NSMutableArray *)newNotes {
-    //NSLog(@"in -setNotes:, old value of notes: %@, changed to: %@", notes, newNotes);
-    
-    if (notes != newNotes) {
-        [notes release];
-        notes = [newNotes mutableCopy];
-    }
-}
-
-
-- (NSMutableArray *)sources { return [[sources retain] autorelease]; }
-
-
-- (void)setSources:(NSMutableArray *)newSources {
-    //NSLog(@"in -setSources:, old value of sources: %@, changed to: %@", sources, newSources);
-    
-    if (sources != newSources) {
-        [sources release];
-        sources = [newSources mutableCopy];
-    }
-}
-
-
-// Indexed accessors:
-
-///////  collections  ///////
-
-- (unsigned int)countOfCollections {
-    return [[self collections] count];
-}
-
-- (id)objectInCollectionsAtIndex:(unsigned int)index {
-    NSMutableArray *myCollections = [self collections];
-    unsigned int collectionsCount = [myCollections count];
-    if ( collectionsCount == 0 || index > (collectionsCount - 1) ) return nil;
-    
-    return [[[myCollections objectAtIndex:index] retain] autorelease];
-}
-
-- (void)insertObject:(id)anObject inCollectionsAtIndex:(unsigned int)index {
-    NSMutableArray *myCollections = [self collections];
-    unsigned int collectionsCount = [myCollections count];
-    if (index > collectionsCount) return;
-    
-    if (anObject) [myCollections insertObject:anObject atIndex:index];
-}
-
-- (void)removeObjectFromCollectionsAtIndex:(unsigned int)index {
-    NSMutableArray *myCollections = [self collections];
-    unsigned int collectionsCount = [myCollections count];
-    if ( collectionsCount == 0 || index > (collectionsCount - 1) ) return;
-    
-    [myCollections removeObjectAtIndex:index];
-}
-
-- (void)replaceObjectInCollectionsAtIndex:(unsigned int)index withObject:(id)anObject {
-    NSMutableArray *myCollections = [self collections];
-    unsigned int collectionsCount = [myCollections count];
-    if ( collectionsCount == 0 || index > (collectionsCount - 1) ) return;
-    
-    [myCollections replaceObjectAtIndex:index withObject:anObject];
-}
-
-
-
-///////  notes  ///////
-
-- (unsigned int)countOfNotes {
-    return [[self notes] count];
-}
-
-- (id)objectInNotesAtIndex:(unsigned int)index {
-    NSMutableArray *myNotes = [self notes];
-    unsigned int notesCount = [myNotes count];
-    if ( notesCount == 0 || index > (notesCount - 1) ) return nil;
-    
-    return [[[myNotes objectAtIndex:index] retain] autorelease];
-}
-
-- (void)insertObject:(id)anObject inNotesAtIndex:(unsigned int)index {
-    NSMutableArray *myNotes = [self notes];
-    unsigned int notesCount = [myNotes count];
-    if (index > notesCount) return;
-    
-    if (anObject) [myNotes insertObject:anObject atIndex:index];
-}
-
-- (void)removeObjectFromNotesAtIndex:(unsigned int)index {
-    NSMutableArray *myNotes = [self notes];
-    unsigned int notesCount = [myNotes count];
-    if ( notesCount == 0 || index > (notesCount - 1) ) return;
-    
-    [myNotes removeObjectAtIndex:index];
-}
-
-- (void)replaceObjectInNotesAtIndex:(unsigned int)index withObject:(id)anObject {
-    NSMutableArray *myNotes = [self notes];
-    unsigned int notesCount = [myNotes count];
-    if ( notesCount == 0 || index > (notesCount - 1) ) return;
-    
-    [myNotes replaceObjectAtIndex:index withObject:anObject];
-}
-
-
-
-///////  sources  ///////
-
-- (unsigned int)countOfSources {
-    return [[self sources] count];
-}
-
-- (id)objectInSourcesAtIndex:(unsigned int)index {
-    NSMutableArray *mySources = [self sources];
-    unsigned int sourcesCount = [mySources count];
-    if ( sourcesCount == 0 || index > (sourcesCount - 1) ) return nil;
-    
-    return [[[mySources objectAtIndex:index] retain] autorelease];
-}
-
-- (void)insertObject:(id)anObject inSourcesAtIndex:(unsigned int)index {
-    NSMutableArray *mySources = [self sources];
-    unsigned int sourcesCount = [mySources count];
-    if (index > sourcesCount) return;
-    
-    if (anObject) [mySources insertObject:anObject atIndex:index];
-}
-
-- (void)removeObjectFromSourcesAtIndex:(unsigned int)index {
-    NSMutableArray *mySources = [self sources];
-    unsigned int sourcesCount = [mySources count];
-    if ( sourcesCount == 0 || index > (sourcesCount - 1) ) return;
-    
-    [mySources removeObjectAtIndex:index];
-}
-
-- (void)replaceObjectInSourcesAtIndex:(unsigned int)index withObject:(id)anObject {
-    NSMutableArray *mySources = [self sources];
-    unsigned int sourcesCount = [mySources count];
-    if ( sourcesCount == 0 || index > (sourcesCount - 1) ) return;
-    
-    [mySources replaceObjectAtIndex:index withObject:anObject];
-}
-
-- (void)outlineViewSelectionDidChange:(NSNotification *)notification{
-    if (sourceList != [notification object]) return;
-    id /*<BibItemSource>*/ item = [sourceList selectedItem];
-    if([item respondsToSelector:@selector(publications)]){
-        [shownPublications setArray:[item publications]];
-    }else if(item == collections){
-        NSMutableSet *totalSet = [NSMutableSet set];
-        foreach(collection, collections){
-            [totalSet addObjectsFromArray:[collection publications]];
-        }
-        [shownPublications setArray:[totalSet allObjects]];
-    }
-    [self updateUI];
-
-}
-
-- (void)reloadSourceList{
-    [sourceList reloadData];
-}
-
-- (IBAction)makeNewEmptyCollection:(id)sender{
-    BibCollection *newBC = [[BibCollection alloc] initWithParent:self];
-    [collections addObject:[newBC autorelease]];
-    [self reloadSourceList];
-}
-
-- (IBAction)makeNewCollectionFromSelectedPublications:(id)sender{
-    // untested.
-    BibCollection *newBC = [[BibCollection alloc] initWithParent:self];
-    [newBC setPublications:[[self selectedPubEnumerator] allObjects]];
-    [collections addObject:[newBC autorelease]];
-    [self reloadSourceList];
-}
-
-- (IBAction)makeNewExternalSource:(id)sender{
-    
-}
-
-- (IBAction)makeNewNotepad:(id)sender{
-    
 }
 
 @end

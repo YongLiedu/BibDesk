@@ -36,7 +36,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 #import "BDSKFileContentsFilter.h"
 #import "ApplicationServices/ApplicationServices.h"
 #import "RYZImagePopUpButton.h"
-#import "BibCollection.h"
+
 #import "MacroWindowController.h"
 
 
@@ -164,12 +164,6 @@ extern NSString *BDSKBibItemLocalDragPboardType;
     IBOutlet NSPopUpButton *exporterSelectionPopUp;
     IBOutlet NSButton *exporterEnabledCheckButton;
     IBOutlet NSView *exporterSubView;
-    BibCollection *currentCollection;
-    
-    // model:
-    NSMutableArray *collections; // playlist style sub-lists of publications. Can be 'smart'.
-    NSMutableArray *notes;       // free-form note storage
-    NSMutableArray *sources;     // external sources of publications, not represented in library (aka the publications array)
     
     // view:
     NSMutableArray *draggedItems; // an array to temporarily hold references to dragged items used locally.
@@ -315,14 +309,6 @@ extern NSString *BDSKBibItemLocalDragPboardType;
 */
 - (NSString *)publicationsAsHTML;
 
-/*!
-    @method     archivedDataRepresentation
-    @abstract   uses NSKeyedArchiver to generate save data
-    @discussion (description)
-    @result     (description)
-*/
-- (NSData *)archivedDataRepresentation;
-
 - (NSData *)atomDataRepresentation;
 - (NSData *)MODSDataRepresentation;
 /*!
@@ -340,7 +326,6 @@ extern NSString *BDSKBibItemLocalDragPboardType;
 - (BOOL)loadRSSDataRepresentation:(NSData *)data;
 - (BOOL)loadPubMedDataRepresentation:(NSData *)data;
 
-- (BOOL)loadArchivedDataRepresentation:(NSData *)data;
 - (BOOL)readFromFile:(NSString *)fileName ofType:(NSString *)docType;
 
 /*!
@@ -374,13 +359,6 @@ extern NSString *BDSKBibItemLocalDragPboardType;
 */
 - (IBAction)newPub:(id)sender; // new pub button pressed.
 
-
-/*!
-    @method     handleTableViewBackspaceDel
-    @abstract   does the appropriate thing when backspace or delete are pressed on the tableview.
-    @discussion this means either calling delPub or removing the pub from the selected collection.
-*/
-- (void)handleTableViewBackspaceDel;
 
 /*!
     @method delPub
@@ -925,130 +903,5 @@ int compareSetLengths(NSSet *set1, NSSet *set2, void *context);
 - (IBAction)exportEncodedBib:(id)sender;
 - (NSStringEncoding)documentStringEncoding;
 - (void)setDocumentStringEncoding:(NSStringEncoding)encoding;
-
-
-#pragma mark Methods for Exporting the entire file or collections.
-
-- (IBAction)editExportSettingsAction:(id)sender;
-- (IBAction)dismissEditExportSettingsSheet:(id)sender;
-- (IBAction)handleExportChooserPopupChange:(id)sender;
-- (void)setEditExportViewForClassName:(NSString *)className;
-
-#pragma mark Methods supporting the source list for .bdsk files
-
-/*!
-@method collections
-@abstract the getter corresponding to setCollections
-@result returns value for collections
-*/
-- (NSMutableArray *)collections;
-
-/*!
-@method setCollections
-@abstract sets collections to the param
-@discussion 
-@param newCollections 
-*/
-- (void)setCollections:(NSMutableArray *)newCollections;
-
-
-/*!
-@method notes
-@abstract the getter corresponding to setNotes
-@result returns value for notes
-*/
-- (NSMutableArray *)notes;
-
-/*!
-@method setNotes
-@abstract sets notes to the param
-@discussion 
-@param newNotes 
-*/
-- (void)setNotes:(NSMutableArray *)newNotes;
-
-
-/*!
-@method sources
-@abstract the getter corresponding to setSources
-@result returns value for sources
-*/
-- (NSMutableArray *)sources;
-
-/*!
-@method setSources
-@abstract sets sources to the param
-@discussion 
-@param newSources 
-*/
-- (void)setSources:(NSMutableArray *)newSources;
-
-
-    ///////  collections  ///////
-
-- (unsigned int)countOfCollections;
-- (id)objectInCollectionsAtIndex:(unsigned int)index;
-- (void)insertObject:(id)anObject inCollectionsAtIndex:(unsigned int)index;
-- (void)removeObjectFromCollectionsAtIndex:(unsigned int)index;
-- (void)replaceObjectInCollectionsAtIndex:(unsigned int)index withObject:(id)anObject;
-
-
-    ///////  notes  ///////
-
-- (unsigned int)countOfNotes;
-- (id)objectInNotesAtIndex:(unsigned int)index;
-- (void)insertObject:(id)anObject inNotesAtIndex:(unsigned int)index;
-- (void)removeObjectFromNotesAtIndex:(unsigned int)index;
-- (void)replaceObjectInNotesAtIndex:(unsigned int)index withObject:(id)anObject;
-
-
-    ///////  sources  ///////
-
-- (unsigned int)countOfSources;
-- (id)objectInSourcesAtIndex:(unsigned int)index;
-- (void)insertObject:(id)anObject inSourcesAtIndex:(unsigned int)index;
-- (void)removeObjectFromSourcesAtIndex:(unsigned int)index;
-- (void)replaceObjectInSourcesAtIndex:(unsigned int)index withObject:(id)anObject;
-
-
-/*!
-    @method     reloadSourceList
-    @abstract   reloads source list for changes
-    @discussion Currently just calles reloadData, but should save expanded state in future.
-*/
-- (void)reloadSourceList;
-
-/*!
-    @method     makeNewEmptyCollection:
-    @abstract   creates a new empty top-level collection and adds it to the document
-    @discussion (description)
-    @param      sender anything
-*/
-- (IBAction)makeNewEmptyCollection:(id)sender;
-
-/*!
-    @method     makeNewCollectionFromSelectedPublications:
-    @abstract   creates a new top level collection from the selected publications 
- in the first responder view and adds it to the document
-    @discussion (description)
-    @param      sender (description)
-*/
-- (IBAction)makeNewCollectionFromSelectedPublications:(id)sender;
-
-    /*!
-                   @method     makeNewExternalSource
-     @abstract   creates a new externalSource and adds it to the document
-     @discussion (description)
-     @param      sender anything
-     */
-- (IBAction)makeNewExternalSource:(id)sender;
-
-    /*!
-    @method     makeNewNotepad
-     @abstract   creates a new empty notepad and adds it to the document
-     @discussion (description)
-     @param      sender anything
-     */
-- (IBAction)makeNewNotepad:(id)sender;
 
 @end
