@@ -31,24 +31,30 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
     [defaults setObject:[sender stringValue] forKey:BDSKBibTeXBinPathKey];
 }
 
-- (BOOL)control:(NSControl *)control textShouldEndEditing:(NSText *)fieldEditor{
+- (void)controlTextDidEndEditing:(NSNotification *)aNotification{
+    NSTextField *control = [aNotification object];
     if(control == bibtexBinaryPath || control == texBinaryPath){
         if(![[NSFileManager defaultManager] isExecutableFileAtPath:[control stringValue]]){
+            NSBeep();
             NSAlert *anAlert = [NSAlert alertWithMessageText:NSLocalizedString(@"Error!",@"Error!")
                                                defaultButton:nil
                                              alternateButton:nil
                                                  otherButton:nil
                                    informativeTextWithFormat:NSLocalizedString(@"The file %@ does not exist or is not executable.  Please try again.",@""), [control stringValue]];
-            // work around apparent appkit bug that causes endless loop here
-            [control setStringValue:(control == bibtexBinaryPath ? [defaults objectForKey:BDSKBibTeXBinPathKey] : [defaults objectForKey:BDSKTeXBinPathKey])];
             [anAlert beginSheetModalForWindow:[[OAPreferenceController sharedPreferenceController] window]
-                                modalDelegate:nil
-                               didEndSelector:nil
-                                  contextInfo:nil];
-            return NO;
+                                modalDelegate:self
+                               didEndSelector:@selector(alertDidEnd:returnCode:contextInfo:)
+                                  contextInfo:control];
         }
-    } return YES;
-        
+    }
+}
+
+- (void)alertDidEnd:(NSAlert *)alert returnCode:(int)returnCode contextInfo:(void *)control{
+    if(returnCode == NSOKButton)
+        [[alert window] orderOut:nil];
+    NSText *fe = [[[OAPreferenceController sharedPreferenceController] window] fieldEditor:YES forObject:control];
+    [(NSTextField *)control selectText:nil];
+    [fe setSelectedRange:NSMakeRange([[fe string] length], 0)];
 }
 
 - (IBAction)changeUsesTeX:(id)sender{
@@ -91,7 +97,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 					   defaultButton:nil
 					 alternateButton:nil
 					     otherButton:nil
-			       informativeTextWithFormat:NSLocalizedString(@"The file %@ does not exist or is not executable.  Please set an appropriate path.",@""), path];
+			       informativeTextWithFormat:NSLocalizedString(@"The file %@ does not exist or is not executable.  Please set an appropriate path.",@""), errStr];
 	[anAlert beginSheetModalForWindow:[[OAPreferenceController sharedPreferenceController] window]
 			    modalDelegate:nil
 			   didEndSelector:nil
