@@ -97,6 +97,7 @@ NSString *BDSKDateCreatedString = @"Date-Added";
 NSString *BDSKDateModifiedString = @"Date-Modified";
 NSString *BDSKDateString = @"Date";
 NSString *BDSKBibtexString = @"BibTeX";
+NSString *BDSKNumberString = @"Number";
 
 
 #pragma mark ||  Notification name strings

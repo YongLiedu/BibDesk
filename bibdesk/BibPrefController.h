@@ -121,6 +121,7 @@ extern NSString *BDSKDateCreatedString;
 extern NSString *BDSKDateModifiedString;
 extern NSString *BDSKDateString;
 extern NSString *BDSKBibtexString;
+extern NSString *BDSKNumberString;
 
 
 #pragma mark ||  Notification name strings

@@ -431,6 +431,8 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
     
     if([entry isEqualToString:BDSKLocalUrlString] || [entry isEqualToString:BDSKUrlString] || 
        [entry isEqualToString:BDSKAbstractString] || [entry isEqualToString:BDSKAnnoteString] ||
+       [entry isEqualToString:BDSKVolumeString] || [entry isEqualToString:BDSKPagesString] ||
+       [entry isEqualToString:BDSKYearString] || [entry isEqualToString:BDSKNumberString] ||
        [entry rangeOfString:BDSKDateString].location != NSNotFound ) return; // don't add these
 
     if([entry isEqualToString:BDSKTitleString] || 
@@ -455,7 +457,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
         while(![scanner isAtEnd]){
             [scanner scanUpToCharactersFromSet:_autocompletePunctuationCharacterSet intoString:&tmp];
             if(tmp != nil) 
-		[completionArray addObject:tmp]; // we have the lock, so don't use the locking method here
+                [completionArray addObject:tmp]; // we have the lock, so don't use the locking method here
             [scanner scanCharactersFromSet:_autocompletePunctuationCharacterSet intoString:nil];
             [scanner scanCharactersFromSet:[NSCharacterSet whitespaceCharacterSet] intoString:nil];
         }
