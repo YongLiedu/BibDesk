@@ -287,6 +287,7 @@
 		};
 		2A37F4C6FDCFA73011CA2CEA = {
 			buildPhases = (
+				F565BE75038CD71101EF0A93,
 				2A37F4C7FDCFA73011CA2CEA,
 				2A37F4C9FDCFA73011CA2CEA,
 				2A37F4CEFDCFA73011CA2CEA,
@@ -295,9 +296,9 @@
 				F5FB32B2034D6D5901EF0AD8,
 			);
 			buildSettings = {
-				FRAMEWORK_SEARCH_PATHS = /Users/mike/Code/bibdesk;
-				HEADER_SEARCH_PATHS = "";
-				LIBRARY_SEARCH_PATHS = /Users/mike/Code/bibdesk;
+				FRAMEWORK_SEARCH_PATHS = .;
+				HEADER_SEARCH_PATHS = .;
+				LIBRARY_SEARCH_PATHS = .;
 				OPTIMIZATION_CFLAGS = "-O0";
 				OTHER_CFLAGS = "-pipe";
 				OTHER_LDFLAGS = "-pipe";
@@ -1243,6 +1244,19 @@
 			isa = PBXBuildFile;
 			settings = {
 			};
+		};
+		F565BE75038CD71101EF0A93 = {
+			buildActionMask = 2147483647;
+			files = (
+			);
+			generatedFileNames = (
+			);
+			isa = PBXShellScriptBuildPhase;
+			neededFileNames = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "echo \"running\"\nranlib libbtparse.a";
 		};
 		F568CBDA025BBCB801709AC4 = {
 			isa = PBXExecutableFileReference;
