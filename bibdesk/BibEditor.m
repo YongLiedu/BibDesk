@@ -809,16 +809,26 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
     NSOpenPanel *oPanel = [NSOpenPanel openPanel];
     [oPanel setAllowsMultipleSelection:NO];
     [oPanel setResolvesAliases:NO];
-    int result = [oPanel runModalForDirectory:nil
-										 file:nil
-										types:nil];
-    if (result == NSOKButton) {
-		NSString *fileURLString = [[NSURL fileURLWithPath:[oPanel filename]] absoluteString];
+    [oPanel setCanChooseDirectories:NO];
+    [oPanel setPrompt:NSLocalizedString(@"Choose", @"Choose file")];
+
+    [oPanel beginSheetForDirectory:nil 
+                              file:nil 
+                    modalForWindow:[self window] 
+                     modalDelegate:self 
+                    didEndSelector:@selector(chooseLocalURLPanelDidEnd:returnCode:contextInfo:) 
+                       contextInfo:nil];
+  
+}
+
+- (void)chooseLocalURLPanelDidEnd:(NSOpenPanel *)sheet returnCode:(int)returnCode contextInfo:(void *)contextInfo{
+
+    if(returnCode == NSOKButton){
+        NSString *fileURLString = [[NSURL fileURLWithPath:[[sheet filenames] objectAtIndex:0]] absoluteString];
         
 		[theBib setField:BDSKLocalUrlString toValue:fileURLString];
 		[theBib autoFilePaper];
-    }
-    
+    }        
 }
 
 - (void)setLocalURLPathFromMenuItem:(NSMenuItem *)sender{
