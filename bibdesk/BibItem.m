@@ -1296,7 +1296,7 @@ void _setupFonts(){
 					break;
 				case 'l':
 					// old filename without extension
-					string = [self localURLPathRelativeTo:[self document]];
+					string = [self localURLPathRelativeTo:[[[self document] fileName] stringByDeletingLastPathComponent]];
 					if (string != nil) {
 						string = [[string lastPathComponent] stringByDeletingPathExtension];
 						string = [converter stringBySanitizingString:string forField:fieldName inFileType:[self fileType]]; 
@@ -1305,7 +1305,7 @@ void _setupFonts(){
 					break;
 				case 'L':
 					// old filename with extension
-					string = [self localURLPathRelativeTo:[self document]];
+					string = [self localURLPathRelativeTo:[[[self document] fileName] stringByDeletingLastPathComponent]];
 					if (string != nil) {
 						string = [string lastPathComponent];
 						string = [converter stringBySanitizingString:string forField:fieldName inFileType:[self fileType]]; 
