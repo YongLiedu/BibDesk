@@ -18,8 +18,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 #import "BibDocument.h"
 #import "BibItem.h"
 #import "BibDocument_DataSource.h"
-
-@class BibAuthor;
+#import "BibAuthor.h"
 
 @implementation BibDocument (DataSource)
 
@@ -219,10 +218,11 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
                 return [[pub date] descriptionWithCalendarFormat:@"%b %Y"];
             
         }else if([[tableColumn identifier] isEqualToString: @"1st Author"] ){
-            if([auths count] > 0)
+            if([auths count] > 0){
                 return [pub authorAtIndex:0];
-            else
+            }else{
                 return @"-";
+            }
             
         }else if([[tableColumn identifier] isEqualToString: @"2nd Author"] ){
             if([auths count] > 1)
@@ -237,9 +237,17 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
                 return @"-";
             
         }else if ([[tableColumn identifier] isEqualToString:@"Local-Url"]){
-            path = [pub localURLPath];
+            path = [pub localURLPathRelativeTo:[[self fileName] stringByDeletingLastPathComponent]];
             if(path && [[NSFileManager defaultManager] fileExistsAtPath:path]){
                 return [[NSWorkspace sharedWorkspace] iconForFile:path];
+            }else{
+                return nil;
+            }
+
+        }else if ([[tableColumn identifier] isEqualToString:@"Url"]){
+            path = [pub valueOfField:@"Url"];
+            if(path && ![path isEqualToString:@""]){
+                return [[NSWorkspace sharedWorkspace] iconForFileType:@"webloc"];
             }else{
                 return nil;
             }
@@ -308,7 +316,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
     BOOL yn;
     NSString *startCite = [NSString stringWithFormat:@"\\%@{",[[OFPreferenceWrapper sharedPreferenceWrapper] stringForKey:BDSKCiteStringKey]];
 #warning - extra spurious retain? not sure.
-    NSMutableString *s = [[NSMutableString string] retain]; 
+    NSMutableString *s = [[NSMutableString string] retain];
     NSMutableString *localPBString = [NSMutableString string];
     NSEnumerator *enumerator;
     NSNumber *i;
@@ -319,56 +327,60 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
     NSEnumerator *selRowE;
     NSNumber *idx;
     NSMutableArray* newRows;
+    int sortedIndex = 0;
 
     if([tv numberOfSelectedRows] == 0) return NO;
-    
+
     if(tv == (NSTableView *)ccTableView){
         startCite = [NSString stringWithFormat:@"\\%@{",[customStringArray objectAtIndex:[[rows objectAtIndex:0] intValue]]]; // rows oi:0 is ok because we don't allow multiple selections in ccTV.
-        
+
         // if it's the ccTableView, then rows has the rows of the ccTV.
         // we need to change rows to be the main TV's selected rows,
-        // so that the regular code still works           
+        // so that the regular code still works
         newRows = [NSMutableArray arrayWithCapacity:10];
-        selRowE = [tv selectedRowEnumerator];
+        selRowE = [tableView selectedRowEnumerator]; 
         while(idx = [selRowE nextObject]){
             [newRows addObject:idx];
         }
         rows = [NSArray arrayWithArray:newRows];
-        ////NSLog(@"rows is %@", rows);
-    }
+        // NSLog(@"rows is %@", rows);
+    }// ccTableView
 
-    enumerator = [rows objectEnumerator];
-        if((dragType == 1) && !sep)
-            [s appendString:startCite];
 
-        while (i = [enumerator nextObject]) {
-            [localPBString appendString:[[shownPublications objectAtIndex:[i intValue]] bibTeXString]];
-            if((dragType == 0) ||
-               (dragType == 2)){
-                [s appendString:[[shownPublications objectAtIndex:[i intValue]] bibTeXString]];
-            }
-            if(dragType == 1){
-                if(sep) [s appendString:startCite];
-                [s appendString:[[shownPublications objectAtIndex:[i intValue]] citeKey]];
-                if(sep) [s appendString:@"}"];
-                else [s appendString:@","];
-            }
-        }// end while
+    if((dragType == 1) && !sep)
+        [s appendString:startCite];
 
-        if(dragType == 1){
-            if(!sep)[s replaceCharactersInRange:[s rangeOfString:@"," options:NSBackwardsSearch] withString:@"}"];
-        }
+    enumerator = [rows objectEnumerator]; 
+    while (i = [enumerator nextObject]) {
+        sortedIndex = (sortDescending ? [shownPublications count] - 1 - [i intValue] : [i intValue]);
+        
+        [localPBString appendString:[[shownPublications objectAtIndex:sortedIndex] bibTeXString]];
         if((dragType == 0) ||
-           (dragType == 1)){
-            [pboard declareTypes:[NSArray arrayWithObject:NSStringPboardType] owner:nil];
-            yn = [pboard setString:s forType:NSStringPboardType];
-        }else{
-            [pboard declareTypes:[NSArray arrayWithObject:NSPDFPboardType] owner:nil];
-            yn = [pboard setData:[PDFpreviewer PDFDataFromString:s] forType:NSPDFPboardType];
+           (dragType == 2)){
+            [s appendString:[[shownPublications objectAtIndex:sortedIndex] bibTeXString]];
         }
-        [localDragPboard declareTypes:[NSArray arrayWithObject:NSStringPboardType] owner:nil];
-        [localDragPboard setString:localPBString forType:NSStringPboardType];
-        return yn;
+        if(dragType == 1){
+            if(sep) [s appendString:startCite];
+            [s appendString:[[shownPublications objectAtIndex:sortedIndex] citeKey]];
+            if(sep) [s appendString:@"}"];
+            else [s appendString:@","];
+        }
+    }// end while
+
+    if(dragType == 1){
+        if(!sep)[s replaceCharactersInRange:[s rangeOfString:@"," options:NSBackwardsSearch] withString:@"}"];
+    }
+    if((dragType == 0) ||
+       (dragType == 1)){
+        [pboard declareTypes:[NSArray arrayWithObject:NSStringPboardType] owner:nil];
+        yn = [pboard setString:s forType:NSStringPboardType];
+    }else{
+        [pboard declareTypes:[NSArray arrayWithObject:NSPDFPboardType] owner:nil];
+        yn = [pboard setData:[PDFpreviewer PDFDataFromString:s] forType:NSPDFPboardType];
+    }
+    [localDragPboard declareTypes:[NSArray arrayWithObject:NSStringPboardType] owner:nil];
+    [localDragPboard setString:localPBString forType:NSStringPboardType];
+    return yn;
 
 }
 
@@ -445,7 +457,8 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
             if(url = [NSURL fileURLWithPath:fnStr]){
                 newBI = [[BibItem alloc] initWithType:[pw stringForKey:BDSKPubTypeStringKey]
                                              fileType:@"BibTeX"
-                                              authors:[NSMutableArray arrayWithCapacity:0]];
+                                              authors:[NSMutableArray arrayWithCapacity:0]
+                                                  doc:self];
                 [publications addObject:newBI];
                 [shownPublications addObject:newBI];
                 [newBI setField:@"Local-Url" toValue:[[NSURL fileURLWithPath:
@@ -518,7 +531,8 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 
 // fixme -  also need to call the processkeychars in keydown...
 - (void)typeAheadSelectItemAtIndex:(int)itemIndex{
-    [self highlightBib:[shownPublications objectAtIndex:itemIndex] byExtendingSelection:NO];
+    int sortedItemIndex = (sortDescending ? [shownPublications count] - 1 - itemIndex : itemIndex);
+    [self highlightBib:[shownPublications objectAtIndex:sortedItemIndex] byExtendingSelection:NO];
 }
 // We call this when a type-ahead-selection match has been made; you should select the item based on its index in the array you provided in -typeAheadSelectionItems.
 
