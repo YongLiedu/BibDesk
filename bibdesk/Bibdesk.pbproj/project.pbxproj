@@ -2038,7 +2038,7 @@
 		};
 		27E0AA7D05A7C86C005BA25A = {
 			isa = PBXFileReference;
-			lastKnownFileType = text.xml;
+			lastKnownFileType = text.plist.xml;
 			path = "Info-Bibdesk__Upgraded_.plist";
 			refType = 4;
 			sourceTree = "<group>";
@@ -2110,6 +2110,8 @@
 				274C83F205DF612E0020EEFF,
 				274C84F705DF720A0020EEFF,
 				F9AC17700638709B009399C1,
+				F9FC662A06A9C6750016151E,
+				F9FC663006A9C6B00016151E,
 			);
 		};
 		2A37F4AAFDCFA73011CA2CEA = {
@@ -4238,6 +4240,70 @@
 			isa = PBXBuildFile;
 			settings = {
 			};
+		};
+		F9FC662906A9C6750016151E = {
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+			);
+			isa = PBXShellScriptBuildPhase;
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "/bin/cp $PROJECT_NAME.dmg /tmp\n/usr/bin/hdiutil attach /tmp/$PROJECT_NAME.dmg\n$SYSTEM_DEVELOPER_DIR/Tools/CpMac -r $BUILT_PRODUCTS_DIR/$PROJECT_NAME.app /Volumes/$PROJECT_NAME";
+		};
+		F9FC662A06A9C6750016151E = {
+			buildPhases = (
+				F9FC662906A9C6750016151E,
+			);
+			buildSettings = {
+				OPTIMIZATION_CFLAGS = "";
+				OTHER_CFLAGS = "";
+				OTHER_LDFLAGS = "";
+				OTHER_REZFLAGS = "";
+				PRODUCT_NAME = DiskImage;
+				SECTORDER_FLAGS = "";
+				WARNING_CFLAGS = "-Wmost -Wno-four-char-constants -Wno-unknown-pragmas";
+			};
+			dependencies = (
+			);
+			isa = PBXAggregateTarget;
+			name = DiskImage;
+			productName = DiskImage;
+		};
+		F9FC662F06A9C6B00016151E = {
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+			);
+			isa = PBXShellScriptBuildPhase;
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "/usr/sbin/diskutil eject /Volumes/$PROJECT_NAME\n/usr/bin/hdiutil convert /tmp/$PROJECT_NAME.dmg -format UDZO -o $HOME/Desktop/$PROJECT_NAME.dmg";
+		};
+		F9FC663006A9C6B00016151E = {
+			buildPhases = (
+				F9FC662F06A9C6B00016151E,
+			);
+			buildSettings = {
+				OPTIMIZATION_CFLAGS = "";
+				OTHER_CFLAGS = "";
+				OTHER_LDFLAGS = "";
+				OTHER_REZFLAGS = "";
+				PRODUCT_NAME = CompressImage;
+				SECTORDER_FLAGS = "";
+				WARNING_CFLAGS = "-Wmost -Wno-four-char-constants -Wno-unknown-pragmas";
+			};
+			dependencies = (
+			);
+			isa = PBXAggregateTarget;
+			name = CompressImage;
+			productName = CompressImage;
 		};
 	};
 	rootObject = 2A37F4A9FDCFA73011CA2CEA;
