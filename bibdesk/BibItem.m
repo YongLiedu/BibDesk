@@ -927,7 +927,7 @@ void _setupFonts(){
 					}
 					for (i = 0; i < numAuth; i++) {
 						string = [[self authorAtIndex:i] lastName];
-						string = [converter stringBySanitizingString:string forField:fieldName inType:[self type]];
+						string = [converter stringBySanitizingString:string forField:fieldName inType:[self fieldType]];
 						if ([string length] > number && number > 0) {
 							string = [string substringToIndex:number];
 						}
@@ -964,7 +964,7 @@ void _setupFonts(){
 						} else {
 							string = [auth lastName];
 						}
-						string = [converter stringBySanitizingString:string forField:fieldName inType:[self type]];
+						string = [converter stringBySanitizingString:string forField:fieldName inType:[self fieldType]];
 						if ([string length] > number && number > 0) {
 							string = [string substringToIndex:number];
 						}
@@ -973,7 +973,7 @@ void _setupFonts(){
 					break;
 				case 't':
 					// title, optional #chars
-					string = [converter stringBySanitizingString:[self title] forField:fieldName inType:[self type]];
+					string = [converter stringBySanitizingString:[self title] forField:fieldName inType:[self fieldType]];
 					if ([scanner scanCharactersFromSet:digits intoString:&numStr]) {
 						number = [numStr intValue];
 					} else {
@@ -1017,7 +1017,7 @@ void _setupFonts(){
 					}
 					string = [self valueOfField:string];
 					if (string != nil) {
-						string = [converter stringBySanitizingString:string forField:fieldName inType:[self type]];
+						string = [converter stringBySanitizingString:string forField:fieldName inType:[self fieldType]];
 						if (number > 0 && [string length] > number) {
 							[parsedStr appendString:[string substringToIndex:number]];
 						} else {

@@ -95,7 +95,7 @@ static BibTypeManager *sharedInstance = nil;
 
 - (NSCharacterSet *)strictInvalidCharactersForField:(NSString *)fieldName inType:(NSString *)type{
 	if( ! [type isEqualToString:@"BibTeX"] || ! [fieldName isEqualToString:@"Cite Key"]){
-		[NSException raise:@"unimpl. feat. exc." format:@"invalidCharactersForField is partly implemented"];
+		[NSException raise:@"unimpl. feat. exc." format:@"strictInvalidCharactersForField is partly implemented"];
 	}
 	return strictInvalidCiteKeyCharSet;
 }
