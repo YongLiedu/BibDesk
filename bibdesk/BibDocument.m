@@ -245,7 +245,7 @@ NSString*   LocalDragPasteboardName = @"edu.ucsd.cs.mmccrack.bibdesk: Local Publ
 	BOOL wasLastRequest = [[userInfo objectForKey:@"lastRequest"] isEqualToString:@"YES"];
 
 	if(wasLastRequest){
-		NSLog(@"was last request in handleBibItemAddDel");
+	//	NSLog(@"was last request in handleBibItemAddDel");
 		// This method should also check the publication to see if it's selected?
 		// and maybe also resort it... - maybe not resort this. 
 		[self updateUI];
@@ -319,10 +319,8 @@ NSString*   LocalDragPasteboardName = @"edu.ucsd.cs.mmccrack.bibdesk: Local Publ
     [super windowControllerDidLoadNib:aController];
     [self setupToolbar];
     [[aController window] setFrameAutosaveName:[self displayName]];
-    [documentWindow makeFirstResponder:[self currentView]];
-
+    [documentWindow makeFirstResponder:[self currentView]];	
     [self setupTableColumns]; // calling it here mostly just makes sure that the menu is set up.
-
 }
 
 - (void)windowDidBecomeMain:(NSNotification *)aNotification{
@@ -825,6 +823,8 @@ stringByAppendingPathComponent:@"BibDesk"]; */
 		NSSearchFieldCell *searchCell = [searchField cell];
 		searchCellOrTextField = searchCell;	
 		[searchCell setPlaceholderString:[NSString stringWithFormat:@"Search by %@",newKey]];
+		[searchField setNextKeyView:[self currentView]];
+		[[self currentView] setNextKeyView:searchField];
 	
 		NSMenu *templateMenu = [searchCell searchMenuTemplate];
 		if(![quickSearchKey isEqualToString:newKey]){
@@ -856,7 +856,7 @@ stringByAppendingPathComponent:@"BibDesk"]; */
 		newQueryString = @"";
     }
  
-	NSLog(@"in setSelectedSearchFieldKey, newQueryString is [%@]", newQueryString);
+	// NSLog(@"in setSelectedSearchFieldKey, newQueryString is [%@]", newQueryString);
 	[self hidePublicationsWithoutSubstring:newQueryString
 								   inField:quickSearchKey];
 		
@@ -1564,7 +1564,7 @@ int generalBibItemCompareFunc(id item1, id item2, void *context){
 
 - (void)handleBibItemChangedNotification:(NSNotification *)notification{
 	// dead simple for now
-	NSLog(@"got handleBibItemChangedNotification with userinfo %@", [notification userInfo]);
+	//NSLog(@"got handleBibItemChangedNotification with userinfo %@", [notification userInfo]);
 	NSDictionary *userInfo = [notification userInfo];
 	
 	NSString *changedKey = [userInfo objectForKey:@"key"];

@@ -343,7 +343,7 @@ void _setupFonts(){
 
 - (void)setCiteKey:(NSString *)newCiteKey{
 	if(editorObj){
-		NSLog(@"setCiteKey called with a valid editor");
+		// NSLog(@"setCiteKey called with a valid editor");
 		if(!undoManager) undoManager = [[editorObj window] undoManager];
 
 		[[undoManager prepareWithInvocationTarget:self] setCiteKey:citeKey];

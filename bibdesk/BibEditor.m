@@ -256,7 +256,6 @@ NSString *BDSKUrlString = @"Url";
 
 #pragma mark Cite Key handling methods
 - (void)setupCautionIcon{
-	NSLog(@"init: getting icon");
 	IconRef cautionIconRef;
 	OSErr err = GetIconRef(kOnSystemDisk,
 						   kSystemIconsCreator,
@@ -310,9 +309,7 @@ NSString *BDSKUrlString = @"Url";
 }
 
 - (void)setCiteKeyDuplicateWarning:(BOOL)set{
-	NSLog(@"setting warning: %@", (set?@"YES":@"NO"));
 	if(set){
-		NSLog(@"setting image: %@ in button: %@",cautionIconImage, citeKeyWarningButton);
 		[citeKeyWarningButton setImage:cautionIconImage];
 		[citeKeyWarningButton setToolTip:NSLocalizedString(@"This cite-key is a duplicate",@"")];
 	}else{
@@ -324,9 +321,7 @@ NSString *BDSKUrlString = @"Url";
 
 // @@ should also check validity using citekeyformatter
 - (BOOL)citeKeyIsValid:(NSString *)proposedCiteKey{
-	NSLog(@" - proposed [%@], used %@ in doc %@", proposedCiteKey,
-		  (([theDocument citeKeyIsUsed:proposedCiteKey byItemOtherThan:theBib]) ? @"YES": @"NO"), theDocument
-		  );
+	
     return !([theDocument citeKeyIsUsed:proposedCiteKey byItemOtherThan:theBib] ||
 			 [proposedCiteKey isEqualToString:@""]);
 }
