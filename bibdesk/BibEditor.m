@@ -67,7 +67,6 @@ NSString *BDSKUrlString = @"Url";
     [notesView setString:[theBib valueOfField:BDSKAnnoteString]];
     [abstractView setString:[theBib valueOfField:BDSKAbstractString]];
     [rssDescriptionView setString:[theBib valueOfField:BDSKRssDescriptionString]];
-    [self fixURLs];
     // NSLog(@"BibEditor gets willLoad.");
 }
 
@@ -76,6 +75,7 @@ NSString *BDSKUrlString = @"Url";
 	if(![self citeKeyIsValid:[theBib citeKey]]){
 		[self setCiteKeyDuplicateWarning:YES];
 	} 	
+    [self fixURLs];
 }
 
 
@@ -581,6 +581,13 @@ NSString *BDSKUrlString = @"Url";
             NULL];
         [link setAttributes:linkAttributes range:NSMakeRange(0,[rurl length])];
         [viewRemoteButton setAttributedTitle:link];     // set the URL field
+        linkAttributes= [NSDictionary dictionaryWithObjectsAndKeys: rurl, NSLinkAttributeName,
+            [NSNumber numberWithInt:NSSingleUnderlineStyle], NSUnderlineStyleAttributeName,
+            [NSColor redColor], NSForegroundColorAttributeName,
+            NULL];
+		[link setAttributes:linkAttributes range:NSMakeRange(0,[rurl length])];
+        [viewRemoteButton setAttributedAlternateTitle:link];     // set the URL field
+
         [viewRemoteButton setEnabled:YES];
         [viewRemoteButton setToolTip:NSLocalizedString(@"View in web browser", @"")];
     }else{
