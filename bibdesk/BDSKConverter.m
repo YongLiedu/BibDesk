@@ -85,13 +85,14 @@ static BDSKConverter *theConverter;
     }
     
     // moved from BibTypeManager, should be removed there
-	NSMutableCharacterSet *validSet = [[NSMutableCharacterSet alloc] init];
+    NSMutableCharacterSet *validSet = [[NSMutableCharacterSet alloc] init];
     [validSet addCharactersInRange:NSMakeRange( (unsigned int)'a', 26)];
     [validSet addCharactersInRange:NSMakeRange( (unsigned int)'A', 26)];
     [validSet addCharactersInRange:NSMakeRange( (unsigned int)'0', 12)];  // get everything through semicolon
     [validSet addCharactersInString:@"-"];
     
     strictInvalidCharSet = [[validSet invert] copy];  // don't release this
+    [validSet release];
 }
 
 - (NSString *)stringByTeXifyingString:(NSString *)s{

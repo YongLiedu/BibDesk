@@ -356,7 +356,7 @@ void _setupFonts(){
                 
             }
         }
-       // bt_free_list(sl); // hey! got to free the memory!
+        bt_free_list(sl); // hey! got to free the memory!
     }
     //    NSLog(@"%@", pubAuthors);
 }
@@ -378,7 +378,7 @@ void _setupFonts(){
             rs = [rs stringByAppendingString:@" and "];
             rs = [rs stringByAppendingString:[author name]];
         }
-        return rs;
+        return [rs autorelease];
     }
         
 }

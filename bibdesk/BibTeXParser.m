@@ -118,8 +118,6 @@
                     field = NULL;
                     // Returned special case handling of abstract & annote.
                     // Special case is there to avoid losing newlines that exist in preexisting files.
-                    // newlines that are typed in bibdesk are
-                    //  now converted to \par and back in stringByDeTexifyingString
                     while (field = bt_next_field (entry, field, &fieldname))
                     {
 
@@ -195,8 +193,10 @@
                         [dictionary setObject:sDeTexified forKey:sFieldName];
 
                         [appController addString:sDeTexified forCompletionEntry:sFieldName];
-                        
-                    }// end while field - process next bt field                    
+
+                    }// end while field - process next bt field
+                    
+                    bt_free_ast(field);
                    
                     [newBI setCiteKey:[NSString stringWithCString:bt_entry_key(entry)]];
                     [newBI setFields:dictionary];
@@ -208,6 +208,7 @@
                 // wasn't ok, record it and deal with it later.
                 *hadProblems = YES;
             }
+            bt_free_ast(entry);
         } // while (scanning through file) 
 
         bt_cleanup();
