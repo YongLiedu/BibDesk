@@ -262,12 +262,13 @@
 							<key>PBXSmartGroupTreeModuleOutlineStateExpansionKey</key>
 							<array>
 								<string>29B97314FDCFA39411CA2CEA</string>
+								<string>1C37FBAC04509CD000000102</string>
 								<string>1C37FABC05509CD000000102</string>
 							</array>
 							<key>PBXSmartGroupTreeModuleOutlineStateSelectionKey</key>
 							<array>
 								<array>
-									<integer>2</integer>
+									<integer>4</integer>
 									<integer>0</integer>
 								</array>
 							</array>
@@ -291,7 +292,7 @@
 							<real>187</real>
 						</array>
 						<key>RubberWindowFrame</key>
-						<string>73 435 690 397 0 0 1280 832 </string>
+						<string>46 434 690 397 0 0 1280 832 </string>
 					</dict>
 					<key>Module</key>
 					<string>PBXSmartGroupTreeModule</string>
@@ -330,7 +331,7 @@
 								<key>Frame</key>
 								<string>{{0, 0}, {481, 1}}</string>
 								<key>RubberWindowFrame</key>
-								<string>73 435 690 397 0 0 1280 832 </string>
+								<string>46 434 690 397 0 0 1280 832 </string>
 							</dict>
 							<key>Module</key>
 							<string>PBXNavigatorGroup</string>
@@ -352,7 +353,7 @@
 								<key>Frame</key>
 								<string>{{0, 8}, {481, 348}}</string>
 								<key>RubberWindowFrame</key>
-								<string>73 435 690 397 0 0 1280 832 </string>
+								<string>46 434 690 397 0 0 1280 832 </string>
 							</dict>
 							<key>Module</key>
 							<string>XCDetailModule</string>
@@ -495,7 +496,7 @@
 	<key>StatusbarIsVisible</key>
 	<true/>
 	<key>TimeStamp</key>
-	<real>123996065.34402347</real>
+	<real>124090882.93850698</real>
 	<key>ToolbarDisplayMode</key>
 	<integer>1</integer>
 	<key>ToolbarIsVisible</key>
@@ -515,12 +516,12 @@
 		<string>F91B57F907628D2C0011ED22</string>
 		<string>1CD10A99069EF8BA00B06720</string>
 		<string>1C530D57069F1CE1000CFCEE</string>
-		<string>F91B57CC076284270011ED22</string>
 		<string>1C0AD2B3069F1EA900FABCE6</string>
+		<string>F91B57CC076284270011ED22</string>
 		<string>/Volumes/Local/Users/amaxwell/build/bibdesk/Bibdesk.xcode</string>
 	</array>
 	<key>WindowString</key>
-	<string>73 435 690 397 0 0 1280 832 </string>
+	<string>46 434 690 397 0 0 1280 832 </string>
 	<key>WindowTools</key>
 	<array>
 		<dict>
@@ -562,7 +563,7 @@
 								<key>Frame</key>
 								<string>{{0, 0}, {610, 0}}</string>
 								<key>RubberWindowFrame</key>
-								<string>65 128 609 282 0 0 1280 832 </string>
+								<string>50 215 609 282 0 0 1280 832 </string>
 							</dict>
 							<key>Module</key>
 							<string>PBXNavigatorGroup</string>
@@ -588,7 +589,7 @@
 								<key>Frame</key>
 								<string>{{0, 7}, {610, 234}}</string>
 								<key>RubberWindowFrame</key>
-								<string>65 128 609 282 0 0 1280 832 </string>
+								<string>50 215 609 282 0 0 1280 832 </string>
 							</dict>
 							<key>Module</key>
 							<string>PBXBuildResultsModule</string>
@@ -618,7 +619,7 @@
 			<key>ToolbarConfiguration</key>
 			<string>xcode.toolbar.config.build</string>
 			<key>WindowString</key>
-			<string>65 128 609 282 0 0 1280 832 </string>
+			<string>50 215 609 282 0 0 1280 832 </string>
 			<key>WindowToolGUID</key>
 			<string>F91B57CC076284270011ED22</string>
 			<key>WindowToolIsVisible</key>
@@ -760,7 +761,7 @@
 												<key>_historyCapacity</key>
 												<integer>0</integer>
 												<key>bookmark</key>
-												<string>F91B5C47076407A10011ED22</string>
+												<string>F91B5CE107657A020011ED22</string>
 												<key>history</key>
 												<array>
 													<string>F91B5ABA0763A4680011ED22</string>

@@ -1,7 +1,7 @@
 // !$*UTF8*$!
 {
 	29B97313FDCFA39411CA2CEA = {
-		activeBuildStyle = 4A9504CCFFE6A4B311CA0CBA;
+		activeBuildStyle = 4A9504CDFFE6A4B311CA0CBA;
 		activeExecutable = F9022BE90758002100C3F701;
 		activeTarget = 8D1107260486CEB800E47090;
 		addToTargets = (
@@ -54,9 +54,49 @@
 					PBXFindDataSource_LocationID,
 				);
 			};
+			PBXConfiguration.PBXFileTableDataSource3.PBXSymbolsDataSource = {
+				PBXFileTableDataSourceColumnSortingDirectionKey = "-1";
+				PBXFileTableDataSourceColumnSortingKey = PBXSymbolsDataSource_SymbolNameID;
+				PBXFileTableDataSourceColumnWidthsKey = (
+					16,
+					182,
+					50,
+					200,
+				);
+				PBXFileTableDataSourceColumnsKey = (
+					PBXSymbolsDataSource_SymbolTypeIconID,
+					PBXSymbolsDataSource_SymbolNameID,
+					PBXSymbolsDataSource_SymbolTypeID,
+					PBXSymbolsDataSource_ReferenceNameID,
+				);
+			};
+			PBXConfiguration.PBXFileTableDataSource3.XCSCMDataSource = {
+				PBXFileTableDataSourceColumnSortingDirectionKey = "-1";
+				PBXFileTableDataSourceColumnSortingKey = PBXFileDataSource_Filename_ColumnID;
+				PBXFileTableDataSourceColumnWidthsKey = (
+					20,
+					20,
+					200,
+					20,
+					48.1626,
+					43,
+					43,
+					20,
+				);
+				PBXFileTableDataSourceColumnsKey = (
+					PBXFileDataSource_SCM_ColumnID,
+					PBXFileDataSource_FiletypeID,
+					PBXFileDataSource_Filename_ColumnID,
+					PBXFileDataSource_Built_ColumnID,
+					PBXFileDataSource_ObjectSize_ColumnID,
+					PBXFileDataSource_Errors_ColumnID,
+					PBXFileDataSource_Warnings_ColumnID,
+					PBXFileDataSource_Target_ColumnID,
+				);
+			};
 			PBXConfiguration.PBXTargetDataSource.PBXTargetDataSource = {
-				PBXFileTableDataSourceColumnSortingDirectionKey = 1;
-				PBXFileTableDataSourceColumnSortingKey = PBXTargetDataSource_PrimaryAttribute;
+				PBXFileTableDataSourceColumnSortingDirectionKey = "-1";
+				PBXFileTableDataSourceColumnSortingKey = PBXFileDataSource_Filename_ColumnID;
 				PBXFileTableDataSourceColumnWidthsKey = (
 					20,
 					210,
@@ -301,6 +341,7 @@
 			F91B5C24076405AE0011ED22 = F91B5C24076405AE0011ED22;
 			F91B5C25076405B40011ED22 = F91B5C25076405B40011ED22;
 			F91B5C47076407A10011ED22 = F91B5C47076407A10011ED22;
+			F91B5CE107657A020011ED22 = F91B5CE107657A020011ED22;
 		};
 		sourceControlManager = F9022BEB0758004000C3F701;
 		userBuildSettings = {
@@ -969,10 +1010,10 @@
 	};
 	F9022CA70758038000C3F701 = {
 		uiCtxt = {
-			sepNavIntBoundsRect = "{{0, 0}, {1130, 7294}}";
-			sepNavSelRange = "{16180, 0}";
-			sepNavVisRect = "{{0, 1439}, {706, 429}}";
-			sepNavWindowFrame = "{{176, 122}, {750, 558}}";
+			sepNavIntBoundsRect = "{{0, 0}, {1130, 7406}}";
+			sepNavSelRange = "{17061, 0}";
+			sepNavVisRect = "{{0, 4171}, {706, 429}}";
+			sepNavWindowFrame = "{{345, 274}, {750, 558}}";
 		};
 	};
 	F9022CB9075803AC00C3F701 = {
@@ -1007,15 +1048,20 @@
 	};
 	F9022D1B0758066000C3F701 = {
 		uiCtxt = {
-			sepNavIntBoundsRect = "{{0, 0}, {706, 6930}}";
-			sepNavSelRange = "{0, 0}";
-			sepNavVisRect = "{{0, 0}, {706, 429}}";
-			sepNavWindowFrame = "{{95, 274}, {750, 558}}";
+			sepNavIntBoundsRect = "{{0, 0}, {706, 7210}}";
+			sepNavSelRange = "{2672, 0}";
+			sepNavVisRect = "{{0, 1389}, {706, 429}}";
+			sepNavWindowFrame = "{{156, 151}, {750, 558}}";
 		};
 	};
 	F9022DA60758088000C3F701 = {
 		uiCtxt = {
 			sepNavWindowFrame = "{{130, 164}, {750, 558}}";
+		};
+	};
+	F9022DBA0758088000C3F701 = {
+		uiCtxt = {
+			sepNavWindowFrame = "{{15, 269}, {750, 558}}";
 		};
 	};
 	F9022FBE07580B9400C3F701 = {
@@ -1507,6 +1553,16 @@
 		name = "BibDocument.m: 2422";
 		rLen = 0;
 		rLoc = 95346;
+		rType = 0;
+		vrLen = 949;
+		vrLoc = 10248;
+	};
+	F91B5CE107657A020011ED22 = {
+		fRef = F9022C66075802E300C3F701;
+		isa = PBXTextBookmark;
+		name = "BibDocument.m: 2422";
+		rLen = 0;
+		rLoc = 95358;
 		rType = 0;
 		vrLen = 949;
 		vrLoc = 10248;
