@@ -870,10 +870,10 @@ NSString * checkAndTranslateString(NSString *s, int line, NSString *filePath){
 
 NSString *stringFromBTField(AST *field, NSString *fieldName, NSString *filePath, BibDocument* document){
     BibAppController *appController = (BibAppController *)[NSApp delegate];
-	NSMutableArray *stringValueArray = [[NSMutableArray alloc] initWithCapacity:10];
-	NSMutableString *s = NULL;
-	BDSKStringNode *sNode;
-	AST *simple_value;
+    NSMutableArray *stringValueArray = [[NSMutableArray alloc] initWithCapacity:10];
+    NSString *s = NULL;
+    BDSKStringNode *sNode;
+    AST *simple_value;
     
     NSStringEncoding parserEncoding;
     if(!document)
@@ -892,21 +892,21 @@ NSString *stringFromBTField(AST *field, NSString *fieldName, NSString *filePath,
         if (simple_value->text){
             switch (simple_value->nodetype){
                 case BTAST_MACRO:
-					s = [[NSString alloc] initWithBytes:simple_value->text encoding:parserEncoding];
+                    s = [[NSString alloc] initWithBytes:simple_value->text encoding:parserEncoding];
                     
                     // We parse the macros in itemsFromData, but for reference, if we wanted to get the 
                     // macro value we could do this:
-					// expanded_text = bt_macro_text (simple_value->text, (char *)[filePath cString], simple_value->line);
+                    // expanded_text = bt_macro_text (simple_value->text, (char *)[filePath fileSystemRepresentation], simple_value->line);
                     sNode = [BDSKStringNode nodeWithMacroString:s];
                     
                     break;
                 case BTAST_STRING:
-					s = [[NSString alloc] initWithBytes:simple_value->text encoding:parserEncoding];
+                    s = [[NSString alloc] initWithBytes:simple_value->text encoding:parserEncoding];
                     sNode = [BDSKStringNode nodeWithQuotedString:checkAndTranslateString(s, field->line, filePath)];
                     
                     break;
                 case BTAST_NUMBER:
-					s = [[NSString alloc] initWithBytes:simple_value->text encoding:parserEncoding];
+                    s = [[NSString alloc] initWithBytes:simple_value->text encoding:parserEncoding];
                     sNode = [BDSKStringNode nodeWithNumberString:s];
                     
                     break;
@@ -921,7 +921,7 @@ NSString *stringFromBTField(AST *field, NSString *fieldName, NSString *filePath,
             [sNode release];
         }
         
-		simple_value = simple_value->right;
+            simple_value = simple_value->right;
 	} // while simple_value
 	
     // Common case: return a solo string as a non-complex string.
@@ -931,6 +931,6 @@ NSString *stringFromBTField(AST *field, NSString *fieldName, NSString *filePath,
         return [[stringValueArray objectAtIndex:0] value]; // an NSString
     }
     
-	return [NSString complexStringWithArray:stringValueArray macroResolver:document];
+    return [NSString complexStringWithArray:stringValueArray macroResolver:document];
 }
 
