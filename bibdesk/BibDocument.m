@@ -346,10 +346,6 @@ Handle Notifications by the popup button to update its icon and its menu before 
 	[self setTableFont];
 }
 
-- (void)windowDidBecomeMain:(NSNotification *)aNotification{
-    [self updateUI]; // mostly because the BDSKPreviewer is a singleton class.
-}
-
 #pragma mark -
 #pragma mark  Document Saving and Reading
 

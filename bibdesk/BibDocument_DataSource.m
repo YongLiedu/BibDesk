@@ -156,8 +156,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 
 - (void)tableViewSelectionDidChange:(NSNotification *)aNotification
 {
-    [self updatePreviews:aNotification];
-	[self updateActionMenu:aNotification];
+    if([aNotification object] == tableView) [self updateUI];
 }
 
 
