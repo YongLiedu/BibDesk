@@ -22,6 +22,7 @@ extern NSString *BDSKInputManagerLoadableApplications;
     NSMutableArray *enabledEditorAutocompletionStrings;
     IBOutlet NSPanel *addFieldSheet;
     IBOutlet NSTextField *addField;
+    IBOutlet NSPopUpButton *addFieldPopupButton;
     IBOutlet NSTabView *acTabView;
 }
 /*!
@@ -37,4 +38,5 @@ extern NSString *BDSKInputManagerLoadableApplications;
 - (IBAction)removeApplication:(id)sender;
 - (IBAction)addAutocompleteString:(id)sender;
 - (IBAction)removeAutocompleteString:(id)sender;
+- (IBAction)selectFieldToAutocomplete:(id)sender;
 @end

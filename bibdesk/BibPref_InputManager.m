@@ -8,6 +8,7 @@
 
 
 #import "BibPref_InputManager.h"
+#import "BibTypeManager.h"
 
 NSString *BDSKInputManagerID = @"net.sourceforge.bibdesk.inputmanager";
 NSString *BDSKInputManagerLoadableApplications = @"Application bundles that we recognize";
@@ -291,6 +292,15 @@ NSString *BDSKInputManagerLoadableApplications = @"Application bundles that we r
 #pragma mark Methods for BibEditor autocomplete
 
 - (IBAction)addAutocompleteString:(id)sender{
+    // first we fill the popup
+	NSMutableArray *fieldNames = [[[[BibTypeManager sharedManager] allRemovableFieldNames] mutableCopy] autorelease];
+	[fieldNames addObjectsFromArray:[NSArray arrayWithObjects:BDSKUrlString, BDSKLocalUrlString, BDSKKeywordsString, nil]];
+	[fieldNames removeObjectsInArray:enabledEditorAutocompletionStrings];
+	[fieldNames sortUsingSelector:@selector(caseInsensitiveCompare:)];
+	[fieldNames insertObject:NSLocalizedString(@"Choose a Field Name:",@"") atIndex:0];
+	[addFieldPopupButton removeAllItems];
+	[addFieldPopupButton addItemsWithTitles:fieldNames];
+	
     [NSApp beginSheet:addFieldSheet
        modalForWindow:[[OAPreferenceController sharedPreferenceController] window]
         modalDelegate:self
@@ -311,6 +321,11 @@ NSString *BDSKInputManagerLoadableApplications = @"Application bundles that we r
     [NSApp endSheet:addFieldSheet returnCode:[sender tag]];
 }
 
+- (IBAction)selectFieldToAutocomplete:(id)sender{
+	if([sender indexOfSelectedItem] > 0){
+		[addField setStringValue:[sender titleOfSelectedItem]];
+	}
+}
 
 - (IBAction)removeAutocompleteString:(id)sender{
     if([editorAutocompletionStringsTableView selectedRow] != -1){
