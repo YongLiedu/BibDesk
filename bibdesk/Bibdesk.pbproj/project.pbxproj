@@ -1260,6 +1260,7 @@
 				F992AB6406FA8F7200B3747A,
 				F9A11A63073C3B91006B766C,
 				3DC794D8074F91A500C4997E,
+				3D89CDE9075BDBB400AC9690,
 			);
 			isa = PBXHeadersBuildPhase;
 			runOnlyForDeploymentPostprocessing = 0;
@@ -1792,6 +1793,7 @@
 				F9A59EE106DFE7DD00C411CA,
 				F992AB6506FA8F7200B3747A,
 				3DC794D7074F91A500C4997E,
+				3D89CDEA075BDBB400AC9690,
 			);
 			isa = PBXSourcesBuildPhase;
 			runOnlyForDeploymentPostprocessing = 0;
@@ -2454,6 +2456,36 @@
 		};
 		3D890DB107526C580073F8E5 = {
 			fileRef = 3D890DB007526C580073F8E5;
+			isa = PBXBuildFile;
+			settings = {
+			};
+		};
+		3D89CDE7075BDBB400AC9690 = {
+			fileEncoding = 30;
+			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.c.h;
+			name = BibField.h;
+			path = Scripting/BibField.h;
+			refType = 4;
+			sourceTree = "<group>";
+		};
+		3D89CDE8075BDBB400AC9690 = {
+			fileEncoding = 30;
+			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.c.objc;
+			name = BibField.m;
+			path = Scripting/BibField.m;
+			refType = 4;
+			sourceTree = "<group>";
+		};
+		3D89CDE9075BDBB400AC9690 = {
+			fileRef = 3D89CDE7075BDBB400AC9690;
+			isa = PBXBuildFile;
+			settings = {
+			};
+		};
+		3D89CDEA075BDBB400AC9690 = {
+			fileRef = 3D89CDE8075BDBB400AC9690;
 			isa = PBXBuildFile;
 			settings = {
 			};
@@ -5228,6 +5260,8 @@
 				F9D6C1EE06AECF9700EAEB04,
 				F9D6C1EF06AECF9700EAEB04,
 				F9D6C1F006AECF9700EAEB04,
+				3D89CDE7075BDBB400AC9690,
+				3D89CDE8075BDBB400AC9690,
 			);
 			isa = PBXGroup;
 			name = "Scripting extensions";
