@@ -27,7 +27,6 @@
 - (NSArray *)bibFields;
 
 - (NSMutableDictionary *)fields;
-- (NSMutableArray*) requiredFieldNames;
 
 - (void) setBibTeXString:(NSString*) btString;
 

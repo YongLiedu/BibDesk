@@ -229,6 +229,11 @@ void _setupFonts(){
     return [citeKey hash];
 }
 
+- (NSMutableArray*) requiredFieldNames {
+    // rather return a copy?
+    return requiredFieldNames;
+}
+
 #pragma mark Comparison functions
 - (NSComparisonResult)pubTypeCompare:(BibItem *)aBI{
 	return [[self type] caseInsensitiveCompare:[aBI type]];

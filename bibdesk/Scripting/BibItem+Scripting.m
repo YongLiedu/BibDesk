@@ -244,21 +244,6 @@ Extra wrapping of the created and modified date methods to
 	NSLog([newPub description]);
 }
 
-
-
-/* 
-ssp: 2004-07-12
- Apparently this didn't exist before
- It is needed in -setBibTeXString:
- Perhaps a better way to do this can be devised?
-*/
-- (NSMutableArray*) requiredFieldNames {
-	// rather return a copy?
-	return requiredFieldNames;
-}
-
-
-
 /*
  ssp: 2004-07-10
  Return attribute keys corresponding to the fields present in the current BibItem

@@ -109,7 +109,7 @@
     
 */
 - (BOOL)isRequired:(NSString *)rString; // @@type - move to type class.
-
+- (NSMutableArray*) requiredFieldNames;
 - (BibDocument *)document;
 - (void)setDocument:(BibDocument *)newDocument;
 
