@@ -8,6 +8,10 @@
 		<string>{\&amp;}</string>
 		<key>¡</key>
 		<string>{!'}</string>
+		<key>©</key>
+		<string>{\copyright}</string>
+		<key>®</key>
+		<string>{\textregistered}</string>
 		<key>Á</key>
 		<string>{\'A}</string>
 		<key>Â</key>
@@ -108,6 +112,14 @@
 		<string>{\oe}</string>
 		<key>Ÿ</key>
 		<string>{\"Y}</string>
+		<key>–</key>
+		<string>--</string>
+		<key>—</key>
+		<string>---</string>
+		<key>…</key>
+		<string>{\ldots}</string>
+		<key>™</key>
+		<string>{\texttrademark}</string>
 	</dict>
 	<key>TeX to Roman</key>
 	<dict>
@@ -207,12 +219,20 @@
 		<string>ç</string>
 		<key>{\cc}</key>
 		<string>ç</string>
+		<key>{\copyright}</key>
+		<string>©</string>
+		<key>{\ldots}</key>
+		<string>…</string>
 		<key>{\oe}</key>
 		<string>œ</string>
 		<key>{\o}</key>
 		<string>ø</string>
 		<key>{\ss}</key>
 		<string>ß</string>
+		<key>{\textregistered}</key>
+		<string>®</string>
+		<key>{\texttrademark}</key>
+		<string>™</string>
 		<key>{\~a}</key>
 		<string>ã</string>
 		<key>{\~n}</key>

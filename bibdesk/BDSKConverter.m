@@ -35,6 +35,7 @@ static NSCharacterSet *SkipSet;
     highCharRange.length = 256; //this should get all the characters in the upper-range.
     workingSet = [[NSCharacterSet decomposableCharacterSet] mutableCopy];
     [workingSet addCharactersInRange:highCharRange];
+    [workingSet addCharactersInString:@"пя"]; // special case for en-dash and em-dash (we do one-way conversion only)
     FinalCharSet = [workingSet copy];
     [workingSet release];
 	
@@ -101,7 +102,7 @@ static NSCharacterSet *SkipSet;
 + (void)runConversionAlertPanel{
     int i = NSRunAlertPanel(NSLocalizedString(@"Character Conversion Error",
 				              @"Title of alert when an error happens"),
-		            NSLocalizedString(@"An accented character could not be converted.  Please enter the TeX code directly in your bibliography and e-mail the developers.  For more information, see the Character Conversion topic of BibDesk Help.",
+		            NSLocalizedString(@"An accented or Unicode character could not be converted.  Please enter the TeX code directly in your bibliography and e-mail the developers.  For more information, see the Character Conversion topic of BibDesk Help.",
 				              @"Informative alert text when the error happens."),
 			    @"Send e-mail", @"Edit", nil, nil);
     if(i == NSAlertDefaultReturn){
