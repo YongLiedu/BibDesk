@@ -101,6 +101,13 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
                 return [[pub authorAtIndex:2] name];
             else
                 return @"-";
+
+		} else if ([tcID isEqualToString:@"Authors"]) {
+			if ([auths count] > 0) {
+				return [pub bibtexAuthorString];
+			} else {
+				return @"-";
+			}										
             
         }else if ([tcID isEqualToString:@"Local-Url"]){
             path = [pub localURLPathRelativeTo:[[self fileName] stringByDeletingLastPathComponent]];
