@@ -521,6 +521,13 @@ int generalBibItemCompareFunc(id item1, id item2, void *context);
 */
 - (void)handleBibItemChangedNotification:(NSNotification *)notification;
 
+/*!
+    @method handleBibItemChangedNotification
+	 @abstract responds to closing editor and personview windows
+	 @discussion 
+*/
+- (void)handleCustomWindowClosedNotification:(NSNotification *)notification;
+
 - (int)numberOfSelectedPubs;
 - (NSEnumerator *)selectedPubEnumerator;
 
