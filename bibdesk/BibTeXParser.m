@@ -75,6 +75,7 @@
                 if (bt_entry_metatype (entry) != BTE_REGULAR){
                     // put preambles etc. into the frontmatter string so we carry them along.
                     entryType = [NSString stringWithCString:bt_entry_type(entry)];
+                    
                     if (frontMatter && [entryType isEqualToString:@"preamble"]){
                         [frontMatter appendString:@"\n@preamble{\""];
                         [frontMatter appendString:[NSString stringWithCString:bt_get_text(entry) ]];
@@ -136,7 +137,7 @@
                 // wasn't ok, record it and deal with it later.
                 *hadProblems = YES;
             }
-        } // while (scanning through file)
+        } // while (scanning through file) 
 
         bt_cleanup();
 
