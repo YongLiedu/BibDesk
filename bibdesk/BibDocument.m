@@ -825,7 +825,7 @@ stringByAppendingPathComponent:@"BibDesk"]; */
     NSArray *macros = [[macroDefinitions allKeys] sortedArrayUsingSelector:@selector(compare:)];
     
     // output the bibs
-    if([self documentStringEncoding] == NSASCIIStringEncoding){
+    if(encoding == NSASCIIStringEncoding){
         foreach(macro, macros){
             macroString = [NSString stringWithFormat:@"\n@STRING{%@ = \"%@\"}\n",macro,[macroDefinitions objectForKey:macro]];
             [d appendData:[macroString dataUsingEncoding:NSUTF8StringEncoding allowLossyConversion:YES]];

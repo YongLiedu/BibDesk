@@ -426,31 +426,13 @@ _setupParagraphStyle()
 }
 
 - (void)setAuthorsFromBibtexString:(NSString *)aString{
-    
-    if([[OFPreferenceWrapper sharedPreferenceWrapper] boolForKey:BDSKUseUnicodeBibTeXParser]){
-        NSArray *auths = [aString componentsSeparatedByString:@" and "];
-        NSEnumerator *e = [auths objectEnumerator];
-        NSString *aString = nil;
-        
-        [pubAuthors removeAllObjectsUsingLock:bibLock];
-        
-        while(aString = [e nextObject]){
-            [self addAuthorWithName:[aString stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceCharacterSet]]];
-        }
-        return;
-    }
-            
+                
     char *str = nil;
 
     if (aString == nil) return;
 
-    if(![aString canBeConvertedToEncoding:[NSString defaultCStringEncoding]]){
-	NSLog(@"An author name could not be displayed losslessly.");
-	NSLog(@"Using lossy encoding for %@", aString);
-	str = (char *)[aString lossyCString];
-    } else  str = (char *)[aString cString];
+    str = (char *)[aString UTF8String];
     
-//    [aString getCString:str]; // str will be autoreleased. (freed?)
     bt_stringlist *sl = nil;
     int i=0;
 #warning - Exception - might want to add an exception handler that notifies the user of the warning...
@@ -459,7 +441,7 @@ _setupParagraphStyle()
     if (sl != nil) {
         for(i=0; i < sl->num_items; i++){
             if(sl->items[i] != nil){
-				NSString *s = [NSString stringWithCString: sl->items[i]];
+				NSString *s = [NSString stringWithBytes:sl->items[i] encoding:NSUTF8StringEncoding];
                 [self addAuthorWithName:s];
                 
             }
@@ -1047,12 +1029,6 @@ _setupParagraphStyle()
            [(BDSKComplexString *)v isComplex]){
             valString = [(BDSKComplexString *)v nodesAsBibTeXString];
         }else{    
-            // Don't run the converter on Local-Url or Url fields, so we don't trash ~ and % escapes.
-            // Note that NSURLs comply with RFC 2396, and can't contain high-bit characters anyway.
-            if(![k isEqualToString:BDSKLocalUrlString] &&
-               ![k isEqualToString:BDSKUrlString]){
-                v = [[BDSKConverter sharedConverter] stringByTeXifyingString:v];
-            }
             valString = [NSString stringWithFormat:@"{%@}", v];
         }
         
