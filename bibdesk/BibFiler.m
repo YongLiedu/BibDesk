@@ -87,8 +87,9 @@ static BibFiler *_sharedFiler = nil;
 		[progressIndicator incrementBy:1.0];
 		[progressIndicator displayIfNeeded];
 	}
-	if(path == nil || [path isEqualToString:@""] || newPath == nil || 
-	   [newPath isEqualToString:@""] || [path isEqualToString:newPath])
+	if(path == nil || [path isEqualToString:@""] |
+	   newPath == nil || [newPath isEqualToString:@""] || 
+	   [path isEqualToString:newPath])
 		return;
 	
 	NSMutableDictionary *info = [NSMutableDictionary dictionaryWithObjectsAndKeys:
@@ -119,7 +120,11 @@ static BibFiler *_sharedFiler = nil;
 				[fm createPathToFile:resolvedNewPath attributes:nil]; // create parent directories if necessary (OmniFoundation)
 				// unfortunately NSFileManager cannot reliably move symlinks...
 				if([fileType isEqualToString:NSFileTypeSymbolicLink]){
-					if([fm createSymbolicLinkAtPath:resolvedNewPath pathContent:[resolvedPath stringByResolvingSymlinksInPath]]){
+					NSString *pathContent = [fm pathContentOfSymbolicLinkAtPath:resolvedPath];
+					if(![pathContent hasPrefix:@"/"]){// it links to a relative path
+						pathContent = [[resolvedPath stringByDeletingLastPathComponent] stringByAppendingPathComponent:pathContent];
+					}
+					if([fm createSymbolicLinkAtPath:resolvedNewPath pathContent:pathContent]){
 						if(![fm removeFileAtPath:resolvedPath handler:self]){
 							status = [_errorString autorelease];
 							statusFlag = statusFlag | BDSKMoveErrorMask;
