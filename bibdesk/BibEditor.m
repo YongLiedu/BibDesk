@@ -1001,10 +1001,9 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
     NSString *value = [userInfo objectForKey:@"complexStringValue"];
 	NSString *prevValue = [theBib valueOfField:fieldName];
     
-    if(![value isEqualToString:prevValue]){ // order is important, as prevValue can be a proper NSString
+    if(![value isEqualAsComplexString:prevValue]){
 		[self recordChangingField:fieldName toValue:value];
 	}
-
     
     [[NSNotificationCenter defaultCenter] removeObserver:self
                                                     name:BDSKMacroTextFieldWindowWillCloseNotification
@@ -1023,7 +1022,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 	NSString *prevValue = [theBib valueOfField:title];
 	
     if([sender indexOfSelectedItem] != -1 &&
-	   ![prevValue isEqualToString:value]){ // order is important, as prevValue can be complex
+	   ![value isEqualToString:prevValue]){
 		[self recordChangingField:title toValue:value];
     }
 }
