@@ -20,9 +20,10 @@ NSString *BDSKShouldUseTemplateFile = @"Write template file when saving";
 NSString *BDSKSnoopDrawerContentKey = @"Snoop Drawer Content";
 NSString *BDSKBibEditorAutocompletionFields = @"Enabled for autocompletion in BibEditor";
 NSString *BDSKPreviewPaneFontFamily = @"Font family to use for RTF preview display";
+NSString *BDSKFilterFieldHistory = @"Open using filter command history";
 
-NSString *BDSKUseUnicodeBibTeXParser = @"Use Unicode BibTeX Parser";
-NSString *BDSKUseThreadedFileLoading = @"Load files in background";
+NSString *BDSKUseUnicodeBibTeXParser = @"Use Unicode BibTeX Parser"; // deprecated in 0.99
+NSString *BDSKUseThreadedFileLoading = @"Load files in background"; // deprecated in 0.99
 NSString *BDSKDefaultStringEncoding = @"Default string encoding for opening and saving";
 
 NSString *BDSKTeXBinPathKey = @"TeX Binary Path";

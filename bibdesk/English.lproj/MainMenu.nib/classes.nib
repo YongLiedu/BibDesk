@@ -6,6 +6,8 @@
                 gotoError = id; 
                 gotoErrorObj = id; 
                 hideErrorPanel = id; 
+                hidePreviewPanel = id; 
+                newBDSKLibrary = id; 
                 openDocument = id; 
                 openEditWindowWithFile = id; 
                 openUsingFilter = id; 
@@ -13,6 +15,8 @@
                 showErrorPanel = id; 
                 showFindPanel = id; 
                 showPreferencePanel = id; 
+                showPreviewPanel = id; 
+                showReadMeFile = id; 
                 toggleShowingErrorPanel = id; 
                 toggleShowingPreviewPanel = id; 
                 visitWebSite = id; 
@@ -24,9 +28,9 @@
                 errorPanel = NSPanel; 
                 errorTableView = NSTableView; 
                 openTextEncodingAccessoryView = NSView; 
-                openTextEncodingPopupButton = NSButton; 
+                openTextEncodingPopupButton = NSPopUpButton; 
                 openUsingFilterAccessoryView = NSView; 
-                openUsingFilterTextField = NSTextField; 
+                openUsingFilterComboBox = NSComboBox; 
                 readmeTextView = NSTextView; 
                 readmeWindow = NSWindow; 
                 showHideCustomCiteStringsMenuItem = NSMenuItem; 
@@ -127,6 +131,7 @@
                 newPub = id; 
                 saveAsBDSKDocument = id; 
                 showMacrosWindow = id; 
+                showReadMe = id; 
                 toggle = id; 
                 toggleShowingCustomCiteDrawer = id; 
             }; 

@@ -61,7 +61,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
     // ----------------------------------------------------------------------------------------
     // stuff for the accessory view for openUsingFilter
     IBOutlet NSView* openUsingFilterAccessoryView;
-    IBOutlet NSTextField* openUsingFilterTextField;
+    IBOutlet NSComboBox *openUsingFilterComboBox;
 	
 	// stuff for the accessory view for open text encoding 
 	IBOutlet NSView *openTextEncodingAccessoryView;
@@ -178,7 +178,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 - (IBAction)hidePreviewPanel:(id)sender;
 - (BOOL) isShowingPreviewPanel;
 
-- (void)showReadMeFile;
+- (IBAction)showReadMeFile:(id)sender;
 
 // ----------------------------------------------------------------------------------------
 // A first attempt at a service.

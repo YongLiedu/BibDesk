@@ -339,12 +339,32 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
     NSOpenPanel *oPanel = [NSOpenPanel openPanel];
     [oPanel setAccessoryView:openUsingFilterAccessoryView];
     [oPanel setAllowsMultipleSelection:NO];
+    NSMutableArray *commandHistory = [NSMutableArray arrayWithArray:[[OFPreferenceWrapper sharedPreferenceWrapper] arrayForKey:BDSKFilterFieldHistory]];
+    [openUsingFilterComboBox addItemsWithObjectValues:commandHistory];
     result = [oPanel runModalForDirectory:nil
                                      file:nil
                                     types:nil];
     if (result == NSOKButton) {
         fileToOpen = [oPanel filename];
-        shellCommand = [openUsingFilterTextField stringValue];
+        shellCommand = [openUsingFilterComboBox stringValue];
+        // this is for command history reordering in the combo box; bumps the current command to the top of the stack and limits the history size to 7
+        BOOL reorder = NO;
+        int previousIndex;
+        
+        if([[openUsingFilterComboBox objectValues] containsObject:shellCommand]){
+            reorder = YES;
+            previousIndex = [openUsingFilterComboBox indexOfItemWithObjectValue:shellCommand];
+        }
+        
+        [openUsingFilterComboBox insertItemWithObjectValue:shellCommand atIndex:0];
+        if(reorder){
+            [openUsingFilterComboBox removeItemAtIndex:(previousIndex + 1)];
+        }
+        if([[openUsingFilterComboBox objectValues] count] >= 7){
+            [openUsingFilterComboBox removeItemAtIndex:6];
+        }
+        [[OFPreferenceWrapper sharedPreferenceWrapper] setObject:commandHistory forKey:BDSKFilterFieldHistory];
+        
         fileInputString = [NSString stringWithContentsOfFile:fileToOpen];
         if (!fileInputString || [shellCommand isEqualToString:@""]){
             NSRunCriticalAlertPanel(NSLocalizedString(@"Problems Opening with Filter",@""),
@@ -358,7 +378,6 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 			// I suppose in the future, bibTeX database won't be the default? 
 			bibDoc = [[NSDocumentController sharedDocumentController] openUntitledDocumentOfType:@"bibTeX database" display:YES]; // #retain?
 			[bibDoc loadDataRepresentation:[filterOutput dataUsingEncoding:NSUTF8StringEncoding] ofType:@"bibTeX database"];
-			//[bibDoc updateChangeCount:NSChangeDone];
 			[bibDoc updateUI];
 		}
     }
@@ -639,12 +658,10 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 
 - (IBAction)hideErrorPanel:(id)sender{
     [errorPanel orderOut:sender];
-    [showHideErrorsMenuItem setState:NSOffState];
 }
 
 - (IBAction)showErrorPanel:(id)sender{
     [errorPanel makeKeyAndOrderFront:sender];
-    [showHideErrorsMenuItem setState:NSOnState];
 }
 
 - (void)handleErrorNotification:(NSNotification *)notification{
@@ -787,13 +804,13 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
     NSString *versionString = [[[NSBundle mainBundle] infoDictionary] objectForKey:@"CFBundleVersion"];
     if( ([[OFPreferenceWrapper sharedPreferenceWrapper] objectForKey:BDSKLastVersionLaunched] == nil) ||
         (![versionString isEqualToString:[[OFPreferenceWrapper sharedPreferenceWrapper] objectForKey:BDSKLastVersionLaunched]]) ){
-	[self showReadMeFile];
+        [self showReadMeFile:nil];
     }
     [[OFPreferenceWrapper sharedPreferenceWrapper] setObject:versionString forKey:BDSKLastVersionLaunched];
   
 }
 
-- (void)showReadMeFile{
+- (IBAction)showReadMeFile:(id)sender{
     [NSBundle loadNibNamed:@"ReadMe" owner:self];
     [readmeWindow makeKeyAndOrderFront:self];
     [readmeTextView replaceCharactersInRange:[readmeTextView selectedRange]

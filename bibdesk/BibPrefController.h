@@ -74,6 +74,8 @@ extern NSString *BDSKShouldUseTemplateFile;
 extern NSString *BDSKSnoopDrawerContentKey;
 extern NSString *BDSKBibEditorAutocompletionFields;
 extern NSString *BDSKPreviewPaneFontFamily;
+extern NSString *BDSKFilterFieldHistory;
+
 
 extern NSString *BDSKCiteKeyFormatKey;
 extern NSString *BDSKCiteKeyFormatPresetKey;
