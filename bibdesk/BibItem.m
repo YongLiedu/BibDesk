@@ -147,7 +147,7 @@ void _setupFonts(){
     return [NSString stringWithFormat:@"%@ %@", [self citeKey], [pubFields description]];
 }
 
-#warning doesn't always seem to work? specifically when changing updatecounts from changing the pubtype
+#warning does not always seem to work? specifically when changing updatecounts from changing the pubtype
 - (BOOL)isEqual:(BibItem *)aBI{
     return ([pubType isEqualToString:[aBI type]]) && ([citeKey isEqualToString:[aBI citeKey]]) &&
     ([pubFields isEqual:[aBI dict]]);

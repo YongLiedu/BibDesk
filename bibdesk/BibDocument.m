@@ -965,7 +965,7 @@ didClickTableColumn: (NSTableColumn *) tableColumn{
     }
     */
 
-#warning FIXME: won't always say "Publications shown"?
+#warning FIXME: will not always say "Publications shown"?
     [infoLine setStringValue: [NSString stringWithFormat:
         NSLocalizedString(@"%d of %d Publications shown.",
                           @"need two ints in format string."),

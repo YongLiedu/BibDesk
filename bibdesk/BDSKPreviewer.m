@@ -206,7 +206,7 @@ static unsigned threadCount = 0;
     return YES;
 }
 
-#warning PDFDataFromString isn't properly threaded!
+#warning PDFDataFromString is not properly threaded!
 - (NSData *)PDFDataFromString:(NSString *)str{
     // pool for MT
     NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
