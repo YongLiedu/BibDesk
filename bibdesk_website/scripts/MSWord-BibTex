@@ -1,0 +1,34 @@
+#! /bin/bash
+ 
+ theFileName=`osascript -e "tell application "Microsoft Word" to set  
+theFileName to the name of document 1"`
+ 
+ theFilePath=`osascript -e "tell application "Microsoft Word" to set  
+ theFilePath to the path of document 1" -e "set theFilePath to the POSIX  
+ path of theFilePath"`
+ 
+ cd "$theFilePath"
+ 
+ bibfilertf="$theFileName".bib.rtf
+ 
+ /usr/local/bin/antiword "$theFileName" > makeBibDoc.txt
+ /usr/bin/awk "/\\cite/ || /\\bibliography/ {print $0"\n"}"  
+ makeBibDoc.txt > makeBibDoc.stripped
+ 
+ echo "\documentclass[11pt]{article}" > makeBibDoc.tex
+ echo "\pagestyle{empty}"            >> makeBibDoc.tex
+ echo "\textwidth = 6.5 in"          >> makeBibDoc.tex
+ echo "\oddsidemargin = 0.0 in"      >> makeBibDoc.tex
+ echo "\evensidemargin = 0.0 in"     >> makeBibDoc.tex
+ echo "\begin{document}"             >> makeBibDoc.tex
+ cat makeBibDoc.stripped             >> makeBibDoc.tex
+ echo "\end{document}"               >> makeBibDoc.tex
+ 
+ /usr/local/teTeX/bin/powerpc-apple-darwin-current/latex makeBibDoc
+ /usr/local/teTeX/bin/powerpc-apple-darwin-current/bibtex makeBibDoc
+ /usr/local/teTeX/bin/powerpc-apple-darwin-current/latex makeBibDoc
+ /usr/local/bin/latex2rtf -o "$bibfilertf" makeBibDoc
+ mv "$bibfilertf" /tmp/
+ /usr/bin/open -a /Applications/Microsoft\ Office\ 2004/Microsoft\ Word  
+ /tmp/"$bibfilertf"
+ rm ./makeBibDoc.*

@@ -1,0 +1,102 @@
+{\rtf1\mac\ansicpg10000\cocoartf102
+{\fonttbl\f0\fmodern\fcharset77 Courier;}
+{\colortbl;\red255\green255\blue255;\red0\green51\blue153;}
+\paperw11900\paperh16840\margl1440\margr1440\vieww14620\viewh9860\viewkind0
+\pard\tx560\tx1120\tx1680\tx2240\tx2800\tx3360\tx3920\tx4480\tx5040\tx5600\tx6160\tx6720\ql\qnatural
+
+\f0\fs22 \cf0  what it does:\
+ allows you to use \\cite commands in an ms word file to generate a  \
+ bibliography.  you can then replace the \\cite commands "at the end of  \
+ the day" with the appropriate reference numbers.\
+ \
+ for this to work, you need:\
+ (1) latex2rtf ({\field{\*\fldinst{HYPERLINK "http://latex2rtf.sourceforge.net/"}}{\fldrslt \cf2 http://latex2rtf.sourceforge.net/}})\
+ (2) antiword ({\field{\*\fldinst{HYPERLINK "http://www.winfield.demon.nl/"}}{\fldrslt \cf2 http://www.winfield.demon.nl/}})\
+ (3) a tex/bibtex installation -- i use the one from gerben weirda found  \
+ at {\field{\*\fldinst{HYPERLINK "http://www.uoregon.edu/~koch/texshop/texshop.html."}}{\fldrslt \cf2 http://www.uoregon.edu/~koch/texshop/texshop.html.}}\
+ \
+ here"s how to make script double-clickable:\
+ (1) copy the script text into a file -- i used "MSWord-BibTeX"\
+ (2) make the file executable by doing a "chmod +x MSWord-BibTeX"\
+ (3) make an os x .app out of the script by making a folder called  \
+ "MSWord-BibTex.app", then putting putting the script inside of this  \
+ folder with the following hierarchy:  \
+ MSWord-BibTeX.app/Contents/MacOS/MSWord-BibTex (i.e. inside the folder  \
+ MacOS inside Contents inside the .app folder).  you now have a  \
+ double-clickable shell script!\
+ \
+ here"s how to use the script:\
+ (1) in your word document, make citations as you would in a latex doc  \
+ (i.e. \\cite\{ref\}), and put the commands:\
+ \\bibliography\{bibfile\}\
+ \\bibliographystyle\{unsrt\}\
+ at the end of your word document -- where bibfile is the name of the  \
+ ..bib file (must be in same directory as your word doc), and "unsrt" is  \
+ one of the standard bibtex styles (the others work as well, i just like  \
+ unsrt).\
+ (2) save the word document\
+ (3) make sure it"s the only open word document [i think]\
+ (4) double-click the script app\
+ (5) voila!  after a few seconds, you should see an rtf file pop open in  \
+ word with every line containing a \\cite command followed by a formatted  \
+ bibliography.  (if it doesn"t work, check for error messages in  \
+ Console.app).\
+ \
+ finally, the (single) script.  note that you may have to change the  \
+ location of the latex, bibtex, and latex2rtf executables for your  \
+ system.  for those unfamiliar with reading these types of scripts, a  \
+ brief explanation follows (and the script text is just what"s BETWEEN  \
+ the dashed lines, not including them).\
+ ------------------------------------------------------------------------ \
+ -------------\
+ #! /bin/bash\
+ \
+ theFileName=`osascript -e "tell application "Microsoft Word" to set  \
+ theFileName to the name of document 1"`\
+ \
+ theFilePath=`osascript -e "tell application "Microsoft Word" to set  \
+ theFilePath to the path of document 1" -e "set theFilePath to the POSIX  \
+ path of theFilePath"`\
+ \
+ cd "$theFilePath"\
+ \
+ bibfilertf="$theFileName".bib.rtf\
+ \
+ /usr/local/bin/antiword "$theFileName" > makeBibDoc.txt\
+ /usr/bin/awk "/\\\\cite/ || /\\\\bibliography/ \{print $0"\\n"\}"  \
+ makeBibDoc.txt > makeBibDoc.stripped\
+ \
+ echo "\\documentclass[11pt]\{article\}" > makeBibDoc.tex\
+ echo "\\pagestyle\{empty\}"            >> makeBibDoc.tex\
+ echo "\\textwidth = 6.5 in"          >> makeBibDoc.tex\
+ echo "\\oddsidemargin = 0.0 in"      >> makeBibDoc.tex\
+ echo "\\evensidemargin = 0.0 in"     >> makeBibDoc.tex\
+ echo "\\begin\{document\}"             >> makeBibDoc.tex\
+ cat makeBibDoc.stripped             >> makeBibDoc.tex\
+ echo "\\end\{document\}"               >> makeBibDoc.tex\
+ \
+ /usr/local/teTeX/bin/powerpc-apple-darwin-current/latex makeBibDoc\
+ /usr/local/teTeX/bin/powerpc-apple-darwin-current/bibtex makeBibDoc\
+ /usr/local/teTeX/bin/powerpc-apple-darwin-current/latex makeBibDoc\
+ /usr/local/bin/latex2rtf -o "$bibfilertf" makeBibDoc\
+ mv "$bibfilertf" /tmp/\
+ /usr/bin/open -a /Applications/Microsoft\\ Office\\ 2004/Microsoft\\ Word  \
+ /tmp/"$bibfilertf"\
+ rm ./makeBibDoc.*\
+ ---------------------------------------------------------------------\
+ \
+ the script explanation:\
+ (1) use osascript (command line applescript) to get the filename and  \
+ path of the currently opened file.\
+ (2) use antiword to convert this file into a text-only file\
+ (3) use awk to scan this file for any line containting "\\cite" or  \
+ "\\bibliography" . . . then dump these lines into a new text file.\
+ (4) make a .tex file out of this awk-outputed text with some latex  \
+ headers\
+ (5) latex the file to generate the auxiliary latex files\
+ (6) bibtex the file\
+ (7) latex it again to get the auxiliary latex files "corrected"\
+ (8) generate the rtf file using latex2rtf\
+ (9) move the rtf file to /tmp/, then open it\
+ (10) deleted all the intermediate latex files (which were generated in  \
+ the same directory as your word file).}
