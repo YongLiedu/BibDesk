@@ -28,6 +28,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
     IBOutlet NSTextField* customStringField;
     IBOutlet NSButton* addCustomStringButton;
     IBOutlet NSButton* delSelectedCustomStringButton;
+	IBOutlet NSMatrix* citeBracketRadio;
 }
 
 - (IBAction)changeCopyBehavior:(id)sender;
@@ -37,4 +38,5 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 
 - (IBAction)addCustomString:(id)sender;
 - (IBAction)delSelectedCustomString:(id)sender;
+- (IBAction)setCitationBracketStyle:(id)sender;
 @end

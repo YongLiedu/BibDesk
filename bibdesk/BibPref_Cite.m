@@ -23,14 +23,22 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 }
 - (void)updateUI{
     NSString *citeString = [defaults stringForKey:BDSKCiteStringKey];
+	NSString *startCiteBracket = [defaults stringForKey:BDSKCiteStartBracketKey]; 
+	NSString *endCiteBracket = [defaults stringForKey:BDSKCiteEndBracketKey]; 
+	
+	if([startCiteBracket isEqualToString:@"{"]){
+		
+	}
 
     [dragCopyRadio selectCellWithTag:[defaults integerForKey:BDSKDragCopyKey]];
     [separateCiteCheckButton setState:[defaults integerForKey:BDSKSeparateCiteKey]];
     [citeStringField setStringValue:citeString];
-    if([separateCiteCheckButton state] == NSOnState)
-        [citeBehaviorLine setStringValue:[NSString stringWithFormat:@"\\%@{key1} \\%@{key2}",citeString, citeString]];
-    else
-        [citeBehaviorLine setStringValue:[NSString stringWithFormat:@"\\%@{key1,key2}" , citeString]];
+    if([separateCiteCheckButton state] == NSOnState){
+        [citeBehaviorLine setStringValue:[NSString stringWithFormat:@"\\%@%@key1%@ \\%@%@key2%@",citeString, startCiteBracket, endCiteBracket,
+			citeString, startCiteBracket,endCiteBracket]];
+	}else{
+		[citeBehaviorLine setStringValue:[NSString stringWithFormat:@"\\%@%@key1, key2%@" ,citeString, startCiteBracket, endCiteBracket]];
+	}
     [editOnPasteButton setState:[defaults integerForKey:BDSKEditOnPasteKey]];
 }
 
@@ -39,13 +47,8 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 }
 
 - (IBAction)changeSeparateCite:(id)sender{
-    NSString *cs = [defaults stringForKey:BDSKCiteStringKey];
-    if([sender state] == NSOnState){
-        [citeBehaviorLine setStringValue:[NSString stringWithFormat:@"\\%@{key1} \\%@{key2}",cs, cs]];
-            }else{
-                [citeBehaviorLine setStringValue:[NSString stringWithFormat:@"\\%@{key1, key2}" , cs]];
-                    }
     [defaults setInteger:[sender state] forKey:BDSKSeparateCiteKey];
+	[self updateUI];
 }
     - (IBAction)citeStringFieldChanged:(id)sender{
     [defaults setObject:[sender stringValue] forKey:BDSKCiteStringKey];
@@ -87,5 +90,17 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
     return [customStringArray objectAtIndex:row];
 }
 
+- (IBAction)setCitationBracketStyle:(id)sender{
+	// 1 - tex 2 - context
+	int tag = [[sender selectedCell] tag];
+	if(tag == 1){
+		[defaults setObject:@"{" forKey:BDSKCiteStartBracketKey];
+		[defaults setObject:@"}" forKey:BDSKCiteEndBracketKey];
+	}else if(tag == 2){
+		[defaults setObject:@"[" forKey:BDSKCiteStartBracketKey];
+		[defaults setObject:@"]" forKey:BDSKCiteEndBracketKey];
+	}
+	[self updateUI];
+}
 
 @end

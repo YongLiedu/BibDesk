@@ -25,6 +25,8 @@ NSString *BDSKDragCopyKey = @"Drag and Copy";
 NSString *BDSKEditOnPasteKey = @"Edit on Paste";
 NSString *BDSKSeparateCiteKey = @"Separate Cite";
 NSString *BDSKCiteStringKey = @"Cite String";
+NSString *BDSKCiteStartBracketKey = @"Citation Start Bracket";
+NSString *BDSKCiteEndBracketKey = @"Citation End Bracket";
 
 NSString *BDSKShowColsKey = @"Shown Columns";
 NSString *BDSKShownColsNamesKey = @"Shown Column Names";

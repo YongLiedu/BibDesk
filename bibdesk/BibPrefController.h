@@ -41,11 +41,13 @@ extern NSString *BDSKShowColsKey;
 extern NSString *BDSKShownColsNamesKey;
 extern NSString *BDSKDefaultFieldsKey;
 extern NSString *BDSKOutputTemplateFileKey;
-extern NSString *BDSKCiteStringKey;
 extern NSString *BDSKTableViewFontKey;
 extern NSString *BDSKTableViewFontSizeKey;
 extern NSString *BDSKPreviewDisplayKey;
 extern NSString *BDSKCustomCiteStringsKey;
+extern NSString *BDSKCiteStringKey;
+extern NSString *BDSKCiteStartBracketKey;
+extern NSString *BDSKCiteEndBracketKey;
 
 extern NSString *BDSKAutoSaveAsRSSKey;
 extern NSString *BDSKRSSDescriptionFieldKey;
