@@ -115,7 +115,7 @@ static NSCharacterSet *SkipSet;
 				              @"Informative alert text when the error happens."),
 			    @"Send e-mail", @"Edit", nil, nil);
     if(i == NSAlertDefaultReturn){
-	NSString *urlString = @"mailto:bibdesk-develop@sourceforge.net?subject=Character%20Conversion%20Error&body=Please%20enter%20the%20accented%20character%20that%20failed%20to%20convert%20and%20its%20TeX%20equivalent.";
+	NSString *urlString = @"mailto:bibdesk-develop@lists.sourceforge.net?subject=Character%20Conversion%20Error&body=Please%20enter%20the%20accented%20character%20that%20failed%20to%20convert%20and%20its%20TeX%20equivalent.";
 	NSURL *mailURL = [NSURL URLWithString:urlString];
 	[[NSWorkspace sharedWorkspace] openURL:mailURL];
     } else {
