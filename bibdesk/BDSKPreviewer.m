@@ -44,6 +44,7 @@ static unsigned threadCount = 0;
 	nopreviewPDFPath = [[[bundle resourcePath] stringByAppendingPathComponent:@"nopreview.pdf"] retain];
         tmpBibFilePath = [[applicationSupportPath stringByAppendingPathComponent:@"bibpreview.bib"] retain];
 	rtfFilePath = [[applicationSupportPath stringByAppendingPathComponent:@"bibpreview.rtf"] retain];
+        binPathDir = [[NSString alloc] init]; // set from where we run the tasks, since some programs (e.g. XeLaTeX) need a real path setting
         countLock = [[NSLock alloc] init];
         workingLock = [[NSLock alloc] init];
     }
@@ -151,7 +152,7 @@ static unsigned threadCount = 0;
     [s scanUpToString:@"\bye" intoString:&postfix];
     [finalTexFile appendFormat:@"%@bibliographystyle{%@%@", prefix, style, postfix];
     // overwrites the old bibpreview.tex file, replacing the previous bibliographystyle
-    if(![finalTexFile writeToFile:texTemplatePath atomically:YES]){
+    if(![[finalTexFile dataUsingEncoding:[[OFPreferenceWrapper sharedPreferenceWrapper] integerForKey:BDSKDefaultStringEncoding]] writeToFile:texTemplatePath atomically:YES]){
         NSLog(@"error replacing texfile");
         [pool release];
         return NO;
@@ -159,7 +160,7 @@ static unsigned threadCount = 0;
 
     // write out the bib file with the template attached:
     [bibTemplate appendFormat:@"\n%@",str];
-    if(![bibTemplate writeToFile:tmpBibFilePath atomically:YES]){
+    if(![[bibTemplate dataUsingEncoding:[[OFPreferenceWrapper sharedPreferenceWrapper] integerForKey:BDSKDefaultStringEncoding]] writeToFile:tmpBibFilePath atomically:YES]){
         NSLog(@"Error replacing bibfile.");
         [pool release];
         return NO;
@@ -208,6 +209,14 @@ static unsigned threadCount = 0;
     NSString *bibtexbinpath = [[OFPreferenceWrapper sharedPreferenceWrapper] objectForKey:BDSKBibTeXBinPathKey];
     NSTask *latex2rtf;
     NSString *latex2rtfpath = [NSString stringWithFormat:@"%@/latex2rtf",[[NSBundle mainBundle] resourcePath]];
+    
+    if(![[pdftexbinpath stringByDeletingLastPathComponent] isEqualToString:binPathDir]){
+        [binPathDir release];
+        binPathDir = [[pdftexbinpath stringByDeletingLastPathComponent] retain];
+        NSString *original_path = [NSString stringWithCString: getenv("PATH")];
+        NSString *new_path = [NSString stringWithFormat: @"%@:%@", original_path, binPathDir];
+        setenv("PATH", [new_path cString], 1);
+    }
     
     if(![[NSFileManager defaultManager] fileExistsAtPath:pdftexbinpath]){
 #warning need more user-level errors in PDFPreviewer.
@@ -297,6 +306,15 @@ static unsigned threadCount = 0;
     NSTask *bibtex;
     NSString *pdftexbinpath = [[OFPreferenceWrapper sharedPreferenceWrapper] objectForKey:BDSKTeXBinPathKey];
     NSString *bibtexbinpath = [[OFPreferenceWrapper sharedPreferenceWrapper] objectForKey:BDSKBibTeXBinPathKey];
+    
+    if(![[pdftexbinpath stringByDeletingLastPathComponent] isEqualToString:binPathDir]){
+        [binPathDir release];
+        binPathDir = [[pdftexbinpath stringByDeletingLastPathComponent] retain];
+        NSString *original_path = [NSString stringWithCString: getenv("PATH")];
+        NSString *new_path = [NSString stringWithFormat: @"%@:%@", original_path, binPathDir];
+        setenv("PATH", [new_path cString], 1);
+    }
+    
     unsigned myThreadCount;
 
     [countLock lock];
@@ -467,6 +485,7 @@ static unsigned threadCount = 0;
     [tmpBibFilePath release];
     [rtfFilePath release];
     [applicationSupportPath release];
+    [binPathDir release];
     [countLock release];
     [workingLock release];
     [super dealloc];

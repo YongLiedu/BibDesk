@@ -1505,16 +1505,24 @@ int compareSetLengths(NSSet *set1, NSSet *set2, void *context){
 		//take care of the preview field
 		[self displayPreviewForItems:[self selectedPubEnumerator]];
 		// (don't just pass it 'e' - it needs its own enum.)
-		
-		while(i = [e nextObject]){
-			[bibString appendString:[[shownPublications objectAtIndex:[i intValue]] bibTeXString]];
-		}// while i is num of selected row
-		
-		if([[OFPreferenceWrapper sharedPreferenceWrapper] integerForKey:BDSKUsesTeXKey] == NSOnState){
-			[NSThread
-                detachNewThreadSelector:@selector(PDFFromString:)
-                               toTarget:PDFpreviewer
-                             withObject:bibString];
+		if([[OFPreferenceWrapper sharedPreferenceWrapper] integerForKey:BDSKUsesTeXKey] == NSOnState){ 
+
+                    // It's fairly likely that the user wants Unicode if this is the case, right?  I'm assuming that the user will know how to set up their previewtemplate.tex
+                    // file accordingly as well, so we'll write that out with the default encoding from prefs (not the per-document encoding)
+                    if([[OFPreferenceWrapper sharedPreferenceWrapper] boolForKey:BDSKUseUnicodeBibTeXParser] &&
+                       [[OFPreferenceWrapper sharedPreferenceWrapper] integerForKey:BDSKDefaultStringEncoding] != NSASCIIStringEncoding){ 
+                        while(i = [e nextObject]){
+                            [bibString appendString:[[shownPublications objectAtIndex:[i intValue]] unicodeBibTeXString]];
+                        }
+                    } else {
+                        
+                        while(i = [e nextObject]){
+                            [bibString appendString:[[shownPublications objectAtIndex:[i intValue]] bibTeXString]];
+                        }// while i is num of selected row
+                    }                    
+			[NSThread detachNewThreadSelector:@selector(PDFFromString:)
+                                                 toTarget:PDFpreviewer
+                                               withObject:bibString];
 		}else{
 			// do nothing for now... (later, tell it to nullify the view?)
 		}
