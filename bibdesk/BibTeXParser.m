@@ -47,6 +47,16 @@
     const char * fs_path = NULL;
     NSString *tempFilePath = nil;
     FILE *infile = NULL;
+
+    NSRange EnglishRange;
+    NSMutableCharacterSet *EnglishLetters;
+
+    //This range defines ASCII without most of the control characters (or should).
+    EnglishRange.location = (unsigned int)' '; //Begin at space
+    EnglishRange.length = 95; //This should get everything through tilde
+    EnglishLetters = [NSMutableCharacterSet characterSetWithRange:EnglishRange];
+    [EnglishLetters addCharactersInString:@"\n"];
+    
     
     if( !([filePath isEqualToString:@"Paste/Drag"]) && [[NSFileManager defaultManager] fileExistsAtPath:filePath]){
         fs_path = [[NSFileManager defaultManager] fileSystemRepresentationWithPath:filePath];
@@ -143,21 +153,15 @@
                         
                         NSScanner *validscan;
                         NSString *validscanstring = nil;
-                        NSRange EnglishRange;
-                        NSCharacterSet *EnglishLetters;
-
-                        //This range defines ASCII without the control characters (or should).
-                        EnglishRange.location = (unsigned int)' '; //Begin at space
-                        EnglishRange.length = 95; //This should get everything through tilde
-                        EnglishLetters = [NSCharacterSet characterSetWithRange:EnglishRange];
-
+                                                
                         validscan = [NSScanner scannerWithString:s];  //Scan string s after we get it from bt
 
                         [validscan scanCharactersFromSet:EnglishLetters intoString:&validscanstring];
+                        
                         if([validscanstring length] != [s length]) //Compare it to the original string
                         {
-                            //NSLog(@"I am string s: %@",s);
-                            //NSLog(@"I am validscanstring: %@",validscanstring);
+                            NSLog(@"I am string s: [%@]",s);
+                            NSLog(@"I am validscanstring: [%@]",validscanstring);
                             *hadProblems = YES;
                         }
                         //End check for valid characters.
