@@ -5,7 +5,9 @@
                 checkForUpdates = id; 
                 gotoError = id; 
                 gotoErrorObj = id; 
+                hideErrorPanel = id; 
                 openEditWindowWithFile = id; 
+                openUsingFilter = id; 
                 reopenDocument = id; 
                 showErrorPanel = id; 
                 showFindPanel = id; 
@@ -20,6 +22,8 @@
             OUTLETS = {
                 errorPanel = NSPanel; 
                 errorTableView = NSTableView; 
+                openUsingFilterAccessoryView = NSView; 
+                openUsingFilterTextField = NSTextField; 
                 sourceEditTextView = NSTextView; 
                 sourceEditWindow = NSWindow; 
             }; 

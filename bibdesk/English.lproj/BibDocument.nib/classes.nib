@@ -51,6 +51,7 @@
                 rssExportForm = NSForm; 
                 rssExportTextField = NSTextField; 
                 sortKeyButton = NSPopUpButton; 
+                sortKeyView = NSView; 
                 tableBox = NSView; 
                 tableView = BDSKDragTableView; 
             }; 
