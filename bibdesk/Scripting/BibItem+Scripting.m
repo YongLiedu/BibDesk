@@ -9,20 +9,30 @@
 #import "BibItem+Scripting.h"
 
 /* ssp
-A Category on BibItem with a few additional methods to enable and enhance its scriptability beyond what would be for free with key value coding.
+A Category on BibItem with a few additional methods to enable and enhance its scriptability beyond what comes for free with key value coding.
 */
 @implementation BibItem (Scripting)
 
 
 /*
- ssp: 2004-07-10
- This _should_ return the document containing this item
- Currently it simply returns the first document.
- Doing this properly may require a little work.
- But in the current state it means that useful AppleScript support will remain limited to a single open document only.
- */
+ ssp: 2004-07-10 / 2004-08-03
+ Returns the document containing self.
+ This is done by running through all open documents as we have no back-reference.
+*/
 - (BibDocument*) document {
-	return (BibDocument*)[[NSApp orderedDocuments] objectAtIndex:0];
+	NSEnumerator * docEnum = [[NSApp orderedDocuments] objectEnumerator];
+	BibDocument * doc;
+	int i;
+	
+	// run through all open documents and find the one containing self
+	while (doc = [docEnum nextObject]) {
+		// we really want identity here, isEqual isn't good enough (in case we just copied a publication from one document to another, say)
+		i = [[doc publications] indexOfObjectIdenticalTo:self];
+		if (i != NSNotFound) {
+			return doc;
+		}
+	}
+	return nil;	
 }
 
 
@@ -48,7 +58,9 @@ A Category on BibItem with a few additional methods to enable and enhance its sc
  ssp: 2004-07-10
  Seems to be a better naming for pubFields as there also is a setFields method.
  In AppleScript this provides an NSDictionary with all the available fields (including those containing empty strings - perhaps some cleaning should be done there). 
- Unfortunately I couldn't figure how to actually access these fields by name. NSDictionaries are represented by AppleScript records. However, labels have strange names surrounded by | characters. Very odd. 
+ See BD Test.scpt for instructions on how to actually use this record in AppleScript.
+ http://earthlingsoft.net/ssp/blog/2004/07/cocoa_and_applescript#812
+ gives insight on what's going on there. Perhaps it's worth to implement some other NSSetCommand to make things easier - but I don't know how to do that right now.
 */
 - (NSMutableDictionary *)fields{
     return [self pubFields];

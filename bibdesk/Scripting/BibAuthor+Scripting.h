@@ -8,7 +8,7 @@
 
 #import <Foundation/Foundation.h>
 #import "BibAuthor.h"
-#import "BibItem.h"
+#import "BibItem+Scripting.h"
 
 @interface BibAuthor (Scripting)
 

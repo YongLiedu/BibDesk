@@ -34,9 +34,6 @@ is a good command
                     <property name="von name part" code="auvp" type="string" description="'von' part of the author's name (hopefully)" access="r">
                         <cocoa method="vonPart"/>
                     </property>  
- <!--                   <property name="full name" code="aunm" type="string" description="The author's full name">
-                        <cocoa method="name"/>
-                    </property>  -->
 			     </properties>
 			     <!-- Couldn't figure how to do the inverse relationships -->
 			     <elements>
@@ -67,6 +64,10 @@ is a good command
 				<elements>
 			         <element type="publication" description="Publications in the bibliography">
 			             <cocoa method="publications"/>
+			         </element>
+
+			         <element type="author" description="Authors of publications in the bibliography" access="r">
+			             <cocoa method="authors"/>
 			         </element>
 			    </elements>
 			     

@@ -22,15 +22,11 @@ ssp 2004-07-10
 	NSArray * bars = [self publications];
 	// just use the first one here for the time being
 	BibItem * myPub = (BibItem*)[bars objectAtIndex:0];
-	NSArray * ar = [myPub pubAuthors];
-	unsigned index = [ar indexOfObjectIdenticalTo:self];
-    if (index != NSNotFound) {
-        NSScriptObjectSpecifier *containerRef = [myPub objectSpecifier];
-		return [[[NSIndexSpecifier allocWithZone:[self zone]] initWithContainerClassDescription:[containerRef keyClassDescription] containerSpecifier:containerRef key:@"pubAuthors" index:index] autorelease];
-    } 
-	else {
-        return nil;
-    }
+	BibDocument * myDoc = [myPub document];
+	NSScriptObjectSpecifier *containerRef = [myDoc objectSpecifier];
+		
+	return [[[NSNameSpecifier allocWithZone:[self zone]] initWithContainerClassDescription:[containerRef keyClassDescription] containerSpecifier:containerRef key:@"authors" name:[self normalizedName]] autorelease];
+
 }
 
 
