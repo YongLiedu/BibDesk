@@ -27,6 +27,7 @@ NSString *BDSKInputManagerID = @"net.sourceforge.bibdesk.inputmanager";
     if([ws respondsToSelector:@selector(absolutePathForAppBundleWithIdentifier:)]){
 	textEditPath = [ws absolutePathForAppBundleWithIdentifier:@"com.apple.textedit"];
     } else {
+	[enableButton setEnabled:NO];
 	NSAlert *anAlert = [NSAlert alertWithMessageText:@"Error!"
 					   defaultButton:nil
 					 alternateButton:nil
