@@ -87,7 +87,7 @@ static void addToolbarItem(NSMutableDictionary *theDict,NSString *identifier,NSS
                    self, @selector(setImage:), [NSImage imageNamed: @"newdoc"], @selector(newPub:),
                    NULL);
 
-    addToolbarItem(toolbarItems, NewDocToolbarItemIdentifier,
+    addToolbarItem(toolbarItems, DelDocToolbarItemIdentifier,
                    NSLocalizedString(@"Delete",@""), NSLocalizedString(@"Delete Publication",@""),
                    NSLocalizedString(@"Delete Selected Publication(s)",@""),
                    self, @selector(setImage:), [NSImage imageNamed: @"deldoc"], @selector(delPub:),
