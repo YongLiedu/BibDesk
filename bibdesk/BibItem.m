@@ -430,6 +430,9 @@ _setupParagraphStyle()
     char *str = nil;
 
     if (aString == nil) return;
+    
+    // we're supposed to collapse whitespace before using bt_split_name, and author names with surrounding whitespace don't display in the table (probably for that reason)
+    aString = [aString stringByCollapsingWhitespaceAndRemovingSurroundingWhitespace];
 
     str = (char *)[aString UTF8String];
     
@@ -437,18 +440,20 @@ _setupParagraphStyle()
     int i=0;
 #warning - Exception - might want to add an exception handler that notifies the user of the warning...
     [pubAuthors removeAllObjects];
+    NSString *s;
+    
     sl = bt_split_list(str, "and", "BibTex Name", 1, "inside setAuthorsFromBibtexString");
     if (sl != nil) {
         for(i=0; i < sl->num_items; i++){
             if(sl->items[i] != nil){
-				NSString *s = [NSString stringWithBytes:sl->items[i] encoding:NSUTF8StringEncoding];
+                s = [NSString stringWithBytes:sl->items[i] encoding:NSUTF8StringEncoding];
                 [self addAuthorWithName:s];
                 
             }
         }
         bt_free_list(sl); // hey! got to free the memory!
     }
-    //    NSLog(@"%@", pubAuthors);
+      //  NSLog(@"%@", pubAuthors);
 }
 
 - (NSString *)bibtexAuthorString{
