@@ -89,6 +89,8 @@
 		<string>{\^a}</string>
 		<key>ã</key>
 		<string>{\~a}</string>
+		<key>Ã</key>
+		<string>{\~A}</string>
 		<key>ä</key>
 		<string>{\"a}</string>
 		<key>å</key>
@@ -330,6 +332,8 @@
 		<string>ž</string>
 		<key>{\~a}</key>
 		<string>ã</string>
+		<key>{\~A}</key>
+		<string>Ã</string>
 		<key>{\~n}</key>
 		<string>ñ</string>
 		<key>{\~o}</key>
