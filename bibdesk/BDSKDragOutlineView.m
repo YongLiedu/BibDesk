@@ -141,7 +141,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 
 #pragma mark || Methods to support the type-ahead selector.
 - (NSArray *)typeAheadSelectionItems{
-    NSEnumerator *authE = [[[self delegate] allAuthors] objectEnumerator];
+    NSEnumerator *authE = [[[self delegate] currentSortFieldArray] objectEnumerator];
     NSMutableArray *authStringsArray = [NSMutableArray arrayWithCapacity:15];
     id auth = nil;
     while(auth = [authE nextObject]){
@@ -173,7 +173,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 }
 
 - (void)typeAheadSelectItemAtIndex:(int)itemIndex{
-    NSString *itemToSelect = [[[self delegate] allAuthors] objectAtIndex:itemIndex];
+    NSString *itemToSelect = [[[self delegate] currentSortFieldArray] objectAtIndex:itemIndex];
     int  rowToSelect = [self rowForItem:itemToSelect];
     [self selectRow:rowToSelect byExtendingSelection:NO];
 }
