@@ -1282,9 +1282,9 @@ void _setupFonts(){
 					break;
 				case 'f':
 					// arbitrary field
-					NSAssert( [scanner scanString:@"{" intoString:NULL], @"Failed to scan {." ); // these errors will be handled gracefully by the BDSKConverter
+					// NSAssert( [scanner scanString:@"{" intoString:NULL], @"Failed to scan {." ); // these errors will be handled gracefully by the BDSKConverter
 					[scanner scanUpToString:@"}" intoString:&string]; // it isn't really an error if there's no content
-					NSAssert( [scanner scanString:@"}" intoString:NULL], @"Failed to scan }." );
+					// NSAssert( [scanner scanString:@"}" intoString:NULL], @"Failed to scan }." );
 					
 					if ([scanner scanCharactersFromSet:digits intoString:&numStr]) {
 						number = [numStr intValue];
@@ -1303,9 +1303,9 @@ void _setupFonts(){
 					break;
 				case 'c':
 					// This handles acronym specifiers of the form %c{FieldName}
-					NSAssert( [scanner scanString:@"{" intoString:NULL], @"Failed to scan {." ); // these errors will be handled gracefully by the BDSKConverter
+					// NSAssert( [scanner scanString:@"{" intoString:NULL], @"Failed to scan {." ); // these errors will be handled gracefully by the BDSKConverter
 					[scanner scanUpToString:@"}" intoString:&string]; // it isn't really an error if there's no content
-					NSAssert( [scanner scanString:@"}" intoString:NULL], @"Failed to scan }." );
+					// NSAssert( [scanner scanString:@"}" intoString:NULL], @"Failed to scan }." );
 					
 					string = [self acronymValueOfField:string];
 					string = [converter stringBySanitizingString:string forField:fieldName inFileType:[self fileType]];
