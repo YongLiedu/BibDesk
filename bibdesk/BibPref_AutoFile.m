@@ -23,6 +23,9 @@
 	[openPanel setAllowsMultipleSelection:NO];
 	[openPanel setCanChooseFiles:NO];
 	[openPanel setCanChooseDirectories:YES];
+        if([openPanel respondsToSelector:@selector(setCanCreateDirectories:)]){
+            [openPanel setCanCreateDirectories:YES];
+        }
 
 	if ([openPanel runModalForTypes:nil] != NSOKButton)
 	{
