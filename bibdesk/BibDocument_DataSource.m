@@ -87,20 +87,20 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
             
         }else if([tcID isEqualToString: @"1st Author"] ){
             if([auths count] > 0){
-                return [[pub authorAtIndex:0] name];
+                return [[pub authorAtIndex:0] normalizedName];
             }else{
                 return @"-";
             }
             
         }else if([tcID isEqualToString: @"2nd Author"] ){
             if([auths count] > 1)
-                return [[pub authorAtIndex:1] name]; 
+                return [[pub authorAtIndex:1] normalizedName]; 
             else
                 return @"-";
             
         }else if([tcID isEqualToString: @"3rd Author"] ){
             if([auths count] > 2)
-                return [[pub authorAtIndex:2] name];
+                return [[pub authorAtIndex:2] normalizedName];
             else
                 return @"-";
 
