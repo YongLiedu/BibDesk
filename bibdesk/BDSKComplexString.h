@@ -157,6 +157,14 @@ typedef enum{
 - (NSString *)expandedValueFromArray:(NSArray *)nodes;
 
 /*!
+    @method     updateExpandedValue
+    @abstract   Updates the expanded value of the receiver, using expandedValueFromArray:
+    @discussion (description)
+    @result     -
+*/
+- (void)updateExpandedValue;
+
+/*!
     @method     macroResolver
     @abstract   Returns the object used to resolve macros in the complex string
     @discussion (description)
@@ -175,6 +183,7 @@ typedef enum{
 
 - (void)handleMacroKeyChangedNotification:(NSNotification *)notification;
 - (void)handleMacroDefinitionChangedNotification:(NSNotification *)notification;
+- (void)handleNodeValueChangedNotification:(NSNotification *)notification;
 
 @end
 

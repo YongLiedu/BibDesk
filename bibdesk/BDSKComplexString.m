@@ -126,9 +126,13 @@ static NSCharacterSet *macroCharSet = nil;
 }
 
 - (void)setValue:(NSString *)newValue {
-    if (value != newValue) {
+    if (![value isEqualToString:newValue]) {
         [value release];
         value = [newValue copy];
+		
+        [[NSNotificationCenter defaultCenter] postNotificationName:BDSKNodeValueChangedNotification
+                                                            object:self
+                                                          userInfo:[NSDictionary dictionary]];
     }
 }
 
@@ -169,6 +173,18 @@ static NSDictionary *globalMacroDefs;
 			NSLog(@"Warning: complex string being created without macro resolver. Macros in it will not be resolved.");
 		
 		expandedValue = [[self expandedValueFromArray:[self nodes]] retain];
+		
+		NSNotificationCenter *nc = [NSNotificationCenter defaultCenter];
+		NSEnumerator *nodeEnum = [nodes objectEnumerator];
+		BDSKStringNode *node;
+		
+		while (node = [nodeEnum nextObject]) {
+			[nc addObserver:self
+				   selector:@selector(handleNodeValueChangedNotification:)
+					   name:BDSKNodeValueChangedNotification
+					 object:node];
+			
+		}
 	}		
     return self;
 }
@@ -298,12 +314,16 @@ static NSDictionary *globalMacroDefs;
 	if (newMacroResolver != macroResolver) {
 		NSNotificationCenter *nc = [NSNotificationCenter defaultCenter];
 		if (macroResolver) {
-			[nc removeObserver:self];
+			[nc removeObserver:self 
+						  name:BDSKBibDocMacroKeyChangedNotification 
+						object:macroResolver];
+			[nc removeObserver:self
+						  name:BDSKBibDocMacroDefinitionChangedNotification 
+						object:macroResolver];
 		}
 		macroResolver = newMacroResolver;
 		
-		[expandedValue autorelease];
-		expandedValue = [[self expandedValueFromArray:nodes] retain];
+		[self updateExpandedValue];
 		
 		if (newMacroResolver) {
 			[nc addObserver:self
@@ -318,25 +338,30 @@ static NSDictionary *globalMacroDefs;
 	}
 }
 
+- (void)updateExpandedValue{
+	[expandedValue autorelease];
+	expandedValue = [[self expandedValueFromArray:nodes] retain];
+}
+
 - (void)handleMacroKeyChangedNotification:(NSNotification *)notification{
 	NSDictionary *userInfo = [notification userInfo];
 	BDSKStringNode *oldMacroNode = [BDSKStringNode nodeWithMacroString:[userInfo objectForKey:@"oldKey"]];
 	BDSKStringNode *newMacroNode = [BDSKStringNode nodeWithMacroString:[userInfo objectForKey:@"newKey"]];
 	
-	if ([nodes containsObject:oldMacroNode] || [nodes containsObject:newMacroNode]) {
-		[expandedValue autorelease];
-		expandedValue = [[self expandedValueFromArray:nodes] retain];
-	}
+	if ([nodes containsObject:oldMacroNode] || [nodes containsObject:newMacroNode])
+		[self updateExpandedValue];
 }
 
 - (void)handleMacroDefinitionChangedNotification:(NSNotification *)notification{
 	NSDictionary *userInfo = [notification userInfo];
 	BDSKStringNode *macroNode = [BDSKStringNode nodeWithMacroString:[userInfo objectForKey:@"macroKey"]];
 	
-	if ([nodes containsObject:macroNode]) {
-		[expandedValue autorelease];
-		expandedValue = [[self expandedValueFromArray:nodes] retain];
-	}
+	if ([nodes containsObject:macroNode])
+		[self updateExpandedValue];
+}
+
+- (void)handleNodeValueChangedNotification:(NSNotification *)notification{
+	[self updateExpandedValue];
 }
 
 @end
