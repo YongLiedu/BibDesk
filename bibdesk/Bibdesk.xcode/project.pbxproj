@@ -11,6 +11,13 @@
 				F918104307583A6E00CF822D,
 				F988709007580CB4001D4D49,
 				F94A94F3079AEE5800D13AB5,
+				2730077607CF20B500F2E485,
+				2730077707CF20B500F2E485,
+				2730077807CF20B500F2E485,
+				2730077907CF20B500F2E485,
+				2730077A07CF20B500F2E485,
+				2730077B07CF20B500F2E485,
+				2730077C07CF20B500F2E485,
 				F94A94E9079AEE5800D13AB5,
 				27C1639D078BF48C008A4B83,
 				F9022C66075802E300C3F701,
@@ -145,6 +152,166 @@
 //272
 //273
 //274
+		2730077607CF20B500F2E485 = {
+			fileEncoding = 30;
+			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.c.h;
+			path = BDSKBorderlessKeyWindow.h;
+			refType = 4;
+			sourceTree = "<group>";
+		};
+		2730077707CF20B500F2E485 = {
+			fileEncoding = 30;
+			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.c.objc;
+			path = BDSKBorderlessKeyWindow.m;
+			refType = 4;
+			sourceTree = "<group>";
+		};
+		2730077807CF20B500F2E485 = {
+			fileEncoding = 30;
+			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.c.objc;
+			path = BDSKComplexString.m;
+			refType = 4;
+			sourceTree = "<group>";
+		};
+		2730077907CF20B500F2E485 = {
+			fileEncoding = 30;
+			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.c.h;
+			path = MacroTextFieldWindowController.h;
+			refType = 4;
+			sourceTree = "<group>";
+		};
+		2730077A07CF20B500F2E485 = {
+			fileEncoding = 30;
+			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.c.objc;
+			path = MacroTextFieldWindowController.m;
+			refType = 4;
+			sourceTree = "<group>";
+		};
+		2730077B07CF20B500F2E485 = {
+			fileEncoding = 30;
+			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.c.h;
+			path = MacroWindowController.h;
+			refType = 4;
+			sourceTree = "<group>";
+		};
+		2730077C07CF20B500F2E485 = {
+			fileEncoding = 30;
+			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.c.objc;
+			path = MacroWindowController.m;
+			refType = 4;
+			sourceTree = "<group>";
+		};
+		2730077D07CF20B500F2E485 = {
+			fileRef = 2730077607CF20B500F2E485;
+			isa = PBXBuildFile;
+			settings = {
+			};
+		};
+		2730077E07CF20B500F2E485 = {
+			fileRef = 2730077707CF20B500F2E485;
+			isa = PBXBuildFile;
+			settings = {
+			};
+		};
+		2730077F07CF20B500F2E485 = {
+			fileRef = 2730077807CF20B500F2E485;
+			isa = PBXBuildFile;
+			settings = {
+			};
+		};
+		2730078007CF20B500F2E485 = {
+			fileRef = 2730077907CF20B500F2E485;
+			isa = PBXBuildFile;
+			settings = {
+			};
+		};
+		2730078107CF20B500F2E485 = {
+			fileRef = 2730077A07CF20B500F2E485;
+			isa = PBXBuildFile;
+			settings = {
+			};
+		};
+		2730078207CF20B500F2E485 = {
+			fileRef = 2730077B07CF20B500F2E485;
+			isa = PBXBuildFile;
+			settings = {
+			};
+		};
+		2730078307CF20B500F2E485 = {
+			fileRef = 2730077C07CF20B500F2E485;
+			isa = PBXBuildFile;
+			settings = {
+			};
+		};
+		2730079B07CF214E00F2E485 = {
+			children = (
+				2730079C07CF214E00F2E485,
+			);
+			isa = PBXVariantGroup;
+			name = MacroTextFieldWindow.nib;
+			path = "";
+			refType = 4;
+			sourceTree = "<group>";
+		};
+		2730079C07CF214E00F2E485 = {
+			isa = PBXFileReference;
+			lastKnownFileType = wrapper.nib;
+			name = English;
+			path = English.lproj/MacroTextFieldWindow.nib;
+			refType = 4;
+			sourceTree = "<group>";
+		};
+		2730079D07CF214E00F2E485 = {
+			children = (
+				2730079E07CF214E00F2E485,
+			);
+			isa = PBXVariantGroup;
+			name = MacroWindow.nib;
+			path = "";
+			refType = 4;
+			sourceTree = "<group>";
+		};
+		2730079E07CF214E00F2E485 = {
+			isa = PBXFileReference;
+			lastKnownFileType = wrapper.nib;
+			name = English;
+			path = English.lproj/MacroWindow.nib;
+			refType = 4;
+			sourceTree = "<group>";
+		};
+		2730079F07CF214E00F2E485 = {
+			fileRef = 2730079B07CF214E00F2E485;
+			isa = PBXBuildFile;
+			settings = {
+			};
+		};
+		273007A007CF214E00F2E485 = {
+			fileRef = 2730079D07CF214E00F2E485;
+			isa = PBXBuildFile;
+			settings = {
+			};
+		};
+		273007A407CF216700F2E485 = {
+			fileEncoding = 30;
+			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.c.h;
+			path = BDSKComplexString.h;
+			refType = 4;
+			sourceTree = "<group>";
+		};
+		273007A507CF216700F2E485 = {
+			fileRef = 273007A407CF216700F2E485;
+			isa = PBXBuildFile;
+			settings = {
+			};
+		};
 		275E26FA07838E150070398A = {
 			children = (
 				275E271D07838F7B0070398A,
@@ -664,6 +831,8 @@
 		};
 		29B97317FDCFA39411CA2CEA = {
 			children = (
+				2730079B07CF214E00F2E485,
+				2730079D07CF214E00F2E485,
 				F92F4E460788DEDD001B8F82,
 				F92F4E430788DEC5001B8F82,
 				F94A9504079AEE7600D13AB5,
@@ -1195,6 +1364,8 @@
 				3D7D45BD07C4EDB100F8D262,
 				3D7D473107C51ACE00F8D262,
 				3D8CA0A507CB625300460D07,
+				2730079F07CF214E00F2E485,
+				273007A007CF214E00F2E485,
 			);
 			isa = PBXResourcesBuildPhase;
 			runOnlyForDeploymentPostprocessing = 0;
@@ -1277,6 +1448,10 @@
 				F94A9502079AEE5800D13AB5,
 				F916E69607A9F9AB009EF011,
 				F916E6AC07A9FB56009EF011,
+				2730077E07CF20B500F2E485,
+				2730077F07CF20B500F2E485,
+				2730078107CF20B500F2E485,
+				2730078307CF20B500F2E485,
 			);
 			isa = PBXSourcesBuildPhase;
 			runOnlyForDeploymentPostprocessing = 0;
@@ -4220,6 +4395,7 @@
 		};
 		F918104307583A6E00CF822D = {
 			children = (
+				273007A407CF216700F2E485,
 				F94A94E4079AEE5800D13AB5,
 				F94A94EE079AEE5800D13AB5,
 				27C1639C078BF48C008A4B83,
@@ -5027,6 +5203,10 @@
 				F916E69407A9F9AB009EF011,
 				F916E6AA07A9FB56009EF011,
 				F9D5A8CB07B9B94F0092E7E2,
+				2730077D07CF20B500F2E485,
+				2730078007CF20B500F2E485,
+				2730078207CF20B500F2E485,
+				273007A507CF216700F2E485,
 			);
 			isa = PBXHeadersBuildPhase;
 			runOnlyForDeploymentPostprocessing = 0;
