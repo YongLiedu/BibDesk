@@ -489,7 +489,7 @@ void _setupFonts(){
 
 - (NSString *)citeKey{
     if(!citeKey || [@"" isEqualToString:citeKey]){
-		NSLog(@"setting suggested to %@",[self suggestedCiteKey]);
+		// NSLog(@"setting suggested to %@",[self suggestedCiteKey]);
         [self setCiteKey:[self suggestedCiteKey]]; 
     }
     return citeKey;
