@@ -1063,7 +1063,6 @@ stringByAppendingPathComponent:@"BibDesk"]; */
 
 - (void)stopParseUpdateTimer{ // sent by the parser when it's done with a file
     [parseUpdateTimer invalidate];
-    [self performSelectorOnMainThread:@selector(updateUI) withObject:nil waitUntilDone:NO]; // make sure this is on the main thread
 }
 
 - (IBAction)newPub:(id)sender{

@@ -12,11 +12,27 @@
 @implementation BibTeXParser
 
 - (id)init{
-    return self = [super init];
+    if(self = [super init]){
+        theDocument = nil;
+        [[NSNotificationCenter defaultCenter] addObserver:self
+                                                 selector:@selector(terminateCurrentThread)
+                                                     name:BDSKDocumentWindowWillCloseNotification
+                                                   object:[self document]]; 
+    }
+    return self;
 }
 
 - (void)dealloc{
+    [[NSNotificationCenter defaultCenter] removeObserver:self];
     [super dealloc];
+}
+
+- (void)terminateCurrentThread{
+    // NSLog(@"%@", NSStringFromSelector(_cmd));
+    [[NSNotificationCenter defaultCenter] removeObserver:self];
+    [theDocument stopParseUpdateTimer];
+    [self setDocument:nil];
+    // [NSThread exit]; // causes a hang; why?
 }
 
 /// libbtparse methods
@@ -57,6 +73,14 @@ NSRange SafeForwardSearchRange( unsigned startLoc, unsigned seekLength, unsigned
     [pool release];
 }
 
+- (void)setDocument:(BibDocument *)aDocument{
+    theDocument = aDocument;
+}
+
+- (BibDocument *)document{
+    return theDocument;
+}
+
 - (void)parseItemsFromString:(NSString *)fullString addToDocument:(BibDocument *)document{
     BOOL hadProblems;
     [self itemsFromString:fullString error:&hadProblems frontMatter:nil filePath:[document fileName] addToDocument:document];
@@ -81,6 +105,8 @@ NSRange SafeForwardSearchRange( unsigned startLoc, unsigned seekLength, unsigned
 
     if(document != nil)
         isThreadedLoad = YES;
+    
+    [self setDocument:document];
     
     NSAssert( fullString != nil, @"A nil string was passed to the parser.  This is probably due to an incorrect guess at the string encoding." );
 
@@ -364,14 +390,14 @@ NSRange SafeForwardSearchRange( unsigned startLoc, unsigned seekLength, unsigned
             NSAssert( key != nil, @"Found a nil key string");
             
             [dict setObject:value forKey:key];
-            [[NSApp delegate] addString:value forCompletionEntry:key];
+            //[[NSApp delegate] addString:value forCompletionEntry:key];
             
         }
         
         if(!isStringValue){ // this is all BibItem related stuff
             [newBI setFileOrder:fileOrder];
             [newBI setPubFields:dict];
-            (isThreadedLoad) ? [document addPublicationInBackground:newBI] : [bibItemArray addObject:newBI];
+            (isThreadedLoad) ? [theDocument addPublicationInBackground:newBI] : [bibItemArray addObject:newBI];
             [newBI release]; // now retained by the array
 
             fileOrder ++;
@@ -415,7 +441,10 @@ NSRange SafeForwardSearchRange( unsigned startLoc, unsigned seekLength, unsigned
                                            withObject:nil
                                         waitUntilDone:NO]; // this isn't nice, but I'm going to override the warning preference until the parser has been tested
 
-    if(isThreadedLoad) [document stopParseUpdateTimer]; // tell the doc to stop periodic gui updates
+    if(isThreadedLoad && theDocument != nil){ // see if the document ivar has been set to nil, since posting this notification can overlap with the document's -dealloc and cause a crash
+        [theDocument stopParseUpdateTimer]; // tell the doc to stop periodic gui updates
+        [[NSNotificationCenter defaultCenter] postNotificationName:BDSKDocumentUpdateUINotification object:nil]; // tell the doc to update; this will happen on the main thread
+    }
 
     [bibItemArray retain]; // don't release this when we release the threadPool!
 

@@ -15,7 +15,7 @@
 #import "BDSKConverter.h"
 
 @interface BibTeXParser : NSObject {
-
+    BibDocument *theDocument;
 }
 
 /*!
