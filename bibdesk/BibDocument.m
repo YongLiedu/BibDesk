@@ -2440,6 +2440,15 @@ This method always returns YES. Even if some or many operations fail.
 
 - (IBAction)columnsMenuAddTableColumn:(id)sender{
     // get the name, then call columnsMenuAddTableColumnName: enabled: to add it for you
+    // first we fill the popup
+	NSArray *prefsShownColNamesArray = [[OFPreferenceWrapper sharedPreferenceWrapper] arrayForKey:BDSKShownColsNamesKey];
+	NSMutableArray *colNames = [[[[BibTypeManager sharedManager] allRemovableFieldNames] mutableCopy] autorelease];
+	[colNames addObjectsFromArray:[NSArray arrayWithObjects:BDSKUrlString, BDSKLocalUrlString, BDSKCiteKeyString, @"Date", @"Added", @"Modified", @"1st Author", @"2nd Author", @"3rd Author", nil]];
+	[colNames removeObjectsInArray:prefsShownColNamesArray];
+	[colNames sortUsingSelector:@selector(caseInsensitiveCompare:)];
+	[colNames insertObject:NSLocalizedString(@"Choose a Column:",@"") atIndex:0];
+	[addFieldPopupButton removeAllItems];
+	[addFieldPopupButton addItemsWithTitles:colNames];
     [addFieldPrompt setStringValue:NSLocalizedString(@"Name of column to add:",@"")];
     [NSApp beginSheet:addFieldSheet
        modalForWindow:documentWindow
@@ -2474,8 +2483,11 @@ This method always returns YES. Even if some or many operations fail.
     }
 }
 
-
-
+- (IBAction)selectColumnToAdd:(id)sender{
+	if([sender indexOfSelectedItem] > 0){
+		[addFieldTextField setStringValue:[sender titleOfSelectedItem]];
+	}
+}
 
 
 

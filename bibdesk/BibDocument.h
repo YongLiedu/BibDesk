@@ -126,6 +126,7 @@ extern NSString *BDSKBibItemLocalDragPboardType;
     // and its prompt:
     IBOutlet NSTextField* addFieldPrompt;
     IBOutlet NSTextField* addFieldTextField;
+	IBOutlet NSPopUpButton* addFieldPopupButton;
 	
 	// dialog for removing 'fields'.
 	IBOutlet NSWindow *delFieldSheet;
@@ -700,6 +701,14 @@ int generalBibItemCompareFunc(id item1, id item2, void *context);
 - (void)addTableColumnSheetDidEnd:(NSWindow *)sheet
                        returnCode:(int) returnCode
                       contextInfo:(void *)contextInfo;
+
+/*!
+    @method selectColumnToAdd:
+    @abstract Action of the add column popup button to select a column field to add.
+    @discussion \253discussion\273
+    
+*/
+- (IBAction)selectColumnToAdd:(id)sender;
 
 /*!
     @method menuForTableViewSelection...

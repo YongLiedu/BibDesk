@@ -46,6 +46,7 @@
                 quickSearchRemoveField = id; 
                 searchFieldAction = id; 
                 searchFieldChangeKey = id; 
+                selectColumnToAdd = id; 
                 splitViewDoubleClick = id; 
                 toggleShowingCustomCiteDrawer = id; 
             }; 
@@ -56,6 +57,7 @@
                 actionMenu = NSMenu; 
                 actionMenuButton = RYZImagePopUpButton; 
                 actionMenuFirstItem = NSMenuItem; 
+                addFieldPopupButton = NSPopUpButton; 
                 addFieldPrompt = NSTextField; 
                 addFieldSheet = NSWindow; 
                 addFieldTextField = NSTextField; 
