@@ -44,8 +44,7 @@
 			sourceTree = "<group>";
 		};
 		1058C7A7FEA54F5311CA2CBB = {
-			fallbackIsa = PBXFileReference;
-			isa = PBXFrameworkReference;
+			isa = PBXFileReference;
 			lastKnownFileType = wrapper.framework;
 			name = Cocoa.framework;
 			path = /System/Library/Frameworks/Cocoa.framework;
@@ -358,8 +357,7 @@
 			};
 		};
 		27413A6B05328D0A00BEE674 = {
-			fallbackIsa = PBXFileReference;
-			isa = PBXFrameworkReference;
+			isa = PBXFileReference;
 			lastKnownFileType = wrapper.framework;
 			name = Message.framework;
 			path = /System/Library/Frameworks/Message.framework;
@@ -825,7 +823,7 @@
 		277D26090694D26B0047A142 = {
 			fileEncoding = 30;
 			isa = PBXFileReference;
-			lastKnownFileType = text.plist.xml;
+			lastKnownFileType = text.plist.scriptTerminology;
 			path = BibDesk.scriptTerminology;
 			refType = 4;
 			sourceTree = "<group>";
@@ -2040,7 +2038,7 @@
 		};
 		27E0AA7D05A7C86C005BA25A = {
 			isa = PBXFileReference;
-			lastKnownFileType = text.plist.xml;
+			lastKnownFileType = text.xml;
 			path = "Info-Bibdesk__Upgraded_.plist";
 			refType = 4;
 			sourceTree = "<group>";
@@ -2303,8 +2301,7 @@
 			sourceTree = "<group>";
 		};
 		2A37F4C4FDCFA73011CA2CEA = {
-			fallbackIsa = PBXFileReference;
-			isa = PBXFrameworkReference;
+			isa = PBXFileReference;
 			lastKnownFileType = wrapper.framework;
 			name = AppKit.framework;
 			path = /System/Library/Frameworks/AppKit.framework;
@@ -2312,8 +2309,7 @@
 			sourceTree = "<absolute>";
 		};
 		2A37F4C5FDCFA73011CA2CEA = {
-			fallbackIsa = PBXFileReference;
-			isa = PBXFrameworkReference;
+			isa = PBXFileReference;
 			lastKnownFileType = wrapper.framework;
 			name = Foundation.framework;
 			path = /System/Library/Frameworks/Foundation.framework;
@@ -2331,8 +2327,6 @@
 //4A3
 //4A4
 		4A9504D0FFE6A4CB11CA0CBA = {
-			buildRules = (
-			);
 			buildSettings = {
 				COPY_PHASE_STRIP = NO;
 				GCC_DYNAMIC_NO_PIC = YES;
@@ -2674,8 +2668,6 @@
 			sourceTree = "<group>";
 		};
 		F55B9B6E02A0EC6001EF0AED = {
-			buildRules = (
-			);
 			buildSettings = {
 				COPY_PHASE_STRIP = YES;
 				DEPLOYMENT_POSTPROCESSING = YES;
@@ -3017,8 +3009,7 @@
 			sourceTree = "<group>";
 		};
 		F58886DB03ABFA7101A80167 = {
-			fallbackIsa = PBXFileReference;
-			isa = PBXExecutableFileReference;
+			isa = PBXFileReference;
 			lastKnownFileType = "compiled.mach-o.executable";
 			name = pdftotext;
 			path = ../bibdesk_vendorsrc/foolabs/xpdf/xpdf/pdftotext;
@@ -3026,24 +3017,21 @@
 			sourceTree = "<group>";
 		};
 		F5941276037E3B5401A80166 = {
-			fallbackIsa = PBXFileReference;
-			isa = PBXFrameworkReference;
+			isa = PBXFileReference;
 			lastKnownFileType = wrapper.framework;
 			path = OmniAppKit.framework;
 			refType = 3;
 			sourceTree = BUILT_PRODUCTS_DIR;
 		};
 		F5941277037E3B5401A80166 = {
-			fallbackIsa = PBXFileReference;
-			isa = PBXFrameworkReference;
+			isa = PBXFileReference;
 			lastKnownFileType = wrapper.framework;
 			path = OmniBase.framework;
 			refType = 3;
 			sourceTree = BUILT_PRODUCTS_DIR;
 		};
 		F5941278037E3B5401A80166 = {
-			fallbackIsa = PBXFileReference;
-			isa = PBXFrameworkReference;
+			isa = PBXFileReference;
 			lastKnownFileType = wrapper.framework;
 			path = OmniFoundation.framework;
 			refType = 3;
@@ -3195,8 +3183,7 @@
 		};
 		F5A86D930398EC5D01A80164 = {
 			explicitFileType = wrapper.framework;
-			fallbackIsa = PBXFileReference;
-			isa = PBXFrameworkReference;
+			isa = PBXFileReference;
 			path = SenTestingKit.framework;
 			refType = 3;
 			sourceTree = BUILT_PRODUCTS_DIR;
@@ -3284,8 +3271,6 @@
 			sourceTree = "<group>";
 		};
 		F5AD2C780396E97C01A80164 = {
-			buildRules = (
-			);
 			buildSettings = {
 				TEST_AFTER_BUILD = YES;
 			};
