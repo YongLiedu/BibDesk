@@ -17,11 +17,15 @@ NSString *BDSKInputManagerID = @"net.sourceforge.bibdesk.inputmanager";
     [super awakeFromNib];
     applicationSupportPath = [[NSHomeDirectory() stringByAppendingPathComponent:@"/Library/Application Support/BibDeskInputManager"] retain];
     inputManagerPath = [[NSHomeDirectory() stringByAppendingPathComponent:@"/Library/InputManagers/BibDeskInputManager"] retain];
+    NSString *textEditPath = [@"/Applications/TextEdit.app" stringByStandardizingPath];
     if(![[NSFileManager defaultManager] fileExistsAtPath:[applicationSupportPath stringByAppendingPathComponent:@"EnabledApplications.plist"]]){
-	appListArray = [[NSMutableArray arrayWithObjects:[NSMutableDictionary dictionaryWithObject:[@"/Applications/TextEdit.app" stringByStandardizingPath] forKey:@"Path"], 
-							 [NSMutableDictionary dictionaryWithObject:[@"/Developer/Applications/Xcode.app" stringByStandardizingPath] forKey:@"Path"], nil] retain];
+	if([[NSFileManager defaultManager] fileExistsAtPath:textEditPath]){
+	    appListArray = [[NSMutableArray arrayWithObjects:[NSMutableDictionary dictionaryWithObject:textEditPath forKey:@"Path"], nil] retain];
+	} else {
+	    appListArray = [[NSMutableArray array] retain]; // create an empty one if we don't have TextEdit at the default location
+	}
 	[[NSFileManager defaultManager] createDirectoryAtPath:applicationSupportPath attributes:nil];
-    } else {
+    } else { // if we found the plist, use that instead
 	appListArray = [[NSArray arrayWithContentsOfFile:[applicationSupportPath stringByAppendingPathComponent:@"EnabledApplications.plist"]] mutableCopy];
     }
     [[appList tableColumnWithIdentifier:@"AppList"] setDataCell:[[[NSBrowserCell alloc] init] autorelease]];
@@ -35,6 +39,7 @@ NSString *BDSKInputManagerID = @"net.sourceforge.bibdesk.inputmanager";
 }
 
 - (void)updateUI{
+//    NSLog(@"-[%@ %@] 0x%x", [self class], NSStringFromSelector(_cmd), self);
     if([[NSFileManager defaultManager] fileExistsAtPath:inputManagerPath]){
 	[enableButton setTitle:NSLocalizedString(@"Reinstall",@"Reinstall input manager")];
 	[enableButton sizeToFit];
@@ -44,12 +49,14 @@ NSString *BDSKInputManagerID = @"net.sourceforge.bibdesk.inputmanager";
 }
 
 - (NSString *)bundleIDForPath:(NSString *)path{
+//    NSLog(@"-[%@ %@] 0x%x", [self class], NSStringFromSelector(_cmd), self);
     NSBundle *bundle = [NSBundle bundleWithPath:path];
     
     return [[bundle infoDictionary] objectForKey:@"CFBundleIdentifier"];
 }
 
 - (void)setBundleID{
+//    NSLog(@"-[%@ %@] 0x%x", [self class], NSStringFromSelector(_cmd), self);
     NSEnumerator *e = [appListArray objectEnumerator];
     NSMutableDictionary *dict;
     
