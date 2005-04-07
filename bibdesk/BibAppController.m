@@ -127,7 +127,6 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
                                                      name:BDSKParserErrorNotification
                                                    object:nil];
         errors = [[NSMutableArray alloc] initWithCapacity:5];
-        finder = [[BibFinder sharedFinder] retain];
         acLock = [[NSLock alloc] init];
         autoCompletionDict = [[NSMutableDictionary alloc] initWithCapacity:15]; // arbitrary
 	 	formatters = [[NSMutableDictionary alloc] initWithCapacity:15]; // arbitrary
@@ -191,7 +190,6 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 	[formatters release];
     [autocompletePunctuationCharacterSet release];
     [acLock release];
-	[finder release];
     [errors release];
     [super dealloc];
 }
@@ -739,11 +737,6 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
     
 }
 
-- (IBAction)showFindPanel:(id)sender{
-    [finder showWindow:self];
-}
-
-
 - (IBAction)toggleShowingPreviewPanel:(id)sender{
     if(!showingPreviewPanel){
 		[self showPreviewPanel:sender];
@@ -846,12 +839,13 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 #pragma mark || Service code
 
 - (NSDictionary *)constraintsFromString:(NSString *)string{
+#warning FIXME
+    // ARM:  this parsing code is sort of broken, at least with regard to the online help.  constraints are not split properly.
     NSScanner *scanner;
     NSMutableDictionary *searchConstraints = [NSMutableDictionary dictionary];
     NSString *queryString;
     NSMutableString *queryKey;
     NSCharacterSet *delimiterSet = [NSCharacterSet characterSetWithCharactersInString:@":="];
-    //NSCharacterSet *emptySet =  [NSCharacterSet characterSetWithCharactersInString:@""];
     NSCharacterSet *ampersandSet =  [NSCharacterSet characterSetWithCharactersInString:@"&"];
 
     scanner = [NSScanner scannerWithString:string];
@@ -870,18 +864,16 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
                                                                                       // might have to remove a trailing space:
             if([[queryString substringWithRange:NSMakeRange([queryString length]-1,1)] isEqualToString:@" "]){
                 queryString = [queryString substringWithRange:NSMakeRange(0,[queryString length]-1)];
-                // FIXME? does this leak memory? is the intoString: argument autoreleased?
             }
             [scanner scanCharactersFromSet:ampersandSet intoString:nil]; // scan the ampersands away.
             if(queryKey)
-                [searchConstraints setObject:queryString forKey:queryKey];
+                [searchConstraints setObject:queryString forKey:[queryKey capitalizedString]];
             if(![scanner isAtEnd]) // do i have to do this?
                 [scanner scanCharactersFromSet:[NSCharacterSet alphanumericCharacterSet] intoString:&queryKey];// scan another
         }
 
     }else{
         // if it was at end, we are done, and we'll scan in the title:
-        // items = [finder itemsMatchingText:queryKey inKey:BDSKTitleString];
         if(queryKey){
             [searchConstraints setObject:queryKey forKey:BDSKTitleString];
         } else {
@@ -897,7 +889,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
                                 error:(NSString **)error{
     NSString *pboardString;
     NSArray *types;
-    NSMutableArray *items;
+    NSSet *items;
     NSEnumerator *e;
     BibItem *key;
     BOOL yn;
@@ -929,8 +921,8 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
                                    @"search constraints not valid.");
         return;
     }        
-    
-    items = [finder itemsMatchingConstraints:searchConstraints];
+
+    items = [self itemsMatchingSearchConstraints:searchConstraints];
     
     e = [items objectEnumerator];
     if([items count] > 0){
@@ -962,6 +954,35 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
     return;
 }
 
+- (NSSet *)itemsMatchingSearchConstraints:(NSDictionary *)constraints{
+    NSArray *docs = [self documents];
+    if([docs count] == 0)
+        return nil;
+
+    NSMutableSet *itemsFound = [NSMutableSet set];
+    
+    NSEnumerator *constraintsKeyEnum = [constraints keyEnumerator];
+    NSString *constraintKey = nil;
+    BibDocument *aDoc = nil;
+
+    while(constraintKey = [constraintsKeyEnum nextObject]){
+        
+        NSEnumerator *docEnum = [docs objectEnumerator];
+        
+        while(aDoc = [docEnum nextObject]){
+            [itemsFound addObjectsFromArray:[aDoc publicationsWithSubstring:[constraints objectForKey:constraintKey] 
+                                                                    inField:constraintKey 
+                                                                   forArray:[aDoc publications]]];
+        }
+    }
+    return itemsFound;
+}
+
+- (NSSet *)itemsMatchingCiteKey:(NSString *)citeKeyString{
+    NSDictionary *constraints = [NSDictionary dictionaryWithObject:citeKeyString forKey:BDSKCiteKeyString];
+    return [self itemsMatchingSearchConstraints:constraints];
+}
+
 - (void)completeCiteKeyFromSelection:(NSPasteboard *)pboard
                              userData:(NSString *)userData
                                 error:(NSString **)error{
@@ -973,16 +994,15 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
         return;
     }
     NSString *pboardString = [pboard stringForType:NSStringPboardType];
-    NSArray *items = [finder itemsMatchingCiteKey:pboardString];
-    NSDictionary *itemDict = nil;
+
+    NSSet *items = [self itemsMatchingCiteKey:pboardString];
 	BibItem *item = nil;
     NSMutableString *retStr = [NSMutableString string];
     BOOL yn = NO;    
     NSEnumerator *itemE = [items objectEnumerator];
     int count = [items count];
     
-    while(itemDict = [itemE nextObject]){
-		item = [itemDict objectForKey:@"BibItem"];
+    while(item = [itemE nextObject]){
         [retStr appendString:[item citeKey]];
         if(count > 1)
             [retStr appendString:@" "];
@@ -1003,7 +1023,8 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
         return;
     }
     NSString *pboardString = [pboard stringForType:NSStringPboardType];
-    NSArray *items = [finder itemsMatchingCiteKey:pboardString];
+
+    NSSet *items = [self itemsMatchingCiteKey:pboardString];
 	NSDictionary *itemDict = nil;
 	BibItem *item;
 	BibDocument *doc = nil;
@@ -1041,10 +1062,6 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
     [doc showWindows];
 }
 
-
-/* ssp: 2004-07-18
-Implements service to import selection
-*/
 - (void)addPublicationsFromSelection:(NSPasteboard *)pboard
 						   userData:(NSString *)userData
 							  error:(NSString **)error{	

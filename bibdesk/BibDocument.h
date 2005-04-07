@@ -44,7 +44,6 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 @class BibItem;
 @class BibEditor;
 @class BibAuthor;
-@class BibFinder;
 @class AGRegex;
 
 // Local drag pasteboard currently stores bibtex string data to drag between open docs

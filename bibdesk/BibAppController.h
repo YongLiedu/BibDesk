@@ -17,7 +17,6 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 #import <Cocoa/Cocoa.h>
 
 #import "BibPrefController.h";
-#import "BibFinder.h";
 #import "BDSKFormCellFormatter.h";
 #import "BDSKShellTask.h";
 #import <OmniAppKit/OAScriptMenuItem.h>
@@ -38,7 +37,6 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 
 @interface BibAppController : NSDocumentController {
     BOOL showingPreviewPanel;
-    BibFinder *finder;
 
     // error-handling stuff:
     IBOutlet NSPanel* errorPanel;
@@ -171,7 +169,6 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 - (IBAction)checkForUpdates:(id)sender;
 
 - (IBAction)showPreferencePanel:(id)sender;
-- (IBAction)showFindPanel:(id)sender;
 
 - (IBAction)toggleShowingPreviewPanel:(id)sender;
 - (IBAction)showPreviewPanel:(id)sender;
@@ -222,6 +219,22 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 						   userData:(NSString *)userData
 							  error:(NSString **)error;
 
+/*!
+    @method     itemsMatchingSearchConstraints:
+    @abstract   Search across all open documents for items matching the given search constraints.  Returns a set of BibItems.
+    @discussion (comprehensive description)
+    @param      constraints Dictionary of the form @"objectToSearchFor" forKey:@"BibTeXFieldName".
+    @result     NSSet of BibItems.
+*/
+- (NSSet *)itemsMatchingSearchConstraints:(NSDictionary *)constraints;
+/*!
+    @method     itemsMatchingCiteKey:
+    @abstract   Search across all open documents for items with the given cite key.  Returns a set of BibItems.
+    @discussion (comprehensive description)
+    @param      citeKeyString (description)
+    @result     (description)
+*/
+- (NSSet *)itemsMatchingCiteKey:(NSString *)citeKeyString;
 @end
 
 @interface NSFileManager (BibDeskAdditions)
