@@ -1605,36 +1605,34 @@ stringByAppendingPathComponent:@"BibDesk"]; */
             [aSet removeAllObjects];
         }
     }
-        
-    NSMutableSet *newSet = [NSMutableSet setWithCapacity:10];
-    NSSet *tmpSet;
 
     // we need to sort the set so we always start with the shortest one
     [andResultsArray sortUsingFunction:compareSetLengths context:nil];
     
+    e = [andResultsArray objectEnumerator];
     // don't start out by intersecting an empty set
-    [newSet setSet:[andResultsArray objectAtIndex:0]];
+    [aSet setSet:[e nextObject]];
     // NSLog(@"newSet count is %i", [newSet count]);
     // NSLog(@"nextSet count is %i", [[andResultsArray objectAtIndex:1] count]);
     
-    // get the intersection of all of the results from the AND terms
-    e = [andResultsArray objectEnumerator];
+    NSSet *tmpSet = nil;
+    // get the intersection of all of successive results from the AND terms
     while(tmpSet = [e nextObject]){
-        [newSet intersectSet:tmpSet];
+        [aSet intersectSet:tmpSet];
     }
     
     // union the results from the OR search; use the newSet, so we don't have to worry about duplicates
     e = [orResultsArray objectEnumerator];
     
     while(tmpSet = [e nextObject]){
-        [newSet unionSet:tmpSet];
+        [aSet unionSet:tmpSet];
     }
 
-    return [newSet allObjects];
+    return [aSet allObjects];
     
 }
 
-int compareSetLengths(NSSet *set1, NSSet *set2, void *context){
+NSComparisonResult compareSetLengths(NSSet *set1, NSSet *set2, void *context){
     NSNumber *n1 = [NSNumber numberWithInt:[set1 count]];
     NSNumber *n2 = [NSNumber numberWithInt:[set2 count]];
     return [n1 compare:n2];

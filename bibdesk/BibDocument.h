@@ -878,7 +878,7 @@ Uses the tableview argument to determine which actionMenu it should validate.
     @param      (name) (description)
     @result     NSComparisonResult
 */
-int compareSetLengths(NSSet *set1, NSSet *set2, void *context);
+NSComparisonResult compareSetLengths(NSSet *set1, NSSet *set2, void *context);
 
 - (IBAction)exportEncodedBib:(id)sender;
 - (NSStringEncoding)documentStringEncoding;
