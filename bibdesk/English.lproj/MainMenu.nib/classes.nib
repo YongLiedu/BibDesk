@@ -14,7 +14,6 @@
                 reopenDocument = id; 
                 showConversionEditor = id; 
                 showErrorPanel = id; 
-                showFindPanel = id; 
                 showPreferencePanel = id; 
                 showPreviewPanel = id; 
                 showReadMeFile = id; 
@@ -124,6 +123,7 @@
                 exportAsMODS = id; 
                 exportAsRSS = id; 
                 exportEncodedBib = id; 
+                find = id; 
                 generateCiteKey = id; 
                 makeNewEmptyCollection = id; 
                 makeNewExternalSource = id; 
