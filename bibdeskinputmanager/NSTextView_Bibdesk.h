@@ -65,5 +65,5 @@ NSRange SafeForwardSearchRange( unsigned startLoc, unsigned seekLength, unsigned
 - (NSRange)rangeForUserCompletion;
 - (NSArray *)completionsForPartialWordRange:(NSRange)charRange indexOfSelectedItem:(int *)index;
 - (void)insertCompletion:(NSString *)word forPartialWordRange:(NSRange)charRange movement:(int)movement isFinal:(BOOL)flag;
-int arraySort(NSString *str1, NSString *str2, void *context);
+NSComparisonResult arraySort(NSString *str1, NSString *str2, void *context);
 @end

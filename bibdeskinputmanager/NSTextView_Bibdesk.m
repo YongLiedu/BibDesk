@@ -114,13 +114,10 @@ NSRange SafeBackwardSearchRange(NSRange startRange, unsigned seekLength){
     if(doubleBraceRange.location != NSNotFound) // reset the brace range if we have jurabib
         braceRange = [str rangeOfString:@"{" options:NSBackwardsSearch | NSLiteralSearch range:SafeBackwardSearchRange(doubleBraceRange, 10)];
     
-    NSRange leftBracketRange = [str rangeOfString:@"[" options:NSBackwardsSearch | NSLiteralSearch]; // first occurrence of it, looking backwards
+    NSRange leftBracketRange = [str rangeOfString:@"[" options:NSBackwardsSearch | NSLiteralSearch range:SafeBackwardSearchRange(braceRange, 100)]; // first occurrence of it, looking backwards
     // next, see if we have two optional parameters; this range is tricky, since we have to go forward one, then do a safe backward search over the previous characters
-    if(leftBracketRange.location != NSNotFound){
+    if(leftBracketRange.location != NSNotFound)
         doubleBracketRange = [str rangeOfString:@"][" options:NSBackwardsSearch | NSLiteralSearch range:SafeBackwardSearchRange( NSMakeRange(leftBracketRange.location + 1, 3), 3)]; 
-    } else {
-        doubleBracketRange = NSMakeRange(NSNotFound, 0);
-    }
     
     if(doubleBracketRange.location != NSNotFound) // if we had two parameters, find the last opening bracket
         leftBracketRange = [str rangeOfString:@"[" options:NSBackwardsSearch | NSLiteralSearch range:SafeBackwardSearchRange(doubleBracketRange, 50)];
@@ -321,7 +318,7 @@ requires X.3
 	return [super completionsForPartialWordRange:charRange indexOfSelectedItem:index];
 }
 
-int arraySort(NSString *str1, NSString *str2, void *context){
+NSComparisonResult arraySort(NSString *str1, NSString *str2, void *context){
     return [str1 compare:str2];
 }
 
