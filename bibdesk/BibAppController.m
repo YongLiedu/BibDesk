@@ -839,8 +839,6 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 #pragma mark || Service code
 
 - (NSDictionary *)constraintsFromString:(NSString *)string{
-#warning FIXME
-    // ARM:  this parsing code is sort of broken, at least with regard to the online help.  constraints are not split properly.
     NSScanner *scanner;
     NSMutableDictionary *searchConstraints = [NSMutableDictionary dictionary];
     NSString *queryString;
@@ -960,6 +958,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
         return nil;
 
     NSMutableSet *itemsFound = [NSMutableSet set];
+    NSMutableArray *arrayOfSets = [NSMutableArray array];
     
     NSEnumerator *constraintsKeyEnum = [constraints keyEnumerator];
     NSString *constraintKey = nil;
@@ -969,11 +968,26 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
         
         NSEnumerator *docEnum = [docs objectEnumerator];
         
-        while(aDoc = [docEnum nextObject]){
+        while(aDoc = [docEnum nextObject]){ 
+	    // this is an array of objects matching this particular set of search constraints; add them to the set
             [itemsFound addObjectsFromArray:[aDoc publicationsWithSubstring:[constraints objectForKey:constraintKey] 
                                                                     inField:constraintKey 
                                                                    forArray:[aDoc publications]]];
         }
+	// we have one set per search term, so copy it to an array and we'll get the next set of matches
+	[arrayOfSets addObject:[[itemsFound copy] autorelease]];
+	[itemsFound removeAllObjects];
+    }
+    
+    // sort the sets in order of increasing length indexed 0-->[arrayOfSets length]
+    [arrayOfSets sortUsingFunction:compareSetLengths context:nil];
+
+    NSEnumerator *e = [arrayOfSets objectEnumerator];
+    [itemsFound setSet:[e nextObject]]; // smallest set
+
+    NSSet *aSet = nil;
+    while(aSet = [e nextObject]){
+	[itemsFound intersectSet:aSet];
     }
     return itemsFound;
 }

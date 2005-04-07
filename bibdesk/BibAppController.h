@@ -222,7 +222,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 /*!
     @method     itemsMatchingSearchConstraints:
     @abstract   Search across all open documents for items matching the given search constraints.  Returns a set of BibItems.
-    @discussion (comprehensive description)
+    @discussion Searches are performed by intersecting the search constraints, so all object/key pairs will be matched in any single item returned.
     @param      constraints Dictionary of the form @"objectToSearchFor" forKey:@"BibTeXFieldName".
     @result     NSSet of BibItems.
 */
