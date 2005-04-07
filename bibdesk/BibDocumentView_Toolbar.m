@@ -129,9 +129,9 @@ static void addToolbarItem(NSMutableDictionary *theDict,NSString *identifier,NSS
 	
 	
 	menuItem = [[[NSMenuItem alloc] initWithTitle:NSLocalizedString(@"Search",@"") 
-										   action:@selector(showFindPanel:)
+										   action:@selector(find:)
 									keyEquivalent:@""] autorelease];
-	[menuItem setTarget:[NSApp delegate]];
+	[menuItem setTarget:self];
     addToolbarItem(toolbarItems, SearchFieldDocToolbarItemIdentifier,
                    NSLocalizedString(@"Search",@""),
                    NSLocalizedString(@"Search",@""),
@@ -159,7 +159,16 @@ static void addToolbarItem(NSMutableDictionary *theDict,NSString *identifier,NSS
     [documentWindow setToolbar: toolbar];
 }
 
-
+- (IBAction)find:(id)sender{
+    NSToolbar *tb = [documentWindow toolbar];
+    [tb setVisible:YES];
+    if([tb displayMode] == NSToolbarDisplayModeLabelOnly)
+	[tb setDisplayMode:NSToolbarDisplayModeIconAndLabel];
+    if(BDSK_USING_JAGUAR)
+	[searchFieldTextField selectText:nil];
+    else
+	[searchField selectText:nil];
+}
 
 - (NSToolbarItem *) toolbar: (NSToolbar *)toolbar
       itemForItemIdentifier: (NSString *)itemIdent
