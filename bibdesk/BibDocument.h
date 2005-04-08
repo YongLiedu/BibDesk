@@ -565,6 +565,14 @@ extern NSString *BDSKBibItemLocalDragPboardType;
 
 - (void)removePublication:(BibItem *)pub;
 
+/*!
+    @method     sortPubsByColumn:
+    @abstract   Sorts the publications table by the given table column.  Pass nil for the table column to re-sort the previously sorted column with the same order.
+    @discussion (comprehensive description)
+    @param      tableColumn (description)
+*/
+- (void)sortPubsByColumn:(NSTableColumn *)tableColumn;
+
 #pragma mark bibtex macro support
 
 - (NSMutableDictionary *)macroDefinitions;

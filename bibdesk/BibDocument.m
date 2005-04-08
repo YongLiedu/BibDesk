@@ -309,7 +309,10 @@ NSString *BDSKBibItemLocalDragPboardType = @"edu.ucsd.cs.mmccrack.bibdesk: Local
 	[publications insertObject:pub atIndex:index];
 	// always add new pubs to the shown array
 	// I do not know how to add it at the right place when satisfies the search
-	[shownPublications addObject:pub];
+    if([[(BDSK_USING_JAGUAR ? searchFieldTextField : searchField) stringValue] isEqualToString:@""]){
+        [shownPublications addObject:pub usingLock:pubsLock];
+        [self sortPubsByColumn:nil];
+    }
 	[pub setDocument:self];
 	
 	NSDictionary *notifInfo = [NSDictionary dictionaryWithObjectsAndKeys:pub, @"pub",
@@ -331,8 +334,8 @@ NSString *BDSKBibItemLocalDragPboardType = @"edu.ucsd.cs.mmccrack.bibdesk: Local
     
      // don't add directly to shownPublications if there is a search in action; let the notifications take care of it
     if([[(BDSK_USING_JAGUAR ? searchFieldTextField : searchField) stringValue] isEqualToString:@""]){
-        // insert at beginning or add at end in order to maintain selection (if any) in tableview, and avoid fouling up the selectedPubEnumerator
-        (sortDescending) ? [shownPublications insertObject:pub atIndex:0 usingLock:pubsLock] : [shownPublications addObject:pub usingLock:pubsLock];
+        [shownPublications addObject:pub usingLock:pubsLock];
+        [self sortPubsByColumn:nil];
     }
 
 	[pub setDocument:self];
@@ -1642,19 +1645,21 @@ NSComparisonResult compareSetLengths(NSSet *set1, NSSet *set2, void *context){
 
 #pragma mark Sorting
 
-// replaces sortPubsByColumn
-- (void) tableView: (NSTableView *) theTableView
-didClickTableColumn: (NSTableColumn *) tableColumn{
-	// check whether this is the right kind of table view and don't re-sort when we have a contextual menu click
-    if (tableView != (BDSKDragTableView *) theTableView || 	[[NSApp currentEvent] type] == NSRightMouseDown
-) return;
-    
+- (void)sortPubsByColumn:(NSTableColumn *)tableColumn{
     BibItem *selection = nil;
     int sortedRow; // see the datasource methods for this; it's tricky
     
     if([tableView selectedRow] != -1){
         sortedRow = (sortDescending ? [shownPublications count] - 1 - [tableView selectedRow] : [tableView selectedRow]);
         selection = [shownPublications objectAtIndex:sortedRow];
+    }
+    
+    // a nil argument means resort the current column in the same order
+    if(tableColumn == nil){
+        if(lastSelectedColumnForSort == nil)
+            return;
+        tableColumn = lastSelectedColumnForSort; // use the previous one
+        sortDescending = !sortDescending; // we'll reverse this again in the next step
     }
     
     if (lastSelectedColumnForSort == tableColumn) {
@@ -1672,7 +1677,7 @@ didClickTableColumn: (NSTableColumn *) tableColumn{
         lastSelectedColumnForSort = [tableColumn retain];
         [tableView setHighlightedTableColumn: tableColumn]; 
 	}
-
+    
 	NSString *tcID = [tableColumn identifier];
 	// resorting should happen whenever you click.
 	if([tcID caseInsensitiveCompare:BDSKCiteKeyString] == NSOrderedSame ||
@@ -1749,6 +1754,15 @@ didClickTableColumn: (NSTableColumn *) tableColumn{
         [tableView selectRow:sortedRow byExtendingSelection:NO];
         [tableView scrollRowToVisible:sortedRow];
     }
+}
+
+- (void) tableView: (NSTableView *) theTableView didClickTableColumn: (NSTableColumn *) tableColumn{
+	// check whether this is the right kind of table view and don't re-sort when we have a contextual menu click
+    if (tableView != (BDSKDragTableView *) theTableView || 	[[NSApp currentEvent] type] == NSRightMouseDown) 
+        return;
+    else
+        [self sortPubsByColumn:tableColumn];
+
 }
 
 
