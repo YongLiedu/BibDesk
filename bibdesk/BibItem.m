@@ -754,6 +754,7 @@ setupParagraphStyle()
 - (void)setRequiredFieldNames: (NSArray *)newRequiredFieldNames{
     [bibLock lock];
     [requiredFieldNames autorelease];
+    NSAssert(newRequiredFieldNames != nil, @"Required field names must not be nil");
     requiredFieldNames = [newRequiredFieldNames mutableCopy];
     [bibLock unlock];
 }
