@@ -846,42 +846,39 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 - (NSDictionary *)constraintsFromString:(NSString *)string{
     NSScanner *scanner;
     NSMutableDictionary *searchConstraints = [NSMutableDictionary dictionary];
-    NSString *queryString;
-    NSMutableString *queryKey;
+    NSString *queryString = nil;
+    NSString *queryKey = nil;
     NSCharacterSet *delimiterSet = [NSCharacterSet characterSetWithCharactersInString:@":="];
     NSCharacterSet *ampersandSet =  [NSCharacterSet characterSetWithCharactersInString:@"&"];
 
+    if([string rangeOfCharacterFromSet:delimiterSet].location == NSNotFound){
+        [searchConstraints setObject:[string stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceCharacterSet]] forKey:BDSKTitleString];
+        return searchConstraints;
+    }
+    
+    
     scanner = [NSScanner scannerWithString:string];
     
     // Now split the string into a key and value pair by looking for a delimiter
     // (we'll use a bunch of handy delimiters, including the first space, so it's flexible.)
     // alternatively we can just type the title, like we used to.
-
-    [scanner scanCharactersFromSet:[NSCharacterSet alphanumericCharacterSet] intoString:&queryKey];
-    // scan the first key (also might be a simple title for original style search)
-
-    if (![scanner isAtEnd]){
-        while(![scanner isAtEnd]){
-            [scanner scanCharactersFromSet:delimiterSet intoString:nil]; // scan the delimiters away
-            [scanner scanUpToCharactersFromSet:ampersandSet intoString:&queryString]; // scan to either the end, or the next query key.
-                                                                                      // might have to remove a trailing space:
-            if([[queryString substringWithRange:NSMakeRange([queryString length]-1,1)] isEqualToString:@" "]){
-                queryString = [queryString substringWithRange:NSMakeRange(0,[queryString length]-1)];
-            }
-            [scanner scanCharactersFromSet:ampersandSet intoString:nil]; // scan the ampersands away.
-            if(queryKey)
-                [searchConstraints setObject:queryString forKey:[queryKey capitalizedString]];
-            if(![scanner isAtEnd]) // do i have to do this?
-                [scanner scanCharactersFromSet:[NSCharacterSet alphanumericCharacterSet] intoString:&queryKey];// scan another
-        }
-
-    }else{
-        // if it was at end, we are done, and we'll scan in the title:
-        if(queryKey){
-            [searchConstraints setObject:queryKey forKey:BDSKTitleString];
-        } else {
-            searchConstraints = nil;
-        }
+    [scanner setCharactersToBeSkipped:nil];
+    
+    while(![scanner isAtEnd]){
+        // set these to nil explicitly, since we check for that later
+        queryKey = nil;
+        queryString = nil;
+        [scanner scanUpToCharactersFromSet:delimiterSet intoString:&queryKey];
+        [scanner scanCharactersFromSet:delimiterSet intoString:nil]; // scan the delimiters away
+        [scanner scanUpToCharactersFromSet:ampersandSet intoString:&queryString]; // scan to either the end, or the next query key.
+        [scanner scanCharactersFromSet:ampersandSet intoString:nil]; // scan the ampersands away.
+        
+        // lose the whitespace, if any
+        queryString = [queryString stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceCharacterSet]];
+        queryKey = [queryKey stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceCharacterSet]];
+        
+        if(queryKey && queryString) // make sure we have both a key and a value
+            [searchConstraints setObject:queryString forKey:[queryKey capitalizedString]]; // BibItem field names are capitalized
     }
     
     return searchConstraints;
