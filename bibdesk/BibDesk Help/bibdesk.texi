@@ -447,7 +447,7 @@ window when one of the form fields has the keyboard focus.
 @subsection Editing Macro Definitions
 
 @cindex macro
-@image{gfx/macroWindow}
+@image{gfx/macrosWindow}
 
 @node Deleting References
 @section Deleting References
