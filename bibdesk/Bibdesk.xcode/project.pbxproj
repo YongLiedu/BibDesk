@@ -2322,6 +2322,7 @@
 				F920DB22075C2D40000C5FCA,
 				F91B5C4E076412A10011ED22,
 				27E89E2F0805EC0F00E4DA08,
+				F980F8320806347700C9D704,
 			);
 			buildRules = (
 			);
@@ -5872,6 +5873,19 @@
 			isa = PBXBuildFile;
 			settings = {
 			};
+		};
+		F980F8320806347700C9D704 = {
+			buildActionMask = 12;
+			files = (
+			);
+			inputPaths = (
+			);
+			isa = PBXShellScriptBuildPhase;
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "## index online help\n## \nif [ -d /Developer/Applications/Utilities/Help\\ Indexer.app/ ]; then indexerName=\"Help Indexer\"\nelse indexerName=\"Apple Help Indexing Tool\"\nfi\necho \"using $indexerName\"\nosascript \\\n-e \"tell application \\\"$indexerName\\\"\" \\\n-e \"activate\" \\\n-e \"open POSIX file \\\"${TARGET_BUILD_DIR}/Bibdesk.app/Contents/Resources/English.lproj/BibDesk Help\\\"\" \\\n-e \"end tell\"";
 		};
 		F988709007580CB4001D4D49 = {
 			children = (
