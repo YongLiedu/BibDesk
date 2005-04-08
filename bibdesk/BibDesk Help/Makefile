@@ -1,4 +1,4 @@
-texi2html = /Users/mike/bin/texi2html
+texi2html = texi2html
 #makeinfo
 
 INPUT = bibdesk.texi
