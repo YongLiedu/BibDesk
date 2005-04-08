@@ -2249,21 +2249,22 @@ This method always returns YES. Even if some or many operations fail.
 	return columnsMenu;
 }
 
+// If we call this for a name that is already there, it just sets the state.
 #define ADD_MENUITEM_TAG 47
 - (void)columnsMenuAddTableColumnName:(NSString *)name enabled:(BOOL)yn{
     NSMenuItem *item = nil;
-    if ([columnsMenu indexOfItemWithTitle:name] == -1) {
+    item = [columnsMenu itemWithTitle:name];
+    if (item == nil) {
         item = [[[NSMenuItem alloc] initWithTitle:name 
                                            action:@selector(columnsMenuSelectTableColumn:)
                                     keyEquivalent:@""] autorelease];
         [columnsMenu insertItem:item atIndex:[columnsMenu indexOfItemWithTag:ADD_MENUITEM_TAG]]; // put it before the add other menu item.
-        if (yn) {
-            [item setState:NSOnState];
-        }else{
-            [item setState:NSOffState];
-        }
     }
-
+    if(yn){
+        [item setState:NSOnState];
+    }else{
+        [item setState:NSOffState];
+    }
 }
 
 - (IBAction)columnsMenuSelectTableColumn:(id)sender{
@@ -2304,7 +2305,10 @@ This method always returns YES. Even if some or many operations fail.
     // first we fill the popup
 	NSArray *prefsShownColNamesArray = [[OFPreferenceWrapper sharedPreferenceWrapper] arrayForKey:BDSKShownColsNamesKey];
 	NSMutableArray *colNames = [[[[BibTypeManager sharedManager] allRemovableFieldNames] mutableCopy] autorelease];
-	[colNames addObjectsFromArray:[NSArray arrayWithObjects:BDSKUrlString, BDSKLocalUrlString, BDSKCiteKeyString, BDSKKeywordsString, BDSKDateString, @"Added", @"Modified", @"1st Author", @"2nd Author", @"3rd Author", nil]];
+
+	NSArray *defaultColNames = [NSArray arrayWithObjects:BDSKUrlString, BDSKLocalUrlString, BDSKCiteKeyString, BDSKKeywordsString, BDSKDateString, @"Added", @"Modified", @"1st Author", @"2nd Author", @"3rd Author", @"Number", nil];
+
+    [colNames addObjectsFromArray:defaultColNames];
 	[colNames removeObjectsInArray:prefsShownColNamesArray];
 	[colNames sortUsingSelector:@selector(caseInsensitiveCompare:)];
 	[colNames insertObject:NSLocalizedString(@"Choose a Column:",@"") atIndex:0];
