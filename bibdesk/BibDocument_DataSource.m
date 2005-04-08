@@ -64,6 +64,9 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 		   [tcID isEqualToString:@"Key"]){
             return [pub citeKey];
             
+        }else if([tcID isEqualToString:@"Number"]){
+            return [NSString stringWithFormat:@"%d", [pub fileOrder]];
+            
         }else if([tcID isEqualToString: BDSKTitleString] ){
 			
 			if ([[pub type] isEqualToString:@"inbook"]){

@@ -1722,7 +1722,12 @@ didClickTableColumn: (NSTableColumn *) tableColumn{
 		
 		[publications sortUsingSelector:@selector(pubTypeCompare:)];
 		[shownPublications sortUsingSelector:@selector(pubTypeCompare:)];
-	}else{
+    }else if([tcID isEqualToString:@"Number"]){
+		
+		[publications sortUsingSelector:@selector(fileOrderCompare:)];
+		[shownPublications sortUsingSelector:@selector(fileOrderCompare:)];
+        
+    }else{
 		
 		[publications sortUsingFunction:generalBibItemCompareFunc context:tcID];
 		[shownPublications sortUsingFunction:generalBibItemCompareFunc context:tcID];
@@ -1752,7 +1757,11 @@ int generalBibItemCompareFunc(id item1, id item2, void *context){
 
 	NSString *keyPath = [NSString stringWithFormat:@"pubFields.%@", tableColumnName];
 	NSString *value1 = (NSString *)[item1 valueForKeyPath:keyPath];
-	NSString *value2 = (NSString *)[item2 valueForKeyPath:keyPath];
+    if(value1 == nil) value1 = (NSString *)[item1 valueForKey:tableColumnName];
+	
+    NSString *value2 = (NSString *)[item2 valueForKeyPath:keyPath];
+    if(value2 == nil) value2 = (NSString *)[item2 valueForKey:tableColumnName];
+    
 	if (value1 == nil) {
 		NSLog(@"a value is nil!");
 		return (value2 == nil)? NSOrderedSame : NSOrderedDescending;
