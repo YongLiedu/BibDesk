@@ -63,7 +63,6 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 - (void)windowWillLoad{
     [theBib setEditorObj:self];
     [citeKeyField setStringValue:[theBib citeKey]];
-    [self setupForm];
     [notesView setString:[theBib valueOfField:BDSKAnnoteString]];
     [abstractView setString:[theBib valueOfField:BDSKAbstractString]];
     [rssDescriptionView setString:[theBib valueOfField:BDSKRssDescriptionString]];
@@ -81,11 +80,17 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 }
 
 - (void)setupForm{
+    static NSFont *requiredFont = nil;
+    if(!requiredFont){
+        requiredFont = [NSFont systemFontOfSize:13.0];
+        [[NSFontManager sharedFontManager] convertFont:requiredFont
+                                           toHaveTrait:NSBoldFontMask];
+    }
+
     BibAppController *appController = (BibAppController *)[NSApp delegate];
     NSString *tmp;
     NSFormCell *entry;
     NSArray *sKeys;
-    NSFont *requiredFont = [NSFont labelFontOfSize:12.0];
     int i=0;
     int numRows;
     NSRect rect = [bibFields frame];
@@ -96,10 +101,6 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 
     NSDictionary *reqAtt = [NSDictionary dictionaryWithObjects:[NSArray arrayWithObjects:[NSColor redColor],nil]
                                                        forKeys:[NSArray arrayWithObjects:NSForegroundColorAttributeName,nil]];
-
-    
-    [[NSFontManager sharedFontManager] convertFont:requiredFont
-                                       toHaveTrait:NSBoldFontMask];
 	
 	// set up for adding all items 
     // remove all items in the NSForm (NSForm doesn't have a removeAllEntries.)
@@ -114,6 +115,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
     
     NSMutableSet *addedFields = [NSMutableSet set];
     NSArray *requiredKeys = [theBib requiredFieldNames];
+    NSAssert(requiredKeys != nil, @"Required keys must not be nil."); // it may be empty, though
     e = [requiredKeys objectEnumerator];
     while(tmp = [e nextObject]){
         if (![keysNotInForm containsObject:tmp]){
@@ -200,6 +202,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
     [citeKeyField setFormatter:citeKeyFormatter];
     [newFieldName setFormatter:fieldNameFormatter];
 
+    [self setupTypePopUp];
     [self setupForm]; // gets called in window will load...?
     
 	// The popupbutton needs to be set before fixURLs is called, and -windowDidLoad gets sent after awakeFromNib.
