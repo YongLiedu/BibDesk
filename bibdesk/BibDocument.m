@@ -1646,12 +1646,18 @@ NSComparisonResult compareSetLengths(NSSet *set1, NSSet *set2, void *context){
 #pragma mark Sorting
 
 - (void)sortPubsByColumn:(NSTableColumn *)tableColumn{
-    BibItem *selection = nil;
-    int sortedRow; // see the datasource methods for this; it's tricky
     
-    if([tableView selectedRow] != -1){
-        sortedRow = (sortDescending ? [shownPublications count] - 1 - [tableView selectedRow] : [tableView selectedRow]);
-        selection = [shownPublications objectAtIndex:sortedRow];
+    // cache the selection; this works for multiple publications
+    NSMutableArray *pubsToSelect = nil;    
+    if([tableView numberOfSelectedRows]){
+        NSEnumerator *selE = [self selectedPubEnumerator]; // this is an array of indices, not pubs
+        pubsToSelect = [NSMutableArray array];
+        NSNumber *row;
+        
+        while(row = [selE nextObject]){ // make an array of BibItems, since indices will change
+            [pubsToSelect addObject:[shownPublications objectAtIndex:[row intValue]]];
+        }
+        
     }
     
     // a nil argument means resort the current column in the same order
@@ -1746,14 +1752,22 @@ NSComparisonResult compareSetLengths(NSSet *set1, NSSet *set2, void *context){
                                    [NSImage imageNamed:@"sort-up"])
                    inTableColumn: tableColumn];
 
-    [tableView reloadData];
-    
-    if(selection != nil){
-        // NSLog(@"selection later is %@", [selection title]);
-        sortedRow = (sortDescending ? [shownPublications count] - 1 - [shownPublications indexOfObjectIdenticalTo:selection] : [shownPublications indexOfObjectIdenticalTo:selection]);
-        [tableView selectRow:sortedRow byExtendingSelection:NO];
-        [tableView scrollRowToVisible:sortedRow];
+    // fix the selection
+    if(pubsToSelect){
+        [tableView deselectAll:nil]; // deselect all, or we'll extend the selection to include previously selected row indexes
+        [tableView reloadData]; // have to reload so the rows get set up right, but a full updateUI flashes the preview, which is annoying
+                                // now select the items that were previously selected
+        NSEnumerator *oldSelE = [pubsToSelect objectEnumerator];
+        BibItem *anItem;
+        unsigned index;
+        while(anItem = [oldSelE nextObject]){
+            index = (sortDescending ? [shownPublications count] - 1 - [shownPublications indexOfObjectIdenticalTo:anItem] : [shownPublications indexOfObjectIdenticalTo:anItem]);
+            [tableView selectRow:index byExtendingSelection:YES];
+        }
+        
+        [tableView scrollRowToVisible:index]; // just go to the last one
     }
+    [self updateUI]; // needed to reset the previews
 }
 
 - (void) tableView: (NSTableView *) theTableView didClickTableColumn: (NSTableColumn *) tableColumn{
