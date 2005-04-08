@@ -334,6 +334,10 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
     [oPanel setAllowsMultipleSelection:NO];
     NSMutableArray *commandHistory = [NSMutableArray arrayWithArray:[[OFPreferenceWrapper sharedPreferenceWrapper] arrayForKey:BDSKFilterFieldHistory]];
     [openUsingFilterComboBox addItemsWithObjectValues:commandHistory];
+    if([commandHistory count]){
+        [openUsingFilterComboBox selectItemAtIndex:0];
+        [openUsingFilterComboBox setObjectValue:[openUsingFilterComboBox objectValueOfSelectedItem]];
+    }
     result = [oPanel runModalForDirectory:nil
                                      file:nil
                                     types:nil];
@@ -356,7 +360,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
         if([[openUsingFilterComboBox objectValues] count] >= 7){
             [openUsingFilterComboBox removeItemAtIndex:6];
         }
-        [[OFPreferenceWrapper sharedPreferenceWrapper] setObject:commandHistory forKey:BDSKFilterFieldHistory];
+        [[OFPreferenceWrapper sharedPreferenceWrapper] setObject:[openUsingFilterComboBox objectValues] forKey:BDSKFilterFieldHistory];
         
         fileInputString = [NSString stringWithContentsOfFile:fileToOpen];
         if (!fileInputString || [shellCommand isEqualToString:@""]){
@@ -369,8 +373,9 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 													  withInputString:fileInputString];
 			// @@ REFACTOR:
 			// I suppose in the future, bibTeX database won't be the default? 
-			bibDoc = [[NSDocumentController sharedDocumentController] openUntitledDocumentOfType:@"bibTeX database" display:YES]; // #retain?
+			bibDoc = [[NSDocumentController sharedDocumentController] openUntitledDocumentOfType:@"bibTeX database" display:YES];
 			[bibDoc loadDataRepresentation:[filterOutput dataUsingEncoding:NSUTF8StringEncoding] ofType:@"bibTeX database"];
+            [bibDoc updateChangeCount:NSChangeDone]; // imported files are unsaved
 			[bibDoc updateUI];
 		}
     }
