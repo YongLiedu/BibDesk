@@ -1391,6 +1391,8 @@ stringByAppendingPathComponent:@"BibDesk"]; */
     }
 }
 
+#pragma mark -
+
 - (void)hidePublicationsWithoutSubstring:(NSString *)substring inField:(NSString *)field{
     if([substring isEqualToString:@""]){
         // if it's an empty string, cache the selected BibItems for later selection, so the items remain selected after clearing the field
@@ -1638,26 +1640,7 @@ NSComparisonResult compareSetLengths(NSSet *set1, NSSet *set2, void *context){
     return [n1 compare:n2];
 }
 
-#pragma mark -
-
-- (void)updatePreviews:(NSNotification *)aNotification{
-    NSNumber *i;
-    NSMutableString *bibString = [NSMutableString stringWithString:@""];
-    NSEnumerator *e = [self selectedPubEnumerator];
-
-    //take care of the preview field (NSTextView below the pub table); if the enumerator is nil, the view will get cleared out
-    [self displayPreviewForItems:[self selectedPubEnumerator]];
-    // (don't just pass it 'e' - it needs its own enum.)
-    if([[OFPreferenceWrapper sharedPreferenceWrapper] integerForKey:BDSKUsesTeXKey] == NSOnState){ 
-        while(i = [e nextObject]){
-            [bibString appendString:[[shownPublications objectAtIndex:[i intValue]] bibTeXStringByExpandingMacros]];
-        }// while i is num of selected row                  
-        [NSThread detachNewThreadSelector:@selector(PDFFromString:)
-                                 toTarget:PDFpreviewer
-                               withObject:bibString];
-    }
-}
-
+#pragma mark Sorting
 
 // replaces sortPubsByColumn
 - (void) tableView: (NSTableView *) theTableView
@@ -2182,44 +2165,7 @@ This method always returns YES. Even if some or many operations fail.
 	return YES;
 }
 
-
-- (void)handleComplexStringChangedNotification:(NSNotification *)notification{
-    if([notification object] == self)
-        [self updateUI];
-}
-
-
-- (void)handleUpdateUINotification:(NSNotification *)notification{
-    [self performSelectorOnMainThread:@selector(updateUI)
-                           withObject:nil
-                        waitUntilDone:NO];
-}
-
-
-- (void)updateUI{ // not thread safe
-	[tableView reloadData];
-
-	int shownPubsCount = [shownPublications count];
-	int totalPubsCount = [publications count];
-	
-	if (shownPubsCount != totalPubsCount) { 
-		// inform people
-		[infoLine setStringValue: [NSString stringWithFormat:
-			NSLocalizedString(@"%d of %d Publications",
-                          @"need two ints in format string."),
-            shownPubsCount,totalPubsCount] ];
-	}
-	else {
-		[infoLine setStringValue:[NSString stringWithFormat:
-			NSLocalizedString(@"%d Publications",
-							  @"%d Publications (total number)"),
-            totalPubsCount]];
-	}
-	
-    [self updatePreviews:nil];
-    [self updateActionMenus:nil];
-}
-
+#pragma mark Table Column Setup
 
 //note - ********** the notification handling method will add NSTableColumn instances to the tableColumns dictionary.
 - (void)setupTableColumns{
@@ -2416,11 +2362,7 @@ This method always returns YES. Even if some or many operations fail.
 	return myMenu;
 }
 
-
-
-
-
-
+#pragma mark Notification handlers
 
 - (void)handleTableColumnChangedNotification:(NSNotification *)notification{
     id menuItem = nil;
@@ -2436,6 +2378,32 @@ This method always returns YES. Even if some or many operations fail.
     }
     menuItem = [columnsMenu itemWithTitle:colName];
     [self columnsMenuSelectTableColumn:menuItem post:NO]; 
+}
+
+- (void)handlePreviewDisplayChangedNotification:(NSNotification *)notification{
+    [self displayPreviewForItems:[self selectedPubEnumerator]];
+}
+
+- (void)handleCustomStringsChangedNotification:(NSNotification *)notification{
+    [customStringArray setArray:[[OFPreferenceWrapper sharedPreferenceWrapper] arrayForKey:BDSKCustomCiteStringsKey]];
+    [ccTableView reloadData];
+}
+
+- (void)handleFontChangedNotification:(NSNotification *)notification{
+	[self setTableFont];
+}
+
+
+- (void)handleComplexStringChangedNotification:(NSNotification *)notification{
+    if([notification object] == self)
+        [self updateUI];
+}
+
+
+- (void)handleUpdateUINotification:(NSNotification *)notification{
+    [self performSelectorOnMainThread:@selector(updateUI)
+                           withObject:nil
+                        waitUntilDone:NO];
 }
 
 - (void)handleBibItemChangedNotification:(NSNotification *)notification{
@@ -2469,6 +2437,26 @@ This method always returns YES. Even if some or many operations fail.
 	// should: also check if we're filtering by the key that was changed and refilter.
 	// should: need to save the highlighted pub and rehighlight after sort...
 	
+}
+
+#pragma mark UI updating
+
+- (void)updatePreviews:(NSNotification *)aNotification{
+    NSNumber *i;
+    NSMutableString *bibString = [NSMutableString stringWithString:@""];
+    NSEnumerator *e = [self selectedPubEnumerator];
+    
+    //take care of the preview field (NSTextView below the pub table); if the enumerator is nil, the view will get cleared out
+    [self displayPreviewForItems:[self selectedPubEnumerator]];
+    // (don't just pass it 'e' - it needs its own enum.)
+    if([[OFPreferenceWrapper sharedPreferenceWrapper] integerForKey:BDSKUsesTeXKey] == NSOnState){ 
+        while(i = [e nextObject]){
+            [bibString appendString:[[shownPublications objectAtIndex:[i intValue]] bibTeXStringByExpandingMacros]];
+        }// while i is num of selected row                  
+        [NSThread detachNewThreadSelector:@selector(PDFFromString:)
+                                 toTarget:PDFpreviewer
+                               withObject:bibString];
+    }
 }
 
 - (void)displayPreviewForItems:(NSEnumerator *)enumerator{
@@ -2539,17 +2527,28 @@ This method always returns YES. Even if some or many operations fail.
     [previewField unlockFocus];
 }
 
-- (void)handlePreviewDisplayChangedNotification:(NSNotification *)notification{
-    [self displayPreviewForItems:[self selectedPubEnumerator]];
-}
-
-- (void)handleCustomStringsChangedNotification:(NSNotification *)notification{
-    [customStringArray setArray:[[OFPreferenceWrapper sharedPreferenceWrapper] arrayForKey:BDSKCustomCiteStringsKey]];
-    [ccTableView reloadData];
-}
-
-- (void)handleFontChangedNotification:(NSNotification *)notification{
-	[self setTableFont];
+- (void)updateUI{ // not thread safe
+	[tableView reloadData];
+    
+	int shownPubsCount = [shownPublications count];
+	int totalPubsCount = [publications count];
+	
+	if (shownPubsCount != totalPubsCount) { 
+		// inform people
+		[infoLine setStringValue: [NSString stringWithFormat:
+			NSLocalizedString(@"%d of %d Publications",
+                              @"need two ints in format string."),
+            shownPubsCount,totalPubsCount] ];
+	}
+	else {
+		[infoLine setStringValue:[NSString stringWithFormat:
+			NSLocalizedString(@"%d Publications",
+							  @"%d Publications (total number)"),
+            totalPubsCount]];
+	}
+	
+    [self updatePreviews:nil];
+    [self updateActionMenus:nil];
 }
 
 - (void)setTableFont{
