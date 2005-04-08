@@ -2156,16 +2156,17 @@ This method always returns YES. Even if some or many operations fail.
 	
 	while(fnStr = [fileNameEnum nextObject]){
 		if(url = [NSURL fileURLWithPath:fnStr]){
-			BibItem * newBI = [[[BibItem alloc] init] autorelease];
+			BibItem * newBI = [[BibItem alloc] init];
 			
 			NSString *newUrl = [[NSURL fileURLWithPath:
 				[fnStr stringByExpandingTildeInPath]]absoluteString];
-			
-			[newBI setField:BDSKLocalUrlString toValue:newUrl];	
+
+			[newBI setField:BDSKLocalUrlString toValue:newUrl];
 			
 			[newBI autoFilePaper];
 			
 			[self addPublication:newBI];
+            [newBI release];
 			
 			[self updateUI];
 			
@@ -2667,7 +2668,24 @@ This method always returns YES. Even if some or many operations fail.
 }    
 
 - (void)splitViewDoubleClick:(OASplitView *)sender{
-    [NSException raise:@"UnimplementedException" format:@"splitview %@ was clicked.", sender];
+    NSView *tv = [[splitView subviews] objectAtIndex:0]; // tableview
+    NSView *pv = [[splitView subviews] objectAtIndex:1]; // attributed text preview
+    NSRect tableFrame = [tv frame];
+    NSRect previewFrame = [pv frame];
+    
+    if(NSHeight([pv frame]) != 0){ // not sure what the criteria for isSubviewCollapsed, but it doesn't work
+        lastPreviewHeight = NSHeight(previewFrame); // cache this
+        tableFrame.size.height += lastPreviewHeight;
+        previewFrame.size.height = 0;
+    } else {
+        if(lastPreviewHeight == 0)
+            lastPreviewHeight = NSHeight([sender frame]) / 3; // a reasonable value for uncollapsing the first time
+        previewFrame.size.height = lastPreviewHeight;
+        tableFrame.size.height = NSHeight([sender frame]) - lastPreviewHeight;
+    }
+    [tv setFrame:tableFrame];
+    [pv setFrame:previewFrame];
+    [sender adjustSubviews];
 }
 
 #pragma mark macro stuff

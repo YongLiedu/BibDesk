@@ -69,6 +69,8 @@ extern NSString *BDSKBibItemLocalDragPboardType;
     IBOutlet NSMenuItem *ctxCopyTex;
     IBOutlet NSMenuItem *ctxCopyPDF;
     IBOutlet OASplitView* splitView;
+    // for the splitview double-click handling
+    float lastPreviewHeight;
 
 #pragma mark Toolbar variable declarations
 
