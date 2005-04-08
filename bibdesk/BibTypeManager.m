@@ -127,7 +127,7 @@ static BibTypeManager *sharedInstance = nil;
 
 - (NSArray *)requiredFieldsForType:(NSString *)type{
     if(fieldsForTypesDict){
-        return [fieldsForTypesDict objectForKey:@"required"];
+        return [[fieldsForTypesDict objectForKey:type] objectForKey:@"required"];
     }else{
         return [NSArray array];
     }
@@ -135,7 +135,7 @@ static BibTypeManager *sharedInstance = nil;
 
 - (NSArray *)optionalFieldsForType:(NSString *)type{
     if(fieldsForTypesDict){
-        return [fieldsForTypesDict objectForKey:@"optional"];
+        return [[fieldsForTypesDict objectForKey:type] objectForKey:@"optional"];
     }else{
         return [NSArray array];
     }
