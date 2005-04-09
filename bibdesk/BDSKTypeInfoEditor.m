@@ -324,6 +324,7 @@ static BDSKTypeInfoEditor *sharedTypeInfoEditor;
 		[self addType:type withFields:[defaultFieldsForTypesDict objectForKey:type]];
 	}
 	[types sortUsingSelector:@selector(compare:)];
+	[typeTableView reloadData];
 	[self setCurrentType:nil];
 }
 
