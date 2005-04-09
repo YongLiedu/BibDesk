@@ -7,6 +7,8 @@
                 outputTemplateButtonPressed = id; 
                 setShouldUseNormalizedNames = id; 
                 shouldUseTemplateFile = id; 
+                showConversionEditor = id; 
+                showTypeInfoEditor = id; 
             }; 
             CLASS = "BibPref_Defaults"; 
             LANGUAGE = ObjC; 

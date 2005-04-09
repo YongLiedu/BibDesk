@@ -12,6 +12,8 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 */
 
 #import "BibPref_Defaults.h"
+#import "BDSKCharacterConversion.h"
+#import "BDSKTypeInfoEditor.h"
 
 @implementation BibPref_Defaults
 
@@ -78,6 +80,15 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 
 - (IBAction)setShouldUseNormalizedNames:(id)sender{
     [defaults setBool:([sender state] == NSOnState ? YES : NO) forKey:BDSKShouldSaveNormalizedAuthorNames];
+}
+
+- (IBAction)showTypeInfoEditor:(id)sender{
+    [[BDSKTypeInfoEditor sharedTypeInfoEditor] showWindow:self];
+}
+
+
+- (IBAction)showConversionEditor:(id)sender{
+    [[BDSKCharacterConversion sharedConversionEditor] showWindow:self];
 }
 
 @end

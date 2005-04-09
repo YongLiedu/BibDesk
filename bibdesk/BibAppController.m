@@ -768,17 +768,6 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 	return showingPreviewPanel;
 }
 
-
-- (IBAction)showTypeInfoEditor:(id)sender{
-	[[BDSKTypeInfoEditor sharedTypeInfoEditor] showWindow:self];
-}
-
-
-- (IBAction)showConversionEditor:(id)sender{
-	[[BDSKCharacterConversion sharedConversionEditor] showWindow:self];
-}
-
-
 - (BOOL)applicationShouldOpenUntitledFile:(NSApplication *)sender
 {
     if ([[[OFPreferenceWrapper sharedPreferenceWrapper] objectForKey:BDSKStartupBehaviorKey] intValue] == 0) {

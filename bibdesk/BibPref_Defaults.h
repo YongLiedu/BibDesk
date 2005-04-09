@@ -39,5 +39,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 - (IBAction)shouldUseTemplateFile:(id)sender;
 
 - (IBAction)setShouldUseNormalizedNames:(id)sender;
+- (IBAction)showTypeInfoEditor:(id)sender;
+- (IBAction)showConversionEditor:(id)sender;
 
 @end
