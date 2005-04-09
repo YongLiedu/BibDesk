@@ -503,7 +503,7 @@ static BDSKTypeInfoEditor *sharedTypeInfoEditor;
 	NSNumber *rowNum;
 	int i;
 	int offset = 0;
-	NSMutableArray *fields;
+	NSMutableArray *fields = nil;
 	NSString *field;
 	
 	// find the array of fields
@@ -511,9 +511,11 @@ static BDSKTypeInfoEditor *sharedTypeInfoEditor;
 		fields = types;
 	} else if (tv == requiredTableView) {
 		fields = currentRequiredFields;
-	} else if (tv == requiredTableView) {
+	} else if (tv == optionalTableView) {
 		fields = currentOptionalFields;
-	} 
+	}
+	
+	NSAssert(fields != nil, @"An error occurred:  fields must not be nil when dragging");
 	
 	// move the rows
 	while (rowNum = [rowEnum nextObject]) {
