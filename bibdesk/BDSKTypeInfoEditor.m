@@ -383,7 +383,7 @@ static BDSKTypeInfoEditor *sharedTypeInfoEditor;
 		[removeOptionalButton setEnabled:canRemove];
 	}
 	
-	[revertCurrentToDefaultButton setEnabled:(currentType != nil)];
+	[revertCurrentToDefaultButton setEnabled:(currentType && [defaultFieldsForTypesDict objectForKey:currentType])];
 }
 
 #pragma mark NSTableview datasource
