@@ -448,6 +448,7 @@
     @param fieldName The name of the field (e.g. "Author")
 */
 - (BOOL)stringIsValid:(NSString *)proposedStr forField:(NSString *)fieldName;
+- (void)typeInfoDidChange:(NSNotification *)aNotification;
 @end
 
 

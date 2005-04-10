@@ -140,6 +140,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 */
 
 - (BibItem *)currentBib;
+- (void)setupTypePopUp;
 - (void)setupForm;
 
 /*!
@@ -372,6 +373,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 - (void)makeKeyField:(NSString *)fieldName;
 
 - (void)bibDidChange:(NSNotification *)notification;
+- (void)typeInfoDidChange:(NSNotification *)aNotification;
 
 - (void)docWillSave:(NSNotification *)notification;
 - (void)bibWillBeRemoved:(NSNotification *)notification;
