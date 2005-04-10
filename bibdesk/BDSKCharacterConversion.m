@@ -11,7 +11,7 @@
 #import "BDSKConverter.h"
 
 #define CHARACTER_CONVERSION_FILENAME	@"CharacterConversion.plist"
-#define ONE_WAY_CONVERSION_KEY			@"TeX to Roman"
+#define ONE_WAY_CONVERSION_KEY			@"One-Way Conversions"
 #define TWO_WAY_CONVERSION_KEY			@"Roman to TeX"
 
 static BDSKCharacterConversion *sharedConversionEditor;
@@ -36,8 +36,8 @@ static BDSKCharacterConversion *sharedConversionEditor;
 		
 		if ([fm fileExistsAtPath:charConvPath]) {
 			NSDictionary *tmpDict = [NSDictionary dictionaryWithContentsOfFile:charConvPath];
-			oneWayDict = [[tmpDict objectForKey:TWO_WAY_CONVERSION_KEY] mutableCopy];
-			twoWayDict = [[tmpDict objectForKey:ONE_WAY_CONVERSION_KEY] mutableCopy];
+			oneWayDict = [[tmpDict objectForKey:ONE_WAY_CONVERSION_KEY] mutableCopy];
+			twoWayDict = [[tmpDict objectForKey:TWO_WAY_CONVERSION_KEY] mutableCopy];
 		}
 		if (oneWayDict == nil) {
 			oneWayDict = [[NSMutableDictionary dictionaryWithCapacity:1] retain];
@@ -218,7 +218,7 @@ static BDSKCharacterConversion *sharedConversionEditor;
 	}
 	else {
 		if (![object isEqualToString:[currentDict objectForKey:roman]]) {
-			if ([self listType] == 2 && [[currentDict allKeysForObject:object] count] == 0) {
+			if ([[currentDict allKeysForObject:object] count] == 0) {
 				[currentDict setObject:object forKey:roman];
 			} else {
 				NSLog(@"Try to set duplicate TeX conversion %@",object);
