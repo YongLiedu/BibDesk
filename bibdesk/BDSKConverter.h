@@ -28,9 +28,6 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
  @discussion This was a pain to write, and more of a pain to link. :)
 */
 @interface BDSKConverter : NSObject {
-     NSDictionary *wholeDict;
-     NSDictionary *userWholeDict;
-     NSCharacterSet *emptySet;
      NSCharacterSet *finalCharSet;
      NSCharacterSet *accentCharSet;
      NSDictionary *detexifyConversions;

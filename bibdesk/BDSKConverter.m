@@ -18,13 +18,12 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 #import "BDSKComplexString.h"
 #import "BibAppController.h"
 
-static BDSKConverter *theConverter;
-
 @implementation BDSKConverter
 
 + (BDSKConverter *)sharedConverter{
+    static BDSKConverter *theConverter = nil;
     if(!theConverter){
-	theConverter = [[[BDSKConverter alloc] init] retain];
+	theConverter = [[BDSKConverter alloc] init];
     }
     return theConverter;
 }
@@ -37,9 +36,6 @@ static BDSKConverter *theConverter;
 }
 
 - (void)dealloc{
-    [wholeDict release];
-    [userWholeDict release];
-    [emptySet release];
     [finalCharSet release];
     [accentCharSet release];
     [texifyConversions release];
@@ -53,9 +49,6 @@ static BDSKConverter *theConverter;
 
 - (void)loadDict{
     // first make sure that we release, as this may be called by the character conversion editor
-	[wholeDict release];
-    [userWholeDict release];
-    [emptySet release];
     [finalCharSet release];
     [accentCharSet release];
     [texifyConversions release];
@@ -64,13 +57,12 @@ static BDSKConverter *theConverter;
     [detexifyAccents release];
     [baseCharacterSetForTeX release];
     
-    wholeDict = [[NSDictionary dictionaryWithContentsOfFile:[[[NSBundle mainBundle] resourcePath] stringByAppendingPathComponent:@"CharacterConversion.plist"]] retain];
-    emptySet = [[NSCharacterSet characterSetWithCharactersInString:@""] retain];
-	
-	// look for the user file
-	NSFileManager *fm = [NSFileManager defaultManager];
-	NSString *applicationSupportPath = [[fm applicationSupportDirectory:kUserDomain] stringByAppendingPathComponent:@"BibDesk"];
-	NSString *charConvPath = [applicationSupportPath stringByAppendingPathComponent:@"CharacterConversion.plist"];
+    NSDictionary *wholeDict = [NSDictionary dictionaryWithContentsOfFile:[[[NSBundle mainBundle] resourcePath] stringByAppendingPathComponent:@"CharacterConversion.plist"]];
+	NSDictionary *userWholeDict = nil;
+    // look for the user file
+    NSFileManager *fm = [NSFileManager defaultManager];
+    NSString *applicationSupportPath = [[fm applicationSupportDirectory:kUserDomain] stringByAppendingPathComponent:@"BibDesk"];
+    NSString *charConvPath = [applicationSupportPath stringByAppendingPathComponent:@"CharacterConversion.plist"];
 	
 	if ([fm fileExistsAtPath:charConvPath]) {
 		userWholeDict = [NSDictionary dictionaryWithContentsOfFile:charConvPath];
@@ -103,7 +95,7 @@ static BDSKConverter *theConverter;
 	if (userWholeDict) {
 		oneWayCharacters = [userWholeDict objectForKey:@"One-Way Conversions"];
 		e = [oneWayCharacters keyEnumerator];
-		oneWayKey;
+
 		while(oneWayKey = [e nextObject]){
 			[workingSet addCharactersInString:oneWayKey];
 		}
@@ -304,7 +296,7 @@ static BDSKConverter *theConverter;
         return [NSString string];
     }
     
-    [scanner setCharactersToBeSkipped:emptySet];
+    [scanner setCharactersToBeSkipped:nil];
     //    NSLog(@"scanning string: %@",s);
     while(![scanner isAtEnd]){
         if([scanner scanUpToString:@"{\\" intoString:&tmpPass])
