@@ -284,7 +284,7 @@ static BDSKTypeInfoEditor *sharedTypeInfoEditor;
 }
 
 - (IBAction)removeOptional:(id)sender {
-	NSEnumerator *fieldEnum = [requiredTableView selectedRowEnumerator];
+	NSEnumerator *fieldEnum = [optionalTableView selectedRowEnumerator];
 	NSNumber *row;
 	NSMutableArray *fieldsToRemove = [NSMutableArray arrayWithCapacity:1];
 	
@@ -297,7 +297,7 @@ static BDSKTypeInfoEditor *sharedTypeInfoEditor;
 	}
 	[currentOptionalFields removeObjectsInArray:fieldsToRemove];
 	
-    [optionalTableView reloadData];
+	[optionalTableView reloadData];
 	[optionalTableView deselectAll:nil];
 }
 
