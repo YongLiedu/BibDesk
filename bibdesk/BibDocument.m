@@ -129,7 +129,7 @@ NSString *BDSKBibItemLocalDragPboardType = @"edu.ucsd.cs.mmccrack.bibdesk: Local
         [self setDocumentStringEncoding:[[OFPreferenceWrapper sharedPreferenceWrapper] integerForKey:BDSKDefaultStringEncoding]]; // need to set this for new documents
 
 		tableColumnsChanged = YES;
-		sortDescending = YES;
+		sortDescending = NO;
 		showStatus = YES;
                 
                 [self cacheQuickSearchRegexes];

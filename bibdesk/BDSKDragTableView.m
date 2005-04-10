@@ -145,6 +145,7 @@ static NSColor *sStripeColor = nil;
     }else if(c == 0x0020){ // spacebar to page down in the lower pane of the BibDocument splitview
         [[self delegate] pageDownInPreview:nil];
     }else if ([alnum characterIsMember:c]) {
+        [typeAheadHelper rebuildTypeAheadSearchCache]; // if we resorted or searched, the cache is stale
         [typeAheadHelper newProcessKeyDownCharacter:c];
     }else{
         [super keyDown:event];
