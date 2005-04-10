@@ -88,6 +88,7 @@ static BDSKCharacterConversion *sharedConversionEditor;
 	} else {
 		[[tc dataCell] setFormatter:nil];
 	}
+	[tableView reloadData];
 }
 
 - (NSDictionary *)oneWayDict {
@@ -150,15 +151,14 @@ static BDSKCharacterConversion *sharedConversionEditor;
 }
 
 - (IBAction)changeList:(id)sender {
-	[self setListType:[sender tag]];
+	[self setListType:[[sender selectedItem] tag]];
 }
 
 - (IBAction)add:(id)sender {
-	NSString *newRoman = [NSString stringWithString:@"Unicode Character"];
-	NSString *newTex = [NSString stringWithString:@"{\\}"];
-	[currentArray addObject:newRoman];
-	NSMutableDictionary *newDict = [NSMutableDictionary dictionaryWithObjectsAndKeys: [NSMutableArray array], @"required", [NSMutableArray array], @"optional", nil];
-	[currentDict setObject:newTex forKey:newRoman];
+    NSString *newRoman = [NSString stringWithFormat:@"%C",0x00E4];
+    NSString *newTex = [NSString stringWithString:@"{\\\"a}"];
+    [currentArray addObject:newRoman];
+    [currentDict setObject:newTex forKey:newRoman];
 	
     [tableView reloadData];
 	
