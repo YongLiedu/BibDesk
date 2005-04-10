@@ -218,11 +218,11 @@ static BDSKCharacterConversion *sharedConversionEditor;
 	}
 	else {
 		if (![object isEqualToString:[currentDict objectForKey:roman]]) {
-			if ([[currentDict allKeysForObject:object] count] == 0) {
-				[currentDict setObject:object forKey:roman];
-			} else {
+			if ([self listType] == 2 && [[currentDict allKeysForObject:object] count] > 0) {
 				NSLog(@"Try to set duplicate TeX conversion %@",object);
 				[tableView reloadData];
+			} else {
+				[currentDict setObject:object forKey:roman];
 			}
 		}
 	}
