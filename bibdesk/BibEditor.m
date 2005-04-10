@@ -329,10 +329,14 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 }
 
 - (IBAction)saveDocument:(id)sender{
+    NSResponder *fr = [[self window] firstResponder];
+
     // a safety call to be sure that the current field's changes are saved :...
     [self finalizeChanges];
-
+    
     [theDocument saveDocument:sender];
+    
+    [[self window] makeFirstResponder:fr];
 }
 
 - (IBAction)revealLocal:(id)sender{
