@@ -106,6 +106,7 @@ NSString *BDSKMonthString = @"Month";
 NSString *BDSKKeywordsString = @"Keywords";
 NSString *BDSKJournalString = @"Journal";
 NSString *BDSKVolumeString = @"Volume";
+NSString *BDSKNumberString = @"Number";
 NSString *BDSKPagesString = @"Pages";
 NSString *BDSKBooktitleString = @"Booktitle";
 NSString *BDSKPublisherString = @"Publisher";
@@ -113,7 +114,7 @@ NSString *BDSKDateCreatedString = @"Date-Added";
 NSString *BDSKDateModifiedString = @"Date-Modified";
 NSString *BDSKDateString = @"Date";
 NSString *BDSKBibtexString = @"BibTeX";
-NSString *BDSKNumberString = @"Number";
+NSString *BDSKItemNumberString = @"Item-Number";
 
 
 #pragma mark ||  Notification name strings

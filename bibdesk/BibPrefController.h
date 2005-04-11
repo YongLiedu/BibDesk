@@ -130,6 +130,7 @@ extern NSString *BDSKMonthString;
 extern NSString *BDSKKeywordsString;
 extern NSString *BDSKJournalString;
 extern NSString *BDSKVolumeString;
+extern NSString *BDSKNumberString;
 extern NSString *BDSKPagesString;
 extern NSString *BDSKBooktitleString;
 extern NSString *BDSKPublisherString;
@@ -137,7 +138,7 @@ extern NSString *BDSKDateCreatedString;
 extern NSString *BDSKDateModifiedString;
 extern NSString *BDSKDateString;
 extern NSString *BDSKBibtexString;
-extern NSString *BDSKNumberString;
+extern NSString *BDSKItemNumberString;
 
 
 #pragma mark ||  Notification name strings
