@@ -29,7 +29,7 @@
 - (void)setBibTypesForFileTypeDict:(NSDictionary *)newDict;
 
 - (NSString *)defaultTypeForFileFormat:(NSString *)fileFormat;
-- (NSArray *)allRemovableFieldNames;
+- (NSArray *)allFieldNames;
 - (NSArray *)requiredFieldsForType:(NSString *)type;
 - (NSArray *)optionalFieldsForType:(NSString *)type;
 - (NSArray *)userDefaultFieldsForType:(NSString *)type;

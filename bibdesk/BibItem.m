@@ -164,7 +164,7 @@ setupParagraphStyle()
     NSEnumerator *e;
     NSString *tmp;
     BibTypeManager *typeMan = [BibTypeManager sharedManager];
-    NSMutableArray *removeKeys = [[typeMan allRemovableFieldNames] mutableCopy];
+    NSMutableArray *removeKeys = [[typeMan allFieldNames] mutableCopy];
     NSEnumerator *reqFieldsE = [[typeMan requiredFieldsForType:type] objectEnumerator];
     NSEnumerator *optFieldsE = [[typeMan optionalFieldsForType:type] objectEnumerator];
     NSEnumerator *defFieldsE = [[typeMan userDefaultFieldsForType:type] objectEnumerator];

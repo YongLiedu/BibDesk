@@ -19,7 +19,7 @@ static BibTypeManager *sharedInstance = nil;
 
 - (id)init{
     self = [super init];
-    NSDictionary *typeInfoDict = [[NSDictionary dictionaryWithContentsOfFile:[[[NSBundle mainBundle] resourcePath] stringByAppendingPathComponent:@"TypeInfo.plist"]] retain];
+    NSDictionary *typeInfoDict = [NSDictionary dictionaryWithContentsOfFile:[[[NSBundle mainBundle] resourcePath] stringByAppendingPathComponent:@"TypeInfo.plist"]]];
 
 	NSFileManager *fm = [NSFileManager defaultManager];
 	NSString *applicationSupportPath = [[fm applicationSupportDirectory:kUserDomain] stringByAppendingPathComponent:@"BibDesk"];
@@ -34,7 +34,7 @@ static BibTypeManager *sharedInstance = nil;
 		typesForFileTypeDict = [[NSDictionary dictionaryWithObjectsAndKeys: 
 				[[userTypeInfoDict objectForKey:@"TypesForFileType"] objectForKey:BDSKBibtexString], BDSKBibtexString, 
 				[[typeInfoDict objectForKey:@"TypesForFileType"] objectForKey:@"PubMed"], @"PubMed", nil] retain];
-		allFieldNames = [[userTypeInfoDict objectForKey:@"AllRemovableFieldNames"] retain];
+		allFieldNames = [[userTypeInfoDict objectForKey:@"AllFieldNames"] retain];
 	}
 	
 	if (fieldsForTypesDict == nil)
@@ -42,7 +42,7 @@ static BibTypeManager *sharedInstance = nil;
 	if (typesForFileTypeDict == nil)
 		typesForFileTypeDict = [[typeInfoDict objectForKey:@"TypesForFileType"] retain];
 	if (allFieldNames == nil)
-		allFieldNames = [[typeInfoDict objectForKey:@"AllRemovableFieldNames"] retain];
+		allFieldNames = [[typeInfoDict objectForKey:@"AllFieldNames"] retain];
 	fileTypesDict = [[typeInfoDict objectForKey:@"FileTypes"] retain];
 	fieldNameForPubMedTagDict = [[typeInfoDict objectForKey:@"BibTeXFieldNamesForPubMedTags"] retain];
 	bibtexTypeForPubMedTypeDict = [[typeInfoDict objectForKey:@"BibTeXTypesForPubMedTypes"] retain];
@@ -120,8 +120,8 @@ static BibTypeManager *sharedInstance = nil;
      return [[fileTypesDict objectForKey:fileFormat] objectForKey:@"DefaultType"];
 }
 
-- (NSArray *)allRemovableFieldNames{
-    if (allFieldNames == nil) [NSException raise:@"nilNames exception" format:@"allRemovableFieldNames returning nil."];
+- (NSArray *)allFieldNames{
+    if (allFieldNames == nil) [NSException raise:@"nilNames exception" format:@"allFieldNames returning nil."];
     return allFieldNames;
 }
 
