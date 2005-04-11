@@ -1430,10 +1430,15 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 - (BOOL)windowShouldClose:(id)sender{
     NSString *msgCiteKey = @"";
     NSString *msgPaper = @"";
+    
+    // check for our default cite key
     if([[theBib citeKey] isEqualToString:@"cite-key"])
         msgCiteKey = NSLocalizedString(@"Cite key has not been set.", @"cite key has not been set");
-    if([theBib needsToBeFiled] && [[OFPreferenceWrapper sharedPreferenceWrapper] boolForKey:BDSKFilePapersAutomaticallyKey])
+    
+    if([theBib needsToBeFiled])
         msgPaper = NSLocalizedString(@"Paper needs to be filed.", @"paper needs to be filed\n");
+    
+    // if both are empty, we can close the window safely
     if([msgCiteKey isEqualToString:@""] && [msgPaper isEqualToString:@""])
         return YES;
     
@@ -1448,13 +1453,15 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
                       NULL, // did dismiss sel
                       NULL,
                       @"%@\n%@\n%@", warning, msgCiteKey, msgPaper);
-    return NO;
+    return NO; // windowShouldClose returns while the sheet is active
 
 }
 
 - (void)shouldCloseSheetDidEnd:(NSWindow *)sheet returnCode:(int)returnCode contextInfo:(void *)contextInfo{
-    if(returnCode == NSAlertAlternateReturn)
+    if(returnCode == NSAlertAlternateReturn){ // user elected to close anyway
+        [sheet orderOut:nil]; // suck the sheet back in
         [self close];
+    }
 }
 
 - (void)windowWillClose:(NSNotification *)notification{
