@@ -520,10 +520,10 @@ static BDSKTypeInfoEditor *sharedTypeInfoEditor;
 	NSTableView *tv = [aNotification object];
 	
 	if (tv == typeTableView) {
-		if ([typeTableView selectedRow] == -1) {
-			[self setCurrentType:nil];
-		} else {
+		if ([typeTableView numberOfSelectedRows] == 1) {
 			[self setCurrentType:[types objectAtIndex:[typeTableView selectedRow]]];
+		} else {
+			[self setCurrentType:nil];
 		}
 		// the fields changed, so update their tableViews
 		[requiredTableView reloadData];
