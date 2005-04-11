@@ -499,9 +499,10 @@ static BDSKTypeInfoEditor *sharedTypeInfoEditor;
 			--row;
 			++offset;
 		}
-		field = [fields objectAtIndex:i];
+		field = [[fields objectAtIndex:i] retain];
 		[fields removeObjectAtIndex:i];
 		[fields insertObject:field atIndex:row++];
+        [field release];
 	}
 	
 	//select the moved rows
