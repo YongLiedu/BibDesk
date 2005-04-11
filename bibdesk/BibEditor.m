@@ -349,7 +349,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 
 - (IBAction)toggleStatusBar:(id)sender{
 	NSRect tabViewFrame = [tabView frame];
-	NSRect statusRect = [[[self window] contentView] frame];
+	NSRect contentRect = [[[self window] contentView] frame];
 	NSRect infoRect = [statusLine frame];
 	if (showStatus) {
 		showStatus = NO;
@@ -358,12 +358,13 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 	} else {
 		showStatus = YES;
 		tabViewFrame.size.height -= 20.0;
-		infoRect.size.width = statusRect.size.width - 16.0;
+		infoRect.origin.y = contentRect.size.height - 16.0;
+		infoRect.size.width = contentRect.size.width - 16.0;
 		[statusLine setFrame:infoRect];
 		[[[self window] contentView]  addSubview:statusLine];
 	}
 	[tabView setFrame:tabViewFrame];
-	[[[self window] contentView] setNeedsDisplayInRect:[[[self window] contentView] frame]];
+	[[[self window] contentView] setNeedsDisplayInRect:contentRect];
 	[[OFPreferenceWrapper sharedPreferenceWrapper] setBool:showStatus forKey:BDSKShowEditorStatusBarKey];
 }
 
@@ -1158,6 +1159,10 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
     [[NSNotificationCenter defaultCenter] postNotificationName:BDSKDocumentUpdateUINotification
                                                         object:nil
                                                       userInfo:nil];
+}
+
+- (void)setStatus:(NSString *)status {
+	[statusLine setStringValue:status];
 }
 
 - (void)bibDidChange:(NSNotification *)notification{

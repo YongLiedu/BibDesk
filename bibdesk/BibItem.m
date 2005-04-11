@@ -1285,6 +1285,9 @@ setupParagraphStyle()
 		[[BibFiler sharedFiler] filePapers:[NSArray arrayWithObject:self]
 							  fromDocument:[self document] 
 									   ask:NO]; 
+		if (editorObj) {
+			[editorObj setStatus:NSLocalizedString(@"Autofiled linked file",@"Autofiled linked file")];
+		}
 	} else {
 		[self setNeedsToBeFiled:YES];
 	}

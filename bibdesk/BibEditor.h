@@ -215,6 +215,8 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 */
 - (void)recordChangingField:(NSString *)fieldName toValue:(NSString *)value;
 
+- (void)setStatus:(NSString *)status;
+
 /*!
     @method     finalizeChanges
     @abstract   Makes sure that edits of fields are submitted.
