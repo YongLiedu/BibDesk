@@ -36,7 +36,7 @@
   \'a5  You can now customize BibTeX types by adding new types, adding/removing fields from existing types, or rearranging the order of fields in existing types\
   \'a5  You can now customize the Unicode->LaTeX character conversion process by adding your own definitions\
   \'a5  Double-clicking the splitview divider in the document window now collapses or expands the preview\
-  \'a5  You can sort the publications list by the order of items in the actual BibTeX file ("Number")\cf0 \
+  \'a5  You can sort the publications list by the order of items in the actual BibTeX file ("Number")\
   \
 \pard\tx1440\tx2880\tx4320\tx5760\tx7200\ql\qnatural
 
@@ -57,13 +57,15 @@
   \'a5  Saving with normalized names on will no longer insert editors into an author field (bug #1176433)\
   \'a5  Remove BibFinder and connect cmd-F to quick search field; this fixes at least one crashing bug\
   \'a5  Input manager now works properly with natbib optional parameters\
-  \'a5  Make font sizes in BibEditor form labeling consistent\
+  \'a5  Make font sizes in BibEditor form labels consistent\
   \'a5  "Open Using Filter" history is now saved properly across launches\
   \'a5  Documents imported using a filter are now properly marked as unsaved\
   \'a5  Pub list is properly sorted after adding a new publication\
   \'a5  Resizing problem with duplicate citekey warning should be fixed in the editor\
   \'a5  Editor window should remember its size properly\
-  \'a5  Reworked search code for Services, which fixes bug #604338 (custom fields weren't searched), and #854414 (spaces in a search string were not recognized)\cf0 \
+  \'a5  Reworked search code for Services, which fixes bug #604338 (custom fields weren't searched), and #854414 (spaces in a search string were not recognized)\
+  \'a5  Fixed the type-ahead search in publications list (typing a partial author name selects a publication by that author)\
+  \'a5  Saving won't change focus from Annot\cf0 e/Abstract editing (bug #833430)\cf0 \
 \pard\tx1440\tx2880\tx4320\tx5760\tx7200\ql\qnatural
 
 \f2\b\fs28 \cf0 \
@@ -81,8 +83,9 @@ Parser notes
 \f3\i\b\fs26 \
 \
 New Features\
+\pard\tx1440\tx2880\tx4320\tx5760\tx7200\ql\qnatural
 
-\f1\i0\b0\fs22   \'a5  Option added to save author names as normalized (off by default); see "Defaults" pref pane.  This converts names to "von Last, Jr., First" format.\
+\f1\i0\b0\fs22 \cf0   \'a5  Option added to save author names as normalized (off by default); see "Defaults" pref pane.  This converts names to "von Last, Jr., First" format.\
   \'a5  Option added to generate all-lowercase Local-Urls\
   \'a5  Optional parameters for separators and etal in format for author names (see online help for details)\
   \'a5  Added an option to display Abstract in preview pane\
