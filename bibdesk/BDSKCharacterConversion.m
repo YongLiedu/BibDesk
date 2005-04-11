@@ -10,10 +10,6 @@
 #import "BibAppController.h"
 #import "BDSKConverter.h"
 
-#define CHARACTER_CONVERSION_FILENAME	@"CharacterConversion.plist"
-#define ONE_WAY_CONVERSION_KEY			@"One-Way Conversions"
-#define TWO_WAY_CONVERSION_KEY			@"Roman to TeX"
-
 static BDSKCharacterConversion *sharedConversionEditor;
 
 @implementation BDSKCharacterConversion
@@ -37,7 +33,7 @@ static BDSKCharacterConversion *sharedConversionEditor;
 		if ([fm fileExistsAtPath:charConvPath]) {
 			NSDictionary *tmpDict = [NSDictionary dictionaryWithContentsOfFile:charConvPath];
 			oneWayDict = [[tmpDict objectForKey:ONE_WAY_CONVERSION_KEY] mutableCopy];
-			twoWayDict = [[tmpDict objectForKey:TWO_WAY_CONVERSION_KEY] mutableCopy];
+			twoWayDict = [[tmpDict objectForKey:ROMAN_TO_TEX_KEY] mutableCopy];
 		}
 		if (oneWayDict == nil) {
 			oneWayDict = [[NSMutableDictionary dictionaryWithCapacity:1] retain];
@@ -129,9 +125,9 @@ static BDSKCharacterConversion *sharedConversionEditor;
 	while (roman = [rEnum nextObject]) {
 		[reverseDict setObject:roman forKey:[twoWayDict objectForKey:roman]];
 	}
-	NSDictionary *dict = [NSDictionary dictionaryWithObjectsAndKeys:oneWayDict, @"One-Way Conversions", 
-																	twoWayDict, @"Roman to TeX",
-																	reverseDict, @"TeX to Roman", nil];
+	NSDictionary *dict = [NSDictionary dictionaryWithObjectsAndKeys:oneWayDict, ONE_WAY_CONVERSION_KEY, 
+																	twoWayDict, ROMAN_TO_TEX_KEY,
+																	reverseDict, TEX_TO_ROMAN_KEY, nil];
 	
 	NSData *data = [NSPropertyListSerialization dataFromPropertyList:dict
 															  format:format 

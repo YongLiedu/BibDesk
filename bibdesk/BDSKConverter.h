@@ -22,6 +22,14 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 #import <OmniFoundation/NSString-OFExtensions.h>
 #import "BibTypeManager.h"
 
+// The filename and keys used in the plist
+#define CHARACTER_CONVERSION_FILENAME	@"CharacterConversion.plist"
+#define ONE_WAY_CONVERSION_KEY			@"One-Way Conversions"
+#define ROMAN_TO_TEX_KEY				@"Roman to TeX"
+#define TEX_TO_ROMAN_KEY				@"TeX to Roman"
+#define ROMAN_TO_TEX_ACCENTS_KEY		@"Roman to TeX Accents"
+#define TEX_TO_ROMAN_ACCENTS_KEY		@"TeX to Roman Accents"
+
 /*!
  @class BDSKConverter
  @abstract converts from UTF-8 <-> TeX

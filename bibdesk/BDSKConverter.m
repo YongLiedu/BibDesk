@@ -57,12 +57,12 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
     [detexifyAccents release];
     [baseCharacterSetForTeX release];
     
-    NSDictionary *wholeDict = [NSDictionary dictionaryWithContentsOfFile:[[[NSBundle mainBundle] resourcePath] stringByAppendingPathComponent:@"CharacterConversion.plist"]];
+    NSDictionary *wholeDict = [NSDictionary dictionaryWithContentsOfFile:[[[NSBundle mainBundle] resourcePath] stringByAppendingPathComponent:CHARACTER_CONVERSION_FILENAME]];
 	NSDictionary *userWholeDict = nil;
     // look for the user file
     NSFileManager *fm = [NSFileManager defaultManager];
     NSString *applicationSupportPath = [[fm applicationSupportDirectory:kUserDomain] stringByAppendingPathComponent:@"BibDesk"];
-    NSString *charConvPath = [applicationSupportPath stringByAppendingPathComponent:@"CharacterConversion.plist"];
+    NSString *charConvPath = [applicationSupportPath stringByAppendingPathComponent:CHARACTER_CONVERSION_FILENAME];
 	
 	if ([fm fileExistsAtPath:charConvPath]) {
 		userWholeDict = [NSDictionary dictionaryWithContentsOfFile:charConvPath];
@@ -80,7 +80,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
     [workingSet addCharactersInRange:highCharRange];
 
     // Build a dictionary of one-way conversions that we know how to do, then add these to the character set
-    NSDictionary *oneWayCharacters = [wholeDict objectForKey:@"One-Way Conversions"];
+    NSDictionary *oneWayCharacters = [wholeDict objectForKey:ONE_WAY_CONVERSION_KEY];
     NSEnumerator *e = [oneWayCharacters keyEnumerator];
     NSString *oneWayKey;
 	while(oneWayKey = [e nextObject]){
@@ -88,21 +88,21 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 	}
     
     // set up the dictionaries
-    NSMutableDictionary *tmpDetexifyDict = [NSMutableDictionary dictionaryWithDictionary:[wholeDict objectForKey:@"TeX to Roman"]];
-    NSMutableDictionary *tmpTexifyDict = [NSMutableDictionary dictionaryWithDictionary:[wholeDict objectForKey:@"Roman to TeX"]];
-    [tmpTexifyDict addEntriesFromDictionary:[wholeDict objectForKey:@"One-Way Conversions"]];
+    NSMutableDictionary *tmpDetexifyDict = [NSMutableDictionary dictionaryWithDictionary:[wholeDict objectForKey:TEX_TO_ROMAN_KEY]];
+    NSMutableDictionary *tmpTexifyDict = [NSMutableDictionary dictionaryWithDictionary:[wholeDict objectForKey:ROMAN_TO_TEX_KEY]];
+    [tmpTexifyDict addEntriesFromDictionary:[wholeDict objectForKey:ONE_WAY_CONVERSION_KEY]];
     
 	if (userWholeDict) {
-		oneWayCharacters = [userWholeDict objectForKey:@"One-Way Conversions"];
+		oneWayCharacters = [userWholeDict objectForKey:ONE_WAY_CONVERSION_KEY];
 		e = [oneWayCharacters keyEnumerator];
 
 		while(oneWayKey = [e nextObject]){
 			[workingSet addCharactersInString:oneWayKey];
 		}
 		
-		[tmpTexifyDict addEntriesFromDictionary:[wholeDict objectForKey:@"Roman to TeX"]];
-		[tmpTexifyDict addEntriesFromDictionary:[wholeDict objectForKey:@"One-Way Conversions"]];
-		[tmpDetexifyDict addEntriesFromDictionary:[wholeDict objectForKey:@"TeX to Roman"]];
+		[tmpTexifyDict addEntriesFromDictionary:[wholeDict objectForKey:ROMAN_TO_TEX_KEY]];
+		[tmpTexifyDict addEntriesFromDictionary:[wholeDict objectForKey:ONE_WAY_CONVERSION_KEY]];
+		[tmpDetexifyDict addEntriesFromDictionary:[wholeDict objectForKey:TEX_TO_ROMAN_KEY]];
     }
 	
 	// set the ivars
@@ -127,9 +127,9 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
     baseCharacterSetForTeX = [workingSet copy];
     [workingSet release];
 	
-    texifyAccents = [[wholeDict objectForKey:@"Roman to TeX Accents"] retain];
+    texifyAccents = [[wholeDict objectForKey:ROMAN_TO_TEX_ACCENTS_KEY] retain];
     accentCharSet = [[NSCharacterSet characterSetWithCharactersInString:[[texifyAccents allKeys] componentsJoinedByString:@""]] retain];
-	detexifyAccents = [[wholeDict objectForKey:@"TeX to Roman Accents"] retain];
+	detexifyAccents = [[wholeDict objectForKey:TEX_TO_ROMAN_ACCENTS_KEY] retain];
 }
 
 - (NSString *)stringByTeXifyingString:(NSString *)s{
