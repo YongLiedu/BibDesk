@@ -61,6 +61,7 @@ extern NSString *BDSKSeparateCiteKey;
 extern NSString *BDSKShowColsKey;
 extern NSString *BDSKShownColsNamesKey;
 extern NSString *BDSKShowStatusBarKey;
+extern NSString *BDSKShowEditorStatusBarKey;
 extern NSString *BDSKDefaultFieldsKey;
 extern NSString *BDSKOutputTemplateFileKey;
 extern NSString *BDSKTableViewFontKey;

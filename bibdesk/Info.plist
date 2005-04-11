@@ -441,6 +441,8 @@
 					<string>1.156487706076073e-310</string>
 					<key>Show Status Bar</key>
 					<true/>
+					<key>Show Editor Status Bar</key>
+					<true/>
 					<key>Show Warnings in Error Panel</key>
 					<string>0</string>
 					<key>Shown Column Names</key>
