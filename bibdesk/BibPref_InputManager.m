@@ -298,7 +298,9 @@ NSString *BDSKInputManagerLoadableApplications = @"Application bundles that we r
 - (IBAction)addAutocompleteString:(id)sender{
     // first we fill the popup
 	BibTypeManager *typeMan = [BibTypeManager sharedManager];
-	NSMutableArray *fieldNames = [[[typeMan allFieldNames] allObjects] mutableCopy];
+	NSMutableSet *fieldNameSet = [NSMutableSet setWithSet:[typeMan allFieldNames]];
+	[fieldNameSet minusSet:[NSSet setWithObjects:BDSKLocalUrlString, BDSKUrlString, BDSKAbstractString, BDSKAnnoteString, BDSKYearString, BDSKVolumeString, BDSKNumberString, BDSKPagesString, nil]];
+	NSMutableArray *fieldNames = [[fieldNameSet allObjects] mutableCopy];
 	[fieldNames sortUsingSelector:@selector(caseInsensitiveCompare:)];
 	[fieldNames removeObjectsInArray:enabledEditorAutocompletionStrings];
 	[fieldNames insertObject:NSLocalizedString(@"Choose a Field Name:",@"") atIndex:0];

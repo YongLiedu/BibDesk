@@ -1258,7 +1258,7 @@ stringByAppendingPathComponent:@"BibDesk"]; */
 	NSArray *prefsQuickSearchKeysArray = [[OFPreferenceWrapper sharedPreferenceWrapper] arrayForKey:BDSKQuickSearchKeys];
 	BibTypeManager *typeMan = [BibTypeManager sharedManager];
 	NSMutableSet *fieldNameSet = [NSMutableSet setWithSet:[typeMan allFieldNames]];
-	[fieldNameSet addObjectsFromArray:[NSArray arrayWithObjects:BDSKLocalUrlString, BDSKUrlString, BDSKCiteKeyString, BDSKDateString, @"Added", @"Modified", nil]];
+	[fieldNameSet unionSet:[NSSet setWithObjects:BDSKLocalUrlString, BDSKUrlString, BDSKCiteKeyString, BDSKDateString, @"Added", @"Modified", nil]];
 	NSMutableArray *colNames = [[fieldNameSet allObjects] mutableCopy];
 	[colNames sortUsingSelector:@selector(caseInsensitiveCompare:)];
 	[colNames removeObjectsInArray:prefsQuickSearchKeysArray];
@@ -2323,7 +2323,7 @@ This method always returns YES. Even if some or many operations fail.
 	NSArray *prefsShownColNamesArray = [[OFPreferenceWrapper sharedPreferenceWrapper] arrayForKey:BDSKShownColsNamesKey];
 	BibTypeManager *typeMan = [BibTypeManager sharedManager];
 	NSMutableSet *fieldNameSet = [NSMutableSet setWithSet:[typeMan allFieldNames]];
-	[fieldNameSet addObjectsFromArray:[NSArray arrayWithObjects:BDSKLocalUrlString, BDSKUrlString, BDSKCiteKeyString, BDSKDateString, @"Added", @"Modified", BDSKFirstAuthorString, BDSKSecondAuthorString, BDSKThirdAuthorString, BDSKItemNumberString, nil]];
+	[fieldNameSet unionSet:[NSSet setWithObjects:BDSKLocalUrlString, BDSKUrlString, BDSKCiteKeyString, BDSKDateString, @"Added", @"Modified", BDSKFirstAuthorString, BDSKSecondAuthorString, BDSKThirdAuthorString, BDSKItemNumberString, nil]];
 	NSMutableArray *colNames = [[fieldNameSet allObjects] mutableCopy];
 	[colNames sortUsingSelector:@selector(caseInsensitiveCompare:)];
 	[colNames removeObjectsInArray:prefsShownColNamesArray];
