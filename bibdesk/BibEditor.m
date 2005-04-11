@@ -745,6 +745,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 			 [theBib needsToBeFiled] && [theBib canSetLocalUrl] ) {
 			[[BibFiler sharedFiler] filePapers:[NSArray arrayWithObject:theBib] fromDocument:[theBib document] ask:NO];
 			[theBib setNeedsToBeFiled:NO]; // unset the flag even when we fail, to avoid retrying at every edit
+			[self setStatus:NSLocalizedString(@"Autofiled linked file.",@"Autofiled linked file.")];
 		}
 
 		// still need to check duplicates ourselves:
@@ -1439,15 +1440,10 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 - (BOOL)windowShouldClose:(id)sender{
     NSString *msgCiteKey = @"";
     NSString *msgPaper = @"";
-    
-    // check for our default cite key
     if([[theBib citeKey] isEqualToString:@"cite-key"])
         msgCiteKey = NSLocalizedString(@"Cite key has not been set.", @"cite key has not been set");
-    
-    if([theBib needsToBeFiled])
+    if([theBib needsToBeFiled] && [[OFPreferenceWrapper sharedPreferenceWrapper] boolForKey:BDSKFilePapersAutomaticallyKey])
         msgPaper = NSLocalizedString(@"Paper needs to be filed.", @"paper needs to be filed\n");
-    
-    // if both are empty, we can close the window safely
     if([msgCiteKey isEqualToString:@""] && [msgPaper isEqualToString:@""])
         return YES;
     
@@ -1462,15 +1458,13 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
                       NULL, // did dismiss sel
                       NULL,
                       @"%@\n%@\n%@", warning, msgCiteKey, msgPaper);
-    return NO; // windowShouldClose returns while the sheet is active
+    return NO;
 
 }
 
 - (void)shouldCloseSheetDidEnd:(NSWindow *)sheet returnCode:(int)returnCode contextInfo:(void *)contextInfo{
-    if(returnCode == NSAlertAlternateReturn){ // user elected to close anyway
-        [sheet orderOut:nil]; // suck the sheet back in
+    if(returnCode == NSAlertAlternateReturn)
         [self close];
-    }
 }
 
 - (void)windowWillClose:(NSNotification *)notification{
