@@ -1274,6 +1274,9 @@ setupParagraphStyle()
 
 - (void)setNeedsToBeFiled:(BOOL)flag {
 	needsToBeFiled = flag;
+	if (flag && editorObj) {
+		[editorObj setStatus:NSLocalizedString(@"Linked file needs to be filed.",@"Linked file needs to be filed.")];
+	}
 }
 
 - (void)autoFilePaper
@@ -1286,7 +1289,7 @@ setupParagraphStyle()
 							  fromDocument:[self document] 
 									   ask:NO]; 
 		if (editorObj) {
-			[editorObj setStatus:NSLocalizedString(@"Autofiled linked file",@"Autofiled linked file")];
+			[editorObj setStatus:NSLocalizedString(@"Autofiled linked file.",@"Autofiled linked file.")];
 		}
 	} else {
 		[self setNeedsToBeFiled:YES];
