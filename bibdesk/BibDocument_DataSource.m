@@ -64,7 +64,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 		   [tcID isEqualToString:@"Key"]){
             return [pub citeKey];
             
-        }else if([tcID isEqualToString:@"Number"]){
+        }else if([tcID isEqualToString:BDSKItemNumberString]){
             return [NSString stringWithFormat:@"%d", [pub fileOrder]];
             
         }else if([tcID isEqualToString: BDSKTitleString] ){
@@ -100,20 +100,20 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
             else
                 return [date descriptionWithCalendarFormat:NSLocalizedString(@"%b %Y", @"Date format for month and year inside table views")];
             
-        }else if([tcID isEqualToString: @"1st Author"] ){
+        }else if([tcID isEqualToString: BDSKFirstAuthorString] ){
             if([auths count] > 0){
                 return [[pub authorAtIndex:0] normalizedName];
             }else{
                 return @"-";
             }
             
-        }else if([tcID isEqualToString: @"2nd Author"] ){
+        }else if([tcID isEqualToString: BDSKSecondAuthorString] ){
             if([auths count] > 1)
                 return [[pub authorAtIndex:1] normalizedName]; 
             else
                 return @"-";
             
-        }else if([tcID isEqualToString: @"3rd Author"] ){
+        }else if([tcID isEqualToString: BDSKThirdAuthorString] ){
             if([auths count] > 2)
                 return [[pub authorAtIndex:2] normalizedName];
             else
@@ -148,7 +148,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
             }else{
                 return nil;
             }
-		}else if([tcID isEqualToString:@"Type"]){
+		}else if([tcID isEqualToString:BDSKTypeString]){
 			return [pub type];
         }else{
             // the tableColumn isn't something we handle in a custom way.

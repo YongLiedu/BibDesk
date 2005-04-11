@@ -1480,7 +1480,7 @@ stringByAppendingPathComponent:@"BibDesk"]; */
 		selectorString = @"calendarDateCreatedDescription";
 	} else if([field isEqualToString:@"All Fields"]){
 		selectorString = @"allFieldsString";
-	} else if([field isEqualToString:@"Type"] || 
+	} else if([field isEqualToString:BDSKTypeString] || 
 			  [field isEqualToString:@"Pub Type"]){
 		selectorString = @"type";
 	} else  if([field isEqualToString:BDSKCiteKeyString] ||
@@ -1718,15 +1718,15 @@ NSComparisonResult compareSetLengths(NSSet *set1, NSSet *set2, void *context){
 		
 		[publications sortUsingSelector:@selector(modDateCompare:)];
 		[shownPublications sortUsingSelector:@selector(modDateCompare:)];
-	}else if([tcID isEqualToString:@"1st Author"]){
+	}else if([tcID isEqualToString:BDSKFirstAuthorString]){
 		
 		[publications sortUsingSelector:@selector(auth1Compare:)];
 		[shownPublications sortUsingSelector:@selector(auth1Compare:)];
-	}else if([tcID isEqualToString:@"2nd Author"]){
+	}else if([tcID isEqualToString:BDSKSecondAuthorString]){
 		
 		[publications sortUsingSelector:@selector(auth2Compare:)];
 		[shownPublications sortUsingSelector:@selector(auth2Compare:)];
-	}else if([tcID isEqualToString:@"3rd Author"]){
+	}else if([tcID isEqualToString:BDSKThirdAuthorString]){
 		
 		[publications sortUsingSelector:@selector(auth3Compare:)];
 		[shownPublications sortUsingSelector:@selector(auth3Compare:)];
@@ -1735,11 +1735,11 @@ NSComparisonResult compareSetLengths(NSSet *set1, NSSet *set2, void *context){
 		
 		[publications sortUsingSelector:@selector(authorCompare:)];
 		[shownPublications sortUsingSelector:@selector(authorCompare:)];
-	}else if([tcID isEqualToString:@"Type"]){
+	}else if([tcID isEqualToString:BDSKTypeString]){
 		
 		[publications sortUsingSelector:@selector(pubTypeCompare:)];
 		[shownPublications sortUsingSelector:@selector(pubTypeCompare:)];
-    }else if([tcID isEqualToString:@"Number"]){
+    }else if([tcID isEqualToString:BDSKItemNumberString]){
 		
 		[publications sortUsingSelector:@selector(fileOrderCompare:)];
 		[shownPublications sortUsingSelector:@selector(fileOrderCompare:)];
@@ -2323,7 +2323,7 @@ This method always returns YES. Even if some or many operations fail.
 	NSArray *prefsShownColNamesArray = [[OFPreferenceWrapper sharedPreferenceWrapper] arrayForKey:BDSKShownColsNamesKey];
 	BibTypeManager *typeMan = [BibTypeManager sharedManager];
 	NSMutableSet *fieldNameSet = [NSMutableSet setWithSet:[typeMan allFieldNames]];
-	[fieldNameSet addObjectsFromArray:[NSArray arrayWithObjects:BDSKLocalUrlString, BDSKUrlString, BDSKCiteKeyString, BDSKDateString, @"Added", @"Modified", @"1st Author", @"2nd Author", @"3rd Author", @"Number", nil]];
+	[fieldNameSet addObjectsFromArray:[NSArray arrayWithObjects:BDSKLocalUrlString, BDSKUrlString, BDSKCiteKeyString, BDSKDateString, @"Added", @"Modified", BDSKFirstAuthorString, BDSKSecondAuthorString, BDSKThirdAuthorString, BDSKItemNumberString, nil]];
 	NSMutableArray *colNames = [[fieldNameSet allObjects] mutableCopy];
 	[colNames sortUsingSelector:@selector(caseInsensitiveCompare:)];
 	[colNames removeObjectsInArray:prefsShownColNamesArray];

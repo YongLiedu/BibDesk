@@ -114,7 +114,11 @@ NSString *BDSKDateCreatedString = @"Date-Added";
 NSString *BDSKDateModifiedString = @"Date-Modified";
 NSString *BDSKDateString = @"Date";
 NSString *BDSKBibtexString = @"BibTeX";
-NSString *BDSKItemNumberString = @"Item-Number";
+NSString *BDSKFirstAuthorString = @"1st Author";
+NSString *BDSKSecondAuthorString = @"2nd Author";
+NSString *BDSKThirdAuthorString = @"3rd Author";
+NSString *BDSKItemNumberString = @"Item Number";
+NSString *BDSKTypeString = @"Type";
 
 
 #pragma mark ||  Notification name strings

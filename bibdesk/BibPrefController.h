@@ -138,7 +138,11 @@ extern NSString *BDSKDateCreatedString;
 extern NSString *BDSKDateModifiedString;
 extern NSString *BDSKDateString;
 extern NSString *BDSKBibtexString;
+extern NSString *BDSKFirstAuthorString;
+extern NSString *BDSKSecondAuthorString;
+extern NSString *BDSKThirdAuthorString;
 extern NSString *BDSKItemNumberString;
+extern NSString *BDSKTypeString;
 
 
 #pragma mark ||  Notification name strings
