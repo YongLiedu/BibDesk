@@ -32,35 +32,9 @@ static BDSKTypeInfoEditor *sharedTypeInfoEditor;
 		// we are only interested in this dictionary
 		defaultFieldsForTypesDict = [[tmpDict objectForKey:FIELDS_FOR_TYPES_KEY] retain];
 		
-		// try to read the user file in the Application Support directory
-		NSFileManager *fm = [NSFileManager defaultManager];
-		NSString *applicationSupportPath = [[fm applicationSupportDirectory:kUserDomain] stringByAppendingPathComponent:@"BibDesk"];
-		NSString *typeInfoPath = [applicationSupportPath stringByAppendingPathComponent:TYPE_INFO_FILENAME];
-		
-		if ([fm fileExistsAtPath:typeInfoPath]) {
-			NSString *error = nil;
-			NSPropertyListFormat format;
-			NSData *data = [NSData dataWithContentsOfFile:typeInfoPath];
-			
-			tmpDict = [NSPropertyListSerialization propertyListFromData:data 
-													   mutabilityOption:NSPropertyListMutableContainers 
-																 format:&format 
-													   errorDescription:&error];
-			
-			if (error) {
-				NSLog(@"Error reading: %@", error);
-			} else {
-				fieldsForTypesDict = [[tmpDict objectForKey:FIELDS_FOR_TYPES_KEY] retain];
-				types = [[[tmpDict objectForKey:TYPES_FOR_FILE_TYPE_KEY] objectForKey:BDSKBibtexString] retain];
-			}
-		} 
-		
-		// if we failed, we set the default types from the bundled one
-		if ((fieldsForTypesDict == nil) || (types == nil)) {
-			fieldsForTypesDict = [[NSMutableDictionary alloc] initWithCapacity:[defaultFieldsForTypesDict count]];
-			types = [[NSMutableArray alloc] initWithCapacity:[defaultFieldsForTypesDict count]];
-			[self revertAllToDefault:nil]; // this sets the default values for the types
-		}
+		fieldsForTypesDict = [[NSMutableDictionary alloc] initWithCapacity:[defaultFieldsForTypesDict count]];
+		types = [[NSMutableArray alloc] initWithCapacity:[defaultFieldsForTypesDict count]];
+		[self revertTypes]; // this loads the current typeInfo from BibTypeManager
     }
     return self;
 }
@@ -94,6 +68,27 @@ static BDSKTypeInfoEditor *sharedTypeInfoEditor;
 	[optionalTableView reloadData];
 	
 	[self updateButtons];
+}
+
+- (void)revertTypes {
+	BibTypeManager *btm = [BibTypeManager sharedManager];
+	NSMutableDictionary *fieldsDict = [NSMutableDictionary dictionaryWithCapacity:2];
+	NSEnumerator *typeEnum = [[btm bibTypesForFileType:BDSKBibtexString] objectEnumerator];
+	NSString *type;
+	
+	[types removeAllObjects];
+	[fieldsForTypesDict removeAllObjects];
+	while (type = [typeEnum nextObject]) {
+		[fieldsDict setObject:[btm requiredFieldsForType:type] forKey:REQUIRED_KEY];
+		[fieldsDict setObject:[btm optionalFieldsForType:type] forKey:OPTIONAL_KEY];
+		[self addType:type withFields:fieldsDict];
+	}
+	[types sortUsingSelector:@selector(compare:)];
+	
+	[typeTableView reloadData];
+	[self setCurrentType:nil];
+	
+	[self setDocumentEdited:NO];
 }
 
 # pragma mark Accessors
@@ -146,6 +141,7 @@ static BDSKTypeInfoEditor *sharedTypeInfoEditor;
 #pragma mark Actions
 
 - (IBAction)cancel:(id)sender {
+	[self revertTypes];
 	[self close];
 }
 
@@ -176,6 +172,8 @@ static BDSKTypeInfoEditor *sharedTypeInfoEditor;
 		[data writeToFile:typeInfoPath atomically:YES];
 	}
 	
+	[self setDocumentEdited:NO];
+	
 	[self close];
 }
 
@@ -193,6 +191,8 @@ static BDSKTypeInfoEditor *sharedTypeInfoEditor;
     [typeTableView selectRow:row byExtendingSelection:NO];
 	[[[typeTableView tableColumnWithIdentifier:@"type"] dataCell] setEnabled:YES];
     [typeTableView editColumn:0 row:row withEvent:nil select:YES];
+	
+	[self setDocumentEdited:YES];
 }
 
 - (IBAction)removeType:(id)sender {
@@ -212,6 +212,8 @@ static BDSKTypeInfoEditor *sharedTypeInfoEditor;
 	
     [typeTableView reloadData];
     [typeTableView deselectAll:nil];
+	
+	[self setDocumentEdited:YES];
 }
 
 - (IBAction)addRequired:(id)sender {
@@ -228,6 +230,8 @@ static BDSKTypeInfoEditor *sharedTypeInfoEditor;
     [requiredTableView selectRow:row byExtendingSelection:NO];
 	[[[requiredTableView tableColumnWithIdentifier:@"required"] dataCell] setEnabled:YES];
     [requiredTableView editColumn:0 row:row withEvent:nil select:YES];
+	
+	[self setDocumentEdited:YES];
 }
 
 - (IBAction)removeRequired:(id)sender  {
@@ -245,6 +249,8 @@ static BDSKTypeInfoEditor *sharedTypeInfoEditor;
 	
     [requiredTableView reloadData];
     [requiredTableView deselectAll:nil];
+	
+	[self setDocumentEdited:YES];
 }
 
 - (IBAction)addOptional:(id)sender {
@@ -261,6 +267,8 @@ static BDSKTypeInfoEditor *sharedTypeInfoEditor;
     [optionalTableView selectRow:row byExtendingSelection:NO];
 	[[[optionalTableView tableColumnWithIdentifier:@"optional"] dataCell] setEnabled:YES];
     [optionalTableView editColumn:0 row:row withEvent:nil select:YES];
+	
+	[self setDocumentEdited:YES];
 }
 
 - (IBAction)removeOptional:(id)sender {
@@ -279,6 +287,8 @@ static BDSKTypeInfoEditor *sharedTypeInfoEditor;
 	
 	[optionalTableView reloadData];
 	[optionalTableView deselectAll:nil];
+	
+	[self setDocumentEdited:YES];
 }
 
 - (IBAction)revertCurrentToDefault:(id)sender {
@@ -292,6 +302,8 @@ static BDSKTypeInfoEditor *sharedTypeInfoEditor;
 	
 	[requiredTableView reloadData];
 	[optionalTableView reloadData];
+	
+	[self setDocumentEdited:YES];
 }
 
 - (IBAction)revertAllToDefault:(id)sender {
@@ -306,6 +318,8 @@ static BDSKTypeInfoEditor *sharedTypeInfoEditor;
 	[types sortUsingSelector:@selector(compare:)];
 	[typeTableView reloadData];
 	[self setCurrentType:nil];
+	
+	[self setDocumentEdited:YES];
 }
 
 #pragma mark validation methods
@@ -423,6 +437,8 @@ static BDSKTypeInfoEditor *sharedTypeInfoEditor;
 			[fieldsForTypesDict setObject:[fieldsForTypesDict objectForKey:oldValue] forKey:newValue];
 			[fieldsForTypesDict removeObjectForKey:oldValue];
 			[self setCurrentType:newValue];
+			
+			[self setDocumentEdited:YES];
 		}
 	}
 	else if (tv == requiredTableView) {
@@ -433,6 +449,8 @@ static BDSKTypeInfoEditor *sharedTypeInfoEditor;
 			![currentOptionalFields containsObject:newValue]) {
 			
 			[currentRequiredFields replaceObjectAtIndex:row withObject:newValue];
+			
+			[self setDocumentEdited:YES];
 		}
 	}
 	else if (tv == optionalTableView) {
@@ -443,6 +461,8 @@ static BDSKTypeInfoEditor *sharedTypeInfoEditor;
 			![currentOptionalFields containsObject:newValue]) {
 			
 			[currentOptionalFields replaceObjectAtIndex:row withObject:newValue];
+			
+			[self setDocumentEdited:YES];
 		}
 	}
 }
@@ -532,6 +552,8 @@ static BDSKTypeInfoEditor *sharedTypeInfoEditor;
 	}
 	
 	[tv reloadData];
+	
+	[self setDocumentEdited:YES];
 }
 
 #pragma mark NSTableView notifications

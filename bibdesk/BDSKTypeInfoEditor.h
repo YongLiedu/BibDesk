@@ -33,6 +33,8 @@
 
 + (BDSKTypeInfoEditor *)sharedTypeInfoEditor;
 
+- (void)revertTypes;
+
 - (void)addType:(NSString *)newType withFields:(NSDictionary *)fieldsDict;
 - (void)setCurrentType:(NSString *)newCurrentType;
 
