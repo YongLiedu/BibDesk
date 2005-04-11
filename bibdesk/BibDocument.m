@@ -2271,7 +2271,7 @@ This method always returns YES. Even if some or many operations fail.
 #define ADD_MENUITEM_TAG 47
 - (void)columnsMenuAddTableColumnName:(NSString *)name enabled:(BOOL)yn{
     NSMenuItem *item = nil;
-    item = [columnsMenu itemWithTitle:name];
+    item = (NSMenuItem *)[columnsMenu itemWithTitle:name];
     if (item == nil) {
         item = [[[NSMenuItem alloc] initWithTitle:name 
                                            action:@selector(columnsMenuSelectTableColumn:)
@@ -2325,7 +2325,7 @@ This method always returns YES. Even if some or many operations fail.
 	BibTypeManager *typeMan = [BibTypeManager sharedManager];
 	NSMutableSet *fieldNameSet = [NSMutableSet setWithArray:[typeMan allFieldNames]];
 	[fieldNameSet addObjectsFromArray:[typeMan userDefaultFieldsForType:@""]];
-	[fieldNameSet addObjectsFromArray:[NSArray arrayWithObjects:BDSKCiteKeyString, BDSKDateString, @"Added", @"Modified", @"1st Author", @"2nd Author", @"3rd Author", @"Number", nil];
+	[fieldNameSet addObjectsFromArray:[NSArray arrayWithObjects:BDSKCiteKeyString, BDSKDateString, @"Added", @"Modified", @"1st Author", @"2nd Author", @"3rd Author", @"Number", nil]];
 	NSMutableArray *colNames = [[fieldNameSet allObjects] mutableCopy];
 	[colNames sortUsingSelector:@selector(caseInsensitiveCompare:)];
 	[colNames removeObjectsInArray:prefsShownColNamesArray];
