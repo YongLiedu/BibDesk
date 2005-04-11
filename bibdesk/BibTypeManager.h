@@ -9,6 +9,18 @@
 #import <Foundation/Foundation.h>
 #import "BibPrefController.h"
 
+// The filename and keys used in the plist
+#define TYPE_INFO_FILENAME                  @"TypeInfo.plist"
+#define ALL_REMOVABLE_FIELDS_KEY            @"AllRemovableFieldNames"
+#define FIELDS_FOR_TYPES_KEY                @"FieldsForTypes"
+#define REQUIRED_KEY                        @"required"
+#define OPTIONAL_KEY                        @"optional"
+#define TYPES_FOR_FILE_TYPE_KEY             @"TypesForFileType"
+#define FILE_TYPES_KEY                      @"FileTypes"
+#define BIBTEX_FIELDS_FOR_PUBMED_TAGS_KEY   @"BibTeXFieldNamesForPubMedTags"
+#define BIBTEX_TYPES_FOR_PUBMED_TYPES_KEY   @"BibTeXTypesForPubMedTypes"
+#define MODS_GENRES_FOR_BIBTEX_TYPES_KEY    @"MODSGenresForBibTeXType"
+
 @interface BibTypeManager : NSObject {
 	NSDictionary *fileTypesDict;
 	NSDictionary *fieldsForTypesDict;
@@ -16,7 +28,8 @@
 	NSDictionary *fieldNameForPubMedTagDict;
 	NSDictionary *bibtexTypeForPubMedTypeDict;
 	NSDictionary *MODSGenresForBibTeXTypeDict;
-	NSArray *allFieldNames;
+	NSArray *allRemovableFieldNames;
+	NSSet *allFieldNames;
 	NSCharacterSet *invalidCiteKeyCharSet;
 	NSCharacterSet *invalidLocalUrlCharSet;
 	NSCharacterSet *strictInvalidCiteKeyCharSet;
@@ -24,12 +37,12 @@
 }
 + (BibTypeManager *)sharedManager;
 
-- (void)setAllFieldNames:(NSArray *)newDict;
 - (void)setFieldsForTypeDict:(NSDictionary *)newDict;
 - (void)setBibTypesForFileTypeDict:(NSDictionary *)newDict;
 
 - (NSString *)defaultTypeForFileFormat:(NSString *)fileFormat;
-- (NSArray *)allFieldNames;
+- (NSArray *)allRemovableFieldNames;
+- (NSSet *)allFieldNames;
 - (NSArray *)requiredFieldsForType:(NSString *)type;
 - (NSArray *)optionalFieldsForType:(NSString *)type;
 - (NSArray *)userDefaultFieldsForType:(NSString *)type;

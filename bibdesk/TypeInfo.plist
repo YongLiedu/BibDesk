@@ -2,7 +2,7 @@
 <!DOCTYPE plist PUBLIC "-//Apple Computer//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
-	<key>AllFieldNames</key>
+	<key>AllRemovableFieldNames</key>
 	<array>
 		<string>Address</string>
 		<string>Author</string>
@@ -14,7 +14,6 @@
 		<string>Institution</string>
 		<string>Lastchecked</string>
 		<string>Journal</string>
-		<string>Local-Url</string>
 		<string>Month</string>
 		<string>Number</string>
 		<string>Organization</string>
@@ -24,7 +23,6 @@
 		<string>Series</string>
 		<string>Title</string>
 		<string>Type</string>
-		<string>Url</string>
 		<string>Volume</string>
 		<string>Year</string>
 		<string>Note</string>

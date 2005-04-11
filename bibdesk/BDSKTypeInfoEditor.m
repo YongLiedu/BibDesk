@@ -12,12 +12,6 @@
 #import "BibTypeManager.h"
 
 #define BDSKTypeInfoRowsPboardType	@"BDSKTypeInfoRowsPboardType"
-#define REQUIRED_KEY				@"required"
-#define OPTIONAL_KEY				@"optional"
-#define FIELDS_FOR_TYPES_KEY		@"FieldsForTypes"
-#define TYPES_FOR_FILE_TYPE_KEY		@"TypesForFileType"
-#define ALL_FIELDS_KEY				@"AllFields"
-#define TYPE_INFO_FILENAME			@"TypeInfo.plist"
 
 static BDSKTypeInfoEditor *sharedTypeInfoEditor;
 
@@ -156,38 +150,18 @@ static BDSKTypeInfoEditor *sharedTypeInfoEditor;
 }
 
 - (IBAction)saveChanges:(id)sender {
-	NSMutableSet *allFields = [NSMutableSet setWithCapacity:24];
-	NSEnumerator *typeEnum = [types objectEnumerator];
-	NSEnumerator *fieldEnum;
-	NSString *type;
-	NSString *field;
-	
-	while (type = [typeEnum nextObject]) {
-		fieldEnum = [[[fieldsForTypesDict objectForKey:type] objectForKey:REQUIRED_KEY] objectEnumerator];
-		while (field = [fieldEnum nextObject]) {
-			[allFields addObject:field];
-		}
-		fieldEnum = [[[fieldsForTypesDict objectForKey:type] objectForKey:OPTIONAL_KEY] objectEnumerator];
-		while (field = [fieldEnum nextObject]) {
-			[allFields addObject:field];
-		}
-	}
-	
 	// this might not be ideal, as it uses that there are just these 2 items
 	BibTypeManager *btm = [BibTypeManager sharedManager];
-	NSArray *allFieldsArray = [allFields allObjects];
 	NSDictionary *typesDict = [NSDictionary dictionaryWithObjectsAndKeys: 
 				[[types copy] autorelease], BDSKBibtexString,
 				[btm bibTypesForFileType:@"PubMed"], @"PubMed", nil];
 	
 	[btm setBibTypesForFileTypeDict:typesDict];
 	[btm setFieldsForTypeDict:fieldsForTypesDict];
-	[btm setAllFieldNames:allFieldsArray];
 	
 	NSDictionary *dict = [NSDictionary dictionaryWithObjectsAndKeys: 
 				fieldsForTypesDict, FIELDS_FOR_TYPES_KEY, 
-				[NSDictionary dictionaryWithObject:types forKey:BDSKBibtexString], TYPES_FOR_FILE_TYPE_KEY, 
-				allFieldsArray, ALL_FIELDS_KEY, nil];
+				[NSDictionary dictionaryWithObject:types forKey:BDSKBibtexString], TYPES_FOR_FILE_TYPE_KEY, nil];
 	
 	NSString *error = nil;
 	NSPropertyListFormat format = NSPropertyListXMLFormat_v1_0;

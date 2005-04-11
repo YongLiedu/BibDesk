@@ -1257,9 +1257,8 @@ stringByAppendingPathComponent:@"BibDesk"]; */
     // first we fill the popup
 	NSArray *prefsQuickSearchKeysArray = [[OFPreferenceWrapper sharedPreferenceWrapper] arrayForKey:BDSKQuickSearchKeys];
 	BibTypeManager *typeMan = [BibTypeManager sharedManager];
-	NSMutableSet *fieldNameSet = [NSMutableSet setWithArray:[typeMan allFieldNames]];
-	[fieldNameSet addObjectsFromArray:[typeMan userDefaultFieldsForType:@""]];
-	[fieldNameSet addObjectsFromArray:[NSArray arrayWithObjects:BDSKCiteKeyString, BDSKDateString, @"Added", @"Modified", nil]];
+	NSMutableSet *fieldNameSet = [NSMutableSet setWithSet:[typeMan allFieldNames]];
+	[fieldNameSet addObjectsFromArray:[NSArray arrayWithObjects:BDSKLocalUrlString, BDSKUrlString, BDSKCiteKeyString, BDSKDateString, @"Added", @"Modified", nil]];
 	NSMutableArray *colNames = [[fieldNameSet allObjects] mutableCopy];
 	[colNames sortUsingSelector:@selector(caseInsensitiveCompare:)];
 	[colNames removeObjectsInArray:prefsQuickSearchKeysArray];
@@ -2323,9 +2322,8 @@ This method always returns YES. Even if some or many operations fail.
     // first we fill the popup
 	NSArray *prefsShownColNamesArray = [[OFPreferenceWrapper sharedPreferenceWrapper] arrayForKey:BDSKShownColsNamesKey];
 	BibTypeManager *typeMan = [BibTypeManager sharedManager];
-	NSMutableSet *fieldNameSet = [NSMutableSet setWithArray:[typeMan allFieldNames]];
-	[fieldNameSet addObjectsFromArray:[typeMan userDefaultFieldsForType:@""]];
-	[fieldNameSet addObjectsFromArray:[NSArray arrayWithObjects:BDSKCiteKeyString, BDSKDateString, @"Added", @"Modified", @"1st Author", @"2nd Author", @"3rd Author", @"Number", nil]];
+	NSMutableSet *fieldNameSet = [NSMutableSet setWithSet:[typeMan allFieldNames]];
+	[fieldNameSet addObjectsFromArray:[NSArray arrayWithObjects:BDSKLocalUrlString, BDSKUrlString, BDSKCiteKeyString, BDSKDateString, @"Added", @"Modified", @"1st Author", @"2nd Author", @"3rd Author", @"Number", nil]];
 	NSMutableArray *colNames = [[fieldNameSet allObjects] mutableCopy];
 	[colNames sortUsingSelector:@selector(caseInsensitiveCompare:)];
 	[colNames removeObjectsInArray:prefsShownColNamesArray];
