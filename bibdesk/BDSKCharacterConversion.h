@@ -23,6 +23,8 @@
 
 + (BDSKCharacterConversion *)sharedConversionEditor;
 
+- (void)updateDicts;
+
 - (IBAction)saveChanges:(id)sender;
 - (IBAction)cancel:(id)sender;
 - (IBAction)changeList:(id)sender;

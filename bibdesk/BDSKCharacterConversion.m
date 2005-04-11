@@ -25,22 +25,7 @@ static BDSKCharacterConversion *sharedConversionEditor;
 {
     if (self = [super initWithWindowNibName:@"BDSKCharacterConversion"]) {    
 		
-		// try to read the user file in the Application Support directory
-		NSFileManager *fm = [NSFileManager defaultManager];
-		NSString *applicationSupportPath = [[fm applicationSupportDirectory:kUserDomain] stringByAppendingPathComponent:@"BibDesk"];
-		NSString *charConvPath = [applicationSupportPath stringByAppendingPathComponent:CHARACTER_CONVERSION_FILENAME];
-		
-		if ([fm fileExistsAtPath:charConvPath]) {
-			NSDictionary *tmpDict = [NSDictionary dictionaryWithContentsOfFile:charConvPath];
-			oneWayDict = [[tmpDict objectForKey:ONE_WAY_CONVERSION_KEY] mutableCopy];
-			twoWayDict = [[tmpDict objectForKey:ROMAN_TO_TEX_KEY] mutableCopy];
-		}
-		if (oneWayDict == nil) {
-			oneWayDict = [[NSMutableDictionary dictionaryWithCapacity:1] retain];
-		}
-		if (twoWayDict == nil) {
-			twoWayDict = [[NSMutableDictionary dictionaryWithCapacity:1] retain];
-		}
+		[self updateDicts];
 		
         [self setListType:2];
     }
@@ -65,6 +50,32 @@ static BDSKCharacterConversion *sharedConversionEditor;
 		[[tc dataCell] setFormatter:texFormatter];
 	}
 	[self updateButtons];
+}
+
+- (void)updateDicts {
+	// try to read the user file in the Application Support directory
+	NSFileManager *fm = [NSFileManager defaultManager];
+	NSString *applicationSupportPath = [[fm applicationSupportDirectory:kUserDomain] stringByAppendingPathComponent:@"BibDesk"];
+	NSString *charConvPath = [applicationSupportPath stringByAppendingPathComponent:CHARACTER_CONVERSION_FILENAME];
+	
+	[oneWayDict release];
+	oneWayDict = nil;
+	[twoWayDict release];
+	twoWayDict = nil;
+	
+	if ([fm fileExistsAtPath:charConvPath]) {
+		NSDictionary *tmpDict = [NSDictionary dictionaryWithContentsOfFile:charConvPath];
+		oneWayDict = [[tmpDict objectForKey:ONE_WAY_CONVERSION_KEY] mutableCopy];
+		twoWayDict = [[tmpDict objectForKey:ROMAN_TO_TEX_KEY] mutableCopy];
+	}
+	if (oneWayDict == nil) {
+		oneWayDict = [[NSMutableDictionary dictionaryWithCapacity:1] retain];
+	}
+	if (twoWayDict == nil) {
+		twoWayDict = [[NSMutableDictionary dictionaryWithCapacity:1] retain];
+	}
+	
+	[self setDocumentEdited:NO];
 }
 
 #pragma mark Acessors
@@ -112,6 +123,7 @@ static BDSKCharacterConversion *sharedConversionEditor;
 #pragma mark Actions
 
 - (IBAction)cancel:(id)sender {
+	[self updateDicts];
 	[self close];
 }
 
@@ -143,6 +155,8 @@ static BDSKCharacterConversion *sharedConversionEditor;
 	// tell the converter to reload its dictionaries
 	[[BDSKConverter sharedConverter] loadDict];
 	
+	[self setDocumentEdited:NO];
+	
 	[self close];
 }
 
@@ -161,6 +175,8 @@ static BDSKCharacterConversion *sharedConversionEditor;
     int row = [currentArray indexOfObject:newRoman];
     [tableView selectRow:row byExtendingSelection:NO];
     [tableView editColumn:0 row:row withEvent:nil select:YES];
+	
+	[self setDocumentEdited:YES];
 }
 
 - (IBAction)remove:(id)sender {
@@ -173,6 +189,8 @@ static BDSKCharacterConversion *sharedConversionEditor;
     [tableView reloadData];
 	
     [tableView deselectAll:nil];
+	
+	[self setDocumentEdited:YES];
 }
 
 #pragma mark UI methods
@@ -206,6 +224,8 @@ static BDSKCharacterConversion *sharedConversionEditor;
 				[currentArray replaceObjectAtIndex:row withObject:object];
 				[currentDict setObject:[currentDict objectForKey:roman] forKey:object];
 				[currentDict removeObjectForKey:roman];
+				
+				[self setDocumentEdited:YES];
 			} else {
 				NSLog(@"Try to set duplicate Roman conversion %@",object);
 				[tableView reloadData];
@@ -219,6 +239,8 @@ static BDSKCharacterConversion *sharedConversionEditor;
 				[tableView reloadData];
 			} else {
 				[currentDict setObject:object forKey:roman];
+				
+				[self setDocumentEdited:YES];
 			}
 		}
 	}
