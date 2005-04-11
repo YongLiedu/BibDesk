@@ -94,6 +94,11 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
     IBOutlet WebView *remoteSnoopWebView;
     IBOutlet NSView* webSnoopContainerView;
 	BOOL webSnoopViewLoaded;
+// ----------------------------------------------------------------------------------------
+// status bar stuff
+// ----------------------------------------------------------------------------------------
+    IBOutlet NSTextField *statusLine;
+	BOOL showStatus;
     
 // Autocompletion stuff
     NSDictionary *completionMatcherDict;
@@ -171,6 +176,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 */
 - (IBAction)chooseLocalURL:(id)sender;
 
+- (IBAction)toggleStatusBar:(id)sender;
 
 // ----------------------------------------------------------------------------------------
 // Add-field sheet support

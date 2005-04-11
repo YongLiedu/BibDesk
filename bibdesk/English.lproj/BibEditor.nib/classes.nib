@@ -30,6 +30,7 @@
                 showPersonDetailCmd = id; 
                 textFieldDidEndEditing = id; 
                 toggleSnoopDrawer = id; 
+                toggleStatusBar = id; 
                 viewLocal = id; 
                 viewRemote = id; 
             }; 
@@ -64,6 +65,7 @@
                 pdfSnoopContainerView = NSView; 
                 remoteSnoopWebView = WebView; 
                 rssDescriptionView = NSTextView; 
+                statusLine = NSTextField; 
                 tabView = NSTabView; 
                 textSnoopContainerView = NSView; 
                 viewLocalButton = RYZImagePopUpButton; 
