@@ -1384,6 +1384,36 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
     return contentSize;
 }
 
+- (BOOL)windowShouldClose:(id)sender{
+    NSString *msgCiteKey = @"";
+    NSString *msgPaper = @"";
+    if([[theBib citeKey] isEqualToString:@"cite-key"])
+        msgCiteKey = NSLocalizedString(@"Cite key has not been set.", @"cite key has not been set");
+    if([theBib needsToBeFiled] && [[OFPreferenceWrapper sharedPreferenceWrapper] boolForKey:BDSKFilePapersAutomaticallyKey])
+        msgPaper = NSLocalizedString(@"Paper needs to be filed.", @"paper needs to be filed\n");
+    if([msgCiteKey isEqualToString:@""] && [msgPaper isEqualToString:@""])
+        return YES;
+    
+    NSString *warning = NSLocalizedString(@"The following potential problem(s) have been observed:",@"The following potential problem(s) have been observed:");
+    NSBeginAlertSheet(NSLocalizedString(@"Warning!", @"Warning"),
+                      NSLocalizedString(@"Edit", @"Edit"),
+                      NSLocalizedString(@"Close", @"Close"),
+                      nil, //3rd button
+                      [self window],
+                      self, // modal delegate
+                      @selector(shouldCloseSheetDidEnd:returnCode:contextInfo:),
+                      NULL, // did dismiss sel
+                      NULL,
+                      @"%@\n%@\n%@", warning, msgCiteKey, msgPaper);
+    return NO;
+
+}
+
+- (void)shouldCloseSheetDidEnd:(NSWindow *)sheet returnCode:(int)returnCode contextInfo:(void *)contextInfo{
+    if(returnCode == NSAlertAlternateReturn)
+        [self close];
+}
+
 - (void)windowWillClose:(NSNotification *)notification{
  //@@citekey   [[self window] makeFirstResponder:citeKeyField]; // makes the field check if there is a duplicate field.
 	[self finalizeChanges];
