@@ -1256,15 +1256,22 @@ stringByAppendingPathComponent:@"BibDesk"]; */
 - (IBAction)quickSearchAddField:(id)sender{
     // first we fill the popup
 	NSArray *prefsQuickSearchKeysArray = [[OFPreferenceWrapper sharedPreferenceWrapper] arrayForKey:BDSKQuickSearchKeys];
-	NSMutableArray *colNames = [[[[BibTypeManager sharedManager] allRemovableFieldNames] mutableCopy] autorelease];
-	[colNames addObjectsFromArray:[NSArray arrayWithObjects:BDSKUrlString, BDSKLocalUrlString, BDSKCiteKeyString, BDSKKeywordsString, BDSKDateString, @"Added", @"Modified", nil]];
-	[colNames removeObjectsInArray:prefsQuickSearchKeysArray];
+	BibTypeManager *typeMan = [BibTypeManager sharedManager];
+	NSMutableSet *fieldNameSet = [NSMutableSet setWithArray:[typeMan allFieldNames]];
+	[fieldNameSet addObjectsFromArray:[typeMan userDefaultFieldsForType:@""]];
+	[fieldNameSet addObjectsFromArray:[NSArray arrayWithObjects:BDSKCiteKeyString, BDSKDateString, @"Added", @"Modified", nil]];
+	NSMutableArray *colNames = [[fieldNameSet allObjects] mutableCopy];
 	[colNames sortUsingSelector:@selector(caseInsensitiveCompare:)];
+	[colNames removeObjectsInArray:prefsQuickSearchKeysArray];
 	[colNames insertObject:NSLocalizedString(@"Choose a Field:",@"") atIndex:0];
+	
 	[addFieldPopupButton removeAllItems];
 	[addFieldPopupButton addItemsWithTitles:colNames];
     [addFieldPrompt setStringValue:NSLocalizedString(@"Name of field to search:",@"")];
-    [NSApp beginSheet:addFieldSheet
+	
+	[colNames release];
+    
+	[NSApp beginSheet:addFieldSheet
        modalForWindow:documentWindow
         modalDelegate:self
        didEndSelector:@selector(quickSearchAddFieldSheetDidEnd:returnCode:contextInfo:)
@@ -2315,18 +2322,22 @@ This method always returns YES. Even if some or many operations fail.
     // get the name, then call columnsMenuAddTableColumnName: enabled: to add it for you
     // first we fill the popup
 	NSArray *prefsShownColNamesArray = [[OFPreferenceWrapper sharedPreferenceWrapper] arrayForKey:BDSKShownColsNamesKey];
-	NSMutableArray *colNames = [[[[BibTypeManager sharedManager] allRemovableFieldNames] mutableCopy] autorelease];
-
-	NSArray *defaultColNames = [NSArray arrayWithObjects:BDSKUrlString, BDSKLocalUrlString, BDSKCiteKeyString, BDSKKeywordsString, BDSKDateString, @"Added", @"Modified", @"1st Author", @"2nd Author", @"3rd Author", @"Number", nil];
-
-    [colNames addObjectsFromArray:defaultColNames];
-	[colNames removeObjectsInArray:prefsShownColNamesArray];
+	BibTypeManager *typeMan = [BibTypeManager sharedManager];
+	NSMutableSet *fieldNameSet = [NSMutableSet setWithArray:[typeMan allFieldNames]];
+	[fieldNameSet addObjectsFromArray:[typeMan userDefaultFieldsForType:@""]];
+	[fieldNameSet addObjectsFromArray:[NSArray arrayWithObjects:BDSKCiteKeyString, BDSKDateString, @"Added", @"Modified", @"1st Author", @"2nd Author", @"3rd Author", @"Number", nil];
+	NSMutableArray *colNames = [[fieldNameSet allObjects] mutableCopy];
 	[colNames sortUsingSelector:@selector(caseInsensitiveCompare:)];
+	[colNames removeObjectsInArray:prefsShownColNamesArray];
 	[colNames insertObject:NSLocalizedString(@"Choose a Column:",@"") atIndex:0];
+	
 	[addFieldPopupButton removeAllItems];
 	[addFieldPopupButton addItemsWithTitles:colNames];
     [addFieldPrompt setStringValue:NSLocalizedString(@"Name of column to add:",@"")];
-    [NSApp beginSheet:addFieldSheet
+	
+	[colNames release];
+    
+	[NSApp beginSheet:addFieldSheet
        modalForWindow:documentWindow
         modalDelegate:self
        didEndSelector:@selector(addTableColumnSheetDidEnd:returnCode:contextInfo:)

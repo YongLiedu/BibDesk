@@ -297,13 +297,18 @@ NSString *BDSKInputManagerLoadableApplications = @"Application bundles that we r
 
 - (IBAction)addAutocompleteString:(id)sender{
     // first we fill the popup
-	NSMutableArray *fieldNames = [[[[BibTypeManager sharedManager] allRemovableFieldNames] mutableCopy] autorelease];
-	[fieldNames addObjectsFromArray:[NSArray arrayWithObjects:BDSKUrlString, BDSKLocalUrlString, BDSKKeywordsString, nil]];
-	[fieldNames removeObjectsInArray:enabledEditorAutocompletionStrings];
+	BibTypeManager *typeMan = [BibTypeManager sharedManager];
+	NSMutableSet *fieldNameSet = [NSMutableSet setWithArray:[typeMan allFieldNames]];
+	[fieldNameSet addObjectsFromArray:[typeMan userDefaultFieldsForType:@""]];
+	NSMutableArray *fieldNames = [[fieldNameSet allObjects] mutableCopy];
 	[fieldNames sortUsingSelector:@selector(caseInsensitiveCompare:)];
+	[fieldNames removeObjectsInArray:enabledEditorAutocompletionStrings];
 	[fieldNames insertObject:NSLocalizedString(@"Choose a Field Name:",@"") atIndex:0];
+	
 	[addFieldPopupButton removeAllItems];
 	[addFieldPopupButton addItemsWithTitles:fieldNames];
+	
+	[fieldNames release];
 	
     [NSApp beginSheet:addFieldSheet
        modalForWindow:[[OAPreferenceController sharedPreferenceController] window]
