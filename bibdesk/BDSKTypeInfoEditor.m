@@ -196,13 +196,19 @@ static BDSKTypeInfoEditor *sharedTypeInfoEditor;
 }
 
 - (IBAction)removeType:(id)sender {
-	NSString *oldType = [types objectAtIndex:[typeTableView selectedRow]];
+	NSEnumerator *typeEnum = [typeTableView selectedRowEnumerator];
+	NSNumber *row;
+	NSMutableArray *typesToRemove = [NSMutableArray arrayWithCapacity:1];
 	
 	// make sure we stop editing
 	[[self window] makeFirstResponder:typeTableView];
 	
-	[types removeObject:oldType];
-	[fieldsForTypesDict removeObjectForKey:oldType];
+	
+	while (row = [typeEnum nextObject]) {
+		[typesToRemove addObject:[types objectAtIndex:[row intValue]]];
+	}
+	[types removeObjectsInArray:typesToRemove];
+	[fieldsForTypesDict removeObjectsForKeys:typesToRemove];
 	
     [typeTableView reloadData];
     [typeTableView deselectAll:nil];
@@ -318,10 +324,24 @@ static BDSKTypeInfoEditor *sharedTypeInfoEditor;
 	NSEnumerator *rowEnum;
 	NSNumber *row;
 	BOOL canRemove;
-	NSString *field;
+	NSString *value;
 	
 	[addTypeButton setEnabled:YES];
-	[removeTypeButton setEnabled:(currentType != nil && [self canEditType:currentType])];
+	
+	if ([typeTableView numberOfSelectedRows] == 0) {
+		[removeTypeButton setEnabled:NO];
+	} else {
+		rowEnum = [typeTableView selectedRowEnumerator];
+		canRemove = YES;
+		while (row = [rowEnum nextObject]) {
+			value = [types objectAtIndex:[row intValue]];
+			if (![self canEditType:value]) {
+				canRemove = NO;
+				break;
+			}
+		}
+		[removeTypeButton setEnabled:canRemove];
+	}
 	
 	[addRequiredButton setEnabled:currentType != nil];
 	
@@ -331,8 +351,8 @@ static BDSKTypeInfoEditor *sharedTypeInfoEditor;
 		rowEnum = [requiredTableView selectedRowEnumerator];
 		canRemove = YES;
 		while (row = [rowEnum nextObject]) {
-			field = [currentRequiredFields objectAtIndex:[row intValue]];
-			if (![self canEditField:field]) {
+			value = [currentRequiredFields objectAtIndex:[row intValue]];
+			if (![self canEditField:value]) {
 				canRemove = NO;
 				break;
 			}
@@ -348,8 +368,8 @@ static BDSKTypeInfoEditor *sharedTypeInfoEditor;
 		rowEnum = [optionalTableView selectedRowEnumerator];
 		canRemove = YES;
 		while (row = [rowEnum nextObject]) {
-			field = [currentOptionalFields objectAtIndex:[row intValue]];
-			if (![self canEditField:field]) {
+			value = [currentOptionalFields objectAtIndex:[row intValue]];
+			if (![self canEditField:value]) {
 				canRemove = NO;
 				break;
 			}
