@@ -141,11 +141,14 @@ static BDSKTypeInfoEditor *sharedTypeInfoEditor;
 #pragma mark Actions
 
 - (IBAction)cancel:(id)sender {
+    [[self window] makeFirstResponder:nil]; // commit edit before reloading
 	[self revertTypes];
 	[self close];
 }
 
 - (IBAction)saveChanges:(id)sender {
+    [[self window] makeFirstResponder:nil]; // commit edit before saving
+	
 	// this might not be ideal, as it uses that there are just these 2 items
 	BibTypeManager *btm = [BibTypeManager sharedManager];
 	NSDictionary *typesDict = [NSDictionary dictionaryWithObjectsAndKeys: 
