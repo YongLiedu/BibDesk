@@ -1378,6 +1378,7 @@
 		27E89E240805E9F500E4DA08 = {
 			fileEncoding = 30;
 			isa = PBXFileReference;
+			languageSpecificationIdentifier = make;
 			lastKnownFileType = text;
 			name = bibdesk.texi;
 			path = "BibDesk Help/bibdesk.texi";

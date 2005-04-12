@@ -1,4 +1,4 @@
-{\rtf1\mac\ansicpg10000\cocoartf823
+{\rtf1\mac\ansicpg10000\cocoartf102
 {\fonttbl\f0\fnil\fcharset77 GillSans;\f1\fnil\fcharset77 LucidaGrande;\f2\fnil\fcharset77 HelveticaNeue-Bold;
 \f3\fnil\fcharset77 HelveticaNeue-BoldItalic;\f4\fnil\fcharset77 HelveticaNeue;\f5\fnil\fcharset77 HelveticaNeue-Italic;
 \f6\fnil\fcharset77 LucidaGrande-Bold;\f7\fnil\fcharset77 Geneva;\f8\fnil\fcharset77 Verdana;
@@ -13,10 +13,31 @@
 \f1\fs22 \cf0 \
 \pard\tx1440\tx2880\tx4320\tx5760\tx7200\ql\qnatural
 
-\f2\b\fs28 \cf0 Changes since 0.99\
+\f2\b\fs28 \cf0 Changes since 0.99.1\
 \pard\tx1440\tx2880\tx4320\tx5760\tx7200\ql\qnatural
 
-\f1\b0\fs22 \cf0 \
+\f3\i\fs26 \cf0 \
+New Features\
+\pard\tx1440\tx2880\tx4320\tx5760\tx7200\ql\qnatural
+
+\f1\i0\b0\fs22 \cf0   \'a5  BibEditor now has a status bar (which can be disabled from the main menu)\
+  \'a5  A warning will appear if you close an editor window without setting the cite key, or a paper needs to be filed\
+  \'a5  Multiple selection is now allowed in the type editing list (enables dragging/removing simultaneously)\
+\pard\tx1440\tx2880\tx4320\tx5760\tx7200\ql\qnatural
+
+\f3\i\b\fs26 \cf0 \
+Bugfixes\
+\pard\tx1440\tx2880\tx4320\tx5760\tx7200\ql\qnatural
+
+\f1\i0\b0\fs22 \cf0   \'a5  Fixed a nil types warning which could occur with some bib types\
+  \'a5  Renamed "Number" column in main pub list to "Item Number"\
+  \'a5  Dragging to rearrange fields in the types editor will no longer cause a crash\
+  \'a5  Character conversion and types editors now revert to currently saved state on "Cancel"
+\f2\b\fs28 \
+\
+Changes since 0.99\
+
+\f1\b0\fs22 \
 \pard\tx1440\tx2880\tx4320\tx5760\tx7200\ql\qnatural
 
 \f3\i\b\fs26 \cf0 Important:
@@ -65,7 +86,7 @@
   \'a5  Editor window should remember its size properly\
   \'a5  Reworked search code for Services, which fixes bug #604338 (custom fields weren't searched), and #854414 (spaces in a search string were not recognized)\
   \'a5  Fixed the type-ahead search in publications list (typing a partial author name selects a publication by that author)\
-  \'a5  Saving won't change focus from Annot\cf0 e/Abstract editing (bug #833430)\cf0 \
+  \'a5  Saving won't change focus from Annote/Abstract editing (bug #833430)\
 \pard\tx1440\tx2880\tx4320\tx5760\tx7200\ql\qnatural
 
 \f2\b\fs28 \cf0 \

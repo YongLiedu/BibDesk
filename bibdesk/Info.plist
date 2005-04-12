@@ -37,7 +37,7 @@
 			<key>CFBundleTypeName</key>
 			<string>MODS XML Database</string>
 			<key>CFBundleTypeRole</key>
-			<string>Editor</string>
+			<string>None</string>
 			<key>NSDocumentClass</key>
 			<string>BibDocument</string>
 		</dict>
@@ -54,7 +54,7 @@
 			<key>CFBundleTypeName</key>
 			<string>Atom Syndication File</string>
 			<key>CFBundleTypeRole</key>
-			<string>Editor</string>
+			<string>None</string>
 			<key>NSDocumentClass</key>
 			<string>BibDocument</string>
 		</dict>
@@ -87,7 +87,7 @@
 			<key>CFBundleTypeName</key>
 			<string>BibDesk Library</string>
 			<key>CFBundleTypeRole</key>
-			<string>Editor</string>
+			<string>None</string>
 			<key>NSDocumentClass</key>
 			<string>BDSKLibrary</string>
 		</dict>
@@ -95,9 +95,9 @@
 	<key>CFBundleExecutable</key>
 	<string>Bibdesk</string>
 	<key>CFBundleGetInfoHTML</key>
-	<string>&lt;B&gt;BibDesk&lt;/B&gt; Version 0.99.1</string>
+	<string>&lt;B&gt;BibDesk&lt;/B&gt; Version 0.99.2</string>
 	<key>CFBundleGetInfoString</key>
-	<string>version 0.99.1</string>
+	<string>version 0.99.2</string>
 	<key>CFBundleHelpBookFolder</key>
 	<string>BibDesk Help</string>
 	<key>CFBundleHelpBookName</key>
@@ -113,11 +113,11 @@
 	<key>CFBundlePackageType</key>
 	<string>APPL</string>
 	<key>CFBundleShortVersionString</key>
-	<string>0.99.1</string>
+	<string>0.99.2</string>
 	<key>CFBundleSignature</key>
 	<string>BDSK</string>
 	<key>CFBundleVersion</key>
-	<string>0.99.1</string>
+	<string>0.99.2</string>
 	<key>NSAppleScriptEnabled</key>
 	<string>YES</string>
 	<key>NSMainNibFile</key>
@@ -439,9 +439,9 @@
 					</array>
 					<key>RedComponentColor of alternating rows Key</key>
 					<string>1.156487706076073e-310</string>
-					<key>Show Status Bar</key>
-					<true/>
 					<key>Show Editor Status Bar</key>
+					<true/>
+					<key>Show Status Bar</key>
 					<true/>
 					<key>Show Warnings in Error Panel</key>
 					<string>0</string>
