@@ -215,6 +215,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 */
 - (void)recordChangingField:(NSString *)fieldName toValue:(NSString *)value;
 
+- (NSString *)status;
 - (void)setStatus:(NSString *)status;
 
 /*!

@@ -1274,8 +1274,14 @@ setupParagraphStyle()
 
 - (void)setNeedsToBeFiled:(BOOL)flag {
 	needsToBeFiled = flag;
-	if (flag && editorObj) {
-		[editorObj setStatus:NSLocalizedString(@"Linked file needs to be filed.",@"Linked file needs to be filed.")];
+	
+	if (editorObj) {
+		NSString *message = NSLocalizedString(@"Linked file needs to be filed.",@"Linked file needs to be filed.");
+		if (flag) {
+			[editorObj setStatus:message];
+		} else if ([message isEqualToString:[editorObj status]]) {
+			[editorObj setStatus:@""];
+		}
 	}
 }
 
