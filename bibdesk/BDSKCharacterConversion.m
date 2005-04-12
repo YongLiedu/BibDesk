@@ -161,6 +161,7 @@ static BDSKCharacterConversion *sharedConversionEditor;
 }
 
 - (IBAction)changeList:(id)sender {
+    [[self window] makeFirstResponder:nil]; // commit edit before switching
 	[self setListType:[[sender selectedItem] tag]];
 }
 
@@ -224,7 +225,7 @@ static BDSKCharacterConversion *sharedConversionEditor;
 				[currentArray replaceObjectAtIndex:row withObject:object];
 				[currentDict setObject:[currentDict objectForKey:roman] forKey:object];
 				[currentDict removeObjectForKey:roman];
-				
+
 				[self setDocumentEdited:YES];
 			} else {
 				NSLog(@"Try to set duplicate Roman conversion %@",object);
