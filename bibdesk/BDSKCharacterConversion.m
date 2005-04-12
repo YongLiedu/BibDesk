@@ -31,6 +31,8 @@ static BDSKCharacterConversion *sharedConversionEditor;
 		texSet = [[NSMutableSet alloc] initWithCapacity:1];
 		currentDict = twoWayDict;
 		
+		ignoreEdit = NO;
+		
 		[self updateDicts];
 		
 	}
@@ -152,13 +154,15 @@ static BDSKCharacterConversion *sharedConversionEditor;
 #pragma mark Actions
 
 - (IBAction)cancel:(id)sender {
-    [[self window] makeFirstResponder:nil]; // commit edit before reloading
+    [self finalizeChangesIgnoringEdit:YES]; // commit edit before reloading
 	[self updateDicts];
     [tableView reloadData];
 	[self close];
 }
 
 - (IBAction)saveChanges:(id)sender {
+    [self finalizeChangesIgnoringEdit:NO]; // commit edit before saving
+	
 	if (!validRoman || !validTex) {
 		NSBeginAlertSheet(NSLocalizedString(@"Invalid Conversion", @""),
 						  NSLocalizedString(@"OK", @"OK"),
@@ -166,8 +170,6 @@ static BDSKCharacterConversion *sharedConversionEditor;
 						  NSLocalizedString(@"The last item you entered is invalid or a duplicate. Please first edit it.",@""), nil);
 		return;
 	}
-    
-	[[self window] makeFirstResponder:nil]; // commit edit before saving
 	
 	NSString *error = nil;
 	NSPropertyListFormat format = NSPropertyListXMLFormat_v1_0;
@@ -202,12 +204,12 @@ static BDSKCharacterConversion *sharedConversionEditor;
 }
 
 - (IBAction)changeList:(id)sender {
-    [[self window] makeFirstResponder:nil]; // commit edit before switching
+    [self finalizeChangesIgnoringEdit:NO]; // commit edit before switching
 	[self setListType:[[sender selectedItem] tag]];
 }
 
 - (IBAction)add:(id)sender {
-    [[self window] makeFirstResponder:nil]; // make sure we are not editing
+    [self finalizeChangesIgnoringEdit:NO]; // make sure we are not editing
 	
 	NSString *newRoman = [NSString stringWithFormat:@"%C",0x00E4];
     NSString *newTex = [NSString stringWithString:@"{\\\"a}"];
@@ -231,6 +233,8 @@ static BDSKCharacterConversion *sharedConversionEditor;
 }
 
 - (IBAction)remove:(id)sender {
+    [self finalizeChangesIgnoringEdit:YES]; // make sure we are not editing
+	
 	int row = [tableView selectedRow];
 	if (row == -1) return;
 	NSString *oldRoman = [currentArray objectAtIndex:row];
@@ -254,6 +258,12 @@ static BDSKCharacterConversion *sharedConversionEditor;
 	[removeButton setEnabled:[tableView selectedRow] != -1];
 }
 
+- (void)finalizeChangesIgnoringEdit:(BOOL)flag {
+	ignoreEdit = flag;
+	[[self window] makeFirstResponder:nil];
+	ignoreEdit = NO;
+}
+
 #pragma mark NSTableview Datasource
 
 - (int)numberOfRowsInTableView:(NSTableView *)tv {
@@ -271,6 +281,8 @@ static BDSKCharacterConversion *sharedConversionEditor;
 }
 
 - (void)tableView:(NSTableView *)tv setObjectValue:(id)object forTableColumn:(NSTableColumn *)tableColumn row:(int)row {
+	if (ignoreEdit) return;
+	
 	NSString *roman = [currentArray objectAtIndex:row];
 	NSString *tex = [currentDict objectForKey:roman];
 	

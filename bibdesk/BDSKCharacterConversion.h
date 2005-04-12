@@ -23,6 +23,7 @@
 	NSFormatter *texFormatter;
 	BOOL validRoman;
 	BOOL validTex;
+	BOOL ignoreEdit;
 }
 
 + (BDSKCharacterConversion *)sharedConversionEditor;
@@ -43,6 +44,7 @@
 - (void)setTwoWayDict:(NSDictionary *)newTwoWayDict;
 
 - (void)updateButtons;
+- (void)finalizeChangesIgnoringEdit:(BOOL)flag;
 
 @end
 
