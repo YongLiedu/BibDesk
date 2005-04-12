@@ -29,11 +29,9 @@ static BDSKCharacterConversion *sharedConversionEditor;
 		twoWayDict = [[NSMutableDictionary alloc] initWithCapacity:1];
 		romanSet = [[NSMutableSet alloc] initWithCapacity:1];
 		texSet = [[NSMutableSet alloc] initWithCapacity:1];
+		currentDict = twoWayDict;
 		
 		[self updateDicts];
-		
-		currentDict = twoWayDict;
-		currentArray = [[currentDict allKeys] mutableCopy];
 		
 	}
     return self;
@@ -85,6 +83,9 @@ static BDSKCharacterConversion *sharedConversionEditor;
 		[romanSet addObjectsFromArray:[twoWayDict allKeys]];
 		[texSet addObjectsFromArray:[twoWayDict allValues]];
 	}
+	
+	[currentArray autorelease];
+	currentArray = [[currentDict allKeys] mutableCopy];
 	
 	validRoman = YES;
 	validTex = YES;
@@ -151,7 +152,9 @@ static BDSKCharacterConversion *sharedConversionEditor;
 #pragma mark Actions
 
 - (IBAction)cancel:(id)sender {
+    [[self window] makeFirstResponder:nil]; // commit edit before reloading
 	[self updateDicts];
+    [tableView reloadData];
 	[self close];
 }
 
@@ -163,6 +166,8 @@ static BDSKCharacterConversion *sharedConversionEditor;
 						  NSLocalizedString(@"The last item you entered is invalid or a duplicate. Please first edit it.",@""), nil);
 		return;
 	}
+    
+	[[self window] makeFirstResponder:nil]; // commit edit before saving
 	
 	NSString *error = nil;
 	NSPropertyListFormat format = NSPropertyListXMLFormat_v1_0;
@@ -202,6 +207,8 @@ static BDSKCharacterConversion *sharedConversionEditor;
 }
 
 - (IBAction)add:(id)sender {
+    [[self window] makeFirstResponder:nil]; // make sure we are not editing
+	
 	NSString *newRoman = [NSString stringWithFormat:@"%C",0x00E4];
     NSString *newTex = [NSString stringWithString:@"{\\\"a}"];
 	
@@ -218,7 +225,7 @@ static BDSKCharacterConversion *sharedConversionEditor;
 	
     int row = [currentArray indexOfObject:newRoman];
     [tableView selectRow:row byExtendingSelection:NO];
-    [tableView editColumn:0 row:row withEvent:nil select:NO];
+    [tableView editColumn:0 row:row withEvent:nil select:YES];
 	
 	[self setDocumentEdited:YES];
 }
@@ -229,6 +236,9 @@ static BDSKCharacterConversion *sharedConversionEditor;
 	NSString *oldRoman = [currentArray objectAtIndex:row];
 	[currentArray removeObject:oldRoman];
 	[currentDict removeObjectForKey:oldRoman];
+	
+	validRoman = YES;
+	validTex = YES;
 	
     [tableView reloadData];
 	
@@ -270,7 +280,8 @@ static BDSKCharacterConversion *sharedConversionEditor;
 				NSBeginAlertSheet(NSLocalizedString(@"Duplicate Unicode Character", @""),
 								  NSLocalizedString(@"OK", @"OK"),
 								  nil,nil, [self window],self, NULL, NULL, NULL,
-								  NSLocalizedString(@"The character you entered is a duplicate.",@""), nil);
+								  [NSString stringWithFormat:NSLocalizedString(@"The character %@ you entered already has a TeX conversion. This could have been defined in the internal data.",@""), object], nil);
+				
 				[tableView reloadData];
 			} else {
 				[currentArray replaceObjectAtIndex:row withObject:object];
@@ -282,6 +293,7 @@ static BDSKCharacterConversion *sharedConversionEditor;
 				validRoman = YES;
 				
 				[self setDocumentEdited:YES];
+				[self updateButtons];
 			}
 		}
 	}
@@ -291,7 +303,8 @@ static BDSKCharacterConversion *sharedConversionEditor;
 				NSBeginAlertSheet(NSLocalizedString(@"Duplicate TeX Conversion", @""),
 								  NSLocalizedString(@"OK", @"OK"),
 								  nil,nil, [self window],self, NULL, NULL, NULL,
-								  NSLocalizedString(@"The TeX conversion you entered is a duplicate.",@""), nil);
+								  [NSString stringWithFormat:NSLocalizedString(@"The TeX conversion %@ you entered already has a Unicode conversion. This could have been defined in the internal data.",@""), object], nil);
+				
 				[tableView reloadData];
 			} else {
 				[currentDict setObject:object forKey:roman];
@@ -301,12 +314,20 @@ static BDSKCharacterConversion *sharedConversionEditor;
 				validTex = YES;
 				
 				[self setDocumentEdited:YES];
+				[self updateButtons];
 			}
 		}
 	}
 }
 
 #pragma mark NSTableView delegate methods
+
+- (BOOL)selectionShouldChangeInTableView:(NSTableView *)tv {
+	if (!validRoman || !validTex) { // we force selection of an invalid row
+		return NO;
+	}
+	return YES;
+}
 
 - (void)tableViewSelectionDidChange:(NSNotification *)aNotification {
 	[self updateButtons];
