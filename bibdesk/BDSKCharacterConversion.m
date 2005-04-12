@@ -25,10 +25,17 @@ static BDSKCharacterConversion *sharedConversionEditor;
 {
     if (self = [super initWithWindowNibName:@"BDSKCharacterConversion"]) {    
 		
+		oneWayDict = [[NSMutableDictionary alloc] initWithCapacity:1];
+		twoWayDict = [[NSMutableDictionary alloc] initWithCapacity:1];
+		romanSet = [[NSMutableSet alloc] initWithCapacity:1];
+		texSet = [[NSMutableSet alloc] initWithCapacity:1];
+		
 		[self updateDicts];
 		
-        [self setListType:2];
-    }
+		currentDict = twoWayDict;
+		currentArray = [[currentDict allKeys] mutableCopy];
+		
+	}
     return self;
 }
 
@@ -36,8 +43,10 @@ static BDSKCharacterConversion *sharedConversionEditor;
 {
     [oneWayDict release];
     [twoWayDict release];
-	[currentArray autorelease];
-	[texFormatter autorelease];
+	[currentArray release];
+	[texFormatter release];
+	[romanSet release];
+	[texSet release];
     [super dealloc];
 }
 
@@ -45,10 +54,8 @@ static BDSKCharacterConversion *sharedConversionEditor;
 	texFormatter = [[BDSKTeXFormatter alloc] init];
     NSTableColumn *tc = [tableView tableColumnWithIdentifier:@"roman"];
     [[tc dataCell] setFormatter:[[[BDSKRomanCharacterFormatter alloc] init] autorelease]];
-	if ([self listType] == 2) {
-		tc = [tableView tableColumnWithIdentifier:@"tex"];
-		[[tc dataCell] setFormatter:texFormatter];
-	}
+	tc = [tableView tableColumnWithIdentifier:@"tex"];
+	[[tc dataCell] setFormatter:texFormatter];
 	[self updateButtons];
 }
 
@@ -57,23 +64,30 @@ static BDSKCharacterConversion *sharedConversionEditor;
 	NSFileManager *fm = [NSFileManager defaultManager];
 	NSString *applicationSupportPath = [[fm applicationSupportDirectory:kUserDomain] stringByAppendingPathComponent:@"BibDesk"];
 	NSString *charConvPath = [applicationSupportPath stringByAppendingPathComponent:CHARACTER_CONVERSION_FILENAME];
+	NSDictionary *tmpDict = [NSDictionary dictionaryWithContentsOfFile:[[[NSBundle mainBundle] resourcePath] stringByAppendingPathComponent:CHARACTER_CONVERSION_FILENAME]];
 	
-	[oneWayDict release];
-	oneWayDict = nil;
-	[twoWayDict release];
-	twoWayDict = nil;
+	[oneWayDict removeAllObjects];
+	[twoWayDict removeAllObjects];
+	[romanSet removeAllObjects];
+	[texSet removeAllObjects];
+	
+	[romanSet addObjectsFromArray:[[tmpDict objectForKey:ONE_WAY_CONVERSION_KEY] allKeys]];
+	[romanSet addObjectsFromArray:[[tmpDict objectForKey:ROMAN_TO_TEX_KEY] allKeys]];
+	[texSet addObjectsFromArray:[[tmpDict objectForKey:TEX_TO_ROMAN_KEY] allKeys]];
 	
 	if ([fm fileExistsAtPath:charConvPath]) {
-		NSDictionary *tmpDict = [NSDictionary dictionaryWithContentsOfFile:charConvPath];
-		oneWayDict = [[tmpDict objectForKey:ONE_WAY_CONVERSION_KEY] mutableCopy];
-		twoWayDict = [[tmpDict objectForKey:ROMAN_TO_TEX_KEY] mutableCopy];
+		tmpDict = [NSDictionary dictionaryWithContentsOfFile:charConvPath];
+		
+		[oneWayDict addEntriesFromDictionary:[tmpDict objectForKey:ONE_WAY_CONVERSION_KEY]];
+		[twoWayDict addEntriesFromDictionary:[tmpDict objectForKey:ROMAN_TO_TEX_KEY]];
+		
+		[romanSet addObjectsFromArray:[oneWayDict allKeys]];
+		[romanSet addObjectsFromArray:[twoWayDict allKeys]];
+		[texSet addObjectsFromArray:[twoWayDict allValues]];
 	}
-	if (oneWayDict == nil) {
-		oneWayDict = [[NSMutableDictionary dictionaryWithCapacity:1] retain];
-	}
-	if (twoWayDict == nil) {
-		twoWayDict = [[NSMutableDictionary dictionaryWithCapacity:1] retain];
-	}
+	
+	validRoman = YES;
+	validTex = YES;
 	
 	[self setDocumentEdited:NO];
 }
@@ -85,9 +99,23 @@ static BDSKCharacterConversion *sharedConversionEditor;
 }
 
 - (void)setListType:(int)listType {
+	if ([self listType] == listType)
+		return;
+	if (!validRoman || !validTex) {
+		NSBeginAlertSheet(NSLocalizedString(@"Invalid Conversion", @""),
+						  NSLocalizedString(@"OK", @"OK"),
+						  nil,nil, [self window],self, NULL, NULL, NULL,
+						  NSLocalizedString(@"The last item you entered is invalid or a duplicate. Please first edit it.",@""), nil);
+		[listButton selectItemAtIndex:[listButton indexOfItemWithTag:[self listType]]];
+		return;
+	}
+	
 	currentDict = (listType == 1)? oneWayDict : twoWayDict;
 	[currentArray autorelease];
 	currentArray = [[currentDict allKeys] mutableCopy];
+	
+	validRoman = YES;
+	validTex = YES;
 	
 	NSTableColumn *tc = [tableView tableColumnWithIdentifier:@"tex"];
 	if (listType == 2) {
@@ -128,6 +156,14 @@ static BDSKCharacterConversion *sharedConversionEditor;
 }
 
 - (IBAction)saveChanges:(id)sender {
+	if (!validRoman || !validTex) {
+		NSBeginAlertSheet(NSLocalizedString(@"Invalid Conversion", @""),
+						  NSLocalizedString(@"OK", @"OK"),
+						  nil,nil, [self window],self, NULL, NULL, NULL,
+						  NSLocalizedString(@"The last item you entered is invalid or a duplicate. Please first edit it.",@""), nil);
+		return;
+	}
+	
 	NSString *error = nil;
 	NSPropertyListFormat format = NSPropertyListXMLFormat_v1_0;
 	
@@ -166,16 +202,23 @@ static BDSKCharacterConversion *sharedConversionEditor;
 }
 
 - (IBAction)add:(id)sender {
-    NSString *newRoman = [NSString stringWithFormat:@"%C",0x00E4];
+	NSString *newRoman = [NSString stringWithFormat:@"%C",0x00E4];
     NSString *newTex = [NSString stringWithString:@"{\\\"a}"];
-    [currentArray addObject:newRoman];
-    [currentDict setObject:newTex forKey:newRoman];
+	
+	[currentArray addObject:newRoman];
+	[currentDict setObject:newTex forKey:newRoman];
+	[romanSet addObject:newRoman];
+	if ([self listType] == 2)
+		[texSet addObject:newTex];
+	
+	validRoman = NO;
+	validTex = ([self listType] == 1);
 	
     [tableView reloadData];
 	
     int row = [currentArray indexOfObject:newRoman];
     [tableView selectRow:row byExtendingSelection:NO];
-    [tableView editColumn:0 row:row withEvent:nil select:YES];
+    [tableView editColumn:0 row:row withEvent:nil select:NO];
 	
 	[self setDocumentEdited:YES];
 }
@@ -197,7 +240,7 @@ static BDSKCharacterConversion *sharedConversionEditor;
 #pragma mark UI methods
 
 - (void)updateButtons {
-	[addButton setEnabled:YES];
+	[addButton setEnabled:(validRoman && validTex)];
 	[removeButton setEnabled:[tableView selectedRow] != -1];
 }
 
@@ -219,27 +262,43 @@ static BDSKCharacterConversion *sharedConversionEditor;
 
 - (void)tableView:(NSTableView *)tv setObjectValue:(id)object forTableColumn:(NSTableColumn *)tableColumn row:(int)row {
 	NSString *roman = [currentArray objectAtIndex:row];
+	NSString *tex = [currentDict objectForKey:roman];
+	
 	if ([[tableColumn identifier] isEqualToString:@"roman"]) {
-		if (![object isEqualToString:roman]) {
-			if (![currentArray containsObject:object]) {
-				[currentArray replaceObjectAtIndex:row withObject:object];
-				[currentDict setObject:[currentDict objectForKey:roman] forKey:object];
-				[currentDict removeObjectForKey:roman];
-
-				[self setDocumentEdited:YES];
-			} else {
-				NSLog(@"Try to set duplicate Roman conversion %@",object);
+		if (!validRoman || ![object isEqualToString:roman]) {
+			if ([romanSet containsObject:object]) {
+				NSBeginAlertSheet(NSLocalizedString(@"Duplicate Unicode Character", @""),
+								  NSLocalizedString(@"OK", @"OK"),
+								  nil,nil, [self window],self, NULL, NULL, NULL,
+								  NSLocalizedString(@"The character you entered is a duplicate.",@""), nil);
 				[tableView reloadData];
+			} else {
+				[currentArray replaceObjectAtIndex:row withObject:object];
+				[currentDict setObject:tex forKey:object];
+				[currentDict removeObjectForKey:roman];
+				[romanSet removeObject:roman];
+				[romanSet addObject:object];
+				
+				validRoman = YES;
+				
+				[self setDocumentEdited:YES];
 			}
 		}
 	}
 	else {
-		if (![object isEqualToString:[currentDict objectForKey:roman]]) {
-			if ([self listType] == 2 && [[currentDict allKeysForObject:object] count] > 0) {
-				NSLog(@"Try to set duplicate TeX conversion %@",object);
+		if (!validTex || ![object isEqualToString:tex]) {
+			if ([self listType] == 2 && [texSet containsObject:object]) {
+				NSBeginAlertSheet(NSLocalizedString(@"Duplicate TeX Conversion", @""),
+								  NSLocalizedString(@"OK", @"OK"),
+								  nil,nil, [self window],self, NULL, NULL, NULL,
+								  NSLocalizedString(@"The TeX conversion you entered is a duplicate.",@""), nil);
 				[tableView reloadData];
 			} else {
 				[currentDict setObject:object forKey:roman];
+				[texSet removeObject:tex];
+				[texSet addObject:object];
+				
+				validTex = YES;
 				
 				[self setDocumentEdited:YES];
 			}
@@ -297,10 +356,24 @@ static BDSKCharacterConversion *sharedConversionEditor;
 
 - (BOOL)isPartialStringValid:(NSString **)partialStringPtr proposedSelectedRange:(NSRangePointer)proposedSelRangePtr originalString:(NSString *)origString originalSelectedRange:(NSRange)origSelRange errorDescription:(NSString **)error{
 	NSString *partialString = *partialStringPtr;
+	
 	if ([partialString length] >= 3 &&
 		[[partialString substringToIndex:2] isEqualToString:@"{\\"] &&
-		[partialString characterAtIndex:[partialString length] - 1] == '}') 
+		[partialString characterAtIndex:[partialString length] - 1] == '}') {
+		
 		return YES;
+	}
+	
+	if ([origString length] >= 3 &&
+		[[origString substringToIndex:2] isEqualToString:@"{\\"] &&
+		[origString characterAtIndex:[origString length] - 1] == '}') {
+		
+		*partialStringPtr = [[origString copy] autorelease]; // don't know why I need to do this, seems a bug
+	} else {
+		*partialStringPtr = @"{\\}";
+	}
+	
+	*proposedSelRangePtr = NSMakeRange(2, [*partialStringPtr length] - 3);
 	return NO;
 }
 

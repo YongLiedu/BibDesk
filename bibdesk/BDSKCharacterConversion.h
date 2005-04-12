@@ -18,7 +18,11 @@
 	NSMutableDictionary *twoWayDict;
 	NSMutableDictionary *currentDict;
 	NSMutableArray *currentArray;
+	NSMutableSet *romanSet;
+	NSMutableSet *texSet;
 	NSFormatter *texFormatter;
+	BOOL validRoman;
+	BOOL validTex;
 }
 
 + (BDSKCharacterConversion *)sharedConversionEditor;
