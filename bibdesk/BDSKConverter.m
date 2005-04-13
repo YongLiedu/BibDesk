@@ -516,10 +516,10 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 			case 'e':
 				[arr addObject:BDSKLocalUrlString];
 				break;
-			case 'f':
             case 'k':
                 [arr addObject:BDSKKeywordsString];
                 break;
+			case 'f':
 			case 'c':
 				[arr addObject:[[[string componentsSeparatedByString:@"}"] objectAtIndex:0] substringFromIndex:2]];
 		}
