@@ -116,6 +116,7 @@ extern NSString *BDSKLocalUrlLowercaseKey;
 extern NSString *BDSKLastVersionLaunched;
 extern NSString *BDSKSnoopDrawerSavedSize;
 extern NSString *BDSKShouldSaveNormalizedAuthorNames;
+extern NSString *BDSKSaveAnnoteAndAbstractAtEndOfItemKey;
 
 #pragma mark Field name strings
 

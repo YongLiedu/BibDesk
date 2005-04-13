@@ -92,6 +92,7 @@ NSString *BDSKLocalUrlLowercaseKey = @"Local-Url Generate Lowercase";
 NSString *BDSKLastVersionLaunched = @"Last launched version number";
 NSString *BDSKSnoopDrawerSavedSize = @"Saved size of BibEditor document snoop drawer";
 NSString *BDSKShouldSaveNormalizedAuthorNames = @"Save normalized names in BibTeX files";
+NSString *BDSKSaveAnnoteAndAbstractAtEndOfItemKey = @"Save Annote and Abstract at End of Item";
 
 #pragma mark Field name strings
 
