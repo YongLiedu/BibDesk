@@ -1044,9 +1044,9 @@ setupParagraphStyle()
 	[keys sortUsingSelector:@selector(caseInsensitiveCompare:)];
 	[keys removeObjectsInArray:finalKeys]; // make sure these fields are at the end, as they can be long
 	[keys addObjectsFromArray:finalKeys];
-    [keys release];
 	NSEnumerator *e = [keys objectEnumerator];
-    
+    [keys release];
+
     //build BibTeX entry:
     [s appendString:@"@"];
     
