@@ -68,10 +68,11 @@ $CSS_LINES = <<'EOT';
 <style type="text/css">
 p,ul,ol,td {
     font-family: Lucida Grande,Helvetica,Geneva;
-    font-size: 1em;
+    font-size: 0.7em;
 }
 h1, h2, h3, h4, h5 {
     font-family: Lucida Grande,Helvetica,Geneva;
+    font-size: 1em;
     color: #3333cc;
 }
 code,tt,pre { 
