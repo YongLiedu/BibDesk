@@ -573,6 +573,12 @@ extern NSString *BDSKBibItemLocalDragPboardType;
 */
 - (void)sortPubsByColumn:(NSTableColumn *)tableColumn;
 
+/*!
+    @method     sortTableByDefaultColumn
+    @abstract   Sorts the pubs table by the last column saved to user defaults (saved when a doc window closes).
+    @discussion (comprehensive description)
+*/
+- (void)sortPubsByDefaultColumn;
 #pragma mark bibtex macro support
 
 - (NSMutableDictionary *)macroDefinitions;

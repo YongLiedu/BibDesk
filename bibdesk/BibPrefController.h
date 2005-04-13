@@ -91,6 +91,8 @@ extern NSString *BDSKRSSDescriptionFieldKey;
 
 extern NSString *BDSKColumnWidthsKey;
 extern NSString *BDSKColumnOrderKey;
+extern NSString *BDSKDefaultSortedTableColumn;
+extern NSString *BDSKDefaultSortedTableColumnIsDescending;
 
 extern NSString *BDSKPubTypeKey;
 extern NSString *BDSKPubTypeStringKey;

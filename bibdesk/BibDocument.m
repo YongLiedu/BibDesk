@@ -110,10 +110,10 @@ NSString *BDSKBibItemLocalDragPboardType = @"edu.ucsd.cs.mmccrack.bibdesk: Local
 													 name:BDSKDocDelItemNotification
                                                    object:self];
                 
-                [[NSNotificationCenter defaultCenter] addObserver:self 
-                                                         selector:@selector(handleComplexStringChangedNotification:) 
-                                                             name:BDSKComplexStringChangedNotification 
-                                                           object:self];
+        [[NSNotificationCenter defaultCenter] addObserver:self 
+                                                 selector:@selector(handleComplexStringChangedNotification:) 
+                                                     name:BDSKComplexStringChangedNotification 
+                                                   object:self];
 
         // It's wrong that we have to manually register for this, since the document is the window's delegate in IB (and debugging/logging appears to confirm this).
         // However, we don't get this notification, and it's critical to clean up when closing the document window; this fixes #1097306, a crash when closing the
@@ -132,7 +132,7 @@ NSString *BDSKBibItemLocalDragPboardType = @"edu.ucsd.cs.mmccrack.bibdesk: Local
 		sortDescending = NO;
 		showStatus = YES;
                 
-                [self cacheQuickSearchRegexes];
+        [self cacheQuickSearchRegexes];
 
     }
     return self;
@@ -456,6 +456,7 @@ NSString *BDSKBibItemLocalDragPboardType = @"edu.ucsd.cs.mmccrack.bibdesk: Local
     [[aController window] setFrameAutosaveName:[self displayName]];
     [documentWindow makeFirstResponder:tableView];	
     [self setupTableColumns]; // calling it here mostly just makes sure that the menu is set up.
+    [self sortPubsByDefaultColumn];
     [self setTableFont];
     [self updateUI];
 
@@ -1803,6 +1804,24 @@ int generalBibItemCompareFunc(id item1, id item2, void *context){
 	return [value1 compare:value2];
 }
 
+- (void)sortPubsByDefaultColumn{
+    OFPreferenceWrapper *defaults = [OFPreferenceWrapper sharedPreferenceWrapper];
+    
+    NSString *colName = [defaults objectForKey:BDSKDefaultSortedTableColumn];
+    if([colName isEqualToString:@""])
+        return;
+    
+    NSTableColumn *tc = [tableView tableColumnWithIdentifier:colName];
+    if(tc == nil)
+        return;
+    
+    lastSelectedColumnForSort = [tc retain];
+    sortDescending = [defaults boolForKey:BDSKDefaultSortedTableColumnIsDescending];
+    [self sortPubsByColumn:tc];
+    [tableView setHighlightedTableColumn:tc];
+}
+
+#pragma mark
 
 - (IBAction)emailPubCmd:(id)sender{
     NSEnumerator *e = [self selectedPubEnumerator];
@@ -1911,6 +1930,8 @@ int generalBibItemCompareFunc(id item1, id item2, void *context){
     }
     [e show];
 }
+
+#pragma mark Pasteboard || copy
 
 - (IBAction)cut:(id)sender{ // puts the pubs on the pasteboard, using the default implementation, then deletes them
     [self copy:self];
@@ -2030,7 +2051,7 @@ int generalBibItemCompareFunc(id item1, id item2, void *context){
 }
 
 
-#pragma mark Paste
+#pragma mark Pasteboard || paste
 
 // ----------------------------------------------------------------------------------------
 // paste: get text, parse it as bibtex, add the entry to publications and (optionally) edit it.
@@ -2376,8 +2397,6 @@ This method always returns YES. Even if some or many operations fail.
 	}
 }
 
-
-
 /*
  Returns action/contextual menu that contains items appropriate for the current selection.
  The code may need to be revised if the menu's contents are changed.
@@ -2707,6 +2726,10 @@ This method always returns YES. Even if some or many operations fail.
     
     [customCiteDrawer close];
     [[NSApp delegate] removeErrorObjsForFileName:[self fileName]];
+
+    [[OFPreferenceWrapper sharedPreferenceWrapper] setObject:[lastSelectedColumnForSort identifier] forKey:BDSKDefaultSortedTableColumn];
+    [[OFPreferenceWrapper sharedPreferenceWrapper] setBool:(!sortDescending) forKey:BDSKDefaultSortedTableColumnIsDescending];
+    
 }
 
 - (void)pageDownInPreview:(id)sender{
