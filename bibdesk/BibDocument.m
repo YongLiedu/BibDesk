@@ -2508,14 +2508,18 @@ This method always returns YES. Even if some or many operations fail.
 #pragma mark UI updating
 
 - (void)updatePreviews:(NSNotification *)aNotification{
-    NSNumber *i;
-    NSMutableString *bibString = [NSMutableString stringWithString:@""];
-    NSEnumerator *e = [self selectedPubEnumerator];
     
     //take care of the preview field (NSTextView below the pub table); if the enumerator is nil, the view will get cleared out
     [self displayPreviewForItems:[self selectedPubEnumerator]];
     // (don't just pass it 'e' - it needs its own enum.)
-    if([[OFPreferenceWrapper sharedPreferenceWrapper] integerForKey:BDSKUsesTeXKey] == NSOnState){ 
+    if([[OFPreferenceWrapper sharedPreferenceWrapper] integerForKey:BDSKUsesTeXKey] == NSOnState){
+        NSNumber *i;
+        NSMutableString *bibString = [NSMutableString string];
+        NSEnumerator *e = [self selectedPubEnumerator];
+        // in case there are @preambles in it
+        [bibString appendString:frontMatter];
+        [bibString appendString:@"\n"];
+        
         while(i = [e nextObject]){
             [bibString appendString:[[shownPublications objectAtIndex:[i intValue]] bibTeXStringByExpandingMacros]];
         }// while i is num of selected row                  
