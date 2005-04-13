@@ -1039,8 +1039,13 @@ setupParagraphStyle()
     NSString *k;
     NSString *v;
     NSMutableString *s = [[[NSMutableString alloc] init] autorelease];
-    NSArray *keys = [[pubFields allKeys] sortedArrayUsingSelector:@selector(caseInsensitiveCompare:)];
-    NSEnumerator *e = [keys objectEnumerator];
+    NSMutableArray *keys = [[pubFields allKeys] mutableCopy];
+	NSArray *finalKeys = [NSArray arrayWithObjects:BDSKAbstractString, BDSKAnnoteString, nil];
+	[keys sortUsingSelector:@selector(caseInsensitiveCompare:)];
+	[keys removeObjectsInArray:finalKeys]; // make sure these fields are at the end, as they can be long
+	[keys addObjectsFromArray:finalKeys];
+    [keys release];
+	NSEnumerator *e = [keys objectEnumerator];
     
     //build BibTeX entry:
     [s appendString:@"@"];
