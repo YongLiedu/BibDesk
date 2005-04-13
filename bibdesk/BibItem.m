@@ -1040,12 +1040,16 @@ setupParagraphStyle()
     NSString *v;
     NSMutableString *s = [[[NSMutableString alloc] init] autorelease];
     NSMutableArray *keys = [[pubFields allKeys] mutableCopy];
-	NSArray *finalKeys = [NSArray arrayWithObjects:BDSKAbstractString, BDSKAnnoteString, nil];
+	NSEnumerator *e;
+	
 	[keys sortUsingSelector:@selector(caseInsensitiveCompare:)];
-	[keys removeObjectsInArray:finalKeys]; // make sure these fields are at the end, as they can be long
-	[keys addObjectsFromArray:finalKeys];
-	NSEnumerator *e = [keys objectEnumerator];
-    [keys release];
+	if ([[OFPreferenceWrapper sharedPreferenceWrapper] boolForKey:BDSKSaveAnnoteAndAbstractAtEndOfItemKey]) {
+		NSArray *finalKeys = [NSArray arrayWithObjects:BDSKAbstractString, BDSKAnnoteString, nil];
+		[keys removeObjectsInArray:finalKeys]; // make sure these fields are at the end, as they can be long
+		[keys addObjectsFromArray:finalKeys];
+	}
+	e = [keys objectEnumerator];
+	[keys release];
 
     //build BibTeX entry:
     [s appendString:@"@"];
