@@ -2,16 +2,25 @@
     IBClasses = (
         {
             ACTIONS = {
+                editTemplateFile = id; 
                 setDefaultStringEncoding = id; 
+                showConversionEditor = id; 
+                toggleSaveAnnoteAndAbstractAtEnd = id; 
                 toggleShouldTeXify = id; 
+                toggleShouldUseNormalizedNames = id; 
+                toggleShouldUseTemplateFile = id; 
                 toggleShowWarnings = id; 
             }; 
             CLASS = "BibPref_Files"; 
             LANGUAGE = ObjC; 
             OUTLETS = {
                 encodingPopUp = NSPopUpButton; 
+                outputTemplateFileButton = NSButton; 
+                saveAnnoteAndAbstractAtEndButton = NSButton; 
                 shouldTeXifyCheckButton = NSButton; 
                 showErrorsCheckButton = NSButton; 
+                useNormalizedNamesButton = NSButton; 
+                useTemplateFileButton = NSButton; 
             }; 
             SUPERCLASS = OAPreferenceClient; 
         }, 

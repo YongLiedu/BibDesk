@@ -1,15 +1,7 @@
 {
     IBClasses = (
         {
-            ACTIONS = {
-                addDefaultField = id; 
-                delSelectedDefaultField = id; 
-                outputTemplateButtonPressed = id; 
-                setShouldUseNormalizedNames = id; 
-                shouldUseTemplateFile = id; 
-                showConversionEditor = id; 
-                showTypeInfoEditor = id; 
-            }; 
+            ACTIONS = {addDefaultField = id; delSelectedDefaultField = id; showTypeInfoEditor = id; }; 
             CLASS = "BibPref_Defaults"; 
             LANGUAGE = ObjC; 
             OUTLETS = {
@@ -17,9 +9,6 @@
                 addFieldField = NSTextField; 
                 defaultFieldsTableView = NSTableView; 
                 delSelectedFieldButton = NSButton; 
-                outputTemplateFileButton = NSButton; 
-                templateRadioMatrix = NSMatrix; 
-                useNormalizedNamesButton = NSButton; 
             }; 
             SUPERCLASS = OAPreferenceClient; 
         }, 

@@ -12,7 +12,6 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 */
 
 #import "BibPref_Defaults.h"
-#import "BDSKCharacterConversion.h"
 #import "BDSKTypeInfoEditor.h"
 
 @implementation BibPref_Defaults
@@ -22,9 +21,6 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 
     defaultFieldsArray = [[NSMutableArray arrayWithCapacity:6] retain];
     [defaultFieldsArray setArray:[defaults arrayForKey:BDSKDefaultFieldsKey]];
-    [[templateRadioMatrix cellWithTag:1] setState:NSOffState];
-    [[templateRadioMatrix cellWithTag:0] setState:NSOffState];
-    [[templateRadioMatrix cellWithTag:([defaults boolForKey:BDSKShouldUseTemplateFile] ? 1 : 0 )] setState:NSOnState];
     BDSKFieldNameFormatter *fieldNameFormatter = [[BDSKFieldNameFormatter alloc] init];
     [addFieldField setFormatter:fieldNameFormatter];
     [fieldNameFormatter release];
@@ -32,8 +28,6 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 }
 
 - (void)updateUI{
-    [outputTemplateFileButton setTitle:[[defaults stringForKey:BDSKOutputTemplateFileKey] stringByAbbreviatingWithTildeInPath]];
-    [useNormalizedNamesButton setState:[defaults boolForKey:BDSKShouldSaveNormalizedAuthorNames]];
 }
 
 
@@ -67,28 +61,9 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
                  forKey:BDSKDefaultFieldsKey];
     [addFieldField setStringValue:@""];
 }
-    // changes the template file:
-- (IBAction)outputTemplateButtonPressed:(id)sender{
-    [[NSWorkspace sharedWorkspace] openFile:
-        [[defaults stringForKey:BDSKOutputTemplateFileKey] stringByExpandingTildeInPath]
-                            withApplication:@"TextEdit"];
-}
-
-- (IBAction)shouldUseTemplateFile:(id)sender{
-    [defaults setBool:([[sender selectedCell] tag] == 1 ? YES : NO) forKey:BDSKShouldUseTemplateFile];
-}
-
-- (IBAction)setShouldUseNormalizedNames:(id)sender{
-    [defaults setBool:([sender state] == NSOnState ? YES : NO) forKey:BDSKShouldSaveNormalizedAuthorNames];
-}
 
 - (IBAction)showTypeInfoEditor:(id)sender{
     [[BDSKTypeInfoEditor sharedTypeInfoEditor] showWindow:self];
-}
-
-
-- (IBAction)showConversionEditor:(id)sender{
-    [[BDSKCharacterConversion sharedConversionEditor] showWindow:self];
 }
 
 @end

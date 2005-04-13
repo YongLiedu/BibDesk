@@ -25,21 +25,10 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
     IBOutlet NSButton* addFieldButton;
     IBOutlet NSTextField* addFieldField;
     IBOutlet NSTableView* defaultFieldsTableView;
-    // the template file button:
-    IBOutlet NSButton* outputTemplateFileButton;
-    IBOutlet NSMatrix *templateRadioMatrix;
-    
-    IBOutlet NSButton *useNormalizedNamesButton;
 }
 // defaultFieldStuff
 - (IBAction)delSelectedDefaultField:(id)sender;
 - (IBAction)addDefaultField:(id)sender;
-// edits the template file:
-- (IBAction)outputTemplateButtonPressed:(id)sender;
-- (IBAction)shouldUseTemplateFile:(id)sender;
-
-- (IBAction)setShouldUseNormalizedNames:(id)sender;
 - (IBAction)showTypeInfoEditor:(id)sender;
-- (IBAction)showConversionEditor:(id)sender;
 
 @end

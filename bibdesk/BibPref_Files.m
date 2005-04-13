@@ -8,6 +8,7 @@
 
 #import "BibPref_Files.h"
 #import "BibAppController.h"
+#import "BDSKCharacterConversion.h"
 
 
 @implementation BibPref_Files
@@ -30,6 +31,11 @@
     [showErrorsCheckButton setState: 
 		([defaults boolForKey:BDSKShowWarningsKey] == YES) ? NSOnState : NSOffState  ];	
     [shouldTeXifyCheckButton setState:([defaults boolForKey:BDSKShouldTeXifyWhenSavingAndCopying] == YES) ? NSOnState : NSOffState];
+    [saveAnnoteAndAbstractAtEndButton setState:([defaults boolForKey:BDSKSaveAnnoteAndAbstractAtEndOfItemKey] == YES) ? NSOnState : NSOffState];
+    [useNormalizedNamesButton setState:[defaults boolForKey:BDSKShouldSaveNormalizedAuthorNames] ? NSOnState : NSOffState];
+    [useTemplateFileButton setState:[defaults boolForKey:BDSKShouldUseTemplateFile] ? NSOnState : NSOffState];
+    [outputTemplateFileButton setTitle:[[defaults stringForKey:BDSKOutputTemplateFileKey] stringByAbbreviatingWithTildeInPath]];
+	[outputTemplateFileButton sizeToFit];
 }
 
 - (IBAction)setDefaultStringEncoding:(id)sender{    
@@ -52,6 +58,29 @@
 - (IBAction)toggleShouldTeXify:(id)sender{
     [defaults setBool:([sender state] == NSOnState ? YES : NO) forKey:BDSKShouldTeXifyWhenSavingAndCopying];
     [self updateUI];
+}
+
+- (IBAction)toggleShouldUseNormalizedNames:(id)sender{
+    [defaults setBool:([sender state] == NSOnState ? YES : NO) forKey:BDSKShouldSaveNormalizedAuthorNames];
+}
+
+- (IBAction)toggleSaveAnnoteAndAbstractAtEnd:(id)sender{
+    [defaults setBool:([sender state] == NSOnState ? YES : NO) forKey:BDSKSaveAnnoteAndAbstractAtEndOfItemKey];
+    [self updateUI];
+}
+
+- (IBAction)toggleShouldUseTemplateFile:(id)sender{
+    [defaults setBool:([[sender selectedCell] tag] == 1 ? YES : NO) forKey:BDSKShouldUseTemplateFile];
+}
+
+- (IBAction)editTemplateFile:(id)sender{
+    [[NSWorkspace sharedWorkspace] openFile:
+        [[defaults stringForKey:BDSKOutputTemplateFileKey] stringByExpandingTildeInPath]
+                            withApplication:@"TextEdit"];
+}
+
+- (IBAction)showConversionEditor:(id)sender{
+    [[BDSKCharacterConversion sharedConversionEditor] showWindow:self];
 }
 
 @end

@@ -16,10 +16,19 @@
     IBOutlet NSButton *showErrorsCheckButton;
     IBOutlet NSPopUpButton *encodingPopUp;
     IBOutlet NSButton *shouldTeXifyCheckButton;
+    IBOutlet NSButton *saveAnnoteAndAbstractAtEndButton;
+    IBOutlet NSButton *useNormalizedNamesButton;
+    IBOutlet NSButton *useTemplateFileButton;
+    IBOutlet NSButton *outputTemplateFileButton;
 }
 
 - (IBAction)setDefaultStringEncoding:(id)sender;
 - (IBAction)toggleShowWarnings:(id)sender;
 - (IBAction)toggleShouldTeXify:(id)sender;
+- (IBAction)toggleShouldUseNormalizedNames:(id)sender;
+- (IBAction)toggleSaveAnnoteAndAbstractAtEnd:(id)sender;
+- (IBAction)toggleShouldUseTemplateFile:(id)sender;
+- (IBAction)editTemplateFile:(id)sender;
+- (IBAction)showConversionEditor:(id)sender;
 
 @end
