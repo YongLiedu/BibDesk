@@ -66,7 +66,7 @@ NSString *stringFromBTField(AST *field,
     
     NSStringEncoding parserEncoding;
     if(!aDocument)
-        parserEncoding = [NSString defaultCStringEncoding]; // is this a good assumption?  only used for pasteboard stuff.
+        parserEncoding = NSUTF8StringEncoding; // is this a good assumption?  only used for pasteboard stuff.
     else
         parserEncoding = [aDocument documentStringEncoding]; 
     
@@ -287,7 +287,7 @@ NSString *stringFromBTField(AST *field, NSString *fieldName, NSString *filePath,
     
     NSStringEncoding parserEncoding;
     if(!document)
-        parserEncoding = [NSString defaultCStringEncoding];
+        parserEncoding = NSUTF8StringEncoding;
     else
         parserEncoding = [document documentStringEncoding]; 
     
