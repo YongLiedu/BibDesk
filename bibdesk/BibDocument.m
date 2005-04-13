@@ -2201,7 +2201,7 @@ This method always returns YES. Even if some or many operations fail.
 	while(fnStr = [fileNameEnum nextObject]){
 		if(url = [NSURL fileURLWithPath:fnStr]){
 			BibItem * newBI = [[BibItem alloc] init];
-			
+
 			NSString *newUrl = [[NSURL fileURLWithPath:
 				[fnStr stringByExpandingTildeInPath]]absoluteString];
 
@@ -2598,19 +2598,16 @@ This method always returns YES. Even if some or many operations fail.
     
 	int shownPubsCount = [shownPublications count];
 	int totalPubsCount = [publications count];
-	
+    // show the singular form correctly
+    NSString *totalStr = (totalPubsCount == 1) ? NSLocalizedString(@"Publication", @"Publication") : NSLocalizedString(@"Publications", @"Publications");
+
 	if (shownPubsCount != totalPubsCount) { 
 		// inform people
-		[infoLine setStringValue: [NSString stringWithFormat:
-			NSLocalizedString(@"%d of %d Publications",
-                              @"need two ints in format string."),
-            shownPubsCount,totalPubsCount] ];
+        NSString *ofStr = NSLocalizedString(@"of", @"of");
+		[infoLine setStringValue: [NSString stringWithFormat:@"%d %@ %d %@", shownPubsCount, ofStr, totalPubsCount, totalStr]];
 	}
 	else {
-		[infoLine setStringValue:[NSString stringWithFormat:
-			NSLocalizedString(@"%d Publications",
-							  @"%d Publications (total number)"),
-            totalPubsCount]];
+		[infoLine setStringValue:[NSString stringWithFormat:@"%d %@", totalPubsCount, totalStr]];
 	}
 	
     [self updatePreviews:nil];
