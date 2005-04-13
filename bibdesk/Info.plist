@@ -327,12 +327,6 @@
 					<array>
 						<string>Keywords</string>
 					</array>
-					<key>Output Template File</key>
-					<string>~/Library/Application Support/BibDesk/template.txt</string>
-					<key>Save normalized names in BibTeX files</key>
-					<false/>
-					<key>Write template file when saving</key>
-					<true/>
 				</dict>
 				<key>icon</key>
 				<string>defaults.tiff</string>
@@ -357,10 +351,18 @@
 					<string>NO</string>
 					<key>Load files in background</key>
 					<false/>
+					<key>Output Template File</key>
+					<string>~/Library/Application Support/BibDesk/template.txt</string>
+					<key>Save Annote and Abstract at End of Item</key>
+					<false/>
+					<key>Save normalized names in BibTeX files</key>
+					<false/>
 					<key>TeXify characters when saving or copying BibTeX</key>
 					<true/>
 					<key>Use Unicode BibTeX Parser</key>
 					<false/>
+					<key>Write template file when saving</key>
+					<true/>
 				</dict>
 				<key>icon</key>
 				<string>genericBibDocIcon.tiff</string>
