@@ -2673,12 +2673,6 @@ This method always returns YES. Even if some or many operations fail.
 #pragma mark
 #pragma mark || Custom cite drawer stuff
 
-- (IBAction)openCustomCitePrefPane:(id)sender{
-    OAPreferenceController *pc = [OAPreferenceController sharedPreferenceController];
-    [pc showPreferencesPanel:nil];
-    [pc setCurrentClientByClassName:@"BibPref_Cite"];
-}
-
 - (IBAction)toggleShowingCustomCiteDrawer:(id)sender{
     [customCiteDrawer toggle:sender];
 	if(showingCustomCiteDrawer){
@@ -2686,6 +2680,21 @@ This method always returns YES. Even if some or many operations fail.
 	}else{
 		showingCustomCiteDrawer = YES;
 	}
+}
+
+- (IBAction)addCustomCiteString:(id)sender{
+    [customStringArray addObject:@"citeCommand"];
+    [ccTableView reloadData];
+    [[OFPreferenceWrapper sharedPreferenceWrapper] setObject:customStringArray forKey:BDSKCustomCiteStringsKey];
+}
+
+- (IBAction)removeCustomCiteString:(id)sender{
+    if([ccTableView numberOfSelectedRows] == 0)
+		return;
+	
+	[customStringArray removeObjectAtIndex:[ccTableView selectedRow]];
+	[ccTableView reloadData];
+    [[OFPreferenceWrapper sharedPreferenceWrapper] setObject:customStringArray forKey:BDSKCustomCiteStringsKey];
 }
 
 
@@ -2757,6 +2766,7 @@ This method always returns YES. Even if some or many operations fail.
     [pv setFrame:previewFrame];
     [sender adjustSubviews];
 }
+
 
 #pragma mark macro stuff
 

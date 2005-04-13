@@ -10,19 +10,20 @@
         }, 
         {
             ACTIONS = {
+                addCustomCiteString = id; 
                 clearQuickSearch = id; 
                 columnsMenuAddTableColumn = id; 
                 columnsMenuSelectTableColumn = id; 
                 consolidateLinkedFiles = id; 
+                copy = id; 
                 copyAsBibTex = id; 
                 copyAsPDF = id; 
                 copyAsRTF = id; 
                 copyAsTex = id; 
+                cut = id; 
                 delPub = id; 
                 dismissAddFieldSheet = id; 
                 dismissDelFieldSheet = id; 
-                dismissEditExportSettingsSheet = id; 
-                editExportSettingsAction = id; 
                 editPubCmd = id; 
                 emailPubCmd = id; 
                 exportAsAtom = id; 
@@ -31,24 +32,21 @@
                 exportAsRSS = id; 
                 exportEncodedBib = id; 
                 generateCiteKey = id; 
-                handleExportChooserPopupChange = id; 
-                makeNewCollectionFromSelectedPublications = id; 
-                makeNewEmptyCollection = id; 
-                makeNewExternalSource = id; 
-                makeNewNotepad = id; 
                 makeSearchFieldKey = id; 
                 newPub = id; 
-                openCustomCitePrefPane = id; 
                 pageDownInPreview = id; 
                 paste = id; 
                 postItemToWeblog = id; 
                 quickSearchAddField = id; 
                 quickSearchRemoveField = id; 
+                removeCustomCiteString = id; 
                 searchFieldAction = id; 
                 searchFieldChangeKey = id; 
                 selectColumnToAdd = id; 
+                showMacrosWindow = id; 
                 splitViewDoubleClick = id; 
                 toggleShowingCustomCiteDrawer = id; 
+                toggleStatusBar = id; 
             }; 
             CLASS = BibDocument; 
             LANGUAGE = ObjC; 
@@ -58,6 +56,7 @@
                 actionMenuButton = RYZImagePopUpButton; 
                 actionMenuFirstItem = NSMenuItem; 
                 actionMenuView = NSView; 
+                addCustomCiteStringButton = NSButton; 
                 addFieldPopupButton = NSPopUpButton; 
                 addFieldPrompt = NSTextField; 
                 addFieldSheet = NSWindow; 
@@ -78,10 +77,10 @@
                 exporterSelectionPopUp = NSPopUpButton; 
                 exporterSubView = NSView; 
                 infoLine = NSTextField; 
-                openCustomCitePrefsButton = NSButton; 
                 previewField = NSTextView; 
                 quickSearchButton = NSPopUpButton; 
                 quickSearchClearButton = NSButton; 
+                removeCustomCiteStringButton = NSButton; 
                 rssExportAccessoryView = NSView; 
                 rssExportForm = NSForm; 
                 rssExportTextField = NSTextField; 

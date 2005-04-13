@@ -161,15 +161,31 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
     else return nil;
 }
 
-- (void)tableViewSelectionDidChange:(NSNotification *)aNotification
-{
-    if([aNotification object] == tableView) // coalesce notifications so it doesn't have to deal with a notification for every item
+- (void)tableView:(NSTableView *)tv setObjectValue:(id)object forTableColumn:(NSTableColumn *)tableColumn row:(int)row{
+    if(tv == (NSTableView *)ccTableView){
+		[customStringArray replaceObjectAtIndex:row withObject:object];
+	}
+}
+
+- (BOOL)tableView:(NSTableView *)tv shouldEditTableColumn:(NSTableColumn *)aTableColumn row:(int)row{
+    if(tv == tableView){
+		return NO;
+	}else if(tv == (NSTableView *)ccTableView){
+		return YES;
+	}
+}
+
+- (void)tableViewSelectionDidChange:(NSNotification *)aNotification{
+	NSTableView *tv = [aNotification object];
+    if(tv == tableView){ // coalesce notifications so it doesn't have to deal with a notification for every item
         [[NSNotificationQueue defaultQueue] enqueueNotification:[NSNotification notificationWithName:BDSKDocumentUpdateUINotification object:self]
                                                    postingStyle:NSPostWhenIdle
                                                    coalesceMask:NSNotificationCoalescingOnSender
                                                        forModes:nil];
+    }else if(tv == (NSTableView *)ccTableView){
+		[removeCustomCiteStringButton setEnabled:([tv numberOfSelectedRows] > 0)];
+	}
 }
-
 
 - (void)tableViewColumnDidResize:(NSNotification *)notification{
     OFPreferenceWrapper *pw = [OFPreferenceWrapper sharedPreferenceWrapper];

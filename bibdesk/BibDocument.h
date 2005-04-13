@@ -98,8 +98,9 @@ extern NSString *BDSKBibItemLocalDragPboardType;
 #pragma mark Custom Cite-String drawer variable declarations:
 
     IBOutlet NSDrawer* customCiteDrawer;
-    IBOutlet NSButton* openCustomCitePrefsButton;
     IBOutlet BDSKCustomCiteTableView* ccTableView;
+    IBOutlet NSButton *addCustomCiteStringButton;
+    IBOutlet NSButton *removeCustomCiteStringButton;
     NSMutableArray* customStringArray;
 	BOOL showingCustomCiteDrawer;
     
@@ -855,8 +856,10 @@ Uses the tableview argument to determine which actionMenu it should validate.
 
 - (IBAction)toggleStatusBar:(id)sender;
 
-- (IBAction)openCustomCitePrefPane:(id)sender;
 - (IBAction)toggleShowingCustomCiteDrawer:(id)sender;
+
+- (IBAction)addCustomCiteString:(id)sender;
+- (IBAction)removeCustomCiteString:(id)sender;
 
 - (NSArray*) authors;
 - (void)refreshAuthors;
