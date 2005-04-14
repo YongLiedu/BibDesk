@@ -337,7 +337,9 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 }
 
 - (IBAction)saveDocument:(id)sender{
-    NSResponder *fr = [[self window] firstResponder];
+    // see controlTextDidBeginEditing and controlTextDidEndEditing for currentControl, which may be a textfield or form
+    // if currentControl is nil, the first responder is (possibly) one of the text views, so we'll give them focus after a save
+    NSResponder *fr = (currentControl == nil) ? [[self window] firstResponder] : currentControl;
 
     // a safety call to be sure that the current field's changes are saved :...
     [self finalizeChanges];
@@ -1121,8 +1123,13 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 	return YES;
 }
 
+- (void)controlTextDidBeginEditing:(NSNotification *)aNotification{
+    currentControl = [aNotification object]; // cache the current control, so we can re-set the first responder after a save
+}
+
 - (void)controlTextDidEndEditing:(NSNotification *)aNotification{
     // here for undo
+    currentControl = nil; // if a control doesn't have focus, set this to nil; this allows us to set the textview(s) as first responder
 }
 
 // sent by the NSForm when we are done editing a field if we used the formcell.
