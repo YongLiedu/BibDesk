@@ -33,9 +33,10 @@
     IBOutlet NSPopUpButton *previewFontPopup;
     IBOutlet NSPopUpButton *tableViewFontPopup;
     IBOutlet NSTextField *tableViewFontSizeField;
-    IBOutlet NSTextView *defaultBibFileTextView;
+    IBOutlet NSTextField *defaultBibFileTextField;
 }
 
+- (IBAction)setAutoOpenFilePath:(id)sender;
 - (IBAction)changeStartupBehavior:(id)sender;
 - (IBAction) chooseAutoOpenFile:(id) sender;
 

@@ -35,15 +35,6 @@
     [tableViewFontPopup addItemsWithTitles:[availableFonts sortedArrayUsingSelector:@selector(compare:)]];
     [tableViewFontPopup selectItemWithTitle:[defaults objectForKey:BDSKTableViewFontKey]];
     [availableFonts release];
-    
-    // the whole point of using an NSTextView instead of a text field is so we can set the baseline properly on an unshadowed text view.
-    // for the default system font at 12pt size, a height of 18 is correct, in order to avoid clipping while scrolling (scrolling horizontally actually scrolls vertically and can show the characters from the previous line)
-    [defaultBibFileTextView setEditable:YES];
-    [defaultBibFileTextView setFont:[NSFont systemFontOfSize:12]];
-    int i;
-    for( i = 0 ; i < 2 ; i++ )
-        [defaultBibFileTextView lowerBaseline:nil];
-    [defaultBibFileTextView setEditable:NO];
 
 }
 
@@ -56,8 +47,12 @@
 
 - (void)updateUI{
     [startupBehaviorRadio selectCellWithTag:[[defaults objectForKey:BDSKStartupBehaviorKey] intValue]];
+    if([[defaults objectForKey:BDSKStartupBehaviorKey] intValue] != 3)
+        [defaultBibFileTextField setEnabled:NO];
+    else
+        [defaultBibFileTextField setEnabled:YES];
 	
-    [defaultBibFileTextView setString:[[defaults objectForKey:BDSKDefaultBibFilePathKey] stringByAbbreviatingWithTildeInPath]];
+    [defaultBibFileTextField setStringValue:[[defaults objectForKey:BDSKDefaultBibFilePathKey] stringByAbbreviatingWithTildeInPath]];
 	
     prevStartupBehaviorTag = [[defaults objectForKey:BDSKStartupBehaviorKey] intValue];
     [tableViewFontSizeField setFloatValue:[defaults floatForKey:BDSKTableViewFontSizeKey]];
@@ -76,65 +71,38 @@
 
 }
 
-
-
-- (void)setValueForSender:(id)sender{
-    // ?
-}
-
-
-- (void)becomeCurrentPreferenceClient{
-	//    NSLog(@"not sure - becomecurrent");
-}
-- (void)resignCurrentPreferenceClient{
-	//    NSLog(@"not sure - resigncurrent");
-}
-
 - (IBAction)toggleAutoCheckForUpdates:(id)sender{
     [defaults setBool:([sender state] == NSOnState) ? YES : NO forKey:BDSKAutoCheckForUpdates];
+}
+
+- (IBAction)setAutoOpenFilePath:(id)sender{
+    [defaults setObject:[[sender stringValue] stringByExpandingTildeInPath] forKey:BDSKDefaultBibFilePathKey];
 }
 
 - (IBAction)changeStartupBehavior:(id)sender{
     int n = [[sender selectedCell] tag];
     [defaults setObject:[NSNumber numberWithInt:n] forKey:BDSKStartupBehaviorKey];
-    
-    if (n == 3) {
-        NSOpenPanel * openPanel = [NSOpenPanel openPanel];
-		[openPanel beginSheetForDirectory:nil file:nil types:[NSArray arrayWithObject:@"bib"] modalForWindow:[sender window] modalDelegate: self didEndSelector:@selector(openPanelDidEnd:returnCode:contextInfo:) contextInfo:NULL];
-    }else{
-        prevStartupBehaviorTag = n;
-    }
-    [defaults synchronize];
+    [self updateUI];
 }
 
-
-/*
-	Invoked by the choose button for the 'auto open bibliography' radio button
-	Simply simulates a click on the radio button.
-*/ 
 -(IBAction) chooseAutoOpenFile:(id) sender {
-	[startupBehaviorRadio selectCellWithTag:3];	
-	[startupBehaviorRadio performClick:self];
+    NSOpenPanel * openPanel = [NSOpenPanel openPanel];
+    [openPanel setCanChooseDirectories:NO];
+    [openPanel setAllowsMultipleSelection:NO];
+    [openPanel beginSheetForDirectory:nil file:nil types:[NSArray arrayWithObject:@"bib"] modalForWindow:[sender window] modalDelegate: self didEndSelector:@selector(openPanelDidEnd:returnCode:contextInfo:) contextInfo:NULL];
 }
 
-
-/*
- finishing off the open panel for selecting the file to open on startup
- 
- -> re-sets the previous behaviour if the user cancels
- -> sets the 'auto open' behaviour otherwise
-*/
 - (void)openPanelDidEnd:(NSOpenPanel *)sheet returnCode:(int)returnCode contextInfo:(void *)contextInfo {
     if (returnCode == NSCancelButton)
-    {
-            [startupBehaviorRadio selectCellWithTag:prevStartupBehaviorTag];
-            return;
-    }
+        return;
+    
     NSString * path = [[sheet filenames] objectAtIndex: 0];
-    [defaultBibFileTextView setString:[path stringByAbbreviatingWithTildeInPath]];    
+    [defaultBibFileTextField setStringValue:[path stringByAbbreviatingWithTildeInPath]];    
     
     [defaults setObject:path forKey:BDSKDefaultBibFilePathKey];
-    [defaults setObject:path forKey:@"NSOpen"]; // -- what did this do?		
+    [defaults setObject:path forKey:@"NSOpen"]; // -- what did this do?
+    [defaults setObject:[NSNumber numberWithInt:3] forKey:BDSKStartupBehaviorKey];
+    [self updateUI];
 }
 
 - (IBAction)changePreviewDisplay:(id)sender{
