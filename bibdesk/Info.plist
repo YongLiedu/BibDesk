@@ -327,6 +327,8 @@
 					<array>
 						<string>Keywords</string>
 					</array>
+					<key>Field to use as Description in RSS</key>
+					<string>Rss-Description</string>
 				</dict>
 				<key>icon</key>
 				<string>defaults.tiff</string>
@@ -345,6 +347,8 @@
 			<dict>
 				<key>defaultsDictionary</key>
 				<dict>
+					<key>Auto-save as RSS</key>
+					<false/>
 					<key>Default string encoding for opening and saving</key>
 					<string>1</string>
 					<key>Export BibTeX document when saving BibDesk document</key>
@@ -515,28 +519,6 @@
 				<string>Autocompletion</string>
 				<key>title</key>
 				<string>Autocompletion</string>
-			</dict>
-			<key>BibPref_RSS</key>
-			<dict>
-				<key>defaultsDictionary</key>
-				<dict>
-					<key>Auto-save as RSS</key>
-					<string>0</string>
-					<key>Field to use as Description in RSS</key>
-					<string>Rss-Description</string>
-				</dict>
-				<key>icon</key>
-				<string>rss.tiff</string>
-				<key>identifier</key>
-				<string>bp_rss</string>
-				<key>nib</key>
-				<string>BibPref_RSS</string>
-				<key>ordering</key>
-				<string>25</string>
-				<key>shortTitle</key>
-				<string>RSS</string>
-				<key>title</key>
-				<string>RSS Publish and Subscribe</string>
 			</dict>
 			<key>BibPref_TeX</key>
 			<dict>

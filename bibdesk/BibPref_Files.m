@@ -34,6 +34,7 @@
     [saveAnnoteAndAbstractAtEndButton setState:([defaults boolForKey:BDSKSaveAnnoteAndAbstractAtEndOfItemKey] == YES) ? NSOnState : NSOffState];
     [useNormalizedNamesButton setState:[defaults boolForKey:BDSKShouldSaveNormalizedAuthorNames] ? NSOnState : NSOffState];
     [useTemplateFileButton setState:[defaults boolForKey:BDSKShouldUseTemplateFile] ? NSOnState : NSOffState];
+    [autoSaveAsRSSButton setState:[defaults boolForKey:BDSKAutoSaveAsRSSKey] ? NSOnState : NSOffState];
 }
 
 - (IBAction)setDefaultStringEncoding:(id)sender{    
@@ -65,6 +66,10 @@
 - (IBAction)toggleSaveAnnoteAndAbstractAtEnd:(id)sender{
     [defaults setBool:([sender state] == NSOnState ? YES : NO) forKey:BDSKSaveAnnoteAndAbstractAtEndOfItemKey];
     [self updateUI];
+}
+
+- (IBAction)toggleAutoSaveAsRSSChanged:(id)sender{
+    [defaults setBool:([sender state] == NSOnState ? YES : NO) forKey:BDSKAutoSaveAsRSSKey];
 }
 
 - (IBAction)toggleShouldUseTemplateFile:(id)sender{

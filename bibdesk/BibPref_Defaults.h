@@ -25,10 +25,13 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
     IBOutlet NSButton* addFieldButton;
     IBOutlet NSTextField* addFieldField;
     IBOutlet NSTableView* defaultFieldsTableView;
+    IBOutlet NSMatrix* RSSDescriptionFieldMatrix;
+    IBOutlet NSTextField* RSSDescriptionFieldTextField;
 }
 // defaultFieldStuff
 - (IBAction)delSelectedDefaultField:(id)sender;
 - (IBAction)addDefaultField:(id)sender;
 - (IBAction)showTypeInfoEditor:(id)sender;
+- (IBAction)RSSDescriptionFieldChanged:(id)sender;
 
 @end

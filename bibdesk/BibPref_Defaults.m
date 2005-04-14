@@ -23,11 +23,20 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
     [defaultFieldsArray setArray:[defaults arrayForKey:BDSKDefaultFieldsKey]];
     BDSKFieldNameFormatter *fieldNameFormatter = [[BDSKFieldNameFormatter alloc] init];
     [addFieldField setFormatter:fieldNameFormatter];
+    [RSSDescriptionFieldTextField setFormatter:fieldNameFormatter];
     [fieldNameFormatter release];
     
 }
 
 - (void)updateUI{
+    if ([[defaults objectForKey:BDSKRSSDescriptionFieldKey] isEqualToString:BDSKRssDescriptionString]) {
+        [RSSDescriptionFieldMatrix selectCellWithTag:0];
+        [RSSDescriptionFieldTextField setEnabled:NO];
+    }else{
+		[RSSDescriptionFieldTextField setStringValue:[defaults objectForKey:BDSKRSSDescriptionFieldKey]];
+        [RSSDescriptionFieldMatrix selectCellWithTag:1];
+        [RSSDescriptionFieldTextField setEnabled:YES];
+    }
 }
 
 
@@ -64,6 +73,31 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 
 - (IBAction)showTypeInfoEditor:(id)sender{
     [[BDSKTypeInfoEditor sharedTypeInfoEditor] showWindow:self];
+}
+
+- (IBAction)RSSDescriptionFieldChanged:(id)sender{
+    int selTag = [[sender selectedCell] tag];
+    switch(selTag){
+        case 0:
+            // use Rss-
+            //BDSKRSSDescriptionFieldKey
+            [defaults setObject:BDSKRssDescriptionString
+                         forKey:BDSKRSSDescriptionFieldKey];
+			break;
+        case 1:
+            [defaults setObject:[[RSSDescriptionFieldTextField stringValue] capitalizedString]
+                         forKey:BDSKRSSDescriptionFieldKey];
+            break;
+    }
+    [self updateUI];
+}
+
+- (void)controlTextDidChange:(NSNotification *)aNotification{
+	if ([aNotification object] == RSSDescriptionFieldTextField) {
+		[defaults setObject:[[RSSDescriptionFieldTextField stringValue] capitalizedString]
+					 forKey:BDSKRSSDescriptionFieldKey];
+		[self updateUI];
+	}
 }
 
 @end
