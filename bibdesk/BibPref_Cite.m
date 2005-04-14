@@ -18,6 +18,9 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 @implementation BibPref_Cite
 - (void)awakeFromNib{
     [super awakeFromNib];
+    BDSKDragCopyCiteKeyFormatter *formatter = [[BDSKDragCopyCiteKeyFormatter alloc] init];
+    [citeStringField setFormatter:formatter];
+    [formatter release];
 }
 
 
@@ -32,7 +35,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 
     [dragCopyRadio selectCellWithTag:[defaults integerForKey:BDSKDragCopyKey]];
     [separateCiteCheckButton setState:[defaults integerForKey:BDSKSeparateCiteKey]];
-    [citeStringField setStringValue:citeString];
+    [citeStringField setStringValue:[NSString stringWithFormat:@"\\%@", citeString]];
     if([separateCiteCheckButton state] == NSOnState){
         [citeBehaviorLine setStringValue:[NSString stringWithFormat:@"\\%@%@key1%@ \\%@%@key2%@",citeString, startCiteBracket, endCiteBracket,
 			citeString, startCiteBracket,endCiteBracket]];
@@ -46,7 +49,6 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 		[citeBehaviorLine setFrame:frame];
 	}
 	[controlBox setNeedsDisplay:YES];
-  //  [editOnPasteButton setState:[defaults integerForKey:BDSKEditOnPasteKey]];
 }
 
 - (IBAction)changeCopyBehavior:(id)sender{
@@ -59,15 +61,10 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 }
 
 - (IBAction)citeStringFieldChanged:(id)sender{
-    [defaults setObject:[sender stringValue] forKey:BDSKCiteStringKey];
+    [defaults setObject:[[sender stringValue] stringByTrimmingCharactersInSet:[NSCharacterSet characterSetWithCharactersInString:@"\\"]]
+                 forKey:BDSKCiteStringKey];
     [self changeSeparateCite:separateCiteCheckButton];
 }
-
-/*
- - (IBAction)changeEditOnPaste:(id)sender{
-    [defaults setInteger:[sender state] forKey:BDSKEditOnPasteKey];
-}
-*/
 
 - (IBAction)setCitationBracketStyle:(id)sender{
 	// 1 - tex 2 - context
@@ -80,6 +77,31 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 		[defaults setObject:@"]" forKey:BDSKCiteEndBracketKey];
 	}
 	[self updateUI];
+}
+
+@end
+
+@implementation BDSKDragCopyCiteKeyFormatter
+
+- (BOOL)isPartialStringValid:(NSString **)partialStringPtr proposedSelectedRange:(NSRangePointer)proposedSelRangePtr originalString:(NSString *)origString originalSelectedRange:(NSRange)origSelRange errorDescription:(NSString **)error{
+    if([*partialStringPtr isEqualToString:@""] || [origString characterAtIndex:0] != 0x005C){ // backslash
+        *partialStringPtr = [NSString stringWithFormat:@"\\%@", *partialStringPtr];
+        proposedSelRangePtr->location = [*partialStringPtr length];
+        return NO;
+    } else
+        return YES;
+}
+
+- (BOOL)getObjectValue:(id *)obj forString:(NSString *)string errorDescription:(NSString **)error{
+    *obj = string;
+    return YES;
+}
+
+- (NSString *)stringForObjectValue:(id)anObject{
+    if (![anObject isKindOfClass:[NSString class]]) {
+        return nil;
+    }
+    return anObject;
 }
 
 @end

@@ -1,9 +1,15 @@
 {
     IBClasses = (
         {
+            CLASS = BDSKDragCopyCiteKeyFormatter; 
+            LANGUAGE = ObjC; 
+            SUPERCLASS = NSFormatter; 
+        }, 
+        {
             ACTIONS = {
                 changeCopyBehavior = id; 
                 changeSeparateCite = id; 
+                citeStringFieldChanged = id; 
                 setCitationBracketStyle = id; 
             }; 
             CLASS = "BibPref_Cite"; 
