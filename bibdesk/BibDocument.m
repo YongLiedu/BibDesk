@@ -2468,7 +2468,7 @@ This method always returns YES. Even if some or many operations fail.
 	NSDictionary *userInfo = [notification userInfo];
     
     // see if it's ours
-	if([userInfo objectForKey:@"document"] != self || [userInfo objectForKey:@"document" == nil])
+	if([userInfo objectForKey:@"document"] != self || [userInfo objectForKey:@"document"] == nil)
         return;
     //NSLog(@"got handleBibItemChangedNotification in %@", [[self fileName] lastPathComponent]);
 
