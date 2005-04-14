@@ -93,8 +93,8 @@ NSRange SafeBackwardSearchRange(NSRange startRange, unsigned seekLength){
 
 - (BOOL)isBibTeXCitation:(NSRange)braceRange{
     NSString *str = [[self textStorage] string];
-    NSRange citeSearchRange;
-    NSRange doubleBracketRange;
+    NSRange citeSearchRange = NSMakeRange(NSNotFound, 0);
+    NSRange doubleBracketRange = NSMakeRange(NSNotFound, 0);
 
     NSRange rightBracketRange = [str rangeOfString:@"]" options:NSBackwardsSearch | NSLiteralSearch range:SafeBackwardSearchRange(braceRange, 1)]; // see if there are any optional parameters
 
