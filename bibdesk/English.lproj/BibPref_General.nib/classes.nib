@@ -20,13 +20,14 @@
                 chooseAutoOpenFile = id; 
                 chooseFont = id; 
                 selectPreviewFont = id; 
+                setAutoOpenFilePath = id; 
                 toggleAutoCheckForUpdates = id; 
             }; 
             CLASS = "BibPref_General"; 
             LANGUAGE = ObjC; 
             OUTLETS = {
                 checkForUpdatesButton = NSButton; 
-                defaultBibFileTextView = NSTextView; 
+                defaultBibFileTextField = NSTextField; 
                 displayPrefRadioMatrix = NSMatrix; 
                 editOnPasteButton = NSButton; 
                 openSheetAccessoryView = NSView; 
