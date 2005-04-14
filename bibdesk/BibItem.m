@@ -616,7 +616,7 @@ setupParagraphStyle()
 	}
 	[self updateMetadataForKey:BDSKCiteKeyString];
 		
-    NSDictionary *notifInfo = [NSDictionary dictionaryWithObjectsAndKeys:citeKey, @"value", BDSKCiteKeyString, @"key",nil];
+    NSDictionary *notifInfo = [NSDictionary dictionaryWithObjectsAndKeys:citeKey, @"value", BDSKCiteKeyString, @"key", document, @"document", nil];
     NSNotification *aNotification = [NSNotification notificationWithName:BDSKBibItemChangedNotification
                                                                   object:self
                                                                 userInfo:notifInfo];
@@ -660,7 +660,7 @@ setupParagraphStyle()
 		
 		[self setPubFields:newFields];
 		
-		NSDictionary *notifInfo = [NSDictionary dictionaryWithObjectsAndKeys:@"Add/Del Fields", @"type", nil]; // cmh: maybe not the best info, but handled correctly
+		NSDictionary *notifInfo = [NSDictionary dictionaryWithObjectsAndKeys:@"Add/Del Fields", @"type", document, @"document", nil]; // cmh: maybe not the best info, but handled correctly
 		[[NSNotificationCenter defaultCenter] postNotificationName:BDSKBibItemChangedNotification
 															object:self
 														  userInfo:notifInfo];
@@ -781,7 +781,7 @@ setupParagraphStyle()
 	}
 	[self updateMetadataForKey:key];
 	
-	NSDictionary *notifInfo = [NSDictionary dictionaryWithObjectsAndKeys:value, @"value", key, @"key", @"Change", @"type",nil];
+	NSDictionary *notifInfo = [NSDictionary dictionaryWithObjectsAndKeys:value, @"value", key, @"key", @"Change", @"type",document, @"document",nil];
 	[[NSNotificationCenter defaultCenter] postNotificationName:BDSKBibItemChangedNotification
 														object:self
 													  userInfo:notifInfo];
@@ -847,7 +847,7 @@ setupParagraphStyle()
 	[pubFields setObject:dateString forKey:BDSKDateModifiedString usingLock:bibLock];
 	[self updateMetadataForKey:key];
 	
-	NSDictionary *notifInfo = [NSDictionary dictionaryWithObjectsAndKeys:@"Add/Del Field", @"type",nil];
+	NSDictionary *notifInfo = [NSDictionary dictionaryWithObjectsAndKeys:@"Add/Del Field", @"type",document, @"document", nil];
 	[[NSNotificationCenter defaultCenter] postNotificationName:BDSKBibItemChangedNotification
 														object:self
 													  userInfo:notifInfo];
@@ -871,7 +871,7 @@ setupParagraphStyle()
 	[pubFields setObject:dateString forKey:BDSKDateModifiedString usingLock:bibLock];
 	[self updateMetadataForKey:key];
 
-	NSDictionary *notifInfo = [NSDictionary dictionaryWithObjectsAndKeys:@"Add/Del Field", @"type",nil];
+	NSDictionary *notifInfo = [NSDictionary dictionaryWithObjectsAndKeys:@"Add/Del Field", @"type",document, @"document", nil];
 	[[NSNotificationCenter defaultCenter] postNotificationName:BDSKBibItemChangedNotification
 														object:self
 													  userInfo:notifInfo];

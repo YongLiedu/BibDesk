@@ -380,7 +380,7 @@ NSString *BDSKBibItemLocalDragPboardType = @"edu.ucsd.cs.mmccrack.bibdesk: Local
 		// This method should also check the publication to see if it's selected?
 		// and maybe also resort it... - maybe not resort this.
         [self refreshAuthors];
-        [self performSelectorOnMainThread:@selector(updateUI) withObject:nil waitUntilDone:NO];
+        [self updateUI];
 	}
 }
 
@@ -2459,16 +2459,19 @@ This method always returns YES. Even if some or many operations fail.
 
 
 - (void)handleUpdateUINotification:(NSNotification *)notification{
-    [self performSelectorOnMainThread:@selector(updateUI)
-                           withObject:nil
-                        waitUntilDone:NO];
+    [self updateUI];
 }
 
 - (void)handleBibItemChangedNotification:(NSNotification *)notification{
 	// dead simple for now
 	// NSLog(@"got handleBibItemChangedNotification with userinfo %@", [notification userInfo]);
 	NSDictionary *userInfo = [notification userInfo];
-	
+    
+    // see if it's ours
+	if([userInfo objectForKey:@"document"] != self || [userInfo objectForKey:@"document" == nil])
+        return;
+    //NSLog(@"got handleBibItemChangedNotification in %@", [[self fileName] lastPathComponent]);
+
 	NSString *changedKey = [userInfo objectForKey:@"key"];
     
     [self refreshAuthors];
