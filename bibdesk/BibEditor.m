@@ -38,7 +38,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 	
     theBib = aBib;
     [theBib setEditorObj:self];
-    currentType = [theBib type];    // do this once in init so it's right at the start.
+    currentType = [[theBib type] retain];    // do this once in init so it's right at the start.
                                     // has to be before we call [self window] because that calls windowDidLoad:.
     theDocument = doc; // don't retain - it retains us.
 	pdfSnoopViewLoaded = NO;
@@ -304,7 +304,8 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
     // See http://www.cocoabuilderfcom/search/archive?words=crash+%22setDataSource:nil%22 for similar problems.
     [authorTableView setDelegate:nil];
     [authorTableView setDataSource:nil];
-    
+
+    [currentType release];
     [citeKeyFormatter release];
     [[NSNotificationCenter defaultCenter] removeObserver:self];
     [fieldNumbers release];
@@ -819,8 +820,8 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
     if (![[self window] makeFirstResponder:[self window]]){
         [[self window] endEditingFor:nil];
     }
-    currentType = [bibTypeButton titleOfSelectedItem];
-    if([theBib type] != currentType){
+    [self setCurrentType:[bibTypeButton titleOfSelectedItem]];
+    if(![[theBib type] isEqualToString:currentType]){
         [theBib makeType:currentType];
 		[self finalizeChanges];
         [self setupForm];
@@ -832,7 +833,11 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 - (void)updateTypePopup{ // used to update UI after dragging into the editor
     [bibTypeButton selectItemWithTitle:[theBib type]];
 }
-    
+
+- (void)setCurrentType:(NSString *)type{
+    [currentType release];
+    currentType = [type retain];
+}
 
 - (void)fixURLs{
     NSString *lurl = [theBib localURLPath];

@@ -148,7 +148,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 - (BibItem *)currentBib;
 - (void)setupTypePopUp;
 - (void)setupForm;
-
+- (void)setCurrentType:(NSString *)type;
 /*!
     @method     show
     @abstract   Shows the window.
