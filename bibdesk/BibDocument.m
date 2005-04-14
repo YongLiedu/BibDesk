@@ -1263,10 +1263,9 @@ stringByAppendingPathComponent:@"BibDesk"]; */
 	NSMutableArray *colNames = [[fieldNameSet allObjects] mutableCopy];
 	[colNames sortUsingSelector:@selector(caseInsensitiveCompare:)];
 	[colNames removeObjectsInArray:prefsQuickSearchKeysArray];
-	[colNames insertObject:NSLocalizedString(@"Choose a Field:",@"") atIndex:0];
 	
-	[addFieldPopupButton removeAllItems];
-	[addFieldPopupButton addItemsWithTitles:colNames];
+	[addFieldComboBox removeAllItems];
+	[addFieldComboBox addItemsWithObjectValues:colNames];
     [addFieldPrompt setStringValue:NSLocalizedString(@"Name of field to search:",@"")];
 	
 	[colNames release];
@@ -1289,7 +1288,7 @@ stringByAppendingPathComponent:@"BibDesk"]; */
 	NSString *newFieldTitle = nil;
 	
     if(returnCode == 1){
-        newFieldTitle = [[addFieldTextField stringValue] capitalizedString];
+        newFieldTitle = [[addFieldComboBox stringValue] capitalizedString];
 
         if(BDSK_USING_JAGUAR)
             [quickSearchButton insertItemWithTitle:newFieldTitle atIndex:0];
@@ -2348,10 +2347,9 @@ This method always returns YES. Even if some or many operations fail.
 	NSMutableArray *colNames = [[fieldNameSet allObjects] mutableCopy];
 	[colNames sortUsingSelector:@selector(caseInsensitiveCompare:)];
 	[colNames removeObjectsInArray:prefsShownColNamesArray];
-	[colNames insertObject:NSLocalizedString(@"Choose a Column:",@"") atIndex:0];
 	
-	[addFieldPopupButton removeAllItems];
-	[addFieldPopupButton addItemsWithTitles:colNames];
+	[addFieldComboBox removeAllItems];
+	[addFieldComboBox addItemsWithObjectValues:colNames];
     [addFieldPrompt setStringValue:NSLocalizedString(@"Name of column to add:",@"")];
 	
 	[colNames release];
@@ -2371,7 +2369,7 @@ This method always returns YES. Even if some or many operations fail.
     NSMutableArray *prefsShownColNamesMutableArray = nil;
 
     if(returnCode == 1){
-        NSString *newColumnName = [addFieldTextField stringValue];
+        NSString *newColumnName = [addFieldComboBox stringValue];
 		[self columnsMenuAddTableColumnName:newColumnName enabled:YES];
         tc = [[[NSTableColumn alloc] initWithIdentifier:newColumnName] autorelease];
         [tc setResizable:YES];
@@ -2389,12 +2387,6 @@ This method always returns YES. Even if some or many operations fail.
     }else{
         //do nothing
     }
-}
-
-- (IBAction)selectColumnToAdd:(id)sender{
-	if([sender indexOfSelectedItem] > 0){
-		[addFieldTextField setStringValue:[sender titleOfSelectedItem]];
-	}
 }
 
 /*

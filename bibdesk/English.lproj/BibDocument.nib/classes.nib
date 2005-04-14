@@ -42,7 +42,6 @@
                 removeCustomCiteString = id; 
                 searchFieldAction = id; 
                 searchFieldChangeKey = id; 
-                selectColumnToAdd = id; 
                 showMacrosWindow = id; 
                 splitViewDoubleClick = id; 
                 toggleShowingCustomCiteDrawer = id; 
@@ -57,10 +56,9 @@
                 actionMenuFirstItem = NSMenuItem; 
                 actionMenuView = NSView; 
                 addCustomCiteStringButton = NSButton; 
-                addFieldPopupButton = NSPopUpButton; 
+                addFieldComboBox = NSComboBox; 
                 addFieldPrompt = NSTextField; 
                 addFieldSheet = NSWindow; 
-                addFieldTextField = NSTextField; 
                 addSourceListItemButton = NSButton; 
                 ccTableView = BDSKCustomCiteTableView; 
                 columnsMenu = NSMenu; 
