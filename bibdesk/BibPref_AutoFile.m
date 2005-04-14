@@ -10,6 +10,8 @@
 #import "NSImage+Toolbox.h"
 #import <Carbon/Carbon.h>
 
+#define MAX_PREVIEW_WIDTH	501.0
+
 @implementation BibPref_AutoFile
 
 - (void)updateUI{
@@ -38,6 +40,13 @@
 		[tmpBI setField:BDSKKeywordsString toValue:@"Keyword1,Keyword2"];
 		[tmpBI setField:BDSKLocalUrlString toValue:@"Local File Name.pdf"];
 		[previewTextField setStringValue:[[[NSURL URLWithString:[tmpBI suggestedLocalUrl]] path] stringByAbbreviatingWithTildeInPath]];
+		[previewTextField sizeToFit];
+		NSRect frame = [previewTextField frame];
+		if (frame.size.width > MAX_PREVIEW_WIDTH) {
+			frame.size.width = MAX_PREVIEW_WIDTH;
+			[previewTextField setFrame:frame];
+		}
+		[controlBox setNeedsDisplay:YES];
 		[tmpBI release];
 	} else {
 		[self setLocalUrlFormatInvalidWarning:YES message:error];

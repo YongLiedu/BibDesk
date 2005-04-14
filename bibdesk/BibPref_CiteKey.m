@@ -10,6 +10,7 @@
 #import "NSImage+Toolbox.h"
 #import <Carbon/Carbon.h>
 
+#define MAX_PREVIEW_WIDTH	475.0
 
 @implementation BibPref_CiteKey
 
@@ -44,6 +45,13 @@
 		[tmpBI setField:BDSKPagesString toValue:@"96"];
 		[tmpBI setField:BDSKKeywordsString toValue:@"Keyword1,Keyword2"];
 		[citeKeyLine setStringValue:[tmpBI suggestedCiteKey]];
+		[citeKeyLine sizeToFit];
+		NSRect frame = [citeKeyLine frame];
+		if (frame.size.width > MAX_PREVIEW_WIDTH) {
+			frame.size.width = MAX_PREVIEW_WIDTH;
+			[citeKeyLine setFrame:frame];
+		}
+		[controlBox setNeedsDisplay:YES];
 		[tmpBI release];
 	} else {
 		[self setCiteKeyFormatInvalidWarning:YES message:error];

@@ -13,6 +13,8 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 
 #import "BibPref_Cite.h"
 
+#define MAX_PREVIEW_WIDTH	465.0
+
 @implementation BibPref_Cite
 - (void)awakeFromNib{
     [super awakeFromNib];
@@ -37,6 +39,13 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 	}else{
 		[citeBehaviorLine setStringValue:[NSString stringWithFormat:@"\\%@%@key1, key2%@" ,citeString, startCiteBracket, endCiteBracket]];
 	}
+	[citeBehaviorLine sizeToFit];
+	NSRect frame = [citeBehaviorLine frame];
+	if (frame.size.width > MAX_PREVIEW_WIDTH) {
+		frame.size.width = MAX_PREVIEW_WIDTH;
+		[citeBehaviorLine setFrame:frame];
+	}
+	[controlBox setNeedsDisplay:YES];
   //  [editOnPasteButton setState:[defaults integerForKey:BDSKEditOnPasteKey]];
 }
 
