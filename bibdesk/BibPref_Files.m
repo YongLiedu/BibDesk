@@ -34,8 +34,6 @@
     [saveAnnoteAndAbstractAtEndButton setState:([defaults boolForKey:BDSKSaveAnnoteAndAbstractAtEndOfItemKey] == YES) ? NSOnState : NSOffState];
     [useNormalizedNamesButton setState:[defaults boolForKey:BDSKShouldSaveNormalizedAuthorNames] ? NSOnState : NSOffState];
     [useTemplateFileButton setState:[defaults boolForKey:BDSKShouldUseTemplateFile] ? NSOnState : NSOffState];
-    [outputTemplateFileButton setTitle:[[defaults stringForKey:BDSKOutputTemplateFileKey] stringByAbbreviatingWithTildeInPath]];
-	[outputTemplateFileButton sizeToFit];
 }
 
 - (IBAction)setDefaultStringEncoding:(id)sender{    
@@ -74,9 +72,9 @@
 }
 
 - (IBAction)editTemplateFile:(id)sender{
-    [[NSWorkspace sharedWorkspace] openFile:
-        [[defaults stringForKey:BDSKOutputTemplateFileKey] stringByExpandingTildeInPath]
-                            withApplication:@"TextEdit"];
+    if(![[NSWorkspace sharedWorkspace] openFile:[[defaults stringForKey:BDSKOutputTemplateFileKey] stringByExpandingTildeInPath]])
+        if(![[NSWorkspace sharedWorkspace] openFile:[[defaults stringForKey:BDSKOutputTemplateFileKey] stringByExpandingTildeInPath] withApplication:@"TextEdit"])
+            NSBeep();
 }
 
 - (IBAction)showConversionEditor:(id)sender{
