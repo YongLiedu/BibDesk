@@ -303,10 +303,9 @@ NSString *BDSKInputManagerLoadableApplications = @"Application bundles that we r
 	NSMutableArray *fieldNames = [[fieldNameSet allObjects] mutableCopy];
 	[fieldNames sortUsingSelector:@selector(caseInsensitiveCompare:)];
 	[fieldNames removeObjectsInArray:enabledEditorAutocompletionStrings];
-	[fieldNames insertObject:NSLocalizedString(@"Choose a Field Name:",@"") atIndex:0];
 	
-	[addFieldPopupButton removeAllItems];
-	[addFieldPopupButton addItemsWithTitles:fieldNames];
+	[addFieldComboBox removeAllItems];
+	[addFieldComboBox addItemsWithObjectValues:fieldNames];
 	
 	[fieldNames release];
 	
@@ -319,7 +318,7 @@ NSString *BDSKInputManagerLoadableApplications = @"Application bundles that we r
 
 - (void)addFieldSheetDidEnd:(NSWindow *)sheet returnCode:(int)returnCode contextInfo:(void *)contextInfo{
     if(returnCode == 1){
-        [enabledEditorAutocompletionStrings addObject:[[addField stringValue] capitalizedString]];
+        [enabledEditorAutocompletionStrings addObject:[[addFieldComboBox stringValue] capitalizedString]];
         [defaults setObject:enabledEditorAutocompletionStrings forKey:BDSKBibEditorAutocompletionFields];
     }
     [self updateUI];
@@ -328,12 +327,6 @@ NSString *BDSKInputManagerLoadableApplications = @"Application bundles that we r
 - (IBAction)dismissAddFieldSheet:(id)sender{
     [addFieldSheet orderOut:sender];
     [NSApp endSheet:addFieldSheet returnCode:[sender tag]];
-}
-
-- (IBAction)selectFieldToAutocomplete:(id)sender{
-	if([sender indexOfSelectedItem] > 0){
-		[addField setStringValue:[sender titleOfSelectedItem]];
-	}
 }
 
 - (IBAction)removeAutocompleteString:(id)sender{

@@ -7,14 +7,12 @@
                 enableAutocompletion = id; 
                 removeApplication = id; 
                 removeAutocompleteString = id; 
-                selectFieldToAutocomplete = id; 
             }; 
             CLASS = "BibPref_InputManager"; 
             LANGUAGE = ObjC; 
             OUTLETS = {
                 acTabView = NSTabView; 
-                addField = NSTextField; 
-                addFieldPopupButton = NSPopUpButton; 
+                addFieldComboBox = NSComboBox; 
                 addFieldSheet = NSPanel; 
                 appList = NSTableView; 
                 editorAutocompletionStringsTableView = NSTableView; 
