@@ -22,21 +22,12 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
     IBOutlet NSTextField* citeStringField; /*! for user input */
     IBOutlet NSButton* separateCiteCheckButton;
   //  IBOutlet NSButton* editOnPasteButton;
-
-    NSMutableArray *customStringArray;
-    IBOutlet NSTableView* customStringTableView;
-    IBOutlet NSTextField* customStringField;
-    IBOutlet NSButton* addCustomStringButton;
-    IBOutlet NSButton* delSelectedCustomStringButton;
 	IBOutlet NSMatrix* citeBracketRadio;
 }
 
 - (IBAction)changeCopyBehavior:(id)sender;
 - (IBAction)changeSeparateCite:(id)sender;
 // - (IBAction)changeEditOnPaste:(id)sender;
-- (IBAction)citeStringFieldChanged:(id)sender;
-
-- (IBAction)addCustomString:(id)sender;
-- (IBAction)delSelectedCustomString:(id)sender;
 - (IBAction)setCitationBracketStyle:(id)sender;
+
 @end

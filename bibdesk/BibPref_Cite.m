@@ -16,11 +16,6 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 @implementation BibPref_Cite
 - (void)awakeFromNib{
     [super awakeFromNib];
-
-    customStringArray = [[NSMutableArray arrayWithCapacity:6] retain];
-    [customStringArray setArray:[defaults arrayForKey:BDSKCustomCiteStringsKey]];
-	[delSelectedCustomStringButton setEnabled:NO];
-
 }
 
 
@@ -64,47 +59,6 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
     [defaults setInteger:[sender state] forKey:BDSKEditOnPasteKey];
 }
 */
-
-#pragma mark ||  Methods to support table view of custom strings.
-
-- (IBAction)addCustomString:(id)sender{
-    [customStringArray addObject:[customStringField stringValue]];
-    [customStringTableView reloadData];
-    [defaults setObject:customStringArray
-                 forKey:BDSKCustomCiteStringsKey];
-    [customStringField setStringValue:@""];
-    [[NSNotificationCenter defaultCenter] postNotificationName:BDSKCustomStringsChangedNotification
-                                                        object:nil];
-}
-
-- (IBAction)delSelectedCustomString:(id)sender{
-    if([customStringTableView numberOfSelectedRows] != 0){
-        [customStringArray removeObjectAtIndex:[customStringTableView selectedRow]];
-        [customStringTableView reloadData];
-        [defaults setObject:customStringArray
-                     forKey:BDSKCustomCiteStringsKey];
-        [[NSNotificationCenter defaultCenter] postNotificationName:BDSKCustomStringsChangedNotification
-                                                            object:nil];
-    }
-}
-
-
-- (int)numberOfRowsInTableView:(NSTableView *)tView{
-    return [customStringArray count];
-}
-- (id)tableView:(NSTableView *)tView objectValueForTableColumn:(NSTableColumn *)tableColumn row:(int)row{
-    return [customStringArray objectAtIndex:row];
-}
-
-- (void)tableViewSelectionDidChange:(NSNotification *)aNotification{
-	NSTableView *tv = [aNotification object];
-	int selIdx = [tv selectedRow];
-	if(selIdx == -1){
-		[delSelectedCustomStringButton setEnabled:NO];
-	}else{
-		[delSelectedCustomStringButton setEnabled:YES];
-	}
-}
 
 - (IBAction)setCitationBracketStyle:(id)sender{
 	// 1 - tex 2 - context
