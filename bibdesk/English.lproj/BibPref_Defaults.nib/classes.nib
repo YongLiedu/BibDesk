@@ -1,10 +1,17 @@
 {
     IBClasses = (
         {
-            ACTIONS = {addDefaultField = id; delSelectedDefaultField = id; showTypeInfoEditor = id; }; 
+            ACTIONS = {
+                RSSDescriptionFieldChanged = id; 
+                addDefaultField = id; 
+                delSelectedDefaultField = id; 
+                showTypeInfoEditor = id; 
+            }; 
             CLASS = "BibPref_Defaults"; 
             LANGUAGE = ObjC; 
             OUTLETS = {
+                RSSDescriptionFieldMatrix = NSMatrix; 
+                RSSDescriptionFieldTextField = NSTextField; 
                 addFieldButton = NSButton; 
                 addFieldField = NSTextField; 
                 defaultFieldsTableView = NSTableView; 
