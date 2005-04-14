@@ -2,26 +2,17 @@
     IBClasses = (
         {
             ACTIONS = {
-                addCustomString = id; 
                 changeCopyBehavior = id; 
-                changeEditOnPaste = id; 
                 changeSeparateCite = id; 
-                citeStringFieldChanged = id; 
-                delSelectedCustomString = id; 
                 setCitationBracketStyle = id; 
             }; 
             CLASS = "BibPref_Cite"; 
             LANGUAGE = ObjC; 
             OUTLETS = {
-                addCustomStringButton = NSButton; 
                 citeBehaviorLine = NSTextField; 
                 citeBracketRadio = NSMatrix; 
                 citeStringField = NSTextField; 
-                customStringField = NSTextField; 
-                customStringTableView = NSTableView; 
-                delSelectedCustomStringButton = NSButton; 
                 dragCopyRadio = NSMatrix; 
-                editOnPasteButton = NSButton; 
                 separateCiteCheckButton = NSButton; 
             }; 
             SUPERCLASS = OAPreferenceClient; 
