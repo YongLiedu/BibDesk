@@ -314,6 +314,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
             [newRows addObject:idx];
         }
         rows = [NSArray arrayWithArray:newRows];
+        dragType = 1; // only type that makes sense here
         // NSLog(@"rows is %@", rows);
     }// ccTableView
 
