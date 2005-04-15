@@ -172,6 +172,28 @@
 				<string>Year</string>
 			</array>
 		</dict>
+		<key>conference</key>
+		<dict>
+			<key>optional</key>
+			<array>
+				<string>Editor</string>
+				<string>Volume</string>
+				<string>Pages</string>
+				<string>Number</string>
+				<string>Organization</string>
+				<string>Series</string>
+				<string>Publisher</string>
+				<string>Address</string>
+				<string>Month</string>
+			</array>
+			<key>required</key>
+			<array>
+				<string>Author</string>
+				<string>Title</string>
+				<string>Booktitle</string>
+				<string>Year</string>
+			</array>
+		</dict>
 		<key>electronic</key>
 		<dict>
 			<key>optional</key>
@@ -490,6 +512,13 @@
 				<string>online system or service</string>
 			</array>
 		</dict>
+		<key>conference</key>
+		<dict>
+			<key>host</key>
+			<array>
+				<string>conference publication</string>
+			</array>
+		</dict>
 		<key>glossdef</key>
 		<dict/>
 		<key>inbook</key>
@@ -579,6 +608,27 @@
 			</array>
 		</dict>
 	</dict>
+	<key>RequiredTypesForFileType</key>
+	<dict>
+		<key>BibTeX</key>
+		<array>
+			<string>article</string>
+			<string>book</string>
+			<string>booklet</string>
+			<string>conference</string>
+			<string>inbook</string>
+			<string>incollection</string>
+			<string>inproceedings</string>
+			<string>jurthesis</string>
+			<string>manual</string>
+			<string>mastersthesis</string>
+			<string>misc</string>
+			<string>phdthesis</string>
+			<string>proceedings</string>
+			<string>techreport</string>
+			<string>unpublished</string>
+		</array>
+	</dict>
 	<key>TypesForFileType</key>
 	<dict>
 		<key>BibTeX</key>
@@ -587,6 +637,7 @@
 			<string>book</string>
 			<string>booklet</string>
 			<string>commented</string>
+			<string>conference</string>
 			<string>glossdef</string>
 			<string>inbook</string>
 			<string>incollection</string>
