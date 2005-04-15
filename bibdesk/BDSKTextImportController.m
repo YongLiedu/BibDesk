@@ -164,6 +164,8 @@
 - (IBAction)changeTypeOfBibAction:(id)sender{
     NSString *type = [[sender selectedItem] title];
     [self setType:type];
+    [[OFPreferenceWrapper sharedPreferenceWrapper] setObject:type
+                                                      forKey:BDSKPubTypeStringKey];
     [item setCiteKey:[item suggestedCiteKey]];
     [citeKeyLine setStringValue:[item citeKey]];
 
