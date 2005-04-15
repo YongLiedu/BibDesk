@@ -51,7 +51,6 @@ static BibTypeManager *sharedInstance = nil;
 	[bibtexTypeForPubMedTypeDict release];
 	[MODSGenresForBibTeXTypeDict release];
 	[allFieldNames release];
-	[allRemovableFieldNames release];
 	[invalidCiteKeyCharSet release];
 	[strictInvalidCiteKeyCharSet release];
 	[invalidLocalUrlCharSet release];
@@ -75,8 +74,6 @@ static BibTypeManager *sharedInstance = nil;
 	MODSGenresForBibTeXTypeDict = nil;
 	[allFieldNames release];
 	allFieldNames = nil;
-	[allRemovableFieldNames release];
-	allRemovableFieldNames = nil;
 	
 	// Load the TypeInfo plists
 	NSDictionary *typeInfoDict = [NSDictionary dictionaryWithContentsOfFile:[[[NSBundle mainBundle] resourcePath] stringByAppendingPathComponent:TYPE_INFO_FILENAME]];
@@ -100,7 +97,6 @@ static BibTypeManager *sharedInstance = nil;
 		fieldsForTypesDict = [[typeInfoDict objectForKey:FIELDS_FOR_TYPES_KEY] retain];
 	if (typesForFileTypeDict == nil)
 		typesForFileTypeDict = [[typeInfoDict objectForKey:TYPES_FOR_FILE_TYPE_KEY] retain];
-	allRemovableFieldNames = [[typeInfoDict objectForKey:ALL_REMOVABLE_FIELDS_KEY] retain];
 	fileTypesDict = [[typeInfoDict objectForKey:FILE_TYPES_KEY] retain];
 	fieldNameForPubMedTagDict = [[typeInfoDict objectForKey:BIBTEX_FIELDS_FOR_PUBMED_TAGS_KEY] retain];
 	bibtexTypeForPubMedTypeDict = [[typeInfoDict objectForKey:BIBTEX_TYPES_FOR_PUBMED_TYPES_KEY] retain];
@@ -126,11 +122,6 @@ static BibTypeManager *sharedInstance = nil;
 
 - (NSString *)defaultTypeForFileFormat:(NSString *)fileFormat{
      return [[fileTypesDict objectForKey:fileFormat] objectForKey:@"DefaultType"];
-}
-
-- (NSArray *)allRemovableFieldNames{
-    if (allFieldNames == nil) [NSException raise:@"nilNames exception" format:@"allRemovableFieldNames returning nil."];
-    return allRemovableFieldNames;
 }
 
 - (NSSet *)allFieldNames{

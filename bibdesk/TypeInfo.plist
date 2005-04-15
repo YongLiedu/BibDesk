@@ -2,33 +2,6 @@
 <!DOCTYPE plist PUBLIC "-//Apple Computer//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
-	<key>AllRemovableFieldNames</key>
-	<array>
-		<string>Address</string>
-		<string>Author</string>
-		<string>Booktitle</string>
-		<string>Chapter</string>
-		<string>Edition</string>
-		<string>Editor</string>
-		<string>Howpublished</string>
-		<string>Institution</string>
-		<string>Lastchecked</string>
-		<string>Journal</string>
-		<string>Month</string>
-		<string>Number</string>
-		<string>Organization</string>
-		<string>Pages</string>
-		<string>Publisher</string>
-		<string>School</string>
-		<string>Series</string>
-		<string>Title</string>
-		<string>Type</string>
-		<string>Volume</string>
-		<string>Year</string>
-		<string>Note</string>
-		<string>Code</string>
-		<string>Crossref</string>
-	</array>
 	<key>BibTeXFieldNamesForPubMedTags</key>
 	<dict>
 		<key>AB</key>

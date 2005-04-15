@@ -11,7 +11,6 @@
 
 // The filename and keys used in the plist
 #define TYPE_INFO_FILENAME                  @"TypeInfo.plist"
-#define ALL_REMOVABLE_FIELDS_KEY            @"AllRemovableFieldNames"
 #define FIELDS_FOR_TYPES_KEY                @"FieldsForTypes"
 #define REQUIRED_KEY                        @"required"
 #define OPTIONAL_KEY                        @"optional"
@@ -28,7 +27,6 @@
 	NSDictionary *fieldNameForPubMedTagDict;
 	NSDictionary *bibtexTypeForPubMedTypeDict;
 	NSDictionary *MODSGenresForBibTeXTypeDict;
-	NSArray *allRemovableFieldNames;
 	NSSet *allFieldNames;
 	NSCharacterSet *invalidCiteKeyCharSet;
 	NSCharacterSet *invalidLocalUrlCharSet;
@@ -40,7 +38,6 @@
 - (void)reloadTypeInfo;
 
 - (NSString *)defaultTypeForFileFormat:(NSString *)fileFormat;
-- (NSArray *)allRemovableFieldNames;
 - (NSSet *)allFieldNames;
 - (NSArray *)requiredFieldsForType:(NSString *)type;
 - (NSArray *)optionalFieldsForType:(NSString *)type;
