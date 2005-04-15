@@ -125,6 +125,7 @@
                 exportEncodedBib = id; 
                 find = id; 
                 generateCiteKey = id; 
+                importFromTextAction = id; 
                 makeNewEmptyCollection = id; 
                 makeNewExternalSource = id; 
                 makeNewNotepad = id; 
