@@ -228,7 +228,7 @@
 
 - (BOOL)tableView:(NSTableView*)tv acceptDrop:(id <NSDraggingInfo>)info row:(int)row dropOperation:(NSTableViewDropOperation)op{
     NSPasteboard *pb = [info draggingPasteboard];
-    NSString *pbType = [pb availableTypesFromArray:[NSArray arrayWithObjects:NSStringPboardType, nil]];
+    NSString *pbType = [pb availableTypeFromArray:[NSArray arrayWithObjects:NSStringPboardType, nil]];
     if ([NSStringPboardType isEqualToString:pbType]){
 
         NSString *key = [fields objectAtIndex:row];

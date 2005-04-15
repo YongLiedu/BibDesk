@@ -27,7 +27,7 @@
     IBOutlet NSTextField* urlTextField;
     BOOL showingWebView;
 }
-- (BDSKTextImportController*)initWithDocument:(BibDocument *)document;
+- (id)initWithDocument:(BibDocument *)document;
 - (void)setType:(NSString *)type;
 - (IBAction)addCurrentItemAction:(id)sender;
 - (IBAction)stopAddingAction:(id)sender;
