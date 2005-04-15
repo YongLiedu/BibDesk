@@ -32,6 +32,7 @@
 }
 
 - (void)awakeFromNib{
+	[itemTableView registerForDraggedTypes:[NSArray arrayWithObject:NSStringPboardType]];
     [statusLine setStringValue:@""];
     [citeKeyLine setStringValue:[item citeKey]];
     [self setupTypeUI];
