@@ -70,23 +70,32 @@ setupParagraphStyle()
 	OFPreferenceWrapper *pw = [OFPreferenceWrapper sharedPreferenceWrapper];
 	self = [self initWithType:[pw stringForKey:BDSKPubTypeStringKey]
 									  fileType:BDSKBibtexString // Not Sure if this is good.
-									   authors:[NSMutableArray arrayWithCapacity:0]
+									 pubFields:nil
+									   authors:nil
 								   createdDate:[NSCalendarDate calendarDate]];
 	return self;
 }
 
-- (id)initWithType:(NSString *)type fileType:(NSString *)inFileType authors:(NSMutableArray *)authArray createdDate:(NSCalendarDate *)date{ // this is the designated initializer.
+- (id)initWithType:(NSString *)type fileType:(NSString *)inFileType pubFields:(NSDictionary *)fieldsDict authors:(NSMutableArray *)authArray createdDate:(NSCalendarDate *)date{ // this is the designated initializer.
     if (self = [super init]){
 		bibLock = [[NSLock alloc] init];
 		[bibLock lock];
-		if (date == nil){
-			pubFields = [[NSMutableDictionary alloc] init];
+		if(fieldsDict){
+			pubFields = [fieldsDict mutableCopy];
 		}else{
+			pubFields = [[NSMutableDictionary alloc] initWithCapacity:7];
+		}
+		if (date){
 			NSString *nowStr = [date description];
-			pubFields = [[NSMutableDictionary alloc] initWithObjectsAndKeys:nowStr, BDSKDateCreatedString, nowStr, BDSKDateModifiedString, nil];
+			[pubFields setObject:nowStr forKey:BDSKDateCreatedString];
+			[pubFields setObject:nowStr forKey:BDSKDateModifiedString];
         }
+		if(authArray){
+			pubAuthors = [authArray mutableCopy];     // copy, it's mutable
+		}else{
+			pubAuthors = [[NSMutableArray alloc] initWithCapacity:1];
+		}
 		requiredFieldNames = [[NSMutableArray alloc] init];
-        pubAuthors = [authArray mutableCopy];     // copy, it's mutable
         document = nil;
         editorObj = nil;
         [bibLock unlock];
@@ -98,6 +107,7 @@ setupParagraphStyle()
         [self setDateModified: date];
         [self setFileOrder:-1];
 		[self setNeedsToBeFiled:NO];
+		[self updateMetadataForKey:nil];
         setupParagraphStyle();
 		
 		[[NSNotificationCenter defaultCenter] addObserver:self
@@ -113,12 +123,12 @@ setupParagraphStyle()
 - (id)copyWithZone:(NSZone *)zone{
     BibItem *theCopy = [[[self class] allocWithZone: zone] initWithType:pubType
                                                                fileType:fileType
+															  pubFields:pubFields
                                                                 authors:pubAuthors
 															createdDate:[NSCalendarDate calendarDate]];
     [theCopy setCiteKeyString: citeKey];
     [theCopy setDate: pubDate];
 	
-    [theCopy setPubFields: pubFields];
 	[theCopy copyComplexStringValues];
 	
     [theCopy setRequiredFieldNames: requiredFieldNames];
@@ -164,10 +174,10 @@ setupParagraphStyle()
     NSEnumerator *e;
     NSString *tmp;
     BibTypeManager *typeMan = [BibTypeManager sharedManager];
-    NSMutableArray *removeKeys = [[typeMan allRemovableFieldNames] mutableCopy];
     NSEnumerator *reqFieldsE = [[typeMan requiredFieldsForType:type] objectEnumerator];
     NSEnumerator *optFieldsE = [[typeMan optionalFieldsForType:type] objectEnumerator];
     NSEnumerator *defFieldsE = [[typeMan userDefaultFieldsForType:type] objectEnumerator];
+    NSMutableArray *removeKeys = [[pubFields allKeysForObject:@""] mutableCopy];
   
     while(fieldString = [reqFieldsE nextObject]){
         addkey(fieldString)
@@ -182,15 +192,6 @@ setupParagraphStyle()
     //I don't enforce Keywords, but since there's GUI depending on them, I will enforce these others:
     addkey(BDSKUrlString) addkey(BDSKLocalUrlString) addkey(BDSKAnnoteString) addkey(BDSKAbstractString) addkey(BDSKRssDescriptionString)
 
-    // remove from removeKeys things that aren't == @"" in pubFields
-    // this includes things left over from the previous bibtype - that's good.
-    e = [[pubFields allKeysUsingLock:bibLock] objectEnumerator];
-
-    while (tmp = [e nextObject]) {
-        if (![[pubFields objectForKey:tmp usingLock:bibLock] isEqualToString:@""]) {
-            [removeKeys removeObject:tmp usingLock:bibLock];
-        }
-    }
     // now remove everything that's left in remove keys from pubfields
     [pubFields removeObjectsForKeys:removeKeys usingLock:bibLock];
     [removeKeys release];
@@ -718,8 +719,11 @@ setupParagraphStyle()
 	}
 	
     // re-call make type to make sure we still have all the appropriate bibtex defined fields...
-    //@@ 3/5/2004: moved why is this here? 
-    [self makeType:[self type]];
+    // but only if we have set the full pubFields array, as we should not be able to remove necessary fields.
+	//@@ 3/5/2004: moved why is this here? 
+	if(key == nil){
+		[self makeType:[self type]];
+	}
 
     NSString *yearValue = [pubFields objectForKey:BDSKYearString usingLock:bibLock];
     if (yearValue && ![yearValue isEqualToString:@""]) {
