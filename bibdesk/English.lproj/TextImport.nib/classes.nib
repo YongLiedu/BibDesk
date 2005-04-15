@@ -1,0 +1,29 @@
+{
+    IBClasses = (
+        {
+            ACTIONS = {
+                addCurrentItemAction = id; 
+                addTextToCurrentFieldAction = id; 
+                changeTypeOfBibAction = id; 
+                stopAddingAction = id; 
+            }; 
+            CLASS = BDSKTextImportController; 
+            LANGUAGE = ObjC; 
+            OUTLETS = {
+                chooseSourceButton = NSPopUpButton; 
+                citeKeyLine = NSTextField; 
+                itemTableView = NSTableView; 
+                itemTypeButton = NSPopUpButton; 
+                sourceBox = NSBox; 
+                sourceTextView = NSTextView; 
+                statusLine = NSTextField; 
+                urlTextField = NSTextField; 
+                webView = WebView; 
+            }; 
+            SUPERCLASS = NSWindowController; 
+        }, 
+        {CLASS = FirstResponder; LANGUAGE = ObjC; SUPERCLASS = NSObject; }, 
+        {CLASS = TextImportItemTableView; LANGUAGE = ObjC; SUPERCLASS = NSTableView; }
+    ); 
+    IBVersion = 1; 
+}
