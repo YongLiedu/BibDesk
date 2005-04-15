@@ -362,11 +362,11 @@ NSString *StringByFixingReferenceMinerString(NSString *aString)
     
     newBI = [[BibItem alloc] initWithType:@"misc"
 								 fileType:BDSKBibtexString
-								  authors:[NSMutableArray arrayWithCapacity:0]
+								pubFields:pubDict
+								  authors:nil
 							  createdDate:nil];
 
     [newBI setFileOrder:itemOrder];
-    [newBI setPubFields:pubDict];
     
     // set the pub type if we know the bibtex equivalent, otherwise leave it as misc
     if([typeManager bibtexTypeForPubMedType:[pubDict objectForKey:@"TY"]] != nil){ // "standard" RIS, if such a thing exists

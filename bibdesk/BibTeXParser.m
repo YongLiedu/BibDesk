@@ -121,12 +121,6 @@ NSString *stringFromBTField(AST *field,
                                                    forMacro:macroKey];
 					}
                 }else{
-                    newBI = [[BibItem alloc] initWithType:[entryType lowercaseString]
-                                                 fileType:BDSKBibtexString
-                                                  authors:[NSMutableArray arrayWithCapacity:0]
-                                              createdDate:nil];
-					[newBI setFileOrder:itemOrder];
-                    itemOrder++;
                     field = NULL;
                     // Returned special case handling of abstract & annote.
                     // Special case is there to avoid losing newlines that exist in preexisting files.
@@ -166,8 +160,14 @@ NSString *stringFromBTField(AST *field,
 
                     }// end while field - process next bt field                    
 					
+                    newBI = [[BibItem alloc] initWithType:[entryType lowercaseString]
+                                                 fileType:BDSKBibtexString
+												pubFields:dictionary
+                                                  authors:nil
+                                              createdDate:nil];
+					[newBI setFileOrder:itemOrder];
+                    itemOrder++;
                     [newBI setCiteKeyString:[NSString stringWithBytes:bt_entry_key(entry) encoding:parserEncoding]];
-                    [newBI setPubFields:dictionary];
                     [returnArray addObject:newBI];
                     [newBI release];
                     
