@@ -927,7 +927,8 @@ setupParagraphStyle()
     
     [aStr appendAttributedString:[[[NSMutableAttributedString alloc] initWithString:
                       [NSString stringWithFormat:@"%@\n",[self citeKey]] attributes:typeAttributes] autorelease]];
-    [aStr appendAttributedString:[self attributedStringByParsingTeX:[self title] inField:BDSKTitleString defaultStyle:keyParagraphStyle]];
+    
+    [aStr appendAttributedString:[self attributedStringByParsingTeX:[self title] inField:BDSKTitleString defaultStyle:keyParagraphStyle collapse:YES]];
     
     [aStr appendAttributedString:[[[NSMutableAttributedString alloc] initWithString:
                        [NSString stringWithFormat:@"(%@)\n",[self type]] attributes:typeAttributes] autorelease]];
@@ -943,8 +944,8 @@ setupParagraphStyle()
 					NSString *authors = [[self bibtexAuthorString] stringByRemovingCurlyBraces];
 					[aStr appendAttributedString:[[[NSAttributedString alloc] initWithString:[NSString stringWithFormat:@"%@\n",authors]
 																				  attributes:bodyAttributes] autorelease]];
-				}else{
-                    [aStr appendAttributedString:[self attributedStringByParsingTeX:[pubFields objectForKey:key] inField:@"Body" defaultStyle:bodyParagraphStyle]];
+				}else{ // safe to collapse whitespace in required keys
+                    [aStr appendAttributedString:[self attributedStringByParsingTeX:[pubFields objectForKey:key] inField:@"Body" defaultStyle:bodyParagraphStyle collapse:YES]];
                     [aStr appendString:@"\n"];
 				}
 			}else{
@@ -955,6 +956,7 @@ setupParagraphStyle()
     
     e = [nonReqKeys objectEnumerator];
     while(key = [e nextObject]){
+        BOOL collapseWhitespace = !([key isEqualToString:BDSKAnnoteString] || [key isEqualToString:BDSKAbstractString]);
         if(![[pubFields objectForKey:key] isEqualToString:@""]){
             [aStr appendAttributedString:[[[NSAttributedString alloc] initWithString:[NSString stringWithFormat:@"%@\n",key]
                                                                           attributes:keyAttributes] autorelease]];
@@ -979,7 +981,7 @@ setupParagraphStyle()
                                                                               attributes:bodyAttributes] autorelease]];
 
             }else{
-                [aStr appendAttributedString:[self attributedStringByParsingTeX:[pubFields objectForKey:key] inField:@"Body" defaultStyle:bodyParagraphStyle]];
+                [aStr appendAttributedString:[self attributedStringByParsingTeX:[pubFields objectForKey:key] inField:@"Body" defaultStyle:bodyParagraphStyle collapse:collapseWhitespace]];
                 [aStr appendString:@"\n"];
             }
 
@@ -992,9 +994,10 @@ setupParagraphStyle()
     return 	aStr;
 }
 
-- (NSAttributedString *)attributedStringByParsingTeX:(NSString *)texStr inField:(NSString *)field defaultStyle:(NSParagraphStyle *)defaultStyle{
+- (NSAttributedString *)attributedStringByParsingTeX:(NSString *)texStr inField:(NSString *)field defaultStyle:(NSParagraphStyle *)defaultStyle collapse:(BOOL)collapse{
     
-    texStr = [texStr stringByCollapsingWhitespaceAndRemovingSurroundingWhitespace]; // clean this up first
+    if(collapse)
+        texStr = [texStr stringByCollapsingWhitespaceAndRemovingSurroundingWhitespace]; // clean this up first
     
     if(regexForTeX == nil)
         regexForTeX = [[AGRegex alloc] initWithPattern:@"(\\\\[a-z].+)(?P<pn>\\{( (?>[^{}]+) | (?P>pn) )* \\} )"
