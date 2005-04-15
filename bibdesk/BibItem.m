@@ -1812,12 +1812,7 @@ setupParagraphStyle()
 }
 
 - (void)typeInfoDidChange:(NSNotification *)aNotification{
-	NSDictionary *userInfo = [aNotification userInfo];
-	NSString *list = [userInfo objectForKey:@"list"];
-	
-	if ([list isEqualToString:@"fieldsForTypes"]) {
-        [self makeType:[self type]];
-	}
+	[self makeType:[self type]];
 }
 
 @end

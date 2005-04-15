@@ -19,43 +19,8 @@ static BibTypeManager *sharedInstance = nil;
 
 - (id)init{
     self = [super init];
-    NSDictionary *typeInfoDict = [NSDictionary dictionaryWithContentsOfFile:[[[NSBundle mainBundle] resourcePath] stringByAppendingPathComponent:TYPE_INFO_FILENAME]];
-
-	NSFileManager *fm = [NSFileManager defaultManager];
-	NSString *applicationSupportPath = [[fm applicationSupportDirectory:kUserDomain] stringByAppendingPathComponent:@"BibDesk"];
-	NSString *userTypeInfoPath = [applicationSupportPath stringByAppendingPathComponent:TYPE_INFO_FILENAME];
-	NSDictionary *userTypeInfoDict;
 	
-	if ([fm fileExistsAtPath:userTypeInfoPath]) {
-		userTypeInfoDict = [NSDictionary dictionaryWithContentsOfFile:userTypeInfoPath];
-		
-		// set all the lists we support in the user file
-		fieldsForTypesDict = [[userTypeInfoDict objectForKey:FIELDS_FOR_TYPES_KEY] retain];
-		typesForFileTypeDict = [[NSDictionary dictionaryWithObjectsAndKeys: 
-				[[userTypeInfoDict objectForKey:TYPES_FOR_FILE_TYPE_KEY] objectForKey:BDSKBibtexString], BDSKBibtexString, 
-				[[typeInfoDict objectForKey:TYPES_FOR_FILE_TYPE_KEY] objectForKey:@"PubMed"], @"PubMed", nil] retain];
-	}
-	
-	if (fieldsForTypesDict == nil)
-		fieldsForTypesDict = [[typeInfoDict objectForKey:FIELDS_FOR_TYPES_KEY] retain];
-	if (typesForFileTypeDict == nil)
-		typesForFileTypeDict = [[typeInfoDict objectForKey:TYPES_FOR_FILE_TYPE_KEY] retain];
-	allRemovableFieldNames = [[typeInfoDict objectForKey:ALL_REMOVABLE_FIELDS_KEY] retain];
-	fileTypesDict = [[typeInfoDict objectForKey:FILE_TYPES_KEY] retain];
-	fieldNameForPubMedTagDict = [[typeInfoDict objectForKey:BIBTEX_FIELDS_FOR_PUBMED_TAGS_KEY] retain];
-	bibtexTypeForPubMedTypeDict = [[typeInfoDict objectForKey:BIBTEX_TYPES_FOR_PUBMED_TYPES_KEY] retain];
-	MODSGenresForBibTeXTypeDict = [[typeInfoDict objectForKey:MODS_GENRES_FOR_BIBTEX_TYPES_KEY] retain];
-
-	NSMutableSet *allFields = [NSMutableSet setWithCapacity:30];
-	NSEnumerator *typeEnum = [[[typeInfoDict objectForKey:TYPES_FOR_FILE_TYPE_KEY] objectForKey:BDSKBibtexString] objectEnumerator];
-	NSString *type;
-	
-	while (type = [typeEnum nextObject]) {
-		[allFields addObjectsFromArray:[[fieldsForTypesDict objectForKey:type] objectForKey:REQUIRED_KEY]];
-		[allFields addObjectsFromArray:[[fieldsForTypesDict objectForKey:type] objectForKey:OPTIONAL_KEY]];
-	}
-	[allFields addObjectsFromArray:[[OFPreferenceWrapper sharedPreferenceWrapper] stringArrayForKey:BDSKDefaultFieldsKey]];
-	allFieldNames = [allFields copy];
+	[self reloadTypeInfo];
 	
     // this set is used for warning the user on manual entry of a citekey; allows non-ASCII characters and some math symbols
     invalidCiteKeyCharSet = [[NSCharacterSet characterSetWithCharactersInString:@" '\"@,\\#}{~&%$^"] retain];
@@ -94,27 +59,70 @@ static BibTypeManager *sharedInstance = nil;
 	[super dealloc];
 }
 
-#pragma mark Getters and Setters
-
-- (void)setFieldsForTypeDict:(NSDictionary *)newDict{
-	[fieldsForTypesDict autorelease];
-	fieldsForTypesDict = [newDict copy];
-	
-	NSDictionary *notifInfo = [NSDictionary dictionaryWithObjectsAndKeys:@"fieldsForTypes", @"list",nil];
-	[[NSNotificationCenter defaultCenter] postNotificationName:BDSKBibTypeInfoChangedNotification
-														object:self
-													  userInfo:notifInfo];
-}
-
-- (void)setBibTypesForFileTypeDict:(NSDictionary *)newDict{
+- (void)reloadTypeInfo{
+    // First make sure we release the ivars. This does nothing at init.
+	[fileTypesDict release];
+	fileTypesDict = nil;
+	[fieldsForTypesDict release];
+	fieldsForTypesDict = nil;
 	[typesForFileTypeDict release];
-	typesForFileTypeDict = [newDict copy];
+	typesForFileTypeDict = nil;
+	[fieldNameForPubMedTagDict release];
+	fieldNameForPubMedTagDict = nil;
+	[bibtexTypeForPubMedTypeDict release];
+	bibtexTypeForPubMedTypeDict = nil;
+	[MODSGenresForBibTeXTypeDict release];
+	MODSGenresForBibTeXTypeDict = nil;
+	[allFieldNames release];
+	allFieldNames = nil;
+	[allRemovableFieldNames release];
+	allRemovableFieldNames = nil;
 	
-	NSDictionary *notifInfo = [NSDictionary dictionaryWithObjectsAndKeys:@"typesForFileTypes", @"list",nil];
+	// Load the TypeInfo plists
+	NSDictionary *typeInfoDict = [NSDictionary dictionaryWithContentsOfFile:[[[NSBundle mainBundle] resourcePath] stringByAppendingPathComponent:TYPE_INFO_FILENAME]];
+
+	NSFileManager *fm = [NSFileManager defaultManager];
+	NSString *applicationSupportPath = [[fm applicationSupportDirectory:kUserDomain] stringByAppendingPathComponent:@"BibDesk"];
+	NSString *userTypeInfoPath = [applicationSupportPath stringByAppendingPathComponent:TYPE_INFO_FILENAME];
+	NSDictionary *userTypeInfoDict;
+	
+	if ([fm fileExistsAtPath:userTypeInfoPath]) {
+		userTypeInfoDict = [NSDictionary dictionaryWithContentsOfFile:userTypeInfoPath];
+		
+		// set all the lists we support in the user file
+		fieldsForTypesDict = [[userTypeInfoDict objectForKey:FIELDS_FOR_TYPES_KEY] retain];
+		typesForFileTypeDict = [[NSDictionary dictionaryWithObjectsAndKeys: 
+				[[userTypeInfoDict objectForKey:TYPES_FOR_FILE_TYPE_KEY] objectForKey:BDSKBibtexString], BDSKBibtexString, 
+				[[typeInfoDict objectForKey:TYPES_FOR_FILE_TYPE_KEY] objectForKey:@"PubMed"], @"PubMed", nil] retain];
+	}
+	
+	if (fieldsForTypesDict == nil)
+		fieldsForTypesDict = [[typeInfoDict objectForKey:FIELDS_FOR_TYPES_KEY] retain];
+	if (typesForFileTypeDict == nil)
+		typesForFileTypeDict = [[typeInfoDict objectForKey:TYPES_FOR_FILE_TYPE_KEY] retain];
+	allRemovableFieldNames = [[typeInfoDict objectForKey:ALL_REMOVABLE_FIELDS_KEY] retain];
+	fileTypesDict = [[typeInfoDict objectForKey:FILE_TYPES_KEY] retain];
+	fieldNameForPubMedTagDict = [[typeInfoDict objectForKey:BIBTEX_FIELDS_FOR_PUBMED_TAGS_KEY] retain];
+	bibtexTypeForPubMedTypeDict = [[typeInfoDict objectForKey:BIBTEX_TYPES_FOR_PUBMED_TYPES_KEY] retain];
+	MODSGenresForBibTeXTypeDict = [[typeInfoDict objectForKey:MODS_GENRES_FOR_BIBTEX_TYPES_KEY] retain];
+
+	NSMutableSet *allFields = [NSMutableSet setWithCapacity:30];
+	NSEnumerator *typeEnum = [[[typeInfoDict objectForKey:TYPES_FOR_FILE_TYPE_KEY] objectForKey:BDSKBibtexString] objectEnumerator];
+	NSString *type;
+	
+	while (type = [typeEnum nextObject]) {
+		[allFields addObjectsFromArray:[[fieldsForTypesDict objectForKey:type] objectForKey:REQUIRED_KEY]];
+		[allFields addObjectsFromArray:[[fieldsForTypesDict objectForKey:type] objectForKey:OPTIONAL_KEY]];
+	}
+	[allFields addObjectsFromArray:[[OFPreferenceWrapper sharedPreferenceWrapper] stringArrayForKey:BDSKDefaultFieldsKey]];
+	allFieldNames = [allFields copy];
+	
 	[[NSNotificationCenter defaultCenter] postNotificationName:BDSKBibTypeInfoChangedNotification
 														object:self
-													  userInfo:notifInfo];
+													  userInfo:[NSDictionary dictionary]];
 }
+
+#pragma mark Accessors
 
 - (NSString *)defaultTypeForFileFormat:(NSString *)fileFormat{
      return [[fileTypesDict objectForKey:fileFormat] objectForKey:@"DefaultType"];

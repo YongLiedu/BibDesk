@@ -981,16 +981,26 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 // raises the del field sheet
 - (IBAction)raiseDelField:(id)sender{
     // populate the popupbutton
-    NSEnumerator *keyE = [[[[theBib pubFields] allKeys] sortedArrayUsingSelector:@selector(caseInsensitiveCompare:)]objectEnumerator];
-    NSString *k;
-    [delFieldPopUp removeAllItems];
-    while(k = [keyE nextObject]){
-        if(![k isEqualToString:BDSKAnnoteString] &&
-           ![k isEqualToString:BDSKAbstractString] &&
-           ![k isEqualToString:BDSKRssDescriptionString])
-            [delFieldPopUp addItemWithTitle:k];
-    }
+	BibTypeManager *typeMan = [BibTypeManager sharedManager];
+	NSMutableArray *removableFields = [[[theBib pubFields] allKeys] mutableCopy];
+	[removableFields removeObjectsInArray:[NSArray arrayWithObjects:BDSKUrlString, BDSKLocalUrlString, BDSKAnnoteString, BDSKAbstractString, BDSKRssDescriptionString, nil]];
+	[removableFields removeObjectsInArray:[typeMan requiredFieldsForType:currentType]];
+	[removableFields removeObjectsInArray:[typeMan optionalFieldsForType:currentType]];
+	[removableFields removeObjectsInArray:[typeMan userDefaultFieldsForType:currentType]];
+	if ([removableFields count]) {
+		[removableFields sortUsingSelector:@selector(caseInsensitiveCompare:)];
+		[delFieldPopUp setEnabled:YES];
+	} else {
+		[removableFields addObject:NSLocalizedString(@"No fields to remove",@"")];
+		[delFieldPopUp setEnabled:NO];
+	}
+    
+	[delFieldPopUp removeAllItems];
+    [delFieldPopUp addItemsWithTitles:removableFields];
     [delFieldPopUp selectItemAtIndex:0];
+	
+	[removableFields release];
+	
     [NSApp beginSheet:delFieldWindow
        modalForWindow:[self window]
         modalDelegate:self
@@ -1258,16 +1268,10 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 }
 
 - (void)typeInfoDidChange:(NSNotification *)aNotification{
-	NSDictionary *userInfo = [aNotification userInfo];
-	NSString *list = [userInfo objectForKey:@"list"];
-	
-	if ([list isEqualToString:@"typesForFileTypes"]) {
-		[self setupTypePopUp];
-	} else if ([list isEqualToString:@"fieldsForTypes"]) {
-        [theBib makeType:currentType]; // make sure this is done now, and not later
-		[self finalizeChanges];
-		[self setupForm];
-	}
+	[self setupTypePopUp];
+	[theBib makeType:currentType]; // make sure this is done now, and not later
+	[self finalizeChanges];
+	[self setupForm];
 }
 
 #pragma mark document interaction

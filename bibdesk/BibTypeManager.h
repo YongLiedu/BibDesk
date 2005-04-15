@@ -37,8 +37,7 @@
 }
 + (BibTypeManager *)sharedManager;
 
-- (void)setFieldsForTypeDict:(NSDictionary *)newDict;
-- (void)setBibTypesForFileTypeDict:(NSDictionary *)newDict;
+- (void)reloadTypeInfo;
 
 - (NSString *)defaultTypeForFileFormat:(NSString *)fileFormat;
 - (NSArray *)allRemovableFieldNames;

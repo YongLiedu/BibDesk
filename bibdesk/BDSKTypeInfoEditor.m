@@ -149,15 +149,6 @@ static BDSKTypeInfoEditor *sharedTypeInfoEditor;
 - (IBAction)saveChanges:(id)sender {
     [[self window] makeFirstResponder:nil]; // commit edit before saving
 	
-	// this might not be ideal, as it uses that there are just these 2 items
-	BibTypeManager *btm = [BibTypeManager sharedManager];
-	NSDictionary *typesDict = [NSDictionary dictionaryWithObjectsAndKeys: 
-				[[types copy] autorelease], BDSKBibtexString,
-				[btm bibTypesForFileType:@"PubMed"], @"PubMed", nil];
-	
-	[btm setBibTypesForFileTypeDict:typesDict];
-	[btm setFieldsForTypeDict:fieldsForTypesDict];
-	
 	NSDictionary *dict = [NSDictionary dictionaryWithObjectsAndKeys: 
 				fieldsForTypesDict, FIELDS_FOR_TYPES_KEY, 
 				[NSDictionary dictionaryWithObject:types forKey:BDSKBibtexString], TYPES_FOR_FILE_TYPE_KEY, nil];
@@ -174,6 +165,8 @@ static BDSKTypeInfoEditor *sharedTypeInfoEditor;
 		NSString *typeInfoPath = [applicationSupportPath stringByAppendingPathComponent:TYPE_INFO_FILENAME];
 		[data writeToFile:typeInfoPath atomically:YES];
 	}
+	
+	[[BibTypeManager sharedManager] reloadTypeInfo];
 	
 	[self setDocumentEdited:NO];
 	
