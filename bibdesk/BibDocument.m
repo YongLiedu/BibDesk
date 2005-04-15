@@ -3013,4 +3013,23 @@ This method always returns YES. Even if some or many operations fail.
 #endif
 }
 
+#pragma mark Text import sheet support
+
+- (IBAction)importFromTextAction:(id)sender{
+    BDSKTextImportController *tic = [[BDSKTextImportController alloc] initWithDocument:self];
+    NSWindow *win = [tic window];
+
+    [NSApp beginSheet:win
+       modalForWindow:documentWindow
+        modalDelegate:self
+       didEndSelector:@selector(importFromTextSheetDidEnd:returnCode:contextInfo:)
+          contextInfo:tic];
+
+}
+
+- (void)importFromTextSheetDidEnd:(NSWindow *)sheet returnCode:(int)rv contextInfo:(void *)contextInfo {
+    BDSKTextImportController *tic = (BDSKTextImportController *)contextInfo;
+    [tic autorelease];
+}
+
 @end

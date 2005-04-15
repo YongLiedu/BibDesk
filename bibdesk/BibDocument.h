@@ -38,7 +38,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 #import "RYZImagePopUpButton.h"
 
 #import "MacroWindowController.h"
-
+#import "BDSKTextImportController.h"
 
 @class BDSKCustomCiteTableView;
 @class BibItem;
