@@ -31,6 +31,7 @@ static BDSKTypeInfoEditor *sharedTypeInfoEditor;
 		NSDictionary *tmpDict = [NSDictionary dictionaryWithContentsOfFile:[[[NSBundle mainBundle] resourcePath] stringByAppendingPathComponent:@"TypeInfo.plist"]];
 		// we are only interested in this dictionary
 		defaultFieldsForTypesDict = [[tmpDict objectForKey:FIELDS_FOR_TYPES_KEY] retain];
+		defaultTypes = [[[tmpDict objectForKey:REQUIRED_TYPES_FOR_FILE_TYPE_KEY] objectForKey:BDSKBibtexString] retain];
 		
 		fieldsForTypesDict = [[NSMutableDictionary alloc] initWithCapacity:[defaultFieldsForTypesDict count]];
 		types = [[NSMutableArray alloc] initWithCapacity:[defaultFieldsForTypesDict count]];
@@ -42,8 +43,9 @@ static BDSKTypeInfoEditor *sharedTypeInfoEditor;
 - (void)dealloc
 {
     [fieldsForTypesDict release];
-    [defaultFieldsForTypesDict release];
     [types release];
+    [defaultFieldsForTypesDict release];
+    [defaultTypes release];
     [currentType release];
     [super dealloc];
 }
@@ -115,7 +117,7 @@ static BDSKTypeInfoEditor *sharedTypeInfoEditor;
 }
 
 - (void)setCurrentType:(NSString *)newCurrentType {
-    if (currentType != newCurrentType) {
+    if (currentType == nil || ![currentType isEqualToString:newCurrentType]) {
         [currentType release];
         currentType = [newCurrentType copy];
 		
@@ -321,13 +323,18 @@ static BDSKTypeInfoEditor *sharedTypeInfoEditor;
 #pragma mark validation methods
 
 - (BOOL)canEditType:(NSString *)type {
-	return ([defaultFieldsForTypesDict objectForKey:type] == nil);
+	return (![defaultTypes containsObject:type]);
 }
 
 - (BOOL)canEditField:(NSString *)field{
-	return (currentType != nil &&
-			![currentDefaultRequiredFields containsObject:field] &&
-			![currentDefaultOptionalFields containsObject:field]);
+	if (currentType == nil) // there is nothing to edit
+		return NO;
+	if (![defaultTypes containsObject:currentType]) // we allow any edits for non-default types
+		return YES;
+	if ([currentDefaultRequiredFields containsObject:field] ||
+		[currentDefaultOptionalFields containsObject:field]) // we don't allow edits of default fields for default types
+		return NO;
+	return YES; // any other fields of default types can be removed
 }
 
 - (void)updateButtons {

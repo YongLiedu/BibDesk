@@ -22,8 +22,9 @@
 	IBOutlet NSButton *revertCurrentToDefaultButton;
 	IBOutlet NSButton *revertAllToDefaultButton;
 	NSMutableDictionary *fieldsForTypesDict;
-	NSDictionary *defaultFieldsForTypesDict;
 	NSMutableArray *types;
+	NSDictionary *defaultFieldsForTypesDict;
+	NSArray *defaultTypes;
 	NSMutableArray *currentRequiredFields;
 	NSMutableArray *currentOptionalFields;
 	NSArray *currentDefaultRequiredFields;
