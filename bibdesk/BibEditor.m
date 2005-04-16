@@ -1458,7 +1458,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 }
 
 - (BOOL)windowShouldClose:(id)sender{
-    NSString *msgCiteKey = @"";
+    NSString *msgCiteKey = @""; // use empty strings to initialize, since we always use both of them in the format string
     NSString *msgPaper = @"";
     if([[theBib citeKey] isEqualToString:@"cite-key"])
         msgCiteKey = NSLocalizedString(@"Cite key has not been set.", @"cite key has not been set");
@@ -1469,8 +1469,8 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
     
     NSString *warning = NSLocalizedString(@"The following potential problem(s) have been observed:",@"The following potential problem(s) have been observed:");
     NSBeginAlertSheet(NSLocalizedString(@"Warning!", @"Warning"),
+                      nil,
                       NSLocalizedString(@"Edit", @"Edit"),
-                      NSLocalizedString(@"Close", @"Close"),
                       nil, //3rd button
                       [self window],
                       self, // modal delegate
@@ -1483,8 +1483,10 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 }
 
 - (void)shouldCloseSheetDidEnd:(NSWindow *)sheet returnCode:(int)returnCode contextInfo:(void *)contextInfo{
-    if(returnCode == NSAlertAlternateReturn)
+    if(returnCode == NSAlertDefaultReturn){
+        [sheet orderOut:nil];
         [self close];
+    }
 }
 
 - (void)windowWillClose:(NSNotification *)notification{
