@@ -32,7 +32,7 @@
                 editOnPasteButton = NSButton; 
                 openSheetAccessoryView = NSView; 
                 previewFontPopup = NSPopUpButton; 
-                previewMaxNumberField = NSTextField; 
+                previewMaxNumberComboBox = NSComboBox; 
                 startupBehaviorRadio = NSMatrix; 
                 tableViewFontPopup = NSPopUpButton; 
                 tableViewFontSizeField = NSTextField; 
@@ -50,7 +50,12 @@
             }; 
             SUPERCLASS = OAPreferenceClient; 
         }, 
-        {CLASS = FirstResponder; LANGUAGE = ObjC; SUPERCLASS = NSObject; }, 
+        {
+            ACTIONS = {"" = id; }; 
+            CLASS = FirstResponder; 
+            LANGUAGE = ObjC; 
+            SUPERCLASS = NSObject; 
+        }, 
         {
             ACTIONS = {restoreDefaults = id; setValueForSender = id; }; 
             CLASS = OAPreferenceClient; 

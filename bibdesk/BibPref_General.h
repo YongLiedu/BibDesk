@@ -28,7 +28,7 @@
 
     // display pref radio matrix
     IBOutlet NSMatrix* displayPrefRadioMatrix;
-    IBOutlet NSTextField *previewMaxNumberField;
+    IBOutlet NSComboBox *previewMaxNumberComboBox;
     
     IBOutlet NSPopUpButton *previewFontPopup;
     IBOutlet NSPopUpButton *tableViewFontPopup;

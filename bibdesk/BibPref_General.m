@@ -35,6 +35,8 @@
     [tableViewFontPopup addItemsWithTitles:[availableFonts sortedArrayUsingSelector:@selector(compare:)]];
     [tableViewFontPopup selectItemWithTitle:[defaults objectForKey:BDSKTableViewFontKey]];
     [availableFonts release];
+    
+    [previewMaxNumberComboBox addItemsWithObjectValues:[NSArray arrayWithObjects:NSLocalizedString(@"All", @"All"), @"1", @"5", @"10", @"20", nil]];
 
 }
 
@@ -61,9 +63,9 @@
 	
     int maxNumber = [defaults integerForKey:BDSKPreviewMaxNumberKey];
 	if (maxNumber == 0)
-		[previewMaxNumberField setStringValue:NSLocalizedString(@"All",@"All")];
+		[previewMaxNumberComboBox setStringValue:NSLocalizedString(@"All",@"All")];
 	else 
-		[previewMaxNumberField setIntValue:maxNumber];
+		[previewMaxNumberComboBox setIntValue:maxNumber];
     
     [editOnPasteButton setState:[defaults integerForKey:BDSKEditOnPasteKey]];
 
@@ -114,7 +116,7 @@
 }
 
 - (IBAction)changePreviewMaxNumber:(id)sender{
-    int maxNumber = [sender intValue];
+    int maxNumber = [[[sender cell] objectValueOfSelectedItem] intValue]; // returns 0 if not a number (as in @"All")
     if(maxNumber != [defaults integerForKey:BDSKPreviewMaxNumberKey]){
 		[defaults setInteger:maxNumber forKey:BDSKPreviewMaxNumberKey];
 		[[NSNotificationCenter defaultCenter] postNotificationName:BDSKPreviewDisplayChangedNotification object:nil];
