@@ -23,8 +23,6 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 /*! @const BDSKPreviewer helps to enforce a single object of this class */
 static BDSKPreviewer *thePreviewer;
 
-static unsigned threadCount = 0;
-
 @implementation BDSKPreviewer
 
 + (BDSKPreviewer *)sharedPreviewer{
@@ -35,19 +33,17 @@ static unsigned threadCount = 0;
 }
 
 - (id)init{
-    applicationSupportPath = [[[[NSFileManager defaultManager] applicationSupportDirectory:kUserDomain] stringByAppendingPathComponent:@"BibDesk"] retain];
-
     if(self = [super init]){
+        applicationSupportPath = [[[[NSFileManager defaultManager] applicationSupportDirectory:kUserDomain] stringByAppendingPathComponent:@"BibDesk"] retain];
         bundle = [NSBundle mainBundle];
-	usertexTemplatePath = [[applicationSupportPath stringByAppendingPathComponent:@"previewtemplate.tex"] retain];
+        usertexTemplatePath = [[applicationSupportPath stringByAppendingPathComponent:@"previewtemplate.tex"] retain];
         texTemplatePath = [[applicationSupportPath stringByAppendingPathComponent:@"bibpreview.tex"] retain];
         finalPDFPath = [[applicationSupportPath stringByAppendingPathComponent:@"bibpreview.pdf"] retain];
-	nopreviewPDFPath = [[[bundle resourcePath] stringByAppendingPathComponent:@"nopreview.pdf"] retain];
+        nopreviewPDFPath = [[[bundle resourcePath] stringByAppendingPathComponent:@"nopreview.pdf"] retain];
         tmpBibFilePath = [[applicationSupportPath stringByAppendingPathComponent:@"bibpreview.bib"] retain];
-	rtfFilePath = [[applicationSupportPath stringByAppendingPathComponent:@"bibpreview.rtf"] retain];
+        rtfFilePath = [[applicationSupportPath stringByAppendingPathComponent:@"bibpreview.rtf"] retain];
         binPathDir = [[NSString alloc] init]; // set from where we run the tasks, since some programs (e.g. XeLaTeX) need a real path setting
-        countLock = [[NSLock alloc] init];
-        workingLock = [[NSLock alloc] init];
+        theLock = [[BDOrganizedLock alloc] init];
     }
     return self;
 }
@@ -83,13 +79,14 @@ static unsigned threadCount = 0;
 
 - (BOOL)PDFFromString:(NSString *)str{
     
-    if(str == nil){
-	[self resetPreviews];
-	return YES;
-    }
     // pool for MT
     NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
-
+    
+    if(str == nil){
+        [self resetPreviews];
+        [pool release];
+        return NO;
+    }
     // get a fresh copy of the file:
     NSString *texFile; 
 
@@ -100,36 +97,18 @@ static unsigned threadCount = 0;
     NSMutableString *finalTexFile = [NSMutableString string];
     NSScanner *s;
     
-    unsigned myThreadCount;
-
-    [countLock lock];
-    threadCount++;
-    myThreadCount = threadCount;
-    [countLock unlock];
-    
-    while(working){
-        if(myThreadCount == threadCount){
-            // if someone else is working and i'm the top go to sleep for a bit
-            [NSThread sleepUntilDate:[[NSDate date] addTimeInterval:0.2]];
-        }else{
-            // if someone else is working and I'm not the top, die.
-            [pool release];
-            return NO;
-        }
+    switch ([theLock lockFor:self job:str])
+    {
+        case BDDoTheWork:
+            break; // run the preview setup and tasks
+            
+        case BDWorkJustDone:
+            goto display; // display the results
+            
+        case BDOtherWorkRequested:
+            goto cleanup; // cleanup
     }
-
-    // don't do anything if i'm not the top.
-    if(myThreadCount < threadCount){
-        [pool release];
-        return NO;
-    }
-    
-    [workingLock lock];
-    working = YES;
-    [workingLock unlock];
-
-    // NSLog(@"**** starting thread %d", myThreadCount);
-    
+        
     // Files:  previewtemplate.tex is intended to be changed by the user, and so we allow opening
     // this file from the preview prefpane.  By using previewtemplate.tex as a base instead of the previous
     // bibpreview.tex file, we avoid problems.   Previously if the user was editing the 
@@ -140,7 +119,10 @@ static unsigned threadCount = 0;
         [[[OFPreferenceWrapper sharedPreferenceWrapper] stringForKey:BDSKOutputTemplateFileKey] stringByExpandingTildeInPath]];
     s = [NSScanner scannerWithString:texFile];
 
-    [imagePreviewView setImage:[NSImage imageNamed:@"typesetting.pdf"]];
+    if([imagePreviewView lockFocusIfCanDraw]){
+        [imagePreviewView setImage:[NSImage imageNamed:@"typesetting.pdf"]];
+        [imagePreviewView unlockFocus];
+    }
 
     // replace the appropriate style & bib files.
     style = [[OFPreferenceWrapper sharedPreferenceWrapper] objectForKey:BDSKBTStyleKey];
@@ -151,55 +133,37 @@ static unsigned threadCount = 0;
     // overwrites the old bibpreview.tex file, replacing the previous bibliographystyle
     if(![[finalTexFile dataUsingEncoding:[[OFPreferenceWrapper sharedPreferenceWrapper] integerForKey:BDSKTeXPreviewFileEncoding]] writeToFile:texTemplatePath atomically:YES]){
         NSLog(@"error replacing texfile");
-        [workingLock lock];
-        working = NO;
-        [workingLock unlock];
-        [pool release];
-        return NO;
+        goto cleanup;
     }
 
     // write out the bib file with the template attached:
     [bibTemplate appendFormat:@"\n%@",str];
     if(![[bibTemplate dataUsingEncoding:[[OFPreferenceWrapper sharedPreferenceWrapper] integerForKey:BDSKTeXPreviewFileEncoding]] writeToFile:tmpBibFilePath atomically:YES]){
         NSLog(@"Error replacing bibfile.");
-        [workingLock lock];
-        working = NO;
-        [workingLock unlock];        
-        [pool release];
-        return NO;
+        goto cleanup;
     }
     
     NS_DURING
-    if([self previewTexTasks:@"bibpreview.tex"]){ // run the TeX tasks
-
-        if (myThreadCount >= threadCount){
-            [self performSelectorOnMainThread:@selector(performDrawing)
-                                                         withObject:nil
-                                                  waitUntilDone:YES];
-        }
-        
-    } else {
+    if([self previewTexTasks:@"bibpreview.tex"])
+        goto display;
+    else
         NSLog(@"Task failure in -[%@ %@]", [self class], NSStringFromSelector(_cmd));
-    }
     NS_HANDLER
         if([[localException name] isEqualToString:@"BDSKPreviewerPathNotFound"]){ // clean up and return
-            NSLog(@"Task failure in -[%@ %@], executable(s) not found", [self class], NSStringFromSelector(_cmd));
-            [pool release];
-            [workingLock lock];
-            working = NO;
-            [workingLock unlock];
-            return NO;
+            goto cleanup;
         } else {
             [localException raise]; // re-raise, it's not ours
         }
     NS_ENDHANDLER
-    // Pool for MT
-    [pool release];
-    
-    [workingLock lock];
-    working = NO;
-    [workingLock unlock];
-    
+            
+    display:
+        [self performSelectorOnMainThread:@selector(performDrawing)
+                               withObject:nil
+                            waitUntilDone:YES]; // now we fall through to clean up
+    cleanup:
+        [pool release];
+        [theLock unlock];
+        
     return YES;    
     
 }
@@ -436,8 +400,7 @@ static unsigned threadCount = 0;
     [rtfFilePath release];
     [applicationSupportPath release];
     [binPathDir release];
-    [countLock release];
-    [workingLock release];
+    [theLock release];
     [super dealloc];
 }
 @end

@@ -21,6 +21,8 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 
 #import <Cocoa/Cocoa.h>
 #import "PDFImageView.h"
+#import "BDOrganizedLock.h"
+
 
 @class BibDocument;
 
@@ -50,6 +52,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
     IBOutlet NSTextView *rtfPreviewView;
     IBOutlet NSTabView *tabView;
     NSString *binPathDir;
+    BDOrganizedLock *theLock;
 }
 /*!
     @method sharedPreviewer
