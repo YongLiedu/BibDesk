@@ -277,6 +277,8 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 - (IBAction)openDocument:(id)sender{
 	NSOpenPanel *oPanel = [NSOpenPanel openPanel];
     [oPanel setAccessoryView:openTextEncodingAccessoryView];
+    NSString *defaultEncName = [[BDSKStringEncodingManager sharedEncodingManager] displayedNameForStringEncoding:[[OFPreferenceWrapper sharedPreferenceWrapper] integerForKey:BDSKDefaultStringEncoding]];
+    [openTextEncodingPopupButton selectItemWithTitle:defaultEncName];
 		
 	NSArray *types = [NSArray arrayWithObjects:@"bib", @"fcgi", @"ris", @"bdsk", nil];
 	
