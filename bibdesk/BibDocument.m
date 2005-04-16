@@ -3016,7 +3016,7 @@ This method always returns YES. Even if some or many operations fail.
 #pragma mark Text import sheet support
 
 - (IBAction)importFromTextAction:(id)sender{
-    BDSKTextImportController *tic = [[BDSKTextImportController alloc] initWithDocument:self];
+    BDSKTextImportController *tic = [(BDSKTextImportController *)[BDSKTextImportController alloc] initWithDocument:self];
     NSWindow *win = [tic window];
 
     [NSApp beginSheet:win
