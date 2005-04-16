@@ -293,6 +293,9 @@ static BDSKTypeInfoEditor *sharedTypeInfoEditor;
 	if (currentType == nil) 
 		return;
 	
+	// make sure we stop editing
+	[[self window] makeFirstResponder:nil];
+	
 	[currentRequiredFields removeAllObjects];
 	[currentRequiredFields addObjectsFromArray:currentDefaultRequiredFields];
 	[currentOptionalFields removeAllObjects];
@@ -307,6 +310,9 @@ static BDSKTypeInfoEditor *sharedTypeInfoEditor;
 - (IBAction)revertAllToDefault:(id)sender {
 	NSEnumerator *typeEnum = [defaultFieldsForTypesDict keyEnumerator];
 	NSString *type;
+	
+	// make sure we stop editing
+	[[self window] makeFirstResponder:nil];
 	
 	[fieldsForTypesDict removeAllObjects];
 	[types removeAllObjects];
