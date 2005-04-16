@@ -1469,7 +1469,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
     
     NSString *warning = NSLocalizedString(@"The following potential problem(s) have been observed:",@"The following potential problem(s) have been observed:");
     NSBeginAlertSheet(NSLocalizedString(@"Warning!", @"Warning"),
-                      nil,
+                      NSLocalizedString(@"OK", @"OK"),
                       NSLocalizedString(@"Edit", @"Edit"),
                       nil, //3rd button
                       [self window],
