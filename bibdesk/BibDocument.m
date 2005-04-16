@@ -79,7 +79,7 @@ NSString *BDSKBibItemLocalDragPboardType = @"edu.ucsd.cs.mmccrack.bibdesk: Local
 		[[NSNotificationCenter defaultCenter] addObserver:self
 												 selector:@selector(handleUpdateUINotification:)
 													 name:BDSKDocumentUpdateUINotification
-												   object:nil];
+												   object:self];
 
 		// register for tablecolumn changes notifications:
 		[[NSNotificationCenter defaultCenter] addObserver:self
