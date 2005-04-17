@@ -271,6 +271,8 @@
 
 - (NSString *)valueOfField: (NSString *)key;
 
+- (NSString *)acronymValueOfField:(NSString *)key;
+
 - (void)removeField: (NSString *)key;
 - (void)removeField: (NSString *)key withModDate:(NSCalendarDate *)date;
 
