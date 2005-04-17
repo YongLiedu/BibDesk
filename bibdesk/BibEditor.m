@@ -1461,23 +1461,33 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
     NSString *msgCiteKey = @""; // use empty strings to initialize, since we always use both of them in the format string
     NSString *msgPaper = @"";
     if([[theBib citeKey] isEqualToString:@"cite-key"])
-        msgCiteKey = NSLocalizedString(@"Cite key has not been set.", @"cite key has not been set");
+        msgCiteKey = [NSString stringWithFormat:@" %C %@\n", 0x2022, NSLocalizedString(@"Cite key has not been set.", @"cite key has not been set")];
     if([theBib needsToBeFiled] && [[OFPreferenceWrapper sharedPreferenceWrapper] boolForKey:BDSKFilePapersAutomaticallyKey])
-        msgPaper = NSLocalizedString(@"Paper needs to be filed.", @"paper needs to be filed\n");
+        msgPaper = [NSString stringWithFormat:@" %C %@\n", 0x2022, NSLocalizedString(@"Paper needs to be filed.", @"paper needs to be filed\n")];
     if([msgCiteKey isEqualToString:@""] && [msgPaper isEqualToString:@""])
         return YES;
     
-    NSString *warning = NSLocalizedString(@"The following potential problem(s) have been observed:",@"The following potential problem(s) have been observed:");
-    NSBeginAlertSheet(NSLocalizedString(@"Warning!", @"Warning"),
-                      NSLocalizedString(@"OK", @"OK"),
-                      NSLocalizedString(@"Edit", @"Edit"),
+    NSString *editStr = [NSString stringWithFormat:@"%@%C", NSLocalizedString(@"Edit", @""), 0x2026];
+    NSString *acceptStr = NSLocalizedString(@"Accept", @"");
+    
+    NSString *pluralOrSingular = ([msgCiteKey isEqualToString:@""] || [msgPaper isEqualToString:@""]) ?
+        NSLocalizedString(@"problem has", @"singular form") : NSLocalizedString(@"problems have", @"plural form");
+    
+    NSString *warning = [NSString stringWithFormat:NSLocalizedString(@"The following potential %@ been observed:\n",
+                                                                     @"need a single NSString specifier, newline at end"), pluralOrSingular];
+    NSString *details = [NSString stringWithFormat:NSLocalizedString(@"Click \"%@\" to continue editing, or \"%@\" to accept the entry as-is.", 
+                                                                     @"need two NSString format specifiers"), editStr, acceptStr];
+    
+    NSBeginAlertSheet(NSLocalizedString(@"Warning!", @""),
+                      acceptStr,
+                      editStr,
                       nil, //3rd button
                       [self window],
                       self, // modal delegate
                       @selector(shouldCloseSheetDidEnd:returnCode:contextInfo:),
                       NULL, // did dismiss sel
                       NULL,
-                      @"%@\n%@\n%@", warning, msgCiteKey, msgPaper);
+                      @"%@%@%@%@", warning, msgCiteKey, msgPaper, details);
     return NO;
 
 }
