@@ -214,6 +214,8 @@
 	</dict>
 	<key>Roman to TeX Accents</key>
 	<dict>
+		<key>̊</key>
+		<string>r</string>
 		<key>̀</key>
 		<string>`</string>
 		<key>́</key>
@@ -438,6 +440,8 @@
 		<string>̧</string>
 		<key>d</key>
 		<string>̣</string>
+		<key>r</key>
+		<string>̊</string>
 		<key>u</key>
 		<string>̆</string>
 		<key>v</key>
