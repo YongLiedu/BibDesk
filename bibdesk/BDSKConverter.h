@@ -101,36 +101,4 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 */
 - (NSString *)composedStringFromTeXString:(NSString *)texString;
 
-/*!
- @method stringBySanitizingString:forField:inFieldType:
- @abstract Sanitize a string to use in a generated value for a field and type
- @discussion Creates a string containing only a strict set of characters, by converting some characters and removing others. 
- @param string The unsanitized string
- @param fieldName The name of the field (e.g. "Author")
- @param type The reference type (e.g. BibTeX, RIS)
- @result The sanitized string
-*/
-- (NSString *)stringBySanitizingString:(NSString *)string forField:(NSString *)fieldName inFileType:(NSString *)type;
-
-/*!
- @method stringBySanitizedCiteKeyString
- @abstract Validate a format string to use for a field in a type
- @discussion Checks for valid specifiers and calls stringBySanitizingString:forField:inFieldType: on other parts of the string. Might change the format string.
- @param formatString The format string to check
- @param fieldName The name of the field (e.g. "Author")
- @param type The reference type (e.g. BibTeX, RIS)
- @param error An error string returned when the format is not valid
- @result The sanitized string
-*/
-- (BOOL)validateFormat:(NSString **)formatString forField:(NSString *)fieldName inFileType:(NSString *)type error:(NSString **)error;
-
-/*!
- @method requiredFieldsForFormat
- @abstract Finds all field names used in a format string
- @discussion -
- @param formatString The format string to check
- @result Array of required field names
-*/
-- (NSArray *)requiredFieldsForFormat:(NSString *)formatString;
-
 @end

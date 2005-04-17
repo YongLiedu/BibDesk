@@ -25,7 +25,7 @@
     [papersFolderLocationTextField setStringValue:[[defaults objectForKey:BDSKPapersFolderPathKey] stringByAbbreviatingWithTildeInPath]];
 
     [formatLowercaseCheckButton setState:[defaults integerForKey:BDSKLocalUrlLowercaseKey]];
-	if ([[BDSKConverter sharedConverter] validateFormat:&formatString forField:BDSKLocalUrlString inFileType:BDSKBibtexString error:&error]) {
+	if ([[BDSKFormatParser sharedParser] validateFormat:&formatString forField:BDSKLocalUrlString inFileType:BDSKBibtexString error:&error]) {
 		[self setLocalUrlFormatInvalidWarning:NO message:nil];
 		
 		// use a BibItem with some data to build the preview local-url
@@ -66,9 +66,9 @@
 	NSString *alternateButton = nil;
 	int rv;
 	
-	if (![[BDSKConverter sharedConverter] validateFormat:&formatString forField:BDSKLocalUrlString inFileType:BDSKBibtexString error:&error]) {
+	if (![[BDSKFormatParser sharedParser] validateFormat:&formatString forField:BDSKLocalUrlString inFileType:BDSKBibtexString error:&error]) {
 		formatString = [defaults stringForKey:BDSKLocalUrlFormatKey];
-		if ([[BDSKConverter sharedConverter] validateFormat:&formatString forField:BDSKLocalUrlString inFileType:BDSKBibtexString error:NULL]) {
+		if ([[BDSKFormatParser sharedParser] validateFormat:&formatString forField:BDSKLocalUrlString inFileType:BDSKBibtexString error:NULL]) {
 			// The currently set local-url format is valid, so we can keep it 
 			alternateButton = NSLocalizedString(@"Revert to Last", @"Revert to Last Valid Local-Url Format");
 		}
@@ -81,7 +81,7 @@
 		if (rv == NSAlertDefaultReturn){
 			formatString = [[[OFPreferenceWrapper sharedPreferenceWrapper] preferenceForKey:BDSKLocalUrlFormatKey] defaultObjectValue];
 			[[OFPreferenceWrapper sharedPreferenceWrapper] setObject:formatString forKey:BDSKLocalUrlFormatKey];
-			[[NSApp delegate] setRequiredFieldsForLocalUrl: [[BDSKConverter sharedConverter] requiredFieldsForFormat:formatString]];
+			[[NSApp delegate] setRequiredFieldsForLocalUrl: [[BDSKFormatParser sharedParser] requiredFieldsForFormat:formatString]];
 		}
 	}
 }
@@ -190,7 +190,7 @@
 		NSString *error;
 		formatString = [formatField stringValue];
 		//if ([formatString isEqualToString:[defaults stringForKey:BDSKLocalUrlFormatKey]]) return; // nothing changed
-		if ([[BDSKConverter sharedConverter] validateFormat:&formatString forField:BDSKLocalUrlString inFileType:BDSKBibtexString error:&error]) {
+		if ([[BDSKFormatParser sharedParser] validateFormat:&formatString forField:BDSKLocalUrlString inFileType:BDSKBibtexString error:&error]) {
 			[defaults setObject:formatString forKey:BDSKLocalUrlFormatKey];
 		}
 		else {
@@ -198,7 +198,7 @@
 			return;
 		}
 	}
-	[[NSApp delegate] setRequiredFieldsForLocalUrl: [[BDSKConverter sharedConverter] requiredFieldsForFormat:formatString]];
+	[[NSApp delegate] setRequiredFieldsForLocalUrl: [[BDSKFormatParser sharedParser] requiredFieldsForFormat:formatString]];
 	[self updateUI];
 }
 

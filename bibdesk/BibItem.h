@@ -48,6 +48,7 @@
 #import "BDSKConverter.h"
 #import "BDSKFontManager.h"
 #import "BDAlias.h"
+#import "BDSKFormatParser.h"
 
 @class BibEditor;
 @class BibDocument;
@@ -413,45 +414,6 @@
 */
 - (void)autoFilePaper;
 
-/*!
-    @method parseFormat:forField:
-    @abstract Generates a value for a field in a type based on the receiver and the format string
-    @discussion -
-    @param format The format string to use
-    @param fieldName The name of the field (e.g. "Author")
-	@result The suggested cite key string
-*/
-- (NSString *)parseFormat:(NSString *)format forField:(NSString *)fieldName;
-
-/*!
-    @method uniqueString:suffix:forField:numberOfChars:from:to:force:
-    @abstract Tries to return a unique string value for a field in a type, by adding characters from a range
-    @discussion -
-    @param baseString The string to base the unique string on
-    @param suffix The string to add as a suffix to the unique string
-    @param fieldName The name of the field (e.g. "Author")
-	@param number The number of characters to add, when force is YES the minimal number
-	@param fromChar The first character in the range to use
-	@param toChar The last character of the range to use
-	@param force Determines whether to allow for more characters to force a unique key
-	@result A string value for field in type that starts with baseString and is unique when force is YES
-*/
-- (NSString *)uniqueString:(NSString *)baseString 
-					suffix:(NSString *)suffix
-				  forField:(NSString *)fieldName 
-			 numberOfChars:(unsigned int)number 
-					  from:(unichar)fromChar 
-						to:(unichar)toChar 
-					 force:(BOOL)force;
-
-/*!
-    @method stringIsValid:forField:
-    @abstract Returns whether a string is a valid as a value for a field in a type
-    @discussion -
-	@param proposedStr The trial string to check for validity
-    @param fieldName The name of the field (e.g. "Author")
-*/
-- (BOOL)stringIsValid:(NSString *)proposedStr forField:(NSString *)fieldName;
 - (void)typeInfoDidChange:(NSNotification *)aNotification;
 @end
 
