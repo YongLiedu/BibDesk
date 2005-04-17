@@ -51,6 +51,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
     int sortedRow = (sortDescending ? [shownPublications count] - 1 - row : row);
     NSString *path = nil;
     NSString *extension = nil;
+    NSString *lurl = nil;
     NSString *tcID = [tableColumn identifier];
 	NSString *shortDateFormatString = [[NSUserDefaults standardUserDefaults] stringForKey:NSShortDateFormatString];
     
@@ -130,6 +131,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
         }else if ([tcID isEqualToString:BDSKLocalUrlString]){
             path = [pub localURLPath];
 	        extension = [path pathExtension];
+			lurl = [pub valueOfField:BDSKLocalUrlString];
             if(path && [[NSFileManager defaultManager] fileExistsAtPath:path]){
 				if(![extension isEqualToString:@""]){
 					// use the NSImage method, as it seems to be faster, but only for files with extensions
@@ -137,7 +139,9 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 				} else {
 					return [[NSWorkspace sharedWorkspace] iconForFile:path];
 				}
-            }else{
+            }else if(lurl && ![lurl isEqualToString:@""]){
+				return [NSImage imageNamed:@"QuestionMarkFile"];
+			}else{
                 return nil;
             }
 
