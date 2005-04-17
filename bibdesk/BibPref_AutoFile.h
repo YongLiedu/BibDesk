@@ -21,7 +21,6 @@
 #import <Foundation/Foundation.h>
 #import "BibPrefController.h"
 #import "BibItem.h"
-#import "BDSKFormatParser.h"
 
 @interface BibPref_AutoFile : OAPreferenceClient {
 	IBOutlet NSTextField* papersFolderLocationTextField;

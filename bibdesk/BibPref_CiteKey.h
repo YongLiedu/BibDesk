@@ -9,7 +9,6 @@
 #import <Cocoa/Cocoa.h>
 #import "BibPrefController.h"
 #import "BibItem.h"
-#import "BDSKConverter.h"
 
 @interface BibPref_CiteKey : OAPreferenceClient
 {
