@@ -144,16 +144,11 @@ static BDSKPreviewer *thePreviewer;
     }
     
     NS_DURING
-    if([self previewTexTasks:@"bibpreview.tex"])
-        goto display;
-    else
-        NSLog(@"Task failure in -[%@ %@]", [self class], NSStringFromSelector(_cmd));
-    NS_HANDLER
-        if([[localException name] isEqualToString:@"BDSKPreviewerPathNotFound"]){ // clean up and return
+        if(![self previewTexTasks:@"bibpreview.tex"])
+            NSLog(@"Task failure in -[%@ %@]", [self class], NSStringFromSelector(_cmd));
+    NS_HANDLER 
+            // clean up and return, since we're responsible for all exceptions here
             goto cleanup;
-        } else {
-            [localException raise]; // re-raise, it's not ours
-        }
     NS_ENDHANDLER
             
     display:
