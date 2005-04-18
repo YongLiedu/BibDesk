@@ -24,6 +24,7 @@
     IBOutlet NSPopUpButton* chooseSourceButton;
     IBOutlet NSBox* sourceBox;
     IBOutlet WebView* webView;
+    IBOutlet NSPanel* urlSheet;
     IBOutlet NSTextField* urlTextField;
     BOOL showingWebView;
 }
@@ -33,6 +34,13 @@
 - (IBAction)stopAddingAction:(id)sender;
 - (IBAction)addTextToCurrentFieldAction:(id)sender;
 - (IBAction)changeTypeOfBibAction:(id)sender;
+- (IBAction)loadPasteboard:(id)sender;
+- (IBAction)loadFile:(id)sender;
+- (IBAction)loadWebPage:(id)sender;
+- (IBAction)dismissUrlSheet:(id)sender;
+
+- (void)openPanelDidEnd:(NSOpenPanel *)sheet returnCode:(int)returnCode contextInfo:(void *)contextInfo;
+- (void)urlSheetDidEnd:(NSOpenPanel *)sheet returnCode:(int)returnCode contextInfo:(void *)contextInfo;
 
 - (void)setupSourceUI;
 - (void)setupTypeUI;

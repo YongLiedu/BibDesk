@@ -53,8 +53,10 @@
     if([pbType isEqualToString:NSURLPboardType]){
         // setup webview and load page
         
-        [sourceBox replaceSubview:[sourceTextView enclosingScrollView] with:webView];
-        showingWebView = YES;
+		if (!showingWebView) {
+			[sourceBox replaceSubview:[sourceTextView enclosingScrollView] with:webView];
+			showingWebView = YES;
+		}
         
         NSArray *urls = (NSArray *)[pb propertyListForType:pbType];
         NSURL *url = [NSURL URLWithString:[urls objectAtIndex:0]];
@@ -64,14 +66,32 @@
         
         
     }else if([pbType isEqualToString:NSRTFPboardType]){
+		
+		if (showingWebView) {
+			[sourceBox replaceSubview:webView with:[sourceTextView enclosingScrollView]];
+			showingWebView = NO;
+		}
+		
         NSRange r = NSMakeRange(0,[[sourceTextView string] length]);
         [sourceTextView replaceCharactersInRange:r withRTF:[pb dataForType:pbType]];
         
     }else if([pbType isEqualToString:NSRTFDPboardType]){
+		
+		if (showingWebView) {
+			[sourceBox replaceSubview:webView with:[sourceTextView enclosingScrollView]];
+			showingWebView = NO;
+		}
+		
         NSRange r = NSMakeRange(0,[[sourceTextView string] length]);
         [sourceTextView replaceCharactersInRange:r withRTFD:[pb dataForType:pbType]];
 
     }else{
+		
+		if (showingWebView) {
+			[sourceBox replaceSubview:webView with:[sourceTextView enclosingScrollView]];
+			showingWebView = NO;
+		}
+		
         [sourceTextView setString:[pb stringForType:pbType]];
     }
 }
@@ -171,6 +191,125 @@
     [citeKeyLine setStringValue:[item citeKey]];
 
     [itemTableView reloadData];
+}
+
+- (IBAction)loadPasteboard:(id)sender{
+	[self setupSourceUI];
+}
+
+- (IBAction)loadFile:(id)sender{
+    NSOpenPanel *oPanel = [NSOpenPanel openPanel];
+    [oPanel setAllowsMultipleSelection:NO];
+    [oPanel setCanChooseDirectories:NO];
+
+    [oPanel beginSheetForDirectory:nil 
+                              file:nil 
+							 types:nil
+                    modalForWindow:[self window]
+                     modalDelegate:self 
+                    didEndSelector:@selector(openPanelDidEnd:returnCode:contextInfo:) 
+                       contextInfo:nil];
+}
+
+- (void)openPanelDidEnd:(NSOpenPanel *)sheet returnCode:(int)returnCode contextInfo:(void *)contextInfo{
+
+    if(returnCode == NSOKButton){
+        NSString *fileName = [sheet filename];
+		NSURL *url = [NSURL fileURLWithPath:fileName];
+		NSTextStorage *text = [sourceTextView textStorage];
+		NSLayoutManager *layoutManager = [[text layoutManagers] objectAtIndex:0];
+
+		[[text mutableString] setString:@""];	// Empty the document
+		
+		[layoutManager retain];			// Temporarily remove layout manager so it doesn't do any work while loading
+		[text removeLayoutManager:layoutManager];
+		[text beginEditing];			// Bracket with begin/end editing for efficiency
+		[text readFromURL:url options:nil documentAttributes:NULL];	// Read!
+		[text endEditing];
+		[text addLayoutManager:layoutManager];	// Hook layout manager back up
+		[layoutManager release];
+
+    }        
+}
+
+- (IBAction)loadWebPage:(id)sender{
+	[NSApp beginSheet:urlSheet
+       modalForWindow:[self window]
+        modalDelegate:self
+       didEndSelector:@selector(urlSheetDidEnd:returnCode:contextInfo:)
+          contextInfo:nil];
+}
+
+- (IBAction)dismissUrlSheet:(id)sender{
+    [urlSheet orderOut:sender];
+    [NSApp endSheet:urlSheet returnCode:[sender tag]];
+}
+
+- (void)urlSheetDidEnd:(NSOpenPanel *)sheet returnCode:(int)returnCode contextInfo:(void *)contextInfo{
+
+    if(returnCode == NSOKButton){
+		// setup webview and load page
+        
+		if (!showingWebView) {
+			[sourceBox replaceSubview:[sourceTextView enclosingScrollView] with:webView];
+			showingWebView = YES;
+		}
+        
+        NSURL *url = [NSURL URLWithString:[urlTextField stringValue]];
+        NSURLRequest *urlreq = [NSURLRequest requestWithURL:url];
+        
+        [[webView mainFrame] loadRequest:urlreq];
+    }        
+}
+
+#pragma mark WebUIDelegate
+
+- (NSArray *)webView:(WebView *)sender contextMenuItemsForElement:(NSDictionary *)element defaultMenuItems:(NSArray *)defaultMenuItems{
+	NSMutableArray *menuItems = [NSMutableArray arrayWithCapacity:6];
+	NSMenuItem *menuItem;
+	
+	NSEnumerator *iEnum = [defaultMenuItems objectEnumerator];
+	while (menuItem = [iEnum nextObject]) { 
+		if ([menuItem tag] == WebMenuItemTagCopy ||
+			[menuItem tag] == WebMenuItemTagCopyLinkToClipboard) {
+			
+			[menuItems addObject:menuItem];
+		}
+	}
+	if ([menuItems count] > 0) 
+		[menuItems addObject:[NSMenuItem separatorItem]];
+	
+	menuItem = [[NSMenuItem alloc] initWithTitle:NSLocalizedString(@"Back",@"Back")
+									  action:@selector(goBack:)
+							   keyEquivalent:@""];
+	[menuItems addObject:[menuItem autorelease]];
+	
+	menuItem = [[NSMenuItem alloc] initWithTitle:NSLocalizedString(@"Forward",@"Forward")
+									  action:@selector(goForward:)
+							   keyEquivalent:@""];
+	[menuItems addObject:[menuItem autorelease]];
+	
+	menuItem = [[NSMenuItem alloc] initWithTitle:NSLocalizedString(@"Reload",@"Reload")
+									  action:@selector(reload:)
+							   keyEquivalent:@""];
+	[menuItems addObject:[menuItem autorelease]];
+	
+	menuItem = [[NSMenuItem alloc] initWithTitle:NSLocalizedString(@"Stop",@"Stop")
+									  action:@selector(stopLoading:)
+							   keyEquivalent:@""];
+	[menuItems addObject:[menuItem autorelease]];
+	
+	menuItem = [[NSMenuItem alloc] initWithTitle:NSLocalizedString(@"Increase Text Size",@"Increase Text Size")
+									  action:@selector(makeTextLarger:)
+							   keyEquivalent:@""];
+	[menuItems addObject:[menuItem autorelease]];
+	
+	menuItem = [[NSMenuItem alloc] initWithTitle:NSLocalizedString(@"Decrease Text Size",@"Increase Text Size")
+									  action:@selector(makeTextSmaller:)
+							   keyEquivalent:@""];
+	[menuItems addObject:[menuItem autorelease]];
+	
+	return menuItems;
 }
 
 #pragma mark TableView Data source

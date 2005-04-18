@@ -5,6 +5,10 @@
                 addCurrentItemAction = id; 
                 addTextToCurrentFieldAction = id; 
                 changeTypeOfBibAction = id; 
+                dismissUrlSheet = id; 
+                loadFile = id; 
+                loadPasteboard = id; 
+                loadWebPage = id; 
                 stopAddingAction = id; 
             }; 
             CLASS = BDSKTextImportController; 
@@ -17,6 +21,7 @@
                 sourceBox = NSBox; 
                 sourceTextView = NSTextView; 
                 statusLine = NSTextField; 
+                urlSheet = NSPanel; 
                 urlTextField = NSTextField; 
                 webView = WebView; 
             }; 
