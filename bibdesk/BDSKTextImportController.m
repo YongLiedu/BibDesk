@@ -65,27 +65,6 @@
         
         [[webView mainFrame] loadRequest:urlreq];
         
-        
-    }else if([pbType isEqualToString:NSRTFPboardType]){
-		
-		if (showingWebView) {
-			[sourceBox replaceSubview:webView with:[sourceTextView enclosingScrollView]];
-			showingWebView = NO;
-		}
-		
-        NSRange r = NSMakeRange(0,[[sourceTextView string] length]);
-        [sourceTextView replaceCharactersInRange:r withRTF:[pb dataForType:pbType]];
-        
-    }else if([pbType isEqualToString:NSRTFDPboardType]){
-		
-		if (showingWebView) {
-			[sourceBox replaceSubview:webView with:[sourceTextView enclosingScrollView]];
-			showingWebView = NO;
-		}
-		
-        NSRange r = NSMakeRange(0,[[sourceTextView string] length]);
-        [sourceTextView replaceCharactersInRange:r withRTFD:[pb dataForType:pbType]];
-
     }else{
 		
 		if (showingWebView) {
@@ -93,8 +72,25 @@
 			showingWebView = NO;
 		}
 		
-        [sourceTextView setString:[pb stringForType:pbType]];
-    }
+		if([pbType isEqualToString:NSRTFPboardType]){
+			
+			NSRange r = NSMakeRange(0,[[sourceTextView string] length]);
+			[sourceTextView replaceCharactersInRange:r withRTF:[pb dataForType:pbType]];
+			
+		}else if([pbType isEqualToString:NSRTFDPboardType]){
+			
+			NSRange r = NSMakeRange(0,[[sourceTextView string] length]);
+			[sourceTextView replaceCharactersInRange:r withRTFD:[pb dataForType:pbType]];
+
+		}else if([pbType isEqualToString:NSStringPboardType]){
+			
+			[sourceTextView setString:[pb stringForType:pbType]];
+			
+		}else {
+			
+			[sourceTextView setString:@""];
+		}
+	}
 }
 
 
