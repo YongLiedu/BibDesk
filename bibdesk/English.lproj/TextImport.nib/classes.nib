@@ -18,6 +18,7 @@
                 citeKeyLine = NSTextField; 
                 itemTableView = NSTableView; 
                 itemTypeButton = NSPopUpButton; 
+                progressIndicator = NSProgressIndicator; 
                 sourceBox = NSBox; 
                 sourceTextView = NSTextView; 
                 statusLine = NSTextField; 

@@ -315,6 +315,20 @@
 	return menuItems;
 }
 
+#pragma mark WebFrameLoadDelegate
+
+- (void)webView:(WebView *)sender didStartProvisionalLoadForFrame:(WebFrame *)frame{
+	if ([progressIndicator respondsToSelector:@selector(setHidden:)])
+		[progressIndicator setHidden:NO];
+	[progressIndicator startAnimation:nil];
+}
+
+- (void)webView:(WebView *)sender didFinishLoadForFrame:(WebFrame *)frame{
+	if ([progressIndicator respondsToSelector:@selector(setHidden:)])
+		[progressIndicator setHidden:YES];
+	[progressIndicator stopAnimation:nil];
+}
+
 #pragma mark TableView Data source
 
 - (int)numberOfRowsInTableView:(NSTableView *)tableView{
