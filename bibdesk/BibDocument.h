@@ -322,13 +322,26 @@ extern NSString *BDSKBibItemLocalDragPboardType;
 */
 - (NSData *)bibTeXDataWithEncoding:(NSStringEncoding)encoding;
 
+/*!
+    @method     RISDataWithEncoding:
+    @abstract   Returns document contents in RIS form as NSData, in the specified string encoding.
+    @discussion (comprehensive description)
+    @param      encoding (description)
+    @result     (description)
+*/
+- (NSData *)RISDataWithEncoding:(NSStringEncoding)encoding;
+/*!
+    @method     RISDataRepresentation
+    @abstract   Returns document contents in RIS form as NSData, using the document's specified string encoding.
+    @discussion (comprehensive description)
+    @result     (description)
+*/
+- (NSData *)RISDataRepresentation;
 
 - (BOOL)loadDataRepresentation:(NSData *)data ofType:(NSString *)aType;
 - (BOOL)loadBibTeXDataRepresentation:(NSData *)data encoding:(NSStringEncoding)encoding;
 - (BOOL)loadRSSDataRepresentation:(NSData *)data;
 - (BOOL)loadPubMedDataRepresentation:(NSData *)data;
-
-- (BOOL)readFromFile:(NSString *)fileName ofType:(NSString *)docType;
 
 // Responses to UI actions
 
