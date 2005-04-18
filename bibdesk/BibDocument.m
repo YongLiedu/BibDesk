@@ -521,6 +521,10 @@ NSString *BDSKBibItemLocalDragPboardType = @"edu.ucsd.cs.mmccrack.bibdesk: Local
     [self exportAsFileType:@"bib"];
 }
 
+- (IBAction)exportRIS:(id)sender{
+    [self exportAsFileType:@"ris"];
+}
+
 - (void)exportAsFileType:(NSString *)fileType{
     NSSavePanel *sp = [NSSavePanel savePanel];
     [sp setRequiredFileType:fileType];
@@ -529,7 +533,7 @@ NSString *BDSKBibItemLocalDragPboardType = @"edu.ucsd.cs.mmccrack.bibdesk: Local
         [sp setAccessoryView:rssExportAccessoryView];
         // should call a [self setupRSSExportView]; to populate those with saved userdefaults!
     } else {
-        if([fileType isEqualToString:@"bib"]){ // this is for exporting bib files with alternate text encodings
+        if([fileType isEqualToString:@"bib"] || [fileType isEqualToString:@"ris"]){ // this is for exporting bib files with alternate text encodings
             [sp setAccessoryView:SaveEncodingAccessoryView];
         }
     }
@@ -561,29 +565,14 @@ NSString *BDSKBibItemLocalDragPboardType = @"edu.ucsd.cs.mmccrack.bibdesk: Local
         }else if([fileType isEqualToString:@"bib"]){            
             NSStringEncoding encoding = [[BDSKStringEncodingManager sharedEncodingManager] stringEncodingForDisplayedName:[saveTextEncodingPopupButton titleOfSelectedItem]];
             fileData = [self bibTeXDataWithEncoding:encoding];
+        }else if([fileType isEqualToString:@"ris"]){
+            NSStringEncoding encoding = [[BDSKStringEncodingManager sharedEncodingManager] stringEncodingForDisplayedName:[saveTextEncodingPopupButton titleOfSelectedItem]];
+            fileData = [self RISDataWithEncoding:encoding];
         }
         [fileData writeToFile:fileName atomically:YES];
     }
     [sp setRequiredFileType:@"bib"]; // just in case...
     [sp setAccessoryView:nil];
-}
-
-- (BOOL)writeToFile:(NSString *)fileName ofType:(NSString *)docType{
-	if ([docType isEqualToString:@"RIS/Medline File"]){
-		// Can't save pubmed files now. Could try saving as bibtex.
-		int returnCode = NSRunAlertPanel(NSLocalizedString(@"Cannot Save as PubMed.",@"alert title"),
-						 NSLocalizedString(@"Saving PubMed Files is not currently supported. You can choose to save as BibTeX instead.",@""),
-						 NSLocalizedString(@"Save as BibTeX",@""), 
-						 NSLocalizedString(@"Don't Save",@""), nil, nil);
-		if(returnCode == NSAlertDefaultReturn){
-			NSString *newName = [[[self fileName] stringByDeletingPathExtension] stringByAppendingPathExtension:@"bib"];
-		    return [self writeToFile:newName ofType:@"bibTeX database"];
-		}else{
-			return NO;
-		}
-	}else{
-	    return [super writeToFile:fileName ofType:docType];
-	}
 }
 
 - (NSData *)dataRepresentationOfType:(NSString *)aType
@@ -602,6 +591,8 @@ NSString *BDSKBibItemLocalDragPboardType = @"edu.ucsd.cs.mmccrack.bibdesk: Local
         return [self MODSDataRepresentation];
     }else if ([aType isEqualToString:@"ATOM"]){
         return [self atomDataRepresentation];
+    }else if ([aType isEqualToString:@"RIS/Medline File"]){
+        return [self RISDataRepresentation];
     }else
         return nil;
 }
@@ -622,7 +613,7 @@ NSString *BDSKBibItemLocalDragPboardType = @"edu.ucsd.cs.mmccrack.bibdesk: Local
                                                        @"Validate",@"Skip", nil, nil);
             // let NSDocument name it
             [self setFileName:nil];
-	    [self setFileType:@"bibTeX database"];  // this is the only type we support via the save command
+            [self setFileType:@"bibTeX database"];  // this is the only type we support via the save command
             if(rv == NSAlertDefaultReturn){
                 // per user feedback, give an option to run the file through the BibTeX parser to see if we can open our own BibTeX representation
                 // it is necessary to write the data to a file in order to use the error panel to jump to the offending line
@@ -822,6 +813,31 @@ stringByAppendingPathComponent:@"BibDesk"]; */
         
 }
 
+- (NSData *)RISDataWithEncoding:(NSStringEncoding)encoding{
+    
+    BibItem *tmp;
+    NSEnumerator *e = [[publications sortedArrayUsingSelector:@selector(fileOrderCompare:)] objectEnumerator];
+    NSMutableData *d = [NSMutableData data];
+    
+    if(encoding == 0)
+        [NSException raise:@"String encoding exception" format:@"Sender did not specify an encoding to %@.", NSStringFromSelector(_cmd)];
+    
+    while(tmp = [e nextObject]){
+        [d appendData:[[NSString stringWithString:@"\n\n"] dataUsingEncoding:encoding  allowLossyConversion:YES]];
+        [d appendData:[[tmp RISStringValue] dataUsingEncoding:encoding allowLossyConversion:YES]];
+    }
+        return d;
+        
+}
+
+- (NSData *)RISDataRepresentation{
+    
+    if([self documentStringEncoding] == 0)
+        [NSException raise:@"String encoding exception" format:@"Document does not have a specified string encoding."];
+    
+    return [self RISDataWithEncoding:[self documentStringEncoding]];
+    
+}
 
 #pragma mark -
 #pragma mark Opening and Loading Files
@@ -2200,7 +2216,7 @@ This method always returns YES. Even if some or many operations fail.
 	while(fnStr = [fileNameEnum nextObject]){
 		if(url = [NSURL fileURLWithPath:fnStr]){
 			BibItem * newBI = [[BibItem alloc] init];
-
+            
 			NSString *newUrl = [[NSURL fileURLWithPath:
 				[fnStr stringByExpandingTildeInPath]]absoluteString];
 

@@ -123,6 +123,7 @@
                 exportAsMODS = id; 
                 exportAsRSS = id; 
                 exportEncodedBib = id; 
+                exportRIS = id; 
                 find = id; 
                 generateCiteKey = id; 
                 importFromTextAction = id; 

@@ -61,8 +61,8 @@
 		<dict>
 			<key>CFBundleTypeExtensions</key>
 			<array>
-				<string>fcgi</string>
 				<string>ris</string>
+				<string>fcgi</string>
 			</array>
 			<key>CFBundleTypeIconFile</key>
 			<string>risDocIcon.icns</string>
@@ -73,7 +73,7 @@
 			<key>CFBundleTypeName</key>
 			<string>RIS/Medline File</string>
 			<key>CFBundleTypeRole</key>
-			<string>Viewer</string>
+			<string>Editor</string>
 			<key>NSDocumentClass</key>
 			<string>BibDocument</string>
 		</dict>

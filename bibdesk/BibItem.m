@@ -1073,7 +1073,7 @@ setupParagraphStyle()
         
         [s appendFormat:@"%@  - %@\n", [btm RISTagForBibTeXFieldName:k], v];
     }
-    [s appendString:@"ER  - \n\n\n"];
+    [s appendString:@"ER  - \n"];
     return s;
 }
 
