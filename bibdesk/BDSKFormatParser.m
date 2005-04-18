@@ -46,8 +46,7 @@ static BDSKFormatParser *sharedParser;
 	NSMutableString *parsedStr = [NSMutableString string];
 	NSString *savedStr = nil;
 	NSScanner *scanner = [NSScanner scannerWithString:format];
-	NSCharacterSet *digits = [NSCharacterSet decimalDigitCharacterSet];
-	NSString *string, *numStr, *authSep, *nameSep, *etal;
+	NSString *string, *authSep, *nameSep, *etal;
 	int number, numAuth, i, uniqueNumber;
 	unichar specifier, nextChar, uniqueSpecifier = 0;
 	NSMutableArray *arr;
@@ -79,28 +78,22 @@ static BDSKFormatParser *sharedParser;
 					if (![scanner isAtEnd]) {
 						// look for [separator]
 						if ([scanner scanString:@"[" intoString:NULL]) {
-							if ([scanner scanUpToString:@"]" intoString:&string]) {
-								authSep = string;
-							}
+							if (![scanner scanUpToString:@"]" intoString:&authSep]) authSep = @"";
 							[scanner scanString:@"]" intoString:NULL];
 							// look for [etal]
 							if ([scanner scanString:@"[" intoString:NULL]) {
-								if ([scanner scanUpToString:@"]" intoString:&string]) {
-									etal = string;
-								}
+								if (![scanner scanUpToString:@"]" intoString:&etal]) etal = @"";
 								[scanner scanString:@"]" intoString:NULL];
 							}
 						}
 						if (![scanner isAtEnd]) {
 							// look for #names
 							nextChar = [format characterAtIndex:[scanner scanLocation]];
-							if ([digits characterIsMember:nextChar]) {
+							if ([[NSCharacterSet decimalDigitCharacterSet] characterIsMember:nextChar]) {
 								[scanner setScanLocation:[scanner scanLocation]+1];
 								numAuth = (int)(nextChar - '0');
 								// scan for #chars per name
-								if ([scanner scanCharactersFromSet:digits intoString:&numStr]) {
-									number = [numStr intValue];
-								}
+								if (![scanner scanInt:&number]) number = 0;
 							}
 						}
 					}
@@ -123,34 +116,23 @@ static BDSKFormatParser *sharedParser;
 					}
 					break;
 				case 'A':
-					// author names with initials, optional [author separator], [name separator], [etal], #names and #chars
-					number = 0;
-					int numAuth = 0;
+					// author names with initials, optional [author separator], [name separator], [etal], #names
+					numAuth = 0;
 					authSep = @";";
 					nameSep = @".";
 					etal = @"";
 					if (![scanner isAtEnd]) {
 						// look for [author separator]
 						if ([scanner scanString:@"[" intoString:NULL]) {
-							if ([scanner scanUpToString:@"]" intoString:&string]) {
-								authSep = string;
-							} else {
-								authSep = @"";
-							}
+							if (![scanner scanUpToString:@"]" intoString:&authSep]) authSep = @"";
 							[scanner scanString:@"]" intoString:NULL];
 							// look for [name separator]
 							if ([scanner scanString:@"[" intoString:NULL]) {
-								if ([scanner scanUpToString:@"]" intoString:&string]) {
-									nameSep = string;
-								} else {
-									nameSep = @"";
-								}
+								if (![scanner scanUpToString:@"]" intoString:&nameSep]) nameSep = @"";
 								[scanner scanString:@"]" intoString:NULL];
 								// look for [etal]
 								if ([scanner scanString:@"[" intoString:NULL]) {
-									if ([scanner scanUpToString:@"]" intoString:&string]) {
-										etal = string;
-									}
+									if (![scanner scanUpToString:@"]" intoString:&etal]) etal = @"";
 									[scanner scanString:@"]" intoString:NULL];
 								}
 							}
@@ -158,7 +140,7 @@ static BDSKFormatParser *sharedParser;
 						if (![scanner isAtEnd]) {
 							// look for #names
 							nextChar = [format characterAtIndex:[scanner scanLocation]];
-							if ([digits characterIsMember:nextChar]) {
+							if ([[NSCharacterSet decimalDigitCharacterSet] characterIsMember:nextChar]) {
 								[scanner setScanLocation:[scanner scanLocation]+1];
 								numAuth = (int)(nextChar - '0');
 							}
@@ -181,9 +163,6 @@ static BDSKFormatParser *sharedParser;
 							string = lastName;
 						}
 						string = [self stringBySanitizingString:string forField:fieldName inFileType:[pub fileType]];
-						if ([string length] > number && number > 0) {
-							string = [string substringToIndex:number];
-						}
 						[parsedStr appendString:string];
 					}
 					if (numAuth < [pub numberOfAuthors]) {
@@ -194,11 +173,7 @@ static BDSKFormatParser *sharedParser;
 					// title, optional #chars
 					string = [[pub title] stringByRemovingCurlyBraces];
 					string = [self stringBySanitizingString:string forField:fieldName inFileType:[pub fileType]];
-					if ([scanner scanCharactersFromSet:digits intoString:&numStr]) {
-						number = [numStr intValue];
-					} else {
-						number = 0;
-					}
+					if (![scanner scanInt:&number]) number = 0;
 					if (number > 0 && [string length] > number) {
 						[parsedStr appendString:[string substringToIndex:number]];
 					} else {
@@ -208,11 +183,7 @@ static BDSKFormatParser *sharedParser;
 				case 'T':
 					// title, optional #words
 					string = [[pub title] stringByRemovingCurlyBraces];
-					if ([scanner scanCharactersFromSet:digits intoString:&numStr]) {
-						number = [numStr intValue];
-					} else {
-						number = 0;
-					}
+					if (![scanner scanInt:&number]) number = 0;
 					if (string != nil) {
 						arr = [NSMutableArray array];
 						// split the title into words using the same methodology as addString:forCompletionEntry:
@@ -262,11 +233,7 @@ static BDSKFormatParser *sharedParser;
 				case 'k':
 					// keywords
 					string = [pub valueOfField:BDSKKeywordsString];
-					if ([scanner scanCharactersFromSet:digits intoString:&numStr]) {
-						number = [numStr intValue];
-					} else {
-						number = 0;
-					}
+					if (![scanner scanInt:&number]) number = 0;
 					if (string != nil) {
 						arr = [NSMutableArray array];
 						// split the keyword string using the same methodology as addString:forCompletionEntry:, treating ,:; as possible dividers
@@ -325,11 +292,7 @@ static BDSKFormatParser *sharedParser;
 						[scanner scanUpToString:@"}" intoString:&string] &&
 						[scanner scanString:@"}" intoString:NULL]) {
 					
-						if ([scanner scanCharactersFromSet:digits intoString:&numStr]) {
-							number = [numStr intValue];
-						} else {
-							number = 0;
-						}
+						if (![scanner scanInt:&number]) number = 0;
 						if (![fieldName isEqualToString:BDSKCiteKeyString] &&
 							([string isEqualToString:BDSKCiteKeyString] ||
 							 [string isEqualToString:@"Citekey"] ||
@@ -367,33 +330,21 @@ static BDSKFormatParser *sharedParser;
 					break;
 				case 'r':
 					// random lowercase letters
-					if ([scanner scanCharactersFromSet:digits intoString:&numStr]) {
-						number = [numStr intValue];
-					} else {
-						number = 1;
-					}
+					if (![scanner scanInt:&number]) number = 1;
 					while (number-- > 0) {
 						[parsedStr appendFormat:@"%c",'a' + (char)(rand() % 26)];
 					}
 					break;
 				case 'R':
 					// random uppercase letters
-					if ([scanner scanCharactersFromSet:digits intoString:&numStr]) {
-						number = [numStr intValue];
-					} else {
-						number = 1;
-					}
+					if (![scanner scanInt:&number]) number = 1;
 					while (number-- > 0) {
 						[parsedStr appendFormat:@"%c",'A' + (char)(rand() % 26)];
 					}
 					break;
 				case 'd':
 					// random digits
-					if ([scanner scanCharactersFromSet:digits intoString:&numStr]) {
-						number = [numStr intValue];
-					} else {
-						number = 1;
-					}
+					if (![scanner scanInt:&number]) number = 1;
 					while (number-- > 0) {
 						[parsedStr appendFormat:@"%i",(int)(rand() % 10)];
 					}
@@ -422,11 +373,7 @@ static BDSKFormatParser *sharedParser;
 						uniqueSpecifier = specifier;
 						savedStr = parsedStr;
 						parsedStr = [NSMutableString string];
-						if ([scanner scanCharactersFromSet:digits intoString:&numStr]) {
-							uniqueNumber = [numStr intValue];
-						} else {
-							uniqueNumber = 1;
-						}
+						if (![scanner scanInt:&uniqueNumber]) number = 1;
 					}
 					else {
 						NSLog(@"Specifier %%%C can only be used once in the format.", specifier);
@@ -616,7 +563,7 @@ static BDSKFormatParser *sharedParser;
 				*error = [NSString stringWithFormat: NSLocalizedString(@"Specifier %%%C must be followed by a {'field'} name.", @""), specifier];
 				return NO;
 			}
-			string = [self stringBySanitizingString:string forField:fieldName inFileType:type];
+			string = [self stringBySanitizingString:string forField:BDSKCiteKeyString inFileType:type]; // cite-key sanitization is strict, so we use that for fieldnames
 			[sanitizedFormatString appendFormat:@"{%@}", [string capitalizedString]]; // we need to have BibTeX field names capitalized
 		}
 		else if ([validOptArgSpecifierChars characterIsMember:specifier]) {
