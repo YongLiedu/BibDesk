@@ -166,6 +166,22 @@ static BibTypeManager *sharedInstance = nil;
     return [MODSGenresForBibTeXTypeDict objectForKey:type];
 }
 
+- (NSString *)RISTagForBibTeXFieldName:(NSString *)name{
+    NSArray *types = [fieldNameForPubMedTagDict allKeysForObject:name];
+    if([types count])
+        return [types objectAtIndex:0];
+    else
+        return [[name stringByPaddingToLength:2 withString:@"1" startingAtIndex:0] uppercaseString]; // manufacture a guess
+}
+
+- (NSString *)RISTypeForBibTeXType:(NSString *)type{
+    NSArray *types = [bibtexTypeForPubMedTypeDict allKeysForObject:type];
+    if([types count])
+        return [types objectAtIndex:0];
+    else
+        return [[type stringByPaddingToLength:4 withString:@"?" startingAtIndex:0] uppercaseString]; // manufacture a guess
+}
+
 #pragma mark Character sets
 
 - (NSCharacterSet *)invalidCharactersForField:(NSString *)fieldName inFileType:(NSString *)type{

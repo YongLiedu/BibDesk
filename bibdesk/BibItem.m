@@ -1042,6 +1042,41 @@ setupParagraphStyle()
     return [mas autorelease];
 }
 
+- (NSString *)RISStringValue{
+    NSString *k;
+    NSString *v;
+    NSMutableString *s = [[[NSMutableString alloc] init] autorelease];
+    NSMutableArray *keys = [[pubFields allKeys] mutableCopy];
+    [keys sortUsingSelector:@selector(caseInsensitiveCompare:)];
+
+    NSEnumerator *e = [keys objectEnumerator];
+	[keys release];
+    
+    BibTypeManager *btm = [BibTypeManager sharedManager];
+    
+    [s appendFormat:@"TY  - %@\n", [btm RISTypeForBibTeXType:[self type]]];
+    
+    while(k = [e nextObject]){
+        v = [pubFields objectForKey:k];
+        NSString *valString;
+        
+        if([k isEqualToString:BDSKAuthorString]){
+            NSArray *auths = [v componentsSeparatedByString:@" and "];
+            NSEnumerator *authE = [auths objectEnumerator];
+            NSString *auth = nil;
+            unsigned  authCount = 1;
+            while(auth = [authE nextObject]){
+                [s appendFormat:@"A%i  - %@\n", authCount, auth];
+                authCount ++;
+            }
+        }
+        
+        [s appendFormat:@"%@  - %@\n", [btm RISTagForBibTeXFieldName:k], v];
+    }
+    [s appendString:@"ER  - \n\n\n"];
+    return s;
+}
+
 - (NSString *)bibTeXStringByTeXifying:(BOOL)shouldTeXify expandMacros:(BOOL)expand{
     NSString *k;
     NSString *v;

@@ -47,6 +47,26 @@
 - (NSString *)fieldNameForPubMedTag:(NSString *)tag;
 - (NSString *)bibtexTypeForPubMedType:(NSString *)type;
 
+/*!
+    @method     RISTagForBibTeXFieldName:
+    @abstract   Returns an RIS tag for a BibTeX field name.  May not be a recognized tag according to the http://www.refman.com/support/risformat_intro.asp, but
+                it should always be a valid RIS tag.
+    @discussion (comprehensive description)
+    @param      name (description)
+    @result     (description)
+*/
+- (NSString *)RISTagForBibTeXFieldName:(NSString *)name;
+
+/*!
+    @method     RISTypeForBibTeXType:
+    @abstract   Returns the closest matching RIS type for a given BibTeX type.  If the type does not exist, it is manufactured by uppercasing the first
+                four characters of the given type, and padding with ? as necessary.
+    @discussion (comprehensive description)
+    @param      type (description)
+    @result     (description)
+*/
+- (NSString *)RISTypeForBibTeXType:(NSString *)type;
+    
     /*!
 @method     MODSGenreForBibTeXType:
      @abstract   returns the appropriate MODS genre and level (like "Conference Publication") for known bibtex types (like "inproceedings")

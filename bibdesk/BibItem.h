@@ -307,6 +307,14 @@
 - (NSString *)bibTeXStringByExpandingMacros;
 
 /*!
+    @method     RISStringValue
+    @abstract   Returns the value of the BibItem in Reference Manager (RIS) format.  BibTeX tags are converted to RIS by the type manager.
+    @discussion (comprehensive description)
+    @result     (description)
+*/
+- (NSString *)RISStringValue;
+
+/*!
     @method RTFValue
     @abstract  returns a pretty RTF display for this bib item.
     @discussion «discussion»
