@@ -54,6 +54,7 @@
         // setup webview and load page
         
 		if (!showingWebView) {
+			[webView setFrame:[[sourceTextView enclosingScrollView] frame]];
 			[sourceBox replaceSubview:[sourceTextView enclosingScrollView] with:webView];
 			showingWebView = YES;
 		}
@@ -221,6 +222,11 @@
 
 		[[text mutableString] setString:@""];	// Empty the document
 		
+		if (showingWebView) {
+			[sourceBox replaceSubview:webView with:[sourceTextView enclosingScrollView]];
+			showingWebView = NO;
+		}
+		
 		[layoutManager retain];			// Temporarily remove layout manager so it doesn't do any work while loading
 		[text removeLayoutManager:layoutManager];
 		[text beginEditing];			// Bracket with begin/end editing for efficiency
@@ -251,6 +257,7 @@
 		// setup webview and load page
         
 		if (!showingWebView) {
+			[webView setFrame:[[sourceTextView enclosingScrollView] frame]];
 			[sourceBox replaceSubview:[sourceTextView enclosingScrollView] with:webView];
 			showingWebView = YES;
 		}
