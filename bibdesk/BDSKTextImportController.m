@@ -269,6 +269,10 @@
     }        
 }
 
+- (IBAction)stopLoadingAction:(id)sender{
+	[webView stopLoading:sender];
+}
+
 #pragma mark WebUIDelegate
 
 - (NSArray *)webView:(WebView *)sender contextMenuItemsForElement:(NSDictionary *)element defaultMenuItems:(NSArray *)defaultMenuItems{
@@ -322,14 +326,23 @@
 #pragma mark WebFrameLoadDelegate
 
 - (void)webView:(WebView *)sender didStartProvisionalLoadForFrame:(WebFrame *)frame{
+	if ([stopLoadingButton respondsToSelector:@selector(setHidden:)])
+		[stopLoadingButton setHidden:NO];
+	[stopLoadingButton setEnabled:YES];
 	[progressIndicator startAnimation:nil];
 }
 
 - (void)webView:(WebView *)sender didFinishLoadForFrame:(WebFrame *)frame{
+	if ([stopLoadingButton respondsToSelector:@selector(setHidden:)])
+		[stopLoadingButton setHidden:YES];
+	[stopLoadingButton setEnabled:NO];
 	[progressIndicator stopAnimation:nil];
 }
 
 - (void)webView:(WebView *)sender didFailProvisionalLoadWithError:(NSError *)error forFrame:(WebFrame *)frame{
+	if ([stopLoadingButton respondsToSelector:@selector(setHidden:)])
+		[stopLoadingButton setHidden:YES];
+	[stopLoadingButton setEnabled:NO];
 	[progressIndicator stopAnimation:nil];
 }
 

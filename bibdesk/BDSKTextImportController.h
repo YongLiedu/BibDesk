@@ -28,6 +28,7 @@
     IBOutlet NSPanel* urlSheet;
     IBOutlet NSTextField* urlTextField;
     IBOutlet NSProgressIndicator *progressIndicator;
+    IBOutlet NSButton *stopLoadingButton;
     BOOL showingWebView;
 }
 - (id)initWithDocument:(BibDocument *)document;
@@ -40,6 +41,7 @@
 - (IBAction)loadFile:(id)sender;
 - (IBAction)loadWebPage:(id)sender;
 - (IBAction)dismissUrlSheet:(id)sender;
+- (IBAction)stopLoadingAction:(id)sender;
 
 - (void)openPanelDidEnd:(NSOpenPanel *)sheet returnCode:(int)returnCode contextInfo:(void *)contextInfo;
 - (void)urlSheetDidEnd:(NSOpenPanel *)sheet returnCode:(int)returnCode contextInfo:(void *)contextInfo;

@@ -10,6 +10,7 @@
                 loadPasteboard = id; 
                 loadWebPage = id; 
                 stopAddingAction = id; 
+                stopLoadingAction = id; 
             }; 
             CLASS = BDSKTextImportController; 
             LANGUAGE = ObjC; 
@@ -22,6 +23,7 @@
                 sourceBox = NSBox; 
                 sourceTextView = NSTextView; 
                 statusLine = NSTextField; 
+                stopLoadingButton = NSButton; 
                 urlSheet = NSPanel; 
                 urlTextField = NSTextField; 
                 webView = WebView; 
