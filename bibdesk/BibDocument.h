@@ -341,7 +341,7 @@ extern NSString *BDSKBibItemLocalDragPboardType;
 - (BOOL)loadDataRepresentation:(NSData *)data ofType:(NSString *)aType;
 - (BOOL)loadBibTeXDataRepresentation:(NSData *)data encoding:(NSStringEncoding)encoding;
 - (BOOL)loadRSSDataRepresentation:(NSData *)data;
-- (BOOL)loadPubMedDataRepresentation:(NSData *)data;
+- (BOOL)loadRISDataRepresentation:(NSData *)data encoding:(NSStringEncoding)encoding;
 
 // Responses to UI actions
 

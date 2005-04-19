@@ -119,6 +119,15 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
  */
 - (void)openBibTeXFile:(NSString *)filePath withEncoding:(NSStringEncoding)encoding;
 
+/*!
+    @method     openRISFile:withEncoding:
+    @abstract   Creates a new document with given RIS file and string encoding.
+    @discussion (comprehensive description)
+    @param      filePath (description)
+    @param      encoding (description)
+*/
+- (void)openRISFile:(NSString *)filePath withEncoding:(NSStringEncoding)encoding;
+
 - (NSArray *)requiredFieldsForCiteKey;
 - (void)setRequiredFieldsForCiteKey:(NSArray *)newFields;
 - (NSArray *)requiredFieldsForLocalUrl;
@@ -208,7 +217,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 			  userData:(NSString *)userData
 				 error:(NSString **)error;
 
-- (void)importDataFromSelection:(NSPasteboard *)pboard
+- (void)newRISDocumentFromSelection:(NSPasteboard *)pboard
 		       userData:(NSString *)userData
 			  error:(NSString **)error;
 

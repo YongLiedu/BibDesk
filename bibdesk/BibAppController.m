@@ -292,7 +292,10 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
         if([fileType isEqualToString:@"bib"]){
             NSStringEncoding encoding = [[BDSKStringEncodingManager sharedEncodingManager] stringEncodingForDisplayedName:[openTextEncodingPopupButton titleOfSelectedItem]];
             [self openBibTeXFile:fileToOpen withEncoding:encoding];		
-        }else{
+        } else if([fileType isEqualToString:@"ris"] || [fileType isEqualToString:@"fcgi"]){
+            NSStringEncoding encoding = [[BDSKStringEncodingManager sharedEncodingManager] stringEncodingForDisplayedName:[openTextEncodingPopupButton titleOfSelectedItem]];
+            [self openRISFile:fileToOpen withEncoding:encoding];
+        } else {
             // handle other types in the usual way 
             // This ends up calling NSDocumentController makeDocumentWithContentsOfFile:ofType:
             // which calls NSDocument (here, most likely BibDocument) initWithContentsOfFile:ofType:
@@ -397,7 +400,20 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
     
 }
 
-
+- (void)openRISFile:(NSString *)filePath withEncoding:(NSStringEncoding)encoding{
+	
+	NSData *data = [NSData dataWithContentsOfFile:filePath];
+	BibDocument *doc = nil;
+	
+    // make a fresh document, and don't display it until we can set its name.
+    doc = [self openUntitledDocumentOfType:@"RIS/Medline File" display:NO];
+    [doc setFileName:filePath]; // this effectively makes it not an untitled document anymore.
+    [doc setFileType:@"RIS/Medline File"];  // this looks redundant, but it's necessary to enable saving the file (at least on AppKit == 10.3)
+    [doc loadRISDataRepresentation:data encoding:encoding];
+    [doc showWindows];
+    [doc updateUI];  
+    
+}
 
 #pragma mark Auto generation format stuff
 
@@ -1047,7 +1063,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 	
 }
 
-- (void)importDataFromSelection:(NSPasteboard *)pboard
+- (void)newRISDocumentFromSelection:(NSPasteboard *)pboard
 	      userData:(NSString *)userData
 		 error:(NSString **)error{	
     NSArray *types = [pboard types];
@@ -1060,7 +1076,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 
     BibDocument *doc = [[[BibDocument alloc] init] autorelease];
     
-    [doc loadPubMedDataRepresentation:[pboardString dataUsingEncoding:NSUTF8StringEncoding]];
+    [doc loadRISDataRepresentation:[pboardString dataUsingEncoding:NSUTF8StringEncoding] encoding:NSUTF8StringEncoding];
     [[NSDocumentController sharedDocumentController] setShouldCreateUI:YES];
     [[NSDocumentController sharedDocumentController] addDocument:doc];
     [doc makeWindowControllers];

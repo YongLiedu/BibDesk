@@ -583,7 +583,6 @@ NSString *BDSKBibItemLocalDragPboardType = @"edu.ucsd.cs.mmccrack.bibdesk: Local
 }
 
 - (void)savePanelDidEnd:(NSWindow *)sheet returnCode:(int)returnCode contextInfo:(void *)contextInfo{
-    NSLog(@"save panel did end");
     NSData *fileData = nil;
     NSString *fileName = nil;
     NSSavePanel *sp = (NSSavePanel *)sheet;
@@ -632,38 +631,6 @@ NSString *BDSKBibItemLocalDragPboardType = @"edu.ucsd.cs.mmccrack.bibdesk: Local
         return [self RISDataRepresentation];
     }else
         return nil;
-}
-
-- (BOOL)readFromFile:(NSString *)fileName ofType:(NSString *)docType{
-    if([super readFromFile:fileName ofType:docType]){
-	NSFileManager *fm = [NSFileManager defaultManager];
-	NSString *newName = [[[self fileName] stringByDeletingPathExtension] stringByAppendingPathExtension:@"bib"];
-	int i = 0;
-	NSArray *writableTypesArray = [[self class] writableTypes];
-	NSString *finalName = [NSString stringWithString:newName];
-	
-	if(![writableTypesArray containsObject:[self fileType]]){
-	    int rv = NSRunAlertPanel(NSLocalizedString(@"File Imported",
-                                                       @"alert title"),
-			             NSLocalizedString(@"To re-read the file as BibTeX and see if the import was successful, use the \"Validate\" button.",
-                                                       @"Validate file or skip."),
-                                                       @"Validate",@"Skip", nil, nil);
-            // let NSDocument name it
-            [self setFileName:nil];
-            [self setFileType:@"bibTeX database"];  // this is the only type we support via the save command
-            if(rv == NSAlertDefaultReturn){
-                // per user feedback, give an option to run the file through the BibTeX parser to see if we can open our own BibTeX representation
-                // it is necessary to write the data to a file in order to use the error panel to jump to the offending line
-                NSString *tempFilePath = [NSTemporaryDirectory() stringByAppendingPathComponent:[[NSProcessInfo processInfo] globallyUniqueString]];
-                [[self bibTeXDataWithEncoding:[[OFPreferenceWrapper sharedPreferenceWrapper] integerForKey:BDSKDefaultStringEncoding]] writeToFile:tempFilePath atomically:YES];
-                [[NSApp delegate] openBibTeXFile:tempFilePath withEncoding:[[OFPreferenceWrapper sharedPreferenceWrapper] integerForKey:BDSKDefaultStringEncoding]];
-                // [self performSelector:@selector(close) withObject:nil afterDelay:0]; // closes the window, but it's weird to have it open, then close
-            }
-            
-        } return YES;
-    
-    } else return NO;  // if super failed
-
 }
 
 #define AddDataFromString(s) [d appendData:[s dataUsingEncoding:NSASCIIStringEncoding]]
@@ -879,6 +846,38 @@ stringByAppendingPathComponent:@"BibDesk"]; */
 #pragma mark -
 #pragma mark Opening and Loading Files
 
+- (BOOL)readFromFile:(NSString *)fileName ofType:(NSString *)docType{
+    if([super readFromFile:fileName ofType:docType]){
+        NSFileManager *fm = [NSFileManager defaultManager];
+        NSString *newName = [[[self fileName] stringByDeletingPathExtension] stringByAppendingPathExtension:@"bib"];
+        int i = 0;
+        NSArray *writableTypesArray = [[self class] writableTypes];
+        NSString *finalName = [NSString stringWithString:newName];
+        
+        if(![writableTypesArray containsObject:[self fileType]]){
+            int rv = NSRunAlertPanel(NSLocalizedString(@"File Imported",
+                                                       @"alert title"),
+                                     NSLocalizedString(@"To re-read the file as BibTeX and see if the import was successful, use the \"Validate\" button.",
+                                                       @"Validate file or skip."),
+                                     @"Validate",@"Skip", nil, nil);
+            // let NSDocument name it
+            [self setFileName:nil];
+            [self setFileType:@"bibTeX database"];  // this is the only type we support via the save command
+            if(rv == NSAlertDefaultReturn){
+                // per user feedback, give an option to run the file through the BibTeX parser to see if we can open our own BibTeX representation
+                // it is necessary to write the data to a file in order to use the error panel to jump to the offending line
+                NSString *tempFilePath = [NSTemporaryDirectory() stringByAppendingPathComponent:[[NSProcessInfo processInfo] globallyUniqueString]];
+                [[self bibTeXDataWithEncoding:[[OFPreferenceWrapper sharedPreferenceWrapper] integerForKey:BDSKDefaultStringEncoding]] writeToFile:tempFilePath atomically:YES];
+                [[NSApp delegate] openBibTeXFile:tempFilePath withEncoding:[[OFPreferenceWrapper sharedPreferenceWrapper] integerForKey:BDSKDefaultStringEncoding]];
+                // [self performSelector:@selector(close) withObject:nil afterDelay:0]; // closes the window, but it's weird to have it open, then close
+            }
+            
+        } return YES;
+        
+    } else return NO;  // if super failed
+    
+}
+
 - (BOOL)loadDataRepresentation:(NSData *)data ofType:(NSString *)aType
 {
     if ([aType isEqualToString:@"bibTeX database"]){
@@ -886,25 +885,26 @@ stringByAppendingPathComponent:@"BibDesk"]; */
     }else if([aType isEqualToString:@"Rich Site Summary File"]){
         return [self loadRSSDataRepresentation:data];
     }else if([aType isEqualToString:@"RIS/Medline File"]){
-        return [self loadPubMedDataRepresentation:data];
+        return [self loadRISDataRepresentation:data encoding:[[OFPreferenceWrapper sharedPreferenceWrapper] integerForKey:BDSKDefaultStringEncoding]];
     }else
         return NO;
 }
 
 
-- (BOOL)loadPubMedDataRepresentation:(NSData *)data{
+- (BOOL)loadRISDataRepresentation:(NSData *)data encoding:(NSStringEncoding)encoding{
     int rv = 0;
     BOOL hadProblems = NO;
     NSMutableDictionary *dictionary = nil;
     NSString *tempFileName = nil;
-    NSString *dataString = [[[NSString alloc] initWithData:data encoding:NSUTF8StringEncoding] autorelease];
+    NSString *dataString = [[[NSString alloc] initWithData:data encoding:encoding] autorelease];
     NSString* filePath = [self fileName];
     NSMutableArray *newPubs = nil;
     
-    // Dirty check to see if we guessed the right encoding.  UTF8 will do fine for ASCII and fairly well for MacRoman but fails for
-    // ISO-8859-1 and gives a nil string.  This is a problem with ScienceDirect, if your browser is set to accept 8859-1 by default.
     if(dataString == nil){
-	dataString = [[[NSString alloc] initWithData:data encoding:NSISOLatin1StringEncoding] autorelease];
+        NSString *encStr = [[BDSKStringEncodingManager sharedEncodingManager] displayedNameForStringEncoding:encoding];
+        [NSException raise:@"BDSKStringEncodingException" 
+                    format:NSLocalizedString(@"Unable to interpret data as %@.  Try a different encoding.", 
+                                             @"need a single NSString format specifier"), encStr];
     }
     
     if(!filePath){
