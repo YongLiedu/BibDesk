@@ -135,8 +135,12 @@ Getting and setting the selection of the table
 Return styled text for a bibstring.
 */
 - (NSTextStorage*) textStorageForBibString:(NSString*) bibString {
-	[PDFpreviewer PDFFromString:bibString];
-    NSData * d = [PDFpreviewer rtfDataPreview];
+    NSData *d;
+	if([PDFpreviewer PDFFromString:bibString])
+        d = [PDFpreviewer rtfDataPreview];
+    else
+        return nil;
+    
 	NSDictionary * myDict;
 	
 	return [[[NSTextStorage alloc] initWithRTF:d documentAttributes:&myDict] autorelease];

@@ -82,6 +82,8 @@ static BDSKPreviewer *thePreviewer;
     // pool for MT
     NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
     
+    BOOL rv = YES;
+    
     if(str == nil){
         [self resetPreviews];
         [pool release];
@@ -133,6 +135,7 @@ static BDSKPreviewer *thePreviewer;
     // overwrites the old bibpreview.tex file, replacing the previous bibliographystyle
     if(![[finalTexFile dataUsingEncoding:[[OFPreferenceWrapper sharedPreferenceWrapper] integerForKey:BDSKTeXPreviewFileEncoding]] writeToFile:texTemplatePath atomically:YES]){
         NSLog(@"error replacing texfile");
+        rv = NO;
         goto cleanup;
     }
 
@@ -140,15 +143,19 @@ static BDSKPreviewer *thePreviewer;
     [bibTemplate appendFormat:@"\n%@",str];
     if(![[bibTemplate dataUsingEncoding:[[OFPreferenceWrapper sharedPreferenceWrapper] integerForKey:BDSKTeXPreviewFileEncoding]] writeToFile:tmpBibFilePath atomically:YES]){
         NSLog(@"Error replacing bibfile.");
+        rv = NO;
         goto cleanup;
     }
     
     NS_DURING
-        if(![self previewTexTasks:@"bibpreview.tex"])
+        if(![self previewTexTasks:@"bibpreview.tex"]){
             NSLog(@"Task failure in -[%@ %@]", [self class], NSStringFromSelector(_cmd));
+            rv = NO;
+        }
     NS_HANDLER 
-            // clean up and return, since we're responsible for all exceptions here
-            goto cleanup;
+        // clean up and return, since we're responsible for all exceptions here
+        rv = NO;
+        goto cleanup;
     NS_ENDHANDLER
             
     display:
@@ -159,7 +166,7 @@ static BDSKPreviewer *thePreviewer;
         [pool release];
         [theLock unlock];
         
-    return YES;    
+    return rv;    
     
 }
 

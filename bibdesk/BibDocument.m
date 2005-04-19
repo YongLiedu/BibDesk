@@ -2033,7 +2033,7 @@ int generalBibItemCompareFunc(id item1, id item2, void *context){
 
 - (IBAction)copyAsPDF:(id)sender{
     NSPasteboard *pb = [NSPasteboard pasteboardWithName:NSGeneralPboard];
-    NSData *d;
+    NSData *d = nil;
     NSNumber *i;
     NSEnumerator *e = [self selectedPubEnumerator];
     NSMutableString *bibString = [NSMutableString string];
@@ -2044,7 +2044,10 @@ int generalBibItemCompareFunc(id item1, id item2, void *context){
     }
     [pb setString:bibString forType:BDSKBibTeXStringPboardType];
     d = [PDFpreviewer PDFDataFromString:bibString];
-    [pb setData:d forType:NSPDFPboardType];
+    if(d != nil)
+        [pb setData:d forType:NSPDFPboardType];
+    else
+        NSBeep();
 }
 
 - (IBAction)copyAsRTF:(id)sender{
@@ -2059,9 +2062,12 @@ int generalBibItemCompareFunc(id item1, id item2, void *context){
         [bibString appendString:[[shownPublications objectAtIndex:[i intValue]] bibTeXString]];
     }
     [pb setString:bibString forType:BDSKBibTeXStringPboardType];
-    [PDFpreviewer PDFFromString:bibString];
-    d = [PDFpreviewer rtfDataPreview];
-    [pb setData:d forType:NSRTFPboardType];
+    if([PDFpreviewer PDFFromString:bibString]){
+        d = [PDFpreviewer rtfDataPreview];
+        [pb setData:d forType:NSRTFPboardType];
+    } else {
+        NSBeep();
+    }
     
 }
 
