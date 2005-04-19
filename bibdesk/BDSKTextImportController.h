@@ -30,9 +30,16 @@
     IBOutlet NSProgressIndicator *progressIndicator;
     IBOutlet NSButton *stopLoadingButton;
     BOOL showingWebView;
+	BOOL isDownloading;
+	WebDownload *download;
+	NSString *downloadFileName;
+    int receivedContentLength;
+    int expectedContentLength;
 }
+
 - (id)initWithDocument:(BibDocument *)document;
 - (void)setType:(NSString *)type;
+
 - (IBAction)addCurrentItemAction:(id)sender;
 - (IBAction)stopAddingAction:(id)sender;
 - (IBAction)addTextToCurrentFieldAction:(id)sender;
@@ -42,9 +49,21 @@
 - (IBAction)loadWebPage:(id)sender;
 - (IBAction)dismissUrlSheet:(id)sender;
 - (IBAction)stopLoadingAction:(id)sender;
+- (void)copyLocationAsRemoteUrl:(id)sender;
+- (void)copyLinkedLocationAsRemoteUrl:(id)sender;
+- (void)saveFileAsLocalUrl:(id)sender;
+- (void)downloadLinkedFileAsLocalUrl:(id)sender;
+- (void)bookmarkPage:(id)sender;
+- (void)bookmarkLink:(id)sender;
 
 - (void)openPanelDidEnd:(NSOpenPanel *)sheet returnCode:(int)returnCode contextInfo:(void *)contextInfo;
 - (void)urlSheetDidEnd:(NSOpenPanel *)sheet returnCode:(int)returnCode contextInfo:(void *)contextInfo;
+- (void)savePanelDidEnd:(NSSavePanel *)sheet returnCode:(int)returnCode contextInfo:(void *)contextInfo;
+- (void)saveDownloadPanelDidEnd:(NSSavePanel *)sheet returnCode:(int)returnCode contextInfo:(void *)contextInfo;
+
+- (void)cancelDownload;
+- (void)setLocalUrlFromDownload;
+- (void)setDownloading:(BOOL)downloading;
 
 - (void)setupSourceUI;
 - (void)setupTypeUI;

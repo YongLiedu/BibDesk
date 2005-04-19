@@ -127,7 +127,11 @@
     [fields addObjectsFromArray:[typeMan requiredFieldsForType:type]];
     [fields addObjectsFromArray:[typeMan optionalFieldsForType:type]];
     [fields addObjectsFromArray:[typeMan userDefaultFieldsForType:type]];
-
+	if (![fields containsObject:BDSKLocalUrlString]) 
+		[fields addObject:BDSKLocalUrlString];
+	if (![fields containsObject:BDSKUrlString]) 
+		[fields addObject:BDSKUrlString];
+	
 }
 
 #pragma mark Actions
@@ -212,6 +216,95 @@
                        contextInfo:nil];
 }
 
+- (IBAction)loadWebPage:(id)sender{
+	[NSApp beginSheet:urlSheet
+       modalForWindow:[self window]
+        modalDelegate:self
+       didEndSelector:@selector(urlSheetDidEnd:returnCode:contextInfo:)
+          contextInfo:nil];
+}
+
+- (IBAction)dismissUrlSheet:(id)sender{
+    [urlSheet orderOut:sender];
+    [NSApp endSheet:urlSheet returnCode:[sender tag]];
+}
+
+- (IBAction)stopLoadingAction:(id)sender{
+	if(isDownloading){
+		[self cancelDownload];
+	}else{
+		[webView stopLoading:sender];
+	}
+}
+
+- (void)copyLocationAsRemoteUrl:(id)sender{
+	NSString *URLString = [[[[[webView mainFrame] dataSource] request] URL] absoluteString];
+	
+	if (URLString) {
+		[item setField:BDSKUrlString toValue:URLString];
+		[itemTableView reloadData];
+	}
+}
+
+- (void)copyLinkedLocationAsRemoteUrl:(id)sender{
+	NSString *URLString = [(NSURL *)[sender representedObject] absoluteString];
+	
+	if (URLString) {
+		[item setField:BDSKUrlString toValue:URLString];
+		[itemTableView reloadData];
+	}
+}
+
+- (void)saveFileAsLocalUrl:(id)sender{
+	WebDataSource *dataSource = [[webView mainFrame] dataSource];
+	if (!dataSource || [dataSource isLoading]) 
+		return;
+	
+	NSString *fileName = [[[[dataSource request] URL] relativePath] lastPathComponent];
+	NSString *extension = [fileName pathExtension];
+
+    NSSavePanel *sPanel = [NSSavePanel savePanel];
+    if (![extension isEqualToString:@""]) 
+		[sPanel setRequiredFileType:extension];
+    if([sPanel respondsToSelector:@selector(setCanCreateDirectories:)])
+		[sPanel setCanCreateDirectories:YES];
+
+    [sPanel beginSheetForDirectory:nil 
+                              file:fileName 
+                    modalForWindow:[self window]
+                     modalDelegate:self 
+                    didEndSelector:@selector(savePanelDidEnd:returnCode:contextInfo:) 
+                       contextInfo:nil];
+}
+
+- (void)downloadLinkedFileAsLocalUrl:(id)sender{
+	NSURL *linkURL = (NSURL *)[sender representedObject];
+    if (isDownloading)
+        return;
+	if (linkURL) {
+		download = [[WebDownload alloc] initWithRequest:[NSURLRequest requestWithURL:linkURL] delegate:self];
+	}
+	if (!download) {
+		NSBeginAlertSheet(NSLocalizedString(@"Invalid or unsupported URL",@""),
+						  nil, nil, nil, 
+						  [self window], 
+						  nil, nil, nil, nil,
+						  NSLocalizedString(@"The URL to download is either invalid or unsupported.",@""));
+	}
+}
+
+- (void)bookmarkPage:(id)sender{
+	NSURL *URL = [[[[webView mainFrame] dataSource] request] URL];
+	// not yet implemented
+}
+
+- (void)bookmarkLink:(id)sender{
+	NSURL *linkURL = (NSURL *)[sender representedObject];
+	// not yet implemented
+}
+
+#pragma mark End sheet methods
+
 - (void)openPanelDidEnd:(NSOpenPanel *)sheet returnCode:(int)returnCode contextInfo:(void *)contextInfo{
 
     if(returnCode == NSOKButton){
@@ -238,17 +331,20 @@
     }        
 }
 
-- (IBAction)loadWebPage:(id)sender{
-	[NSApp beginSheet:urlSheet
-       modalForWindow:[self window]
-        modalDelegate:self
-       didEndSelector:@selector(urlSheetDidEnd:returnCode:contextInfo:)
-          contextInfo:nil];
-}
+- (void)savePanelDidEnd:(NSSavePanel *)sheet returnCode:(int)returnCode contextInfo:(void *)contextInfo{
+    
+	if (returnCode == NSOKButton) {
+		if ([[[[webView mainFrame] dataSource] data] writeToFile:[sheet filename] atomically:YES]) {
+			NSString *fileURLString = [[NSURL fileURLWithPath:[sheet filename]] absoluteString];
+			
+			[item setField:BDSKLocalUrlString toValue:fileURLString];
+			[item autoFilePaper];
+		} else {
+			NSLog(@"Could not write downloaded file.");
+		}
+    }
 
-- (IBAction)dismissUrlSheet:(id)sender{
-    [urlSheet orderOut:sender];
-    [NSApp endSheet:urlSheet returnCode:[sender tag]];
+    [itemTableView reloadData];
 }
 
 - (void)urlSheetDidEnd:(NSOpenPanel *)sheet returnCode:(int)returnCode contextInfo:(void *)contextInfo{
@@ -269,11 +365,72 @@
     }        
 }
 
-- (IBAction)stopLoadingAction:(id)sender{
-	[webView stopLoading:sender];
+- (void)saveDownloadPanelDidEnd:(NSSavePanel *)sheet returnCode:(int)returnCode contextInfo:(void *)contextInfo{
+    if (returnCode == NSOKButton) {
+        [download setDestination:[sheet filename] allowOverwrite:YES];
+    } else {
+        [self cancelDownload];
+    }
 }
 
-#pragma mark WebUIDelegate
+#pragma mark Download methods
+
+- (void)cancelDownload{
+	[download cancel];
+	[self setDownloading:NO];
+}
+
+- (void)setLocalUrlFromDownload{
+	NSString *fileURLString = [[NSURL fileURLWithPath:downloadFileName] absoluteString];
+	
+	[item setField:BDSKLocalUrlString toValue:fileURLString];
+	[item autoFilePaper];
+	
+	[itemTableView reloadData];
+}
+
+- (void)setDownloading:(BOOL)downloading{
+    if (isDownloading != downloading) {
+        isDownloading = downloading;
+        if (isDownloading) {
+			if ([stopLoadingButton respondsToSelector:@selector(setHidden:)])
+				[stopLoadingButton setHidden:NO];
+			[stopLoadingButton setEnabled:YES];
+			[stopLoadingButton setToolTip:NSLocalizedString(@"Cancel download",@"Cancel download")];
+            [progressIndicator startAnimation:self];
+			[progressIndicator setToolTip:[NSString stringWithFormat:NSLocalizedString(@"Downloading file. Received %i%%%C",@"Downloading file..."),0,0x2026]];
+            [downloadFileName release];
+			downloadFileName = nil;
+        } else {
+			if ([stopLoadingButton respondsToSelector:@selector(setHidden:)])
+				[stopLoadingButton setHidden:YES];
+			[stopLoadingButton setEnabled:NO];
+			[stopLoadingButton setToolTip:NSLocalizedString(@"Stop loading page",@"Stop loading page")];
+            [progressIndicator stopAnimation:self];
+			[progressIndicator setToolTip:[NSString stringWithFormat:@"%@%C",NSLocalizedString(@"Page is loading",@"Page is loading"),0x2026]];
+            [download release];
+            download = nil;
+            receivedContentLength = 0;
+        }
+    }
+}
+
+- (void)close{
+    [self cancelDownload];
+    [super close];
+}
+
+#pragma mark Menu validation
+
+- (BOOL)validateMenuItem:(id <NSMenuItem>)menuItem{
+	if([menuItem action] == @selector(bookmarkPage:) ||
+	   [menuItem action] == @selector(bookmarkLink:) ){
+		return NO; // these are not yet implemented
+	}
+	return YES;
+}
+
+#pragma mark WebUIDelegate methods
 
 - (NSArray *)webView:(WebView *)sender contextMenuItemsForElement:(NSDictionary *)element defaultMenuItems:(NSArray *)defaultMenuItems{
 	NSMutableArray *menuItems = [NSMutableArray arrayWithCapacity:6];
@@ -281,14 +438,68 @@
 	
 	NSEnumerator *iEnum = [defaultMenuItems objectEnumerator];
 	while (menuItem = [iEnum nextObject]) { 
-		if ([menuItem tag] == WebMenuItemTagCopy ||
-			[menuItem tag] == WebMenuItemTagCopyLinkToClipboard) {
+		if ([menuItem tag] == WebMenuItemTagCopy) {
+			// copy text items
+			if ([menuItems count] > 0)
+				[menuItems addObject:[NSMenuItem separatorItem]];
 			
 			[menuItems addObject:menuItem];
 		}
+		if ([menuItem tag] == WebMenuItemTagCopyLinkToClipboard) {
+			NSURL *linkURL = [element objectForKey:WebElementLinkURLKey];
+			// copy link items
+			if ([menuItems count] > 0)
+				[menuItems addObject:[NSMenuItem separatorItem]];
+			
+			[menuItems addObject:menuItem];
+			
+			menuItem = [[NSMenuItem alloc] initWithTitle:NSLocalizedString(@"Copy Link To Url Field",@"Copy link to url field")
+											  action:@selector(copyLinkedLocationAsRemoteUrl:)
+									   keyEquivalent:@""];
+			[menuItem setTarget:self];
+			[menuItem setRepresentedObject:linkURL];
+			[menuItems addObject:[menuItem autorelease]];
+			
+			menuItem = [[NSMenuItem alloc] initWithTitle:[NSString stringWithFormat:@"%@%C",NSLocalizedString(@"Save Link As Local File",@"Save link as local file"),0x2026]
+											  action:@selector(downloadLinkedFileAsLocalUrl:)
+									   keyEquivalent:@""];
+			[menuItem setTarget:self];
+			[menuItem setRepresentedObject:linkURL];
+			[menuItems addObject:[menuItem autorelease]];
+			
+			menuItem = [[NSMenuItem alloc] initWithTitle:NSLocalizedString(@"Bookmark Link",@"Bookmark linked page")
+											  action:@selector(bookmarkLink:)
+									   keyEquivalent:@""];
+			[menuItem setTarget:self];
+			[menuItem setRepresentedObject:linkURL];
+			[menuItems addObject:[menuItem autorelease]];
+		}
 	}
+	
+	// current location items
 	if ([menuItems count] > 0) 
 		[menuItems addObject:[NSMenuItem separatorItem]];
+		
+	menuItem = [[NSMenuItem alloc] initWithTitle:NSLocalizedString(@"Copy Location To Url Field",@"Copy to url field")
+									  action:@selector(copyLocationAsRemoteUrl:)
+							   keyEquivalent:@""];
+	[menuItem setTarget:self];
+	[menuItems addObject:[menuItem autorelease]];
+	
+	menuItem = [[NSMenuItem alloc] initWithTitle:[NSString stringWithFormat:@"%@%C",NSLocalizedString(@"Save As Local File",@"Save as local file"),0x2026]
+									  action:@selector(saveFileAsLocalUrl:)
+							   keyEquivalent:@""];
+	[menuItem setTarget:self];
+	[menuItems addObject:[menuItem autorelease]];
+	
+	menuItem = [[NSMenuItem alloc] initWithTitle:NSLocalizedString(@"Bookmark This Page",@"Bookmark this page")
+									  action:@selector(bookmarkPage:)
+							   keyEquivalent:@""];
+	[menuItem setTarget:self];
+	[menuItems addObject:[menuItem autorelease]];
+	
+	// navigation items
+	[menuItems addObject:[NSMenuItem separatorItem]];
 	
 	menuItem = [[NSMenuItem alloc] initWithTitle:NSLocalizedString(@"Back",@"Back")
 									  action:@selector(goBack:)
@@ -310,6 +521,9 @@
 							   keyEquivalent:@""];
 	[menuItems addObject:[menuItem autorelease]];
 	
+	// text size items
+	[menuItems addObject:[NSMenuItem separatorItem]];
+	
 	menuItem = [[NSMenuItem alloc] initWithTitle:NSLocalizedString(@"Increase Text Size",@"Increase Text Size")
 									  action:@selector(makeTextLarger:)
 							   keyEquivalent:@""];
@@ -323,7 +537,7 @@
 	return menuItems;
 }
 
-#pragma mark WebFrameLoadDelegate
+#pragma mark WebFrameLoadDelegate methods
 
 - (void)webView:(WebView *)sender didStartProvisionalLoadForFrame:(WebFrame *)frame{
 	if ([stopLoadingButton respondsToSelector:@selector(setHidden:)])
@@ -344,6 +558,71 @@
 		[stopLoadingButton setHidden:YES];
 	[stopLoadingButton setEnabled:NO];
 	[progressIndicator stopAnimation:nil];
+}
+
+#pragma mark NSURLDownloadDelegate methods
+
+- (void)downloadDidBegin:(NSURLDownload *)download{
+    [self setDownloading:YES];
+}
+
+- (NSWindow *)downloadWindowForAuthenticationSheet:(WebDownload *)download{
+    return [self window];
+}
+
+- (void)download:(NSURLDownload *)theDownload didReceiveResponse:(NSURLResponse *)response{
+    expectedContentLength = [response expectedContentLength];
+
+    if (expectedContentLength > 0) {
+    }
+}
+
+- (void)download:(NSURLDownload *)theDownload decideDestinationWithSuggestedFilename:(NSString *)filename{
+	[[NSSavePanel savePanel] beginSheetForDirectory:nil
+											   file:filename
+									 modalForWindow:[self window]
+									  modalDelegate:self
+									 didEndSelector:@selector(saveDownloadPanelDidEnd:returnCode:contextInfo:)
+										contextInfo:nil];
+}
+
+- (void)download:(NSURLDownload *)theDownload didReceiveDataOfLength:(unsigned)length{
+    if (expectedContentLength > 0) {
+        receivedContentLength += length;
+        int percent = round((double)receivedContentLength / (double)expectedContentLength);
+		[progressIndicator setToolTip:[NSString stringWithFormat:NSLocalizedString(@"Downloading file. Received %i%%%C",@"Downloading file..."),percent,0x2026]];
+    }
+}
+
+- (BOOL)download:(NSURLDownload *)download shouldDecodeSourceDataOfMIMEType:(NSString *)encodingType;{
+    return YES;
+}
+
+- (void)download:(NSURLDownload *)download didCreateDestination:(NSString *)path{
+    [downloadFileName release];
+	downloadFileName = [path copy];
+}
+
+- (void)downloadDidFinish:(NSURLDownload *)theDownload{
+    [self setDownloading:NO];
+	
+	[self setLocalUrlFromDownload];
+}
+
+- (void)download:(NSURLDownload *)theDownload didFailWithError:(NSError *)error
+{
+    [self setDownloading:NO];
+        
+    NSString *errorDescription = [error localizedDescription];
+    if (!errorDescription) {
+        errorDescription = @"An error occured during download.";
+    }
+    
+    NSBeginAlertSheet(NSLocalizedString(@"Download Failed",@"Download Failed"), 
+					  nil, nil, nil, 
+					  [self window], 
+					  nil, nil, nil, nil, 
+					  errorDescription);
 }
 
 #pragma mark TableView Data source
