@@ -26,6 +26,7 @@
     IBOutlet WebView* webView;
     IBOutlet NSPanel* urlSheet;
     IBOutlet NSTextField* urlTextField;
+    IBOutlet NSProgressIndicator *progressIndicator;
     BOOL showingWebView;
 }
 - (id)initWithDocument:(BibDocument *)document;
