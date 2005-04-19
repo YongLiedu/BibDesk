@@ -329,6 +329,10 @@
 	[progressIndicator stopAnimation:nil];
 }
 
+- (void)webView:(WebView *)sender didFailProvisionalLoadWithError:(NSError *)error forFrame:(WebFrame *)frame{
+	[progressIndicator stopAnimation:nil];
+}
+
 #pragma mark TableView Data source
 
 - (int)numberOfRowsInTableView:(NSTableView *)tableView{
