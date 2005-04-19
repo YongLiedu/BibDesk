@@ -27,7 +27,7 @@
     [item release];
     [fields release];
     [[sourceTextView enclosingScrollView] release];
-    [webView release];
+    [webViewBox release];
     [super dealloc];
 }
 
@@ -35,10 +35,12 @@
 	[itemTableView registerForDraggedTypes:[NSArray arrayWithObject:NSStringPboardType]];
     [statusLine setStringValue:@""];
     [citeKeyLine setStringValue:[item citeKey]];
+	[webViewBox setContentViewMargins:NSZeroSize];
+	[webViewBox setContentView:webView];
     [self setupTypeUI];
     [self setupSourceUI];
     [[sourceTextView enclosingScrollView] retain];
-    [webView retain];
+    [webViewBox retain];
     [itemTableView setDoubleAction:@selector(addTextToCurrentFieldAction:)];
 }
 
@@ -54,8 +56,8 @@
         // setup webview and load page
         
 		if (!showingWebView) {
-			[webView setFrame:[[sourceTextView enclosingScrollView] frame]];
-			[sourceBox replaceSubview:[sourceTextView enclosingScrollView] with:webView];
+			[webViewBox setFrame:[[sourceTextView enclosingScrollView] frame]];
+			[sourceBox replaceSubview:[sourceTextView enclosingScrollView] with:webViewBox];
 			showingWebView = YES;
 		}
         
@@ -68,7 +70,7 @@
     }else{
 		
 		if (showingWebView) {
-			[sourceBox replaceSubview:webView with:[sourceTextView enclosingScrollView]];
+			[sourceBox replaceSubview:webViewBox with:[sourceTextView enclosingScrollView]];
 			showingWebView = NO;
 		}
 		
@@ -219,7 +221,7 @@
 		[[text mutableString] setString:@""];	// Empty the document
 		
 		if (showingWebView) {
-			[sourceBox replaceSubview:webView with:[sourceTextView enclosingScrollView]];
+			[sourceBox replaceSubview:webViewBox with:[sourceTextView enclosingScrollView]];
 			showingWebView = NO;
 		}
 		
@@ -253,8 +255,8 @@
 		// setup webview and load page
         
 		if (!showingWebView) {
-			[webView setFrame:[[sourceTextView enclosingScrollView] frame]];
-			[sourceBox replaceSubview:[sourceTextView enclosingScrollView] with:webView];
+			[webViewBox setFrame:[[sourceTextView enclosingScrollView] frame]];
+			[sourceBox replaceSubview:[sourceTextView enclosingScrollView] with:webViewBox];
 			showingWebView = YES;
 		}
         

@@ -24,6 +24,7 @@
     IBOutlet NSPopUpButton* chooseSourceButton;
     IBOutlet NSBox* sourceBox;
     IBOutlet WebView* webView;
+    IBOutlet NSBox* webViewBox;
     IBOutlet NSPanel* urlSheet;
     IBOutlet NSTextField* urlTextField;
     IBOutlet NSProgressIndicator *progressIndicator;

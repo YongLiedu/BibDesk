@@ -25,6 +25,7 @@
                 urlSheet = NSPanel; 
                 urlTextField = NSTextField; 
                 webView = WebView; 
+                webViewBox = NSBox; 
             }; 
             SUPERCLASS = NSWindowController; 
         }, 
