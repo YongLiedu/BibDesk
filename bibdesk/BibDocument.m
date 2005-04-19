@@ -487,6 +487,42 @@ NSString *BDSKBibItemLocalDragPboardType = @"edu.ucsd.cs.mmccrack.bibdesk: Local
 #pragma mark -
 #pragma mark  Document Saving and Reading
 
+// if the user is saving in one of our plain text formats, give them an encoding option as well
+// this also requires overriding saveToFile:saveOperation:delegate:didSaveSelector:contextInfo:
+// to set the document's encoding before writing to the file
+- (BOOL)prepareSavePanel:(NSSavePanel *)savePanel{
+    if([super prepareSavePanel:savePanel]){
+        if([[self fileType] isEqualToString:@"bibTeX database"] || [[self fileType] isEqualToString:@"RIS/Medline File"]){
+            NSArray *oldViews = [[[savePanel accessoryView] subviews] retain]; // this should give us the file types popup from super and its label text field
+            [savePanel setAccessoryView:SaveEncodingAccessoryView]; // use our accessory view, since we've set the size appropriately in IB
+            NSEnumerator *e = [oldViews objectEnumerator];
+            NSView *aView = nil;
+            while(aView = [e nextObject]){ // now add in the subviews, excluding boxes (the old accessoryView box shouldn't be in the array)
+                if(![aView isKindOfClass:[NSBox class]])
+                    [[savePanel accessoryView] addSubview:aView];
+            }
+            if([[savePanel accessoryView] respondsToSelector:@selector(sizeToFit)])
+                [(NSBox *)[savePanel accessoryView] sizeToFit]; // this keeps us from truncating the file types popup
+            [oldViews release];
+            // set the popup to reflect the document's present string encoding
+            NSString *defaultEncName = [[BDSKStringEncodingManager sharedEncodingManager] displayedNameForStringEncoding:[self documentStringEncoding]];
+            [saveTextEncodingPopupButton selectItemWithTitle:defaultEncName];
+            [[savePanel accessoryView] setNeedsDisplay:YES];
+        } return YES;
+    } else return NO; // if super failed
+}
+
+- (void)saveToFile:(NSString *)fileName 
+     saveOperation:(NSSaveOperationType)saveOperation 
+          delegate:(id)delegate 
+   didSaveSelector:(SEL)didSaveSelector 
+       contextInfo:(void *)contextInfo{
+    // set the string encoding according to the popup if it's a plain text type
+    if([[self fileType] isEqualToString:@"bibTeX database"] || [[self fileType] isEqualToString:@"RIS/Medline File"])
+        [self setDocumentStringEncoding:[[BDSKStringEncodingManager sharedEncodingManager] 
+                                            stringEncodingForDisplayedName:[saveTextEncodingPopupButton titleOfSelectedItem]]];
+    [super saveToFile:fileName saveOperation:saveOperation delegate:delegate didSaveSelector:didSaveSelector contextInfo:contextInfo];
+}
 
 - (IBAction)saveDocument:(id)sender{
 
@@ -547,6 +583,7 @@ NSString *BDSKBibItemLocalDragPboardType = @"edu.ucsd.cs.mmccrack.bibdesk: Local
 }
 
 - (void)savePanelDidEnd:(NSWindow *)sheet returnCode:(int)returnCode contextInfo:(void *)contextInfo{
+    NSLog(@"save panel did end");
     NSData *fileData = nil;
     NSString *fileName = nil;
     NSSavePanel *sp = (NSSavePanel *)sheet;
