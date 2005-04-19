@@ -1049,12 +1049,21 @@ setupParagraphStyle()
     NSMutableArray *keys = [[pubFields allKeys] mutableCopy];
     [keys sortUsingSelector:@selector(caseInsensitiveCompare:)];
 
+    BibTypeManager *btm = [BibTypeManager sharedManager];
+    
+    // get the type, which may exist in pubFields if this was originally an RIS import; we must have only _one_ TY field,
+    // since they mark the beginning of each entry
+    NSString *risType = [pubFields objectForKey:@"TY"];
+    if(risType)
+        [keys removeObject:@"TY"];
+    else
+        risType = [btm RISTypeForBibTeXType:[self type]];
+    
+    // enumerate the remaining keys
     NSEnumerator *e = [keys objectEnumerator];
 	[keys release];
     
-    BibTypeManager *btm = [BibTypeManager sharedManager];
-    
-    [s appendFormat:@"TY  - %@\n", [btm RISTypeForBibTeXType:[self type]]];
+    [s appendFormat:@"TY  - %@\n", risType];
     
     while(k = [e nextObject]){
         v = [pubFields objectForKey:k];
@@ -1066,12 +1075,12 @@ setupParagraphStyle()
             NSString *auth = nil;
             unsigned  authCount = 1;
             while(auth = [authE nextObject]){
-                [s appendFormat:@"A%i  - %@\n", authCount, auth];
+                [s appendFormat:@"A%i  - %@\n", authCount, [auth stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]]];
                 authCount ++;
             }
         }
         
-        [s appendFormat:@"%@  - %@\n", [btm RISTagForBibTeXFieldName:k], v];
+        [s appendFormat:@"%@  - %@\n", [btm RISTagForBibTeXFieldName:k], [v stringByRemovingTeX]]; // this won't help with math, but removing $^_ is probably not a good idea
     }
     [s appendString:@"ER  - \n"];
     return s;
