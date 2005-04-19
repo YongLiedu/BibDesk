@@ -154,10 +154,10 @@
 			<key>NSMenuItem</key>
 			<dict>
 				<key>default</key>
-				<string>Bibdesk/Import RIS</string>
+				<string>Bibdesk/New Document With RIS</string>
 			</dict>
 			<key>NSMessage</key>
-			<string>importDataFromSelection</string>
+			<string>newRISDocumentFromSelection</string>
 			<key>NSPortName</key>
 			<string>Bibdesk</string>
 			<key>NSSendTypes</key>
