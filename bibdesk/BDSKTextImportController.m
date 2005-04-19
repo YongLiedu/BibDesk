@@ -161,7 +161,9 @@
     NSString *selString = nil;
 
     if(showingWebView){
-        selString = [[[[webView mainFrame] frameView] documentView] selectedString];
+		NSView *docView = [[[webView mainFrame] frameView] documentView];
+		if (![docView conformsToProtocol:@protocol(WebDocumentText)]) return;
+		selString = [docView selectedString];
         NSLog(@"selstr %@", selString);
     }else{
         NSRange selRange = [sourceTextView selectedRange];
