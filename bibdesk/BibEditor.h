@@ -234,13 +234,6 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 - (IBAction)viewLocal:(id)sender;
 
 /*!
-    @method     menuForImagePopUpButtonCell:
-    @abstract   Delegate method to get the current menu for the image popup button cell.
-    @discussion (comprehensive description)
-*/
-- (NSMenu *)menuForImagePopUpButtonCell:(RYZImagePopUpButtonCell *)cell;
-
-/*!
     @method     getSafariRecentDownloadsMenu
     @abstract   Returns an array of menuItem's for local paths of recent downloads from Safari.
     @discussion (comprehensive description)
