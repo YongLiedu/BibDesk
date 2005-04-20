@@ -289,10 +289,21 @@
 			showingWebView = YES;
 		}
         
-        NSURL *url = [NSURL URLWithString:[urlTextField stringValue]];
-        NSURLRequest *urlreq = [NSURLRequest requestWithURL:url];
+        NSString *urlString = [urlTextField stringValue];
         
-        [[webView mainFrame] loadRequest:urlreq];
+        if([urlString rangeOfString:@"://"].location == NSNotFound)
+            urlString = [@"http://" stringByAppendingString:urlString];
+        
+        NSURL *url = [NSURL URLWithString:urlString];
+        
+        if(url == nil){
+            [sheet orderOut:nil];
+            NSBeginAlertSheet(NSLocalizedString(@"Error", @""), nil, nil, nil, [self window], nil, nil, nil, nil, 
+                              NSLocalizedString(@"Mac OS X does not recognize this as a valid URL.  Please re-enter the address and try again.", @"") );
+        } else {        
+            NSURLRequest *urlreq = [NSURLRequest requestWithURL:url];
+            [[webView mainFrame] loadRequest:urlreq];
+        }
     }        
 }
 
