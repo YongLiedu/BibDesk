@@ -369,6 +369,7 @@ characters as equivalent, and is case-insensitive
 
 @node Adding References
 @section Adding References
+@abstract{How to add new references to a database.}
 
 @kindex cmd-shift-N
 @kindex cmd-N
@@ -378,6 +379,19 @@ with "New Reference" from the Bibliography menu, the keyboard
 shortcut @cmd{} N, or the New Reference toolbar button.
 
 #fixme: Add info about text import
+
+@node Editing References
+@section Editing References
+@abstract{Editing the data in your references.}
+
+@kindex cmd-E
+
+Once references have been added to the bibliography, they can be
+edited by selecting a reference and choosing "Edit Reference" from the
+Bibliography menu, typing @cmd{}E, or double-clicking the
+reference. When editing, changing pub type never loses information. In
+other words, if you put a booktitle in when it was inproceedings, and
+you change it to phdthesis, it will still have that booktitle.
 
 This opens the Editor window, which looks something
 like this:
@@ -416,12 +430,13 @@ publication's data fields.
 
 The "Annote" and "Abstract" tabs provide access to larger text areas
 for these types of information. Rss-Description is covered in
-`Exporting to RSS`_.
-
+@ref{RSS Preferences}.
 
 The references are presented in a table, similar to this:
 
 @image{gfx/tableView}
+
+@cindex Drag and Drop
 
 References can also be added to a bibliography by dragging an entry
 from a text source (text editor, web browser). Here's a fancy picture:
@@ -433,17 +448,6 @@ the highlighted reference. It can also be set (in the
 @ref{General Preferences} Preferences) to show the entire selected entry as nicely formatted
 text.
 
-
-@node Editing References
-@section Editing References
-@kindex cmd-E
-
-Once references have been added to the bibliography, they can be
-edited by selecting a reference and choosing "Edit Reference" from the
-Bibliography menu, typing @cmd{}E, or double-clicking the
-reference. When editing, changing pub type never loses information. In
-other words, if you put a booktitle in when it was inproceedings, and
-you change it to phdthesis, it will still have that booktitle.
 
 @menu
 * Entering Accented Characters::  
@@ -465,9 +469,9 @@ it.
 
 @node Editing Fields with Macros
 @subsection Editing Fields with Macros
+@abstract{How to edit a field as Raw BibTeX, to add macro references.}
 
 @cindex macro
-
 @kindex cmd-R
 
 FIXME
@@ -477,6 +481,7 @@ window when one of the form fields has the keyboard focus.
 
 @node Editing Macro Definitions
 @subsection Editing Macro Definitions
+@abstract{How to edit the definitions of a macro.}
 
 @cindex macro
 @image{gfx/macrosWindow}
@@ -499,6 +504,7 @@ of the lower browser pane of the selected reference.
 
 @node Saving The File
 @section Saving The File
+@abstract{Saving files and dealing with encodings}
 
 @cindex saving
 
@@ -545,6 +551,10 @@ FIXME: Notes about using the import RIS service
 
 @node Citation Keys
 @chapter Citation Keys
+@abstract{Controlling the automatic generation of citation keys.}
+
+@cindex cite key
+@cindex key
 
 @heading Citation Key Generation
 
@@ -559,11 +569,17 @@ reference in the preferences (See the @ref{Cite Key Preferences} preference pane
 
 @node When the Key is Generated
 @section When the Key is Generated
+@cindex cite key
+@cindex key
+
 
 When there is enough data entered...
 
 @node Generating a Key for an Existing Publication
 @section Generating a Key for an Existing Publication
+
+@cindex cite key
+@cindex key
 
 @cartouche 
 Use the action menu in the editor.
@@ -571,6 +587,9 @@ Use the action menu in the editor.
 
 @node Customizing the Format of Keys
 @section Customizing the Format of Keys
+@cindex cite key
+@cindex key
+
 
 FIXME
 
