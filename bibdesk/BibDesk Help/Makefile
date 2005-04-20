@@ -16,7 +16,8 @@ html:
 applehelp:
 	${texi2html} ${INPUT} --init-file=applehelp.init --prefix="BibDesk Help" --output=${DEST} --split=node ;\
 	cp -r gfx ${DEST}/;
-	perl -pi -e 's#<!--AppleMeta-->#<meta name=\"AppleTitle\" content=\"BibDesk Help\"><meta name=\"AppleIcon\" content=\"BibDesk%20Help/gfx/bibDeskIcon.png\"><meta name=\"robots\" content=\"anchors\">#' ${DEST}/BibDesk\ Help.html
+	perl -pi -e 's#<!--AppleMeta-->#<meta name=\"AppleTitle\" content=\"BibDesk Help\"><meta name=\"AppleIcon\" content=\"BibDesk%20Help/gfx/bibDeskIcon.png\"><meta name=\"robots\" content=\"anchors\">#' ${DEST}/BibDesk\ Help.html;\
+	python postprocess-nontitle.py ${DEST}/BibDesk\ Help_*.html
 #section#chapter
 
 pdf:
