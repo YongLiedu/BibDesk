@@ -583,4 +583,14 @@ static BDSKTypeInfoEditor *sharedTypeInfoEditor;
 	[self updateButtons];
 }
 
+#pragma mark Splitview delegate methods
+
+- (float)splitView:(NSSplitView *)sender constrainMinCoordinate:(float)proposedMin ofSubviewAt:(int)offset{
+	return proposedMin + 50.0;
+}
+
+- (float)splitView:(NSSplitView *)sender constrainMaxCoordinate:(float)proposedMax ofSubviewAt:(int)offset{
+	return proposedMax - 50.0;
+}
+
 @end
