@@ -525,20 +525,34 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 - (void)checkForUpdatesInBackground{
     NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
     
-    NSString *currVersionNumber = [[[NSBundle bundleForClass:[self class]]
-        infoDictionary] objectForKey:@"CFBundleVersion"];
+    NSString *currVersionNumber = [[[NSBundle mainBundle] infoDictionary] objectForKey:@"CFBundleVersion"];
     
-    NSDictionary *productVersionDict = [NSDictionary dictionaryWithContentsOfURL:
-        [NSURL URLWithString:@"http://bibdesk.sourceforge.net/bibdesk-versions-xml.txt"]];
+    NSURL *theURL = [NSURL URLWithString:@"http://bibdesk.sourceforge.net/bibdesk-versions-xml.txt"];
+    CFDataRef theData = NULL;
+    SInt32 status;
     
-    NSString *latestVersionNumber = [productVersionDict valueForKey:@"BibDesk"];
-    
-    if(productVersionDict != nil && ([latestVersionNumber caseInsensitiveCompare: currVersionNumber] == NSOrderedDescending) )
-        [self performSelectorOnMainThread:@selector(displayUpdateAvailableWindow:)
-                               withObject:latestVersionNumber
-                            waitUntilDone:NO];
+    if(CFURLCreateDataAndPropertiesFromResource(kCFAllocatorDefault,
+                                                (CFURLRef)theURL,
+                                                &theData,
+                                                NULL,
+                                                NULL,
+                                                &status))
+    {
+        NSString *err = nil;
+        NSDictionary *prodVersionDict = [NSPropertyListSerialization propertyListFromData:(NSData *)theData
+                                                                         mutabilityOption:NSPropertyListImmutable
+                                                                                   format:NULL
+                                                                         errorDescription:&err];
+        if(theData != NULL) CFRelease(theData);
+        
+        NSString *latestVersionNumber = [prodVersionDict valueForKey:@"BibDesk"];
+        if(prodVersionDict != nil && ([latestVersionNumber caseInsensitiveCompare: currVersionNumber] == NSOrderedDescending) )
+            [self performSelectorOnMainThread:@selector(displayUpdateAvailableWindow:)
+                                   withObject:latestVersionNumber
+                                waitUntilDone:NO];
+    }
     [pool release];
-
+    
 }
 
 - (void)displayUpdateAvailableWindow:(NSString *)latestVersionNumber{
@@ -548,8 +562,8 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
                              [NSString stringWithFormat:
                                  NSLocalizedString(@"A new version of BibDesk is available (version %@). Would you like to download the new version now?",
                                                    @"format string asking if the user would like to get the new version"), latestVersionNumber],
-							     NSLocalizedString(@"OK",@"OK"), 
-								 NSLocalizedString(@"Cancel",@"Cancel"), nil);
+                             NSLocalizedString(@"OK",@"OK"), 
+                             NSLocalizedString(@"Cancel",@"Cancel"), nil);
     if (button == NSOKButton) {
         [[NSWorkspace sharedWorkspace] openURL:[NSURL URLWithString:@"http://bibdesk.sourceforge.net/"]];
     }
@@ -559,12 +573,12 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 - (IBAction)checkForUpdates:(id)sender{
     NSString *currVersionNumber = [[[NSBundle bundleForClass:[self class]]
         infoDictionary] objectForKey:@"CFBundleVersion"];
-
+    
     NSDictionary *productVersionDict = [NSDictionary dictionaryWithContentsOfURL:
         [NSURL URLWithString:@"http://bibdesk.sourceforge.net/bibdesk-versions-xml.txt"]];
-
+    
     NSString *latestVersionNumber = [productVersionDict valueForKey:@"BibDesk"];
-
+    
     int button;
     if(latestVersionNumber == nil){
         NSRunAlertPanel(NSLocalizedString(@"Error",
@@ -574,7 +588,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
                         NSLocalizedString(@"Give up", @"Accept & give up"), nil, nil);
         return;
     }
-
+    
     if([latestVersionNumber caseInsensitiveCompare: currVersionNumber] != NSOrderedDescending)
     {
         // tell user software is up to date
@@ -587,16 +601,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
     else
     {
         // tell user to download a new version
-        button = NSRunAlertPanel(NSLocalizedString(@"A New Version is Available",
-                                                       @"Alert when new version is available"),
-                                     [NSString stringWithFormat:
-                                         NSLocalizedString(@"A new version of BibDesk is available (version %@). Would you like to download the new version now?",
-                                                           @"format string asking if the user would like to get the new version"), latestVersionNumber],
-                                         NSLocalizedString(@"OK",@"OK"), 
-										 NSLocalizedString(@"Cancel",@"Cancel"), nil);
-        if (button == NSOKButton) {
-            [[NSWorkspace sharedWorkspace] openURL:[NSURL URLWithString:@"http://bibdesk.sourceforge.net/"]];
-        }
+        [self displayUpdateAvailableWindow:latestVersionNumber];
     }
     
 }
