@@ -10,14 +10,37 @@
 @defindex pref
 
 @settitle BibDesk Help
-@documentdescription
-BibDesk Help
-@end documentdescription
 @setchapternewpage odd
 @footnotestyle separate
 @ifset shorttitlepage-enabled
 @shorttitlepage BibDesk v@value{VERSION}
 @end ifset
+
+@c A macro for search-result abstracts
+
+@macro cmd {}
+@html
+&#8984;
+@end html
+@ifnothtml
+Command
+@end ifnothtml
+@end macro
+
+@macro shift {}
+@html
+&#8679;
+@end html
+@ifnothtml
+Shift
+@end ifnothtml
+@end macro
+
+@macro abstract{text}
+@html
+<META NAME="DESCRIPTION" CONTENT="\text\">
+@end html
+@end macro
 
 @ifnottex
 @node Top
@@ -110,13 +133,14 @@ Searches will match the string without the braces - a search for
 @heading File Encodings
 
 @cindex encodings
-If you have a BibTeX file that is not stored with ASCII encoding, see
-[Opening a file with specific encodings](open-import.html#encoding)
+If you have a BibTeX file that is not stored with ASCII encoding,
+BibDesk will work with the file's encoding. See @ref{encoding-notes}
+for further information.
 
 @heading Citation Keys
 
 BibDesk can help you maintain useful and readable citation keys
-painlessly. See [Cite-key generation](cite-key.html) for more information.
+painlessly. See @ref{Cite Key Preferences} for more information.
 
 @heading Macro Support
 
@@ -131,7 +155,7 @@ them.
 BibDesk does not currently take advantage of the BibTeX crossref
 feature for display or searching, but if you use crossrefs, using
 BibDesk will not break them. If you would like to send feedback about
-this, see [Getting More Help](morehelp.html).
+this, see @ref{Getting More Help}.
 
 
 @node BibTeX Intro
@@ -140,8 +164,8 @@ this, see [Getting More Help](morehelp.html).
 @cindex bibtex
 
 BibTeX database files are in a text format with a few conventions you
-will want to know. See [Formatting Names](#names) and
- [Publication Types](#pubtypes) for answers to common questions.
+will want to know. See @ref{Formatting Names} and
+ @ref{Publication Types}) for answers to common questions.
 
 It helps to know what the parts of a BibTeX file are. Here's a trivial
 example to help illustrate. First we have a *macro definition*:
@@ -150,13 +174,13 @@ example to help illustrate. First we have a *macro definition*:
 @@string@{"PACT" = "International Conference on Processors, Architectures and Compilation Techniques"@}
 @end example
 
-Next a single *entry*:
+Next a single entry:
 @example
->    @@proceedings@{pact02,
->	    booktitle = PACT,
->	    Year = 2002,
->	    Month = sep,
->	    Address = "Harvard Square"@}
+@@proceedings@{pact02,
+	    booktitle = PACT,
+	    Year = 2002,
+	    Month = sep,
+	    Address = "Harvard Square"@}
 @end example
 
 The terminology we'll use to describe the entry is as follows:
@@ -168,6 +192,7 @@ The terminology we'll use to describe the entry is as follows:
 Any value can be either a quoted string (using either `""` or `@{@}`) or a
 number, or a macro (like `PACT` in the above example).
 
+@anchor{Publication Types}
 @heading Publication Types
 
 Each publication is assigned a type, which along with carrying some
@@ -183,6 +208,7 @@ Must be unique.
 
 Any field can be in any type.
 
+@anchor{Formatting Names}
 @heading Formatting Names
 
 Author and editor lists in BibTeX files are written as a single string
@@ -252,13 +278,16 @@ btxdoc.dvi
 
 @node Starting a New File
 @section Starting a New File
+@abstract{Various ways of Creating a New File}
 
-Choose "New Bibliography" from the File menu or type the keyboard shortcut \ |cmd|\ |shift|\ N. 
+Choose "New Bibliography" from the File menu or 
+type the keyboard shortcut @cmd{} @shift{} N. 
 
 @subsection Opening a File in a Specific Encoding
 
 Use the "Open..." menu item in the File menu, and select the encoding
-you want to use from the popup menu at the bottom of the dialog box.
+you want to use from the popup menu at the bottom of the dialog
+box.
 
 @subsection Opening a File Using a Command-Line Filter
 
@@ -273,16 +302,16 @@ FIXME: Example
 
 @cindex PubMed
 @cindex RIS
-BibDesk expects a file with the extension &#8216;.fcgi&#8217; and of
-MIME type &#8216;application/x-Research-Info-Systems&#8217;. If you
+BibDesk expects a file with the extension ``.fcgi'' and of
+MIME type ``application/x-Research-Info-Systems''. If you
 don't know what that means, that's OK. Just do your search as usual on
 PubMed, and then select the settings as in the following image:
 
 @image{gfx/pubmed}
 
 The important settings are that it should be set to Display
-&#8216;MEDLINE&#8217; and Send to &#8216;File&#8217;. Then click the
-&#8216;Send to&#8217; button, and a file &#8216;query.fcgi&#8217; will
+``MEDLINE'' and Send to ``File''. Then click the
+``Send to'' button, and a file ``query.fcgi'' will
 be saved to your download folder. You can then use BibDesk to open
 this file. Once you have opened the file it cannot be saved back in
 the same format. If you want to, you can save it as a BibTeX file, or
@@ -344,10 +373,13 @@ characters as equivalent, and is case-insensitive
 @kindex cmd-shift-N
 @kindex cmd-N
 
-Choose "New Bibliography" from the File menu or type the keyboard
-shortcut &#8984;&#8679;N. New references are added to the bibliography
-with "New Reference" from the Bibliography menu or the keyboard
-shortcut &#8984;N. This opens the Editor window, which looks something
+New references are added to the bibliography 
+with "New Reference" from the Bibliography menu, the keyboard
+shortcut @cmd{} N, or the New Reference toolbar button.
+
+#fixme: Add info about text import
+
+This opens the Editor window, which looks something
 like this:
 
 @image{gfx/editWindow}
@@ -397,8 +429,8 @@ from a text source (text editor, web browser). Here's a fancy picture:
 @image{gfx/dragIntoBib}
 
 Below the table view is the Notes pane, which shows the contents of
-the highlighted reference. It can also be set (in the [General
-preference pane](prefs.html#general) to show the entire selected entry as nicely formatted
+the highlighted reference. It can also be set (in the 
+@ref{General Preferences} Preferences) to show the entire selected entry as nicely formatted
 text.
 
 
@@ -408,7 +440,7 @@ text.
 
 Once references have been added to the bibliography, they can be
 edited by selecting a reference and choosing "Edit Reference" from the
-Bibliography menu, typing &#8984;E, or double-clicking the
+Bibliography menu, typing @cmd{}E, or double-clicking the
 reference. When editing, changing pub type never loses information. In
 other words, if you put a booktitle in when it was inproceedings, and
 you change it to phdthesis, it will still have that booktitle.
@@ -440,7 +472,7 @@ it.
 
 FIXME
 
-You can edit a field as raw BibTeX by pressing &#8984;R in the edit
+You can edit a field as raw BibTeX by pressing @cmd{}R in the edit
 window when one of the form fields has the keyboard focus.
 
 @node Editing Macro Definitions
@@ -462,7 +494,7 @@ delete the reference.
 
 @cindex printing
 
-Choosing "Print" from the File menu (&#8984;P) prints the contents
+Choosing "Print" from the File menu (@cmd{}P) prints the contents
 of the lower browser pane of the selected reference.
 
 @node Saving The File
@@ -470,7 +502,7 @@ of the lower browser pane of the selected reference.
 
 @cindex saving
 
-Save (&#8984;S) and Save As... (&#8984;&#8679;S) under the File
+Save (@cmd{}S) and Save As... (@cmd{}@shift{}S) under the File
 menu will save your bibliography as a BibTeX file. 
 
 @cindex encoding
@@ -492,8 +524,8 @@ from the pop-up button at the bottom of the resulting sheet.
 
 The preview panel shows you the currently selected references as a
 formatted bibliography. The bibliography's format is based on the
-current style file (set in <a href="prefs.html#preview">Preview
-preferences</a>). This helps in spotting errors and omissions in your
+current style file (set in the preference pane 
+``@ref{Preview Preferences}''). This helps in spotting errors and omissions in your
 references. The preview file will also reflect any macros you have
 included in your template file, if you have included them in the
 current bib-item.
@@ -517,7 +549,7 @@ FIXME: Notes about using the import RIS service
 @heading Citation Key Generation
 
 You can set the citation key to be automatically generated for a new
-reference in the preferences (See the [Cite Key preference pane](prefs.html#citekey)
+reference in the preferences (See the @ref{Cite Key Preferences} preference pane).
 
 @menu
 * When the Key is Generated::   
@@ -557,7 +589,7 @@ See prefs, see the @xref{Citation Key Format Reference}.
 This help page describes how to use the AutoFile feature to keep your
 electronic copies of papers organized.  You will need to choose a
 Papers Folder as described in the 
-[AutoFile preference pane help topic][preftopic]
+@ref{AutoFile Preferences} preference help topic.
 
 @menu
 * Automatically Move Files::    How Bibdesk can keep new papers organized automatically once you've consolidated them.
@@ -571,7 +603,7 @@ When linking a file by dragging and dropping it onto an edit window or
 the publications table, or by using the Choose File button in the edit
 window, AutoFile will automatically move the file to the Papers Folder
 if the "File Papers Automatically" preference is selected, as
-described in the [AutoFile preference pane help topic][preftopic].
+described in the @ref{AutoFile Preferences} preference help topic.
 
 
 @node Consolidate Linked Files
@@ -611,10 +643,10 @@ publications.
 
 This also works for multiple publications at once. Multiple selections
 produce a single citation containing the highlighted references (i.e.,
-`\cite@{key1,key2@}`).
+@code{\cite@{key1,key2@}}).
 
-The [Citation preferences](prefs.html#citation) allow for separate citations
-(i.e., `\cite@{key1@}\cite@{key2@}`).
+The @ref{Cite Key Preferences} allow for separate citations
+(i.e., @code{\cite@{key1@}\cite@{key2@}}).
 
 If you need a different citation command, then you will
 want to use the Custom Citation Strings Drawer.
@@ -629,7 +661,7 @@ want to use the Custom Citation Strings Drawer.
 @section The Custom Citation Strings Drawer
 
 Choosing Show/Hide Custom Citation Strings from the Window menu
-(&#8984;&#8679;C) toggles a drawer that allows you to drag and drop
+(@cmd{}@shift{}C) toggles a drawer that allows you to drag and drop
 citations into a TeX document using custom-defined citation strings,
 such as fullcite, citet, and citep.
 
@@ -640,8 +672,7 @@ such as fullcite, citet, and citep.
 
 BibDesk can install a plugin that lets you search your database and
 insert citation commands conveniently without leaving your text
-editing application. More detail about that is in the [autocompletion
-help page](autocompletion.html)
+editing application. @xref{External Autocompletion}
 
 @node System Service
 @section System Service
@@ -662,8 +693,8 @@ notably not BBEdit for OS X and no Classic or X windows apps) type a
 string, select it, then choose Complete Citation from the Bibdesk
 submenu of the Services Menu. This will replace the selected string
 with the citation(s) of any entries in open BibDesk documents (or, if
-BibDesk is not open yet, in the default bibliography set in <a
-href="prefs.htm">Preferences</a>) whose titles contain that
+BibDesk is not open yet, in the default bibliography set in
+@ref{General Preferences} Preferences) whose titles contain that
 string. So:
 
 @image{gfx/serviceBefore}
@@ -693,8 +724,8 @@ author, ``foo'' in the title, and ``Jan'' in the month:
 Another service is available, called "Complete Cite Key" which allows
 you to highlight a part of a citation key and BibDesk will complete
 the key for you. For instance, in our example , selecting
-&#8216;CasO&#8217; and invoking the &#8216;Complete Cite Key&#8217;
-service would insert &#8216;CasObe00&#8217;.
+``CasO'' and invoking the ``Complete Cite Key''
+service would insert ``CasObe00''.
 
 @node Preferences Guide
 @chapter Preferences Guide
@@ -702,7 +733,7 @@ service would insert &#8216;CasObe00&#8217;.
 
 This help page describes options in the preferences you can use to
 customize Bibdesk. To change your preferences, choose "Preferences"
-from the "Bibdesk" menu, or press the key shortcut &#8984;-, (Command
+from the "Bibdesk" menu, or press the key shortcut @cmd{}-, (Command
 - comma).
 
 @heading Preference Panes
@@ -725,12 +756,12 @@ from the "Bibdesk" menu, or press the key shortcut &#8984;-, (Command
 @image{gfx/generalPrefs}
 
 This panel controls what BibDesk does when it starts up. Clicking the
-&#8216;Open this bibliography&#8217; radio button prompts you to
+``Open this bibliography'' radio button prompts you to
 choose a default bib file to open. You can set the font used in the
 publications list, and whether annotations or complete references are
 displayed in the bottom of the publications list.  Clicking the
-&#8216;Display errors panel for warnings&#8217; causes the Error panel
-to be shown at startup (see <a href ="morehelp.html">Getting help</a> for
+``Display errors panel for warnings'' causes the Error panel
+to be shown at startup (see @ref{Getting More Help} for
 information on the Error panel).
 
 @node Citation Preferences
@@ -739,26 +770,31 @@ information on the Error panel).
 @image{gfx/citationPrefs}
 
 
-<em>Copying and Dragging Out</em>: This controls what gets dropped (or copied) on a drag (or copy).
-<ul>
-<li>BibTeX entry means the whole entry like: @@misc@{key, author="", ... , .... @}.
-<li>TeX Citation means: \cite@{cite-key@}
-<li>PDF Description means essentially the contents of the Preview pane as a page of PDF.
-<li>Separate citations lets you choose whether to have bibdesk drop strings like \cite@{key1,key2@} or \cite@{key1@} \cite@{key2@} when multiple items are involved.
-<li>The citation text field lets you change the string that is used when dragging from the publications table to whatever you like (e.g. citep or citet ...)
-<li>Bracket Style lets you choose to use square brackets for copy/paste and dragging citations, for compatibility with ConTeXt.
-</ul>
+Copying and Dragging Out: This controls what gets dropped (or copied) on a drag (or copy).
 
+@itemize
+@item BibTeX entry means the whole entry like: @code{@@misc@{key, author="" , @dots{} @}}.
+@item TeX Citation means: @code{\cite@{cite-key@}}
+@item PDF Description means the contents of the PDF Preview pane as a page of PDF.
+@item RTF Description means the contents of the RTF Preview pane.
+@end itemize
 
-<em>Custom Citation Drawer</em>: This allows you to enter further
+Separate Citations lets you choose whether to have bibdesk drop strings like \cite@{key1,key2@} or \cite@{key1@} \cite@{key2@} when multiple items are involved.
+
+The citation text field lets you change the string that is used when dragging from the publications table to whatever you like (e.g. citep or citet ...)
+
+Bracket Style lets you choose to use square brackets for copy/paste and dragging citations, for compatibility with ConTeXt.
+
+Custom Citation Drawer: This allows you to enter further
 strings that you can access via dragging from the custom citation
 strings drawer. This drawer lets you drag the selected publications
 from the publications table, using a different citation string.
 
-
-<em>Pasting and dragging in</em>: &#8216;Open edit window when
-paste/dragging in&#8217; lets you decide whether to always immediately
+Pasting and Dragging in: ``Open edit window when
+paste/dragging in'' lets you decide whether to always immediately
 open the edit window for an item you have pasted or dragged in.
+
+
 
 @node Files Preferences
 @section Files
@@ -766,13 +802,15 @@ open the edit window for an item you have pasted or dragged in.
 @image{gfx/filesPrefs}
 
 
-<em>Default string encoding for opening and exporting BibTeX files</em>: This popup menu allows you to select the <a href="./charencoding.htm">encoding</a> used to open files by double-clicking on them in the Finder.
+Default string encoding for opening and exporting BibTeX files: This
+popup menu allows you to select the encoding used to open files by
+double-clicking on them in the Finder.
 
+@anchor{encoding-notes}
+Specific notes and warnings:
 
-<em>Specific notes and warnings:</em> 
-
-* Files that are opened as ASCII will be run through the [character
-conversion](char-convert.txt) process so that accented characters
+* Files that are opened as ASCII will be run through the
+@ref{Character Conversion} process so that accented characters
 display properly.
 
 * This is the default behavior in BibDesk 0.97.2 and
@@ -783,7 +821,7 @@ encoding.  To save with an alternate encoding, choose the
 "File->Export->Export BibTeX With Encoding..." menu option and select
 a particular encoding.  Characters will only be converted to TeX when
 saving as ASCII files; otherwise, they are written out as displayed in
-BibDesk.
+BibDesk. 
 
 @node Preview Preferences
 @section Preview
@@ -791,23 +829,23 @@ BibDesk.
 @image{gfx/previewPrefs}
 
 
-<em>Use TeX for Previewing</em>: (More appropriately, use pdftex for previewing.) If this is checked, the preview pane will be drawn.
+Use TeX for Previewing: (More appropriately, use pdftex for previewing.) If this is checked, the preview pane will be drawn.
 
 
-<em>TeX Options</em>: The style file (just the name, not the whole path) can be specified here. Also, the TeX and BibTeX program paths can be changed here, so you are not tied to one distribution of TeX.
+TeX Options: The style file (just the name, not the whole path) can be specified here. Also, the TeX and BibTeX program paths can be changed here, so you are not tied to one distribution of TeX.
 
 
-<em>Browser preview pane</em>: Select what you want the lower pane of the main browser window to show.
+Browser preview pane: Select what you want the lower pane of the main browser window to show.
 
 @node Default Fields Preferences
 @section Default Fields
 
 @image{gfx/defaultsPrefs}
 
-<em>BibTeX Fields</em>: You can set fields to be added to publications by default here. They are added when a file is opened and if a new publication is made.<br>
+BibTeX Fields: You can set fields to be added to publications by default here. They are added when a file is opened and if a new publication is made.<br>
 Tip: Use this for fields you would like to use on every entry to avoid adding them every time. For example, a rating field or one that reminds you if you've read the cited paper.
 
-<em>Template File</em>: Clicking this button sends you to TextEdit to change the template file that is added to the beginning of every saved bib file. This template file is a great place to put your macros, copyright info (if applicable), or shameless plugs for your software :)
+Template File: Clicking this button sends you to TextEdit to change the template file that is added to the beginning of every saved bib file. This template file is a great place to put your macros, copyright info (if applicable), or shameless plugs for your software :)
 
 FIXME: incomplete. should use @@enumerate macros too?
 
@@ -817,13 +855,13 @@ FIXME: incomplete. should use @@enumerate macros too?
 @image{gfx/rssPrefs}
 
 Hopefully this panel is self explanatory. If you click on the
-&#8216;Find out more...&#8217; link, your favorite web browser will
-open the page <a
-href="http://www.cs.ucsd.edu/~mmccrack/AboutRSS.html">http://www.cs.ucsd.edu/~mmccrack/AboutRSS.html</a>. The
-RSS publishing preferences control the RSS export features. If you
-check &#8216;Automatically save RSS feeds&#8217;, everytime you save a
+``Find out more...'' link, your favorite web browser will
+open the page
+@uref{href="http://www.cs.ucsd.edu/~mmccrack/AboutRSS.html}">
+The RSS publishing preferences control the RSS export features. If you
+check ``Automatically save RSS feeds'', everytime you save a
 .bib file, a correspondingly named .rss file will be saved in the same
-directory. The &#8216;description&#8217; field in RSS is the text that
+directory. The ``description'' field in RSS is the text that
 shows up as the headline of each item in the RSS feed. See the link
 for more details.
 
@@ -832,18 +870,18 @@ for more details.
 
 @image{gfx/citeKeyPrefs}
 
-<em>Preset Format</em>: You can choose from several default cite key
-formats. Choosing <em>Custom</em> allows you to set the cite key
+Preset Format: You can choose from several default cite key
+formats. Choosing ``Custom'' allows you to set the cite key
 format string to any valid format.
 
-<em>Format String</em>: This text field shows the cite key format
+Format String: This text field shows the cite key format
 field that is used to automatically generate cite keys. The cite key
 format string can contain several special format specifiers, which are
 a %-character followed by a specifier character and optionally zero to
-two numbers. See @xref{Citation Key Format Reference} for a
+two numbers. See @ref{Citation Key Format Reference} for a
 more detailed description of the syntax.
 
-<em>Choose a format specifier to add</em>: This allows you to easily
+Choose a format specifier to add: This allows you to easily
 add format specifiers at the end of the format string. This popup
 button will only be visible in custom mode.
 
@@ -851,12 +889,14 @@ FIXME: out of date: lowercase missing
 
 @node Autocompletion Preferences
 @section Autocompletion
+@abstract{Configuring the Autocompletion feature}
 
 @subsection Internal Autocompletion
 @image{gfx/autocompletePrefs-Internal}
 
 FIXME: What to say here?
 
+@anchor{External Autocompletion}
 @subsection External Autocompletion
 @image{gfx/autocompletePrefs-External}
 
@@ -867,12 +907,11 @@ the "Install" button.
 When the plugin has been installed, the button title changes to
 "Reinstall" automatically. Autocompletion will only work in Cocoa
 applications, such as the ones in the picture, and they must be added
-to the list manually using the "Add" button below the list.  See <a
-href="autocompletion.html">Inserting References Automatically</a> for
-more information.
+to the list manually using the "Add" button below the list.  
 
 @node AutoFile Preferences
 @section AutoFile
+@abstract{Configuring the AutoFile feature}
 
 @image{gfx/autoFilePrefs}
 
@@ -885,14 +924,14 @@ automatically move files.
 @xref{Citation Key Format Reference}.
 
 @node Getting More Help
-
 @chapter Getting More Help
+@abstract{Where to go to figure out problems.}
 
 @heading The Error Panel
 
 The Error panel provides feedback on errors contained in a bib
-file. You can always show the panel by selecting &#8216;Show/Hide
-Error Panel&#8217; from the Window menu (&#8984;-Shift-E). This is
+file. You can always show the panel by selecting ``Show/Hide
+Error Panel'' from the Window menu (@cmd{}@shift{}E). This is
 what the errors panel looks like:
 
 Clicking on a warning line in this table opens an editing window with
@@ -902,17 +941,17 @@ the offending line highlighted.
 
 @heading Mailing List
 If your questions aren't answered in this help file, the
-[bibdesk-users mailing list][list] may have an answer. Your question
-may have been answered already, so you can check the [list
-archives][arc] to get instant gratification.
+@uref{http://lists.sourceforge.net/lists/listinfo/bibdesk-users, bibdesk-users mailing list}
+ may have an answer. Your question
+may have been answered already, so you can check the 
+@uref{http://sourceforge.net/mailarchive/forum.php?forum=bibdesk-users,list archives} 
+to get instant gratification.
 
-[list]:http://lists.sourceforge.net/lists/listinfo/bibdesk-users
-[arc]:http://sourceforge.net/mailarchive/forum.php?forum=bibdesk-users
 
 @heading Bug reports
 
-You can submit a bug report to the bug tracker at <a
-href="http://sourceforge.net/projects/bibdesk/">http://sourceforge.net/projects/bibdesk/</a>.
+You can submit a bug report to the bug tracker at 
+@uref{http://sourceforge.net/projects/bibdesk/}.
 
 The reports are most useful if they provide a clear description of
 what went wrong, what you expected, and how to reproduce the problem
@@ -948,11 +987,12 @@ be obtained from the Console application (in `Applications/Utilities`).
 @heading What is character conversion? 
 
 BibDesk automatically converts many accented characters into their
-TeXequivalents when it writes a BibTeX file.&nbsp; For instance , a 
-isconverted to @{\"u@} when your file is saved, but presented as  in
-theinterface.&nbsp; There are some limitations on this process;
-conversion only works when a @{\ sequence is encountered, as in the
-above example,and it only works if BibDesk has the conversion stored
+TeXequivalents when it writes a BibTeX file. For instance, a u
+with umlaut 
+is converted to @code{@{\"u@}} when your file is saved, but presented as-is in
+theinterface. There are some limitations on this process;
+conversion only works when a @code{@{\} sequence is encountered, as in the
+above example, and it only works if BibDesk has the conversion stored
 in its internal dictionary.
 
 If you encounter a warning that BibDesk was unable to convert an
@@ -963,10 +1003,10 @@ release of BibDesk.
 
 @heading Accented characters and TeX 
 
-The following table was taken from <i>The
-Not So Short Introduction to LaTeX2e</i> (Oetiker et al., 1999).&nbsp;
+The following table was taken from The
+Not So Short Introduction to LaTeX2e> (Oetiker et al., 1999).
 Depending on your TeX distribution, it may be available at
-`/usr/local/teTeX/share/texmf.tetex/doc/latex/general/lshort.dvi`, or it is available from @uref{http://www.ctan.org/ctan/tex-archive/info/lshort/english/, CTAN}.
+@code{/usr/local/teTeX/share/texmf.tetex/doc/latex/general/lshort.dvi}, or it is available from @uref{http://www.ctan.org/ctan/tex-archive/info/lshort/english/, CTAN}.
 
 Many of the accents listed in this table can be applied to characters
 other than o, as well.  
@@ -984,127 +1024,121 @@ Note: for BibTeX, it is also necessary to enclose the accent sequence in braces 
 
 The format is used for autogeneration of certain values, such as the cite key and the local-url. The format is a string containing special format specifiers, which are replaced by strings determined by the bibliography data. Most format specifiers have the form of a %-character followed by a single character. It can be followed by optional digits, which serve as parameters for the format specifier. Possible format specifiers are given in the table below.
 
+@ifnothtml
+Warning: there is a large chunk of HTML that isn't included.
+@end ifnothtml
 
-@multitable @columnfractions .1 .6
-@headitem Specifier @tab Replaced content description
-
-@item %a<span class="param">[][]00 
-@tab Author last names, with (optional) maximal number of authors and number of characters
-@item %A<span class="param">[;]<span class="param">[.]<span class="param">[]<span class="param">0
-@tab Author last names with initials, with (optional) maximal number of authors
-@item %t<span class="param">0
-@tab Title, with (optional) maximal length
-@item %T<span class="param">0
-@tab Title, with (optional) maximal number of words
-@item %y
-@tab Year without century
-@item %Y
-@tab Year with century
-@item %m
-@tab Month as decimal number
-@item %k<span class="param">0
-@tab Keywords concatenated together, with (optional) maximal number of keywords. Keywords must be separated by one of ;:, (semicolon, colon, or comma)
-@item %l
-@tab File name from Local-Url, without extension
-
-@item %L
-@tab File name from Local-Url, with extension
-
-@item %e
-@tab File extension from Local-Url (including the period)
-
-@item %f@{<i>Field</i><span class="spec">@}<span class="param">0
-@tab Arbitrary field, with (optional) maximal length
-
-@item %c@{<i>Field</i><span class="spec">@}
-@tab Arbitrary field as initials, e.g. &#8216;JCIS&#8217; for &#8216;Journal of Colloid and Interface Science&#8217; in the &#8216;Journal&#8217; BibTeX field
-
-@item %r<span class="param">1
-@tab Random lowercase letter, with (optional) number of characters
-
-@item %R<span class="param">1
-@tab Random uppercase letter, with (optional) number of characters
-
-@item %d<span class="param">1
-@tab Random number, with (optional) number of digits
-
-@item %u<span class="param">1
-@tab Unique lowercase letter, with (optional) number of characters (only once)
-
-@item %U<span class="param">1
-@tab Unique uppercase letter, with (optional) number of characters (only once)
-
-@item %n<span class="param">1
-@tab Unique number, with (optional) number of characters (only once)
-
-@item %0
-@tab Escaped digit (0-9)
-
-@item %%
-@tab Escaped percent character (if allowed)
-
-@item %[
-@tab Escaped square bracket (if allowed)
-
-@item %]
-@tab Escaped square bracket character (if allowed)
-
-@end multitable
+@html
+<table>
+<tr><th align="left">Specifier</th><th>Replaced content description</th></tr>
+<tr><td><span class="spec">%a</span><span class="param">[0][0]</span></td>
+<td>Author last names, with (optional) maximal number of authors and number of characters</td></tr>
+<tr><td><span class="spec">%A</span><span class="param">[;]</span><span class="param">[.]</span><span class="param">[0]</span></td>
+<td>Author last names with initials, with (optional) maximal number of authors</td></tr>
+<tr><td><span class="spec">%t</span><span class="param">0</span></td><td>Title, with (optional) maximal length</td></tr>
+<tr><td><span class="spec">%T</span><span class="param">0</span></td><td>Title, with (optional) maximal number of words</td></tr>
+<tr><td><span class="spec">%y</span></td><td>Year without century</td></tr>
+<tr><td><span class="spec">%Y</span></td><td>Year with century</td></tr>
+<tr><td><span class="spec">%m</span></td><td>Month as decimal number</td></tr>
+<tr><td><span class="spec">%k</span><span class="param">0</span></td><td>Keywords concatenated together, with (optional) maximal number of keywords. Keywords must be separated by one of ;:, (semicolon, colon, or comma)</td></tr>
+<tr><td><span class="spec">%l</span></td><td>File name from Local-Url, without extension</td></tr>
+<tr><td><span class="spec">%L</span></td><td>File name from Local-Url, with extension</td></tr>
+<tr><td><span class="spec">%e</span></td><td>File extension from Local-Url (including the period)</td></tr>
+<tr><td><span class="spec">%f{</span><i>Field</i><span class="spec">}</span><span class="param">0</span></td><td>Arbitrary field, with (optional) maximal length</td></tr>
+<tr><td><span class="spec">%c{</span><i>Field</i><span class="spec">}</span></td><td>Arbitrary field as initials, e.g. &#8216;JCIS&#8217; for &#8216;Journal of Colloid and Interface Science&#8217; in the &#8216;Journal&#8217; BibTeX field</td></tr>
+<tr><td><span class="spec">%r</span><span class="param">1</span></td><td>Random lowercase letter, with (optional) number of characters</td></tr>
+<tr><td><span class="spec">%R</span><span class="param">1</span></td><td>Random uppercase letter, with (optional) number of characters</td></tr>
+<tr><td><span class="spec">%d</span><span class="param">1</span></td><td>Random number, with (optional) number of digits</td></tr>
+<tr><td><span class="spec">%u</span><span class="param">1</span></td><td>Unique lowercase letter, with (optional) number of characters (only once)</td></tr>
+<tr><td><span class="spec">%U</span><span class="param">1</span></td><td>Unique uppercase letter, with (optional) number of characters (only once)</td></tr>
+<tr><td><span class="spec">%n</span><span class="param">1</span></td><td>Unique number, with (optional) number of characters (only once)</td></tr>
+<tr><td><span class="spec">%0</span></td><td>Escaped digit (0-9)</td></tr>
+<tr><td><span class="spec">%%</span></td><td>Escaped percent character (if allowed)</td></tr>
+<tr><td><span class="spec">%[</span></td><td>Escaped square bracket (if allowed)</td></tr>
+<tr><td><span class="spec">%]</span></td><td>Escaped square bracket character (if allowed)</td></tr>
+</table>
+</font></p>
  
+<p><font size="-1" face="Lucida Grande,Geneva,Arial">
 In the table above, green characters after the specifiers indicate the optional parameters (the first number after an author specifier, the number of authors, should be a single digit). Indicated in the table are the parameter values that are used when they are not entered. 
+</font></p>
 
+<p><font size="-1" face="Lucida Grande,Geneva,Arial">
 The special value of zero for an optional parameter is interpreted either as <em>all</em> (for the &#8216;author&#8217;, &#8216;title&#8217;, or &#8216;field&#8217; specifiers), <em>sufficient</em> (for the &#8216;unique&#8217; specifiers, i.e., sufficient to create a unique cite key), or <em>none</em> (for the &#8216;random&#8217; specifiers). 
+</font></p>
 
+<p><font size="-1" face="Lucida Grande,Geneva,Arial">
 The format can contain only a single one of the &#8216;unique&#8217; specifiers <span class="spec">%u</span>, <span class="spec">%U</span> and <span class="spec">%n</span>. 
+</font></p>
 
+<p><font size="-1" face="Lucida Grande,Geneva,Arial">
 The optional parameters delimited by square brackets after an author specifier can be used to control the separator between author names and an optional &#8216;et al.&#8217; suffix. For <span class="spec">%A</span>, the first one is the separator between two author names, and the second one is the separator between the last name and the first initial. 
+</font></p>
 
-
+<p><font size="-1" face="Lucida Grande,Geneva,Arial">
 Because a number right after most specifiers is interpreted as an optional parameter, in order to use explicit digits right after a format specifier, one should use one of the escape specifiers <span class="spec">%0</span>-<span class="spec">%9</span>. 
+</font></p>
 
-
+<p><font size="-1" face="Lucida Grande,Geneva,Arial">
 The cite key format can contain, apart from the specifiers, only unaccented alphanumeric characters (a-zA-Z0-9), (semi-)colons (:;), dashes (-) or periods (.). Any generated part of the cite key will be converted to contain only those characters. For example, accents are removed and spaces will be converted to dashes. 
+</font></p>
 
-
+<p><font size="-1" face="Lucida Grande,Geneva,Arial">
 The format for the local-url can contain any character apart from colons (:). To use an explicit percent character, use the escape specifier <span class="spec">%%</span> (except inside an optional argument delimited by square brackets). 
+</font></p>
 
-@subheading Examples
+<p><font size="+1"  face="Lucida Grande,Helvetica,Geneva"><b>
+Examples
+</b></font></p>
 
-
+<p><font size="-1" face="Lucida Grande,Geneva,Arial">
 <i>Bibliography:</i><br/>
 M. McCracken, A. Maxwell, J. Howison, M. Routley, S. Spiegel, S. S. Porst, and C. M. Hofman,<br/>
 Bibdesk, a great application to manage your bibliographies,<br/>
 Source Forge, 1:96, 11 2004.<br/>
+</font></p>
 
+<p><font size="-1" face="Lucida Grande,Geneva,Arial">
 <table>
 <tr><td>Format string:</td><td><span class="spec">%a</span><span class="param">1</span><b>:</b><span class="spec">%Y</span><span class="spec">%r</span><span class="param">2</span></td></tr>
 <tr><td>Resulting value:</td><td>McCracken:2004yc</td></tr>
 </table>
+</font></p>
 
+<p><font size="-1" face="Lucida Grande,Geneva,Arial">
 <table>
 <tr><td>Format string:</td><td><span class="spec">%a</span><span class="param">1</span><b>:</b><span class="spec">%Y</span><span class="spec">%u</span><span class="param"></span></td></tr>
 <tr><td>Resulting value:</td><td>McCracken:2004b</td></tr>
 </table>
+</font></p>
 
+<p><font size="-1" face="Lucida Grande,Geneva,Arial">
 <table>
 <tr><td>Format string:</td><td><span class="spec">%a</span><span class="param">03</span><span class="spec">%y</span><span class="spec">%m</span></td></tr>
 <tr><td>Resulting value:</td><td>McCMaxHowRouSpiPorHof0411</td></tr>
 </table>
+</font></p>
 
+<p><font size="-1" face="Lucida Grande,Geneva,Arial">
 <table>
 <tr><td>Format string:</td><td><span class="spec">%A</span><span class="param">[;][.][;etal]2</span><b>:</b><span class="spec">%y</span><span class="spec">%t</span><span class="param">20</span></td></tr>
 <tr><td>Resulting value:</td><td>McCracken.M;Maxwell.A;etal:2004Bibdesk-a-great-appl</td></tr>
 </table>
+</font></p>
 
+<p><font size="-1" face="Lucida Grande,Geneva,Arial">
 <table>
-<tr><td>Format string:</td><td><span class="spec">%a</span><span class="param">[;][;etal]24</span><b>:</b><span class="spec">%c@{</span><span class="param">Journal</span><span class="spec">@}</span><span class="spec">%f@{</span><span class="param">Volume</span><span class="spec">@}</span></td></tr>
+<tr><td>Format string:</td><td><span class="spec">%a</span><span class="param">[;][;etal]24</span><b>:</b><span class="spec">%c{</span><span class="param">Journal</span><span class="spec">}</span><span class="spec">%f{</span><span class="param">Volume</span><span class="spec">}</span></td></tr>
 <tr><td>Resulting value:</td><td>McCr;Maxw;etal:SF1</td></tr>
 </table>
+</font></p>
+
+@end html
 
 @subheading Setting the cite key format
 
-See the discussion in <a href="prefs.html#citekey">Preferences</a> for
-details on setting the cite key format.
+See the discussion in ``@ref{Cite Key Preferences} Preferences'' for
+details on how to set the cite key format.
 
 
 @bye
