@@ -1,5 +1,4 @@
 #import "RYZImagePopUpButtonCell.h"
-#import "BibEditor.h"
 
 @implementation RYZImagePopUpButtonCell
 
@@ -222,6 +221,7 @@
        untilMouseUp: (BOOL) untilMouseUp
 {
     BOOL trackingResult = YES;
+
     if ([event type] == NSKeyDown) {
 		// Keyboard event
 		unichar upAndDownArrowCharacters[2];

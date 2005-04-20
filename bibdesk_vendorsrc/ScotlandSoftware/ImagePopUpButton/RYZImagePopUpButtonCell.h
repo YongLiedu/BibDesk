@@ -54,3 +54,15 @@
 - (NSSize)iconDrawSize;
 
 @end
+
+// Method that may be implemented by the delegate
+@interface NSObject (RYZPopUpDelegate)
+
+/*!
+ @method     menuForImagePopUpButtonCell:
+ @abstract   Delegate method to get the current menu for the image popup button cell.
+ @discussion (comprehensive description)
+*/
+- (NSMenu *)menuForImagePopUpButtonCell:(RYZImagePopUpButtonCell *)cell;
+@end
+
