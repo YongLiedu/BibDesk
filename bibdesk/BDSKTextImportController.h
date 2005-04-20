@@ -16,6 +16,7 @@
     BibItem* item;
     int itemsAdded;
     NSMutableArray *fields;
+    NSMutableArray *bookmarks;
     IBOutlet NSTextView* sourceTextView;
     IBOutlet NSTableView* itemTableView;
     IBOutlet NSTextField* statusLine;
@@ -27,8 +28,11 @@
     IBOutlet NSBox* webViewBox;
     IBOutlet NSPanel* urlSheet;
     IBOutlet NSTextField* urlTextField;
+    IBOutlet NSPopUpButton* bookmarkPopUpButton;
     IBOutlet NSProgressIndicator *progressIndicator;
     IBOutlet NSButton *stopLoadingButton;
+    IBOutlet NSTextField *bookmarkField;
+    IBOutlet NSPanel *addBookmarkSheet;
     BOOL showingWebView;
 	BOOL isDownloading;
 	WebDownload *download;
@@ -47,8 +51,11 @@
 - (IBAction)loadPasteboard:(id)sender;
 - (IBAction)loadFile:(id)sender;
 - (IBAction)loadWebPage:(id)sender;
+- (IBAction)chooseBookmarkAction:(id)sender;
 - (IBAction)dismissUrlSheet:(id)sender;
+- (IBAction)dismissAddBookmarkSheet:(id)sender;
 - (IBAction)stopLoadingAction:(id)sender;
+
 - (void)copyLocationAsRemoteUrl:(id)sender;
 - (void)copyLinkedLocationAsRemoteUrl:(id)sender;
 - (void)saveFileAsLocalUrl:(id)sender;
@@ -58,6 +65,7 @@
 
 - (void)openPanelDidEnd:(NSOpenPanel *)sheet returnCode:(int)returnCode contextInfo:(void *)contextInfo;
 - (void)urlSheetDidEnd:(NSOpenPanel *)sheet returnCode:(int)returnCode contextInfo:(void *)contextInfo;
+- (void)addBookmarkSheetDidEnd:(NSOpenPanel *)sheet returnCode:(int)returnCode contextInfo:(void *)contextInfo;
 - (void)savePanelDidEnd:(NSSavePanel *)sheet returnCode:(int)returnCode contextInfo:(void *)contextInfo;
 - (void)saveDownloadPanelDidEnd:(NSSavePanel *)sheet returnCode:(int)returnCode contextInfo:(void *)contextInfo;
 
@@ -68,6 +76,9 @@
 - (void)setupSourceUI;
 - (void)setupTypeUI;
 - (void)addCurrentSelectionToFieldAtIndex:(int)index;
+
+- (void)addBookmarkWithURLString:(NSString *)URLString title:(NSString *)title;
+- (void)saveBookmarks;
 
 @end
 

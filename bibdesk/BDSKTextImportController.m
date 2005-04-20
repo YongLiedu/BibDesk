@@ -17,8 +17,20 @@
         document = doc;
         item = [[BibItem alloc] init];
         fields = [[NSMutableArray alloc] init];
+		bookmarks = [[NSMutableArray alloc] init];
         showingWebView = NO;
         itemsAdded = 0;
+		
+		NSString *applicationSupportPath = [[[NSFileManager defaultManager] applicationSupportDirectory:kUserDomain] stringByAppendingPathComponent:@"BibDesk"]; 
+		NSString *bookmarksPath = [applicationSupportPath stringByAppendingPathComponent:@"Bookmarks.plist"];
+		if ([[NSFileManager defaultManager] fileExistsAtPath:bookmarksPath]) {
+			NSEnumerator *bEnum = [[[NSMutableArray alloc] initWithContentsOfFile:bookmarksPath] objectEnumerator];
+			NSDictionary *bm;
+			
+			while(bm = [bEnum nextObject]){
+				[bookmarks addObject:[[bm mutableCopy] autorelease]];
+			}
+		}
     }
     return self;
 }
@@ -26,6 +38,7 @@
 - (void)dealloc{
     [item release];
     [fields release];
+    [bookmarks release];
     [[sourceTextView enclosingScrollView] release];
     [webViewBox release];
     [super dealloc];
@@ -150,6 +163,7 @@
 }
 
 - (IBAction)stopAddingAction:(id)sender{
+    [self cancelDownload];
     [[self window] orderOut:sender];
     [NSApp endSheet:[self window] returnCode:[sender tag]];
 }
@@ -216,7 +230,42 @@
                        contextInfo:nil];
 }
 
+- (void)openPanelDidEnd:(NSOpenPanel *)sheet returnCode:(int)returnCode contextInfo:(void *)contextInfo{
+
+    if(returnCode == NSOKButton){
+        NSString *fileName = [sheet filename];
+		NSURL *url = [NSURL fileURLWithPath:fileName];
+		NSTextStorage *text = [sourceTextView textStorage];
+		NSLayoutManager *layoutManager = [[text layoutManagers] objectAtIndex:0];
+
+		[[text mutableString] setString:@""];	// Empty the document
+		
+		if (showingWebView) {
+			[sourceBox replaceSubview:webViewBox with:[sourceTextView enclosingScrollView]];
+			showingWebView = NO;
+		}
+		
+		[layoutManager retain];			// Temporarily remove layout manager so it doesn't do any work while loading
+		[text removeLayoutManager:layoutManager];
+		[text beginEditing];			// Bracket with begin/end editing for efficiency
+		[text readFromURL:url options:nil documentAttributes:NULL];	// Read!
+		[text endEditing];
+		[text addLayoutManager:layoutManager];	// Hook layout manager back up
+		[layoutManager release];
+
+    }        
+}
+
 - (IBAction)loadWebPage:(id)sender{
+	NSEnumerator *bEnum = [bookmarks objectEnumerator];
+	NSDictionary *bm;
+	
+	[bookmarkPopUpButton removeAllItems];
+	[bookmarkPopUpButton addItemWithTitle:NSLocalizedString(@"Bookmarks",@"Bookmarks")];
+	while (bm = [bEnum nextObject]) {
+		[bookmarkPopUpButton addItemWithTitle:[bm objectForKey:@"Title"]];
+	}
+	
 	[NSApp beginSheet:urlSheet
        modalForWindow:[self window]
         modalDelegate:self
@@ -229,6 +278,47 @@
     [NSApp endSheet:urlSheet returnCode:[sender tag]];
 }
 
+- (void)urlSheetDidEnd:(NSOpenPanel *)sheet returnCode:(int)returnCode contextInfo:(void *)contextInfo{
+
+    if(returnCode == NSOKButton){
+		// setup webview and load page
+        
+		if (!showingWebView) {
+			[webViewBox setFrame:[[sourceTextView enclosingScrollView] frame]];
+			[sourceBox replaceSubview:[sourceTextView enclosingScrollView] with:webViewBox];
+			showingWebView = YES;
+		}
+        
+        NSURL *url = [NSURL URLWithString:[urlTextField stringValue]];
+        NSURLRequest *urlreq = [NSURLRequest requestWithURL:url];
+        
+        [[webView mainFrame] loadRequest:urlreq];
+    }        
+}
+
+- (IBAction)chooseBookmarkAction:(id)sender{
+	int index = [bookmarkPopUpButton indexOfSelectedItem];
+	NSString *URLString = [[bookmarks objectAtIndex:index-1] objectForKey:@"URLString"];
+	[urlTextField setStringValue:URLString];
+    
+	[urlSheet orderOut:sender];
+    [NSApp endSheet:urlSheet returnCode:1];
+}
+
+- (IBAction)dismissAddBookmarkSheet:(id)sender{
+    [addBookmarkSheet orderOut:sender];
+    [NSApp endSheet:addBookmarkSheet returnCode:[sender tag]];
+}
+
+- (void)addBookmarkSheetDidEnd:(NSOpenPanel *)sheet returnCode:(int)returnCode contextInfo:(void *)contextInfo{
+    if (returnCode == NSOKButton) {
+		[[bookmarks lastObject] setObject:[bookmarkField stringValue] forKey:@"Title"];
+		[self saveBookmarks];
+	}else{
+		[bookmarks removeObjectAtIndex:[bookmarks count] - 1];
+	}
+}
+
 - (IBAction)stopLoadingAction:(id)sender{
 	if(isDownloading){
 		[self cancelDownload];
@@ -236,6 +326,8 @@
 		[webView stopLoading:sender];
 	}
 }
+
+#pragma mark WebView contextual menu actions
 
 - (void)copyLocationAsRemoteUrl:(id)sender{
 	NSString *URLString = [[[[[webView mainFrame] dataSource] request] URL] absoluteString];
@@ -277,6 +369,22 @@
                        contextInfo:nil];
 }
 
+- (void)savePanelDidEnd:(NSSavePanel *)sheet returnCode:(int)returnCode contextInfo:(void *)contextInfo{
+    
+	if (returnCode == NSOKButton) {
+		if ([[[[webView mainFrame] dataSource] data] writeToFile:[sheet filename] atomically:YES]) {
+			NSString *fileURLString = [[NSURL fileURLWithPath:[sheet filename]] absoluteString];
+			
+			[item setField:BDSKLocalUrlString toValue:fileURLString];
+			[item autoFilePaper];
+		} else {
+			NSLog(@"Could not write downloaded file.");
+		}
+    }
+
+    [itemTableView reloadData];
+}
+
 - (void)downloadLinkedFileAsLocalUrl:(id)sender{
 	NSURL *linkURL = (NSURL *)[sender representedObject];
     if (isDownloading)
@@ -294,83 +402,21 @@
 }
 
 - (void)bookmarkPage:(id)sender{
-	NSURL *URL = [[[[webView mainFrame] dataSource] request] URL];
-	// not yet implemented
+	WebDataSource *datasource = [[webView mainFrame] dataSource];
+	NSString *URLString = [[[datasource request] URL] absoluteString];
+	NSString *title = [datasource pageTitle];
+	if(title == nil) title = [URLString lastPathComponent];
+	
+	[self addBookmarkWithURLString:URLString title:title];
 }
 
 - (void)bookmarkLink:(id)sender{
-	NSURL *linkURL = (NSURL *)[sender representedObject];
-	// not yet implemented
-}
-
-#pragma mark End sheet methods
-
-- (void)openPanelDidEnd:(NSOpenPanel *)sheet returnCode:(int)returnCode contextInfo:(void *)contextInfo{
-
-    if(returnCode == NSOKButton){
-        NSString *fileName = [sheet filename];
-		NSURL *url = [NSURL fileURLWithPath:fileName];
-		NSTextStorage *text = [sourceTextView textStorage];
-		NSLayoutManager *layoutManager = [[text layoutManagers] objectAtIndex:0];
-
-		[[text mutableString] setString:@""];	// Empty the document
-		
-		if (showingWebView) {
-			[sourceBox replaceSubview:webViewBox with:[sourceTextView enclosingScrollView]];
-			showingWebView = NO;
-		}
-		
-		[layoutManager retain];			// Temporarily remove layout manager so it doesn't do any work while loading
-		[text removeLayoutManager:layoutManager];
-		[text beginEditing];			// Bracket with begin/end editing for efficiency
-		[text readFromURL:url options:nil documentAttributes:NULL];	// Read!
-		[text endEditing];
-		[text addLayoutManager:layoutManager];	// Hook layout manager back up
-		[layoutManager release];
-
-    }        
-}
-
-- (void)savePanelDidEnd:(NSSavePanel *)sheet returnCode:(int)returnCode contextInfo:(void *)contextInfo{
-    
-	if (returnCode == NSOKButton) {
-		if ([[[[webView mainFrame] dataSource] data] writeToFile:[sheet filename] atomically:YES]) {
-			NSString *fileURLString = [[NSURL fileURLWithPath:[sheet filename]] absoluteString];
-			
-			[item setField:BDSKLocalUrlString toValue:fileURLString];
-			[item autoFilePaper];
-		} else {
-			NSLog(@"Could not write downloaded file.");
-		}
-    }
-
-    [itemTableView reloadData];
-}
-
-- (void)urlSheetDidEnd:(NSOpenPanel *)sheet returnCode:(int)returnCode contextInfo:(void *)contextInfo{
-
-    if(returnCode == NSOKButton){
-		// setup webview and load page
-        
-		if (!showingWebView) {
-			[webViewBox setFrame:[[sourceTextView enclosingScrollView] frame]];
-			[sourceBox replaceSubview:[sourceTextView enclosingScrollView] with:webViewBox];
-			showingWebView = YES;
-		}
-        
-        NSURL *url = [NSURL URLWithString:[urlTextField stringValue]];
-        NSURLRequest *urlreq = [NSURLRequest requestWithURL:url];
-        
-        [[webView mainFrame] loadRequest:urlreq];
-    }        
-}
-
-- (void)saveDownloadPanelDidEnd:(NSSavePanel *)sheet returnCode:(int)returnCode contextInfo:(void *)contextInfo{
-    if (returnCode == NSOKButton) {
-        [download setDestination:[sheet filename] allowOverwrite:YES];
-    } else {
-        [self cancelDownload];
-    }
+	NSDictionary *element = (NSDictionary *)[sender representedObject];
+	NSString *URLString = [(NSURL *)[element objectForKey:WebElementLinkURLKey] absoluteString];
+	NSString *title = [element objectForKey:WebElementLinkLabelKey];
+	if(title == nil) title = [URLString lastPathComponent];
+	
+	[self addBookmarkWithURLString:URLString title:title];
 }
 
 #pragma mark Download methods
@@ -415,18 +461,47 @@
     }
 }
 
-- (void)close{
-    [self cancelDownload];
-    [super close];
+- (void)saveDownloadPanelDidEnd:(NSSavePanel *)sheet returnCode:(int)returnCode contextInfo:(void *)contextInfo{
+    if (returnCode == NSOKButton) {
+        [download setDestination:[sheet filename] allowOverwrite:YES];
+    } else {
+        [self cancelDownload];
+    }
+}
+
+#pragma mark Bookmark methods
+
+- (void)addBookmarkWithURLString:(NSString *)URLString title:(NSString *)title{
+	NSMutableDictionary *bookmark = [NSMutableDictionary dictionaryWithObjectsAndKeys:
+									URLString, @"URLString", title, @"Title", nil];
+	[bookmarks addObject:bookmark];
+	[bookmarkField setStringValue:title];
+	
+	[NSApp beginSheet:addBookmarkSheet
+       modalForWindow:[self window]
+        modalDelegate:self
+       didEndSelector:@selector(addBookmarkSheetDidEnd:returnCode:contextInfo:)
+          contextInfo:nil];
+}
+
+- (void)saveBookmarks{
+	NSString *error = nil;
+	NSData *data = [NSPropertyListSerialization dataFromPropertyList:bookmarks
+															  format:NSPropertyListXMLFormat_v1_0 
+													errorDescription:&error];
+	if (error) {
+		NSLog(@"Error writing bookmarks: %@", error);
+		return;
+	}
+	
+	NSString *applicationSupportPath = [[[NSFileManager defaultManager] applicationSupportDirectory:kUserDomain] stringByAppendingPathComponent:@"BibDesk"]; 
+	NSString *bookmarksPath = [applicationSupportPath stringByAppendingPathComponent:@"Bookmarks.plist"];
+	[data writeToFile:bookmarksPath atomically:YES];
 }
 
 #pragma mark Menu validation
 
 - (BOOL)validateMenuItem:(id <NSMenuItem>)menuItem{
-	if([menuItem action] == @selector(bookmarkPage:) ||
-	   [menuItem action] == @selector(bookmarkLink:) ){
-		return NO; // these are not yet implemented
-	}
 	return YES;
 }
 
@@ -467,11 +542,11 @@
 			[menuItem setRepresentedObject:linkURL];
 			[menuItems addObject:[menuItem autorelease]];
 			
-			menuItem = [[NSMenuItem alloc] initWithTitle:NSLocalizedString(@"Bookmark Link",@"Bookmark linked page")
+			menuItem = [[NSMenuItem alloc] initWithTitle:[NSString stringWithFormat:@"%@%C",NSLocalizedString(@"Bookmark Link",@"Bookmark linked page"),0x2026]
 											  action:@selector(bookmarkLink:)
 									   keyEquivalent:@""];
 			[menuItem setTarget:self];
-			[menuItem setRepresentedObject:linkURL];
+			[menuItem setRepresentedObject:element];
 			[menuItems addObject:[menuItem autorelease]];
 		}
 	}
@@ -480,19 +555,19 @@
 	if ([menuItems count] > 0) 
 		[menuItems addObject:[NSMenuItem separatorItem]];
 		
-	menuItem = [[NSMenuItem alloc] initWithTitle:NSLocalizedString(@"Copy Location To Url Field",@"Copy to url field")
+	menuItem = [[NSMenuItem alloc] initWithTitle:NSLocalizedString(@"Copy Page Location To Url Field",@"Copy page location to url field")
 									  action:@selector(copyLocationAsRemoteUrl:)
 							   keyEquivalent:@""];
 	[menuItem setTarget:self];
 	[menuItems addObject:[menuItem autorelease]];
 	
-	menuItem = [[NSMenuItem alloc] initWithTitle:[NSString stringWithFormat:@"%@%C",NSLocalizedString(@"Save As Local File",@"Save as local file"),0x2026]
+	menuItem = [[NSMenuItem alloc] initWithTitle:[NSString stringWithFormat:@"%@%C",NSLocalizedString(@"Save Page As Local File",@"Save page as local file"),0x2026]
 									  action:@selector(saveFileAsLocalUrl:)
 							   keyEquivalent:@""];
 	[menuItem setTarget:self];
 	[menuItems addObject:[menuItem autorelease]];
 	
-	menuItem = [[NSMenuItem alloc] initWithTitle:NSLocalizedString(@"Bookmark This Page",@"Bookmark this page")
+	menuItem = [[NSMenuItem alloc] initWithTitle:[NSString stringWithFormat:@"%@%C",NSLocalizedString(@"Bookmark This Page",@"Bookmark this page"),0x2026]
 									  action:@selector(bookmarkPage:)
 							   keyEquivalent:@""];
 	[menuItem setTarget:self];
