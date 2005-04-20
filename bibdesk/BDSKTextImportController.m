@@ -68,11 +68,7 @@
     if([pbType isEqualToString:NSURLPboardType]){
         // setup webview and load page
         
-		if (!showingWebView) {
-			[webViewBox setFrame:[[sourceTextView enclosingScrollView] frame]];
-			[sourceBox replaceSubview:[sourceTextView enclosingScrollView] with:webViewBox];
-			showingWebView = YES;
-		}
+		[self setShowingWebView:YES];
         
         NSArray *urls = (NSArray *)[pb propertyListForType:pbType];
         NSURL *url = [NSURL URLWithString:[urls objectAtIndex:0]];
@@ -82,10 +78,7 @@
         
     }else{
 		
-		if (showingWebView) {
-			[sourceBox replaceSubview:webViewBox with:[sourceTextView enclosingScrollView]];
-			showingWebView = NO;
-		}
+		[self setShowingWebView:NO];
 		
 		if([pbType isEqualToString:NSRTFPboardType]){
 			
@@ -127,6 +120,35 @@
     [itemTableView reloadData];
 }
 
+- (void)setShowingWebView:(BOOL)showWebView{
+	if (showWebView != showingWebView) {
+		showingWebView = showWebView;
+		if (showingWebView) {
+			[webViewBox setFrame:[[sourceTextView enclosingScrollView] frame]];
+			[sourceBox replaceSubview:[sourceTextView enclosingScrollView] with:webViewBox];
+			
+			[backButton setEnabled:[webView canGoBack]];
+			[forwardButton setEnabled:[webView canGoForward]];
+			[stopOrReloadButton setEnabled:YES];
+			if ([stopOrReloadButton respondsToSelector:@selector(setHidden:)]) {
+				[backButton setHidden:NO];
+				[stopOrReloadButton setHidden:NO];
+				[forwardButton setHidden:NO];
+			}
+		} else {
+			[sourceBox replaceSubview:webViewBox with:[sourceTextView enclosingScrollView]];
+			
+			[backButton setEnabled:NO];
+			[forwardButton setEnabled:NO];
+			[stopOrReloadButton setEnabled:NO];
+			if ([stopOrReloadButton respondsToSelector:@selector(setHidden:)]) {
+				[backButton setHidden:YES];
+				[stopOrReloadButton setHidden:YES];
+				[forwardButton setHidden:YES];
+			}
+		}
+	}
+}
 
 - (void)setType:(NSString *)type{
     
@@ -147,6 +169,12 @@
 	
 }
 
+// this should be called by the caller when the sheet is removed
+- (void)cleanup{
+    [self cancelDownload];
+	[webView stopLoading:nil];
+}
+
 #pragma mark Actions
 - (IBAction)addCurrentItemAction:(id)sender{
     // make the tableview stop editing:
@@ -163,7 +191,6 @@
 }
 
 - (IBAction)stopAddingAction:(id)sender{
-    [self cancelDownload];
     [[self window] orderOut:sender];
     [NSApp endSheet:[self window] returnCode:[sender tag]];
 }
@@ -240,10 +267,7 @@
 
 		[[text mutableString] setString:@""];	// Empty the document
 		
-		if (showingWebView) {
-			[sourceBox replaceSubview:webViewBox with:[sourceTextView enclosingScrollView]];
-			showingWebView = NO;
-		}
+		[self setShowingWebView:NO];
 		
 		[layoutManager retain];			// Temporarily remove layout manager so it doesn't do any work while loading
 		[text removeLayoutManager:layoutManager];
@@ -283,11 +307,7 @@
     if(returnCode == NSOKButton){
 		// setup webview and load page
         
-		if (!showingWebView) {
-			[webViewBox setFrame:[[sourceTextView enclosingScrollView] frame]];
-			[sourceBox replaceSubview:[sourceTextView enclosingScrollView] with:webViewBox];
-			showingWebView = YES;
-		}
+		[self setShowingWebView:YES];
         
         NSString *urlString = [urlTextField stringValue];
         
@@ -316,25 +336,13 @@
     [NSApp endSheet:urlSheet returnCode:1];
 }
 
-- (IBAction)dismissAddBookmarkSheet:(id)sender{
-    [addBookmarkSheet orderOut:sender];
-    [NSApp endSheet:addBookmarkSheet returnCode:[sender tag]];
-}
-
-- (void)addBookmarkSheetDidEnd:(NSOpenPanel *)sheet returnCode:(int)returnCode contextInfo:(void *)contextInfo{
-    if (returnCode == NSOKButton) {
-		[[bookmarks lastObject] setObject:[bookmarkField stringValue] forKey:@"Title"];
-		[self saveBookmarks];
-	}else{
-		[bookmarks removeObjectAtIndex:[bookmarks count] - 1];
-	}
-}
-
-- (IBAction)stopLoadingAction:(id)sender{
+- (IBAction)stopOrReloadAction:(id)sender{
 	if(isDownloading){
-		[self cancelDownload];
-	}else{
+		[self setDownloading:NO];
+	}else if (isLoading){
 		[webView stopLoading:sender];
+	}else{
+		[webView reload:sender];
 	}
 }
 
@@ -430,6 +438,42 @@
 	[self addBookmarkWithURLString:URLString title:title];
 }
 
+#pragma mark Page loading methods
+
+
+- (void)cancelLoad{
+	[webView stopLoading:self];
+	[self setLoading:NO];
+}
+
+- (void)setLoading:(BOOL)loading{
+    if (isLoading != loading) {
+        isLoading = loading;
+        if (isLoading) {
+			NSString *message = [NSString stringWithFormat:@"%@%C",NSLocalizedString(@"Loading page",@"Loading page"),0x2026];
+			[progressIndicator setToolTip:message];
+			[statusLine setStringValue:@""];
+			//if ([stopOrReloadButton respondsToSelector:@selector(setHidden:)])
+			//	[stopOrReloadButton setHidden:NO];
+			//[stopOrReloadButton setEnabled:YES];
+			[stopOrReloadButton setImage:[NSImage imageNamed:@"stop_small"]];
+			[stopOrReloadButton setToolTip:NSLocalizedString(@"Stop loading page",@"Stop loading page")];
+			[progressIndicator startAnimation:self];
+			[progressIndicator setToolTip:message];
+			[statusLine setStringValue:message];
+		} else {
+			//if ([stopOrReloadButton respondsToSelector:@selector(setHidden:)])
+			//	[stopOrReloadButton setHidden:YES];
+			//[stopOrReloadButton setEnabled:NO];
+			[stopOrReloadButton setImage:[NSImage imageNamed:@"reload_small"]];
+			[stopOrReloadButton setToolTip:NSLocalizedString(@"Reload page",@"Reload page")];
+			[progressIndicator stopAnimation:self];
+			[progressIndicator setToolTip:@""];
+			[statusLine setStringValue:@""];
+		}
+	}
+}
+
 #pragma mark Download methods
 
 - (void)cancelDownload{
@@ -450,21 +494,26 @@
     if (isDownloading != downloading) {
         isDownloading = downloading;
         if (isDownloading) {
-			if ([stopLoadingButton respondsToSelector:@selector(setHidden:)])
-				[stopLoadingButton setHidden:NO];
-			[stopLoadingButton setEnabled:YES];
-			[stopLoadingButton setToolTip:NSLocalizedString(@"Cancel download",@"Cancel download")];
+			NSString *message = [NSString stringWithFormat:NSLocalizedString(@"Downloading file. Received 0%%%C",@"Downloading file. Received 0%..."),0x2026];
+			[progressIndicator setToolTip:message];
+			[statusLine setStringValue:@""];
+			if ([stopOrReloadButton respondsToSelector:@selector(setHidden:)])
+				[stopOrReloadButton setHidden:NO];
+			[stopOrReloadButton setEnabled:YES];
+			[stopOrReloadButton setToolTip:NSLocalizedString(@"Cancel download",@"Cancel download")];
             [progressIndicator startAnimation:self];
-			[progressIndicator setToolTip:[NSString stringWithFormat:NSLocalizedString(@"Downloading file. Received %i%%%C",@"Downloading file..."),0,0x2026]];
+			[progressIndicator setToolTip:message];
+			[statusLine setStringValue:message];
             [downloadFileName release];
 			downloadFileName = nil;
         } else {
-			if ([stopLoadingButton respondsToSelector:@selector(setHidden:)])
-				[stopLoadingButton setHidden:YES];
-			[stopLoadingButton setEnabled:NO];
-			[stopLoadingButton setToolTip:NSLocalizedString(@"Stop loading page",@"Stop loading page")];
+			if ([stopOrReloadButton respondsToSelector:@selector(setHidden:)])
+				[stopOrReloadButton setHidden:YES];
+			[stopOrReloadButton setEnabled:NO];
+			[stopOrReloadButton setToolTip:NSLocalizedString(@"Stop loading page",@"Stop loading page")];
             [progressIndicator stopAnimation:self];
 			[progressIndicator setToolTip:[NSString stringWithFormat:@"%@%C",NSLocalizedString(@"Page is loading",@"Page is loading"),0x2026]];
+			[statusLine setStringValue:@""];
             [download release];
             download = nil;
             receivedContentLength = 0;
@@ -483,16 +532,30 @@
 #pragma mark Bookmark methods
 
 - (void)addBookmarkWithURLString:(NSString *)URLString title:(NSString *)title{
-	NSMutableDictionary *bookmark = [NSMutableDictionary dictionaryWithObjectsAndKeys:
-									URLString, @"URLString", title, @"Title", nil];
-	[bookmarks addObject:bookmark];
 	[bookmarkField setStringValue:title];
 	
 	[NSApp beginSheet:addBookmarkSheet
        modalForWindow:[self window]
         modalDelegate:self
        didEndSelector:@selector(addBookmarkSheetDidEnd:returnCode:contextInfo:)
-          contextInfo:nil];
+          contextInfo:[URLString retain]];
+}
+
+- (IBAction)dismissAddBookmarkSheet:(id)sender{
+    [addBookmarkSheet orderOut:sender];
+    [NSApp endSheet:addBookmarkSheet returnCode:[sender tag]];
+}
+
+- (void)addBookmarkSheetDidEnd:(NSOpenPanel *)sheet returnCode:(int)returnCode contextInfo:(void *)contextInfo{
+    NSString *URLString = (NSString *)contextInfo;
+	if (returnCode == NSOKButton) {
+		NSMutableDictionary *bookmark = [NSMutableDictionary dictionaryWithObjectsAndKeys:
+										URLString, @"URLString", [bookmarkField stringValue], @"Title", nil];
+		[bookmarks addObject:bookmark];
+		
+		[self saveBookmarks];
+	}
+	[URLString release]; //the contextInfo was retained
 }
 
 - (void)saveBookmarks{
@@ -513,6 +576,9 @@
 #pragma mark Menu validation
 
 - (BOOL)validateMenuItem:(id <NSMenuItem>)menuItem{
+	if ([menuItem action] == @selector(saveFileAsLocalUrl:)) {
+		return ![[[webView mainFrame] dataSource] isLoading];
+	}
 	return YES;
 }
 
@@ -626,24 +692,28 @@
 #pragma mark WebFrameLoadDelegate methods
 
 - (void)webView:(WebView *)sender didStartProvisionalLoadForFrame:(WebFrame *)frame{
-	if ([stopLoadingButton respondsToSelector:@selector(setHidden:)])
-		[stopLoadingButton setHidden:NO];
-	[stopLoadingButton setEnabled:YES];
-	[progressIndicator startAnimation:nil];
+	[self setLoading:YES];
 }
 
 - (void)webView:(WebView *)sender didFinishLoadForFrame:(WebFrame *)frame{
-	if ([stopLoadingButton respondsToSelector:@selector(setHidden:)])
-		[stopLoadingButton setHidden:YES];
-	[stopLoadingButton setEnabled:NO];
-	[progressIndicator stopAnimation:nil];
+	[self setLoading:NO];
+	[backButton setEnabled:[sender canGoBack]];
+	[forwardButton setEnabled:[sender canGoForward]];
 }
 
 - (void)webView:(WebView *)sender didFailProvisionalLoadWithError:(NSError *)error forFrame:(WebFrame *)frame{
-	if ([stopLoadingButton respondsToSelector:@selector(setHidden:)])
-		[stopLoadingButton setHidden:YES];
-	[stopLoadingButton setEnabled:NO];
-	[progressIndicator stopAnimation:nil];
+	[self setLoading:NO];
+	
+    NSString *errorDescription = [error localizedDescription];
+    if (!errorDescription) {
+        errorDescription = NSLocalizedString(@"An error occured during page load.",@"An error occured during page load.");
+    }
+    
+    NSBeginAlertSheet(NSLocalizedString(@"Page Load Failed",@"Page Load Failed"), 
+					  nil, nil, nil, 
+					  [self window], 
+					  nil, nil, nil, nil, 
+					  errorDescription);
 }
 
 #pragma mark NSURLDownloadDelegate methods
@@ -675,8 +745,10 @@
 - (void)download:(NSURLDownload *)theDownload didReceiveDataOfLength:(unsigned)length{
     if (expectedContentLength > 0) {
         receivedContentLength += length;
-        int percent = round((double)receivedContentLength / (double)expectedContentLength);
-		[progressIndicator setToolTip:[NSString stringWithFormat:NSLocalizedString(@"Downloading file. Received %i%%%C",@"Downloading file..."),percent,0x2026]];
+        int percent = round(100.0 * (double)receivedContentLength / (double)expectedContentLength);
+		NSString *message = [NSString stringWithFormat:NSLocalizedString(@"Downloading file. Received %i%%%C",@"Downloading file..."),percent,0x2026];
+		[progressIndicator setToolTip:message];
+		[statusLine setStringValue:message];
     }
 }
 
@@ -701,7 +773,7 @@
         
     NSString *errorDescription = [error localizedDescription];
     if (!errorDescription) {
-        errorDescription = @"An error occured during download.";
+        errorDescription = NSLocalizedString(@"An error occured during download.",@"An error occured during download.");
     }
     
     NSBeginAlertSheet(NSLocalizedString(@"Download Failed",@"Download Failed"), 
@@ -767,6 +839,7 @@
     else return NSDragOperationNone;
 }
 
+// This method is called when the mouse is released over a table view that previously decided to allow a drop via the validateDrop method.  The data source should incorporate the data from the dragging pasteboard at this time.
 - (BOOL)tableView:(NSTableView*)tv acceptDrop:(id <NSDraggingInfo>)info row:(int)row dropOperation:(NSTableViewDropOperation)op{
     NSPasteboard *pb = [info draggingPasteboard];
     NSString *pbType = [pb availableTypeFromArray:[NSArray arrayWithObjects:NSStringPboardType, nil]];
@@ -778,7 +851,17 @@
     }
     return YES;
 }
-    // This method is called when the mouse is released over an outline view that previously decided to allow a drop via the validateDrop method.  The data source should incorporate the data from the dragging pasteboard at this time.
+
+#pragma mark Splitview delegate methods
+
+- (float)splitView:(NSSplitView *)sender constrainMinCoordinate:(float)proposedMin ofSubviewAt:(int)offset{
+	return 224.0; // from IB
+}
+
+- (float)splitView:(NSSplitView *)sender constrainMaxCoordinate:(float)proposedMax ofSubviewAt:(int)offset{
+	NSRect totalFrame = [sender frame];
+	return totalFrame.size.width - [sender dividerThickness] - 200.0;
+}
 
 @end
 

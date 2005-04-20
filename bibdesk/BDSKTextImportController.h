@@ -30,10 +30,13 @@
     IBOutlet NSTextField* urlTextField;
     IBOutlet NSPopUpButton* bookmarkPopUpButton;
     IBOutlet NSProgressIndicator *progressIndicator;
-    IBOutlet NSButton *stopLoadingButton;
+    IBOutlet NSButton *backButton;
+    IBOutlet NSButton *forwardButton;
+    IBOutlet NSButton *stopOrReloadButton;
     IBOutlet NSTextField *bookmarkField;
     IBOutlet NSPanel *addBookmarkSheet;
     BOOL showingWebView;
+	BOOL isLoading;
 	BOOL isDownloading;
 	WebDownload *download;
 	NSString *downloadFileName;
@@ -42,7 +45,9 @@
 }
 
 - (id)initWithDocument:(BibDocument *)document;
+- (void)setShowingWebView:(BOOL)showWebView;
 - (void)setType:(NSString *)type;
+- (void)cleanup;
 
 - (IBAction)addCurrentItemAction:(id)sender;
 - (IBAction)stopAddingAction:(id)sender;
@@ -54,7 +59,7 @@
 - (IBAction)chooseBookmarkAction:(id)sender;
 - (IBAction)dismissUrlSheet:(id)sender;
 - (IBAction)dismissAddBookmarkSheet:(id)sender;
-- (IBAction)stopLoadingAction:(id)sender;
+- (IBAction)stopOrReloadAction:(id)sender;
 
 - (void)copyLocationAsRemoteUrl:(id)sender;
 - (void)copyLinkedLocationAsRemoteUrl:(id)sender;
@@ -72,6 +77,7 @@
 - (void)cancelDownload;
 - (void)setLocalUrlFromDownload;
 - (void)setDownloading:(BOOL)downloading;
+- (void)setLoading:(BOOL)loading;
 
 - (void)setupSourceUI;
 - (void)setupTypeUI;

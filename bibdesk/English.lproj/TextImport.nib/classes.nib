@@ -18,23 +18,25 @@
                 loadWebPage = id; 
                 saveFileAsLocalUrl = id; 
                 stopAddingAction = id; 
-                stopLoadingAction = id; 
+                stopOrReloadAction = id; 
             }; 
             CLASS = BDSKTextImportController; 
             LANGUAGE = ObjC; 
             OUTLETS = {
                 addBookmarkSheet = NSPanel; 
+                backButton = NSButton; 
                 bookmarkField = NSTextField; 
                 bookmarkPopUpButton = NSPopUpButton; 
                 chooseSourceButton = NSPopUpButton; 
                 citeKeyLine = NSTextField; 
+                forwardButton = NSButton; 
                 itemTableView = NSTableView; 
                 itemTypeButton = NSPopUpButton; 
                 progressIndicator = NSProgressIndicator; 
                 sourceBox = NSBox; 
                 sourceTextView = NSTextView; 
                 statusLine = NSTextField; 
-                stopLoadingButton = NSButton; 
+                stopOrReloadButton = NSButton; 
                 urlSheet = NSPanel; 
                 urlTextField = NSTextField; 
                 webView = WebView; 
