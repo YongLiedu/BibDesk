@@ -3088,7 +3088,8 @@ This method always returns YES. Even if some or many operations fail.
 
 - (void)importFromTextSheetDidEnd:(NSWindow *)sheet returnCode:(int)rv contextInfo:(void *)contextInfo {
     BDSKTextImportController *tic = (BDSKTextImportController *)contextInfo;
-    [tic autorelease];
+    [tic cleanup];
+	[tic autorelease];
 }
 
 @end
