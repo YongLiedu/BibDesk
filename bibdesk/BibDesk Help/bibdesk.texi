@@ -542,7 +542,7 @@ Use the action menu in the editor.
 
 FIXME
 
-See prefs, see the [Citation Key Format Reference](cite-key-format.html)
+See prefs, see the @xref{Citation Key Format Reference}.
 
 
 @node AutoFile
@@ -840,7 +840,7 @@ format string to any valid format.
 field that is used to automatically generate cite keys. The cite key
 format string can contain several special format specifiers, which are
 a %-character followed by a specifier character and optionally zero to
-two numbers. See [Cite Key Format](cite-key-format.html) for a
+two numbers. See @xref{Citation Key Format Reference} for a
 more detailed description of the syntax.
 
 <em>Choose a format specifier to add</em>: This allows you to easily
