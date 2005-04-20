@@ -855,12 +855,11 @@
 #pragma mark Splitview delegate methods
 
 - (float)splitView:(NSSplitView *)sender constrainMinCoordinate:(float)proposedMin ofSubviewAt:(int)offset{
-	return 224.0; // from IB
+	return proposedMin + 224.0; // from IB
 }
 
 - (float)splitView:(NSSplitView *)sender constrainMaxCoordinate:(float)proposedMax ofSubviewAt:(int)offset{
-	NSRect totalFrame = [sender frame];
-	return totalFrame.size.width - [sender dividerThickness] - 200.0;
+	return proposedMax - 200.0;
 }
 
 @end
