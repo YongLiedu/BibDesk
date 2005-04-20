@@ -99,7 +99,8 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
             else if( !monthStr ||  [monthStr isEqualToString:@""])
                 return [date descriptionWithCalendarFormat:NSLocalizedString(@"%Y", @"Date format for only year inside table views")];
             else
-                return [date descriptionWithCalendarFormat:NSLocalizedString(@"%b %Y", @"Date format for month and year inside table views")];
+                return [date descriptionWithCalendarFormat:NSLocalizedString(@"%b %Y", @"Date format for month and year inside table views")
+                                                    locale:[[NSUserDefaults standardUserDefaults] dictionaryRepresentation]];
             
         }else if([tcID isEqualToString: BDSKFirstAuthorString] ){
             if([auths count] > 0){

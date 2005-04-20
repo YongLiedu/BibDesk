@@ -516,6 +516,7 @@ setupParagraphStyle()
     [bibLock unlock];
     
 }
+
 - (NSCalendarDate *)date{
     return pubDate;
 }
@@ -728,6 +729,8 @@ setupParagraphStyle()
     NSString *yearValue = [pubFields objectForKey:BDSKYearString usingLock:bibLock];
     if (yearValue && ![yearValue isEqualToString:@""]) {
         NSString *monthValue = [pubFields objectForKey:BDSKMonthString usingLock:bibLock];
+        if([monthValue isComplex])
+            monthValue = [[(BDSKComplexString *)monthValue nodes] objectAtIndex:0];
         if (!monthValue) monthValue = @"";
         NSString *dateStr = [NSString stringWithFormat:@"%@ 1 %@", monthValue, [pubFields objectForKey:BDSKYearString usingLock:bibLock]];
         NSDictionary *locale = [NSDictionary dictionaryWithObjectsAndKeys:@"MDYH", NSDateTimeOrdering, 
