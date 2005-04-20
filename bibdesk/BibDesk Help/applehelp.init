@@ -56,7 +56,6 @@ sub t2h_html32_menu($)
 $protect_text      = \&t2h_html32_protect_text;
 #$heading           = \&t2h_html32_heading;
 $preformatted      = \&t2h_html32_preformatted;
-$raw               = \&t2h_html32_raw;
 $menu              = \&t2h_html32_menu;
 $foot_section      = \&t2h_html32_foot_section;
 #$cartouche         = \&t2h_html32_cartouche;
@@ -78,7 +77,10 @@ h1, h2, h3, h4, h5 {
 code,tt,pre { 
     font-family: Monaco, Courier, Mono, sans-serif;
     font-size: 0.8em;
-}</style>
+}
+.spec {font-weight:bold; color:blue}
+.param {font-weight:bold; color:green}
+</style>
 EOT
 
 #@CHAPTER_BUTTONS = @MISC_BUTTONS;
