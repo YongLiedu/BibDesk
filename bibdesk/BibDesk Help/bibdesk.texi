@@ -273,7 +273,7 @@ btxdoc.dvi
 
 @menu
 * Starting a New File::         
-* Opening a PubMed File::       
+* Opening an RIS File::       
 @end menu
 
 @node Starting a New File
@@ -294,29 +294,64 @@ box.
 This feature lets you specify any command line that produces a BibTeX
 file and open it in BibDesk directly. If you have command line
 conversion tools from other formats, this is a handy way to use them.
+For instance, suppose you have a file called ``searchresults.isi'' in the ISI file format from
+an online database.  Using the @uref{http://www.scripps.edu/~cdputnam/software/bibutils/bibutils.html, BibUtils}
+suite of command line utilities (available here), you can translate that file into BibTeX with the following
+command: @code{/usr/local/bin/isi2xml | /usr/local/bin/xml2bib}, with the paths adjusted appropriately for your
+installation.  
 
-FIXME: Example
+@image{gfx/filterCmd}
 
-@node Opening a PubMed File
-@section Opening a PubMed File
+The drop-down menu will save the last seven commands used, which should be sufficient for most needs!
+Note that BibDesk can open RIS files directly, so a filter isn't required for them.
+
+
+@node Opening an RIS File
+@section Opening an RIS File
 
 @cindex PubMed
 @cindex RIS
-BibDesk expects a file with the extension ``.fcgi'' and of
-MIME type ``application/x-Research-Info-Systems''. If you
-don't know what that means, that's OK. Just do your search as usual on
+@cindex Service
+
+BibDesk expects a file with the extension ``.fcgi'' or ``.ris''.
+Many of the RIS tags are converted into their BibTeX equivalents, but unknown tags are left as-is for you to deal with manually.
+BibDesk's RIS import feature converts some HTML characters and tags into LaTeX commands, which can be handy when importing large
+numbers of references; the LaTeX produced may be rather primitive, however.
+
+@subsection PubMed
+
+Just do your search as usual on
 PubMed, and then select the settings as in the following image:
 
 @image{gfx/pubmed}
 
 The important settings are that it should be set to Display
 ``MEDLINE'' and Send to ``File''. Then click the
-``Send to'' button, and a file ``query.fcgi'' will
+``Send to'' button, and a file will
 be saved to your download folder. You can then use BibDesk to open
 this file. Once you have opened the file it cannot be saved back in
 the same format. If you want to, you can save it as a BibTeX file, or
 transfer the translated entries over into a BibTeX file that you use
 permanently.
+
+@subsection Other Online Databases
+
+Many online databases have the capability to export RIS 
+(the @uref{http://www.refman.com/support/risformat_intro.asp, Reference Manager format}), 
+and BibDesk can open those files directly.
+@uref{http://www.sonnysoftware.com/, SonnySoftware} offers a free application
+called ``ReferenceMiner'' which searches PubMed, the Library of Congress, and
+Amazon.  References can be dragged from ReferenceMiner directly into BibDesk's
+publication list, which may be more convenient for those sources.
+
+@subsection Using Services
+
+The Services menu items ``Bibdesk->Add to Bibliography'' and ``Bibdesk->New Document With RIS''
+can be used from a text editor or web browser which supports Services to
+either add selected RIS text to an existing document, or create a new document based on the selected text.  Further, RIS can be pasted or
+dragged directly into BibDesk's publication list as text, so at least one method should be convenient for your particular situation!
+BibDesk can also save RIS files directly, although some modification of the original source will occur, and this is only recommended
+when it is necessary to share files with other people or applications.
 
 @node Searching Your Database
 @chapter Searching Your Database
@@ -707,8 +742,7 @@ the same thing.
 The services also perform some searching functionality which can help
 if you don't have a photographic memory of citation keys.
 
-In any Services aware app (At least: TeXShop, iTeXMac, TextEdit, but
-notably not BBEdit for OS X and no Classic or X windows apps) type a
+In any Services aware app (including: TeXShop, iTeXMac, TextEdit, BBEdit, and TextWrangler, but no Classic or X11 apps) type a
 string, select it, then choose Complete Citation from the Bibdesk
 submenu of the Services Menu. This will replace the selected string
 with the citation(s) of any entries in open BibDesk documents (or, if
@@ -828,19 +862,18 @@ double-clicking on them in the Finder.
 @anchor{encoding-notes}
 Specific notes and warnings:
 
-* Files that are opened as ASCII will be run through the
-@ref{Character Conversion} process so that accented characters
+* Files will be run through the
+@ref{Character Conversion} process when opened so that accented characters
 display properly.
 
 * This is the default behavior in BibDesk 0.97.2 and
 earlier versions.
 
- * Files opened with a given encoding will be saved with that
-encoding.  To save with an alternate encoding, choose the
+ * Files opened with a given encoding will be saved with that encoding.  To save with an alternate encoding, choose the
 "File->Export->Export BibTeX With Encoding..." menu option and select
 a particular encoding.  Characters will only be converted to TeX when
-saving as ASCII files; otherwise, they are written out as displayed in
-BibDesk. 
+the checkbox for character conversion is marked; otherwise, they are written out as displayed in
+BibDesk.
 
 @node Preview Preferences
 @section Preview
@@ -848,10 +881,12 @@ BibDesk.
 @image{gfx/previewPrefs}
 
 
-Use TeX for Previewing: (More appropriately, use pdftex for previewing.) If this is checked, the preview pane will be drawn.
+Use TeX for Previewing: (More appropriately, use pdflatex for previewing.) If this is checked, the preview pane will be drawn.
 
 
-TeX Options: The style file (just the name, not the whole path) can be specified here. Also, the TeX and BibTeX program paths can be changed here, so you are not tied to one distribution of TeX.
+TeX Options: The style file (just the name, not the whole path) can be specified here.
+Also, the TeX and BibTeX program paths can be changed here, so you are not tied to one distribution of TeX.
+You must enter the full path to the binaries for pdflatex and bibtex, e.g. @code{/usr/local/teTeX/bin/powerpc-apple-darwin-current/pdflatex}.
 
 
 Browser preview pane: Select what you want the lower pane of the main browser window to show.
