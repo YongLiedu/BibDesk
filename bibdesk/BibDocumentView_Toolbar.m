@@ -135,7 +135,7 @@ static void addToolbarItem(NSMutableDictionary *theDict,NSString *identifier,NSS
     addToolbarItem(toolbarItems, SearchFieldDocToolbarItemIdentifier,
                    NSLocalizedString(@"Search",@""),
                    NSLocalizedString(@"Search",@""),
-                   NSLocalizedString(@"Search using Boolean AND and OR, see Help for details)",@""),
+                   NSLocalizedString(@"Search using Boolean AND and OR, see Help for details",@""),
                    self, @selector(setView:),
                    searchFieldView,
                    NULL, 
