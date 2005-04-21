@@ -65,21 +65,29 @@ $foot_section      = \&t2h_html32_foot_section;
 # Embedded stylesheet:
 $CSS_LINES = <<'EOT';
 <style type="text/css">
-p,ul,ol,td {
+p,ul,ol,td,dt,dd {
     font-family: Lucida Grande,Helvetica,Geneva;
-    font-size: 0.7em;
+    font-size: 11px;
 }
 h1, h2, h3, h4, h5 {
     font-family: Lucida Grande,Helvetica,Geneva;
-    font-size: 1em;
+    font-size: 16px;
     color: #3333cc;
 }
 code,tt,pre { 
     font-family: Monaco, Courier, Mono, sans-serif;
-    font-size: 0.8em;
+    font-size: 11px;
 }
-.spec {font-weight:bold; color:blue}
-.param {font-weight:bold; color:green}
+.spec {
+    font-family: Lucida Grande,Helvetica,Geneva;
+    font-size: 11px;
+    font-weight:bold;
+    color:blue}
+.param {
+    font-family: Lucida Grande,Helvetica,Geneva;
+    font-size: 11px;
+    font-weight:bold;
+    color:green}
 </style>
 EOT
 
