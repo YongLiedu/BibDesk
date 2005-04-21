@@ -87,9 +87,9 @@
 		if([pbType isEqualToString:NSRTFPboardType]){
             pbString = [[[NSAttributedString alloc] initWithRTF:pbData
                                              documentAttributes:NULL] autorelease];
-            pbString = [(NSAttributedString *)pbString string];
+            pbString = [[(NSAttributedString *)pbString string] stringByRemovingSurroundingWhitespace];
 
-            if([pbString rangeOfString:@"http://"].location != NSNotFound){
+            if([pbString rangeOfString:@"http://"].location == 0){
                 [self showWebViewWithURLString:pbString];
             }else{
                 NSRange r = NSMakeRange(0,[[sourceTextView string] length]);
@@ -99,9 +99,9 @@
 		}else if([pbType isEqualToString:NSRTFDPboardType]){
             pbString = [[[NSAttributedString alloc] initWithRTFD:pbData
                                               documentAttributes:NULL] autorelease];
-            pbString = [(NSAttributedString *)pbString string];
+            pbString = [[(NSAttributedString *)pbString string] stringByRemovingSurroundingWhitespace];
             
-            if([pbString rangeOfString:@"http://"].location != NSNotFound){
+            if([pbString rangeOfString:@"http://"].location == 0){
                 [self showWebViewWithURLString:pbString];
             }else{
                 NSRange r = NSMakeRange(0,[[sourceTextView string] length]);
@@ -110,8 +110,8 @@
             
 		}else if([pbType isEqualToString:NSStringPboardType]){
             pbString = [pb stringForType:pbType];
-            
-			if([pbString rangeOfString:@"http://"].location != NSNotFound){
+            pbString = [pbString stringByRemovingSurroundingWhitespace];
+			if([pbString rangeOfString:@"http://"].location == 0){
                 [self showWebViewWithURLString:pbString];
             }else{
                 [sourceTextView setString:pbString];
