@@ -80,6 +80,7 @@
 - (void)setLoading:(BOOL)loading;
 
 - (void)setupSourceUI;
+- (void)showWebViewWithURLString:(NSString *)urlString;
 - (void)setupTypeUI;
 - (void)addCurrentSelectionToFieldAtIndex:(int)index;
 

@@ -55,6 +55,7 @@
     [[sourceTextView enclosingScrollView] retain];
     [webViewBox retain];
     [itemTableView setDoubleAction:@selector(addTextToCurrentFieldAction:)];
+    [self setWindowFrameAutosaveName:@"BDSKTextImportController Frame Autosave Name"];
 }
 
 
@@ -80,25 +81,55 @@
 		
 		[self setShowingWebView:NO];
 		
+        NSString *pbString = nil;
+        NSData *pbData = [pb dataForType:pbType];
+        
 		if([pbType isEqualToString:NSRTFPboardType]){
-			
-			NSRange r = NSMakeRange(0,[[sourceTextView string] length]);
-			[sourceTextView replaceCharactersInRange:r withRTF:[pb dataForType:pbType]];
-			
-		}else if([pbType isEqualToString:NSRTFDPboardType]){
-			
-			NSRange r = NSMakeRange(0,[[sourceTextView string] length]);
-			[sourceTextView replaceCharactersInRange:r withRTFD:[pb dataForType:pbType]];
+            pbString = [[[NSAttributedString alloc] initWithRTF:pbData
+                                             documentAttributes:NULL] autorelease];
+            pbString = [(NSAttributedString *)pbString string];
 
+            if([pbString rangeOfString:@"http://"].location != NSNotFound){
+                [self showWebViewWithURLString:pbString];
+            }else{
+                NSRange r = NSMakeRange(0,[[sourceTextView string] length]);
+                [sourceTextView replaceCharactersInRange:r withRTF:pbData];
+			}
+            
+		}else if([pbType isEqualToString:NSRTFDPboardType]){
+            pbString = [[[NSAttributedString alloc] initWithRTFD:pbData
+                                              documentAttributes:NULL] autorelease];
+            pbString = [(NSAttributedString *)pbString string];
+            
+            if([pbString rangeOfString:@"http://"].location != NSNotFound){
+                [self showWebViewWithURLString:pbString];
+            }else{
+                NSRange r = NSMakeRange(0,[[sourceTextView string] length]);
+                [sourceTextView replaceCharactersInRange:r withRTFD:pbData];
+            }
+            
 		}else if([pbType isEqualToString:NSStringPboardType]){
-			
-			[sourceTextView setString:[pb stringForType:pbType]];
-			
+            pbString = [pb stringForType:pbType];
+            
+			if([pbString rangeOfString:@"http://"].location != NSNotFound){
+                [self showWebViewWithURLString:pbString];
+            }else{
+                [sourceTextView setString:pbString];
+            }
 		}else {
 			
 			[sourceTextView setString:@""];
 		}
 	}
+}
+
+- (void)showWebViewWithURLString:(NSString *)urlString{
+    [self setShowingWebView:YES];
+    NSURL *url = [NSURL URLWithString:[urlString stringByRemovingSurroundingWhitespace]];
+    NSURLRequest *urlreq = [NSURLRequest requestWithURL:url];
+    
+    [[webView mainFrame] loadRequest:urlreq];
+        
 }
 
 
