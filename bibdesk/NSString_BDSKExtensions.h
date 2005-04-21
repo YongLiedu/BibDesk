@@ -103,4 +103,13 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 */
 - (NSString *)stringByRemovingTeXForSorting;
 
+/*!
+    @method     localizedCaseInsensitiveNumericCompare:
+    @abstract   Returns a case insensitve, numeric comparison in the user's default locale.
+    @discussion (comprehensive description)
+    @param      aStr (description)
+    @result     (description)
+*/
+- (NSComparisonResult)localizedCaseInsensitiveNumericCompare:(NSString *)aStr;
+
 @end

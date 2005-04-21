@@ -269,4 +269,11 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
     return [self stringByRemovingCharactersInOFCharacterSet:braceSet];
 }
 
+- (NSComparisonResult)localizedCaseInsensitiveNumericCompare:(NSString *)aStr{
+    return [self compare:aStr
+                 options:NSCaseInsensitiveSearch | NSNumericSearch
+                   range:NSMakeRange(0, [self length])
+                  locale:[[NSUserDefaults standardUserDefaults] dictionaryRepresentation]];
+}
+
 @end

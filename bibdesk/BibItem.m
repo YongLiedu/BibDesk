@@ -279,7 +279,7 @@ setupParagraphStyle()
 }
 
 - (NSComparisonResult)keyCompare:(BibItem *)aBI{
-    return [citeKey localizedCaseInsensitiveCompare:[aBI citeKey]];
+    return [citeKey localizedCaseInsensitiveNumericCompare:[aBI citeKey]];
 }
 
 - (NSComparisonResult)titleCompare:(BibItem *)aBI{

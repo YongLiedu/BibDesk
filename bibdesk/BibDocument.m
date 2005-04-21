@@ -1853,7 +1853,7 @@ int generalBibItemCompareFunc(id item1, id item2, void *context){
 		NSLog(@"a value is nil!");
 		return NSOrderedAscending;
 	}
-	return [value1 compare:value2];
+	return [value1 localizedCaseInsensitiveNumericCompare:value2];
 }
 
 - (void)sortPubsByDefaultColumn{
