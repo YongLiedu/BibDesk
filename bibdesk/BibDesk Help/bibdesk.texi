@@ -80,16 +80,16 @@ about the BibTeX file format.
 
 @heading Online Resources
 @itemize
-@item @url{http://bibdesk.sourceforge.net ,BibDesk Website}
-@item @url{http://bibdesk.sourceforge.net/scripts.html, BibDesk AppleScript Repository}
-@item @url{http://bibdesk.sourceforge.net/manual/, Online Copy of This Manual}
+@item @uref{http://bibdesk.sourceforge.net, BibDesk Website}
+@item @uref{http://bibdesk.sourceforge.net/scripts.html, BibDesk AppleScript Repository}
+@item @uref{http://bibdesk.sourceforge.net/manual/, Online Copy of This Manual}
 @end itemize
 
 @heading Appendices
 @menu
 
 * indexcp::             Concept Index
-* indexpref::           Preferences Index
+* indexpref::           Preference Settings Index
 * indexky::             Key Shortcut Index
 * Citation Key Format Reference:: Citation Key Format Reference
 * Character Conversion::
