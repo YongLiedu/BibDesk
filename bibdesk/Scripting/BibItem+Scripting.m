@@ -176,16 +176,13 @@ Extra wrapping of the created and modified date methods to
     NSData *data = [btString dataUsingEncoding:NSUTF8StringEncoding];
 	NSScriptCommand * cmd = [NSScriptCommand currentCommand];
 
-	NSEnumerator *fnEnum = [pubFields keyEnumerator];
-	NSString *fn;
-	while (fn = [fnEnum nextObject]) {
-		if (![[self valueOfField:fn] isEqualToString:@""] && ![fn isEqualToString:BDSKDateCreatedString] && ![fn isEqualToString:BDSKDateModifiedString]) {
-			if (cmd) {
-				[cmd setScriptErrorNumber:NSReceiversCantHandleCommandScriptError];
-				[cmd setScriptErrorString:[NSString stringWithFormat:NSLocalizedString(@"Cannot set BibTeX string after initialization.",@"Cannot set BibTeX string after initialization.")]];
-			}
-			return;
+	// we do not allow setting the bibtex string after an edit, only at initialization
+	if([self hasBeenEdited]){
+		if (cmd) {
+			[cmd setScriptErrorNumber:NSReceiversCantHandleCommandScriptError];
+			[cmd setScriptErrorString:[NSString stringWithFormat:NSLocalizedString(@"Cannot set BibTeX string after initialization.",@"Cannot set BibTeX string after initialization.")]];
 		}
+		return;
 	}
 
 	BOOL hadProblems = NO;
