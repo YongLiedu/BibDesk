@@ -1459,23 +1459,27 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 
 - (BOOL)windowShouldClose:(id)sender{
     NSString *errMsg = nil;
+    NSString *alternateButtonTitle = nil;
     
-    // case 1: cite key hasn't been set, and paper needs to be filed
-    if([[theBib citeKey] isEqualToString:@"cite-key"] && [theBib needsToBeFiled] && [[OFPreferenceWrapper sharedPreferenceWrapper] boolForKey:BDSKFilePapersAutomaticallyKey])
+    // case 1: the item has not been edited
+    if(![theBib hasBeenEdited]){
+        errMsg = NSLocalizedString(@"The item has not been edited.  Would you like to keep it?", @"");
+        // only give the option to discard if the bib has not been edited; otherwise, it's likely that autofile/autogen citekey just hasn't happened yet
+        alternateButtonTitle = NSLocalizedString(@"Discard", @"");
+    // case 2: cite key hasn't been set, and paper needs to be filed
+    }else if([[theBib citeKey] isEqualToString:@"cite-key"] && [theBib needsToBeFiled] && [[OFPreferenceWrapper sharedPreferenceWrapper] boolForKey:BDSKFilePapersAutomaticallyKey]){
         errMsg = NSLocalizedString(@"The cite key for this entry has not been set, and AutoFile did not have enough information to file the paper.  Would you like to keep it as-is?", @"");
-    // case 2: only the paper needs to be filed
-    else if([theBib needsToBeFiled] && [[OFPreferenceWrapper sharedPreferenceWrapper] boolForKey:BDSKFilePapersAutomaticallyKey]) 
+    // case 3: only the paper needs to be filed
+    }else if([theBib needsToBeFiled] && [[OFPreferenceWrapper sharedPreferenceWrapper] boolForKey:BDSKFilePapersAutomaticallyKey]){
         errMsg = NSLocalizedString(@"AutoFile did not have enough information to file this paper.  Would you like to keep it as-is?", @"");
-    // case 3: only the cite key needs to be set
-    else if([[theBib citeKey] isEqualToString:@"cite-key"])
+    // case 4: only the cite key needs to be set
+    }else if([[theBib citeKey] isEqualToString:@"cite-key"]){
         errMsg = NSLocalizedString(@"The cite key for this entry has not been set.  Would you like to keep it as-is?", @"");
-    // case 4: good to go
-    if(errMsg == nil)
+	// case 5: good to go
+    }else{
         return YES;
-    
-    // only give the option to discard if the bib has not been edited; otherwise, it's likely that autofile/autogen citekey just hasn't happened yet
-    NSString *alternateButtonTitle = ([theBib hasBeenEdited]) ? nil : NSLocalizedString(@"Discard", @"");
-
+    }
+	
     NSBeginAlertSheet(NSLocalizedString(@"Warning!", @""),
                       NSLocalizedString(@"Keep", @""),   //default button NSAlertDefaultReturn
                       alternateButtonTitle,              //far left button NSAlertAlternateReturn
