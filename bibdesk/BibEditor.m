@@ -1462,21 +1462,21 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
     
     // case 1: cite key hasn't been set, and paper needs to be filed
     if([[theBib citeKey] isEqualToString:@"cite-key"] && [theBib needsToBeFiled] && [[OFPreferenceWrapper sharedPreferenceWrapper] boolForKey:BDSKFilePapersAutomaticallyKey])
-        errMsg = NSLocalizedString(@"The cite key for this entry has not been set, and AutoFile did not have enough information to file the paper.  Close anyway?", @"");
+        errMsg = NSLocalizedString(@"The cite key for this entry has not been set, and AutoFile did not have enough information to file the paper.  Would you like to keep it as-is?", @"");
     // case 2: only the paper needs to be filed
     else if([theBib needsToBeFiled] && [[OFPreferenceWrapper sharedPreferenceWrapper] boolForKey:BDSKFilePapersAutomaticallyKey]) 
-        errMsg = NSLocalizedString(@"AutoFile did not have enough information to file this paper.  Close anyway?", @"");
+        errMsg = NSLocalizedString(@"AutoFile did not have enough information to file this paper.  Would you like to keep it as-is?", @"");
     // case 3: only the cite key needs to be set
     else if([[theBib citeKey] isEqualToString:@"cite-key"])
-        errMsg = NSLocalizedString(@"The cite key for this entry has not been set.  Close anyway?", @"");
+        errMsg = NSLocalizedString(@"The cite key for this entry has not been set.  Would you like to keep it as-is?", @"");
     // case 4: good to go
     if(errMsg == nil)
         return YES;
 
     NSBeginAlertSheet(NSLocalizedString(@"Warning!", @""),
-                      NSLocalizedString(@"Close", @""), //default button
-                      NSLocalizedString(@"Cancel", @""), //2nd button
-                      nil, //3rd button
+                      NSLocalizedString(@"Keep", @""), //default button NSAlertDefaultReturn
+                      NSLocalizedString(@"Discard", @""), //far left button NSAlertAlternateReturn
+                      NSLocalizedString(@"Cancel", @""), //middle button NSAlertOtherReturn
                       [self window],
                       self, // modal delegate
                       @selector(shouldCloseSheetDidEnd:returnCode:contextInfo:),
@@ -1488,9 +1488,15 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 }
 
 - (void)shouldCloseSheetDidEnd:(NSWindow *)sheet returnCode:(int)returnCode contextInfo:(void *)contextInfo{
-    if(returnCode == NSAlertDefaultReturn){
-        [sheet orderOut:nil];
-        [self close];
+    switch (returnCode){
+        case NSAlertOtherReturn:
+            break; // do nothing
+        case NSAlertAlternateReturn:
+            [[theBib retain] autorelease]; // make sure it stays around till we're closed
+            [[theBib document] removePublication:theBib]; // now fall through to default
+        default:
+            [sheet orderOut:nil];
+            [self close];
     }
 }
 
