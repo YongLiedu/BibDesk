@@ -109,6 +109,7 @@ setupParagraphStyle()
 		[self setNeedsToBeFiled:NO];
 		[self updateMetadataForKey:nil];
         setupParagraphStyle();
+        [self setHasBeenEdited:NO]; // set this here, since makeType: and updateMetadataForKey set it to YES
 		
 		[[NSNotificationCenter defaultCenter] addObserver:self
 												 selector:@selector(typeInfoDidChange:)
@@ -152,6 +153,7 @@ setupParagraphStyle()
     document = nil;
     editorObj = nil;
     setupParagraphStyle();
+    hasBeenEdited = NO;
     bibLock = [[NSLock alloc] init]; // not encoded
     return self;
 }
@@ -565,10 +567,20 @@ setupParagraphStyle()
     [bibLock lock];
     [pubType autorelease];
     pubType = [[newType lowercaseString] retain];
+    [self setHasBeenEdited:YES];
     [bibLock unlock];
 }
 - (NSString *)type{
     return pubType;
+}
+
+- (void)setHasBeenEdited:(BOOL)yn{
+    //NSLog(@"set has been edited %@", (yn)?@"YES":@"NO");
+    hasBeenEdited = yn;
+}
+
+- (BOOL)hasBeenEdited{
+    return hasBeenEdited;
 }
 
 - (NSString *)suggestedCiteKey
@@ -699,6 +711,8 @@ setupParagraphStyle()
 }
 
 - (void)updateMetadataForKey:(NSString *)key{
+    
+    [self setHasBeenEdited:YES];
 	
 	if([BDSKAnnoteString isEqualToString:key] || 
 	   [BDSKAbstractString isEqualToString:key] || 

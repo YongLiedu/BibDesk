@@ -1472,10 +1472,13 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
     // case 4: good to go
     if(errMsg == nil)
         return YES;
+    
+    // only give the option to discard if the bib has not been edited; otherwise, it's likely that autofile/autogen citekey just hasn't happened yet
+    NSString *alternateButtonTitle = ([theBib hasBeenEdited]) ? nil : NSLocalizedString(@"Discard", @"");
 
     NSBeginAlertSheet(NSLocalizedString(@"Warning!", @""),
-                      NSLocalizedString(@"Keep", @""), //default button NSAlertDefaultReturn
-                      NSLocalizedString(@"Discard", @""), //far left button NSAlertAlternateReturn
+                      NSLocalizedString(@"Keep", @""),   //default button NSAlertDefaultReturn
+                      alternateButtonTitle,              //far left button NSAlertAlternateReturn
                       NSLocalizedString(@"Cancel", @""), //middle button NSAlertOtherReturn
                       [self window],
                       self, // modal delegate

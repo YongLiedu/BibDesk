@@ -74,6 +74,7 @@
 	BOOL needsToBeFiled;
 	BibDocument *document;
 	NSLock *bibLock;
+    BOOL hasBeenEdited;
 }
 
 /*!
@@ -187,6 +188,21 @@
 
 - (void)setType: (NSString *)newType;
 - (NSString *)type;
+
+/*!
+    @method     setHasBeenEdited:
+    @abstract   Must be set to YES if the BibItem has been edited externally.
+    @discussion (comprehensive description)
+    @param      yn (description)
+*/
+- (void)setHasBeenEdited:(BOOL)yn;
+/*!
+    @method     hasBeenEdited
+    @abstract   Returns YES if the BibItem has been edited (type or metadata changed) externally.
+    @discussion (comprehensive description)
+    @result     (description)
+*/
+- (BOOL)hasBeenEdited;
 
 /*!
     @method suggestedCiteKey
