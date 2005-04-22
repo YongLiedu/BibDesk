@@ -272,8 +272,9 @@ btxdoc.dvi
 @chapter Opening and Importing Files
 
 @menu
-* Starting a New File::         
-* Opening an RIS File::       
+* Starting a New File::
+* Opening a File::
+* Opening an RIS File::  
 @end menu
 
 @node Starting a New File
@@ -281,15 +282,18 @@ btxdoc.dvi
 @abstract{Various ways of Creating a New File}
 
 Choose "New Bibliography" from the File menu or 
-type the keyboard shortcut @cmd{} @shift{} N. 
+type the keyboard shortcut @cmd{} @shift{} N.
 
-@subsection Opening a File in a Specific Encoding
+@node Opening a File
+@section Opening a File
+
+@subheading Opening a File in a Specific Encoding
 
 Use the "Open..." menu item in the File menu, and select the encoding
 you want to use from the popup menu at the bottom of the dialog
 box.
 
-@subsection Opening a File Using a Command-Line Filter
+@subheading Opening a File Using a Command-Line Filter
 
 This feature lets you specify any command line that produces a BibTeX
 file and open it in BibDesk directly. If you have command line
@@ -305,7 +309,6 @@ installation.
 The drop-down menu will save the last seven commands used, which should be sufficient for most needs!
 Note that BibDesk can open RIS files directly, so a filter isn't required for them.
 
-
 @node Opening an RIS File
 @section Opening an RIS File
 
@@ -318,7 +321,7 @@ Many of the RIS tags are converted into their BibTeX equivalents, but unknown ta
 BibDesk's RIS import feature converts some HTML characters and tags into LaTeX commands, which can be handy when importing large
 numbers of references; the LaTeX produced may be rather primitive, however.
 
-@subsection PubMed
+@subheading PubMed
 
 Just do your search as usual on
 PubMed, and then select the settings as in the following image:
@@ -334,7 +337,7 @@ the same format. If you want to, you can save it as a BibTeX file, or
 transfer the translated entries over into a BibTeX file that you use
 permanently.
 
-@subsection Other Online Databases
+@subheading Other Online Databases
 
 Many online databases have the capability to export RIS 
 (the @uref{http://www.refman.com/support/risformat_intro.asp, Reference Manager format}), 
@@ -344,7 +347,7 @@ called ``ReferenceMiner'' which searches PubMed, the Library of Congress, and
 Amazon.  References can be dragged from ReferenceMiner directly into BibDesk's
 publication list, which may be more convenient for those sources.
 
-@subsection Using Services
+@subheading Using RIS Services
 
 The Services menu items ``Bibdesk->Add to Bibliography'' and ``Bibdesk->New Document With RIS''
 can be used from a text editor or web browser which supports Services to
@@ -386,8 +389,8 @@ BibDesk's quick search field also supports a Boolean search, using
 capitalized).  Please note that grouping is not supported at this
 time.  The search feature will also consider accented and non-accented
 characters as equivalent, and is case-insensitive
-(i.e. "BÃ¼rger" can be found by searching for "burger" or
-"BÃ¼rGeR").
+(i.e. "Bürger" can be found by searching for "burger" or
+"BÜrGeR").
 
 
 @node Managing References, Citation Keys, Searching Your Database, Top
