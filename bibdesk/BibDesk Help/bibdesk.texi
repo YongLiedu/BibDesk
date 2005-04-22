@@ -1100,6 +1100,33 @@ The format is used for autogeneration of certain values, such as the cite key an
 @end ifnothtml
 @end macro
 
+@macro specparam {spec, param}
+@html
+<span class="spec">\spec\</span><span class="param">\param\</span>
+@end html
+@ifnothtml
+@b{\spec\}@b{\param\}
+@end ifnothtml
+@end macro
+
+@macro specarg {spec, arg}
+@html
+<span class="spec">\spec\{</span><i>\arg\</i><span class="spec">}</span>
+@end html
+@ifnothtml
+@b{\spec\\{}@i{\arg\}@b{\}}
+@end ifnothtml
+@end macro
+
+@macro specargparam {spec, arg, param}
+@html
+<span class="spec">\spec\{</span><i>\arg\</i><span class="spec">}</span><span class="param">\param\</span>
+@end html
+@ifnothtml
+@b{\spec\\{}@i{\arg\}@b{\}}@b{\param\}
+@end ifnothtml
+@end macro
+
 @macro bold {text}
 @html
 <b>\text\</b>
@@ -1127,15 +1154,15 @@ The format is used for autogeneration of certain values, such as the cite key an
 @set paramdescr italics
 @end ifnothtml
 
-@multitable {@b{%f{ Field } 0}} {Keywords concatenated together, with (optional) maximal number of keywords. Keywords must be separated by one of ;:, (semicolon, colon, or comma)}
+@multitable {@b{%f\{}\i{Field}\b{\}0}} {Keywords concatenated together, with (optional) maximal number of keywords. Keywords must be separated by one of ;:, (semicolon, colon, or comma)}
 @item @b{Specifier} @tab @b{Replaced content description}
-@item @spec{%a}@param{[][]00}
+@item @specparam{%a, [][]00}
 @tab Author last names, with (optional) maximal number of authors and number of characters
-@item @spec{%A}@param{[;][.][]0}
+@item @specparam{%A, [;][.][]0}
 @tab Author last names with initials, with (optional) maximal number of authors
-@item @spec{%t}@param{0 }
+@item @specparam{%t, 0 }
 @tab Title, with (optional) maximal length
-@item @spec{%T}@param{0 }
+@item @specparam{%T, 0 }
 @tab Title, with (optional) maximal number of words
 @item @spec{%y}
 @tab Year without century
@@ -1143,7 +1170,7 @@ The format is used for autogeneration of certain values, such as the cite key an
 @tab Year with century
 @item @spec{%m}
 @tab Month as decimal number
-@item @spec{%k}@param{0 }
+@item @specparam{%k, 0 }
 @tab Keywords concatenated together, with (optional) maximal number of keywords. 
 Keywords must be separated by one of ;:, (semicolon, colon, or comma)
 @item @spec{%l}
@@ -1152,22 +1179,22 @@ Keywords must be separated by one of ;:, (semicolon, colon, or comma)
 @tab File name from Local-Url, with extension
 @item @spec{%e}
 @tab File extension from Local-Url (including the period)
-@item @spec{%f\{}@it{Field}@spec{\}}@param{0 }
+@item @specargparam{%f, Field, 0 }
 @tab Arbitrary field, with (optional) maximal length
-@item @spec{%c\{}@it{Field}@spec{\}}
+@item @specarg{%c, Field}
 @tab Arbitrary field as initials, e.g. @samp{JCIS} for @samp{Journal of Colloid and Interface Science} 
 in the @samp{Journal} BibTeX field
-@item @spec{%r}@param{1}
+@item @specparam{%r, 1}
 @tab Random lowercase letter, with (optional) number of characters
-@item @spec{%R}@param{1}
+@item @specparam{%R, 1}
 @tab Random uppercase letter, with (optional) number of characters
-@item @spec{%d}@param{1}
+@item @specparam{%d, 1}
 @tab Random number, with (optional) number of digits
-@item @spec{%u}@param{1}
+@item @specparam{%u, 1}
 @tab Unique lowercase letter, with (optional) number of characters (only once)
-@item @spec{%U}@param{1}
+@item @specparam{%U, 1}
 @tab Unique uppercase letter, with (optional) number of characters (only once)
-@item @spec{%n}@param{1}
+@item @specparam{%n, 1}
 @tab Unique number, with (optional) number of characters (only once)
 @item @spec{%0}
 @tab Escaped digit (0-9)
@@ -1177,7 +1204,7 @@ in the @samp{Journal} BibTeX field
 @tab Escaped square bracket (if allowed)
 @item @spec{%]}
 @tab Escaped square bracket character (if allowed)
-@end table
+@end multitable
 @noindent
 In the table above, @value{paramdescr} characters after the specifiers 
 indicate the optional parameters (the first number after an author specifier, 
@@ -1221,35 +1248,35 @@ Source Forge, 1:96, 11 2004.
 
 @table @asis
 @item Format string:
-@spec{%a}@param{1}@bold{:}@spec{%Y}@spec{%r}@param{2}
+@specparam{%a, 1}@bold{:}@spec{%Y}@specparam{%r,2}
 @item Resulting value:
 McCracken:2004yc
 @end table
 
 @table @asis
 @item Format string:
-@spec{%a}@param{1}@bold{:}@spec{%Y}@spec{%u}@param{}
+@specparam{%a, 1}@bold{:}@spec{%Y}@spec{%u}
 @item Resulting value:
 McCracken:2004b
 @end table
 
 @table @asis
 @item Format string:
-@spec{%a}@param{03}@spec{%y}@spec{%m}
+@specparam{%a, 03}@spec{%y}@spec{%m}
 @item Resulting value:
 McCMaxHowRouSpiPorHof0411
 @end table
 
 @table @asis
 @item Format string:
-@spec{%A}@param{[;][.][;etal]2}@bold{:}@spec{%y}@spec{%t}@param{20}
+@specparam{%A, [;][.][;etal]2}@bold{:}@spec{%y}@specparam{%t, 20}
 @item Resulting value:
 McCracken.M;Maxwell.A;etal:2004Bibdesk-a-great-appl
 @end table
 
 @table @asis
 @item Format string:
-@spec{%a}@param{[;][;etal]24}@bold{:}@spec{%c\{}@param{Journal}@spec{\}}@spec{%f\{}@param{Volume}@spec{\}}
+@specparam{%a, [;][;etal]24}@bold{:}@specarg{%c,Journal}@specarg{%f, Volume}
 @item Resulting value:
 McCr;Maxw;etal:SF1
 @end table
