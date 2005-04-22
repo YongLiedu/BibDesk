@@ -2332,6 +2332,8 @@ This method always returns YES. Even if some or many operations fail.
             }
         }
     }
+    
+    [self setTableFont];
 }
 
 - (IBAction)dismissAddFieldSheet:(id)sender{
@@ -2438,7 +2440,6 @@ This method always returns YES. Even if some or many operations fail.
         [[OFPreferenceWrapper sharedPreferenceWrapper] setObject:prefsShownColNamesMutableArray
                                                           forKey:BDSKShownColsNamesKey];
         [self setupTableColumns];
-        [self setTableFont];
         [self updateUI];
         [[NSNotificationCenter defaultCenter] postNotificationName:BDSKTableColumnChangedNotification
                                                             object:[tc identifier]
@@ -2494,7 +2495,7 @@ This method always returns YES. Even if some or many operations fail.
         [self columnsMenuAddTableColumnName:colName enabled:NO];
     }
     menuItem = [columnsMenu itemWithTitle:colName];
-    [self columnsMenuSelectTableColumn:menuItem post:NO]; 
+    [self columnsMenuSelectTableColumn:menuItem post:NO];
 }
 
 - (void)handlePreviewDisplayChangedNotification:(NSNotification *)notification{
@@ -2675,11 +2676,10 @@ This method always returns YES. Even if some or many operations fail.
 - (void)setTableFont{
     // The font we're using now
     NSFont *font = [NSFont fontWithName:[[OFPreferenceWrapper sharedPreferenceWrapper] objectForKey:BDSKTableViewFontKey]
-                                   size:
-        [[OFPreferenceWrapper sharedPreferenceWrapper] floatForKey:BDSKTableViewFontSizeKey]];
+                                   size:[[OFPreferenceWrapper sharedPreferenceWrapper] floatForKey:BDSKTableViewFontSizeKey]];
 	
-	[tableView setRowHeight:[font defaultLineHeightForFont]+2];
 	[tableView setFont:font];
+    [tableView setRowHeight:[font defaultLineHeightForFont]+2];
 	[tableView tile];
     [tableView reloadData]; // othewise the change isn't immediately visible
 }
