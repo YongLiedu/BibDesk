@@ -73,6 +73,9 @@ setupParagraphStyle()
 									 pubFields:nil
 									   authors:nil
 								   createdDate:[NSCalendarDate calendarDate]];
+	if (self) {
+        [self setHasBeenEdited:NO]; // set this here, since makeType: and updateMetadataForKey set it to YES
+	}
 	return self;
 }
 
@@ -109,7 +112,6 @@ setupParagraphStyle()
 		[self setNeedsToBeFiled:NO];
 		[self updateMetadataForKey:nil];
         setupParagraphStyle();
-        [self setHasBeenEdited:NO]; // set this here, since makeType: and updateMetadataForKey set it to YES
 		
 		[[NSNotificationCenter defaultCenter] addObserver:self
 												 selector:@selector(typeInfoDidChange:)
