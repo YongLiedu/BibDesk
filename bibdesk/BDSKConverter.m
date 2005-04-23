@@ -342,10 +342,14 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 		return nil;
 	
 	if ((accent = [detexifyAccents objectForKey:texAccent]) && 
-		[scanner scanUpToString:@"}" intoString:&character] && 
-		([character length] == 1))
-		return [[character stringByAppendingString:accent] precomposedStringWithCanonicalMapping];
-	
+		[scanner scanUpToString:@"}" intoString:&character]) {
+		if ([character isEqualToString:@"\\i"])
+			character = @"i";
+		else if ([character isEqualToString:@"\\j"])
+			character = @"j";
+		if ([character length] == 1)
+			return [[character stringByAppendingString:accent] precomposedStringWithCanonicalMapping];
+	}
 	return nil;
 }
 
