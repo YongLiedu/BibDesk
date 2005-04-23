@@ -137,7 +137,7 @@ Return styled text for a bibstring.
 - (NSTextStorage*) textStorageForBibString:(NSString*) bibString {
     NSData *d;
 	if([PDFpreviewer PDFFromString:bibString])
-        d = [PDFpreviewer rtfDataPreview];
+        d = [PDFpreviewer RTFPreviewData];
     else
         return nil;
     

@@ -2100,7 +2100,7 @@ int generalBibItemCompareFunc(id item1, id item2, void *context){
     }
     [pb setString:bibString forType:BDSKBibTeXStringPboardType];
     if([PDFpreviewer PDFFromString:bibString]){
-        d = [PDFpreviewer rtfDataPreview];
+        d = [PDFpreviewer RTFPreviewData];
         [pb setData:d forType:NSRTFPboardType];
     } else {
         NSBeep();

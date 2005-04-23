@@ -379,7 +379,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
         yn = [pboard setData:[PDFpreviewer PDFDataFromString:s] forType:NSPDFPboardType];
     }else if (dragType == 3){
 		[pboard declareTypes:[NSArray arrayWithObject:NSRTFPboardType] owner:nil];
-        yn = [pboard setData:[PDFpreviewer rtfDataPreview] forType:NSRTFPboardType];
+        yn = [pboard setData:[PDFpreviewer RTFPreviewData] forType:NSRTFPboardType];
     }
     [localDragPboard declareTypes:[NSArray arrayWithObjects:NSStringPboardType, BDSKBibItemLocalDragPboardType, nil] owner:nil];
     lyn = [localDragPboard setString:localPBString forType:NSStringPboardType];

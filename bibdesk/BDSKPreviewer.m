@@ -71,9 +71,7 @@ static BDSKPreviewer *thePreviewer;
 
 - (void)windowDidLoad{ // we get this the first time the user selects "Show Preview"
     NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
-    [self performSelectorOnMainThread:@selector(resetPreviews)
-                           withObject:nil
-                        waitUntilDone:YES];
+    [self resetPreviews];
     [pool release];
 }
 
@@ -84,7 +82,7 @@ static BDSKPreviewer *thePreviewer;
     
     BOOL rv = YES;
     
-    if(str == nil){
+    if(str == nil || [str isEqualToString:@""]){
         [self resetPreviews];
         [pool release];
         return NO;
@@ -121,10 +119,7 @@ static BDSKPreviewer *thePreviewer;
         [[[OFPreferenceWrapper sharedPreferenceWrapper] stringForKey:BDSKOutputTemplateFileKey] stringByExpandingTildeInPath]];
     s = [NSScanner scannerWithString:texFile];
 
-    if([imagePreviewView lockFocusIfCanDraw]){
-        [imagePreviewView setImage:[NSImage imageNamed:@"typesetting.pdf"]];
-        [imagePreviewView unlockFocus];
-    }
+    [imagePreviewView setImage:[NSImage imageNamed:@"typesetting.pdf"]];
 
     // replace the appropriate style & bib files.
     style = [[OFPreferenceWrapper sharedPreferenceWrapper] objectForKey:BDSKBTStyleKey];
@@ -159,9 +154,7 @@ static BDSKPreviewer *thePreviewer;
     NS_ENDHANDLER
             
     display:
-        [self performSelectorOnMainThread:@selector(performDrawing)
-                               withObject:nil
-                            waitUntilDone:YES]; // now we fall through to clean up
+        [self performDrawing];
     cleanup:
         [pool release];
         [theLock unlock];
@@ -186,11 +179,8 @@ static BDSKPreviewer *thePreviewer;
 
 - (void)performDrawing{
     NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
-    if([tabView lockFocusIfCanDraw]){
-        [imagePreviewView loadFromPath:finalPDFPath];
-        [tabView unlockFocus];
-        [self rtfPreviewFromData:[self rtfDataPreview]]; // does its own locking of the view
-    }
+    [imagePreviewView loadFromPath:finalPDFPath];
+    [self displayRTFPreviewFromData:[self RTFPreviewData]]; // does its own locking of the view
     [pool release];
 }	
 
@@ -324,43 +314,32 @@ static BDSKPreviewer *thePreviewer;
     return rtfString;
 }
 
-- (NSData *)rtfDataPreview{   // Returns the RTF as NSData, used for pasteboard ops
+- (NSData *)RTFPreviewData{   // Returns the RTF as NSData, used for pasteboard ops
     NSData *d = [NSData dataWithContentsOfFile:rtfFilePath];
     return d;
 }
 
-
-// accessor
-- (NSImageView*) pdfView { 
-	return imagePreviewView;
-}
-
-
-- (BOOL)rtfPreviewFromData:(NSData *)rtfdata{  // This draws the RTF in a textview
+- (BOOL)displayRTFPreviewFromData:(NSData *)rtfdata{  // This draws the RTF in a textview
+    NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
+    BOOL rv = YES;
+    
     NSSize inset = NSMakeSize(20,20); // set this for the margin
     
-    if([tabView lockFocusIfCanDraw]){
-	[rtfPreviewView setString:@""];   // clean the view
-	[rtfPreviewView setTextContainerInset:inset];  // pad the edges of the text
-	[tabView unlockFocus];
-    }
+    [rtfPreviewView setString:@""];   // clean the view
+    [rtfPreviewView setTextContainerInset:inset];  // pad the edges of the text
 
     // we get a zero-length string if a bad bibstyle is used, so check for it
-    if([rtfdata length] > 0 && [tabView lockFocusIfCanDraw]){
+    if([rtfdata length] > 0){
         [rtfPreviewView replaceCharactersInRange:[rtfPreviewView selectedRange]
                                          withRTF:rtfdata];
-        [tabView unlockFocus];
-        return YES;
     } else {
         NSString *errstr = [NSString stringWithString:@"***** ERROR:  unable to create preview *****"];
-        if([tabView lockFocusIfCanDraw]){
-            [rtfPreviewView replaceCharactersInRange: [rtfPreviewView selectedRange]
-                          withString:errstr];
-            [tabView unlockFocus];
-        }
-    	return NO;
+        [rtfPreviewView replaceCharactersInRange: [rtfPreviewView selectedRange]
+                                      withString:errstr];
+    	rv = NO;
     }
-	
+    [pool release];
+    return rv;	
 }
 
 - (void)windowWillClose:(NSNotification *)notification{
@@ -378,17 +357,11 @@ static BDSKPreviewer *thePreviewer;
 }
 
 - (void)resetPreviews{
-    if([tabView lockFocusIfCanDraw]){
-        [imagePreviewView loadFromPath:nopreviewPDFPath];
-        [tabView unlockFocus];
-    }
-    if([tabView lockFocusIfCanDraw]){
-        [rtfPreviewView setString:@""];
-        [rtfPreviewView setTextContainerInset:NSMakeSize(20, 20)];
-        [rtfPreviewView replaceCharactersInRange:[rtfPreviewView selectedRange]
-                                      withString:NSLocalizedString(@"Please select an item or items from the bibliography list for LaTeX to preview.",@"")];
-        [tabView unlockFocus];
-    }
+    [imagePreviewView loadFromPath:nopreviewPDFPath];
+    [rtfPreviewView setString:@""];
+    [rtfPreviewView setTextContainerInset:NSMakeSize(20, 20)];
+    [rtfPreviewView replaceCharactersInRange:[rtfPreviewView selectedRange]
+                                  withString:NSLocalizedString(@"Please select an item or items from the bibliography list for LaTeX to preview.",@"")];
 }
 
 
