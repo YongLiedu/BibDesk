@@ -116,7 +116,10 @@
 	// Panther only
 	//[[NSHelpManager sharedHelpManager] openHelpAnchor:@"citekeyFormat" inBook:@"BibDesk Help"];
 	// ..or we need Carbon/AppleHelp.h
-	AHLookupAnchor((CFStringRef)@"BibDesk Help",(CFStringRef)@"format");
+	OSErr err = AHLookupAnchor((CFStringRef)@"BibDesk Help",(CFStringRef)@"Citation-Key-Format-Reference");
+    if (err == kAHInternalErr || err == kAHInternalErr){
+        NSLog(@"Help Book: error looking up anchor \"Citation-Key-Format-Reference\"");
+    }
 }
 
 - (IBAction)changeLocalUrlLowercase:(id)sender{
