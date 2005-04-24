@@ -17,6 +17,7 @@
                 loadPasteboard = id; 
                 loadWebPage = id; 
                 saveFileAsLocalUrl = id; 
+                showHelpAction = id; 
                 stopAddingAction = id; 
                 stopOrReloadAction = id; 
             }; 
