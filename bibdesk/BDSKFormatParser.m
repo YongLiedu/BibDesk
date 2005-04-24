@@ -171,7 +171,11 @@ static BDSKFormatParser *sharedParser;
 					break;
 				case 't':
 					// title, optional #chars
-					string = [[pub title] stringByRemovingCurlyBraces];
+					if ([[pub type] isEqualToString:@"inbook"]) {
+						string = [[pub valueOfField:@"Chapter"] stringByRemovingCurlyBraces];
+					} else {
+						string = [[pub valueOfField:BDSKTitleString] stringByRemovingCurlyBraces];
+					}
 					string = [self stringBySanitizingString:string forField:fieldName inFileType:[pub fileType]];
 					if (![scanner scanInt:&number]) number = 0;
 					if (number > 0 && [string length] > number) {
@@ -182,7 +186,11 @@ static BDSKFormatParser *sharedParser;
 					break;
 				case 'T':
 					// title, optional #words
-					string = [[pub title] stringByRemovingCurlyBraces];
+					if ([[pub type] isEqualToString:@"inbook"]) {
+						string = [[pub valueOfField:@"Chapter"] stringByRemovingCurlyBraces];
+					} else {
+						string = [[pub valueOfField:BDSKTitleString] stringByRemovingCurlyBraces];
+					}
 					if (![scanner scanInt:&number]) number = 0;
 					if (string != nil) {
 						arr = [NSMutableArray array];
