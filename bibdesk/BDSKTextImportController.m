@@ -7,7 +7,7 @@
 //
 
 #import "BDSKTextImportController.h"
-
+#import <Carbon/Carbon.h>
 
 @implementation BDSKTextImportController
 
@@ -375,6 +375,14 @@
 	}else{
 		[webView reload:sender];
 	}
+}
+
+- (IBAction)showHelpAction:(id)sender{
+    
+    OSErr err = AHLookupAnchor((CFStringRef)@"BibDesk Help", (CFStringRef)@"Adding-from-Text");
+    if (err == kAHInternalErr || err == kAHInternalErr){
+        NSLog(@"Help Book: error looking up anchor \"Adding-from-Text\"");
+    }
 }
 
 #pragma mark WebView contextual menu actions

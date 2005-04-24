@@ -60,6 +60,7 @@
 - (IBAction)dismissUrlSheet:(id)sender;
 - (IBAction)dismissAddBookmarkSheet:(id)sender;
 - (IBAction)stopOrReloadAction:(id)sender;
+- (IBAction)showHelpAction:(id)sender;
 
 - (void)copyLocationAsRemoteUrl:(id)sender;
 - (void)copyLinkedLocationAsRemoteUrl:(id)sender;
