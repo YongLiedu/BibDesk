@@ -18,6 +18,7 @@
                 copy = id; 
                 copyAsBibTex = id; 
                 copyAsPDF = id; 
+                copyAsPublicBibTex = id; 
                 copyAsRTF = id; 
                 copyAsTex = id; 
                 cut = id; 

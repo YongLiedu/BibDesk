@@ -112,6 +112,7 @@
                 consolidateLinkedFiles = id; 
                 copyAsBibTex = id; 
                 copyAsPDF = id; 
+                copyAsPublicBibTex = id; 
                 copyAsRTF = id; 
                 copyAsTex = id; 
                 delPub = id; 
@@ -123,6 +124,7 @@
                 exportAsMODS = id; 
                 exportAsRSS = id; 
                 exportEncodedBib = id; 
+                exportEncodedPublicBib = id; 
                 exportRIS = id; 
                 find = id; 
                 generateCiteKey = id; 
