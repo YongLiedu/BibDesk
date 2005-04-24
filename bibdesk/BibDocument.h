@@ -233,7 +233,7 @@ extern NSString *BDSKBibItemLocalDragPboardType;
 /*!
     @method     exportAsRSS:
     @abstract   Action method to export RSS XML
-    @discussion  This calls exportAsFileType:@"rss".
+    @discussion  This calls exportAsFileType:@"rss" droppingInternal:NO.
     @param      sender anything
 */
 - (IBAction)exportAsRSS:(id)sender;
@@ -241,7 +241,7 @@ extern NSString *BDSKBibItemLocalDragPboardType;
 /*!
 @method     exportAsHTML:
      @abstract   Action method to export HTML
-     @discussion  This calls exportAsFileType:@"html".
+     @discussion  This calls exportAsFileType:@"html" droppingInternal:NO.
      @param      sender anything
 */
 - (IBAction)exportAsHTML:(id)sender;
@@ -249,7 +249,7 @@ extern NSString *BDSKBibItemLocalDragPboardType;
 /*!
 @method     exportAsMODS:
      @abstract   Action method to export MODS XML. 
-     @discussion  This calls exportAsFileType:@"mods".
+     @discussion  This calls exportAsFileType:@"mods" droppingInternal:NO.
  It should not be considered robust currently.
      @param      sender anything
 */
@@ -258,21 +258,46 @@ extern NSString *BDSKBibItemLocalDragPboardType;
 /*!
 @method     exportAsAtom:
      @abstract   Action method to export ATOM XML for syndication.
-     @discussion  This calls exportAsFileType:@"mods".
+     @discussion  This calls exportAsFileType:@"mods" droppingInternal:NO.
      It should not be considered robust currently.
      @param      sender anything
 */
 - (IBAction)exportAsAtom:(id)sender;
 
 /*!
-    @method     exportAsFileType:
+    @method     exportEncodedBib:
+    @abstract   Action method to export BibTex data
+    @discussion This calls exportAsFileType:@"bib" droppingInternal:NO.
+    @param      sender anything
+*/
+- (IBAction)exportEncodedBib:(id)sender;
+
+/*!
+    @method     exportEncodedBib:
+    @abstract   Action method to export BibTex data without internal fields
+    @discussion This calls exportAsFileType:@"bib" droppingInternal:YES.
+    @param      sender anything
+*/
+- (IBAction)exportEncodedPublicBib:(id)sender;
+
+/*!
+    @method     exportRIS:
+    @abstract   Action method to export RIS
+    @discussion This calls exportAsFileType:@"ris" droppingInternal:NO.
+    @param      sender anything
+*/
+- (IBAction)exportRIS:(id)sender;
+
+/*!
+    @method     exportAsFileType:droppingInternal:
     @abstract   Export the document's contents.
     @discussion Exports the entire document to one of many file types. 
  This method just opens a save panel, with the appropriate accessory view.
  On return from the save panel, Cocoa calls our method savePanelDidEnd:returnCode:contextInfo:
  @param      fileType A string representing the type to export.
+ @param      drop A boolean specifying whether internal fields should be dropped. 
 */
-- (void)exportAsFileType:(NSString *)fileType;
+- (void)exportAsFileType:(NSString *)fileType droppingInternal:(BOOL)drop;
 
 /*!
     @method     savePanelDidEnd:returnCode:contextInfo:
@@ -291,9 +316,10 @@ extern NSString *BDSKBibItemLocalDragPboardType;
     @method     bibDataRepresentation
     @abstract   BibTeX representation of the entire document.
     @discussion Uses the document's string encoding as returned by -[BibDocument documentStringEncoding], which is the encoding used when opening the document.
-    @result     (description)
+    @param      drop Boolean determines whether internal fields should be dropped from the bibtex strings.
+	@result     (description)
 */
-- (NSData *)bibDataRepresentation;
+- (NSData *)bibDataRepresentationDroppingInternal:(BOOL)drop;
 
 /*!
     @method     htmlDataRepresentation
@@ -318,9 +344,10 @@ extern NSString *BDSKBibItemLocalDragPboardType;
     @abstract   Returns all of the BibItems as BibTeX with the specified string encoding.
     @discussion Used for export operations (saving with a specified string encoding, which is not necessarily the document's string encoding).
     @param      encoding (description)
+    @param      drop (description)
     @result     (description)
 */
-- (NSData *)bibTeXDataWithEncoding:(NSStringEncoding)encoding;
+- (NSData *)bibTeXDataWithEncoding:(NSStringEncoding)encoding droppingInternal:(BOOL)drop;
 
 /*!
     @method     RISDataWithEncoding:
@@ -509,6 +536,14 @@ extern NSString *BDSKBibItemLocalDragPboardType;
     @param sender The sender. Not used.
 */
 - (IBAction)copyAsBibTex:(id)sender;
+
+/*!
+    @method copyAsPublicBibTex
+    @abstract copy as bibtex source dropping internal fields
+    @discussion puts the bibtex source of the currently selected publications onto the general pasteboard.
+    @param sender The sender. Not used.
+*/
+- (IBAction)copyAsPublicBibTex:(id)sender;
 
 /*!
     @method copyAsTex

@@ -538,30 +538,34 @@ NSString *BDSKBibItemLocalDragPboardType = @"edu.ucsd.cs.mmccrack.bibdesk: Local
 }
 
 - (IBAction)exportAsAtom:(id)sender{
-    [self exportAsFileType:@"atom"];
+    [self exportAsFileType:@"atom" droppingInternal:NO];
 }
 
 - (IBAction)exportAsMODS:(id)sender{
-    [self exportAsFileType:@"mods"];
+    [self exportAsFileType:@"mods" droppingInternal:NO];
 }
 
 - (IBAction)exportAsHTML:(id)sender{
-    [self exportAsFileType:@"html"];
+    [self exportAsFileType:@"html" droppingInternal:NO];
 }
 
 - (IBAction)exportAsRSS:(id)sender{
-    [self exportAsFileType:@"rss"];
+    [self exportAsFileType:@"rss" droppingInternal:NO];
 }
 
 - (IBAction)exportEncodedBib:(id)sender{
-    [self exportAsFileType:@"bib"];
+    [self exportAsFileType:@"bib" droppingInternal:NO];
+}
+
+- (IBAction)exportEncodedPublicBib:(id)sender{
+    [self exportAsFileType:@"bib" droppingInternal:YES];
 }
 
 - (IBAction)exportRIS:(id)sender{
-    [self exportAsFileType:@"ris"];
+    [self exportAsFileType:@"ris" droppingInternal:NO];
 }
 
-- (void)exportAsFileType:(NSString *)fileType{
+- (void)exportAsFileType:(NSString *)fileType droppingInternal:(BOOL)drop{
     NSSavePanel *sp = [NSSavePanel savePanel];
     [sp setRequiredFileType:fileType];
     [sp setDelegate:self];
@@ -573,12 +577,13 @@ NSString *BDSKBibItemLocalDragPboardType = @"edu.ucsd.cs.mmccrack.bibdesk: Local
             [sp setAccessoryView:SaveEncodingAccessoryView];
         }
     }
-    [sp beginSheetForDirectory:nil
+    NSDictionary *contextInfo = [[NSDictionary dictionaryWithObjectsAndKeys:fileType, @"fileType", [NSNumber numberWithBool:drop], @"dropInternal", nil] retain];
+	[sp beginSheetForDirectory:nil
                           file:( [self fileName] == nil ? nil : [[NSString stringWithString:[[self fileName] stringByDeletingPathExtension]] lastPathComponent])
                 modalForWindow:documentWindow
                  modalDelegate:self
                 didEndSelector:@selector(savePanelDidEnd:returnCode:contextInfo:)
-                   contextInfo:fileType];
+                   contextInfo:contextInfo];
 
 }
 
@@ -586,8 +591,10 @@ NSString *BDSKBibItemLocalDragPboardType = @"edu.ucsd.cs.mmccrack.bibdesk: Local
     NSData *fileData = nil;
     NSString *fileName = nil;
     NSSavePanel *sp = (NSSavePanel *)sheet;
-    NSString *fileType = contextInfo;
-    
+    NSDictionary *dict = (NSDictionary *)contextInfo;
+	NSString *fileType = [dict objectForKey:@"fileType"];
+    BOOL drop = [[dict objectForKey:@"dropInternal"] boolValue];
+	
     if(returnCode == NSOKButton){
         fileName = [sp filename];
         if([fileType isEqualToString:@"rss"]){
@@ -600,7 +607,7 @@ NSString *BDSKBibItemLocalDragPboardType = @"edu.ucsd.cs.mmccrack.bibdesk: Local
             fileData = [self dataRepresentationOfType:@"ATOM"];
         }else if([fileType isEqualToString:@"bib"]){            
             NSStringEncoding encoding = [[BDSKStringEncodingManager sharedEncodingManager] stringEncodingForDisplayedName:[saveTextEncodingPopupButton titleOfSelectedItem]];
-            fileData = [self bibTeXDataWithEncoding:encoding];
+            fileData = [self bibTeXDataWithEncoding:encoding droppingInternal:drop];
         }else if([fileType isEqualToString:@"ris"]){
             NSStringEncoding encoding = [[BDSKStringEncodingManager sharedEncodingManager] stringEncodingForDisplayedName:[saveTextEncodingPopupButton titleOfSelectedItem]];
             fileData = [self RISDataWithEncoding:encoding];
@@ -609,6 +616,7 @@ NSString *BDSKBibItemLocalDragPboardType = @"edu.ucsd.cs.mmccrack.bibdesk: Local
     }
     [sp setRequiredFileType:@"bib"]; // just in case...
     [sp setAccessoryView:nil];
+	[dict release];
 }
 
 - (NSData *)dataRepresentationOfType:(NSString *)aType
@@ -618,7 +626,7 @@ NSString *BDSKBibItemLocalDragPboardType = @"edu.ucsd.cs.mmccrack.bibdesk: Local
                                                       userInfo:[NSDictionary dictionary]];
     
     if ([aType isEqualToString:@"bibTeX database"]){
-        return [self bibDataRepresentation];
+        return [self bibDataRepresentationDroppingInternal:NO];
     }else if ([aType isEqualToString:@"Rich Site Summary file"]){
         return [self rssDataRepresentation];
     }else if ([aType isEqualToString:@"HTML"]){
@@ -721,12 +729,12 @@ stringByAppendingPathComponent:@"BibDesk"]; */
     return s;
 }
 
-- (NSData *)bibDataRepresentation{
+- (NSData *)bibDataRepresentationDroppingInternal:(BOOL)drop{
     
     if([self documentStringEncoding] == 0)
         [NSException raise:@"String encoding exception" format:@"Document does not have a specified string encoding."];
 
-    return [self bibTeXDataWithEncoding:[self documentStringEncoding]];
+    return [self bibTeXDataWithEncoding:[self documentStringEncoding] droppingInternal:drop];
            
 }
 
@@ -764,7 +772,7 @@ stringByAppendingPathComponent:@"BibDesk"]; */
     return d;
 }
 
-- (NSData *)bibTeXDataWithEncoding:(NSStringEncoding)encoding{
+- (NSData *)bibTeXDataWithEncoding:(NSStringEncoding)encoding droppingInternal:(BOOL)drop{
     
     BibItem *tmp;
     NSEnumerator *e = [[publications sortedArrayUsingSelector:@selector(fileOrderCompare:)] objectEnumerator];
@@ -802,7 +810,7 @@ stringByAppendingPathComponent:@"BibDesk"]; */
     while(tmp = [e nextObject]){
         [d appendData:[[NSString stringWithString:@"\n\n"] dataUsingEncoding:encoding  allowLossyConversion:YES]];
         NS_DURING
-            [d appendData:[[tmp bibTeXString] dataUsingEncoding:encoding allowLossyConversion:YES]];
+            [d appendData:[[tmp bibTeXStringDroppingInternal:drop] dataUsingEncoding:encoding allowLossyConversion:YES]];
         NS_HANDLER
             if([[localException name] isEqualToString:@"BDSKTeXifyException"]){
 		int i = NSRunAlertPanel(NSLocalizedString(@"Warning!", @"Title of alert when an error happens"),
@@ -867,7 +875,7 @@ stringByAppendingPathComponent:@"BibDesk"]; */
                 // per user feedback, give an option to run the file through the BibTeX parser to see if we can open our own BibTeX representation
                 // it is necessary to write the data to a file in order to use the error panel to jump to the offending line
                 NSString *tempFilePath = [NSTemporaryDirectory() stringByAppendingPathComponent:[[NSProcessInfo processInfo] globallyUniqueString]];
-                [[self bibTeXDataWithEncoding:[[OFPreferenceWrapper sharedPreferenceWrapper] integerForKey:BDSKDefaultStringEncoding]] writeToFile:tempFilePath atomically:YES];
+                [[self bibTeXDataWithEncoding:[[OFPreferenceWrapper sharedPreferenceWrapper] integerForKey:BDSKDefaultStringEncoding] droppingInternal:NO] writeToFile:tempFilePath atomically:YES];
                 [[NSApp delegate] openBibTeXFile:tempFilePath withEncoding:[[OFPreferenceWrapper sharedPreferenceWrapper] integerForKey:BDSKDefaultStringEncoding]];
                 // [self performSelector:@selector(close) withObject:nil afterDelay:0]; // closes the window, but it's weird to have it open, then close
             }
@@ -2013,6 +2021,20 @@ int generalBibItemCompareFunc(id item1, id item2, void *context){
     while(i=[e nextObject]){
 	    [s appendString:@"\n"];
         [s appendString:[[shownPublications objectAtIndex:[i intValue]] bibTeXString]];
+		[s appendString:@"\n"];
+    }
+    [pasteboard setString:s forType:NSStringPboardType];
+}    
+
+- (IBAction)copyAsPublicBibTex:(id)sender{
+    NSPasteboard *pasteboard = [NSPasteboard pasteboardWithName:NSGeneralPboard];
+    NSEnumerator *e = [self selectedPubEnumerator];
+    NSMutableString *s = [[NSMutableString string] retain];
+    NSNumber *i;
+    [pasteboard declareTypes:[NSArray arrayWithObject:NSStringPboardType] owner:nil];
+    while(i=[e nextObject]){
+	    [s appendString:@"\n"];
+        [s appendString:[[shownPublications objectAtIndex:[i intValue]] bibTeXStringDroppingInternal:YES]];
 		[s appendString:@"\n"];
     }
     [pasteboard setString:s forType:NSStringPboardType];

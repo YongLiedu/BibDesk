@@ -27,6 +27,9 @@ Broken out of BibDocument and split up into smaller parts to make things more ma
 	else if (act == @selector(copyAsBibTex:)) {
 		return [self validateCopyAsBibTeXMenuItem:menuItem];
 	}
+	else if (act == @selector(copyAsPublicBibTex:)) {
+		return [self validateCopyAsPublicBibTeXMenuItem:menuItem];
+	}
 	else if (act == @selector(copyAsPDF:)) {
 		return [self validateCopyAsPDFMenuItem:menuItem];
 	}
@@ -184,6 +187,42 @@ Broken out of BibDocument and split up into smaller parts to make things more ma
 		}
 		else {
 			s = NSLocalizedString(@"Copy %i BibTeX Records", @"Copy %i BibTeX Records");
+		}
+		[menuItem setTitle:[NSString stringWithFormat:s, [self numberOfSelectedPubs]]];
+		return YES;
+	}
+}	
+
+
+
+- (BOOL) validateCopyAsPublicBibTeXMenuItem:(NSMenuItem*) menuItem {
+	NSString * s;
+	
+	if ([self numberOfSelectedPubs] == 0) {
+		// no selection
+		s = NSLocalizedString(@"Public BibTeX Record", @"Public BibTeX Record");
+		[menuItem setTitle:s];
+		return NO;
+	}
+	else if ([self numberOfSelectedPubs] == 1) {
+		// single selection
+		if ([[menuItem menu] supermenu]) {
+			s = NSLocalizedString(@"Clean BibTeX Record for %@", @"Public BibTeX Record for %@");
+		}
+		else {
+			s = NSLocalizedString(@"Copy Public BibTeX Record for %@", @"Copy Public BibTeX Record for %@");
+		}
+		NSString * citeKey = [(BibItem*)[shownPublications objectAtIndex:[[[self selectedPubEnumerator] nextObject] intValue]] citeKey];
+		[menuItem setTitle:[NSString stringWithFormat:s, citeKey]];
+		return YES;
+	}
+	else {
+		// multiple selection
+		if ([[menuItem menu] supermenu]) {
+			s = NSLocalizedString(@"%i Public BibTeX Records", @"%i Public BibTeX Records");
+		}
+		else {
+			s = NSLocalizedString(@"Copy %i Public BibTeX Records", @"Copy %i Public BibTeX Records");
 		}
 		[menuItem setTitle:[NSString stringWithFormat:s, [self numberOfSelectedPubs]]];
 		return YES;

@@ -16,6 +16,7 @@
 
 - (BOOL) validateCopyAsTeXMenuItem:(NSMenuItem*) menuItem;
 - (BOOL) validateCopyAsBibTeXMenuItem:(NSMenuItem*) menuItem;
+- (BOOL) validateCopyAsPublicBibTeXMenuItem:(NSMenuItem*) menuItem;
 - (BOOL) validateCopyAsPDFMenuItem:(NSMenuItem*) menuItem;
 - (BOOL) validateCopyAsRTFMenuItem:(NSMenuItem*) menuItem;
 - (BOOL) validateEditSelectionMenuItem:(NSMenuItem*) menuItem;

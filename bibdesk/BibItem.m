@@ -1105,8 +1105,9 @@ setupParagraphStyle()
     return s;
 }
 
-- (NSString *)bibTeXStringByTeXifying:(BOOL)shouldTeXify expandMacros:(BOOL)expand{
-    NSString *k;
+- (NSString *)bibTeXStringByExpandingMacros:(BOOL)expand dropInternal:(BOOL)drop{
+    BOOL shouldTeXify = [[OFPreferenceWrapper sharedPreferenceWrapper] boolForKey:BDSKShouldTeXifyWhenSavingAndCopying];
+	NSString *k;
     NSString *v;
     NSMutableString *s = [[[NSMutableString alloc] init] autorelease];
     NSMutableArray *keys = [[pubFields allKeys] mutableCopy];
@@ -1117,6 +1118,17 @@ setupParagraphStyle()
 		NSArray *finalKeys = [NSArray arrayWithObjects:BDSKAbstractString, BDSKAnnoteString, nil];
 		[keys removeObjectsInArray:finalKeys]; // make sure these fields are at the end, as they can be long
 		[keys addObjectsFromArray:finalKeys];
+	}
+	if (drop) {
+		BibTypeManager *btm = [BibTypeManager sharedManager];
+		NSMutableSet *set = [NSMutableSet setWithArray:[btm requiredFieldsForType:[self type]]];
+		[set addObjectsFromArray:[btm optionalFieldsForType:[self type]]];
+		[set addObjectsFromArray:[btm userDefaultFieldsForType:[self type]]];
+		e = [[NSArray arrayWithObjects:BDSKDateCreatedString, BDSKDateModifiedString, BDSKLocalUrlString, BDSKUrlString, nil] objectEnumerator];
+		while (k = [e nextObject]) {
+			if (![set containsObject:k])
+				[keys removeObject:k];
+		}
 	}
 	e = [keys objectEnumerator];
 	[keys release];
@@ -1173,17 +1185,15 @@ setupParagraphStyle()
 }
 
 - (NSString *)bibTeXString{
-    if([[OFPreferenceWrapper sharedPreferenceWrapper] boolForKey:BDSKShouldTeXifyWhenSavingAndCopying]){
-        return [self bibTeXStringByTeXifying:YES expandMacros:NO];
-    } else
-        return [self bibTeXStringByTeXifying:NO expandMacros:NO];
+	return [self bibTeXStringByExpandingMacros:NO dropInternal:NO];
+}
+
+- (NSString *)bibTeXStringDroppingInternal:(BOOL)drop{
+	return [self bibTeXStringByExpandingMacros:NO dropInternal:drop];
 }
 
 - (NSString *)bibTeXStringByExpandingMacros{
-    if([[OFPreferenceWrapper sharedPreferenceWrapper] boolForKey:BDSKShouldTeXifyWhenSavingAndCopying]){
-        return [self bibTeXStringByTeXifying:YES expandMacros:YES];
-    } else
-        return [self bibTeXStringByTeXifying:NO expandMacros:YES];
+    return [self bibTeXStringByExpandingMacros:YES dropInternal:NO];
 }
     
 #warning not currently XML entity-escaped !!

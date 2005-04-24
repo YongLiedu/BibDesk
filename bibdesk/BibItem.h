@@ -315,6 +315,15 @@
 - (NSString *)bibTeXString;
 
 /*!
+    @method     bibTeXStringDroppingInternal:
+    @abstract   Returns the BibTeX value of this bib item.  It is TeXified based on default prefs for the application.
+    @param      drop Boolean determines whether internal fields are dropped. 
+    @discussion (comprehensive description)
+    @result     (description)
+*/
+- (NSString *)bibTeXStringDroppingInternal:(BOOL)drop;
+
+/*!
     @method     bibTeXStringByExpandingMacros
     @abstract   Returns the BibTeX value of this bib item with macros expanded.  It is TeXified based on default prefs for the application.
     @discussion (comprehensive description)
