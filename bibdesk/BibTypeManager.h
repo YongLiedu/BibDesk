@@ -30,6 +30,7 @@
 	NSDictionary *MODSGenresForBibTeXTypeDict;
 	NSSet *allFieldNames;
 	NSCharacterSet *invalidCiteKeyCharSet;
+	NSCharacterSet *fragileCiteKeyCharSet;
 	NSCharacterSet *invalidLocalUrlCharSet;
 	NSCharacterSet *strictInvalidCiteKeyCharSet;
 	NSCharacterSet *strictInvalidLocalUrlCharSet;
@@ -106,5 +107,13 @@
     @result     (description)
 */
 - (NSCharacterSet *)invalidFieldNameCharacterSetForFileType:(NSString *)type;
+
+/*!
+    @method     fragileCiteKeyCharacterSet
+    @abstract   Returns characters that could give problems in LaTeX for use in cite keys.
+    @discussion (comprehensive description)
+    @result     (description)
+*/
+- (NSCharacterSet *)fragileCiteKeyCharacterSet;
 
 @end

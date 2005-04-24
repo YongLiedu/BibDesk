@@ -20,6 +20,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 #import "BibEditor_Toolbar.h"
 #import "BibDocument.h"
 #import <OmniAppKit/NSScrollView-OAExtensions.h>
+#import <OmniFoundation/NSString-OFExtensions.h>
 #import "BDAlias.h"
 #import "NSImage+Toolbox.h"
 
@@ -1108,31 +1109,62 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 }
 
 - (BOOL)control:(NSControl *)control textShouldEndEditing:(NSText *)fieldEditor{
-	if (control != bibFields) return YES;
-	
-	NSCell *cell = [bibFields cellAtIndex:[bibFields indexOfSelectedItem]];
-	
-	if (![[cell stringValue] isStringTeXQuotingBalancedWithBraces:YES connected:NO]) {
-		NSString *message = nil;
-		NSString *cancelButton = nil;
+	if (control == bibFields) {
 		
-		if (forceEndEditing) {
-			message = NSLocalizedString(@"The value you entered contains unbalanced braces and cannot be saved.", @"");
-		} else {
-			message = NSLocalizedString(@"The value you entered contains unbalanced braces and cannot be saved. Do you want to keep editing?", @"");
-			cancelButton = NSLocalizedString(@"Cancel", @"Cancel");
+		NSCell *cell = [bibFields cellAtIndex:[bibFields indexOfSelectedItem]];
+		
+		if (![[cell stringValue] isStringTeXQuotingBalancedWithBraces:YES connected:NO]) {
+			NSString *message = nil;
+			NSString *cancelButton = nil;
+			
+			if (forceEndEditing) {
+				message = NSLocalizedString(@"The value you entered contains unbalanced braces and cannot be saved.", @"");
+			} else {
+				message = NSLocalizedString(@"The value you entered contains unbalanced braces and cannot be saved. Do you want to keep editing?", @"");
+				cancelButton = NSLocalizedString(@"Cancel", @"Cancel");
+			}
+			
+			int rv = NSRunAlertPanel(NSLocalizedString(@"Invalid Value", @"Invalid Value"),
+									 message,
+									 NSLocalizedString(@"OK", @"OK"), cancelButton, nil);
+			
+			if (forceEndEditing || rv == NSAlertAlternateReturn) {
+				[cell setStringValue:[theBib valueOfField:[cell title]]];
+				return YES;
+			} else {
+				return NO;
+			}
+		}
+	
+	} else if (control == citeKeyField) {
+		
+		NSCharacterSet *invalidSet = [[BibTypeManager sharedManager] fragileCiteKeyCharacterSet];
+		NSRange r = [[control stringValue] rangeOfCharacterFromSet:invalidSet];
+		
+		if (r.location != NSNotFound) {
+			NSString *message = nil;
+			NSString *cancelButton = nil;
+			
+			if (forceEndEditing) {
+				message = NSLocalizedString(@"The cite key you entered contains characters that could be invalid in TeX.", @"");
+			} else {
+				message = NSLocalizedString(@"The cite key you entered contains characters that could be invalid in TeX. Do you want to continue editing with the invalid characters removed?", @"");
+				cancelButton = NSLocalizedString(@"Cancel", @"Cancel");
+			}
+			
+			int rv = NSRunAlertPanel(NSLocalizedString(@"Invalid Value", @"Invalid Value"),
+									 message,
+									 NSLocalizedString(@"OK", @"OK"), 
+									 cancelButton, nil);
+			
+			if (forceEndEditing || rv == NSAlertAlternateReturn) {
+				return YES;
+			 } else {
+				[control setStringValue:[[control stringValue] stringByReplacingCharactersInSet:invalidSet withString:@""]];
+				return NO;
+			}
 		}
 		
-		int rv = NSRunAlertPanel(NSLocalizedString(@"Invalid Value", @"Invalid Value"),
-								 message,
-								 NSLocalizedString(@"OK", @"OK"), cancelButton, nil);
-		
-		if (forceEndEditing || rv == NSAlertAlternateReturn) {
-			[cell setStringValue:[theBib valueOfField:[cell title]]];
-			return YES;
-		} else {
-			return NO;
-		}
 	}
 	
 	return YES;

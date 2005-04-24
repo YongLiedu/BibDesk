@@ -23,7 +23,9 @@ static BibTypeManager *sharedInstance = nil;
 	[self reloadTypeInfo];
 	
     // this set is used for warning the user on manual entry of a citekey; allows non-ASCII characters and some math symbols
-    invalidCiteKeyCharSet = [[NSCharacterSet characterSetWithCharactersInString:@" '\"@,\\#}{~&%$^"] retain];
+    invalidCiteKeyCharSet = [[NSCharacterSet characterSetWithCharactersInString:@" '\"@,\\#}{~%"] retain];
+    
+	fragileCiteKeyCharSet = [[NSCharacterSet characterSetWithCharactersInString:@"&$^"] retain];
     
     NSMutableCharacterSet *validSet = [[NSCharacterSet characterSetWithRange:NSMakeRange( (unsigned int)'a', 26)] mutableCopy];
     [validSet addCharactersInRange:NSMakeRange( (unsigned int)'A', 26)];
@@ -209,6 +211,10 @@ static BibTypeManager *sharedInstance = nil;
         return invalidCiteKeyCharSet;
     else
         [NSException raise:@"unimpl. feat. exc." format:@"invalidFieldNameCharacterSetForFileType is only implemented for BibTeX"];
+}
+
+- (NSCharacterSet *)fragileCiteKeyCharacterSet{
+	return fragileCiteKeyCharSet;
 }
 
 @end
