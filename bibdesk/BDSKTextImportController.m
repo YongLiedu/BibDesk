@@ -11,14 +11,14 @@
 
 @implementation BDSKTextImportController
 
-- (id)initWithDocument:(BibDocument *)doc{
+- (id)initWithDocument:(BibDocument *)doc fromWeb:(BOOL)showWebView{
     self = [super initWithWindowNibName:@"TextImport"];
     if(self){
         document = doc;
         item = [[BibItem alloc] init];
         fields = [[NSMutableArray alloc] init];
 		bookmarks = [[NSMutableArray alloc] init];
-        showingWebView = NO;
+        showingWebView = showWebView;
         itemsAdded = 0;
 		
 		NSString *applicationSupportPath = [[[NSFileManager defaultManager] applicationSupportDirectory:kUserDomain] stringByAppendingPathComponent:@"BibDesk"]; 
@@ -51,15 +51,21 @@
 	[webViewBox setContentViewMargins:NSZeroSize];
 	[webViewBox setContentView:webView];
     [self setupTypeUI];
-    [self setupSourceUI];
     [[sourceTextView enclosingScrollView] retain];
     [webViewBox retain];
     [itemTableView setDoubleAction:@selector(addTextToCurrentFieldAction:)];
     [self setWindowFrameAutosaveName:@"BDSKTextImportController Frame Autosave Name"];
+	if(showingWebView){
+		showingWebView = NO; // Note that in IB we have the textView. This makes sure we swap in the webview.
+		[self setShowingWebView:YES];
+		[self loadWebPage:nil];
+	}else{
+		[self loadPageboardData];
+	}
 }
 
 
-- (void)setupSourceUI{
+- (void)loadPageboardData{
     NSPasteboard* pb = [NSPasteboard generalPasteboard];
 
     NSArray *typeArray = [NSArray arrayWithObjects:NSURLPboardType, NSRTFDPboardType, 
@@ -271,7 +277,7 @@
 }
 
 - (IBAction)loadPasteboard:(id)sender{
-	[self setupSourceUI];
+	[self loadPasteboardData];
 }
 
 - (IBAction)loadFile:(id)sender{
@@ -322,7 +328,7 @@
 	}
 	
 	[NSApp beginSheet:urlSheet
-       modalForWindow:[self window]
+       modalForWindow:sender?[self window]:[document windowForSheet]
         modalDelegate:self
        didEndSelector:@selector(urlSheetDidEnd:returnCode:contextInfo:)
           contextInfo:nil];

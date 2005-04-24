@@ -44,7 +44,7 @@
     int expectedContentLength;
 }
 
-- (id)initWithDocument:(BibDocument *)document;
+- (id)initWithDocument:(BibDocument *)doc fromWeb:(BOOL)showWebView;
 - (void)setShowingWebView:(BOOL)showWebView;
 - (void)setType:(NSString *)type;
 - (void)cleanup;
@@ -80,7 +80,7 @@
 - (void)setDownloading:(BOOL)downloading;
 - (void)setLoading:(BOOL)loading;
 
-- (void)setupSourceUI;
+- (void)loadPageboardData;
 - (void)showWebViewWithURLString:(NSString *)urlString;
 - (void)setupTypeUI;
 - (void)addCurrentSelectionToFieldAtIndex:(int)index;
