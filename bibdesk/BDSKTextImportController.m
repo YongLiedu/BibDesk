@@ -60,12 +60,12 @@
 		[self setShowingWebView:YES];
 		[self loadWebPage:nil];
 	}else{
-		[self loadPageboardData];
+		[self loadPasteboardData];
 	}
 }
 
 
-- (void)loadPageboardData{
+- (void)loadPasteboardData{
     NSPasteboard* pb = [NSPasteboard generalPasteboard];
 
     NSArray *typeArray = [NSArray arrayWithObjects:NSURLPboardType, NSRTFDPboardType, 

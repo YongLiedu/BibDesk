@@ -80,7 +80,7 @@
 - (void)setDownloading:(BOOL)downloading;
 - (void)setLoading:(BOOL)loading;
 
-- (void)loadPageboardData;
+- (void)loadPasteboardData;
 - (void)showWebViewWithURLString:(NSString *)urlString;
 - (void)setupTypeUI;
 - (void)addCurrentSelectionToFieldAtIndex:(int)index;
