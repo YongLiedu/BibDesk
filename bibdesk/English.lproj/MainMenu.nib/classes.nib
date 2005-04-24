@@ -127,6 +127,7 @@
                 find = id; 
                 generateCiteKey = id; 
                 importFromTextAction = id; 
+                importFromWebAction = id; 
                 makeNewEmptyCollection = id; 
                 makeNewExternalSource = id; 
                 makeNewNotepad = id; 
