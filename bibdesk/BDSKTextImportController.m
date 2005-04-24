@@ -749,6 +749,29 @@
 - (void)webView:(WebView *)sender didFailProvisionalLoadWithError:(NSError *)error forFrame:(WebFrame *)frame{
 	[self setLoading:NO];
 	
+	if ([error code] == NSURLErrorCancelled) {// don't warn when the user cancels
+		return;
+	}
+	
+    NSString *errorDescription = [error localizedDescription];
+    if (!errorDescription) {
+        errorDescription = NSLocalizedString(@"An error occured during page load.",@"An error occured during page load.");
+    }
+    
+    NSBeginAlertSheet(NSLocalizedString(@"Page Load Failed",@"Page Load Failed"), 
+					  nil, nil, nil, 
+					  [self window], 
+					  nil, nil, nil, nil, 
+					  errorDescription);
+}
+
+- (void)webView:(WebView *)sender didFailLoadWithError:(NSError *)error forFrame:(WebFrame *)frame{
+	[self setLoading:NO];
+	
+	if ([error code] == NSURLErrorCancelled) {// don't warn when the user cancels
+		return;
+	}
+	
     NSString *errorDescription = [error localizedDescription];
     if (!errorDescription) {
         errorDescription = NSLocalizedString(@"An error occured during page load.",@"An error occured during page load.");
