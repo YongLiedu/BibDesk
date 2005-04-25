@@ -143,6 +143,7 @@
 - (NSComparisonResult)pubTypeCompare:(BibItem *)aBI;
 - (NSComparisonResult)keyCompare:(BibItem *)aBI;
 - (NSComparisonResult)titleCompare:(BibItem *)aBI;
+- (NSComparisonResult)containerWithoutTeXCompare:(BibItem *)aBI;
 - (NSComparisonResult)titleWithoutTeXCompare:(BibItem *)aBI;
 - (NSComparisonResult)dateCompare:(BibItem *)aBI;
 - (NSComparisonResult)auth1Compare:(BibItem *)aBI;
@@ -176,6 +177,8 @@
 
 - (NSString *)title;
 - (void)setTitle:(NSString *)title;
+
+- (NSString *)container;
 
 - (void)setDate: (NSCalendarDate *)newDate;
 - (NSCalendarDate *)date;

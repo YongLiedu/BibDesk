@@ -71,10 +71,19 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
         }else if([tcID isEqualToString: BDSKTitleString] ){
 			
 			if ([[pub type] isEqualToString:@"inbook"]){
-				return [NSString stringWithFormat:@"%@ : %@", [pub valueOfField:@"Chapter"], [pub title]];
+				if (! [[pub valueOfField:@"Chapter"] isEqualTo:@""] ) {
+				   return [NSString stringWithFormat:@"%@ (chapter of %@)", [pub valueOfField:@"Chapter"], [pub title]];
+			     } else if (! [[pub valueOfField:@"Pages"] isEqualTo:@""]) {
+				   return [NSString stringWithFormat:@"%@ (pp %@)", [pub title], [pub valueOfField:@"Pages"]];
+				 } else {
+					return [pub title];
+				}
 			}else{
 				return [pub title];
 			}
+		
+		}else if([tcID isEqualToString: BDSKContainerString] ){
+			return [pub container];
             
         }else if([tcID isEqualToString: BDSKDateCreatedString] ||
 				 [tcID isEqualToString: @"Added"] ||

@@ -1764,6 +1764,11 @@ NSComparisonResult compareSetLengths(NSSet *set1, NSSet *set2, void *context){
 		
 		[publications sortUsingSelector:@selector(titleWithoutTeXCompare:)];
 		[shownPublications sortUsingSelector:@selector(titleWithoutTeXCompare:)];
+		
+	}else if([tcID isEqualToString:BDSKContainerString]){
+		
+		[publications sortUsingSelector:@selector(containerWithoutTeXCompare:)];
+		[shownPublications sortUsingSelector:@selector(containerWithoutTeXCompare:)];
 	}else if([tcID isEqualToString:BDSKDateString]){
 		
 		[publications sortUsingSelector:@selector(dateCompare:)];

@@ -105,6 +105,7 @@ NSString *BDSKUrlString = @"Url";
 NSString *BDSKAuthorString = @"Author";
 NSString *BDSKEditorString = @"Editor";
 NSString *BDSKTitleString = @"Title";
+NSString *BDSKContainerString = @"Container";  //See [BibItem container] for explanation
 NSString *BDSKYearString = @"Year";
 NSString *BDSKMonthString = @"Month";
 NSString *BDSKKeywordsString = @"Keywords";

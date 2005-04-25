@@ -296,6 +296,19 @@ setupParagraphStyle()
     return [titleNoBraces localizedCaseInsensitiveCompare:aBITitleNoBraces];
 }
 
+- (NSComparisonResult)containerWithoutTeXCompare:(BibItem *)aBI{
+    NSString *containerNoBraces = [[self container] stringByRemovingTeXForSorting];
+    NSString *aBIContainerNoBraces = [[aBI container] stringByRemovingTeXForSorting];
+	
+	//Handle special case of no container. - is a good display but we want it to sort to the bottom
+	if ([containerNoBraces isEqualTo:@"-"]) {
+		return NSOrderedDescending;
+	} else if ([aBIContainerNoBraces isEqualTo:@"-"]) {
+	    return NSOrderedAscending;
+	}
+    return [containerNoBraces localizedCaseInsensitiveCompare:aBIContainerNoBraces];
+}
+
 /* Helper method that treats all the special cases of nil values properly, by making them smaller than all other dates.	It is used by the comparison methods for creation, modification and publication date.
 */	
 - (NSComparisonResult) compareCalendarDate:(NSCalendarDate*) myDate with:(NSCalendarDate*) otherDate {
@@ -499,6 +512,35 @@ setupParagraphStyle()
 
 - (NSString *)bibtexAuthorString{
     return [self bibTeXAuthorStringNormalized:NO];
+}
+
+// Container is an aspect of the BibItem that depends on the type of the item
+// It is used only to have one column to show all these containers.
+- (NSString *)container{
+	NSString *c;
+	
+	if ( [[self type] isEqualToString:@"inbook"]) {
+	    c = [self title];
+	} else if ( [[self type] isEqualToString:@"article"] ) {
+		c = [self valueOfField:@"Journal"];
+	} else if ( [[self type] isEqualToString:@"incollection"] || 
+				[[self type] isEqualToString:@"inproceedings"] ||
+				[[self type] isEqualToString:@"conference"] ) {
+		c = [self valueOfField:@"Booktitle"];
+	} else if ( [[self type] isEqualToString:@"commented"] ){
+		c = [self valueOfField:@"Volumetitle"];
+	} else if ( [[self type] isEqualToString:@"book"] ){
+		c = [self valueOfField:@"Series"];
+	} else {
+		c = @"-"; //Container is empty for non-container types
+	}
+	// Check to see if the field for Container was empty
+	// They are optional for some types
+	if ([c isEqualToString:@""]) {
+		c = @"-";
+	}
+	
+	return c;
 }
 
 - (NSString *)title{

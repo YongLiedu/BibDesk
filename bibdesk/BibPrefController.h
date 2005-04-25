@@ -129,6 +129,7 @@ extern NSString *BDSKUrlString;
 extern NSString *BDSKAuthorString;
 extern NSString *BDSKEditorString;
 extern NSString *BDSKTitleString;
+extern NSString *BDSKContainerString;
 extern NSString *BDSKYearString;
 extern NSString *BDSKMonthString;
 extern NSString *BDSKKeywordsString;
