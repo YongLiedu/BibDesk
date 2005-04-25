@@ -447,7 +447,7 @@ setupParagraphStyle()
         }
     }
     if(!existingAuthor){
-        existingAuthor =  [BibAuthor authorWithName:newAuthorName andPub:self]; //@@author - why was andPub:nil before?!
+        existingAuthor =  [BibAuthor authorWithName:newAuthorName document:[self document]]; //@@author - why was andPub:nil before?!
         [pubAuthors addObject:existingAuthor usingLock:bibLock];
     }
     return;
@@ -465,6 +465,7 @@ setupParagraphStyle()
 }
 
 - (void)setAuthorsFromBibtexString:(NSString *)aString{
+    [[NSApp delegate] setDocumentForErrors:[self document]];
                 
     char *str = nil;
 

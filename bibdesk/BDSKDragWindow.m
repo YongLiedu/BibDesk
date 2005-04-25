@@ -101,6 +101,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
             draggedPubs = [PubMedParser itemsFromString:pbString error:&hadProblems];
         } else {
             // must be BibTeX
+			[[NSApp delegate] setDocumentForErrors:[editorBib document]];
             draggedPubs = [BibTeXParser itemsFromData:pbData error:&hadProblems];
         }
         

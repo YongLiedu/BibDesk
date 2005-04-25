@@ -45,7 +45,8 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
     IBOutlet NSTextView *sourceEditTextView;
     IBOutlet NSWindow *sourceEditWindow;
     NSString *currentFileName;
-    
+    NSDocument *currentDocumentForErrors;
+	
     // global auto-completion dictionary:
     NSLock *acLock;
     NSMutableDictionary *autoCompletionDict;
@@ -166,11 +167,15 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 - (IBAction)toggleShowingErrorPanel:(id)sender;
 - (IBAction)hideErrorPanel:(id)sender;
 - (IBAction)showErrorPanel:(id)sender;
-- (void)removeErrorObjsForFileName:(NSString *)fileName;
+- (void)removeErrorObjsForDocument:(NSDocument *)doc;
+- (void)handoverErrorObjsForDocument:(NSDocument *)doc;
+- (void)setDocumentForErrors:(NSDocument *)doc;
 - (void)updateErrorPanelUI;
 - (IBAction)gotoError:(id)sender;
-- (IBAction)gotoErrorObj:(id)errObj;
-- (IBAction)openEditWindowWithFile:(NSString *)fileName;
+- (void)gotoErrorObj:(id)errObj;
+- (void)gotoLine:(int)lineNum;
+- (void)openEditWindowWithFile:(NSString *)fileName;
+- (void)openEditWindowForDocument:(NSDocument *)doc;
 
 - (IBAction)reopenDocument:(id)sender;
 

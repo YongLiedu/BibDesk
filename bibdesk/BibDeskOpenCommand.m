@@ -56,7 +56,7 @@ It can be used with
 			// the following is taken from BibEditor's -showPersonDetail: method. This method should probably live in BibAppController or so - which will let us call it from everywhere. It shouldn't depend on a publication or a publication's editor.
 			BibPersonController *pc = [author personController];
 			if(pc == nil){
-                            BibDocument *doc = [[author publication] document];
+                            BibDocument *doc = [author document];
                             pc = [[BibPersonController alloc] initWithPerson:author document:doc];
                             [doc addWindowController:pc];
                             [pc release];

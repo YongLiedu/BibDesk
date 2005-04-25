@@ -21,14 +21,14 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 
 @implementation BibAuthor
 
-+ (BibAuthor *)authorWithName:(NSString *)newName andPub:(BibItem *)aPub{	
-    return [[[BibAuthor alloc] initWithName:newName andPub:aPub] autorelease];
++ (BibAuthor *)authorWithName:(NSString *)newName document:(BibDocument *)doc{	
+    return [[[BibAuthor alloc] initWithName:newName document:doc] autorelease];
 }
 
-- (id)initWithName:(NSString *)aName andPub:(BibItem *)aPub{
+- (id)initWithName:(NSString *)aName document:(BibDocument *)doc{
 	if (self = [super init]) {
 		[self setName:aName];
-		publication = aPub; // don't retain this, since it retains us
+		document = doc; // don't retain this, since it retains us
 	}
     
     return self;
@@ -51,20 +51,20 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 
 - (id)copyWithZone:(NSZone *)zone{
     BibAuthor *copy = [[[self class] allocWithZone: zone] initWithName:[self name]
-                                                                andPub:[self publication]];
+															  document:[self document]];
     return copy;
 }
 
 - (id)initWithCoder:(NSCoder *)coder{
     self = [super init];
     [self setName:[coder decodeObjectForKey:@"name"]]; // this should take care of the rest of the ivars, right?
-    publication = [coder decodeObjectForKey:@"publication"];
+    document = [coder decodeObjectForKey:@"document"];
     return self;
 }
 
 - (void)encodeWithCoder:(NSCoder *)coder{
     [coder encodeObject:name forKey:@"name"];
-    [coder encodeConditionalObject:publication forKey:@"publication"];
+    [coder encodeConditionalObject:document forKey:@"document"];
 }
 
 - (BOOL)isEqual:(BibAuthor *)otherAuth{
@@ -211,6 +211,8 @@ Sets all the different variables for partial names and so on from a given string
 Note: The strings returned by the bt_split_name function seem to be in the wrong encoding Ð UTF-8 is treated as ASCII. This is manually fixed for the firstName, lastName,  jrPart and vonPart variables.
 */
 - (void)setName:(NSString *)newName{
+    [[NSApp delegate] setDocumentForErrors:[self document]];
+	
     bt_name *theName;
     int i = 0;
     NSMutableString *tmpStr = nil;
@@ -271,12 +273,12 @@ Note: The strings returned by the bt_split_name function seem to be in the wrong
     bt_free_name(theName);
 }
 
-- (BibItem *)publication{
-    return publication;
+- (BibDocument *)document{
+    return document;
 }
 
-- (void)setPublication:(BibItem *)newPub{
-    publication = newPub;
+- (void)setDocument:(BibDocument *)newDoc{
+    document = newDoc;
 }
 
 // Accessors for personController - we don't retain it to avoid cycles.

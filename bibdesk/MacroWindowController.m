@@ -260,6 +260,8 @@
 }
 
 - (BOOL)addMacrosFromBibTeXString:(NSString *)aString{
+    [[NSApp delegate] setDocumentForErrors:(NSDocument *)macroDataSource];
+	
     BOOL hadProblems = NO;
     NSArray *defs = [BibTeXParser macrosFromBibTeXString:aString hadProblems:&hadProblems];
     NSEnumerator *e = [defs objectEnumerator];

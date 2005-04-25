@@ -186,6 +186,7 @@ Extra wrapping of the created and modified date methods to
 	}
 
 	BOOL hadProblems = NO;
+    [[NSApp delegate] setDocumentForErrors:[self document]];
     NSArray * newPubs = [BibTeXParser itemsFromData:data error:&hadProblems];
 	
 	// try to do some error handling for AppleScript

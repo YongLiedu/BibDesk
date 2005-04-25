@@ -18,8 +18,7 @@ ssp 2004-07-10
 */
 - (NSScriptObjectSpecifier *) objectSpecifier {
 	// NSLog(@"BibAuthor objectSpecifier");
-	BibItem * myPub = [self publication];
-	BibDocument * myDoc = [myPub document];
+	BibDocument * myDoc = [self document];
 	NSScriptObjectSpecifier *containerRef = [myDoc objectSpecifier];
 		
 	return [[[NSNameSpecifier allocWithZone:[self zone]] initWithContainerClassDescription:[containerRef keyClassDescription] containerSpecifier:containerRef key:@"authors" name:[self normalizedName]] autorelease];
@@ -34,7 +33,7 @@ ssp 2004-07-10
 }
 
 - (NSArray *)publications {
-	BibDocument * myDoc = [[self publication] document];
+	BibDocument * myDoc = [self document];
 	if (myDoc)
 		return [myDoc publicationsForAuthor:self];
 	return [NSArray array];

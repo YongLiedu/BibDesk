@@ -629,6 +629,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 /*reference:
 @interface BDSKErrObj : NSObject{
     NSString *fileName;
+	NSDocument *document;
     int lineNumber;
 
     NSString *itemDescription;
@@ -688,7 +689,8 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
     NSString *errorClass = [errDict valueForKey:@"errorClassName"];
 
     if (errorClass) {
-        [errors addObject:errDict];
+		[errDict takeValue:currentDocumentForErrors forKey:@"document"];
+		[errors addObject:errDict];
         [self performSelectorOnMainThread:@selector(updateErrorPanelUI) withObject:nil waitUntilDone:NO];
     }
 }
@@ -700,17 +702,39 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 	}
 }
 
-- (void)removeErrorObjsForFileName:(NSString *)fileName{
+- (void)setDocumentForErrors:(NSDocument *)doc{
+	if (doc != currentDocumentForErrors) {
+		[currentDocumentForErrors release];
+		currentDocumentForErrors = [doc retain];
+	}
+}
+
+- (void)removeErrorObjsForDocument:(NSDocument *)doc{
     NSMutableArray *errorsToRemove = [NSMutableArray arrayWithCapacity:10];
     NSEnumerator *enumerator = [errors objectEnumerator];
     id errObj;
 
     while (errObj = [enumerator nextObject]) {
-        if ([[errObj valueForKey:@"fileName"] isEqualToString:fileName]) {
+        if ([errObj valueForKey:@"document"] == doc) {
             [errorsToRemove addObject:errObj];
     	}
     }
     [errors removeObjectsInArray:errorsToRemove];
+    [errorTableView reloadData];
+	
+	if (currentDocumentForErrors == doc)
+		[self setDocumentForErrors:nil];
+}
+
+- (void)handoverErrorObjsForDocument:(NSDocument *)doc{
+    NSEnumerator *enumerator = [errors objectEnumerator];
+    id errObj;
+
+    while (errObj = [enumerator nextObject]) {
+        if ([errObj valueForKey:@"document"] == doc) {
+            [errObj takeValue:nil forKey:@"document"];
+    	}
+    }
     [errorTableView reloadData];
 }
 
@@ -731,11 +755,35 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
     [self openEditWindowWithFile:fileName];
     
     if ([dfm fileExistsAtPath:fileName]) {
-        [sourceEditTextView selectLine:[lineNumber intValue]];
+        [self gotoLine:[lineNumber intValue]];
     }
 }
 
-- (IBAction)openEditWindowWithFile:(NSString *)fileName{
+- (void)gotoLine:(int)lineNum{
+	NSString *s = [sourceEditTextView string];
+	NSRange lineRange = NSMakeRange(0,0);
+	NSRange searchRange = NSMakeRange(0,[s length]);
+	int currLine;
+	NSCharacterSet* newlineSet = [NSCharacterSet characterSetWithCharactersInString: @"\n\r"];
+	
+	for (currLine = 0; currLine < lineNum; currLine++) {
+		lineRange.location = searchRange.location;
+		searchRange = [s rangeOfCharacterFromSet:newlineSet options:NSLiteralSearch range:searchRange];
+		if (searchRange.location == NSNotFound) {
+			// we are at the end, select the last line
+			lineRange.length = [s length] - lineRange.location;
+			break;
+		}
+		lineRange.length = searchRange.location - lineRange.location;
+		searchRange.location = NSMaxRange(searchRange);
+		searchRange.length = [s length] - searchRange.location;
+	}
+	
+	[sourceEditTextView scrollRangeToVisible:lineRange];
+	[sourceEditTextView setSelectedRange:lineRange];
+}
+
+- (void)openEditWindowWithFile:(NSString *)fileName{
     NSFileManager *dfm = [NSFileManager defaultManager];
     if (!fileName) return;
 
@@ -748,6 +796,13 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
         [currentFileName autorelease];
         currentFileName = [fileName retain]; // should use an accessor!
     }
+}
+
+- (void)openEditWindowForDocument:(NSDocument *)doc{
+	[self removeErrorObjsForDocument:nil]; // this removes errors from a previous failed load
+	[self handoverErrorObjsForDocument:doc]; // this dereferences the doc from the errors, so they won't be removed when the document is deallocated
+	
+	[self openEditWindowWithFile:[doc fileName]];
 }
 
 - (IBAction)reopenDocument:(id)sender{

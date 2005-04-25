@@ -230,6 +230,7 @@ NSString *BDSKBibItemLocalDragPboardType = @"edu.ucsd.cs.mmccrack.bibdesk: Local
         [[self undoManager] removeAllActionsWithTarget:self];
     }
     [[NSNotificationCenter defaultCenter] removeObserver:self];
+	[[NSApp delegate] removeErrorObjsForDocument:self];
     [macroDefinitions release];
     [publications makeObjectsPerformSelector:@selector(setDocument:) // Set the non-retained document ivar in each BibItem to nil.  Otherwise, they message the document in -[BibItem dealloc] when removing undo action; since the doc is dealloced, this causes a crash.
                                   withObject:nil];
@@ -920,7 +921,8 @@ stringByAppendingPathComponent:@"BibDesk"]; */
     }
     dictionary = [NSMutableDictionary dictionaryWithCapacity:10];
     
-    newPubs = [PubMedParser itemsFromString:dataString
+    [[NSApp delegate] setDocumentForErrors:self];
+	newPubs = [PubMedParser itemsFromString:dataString
                                       error:&hadProblems
                                 frontMatter:frontMatter
                                    filePath:filePath];
@@ -939,9 +941,7 @@ stringByAppendingPathComponent:@"BibDesk"]; */
             // the user said to keep going, so if they save, they might clobber data...
         }else if(rv == NSAlertOtherReturn){
             // they said to edit the file.
-            tempFileName = [NSTemporaryDirectory() stringByAppendingPathComponent:[[NSProcessInfo processInfo] globallyUniqueString]];
-            [dataString writeToFile:tempFileName atomically:YES];
-            [[NSApp delegate] openEditWindowWithFile:tempFileName];
+            [[NSApp delegate] openEditWindowForDocument:self];
             [[NSApp delegate] showErrorPanel:self];
             return NO;
         }
@@ -995,7 +995,9 @@ stringByAppendingPathComponent:@"BibDesk"]; */
 //    NSDate *start = [NSDate date];
 //    NSLog(@"start: %@", [start description]);
         
-    newPubs = [BibTeXParser itemsFromData:data
+    [[NSApp delegate] setDocumentForErrors:self];
+	
+	newPubs = [BibTeXParser itemsFromData:data
                                     error:&hadProblems
                               frontMatter:frontMatter
                                  filePath:filePath
@@ -1017,9 +1019,7 @@ stringByAppendingPathComponent:@"BibDesk"]; */
             // the user said to keep going, so if they save, they might clobber data...
         }else if(rv == NSAlertOtherReturn){
             // they said to edit the file.
-            tempFileName = [NSTemporaryDirectory() stringByAppendingPathComponent:[[NSProcessInfo processInfo] globallyUniqueString]];
-            [data writeToFile:tempFileName atomically:YES];
-            [[NSApp delegate] openEditWindowWithFile:tempFileName];
+            [[NSApp delegate] openEditWindowForDocument:self];
             [[NSApp delegate] showErrorPanel:self];
             return NO;
         }
@@ -2217,6 +2217,7 @@ int generalBibItemCompareFunc(id item1, id item2, void *context){
     if([pbString isRISString])
         isRIS = YES;
     
+	[[NSApp delegate] setDocumentForErrors:self];
     if(isRIS){
         newPubs = [PubMedParser itemsFromString:pbString error:&hadProblems];
     } else {
@@ -2816,7 +2817,6 @@ This method always returns YES. Even if some or many operations fail.
                                                       userInfo:[NSDictionary dictionary]];
     
     [customCiteDrawer close];
-    [[NSApp delegate] removeErrorObjsForFileName:[self fileName]];
 
     [[OFPreferenceWrapper sharedPreferenceWrapper] setObject:[lastSelectedColumnForSort identifier] forKey:BDSKDefaultSortedTableColumnKey];
     [[OFPreferenceWrapper sharedPreferenceWrapper] setBool:(!sortDescending) forKey:BDSKDefaultSortedTableColumnIsDescendingKey];
