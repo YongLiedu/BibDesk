@@ -172,7 +172,7 @@ static BDSKFormatParser *sharedParser;
 				case 't':
 					// title, optional #chars
 					if ([[pub type] isEqualToString:@"inbook"]) {
-						string = [[pub valueOfField:@"Chapter"] stringByRemovingCurlyBraces];
+						string = [[pub valueOfField:BDSKChapterString] stringByRemovingCurlyBraces];
 					} else {
 						string = [[pub valueOfField:BDSKTitleString] stringByRemovingCurlyBraces];
 					}
@@ -187,7 +187,7 @@ static BDSKFormatParser *sharedParser;
 				case 'T':
 					// title, optional #words
 					if ([[pub type] isEqualToString:@"inbook"]) {
-						string = [[pub valueOfField:@"Chapter"] stringByRemovingCurlyBraces];
+						string = [[pub valueOfField:BDSKChapterString] stringByRemovingCurlyBraces];
 					} else {
 						string = [[pub valueOfField:BDSKTitleString] stringByRemovingCurlyBraces];
 					}
@@ -306,6 +306,8 @@ static BDSKFormatParser *sharedParser;
 							 [string isEqualToString:@"Citekey"] ||
 							 [string isEqualToString:@"Cite-Key"]) ) {
 							string = [pub citeKey];
+						} else if ([string isEqualToString:BDSKContainerString]) {
+							string = [pub container];
 						} else {
 							string = [pub valueOfField:string];
 						}
