@@ -27,12 +27,12 @@
 
 - (void)updateUI{
     OFPreferenceWrapper *prefs = [OFPreferenceWrapper sharedPreferenceWrapper];
-    [encodingPopUp selectItemWithTitle:[encodingManager displayedNameForStringEncoding:[defaults integerForKey:BDSKDefaultStringEncoding]]];
+    [encodingPopUp selectItemWithTitle:[encodingManager displayedNameForStringEncoding:[defaults integerForKey:BDSKDefaultStringEncodingKey]]];
     [showErrorsCheckButton setState: 
 		([defaults boolForKey:BDSKShowWarningsKey] == YES) ? NSOnState : NSOffState  ];	
-    [shouldTeXifyCheckButton setState:([defaults boolForKey:BDSKShouldTeXifyWhenSavingAndCopying] == YES) ? NSOnState : NSOffState];
+    [shouldTeXifyCheckButton setState:([defaults boolForKey:BDSKShouldTeXifyWhenSavingAndCopyingKey] == YES) ? NSOnState : NSOffState];
     [saveAnnoteAndAbstractAtEndButton setState:([defaults boolForKey:BDSKSaveAnnoteAndAbstractAtEndOfItemKey] == YES) ? NSOnState : NSOffState];
-    [useNormalizedNamesButton setState:[defaults boolForKey:BDSKShouldSaveNormalizedAuthorNames] ? NSOnState : NSOffState];
+    [useNormalizedNamesButton setState:[defaults boolForKey:BDSKShouldSaveNormalizedAuthorNamesKey] ? NSOnState : NSOffState];
     [useTemplateFileButton setState:[defaults boolForKey:BDSKShouldUseTemplateFile] ? NSOnState : NSOffState];
     [autoSaveAsRSSButton setState:[defaults boolForKey:BDSKAutoSaveAsRSSKey] ? NSOnState : NSOffState];
 }
@@ -41,7 +41,7 @@
     NSStringEncoding encoding = [encodingManager stringEncodingForDisplayedName:[[sender selectedItem] title]];
     
     // NSLog(@"set encoding to %i for tag %i", [[encodingsArray objectAtIndex:[sender indexOfSelectedItem]] intValue], [sender indexOfSelectedItem]);    
-    [defaults setInteger:encoding forKey:BDSKDefaultStringEncoding];    
+    [defaults setInteger:encoding forKey:BDSKDefaultStringEncodingKey];    
 }
 
 - (IBAction)toggleShowWarnings:(id)sender{
@@ -55,12 +55,12 @@
 }
 
 - (IBAction)toggleShouldTeXify:(id)sender{
-    [defaults setBool:([sender state] == NSOnState ? YES : NO) forKey:BDSKShouldTeXifyWhenSavingAndCopying];
+    [defaults setBool:([sender state] == NSOnState ? YES : NO) forKey:BDSKShouldTeXifyWhenSavingAndCopyingKey];
     [self updateUI];
 }
 
 - (IBAction)toggleShouldUseNormalizedNames:(id)sender{
-    [defaults setBool:([sender state] == NSOnState ? YES : NO) forKey:BDSKShouldSaveNormalizedAuthorNames];
+    [defaults setBool:([sender state] == NSOnState ? YES : NO) forKey:BDSKShouldSaveNormalizedAuthorNamesKey];
 }
 
 - (IBAction)toggleSaveAnnoteAndAbstractAtEnd:(id)sender{

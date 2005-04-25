@@ -52,8 +52,8 @@ NSString *BDSKInputManagerLoadableApplications = @"Application bundles that we r
                               contextInfo:nil];
     }
     
-    if([defaults objectForKey:BDSKBibEditorAutocompletionFields]){
-        enabledEditorAutocompletionStrings = [[defaults objectForKey:BDSKBibEditorAutocompletionFields] mutableCopy];
+    if([defaults objectForKey:BDSKBibEditorAutocompletionFieldsKey]){
+        enabledEditorAutocompletionStrings = [[defaults objectForKey:BDSKBibEditorAutocompletionFieldsKey] mutableCopy];
     } else {
         enabledEditorAutocompletionStrings = [[NSMutableArray array] retain];
     }
@@ -75,7 +75,7 @@ NSString *BDSKInputManagerLoadableApplications = @"Application bundles that we r
     [super restoreDefaultsNoPrompt];
     // after resetting the preferences, the array is no longer valid, but the table is still using an old copy (needed for add/remove, since we set the whole array in the prefs)
     [enabledEditorAutocompletionStrings release];
-    enabledEditorAutocompletionStrings = [[defaults objectForKey:BDSKBibEditorAutocompletionFields] mutableCopy];
+    enabledEditorAutocompletionStrings = [[defaults objectForKey:BDSKBibEditorAutocompletionFieldsKey] mutableCopy];
     [self updateUI];
 }
 
@@ -319,7 +319,7 @@ NSString *BDSKInputManagerLoadableApplications = @"Application bundles that we r
 - (void)addFieldSheetDidEnd:(NSWindow *)sheet returnCode:(int)returnCode contextInfo:(void *)contextInfo{
     if(returnCode == 1){
         [enabledEditorAutocompletionStrings addObject:[[addFieldComboBox stringValue] capitalizedString]];
-        [defaults setObject:enabledEditorAutocompletionStrings forKey:BDSKBibEditorAutocompletionFields];
+        [defaults setObject:enabledEditorAutocompletionStrings forKey:BDSKBibEditorAutocompletionFieldsKey];
     }
     [self updateUI];
 }
@@ -332,7 +332,7 @@ NSString *BDSKInputManagerLoadableApplications = @"Application bundles that we r
 - (IBAction)removeAutocompleteString:(id)sender{
     if([editorAutocompletionStringsTableView selectedRow] != -1){
         [enabledEditorAutocompletionStrings removeObjectAtIndex:[editorAutocompletionStringsTableView selectedRow]];
-        [defaults setObject:enabledEditorAutocompletionStrings forKey:BDSKBibEditorAutocompletionFields];
+        [defaults setObject:enabledEditorAutocompletionStrings forKey:BDSKBibEditorAutocompletionFieldsKey];
     }
     [self updateUI];    
 }

@@ -43,7 +43,7 @@
 	   originalSelectedRange:(NSRange)origSelRange
             errorDescription:(NSString **)error{
 
-    if(![[[OFPreferenceWrapper sharedPreferenceWrapper] objectForKey:BDSKBibEditorAutocompletionFields] containsObject:entry])
+    if(![[[OFPreferenceWrapper sharedPreferenceWrapper] objectForKey:BDSKBibEditorAutocompletionFieldsKey] containsObject:entry])
         return YES;
     
     NSArray *strings = [[NSApp delegate] stringsForCompletionEntry:entry];

@@ -128,7 +128,7 @@ static BDSKPreviewer *thePreviewer;
     [s scanUpToString:@"\bye" intoString:&postfix];
     [finalTexFile appendFormat:@"%@bibliographystyle{%@%@", prefix, style, postfix];
     // overwrites the old bibpreview.tex file, replacing the previous bibliographystyle
-    if(![[finalTexFile dataUsingEncoding:[[OFPreferenceWrapper sharedPreferenceWrapper] integerForKey:BDSKTeXPreviewFileEncoding]] writeToFile:texTemplatePath atomically:YES]){
+    if(![[finalTexFile dataUsingEncoding:[[OFPreferenceWrapper sharedPreferenceWrapper] integerForKey:BDSKTeXPreviewFileEncodingKey]] writeToFile:texTemplatePath atomically:YES]){
         NSLog(@"error replacing texfile");
         rv = NO;
         goto cleanup;
@@ -136,7 +136,7 @@ static BDSKPreviewer *thePreviewer;
 
     // write out the bib file with the template attached:
     [bibTemplate appendFormat:@"\n%@",str];
-    if(![[bibTemplate dataUsingEncoding:[[OFPreferenceWrapper sharedPreferenceWrapper] integerForKey:BDSKTeXPreviewFileEncoding]] writeToFile:tmpBibFilePath atomically:YES]){
+    if(![[bibTemplate dataUsingEncoding:[[OFPreferenceWrapper sharedPreferenceWrapper] integerForKey:BDSKTeXPreviewFileEncodingKey]] writeToFile:tmpBibFilePath atomically:YES]){
         NSLog(@"Error replacing bibfile.");
         rv = NO;
         goto cleanup;

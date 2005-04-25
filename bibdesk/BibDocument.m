@@ -126,7 +126,7 @@ NSString *BDSKBibItemLocalDragPboardType = @"edu.ucsd.cs.mmccrack.bibdesk: Local
 		customStringArray = [[NSMutableArray arrayWithCapacity:6] retain];
 		[customStringArray setArray:[[OFPreferenceWrapper sharedPreferenceWrapper] arrayForKey:BDSKCustomCiteStringsKey]];
         
-        [self setDocumentStringEncoding:[[OFPreferenceWrapper sharedPreferenceWrapper] integerForKey:BDSKDefaultStringEncoding]]; // need to set this for new documents
+        [self setDocumentStringEncoding:[[OFPreferenceWrapper sharedPreferenceWrapper] integerForKey:BDSKDefaultStringEncodingKey]]; // need to set this for new documents
 
 		tableColumnsChanged = YES;
 		sortDescending = NO;
@@ -875,8 +875,8 @@ stringByAppendingPathComponent:@"BibDesk"]; */
                 // per user feedback, give an option to run the file through the BibTeX parser to see if we can open our own BibTeX representation
                 // it is necessary to write the data to a file in order to use the error panel to jump to the offending line
                 NSString *tempFilePath = [NSTemporaryDirectory() stringByAppendingPathComponent:[[NSProcessInfo processInfo] globallyUniqueString]];
-                [[self bibTeXDataWithEncoding:[[OFPreferenceWrapper sharedPreferenceWrapper] integerForKey:BDSKDefaultStringEncoding] droppingInternal:NO] writeToFile:tempFilePath atomically:YES];
-                [[NSApp delegate] openBibTeXFile:tempFilePath withEncoding:[[OFPreferenceWrapper sharedPreferenceWrapper] integerForKey:BDSKDefaultStringEncoding]];
+                [[self bibTeXDataWithEncoding:[[OFPreferenceWrapper sharedPreferenceWrapper] integerForKey:BDSKDefaultStringEncodingKey] droppingInternal:NO] writeToFile:tempFilePath atomically:YES];
+                [[NSApp delegate] openBibTeXFile:tempFilePath withEncoding:[[OFPreferenceWrapper sharedPreferenceWrapper] integerForKey:BDSKDefaultStringEncodingKey]];
                 // [self performSelector:@selector(close) withObject:nil afterDelay:0]; // closes the window, but it's weird to have it open, then close
             }
             
@@ -889,11 +889,11 @@ stringByAppendingPathComponent:@"BibDesk"]; */
 - (BOOL)loadDataRepresentation:(NSData *)data ofType:(NSString *)aType
 {
     if ([aType isEqualToString:@"bibTeX database"]){
-        return [self loadBibTeXDataRepresentation:data encoding:[[OFPreferenceWrapper sharedPreferenceWrapper] integerForKey:BDSKDefaultStringEncoding]];
+        return [self loadBibTeXDataRepresentation:data encoding:[[OFPreferenceWrapper sharedPreferenceWrapper] integerForKey:BDSKDefaultStringEncodingKey]];
     }else if([aType isEqualToString:@"Rich Site Summary File"]){
         return [self loadRSSDataRepresentation:data];
     }else if([aType isEqualToString:@"RIS/Medline File"]){
-        return [self loadRISDataRepresentation:data encoding:[[OFPreferenceWrapper sharedPreferenceWrapper] integerForKey:BDSKDefaultStringEncoding]];
+        return [self loadRISDataRepresentation:data encoding:[[OFPreferenceWrapper sharedPreferenceWrapper] integerForKey:BDSKDefaultStringEncodingKey]];
     }else
         return NO;
 }
@@ -1189,7 +1189,7 @@ stringByAppendingPathComponent:@"BibDesk"]; */
 
 - (void)setupSearchField{
 	// called in awakeFromNib
-	    quickSearchTextDict = [[[OFPreferenceWrapper sharedPreferenceWrapper] objectForKey:BDSKCurrentQuickSearchTextDict] mutableCopy];
+	    quickSearchTextDict = [[[OFPreferenceWrapper sharedPreferenceWrapper] objectForKey:BDSKCurrentQuickSearchTextDictKey] mutableCopy];
 	id searchCellOrTextField = nil;
 	
 
@@ -1506,7 +1506,7 @@ stringByAppendingPathComponent:@"BibDesk"]; */
                             forKey:field];
     
     [[OFPreferenceWrapper sharedPreferenceWrapper] setObject:[[quickSearchTextDict copy] autorelease]
-                                                      forKey:BDSKCurrentQuickSearchTextDict];
+                                                      forKey:BDSKCurrentQuickSearchTextDictKey];
     [[OFPreferenceWrapper sharedPreferenceWrapper] autoSynchronize];
     
     [self updateUI]; // calls reloadData
@@ -1872,7 +1872,7 @@ int generalBibItemCompareFunc(id item1, id item2, void *context){
 - (void)sortPubsByDefaultColumn{
     OFPreferenceWrapper *defaults = [OFPreferenceWrapper sharedPreferenceWrapper];
     
-    NSString *colName = [defaults objectForKey:BDSKDefaultSortedTableColumn];
+    NSString *colName = [defaults objectForKey:BDSKDefaultSortedTableColumnKey];
     if([colName isEqualToString:@""])
         return;
     
@@ -1881,7 +1881,7 @@ int generalBibItemCompareFunc(id item1, id item2, void *context){
         return;
     
     lastSelectedColumnForSort = [tc retain];
-    sortDescending = [defaults boolForKey:BDSKDefaultSortedTableColumnIsDescending];
+    sortDescending = [defaults boolForKey:BDSKDefaultSortedTableColumnIsDescendingKey];
     [self sortPubsByColumn:tc];
     [tableView setHighlightedTableColumn:tc];
 }
@@ -2818,8 +2818,8 @@ This method always returns YES. Even if some or many operations fail.
     [customCiteDrawer close];
     [[NSApp delegate] removeErrorObjsForFileName:[self fileName]];
 
-    [[OFPreferenceWrapper sharedPreferenceWrapper] setObject:[lastSelectedColumnForSort identifier] forKey:BDSKDefaultSortedTableColumn];
-    [[OFPreferenceWrapper sharedPreferenceWrapper] setBool:(!sortDescending) forKey:BDSKDefaultSortedTableColumnIsDescending];
+    [[OFPreferenceWrapper sharedPreferenceWrapper] setObject:[lastSelectedColumnForSort identifier] forKey:BDSKDefaultSortedTableColumnKey];
+    [[OFPreferenceWrapper sharedPreferenceWrapper] setBool:(!sortDescending) forKey:BDSKDefaultSortedTableColumnIsDescendingKey];
     
 }
 

@@ -86,7 +86,7 @@ NSFont *bodyFontForFamily(NSString *tryFamily)
 }
 
 - (void)setupFonts{
-    NSString *fontFamily = [[OFPreferenceWrapper sharedPreferenceWrapper] objectForKey:BDSKPreviewPaneFontFamily];
+    NSString *fontFamily = [[OFPreferenceWrapper sharedPreferenceWrapper] objectForKey:BDSKPreviewPaneFontFamilyKey];
     [cachedFontsForPreviewPane release];
     cachedFontsForPreviewPane = [[NSDictionary dictionaryWithObjectsAndKeys:
         titleFontForFamily(fontFamily), @"Title",

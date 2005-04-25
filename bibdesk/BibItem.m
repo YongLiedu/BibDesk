@@ -1154,7 +1154,7 @@ setupParagraphStyle()
 }
 
 - (NSString *)bibTeXStringByExpandingMacros:(BOOL)expand dropInternal:(BOOL)drop{
-    BOOL shouldTeXify = [[OFPreferenceWrapper sharedPreferenceWrapper] boolForKey:BDSKShouldTeXifyWhenSavingAndCopying];
+    BOOL shouldTeXify = [[OFPreferenceWrapper sharedPreferenceWrapper] boolForKey:BDSKShouldTeXifyWhenSavingAndCopyingKey];
 	NSString *k;
     NSString *v;
     NSMutableString *s = [[[NSMutableString alloc] init] autorelease];
@@ -1194,7 +1194,7 @@ setupParagraphStyle()
         NSString *valString;
         
 		if([k isEqualToString:BDSKAuthorString] && 
-		   [[OFPreferenceWrapper sharedPreferenceWrapper] boolForKey:BDSKShouldSaveNormalizedAuthorNames] && 
+		   [[OFPreferenceWrapper sharedPreferenceWrapper] boolForKey:BDSKShouldSaveNormalizedAuthorNamesKey] && 
 		   ![v isComplex]){ // only if it's not complex, use the normalized author name
 		    if(![v isEqualToString:@""]) // pubAuthors will have an editor if no authors exist, but editors can't be written out as authors
 			v = [self bibTeXAuthorStringNormalized:YES];

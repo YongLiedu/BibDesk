@@ -28,7 +28,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
     [texBinaryPath setStringValue:[defaults objectForKey:BDSKTeXBinPathKey]];
     [bibtexBinaryPath setStringValue:[defaults objectForKey:BDSKBibTeXBinPathKey]];
     [bibTeXStyle setStringValue:[defaults objectForKey:BDSKBTStyleKey]];
-    [encodingPopUpButton selectItemWithTitle:[encodingManager displayedNameForStringEncoding:[defaults integerForKey:BDSKTeXPreviewFileEncoding]]];
+    [encodingPopUpButton selectItemWithTitle:[encodingManager displayedNameForStringEncoding:[defaults integerForKey:BDSKTeXPreviewFileEncodingKey]]];
 
 	//This has to follow the lines above because it checks their validity
 	[self changeUsesTeX:usesTeXButton]; // this makes sure the fields are set enabled / disabled properly
@@ -158,7 +158,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
     NSStringEncoding encoding = [encodingManager stringEncodingForDisplayedName:[[sender selectedItem] title]];
     
     // NSLog(@"set encoding to %i for tag %i", [[encodingsArray objectAtIndex:[sender indexOfSelectedItem]] intValue], [sender indexOfSelectedItem]);    
-    [defaults setInteger:encoding forKey:BDSKTeXPreviewFileEncoding];        
+    [defaults setInteger:encoding forKey:BDSKTeXPreviewFileEncodingKey];        
 }
 
 

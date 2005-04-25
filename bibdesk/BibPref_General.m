@@ -26,7 +26,7 @@
 
     [previewFontPopup removeAllItems];
     [previewFontPopup addItemsWithTitles:[availableFontFamilies sortedArrayUsingSelector:@selector(compare:)]];
-    [previewFontPopup selectItemWithTitle:[defaults objectForKey:BDSKPreviewPaneFontFamily]];
+    [previewFontPopup selectItemWithTitle:[defaults objectForKey:BDSKPreviewPaneFontFamilyKey]];
     [availableFontFamilies release];
     
     NSMutableArray *availableFonts = [[[NSFontManager sharedFontManager] availableFonts] mutableCopy];
@@ -41,7 +41,7 @@
 }
 
 - (IBAction)selectPreviewFont:(id)sender{
-    [defaults setObject:[sender titleOfSelectedItem] forKey:BDSKPreviewPaneFontFamily];
+    [defaults setObject:[sender titleOfSelectedItem] forKey:BDSKPreviewPaneFontFamilyKey];
     [[NSNotificationCenter defaultCenter] postNotificationName:BDSKPreviewPaneFontChangedNotification object:nil];
     [[NSNotificationCenter defaultCenter] postNotificationName:BDSKPreviewDisplayChangedNotification object:nil];
 }
@@ -69,12 +69,12 @@
     
     [editOnPasteButton setState:[defaults integerForKey:BDSKEditOnPasteKey]];
 
-    [checkForUpdatesButton setState:([defaults boolForKey:BDSKAutoCheckForUpdates] == YES) ? NSOnState : NSOffState];
+    [checkForUpdatesButton setState:([defaults boolForKey:BDSKAutoCheckForUpdatesKey] == YES) ? NSOnState : NSOffState];
 
 }
 
 - (IBAction)toggleAutoCheckForUpdates:(id)sender{
-    [defaults setBool:([sender state] == NSOnState) ? YES : NO forKey:BDSKAutoCheckForUpdates];
+    [defaults setBool:([sender state] == NSOnState) ? YES : NO forKey:BDSKAutoCheckForUpdatesKey];
 }
 
 - (IBAction)setAutoOpenFilePath:(id)sender{

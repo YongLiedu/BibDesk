@@ -15,18 +15,18 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 
 NSString *BDSKDefaultBibFilePathKey = @"Default Bib File";
 NSString *BDSKStartupBehaviorKey = @"Startup Behavior";
-NSString *BDSKAutoCheckForUpdates = @"Check for updates when starting";
+NSString *BDSKAutoCheckForUpdatesKey = @"Check for updates when starting";
 NSString *BDSKShouldUseTemplateFile = @"Write template file when saving";
 NSString *BDSKSnoopDrawerContentKey = @"Snoop Drawer Content";
-NSString *BDSKBibEditorAutocompletionFields = @"Enabled for autocompletion in BibEditor";
-NSString *BDSKPreviewPaneFontFamily = @"Font family to use for RTF preview display";
-NSString *BDSKFilterFieldHistory = @"Open using filter command history";
+NSString *BDSKBibEditorAutocompletionFieldsKey = @"Enabled for autocompletion in BibEditor";
+NSString *BDSKPreviewPaneFontFamilyKey = @"Font family to use for RTF preview display";
+NSString *BDSKFilterFieldHistoryKey = @"Open using filter command history";
 
-NSString *BDSKUseUnicodeBibTeXParser = @"Use Unicode BibTeX Parser"; // deprecated in 0.99
-NSString *BDSKUseThreadedFileLoading = @"Load files in background"; // deprecated in 0.99
-NSString *BDSKDefaultStringEncoding = @"Default string encoding for opening and saving";
-NSString *BDSKShouldTeXifyWhenSavingAndCopying = @"TeXify characters when saving or copying BibTeX";
-NSString *BDSKTeXPreviewFileEncoding = @"Character encoding for TeX preview file";
+NSString *BDSKUseUnicodeBibTeXParserKey = @"Use Unicode BibTeX Parser"; // deprecated in 0.99
+NSString *BDSKUseThreadedFileLoadingKey = @"Load files in background"; // deprecated in 0.99
+NSString *BDSKDefaultStringEncodingKey = @"Default string encoding for opening and saving";
+NSString *BDSKShouldTeXifyWhenSavingAndCopyingKey = @"TeXify characters when saving or copying BibTeX";
+NSString *BDSKTeXPreviewFileEncodingKey = @"Character encoding for TeX preview file";
 
 NSString *BDSKTeXBinPathKey = @"TeX Binary Path";
 NSString *BDSKBibTeXBinPathKey = @"BibTeX Binary Path";
@@ -49,8 +49,8 @@ NSString *BDSKShowColsKey = @"Shown Columns";
 NSString *BDSKShownColsNamesKey = @"Shown Column Names";
 NSString *BDSKColumnWidthsKey = @"Column Widths by Name";
 NSString *BDSKColumnOrderKey = @"Column Names in Order";
-NSString *BDSKDefaultSortedTableColumn = @"Default table column to sort new documents";
-NSString *BDSKDefaultSortedTableColumnIsDescending = @"Default table column sort order";
+NSString *BDSKDefaultSortedTableColumnKey = @"Default table column to sort new documents";
+NSString *BDSKDefaultSortedTableColumnIsDescendingKey = @"Default table column sort order";
 
 NSString *BDSKShowStatusBarKey = @"Show Status Bar";
 NSString *BDSKShowEditorStatusBarKey = @"Show Editor Status Bar";
@@ -76,7 +76,7 @@ NSString *BDSKPubTypeStringKey = @"Current Publication Type String";
 NSString *BDSKShowWarningsKey = @"Show Warnings in Error Panel";
 
 NSString *BDSKCurrentQuickSearchKey = @"Current Quick Search Key";
-NSString *BDSKCurrentQuickSearchTextDict = @"Current Quick Search Text Dictionary";
+NSString *BDSKCurrentQuickSearchTextDictKey = @"Current Quick Search Text Dictionary";
 NSString *BDSKQuickSearchKeys = @"Quick Search Keys";
 NSString *BDSKRowColorRedKey = @"RedComponentColor of alternating rows Key";
 NSString *BDSKRowColorGreenKey = @"GreenComponentColor of alternating rows Key";
@@ -89,9 +89,9 @@ NSString *BDSKLocalUrlFormatKey = @"Local-Url Format";
 NSString *BDSKLocalUrlFormatPresetKey = @"Local-Url Format Preset";
 NSString *BDSKLocalUrlLowercaseKey = @"Local-Url Generate Lowercase";
 
-NSString *BDSKLastVersionLaunched = @"Last launched version number";
-NSString *BDSKSnoopDrawerSavedSize = @"Saved size of BibEditor document snoop drawer";
-NSString *BDSKShouldSaveNormalizedAuthorNames = @"Save normalized names in BibTeX files";
+NSString *BDSKLastVersionLaunchedKey = @"Last launched version number";
+NSString *BDSKSnoopDrawerSavedSizeKey = @"Saved size of BibEditor document snoop drawer";
+NSString *BDSKShouldSaveNormalizedAuthorNamesKey = @"Save normalized names in BibTeX files";
 NSString *BDSKSaveAnnoteAndAbstractAtEndOfItemKey = @"Save Annote and Abstract at End of Item";
 
 #pragma mark Field name strings

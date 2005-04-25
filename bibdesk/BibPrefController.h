@@ -46,14 +46,14 @@ extern NSString *BDSKBibTeXBinPathKey;
 
 /*! @const BDSKBTStyleKey Key for user default: The style file name to be inserted into the tex template for preview. */
 extern NSString *BDSKBTStyleKey;
-extern NSString *BDSKUseUnicodeBibTeXParser;
-extern NSString *BDSKUseThreadedFileLoading;
-extern NSString *BDSKDefaultStringEncoding;
-extern NSString *BDSKShouldTeXifyWhenSavingAndCopying;
-extern NSString *BDSKTeXPreviewFileEncoding;
+extern NSString *BDSKUseUnicodeBibTeXParserKey;
+extern NSString *BDSKUseThreadedFileLoadingKey;
+extern NSString *BDSKDefaultStringEncodingKey;
+extern NSString *BDSKShouldTeXifyWhenSavingAndCopyingKey;
+extern NSString *BDSKTeXPreviewFileEncodingKey;
 extern NSString *BDSKDefaultBibFilePathKey;
 extern NSString *BDSKStartupBehaviorKey;
-extern NSString *BDSKAutoCheckForUpdates;
+extern NSString *BDSKAutoCheckForUpdatesKey;
 extern NSString *BDSKDragCopyKey;
 extern NSString *BDSKUsesTeXKey;
 extern NSString *BDSKEditOnPasteKey;
@@ -76,9 +76,9 @@ extern NSString *BDSKCiteStartBracketKey;
 extern NSString *BDSKCiteEndBracketKey;
 extern NSString *BDSKShouldUseTemplateFile;
 extern NSString *BDSKSnoopDrawerContentKey;
-extern NSString *BDSKBibEditorAutocompletionFields;
-extern NSString *BDSKPreviewPaneFontFamily;
-extern NSString *BDSKFilterFieldHistory;
+extern NSString *BDSKBibEditorAutocompletionFieldsKey;
+extern NSString *BDSKPreviewPaneFontFamilyKey;
+extern NSString *BDSKFilterFieldHistoryKey;
 
 
 extern NSString *BDSKCiteKeyFormatKey;
@@ -91,15 +91,15 @@ extern NSString *BDSKRSSDescriptionFieldKey;
 
 extern NSString *BDSKColumnWidthsKey;
 extern NSString *BDSKColumnOrderKey;
-extern NSString *BDSKDefaultSortedTableColumn;
-extern NSString *BDSKDefaultSortedTableColumnIsDescending;
+extern NSString *BDSKDefaultSortedTableColumnKey;
+extern NSString *BDSKDefaultSortedTableColumnIsDescendingKey;
 
 extern NSString *BDSKPubTypeKey;
 extern NSString *BDSKPubTypeStringKey;
 extern NSString *BDSKShowWarningsKey;
 
 extern NSString *BDSKCurrentQuickSearchKey;
-extern NSString *BDSKCurrentQuickSearchTextDict;
+extern NSString *BDSKCurrentQuickSearchTextDictKey;
 extern NSString *BDSKQuickSearchKeys;
 
 extern NSString *BDSKRowColorRedKey;
@@ -113,9 +113,9 @@ extern NSString *BDSKLocalUrlFormatKey;
 extern NSString *BDSKLocalUrlFormatPresetKey;
 extern NSString *BDSKLocalUrlLowercaseKey;
 
-extern NSString *BDSKLastVersionLaunched;
-extern NSString *BDSKSnoopDrawerSavedSize;
-extern NSString *BDSKShouldSaveNormalizedAuthorNames;
+extern NSString *BDSKLastVersionLaunchedKey;
+extern NSString *BDSKSnoopDrawerSavedSizeKey;
+extern NSString *BDSKShouldSaveNormalizedAuthorNamesKey;
 extern NSString *BDSKSaveAnnoteAndAbstractAtEndOfItemKey;
 
 #pragma mark Field name strings
