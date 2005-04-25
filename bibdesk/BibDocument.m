@@ -2819,7 +2819,7 @@ This method always returns YES. Even if some or many operations fail.
     [[NSNotificationCenter defaultCenter] postNotificationName:BDSKDocumentWindowWillCloseNotification
                                                         object:self
                                                       userInfo:[NSDictionary dictionary]];
-    
+    [[NSApp delegate] removeErrorObjsForDocument:self];
     [customCiteDrawer close];
 
     [[OFPreferenceWrapper sharedPreferenceWrapper] setObject:[lastSelectedColumnForSort identifier] forKey:BDSKDefaultSortedTableColumnKey];
