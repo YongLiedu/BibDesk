@@ -193,7 +193,7 @@ static BibTypeManager *sharedInstance = nil;
 	if([fieldName isEqualToString:BDSKLocalUrlString]){
 		return invalidLocalUrlCharSet;
 	}
-	[NSException raise:@"unimpl. feat. exc." format:@"invalidCharactersForField is partly implemented"];
+	[NSException raise:BDSKUnimplementedException format:@"invalidCharactersForField is partly implemented"];
 }
 
 - (NSCharacterSet *)strictInvalidCharactersForField:(NSString *)fieldName inFileType:(NSString *)type{
@@ -203,14 +203,14 @@ static BibTypeManager *sharedInstance = nil;
 	if([fieldName isEqualToString:BDSKLocalUrlString]){
 		return strictInvalidLocalUrlCharSet;
 	}
-	[NSException raise:@"unimpl. feat. exc." format:@"strictInvalidCharactersForField is partly implemented"];
+	[NSException raise:BDSKUnimplementedException format:@"strictInvalidCharactersForField is partly implemented"];
 }
 
 - (NSCharacterSet *)invalidFieldNameCharacterSetForFileType:(NSString *)type{
     if([type isEqualToString:BDSKBibtexString])
         return invalidCiteKeyCharSet;
     else
-        [NSException raise:@"unimpl. feat. exc." format:@"invalidFieldNameCharacterSetForFileType is only implemented for BibTeX"];
+        [NSException raise:BDSKUnimplementedException format:@"invalidFieldNameCharacterSetForFileType is only implemented for BibTeX"];
 }
 
 - (NSCharacterSet *)fragileCiteKeyCharacterSet{

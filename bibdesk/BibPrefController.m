@@ -154,3 +154,10 @@ NSString *BDSKBibLibrarySelectedItemsChangedNotification = @"BibLibraryControlle
 NSString *BDSKBibCollectionItemAddedNotification = @"added an item to a collection";
 NSString *BDSKBibCollectionItemRemovedNotification = @"removed an item from a collection";
 
+#pragma mark Exception name strings
+
+NSString *BDSKComplexStringException = @"BDSKComplexStringException";
+NSString *BDSKTeXifyException = @"BDSKTeXifyException";
+NSString *BDSKStringEncodingException = @"BDSKStringEncodingException";
+NSString *BDSKUnimplementedException = @"BDSKUnimplementedException";
+

@@ -1207,7 +1207,7 @@ setupParagraphStyle()
 			NS_DURING
 				v = [[BDSKConverter sharedConverter] stringByTeXifyingString:v];
 			NS_HANDLER
-				if([[localException name] isEqualToString:@"BDSKTeXifyException"]){
+				if([[localException name] isEqualToString:BDSKTeXifyException]){
 					int i = NSRunAlertPanel(NSLocalizedString(@"Character Conversion Error", @"Title of alert when an error happens"),
 											[NSString stringWithFormat: NSLocalizedString(@"An unrecognized character in the \"%@\" field of \"%@\" could not be converted to TeX.", @"Informative alert text when the error happens."), k, [self citeKey]],
 											nil, nil, nil, nil);

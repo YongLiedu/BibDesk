@@ -496,7 +496,7 @@ static BDSKFormatParser *sharedParser;
 		return YES;
 	}
 	else {
-		[NSException raise:@"unimpl. feat. exc." format:@"stringIsValid:forField:ofItem: is partly implemented"];
+		[NSException raise:BDSKUnimplementedException format:@"stringIsValid:forField:ofItem: is partly implemented"];
 		return YES;
 	}
 }
@@ -531,7 +531,7 @@ static BDSKFormatParser *sharedParser;
 		return newString;
 	}
 	else {
-		[NSException raise:@"unimpl. feat. exc." format:@"stringBySanitizingString:forField:inFileType: is partly implemented"];
+		[NSException raise:BDSKUnimplementedException format:@"stringBySanitizingString:forField:inFileType: is partly implemented"];
 		return string;
 	}
 }

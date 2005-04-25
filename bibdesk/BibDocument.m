@@ -683,7 +683,7 @@ stringByAppendingPathComponent:@"BibDesk"]; */
         NS_DURING
           [d appendData:[[[BDSKConverter sharedConverter] stringByTeXifyingString:[tmp RSSValue]] dataUsingEncoding:NSASCIIStringEncoding allowLossyConversion:YES]];
         NS_HANDLER
-          if([[localException name] isEqualToString:@"BDSKTeXifyException"]){
+          if([[localException name] isEqualToString:BDSKTeXifyException]){
               int i = NSRunAlertPanel(NSLocalizedString(@"Character Conversion Error", @"Title of alert when an error happens"),
                                       [NSString stringWithFormat: NSLocalizedString(@"An unrecognized character in \"%@\" could not be converted to TeX.", @"Informative alert text when the error happens."), [tmp RSSValue]],
                                       nil, nil, nil, nil);
@@ -812,7 +812,7 @@ stringByAppendingPathComponent:@"BibDesk"]; */
         NS_DURING
             [d appendData:[[tmp bibTeXStringDroppingInternal:drop] dataUsingEncoding:encoding allowLossyConversion:YES]];
         NS_HANDLER
-            if([[localException name] isEqualToString:@"BDSKTeXifyException"]){
+            if([[localException name] isEqualToString:BDSKTeXifyException]){
 		int i = NSRunAlertPanel(NSLocalizedString(@"Warning!", @"Title of alert when an error happens"),
                                         NSLocalizedString(@"Data will be lost if you are saving in ASCII encoding.", @"Informative alert text when the error happens."),
                                         nil, nil, nil, nil);
@@ -910,7 +910,7 @@ stringByAppendingPathComponent:@"BibDesk"]; */
     
     if(dataString == nil){
         NSString *encStr = [[BDSKStringEncodingManager sharedEncodingManager] displayedNameForStringEncoding:encoding];
-        [NSException raise:@"BDSKStringEncodingException" 
+        [NSException raise:BDSKStringEncodingException 
                     format:NSLocalizedString(@"Unable to interpret data as %@.  Try a different encoding.", 
                                              @"need a single NSString format specifier"), encStr];
     }
@@ -1935,7 +1935,7 @@ int generalBibItemCompareFunc(id item1, id item2, void *context){
      //                           protocol: nil];
 
     //if(!sent){
-   //     [NSException raise:@"UnimplementedException" format:@"Can't handle errors in mail sending yet."];
+   //     [NSException raise:BDSKUnimplementedException format:@"Can't handle errors in mail sending yet."];
    // }
 
     [body release];
@@ -3070,7 +3070,7 @@ This method always returns YES. Even if some or many operations fail.
 //	NSEnumerator *pubE = [self selectedPubEnumerator];
 //	BibItem *pub = [pubE nextObject];
 
-	[NSException raise:@"unimplementedFunctionException"
+	[NSException raise:BDSKUnimplementedException
 				format:@"postItemToWeblog is unimplemented."];
 	
 	NSString *appPath = [[NSWorkspace sharedWorkspace] fullPathForApplication:@"Blapp"]; // pref

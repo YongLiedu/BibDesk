@@ -177,3 +177,10 @@ extern NSString *BDSKBibTypeInfoChangedNotification;
 extern NSString *BDSKBibLibrarySelectedItemsChangedNotification;
 extern NSString *BDSKBibCollectionItemAddedNotification;
 extern NSString *BDSKBibCollectionItemRemovedNotification;
+
+#pragma mark Exception name strings
+extern NSString *BDSKComplexStringException;
+extern NSString *BDSKTeXifyException;
+extern NSString *BDSKStringEncodingException;
+extern NSString *BDSKUnimplementedException;
+

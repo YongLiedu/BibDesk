@@ -197,7 +197,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 				[scanner setScanLocation:(index + 1)]; // increment the scanner to go past the character that we don't have in the dict
                 NSString *hexString = [NSString stringWithFormat:@"%X", [tmpConv characterAtIndex:0]];
                 NSLog(@"unable to convert character 0x%@", [hexString stringByPaddingToLength:4 withString:@"0" startingAtIndex:0]);
-				[NSException raise:@"BDSKTeXifyException" format:@"An error occurred converting %@", tmpConv]; // raise exception after moving the scanner past the offending char
+				[NSException raise:BDSKTeXifyException format:@"An error occurred converting %@", tmpConv]; // raise exception after moving the scanner past the offending char
 			}
         }
     }

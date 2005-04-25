@@ -361,7 +361,7 @@ static NSDictionary *globalMacroDefs;
 				[sc setScanLocation:[sc scanLocation] + 1];
 			}
 			if (nesting > 0) {
-				[NSException raise:@"BDSKComplexStringException" 
+				[NSException raise:BDSKComplexStringException 
 							format:@"Unbalanced string: [%@]", nodeStr];
 			}
 			[returnNodes addObject:[BDSKStringNode nodeWithQuotedString:nodeStr]];
@@ -385,7 +385,7 @@ static NSDictionary *globalMacroDefs;
 			// we don't accept unbalanced braces, as we always quote with braces
 			// do we want to be more permissive and try to use "-quoted fields?
 			if (nesting > 0 || ![nodeStr isStringTeXQuotingBalancedWithBraces:YES connected:NO]) {
-				[NSException raise:@"BDSKComplexStringException" 
+				[NSException raise:BDSKComplexStringException 
 							format:@"Unbalanced string: [%@]", nodeStr];
 			}
 			[returnNodes addObject:[BDSKStringNode nodeWithQuotedString:nodeStr]];
@@ -402,11 +402,11 @@ static NSDictionary *globalMacroDefs;
 		}
 		else if (ch == '#') {
 			// we found 2 # or a # at the beginning
-			[NSException raise:@"BDSKComplexStringException" 
+			[NSException raise:BDSKComplexStringException 
 						format:@"Missing component"];
 		} 
 		else {
-			[NSException raise:@"BDSKComplexStringException" 
+			[NSException raise:BDSKComplexStringException 
 						format:@"Invalid first character in component"];
 		}
 		
@@ -414,13 +414,13 @@ static NSDictionary *globalMacroDefs;
 		[sc scanCharactersFromSet:[NSCharacterSet whitespaceAndNewlineCharacterSet] intoString:NULL];
 		if (![sc isAtEnd]) {
 			if (![sc scanString:@"#" intoString:NULL]) {
-				[NSException raise:@"BDSKComplexStringException" 
+				[NSException raise:BDSKComplexStringException 
 							format:@"Missing # character"];
 			}
 			[sc scanCharactersFromSet:[NSCharacterSet whitespaceAndNewlineCharacterSet] intoString:NULL];
 			if ([sc isAtEnd]) {
 				// we found a # at the end
-				[NSException raise:@"BDSKComplexStringException" 
+				[NSException raise:BDSKComplexStringException 
 							format:@"Empty component"];
 			}
 		}
