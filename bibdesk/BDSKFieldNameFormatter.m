@@ -42,8 +42,12 @@
         return NO;
     else if([partialString length] && [[NSCharacterSet decimalDigitCharacterSet] characterIsMember:[partialString characterAtIndex:0]])
         return NO; // BibTeX chokes if the first character of a field name is a digit
-    else 
-        return YES;
+    else if([partialString length] && ![[NSCharacterSet uppercaseLetterCharacterSet] characterIsMember:[partialString characterAtIndex:0]]){
+        // this is a BibDesk requirement, since we expect field names to be capitalized
+        *newString = [partialString capitalizedString];
+        return NO;
+    }
+    else return YES;
 }
 
 
