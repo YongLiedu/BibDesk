@@ -200,17 +200,17 @@ Broken out of BibDocument and split up into smaller parts to make things more ma
 	
 	if ([self numberOfSelectedPubs] == 0) {
 		// no selection
-		s = NSLocalizedString(@"Public BibTeX Record", @"Public BibTeX Record");
+		s = NSLocalizedString(@"Minimal BibTeX Record", @"Minimal BibTeX Record");
 		[menuItem setTitle:s];
 		return NO;
 	}
 	else if ([self numberOfSelectedPubs] == 1) {
 		// single selection
 		if ([[menuItem menu] supermenu]) {
-			s = NSLocalizedString(@"Clean BibTeX Record for %@", @"Public BibTeX Record for %@");
+			s = NSLocalizedString(@"Minimal BibTeX Record for %@", @"Minimal BibTeX Record for %@");
 		}
 		else {
-			s = NSLocalizedString(@"Copy Public BibTeX Record for %@", @"Copy Public BibTeX Record for %@");
+			s = NSLocalizedString(@"Copy Minimal BibTeX Record for %@", @"Copy Minimal BibTeX Record for %@");
 		}
 		NSString * citeKey = [(BibItem*)[shownPublications objectAtIndex:[[[self selectedPubEnumerator] nextObject] intValue]] citeKey];
 		[menuItem setTitle:[NSString stringWithFormat:s, citeKey]];
@@ -219,10 +219,10 @@ Broken out of BibDocument and split up into smaller parts to make things more ma
 	else {
 		// multiple selection
 		if ([[menuItem menu] supermenu]) {
-			s = NSLocalizedString(@"%i Public BibTeX Records", @"%i Public BibTeX Records");
+			s = NSLocalizedString(@"%i Minimal BibTeX Records", @"%i Minimal BibTeX Records");
 		}
 		else {
-			s = NSLocalizedString(@"Copy %i Public BibTeX Records", @"Copy %i Public BibTeX Records");
+			s = NSLocalizedString(@"Copy %i Minimal BibTeX Records", @"Copy %i Minimal BibTeX Records");
 		}
 		[menuItem setTitle:[NSString stringWithFormat:s, [self numberOfSelectedPubs]]];
 		return YES;

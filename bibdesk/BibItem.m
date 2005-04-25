@@ -1156,6 +1156,7 @@ setupParagraphStyle()
 
 - (NSString *)bibTeXStringByExpandingMacros:(BOOL)expand dropInternal:(BOOL)drop{
     BOOL shouldTeXify = [[OFPreferenceWrapper sharedPreferenceWrapper] boolForKey:BDSKShouldTeXifyWhenSavingAndCopyingKey];
+	NSMutableSet *knownKeys = [NSMutableSet set];
 	NSString *k;
     NSString *v;
     NSMutableString *s = [[[NSMutableString alloc] init] autorelease];
@@ -1170,14 +1171,9 @@ setupParagraphStyle()
 	}
 	if (drop) {
 		BibTypeManager *btm = [BibTypeManager sharedManager];
-		NSMutableSet *set = [NSMutableSet setWithArray:[btm requiredFieldsForType:[self type]]];
-		[set addObjectsFromArray:[btm optionalFieldsForType:[self type]]];
-		[set addObjectsFromArray:[btm userDefaultFieldsForType:[self type]]];
-		e = [[NSArray arrayWithObjects:BDSKDateCreatedString, BDSKDateModifiedString, BDSKLocalUrlString, BDSKUrlString, nil] objectEnumerator];
-		while (k = [e nextObject]) {
-			if (![set containsObject:k])
-				[keys removeObject:k];
-		}
+		[knownKeys addObjectsFromArray:[btm requiredFieldsForType:[self type]]];
+		[knownKeys addObjectsFromArray:[btm optionalFieldsForType:[self type]]];
+		[knownKeys addObjectsFromArray:[btm userDefaultFieldsForType:[self type]]];
 	}
 	e = [keys objectEnumerator];
 	[keys release];
@@ -1191,6 +1187,9 @@ setupParagraphStyle()
     [s appendString:@"{"];
     [s appendString:[self citeKey]];
     while(k = [e nextObject]){
+		if (drop && ![knownKeys containsObject:k])
+			continue;
+		
         v = [pubFields objectForKey:k];
         NSString *valString;
         
