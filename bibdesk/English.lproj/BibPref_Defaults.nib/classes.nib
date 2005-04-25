@@ -13,7 +13,6 @@
                 RSSDescriptionFieldMatrix = NSMatrix; 
                 RSSDescriptionFieldTextField = NSTextField; 
                 addFieldButton = NSButton; 
-                addFieldField = NSTextField; 
                 defaultFieldsTableView = NSTableView; 
                 delSelectedFieldButton = NSButton; 
             }; 

@@ -22,13 +22,16 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
     defaultFieldsArray = [[NSMutableArray arrayWithCapacity:6] retain];
     [defaultFieldsArray setArray:[defaults arrayForKey:BDSKDefaultFieldsKey]];
     BDSKFieldNameFormatter *fieldNameFormatter = [[BDSKFieldNameFormatter alloc] init];
-    [addFieldField setFormatter:fieldNameFormatter];
     [RSSDescriptionFieldTextField setFormatter:fieldNameFormatter];
+    [[[[defaultFieldsTableView tableColumns] objectAtIndex:0] dataCell] setFormatter:fieldNameFormatter];
     [fieldNameFormatter release];
     
 }
 
 - (void)updateUI{
+    [defaultFieldsTableView reloadData];
+    [defaults setObject:defaultFieldsArray forKey:BDSKDefaultFieldsKey];
+    
     if ([[defaults objectForKey:BDSKRSSDescriptionFieldKey] isEqualToString:BDSKRssDescriptionString]) {
         [RSSDescriptionFieldMatrix selectCellWithTag:0];
         [RSSDescriptionFieldTextField setEnabled:NO];
@@ -51,24 +54,33 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 - (int)numberOfRowsInTableView:(NSTableView *)tView{
     return [defaultFieldsArray count];
 }
-    - (id)tableView:(NSTableView *)tView objectValueForTableColumn:(NSTableColumn *)tableColumn row:(int)row{
+
+- (id)tableView:(NSTableView *)tView objectValueForTableColumn:(NSTableColumn *)tableColumn row:(int)row{
     return [defaultFieldsArray objectAtIndex:row];
 }
+
+- (void)tableView:(NSTableView *)tableView setObjectValue:(id)object forTableColumn:(NSTableColumn *)tableColumn row:(int)row{
+    if([object isEqualToString:@""])
+        [defaultFieldsArray removeObjectAtIndex:row];
+    else
+        [defaultFieldsArray replaceObjectAtIndex:row withObject:object];
+    [self updateUI];
+}
+
     // defaultFieldStuff
 - (IBAction)delSelectedDefaultField:(id)sender{
     if([defaultFieldsTableView numberOfSelectedRows] != 0){
         [defaultFieldsArray removeObjectAtIndex:[defaultFieldsTableView selectedRow]];
-        [defaultFieldsTableView reloadData];
-        [defaults setObject:defaultFieldsArray
-                     forKey:BDSKDefaultFieldsKey];
+        [self updateUI];
     }
 }
 - (IBAction)addDefaultField:(id)sender{
-    [defaultFieldsArray addObject:[[addFieldField stringValue] capitalizedString]];  // ARM: force uppercase, otherwise the user will end up with an upper and lower case field
+    NSString *newField = @"Field"; // do not localize
+    [defaultFieldsArray addObject:newField];
+    int row = [defaultFieldsArray count] - 1;
     [defaultFieldsTableView reloadData];
-    [defaults setObject:defaultFieldsArray
-                 forKey:BDSKDefaultFieldsKey];
-    [addFieldField setStringValue:@""];
+    [defaultFieldsTableView selectRow:row byExtendingSelection:NO];
+    [defaultFieldsTableView editColumn:0 row:row withEvent:nil select:YES];
 }
 
 - (IBAction)showTypeInfoEditor:(id)sender{

@@ -23,7 +23,6 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
     NSMutableArray *defaultFieldsArray;    // the fields to add to every new bib.
     IBOutlet NSButton* delSelectedFieldButton;
     IBOutlet NSButton* addFieldButton;
-    IBOutlet NSTextField* addFieldField;
     IBOutlet NSTableView* defaultFieldsTableView;
     IBOutlet NSMatrix* RSSDescriptionFieldMatrix;
     IBOutlet NSTextField* RSSDescriptionFieldTextField;
