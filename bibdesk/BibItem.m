@@ -157,7 +157,13 @@ setupParagraphStyle()
     setupParagraphStyle();
     hasBeenEdited = NO;
     bibLock = [[NSLock alloc] init]; // not encoded
-    return self;
+	
+	[[NSNotificationCenter defaultCenter] addObserver:self
+											 selector:@selector(typeInfoDidChange:)
+												 name:BDSKBibTypeInfoChangedNotification
+											   object:[BibTypeManager sharedManager]];
+    
+	return self;
 }
 
 - (void)encodeWithCoder:(NSCoder *)coder{
