@@ -1480,6 +1480,10 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 	[self updateDocumentSnoopButton];
 }
 
+- (void)drawerWillClose:(NSNotification *)notification{
+	[[self window] makeFirstResponder:nil]; // this is necessary to avoid a crash after browsing
+}
+
 - (void)drawerDidClose:(NSNotification *)notification{
 	[self updateDocumentSnoopButton];
 }
