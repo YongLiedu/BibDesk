@@ -936,6 +936,8 @@ stringByAppendingPathComponent:@"BibDesk"]; */
                              NSLocalizedString(@"Edit file", @""));
         if (rv == NSAlertDefaultReturn) {
             // the user said to give up
+			[[NSApp delegate] removeErrorObjsForDocument:nil]; // this removes errors from a previous failed load
+			[[NSApp delegate] handoverErrorObjsForDocument:doc]; // this dereferences the doc from the errors, so they won't be removed when the document is deallocated
             return NO;
         }else if (rv == NSAlertAlternateReturn){
             // the user said to keep going, so if they save, they might clobber data...
@@ -1014,6 +1016,8 @@ stringByAppendingPathComponent:@"BibDesk"]; */
                              NSLocalizedString(@"Edit file", @""));
         if (rv == NSAlertDefaultReturn) {
             // the user said to give up
+			[[NSApp delegate] removeErrorObjsForDocument:nil]; // this removes errors from a previous failed load
+			[[NSApp delegate] handoverErrorObjsForDocument:doc]; // this dereferences the doc from the errors, so they won't be removed when the document is deallocated
             return NO;
         }else if (rv == NSAlertAlternateReturn){
             // the user said to keep going, so if they save, they might clobber data...
