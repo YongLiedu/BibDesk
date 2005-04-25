@@ -7,6 +7,7 @@
 //
 
 #import "BDSKFormatParser.h"
+#import "BibItem.h"
 
 static BDSKFormatParser *sharedParser;
 

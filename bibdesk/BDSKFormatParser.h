@@ -7,8 +7,8 @@
 //
 
 #import <Cocoa/Cocoa.h>
-#import "BibItem.h"
 
+@class BibItem;
 
 @interface BDSKFormatParser : NSObject {
 	NSCharacterSet *validSpecifierChars;
