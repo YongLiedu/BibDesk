@@ -38,6 +38,7 @@
 
 @interface BDSKErrObj : NSObject{
     NSString *fileName;
+	NSDocument *document;
     int lineNumber;
 
     NSString *itemDescription;
