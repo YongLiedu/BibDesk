@@ -22,7 +22,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 #import "NSString+XMLUtils.h"
 #import "BibPrefController.h"
 @class BibPersonController;
-@class BibDocument;
+@class BibItem;
 
 
 /*!
@@ -39,13 +39,13 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
     NSString *normalizedName;
     NSString *sortableName;
     BibPersonController *personController; // unretained
-    BibDocument *document;
+    BibItem *publication;
 }
 
-+ (BibAuthor *)authorWithName:(NSString *)name document:(BibDocument *)doc;
++ (BibAuthor *)authorWithName:(NSString *)name andPub:(BibItem *)aPub;
 
 // maybe this should be 'and pubs'
-- (id)initWithName:(NSString *)aName document:(BibDocument *)doc;
+- (id)initWithName:(NSString *)aName andPub:(BibItem *)aPub;
 - (void)dealloc;
 
 - (NSComparisonResult)compare:(BibAuthor *)otherAuth;
@@ -74,8 +74,8 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 
 - (NSString *)MODSStringWithRole:(NSString *)rel;
 
-- (BibDocument *)document;
-- (void)setDocument:(BibDocument *)newDoc;
+- (BibItem *)publication;
+- (void)setPublication:(BibItem *)newPub;
 
 - (BibPersonController *)personController;
 - (void)setPersonController:(BibPersonController *)newPersonController;
