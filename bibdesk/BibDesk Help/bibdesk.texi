@@ -399,7 +399,8 @@ characters as equivalent, and is case-insensitive
 @menu
 * Adding References::           
 * Editing References::          
-* Deleting References::         
+* Deleting References::    
+* Browsing References::       
 * Printing References::         
 * Saving The File::             
 * Previewing Typeset Output::   
@@ -470,10 +471,6 @@ The "Annote" and "Abstract" tabs provide access to larger text areas
 for these types of information. Rss-Description is covered in
 @ref{RSS Preferences}.
 
-The references are presented in a table, similar to this:
-
-@image{gfx/tableView}
-
 @cindex Drag and Drop
 
 References can also be added to a bibliography by dragging an entry
@@ -531,6 +528,58 @@ References can be deleted by selecting the reference and choosing
 "Delete Reference" from the Bibliography menu or pressing the delete
 key. Either way, a warning will appear to verify that you want to
 delete the reference.
+
+@node Browsing References
+@section Browsing References
+
+The references are presented in a table, similar to this:
+
+@image{gfx/tableView}
+
+Columns can be added to the table using the View -> Columns menu.  You 
+can select from the drop down menu or enter an arbitrary field which will
+be shown if any of your records have that field.
+
+The Columns almost always simply display the content of the relevant field.
+There are a few exceptions where Bibdesk tries to `do the right thing' when
+bibtex is difficult.  The inbook type uses Title to refer to the title of 
+the whole work and the Chapter field to refer to the specific part of the 
+work that is cited.  For the inbook type, then, if there is a Chapter field
+that is displayed along with the Book title, thus:
+
+@example
+Chapter : Title
+@end example
+
+If Chapter is empty, Pages must be present so the Title column will display
+
+Title (pp Pages)
+
+@cindex Container
+@heading Container 
+
+The special column 'Container' can be added to the table.  It is useful for
+types that are part of a larger document and displays the title of that
+'Container' document.  It will display a slightly different field depending
+on the type of the item.
+
+@table
+@item article
+Journal
+@item incollection
+@itemx inproceedings
+@itemx conference
+Booktitle
+@item inbook
+Title
+@item book
+Series 
+@item commented
+Volumetitle
+@end table
+
+If you use a special type that has a container concept write to bibdesk-develop
+and it can be added. 
 
 @node Printing References
 @section Printing References
