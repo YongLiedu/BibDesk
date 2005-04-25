@@ -763,21 +763,16 @@ setupParagraphStyle()
 - (void)updateMetadataForKey:(NSString *)key{
     
     [self setHasBeenEdited:YES];
-	
-	if([BDSKAnnoteString isEqualToString:key] || 
-	   [BDSKAbstractString isEqualToString:key] || 
-	   [BDSKRssDescriptionString isEqualToString:key]){
-		// don't do anything for fields we don't need to update.
-		return;
-	}
 
-    if((![@"" isEqualToString:[pubFields objectForKey: BDSKAuthorString usingLock:bibLock]]) && 
-       ([pubFields objectForKey: BDSKAuthorString usingLock:bibLock] != nil))
-    {
-        [self setAuthorsFromBibtexString:[pubFields objectForKey: BDSKAuthorString usingLock:bibLock]];
-    }else{
-        [self setAuthorsFromBibtexString:[pubFields objectForKey: @"Editor" usingLock:bibLock]]; // or what else?
-    }
+    if (key == nil || [BDSKAuthorString isEqualToString:key] || [BDSKEditorString isEqualToString:key]) {
+		if((![@"" isEqualToString:[pubFields objectForKey: BDSKAuthorString usingLock:bibLock]]) && 
+		   ([pubFields objectForKey: BDSKAuthorString usingLock:bibLock] != nil))
+		{
+			[self setAuthorsFromBibtexString:[pubFields objectForKey: BDSKAuthorString usingLock:bibLock]];
+		}else{
+			[self setAuthorsFromBibtexString:[pubFields objectForKey: BDSKEditorString usingLock:bibLock]]; // or what else?
+		}
+	}
 	
 	if([BDSKLocalUrlString isEqualToString:key]){
 		[self setNeedsToBeFiled:NO];
@@ -790,29 +785,34 @@ setupParagraphStyle()
 		[self makeType:[self type]];
 	}
 
-    NSString *yearValue = [pubFields objectForKey:BDSKYearString usingLock:bibLock];
-    if (yearValue && ![yearValue isEqualToString:@""]) {
-        NSString *monthValue = [pubFields objectForKey:BDSKMonthString usingLock:bibLock];
-        if([monthValue isComplex])
-            monthValue = [[(BDSKComplexString *)monthValue nodes] objectAtIndex:0];
-        if (!monthValue) monthValue = @"";
-        NSString *dateStr = [NSString stringWithFormat:@"%@ 1 %@", monthValue, [pubFields objectForKey:BDSKYearString usingLock:bibLock]];
-        NSDictionary *locale = [NSDictionary dictionaryWithObjectsAndKeys:@"MDYH", NSDateTimeOrdering, 
-        [NSArray arrayWithObjects:@"January", @"February", @"March", @"April", @"May", @"June", @"July", @"August", @"September", @"October", @"November", @"December", nil], NSMonthNameArray,
-        [NSArray arrayWithObjects:@"Jan", @"Feb", @"Mar", @"Apr", @"May", @"Jun", @"Jul", @"Aug", @"Sep", @"Oct", @"Nov", @"Dec", nil], NSShortMonthNameArray, nil];
-        [self setDate:[NSCalendarDate dateWithNaturalLanguageString:dateStr locale:locale]];
-    }else{
-        [self setDate:nil];    // nil means we don't have a good date.
-    }
-	
-    NSString *dateCreatedValue = [pubFields objectForKey:BDSKDateCreatedString usingLock:bibLock];
-    if (dateCreatedValue && ![dateCreatedValue isEqualToString:@""]) {
-		[self setDateCreated:[NSCalendarDate dateWithNaturalLanguageString:dateCreatedValue]];
-	}else{
-		[self setDateCreated:nil];
+    if (key == nil || [BDSKYearString isEqualToString:key] || [BDSKMonthString isEqualToString:key]) {
+		NSString *yearValue = [pubFields objectForKey:BDSKYearString usingLock:bibLock];
+		if (yearValue && ![yearValue isEqualToString:@""]) {
+			NSString *monthValue = [pubFields objectForKey:BDSKMonthString usingLock:bibLock];
+			if([monthValue isComplex])
+				monthValue = [[(BDSKComplexString *)monthValue nodes] objectAtIndex:0];
+			if (!monthValue) monthValue = @"";
+			NSString *dateStr = [NSString stringWithFormat:@"%@ 1 %@", monthValue, [pubFields objectForKey:BDSKYearString usingLock:bibLock]];
+			NSDictionary *locale = [NSDictionary dictionaryWithObjectsAndKeys:@"MDYH", NSDateTimeOrdering, 
+			[NSArray arrayWithObjects:@"January", @"February", @"March", @"April", @"May", @"June", @"July", @"August", @"September", @"October", @"November", @"December", nil], NSMonthNameArray,
+			[NSArray arrayWithObjects:@"Jan", @"Feb", @"Mar", @"Apr", @"May", @"Jun", @"Jul", @"Aug", @"Sep", @"Oct", @"Nov", @"Dec", nil], NSShortMonthNameArray, nil];
+			[self setDate:[NSCalendarDate dateWithNaturalLanguageString:dateStr locale:locale]];
+		}else{
+			[self setDate:nil];    // nil means we don't have a good date.
+		}
 	}
 	
-    NSString *dateModValue = [pubFields objectForKey:BDSKDateModifiedString usingLock:bibLock];
+    if (key == nil || [BDSKDateCreatedString isEqualToString:key]) {
+		NSString *dateCreatedValue = [pubFields objectForKey:BDSKDateCreatedString usingLock:bibLock];
+		if (dateCreatedValue && ![dateCreatedValue isEqualToString:@""]) {
+			[self setDateCreated:[NSCalendarDate dateWithNaturalLanguageString:dateCreatedValue]];
+		}else{
+			[self setDateCreated:nil];
+		}
+	}
+	
+    // we shouldn't check for the key here, as the DateModified can be set with any key
+	NSString *dateModValue = [pubFields objectForKey:BDSKDateModifiedString usingLock:bibLock];
     if (dateModValue && ![dateModValue isEqualToString:@""]) {
 		// NSLog(@"updating date %@", dateModValue);
 		[self setDateModified:[NSCalendarDate dateWithNaturalLanguageString:dateModValue]];

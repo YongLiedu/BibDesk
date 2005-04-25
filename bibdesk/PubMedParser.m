@@ -251,8 +251,8 @@ void mergePageNumbers(NSMutableDictionary *dict);
 							    if([key isEqualToString:BDSKKeywordsString]){ // may have multiple keywords, so concatenate them
                                     addStringToDict([[wholeValue copy] autorelease], pubDict, BDSKKeywordsString);
 							    }else{
-                                    if([key isEqualToString:@"Editor"]){ // may have multiple editors, so concatenate them
-                                        addStringToDict([[wholeValue copy] autorelease], pubDict, @"Editor");
+                                    if([key isEqualToString:BDSKEditorString]){ // may have multiple editors, so concatenate them
+                                        addStringToDict([[wholeValue copy] autorelease], pubDict, BDSKEditorString);
                                     } else {
                                         [pubDict setObject:[[wholeValue copy] autorelease] forKey:key];
                                     }
