@@ -2436,7 +2436,7 @@ This method always returns YES. Even if some or many operations fail.
 	NSArray *prefsShownColNamesArray = [[OFPreferenceWrapper sharedPreferenceWrapper] arrayForKey:BDSKShownColsNamesKey];
 	BibTypeManager *typeMan = [BibTypeManager sharedManager];
 	NSMutableSet *fieldNameSet = [NSMutableSet setWithSet:[typeMan allFieldNames]];
-	[fieldNameSet unionSet:[NSSet setWithObjects:BDSKLocalUrlString, BDSKUrlString, BDSKCiteKeyString, BDSKDateString, @"Added", @"Modified", BDSKFirstAuthorString, BDSKSecondAuthorString, BDSKThirdAuthorString, BDSKItemNumberString, nil]];
+	[fieldNameSet unionSet:[NSSet setWithObjects:BDSKLocalUrlString, BDSKUrlString, BDSKCiteKeyString, BDSKDateString, @"Added", @"Modified", BDSKFirstAuthorString, BDSKSecondAuthorString, BDSKThirdAuthorString, BDSKItemNumberString, BDSKContainerString, nil]];
 	NSMutableArray *colNames = [[fieldNameSet allObjects] mutableCopy];
 	[colNames sortUsingSelector:@selector(caseInsensitiveCompare:)];
 	[colNames removeObjectsInArray:prefsShownColNamesArray];
