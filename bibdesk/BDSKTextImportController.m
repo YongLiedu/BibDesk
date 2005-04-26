@@ -58,7 +58,6 @@
 	if(showingWebView){
 		showingWebView = NO; // Note that in IB we have the textView. This makes sure we swap in the webview.
 		[self setShowingWebView:YES];
-		[self loadWebPage:nil];
 	}else{
 		[self loadPasteboardData];
 	}
@@ -212,6 +211,45 @@
 	[webView stopLoading:nil];
 }
 
+- (void)beginSheetModalForWindow:(NSWindow *)docWindow modalDelegate:(id)modalDelegate didEndSelector:(SEL)didEndSelector contextInfo:(void *)contextInfo{
+	if(showingWebView){
+		// we start with a webview, so we first ask for the URL to load
+		[self window]; // hack to avoid an exception, I guess to make sure we loaded the nib
+		
+		// load the popup buttons with our bookmarks
+		NSEnumerator *bEnum = [bookmarks objectEnumerator];
+		NSDictionary *bm;
+		
+		[bookmarkPopUpButton removeAllItems];
+		[bookmarkPopUpButton addItemWithTitle:NSLocalizedString(@"Bookmarks",@"Bookmarks")];
+		while (bm = [bEnum nextObject]) {
+			[bookmarkPopUpButton addItemWithTitle:[bm objectForKey:@"Title"]];
+		}
+		
+		// remember the arguments to pass for the main sheet later
+		theDocWindow = [docWindow retain];
+		theModalDelegate = [modalDelegate retain];
+		theDidEndSelector = didEndSelector;
+		theContextInfo = contextInfo; // this one should be retained by the caller if it is non-nil
+		
+		// now show the URL sheet
+		[NSApp beginSheet:urlSheet
+		   modalForWindow:docWindow
+			modalDelegate:self
+		   didEndSelector:@selector(urlSheetDidEnd:returnCode:contextInfo:)
+			  contextInfo:[[NSNumber alloc] initWithBool:YES]];
+		
+	}else{
+		// we start with the pasteboard data, so we can directly show the main sheet 
+		
+		[NSApp beginSheet:[self window]
+		   modalForWindow:docWindow
+			modalDelegate:modalDelegate
+		   didEndSelector:didEndSelector
+			  contextInfo:contextInfo];
+	}
+}
+
 #pragma mark Actions
 - (IBAction)addCurrentItemAction:(id)sender{
     // make the tableview stop editing:
@@ -328,7 +366,7 @@
 	}
 	
 	[NSApp beginSheet:urlSheet
-       modalForWindow:sender?[self window]:[document windowForSheet]
+       modalForWindow:[self window]
         modalDelegate:self
        didEndSelector:@selector(urlSheetDidEnd:returnCode:contextInfo:)
           contextInfo:nil];
@@ -339,8 +377,35 @@
     [NSApp endSheet:urlSheet returnCode:[sender tag]];
 }
 
-- (void)urlSheetDidEnd:(NSOpenPanel *)sheet returnCode:(int)returnCode contextInfo:(void *)contextInfo{
-
+- (void)urlSheetDidEnd:(NSPanel *)sheet returnCode:(int)returnCode contextInfo:(void *)contextInfo{
+	// this variable is true when we called the URL sheet initially before showing the main window 
+	BOOL initialWebLoad = [[(NSNumber *)contextInfo autorelease] boolValue];
+	
+	if (initialWebLoad) {
+		// this is the initial web load, the main window is not yet there
+		
+		// we need to release these, as we had retained them
+		[theDocWindow autorelease];
+		[theModalDelegate autorelease];
+		
+		if (returnCode == NSOKButton) {
+			// show the main window and pass it the information initially given by the modalDelegate
+			
+			[NSApp beginSheet:[self window]
+			   modalForWindow:theDocWindow
+				modalDelegate:theModalDelegate
+			   didEndSelector:theDidEndSelector
+				  contextInfo:theContextInfo];
+			
+		} else {
+			// the user cancelled. As we don't end the main sheet we have to call the didEndSelector ourselves
+			
+			objc_msgSend(theModalDelegate, theDidEndSelector, sheet, 0, theContextInfo);
+			
+		}
+	}
+	
+	// now do the things we need to do always
     if(returnCode == NSOKButton){
 		// setup webview and load page
         

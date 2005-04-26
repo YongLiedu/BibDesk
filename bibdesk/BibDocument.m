@@ -3107,25 +3107,21 @@ This method always returns YES. Even if some or many operations fail.
 
 - (IBAction)importFromTextAction:(id)sender{
     BDSKTextImportController *tic = [(BDSKTextImportController *)[BDSKTextImportController alloc] initWithDocument:self fromWeb:NO];
-    NSWindow *win = [tic window];
 
-    [NSApp beginSheet:win
-       modalForWindow:documentWindow
-        modalDelegate:self
-       didEndSelector:@selector(importFromTextSheetDidEnd:returnCode:contextInfo:)
-          contextInfo:tic];
+    [tic beginSheetModalForWindow:documentWindow
+					modalDelegate:self
+				   didEndSelector:@selector(importFromTextSheetDidEnd:returnCode:contextInfo:)
+					  contextInfo:tic];
 
 }
 
 - (IBAction)importFromWebAction:(id)sender{
     BDSKTextImportController *tic = [(BDSKTextImportController *)[BDSKTextImportController alloc] initWithDocument:self fromWeb:YES];
-    NSWindow *win = [tic window];
 
-    [NSApp beginSheet:win
-       modalForWindow:documentWindow
-        modalDelegate:self
-       didEndSelector:@selector(importFromTextSheetDidEnd:returnCode:contextInfo:)
-          contextInfo:tic];
+    [tic beginSheetModalForWindow:documentWindow
+					modalDelegate:self
+				   didEndSelector:@selector(importFromTextSheetDidEnd:returnCode:contextInfo:)
+					  contextInfo:tic];
 
 }
 

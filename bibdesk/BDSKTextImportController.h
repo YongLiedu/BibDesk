@@ -42,6 +42,10 @@
 	NSString *downloadFileName;
     int receivedContentLength;
     int expectedContentLength;
+	NSWindow *theDocWindow;
+	id theModalDelegate;
+	SEL theDidEndSelector;
+	void *theContextInfo;
 }
 
 - (id)initWithDocument:(BibDocument *)doc fromWeb:(BOOL)showWebView;
@@ -69,8 +73,9 @@
 - (void)bookmarkPage:(id)sender;
 - (void)bookmarkLink:(id)sender;
 
+- (void)beginSheetModalForWindow:(NSWindow *)docWindow modalDelegate:(id)modalDelegate didEndSelector:(SEL)didEndSelector contextInfo:(void *)contextInfo;
 - (void)openPanelDidEnd:(NSOpenPanel *)sheet returnCode:(int)returnCode contextInfo:(void *)contextInfo;
-- (void)urlSheetDidEnd:(NSOpenPanel *)sheet returnCode:(int)returnCode contextInfo:(void *)contextInfo;
+- (void)urlSheetDidEnd:(NSPanel *)sheet returnCode:(int)returnCode contextInfo:(void *)contextInfo;
 - (void)addBookmarkSheetDidEnd:(NSOpenPanel *)sheet returnCode:(int)returnCode contextInfo:(void *)contextInfo;
 - (void)savePanelDidEnd:(NSSavePanel *)sheet returnCode:(int)returnCode contextInfo:(void *)contextInfo;
 - (void)saveDownloadPanelDidEnd:(NSSavePanel *)sheet returnCode:(int)returnCode contextInfo:(void *)contextInfo;
