@@ -1117,6 +1117,9 @@ setupParagraphStyle()
     NSMutableString *s = [[[NSMutableString alloc] init] autorelease];
     NSMutableArray *keys = [[pubFields allKeys] mutableCopy];
     [keys sortUsingSelector:@selector(caseInsensitiveCompare:)];
+    [keys removeObject:BDSKDateCreatedString];
+    [keys removeObject:BDSKDateModifiedString];
+    [keys removeObject:BDSKLocalUrlString];
 
     BibTypeManager *btm = [BibTypeManager sharedManager];
     
@@ -1149,7 +1152,8 @@ setupParagraphStyle()
             }
         }
         
-        [s appendFormat:@"%@  - %@\n", [btm RISTagForBibTeXFieldName:k], [v stringByRemovingTeX]]; // this won't help with math, but removing $^_ is probably not a good idea
+        if(![v isEqualToString:@""])
+            [s appendFormat:@"%@  - %@\n", [btm RISTagForBibTeXFieldName:k], [v stringByRemovingTeX]]; // this won't help with math, but removing $^_ is probably not a good idea
     }
     [s appendString:@"ER  - \n"];
     return s;
