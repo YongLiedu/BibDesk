@@ -7,17 +7,14 @@
 	objects = {
 		080E96DDFE201D6D7F000001 = {
 			children = (
-				3D44F5600812A91D003C67F0,
-				3D44F5610812A91D003C67F0,
-				F94EC0E608117BB6005EAFD9,
-				F94EC0E708117BB6005EAFD9,
-				27AFAF9A080D1E1B0096F5D2,
-				27AFAF9B080D1E1B0096F5D2,
 				27D4FA0307DE560A001CAB00,
 				3D6D747307EE1ECD00E8A7EF,
 				F9022FB707580B9400C3F701,
 				F918104307583A6E00CF822D,
 				F988709007580CB4001D4D49,
+				3D44F5610812A91D003C67F0,
+				F94EC0E708117BB6005EAFD9,
+				27AFAF9B080D1E1B0096F5D2,
 				F9A6742907D04E8000782ACD,
 				F94A94F3079AEE5800D13AB5,
 				F94A94E9079AEE5800D13AB5,
@@ -1336,12 +1333,6 @@
 			refType = 2;
 			sourceTree = SOURCE_ROOT;
 		};
-		27D4FB5507DE7A83001CAB00 = {
-			fileRef = 27D4FB5407DE7A83001CAB00;
-			isa = PBXBuildFile;
-			settings = {
-			};
-		};
 		27D4FB5607DE7A97001CAB00 = {
 			children = (
 				27D4FB5707DE7A97001CAB00,
@@ -1377,24 +1368,6 @@
 			refType = 4;
 			sourceTree = "<group>";
 		};
-		27D4FB5A07DE7A97001CAB00 = {
-			fileRef = 27D4FB5707DE7A97001CAB00;
-			isa = PBXBuildFile;
-			settings = {
-			};
-		};
-		27D4FB5B07DE7A97001CAB00 = {
-			fileRef = 27D4FB5807DE7A97001CAB00;
-			isa = PBXBuildFile;
-			settings = {
-			};
-		};
-		27D4FB5C07DE7A97001CAB00 = {
-			fileRef = 27D4FB5907DE7A97001CAB00;
-			isa = PBXBuildFile;
-			settings = {
-			};
-		};
 		27D4FC3307DE883B001CAB00 = {
 			fileEncoding = 4;
 			isa = PBXFileReference;
@@ -1428,7 +1401,7 @@
 			sourceTree = "<group>";
 		};
 		27E89E240805E9F500E4DA08 = {
-			fileEncoding = 30;
+			fileEncoding = 4;
 			isa = PBXFileReference;
 			languageSpecificationIdentifier = make;
 			lastKnownFileType = text;
@@ -1436,24 +1409,6 @@
 			path = "BibDesk Help/bibdesk.texi";
 			refType = 4;
 			sourceTree = "<group>";
-		};
-		27E89E250805E9F500E4DA08 = {
-			fileRef = 27E89E220805E9F500E4DA08;
-			isa = PBXBuildFile;
-			settings = {
-			};
-		};
-		27E89E260805E9F500E4DA08 = {
-			fileRef = 27E89E230805E9F500E4DA08;
-			isa = PBXBuildFile;
-			settings = {
-			};
-		};
-		27E89E270805E9F500E4DA08 = {
-			fileRef = 27E89E240805E9F500E4DA08;
-			isa = PBXBuildFile;
-			settings = {
-			};
 		};
 		27E89E2F0805EC0F00E4DA08 = {
 			buildActionMask = 12;
@@ -1764,12 +1719,6 @@
 		};
 		3D44F5630812A91D003C67F0 = {
 			fileRef = 3D44F5610812A91D003C67F0;
-			isa = PBXBuildFile;
-			settings = {
-			};
-		};
-		3D4AF511081658650024053E = {
-			fileRef = 27AF74EF08021E93006A6ADE;
 			isa = PBXBuildFile;
 			settings = {
 			};
@@ -2694,7 +2643,6 @@
 				27AFAF9D080D1E1B0096F5D2,
 				F94EC0E908117BB6005EAFD9,
 				3D44F5630812A91D003C67F0,
-				3D4AF511081658650024053E,
 			);
 			isa = PBXSourcesBuildPhase;
 			runOnlyForDeploymentPostprocessing = 0;
@@ -5545,6 +5493,9 @@
 		};
 		F918104307583A6E00CF822D = {
 			children = (
+				27AFAF9A080D1E1B0096F5D2,
+				F94EC0E608117BB6005EAFD9,
+				3D44F5600812A91D003C67F0,
 				F9A6742807D04E8000782ACD,
 				F94A94EE079AEE5800D13AB5,
 				F94A94E4079AEE5800D13AB5,
@@ -5736,13 +5687,6 @@
 		F91B5D1907658A5F0011ED22 = {
 			buildActionMask = 2147483647;
 			files = (
-				27D4FB5507DE7A83001CAB00,
-				27D4FB5A07DE7A97001CAB00,
-				27D4FB5B07DE7A97001CAB00,
-				27D4FB5C07DE7A97001CAB00,
-				27E89E250805E9F500E4DA08,
-				27E89E260805E9F500E4DA08,
-				27E89E270805E9F500E4DA08,
 			);
 			inputPaths = (
 				../bibdesk_vendorsrc/infinite_loop/ILCrashReporter.framework.tgz,
@@ -6049,7 +5993,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "## index online help\n##\nif [ ${BUILD_STYLE} = Development ]; then\necho \"Developers don't need no stinkin' help\"\nexit 0\nfi\nif [ -d /Developer/Applications/Utilities/Help\\ Indexer.app/ ]; then indexerName=\"Help Indexer\"\nelse indexerName=\"Apple Help Indexing Tool\"\nfi\necho \"using $indexerName\"\nosascript \\\n-e \"tell application \\\"$indexerName\\\"\" \\\n-e \"activate\" \\\n-e \"open POSIX file \\\"${TARGET_BUILD_DIR}/Bibdesk.app/Contents/Resources/English.lproj/BibDesk Help\\\"\" \\\n-e \"end tell\"";
+			shellScript = "## index online help\n##\nif [ ${BUILD_STYLE} = Development ]; then\necho \"Developers don't need no stinkin' help\"\nexit 0\nfi\nif [ -d /Developer/Applications/Utilities/Help\\ Indexer.app/ ]; then\nindexerName=\"Help Indexer\"\nelse\nindexerName=\"Apple Help Indexing Tool\"\nfi\necho \"Using $indexerName\"\nosascript \\\n-e \"tell application \\\"$indexerName\\\"\" \\\n-e \"activate\" \\\n-e \"open POSIX file \\\"${TARGET_BUILD_DIR}/Bibdesk.app/Contents/Resources/English.lproj/BibDesk Help\\\"\" \\\n-e \"end tell\"";
 		};
 		F988709007580CB4001D4D49 = {
 			children = (

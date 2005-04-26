@@ -1,7 +1,7 @@
-{\rtf1\mac\ansicpg10000\cocoartf823
+{\rtf1\mac\ansicpg10000\cocoartf102
 {\fonttbl\f0\fnil\fcharset77 GillSans;\f1\fnil\fcharset77 LucidaGrande;\f2\fnil\fcharset77 HelveticaNeue-Bold;
-\f3\fnil\fcharset77 HelveticaNeue-BoldItalic;\f4\fnil\fcharset77 Geneva;\f5\fnil\fcharset77 HelveticaNeue;
-\f6\fnil\fcharset77 HelveticaNeue-Italic;\f7\fnil\fcharset77 LucidaGrande-Bold;\f8\fnil\fcharset77 Verdana;
+\f3\fnil\fcharset77 LucidaGrande-Bold;\f4\fnil\fcharset77 HelveticaNeue-BoldItalic;\f5\fnil\fcharset77 Geneva;
+\f6\fnil\fcharset77 HelveticaNeue;\f7\fnil\fcharset77 HelveticaNeue-Italic;\f8\fnil\fcharset77 Verdana;
 \f9\fswiss\fcharset77 Helvetica;\f10\fswiss\fcharset77 Helvetica-Bold;\f11\fnil\fcharset80 AppleGothic;
 }
 {\colortbl;\red255\green255\blue255;\red255\green0\blue3;\red85\green85\blue85;}
@@ -17,30 +17,36 @@
 \
 \pard\tx1440\tx2880\tx4320\tx5760\tx7200\ql\qnatural
 
-\f1\b0\fs22 \cf0 // mention new input manager, rearrangement of prefs\
-// text import, see online help\
+\f3\fs22 \cf0 IMPORTANT
+\f1\b0 :  a new version of the autocompletion plugin is available, which fixes an issue for jurabib users in particular; use the Autocompletion (External) preferences to reinstall the plugin.\
+\
+Preferences have been rearranged and consolidated, but the online help screenshots do not reflect this yet!\
+\
+This version also has a new feature for adding references by selecting blocks of text from the clipboard or the web and adding them directly to BibDesk.  You can access the new feature from the Publication menu, but please check the online help for documentation of this feature (note the handy Help button on the sheet).
+\f2\b\fs28 \
 \pard\tx1440\tx2880\tx4320\tx5760\tx7200\ql\qnatural
 
-\f2\b\fs28 \cf0 \
-\pard\tx1440\tx2880\tx4320\tx5760\tx7200\ql\qnatural
-
-\f3\i\fs26 \cf0 \
+\f4\i\fs26 \cf0 \
 New Features\
 \pard\tx1440\tx2880\tx4320\tx5760\tx7200\ql\qnatural
 
 \f1\i0\b0\fs22 \cf0   \'a5  Last-selected column for sorting when a document is closed will be the default sort order for new/opened documents (bug #1178642)\
-\pard\tx560\tx1120\tx1680\tx2240\tx2800\tx3360\tx3920\tx4480\tx5040\tx5600\tx6160\tx6720\ql\qnatural\pardirnatural
-  \'a5  Annote and Abstract may now be saved at the end of entries (preference), which works around buffer limits in some versions of bibtex\
+\pard\tx560\tx1120\tx1680\tx2240\tx2800\tx3360\tx3920\tx4480\tx5040\tx5600\tx6160\tx6720\ql\qnatural
+\cf0   \'a5  Annote and Abstract may now be saved at the end of entries (preference), which works around buffer limits in some versions of bibtex\
   \'a5  Custom cite key drawer is now editable directly, rather than from preferences\
-// fixme...embellish this\
-  \'a5  Text Import feature\
+  \'a5  Text import feature added, which allows adding text from the clipboard or a web page directly to a reference\
   \'a5  Missing files are now shown with a question mark icon in the main pubs list\
   \'a5  Can save/export as RIS\
   \'a5  Encoding is now settable from Save As... dialogs\
-  \'a5  Fields with alphanumeric values are now sorted correctly
-\f4 \cf0 \
+  \'a5  Fields with alphanumeric values are now sorted correctly\
+  \'a5  Added a "Container" column for the main pubs list that shows the title of the work that a reference is a part of (e.g. Journal for articles, Booktitle for inproceedings)\
+  \'a5  Added options to Copy and Export as minimal BibTeX, so you can access the pubs without BibDesk's fields (
+\f5 Date-Created Date-Modified, Local-Url, Url)
+\f1 \
+  \'a5  Can now edit fields list in Defaults pref pane directly
+\f5 \
   
-\f3\i\b\fs26 \
+\f4\i\b\fs26 \
 \pard\tx1440\tx2880\tx4320\tx5760\tx7200\ql\qnatural
 \cf0 Bugfixes\
 \pard\tx1440\tx2880\tx4320\tx5760\tx7200\ql\qnatural
@@ -58,7 +64,7 @@ New Features\
   \'a5  Changes to BibItems are only observed by the document that contains them, instead of all open documents\
   \'a5  Field for default cite key in prefs actually works now\
   \'a5  Jurabib works again with autocompletion input manager\
-\cf0   \'a5  Dragging from the cite key drawer always gives a cite key, regardless of your prefs for dragging/copying\
+  \'a5  Dragging from the cite key drawer always gives a cite key, regardless of your prefs for dragging/copying\
   \'a5  Fix bug #1183091, crash on second reordering of fields in the types editor\
   \'a5  Whitespace is no longer collapsed in Abstract and Annote for preview pane below the pub list, so people who create lists with returns and tabs will see them now\
   \'a5  Matthew Cook's BDOrganizedLock is now used for locking in the LaTeX preview, which should eliminate some (hopefully all) of the thread-safety problems there\
@@ -76,13 +82,18 @@ New Features\
   \'a5  Arbitrary accented characters with \\i and \\j are now converted both ways properly\
   \'a5  LaTeX preview should display the currently selected item as soon as it becomes visible, so you don't have to deselect/reselect an item to make it work\
   \'a5  It's now possible to enter &$^ in cite keys, but we warn you that this is a bad idea\
-  \'a5  Use Chapter instead of Title for inbook for format specifiers %t and %T.
+  \'a5  Use Chapter instead of Title for inbook for format specifiers %t and %T\
+  \'a5  Fixed crasher that could occur when browsing the web in BibEditor (bug #1151065)
+\f2\b\fs28 \
+
+\f1\b0\fs22   \'a5  Paste/Drag errors are properly removed when their document closes (bug #944817)\
+\pard\tx1440\tx2880\tx4320\tx5760\tx7200\ql\qnatural
+
 \f2\b\fs28 \cf0 \
-\
 Changes since 0.99.1\
 \pard\tx1440\tx2880\tx4320\tx5760\tx7200\ql\qnatural
 
-\f3\i\fs26 \cf0 \
+\f4\i\fs26 \cf0 \
 New Features\
 \pard\tx1440\tx2880\tx4320\tx5760\tx7200\ql\qnatural
 
@@ -91,7 +102,7 @@ New Features\
   \'a5  Multiple selection is now allowed in the type editing list (enables dragging/removing simultaneously)\
 \pard\tx1440\tx2880\tx4320\tx5760\tx7200\ql\qnatural
 
-\f3\i\b\fs26 \cf0 \
+\f4\i\b\fs26 \cf0 \
 Bugfixes\
 \pard\tx1440\tx2880\tx4320\tx5760\tx7200\ql\qnatural
 
@@ -106,7 +117,7 @@ Changes since 0.99\
 \f1\b0\fs22 \
 \pard\tx1440\tx2880\tx4320\tx5760\tx7200\ql\qnatural
 
-\f3\i\b\fs26 \cf0 Important:
+\f4\i\b\fs26 \cf0 Important:
 \f1\i0\b0\fs22 \
 - The input manager for autocompletion has been updated, and a reinstallation is recommended.  To update your installation, go to BibDesk's Autocompletion preferences, and click the External tab; the Reinstall button will update the plugin.\
 \
@@ -115,7 +126,7 @@ Changes since 0.99\
 - You can now add character conversion definitions, so people who (for instance) use guillemets and german.sty can now define the conversion as they see fit.  For "Two-way conversions", the Unicode character must be represented by a TeX command sequence of the form \{\\xx\}, where xx may be any character or characters.  The "One-way conversions" do not have this limitation on the TeX command.  Online help is not yet available for this feature; if you have problems, remove the file ~/Library/Application Support/BibDesk/CharacterConversion.plist and relaunch BibDesk.\
 \
 
-\f3\i\b\fs26 New Features\
+\f4\i\b\fs26 New Features\
 \pard\tx1440\tx2880\tx4320\tx5760\tx7200\ql\qnatural
 
 \f1\i0\b0\fs22 \cf0   \'a5  BibEditor now has a customizable toolbar\
@@ -127,7 +138,7 @@ Changes since 0.99\
   \
 \pard\tx1440\tx2880\tx4320\tx5760\tx7200\ql\qnatural
 
-\f3\i\b\fs26 \cf0 Bugfixes\
+\f4\i\b\fs26 \cf0 Bugfixes\
 \pard\tx1440\tx2880\tx4320\tx5760\tx7200\ql\qnatural
 
 \f1\i0\b0\fs22 \cf0   \'a5  LaTeX previewing didn't work properly if the entry contained macros (bug #11755031)\
@@ -157,17 +168,17 @@ Changes since 0.99\
 
 \f2\b\fs28 \cf0 \
 Changes since 0.99.a1 
-\f5\b0\fs24 (
-\f6\i see changes since 0.98.1 if you didn't use 0.99a1
-\f5\i0 )
+\f6\b0\fs24 (
+\f7\i see changes since 0.98.1 if you didn't use 0.99a1
+\f6\i0 )
 \f2\b\fs28 \
 \pard\tx1440\tx2880\tx4320\tx5760\tx7200\ql\qnatural
 
-\f7\fs22 \cf0 \
+\f3\fs22 \cf0 \
 Parser notes
 \f1\b0 :\
 -  The "Unicode" parser has been removed, as we believe that libbtparse is now able to read arbitrary encodings.  If you experience a problem, please let us know immediately.
-\f3\i\b\fs26 \
+\f4\i\b\fs26 \
 \
 New Features\
 \pard\tx1440\tx2880\tx4320\tx5760\tx7200\ql\qnatural
@@ -193,7 +204,7 @@ New Features\
 \
 \pard\tx1440\tx2880\tx4320\tx5760\tx7200\ql\qnatural
 
-\f3\i\b\fs26 \cf0 Bugfixes\
+\f4\i\b\fs26 \cf0 Bugfixes\
 \pard\tx1440\tx2880\tx4320\tx5760\tx7200\ql\qnatural
 
 \f1\i0\b0\fs22 \cf0   \'a5  Fixed display of "2nd Author" and other columns\
@@ -231,7 +242,7 @@ New Features\
 \f2\b\fs28 \cf0 Changes since 0.98.1\
 \pard\tx1440\tx2880\tx4320\tx5760\tx7200\ql\qnatural
 
-\f3\i\fs26 \cf0 \
+\f4\i\fs26 \cf0 \
 New Features\
 \pard\tx1440\tx2880\tx4320\tx5760\tx7200\ql\qnatural
 
@@ -247,7 +258,7 @@ New Features\
 \f2\b\fs28 \cf0 \
 \pard\tx1440\tx2880\tx4320\tx5760\tx7200\ql\qnatural
 
-\f3\i\fs26 \cf0 Bugfixes\
+\f4\i\fs26 \cf0 Bugfixes\
 \pard\tx1440\tx2880\tx4320\tx5760\tx7200\ql\qnatural
 
 \f1\i0\b0\fs22 \cf0   \'a5  Cleaned up the formatted preview display in the main publications list; braces are no longer displayed, whitespace is collapsed, and Local-Urls are no longer displayed as file URLs.  It should also be faster to display.\
@@ -266,7 +277,7 @@ New Features\
 Changes since 0.98\
 \pard\tx1440\tx2880\tx4320\tx5760\tx7200\ql\qnatural
 
-\f3\i\fs26 \cf0 \
+\f4\i\fs26 \cf0 \
 New Features\
 \pard\tx1440\tx2880\tx4320\tx5760\tx7200\ql\qnatural
 
@@ -277,7 +288,7 @@ New Features\
 \f2\b\fs28 \cf0 \
 \pard\tx1440\tx2880\tx4320\tx5760\tx7200\ql\qnatural
 
-\f3\i\fs26 \cf0 Bugfixes\
+\f4\i\fs26 \cf0 Bugfixes\
 \pard\tx1440\tx2880\tx4320\tx5760\tx7200\ql\qnatural
 
 \f1\i0\b0\fs22 \cf0   \'a5  Fix for unique characters in Local-Url format string\
@@ -294,7 +305,7 @@ New Features\
 Changes since 0.97.9\
 \pard\tx1440\tx2880\tx4320\tx5760\tx7200\ql\qnatural
 
-\f3\i\fs26 \cf0 \
+\f4\i\fs26 \cf0 \
 New Features\
 \pard\tx1440\tx2880\tx4320\tx5760\tx7200\ql\qnatural
 
@@ -305,7 +316,7 @@ New Features\
 \
 \pard\tx1440\tx2880\tx4320\tx5760\tx7200\ql\qnatural
 
-\f3\i\fs26 \cf0 Bugfixes\
+\f4\i\fs26 \cf0 Bugfixes\
 \pard\tx1440\tx2880\tx4320\tx5760\tx7200\ql\qnatural
 
 \f1\i0\b0\fs22 \cf0   \'a5  AppleScript should work again\
@@ -320,7 +331,7 @@ Changes since 0.97.8\
 \
 \pard\tx1440\tx2880\tx4320\tx5760\tx7200\ql\qnatural
 
-\f3\i\fs26 \cf0 New Features\
+\f4\i\fs26 \cf0 New Features\
 \pard\tx1440\tx2880\tx4320\tx5760\tx7200\ql\qnatural
 
 \f1\i0\b0\fs22 \cf0   \'a5  Allow drag-copying PDF (or other attached file) from the main publication list (drop it on Mail to send as an attachment, in Finder to create a copy)\
@@ -334,7 +345,7 @@ Changes since 0.97.8\
 \fs24 \
 \pard\tx1440\tx2880\tx4320\tx5760\tx7200\ql\qnatural
 
-\f3\i\b\fs26 \cf0 Bugfixes\
+\f4\i\b\fs26 \cf0 Bugfixes\
 \pard\tx1440\tx2880\tx4320\tx5760\tx7200\ql\qnatural
 
 \f1\i0\b0\fs22 \cf0   \'a5  Enable spacebar scrolling in the preview pane below the main table\
@@ -366,7 +377,7 @@ Changes since 0.97.8\
 \
 \pard\tx1440\tx2880\tx4320\tx5760\tx7200\ql\qnatural
 
-\f3\i\fs26 \cf0 New Features
+\f4\i\fs26 \cf0 New Features
 \f2\i0\fs28 \
 \pard\tx1440\tx2880\tx4320\tx5760\tx7200\ql\qnatural
 
@@ -374,7 +385,7 @@ Changes since 0.97.8\
 \
 \pard\tx1440\tx2880\tx4320\tx5760\tx7200\ql\qnatural
 
-\f3\i\b\fs26 \cf0 Bugfixes\
+\f4\i\b\fs26 \cf0 Bugfixes\
 \pard\tx1440\tx2880\tx4320\tx5760\tx7200\ql\qnatural
 
 \f1\i0\b0\fs24 \cf0   \'a5  Force ASCII encoding by default if libbtparse is used (bug ##1110754), which should (help) keep users from corrupting their files.  Note that the File->Open menu item can still be used to open with different encodings, no matter which parser is set in the Files preference pane.\
@@ -388,12 +399,12 @@ Changes since 0.97.8\
 Changes since 0.97.6\
 \
 Important note:  
-\f6\i\b0\fs24 if you used the %\{FieldName\} cite key format in previous versions, you will need to modify your preferences to use the new %f\{FieldName\} format.  See the online help for further details.
+\f7\i\b0\fs24 if you used the %\{FieldName\} cite key format in previous versions, you will need to modify your preferences to use the new %f\{FieldName\} format.  See the online help for further details.
 \f2\i0\b\fs28 \
 \
 \pard\tx1440\tx2880\tx4320\tx5760\tx7200\ql\qnatural
 
-\f3\i\fs26 \cf0 New Features
+\f4\i\fs26 \cf0 New Features
 \f2\i0\fs28 \
 \pard\tx1440\tx2880\tx4320\tx5760\tx7200\ql\qnatural
 
@@ -407,7 +418,7 @@ Important note:
 \cf0 \
 \pard\tx1440\tx2880\tx4320\tx5760\tx7200\ql\qnatural
 
-\f3\i\b\fs26 \cf0 Bugfixes\
+\f4\i\b\fs26 \cf0 Bugfixes\
 \pard\tx1440\tx2880\tx4320\tx5760\tx7200\ql\qnatural
 
 \f1\i0\b0\fs24 \cf0   \'a5  Can once again save newly created bib files (bug #1108583)\
@@ -428,7 +439,7 @@ Important note:
 Changes since 0.97.5\
 \pard\tx1440\tx2880\tx4320\tx5760\tx7200\ql\qnatural
 
-\f3\i\fs26 \cf0 Bugfixes\
+\f4\i\fs26 \cf0 Bugfixes\
 \pard\tx1440\tx2880\tx4320\tx5760\tx7200\ql\qnatural
 
 \f1\i0\b0\fs24 \cf0   \'a5  Should no longer crash after quitting the app and choosing to save changes\
@@ -439,7 +450,7 @@ Changes since 0.97.5\
 Changes since 0.97.2\
 \pard\tx1440\tx2880\tx4320\tx5760\tx7200\ql\qnatural
 
-\f3\i\fs26 \cf0 New Features\
+\f4\i\fs26 \cf0 New Features\
 \pard\tx1440\tx2880\tx4320\tx5760\tx7200\ql\qnatural
 
 \f1\i0\b0\fs24 \cf0   \'a5  Added an acronym character specifier for citekey generation\
@@ -450,7 +461,7 @@ Changes since 0.97.2\
   \
 \pard\tx1440\tx2880\tx4320\tx5760\tx7200\ql\qnatural
 
-\f3\i\b\fs26 \cf0 Bugfixes\
+\f4\i\b\fs26 \cf0 Bugfixes\
 \pard\tx1440\tx2880\tx4320\tx5760\tx7200\ql\qnatural
 
 \f1\i0\b0\fs24 \cf0   \'a5  Crashing bug that occurred when adding an application to the autocompletion preferences list\
@@ -471,12 +482,12 @@ Changes since 0.97.2\
 Changes since 0.97.1\
 \
 Important note:  
-\f6\i\b0\fs24 if you install the latest autocompletion plugin (recommended), you will need to re-add your applications in the Autocompletion preferences, due to a change in the way this information is stored.  We apologize for the inconvenience.
+\f7\i\b0\fs24 if you install the latest autocompletion plugin (recommended), you will need to re-add your applications in the Autocompletion preferences, due to a change in the way this information is stored.  We apologize for the inconvenience.
 \f2\i0\b\fs28 \
 \
 \pard\tx1440\tx2880\tx4320\tx5760\tx7200\ql\qnatural
 
-\f3\i\fs26 \cf0 New Features\
+\f4\i\fs26 \cf0 New Features\
 \pard\tx1440\tx2880\tx4320\tx5760\tx7200\ql\qnatural
 
 \f1\i0\b0\fs24 \cf0   \'a5  Zoom added to drawer and TeX previews\
@@ -489,7 +500,7 @@ Important note:
 \cf0 \
 \pard\tx1440\tx2880\tx4320\tx5760\tx7200\ql\qnatural
 
-\f3\i\fs26 \cf0 Bugfixes\
+\f4\i\fs26 \cf0 Bugfixes\
 \pard\tx1440\tx2880\tx4320\tx5760\tx7200\ql\qnatural
 
 \f1\i0\b0\fs24 \cf0   \'a5  Fixed a crashing bug that occurred when closing a document\
@@ -513,7 +524,7 @@ bibdocument\
 Changes since 0.97\
 \pard\tx1440\tx2880\tx4320\tx5760\tx7200\ql\qnatural
 
-\f3\i\fs26 \cf0 Bugfixes\
+\f4\i\fs26 \cf0 Bugfixes\
 \pard\tx1440\tx2880\tx4320\tx5760\tx7200\ql\qnatural
 
 \f1\i0\b0\fs24 \cf0   \'a5  Fixed the top reported crasher (canceling a file load with invalid characters)\
@@ -534,14 +545,14 @@ Changes since 0.97\
   \'a5  Make shortcut Cmd-K for Generate Cite Key\
 \pard\tx560\tx1120\tx1680\tx2240\tx2800\tx3360\tx3920\tx4480\tx5040\tx5600\tx6160\tx6720\ql\qnatural
 \cf0   \'a5  Change casing for shortcut of cite key completion in Services to get Shift-Cmd-K
-\f4\fs22 \
+\f5\fs22 \
 \pard\tx1440\tx2880\tx4320\tx5760\tx7200\ql\qnatural
 
 \f2\b\fs28 \cf0 \
 Changes since 0.96.2\
 \pard\tx1440\tx2880\tx4320\tx5760\tx7200\ql\qnatural
 
-\f3\i\fs26 \cf0 New Features
+\f4\i\fs26 \cf0 New Features
 \f1\i0\b0\fs24 \
   \'a5  Automatic generation of custom citekey formats; see the preferences and online help for details.  Many thanks to Christiaan Hofman for this feature!  BibDesk can now enter a citekey automatically when it has enough info, or you can use the "Generate" button to enter a key.  RIS imports now use this automatically.\
   \'a5  Support for converting arbitrary Unicode accented characters into TeX (the character conversion code was rewritten to be faster, as well).\
@@ -552,7 +563,7 @@ Changes since 0.96.2\
   \'a5  On OS X 10.3 and greater, users can reinstall the autocompletion plugin from the autocompletion preferences to have "\\ref\{" autocompletion as well as "\\cite" autocompletion (search for autocompletion in the online help to see details).\
   \'a5  Added a Scripts menu for user-supplied AppleScripts\
 
-\f3\i\b\fs26 Bugfixes
+\f4\i\b\fs26 Bugfixes
 \f2\i0\fs28 \
 \pard\tx560\tx1120\tx1680\tx2240\tx2800\tx3360\tx3920\tx4480\tx5040\tx5600\tx6160\tx6720\ql\qnatural
 
@@ -603,7 +614,7 @@ Changes since 0.96.2\
 \f2\b\fs28 \
 \pard\tx1440\tx2880\tx4320\tx5760\tx7200\ql\qnatural
 
-\f5\b0\fs36 \cf0 \
+\f6\b0\fs36 \cf0 \
 \pard\tx1440\tx2880\tx4320\tx5760\tx7200\ql\qnatural
 
 \f2\b\fs28 \cf0 Changes since 0.96.1\
@@ -634,7 +645,7 @@ Changes since 0.96.2\
 Changes since 0.96\
 \pard\tx1440\tx2880\tx4320\tx5760\tx7200\ql\qnatural
 
-\f3\i\fs26 \cf0 Bugfixes\
+\f4\i\fs26 \cf0 Bugfixes\
 \pard\tx1440\tx2880\tx4320\tx5760\tx7200\ql\qnatural
 
 \f1\i0\b0\fs24 \cf0   \'a5  Remove conversion of ~ to \{\\~\}, as it caused manually entering TeX code for tilde-accented characters to fail (#1030651)\
@@ -649,7 +660,7 @@ Changes since 0.96\
 Changes since 0.95\
 \pard\tx1440\tx2880\tx4320\tx5760\tx7200\ql\qnatural
 
-\f3\i\fs26 \cf0 Features
+\f4\i\fs26 \cf0 Features
 \f1\i0\b0\fs24 \
 \pard\tx1440\tx2880\tx4320\tx5760\tx7200\li440\fi-440\ql\qnatural
 \cf0   \'a5  AppleScript support; open the dictionary in ScriptEditor, or {\field{\*\fldinst{HYPERLINK "http://bibdesk.sourceforge.net/wiki/index.php/AppleScript"}}{\fldrslt visit the wiki}} for details (thanks to Sven-S. Porst!)\
@@ -665,7 +676,7 @@ Changes since 0.95\
 \f2\b\fs28 \cf0 \
 \pard\tx1440\tx2880\tx4320\tx5760\tx7200\ql\qnatural
 
-\f3\i\fs26 \cf0 Bugfixes (partial list)\
+\f4\i\fs26 \cf0 Bugfixes (partial list)\
 \pard\tx1440\tx2880\tx4320\tx5760\tx7200\li440\fi-440\ql\qnatural
 
 \f1\i0\b0\fs24 \cf0   \'a5  Fix URL/LaTeX bug introduced in 0.95\
@@ -683,7 +694,7 @@ Changes since 0.95\
 \cf0 Changes since 0.94\
 \pard\tx1440\tx2880\tx4320\tx5760\tx7200\ql\qnatural
 
-\f3\i\fs26 \cf0 Features
+\f4\i\fs26 \cf0 Features
 \f1\i0\b0\fs24 \
 \pard\tx1440\tx2880\tx4320\tx5760\tx7200\li440\fi-440\ql\qnatural
 \cf0   \'a5  AutoFile - use this to automatically keep your PDF files organized; check out the Preference Pane to set it up.\
@@ -695,7 +706,7 @@ Changes since 0.95\
 \
 \pard\tx1440\tx2880\tx4320\tx5760\tx7200\ql\qnatural
 
-\f3\i\b\fs26 \cf0 Bugfixes
+\f4\i\b\fs26 \cf0 Bugfixes
 \f1\i0\b0\fs24 \
   \'a5  Character Conversion\
 \pard\tx1440\tx2880\tx4320\tx5760\tx7200\li600\fi-600\ql\qnatural
