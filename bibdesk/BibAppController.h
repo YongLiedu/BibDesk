@@ -173,7 +173,6 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 - (void)updateErrorPanelUI;
 - (IBAction)gotoError:(id)sender;
 - (void)gotoErrorObj:(id)errObj;
-- (void)gotoLine:(int)lineNum;
 - (void)openEditWindowWithFile:(NSString *)fileName;
 - (void)openEditWindowForDocument:(NSDocument *)doc;
 

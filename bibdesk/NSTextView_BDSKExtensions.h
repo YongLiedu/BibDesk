@@ -18,5 +18,5 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 
 
 @interface NSTextView (BDSKExtensions)
-- (void)selectLine:(int)line;
+- (void)selectLineNumber:(int)line;
 @end

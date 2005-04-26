@@ -755,32 +755,8 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
     [self openEditWindowWithFile:fileName];
     
     if ([dfm fileExistsAtPath:fileName]) {
-        [self gotoLine:[lineNumber intValue]];
+        [sourceEditTextView selectLineNumber:[lineNumber intValue]];
     }
-}
-
-- (void)gotoLine:(int)lineNum{
-	NSString *s = [sourceEditTextView string];
-	NSRange lineRange = NSMakeRange(0,0);
-	NSRange searchRange = NSMakeRange(0,[s length]);
-	int currLine;
-	NSCharacterSet* newlineSet = [NSCharacterSet characterSetWithCharactersInString: @"\n\r"];
-	
-	for (currLine = 0; currLine < lineNum; currLine++) {
-		lineRange.location = searchRange.location;
-		searchRange = [s rangeOfCharacterFromSet:newlineSet options:NSLiteralSearch range:searchRange];
-		if (searchRange.location == NSNotFound) {
-			// we are at the end, select the last line
-			lineRange.length = [s length] - lineRange.location;
-			break;
-		}
-		lineRange.length = searchRange.location - lineRange.location;
-		searchRange.location = NSMaxRange(searchRange);
-		searchRange.length = [s length] - searchRange.location;
-	}
-	
-	[sourceEditTextView scrollRangeToVisible:lineRange];
-	[sourceEditTextView setSelectedRange:lineRange];
 }
 
 - (void)openEditWindowWithFile:(NSString *)fileName{
