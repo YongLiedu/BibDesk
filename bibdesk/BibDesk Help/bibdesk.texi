@@ -407,30 +407,6 @@ characters as equivalent, and is case-insensitive
 @chapter Managing References
 
 
-The references are presented in a table with a detail pane on the
-bottom of the window. You can sort the table by column by clicking on
-the name of each column, in the header of the table.
-
-@image{gfx/tableView}
-
-@cindex table, customizing
-@cindex customizing
-@cindex displaying custom fields
-@cindex table columns
-
-@heading Customizing the table
-
-You can control the order of the columns by moving them directly.
-
-To add a field that isn't displayed, use the column management
-menu. There are three ways to access this menu; In the menu bar under
-``View->Columns'', by Control-clicking on a column name, or by
-clicking the small button at the top right of the table.
-
-It has a menu of fields you can add, or you can choose to add any
-field that isn't listed. You can add a column for any field you like,
-even if that field doesn't exist in any of the publications listed.
-
 @heading Topics
 
 @menu
@@ -515,7 +491,7 @@ the field you want the selected text to fill and it will be added for
 you. You can also use the key shortcuts @cmd{}0 through @cmd{}9 to
 copy the selected text over to the corresponding field.
 
-@note Double-clicking to transfer the data does not work for the web
+@c note: Double-clicking to transfer the data does not work for the web
 page view yet.
 
 
@@ -643,13 +619,31 @@ delete the reference.
 @node Browsing References
 @section Browsing References
 
-The references are presented in a table, similar to this:
+
+The references are presented in a table with a detail pane on the
+bottom of the window. You can sort the table by column by clicking on
+the name of each column, in the header of the table.
 
 @image{gfx/tableView}
 
-Columns can be added to the table using the View -> Columns menu.  You 
-can select from the drop down menu or enter an arbitrary field which will
-be shown if any of your records have that field.
+@cindex table, customizing
+@cindex customizing
+@cindex displaying custom fields
+@cindex table columns
+
+@heading Customizing the table
+
+You can control the order of the columns by moving them directly.
+
+To add a field that isn't displayed, use the column management
+menu. There are three ways to access this menu; In the menu bar under
+``View->Columns'', by Control-clicking on a column name, or by
+clicking the small button at the top right of the table.
+
+It has a menu of fields you can add, or you can choose to add any
+field that isn't listed by typing in the box. You can add a column for
+any field you like, even if that field doesn't exist in any of the
+publications listed.
 
 The Columns almost always simply display the content of the relevant field.
 There are a few exceptions where Bibdesk tries to `do the right thing' when
@@ -1274,7 +1268,7 @@ The format is used for autogeneration of certain values, such as the cite key an
 <span class="spec">\spec\{</span><i>\arg\</i><span class="spec">}</span>
 @end html
 @ifnothtml
-@b{\spec\\{}@i{\arg\}@b{\}}
+@b{\spec\@{}@i{\arg\}@b{@}}
 @end ifnothtml
 @end macro
 
@@ -1283,7 +1277,7 @@ The format is used for autogeneration of certain values, such as the cite key an
 <span class="spec">\spec\{</span><i>\arg\</i><span class="spec">}</span><span class="param">\param\</span>
 @end html
 @ifnothtml
-@b{\spec\\{}@i{\arg\}@b{\}}@b{\param\}
+@b{\spec\@{}@i{\arg\}@b{@}}@b{\param\}
 @end ifnothtml
 @end macro
 
