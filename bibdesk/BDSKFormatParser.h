@@ -67,13 +67,24 @@
 /*!
  @method stringBySanitizingString:forField:inFieldType:
  @abstract Sanitize a string to use in a generated value for a field and type
- @discussion Creates a string containing only a strict set of characters, by converting some characters and removing others. 
+ @discussion Creates a string containing only a strictly valid set of characters, by converting some characters and removing others. This uses invalidCharactersForField:inFileType:. It is used for the validation of the format string.  
  @param string The unsanitized string
  @param fieldName The name of the field (e.g. "Author")
  @param type The reference type (e.g. BibTeX, RIS)
  @result The sanitized string
 */
 - (NSString *)stringBySanitizingString:(NSString *)string forField:(NSString *)fieldName inFileType:(NSString *)type;
+
+/*!
+ @method stringByStrictlySanitizingString:forField:inFieldType:
+ @abstract Sanitize a string to use in a generated value for a field and type
+ @discussion Creates a string containing only a valid set of characters, by converting some characters and removing others. This uses strictInvalidCharactersForField:inFileType:. It is used for the parsing of the format string. 
+ @param string The unsanitized string
+ @param fieldName The name of the field (e.g. "Author")
+ @param type The reference type (e.g. BibTeX, RIS)
+ @result The sanitized string
+*/
+- (NSString *)stringByStrictlySanitizingString:(NSString *)string forField:(NSString *)fieldName inFileType:(NSString *)type;
 
 /*!
  @method stringBySanitizedCiteKeyString
