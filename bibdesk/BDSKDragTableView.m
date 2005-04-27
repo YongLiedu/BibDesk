@@ -262,9 +262,12 @@ static NSColor *sStripeColor = nil;
 	NSPoint pt=[self convertPoint:[theEvent locationInWindow] fromView:nil];
 	int column=[self columnAtPoint:pt];
 	int row=0;
-	
+    
 	if ([theDelegate respondsToSelector:@selector(menuForTableColumn:row:)]) {
-		return [theDelegate menuForTableColumn:[[myTV tableColumns] objectAtIndex:column] row:row];
+        if(column == -1)
+            return [theDelegate menuForTableColumn:nil row:row];
+        else
+            return [theDelegate menuForTableColumn:[[myTV tableColumns] objectAtIndex:column] row:row];
 	}
 	return nil;
 }
