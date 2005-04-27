@@ -400,7 +400,13 @@
 		} else {
 			// the user cancelled. As we don't end the main sheet we have to call the didEndSelector ourselves
 			
-			objc_msgSend(theModalDelegate, theDidEndSelector, sheet, 0, theContextInfo);
+			NSMethodSignature *signature = [theModalDelegate methodSignatureForSelector:theDidEndSelector];
+			NSInvocation *invocation = [NSInvocation invocationWithMethodSignature:signature];
+			[invocation setSelector:theDidEndSelector];
+			[invocation setArgument:&sheet atIndex:2];
+			[invocation setArgument:&returnCode atIndex:3];
+			[invocation setArgument:&theContextInfo atIndex:4];
+			[invocation invokeWithTarget:theModalDelegate];
 			
 		}
 	}
