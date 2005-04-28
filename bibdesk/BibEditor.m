@@ -340,8 +340,13 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 
 - (IBAction)saveDocument:(id)sender{
     // see controlTextDidBeginEditing and controlTextDidEndEditing for currentControl, which may be a textfield or form
-    // if currentControl is nil, the first responder is (possibly) one of the text views, so we'll give them focus after a save
+    // if currentControl is nil, the first responder is (possibly) one of the text views, so we'll give it focus after a save
     NSResponder *fr = (currentControl == nil) ? [[self window] firstResponder] : currentControl;
+
+    // this case occurs if a form or text field cell is selected, but nothing has been entered yet
+    // we lose the selection, but at least the window doesn't lose first responder (which disconnects cmd-w)
+    if(currentControl == nil && fr == [[self window] fieldEditor:YES forObject:bibFields])
+        fr = [self window];
 
     // a safety call to be sure that the current field's changes are saved :...
     [self finalizeChanges];
