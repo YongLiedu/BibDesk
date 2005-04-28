@@ -2600,15 +2600,23 @@ This method always returns YES. Even if some or many operations fail.
     [self displayPreviewForItems:[self selectedPubEnumerator]];
     // (don't just pass it 'e' - it needs its own enum.)
     if([[OFPreferenceWrapper sharedPreferenceWrapper] integerForKey:BDSKUsesTeXKey] == NSOnState){
-        NSNumber *i;
         NSMutableString *bibString = [NSMutableString string];
-        NSEnumerator *e = [self selectedPubEnumerator];
+
         // in case there are @preambles in it
         [bibString appendString:frontMatter];
         [bibString appendString:@"\n"];
         
+        // passing the expanded bibtex string causes problems with accented months, so we'll let BibTeX expand things
+        NSArray *macros = [macroDefinitions allKeys];
+        foreach(macro, macros){
+            [bibString appendFormat:@"@STRING{%@ = \"%@\"}\n",macro,[macroDefinitions objectForKey:macro]];
+        }
+        
+        NSNumber *i;
+        NSEnumerator *e = [self selectedPubEnumerator];
+        
         while(i = [e nextObject]){
-            [bibString appendString:[[shownPublications objectAtIndex:[i intValue]] bibTeXStringByExpandingMacros]];
+            [bibString appendString:[[shownPublications objectAtIndex:[i intValue]] bibTeXString]];
         }// while i is num of selected row                  
         [NSThread detachNewThreadSelector:@selector(PDFFromString:)
                                  toTarget:PDFpreviewer
