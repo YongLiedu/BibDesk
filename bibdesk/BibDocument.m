@@ -1527,6 +1527,13 @@ stringByAppendingPathComponent:@"BibDesk"]; */
 
 - (NSArray *)publicationsWithSubstring:(NSString *)substring inField:(NSString *)field forArray:(NSArray *)arrayToSearch{
     
+    unsigned searchMask = NSCaseInsensitiveSearch;
+    if([substring rangeOfCharacterFromSet:[NSCharacterSet uppercaseLetterCharacterSet]].location != NSNotFound)
+        searchMask = 0;
+    BOOL doLossySearch = YES;
+    if(![substring canBeConvertedToEncoding:NSASCIIStringEncoding])
+        doLossySearch = NO;
+    
     NSString *selectorString;
     BOOL isGeneric = NO;
     
@@ -1597,7 +1604,6 @@ stringByAppendingPathComponent:@"BibDesk"]; */
     if(isGeneric){ // use the -[BibItem valueOfField:] method to get the substring we want to search in, if it's not a "standard" one
         NSString *value = nil;
         while(componentSubstring = [andEnum nextObject]){ // strip the accents from the search string, and from the string we get from BibItem
-            componentSubstring = [NSString lossyASCIIStringWithString:componentSubstring];
             
             pubEnum = [arrayToSearch objectEnumerator];
             while(pub = [pubEnum nextObject]){
@@ -1605,9 +1611,11 @@ stringByAppendingPathComponent:@"BibDesk"]; */
                 if(!value){
                     r.location = NSNotFound;
                 } else {
-                    value = [NSString lossyASCIIStringWithString:[value stringByRemovingCurlyBraces]];
+                    value = [value stringByRemovingCurlyBraces];
+                    if(doLossySearch)
+                        value = [NSString lossyASCIIStringWithString:value];
                     r = [value rangeOfString:componentSubstring
-                                     options:NSCaseInsensitiveSearch];
+                                     options:searchMask];
                 }
                 if(r.location != NSNotFound){
                     // NSLog(@"Found %@ in %@", substring, [pub citeKey]);
@@ -1619,14 +1627,15 @@ stringByAppendingPathComponent:@"BibDesk"]; */
         }
     } else { // if it was a substring that has an accessor in BibItem, use that directly
         while(componentSubstring = [andEnum nextObject]){
-            componentSubstring = [NSString lossyASCIIStringWithString:componentSubstring];
             
             pubEnum = [arrayToSearch objectEnumerator];
             while(pub = [pubEnum nextObject]){
                 accessorResult = [pub performSelector:NSSelectorFromString(selectorString) withObject:nil];
-                accessorResult = [[NSString lossyASCIIStringWithString:accessorResult] stringByRemovingCurlyBraces];
+                accessorResult = [accessorResult stringByRemovingCurlyBraces];
+                if(doLossySearch)
+                    accessorResult = [NSString lossyASCIIStringWithString:accessorResult];
                 r = [accessorResult rangeOfString:componentSubstring
-                                          options:NSCaseInsensitiveSearch];
+                                          options:searchMask];
                 if(r.location != NSNotFound){
                     // NSLog(@"Found %@ in %@", substring, [pub citeKey]);
                     [aSet addObject:pub];
@@ -1642,7 +1651,6 @@ stringByAppendingPathComponent:@"BibDesk"]; */
     
     if(isGeneric){ // use the -[BibItem valueOfField:] method to get the substring we want to search in, if it's not a "standard" one
         while(componentSubstring = [orEnum nextObject]){
-            componentSubstring = [NSString lossyASCIIStringWithString:componentSubstring];
             
             NSString *value = nil;
             pubEnum = [arrayToSearch objectEnumerator];
@@ -1651,9 +1659,11 @@ stringByAppendingPathComponent:@"BibDesk"]; */
                 if(!value){
                     r.location = NSNotFound;
                 } else {
-                    value = [NSString lossyASCIIStringWithString:[value stringByRemovingCurlyBraces]];
+                    value = [value stringByRemovingCurlyBraces];
+                    if(doLossySearch)
+                        value = [NSString lossyASCIIStringWithString:value];
                     r = [value rangeOfString:componentSubstring
-                                     options:NSCaseInsensitiveSearch];
+                                     options:searchMask];
                 }
                 if(r.location != NSNotFound){
                     // NSLog(@"Found %@ in %@", substring, [pub citeKey]);
@@ -1665,14 +1675,15 @@ stringByAppendingPathComponent:@"BibDesk"]; */
         }
     } else { // if it was a substring that has an accessor in BibItem, use that directly
         while(componentSubstring = [orEnum nextObject]){
-            componentSubstring = [NSString lossyASCIIStringWithString:componentSubstring];
             
             pubEnum = [arrayToSearch objectEnumerator];
             while(pub = [pubEnum nextObject]){
                 accessorResult = [pub performSelector:NSSelectorFromString(selectorString) withObject:nil];
-                accessorResult = [[NSString lossyASCIIStringWithString:accessorResult] stringByRemovingCurlyBraces];
+                accessorResult = [accessorResult stringByRemovingCurlyBraces];
+                if(doLossySearch)
+                    accessorResult = [NSString lossyASCIIStringWithString:accessorResult];
                 r = [accessorResult rangeOfString:componentSubstring
-                                          options:NSCaseInsensitiveSearch];
+                                          options:searchMask];
                 if(r.location != NSNotFound){
                     [aSet addObject:pub];
                 }
