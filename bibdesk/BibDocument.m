@@ -513,6 +513,7 @@ NSString *BDSKBibItemLocalDragPboardType = @"edu.ucsd.cs.mmccrack.bibdesk: Local
     } else return NO; // if super failed
 }
 
+// overriden in order to set the string encoding before writing out to disk, in case it was changed in the save-as panel
 - (void)saveToFile:(NSString *)fileName 
      saveOperation:(NSSaveOperationType)saveOperation 
           delegate:(id)delegate 
@@ -523,6 +524,29 @@ NSString *BDSKBibItemLocalDragPboardType = @"edu.ucsd.cs.mmccrack.bibdesk: Local
         [self setDocumentStringEncoding:[[BDSKStringEncodingManager sharedEncodingManager] 
                                             stringEncodingForDisplayedName:[saveTextEncodingPopupButton titleOfSelectedItem]]];
     [super saveToFile:fileName saveOperation:saveOperation delegate:delegate didSaveSelector:didSaveSelector contextInfo:contextInfo];
+}
+
+// we override this method only to catch exceptions raised during TeXification of BibItems
+// returning NO keeps the document window from closing if the save was initiated by a close
+// action, so the user gets a second chance at fixing the problem
+- (BOOL)writeToFile:(NSString *)fileName ofType:(NSString *)docType{
+    BOOL success;
+    NS_DURING
+        success = [super writeToFile:fileName ofType:docType];
+    NS_HANDLER
+        if([[localException name] isEqualToString:BDSKTeXifyException]){
+            NSBeginCriticalAlertSheet(NSLocalizedString(@"Unable to save file completely.", @""),
+                                      nil, nil, nil,
+                                      documentWindow,
+                                      nil, NULL, NULL, NULL,
+                                      NSLocalizedString(@"If you are unable to correct the problem, you must save your file in a non-lossy encoding such as UTF-8, with accented character conversion disabled in BibDesk's preferences.", @""));
+            success = NO;
+        } else {
+            [localException raise];
+        }
+    NS_ENDHANDLER
+        
+    return success;
 }
 
 - (IBAction)saveDocument:(id)sender{
@@ -588,6 +612,7 @@ NSString *BDSKBibItemLocalDragPboardType = @"edu.ucsd.cs.mmccrack.bibdesk: Local
 
 }
 
+// this is only called by export actions, and isn't part of the regular save process
 - (void)savePanelDidEnd:(NSWindow *)sheet returnCode:(int)returnCode contextInfo:(void *)contextInfo{
     NSData *fileData = nil;
     NSString *fileName = nil;
@@ -691,6 +716,7 @@ stringByAppendingPathComponent:@"BibDesk"]; */
           } else {
               [localException raise];
           }
+            [localException raise];
         NS_ENDHANDLER
     }
     [d appendData:[@"</channel>\n</rss>" dataUsingEncoding:NSASCIIStringEncoding  allowLossyConversion:YES]];
@@ -810,17 +836,8 @@ stringByAppendingPathComponent:@"BibDesk"]; */
     
     while(tmp = [e nextObject]){
         [d appendData:[[NSString stringWithString:@"\n\n"] dataUsingEncoding:encoding  allowLossyConversion:YES]];
-        NS_DURING
-            [d appendData:[[tmp bibTeXStringDroppingInternal:drop] dataUsingEncoding:encoding allowLossyConversion:YES]];
-        NS_HANDLER
-            if([[localException name] isEqualToString:BDSKTeXifyException]){
-		int i = NSRunAlertPanel(NSLocalizedString(@"Warning!", @"Title of alert when an error happens"),
-                                        NSLocalizedString(@"Data will be lost if you are saving in ASCII encoding.", @"Informative alert text when the error happens."),
-                                        nil, nil, nil, nil);
-            } else {
-                [localException raise];
-            }
-        NS_ENDHANDLER
+        [d appendData:[[tmp bibTeXStringDroppingInternal:drop] dataUsingEncoding:encoding allowLossyConversion:YES]];
+
     }
     return d;
         
