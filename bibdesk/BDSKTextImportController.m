@@ -569,20 +569,16 @@
 			NSString *message = [NSString stringWithFormat:@"%@%C",NSLocalizedString(@"Loading page",@"Loading page"),0x2026];
 			[progressIndicator setToolTip:message];
 			[statusLine setStringValue:@""];
-			//if ([stopOrReloadButton respondsToSelector:@selector(setHidden:)])
-			//	[stopOrReloadButton setHidden:NO];
-			//[stopOrReloadButton setEnabled:YES];
 			[stopOrReloadButton setImage:[NSImage imageNamed:@"stop_small"]];
 			[stopOrReloadButton setToolTip:NSLocalizedString(@"Stop loading page",@"Stop loading page")];
+			[stopOrReloadButton setKeyEquivalent:@"."];
 			[progressIndicator startAnimation:self];
 			[progressIndicator setToolTip:message];
 			[statusLine setStringValue:message];
 		} else {
-			//if ([stopOrReloadButton respondsToSelector:@selector(setHidden:)])
-			//	[stopOrReloadButton setHidden:YES];
-			//[stopOrReloadButton setEnabled:NO];
 			[stopOrReloadButton setImage:[NSImage imageNamed:@"reload_small"]];
 			[stopOrReloadButton setToolTip:NSLocalizedString(@"Reload page",@"Reload page")];
+			[stopOrReloadButton setKeyEquivalent:@"r"];
 			[progressIndicator stopAnimation:self];
 			[progressIndicator setToolTip:@""];
 			[statusLine setStringValue:@""];
@@ -613,22 +609,20 @@
 			NSString *message = [NSString stringWithFormat:NSLocalizedString(@"Downloading file. Received 0%%%C",@"Downloading file. Received 0%..."),0x2026];
 			[progressIndicator setToolTip:message];
 			[statusLine setStringValue:@""];
-			if ([stopOrReloadButton respondsToSelector:@selector(setHidden:)])
-				[stopOrReloadButton setHidden:NO];
-			[stopOrReloadButton setEnabled:YES];
+			[stopOrReloadButton setImage:[NSImage imageNamed:@"stop_small"]];
 			[stopOrReloadButton setToolTip:NSLocalizedString(@"Cancel download",@"Cancel download")];
+			[stopOrReloadButton setKeyEquivalent:@"."];
             [progressIndicator startAnimation:self];
 			[progressIndicator setToolTip:message];
 			[statusLine setStringValue:message];
             [downloadFileName release];
 			downloadFileName = nil;
         } else {
-			if ([stopOrReloadButton respondsToSelector:@selector(setHidden:)])
-				[stopOrReloadButton setHidden:YES];
-			[stopOrReloadButton setEnabled:NO];
-			[stopOrReloadButton setToolTip:NSLocalizedString(@"Stop loading page",@"Stop loading page")];
+			[stopOrReloadButton setImage:[NSImage imageNamed:@"reload_small"]];
+			[stopOrReloadButton setToolTip:NSLocalizedString(@"Reload page",@"Reload page")];
+			[stopOrReloadButton setKeyEquivalent:@"R"];
             [progressIndicator stopAnimation:self];
-			[progressIndicator setToolTip:[NSString stringWithFormat:@"%@%C",NSLocalizedString(@"Page is loading",@"Page is loading"),0x2026]];
+			[progressIndicator setToolTip:@""];
 			[statusLine setStringValue:@""];
             [download release];
             download = nil;
