@@ -2491,21 +2491,36 @@ This method always returns YES. Even if some or many operations fail.
 
     if(returnCode == 1){
         NSString *newColumnName = [addFieldComboBox stringValue];
-		[self columnsMenuAddTableColumnName:newColumnName enabled:YES];
+
+		// Check if an object already exists in the tableview, bail without notification if it does
+		// This means we can't have a column more than once.
+		if ([tableColumns objectForKey:newColumnName] != nil )
+			return;
+
+		// Set up the object for the new column
         tc = [[[NSTableColumn alloc] initWithIdentifier:newColumnName] autorelease];
         [tc setResizable:YES];
-        [tableColumns setObject:tc forKey:[tc identifier]];
-        prefsShownColNamesMutableArray = [[[[OFPreferenceWrapper sharedPreferenceWrapper] arrayForKey:BDSKShownColsNamesKey] mutableCopy] autorelease];
+		
+		// Add the new Column 
+		[tableColumns setObject:tc forKey:[tc identifier]];
+		
+		// Add the column-name to the remove menu
+		[self columnsMenuAddTableColumnName:newColumnName enabled:YES];
+
+		// Store the new column in the preferences
+		prefsShownColNamesMutableArray = [[[[OFPreferenceWrapper sharedPreferenceWrapper] arrayForKey:BDSKShownColsNamesKey] mutableCopy] autorelease];
         [prefsShownColNamesMutableArray addObject:[tc identifier]];
         [[OFPreferenceWrapper sharedPreferenceWrapper] setObject:prefsShownColNamesMutableArray
                                                           forKey:BDSKShownColsNamesKey];
-        [self setupTableColumns];
+        
+		// Actually redraw the view now with the new column.
+		[self setupTableColumns];
         [self updateUI];
         [[NSNotificationCenter defaultCenter] postNotificationName:BDSKTableColumnChangedNotification
                                                             object:[tc identifier]
                                                           userInfo:[NSDictionary dictionaryWithObjectsAndKeys:self, @"Sender", nil]];
     }else{
-        //do nothing
+        //do nothing (because nothing was entered or selected)
     }
 }
 
