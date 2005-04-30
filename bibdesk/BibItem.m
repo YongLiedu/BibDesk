@@ -297,9 +297,12 @@ setupParagraphStyle()
 }
 
 - (NSComparisonResult)titleWithoutTeXCompare:(BibItem *)aBI{
+    NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init]; // popping the autorelease pool at the end of a sort is expensive
     NSString *titleNoBraces = [[self title] stringByRemovingTeXForSorting];
     NSString *aBITitleNoBraces = [[aBI title] stringByRemovingTeXForSorting];
-    return [titleNoBraces localizedCaseInsensitiveCompare:aBITitleNoBraces];
+    NSComparisonResult comp = [titleNoBraces localizedCaseInsensitiveCompare:aBITitleNoBraces];
+    [pool release];
+    return comp;
 }
 
 - (NSComparisonResult)containerWithoutTeXCompare:(BibItem *)aBI{
