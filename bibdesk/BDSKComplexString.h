@@ -91,7 +91,6 @@ typedef enum{
 @interface BDSKComplexString : NSString <NSCopying, NSCoding>{
   NSArray *nodes;			/* an array of bdsk_stringnodes. */
 
-  NSString *expandedValue;
   id macroResolver;
 }
 
@@ -156,14 +155,6 @@ typedef enum{
 - (NSString *)expandedValueFromArray:(NSArray *)nodes;
 
 /*!
-    @method     updateExpandedValue
-    @abstract   Updates the expanded value of the receiver, using expandedValueFromArray:
-    @discussion (description)
-    @result     -
-*/
-- (void)updateExpandedValue;
-
-/*!
     @method     macroResolver
     @abstract   Returns the object used to resolve macros in the complex string
     @discussion (description)
@@ -179,10 +170,6 @@ typedef enum{
     @result     -
 */
 - (void)setMacroResolver:(id <BDSKMacroResolver>)newMacroResolver;
-
-- (void)handleMacroKeyChangedNotification:(NSNotification *)notification;
-- (void)handleMacroDefinitionChangedNotification:(NSNotification *)notification;
-- (void)handleNodeValueChangedNotification:(NSNotification *)notification;
 
 @end
 

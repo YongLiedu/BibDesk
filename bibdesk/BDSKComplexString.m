@@ -77,6 +77,17 @@ static NSCharacterSet *macroCharSet = nil;
 
 @end
 
+// accessor for lazy updating of the expanded value
+@interface BDSKComplexString (Private)
+- (NSString *)expandedValue;
+@end
+
+@implementation BDSKComplexString (Private)
+- (NSString *)expandedValue{
+    return [self expandedValueFromArray:[self nodes]];
+}
+@end
+
 // stores system-defined macros for the months.
 // we grab their localized versions for display.
 static NSDictionary *globalMacroDefs; 
@@ -99,33 +110,28 @@ static NSDictionary *globalMacroDefs;
 	return self;
 }
 
+- (BOOL)isEqual:(BDSKComplexString *)other{
+    return [self isEqualAsComplexString:other];
+}
+
+- (unsigned)hash{
+    return [[self expandedValue] hash];
+}
+
 - (id)initWithArray:(NSArray *)a macroResolver:(id)theMacroResolver{
     if (self = [super init]) {
         nodes = [[NSArray alloc] initWithArray:a copyItems:YES];
 		if(theMacroResolver) {
-            NSNotificationCenter *nc = [NSNotificationCenter defaultCenter];
 			macroResolver = theMacroResolver;
-			[nc addObserver:self
-				   selector:@selector(handleMacroKeyChangedNotification:)
-					   name:BDSKBibDocMacroKeyChangedNotification
-					 object:theMacroResolver];
-			[nc addObserver:self
-				   selector:@selector(handleMacroDefinitionChangedNotification:)
-					   name:BDSKBibDocMacroDefinitionChangedNotification
-					 object:theMacroResolver];
 		} else {
 			NSLog(@"Warning: complex string being created without macro resolver. Macros in it will not be resolved.");
 		}
-		expandedValue = [[self expandedValueFromArray:[self nodes]] retain];
 	}		
     return self;
 }
 
 - (void)dealloc{
-    [expandedValue release];
 	[nodes release];
-	if (macroResolver)
-		[[NSNotificationCenter defaultCenter] removeObserver:self];
     [super dealloc];
 }
 
@@ -145,7 +151,6 @@ static NSDictionary *globalMacroDefs;
 
 - (id)initWithCoder:(NSCoder *)coder{
 	if (self = [super initWithCoder:coder]) {
-		expandedValue = [[coder decodeObjectForKey:@"expandedValue"] retain];
 		nodes = [[coder decodeObjectForKey:@"nodes"] retain];
 		[self setMacroResolver:[coder decodeObjectForKey:@"macroResolver"]];
 	}
@@ -155,26 +160,25 @@ static NSDictionary *globalMacroDefs;
 - (void)encodeWithCoder:(NSCoder *)coder{
 	[super encodeWithCoder:coder];
     [coder encodeObject:nodes forKey:@"nodes"];
-    [coder encodeObject:expandedValue forKey:@"expandedValue"];
     [coder encodeConditionalObject:macroResolver forKey:@"macroResolver"];
 }
 
 #pragma mark overridden NSString Methods
 
 - (unsigned int)length{
-    return [expandedValue length];
+    return [[self expandedValue] length];
 }
 
 - (unichar)characterAtIndex:(unsigned)index{
-    return [expandedValue characterAtIndex:index];
+    return [[self expandedValue] characterAtIndex:index];
 }
 
 - (void)getCharacters:(unichar *)buffer{
-    [expandedValue getCharacters:buffer];
+    [[self expandedValue] getCharacters:buffer];
 }
 
 - (void)getCharacters:(unichar *)buffer range:(NSRange)aRange{
-    [expandedValue getCharacters:buffer range:aRange];
+    [[self expandedValue] getCharacters:buffer range:aRange];
 }
 
 #pragma mark overridden methods from the ComplexStringExtensions
@@ -210,7 +214,7 @@ static NSDictionary *globalMacroDefs;
 }
 
 - (NSString *)stringAsExpandedBibTeXString{
-    return [NSString stringWithFormat:@"{%@}", expandedValue];
+    return [NSString stringWithFormat:@"{%@}", [self expandedValue]];
 }
 
 #pragma mark complex string methods
@@ -259,50 +263,8 @@ static NSDictionary *globalMacroDefs;
 }
 
 - (void)setMacroResolver:(id <BDSKMacroResolver>)newMacroResolver{
-	if (newMacroResolver != macroResolver) {
-		NSNotificationCenter *nc = [NSNotificationCenter defaultCenter];
-		if (macroResolver) {
-			[nc removeObserver:self 
-						  name:BDSKBibDocMacroKeyChangedNotification 
-						object:macroResolver];
-			[nc removeObserver:self
-						  name:BDSKBibDocMacroDefinitionChangedNotification 
-						object:macroResolver];
-		}
+	if (newMacroResolver != macroResolver)
 		macroResolver = newMacroResolver;
-		
-		[self updateExpandedValue];
-		
-		if (newMacroResolver) {
-			[nc addObserver:self
-				   selector:@selector(handleMacroKeyChangedNotification:)
-					   name:BDSKBibDocMacroKeyChangedNotification
-					 object:newMacroResolver];
-			[nc addObserver:self
-				   selector:@selector(handleMacroDefinitionChangedNotification:)
-					   name:BDSKBibDocMacroDefinitionChangedNotification
-					 object:newMacroResolver];
-		}
-	}
-}
-
-- (void)updateExpandedValue{
-    [expandedValue release];
-    expandedValue = [[self expandedValueFromArray:nodes] retain];
-    NSNotification *aNotif = [NSNotification notificationWithName:BDSKComplexStringChangedNotification object:macroResolver];
-    [[NSNotificationQueue defaultQueue] enqueueNotification:aNotif postingStyle:NSPostWhenIdle coalesceMask:NSNotificationCoalescingOnName forModes:nil];
-}
-
-- (void)handleMacroKeyChangedNotification:(NSNotification *)notification{
-	[self updateExpandedValue];
-}
-
-- (void)handleMacroDefinitionChangedNotification:(NSNotification *)notification{	
-	[self updateExpandedValue];
-}
-
-- (void)handleNodeValueChangedNotification:(NSNotification *)notification{
-	[self updateExpandedValue];
 }
 
 @end
