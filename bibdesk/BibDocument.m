@@ -109,11 +109,6 @@ NSString *BDSKBibItemLocalDragPboardType = @"edu.ucsd.cs.mmccrack.bibdesk: Local
 												 selector:@selector(handleBibItemAddDelNotification:)
 													 name:BDSKDocDelItemNotification
                                                    object:self];
-                
-        [[NSNotificationCenter defaultCenter] addObserver:self 
-                                                 selector:@selector(handleComplexStringChangedNotification:) 
-                                                     name:BDSKComplexStringChangedNotification 
-                                                   object:self];
 
         // It's wrong that we have to manually register for this, since the document is the window's delegate in IB (and debugging/logging appears to confirm this).
         // However, we don't get this notification, and it's critical to clean up when closing the document window; this fixes #1097306, a crash when closing the
@@ -219,7 +214,6 @@ NSString *BDSKBibItemLocalDragPboardType = @"edu.ucsd.cs.mmccrack.bibdesk: Local
     
 }
 
-
 - (void)dealloc{
 #if DEBUG
     NSLog(@"bibdoc dealloc");
@@ -232,9 +226,7 @@ NSString *BDSKBibItemLocalDragPboardType = @"edu.ucsd.cs.mmccrack.bibdesk: Local
     [[NSNotificationCenter defaultCenter] removeObserver:self];
 	[[NSApp delegate] removeErrorObjsForDocument:self];
     [macroDefinitions release];
-    [publications makeObjectsPerformSelector:@selector(setDocument:) // Set the non-retained document ivar in each BibItem to nil.  Otherwise, they message the document in -[BibItem dealloc] when removing undo action; since the doc is dealloced, this causes a crash.
-                                  withObject:nil];
-    [publications release]; // these should cause the bibitems to get dealloc'ed
+    [publications release];
     [shownPublications release];
     [pubsLock release];
     [frontMatter release];
@@ -2586,13 +2578,6 @@ This method always returns YES. Even if some or many operations fail.
 	[self setTableFont];
 }
 
-
-- (void)handleComplexStringChangedNotification:(NSNotification *)notification{
-    if([notification object] == self)
-        [self updateUI];
-}
-
-
 - (void)handleUpdateUINotification:(NSNotification *)notification{
     [self updateUI];
 }
@@ -2940,6 +2925,7 @@ This method always returns YES. Even if some or many operations fail.
     [[NSNotificationCenter defaultCenter] postNotificationName:BDSKBibDocMacroKeyChangedNotification
 														object:self
 													  userInfo:notifInfo];
+    [self updateUI];
     
 }
 
@@ -2958,6 +2944,7 @@ This method always returns YES. Even if some or many operations fail.
     [[NSNotificationCenter defaultCenter] postNotificationName:BDSKBibDocMacroDefinitionChangedNotification
 														object:self
 													  userInfo:notifInfo];
+    [self updateUI];
     
 }
 
@@ -2976,6 +2963,7 @@ This method always returns YES. Even if some or many operations fail.
     [[NSNotificationCenter defaultCenter] postNotificationName:BDSKBibDocMacroDefinitionChangedNotification
 														object:self
 													  userInfo:notifInfo];
+    [self updateUI];
     
 }
 
@@ -2999,6 +2987,7 @@ This method always returns YES. Even if some or many operations fail.
     [[NSNotificationCenter defaultCenter] postNotificationName:BDSKBibDocMacroDefinitionChangedNotification
 														object:self
 													  userInfo:notifInfo];
+    [self updateUI];
     
 }
 
