@@ -15,7 +15,7 @@
 }
 
 - (void)dealloc{
-    [originalInfoLineValue dealloc];
+    [originalInfoLineValue release];
 	[startString release];
     [super dealloc];
 }
@@ -49,7 +49,7 @@
                     display:YES
                     animate:NO];
     
-    startString = [string retain];
+    [self setStartString:string];
     [expandedValueTextField setStringValue:string];
     // in case we already ran and had an error that wasn't recorded:
     [infoLine setStringValue:originalInfoLineValue];
@@ -117,6 +117,14 @@
     [expandedValueTextField setStringValue:value];
 }
 
+- (NSString *)startString{
+	return [[startString retain] autorelease];
+}
+
+- (void)setStartString:(NSString *)string{
+	[startString autorelease];
+	startString = [string retain];
+}
 
 - (NSString *)stringValue{
     return [NSString complexStringWithBibTeXString:[textField stringValue] macroResolver:macroResolver];

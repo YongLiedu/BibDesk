@@ -27,5 +27,7 @@
 // Private
 - (void)controlTextDidEndEditing:(NSNotification *)aNotification;
 - (void)notifyNewValueAndOrderOut;
+- (NSString *)startString;
+- (void)setStartString:(NSString *)string;
 - (NSString *)stringValue;
 @end
