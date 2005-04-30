@@ -189,7 +189,7 @@
 		
 - (void)beginSheetForPasteboardModalForWindow:(NSWindow *)docWindow modalDelegate:(id)modalDelegate didEndSelector:(SEL)didEndSelector contextInfo:(void *)contextInfo{
 	// we start with the pasteboard data, so we can directly show the main sheet 
-	[self window];
+	if (![NSBundle loadNibNamed:[self windowNibName] owner:self]) return; // make sure we loaded the nib
 	[self loadPasteboardData];
 	
 	[NSApp beginSheet:[self window]
@@ -201,7 +201,7 @@
 
 - (void)beginSheetForWebModalForWindow:(NSWindow *)docWindow modalDelegate:(id)modalDelegate didEndSelector:(SEL)didEndSelector contextInfo:(void *)contextInfo{
 	// we start with a webview, so we first ask for the URL to load
-	[self window]; // hack to avoid an exception, I guess to make sure we loaded the nib
+	if (![NSBundle loadNibNamed:[self windowNibName] owner:self]) return; // make sure we loaded the nib
 	[self setShowingWebView:YES];
 	
 	// load the popup buttons with our bookmarks
@@ -230,7 +230,7 @@
 		
 - (void)beginSheetForFileModalForWindow:(NSWindow *)docWindow modalDelegate:(id)modalDelegate didEndSelector:(SEL)didEndSelector contextInfo:(void *)contextInfo{
 	// we start with a file, so we first ask for the file to load
-	[self window]; // hack to avoid an exception, I guess to make sure we loaded the nib
+	if (![NSBundle loadNibNamed:[self windowNibName] owner:self]) return; // make sure we loaded the nib
 	
 	// remember the arguments to pass for the main sheet later
 	theDocWindow = [docWindow retain];
