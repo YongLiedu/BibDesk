@@ -317,6 +317,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 	[documentSnoopToolbarItem release];
 	[statusLine release];
 	[toolbarItems release];
+	[macroTextFieldWC release];
     [super dealloc];
 }
 
