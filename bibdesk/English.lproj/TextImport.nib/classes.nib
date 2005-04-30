@@ -13,9 +13,9 @@
                 dismissAddBookmarkSheet = id; 
                 dismissUrlSheet = id; 
                 downloadLinkedFileAsLocalUrl = id; 
-                loadFile = id; 
-                loadPasteboard = id; 
-                loadWebPage = id; 
+                importFromFileAction = id; 
+                importFromTextAction = id; 
+                importFromWebAction = id; 
                 saveFileAsLocalUrl = id; 
                 showHelpAction = id; 
                 stopAddingAction = id; 
@@ -28,7 +28,6 @@
                 backButton = NSButton; 
                 bookmarkField = NSTextField; 
                 bookmarkPopUpButton = NSPopUpButton; 
-                chooseSourceButton = NSPopUpButton; 
                 citeKeyLine = NSTextField; 
                 forwardButton = NSButton; 
                 itemTableView = NSTableView; 
@@ -36,12 +35,14 @@
                 progressIndicator = NSProgressIndicator; 
                 sourceBox = NSBox; 
                 sourceTextView = NSTextView; 
+                splitView = NSSplitView; 
                 statusLine = NSTextField; 
                 stopOrReloadButton = NSButton; 
                 urlSheet = NSPanel; 
                 urlTextField = NSTextField; 
                 webView = WebView; 
                 webViewBox = NSBox; 
+                webViewView = NSView; 
             }; 
             SUPERCLASS = NSWindowController; 
         }, 
