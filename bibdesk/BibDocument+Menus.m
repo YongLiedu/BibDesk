@@ -67,6 +67,12 @@ Broken out of BibDocument and split up into smaller parts to make things more ma
 	}
 	else if (act == @selector(toggleStatusBar:)) {
 		return [self validateToggleStatusBarMenuItem:menuItem];
+	} else if ([menuItem action] == @selector(importFromPasteboardAction:)) {
+		return [self validateNewPubFromPasteboardMenuItem:menuItem];
+	} else if ([menuItem action] == @selector(importFromFileAction:)) {
+		return [self validateNewPubFromFileMenuItem:menuItem];
+	} else if ([menuItem action] == @selector(importFromWebAction:)) {
+		return [self validateNewPubFromWebMenuItem:menuItem];
 	}
 //	else if ([[menuItem representedObject] isEqualToString:@"displayMenuItem"]) {
 //		// update the display menu. Is this smart enough?
@@ -422,6 +428,30 @@ Broken out of BibDocument and split up into smaller parts to make things more ma
 		s = NSLocalizedString(@"Show Status Bar", @"Show Status Bar");
 		[menuItem setTitle:s];
 	}
+	return YES;
+}
+
+
+
+- (BOOL) validateNewPubFromPasteboardMenuItem:(NSMenuItem*) menuItem {
+    NSString *s = [NSString stringWithFormat:@"%@%C", NSLocalizedString(@"New Publications from Pasteboard",@"New Publications from Pasteboard"),0x2026];
+	[menuItem setTitle:s];
+	return YES;
+}
+
+
+
+- (BOOL) validateNewPubFromFileMenuItem:(NSMenuItem*) menuItem {
+    NSString *s = [NSString stringWithFormat:@"%@%C", NSLocalizedString(@"New Publications from File",@"New Publications from File"),0x2026];
+	[menuItem setTitle:s];
+	return YES;
+}
+
+
+
+- (BOOL) validateNewPubFromWebMenuItem:(NSMenuItem*) menuItem {
+    NSString *s = [NSString stringWithFormat:@"%@%C", NSLocalizedString(@"New Publications from Web",@"New Publications from Web"),0x2026];
+	[menuItem setTitle:s];
 	return YES;
 }
 

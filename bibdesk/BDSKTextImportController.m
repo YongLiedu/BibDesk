@@ -11,14 +11,14 @@
 
 @implementation BDSKTextImportController
 
-- (id)initWithDocument:(BibDocument *)doc fromWeb:(BOOL)showWebView{
+- (id)initWithDocument:(BibDocument *)doc{
     self = [super initWithWindowNibName:@"TextImport"];
     if(self){
         document = doc;
         item = [[BibItem alloc] init];
         fields = [[NSMutableArray alloc] init];
 		bookmarks = [[NSMutableArray alloc] init];
-        showingWebView = showWebView;
+        showingWebView = NO;
         itemsAdded = 0;
 		
 		NSString *applicationSupportPath = [[[NSFileManager defaultManager] applicationSupportDirectory:kUserDomain] stringByAppendingPathComponent:@"BibDesk"]; 
@@ -39,8 +39,8 @@
     [item release];
     [fields release];
     [bookmarks release];
-    [[sourceTextView enclosingScrollView] release];
-    [webViewBox release];
+    [sourceBox release];
+    [webViewView release];
     [super dealloc];
 }
 
@@ -51,16 +51,10 @@
 	[webViewBox setContentViewMargins:NSZeroSize];
 	[webViewBox setContentView:webView];
     [self setupTypeUI];
-    [[sourceTextView enclosingScrollView] retain];
-    [webViewBox retain];
+    [sourceBox retain];
+    [webViewView retain];
     [itemTableView setDoubleAction:@selector(addTextToCurrentFieldAction:)];
     [self setWindowFrameAutosaveName:@"BDSKTextImportController Frame Autosave Name"];
-	if(showingWebView){
-		showingWebView = NO; // Note that in IB we have the textView. This makes sure we swap in the webview.
-		[self setShowingWebView:YES];
-	}else{
-		[self loadPasteboardData];
-	}
 }
 
 
@@ -160,28 +154,10 @@
 	if (showWebView != showingWebView) {
 		showingWebView = showWebView;
 		if (showingWebView) {
-			[webViewBox setFrame:[[sourceTextView enclosingScrollView] frame]];
-			[sourceBox replaceSubview:[sourceTextView enclosingScrollView] with:webViewBox];
-			
-			[backButton setEnabled:[webView canGoBack]];
-			[forwardButton setEnabled:[webView canGoForward]];
-			[stopOrReloadButton setEnabled:YES];
-			if ([stopOrReloadButton respondsToSelector:@selector(setHidden:)]) {
-				[backButton setHidden:NO];
-				[stopOrReloadButton setHidden:NO];
-				[forwardButton setHidden:NO];
-			}
+			[webViewView setFrame:[sourceBox frame]];
+			[splitView replaceSubview:sourceBox with:webViewView];
 		} else {
-			[sourceBox replaceSubview:webViewBox with:[sourceTextView enclosingScrollView]];
-			
-			[backButton setEnabled:NO];
-			[forwardButton setEnabled:NO];
-			[stopOrReloadButton setEnabled:NO];
-			if ([stopOrReloadButton respondsToSelector:@selector(setHidden:)]) {
-				[backButton setHidden:YES];
-				[stopOrReloadButton setHidden:YES];
-				[forwardButton setHidden:YES];
-			}
+			[splitView replaceSubview:webViewView with:sourceBox];
 		}
 	}
 }
@@ -210,44 +186,69 @@
     [self cancelDownload];
 	[webView stopLoading:nil];
 }
+		
+- (void)beginSheetForPasteboardModalForWindow:(NSWindow *)docWindow modalDelegate:(id)modalDelegate didEndSelector:(SEL)didEndSelector contextInfo:(void *)contextInfo{
+	// we start with the pasteboard data, so we can directly show the main sheet 
+	[self window];
+	[self loadPasteboardData];
+	
+	[NSApp beginSheet:[self window]
+	   modalForWindow:docWindow
+		modalDelegate:modalDelegate
+	   didEndSelector:didEndSelector
+		  contextInfo:contextInfo];
+}
 
-- (void)beginSheetModalForWindow:(NSWindow *)docWindow modalDelegate:(id)modalDelegate didEndSelector:(SEL)didEndSelector contextInfo:(void *)contextInfo{
-	if(showingWebView){
-		// we start with a webview, so we first ask for the URL to load
-		[self window]; // hack to avoid an exception, I guess to make sure we loaded the nib
-		
-		// load the popup buttons with our bookmarks
-		NSEnumerator *bEnum = [bookmarks objectEnumerator];
-		NSDictionary *bm;
-		
-		[bookmarkPopUpButton removeAllItems];
-		[bookmarkPopUpButton addItemWithTitle:NSLocalizedString(@"Bookmarks",@"Bookmarks")];
-		while (bm = [bEnum nextObject]) {
-			[bookmarkPopUpButton addItemWithTitle:[bm objectForKey:@"Title"]];
-		}
-		
-		// remember the arguments to pass for the main sheet later
-		theDocWindow = [docWindow retain];
-		theModalDelegate = [modalDelegate retain];
-		theDidEndSelector = didEndSelector;
-		theContextInfo = contextInfo; // this one should be retained by the caller if it is non-nil
-		
-		// now show the URL sheet
-		[NSApp beginSheet:urlSheet
-		   modalForWindow:docWindow
-			modalDelegate:self
-		   didEndSelector:@selector(urlSheetDidEnd:returnCode:contextInfo:)
-			  contextInfo:[[NSNumber alloc] initWithBool:YES]];
-		
-	}else{
-		// we start with the pasteboard data, so we can directly show the main sheet 
-		
-		[NSApp beginSheet:[self window]
-		   modalForWindow:docWindow
-			modalDelegate:modalDelegate
-		   didEndSelector:didEndSelector
-			  contextInfo:contextInfo];
+- (void)beginSheetForWebModalForWindow:(NSWindow *)docWindow modalDelegate:(id)modalDelegate didEndSelector:(SEL)didEndSelector contextInfo:(void *)contextInfo{
+	// we start with a webview, so we first ask for the URL to load
+	[self window]; // hack to avoid an exception, I guess to make sure we loaded the nib
+	[self setShowingWebView:YES];
+	
+	// load the popup buttons with our bookmarks
+	NSEnumerator *bEnum = [bookmarks objectEnumerator];
+	NSDictionary *bm;
+	
+	[bookmarkPopUpButton removeAllItems];
+	[bookmarkPopUpButton addItemWithTitle:NSLocalizedString(@"Bookmarks",@"Bookmarks")];
+	while (bm = [bEnum nextObject]) {
+		[bookmarkPopUpButton addItemWithTitle:[bm objectForKey:@"Title"]];
 	}
+	
+	// remember the arguments to pass for the main sheet later
+	theDocWindow = [docWindow retain];
+	theModalDelegate = [modalDelegate retain];
+	theDidEndSelector = didEndSelector;
+	theContextInfo = contextInfo; // this one should be retained by the caller if it is non-nil
+	
+	// now show the URL sheet
+	[NSApp beginSheet:urlSheet
+	   modalForWindow:docWindow
+		modalDelegate:self
+	   didEndSelector:@selector(urlSheetDidEnd:returnCode:contextInfo:)
+		  contextInfo:[[NSNumber alloc] initWithBool:YES]];
+}
+		
+- (void)beginSheetForFileModalForWindow:(NSWindow *)docWindow modalDelegate:(id)modalDelegate didEndSelector:(SEL)didEndSelector contextInfo:(void *)contextInfo{
+	// we start with a file, so we first ask for the file to load
+	[self window]; // hack to avoid an exception, I guess to make sure we loaded the nib
+	
+	// remember the arguments to pass for the main sheet later
+	theDocWindow = [docWindow retain];
+	theModalDelegate = [modalDelegate retain];
+	theDidEndSelector = didEndSelector;
+	theContextInfo = contextInfo; // this one should be retained by the caller if it is non-nil
+	
+	NSOpenPanel *oPanel = [NSOpenPanel openPanel];
+	[oPanel setAllowsMultipleSelection:NO];
+	[oPanel setCanChooseDirectories:NO];
+
+	[oPanel beginSheetForDirectory:nil 
+							  file:nil 
+							 types:nil
+					modalForWindow:docWindow
+					 modalDelegate:self 
+					didEndSelector:@selector(openPanelDidEnd:returnCode:contextInfo:) 
+					   contextInfo:[[NSNumber alloc] initWithBool:YES]];
 }
 
 #pragma mark Actions
@@ -314,11 +315,11 @@
     [itemTableView reloadData];
 }
 
-- (IBAction)loadPasteboard:(id)sender{
+- (IBAction)importFromPasteboardAction:(id)sender{
 	[self loadPasteboardData];
 }
 
-- (IBAction)loadFile:(id)sender{
+- (IBAction)importFromFileAction:(id)sender{
     NSOpenPanel *oPanel = [NSOpenPanel openPanel];
     [oPanel setAllowsMultipleSelection:NO];
     [oPanel setCanChooseDirectories:NO];
@@ -333,7 +334,40 @@
 }
 
 - (void)openPanelDidEnd:(NSOpenPanel *)sheet returnCode:(int)returnCode contextInfo:(void *)contextInfo{
-
+	// this variable is true when we called the open sheet initially before showing the main window 
+	BOOL initialFileLoad = [[(NSNumber *)contextInfo autorelease] boolValue];
+	
+	if (initialFileLoad) {
+		// this is the initial web load, the main window is not yet there
+		
+		// we need to release these, as we had retained them
+		[theDocWindow autorelease];
+		[theModalDelegate autorelease];
+		
+		if (returnCode == NSOKButton) {
+			// show the main window and pass it the information initially given by the modalDelegate
+			
+			[NSApp beginSheet:[self window]
+			   modalForWindow:theDocWindow
+				modalDelegate:theModalDelegate
+			   didEndSelector:theDidEndSelector
+				  contextInfo:theContextInfo];
+			
+		} else {
+			// the user cancelled. As we don't end the main sheet we have to call the didEndSelector ourselves
+			
+			NSMethodSignature *signature = [theModalDelegate methodSignatureForSelector:theDidEndSelector];
+			NSInvocation *invocation = [NSInvocation invocationWithMethodSignature:signature];
+			[invocation setSelector:theDidEndSelector];
+			[invocation setArgument:&sheet atIndex:2];
+			[invocation setArgument:&returnCode atIndex:3];
+			[invocation setArgument:&theContextInfo atIndex:4];
+			[invocation invokeWithTarget:theModalDelegate];
+			
+		}
+	}
+	
+	// now do the things we need to do always
     if(returnCode == NSOKButton){
         NSString *fileName = [sheet filename];
 		NSURL *url = [NSURL fileURLWithPath:fileName];
@@ -355,7 +389,7 @@
     }        
 }
 
-- (IBAction)loadWebPage:(id)sender{
+- (IBAction)importFromWebAction:(id)sender{
 	NSEnumerator *bEnum = [bookmarks objectEnumerator];
 	NSDictionary *bm;
 	
@@ -571,7 +605,7 @@
 			[statusLine setStringValue:@""];
 			[stopOrReloadButton setImage:[NSImage imageNamed:@"stop_small"]];
 			[stopOrReloadButton setToolTip:NSLocalizedString(@"Stop loading page",@"Stop loading page")];
-			[stopOrReloadButton setKeyEquivalent:@"."];
+			[stopOrReloadButton setKeyEquivalent:@""];
 			[progressIndicator startAnimation:self];
 			[progressIndicator setToolTip:message];
 			[statusLine setStringValue:message];
@@ -611,7 +645,7 @@
 			[statusLine setStringValue:@""];
 			[stopOrReloadButton setImage:[NSImage imageNamed:@"stop_small"]];
 			[stopOrReloadButton setToolTip:NSLocalizedString(@"Cancel download",@"Cancel download")];
-			[stopOrReloadButton setKeyEquivalent:@"."];
+			[stopOrReloadButton setKeyEquivalent:@""];
             [progressIndicator startAnimation:self];
 			[progressIndicator setToolTip:message];
 			[statusLine setStringValue:message];
@@ -620,7 +654,7 @@
         } else {
 			[stopOrReloadButton setImage:[NSImage imageNamed:@"reload_small"]];
 			[stopOrReloadButton setToolTip:NSLocalizedString(@"Reload page",@"Reload page")];
-			[stopOrReloadButton setKeyEquivalent:@"R"];
+			[stopOrReloadButton setKeyEquivalent:@"r"];
             [progressIndicator stopAnimation:self];
 			[progressIndicator setToolTip:@""];
 			[statusLine setStringValue:@""];
@@ -688,6 +722,15 @@
 - (BOOL)validateMenuItem:(id <NSMenuItem>)menuItem{
 	if ([menuItem action] == @selector(saveFileAsLocalUrl:)) {
 		return ![[[webView mainFrame] dataSource] isLoading];
+	} else if ([menuItem action] == @selector(importFromPasteboardAction:)) {
+		[menuItem setTitle:NSLocalizedString(@"Load Pasteboard",@"Load Pasteboard")];
+		return YES;
+	} else if ([menuItem action] == @selector(importFromFileAction:)) {
+		[menuItem setTitle:[NSString stringWithFormat:@"%@%C", NSLocalizedString(@"Load File",@"Load File"),0x2026]];
+		return YES;
+	} else if ([menuItem action] == @selector(importFromWebAction:)) {
+		[menuItem setTitle:[NSString stringWithFormat:@"%@%C", NSLocalizedString(@"Load Website",@"Load Website"),0x2026]];
+		return YES;
 	}
 	return YES;
 }
@@ -765,17 +808,17 @@
 	
 	menuItem = [[NSMenuItem alloc] initWithTitle:NSLocalizedString(@"Back",@"Back")
 									  action:@selector(goBack:)
-							   keyEquivalent:@""];
+							   keyEquivalent:@"["];
 	[menuItems addObject:[menuItem autorelease]];
 	
 	menuItem = [[NSMenuItem alloc] initWithTitle:NSLocalizedString(@"Forward",@"Forward")
 									  action:@selector(goForward:)
-							   keyEquivalent:@""];
+							   keyEquivalent:@"]"];
 	[menuItems addObject:[menuItem autorelease]];
 	
 	menuItem = [[NSMenuItem alloc] initWithTitle:NSLocalizedString(@"Reload",@"Reload")
 									  action:@selector(reload:)
-							   keyEquivalent:@""];
+							   keyEquivalent:@"r"];
 	[menuItems addObject:[menuItem autorelease]];
 	
 	menuItem = [[NSMenuItem alloc] initWithTitle:NSLocalizedString(@"Stop",@"Stop")
@@ -988,7 +1031,7 @@
 #pragma mark Splitview delegate methods
 
 - (float)splitView:(NSSplitView *)sender constrainMinCoordinate:(float)proposedMin ofSubviewAt:(int)offset{
-	return proposedMin + 224.0; // from IB
+	return proposedMin + 126; // from IB
 }
 
 - (float)splitView:(NSSplitView *)sender constrainMaxCoordinate:(float)proposedMax ofSubviewAt:(int)offset{

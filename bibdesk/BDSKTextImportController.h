@@ -22,10 +22,11 @@
     IBOutlet NSTextField* statusLine;
     IBOutlet NSTextField* citeKeyLine;
     IBOutlet NSPopUpButton* itemTypeButton;
-    IBOutlet NSPopUpButton* chooseSourceButton;
+    IBOutlet NSSplitView* splitView;
     IBOutlet NSBox* sourceBox;
     IBOutlet WebView* webView;
     IBOutlet NSBox* webViewBox;
+    IBOutlet NSView* webViewView;
     IBOutlet NSPanel* urlSheet;
     IBOutlet NSTextField* urlTextField;
     IBOutlet NSPopUpButton* bookmarkPopUpButton;
@@ -48,7 +49,7 @@
 	void *theContextInfo;
 }
 
-- (id)initWithDocument:(BibDocument *)doc fromWeb:(BOOL)showWebView;
+- (id)initWithDocument:(BibDocument *)doc;
 - (void)setShowingWebView:(BOOL)showWebView;
 - (void)setType:(NSString *)type;
 - (void)cleanup;
@@ -57,9 +58,9 @@
 - (IBAction)stopAddingAction:(id)sender;
 - (IBAction)addTextToCurrentFieldAction:(id)sender;
 - (IBAction)changeTypeOfBibAction:(id)sender;
-- (IBAction)loadPasteboard:(id)sender;
-- (IBAction)loadFile:(id)sender;
-- (IBAction)loadWebPage:(id)sender;
+- (IBAction)importFromPasteboardAction:(id)sender;
+- (IBAction)importFromFileAction:(id)sender;
+- (IBAction)importFromWebAction:(id)sender;
 - (IBAction)chooseBookmarkAction:(id)sender;
 - (IBAction)dismissUrlSheet:(id)sender;
 - (IBAction)dismissAddBookmarkSheet:(id)sender;
@@ -73,7 +74,9 @@
 - (void)bookmarkPage:(id)sender;
 - (void)bookmarkLink:(id)sender;
 
-- (void)beginSheetModalForWindow:(NSWindow *)docWindow modalDelegate:(id)modalDelegate didEndSelector:(SEL)didEndSelector contextInfo:(void *)contextInfo;
+- (void)beginSheetForPasteboardModalForWindow:(NSWindow *)docWindow modalDelegate:(id)modalDelegate didEndSelector:(SEL)didEndSelector contextInfo:(void *)contextInfo;
+- (void)beginSheetForFileModalForWindow:(NSWindow *)docWindow modalDelegate:(id)modalDelegate didEndSelector:(SEL)didEndSelector contextInfo:(void *)contextInfo;
+- (void)beginSheetForWebModalForWindow:(NSWindow *)docWindow modalDelegate:(id)modalDelegate didEndSelector:(SEL)didEndSelector contextInfo:(void *)contextInfo;
 - (void)openPanelDidEnd:(NSOpenPanel *)sheet returnCode:(int)returnCode contextInfo:(void *)contextInfo;
 - (void)urlSheetDidEnd:(NSPanel *)sheet returnCode:(int)returnCode contextInfo:(void *)contextInfo;
 - (void)addBookmarkSheetDidEnd:(NSOpenPanel *)sheet returnCode:(int)returnCode contextInfo:(void *)contextInfo;

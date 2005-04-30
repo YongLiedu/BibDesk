@@ -25,6 +25,9 @@
 - (BOOL) validateDeleteSelectionMenuItem:(NSMenuItem*) menuItem;
 - (BOOL) validatePrintDocumentMenuItem:(NSMenuItem*) menuItem;
 - (BOOL) validateToggleStatusBarMenuItem:(NSMenuItem*) menuItem;
+- (BOOL) validateNewPubFromPasteboardMenuItem:(NSMenuItem*) menuItem;
+- (BOOL) validateNewPubFromFileMenuItem:(NSMenuItem*) menuItem;
+- (BOOL) validateNewPubFromWebMenuItem:(NSMenuItem*) menuItem;
 
 
 - (IBAction) clear:(id) sender;
