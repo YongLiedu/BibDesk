@@ -6,7 +6,7 @@ fnames = sys.argv[1:]
 
 for fname in fnames:
 
-    f = open(fname, 'r+')
+    f = open(fname)
     lines = f.readlines()
 
     teximetaline = 0
@@ -22,6 +22,10 @@ for fname in fnames:
         lines[teximetaline] = lines[metaline]
         lines[metaline] = ""
 
-    f.seek(0)
-    for line in lines:
-        f.write(line)
+        f.close()
+        f = open(fname, 'w')
+        f.seek(0)
+        for line in lines:
+            f.write(line)
+
+f.close()
