@@ -249,7 +249,7 @@
 				<key>nib</key>
 				<string>BibPref_AutoFile</string>
 				<key>ordering</key>
-				<string>9</string>
+				<string>6</string>
 				<key>shortTitle</key>
 				<string>AutoFile</string>
 				<key>title</key>
@@ -313,7 +313,7 @@
 				<key>nib</key>
 				<string>BibPref_CiteKey</string>
 				<key>ordering</key>
-				<string>30</string>
+				<string>5</string>
 				<key>shortTitle</key>
 				<string>Cite Key</string>
 				<key>title</key>
@@ -337,7 +337,7 @@
 				<key>nib</key>
 				<string>BibPref_Defaults</string>
 				<key>ordering</key>
-				<string>20</string>
+				<string>4</string>
 				<key>shortTitle</key>
 				<string>Defaults</string>
 				<key>title</key>
@@ -375,7 +375,7 @@
 				<key>nib</key>
 				<string>BibPref_Files</string>
 				<key>ordering</key>
-				<string>10</string>
+				<string>2</string>
 				<key>shortTitle</key>
 				<string>Files</string>
 				<key>title</key>
@@ -514,7 +514,7 @@
 				<key>nib</key>
 				<string>BibPref_InputManager</string>
 				<key>ordering</key>
-				<string>50</string>
+				<string>7</string>
 				<key>shortTitle</key>
 				<string>Autocompletion</string>
 				<key>title</key>
@@ -542,7 +542,7 @@
 				<key>nib</key>
 				<string>BibPref_TeX</string>
 				<key>ordering</key>
-				<string>2</string>
+				<string>3</string>
 				<key>shortTitle</key>
 				<string>Preview</string>
 				<key>title</key>
