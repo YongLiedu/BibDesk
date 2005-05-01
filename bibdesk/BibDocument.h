@@ -942,4 +942,8 @@ NSComparisonResult compareSetLengths(NSSet *set1, NSSet *set2, void *context);
 - (NSStringEncoding)documentStringEncoding;
 - (void)setDocumentStringEncoding:(NSStringEncoding)encoding;
 
+- (IBAction)importFromPasteboardAction:(id)sender;
+- (IBAction)importFromFileAction:(id)sender;
+- (IBAction)importFromWebAction:(id)sender;
+
 @end

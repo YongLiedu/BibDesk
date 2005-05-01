@@ -3145,23 +3145,33 @@ This method always returns YES. Even if some or many operations fail.
 
 #pragma mark Text import sheet support
 
-- (IBAction)importFromTextAction:(id)sender{
-    BDSKTextImportController *tic = [(BDSKTextImportController *)[BDSKTextImportController alloc] initWithDocument:self fromWeb:NO];
+- (IBAction)importFromPasteboardAction:(id)sender{
+    BDSKTextImportController *tic = [(BDSKTextImportController *)[BDSKTextImportController alloc] initWithDocument:self];
 
-    [tic beginSheetModalForWindow:documentWindow
-					modalDelegate:self
-				   didEndSelector:@selector(importFromTextSheetDidEnd:returnCode:contextInfo:)
-					  contextInfo:tic];
+    [tic beginSheetForPasteboardModalForWindow:documentWindow
+								 modalDelegate:self
+								didEndSelector:@selector(importFromTextSheetDidEnd:returnCode:contextInfo:)
+								   contextInfo:tic];
+
+}
+
+- (IBAction)importFromFileAction:(id)sender{
+    BDSKTextImportController *tic = [(BDSKTextImportController *)[BDSKTextImportController alloc] initWithDocument:self];
+
+    [tic beginSheetForFileModalForWindow:documentWindow
+						   modalDelegate:self
+						  didEndSelector:@selector(importFromTextSheetDidEnd:returnCode:contextInfo:)
+							 contextInfo:tic];
 
 }
 
 - (IBAction)importFromWebAction:(id)sender{
-    BDSKTextImportController *tic = [(BDSKTextImportController *)[BDSKTextImportController alloc] initWithDocument:self fromWeb:YES];
+    BDSKTextImportController *tic = [(BDSKTextImportController *)[BDSKTextImportController alloc] initWithDocument:self];
 
-    [tic beginSheetModalForWindow:documentWindow
-					modalDelegate:self
-				   didEndSelector:@selector(importFromTextSheetDidEnd:returnCode:contextInfo:)
-					  contextInfo:tic];
+    [tic beginSheetForWebModalForWindow:documentWindow
+						  modalDelegate:self
+						 didEndSelector:@selector(importFromTextSheetDidEnd:returnCode:contextInfo:)
+							contextInfo:tic];
 
 }
 
