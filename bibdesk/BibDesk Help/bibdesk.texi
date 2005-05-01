@@ -1,5 +1,5 @@
 \input texinfo @c -*-texinfo-*-
-@c This is the manual for Bibdesk.
+@c This is the manual for BibDesk.
 
 @setfilename bibdesk.info
 
@@ -23,7 +23,7 @@
 &#8984;
 @end html
 @ifnothtml
-Command
+Cmd-
 @end ifnothtml
 @end macro
 
@@ -32,7 +32,7 @@ Command
 &#8679;
 @end html
 @ifnothtml
-Shift
+Shift-
 @end ifnothtml
 @end macro
 
@@ -41,7 +41,7 @@ Shift
 &#8997;
 @end html
 @ifnothtml
-Shift
+Option-
 @end ifnothtml
 @end macro
 
@@ -78,13 +78,13 @@ about the BibTeX file format.
 
 * Quick Start::         For those who are already familiar with BibTeX
 * BibTeX Intro::        For those who need to know more about BibTeX
-* Opening and Importing Files:: 
-* Searching Your Database::
-* Managing References:: Browsing, Managing and Editing References
-* Citation Keys::       Automatically Generating Citation Keys
-* AutoFile::            Keeping Local Copies of Articles Organized
+* Opening and Importing Files:: Opening new and existing files of different formats
+* Searching Your Database:: Searching references in the BibDesk database
+* Managing References:: Browsing, managing and editing references
+* Citation Keys::       Automatically generating citation keys
+* AutoFile::            Keeping local copies of articles organized
 * Inserting Citations:: Adding citation commands in your favorite editor
-* Preferences Guide::
+* Preferences Guide::   Setting preferences for BibDesk
 * Getting More Help::   Where to find more answers about BibDesk
 @end menu
 
@@ -100,16 +100,16 @@ about the BibTeX file format.
 
 * indexcp::             Concept Index
 * indexpref::           Preference Settings Index
-* indexky::             Key Shortcut Index
+* indexky::             Keyboard Shortcut Index
+* Character Conversion:: Character Conversion
 * Citation Key Format Reference:: Citation Key Format Reference
-* Character Conversion::
 @end menu
 
 @shortcontents
 
 @end ifnottex
 
-Portions of Bibdesk:
+Portions of BibDesk:
 
 Copyright @copyright{} 2001 - 2005 Michael O. McCracken@*
 Copyright @copyright{} many others@*
@@ -171,7 +171,7 @@ this, see @ref{Getting More Help}.
 @node BibTeX Intro
 @chapter BibTeX Intro
 
-@cindex bibtex
+@cindex BibTeX
 
 BibTeX database files are in a text format with a few conventions you
 will want to know. See @ref{Formatting Names} and
@@ -291,11 +291,19 @@ btxdoc.dvi
 @section Starting a New File
 @abstract{Various ways of Creating a New File}
 
+@cindex opening a new file
+@kindex Shift-Cmd-N
+
 Choose "New Bibliography" from the File menu or 
-type the keyboard shortcut @cmd{} @shift{} N.
+type the keyboard shortcut @shift{}@cmd{}N.
 
 @node Opening a File
 @section Opening a File
+
+@cindex opening a file
+@cindex open using filter
+@kindex Cmd-O
+@kindex Shift-Cmd-O
 
 @subheading Opening a File in a Specific Encoding
 
@@ -324,7 +332,7 @@ Note that BibDesk can open RIS files directly, so a filter isn't required for th
 
 @cindex PubMed
 @cindex RIS
-@cindex Service
+@cindex service
 
 BibDesk expects a file with the extension ``.fcgi'' or ``.ris''.
 Many of the RIS tags are converted into their BibTeX equivalents, but unknown tags are left as-is for you to deal with manually.
@@ -370,6 +378,7 @@ when it is necessary to share files with other people or applications.
 @chapter Searching Your Database
 
 @cindex searching
+@kindex Cmd-F
 
 @heading Quick Search
 
@@ -391,8 +400,8 @@ citation key.)
 
 @subheading Advanced Searches
 
-@cindex Boolean
-@cindex accents
+@cindex boolean search
+@cindex accents in search
 
 BibDesk's quick search field also supports a Boolean search, using
 "AND" or "OR" operators (no quotes, but the operator must be
@@ -423,36 +432,41 @@ characters as equivalent, and is case-insensitive
 @section Adding References
 @abstract{How to add new references to a database.}
 
-@kindex cmd-shift-N
-@kindex cmd-N
+@kindex Cmd-N
 
 New references are added to the bibliography 
 with "New Reference" from the Bibliography menu, the keyboard
-shortcut @cmd{} N, or the New Reference toolbar button.
+shortcut @cmd{}N, or the New Reference toolbar button.
 
 @subsection Drag and Drop
-@cindex Drag and Drop
+
+@cindex drag and drop
 
 References can also be added to a bibliography by dragging an entry
 from a text source (text editor, web browser). Here's a fancy picture:
 
 @image{gfx/dragIntoBib}
 
-@anchor{Adding from Text}
-@heading Adding from Text
+
+@node Adding References
+@section Adding References
+@abstract{Adding new references from text sources.}
+
 @cindex creating references, from text
+@cindex creating references, from a file
 @cindex creating references, from the web
-@kindex Command-Option-N
-@kindex Command-Control-N
+@kindex Option-Cmd-L
+@kindex Shift-Cmd-L
+@kindex Cmd-L
 
 If you have a source of references that isn't in a structured form,
 you can use the ``Add New Publication from Text'' menu item in the
-``Publication'' menu (or the key shortcut @cmd{} @opt{} N) to open a
+``Publication'' menu (or the key shortcut @opt{}@cmd{}N) to open a
 sheet that lets you add references by selecting text and assigning
 that text to fields in a new reference.
 
 Examples of reference sources that this would be convenient for are
-emails, conference proceedings web sites, and the text from a list of
+emails, conference proceedings web sites, and the text from a list of
 citations at the end of a publication.
 
 When the sheet opens, it loads the data on the clipboard into the
@@ -484,7 +498,7 @@ paste into the table on the right to fill in the publication's
 information. Edit and make any other changes you want by
 double-clicking on the rightmost column of the table.
 
-@kindex Command-0 through Command-9
+@kindex Cmd-0 - Cmd-9
 
 You can make adding data faster by just double-clicking the name of
 the field you want the selected text to fill and it will be added for
@@ -500,7 +514,7 @@ page view yet.
 @section Editing References
 @abstract{Editing the data in your references.}
 
-@kindex cmd-E
+@kindex Cmd-E
 
 Once references have been added to the bibliography, they can be
 edited by selecting a reference and choosing "Edit Reference" from the
@@ -527,12 +541,12 @@ bibliography.
 
 @cindex URL
 @cindex Local-URL
-@cindex Linked file, setting
-@cindex Linked file, viewing
+@cindex linked file, setting
+@cindex linked file, viewing
 @cindex PDF
-@cindex Previewing files
-@cindex Viewing PDF as text
-@cindex Drag and drop, files
+@cindex previewing files
+@cindex viewing PDF as text
+@cindex drag and drop, files
 
 @heading Viewing a linked file
 
@@ -545,7 +559,7 @@ which gives you options to choose a file to link. Another way of
 setting the Local-URL link is by dragging a file onto the Edit window.
 
 If your your linked file is a PDF, you can use the ``View in Drawer''
-button to view it without leaving Bibdesk. Pressing and holding that
+button to view it without leaving BibDesk. Pressing and holding that
 button gives you the option of viewing it as a PDF or viewing just
 the text of the PDF, so you can select the text to copy and paste
 into the data fields.
@@ -583,7 +597,7 @@ text.
 @cindex accented characters
 
 You can enter many common accented characters such as  and o directly, and 
-Bibdesk will take care of translating them into the appropriate LaTeX definitions when the file is saved.
+BibDesk will take care of translating them into the appropriate LaTeX definitions when the file is saved.
 
 They will also be re-translated upon reopening the file, so that you
 will see the intended character, not the markup LaTeX uses to generate
@@ -594,7 +608,7 @@ it.
 @abstract{How to edit a field as Raw BibTeX, to add macro references.}
 
 @cindex macro
-@kindex cmd-R
+@kindex Cmd-R
 
 @c FIXME
 
@@ -606,6 +620,8 @@ window when one of the form fields has the keyboard focus.
 @abstract{How to edit the definitions of a macro.}
 
 @cindex macro
+@kindex Shift-Cmd-M
+
 @image{gfx/macrosWindow}
 
 @node Deleting References
@@ -646,8 +662,8 @@ any field you like, even if that field doesn't exist in any of the
 publications listed.
 
 The Columns almost always simply display the content of the relevant field.
-There are a few exceptions where Bibdesk tries to `do the right thing' when
-bibtex is difficult.  The inbook type uses Title to refer to the title of 
+There are a few exceptions where BibDesk tries to `do the right thing' when
+BibTeX is difficult.  The inbook type uses Title to refer to the title of 
 the whole work and the Chapter field to refer to the specific part of the 
 work that is cited.  For the inbook type, then, if there is a Chapter field
 that is displayed along with the Book title, thus:
@@ -690,6 +706,7 @@ and it can be added.
 @section Printing References
 
 @cindex printing
+@kindex Cmd-P
 
 Choosing "Print" from the File menu (@cmd{}P) prints the contents
 of the lower browser pane of the selected reference.
@@ -699,8 +716,10 @@ of the lower browser pane of the selected reference.
 @abstract{Saving files and dealing with encodings}
 
 @cindex saving
+@kindex Cmd-S
+@kindex Shift-Cmd-S
 
-Save (@cmd{}S) and Save As... (@cmd{}@shift{}S) under the File
+Save (@cmd{}S) and Save As... (@shift{}@cmd{}S) under the File
 menu will save your bibliography as a BibTeX file. 
 
 @cindex encoding
@@ -712,7 +731,7 @@ from the pop-up button at the bottom of the resulting sheet.
 @node Previewing Typeset Output
 @section Previewing Typeset Output
 
-@kindex cmd-T
+@kindex Cmd-T
 
 @cindex LaTeX
 @cindex preview
@@ -755,7 +774,7 @@ reference in the preferences (See the @ref{Cite Key Preferences} preference pane
 
 @menu
 * When the Key is Generated::   
-* Generating a Key for an Existing Publication::  
+* Generating a Key for an Existing Publications::  
 * Customizing the Format of Keys::  
 @end menu
 
@@ -767,11 +786,12 @@ reference in the preferences (See the @ref{Cite Key Preferences} preference pane
 
 When there is enough data entered...
 
-@node Generating a Key for an Existing Publication
-@section Generating a Key for an Existing Publication
+@node Generating a Key for an Existing Publications
+@section Generating a Key for an Existing Publications
 
 @cindex cite key
 @cindex key
+@kindex Cmd-K
 
 @cartouche 
 Use the action menu in the editor.
@@ -791,9 +811,10 @@ See prefs, see the @xref{Citation Key Format Reference}.
 @node AutoFile
 @chapter AutoFile
 
-@cindex File Management
+@cindex autofile
+@cindex file management
 @cindex PDF
-@cindex Local Copies of Papers, Organizing
+@cindex local copies of papers, organizing
 
 @heading Keeping Local Copies of Papers Organized
 
@@ -803,7 +824,7 @@ Papers Folder as described in the
 @ref{AutoFile Preferences} preference help topic.
 
 @menu
-* Automatically Move Files::    How Bibdesk can keep new papers organized automatically once you've consolidated them.
+* Automatically Move Files::    How BibDesk can keep new papers organized automatically once you've consolidated them.
 * Consolidate Linked Files::    A command to move all linked files to your Papers Folder.
 @end menu
 
@@ -834,18 +855,20 @@ dialog will show you what the problems were:
 
 @image{gfx/consolidateLinkedFilesErrorWindow}
 
-@cindex undo, AutoFile
-@cindex Autofile, undo
-@cindex undo, Consolidating Linked Files
-@cindex Consolidating Linked Files, undo
+@cindex undo, autofile
+@cindex autofile, undo
+@cindex undo, consolidating linked files
+@cindex consolidating linked files, undo
 
 Consolidating linked files is undoable, so feel free to experiment.
 
 @node Inserting Citations
 @chapter Inserting Citations
 
-@cindex Copy and Paste
-@cindex Drag and Drop
+@cindex copy and paste
+@cindex drag and drop
+@kindex Cmd-C
+@kindex Cmd-V
 
 You can copy a publication from the publication table and paste it
 into any text editor to get the TeX citation command for that
@@ -871,8 +894,11 @@ want to use the Custom Citation Strings Drawer.
 @node The Custom Citation Strings Drawer
 @section The Custom Citation Strings Drawer
 
+@cindex	custom citation strings
+@kindex Shift-Cmd-C
+
 Choosing Show/Hide Custom Citation Strings from the Window menu
-(@cmd{}@shift{}C) toggles a drawer that allows you to drag and drop
+(@shift{}@cmd{}C) toggles a drawer that allows you to drag and drop
 citations into a TeX document using custom-defined citation strings,
 such as fullcite, citet, and citep.
 
@@ -888,7 +914,7 @@ editing application. @xref{External Autocompletion}
 @node System Service
 @section System Service
 
-@cindex System Service
+@cindex system service
 @cindex services
 
 If you can't use the autocompletion plugin because your favorite text
@@ -901,7 +927,7 @@ if you don't have a photographic memory of citation keys.
 
 In any Services aware app (including: TeXShop, iTeXMac, TextEdit, 
 BBEdit, and TextWrangler, but no Classic or X11 apps) type a
-string, select it, then choose Complete Citation from the Bibdesk
+string, select it, then choose Complete Citation from the BibDesk
 submenu of the Services Menu. This will replace the selected string
 with the citation(s) of any entries in open BibDesk documents (or, if
 BibDesk is not open yet, in the default bibliography set in
@@ -941,20 +967,21 @@ service would insert ``CasObe00''.
 @node Preferences Guide
 @chapter Preferences Guide
 
+@kindex Cmd-,
 
 This help page describes options in the preferences you can use to
-customize Bibdesk. To change your preferences, choose "Preferences"
-from the "Bibdesk" menu, or press the key shortcut @cmd{}-, (Command
+customize BibDesk. To change your preferences, choose "Preferences"
+from the "BibDesk" menu, or press the key shortcut @cmd{}, (Command
 - comma).
 
 @heading Preference Panes
 
 @menu
-* General Preferences::      Change what Bibdesk does when starting up, such as opening specific files, as well as overall appearance.                
+* General Preferences::      Change what BibDesk does when starting up, such as opening specific files, as well as overall appearance.                
 * Citation Preferences::     Set what you get when copying or dragging citations to other apps.               
 * Files Preferences::          Set preferences for opening and saving files.             
 * Preview Preferences::              Change the default settings for using LaTeX in the typeset preview window.       
-* Default Fields Preferences::     Add fields that Bibdesk will add to every entry.         
+* Default Fields Preferences::     Add fields that BibDesk will add to every entry.         
 * RSS Preferences::                Configure syndication settings.         
 * Cite Key Preferences::              Set a format for autogenerated cite keys.      
 * Autocompletion Preferences::   Install and configure the autocompletion system.           
@@ -1044,7 +1071,7 @@ Use TeX for Previewing: (More appropriately, use pdflatex for previewing.) If th
 
 TeX Options: The style file (just the name, not the whole path) can be specified here.
 Also, the TeX and BibTeX program paths can be changed here, so you are not tied to one distribution of TeX.
-You must enter the full path to the binaries for pdflatex and bibtex, e.g. @code{/usr/local/teTeX/bin/powerpc-apple-darwin-current/pdflatex}.
+You must enter the full path to the binaries for pdflatex and BibTeX, e.g. @code{/usr/local/teTeX/bin/powerpc-apple-darwin-current/pdflatex}.
 
 
 Browser preview pane: Select what you want the lower pane of the main browser window to show.
@@ -1143,7 +1170,7 @@ automatically move files.
 
 The Error panel provides feedback on errors contained in a bib
 file. You can always show the panel by selecting ``Show/Hide
-Error Panel'' from the Window menu (@cmd{}@shift{}E). This is
+Error Panel'' from the Window menu (@shift{}@cmd{}E). This is
 what the errors panel looks like:
 
 Clicking on a warning line in this table opens an editing window with
@@ -1190,7 +1217,7 @@ be obtained from the Console application (in `Applications/Utilities`).
 @printindex pref
 
 @node indexky
-@appendix Key Shortcut Index
+@appendix Keyboard Shortcut Index
 @printindex ky
 
 @node Character Conversion
@@ -1396,7 +1423,7 @@ To use an explicit percent character, use the escape specifier @spec{%%}
 @example
 @emph{Bibliography:}
 M. McCracken, A. Maxwell, J. Howison, M. Routley, S. Spiegel, S. S. Porst, and C. M. Hofman,
-Bibdesk, a great application to manage your bibliographies,
+BibDesk, a great application to manage your bibliographies,
 Source Forge, 1:96, 11 2004.
 @end example
 
@@ -1425,7 +1452,7 @@ McCMaxHowRouSpiPorHof0411
 @item Format string:
 @specparam{%A, [;][.][;etal]2}@bold{:}@spec{%y}@specparam{%t, 20}
 @item Resulting value:
-McCracken.M;Maxwell.A;etal:2004Bibdesk-a-great-appl
+McCracken.M;Maxwell.A;etal:2004BibDesk-a-great-appl
 @end table
 
 @table @asis
@@ -1446,7 +1473,7 @@ details on how to set the cite key format.
 
 --nothing past bye gets processed...
 @multitable @columnfractions .12 .88
-@item Portions of Bibdesk
+@item Portions of BibDesk
 @item @tab Copyright @copyright{} 2001 - 2005 Michael O. McCracken@*
 @item @tab Copyright @copyright{} 2002 - 2005 Adam Maxwell@*
 @item @tab Copyright @copyright{} 2002 - 2005 Christiaan Hofman@* 
