@@ -128,7 +128,8 @@
                 exportRIS = id; 
                 find = id; 
                 generateCiteKey = id; 
-                importFromTextAction = id; 
+                importFromFileAction = id; 
+                importFromPasteboardAction = id; 
                 importFromWebAction = id; 
                 makeNewEmptyCollection = id; 
                 makeNewExternalSource = id; 
