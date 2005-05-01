@@ -74,18 +74,28 @@ h1, h2, h3, h4, h5 {
     font-size: 16px;
     color: #3333cc;
 }
+a {
+	font-weight: bold;
+    color: #3333cc;
+}
+a:link, a:visited {
+	text-decoration: none;
+}
+a:hover, a:active {
+	text-decoration: underline;
+}
 code,tt,pre { 
     font-family: Monaco, Courier, Mono, sans-serif;
-    font-size: 11px;
+    font-size: 1em;
 }
 .spec {
     font-family: Lucida Grande,Helvetica,Geneva;
-    font-size: 11px;
+    font-size: 1em;
     font-weight:bold;
     color:blue}
 .param {
     font-family: Lucida Grande,Helvetica,Geneva;
-    font-size: 11px;
+    font-size: 1em;
     font-weight:bold;
     color:green}
 </style>
