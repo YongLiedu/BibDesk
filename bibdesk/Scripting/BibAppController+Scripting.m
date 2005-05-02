@@ -7,6 +7,7 @@
 //
 
 #import "BibAppController+Scripting.h"
+#import "BibTypeManager.h"
 
 /* ssp
 Category on BibAppController making the papers folder readable for scripting
@@ -23,8 +24,18 @@ Category on BibAppController making the papers folder readable for scripting
 	return [[OFPreferenceWrapper sharedPreferenceWrapper] stringForKey:BDSKPapersFolderPathKey];
 }
 
+- (NSArray *)allTypes {
+	return [[BibTypeManager sharedManager] bibTypesForFileType:BDSKBibtexString];
+}
+
+- (NSArray *)allFieldNames {
+	return [[[[BibTypeManager sharedManager] allFieldNames] allObjects] sortedArrayUsingSelector:@selector(caseInsensitiveCompare:)];
+}
+
 - (BOOL)application:(NSApplication *)sender delegateHandlesKey:(NSString *)key {
-	if ([key isEqualToString:@"papersFolder"]) 
+	if ([key isEqualToString:@"papersFolder"] ||
+		[key isEqualToString:@"allTypes"] ||
+		[key isEqualToString:@"allFieldNames"] ) 
 		return YES;
 	return NO;
 }

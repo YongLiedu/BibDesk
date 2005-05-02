@@ -206,6 +206,12 @@ will translate this file into the necessary scriptSuite and scriptTerminology fi
                     <property name="papers folder" code="pfol" type="string" description="Path to the papers folder as specified in the Auto File preference." access="r">
                         <cocoa method="papersFolder"/>
                     </property>
+                    <property name="all typenames" code="atyp" type="list of string" description="All the known BibTeX publication types." access="r">
+                        <cocoa method="allTypes"/>
+                    </property>
+                    <property name="all fieldnames" code="afnm" type="list of string" description="All the known BibTeX field names" access="r">
+                        <cocoa method="allFieldNames"/>
+                    </property>
                 </properties>
 			     <elements>
 			         <element type="document" description="The bibliography files currently opened by Bibdesk.">

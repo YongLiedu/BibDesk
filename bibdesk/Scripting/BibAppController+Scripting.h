@@ -14,6 +14,10 @@
 
 - (NSString*) papersFolder;
 
+- (NSArray *)allTypes;
+
+- (NSArray *)allFieldNames;
+
 - (BOOL)application:(NSApplication *)sender delegateHandlesKey:(NSString *)key;
 
 
