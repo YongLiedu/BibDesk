@@ -18,30 +18,30 @@
 
 @c A macro for search-result abstracts
 
-@macro cmd {}
+@macro cmd {key}
 @html
-&#8984;
+&#8984;\key\
 @end html
 @ifnothtml
-Cmd-
+Cmd-\key\
 @end ifnothtml
 @end macro
 
-@macro shift {}
+@macro shiftcmd {key}
 @html
-&#8679;
+&#8679;&#8984;\key\
 @end html
 @ifnothtml
-Shift-
+Shift-Cmd-\key\
 @end ifnothtml
 @end macro
 
-@macro opt {}
+@macro optcmd {key}
 @html
-&#8997;
+&#8997;&#8984;\key\
 @end html
 @ifnothtml
-Option-
+Option-Cmd-\key\
 @end ifnothtml
 @end macro
 
@@ -299,7 +299,7 @@ btxdoc.dvi
 @kindex Shift-Cmd-N
 
 Choose "New Bibliography" from the File menu or 
-type the keyboard shortcut @shift{}@cmd{}N.
+type the keyboard shortcut @shiftcmd{N}.
 
 @node Opening a File
 @section Opening a File
@@ -424,6 +424,7 @@ characters as equivalent, and is case-insensitive
 
 @menu
 * Adding References::           
+* Adding References From Text Sources::           
 * Editing References::          
 * Deleting References::    
 * Browsing References::       
@@ -440,8 +441,13 @@ characters as equivalent, and is case-insensitive
 
 New references are added to the bibliography 
 with "New Reference" from the Bibliography menu, the keyboard
-shortcut @cmd{}N, or the New Reference toolbar button.
+shortcut @cmd{N}, or the New Reference toolbar button.
 
+@menu
+* Drag and Drop::
+@end menu
+
+@node Drag and Drop
 @subsection Drag and Drop
 
 @cindex drag and drop
@@ -452,11 +458,11 @@ from a text source (text editor, web browser). Here's a fancy picture:
 @image{gfx/dragIntoBib}
 
 
-@node Adding References
-@section Adding References
+@node Adding References From Text Sources
+@section Adding References From Text Sources
 @abstract{Adding new references from text sources.}
 
-@cindex creating references, from text
+@cindex creating references, from pasteboard
 @cindex creating references, from a file
 @cindex creating references, from the web
 @kindex Option-Cmd-L
@@ -464,10 +470,14 @@ from a text source (text editor, web browser). Here's a fancy picture:
 @kindex Cmd-L
 
 If you have a source of references that isn't in a structured form,
-you can use the ``Add New Publication from Text'' menu item in the
-``Publication'' menu (or the key shortcut @opt{}@cmd{}N) to open a
+you can use the ``Add New Publications from Pasteboard'' menu item in the
+``Publication'' menu (or the key shortcut @optcmd{L}) to open a
 sheet that lets you add references by selecting text and assigning
-that text to fields in a new reference.
+that text to fields in a new reference. You can also choose the 
+``Add New Publications from File'' menu item (key shortcut @shiftcmd{L}) 
+to add references from an arbitrary text file, or the 
+``Add New Publications from Web'' menu item (key shortcut @cmd{L}), 
+to add publactions from a website. 
 
 Examples of reference sources that this would be convenient for are
 emails, conference proceedings web sites, and the text from a list of
@@ -481,7 +491,7 @@ page that is not on the clipboard, you can use the ``Add New
 Publication from Web'' menu item instead.
 
 The ``Open'' button gives you the option to choose other sources of
-information. If the sheet is displaying a website, there are other
+information. If the sheet is displaying a website, there are navigation
 controls, including back, forward, and a button for reload and stop.
 
 Using the contextual menu on the web page, you can bookmark pages to
@@ -506,11 +516,10 @@ double-clicking on the rightmost column of the table.
 
 You can make adding data faster by just double-clicking the name of
 the field you want the selected text to fill and it will be added for
-you. You can also use the key shortcuts @cmd{}0 through @cmd{}9 to
+you. You can also use the key shortcuts @cmd{0} through @cmd{9} to
 copy the selected text over to the corresponding field.
 
-@c note: Double-clicking to transfer the data does not work for the web
-page view yet.
+@c note: Double-clicking to transfer the data does not work for the webpage view yet.
 
 
 
@@ -522,7 +531,7 @@ page view yet.
 
 Once references have been added to the bibliography, they can be
 edited by selecting a reference and choosing "Edit Reference" from the
-Bibliography menu, typing @cmd{}E, or double-clicking the
+Bibliography menu, typing @cmd{E}, or double-clicking the
 reference. When editing, changing pub type never loses information. In
 other words, if you put a booktitle in when it was inproceedings, and
 you change it to phdthesis, it will still have that booktitle.
@@ -616,7 +625,7 @@ it.
 
 @c FIXME
 
-You can edit a field as raw BibTeX by pressing @cmd{}R in the edit
+You can edit a field as raw BibTeX by pressing @cmd{R} in the edit
 window when one of the form fields has the keyboard focus.
 
 @node Editing Macro Definitions
@@ -712,7 +721,7 @@ and it can be added.
 @cindex printing
 @kindex Cmd-P
 
-Choosing "Print" from the File menu (@cmd{}P) prints the contents
+Choosing "Print" from the File menu (@cmd{P}) prints the contents
 of the lower browser pane of the selected reference.
 
 @node Saving The File
@@ -723,7 +732,7 @@ of the lower browser pane of the selected reference.
 @kindex Cmd-S
 @kindex Shift-Cmd-S
 
-Save (@cmd{}S) and Save As... (@shift{}@cmd{}S) under the File
+Save (@cmd{S}) and Save As... (@shiftcmd{S}) under the File
 menu will save your bibliography as a BibTeX file. 
 
 @cindex encoding
@@ -902,7 +911,7 @@ want to use the Custom Citation Strings Drawer.
 @kindex Shift-Cmd-C
 
 Choosing Show/Hide Custom Citation Strings from the Window menu
-(@shift{}@cmd{}C) toggles a drawer that allows you to drag and drop
+(@shiftcmd{C}) toggles a drawer that allows you to drag and drop
 citations into a TeX document using custom-defined citation strings,
 such as fullcite, citet, and citep.
 
@@ -978,7 +987,7 @@ service would insert ``CasObe00''.
 
 This help page describes options in the preferences you can use to
 customize BibDesk. To change your preferences, choose "Preferences"
-from the "BibDesk" menu, or press the key shortcut @cmd{}, (Command
+from the "BibDesk" menu, or press the key shortcut @cmd{,} (Command
 - comma).
 
 @heading Preference Panes
@@ -1259,7 +1268,7 @@ to the list manually using the "Add" button below the list.
 
 The Error panel provides feedback on errors contained in a bib
 file. You can always show the panel by selecting ``Show/Hide
-Error Panel'' from the Window menu (@shift{}@cmd{}E). This is
+Error Panel'' from the Window menu (@shiftcmd{E}). This is
 what the errors panel looks like:
 
 Clicking on a warning line in this table opens an editing window with
