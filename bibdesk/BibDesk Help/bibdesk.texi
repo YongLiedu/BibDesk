@@ -469,6 +469,8 @@ from a text source (text editor, web browser). Here's a fancy picture:
 @kindex Shift-Cmd-L
 @kindex Cmd-L
 
+@image{gfx/textImport}
+
 If you have a source of references that isn't in a structured form,
 you can use the ``Add New Publications from Pasteboard'' menu item in the
 ``Publication'' menu (or the key shortcut @optcmd{L}) to open a
@@ -622,6 +624,8 @@ it.
 
 @cindex macro
 @kindex Cmd-R
+
+@image{gfx/rawEdit}
 
 @c FIXME
 
@@ -1101,6 +1105,8 @@ check ``Automatically save RSS feeds'', everytime you save a .bib file, a corres
 
 @cindex character conversion
 
+@image{gfx/characterConversion}
+
 FIXME: add information about character conversion editing
 
 
@@ -1160,6 +1166,8 @@ to existing fields.
 @cindex custom types
 @cindex custom fields
 @cindex type info
+
+@image{gfx/typeInfo}
 
 FIXME: add information about typeinfo editing
 
