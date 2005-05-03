@@ -254,7 +254,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 		else {
 			[menuItem setState:NSOffState];
 		}
-		return ([[[OFPreferenceWrapper sharedPreferenceWrapper] objectForKey:BDSKUsesTeXKey] intValue] == NSOnState);
+		return ([[OFPreferenceWrapper sharedPreferenceWrapper] boolForKey:BDSKUsesTeXKey]);
 	}
 
 	return [super validateMenuItem:menuItem];
@@ -264,7 +264,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 - (BOOL) validateToolbarItem: (NSToolbarItem *) toolbarItem {
 
 	if ([[toolbarItem itemIdentifier] isEqualToString:PrvDocToolbarItemIdentifier]) {
-		return ([[[OFPreferenceWrapper sharedPreferenceWrapper] objectForKey:BDSKUsesTeXKey] intValue] == NSOnState);
+		return ([[OFPreferenceWrapper sharedPreferenceWrapper] boolForKey:BDSKUsesTeXKey]);
 	}
 	
     return [super validateToolbarItem:toolbarItem];

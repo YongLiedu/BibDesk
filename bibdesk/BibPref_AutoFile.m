@@ -20,11 +20,11 @@
 	BOOL custom = (formatPresetChoice == 0);
     NSString * error;
 	
-    [filePapersAutomaticallyCheckButton setState:[defaults integerForKey:BDSKFilePapersAutomaticallyKey]];
+    [filePapersAutomaticallyCheckButton setState:[defaults boolForKey:BDSKFilePapersAutomaticallyKey] ? NSOnState : NSOffState];
 
     [papersFolderLocationTextField setStringValue:[[defaults objectForKey:BDSKPapersFolderPathKey] stringByAbbreviatingWithTildeInPath]];
 
-    [formatLowercaseCheckButton setState:[defaults integerForKey:BDSKLocalUrlLowercaseKey]];
+    [formatLowercaseCheckButton setState:[defaults boolForKey:BDSKLocalUrlLowercaseKey] ? NSOnState : NSOffState];
 	if ([[BDSKFormatParser sharedParser] validateFormat:&formatString forField:BDSKLocalUrlString inFileType:BDSKBibtexString error:&error]) {
 		[self setLocalUrlFormatInvalidWarning:NO message:nil];
 		
@@ -106,7 +106,7 @@
 }
 
 - (IBAction)toggleFilePapersAutomaticallyAction:(id)sender{
-	[defaults setBool:[filePapersAutomaticallyCheckButton state]
+	[defaults setBool:([filePapersAutomaticallyCheckButton state] == NSOnState)
 			   forKey:BDSKFilePapersAutomaticallyKey];
 }
 
@@ -123,7 +123,7 @@
 }
 
 - (IBAction)changeLocalUrlLowercase:(id)sender{
-    [defaults setInteger:[sender state] forKey:BDSKLocalUrlLowercaseKey];
+    [defaults setBool:([sender state] == NSOnState) forKey:BDSKLocalUrlLowercaseKey];
 	[self updateUI];
 }
 

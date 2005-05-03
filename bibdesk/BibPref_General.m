@@ -67,7 +67,7 @@
 	else 
 		[previewMaxNumberComboBox setIntValue:maxNumber];
     
-    [editOnPasteButton setState:[defaults integerForKey:BDSKEditOnPasteKey]];
+    [editOnPasteButton setState:[defaults boolForKey:BDSKEditOnPasteKey] ? NSOnState : NSOffState];
 
     [checkForUpdatesButton setState:([defaults boolForKey:BDSKAutoCheckForUpdatesKey] == YES) ? NSOnState : NSOffState];
 
@@ -135,7 +135,7 @@
 }
 
 - (IBAction)changeEditOnPaste:(id)sender{
-    [defaults setInteger:[sender state] forKey:BDSKEditOnPasteKey];
+    [defaults setBool:([sender state] == NSOnState) forKey:BDSKEditOnPasteKey];
 }
 
 - (void)dealloc{

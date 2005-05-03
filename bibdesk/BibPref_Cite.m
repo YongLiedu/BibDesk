@@ -34,7 +34,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 	}
 
     [dragCopyRadio selectCellWithTag:[defaults integerForKey:BDSKDragCopyKey]];
-    [separateCiteCheckButton setState:[defaults integerForKey:BDSKSeparateCiteKey]];
+    [separateCiteCheckButton setState:[defaults boolForKey:BDSKSeparateCiteKey] ? NSOnState : NSOffState];
     [citeStringField setStringValue:[NSString stringWithFormat:@"\\%@", citeString]];
     if([separateCiteCheckButton state] == NSOnState){
         [citeBehaviorLine setStringValue:[NSString stringWithFormat:@"\\%@%@key1%@ \\%@%@key2%@",citeString, startCiteBracket, endCiteBracket,
@@ -56,7 +56,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 }
 
 - (IBAction)changeSeparateCite:(id)sender{
-    [defaults setInteger:[sender state] forKey:BDSKSeparateCiteKey];
+    [defaults setBool:([sender state] == NSOnState) forKey:BDSKSeparateCiteKey];
 	[self updateUI];
 }
 

@@ -2097,7 +2097,7 @@ int generalBibItemCompareFunc(id item1, id item2, void *context){
 	NSString *endCiteBracket = [sud stringForKey:BDSKCiteEndBracketKey]; 
 	
     NSNumber *i;
-    BOOL sep = ([sud integerForKey:BDSKSeparateCiteKey] == NSOnState);
+    BOOL sep = [sud boolForKey:BDSKSeparateCiteKey];
     
     NSEnumerator *e = [items objectEnumerator];
     while(i=[e nextObject]){
@@ -2285,7 +2285,7 @@ int generalBibItemCompareFunc(id item1, id item2, void *context){
 	while(newBI = [newPubE nextObject]){		
 		[self addPublication:newBI];
 		
-		if([[OFPreferenceWrapper sharedPreferenceWrapper] integerForKey:BDSKEditOnPasteKey] == NSOnState) {
+		if([[OFPreferenceWrapper sharedPreferenceWrapper] boolForKey:BDSKEditOnPasteKey]) {
 			[self editPub:newBI];
 		}
 	}
@@ -2324,7 +2324,7 @@ This method always returns YES. Even if some or many operations fail.
 			
 			[self updateUI];
 			
-			if([pw integerForKey:BDSKEditOnPasteKey] == NSOnState){
+			if([pw boolForKey:BDSKEditOnPasteKey]){
 				[self editPub:newBI];
 				//[[newBI editorObj] fixEditedStatus];  - deprecated
 			}
@@ -2627,7 +2627,7 @@ This method always returns YES. Even if some or many operations fail.
     //take care of the preview field (NSTextView below the pub table); if the enumerator is nil, the view will get cleared out
     [self displayPreviewForItems:[self selectedPubEnumerator]];
     // (don't just pass it 'e' - it needs its own enum.)
-    if([[OFPreferenceWrapper sharedPreferenceWrapper] integerForKey:BDSKUsesTeXKey] == NSOnState){
+    if([[OFPreferenceWrapper sharedPreferenceWrapper] boolForKey:BDSKUsesTeXKey]){
         NSMutableString *bibString = [NSMutableString string];
 
         // in case there are @preambles in it

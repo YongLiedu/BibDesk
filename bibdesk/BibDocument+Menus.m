@@ -133,7 +133,7 @@ Broken out of BibDocument and split up into smaller parts to make things more ma
 	else {
 		// multiple selection
 		// figure out whether we're dealing with a single or multiple commands
-		BOOL sep = ([sud integerForKey:BDSKSeparateCiteKey] == NSOnState);
+		BOOL sep = [sud boolForKey:BDSKSeparateCiteKey];
 
 		if (!sep) {
 			// single command
@@ -240,7 +240,7 @@ Broken out of BibDocument and split up into smaller parts to make things more ma
 	NSString * s;
 	
 	// check whether we are doing previews at all
-	if([[OFPreferenceWrapper sharedPreferenceWrapper] integerForKey:BDSKUsesTeXKey] != NSOnState){
+	if(![[OFPreferenceWrapper sharedPreferenceWrapper] boolForKey:BDSKUsesTeXKey]){
 		return NO;
 	}
 	
@@ -275,7 +275,7 @@ Broken out of BibDocument and split up into smaller parts to make things more ma
 	NSString * s;
 	
 	// check whether we are doing previews at all
-	if([[OFPreferenceWrapper sharedPreferenceWrapper] integerForKey:BDSKUsesTeXKey] != NSOnState){
+	if(![[OFPreferenceWrapper sharedPreferenceWrapper] boolForKey:BDSKUsesTeXKey]){
 		return NO;
 	}
 	

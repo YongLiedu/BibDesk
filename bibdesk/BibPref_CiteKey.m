@@ -29,8 +29,8 @@
 	NSString *error;
 	
 	// update the UI elements
-    [citeKeyAutogenerateCheckButton setState:[defaults integerForKey:BDSKCiteKeyAutogenerateKey]];
-    [citeKeyLowercaseCheckButton setState:[defaults integerForKey:BDSKCiteKeyLowercaseKey]];
+    [citeKeyAutogenerateCheckButton setState:[defaults boolForKey:BDSKCiteKeyAutogenerateKey] ? NSOnState : NSOffState];
+    [citeKeyLowercaseCheckButton setState:[defaults boolForKey:BDSKCiteKeyLowercaseKey] ? NSOnState : NSOffState];
 	if ([[BDSKFormatParser sharedParser] validateFormat:&citeKeyFormat forField:BDSKCiteKeyString inFileType:BDSKBibtexString error:&error]) {
 		[self setCiteKeyFormatInvalidWarning:NO message:nil];
 		
@@ -99,12 +99,12 @@
 }
 
 - (IBAction)changeCiteKeyAutogenerate:(id)sender{
-    [defaults setInteger:[sender state] forKey:BDSKCiteKeyAutogenerateKey];
+    [defaults setBool:([sender state] == NSOnState) forKey:BDSKCiteKeyAutogenerateKey];
 	[self updateUI];
 }
 
 - (IBAction)changeCiteKeyLowercase:(id)sender{
-    [defaults setInteger:[sender state] forKey:BDSKCiteKeyLowercaseKey];
+    [defaults setBool:([sender state] == NSOnState) forKey:BDSKCiteKeyLowercaseKey];
 	[self updateUI];
 }
 

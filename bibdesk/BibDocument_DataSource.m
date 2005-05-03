@@ -74,7 +74,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 				if (! [[pub valueOfField:BDSKChapterString] isEqualTo:@""] ) {
 				   return [NSString stringWithFormat:NSLocalizedString(@"%@ (chapter of %@)", @"Chapter of inbook (chapter of Title)"), [pub valueOfField:BDSKChapterString], [pub title]];
 			     } else if (! [[pub valueOfField:BDSKPagesString] isEqualTo:@""]) {
-				   return [NSString stringWithFormat:BDSKChapterString(@"%@ (pp %@)", @"Title of inbook (pp Pages)"), [pub title], [pub valueOfField:BDSKPagesString]];
+				   return [NSString stringWithFormat:NSLocalizedString(@"%@ (pp %@)", @"Title of inbook (pp Pages)"), [pub title], [pub valueOfField:BDSKPagesString]];
 				 } else {
 					return [pub title];
 				}
@@ -249,7 +249,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 	NSString *startCite = [NSString stringWithFormat:@"\\%@%@",[sud stringForKey:BDSKCiteStringKey], startCiteBracket];
 	NSString *endCiteBracket = [sud stringForKey:BDSKCiteEndBracketKey]; 
     NSMutableArray *rows = nil;
-    BOOL sep = ([[OFPreferenceWrapper sharedPreferenceWrapper] integerForKey:BDSKSeparateCiteKey] == NSOnState);
+    BOOL sep = [[OFPreferenceWrapper sharedPreferenceWrapper] boolForKey:BDSKSeparateCiteKey];
     NSNumber *idx;
 
     if(tv == (NSTableView *)ccTableView){
@@ -300,7 +300,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
     NSMutableString *localPBString = [NSMutableString string];
     NSEnumerator *enumerator;
     NSNumber *i;
-    BOOL sep = ([[OFPreferenceWrapper sharedPreferenceWrapper] integerForKey:BDSKSeparateCiteKey] == NSOnState);
+    BOOL sep = [[OFPreferenceWrapper sharedPreferenceWrapper] boolForKey:BDSKSeparateCiteKey];
 
     int dragType = [[sud objectForKey:BDSKDragCopyKey] intValue];
 

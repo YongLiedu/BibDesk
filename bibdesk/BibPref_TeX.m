@@ -23,7 +23,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 }
 
 - (void)updateUI{
-    [usesTeXButton setState:[defaults integerForKey:BDSKUsesTeXKey]];
+    [usesTeXButton setState:[defaults boolForKey:BDSKUsesTeXKey] ? NSOnState : NSOffState];
   
     [texBinaryPath setStringValue:[defaults objectForKey:BDSKTeXBinPathKey]];
     [bibtexBinaryPath setStringValue:[defaults objectForKey:BDSKBibTeXBinPathKey]];
@@ -59,7 +59,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
         [texBinaryPath setEnabled:YES];
         [bibtexBinaryPath setEnabled:YES];
 		
-        [defaults setInteger:NSOffState forKey:BDSKUsesTeXKey];
+        [defaults setBool:NO forKey:BDSKUsesTeXKey];
 		
 		// hide preview panel if necessary
 		if ([[NSApp delegate] isShowingPreviewPanel]) {
@@ -77,7 +77,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 			// Enable the style changing interface
 			[bibTeXStyle setEnabled:YES];
 			
-			[defaults setInteger:NSOnState forKey:BDSKUsesTeXKey];
+			[defaults setBool:YES forKey:BDSKUsesTeXKey];
 		
 			// show preview panel if necessary
 			if ([[defaults objectForKey:@"BDSK Showing Preview Key"] isEqualToString:@"showing"]) {
