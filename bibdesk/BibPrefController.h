@@ -58,7 +58,6 @@ extern NSString *BDSKDragCopyKey;
 extern NSString *BDSKUsesTeXKey;
 extern NSString *BDSKEditOnPasteKey;
 extern NSString *BDSKSeparateCiteKey;
-extern NSString *BDSKShowColsKey;
 extern NSString *BDSKShownColsNamesKey;
 extern NSString *BDSKShowStatusBarKey;
 extern NSString *BDSKShowEditorStatusBarKey;
@@ -94,7 +93,6 @@ extern NSString *BDSKColumnOrderKey;
 extern NSString *BDSKDefaultSortedTableColumnKey;
 extern NSString *BDSKDefaultSortedTableColumnIsDescendingKey;
 
-extern NSString *BDSKPubTypeKey;
 extern NSString *BDSKPubTypeStringKey;
 extern NSString *BDSKShowWarningsKey;
 
@@ -108,7 +106,6 @@ extern NSString *BDSKRowColorBlueKey;
 
 extern NSString *BDSKPapersFolderPathKey;
 extern NSString *BDSKFilePapersAutomaticallyKey;
-extern NSString *BDSKKeepPapersFolderOrganizedKey;
 extern NSString *BDSKLocalUrlFormatKey;
 extern NSString *BDSKLocalUrlFormatPresetKey;
 extern NSString *BDSKLocalUrlLowercaseKey;

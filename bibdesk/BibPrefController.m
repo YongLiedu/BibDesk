@@ -45,7 +45,6 @@ NSString *BDSKCiteKeyFormatPresetKey = @"Cite Key Format Preset";
 NSString *BDSKCiteKeyAutogenerateKey = @"Cite Key Autogenerate";
 NSString *BDSKCiteKeyLowercaseKey = @"Cite Key Generate Lowercase";
 
-NSString *BDSKShowColsKey = @"Shown Columns";
 NSString *BDSKShownColsNamesKey = @"Shown Column Names";
 NSString *BDSKColumnWidthsKey = @"Column Widths by Name";
 NSString *BDSKColumnOrderKey = @"Column Names in Order";
@@ -70,7 +69,6 @@ NSString *BDSKCustomCiteStringsKey = @"Custom CiteStrings";
 NSString *BDSKAutoSaveAsRSSKey = @"Auto-save as RSS";
 NSString *BDSKRSSDescriptionFieldKey = @"Field to use as Description in RSS";
 
-NSString *BDSKPubTypeKey = @"Current Publication Type";
 NSString *BDSKPubTypeStringKey = @"Current Publication Type String";
 
 NSString *BDSKShowWarningsKey = @"Show Warnings in Error Panel";
@@ -84,7 +82,6 @@ NSString *BDSKRowColorBlueKey = @"BlueComponentColor of alternating rows Key";
 
 NSString *BDSKPapersFolderPathKey = @"Path to the papers folder";
 NSString *BDSKFilePapersAutomaticallyKey = @"File papers into the papers folder automatically";
-NSString *BDSKKeepPapersFolderOrganizedKey = @"Keep files in the papers folder organized";
 NSString *BDSKLocalUrlFormatKey = @"Local-Url Format";
 NSString *BDSKLocalUrlFormatPresetKey = @"Local-Url Format Preset";
 NSString *BDSKLocalUrlLowercaseKey = @"Local-Url Generate Lowercase";
