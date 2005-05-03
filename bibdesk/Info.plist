@@ -230,15 +230,13 @@
 				<key>defaultsDictionary</key>
 				<dict>
 					<key>File papers into the papers folder automatically</key>
-					<string>0</string>
-					<key>Keep files in the papers folder organized</key>
-					<string>0</string>
+					<false/>
 					<key>Local-Url Format</key>
 					<string>%L</string>
 					<key>Local-Url Format Preset</key>
 					<integer>1</integer>
 					<key>Local-Url Generate Lowercase</key>
-					<integer>0</integer>
+					<false/>
 					<key>Path to the papers folder</key>
 					<string>~/Documents/Papers</string>
 				</dict>
@@ -274,11 +272,11 @@
 						<string>citeauthor</string>
 					</array>
 					<key>Drag and Copy</key>
-					<string>1</string>
+					<integer>1</integer>
 					<key>Edit on Paste</key>
-					<string>0</string>
+					<false/>
 					<key>Separate Cite</key>
-					<string>0</string>
+					<false/>
 				</dict>
 				<key>icon</key>
 				<string>citation.tiff</string>
@@ -298,13 +296,13 @@
 				<key>defaultsDictionary</key>
 				<dict>
 					<key>Cite Key Autogenerate</key>
-					<integer>0</integer>
+					<false/>
 					<key>Cite Key Format</key>
 					<string>%a1:%Y%r2</string>
 					<key>Cite Key Format Preset</key>
 					<integer>1</integer>
 					<key>Cite Key Generate Lowercase</key>
-					<integer>0</integer>
+					<false/>
 				</dict>
 				<key>icon</key>
 				<string>key.tiff</string>
@@ -350,9 +348,7 @@
 					<key>Auto-save as RSS</key>
 					<false/>
 					<key>Default string encoding for opening and saving</key>
-					<string>1</string>
-					<key>Export BibTeX document when saving BibDesk document</key>
-					<string>NO</string>
+					<integer>1</integer>
 					<key>Load files in background</key>
 					<false/>
 					<key>Output Template File</key>
@@ -389,35 +385,33 @@
 					<string>1.010918794815856e-310</string>
 					<key>Check for updates when starting</key>
 					<true/>
-					<key>Column Widths By Name</key>
+					<key>Column Widths by Name</key>
 					<dict>
 						<key>1st Author</key>
-						<string>80</string>
+						<real>80.0</real>
 						<key>2nd Author</key>
-						<string>80</string>
+						<real>80.0</real>
 						<key>3rd Author</key>
-						<string>80</string>
+						<real>80.0</real>
 						<key>Category</key>
-						<string>50</string>
+						<real>50.0</real>
 						<key>Cite Key</key>
-						<string>85.4439697265625</string>
+						<real>85.0</real>
 						<key>Date</key>
-						<string>50</string>
+						<real>50.0</real>
 						<key>Local-Url</key>
-						<string>18</string>
+						<real>18.0</real>
 						<key>No Identifier</key>
-						<string>176</string>
+						<real>176.0</real>
 						<key>Read</key>
-						<string>29</string>
+						<real>29.0</real>
 						<key>Title</key>
-						<string>300</string>
+						<real>300.0</real>
 						<key>Type</key>
-						<string>55</string>
+						<real>55.0</real>
 						<key>Url</key>
-						<string>23</string>
+						<real>23.0</real>
 					</dict>
-					<key>Current Publication Type</key>
-					<string>6</string>
 					<key>Current Publication Type String</key>
 					<string>Inproceedings</string>
 					<key>Current Quick Search Key</key>
@@ -431,13 +425,13 @@
 					<key>GreenComponentColor of alternating rows Key</key>
 					<string>1.093888830242598e-310</string>
 					<key>Maximum Number of Items in Preview Pane</key>
-					<string>0</string>
+					<integer>0</integer>
 					<key>Preview PDF Scale Factor</key>
-					<string>1.0</string>
+					<real>1.0</real>
 					<key>Preview Pane Displays What?</key>
-					<string>1</string>
+					<integer>1</integer>
 					<key>Preview RTF Scale Factor</key>
-					<string>1.0</string>
+					<real>1.0</real>
 					<key>Quick Search Keys</key>
 					<array>
 						<string>Keywords</string>
@@ -450,7 +444,7 @@
 					<key>Show Status Bar</key>
 					<true/>
 					<key>Show Warnings in Error Panel</key>
-					<string>0</string>
+					<false/>
 					<key>Shown Column Names</key>
 					<array>
 						<string>Local-Url</string>
@@ -463,19 +457,10 @@
 						<string>2nd Author</string>
 						<string>3rd Author</string>
 					</array>
-					<key>Shown Columns</key>
-					<array>
-						<string>1</string>
-						<string>1</string>
-						<string>1</string>
-						<string>1</string>
-						<string>0</string>
-						<string>0</string>
-					</array>
 					<key>Snoop Drawer Content</key>
-					<string>0</string>
+					<integer>0</integer>
 					<key>Startup Behavior</key>
-					<string>0</string>
+					<integer>0</integer>
 					<key>TableView Font</key>
 					<string>LucidaGrande</string>
 					<key>TableView Font Size</key>
@@ -529,11 +514,11 @@
 					<key>BibTeX Style</key>
 					<string>abbrv</string>
 					<key>Character encoding for TeX preview file</key>
-					<string>1</string>
+					<integer>1</integer>
 					<key>TeX Binary Path</key>
 					<string>/usr/local/teTeX/bin/powerpc-apple-darwin-current/pdflatex</string>
 					<key>Uses TeX</key>
-					<string>0</string>
+					<false/>
 				</dict>
 				<key>icon</key>
 				<string>preview.tiff</string>
