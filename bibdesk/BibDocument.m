@@ -2805,8 +2805,11 @@ This method always returns YES. Even if some or many operations fail.
 }
 
 - (IBAction)addCustomCiteString:(id)sender{
-    [customStringArray addObject:@"citeCommand"];
+    int row = [customStringArray count];
+	[customStringArray addObject:@"citeCommand"];
     [ccTableView reloadData];
+	[ccTableView selectRow:row byExtendingSelection:NO];
+	[ccTableView editColumn:0 row:row withEvent:nil select:YES];
     [[OFPreferenceWrapper sharedPreferenceWrapper] setObject:customStringArray forKey:BDSKCustomCiteStringsKey];
 }
 
@@ -2814,6 +2817,8 @@ This method always returns YES. Even if some or many operations fail.
     if([ccTableView numberOfSelectedRows] == 0)
 		return;
 	
+	if ([ccTableView editedRow] != -1)
+		[documentWindow makeFirstResponder:ccTableView];
 	[customStringArray removeObjectAtIndex:[ccTableView selectedRow]];
 	[ccTableView reloadData];
     [[OFPreferenceWrapper sharedPreferenceWrapper] setObject:customStringArray forKey:BDSKCustomCiteStringsKey];
