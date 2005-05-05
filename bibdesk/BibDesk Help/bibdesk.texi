@@ -74,6 +74,8 @@ Option-Cmd-\key\
 @c Make sure that each node is included in a menu of a node one level higher. 
 @c Usually, the menu comes just before the lower level sectioning commands. 
 
+
+
 @ifnottex
 @node Top
 @top BibDesk 
@@ -124,7 +126,7 @@ about the BibTeX file format.
 * indexpref::           Preference Settings Index
 * indexky::             Keyboard Shortcut Index
 * Character Conversion:: Character Conversion
-* Citation Key Format Reference:: Citation Key Format Reference
+* Autogeneration Format Syntax:: Autogeneration Format Syntax
 @end menu
 
 @shortcontents
@@ -135,6 +137,8 @@ Portions of BibDesk:
 
 Copyright @copyright{} 2001 - 2005 Michael O. McCracken@*
 Copyright @copyright{} many others@*
+
+
 
 @node Quick Start
 @chapter Quick Start 
@@ -650,6 +654,18 @@ it.
 You can edit a field as raw BibTeX by pressing @cmd{R} in the edit
 window when one of the form fields has the keyboard focus.
 
+See the @ref{BibTeX Intro} for more details on BibTeX with macros.
+
+When a field is edited as raw BibTeX, an extra view is shown below the field. 
+This shows the expanded value of the BibTeX string, or reports errors if the BibTeX 
+string you entered is not valid BibTeX. 
+Note that bare strings in raw BibTeX mode are surrounded by curly braces 
+(`@{' and `@}') or double-quotes (`"'). 
+
+The next time you try to edit a field that contains raw BibTeX, 
+the field will automatically go into raw BibteX mode. 
+
+
 @node Editing Macro Definitions
 @subsection Editing Macro Definitions
 @abstract{How to edit the definitions of a macro.}
@@ -659,17 +675,22 @@ window when one of the form fields has the keyboard focus.
 
 @image{gfx/macrosWindow}
 
+
+
 @node Deleting References
 @section Deleting References
+
+@cindex deleting
 
 References can be deleted by selecting the reference and choosing
 @menutitle{Delete Reference} from the Bibliography menu or pressing the delete
 key. Either way, a warning will appear to verify that you want to
 delete the reference.
 
+
+
 @node Browsing References
 @section Browsing References
-
 
 The references are presented in a table with a detail pane on the
 bottom of the window. You can sort the table by column by clicking on
@@ -682,7 +703,7 @@ the name of each column, in the header of the table.
 @cindex displaying custom fields
 @cindex table columns
 
-@heading Customizing the table
+@heading Customizing the Table
 
 You can control the order of the columns by moving them directly.
 
@@ -696,9 +717,19 @@ field that isn't listed by typing in the box. You can add a column for
 any field you like, even if that field doesn't exist in any of the
 publications listed.
 
-The Columns almost always simply display the content of the relevant field.
-There are a few exceptions where BibDesk tries to `do the right thing' when
-BibTeX is difficult.  The inbook type uses Title to refer to the title of 
+You can also easily remove a column, by unchecking the columns name in 
+one of the menus mentioned above. 
+
+The Columns usually simply display the content of the relevant field.
+There are a few special columns, where information is displayed that 
+is more informative to the user. Below we discuss some of these special fields. 
+
+@cindex Title
+@heading Title 
+
+Normally, the Title column will display the content of a Title field, if it exists. 
+There is one exception however, where BibDesk tries to `do the right thing' 
+because of a BibTeX quirck. The inbook type uses Title to refer to the title of 
 the whole work and the Chapter field to refer to the specific part of the 
 work that is cited.  For the inbook type, then, if there is a Chapter field
 that is displayed along with the Book title, thus:
@@ -709,7 +740,9 @@ Chapter : Title
 
 If Chapter is empty, Pages must be present so the Title column will display
 
+@example
 Title (pp Pages)
+@end example
 
 @cindex Container
 @heading Container 
@@ -719,25 +752,52 @@ types that are part of a larger document and displays the title of that
 'Container' document.  It will display a slightly different field depending
 on the type of the item.
 
-@table
-@item article
-Journal
-@item incollection
-@itemx inproceedings
-@itemx conference
-Booktitle
-@item inbook
-Title
-@item book
-Series 
-@item commented
-Volumetitle
-@end table
+@multitable @columnfractions .5 .5
+@headitem Type @tab Container Field
+@item article @tab Journal
+@item incollection @tab Booktitle
+@item inproceedings @tab Booktitle
+@item conference @tab Booktitle
+@item inbook @tab Title
+@item book @tab Series 
+@item commented @tab Volumetitle
+@end multitable
 
 If you use a special type that has a container concept write to bibdesk-develop
 and it can be added. 
 
-FIXME: add information about double-clicking and dragging from the Local-Url and Url columns
+@cindex Local-Url
+@heading Local-Url 
+
+The Local-Url column is the column with the column with a little icon depicting a file in the header. 
+
+The Local-Url column displays a little icon for a file that is linked through 
+the Local-Url field, of course only if the Local-Url field is set. 
+If the Local-Url field for an item is set, but the file could not be found 
+on the system, the cell in the Local-Url column displays a file icon with a question mark. 
+This way you can easily track missing linked files. 
+
+When a cell in the Local-Url column is double-clicked, the linked file will be opened 
+using the default application for the corresponding file type. 
+You can also drag an icon from the Local-Url column, creating a copy of the linked file. 
+
+@cindex Url
+@heading Url
+
+The Url column is the column with the column with an @@-sign in the header. 
+
+Similarly, the Url column displays a little webloc icon (a file icon with an @@-sign) 
+when the Url field of the item is set. 
+
+Double-clicking a cell in the Url column will open the linked remote URL 
+in your default browser application.   
+
+@cindex Date
+@heading Date
+
+The Date column displays the date of the item, which is guessed from the Year and Month 
+fields of the item. 
+
 
 
 @node Printing References
@@ -748,6 +808,8 @@ FIXME: add information about double-clicking and dragging from the Local-Url and
 
 Choosing @menutitle{Print} from the File menu (@cmd{P}) prints the contents
 of the lower browser pane of the selected reference.
+
+
 
 @node Saving the File
 @section Saving the File
@@ -765,6 +827,8 @@ To save a file with an encoding other than the one it was read in
 using, use the @menutitle{Export BibTeX With Encoding} command, found in the 
 @menutitle{Export} sub-menu of the @menutitle{File} menu. Choose the encoding you want
 from the pop-up button at the bottom of the resulting sheet.
+
+
 
 @node Previewing Typeset Output
 @section Previewing Typeset Output
@@ -793,9 +857,8 @@ current bib-item.
 @subsection Importing RIS Directly
 @cindex RIS
 
-
-
 FIXME: Notes about using the import RIS service
+
 
 
 @node Citation Keys
@@ -811,18 +874,31 @@ You can set the citation key to be automatically generated for a new
 reference in the preferences (See the @ref{Cite Key Preferences} preference pane).
 
 @menu
-* When the Key is Generated::   
-* Generating a Key for an Existing Publications::  
-* Customizing the Format of Keys::  
+* When the Key is Generated::       When BibDesk automatically generates the key.
+* Generating a Key for an Existing Publications::  How to force generating a key.
+* Customizing the Format of Keys::  How to customize the way the key is generated. 
 @end menu
+
+
 
 @node When the Key is Generated
 @section When the Key is Generated
 @cindex cite key
 @cindex key
 
+The key will be autogenerated only after all the necessary fields are set. 
+Which fields are necessary to generate the key depends on the format 
+that is used for the cite key. This format can be set in the 
+@ref{Cite Key Preferences,Cite Key Preferences}.
 
-When there is enough data entered...
+Of course the key will never be automatically generated if you do not choose the 
+autogenerate option in the @ref{Cite Key Preferences,Cite Key Preferences}.
+
+When a key is automatically generated, a message will appear in the 
+status bar of the Editor window, if that window is open and the 
+status bar is shown. 
+
+
 
 @node Generating a Key for an Existing Publications
 @section Generating a Key for an Existing Publications
@@ -831,19 +907,26 @@ When there is enough data entered...
 @cindex key
 @kindex Cmd-K
 
-@cartouche 
-Use the action menu in the editor.
-@end cartouche
+Cite keys can be generated automatically using the @ref{Cite Key Preferences,Cite Key Preferences}. 
+Note that the BibDesk will only automatically generate a key when all the necessary 
+information is supplied. 
+
+If you want to force a cite key to be generated, for example when you do not have the 
+autogeneration feature turned on, or you know you do not have the full bibliographical 
+information, you can choose @menutitle{Generate Cite Key} from the @menutitle{Publication} 
+menu (keyboard shortcut @cmd{K}), or from the action menu in the Editor for the item. 
+
+
 
 @node Customizing the Format of Keys
 @section Customizing the Format of Keys
-@cindex cite key
-@cindex key
+@cindex cite key format
 
+For setting the format used to generate the key, 
+see the @ref{Cite Key Preferences} preference help topic.
+The syntax of the format is described in more detail in 
+@ref{Autogeneration Format Syntax}. 
 
-@c FIXME
-
-See prefs, see the @xref{Citation Key Format Reference}.
 
 
 @node AutoFile
@@ -864,27 +947,56 @@ Papers Folder as described in the
 @menu
 * Automatically Move Files::    How BibDesk can keep new papers organized automatically once you've consolidated them.
 * Consolidate Linked Files::    A command to move all linked files to your Papers Folder.
+* Customizing the Format the Local-Url::  How to customize the generated location of used for AutoFile. 
 @end menu
+
+
 
 @node Automatically Move Files
 @section Automatically Move Files
 
+@cindex AutoFile
+
 When linking a file by dragging and dropping it onto an edit window or
 the publications table, or by using the Choose File button in the edit
-window, AutoFile will automatically move the file to the Papers Folder
-if the "File Papers Automatically" preference is selected, as
-described in the @ref{AutoFile Preferences} preference help topic.
+window, AutoFile will try to automatically move the file to the Papers Folder
+if the @buttontitle{File Papers Automatically} preference is selected, as
+described in the @ref{AutoFile Preferences} preference help topic. 
+
+Note however that the actual move can be delayed if not all the fields 
+that are necessary to generate the new location are set. 
+Which fields are necessary to generate the location depends on the format 
+that is used for the Local-Url. This format can be set in the 
+@ref{AutoFile Preferences,AutoFile Preferences}.
+
+Of course the file will never be automatically moved if you do not choose the 
+@buttontitle{File Papers Automatically} option in the 
+@ref{AutoFile Preferences,AutoFile Preferences}.
+
+When a file is automatically moved, a message will appear in the 
+status bar of the Editor window, if that window is open and the 
+status bar is shown. 
+
 
 
 @node Consolidate Linked Files
 @section Consolidate Linked Files
 
+@cindex consolidate linked files
+
 @image{gfx/consolidateLinkedFiles}
 
-Choose this command to scan all publications in the file for linked
-files. A preview window will be opened that shows you some information
-about each of the linked files. You can then choose to move them all
-to your Papers Folder or cancel.
+Choose this command to scan all selected publications in the file for linked
+files. A dialog will be opened that asks you for some options. 
+
+If you choose @buttontitle{Move All}, all the linked files of selected items 
+will be moved to the generated location, even if not all the fields necessary 
+for the location are set. 
+
+If you choose @buttontitle{Move Complete Only}, only the files for which 
+all the fields necessary for generating the Local-Url are set will be moved. 
+Which fields are necessary to generate the location depends on the format 
+that is used for the Local-Url.
 
 @image{gfx/consolidateLinkedFilesDialog}
 
@@ -899,6 +1011,22 @@ dialog will show you what the problems were:
 @cindex consolidating linked files, undo
 
 Consolidating linked files is undoable, so feel free to experiment.
+
+You can also AutoFile a single linked file by choosing the 
+@menutitle{Auto File Paper} menu item in the action menu 
+of the Editor. 
+
+
+
+@node Customizing the Format the Local-Url
+@section Customizing the Format the Local-Url
+
+For setting the format used to generate the new location for AutoFile, 
+see the @ref{AutoFile Preferences} preference help topic.
+The syntax of the format is described in more detail in 
+@ref{Autogeneration Format Syntax}. 
+
+
 
 @node Inserting Citations
 @chapter Inserting Citations
@@ -929,20 +1057,34 @@ want to use the Custom Citation Strings Drawer.
 * System Service::              
 @end menu
 
+
+
 @node The Custom Citation Strings Drawer
 @section The Custom Citation Strings Drawer
 
 @cindex	custom citation strings
 @kindex Shift-Cmd-C
 
-Choosing Show/Hide Custom Citation Strings from the Window menu
+Choosing @menutitle{Show/Hide Custom Citation Strings} from the Window menu
 (@shiftcmd{C}) toggles a drawer that allows you to drag and drop
 citations into a TeX document using custom-defined citation strings,
-such as fullcite, citet, and citep.
+such as @code{fullcite}, @code{citet}, and @code{citep}.
 
 @image{gfx/citeDrawer}
 
-FIXME: add editing custom citation strings
+Dragging a custom citation string from the drawer will put a LaTeX 
+citation command for the currently selected items on the pasteboard, 
+using the corresponding custom citation command rather than the 
+default one. See @ref{Citation Preferences} for setting the 
+default citation command and the command style to use. 
+
+You can edit the list of custom citation strings from the drawer. 
+To add a custom citation string, choose the @buttontitle{+} button. 
+You can change the name of a citation string by double-clicking on the item. 
+To remove a custom citation string, select the corresponding item 
+in the table, and choose the @buttontitle{-} button. 
+
+
 
 @node Autocompletion
 @section Autocompletion
@@ -950,6 +1092,8 @@ FIXME: add editing custom citation strings
 BibDesk can install a plugin that lets you search your database and
 insert citation commands conveniently without leaving your text
 editing application. @xref{External Autocompletion}
+
+
 
 @node System Service
 @section System Service
@@ -1004,6 +1148,8 @@ the key for you. For instance, in our example , selecting
 ``CasO'' and invoking the @menutitle{Complete Cite Key}
 service would insert ``CasObe00''.
 
+
+
 @node Preferences Guide
 @chapter Preferences Guide
 
@@ -1027,6 +1173,8 @@ from the @menutitle{BibDesk} menu, or press the key shortcut @cmd{,} (Command
 * AutoFile Preferences::       Set up a directory to automatically store copies of papers.         
 * Autocompletion Preferences:: Install and configure the autocompletion system.           
 @end menu
+
+
 
 @node General Preferences
 @section General
@@ -1057,6 +1205,7 @@ open the edit window for an item you have pasted or dragged in.
 See @ref{Getting More Help} for information on the Error panel.
 
 
+
 @node Citation Preferences
 @section Citation
 @abstract{Configuring Dragging and Citation Commands}
@@ -1084,6 +1233,7 @@ to other applcations from BibDesk.
 @item Bracket Style lets you choose to use square brackets for copy/paste and dragging citations, for compatibility with ConTeXt.
 @item Separate Citations lets you choose whether to have bibdesk drop strings like \cite@{key1,key2@} or \cite@{key1@} \cite@{key2@} when multiple items are involved.
 @end itemize
+
 
 
 @node Files Preferences
@@ -1145,15 +1295,55 @@ errors and warning by showing the Error Panel, as described in @ref{Getting More
 * Custom Character Conversions::
 @end menu
 
+
 @node Custom Character Conversions
 @subsection Custom Character Conversions
 @abstract{Configuring Custom Character Conversions}
 
 @cindex character conversion
 
+The Character Conversions Editor allows you to add characters to be converted 
+between TeX and Unicode. See @ref{Character Conversion} for more details. 
+
+You can open the Character Conversions Editor by choosing the 
+``Custom character conversions'' button in the @ref{Files Preferences,Files Preferences}. 
+
 @image{gfx/characterConversion}
 
-FIXME: add information about character conversion editing
+BibDesk uses two sets of character conversions between TeX and Unicode. 
+Conversions can occur in both directions, or they can occur only from 
+Unicode to TeX. With the @menutitle{One-Way/Two-Way Conversions} popup you 
+can choose the type of conversions to edit. 
+
+The left column displays Unicode characters that BibDesk should convert to 
+TeX. These can only be @emph{single} Unicode characters. 
+
+Note that for two-way conversions, the TeX equivalent should @emph{always} 
+start with @code{@{\} and end with @code{@}}. Therefore, the editor does not 
+allow you to edit these characters when you are editing a two-way conversion. 
+
+You can add a new character conversion by choosing the @buttontitle{+} button. 
+Choosing the @buttontitle{-} button will remove the currently selected items. 
+
+When you are done editing, you should choose the @buttontitle{OK} button 
+to save your edits. If you choose the @buttontitle{Cancel} button, 
+your changes will be lost. 
+
+@heading Notes
+
+@itemize
+@item If you want to convert a Unicode character to TeX that is not surrounded by 
+@code{@{\} and @code{@}}, you can only add it as a one-way conversion.
+
+@item A new conversion must first be made valid, before you can edit another entry. 
+Note that duplicate characters are not allowed. In particular, you are not allowed 
+to overwrite character conversions that BibDesk has defined internally. 
+
+@item If you simply close the editor window, without choosing the @buttontitle{OK} or 
+@buttontitle{Cancel} button, your changes will @emph{not} be saved, even though 
+they will show up on a subsequent edit. 
+@end itemize
+
 
 
 @node Preview Preferences
@@ -1190,6 +1380,7 @@ Unicode characters. Therefore if you want to use other encodings then ASCII (TeX
 modify the template and TeX command appropriately. 
 
 
+
 @node Default Fields Preferences
 @section Default Fields
 @abstract{Configuring the Default Fields}
@@ -1216,6 +1407,7 @@ to existing fields.
 * Custom Types and Fields::
 @end menu
 
+
 @node Custom Types and Fields
 @subsection Custom Types and Fields
 @abstract{Configuring Custom Default Fields and Types}
@@ -1224,9 +1416,41 @@ to existing fields.
 @cindex custom fields
 @cindex type info
 
+The TypeInfo Editor allows you to add and manage custom types and fields to BibDesk. 
+You can add new types, add new fields to existing types, or chnage the order in which 
+BibDesk presents the types and fields. 
+
+You can open the TypeInfo Editor by choosing the 
+``Custom BibteX types and fields'' button in the @ref{Default Fields Preferences,Default Fields Preferences}. 
+
 @image{gfx/typeInfo}
 
-FIXME: add information about typeinfo editing
+The Required Fields and Optional Fields tables list the fields for the 
+currently selected type. 
+
+You can add new types and fields by choosing the @buttontitle{+} buttons 
+under the respective tables. You can remove selected typed or fields from 
+one of the lists by choosing the appropriate @buttontitle{-} button. 
+
+By dragging the entries, you can change the order in which the fields and 
+types are presented to you in the Editor window.
+
+Choosing the @buttontitle{Revert All To Default} button will revert all the 
+types and fields to their default values. 
+Choosing the @buttontitle{Revert Current To Default} button reverts only the 
+fields for the currently selected types to the defaults. Note that this will 
+remove all the fields for new custom types, but not the types themselves. 
+
+When you are done editing, you should choose the @buttontitle{OK} button 
+to save your edits. If you choose the @buttontitle{Cancel} button, 
+your changes will be lost. 
+
+@heading Note
+
+If you simply close the editor window, without choosing the @buttontitle{OK} or 
+@buttontitle{Cancel} button, your changes will @emph{not} be saved, even though 
+they will show up on a subsequent edit. 
+
 
 
 @node Cite Key Preferences
@@ -1252,7 +1476,7 @@ format string to any valid format.
 field that is used to automatically generate cite keys. The cite key
 format string can contain several special format specifiers, which are
 a %-character followed by a specifier character and optionally zero to
-two numbers. See @ref{Citation Key Format Reference} for a
+two numbers. See @ref{Autogeneration Format Syntax} for a
 more detailed description of the syntax.
 
 @prefitem{Choose a format specifier to add} This allows you to easily
@@ -1261,6 +1485,7 @@ button will only be visible in custom mode.
 
 @prefitem{Generate lowercase cite keys} Selecting this option will generate 
 cite keys in all lowercase characters. 
+
 
 
 @node AutoFile Preferences
@@ -1292,7 +1517,7 @@ format string to any valid format.
 automatically generate new locations for auto filed papers. The Local-Url 
 format string can contain several special format specifiers, which are
 a %-character followed by a specifier character and optionally zero to
-two numbers. See @ref{Citation Key Format Reference} for a
+two numbers. See @ref{Autogeneration Format Syntax} for a
 more detailed description of the syntax. This path is relative to the Papers Folder. 
 
 @prefitem{Choose a format specifier to add} This allows you to easily
@@ -1301,6 +1526,7 @@ button will only be visible in custom mode.
 
 @prefitem{Generate lowercase file names} Selecting this option will generate 
 paths in all lowercase characters. 
+
 
 
 @node Autocompletion Preferences
@@ -1316,6 +1542,7 @@ and configure citations autocompletion for external applications.
 * External Autocompletion::
 @end menu
 
+
 @node Internal Autocompletion
 @subsection Internal Autocompletion
 @image{gfx/autocompletePrefs-Internal}
@@ -1326,6 +1553,7 @@ The table lists the BibTeX fields for which autocompletion within BibDesk is act
 You can add new fields with the @buttontitle{+} button. The field name can be edited 
 after double-clicking on the field in the table. 
 You can remove a field by selecting it and clicking the @buttontitle{-} button. 
+
 
 @node External Autocompletion
 @subsection External Autocompletion
@@ -1341,6 +1569,7 @@ When the plugin has been installed, the button title changes to
 @buttontitle{Reinstall} automatically. Autocompletion will only work in Cocoa
 applications, such as the ones in the picture, and they must be added
 to the list manually using the @buttontitle{Add} button below the list.  
+
 
 
 @node Getting More Help
@@ -1391,17 +1620,21 @@ be obtained from the Console application (in `Applications/Utilities`).
 @c INDEXES
 @c -------------------------------------------
 
+
 @node indexcp
 @appendix Concept Index
 @printindex cp
+
 
 @node indexpref
 @appendix Preference Settings Index
 @printindex pref
 
+
 @node indexky
 @appendix Keyboard Shortcut Index
 @printindex ky
+
 
 @node Character Conversion
 @appendix Character Conversion
@@ -1438,8 +1671,9 @@ other than o, as well.
 Note: for BibTeX, it is also necessary to enclose the accent sequence in braces (see the @uref{http://www.tex.ac.uk/cgi-bin/texfaq2html?label=bibaccent, TeX FAQ}).
 
 
-@node Citation Key Format Reference
-@appendix Citation Key Format Reference
+
+@node Autogeneration Format Syntax
+@appendix Autogeneration Format Syntax
 
 
 @heading Syntax of the format
@@ -1519,7 +1753,7 @@ The format is used for autogeneration of certain values, such as the cite key an
 @end ifnothtml
 
 @multitable {@b{%f\{}\i{Field}\b{\}0}} {Keywords concatenated together, with (optional) maximal number of keywords. Keywords must be separated by one of ;:, (semicolon, colon, or comma)}
-@item @b{Specifier} @tab @b{Replaced content description}
+@headitem Specifier @tab Replaced content description
 @item @specparam{%a, [][]00}
 @tab Author last names, with (optional) maximal number of authors and number of characters
 @item @specparam{%A, [;][.][]0}
