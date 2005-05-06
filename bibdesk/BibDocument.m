@@ -477,6 +477,18 @@ NSString *BDSKBibItemLocalDragPboardType = @"edu.ucsd.cs.mmccrack.bibdesk: Local
     }
 }
 
+- (void)showWindows{
+    [super showWindows];
+    NSAppleEventManager *sam = [NSAppleEventManager sharedAppleEventManager];
+    if(![sam respondsToSelector:@selector(currentAppleEvent)]) // 10.3 only
+        return;
+    // on 10.4 systems, we get a search string keyword from an open document event initiated from Spotlight search results
+    NSAppleEventDescriptor *desc = [sam performSelector:@selector(currentAppleEvent)];    
+    NSString *searchString = [[desc descriptorForKeyword:keyAESearchText] stringValue];
+    if(searchString && [self respondsToSelector:@selector(setFilterField:)])
+        [self performSelector:@selector(setFilterField:) withObject:searchString];
+}
+
 #pragma mark -
 #pragma mark  Document Saving and Reading
 
