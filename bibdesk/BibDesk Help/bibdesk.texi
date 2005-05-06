@@ -685,7 +685,7 @@ the field will automatically go into raw BibteX mode.
 References can be deleted by selecting the reference and choosing
 @menutitle{Delete Reference} from the Bibliography menu or pressing the delete
 key. Either way, a warning will appear to verify that you want to
-delete the reference.
+delete the reference, but delete operations are also undoable.
 
 
 
@@ -779,7 +779,9 @@ This way you can easily track missing linked files.
 
 When a cell in the Local-Url column is double-clicked, the linked file will be opened 
 using the default application for the corresponding file type. 
-You can also drag an icon from the Local-Url column, creating a copy of the linked file. 
+The icon can also be dragged from the table to the Finder in order to copy it to another location, 
+or it can be dragged into a specific application in the Dock to open the file in a specific application 
+or perhaps mail it as an attachment.
 
 @cindex Url
 @heading Url
@@ -798,8 +800,6 @@ in your default browser application.
 The Date column displays the date of the item, which is guessed from the Year and Month 
 fields of the item. 
 
-
-
 @node Printing References
 @section Printing References
 
@@ -807,7 +807,9 @@ fields of the item.
 @kindex Cmd-P
 
 Choosing @menutitle{Print} from the File menu (@cmd{P}) prints the contents
-of the lower browser pane of the selected reference.
+of the lower browser pane of the selected reference.  If you prefer to print the
+contents of the LaTeX preview, bring that window to the front and choose
+@menutitle{Print} from the File menu (@cmd{P}) to print the typeset preview contents.
 
 
 
@@ -823,10 +825,11 @@ of the lower browser pane of the selected reference.
 menu will save your bibliography as a BibTeX file. 
 
 @cindex encoding
-To save a file with an encoding other than the one it was read in
-using, use the @menutitle{Export BibTeX With Encoding} command, found in the 
-@menutitle{Export} sub-menu of the @menutitle{File} menu. Choose the encoding you want
-from the pop-up button at the bottom of the resulting sheet.
+To save a file with an encoding other than the one it was read in,
+use the @menutitle{Export BibTeX With Encoding} command, found in the 
+@menutitle{Export} sub-menu of the @menutitle{File} menu, or @menutitle{Save As@dots{}} from the
+@menutitle{File} menu (if you want to continue working with the file in a different encoding). 
+Choose the encoding you want from the pop-up button at the bottom of the resulting sheet.
 
 
 
@@ -852,14 +855,6 @@ current bib-item.
 @image{gfx/typesetPreview}
 
 @image{gfx/typesetPreview-rtf}
-
-
-@subsection Importing RIS Directly
-@cindex RIS
-
-FIXME: Notes about using the import RIS service
-
-
 
 @node Citation Keys
 @chapter Citation Keys
