@@ -19,7 +19,7 @@ will translate this file into the necessary scriptSuite and scriptTerminology fi
         <cocoa name="BibDeskSuite"/>
         
         <classes>		
-			<class name="author" plural="authors" code="auth" description="Contains the name of an author, tries to analyse it and list all publications of that author. Author names can be split into four E.g. '(Jean) (de la) (Fontaine) (Jr.)'">
+			<class name="author" plural="authors" code="auth" description="Contains the name of an author, tries to analyse it and list all publications of that author. Author names can be split into four E.g. '(Jean) (de la) (Fontaine) (Jr.)'" inherits="NSCoreSuite.AbstractObject">
                 <cocoa class="BibAuthor"/>
                 <properties>
 	                <property name="name" type="string" code="pnam" description="The author's name." access="r">
@@ -56,7 +56,7 @@ will translate this file into the necessary scriptSuite and scriptTerminology fi
 
 
 
-			<class name="field" plural="fields" code="bfld" description="Field containing data for a publication.">
+			<class name="field" plural="fields" code="bfld" description="Field containing data for a publication." inherits="NSCoreSuite.AbstractObject">
                 <cocoa class="BibField"/>
                 <properties>
                     <property name="value" code="fldv" type="string" description="The value of the field">
@@ -71,7 +71,7 @@ will translate this file into the necessary scriptSuite and scriptTerminology fi
 
 
 
-			<class name="document" plural="documents" code="docu" description="A Bibdesk bibliography document." inherits="document">
+			<class name="document" plural="documents" code="docu" description="A Bibdesk bibliography document." inherits="NSCoreSuite.NSDocument">
                 <cocoa class="BibDocument"/>
                 <properties>
 					<property name="filter field" code="filt" type="string" description="Only publications matching this property will be displayed">
@@ -110,7 +110,7 @@ will translate this file into the necessary scriptSuite and scriptTerminology fi
 
 
 
-			<class name="publication" plural="publications" code="bibi" description="A publication.">
+			<class name="publication" plural="publications" code="bibi" description="A publication." inherits="NSCoreSuite.AbstractObject">
                 <cocoa class="BibItem"/>
                 <properties>
 					<property name="cite key" code="ckey" type="string" description="Key for citing the publication.">
@@ -200,7 +200,7 @@ will translate this file into the necessary scriptSuite and scriptTerminology fi
 
 
 
-			<class name="application" plural="applications" code="capp" description="Bibdesk's top level scripting object." inherits="application">
+			<class name="application" plural="applications" code="capp" description="Bibdesk's top level scripting object." inherits="NSCoreSuite.NSApplication">
                 <cocoa class="NSApplication"/>
                 <properties>
                     <property name="papers folder" code="pfol" type="string" description="Path to the papers folder as specified in the Auto File preference." access="r">
