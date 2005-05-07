@@ -705,6 +705,7 @@
 		};
 		27AF74ED08021E47006A6ADE = {
 			children = (
+				F9F0856808247BC800812F2A,
 				27AF74EF08021E93006A6ADE,
 				27E89E220805E9F500E4DA08,
 				27E89E230805E9F500E4DA08,
@@ -2457,8 +2458,6 @@
 				F9022CED0758050E00C3F701,
 				F9022CEE0758050E00C3F701,
 				F9022CEF0758050E00C3F701,
-				F9022D1C0758066000C3F701,
-				F9022D1D0758066000C3F701,
 				F9022D1E0758066000C3F701,
 				F9022D1F0758066000C3F701,
 				F9022D200758066000C3F701,
@@ -2503,7 +2502,6 @@
 				F9022DD50758088000C3F701,
 				F9022DD60758088000C3F701,
 				F9022DD70758088000C3F701,
-				F9022FCE07580B9400C3F701,
 				F98F1C2207583400007DC618,
 				F91B5CC8076579830011ED22,
 				F91B5CE0076579FE0011ED22,
@@ -2538,6 +2536,8 @@
 				3DFF355F0816B5460052F37C,
 				3DFF35610816B55B0052F37C,
 				3DFF35630816B5780052F37C,
+				F9B07D14082B1B9000345747,
+				F9B07D15082B1B9100345747,
 			);
 			isa = PBXResourcesBuildPhase;
 			runOnlyForDeploymentPostprocessing = 0;
@@ -4231,18 +4231,6 @@
 			refType = 4;
 			sourceTree = "<group>";
 		};
-		F9022D1C0758066000C3F701 = {
-			fileRef = F9022D100758066000C3F701;
-			isa = PBXBuildFile;
-			settings = {
-			};
-		};
-		F9022D1D0758066000C3F701 = {
-			fileRef = F9022D110758066000C3F701;
-			isa = PBXBuildFile;
-			settings = {
-			};
-		};
 		F9022D1E0758066000C3F701 = {
 			fileRef = F9022D120758066000C3F701;
 			isa = PBXBuildFile;
@@ -4991,6 +4979,7 @@
 			);
 			inputPaths = (
 				Scripting/BibDesk.sdef,
+				"Scripting/BibDesk-Tiger.sdef",
 			);
 			isa = PBXShellScriptBuildPhase;
 			outputPaths = (
@@ -5000,7 +4989,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "if [ -x /Developer/Tools/sdp ]; then\n/Developer/Tools/sdp -f ast -i /Developer/Examples/Scripting\\ Definitions/NSCoreSuite.sdef -i /Developer/Examples/Scripting\\ Definitions/NSTextSuite.sdef Scripting/BibDesk.sdef\nexit 0\nelse\n/usr/bin/sdp -f ast -i /Developer/Examples/Scripting\\ Definitions/NSCoreSuite.sdef -i /Developer/Examples/Scripting\\ Definitions/NSTextSuite.sdef Scripting/BibDesk.sdef\nexit 0\nfi";
+			shellScript = "if [ -x /Developer/Tools/sdp ]; then\n/Developer/Tools/sdp -f ast -i /Developer/Examples/Scripting\\ Definitions/NSCoreSuite.sdef -i /Developer/Examples/Scripting\\ Definitions/NSTextSuite.sdef Scripting/BibDesk.sdef\nexit 0\nelse\necho \"*** Using Tiger sdef ***\"\n/usr/bin/xsltproc --novalid /usr/share/sdef/upgrade.xsl Scripting/BibDesk.sdef >Scripting/BibDesk-Tiger.sdef\n/usr/bin/sdp -f ast Scripting/BibDesk-Tiger.sdef\nmv BibDesk-TigerScripting.r BibDeskScripting.r\nexit 0\nfi";
 		};
 		F9022E8B07580A7C00C3F701 = {
 			buildActionMask = 2147483647;
@@ -5119,12 +5108,6 @@
 		};
 		F9022FCD07580B9400C3F701 = {
 			fileRef = F9022FBE07580B9400C3F701;
-			isa = PBXBuildFile;
-			settings = {
-			};
-		};
-		F9022FCE07580B9400C3F701 = {
-			fileRef = F9022FBF07580B9400C3F701;
 			isa = PBXBuildFile;
 			settings = {
 			};
@@ -5776,7 +5759,7 @@
 		F920DB22075C2D40000C5FCA = {
 			buildActionMask = 2147483647;
 			files = (
-				F9E1B2C7076BC33200ADAE66,
+				F9E2B8DB082C5D3500D04FEA,
 			);
 			isa = PBXRezBuildPhase;
 			runOnlyForDeploymentPostprocessing = 0;
@@ -5993,7 +5976,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "## index online help\n##\nif [ ${BUILD_STYLE} = Development ]; then\necho \"Developers don't need no stinkin' help\"\nexit 0\nfi\nif [ -d /Developer/Applications/Utilities/Help\\ Indexer.app/ ]; then\nindexerName=\"Help Indexer\"\nelse\nindexerName=\"Apple Help Indexing Tool\"\nfi\necho \"Using $indexerName\"\nosascript \\\n-e \"tell application \\\"$indexerName\\\"\" \\\n-e \"activate\" \\\n-e \"open POSIX file \\\"${TARGET_BUILD_DIR}/Bibdesk.app/Contents/Resources/English.lproj/BibDesk Help\\\"\" \\\n-e \"end tell\"";
+			shellScript = "## index online help\n##\nif [ ${BUILD_STYLE} = Development ]; then\necho \"Developers don't need no stinkin' help\"\nexit 0\nfi\nif [ -d /Developer/Applications/Utilities/Help\\ Indexer.app/ ]; then\necho \"*** Building Tiger Help ***\"\n/Developer/Applications/Utilities/Help\\ Indexer.app/Contents/MacOS/Help\\ Indexer \\\n${TARGET_BUILD_DIR}/Bibdesk.app/Contents/Resources/English.lproj/BibDesk\\ Help \\\n-PantherIndexer YES \\\n-Tokenizer 1 \\\n-ShowProgress YES \\\n-UseRemoteRoot YES \\\n-RemoteRoot http://bibdesk.sf.net/applehelp/ \\\n-PreferNetworkFiles NO \\\n-LogStyle 2 \\\n-IndexAnchors YES \\\n-TigerIndexing YES \\\n-GenerateSummaries YES \\\n-Stopwords en \\\n-MinTermLength 3\nexit 0\nelse\necho \"*** Building Panther Help ***\"\nindexerName=\"Apple Help Indexing Tool\"\nosascript \\\n-e \"tell application \\\"$indexerName\\\"\" \\\n-e \"activate\" \\\n-e \"open POSIX file \\\"${TARGET_BUILD_DIR}/Bibdesk.app/Contents/Resources/English.lproj/BibDesk Help\\\"\" \\\n-e \"end tell\"\nexit 0\nfi\n";
 		};
 		F988709007580CB4001D4D49 = {
 			children = (
@@ -6457,17 +6440,38 @@
 			settings = {
 			};
 		};
+		F9B07D14082B1B9000345747 = {
+			fileRef = F9022D100758066000C3F701;
+			isa = PBXBuildFile;
+			settings = {
+			};
+		};
+		F9B07D15082B1B9100345747 = {
+			fileRef = F9022D110758066000C3F701;
+			isa = PBXBuildFile;
+			settings = {
+			};
+		};
 		F9D5A8CB07B9B94F0092E7E2 = {
 			fileRef = F9022C420758027800C3F701;
 			isa = PBXBuildFile;
 			settings = {
 			};
 		};
-		F9E1B2C7076BC33200ADAE66 = {
+		F9E2B8DB082C5D3500D04FEA = {
 			fileRef = F920DB25075C2D8F000C5FCA;
 			isa = PBXBuildFile;
 			settings = {
 			};
+		};
+		F9F0856808247BC800812F2A = {
+			fileEncoding = 4;
+			isa = PBXFileReference;
+			lastKnownFileType = text.script.python;
+			name = "postprocess-nontitle.py";
+			path = "BibDesk Help/postprocess-nontitle.py";
+			refType = 4;
+			sourceTree = "<group>";
 		};
 		F9F14A47075811CF008BA22F = {
 			buildPhases = (
