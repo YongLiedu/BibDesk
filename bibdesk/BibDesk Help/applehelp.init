@@ -127,9 +127,7 @@ sub appleHelp_image{
    my $preformatted = shift;
    my $file_name = shift;
    return "[ $base ]" if ($preformatted);
-   # hack - make relative image refs point to their final destination.
-   $file =~ s#\A.*/\./##;
-   return "<img src=\"$file\" alt=\"$base\">";
+   return "<img src=\"$file_name\" alt=\"$base\">";
 }
 
 $index_entry_label = \&appleHelp_index_entry_label;
