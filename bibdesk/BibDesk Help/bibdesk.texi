@@ -430,12 +430,16 @@ citation key.)
 @cindex accents in search
 
 BibDesk's quick search field also supports a Boolean search, using
-"AND" or "OR" operators (no quotes, but the operator must be
+``AND'' or ``OR'' operators (no quotes, but the operator must be
 capitalized).  Please note that grouping is not supported at this
-time.  The search feature will also consider accented and non-accented
-characters as equivalent, and is case-insensitive
-(i.e. "Bürger" can be found by searching for "burger" or
-"BÜrGeR").
+time.  If you do not explicitly search for accented characters, the
+search feature will return results with accented characters, so it is
+slightly fuzzy; further, case is ignored unless you explicitly enter
+uppercase letters.  Sound confusing?  
+For example, searching for ``Burger,'' could return matches containing
+``R. Bürger'' and ``J. Burger,'' but not ``Hamburger.''  Searching for
+``Bürger'' will only return items that match the case and accent exactly,
+such as ``R. Bürger.''
 
 
 @node Managing References, Citation Keys, Searching Your Database, Top
