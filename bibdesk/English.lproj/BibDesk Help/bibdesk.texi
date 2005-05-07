@@ -430,8 +430,9 @@ citation key.)
 @cindex accents in search
 
 BibDesk's quick search field also supports a Boolean search, using
-``AND'' or ``OR'' operators (no quotes, but the operator must be
-capitalized).  Please note that grouping is not supported at this
+``+'' for ``and'' or ``|'' for ``or'' operators (no quotes), as
+Apple's Help Viewer does in Mac OS X 10.4 and greater.
+Please note that grouping is not supported at this
 time.  If you do not explicitly search for accented characters, the
 search feature will return results with accented characters, so it is
 slightly fuzzy; further, case is ignored unless you explicitly enter
@@ -617,7 +618,7 @@ in Safari.
 
 The @buttontitle{Annote} and @buttontitle{Abstract} tabs provide access to larger text areas
 for these types of information. Rss-Description is covered in
-@ref{RSS Preferences}.
+@ref{Default Fields Preferences}.
 
 Below the table view is the Notes pane, which shows the contents of
 the highlighted reference. It can also be set (in the 
