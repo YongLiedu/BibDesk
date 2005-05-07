@@ -435,7 +435,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 		
 		[menu addItem:[NSMenuItem separatorItem]];
 		
-		[menu addItemWithTitle:NSLocalizedString(@"Choose File...",@"Choose File... string menu item (needs proper ellipsis)")
+		[menu addItemWithTitle:[NSString stringWithFormat:@"%@%C",NSLocalizedString(@"Choose File",@"Choose File... string menu item"),0x2026]
 						action:@selector(chooseLocalURL:)
 				 keyEquivalent:@""];
 		

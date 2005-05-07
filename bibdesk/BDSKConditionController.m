@@ -86,7 +86,7 @@
 	
 	if ([[condition itemClass] acceptsOtherFilterKeys]) {
 		[menu addItem:[NSMenuItem separatorItem]];
-		menuItem = [[NSMenuItem alloc] initWithTitle:NSLocalizedString(@"Add Other...", @"Add Other... (needs proper ellipsis)") action:@selector(addNewKey:) keyEquivalent:@""];
+		menuItem = [[NSMenuItem alloc] initWithTitle:[NSString stringWithFormat:@"%@%C",NSLocalizedString(@"Add Other", @"Add Other..."),0x2026] action:@selector(addNewKey:) keyEquivalent:@""];
 		[menuItem setTarget:self];
 		[menu addItem:[menuItem autorelease]];
 	}

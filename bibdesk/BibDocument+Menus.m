@@ -366,19 +366,19 @@ Broken out of BibDocument and split up into smaller parts to make things more ma
 	
 	if ([self numberOfSelectedPubs] == 0) {
 		// no selection
-		s = NSLocalizedString(@"Consolidate Linked Files...", @"Consolidate Linked Files... (needs proper ellipsis)");
+		s = [NSString stringWithFormat:@"%@%C",NSLocalizedString(@"Consolidate Linked Files", @"Consolidate Linked Files..."),0x2026];
 		[menuItem setTitle:s];
 		return NO;
 	}
 	else if ([self numberOfSelectedPubs] == 1) {
 		// single selection
 		NSString * citeKey = [(BibItem*)[shownPublications objectAtIndex:[[[self selectedPubEnumerator] nextObject] intValue]] citeKey];
-		s = NSLocalizedString(@"Consolidate Linked File for %@...", @"Consolidate Linked File for %@... (needs proper ellipsis)");
+		s = [NSString stringWithFormat:@"%@%C",NSLocalizedString(@"Consolidate Linked File for %@", @"Consolidate Linked File for %@..."),0x2026];
 		[menuItem setTitle:[NSString stringWithFormat:s, citeKey]];
 		return YES;
 	}
 	else {
-		s = NSLocalizedString(@"Consolidate %i Linked Files...", @"Consolidate %i Linked Files... (needs proper ellipsis)");
+		s = [NSString stringWithFormat:@"%@%C",NSLocalizedString(@"Consolidate %i Linked Files", @"Consolidate %i Linked Files..."),0x2026];
 		[menuItem setTitle:[NSString stringWithFormat:s, [self numberOfSelectedPubs]]];
 		return YES;
 	}
@@ -391,13 +391,13 @@ Broken out of BibDocument and split up into smaller parts to make things more ma
 	
 	if (n <= 1) {
 		// no selection or single selection
-		s = NSLocalizedString(@"Delete...", @"Delete... (needs proper ellipsis)");
+		s = [NSString stringWithFormat:@"%@%C",NSLocalizedString(@"Delete", @"Delete..."),0x2026];
 		[menuItem setTitle:s];
 		return (n==1);
 	}
 	else {
 		// multiple selection
-		s = NSLocalizedString(@"Delete %i Publications...", @"Delete %i Publications... (needs proper ellipsis)");
+		s = [NSString stringWithFormat:@"%@%C",NSLocalizedString(@"Delete %i Publications", @"Delete %i Publications..."),0x2026];
 		[menuItem setTitle:[NSString stringWithFormat:s, n]];
 		return YES;
 	}
