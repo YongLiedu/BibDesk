@@ -1542,9 +1542,9 @@ stringByAppendingPathComponent:@"BibDesk"]; */
 }
 
 - (void)cacheQuickSearchRegexes{
-    tipRegex = [[AGRegex regexWithPattern:@"(?(?=^.+(AND|OR))(^.+(?= AND| OR))|^.+)"] retain]; // match the any words up to but not including AND or OR if they exist (see "Lookahead assertions" and "CONDITIONAL SUBPATTERNS" in pcre docs)
-    andRegex = [[AGRegex regexWithPattern:@"AND \\b[^ ]+"] retain]; // match the word following an AND
-    orRegex = [[AGRegex regexWithPattern:@"OR \\b([^ ]+)"] retain]; // match the first word following an OR
+    tipRegex = [[AGRegex regexWithPattern:@"(?(?=^.+(\\+|\\|))(^.+(?= \\+| \\|))|^.+)" options:AGRegexExtended | AGRegexLazy] retain]; // match any words up to but not including AND or OR if they exist (see "Lookahead assertions" and "CONDITIONAL SUBPATTERNS" in pcre docs)
+    andRegex = [[AGRegex regexWithPattern:@"\\+ \\b[^ ]+"] retain]; // match the word following an AND
+    orRegex = [[AGRegex regexWithPattern:@"\\| \\b([^ ]+)"] retain]; // match the first word following an OR
 }
 
 - (NSArray *)publicationsWithSubstring:(NSString *)substring inField:(NSString *)field forArray:(NSArray *)arrayToSearch{
@@ -1585,22 +1585,24 @@ stringByAppendingPathComponent:@"BibDesk"]; */
 	} else {
         isGeneric = YES; // this means that we don't have an accessor for it in BibItem
     }
-//    The AGRegexes are now ivars, but I've left them here as comments in the relevant places.        
-//    AGRegex *tip = [AGRegex regexWithPattern:@"(?(?=^.+(AND|OR))(^.+(?= AND| OR))|^.+)"]; // match the any words up to but not including AND or OR if they exist (see "Lookahead assertions" and "CONDITIONAL SUBPATTERNS" in pcre docs)
-//    AGRegex *andRegex = [AGRegex regexWithPattern:@"AND \\b[^ ]+"]; // match the word following an AND
+//    The AGRegexes are now ivars, but I've left them here as comments in the relevant places.
+//    I'm also leaving AND/OR in the comments, but the code uses +| to be compatible with Spotlight query syntax; it's harder to see
+//    what's going on with all of the escapes, though.
+//    Pattern:@"(?(?=^.+(AND|OR))(^.+(?= AND| OR))|^.+) options:AGRegexExtended | AGRegexLazy" will match any words up to but not including AND or OR if they exist (see "Lookahead assertions" and "CONDITIONAL SUBPATTERNS" in pcre docs)
+//    Pattern:@"AND \\b[^ ]+" // match the word following an AND
     NSArray *matchArray = [andRegex findAllInString:substring]; // an array of AGRegexMatch objects
     NSMutableArray *andArray = [NSMutableArray array]; // and array of all the AND terms we're looking for
     
     // get the tip of the search string first (always an AND)
-    [andArray addObject:[[tipRegex findInString:substring] group]];
-
+    [andArray addObject:[[[tipRegex findInString:substring] group] stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceCharacterSet]]];
+    //NSLog(@"first pattern is %@",andArray);
     NSEnumerator *e = [matchArray objectEnumerator];
     AGRegexMatch *m;
 
     while(m = [e nextObject]){ // get the resulting string from the match, and strip the AND from it; there might be a better way, but this works
-        [andArray addObject:[[[m group] componentsSeparatedByString:@"AND "] objectAtIndex:1]];
+        [andArray addObject:[[[m group] componentsSeparatedByString:@"+ "] objectAtIndex:1]];
     }
-    // NSLog(@"andArray is %@", [andArray description]);
+     //NSLog(@"final andArray is %@", andArray);
 
 //    AGRegex *orRegex = [AGRegex regexWithPattern:@"OR \\b([^ ]+)"]; // match the first word following an OR
     NSMutableArray *orArray = [NSMutableArray array]; // an array of all the OR terms we're looking for
@@ -1609,8 +1611,9 @@ stringByAppendingPathComponent:@"BibDesk"]; */
     e = [matchArray objectEnumerator];
     
     while(m = [e nextObject]){ // now get all of the OR strings and strip the OR from them
-        [orArray addObject:[[[m group] componentsSeparatedByString:@"OR "] objectAtIndex:1]];
-    }    
+        [orArray addObject:[[[m group] componentsSeparatedByString:@"| "] objectAtIndex:1]];
+    }
+    //NSLog(@"orArray has %@", orArray);
     
     NSMutableSet *aSet = [NSMutableSet setWithCapacity:10];
     NSEnumerator *andEnum = [andArray objectEnumerator];
@@ -1717,7 +1720,7 @@ stringByAppendingPathComponent:@"BibDesk"]; */
 
     // we need to sort the set so we always start with the shortest one
     [andResultsArray sortUsingFunction:compareSetLengths context:nil];
-    
+    //NSLog(@"andResultsArray is %@", andResultsArray);
     e = [andResultsArray objectEnumerator];
     // don't start out by intersecting an empty set
     [aSet setSet:[e nextObject]];
