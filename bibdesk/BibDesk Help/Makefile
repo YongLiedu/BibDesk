@@ -1,23 +1,26 @@
 texi2html = ./texi2html
 #makeinfo
 
-INPUT = bibdesk.texi
+INPUT = BibDesk\ Help/bibdesk.texi
 
 all: applehelp html pdf
 
 # use the longer one for xcode.
 # NOTE:: must be done after the copy resources build phase.
 #DEST = .
-DEST = ${BUILD_DIR}/${UNLOCALIZED_RESOURCES_FOLDER_PATH}/English.lproj/BibDesk\ Help
+#DEST = ${BUILD_DIR}/${UNLOCALIZED_RESOURCES_FOLDER_PATH}/English.lproj/BibDesk\ Help
+DEST = BibDesk\ Help
+LOC_DIR = ${SOURCE_ROOT}/English.lproj
 
 html:
-	${texi2html} ${INPUT} --prefix=bibdesk-manual --split=chapter
+	${texi2html} ${LOC_DIR}/${INPUT} --prefix=bibdesk-manual --split=chapter
 
 applehelp:
-	${texi2html} ${INPUT} --init-file=applehelp.init --prefix="BibDesk Help" --output=${DEST} --split=node ;\
-	cp -R gfx ${DEST}/;
-	perl -pi -e 's#<!--AppleMeta-->#<meta name=\"AppleTitle\" content=\"BibDesk Help\"><meta name=\"AppleIcon\" content=\"BibDesk%20Help/gfx/bibDeskIcon.png\"><meta name=\"robots\" content=\"anchors\">#' ${DEST}/BibDesk\ Help.html;\
-	python postprocess-nontitle.py ${DEST}/BibDesk\ Help_*.html
+	for LOC_DIR in ${SOURCE_ROOT}/*.lproj; do \
+	${texi2html} ${LOC_DIR}/${INPUT} --init-file=applehelp.init --prefix="BibDesk Help" --output=${LOC_DIR}/${DEST} --split=node ;\
+	perl -pi -e 's#<!--AppleMeta-->#<meta name=\"AppleTitle\" content=\"BibDesk Help\"><meta name=\"AppleIcon\" content=\"BibDesk%20Help/gfx/bibDeskIcon.png\"><meta name=\"robots\" content=\"anchors\">#' ${LOC_DIR}/${DEST}/BibDesk\ Help.html;\
+	python postprocess-nontitle.py ${LOC_DIR}/${DEST}/BibDesk\ Help_*.html;\
+	done;
 #section#chapter
 
 pdf:
