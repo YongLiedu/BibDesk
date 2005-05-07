@@ -2487,7 +2487,6 @@
 				F9022E8B07580A7C00C3F701,
 				F920DB22075C2D40000C5FCA,
 				F91B5C4E076412A10011ED22,
-				F980F8320806347700C9D704,
 			);
 			buildRules = (
 			);
@@ -6042,19 +6041,6 @@
 			isa = PBXBuildFile;
 			settings = {
 			};
-		};
-		F980F8320806347700C9D704 = {
-			buildActionMask = 12;
-			files = (
-			);
-			inputPaths = (
-			);
-			isa = PBXShellScriptBuildPhase;
-			outputPaths = (
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-			shellPath = /bin/sh;
-			shellScript = "## index online help\n##\nif [ ${BUILD_STYLE} = Development ]; then\necho \"Developers don't need no stinkin' help\"\nexit 0\nfi\nif [ -d /Developer/Applications/Utilities/Help\\ Indexer.app/ ]; then\necho \"*** Building Tiger Help ***\"\n/Developer/Applications/Utilities/Help\\ Indexer.app/Contents/MacOS/Help\\ Indexer \\\n${TARGET_BUILD_DIR}/Bibdesk.app/Contents/Resources/English.lproj/BibDesk\\ Help \\\n-PantherIndexer YES \\\n-Tokenizer 1 \\\n-ShowProgress YES \\\n-UseRemoteRoot YES \\\n-RemoteRoot http://bibdesk.sf.net/applehelp/ \\\n-PreferNetworkFiles NO \\\n-LogStyle 2 \\\n-IndexAnchors YES \\\n-TigerIndexing YES \\\n-GenerateSummaries YES \\\n-Stopwords en \\\n-MinTermLength 3\nexit 0\nelse\necho \"*** Building Panther Help ***\"\nindexerName=\"Apple Help Indexing Tool\"\nosascript \\\n-e \"tell application \\\"$indexerName\\\"\" \\\n-e \"activate\" \\\n-e \"open POSIX file \\\"${TARGET_BUILD_DIR}/Bibdesk.app/Contents/Resources/English.lproj/BibDesk Help\\\"\" \\\n-e \"end tell\"\nexit 0\nfi\n";
 		};
 		F988709007580CB4001D4D49 = {
 			children = (
