@@ -708,8 +708,8 @@
 				F9F0856808247BC800812F2A,
 				27AF74EF08021E93006A6ADE,
 				27E89E220805E9F500E4DA08,
-				27E89E230805E9F500E4DA08,
-				27E89E240805E9F500E4DA08,
+				3D8A552D082D25FB008E818C,
+				3D8A5523082D1FF2008E818C,
 			);
 			isa = PBXGroup;
 			name = "Help Sources";
@@ -1397,7 +1397,7 @@
 			isa = PBXFileReference;
 			lastKnownFileType = text;
 			name = version.texi;
-			path = "BibDesk Help/version.texi";
+			path = "English.lproj/BibDesk Help/version.texi";
 			refType = 4;
 			sourceTree = "<group>";
 		};
@@ -1407,22 +1407,9 @@
 			languageSpecificationIdentifier = make;
 			lastKnownFileType = text;
 			name = bibdesk.texi;
-			path = "BibDesk Help/bibdesk.texi";
+			path = "English.lproj/BibDesk Help/bibdesk.texi";
 			refType = 4;
 			sourceTree = "<group>";
-		};
-		27E89E2F0805EC0F00E4DA08 = {
-			buildActionMask = 12;
-			files = (
-			);
-			inputPaths = (
-			);
-			isa = PBXShellScriptBuildPhase;
-			outputPaths = (
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-			shellPath = /bin/sh;
-			shellScript = "cd ${SOURCE_ROOT}/BibDesk\\ Help;\nmake applehelp";
 		};
 //270
 //271
@@ -1454,6 +1441,7 @@
 			);
 			targets = (
 				8D1107260486CEB800E47090,
+				3D8A5779082D3077008E818C,
 				F98870A107580D63001D4D49,
 				F98870A607580D83001D4D49,
 				F98870B007580DAF001D4D49,
@@ -1514,6 +1502,7 @@
 		};
 		29B97317FDCFA39411CA2CEA = {
 			children = (
+				3D8A54F6082D1F86008E818C,
 				F994B8F607F5F65F00751DA1,
 				27D4FA5D07DE5CF5001CAB00,
 				27D4FA5F07DE5CF5001CAB00,
@@ -1568,6 +1557,7 @@
 				29B97318FDCFA39411CA2CEA,
 				27AFAFA8080D1E5B0096F5D2,
 			);
+			includeInIndex = 1;
 			isa = PBXGroup;
 			name = Resources;
 			path = "";
@@ -2090,6 +2080,94 @@
 			settings = {
 			};
 		};
+		3D8A54F6082D1F86008E818C = {
+			children = (
+				3D8A54F7082D1F86008E818C,
+			);
+			isa = PBXVariantGroup;
+			name = "BibDesk Help";
+			path = "";
+			refType = 4;
+			sourceTree = "<group>";
+		};
+		3D8A54F7082D1F86008E818C = {
+			isa = PBXFileReference;
+			lastKnownFileType = folder;
+			name = English;
+			path = "English.lproj/BibDesk Help";
+			refType = 4;
+			sourceTree = "<group>";
+		};
+		3D8A5520082D1F86008E818C = {
+			fileRef = 3D8A54F6082D1F86008E818C;
+			isa = PBXBuildFile;
+			settings = {
+			};
+		};
+		3D8A5523082D1FF2008E818C = {
+			children = (
+				27E89E240805E9F500E4DA08,
+			);
+			isa = PBXVariantGroup;
+			name = bibdesk.texi;
+			refType = 4;
+			sourceTree = "<group>";
+		};
+		3D8A552D082D25FB008E818C = {
+			children = (
+				27E89E230805E9F500E4DA08,
+			);
+			isa = PBXVariantGroup;
+			name = version.texi;
+			refType = 4;
+			sourceTree = "<group>";
+		};
+		3D8A5779082D3077008E818C = {
+			buildPhases = (
+				3D8A577A082D308B008E818C,
+				3D8A5780082D31D2008E818C,
+			);
+			buildSettings = {
+				OPTIMIZATION_CFLAGS = "";
+				OTHER_CFLAGS = "";
+				OTHER_LDFLAGS = "";
+				OTHER_REZFLAGS = "";
+				PRODUCT_NAME = "BibDesk Help";
+				SECTORDER_FLAGS = "";
+				WARNING_CFLAGS = "-Wmost -Wno-four-char-constants -Wno-unknown-pragmas";
+			};
+			dependencies = (
+			);
+			isa = PBXAggregateTarget;
+			name = "BibDesk Help";
+			productName = "BibDesk Help";
+		};
+		3D8A577A082D308B008E818C = {
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+			);
+			isa = PBXShellScriptBuildPhase;
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "cd ${SOURCE_ROOT}/BibDesk\\ Help;\nmake applehelp";
+		};
+		3D8A5780082D31D2008E818C = {
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+			);
+			isa = PBXShellScriptBuildPhase;
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "## index online help\n##\nif [ -d /Developer/Applications/Utilities/Help\\ Indexer.app/ ]; then\necho \"*** Building Tiger Help ***\"\nfor LOC_DIR in ${SOURCE_ROOT}/*.lproj; do \\\n/Developer/Applications/Utilities/Help\\ Indexer.app/Contents/MacOS/Help\\ Indexer \\\n${LOC_DIR}/BibDesk\\ Help \\\n-PantherIndexer YES \\\n-Tokenizer 1 \\\n-ShowProgress YES \\\n-UseRemoteRoot YES \\\n-RemoteRoot http://bibdesk.sf.net/applehelp/ \\\n-PreferNetworkFiles NO \\\n-LogStyle 2 \\\n-IndexAnchors YES \\\n-TigerIndexing YES \\\n-GenerateSummaries YES \\\n-Stopwords en \\\n-MinTermLength 3;\\\ndone\nexit 0\nelse\necho \"*** Building Panther Help ***\"\nfor LOC_DIR in ${SOURCE_ROOT}/*.lproj; do \\\nopen -a \"Apple Help Indexing Tool\" ${LOC_DIR}/BibDesk\\ Help;\\\ndone\nexit 0\nfi\n";
+		};
 		3D8CA0A307CB625300460D07 = {
 			children = (
 				3D8CA0A407CB625300460D07,
@@ -2409,7 +2487,6 @@
 				F9022E8B07580A7C00C3F701,
 				F920DB22075C2D40000C5FCA,
 				F91B5C4E076412A10011ED22,
-				27E89E2F0805EC0F00E4DA08,
 				F980F8320806347700C9D704,
 			);
 			buildRules = (
@@ -2538,6 +2615,7 @@
 				3DFF35630816B5780052F37C,
 				F9B07D14082B1B9000345747,
 				F9B07D15082B1B9100345747,
+				3D8A5520082D1F86008E818C,
 			);
 			isa = PBXResourcesBuildPhase;
 			runOnlyForDeploymentPostprocessing = 0;
