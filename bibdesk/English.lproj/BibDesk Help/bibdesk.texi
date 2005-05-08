@@ -142,6 +142,7 @@ Copyright @copyright{} many others@*
 
 @node Quick Start
 @chapter Quick Start 
+@abstract{Quick start to BibDesk.}
 
 Using BibDesk should be pretty natural for the average user of
 BibTeX. Simply open your .bib file with BibDesk and start working. @xref{Managing References}
@@ -196,6 +197,7 @@ this, see @ref{Getting More Help}.
 
 @node BibTeX Intro
 @chapter BibTeX Intro
+@abstract{Introduction to BibTeX.}
 
 @cindex BibTeX
 
@@ -306,6 +308,7 @@ btxdoc.dvi
 
 @node Opening and Importing Files
 @chapter Opening and Importing Files
+@abstract{How to open and import files.}
 
 @menu
 * Starting a New File::
@@ -325,6 +328,7 @@ type the keyboard shortcut @shiftcmd{N}.
 
 @node Opening a File
 @section Opening a File
+@abstract{Opening a file.}
 
 @cindex opening a file
 @cindex open using filter
@@ -355,6 +359,7 @@ Note that BibDesk can open RIS files directly, so a filter isn't required for th
 
 @node Opening an RIS File
 @section Opening an RIS File
+@abstract{Opening an RIS file.}
 
 @cindex PubMed
 @cindex RIS
@@ -402,6 +407,7 @@ when it is necessary to share files with other people or applications.
 
 @node Searching Your Database
 @chapter Searching Your Database
+@abstract{How to search your database.}
 
 @cindex searching
 @kindex Cmd-F
@@ -445,7 +451,7 @@ such as ``R. B@ue{}rger.''
 
 @node Managing References, Citation Keys, Searching Your Database, Top
 @chapter Managing References
-
+@abstract{How to manage the references in your database.}
 
 @heading Topics
 
@@ -635,6 +641,7 @@ text.
 
 @node Entering Accented Characters
 @subsection Entering Accented Characters
+@abstract{Entering accented characters.}
 
 @cindex accented characters
 
@@ -696,6 +703,7 @@ delete the reference, but delete operations are also undoable.
 
 @node Browsing References
 @section Browsing References
+@abstract{Browsing references in your database.}
 
 The references are presented in a table with a detail pane on the
 bottom of the window. You can sort the table by column by clicking on
@@ -807,6 +815,7 @@ fields of the item.
 
 @node Printing References
 @section Printing References
+@abstract{Printing references}
 
 @cindex printing
 @kindex Cmd-P
@@ -840,6 +849,7 @@ Choose the encoding you want from the pop-up button at the bottom of the resulti
 
 @node Previewing Typeset Output
 @section Previewing Typeset Output
+@abstract{Previewing the typeset output.}
 
 @kindex Cmd-T
 
@@ -883,6 +893,8 @@ reference in the preferences (See the @ref{Cite Key Preferences} preference pane
 
 @node When the Key is Generated
 @section When the Key is Generated
+@abstract{When the cite-key is generated.}
+
 @cindex cite key
 @cindex key
 
@@ -902,6 +914,7 @@ status bar is shown.
 
 @node Generating a Key for an Existing Publications
 @section Generating a Key for an Existing Publications
+@abstract{Generating a cite key for an exisiting publication.}
 
 @cindex cite key
 @cindex key
@@ -920,6 +933,8 @@ menu (keyboard shortcut @cmd{K}), or from the action menu in the Editor for the 
 
 @node Customizing the Format of Keys
 @section Customizing the Format of Keys
+@abstract{Customizing the format for generated cite keys.}
+
 @cindex cite key format
 
 For setting the format used to generate the key, 
@@ -931,6 +946,7 @@ The syntax of the format is described in more detail in
 
 @node AutoFile
 @chapter AutoFile
+@abstract{Automatically file papers.}
 
 @cindex autofile
 @cindex file management
@@ -954,6 +970,7 @@ Papers Folder as described in the
 
 @node Automatically Move Files
 @section Automatically Move Files
+@abstract{How to automatically move papers.}
 
 @cindex AutoFile
 
@@ -981,6 +998,7 @@ status bar is shown.
 
 @node Consolidate Linked Files
 @section Consolidate Linked Files
+@abstract{How to consolidate linked files.}
 
 @cindex consolidate linked files
 
@@ -1020,6 +1038,7 @@ of the Editor.
 
 @node Customizing the Format the Local-Url
 @section Customizing the Format the Local-Url
+@abstract{Customizing the format for the Local-Url}
 
 For setting the format used to generate the new location for AutoFile, 
 see the @ref{AutoFile Preferences} preference help topic.
@@ -1030,6 +1049,7 @@ The syntax of the format is described in more detail in
 
 @node Inserting Citations
 @chapter Inserting Citations
+@abstract{How to insert citations into other applications.}
 
 @cindex copy and paste
 @cindex drag and drop
@@ -1061,6 +1081,7 @@ want to use the Custom Citation Strings Drawer.
 
 @node The Custom Citation Strings Drawer
 @section The Custom Citation Strings Drawer
+@abstract{How to manage and copy custom citation commands.}
 
 @cindex	custom citation strings
 @kindex Shift-Cmd-C
@@ -1088,6 +1109,7 @@ in the table, and choose the @buttontitle{-} button.
 
 @node Autocompletion
 @section Autocompletion
+@abstract{Autocompletion in edits and external applications.}
 
 BibDesk can install a plugin that lets you search your database and
 insert citation commands conveniently without leaving your text
@@ -1097,6 +1119,7 @@ editing application. @xref{External Autocompletion}
 
 @node System Service
 @section System Service
+@abstract{BibDesk System Services.}
 
 @cindex system service
 @cindex services
@@ -1152,6 +1175,7 @@ service would insert ``CasObe00''.
 
 @node Preferences Guide
 @chapter Preferences Guide
+@abstract{How to set preferences in BibDesk.}
 
 @cindex preferences
 @kindex Cmd-,
@@ -1545,6 +1569,8 @@ and configure citations autocompletion for external applications.
 
 @node Internal Autocompletion
 @subsection Internal Autocompletion
+@abstract{Autocompletion for edits in BibDesk}
+
 @image{gfx/autocompletePrefs-Internal}
 
 @prefindex Internal Autocompletion
@@ -1557,6 +1583,8 @@ You can remove a field by selecting it and clicking the @buttontitle{-} button.
 
 @node External Autocompletion
 @subsection External Autocompletion
+@abstract{Autocompletion of citation commands in other applications.}
+
 @image{gfx/autocompletePrefs-External}
 
 @prefindex External Autocompletion
@@ -1623,21 +1651,25 @@ be obtained from the Console application (in `Applications/Utilities`).
 
 @node indexcp
 @appendix Concept Index
+@abstract{Concept index.}
 @printindex cp
 
 
 @node indexpref
 @appendix Preference Settings Index
+@abstract{Preferences setting index.}
 @printindex pref
 
 
 @node indexky
 @appendix Keyboard Shortcut Index
+@abstract{Keyboard shortcuts index.}
 @printindex ky
 
 
 @node Character Conversion
 @appendix Character Conversion
+@abstract{Character conversions in BibDesk.}
 
 @heading What is character conversion? 
 
@@ -1674,7 +1706,7 @@ Note: for BibTeX, it is also necessary to enclose the accent sequence in braces 
 
 @node Autogeneration Format Syntax
 @appendix Autogeneration Format Syntax
-
+@abstract{The syntax of the format used for Cite Key and Local-Url AutoGeneration.}
 
 @heading Syntax of the format
 
