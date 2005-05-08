@@ -22,13 +22,11 @@ for fname in fnames:
 
     if teximetaline > 0 and metaline > 0:
 
-		f = open(fname, 'w')
-
-		lines[teximetaline] = lines[teximetaline][:34] + lines[metaline][34:]
+        lines[teximetaline] = lines[teximetaline][:34] + lines[metaline][34:]
         lines[metaline] = ""
 
-		f.seek(0)
+        f = open(fname, 'w')
+        f.seek(0)
         for line in lines:
             f.write(line)
-
-		f.close()
+        f.close()
