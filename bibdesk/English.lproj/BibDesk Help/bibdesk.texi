@@ -161,7 +161,7 @@ for an overview, or @ref{Character Conversion} for more detail.
 
 @cindex capitalization
 If you use braces in your BibTeX fields to protect meaningful
-captialization, BibDesk attempts not to interfere. The braces will bety
+capitalization, BibDesk attempts not to interfere. The braces will be
 saved and any previews will show the intended capitalization.
 
 Searches will match the string without the braces - a search for
@@ -434,6 +434,7 @@ citation key.)
 
 @cindex boolean search
 @cindex accents in search
+@cindex braces in search
 
 BibDesk's quick search field also supports a Boolean search, using
 ``+'' for ``and'' or ``|'' for ``or'' operators (no quotes), as
@@ -447,6 +448,11 @@ For example, searching for ``Burger,'' could return matches containing
 ``R. B@ue{}rger'' and ``J. Burger,'' but not ``Hamburger.''  Searching for
 ``B@ue{}rger'' will only return items that match the case and accent exactly,
 such as ``R. B@ue{}rger.''
+
+As mentioned elsewhere, braces are ignored when searching, so searching
+for ``BibDesk'' will find ``{B}ib{D}esk'' as well as ``BibDesk.''  Of course,
+this will not find ``Bibdesk,'' since uppercase letters were used in this
+example.
 
 
 @node Managing References, Citation Keys, Searching Your Database, Top
@@ -776,7 +782,7 @@ on the type of the item.
 @item commented @tab Volumetitle
 @end multitable
 
-If you use a special type that has a container concept write to bibdesk-develop
+If you use a special type that has a container concept write to bibdesk-develop@lists.sourceforge.net
 and it can be added. 
 
 @cindex Local-Url
@@ -864,7 +870,7 @@ formatted bibliography. The bibliography's format is based on the
 current style file (set in the preference pane 
 @ref{Preview Preferences}). This helps in spotting errors and omissions in your
 references, as LaTeX and BibTeX are actually used to generate the PDF preview. 
-The frontmatter and macros from the current bibliography document are
+The front matter and macros from the current bibliography document are
 used for previewing.
 
 @image{gfx/typesetPreview}
