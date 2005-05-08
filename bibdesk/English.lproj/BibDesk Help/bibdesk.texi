@@ -438,9 +438,9 @@ search feature will return results with accented characters, so it is
 slightly fuzzy; further, case is ignored unless you explicitly enter
 uppercase letters.  Sound confusing?  
 For example, searching for ``Burger,'' could return matches containing
-``R. Bürger'' and ``J. Burger,'' but not ``Hamburger.''  Searching for
-``Bürger'' will only return items that match the case and accent exactly,
-such as ``R. Bürger.''
+``R. B@ue{}rger'' and ``J. Burger,'' but not ``Hamburger.''  Searching for
+``B@ue{}rger'' will only return items that match the case and accent exactly,
+such as ``R. B@ue{}rger.''
 
 
 @node Managing References, Citation Keys, Searching Your Database, Top
