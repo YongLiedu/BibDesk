@@ -44,7 +44,6 @@ static BDSKStringEncodingManager *sharedEncodingManager = nil;
     [dictionary setObject:[NSNumber numberWithInt:NSISOLatin1StringEncoding] forKey:@"ISO Latin 1"];
     [dictionary setObject:[NSNumber numberWithInt:NSNonLossyASCIIStringEncoding] forKey:@"Non-lossy ASCII"];
     [dictionary setObject:[NSNumber numberWithInt:NSISOLatin2StringEncoding] forKey:@"ISO Latin 2"];
-    [dictionary setObject:[NSNumber numberWithInt:NSUnicodeStringEncoding] forKey:@"Unicode"];
     [dictionary setObject:[NSNumber numberWithInt:NSWindowsCP1251StringEncoding] forKey:@"Cyrillic"];
     [dictionary setObject:[NSNumber numberWithInt:NSWindowsCP1252StringEncoding] forKey:@"Windows Latin 1"];
     [dictionary setObject:[NSNumber numberWithInt:NSWindowsCP1253StringEncoding] forKey:@"Greek"];
