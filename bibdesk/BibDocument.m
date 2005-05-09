@@ -2494,15 +2494,15 @@ This method always returns YES. Even if some or many operations fail.
 - (void)addTableColumnSheetDidEnd:(NSWindow *)sheet
                        returnCode:(int) returnCode
                       contextInfo:(void *)contextInfo{
-    NSTableColumn *tc = nil;
-    NSMutableArray *prefsShownColNamesMutableArray = nil;
 
     if(returnCode == 1){
+		NSTableColumn *tc = nil;
+		NSMutableArray *prefsShownColNamesMutableArray = [[[[OFPreferenceWrapper sharedPreferenceWrapper] arrayForKey:BDSKShownColsNamesKey] mutableCopy] autorelease];
         NSString *newColumnName = [addFieldComboBox stringValue];
 
 		// Check if an object already exists in the tableview, bail without notification if it does
 		// This means we can't have a column more than once.
-		if ([tableColumns objectForKey:newColumnName] != nil )
+		if ([prefsShownColNamesMutableArray containsObject:newColumnName])
 			return;
 
 		// Set up the object for the new column
@@ -2516,7 +2516,6 @@ This method always returns YES. Even if some or many operations fail.
 		[self columnsMenuAddTableColumnName:newColumnName enabled:YES];
 
 		// Store the new column in the preferences
-		prefsShownColNamesMutableArray = [[[[OFPreferenceWrapper sharedPreferenceWrapper] arrayForKey:BDSKShownColsNamesKey] mutableCopy] autorelease];
         [prefsShownColNamesMutableArray addObject:[tc identifier]];
         [[OFPreferenceWrapper sharedPreferenceWrapper] setObject:prefsShownColNamesMutableArray
                                                           forKey:BDSKShownColsNamesKey];
