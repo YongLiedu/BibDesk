@@ -411,6 +411,8 @@
 						<real>55.0</real>
 						<key>Url</key>
 						<real>23.0</real>
+						<key>Item Number</key>
+						<real>33.0</real>
 					</dict>
 					<key>Current Publication Type String</key>
 					<string>Inproceedings</string>

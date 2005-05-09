@@ -819,6 +819,13 @@ in your default browser application.
 The Date column displays the date of the item, which is guessed from the Year and Month 
 fields of the item. 
 
+@cindex Item Number
+@heading Item Number 
+
+The Item Number column shows a little #-mark in the header. The column displays the 
+order of the item as it appears in the file. 
+
+
 @node Printing References
 @section Printing References
 @abstract{Printing references}
