@@ -1543,10 +1543,10 @@ stringByAppendingPathComponent:@"BibDesk"]; */
 
 - (void)cacheQuickSearchRegexes{
     // match any words up to but not including AND or OR if they exist (see "Lookahead assertions" and "CONDITIONAL SUBPATTERNS" in pcre docs)
-    tipRegex = [[AGRegex regexWithPattern:@"(?(?=^.+(\\+|\\|))(^.+(?= \\+| \\|))|^.++)" options:AGRegexLazy] retain];
+    tipRegex = [[AGRegex regexWithPattern:@"(?(?=^.+(\\+|\\|))(^.+(?=\\+|\\|))|^.++)" options:AGRegexLazy] retain];
     
-    andRegex = [[AGRegex regexWithPattern:@"\\+ \\b[^ ]+"] retain]; // match the word following an AND
-    orRegex = [[AGRegex regexWithPattern:@"\\| \\b([^ ]+)"] retain]; // match the first word following an OR
+    andRegex = [[AGRegex regexWithPattern:@"\\+[^+|]+"] retain]; // match the word following an AND; we consider a word boundary to be + or |
+    orRegex = [[AGRegex regexWithPattern:@"\\|[^+|]+"] retain]; // match the first word following an OR
 }
 
 - (NSArray *)publicationsWithSubstring:(NSString *)substring inField:(NSString *)field forArray:(NSArray *)arrayToSearch{
@@ -1594,13 +1594,23 @@ stringByAppendingPathComponent:@"BibDesk"]; */
     NSMutableArray *andArray = [NSMutableArray array]; // and array of all the AND terms we're looking for
     
     // get the tip of the search string first (always an AND)
-    [andArray addObject:[[[tipRegex findInString:substring] group] stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceCharacterSet]]];
+    NSString *tip = [[[tipRegex findInString:substring] group] stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceCharacterSet]];
+    if(!tip)
+        return;
+    else
+        [andArray addObject:tip];
     // NSLog(@"first pattern is %@",andArray);
     NSEnumerator *e = [matchArray objectEnumerator];
     AGRegexMatch *m;
+    static NSCharacterSet *trimSet;
+    if(!trimSet)
+        trimSet = [[NSCharacterSet characterSetWithCharactersInString:@"+| "] retain]; // leftovers from regex search
+    NSString *s;
 
     while(m = [e nextObject]){ // get the resulting string from the match, and strip the AND from it; there might be a better way, but this works
-        [andArray addObject:[[[m group] componentsSeparatedByString:@"+ "] objectAtIndex:1]];
+        s = [[m group] stringByTrimmingCharactersInSet:trimSet];
+        if(s && ![s isEqualToString:@""])
+            [andArray addObject:s];
     }
     // NSLog(@"final andArray is %@", andArray);
 
@@ -1610,7 +1620,9 @@ stringByAppendingPathComponent:@"BibDesk"]; */
     e = [matchArray objectEnumerator];
     
     while(m = [e nextObject]){ // now get all of the OR strings and strip the OR from them
-        [orArray addObject:[[[m group] componentsSeparatedByString:@"| "] objectAtIndex:1]];
+        s = [[m group] stringByTrimmingCharactersInSet:trimSet];
+        if(s && ![s isEqualToString:@""])
+            [orArray addObject:s];
     }
     // NSLog(@"orArray has %@", orArray);
     
