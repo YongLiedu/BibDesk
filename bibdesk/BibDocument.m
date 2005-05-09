@@ -1542,7 +1542,9 @@ stringByAppendingPathComponent:@"BibDesk"]; */
 }
 
 - (void)cacheQuickSearchRegexes{
-    tipRegex = [[AGRegex regexWithPattern:@"(?(?=^.+(\\+|\\|))(^.+(?= \\+| \\|))|^.+)" options:AGRegexExtended] retain]; // match any words up to but not including AND or OR if they exist (see "Lookahead assertions" and "CONDITIONAL SUBPATTERNS" in pcre docs)
+    // match any words up to but not including AND or OR if they exist (see "Lookahead assertions" and "CONDITIONAL SUBPATTERNS" in pcre docs)
+    tipRegex = [[AGRegex regexWithPattern:@"(?(?=^.+(\\+|\\|))(^.+(?= \\+| \\|))|^.++)" options:AGRegexLazy] retain];
+    
     andRegex = [[AGRegex regexWithPattern:@"\\+ \\b[^ ]+"] retain]; // match the word following an AND
     orRegex = [[AGRegex regexWithPattern:@"\\| \\b([^ ]+)"] retain]; // match the first word following an OR
 }
@@ -1588,23 +1590,20 @@ stringByAppendingPathComponent:@"BibDesk"]; */
 //    The AGRegexes are now ivars, but I've left them here as comments in the relevant places.
 //    I'm also leaving AND/OR in the comments, but the code uses +| to be compatible with Spotlight query syntax; it's harder to see
 //    what's going on with all of the escapes, though.
-//    Pattern:@"(?(?=^.+(AND|OR))(^.+(?= AND| OR))|^.+) options:AGRegexExtended" will match any words up to but not including AND or OR if they exist (see "Lookahead assertions" and "CONDITIONAL SUBPATTERNS" in pcre docs)
-//    Pattern:@"AND \\b[^ ]+" // match the word following an AND
     NSArray *matchArray = [andRegex findAllInString:substring]; // an array of AGRegexMatch objects
     NSMutableArray *andArray = [NSMutableArray array]; // and array of all the AND terms we're looking for
     
     // get the tip of the search string first (always an AND)
     [andArray addObject:[[[tipRegex findInString:substring] group] stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceCharacterSet]]];
-    //NSLog(@"first pattern is %@",andArray);
+    // NSLog(@"first pattern is %@",andArray);
     NSEnumerator *e = [matchArray objectEnumerator];
     AGRegexMatch *m;
 
     while(m = [e nextObject]){ // get the resulting string from the match, and strip the AND from it; there might be a better way, but this works
         [andArray addObject:[[[m group] componentsSeparatedByString:@"+ "] objectAtIndex:1]];
     }
-     //NSLog(@"final andArray is %@", andArray);
+    // NSLog(@"final andArray is %@", andArray);
 
-//    AGRegex *orRegex = [AGRegex regexWithPattern:@"OR \\b([^ ]+)"]; // match the first word following an OR
     NSMutableArray *orArray = [NSMutableArray array]; // an array of all the OR terms we're looking for
     
     matchArray = [orRegex findAllInString:substring];
@@ -1613,7 +1612,7 @@ stringByAppendingPathComponent:@"BibDesk"]; */
     while(m = [e nextObject]){ // now get all of the OR strings and strip the OR from them
         [orArray addObject:[[[m group] componentsSeparatedByString:@"| "] objectAtIndex:1]];
     }
-    //NSLog(@"orArray has %@", orArray);
+    // NSLog(@"orArray has %@", orArray);
     
     NSMutableSet *aSet = [NSMutableSet setWithCapacity:10];
     NSEnumerator *andEnum = [andArray objectEnumerator];
