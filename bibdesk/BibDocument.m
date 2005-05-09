@@ -1595,7 +1595,7 @@ stringByAppendingPathComponent:@"BibDesk"]; */
     
     // get the tip of the search string first (always an AND)
     [andArray addObject:[[[tipRegex findInString:substring] group] stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceCharacterSet]]];
-    NSLog(@"first pattern is %@",andArray);
+    //NSLog(@"first pattern is %@",andArray);
     NSEnumerator *e = [matchArray objectEnumerator];
     AGRegexMatch *m;
 
