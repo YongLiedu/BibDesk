@@ -693,6 +693,7 @@ the field will automatically go into raw BibteX mode.
 
 @image{gfx/macrosWindow}
 
+FIXME: missing text
 
 
 @node Deleting References
@@ -1025,8 +1026,6 @@ status bar is shown.
 @abstract{How to consolidate linked files.}
 
 @cindex consolidate linked files
-
-@image{gfx/consolidateLinkedFiles}
 
 Choose this command to scan all selected publications in the file for linked
 files. A dialog will be opened that asks you for some options. 
