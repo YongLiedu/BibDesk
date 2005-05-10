@@ -85,13 +85,15 @@
     int n = [[sender selectedCell] tag];
     [defaults setObject:[NSNumber numberWithInt:n] forKey:BDSKStartupBehaviorKey];
     [self updateUI];
+    if(n == 3 && [[defaultBibFileTextField stringValue] isEqualToString:@""])
+        [self chooseAutoOpenFile:nil];
 }
 
 -(IBAction) chooseAutoOpenFile:(id) sender {
     NSOpenPanel * openPanel = [NSOpenPanel openPanel];
     [openPanel setCanChooseDirectories:NO];
     [openPanel setAllowsMultipleSelection:NO];
-    [openPanel beginSheetForDirectory:nil file:nil types:[NSArray arrayWithObject:@"bib"] modalForWindow:[sender window] modalDelegate: self didEndSelector:@selector(openPanelDidEnd:returnCode:contextInfo:) contextInfo:NULL];
+    [openPanel beginSheetForDirectory:nil file:nil types:[NSArray arrayWithObject:@"bib"] modalForWindow:[[OAPreferenceController sharedPreferenceController] window] modalDelegate: self didEndSelector:@selector(openPanelDidEnd:returnCode:contextInfo:) contextInfo:NULL];
 }
 
 - (void)openPanelDidEnd:(NSOpenPanel *)sheet returnCode:(int)returnCode contextInfo:(void *)contextInfo {
