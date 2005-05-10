@@ -15,6 +15,8 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 */
 
 #import "NSTextView_BDSKExtensions.h"
+#import "BibPrefController.h"
+#import <OmniFoundation/OmniFoundation.h>
 
 
 @implementation NSTextView (BDSKExtensions)
@@ -42,4 +44,17 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
     [self setSelectedRange:myRange];
     [self scrollRangeToVisible:myRange];
 }
+
+// allows persistent spell checking in text views
+
+- (void)toggleContinuousSpellChecking:(id)sender{
+    BOOL state = ![[OFPreferenceWrapper sharedPreferenceWrapper] boolForKey:BDSKEditorShouldCheckSpellingContinuouslyKey];
+    [sender setState:state];
+    [[OFPreferenceWrapper sharedPreferenceWrapper] setBool:state forKey:BDSKEditorShouldCheckSpellingContinuouslyKey];
+}
+
+- (BOOL)isContinuousSpellCheckingEnabled{
+    return [[OFPreferenceWrapper sharedPreferenceWrapper] boolForKey:BDSKEditorShouldCheckSpellingContinuouslyKey];
+}
+
 @end
