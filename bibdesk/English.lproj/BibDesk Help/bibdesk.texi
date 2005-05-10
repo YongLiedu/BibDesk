@@ -1,6 +1,10 @@
 \input texinfo @c -*-texinfo-*-
 @c This is the manual for BibDesk.
 
+@c ======================================================================================
+@c Document info
+@c ======================================================================================
+
 @setfilename bibdesk.info
 
 @c get versions of the manual and program from a separate file
@@ -15,6 +19,10 @@
 @ifset shorttitlepage-enabled
 @shorttitlepage BibDesk v@value{VERSION}
 @end ifset
+
+@c ======================================================================================
+@c Macro definitions
+@c ======================================================================================
 
 @c macros for keyboard shortcuts
 
@@ -74,7 +82,9 @@ Option-Cmd-\key\
 @c Make sure that each node is included in a menu of a node one level higher. 
 @c Usually, the menu comes just before the lower level sectioning commands. 
 
-
+@c ======================================================================================
+@c The content of the Help Pages starts here...
+@c ======================================================================================
 
 @ifnottex
 @node Top
@@ -109,6 +119,7 @@ about the BibTeX file format.
 * AutoFile::            Keeping local copies of articles organized
 * Inserting Citations:: Adding citation commands in your favorite editor
 * Preferences Guide::   Setting preferences for BibDesk
+* AppleScript::         Automating tasks using AppleScript
 * Getting More Help::   Where to find more answers about BibDesk
 @end menu
 
@@ -138,7 +149,7 @@ Portions of BibDesk:
 Copyright @copyright{} 2001 - 2005 Michael O. McCracken@*
 Copyright @copyright{} many others@*
 
-
+@c ======================================================================================
 
 @node Quick Start
 @chapter Quick Start 
@@ -194,6 +205,7 @@ feature for display or searching, but if you use crossrefs, using
 BibDesk will not break them. If you would like to send feedback about
 this, see @ref{Getting More Help}.
 
+@c ======================================================================================
 
 @node BibTeX Intro
 @chapter BibTeX Intro
@@ -242,7 +254,6 @@ later in conjunction with BibTeX styles.
 Must be unique.
 
 @heading Field data
-
 
 Any field can be in any type.
 
@@ -306,6 +317,8 @@ BibDesk supports reading, editing and saving BibTeX macros. See
 
 btxdoc.dvi
 
+@c ======================================================================================
+
 @node Opening and Importing Files
 @chapter Opening and Importing Files
 @abstract{How to open and import files.}
@@ -316,6 +329,8 @@ btxdoc.dvi
 * Opening an RIS File::  
 @end menu
 
+
+
 @node Starting a New File
 @section Starting a New File
 @abstract{Various ways of Creating a New File}
@@ -325,6 +340,8 @@ btxdoc.dvi
 
 Choose @menutitle{New Bibliography} from the File menu or 
 type the keyboard shortcut @shiftcmd{N}.
+
+
 
 @node Opening a File
 @section Opening a File
@@ -356,6 +373,8 @@ installation.
 
 The drop-down menu will save the last seven commands used, which should be sufficient for most needs!
 Note that BibDesk can open RIS files directly, so a filter isn't required for them.
+
+
 
 @node Opening an RIS File
 @section Opening an RIS File
@@ -398,12 +417,17 @@ publication list, which may be more convenient for those sources.
 
 @subheading Using RIS Services
 
-The Services menu items @menutitle{Bibdesk->Add to Bibliography} and @menutitle{Bibdesk->New Document With RIS}
-can be used from a text editor or web browser which supports Services to
-either add selected RIS text to an existing document, or create a new document based on the selected text.  Further, RIS can be pasted or
-dragged directly into BibDesk's publication list as text, so at least one method should be convenient for your particular situation!
-BibDesk can also save RIS files directly, although some modification of the original source will occur, and this is only recommended
+The Services menu items @menutitle{Bibdesk->Add to Bibliography} and 
+@menutitle{Bibdesk->New Document With RIS}can be used from a text editor or 
+web browser which supports Services toeither add selected RIS text to an 
+existing document, or create a new document based on the selected text.  
+Further, RIS can be pasted ordragged directly into BibDesk's publication 
+list as text, so at least one method should be convenient for your particular situation! 
+BibDesk can also save RIS files directly, although some modification of 
+the original source will occur, and this is only recommended
 when it is necessary to share files with other people or applications.
+
+@c ======================================================================================
 
 @node Searching Your Database
 @chapter Searching Your Database
@@ -454,6 +478,7 @@ for ``BibDesk'' will find ``{B}ib{D}esk'' as well as ``BibDesk.''  Of course,
 this will not find ``Bibdesk,'' since uppercase letters were used in this
 example.
 
+@c ======================================================================================
 
 @node Managing References, Citation Keys, Searching Your Database, Top
 @chapter Managing References
@@ -472,6 +497,8 @@ example.
 * Previewing Typeset Output::   
 @end menu
 
+
+
 @node Adding References
 @section Adding References
 @abstract{How to add new references to a database.}
@@ -486,6 +513,7 @@ shortcut @cmd{N}, or the New Reference toolbar button.
 * Drag and Drop::
 @end menu
 
+
 @node Drag and Drop
 @subsection Drag and Drop
 
@@ -495,6 +523,7 @@ References can also be added to a bibliography by dragging an entry
 from a text source (text editor, web browser). Here's a fancy picture:
 
 @image{gfx/dragIntoBib}
+
 
 
 @node Adding References From Text Sources
@@ -645,6 +674,7 @@ text.
 * Editing Macro Definitions::   
 @end menu
 
+
 @node Entering Accented Characters
 @subsection Entering Accented Characters
 @abstract{Entering accented characters.}
@@ -657,6 +687,7 @@ BibDesk will take care of translating them into the appropriate LaTeX definition
 They will also be re-translated upon reopening the file, so that you
 will see the intended character, not the markup LaTeX uses to generate
 it.
+
 
 @node Editing Fields with Macros
 @subsection Editing Fields with Macros
@@ -689,11 +720,26 @@ the field will automatically go into raw BibteX mode.
 @abstract{How to edit the definitions of a macro.}
 
 @cindex macro
+@cindex editing macros
 @kindex Shift-Cmd-M
+
+You can edit the macros of a document by choosing @menutitle{Macros} from the 
+@menutitle{Window} menu, or typing the keyboard shortcut @shiftcmd{M}. 
+See the @ref{BibTeX Intro} for more information of macros in BibTeX, and 
+@ref{Editing Fields with Macros} on how to use macros in references. 
 
 @image{gfx/macrosWindow}
 
-FIXME: missing text
+Macro definitions consist of a pair of a macro key, which is sued in 
+the raw BibteX string, and a definition string. Note that the definition 
+string is the expanded string value, so it does not include the surrounding 
+braces of a raw BibTeX string. 
+
+You can add a macro definition by pressing the @buttontitle{+} button. 
+Pressing the @buttontitle{-} button removes the selected macro defintions. 
+You can edit the key and the definition value by double clicking the 
+corresponding cell in the table. 
+
 
 
 @node Deleting References
@@ -827,6 +873,7 @@ The Item Number column shows a little #-mark in the header. The column displays 
 order of the item as it appears in the file. 
 
 
+
 @node Printing References
 @section Printing References
 @abstract{Printing references}
@@ -895,6 +942,8 @@ An odd-sized page layout is used so that you don't have to scroll in order to se
 the text, which allows you to have a smaller preview window.  However, this is not
 desirable for printed output, so you may wish to edit the LaTeX template file
 (see the @ref{Preview Preferences} preference pane for more details).
+
+@c ======================================================================================
 
 @node Citation Keys
 @chapter Citation Keys
@@ -967,7 +1016,7 @@ see the @ref{Cite Key Preferences} preference help topic.
 The syntax of the format is described in more detail in 
 @ref{Autogeneration Format Syntax}. 
 
-
+@c ======================================================================================
 
 @node AutoFile
 @chapter AutoFile
@@ -1068,7 +1117,7 @@ see the @ref{AutoFile Preferences} preference help topic.
 The syntax of the format is described in more detail in 
 @ref{Autogeneration Format Syntax}. 
 
-
+@c ======================================================================================
 
 @node Inserting Citations
 @chapter Inserting Citations
@@ -1133,6 +1182,8 @@ in the table, and choose the @buttontitle{-} button.
 @node Autocompletion
 @section Autocompletion
 @abstract{Autocompletion in edits and external applications.}
+
+@cindex autocompletion
 @cindex TextExtras problems
 @cindex iTeXMac problems
 
@@ -1195,6 +1246,8 @@ Users who develop similar functionality for other applications are encouraged to
 scripts and e-mail a link to @uref{mailto:bibdesk-users@lists.sourceforge.net}
 for inclusion here.
 
+
+
 @node System Service
 @section System Service
 @abstract{BibDesk System Services.}
@@ -1225,7 +1278,6 @@ becomes:
 
 @image{gfx/serviceAfter}
 
-
 You can search more than just the title from the service.
 Both of the next two examples search for the string ``foo'' in the title:
 @example
@@ -1242,14 +1294,13 @@ author, ``foo'' in the title, and ``Jan'' in the month:
 "Author = Baz & Title = foo & Month = Jan"
 @end example
 
-
 Another service is available, called @menutitle{Complete Cite Key} which allows
 you to highlight a part of a citation key and BibDesk will complete
 the key for you. For instance, in our example , selecting
 ``CasO'' and invoking the @menutitle{Complete Cite Key}
 service would insert ``CasObe00''.
 
-
+@c ======================================================================================
 
 @node Preferences Guide
 @chapter Preferences Guide
@@ -1282,6 +1333,10 @@ from the @menutitle{BibDesk} menu, or press the key shortcut @cmd{,} (Command
 @section General
 @abstract{Configuring Startup behavior and Overall Appearance}
 
+@cindex startup behavior
+@cindex appearance
+@cindex fonts
+
 This preference pane lets you control what BibDesk does when starting up. 
 You can also control the overall appearance of the main window. 
 
@@ -1312,11 +1367,13 @@ See @ref{Getting More Help} for information on the Error panel.
 @section Citation
 @abstract{Configuring Dragging and Citation Commands}
 
+@cindex dragging
+@cindex citation commands
+
 The Citation preference pane lets you set what gets copied and dragged by default 
 to other applcations from BibDesk. 
 
 @image{gfx/citationPrefs}
-
 
 @prefitem{Copying and Dragging} This controls what gets dropped (or copied) on a drag (or copy).
 
@@ -1342,10 +1399,12 @@ to other applcations from BibDesk.
 @section Files
 @abstract{Configuring Saving and Reading Defaults}
 
+@cindex saving files
+@cindex reading files
+
 Using the Files preference pane you can change the way BibDesk saves and reads BibTeX files. 
 
 @image{gfx/filesPrefs}
-
 
 @prefitem{String Encoding} This popup menu allows you to select the encoding used to open 
 BibTeX files by double-clicking on them in the Finder.
@@ -1452,12 +1511,13 @@ they will show up on a subsequent edit.
 @section Preview
 @abstract{Configuring the Preview Settings}
 
+@cindex preview settings
+
 The Preview pane allows you to change the default settings for using 
 LaTeX to generate the contents of the typeset preview window, as described in 
 @ref{Previewing Typeset Output}.
 
 @image{gfx/previewPrefs}
-
 
 @prefitem{Generate previews using TeX} (More appropriately, use pdflatex for previewing.) 
 If this is checked, the preview pane will be drawn.
@@ -1486,6 +1546,8 @@ modify the template and TeX command appropriately.
 @node Default Fields Preferences
 @section Default Fields
 @abstract{Configuring the Default Fields}
+
+@cindex default fields
 
 The Defaults pane lets you add new default BibTeX fields, that will be added to all entries. 
 You can also control which field 
@@ -1559,6 +1621,8 @@ they will show up on a subsequent edit.
 @section Cite Key
 @abstract{Configuring the Cite Key Autogeneration Feature}
 
+@cindex cite key autogeneration
+
 The Cite Key pane lets you control the Cite Key Autogeneration feature. 
 You can set whether you want BibDesk to automatically generate cite keys 
 for you. You can also control how the generated keys are contructed using a format string. 
@@ -1593,6 +1657,8 @@ cite keys in all lowercase characters.
 @node AutoFile Preferences
 @section AutoFile
 @abstract{Configuring the AutoFile feature}
+
+@cindex AutoFile
 
 AutoFile lets you choose a folder as your "Papers Folder" to
 automatically move files into when you link to them. You can do this
@@ -1635,6 +1701,8 @@ paths in all lowercase characters.
 @section Autocompletion
 @abstract{Configuring the Autocompletion feature}
 
+@cindex autocompletion
+
 In the Autocompletion pane you can configure the autocompletion system. 
 You can control which fields in BiDesk are autocompleted. You can also install 
 and configure citations autocompletion for external applications. 
@@ -1649,6 +1717,8 @@ and configure citations autocompletion for external applications.
 @subsection Internal Autocompletion
 @abstract{Autocompletion for edits in BibDesk}
 
+@cindex internal autocompletion
+
 @image{gfx/autocompletePrefs-Internal}
 
 @prefindex Internal Autocompletion
@@ -1662,6 +1732,8 @@ You can remove a field by selecting it and clicking the @buttontitle{-} button.
 @node External Autocompletion
 @subsection External Autocompletion
 @abstract{Autocompletion of citation commands in other applications.}
+
+@cindex external autocompletion
 
 @image{gfx/autocompletePrefs-External}
 
@@ -1680,9 +1752,64 @@ If an application you have added to the list behaves strangely after
 you add it, this is a clue that autocompletion is not compatible;
 Apple's Stickies application is a good example of this.
 
+@c ======================================================================================
+
+@node AppleScript
+@chapter AppleScript
+@abstract{How to use AppleScript with BibDesk.}
+
+@cindex AppleScript
+
+FIXME
+
+@heading Topics
+
+@menu
+* Using AppleScript::
+* Scripts Menu::
+* Where to get Scripts::
+@end menu
+
+
+@node Using AppleScript
+@section Using AppleScript
+@abstract{How to use AppleScript with Bibdesk.}
+
+@cindex using AppleScript
+
+FIXME
+
+@uref{http://www.apple.com/applescript, AppleScript}
+
+
+@node Scripts Menu
+@section Scripts Menu
+@abstract{How to use the Scripts menu.}
+
+@cindex Scripts menu
+
+FIXME
+
+@menutitle{About the Scripts Menu}
+
+
+@node Where to get Scripts
+@section Where to get Scripts
+@abstract{Where to get Scripts for BibDesk.}
+
+FIXME
+
+@uref{http://bibdesk.sourceforge.net/scripts.html, BibDesk AppleScript Repository}
+
+@c ======================================================================================
+
 @node Getting More Help
 @chapter Getting More Help
 @abstract{Where to go to figure out problems.}
+
+@cindex error panel
+@cindex mailing list
+@cindex bug reports
 
 @heading The Error Panel
 
@@ -1699,13 +1826,13 @@ the offending line highlighted.
 @image{gfx/errorWindow}
 
 @heading Mailing List
+
 If your questions aren't answered in this help file, the
 @uref{http://lists.sourceforge.net/lists/listinfo/bibdesk-users, bibdesk-users mailing list}
  may have an answer. Your question
 may have been answered already, so you can check the 
 @uref{http://sourceforge.net/mailarchive/forum.php?forum=bibdesk-users,list archives} 
 to get instant gratification.
-
 
 @heading Bug reports
 
@@ -1722,30 +1849,30 @@ subset that causes the errors. Crash reports are also useful and can
 be obtained from the Console application (in `Applications/Utilities`).
 
 
-
-
-@c -------------------------------------------
+@c ======================================================================================
 @c INDEXES
-@c -------------------------------------------
-
+@c ======================================================================================
 
 @node indexcp
 @appendix Concept Index
 @abstract{Concept index.}
 @printindex cp
 
+@c ======================================================================================
 
 @node indexpref
 @appendix Preference Settings Index
 @abstract{Preferences setting index.}
 @printindex pref
 
+@c ======================================================================================
 
 @node indexky
 @appendix Keyboard Shortcut Index
 @abstract{Keyboard shortcuts index.}
 @printindex ky
 
+@c ======================================================================================
 
 @node Character Conversion
 @appendix Character Conversion
@@ -1773,16 +1900,18 @@ release of BibDesk.
 The following table was taken from The
 Not So Short Introduction to LaTeX2e> (Oetiker et al., 1999).
 Depending on your TeX distribution, it may be available at
-@code{/usr/local/teTeX/share/texmf.tetex/doc/latex/general/lshort.dvi}, or it is available from @uref{http://www.ctan.org/ctan/tex-archive/info/lshort/english/, CTAN}.
+@code{/usr/local/teTeX/share/texmf.tetex/doc/latex/general/lshort.dvi}, 
+or it is available from @uref{http://www.ctan.org/ctan/tex-archive/info/lshort/english/, CTAN}.
 
 Many of the accents listed in this table can be applied to characters
 other than o, as well.  
 
 @image{gfx/accents}
 
-Note: for BibTeX, it is also necessary to enclose the accent sequence in braces (see the @uref{http://www.tex.ac.uk/cgi-bin/texfaq2html?label=bibaccent, TeX FAQ}).
+Note: for BibTeX, it is also necessary to enclose the accent sequence in braces 
+(see the @uref{http://www.tex.ac.uk/cgi-bin/texfaq2html?label=bibaccent, TeX FAQ}).
 
-
+@c ======================================================================================
 
 @node Autogeneration Format Syntax
 @appendix Autogeneration Format Syntax
@@ -1790,7 +1919,14 @@ Note: for BibTeX, it is also necessary to enclose the accent sequence in braces 
 
 @heading Syntax of the format
 
-The format is used for autogeneration of certain values, such as the cite key and the local-url. The format is a string containing special format specifiers, which are replaced by strings determined by the bibliography data. Most format specifiers have the form of a %-character followed by a single character. It can be followed by optional digits, which serve as parameters for the format specifier. Possible format specifiers are given in the table below.
+The format is used for autogeneration of certain values, such as the cite key 
+and the local-url. The format is a string containing special format specifiers, 
+which are replaced by strings determined by the bibliography data. 
+Most format specifiers have the form of a %-character followed by a single character. 
+It can be followed by optional digits, which serve as parameters for the format specifier. 
+Possible format specifiers are given in the table below.
+
+@c Some macro defintions used in the table
 
 @macro spec {text}
 @html
@@ -1863,6 +1999,8 @@ The format is used for autogeneration of certain values, such as the cite key an
 @set specdescr bold
 @set paramdescr italics
 @end ifnothtml
+
+@c End of macro definitions
 
 @multitable {@b{%f\{}\i{Field}\b{\}0}} {Keywords concatenated together, with (optional) maximal number of keywords. Keywords must be separated by one of ;:, (semicolon, colon, or comma)}
 @headitem Specifier @tab Replaced content description
@@ -1991,7 +2129,6 @@ McCracken.M;Maxwell.A;etal:2004BibDesk-a-great-appl
 McCr;Maxw;etal:SF1
 @end table
 
-
 @subheading Setting the cite key format
 
 See the discussion in @ref{Cite Key Preferences} Preferences for
@@ -2000,7 +2137,10 @@ details on how to set the cite key format.
 
 @bye
 
---nothing past bye gets processed...
+@c ======================================================================================
+@c nothing past bye gets processed...
+@c ======================================================================================
+
 @multitable @columnfractions .12 .88
 @item Portions of BibDesk
 @item @tab Copyright @copyright{} 2001 - 2005 Michael O. McCracken@*
