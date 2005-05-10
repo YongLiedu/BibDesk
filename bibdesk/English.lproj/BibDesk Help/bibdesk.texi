@@ -1133,12 +1133,67 @@ in the table, and choose the @buttontitle{-} button.
 @node Autocompletion
 @section Autocompletion
 @abstract{Autocompletion in edits and external applications.}
+@cindex TextExtras problems
+@cindex iTeXMac problems
 
 BibDesk can install a plugin that lets you search your database and
 insert citation commands conveniently without leaving your text
-editing application. @xref{External Autocompletion}
+editing application. @xref{External Autocompletion} to install
+the plugin and manage the applications that use it.
 
+@image{gfx/autocompleteExample}
 
+@subheading What does it do?
+
+Autocompletion ties into the regular dictionary autocompletion of
+words on Mac OS X 10.3 and greater.  In Cocoa applications (such as
+TextEdit), you can start typing a word and hit the F5 function key to
+get a list of possible autocompletion entries; the arrow keys can be
+used to scroll the list, and tab or return to select an item.
+BibDesk's autocompletion provides possible matches based on the Title,
+Author, Citekey, and Keywords of your currently open BibTeX files.  To
+select an item, hit tab, return, comma, or closing brace as
+appropriate.
+
+Note that on laptop keyboards, the "fn" key must
+be used to get the actual F5 key behavior with the default keyboard
+preferences.  Alternatives are to use option-escape, which will also
+trigger autocompletion, or to set up a key binding for the
+@code{complete:} selector (TextExtras can be used for this, but see
+the caveat below).
+
+@subheading Bonus feature: reference completion
+
+The autocompletion input manager will also provide completion for TeX @code{\ref{}
+commands, based on all @code{\label} commands in the same text file.  For instance, 
+if you have a table labeled "@code{\label{tab:myTable}}", you can type "@code{See Table~\ref{tab:m}", 
+hit the same key sequence used for citekey autocompletion, and see a list of all 
+matching entries pop up.  The autocompletion looks for up to seven matching 
+characters, so the more you type, the fewer options you'll be presented with in the list.
+
+@subheading Caveats and known issues
+
+There is a conflict with the @uref{http://www.lorax.com/FreeStuff/TextExtras.html, TextExtras 1.7}
+input manager at present.  The author of TextExtras is aware of the issue and working on a fix, 
+but the only solution at present is to remove TextExtras or install an unsupported 
+@uref{http://bibdesk.sourceforge.net/TextExtras_1.7BDSK.dmg, modified version}.
+
+By default, @uref{http://itexmac.sourceforge.net, iTeXMac 1.3} does not support the keybinding for
+autocompletion, but it can easily be made to work by adding a @code{complete:} keybinding to 
+@code{~/Library/Application Support/iTeXMac/Key Bindings/TextKeyBinding.dict}.  
+The following snippet binds control-u to autocompletion:
+
+@code{<key>^u</key>} @*
+@code{<string>complete:</string>}
+
+@subheading Alternatives
+
+For @uref{http://barebones.com/", BBEdit} users, Curt Clifton has written an AppleScript 
+to provide similar functionality.  It can be obtained from 
+@uref{http://www.cs.iastate.edu/~cclifton/software.shtml}.  
+Users who develop similar functionality for other applications are encouraged to post their 
+scripts and e-mail a link to @uref{mailto:bibdesk-users@lists.sourceforge.net}
+for inclusion here.
 
 @node System Service
 @section System Service
@@ -1621,7 +1676,9 @@ When the plugin has been installed, the button title changes to
 applications, such as the ones in the picture, and they must be added
 to the list manually using the @buttontitle{Add} button below the list.  
 
-
+If an application you have added to the list behaves strangely after
+you add it, this is a clue that autocompletion is not compatible;
+Apple's Stickies application is a good example of this.
 
 @node Getting More Help
 @chapter Getting More Help
