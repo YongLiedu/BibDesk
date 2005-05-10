@@ -99,7 +99,7 @@ h1.chapter, h1.appendix, h1 {
 h2.section {
     font-size: 18px;
 }
-h2.subsection, h2.heading. h2 {
+h2.subsection, h2.heading, h2 {
     font-size: 16px;
 }
 h3.subheading, h3, h4, h5 {
