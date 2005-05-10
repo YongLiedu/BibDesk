@@ -21,6 +21,7 @@ NSString *BDSKSnoopDrawerContentKey = @"Snoop Drawer Content";
 NSString *BDSKBibEditorAutocompletionFieldsKey = @"Enabled for autocompletion in BibEditor";
 NSString *BDSKPreviewPaneFontFamilyKey = @"Font family to use for RTF preview display";
 NSString *BDSKFilterFieldHistoryKey = @"Open using filter command history";
+NSString *BDSKEditorShouldCheckSpellingContinuouslyKey = @"Check spelling continuously while editing";
 
 NSString *BDSKUseUnicodeBibTeXParserKey = @"Use Unicode BibTeX Parser"; // deprecated in 0.99
 NSString *BDSKUseThreadedFileLoadingKey = @"Load files in background"; // deprecated in 0.99

@@ -78,6 +78,7 @@ extern NSString *BDSKSnoopDrawerContentKey;
 extern NSString *BDSKBibEditorAutocompletionFieldsKey;
 extern NSString *BDSKPreviewPaneFontFamilyKey;
 extern NSString *BDSKFilterFieldHistoryKey;
+extern NSString *BDSKEditorShouldCheckSpellingContinuouslyKey;
 
 
 extern NSString *BDSKCiteKeyFormatKey;

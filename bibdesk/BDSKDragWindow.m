@@ -145,4 +145,33 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
     return YES;
 }
 
+@implementation BDSKSpellingTextView
+
+// This allows spell checking in the editor to remain enabled, although the
+// behavior is a bit strange; the pref only gets set if the window gets toggleContinuousSpellChecking:,
+// so you can potentially be frustrated by trying to disable it in one of the textviews.
+// However, this probably is no more frustrating than finding spell checking disabled
+// every time you close/reopen an editor.
+
+- (BOOL)validateMenuItem:(NSMenuItem*)menuItem{
+    if([menuItem action] == @selector(toggleContinuousSpellChecking:)){
+        [menuItem setState:[[OFPreferenceWrapper sharedPreferenceWrapper] boolForKey:BDSKEditorShouldCheckSpellingContinuouslyKey]];
+        return YES;
+    }
+    else return [super validateMenuItem:menuItem];
+}
+
+- (void)toggleContinuousSpellChecking:(id)sender{
+    BOOL state = ![[OFPreferenceWrapper sharedPreferenceWrapper] boolForKey:BDSKEditorShouldCheckSpellingContinuouslyKey];
+    [sender setState:state];
+    [[OFPreferenceWrapper sharedPreferenceWrapper] setBool:state forKey:BDSKEditorShouldCheckSpellingContinuouslyKey];
+}
+
+- (BOOL)makeFirstResponder:(NSResponder *)aResponder{
+    if([aResponder respondsToSelector:@selector(setContinuousSpellCheckingEnabled:)]){
+        [(NSTextView *)aResponder setContinuousSpellCheckingEnabled:[[OFPreferenceWrapper sharedPreferenceWrapper] boolForKey:BDSKEditorShouldCheckSpellingContinuouslyKey]];
+    }
+    return [super makeFirstResponder:aResponder];
+}
+
 @end
