@@ -81,6 +81,7 @@ Option-Cmd-\key\
 @c Use a @node command before every sectioning command.
 @c Make sure that each node is included in a menu of a node one level higher. 
 @c Usually, the menu comes just before the lower level sectioning commands. 
+@c Use @heading in chapters and appendixes and @subheading in (sub)sections
 
 @c ======================================================================================
 @c The content of the Help Pages starts here...
@@ -329,7 +330,7 @@ btxdoc.dvi
 * Opening an RIS File::  
 @end menu
 
-
+@c --------------------------------------------------------------------------------------
 
 @node Starting a New File
 @section Starting a New File
@@ -341,7 +342,7 @@ btxdoc.dvi
 Choose @menutitle{New Bibliography} from the File menu or 
 type the keyboard shortcut @shiftcmd{N}.
 
-
+@c --------------------------------------------------------------------------------------
 
 @node Opening a File
 @section Opening a File
@@ -374,7 +375,7 @@ installation.
 The drop-down menu will save the last seven commands used, which should be sufficient for most needs!
 Note that BibDesk can open RIS files directly, so a filter isn't required for them.
 
-
+@c --------------------------------------------------------------------------------------
 
 @node Opening an RIS File
 @section Opening an RIS File
@@ -454,7 +455,7 @@ publication has that field, it will be searched. Adding the field
 the citation key of publications. (All Fields also searches the
 citation key.)
 
-@subheading Advanced Searches
+@heading Advanced Searches
 
 @cindex boolean search
 @cindex accents in search
@@ -497,7 +498,7 @@ example.
 * Previewing Typeset Output::   
 @end menu
 
-
+@c --------------------------------------------------------------------------------------
 
 @node Adding References
 @section Adding References
@@ -524,7 +525,7 @@ from a text source (text editor, web browser). Here's a fancy picture:
 
 @image{gfx/dragIntoBib}
 
-
+@c --------------------------------------------------------------------------------------
 
 @node Adding References From Text Sources
 @section Adding References From Text Sources
@@ -591,7 +592,7 @@ copy the selected text over to the corresponding field.
 
 @c note: Double-clicking to transfer the data does not work for the webpage view yet.
 
-
+@c --------------------------------------------------------------------------------------
 
 @node Editing References
 @section Editing References
@@ -631,7 +632,7 @@ bibliography.
 @cindex viewing PDF as text
 @cindex drag and drop, files
 
-@heading Viewing a linked file
+@subheading Viewing a linked file
 
 You can view a linked file in its appropriate application by clicking
 on the @buttontitle{View File} button, which has the file's icon as its
@@ -666,7 +667,7 @@ the highlighted reference. It can also be set (in the
 @ref{General Preferences} Preferences) to show the entire selected entry as nicely formatted
 text.
 
-@heading Other editing topics
+@subheading Other editing topics
 
 @menu
 * Entering Accented Characters::  
@@ -740,7 +741,7 @@ Pressing the @buttontitle{-} button removes the selected macro defintions.
 You can edit the key and the definition value by double clicking the 
 corresponding cell in the table. 
 
-
+@c --------------------------------------------------------------------------------------
 
 @node Deleting References
 @section Deleting References
@@ -752,7 +753,7 @@ References can be deleted by selecting the reference and choosing
 key. Either way, a warning will appear to verify that you want to
 delete the reference, but delete operations are also undoable.
 
-
+@c --------------------------------------------------------------------------------------
 
 @node Browsing References
 @section Browsing References
@@ -769,7 +770,7 @@ the name of each column, in the header of the table.
 @cindex displaying custom fields
 @cindex table columns
 
-@heading Customizing the Table
+@subheading Customizing the Table
 
 You can control the order of the columns by moving them directly.
 
@@ -791,7 +792,7 @@ There are a few special columns, where information is displayed that
 is more informative to the user. Below we discuss some of these special fields. 
 
 @cindex Title
-@heading Title 
+@subheading Title 
 
 Normally, the Title column will display the content of a Title field, if it exists. 
 There is one exception however, where BibDesk tries to `do the right thing' 
@@ -811,7 +812,7 @@ Title (pp Pages)
 @end example
 
 @cindex Container
-@heading Container 
+@subheading Container 
 
 The special column 'Container' can be added to the table.  It is useful for
 types that are part of a larger document and displays the title of that
@@ -833,7 +834,7 @@ If you use a special type that has a container concept write to bibdesk-develop@
 and it can be added. 
 
 @cindex Local-Url
-@heading Local-Url 
+@subheading Local-Url 
 
 The Local-Url column is the column with the column with a little icon depicting a file in the header. 
 
@@ -850,7 +851,7 @@ or it can be dragged into a specific application in the Dock to open the file in
 or perhaps mail it as an attachment.
 
 @cindex Url
-@heading Url
+@subheading Url
 
 The Url column is the column with the column with an @@-sign in the header. 
 
@@ -861,18 +862,18 @@ Double-clicking a cell in the Url column will open the linked remote URL
 in your default browser application.   
 
 @cindex Date
-@heading Date
+@subheading Date
 
 The Date column displays the date of the item, which is guessed from the Year and Month 
 fields of the item. 
 
 @cindex Item Number
-@heading Item Number 
+@subheading Item Number 
 
 The Item Number column shows a little #-mark in the header. The column displays the 
 order of the item as it appears in the file. 
 
-
+@c --------------------------------------------------------------------------------------
 
 @node Printing References
 @section Printing References
@@ -886,7 +887,7 @@ of the lower browser pane of the selected reference.  If you prefer to print the
 contents of the LaTeX preview, bring that window to the front and choose
 @menutitle{Print} from the File menu (@cmd{P}) to print the typeset preview contents.
 
-
+@c --------------------------------------------------------------------------------------
 
 @node Saving the File
 @section Saving the File
@@ -906,7 +907,7 @@ use the @menutitle{Export BibTeX With Encoding} command, found in the
 @menutitle{File} menu (if you want to continue working with the file in a different encoding). 
 Choose the encoding you want from the pop-up button at the bottom of the resulting sheet.
 
-
+@c --------------------------------------------------------------------------------------
 
 @node Previewing Typeset Output
 @section Previewing Typeset Output
@@ -963,7 +964,7 @@ reference in the preferences (See the @ref{Cite Key Preferences} preference pane
 * Customizing the Format of Keys::  How to customize the way the key is generated. 
 @end menu
 
-
+@c --------------------------------------------------------------------------------------
 
 @node When the Key is Generated
 @section When the Key is Generated
@@ -984,7 +985,7 @@ When a key is automatically generated, a message will appear in the
 status bar of the Editor window, if that window is open and the 
 status bar is shown. 
 
-
+@c --------------------------------------------------------------------------------------
 
 @node Generating a Key for an Existing Publications
 @section Generating a Key for an Existing Publications
@@ -1003,7 +1004,7 @@ autogeneration feature turned on, or you know you do not have the full bibliogra
 information, you can choose @menutitle{Generate Cite Key} from the @menutitle{Publication} 
 menu (keyboard shortcut @cmd{K}), or from the action menu in the Editor for the item. 
 
-
+@c --------------------------------------------------------------------------------------
 
 @node Customizing the Format of Keys
 @section Customizing the Format of Keys
@@ -1040,7 +1041,7 @@ Papers Folder as described in the
 * Customizing the Format the Local-Url::  How to customize the generated location of used for AutoFile. 
 @end menu
 
-
+@c --------------------------------------------------------------------------------------
 
 @node Automatically Move Files
 @section Automatically Move Files
@@ -1068,7 +1069,7 @@ When a file is automatically moved, a message will appear in the
 status bar of the Editor window, if that window is open and the 
 status bar is shown. 
 
-
+@c --------------------------------------------------------------------------------------
 
 @node Consolidate Linked Files
 @section Consolidate Linked Files
@@ -1106,7 +1107,7 @@ You can also AutoFile a single linked file by choosing the
 @menutitle{Auto File Paper} menu item in the action menu 
 of the Editor. 
 
-
+@c --------------------------------------------------------------------------------------
 
 @node Customizing the Format the Local-Url
 @section Customizing the Format the Local-Url
@@ -1149,7 +1150,7 @@ want to use the Custom Citation Strings Drawer.
 * System Service::              
 @end menu
 
-
+@c --------------------------------------------------------------------------------------
 
 @node The Custom Citation Strings Drawer
 @section The Custom Citation Strings Drawer
@@ -1177,7 +1178,7 @@ You can change the name of a citation string by double-clicking on the item.
 To remove a custom citation string, select the corresponding item 
 in the table, and choose the @buttontitle{-} button. 
 
-
+@c --------------------------------------------------------------------------------------
 
 @node Autocompletion
 @section Autocompletion
@@ -1246,7 +1247,7 @@ Users who develop similar functionality for other applications are encouraged to
 scripts and e-mail a link to @uref{mailto:bibdesk-users@lists.sourceforge.net}
 for inclusion here.
 
-
+@c --------------------------------------------------------------------------------------
 
 @node System Service
 @section System Service
@@ -1327,7 +1328,7 @@ from the @menutitle{BibDesk} menu, or press the key shortcut @cmd{,} (Command
 * Autocompletion Preferences:: Install and configure the autocompletion system.           
 @end menu
 
-
+@c --------------------------------------------------------------------------------------
 
 @node General Preferences
 @section General
@@ -1361,7 +1362,7 @@ The Font family popup menu allows you to choose the font used for the preview pa
 open the edit window for an item you have pasted or dragged in. 
 See @ref{Getting More Help} for information on the Error panel.
 
-
+@c --------------------------------------------------------------------------------------
 
 @node Citation Preferences
 @section Citation
@@ -1384,7 +1385,6 @@ to other applcations from BibDesk.
 @item RTF Description means the contents of the RTF Preview pane.
 @end itemize
 
-
 @prefitem{Cite Command Style} This lets you define the default cite command style that is used when dragging TeX cite commands from the publication table.
 
 @itemize
@@ -1393,7 +1393,7 @@ to other applcations from BibDesk.
 @item Separate Citations lets you choose whether to have bibdesk drop strings like \cite@{key1,key2@} or \cite@{key1@} \cite@{key2@} when multiple items are involved.
 @end itemize
 
-
+@c --------------------------------------------------------------------------------------
 
 @node Files Preferences
 @section Files
@@ -1450,7 +1450,7 @@ will be shown automatically when you open a file that contains errors. Note that
 errors and warning by showing the Error Panel, as described in @ref{Getting More Help}. 
 
 
-@heading Advanced
+@subheading Advanced
 
 @menu
 * Custom Character Conversions::
@@ -1490,7 +1490,7 @@ When you are done editing, you should choose the @buttontitle{OK} button
 to save your edits. If you choose the @buttontitle{Cancel} button, 
 your changes will be lost. 
 
-@heading Notes
+@subheading Notes
 
 @itemize
 @item If you want to convert a Unicode character to TeX that is not surrounded by 
@@ -1505,7 +1505,7 @@ to overwrite character conversions that BibDesk has defined internally.
 they will show up on a subsequent edit. 
 @end itemize
 
-
+@c --------------------------------------------------------------------------------------
 
 @node Preview Preferences
 @section Preview
@@ -1541,7 +1541,7 @@ TeX program you are using. Note that the standard pdflatex and style files does 
 Unicode characters. Therefore if you want to use other encodings then ASCII (TeX), you should 
 modify the template and TeX command appropriately. 
 
-
+@c --------------------------------------------------------------------------------------
 
 @node Default Fields Preferences
 @section Default Fields
@@ -1565,7 +1565,7 @@ but you can also supply here your own custom field.
 @prefitem{Custom BibTeX types and fields} Clicking the button allows you to add new types and add new fields 
 to existing fields. 
 
-@heading Advanced
+@subheading Advanced
 
 @menu
 * Custom Types and Fields::
@@ -1609,13 +1609,13 @@ When you are done editing, you should choose the @buttontitle{OK} button
 to save your edits. If you choose the @buttontitle{Cancel} button, 
 your changes will be lost. 
 
-@heading Note
+@subheading Note
 
 If you simply close the editor window, without choosing the @buttontitle{OK} or 
 @buttontitle{Cancel} button, your changes will @emph{not} be saved, even though 
 they will show up on a subsequent edit. 
 
-
+@c --------------------------------------------------------------------------------------
 
 @node Cite Key Preferences
 @section Cite Key
@@ -1652,7 +1652,7 @@ button will only be visible in custom mode.
 @prefitem{Generate lowercase cite keys} Selecting this option will generate 
 cite keys in all lowercase characters. 
 
-
+@c --------------------------------------------------------------------------------------
 
 @node AutoFile Preferences
 @section AutoFile
@@ -1695,7 +1695,7 @@ button will only be visible in custom mode.
 @prefitem{Generate lowercase file names} Selecting this option will generate 
 paths in all lowercase characters. 
 
-
+@c --------------------------------------------------------------------------------------
 
 @node Autocompletion Preferences
 @section Autocompletion
@@ -1770,6 +1770,7 @@ FIXME
 * Where to get Scripts::
 @end menu
 
+@c --------------------------------------------------------------------------------------
 
 @node Using AppleScript
 @section Using AppleScript
@@ -1781,6 +1782,7 @@ FIXME
 
 @uref{http://www.apple.com/applescript, AppleScript}
 
+@c --------------------------------------------------------------------------------------
 
 @node Scripts Menu
 @section Scripts Menu
@@ -1792,6 +1794,7 @@ FIXME
 
 @menutitle{About the Scripts Menu}
 
+@c --------------------------------------------------------------------------------------
 
 @node Where to get Scripts
 @section Where to get Scripts
@@ -2085,7 +2088,7 @@ The format for the local-url can contain any character apart from colons (:).
 To use an explicit percent character, use the escape specifier @spec{%%} 
 (except inside an optional argument delimited by square brackets). 
 
-@subheading Examples
+@heading Examples
 
 @example
 @emph{Bibliography:}
@@ -2129,7 +2132,7 @@ McCracken.M;Maxwell.A;etal:2004BibDesk-a-great-appl
 McCr;Maxw;etal:SF1
 @end table
 
-@subheading Setting the cite key format
+@heading Setting the cite key format
 
 See the discussion in @ref{Cite Key Preferences} Preferences for
 details on how to set the cite key format.
