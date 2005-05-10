@@ -23,6 +23,24 @@ sub t2h_html32_protect_text($)
    return $text;
 }
 
+# a heading
+sub t2h_html32_heading($)
+{
+    my $element = shift;
+    my $text = $element->{'text'};
+    my $level = $element->{'level'};
+    my $tag_level = $element->{'tag_level'};
+    if (!$element->{'node'} && !$NUMBER_SECTIONS)
+	{
+        $text = $element->{'name'};
+	}
+    if (($tag_level eq "chapter") || ($tag_level eq "section") || ($tag_level eq "subsection"))
+    {
+        $text = "<img src=\"gfx/bibDeskIcon.png\" alt=\"BibDesk\"> " . $text;
+    }
+    return "<h$level class=\"$tag_level\"> $text</h$level>$node\n";
+}
+
 # a preformatted section
 sub t2h_html32_preformatted($$$)
 {
@@ -56,7 +74,7 @@ sub t2h_html32_menu($)
 
 #$summary_letter    = \&t2h_html32_summary_letter;
 $protect_text      = \&t2h_html32_protect_text;
-#$heading           = \&t2h_html32_heading;
+$heading           = \&t2h_html32_heading;
 $preformatted      = \&t2h_html32_preformatted;
 $menu              = \&t2h_html32_menu;
 $foot_section      = \&t2h_html32_foot_section;
