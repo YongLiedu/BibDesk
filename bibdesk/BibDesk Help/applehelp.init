@@ -34,7 +34,7 @@ sub t2h_html32_heading($)
 	{
         $text = $element->{'name'};
 	}
-    if (($tag_level eq "chapter") || ($tag_level eq "section") || ($tag_level eq "subsection"))
+    if (($tag_level eq "chapter") || ($tag_level eq "section") || ($tag_level eq "subsection") || ($tag_level eq "appendix"))
     {
         $text = "<img src=\"gfx/bibDeskIcon.png\" alt=\"BibDesk\"> " . $text;
     }
@@ -91,8 +91,19 @@ p,ul,ol,td,dt,dd {
 }
 h1, h2, h3, h4, h5 {
     font-family: Lucida Grande,Helvetica,Geneva;
-    font-size: 16px;
     color: #3333cc;
+}
+h1.chapter, h1.appendix, h1 {
+    font-size: 20px;
+}
+h2.section {
+    font-size: 18px;
+}
+h2.subsection, h2.heading. h2 {
+    font-size: 16px;
+}
+h3.subheading, h3, h4, h5 {
+    font-size: 14px;
 }
 a {
 	font-weight: bold;
