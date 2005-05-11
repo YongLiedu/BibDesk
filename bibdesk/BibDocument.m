@@ -54,7 +54,6 @@ NSString *BDSKBibItemLocalDragPboardType = @"edu.ucsd.cs.mmccrack.bibdesk: Local
         localDragPboard = [[NSPasteboard pasteboardWithName:LocalDragPasteboardName] retain];
         draggedItems = [[NSMutableArray alloc] initWithCapacity:1];
         tableColumns = [[NSMutableDictionary dictionaryWithCapacity:6] retain];
-        fileOrderCount = 1;
 		
         BD_windowControllers = [[NSMutableArray alloc] initWithCapacity:1];
         
@@ -299,11 +298,11 @@ NSString *BDSKBibItemLocalDragPboardType = @"edu.ucsd.cs.mmccrack.bibdesk: Local
 	NSUndoManager *undoManager = [self undoManager];
 	[[undoManager prepareWithInvocationTarget:self] removePublication:pub];
 	
-	[publications insertObject:pub atIndex:index];
+    [publications insertObject:pub atIndex:index usingLock:pubsLock]; 
 	// always add new pubs to the shown array
 	// I do not know how to add it at the right place when satisfies the search
     if([[(BDSK_USING_JAGUAR ? searchFieldTextField : searchField) stringValue] isEqualToString:@""]){
-        [shownPublications addObject:pub usingLock:pubsLock];
+        [shownPublications insertObject:pub atIndex:index usingLock:pubsLock];
         [self sortPubsByColumn:nil];
     }
 	[pub setDocument:self];
@@ -320,24 +319,7 @@ NSString *BDSKBibItemLocalDragPboardType = @"edu.ucsd.cs.mmccrack.bibdesk: Local
 }
 
 - (void)addPublication:(BibItem *)pub lastRequest:(BOOL)last{
-	NSUndoManager *undoManager = [self undoManager];
-	[[undoManager prepareWithInvocationTarget:self] removePublication:pub];
-	
-    [publications addObject:pub usingLock:pubsLock];
-    
-     // don't add directly to shownPublications if there is a search in action; let the notifications take care of it
-    if([[(BDSK_USING_JAGUAR ? searchFieldTextField : searchField) stringValue] isEqualToString:@""]){
-        [shownPublications addObject:pub usingLock:pubsLock];
-        [self sortPubsByColumn:nil];
-    }
-
-	[pub setDocument:self];
-
-	NSDictionary *notifInfo = [NSDictionary dictionaryWithObjectsAndKeys:pub, @"pub",
-		(last ? @"YES" : @"NO"), @"lastRequest", nil];
-	[[NSNotificationCenter defaultCenter] postNotificationName:BDSKDocAddItemNotification
-														object:self
-													  userInfo:notifInfo];
+    [self insertPublication:pub atIndex:0 lastRequest:last]; // insert new pubs at the beginning, so item number is handled properly
 }
 
 - (void)removePublication:(BibItem *)pub{
@@ -807,7 +789,7 @@ stringByAppendingPathComponent:@"BibDesk"]; */
 - (NSData *)bibTeXDataWithEncoding:(NSStringEncoding)encoding droppingInternal:(BOOL)drop{
     
     BibItem *tmp;
-    NSEnumerator *e = [[publications sortedArrayUsingSelector:@selector(fileOrderCompare:)] objectEnumerator];
+    NSEnumerator *e = [publications objectEnumerator];
     NSMutableData *d = [NSMutableData data];
 
     if(encoding == 0)
@@ -851,7 +833,7 @@ stringByAppendingPathComponent:@"BibDesk"]; */
 - (NSData *)RISDataWithEncoding:(NSStringEncoding)encoding{
     
     BibItem *tmp;
-    NSEnumerator *e = [[publications sortedArrayUsingSelector:@selector(fileOrderCompare:)] objectEnumerator];
+    NSEnumerator *e = [publications objectEnumerator];
     NSMutableData *d = [NSMutableData data];
     
     if(encoding == 0)
@@ -2206,9 +2188,6 @@ int generalBibItemCompareFunc(id item1, id item2, void *context){
 - (void)createNewBlankPubAndEdit:(BOOL)yn{
     BibItem *newBI = [[[BibItem alloc] init] autorelease];
 
-    [newBI setFileOrder:fileOrderCount];
-	
-    fileOrderCount++;
     [self addPublication:newBI];
 	[[self undoManager] setActionName:NSLocalizedString(@"Add Publication",@"")];
     

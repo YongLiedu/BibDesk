@@ -145,7 +145,7 @@ extern NSString *BDSKBibItemLocalDragPboardType;
 	IBOutlet RYZImagePopUpButton * actionMenuButton;
 	IBOutlet NSMenuItem * actionMenuFirstItem;
 	IBOutlet NSView * actionMenuView;
-    int fileOrderCount;
+
     // ----------------------------------------------------------------------------------------
     // stuff for the accessory view for the exportAsRSS
     IBOutlet NSView *rssExportAccessoryView;
