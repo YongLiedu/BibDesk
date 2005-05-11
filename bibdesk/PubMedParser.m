@@ -361,7 +361,6 @@ NSString *StringByFixingReferenceMinerString(NSString *aString)
 								pubFields:pubDict
 								  authors:nil
 							  createdDate:nil];
-    [newBI setFileOrder:-1]; // order will be set when the item's document is set
     // set the pub type if we know the bibtex equivalent, otherwise leave it as misc
     if([typeManager bibtexTypeForPubMedType:[pubDict objectForKey:@"TY"]] != nil){ // "standard" RIS, if such a thing exists
         [newBI setType:[typeManager bibtexTypeForPubMedType:[pubDict objectForKey:@"TY"]]];

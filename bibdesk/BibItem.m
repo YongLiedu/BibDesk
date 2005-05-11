@@ -108,7 +108,6 @@ setupParagraphStyle()
         [self setDate: nil];
         [self setDateCreated: date];
         [self setDateModified: date];
-        [self setFileOrder:-1];
 		[self setNeedsToBeFiled:NO];
 		[self updateMetadataForKey:nil];
         setupParagraphStyle();
@@ -150,7 +149,6 @@ setupParagraphStyle()
     pubFields = [[coder decodeObjectForKey:@"pubFields"] retain];
     pubAuthors = [[coder decodeObjectForKey:@"pubAuthors"] retain];
     requiredFieldNames = [[coder decodeObjectForKey:@"requiredFieldNames"] retain];
-    [self setFileOrder:[coder decodeIntForKey:@"fileOrder"]];
     // set by the document, which we don't archive
     document = nil;
     editorObj = nil;
@@ -176,7 +174,6 @@ setupParagraphStyle()
     [coder encodeObject:pubFields forKey:@"pubFields"];
     [coder encodeObject:pubAuthors forKey:@"pubAuthors"];
     [coder encodeObject:requiredFieldNames forKey:@"requiredFieldNames"];
-    [coder encodeInt:fileOrder forKey:@"fileOrder"];
 }
 
 - (void)makeType:(NSString *)type{
@@ -247,8 +244,6 @@ setupParagraphStyle()
 		document = newDocument;
 		[self updateComplexStringValues];
 	}
-    if(fileOrder == -1 && document)
-        [self setFileOrder:([[document publications] indexOfObjectIdenticalTo:self] + 1)]; // file order is Fortran indexed
 }
 
 - (NSUndoManager *)undoManager { // this may be nil
@@ -401,11 +396,12 @@ setupParagraphStyle()
 
 - (NSComparisonResult)fileOrderCompare:(BibItem *)aBI{
     int aBIOrd = [aBI fileOrder];
-    if (fileOrder == -1) return NSOrderedDescending; //@@ file order for crossrefs - here is where we would change to accommodate new pubs in crossrefs...
-    if (fileOrder < aBIOrd) {
+    int myFileOrder = [self fileOrder];
+    if (myFileOrder == -1) return NSOrderedDescending; //@@ file order for crossrefs - here is where we would change to accommodate new pubs in crossrefs...
+    if (myFileOrder < aBIOrd) {
         return NSOrderedAscending;
     }
-    if (fileOrder > aBIOrd){
+    if (myFileOrder > aBIOrd){
         return NSOrderedDescending;
     }else{
         return NSOrderedSame;
@@ -414,14 +410,9 @@ setupParagraphStyle()
 
 // accessors for fileorder
 - (int)fileOrder{
-    return fileOrder;
+    return [[document publications] indexOfObjectIdenticalTo:self];
 }
 
-- (void)setFileOrder:(int)ord{
-    [bibLock lock];
-    fileOrder = ord;
-    [bibLock unlock];
-}
 - (NSString *)fileType { return fileType; }
 
 - (void)setFileType:(NSString *)someFileType {
