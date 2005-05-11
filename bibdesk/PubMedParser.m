@@ -51,10 +51,9 @@ void mergePageNumbers(NSMutableDictionary *dict);
  may represent PubMed or other RIS information.
  @discussion (comprehensive description)
  @param      pubDict Dictionary containing an RIS representation of a bib item.
- @param      itemOrder (description)
  @result     A new, autoreleased BibItem, of type BibTeX.
  */
-+ (BibItem *)bibitemWithPubMedDictionary:(NSMutableDictionary *)pubDict fileOrder:(int)itemOrder;
++ (BibItem *)bibitemWithPubMedDictionary:(NSMutableDictionary *)pubDict;
 @end
 
 @implementation PubMedParser
@@ -74,7 +73,6 @@ void mergePageNumbers(NSMutableDictionary *dict);
     
     BibItem *newBI = nil;
 
-    int itemOrder = 1;
     // BibAppController *appController = (BibAppController *)[NSApp delegate]; // used to add autocomplete entries.
 
     NSMutableArray *returnArray = [NSMutableArray arrayWithCapacity:1];
@@ -201,8 +199,7 @@ void mergePageNumbers(NSMutableDictionary *dict);
                     // we have a new publication
                     if([[pubDict allKeys] count] > 0){
                         // and we've already seen an old one: so save the old one off -
-			            newBI = [self bibitemWithPubMedDictionary:pubDict fileOrder:itemOrder];
-			            itemOrder ++;
+			            newBI = [self bibitemWithPubMedDictionary:pubDict];
                         [returnArray addObject:newBI];
                     }
                     [pubDict removeAllObjects];
@@ -296,8 +293,7 @@ void mergePageNumbers(NSMutableDictionary *dict);
 
     
     if([[pubDict allKeys] count] > 0){
-	newBI = [self bibitemWithPubMedDictionary:pubDict fileOrder:itemOrder];
-	itemOrder ++;
+	newBI = [self bibitemWithPubMedDictionary:pubDict];
 	[returnArray addObject:newBI];
     }
     //    NSLog(@"pubDict is %@", pubDict);
@@ -352,7 +348,7 @@ NSString *StringByFixingReferenceMinerString(NSString *aString)
 }
 
 
-+ (BibItem *)bibitemWithPubMedDictionary:(NSMutableDictionary *)pubDict fileOrder:(int)itemOrder{
++ (BibItem *)bibitemWithPubMedDictionary:(NSMutableDictionary *)pubDict{
     
     BibTypeManager *typeManager = [BibTypeManager sharedManager];
     BibItem *newBI = nil;
@@ -365,9 +361,7 @@ NSString *StringByFixingReferenceMinerString(NSString *aString)
 								pubFields:pubDict
 								  authors:nil
 							  createdDate:nil];
-
-    [newBI setFileOrder:itemOrder];
-    
+    [newBI setFileOrder:-1]; // order will be set when the item's document is set
     // set the pub type if we know the bibtex equivalent, otherwise leave it as misc
     if([typeManager bibtexTypeForPubMedType:[pubDict objectForKey:@"TY"]] != nil){ // "standard" RIS, if such a thing exists
         [newBI setType:[typeManager bibtexTypeForPubMedType:[pubDict objectForKey:@"TY"]]];

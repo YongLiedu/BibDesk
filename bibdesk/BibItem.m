@@ -247,6 +247,8 @@ setupParagraphStyle()
 		document = newDocument;
 		[self updateComplexStringValues];
 	}
+    if(fileOrder == -1 && document)
+        [self setFileOrder:([[document publications] indexOfObjectIdenticalTo:self] + 1)]; // file order is Fortran indexed
 }
 
 - (NSUndoManager *)undoManager { // this may be nil
@@ -824,7 +826,7 @@ setupParagraphStyle()
 	}else{
 		[self setDateModified:nil];
 	}
-	
+    	
 }
 
 - (void)setRequiredFieldNames: (NSArray *)newRequiredFieldNames{

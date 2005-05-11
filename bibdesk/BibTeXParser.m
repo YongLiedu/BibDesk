@@ -165,7 +165,8 @@ NSString *stringFromBTField(AST *field,
 												pubFields:dictionary
                                                   authors:nil
                                               createdDate:nil];
-					[newBI setFileOrder:itemOrder];
+					if(aDocument)
+                        [newBI setFileOrder:itemOrder]; // not correct for paste/drag; we'll leave it at -1
                     itemOrder++;
                     [newBI setCiteKeyString:[NSString stringWithBytes:bt_entry_key(entry) encoding:parserEncoding]];
                     [returnArray addObject:newBI];
