@@ -1483,7 +1483,7 @@ stringByAppendingPathComponent:@"BibDesk"]; */
 
 - (IBAction)searchFieldAction:(id)sender{
     if([sender stringValue] != nil){
-	[self hidePublicationsWithoutSubstring:[sender stringValue] inField:quickSearchKey];
+        [self hidePublicationsWithoutSubstring:[sender stringValue] inField:quickSearchKey];
     }
 }
 
@@ -1506,6 +1506,7 @@ stringByAppendingPathComponent:@"BibDesk"]; */
         }
         
         [shownPublications setArray:publications];
+        [self sortPubsByColumn:nil]; // resort
 
         if(pubsToSelect){
             [tableView deselectAll:nil]; // deselect all, or we'll extend the selection to include previously selected row indexes
@@ -1534,7 +1535,9 @@ stringByAppendingPathComponent:@"BibDesk"]; */
     [[OFPreferenceWrapper sharedPreferenceWrapper] setObject:[[quickSearchTextDict copy] autorelease]
                                                       forKey:BDSKCurrentQuickSearchTextDictKey];
     [[OFPreferenceWrapper sharedPreferenceWrapper] autoSynchronize];
-    
+
+    [tableView deselectAll:nil];
+    [self sortPubsByColumn:nil];
     [self updateUI]; // calls reloadData
     if([shownPublications count] == 1)
         [tableView selectAll:self];
@@ -1809,61 +1812,48 @@ NSComparisonResult compareSetLengths(NSSet *set1, NSSet *set2, void *context){
        [tcID caseInsensitiveCompare:@"Cite-Key"] == NSOrderedSame ||
        [tcID caseInsensitiveCompare:@"Key"]== NSOrderedSame){
 		
-		[publications sortUsingSelector:@selector(keyCompare:)];
 		[shownPublications sortUsingSelector:@selector(keyCompare:)];
 	}else if([tcID isEqualToString:BDSKTitleString]){
 		
-		[publications sortUsingSelector:@selector(titleWithoutTeXCompare:)];
 		[shownPublications sortUsingSelector:@selector(titleWithoutTeXCompare:)];
 		
 	}else if([tcID isEqualToString:BDSKContainerString]){
 		
-		[publications sortUsingSelector:@selector(containerWithoutTeXCompare:)];
 		[shownPublications sortUsingSelector:@selector(containerWithoutTeXCompare:)];
 	}else if([tcID isEqualToString:BDSKDateString]){
 		
-		[publications sortUsingSelector:@selector(dateCompare:)];
 		[shownPublications sortUsingSelector:@selector(dateCompare:)];
 	}else if([tcID isEqualToString:BDSKDateCreatedString] ||
 			 [tcID isEqualToString:@"Added"] ||
 			 [tcID isEqualToString:@"Created"]){
 		
-		[publications sortUsingSelector:@selector(createdDateCompare:)];
 		[shownPublications sortUsingSelector:@selector(createdDateCompare:)];
 	}else if([tcID isEqualToString:BDSKDateModifiedString] ||
 			 [tcID isEqualToString:@"Modified"]){
 		
-		[publications sortUsingSelector:@selector(modDateCompare:)];
 		[shownPublications sortUsingSelector:@selector(modDateCompare:)];
 	}else if([tcID isEqualToString:BDSKFirstAuthorString]){
 		
-		[publications sortUsingSelector:@selector(auth1Compare:)];
 		[shownPublications sortUsingSelector:@selector(auth1Compare:)];
 	}else if([tcID isEqualToString:BDSKSecondAuthorString]){
 		
-		[publications sortUsingSelector:@selector(auth2Compare:)];
 		[shownPublications sortUsingSelector:@selector(auth2Compare:)];
 	}else if([tcID isEqualToString:BDSKThirdAuthorString]){
 		
-		[publications sortUsingSelector:@selector(auth3Compare:)];
 		[shownPublications sortUsingSelector:@selector(auth3Compare:)];
 	}else if([tcID isEqualToString:BDSKAuthorString] ||
 			 [tcID isEqualToString:@"Authors"]){
 		
-		[publications sortUsingSelector:@selector(authorCompare:)];
 		[shownPublications sortUsingSelector:@selector(authorCompare:)];
 	}else if([tcID isEqualToString:BDSKTypeString]){
 		
-		[publications sortUsingSelector:@selector(pubTypeCompare:)];
 		[shownPublications sortUsingSelector:@selector(pubTypeCompare:)];
     }else if([tcID isEqualToString:BDSKItemNumberString]){
 		
-		[publications sortUsingSelector:@selector(fileOrderCompare:)];
 		[shownPublications sortUsingSelector:@selector(fileOrderCompare:)];
         
     }else{
 		
-		[publications sortUsingFunction:generalBibItemCompareFunc context:tcID];
 		[shownPublications sortUsingFunction:generalBibItemCompareFunc context:tcID];
 	}
 	
