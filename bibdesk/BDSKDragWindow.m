@@ -104,7 +104,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 			[[NSApp delegate] setDocumentForErrors:[editorBib document]];
             draggedPubs = [BibTeXParser itemsFromData:pbData error:&hadProblems];
         }
-        
+        [pbString release]; 
         if(hadProblems) return NO;
             
         draggedPubsE = [draggedPubs objectEnumerator];
