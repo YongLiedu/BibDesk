@@ -475,7 +475,7 @@ For example, searching for ``Burger,'' could return matches containing
 such as ``R. B@ue{}rger.''
 
 As mentioned elsewhere, braces are ignored when searching, so searching
-for ``BibDesk'' will find ``{B}ib{D}esk'' as well as ``BibDesk.''  Of course,
+for ``BibDesk'' will find ``@{B@}ib@{D@}esk'' as well as ``BibDesk.''  Of course,
 this will not find ``Bibdesk,'' since uppercase letters were used in this
 example.
 
@@ -682,7 +682,7 @@ text.
 
 @cindex accented characters
 
-You can enter many common accented characters such as  and o directly, and 
+You can enter many common accented characters such as @ue{} and @oe{} directly, and 
 BibDesk will take care of translating them into the appropriate LaTeX definitions when the file is saved.
 
 They will also be re-translated upon reopening the file, so that you
@@ -830,7 +830,7 @@ on the type of the item.
 @item commented @tab Volumetitle
 @end multitable
 
-If you use a special type that has a container concept write to bibdesk-develop@lists.sourceforge.net
+If you use a special type that has a container concept write to bibdesk-develop@@lists.sourceforge.net
 and it can be added. 
 
 @cindex Local-Url
@@ -1216,9 +1216,9 @@ the caveat below).
 
 @subheading Bonus feature: reference completion
 
-The autocompletion input manager will also provide completion for TeX @code{\ref{}
+The autocompletion input manager will also provide completion for TeX @code{\ref@{}
 commands, based on all @code{\label} commands in the same text file.  For instance, 
-if you have a table labeled "@code{\label{tab:myTable}}", you can type "@code{See Table~\ref{tab:m}", 
+if you have a table labeled "@code{\label@{tab:myTable@}}", you can type "@code{See Table~\ref@{tab:m@}", 
 hit the same key sequence used for citekey autocompletion, and see a list of all 
 matching entries pop up.  The autocompletion looks for up to seven matching 
 characters, so the more you type, the fewer options you'll be presented with in the list.
@@ -1244,7 +1244,7 @@ For @uref{http://barebones.com/", BBEdit} users, Curt Clifton has written an App
 to provide similar functionality.  It can be obtained from 
 @uref{http://www.cs.iastate.edu/~cclifton/software.shtml}.  
 Users who develop similar functionality for other applications are encouraged to post their 
-scripts and e-mail a link to @uref{mailto:bibdesk-users@lists.sourceforge.net}
+scripts and e-mail a link to @uref{mailto:bibdesk-users@@lists.sourceforge.net}
 for inclusion here.
 
 @c --------------------------------------------------------------------------------------
