@@ -142,8 +142,11 @@ static NSColor *sStripeColor = nil;
              c == NSEnterCharacter ||
              c == NSCarriageReturnCharacter){
         [[self delegate] editPubCmd:nil];
-    }else if(c == 0x0020){ // spacebar to page down in the lower pane of the BibDocument splitview
-        [[self delegate] pageDownInPreview:nil];
+    }else if(c == 0x0020){ // spacebar to page down in the lower pane of the BibDocument splitview, shift-space to page up
+        if([event modifierFlags] & NSShiftKeyMask)
+            [[self delegate] pageUpInPreview:nil];
+        else
+            [[self delegate] pageDownInPreview:nil];
     }else if ([alnum characterIsMember:c]) {
         [typeAheadHelper rebuildTypeAheadSearchCache]; // if we resorted or searched, the cache is stale
         [typeAheadHelper newProcessKeyDownCharacter:c];

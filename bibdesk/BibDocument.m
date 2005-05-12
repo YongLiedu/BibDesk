@@ -2865,7 +2865,11 @@ This method always returns YES. Even if some or many operations fail.
 
 - (void)pageDownInPreview:(id)sender{
     [previewField pageDown:sender];
-}    
+}
+
+- (void)pageUpInPreview:(id)sender{
+    [previewField pageUp:sender];
+}
 
 - (void)splitViewDoubleClick:(OASplitView *)sender{
     NSView *tv = [[splitView subviews] objectAtIndex:0]; // tableview
