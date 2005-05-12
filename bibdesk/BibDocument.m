@@ -51,7 +51,6 @@ NSString *BDSKBibItemLocalDragPboardType = @"edu.ucsd.cs.mmccrack.bibdesk: Local
         PDFpreviewer = [BDSKPreviewer sharedPreviewer];
         localDragPboard = [[NSPasteboard pasteboardWithName:LocalDragPasteboardName] retain];
         draggedItems = [[NSMutableArray alloc] initWithCapacity:1];
-        fileOrderCount = 1;
 		
         BD_windowControllers = [[NSMutableArray alloc] initWithCapacity:1];
         
