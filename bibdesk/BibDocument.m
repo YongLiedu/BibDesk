@@ -2864,10 +2864,20 @@ This method always returns YES. Even if some or many operations fail.
 }
 
 - (void)pageDownInPreview:(id)sender{
+    NSPoint p = [previewField scrollPositionAsPercentage];
+    if(p.y > 0.99){ // select next row if the last scroll put us at the end
+        [tableView selectRow:([tableView selectedRow] + 1) byExtendingSelection:NO];
+        return; // adjust page next time
+    }
     [previewField pageDown:sender];
 }
 
 - (void)pageUpInPreview:(id)sender{
+    NSPoint p = [previewField scrollPositionAsPercentage];
+    if(p.y < 0.01){ // select previous row if we're already at the top
+        [tableView selectRow:([tableView selectedRow] - 1) byExtendingSelection:NO];
+        return; // adjust page next time
+    }
     [previewField pageUp:sender];
 }
 
