@@ -215,6 +215,8 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
     }
     ////NSLog(@"tableViewColumnDidResize - setting %@ forKey: %@ ", columns, BDSKColumnWidthsKey);
     [pw setObject:columns forKey:BDSKColumnWidthsKey];
+    [[NSNotificationCenter defaultCenter] postNotificationName:BDSKTableColumnChangedNotification
+                                                        object:self];
 }
 
 
@@ -230,7 +232,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 
     [[OFPreferenceWrapper sharedPreferenceWrapper] setObject:columnsInOrder
                                                       forKey:BDSKShownColsNamesKey];
-    [[NSNotificationCenter defaultCenter] postNotificationName:BDSKDocumentUpdateUINotification
+    [[NSNotificationCenter defaultCenter] postNotificationName:BDSKTableColumnChangedNotification
                                                         object:self];
 
 }

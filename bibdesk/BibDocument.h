@@ -117,9 +117,6 @@ extern NSString *BDSKBibItemLocalDragPboardType;
    
 	NSMutableString *frontMatter;    // for preambles, and stuff
     BDSKPreviewer *PDFpreviewer;
-    NSMutableArray *showColsArray;
-    NSMutableDictionary *tableColumns;
-    BOOL tableColumnsChanged;
     NSTableColumn *lastSelectedColumnForSort;
     BOOL sortDescending;
 	BOOL showStatus;
@@ -787,7 +784,6 @@ int generalBibItemCompareFunc(id item1, id item2, void *context);
     
 */
 - (IBAction)columnsMenuSelectTableColumn:(id)sender;
-- (void)columnsMenuSelectTableColumn:(id)sender post:(BOOL)yn;
 /*!
     @method columnsMenuAddTableColumn
     @abstract called by the "add other..." menu item

@@ -49,11 +49,9 @@ NSString *BDSKBibItemLocalDragPboardType = @"edu.ucsd.cs.mmccrack.bibdesk: Local
             quickSearchKey = [[NSString alloc] initWithString:BDSKTitleString];
         }
         PDFpreviewer = [BDSKPreviewer sharedPreviewer];
-        showColsArray = [[NSMutableArray arrayWithObjects:
-            [NSNumber numberWithInt:1],[NSNumber numberWithInt:1],[NSNumber numberWithInt:1],[NSNumber numberWithInt:1],[NSNumber numberWithInt:1],[NSNumber numberWithInt:1],nil] retain];
         localDragPboard = [[NSPasteboard pasteboardWithName:LocalDragPasteboardName] retain];
         draggedItems = [[NSMutableArray alloc] initWithCapacity:1];
-        tableColumns = [[NSMutableDictionary dictionaryWithCapacity:6] retain];
+        fileOrderCount = 1;
 		
         BD_windowControllers = [[NSMutableArray alloc] initWithCapacity:1];
         
@@ -122,7 +120,6 @@ NSString *BDSKBibItemLocalDragPboardType = @"edu.ucsd.cs.mmccrack.bibdesk: Local
         
         [self setDocumentStringEncoding:[[OFPreferenceWrapper sharedPreferenceWrapper] integerForKey:BDSKDefaultStringEncodingKey]]; // need to set this for new documents
 
-		tableColumnsChanged = YES;
 		sortDescending = NO;
 		showStatus = YES;
                 
@@ -134,34 +131,10 @@ NSString *BDSKBibItemLocalDragPboardType = @"edu.ucsd.cs.mmccrack.bibdesk: Local
 
 
 - (void)awakeFromNib{
-    NSEnumerator *nibTCE = [[tableView tableColumns] objectEnumerator];
-    NSTableColumn *tc;
-    NSArray *prefTCNames = [[OFPreferenceWrapper sharedPreferenceWrapper] arrayForKey:BDSKShownColsNamesKey];
-    NSEnumerator *prefTCNamesE = [prefTCNames objectEnumerator];
-    NSString *tcName;
-    
     NSSize drawerSize;
     //NSString *viewByKey = [[OFPreferenceWrapper sharedPreferenceWrapper] objectForKey:BDSKViewByKey];
 	
 	[self setupSearchField];
-
-    // this is kind of a hack... we're getting the pre-configured tableColumns
-    //    from the nib file, and then we're treating them just like the other ones.
-    
-    // add all the tablecolumns that are in the nib to our tableColumns dict.
-    while (tc = [nibTCE nextObject]) {
-        [tableColumns setObject:tc forKey:[tc identifier]];
-    
-    }
-    // 
-    tc = nil;
-    // next, add tablecolumns that show up in the system prefs.
-    while (tcName = [prefTCNamesE nextObject]) {
-        tc = [[[NSTableColumn alloc] initWithIdentifier:tcName] autorelease];
-        [tc setResizable:YES];
-
-        [tableColumns setObject:tc forKey:[tc identifier]];
-    }
    
     [tableView setDoubleAction:@selector(editPubCmd:)];
     [tableView registerForDraggedTypes:[NSArray arrayWithObjects:NSStringPboardType, NSFilenamesPboardType, @"CorePasteboardFlavorType 0x57454253", nil]];
@@ -232,10 +205,8 @@ NSString *BDSKBibItemLocalDragPboardType = @"edu.ucsd.cs.mmccrack.bibdesk: Local
     [authors release];
     [quickSearchTextDict release];
     [quickSearchKey release];
-    [showColsArray release];
     [customStringArray release];
     [toolbarItems release];
-    [tableColumns release];
 	[infoLine release];
     [BD_windowControllers release];
     [localDragPboard release];
@@ -430,7 +401,8 @@ NSString *BDSKBibItemLocalDragPboardType = @"edu.ucsd.cs.mmccrack.bibdesk: Local
     [self setupToolbar];
     [[aController window] setFrameAutosaveName:[self displayName]];
     [documentWindow makeFirstResponder:tableView];	
-    [self setupTableColumns]; // calling it here mostly just makes sure that the menu is set up.
+    [tableView removeAllTableColumns];
+	[self setupTableColumns]; // calling it here mostly just makes sure that the menu is set up.
     [self sortPubsByDefaultColumn];
     [self setTableFont];
     [self updateUI];
@@ -2336,7 +2308,7 @@ This method always returns YES. Even if some or many operations fail.
 
 //note - ********** the notification handling method will add NSTableColumn instances to the tableColumns dictionary.
 - (void)setupTableColumns{
-    NSArray *prefsShownColNamesArray = [[OFPreferenceWrapper sharedPreferenceWrapper] arrayForKey:BDSKShownColsNamesKey];
+	NSArray *prefsShownColNamesArray = [[OFPreferenceWrapper sharedPreferenceWrapper] arrayForKey:BDSKShownColsNamesKey];
     NSEnumerator *shownColNamesE = [prefsShownColNamesArray objectEnumerator];
     NSTableColumn *tc;
     NSString *colName;
@@ -2344,41 +2316,47 @@ This method always returns YES. Even if some or many operations fail.
     NSDictionary *tcWidthsByIdentifier = [[OFPreferenceWrapper sharedPreferenceWrapper] objectForKey:BDSKColumnWidthsKey];
     NSNumber *tcWidth = nil;
     NSImageCell *imageCell = [[[NSImageCell alloc] init] autorelease];
-
-    [tableView removeAllTableColumns];
-    
-    while(colName = [shownColNamesE nextObject]){
-        tc = [tableColumns objectForKey:colName];
-        if(tcWidthsByIdentifier){
-            tcWidth = [tcWidthsByIdentifier objectForKey:[tc identifier]];
-            if(tcWidth){
-                [tc setWidth:[tcWidth floatValue]];
-            }
-        }
-		if([colName isEqualToString:BDSKLocalUrlString]){
-			NSImage * pdfImage = [NSImage imageNamed:@"TinyFile"];
-			[[tc headerCell] setImage:pdfImage];
-		}else{	
-			[[tc headerCell] setStringValue:NSLocalizedStringFromTable(colName, @"BibTeXKeys", @"")];
-		}
-        [tc setEditable:NO];
-
-        if([[tc identifier] isEqualToString:@"No Identifier"]){
-            // don't add the 'no ident' tc to either....
-            // THIS IS A HACK.
-            // I should probably set it up better in the nib, or something.
-        }else{
-            [tableView addTableColumn:tc];
-            if([[tc identifier] isEqualToString:BDSKLocalUrlString] ||
-               [[tc identifier] isEqualToString:BDSKUrlString]){
+	
+    NSMutableArray *columns = [NSMutableArray arrayWithCapacity:[prefsShownColNamesArray count]];
+	
+	while(colName = [shownColNamesE nextObject]){
+		tc = [tableView tableColumnWithIdentifier:colName];
+		
+		if(tc == nil){
+			// it is a new column, so create it
+			tc = [[[NSTableColumn alloc] initWithIdentifier:colName] autorelease];
+			[tc setResizable:YES];
+			[tc setEditable:NO];
+            if([colName isEqualToString:BDSKLocalUrlString] ||
+               [colName isEqualToString:BDSKUrlString]){
                 [tc setDataCell:imageCell];
-                
             }
-            if(![[tc identifier] isEqualToString:BDSKTitleString]){
-                [self columnsMenuAddTableColumnName:[tc identifier] enabled:YES];
-                // OK to add multiple times.
-            }
+			if([colName isEqualToString:BDSKLocalUrlString]){
+				NSImage * pdfImage = [NSImage imageNamed:@"TinyFile"];
+				[[tc headerCell] setImage:pdfImage];
+			}else{	
+				[[tc headerCell] setStringValue:NSLocalizedStringFromTable(colName, @"BibTeXKeys", @"")];
+			}
+			
+			if(![colName isEqualToString:BDSKTitleString]){
+				[self columnsMenuAddTableColumnName:colName enabled:YES];
+				// OK to add multiple times.
+			}
+		}
+		
+		[columns addObject:tc];
+	}
+	
+    [tableView removeAllTableColumns];
+    NSEnumerator *columnsE = [columns objectEnumerator];
+	
+    while(tc = [columnsE nextObject]){
+        if(tcWidthsByIdentifier && 
+		  (tcWidth = [tcWidthsByIdentifier objectForKey:[tc identifier]])){
+			[tc setWidth:[tcWidth floatValue]];
         }
+
+		[tableView addTableColumn:tc];
     }
     
     [self setTableFont];
@@ -2414,23 +2392,14 @@ This method always returns YES. Even if some or many operations fail.
 }
 
 - (IBAction)columnsMenuSelectTableColumn:(id)sender{
-    [self columnsMenuSelectTableColumn:sender post:YES];
-}
-
-- (void)columnsMenuSelectTableColumn:(id)sender post:(BOOL)yn{
-    NSTableColumn *tc = nil;
     NSMutableArray *prefsShownColNamesMutableArray = [[[OFPreferenceWrapper sharedPreferenceWrapper] arrayForKey:BDSKShownColsNamesKey] mutableCopy];
 
     if ([sender state] == NSOnState) {
-        [tableColumns removeObjectForKey:[sender title]];
         [prefsShownColNamesMutableArray removeObject:[sender title]];
         [sender setState:NSOffState];
     }else{
-        tc = [[[NSTableColumn alloc] initWithIdentifier:[sender title]] autorelease];
-        [tc setResizable:YES];
-        [tableColumns setObject:tc forKey:[tc identifier]];
-        if(![prefsShownColNamesMutableArray containsObject:[tc identifier]]){
-            [prefsShownColNamesMutableArray addObject:[tc identifier]];
+        if(![prefsShownColNamesMutableArray containsObject:[sender title]]){
+            [prefsShownColNamesMutableArray addObject:[sender title]];
         }
         [sender setState:NSOnState];
     }
@@ -2438,16 +2407,11 @@ This method always returns YES. Even if some or many operations fail.
                                                       forKey:BDSKShownColsNamesKey];
     [self setupTableColumns];
     [self updateUI];
-    if(yn){
-        [[NSNotificationCenter defaultCenter] postNotificationName:BDSKTableColumnChangedNotification
-                                                            object:[sender title]
-                                                          userInfo:
-            [NSDictionary dictionaryWithObjectsAndKeys:self, @"Sender", nil]];
-    }
+	[[NSNotificationCenter defaultCenter] postNotificationName:BDSKTableColumnChangedNotification
+														object:self];
 }
 
 - (IBAction)columnsMenuAddTableColumn:(id)sender{
-    // get the name, then call columnsMenuAddTableColumnName: enabled: to add it for you
     // first we fill the popup
 	NSArray *prefsShownColNamesArray = [[OFPreferenceWrapper sharedPreferenceWrapper] arrayForKey:BDSKShownColsNamesKey];
 	BibTypeManager *typeMan = [BibTypeManager sharedManager];
@@ -2476,7 +2440,6 @@ This method always returns YES. Even if some or many operations fail.
                       contextInfo:(void *)contextInfo{
 
     if(returnCode == 1){
-		NSTableColumn *tc = nil;
 		NSMutableArray *prefsShownColNamesMutableArray = [[[[OFPreferenceWrapper sharedPreferenceWrapper] arrayForKey:BDSKShownColsNamesKey] mutableCopy] autorelease];
         NSString *newColumnName = [addFieldComboBox stringValue];
 
@@ -2485,18 +2448,8 @@ This method always returns YES. Even if some or many operations fail.
 		if ([prefsShownColNamesMutableArray containsObject:newColumnName])
 			return;
 
-		// Set up the object for the new column
-        tc = [[[NSTableColumn alloc] initWithIdentifier:newColumnName] autorelease];
-        [tc setResizable:YES];
-		
-		// Add the new Column 
-		[tableColumns setObject:tc forKey:[tc identifier]];
-		
-		// Add the column-name to the remove menu
-		[self columnsMenuAddTableColumnName:newColumnName enabled:YES];
-
 		// Store the new column in the preferences
-        [prefsShownColNamesMutableArray addObject:[tc identifier]];
+        [prefsShownColNamesMutableArray addObject:newColumnName];
         [[OFPreferenceWrapper sharedPreferenceWrapper] setObject:prefsShownColNamesMutableArray
                                                           forKey:BDSKShownColsNamesKey];
         
@@ -2504,8 +2457,7 @@ This method always returns YES. Even if some or many operations fail.
 		[self setupTableColumns];
         [self updateUI];
         [[NSNotificationCenter defaultCenter] postNotificationName:BDSKTableColumnChangedNotification
-                                                            object:[tc identifier]
-                                                          userInfo:[NSDictionary dictionaryWithObjectsAndKeys:self, @"Sender", nil]];
+                                                            object:self];
     }else{
         //do nothing (because nothing was entered or selected)
     }
@@ -2545,19 +2497,12 @@ This method always returns YES. Even if some or many operations fail.
 #pragma mark Notification handlers
 
 - (void)handleTableColumnChangedNotification:(NSNotification *)notification{
-    id menuItem = nil;
-    NSString *colName = [notification object];
-
     // don't pay attention to notifications I send (infinite loop might result)
-    if([[notification userInfo] objectForKey:@"Sender"] == self){
+    if([notification object] == self)
         return;
-    }
-    
-    if (nil == [tableColumns objectForKey:colName]) {
-        [self columnsMenuAddTableColumnName:colName enabled:NO];
-    }
-    menuItem = [columnsMenu itemWithTitle:colName];
-    [self columnsMenuSelectTableColumn:menuItem post:NO];
+	
+    [self setupTableColumns];
+	[self updateUI];
 }
 
 - (void)handlePreviewDisplayChangedNotification:(NSNotification *)notification{
