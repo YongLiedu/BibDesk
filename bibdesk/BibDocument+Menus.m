@@ -65,6 +65,9 @@ Broken out of BibDocument and split up into smaller parts to make things more ma
 	else if (act == @selector(printDocument:)) {
 		return [self validatePrintDocumentMenuItem:menuItem];
 	}
+	else if (act == @selector(columnsMenuSelectTableColumn:)) {
+		return (![[menuItem title] isEqualToString:BDSKTitleString]);
+	}
 	else if (act == @selector(toggleStatusBar:)) {
 		return [self validateToggleStatusBarMenuItem:menuItem];
 	} else if ([menuItem action] == @selector(importFromPasteboardAction:)) {

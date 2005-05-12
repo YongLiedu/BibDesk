@@ -2336,11 +2336,6 @@ This method always returns YES. Even if some or many operations fail.
 			}else{	
 				[[tc headerCell] setStringValue:NSLocalizedStringFromTable(colName, @"BibTeXKeys", @"")];
 			}
-			
-			if(![colName isEqualToString:BDSKTitleString]){
-				[self columnsMenuAddTableColumnName:colName enabled:YES];
-				// OK to add multiple times.
-			}
 		}
 		
 		[columns addObject:tc];
@@ -2359,6 +2354,44 @@ This method always returns YES. Even if some or many operations fail.
     }
     
     [self setTableFont];
+	[self setupColumnsMenu];
+}
+
+- (void)setupColumnsMenu{
+	NSArray *prefsShownColNamesArray = [[OFPreferenceWrapper sharedPreferenceWrapper] arrayForKey:BDSKShownColsNamesKey];
+    NSEnumerator *colNamesE;
+	NSString *colName;
+	NSMutableArray *extraColNamesArray = [NSMutableArray array];
+    NSMenuItem *item = nil;
+	
+	// remove the add-items, and remember the extra ones, corrsponding to removed columns
+	while(![[columnsMenu itemAtIndex:0] isSeparatorItem]){
+		colName = [[columnsMenu itemAtIndex:0] title];
+		if(![prefsShownColNamesArray containsObject:colName])
+			[extraColNamesArray addObject:colName];
+		[columnsMenu removeItemAtIndex:0];
+	}
+	[extraColNamesArray sortUsingSelector:@selector(caseInsensitiveCompare:)];
+	
+	// first add all the extra items, they are in the off-state
+    colNamesE = [extraColNamesArray reverseObjectEnumerator];
+	while(colName = [colNamesE nextObject]){
+        item = [[[NSMenuItem alloc] initWithTitle:colName 
+                                           action:@selector(columnsMenuSelectTableColumn:)
+                                    keyEquivalent:@""] autorelease];
+		[item setState:NSOffState];
+		[columnsMenu insertItem:item atIndex:0];
+	}
+	
+	// next add all the shown columns in the order they are shown
+	colNamesE = [prefsShownColNamesArray reverseObjectEnumerator];
+	while(colName = [colNamesE nextObject]){
+        item = [[[NSMenuItem alloc] initWithTitle:colName 
+                                           action:@selector(columnsMenuSelectTableColumn:)
+                                    keyEquivalent:@""] autorelease];
+		[item setState:NSOnState];
+		[columnsMenu insertItem:item atIndex:0];
+	}
 }
 
 - (IBAction)dismissAddFieldSheet:(id)sender{
@@ -2370,24 +2403,6 @@ This method always returns YES. Even if some or many operations fail.
 	// for now, just returns the same all the time.
 	// Could customize menu for details of selected item.
 	return columnsMenu;
-}
-
-// If we call this for a name that is already there, it just sets the state.
-#define ADD_MENUITEM_TAG 47
-- (void)columnsMenuAddTableColumnName:(NSString *)name enabled:(BOOL)yn{
-    NSMenuItem *item = nil;
-    item = (NSMenuItem *)[columnsMenu itemWithTitle:name];
-    if (item == nil) {
-        item = [[[NSMenuItem alloc] initWithTitle:name 
-                                           action:@selector(columnsMenuSelectTableColumn:)
-                                    keyEquivalent:@""] autorelease];
-        [columnsMenu insertItem:item atIndex:[columnsMenu indexOfItemWithTag:ADD_MENUITEM_TAG]]; // put it before the add other menu item.
-    }
-    if(yn){
-        [item setState:NSOnState];
-    }else{
-        [item setState:NSOffState];
-    }
 }
 
 - (IBAction)columnsMenuSelectTableColumn:(id)sender{

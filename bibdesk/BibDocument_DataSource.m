@@ -232,7 +232,8 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 
     [[OFPreferenceWrapper sharedPreferenceWrapper] setObject:columnsInOrder
                                                       forKey:BDSKShownColsNamesKey];
-    [[NSNotificationCenter defaultCenter] postNotificationName:BDSKTableColumnChangedNotification
+    [self setupColumnsMenu];
+	[[NSNotificationCenter defaultCenter] postNotificationName:BDSKTableColumnChangedNotification
                                                         object:self];
 
 }
