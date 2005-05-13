@@ -451,7 +451,8 @@ NSString *BDSKBibItemLocalDragPboardType = @"edu.ucsd.cs.mmccrack.bibdesk: Local
         [self performSelector:@selector(setFilterField:) withObject:@""]; // make sure we can see everything
     
     [documentWindow makeFirstResponder:tableView]; // make sure tableview has the focus
-    
+    [tableView deselectAll:nil];
+
     NSMutableArray *pubsToRemove = [[self publications] mutableCopy];
     NSSet *uniquePubs = [NSSet setWithArray:pubsToRemove];
     [pubsToRemove removeIdenticalObjectsFromArray:[uniquePubs allObjects]]; // remove all unique ones based on pointer equality, not isEqual
@@ -459,15 +460,19 @@ NSString *BDSKBibItemLocalDragPboardType = @"edu.ucsd.cs.mmccrack.bibdesk: Local
     NSEnumerator *e = [pubsToRemove objectEnumerator];
     BibItem *anItem;
     unsigned index;
-	[tableView deselectAll:nil];
+
     while(anItem = [e nextObject]){
         index = (sortDescending ? [shownPublications count] - 1 - [shownPublications indexOfObjectIdenticalTo:anItem] : [shownPublications indexOfObjectIdenticalTo:anItem]);
         [tableView selectRow:index byExtendingSelection:YES];
     }
+
     if([pubsToRemove count])
         [tableView scrollRowToVisible:index];  // make sure at least one item is visible
     else
         NSBeep();
+
+    // update status line after the updateUI notification, or else it gets overwritten
+    [infoLine performSelector:@selector(setStringValue:) withObject:[NSString stringWithFormat:@"%i %@", [pubsToRemove count], NSLocalizedString(@"duplicate publications found.", @"")] afterDelay:0.01];
     [pubsToRemove release];
 }
 
