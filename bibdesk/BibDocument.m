@@ -459,6 +459,7 @@ NSString *BDSKBibItemLocalDragPboardType = @"edu.ucsd.cs.mmccrack.bibdesk: Local
     NSEnumerator *e = [pubsToRemove objectEnumerator];
     BibItem *anItem;
     unsigned index;
+	[tableView deselectAll:nil];
     while(anItem = [e nextObject]){
         index = (sortDescending ? [shownPublications count] - 1 - [shownPublications indexOfObjectIdenticalTo:anItem] : [shownPublications indexOfObjectIdenticalTo:anItem]);
         [tableView selectRow:index byExtendingSelection:YES];
