@@ -759,14 +759,6 @@ extern NSString *BDSKBibItemLocalDragPboardType;
 */
 - (void)setupTableColumns;
 
-/*!
-    @method setupColumnsMenu:
-    @abstract \253Abstract\273
-    @discussion \253discussion\273
-    
-*/
-- (void)setupColumnsMenu;
-
 int generalBibItemCompareFunc(id item1, id item2, void *context);
 
 /*!

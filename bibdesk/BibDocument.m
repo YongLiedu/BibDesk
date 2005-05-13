@@ -183,6 +183,7 @@ NSString *BDSKBibItemLocalDragPboardType = @"edu.ucsd.cs.mmccrack.bibdesk: Local
     [saveTextEncodingPopupButton removeAllItems];
     [saveTextEncodingPopupButton addItemsWithTitles:[[BDSKStringEncodingManager sharedEncodingManager] availableEncodingDisplayedNames]];
     
+	[addFieldComboBox setFormatter:[[[BDSKFieldNameFormatter alloc] init] autorelease]];
 }
 
 - (void)dealloc{
@@ -2354,44 +2355,6 @@ This method always returns YES. Even if some or many operations fail.
     }
     
     [self setTableFont];
-	[self setupColumnsMenu];
-}
-
-- (void)setupColumnsMenu{
-	NSArray *prefsShownColNamesArray = [[OFPreferenceWrapper sharedPreferenceWrapper] arrayForKey:BDSKShownColsNamesKey];
-    NSEnumerator *colNamesE;
-	NSString *colName;
-	NSMutableArray *extraColNamesArray = [NSMutableArray array];
-    NSMenuItem *item = nil;
-	
-	// remove the add-items, and remember the extra ones, corrsponding to removed columns
-	while(![[columnsMenu itemAtIndex:0] isSeparatorItem]){
-		colName = [[columnsMenu itemAtIndex:0] title];
-		if(![prefsShownColNamesArray containsObject:colName])
-			[extraColNamesArray addObject:colName];
-		[columnsMenu removeItemAtIndex:0];
-	}
-	[extraColNamesArray sortUsingSelector:@selector(caseInsensitiveCompare:)];
-	
-	// first add all the extra items, they are in the off-state
-    colNamesE = [extraColNamesArray reverseObjectEnumerator];
-	while(colName = [colNamesE nextObject]){
-        item = [[[NSMenuItem alloc] initWithTitle:colName 
-                                           action:@selector(columnsMenuSelectTableColumn:)
-                                    keyEquivalent:@""] autorelease];
-		[item setState:NSOffState];
-		[columnsMenu insertItem:item atIndex:0];
-	}
-	
-	// next add all the shown columns in the order they are shown
-	colNamesE = [prefsShownColNamesArray reverseObjectEnumerator];
-	while(colName = [colNamesE nextObject]){
-        item = [[[NSMenuItem alloc] initWithTitle:colName 
-                                           action:@selector(columnsMenuSelectTableColumn:)
-                                    keyEquivalent:@""] autorelease];
-		[item setState:NSOnState];
-		[columnsMenu insertItem:item atIndex:0];
-	}
 }
 
 - (IBAction)dismissAddFieldSheet:(id)sender{

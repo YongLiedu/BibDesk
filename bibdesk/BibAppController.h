@@ -79,8 +79,9 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 
 /* Accessor methods for the displayMenuItem */
 - (NSMenuItem*) displayMenuItem;
-- (void) setDisplayMenuItem:(NSMenuItem*) item;
 	
+- (void)updateColumnsMenu;
+
 
 #pragma mark Overridden NSDocumentController methods
 

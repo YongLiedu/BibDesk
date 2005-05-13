@@ -197,33 +197,58 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
     [errorTableView setDoubleAction:@selector(gotoError:)];
     [openUsingFilterAccessoryView retain];
 	[showHideCustomCiteStringsMenuItem setRepresentedObject:@"showHideCustomCiteMenuItem"];
+	[self updateColumnsMenu];
 
+	// register to observe when the columns change, to update the columns menu
+	[[NSNotificationCenter defaultCenter] addObserver:self
+			selector:@selector(handleTableColumnsChangedNotification:)
+			name:BDSKTableColumnChangedNotification
+			object:nil];
 	// register to observe when the preview needs to be updated (handle this here rather than on a per document basis as the preview is currently global for the application)
 	[[NSNotificationCenter defaultCenter] addObserver:self
 			selector:@selector(handlePreviewNeedsUpdate:)
 			name:BDSKPreviewNeedsUpdateNotification
 			object:nil];
-        
-        [openTextEncodingPopupButton removeAllItems];
-        [openTextEncodingPopupButton addItemsWithTitles:[[BDSKStringEncodingManager sharedEncodingManager] availableEncodingDisplayedNames]];
-     
-        if([[OFPreferenceWrapper sharedPreferenceWrapper] boolForKey:BDSKAutoCheckForUpdatesKey])
-            [NSThread detachNewThreadSelector:@selector(checkForUpdatesInBackground) toTarget:self withObject:nil];
+	
+	[openTextEncodingPopupButton removeAllItems];
+	[openTextEncodingPopupButton addItemsWithTitles:[[BDSKStringEncodingManager sharedEncodingManager] availableEncodingDisplayedNames]];
+ 
+	if([[OFPreferenceWrapper sharedPreferenceWrapper] boolForKey:BDSKAutoCheckForUpdatesKey])
+		[NSThread detachNewThreadSelector:@selector(checkForUpdatesInBackground) toTarget:self withObject:nil];
 
 }
-
 
 
 - (NSMenuItem*) displayMenuItem {
 	return displayMenuItem;
 }
 
-- (void) setDisplayMenuItem:(NSMenuItem*) item {
-	NSMenuItem * temp = displayMenuItem;
-	displayMenuItem = [item retain];
-	[temp release];
+- (void)updateColumnsMenu{
+	NSArray *prefsShownColNamesArray = [[OFPreferenceWrapper sharedPreferenceWrapper] arrayForKey:BDSKShownColsNamesKey];
+    NSEnumerator *shownColNamesE = [prefsShownColNamesArray reverseObjectEnumerator];
+	NSString *colName;
+    NSMenu *columnsMenu = [displayMenuItem submenu];
+	NSMenuItem *item = nil;
+	
+	
+	// remove the add-items, and remember the extra ones, corrsponding to removed columns
+	while(![[columnsMenu itemAtIndex:0] isSeparatorItem]){
+		[columnsMenu removeItemAtIndex:0];
+	}
+	
+	// next add all the shown columns in the order they are shown
+	while(colName = [shownColNamesE nextObject]){
+        item = [[[NSMenuItem alloc] initWithTitle:colName 
+                                           action:@selector(columnsMenuSelectTableColumn:)
+                                    keyEquivalent:@""] autorelease];
+		[item setState:NSOnState];
+		[columnsMenu insertItem:item atIndex:0];
+	}
 }
 	
+- (void)handleTableColumnsChangedNotification:(NSNotification *)notification {
+	[self updateColumnsMenu];
+}
 
 /*
  if the preview needs to be updated, get the first document and make it do the updating
