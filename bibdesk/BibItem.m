@@ -264,11 +264,7 @@ setupParagraphStyle()
 
 
 - (BOOL)isEqual:(BibItem *)aBI{
-    BOOL yn = ([citeKey isEqualToString:[aBI citeKey]]) && 
-              ([pubType isEqualToString:[aBI type]]) &&
-              ([[self title] isEqualToString:[aBI title]]);
-    // NSLog(@"isEqual returns %i", yn);
-    return yn;
+    return [[self bibTeXStringUnexpandedAndDeTeXifiedWithoutInternalFields] isEqualToString:[aBI bibTeXStringUnexpandedAndDeTeXifiedWithoutInternalFields]];
 }
 
 - (unsigned)hash{
@@ -1155,8 +1151,9 @@ setupParagraphStyle()
     return s;
 }
 
-- (NSString *)bibTeXStringByExpandingMacros:(BOOL)expand dropInternal:(BOOL)drop{
-    BOOL shouldTeXify = [[OFPreferenceWrapper sharedPreferenceWrapper] boolForKey:BDSKShouldTeXifyWhenSavingAndCopyingKey];
+#pragma mark BibTeX strings
+
+- (NSString *)bibTeXStringByExpandingMacros:(BOOL)expand dropInternal:(BOOL)drop texify:(BOOL)shouldTeXify{
 	NSMutableSet *knownKeys = [NSMutableSet set];
 	NSString *k;
     NSString *v;
@@ -1233,6 +1230,11 @@ setupParagraphStyle()
     return s;
 }
 
+- (NSString *)bibTeXStringByExpandingMacros:(BOOL)expand dropInternal:(BOOL)drop{
+    BOOL shouldTeXify = [[OFPreferenceWrapper sharedPreferenceWrapper] boolForKey:BDSKShouldTeXifyWhenSavingAndCopyingKey];
+    return [self bibTeXStringByExpandingMacros:expand dropInternal:drop texify:shouldTeXify];
+}
+
 - (NSString *)bibTeXString{
 	return [self bibTeXStringByExpandingMacros:NO dropInternal:NO];
 }
@@ -1244,7 +1246,11 @@ setupParagraphStyle()
 - (NSString *)bibTeXStringByExpandingMacros{
     return [self bibTeXStringByExpandingMacros:YES dropInternal:NO];
 }
-    
+
+- (NSString *)bibTeXStringUnexpandedAndDeTeXifiedWithoutInternalFields{
+    return [self bibTeXStringByExpandingMacros:NO dropInternal:YES texify:NO];
+}
+
 #warning not currently XML entity-escaped !!
 - (NSString *)MODSString{
     NSDictionary *genreForTypeDict = [[BibTypeManager sharedManager] MODSGenresForBibTeXType:pubType];

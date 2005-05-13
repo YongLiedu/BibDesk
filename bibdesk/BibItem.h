@@ -333,6 +333,16 @@
 */
 - (NSString *)bibTeXStringByExpandingMacros;
 
+
+/*!
+    @method     bibTeXStringUnexpandedAndDeTeXifiedWithoutInternalFields
+    @abstract   Returns a BibTeX value with macros unexpanded, deTeXified (not converted to TeX), without internal fields
+                such as Local-Url.
+    @discussion (comprehensive description)
+    @result     (description)
+*/
+- (NSString *)bibTeXStringUnexpandedAndDeTeXifiedWithoutInternalFields;
+
 /*!
     @method     RISStringValue
     @abstract   Returns the value of the BibItem in Reference Manager (RIS) format.  BibTeX tags are converted to RIS by the type manager.
