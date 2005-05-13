@@ -444,6 +444,32 @@ NSString *BDSKBibItemLocalDragPboardType = @"edu.ucsd.cs.mmccrack.bibdesk: Local
         [self performSelector:@selector(setFilterField:) withObject:searchString];
 }
 
+// select duplicates, then allow user to delete/copy/whatever
+- (IBAction)selectDuplicates:(id)sender{
+    
+    if([self respondsToSelector:@selector(setFilterField:)])
+        [self performSelector:@selector(setFilterField:) withObject:@""]; // make sure we can see everything
+    
+    [documentWindow makeFirstResponder:tableView]; // make sure tableview has the focus
+    
+    NSMutableArray *pubsToRemove = [[self publications] mutableCopy];
+    NSSet *uniquePubs = [NSSet setWithArray:pubsToRemove];
+    [pubsToRemove removeIdenticalObjectsFromArray:[uniquePubs allObjects]]; // remove all unique ones based on pointer equality, not isEqual
+    
+    NSEnumerator *e = [pubsToRemove objectEnumerator];
+    BibItem *anItem;
+    unsigned index;
+    while(anItem = [e nextObject]){
+        index = (sortDescending ? [shownPublications count] - 1 - [shownPublications indexOfObjectIdenticalTo:anItem] : [shownPublications indexOfObjectIdenticalTo:anItem]);
+        [tableView selectRow:index byExtendingSelection:YES];
+    }
+    if([pubsToRemove count])
+        [tableView scrollRowToVisible:index];  // make sure at least one item is visible
+    else
+        NSBeep();
+    [pubsToRemove release];
+}
+
 #pragma mark -
 #pragma mark  Document Saving and Reading
 

@@ -387,6 +387,8 @@ extern NSString *BDSKBibItemLocalDragPboardType;
 */
 - (IBAction)delPub:(id)sender;
 
+- (IBAction)selectDuplicates:(id)sender;
+
 #pragma mark searchField functions
 
 /*!

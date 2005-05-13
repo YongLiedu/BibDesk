@@ -139,6 +139,7 @@
                 newBDSKLibrary = id; 
                 newPub = id; 
                 saveAsBDSKDocument = id; 
+                selectDuplicates = id; 
                 showMacrosWindow = id; 
                 showReadMe = id; 
                 showRelNotes = id; 
