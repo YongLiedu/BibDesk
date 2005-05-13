@@ -496,6 +496,7 @@ example.
 * Printing References::         
 * Saving the File::             
 * Previewing Typeset Output::   
+* Identifying Duplicate References::
 @end menu
 
 @c --------------------------------------------------------------------------------------
@@ -943,6 +944,29 @@ An odd-sized page layout is used so that you don't have to scroll in order to se
 the text, which allows you to have a smaller preview window.  However, this is not
 desirable for printed output, so you may wish to edit the LaTeX template file
 (see the @ref{Preview Preferences} preference pane for more details).
+
+@c --------------------------------------------------------------------------------------
+
+@node Identifying Duplicate References
+@section Identifying Duplicate References
+@abstract{How to identify duplicate references in a database.}
+
+@cindex duplicate references
+@cindex finding duplicates
+
+To identify duplicate references in your database, use the @menutitle{Select Duplicates} item
+of the @menutitle{Publication} menu.  BibDesk only considers items to be equal if their
+BibTeX representations are identical (excluding BibDesk's added fields such as Local-Url).
+
+For a large file, the analysis may take a few seconds, so be patient.  When BibDesk is done,
+the duplicate items will be highlighted in the main publications list, and the number of duplicates
+found will be visible in the status line at the bottom of the window.
+You can delete the items directly, but we recommend that you cut-and-paste them to a new document
+for review first!
+
+For less conservative comparisons you will need to use a utility such as Gerd Neugebauer's 
+@uref{http://www.gerd-neugebauer.de/software/TeX/BibTool.en.html, BibTool}, which allows
+you to explicitly specify the criteria for determining if two references are identical.
 
 @c ======================================================================================
 
