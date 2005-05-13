@@ -147,6 +147,18 @@ static NSColor *sStripeColor = nil;
             [[self delegate] pageUpInPreview:nil];
         else
             [[self delegate] pageDownInPreview:nil];
+    // following methods should solve the mysterious problem of arrow/page keys not working for some users
+    }else if(c == NSPageDownFunctionKey){
+        [[self enclosingScrollView] pageDown:self];
+    }else if(c == NSPageUpFunctionKey){
+        [[self enclosingScrollView] pageUp:self];
+    }else if(c == NSUpArrowFunctionKey){
+        [self selectRow:([self selectedRow] - 1) byExtendingSelection:NO];
+        [self scrollRowToVisible:[self selectedRow]];
+    }else if(c == NSDownArrowFunctionKey){
+        [self selectRow:([self selectedRow] + 1) byExtendingSelection:NO];
+        [self scrollRowToVisible:[self selectedRow]];
+    // pass it on the typeahead selector
     }else if ([alnum characterIsMember:c]) {
         [typeAheadHelper rebuildTypeAheadSearchCache]; // if we resorted or searched, the cache is stale
         [typeAheadHelper newProcessKeyDownCharacter:c];
