@@ -42,7 +42,6 @@ NSString *BDSKBibItemLocalDragPboardType = @"edu.ucsd.cs.mmccrack.bibdesk: Local
         shownPublications = [[NSMutableArray alloc] initWithCapacity:1];
         pubsLock = [[NSLock alloc] init];
         frontMatter = [[NSMutableString alloc] initWithString:@""];
-        authors = [[NSMutableSet alloc] init];
 
         quickSearchKey = [[[OFPreferenceWrapper sharedPreferenceWrapper] objectForKey:BDSKCurrentQuickSearchKey] retain];
         if(!quickSearchKey){
@@ -202,7 +201,6 @@ NSString *BDSKBibItemLocalDragPboardType = @"edu.ucsd.cs.mmccrack.bibdesk: Local
     [shownPublications release];
     [pubsLock release];
     [frontMatter release];
-    [authors release];
     [quickSearchTextDict release];
     [quickSearchKey release];
     [customStringArray release];
@@ -325,27 +323,8 @@ NSString *BDSKBibItemLocalDragPboardType = @"edu.ucsd.cs.mmccrack.bibdesk: Local
 	//	NSLog(@"was last request in handleBibItemAddDel");
 		// This method should also check the publication to see if it's selected?
 		// and maybe also resort it... - maybe not resort this.
-        [self refreshAuthors];
         [self updateUI];
 	}
-}
-
-
-// accessor method used by AppleScript (at least)
-- (NSArray*) authors {
-	return [authors allObjects];
-}
-
-
-- (void)refreshAuthors{
-    NSEnumerator *pubE = [shownPublications objectEnumerator];
-    BibItem *pub = nil;
-    
-    while (pub = [pubE nextObject]) {
-        // for each pub, get its authors and add them to the set
-        [authors addObjectsFromArray:[pub pubAuthors]];
-    }
-    
 }
 
 - (NSArray *)publicationsForAuthor:(BibAuthor *)anAuthor{
@@ -967,7 +946,6 @@ stringByAppendingPathComponent:@"BibDesk"]; */
 	}
     
     [shownPublications setArray:publications];
-    [self refreshAuthors];
     // since we can't save pubmed files as pubmed files:
     [self updateChangeCount:NSChangeDone];
     return YES;
@@ -1047,7 +1025,6 @@ stringByAppendingPathComponent:@"BibDesk"]; */
 	}
     
 	[shownPublications setArray:publications];
-    [self refreshAuthors];
     return YES;
 }
 
@@ -2542,8 +2519,6 @@ This method always returns YES. Even if some or many operations fail.
     //NSLog(@"got handleBibItemChangedNotification in %@", [[self fileName] lastPathComponent]);
 
 	NSString *changedKey = [userInfo objectForKey:@"key"];
-    
-    [self refreshAuthors];
     
 	if(!changedKey){
 		[self updateUI];

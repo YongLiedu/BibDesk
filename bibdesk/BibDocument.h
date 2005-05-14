@@ -109,8 +109,6 @@ extern NSString *BDSKBibItemLocalDragPboardType;
     // All display related operations should use shownPublications
     // in aspect oriented objective c i could have coded that assertion!
     NSLock *pubsLock;
-	
-	NSMutableSet *authors;
 
     NSString *quickSearchKey;
     NSMutableDictionary *quickSearchTextDict;
@@ -889,9 +887,6 @@ Uses the tableview argument to determine which actionMenu it should validate.
 
 - (IBAction)addCustomCiteString:(id)sender;
 - (IBAction)removeCustomCiteString:(id)sender;
-
-- (NSArray*) authors;
-- (void)refreshAuthors;
 
 /*!
     @method     pageDownInPreview:

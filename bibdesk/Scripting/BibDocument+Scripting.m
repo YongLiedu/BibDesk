@@ -41,23 +41,39 @@ Scripting Key-Value coding methods to access publications
 Scripting Key-Value coding method to access an author by his name
 */
 - (BibAuthor*) valueInAuthorsWithName:(NSString*) name {
-	NSEnumerator * myEnum = [authors objectEnumerator];
-	BibAuthor * auth = nil;
-	// NSLog (@"valueInAuthors...");
-	while (auth = [myEnum nextObject]) {
-		if ([[auth normalizedName] isEqualToString:name]) {
-			return auth;
+	NSEnumerator *pubEnum = [publications objectEnumerator];
+	NSEnumerator *authEnum;
+	BibItem *pub;
+	BibAuthor *auth;
+	BibAuthor *altAuth = nil;
+	while (pub = [pubEnum nextObject]) {
+		authEnum = [[pub pubAuthors] objectEnumerator];
+		while (auth = [authEnum nextObject]) {
+			if ([[auth normalizedName] isEqualToString:name]) {
+				return auth;
+			}
+			if ([[auth name] isEqualToString:name]) {
+				altAuth = auth;
+			}
 		}
 	}
-	myEnum = [authors objectEnumerator];
-	while (auth = [myEnum nextObject]) {
-		if ([[auth name] isEqualToString:name]) {
-			return auth;
-		}
-	}
-	return nil;
+	return altAuth;
 }
 
+- (BibAuthor*) valueInAuthorsAtIndex:(unsigned int)index {
+	NSEnumerator *pubEnum = [publications objectEnumerator];
+	NSEnumerator *authEnum;
+	BibItem *pub;
+	NSMutableSet *auths = [NSMutableSet set];
+	
+	while (pub = [pubEnum nextObject]) {
+		[auths addObjectsFromArray:[pub pubAuthors]];
+	}
+	
+	if (index < [auths count]) 
+		return [[auths allObjects] objectAtIndex:index];
+	return nil;
+}
 
 
 /* ssp: 2004-07-22
