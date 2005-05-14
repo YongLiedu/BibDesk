@@ -2,6 +2,78 @@
 <!DOCTYPE plist PUBLIC "-//Apple Computer//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
+	<key>BibTeXFieldNamesForMARCXMLSubFields</key>
+	<dict>
+		<key>010</key>
+		<dict>
+			<key>a</key>
+			<string>LibraryID</string>
+		</dict>
+		<key>020</key>
+		<dict>
+			<key>a</key>
+			<string>ISBN</string>
+		</dict>
+		<key>050</key>
+		<dict>
+			<key>a</key>
+			<string>CallNumber</string>
+		</dict>
+		<key>082</key>
+		<dict>
+			<key>a</key>
+			<string>DeweyCallNumber</string>
+		</dict>
+		<key>100</key>
+		<dict>
+			<key>a</key>
+			<string>Author</string>
+		</dict>
+		<key>245</key>
+		<dict>
+			<key>a</key>
+			<string>Title</string>
+		</dict>
+		<key>250</key>
+		<dict>
+			<key>a</key>
+			<string>Edition</string>
+		</dict>
+		<key>260</key>
+		<dict>
+			<key>a</key>
+			<string>Place-Published</string>
+			<key>b</key>
+			<string>Publisher</string>
+			<key>c</key>
+			<string>Publication-Date</string>
+		</dict>
+		<key>300</key>
+		<dict>
+			<key>a</key>
+			<string>NumberOfPages</string>
+		</dict>
+		<key>440</key>
+		<dict>
+			<key>a</key>
+			<string>Series</string>
+		</dict>
+		<key>490</key>
+		<dict>
+			<key>a</key>
+			<string>Series</string>
+		</dict>
+		<key>650</key>
+		<dict>
+			<key>a</key>
+			<string>Genre</string>
+		</dict>
+		<key>700</key>
+		<dict>
+			<key>a</key>
+			<string>Author</string>
+		</dict>
+	</dict>
 	<key>BibTeXFieldNamesForPubMedTags</key>
 	<dict>
 		<key>AB</key>
@@ -463,6 +535,13 @@
 			<string>Inproceedings</string>
 			<key>FileExtension</key>
 			<string>.bib</string>
+		</dict>
+		<key>MARC XML</key>
+		<dict>
+			<key>DefaultType</key>
+			<string>Article</string>
+			<key>FileExtension</key>
+			<string>.marc</string>
 		</dict>
 		<key>MODS XML</key>
 		<dict>
