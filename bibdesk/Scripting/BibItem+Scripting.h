@@ -17,6 +17,8 @@
 - (BibField *)valueInBibFieldsWithName:(NSString *)name;
 - (NSArray *)bibFields;
 
+- (BibAuthor*)valueInAuthorsWithName:(NSString*)name;
+
 - (NSMutableDictionary *)fields;
 
 - (void) setBibTeXString:(NSString*) btString;
@@ -30,7 +32,7 @@
 - (void) setRemoteURL:(NSString*) newURL;
 
 - (NSString*) localURL;
-- (void) setLocalURL:(NSString*) newURL;
+- (void) setLocalURLPath:(NSString*) newURL;
 
 - (NSString*) abstract;
 - (void) setAbstract:(NSString*) newAbstract;

@@ -67,6 +67,21 @@ A Category on BibItem with a few additional methods to enable and enhance its sc
 	return [bibFields allValues];
 }
 
+- (BibAuthor *)valueInAuthorsWithName:(NSString *)name {
+	NSEnumerator *authEnum = [[self pubAuthors] objectEnumerator];
+	BibAuthor *auth;
+	BibAuthor *altAuth = nil;
+	while (auth = [authEnum nextObject]) {
+		if ([[auth normalizedName] isEqualToString:name]) {
+			return auth;
+		}
+		if ([[auth name] isEqualToString:name]) {
+			altAuth = auth;
+		}
+	}
+	return altAuth;
+}
+
 /* ssp: 2004-09-21
 Extra wrapping of the created and modified date methods to 
 - return some value when there is none
@@ -125,11 +140,13 @@ Extra wrapping of the created and modified date methods to
 }
 
 - (NSString*) localURL {
-	return [self valueOfField:BDSKLocalUrlString];
+	return [self localURLPath];
 }
 
-- (void) setLocalURL:(NSString*) newURL {
-	[self setField:BDSKLocalUrlString toValue:newURL];
+- (void) setLocalURL:(NSString*) newPath {
+	if ([newPath hasPrefix:@"file://"])
+		[self setField:BDSKLocalUrlString toValue:newPath];
+	[self setField:BDSKLocalUrlString toValue:[NSURL fileURLWithPath:[newPath stringByExpandingTildeInPath]]];
 }
 
 - (NSString*) abstract {
@@ -208,12 +225,11 @@ Extra wrapping of the created and modified date methods to
 	
 	// ... and replace the current record with it.
 	// hopefully, I don't understand the whole filetypes/pubtypes stuff	
+	[self makeType:[newPub type]];
 	[self setFileType:[newPub fileType]];
 	[self setCiteKey:[newPub citeKey]];
 	[self setFields:[newPub fields]];
-	[self setRequiredFieldNames: [newPub requiredFieldNames]];
-	[self makeType:[newPub type]];
-	NSLog([newPub description]);
+	// NSLog([newPub description]);
 }
 
 /*

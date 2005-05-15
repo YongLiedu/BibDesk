@@ -22,10 +22,10 @@ will translate this file into the necessary scriptSuite and scriptTerminology fi
 			<class name="author" plural="authors" code="auth" description="Contains the name of an author, tries to analyse it and list all publications of that author. Author names can be split into four E.g. '(Jean) (de la) (Fontaine) (Jr.)'" inherits="NSCoreSuite.AbstractObject">
                 <cocoa class="BibAuthor"/>
                 <properties>
-	                <property name="name" type="string" code="pnam" description="The author's name." access="r">
+	                <property name="name" type="string" code="pnam" description="The author's name. This name is normalized as 'von Last, First, Jr'." access="r">
     	            	<cocoa method="normalizedName"/>
         	        </property>
-	                <property name="full name" type="string" code="aunm" description="The author's full name.">
+	                <property name="full name" type="string" code="aunm" description="The author's full name, as entered.">
     	            	<cocoa method="name"/>
         	        </property>
                     <property name="first name" code="aufn" type="string" description="The author's first name." access="r">
@@ -128,7 +128,7 @@ will translate this file into the necessary scriptSuite and scriptTerminology fi
 					<property name="keywords" code="keyw" type="string" description="The publication's keywords.">
 						<cocoa method="keywords"/>
 					</property>
-					<property name="local file" code="lURL" type="file" description="Location of a file containing the publication.">
+					<property name="local file" code="lURL" type="file" description="Location of a file containing the publication. This is a POSIX path.">
 						<cocoa method="localURL"/>
 					</property>  
 					<property name="URL" code="rURL" type="string" description="URL pointing to the publication.">
