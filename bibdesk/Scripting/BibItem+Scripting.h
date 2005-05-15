@@ -32,7 +32,7 @@
 - (void) setRemoteURL:(NSString*) newURL;
 
 - (NSString*) localURL;
-- (void) setLocalURLPath:(NSString*) newURL;
+- (void) setLocalURL:(NSString*) newURL;
 
 - (NSString*) abstract;
 - (void) setAbstract:(NSString*) newAbstract;
