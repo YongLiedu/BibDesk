@@ -41,23 +41,24 @@ Scripting Key-Value coding methods to access publications
 Scripting Key-Value coding method to access an author by his name
 */
 - (BibAuthor*) valueInAuthorsWithName:(NSString*) name {
+    // create a new author so we can use BibAuthor's isEqual: method for comparison
+    // instead of trying to do string comparisons
+    BibAuthor *newAuth = [BibAuthor authorWithName:name andPub:nil];
+    
 	NSEnumerator *pubEnum = [publications objectEnumerator];
 	NSEnumerator *authEnum;
 	BibItem *pub;
 	BibAuthor *auth;
-	BibAuthor *altAuth = nil;
+
 	while (pub = [pubEnum nextObject]) {
 		authEnum = [[pub pubAuthors] objectEnumerator];
 		while (auth = [authEnum nextObject]) {
-			if ([[auth normalizedName] isEqualToString:name]) {
+			if ([auth isEqual:newAuth]) {
 				return auth;
-			}
-			if ([[auth name] isEqualToString:name]) {
-				altAuth = auth;
 			}
 		}
 	}
-	return altAuth;
+	return nil;
 }
 
 - (BibAuthor*) valueInAuthorsAtIndex:(unsigned int)index {
