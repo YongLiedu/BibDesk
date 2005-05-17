@@ -393,7 +393,7 @@ setupParagraphStyle()
 - (NSComparisonResult)fileOrderCompare:(BibItem *)aBI{
     int aBIOrd = [aBI fileOrder];
     int myFileOrder = [self fileOrder];
-    if (myFileOrder == -1) return NSOrderedDescending; //@@ file order for crossrefs - here is where we would change to accommodate new pubs in crossrefs...
+    if (myFileOrder == 0) return NSOrderedDescending; //@@ file order for crossrefs - here is where we would change to accommodate new pubs in crossrefs...
     if (myFileOrder < aBIOrd) {
         return NSOrderedAscending;
     }
@@ -406,7 +406,7 @@ setupParagraphStyle()
 
 // accessors for fileorder
 - (int)fileOrder{
-    return [[document publications] indexOfObjectIdenticalTo:self];
+    return [[document publications] indexOfObjectIdenticalTo:self] + 1;
 }
 
 - (NSString *)fileType { return fileType; }
