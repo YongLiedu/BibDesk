@@ -111,11 +111,7 @@ static NSDictionary *globalMacroDefs;
 }
 
 - (BOOL)isEqual:(BDSKComplexString *)other{
-    return [self isEqualAsComplexString:other];
-}
-
-- (unsigned)hash{
-    return [[self expandedValue] hash];
+    return [super isEqual:other]; // do not override super's implementation of isEqual
 }
 
 - (id)initWithArray:(NSArray *)a macroResolver:(id)theMacroResolver{

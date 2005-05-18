@@ -219,7 +219,7 @@ will want to know. See @ref{Formatting Names} and
  @ref{Publication Types}) for answers to common questions.
 
 It helps to know what the parts of a BibTeX file are. Here's a trivial
-example to help illustrate. First we have a *macro definition*:
+example to help illustrate. First we have a @emph{macro definition}:
 
 @example
 @@string@{"PACT" = "International Conference on Processors, Architectures and Compilation Techniques"@}
@@ -240,8 +240,8 @@ The terminology we'll use to describe the entry is as follows:
 @@publication-type@{citation-key, field-name = value@}
 @end example
 
-Any value can be either a quoted string (using either `""` or `@{@}`) or a
-number, or a macro (like `PACT` in the above example).
+Any value can be either a quoted string (using either @samp{""} or @samp{@{@}}) or a
+number, or a macro (like @samp{PACT} in the above example).
 
 @anchor{Publication Types}
 @heading Publication Types
@@ -252,11 +252,32 @@ later in conjunction with BibTeX styles.
 
 @heading Citation Keys
 
-Must be unique.
+A cite key is a unique identifier for a given reference.  BibTeX scans your document for
+occurrences of a cite command with a cite key embedded in it, and translates it into a
+properly formatted reference.  Several patterns are common
+in choosing cite keys, from simple ones such as ``lastnameYEAR'' to more complicated
+abbreviations of journal names and author names.  BibDesk will automatically
+generate cite keys for you (@xref{Citation Keys}), or you can enter your own in the editor.
+BibDesk takes a fairly strict interpretation of the valid characters for cite keys,
+and the characters "@code{ "@@',\#@}@{~%}" (including the space character) are never allowed,
+while you will be warned if you use one of "@code{&$^}" in a cite key.  Cite keys are
+essentially TeX commands, so you should avoid using underscores, for instance, if you
+ever need to print the actual cite key itself.
 
-@heading Field data
+@heading Field Data
 
-Any field can be in any type.
+BibTeX defines numerous required and optional fields for each type, such as "Title" or "Author".  
+BibDesk's editor will highlight the required fields in red, and optional fields are black.
+Any field may be used with any type, however, and you can add your own fields to entries
+and use them with custom bibliography styles.  For instance, you can add a "Keywords" field
+to all of your entries, then modify a bibliography style to print out the list of keywords
+in your bibliography.
+
+Field entries are subject to limitations of TeX itself, and if you copy-and-paste a title 
+with characters that are special to TeX, such as @samp{$}, errors will occur when
+processing your file with BibTeX and TeX.  Other than that, any text is valid for a
+BibTeX field, and is not limited to bibliographic information (some people store
+addresses in a BibTeX database).
 
 @anchor{Formatting Names}
 @heading Formatting Names
@@ -277,7 +298,7 @@ are the same:
 @end example
 
 BibTeX also handles more complicated names. Prefixes to given names
-such as *van* or *van den* and suffixes such as *Jr.* or *III* are
+such as @samp{van} or @samp{van den} and suffixes such as @samp{Jr.} or @samp{III} are
 OK:
 
 @example
@@ -288,35 +309,51 @@ OK:
 
 @cindex macro
 
-Macro definitions look like this:
-@example
-@@string@{"PACT" = "International Conference on Processors, Architectures and Compilation Techniques"@}
-@end example
-
-Macro uses just use the first part of the definition without quotes as
-the value for a field in the BibTeX file.
-
 Macros are a time saving feature that save typing when you have to
 repeat the same long journal name over and over. If you define a
 macro, you can just type the short version and BibTeX will substitute
 the full version in processing.
 
-Note that in our example, we also used a macro *sep*, which was not
+Macro definitions look like this:
+@example
+@@string@{"PACT" = "International Conference on Processors, Architectures and Compilation Techniques"@}
+@end example
+
+To use the macro, just use the first part of the definition without quotes (here @code{PACT}) 
+as the value for a field in the BibTeX file, as in the example above.
+
+Note that in our example, we also used a macro @samp{sep}, which was not
 defined in the example. Common three-letter month names are usually
-defined appropriately in your `Style Files`_ for the document's
+defined appropriately in your @ref{Style Files} for the document's
 language, and may also be abbreviated depending on the citation style.
 
 
 BibDesk supports reading, editing and saving BibTeX macros. See
 @ref{Editing Fields with Macros} for further information.
 
+@anchor{Style Files}
 @heading Style Files
 
-.bst
+BibTeX uses style files (extension @code{.bst}) to produce formatted bibliographies
+for various publishers.  You probably have numerous BibTeX styles installed on your
+computer, and many more can be found on @uref{http://ctan.tug.org/, CTAN}, the
+Comprehensive TeX Archive Network.
+
+Writing your own BibTeX style files is possible, but not recommended for the
+faint of heart (or even the not-so-faint of heart).  Patrick W. Daly's
+@uref{http://www.ctan.org/tex-archive/macros/latex/contrib/supported/custom-bib/, custom-bib}
+package is a valuable asset when you need a customized bibliography style, as it
+walks you through a semi-automatic creation process.
 
 @heading BibTeX References
 
-btxdoc.dvi
+The canonical reference for BibTeX itself is Oren Patashnik's
+@uref{http://www.ctan.org/tex-archive/biblio/bibtex/contrib/doc/btxdoc.pdf, BibTeXing},
+which you may have already as @uref{/usr/local/teTeX/share/texmf.tetex/doc/bibtex/base/btxdoc.dvi, btxdoc.dvi} 
+in your TeX tree. Standard references such as @samp{The LaTeX Companion} are very
+helpful in understanding and debugging BibTeX, and searching the
+@uref{http://www.tex.ac.uk/cgi-bin/texfaq2html, TeX FAQ} is usually a
+good idea as well.
 
 @c ======================================================================================
 
@@ -364,7 +401,7 @@ box.
 This feature lets you specify any command line that produces a BibTeX
 file and open it in BibDesk directly. If you have command line
 conversion tools from other formats, this is a handy way to use them.
-For instance, suppose you have a file called ``searchresults.isi'' in the ISI file format from
+For instance, suppose you have a file called @samp{searchresults.isi} in the ISI file format from
 an online database.  Using the @uref{http://www.scripps.edu/~cdputnam/software/bibutils/bibutils.html, BibUtils}
 suite of command line utilities (available here), you can translate that file into BibTeX with the following
 command: @code{/usr/local/bin/isi2xml | /usr/local/bin/xml2bib}, with the paths adjusted appropriately for your
@@ -385,7 +422,7 @@ Note that BibDesk can open RIS files directly, so a filter isn't required for th
 @cindex RIS
 @cindex service
 
-BibDesk expects a file with the extension ``.fcgi'' or ``.ris''.
+BibDesk expects a file with the extension @samp{.fcgi} or @samp{.ris}.
 Many of the RIS tags are converted into their BibTeX equivalents, but unknown tags are left as-is for you to deal with manually.
 BibDesk's RIS import feature converts some HTML characters and tags into LaTeX commands, which can be handy when importing large
 numbers of references; the LaTeX produced may be rather primitive, however.
@@ -398,8 +435,8 @@ PubMed, and then select the settings as in the following image:
 @image{gfx/pubmed}
 
 The important settings are that it should be set to Display
-``MEDLINE'' and Send to ``File''. Then click the
-``Send to'' button, and a file will
+@buttontitle{MEDLINE} and Send to @buttontitle{File}. Then click the
+@buttontitle{Send to} button, and a file will
 be saved to your download folder. You can then use BibDesk to open
 this file. Once you have opened the file it cannot be saved back in
 the same format. If you want to, you can save it as a BibTeX file, or
@@ -418,11 +455,11 @@ publication list, which may be more convenient for those sources.
 
 @subheading Using RIS Services
 
-The Services menu items @menutitle{Bibdesk->Add to Bibliography} and 
-@menutitle{Bibdesk->New Document With RIS}can be used from a text editor or 
-web browser which supports Services toeither add selected RIS text to an 
+The Services menu items @menutitle{Bibdesk > Add to Bibliography} and 
+@menutitle{Bibdesk > New Document With RIS}can be used from a text editor or 
+web browser which supports Services to either add selected RIS text to an 
 existing document, or create a new document based on the selected text.  
-Further, RIS can be pasted ordragged directly into BibDesk's publication 
+Further, RIS can be pasted or dragged directly into BibDesk's publication 
 list as text, so at least one method should be convenient for your particular situation! 
 BibDesk can also save RIS files directly, although some modification of 
 the original source will occur, and this is only recommended
@@ -442,7 +479,7 @@ when it is necessary to share files with other people or applications.
 The quick search field lets you enter sub-strings that might be in
 author names, titles or dates, and the reference view will display
 only matching publications. There are several built-in options. For
-example, All Fields (search every entry except the pub type at once),
+example, "All Fields" (search every entry except the pub type at once),
 Keywords (search the keywords entries) and Pub Type (search by pub
 type).
 
@@ -452,7 +489,7 @@ The quick search field is configurable by selecting @menutitle{Add Field@dots{}}
 which allows you to add any string you want to the menu. If a
 publication has that field, it will be searched. Adding the field
 "Cite Key" (with that exact capitalization) will allow you to search
-the citation key of publications. (All Fields also searches the
+the citation key of publications. ("All Fields" also searches the
 citation key.)
 
 @heading Advanced Searches
@@ -462,21 +499,21 @@ citation key.)
 @cindex braces in search
 
 BibDesk's quick search field also supports a Boolean search, using
-``+'' for ``and'' or ``|'' for ``or'' operators (no quotes), as
+@samp{+} for @samp{and} or @samp{|} for @samp{or} operators (no quotes), as
 Apple's Help Viewer does in Mac OS X 10.4 and greater.
 Please note that grouping is not supported at this
 time.  If you do not explicitly search for accented characters, the
 search feature will return results with accented characters, so it is
 slightly fuzzy; further, case is ignored unless you explicitly enter
 uppercase letters.  Sound confusing?  
-For example, searching for ``Burger,'' could return matches containing
-``R. B@ue{}rger'' and ``J. Burger,'' but not ``Hamburger.''  Searching for
-``B@ue{}rger'' will only return items that match the case and accent exactly,
-such as ``R. B@ue{}rger.''
+For example, searching for @samp{Burger,} could return matches containing
+@samp{R. B@ue{}rger} and @samp{J. Burger,} but not @samp{Hamburger.}  Searching for
+@samp{B@ue{}rger} will only return items that match the case and accent exactly,
+such as @samp{R. B@ue{}rger.}
 
 As mentioned elsewhere, braces are ignored when searching, so searching
-for ``BibDesk'' will find ``@{B@}ib@{D@}esk'' as well as ``BibDesk.''  Of course,
-this will not find ``Bibdesk,'' since uppercase letters were used in this
+for @samp{BibDesk} will find @samp{@{B@}ib@{D@}esk} as well as @samp{BibDesk.}  Of course,
+this will not find @samp{Bibdesk}, since uppercase letters were used in this
 example.
 
 @c ======================================================================================
@@ -508,8 +545,8 @@ example.
 @kindex Cmd-N
 
 New references are added to the bibliography 
-with @menutitle{New Reference} from the Bibliography menu, the keyboard
-shortcut @cmd{N}, or the New Reference toolbar button.
+with @menutitle{New Reference} from the @menutitle{Publication} menu, the keyboard
+shortcut @cmd{N}, or the @buttontitle{New Reference} toolbar button.
 
 @menu
 * Drag and Drop::
@@ -525,6 +562,11 @@ References can also be added to a bibliography by dragging an entry
 from a text source (text editor, web browser). Here's a fancy picture:
 
 @image{gfx/dragIntoBib}
+
+Dragging a reference from the main publications list onto a BibDesk editor window will 
+only set non-empty fields of the publication, which can be quite useful when you are 
+entering a number of items from a common source.  If you do want to overwrite all fields
+when dragging to an editor, simply hold down the option key while you drag.
 
 @c --------------------------------------------------------------------------------------
 
@@ -700,8 +742,6 @@ it.
 
 @image{gfx/rawEdit}
 
-@c FIXME
-
 You can edit a field as raw BibTeX by pressing @cmd{R} in the edit
 window when one of the form fields has the keyboard focus.
 
@@ -777,7 +817,7 @@ You can control the order of the columns by moving them directly.
 
 To add a field that isn't displayed, use the column management
 menu. There are three ways to access this menu; In the menu bar under
-@menutitle{View->Columns}, by Control-clicking on a column name, or by
+@menutitle{View > Columns}, by Control-clicking on a column name, or by
 clicking the small button at the top right of the table.
 
 It has a menu of fields you can add, or you can choose to add any
@@ -835,7 +875,8 @@ If you use a special type that has a container concept write to bibdesk-develop@
 and it can be added. 
 
 @cindex Local-Url
-@subheading Local-Url 
+@cindex drag and drop, files
+@subheading Local-Url
 
 The Local-Url column is the column with the column with a little icon depicting a file in the header. 
 
@@ -852,6 +893,7 @@ or it can be dragged into a specific application in the Dock to open the file in
 or perhaps mail it as an attachment.
 
 @cindex Url
+@cindex drag and drop, URLs
 @subheading Url
 
 The Url column is the column with the column with an @@-sign in the header. 
@@ -1209,8 +1251,8 @@ in the table, and choose the @buttontitle{-} button.
 @abstract{Autocompletion in edits and external applications.}
 
 @cindex autocompletion
-@cindex TextExtras problems
-@cindex iTeXMac problems
+@cindex problems with TextExtras
+@cindex problems with iTeXMac
 
 BibDesk can install a plugin that lets you search your database and
 insert citation commands conveniently without leaving your text
@@ -1242,7 +1284,7 @@ the caveat below).
 
 The autocompletion input manager will also provide completion for TeX @code{\ref@{}
 commands, based on all @code{\label} commands in the same text file.  For instance, 
-if you have a table labeled "@code{\label@{tab:myTable@}}", you can type "@code{See Table~\ref@{tab:m@}", 
+if you have a table labeled "@code{\label@{tab:myTable@}}", you can type "@code{See Table~\ref@{tab:m@}}", 
 hit the same key sequence used for citekey autocompletion, and see a list of all 
 matching entries pop up.  The autocompletion looks for up to seven matching 
 characters, so the more you type, the fewer options you'll be presented with in the list.
@@ -1443,7 +1485,7 @@ opened so that accented characters display properly.
 
 * Files opened with a given encoding will be saved with that encoding.  
  To save with an alternate encoding, choose the
-@menutitle{File->Export->Export BibTeX With Encoding@dots{}} menu option and select a particular encoding.  
+@menutitle{File > Export > Export BibTeX With Encoding@dots{}} menu option and select a particular encoding.  
 
 @prefitem{Unicode to TeX Conversion} Characters will only be converted to TeX when this 
 checkbox for character conversion is marked. Otherwise, they are written out as displayed in BibDesk.
@@ -1725,7 +1767,7 @@ paths in all lowercase characters.
 @section Autocompletion
 @abstract{Configuring the Autocompletion feature}
 
-@cindex autocompletion
+@cindex autocompletion, preferences
 
 In the Autocompletion pane you can configure the autocompletion system. 
 You can control which fields in BiDesk are autocompleted. You can also install 
@@ -1742,22 +1784,35 @@ and configure citations autocompletion for external applications.
 @abstract{Autocompletion for edits in BibDesk}
 
 @cindex internal autocompletion
+@cindex autocompletion, internal
 
 @image{gfx/autocompletePrefs-Internal}
 
 @prefindex Internal Autocompletion
 
-The table lists the BibTeX fields for which autocompletion within BibDesk is activated. 
-You can add new fields with the @buttontitle{+} button. The field name can be edited 
-after double-clicking on the field in the table. 
-You can remove a field by selecting it and clicking the @buttontitle{-} button. 
+The table lists the fields for which autocompletion within BibDesk's editor is activated.
+As you type, BibDesk can automatically complete fields based on other entries in your
+file.  Note that if this dictionary ever gets corrupted due to a misspelling, relaunching
+the application will rebuild the dictionary; if that doesn't work, you need to find the 
+other misspelling!
 
+At present, terms in the keywords field will be completed individually if they are separated 
+by one of @code{;:,}, and authors will be completed individually as well.
+Other fields are completed in their entirety.
+
+You can enable autocompletion for other fields with the @buttontitle{+} button,
+and the field name can be edited after double-clicking on the field in the table.  
+Likewise, you can remove a field by selecting it and clicking the @buttontitle{-} button.
+Some users find the completion feature really annoying, especially since it can't read your mind or
+know what to type for you.  In this case you should remove all the fields from the list, or 
+submit a patch to improve the code.
 
 @node External Autocompletion
 @subsection External Autocompletion
 @abstract{Autocompletion of citation commands in other applications.}
 
 @cindex external autocompletion
+@cindex autocompletion, external
 
 @image{gfx/autocompletePrefs-External}
 
@@ -1784,27 +1839,66 @@ Apple's Stickies application is a good example of this.
 
 @cindex AppleScript
 
-FIXME
-
 @heading Topics
 
 @menu
-* Using AppleScript::
+* Automating Tasks with AppleScript::
 * Scripts Menu::
 * Where to get Scripts::
 @end menu
 
 @c --------------------------------------------------------------------------------------
 
-@node Using AppleScript
-@section Using AppleScript
-@abstract{How to use AppleScript with Bibdesk.}
+@node Automating Tasks with AppleScript
+@section Automating Tasks with AppleScript
+@abstract{How to automate tasks using AppleScript with Bibdesk.}
 
 @cindex using AppleScript
+@cindex automating tasks
 
-FIXME
+You can use @uref{http://www.apple.com/applescript, AppleScript} to write small programs, 
+or scripts, to automate common tasks in BibDesk. For example, you can have a script 
+process all the titles of your references, cleaning them up or capitalizing them. 
+Or you can use a script to download bibliography information for references from the web. 
+Scripts can be made accessible from the @ref{Scripts Menu}.
 
-@uref{http://www.apple.com/applescript, AppleScript}
+Here is an example of an AppleScript to process the titles of all selected references. 
+(The definition of the subroutine to actually do the processing is not shown).
+
+@example
+@html
+<span class="aslangkeyword">tell</span> <span class="asappkeyword">application</span> <span class="asvalue">"Bibdesk"</span>
+    <span class="aslangkeyword">set</span> <span class="asvariable">theSelection</span> <span class="aslangkeyword">to the</span> <span class="asappkeyword">selection</span> <span class="aslangkeyword">of</span> <span class="asappkeyword">document</span> <span class="asvalue">1</span>
+    <span class="aslangkeyword">repeat with</span> <span class="asvariable">thePub</span> <span class="aslangkeyword">in</span> <span class="asvariable">theSelection</span>
+        <span class="ascomment">-- accessing field values</span>
+        <span class="aslangkeyword">set</span> <span class="asvariable">theTitle</span> <span class="aslangkeyword">to the</span> <span class="asappkeyword">value</span> <span class="aslangkeyword">of</span> <span class="asappkeyword">field</span> <span class="asvalue">"Title"</span> <span class="aslangkeyword">of</span> <span class="asvariable">thePub</span>
+        <span class="ascomment">-- processString is a subroutine defined elsewhere in the script</span>
+        <span class="aslangkeyword">set</span> <span class="asvariable">theTitle</span> <span class="aslangkeyword">to my</span> <span class="asvariable">processString</span><span class="asoperator">(</span><span class="asvariable">theTitle</span><span class="asoperator">)</span>
+        <span class="aslangkeyword">set the</span> <span class="asappkeyword">value</span> <span class="aslangkeyword">of</span> <span class="asappkeyword">field</span> <span class="asvalue">"Title"</span> <span class="aslangkeyword">of</span> <span class="asvariable">thePub</span> <span class="aslangkeyword">to</span> <span class="asvariable">theTitle</span>
+    <span class="aslangkeyword">end repeat</span>
+<span class="aslangkeyword">end tell</span>
+@end html
+@ifnothtml
+@b{tell} application "Bibdesk"
+    @b{set} theSelection @b{to the} selection @b{of} document 1
+    @b{repeat with} thePub @b{in} theSelection
+        @i{-- acessing fields}
+        @b{set} theTitle @b{to the} value @b{of} field "Title" @b{of} thePub
+        @i{-- processString is a subroutine defined elsewhere in the script}
+        @b{set} thetitle @b{to my} processString(theTitle)
+        @b{set the} value @b{of} field "Title" @b{of} thePub @b{to} theTitle
+    @b{end repeat}
+@b{end tell}
+@end ifnothtml
+@end example
+
+A more extensive sample of AppleScript support for BibDesk can be found in the script @samp{BD test.scpt}. 
+You can view it through the @uref{Scripts Menu}. 
+
+To see the AppleScript commands you can use with BibDesk, open "Script Editor" 
+(located in @code{Applications/AppleScript}). In "Script Editor", choose 
+@menutitle{File > Open Dictionary} (shortcut @shiftcmd{O}) and select BibDesk in the dialog. 
+You can also drag the BibDesk icon onto the "Script Editor" icon to open the dictionary.
 
 @c --------------------------------------------------------------------------------------
 
@@ -1814,9 +1908,14 @@ FIXME
 
 @cindex Scripts menu
 
-FIXME
+BibDesk has its own AppleScript menu, and scripts dedicated to BibDesk can be stored
+in your home directory under @code{~/Library/Application Support/BibDesk/Scripts}.
 
-@menutitle{About the Scripts Menu}
+To quickly open the scripts folder, select @menutitle{About the Scripts Menu} from
+the @menutitle{Scripts} menu (which is shaped like the AppleScript icon on later
+version of OS X).  Scripts added to this folder will show up in the menu without relaunching BibDesk.
+You can also use this menu item to view a sample script explaining the most important 
+AppleScript commands you can use with BibDesk. 
 
 @c --------------------------------------------------------------------------------------
 
@@ -1824,9 +1923,11 @@ FIXME
 @section Where to get Scripts
 @abstract{Where to get Scripts for BibDesk.}
 
-FIXME
-
-@uref{http://bibdesk.sourceforge.net/scripts.html, BibDesk AppleScript Repository}
+Various user-contributed scripts are located or linked from the BibDesk website here:
+@uref{http://bibdesk.sourceforge.net/scripts.html, BibDesk AppleScript Repository}.
+If you have a contribution that you would like to share, please e-mail the
+@uref{mailto:bibdesk-users@@lists.sourceforge.net, BibDesk Users} mailing list with
+a link to your page, and we'll make sure it gets added!
 
 @c ======================================================================================
 
@@ -1915,12 +2016,6 @@ theinterface. There are some limitations on this process;
 conversion only works when a @code{@{\} sequence is encountered, as in the
 above example, and it only works if BibDesk has the conversion stored
 in its internal dictionary.
-
-If you encounter a warning that BibDesk was unable to convert an
-accented character into aTeX sequence, please e-mail the BibDesk 
-@uref{mailto:bibdesk-develop@@sourceforge.net?Subject=Character%20Conversion%20Error, developers' mailing list} with a description of the character and its TeX
-equivalent. This will enable us to add the character to the next
-release of BibDesk.
 
 @heading Accented characters and TeX 
 
