@@ -1502,6 +1502,7 @@
 		};
 		29B97317FDCFA39411CA2CEA = {
 			children = (
+				F95A735E0836F869007768EA,
 				3D8A54F6082D1F86008E818C,
 				F994B8F607F5F65F00751DA1,
 				27D4FA5D07DE5CF5001CAB00,
@@ -2128,7 +2129,6 @@
 				3D8A5780082D31D2008E818C,
 			);
 			buildSettings = {
-				OPTIMIZATION_CFLAGS = "";
 				OTHER_CFLAGS = "";
 				OTHER_LDFLAGS = "";
 				OTHER_REZFLAGS = "";
@@ -2516,6 +2516,7 @@
 		8D1107290486CEB800E47090 = {
 			buildActionMask = 2147483647;
 			files = (
+				F95A73640836F8A0007768EA,
 				F9022D9B0758073F00C3F701,
 				8D11072A0486CEB800E47090,
 				8D11072B0486CEB800E47090,
@@ -5078,6 +5079,7 @@
 				F9022FB207580A9600C3F701,
 				F9022FB307580A9600C3F701,
 				F9022FB407580A9600C3F701,
+				F95A735F0836F869007768EA,
 			);
 			isa = PBXCopyFilesBuildPhase;
 			runOnlyForDeploymentPostprocessing = 0;
@@ -5836,7 +5838,6 @@
 		F920DB22075C2D40000C5FCA = {
 			buildActionMask = 2147483647;
 			files = (
-				F9E2B8DB082C5D3500D04FEA,
 			);
 			isa = PBXRezBuildPhase;
 			runOnlyForDeploymentPostprocessing = 0;
@@ -6026,6 +6027,27 @@
 		};
 		F94EC0E908117BB6005EAFD9 = {
 			fileRef = F94EC0E708117BB6005EAFD9;
+			isa = PBXBuildFile;
+			settings = {
+			};
+		};
+		F95A735E0836F869007768EA = {
+			fileEncoding = 4;
+			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.scpt;
+			name = "BD Test.scpt";
+			path = "Scripting/BD Test.scpt";
+			refType = 4;
+			sourceTree = "<group>";
+		};
+		F95A735F0836F869007768EA = {
+			fileRef = F95A735E0836F869007768EA;
+			isa = PBXBuildFile;
+			settings = {
+			};
+		};
+		F95A73640836F8A0007768EA = {
+			fileRef = F95A735E0836F869007768EA;
 			isa = PBXBuildFile;
 			settings = {
 			};
@@ -6518,12 +6540,6 @@
 		};
 		F9D5A8CB07B9B94F0092E7E2 = {
 			fileRef = F9022C420758027800C3F701;
-			isa = PBXBuildFile;
-			settings = {
-			};
-		};
-		F9E2B8DB082C5D3500D04FEA = {
-			fileRef = F920DB25075C2D8F000C5FCA;
 			isa = PBXBuildFile;
 			settings = {
 			};
