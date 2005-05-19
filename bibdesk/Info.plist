@@ -27,40 +27,6 @@
 		<dict>
 			<key>CFBundleTypeExtensions</key>
 			<array>
-				<string>mods</string>
-				<string>xml</string>
-			</array>
-			<key>CFBundleTypeMIMETypes</key>
-			<array>
-				<string>text/xml</string>
-			</array>
-			<key>CFBundleTypeName</key>
-			<string>MODS XML Database</string>
-			<key>CFBundleTypeRole</key>
-			<string>None</string>
-			<key>NSDocumentClass</key>
-			<string>BibDocument</string>
-		</dict>
-		<dict>
-			<key>CFBundleTypeExtensions</key>
-			<array>
-				<string>atom</string>
-				<string>xml</string>
-			</array>
-			<key>CFBundleTypeMIMETypes</key>
-			<array>
-				<string>application/xml+atom</string>
-			</array>
-			<key>CFBundleTypeName</key>
-			<string>Atom Syndication File</string>
-			<key>CFBundleTypeRole</key>
-			<string>None</string>
-			<key>NSDocumentClass</key>
-			<string>BibDocument</string>
-		</dict>
-		<dict>
-			<key>CFBundleTypeExtensions</key>
-			<array>
 				<string>ris</string>
 				<string>fcgi</string>
 			</array>
@@ -77,27 +43,13 @@
 			<key>NSDocumentClass</key>
 			<string>BibDocument</string>
 		</dict>
-		<dict>
-			<key>CFBundleTypeExtensions</key>
-			<array>
-				<string>bdsk</string>
-			</array>
-			<key>CFBundleTypeIconFile</key>
-			<string>bibDocIcon.icns</string>
-			<key>CFBundleTypeName</key>
-			<string>BibDesk Library</string>
-			<key>CFBundleTypeRole</key>
-			<string>None</string>
-			<key>NSDocumentClass</key>
-			<string>BDSKLibrary</string>
-		</dict>
 	</array>
 	<key>CFBundleExecutable</key>
 	<string>Bibdesk</string>
 	<key>CFBundleGetInfoHTML</key>
-	<string>&lt;B&gt;BibDesk&lt;/B&gt; Version 0.99.3</string>
+	<string>&lt;B&gt;BibDesk&lt;/B&gt; Version 1.0RC1</string>
 	<key>CFBundleGetInfoString</key>
-	<string>version 0.99.3</string>
+	<string>version 1.0RC1</string>
 	<key>CFBundleHelpBookFolder</key>
 	<string>BibDesk Help</string>
 	<key>CFBundleHelpBookName</key>
@@ -113,11 +65,11 @@
 	<key>CFBundlePackageType</key>
 	<string>APPL</string>
 	<key>CFBundleShortVersionString</key>
-	<string>0.99.3</string>
+	<string>1.0RC1</string>
 	<key>CFBundleSignature</key>
 	<string>BDSK</string>
 	<key>CFBundleVersion</key>
-	<string>0.99.3</string>
+	<string>1.0RC1</string>
 	<key>NSAppleScriptEnabled</key>
 	<string>YES</string>
 	<key>NSMainNibFile</key>

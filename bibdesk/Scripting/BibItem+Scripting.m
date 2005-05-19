@@ -68,18 +68,18 @@ A Category on BibItem with a few additional methods to enable and enhance its sc
 }
 
 - (BibAuthor *)valueInAuthorsWithName:(NSString *)name {
+    // create a new author so we can use BibAuthor's isEqual: method for comparison
+    // instead of trying to do string comparisons
+    BibAuthor *newAuth = [BibAuthor authorWithName:name andPub:nil];
 	NSEnumerator *authEnum = [[self pubAuthors] objectEnumerator];
 	BibAuthor *auth;
-	BibAuthor *altAuth = nil;
+	
 	while (auth = [authEnum nextObject]) {
-		if ([[auth normalizedName] isEqualToString:name]) {
+		if ([auth isEqual:newAuth]) {
 			return auth;
 		}
-		if ([[auth name] isEqualToString:name]) {
-			altAuth = auth;
-		}
 	}
-	return altAuth;
+	return nil;
 }
 
 /* ssp: 2004-09-21
@@ -146,7 +146,8 @@ Extra wrapping of the created and modified date methods to
 - (void) setLocalURL:(NSString*) newPath {
 	if ([newPath hasPrefix:@"file://"])
 		[self setField:BDSKLocalUrlString toValue:newPath];
-	[self setField:BDSKLocalUrlString toValue:[NSURL fileURLWithPath:[newPath stringByExpandingTildeInPath]]];
+	NSString *newURL = [[NSURL fileURLWithPath:[newPath stringByExpandingTildeInPath]] absoluteString];
+	[self setField:BDSKLocalUrlString toValue:newURL];
 }
 
 - (NSString*) abstract {
