@@ -102,6 +102,10 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
         // copy html item template file:
         [DFM copyPath:[[NSBundle mainBundle] pathForResource:@"htmlItemExportTemplate" ofType:nil]
                toPath:[applicationSupportPath stringByAppendingPathComponent:@"htmlItemExportTemplate"] handler:nil];
+    }if(![DFM fileExistsAtPath:[applicationSupportPath stringByAppendingPathComponent:@"BD Test.scpt"]]){
+        // copy test script:
+        [DFM copyPath:[[NSBundle mainBundle] pathForResource:@"BD Test" ofType:@"scpt"]
+               toPath:[applicationSupportPath stringByAppendingPathComponent:@"BD Test.scpt"] handler:nil];
     }
 
     [NSApp registerServicesMenuSendTypes:[NSArray arrayWithObjects:NSStringPboardType,nil] returnTypes:[NSArray arrayWithObjects:NSStringPboardType,nil]];

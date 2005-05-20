@@ -197,6 +197,8 @@ NSString *BDSKBibItemLocalDragPboardType = @"edu.ucsd.cs.mmccrack.bibdesk: Local
     [[NSNotificationCenter defaultCenter] removeObserver:self];
 	[[NSApp delegate] removeErrorObjsForDocument:self];
     [macroDefinitions release];
+    // set pub document ivars to nil, or we get a crash when they message the undo manager in dealloc (only happens if you edit, click to close the doc, then save)
+    //[publications makeObjectsPerformSelector:@selector(setDocument:) withObject:nil];
     [publications release];
     [shownPublications release];
     [pubsLock release];

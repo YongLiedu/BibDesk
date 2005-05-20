@@ -287,6 +287,14 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 											 selector:@selector(typeInfoDidChange:)
 												 name:BDSKBibTypeInfoChangedNotification
 											   object:[BibTypeManager sharedManager]];
+	[[NSNotificationCenter defaultCenter] addObserver:self
+											 selector:@selector(macrosDidChange:)
+												 name:BDSKBibDocMacroDefinitionChangedNotification
+											   object:theDocument];
+	[[NSNotificationCenter defaultCenter] addObserver:self
+											 selector:@selector(macrosDidChange:)
+												 name:BDSKBibDocMacroKeyChangedNotification
+											   object:theDocument];
 
 	[authorTableView setDoubleAction:@selector(showPersonDetailCmd:)];
 
@@ -1310,6 +1318,19 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 	[theBib makeType:currentType]; // make sure this is done now, and not later
 	[self finalizeChanges];
 	[self setupForm];
+}
+
+- (void)macrosDidChange:(NSNotification *)notification{
+	NSArray *cells = [bibFields cells];
+	NSEnumerator *cellE = [cells objectEnumerator];
+	NSFormCell *entry = nil;
+	NSString *value;
+	
+	while(entry = [cellE nextObject]){
+		value = [theBib valueOfField:[entry title]];
+		if([value isComplex])
+			[entry setObjectValue:value];
+	}
 }
 
 #pragma mark document interaction

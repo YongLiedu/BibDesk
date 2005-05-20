@@ -1,4 +1,4 @@
-{\rtf1\mac\ansicpg10000\cocoartf102
+{\rtf1\mac\ansicpg10000\cocoartf824\cocoasubrtf100
 {\fonttbl\f0\fnil\fcharset77 GillSans;\f1\fnil\fcharset77 LucidaGrande;\f2\fnil\fcharset77 HelveticaNeue-Bold;
 \f3\fnil\fcharset77 LucidaGrande-Bold;\f4\fnil\fcharset77 HelveticaNeue-BoldItalic;\f5\fnil\fcharset77 Geneva;
 \f6\fnil\fcharset77 HelveticaNeue;\f7\fnil\fcharset77 HelveticaNeue-Italic;\f8\fnil\fcharset77 Verdana;
@@ -13,7 +13,65 @@
 \f1\fs22 \cf0 \
 \pard\tx1440\tx2880\tx4320\tx5760\tx7200\ql\qnatural
 
-\f2\b\fs28 \cf0 Changes since 0.99.2\
+\f2\b\fs28 \cf0 Changes since 0.99.3\
+\
+\pard\tx1440\tx2880\tx4320\tx5760\tx7200\ql\qnatural
+
+\f3\fs22 \cf0 IMPORTANT
+\f1\b0 :  Boolean search syntax has changed to be compatible with Apple's Help Viewer search, which should make future integration with Apple's search technology more seamless.  We apologize for the change (in case anyone uses this feature).\
+\
+Please see the new and improved online help for details of any of the new features mentioned below.  If there is an existing feature that you would like to see documented, please file a bug report!\
+\pard\tx1440\tx2880\tx4320\tx5760\tx7200\ql\qnatural
+
+\f4\i\b\fs26 \cf0 \
+New Features\
+\pard\tx1440\tx2880\tx4320\tx5760\tx7200\ql\qnatural
+
+\f1\i0\b0\fs22 \cf0   \'a5  Search is now case-sensitive if you enter at least one uppercase character in the searchfield\
+  \'a5  Added AppleScript properties for 'all fieldnames' and 'all typenames'\
+  \'a5  If a BibDesk document is opened in response to a Spotlight search, the search term is automatically entered for you\
+  \'a5  Boolean search syntax is now compatible with Apple Help Viewer's new syntax for queries, which uses +| as AND/OR\
+  \'a5  "Check Spelling as You Type" menu setting is now remembered (globally); this fixes RFE #974890 and bug #1198028\
+  \'a5  Shift+space now pages up in the preview pane, and the spacebar can be used to scroll to the next pub as well (as in Mail.app)\
+  \'a5  Added a "Select Duplicates" item in the "Publication" menu, which finds duplicate items in your bibliography\
+  \'a5  Sample AppleScript was rewritten, and is now available from the Scripts menu (choose "About the Scripts Menu")
+\f5 \
+  
+\f4\i\b\fs26 \
+Bugfixes\
+
+\f1\i0\b0\fs22   \'a5  "Container" added to the "add column" menu\
+  \'a5  Changed canceling behavior of text import sheet\
+  \'a5  More characters (including underscore) allowed in the cite-key format strings\
+  \'a5  An exception is no longer raised if you control click on part of a table header that isn't part of a column header\
+  \'a5  Command-W no longer becomes disconnected in the editor window after saving\
+  \'a5  The LaTeX previewer now has access to all of your document's macros, rather than writing out the expanded values (fixes bug #1191916)\
+  \'a5  Accented characters in the searchfield are respected (search is fuzzy otherwise, removing accents)\
+  \'a5  Document closing speed is no longer glacial for large files with macros (bug #1192203), since complex strings are updated lazily\
+  \'a5  Key equivalents for navigation buttons of text import webview, and better updating of stop/reload button for downloading\
+  \'a5  Fixed bug #1192511, data loss in case of encoding error (if an exception was raised after you closed an unsaved document and chose to save it)\
+  \'a5  Table columns can no longer be duplicated in the main pub list\
+  \'a5  Fixed memory leak in macro text field window controller, and in dragging a pub into the editor window\
+  \'a5  Sorting a pubs list with lots of braces may be faster\
+  \'a5  Changed order of pref panes\
+  \'a5  Many changes and updates to the online help, including revised screenshots\
+  \'a5  Default column widths should be sane\
+  \'a5  AppleScript now works when building on Tiger\
+  \'a5  More menu items now have proper ellipses added\
+  \'a5  Boolean search now works properly (previously the first search term was captured incorrectly, and whitespace was not handled correctly), and should be less weird about updating\
+  \'a5  Removed "Unicode" encoding option for saving/exporting files, as btparse can't handle it (bug #1198587)\
+  \'a5  "Open" dialog now comes up when you choose to open a file at launch in "General" preferences, as documented in the help\
+  \'a5  Fix bug #1196588, making cite key field its maximal length\
+  \'a5  Fix bug #1199338 by creating the "Item Number" of each publication on demand, so you don't end up with weird changes in file order when adding pubs\
+  \'a5  Reimplemented table column code\
+  \'a5  Columns menu is now rebuilt when table columns change\
+  \'a5  Some users had problems scrolling the main pub list with page up/page down, and possibly arrow keys, but this should be fixed\
+  \'a5  List of authors for a document is now created on demand for AppleScript, which fixes a bug with zombie authors referring to deleted pubs\
+  \'a5  Author name comparisons in AppleScript should be more consistent\
+\pard\tx1440\tx2880\tx4320\tx5760\tx7200\ql\qnatural
+
+\f2\b\fs28 \cf0 \
+Changes since 0.99.2\
 \
 \pard\tx1440\tx2880\tx4320\tx5760\tx7200\ql\qnatural
 
