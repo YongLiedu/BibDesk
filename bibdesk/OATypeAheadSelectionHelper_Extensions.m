@@ -1,6 +1,6 @@
 //
 //  OATypeAheadSelectionHelper_Extensions.m
-//  Bibdesk
+//  BibDesk
 /*
  This software is Copyright (c) 2001,2002, Michael O. McCracken
  All rights reserved.

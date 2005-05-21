@@ -1,6 +1,6 @@
 //
 //  BDSKBorderlessKeyWindow.h
-//  Bibdesk
+//  BibDesk
 //
 //  Created by Michael McCracken on 12/23/04.
 //  Copyright 2004 __MyCompanyName__. All rights reserved.

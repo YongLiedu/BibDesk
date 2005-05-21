@@ -1,6 +1,6 @@
 //
 //  TestComplexString.h
-//  Bibdesk
+//  BibDesk
 //
 //  Created by Michael McCracken on 12/25/04.
 //  Copyright (c) 2004 __MyCompanyName__. All rights reserved.

@@ -1,6 +1,6 @@
 //
 //  BibDeskOpenCommand.m
-//  Bibdesk
+//  BibDesk
 //
 //  Created by Sven-S. Porst on 14.09.04.
 //  Copyright 2004 __MyCompanyName__. All rights reserved.

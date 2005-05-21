@@ -146,11 +146,6 @@ NSString *BDSKMacroTextFieldWindowWillCloseNotification = @"Macro TextField Wind
 NSString *BDSKPreviewPaneFontChangedNotification = @"Changed the RTF preview pane font family";
 NSString *BDSKBibTypeInfoChangedNotification = @"TypeInfo Changed Notification";
 
-#pragma mark BDSKLibrary notifications
-NSString *BDSKBibLibrarySelectedItemsChangedNotification = @"BibLibraryController's selected items has changed";
-NSString *BDSKBibCollectionItemAddedNotification = @"added an item to a collection";
-NSString *BDSKBibCollectionItemRemovedNotification = @"removed an item from a collection";
-
 #pragma mark Exception name strings
 
 NSString *BDSKComplexStringException = @"BDSKComplexStringException";

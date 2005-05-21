@@ -156,12 +156,7 @@ extern NSString *BDSKBibItemLocalDragPboardType;
     IBOutlet NSOutlineView *sourceList;
     IBOutlet NSButton *addSourceListItemButton;
     IBOutlet NSMenu *sourceListActionMenu;
-    
-    IBOutlet NSWindow *editExportSettingsWindow;
-    IBOutlet NSPopUpButton *exporterSelectionPopUp;
-    IBOutlet NSButton *exporterEnabledCheckButton;
-    IBOutlet NSView *exporterSubView;
-    
+        
     // view:
     NSMutableArray *draggedItems; // an array to temporarily hold references to dragged items used locally.
     

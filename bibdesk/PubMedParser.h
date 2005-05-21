@@ -1,6 +1,6 @@
 //
 //  PubMedParser.h
-//  Bibdesk
+//  BibDesk
 //
 //  Created by Michael McCracken on Sun Nov 16 2003.
 //  Copyright (c) 2003 __MyCompanyName__. All rights reserved.
