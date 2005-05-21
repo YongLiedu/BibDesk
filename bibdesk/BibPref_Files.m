@@ -1,6 +1,6 @@
 //
 //  BibPref_Files.m
-//  Bibdesk
+//  BibDesk
 //
 //  Created by Adam Maxwell on 01/02/05.
 //  Copyright 2005 __MyCompanyName__. All rights reserved.

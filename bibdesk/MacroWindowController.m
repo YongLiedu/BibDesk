@@ -1,6 +1,6 @@
 //
 //  MacroWindowController.m
-//  Bibdesk
+//  BibDesk
 //
 //  Created by Michael McCracken on 2/21/05.
 //  Copyright 2005 __MyCompanyName__. All rights reserved.

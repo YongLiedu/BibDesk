@@ -1,6 +1,6 @@
 //
 //  BDSKCharacterConversion.m
-//  Bibdesk
+//  BibDesk
 //
 //  Created by Christiaan Hofman on 5/4/05.
 //  Copyright 2005 __MyCompanyName__. All rights reserved.

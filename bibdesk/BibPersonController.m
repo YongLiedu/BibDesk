@@ -1,6 +1,6 @@
 //
 //  BibPersonController.m
-//  Bibdesk
+//  BibDesk
 //
 //  Created by Michael McCracken on Thu Mar 18 2004.
 //  Copyright (c) 2004 __MyCompanyName__. All rights reserved.

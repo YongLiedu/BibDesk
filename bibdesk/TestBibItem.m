@@ -1,6 +1,6 @@
 //
 //  TestBibItem.m
-//  Bibdesk
+//  BibDesk
 //
 //  Created by Michael McCracken on Thu Nov 28 2002.
 //  Copyright (c) 2001 __MyCompanyName__. All rights reserved.

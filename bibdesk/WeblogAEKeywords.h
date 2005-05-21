@@ -1,6 +1,6 @@
 /*
  *  WeblogAEKeywords.h
- *  Bibdesk
+ *  BibDesk
  *
  *  Created by Michael McCracken on Wed Jun 16 2004.
  *

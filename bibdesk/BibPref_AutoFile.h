@@ -1,6 +1,6 @@
 //
 //  BibPref_AutoFile.h
-//  Bibdesk
+//  BibDesk
 //
 //  Created by Michael McCracken on Wed Oct 08 2003.
 

@@ -170,11 +170,6 @@ extern NSString *BDSKMacroTextFieldWindowWillCloseNotification;
 extern NSString *BDSKPreviewPaneFontChangedNotification;
 extern NSString *BDSKBibTypeInfoChangedNotification;
 
-#pragma mark BDSKLibrary notifications
-extern NSString *BDSKBibLibrarySelectedItemsChangedNotification;
-extern NSString *BDSKBibCollectionItemAddedNotification;
-extern NSString *BDSKBibCollectionItemRemovedNotification;
-
 #pragma mark Exception name strings
 extern NSString *BDSKComplexStringException;
 extern NSString *BDSKTeXifyException;

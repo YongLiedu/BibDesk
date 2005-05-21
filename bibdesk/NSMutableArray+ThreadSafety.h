@@ -1,6 +1,6 @@
 //
 //  NSMutableArray+ThreadSafety.h
-//  Bibdesk
+//  BibDesk
 //
 //  Created by Adam Maxwell on 01/27/05.
 //  Copyright 2005 __MyCompanyName__. All rights reserved.

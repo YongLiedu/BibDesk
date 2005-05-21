@@ -1,6 +1,6 @@
 //
 //  BibEditor_Toolbar.h
-//  Bibdesk
+//  BibDesk
 //
 //  Created by Christiaan Hofman on 2/4/05.
 //  Copyright 2005 __MyCompanyName__. All rights reserved.

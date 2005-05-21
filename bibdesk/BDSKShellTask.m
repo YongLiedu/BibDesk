@@ -1,6 +1,6 @@
 //
 //  BDSKShellTask.m
-//  Bibdesk
+//  BibDesk
 //
 //  Created by Michael McCracken on Sat Dec 14 2002.
 //  Copyright (c) 2002 __MyCompanyName__. All rights reserved.

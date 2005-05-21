@@ -104,7 +104,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
             NSCalendarDate *date = [pub date];
 			NSString *monthStr = [pub valueOfField:BDSKMonthString];
 			if(date == nil)
-                return @"No date";
+                return NSLocalizedString(@"No date",@"No date");
             else if( !monthStr ||  [monthStr isEqualToString:@""])
                 return [date descriptionWithCalendarFormat:NSLocalizedString(@"%Y", @"Date format for only year inside table views")];
             else

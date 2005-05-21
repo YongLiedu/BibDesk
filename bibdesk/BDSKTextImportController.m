@@ -1,6 +1,6 @@
 //
 //  BDSKTextImportController.m
-//  Bibdesk
+//  BibDesk
 //
 //  Created by Michael McCracken on 4/13/05.
 //  Copyright 2005 __MyCompanyName__. All rights reserved.
