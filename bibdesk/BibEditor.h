@@ -377,6 +377,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 
 - (void)bibDidChange:(NSNotification *)notification;
 - (void)typeInfoDidChange:(NSNotification *)aNotification;
+- (void)macrosDidChange:(NSNotification *)aNotification;
 
 - (void)docWillSave:(NSNotification *)notification;
 - (void)bibWillBeRemoved:(NSNotification *)notification;

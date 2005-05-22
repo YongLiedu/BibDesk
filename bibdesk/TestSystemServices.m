@@ -1,6 +1,6 @@
 //
 //  TestSystemServices.m
-//  Bibdesk
+//  BibDesk
 //
 //  Created by Michael McCracken on Sat Jun 14 2003.
 //  Copyright (c) 2001 __MyCompanyName__. All rights reserved.

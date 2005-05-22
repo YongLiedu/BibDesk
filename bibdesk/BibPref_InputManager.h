@@ -1,6 +1,6 @@
 //
 //  BibPref_InputManager.h
-//  Bibdesk
+//  BibDesk
 //
 //  Created by Adam Maxwell on Fri Aug 27 2004.
 //  Copyright (c) 2004 Adam R. Maxwell. All rights reserved.

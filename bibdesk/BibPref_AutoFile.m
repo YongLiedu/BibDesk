@@ -1,6 +1,6 @@
 //
 //  BibPref_AutoFile.m
-//  Bibdesk
+//  BibDesk
 //
 //  Created by Michael McCracken on Wed Oct 08 2003.
 //  Copyright (c) 2003 __MyCompanyName__. All rights reserved.
@@ -30,7 +30,7 @@
 		
 		// use a BibItem with some data to build the preview local-url
 		BibItem *tmpBI = [[BibItem alloc] init];
-		[tmpBI setField:BDSKTitleString toValue:@"Bibdesk, a great application to manage your bibliographies"];
+		[tmpBI setField:BDSKTitleString toValue:@"BibDesk, a great application to manage your bibliographies"];
 		[tmpBI setField:BDSKAuthorString toValue:@"McCracken, M. and Maxwell, A. and Howison, J. and Routley, M. and Spiegel, S.  and Porst, S. S. and Hofman, C. M."];
 		[tmpBI setField:BDSKYearString toValue:@"2004"];
 		[tmpBI setField:BDSKMonthString toValue:@"11"];

@@ -1,6 +1,6 @@
 //
 //  BDSKFormatParser.h
-//  Bibdesk
+//  BibDesk
 //
 //  Created by Christiaan Hofman on 17/4/05.
 //  Copyright 2005 __MyCompanyName__. All rights reserved.

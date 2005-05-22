@@ -1,6 +1,6 @@
 //
 //  NSImage+Toolbox.m
-//  Bibdesk
+//  BibDesk
 //
 //  Created by Sven-S. Porst on Thu Jul 29 2004.
 //  Copyright (c) 2004 __MyCompanyName__. All rights reserved.

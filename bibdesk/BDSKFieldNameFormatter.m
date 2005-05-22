@@ -1,6 +1,6 @@
 //
 //  BDSKFieldNameFormatter.m
-//  Bibdesk
+//  BibDesk
 //
 //  Created by Michael McCracken on Sat Sep 27 2003.
 //   See BDSKFieldNameFormatter.h for copyright information.

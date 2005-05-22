@@ -1,6 +1,6 @@
 //
 //  BibFiler.m
-//  Bibdesk
+//  BibDesk
 //
 //  Created by Michael McCracken on Fri Apr 30 2004.
 //  Copyright (c) 2004 __MyCompanyName__. All rights reserved.

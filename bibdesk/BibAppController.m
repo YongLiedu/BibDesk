@@ -102,6 +102,10 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
         // copy html item template file:
         [DFM copyPath:[[NSBundle mainBundle] pathForResource:@"htmlItemExportTemplate" ofType:nil]
                toPath:[applicationSupportPath stringByAppendingPathComponent:@"htmlItemExportTemplate"] handler:nil];
+    }if(![DFM fileExistsAtPath:[applicationSupportPath stringByAppendingPathComponent:@"BD Test.scpt"]]){
+        // copy test script:
+        [DFM copyPath:[[NSBundle mainBundle] pathForResource:@"BD Test" ofType:@"scpt"]
+               toPath:[applicationSupportPath stringByAppendingPathComponent:@"BD Test.scpt"] handler:nil];
     }
 
     [NSApp registerServicesMenuSendTypes:[NSArray arrayWithObjects:NSStringPboardType,nil] returnTypes:[NSArray arrayWithObjects:NSStringPboardType,nil]];
@@ -870,10 +874,11 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
         [self toggleShowingPreviewPanel:self];
     }
     
-    // Add a Scripts menu; should display the script graphic on 10.3+.  Searches in (mainbundle)/Contents/Scripts and (Library domains)/Application Support/Bibdesk/Scripts
+    // Add a Scripts menu; should display the script graphic on 10.3+.  Searches in (mainbundle)/Contents/Scripts and (Library domains)/Application Support/BibDesk/Scripts
     // ARM:  if we add this in -awakeFromNib, we get another script menu each time we show release notes or readme; whatever.
-    NSMenu *newMenu = [[NSMenu allocWithZone:[NSMenu menuZone]] initWithTitle:@"Scripts"];
-    OAScriptMenuItem *scriptItem = [[OAScriptMenuItem allocWithZone:[NSMenu menuZone]] initWithTitle:@"Scripts" action:NULL keyEquivalent:@""];
+    NSString *scriptMenuTitle = NSLocalizedString(@"Scripts", @"title of scripts menu, which only shows on 10.2");
+    NSMenu *newMenu = [[NSMenu allocWithZone:[NSMenu menuZone]] initWithTitle:scriptMenuTitle];
+    OAScriptMenuItem *scriptItem = [[OAScriptMenuItem allocWithZone:[NSMenu menuZone]] initWithTitle:scriptMenuTitle action:NULL keyEquivalent:@""];
     [scriptItem setSubmenu:newMenu];
     [newMenu release];
     [[NSApp mainMenu] insertItem:scriptItem atIndex:[[NSApp mainMenu] indexOfItemWithTitle:@"Help"]];
@@ -1153,7 +1158,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
     if (!doc) {
 		// if there are no open documents, give an error. 
 		// Or rather create a new document and add the entry there? Would anybody want that?
-		*error = NSLocalizedString(@"Error: No open document", @"Bibdesk couldn't import the selected information because there is no open bibliography file to add it to. Please create or open a bibliography file and try again.");
+		*error = NSLocalizedString(@"Error: No open document", @"BibDesk couldn't import the selected information because there is no open bibliography file to add it to. Please create or open a bibliography file and try again.");
 		return;
 	}
 	

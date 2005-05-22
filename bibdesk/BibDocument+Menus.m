@@ -1,6 +1,6 @@
 //
 //  BibDocument+Validation.m
-//  Bibdesk
+//  BibDesk
 //
 //  Created by Sven-S. Porst on Fri Jul 30 2004.
 //  Copyright (c) 2004 __MyCompanyName__. All rights reserved.
