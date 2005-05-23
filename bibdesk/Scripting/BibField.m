@@ -1,6 +1,6 @@
 //
 //  BibField.m
-//  Bibdesk
+//  BibDesk
 //
 //  Created by Christiaan Hofman on 27/11/04.
 //  Copyright 2004 __MyCompanyName__. All rights reserved.
