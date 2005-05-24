@@ -1,8 +1,8 @@
 //  BibItem.m
 //  Created by Michael McCracken on Tue Dec 18 2001.
 /*
- This software is Copyright (c) 2001,2002, Michael O. McCracken
- All rights reserved.
+ This software is Copyright (c) 2001,2002,2003,2004,2005
+ Michael O. McCracken. All rights reserved.
 
  Redistribution and use in source and binary forms, with or without
  modification, are permitted provided that the following conditions
@@ -393,7 +393,7 @@ setupParagraphStyle()
 - (NSComparisonResult)fileOrderCompare:(BibItem *)aBI{
     int aBIOrd = [aBI fileOrder];
     int myFileOrder = [self fileOrder];
-    if (myFileOrder == -1) return NSOrderedDescending; //@@ file order for crossrefs - here is where we would change to accommodate new pubs in crossrefs...
+    if (myFileOrder == 0) return NSOrderedDescending; //@@ file order for crossrefs - here is where we would change to accommodate new pubs in crossrefs...
     if (myFileOrder < aBIOrd) {
         return NSOrderedAscending;
     }
@@ -406,7 +406,7 @@ setupParagraphStyle()
 
 // accessors for fileorder
 - (int)fileOrder{
-    return [[document publications] indexOfObjectIdenticalTo:self];
+    return [[document publications] indexOfObjectIdenticalTo:self] + 1;
 }
 
 - (NSString *)fileType { return fileType; }
@@ -1377,7 +1377,7 @@ setupParagraphStyle()
 - (NSString *)suggestedLocalUrl{
 	OFPreferenceWrapper *prefs = [OFPreferenceWrapper sharedPreferenceWrapper];
 	NSString *localUrlFormat = [prefs objectForKey:BDSKLocalUrlFormatKey];
-	NSString *papersFolderPath = [prefs stringForKey:BDSKPapersFolderPathKey];
+	NSString *papersFolderPath = [[prefs stringForKey:BDSKPapersFolderPathKey] stringByExpandingTildeInPath];
 	NSString *relativeFile = [[BDSKFormatParser sharedParser] parseFormat:localUrlFormat forField:BDSKLocalUrlString ofItem:self];
 	if ([[OFPreferenceWrapper sharedPreferenceWrapper] boolForKey:BDSKCiteKeyLowercaseKey]) {
 		relativeFile = [relativeFile lowercaseString];
