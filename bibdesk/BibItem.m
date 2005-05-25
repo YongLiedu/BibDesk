@@ -1,8 +1,8 @@
 //  BibItem.m
 //  Created by Michael McCracken on Tue Dec 18 2001.
 /*
- This software is Copyright (c) 2001,2002, Michael O. McCracken
- All rights reserved.
+ This software is Copyright (c) 2001,2002,2003,2004,2005
+ Michael O. McCracken. All rights reserved.
 
  Redistribution and use in source and binary forms, with or without
  modification, are permitted provided that the following conditions
@@ -98,7 +98,6 @@ setupParagraphStyle()
 		}else{
 			pubAuthors = [[NSMutableArray alloc] initWithCapacity:1];
 		}
-		requiredFieldNames = [[NSMutableArray alloc] init];
         document = nil;
         editorObj = nil;
         [bibLock unlock];
@@ -133,8 +132,6 @@ setupParagraphStyle()
 	
 	[theCopy copyComplexStringValues];
 	
-    [theCopy setRequiredFieldNames: requiredFieldNames];
-	
     return theCopy;
 }
 
@@ -148,7 +145,6 @@ setupParagraphStyle()
     [self setType:[coder decodeObjectForKey:@"pubType"]];
     pubFields = [[coder decodeObjectForKey:@"pubFields"] retain];
     pubAuthors = [[coder decodeObjectForKey:@"pubAuthors"] retain];
-    requiredFieldNames = [[coder decodeObjectForKey:@"requiredFieldNames"] retain];
     // set by the document, which we don't archive
     document = nil;
     editorObj = nil;
@@ -173,7 +169,6 @@ setupParagraphStyle()
     [coder encodeObject:pubType forKey:@"pubType"];
     [coder encodeObject:pubFields forKey:@"pubFields"];
     [coder encodeObject:pubAuthors forKey:@"pubAuthors"];
-    [coder encodeObject:requiredFieldNames forKey:@"requiredFieldNames"];
 }
 
 - (void)makeType:(NSString *)type{
@@ -204,15 +199,6 @@ setupParagraphStyle()
     [removeKeys release];
     // and don't forget to set what we say our type is:
     [self setType:type];
-    [self setRequiredFieldNames:[typeMan requiredFieldsForType:type]];
-}
-
-//@@ type - move to type class
-- (BOOL)isRequired:(NSString *)rString{
-    if([requiredFieldNames indexOfObject:rString] == NSNotFound)
-        return NO;
-    else
-        return YES;
 }
 
 - (void)dealloc{
@@ -222,7 +208,6 @@ setupParagraphStyle()
 #endif
     [[self undoManager] removeAllActionsWithTarget:self];
     [pubFields release];
-    [requiredFieldNames release];
     [pubAuthors release];
 
     [pubType release];
@@ -269,11 +254,6 @@ setupParagraphStyle()
 
 - (unsigned)hash{
     return [citeKey hash];
-}
-
-- (NSMutableArray*) requiredFieldNames {
-    // rather return a copy?
-    return requiredFieldNames;
 }
 
 #pragma mark Comparison functions
@@ -393,7 +373,7 @@ setupParagraphStyle()
 - (NSComparisonResult)fileOrderCompare:(BibItem *)aBI{
     int aBIOrd = [aBI fileOrder];
     int myFileOrder = [self fileOrder];
-    if (myFileOrder == -1) return NSOrderedDescending; //@@ file order for crossrefs - here is where we would change to accommodate new pubs in crossrefs...
+    if (myFileOrder == 0) return NSOrderedDescending; //@@ file order for crossrefs - here is where we would change to accommodate new pubs in crossrefs...
     if (myFileOrder < aBIOrd) {
         return NSOrderedAscending;
     }
@@ -406,7 +386,7 @@ setupParagraphStyle()
 
 // accessors for fileorder
 - (int)fileOrder{
-    return [[document publications] indexOfObjectIdenticalTo:self];
+    return [[document publications] indexOfObjectIdenticalTo:self] + 1;
 }
 
 - (NSString *)fileType { return fileType; }
@@ -664,13 +644,16 @@ setupParagraphStyle()
 
 - (void)setCiteKey:(NSString *)newCiteKey withModDate:(NSCalendarDate *)date{
     if ([self undoManager]) {
-        [[[self undoManager] prepareWithInvocationTarget:self] setCiteKey:citeKey];
+		[[[self undoManager] prepareWithInvocationTarget:self] setCiteKey:citeKey 
+															  withModDate:[self dateModified]];
         [[self undoManager] setActionName:NSLocalizedString(@"Change Cite Key",@"")];
     }
 	
     [self setCiteKeyString:newCiteKey];
 	if (date != nil) {
-            [pubFields setObject:[date description] forKey:BDSKDateModifiedString usingLock:bibLock];
+		[pubFields setObject:[date description] forKey:BDSKDateModifiedString usingLock:bibLock];
+	} else {
+		[pubFields removeObjectForKey:BDSKDateModifiedString usingLock:bibLock];
 	}
 	[self updateMetadataForKey:BDSKCiteKeyString];
 		
@@ -816,14 +799,6 @@ setupParagraphStyle()
     	
 }
 
-- (void)setRequiredFieldNames: (NSArray *)newRequiredFieldNames{
-    [bibLock lock];
-    [requiredFieldNames autorelease];
-    NSAssert(newRequiredFieldNames != nil, @"Required field names must not be nil");
-    requiredFieldNames = [newRequiredFieldNames mutableCopy];
-    [bibLock unlock];
-}
-
 - (void)setField: (NSString *)key toValue: (NSString *)value{
 	[self setField:key toValue:value withModDate:[NSCalendarDate date]];
 }
@@ -843,6 +818,8 @@ setupParagraphStyle()
     [pubFields setObject:value forKey:key usingLock:bibLock];
 	if (date != nil) {
 		[pubFields setObject:[date description] forKey:BDSKDateModifiedString usingLock:bibLock];
+	} else {
+		[pubFields removeObjectForKey:BDSKDateModifiedString usingLock:bibLock];
 	}
 	[self updateMetadataForKey:key];
 	
@@ -908,8 +885,11 @@ setupParagraphStyle()
 		NSLocalizedString(@"Add data for field:", @""), key];
 	[pubFields setObject:msg forKey:key usingLock:bibLock];
 	
-	NSString *dateString = [date description];
-	[pubFields setObject:dateString forKey:BDSKDateModifiedString usingLock:bibLock];
+	if (date != nil) {
+		[pubFields setObject:[date description] forKey:BDSKDateModifiedString usingLock:bibLock];
+	} else {
+		[pubFields removeObjectForKey:BDSKDateModifiedString usingLock:bibLock];
+	}
 	[self updateMetadataForKey:key];
 	
 	NSDictionary *notifInfo = [NSDictionary dictionaryWithObjectsAndKeys:@"Add/Del Field", @"type",document, @"document", nil];
@@ -932,8 +912,11 @@ setupParagraphStyle()
 	
     [pubFields removeObjectForKey:key usingLock:bibLock];
 	
-	NSString *dateString = [date description];
-	[pubFields setObject:dateString forKey:BDSKDateModifiedString usingLock:bibLock];
+	if (date != nil) {
+		[pubFields setObject:[date description] forKey:BDSKDateModifiedString usingLock:bibLock];
+	} else {
+		[pubFields removeObjectForKey:BDSKDateModifiedString usingLock:bibLock];
+	}
 	[self updateMetadataForKey:key];
 
 	NSDictionary *notifInfo = [NSDictionary dictionaryWithObjectsAndKeys:@"Add/Del Field", @"type",document, @"document", nil];
@@ -979,80 +962,80 @@ setupParagraphStyle()
         [NSDictionary dictionaryWithObjects:[NSArray arrayWithObjects:[cachedFonts objectForKey:@"Body"], bodyParagraphStyle, nil]
                                     forKeys:[NSArray arrayWithObjects:NSFontAttributeName, NSParagraphStyleAttributeName, nil]];
 
-    NSMutableAttributedString* aStr = [[[NSMutableAttributedString alloc] init] autorelease];
+    NSMutableAttributedString* reqStr = [[[NSMutableAttributedString alloc] init] autorelease];
+    NSMutableAttributedString* nonReqStr = [[[NSMutableAttributedString alloc] init] autorelease];
 
-    NSMutableArray *nonReqKeys = [NSMutableArray arrayWithCapacity:5]; // yep, arbitrary
+	NSSet *reqKeys = [NSSet setWithArray:[[BibTypeManager sharedManager] requiredFieldsForType:[self type]]];
 
     NSDateFormatter *dateFormatter = [[[NSDateFormatter alloc] initWithDateFormat:[[NSUserDefaults standardUserDefaults] objectForKey:NSDateFormatString]
                                                          allowNaturalLanguage:NO] autorelease];
     
-    [aStr appendAttributedString:[[[NSMutableAttributedString alloc] initWithString:
+    [reqStr appendAttributedString:[[[NSMutableAttributedString alloc] initWithString:
                       [NSString stringWithFormat:@"%@\n",[self citeKey]] attributes:typeAttributes] autorelease]];
     
-    [aStr appendAttributedString:[self attributedStringByParsingTeX:[self title] inField:BDSKTitleString defaultStyle:keyParagraphStyle collapse:YES]];
+    [reqStr appendAttributedString:[self attributedStringByParsingTeX:[self title] inField:BDSKTitleString defaultStyle:keyParagraphStyle collapse:YES]];
     
-    [aStr appendAttributedString:[[[NSMutableAttributedString alloc] initWithString:
+    [reqStr appendAttributedString:[[[NSMutableAttributedString alloc] initWithString:
                        [NSString stringWithFormat:@"(%@)\n",[self type]] attributes:typeAttributes] autorelease]];
 
     while(key = [e nextObject]){
         if(![[pubFields objectForKey:key] isEqualToString:@""] &&
            ![key isEqualToString:BDSKTitleString]){
-            if([self isRequired:key]){
-                [aStr appendAttributedString:[[[NSAttributedString alloc] initWithString:[NSString stringWithFormat:@"%@\n",key]
+			
+            if([reqKeys containsObject:key]){
+				
+                [reqStr appendAttributedString:[[[NSAttributedString alloc] initWithString:[NSString stringWithFormat:@"%@\n",key]
                                                                               attributes:keyAttributes] autorelease]];
 
 				if([key isEqualToString:BDSKAuthorString]){
 					NSString *authors = [[self bibtexAuthorString] stringByRemovingCurlyBraces];
-					[aStr appendAttributedString:[[[NSAttributedString alloc] initWithString:[NSString stringWithFormat:@"%@\n",authors]
+					[reqStr appendAttributedString:[[[NSAttributedString alloc] initWithString:[NSString stringWithFormat:@"%@\n",authors]
 																				  attributes:bodyAttributes] autorelease]];
 				}else{ // safe to collapse whitespace in required keys
-                    [aStr appendAttributedString:[self attributedStringByParsingTeX:[pubFields objectForKey:key] inField:@"Body" defaultStyle:bodyParagraphStyle collapse:YES]];
-                    [aStr appendString:@"\n"];
+                    [reqStr appendAttributedString:[self attributedStringByParsingTeX:[pubFields objectForKey:key] inField:@"Body" defaultStyle:bodyParagraphStyle collapse:YES]];
+                    [reqStr appendString:@"\n"];
 				}
+				
 			}else{
-                [nonReqKeys addObject:key];
+				
+				BOOL collapseWhitespace = !([key isEqualToString:BDSKAnnoteString] || [key isEqualToString:BDSKAbstractString]);
+				[nonReqStr appendAttributedString:[[[NSAttributedString alloc] initWithString:[NSString stringWithFormat:@"%@\n",key]
+																			  attributes:keyAttributes] autorelease]];
+				
+				if([key isEqualToString:BDSKDateCreatedString] || 
+				   [key isEqualToString:BDSKDateModifiedString]){
+					NSCalendarDate *date = [NSCalendarDate dateWithNaturalLanguageString:[pubFields objectForKey:key]];
+
+					[nonReqStr appendAttributedString:[[[NSAttributedString alloc] initWithString:[NSString stringWithFormat:@"%@\n",[dateFormatter stringForObjectValue:date]]
+																				  attributes:bodyAttributes] autorelease]];
+
+				}else if([key isEqualToString:BDSKAuthorString]){
+					NSString *authors = [[self bibtexAuthorString] stringByRemovingCurlyBraces];
+
+					[nonReqStr appendAttributedString:[[[NSAttributedString alloc] initWithString:[NSString stringWithFormat:@"%@\n",authors]
+																				  attributes:bodyAttributes] autorelease]];
+
+				}else if([key isEqualToString:BDSKLocalUrlString]){
+					NSString *path = [[self localURLPath] stringByAbbreviatingWithTildeInPath];
+
+					[nonReqStr appendAttributedString:[[[NSAttributedString alloc] initWithString:[NSString stringWithFormat:@"%@\n",path]
+																				  attributes:bodyAttributes] autorelease]];
+
+				}else{
+					[nonReqStr appendAttributedString:[self attributedStringByParsingTeX:[pubFields objectForKey:key] inField:@"Body" defaultStyle:bodyParagraphStyle collapse:collapseWhitespace]];
+					[nonReqStr appendString:@"\n"];
+				}
+
             }
-        }
-    }// end required keys
-    
-    e = [nonReqKeys objectEnumerator];
-    while(key = [e nextObject]){
-        BOOL collapseWhitespace = !([key isEqualToString:BDSKAnnoteString] || [key isEqualToString:BDSKAbstractString]);
-        if(![[pubFields objectForKey:key] isEqualToString:@""]){
-            [aStr appendAttributedString:[[[NSAttributedString alloc] initWithString:[NSString stringWithFormat:@"%@\n",key]
-                                                                          attributes:keyAttributes] autorelease]];
-            
-            if([key isEqualToString:BDSKDateCreatedString] || 
-               [key isEqualToString:BDSKDateModifiedString]){
-                NSCalendarDate *date = [NSCalendarDate dateWithNaturalLanguageString:[pubFields objectForKey:key]];
-
-                [aStr appendAttributedString:[[[NSAttributedString alloc] initWithString:[NSString stringWithFormat:@"%@\n",[dateFormatter stringForObjectValue:date]]
-                                                                              attributes:bodyAttributes] autorelease]];
-
-            }else if([key isEqualToString:BDSKAuthorString]){
-                NSString *authors = [[self bibtexAuthorString] stringByRemovingCurlyBraces];
-
-                [aStr appendAttributedString:[[[NSAttributedString alloc] initWithString:[NSString stringWithFormat:@"%@\n",authors]
-                                                                              attributes:bodyAttributes] autorelease]];
-
-            }else if([key isEqualToString:BDSKLocalUrlString]){
-                NSString *path = [[self localURLPath] stringByAbbreviatingWithTildeInPath];
-
-                [aStr appendAttributedString:[[[NSAttributedString alloc] initWithString:[NSString stringWithFormat:@"%@\n",path]
-                                                                              attributes:bodyAttributes] autorelease]];
-
-            }else{
-                [aStr appendAttributedString:[self attributedStringByParsingTeX:[pubFields objectForKey:key] inField:@"Body" defaultStyle:bodyParagraphStyle collapse:collapseWhitespace]];
-                [aStr appendString:@"\n"];
-            }
-
         }
     }
 
-    [aStr appendAttributedString:[[[NSAttributedString alloc] initWithString:@" "
+    // now put them together
+	[reqStr appendAttributedString:nonReqStr];
+	[reqStr appendAttributedString:[[[NSAttributedString alloc] initWithString:@" "
                                                                   attributes:nil] autorelease]];
 
-    return 	aStr;
+    return 	reqStr;
 }
 
 - (NSAttributedString *)attributedStringByParsingTeX:(NSString *)texStr inField:(NSString *)field defaultStyle:(NSParagraphStyle *)defaultStyle collapse:(BOOL)collapse{
@@ -1377,7 +1360,7 @@ setupParagraphStyle()
 - (NSString *)suggestedLocalUrl{
 	OFPreferenceWrapper *prefs = [OFPreferenceWrapper sharedPreferenceWrapper];
 	NSString *localUrlFormat = [prefs objectForKey:BDSKLocalUrlFormatKey];
-	NSString *papersFolderPath = [prefs stringForKey:BDSKPapersFolderPathKey];
+	NSString *papersFolderPath = [[prefs stringForKey:BDSKPapersFolderPathKey] stringByExpandingTildeInPath];
 	NSString *relativeFile = [[BDSKFormatParser sharedParser] parseFormat:localUrlFormat forField:BDSKLocalUrlString ofItem:self];
 	if ([[OFPreferenceWrapper sharedPreferenceWrapper] boolForKey:BDSKCiteKeyLowercaseKey]) {
 		relativeFile = [relativeFile lowercaseString];
