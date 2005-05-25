@@ -1,19 +1,38 @@
 //  BibEditor.m
 
 //  Created by Michael McCracken on Mon Dec 24 2001.
-//  Copyright (c) 2001 Michael McCracken. All rights reserved.
 /*
-This software is Copyright (c) 2002, Michael O. McCracken
-All rights reserved.
+ This software is Copyright (c) 2001,2002,2003,2004,2005
+ Michael O. McCracken. All rights reserved.
 
-Redistribution and use in source and binary forms, with or without modification, are permitted provided that the following conditions are met:
+ Redistribution and use in source and binary forms, with or without
+ modification, are permitted provided that the following conditions
+ are met:
 
-- Redistributions of source code must retain the above copyright notice, this list of conditions and the following disclaimer.
--  Redistributions in binary form must reproduce the above copyright notice, this list of conditions and the following disclaimer in the documentation and/or other materials provided with the distribution.
--  Neither the name of Michael O. McCracken nor the names of any contributors may be used to endorse or promote products derived from this software without specific prior written permission.
+ - Redistributions of source code must retain the above copyright
+   notice, this list of conditions and the following disclaimer.
 
-THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-*/
+ - Redistributions in binary form must reproduce the above copyright
+    notice, this list of conditions and the following disclaimer in
+    the documentation and/or other materials provided with the
+    distribution.
+
+ - Neither the name of Michael O. McCracken nor the names of any
+    contributors may be used to endorse or promote products derived
+    from this software without specific prior written permission.
+
+ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+ "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+ LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+ A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+ OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+ SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+ LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+ DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+ THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+ (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ */
 
 
 #import "BibEditor.h"
@@ -117,9 +136,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
     sKeys = [[[theBib pubFields] allKeys] sortedArrayUsingSelector:@selector(caseInsensitiveCompare:)];
     
     NSMutableSet *addedFields = [NSMutableSet set];
-    NSArray *requiredKeys = [theBib requiredFieldNames];
-    NSAssert(requiredKeys != nil, @"Required keys must not be nil."); // it may be empty, though
-    e = [requiredKeys objectEnumerator];
+    e = [[[BibTypeManager sharedManager] optionalFieldsForType:[theBib type]] objectEnumerator];
     while(tmp = [e nextObject]){
         if (![keysNotInForm containsObject:tmp]){
             
@@ -287,6 +304,14 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 											 selector:@selector(typeInfoDidChange:)
 												 name:BDSKBibTypeInfoChangedNotification
 											   object:[BibTypeManager sharedManager]];
+	[[NSNotificationCenter defaultCenter] addObserver:self
+											 selector:@selector(macrosDidChange:)
+												 name:BDSKBibDocMacroDefinitionChangedNotification
+											   object:theDocument];
+	[[NSNotificationCenter defaultCenter] addObserver:self
+											 selector:@selector(macrosDidChange:)
+												 name:BDSKBibDocMacroKeyChangedNotification
+											   object:theDocument];
 
 	[authorTableView setDoubleAction:@selector(showPersonDetailCmd:)];
 
@@ -425,17 +450,17 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 	
 	if (cell == [viewLocalButton cell]) {
 		// the first one has to be view file, since it's also the button's action when you're clicking on the icon.
-		[menu addItemWithTitle:NSLocalizedString(@"View File",@"View file string menu item")
+		[menu addItemWithTitle:NSLocalizedString(@"View File",@"View file")
 						action:@selector(viewLocal:)
 				 keyEquivalent:@""];
 		
-		[menu addItemWithTitle:NSLocalizedString(@"Reveal in Finder",@"Reveal in finder menu item")
+		[menu addItemWithTitle:NSLocalizedString(@"Reveal in Finder",@"Reveal in finder")
 						action:@selector(revealLocal:)
 				 keyEquivalent:@""];
 		
 		[menu addItem:[NSMenuItem separatorItem]];
 		
-		[menu addItemWithTitle:[NSString stringWithFormat:@"%@%C",NSLocalizedString(@"Choose File",@"Choose File... string menu item"),0x2026]
+		[menu addItemWithTitle:[NSString stringWithFormat:@"%@%C",NSLocalizedString(@"Choose File",@"Choose File..."),0x2026]
 						action:@selector(chooseLocalURL:)
 				 keyEquivalent:@""];
 		
@@ -453,7 +478,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 	}
 	else if (cell == [viewRemoteButton cell]) {
 		// the first one has to be view in web brower, since it's also the button's action when you're clicking on the icon.
-		[menu addItemWithTitle:NSLocalizedString(@"View in Web Browser",@"View in web browser string menu item")
+		[menu addItemWithTitle:NSLocalizedString(@"View in Web Browser",@"View in web browser")
 								 action:@selector(viewRemote:)
 						  keyEquivalent:@""];
 		
@@ -467,19 +492,19 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 	else if (cell == [documentSnoopButton cell]) {
 		NSMenuItem *item;
 		
-		item = [[NSMenuItem alloc] initWithTitle:NSLocalizedString(@"View File in Drawer",@"View file in drawer menu item")
+		item = [[NSMenuItem alloc] initWithTitle:NSLocalizedString(@"View File in Drawer",@"View file in drawer")
 										  action:@selector(toggleSnoopDrawer:)
 								   keyEquivalent:@""];
 		[item setRepresentedObject:pdfSnoopContainerView];
 		[menu addItem:[item autorelease]];
 		
-		item = [[NSMenuItem alloc] initWithTitle:NSLocalizedString(@"View File as Text in Drawer",@"View file as text in drawer menu item")
+		item = [[NSMenuItem alloc] initWithTitle:NSLocalizedString(@"View File as Text in Drawer",@"View file as text in drawer")
 										  action:@selector(toggleSnoopDrawer:)
 								   keyEquivalent:@""];
 		[item setRepresentedObject:textSnoopContainerView];
 		[menu addItem:[item autorelease]];
 		
-		item = [[NSMenuItem alloc] initWithTitle:NSLocalizedString(@"View Remote URL in Drawer",@"View remote URL in drawer menu item")
+		item = [[NSMenuItem alloc] initWithTitle:NSLocalizedString(@"View Remote URL in Drawer",@"View remote URL in drawer")
 										  action:@selector(toggleSnoopDrawer:)
 								   keyEquivalent:@""];
 		[item setRepresentedObject:webSnoopContainerView];
@@ -649,7 +674,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 	}
 	else if ([menuItem action] == @selector(generateCiteKey:)) {
 		// need to setthe title, as the document can change it in the main menu
-		[menuItem setTitle: NSLocalizedString(@"Generate Cite Key", @"Generate Cite Key menu item")];
+		[menuItem setTitle: NSLocalizedString(@"Generate Cite Key", @"Generate Cite Key")];
 		return YES;
 	}
 	else if ([menuItem action] == @selector(generateLocalUrl:) ||
@@ -664,13 +689,13 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 							( [documentSnoopDrawer state] == NSDrawerOpenState ||
 							  [documentSnoopDrawer state] == NSDrawerOpeningState);
 		if (isCloseItem) {
-			[menuItem setTitle:NSLocalizedString(@"Close Drawer", @"Close drawer menu item")];
+			[menuItem setTitle:NSLocalizedString(@"Close Drawer", @"Close drawer")];
 		} else if (requiredSnoopContainerView == pdfSnoopContainerView) {
-			[menuItem setTitle:NSLocalizedString(@"View File in Drawer", @"View file in drawer menu item")];
+			[menuItem setTitle:NSLocalizedString(@"View File in Drawer", @"View file in drawer")];
 		} else if (requiredSnoopContainerView == textSnoopContainerView) {
-			[menuItem setTitle:NSLocalizedString(@"View File as Text in Drawer", @"View file as text in drawer menu item")];
+			[menuItem setTitle:NSLocalizedString(@"View File as Text in Drawer", @"View file as text in drawer")];
 		} else if (requiredSnoopContainerView == webSnoopContainerView) {
-			[menuItem setTitle:NSLocalizedString(@"View Remote URL in Drawer", @"View remote URL in drawer menu item")];
+			[menuItem setTitle:NSLocalizedString(@"View Remote URL in Drawer", @"View remote URL in drawer")];
 		}
 		if (isCloseItem) {
 			// always enable the close item
@@ -861,13 +886,13 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 		icon = [[NSWorkspace sharedWorkspace] iconForFile:lurl];
 		[viewLocalButton setIconImage:icon];      
 		[viewLocalButton setIconActionEnabled:YES];
-		[viewLocalToolbarItem setToolTip:NSLocalizedString(@"View File",@"View file tooltip")];
+		[viewLocalToolbarItem setToolTip:NSLocalizedString(@"View File",@"View file")];
 		[[self window] setRepresentedFilename:lurl];
 		drawerShouldReopen = drawerWasOpen && ([documentSnoopDrawer contentView] != webSnoopContainerView);
     }else{
         [viewLocalButton setIconImage:[NSImage imageNamed:@"QuestionMarkFile"]];
 		[viewLocalButton setIconActionEnabled:NO];
-        [viewLocalToolbarItem setToolTip:NSLocalizedString(@"Choose a file to link with in the Local-Url Field", @"bad/empty local url field tooltip")];
+        [viewLocalToolbarItem setToolTip:NSLocalizedString(@"Choose a file to link with in the Local-Url Field", @"bad/empty local url field")];
         [[self window] setRepresentedFilename:@""];
     }
 
@@ -880,7 +905,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
     }else{
         [viewRemoteButton setIconImage:[NSImage imageNamed:@"WeblocFile_Disabled"]];
 		[viewRemoteButton setIconActionEnabled:NO];
-        [viewRemoteToolbarItem setToolTip:NSLocalizedString(@"Choose a URL to link with in the Url Field", @"bad/empty url field tooltip")];
+        [viewRemoteToolbarItem setToolTip:NSLocalizedString(@"Choose a URL to link with in the Url Field", @"bad/empty url field")];
     }
 	
     if (drawerShouldReopen){
@@ -1312,6 +1337,19 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 	[self setupForm];
 }
 
+- (void)macrosDidChange:(NSNotification *)notification{
+	NSArray *cells = [bibFields cells];
+	NSEnumerator *cellE = [cells objectEnumerator];
+	NSFormCell *entry = nil;
+	NSString *value;
+	
+	while(entry = [cellE nextObject]){
+		value = [theBib valueOfField:[entry title]];
+		if([value isComplex])
+			[entry setObjectValue:value];
+	}
+}
+
 #pragma mark document interaction
 
 - (void)docWillSave:(NSNotification *)notification{
@@ -1401,13 +1439,13 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 		[documentSnoopButton setIconImage:image];
 		
 		if (isClose) {
-			[documentSnoopToolbarItem setToolTip:NSLocalizedString(@"Close Drawer", @"Close drawer tooltip")];
+			[documentSnoopToolbarItem setToolTip:NSLocalizedString(@"Close Drawer", @"Close drawer")];
 		} else if (isWeb) {
-			[documentSnoopToolbarItem setToolTip:NSLocalizedString(@"View Remote URL in Drawer", @"View remote URL in drawer tooltip")];
+			[documentSnoopToolbarItem setToolTip:NSLocalizedString(@"View Remote URL in Drawer", @"View remote URL in drawer")];
 		} else if (isText) {
-			[documentSnoopToolbarItem setToolTip:NSLocalizedString(@"View File as Text in Drawer", @"View file as Text in drawer tooltip")];
+			[documentSnoopToolbarItem setToolTip:NSLocalizedString(@"View File as Text in Drawer", @"View file as text in drawer")];
 		} else {
-			[documentSnoopToolbarItem setToolTip:NSLocalizedString(@"View File in Drawer", @"View file in drawer tooltip")];
+			[documentSnoopToolbarItem setToolTip:NSLocalizedString(@"View File in Drawer", @"View file in drawer")];
 		}
 		
 		[documentSnoopButton setIconActionEnabled:YES];
@@ -1416,7 +1454,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
         [documentSnoopButton setIconImage:[NSImage imageNamed:@"drawerDisabled"]];
 		
 		if (isClose) {
-			[documentSnoopToolbarItem setToolTip:NSLocalizedString(@"Close Drawer", @"Close drawer tooltip")];
+			[documentSnoopToolbarItem setToolTip:NSLocalizedString(@"Close Drawer", @"Close drawer")];
 		} else {
 			[documentSnoopToolbarItem setToolTip:NSLocalizedString(@"Choose Content to View in Drawer", @"Choose content to view in drawer")];
 		}
