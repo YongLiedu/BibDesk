@@ -1,4 +1,4 @@
-%%  Instructions for building Michael McCracken's Bibdesk from source.
+%%  Instructions for building Michael McCracken's BibDesk from source.
 %%  Adam Maxwell <amaxwell@wsu.edu> is responsible for the initial revision of this document.
 %%  10 March 2003  1st draft
 %%  Revised 13 July 2003
@@ -22,7 +22,7 @@
 \section{File Setup}
 \begin{enumerate}
 \item Follow the directions for CVS at http://www.sf.net/projects/bibdesk/ to pull the source tree.
-\item Open the Bibdesk.pbproj file in Project Builder, and click on the ``Files'' tab.
+\item Open the BibDesk.pbproj file in Project Builder, and click on the ``Files'' tab.
 \item Open the Frameworks tree by clicking the triangle.  You should see three frameworks listed at
 the bottom:
   \begin{enumerate}
@@ -60,9 +60,9 @@ the application wrapper.
 discussion on http://cocoadev.com/index.pl?IncludingFrameworksInApplications is helpful, if you want
 something beyond the quick--and--dirty steps I've given.
   \end{enumerate}
-\item At this point, we need to satisfy Bibdesk's dependencies on the Omni frameworks, just like the
+\item At this point, we need to satisfy BibDesk's dependencies on the Omni frameworks, just like the
 Omni frameworks depend on each other.  Get info on each of the three Omni frameworks in the
-Bibdesk.pbproj project (right--click on their icons) and set the paths to those frameworks correctly
+BibDesk.pbproj project (right--click on their icons) and set the paths to those frameworks correctly
 for your system.  Their names should change from red to black in color.  I think you probably want
 them all to be the same version, so make sure the paths point to the frameworks you just installed.
 \end{enumerate}
@@ -71,15 +71,15 @@ them all to be the same version, so make sure the paths point to the frameworks 
 \begin{enumerate}
 \item You can set various options in the Targets tab, e.g. Build Styles (Development vs. Deployment),
 and Optimization (under GCC Compiler Settings).
-\item Uncheck the test files for the Bibdesk build.
+\item Uncheck the test files for the BibDesk build.
 \item Build and run it.
 \item If there are errors, the log output is fairly descriptive.  If ProjectBuilder can't find a
 file, it will list it in red, but you might have to start expanding the file tree or use the
-search.  It is helpful to look at the Build Phases for the Bibdesk target, too, since that will
+search.  It is helpful to look at the Build Phases for the BibDesk target, too, since that will
 usually give you a clue where things stopped.
-\item The Omni frameworks should be copied into Bibdesk.app/Contents/Frameworks automatically in the
+\item The Omni frameworks should be copied into BibDesk.app/Contents/Frameworks automatically in the
 build process, so the resulting app can run on a machine that does not have them.  You can check
-this by `otool -L Bibdesk.app/Contents/MacOS/Bibdesk` which should reference the Omni frameworks
+this by `otool -L BibDesk.app/Contents/MacOS/BibDesk` which should reference the Omni frameworks
 like this:  \begin{verbatim}
   @executable_path/../Frameworks/OmniAppKit.framework/Versions/2001A/OmniA
   ppKit (compatibility version 1.0.0, current version 1.0.0)
@@ -92,8 +92,8 @@ like this:  \begin{verbatim}
 target for the framework and uncheck ``Treat all warnings as errors'' under GCC Compiler
 Settings.  Since this is also set explicitly in Expert View, go to Expert View and delete
 \tt{-Werror} \rm from the \tt WARNING\_CFLAGS \rm option.
-\item You must set up a native target for Bibdesk in order to use the new ``Fix'' debugging
-option.  To do this, select the Bibdesk target and choose ``Upgrade Target to Native'' from
+\item You must set up a native target for BibDesk in order to use the new ``Fix'' debugging
+option.  To do this, select the BibDesk target and choose ``Upgrade Target to Native'' from
 the Project menu in XCode.
 \item You may have to add the Omni frameworks to the ``Copy Files'' build phase in your
 target.  To do this, drag them from the Groups \& Files inspector into the first ``Copy
