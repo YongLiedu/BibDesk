@@ -1,8 +1,8 @@
 // BibItem.h
 // Created by Michael McCracken on Tue Dec 18 2001.
 /*
- This software is Copyright (c) 2001,2002, Michael O. McCracken
- All rights reserved.
+ This software is Copyright (c) 2001,2002,2003,2004,2005
+ Michael O. McCracken. All rights reserved.
 
  Redistribution and use in source and binary forms, with or without
  modification, are permitted provided that the following conditions
@@ -68,7 +68,6 @@
     NSString *pubType;
     NSMutableDictionary *pubFields;
     NSMutableArray *pubAuthors;
-    NSMutableArray *requiredFieldNames;     /*! @var  this is for 'bibtex required fields'*/
     BibEditor *editorObj; /*! @var if we have an editor, don't create a new one. */
 	BOOL needsToBeFiled;
 	BibDocument *document;
@@ -113,17 +112,6 @@
 */
 - (void)dealloc;
 
-/*!
-@method isRequired:
-    @abstract Abstract??
-    @discussion This checks for a string that is an entry type identifier (like "Author") and tells you whether or not it is a bibtex-required entry.
-
- @param rString The string to be checked. (not a great name, no.)
- @result Whether or not rString was required
-    
-*/
-- (BOOL)isRequired:(NSString *)rString; // @@type - move to type class.
-- (NSMutableArray*) requiredFieldNames;
 - (BibDocument *)document;
 - (void)setDocument:(BibDocument *)newDocument;
 
@@ -284,7 +272,6 @@
 */
 - (void)updateMetadataForKey:(NSString *)key;
 
-- (void)setRequiredFieldNames: (NSArray *)newRequiredFieldNames;
 - (void)setField: (NSString *)key toValue: (NSString *)value;
 - (void)setField: (NSString *)key toValue: (NSString *)value withModDate:(NSCalendarDate *)date;
 
