@@ -2,17 +2,37 @@
 
 //  Created by Michael McCracken on Mon Dec 17 2001.
 /*
-This software is Copyright (c) 2001,2002, Michael O. McCracken
-All rights reserved.
+ This software is Copyright (c) 2001,2002,2003,2004,2005
+ Michael O. McCracken. All rights reserved.
 
-Redistribution and use in source and binary forms, with or without modification, are permitted provided that the following conditions are met:
+ Redistribution and use in source and binary forms, with or without
+ modification, are permitted provided that the following conditions
+ are met:
 
-- Redistributions of source code must retain the above copyright notice, this list of conditions and the following disclaimer.
--  Redistributions in binary form must reproduce the above copyright notice, this list of conditions and the following disclaimer in the documentation and/or other materials provided with the distribution.
--  Neither the name of Michael O. McCracken nor the names of any contributors may be used to endorse or promote products derived from this software without specific prior written permission.
+ - Redistributions of source code must retain the above copyright
+   notice, this list of conditions and the following disclaimer.
 
-THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-*/
+ - Redistributions in binary form must reproduce the above copyright
+    notice, this list of conditions and the following disclaimer in
+    the documentation and/or other materials provided with the
+    distribution.
+
+ - Neither the name of Michael O. McCracken nor the names of any
+    contributors may be used to endorse or promote products derived
+    from this software without specific prior written permission.
+
+ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+ "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+ LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+ A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+ OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+ SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+ LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+ DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+ THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+ (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ */
 
 #import "BibDocument.h"
 #import "BibItem.h"
@@ -24,6 +44,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 #import "BDSKUndoManager.h"
 #import "RYZImagePopUpButtonCell.h"
 #import "MultiplePageView.h"
+#import <OmniAppKit/OAInternetConfig.h>
 
 #include <stdio.h>
 
@@ -197,6 +218,8 @@ NSString *BDSKBibItemLocalDragPboardType = @"edu.ucsd.cs.mmccrack.bibdesk: Local
     [[NSNotificationCenter defaultCenter] removeObserver:self];
 	[[NSApp delegate] removeErrorObjsForDocument:self];
     [macroDefinitions release];
+    // set pub document ivars to nil, or we get a crash when they message the undo manager in dealloc (only happens if you edit, click to close the doc, then save)
+    [publications makeObjectsPerformSelector:@selector(setDocument:) withObject:nil];
     [publications release];
     [shownPublications release];
     [pubsLock release];
@@ -342,7 +365,6 @@ NSString *BDSKBibItemLocalDragPboardType = @"edu.ucsd.cs.mmccrack.bibdesk: Local
     }
     return anAuthorPubs;
 }
-
 
 - (BOOL)citeKeyIsUsed:(NSString *)aCiteKey byItemOtherThan:(BibItem *)anItem{
     NSEnumerator *bibE = [publications objectEnumerator];
@@ -794,16 +816,9 @@ stringByAppendingPathComponent:@"BibDesk"]; */
     [d appendData:[frontMatter dataUsingEncoding:encoding allowLossyConversion:YES]];
     
     // output the document's macros:
-    NSString *macroString = nil;
-    NSArray *macros = [[macroDefinitions allKeys] sortedArrayUsingSelector:@selector(compare:)];
+	[d appendData:[[self bibTeXMacroString] dataUsingEncoding:encoding allowLossyConversion:YES]];
     
     // output the bibs
-    foreach(macro, macros){
-        macroString = [NSString stringWithFormat:@"\n@STRING{%@ = \"%@\"}\n",macro,[macroDefinitions objectForKey:macro]];
-        [d appendData:[macroString dataUsingEncoding:encoding
-                                allowLossyConversion:YES]];
-    }
-    
     while(tmp = [e nextObject]){
         [d appendData:[[NSString stringWithString:@"\n\n"] dataUsingEncoding:encoding  allowLossyConversion:YES]];
         [d appendData:[[tmp bibTeXStringDroppingInternal:drop] dataUsingEncoding:encoding allowLossyConversion:YES]];
@@ -1896,53 +1911,38 @@ int generalBibItemCompareFunc(id item1, id item2, void *context){
     NSEnumerator *e = [self selectedPubEnumerator];
     NSNumber *i;
     BibItem *pub = nil;
-    NSFileWrapper *fw = nil;
-    NSTextAttachment *att = nil;
+    
     NSFileManager *dfm = [NSFileManager defaultManager];
     NSString *pubPath = nil;
-    NSMutableAttributedString *body = [[NSMutableAttributedString alloc] init];
+    NSMutableString *body = [NSMutableString string];
     NSMutableArray *files = [NSMutableArray array];
-    //    BOOL sent = NO;
-
-    // other way:
-    NSPasteboard *pb = [NSPasteboard pasteboardWithName:@"BDMailPasteboard"];
-    NSArray *types = [NSArray arrayWithObjects:NSFilenamesPboardType,nil];
-        //NSRTFDPboardType,nil];
-    [pb declareTypes:types owner:self];
     
     while (i = [e nextObject]) {
         pub = [shownPublications objectAtIndex:[i intValue]];
         pubPath = [pub localURLPath];
-       
-        if([dfm fileExistsAtPath:pubPath]){
+        
+        if([dfm fileExistsAtPath:pubPath])
             [files addObject:pubPath];
-            fw = [[NSFileWrapper alloc] initWithPath:pubPath];
-            att = [[NSTextAttachment alloc] initWithFileWrapper:fw];
-
-            [body appendAttributedString:[NSAttributedString attributedStringWithAttachment:att]];
-            [fw release]; [att release];
-        }
+        
+        // use the detexified version without internal fields, since TeXification introduces things that 
+        // AppleScript can't deal with (OAInternetConfig may end up using AS)
+        [body appendString:[pub bibTeXStringUnexpandedAndDeTeXifiedWithoutInternalFields]];
+        [body appendString:@"\n\n"];
     }
-
-
-    /* This doesn't seem to work:
-        [pb setData:[body RTFDFromRange:NSMakeRange(0,[body length]) documentAttributes:nil]
-            forType:NSRTFDPboardType];*/
-
-    [pb setPropertyList:files forType:NSFilenamesPboardType];
-
-    NSPerformService(@"Mail/Send File",pb); // Note: only works with Mail.app.
     
-    //sent = [NSMailDelivery deliverMessage:body
-    //                             headers: headers
-     //                             format: NSMIMEMailFormat
-     //                           protocol: nil];
+    // ampersands are common in publication names
+    [body replaceOccurrencesOfString:@"&" withString:@"\\&" options:NSLiteralSearch range:NSMakeRange(0, [body length])];
+    [body replaceOccurrencesOfString:@"\"" withString:@"\\\"" options:NSLiteralSearch range:NSMakeRange(0, [body length])];
 
-    //if(!sent){
-   //     [NSException raise:BDSKUnimplementedException format:@"Can't handle errors in mail sending yet."];
-   // }
+    // OAInternetConfig will use the default mail helper (at least it works with Mail.app and Entourage)
+    OAInternetConfig *ic = [OAInternetConfig internetConfig];
+    [ic launchMailTo:nil
+          carbonCopy:nil
+     blindCarbonCopy:nil
+             subject:@"BibDesk references"
+                body:body
+         attachments:files];
 
-    [body release];
 }
 
 
@@ -1969,7 +1969,7 @@ int generalBibItemCompareFunc(id item1, id item2, void *context){
 		int n = [self numberOfSelectedPubs];
 		if ( n > 6) {
 		// Do we really want a gazillion of editor windows?
-			NSBeginAlertSheet(NSLocalizedString(@"Edit publications", @"Edit publications (multiple open warning)"), NSLocalizedString(@"Cancel", @"Cancel"), NSLocalizedString(@"Open", @"multiple open warning Open button"), nil, documentWindow, self, @selector(multipleEditSheetDidEnd:returnCode:contextInfo:), NULL, nil, NSLocalizedString(@"Bibdesk is about to open %i editor windows. Do you want to proceed?" , @"mulitple open warning question"), n);
+			NSBeginAlertSheet(NSLocalizedString(@"Edit publications", @"Edit publications (multiple open warning)"), NSLocalizedString(@"Cancel", @"Cancel"), NSLocalizedString(@"Open", @"multiple open warning Open button"), nil, documentWindow, self, @selector(multipleEditSheetDidEnd:returnCode:contextInfo:), NULL, nil, NSLocalizedString(@"BibDesk is about to open %i editor windows. Do you want to proceed?" , @"mulitple open warning question"), n);
 		}
 		else {
 			[self multipleEditSheetDidEnd:nil returnCode:NSAlertAlternateReturn contextInfo:nil];
@@ -2195,7 +2195,7 @@ int generalBibItemCompareFunc(id item1, id item2, void *context){
                 NSArray * pbArray = [pb propertyListForType:NSFilenamesPboardType]; // we will get an array
                 return [self addPublicationsForFiles:pbArray error:error];
             } else {
-                *error = NSLocalizedString(@"didn't find anything appropriate on the pasteboard", @"Bibdesk couldn't find any files or bibliography information in the data it received.");
+                *error = NSLocalizedString(@"didn't find anything appropriate on the pasteboard", @"BibDesk couldn't find any files or bibliography information in the data it received.");
                 return NO;
             }
         }
@@ -2251,7 +2251,7 @@ int generalBibItemCompareFunc(id item1, id item2, void *context){
 	}
 
 	if ([newPubs count] == 0) {
-		*error = NSLocalizedString(@"couldn't analyse string", @"Bibdesk couldn't find bibliography data in the text it received.");
+		*error = NSLocalizedString(@"couldn't analyse string", @"BibDesk couldn't find bibliography data in the text it received.");
 		return NO;
 	}
 	
@@ -2538,10 +2538,9 @@ This method always returns YES. Even if some or many operations fail.
 				   afterDelay:0.5];
 
 		}
-	}
-	// should: also check if we're filtering by the key that was changed and refilter.
-	// should: need to save the highlighted pub and rehighlight after sort...
-	
+	} else { // quicksearch won't update it for us
+        [self updateUI];
+    }	
 }
 
 #pragma mark UI updating
@@ -2558,11 +2557,7 @@ This method always returns YES. Even if some or many operations fail.
         [bibString appendString:frontMatter];
         [bibString appendString:@"\n"];
         
-        // passing the expanded bibtex string causes problems with accented months, so we'll let BibTeX expand things
-        NSArray *macros = [macroDefinitions allKeys];
-        foreach(macro, macros){
-            [bibString appendFormat:@"@STRING{%@ = \"%@\"}\n",macro,[macroDefinitions objectForKey:macro]];
-        }
+        [bibString appendString:[self bibTeXMacroString]];
         
         NSNumber *i;
         NSEnumerator *e = [self selectedPubEnumerator];
@@ -2794,8 +2789,13 @@ This method always returns YES. Even if some or many operations fail.
 
 - (void)pageDownInPreview:(id)sender{
     NSPoint p = [previewField scrollPositionAsPercentage];
-    if(p.y > 0.99){ // select next row if the last scroll put us at the end
+    
+    float pageheight = NSHeight([[[previewField enclosingScrollView] documentView] bounds]);
+    float viewheight = NSHeight([[previewField enclosingScrollView] documentVisibleRect]);
+    
+    if(p.y > 0.99 || viewheight >= pageheight){ // select next row if the last scroll put us at the end
         [tableView selectRow:([tableView selectedRow] + 1) byExtendingSelection:NO];
+        [tableView scrollRowToVisible:[tableView selectedRow]];
         return; // adjust page next time
     }
     [previewField pageDown:sender];
@@ -2803,8 +2803,10 @@ This method always returns YES. Even if some or many operations fail.
 
 - (void)pageUpInPreview:(id)sender{
     NSPoint p = [previewField scrollPositionAsPercentage];
+    
     if(p.y < 0.01){ // select previous row if we're already at the top
         [tableView selectRow:([tableView selectedRow] - 1) byExtendingSelection:NO];
+        [tableView scrollRowToVisible:[tableView selectedRow]];
         return; // adjust page next time
     }
     [previewField pageUp:sender];
@@ -2942,6 +2944,32 @@ This method always returns YES. Even if some or many operations fail.
     return [macroDefinitions objectForKey:[macroString lowercaseString]];
 }
 
+- (NSString *)bibTeXMacroString{
+    BOOL shouldTeXify = [[OFPreferenceWrapper sharedPreferenceWrapper] boolForKey:BDSKShouldTeXifyWhenSavingAndCopyingKey];
+	NSMutableString *macroString = [NSMutableString string];
+    NSString *value;
+    NSArray *macros = [[macroDefinitions allKeys] sortedArrayUsingSelector:@selector(compare:)];
+    
+    foreach(macro, macros){
+		value = [macroDefinitions objectForKey:macro];
+		if(shouldTeXify){
+			
+			NS_DURING
+				value = [[BDSKConverter sharedConverter] stringByTeXifyingString:value];
+			NS_HANDLER
+				if([[localException name] isEqualToString:BDSKTeXifyException]){
+					int i = NSRunAlertPanel(NSLocalizedString(@"Character Conversion Error", @"Title of alert when an error happens"),
+											[NSString stringWithFormat: NSLocalizedString(@"An unrecognized character in the \"%@\" macro could not be converted to TeX.", @"Informative alert text when the error happens."), macro],
+											nil, nil, nil, nil);
+				}
+                                [localException raise]; // re-raise; we localized the error, but the sender needs to know we failed
+			NS_ENDHANDLER
+							
+		}                
+        [macroString appendFormat:@"\n@STRING{%@ = \"%@\"}\n", macro, value];
+    }
+	return macroString;
+}
 
 - (IBAction)showMacrosWindow:(id)sender{
     if (!macroWC){
