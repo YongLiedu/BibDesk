@@ -128,7 +128,33 @@ code,tt,pre {
     font-family: Lucida Grande,Helvetica,Geneva;
     font-size: 1em;
     font-weight:bold;
-    color:green}
+    color: green}
+.aslangkeyword {
+    font-family: Verdana,Regular;
+    font-size: 1em;
+    font-weight:bold;
+    color: blue}
+.asappkeyword {
+    font-family: Verdana,Regular;
+    font-size: 1em;
+    color: blue}
+.asvariable {
+    font-family: Verdana,Regular;
+    font-size: 1em;
+    color: green}
+.asvalue {
+    font-family: Verdana,Regular;
+    font-size: 1em;
+    color: black}
+.asoperator {
+    font-family: Verdana,Regular;
+    font-size: 1em;
+    color: black}
+.ascomment {
+    font-family: Verdana,Italic;
+    font-size: 1em;
+    font-style: italic;
+    color: gray}
 </style>
 EOT
 
