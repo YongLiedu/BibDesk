@@ -1,13 +1,11 @@
 //
-//  NSMutableArray+ThreadSafety.h
+//  BDSKTypeNameFormatter.h
 //  BibDesk
 //
-//  Created by Adam Maxwell on 01/27/05.
-//  From Apple TN2059
-
+//  Created by Michael McCracken on Sat Sep 27 2003.
 /*
- This software is Copyright (c) 2005
- Adam Maxwell. All rights reserved.
+ This software is Copyright (c) 2003,2004,2005
+ Michael O. McCracken. All rights reserved.
 
  Redistribution and use in source and binary forms, with or without
  modification, are permitted provided that the following conditions
@@ -21,7 +19,7 @@
     the documentation and/or other materials provided with the
     distribution.
 
- - Neither the name of Adam Maxwell nor the names of any
+ - Neither the name of Michael O. McCracken nor the names of any
     contributors may be used to endorse or promote products derived
     from this software without specific prior written permission.
 
@@ -38,19 +36,13 @@
  OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#import <Cocoa/Cocoa.h>
+#import <Foundation/Foundation.h>
+#import "BibPrefController.h"
+#import "BibTypeManager.h"
 
 
-@interface NSMutableArray (ThreadSafety)
+@interface BDSKTypeNameFormatter : NSFormatter {
 
-- (void)addObject:(id)anObject usingLock:(NSLock *)aLock;
-- (void)insertObject:(id)anObject atIndex:(unsigned)index usingLock:(NSLock *)aLock;
-- (id)objectAtIndex:(unsigned)index usingLock:(NSLock *)aLock;
-- (void)removeObjectAtIndex:(unsigned)index usingLock:(NSLock *)aLock;
-- (void)removeObject:(id)anObject usingLock:(NSLock *)aLock;
-- (BOOL)containsObject:(id)anObject usingLock:(NSLock *)aLock;
-- (void)removeObjectIdenticalTo:(id)anObject usingLock:(NSLock *)aLock;
-- (void)addObjectsFromArray:(NSArray *)anArray usingLock:(NSLock *)aLock;
-- (void)removeAllObjectsUsingLock:(NSLock *)aLock;
+}
 
 @end
