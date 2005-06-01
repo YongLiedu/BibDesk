@@ -1,7 +1,10 @@
-//  BDSKCiteStringFormatter.m
-//  Created by Michael McCracken on Sat Jul 06 2002.
+//
+//  BDSKTypeNameFormatter.m
+//  BibDesk
+//
+//  Created by Michael McCracken on Sat Sep 27 2003.
 /*
- This software is Copyright (c) 2002,2003,2004,2005
+ This software is Copyright (c) 2003,2004,2005
  Michael O. McCracken. All rights reserved.
 
  Redistribution and use in source and binary forms, with or without
@@ -33,10 +36,18 @@
  OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#import "BDSKCiteKeyFormatter.h"
+//
+//  File Description: BDSKFieldNameFormatter
+//
+//  This is a formatter that makes sure you can't enter invalid field names.
+//
 
 
-@implementation BDSKCiteKeyFormatter 
+
+#import "BDSKTypeNameFormatter.h"
+
+
+@implementation BDSKTypeNameFormatter
 
 - (NSString *)stringForObjectValue:(id)obj{
     return obj;
@@ -51,17 +62,23 @@
     return YES;
 }
 
-// also add checking if it's been typed in the doc before...
+// This is currently the same deal as what we check for in cite-keys, but in a different class
+// because that may change.
 
 - (BOOL)isPartialStringValid:(NSString *)partialString
             newEditingString:(NSString **)newString
             errorDescription:(NSString **)error{
-	NSCharacterSet *invalidSet = [[BibTypeManager sharedManager] invalidCharactersForField:BDSKCiteKeyString inFileType:BDSKBibtexString];
-    NSRange r = [partialString rangeOfCharacterFromSet:invalidSet];
-    if ( r.location != NSNotFound) {
+    NSRange r = [partialString rangeOfCharacterFromSet:[[BibTypeManager sharedManager] invalidFieldNameCharacterSetForFileType:BDSKBibtexString]];
+    if ( r.location != NSNotFound)
         return NO;
-    }else
-        return YES;
+    r = [partialString rangeOfCharacterFromSet:[NSCharacterSet uppercaseLetterCharacterSet]];
+    if ( r.location != NSNotFound) {
+        // this is a BibDesk requirement, since we expect type names to be lowercase
+        *newString = [partialString lowercaseString];
+        return NO;
+    }
+    else return YES;
 }
+
 
 @end
