@@ -1,6 +1,6 @@
 //
 //  BibItemClassDescription.m
-//  Bibdesk
+//  BibDesk
 //
 //  Created by Sven-S. Porst on Sat Jul 10 2004.
 //  Copyright (c) 2004 __MyCompanyName__. All rights reserved.
@@ -68,18 +68,18 @@ A Category on BibItem with a few additional methods to enable and enhance its sc
 }
 
 - (BibAuthor *)valueInAuthorsWithName:(NSString *)name {
+    // create a new author so we can use BibAuthor's isEqual: method for comparison
+    // instead of trying to do string comparisons
+    BibAuthor *newAuth = [BibAuthor authorWithName:name andPub:nil];
 	NSEnumerator *authEnum = [[self pubAuthors] objectEnumerator];
 	BibAuthor *auth;
-	BibAuthor *altAuth = nil;
+	
 	while (auth = [authEnum nextObject]) {
-		if ([[auth normalizedName] isEqualToString:name]) {
+		if ([auth isEqual:newAuth]) {
 			return auth;
 		}
-		if ([[auth name] isEqualToString:name]) {
-			altAuth = auth;
-		}
 	}
-	return altAuth;
+	return nil;
 }
 
 /* ssp: 2004-09-21
@@ -128,7 +128,7 @@ Extra wrapping of the created and modified date methods to
  Extra key-value-style accessor methods for the local and distant URLs, abstract and notes
  These might be particularly useful for scripting, so having them right in the scripting dictionary rather than hidden in the 'fields' record should be useful.
  I assume the same could be achieved more easily using -valueForUndefinedKey:, but that's X.3 and up 
- I am using generic NSStrings here. NSURLs and NSFileHandles might be nicer but as things are handled as strings both in the Bibdesk backend and in AppleScript there wouldn't be much point to it.
+ I am using generic NSStrings here. NSURLs and NSFileHandles might be nicer but as things are handled as strings both in the BibDesk backend and in AppleScript there wouldn't be much point to it.
  Any policies on whether to rather return copies of the strings in question here?
 */
 - (NSString*) remoteURL {
@@ -146,11 +146,12 @@ Extra wrapping of the created and modified date methods to
 - (void) setLocalURL:(NSString*) newPath {
 	if ([newPath hasPrefix:@"file://"])
 		[self setField:BDSKLocalUrlString toValue:newPath];
-	[self setField:BDSKLocalUrlString toValue:[NSURL fileURLWithPath:[newPath stringByExpandingTildeInPath]]];
+	NSString *newURL = [[NSURL fileURLWithPath:[newPath stringByExpandingTildeInPath]] absoluteString];
+	[self setField:BDSKLocalUrlString toValue:newURL];
 }
 
 - (NSString*) abstract {
-	return [self valueOfField:BDSKAbstractString];
+	return [self valueOfField:BDSKAbstractString inherit:NO];
 }
 
 - (void) setAbstract:(NSString*) newAbstract {
@@ -158,7 +159,7 @@ Extra wrapping of the created and modified date methods to
 }
 
 - (NSString*) annotation {
-	return [self valueOfField:BDSKAnnoteString];
+	return [self valueOfField:BDSKAnnoteString inherit:NO];
 }
 
 - (void) setAnnotation:(NSString*) newAnnotation {
@@ -210,7 +211,7 @@ Extra wrapping of the created and modified date methods to
 	if(hadProblems) {
 		if (cmd) {
 			[cmd setScriptErrorNumber:NSInternalScriptError];
-			[cmd setScriptErrorString:[NSString stringWithFormat:NSLocalizedString(@"Bibdesk failed to process the BibTeX entry %@. It may be malformed.",@"Bibdesk failed to process the BibTeX entry %@. It may be malformed."), btString]];
+			[cmd setScriptErrorString:[NSString stringWithFormat:NSLocalizedString(@"BibDesk failed to process the BibTeX entry %@. It may be malformed.",@"BibDesk failed to process the BibTeX entry %@. It may be malformed."), btString]];
 		}
 		return;
 	}
@@ -219,7 +220,7 @@ Extra wrapping of the created and modified date methods to
 	BibItem * newPub = [newPubs objectAtIndex:0];
 	
 	// a parsed pub has no creation date set, so we need to copy first
-	NSString *createdDate = [self valueOfField:BDSKDateCreatedString];
+	NSString *createdDate = [self valueOfField:BDSKDateCreatedString inherit:NO];
 	if (createdDate && ![createdDate isEqualToString:@""])
 		[newPub setField:BDSKDateCreatedString toValue:createdDate];
 	
