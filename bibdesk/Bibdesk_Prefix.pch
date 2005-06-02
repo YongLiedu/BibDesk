@@ -1,5 +1,5 @@
 //
-// Prefix header for all source files of the 'Bibdesk (Upgraded)' target in the 'Bibdesk' project
+// Prefix header for all source files of the 'BibDesk (Upgraded)' target in the 'BibDesk' project
 //
 
 #ifdef __OBJC__
