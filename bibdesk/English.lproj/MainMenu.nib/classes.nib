@@ -143,6 +143,7 @@
                 showMacrosWindow = id; 
                 showReadMe = id; 
                 showRelNotes = id; 
+                sortForCrossrefs = id; 
                 toggle = id; 
                 toggleShowingCustomCiteDrawer = id; 
                 toggleStatusBar = id; 
