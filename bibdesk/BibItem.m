@@ -1,8 +1,8 @@
 //  BibItem.m
 //  Created by Michael McCracken on Tue Dec 18 2001.
 /*
- This software is Copyright (c) 2001,2002, Michael O. McCracken
- All rights reserved.
+ This software is Copyright (c) 2001,2002,2003,2004,2005
+ Michael O. McCracken. All rights reserved.
 
  Redistribution and use in source and binary forms, with or without
  modification, are permitted provided that the following conditions
@@ -340,7 +340,7 @@ setupParagraphStyle()
 
 	
 - (NSComparisonResult)dateCompare:(BibItem *)aBI{
-	return [self compareCalendarDate:pubDate with:[aBI date]];
+	return [self compareCalendarDate:[self date] with:[aBI date]];
 }
 
 - (NSComparisonResult)createdDateCompare:(BibItem *)aBI{
@@ -354,7 +354,7 @@ setupParagraphStyle()
 
 
 - (NSComparisonResult)auth1Compare:(BibItem *)aBI{
-    if([pubAuthors count] > 0){
+    if([[self pubAuthors] count] > 0){
         if([aBI numberOfAuthors] > 0){
             return [[self authorAtIndex:0] sortCompare:
                 [aBI authorAtIndex:0]];
@@ -365,7 +365,7 @@ setupParagraphStyle()
     }
 }
 - (NSComparisonResult)auth2Compare:(BibItem *)aBI{
-    if([pubAuthors count] > 1){
+    if([[self pubAuthors] count] > 1){
         if([aBI numberOfAuthors] > 1){
             return [[self authorAtIndex:1] sortCompare:
                 [aBI authorAtIndex:1]];
@@ -376,7 +376,7 @@ setupParagraphStyle()
     }
 }
 - (NSComparisonResult)auth3Compare:(BibItem *)aBI{
-    if([pubAuthors count] > 2){
+    if([[self pubAuthors] count] > 2){
         if([aBI numberOfAuthors] > 2){
             return [[self authorAtIndex:2] sortCompare:
                 [aBI authorAtIndex:2]];
@@ -387,13 +387,13 @@ setupParagraphStyle()
     }
 }
 - (NSComparisonResult)authorCompare:(BibItem *)aBI{
-    return [[self bibtexAuthorString] compare: [aBI bibtexAuthorString]];
+    return [[self bibTeXAuthorStringNormalized:YES] compare: [aBI bibTeXAuthorStringNormalized:YES]];
 }
 
 - (NSComparisonResult)fileOrderCompare:(BibItem *)aBI{
     int aBIOrd = [aBI fileOrder];
     int myFileOrder = [self fileOrder];
-    if (myFileOrder == -1) return NSOrderedDescending; //@@ file order for crossrefs - here is where we would change to accommodate new pubs in crossrefs...
+    if (myFileOrder == 0) return NSOrderedDescending; //@@ file order for crossrefs - here is where we would change to accommodate new pubs in crossrefs...
     if (myFileOrder < aBIOrd) {
         return NSOrderedAscending;
     }
@@ -406,7 +406,7 @@ setupParagraphStyle()
 
 // accessors for fileorder
 - (int)fileOrder{
-    return [[document publications] indexOfObjectIdenticalTo:self];
+    return [[document publications] indexOfObjectIdenticalTo:self] + 1;
 }
 
 - (NSString *)fileType { return fileType; }
@@ -422,7 +422,11 @@ setupParagraphStyle()
 #pragma mark Author Handling code
 
 - (int)numberOfAuthors{
-    return [pubAuthors count];
+	return [self numberOfAuthorsInheriting:YES];
+}
+
+- (int)numberOfAuthorsInheriting:(BOOL)inherit{
+    return [[self pubAuthorsInheriting:inherit] count];
 }
 
 - (void)addAuthorWithName:(NSString *)newAuthorName{
@@ -446,12 +450,27 @@ setupParagraphStyle()
 }
 
 - (NSArray *)pubAuthors{
+	return [self pubAuthorsInheriting:YES];
+}
+
+- (NSArray *)pubAuthorsInheriting:(BOOL)inherit{
+	BibItem *parent;
+	
+	if (inherit && [pubAuthors count] == 0 && 
+		(parent = [self crossrefParent])) {
+		return [parent pubAuthorsInheriting:NO];
+	}
     return pubAuthors;
 }
 
 - (BibAuthor *)authorAtIndex:(int)index{ 
-    if ([pubAuthors count] > index)
-        return [pubAuthors objectAtIndex:index usingLock:bibLock];
+    return [self authorAtIndex:index inherit:YES];
+}
+
+- (BibAuthor *)authorAtIndex:(int)index inherit:(BOOL)inherit{ 
+	NSMutableArray *auths = (NSMutableArray *)[self pubAuthorsInheriting:inherit];
+	if ([auths count] > index)
+        return [auths objectAtIndex:index usingLock:bibLock]; // not too nice. Is the lock necessary?
     else
         return nil;
 }
@@ -489,29 +508,37 @@ setupParagraphStyle()
       //  NSLog(@"%@", pubAuthors);
 }
 
-- (NSString *)bibTeXAuthorStringNormalized:(BOOL)normalized{ // used for save operations; returns names as "von Last, Jr., First" if normalized is YES
-    
-    NSEnumerator *en = [pubAuthors objectEnumerator];
-    BibAuthor *author;
-    if([pubAuthors count] == 0) return [NSString stringWithString:@""];
-    if([pubAuthors count] == 1){
-        author = [pubAuthors objectAtIndex:0];
-        return (normalized ? [author normalizedName] : [author name]);
-    }else{
-        NSMutableString *rs;
-        author = [en nextObject];
-        rs = [NSMutableString stringWithString:(normalized ? [author normalizedName] : [author name])];
-        // since this method is used for display, BibAuthor -name is right above.
-        
-        while(author = [en nextObject]){
-            [rs appendFormat:@" and %@", (normalized ? [author normalizedName] : [author name])];
-        }
-        return rs;
-    }
+- (NSString *)bibTeXAuthorString{
+    return [self bibTeXAuthorStringNormalized:NO inherit:YES];
 }
 
-- (NSString *)bibtexAuthorString{
-    return [self bibTeXAuthorStringNormalized:NO];
+- (NSString *)bibTeXAuthorStringNormalized:(BOOL)normalized{ // used for save operations; returns names as "von Last, Jr., First" if normalized is YES
+	return [self bibTeXAuthorStringNormalized:normalized inherit:YES];
+}
+
+- (NSString *)bibTeXAuthorStringNormalized:(BOOL)normalized inherit:(BOOL)inherit{ // used for save operations; returns names as "von Last, Jr., First" if normalized is YES
+	NSArray *auths = [self pubAuthorsInheriting:inherit];
+    
+	if([auths count] == 0) return [NSString stringWithString:@""];
+	
+	NSEnumerator *authE = [auths objectEnumerator];
+    BibAuthor *author;
+	NSMutableArray *authNames = [NSMutableArray arrayWithCapacity:[auths count]];
+	
+	while(author = [authE nextObject]){
+		[authNames addObject:(normalized ? [author normalizedName] : [author name])];
+	}
+	
+	return [authNames componentsJoinedByString:@" and "];
+}
+
+- (BibItem *)crossrefParent{
+	NSString *key = [pubFields objectForKey:BDSKCrossrefString];
+	
+	if (key == nil || [key isEqualToString:@""])
+		return nil;
+	
+	return [document publicationForCiteKey:key];
 }
 
 // Container is an aspect of the BibItem that depends on the type of the item
@@ -544,7 +571,7 @@ setupParagraphStyle()
 }
 
 - (NSString *)title{
-    NSString *t = [pubFields objectForKey: BDSKTitleString usingLock:bibLock];
+    NSString *t = [self valueOfField: BDSKTitleString];
   if(t == nil)
     return @"Empty Title";
   else
@@ -564,7 +591,16 @@ setupParagraphStyle()
 }
 
 - (NSCalendarDate *)date{
-    return pubDate;
+    return [self dateInheriting:YES];
+}
+
+- (NSCalendarDate *)dateInheriting:(BOOL)inherit{
+    BibItem *parent;
+	
+	if(inherit && pubDate == nil && (parent = [self crossrefParent])) {
+		return [parent dateInheriting:NO];
+	}
+	return pubDate;
 }
 
 - (NSCalendarDate *)dateCreated {
@@ -667,6 +703,7 @@ setupParagraphStyle()
         [[[self undoManager] prepareWithInvocationTarget:self] setCiteKey:citeKey];
         [[self undoManager] setActionName:NSLocalizedString(@"Change Cite Key",@"")];
     }
+    NSString *oldCiteKey = [citeKey copy];
 	
     [self setCiteKeyString:newCiteKey];
 	if (date != nil) {
@@ -674,7 +711,8 @@ setupParagraphStyle()
 	}
 	[self updateMetadataForKey:BDSKCiteKeyString];
 		
-    NSDictionary *notifInfo = [NSDictionary dictionaryWithObjectsAndKeys:citeKey, @"value", BDSKCiteKeyString, @"key", document, @"document", nil];
+    NSDictionary *notifInfo = [NSDictionary dictionaryWithObjectsAndKeys:citeKey, @"value", BDSKCiteKeyString, @"key", document, @"document", oldCiteKey, @"oldCiteKey", nil];
+    [oldCiteKey release];
     NSNotification *aNotification = [NSNotification notificationWithName:BDSKBibItemChangedNotification
                                                                   object:self
                                                                 userInfo:notifInfo];
@@ -770,6 +808,22 @@ setupParagraphStyle()
 	
 	if([BDSKLocalUrlString isEqualToString:key]){
 		[self setNeedsToBeFiled:NO];
+	}
+	
+	if([BDSKTitleString isEqualToString:key] &&
+	   [[OFPreferenceWrapper sharedPreferenceWrapper] boolForKey:BDSKDuplicateBooktitleKey] &&
+	   [[[OFPreferenceWrapper sharedPreferenceWrapper] arrayForKey:BDSKTypesForDuplicateBooktitleKey] containsObject:[self type]]){
+		NSString *title = [pubFields objectForKey:BDSKTitleString];
+		
+		if((title && ![title isEqualToString:@""])){
+			NSString *booktitle = [pubFields objectForKey:BDSKBooktitleString];
+			if([[OFPreferenceWrapper sharedPreferenceWrapper] boolForKey:BDSKForceDuplicateBooktitleKey] ||
+			   (booktitle == nil || [booktitle isEqualToString:@""])){
+				if(booktitle == nil)
+					[self addField:BDSKBooktitleString];
+				[self setField:BDSKBooktitleString toValue:title];
+			}
+		}
 	}
 	
     // re-call make type to make sure we still have all the appropriate bibtex defined fields...
@@ -874,7 +928,21 @@ setupParagraphStyle()
 }
 
 - (NSString *)valueOfField: (NSString *)key{
+	return [self valueOfField:key inherit:YES];
+}
+
+- (NSString *)valueOfField: (NSString *)key inherit: (BOOL)inherit{
     NSString* value = [pubFields objectForKey:key usingLock:bibLock];
+	
+	if (inherit && (value == nil || [value isEqualToString:@""])) {
+		BibItem *parent = [self crossrefParent];
+		if (parent) {
+			NSString *parentValue = [parent valueOfField:key inherit:NO];
+			if (parentValue && ![parentValue isEqualToString:@""])
+				return [[[BDSKComplexString alloc] initWithInheritedValue:parentValue] autorelease];
+		}
+	}
+	
 	return [[value retain] autorelease];
 }
 
@@ -961,6 +1029,7 @@ setupParagraphStyle()
 - (NSAttributedString *)attributedStringValue{
     NSString *key;
     NSEnumerator *e = [[[pubFields allKeys] sortedArrayUsingSelector:@selector(caseInsensitiveCompare:)] objectEnumerator];
+	BibItem *parent = [self crossrefParent];
     NSDictionary *cachedFonts = [[BDSKFontManager sharedFontManager] cachedFontsForPreviewPane];
 
     NSDictionary *titleAttributes =
@@ -995,18 +1064,18 @@ setupParagraphStyle()
                        [NSString stringWithFormat:@"(%@)\n",[self type]] attributes:typeAttributes] autorelease]];
 
     while(key = [e nextObject]){
-        if(![[pubFields objectForKey:key] isEqualToString:@""] &&
+        if(![[self valueOfField:key] isEqualToString:@""] &&
            ![key isEqualToString:BDSKTitleString]){
             if([self isRequired:key]){
                 [aStr appendAttributedString:[[[NSAttributedString alloc] initWithString:[NSString stringWithFormat:@"%@\n",key]
                                                                               attributes:keyAttributes] autorelease]];
 
 				if([key isEqualToString:BDSKAuthorString]){
-					NSString *authors = [[self bibtexAuthorString] stringByRemovingCurlyBraces];
+					NSString *authors = [[self bibTeXAuthorString] stringByRemovingCurlyBraces];
 					[aStr appendAttributedString:[[[NSAttributedString alloc] initWithString:[NSString stringWithFormat:@"%@\n",authors]
 																				  attributes:bodyAttributes] autorelease]];
 				}else{ // safe to collapse whitespace in required keys
-                    [aStr appendAttributedString:[self attributedStringByParsingTeX:[pubFields objectForKey:key] inField:@"Body" defaultStyle:bodyParagraphStyle collapse:YES]];
+                    [aStr appendAttributedString:[self attributedStringByParsingTeX:[self valueOfField:key] inField:@"Body" defaultStyle:bodyParagraphStyle collapse:YES]];
                     [aStr appendString:@"\n"];
 				}
 			}else{
@@ -1018,7 +1087,7 @@ setupParagraphStyle()
     e = [nonReqKeys objectEnumerator];
     while(key = [e nextObject]){
         BOOL collapseWhitespace = !([key isEqualToString:BDSKAnnoteString] || [key isEqualToString:BDSKAbstractString]);
-        if(![[pubFields objectForKey:key] isEqualToString:@""]){
+        if(![[self valueOfField:key] isEqualToString:@""]){
             [aStr appendAttributedString:[[[NSAttributedString alloc] initWithString:[NSString stringWithFormat:@"%@\n",key]
                                                                           attributes:keyAttributes] autorelease]];
             
@@ -1030,7 +1099,7 @@ setupParagraphStyle()
                                                                               attributes:bodyAttributes] autorelease]];
 
             }else if([key isEqualToString:BDSKAuthorString]){
-                NSString *authors = [[self bibtexAuthorString] stringByRemovingCurlyBraces];
+					NSString *authors = [[self bibTeXAuthorString] stringByRemovingCurlyBraces];
 
                 [aStr appendAttributedString:[[[NSAttributedString alloc] initWithString:[NSString stringWithFormat:@"%@\n",authors]
                                                                               attributes:bodyAttributes] autorelease]];
@@ -1042,7 +1111,7 @@ setupParagraphStyle()
                                                                               attributes:bodyAttributes] autorelease]];
 
             }else{
-                [aStr appendAttributedString:[self attributedStringByParsingTeX:[pubFields objectForKey:key] inField:@"Body" defaultStyle:bodyParagraphStyle collapse:collapseWhitespace]];
+                [aStr appendAttributedString:[self attributedStringByParsingTeX:[self valueOfField:key] inField:@"Body" defaultStyle:bodyParagraphStyle collapse:collapseWhitespace]];
                 [aStr appendString:@"\n"];
             }
 
@@ -1195,7 +1264,7 @@ setupParagraphStyle()
 		   [[OFPreferenceWrapper sharedPreferenceWrapper] boolForKey:BDSKShouldSaveNormalizedAuthorNamesKey] && 
 		   ![v isComplex]){ // only if it's not complex, use the normalized author name
 		    if(![v isEqualToString:@""]) // pubAuthors will have an editor if no authors exist, but editors can't be written out as authors
-			v = [self bibTeXAuthorStringNormalized:YES];
+			v = [self bibTeXAuthorStringNormalized:YES inherit:NO];
 		}
 		
 		if(shouldTeXify &&
@@ -1329,24 +1398,50 @@ setupParagraphStyle()
 
 - (NSString *)allFieldsString{
     NSMutableString *result = [[[NSMutableString alloc] init] autorelease];
-    NSEnumerator *pubFieldsE = [pubFields objectEnumerator];
-    NSString *field = nil;
     
-	[result appendString:[self citeKey]];
-		
-    while(field = [pubFieldsE nextObject]){
-        [result appendFormat:@" %@ ", field];
-    }
+    [result appendString:[self citeKey]];
+    [result appendString:@" "];
+    
+    BibItem *parent = [self crossrefParent];
+    // if it has a parent, find all the available keys, and use valueOfField: to get either the
+    // child object or parent object value
+    if(parent){
+        NSMutableSet *allKeySet = [[NSMutableSet alloc] initWithArray:[pubFields allKeys]];
+        
+        [allKeySet addObjectsFromArray:[[parent pubFields] allKeys]];
+        
+        NSEnumerator *keyEnum = [allKeySet objectEnumerator];
+        NSString *key = nil;
+        
+        while(key = [keyEnum nextObject]){
+            [result appendString:[self valueOfField:key inherit:YES]];
+            [result appendString:@" "];
+        }
+        [allKeySet release];
+        
+    } else {
+        NSEnumerator *pubFieldsE = [pubFields objectEnumerator];
+        NSString *field = nil;
+        
+        while(field = [pubFieldsE nextObject]){
+            [result appendString:field];
+            [result appendString:@" "];
+        }
+    }        
     return result;
 }
 
 - (NSString *)localURLPath{
-	return [self localURLPathRelativeTo:[[document fileName] stringByDeletingLastPathComponent]];
+	return [self localURLPathInheriting:YES];
 }
 
-- (NSString *)localURLPathRelativeTo:(NSString *)base{
+- (NSString *)localURLPathInheriting:(BOOL)inherit{
+	return [self localURLPathRelativeTo:[[document fileName] stringByDeletingLastPathComponent] inherit:inherit];
+}
+
+- (NSString *)localURLPathRelativeTo:(NSString *)base inherit:(BOOL)inherit{
     NSURL *localURL = nil;
-    NSString *localURLFieldValue = [self valueOfField:BDSKLocalUrlString];
+    NSString *localURLFieldValue = [self valueOfField:BDSKLocalUrlString inherit:inherit];
     
     if (!localURLFieldValue || [localURLFieldValue isEqualToString:@""]) return nil;
         
@@ -1377,7 +1472,7 @@ setupParagraphStyle()
 - (NSString *)suggestedLocalUrl{
 	OFPreferenceWrapper *prefs = [OFPreferenceWrapper sharedPreferenceWrapper];
 	NSString *localUrlFormat = [prefs objectForKey:BDSKLocalUrlFormatKey];
-	NSString *papersFolderPath = [prefs stringForKey:BDSKPapersFolderPathKey];
+	NSString *papersFolderPath = [[prefs stringForKey:BDSKPapersFolderPathKey] stringByExpandingTildeInPath];
 	NSString *relativeFile = [[BDSKFormatParser sharedParser] parseFormat:localUrlFormat forField:BDSKLocalUrlString ofItem:self];
 	if ([[OFPreferenceWrapper sharedPreferenceWrapper] boolForKey:BDSKCiteKeyLowercaseKey]) {
 		relativeFile = [relativeFile lowercaseString];

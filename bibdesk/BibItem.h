@@ -1,8 +1,8 @@
 // BibItem.h
 // Created by Michael McCracken on Tue Dec 18 2001.
 /*
- This software is Copyright (c) 2001,2002, Michael O. McCracken
- All rights reserved.
+ This software is Copyright (c) 2001,2002,2003,2004,2005
+ Michael O. McCracken. All rights reserved.
 
  Redistribution and use in source and binary forms, with or without
  modification, are permitted provided that the following conditions
@@ -159,28 +159,163 @@
 - (void)setFileType:(NSString *)someFileType;
 
 
+
+/*!
+    @method numberOfAuthors
+    @abstract Calls numberOfAuthorsInheriting: with inherit set to YES. 
+    @discussion (discussion)
+    
+*/
 - (int)numberOfAuthors;
+
+/*!
+    @method numberOfAuthorsInheriting:
+    @abstract Returns the number of authors.
+	@param inherit Boolean, if set follows the Crossref to find inherited authors.
+    @discussion (discussion)
+    
+*/
+- (int)numberOfAuthorsInheriting:(BOOL)inherit;
+
+/*!
+    @method pubAuthors
+    @abstract Calls pubAuthorsInheriting: with inherit set to YES. 
+    @discussion (discussion)
+    
+*/
 - (NSArray *)pubAuthors;
+
+/*!
+    @method pubAuthorsInheriting:
+    @abstract Returns the authors array of the publication.
+	@param inherit Boolean, if set follows the Crossref to find inherited authors.
+    @discussion (discussion)
+    
+*/
+- (NSArray *)pubAuthorsInheriting:(BOOL)inherit;
+
+/*!
+    @method addAuthorWithName:
+    @abstract Add an author to the authors array. 
+	@param newAuthorName The name of the new author.
+    @discussion (discussion)
+    
+*/
 - (void)addAuthorWithName:(NSString *)newAuthorName;
 
 /*!
-    @method authorAtIndex
-    @abstract returns the author at index index.
+    @method authorAtIndex:
+    @abstract Calls authorAtIndex:inherit: with inherit set to YES. 
+	@param index The index for the author
     @discussion zero-based indexing
     
 */
 - (BibAuthor *)authorAtIndex:(int)index;
 
-- (NSString *)bibtexAuthorString;
+/*!
+    @method authorAtIndex:inherit:
+    @abstract Returns the author at index index.
+	@param index The index for the author
+	@param inherit Boolean, if set follows the Crossref to find inherited authors.
+    @discussion zero-based indexing
+    
+*/
+- (BibAuthor *)authorAtIndex:(int)index inherit:(BOOL)inherit;
+
+/*!
+    @method bibTeXAuthorString
+    @abstract Calls bibTeXAuthorStringNormalized:inherit: with normalized set to NO and inherit set to YES.
+    @discussion (discussion)
+    
+*/
+- (NSString *)bibTeXAuthorString;
+
+/*!
+    @method bibTeXAuthorStringNormalized:
+    @abstract Calls bibTeXAuthorStringNormalized:inherit: with inherit set to YES.
+	@param normalized Boolean, if set uses the normalized names of the authors. 
+    @discussion (discussion)
+    
+*/
+- (NSString *)bibTeXAuthorStringNormalized:(BOOL)normalized;
+
+/*!
+    @method bibTeXAuthorStringNormalized:inherit:
+    @abstract Returns the BibTeX string value for the authors. 
+	@param normalized Boolean, if set uses the normalized names of the authors. 
+	@param inherit Boolean, if set follows the Crossref to find inherited authors.
+    @discussion (discussion)
+    
+*/
+- (NSString *)bibTeXAuthorStringNormalized:(BOOL)normalized inherit:(BOOL)inherit;
+
+/*!
+    @method setAuthorsFromBibtexString:
+    @abstract Sets the authors array by parsing a BibTeX string value for the authors. 
+	@param aString The bibTeX string value for the authors. 
+    @discussion (discussion)
+    
+*/
 - (void)setAuthorsFromBibtexString:(NSString *)aString;
 
+/*!
+    @method crossrefParent
+    @abstract Returns the item linked to by the Crossref field, or nil when the Crossref field is not set or the item cannot be found. 
+    @discussion (discussion)
+    
+*/
+- (BibItem *)crossrefParent;
+
+/*!
+    @method title
+    @abstract Returns the title. This can be inherited from the Crossref parent. 
+    @discussion (discussion)
+    
+*/
 - (NSString *)title;
+
+/*!
+    @method title
+    @abstract Set the title. 
+	@param title The title value to set.
+    @discussion (discussion)
+    
+*/
 - (void)setTitle:(NSString *)title;
 
+/*!
+    @method container
+    @abstract Returns the title of the container item, such as the proceedings or journal. 
+    @discussion (discussion)
+    
+*/
 - (NSString *)container;
 
+/*!
+    @method setDate:
+    @abstract Set the date. 
+	@param newDate The new date to set.
+    @discussion (discussion)
+    
+*/
 - (void)setDate: (NSCalendarDate *)newDate;
+
+/*!
+    @method date
+    @abstract Calls dateInheriting: with inherit set to YES. 
+    @discussion (discussion)
+    
+*/
 - (NSCalendarDate *)date;
+
+/*!
+    @method dateInheriting:
+    @abstract Returns the date. This was formed from the Year and Month fields. 
+	@param inherit Boolean, if set follows the Crossref to find inherited date.
+    @discussion (discussion)
+    
+*/
+- (NSCalendarDate *)dateInheriting:(BOOL)inherit;
 
 - (NSCalendarDate *)dateCreated;
 - (void)setDateCreated:(NSCalendarDate *)newDateCreated;
@@ -288,7 +423,24 @@
 - (void)setField: (NSString *)key toValue: (NSString *)value;
 - (void)setField: (NSString *)key toValue: (NSString *)value withModDate:(NSCalendarDate *)date;
 
+/*!
+    @method valueOfField:
+    @abstract Calls valueOfField:inherit: with inherit set to YES. 
+	@param key The field name.
+    @discussion (discussion)
+    
+*/
 - (NSString *)valueOfField: (NSString *)key;
+
+/*!
+    @method valueOfField:inherit:
+    @abstract Returns the value of a field. 
+	@param key The field name.
+	@param inherit Boolean, if set follows the Crossref to find inherited date.
+    @discussion (discussion)
+    
+*/
+- (NSString *)valueOfField: (NSString *)key inherit: (BOOL)inherit;
 
 - (NSString *)acronymValueOfField:(NSString *)key;
 
@@ -363,7 +515,7 @@
 /*!
     @method     attributedStringValue
     @abstract   Returns an attributed string representation of the receiver, suitable for display purposes
-    @discussion Uses the default font family set in the preferences
+    @discussion Uses the default font family set in the preferences. It follows the Crossref parent for unset fields. 
     @result     (description)
 */
 - (NSAttributedString *)attributedStringValue;
@@ -408,20 +560,30 @@
 
 /*!
     @method     localURLPath
-    @abstract   Calls localURLPathRelativeTo: with the path to the document.
+    @abstract   Calls localURLPathInheriting: with inherit set to YES. 
     @discussion -
     @result     a complete path with no tildes, or nil if an error occurred.
 */
 - (NSString *)localURLPath; 
 
 /*!
-    @method     localURLPathRelativeTo:
+    @method     localURLPathInheriting:
+    @abstract   Calls localURLPathRelativeTo:inherit: with the path to the document.
+	@param      inherit Boolean, if set follows the Crossref to find inherited date.
+    @discussion -
+    @result     a complete path with no tildes, or nil if an error occurred.
+*/
+- (NSString *)localURLPathInheriting:(BOOL)inherit;
+
+/*!
+    @method     localURLPathRelativeTo:inherit:
     @abstract   attempts to return a path to the local-url file, relative to the base parameter
     @discussion If the local-url field is a relative path, this will prepend base to it and return the path from building a URL with the result. If the value of local-url is a valid file url already, base is ignored. Base is also ignored if the value of local-url is an absolute path or has a tilde.
     @param      base a path to serve as the base for resolving the relative path.
+	@param      inherit Boolean, if set follows the Crossref to find inherited date.
     @result     a complete path with no tildes, or nil if an error occurred.
 */
-- (NSString *)localURLPathRelativeTo:(NSString *)base; 
+- (NSString *)localURLPathRelativeTo:(NSString *)base inherit:(BOOL)inherit; 
 
 /*!
     @method suggestedLocalUrl
