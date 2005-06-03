@@ -115,6 +115,7 @@
                 copyAsPublicBibTex = id; 
                 copyAsRTF = id; 
                 copyAsTex = id; 
+                createNewPubUsingCrossrefAction = id; 
                 delPub = id; 
                 editPubCmd = id; 
                 editSelectedFieldAsRawBibTeX = id; 
@@ -139,10 +140,12 @@
                 newBDSKLibrary = id; 
                 newPub = id; 
                 saveAsBDSKDocument = id; 
+                selectCrossrefParentAction = id; 
                 selectDuplicates = id; 
                 showMacrosWindow = id; 
                 showReadMe = id; 
                 showRelNotes = id; 
+                sortForCrossrefs = id; 
                 toggle = id; 
                 toggleShowingCustomCiteDrawer = id; 
                 toggleStatusBar = id; 

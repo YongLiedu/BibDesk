@@ -96,7 +96,11 @@
             SUPERCLASS = NSDocument; 
         }, 
         {
-            ACTIONS = {clearQuickSearch = id; }; 
+            ACTIONS = {
+                clearQuickSearch = id; 
+                createNewPubUsingCrossrefAction = id; 
+                selectCrossrefParentAction = id; 
+            }; 
             CLASS = FirstResponder; 
             LANGUAGE = ObjC; 
             SUPERCLASS = NSObject; 

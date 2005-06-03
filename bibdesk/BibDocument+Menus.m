@@ -1,10 +1,40 @@
 //
-//  BibDocument+Validation.m
-//  Bibdesk
+//  BibDocument+Menus.m
+//  BibDesk
 //
 //  Created by Sven-S. Porst on Fri Jul 30 2004.
-//  Copyright (c) 2004 __MyCompanyName__. All rights reserved.
-//
+/*
+ This software is Copyright (c) 2004,2005
+ Sven-S. Porst. All rights reserved.
+
+ Redistribution and use in source and binary forms, with or without
+ modification, are permitted provided that the following conditions
+ are met:
+
+ - Redistributions of source code must retain the above copyright
+   notice, this list of conditions and the following disclaimer.
+
+ - Redistributions in binary form must reproduce the above copyright
+    notice, this list of conditions and the following disclaimer in
+    the documentation and/or other materials provided with the
+    distribution.
+
+ - Neither the name of Sven-S. Porst nor the names of any
+    contributors may be used to endorse or promote products derived
+    from this software without specific prior written permission.
+
+ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+ "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+ LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+ A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+ OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+ SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+ LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+ DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+ THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+ (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ */
 
 #import "BibDocument+Menus.h"
 
@@ -76,29 +106,13 @@ Broken out of BibDocument and split up into smaller parts to make things more ma
 		return [self validateNewPubFromFileMenuItem:menuItem];
 	} else if ([menuItem action] == @selector(importFromWebAction:)) {
 		return [self validateNewPubFromWebMenuItem:menuItem];
-	}
-//	else if ([[menuItem representedObject] isEqualToString:@"displayMenuItem"]) {
-//		// update the display menu. Is this smart enough?
-//		[menuItem setSubmenu:contextualMenu];
-//		return YES;
-//	}
-    
-    else if (act == @selector(makeNewEmptyCollection:)){
-        return [[self fileType] isEqualToString:@"BibDesk Library"];        
-    }else if (act == @selector(makeNewExternalSource:)){
-        return [[self fileType] isEqualToString:@"BibDesk Library"];        
-    }else if (act == @selector(makeNewNotepad:)){
-        return [[self fileType] isEqualToString:@"BibDesk Library"];        
-    }else if (act == @selector(editExportSettingsAction:)){ 
-        
-        // and selection is a collection:
-        return [[self fileType] isEqualToString:@"BibDesk Library"];        
-    }else{
+	} else if ([menuItem action] == @selector(selectCrossrefParentAction:)) {
+        return [self validateSelectCrossrefParentMenuItem:menuItem];
+    } else if ([menuItem action] == @selector(createNewPubUsingCrossrefAction:)) {
+        return [self validateCreateNewPubUsingCrossrefMenuItem:menuItem];
+    } else {
 		return [super validateMenuItem:menuItem];
     }
-	/*   if([@@ [menuItem title] isEqualToString:@"the one for blogging the item"]){
-		if(BDSK_USING_JAGUAR){return NO}; @@@@@ -- even better, get IBOutlet to that item, then in awakeFromNib, remove it if BDSK_USING_JAGUAR.
-    } */
 }
 
 
@@ -458,6 +472,31 @@ Broken out of BibDocument and split up into smaller parts to make things more ma
 	return YES;
 }
 
+
+- (BOOL)validateSelectCrossrefParentMenuItem:(NSMenuItem *)menuItem{
+    NSString *s = NSLocalizedString(@"Select Parent Publication", @"Select the crossref parent of this pub");
+    [menuItem setTitle:s];
+    BibItem *selectedBI = [shownPublications objectAtIndex:[[[self selectedPublications] lastObject] intValue]];
+    if([self numberOfSelectedPubs] == 1 &&
+        [selectedBI valueOfField:BDSKCrossrefString inherit:NO] &&
+       ![[selectedBI valueOfField:BDSKCrossrefString inherit:NO] isEqualToString:@""])
+        return YES;
+    else
+        return NO;
+}
+
+- (BOOL)validateCreateNewPubUsingCrossrefMenuItem:(NSMenuItem *)menuItem{
+    NSString *s = NSLocalizedString(@"New Publication With Crossref", @"New publication with this pub as parent");
+    [menuItem setTitle:s];
+    BibItem *selectedBI = [shownPublications objectAtIndex:[[[self selectedPublications] lastObject] intValue]];
+    // invalid if the selected pub has a crossref field
+    if([self numberOfSelectedPubs] == 1 &&
+       ([selectedBI valueOfField:BDSKCrossrefString inherit:NO] == nil ||
+        [[selectedBI valueOfField:BDSKCrossrefString inherit:NO] isEqualToString:@""]) )
+        return YES;
+    else
+        return NO;
+}
 
 
 /* respond to the clear: action, so we can validate the Delete item in the edit menu.
