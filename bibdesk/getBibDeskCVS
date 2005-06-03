@@ -49,7 +49,7 @@ sub gettag {
  if (defined $ENV{'SF_BIB_TAG'} ) {
    $bibtag = $ENV{'SF_BIB_TAG'};
  } else {
-   print "Do you want a specific tag? (empty for none or enter tag(eg TRY_RTF_041503) ";
+   print "Do you want a specific tag? (empty for none or enter tag (eg BR_1x)): ";
    $bibtag = <STDIN>;
  }
  chomp($bibtag);

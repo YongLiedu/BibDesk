@@ -1,3 +1,38 @@
+// BDSKComplexString.m
+// Created by Michael McCracken, 2004
+/*
+ This software is Copyright (c) 2004,2005
+ Michael O. McCracken. All rights reserved.
+
+ Redistribution and use in source and binary forms, with or without
+ modification, are permitted provided that the following conditions
+ are met:
+
+ - Redistributions of source code must retain the above copyright
+   notice, this list of conditions and the following disclaimer.
+
+ - Redistributions in binary form must reproduce the above copyright
+    notice, this list of conditions and the following disclaimer in
+    the documentation and/or other materials provided with the
+    distribution.
+
+ - Neither the name of Michael O. McCracken nor the names of any
+    contributors may be used to endorse or promote products derived
+    from this software without specific prior written permission.
+
+ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+ "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+ LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+ A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+ OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+ SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+ LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+ DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+ THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+ (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ */
+
 #import "BDSKComplexString.h"
 #import "NSSTring_BDSKExtensions.h"
 
@@ -111,11 +146,7 @@ static NSDictionary *globalMacroDefs;
 }
 
 - (BOOL)isEqual:(BDSKComplexString *)other{
-    return [self isEqualAsComplexString:other];
-}
-
-- (unsigned)hash{
-    return [[self expandedValue] hash];
+    return [super isEqual:other]; // do not override super's implementation of isEqual
 }
 
 - (id)initWithArray:(NSArray *)a macroResolver:(id)theMacroResolver{
@@ -126,8 +157,29 @@ static NSDictionary *globalMacroDefs;
 		} else {
 			NSLog(@"Warning: complex string being created without macro resolver. Macros in it will not be resolved.");
 		}
+		complex = YES;
 	}		
     return self;
+}
+
+- (id)initWithInheritedValue:(NSString *)newValue {
+    if (self = [super init]) {
+		if ([newValue isComplex]) {
+			nodes = [[NSArray alloc] initWithArray:[(BDSKComplexString *)newValue nodes] copyItems:YES];
+			macroResolver = [(BDSKComplexString *)newValue macroResolver];
+			if (macroResolver == nil) {
+				NSLog(@"Warning: complex string being created without macro resolver. Macros in it will not be resolved.");
+			}
+			complex = YES;
+		} else {
+			if ([newValue isInherited])
+				newValue = [(BDSKComplexString *)newValue expandedValue];
+			nodes = [[NSArray alloc] initWithObjects:[BDSKStringNode nodeWithQuotedString:newValue], nil];
+			complex = NO;
+		}
+		inherited = YES;
+	}
+	return self;
 }
 
 - (void)dealloc{
@@ -136,23 +188,31 @@ static NSDictionary *globalMacroDefs;
 }
 
 - (id)copyWithZone:(NSZone *)zone{
-	NSEnumerator *nodeEnum = [nodes objectEnumerator];
-	BDSKStringNode *node;
-	NSMutableArray *copiedNodes = [NSMutableArray array];
+    BDSKComplexString *cs;
 	
-	// deep copy the nodes, to be sure...
-	while (node = [nodeEnum nextObject]) {
-		[copiedNodes addObject:[[node copyWithZone:zone] autorelease]];
-	}
-    BDSKComplexString *cs = [[BDSKComplexString allocWithZone:zone] initWithArray:copiedNodes 
+	if ([self isInherited]) {
+		cs = [[BDSKComplexString allocWithZone:zone] initWithInheritedValue:self];
+	} else {
+		NSEnumerator *nodeEnum = [nodes objectEnumerator];
+		BDSKStringNode *node;
+		NSMutableArray *copiedNodes = [NSMutableArray array];
+		
+		// deep copy the nodes, to be sure...
+		while (node = [nodeEnum nextObject]) {
+			[copiedNodes addObject:[[node copyWithZone:zone] autorelease]];
+		}
+		cs = [[BDSKComplexString allocWithZone:zone] initWithArray:copiedNodes 
 																	macroResolver:macroResolver];
-    return cs;
+    }
+	return cs;
 }
 
 - (id)initWithCoder:(NSCoder *)coder{
 	if (self = [super initWithCoder:coder]) {
 		nodes = [[coder decodeObjectForKey:@"nodes"] retain];
 		[self setMacroResolver:[coder decodeObjectForKey:@"macroResolver"]];
+		complex = [coder decodeBoolForKey:@"complex"];
+		inherited = [coder decodeBoolForKey:@"inherited"];
 	}
 	return self;
 }
@@ -161,6 +221,8 @@ static NSDictionary *globalMacroDefs;
 	[super encodeWithCoder:coder];
     [coder encodeObject:nodes forKey:@"nodes"];
     [coder encodeConditionalObject:macroResolver forKey:@"macroResolver"];
+	[coder encodeBool:complex forKey:@"complex"];
+	[coder encodeBool:inherited forKey:@"inherited"];
 }
 
 #pragma mark overridden NSString Methods
@@ -184,13 +246,21 @@ static NSDictionary *globalMacroDefs;
 #pragma mark overridden methods from the ComplexStringExtensions
 
 - (BOOL)isComplex {
-    return YES;
+    return complex;
+}
+
+- (BOOL)isInherited {
+    return inherited;
 }
 
 - (BOOL)isEqualAsComplexString:(NSString *)other{
-	if (![other isComplex])
-		return NO;
-	return [[self nodes] isEqualToArray:[(BDSKComplexString*)other nodes]];
+	if ([self isComplex]) {
+		if (![other isComplex])
+			return NO;
+		return [[self nodes] isEqualToArray:[(BDSKComplexString*)other nodes]];
+	} else {
+		return [self isEqualToString:other];
+	}
 }
 
 // Returns the bibtex value of the string.
@@ -400,6 +470,10 @@ static NSDictionary *globalMacroDefs;
 }
 
 - (BOOL)isComplex{
+	return NO;
+}
+
+- (BOOL)isInherited{
 	return NO;
 }
 
