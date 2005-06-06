@@ -9,9 +9,9 @@
 		<key>202</key>
 		<string>163 518 119 49 0 0 1152 746 </string>
 		<key>29</key>
-		<string>240 860 423 44 0 0 1280 1002 </string>
+		<string>242 860 423 44 0 0 1280 1002 </string>
 		<key>424</key>
-		<string>397 616 448 103 0 0 1280 1002 </string>
+		<string>396 616 448 103 0 0 1280 1002 </string>
 		<key>493</key>
 		<string>452 503 328 102 0 0 1280 832 </string>
 	</dict>
@@ -28,6 +28,6 @@
 		<integer>424</integer>
 	</array>
 	<key>IBSystem Version</key>
-	<string>8B13</string>
+	<string>8C21</string>
 </dict>
 </plist>

@@ -1,6 +1,6 @@
 //
 //  BibField.m
-//  Bibdesk
+//  BibDesk
 //
 //  Created by Christiaan Hofman on 27/11/04.
 //  Copyright 2004 __MyCompanyName__. All rights reserved.
@@ -50,10 +50,14 @@ A wrapper object around the fields to access them in AppleScript.
 }
 
 - (NSString *)value {
-    return [bibItem valueOfField:name];
+    NSString *value = [bibItem valueOfField:name];
+	if (value == nil) return @"";
+	return value;
 }
 
 - (void)setValue:(NSString *)newValue {
+	if (![[[bibItem pubFields] allKeys] containsObject:name])
+		[bibItem addField:name];
     [bibItem setField:name toValue:newValue];
 }
 
