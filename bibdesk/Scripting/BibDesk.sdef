@@ -173,9 +173,6 @@ will translate this file into the necessary scriptSuite and scriptTerminology fi
 						<cocoa method="bibTeXString"/>
 					</property>  
 					
-					<property name="fields record" code="flds" type="record" description="Fields with data about the publication. These may vary from publication to publication." hidden="">
-						<cocoa method="fields"/>
-					</property>  
 					<property name="document" code="docu" type="document" description="The bibliography containing this publication record." access="r">
 						<cocoa method="document"/>
 					</property>  

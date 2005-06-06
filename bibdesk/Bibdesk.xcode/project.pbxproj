@@ -7,17 +7,14 @@
 	objects = {
 		080E96DDFE201D6D7F000001 = {
 			children = (
-				27D4FA0307DE560A001CAB00,
-				3D6D747307EE1ECD00E8A7EF,
 				F9022FB707580B9400C3F701,
 				F918104307583A6E00CF822D,
 				F988709007580CB4001D4D49,
+				F9569C2C08415E8300316D02,
 				3D44F5610812A91D003C67F0,
 				F94EC0E708117BB6005EAFD9,
 				27AFAF9B080D1E1B0096F5D2,
 				F9A6742907D04E8000782ACD,
-				F94A94F3079AEE5800D13AB5,
-				F94A94E9079AEE5800D13AB5,
 				F9F78CD307D5320D004B68AF,
 				2730077707CF20B500F2E485,
 				3D824AA707D099C300FB2F67,
@@ -26,7 +23,6 @@
 				3D86633E0802C25800FF1724,
 				3D866C2708031CEC00FF1724,
 				2730077807CF20B500F2E485,
-				27C1639D078BF48C008A4B83,
 				F9022C66075802E300C3F701,
 				F9022C64075802E300C3F701,
 				F9022C8A0758034000C3F701,
@@ -51,7 +47,6 @@
 				3DE3916607FEF5E600BE3AE7,
 				F9022C6A075802E300C3F701,
 				F9022C6E075802E300C3F701,
-				F9022C70075802E300C3F701,
 				F9022C72075802E300C3F701,
 				F9022C3B0758027800C3F701,
 				F9022C3D0758027800C3F701,
@@ -60,6 +55,7 @@
 				F9022C430758027800C3F701,
 				3DE391F107FF260D00BE3AE7,
 				F9022C450758027800C3F701,
+				3D7406920849F5430081EC6F,
 				F9022C390758027800C3F701,
 				F9022C490758027800C3F701,
 				F9022C470758027800C3F701,
@@ -778,34 +774,6 @@
 			settings = {
 			};
 		};
-		27C1639C078BF48C008A4B83 = {
-			fileEncoding = 4;
-			isa = PBXFileReference;
-			lastKnownFileType = sourcecode.c.h;
-			path = BibCollection.h;
-			refType = 4;
-			sourceTree = "<group>";
-		};
-		27C1639D078BF48C008A4B83 = {
-			fileEncoding = 4;
-			isa = PBXFileReference;
-			lastKnownFileType = sourcecode.c.objc;
-			path = BibCollection.m;
-			refType = 4;
-			sourceTree = "<group>";
-		};
-		27C1639E078BF48C008A4B83 = {
-			fileRef = 27C1639C078BF48C008A4B83;
-			isa = PBXBuildFile;
-			settings = {
-			};
-		};
-		27C1639F078BF48C008A4B83 = {
-			fileRef = 27C1639D078BF48C008A4B83;
-			isa = PBXBuildFile;
-			settings = {
-			};
-		};
 		27CD031A07D82C4E00806B7E = {
 			fileEncoding = 30;
 			isa = PBXFileReference;
@@ -1074,258 +1042,6 @@
 			settings = {
 			};
 		};
-		27D4FA0307DE560A001CAB00 = {
-			children = (
-				27D4FC3307DE883B001CAB00,
-				27D4FA0407DE568D001CAB00,
-				27D4FA0507DE568D001CAB00,
-				27D4FA0607DE568D001CAB00,
-				27D4FA0707DE568D001CAB00,
-				27D4FA0807DE568D001CAB00,
-				27D4FA0907DE568D001CAB00,
-				27D4FA0A07DE568D001CAB00,
-				27D4FA0B07DE568D001CAB00,
-				27D4FA0C07DE568D001CAB00,
-				27D4FA0D07DE568D001CAB00,
-				27D4FA0E07DE568D001CAB00,
-				27D4FA0F07DE568D001CAB00,
-				27D4FA1007DE568D001CAB00,
-			);
-			isa = PBXGroup;
-			name = Library;
-			refType = 4;
-			sourceTree = "<group>";
-		};
-		27D4FA0407DE568D001CAB00 = {
-			fileEncoding = 30;
-			isa = PBXFileReference;
-			lastKnownFileType = sourcecode.c.h;
-			path = BDSKItemBibTeXDisplayController.h;
-			refType = 2;
-			sourceTree = SOURCE_ROOT;
-		};
-		27D4FA0507DE568D001CAB00 = {
-			fileEncoding = 30;
-			isa = PBXFileReference;
-			lastKnownFileType = sourcecode.c.objc;
-			path = BDSKItemBibTeXDisplayController.m;
-			refType = 2;
-			sourceTree = SOURCE_ROOT;
-		};
-		27D4FA0607DE568D001CAB00 = {
-			fileEncoding = 30;
-			isa = PBXFileReference;
-			lastKnownFileType = sourcecode.c.h;
-			path = BDSKItemDisplayController.h;
-			refType = 2;
-			sourceTree = SOURCE_ROOT;
-		};
-		27D4FA0707DE568D001CAB00 = {
-			fileEncoding = 30;
-			isa = PBXFileReference;
-			lastKnownFileType = sourcecode.c.h;
-			path = BDSKItemTableDisplayController.h;
-			refType = 2;
-			sourceTree = SOURCE_ROOT;
-		};
-		27D4FA0807DE568D001CAB00 = {
-			fileEncoding = 30;
-			isa = PBXFileReference;
-			lastKnownFileType = sourcecode.c.objc;
-			path = BDSKItemTableDisplayController.m;
-			refType = 2;
-			sourceTree = SOURCE_ROOT;
-		};
-		27D4FA0907DE568D001CAB00 = {
-			fileEncoding = 30;
-			isa = PBXFileReference;
-			lastKnownFileType = sourcecode.c.h;
-			path = BDSKLibrary.h;
-			refType = 2;
-			sourceTree = SOURCE_ROOT;
-		};
-		27D4FA0A07DE568D001CAB00 = {
-			fileEncoding = 30;
-			isa = PBXFileReference;
-			lastKnownFileType = sourcecode.c.objc;
-			path = BDSKLibrary.m;
-			refType = 2;
-			sourceTree = SOURCE_ROOT;
-		};
-		27D4FA0B07DE568D001CAB00 = {
-			fileEncoding = 30;
-			isa = PBXFileReference;
-			lastKnownFileType = sourcecode.c.h;
-			path = BDSKLibraryController.h;
-			refType = 2;
-			sourceTree = SOURCE_ROOT;
-		};
-		27D4FA0C07DE568D001CAB00 = {
-			fileEncoding = 30;
-			isa = PBXFileReference;
-			lastKnownFileType = sourcecode.c.objc;
-			path = BDSKLibraryController.m;
-			refType = 2;
-			sourceTree = SOURCE_ROOT;
-		};
-		27D4FA0D07DE568D001CAB00 = {
-			fileEncoding = 30;
-			isa = PBXFileReference;
-			lastKnownFileType = sourcecode.c.h;
-			path = BDSKRemoteSource.h;
-			refType = 2;
-			sourceTree = SOURCE_ROOT;
-		};
-		27D4FA0E07DE568D001CAB00 = {
-			fileEncoding = 30;
-			isa = PBXFileReference;
-			lastKnownFileType = sourcecode.c.objc;
-			path = BDSKRemoteSource.m;
-			refType = 2;
-			sourceTree = SOURCE_ROOT;
-		};
-		27D4FA0F07DE568D001CAB00 = {
-			fileEncoding = 30;
-			isa = PBXFileReference;
-			lastKnownFileType = sourcecode.c.h;
-			path = BibNote.h;
-			refType = 2;
-			sourceTree = SOURCE_ROOT;
-		};
-		27D4FA1007DE568D001CAB00 = {
-			fileEncoding = 30;
-			isa = PBXFileReference;
-			lastKnownFileType = sourcecode.c.objc;
-			path = BibNote.m;
-			refType = 2;
-			sourceTree = SOURCE_ROOT;
-		};
-		27D4FA1107DE568D001CAB00 = {
-			fileRef = 27D4FA0407DE568D001CAB00;
-			isa = PBXBuildFile;
-			settings = {
-			};
-		};
-		27D4FA1207DE568D001CAB00 = {
-			fileRef = 27D4FA0507DE568D001CAB00;
-			isa = PBXBuildFile;
-			settings = {
-			};
-		};
-		27D4FA1307DE568D001CAB00 = {
-			fileRef = 27D4FA0607DE568D001CAB00;
-			isa = PBXBuildFile;
-			settings = {
-			};
-		};
-		27D4FA1407DE568D001CAB00 = {
-			fileRef = 27D4FA0707DE568D001CAB00;
-			isa = PBXBuildFile;
-			settings = {
-			};
-		};
-		27D4FA1507DE568D001CAB00 = {
-			fileRef = 27D4FA0807DE568D001CAB00;
-			isa = PBXBuildFile;
-			settings = {
-			};
-		};
-		27D4FA1607DE568D001CAB00 = {
-			fileRef = 27D4FA0907DE568D001CAB00;
-			isa = PBXBuildFile;
-			settings = {
-			};
-		};
-		27D4FA1707DE568D001CAB00 = {
-			fileRef = 27D4FA0A07DE568D001CAB00;
-			isa = PBXBuildFile;
-			settings = {
-			};
-		};
-		27D4FA1807DE568D001CAB00 = {
-			fileRef = 27D4FA0B07DE568D001CAB00;
-			isa = PBXBuildFile;
-			settings = {
-			};
-		};
-		27D4FA1907DE568D001CAB00 = {
-			fileRef = 27D4FA0C07DE568D001CAB00;
-			isa = PBXBuildFile;
-			settings = {
-			};
-		};
-		27D4FA1A07DE568D001CAB00 = {
-			fileRef = 27D4FA0D07DE568D001CAB00;
-			isa = PBXBuildFile;
-			settings = {
-			};
-		};
-		27D4FA1B07DE568D001CAB00 = {
-			fileRef = 27D4FA0E07DE568D001CAB00;
-			isa = PBXBuildFile;
-			settings = {
-			};
-		};
-		27D4FA1C07DE568D001CAB00 = {
-			fileRef = 27D4FA0F07DE568D001CAB00;
-			isa = PBXBuildFile;
-			settings = {
-			};
-		};
-		27D4FA1D07DE568D001CAB00 = {
-			fileRef = 27D4FA1007DE568D001CAB00;
-			isa = PBXBuildFile;
-			settings = {
-			};
-		};
-		27D4FA5D07DE5CF5001CAB00 = {
-			children = (
-				27D4FA5E07DE5CF5001CAB00,
-			);
-			isa = PBXVariantGroup;
-			name = BDSKLibrary.nib;
-			path = "";
-			refType = 2;
-			sourceTree = SOURCE_ROOT;
-		};
-		27D4FA5E07DE5CF5001CAB00 = {
-			isa = PBXFileReference;
-			lastKnownFileType = wrapper.nib;
-			name = English;
-			path = English.lproj/BDSKLibrary.nib;
-			refType = 4;
-			sourceTree = "<group>";
-		};
-		27D4FA5F07DE5CF5001CAB00 = {
-			children = (
-				27D4FA6007DE5CF5001CAB00,
-			);
-			isa = PBXVariantGroup;
-			name = BibTeXItemDisplay.nib;
-			path = "";
-			refType = 2;
-			sourceTree = SOURCE_ROOT;
-		};
-		27D4FA6007DE5CF5001CAB00 = {
-			isa = PBXFileReference;
-			lastKnownFileType = wrapper.nib;
-			name = English;
-			path = English.lproj/BibTeXItemDisplay.nib;
-			refType = 4;
-			sourceTree = "<group>";
-		};
-		27D4FA6107DE5CF5001CAB00 = {
-			fileRef = 27D4FA5D07DE5CF5001CAB00;
-			isa = PBXBuildFile;
-			settings = {
-			};
-		};
-		27D4FA6207DE5CF5001CAB00 = {
-			fileRef = 27D4FA5F07DE5CF5001CAB00;
-			isa = PBXBuildFile;
-			settings = {
-			};
-		};
 		27D4FB5407DE7A83001CAB00 = {
 			fileEncoding = 30;
 			isa = PBXFileReference;
@@ -1368,20 +1084,6 @@
 			path = "Scripting Notes";
 			refType = 4;
 			sourceTree = "<group>";
-		};
-		27D4FC3307DE883B001CAB00 = {
-			fileEncoding = 4;
-			isa = PBXFileReference;
-			lastKnownFileType = sourcecode.c.h;
-			path = BDSKItemSource.h;
-			refType = 4;
-			sourceTree = "<group>";
-		};
-		27D4FC3407DE883B001CAB00 = {
-			fileRef = 27D4FC3307DE883B001CAB00;
-			isa = PBXBuildFile;
-			settings = {
-			};
 		};
 		27E89E220805E9F500E4DA08 = {
 			fileEncoding = 30;
@@ -1469,7 +1171,7 @@
 				19C28FACFE9D520D11CA2CBB,
 			);
 			isa = PBXGroup;
-			name = Bibdesk;
+			name = BibDesk;
 			path = "";
 			refType = 4;
 			sourceTree = "<group>";
@@ -1502,19 +1204,15 @@
 		};
 		29B97317FDCFA39411CA2CEA = {
 			children = (
+				3DA82938083ECE9300321864,
+				F95A735E0836F869007768EA,
 				3D8A54F6082D1F86008E818C,
 				F994B8F607F5F65F00751DA1,
-				27D4FA5D07DE5CF5001CAB00,
-				27D4FA5F07DE5CF5001CAB00,
-				3D6D748807EE1F8F00E8A7EF,
-				3D6D748607EE1F8F00E8A7EF,
 				2730079B07CF214E00F2E485,
 				2730079D07CF214E00F2E485,
-				F92F4E460788DEDD001B8F82,
 				3D866C3E0803223900FF1724,
 				3D8663770802CF5C00FF1724,
 				F92F4E430788DEC5001B8F82,
-				F94A9504079AEE7600D13AB5,
 				F91B5CF507657D820011ED22,
 				F91B5CF607657D820011ED22,
 				F91B5CC7076579830011ED22,
@@ -1529,15 +1227,11 @@
 				F9022D130758066000C3F701,
 				F9022D140758066000C3F701,
 				F9022D150758066000C3F701,
-				F9022D160758066000C3F701,
 				F9022D170758066000C3F701,
 				F9022D180758066000C3F701,
-				F9022D190758066000C3F701,
-				F9022D1A0758066000C3F701,
 				F9022D1B0758066000C3F701,
 				F9022CDB0758050E00C3F701,
 				F9022CDD0758050E00C3F701,
-				F9022CDF0758050E00C3F701,
 				F9022CE10758050E00C3F701,
 				F9022CE30758050E00C3F701,
 				F9022CE50758050E00C3F701,
@@ -1547,6 +1241,7 @@
 				F9022CCF075804E400C3F701,
 				F9022CD1075804E400C3F701,
 				F9022CD3075804E400C3F701,
+				3D0D76AD084898AA00A495A5,
 				F9022CC0075804A600C3F701,
 				3D8CA0A307CB625300460D07,
 				F9022CC2075804A600C3F701,
@@ -1644,6 +1339,58 @@
 //3D2
 //3D3
 //3D4
+		3D0D76AD084898AA00A495A5 = {
+			children = (
+				3D0D76AE084898AA00A495A5,
+			);
+			isa = PBXVariantGroup;
+			name = BibPref_Crossref.nib;
+			path = "";
+			refType = 4;
+			sourceTree = "<group>";
+		};
+		3D0D76AE084898AA00A495A5 = {
+			isa = PBXFileReference;
+			lastKnownFileType = wrapper.nib;
+			name = English;
+			path = English.lproj/BibPref_Crossref.nib;
+			refType = 4;
+			sourceTree = "<group>";
+		};
+		3D0D76AF084898AA00A495A5 = {
+			fileRef = 3D0D76AD084898AA00A495A5;
+			isa = PBXBuildFile;
+			settings = {
+			};
+		};
+		3D0D76B0084898C100A495A5 = {
+			fileEncoding = 30;
+			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.c.h;
+			path = BibPref_Crossref.h;
+			refType = 4;
+			sourceTree = "<group>";
+		};
+		3D0D76B1084898C100A495A5 = {
+			fileEncoding = 30;
+			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.c.objc;
+			path = BibPref_Crossref.m;
+			refType = 4;
+			sourceTree = "<group>";
+		};
+		3D0D76B2084898C100A495A5 = {
+			fileRef = 3D0D76B0084898C100A495A5;
+			isa = PBXBuildFile;
+			settings = {
+			};
+		};
+		3D0D76B3084898C100A495A5 = {
+			fileRef = 3D0D76B1084898C100A495A5;
+			isa = PBXBuildFile;
+			settings = {
+			};
+		};
 		3D3EA58907C170A500DEEAA3 = {
 			isa = PBXFileReference;
 			lastKnownFileType = image.tiff;
@@ -1728,194 +1475,44 @@
 			settings = {
 			};
 		};
-		3D6D747307EE1ECD00E8A7EF = {
-			children = (
-				3D6D747407EE1F1D00E8A7EF,
-				3D6D747507EE1F1D00E8A7EF,
-				3D6D747607EE1F1D00E8A7EF,
-				3D6D747707EE1F1E00E8A7EF,
-				3D6D747807EE1F1E00E8A7EF,
-				3D6D747907EE1F1E00E8A7EF,
-				3D6D747A07EE1F1E00E8A7EF,
-				3D6D747B07EE1F1E00E8A7EF,
-				3D6D747C07EE1F1E00E8A7EF,
-			);
-			isa = PBXGroup;
-			name = Filter;
-			path = "";
-			refType = 4;
-			sourceTree = "<group>";
-		};
-		3D6D747407EE1F1D00E8A7EF = {
+		3D7406910849F5430081EC6F = {
 			fileEncoding = 30;
 			isa = PBXFileReference;
 			lastKnownFileType = sourcecode.c.h;
-			path = BDSKCondition.h;
+			path = BDSKTypeNameFormatter.h;
 			refType = 4;
 			sourceTree = "<group>";
 		};
-		3D6D747507EE1F1D00E8A7EF = {
+		3D7406920849F5430081EC6F = {
 			fileEncoding = 30;
 			isa = PBXFileReference;
 			lastKnownFileType = sourcecode.c.objc;
-			path = BDSKCondition.m;
+			path = BDSKTypeNameFormatter.m;
 			refType = 4;
 			sourceTree = "<group>";
 		};
-		3D6D747607EE1F1D00E8A7EF = {
-			fileEncoding = 30;
+		3D7406930849F5430081EC6F = {
+			fileRef = 3D7406910849F5430081EC6F;
+			isa = PBXBuildFile;
+			settings = {
+			};
+		};
+		3D7406940849F5430081EC6F = {
+			fileRef = 3D7406920849F5430081EC6F;
+			isa = PBXBuildFile;
+			settings = {
+			};
+		};
+		3D7C78E1084F4A3A0026D861 = {
 			isa = PBXFileReference;
-			lastKnownFileType = sourcecode.c.h;
-			path = BDSKConditionController.h;
+			lastKnownFileType = image.tiff;
+			name = crossref.tiff;
+			path = Images/crossref.tiff;
 			refType = 4;
 			sourceTree = "<group>";
 		};
-		3D6D747707EE1F1E00E8A7EF = {
-			fileEncoding = 30;
-			isa = PBXFileReference;
-			lastKnownFileType = sourcecode.c.objc;
-			path = BDSKConditionController.m;
-			refType = 4;
-			sourceTree = "<group>";
-		};
-		3D6D747807EE1F1E00E8A7EF = {
-			fileEncoding = 30;
-			isa = PBXFileReference;
-			lastKnownFileType = sourcecode.c.h;
-			path = BDSKFilter.h;
-			refType = 4;
-			sourceTree = "<group>";
-		};
-		3D6D747907EE1F1E00E8A7EF = {
-			fileEncoding = 30;
-			isa = PBXFileReference;
-			lastKnownFileType = sourcecode.c.objc;
-			path = BDSKFilter.m;
-			refType = 4;
-			sourceTree = "<group>";
-		};
-		3D6D747A07EE1F1E00E8A7EF = {
-			fileEncoding = 30;
-			isa = PBXFileReference;
-			lastKnownFileType = sourcecode.c.h;
-			path = BDSKFilterController.h;
-			refType = 4;
-			sourceTree = "<group>";
-		};
-		3D6D747B07EE1F1E00E8A7EF = {
-			fileEncoding = 30;
-			isa = PBXFileReference;
-			lastKnownFileType = sourcecode.c.objc;
-			path = BDSKFilterController.m;
-			refType = 4;
-			sourceTree = "<group>";
-		};
-		3D6D747C07EE1F1E00E8A7EF = {
-			fileEncoding = 30;
-			isa = PBXFileReference;
-			lastKnownFileType = sourcecode.c.h;
-			path = BDSKFilterItem.h;
-			refType = 4;
-			sourceTree = "<group>";
-		};
-		3D6D747D07EE1F1E00E8A7EF = {
-			fileRef = 3D6D747407EE1F1D00E8A7EF;
-			isa = PBXBuildFile;
-			settings = {
-			};
-		};
-		3D6D747E07EE1F1E00E8A7EF = {
-			fileRef = 3D6D747507EE1F1D00E8A7EF;
-			isa = PBXBuildFile;
-			settings = {
-			};
-		};
-		3D6D747F07EE1F1E00E8A7EF = {
-			fileRef = 3D6D747607EE1F1D00E8A7EF;
-			isa = PBXBuildFile;
-			settings = {
-			};
-		};
-		3D6D748007EE1F1E00E8A7EF = {
-			fileRef = 3D6D747707EE1F1E00E8A7EF;
-			isa = PBXBuildFile;
-			settings = {
-			};
-		};
-		3D6D748107EE1F1E00E8A7EF = {
-			fileRef = 3D6D747807EE1F1E00E8A7EF;
-			isa = PBXBuildFile;
-			settings = {
-			};
-		};
-		3D6D748207EE1F1E00E8A7EF = {
-			fileRef = 3D6D747907EE1F1E00E8A7EF;
-			isa = PBXBuildFile;
-			settings = {
-			};
-		};
-		3D6D748307EE1F1E00E8A7EF = {
-			fileRef = 3D6D747A07EE1F1E00E8A7EF;
-			isa = PBXBuildFile;
-			settings = {
-			};
-		};
-		3D6D748407EE1F1E00E8A7EF = {
-			fileRef = 3D6D747B07EE1F1E00E8A7EF;
-			isa = PBXBuildFile;
-			settings = {
-			};
-		};
-		3D6D748507EE1F1E00E8A7EF = {
-			fileRef = 3D6D747C07EE1F1E00E8A7EF;
-			isa = PBXBuildFile;
-			settings = {
-			};
-		};
-		3D6D748607EE1F8F00E8A7EF = {
-			children = (
-				3D6D748707EE1F8F00E8A7EF,
-			);
-			isa = PBXVariantGroup;
-			name = BDSKCondition.nib;
-			path = "";
-			refType = 4;
-			sourceTree = "<group>";
-		};
-		3D6D748707EE1F8F00E8A7EF = {
-			isa = PBXFileReference;
-			lastKnownFileType = wrapper.nib;
-			name = English;
-			path = English.lproj/BDSKCondition.nib;
-			refType = 4;
-			sourceTree = "<group>";
-		};
-		3D6D748807EE1F8F00E8A7EF = {
-			children = (
-				3D6D748907EE1F8F00E8A7EF,
-			);
-			isa = PBXVariantGroup;
-			name = BDSKFilter.nib;
-			path = "";
-			refType = 4;
-			sourceTree = "<group>";
-		};
-		3D6D748907EE1F8F00E8A7EF = {
-			isa = PBXFileReference;
-			lastKnownFileType = wrapper.nib;
-			name = English;
-			path = English.lproj/BDSKFilter.nib;
-			refType = 4;
-			sourceTree = "<group>";
-		};
-		3D6D748A07EE1F8F00E8A7EF = {
-			fileRef = 3D6D748607EE1F8F00E8A7EF;
-			isa = PBXBuildFile;
-			settings = {
-			};
-		};
-		3D6D748B07EE1F8F00E8A7EF = {
-			fileRef = 3D6D748807EE1F8F00E8A7EF;
+		3D7C78E2084F4A3A0026D861 = {
+			fileRef = 3D7C78E1084F4A3A0026D861;
 			isa = PBXBuildFile;
 			settings = {
 			};
@@ -2128,7 +1725,6 @@
 				3D8A5780082D31D2008E818C,
 			);
 			buildSettings = {
-				OPTIMIZATION_CFLAGS = "";
 				OTHER_CFLAGS = "";
 				OTHER_LDFLAGS = "";
 				OTHER_REZFLAGS = "";
@@ -2166,7 +1762,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "## index online help\n##\nif [ -d /Developer/Applications/Utilities/Help\\ Indexer.app/ ]; then\necho \"*** Building Tiger Help ***\"\nfor LOC_DIR in ${SOURCE_ROOT}/*.lproj; do \\\n/Developer/Applications/Utilities/Help\\ Indexer.app/Contents/MacOS/Help\\ Indexer \\\n${LOC_DIR}/BibDesk\\ Help \\\n-PantherIndexer YES \\\n-Tokenizer 1 \\\n-ShowProgress YES \\\n-UseRemoteRoot YES \\\n-RemoteRoot http://bibdesk.sf.net/applehelp/ \\\n-PreferNetworkFiles NO \\\n-LogStyle 2 \\\n-IndexAnchors YES \\\n-TigerIndexing YES \\\n-GenerateSummaries YES \\\n-Stopwords en \\\n-MinTermLength 3;\\\ndone\nexit 0\nelse\necho \"*** Building Panther Help ***\"\nfor LOC_DIR in ${SOURCE_ROOT}/*.lproj; do \\\nopen -a \"Apple Help Indexing Tool\" ${LOC_DIR}/BibDesk\\ Help;\\\ndone\nexit 0\nfi\n";
+			shellScript = "## index online help\n##\n## Tiger help needs to be indexed during the BibDesk target build\n##\nif [ -d /Developer/Applications/Utilities/Help\\ Indexer.app/ ]; then\necho \"*** Will index Tiger Help later ***\"\nexit 0\nelse\necho \"*** Indexing Panther Help ***\"\nfor LOC_DIR in ${SOURCE_ROOT}/*.lproj; do \\\nopen -a \"Apple Help Indexing Tool\" ${LOC_DIR}/BibDesk\\ Help;\\\ndone\nexit 0\nfi\n";
 		};
 		3D8CA0A307CB625300460D07 = {
 			children = (
@@ -2244,6 +1840,21 @@
 		};
 		3D9EC25307C66B1E00DE459D = {
 			fileRef = 3D9EC25207C66B1E00DE459D;
+			isa = PBXBuildFile;
+			settings = {
+			};
+		};
+		3DA82938083ECE9300321864 = {
+			children = (
+				F9E0B08D083E49D2000109C6,
+			);
+			isa = PBXVariantGroup;
+			name = Localizable.strings;
+			refType = 4;
+			sourceTree = "<group>";
+		};
+		3DA82939083ECE9300321864 = {
+			fileRef = 3DA82938083ECE9300321864;
 			isa = PBXBuildFile;
 			settings = {
 			};
@@ -2478,6 +2089,7 @@
 //8D4
 		8D1107260486CEB800E47090 = {
 			buildPhases = (
+				F9E0B071083E450C000109C6,
 				F98F1C3B075839F7007DC618,
 				F91B5D1907658A5F0011ED22,
 				F9022E88075809ED00C3F701,
@@ -2487,6 +2099,7 @@
 				F9022E8B07580A7C00C3F701,
 				F920DB22075C2D40000C5FCA,
 				F91B5C4E076412A10011ED22,
+				F91E54660853576600208CDF,
 			);
 			buildRules = (
 			);
@@ -2500,22 +2113,23 @@
 				INSTALL_PATH = "$(HOME)/Applications";
 				LIBRARY_SEARCH_PATHS = "$(SOURCE_ROOT)/../bibdesk_vendorsrc/gward/btparse";
 				OTHER_LDFLAGS = "";
-				PRODUCT_NAME = Bibdesk;
+				PRODUCT_NAME = BibDesk;
 				WRAPPER_EXTENSION = app;
 				ZERO_LINK = YES;
 			};
 			dependencies = (
 			);
 			isa = PBXNativeTarget;
-			name = Bibdesk;
+			name = BibDesk;
 			productInstallPath = "$(HOME)/Applications";
-			productName = Bibdesk;
+			productName = BibDesk;
 			productReference = 8D1107320486CEB800E47090;
 			productType = "com.apple.product-type.application";
 		};
 		8D1107290486CEB800E47090 = {
 			buildActionMask = 2147483647;
 			files = (
+				F95A73640836F8A0007768EA,
 				F9022D9B0758073F00C3F701,
 				8D11072A0486CEB800E47090,
 				8D11072B0486CEB800E47090,
@@ -2578,7 +2192,6 @@
 				F9022DD50758088000C3F701,
 				F9022DD60758088000C3F701,
 				F9022DD70758088000C3F701,
-				F98F1C2207583400007DC618,
 				F91B5CC8076579830011ED22,
 				F91B5CE0076579FE0011ED22,
 				F91B5CE507657A200011ED22,
@@ -2591,7 +2204,6 @@
 				F92F4E450788DEC5001B8F82,
 				F92F4E470788DEDD001B8F82,
 				F96E21690794FE3400120AB3,
-				F94A950C079AEE7600D13AB5,
 				3D3EA58A07C170A500DEEAA3,
 				3D3EA7F407C19B7900DEEAA3,
 				3D7D45BD07C4EDB100F8D262,
@@ -2599,10 +2211,6 @@
 				3D8CA0A507CB625300460D07,
 				2730079F07CF214E00F2E485,
 				273007A007CF214E00F2E485,
-				27D4FA6107DE5CF5001CAB00,
-				27D4FA6207DE5CF5001CAB00,
-				3D6D748A07EE1F8F00E8A7EF,
-				3D6D748B07EE1F8F00E8A7EF,
 				F994B8F707F5F65F00751DA1,
 				3D4373AD07FB3E960007BA84,
 				3D8663790802CF5C00FF1724,
@@ -2615,6 +2223,10 @@
 				F9B07D14082B1B9000345747,
 				F9B07D15082B1B9100345747,
 				3D8A5520082D1F86008E818C,
+				3DA82939083ECE9300321864,
+				F9CE58EC0842411D0072DF55,
+				3D0D76AF084898AA00A495A5,
+				3D7C78E2084F4A3A0026D861,
 			);
 			isa = PBXResourcesBuildPhase;
 			runOnlyForDeploymentPostprocessing = 0;
@@ -2660,7 +2272,6 @@
 				F9022C81075802E300C3F701,
 				F9022C82075802E300C3F701,
 				F9022C84075802E300C3F701,
-				F9022C85075802E300C3F701,
 				F9022C86075802E300C3F701,
 				F9022C87075802E300C3F701,
 				F9022C88075802E300C3F701,
@@ -2690,9 +2301,6 @@
 				3DAEA2EE07703F6000AF111A,
 				F965D0A9077B8C0500628BD0,
 				F92F4E4F0788DEFC001B8F82,
-				27C1639F078BF48C008A4B83,
-				F94A9500079AEE5800D13AB5,
-				F94A9502079AEE5800D13AB5,
 				F916E69607A9F9AB009EF011,
 				F916E6AC07A9FB56009EF011,
 				2730077E07CF20B500F2E485,
@@ -2703,16 +2311,6 @@
 				3D824AA907D099C300FB2F67,
 				F9A6772E07D2D57F00782ACD,
 				F9F78CD507D5320D004B68AF,
-				27D4FA1207DE568D001CAB00,
-				27D4FA1507DE568D001CAB00,
-				27D4FA1707DE568D001CAB00,
-				27D4FA1907DE568D001CAB00,
-				27D4FA1B07DE568D001CAB00,
-				27D4FA1D07DE568D001CAB00,
-				3D6D747E07EE1F1E00E8A7EF,
-				3D6D748007EE1F1E00E8A7EF,
-				3D6D748207EE1F1E00E8A7EF,
-				3D6D748407EE1F1E00E8A7EF,
 				3DE3916807FEF5E600BE3AE7,
 				3DE391F307FF260D00BE3AE7,
 				3D8663400802C25800FF1724,
@@ -2720,6 +2318,9 @@
 				27AFAF9D080D1E1B0096F5D2,
 				F94EC0E908117BB6005EAFD9,
 				3D44F5630812A91D003C67F0,
+				F9569C2E08415E8300316D02,
+				3D0D76B3084898C100A495A5,
+				3D7406940849F5430081EC6F,
 			);
 			isa = PBXSourcesBuildPhase;
 			runOnlyForDeploymentPostprocessing = 0;
@@ -2768,7 +2369,7 @@
 			explicitFileType = wrapper.application;
 			includeInIndex = 0;
 			isa = PBXFileReference;
-			path = Bibdesk.app;
+			path = BibDesk.app;
 			refType = 3;
 			sourceTree = BUILT_PRODUCTS_DIR;
 		};
@@ -3303,22 +2904,6 @@
 			refType = 4;
 			sourceTree = "<group>";
 		};
-		F9022C6F075802E300C3F701 = {
-			fileEncoding = 30;
-			isa = PBXFileReference;
-			lastKnownFileType = sourcecode.c.h;
-			path = BibLibrary.h;
-			refType = 4;
-			sourceTree = "<group>";
-		};
-		F9022C70075802E300C3F701 = {
-			fileEncoding = 30;
-			isa = PBXFileReference;
-			lastKnownFileType = sourcecode.c.objc;
-			path = BibLibrary.m;
-			refType = 4;
-			sourceTree = "<group>";
-		};
 		F9022C71075802E300C3F701 = {
 			fileEncoding = 30;
 			isa = PBXFileReference;
@@ -3439,12 +3024,6 @@
 			settings = {
 			};
 		};
-		F9022C85075802E300C3F701 = {
-			fileRef = F9022C70075802E300C3F701;
-			isa = PBXBuildFile;
-			settings = {
-			};
-		};
 		F9022C86075802E300C3F701 = {
 			fileRef = F9022C72075802E300C3F701;
 			isa = PBXBuildFile;
@@ -3520,22 +3099,6 @@
 			isa = PBXFileReference;
 			lastKnownFileType = sourcecode.c.objc;
 			path = BibPref_InputManager.m;
-			refType = 4;
-			sourceTree = "<group>";
-		};
-		F9022C910758038000C3F701 = {
-			fileEncoding = 30;
-			isa = PBXFileReference;
-			lastKnownFileType = sourcecode.c.h;
-			path = BibPref_RSS.h;
-			refType = 4;
-			sourceTree = "<group>";
-		};
-		F9022C920758038000C3F701 = {
-			fileEncoding = 30;
-			isa = PBXFileReference;
-			lastKnownFileType = sourcecode.c.objc;
-			path = BibPref_RSS.m;
 			refType = 4;
 			sourceTree = "<group>";
 		};
@@ -4091,24 +3654,6 @@
 			refType = 2;
 			sourceTree = SOURCE_ROOT;
 		};
-		F9022CDF0758050E00C3F701 = {
-			children = (
-				F9022CE00758050E00C3F701,
-			);
-			isa = PBXVariantGroup;
-			name = BibPref_RSS.nib;
-			path = "";
-			refType = 4;
-			sourceTree = "<group>";
-		};
-		F9022CE00758050E00C3F701 = {
-			isa = PBXFileReference;
-			lastKnownFileType = wrapper.nib;
-			name = English;
-			path = English.lproj/BibPref_RSS.nib;
-			refType = 2;
-			sourceTree = SOURCE_ROOT;
-		};
 		F9022CE10758050E00C3F701 = {
 			children = (
 				F9022CE20758050E00C3F701,
@@ -4268,7 +3813,8 @@
 		F9022D160758066000C3F701 = {
 			isa = PBXFileReference;
 			lastKnownFileType = image.tiff;
-			path = fingerCursor.tiff;
+			name = fingerCursor.tiff;
+			path = Images/fingerCursor.tiff;
 			refType = 4;
 			sourceTree = "<group>";
 		};
@@ -4289,14 +3835,16 @@
 		F9022D190758066000C3F701 = {
 			isa = PBXFileReference;
 			lastKnownFileType = image.tiff;
-			path = "sort-down.tiff";
+			name = "sort-down.tiff";
+			path = "Images/sort-down.tiff";
 			refType = 4;
 			sourceTree = "<group>";
 		};
 		F9022D1A0758066000C3F701 = {
 			isa = PBXFileReference;
 			lastKnownFileType = image.tiff;
-			path = "sort-up.tiff";
+			name = "sort-up.tiff";
+			path = "Images/sort-up.tiff";
 			refType = 4;
 			sourceTree = "<group>";
 		};
@@ -4882,6 +4430,7 @@
 				F9022DA30758088000C3F701,
 				F9022DA40758088000C3F701,
 				F9022DA50758088000C3F701,
+				F9CE58EB0842411D0072DF55,
 				F9022DA60758088000C3F701,
 				F9022DA70758088000C3F701,
 				3DFF355E0816B5460052F37C,
@@ -4890,6 +4439,7 @@
 				3D928AAB0778D28B00B2309A,
 				3D5D34380770C8C3006AF48A,
 				3D8EA3E30788B9E300AAD253,
+				3D7C78E1084F4A3A0026D861,
 				F9022DAA0758088000C3F701,
 				F9022DAB0758088000C3F701,
 				3D7D45BC07C4EDB100F8D262,
@@ -4898,9 +4448,11 @@
 				F9022DAC0758088000C3F701,
 				F9022DAD0758088000C3F701,
 				F9022DAE0758088000C3F701,
+				F9022D160758066000C3F701,
 				F9022DAF0758088000C3F701,
 				3DFF35600816B55B0052F37C,
 				3D4373AC07FB3E960007BA84,
+				F92F4E460788DEDD001B8F82,
 				F9022DB00758088000C3F701,
 				F9022DB10758088000C3F701,
 				F9022DB20758088000C3F701,
@@ -4914,6 +4466,8 @@
 				F9022DB80758088000C3F701,
 				F9022DB90758088000C3F701,
 				F91B5CDF076579FE0011ED22,
+				F9022D190758066000C3F701,
+				F9022D1A0758066000C3F701,
 				3DBB79BF081538CA0050C0CD,
 				F9022DBA0758088000C3F701,
 				F91B5CE407657A200011ED22,
@@ -5078,6 +4632,7 @@
 				F9022FB207580A9600C3F701,
 				F9022FB307580A9600C3F701,
 				F9022FB407580A9600C3F701,
+				F95A735F0836F869007768EA,
 			);
 			isa = PBXCopyFilesBuildPhase;
 			runOnlyForDeploymentPostprocessing = 0;
@@ -5395,12 +4950,6 @@
 			settings = {
 			};
 		};
-		F918102807583A5B00CF822D = {
-			fileRef = F9022C6F075802E300C3F701;
-			isa = PBXBuildFile;
-			settings = {
-			};
-		};
 		F918102907583A5B00CF822D = {
 			fileRef = F9022C71075802E300C3F701;
 			isa = PBXBuildFile;
@@ -5553,12 +5102,11 @@
 		};
 		F918104307583A6E00CF822D = {
 			children = (
+				F9569C2B08415E8300316D02,
 				27AFAF9A080D1E1B0096F5D2,
 				F94EC0E608117BB6005EAFD9,
 				3D44F5600812A91D003C67F0,
 				F9A6742807D04E8000782ACD,
-				F94A94EE079AEE5800D13AB5,
-				F94A94E4079AEE5800D13AB5,
 				F9F78CD207D5320D004B68AF,
 				2730077607CF20B500F2E485,
 				3D824AA607D099C300FB2F67,
@@ -5567,7 +5115,6 @@
 				3D86633D0802C25800FF1724,
 				3D866C2608031CEC00FF1724,
 				273007A407CF216700F2E485,
-				27C1639C078BF48C008A4B83,
 				F920DAFA075C2B69000C5FCA,
 				F920DAFB075C2B69000C5FCA,
 				F920DAFC075C2B69000C5FCA,
@@ -5600,7 +5147,6 @@
 				3DD300F3075C0532003FD2D7,
 				F9022C69075802E300C3F701,
 				F9022C6D075802E300C3F701,
-				F9022C6F075802E300C3F701,
 				F9022C71075802E300C3F701,
 				F9022C380758027800C3F701,
 				F9022C3A0758027800C3F701,
@@ -5610,6 +5156,7 @@
 				F9022C420758027800C3F701,
 				3DE391F007FF260D00BE3AE7,
 				F9022C440758027800C3F701,
+				3D7406910849F5430081EC6F,
 				F9022C460758027800C3F701,
 				F9022C480758027800C3F701,
 				3DAEA2EB07703F6000AF111A,
@@ -5758,6 +5305,19 @@
 			shellPath = /bin/sh;
 			shellScript = "fpath=$SOURCE_ROOT/../bibdesk_vendorsrc/infinite_loop/\nif [ -d $fpath ] &! [ -d $fpath/ILCrashReporter.framework/Headers ]; then\n\techo 'Expanding ILCrashReporter framework'\n\tchmod -R u+w $fpath/ILCrashReporter.framework\n\tcd $fpath && /usr/bin/tar -zxvf ILCrashReporter.framework.tgz\n\texit 0\nelif [ -z $fpath ]; then\n\techo 'You need to cvs update -d in vendorsrc'\n\texit 1\nelse\n\techo 'ILCrashReporter.framework found'\n\texit 0\nfi";
 		};
+		F91E54660853576600208CDF = {
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+			);
+			isa = PBXShellScriptBuildPhase;
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "if [ -d /Developer/Applications/Utilities/Help\\ Indexer.app/ ]; then\necho \"*** Indexing Tiger Help ***\"\nfor LOC_DIR in ${BUILD_ROOT}/${UNLOCALIZED_RESOURCES_FOLDER_PATH}/*.lproj; do \\\n/Developer/Applications/Utilities/Help\\ Indexer.app/Contents/MacOS/Help\\ Indexer \\\n${LOC_DIR}/BibDesk\\ Help \\\n-PantherIndexer YES \\\n-Tokenizer 1 \\\n-ShowProgress NO \\\n-UseRemoteRoot YES \\\n-RemoteRoot http://bibdesk.sf.net/applehelp/ \\\n-PreferNetworkFiles NO \\\n-LogStyle 2 \\\n-IndexAnchors YES \\\n-TigerIndexing YES \\\n-GenerateSummaries YES \\\n-Stopwords en \\\n-MinTermLength 3;\\\ndone\nfi\nexit 0";
+		};
 		F920DAFA075C2B69000C5FCA = {
 			fileEncoding = 30;
 			isa = PBXFileReference;
@@ -5836,7 +5396,6 @@
 		F920DB22075C2D40000C5FCA = {
 			buildActionMask = 2147483647;
 			files = (
-				F9E2B8DB082C5D3500D04FEA,
 			);
 			isa = PBXRezBuildPhase;
 			runOnlyForDeploymentPostprocessing = 0;
@@ -5922,86 +5481,6 @@
 			settings = {
 			};
 		};
-		F94A94E4079AEE5800D13AB5 = {
-			fileEncoding = 30;
-			isa = PBXFileReference;
-			lastKnownFileType = sourcecode.c.h;
-			path = BDSKBibTeXExporter.h;
-			refType = 4;
-			sourceTree = "<group>";
-		};
-		F94A94E9079AEE5800D13AB5 = {
-			fileEncoding = 30;
-			isa = PBXFileReference;
-			lastKnownFileType = sourcecode.c.objc;
-			path = BDSKBibTeXExporter.m;
-			refType = 4;
-			sourceTree = "<group>";
-		};
-		F94A94EE079AEE5800D13AB5 = {
-			fileEncoding = 30;
-			isa = PBXFileReference;
-			lastKnownFileType = sourcecode.c.h;
-			path = BDSKExporter.h;
-			refType = 4;
-			sourceTree = "<group>";
-		};
-		F94A94F3079AEE5800D13AB5 = {
-			fileEncoding = 30;
-			isa = PBXFileReference;
-			lastKnownFileType = sourcecode.c.objc;
-			path = BDSKExporter.m;
-			refType = 4;
-			sourceTree = "<group>";
-		};
-		F94A94FF079AEE5800D13AB5 = {
-			fileRef = F94A94E4079AEE5800D13AB5;
-			isa = PBXBuildFile;
-			settings = {
-			};
-		};
-		F94A9500079AEE5800D13AB5 = {
-			fileRef = F94A94E9079AEE5800D13AB5;
-			isa = PBXBuildFile;
-			settings = {
-			};
-		};
-		F94A9501079AEE5800D13AB5 = {
-			fileRef = F94A94EE079AEE5800D13AB5;
-			isa = PBXBuildFile;
-			settings = {
-			};
-		};
-		F94A9502079AEE5800D13AB5 = {
-			fileRef = F94A94F3079AEE5800D13AB5;
-			isa = PBXBuildFile;
-			settings = {
-			};
-		};
-		F94A9504079AEE7600D13AB5 = {
-			children = (
-				F94A9507079AEE7600D13AB5,
-			);
-			isa = PBXVariantGroup;
-			name = BibTexExporterSettings.nib;
-			path = "";
-			refType = 4;
-			sourceTree = "<group>";
-		};
-		F94A9507079AEE7600D13AB5 = {
-			isa = PBXFileReference;
-			lastKnownFileType = wrapper.nib;
-			name = English;
-			path = English.lproj/BibTexExporterSettings.nib;
-			refType = 4;
-			sourceTree = "<group>";
-		};
-		F94A950C079AEE7600D13AB5 = {
-			fileRef = F94A9504079AEE7600D13AB5;
-			isa = PBXBuildFile;
-			settings = {
-			};
-		};
 		F94EC0E608117BB6005EAFD9 = {
 			fileEncoding = 4;
 			isa = PBXFileReference;
@@ -6030,6 +5509,55 @@
 			settings = {
 			};
 		};
+		F9569C2B08415E8300316D02 = {
+			fileEncoding = 4;
+			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.c.h;
+			path = BDSKForm.h;
+			refType = 4;
+			sourceTree = "<group>";
+		};
+		F9569C2C08415E8300316D02 = {
+			fileEncoding = 4;
+			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.c.objc;
+			path = BDSKForm.m;
+			refType = 4;
+			sourceTree = "<group>";
+		};
+		F9569C2D08415E8300316D02 = {
+			fileRef = F9569C2B08415E8300316D02;
+			isa = PBXBuildFile;
+			settings = {
+			};
+		};
+		F9569C2E08415E8300316D02 = {
+			fileRef = F9569C2C08415E8300316D02;
+			isa = PBXBuildFile;
+			settings = {
+			};
+		};
+		F95A735E0836F869007768EA = {
+			fileEncoding = 4;
+			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.scpt;
+			name = "BD Test.scpt";
+			path = "Scripting/BD Test.scpt";
+			refType = 4;
+			sourceTree = "<group>";
+		};
+		F95A735F0836F869007768EA = {
+			fileRef = F95A735E0836F869007768EA;
+			isa = PBXBuildFile;
+			settings = {
+			};
+		};
+		F95A73640836F8A0007768EA = {
+			fileRef = F95A735E0836F869007768EA;
+			isa = PBXBuildFile;
+			settings = {
+			};
+		};
 		F965D0A9077B8C0500628BD0 = {
 			fileRef = F9022C3F0758027800C3F701;
 			isa = PBXBuildFile;
@@ -6052,6 +5580,8 @@
 				F9022C76075802E300C3F701,
 				F9022DDB075808EB00C3F701,
 				F9022DDC075808EB00C3F701,
+				3D0D76B0084898C100A495A5,
+				3D0D76B1084898C100A495A5,
 				F9022CB4075803AC00C3F701,
 				F9022CB5075803AC00C3F701,
 				F9022CB6075803AC00C3F701,
@@ -6060,8 +5590,6 @@
 				F9022CB9075803AC00C3F701,
 				F9022C8F0758038000C3F701,
 				F9022C900758038000C3F701,
-				F9022C910758038000C3F701,
-				F9022C920758038000C3F701,
 				F9022C930758038000C3F701,
 				F9022C940758038000C3F701,
 			);
@@ -6260,7 +5788,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "/usr/bin/gatherHeaderDoc $TARGET_BUILD_DIR/Bibdesk\\ Documentation\n/usr/bin/headerDoc2HTML -o $TARGET_BUILD_DIR/BibDesk\\ Documentation $SRCROOT/*.h\nexit 0";
+			shellScript = "/usr/bin/gatherHeaderDoc $TARGET_BUILD_DIR/BibDesk\\ Documentation\n/usr/bin/headerDoc2HTML -o $TARGET_BUILD_DIR/BibDesk\\ Documentation $SRCROOT/*.h\nexit 0";
 		};
 		F98870CE07580E5F001D4D49 = {
 			buildPhases = (
@@ -6291,7 +5819,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "/bin/cp $PROJECT_NAME.dmg /tmp\n/usr/bin/hdiutil attach /tmp/$PROJECT_NAME.dmg\n$SYSTEM_DEVELOPER_DIR/Tools/CpMac -r $BUILT_PRODUCTS_DIR/$PROJECT_NAME.app /Volumes/$PROJECT_NAME\nosascript -e \"tell application \\\"Finder\\\"\" -e \"set the position of item 1 of the disk named \\\"$PROJECT_NAME\\\" to {204, 148}\" -e \"end tell\"\n/usr/sbin/diskutil eject /Volumes/$PROJECT_NAME\n/usr/bin/hdiutil convert /tmp/$PROJECT_NAME.dmg -format UDZO -imagekey zlib-level=9 -o $HOME/Desktop/$PROJECT_NAME.dmg\n/usr/bin/hdiutil internet-enable -YES $HOME/Desktop/$PROJECT_NAME.dmg\nexit 0";
+			shellScript = "/bin/cp BibDesk.dmg /tmp\n/usr/bin/hdiutil attach /tmp/BibDesk.dmg\n$SYSTEM_DEVELOPER_DIR/Tools/CpMac -r $BUILT_PRODUCTS_DIR/BibDesk.app /Volumes/BibDesk\nosascript -e \"tell application \\\"Finder\\\"\" -e \"set the position of item 1 of the disk named \\\"BibDesk\\\" to {204, 148}\" -e \"end tell\"\n/usr/sbin/diskutil eject /Volumes/BibDesk\n/usr/bin/hdiutil convert /tmp/BibDesk.dmg -format UDZO -imagekey zlib-level=9 -o $HOME/Desktop/BibDesk.dmg\n/usr/bin/hdiutil internet-enable -YES $HOME/Desktop/BibDesk.dmg\nexit 0";
 		};
 		F98870D407580E94001D4D49 = {
 			buildPhases = (
@@ -6317,18 +5845,12 @@
 			isa = PBXContainerItemProxy;
 			proxyType = 1;
 			remoteGlobalIDString = 8D1107260486CEB800E47090;
-			remoteInfo = Bibdesk;
+			remoteInfo = BibDesk;
 		};
 		F98870D807580EA1001D4D49 = {
 			isa = PBXTargetDependency;
 			target = 8D1107260486CEB800E47090;
 			targetProxy = F98870D707580EA1001D4D49;
-		};
-		F98F1C2207583400007DC618 = {
-			fileRef = F9022C200758015B00C3F701;
-			isa = PBXBuildFile;
-			settings = {
-			};
 		};
 		F98F1C2807583831007DC618 = {
 			fileRef = F9022C31075801D100C3F701;
@@ -6361,7 +5883,6 @@
 				F918102407583A5B00CF822D,
 				F918102507583A5B00CF822D,
 				F918102707583A5B00CF822D,
-				F918102807583A5B00CF822D,
 				F918102907583A5B00CF822D,
 				F918102A07583A5B00CF822D,
 				F918102B07583A5B00CF822D,
@@ -6395,10 +5916,7 @@
 				F920DB03075C2B69000C5FCA,
 				3DAEA2ED07703F6000AF111A,
 				F92F4E4E0788DEFC001B8F82,
-				27C1639E078BF48C008A4B83,
 				F9273968078E58A600609739,
-				F94A94FF079AEE5800D13AB5,
-				F94A9501079AEE5800D13AB5,
 				F916E69407A9F9AB009EF011,
 				F916E6AA07A9FB56009EF011,
 				F9D5A8CB07B9B94F0092E7E2,
@@ -6410,19 +5928,6 @@
 				3D824AA807D099C300FB2F67,
 				F9A6772D07D2D57F00782ACD,
 				F9F78CD407D5320D004B68AF,
-				27D4FA1107DE568D001CAB00,
-				27D4FA1307DE568D001CAB00,
-				27D4FA1407DE568D001CAB00,
-				27D4FA1607DE568D001CAB00,
-				27D4FA1807DE568D001CAB00,
-				27D4FA1A07DE568D001CAB00,
-				27D4FA1C07DE568D001CAB00,
-				27D4FC3407DE883B001CAB00,
-				3D6D747D07EE1F1E00E8A7EF,
-				3D6D747F07EE1F1E00E8A7EF,
-				3D6D748107EE1F1E00E8A7EF,
-				3D6D748307EE1F1E00E8A7EF,
-				3D6D748507EE1F1E00E8A7EF,
 				3DE3916707FEF5E600BE3AE7,
 				3DE391BC07FF0EB500BE3AE7,
 				3DE391F207FF260D00BE3AE7,
@@ -6431,6 +5936,9 @@
 				27AFAF9C080D1E1B0096F5D2,
 				F94EC0E808117BB6005EAFD9,
 				3D44F5620812A91D003C67F0,
+				F9569C2D08415E8300316D02,
+				3D0D76B2084898C100A495A5,
+				3D7406930849F5430081EC6F,
 			);
 			isa = PBXHeadersBuildPhase;
 			runOnlyForDeploymentPostprocessing = 0;
@@ -6516,17 +6024,47 @@
 			settings = {
 			};
 		};
+		F9CE58EB0842411D0072DF55 = {
+			isa = PBXFileReference;
+			lastKnownFileType = image.tiff;
+			name = ArrowImage.tiff;
+			path = Images/ArrowImage.tiff;
+			refType = 4;
+			sourceTree = "<group>";
+		};
+		F9CE58EC0842411D0072DF55 = {
+			fileRef = F9CE58EB0842411D0072DF55;
+			isa = PBXBuildFile;
+			settings = {
+			};
+		};
 		F9D5A8CB07B9B94F0092E7E2 = {
 			fileRef = F9022C420758027800C3F701;
 			isa = PBXBuildFile;
 			settings = {
 			};
 		};
-		F9E2B8DB082C5D3500D04FEA = {
-			fileRef = F920DB25075C2D8F000C5FCA;
-			isa = PBXBuildFile;
-			settings = {
-			};
+		F9E0B071083E450C000109C6 = {
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+			);
+			isa = PBXShellScriptBuildPhase;
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "##\n## This takes a while to generate, so it's not worth\n## the wait for development builds.\n##\nif [ ${BUILD_STYLE} = \"Development\" ]; then\n# Check to see if a previous version exists and create it\n# if not, or else pbxcp will complain.\nif [ -f \"English.lproj/Localizable.strings\" ]; then\nexit 0\nfi\nfi\n#\n# Run the genstrings build phase\n#\ncd ${SOURCE_ROOT} && \\\nif [ -f \"English.lproj/Localizable.strings\" ]; then\nmv English.lproj/Localizable.strings English.lproj/Localizable.strings.bak \nfi\n/usr/bin/genstrings -o ${SOURCE_ROOT}/English.lproj \\\n-skipTable BibTeXKeys -skipTable ZoomValues \\\n`/usr/bin/find . -type file -name \"*.[mh]\"`";
+		};
+		F9E0B08D083E49D2000109C6 = {
+			fileEncoding = 10;
+			isa = PBXFileReference;
+			lastKnownFileType = text.plist.strings;
+			name = English;
+			path = English.lproj/Localizable.strings;
+			refType = 4;
+			sourceTree = "<group>";
 		};
 		F9F0856808247BC800812F2A = {
 			fileEncoding = 4;

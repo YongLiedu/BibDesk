@@ -2,17 +2,37 @@
 
 //  Created by Michael McCracken on Mon Dec 24 2001.
 /*
-This software is Copyright (c) 2002, Michael O. McCracken
-All rights reserved.
+ This software is Copyright (c) 2001,2002,2003,2004,2005
+ Michael O. McCracken. All rights reserved.
 
-Redistribution and use in source and binary forms, with or without modification, are permitted provided that the following conditions are met:
+ Redistribution and use in source and binary forms, with or without
+ modification, are permitted provided that the following conditions
+ are met:
 
-- Redistributions of source code must retain the above copyright notice, this list of conditions and the following disclaimer.
--  Redistributions in binary form must reproduce the above copyright notice, this list of conditions and the following disclaimer in the documentation and/or other materials provided with the distribution.
--  Neither the name of Michael O. McCracken nor the names of any contributors may be used to endorse or promote products derived from this software without specific prior written permission.
+ - Redistributions of source code must retain the above copyright
+   notice, this list of conditions and the following disclaimer.
 
-THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-*/
+ - Redistributions in binary form must reproduce the above copyright
+    notice, this list of conditions and the following disclaimer in
+    the documentation and/or other materials provided with the
+    distribution.
+
+ - Neither the name of Michael O. McCracken nor the names of any
+    contributors may be used to endorse or promote products derived
+    from this software without specific prior written permission.
+
+ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+ "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+ LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+ A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+ OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+ SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+ LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+ DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+ THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+ (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ */
 
 /*! @header BibEditor.h
     @discussion The class for editing BibItems. Handles the UI for the fields and notes.
@@ -33,6 +53,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 #import "RYZImagePopUpButtonCell.h"
 #import "MacroTextFieldWindowController.h"
 #import "BDSKMenuItem.h"
+#import "BDSKForm.h"
 
 
 /*!
@@ -42,7 +63,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 */
 @interface BibEditor : NSWindowController {
     IBOutlet NSPopUpButton *bibTypeButton;
-    IBOutlet NSForm *bibFields;
+    IBOutlet BDSKForm *bibFields;
     IBOutlet NSTabView *tabView;
     IBOutlet NSTextView *notesView;
     IBOutlet NSTextView *abstractView;
@@ -125,6 +146,9 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 	BOOL forceEndEditing;
     NSMutableDictionary *toolbarItems;
     NSControl *currentControl;
+
+	IBOutlet NSPanel *editInheritedWarningSheet;
+	IBOutlet NSButton *dontWarnOnEditInheritedCheckButton;
 }
 
 /*!
@@ -197,6 +221,9 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
                  returnCode:(int) returnCode
                 contextInfo:(void *)contextInfo;
 
+- (IBAction)dismissEditInheritedSheet:(id)sender;
+
+- (IBAction)changeWarnOnEditInherited:(id)sender;
 
 /*!
     @method     editSelectedFieldAsRawBibTeX:
@@ -308,9 +335,6 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
     @discussion (comprehensive description)
 */
 - (void)updateTypePopup;
-//- (IBAction)textFieldDidChange:(id)sender;
-- (IBAction)textFieldDidEndEditing:(id)sender;
-//- (void)closeSheetDidEnd:(NSWindow *)sheet returnCode:(int)returnCode contextInfo:(void  *)contextInfo;
 
 /*!
     @method     updateDocumentSnoopButton
@@ -377,10 +401,18 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 
 - (void)bibDidChange:(NSNotification *)notification;
 - (void)typeInfoDidChange:(NSNotification *)aNotification;
+- (void)macrosDidChange:(NSNotification *)aNotification;
 
 - (void)docWillSave:(NSNotification *)notification;
 - (void)bibWillBeRemoved:(NSNotification *)notification;
 - (void)docWindowWillClose:(NSNotification *)notification;
+
+/*!
+	@method     openParentItem:
+	@abstract   opens an editor for the crossref parent item.
+	@discussion (description)
+*/
+- (void)openParentItem:(id)sender;
 
 /*!
     @method     showPersonDetail:
