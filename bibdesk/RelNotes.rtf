@@ -1,10 +1,11 @@
-{\rtf1\mac\ansicpg10000\cocoartf102
+{\rtf1\mac\ansicpg10000\cocoartf824\cocoasubrtf100
 {\fonttbl\f0\fnil\fcharset77 GillSans;\f1\fnil\fcharset77 LucidaGrande;\f2\fnil\fcharset77 HelveticaNeue-Bold;
 \f3\fnil\fcharset77 LucidaGrande-Bold;\f4\fnil\fcharset77 HelveticaNeue-BoldItalic;\f5\fnil\fcharset77 Geneva;
 \f6\fnil\fcharset77 HelveticaNeue;\f7\fnil\fcharset77 HelveticaNeue-Italic;\f8\fnil\fcharset77 Verdana;
 \f9\fswiss\fcharset77 Helvetica;\f10\fswiss\fcharset77 Helvetica-Bold;\f11\fnil\fcharset80 AppleGothic;
 }
 {\colortbl;\red255\green255\blue255;\red255\green0\blue3;\red85\green85\blue85;}
+\vieww9000\viewh8400\viewkind0
 \pard\tx1440\tx2880\tx4320\tx5760\tx7200\qc
 
 \f0\fs60 \cf0 BibDesk Release Notes\
@@ -13,7 +14,149 @@
 \f1\fs22 \cf0 \
 \pard\tx1440\tx2880\tx4320\tx5760\tx7200\ql\qnatural
 
-\f2\b\fs28 \cf0 Changes since 0.99.2\
+\f2\b\fs28 \cf0 Changes since 1.0\
+\
+\pard\tx1440\tx2880\tx4320\tx5760\tx7200\ql\qnatural
+
+\f3\fs22 \cf0 IMPORTANT
+\f1\b0 :  This is the first release of the 1.1 series, with a major new feature (BibTeX crossref support).  Please back up your files before testing and saving, especially if you use the new feature which sorts for crossrefs!  Any problems should be reported on the {\field{\*\fldinst{HYPERLINK "http://sourceforge.net/tracker/?group_id=61487&atid=497423"}}{\fldrslt SourceForge Tracker}}.
+\f2\b\fs28 \
+\
+\pard\tx1440\tx2880\tx4320\tx5760\tx7200\ql\qnatural
+
+\f4\i\fs26 \cf0 New Features\
+\pard\tx1440\tx2880\tx4320\tx5760\tx7200\ql\qnatural
+
+\f1\i0\b0\fs22 \cf0   \'a5  Crossref support implemented (RFE 1175264).  Items using the BibTeX crossref field are now searchable and sortable, and inherited fields are displayed in the main pub list and the editor.  Please see the online help for notes on editing (preferences, menu items, and drag-and-drop).\
+  \'a5  The "add publication from..." items now have autocompletion enabled when editing (RFE 1213519)\
+  \'a5  Added a preference option for cleaning TeX commands or braces from format strings for AutoFile and auto cite key generation\
+  \'a5  The Macro editing list now has type-ahead find, so you can select an item in the list by typing part of its title (handy for looking up definitions)\
+  \'a5  RIS value of a publication is now accessible from AppleScript\
+\pard\tx1440\tx2880\tx4320\tx5760\tx7200\ql\qnatural
+
+\f5 \cf0   
+\f4\i\b\fs26 \
+Bugs Fixed\
+\pard\tx1440\tx2880\tx4320\tx5760\tx7200\ql\qnatural
+
+\f1\i0\b0\fs22 \cf0   \'a5  Online version checking should be more effective; previous versions considered 1.0RC2 to be newer than 1.0\
+  \'a5  Refer to the correct anchor in the Help for help buttons (bug #1213603).\
+  \'a5  Undefined fields are now handled correctly in AppleScript.  Fields are added if necessary, and an empty string is returned if the value is undefined.  'All fields' will now return all defined fields, not just non-empty fields.\
+  \'a5  Copy and Cut menu items should now be disabled when there is no selection  \
+\pard\tx1440\tx2880\tx4320\tx5760\tx7200\ql\qnatural
+
+\f2\b\fs28 \cf0 \
+Changes since 1.0RC2
+\f1\b0\fs22 \
+\pard\tx1440\tx2880\tx4320\tx5760\tx7200\ql\qnatural
+
+\f5 \cf0   
+\f4\i\b\fs26 \
+Bugfixes\
+\pard\tx1440\tx2880\tx4320\tx5760\tx7200\ql\qnatural
+
+\f1\i0\b0\fs22 \cf0   \'a5  "About the Scripts Menu" AppleScript now really works on Panther and Tiger\
+  \'a5  Saving in response to closing/quitting with unsaved changes wasn't really fixed in RC2, but now it is\
+  \'a5  Dates with a month are no longer displayed as "?b ?Y"\
+  \'a5  Crash when adjusting column widths should be fixed\
+  \'a5  All source files now have a BSD license associated with them\
+  \'a5  Sending references via e-mail should work again (bug #1206867), and now sends BibTeX along with the file(s) using your default e-mail app\
+  \'a5  Paging through the reference list with the spacebar now works if the preview pane doesn't need to scroll (bug #1207177)\
+  \'a5  Publication list selection can now be extended using shift+arrow keys (bug #1207912)\
+  \'a5  Undoing a field addition in the editor could lead to a hang under some conditions, and date modified was not always reset properly after undo (bug #1208038)\
+  \'a5  Changes to the cite key will now be immediately visible in the publications list (bug #1207909)\
+  \'a5  Selected row is now always visible when spacebar paging through the publications list\
+  \'a5  Macro definitions are now deTeXified, so accented characters should not be lost (bug #1209013)\
+  \'a5  Macro keys are now lowercased, and checked for duplicates (bug #1209071)\
+  \'a5  Export as RSS works again (bug #1209378)\
+  \'a5  We now ask for confirmation if prefs are set to open editor windows for new publications and you add more than 6 items at once (RFE #1209824)\
+  \'a5  Creation date is now set for pasted/dragged items\
+  \'a5  The TeX preview is now updated properly when showing the window, so you no longer have to play with the selection (bug #1210134)\
+  \'a5  New formatter used for type names, so they are lowercase instead of titlecase\
+  \'a5  AutoFile now replaces "/" with "-" in generated strings; this is optional for %f and %k; see online help for details (bug #1212129)\
+  \'a5  Saving while text is selected in an editor window will no longer lose the selection\
+  \
+\pard\tx1440\tx2880\tx4320\tx5760\tx7200\ql\qnatural
+
+\f2\b\fs28 \cf0 \
+Changes since 1.0RC1
+\f1\b0\fs22 \
+\pard\tx1440\tx2880\tx4320\tx5760\tx7200\ql\qnatural
+
+\f5 \cf0   
+\f4\i\b\fs26 \
+Bugfixes\
+\pard\tx1440\tx2880\tx4320\tx5760\tx7200\ql\qnatural
+
+\f1\i0\b0\fs22 \cf0   \'a5  "About the Scripts Menu" AppleScript now works on Panther and Tiger (why was that so hard?)\
+  \'a5  Setting the 'local file' through AppleScript no longer crashes BibDesk\
+  \'a5  Saving in response to closing/quitting with unsaved changes will no longer cause a crash\
+  \'a5  Open editors now observe changes to macro definitions, so you don't mysteriously lose changes\
+  \'a5  AutoFile should no longer create a '~' file at the root directory (bug ##1205352)\
+  \'a5  Minor changes for localizability\
+  \'a5  Application name is now BibDesk everywhere\
+  \
+\pard\tx1440\tx2880\tx4320\tx5760\tx7200\ql\qnatural
+
+\f2\b\fs28 \cf0 Changes since 0.99.3\
+\
+\pard\tx1440\tx2880\tx4320\tx5760\tx7200\ql\qnatural
+
+\f3\fs22 \cf0 IMPORTANT
+\f1\b0 :  Boolean search syntax has changed to be compatible with Apple's Help Viewer search, which should make future integration with Apple's search technology more seamless.  We apologize for the change (in case anyone uses this feature).\
+\
+Please see the new and improved online help for details of any of the new features mentioned below.  If there is an existing feature that you would like to see documented, please file a bug report!\
+\pard\tx1440\tx2880\tx4320\tx5760\tx7200\ql\qnatural
+
+\f4\i\b\fs26 \cf0 \
+New Features\
+\pard\tx1440\tx2880\tx4320\tx5760\tx7200\ql\qnatural
+
+\f1\i0\b0\fs22 \cf0   \'a5  Search is now case-sensitive if you enter at least one uppercase character in the searchfield\
+  \'a5  Added AppleScript properties for 'all fieldnames' and 'all typenames'\
+  \'a5  If a BibDesk document is opened in response to a Spotlight search, the search term is automatically entered for you\
+  \'a5  Boolean search syntax is now compatible with Apple Help Viewer's new syntax for queries, which uses +| as AND/OR\
+  \'a5  "Check Spelling as You Type" menu setting is now remembered (globally); this fixes RFE #974890 and bug #1198028\
+  \'a5  Shift+space now pages up in the preview pane, and the spacebar can be used to scroll to the next pub as well (as in Mail.app)\
+  \'a5  Added a "Select Duplicates" item in the "Publication" menu, which finds duplicate items in your bibliography\
+  \'a5  Sample AppleScript was rewritten, and is now available from the Scripts menu (choose "About the Scripts Menu")
+\f5 \
+  
+\f4\i\b\fs26 \
+Bugfixes\
+
+\f1\i0\b0\fs22   \'a5  "Container" added to the "add column" menu\
+  \'a5  Changed canceling behavior of text import sheet\
+  \'a5  More characters (including underscore) allowed in the cite-key format strings\
+  \'a5  An exception is no longer raised if you control click on part of a table header that isn't part of a column header\
+  \'a5  Command-W no longer becomes disconnected in the editor window after saving\
+  \'a5  The LaTeX previewer now has access to all of your document's macros, rather than writing out the expanded values (fixes bug #1191916)\
+  \'a5  Accented characters in the searchfield are respected (search is fuzzy otherwise, removing accents)\
+  \'a5  Document closing speed is no longer glacial for large files with macros (bug #1192203), since complex strings are updated lazily\
+  \'a5  Key equivalents for navigation buttons of text import webview, and better updating of stop/reload button for downloading\
+  \'a5  Fixed bug #1192511, data loss in case of encoding error (if an exception was raised after you closed an unsaved document and chose to save it)\
+  \'a5  Table columns can no longer be duplicated in the main pub list\
+  \'a5  Fixed memory leak in macro text field window controller, and in dragging a pub into the editor window\
+  \'a5  Sorting a pubs list with lots of braces may be faster\
+  \'a5  Changed order of pref panes\
+  \'a5  Many changes and updates to the online help, including revised screenshots\
+  \'a5  Default column widths should be sane\
+  \'a5  AppleScript now works when building on Tiger\
+  \'a5  More menu items now have proper ellipses added\
+  \'a5  Boolean search now works properly (previously the first search term was captured incorrectly, and whitespace was not handled correctly), and should be less weird about updating\
+  \'a5  Removed "Unicode" encoding option for saving/exporting files, as btparse can't handle it (bug #1198587)\
+  \'a5  "Open" dialog now comes up when you choose to open a file at launch in "General" preferences, as documented in the help\
+  \'a5  Fix bug #1196588, making cite key field its maximal length\
+  \'a5  Fix bug #1199338 by creating the "Item Number" of each publication on demand, so you don't end up with weird changes in file order when adding pubs\
+  \'a5  Reimplemented table column code\
+  \'a5  Columns menu is now rebuilt when table columns change\
+  \'a5  Some users had problems scrolling the main pub list with page up/page down, and possibly arrow keys, but this should be fixed\
+  \'a5  List of authors for a document is now created on demand for AppleScript, which fixes a bug with zombie authors referring to deleted pubs\
+  \'a5  Author name comparisons in AppleScript should be more consistent\
+\pard\tx1440\tx2880\tx4320\tx5760\tx7200\ql\qnatural
+
+\f2\b\fs28 \cf0 \
+Changes since 0.99.2\
 \
 \pard\tx1440\tx2880\tx4320\tx5760\tx7200\ql\qnatural
 

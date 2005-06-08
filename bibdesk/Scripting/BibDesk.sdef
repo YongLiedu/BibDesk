@@ -165,17 +165,18 @@ will translate this file into the necessary scriptSuite and scriptTerminology fi
 						<cocoa method="attributedStringValue"/>
 					</property>                      
 					
-					<property name="note" code="note" type="string" description="Annotations for the publication as seen in the “Annote” tab.">
+					<property name="note" code="note" type="string" description="Annotations for the publication as seen in the Annote tab.">
                         <cocoa method="annotation"/>
                     </property>  
 
 					<property name="BibTeX string" code="BTeX" type="string" description="String for BibTeX entry. Can be set only at or immediately after initialization.">
 						<cocoa method="bibTeXString"/>
-					</property>  
+					</property>
+                    
+                    <property name="RIS string" code="RISs" type="string" description="RIS representation of the publication record." access="r">
+                        <cocoa method="RISStringValue"/>
+                    </property>
 					
-					<property name="fields record" code="flds" type="record" description="Fields with data about the publication. These may vary from publication to publication." hidden="">
-						<cocoa method="fields"/>
-					</property>  
 					<property name="document" code="docu" type="document" description="The bibliography containing this publication record." access="r">
 						<cocoa method="document"/>
 					</property>  
