@@ -136,6 +136,9 @@ static AGRegex *backrefPattern;
 }
 
 - (AGRegexMatch *)findInString:(NSString *)str range:(NSRange)range {
+    if(!str)
+        return nil; // we crash when calling strlen(nil)
+    
 	int error, length, options, *matchv;
 	length = [str length];
 	options = 0;
@@ -152,6 +155,7 @@ static AGRegex *backrefPattern;
 		options |= PCRE_NOTEOL;
 	// allocate match vector
 	NSAssert1(matchv = malloc(sizeof(int) * groupCount * 3), @"couldn't allocate match vector for %d items", groupCount * 3);
+
 	// convert character range to byte range
 	range.length = strlen([[str substringWithRange:range] UTF8String]);
 	range.location = strlen([[str substringToIndex:range.location] UTF8String]);
