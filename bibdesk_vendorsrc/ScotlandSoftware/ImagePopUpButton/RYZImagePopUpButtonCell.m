@@ -338,15 +338,34 @@
 {
 	NSPoint newLoc = NSMakePoint(NSMinX([controlView bounds]), NSMaxY([controlView bounds]) + 4);
 	newLoc = [controlView convertPoint:newLoc toView:nil];
-	NSEvent *newEvent = [NSEvent mouseEventWithType: [event type]
-										   location: newLoc
-									  modifierFlags: [event modifierFlags]
-										  timestamp: [event timestamp]
-									   windowNumber: [event windowNumber]
-											context: [event context]
-										eventNumber: [event eventNumber]
-										 clickCount: [event clickCount]
-										   pressure: [event pressure]];
+    NSEventType evt = [event type];
+    NSEvent *newEvent;
+    
+    switch(evt){
+        case NSKeyDown:
+            newEvent = [NSEvent keyEventWithType:evt
+                                        location:newLoc
+                                   modifierFlags:[event modifierFlags]
+                                       timestamp:[event timestamp]
+                                    windowNumber:[event windowNumber]
+                                         context:[event context]
+                                      characters:[event characters]
+                     charactersIgnoringModifiers:[event charactersIgnoringModifiers]
+                                       isARepeat:[event isARepeat]
+                                         keyCode:[event keyCode]];
+            break;
+            
+        default:
+            newEvent = [NSEvent mouseEventWithType: [event type]
+                                          location: newLoc
+                                     modifierFlags: [event modifierFlags]
+                                         timestamp: [event timestamp]
+                                      windowNumber: [event windowNumber]
+                                           context: [event context]
+                                       eventNumber: [event eventNumber]
+                                        clickCount: [event clickCount]
+                                          pressure: [event pressure]];
+    }
 	
 	if ([self refreshesMenu]) {
 		[self setMenu:[[self delegate] menuForImagePopUpButtonCell:self]];
