@@ -130,6 +130,15 @@ void print_error (bt_error *err)
        [errObj takeValue:[NSNumber numberWithInt:err->line] forKey:@"lineNumber"];
        something_printed = TRUE;
    }
+   else
+   {
+       if(something_printed)
+           [errString appendString:@", "];
+       
+       [errString appendString:@"Unknown"];
+       [errObj takeValue:[NSNumber numberWithInt:-1] forKey:@"lineNumber"];
+       something_printed = TRUE;
+   }
    if (err->item_desc && err->item > 0) /* going to print an item number? */
    {
        if (something_printed){
