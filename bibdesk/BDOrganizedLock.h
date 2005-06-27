@@ -1,6 +1,6 @@
 //
 //  BDOrganizedLock.h
-//  Bibdesk
+//  BibDesk
 //  This is a self-contained class designed for easy use in any application.
 //
 //  Created (including algorithm design) by Matthew Cook on Sun Sep 28 2003.
