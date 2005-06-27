@@ -1,10 +1,40 @@
 //
 //  BibTeXParser.m
-//  Bibdesk
+//  BibDesk
 //
 //  Created by Michael McCracken on Thu Nov 28 2002.
-//  Copyright (c) 2002 __MyCompanyName__. All rights reserved.
-//
+/*
+ This software is Copyright (c) 2002,2003,2004,2005
+ Michael O. McCracken. All rights reserved.
+
+ Redistribution and use in source and binary forms, with or without
+ modification, are permitted provided that the following conditions
+ are met:
+
+ - Redistributions of source code must retain the above copyright
+   notice, this list of conditions and the following disclaimer.
+
+ - Redistributions in binary form must reproduce the above copyright
+    notice, this list of conditions and the following disclaimer in
+    the documentation and/or other materials provided with the
+    distribution.
+
+ - Neither the name of Michael O. McCracken nor the names of any
+    contributors may be used to endorse or promote products derived
+    from this software without specific prior written permission.
+
+ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+ "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+ LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+ A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+ OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+ SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+ LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+ DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+ THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+ (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ */
 
 #import "BibTeXParser.h"
 
@@ -80,116 +110,106 @@ NSString *stringFromBTField(AST *field,
 
     *hadProblems = NO;
 
-    NS_DURING
-       // [inData getBytes:buf length:[inData length]];
-        buf = (const char *) [inData bytes];
-    NS_HANDLER
-        // if we couldn't convert it, we won't be able to read it: just give up.
-        // maybe instead of giving up we should find a way to use lossyCString here... ?
-        if ([[localException name] isEqualToString:NSCharacterConversionException]) {
-            NSLog(@"Exception %@ raised in itemsFromString, handled by giving up.", [localException name]);
-            inData = nil;
-            NSBeep();
-        }else{
-            [localException raise];
-        }
-        NS_ENDHANDLER
+    buf = (const char *) [inData bytes];
 
-        bt_initialize();
-        bt_set_stringopts(BTE_PREAMBLE, BTO_EXPAND);
-        bt_set_stringopts(BTE_REGULAR, BTO_MINIMAL);
+    bt_initialize();
+    bt_set_stringopts(BTE_PREAMBLE, BTO_EXPAND);
+    bt_set_stringopts(BTE_REGULAR, BTO_MINIMAL);
 
-        while(entry =  bt_parse_entry(infile, (char *)fs_path, 0, &ok)){
-	    NSAutoreleasePool *innerPool = [[NSAutoreleasePool alloc] init];
-            if (ok){
-                // Adding a new BibItem
-                entryType = [NSString stringWithBytes:bt_entry_type(entry) encoding:parserEncoding];
+    while(entry =  bt_parse_entry(infile, (char *)fs_path, 0, &ok)){
+    NSAutoreleasePool *innerPool = [[NSAutoreleasePool alloc] init];
+        if (ok){
+            // Adding a new BibItem
+            entryType = [NSString stringWithBytes:bt_entry_type(entry) encoding:parserEncoding];
 
-                if (bt_entry_metatype (entry) != BTE_REGULAR){
-                    // put preambles etc. into the frontmatter string so we carry them along.
-                    
-                    if (frontMatter && [entryType isEqualToString:@"preamble"]){
-                        [frontMatter appendString:@"\n@preamble{\""];
-                        [frontMatter appendString:[NSString stringWithBytes:bt_get_text(entry) encoding:parserEncoding]];
-                        [frontMatter appendString:@"\"}"];
-                    }else if(frontMatter && [entryType isEqualToString:@"string"]){
-						field = bt_next_field (entry, NULL, &fieldname);
-						NSString *macroKey = [NSString stringWithBytes: field->text encoding:parserEncoding];
-						NSString *macroString = [NSString stringWithBytes: field->down->text encoding:parserEncoding];                        
-                        if(aDocument)
-                            [aDocument addMacroDefinitionWithoutUndo:macroString
-                                                   forMacro:macroKey];
-					}
-                }else{
-                    field = NULL;
-                    // Returned special case handling of abstract & annote.
-                    // Special case is there to avoid losing newlines that exist in preexisting files.
-                    while (field = bt_next_field (entry, field, &fieldname))
-                    {
-                        //Get fieldname as a capitalized NSString
-                        sFieldName = [[NSString stringWithBytes: fieldname encoding:parserEncoding] capitalizedString];
-                        
-                        if(!strcmp(fieldname, "annote") ||
-                           !strcmp(fieldname, "abstract") ||
-                           !strcmp(fieldname, "rss-description")){
-                            if(field->down){
-                                cidx = field->down->offset;
-
-                                // the delimiter is at cidx-1
-                                if(buf[cidx-1] == '{'){
-                                    // scan up to the balanced brace
-                                    for(braceDepth = 1; braceDepth > 0; cidx++){
-                                        if(buf[cidx] == '{') braceDepth++;
-                                        if(buf[cidx] == '}') braceDepth--;
-                                    }
-                                    cidx--;     // just advanced cidx one past the end of the field.
-                                }else if(buf[cidx-1] == '"'){
-                                    // scan up to the next quote.
-                                    for(; buf[cidx] != '"'; cidx++);
-                                }
-                                complexString = [[[NSString alloc] initWithData:[NSData dataWithBytes:&buf[field->down->offset] length:(cidx- (field->down->offset))] encoding:parserEncoding] autorelease];
-                                complexString = checkAndTranslateString(complexString, field->line, filePath, parserEncoding); // check for bad characters, TeXify
-                            }else{
-                                *hadProblems = YES;
-                            }
-                        }else{
-                            complexString = stringFromBTField(field, sFieldName, filePath, aDocument); // handles TeXification
-                        }
-                        
-                        [dictionary setObject:complexString forKey:sFieldName];
-
-                    }// end while field - process next bt field                    
-					
-                    newBI = [[BibItem alloc] initWithType:[entryType lowercaseString]
-                                                 fileType:BDSKBibtexString
-												pubFields:dictionary
-                                                  authors:nil
-                                              createdDate:nil];
-                    [newBI setCiteKeyString:[NSString stringWithBytes:bt_entry_key(entry) encoding:parserEncoding]];
-                    [returnArray addObject:newBI];
-                    [newBI release];
-                    
-                    [dictionary removeAllObjects];
-                } // end generate BibItem from ENTRY metatype.
+            if (bt_entry_metatype (entry) != BTE_REGULAR){
+                // put preambles etc. into the frontmatter string so we carry them along.
+                
+                if (frontMatter && [entryType isEqualToString:@"preamble"]){
+                    [frontMatter appendString:@"\n@preamble{\""];
+                    [frontMatter appendString:[NSString stringWithBytes:bt_get_text(entry) encoding:parserEncoding]];
+                    [frontMatter appendString:@"\"}"];
+                }else if(frontMatter && [entryType isEqualToString:@"string"]){
+                    field = bt_next_field (entry, NULL, &fieldname);
+                    NSString *macroKey = [NSString stringWithBytes: field->text encoding:parserEncoding];
+                    NSString *macroString = [NSString stringWithBytes: field->down->text encoding:parserEncoding];                        
+                    if(aDocument)
+                        [aDocument addMacroDefinitionWithoutUndo:macroString
+                                               forMacro:macroKey];
+                }
             }else{
-                // wasn't ok, record it and deal with it later.
-				*hadProblems = YES;
-            }
-            bt_free_ast(entry);
-	    [innerPool release];
-        } // while (scanning through file) 
-		
-        bt_cleanup();
+                field = NULL;
+                // Returned special case handling of abstract & annote.
+                // Special case is there to avoid losing newlines that exist in preexisting files.
+                while (field = bt_next_field (entry, field, &fieldname))
+                {
+                    //Get fieldname as a capitalized NSString
+                    sFieldName = [[NSString stringWithBytes: fieldname encoding:parserEncoding] capitalizedString];
+                    
+                    if(!strcmp(fieldname, "annote") ||
+                       !strcmp(fieldname, "abstract") ||
+                       !strcmp(fieldname, "rss-description")){
+                        if(field->down){
+                            cidx = field->down->offset;
 
-        fclose(infile);
-        // @@readonly free(buf);
-		
-        [pool release];
-        return [returnArray autorelease];
+                            // the delimiter is at cidx-1
+                            if(buf[cidx-1] == '{'){
+                                // scan up to the balanced brace
+                                for(braceDepth = 1; braceDepth > 0; cidx++){
+                                    if(buf[cidx] == '{') braceDepth++;
+                                    if(buf[cidx] == '}') braceDepth--;
+                                }
+                                cidx--;     // just advanced cidx one past the end of the field.
+                            }else if(buf[cidx-1] == '"'){
+                                // scan up to the next quote.
+                                for(; buf[cidx] != '"'; cidx++);
+                            }
+                            complexString = [[[NSString alloc] initWithData:[NSData dataWithBytes:&buf[field->down->offset] length:(cidx- (field->down->offset))] encoding:parserEncoding] autorelease];
+                            complexString = checkAndTranslateString(complexString, field->line, filePath, parserEncoding); // check for bad characters, TeXify
+                        }else{
+                            *hadProblems = YES;
+                        }
+                    }else{
+                        complexString = stringFromBTField(field, sFieldName, filePath, aDocument); // handles TeXification
+                    }
+                    
+                    // add the expanded values to the autocomplete dictionary
+                    [[NSApp delegate] addString:complexString forCompletionEntry:sFieldName];
+                    
+                    [dictionary setObject:complexString forKey:sFieldName];
+
+                }// end while field - process next bt field                    
+                
+                newBI = [[BibItem alloc] initWithType:[entryType lowercaseString]
+                                             fileType:BDSKBibtexString
+                                            pubFields:dictionary
+                                              authors:nil
+                                          createdDate:[filePath isEqualToString:@"Paste/Drag"] ? [NSCalendarDate date] : nil];
+                [newBI setCiteKeyString:[NSString stringWithBytes:bt_entry_key(entry) encoding:parserEncoding]];
+                [returnArray addObject:newBI];
+                [newBI release];
+                
+                [dictionary removeAllObjects];
+            } // end generate BibItem from ENTRY metatype.
+        }else{
+            // wasn't ok, record it and deal with it later.
+            *hadProblems = YES;
+        }
+        bt_free_ast(entry);
+    [innerPool release];
+    } // while (scanning through file) 
+    
+    bt_cleanup();
+
+    fclose(infile);
+    // @@readonly free(buf);
+    
+    [pool release];
+    return [returnArray autorelease];
 }
 
-+ (NSArray *)macrosFromBibTeXString:(NSString *)aString hadProblems:(BOOL *)hadProblems{
-    NSMutableArray *retArray = [NSMutableArray array];
++ (NSDictionary *)macrosFromBibTeXString:(NSString *)aString hadProblems:(BOOL *)hadProblems{
+    NSMutableDictionary *retDict = [NSMutableDictionary dictionary];
     AST *entry = NULL;
     AST *field = NULL;
     char *entryType = NULL;
@@ -199,6 +219,7 @@ NSString *stringFromBTField(AST *field,
     bt_set_stringopts(BTE_PREAMBLE, BTO_EXPAND);
     bt_set_stringopts(BTE_REGULAR, BTO_MINIMAL);
     boolean ok;
+    *hadProblems = NO;
     
     NSString *macroKey;
     NSString *macroString;
@@ -218,14 +239,17 @@ NSString *stringFromBTField(AST *field,
         field = bt_next_field(entry, NULL, &fieldName);
         macroKey = [NSString stringWithBytes: field->text encoding:NSUTF8StringEncoding];
         macroString = [NSString stringWithBytes: field->down->text encoding:NSUTF8StringEncoding];
-        [retArray addObject:[NSDictionary dictionaryWithObjectsAndKeys:macroKey, @"mkey", macroString, @"mstring", nil]];
+		macroString = checkAndTranslateString(macroString, field->line, @"Paste/Drag", NSUTF8StringEncoding); // check for bad characters, TeXify
+        
+        [retDict setObject:macroString forKey:macroKey];
+        
         bt_free_ast(entry);
         entry = NULL;
         field = NULL;
     }
     bt_cleanup();
     fclose(stream);
-    return retArray;
+    return retDict;
 }
 
 + (NSString *)stringFromBibTeXValue:(NSString *)value error:(BOOL *)hadProblems document:(BibDocument *)aDocument{
@@ -253,6 +277,109 @@ NSString *stringFromBTField(AST *field,
 	bt_cleanup();
 	
 	return valueString;
+}
+
++ (NSDictionary *)macrosFromBibTeXStyle:(NSString *)styleContents{
+    
+    NSScanner *scanner = [[NSScanner alloc] initWithString:styleContents];
+    [scanner setCharactersToBeSkipped:nil];
+    
+    NSMutableDictionary *bstMacros = [NSMutableDictionary dictionary];
+    NSString *key = nil;
+    NSMutableString *value;
+
+	NSCharacterSet *bracesCharSet = [NSCharacterSet characterSetWithCharactersInString:@"{}"];
+	NSString *s;
+	int nesting;
+	unichar ch;
+    
+    // NSScanner is case-insensitive by default
+    
+    while(![scanner isAtEnd]){
+        
+        [scanner scanUpToString:@"MACRO" intoString:nil]; // don't check the return value on this, in case there are no characters between the initial location and "MACRO"
+        
+        // scan past the MACRO keyword
+        if(![scanner scanString:@"MACRO" intoString:nil])
+            break;
+        
+		[scanner scanCharactersFromSet:[NSCharacterSet whitespaceAndNewlineCharacterSet] intoString:nil];
+
+        // scan the key
+		if(![scanner scanString:@"{" intoString:nil] || 
+		   ![scanner scanUpToString:@"}" intoString:&key])
+            continue;
+        
+		[scanner scanCharactersFromSet:[NSCharacterSet whitespaceAndNewlineCharacterSet] intoString:nil];
+        
+        // scan the value, a '{}'- or '"'-quoted string between braces
+        if(![scanner scanString:@"{" intoString:nil] || [scanner isAtEnd])
+			continue;
+		
+		ch = [styleContents characterAtIndex:[scanner scanLocation]];
+        value = [NSMutableString string];
+		
+		if(ch == '{'){
+			
+			[scanner setScanLocation:[scanner scanLocation] + 1];
+			nesting = 1;
+			while(nesting > 0 && ![scanner isAtEnd]){
+				if([scanner scanUpToCharactersFromSet:bracesCharSet intoString:&s])
+					[value appendString:s];
+				if([scanner isAtEnd]) break;
+				if([styleContents characterAtIndex:[scanner scanLocation] - 1] != '\\'){
+					// we found an unquoted brace
+					ch = [styleContents characterAtIndex:[scanner scanLocation]];
+					if(ch == '}'){
+						--nesting;
+					}else{
+						++nesting;
+					}
+					if (nesting > 0) // we don't include the outer braces
+						[value appendFormat:@"%C",ch];
+				}
+				[scanner setScanLocation:[scanner scanLocation] + 1];
+			}
+			if(nesting > 0){
+				//NSLog(@"Unbalanced braces in macro definition.");
+				continue;
+			}
+			
+		}else if(ch == '"'){
+			
+			[scanner setScanLocation:[scanner scanLocation] + 1];
+			nesting = 1;
+			while(nesting > 0 && ![scanner isAtEnd]){
+				if ([scanner scanUpToString:@"\"" intoString:&s])
+					[value appendString:s];
+				if(![scanner isAtEnd]){
+					if([styleContents characterAtIndex:[scanner scanLocation] - 1] == '\\')
+						[value appendString:@"\""];
+					else 
+						nesting = 0;
+					[scanner setScanLocation:[scanner scanLocation] + 1];
+				}
+			}
+			if(nesting > 0 || ![value isStringTeXQuotingBalancedWithBraces:YES connected:NO]){
+				//NSLog(@"Unbalanced braces in macro definition");
+				continue;
+			}
+			
+		}else{
+			//NSLog(@"Missing braces around macro definition");
+			continue;
+		}
+        
+        [value removeSurroundingWhitespace];
+        
+        [bstMacros setObject:value forKey:[key stringByRemovingSurroundingWhitespace]];
+		
+    }
+	
+    [scanner release];
+    
+    return ([bstMacros count] ? bstMacros : nil);
+    
 }
 
 @end
@@ -306,7 +433,7 @@ NSString *stringFromBTField(AST *field, NSString *fieldName, NSString *filePath,
                     // macro value we could do this:
                     // expanded_text = bt_macro_text (simple_value->text, (char *)[filePath fileSystemRepresentation], simple_value->line);
                     sNode = [BDSKStringNode nodeWithMacroString:s];
-                    
+            
                     break;
                 case BTAST_STRING:
                     s = [[NSString alloc] initWithBytes:simple_value->text encoding:parserEncoding];
@@ -316,15 +443,12 @@ NSString *stringFromBTField(AST *field, NSString *fieldName, NSString *filePath,
                 case BTAST_NUMBER:
                     s = [[NSString alloc] initWithBytes:simple_value->text encoding:parserEncoding];
                     sNode = [BDSKStringNode nodeWithNumberString:s];
-                    
+
                     break;
                 default:
                     [NSException raise:@"bad node type exception" format:@"Node type %d is unexpected.", simple_value->nodetype];
             }
             [stringValueArray addObject:sNode];
-            
-            // if we have multiple strings for one field, we add them separately.
-            [appController addString:s forCompletionEntry:fieldName]; 
             [s release];
         }
         
