@@ -7,6 +7,7 @@
                 citeKeyFormatAdd = id; 
                 citeKeyFormatChanged = id; 
                 formatHelp = id; 
+                setFormatCleanOption = id; 
                 showCiteKeyFormatWarning = id; 
             }; 
             CLASS = "BibPref_CiteKey"; 
@@ -15,6 +16,7 @@
                 citeKeyAutogenerateCheckButton = NSButton; 
                 citeKeyLine = NSTextField; 
                 citeKeyLowercaseCheckButton = NSButton; 
+                formatCleanRadio = NSMatrix; 
                 formatField = NSTextField; 
                 formatPresetPopUp = NSPopUpButton; 
                 formatRepositoryPopUp = NSPopUpButton; 
