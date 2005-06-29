@@ -5,6 +5,7 @@
                 RSSDescriptionFieldChanged = id; 
                 addDefaultField = id; 
                 delSelectedDefaultField = id; 
+                showMacrosWindow = id; 
                 showTypeInfoEditor = id; 
             }; 
             CLASS = "BibPref_Defaults"; 
@@ -15,6 +16,7 @@
                 addFieldButton = NSButton; 
                 defaultFieldsTableView = NSTableView; 
                 delSelectedFieldButton = NSButton; 
+                editGlobalMacroDefsButton = NSButton; 
             }; 
             SUPERCLASS = OAPreferenceClient; 
         }, 
