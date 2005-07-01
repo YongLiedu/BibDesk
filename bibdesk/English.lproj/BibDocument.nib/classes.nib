@@ -25,6 +25,7 @@
                 delPub = id; 
                 dismissAddFieldSheet = id; 
                 dismissDelFieldSheet = id; 
+                dismissUndoAlertSheet = id; 
                 editPubCmd = id; 
                 emailPubCmd = id; 
                 exportAsAtom = id; 
@@ -32,10 +33,16 @@
                 exportAsMODS = id; 
                 exportAsRSS = id; 
                 exportEncodedBib = id; 
+                exportEncodedPublicBib = id; 
+                exportRIS = id; 
                 generateCiteKey = id; 
+                importFromFileAction = id; 
+                importFromPasteboardAction = id; 
+                importFromWebAction = id; 
                 makeSearchFieldKey = id; 
                 newPub = id; 
                 pageDownInPreview = id; 
+                pageUpInPreview = id; 
                 paste = id; 
                 postItemToWeblog = id; 
                 quickSearchAddField = id; 
@@ -43,7 +50,9 @@
                 removeCustomCiteString = id; 
                 searchFieldAction = id; 
                 searchFieldChangeKey = id; 
+                selectDuplicates = id; 
                 showMacrosWindow = id; 
+                sortForCrossrefs = id; 
                 splitViewDoubleClick = id; 
                 toggleShowingCustomCiteDrawer = id; 
                 toggleStatusBar = id; 
@@ -60,7 +69,6 @@
                 addFieldComboBox = NSComboBox; 
                 addFieldPrompt = NSTextField; 
                 addFieldSheet = NSWindow; 
-                addSourceListItemButton = NSButton; 
                 ccTableView = BDSKCustomCiteTableView; 
                 columnsMenu = NSMenu; 
                 ctxCopyBibTex = NSMenuItem; 
@@ -71,10 +79,6 @@
                 delFieldPrompt = NSTextField; 
                 delFieldSheet = NSWindow; 
                 documentWindow = NSWindow; 
-                editExportSettingsWindow = NSWindow; 
-                exporterEnabledCheckButton = NSButton; 
-                exporterSelectionPopUp = NSPopUpButton; 
-                exporterSubView = NSView; 
                 infoLine = NSTextField; 
                 previewField = NSTextView; 
                 quickSearchButton = NSPopUpButton; 
@@ -88,15 +92,19 @@
                 searchFieldBox = NSBox; 
                 searchFieldTextField = NSTextField; 
                 searchFieldView = NSView; 
-                sourceList = NSOutlineView; 
-                sourceListActionMenu = NSMenu; 
                 splitView = OASplitView; 
                 tableView = BDSKDragTableView; 
+                undoAlertSheet = NSWindow; 
             }; 
             SUPERCLASS = NSDocument; 
         }, 
         {
-            ACTIONS = {clearQuickSearch = id; }; 
+            ACTIONS = {
+                clearQuickSearch = id; 
+                copyAsRIS = id; 
+                createNewPubUsingCrossrefAction = id; 
+                selectCrossrefParentAction = id; 
+            }; 
             CLASS = FirstResponder; 
             LANGUAGE = ObjC; 
             SUPERCLASS = NSObject; 

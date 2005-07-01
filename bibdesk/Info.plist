@@ -27,40 +27,6 @@
 		<dict>
 			<key>CFBundleTypeExtensions</key>
 			<array>
-				<string>mods</string>
-				<string>xml</string>
-			</array>
-			<key>CFBundleTypeMIMETypes</key>
-			<array>
-				<string>text/xml</string>
-			</array>
-			<key>CFBundleTypeName</key>
-			<string>MODS XML Database</string>
-			<key>CFBundleTypeRole</key>
-			<string>None</string>
-			<key>NSDocumentClass</key>
-			<string>BibDocument</string>
-		</dict>
-		<dict>
-			<key>CFBundleTypeExtensions</key>
-			<array>
-				<string>atom</string>
-				<string>xml</string>
-			</array>
-			<key>CFBundleTypeMIMETypes</key>
-			<array>
-				<string>application/xml+atom</string>
-			</array>
-			<key>CFBundleTypeName</key>
-			<string>Atom Syndication File</string>
-			<key>CFBundleTypeRole</key>
-			<string>None</string>
-			<key>NSDocumentClass</key>
-			<string>BibDocument</string>
-		</dict>
-		<dict>
-			<key>CFBundleTypeExtensions</key>
-			<array>
 				<string>ris</string>
 				<string>fcgi</string>
 			</array>
@@ -77,27 +43,13 @@
 			<key>NSDocumentClass</key>
 			<string>BibDocument</string>
 		</dict>
-		<dict>
-			<key>CFBundleTypeExtensions</key>
-			<array>
-				<string>bdsk</string>
-			</array>
-			<key>CFBundleTypeIconFile</key>
-			<string>bibDocIcon.icns</string>
-			<key>CFBundleTypeName</key>
-			<string>BibDesk Library</string>
-			<key>CFBundleTypeRole</key>
-			<string>None</string>
-			<key>NSDocumentClass</key>
-			<string>BDSKLibrary</string>
-		</dict>
 	</array>
 	<key>CFBundleExecutable</key>
-	<string>Bibdesk</string>
+	<string>BibDesk</string>
 	<key>CFBundleGetInfoHTML</key>
-	<string>&lt;B&gt;BibDesk&lt;/B&gt; Version 0.99.3</string>
+	<string>&lt;B&gt;BibDesk&lt;/B&gt; Version 1.1.2</string>
 	<key>CFBundleGetInfoString</key>
-	<string>version 0.99.3</string>
+	<string>version 1.1.2</string>
 	<key>CFBundleHelpBookFolder</key>
 	<string>BibDesk Help</string>
 	<key>CFBundleHelpBookName</key>
@@ -113,11 +65,11 @@
 	<key>CFBundlePackageType</key>
 	<string>APPL</string>
 	<key>CFBundleShortVersionString</key>
-	<string>0.99.3</string>
+	<string>1.1.2</string>
 	<key>CFBundleSignature</key>
 	<string>BDSK</string>
 	<key>CFBundleVersion</key>
-	<string>0.99.3</string>
+	<string>1.1.2</string>
 	<key>NSAppleScriptEnabled</key>
 	<string>YES</string>
 	<key>NSMainNibFile</key>
@@ -135,12 +87,12 @@
 			<key>NSMenuItem</key>
 			<dict>
 				<key>default</key>
-				<string>Bibdesk/Complete Cite Key</string>
+				<string>BibDesk/Complete Cite Key</string>
 			</dict>
 			<key>NSMessage</key>
 			<string>completeCiteKeyFromSelection</string>
 			<key>NSPortName</key>
-			<string>Bibdesk</string>
+			<string>BibDesk</string>
 			<key>NSReturnTypes</key>
 			<array>
 				<string>NSStringPboardType</string>
@@ -154,12 +106,12 @@
 			<key>NSMenuItem</key>
 			<dict>
 				<key>default</key>
-				<string>Bibdesk/New Document With RIS</string>
+				<string>BibDesk/New Document With RIS</string>
 			</dict>
 			<key>NSMessage</key>
 			<string>newRISDocumentFromSelection</string>
 			<key>NSPortName</key>
-			<string>Bibdesk</string>
+			<string>BibDesk</string>
 			<key>NSSendTypes</key>
 			<array>
 				<string>NSStringPboardType</string>
@@ -169,12 +121,12 @@
 			<key>NSMenuItem</key>
 			<dict>
 				<key>default</key>
-				<string>Bibdesk/Add to Bibliography</string>
+				<string>BibDesk/Add to Bibliography</string>
 			</dict>
 			<key>NSMessage</key>
 			<string>addPublicationsFromSelection</string>
 			<key>NSPortName</key>
-			<string>Bibdesk</string>
+			<string>BibDesk</string>
 			<key>NSSendTypes</key>
 			<array>
 				<string>NSStringPboardType</string>
@@ -190,12 +142,12 @@
 			<key>NSMenuItem</key>
 			<dict>
 				<key>default</key>
-				<string>Bibdesk/Complete Citation</string>
+				<string>BibDesk/Complete Citation</string>
 			</dict>
 			<key>NSMessage</key>
 			<string>completeCitationFromSelection</string>
 			<key>NSPortName</key>
-			<string>Bibdesk</string>
+			<string>BibDesk</string>
 			<key>NSReturnTypes</key>
 			<array>
 				<string>NSStringPboardType</string>
@@ -209,12 +161,12 @@
 			<key>NSMenuItem</key>
 			<dict>
 				<key>default</key>
-				<string>Bibdesk/Show Matching Reference</string>
+				<string>BibDesk/Show Matching Reference</string>
 			</dict>
 			<key>NSMessage</key>
 			<string>showPubWithKey</string>
 			<key>NSPortName</key>
-			<string>Bibdesk</string>
+			<string>BibDesk</string>
 			<key>NSSendTypes</key>
 			<array>
 				<string>NSStringPboardType</string>
@@ -231,6 +183,8 @@
 				<dict>
 					<key>File papers into the papers folder automatically</key>
 					<false/>
+					<key>Local-Url Clean Braces or TeX</key>
+					<integer>2</integer>
 					<key>Local-Url Format</key>
 					<string>%L</string>
 					<key>Local-Url Format Preset</key>
@@ -247,7 +201,7 @@
 				<key>nib</key>
 				<string>BibPref_AutoFile</string>
 				<key>ordering</key>
-				<string>6</string>
+				<string>7</string>
 				<key>shortTitle</key>
 				<string>AutoFile</string>
 				<key>title</key>
@@ -297,6 +251,8 @@
 				<dict>
 					<key>Cite Key Autogenerate</key>
 					<false/>
+					<key>Cite Key Clean Braces or TeX</key>
+					<integer>2</integer>
 					<key>Cite Key Format</key>
 					<string>%a1:%Y%r2</string>
 					<key>Cite Key Format Preset</key>
@@ -311,11 +267,44 @@
 				<key>nib</key>
 				<string>BibPref_CiteKey</string>
 				<key>ordering</key>
-				<string>5</string>
+				<string>6</string>
 				<key>shortTitle</key>
 				<string>Cite Key</string>
 				<key>title</key>
 				<string>Cite Key Format</string>
+			</dict>
+			<key>BibPref_Crossref</key>
+			<dict>
+				<key>defaultsDictionary</key>
+				<dict>
+					<key>Automatically Sort for Crossrefs</key>
+					<false/>
+					<key>Duplicate Booktitle for Crossref</key>
+					<false/>
+					<key>Overwrite Booktitle when Duplicating for Crossref</key>
+					<false/>
+					<key>Types for Duplicating Booktitle for Crossref</key>
+					<array>
+						<string>book</string>
+						<string>proceedings</string>
+						<string>periodical</string>
+						<string>manual</string>
+					</array>
+					<key>Warn on Editing Inherited Fields</key>
+					<true/>
+				</dict>
+				<key>icon</key>
+				<string>crossref.tiff</string>
+				<key>identifier</key>
+				<string>bp_crossref</string>
+				<key>nib</key>
+				<string>BibPref_Crossref</string>
+				<key>ordering</key>
+				<string>5</string>
+				<key>shortTitle</key>
+				<string>Crossref</string>
+				<key>title</key>
+				<string>Crossref</string>
 			</dict>
 			<key>BibPref_Defaults</key>
 			<dict>
@@ -388,27 +377,27 @@
 					<key>Column Widths by Name</key>
 					<dict>
 						<key>1st Author</key>
-						<real>80.0</real>
+						<real>80</real>
 						<key>2nd Author</key>
-						<real>80.0</real>
+						<real>80</real>
 						<key>3rd Author</key>
-						<real>80.0</real>
-						<key>Keywords</key>
-						<real>50.0</real>
+						<real>80</real>
 						<key>Cite Key</key>
-						<real>85.0</real>
+						<real>85</real>
 						<key>Date</key>
-						<real>50.0</real>
-						<key>Local-Url</key>
-						<real>18.0</real>
-						<key>Title</key>
-						<real>300.0</real>
-						<key>Type</key>
-						<real>55.0</real>
-						<key>Url</key>
-						<real>23.0</real>
+						<real>50</real>
 						<key>Item Number</key>
-						<real>33.0</real>
+						<real>33</real>
+						<key>Keywords</key>
+						<real>50</real>
+						<key>Local-Url</key>
+						<real>18</real>
+						<key>Title</key>
+						<real>300</real>
+						<key>Type</key>
+						<real>55</real>
+						<key>Url</key>
+						<real>23</real>
 					</dict>
 					<key>Current Publication Type String</key>
 					<string>Inproceedings</string>
@@ -425,11 +414,11 @@
 					<key>Maximum Number of Items in Preview Pane</key>
 					<integer>0</integer>
 					<key>Preview PDF Scale Factor</key>
-					<real>1.0</real>
+					<real>1</real>
 					<key>Preview Pane Displays What?</key>
 					<integer>1</integer>
 					<key>Preview RTF Scale Factor</key>
-					<real>1.0</real>
+					<real>1</real>
 					<key>Quick Search Keys</key>
 					<array>
 						<string>Keywords</string>
@@ -497,7 +486,7 @@
 				<key>nib</key>
 				<string>BibPref_InputManager</string>
 				<key>ordering</key>
-				<string>7</string>
+				<string>8</string>
 				<key>shortTitle</key>
 				<string>Autocompletion</string>
 				<key>title</key>
@@ -538,10 +527,12 @@
 		<dict>
 			<key>UTTypeConformsTo</key>
 			<array>
-				<string>public.data</string>
+				<string>public.text</string>
 			</array>
 			<key>UTTypeDescription</key>
 			<string>bibTeX database</string>
+			<key>UTTypeIconFile</key>
+			<string>bibDocIcon.icns</string>
 			<key>UTTypeIdentifier</key>
 			<string>edu.ucsd.cs.mmccrack.bibdesk.bib</string>
 			<key>UTTypeTagSpecification</key>
@@ -549,6 +540,32 @@
 				<key>public.filename-extension</key>
 				<array>
 					<string>bib</string>
+				</array>
+			</dict>
+		</dict>
+		<dict>
+			<key>UTTypeConformsTo</key>
+			<array>
+				<string>public.text</string>
+			</array>
+			<key>UTTypeDescription</key>
+			<string>RIS/Medline File</string>
+			<key>UTTypeIconFile</key>
+			<string>risDocIcon.icns</string>
+			<key>UTTypeIdentifier</key>
+			<string>edu.ucsd.cs.mmccrack.bibdesk.ris</string>
+			<key>UTTypeReferenceURL</key>
+			<string>http://www.refman.com/support/risformat_intro.asp</string>
+			<key>UTTypeTagSpecification</key>
+			<dict>
+				<key>public.filename-extensions</key>
+				<array>
+					<string>ris</string>
+					<string>fcgi</string>
+				</array>
+				<key>public.mime-type</key>
+				<array>
+					<string>application/x-Research-Info-Systems</string>
 				</array>
 			</dict>
 		</dict>
