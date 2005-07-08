@@ -1,6 +1,6 @@
 //
 //  BDOrganizedLock.m
-//  Bibdesk
+//  BibDesk
 //  This is a self-contained class designed for easy use in any application.
 //
 //  Created (including algorithm design) by Matthew Cook on Sun Sep 28 2003.
@@ -94,6 +94,7 @@
     if (debugging)
         fprintf(stderr, "Number %d now has lock.\n", (int)number);
     
+	[number release];
     return returnValue; // this was set by the previous unlocker
 } // [BDOrganizedLock lockFor:job:]
 
