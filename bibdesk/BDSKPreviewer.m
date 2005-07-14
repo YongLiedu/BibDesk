@@ -2,17 +2,37 @@
 
 //  Created by Michael McCracken on Tue Jan 29 2002.
 /*
-This software is Copyright (c) 2002, Michael O. McCracken
-All rights reserved.
+ This software is Copyright (c) 2002,2003,2004,2005
+ Michael O. McCracken. All rights reserved.
 
-Redistribution and use in source and binary forms, with or without modification, are permitted provided that the following conditions are met:
+ Redistribution and use in source and binary forms, with or without
+ modification, are permitted provided that the following conditions
+ are met:
 
-- Redistributions of source code must retain the above copyright notice, this list of conditions and the following disclaimer.
--  Redistributions in binary form must reproduce the above copyright notice, this list of conditions and the following disclaimer in the documentation and/or other materials provided with the distribution.
--  Neither the name of Michael O. McCracken nor the names of any contributors may be used to endorse or promote products derived from this software without specific prior written permission.
+ - Redistributions of source code must retain the above copyright
+   notice, this list of conditions and the following disclaimer.
 
-THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-*/
+ - Redistributions in binary form must reproduce the above copyright
+    notice, this list of conditions and the following disclaimer in
+    the documentation and/or other materials provided with the
+    distribution.
+
+ - Neither the name of Michael O. McCracken nor the names of any
+    contributors may be used to endorse or promote products derived
+    from this software without specific prior written permission.
+
+ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+ "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+ LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+ A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+ OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+ SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+ LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+ DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+ THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+ (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ */
 
 #import "BDSKPreviewer.h"
 #import "BibPrefController.h"
@@ -80,7 +100,7 @@ static BDSKPreviewer *thePreviewer;
     // pool for MT
     NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
     
-    BOOL rv = YES;
+    volatile BOOL rv = YES;
     
     if(str == nil || [str isEqualToString:@""]){
         [self resetPreviews];
@@ -188,6 +208,7 @@ static BDSKPreviewer *thePreviewer;
         
     NSTask *pdftex1;
     NSTask *pdftex2;
+    NSTask *pdftex3;
     NSTask *bibtex;
     NSString *pdftexbinpath = [[OFPreferenceWrapper sharedPreferenceWrapper] objectForKey:BDSKTeXBinPathKey];
     NSString *bibtexbinpath = [[OFPreferenceWrapper sharedPreferenceWrapper] objectForKey:BDSKBibTeXBinPathKey];
@@ -203,10 +224,12 @@ static BDSKPreviewer *thePreviewer;
     }
     
     if(![[NSFileManager defaultManager] fileExistsAtPath:pdftexbinpath]){
-        [NSException raise:@"BDSKPreviewerPathNotFound" format:@"File does not exist at %@", pdftexbinpath];    
+        NSLog(@"%@ cannot continue: %@ not found", NSStringFromSelector(_cmd), pdftexbinpath);
+        return NO;    
     }
     if(![[NSFileManager defaultManager] fileExistsAtPath:bibtexbinpath]){        
-        [NSException raise:@"BDSKPreviewerPathNotFound" format:@"File does not exist at %@", bibtexbinpath];     
+        NSLog(@"%@ cannot continue: %@ not found", NSStringFromSelector(_cmd), bibtexbinpath);
+        return NO;     
     }
 
     // remove the old pdf file.
@@ -274,6 +297,27 @@ static BDSKPreviewer *thePreviewer;
     
     [pdftex2 release];
 
+    // third and final pdftex run
+    pdftex3 = [[NSTask alloc] init];
+    [pdftex3 setCurrentDirectoryPath:applicationSupportPath];
+    [pdftex3 setLaunchPath:pdftexbinpath];
+    [pdftex3 setArguments:[NSArray arrayWithObjects:@"-interaction=batchmode",[NSString stringWithString:fileName],
+        nil ]];
+    [pdftex3 setStandardOutput:[NSFileHandle fileHandleWithNullDevice]];
+    
+    NS_DURING
+        [pdftex3 launch];
+        [pdftex3 waitUntilExit];
+    NS_HANDLER
+        if([pdftex3 isRunning])
+            [pdftex3 terminate];
+        NSLog(@"%@ %@ failed", [pdftex3 description], [pdftex3 launchPath]);
+        [pdftex3 release];
+        return NO;
+    NS_ENDHANDLER
+    
+    [pdftex3 release];
+    
     // This task runs latex2rtf on our tex file to generate bibpreview.rtf
     latex2rtf = [[NSTask alloc] init];
     [latex2rtf setCurrentDirectoryPath:applicationSupportPath];

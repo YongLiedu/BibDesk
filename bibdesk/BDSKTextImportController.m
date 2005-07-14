@@ -1,10 +1,40 @@
 //
 //  BDSKTextImportController.m
-//  Bibdesk
+//  BibDesk
 //
 //  Created by Michael McCracken on 4/13/05.
-//  Copyright 2005 __MyCompanyName__. All rights reserved.
-//
+/*
+ This software is Copyright (c) 2005
+ Michael O. McCracken. All rights reserved.
+
+ Redistribution and use in source and binary forms, with or without
+ modification, are permitted provided that the following conditions
+ are met:
+
+ - Redistributions of source code must retain the above copyright
+   notice, this list of conditions and the following disclaimer.
+
+ - Redistributions in binary form must reproduce the above copyright
+    notice, this list of conditions and the following disclaimer in
+    the documentation and/or other materials provided with the
+    distribution.
+
+ - Neither the name of Michael O. McCracken nor the names of any
+    contributors may be used to endorse or promote products derived
+    from this software without specific prior written permission.
+
+ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+ "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+ LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+ A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+ OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+ SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+ LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+ DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+ THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+ (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ */
 
 #import "BDSKTextImportController.h"
 #import <Carbon/Carbon.h>
@@ -47,7 +77,6 @@
 - (void)awakeFromNib{
 	[itemTableView registerForDraggedTypes:[NSArray arrayWithObject:NSStringPboardType]];
     [statusLine setStringValue:@""];
-    [citeKeyLine setStringValue:[item citeKey]];
 	[webViewBox setContentViewMargins:NSZeroSize];
 	[webViewBox setContentView:webView];
     [self setupTypeUI];
@@ -81,9 +110,10 @@
 		[self setShowingWebView:NO];
 		
         NSString *pbString = nil;
-        NSData *pbData = [pb dataForType:pbType];
+        NSData *pbData;
         
 		if([pbType isEqualToString:NSRTFPboardType]){
+            pbData = [pb dataForType:pbType];
             pbString = [[[NSAttributedString alloc] initWithRTF:pbData
                                              documentAttributes:NULL] autorelease];
             pbString = [[(NSAttributedString *)pbString string] stringByRemovingSurroundingWhitespace];
@@ -96,6 +126,7 @@
 			}
             
 		}else if([pbType isEqualToString:NSRTFDPboardType]){
+            pbData = [pb dataForType:pbType];
             pbString = [[[NSAttributedString alloc] initWithRTFD:pbData
                                               documentAttributes:NULL] autorelease];
             pbString = [[(NSAttributedString *)pbString string] stringByRemovingSurroundingWhitespace];
@@ -108,6 +139,7 @@
             }
             
 		}else if([pbType isEqualToString:NSStringPboardType]){
+            pbData = [pb dataForType:pbType];
             pbString = [pb stringForType:pbType];
             pbString = [pbString stringByRemovingSurroundingWhitespace];
 			if([pbString rangeOfString:@"http://"].location == 0){
@@ -117,7 +149,7 @@
             }
 		}else {
 			
-			[sourceTextView setString:@""];
+			[sourceTextView setString:NSLocalizedString(@"Sorry, BibDesk can't read this data type.", @"warning message when choosing \"new publication from pasteboard\" for an unsupported type")];
 		}
 	}
 }
@@ -256,13 +288,14 @@
     // make the tableview stop editing:
     [[self window] makeFirstResponder:[self window]];
     
-    [document addPublication:[item autorelease]];
+    [document addPublication:item];
+	[item setCiteKey:[item suggestedCiteKey]]; // only now can we generate, due to unique specifiers
+	[item release];
 
     [statusLine setStringValue:[NSString stringWithFormat:NSLocalizedString(@"%d publication%@ added.", @"format string for pubs added. args: one int for number added then one string for plural string."), ++itemsAdded, (itemsAdded > 1 ? @"s" : @"")]];
 
     item = [[BibItem alloc] init];
     [itemTypeButton selectItemWithTitle:[item type]];
-    [citeKeyLine setStringValue:[item citeKey]];
     [itemTableView reloadData];
 }
 
@@ -298,9 +331,7 @@
     }
     [item setField:selKey toValue:selString];
     
-    [item setCiteKey:[item suggestedCiteKey]];
-    [citeKeyLine setStringValue:[item citeKey]];
-    
+	[[item undoManager] setActionName:NSLocalizedString(@"Edit Publication",@"")];
     [itemTableView reloadData];
 }
 
@@ -309,9 +340,8 @@
     [self setType:type];
     [[OFPreferenceWrapper sharedPreferenceWrapper] setObject:type
                                                       forKey:BDSKPubTypeStringKey];
-    [item setCiteKey:[item suggestedCiteKey]];
-    [citeKeyLine setStringValue:[item citeKey]];
 
+	[[item undoManager] setActionName:NSLocalizedString(@"Edit Publication",@"")];
     [itemTableView reloadData];
 }
 
@@ -490,9 +520,9 @@
 
 - (IBAction)showHelpAction:(id)sender{
     
-    OSErr err = AHLookupAnchor((CFStringRef)@"BibDesk Help", (CFStringRef)@"Adding-from-Text");
+    OSStatus err = AHLookupAnchor((CFStringRef)@"BibDesk Help", (CFStringRef)@"Adding-References-From-Text-Sources");
     if (err == kAHInternalErr || err == kAHInternalErr){
-        NSLog(@"Help Book: error looking up anchor \"Adding-from-Text\"");
+        NSLog(@"Help Book: error looking up anchor \"Adding-References-From-Text-Sources\"");
     }
 }
 
@@ -503,6 +533,7 @@
 	
 	if (URLString) {
 		[item setField:BDSKUrlString toValue:URLString];
+		[[item undoManager] setActionName:NSLocalizedString(@"Edit Publication",@"")];
 		[itemTableView reloadData];
 	}
 }
@@ -512,6 +543,7 @@
 	
 	if (URLString) {
 		[item setField:BDSKUrlString toValue:URLString];
+		[[item undoManager] setActionName:NSLocalizedString(@"Edit Publication",@"")];
 		[itemTableView reloadData];
 	}
 }
@@ -546,6 +578,8 @@
 			
 			[item setField:BDSKLocalUrlString toValue:fileURLString];
 			[item autoFilePaper];
+			
+			[[item undoManager] setActionName:NSLocalizedString(@"Edit Publication",@"")];
 		} else {
 			NSLog(@"Could not write downloaded file.");
 		}
@@ -633,6 +667,7 @@
 	[item setField:BDSKLocalUrlString toValue:fileURLString];
 	[item autoFilePaper];
 	
+	[[item undoManager] setActionName:NSLocalizedString(@"Edit Publication",@"")];
 	[itemTableView reloadData];
 }
 
@@ -999,8 +1034,8 @@
     
     NSString *key = [fields objectAtIndex:row];
     [item setField:key toValue:object];
-    [item setCiteKey:[item suggestedCiteKey]];
-    [citeKeyLine setStringValue:[item citeKey]];
+	
+	[[item undoManager] setActionName:NSLocalizedString(@"Edit Publication",@"")];
 }
 
 // This method is called after it has been determined that a drag should begin, but before the drag has been started.  To refuse the drag, return NO.  To start a drag, return YES and place the drag data onto the pasteboard (data, owner, etc...).  The drag image and other drag related information will be set up and provided by the table view once this call returns with YES.  The rows array is the list of row numbers that will be participating in the drag.
@@ -1023,9 +1058,19 @@
 
         NSString *key = [fields objectAtIndex:row];
         [item setField:key toValue:[pb stringForType:NSStringPboardType]];
+		
+		[[item undoManager] setActionName:NSLocalizedString(@"Edit Publication",@"")];
         [itemTableView reloadData];
     }
     return YES;
+}
+
+#pragma mark TableView delegate methods
+
+- (void)tableView:(NSTableView *)tv willDisplayCell:(id)cell forTableColumn:(NSTableColumn *)tableColumn row:(int)row{
+	if([[tableColumn identifier] isEqualToString:@"FieldValue"]){
+		[cell setFormatter:[[NSApp delegate] formatterForEntry:[fields objectAtIndex:row]]];
+	}
 }
 
 #pragma mark Splitview delegate methods
