@@ -2,23 +2,43 @@
 
 //  Created by Michael McCracken on Tue Mar 26 2002.
 /*
-This software is Copyright (c) 2001,2002, Michael O. McCracken
-All rights reserved.
+ This software is Copyright (c) 2002,2003,2004,2005
+ Michael O. McCracken. All rights reserved.
 
-Redistribution and use in source and binary forms, with or without modification, are permitted provided that the following conditions are met:
+ Redistribution and use in source and binary forms, with or without
+ modification, are permitted provided that the following conditions
+ are met:
 
-- Redistributions of source code must retain the above copyright notice, this list of conditions and the following disclaimer.
--  Redistributions in binary form must reproduce the above copyright notice, this list of conditions and the following disclaimer in the documentation and/or other materials provided with the distribution.
--  Neither the name of Michael O. McCracken nor the names of any contributors may be used to endorse or promote products derived from this software without specific prior written permission.
+ - Redistributions of source code must retain the above copyright
+   notice, this list of conditions and the following disclaimer.
 
-THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-*/
+ - Redistributions in binary form must reproduce the above copyright
+    notice, this list of conditions and the following disclaimer in
+    the documentation and/or other materials provided with the
+    distribution.
 
+ - Neither the name of Michael O. McCracken nor the names of any
+    contributors may be used to endorse or promote products derived
+    from this software without specific prior written permission.
+
+ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+ "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+ LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+ A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+ OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+ SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+ LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+ DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+ THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+ (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ */
 
 #import "BibDocument.h"
 #import "BibItem.h"
 #import "BibDocument_DataSource.h"
 #import "BibAuthor.h"
+#import "NSImage+Toolbox.h"
 
 @implementation BibDocument (DataSource)
 
@@ -49,38 +69,24 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
     BibItem* pub = nil;
     NSArray *auths = nil;
     int sortedRow = (sortDescending ? [shownPublications count] - 1 - row : row);
+
     NSString *path = nil;
-    NSString *extension = nil;
     NSString *lurl = nil;
     NSString *tcID = [tableColumn identifier];
 	NSString *shortDateFormatString = [[NSUserDefaults standardUserDefaults] stringForKey:NSShortDateFormatString];
     
     if(sortedRow >= 0 && tView == tableView){ // sortedRow can be -1 if you delete the last pub and sortDescending is true
-        pub = [shownPublications objectAtIndex:sortedRow];
+        pub = [shownPublications objectAtIndex:sortedRow usingLock:pubsLock];
         auths = [pub pubAuthors];
         
-        if([tcID isEqualToString:BDSKCiteKeyString] ||
-		   [tcID isEqualToString:@"Citekey"] ||
-		   [tcID isEqualToString:@"Cite-Key"] ||
-		   [tcID isEqualToString:@"Key"]){
+        if([tcID isEqualToString:BDSKCiteKeyString]){
             return [pub citeKey];
             
         }else if([tcID isEqualToString:BDSKItemNumberString]){
             return [NSString stringWithFormat:@"%d", [pub fileOrder]];
             
         }else if([tcID isEqualToString: BDSKTitleString] ){
-			
-			if ([[pub type] isEqualToString:@"inbook"]){
-				if (! [[pub valueOfField:BDSKChapterString] isEqualTo:@""] ) {
-				   return [NSString stringWithFormat:NSLocalizedString(@"%@ (chapter of %@)", @"Chapter of inbook (chapter of Title)"), [pub valueOfField:BDSKChapterString], [pub title]];
-			     } else if (! [[pub valueOfField:BDSKPagesString] isEqualTo:@""]) {
-				   return [NSString stringWithFormat:NSLocalizedString(@"%@ (pp %@)", @"Title of inbook (pp Pages)"), [pub title], [pub valueOfField:BDSKPagesString]];
-				 } else {
-					return [pub title];
-				}
-			}else{
-				return [pub title];
-			}
+			return [pub title];
 		
 		}else if([tcID isEqualToString: BDSKContainerString] ){
 			return [pub container];
@@ -104,12 +110,11 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
             NSCalendarDate *date = [pub date];
 			NSString *monthStr = [pub valueOfField:BDSKMonthString];
 			if(date == nil)
-                return @"No date";
+                return NSLocalizedString(@"No date",@"No date");
             else if( !monthStr ||  [monthStr isEqualToString:@""])
-                return [date descriptionWithCalendarFormat:NSLocalizedString(@"%Y", @"Date format for only year inside table views")];
+                return [date descriptionWithCalendarFormat:@"%Y"];
             else
-                return [date descriptionWithCalendarFormat:NSLocalizedString(@"%b %Y", @"Date format for month and year inside table views")
-                                                    locale:[[NSUserDefaults standardUserDefaults] dictionaryRepresentation]];
+                return [date descriptionWithCalendarFormat:@"%b %Y"];
             
         }else if([tcID isEqualToString: BDSKFirstAuthorString] ){
             if([auths count] > 0){
@@ -133,32 +138,25 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 		} else if ([tcID isEqualToString:BDSKAuthorString] ||
 				   [tcID isEqualToString:@"Authors"]) {
 			if ([auths count] > 0) {
-				return [pub bibtexAuthorString];
+				return [pub bibTeXAuthorStringNormalized:YES];
 			} else {
 				return @"-";
 			}										
             
         }else if ([tcID isEqualToString:BDSKLocalUrlString]){
             path = [pub localURLPath];
-	        extension = [path pathExtension];
 			lurl = [pub valueOfField:BDSKLocalUrlString];
             if(path && [[NSFileManager defaultManager] fileExistsAtPath:path]){
-				if(![extension isEqualToString:@""]){
-					// use the NSImage method, as it seems to be faster, but only for files with extensions
-					return [NSImage imageForFileType:extension];
-				} else {
-					return [[NSWorkspace sharedWorkspace] iconForFile:path];
-				}
+                return [NSImage imageForFile:path];
             }else if(lurl && ![lurl isEqualToString:@""]){
 				return [NSImage imageNamed:@"QuestionMarkFile"];
 			}else{
                 return nil;
             }
-
         }else if ([tcID isEqualToString:BDSKUrlString]){
             path = [pub valueOfField:BDSKUrlString];
             if(path && ![path isEqualToString:@""]){
-                return [[NSWorkspace sharedWorkspace] iconForFileType:@"webloc"];
+                return [NSImage imageForFileType:@"webloc"];
             }else{
                 return nil;
             }
@@ -215,8 +213,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
     }
     ////NSLog(@"tableViewColumnDidResize - setting %@ forKey: %@ ", columns, BDSKColumnWidthsKey);
     [pw setObject:columns forKey:BDSKColumnWidthsKey];
-    [[NSNotificationCenter defaultCenter] postNotificationName:BDSKTableColumnChangedNotification
-                                                        object:self];
+	// WARNING: don't notify changes to other docs, as this is very buggy. 
 }
 
 
@@ -275,7 +272,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
     NSEnumerator *enumerator = [rows objectEnumerator]; 
     while (idx = [enumerator nextObject]) {
         int sortedIndex = (sortDescending ? shownCount - 1 - [idx intValue] : [idx intValue]);
-        BibItem *pub = [shownPublications objectAtIndex:sortedIndex];
+        BibItem *pub = [shownPublications objectAtIndex:sortedIndex usingLock:pubsLock];
         
         if(sep) [s appendString:startCite];
         [s appendString:[pub citeKey]];
@@ -346,7 +343,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
        [rows count] == 1){
         i = [rows objectAtIndex:0];
         sortedIndex = (sortDescending ? shownCount - 1 - [i intValue] : [i intValue]);
-        pub = [shownPublications objectAtIndex:sortedIndex];
+        pub = [shownPublications objectAtIndex:sortedIndex usingLock:pubsLock];
         NSString *path = [pub localURLPath];
         if(path != nil){
             yn = [pboard writeFileContents:path];
@@ -362,7 +359,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
     enumerator = [rows objectEnumerator]; 
     while (i = [enumerator nextObject]) {
         sortedIndex = (sortDescending ? shownCount - 1 - [i intValue] : [i intValue]);
-        pub = [shownPublications objectAtIndex:sortedIndex];
+        pub = [shownPublications objectAtIndex:sortedIndex usingLock:pubsLock];
         
         [draggedItems addObject:pub];
         [localPBString appendString:[pub bibTeXString]];
@@ -477,7 +474,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
     BibItem *pub = nil;
 
     while(pub = [e nextObject]){
-        [a addObject:[pub bibtexAuthorString]];
+        [a addObject:[pub bibTeXAuthorString]];
     }
     return a;
 }
@@ -487,8 +484,8 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
     int n = [self numberOfSelectedPubs];
     BibItem *bib;
     if (n == 1){
-        bib = [shownPublications objectAtIndex:[[[self selectedPubEnumerator] nextObject] intValue]];
-        return [bib bibtexAuthorString];
+        bib = [shownPublications objectAtIndex:[[[self selectedPubEnumerator] nextObject] intValue] usingLock:pubsLock];
+        return [bib bibTeXAuthorString];
     }else{
         return nil;
     }
@@ -498,7 +495,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 // fixme -  also need to call the processkeychars in keydown...
 - (void)typeAheadSelectItemAtIndex:(int)itemIndex{
     int sortedItemIndex = (sortDescending ? [shownPublications count] - 1 - itemIndex : itemIndex);
-    [self highlightBib:[shownPublications objectAtIndex:sortedItemIndex] byExtendingSelection:NO];
+    [self highlightBib:[shownPublications objectAtIndex:sortedItemIndex usingLock:pubsLock] byExtendingSelection:NO];
 }
 // We call this when a type-ahead-selection match has been made; you should select the item based on its index in the array you provided in -typeAheadSelectionItems.
 

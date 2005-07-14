@@ -1,6 +1,6 @@
 //
 //  BibAppController+Scripting.h
-//  Bibdesk
+//  BibDesk
 //
 //  Created by Sven-S. Porst on Sat Jul 10 2004.
 //  Copyright (c) 2004 __MyCompanyName__. All rights reserved.

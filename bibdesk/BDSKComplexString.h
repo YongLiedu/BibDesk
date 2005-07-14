@@ -1,3 +1,37 @@
+// BDSKComplexString.h
+/*
+ This software is Copyright (c) 2004,2005
+ Michael O. McCracken. All rights reserved.
+
+ Redistribution and use in source and binary forms, with or without
+ modification, are permitted provided that the following conditions
+ are met:
+
+ - Redistributions of source code must retain the above copyright
+   notice, this list of conditions and the following disclaimer.
+
+ - Redistributions in binary form must reproduce the above copyright
+    notice, this list of conditions and the following disclaimer in
+    the documentation and/or other materials provided with the
+    distribution.
+
+ - Neither the name of Michael O. McCracken nor the names of any
+    contributors may be used to endorse or promote products derived
+    from this software without specific prior written permission.
+
+ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+ "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+ LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+ A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+ OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+ SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+ LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+ DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+ THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+ (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ */
+
 /* Defines nodes that are used to store either strings or macros or
    raw numbers. These are usually stored as either parts of an array
    or as nodes by themselves. */
@@ -63,14 +97,16 @@ typedef enum{
     @result     -
 */
 - (BOOL)isEqual:(BDSKStringNode *)other;
+- (NSComparisonResult)compareNode:(BDSKStringNode *)aNode;
+- (NSComparisonResult)compareNode:(BDSKStringNode *)aNode options:(unsigned)mask;
 - (bdsk_stringnodetype)type;
 - (NSString *)value;
 
 @end
 
 @protocol BDSKMacroResolver
-- (NSMutableDictionary *)macroDefinitions;
-- (void)setMacroDefinitions:(NSMutableDictionary *)newMacroDefinitions;
+- (NSDictionary *)macroDefinitions;
+- (void)setMacroDefinitions:(NSDictionary *)newMacroDefinitions;
 - (void)addMacroDefinition:(NSString *)macroString forMacro:(NSString *)macroKey;
 - (NSString *)valueOfMacro:(NSString *)macro;
 - (void)removeMacro:(NSString *)macroKey;
@@ -92,6 +128,9 @@ typedef enum{
   NSArray *nodes;			/* an array of bdsk_stringnodes. */
 
   id macroResolver;
+  
+  BOOL complex;
+  BOOL inherited;
 }
 
 /* A bunch of methods that have to be overridden 
@@ -99,8 +138,9 @@ typedef enum{
 */
 + (id)allocWithZone:(NSZone *)aZone;
 - (id)init;
+
 /*!
-    @method     initWithArray
+    @method     initWithArray:
     @abstract   Initializes a complex string with an array of string nodes and a macroresolver. This is the designated initializer. 
     @discussion (description)
     @param		a An array of BDSKStringNodes
@@ -108,6 +148,15 @@ typedef enum{
     @result     -
 */
 - (id)initWithArray:(NSArray *)a macroResolver:(id)theMacroResolver;
+
+/*!
+    @method     initWithInheritedValue:
+    @abstract   Initializes a string with an inherited value.
+    @discussion (description)
+    @param		aValue The string value to inherit.
+    @result     -
+*/
+- (id)initWithInheritedValue:(NSString *)aValue;
 
 /*
  The following methods are supposed to be overridden, but since we 
@@ -131,7 +180,9 @@ typedef enum{
 - (id)copyWithZone:(NSZone *)zone;
 
 /* Overridden BDSKComplexStringExtensions methods */
+- (id)copyUninheritedWithZone:(NSZone *)zone;
 - (BOOL)isComplex;
+- (BOOL)isInherited;
 - (BOOL)isEqualAsComplexString:(NSString *)other;
 - (NSString *)stringAsBibTeXString;
 
@@ -144,15 +195,6 @@ typedef enum{
     @result     -
 */
 - (NSArray *)nodes;
-
-/*!
-    @method     expandedValueFromArray:
-    @abstract   given an array of BDSKStringNodes,
-    @discussion (description)
-    @param      nodes an array of BDSKStringNodes
-    @result     the string with expanded values for nodes that have them
-*/
-- (NSString *)expandedValueFromArray:(NSArray *)nodes;
 
 /*!
     @method     macroResolver
@@ -196,12 +238,46 @@ typedef enum{
 + (id)complexStringWithBibTeXString:(NSString *)btstring macroResolver:(id<BDSKMacroResolver>)theMacroResolver;
 
 /*!
+    @method     stringWithInheritedValue:
+    @abstract   Returns a newly allocated and initialized string with an inherited value. 
+    @discussion -
+    @param		aValue The string value to inherit. 
+    @result     - 
+*/
++ (id)stringWithInheritedValue:(NSString *)aValue;
+
+/*!
+    @method     copyUninherited
+    @abstract   Copies using copyUninheritedWithZone: with the default zone
+    @discussion -
+    @result     - 
+*/
+- (id)copyUninherited;
+
+/*!
+    @method     copyUninheritedWithZone:
+    @abstract   Copies the string, always returning a non-inherited (complex) string
+    @discussion -
+    @param		zone The zone to use
+    @result     - 
+*/
+- (id)copyUninheritedWithZone:(NSZone *)zone;
+
+/*!
     @method     isComplex
     @abstract   Boolean indicating whether the receiver is a complex string.
     @discussion -
     @result     - 
 */
 - (BOOL)isComplex;
+
+/*!
+    @method     isInherited
+    @abstract   Boolean indicating whether the receiver is an inherited string.
+    @discussion -
+    @result     - 
+*/
+- (BOOL)isInherited;
 
 /*!
     @method     isEqualAsComplexString:
@@ -211,6 +287,9 @@ typedef enum{
     @result     Boolean indicating if the strings are equal as complex strings
 */
 - (BOOL)isEqualAsComplexString:(NSString *)other;
+
+- (NSComparisonResult)compareAsComplexString:(NSString *)other;
+- (NSComparisonResult)compareAsComplexString:(NSString *)other options:(unsigned)mask;
 
 /*!
     @method     stringAsBibTeXString
@@ -227,5 +306,22 @@ typedef enum{
     @result     (description)
 */
 - (NSString *)stringAsExpandedBibTeXString;
+
+/*!
+    @method     hasSubstring:options:
+    @abstract   Boolean, checks whether the receiver has target as a substring. 
+    @discussion When the receiver is not complex and target is complex, or if target is not complex and the receiver is not complex, always returns NO. 
+    @result     (description)
+*/
+- (BOOL)hasSubstring:(NSString *)target options:(unsigned)opts;
+
+/*!
+    @method     stringByReplacingOccurrencesOfString:withString:options:replacements:
+    @abstract   Returns a string formed by replacing occurrences of target by replacement, using the search options opts. The last argument is set to the number of replacements set.
+    @discussion When the receiver is not complex and target is complex, or if target is not complex and the receiver is not complex, returns the receiver. 
+When the receiver is complex, only whole node matches are replaced. 
+    @result     (description)
+*/
+- (NSString *)stringByReplacingOccurrencesOfString:(NSString *)target withString:(NSString *)replacement options:(unsigned)opts replacements:(unsigned int *)number;
 
 @end
