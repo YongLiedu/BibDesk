@@ -1,10 +1,40 @@
 //
-//  BibDocument+Validation.m
-//  Bibdesk
+//  BibDocument+Menus.m
+//  BibDesk
 //
 //  Created by Sven-S. Porst on Fri Jul 30 2004.
-//  Copyright (c) 2004 __MyCompanyName__. All rights reserved.
-//
+/*
+ This software is Copyright (c) 2004,2005
+ Sven-S. Porst. All rights reserved.
+
+ Redistribution and use in source and binary forms, with or without
+ modification, are permitted provided that the following conditions
+ are met:
+
+ - Redistributions of source code must retain the above copyright
+   notice, this list of conditions and the following disclaimer.
+
+ - Redistributions in binary form must reproduce the above copyright
+    notice, this list of conditions and the following disclaimer in
+    the documentation and/or other materials provided with the
+    distribution.
+
+ - Neither the name of Sven-S. Porst nor the names of any
+    contributors may be used to endorse or promote products derived
+    from this software without specific prior written permission.
+
+ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+ "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+ LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+ A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+ OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+ SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+ LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+ DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+ THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+ (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ */
 
 #import "BibDocument+Menus.h"
 
@@ -21,7 +51,13 @@ Broken out of BibDocument and split up into smaller parts to make things more ma
 
 	// handle copy menu items
 	// go through hell
-	if (act == @selector(copyAsTex:)) {
+	if (act == @selector(cut:)) {
+		return [self validateCutMenuItem:menuItem];
+	}
+	else if (act == @selector(copy:)) {
+		return [self validateCopyMenuItem:menuItem];
+	}
+	else if (act == @selector(copyAsTex:)) {
 		return [self validateCopyAsTeXMenuItem:menuItem];
 	}
 	else if (act == @selector(copyAsBibTex:)) {
@@ -76,30 +112,44 @@ Broken out of BibDocument and split up into smaller parts to make things more ma
 		return [self validateNewPubFromFileMenuItem:menuItem];
 	} else if ([menuItem action] == @selector(importFromWebAction:)) {
 		return [self validateNewPubFromWebMenuItem:menuItem];
-	}
-//	else if ([[menuItem representedObject] isEqualToString:@"displayMenuItem"]) {
-//		// update the display menu. Is this smart enough?
-//		[menuItem setSubmenu:contextualMenu];
-//		return YES;
-//	}
-    
-    else if (act == @selector(makeNewEmptyCollection:)){
-        return [[self fileType] isEqualToString:@"BibDesk Library"];        
-    }else if (act == @selector(makeNewExternalSource:)){
-        return [[self fileType] isEqualToString:@"BibDesk Library"];        
-    }else if (act == @selector(makeNewNotepad:)){
-        return [[self fileType] isEqualToString:@"BibDesk Library"];        
-    }else if (act == @selector(editExportSettingsAction:)){ 
-        
-        // and selection is a collection:
-        return [[self fileType] isEqualToString:@"BibDesk Library"];        
-    }else{
+	} else if ([menuItem action] == @selector(selectCrossrefParentAction:)) {
+        return [self validateSelectCrossrefParentMenuItem:menuItem];
+    } else if ([menuItem action] == @selector(createNewPubUsingCrossrefAction:)) {
+        return [self validateCreateNewPubUsingCrossrefMenuItem:menuItem];
+    } else if ([menuItem action] == @selector(copyAsRIS:)) {
+        return [self validateCopyAsRISMenuItem:menuItem];
+    } else if ([menuItem action] == @selector(duplicate:)) {
+        return [self validateDuplicateMenuItem:menuItem];
+    } else {
 		return [super validateMenuItem:menuItem];
     }
-	/*   if([@@ [menuItem title] isEqualToString:@"the one for blogging the item"]){
-		if(BDSK_USING_JAGUAR){return NO}; @@@@@ -- even better, get IBOutlet to that item, then in awakeFromNib, remove it if BDSK_USING_JAGUAR.
-    } */
 }
+
+
+
+- (BOOL) validateCutMenuItem:(NSMenuItem*) menuItem {
+	if ([self numberOfSelectedPubs] == 0) {
+		// no selection
+		return NO;
+	}
+	else {
+		// multiple selection
+		return YES;
+	}
+}	
+
+
+
+- (BOOL) validateCopyMenuItem:(NSMenuItem*) menuItem {
+	if ([self numberOfSelectedPubs] == 0) {
+		// no selection
+		return NO;
+	}
+	else {
+		// multiple selection
+		return YES;
+	}
+}	
 
 
 
@@ -308,7 +358,39 @@ Broken out of BibDocument and split up into smaller parts to make things more ma
 	}	
 }
 
-
+- (BOOL)validateCopyAsRISMenuItem:(NSMenuItem *)menuItem{
+	NSString * s;
+	
+	if ([self numberOfSelectedPubs] == 0) {
+		// no selection
+		s = NSLocalizedString(@"RIS Record", @"RIS Record");
+		[menuItem setTitle:s];
+		return NO;
+	}
+	else if ([self numberOfSelectedPubs] == 1) {
+		// single selection
+		if ([[menuItem menu] supermenu]) {
+			s = NSLocalizedString(@"RIS Record for %@", @"RIS Record for %@");
+		}
+		else {
+			s = NSLocalizedString(@"Copy RIS Record for %@", @"Copy RIS Record for %@");
+		}
+		NSString * citeKey = [(BibItem*)[shownPublications objectAtIndex:[[[self selectedPubEnumerator] nextObject] intValue]] citeKey];
+		[menuItem setTitle:[NSString stringWithFormat:s, citeKey]];
+		return YES;
+	}
+	else {
+		// multiple selection
+		if ([[menuItem menu] supermenu]) {
+			s = NSLocalizedString(@"%i RIS Records", @"%i RIS Records");
+		}
+		else {
+			s = NSLocalizedString(@"Copy %i RIS Records", @"Copy %i RIS Records");
+		}
+		[menuItem setTitle:[NSString stringWithFormat:s, [self numberOfSelectedPubs]]];
+		return YES;
+	}
+}	
 
 - (BOOL) validateEditSelectionMenuItem:(NSMenuItem*) menuItem {
 	NSString * s;
@@ -394,13 +476,13 @@ Broken out of BibDocument and split up into smaller parts to make things more ma
 	
 	if (n <= 1) {
 		// no selection or single selection
-		s = [NSString stringWithFormat:@"%@%C",NSLocalizedString(@"Delete", @"Delete..."),0x2026];
+		s = NSLocalizedString(@"Delete", @"Delete");
 		[menuItem setTitle:s];
 		return (n==1);
 	}
 	else {
 		// multiple selection
-		s = [NSString stringWithFormat:@"%@%C",NSLocalizedString(@"Delete %i Publications", @"Delete %i Publications..."),0x2026];
+		s = NSLocalizedString(@"Delete %i Publications", @"Delete %i Publications");
 		[menuItem setTitle:[NSString stringWithFormat:s, n]];
 		return YES;
 	}
@@ -459,6 +541,43 @@ Broken out of BibDocument and split up into smaller parts to make things more ma
 }
 
 
+- (BOOL)validateSelectCrossrefParentMenuItem:(NSMenuItem *)menuItem{
+    NSString *s = NSLocalizedString(@"Select Parent Publication", @"Select the crossref parent of this pub");
+    [menuItem setTitle:s];
+    if([self numberOfSelectedPubs] == 1){
+        BibItem *selectedBI = [shownPublications objectAtIndex:[[[self selectedPublications] lastObject] intValue]];
+        
+        if([selectedBI valueOfField:BDSKCrossrefString inherit:NO] &&
+           ![[selectedBI valueOfField:BDSKCrossrefString inherit:NO] isEqualToString:@""])
+                return YES;
+    } else 
+        return NO;
+}
+
+- (BOOL)validateCreateNewPubUsingCrossrefMenuItem:(NSMenuItem *)menuItem{
+    NSString *s = NSLocalizedString(@"New Publication With Crossref", @"New publication with this pub as parent");
+    [menuItem setTitle:s];
+    if([self numberOfSelectedPubs] == 1){
+        BibItem *selectedBI = [shownPublications objectAtIndex:[[[self selectedPublications] lastObject] intValue]];
+        
+        // only valid if the selected pub (parent-to-be) doesn't have a crossref field
+        if([selectedBI valueOfField:BDSKCrossrefString inherit:NO] == nil ||
+           [[selectedBI valueOfField:BDSKCrossrefString inherit:NO] isEqualToString:@""])
+                return YES;
+    } else
+        return NO;
+}
+
+- (BOOL)validateDuplicateMenuItem:(NSMenuItem *)menuItem{
+	if ([self numberOfSelectedPubs] == 0) {
+		// no selection
+		return NO;
+	}
+	else {
+		// multiple selection
+		return YES;
+	}
+} 
 
 /* respond to the clear: action, so we can validate the Delete item in the edit menu.
 */
