@@ -1,10 +1,40 @@
 //
 //  BDSKFormatParser.m
-//  Bibdesk
+//  BibDesk
 //
 //  Created by Christiaan Hofman on 17/4/05.
-//  Copyright 2005 __MyCompanyName__. All rights reserved.
-//
+/*
+ This software is Copyright (c) 2005
+ Christiaan Hofman. All rights reserved.
+
+ Redistribution and use in source and binary forms, with or without
+ modification, are permitted provided that the following conditions
+ are met:
+
+ - Redistributions of source code must retain the above copyright
+   notice, this list of conditions and the following disclaimer.
+
+ - Redistributions in binary form must reproduce the above copyright
+    notice, this list of conditions and the following disclaimer in
+    the documentation and/or other materials provided with the
+    distribution.
+
+ - Neither the name of Christiaan Hofman nor the names of any
+    contributors may be used to endorse or promote products derived
+    from this software without specific prior written permission.
+
+ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+ "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+ LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+ A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+ OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+ SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+ LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+ DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+ THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+ (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ */
 
 #import "BDSKFormatParser.h"
 #import "BibItem.h"
@@ -22,11 +52,11 @@ static BDSKFormatParser *sharedParser;
 - (id)init {
 	if (self = [super init]) {
 		
-		validSpecifierChars = [[NSCharacterSet characterSetWithCharactersInString:@"tTmyYlLekrRdc"] retain];
+		validSpecifierChars = [[NSCharacterSet characterSetWithCharactersInString:@"tTmyYlLerRdc"] retain];
 		validUniqueSpecifierChars = [[NSCharacterSet characterSetWithCharactersInString:@"uUn"] retain];
 		validEscapeSpecifierChars = [[NSCharacterSet characterSetWithCharactersInString:@"0123456789%[]"] retain];
 		validArgSpecifierChars = [[NSCharacterSet characterSetWithCharactersInString:@"fc"] retain];
-		validOptArgSpecifierChars = [[NSCharacterSet characterSetWithCharactersInString:@"aA"] retain];
+		validOptArgSpecifierChars = [[NSCharacterSet characterSetWithCharactersInString:@"aAk"] retain];
 		
 	}
 	return self;
@@ -47,11 +77,12 @@ static BDSKFormatParser *sharedParser;
 	NSMutableString *parsedStr = [NSMutableString string];
 	NSString *savedStr = nil;
 	NSScanner *scanner = [NSScanner scannerWithString:format];
-	NSString *string, *authSep, *nameSep, *etal;
+	NSString *string, *authSep, *nameSep, *etal, *slash;
 	int number, numAuth, i, uniqueNumber;
 	unichar specifier, nextChar, uniqueSpecifier = 0;
 	NSMutableArray *arr;
 	NSScanner *wordScanner;
+	NSCharacterSet *slashCharSet = [NSCharacterSet characterSetWithCharactersInString:@"/"];
 	
 	// seed for random letters or characters
 	srand(time(NULL));
@@ -106,7 +137,9 @@ static BDSKFormatParser *sharedParser;
 							[parsedStr appendString:authSep];
 						}
 						string = [self stringByStrictlySanitizingString:[[pub authorAtIndex:i] lastName] forField:fieldName inFileType:[pub fileType]];
-						string = [string stringByRemovingCurlyBraces];
+						if ([fieldName isEqualToString:BDSKLocalUrlString]) {
+							string = [string stringByReplacingCharactersInSet:slashCharSet withString:@"-"];
+						}
 						if ([string length] > number && number > 0) {
 							string = [string substringToIndex:number];
 						}
@@ -157,13 +190,14 @@ static BDSKFormatParser *sharedParser;
 						BibAuthor *auth = [pub authorAtIndex:i];
 						NSString *firstName = [self stringByStrictlySanitizingString:[auth firstName] forField:fieldName inFileType:[pub fileType]];
 						NSString *lastName = [self stringByStrictlySanitizingString:[auth lastName] forField:fieldName inFileType:[pub fileType]];
-						firstName = [firstName stringByRemovingCurlyBraces];
-						lastName = [lastName stringByRemovingCurlyBraces];
 						if ([firstName length] > 0) {
 							string = [NSString stringWithFormat:@"%@%@%C", 
 											lastName, nameSep, [firstName characterAtIndex:0]];
 						} else {
 							string = lastName;
+						}
+						if ([fieldName isEqualToString:BDSKLocalUrlString]) {
+							string = [string stringByReplacingCharactersInSet:slashCharSet withString:@"-"];
 						}
 						[parsedStr appendString:string];
 					}
@@ -179,7 +213,9 @@ static BDSKFormatParser *sharedParser;
 						string = [pub valueOfField:BDSKTitleString];
 					}
 					string = [self stringByStrictlySanitizingString:string forField:fieldName inFileType:[pub fileType]];
-					string = [string stringByRemovingCurlyBraces];
+					if ([fieldName isEqualToString:BDSKLocalUrlString]) {
+						string = [string stringByReplacingCharactersInSet:slashCharSet withString:@"-"];
+					}
 					if (![scanner scanInt:&number]) number = 0;
 					if (number > 0 && [string length] > number) {
 						[parsedStr appendString:[string substringToIndex:number]];
@@ -215,7 +251,9 @@ static BDSKFormatParser *sharedParser;
 						for (i = 0; i < [arr count] && number > 0; i++) { 
 							if (i > 0) [parsedStr appendString:[self stringByStrictlySanitizingString:@" " forField:fieldName inFileType:[pub fileType]]]; 
 							string = [self stringByStrictlySanitizingString:[arr objectAtIndex:i] forField:fieldName inFileType:[pub fileType]]; 
-							string = [string stringByRemovingCurlyBraces];
+							if ([fieldName isEqualToString:BDSKLocalUrlString]) {
+								string = [string stringByReplacingCharactersInSet:slashCharSet withString:@"-"];
+							}
 							[parsedStr appendString:string]; 
 							if ([string length] > 3) --number;
 						}
@@ -244,6 +282,12 @@ static BDSKFormatParser *sharedParser;
 					break;
 				case 'k':
 					// keywords
+					// look for [slash]
+					slash = ([fieldName isEqualToString:BDSKLocalUrlString]) ? @"-" : @"/";
+					if ([scanner scanString:@"[" intoString:NULL]) {
+						if (![scanner scanUpToString:@"]" intoString:&slash]) slash = @"";
+						[scanner scanString:@"]" intoString:NULL];
+					}
 					string = [pub valueOfField:BDSKKeywordsString];
 					if (![scanner scanInt:&number]) number = 0;
 					if (string != nil) {
@@ -265,6 +309,8 @@ static BDSKFormatParser *sharedParser;
 						for (i = 0; i < [arr count] && (number == 0 || i < number); i++) { 
 							string = [[arr objectAtIndex:i] stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceCharacterSet]]; 
 							string = [self stringByStrictlySanitizingString:string forField:fieldName inFileType:[pub fileType]]; 
+							if (![slash isEqualToString:@"/"])
+								string = [string stringByReplacingCharactersInSet:slashCharSet withString:slash];
 							[parsedStr appendString:string]; 
 						}
 					}
@@ -274,7 +320,7 @@ static BDSKFormatParser *sharedParser;
 					string = [pub localURLPath];
 					if (string != nil) {
 						string = [[string lastPathComponent] stringByDeletingPathExtension];
-						string = [self stringByStrictlySanitizingString:string forField:fieldName inFileType:[pub fileType]]; 
+						string = [self stringBySanitizingString:string forField:fieldName inFileType:[pub fileType]]; 
 						[parsedStr appendString:string];
 					}
 					break;
@@ -283,7 +329,7 @@ static BDSKFormatParser *sharedParser;
 					string = [pub localURLPath];
 					if (string != nil) {
 						string = [string lastPathComponent];
-						string = [self stringByStrictlySanitizingString:string forField:fieldName inFileType:[pub fileType]]; 
+						string = [self stringBySanitizingString:string forField:fieldName inFileType:[pub fileType]]; 
 						[parsedStr appendString:string];
 					}
 					break;
@@ -293,7 +339,7 @@ static BDSKFormatParser *sharedParser;
 					if (string != nil) {
 						string = [string pathExtension];
 						if (![string isEqualToString:@""]) {
-							string = [self stringByStrictlySanitizingString:string forField:fieldName inFileType:[pub fileType]]; 
+							string = [self stringBySanitizingString:string forField:fieldName inFileType:[pub fileType]]; 
 							[parsedStr appendFormat:@".%@", string];
 						}
 					}
@@ -303,6 +349,12 @@ static BDSKFormatParser *sharedParser;
 					if ([scanner scanString:@"{" intoString:NULL] &&
 						[scanner scanUpToString:@"}" intoString:&string] &&
 						[scanner scanString:@"}" intoString:NULL]) {
+						// look for [slash]
+						slash = ([fieldName isEqualToString:BDSKLocalUrlString]) ? @"-" : @"/";
+						if ([scanner scanString:@"[" intoString:NULL]) {
+							if (![scanner scanUpToString:@"]" intoString:&slash]) slash = @"";
+							[scanner scanString:@"]" intoString:NULL];
+						}
 					
 						if (![scanner scanInt:&number]) number = 0;
 						if (![fieldName isEqualToString:BDSKCiteKeyString] &&
@@ -317,6 +369,8 @@ static BDSKFormatParser *sharedParser;
 						}
 						if (string != nil) {
 							string = [self stringByStrictlySanitizingString:string forField:fieldName inFileType:[pub fileType]];
+							if (![slash isEqualToString:@"/"])
+								string = [string stringByReplacingCharactersInSet:slashCharSet withString:slash];
 							if (number > 0 && [string length] > number) {
 								[parsedStr appendString:[string substringToIndex:number]];
 							} else {
@@ -490,7 +544,10 @@ static BDSKFormatParser *sharedParser;
 	else if ([fieldName isEqualToString:BDSKLocalUrlString]) {
 		if (proposedStr == nil || [proposedStr isEqualToString:@""])
 			return NO;
-		NSString *papersFolderPath = [[OFPreferenceWrapper sharedPreferenceWrapper] stringForKey:BDSKPapersFolderPathKey];
+		OFPreferenceWrapper *prefs = [OFPreferenceWrapper sharedPreferenceWrapper];
+		NSString *papersFolderPath = [[prefs stringForKey:BDSKPapersFolderPathKey] stringByExpandingTildeInPath];
+		if ([[OFPreferenceWrapper sharedPreferenceWrapper] boolForKey:BDSKLocalUrlLowercaseKey])
+			proposedStr = [proposedStr lowercaseString];
 		if ([[NSFileManager defaultManager] fileExistsAtPath:[papersFolderPath stringByAppendingPathComponent:proposedStr]])
 			return NO;
 		return YES;
@@ -540,13 +597,20 @@ static BDSKFormatParser *sharedParser;
 	NSCharacterSet *invalidCharSet = [[BibTypeManager sharedManager] strictInvalidCharactersForField:fieldName inFileType:type];
 	BDSKConverter *converter = [BDSKConverter sharedConverter];
     NSString *newString = nil;
+	int cleanOption = 0;
 
 	if ([fieldName isEqualToString:BDSKCiteKeyString]) {
+		cleanOption = [[OFPreferenceWrapper sharedPreferenceWrapper] integerForKey:BDSKCiteKeyCleanOptionKey];
 		
 		if (string == nil || [string isEqualToString:@""]) {
 			return @"";
 		}
 		newString = [converter stringByDeTeXifyingString:string];
+		if (cleanOption == 1) {
+			newString = [newString stringByRemovingCurlyBraces];
+		} else if (cleanOption == 2) {
+			newString = [newString stringByRemovingTeX];
+		}
 		newString = [newString stringByReplacingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]
 													 withString:@"-"];
 		newString = [NSString lossyASCIIStringWithString:newString];
@@ -555,11 +619,17 @@ static BDSKFormatParser *sharedParser;
 		return newString;
 	}
 	else if ([fieldName isEqualToString:BDSKLocalUrlString]) {
+		cleanOption = [[OFPreferenceWrapper sharedPreferenceWrapper] integerForKey:BDSKLocalUrlCleanOptionKey];
 		
 		if (string == nil || [string isEqualToString:@""]) {
 			return @"";
 		}
 		newString = [converter stringByDeTeXifyingString:string];
+		if (cleanOption == 1) {
+			newString = [newString stringByRemovingCurlyBraces];
+		} else if (cleanOption == 2) {
+			newString = [newString stringByRemovingTeX];
+		}
 		newString = [newString stringByReplacingCharactersInSet:invalidCharSet withString:@""];
 		
 		return newString;
@@ -609,10 +679,20 @@ static BDSKFormatParser *sharedParser;
 			}
 			string = [self stringBySanitizingString:string forField:BDSKCiteKeyString inFileType:type]; // cite-key sanitization is strict, so we use that for fieldnames
 			[sanitizedFormatString appendFormat:@"{%@}", [string capitalizedString]]; // we need to have BibTeX field names capitalized
+			if (specifier == 'f' && [scanner scanString:@"[" intoString:NULL]) {
+				if (![scanner scanUpToString:@"]" intoString:&string]) 
+					string = @"";
+				if (![scanner scanString:@"]" intoString:NULL]) {
+					*error = [NSString stringWithFormat: NSLocalizedString(@"Missing \"]\" after specifier %%%C.", @""), specifier];
+					return NO;
+				}
+				string = [self stringBySanitizingString:string forField:fieldName inFileType:type];
+				[sanitizedFormatString appendFormat:@"[%@]", string];
+			}
 		}
 		else if ([validOptArgSpecifierChars characterIsMember:specifier]) {
 			if (![scanner isAtEnd]) {
-				int numOpts = ((specifier == 'A')? 3 : 2);
+				int numOpts = ((specifier == 'A')? 3 : ((specifier == 'a')? 2 : 1));
 				while ([scanner scanString:@"[" intoString: NULL]) {
 					if (numOpts-- == 0) {
 						*error = [NSString stringWithFormat: NSLocalizedString(@"Too many optional arguments after specifier %%%C.", @""), specifier];

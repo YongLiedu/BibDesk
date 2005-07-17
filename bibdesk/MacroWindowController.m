@@ -1,15 +1,48 @@
 //
 //  MacroWindowController.m
-//  Bibdesk
+//  BibDesk
 //
 //  Created by Michael McCracken on 2/21/05.
-//  Copyright 2005 __MyCompanyName__. All rights reserved.
-//
+/*
+ This software is Copyright (c) 2005
+ Michael O. McCracken. All rights reserved.
+
+ Redistribution and use in source and binary forms, with or without
+ modification, are permitted provided that the following conditions
+ are met:
+
+ - Redistributions of source code must retain the above copyright
+   notice, this list of conditions and the following disclaimer.
+
+ - Redistributions in binary form must reproduce the above copyright
+    notice, this list of conditions and the following disclaimer in
+    the documentation and/or other materials provided with the
+    distribution.
+
+ - Neither the name of Michael O. McCracken nor the names of any
+    contributors may be used to endorse or promote products derived
+    from this software without specific prior written permission.
+
+ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+ "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+ LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+ A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+ OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+ SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+ LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+ DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+ THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+ (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ */
 
 #import "MacroWindowController.h"
 #import "NSString_BDSKExtensions.h"
 #import "OmniFoundation/NSData-OFExtensions.h"
 #import "BibTeXParser.h"
+
+#import <OmniAppKit/OATypeAheadSelectionHelper.h>
+#import "OATypeAheadSelectionHelper_Extensions.h"
 
 @implementation MacroWindowController
 - (id) init {
@@ -113,7 +146,9 @@
     
     [(id <BDSKMacroResolver>)macroDataSource addMacroDefinition:@"definition"
                                                        forMacro:newKey];
-    
+    [[[self window] undoManager] setActionName:NSLocalizedString(@"Add Macro", @"add macro action name for undo")];
+	
+    [self refreshMacros];
     [tableView reloadData];
 
     int row = [macros indexOfObject:newKey];
@@ -125,7 +160,7 @@
 }
 
 - (IBAction)removeSelectedMacros:(id)sender{
-	NSEnumerator *rowEnum = [tableView selectedRowEnumerator];
+	NSEnumerator *rowEnum = [[[tableView selectedRowEnumerator] allObjects] objectEnumerator];
 	NSNumber *row;
     NSDictionary *macroDefinitions = [(id <BDSKMacroResolver>)macroDataSource macroDefinitions];
 
@@ -139,8 +174,9 @@
     while(row = [rowEnum nextObject]){
         NSString *key = [shadowOfMacros objectAtIndex:[row intValue]];
         [(id <BDSKMacroResolver>)macroDataSource removeMacro:key];
+		[[[self window] undoManager] setActionName:NSLocalizedString(@"Delete Macro", @"delete macro action name for undo")];
     }
-    
+    [self refreshMacros];
     [tableView reloadData];
 }
 
@@ -179,7 +215,8 @@
 }
 
 - (void)tableView:(NSTableView *)tv setObjectValue:(id)object forTableColumn:(NSTableColumn *)tableColumn row:(int)row{
-    if([[[self window] undoManager] isUndoingOrRedoing]) return;
+    NSUndoManager *undoMan = [[self window] undoManager];
+	if([undoMan isUndoingOrRedoing]) return;
     NSParameterAssert(row >= 0 && row < [macros count]);    
     NSDictionary *macroDefinitions = [(id <BDSKMacroResolver>)macroDataSource macroDefinitions];
     NSString *key = [macros objectAtIndex:row];
@@ -196,8 +233,19 @@
 			[tableView reloadData];
 			return;
 		}
+                
+		if([macroDefinitions objectForKey:object]){
+			NSRunAlertPanel(NSLocalizedString(@"Duplicate Macro", @"Duplicate Macro"),
+							NSLocalizedString(@"The macro key must be unique.", @""),
+							NSLocalizedString(@"OK", @"OK"), nil, nil);
+			
+			[tableView reloadData];
+			return;
+		}
 		
         [(id <BDSKMacroResolver>)macroDataSource changeMacroKey:key to:object];
+		
+		[undoMan setActionName:NSLocalizedString(@"Change Macro Key", @"change macro key action name for undo")];
 
     }else{
         // do nothing if there was no change.
@@ -213,6 +261,8 @@
 		}
 		
 		[(id <BDSKMacroResolver>)macroDataSource setMacroDefinition:object forMacro:key];
+		
+		[undoMan setActionName:NSLocalizedString(@"Change Macro Definition", @"change macrodef action name for undo")];
     }
 }
 
@@ -260,19 +310,27 @@
 }
 
 - (BOOL)addMacrosFromBibTeXString:(NSString *)aString{
-    [[NSApp delegate] setDocumentForErrors:(NSDocument *)macroDataSource];
+    if([macroDataSource isKindOfClass:[NSDocument class]])
+		[[NSApp delegate] setDocumentForErrors:(NSDocument *)macroDataSource];
+	else
+		[[NSApp delegate] setDocumentForErrors:nil];
 	
     BOOL hadProblems = NO;
-    NSArray *defs = [BibTeXParser macrosFromBibTeXString:aString hadProblems:&hadProblems];
-    NSEnumerator *e = [defs objectEnumerator];
-    NSDictionary *dict = nil;
+    NSMutableDictionary *defs = [NSMutableDictionary dictionary];
+    
+    if([aString rangeOfString:@"@string" options:NSCaseInsensitiveSearch].location != NSNotFound)
+        [defs addEntriesFromDictionary:[BibTeXParser macrosFromBibTeXString:aString hadProblems:&hadProblems]];
+            
+    [defs addEntriesFromDictionary:[BibTeXParser macrosFromBibTeXStyle:aString]]; // in case these are style defs
+
+    NSEnumerator *e = [defs keyEnumerator];
     NSString *macroKey;
     NSString *macroString;
     
-    while(dict = [e nextObject]){
-        macroKey = [dict objectForKey:@"mkey"];
-        macroString = [dict objectForKey:@"mstring"];
+    while(macroKey = [e nextObject]){
+        macroString = [defs objectForKey:macroKey];
         [(id <BDSKMacroResolver>)macroDataSource setMacroDefinition:macroString forMacro:macroKey];
+		[[[self window] undoManager] setActionName:NSLocalizedString(@"Change Macro Definition", @"change macrodef action name for undo")];
     }
     [self refreshMacros];
     [tableView reloadData];
@@ -294,6 +352,31 @@
         return NSDragOperationEvery; // if it's not from me, copying is OK
     }
 }
+
+#pragma mark || Methods to support the type-ahead selector.
+- (NSArray *)typeAheadSelectionItems{
+    NSMutableArray *array = [NSMutableArray array];
+    NSDictionary *defs = [macroDataSource macroDefinitions];
+    foreach(macro, macros)
+        [array addObject:[defs objectForKey:macro]]; // order of items in the array must match the tableview datasource
+    return array;
+}
+// This is where we build the list of possible items which the user can select by typing the first few letters. You should return an array of NSStrings.
+
+- (NSString *)currentlySelectedItem{
+    int n = [tableView numberOfSelectedRows];
+    if (n == 1){
+        return [[tableView dataSource] tableView:tableView objectValueForTableColumn:[[tableView tableColumns] lastObject] row:[tableView selectedRow]];
+    }else{
+        return nil;
+    }
+}
+// Type-ahead-selection behavior can change if an item is currently selected (especially if the item was selected by type-ahead-selection). Return nil if you have no selection or a multiple selection.
+
+- (void)typeAheadSelectItemAtIndex:(int)itemIndex{
+    [tableView selectRow:itemIndex byExtendingSelection:NO];
+}
+// We call this when a type-ahead-selection match has been made; you should select the item based on its index in the array you provided in -typeAheadSelectionItems.
 
 
 @end
@@ -333,7 +416,8 @@
 		 [[NSCharacterSet decimalDigitCharacterSet] characterIsMember:[partialString characterAtIndex:0]]) ){
         return NO;
     }
-    return YES;
+	*partialStringPtr = [partialString lowercaseString];
+    return [*partialStringPtr isEqualToString:partialString];
 }
 
 
@@ -343,6 +427,42 @@
 
 - (NSDragOperation)draggingSourceOperationMaskForLocal:(BOOL)isLocal {
     return NSDragOperationCopy;
+}
+
+- (void)awakeFromNib{
+    typeAheadHelper = [[OATypeAheadSelectionHelper alloc] init];
+    [typeAheadHelper setDataSource:[self delegate]];
+    [typeAheadHelper setCyclesSimilarResults:YES];
+}
+
+- (void)dealloc{
+    [typeAheadHelper release];
+    [super dealloc];
+}
+
+- (void)keyDown:(NSEvent *)event{
+    unichar c = [[event characters] characterAtIndex:0];
+    NSCharacterSet *alnum = [NSCharacterSet alphanumericCharacterSet];
+    if (c == NSDeleteCharacter ||
+        c == NSBackspaceCharacter) {
+        [[self delegate] removeSelectedMacros:nil];
+    }else if(c == NSNewlineCharacter ||
+             c == NSEnterCharacter ||
+             c == NSCarriageReturnCharacter){
+                if([self numberOfSelectedRows] == 1)
+                    [self editColumn:0 row:[self selectedRow] withEvent:nil select:YES];
+    }else if ([alnum characterIsMember:c]) {
+        [typeAheadHelper newProcessKeyDownCharacter:c];
+    }else{
+        [super keyDown:event];
+    }
+}
+
+// this gets called whenever an object is added/removed/changed, so it's
+// a convenient place to rebuild the typeahead find cache
+- (void)reloadData{
+    [super reloadData];
+    [typeAheadHelper rebuildTypeAheadSearchCache];
 }
 
 @end

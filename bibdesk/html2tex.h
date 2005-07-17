@@ -1,6 +1,6 @@
 /*
  *  html2tex.h
- *  Bibdesk
+ *  BibDesk
  *
  *
  */

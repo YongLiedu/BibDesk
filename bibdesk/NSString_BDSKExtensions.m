@@ -2,23 +2,44 @@
 
 //  Created by Michael McCracken on Sun Jul 21 2002.
 /*
-This software is Copyright (c) 2002, Michael O. McCracken
-All rights reserved.
+ This software is Copyright (c) 2002,2003,2004,2005
+ Michael O. McCracken. All rights reserved.
 
-Redistribution and use in source and binary forms, with or without modification, are permitted provided that the following conditions are met:
+ Redistribution and use in source and binary forms, with or without
+ modification, are permitted provided that the following conditions
+ are met:
 
-- Redistributions of source code must retain the above copyright notice, this list of conditions and the following disclaimer.
--  Redistributions in binary form must reproduce the above copyright notice, this list of conditions and the following disclaimer in the documentation and/or other materials provided with the distribution.
--  Neither the name of Michael O. McCracken nor the names of any contributors may be used to endorse or promote products derived from this software without specific prior written permission.
+ - Redistributions of source code must retain the above copyright
+   notice, this list of conditions and the following disclaimer.
 
-THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-*/
+ - Redistributions in binary form must reproduce the above copyright
+    notice, this list of conditions and the following disclaimer in
+    the documentation and/or other materials provided with the
+    distribution.
+
+ - Neither the name of Michael O. McCracken nor the names of any
+    contributors may be used to endorse or promote products derived
+    from this software without specific prior written permission.
+
+ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+ "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+ LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+ A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+ OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+ SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+ LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+ DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+ THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+ (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ */
 
 #import "NSString_BDSKExtensions.h"
 #import <OmniFoundation/NSString-OFExtensions.h>
 #import <Cocoa/Cocoa.h>
 #import <AGRegex/AGRegex.h>
 #import <OmniFoundation/OFCharacterSet.h>
+#import <OmniFoundation/OFStringScanner.h>
 
 
 @implementation NSString (BDSKExtensions)
@@ -251,29 +272,233 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 
 }
 
-- (NSString *)stringByRemovingTeXForSorting{
-    static AGRegex *command = nil;
-    static OFCharacterSet *braceSet = nil;
-
-    if(command == nil)
-        command = [[AGRegex alloc] initWithPattern:@"\\\\[a-z].+\\{" options:AGRegexLazy];
-
-    //NSAssert(command != nil, @"AGRegex must not be nil.");
-
-    if(braceSet == nil)
-        braceSet = [[OFCharacterSet alloc] initWithString:@"{`$\\"];
-    
-    //NSAssert(braceSet != nil, @"OFCharacterSet must not be nil.");
-    
-    self = [command replaceWithString:@"" inString:self];
-    return [self stringByRemovingCharactersInOFCharacterSet:braceSet];
-}
-
 - (NSComparisonResult)localizedCaseInsensitiveNumericCompare:(NSString *)aStr{
     return [self compare:aStr
                  options:NSCaseInsensitiveSearch | NSNumericSearch
                    range:NSMakeRange(0, [self length])
                   locale:[[NSUserDefaults standardUserDefaults] dictionaryRepresentation]];
+}
+
+
+static inline
+BOOL characterIsWhitespace(UniChar c)
+{
+    static CFCharacterSetRef csref = NULL;
+    if(csref == NULL)
+        csref = CFCharacterSetGetPredefined(kCFCharacterSetWhitespace);
+    // minor optimization: check for an ASCII character, since those are most common in TeX
+    return ( (c <= 0x007E && c >= 0x0021) ? NO : CFCharacterSetIsCharacterMember(csref, c) );
+}
+
+#define LARGE_STRING_LENGTH 8192
+CFStringRef collapseAndTrimWhitespace(CFStringRef aString)
+{
+    
+    CFIndex length = CFStringGetLength(aString);
+
+    if(length == 0)
+        return CFSTR("");
+    
+    // set up the buffer to fetch the characters
+    CFIndex cnt = 0;
+    CFStringInlineBuffer inlineBuffer;
+    CFStringInitInlineBuffer(aString, &inlineBuffer, CFRangeMake(0, length));
+    UniChar ch;
+    UniChar *buffer;
+    CFStringRef retStr;
+    
+    BOOL isLarge = (length > LARGE_STRING_LENGTH);
+    
+    // see if we can allocate it on the stack (faster)
+    if(isLarge)
+        buffer = NSZoneMalloc(NULL, sizeof(UniChar) * (length + 1));
+    else
+        buffer = alloca(sizeof(UniChar) * (length + 1));
+                
+    BOOL isFirst = NO;
+    int bufCnt = 0;
+    for(cnt = 0; cnt < length; cnt++){
+        ch = CFStringGetCharacterFromInlineBuffer(&inlineBuffer, cnt);
+        if(!characterIsWhitespace(ch)){
+            isFirst = YES;
+            buffer[bufCnt++] = ch; // not whitespace, so we want to keep it
+        } else {
+            if(isFirst){
+                buffer[bufCnt++] = ' '; // if it's the first whitespace, we add a single space
+                isFirst = NO;
+            }
+        }
+    }
+    
+    if(buffer[(bufCnt-1)] == ' ') // we've collapsed any trailing whitespace, so disregard it
+        bufCnt--;
+    
+    retStr = CFStringCreateWithCharacters(CFAllocatorGetDefault(), buffer, bufCnt);
+    if(isLarge) NSZoneFree(NULL, buffer);
+    return (CFStringRef)[(NSString *)retStr autorelease];
+}
+
+
+- (NSString *)fastStringByCollapsingWhitespaceAndRemovingSurroundingWhitespace;
+{
+    return (NSString *)collapseAndTrimWhitespace((CFStringRef)self);
+}
+
+- (NSRange)rangeOfTeXCommandInRange:(NSRange)searchRange
+{
+    
+    unsigned cmdStart = 0;
+    unsigned braceLoc = 0;
+    unsigned spaceLoc = 0;
+    unsigned cmdStop = 0;
+    unsigned maxLen = [self length];
+    
+    if( (cmdStart = [self rangeOfString:@"\\" options:NSLiteralSearch range:searchRange].location) != NSNotFound){
+        braceLoc = [self rangeOfString:@"{" options:NSLiteralSearch range:NSMakeRange(cmdStart, (maxLen - cmdStart))].location;
+        spaceLoc = [self rangeOfString:@" " options:NSLiteralSearch range:NSMakeRange(cmdStart, (maxLen - cmdStart))].location;
+        
+        if(braceLoc == NSNotFound || spaceLoc == NSNotFound)
+            return NSMakeRange(NSNotFound, 0);
+        
+        if(spaceLoc < braceLoc){
+            // if we want to consider \LaTeX a command to be removed, cmdStop = spaceLoc; this can mess
+            // up sorting, though, since \LaTeX is a word /and/ a command.
+            return NSMakeRange(NSNotFound, 0);
+        } else {
+            cmdStop = braceLoc;
+        }
+    }
+    return NSMakeRange(cmdStart, (cmdStop - cmdStart));
+}
+
+- (unsigned)indexOfRightBraceMatchingLeftBraceAtIndex:(unsigned)startLoc
+{
+
+    CFStringInlineBuffer inlineBuffer;
+    CFIndex length = CFStringGetLength((CFStringRef)self);
+    CFIndex cnt;
+    BOOL matchFound = NO;
+    
+    CFStringInitInlineBuffer((CFStringRef)self, &inlineBuffer, CFRangeMake(0, length));
+    UniChar ch;
+    int rb = 0, lb = 0;
+    
+    if(CFStringGetCharacterFromInlineBuffer(&inlineBuffer, startLoc) != '{')
+        [NSException raise:NSInternalInconsistencyException format:@"character at index %i is not a brace", startLoc];
+    
+    // we don't consider escaped braces yet
+    for(cnt = startLoc; cnt < length; cnt++){
+        ch = CFStringGetCharacterFromInlineBuffer(&inlineBuffer, cnt);
+        if(ch == '{')
+            rb++;
+        if(ch == '}')
+            lb++;
+        if(rb == lb){
+            //NSLog(@"match found at index %i", cnt);
+            matchFound = YES;
+            break;
+        }
+    }
+    
+    return (matchFound == YES) ? cnt : NSNotFound;    
+}
+
+#define SHOULD_REMOVE_CHAR( c ) \
+  (c == '{' || c == '`' || c == '$' || c == '\\' || c == '(')
+
+// private function for removing some tex special characters from a string
+// (only those I consider relevant to sorting)
+static inline
+void deleteTeXCharactersForSorting(CFMutableStringRef texString)
+{
+    
+    CFStringEncoding fastEncoding = CFStringGetFastestEncoding(texString);
+    // Optimization: this is the fastest way to get characters from a string, and we won't have to
+    // create a new string if we use this method.  CFStringGetCStringPtr will sometimes return NULL, and
+    // for our strings, CFStringGetCharactersPtr() always returns NULL, probably since they're not stored as UniChars.
+    const char *cStringPtr = CFStringGetCStringPtr(texString, fastEncoding);
+    if(cStringPtr != NULL){
+        unsigned len = strlen(cStringPtr);
+        Boolean isLarge = FALSE;
+        char *buffer = alloca(sizeof(char) * (len + 1));
+        if(buffer == NULL){
+            isLarge = TRUE;
+            buffer = (char *)malloc(sizeof(char) * (len + 1));
+        }
+        
+        char c;
+        unsigned idx = 0;
+        while((c = *cStringPtr++) != '\0')
+            if(!SHOULD_REMOVE_CHAR(c))
+                buffer[idx++] = c;
+
+        buffer[idx++] = '\0'; // make it a proper C string
+        
+        CFStringDelete(texString, CFRangeMake(0, len));
+        CFStringAppendCString(texString, buffer, fastEncoding);
+        
+        if(isLarge)
+            free(buffer);
+        
+        return;
+    }
+    
+    // this is our fallback method, which works with any string
+    CFStringInlineBuffer inlineBuffer;
+    CFIndex length = CFStringGetLength(texString);
+    CFIndex cnt = 0;
+           
+    // create an immutable copy to use with the inline buffer
+    CFStringRef myCopy = CFStringCreateCopy(kCFAllocatorDefault, texString);
+    CFStringInitInlineBuffer(myCopy, &inlineBuffer, CFRangeMake(0, length));
+    UniChar ch;
+    
+    // delete the {`$\\ characters, since they're irrelevant to sorting, and typically
+    // appear at the beginning of a word
+    CFIndex delCnt = 0;
+    while(cnt < length){
+        ch = CFStringGetCharacterFromInlineBuffer(&inlineBuffer, cnt);
+        if(SHOULD_REMOVE_CHAR(ch)){
+            // remove from the mutable string; we have to keep track of our index in the copy and the original
+            CFStringDelete(texString, CFRangeMake(delCnt, 1));
+        } else {
+            delCnt++;
+        }
+        cnt++;
+    }
+    CFRelease(myCopy); // dispose of our temporary copy
+}
+
+- (NSString *)stringByRemovingTeXForSorting{
+    
+    NSMutableString *mutableString = [self mutableCopy];
+    NSRange searchRange = NSMakeRange(0, [mutableString length]);
+    NSRange cmdRange;
+    unsigned startLoc;
+    
+    // This will find and remove the commands such as \textit{some word} that can confuse the sort order;
+    // unfortunately, we can't remove things like {\textit some word}, since it could also be something
+    // like {\LaTeX is great}, so this is a compromise
+    while( (cmdRange = [mutableString rangeOfTeXCommandInRange:searchRange]).location != NSNotFound){
+        
+        // delete the command
+        [mutableString deleteCharactersInRange:cmdRange];
+        startLoc = cmdRange.location;
+        searchRange = NSMakeRange(startLoc, [mutableString length] - startLoc);
+    }
+    // get rid of braces and such...
+    deleteTeXCharactersForSorting((CFMutableStringRef)mutableString);
+    
+    // Now remove articles "A", "An" and "The", if they occur at the beginning of a title.
+    NSRange articleRange;
+    if( (articleRange = [mutableString rangeOfString:@"The " options:NSLiteralSearch range:NSMakeRange(0, ([mutableString length] > 4 ? 4 : 0))]).location != NSNotFound)
+        [mutableString deleteCharactersInRange:articleRange];
+    if( (articleRange = [mutableString rangeOfString:@"A " options:NSLiteralSearch range:NSMakeRange(0, ([mutableString length] > 2 ? 2 : 0))]).location != NSNotFound)
+        [mutableString deleteCharactersInRange:articleRange];
+    if( (articleRange = [mutableString rangeOfString:@"An " options:NSLiteralSearch range:NSMakeRange(0, ([mutableString length] > 2 ? 2 : 0))]).location != NSNotFound)
+        [mutableString deleteCharactersInRange:articleRange];
+
+    return [mutableString autorelease];
 }
 
 @end
