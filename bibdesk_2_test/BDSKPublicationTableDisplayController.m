@@ -11,17 +11,7 @@
 
 @implementation BDSKPublicationTableDisplayController
 
-- (id)initWithItemSource:(id)newItemSource{
-    self = [super init];
-    if (self != nil) {
-        [self setItemSource:newItemSource];
-    }
-    return self;
-}
-
 - (void)dealloc{
-    [self unbind:@"currentPublications"];
-    [currentPublications release];
     [super dealloc];
 }
 
@@ -32,29 +22,8 @@
     return mainView;
 }
 
-- (NSString *)itemsKeyPath{
-    return @"currentPublications";
-}
-
-- (NSString *)selectionKeyPath{
-    return @"selection.publicationsInSelfOrChildren";
-}
-
-- (id)itemSource{ return itemSource; }
-
-- (void)setItemSource:(id)newItemSource{
-    itemSource = newItemSource; // don't retain - typically your itemSource retains you.  
-}
-
-- (NSArray *)currentPublications{
-    return currentPublications;
-}
-
-- (void)setCurrentPublications:(NSArray *)newCurrentPublications{
-    if (newCurrentPublications != currentPublications){
-        [currentPublications autorelease];
-        currentPublications = [newCurrentPublications retain];
-    }
+- (NSArrayController *)itemsArrayController{
+    return itemsArrayController;
 }
 
 

@@ -33,9 +33,9 @@
     // Set up all available display controllers
     [self setupDisplayControllers];
     
-    [sourceListTreeController performSelector:@selector(setSelectionIndexPath:)
+ /*   [sourceListTreeController performSelector:@selector(setSelectionIndexPath:)
                                    withObject:[NSIndexPath indexPathWithIndex:0]
-                                   afterDelay:0.01];
+                                   afterDelay:0.01];*/
     
     // permanent:
     NSTableColumn *tc = [sourceList tableColumnWithIdentifier:@"mainColumn"];
@@ -66,6 +66,7 @@
 
 - (NSArray *)displayControllers{ return displayControllers;}
 
+// TODO: this is totally incomplete.
 - (NSArray *)displayControllersForCurrentType{
     NSSet* currentTypes = [[sourceListTreeController selectedObjects] valueForKeyPath:@"@distinctUnionOfObjects.entity.name"];
     NSLog(@"displayControllersForCurrentType - currentTypes is %@.", currentTypes);
@@ -96,9 +97,8 @@
     NSString *displayControllerClassName = nil;
     
     while (displayControllerClassName = [displayControllerClassNameE nextObject]){
-        NSLog(@"registering one %@", displayControllerClassName);
         Class controllerClass = NSClassFromString(displayControllerClassName);
-        id controllerObject = [[controllerClass alloc] initWithItemSource:self];
+        id controllerObject = [[controllerClass alloc] init];
         [displayControllers addObject:controllerObject];
 
         NSDictionary *infoDict = [displayControllersInfoDict objectForKey:displayControllerClassName];
@@ -116,26 +116,59 @@
 }
 
 - (void)bindDisplayController:(id)displayController{
-    
-    NSString *itemsKeyPath = [displayController itemsKeyPath];
-    NSString *selectionKeyPath = [displayController selectionKeyPath];
-    
-    // TODO: in future, this should create multiple bindings.
-    // also, mb selectionkeypath should be just the last component, in case it isn't always
-    // just the selection, like if we have intervening filter controllers.
-    [displayController bind:itemsKeyPath toObject:sourceListTreeController
-                       withKeyPath:selectionKeyPath options:nil];
+
+    // TODO: in future, this should create multiple bindings.?    
+    [[displayController itemsArrayController] bind:@"contentArray" toObject:selectedItemsArrayController
+                                       withKeyPath:@"arrangedObjects" options:nil];
     
 }
 
 // TODO: as the above method creates multiple bindings, this one will have to keep up.
 // mb the display controllers themselves should be 
 - (void)unbindDisplayController:(id)displayController{
-    [displayController unbind:[displayController itemsKeyPath]];
+    NSLog(@"unbinding DC = %@", displayController);
+    [[displayController itemsArrayController] unbind:@"contentArray"];
 }
 
 
-// Actions
+#pragma mark Actions
+
+- (IBAction)addNewGroupFromSourceListSelection:(id)sender{
+    NSString *entityName = [[sourceListTreeController selection] valueForKeyPath:@"entity.name"];
+    NSLog(@"entityName is %@", entityName);
+    
+    if ([entityName isEqualToString:@"PublicationGroup"]){
+        [self addNewPublicationGroup:sender];
+        return;
+    }
+    if ([entityName isEqualToString:@"NoteGroup"]){
+        [self addNewNoteGroup:sender];
+        return;
+    }
+    if ([entityName isEqualToString:@"PersonGroup"]){
+        [self addNewPersonGroup:sender];
+        return;
+    }
+    else NSBeep();
+}
+
+- (IBAction)addNewItemFromSourceListSelection:(id)sender{
+    NSString *entityName = [[sourceListTreeController selection] valueForKeyPath:@"entity.name"];
+    
+    if ([entityName isEqualToString:@"PublicationGroup"]){
+        [self addNewPublication:sender];
+        return;
+    }
+    if ([entityName isEqualToString:@"NoteGroup"]){
+        [self addNewNote:sender];
+        return;
+    }
+    if ([entityName isEqualToString:@"PersonGroup"]){
+        [self addNewPerson:sender];
+        return;
+    }
+    else NSBeep();
+}
 
 // TODO: all of the add new *Group actions here could theoretically be better done
 // by letting the sourceListTreeController know what class it should be creating
@@ -153,7 +186,7 @@
         NSLog(@"tried to add a pub to a %@. should have had the action disabled, fool", selectedPublicationGroup);
         return;
     }
-    NSMutableSet *publications = [selectedPublicationGroup mutableSetValueForKey:@"publications"];
+    NSMutableSet *publications = [selectedPublicationGroup mutableSetValueForKey:@"items"];
     [publications addObject:newPublication];
     
 }
@@ -190,7 +223,7 @@
         NSLog(@"tried to add a pub to a %@. should have had the action disabled, fool", selectedNoteGroup);
         return;
     }
-    NSMutableSet *notes = [selectedNoteGroup mutableSetValueForKey:@"notes"];
+    NSMutableSet *notes = [selectedNoteGroup mutableSetValueForKey:@"items"];
     [notes addObject:newNote];
 }
 
@@ -213,6 +246,42 @@
     [children addObject:newNoteGroup];
 }
 
+- (IBAction)addNewPerson:(id)sender{
+    NSManagedObjectContext *managedObjectContext = [[self document] managedObjectContext];
+    id newPerson = [NSEntityDescription insertNewObjectForEntityForName:PersonEntityName
+                                               inManagedObjectContext:managedObjectContext];
+    
+    id selectedPersonGroup = [sourceListTreeController selection];
+    if(selectedPersonGroup == NSNotApplicableMarker ||
+       selectedPersonGroup == NSMultipleValuesMarker ||
+       selectedPersonGroup == NSNoSelectionMarker){
+        NSLog(@"tried to add a person to a %@. should have had the action disabled, fool", selectedPersonGroup);
+        return;
+    }
+    NSMutableSet *people = [selectedPersonGroup mutableSetValueForKey:@"items"];
+    [people addObject:newPerson];
+    NSLog(@"added person %@", newPerson);
+}
+
+- (IBAction)addNewPersonGroup:(id)sender{
+    NSManagedObjectContext *managedObjectContext = [[self document] managedObjectContext];
+    id newPersonGroup = [NSEntityDescription insertNewObjectForEntityForName:PersonGroupEntityName
+                                                    inManagedObjectContext:managedObjectContext];
+    
+    [newPersonGroup setValue:@"Untitled Person Group" forKey:@"name"];
+    
+    
+    id selectedPersonGroup = [sourceListTreeController selection];
+    if(selectedPersonGroup == NSNotApplicableMarker ||
+       selectedPersonGroup == NSMultipleValuesMarker ||
+       selectedPersonGroup == NSNoSelectionMarker){
+        NSLog(@"tried to add a personGroup to a non-noteGroup. should have had the action disabled, fool");
+        return;
+    }
+    NSMutableSet *children = [selectedPersonGroup mutableSetValueForKey:@"children"];
+    [children addObject:newPersonGroup];
+}
+
 #pragma mark Source List Outline View Delegate Methods and such
 
 - (void)selectedEntityClassDidChange{
@@ -221,7 +290,7 @@
     
     id newDC = [currentDisplayControllerForEntity objectForKey:[self currentEntityClassName]];
     
-    NSLog(@"newDC is %@ from %@", newDC, currentDisplayControllerForEntity);
+    //NSLog(@"newDC is %@ from %@", newDC, currentDisplayControllerForEntity);
     
     [self setDisplayController:newDC];
 

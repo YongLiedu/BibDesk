@@ -11,17 +11,7 @@
 
 @implementation BDSKNoteTableDisplayController
 
-- (id)initWithItemSource:(id)newItemSource{
-    self = [super init];
-    if (self != nil) {
-        [self setItemSource:newItemSource];
-    }
-    return self;
-}
-
 - (void)dealloc{
-    [self unbind:@"currentNotes"];
-    [currentNotes release];
     [super dealloc];
 }
 
@@ -33,31 +23,9 @@
 }
 
 
-- (NSString *)itemsKeyPath{
-    return @"currentNotes";
+- (NSArrayController *)itemsArrayController{
+    return itemsArrayController;
 }
 
-
-- (NSString *)selectionKeyPath{
-    return @"selection.notes";
-}
-
-
-- (id)itemSource{ return itemSource; }
-
-- (void)setItemSource:(id)newItemSource{
-    itemSource = newItemSource; // don't retain - typically your itemSource retains you.  
-}
-
-- (NSArray *)currentNotes{
-    return currentNotes;
-}
-
-- (void)setCurrentNotes:(NSArray *)newCurrentNotes{
-    if (newCurrentNotes != currentNotes){
-        [currentNotes autorelease];
-        currentNotes = [newCurrentNotes retain];
-    }
-}
 
 @end

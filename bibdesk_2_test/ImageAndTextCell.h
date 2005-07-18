@@ -11,7 +11,7 @@
     NSImage	*leftImage;
 }
 
-- (void)setleftImage:(NSImage *)anImage;
+- (void)setLeftImage:(NSImage *)anImage;
 - (NSImage *)leftImage;
 
 - (void)drawWithFrame:(NSRect)cellFrame inView:(NSView *)controlView;

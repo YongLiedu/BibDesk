@@ -10,22 +10,11 @@
 
 
 @interface BDSKPersonTableDisplayController : NSObject {
-    id itemSource;
-    NSArray *currentPeople;
-    
-    IBOutlet NSView *mainView;
+    IBOutlet NSView *mainView;  
+    IBOutlet NSArrayController *itemsArrayController;
 }
 
-- (id)initWithItemSource:(id)newItemSource; //@@ should be a protocol here?
 - (NSView *)view;
-
-- (NSString *)itemsKeyPath;
-- (NSString *)selectionKeyPath;
-
-- (id)itemSource;
-- (void)setItemSource:(id)newItemSource;
-
-- (NSArray *)currentPeople;
-- (void)setCurrentPeople:(NSArray *)newCurrentPeople;
+- (NSArrayController *)itemsArrayController;
 
 @end

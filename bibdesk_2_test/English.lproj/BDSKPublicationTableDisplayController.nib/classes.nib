@@ -3,7 +3,7 @@
         {
             CLASS = BDSKPublicationTableDisplayController; 
             LANGUAGE = ObjC; 
-            OUTLETS = {itemSource = id; mainView = NSView; }; 
+            OUTLETS = {itemsArrayController = NSArrayController; mainView = NSView; }; 
             SUPERCLASS = NSObject; 
         }, 
         {

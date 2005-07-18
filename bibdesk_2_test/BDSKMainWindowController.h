@@ -17,7 +17,7 @@
 @interface BDSKMainWindowController : NSWindowController {
     IBOutlet NSTreeController *sourceListTreeController;
     IBOutlet NSOutlineView *sourceList;
-        
+    IBOutlet NSArrayController *selectedItemsArrayController;
 
     IBOutlet NSSplitView *mainSplitView;
     
@@ -34,16 +34,22 @@
 - (NSArray *)displayControllersForCurrentType;
 - (void)setDisplayController:(id)newDisplayController;
 
+- (void)bindDisplayController:(id)displayController;
+- (void)unbindDisplayController:(id)displayController;
+
+- (void)selectedEntityClassDidChange;
+
 // actions
+- (IBAction)addNewGroupFromSourceListSelection:(id)sender;
+- (IBAction)addNewItemFromSourceListSelection:(id)sender;
+
 - (IBAction)addNewPublication:(id)sender;
 - (IBAction)addNewPublicationGroup:(id)sender;
 
 - (IBAction)addNewNote:(id)sender;
 - (IBAction)addNewNoteGroup:(id)sender;
 
-- (void)observeValueForKeyPath:(NSString *)keyPath
-                      ofObject:(id)object 
-                        change:(NSDictionary *)change
-                       context:(void *)context;    
+- (IBAction)addNewPerson:(id)sender;
+- (IBAction)addNewPersonGroup:(id)sender;
 
 @end
