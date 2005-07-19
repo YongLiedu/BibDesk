@@ -1,15 +1,38 @@
+// BibPrefController.m
+// BibDesk 
+// Created by Michael McCracken, 2002
 /*
-This software is Copyright (c) 2002, Michael O. McCracken
-All rights reserved.
+ This software is Copyright (c) 2002,2003,2004,2005
+ Michael O. McCracken. All rights reserved.
 
-Redistribution and use in source and binary forms, with or without modification, are permitted provided that the following conditions are met:
+ Redistribution and use in source and binary forms, with or without
+ modification, are permitted provided that the following conditions
+ are met:
 
-- Redistributions of source code must retain the above copyright notice, this list of conditions and the following disclaimer.
--  Redistributions in binary form must reproduce the above copyright notice, this list of conditions and the following disclaimer in the documentation and/or other materials provided with the distribution.
--  Neither the name of Michael O. McCracken nor the names of any contributors may be used to endorse or promote products derived from this software without specific prior written permission.
+ - Redistributions of source code must retain the above copyright
+   notice, this list of conditions and the following disclaimer.
 
-THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-*/
+ - Redistributions in binary form must reproduce the above copyright
+    notice, this list of conditions and the following disclaimer in
+    the documentation and/or other materials provided with the
+    distribution.
+
+ - Neither the name of Michael O. McCracken nor the names of any
+    contributors may be used to endorse or promote products derived
+    from this software without specific prior written permission.
+
+ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+ "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+ LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+ A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+ OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+ SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+ LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+ DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+ THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+ (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ */
 
 #import "BibPrefController.h"
 
@@ -45,6 +68,7 @@ NSString *BDSKCiteKeyFormatKey = @"Cite Key Format";
 NSString *BDSKCiteKeyFormatPresetKey = @"Cite Key Format Preset";
 NSString *BDSKCiteKeyAutogenerateKey = @"Cite Key Autogenerate";
 NSString *BDSKCiteKeyLowercaseKey = @"Cite Key Generate Lowercase";
+NSString *BDSKCiteKeyCleanOptionKey = @"Cite Key Clean Braces or TeX";
 
 NSString *BDSKShownColsNamesKey = @"Shown Column Names";
 NSString *BDSKColumnWidthsKey = @"Column Widths by Name";
@@ -86,11 +110,27 @@ NSString *BDSKFilePapersAutomaticallyKey = @"File papers into the papers folder 
 NSString *BDSKLocalUrlFormatKey = @"Local-Url Format";
 NSString *BDSKLocalUrlFormatPresetKey = @"Local-Url Format Preset";
 NSString *BDSKLocalUrlLowercaseKey = @"Local-Url Generate Lowercase";
+NSString *BDSKLocalUrlCleanOptionKey = @"Local-Url Clean Braces or TeX";
+
+NSString *BDSKDuplicateBooktitleKey = @"Duplicate Booktitle for Crossref";
+NSString *BDSKForceDuplicateBooktitleKey = @"Overwrite Booktitle when Duplicating for Crossref";
+NSString *BDSKTypesForDuplicateBooktitleKey = @"Types for Duplicating Booktitle for Crossref";
+NSString *BDSKWarnOnEditInheritedKey = @"Warn on Editing Inherited Fields";
+NSString *BDSKAutoSortForCrossrefsKey = @"Automatically Sort for Crossrefs";
 
 NSString *BDSKLastVersionLaunchedKey = @"Last launched version number";
 NSString *BDSKSnoopDrawerSavedSizeKey = @"Saved size of BibEditor document snoop drawer";
 NSString *BDSKShouldSaveNormalizedAuthorNamesKey = @"Save normalized names in BibTeX files";
 NSString *BDSKSaveAnnoteAndAbstractAtEndOfItemKey = @"Save Annote and Abstract at End of Item";
+NSString *BDSKBibStyleMacroDefinitionsKey = @"Macro definitions from bib style file";
+
+NSString *BDSKFindControllerDefaultFindAndReplaceTypeKey = @"Default field for find and replace";
+NSString *BDSKFindControllerSearchScopeKey = @"Search scope for find and replace";
+NSString *BDSKFindControllerCaseInsensitiveFindAndReplaceKey = @"Use case sensitive search for find and replace";
+NSString *BDSKFindControllerFindAndReplaceSelectedItemsKey = @"Search only selected items for find and replace";
+NSString *BDSKFindControllerLastFindAndReplaceFieldKey = @"Last field for find and replace";
+NSString *BDSKFindControllerFindAsMacroKey = @"Find text as macro for replacement";
+NSString *BDSKFindControllerReplaceAsMacroKey = @"Replace found text as macro";
 
 #pragma mark Field name strings
 
@@ -111,12 +151,15 @@ NSString *BDSKKeywordsString = @"Keywords";
 NSString *BDSKJournalString = @"Journal";
 NSString *BDSKVolumeString = @"Volume";
 NSString *BDSKNumberString = @"Number";
+NSString *BDSKSeriesString = @"Series";
 NSString *BDSKPagesString = @"Pages";
 NSString *BDSKBooktitleString = @"Booktitle";
+NSString *BDSKVolumetitleString = @"Volumetitle";
 NSString *BDSKPublisherString = @"Publisher";
 NSString *BDSKDateCreatedString = @"Date-Added";
 NSString *BDSKDateModifiedString = @"Date-Modified";
 NSString *BDSKDateString = @"Date";
+NSString *BDSKCrossrefString = @"Crossref";
 NSString *BDSKBibtexString = @"BibTeX";
 NSString *BDSKFirstAuthorString = @"1st Author";
 NSString *BDSKSecondAuthorString = @"2nd Author";
@@ -128,12 +171,11 @@ NSString *BDSKTypeString = @"Type";
 #pragma mark ||  Notification name strings
 NSString *BDSKDocumentWillSaveNotification = @"Document Will Save Notification";
 NSString *BDSKDocumentWindowWillCloseNotification = @"Document Window Will Close Notification";
-NSString *BDSKDocumentUpdateUINotification = @"General UI update Notification";
 NSString *BDSKTableViewFontChangedNotification = @"Tableview font selection is changing Notification";
 NSString *BDSKPreviewDisplayChangedNotification = @"Preview Pane Preference Change Notification";
-NSString *BDSKCustomStringsChangedNotification = @"CustomStringsChangedNotification";
 NSString *BDSKPreviewNeedsUpdateNotification = @"Preview Needs Update Notification";
 NSString *BDSKTableColumnChangedNotification = @"TableColumnChangedNotification";
+NSString *BDSKTableSelectionChangedNotification = @"TableSelectionChangedNotification";
 NSString *BDSKBibItemChangedNotification = @"BibItem Changed notification";
 NSString *BDSKDocAddItemNotification = @"Added a bibitem to a document";
 NSString *BDSKDocWillRemoveItemNotification = @"Will remove a bibitem from a document";
@@ -145,11 +187,6 @@ NSString *BDSKBibDocMacroDefinitionChangedNotification = @"changed the value of 
 NSString *BDSKMacroTextFieldWindowWillCloseNotification = @"Macro TextField Window Will Close Notification";
 NSString *BDSKPreviewPaneFontChangedNotification = @"Changed the RTF preview pane font family";
 NSString *BDSKBibTypeInfoChangedNotification = @"TypeInfo Changed Notification";
-
-#pragma mark BDSKLibrary notifications
-NSString *BDSKBibLibrarySelectedItemsChangedNotification = @"BibLibraryController's selected items has changed";
-NSString *BDSKBibCollectionItemAddedNotification = @"added an item to a collection";
-NSString *BDSKBibCollectionItemRemovedNotification = @"removed an item from a collection";
 
 #pragma mark Exception name strings
 

@@ -2,17 +2,37 @@
 
 //  Created by Michael McCracken on Mon Dec 17 2001.
 /*
-This software is Copyright (c) 2001,2002, Michael O. McCracken
-All rights reserved.
+ This software is Copyright (c) 2001,2002,2003,2004,2005
+ Michael O. McCracken. All rights reserved.
 
-Redistribution and use in source and binary forms, with or without modification, are permitted provided that the following conditions are met:
+ Redistribution and use in source and binary forms, with or without
+ modification, are permitted provided that the following conditions
+ are met:
 
-- Redistributions of source code must retain the above copyright notice, this list of conditions and the following disclaimer.
--  Redistributions in binary form must reproduce the above copyright notice, this list of conditions and the following disclaimer in the documentation and/or other materials provided with the distribution.
--  Neither the name of Michael O. McCracken nor the names of any contributors may be used to endorse or promote products derived from this software without specific prior written permission.
+ - Redistributions of source code must retain the above copyright
+   notice, this list of conditions and the following disclaimer.
 
-THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-*/
+ - Redistributions in binary form must reproduce the above copyright
+    notice, this list of conditions and the following disclaimer in
+    the documentation and/or other materials provided with the
+    distribution.
+
+ - Neither the name of Michael O. McCracken nor the names of any
+    contributors may be used to endorse or promote products derived
+    from this software without specific prior written permission.
+
+ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+ "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+ LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+ A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+ OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+ SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+ LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+ DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+ THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+ (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ */
 
 /*! @header BibDocument.h
     @discussion This defines a subclass of NSDocument that reads and writes BibTeX entries. It handles the main document window.
@@ -39,6 +59,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 
 #import "MacroWindowController.h"
 #import "BDSKTextImportController.h"
+#import <OmniFoundation/OFMultiValueDictionary.h>
 
 @class BDSKCustomCiteTableView;
 @class BibItem;
@@ -71,6 +92,8 @@ extern NSString *BDSKBibItemLocalDragPboardType;
     IBOutlet OASplitView* splitView;
     // for the splitview double-click handling
     float lastPreviewHeight;
+	
+	IBOutlet NSWindow *undoAlertSheet;
 
 #pragma mark Toolbar variable declarations
 
@@ -89,9 +112,9 @@ extern NSString *BDSKBibItemLocalDragPboardType;
 	IBOutlet NSBox *searchFieldBox;
 	IBOutlet NSView *searchFieldView; 
 	NSToolbarItem *searchFieldToolbarItem;
-        AGRegex *tipRegex;
-        AGRegex *andRegex;
-        AGRegex *orRegex;
+    AGRegex *tipRegex;
+    AGRegex *andRegex;
+    AGRegex *orRegex;
 
 	IBOutlet NSTextField *infoLine;
 
@@ -111,7 +134,6 @@ extern NSString *BDSKBibItemLocalDragPboardType;
     NSLock *pubsLock;
 
     NSString *quickSearchKey;
-    NSMutableDictionary *quickSearchTextDict;
    
 	NSMutableString *frontMatter;    // for preambles, and stuff
     BDSKPreviewer *PDFpreviewer;
@@ -150,23 +172,14 @@ extern NSString *BDSKBibItemLocalDragPboardType;
     IBOutlet NSView *SaveEncodingAccessoryView;
     IBOutlet NSPopUpButton *saveTextEncodingPopupButton;
     NSStringEncoding documentStringEncoding;
-    
-    // stuff for the Source List for .bdsk type files.
-    // Note: the outlets should migrate to a window controller.
-    IBOutlet NSOutlineView *sourceList;
-    IBOutlet NSButton *addSourceListItemButton;
-    IBOutlet NSMenu *sourceListActionMenu;
-    
-    IBOutlet NSWindow *editExportSettingsWindow;
-    IBOutlet NSPopUpButton *exporterSelectionPopUp;
-    IBOutlet NSButton *exporterEnabledCheckButton;
-    IBOutlet NSView *exporterSubView;
-    
+        
     // view:
     NSMutableArray *draggedItems; // an array to temporarily hold references to dragged items used locally.
     
     NSMutableDictionary *macroDefinitions;	
     MacroWindowController *macroWC;
+    
+    OFMultiValueDictionary *itemsForCiteKeys;
 }
 
 
@@ -195,6 +208,8 @@ extern NSString *BDSKBibItemLocalDragPboardType;
 
 */
 - (void)dealloc;
+
+- (IBAction)dismissUndoAlertSheet:(id)sender;
 
 /*!
     @method     setupSearchField
@@ -387,6 +402,10 @@ extern NSString *BDSKBibItemLocalDragPboardType;
 
 - (IBAction)selectDuplicates:(id)sender;
 
+- (IBAction)sortForCrossrefs:(id)sender;
+
+- (void)performSortForCrossrefs;
+
 #pragma mark searchField functions
 
 /*!
@@ -473,10 +492,10 @@ extern NSString *BDSKBibItemLocalDragPboardType;
 /*!
     @method displayPreviewForItems
     @abstract Handles writing the preview pane. (Not the PDF Preview)
-    @discussion items is an enumerator of NSNumbers that are the row indices of the selected items.
+    @discussion itemIndexes is an array of NSNumbers that are the row indices of the selected items.
     
 */
-- (void)displayPreviewForItems:(NSEnumerator *)enumerator;
+- (void)displayPreviewForItems:(NSArray *)itemIndexes;
 
 /*!
 @method emailPubCmd
@@ -608,6 +627,8 @@ extern NSString *BDSKBibItemLocalDragPboardType;
 
 - (void)addPublication:(BibItem *)pub;
 
+- (void)addPublications:(NSArray *)pubArray;
+
 - (void)removePublication:(BibItem *)pub;
 
 /*!
@@ -626,7 +647,7 @@ extern NSString *BDSKBibItemLocalDragPboardType;
 - (void)sortPubsByDefaultColumn;
 #pragma mark bibtex macro support
 
-- (NSMutableDictionary *)macroDefinitions;
+- (NSDictionary *)macroDefinitions;
 
 /*!
     @method     setMacroDefinitions:
@@ -635,7 +656,7 @@ extern NSString *BDSKBibItemLocalDragPboardType;
  It's intended to be used with file parsers to add many defs at once.
     @param      newMacroDefinitions (description)
 */
-- (void)setMacroDefinitions:(NSMutableDictionary *)newMacroDefinitions;
+- (void)setMacroDefinitions:(NSDictionary *)newMacroDefinitions;
 
 /*!
     @method     addMacroDefinitionWithoutUndo:forMacro:
@@ -699,6 +720,36 @@ extern NSString *BDSKBibItemLocalDragPboardType;
 */
 - (void)setMacroDefinition:(NSString *)newDefinition forMacro:(NSString *)macroKey;
 
+
+/*!
+    @method     bibTeXMacroString:
+    @abstract   returns the bibTeX string for the macro definitons.
+    @discussion TeXifies the expanded values when the pref option is set.
+    @result     (description)
+*/
+- (NSString *)bibTeXMacroString;
+
+- (BOOL)citeKeyIsCrossreffed:(NSString *)key;
+
+/*!
+    @method     itemsForCiteKeys
+    @abstract   Returns a dictionary of publications for cite keys. It can have multiple items for a single key.
+    @discussion Keys are case insensitive. Always use this accessor, not the ivar itself, as the ivar is build in this method. 
+    @result     (description)
+*/
+- (OFMultiValueDictionary *)itemsForCiteKeys;
+
+/*!
+    @method     publicationForCiteKey:
+    @abstract   Returns a publication matching the given citekey, using a case-insensitive comparison.
+    @discussion Used for finding parent items for crossref lookups, which require case-insensitivity in cite-keys.
+                The case conversion is handled by this method, though, and the caller shouldn't be concerned with it.
+    @param      key (description)
+    @result     (description)
+*/
+- (BibItem *)publicationForCiteKey:(NSString *)key;
+
+
     /*!
 @method citeKeyIsUsed:byItemOtherThan
      @abstract tells whether aCiteKey is in the dict.
@@ -736,13 +787,13 @@ extern NSString *BDSKBibItemLocalDragPboardType;
 - (void)createNewBlankPubAndEdit:(BOOL)yn;
 
 /*!
-    @method handleUpdateUINotification
-    @abstract listens for notification telling us to update UI.
+    @method handleTableSelectionChangedNotification:
+    @abstract listens for notification of changes in the selection of the main table.
     @discussion \253discussion\273
     
 */
 
-- (void)handleUpdateUINotification:(NSNotification *)notification;
+- (void)handleTableSelectionChangedNotification:(NSNotification *)notification;
 
 /*!
     @method updateUI
@@ -758,8 +809,8 @@ extern NSString *BDSKBibItemLocalDragPboardType;
     
 */
 - (void)setupTableColumns;
-
-int generalBibItemCompareFunc(id item1, id item2, void *context);
+NSComparisonResult reverseGeneralBibItemCompareFunc(id item1, id item2, void *context);
+NSComparisonResult generalBibItemCompareFunc(id item1, id item2, void *context);
 
 /*!
 	@method menuForTableColumn:row:
@@ -877,9 +928,13 @@ Uses the tableview argument to determine which actionMenu it should validate.
 */
 - (NSEnumerator *)selectedPubEnumerator;
 
+- (void)highlightItemForPartialItem:(NSDictionary *)partialItem;
+
 - (void)highlightBib:(BibItem *)bib;
 
 - (void)highlightBib:(BibItem *)bib byExtendingSelection:(BOOL)yn;
+
+- (void)highlightBibs:(NSArray *)bibArray;
 
 - (IBAction)toggleStatusBar:(id)sender;
 

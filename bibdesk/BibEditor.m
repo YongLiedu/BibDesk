@@ -1,19 +1,38 @@
 //  BibEditor.m
 
 //  Created by Michael McCracken on Mon Dec 24 2001.
-//  Copyright (c) 2001 Michael McCracken. All rights reserved.
 /*
-This software is Copyright (c) 2002, Michael O. McCracken
-All rights reserved.
+ This software is Copyright (c) 2001,2002,2003,2004,2005
+ Michael O. McCracken. All rights reserved.
 
-Redistribution and use in source and binary forms, with or without modification, are permitted provided that the following conditions are met:
+ Redistribution and use in source and binary forms, with or without
+ modification, are permitted provided that the following conditions
+ are met:
 
-- Redistributions of source code must retain the above copyright notice, this list of conditions and the following disclaimer.
--  Redistributions in binary form must reproduce the above copyright notice, this list of conditions and the following disclaimer in the documentation and/or other materials provided with the distribution.
--  Neither the name of Michael O. McCracken nor the names of any contributors may be used to endorse or promote products derived from this software without specific prior written permission.
+ - Redistributions of source code must retain the above copyright
+   notice, this list of conditions and the following disclaimer.
 
-THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-*/
+ - Redistributions in binary form must reproduce the above copyright
+    notice, this list of conditions and the following disclaimer in
+    the documentation and/or other materials provided with the
+    distribution.
+
+ - Neither the name of Michael O. McCracken nor the names of any
+    contributors may be used to endorse or promote products derived
+    from this software without specific prior written permission.
+
+ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+ "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+ LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+ A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+ OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+ SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+ LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+ DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+ THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+ (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ */
 
 
 #import "BibEditor.h"
@@ -23,6 +42,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 #import <OmniFoundation/NSString-OFExtensions.h>
 #import "BDAlias.h"
 #import "NSImage+Toolbox.h"
+#import "BDSKComplexString.h"
 
 @implementation BibEditor
 
@@ -49,6 +69,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 	showStatus = YES;
 	
 	forceEndEditing = NO;
+    didSetupForm = NO;
 	
     // this should probably be moved around.
     [[self window] setTitle:[theBib title]];
@@ -56,6 +77,8 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
     [[self window] registerForDraggedTypes:[NSArray arrayWithObjects:
             NSStringPboardType, NSFilenamesPboardType, nil]];					
     macroTextFieldWC = [[MacroTextFieldWindowController alloc] init];
+    
+    textViewUndoManager = [[NSUndoManager alloc] init];
 
 #if DEBUG
     NSLog(@"BibEditor alloc");
@@ -66,8 +89,8 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 - (void)windowWillLoad{
     [theBib setEditorObj:self];
     [citeKeyField setStringValue:[theBib citeKey]];
-    [notesView setString:[theBib valueOfField:BDSKAnnoteString]];
-    [abstractView setString:[theBib valueOfField:BDSKAbstractString]];
+    [notesView setString:[theBib valueOfField:BDSKAnnoteString inherit:NO]];
+    [abstractView setString:[theBib valueOfField:BDSKAbstractString inherit:NO]];
     [rssDescriptionView setString:[theBib valueOfField:BDSKRssDescriptionString]];
     // NSLog(@"BibEditor gets willLoad.");
 }
@@ -89,7 +112,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
         [[NSFontManager sharedFontManager] convertFont:requiredFont
                                            toHaveTrait:NSBoldFontMask];
     }
-
+    
     BibAppController *appController = (BibAppController *)[NSApp delegate];
     NSString *tmp;
     NSFormCell *entry;
@@ -100,39 +123,29 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
     NSPoint origin = rect.origin;
 	NSEnumerator *e;
 
-	NSArray *keysNotInForm = [NSArray arrayWithObjects: BDSKAnnoteString, BDSKAbstractString, BDSKRssDescriptionString, BDSKDateCreatedString, BDSKDateModifiedString, nil];
+	NSArray *keysNotInForm = [[NSArray alloc] initWithObjects: BDSKAnnoteString, BDSKAbstractString, BDSKRssDescriptionString, BDSKDateCreatedString, BDSKDateModifiedString, nil];
 
-    NSDictionary *reqAtt = [NSDictionary dictionaryWithObjects:[NSArray arrayWithObjects:[NSColor redColor],nil]
-                                                       forKeys:[NSArray arrayWithObjects:NSForegroundColorAttributeName,nil]];
+    NSDictionary *reqAtt = [[NSDictionary alloc] initWithObjects:[NSArray arrayWithObjects:[NSColor redColor],nil]
+                                                         forKeys:[NSArray arrayWithObjects:NSForegroundColorAttributeName,nil]];
 	
 	// set up for adding all items 
-    // remove all items in the NSForm (NSForm doesn't have a removeAllEntries.)
-    numRows = [bibFields numberOfRows];
-    for(i=0;i < numRows; i++){
-        [bibFields removeEntryAtIndex:0]; // it shifts indices every time so we have to pop them.
-    }
+    // remove all items in the NSForm
+    [bibFields removeAllEntries];
 
     // make two passes to get the required entries at top.
     i=0;
     sKeys = [[[theBib pubFields] allKeys] sortedArrayUsingSelector:@selector(caseInsensitiveCompare:)];
     
-    NSMutableSet *addedFields = [NSMutableSet set];
-    NSArray *requiredKeys = [theBib requiredFieldNames];
-    NSAssert(requiredKeys != nil, @"Required keys must not be nil."); // it may be empty, though
-    e = [requiredKeys objectEnumerator];
+    NSMutableSet *addedFields = [[NSMutableSet alloc] initWithCapacity:5];
+    e = [[[BibTypeManager sharedManager] requiredFieldsForType:[theBib type]] objectEnumerator];
+
     while(tmp = [e nextObject]){
         if (![keysNotInForm containsObject:tmp]){
+            entry = [bibFields insertEntry:tmp usingTitleFont:requiredFont attributesForTitle:reqAtt indexAndTag:i objectValue:[theBib valueOfField:tmp]];
             
-            entry = [bibFields insertEntry:tmp atIndex:i];
-            [entry setTarget:self];
-            [entry setAction:@selector(textFieldDidEndEditing:)];
-            [entry setTag:i];
-            [entry setObjectValue:[theBib valueOfField:tmp]];
-            [entry setTitleFont:requiredFont];
-            [entry setAttributedTitle:[[[NSAttributedString alloc] initWithString:tmp
-                                                                       attributes:reqAtt] autorelease]];
             // Autocompletion stuff
             [entry setFormatter:[appController formatterForEntry:tmp]];
+
             //[entry setTitleAlignment:NSRightTextAlignment]; this doesn't work...
             i++;
 
@@ -146,16 +159,13 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
     
     while(tmp = [e nextObject]){
         if(![keysNotInForm containsObject:tmp]){
-            entry = [bibFields insertEntry:tmp atIndex:i];
-            [entry setTarget:self];
-            [entry setAction:@selector(textFieldDidEndEditing:)];
-            [entry setTag:i];
-            [entry setObjectValue:[theBib valueOfField:tmp]];
+            entry = [bibFields insertEntry:tmp usingTitleFont:nil attributesForTitle:nil indexAndTag:i objectValue:[theBib valueOfField:tmp]];
+            
             [entry setTitleAlignment:NSLeftTextAlignment];
             
             // Autocompletion stuff
 			[entry setFormatter:[appController formatterForEntry:tmp]];
-            
+
             i++;
             [addedFields addObject:tmp];
         }
@@ -170,21 +180,29 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
     while(tmp = [e nextObject]){
         if(![addedFields containsObject:tmp] && ![keysNotInForm containsObject:tmp]){
             
-            entry = [bibFields insertEntry:tmp atIndex:i];
-            [entry setTarget:self];
-            [entry setAction:@selector(textFieldDidEndEditing:)];
-            [entry setTag:i];
-            [entry setObjectValue:[theBib valueOfField:tmp]];
+            entry = [bibFields insertEntry:tmp usingTitleFont:nil attributesForTitle:nil indexAndTag:i objectValue:[theBib valueOfField:tmp]];
+
             [entry setTitleAlignment:NSLeftTextAlignment];
-            // Autocompletion stuff
-			[entry setFormatter:[appController formatterForEntry:tmp]];
+            
+            if([tmp isEqualToString:BDSKCrossrefString])
+                [entry setFormatter:[citeKeyField formatter]]; // crossref field needs a citekey formatter
+            else
+                [entry setFormatter:[appController formatterForEntry:tmp]]; // for autocompletion
+
             i++;
         }
     }
+    
+    [keysNotInForm release];
+    [reqAtt release];
+    [addedFields release];
+    
     [bibFields sizeToFit];
     
     [bibFields setFrameOrigin:origin];
     [bibFields setNeedsDisplay:YES];
+    didSetupForm = YES;
+    
 }
 
 - (void)setupTypePopUp{
@@ -248,9 +266,16 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 	[documentSnoopButton setMenu:[self menuForImagePopUpButtonCell:[documentSnoopButton cell]]];
 	[documentSnoopButton selectItemAtIndex:[[OFPreferenceWrapper sharedPreferenceWrapper] integerForKey:BDSKSnoopDrawerContentKey]];
 		
-    [notesView setString:[theBib valueOfField:BDSKAnnoteString]];
-    [abstractView setString:[theBib valueOfField:BDSKAbstractString]];
+    [notesView setString:[theBib valueOfField:BDSKAnnoteString inherit:NO]];
+    [abstractView setString:[theBib valueOfField:BDSKAbstractString inherit:NO]];
     [rssDescriptionView setString:[theBib valueOfField:BDSKRssDescriptionString]];
+    
+    // set up identifiers for the tab view items, since we receive delegate messages from it
+    NSArray *tabViewItems = [tabView tabViewItems];
+    [[tabViewItems objectAtIndex:0] setIdentifier:BDSKBibtexString];
+    [[tabViewItems objectAtIndex:1] setIdentifier:BDSKAnnoteString];
+    [[tabViewItems objectAtIndex:2] setIdentifier:BDSKAbstractString];
+    [[tabViewItems objectAtIndex:3] setIdentifier:BDSKRssDescriptionString];
     
 	[fieldsScrollView setDrawsBackground:NO];
 	
@@ -270,7 +295,15 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 	[[NSNotificationCenter defaultCenter] addObserver:self
 											 selector:@selector(bibDidChange:)
 												 name:BDSKBibItemChangedNotification
-											   object:theBib];
+											   object:nil];
+	[[NSNotificationCenter defaultCenter] addObserver:self
+											 selector:@selector(bibWasAddedOrRemoved:)
+												 name:BDSKDocAddItemNotification
+											   object:theDocument];
+	[[NSNotificationCenter defaultCenter] addObserver:self
+											 selector:@selector(bibWasAddedOrRemoved:)
+												 name:BDSKDocDelItemNotification
+											   object:theDocument];
 	[[NSNotificationCenter defaultCenter] addObserver:self
 											 selector:@selector(bibWillBeRemoved:)
 												 name:BDSKDocWillRemoveItemNotification
@@ -287,6 +320,14 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 											 selector:@selector(typeInfoDidChange:)
 												 name:BDSKBibTypeInfoChangedNotification
 											   object:[BibTypeManager sharedManager]];
+	[[NSNotificationCenter defaultCenter] addObserver:self
+											 selector:@selector(macrosDidChange:)
+												 name:BDSKBibDocMacroDefinitionChangedNotification
+											   object:theDocument];
+	[[NSNotificationCenter defaultCenter] addObserver:self
+											 selector:@selector(macrosDidChange:)
+												 name:BDSKBibDocMacroKeyChangedNotification
+											   object:theDocument];
 
 	[authorTableView setDoubleAction:@selector(showPersonDetailCmd:)];
 
@@ -302,10 +343,10 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
     // release theBib? no...
     
     // This fixes some seriously weird issues with Jaguar, and possibly 10.3.  The tableview messages its datasource/delegate (BibEditor) after the editor is dealloced, which causes a crash.
-    // See http://www.cocoabuilderfcom/search/archive?words=crash+%22setDataSource:nil%22 for similar problems.
+    // See http://www.cocoabuilder.com/search/archive?words=crash+%22setDataSource:nil%22 for similar problems.
     [authorTableView setDelegate:nil];
     [authorTableView setDataSource:nil];
-
+    [textViewUndoManager release];
     [currentType release];
     [citeKeyFormatter release];
     [[NSNotificationCenter defaultCenter] removeObserver:self];
@@ -325,6 +366,12 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
     [self showWindow:self];
 }
 
+- (NSUndoManager *)undoManagerForTextView:(NSTextView *)aTextView{
+    // For annote/abstract/rss text views.
+    // This keeps the document from being dirty incorrectly after undoing annote/abstract edits from the tableview.
+    return textViewUndoManager;
+}
+
 // note that we don't want the - document accessor! It messes us up by getting called for other stuff.
 
 - (void)finalizeChanges{
@@ -340,21 +387,31 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 }
 
 - (IBAction)saveDocument:(id)sender{
-    // see controlTextDidBeginEditing and controlTextDidEndEditing for currentControl, which may be a textfield or form
-    // if currentControl is nil, the first responder is (possibly) one of the text views, so we'll give it focus after a save
-    NSResponder *fr = (currentControl == nil) ? [[self window] firstResponder] : currentControl;
+	NSResponder *fr = [[self window] firstResponder];
+	NSText *fe = nil;
+	NSRange selection = NSMakeRange(0,0);
+    
+    // Use this ivar to see if setupForm gets called by finalizeChanges.  This causes an exception to
+    // be raised when you paste a cite key into the crossref field and hit save before committing the
+    // edit.  Under these conditions, the selection is no longer meaningful since setupForm alters the
+    // form, and we (may) select the wrong text when we call setSelectedRange after the save. 
+    didSetupForm = NO;
 
-    // this case occurs if a form or text field cell is selected, but nothing has been entered yet
-    // we lose the selection, but at least the window doesn't lose first responder (which disconnects cmd-w)
-    if(currentControl == nil && fr == [[self window] fieldEditor:YES forObject:bibFields])
-        fr = [self window];
+    // if we were editing, we will should select the delegate of the field editor. We also keep the selection
+	if(fr == [[self window] fieldEditor:YES forObject:bibFields]){
+		fe = (NSText *)fr;
+		selection = [fe selectedRange];
+        fr = [fe delegate];
+	}
 
-    // a safety call to be sure that the current field's changes are saved :...
+	// a safety call to be sure that the current field's changes are saved :...
     [self finalizeChanges];
     
     [theDocument saveDocument:sender];
     
-    [[self window] makeFirstResponder:fr];
+    if([[self window] makeFirstResponder:fr] && fe && !didSetupForm){
+		[fe setSelectedRange:selection];
+    }
 }
 
 - (IBAction)toggleStatusBar:(id)sender{
@@ -387,7 +444,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 - (IBAction)viewLocal:(id)sender{
     NSWorkspace *sw = [NSWorkspace sharedWorkspace];
     
-    BOOL err = NO;
+    volatile BOOL err = NO;
 
     NS_DURING
 
@@ -425,17 +482,17 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 	
 	if (cell == [viewLocalButton cell]) {
 		// the first one has to be view file, since it's also the button's action when you're clicking on the icon.
-		[menu addItemWithTitle:NSLocalizedString(@"View File",@"View file string menu item")
+		[menu addItemWithTitle:NSLocalizedString(@"View File",@"View file")
 						action:@selector(viewLocal:)
 				 keyEquivalent:@""];
 		
-		[menu addItemWithTitle:NSLocalizedString(@"Reveal in Finder",@"Reveal in finder menu item")
+		[menu addItemWithTitle:NSLocalizedString(@"Reveal in Finder",@"Reveal in finder")
 						action:@selector(revealLocal:)
 				 keyEquivalent:@""];
 		
 		[menu addItem:[NSMenuItem separatorItem]];
 		
-		[menu addItemWithTitle:[NSString stringWithFormat:@"%@%C",NSLocalizedString(@"Choose File",@"Choose File... string menu item"),0x2026]
+		[menu addItemWithTitle:[NSString stringWithFormat:@"%@%C",NSLocalizedString(@"Choose File",@"Choose File..."),0x2026]
 						action:@selector(chooseLocalURL:)
 				 keyEquivalent:@""];
 		
@@ -453,7 +510,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 	}
 	else if (cell == [viewRemoteButton cell]) {
 		// the first one has to be view in web brower, since it's also the button's action when you're clicking on the icon.
-		[menu addItemWithTitle:NSLocalizedString(@"View in Web Browser",@"View in web browser string menu item")
+		[menu addItemWithTitle:NSLocalizedString(@"View in Web Browser",@"View in web browser")
 								 action:@selector(viewRemote:)
 						  keyEquivalent:@""];
 		
@@ -467,19 +524,19 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 	else if (cell == [documentSnoopButton cell]) {
 		NSMenuItem *item;
 		
-		item = [[NSMenuItem alloc] initWithTitle:NSLocalizedString(@"View File in Drawer",@"View file in drawer menu item")
+		item = [[NSMenuItem alloc] initWithTitle:NSLocalizedString(@"View File in Drawer",@"View file in drawer")
 										  action:@selector(toggleSnoopDrawer:)
 								   keyEquivalent:@""];
 		[item setRepresentedObject:pdfSnoopContainerView];
 		[menu addItem:[item autorelease]];
 		
-		item = [[NSMenuItem alloc] initWithTitle:NSLocalizedString(@"View File as Text in Drawer",@"View file as text in drawer menu item")
+		item = [[NSMenuItem alloc] initWithTitle:NSLocalizedString(@"View File as Text in Drawer",@"View file as text in drawer")
 										  action:@selector(toggleSnoopDrawer:)
 								   keyEquivalent:@""];
 		[item setRepresentedObject:textSnoopContainerView];
 		[menu addItem:[item autorelease]];
 		
-		item = [[NSMenuItem alloc] initWithTitle:NSLocalizedString(@"View Remote URL in Drawer",@"View remote URL in drawer menu item")
+		item = [[NSMenuItem alloc] initWithTitle:NSLocalizedString(@"View Remote URL in Drawer",@"View remote URL in drawer")
 										  action:@selector(toggleSnoopDrawer:)
 								   keyEquivalent:@""];
 		[item setRepresentedObject:webSnoopContainerView];
@@ -488,7 +545,6 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 	
 	return [menu autorelease];
 }
-
 
 - (NSArray *)getSafariRecentDownloadsMenu{
 	NSString *downloadPlistFileName = [NSHomeDirectory()  stringByAppendingPathComponent:@"Library"];
@@ -649,7 +705,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 	}
 	else if ([menuItem action] == @selector(generateCiteKey:)) {
 		// need to setthe title, as the document can change it in the main menu
-		[menuItem setTitle: NSLocalizedString(@"Generate Cite Key", @"Generate Cite Key menu item")];
+		[menuItem setTitle: NSLocalizedString(@"Generate Cite Key", @"Generate Cite Key")];
 		return YES;
 	}
 	else if ([menuItem action] == @selector(generateLocalUrl:) ||
@@ -664,13 +720,13 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 							( [documentSnoopDrawer state] == NSDrawerOpenState ||
 							  [documentSnoopDrawer state] == NSDrawerOpeningState);
 		if (isCloseItem) {
-			[menuItem setTitle:NSLocalizedString(@"Close Drawer", @"Close drawer menu item")];
+			[menuItem setTitle:NSLocalizedString(@"Close Drawer", @"Close drawer")];
 		} else if (requiredSnoopContainerView == pdfSnoopContainerView) {
-			[menuItem setTitle:NSLocalizedString(@"View File in Drawer", @"View file in drawer menu item")];
+			[menuItem setTitle:NSLocalizedString(@"View File in Drawer", @"View file in drawer")];
 		} else if (requiredSnoopContainerView == textSnoopContainerView) {
-			[menuItem setTitle:NSLocalizedString(@"View File as Text in Drawer", @"View file as text in drawer menu item")];
+			[menuItem setTitle:NSLocalizedString(@"View File as Text in Drawer", @"View file as text in drawer")];
 		} else if (requiredSnoopContainerView == webSnoopContainerView) {
-			[menuItem setTitle:NSLocalizedString(@"View Remote URL in Drawer", @"View remote URL in drawer menu item")];
+			[menuItem setTitle:NSLocalizedString(@"View Remote URL in Drawer", @"View remote URL in drawer")];
 		}
 		if (isCloseItem) {
 			// always enable the close item
@@ -750,6 +806,8 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 		
 		[sender setStringValue:newKey];
 		
+		[[[self window] undoManager] setActionName:NSLocalizedString(@"Change Cite Key",@"")];
+		
 		// autofile paper if we have enough information
 		if ( [[OFPreferenceWrapper sharedPreferenceWrapper] boolForKey:BDSKFilePapersAutomaticallyKey] &&
 			 [theBib needsToBeFiled] && [theBib canSetLocalUrl] ) {
@@ -791,16 +849,17 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 {
 	[theBib setCiteKey:[theBib suggestedCiteKey]];
 	
+	[[[self window] undoManager] setActionName:NSLocalizedString(@"Generate Cite Key",@"")];
 	[tabView selectFirstTabViewItem:self];
 }
 
 - (IBAction)generateLocalUrl:(id)sender
 {
 	if (![theBib canSetLocalUrl]){
-		NSString *message = NSLocalizedString(@"Not all fields needed for generating the file location are set. Do you want me to continue anyway, or wait till all the necessary fields are set?",@"");
+		NSString *message = NSLocalizedString(@"Not all fields needed for generating the file location are set. Do you want me to continue anyway?",@"");
 		NSString *otherButton = nil;
 		if([[OFPreferenceWrapper sharedPreferenceWrapper] boolForKey:BDSKFilePapersAutomaticallyKey]){
-			message = NSLocalizedString(@"Not all fields needed for generating the file location are set. Do you want me to continue anyway?",@""),
+			message = NSLocalizedString(@"Not all fields needed for generating the file location are set. Do you want me to continue anyway, or wait till all the necessary fields are set?",@""),
 			otherButton = NSLocalizedString(@"Wait",@"Wait");
 		}
 		int rv = NSRunAlertPanel(NSLocalizedString(@"Warning",@"Warning"),
@@ -829,11 +888,11 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
     }
     [self setCurrentType:[bibTypeButton titleOfSelectedItem]];
     if(![[theBib type] isEqualToString:currentType]){
-        [theBib makeType:currentType];
-		[self finalizeChanges];
-        [self setupForm];
+        [theBib setType:currentType];
         [[OFPreferenceWrapper sharedPreferenceWrapper] setObject:currentType
                                                            forKey:BDSKPubTypeStringKey];
+		
+		[[[self window] undoManager] setActionName:NSLocalizedString(@"Change Type",@"")];
     }
 }
 
@@ -861,13 +920,13 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 		icon = [[NSWorkspace sharedWorkspace] iconForFile:lurl];
 		[viewLocalButton setIconImage:icon];      
 		[viewLocalButton setIconActionEnabled:YES];
-		[viewLocalToolbarItem setToolTip:NSLocalizedString(@"View File",@"View file tooltip")];
+		[viewLocalToolbarItem setToolTip:NSLocalizedString(@"View File",@"View file")];
 		[[self window] setRepresentedFilename:lurl];
 		drawerShouldReopen = drawerWasOpen && ([documentSnoopDrawer contentView] != webSnoopContainerView);
     }else{
         [viewLocalButton setIconImage:[NSImage imageNamed:@"QuestionMarkFile"]];
 		[viewLocalButton setIconActionEnabled:NO];
-        [viewLocalToolbarItem setToolTip:NSLocalizedString(@"Choose a file to link with in the Local-Url Field", @"bad/empty local url field tooltip")];
+        [viewLocalToolbarItem setToolTip:NSLocalizedString(@"Choose a file to link with in the Local-Url Field", @"bad/empty local url field")];
         [[self window] setRepresentedFilename:@""];
     }
 
@@ -880,7 +939,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
     }else{
         [viewRemoteButton setIconImage:[NSImage imageNamed:@"WeblocFile_Disabled"]];
 		[viewRemoteButton setIconActionEnabled:NO];
-        [viewRemoteToolbarItem setToolTip:NSLocalizedString(@"Choose a URL to link with in the Url Field", @"bad/empty url field tooltip")];
+        [viewRemoteToolbarItem setToolTip:NSLocalizedString(@"Choose a URL to link with in the Url Field", @"bad/empty url field")];
     }
 	
     if (drawerShouldReopen){
@@ -916,6 +975,8 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
         
 		[theBib setField:BDSKLocalUrlString toValue:fileURLString];
 		[theBib autoFilePaper];
+		
+		[[[self window] undoManager] setActionName:NSLocalizedString(@"Edit Publication",@"")];
     }        
 }
 
@@ -924,10 +985,14 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 	
 	[theBib setField:BDSKLocalUrlString toValue:[[NSURL fileURLWithPath:path] absoluteString]];
 	[theBib autoFilePaper];
+	
+	[[[self window] undoManager] setActionName:NSLocalizedString(@"Edit Publication",@"")];
 }
 
 - (void)setRemoteURLFromMenuItem:(NSMenuItem *)sender{
 	[theBib setField:BDSKUrlString toValue:[sender representedObject]];
+	
+	[[[self window] undoManager] setActionName:NSLocalizedString(@"Edit Publication",@"")];
 }
 
 // ----------------------------------------------------------------------------------------
@@ -1038,6 +1103,23 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 
 #pragma mark Text Change handling
 
+- (BOOL)control:(NSControl *)control textShouldStartEditing:(NSText *)fieldEditor{
+
+    if (control != bibFields) return YES;
+    
+    NSFormCell *selectedCell = [bibFields selectedCell];
+    
+    NSString *value = [theBib valueOfField:[selectedCell title]];
+    
+    if([value isComplex] && ![value isInherited]){
+        [self editFormCellAsMacro:selectedCell];
+        return NO;
+    }else{
+        // edit it in the usual way.
+        return YES;
+    }
+}
+
 - (BOOL)control:(NSControl *)control textShouldBeginEditing:(NSText *)fieldEditor{
 
     if (control != bibFields) return YES;
@@ -1046,6 +1128,26 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
     
     NSString *value = [theBib valueOfField:[selectedCell title]];
     
+	if([value isInherited] &&
+	   [[OFPreferenceWrapper sharedPreferenceWrapper] boolForKey:BDSKWarnOnEditInheritedKey]){
+		[dontWarnOnEditInheritedCheckButton setState:NSOffState];
+		[NSApp beginSheet:editInheritedWarningSheet
+		   modalForWindow:[self window]
+			modalDelegate:self
+		   didEndSelector:NULL
+		   contextInfo:nil];
+		int rv = [NSApp runModalForWindow:editInheritedWarningSheet];
+		[NSApp endSheet:editInheritedWarningSheet];
+		[editInheritedWarningSheet orderOut:self];
+		
+		if (rv == NSAlertAlternateReturn) {
+			return NO;
+		} else if (rv == NSAlertOtherReturn) {
+			[self openParentItem:self];
+			return NO;
+		}
+	}
+	
     if([value isComplex]){
         [self editFormCellAsMacro:selectedCell];
         return NO;
@@ -1053,6 +1155,15 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
         // edit it in the usual way.
         return YES;
     }
+}
+
+- (IBAction)dismissEditInheritedSheet:(id)sender{
+	[NSApp stopModalWithCode:[sender tag]];
+}
+
+- (IBAction)changeWarnOnEditInherited:(id)sender{
+    [[OFPreferenceWrapper sharedPreferenceWrapper] setBool:([sender state] == NSOffState) 
+													forKey:BDSKWarnOnEditInheritedKey];
 }
 
 - (IBAction)editSelectedFieldAsRawBibTeX:(id)sender{
@@ -1088,7 +1199,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
     [macroTextFieldWC startEditingValue:value
                              atLocation:loc
                                   width:frame.size.width - titleWidth + 4
-                               withFont:nil
+                               withFont:[cell font]
                               fieldName:[cell title]
 						  macroResolver:theDocument];
         
@@ -1118,9 +1229,32 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 	if (control == bibFields) {
 		
 		NSCell *cell = [bibFields cellAtIndex:[bibFields indexOfSelectedItem]];
+		NSString *message = nil;
+		
+		if ([[cell title] isEqualToString:BDSKCrossrefString]) {
+			
+			if ([[theBib citeKey] caseInsensitiveCompare:[cell stringValue]] == NSOrderedSame) {
+				message = NSLocalizedString(@"An item cannot cross reference to itself.", @"");
+			} else {
+				NSString *parentCr = [[theDocument publicationForCiteKey:[cell stringValue]] valueOfField:BDSKCrossrefString inherit:NO];
+				
+				if (parentCr && ![parentCr isEqualToString:@""]) {
+					message = NSLocalizedString(@"Cannot cross reference to an item that has the Crossref field set.", @"");
+				} else if ([theDocument citeKeyIsCrossreffed:[theBib citeKey]]) {
+					message = NSLocalizedString(@"Cannot set the Crossref field, as the current item is cross referenced.", @"");
+				}
+			}
+			
+			if (message) {
+				NSRunAlertPanel(NSLocalizedString(@"Invalid Crossref Value", @"Invalid Crossref Value"),
+								message,
+								NSLocalizedString(@"OK", @"OK"), nil, nil);
+				[cell setStringValue:@""];
+				return NO;
+			}
+		}
 		
 		if (![[cell stringValue] isStringTeXQuotingBalancedWithBraces:YES connected:NO]) {
-			NSString *message = nil;
 			NSString *cancelButton = nil;
 			
 			if (forceEndEditing) {
@@ -1176,31 +1310,31 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 	return YES;
 }
 
-- (void)controlTextDidBeginEditing:(NSNotification *)aNotification{
-    currentControl = [aNotification object]; // cache the current control, so we can re-set the first responder after a save
-}
 
 - (void)controlTextDidEndEditing:(NSNotification *)aNotification{
-    // here for undo
-    currentControl = nil; // if a control doesn't have focus, set this to nil; this allows us to set the textview(s) as first responder
-}
-
-// sent by the NSForm when we are done editing a field if we used the formcell.
-- (IBAction)textFieldDidEndEditing:(id)sender{
-    NSCell *sel = [sender cellAtIndex: [sender indexOfSelectedItem]];
+	
+	id control = [aNotification object];
+	if (control != bibFields || [control indexOfSelectedItem] == -1)
+		return;
+	
+    NSCell *sel = [control cellAtIndex: [control indexOfSelectedItem]];
     NSString *title = [sel title];
 	NSString *value = [sel stringValue];
 	NSString *prevValue = [theBib valueOfField:title];
 	
-    if([sender indexOfSelectedItem] != -1 &&
-	   ![value isEqualToString:prevValue]){
+    if(![value isEqualToString:prevValue] &&
+	   !([prevValue isInherited] && [value isEqualToString:@""])){
 		[self recordChangingField:title toValue:value];
     }
+	// make sure we have the correct (complex) string value
+	[sel setObjectValue:[theBib valueOfField:title]];
 }
 
 - (void)recordChangingField:(NSString *)fieldName toValue:(NSString *)value{
 
     [theBib setField:fieldName toValue:value];
+	
+	[[[self window] undoManager] setActionName:NSLocalizedString(@"Edit Publication",@"")];
     
 	NSMutableString *status = [NSMutableString stringWithString:@""];
 	
@@ -1225,10 +1359,6 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 	if (![status isEqualToString:@""]) {
 		[self setStatus:status];
 	}
-	
-    [[NSNotificationCenter defaultCenter] postNotificationName:BDSKDocumentUpdateUINotification
-                                                        object:theDocument
-                                                      userInfo:nil];
 }
 
 - (NSString *)status {
@@ -1242,17 +1372,56 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 - (void)bibDidChange:(NSNotification *)notification{
 // unused	BibItem *notifBib = [notification object];
 	NSDictionary *userInfo = [notification userInfo];
+	NSString *changeType = [userInfo objectForKey:@"type"];
+	BibItem *sender = (BibItem *)[notification object];
+	NSString *crossref = [theBib valueOfField:BDSKCrossrefString inherit:NO];
+	BOOL parentDidChange = (crossref != nil && 
+							([crossref caseInsensitiveCompare:[sender citeKey]] == NSOrderedSame || 
+							 [crossref caseInsensitiveCompare:[userInfo objectForKey:@"oldCiteKey"]] == NSOrderedSame));
 	
-	if([[userInfo objectForKey:@"type"] isEqualToString:@"Add/Del Field"]){
+    // If it is not our item or his crossref parent, we don't care, but our parent may have changed his cite key
+	if (sender != theBib && !parentDidChange)
+		return;
+
+	if([changeType isEqualToString:@"Add/Del Field"]){
 		[self finalizeChanges];
 		[self setupForm];
 		return;
 	}
 
-	NSString *changedTitle = [userInfo objectForKey:@"key"];
+	NSString *changeKey = [userInfo objectForKey:@"key"];
 	NSString *newValue = [userInfo objectForKey:@"value"];
+
+	if([changeKey isEqualToString:BDSKTypeString]){
+		[self finalizeChanges];
+		[self setupForm];
+		[self updateTypePopup];
+		return;
+	}
 	
-	if([changedTitle isEqualToString:BDSKCiteKeyString]){
+    // Rebuild the form if the crossref changed, or our parent's cite key changed.
+	if([changeKey isEqualToString:BDSKCrossrefString] || 
+	   (parentDidChange && [changeKey isEqualToString:BDSKCiteKeyString])){
+		[self finalizeChanges];
+		[self setupForm];
+		[[self window] setTitle:[theBib title]];
+		[authorTableView reloadData];
+		pdfSnoopViewLoaded = NO;
+		textSnoopViewLoaded = NO;
+		webSnoopViewLoaded = NO;
+		[self fixURLs];
+		return;
+	}
+	
+	if([changeKey isEqualToString:BDSKTypeString]){
+		if(![newValue isEqualToString:currentType]){
+			[self finalizeChanges];
+			[self setupForm];
+			return;
+		}
+	}
+	
+	if([changeKey isEqualToString:BDSKCiteKeyString]){
 		[citeKeyField setStringValue:newValue];
 		// still need to check duplicates ourselves:
 		if(![self citeKeyIsValid:newValue]){
@@ -1266,50 +1435,88 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 		NSEnumerator *cellE = [cells objectEnumerator];
 		NSFormCell *entry = nil;
 		while(entry = [cellE nextObject]){
-			if([[entry title] isEqualToString:changedTitle])
+			if([[entry title] isEqualToString:changeKey])
 				break;
 		}
-		if(entry)
-			[entry setObjectValue:newValue];
+		if(entry){
+			[entry setObjectValue:[theBib valueOfField:changeKey]];
+			[bibFields setNeedsDisplay:YES];
+		}
 	}
 	
-	if([changedTitle isEqualToString:BDSKLocalUrlString]){
+	if([changeKey isEqualToString:BDSKLocalUrlString]){
 		pdfSnoopViewLoaded = NO;
 		textSnoopViewLoaded = NO;
 		[self fixURLs];
 	}
-	else if([changedTitle isEqualToString:BDSKUrlString]){
+	else if([changeKey isEqualToString:BDSKUrlString]){
 		webSnoopViewLoaded = NO;
 		[self fixURLs];
 	}
-	else if([changedTitle isEqualToString:BDSKTitleString]){
+	else if([changeKey isEqualToString:BDSKTitleString]){
 		[[self window] setTitle:newValue];
 	}
-	else if([changedTitle isEqualToString:BDSKAuthorString]){
+	else if([changeKey isEqualToString:BDSKAuthorString]){
 		[authorTableView reloadData];
 	}
 	
 }
-
-// sent by the notesView and the abstractView
-- (void)textDidChange:(NSNotification *)aNotification{
-    if([aNotification object] == notesView){
-        [theBib setField:BDSKAnnoteString toValue:[notesView string]];
-    }
-    else if([aNotification object] == abstractView){
-        [theBib setField:BDSKAbstractString toValue:[abstractView string]];
-    }
-    else if([aNotification object] == rssDescriptionView){
-        // NSLog(@"setting rssdesc to %@", [rssDescriptionView string]);
-        [theBib setField:BDSKRssDescriptionString toValue:[rssDescriptionView string]];
-    }
+	
+- (void)bibWasAddedOrRemoved:(NSNotification *)notification{
+	NSDictionary *userInfo = [notification userInfo];
+	BibItem *pub = (BibItem *)[userInfo objectForKey:@"pub"];
+	NSString *crossref = [theBib valueOfField:BDSKCrossrefString inherit:NO];
+	
+	if ([crossref caseInsensitiveCompare:[pub citeKey]] == NSOrderedSame) {
+		[self finalizeChanges];
+		[self setupForm];
+	}
 }
 
+- (void)tabView:(NSTabView *)tabView didSelectTabViewItem:(NSTabViewItem *)tabViewItem{
+    // Add the mutableString of the text storage to the item's pubFields, so changes
+    // are automatically tracked.  We still have to update the UI manually.
+    // The contents of the text views are initialized with the current contents of the BibItem in windowWillLoad:
+    //NSLog(@"%@", NSStringFromSelector(_cmd));
+    if([[tabViewItem identifier] isEqualToString:BDSKAnnoteString]){
+        [theBib setField:BDSKAnnoteString toValue:[[notesView textStorage] mutableString]];
+        [[theBib undoManager] setActionName:NSLocalizedString(@"Edit Annotation",@"")];
+    } else if([[tabViewItem identifier] isEqualToString:BDSKAbstractString]){
+        [theBib setField:BDSKAbstractString toValue:[[abstractView textStorage] mutableString]];
+        [[theBib undoManager] setActionName:NSLocalizedString(@"Edit Abstract",@"")];
+    }else if([[tabViewItem identifier] isEqualToString:BDSKRssDescriptionString]){
+        [theBib setField:BDSKRssDescriptionString toValue:[[rssDescriptionView textStorage] mutableString]];
+        [[theBib undoManager] setActionName:NSLocalizedString(@"Edit RSS Description",@"")];
+    }
+}
+    
+ // sent by the notesView and the abstractView; this ensures that the annote/abstract preview gets updated
+ - (void)textDidChange:(NSNotification *)aNotification{
+    NSNotification *notif = [NSNotification notificationWithName:BDSKPreviewDisplayChangedNotification object:nil];
+    [[NSNotificationQueue defaultQueue] enqueueNotification:notif 
+                                               postingStyle:NSPostWhenIdle 
+                                               coalesceMask:NSNotificationCoalescingOnName 
+                                                   forModes:nil];
+}
+ 
 - (void)typeInfoDidChange:(NSNotification *)aNotification{
 	[self setupTypePopUp];
-	[theBib makeType:currentType]; // make sure this is done now, and not later
+	[theBib makeType]; // make sure this is done now, and not later
 	[self finalizeChanges];
 	[self setupForm];
+}
+
+- (void)macrosDidChange:(NSNotification *)notification{
+	NSArray *cells = [bibFields cells];
+	NSEnumerator *cellE = [cells objectEnumerator];
+	NSFormCell *entry = nil;
+	NSString *value;
+	
+	while(entry = [cellE nextObject]){
+		value = [theBib valueOfField:[entry title]];
+		if([value isComplex])
+			[entry setObjectValue:value];
+	}
 }
 
 #pragma mark document interaction
@@ -1343,6 +1550,23 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 // but we're doing it manually at present.
 - (void)setDocument:(NSDocument *)d{
 }
+
+// these methods are for crossref interaction with the form
+- (void)openParentItem:(id)sender{
+    BibItem *parent = [theBib crossrefParent];
+    if(parent)
+        [theDocument editPub:parent];
+}
+
+- (void)arrowClickedInFormCell:(id)cell{
+	[self openParentItem:nil];
+}
+
+- (BOOL)formCellHasArrowButton:(id)cell{
+	return ([[theBib valueOfField:[cell title]] isInherited] || 
+			([[cell title] isEqualToString:BDSKCrossrefString] && [theBib crossrefParent]));
+}
+
 
 #pragma mark snoop drawer stuff
 
@@ -1401,13 +1625,13 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 		[documentSnoopButton setIconImage:image];
 		
 		if (isClose) {
-			[documentSnoopToolbarItem setToolTip:NSLocalizedString(@"Close Drawer", @"Close drawer tooltip")];
+			[documentSnoopToolbarItem setToolTip:NSLocalizedString(@"Close Drawer", @"Close drawer")];
 		} else if (isWeb) {
-			[documentSnoopToolbarItem setToolTip:NSLocalizedString(@"View Remote URL in Drawer", @"View remote URL in drawer tooltip")];
+			[documentSnoopToolbarItem setToolTip:NSLocalizedString(@"View Remote URL in Drawer", @"View remote URL in drawer")];
 		} else if (isText) {
-			[documentSnoopToolbarItem setToolTip:NSLocalizedString(@"View File as Text in Drawer", @"View file as Text in drawer tooltip")];
+			[documentSnoopToolbarItem setToolTip:NSLocalizedString(@"View File as Text in Drawer", @"View file as text in drawer")];
 		} else {
-			[documentSnoopToolbarItem setToolTip:NSLocalizedString(@"View File in Drawer", @"View file in drawer tooltip")];
+			[documentSnoopToolbarItem setToolTip:NSLocalizedString(@"View File in Drawer", @"View file in drawer")];
 		}
 		
 		[documentSnoopButton setIconActionEnabled:YES];
@@ -1416,7 +1640,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
         [documentSnoopButton setIconImage:[NSImage imageNamed:@"drawerDisabled"]];
 		
 		if (isClose) {
-			[documentSnoopToolbarItem setToolTip:NSLocalizedString(@"Close Drawer", @"Close drawer tooltip")];
+			[documentSnoopToolbarItem setToolTip:NSLocalizedString(@"Close Drawer", @"Close drawer")];
 		} else {
 			[documentSnoopToolbarItem setToolTip:NSLocalizedString(@"Choose Content to View in Drawer", @"Choose content to view in drawer")];
 		}
@@ -1632,6 +1856,8 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 			
 			[theBib setField:BDSKLocalUrlString toValue:fileURLString];
 			[theBib autoFilePaper];
+			
+			[[[self window] undoManager] setActionName:NSLocalizedString(@"Edit Publication",@"")];
 		} else {
 			NSLog(@"Could not write downloaded file.");
 		}
