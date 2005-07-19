@@ -13,7 +13,7 @@
 
 - (NSString *)stringValueForSearch{
     return [NSString stringWithFormat:@"%@ %@", [self valueForKey:@"title"],
-        [self valueForKey:@"subTitle"]];
+        [self valueForKey:@"shortTitle"]];
 }
 
 @end

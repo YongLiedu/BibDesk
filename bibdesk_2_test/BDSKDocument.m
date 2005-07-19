@@ -55,6 +55,33 @@
     [[managedObjectContext undoManager] removeAllActions];
     [self updateChangeCount:NSChangeCleared];
         
+    
+    // temporary data set up with one relationship
+    
+    
+    id pub = [NSEntityDescription insertNewObjectForEntityForName:PublicationEntityName
+                                                 inManagedObjectContext:managedObjectContext];
+    [pub setValue:@"test pub"
+                 forKey:@"title"];
+    NSMutableSet *set = [pubGroup mutableSetValueForKey:@"items"];
+    [set addObject:pub];
+    
+    id person = [NSEntityDescription insertNewObjectForEntityForName:PersonEntityName
+                                              inManagedObjectContext:managedObjectContext];
+    [person setValue:@"test first name"
+           forKey:@"firstNamePart"];
+    NSMutableSet *set2 = [personGroup mutableSetValueForKey:@"items"];
+    [set2 addObject:person];
+    
+    id relationship = [NSEntityDescription insertNewObjectForEntityForName:ContributorPublicationRelationshipEntityName
+                                              inManagedObjectContext:managedObjectContext];
+    [relationship setValue:@"author"
+              forKey:@"relationshipType"];
+    [relationship setValue:person
+                    forKey:@"contributor"];
+    [relationship setValue:pub
+                    forKey:@"publication"];
+            
     return self;
 }
 
