@@ -186,7 +186,7 @@
 				<integer>12</integer>
 			</dict>
 		</dict>
-		<string>{{36, 217}, {709, 593}}</string>
+		<string>{{24, 217}, {709, 593}}</string>
 		<string>Window</string>
 		<string>NSWindow</string>
 		<string>View</string>
@@ -1397,7 +1397,7 @@
 			<key>NSTransparent</key>
 			<false/>
 			<key>NSvFlags</key>
-			<integer>18</integer>
+			<integer>274</integer>
 		</dict>
 		<dict>
 			<key>$class</key>
@@ -1434,6 +1434,8 @@
 				<key>CF$UID</key>
 				<integer>86</integer>
 			</dict>
+			<key>NSvFlags</key>
+			<integer>256</integer>
 		</dict>
 		<string>{528, 500}</string>
 		<dict>

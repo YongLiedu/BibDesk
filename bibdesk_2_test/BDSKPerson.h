@@ -7,12 +7,14 @@
 //
 
 #import <Cocoa/Cocoa.h>
+#import "BDSKContributor.h"
 
 
-@interface BDSKPerson : NSManagedObject {
+@interface BDSKPerson : BDSKContributor {
 
 }
 
 - (NSString *)stringValueForSearch;
+- (NSString *)name;
 
 @end
