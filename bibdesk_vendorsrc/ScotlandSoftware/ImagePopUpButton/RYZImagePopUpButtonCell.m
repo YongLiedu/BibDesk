@@ -1,5 +1,9 @@
 #import "RYZImagePopUpButtonCell.h"
 
+@interface RYZImagePopUpButtonCell (Private)
+- (void)setButtonCell:(NSButtonCell *)buttonCell;
+@end
+
 @implementation RYZImagePopUpButtonCell
 
 // -----------------------------------------
@@ -17,10 +21,12 @@
 - (id)initImageCell:(NSImage *)anImage
 {
     if (self = [super initTextCell:@"" pullsDown:NO]) {
-		RYZ_buttonCell = [[NSButtonCell alloc] initTextCell: @""];
-		[RYZ_buttonCell setBordered: NO];
-		[RYZ_buttonCell setHighlightsBy: NSContentsCellMask];
-		[RYZ_buttonCell setImagePosition: NSImageLeft];
+		NSButtonCell *buttonCell = [[NSButtonCell alloc] initTextCell: @""];
+		[buttonCell setBordered: NO];
+		[buttonCell setHighlightsBy: NSContentsCellMask];
+		[buttonCell setImagePosition: NSImageLeft];
+        [self setButtonCell:buttonCell];
+        [buttonCell release];
 		
 		RYZ_iconSize = NSMakeSize(32.0, 32.0);
 		RYZ_showsMenuWhenIconClicked = NO;
@@ -38,7 +44,7 @@
 - (id)initWithCoder:(NSCoder *)coder
 {
 	if (self = [super initWithCoder:coder]) {
-		RYZ_buttonCell = [[coder decodeObjectForKey:@"buttonCell"] retain];
+        [self setButtonCell:[coder decodeObjectForKey:@"buttonCell"]];
 		
 		RYZ_iconSize = NSMakeSize([coder decodeFloatForKey:@"iconSizeWidth"], [coder decodeFloatForKey:@"iconSizeHeight"]);
 		RYZ_showsMenuWhenIconClicked = [coder decodeBoolForKey:@"showsMenuWhenIconClicked"];
@@ -77,7 +83,7 @@
 
 - (void)dealloc
 {
-    [RYZ_buttonCell release];
+    [self setButtonCell:nil]; // release the ivar and set to nil, or [super dealloc] causes a crash
     [RYZ_iconImage release];
     [RYZ_arrowImage release];
     [super dealloc];
@@ -490,6 +496,18 @@
 {
 	[RYZ_buttonCell highlight: flag  withFrame: cellFrame  inView: controlView];
 	[super highlight: flag  withFrame: cellFrame  inView: controlView];
+}
+
+@end
+
+@implementation RYZImagePopUpButtonCell (Private)
+
+- (void)setButtonCell:(NSButtonCell *)buttonCell;
+{
+    if(RYZ_buttonCell != buttonCell){
+        [RYZ_buttonCell release];
+        RYZ_buttonCell = [buttonCell retain];
+    }
 }
 
 @end
