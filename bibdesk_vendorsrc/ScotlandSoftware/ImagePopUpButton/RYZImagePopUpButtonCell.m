@@ -108,6 +108,7 @@
 - (void)setIconSize:(NSSize)iconSize
 {
     RYZ_iconSize = iconSize;
+	[RYZ_buttonCell setImage:nil]; // invalidate the image
 }
 
 - (BOOL)iconActionEnabled 
@@ -152,6 +153,7 @@
     [iconImage retain];
     [RYZ_iconImage release];
     RYZ_iconImage = iconImage;
+	[RYZ_buttonCell setImage:nil]; // invalidate the image
 }
 
 
@@ -170,7 +172,15 @@
     [arrowImage retain];
     [RYZ_arrowImage release];
     RYZ_arrowImage = arrowImage;
+	[RYZ_buttonCell setImage:nil]; // invalidate the image
 }
+
+- (void)setAlternateImage:(NSImage *)alternateImage
+{
+	[super setAlternateImage:alternateImage];
+	[RYZ_buttonCell setImage:nil]; // invalidate the image
+}
+
 
 - (BOOL)alwaysUsesFirstItemAsSelected {
     return RYZ_alwaysUsesFirstItemAsSelected;
@@ -209,6 +219,12 @@
 - (void)setEnabled:(BOOL)flag 
 {
 	[RYZ_buttonCell setEnabled:flag];
+}
+
+- (void)setUsesItemFromMenu:(BOOL)flag
+{
+	[super setUsesItemFromMenu:flag];
+	[RYZ_buttonCell setImage:nil]; // invalidate the image
 }
 
 // -----------------------------------------
@@ -404,65 +420,69 @@
 
 - (void)drawWithFrame:(NSRect)cellFrame  inView:(NSView *)controlView
 {
-    NSImage *iconImage;
-    
-    if ([self usesItemFromMenu] == NO) {
-		iconImage = [self iconImage];
-    } else {
-		iconImage = [[[[self selectedItem] image] copy] autorelease];
-    }
-    
-	[iconImage setSize: [self iconSize]];
-	
-	NSSize iconSize = [iconImage size];
-	NSRect iconRect = NSMakeRect(0.0, 0.0, iconSize.width, iconSize.height);
-	NSSize drawSize = [self iconDrawSize];
-	NSRect iconDrawRect = NSMakeRect(0.0, 0.0, drawSize.width, drawSize.height);
-	NSImage *arrowImage = [self arrowImage];
-	NSSize arrowSize = NSZeroSize;
-	NSRect arrowRect = NSZeroRect;
-	NSRect arrowDrawRect = NSZeroRect;
-	if (arrowImage) {
-		arrowSize = [arrowImage size];
-		arrowRect.size = arrowSize;
-		arrowDrawRect = NSMakeRect(NSWidth(iconDrawRect), 1.0, arrowSize.width, arrowSize.height);
-		drawSize.width += arrowSize.width;
-	}
-	
-	NSImage *popUpImage = [[NSImage alloc] initWithSize: drawSize];
-	
-	[popUpImage lockFocus];
-	[iconImage drawInRect: iconDrawRect  fromRect: iconRect  operation: NSCompositeSourceOver  fraction: 1.0];
-	if (arrowImage)
-		[arrowImage drawInRect: arrowDrawRect  fromRect: arrowRect  operation: NSCompositeSourceOver  fraction: 1.0];
-	[popUpImage unlockFocus];
+	if ([RYZ_buttonCell image] == nil || [self usesItemFromMenu]) {
+		// we need to redraw the image
 
-	[RYZ_buttonCell setImage: popUpImage];
-	[popUpImage release];
-	
-	if ([self alternateImage]) {
-		popUpImage = [[NSImage alloc] initWithSize: drawSize];
+		NSImage *iconImage;
+		
+		if ([self usesItemFromMenu] == NO) {
+			iconImage = [self iconImage];
+		} else {
+			iconImage = [[[[self selectedItem] image] copy] autorelease];
+		}
+		
+		[iconImage setSize: [self iconSize]];
+		
+		NSSize iconSize = [iconImage size];
+		NSRect iconRect = NSMakeRect(0.0, 0.0, iconSize.width, iconSize.height);
+		NSSize drawSize = [self iconDrawSize];
+		NSRect iconDrawRect = NSMakeRect(0.0, 0.0, drawSize.width, drawSize.height);
+		NSImage *arrowImage = [self arrowImage];
+		NSSize arrowSize = NSZeroSize;
+		NSRect arrowRect = NSZeroRect;
+		NSRect arrowDrawRect = NSZeroRect;
+		if (arrowImage) {
+			arrowSize = [arrowImage size];
+			arrowRect.size = arrowSize;
+			arrowDrawRect = NSMakeRect(NSWidth(iconDrawRect), 1.0, arrowSize.width, arrowSize.height);
+			drawSize.width += arrowSize.width;
+		}
+		
+		NSImage *popUpImage = [[NSImage alloc] initWithSize: drawSize];
 		
 		[popUpImage lockFocus];
-		[[self alternateImage] drawInRect: iconDrawRect  fromRect: iconRect  operation: NSCompositeSourceOver  fraction: 1.0];
+		[iconImage drawInRect: iconDrawRect  fromRect: iconRect  operation: NSCompositeSourceOver  fraction: 1.0];
 		if (arrowImage)
 			[arrowImage drawInRect: arrowDrawRect  fromRect: arrowRect  operation: NSCompositeSourceOver  fraction: 1.0];
 		[popUpImage unlockFocus];
-	
-		[RYZ_buttonCell setAlternateImage: popUpImage];
+
+		[RYZ_buttonCell setImage: popUpImage];
 		[popUpImage release];
-	}
-	
-    if ( [[controlView window] firstResponder] == controlView &&
-		 [controlView respondsToSelector: @selector(selectedCell)] &&
-		 [controlView performSelector: @selector(selectedCell)] == self) {
-		[RYZ_buttonCell setShowsFirstResponder: YES];
-    } else {
-		[RYZ_buttonCell setShowsFirstResponder: NO];
+		
+		if ([self alternateImage]) {
+			popUpImage = [[NSImage alloc] initWithSize: drawSize];
+			
+			[popUpImage lockFocus];
+			[[self alternateImage] drawInRect: iconDrawRect  fromRect: iconRect  operation: NSCompositeSourceOver  fraction: 1.0];
+			if (arrowImage)
+				[arrowImage drawInRect: arrowDrawRect  fromRect: arrowRect  operation: NSCompositeSourceOver  fraction: 1.0];
+			[popUpImage unlockFocus];
+		
+			[RYZ_buttonCell setAlternateImage: popUpImage];
+			[popUpImage release];
+		}
+		
+		if ( [[controlView window] firstResponder] == controlView &&
+			 [controlView respondsToSelector: @selector(selectedCell)] &&
+			 [controlView performSelector: @selector(selectedCell)] == self) {
+			[RYZ_buttonCell setShowsFirstResponder: YES];
+		} else {
+			[RYZ_buttonCell setShowsFirstResponder: NO];
+		}
+		
     }
-    
-	 //   NSLog(@"cellFrame: %@  selectedItem: %@", NSStringFromRect(cellFrame), [[self selectedItem] title]);
-    
+	//   NSLog(@"cellFrame: %@  selectedItem: %@", NSStringFromRect(cellFrame), [[self selectedItem] title]);
+	
     [RYZ_buttonCell drawWithFrame: cellFrame  inView: controlView];
 }
 
