@@ -13,7 +13,7 @@
 // this used to be the designated intializer
 - (id)initTextCell:(NSString *)stringValue pullsDown:(BOOL)pullsDown
 {
-    self = [self initImageCell:[NSImage imageNamed: @"NSApplicationIcon"]];
+    self = [self initImageCell:nil];
     return self;
 }
 
@@ -184,6 +184,7 @@
 - (void)setAlternateImage:(NSImage *)alternateImage
 {
 	[super setAlternateImage:alternateImage];
+	[RYZ_buttonCell setAlternateImage:nil]; // invalidate the image
 	[RYZ_buttonCell setImage:nil]; // invalidate the image
 }
 
@@ -262,7 +263,7 @@
 		// Mouse event
 		NSPoint mouseLocation = [controlView convertPoint: [event locationInWindow]  fromView: nil];
 		NSSize iconSize = [self iconDrawSize];
-		NSSize arrowSize = NSMakeSize(0.0,0.0);
+		NSSize arrowSize = NSZeroSize;
 		NSRect arrowRect;
 		
 		if ([self arrowImage] != nil) {
@@ -439,25 +440,26 @@
 		
 		[iconImage setSize: [self iconSize]];
 		
-		NSSize iconSize = [iconImage size];
-		NSRect iconRect = NSMakeRect(0.0, 0.0, iconSize.width, iconSize.height);
 		NSSize drawSize = [self iconDrawSize];
-		NSRect iconDrawRect = NSMakeRect(0.0, 0.0, drawSize.width, drawSize.height);
-		NSImage *arrowImage = [self arrowImage];
-		NSSize arrowSize = NSZeroSize;
+		NSRect iconRect = NSZeroRect;
+		NSRect iconDrawRect = NSZeroRect;
 		NSRect arrowRect = NSZeroRect;
 		NSRect arrowDrawRect = NSZeroRect;
+		NSImage *arrowImage = [self arrowImage];
+		
+		iconRect.size = [self iconSize];
+		iconDrawRect.size = drawSize;
 		if (arrowImage) {
-			arrowSize = [arrowImage size];
-			arrowRect.size = arrowSize;
-			arrowDrawRect = NSMakeRect(NSWidth(iconDrawRect), 1.0, arrowSize.width, arrowSize.height);
-			drawSize.width += arrowSize.width;
+			arrowRect.size = arrowDrawRect.size = [arrowImage size];
+			arrowDrawRect.origin = NSMakePoint(NSWidth(iconDrawRect), 1.0);
+			drawSize.width += NSWidth(arrowRect);
 		}
 		
 		NSImage *popUpImage = [[NSImage alloc] initWithSize: drawSize];
 		
 		[popUpImage lockFocus];
-		[iconImage drawInRect: iconDrawRect  fromRect: iconRect  operation: NSCompositeSourceOver  fraction: 1.0];
+		if (iconImage)
+			[iconImage drawInRect: iconDrawRect  fromRect: iconRect  operation: NSCompositeSourceOver  fraction: 1.0];
 		if (arrowImage)
 			[arrowImage drawInRect: arrowDrawRect  fromRect: arrowRect  operation: NSCompositeSourceOver  fraction: 1.0];
 		[popUpImage unlockFocus];
