@@ -78,6 +78,7 @@
 {
     return [[self cell] iconImage];
 }
+
 - (void)fadeIconImageToImage:(NSImage *)iconImage;
 {
 
@@ -86,27 +87,37 @@
         return;
     }
     
-    alpha = 0;
-    NSTimer *timer = [NSTimer scheduledTimerWithTimeInterval:1.0/30.0  target:self selector:@selector(timerFired:)  userInfo:iconImage  repeats:YES];    
+    alpha = 0.01;
+    NSTimer *timer = [NSTimer scheduledTimerWithTimeInterval:1.0/30.0  target:self selector:@selector(timerFired:)  userInfo:[NSDictionary dictionaryWithObjectsAndKeys:iconImage, @"newImage", [self iconImage], @"oldImage"]  repeats:YES];    
     [[NSRunLoop currentRunLoop] addTimer:timer  forMode:NSDefaultRunLoopMode];
     [[NSRunLoop currentRunLoop] addTimer:timer  forMode:NSEventTrackingRunLoopMode];
 }
 
 - (void)timerFired:(NSTimer *)timer;
 {
-    if(alpha >= 0.99){
+    
+    NSImage *newImage = [[timer userInfo] objectForKey:@"newImage"];
+    
+    if(alpha >= 1){
+        [self setIconImage:newImage];
         [timer invalidate];
         return;
     }
 
-    NSImage *newImage = [timer userInfo];
-    NSImage *oldImage = [self iconImage];
-    alpha += 0.1;
-    [oldImage lockFocus];
-    [oldImage compositeToPoint:NSZeroPoint operation:NSCompositeCopy fraction:(1 - alpha/3)];
-    [newImage compositeToPoint:NSZeroPoint operation:NSCompositeDestinationOver fraction:alpha];
-    [oldImage unlockFocus];
-    [self setIconImage:oldImage];
+    // original image we started with
+    NSImage *oldImage = [[timer userInfo] objectForKey:@"oldImage"];
+    
+    // we need a clear image to draw into, or else the shadows get superimposed
+    NSImage *image = [[NSImage alloc] initWithSize:[self bounds].size];
+    
+    alpha += sin(alpha);
+    
+    [image lockFocus];
+    [oldImage dissolveToPoint:NSZeroPoint fromRect:[self bounds] fraction:(1-alpha)]; // decreasing amount of old image
+    [newImage dissolveToPoint:NSZeroPoint fromRect:[self bounds] fraction:alpha];     // increasing amount of new image
+    [image unlockFocus];
+    [self setIconImage:image];
+    [image release];
 }
 
 - (void)setIconImage:(NSImage *)iconImage
