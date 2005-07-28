@@ -1,5 +1,6 @@
 @interface RYZImagePopUpButton : NSPopUpButton
 {
+    float alpha;
 }
 
 // --- Getting and setting the icon size ---
@@ -15,6 +16,7 @@
 // --- Getting and setting the icon image ---
 - (NSImage *)iconImage;
 - (void)setIconImage:(NSImage *)iconImage;
+- (void)fadeIconImageToImage:(NSImage *)iconImage;
 
 
 // --- Getting and setting the arrow image ---
