@@ -88,7 +88,9 @@
     }
     
     alpha = 0.01;
-    NSTimer *timer = [NSTimer scheduledTimerWithTimeInterval:1.0/30.0  target:self selector:@selector(timerFired:)  userInfo:[NSDictionary dictionaryWithObjectsAndKeys:iconImage, @"newImage", [self iconImage], @"oldImage"]  repeats:YES];    
+	NSDictionary *userInfo = [NSDictionary dictionaryWithObjectsAndKeys:
+								iconImage, @"newImage", [self iconImage], @"oldImage", nil];
+    NSTimer *timer = [NSTimer scheduledTimerWithTimeInterval:1.0/30.0  target:self selector:@selector(timerFired:)  userInfo:userInfo  repeats:YES];    
     [[NSRunLoop currentRunLoop] addTimer:timer  forMode:NSDefaultRunLoopMode];
     [[NSRunLoop currentRunLoop] addTimer:timer  forMode:NSEventTrackingRunLoopMode];
 }
@@ -108,13 +110,13 @@
     NSImage *oldImage = [[timer userInfo] objectForKey:@"oldImage"];
     
     // we need a clear image to draw into, or else the shadows get superimposed
-    NSImage *image = [[NSImage alloc] initWithSize:[self bounds].size];
+    NSImage *image = [[NSImage alloc] initWithSize:[self iconSize]];
     
     alpha += sin(alpha);
     
     [image lockFocus];
-    [oldImage dissolveToPoint:NSZeroPoint fromRect:[self bounds] fraction:(1-alpha)]; // decreasing amount of old image
-    [newImage dissolveToPoint:NSZeroPoint fromRect:[self bounds] fraction:alpha];     // increasing amount of new image
+    [oldImage dissolveToPoint:NSZeroPoint fraction:(1-alpha)]; // decreasing amount of old image
+    [newImage dissolveToPoint:NSZeroPoint fraction:alpha];     // increasing amount of new image
     [image unlockFocus];
     [self setIconImage:image];
     [image release];
