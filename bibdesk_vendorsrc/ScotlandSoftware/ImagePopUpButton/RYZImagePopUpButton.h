@@ -1,6 +1,5 @@
 @interface RYZImagePopUpButton : NSPopUpButton
 {
-    float alpha;
 }
 
 // --- Getting and setting the icon size ---
