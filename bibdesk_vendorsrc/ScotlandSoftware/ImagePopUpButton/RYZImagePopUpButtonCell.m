@@ -46,7 +46,7 @@
 	if (self = [super initWithCoder:coder]) {
         [self setButtonCell:[coder decodeObjectForKey:@"buttonCell"]];
 		
-		RYZ_iconSize = NSMakeSize([coder decodeFloatForKey:@"iconSizeWidth"], [coder decodeFloatForKey:@"iconSizeHeight"]);
+		RYZ_iconSize = [coder decodeSizeForKey:@"iconSize"];
 		RYZ_showsMenuWhenIconClicked = [coder decodeBoolForKey:@"showsMenuWhenIconClicked"];
 		RYZ_iconActionEnabled = [coder decodeBoolForKey:@"iconActionEnabled"];
 		RYZ_alwaysUsesFirstItemAsSelected = [coder decodeBoolForKey:@"alwaysUsesFirstItemAsSelected"];
@@ -68,8 +68,7 @@
 	[super encodeWithCoder:encoder];
 	[encoder encodeObject:RYZ_buttonCell forKey:@"buttonCell"];
 	
-	[encoder encodeFloat:RYZ_iconSize.width forKey:@"iconSizeWidth"];
-	[encoder encodeFloat:RYZ_iconSize.height forKey:@"iconSizeHeight"];
+	[encoder encodeSize:RYZ_iconSize forKey:@"iconSize"];
 	[encoder encodeBool:RYZ_showsMenuWhenIconClicked forKey:@"showsMenuWhenIconClicked"];
 	[encoder encodeBool:RYZ_iconActionEnabled forKey:@"iconActionEnabled"];
 	[encoder encodeBool:RYZ_alwaysUsesFirstItemAsSelected forKey:@"alwaysUsesFirstItemAsSelected"];
