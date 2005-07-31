@@ -99,13 +99,16 @@
     float time = [[[timer userInfo] objectForKey:@"time"] floatValue];
 	
     time += 0.1;
-	[[timer userInfo] setObject:[NSNumber numberWithFloat:time] forKey:@"time"];
 	
-    if(time > 1.57){
+    if(time >= M_PI_2){
         [self setIconImage:newImage];
         [timer invalidate];
         return;
     }
+    
+    NSNumber *timeNumber = [[NSNumber alloc] initWithFloat:time];
+	[[timer userInfo] setObject:timeNumber forKey:@"time"];
+    [timeNumber release];
 
     // original image we started with
     NSImage *oldImage = [[timer userInfo] objectForKey:@"oldImage"];
