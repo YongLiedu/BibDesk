@@ -88,22 +88,20 @@
     }
     
 	NSMutableDictionary *userInfo = [NSMutableDictionary dictionaryWithObjectsAndKeys:
-		[NSNumber numberWithFloat:0], @"alpha", iconImage, @"newImage", [self iconImage], @"oldImage", nil];
-    NSTimer *timer = [NSTimer scheduledTimerWithTimeInterval:1.0/30.0  target:self selector:@selector(timerFired:)  userInfo:userInfo  repeats:YES];    
-    [[NSRunLoop currentRunLoop] addTimer:timer  forMode:NSDefaultRunLoopMode];
-    [[NSRunLoop currentRunLoop] addTimer:timer  forMode:NSEventTrackingRunLoopMode];
+		[NSNumber numberWithFloat:0], @"time", iconImage, @"newImage", [self iconImage], @"oldImage", nil];
+    NSTimer *timer = [NSTimer scheduledTimerWithTimeInterval:0.03  target:self selector:@selector(timerFired:)  userInfo:userInfo  repeats:YES];    
 }
 
 - (void)timerFired:(NSTimer *)timer;
 {
     
     NSImage *newImage = [[timer userInfo] objectForKey:@"newImage"];
-    float alpha = [[[timer userInfo] objectForKey:@"alpha"] floatValue];
+    float time = [[[timer userInfo] objectForKey:@"time"] floatValue];
 	
-    alpha += 0.1;
-	[[timer userInfo] setObject:[NSNumber numberWithFloat:alpha] forKey:@"alpha"];
+    time += 0.1;
+	[[timer userInfo] setObject:[NSNumber numberWithFloat:time] forKey:@"time"];
 	
-    if(alpha >= 1){
+    if(time > 1.57){
         [self setIconImage:newImage];
         [timer invalidate];
         return;
@@ -116,8 +114,8 @@
     NSImage *image = [[NSImage alloc] initWithSize:[self iconSize]];
     
     [image lockFocus];
-    [oldImage dissolveToPoint:NSZeroPoint fraction:(1-alpha)]; // decreasing amount of old image
-    [newImage dissolveToPoint:NSZeroPoint fraction:alpha];     // increasing amount of new image
+    [oldImage dissolveToPoint:NSZeroPoint fraction:cos(time)]; // decreasing amount of old image
+    [newImage dissolveToPoint:NSZeroPoint fraction:sin(time)]; // increasing amount of new image
     [image unlockFocus];
     [self setIconImage:image];
     [image release];
