@@ -2,23 +2,42 @@
 
 //  Created by Michael McCracken on Tue Jan 29 2002.
 /*
-This software is Copyright (c) 2002, Michael O. McCracken
-All rights reserved.
+ This software is Copyright (c) 2002,2003,2004,2005
+ Michael O. McCracken. All rights reserved.
 
-Redistribution and use in source and binary forms, with or without modification, are permitted provided that the following conditions are met:
+ Redistribution and use in source and binary forms, with or without
+ modification, are permitted provided that the following conditions
+ are met:
 
-- Redistributions of source code must retain the above copyright notice, this list of conditions and the following disclaimer.
--  Redistributions in binary form must reproduce the above copyright notice, this list of conditions and the following disclaimer in the documentation and/or other materials provided with the distribution.
--  Neither the name of Michael O. McCracken nor the names of any contributors may be used to endorse or promote products derived from this software without specific prior written permission.
+ - Redistributions of source code must retain the above copyright
+   notice, this list of conditions and the following disclaimer.
 
-THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-*/
+ - Redistributions in binary form must reproduce the above copyright
+    notice, this list of conditions and the following disclaimer in
+    the documentation and/or other materials provided with the
+    distribution.
+
+ - Neither the name of Michael O. McCracken nor the names of any
+    contributors may be used to endorse or promote products derived
+    from this software without specific prior written permission.
+
+ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+ "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+ LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+ A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+ OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+ SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+ LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+ DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+ THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+ (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ */
 
 #import "BDSKPreviewer.h"
 #import "BibPrefController.h"
 #import "BibAppController.h"
 #import "DraggableScrollView.h"
-
 
 /*! @const BDSKPreviewer helps to enforce a single object of this class */
 static BDSKPreviewer *thePreviewer;
@@ -49,10 +68,27 @@ static BDSKPreviewer *thePreviewer;
 }
 
 - (void)awakeFromNib{
+    [self setWindowFrameAutosaveName:@"BDSKPreviewPanel"];
+
 	DraggableScrollView *scrollView = (DraggableScrollView*)[imagePreviewView enclosingScrollView];
     float scaleFactor = [[OFPreferenceWrapper sharedPreferenceWrapper] floatForKey:BDSKPreviewPDFScaleFactorKey];
 	[scrollView setScaleFactor:scaleFactor];
-	scrollView = (DraggableScrollView*)[rtfPreviewView enclosingScrollView];
+    
+    if(floor(NSAppKitVersionNumber) <= NSAppKitVersionNumber10_3){
+        [self performSelectorOnMainThread:@selector(resetPreviews) withObject:nil waitUntilDone:NO];
+    } else {
+#ifdef BDSK_USING_TIGER
+        NSRect frameRect = [imagePreviewView frame];
+        pdfView = [[NSClassFromString(@"BDSKZoomablePDFView") alloc] initWithFrame:frameRect];
+        [[tabView tabViewItemAtIndex:0] setView:pdfView];
+        [pdfView release];
+        [self performSelectorOnMainThread:@selector(resetPreviews) withObject:nil waitUntilDone:YES];
+        // don't reset the scale factor until there's a document loaded, or else we get a huge gray border
+        [pdfView setScaleFactor:scaleFactor];
+#endif
+    }
+    
+    scrollView = (DraggableScrollView*)[rtfPreviewView enclosingScrollView];
 	scaleFactor = [[OFPreferenceWrapper sharedPreferenceWrapper] floatForKey:BDSKPreviewRTFScaleFactorKey];
 	[scrollView setScaleFactor:scaleFactor];
 	
@@ -61,7 +97,6 @@ static BDSKPreviewer *thePreviewer;
 						 name:NSApplicationWillTerminateNotification
 					       object:NSApp];
 	
-	[self setWindowFrameAutosaveName:@"BDSKPreviewPanel"];
 }
 
 - (NSString *)windowNibName
@@ -69,21 +104,15 @@ static BDSKPreviewer *thePreviewer;
     return @"Previewer";
 }
 
-- (void)windowDidLoad{ // we get this the first time the user selects "Show Preview"
-    NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
-    [self resetPreviews];
-    [pool release];
-}
-
 - (BOOL)PDFFromString:(NSString *)str{
     
     // pool for MT
     NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
     
-    BOOL rv = YES;
+    volatile BOOL rv = YES;
     
     if(str == nil || [str isEqualToString:@""]){
-        [self resetPreviews];
+        [self performSelectorOnMainThread:@selector(resetPreviews) withObject:nil waitUntilDone:NO];
         [pool release];
         return NO;
     }
@@ -91,11 +120,11 @@ static BDSKPreviewer *thePreviewer;
     NSString *texFile; 
 
     NSMutableString *bibTemplate; 
-    NSString *prefix = [NSString string];
-    NSString *postfix = [NSString string];
+    NSString *prefix;
+    NSString *postfix;
     NSString *style;
-    NSMutableString *finalTexFile = [NSMutableString string];
-    NSScanner *s;
+    NSMutableString *finalTexFile = [[NSMutableString alloc] initWithCapacity:200];
+    NSScanner *scanner;
     
     switch ([theLock lockFor:self job:str])
     {
@@ -114,19 +143,22 @@ static BDSKPreviewer *thePreviewer;
     // bibpreview.tex file, we avoid problems.   Previously if the user was editing the 
     // bibpreview.tex file and we overwrote it by running another preview, the editor would lose the file.
     // Therefore, bibpreview.* are essentially temporary files, only modified by BibDesk.
-    texFile = [NSString stringWithContentsOfFile:usertexTemplatePath];
-    bibTemplate = [NSMutableString stringWithContentsOfFile:
+    texFile = [[NSString alloc] initWithContentsOfFile:usertexTemplatePath];
+    bibTemplate = [[NSMutableString alloc] initWithContentsOfFile:
         [[[OFPreferenceWrapper sharedPreferenceWrapper] stringForKey:BDSKOutputTemplateFileKey] stringByExpandingTildeInPath]];
-    s = [NSScanner scannerWithString:texFile];
-
-    [imagePreviewView setImage:[NSImage imageNamed:@"typesetting.pdf"]];
+    scanner = [[NSScanner alloc] initWithString:texFile];
 
     // replace the appropriate style & bib files.
     style = [[OFPreferenceWrapper sharedPreferenceWrapper] objectForKey:BDSKBTStyleKey];
-    [s scanUpToString:@"bibliographystyle{" intoString:&prefix];
-    [s scanUpToString:@"}" intoString:nil];
-    [s scanUpToString:@"\bye" intoString:&postfix];
-    [finalTexFile appendFormat:@"%@bibliographystyle{%@%@", prefix, style, postfix];
+    [scanner scanUpToString:@"bibliographystyle{" intoString:&prefix];
+    [scanner scanUpToString:@"}" intoString:nil];
+    [scanner scanUpToString:@"\bye" intoString:&postfix];
+    [scanner release];
+    
+    [finalTexFile appendString:prefix];
+    [finalTexFile appendString:@"bibliographystyle{"];
+    [finalTexFile appendString:style];
+    [finalTexFile appendString:postfix];
     // overwrites the old bibpreview.tex file, replacing the previous bibliographystyle
     if(![[finalTexFile dataUsingEncoding:[[OFPreferenceWrapper sharedPreferenceWrapper] integerForKey:BDSKTeXPreviewFileEncodingKey]] writeToFile:texTemplatePath atomically:YES]){
         NSLog(@"error replacing texfile");
@@ -135,7 +167,8 @@ static BDSKPreviewer *thePreviewer;
     }
 
     // write out the bib file with the template attached:
-    [bibTemplate appendFormat:@"\n%@",str];
+    [bibTemplate appendString:@"\n"];
+    [bibTemplate appendString:str];
     if(![[bibTemplate dataUsingEncoding:[[OFPreferenceWrapper sharedPreferenceWrapper] integerForKey:BDSKTeXPreviewFileEncodingKey]] writeToFile:tmpBibFilePath atomically:YES]){
         NSLog(@"Error replacing bibfile.");
         rv = NO;
@@ -154,8 +187,11 @@ static BDSKPreviewer *thePreviewer;
     NS_ENDHANDLER
             
     display:
-        [self performDrawing];
+        [self performSelectorOnMainThread:@selector(performDrawing) withObject:nil waitUntilDone:NO];
     cleanup:
+        [bibTemplate release];
+        [texFile release];
+        [finalTexFile release];
         [pool release];
         [theLock unlock];
         
@@ -164,7 +200,7 @@ static BDSKPreviewer *thePreviewer;
 }
 
 - (void)printDocument:(id)sender{ // first responder gets this
-    NSView *printView = ([tabView indexOfTabViewItem:[tabView selectedTabViewItem]] == 0 ? (NSView *)imagePreviewView : (NSView *)rtfPreviewView);
+    NSView *printView = [[tabView selectedTabViewItem] view];
     
     // Construct the print operation and setup Print panel
     NSPrintOperation *op = [NSPrintOperation printOperationWithView:printView
@@ -177,9 +213,26 @@ static BDSKPreviewer *thePreviewer;
     
 }
 
+// This should only be called from the main thread
 - (void)performDrawing{
     NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
-    [imagePreviewView loadFromPath:finalPDFPath];
+    
+    // if we're offscreen, no point in doing any extra work; the files are still available for copy operations
+    if(![[self window] isVisible]){
+        [pool release];
+        return;
+    }
+    
+    if(floor(NSAppKitVersionNumber) <= NSAppKitVersionNumber10_3){
+        [imagePreviewView loadFromPath:finalPDFPath];
+    } else {
+#ifdef BDSK_USING_TIGER
+        id pdfDocument = [[NSClassFromString(@"PDFDocument") alloc] initWithURL:[NSURL fileURLWithPath:finalPDFPath]];
+        [(PDFView *)pdfView setDocument:pdfDocument];
+        [pdfDocument release];
+#endif
+    }
+
     [self displayRTFPreviewFromData:[self RTFPreviewData]]; // does its own locking of the view
     [pool release];
 }	
@@ -188,11 +241,12 @@ static BDSKPreviewer *thePreviewer;
         
     NSTask *pdftex1;
     NSTask *pdftex2;
+    NSTask *pdftex3;
     NSTask *bibtex;
     NSString *pdftexbinpath = [[OFPreferenceWrapper sharedPreferenceWrapper] objectForKey:BDSKTeXBinPathKey];
     NSString *bibtexbinpath = [[OFPreferenceWrapper sharedPreferenceWrapper] objectForKey:BDSKBibTeXBinPathKey];
     NSTask *latex2rtf;
-    NSString *latex2rtfpath = [NSString stringWithFormat:@"%@/latex2rtf",[[NSBundle mainBundle] resourcePath]];
+    NSString *latex2rtfpath = [[[NSBundle mainBundle] resourcePath] stringByAppendingPathComponent:@"latex2rtf"];
     
     if(![[pdftexbinpath stringByDeletingLastPathComponent] isEqualToString:binPathDir]){
         [binPathDir release];
@@ -203,10 +257,12 @@ static BDSKPreviewer *thePreviewer;
     }
     
     if(![[NSFileManager defaultManager] fileExistsAtPath:pdftexbinpath]){
-        [NSException raise:@"BDSKPreviewerPathNotFound" format:@"File does not exist at %@", pdftexbinpath];    
+        NSLog(@"%@ cannot continue: %@ not found", NSStringFromSelector(_cmd), pdftexbinpath);
+        return NO;    
     }
     if(![[NSFileManager defaultManager] fileExistsAtPath:bibtexbinpath]){        
-        [NSException raise:@"BDSKPreviewerPathNotFound" format:@"File does not exist at %@", bibtexbinpath];     
+        NSLog(@"%@ cannot continue: %@ not found", NSStringFromSelector(_cmd), bibtexbinpath);
+        return NO;     
     }
 
     // remove the old pdf file.
@@ -218,8 +274,7 @@ static BDSKPreviewer *thePreviewer;
     pdftex1 = [[NSTask alloc] init];
     [pdftex1 setCurrentDirectoryPath:applicationSupportPath];
     [pdftex1 setLaunchPath:pdftexbinpath];
-    [pdftex1 setArguments:[NSArray arrayWithObjects:@"-interaction=batchmode", [NSString stringWithString:fileName],
-        nil ]];
+    [pdftex1 setArguments:[NSArray arrayWithObjects:@"-interaction=batchmode", fileName, nil ]];
     [pdftex1 setStandardOutput:[NSFileHandle fileHandleWithNullDevice]];
 
     NS_DURING
@@ -257,8 +312,7 @@ static BDSKPreviewer *thePreviewer;
     pdftex2 = [[NSTask alloc] init];
     [pdftex2 setCurrentDirectoryPath:applicationSupportPath];
     [pdftex2 setLaunchPath:pdftexbinpath];
-    [pdftex2 setArguments:[NSArray arrayWithObjects:@"-interaction=batchmode",[NSString stringWithString:fileName],
-        nil ]];
+    [pdftex2 setArguments:[NSArray arrayWithObjects:@"-interaction=batchmode",fileName, nil ]];
     [pdftex2 setStandardOutput:[NSFileHandle fileHandleWithNullDevice]];
     
     NS_DURING
@@ -274,14 +328,32 @@ static BDSKPreviewer *thePreviewer;
     
     [pdftex2 release];
 
+    // third and final pdftex run
+    pdftex3 = [[NSTask alloc] init];
+    [pdftex3 setCurrentDirectoryPath:applicationSupportPath];
+    [pdftex3 setLaunchPath:pdftexbinpath];
+    [pdftex3 setArguments:[NSArray arrayWithObjects:@"-interaction=batchmode", fileName, nil]];
+    [pdftex3 setStandardOutput:[NSFileHandle fileHandleWithNullDevice]];
+    
+    NS_DURING
+        [pdftex3 launch];
+        [pdftex3 waitUntilExit];
+    NS_HANDLER
+        if([pdftex3 isRunning])
+            [pdftex3 terminate];
+        NSLog(@"%@ %@ failed", [pdftex3 description], [pdftex3 launchPath]);
+        [pdftex3 release];
+        return NO;
+    NS_ENDHANDLER
+    
+    [pdftex3 release];
+    
     // This task runs latex2rtf on our tex file to generate bibpreview.rtf
     latex2rtf = [[NSTask alloc] init];
     [latex2rtf setCurrentDirectoryPath:applicationSupportPath];
     [latex2rtf setLaunchPath:latex2rtfpath];  // full path to the binary
     // the arguments: it needs -P "path" which is the path to the cfg files in the app wrapper
-    [latex2rtf setArguments:[NSArray arrayWithObjects:[NSString stringWithString:@"-P"],
-	                   [[NSBundle mainBundle] resourcePath],
-	                   [NSString stringWithString:fileName],nil ]];
+    [latex2rtf setArguments:[NSArray arrayWithObjects:[NSString stringWithString:@"-P"], [[NSBundle mainBundle] resourcePath], fileName, nil ]];
     [latex2rtf setStandardOutput:[NSFileHandle fileHandleWithNullDevice]];
     [latex2rtf setStandardError:[NSFileHandle fileHandleWithNullDevice]];
     
@@ -310,13 +382,11 @@ static BDSKPreviewer *thePreviewer;
 }
 
 - (NSAttributedString *)rtfStringPreview:(NSString *)filePath{      // RTF Preview support
-    rtfString = [[[NSAttributedString alloc] initWithPath:filePath documentAttributes:nil] autorelease];
-    return rtfString;
+    return [[[NSAttributedString alloc] initWithPath:filePath documentAttributes:nil] autorelease];
 }
 
 - (NSData *)RTFPreviewData{   // Returns the RTF as NSData, used for pasteboard ops
-    NSData *d = [NSData dataWithContentsOfFile:rtfFilePath];
-    return d;
+    return [NSData dataWithContentsOfFile:rtfFilePath];
 }
 
 - (BOOL)displayRTFPreviewFromData:(NSData *)rtfdata{  // This draws the RTF in a textview
@@ -343,12 +413,17 @@ static BDSKPreviewer *thePreviewer;
 }
 
 - (void)windowWillClose:(NSNotification *)notification{
-	[self resetPreviews];
+	[self performSelectorOnMainThread:@selector(resetPreviews) withObject:nil waitUntilDone:NO];
 }
 
 - (void)appWillTerminate:(NSNotification *)notification{
 	// save the scalefactors of the views
-    float scaleFactor = [(DraggableScrollView*)[imagePreviewView enclosingScrollView] scaleFactor];
+    float scaleFactor;
+    if(floor(NSAppKitVersionNumber) <= NSAppKitVersionNumber10_3){
+        scaleFactor = [(DraggableScrollView*)[imagePreviewView enclosingScrollView] scaleFactor];
+    } else {
+        scaleFactor = ([pdfView autoScales] ? 0.0 : [pdfView scaleFactor]);
+    }
 	if (scaleFactor != [[OFPreferenceWrapper sharedPreferenceWrapper] floatForKey:BDSKPreviewPDFScaleFactorKey])
 		[[OFPreferenceWrapper sharedPreferenceWrapper] setFloat:scaleFactor forKey:BDSKPreviewPDFScaleFactorKey];
 	scaleFactor = [(DraggableScrollView*)[rtfPreviewView enclosingScrollView] scaleFactor];
@@ -356,8 +431,17 @@ static BDSKPreviewer *thePreviewer;
 		[[OFPreferenceWrapper sharedPreferenceWrapper] setFloat:scaleFactor forKey:BDSKPreviewRTFScaleFactorKey];
 }
 
+// This should only be called from the main thread
 - (void)resetPreviews{
-    [imagePreviewView loadFromPath:nopreviewPDFPath];
+    if(floor(NSAppKitVersionNumber) <= NSAppKitVersionNumber10_3){
+        [imagePreviewView loadFromPath:nopreviewPDFPath];
+    } else {
+#ifdef BDSK_USING_TIGER
+        id pdfDocument = [[NSClassFromString(@"PDFDocument") alloc] initWithURL:[NSURL fileURLWithPath:nopreviewPDFPath]];
+        [(PDFView *)pdfView setDocument:pdfDocument];
+        [pdfDocument release];
+#endif
+    }
     [rtfPreviewView setString:@""];
     [rtfPreviewView setTextContainerInset:NSMakeSize(20, 20)];
     [rtfPreviewView replaceCharactersInRange:[rtfPreviewView selectedRange]

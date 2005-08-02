@@ -2,17 +2,37 @@
 
 //  Created by Michael McCracken on Sat Jan 19 2002.
 /*
-This software is Copyright (c) 2002, Michael O. McCracken
-All rights reserved.
+ This software is Copyright (c) 2002,2003,2004,2005
+ Michael O. McCracken. All rights reserved.
 
-Redistribution and use in source and binary forms, with or without modification, are permitted provided that the following conditions are met:
+ Redistribution and use in source and binary forms, with or without
+ modification, are permitted provided that the following conditions
+ are met:
 
-- Redistributions of source code must retain the above copyright notice, this list of conditions and the following disclaimer.
--  Redistributions in binary form must reproduce the above copyright notice, this list of conditions and the following disclaimer in the documentation and/or other materials provided with the distribution.
--  Neither the name of Michael O. McCracken nor the names of any contributors may be used to endorse or promote products derived from this software without specific prior written permission.
+ - Redistributions of source code must retain the above copyright
+   notice, this list of conditions and the following disclaimer.
 
-THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-*/
+ - Redistributions in binary form must reproduce the above copyright
+    notice, this list of conditions and the following disclaimer in
+    the documentation and/or other materials provided with the
+    distribution.
+
+ - Neither the name of Michael O. McCracken nor the names of any
+    contributors may be used to endorse or promote products derived
+    from this software without specific prior written permission.
+
+ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+ "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+ LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+ A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+ OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+ SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+ LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+ DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+ THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+ (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ */
 
 #import "BibItem.h"
 #import "BibAppController.h"
@@ -25,6 +45,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 #import "BDSKConverter.h"
 #import "BDSKTypeInfoEditor.h"
 #import "BDSKCharacterConversion.h"
+#import "BDSKFindController.h"
 
 #import <Carbon/Carbon.h>
 
@@ -49,6 +70,12 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
     BOOL isDir;
     NSString *applicationSupportPath;
     NSFileManager *DFM = [NSFileManager defaultManager];
+    
+    // since Quartz.framework doesn't exist on < 10.4, we can't link against it
+    // http://www.cocoabuilder.com/archive/message/cocoa/2004/1/31/99969
+    if(floor(NSAppKitVersionNumber) <= NSAppKitVersionNumber10_3){}
+    else
+        [[NSBundle bundleWithPath:[[NSBundle mainBundle] pathForResource:@"Tiger" ofType:@"bundle"]] load];
 
 #ifdef USECRASHREPORTER
     [[ILCrashReporter defaultReporter] launchReporterForCompany:@"BibDesk Project" reportAddr:@"bibdesk-crashes@lists.sourceforge.net"];
@@ -102,12 +129,27 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
         // copy html item template file:
         [DFM copyPath:[[NSBundle mainBundle] pathForResource:@"htmlItemExportTemplate" ofType:nil]
                toPath:[applicationSupportPath stringByAppendingPathComponent:@"htmlItemExportTemplate"] handler:nil];
+    }if(![DFM fileExistsAtPath:[applicationSupportPath stringByAppendingPathComponent:@"BD Test.scpt"]]){
+        // copy test script:
+        [DFM copyPath:[[NSBundle mainBundle] pathForResource:@"BD Test" ofType:@"scpt"]
+               toPath:[applicationSupportPath stringByAppendingPathComponent:@"BD Test.scpt"] handler:nil];
     }
 
     [NSApp registerServicesMenuSendTypes:[NSArray arrayWithObjects:NSStringPboardType,nil] returnTypes:[NSArray arrayWithObjects:NSStringPboardType,nil]];
     if([[OFPreferenceWrapper sharedPreferenceWrapper] objectForKey:@"NSToolbar Configuration OAPreferences"] != nil){
 	[[OFPreferenceWrapper sharedPreferenceWrapper] removeObjectForKey:@"NSToolbar Configuration OAPreferences"];
     }
+    
+    const char *bundlePath = [[[NSBundle mainBundle] bundlePath] fileSystemRepresentation];
+    FSRef bundleRef;
+    OSStatus err = FSPathMakeRef((const UInt8 *)bundlePath, &bundleRef, NULL);
+    if(err){
+        NSLog(@"error %d occurred while trying to find bundle %s", err, bundlePath);
+    } else {
+        err = AHRegisterHelpBook(&bundleRef);
+        if(err) NSLog(@"error %d occurred while trying to register help book for %s", err, bundlePath);
+    }
+    
     // removed this functionality in 0.99
     [[OFPreferenceWrapper sharedPreferenceWrapper] setBool:NO forKey:BDSKUseUnicodeBibTeXParserKey];
 }
@@ -131,6 +173,8 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
         autocompletePunctuationCharacterSet = [[NSCharacterSet characterSetWithCharactersInString:@",:;"] retain];
         requiredFieldsForCiteKey = nil;
         requiredFieldsForLocalUrl = nil;
+        
+        metadataCacheLock = [[NSLock alloc] init];
 				
 		NSString *formatString = [[OFPreferenceWrapper sharedPreferenceWrapper] objectForKey:BDSKCiteKeyFormatKey];
 		NSString *error = nil;
@@ -188,9 +232,13 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 	[formatters release];
     [autocompletePunctuationCharacterSet release];
     [acLock release];
+    [metadataCacheLock release];
     [errors release];
     [super dealloc];
 }
+
+
+#pragma mark Application launching
 
 - (void)awakeFromNib{
 
@@ -212,15 +260,82 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 	
 	[openTextEncodingPopupButton removeAllItems];
 	[openTextEncodingPopupButton addItemsWithTitles:[[BDSKStringEncodingManager sharedEncodingManager] availableEncodingDisplayedNames]];
- 
-	if([[OFPreferenceWrapper sharedPreferenceWrapper] boolForKey:BDSKAutoCheckForUpdatesKey])
-		[NSThread detachNewThreadSelector:@selector(checkForUpdatesInBackground) toTarget:self withObject:nil];
 
 }
 
+- (BOOL)applicationShouldOpenUntitledFile:(NSApplication *)sender
+{
+    if ([[[OFPreferenceWrapper sharedPreferenceWrapper] objectForKey:BDSKStartupBehaviorKey] intValue] == 0) {
+        return YES;
+    }else{
+        return NO;
+    }
+}
+
+- (void)applicationDidFinishLaunching:(NSNotification *)aNotification{
+    if ([[[OFPreferenceWrapper sharedPreferenceWrapper] objectForKey:BDSKStartupBehaviorKey] intValue] == 2) {
+        [[NSDocumentController sharedDocumentController] openDocument:nil];// get NSDocController to run the fancy open panel.
+    }
+    if ([[[OFPreferenceWrapper sharedPreferenceWrapper] objectForKey:BDSKStartupBehaviorKey] intValue] == 3) {
+        [[NSDocumentController sharedDocumentController] openDocumentWithContentsOfFile:
+ [[OFPreferenceWrapper sharedPreferenceWrapper] objectForKey:BDSKDefaultBibFilePathKey] display:YES];
+    }
+    // register as a service provider for completecitation:
+    [NSApp setServicesProvider:self];
+    NSUpdateDynamicServices();
+    
+    if([[OFPreferenceWrapper sharedPreferenceWrapper] boolForKey:BDSKShowingPreviewKey]){
+        [self toggleShowingPreviewPanel:self];
+    }
+    
+    // Add a Scripts menu; should display the script graphic on 10.3+.  Searches in (mainbundle)/Contents/Scripts and (Library domains)/Application Support/BibDesk/Scripts
+    // ARM:  if we add this in -awakeFromNib, we get another script menu each time we show release notes or readme; whatever.
+    NSString *scriptMenuTitle = NSLocalizedString(@"Scripts", @"title of scripts menu, which only shows on 10.2");
+    NSMenu *newMenu = [[NSMenu allocWithZone:[NSMenu menuZone]] initWithTitle:scriptMenuTitle];
+    OAScriptMenuItem *scriptItem = [[OAScriptMenuItem allocWithZone:[NSMenu menuZone]] initWithTitle:scriptMenuTitle action:NULL keyEquivalent:@""];
+    [scriptItem setSubmenu:newMenu];
+    [newMenu release];
+    [[NSApp mainMenu] insertItem:scriptItem atIndex:[[NSApp mainMenu] indexOfItemWithTitle:@"Help"]];
+    [scriptItem release];
+    
+    
+    NSString *versionString = [[[NSBundle mainBundle] infoDictionary] objectForKey:@"CFBundleVersion"];
+    if([[OFPreferenceWrapper sharedPreferenceWrapper] objectForKey:BDSKLastVersionLaunchedKey] == nil) // show new users the readme file; others just see the release notes
+        [self showReadMeFile:nil];
+    if(![versionString isEqualToString:[[OFPreferenceWrapper sharedPreferenceWrapper] objectForKey:BDSKLastVersionLaunchedKey]])
+        [self showRelNotes:nil];
+    [[OFPreferenceWrapper sharedPreferenceWrapper] setObject:versionString forKey:BDSKLastVersionLaunchedKey];
+    
+    if([[OFPreferenceWrapper sharedPreferenceWrapper] boolForKey:BDSKAutoCheckForUpdatesKey])
+		[NSThread detachNewThreadSelector:@selector(checkForUpdatesInBackground) toTarget:self withObject:nil];
+}
+
+- (IBAction)showReadMeFile:(id)sender{
+    [NSBundle loadNibNamed:@"ReadMe" owner:self];
+    [readmeWindow setTitle:NSLocalizedString(@"ReadMe", "ReadMe")];
+    [readmeWindow makeKeyAndOrderFront:self];
+    [readmeTextView setString:@""];
+    [readmeTextView replaceCharactersInRange:[readmeTextView selectedRange]
+                                     withRTF:[NSData dataWithContentsOfFile:[[[NSBundle mainBundle] resourcePath] stringByAppendingPathComponent:@"README.rtf"]]];	
+}
+
+- (IBAction)showRelNotes:(id)sender{
+    [NSBundle loadNibNamed:@"ReadMe" owner:self];
+    [readmeWindow setTitle:NSLocalizedString(@"Release Notes", "Release Notes")];
+    [readmeWindow makeKeyAndOrderFront:self];
+    [readmeTextView setString:@""];
+    [readmeTextView replaceCharactersInRange:[readmeTextView selectedRange]
+                                     withRTF:[NSData dataWithContentsOfFile:[[[NSBundle mainBundle] resourcePath] stringByAppendingPathComponent:@"RelNotes.rtf"]]];
+}
+
+#pragma mark -
 
 - (NSMenuItem*) displayMenuItem {
 	return displayMenuItem;
+}
+
+- (IBAction)showFindPanel:(id)sender{
+    [[BDSKFindController sharedFindController] showWindow:self];
 }
 
 - (void)updateColumnsMenu{
@@ -250,20 +365,6 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 	[self updateColumnsMenu];
 }
 
-/*
- if the preview needs to be updated, get the first document and make it do the updating
-*/
-- (void) handlePreviewNeedsUpdate:(id)sender {
-    NSArray *docArray = [NSApp orderedDocuments];
-    if([docArray count]){ // avoid exception when no docs open
-	BibDocument * firstDoc = [[NSApp orderedDocuments] objectAtIndex:0];
-	if (firstDoc) {
-		[firstDoc updatePreviews:nil];
-	}
-    }
-}
-
-
 
 #pragma mark Overridden NSDocumentController methods
 
@@ -279,7 +380,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 		else {
 			[menuItem setState:NSOffState];
 		}
-		return ([[OFPreferenceWrapper sharedPreferenceWrapper] boolForKey:BDSKUsesTeXKey]);
+		return YES;
 	}
 
 	return [super validateMenuItem:menuItem];
@@ -299,7 +400,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 	id doc = [self openUntitledDocumentOfType:@"BibDesk Library" display:YES];
 }
 
-- (IBAction)openDocument:(id)sender{
+- (void)openDocumentUsingPhonyCiteKeys:(BOOL)phony{
 	NSOpenPanel *oPanel = [NSOpenPanel openPanel];
     [oPanel setAccessoryView:openTextEncodingAccessoryView];
     NSString *defaultEncName = [[BDSKStringEncodingManager sharedEncodingManager] displayedNameForStringEncoding:[[OFPreferenceWrapper sharedPreferenceWrapper] integerForKey:BDSKDefaultStringEncodingKey]];
@@ -313,13 +414,14 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 	if (result == NSOKButton) {
         NSString *fileToOpen = [oPanel filename];
         NSString *fileType = [fileToOpen pathExtension];
-        
-        if([fileType isEqualToString:@"bib"]){
-            NSStringEncoding encoding = [[BDSKStringEncodingManager sharedEncodingManager] stringEncodingForDisplayedName:[openTextEncodingPopupButton titleOfSelectedItem]];
+        NSStringEncoding encoding = [[BDSKStringEncodingManager sharedEncodingManager] stringEncodingForDisplayedName:[openTextEncodingPopupButton titleOfSelectedItem]];
+
+        if([fileType isEqualToString:@"bib"] && !phony){
             [self openBibTeXFile:fileToOpen withEncoding:encoding];		
         } else if([fileType isEqualToString:@"ris"] || [fileType isEqualToString:@"fcgi"]){
-            NSStringEncoding encoding = [[BDSKStringEncodingManager sharedEncodingManager] stringEncodingForDisplayedName:[openTextEncodingPopupButton titleOfSelectedItem]];
             [self openRISFile:fileToOpen withEncoding:encoding];
+        } else if([fileType isEqualToString:@"bib"] && phony){
+            [self openBibTeXFileUsingPhonyCiteKeys:fileToOpen withEncoding:encoding];
         } else {
             // handle other types in the usual way 
             // This ends up calling NSDocumentController makeDocumentWithContentsOfFile:ofType:
@@ -328,6 +430,14 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
         }
 	}
 	
+}
+
+- (IBAction)openDocument:(id)sender{
+    [self openDocumentUsingPhonyCiteKeys:NO];
+}
+
+- (IBAction)importDocumentUsingPhonyCiteKeys:(id)sender{
+    [self openDocumentUsingPhonyCiteKeys:YES];
 }
 
 - (void)noteNewRecentDocument:(NSDocument *)aDocument{
@@ -404,7 +514,6 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 			bibDoc = [[NSDocumentController sharedDocumentController] openUntitledDocumentOfType:@"bibTeX database" display:YES];
 			[bibDoc loadDataRepresentation:[filterOutput dataUsingEncoding:NSUTF8StringEncoding] ofType:@"bibTeX database"];
             [bibDoc updateChangeCount:NSChangeDone]; // imported files are unsaved
-			[bibDoc updateUI];
 		}
     }
 }
@@ -421,7 +530,6 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
     [doc setFileType:@"bibTeX database"];  // this looks redundant, but it's necessary to enable saving the file (at least on AppKit == 10.3)
     [doc loadBibTeXDataRepresentation:data encoding:encoding];
     [doc showWindows];
-    [doc updateUI];  
     
 }
 
@@ -436,9 +544,47 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
     [doc setFileType:@"RIS/Medline File"];  // this looks redundant, but it's necessary to enable saving the file (at least on AppKit == 10.3)
     [doc loadRISDataRepresentation:data encoding:encoding];
     [doc showWindows];
-    [doc updateUI];  
     
 }
+
+- (void)openBibTeXFileUsingPhonyCiteKeys:(NSString *)filePath withEncoding:(NSStringEncoding)encoding{
+	NSData *data = [NSData dataWithContentsOfFile:filePath];
+    NSString *stringFromFile = [[[NSString alloc] initWithData:data encoding:encoding] autorelease];
+
+    // (@[a-z]+{),?([[:cntrl:]]) will grab either "@type{,eol" or "@type{eol", which is what we get
+    // from Bookends and EndNote, respectively.
+    AGRegex *theRegex = [AGRegex regexWithPattern:@"(@[a-z]+{),?([[:cntrl:]])" options:AGRegexCaseInsensitive];
+
+    // replace with "@type{FixMe,eol" (add the comma in, since we remove it if present)
+    stringFromFile = [theRegex replaceWithString:@"$1FixMe,$2" inString:stringFromFile];
+    data = [stringFromFile dataUsingEncoding:encoding];
+    
+	BibDocument *doc = nil;
+	
+    // make a fresh document, and don't display it until we can set its name.
+    doc = [self openUntitledDocumentOfType:@"bibTeX database" display:NO];
+    [doc setFileName:nil]; // untitled document
+    [doc setFileType:@"bibTeX database"];  // this looks redundant, but it's necessary to enable saving the file (at least on AppKit == 10.3)
+    BOOL success = [doc loadBibTeXDataRepresentation:data encoding:encoding];
+    [doc showWindows];
+    
+    if(success){
+        // search so we only see the ones that have the temporary key
+        [doc performSelector:@selector(setSelectedSearchFieldKey:) withObject:BDSKCiteKeyString];
+        [doc performSelector:@selector(setFilterField:) withObject:@"FixMe"];
+        NSBeginAlertSheet(NSLocalizedString(@"Temporary Cite Keys.",@""), 
+                          nil, nil, nil, // buttons
+                          [[[doc windowControllers] objectAtIndex:0] window],
+                          nil,
+                          nil,
+                          nil,
+                          nil,
+                          NSLocalizedString(@"This document was opened using a temporary cite key for the publications shown.  In order to use your file with BibTeX, you should generate valid cite keys for all of the items in this file.", @""));
+    }
+    
+}
+
+    
 
 #pragma mark Auto generation format stuff
 
@@ -498,7 +644,17 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
         return;
     }
     
+    // NSScanner is very slow with complex strings, so we'll copy the expanded value
+    if([string isComplex])
+        string = [NSString stringWithString:string];
+    
     NSRange r = [string rangeOfCharacterFromSet:autocompletePunctuationCharacterSet];
+    static NSCharacterSet *wsCharSet = nil;
+    if(wsCharSet == nil)
+        wsCharSet = [[NSCharacterSet whitespaceCharacterSet] retain];
+    static NSCharacterSet *invertedPunctuationSet = nil;
+    if(invertedPunctuationSet == nil)
+        invertedPunctuationSet = [[autocompletePunctuationCharacterSet invertedSet] retain];
     
     if(r.location != NSNotFound){
         [acLock lock];
@@ -510,8 +666,8 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
             [scanner scanUpToCharactersFromSet:autocompletePunctuationCharacterSet intoString:&tmp];
             if(tmp != nil) 
                 [completionArray addObject:tmp]; // we have the lock, so don't use the locking method here
-            [scanner scanCharactersFromSet:autocompletePunctuationCharacterSet intoString:nil];
-            [scanner scanCharactersFromSet:[NSCharacterSet whitespaceCharacterSet] intoString:nil];
+            [scanner scanUpToCharactersFromSet:invertedPunctuationSet intoString:nil];
+            [scanner scanCharactersFromSet:wsCharSet intoString:nil];
         }
         [scanner release];
         [acLock unlock];
@@ -550,8 +706,11 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 - (void)checkForUpdatesInBackground{
     NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
     
-    NSString *currVersionNumber = [[[NSBundle mainBundle] infoDictionary] objectForKey:@"CFBundleVersion"];
+    if(![NSThread setThreadPriority:0])
+        NSLog(@"failed to set update check thread priority");
     
+    NSString *currVersionNumber = [[[NSBundle mainBundle] infoDictionary] objectForKey:@"CFBundleVersion"];
+        
     NSURL *theURL = [NSURL URLWithString:@"http://bibdesk.sourceforge.net/bibdesk-versions-xml.txt"];
     CFDataRef theData = NULL;
     SInt32 status;
@@ -571,7 +730,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
         if(theData != NULL) CFRelease(theData);
         
         NSString *latestVersionNumber = [prodVersionDict valueForKey:@"BibDesk"];
-        if(prodVersionDict != nil && ([latestVersionNumber caseInsensitiveCompare: currVersionNumber] == NSOrderedDescending) )
+        if(prodVersionDict != nil && ([latestVersionNumber localizedCaseInsensitiveNumericCompare:currVersionNumber] != NSOrderedSame) )
             [self performSelectorOnMainThread:@selector(displayUpdateAvailableWindow:)
                                    withObject:latestVersionNumber
                                 waitUntilDone:NO];
@@ -596,9 +755,10 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 }
 
 - (IBAction)checkForUpdates:(id)sender{
+        
     NSString *currVersionNumber = [[[NSBundle bundleForClass:[self class]]
         infoDictionary] objectForKey:@"CFBundleVersion"];
-    
+        
     NSDictionary *productVersionDict = [NSDictionary dictionaryWithContentsOfURL:
         [NSURL URLWithString:@"http://bibdesk.sourceforge.net/bibdesk-versions-xml.txt"]];
     
@@ -614,7 +774,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
         return;
     }
     
-    if([latestVersionNumber caseInsensitiveCompare: currVersionNumber] != NSOrderedDescending)
+    if([latestVersionNumber localizedCaseInsensitiveNumericCompare:currVersionNumber] == NSOrderedSame)
     {
         // tell user software is up to date
         NSRunAlertPanel(NSLocalizedString(@"BibDesk is up-to-date",
@@ -647,7 +807,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 - (void)handleWindowCloseNotification:(NSNotification *)notification{
     if ([notification object] == [[BDSKPreviewer sharedPreviewer] window] ) {
         showingPreviewPanel = NO;
-         [[OFPreferenceWrapper sharedPreferenceWrapper] setObject:@"not showing" forKey:@"BDSK Showing Preview Key"];
+         [[OFPreferenceWrapper sharedPreferenceWrapper] setBool:NO forKey:BDSKShowingPreviewKey];
     }
 }
 
@@ -665,13 +825,14 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 }*/
 
 #pragma mark || tableView datasource methods
+
 - (int)numberOfRowsInTableView:(NSTableView *)tableView{
     return [errors count];
 }
 
 - (id)tableView:(NSTableView *)tableView objectValueForTableColumn:(NSTableColumn *)tableColumn row:(int)row{
     if ([[tableColumn identifier] isEqualToString:@"lineNumber"]) {
-        return ([[errors objectAtIndex:row] valueForKey:@"lineNumber"] != [NSNull null] ? [NSString stringWithFormat:@"%@", [[errors objectAtIndex:row] valueForKey:@"lineNumber"]] : @"" ); // return empty string if it was null, which the Unicode parser returns.
+        return [NSString stringWithFormat:@"%@", ([[[errors objectAtIndex:row] valueForKey:@"lineNumber"] intValue] == -1 ? NSLocalizedString(@"Unknown",@"unknown line number for error") : [[errors objectAtIndex:row] valueForKey:@"lineNumber"])];
     }
     if ([[tableColumn identifier] isEqualToString:@"errorClass"]) {
         return [NSString stringWithFormat:@"%@", [[errors objectAtIndex:row] valueForKey:@"errorClassName"]];
@@ -680,7 +841,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
         if([[NSFileManager defaultManager] fileExistsAtPath:[[errors objectAtIndex:row] valueForKey:@"fileName"]]){
             return [[NSString stringWithFormat:@"%@", [[errors objectAtIndex:row] valueForKey:@"fileName"]] lastPathComponent];
         }else{
-            return NSLocalizedString(@"Paste or Drag data", @"Paste or Drag data");
+            return [[[[errors objectAtIndex:row] valueForKey:@"document"] fileName] lastPathComponent];
         }
     }
     if ([[tableColumn identifier] isEqualToString:@"errorMessage"]) {
@@ -692,6 +853,34 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 
 #pragma mark || error reporting and editing stuff
 
+// copy error messages
+- (IBAction)copy:(id)sender{
+    if([errorPanel isKeyWindow] && [errorTableView numberOfSelectedRows] > 0){
+        NSPasteboard *pasteboard = [NSPasteboard pasteboardWithName:NSGeneralPboard];
+        NSEnumerator *e = [errorTableView selectedRowEnumerator];
+        NSMutableString *s = [[NSMutableString string] retain];
+        NSNumber *i;
+        [pasteboard declareTypes:[NSArray arrayWithObject:NSStringPboardType] owner:nil];
+        //[s appendString:@"File Name\t\tLine Number\t\tMessage Type\t\tMessage Text\n"];
+        int row;
+        while(i = [e nextObject]){
+            row = [i intValue];
+            [s appendString:[[[[errors objectAtIndex:row] valueForKey:@"document"] fileName] lastPathComponent]];
+            [s appendString:@"\t\t"];
+            
+            [s appendString:([[[errors objectAtIndex:row] valueForKey:@"lineNumber"] intValue] == -1 ? NSLocalizedString(@"Unknown line number",@"unknown line number for error") : [[[errors objectAtIndex:row] valueForKey:@"lineNumber"] stringValue])];
+            [s appendString:@"\t\t"];
+            
+            [s appendString:[[errors objectAtIndex:row] valueForKey:@"errorClassName"]];
+            [s appendString:@"\t\t"];
+            
+            [s appendString:[[errors objectAtIndex:row] valueForKey:@"errorMessage"]];
+            [s appendString:@"\n\n"];
+        }
+        [pasteboard setString:s forType:NSStringPboardType];
+    }
+    
+}
 
 - (IBAction)toggleShowingErrorPanel:(id)sender{
     if (![errorPanel isVisible]) {
@@ -819,25 +1008,44 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
     
 }
 
+#pragma mark TeX preview panel
+
 - (IBAction)toggleShowingPreviewPanel:(id)sender{
     if(!showingPreviewPanel){
 		[self showPreviewPanel:sender];
     }else{
 		[self hidePreviewPanel:sender];
-    }    
+    }
 }
-
 
 - (IBAction)showPreviewPanel:(id)sender{
 	[[BDSKPreviewer sharedPreviewer] showWindow:self];
 	showingPreviewPanel = YES;
-	[[OFPreferenceWrapper sharedPreferenceWrapper] setObject:@"showing" forKey:@"BDSK Showing Preview Key"];
+    [[self currentDocument] updatePreviews:nil];
+	[[OFPreferenceWrapper sharedPreferenceWrapper] setBool:YES forKey:BDSKShowingPreviewKey];
+    if(![[OFPreferenceWrapper sharedPreferenceWrapper] boolForKey:BDSKUsesTeXKey])
+        NSBeginAlertSheet(NSLocalizedString(@"Previewing is Disabled.", @"TeX preview is disabled"),
+                          NSLocalizedString(@"Yes", @""),
+                          NSLocalizedString(@"No", @""),
+                          nil,
+                          [[BDSKPreviewer sharedPreviewer] window],
+                          self,
+                          @selector(shouldShowTeXPreferences:returnCode:contextInfo:),
+                          NULL, NULL,
+                          NSLocalizedString(@"TeX previewing must be enabled in BibDesk's preferences in order to use this feature.  Would you like to open the preference pane now?", @"") );
+}
+
+- (void)shouldShowTeXPreferences:(NSWindow *)sheet returnCode:(int)returnCode contextInfo:(void *)contextInfo{
+    if(returnCode == NSAlertDefaultReturn){
+        [[OAPreferenceController sharedPreferenceController] showPreferencesPanel:nil];
+        [[OAPreferenceController sharedPreferenceController] setCurrentClientByClassName:@"BibPref_TeX"];
+    }
 }
 
 - (IBAction)hidePreviewPanel:(id)sender{
 	[[[BDSKPreviewer sharedPreviewer] window] close];
 	showingPreviewPanel = NO; // redundant.
-	[[OFPreferenceWrapper sharedPreferenceWrapper] setObject:@"not showing" forKey:@"BDSK Showing Preview Key"];
+	[[OFPreferenceWrapper sharedPreferenceWrapper] setBool:NO forKey:BDSKShowingPreviewKey];
 }
 
 
@@ -845,66 +1053,14 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 	return showingPreviewPanel;
 }
 
-- (BOOL)applicationShouldOpenUntitledFile:(NSApplication *)sender
-{
-    if ([[[OFPreferenceWrapper sharedPreferenceWrapper] objectForKey:BDSKStartupBehaviorKey] intValue] == 0) {
-        return YES;
-    }else{
-        return NO;
+- (void) handlePreviewNeedsUpdate:(id)sender {
+    NSArray *docArray = [NSApp orderedDocuments];
+    if([docArray count]){ // avoid exception when no docs open
+        BibDocument * firstDoc = [[NSApp orderedDocuments] objectAtIndex:0];
+        if (firstDoc) {
+            [firstDoc updatePreviews:nil];
+        }
     }
-}
-
-- (void)applicationDidFinishLaunching:(NSNotification *)aNotification{
-    if ([[[OFPreferenceWrapper sharedPreferenceWrapper] objectForKey:BDSKStartupBehaviorKey] intValue] == 2) {
-        [[NSDocumentController sharedDocumentController] openDocument:nil];// get NSDocController to run the fancy open panel.
-    }
-    if ([[[OFPreferenceWrapper sharedPreferenceWrapper] objectForKey:BDSKStartupBehaviorKey] intValue] == 3) {
-        [[NSDocumentController sharedDocumentController] openDocumentWithContentsOfFile:
- [[OFPreferenceWrapper sharedPreferenceWrapper] objectForKey:BDSKDefaultBibFilePathKey] display:YES];
-    }
-    // register as a service provider for completecitation:
-    [NSApp setServicesProvider:self];
-    NSUpdateDynamicServices();
-
-    if([@"showing" isEqualToString:[[OFPreferenceWrapper sharedPreferenceWrapper] objectForKey:@"BDSK Showing Preview Key"]]){
-        [self toggleShowingPreviewPanel:self];
-    }
-    
-    // Add a Scripts menu; should display the script graphic on 10.3+.  Searches in (mainbundle)/Contents/Scripts and (Library domains)/Application Support/Bibdesk/Scripts
-    // ARM:  if we add this in -awakeFromNib, we get another script menu each time we show release notes or readme; whatever.
-    NSMenu *newMenu = [[NSMenu allocWithZone:[NSMenu menuZone]] initWithTitle:@"Scripts"];
-    OAScriptMenuItem *scriptItem = [[OAScriptMenuItem allocWithZone:[NSMenu menuZone]] initWithTitle:@"Scripts" action:NULL keyEquivalent:@""];
-    [scriptItem setSubmenu:newMenu];
-    [newMenu release];
-    [[NSApp mainMenu] insertItem:scriptItem atIndex:[[NSApp mainMenu] indexOfItemWithTitle:@"Help"]];
-    [scriptItem release];
-    
-   
-    NSString *versionString = [[[NSBundle mainBundle] infoDictionary] objectForKey:@"CFBundleVersion"];
-    if([[OFPreferenceWrapper sharedPreferenceWrapper] objectForKey:BDSKLastVersionLaunchedKey] == nil) // show new users the readme file; others just see the release notes
-        [self showReadMeFile:nil];
-    if(![versionString isEqualToString:[[OFPreferenceWrapper sharedPreferenceWrapper] objectForKey:BDSKLastVersionLaunchedKey]])
-        [self showRelNotes:nil];
-    [[OFPreferenceWrapper sharedPreferenceWrapper] setObject:versionString forKey:BDSKLastVersionLaunchedKey];
-  
-}
-
-- (IBAction)showReadMeFile:(id)sender{
-    [NSBundle loadNibNamed:@"ReadMe" owner:self];
-    [readmeWindow setTitle:NSLocalizedString(@"ReadMe", "ReadMe")];
-    [readmeWindow makeKeyAndOrderFront:self];
-    [readmeTextView setString:@""];
-    [readmeTextView replaceCharactersInRange:[readmeTextView selectedRange]
-				     withRTF:[NSData dataWithContentsOfFile:[[[NSBundle mainBundle] resourcePath] stringByAppendingPathComponent:@"README.rtf"]]];	
-}
-
-- (IBAction)showRelNotes:(id)sender{
-    [NSBundle loadNibNamed:@"ReadMe" owner:self];
-    [readmeWindow setTitle:NSLocalizedString(@"Release Notes", "Release Notes")];
-    [readmeWindow makeKeyAndOrderFront:self];
-    [readmeTextView setString:@""];
-    [readmeTextView replaceCharactersInRange:[readmeTextView selectedRange]
-                                     withRTF:[NSData dataWithContentsOfFile:[[[NSBundle mainBundle] resourcePath] stringByAppendingPathComponent:@"RelNotes.rtf"]]];
 }
 
 #pragma mark || Service code
@@ -1153,37 +1309,110 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
     if (!doc) {
 		// if there are no open documents, give an error. 
 		// Or rather create a new document and add the entry there? Would anybody want that?
-		*error = NSLocalizedString(@"Error: No open document", @"Bibdesk couldn't import the selected information because there is no open bibliography file to add it to. Please create or open a bibliography file and try again.");
+		*error = NSLocalizedString(@"Error: No open document", @"BibDesk couldn't import the selected information because there is no open bibliography file to add it to. Please create or open a bibliography file and try again.");
 		return;
 	}
 	
 	[doc addPublicationsFromPasteboard:pboard error:error];
 }
 
-@end
+#pragma mark Spotlight support
 
-@implementation NSFileManager (BibDeskAdditions)
+- (NSApplicationTerminateReply)applicationShouldTerminate:(NSApplication *)sender{
+    if([metadataCacheLock lockBeforeDate:[NSDate distantFuture]])
+        return NSTerminateNow;
+}
 
-- (NSString *)applicationSupportDirectory:(SInt16)domain{
-    FSRef foundRef;
-    OSStatus err = noErr;
-
-    err = FSFindFolder(domain,
-                       kApplicationSupportFolderType,
-                       kCreateFolder,
-                       &foundRef);
-    NSAssert1( err == noErr, @"Error %d:  the system was unable to find your Application Support folder.", err);
+- (id)openDocumentWithContentsOfURL:(NSURL *)absoluteURL display:(BOOL)displayDocument error:(NSError **)outError{
     
-    CFURLRef url = CFURLCreateFromFSRef(kCFAllocatorDefault, &foundRef);
-    NSString *retStr = nil;
+    if(![[[absoluteURL path] pathExtension] isEqualToString:@"bdskcache"])
+        return [super openDocumentWithContentsOfURL:absoluteURL display:displayDocument error:outError];
     
-    if(url != nil){
-        retStr = [(NSURL *)url path];
-        CFRelease(url);
+    NSDictionary *dictionary = [NSDictionary dictionaryWithContentsOfURL:absoluteURL];
+    BDAlias *fileAlias = [BDAlias aliasWithData:[dictionary objectForKey:@"FileAlias"]];
+    NSURL *fileURL = [NSURL fileURLWithPath:[fileAlias fullPath]];
+    
+    *outError = nil; // this is a garbage pointer if the document is already open
+    BibDocument *document = [super openDocumentWithContentsOfURL:fileURL display:YES error:outError];
+    
+    if(document == nil || *outError != nil)
+        NSLog(@"document at URL %@ failed to open for reason: %@", fileURL, [*outError localizedFailureReason]);
+    else
+        if(![document highlightItemForPartialItem:dictionary])
+            NSBeep();
+    
+    return document;
+}
+
+- (void)rebuildMetadataCache:(id)document{
+    
+#ifdef BDSK_USING_TIGER    
+
+    if(floor(NSAppKitVersionNumber) <= NSAppKitVersionNumber10_3)
+        return;
+    
+    NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
+    
+    [metadataCacheLock lock]; // block until we can get a lock
+    
+    NSError *error = nil;
+    NSString *cachePath = [[NSFileManager defaultManager] spotlightCacheFolderPathByCreating:&error];
+    
+    NSString *docPath = [document fileName];
+    
+    if(error != nil || docPath == nil){
+        NSLog(@"unable to build metadata cache");
+        [metadataCacheLock unlock];
+        [pool release];
+        [NSThread exit];
     }
     
-    return retStr;
+    NSMutableDictionary *metadata = [[NSMutableDictionary alloc] initWithCapacity:10];
+    NSString *tmpPath;
+    NSString *citeKey;
+    BibItem *anItem;
+    NSDate *dateModified;
+    
+    BDAlias *alias = [[BDAlias alloc] initWithPath:docPath];
+    NSData *aliasData = [alias aliasData];
+    [alias release];
+    
+    NSAssert(aliasData != nil, @"alias must not be nil");
+    
+    NS_DURING{
+        NSEnumerator *entryEnum = [[document publications] objectEnumerator];
+        while(anItem = [entryEnum nextObject]){
+            citeKey = [anItem citeKey];
+            
+            if(citeKey == nil)
+                continue;
+
+            [metadata setObject:aliasData forKey:@"FileAlias"];
+            [metadata setObject:citeKey forKey:BDSKCiteKeyString];
+            
+            // we're not guaranteed to have any of these
+            [metadata setObject:([anItem title] != nil ? [anItem title] : @"") forKey:(NSString *)kMDItemTitle];
+            [metadata setObject:([anItem pubAuthorsAsStrings] != nil ? [anItem pubAuthorsAsStrings] : [NSArray array]) forKey:(NSString *)kMDItemAuthors];
+            [metadata setObject:([anItem valueOfField:BDSKAbstractString] != nil ? [anItem valueOfField:BDSKAbstractString] : @"") forKey:(NSString *)kMDItemDescription];
+            if( (dateModified = [anItem dateModified]) != nil)
+                [metadata setObject:[anItem dateModified] forKey:(NSString *)kMDItemContentModificationDate];
+            [metadata setObject:([anItem valueOfField:BDSKKeywordsString] != nil ? [anItem valueOfField:BDSKKeywordsString] : @"") forKey:(NSString *)kMDItemKeywords];
+            
+            tmpPath = [cachePath stringByAppendingPathComponent:[citeKey stringByAppendingString:@".bdskcache"]];
+            [metadata writeToFile:tmpPath atomically:NO];
+            [metadata removeAllObjects];
+        }
+    }
+    NS_HANDLER{
+        NSLog(@"%@ discarding %@ %@", NSStringFromSelector(_cmd), [localException name], [localException reason]);
+    }
+    NS_ENDHANDLER
+    
+    [metadata release];
+    [metadataCacheLock unlock];
+    
+    [pool release];
+#endif   
 }
-                             
 
 @end

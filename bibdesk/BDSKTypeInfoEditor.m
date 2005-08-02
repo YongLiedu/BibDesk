@@ -1,13 +1,44 @@
 //
 //  BDSKTypeInfoEditor.m
-//  Bibdesk
+//  BibDesk
 //
 //  Created by Christiaan Hofman on 5/4/05.
-//  Copyright 2005 __MyCompanyName__. All rights reserved.
-//
+/*
+ This software is Copyright (c) 2005
+ Christiaan Hofman. All rights reserved.
+
+ Redistribution and use in source and binary forms, with or without
+ modification, are permitted provided that the following conditions
+ are met:
+
+ - Redistributions of source code must retain the above copyright
+   notice, this list of conditions and the following disclaimer.
+
+ - Redistributions in binary form must reproduce the above copyright
+    notice, this list of conditions and the following disclaimer in
+    the documentation and/or other materials provided with the
+    distribution.
+
+ - Neither the name of Christiaan Hofman nor the names of any
+    contributors may be used to endorse or promote products derived
+    from this software without specific prior written permission.
+
+ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+ "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+ LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+ A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+ OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+ SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+ LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+ DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+ THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+ (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ */
 
 #import "BDSKTypeInfoEditor.h"
 #import "BDSKFieldNameFormatter.h"
+#import "BDSKTypeNameFormatter.h"
 #import "BibAppController.h"
 #import "BibTypeManager.h"
 
@@ -58,8 +89,9 @@ static BDSKTypeInfoEditor *sharedTypeInfoEditor;
     [optionalTableView registerForDraggedTypes:[NSArray arrayWithObject:BDSKTypeInfoRowsPboardType]];
 	
     BDSKFieldNameFormatter *fieldNameFormatter = [[[BDSKFieldNameFormatter alloc] init] autorelease];
+    BDSKTypeNameFormatter *typeNameFormatter = [[[BDSKTypeNameFormatter alloc] init] autorelease];
     NSTableColumn *tc = [typeTableView tableColumnWithIdentifier:@"type"];
-    [[tc dataCell] setFormatter:fieldNameFormatter];
+    [[tc dataCell] setFormatter:typeNameFormatter];
 	tc = [requiredTableView tableColumnWithIdentifier:@"required"];
     [[tc dataCell] setFormatter:fieldNameFormatter];
 	tc = [optionalTableView tableColumnWithIdentifier:@"optional"];
@@ -111,9 +143,6 @@ static BDSKTypeInfoEditor *sharedTypeInfoEditor;
 	}
 	NSMutableDictionary *newDict = [NSMutableDictionary dictionaryWithObjectsAndKeys: requiredFields, REQUIRED_KEY, optionalFields, OPTIONAL_KEY, nil];
 	[fieldsForTypesDict setObject:newDict forKey:newType];
-	
-	// select the new type
-	[typeTableView selectRow:[types indexOfObject:newType] byExtendingSelection:NO];
 }
 
 - (void)setCurrentType:(NSString *)newCurrentType {
@@ -343,6 +372,17 @@ static BDSKTypeInfoEditor *sharedTypeInfoEditor;
 	return YES; // any other fields of default types can be removed
 }
 
+- (BOOL)canEditTableView:(NSTableView *)tv row:(int)row{
+	if (tv == typeTableView)
+		return [self canEditType:[types objectAtIndex:row]];
+	if ([self canEditType:currentType])
+		return YES; // if we can edit the type, we can edit all the fields
+	if (tv == requiredTableView)
+		return [self canEditField:[currentRequiredFields objectAtIndex:row]];
+	if (tv == optionalTableView)
+		return [self canEditField:[currentOptionalFields objectAtIndex:row]];
+}
+
 - (void)updateButtons {
 	NSEnumerator *rowEnum;
 	NSNumber *row;
@@ -478,23 +518,17 @@ static BDSKTypeInfoEditor *sharedTypeInfoEditor;
 
 #pragma mark NSTableview delegate
 
+- (BOOL)tableView:(NSTableView *)tv shouldEditTableColumn:(NSTableColumn *)tableColumn row:(int)row{
+	return [self canEditTableView:tv row:row];
+}
+
 - (void)tableView:(NSTableView *)tv willDisplayCell:(id)cell forTableColumn:(NSTableColumn *)tableColumn row:(int)row {
-	NSString *value;
-	if (tv == typeTableView) {
-		value = [types objectAtIndex:row];
-		[cell setEnabled:[self canEditType:value]];
-	}
-	else if ([self canEditType:currentType]) {
-		 // if we can edit the type, we can edit all the fields
-		[cell setEnabled:YES];
-	}
-	else if (tv == requiredTableView) {
-		value = [currentRequiredFields objectAtIndex:row];
-		[cell setEnabled:[self canEditField:value]];
-	}
-	else if (tv == optionalTableView) {
-		value = [currentOptionalFields objectAtIndex:row];
-		[cell setEnabled:[self canEditField:value]];
+	if ([self canEditTableView:tv row:row]) {
+		[cell setTextColor:[NSColor controlTextColor]]; // when selected, this is automatically changed to white
+	} else if ([[self window] isKeyWindow] && [[self window] firstResponder] == tv && [tv isRowSelected:row]) {
+		[cell setTextColor:[NSColor lightGrayColor]]; // selected disabled
+	} else {
+		[cell setTextColor:[NSColor darkGrayColor]]; // unselected disabled
 	}
 }
 
