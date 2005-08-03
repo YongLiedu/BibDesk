@@ -1,5 +1,6 @@
 @interface RYZImagePopUpButton : NSPopUpButton
 {
+	NSTimer *currentTimer;
 }
 
 // --- Getting and setting the icon size ---

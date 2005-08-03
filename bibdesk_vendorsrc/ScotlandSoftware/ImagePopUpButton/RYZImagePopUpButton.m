@@ -20,6 +20,7 @@
 - (id)initWithCoder:(NSCoder *)coder
 {
 	if (self = [super initWithCoder:coder]) {
+		currentTimer = nil;
 		if (![[self cell] isKindOfClass:[RYZImagePopUpButtonCell class]]) {
 			RYZImagePopUpButtonCell *cell = [[[RYZImagePopUpButtonCell alloc] init] autorelease];
 			
@@ -36,6 +37,12 @@
 		}
 	}
 	return self;
+}
+
+- (void)dealloc{
+	[currentTimer invalidate];
+	[currentTimer release];
+	[super dealloc];
 }
 
 // --------------------------------------------
@@ -81,15 +88,21 @@
 
 - (void)fadeIconImageToImage:(NSImage *)iconImage;
 {
-
+	// first make sure we stop a previous timer
+	if(currentTimer){
+		[currentTimer invalidate];
+		[currentTimer release];
+		currentTimer = nil;
+    }
+	
     if(![self iconImage]){
         [self setIconImage:iconImage];
         return;
     }
-    
+	
 	NSMutableDictionary *userInfo = [NSMutableDictionary dictionaryWithObjectsAndKeys:
 		[NSNumber numberWithFloat:0], @"time", iconImage, @"newImage", [self iconImage], @"oldImage", nil];
-    NSTimer *timer = [NSTimer scheduledTimerWithTimeInterval:0.03  target:self selector:@selector(timerFired:)  userInfo:userInfo  repeats:YES];    
+    currentTimer = [[NSTimer scheduledTimerWithTimeInterval:0.03  target:self selector:@selector(timerFired:)  userInfo:userInfo  repeats:YES] retain];
 }
 
 - (void)timerFired:(NSTimer *)timer;
@@ -102,7 +115,13 @@
 	
     if(time >= M_PI_2){
         [self setIconImage:newImage];
-        [timer invalidate];
+		if(![timer isEqual:currentTimer]){
+			[timer invalidate]; // this should never happen
+		}else if(currentTimer){
+			[currentTimer invalidate];
+			[currentTimer release];
+			currentTimer = nil;
+		}
         return;
     }
     
