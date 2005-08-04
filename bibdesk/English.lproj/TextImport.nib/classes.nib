@@ -14,7 +14,7 @@
                 dismissUrlSheet = id; 
                 downloadLinkedFileAsLocalUrl = id; 
                 importFromFileAction = id; 
-                importFromTextAction = id; 
+                importFromPasteboardAction = id; 
                 importFromWebAction = id; 
                 saveFileAsLocalUrl = id; 
                 showHelpAction = id; 
@@ -28,7 +28,6 @@
                 backButton = NSButton; 
                 bookmarkField = NSTextField; 
                 bookmarkPopUpButton = NSPopUpButton; 
-                citeKeyLine = NSTextField; 
                 forwardButton = NSButton; 
                 itemTableView = NSTableView; 
                 itemTypeButton = NSPopUpButton; 
@@ -38,6 +37,7 @@
                 splitView = NSSplitView; 
                 statusLine = NSTextField; 
                 stopOrReloadButton = NSButton; 
+                theModalDelegate = id; 
                 urlSheet = NSPanel; 
                 urlTextField = NSTextField; 
                 webView = WebView; 

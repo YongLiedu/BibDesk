@@ -2,17 +2,37 @@
 
 //  Created by Michael McCracken on Sun Jul 21 2002.
 /*
-This software is Copyright (c) 2002, Michael O. McCracken
-All rights reserved.
+ This software is Copyright (c) 2002,2003,2004,2005
+ Michael O. McCracken. All rights reserved.
 
-Redistribution and use in source and binary forms, with or without modification, are permitted provided that the following conditions are met:
+ Redistribution and use in source and binary forms, with or without
+ modification, are permitted provided that the following conditions
+ are met:
 
-- Redistributions of source code must retain the above copyright notice, this list of conditions and the following disclaimer.
--  Redistributions in binary form must reproduce the above copyright notice, this list of conditions and the following disclaimer in the documentation and/or other materials provided with the distribution.
--  Neither the name of Michael O. McCracken nor the names of any contributors may be used to endorse or promote products derived from this software without specific prior written permission.
+ - Redistributions of source code must retain the above copyright
+   notice, this list of conditions and the following disclaimer.
 
-THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-*/
+ - Redistributions in binary form must reproduce the above copyright
+    notice, this list of conditions and the following disclaimer in
+    the documentation and/or other materials provided with the
+    distribution.
+
+ - Neither the name of Michael O. McCracken nor the names of any
+    contributors may be used to endorse or promote products derived
+    from this software without specific prior written permission.
+
+ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+ "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+ LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+ A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+ OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+ SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+ LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+ DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+ THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+ (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ */
 
 #import <Foundation/Foundation.h>
 
@@ -87,6 +107,14 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 - (BOOL)isRISString;
 
 /*!
+    @method     isBibTeXString
+    @abstract   Tries to determine if a string is BibTeX or not, based on the regular expression ^@[[:alpha:]]+{.*,$
+    @discussion (comprehensive description)
+    @result     (description)
+*/
+- (BOOL)isBibTeXString;
+
+/*!
     @method     stringByRemovingTeX
     @abstract   Removes TeX commands and curly braces from the receiver.
     @discussion May return a different instance.  A TeX command is considered to match a regex of the form "\\[a-z].+\{", with the AGRegexLazy option.
@@ -94,14 +122,14 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 */
 - (NSString *)stringByRemovingTeX;
 
-
 /*!
-    @method     stringByRemovingTeXForSorting
-    @abstract   Removes TeX commands and leading curly braces from the receiver, as well as single backquotes and backslashes.
-    @discussion Tries to make a TeX string suitable for sorting commands.
+    @method     caseInsensitiveNonTeXCompare:
+    @abstract   (brief description)
+    @discussion (comprehensive description)
+    @param      otherString (description)
     @result     (description)
 */
-- (NSString *)stringByRemovingTeXForSorting;
+- (NSComparisonResult)localizedCaseInsensitiveNonTeXNonArticleCompare:(NSString *)otherString;
 
 /*!
     @method     localizedCaseInsensitiveNumericCompare:
@@ -111,5 +139,49 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
     @result     (description)
 */
 - (NSComparisonResult)localizedCaseInsensitiveNumericCompare:(NSString *)aStr;
+
+/*!
+    @method     fastStringByCollapsingWhitespaceAndRemovingSurroundingWhitespace
+    @abstract   Copy of one of the OmniFoundation methods, with CF calls to create and append to the mutable string instead of Cocoa methods.
+                This whole thing is really slow by nature, and should not be used on complex strings.
+    @discussion (comprehensive description)
+    @result     (description)
+*/
+- (NSString *)fastStringByCollapsingWhitespaceAndRemovingSurroundingWhitespace;
+
+/*!
+    @method     rangeOfTeXCommandInRange:
+    @abstract   Returns the range of a TeX command, considered simplistically as <tt>\command</tt> followed by a space or curly brace.
+    @discussion (comprehensive description)
+    @param      searchRange (description)
+    @result     (description)
+*/
+- (NSRange)rangeOfTeXCommandInRange:(NSRange)searchRange;
+
+/*!
+    @method     indexOfRightBraceMatchingLeftBraceAtIndex:
+    @abstract   Counts curly braces from left-to-right, in order to find a match for a left brace <tt>{</tt>.
+    @discussion Raises an exception if the character at <tt>startLoc</tt> is not a brace, and escaped braces are not (yet?) considered.
+                An inline buffer is used for speed in accessing each character.
+    @param      startLoc The index of the starting brace character.
+    @result     The index of the matching brace character.
+*/
+- (unsigned)indexOfRightBraceMatchingLeftBraceAtIndex:(unsigned)startLoc;
+
+/*!
+    @method     stringByNormalizingSpacesAndLineBreaks
+    @abstract   Converts all whitespace characters to a single space, and all newline characters to a \n
+    @discussion (comprehensive description)
+    @result     (description)
+*/
+- (NSString *)stringByNormalizingSpacesAndLineBreaks;
+@end
+
+@interface NSString (PrivateMethods)
+
+CFStringRef __BDCollapseAndTrimWhitespace(CFStringRef aString);
+void __BDDeleteTeXForSorting(NSMutableString *mutableString);
+void __BDDeleteArticlesForSorting(CFMutableStringRef mutableString);
+CFStringRef __BDNormalizeWhitespaceAndNewlines(CFStringRef aString);
 
 @end

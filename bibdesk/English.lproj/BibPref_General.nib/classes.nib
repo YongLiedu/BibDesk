@@ -14,12 +14,8 @@
         {
             ACTIONS = {
                 changeEditOnPaste = id; 
-                changePreviewDisplay = id; 
-                changePreviewMaxNumber = id; 
                 changeStartupBehavior = id; 
                 chooseAutoOpenFile = id; 
-                chooseFont = id; 
-                selectPreviewFont = id; 
                 setAutoOpenFilePath = id; 
                 toggleAutoCheckForUpdates = id; 
             }; 
@@ -27,15 +23,9 @@
             LANGUAGE = ObjC; 
             OUTLETS = {
                 checkForUpdatesButton = NSButton; 
-                defaultBibFileTextField = NSTextField; 
-                displayPrefRadioMatrix = NSMatrix; 
                 editOnPasteButton = NSButton; 
                 openSheetAccessoryView = NSView; 
-                previewFontPopup = NSPopUpButton; 
-                previewMaxNumberComboBox = NSComboBox; 
                 startupBehaviorRadio = NSMatrix; 
-                tableViewFontPopup = NSPopUpButton; 
-                tableViewFontSizeField = NSTextField; 
             }; 
             SUPERCLASS = OAPreferenceClient; 
         }, 
