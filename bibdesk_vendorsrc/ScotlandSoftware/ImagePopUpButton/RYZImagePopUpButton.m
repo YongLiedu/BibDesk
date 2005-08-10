@@ -41,7 +41,6 @@
 
 - (void)dealloc{
 	[currentTimer invalidate];
-	[currentTimer release];
 	[super dealloc];
 }
 
@@ -91,7 +90,6 @@
 	// first make sure we stop a previous timer
 	if(currentTimer){
 		[currentTimer invalidate];
-		[currentTimer release];
 		currentTimer = nil;
     }
 	
@@ -102,7 +100,7 @@
 	
 	NSMutableDictionary *userInfo = [NSMutableDictionary dictionaryWithObjectsAndKeys:
 		[NSNumber numberWithFloat:0], @"time", iconImage, @"newImage", [self iconImage], @"oldImage", nil];
-    currentTimer = [[NSTimer scheduledTimerWithTimeInterval:0.03  target:self selector:@selector(timerFired:)  userInfo:userInfo  repeats:YES] retain];
+    currentTimer = [NSTimer scheduledTimerWithTimeInterval:0.03  target:self selector:@selector(timerFired:)  userInfo:userInfo  repeats:YES];
 }
 
 - (void)timerFired:(NSTimer *)timer;
@@ -119,7 +117,6 @@
 			[timer invalidate]; // this should never happen
 		}else if(currentTimer){
 			[currentTimer invalidate];
-			[currentTimer release];
 			currentTimer = nil;
 		}
         return;
