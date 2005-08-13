@@ -29,25 +29,6 @@
 #include "error.h"
 #include "my_dmalloc.h"
 
-// ----------------------------------------------------------------------------------------
-// changes for use with bibdesk - due to laziness and not wanting
-// to mess with configure too much, the struct is just copy-n-pasted
-// into BibAppController.h
-
-#import <Cocoa/Cocoa.h>
-
-@interface BDSKErrObj : NSObject{
-    NSString *fileName;
-	NSDocument *document;
-    int lineNumber;
-
-    NSString *itemDescription;
-    int itemNumber;
-
-    NSString *errorClassName;
-    NSString *errorMessage;
-}
-@end
 @implementation BDSKErrObj
 @end
 //

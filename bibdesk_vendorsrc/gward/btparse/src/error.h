@@ -21,6 +21,24 @@
 #include <stdarg.h>
 #include "btparse.h"                    /* for AST typedef */
 
+#import <Cocoa/Cocoa.h>
+
+
+
+@interface BDSKErrObj : NSObject{
+    NSString *fileName;
+	NSDocument *document;
+    int lineNumber;
+    
+    NSString *itemDescription;
+    int itemNumber;
+    
+    NSString *errorClassName;
+    NSString *errorMessage;
+}
+@end
+
+
 #define MAX_ERROR 1024
 
 #define ERRFUNC_BODY(class,filename,line,item_desc,item,format)            \
@@ -63,3 +81,4 @@ void usage_error (char * format, ...);
 void internal_error (char * format, ...);
 
 #endif
+
