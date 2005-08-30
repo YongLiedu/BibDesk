@@ -179,4 +179,48 @@
     [[self cell] setIconActionEnabled: iconActionEnabled];
 }
 
+- (void)registerForDraggedTypes:(NSArray *)pboardTypes;
+{
+    [super registerForDraggedTypes:pboardTypes];
+    if(pboardTypes != registeredDraggedTypes){
+        [registeredDraggedTypes release];
+        registeredDraggedTypes = [pboardTypes copy];
+    }
+}
+
+- (NSArray *)registeredDraggedTypes;
+{
+    return ([super respondsToSelector:@selector(registeredDraggedTypes)] ? [super registeredDraggedTypes] : registeredDraggedTypes);
+}
+
+- (NSDragOperation)draggingEntered:(id <NSDraggingInfo>)sender {
+    NSPasteboard *pboard;
+	NSString *pboardType;
+    NSDragOperation sourceDragMask = [sender draggingSourceOperationMask];
+	
+    NSArray *registeredTypes = [self registeredDraggedTypes];
+    
+    pboard = [sender draggingPasteboard];
+    
+    id delegate = [[self cell] delegate];
+    if(delegate == nil) return NSDragOperationNone;
+    
+    if ((sourceDragMask & NSDragOperationCopy) && 
+        [delegate respondsToSelector:@selector(receiveDragFromPasteboard:forView:)] && 
+        [delegate canReceiveDragggedTypes:registeredTypes forView:self]) {
+		return NSDragOperationCopy;
+    }
+    return NSDragOperationNone;
+}
+
+- (BOOL)performDragOperation:(id <NSDraggingInfo>)sender {
+    NSPasteboard *pboard;
+    pboard = [sender draggingPasteboard];
+	id delegate = [[self cell] delegate];
+    
+    if(delegate == nil) return NO;
+    
+    return [[[self cell] delegate] receiveDragFromPasteboard:pboard forView:self];
+}
+
 @end
