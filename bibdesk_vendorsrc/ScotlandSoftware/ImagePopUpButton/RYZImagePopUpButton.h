@@ -1,7 +1,7 @@
 @interface RYZImagePopUpButton : NSPopUpButton
 {
 	NSTimer *currentTimer;
-    NSArray *registeredDraggedTypes;
+	BOOL highlight;
 }
 
 // --- Getting and setting the icon size ---
@@ -32,6 +32,6 @@
 @end
 
 @interface NSObject (RYZImagePopUpButtonDraggingDestination)
-- (BOOL)canReceiveDraggedTypes:(NSArray *)types forView:(id)view;
-- (BOOL)receiveDragFromPasteboard:(NSPasteboard *)pboard forView:(id)view;
+- (BOOL)canReceiveDrag:(id <NSDraggingInfo>)sender forView:(id)view;
+- (BOOL)receiveDrag:(id <NSDraggingInfo>)sender forView:(id)view;
 @end

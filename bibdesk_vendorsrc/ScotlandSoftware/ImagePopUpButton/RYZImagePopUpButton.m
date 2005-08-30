@@ -180,37 +180,15 @@
     [[self cell] setIconActionEnabled: iconActionEnabled];
 }
 
-- (void)registerForDraggedTypes:(NSArray *)pboardTypes;
-{
-    [super registerForDraggedTypes:pboardTypes];
-    if(pboardTypes != registeredDraggedTypes){
-        [registeredDraggedTypes release];
-        registeredDraggedTypes = [pboardTypes copy];
-    }
-}
-
-- (NSArray *)registeredDraggedTypes;
-{
-    return ([super respondsToSelector:@selector(registeredDraggedTypes)] ? [super registeredDraggedTypes] : registeredDraggedTypes);
-}
-
 - (NSDragOperation)draggingEntered:(id <NSDraggingInfo>)sender {
-    NSPasteboard *pboard;
-	NSString *pboardType;
     NSDragOperation sourceDragMask = [sender draggingSourceOperationMask];
 	
-	NSMutableSet *types = [NSMutableSet setWithArray:[[sender draggingPasteboard] types]];
-	
-	[types intersectSet:[NSSet setWithArray:[self registeredDraggedTypes]]];
-    
-    pboard = [sender draggingPasteboard];
-    
     id delegate = [[self cell] delegate];
     if (delegate &&
 	 	(sourceDragMask & NSDragOperationCopy) && 
-        [delegate respondsToSelector:@selector(receiveDragFromPasteboard:forView:)] && 
-        [delegate respondsToSelector:@selector(canReceiveDraggedTypes:forView:)] && 
-        [delegate canReceiveDraggedTypes:types forView:self]) {
+        [delegate respondsToSelector:@selector(receiveDrag:forView:)] && 
+        [delegate respondsToSelector:@selector(canReceiveDrag:forView:)] && 
+        [delegate canReceiveDrag:sender forView:self]) {
 		
 		highlight = YES;
 		[self setKeyboardFocusRingNeedsDisplayInRect:[self bounds]];
@@ -231,13 +209,11 @@
 } 
 
 - (BOOL)performDragOperation:(id <NSDraggingInfo>)sender {
-    NSPasteboard *pboard;
-    pboard = [sender draggingPasteboard];
 	id delegate = [[self cell] delegate];
     
     if(delegate == nil) return NO;
     
-    return [delegate receiveDragFromPasteboard:pboard forView:self];
+    return [delegate receiveDrag:sender forView:self];
 }
 
 -(void)drawRect:(NSRect)rect {
