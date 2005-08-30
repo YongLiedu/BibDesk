@@ -21,6 +21,7 @@
 {
 	if (self = [super initWithCoder:coder]) {
 		currentTimer = nil;
+		highlight = NO;
 		if (![[self cell] isKindOfClass:[RYZImagePopUpButtonCell class]]) {
 			RYZImagePopUpButtonCell *cell = [[[RYZImagePopUpButtonCell alloc] init] autorelease];
 			
@@ -203,16 +204,29 @@
     pboard = [sender draggingPasteboard];
     
     id delegate = [[self cell] delegate];
-    if(delegate == nil) return NSDragOperationNone;
-    
-    if ((sourceDragMask & NSDragOperationCopy) && 
+    if (delegate &&
+	 	(sourceDragMask & NSDragOperationCopy) && 
         [delegate respondsToSelector:@selector(receiveDragFromPasteboard:forView:)] && 
         [delegate respondsToSelector:@selector(canReceiveDraggedTypes:forView:)] && 
         [delegate canReceiveDraggedTypes:registeredTypes forView:self]) {
+		
+		highlight = YES;
+		[self setKeyboardFocusRingNeedsDisplayInRect:[self bounds]];
 		return NSDragOperationCopy;
     }
     return NSDragOperationNone;
 }
+
+- (void)draggingExited:(id <NSDraggingInfo>)sender {
+    highlight = NO;
+	[self setKeyboardFocusRingNeedsDisplayInRect:[self bounds]];
+}
+
+- (BOOL)prepareForDragOperation:(id <NSDraggingInfo>)sender {
+	highlight = NO;
+	[self setKeyboardFocusRingNeedsDisplayInRect:[self bounds]];
+	return YES;
+} 
 
 - (BOOL)performDragOperation:(id <NSDraggingInfo>)sender {
     NSPasteboard *pboard;
@@ -222,6 +236,17 @@
     if(delegate == nil) return NO;
     
     return [delegate receiveDragFromPasteboard:pboard forView:self];
+}
+
+-(void)drawRect:(NSRect)rect {
+	[super drawRect:rect];
+	if(!highlight)  
+		return;
+	
+	[NSGraphicsContext saveGraphicsState];
+	NSSetFocusRingStyle(NSFocusRingOnly);
+	NSRectFill([self bounds]);
+	[NSGraphicsContext restoreGraphicsState];
 }
 
 @end
