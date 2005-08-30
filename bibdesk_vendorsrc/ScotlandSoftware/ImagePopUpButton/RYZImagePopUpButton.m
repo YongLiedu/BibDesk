@@ -199,7 +199,9 @@
 	NSString *pboardType;
     NSDragOperation sourceDragMask = [sender draggingSourceOperationMask];
 	
-    NSArray *registeredTypes = [self registeredDraggedTypes];
+	NSMutableSet *types = [NSMutableSet setWithArray:[[sender draggingPasteboard] types]];
+	
+	[types intersectSet:[NSSet setWithArray:[self registeredDraggedTypes]]];
     
     pboard = [sender draggingPasteboard];
     
@@ -208,7 +210,7 @@
 	 	(sourceDragMask & NSDragOperationCopy) && 
         [delegate respondsToSelector:@selector(receiveDragFromPasteboard:forView:)] && 
         [delegate respondsToSelector:@selector(canReceiveDraggedTypes:forView:)] && 
-        [delegate canReceiveDraggedTypes:registeredTypes forView:self]) {
+        [delegate canReceiveDraggedTypes:types forView:self]) {
 		
 		highlight = YES;
 		[self setKeyboardFocusRingNeedsDisplayInRect:[self bounds]];
