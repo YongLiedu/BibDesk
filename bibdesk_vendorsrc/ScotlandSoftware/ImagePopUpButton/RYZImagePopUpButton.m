@@ -207,7 +207,8 @@
     
     if ((sourceDragMask & NSDragOperationCopy) && 
         [delegate respondsToSelector:@selector(receiveDragFromPasteboard:forView:)] && 
-        [delegate canReceiveDragggedTypes:registeredTypes forView:self]) {
+        [delegate respondsToSelector:@selector(canReceiveDraggedTypes:forView:)] && 
+        [delegate canReceiveDraggedTypes:registeredTypes forView:self]) {
 		return NSDragOperationCopy;
     }
     return NSDragOperationNone;
@@ -220,7 +221,7 @@
     
     if(delegate == nil) return NO;
     
-    return [[[self cell] delegate] receiveDragFromPasteboard:pboard forView:self];
+    return [delegate receiveDragFromPasteboard:pboard forView:self];
 }
 
 @end

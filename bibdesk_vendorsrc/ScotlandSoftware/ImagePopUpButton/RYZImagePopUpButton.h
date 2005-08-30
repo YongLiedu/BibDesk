@@ -30,3 +30,8 @@
 - (void)setIconActionEnabled:(BOOL)iconActionEnabled;
 
 @end
+
+@interface NSObject (RYZImagePopUpButtonDraggingDestination)
+- (BOOL)canReceiveDraggedTypes:(NSArray *)types forView:(id)view;
+- (BOOL)receiveDragFromPasteboard:(NSPasteboard *)pboard forView:(id)view;
+@end
