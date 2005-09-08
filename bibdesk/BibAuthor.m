@@ -2,22 +2,41 @@
 
 //  Created by Michael McCracken on Wed Dec 19 2001.
 /*
-This software is Copyright (c) 2002, Michael O. McCracken
-All rights reserved.
+ This software is Copyright (c) 2001,2002,2003,2004,2005
+ Michael O. McCracken. All rights reserved.
 
-Redistribution and use in source and binary forms, with or without modification, are permitted provided that the following conditions are met:
+ Redistribution and use in source and binary forms, with or without
+ modification, are permitted provided that the following conditions
+ are met:
 
-- Redistributions of source code must retain the above copyright notice, this list of conditions and the following disclaimer.
--  Redistributions in binary form must reproduce the above copyright notice, this list of conditions and the following disclaimer in the documentation and/or other materials provided with the distribution.
--  Neither the name of Michael O. McCracken nor the names of any contributors may be used to endorse or promote products derived from this software without specific prior written permission.
+ - Redistributions of source code must retain the above copyright
+   notice, this list of conditions and the following disclaimer.
 
-THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-*/
+ - Redistributions in binary form must reproduce the above copyright
+    notice, this list of conditions and the following disclaimer in
+    the documentation and/or other materials provided with the
+    distribution.
+
+ - Neither the name of Michael O. McCracken nor the names of any
+    contributors may be used to endorse or promote products derived
+    from this software without specific prior written permission.
+
+ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+ "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+ LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+ A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+ OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+ SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+ LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+ DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+ THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+ (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ */
 
 #import "BibAuthor.h"
 #import "BibItem.h"
 
-#define emptyStr(x) ([x isEqualToString:@""] || !(x))
 
 @implementation BibAuthor
 
@@ -41,7 +60,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 	[lastName release];
 	[jrPart release];
 	[normalizedName release];
-        [sortableName release];
+    [sortableName release];
     [[NSNotificationCenter defaultCenter] removeObserver:self];
 #if DEBUG
     NSLog(@"bibauthor dealloc");
@@ -91,7 +110,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 	NSString *lastStrOther = [NSString stringWithFormat:@"%@%@", [otherAuth vonPart], [otherAuth lastName]];
 	
 	// if we both have a first name, compare first lastStr == first lastStr
-	if(!emptyStr(firstName) && !emptyStr([otherAuth firstName])){
+	if(![NSString isEmptyString:firstName] && ![NSString isEmptyString:[otherAuth firstName]]){
 		return [ [NSString stringWithFormat:@"%@%@", firstName, lastStrMe] compare:
 	[NSString stringWithFormat:@"%@%@",[otherAuth firstName], lastStrOther] options:NSCaseInsensitiveSearch];
 		
@@ -130,38 +149,89 @@ You may almost always use the first form; you shouldn’t if either there’s a Jr p
 }
 
 - (void)refreshNormalizedName{
-	[normalizedName release];
 	
-	BOOL FIRST = !emptyStr(firstName);
-	BOOL VON = !emptyStr(vonPart);
-	BOOL LAST = !emptyStr(lastName);
-	BOOL JR = !emptyStr(jrPart);
+	BOOL FIRST = ![NSString isEmptyString:firstName];
+	BOOL VON = ![NSString isEmptyString:vonPart];
+	BOOL LAST = ![NSString isEmptyString:lastName];
+	BOOL JR = ![NSString isEmptyString:jrPart];
 	
-	normalizedName = [[NSString stringWithFormat:@"%@%@%@%@%@%@%@", (VON ? vonPart : @""),
-		(VON ? @" " : @""),
-		(LAST ? lastName : @""),
-		(JR ? @", " : @""),
-		(JR ? jrPart : @""),
-		(FIRST ? @", " : @""),
-		(FIRST ? firstName : @"")] retain];
+    NSMutableString *theName = [[NSMutableString alloc] initWithCapacity:14];
+    
+    [theName appendString:(VON ? vonPart : @"")];
+    [theName appendString:(VON ? @" " : @"")];
+    [theName appendString:(LAST ? lastName : @"")];
+    [theName appendString:(JR ? @", " : @"")];
+    [theName appendString:(FIRST ? @", " : @"")];
+    [theName appendString:(FIRST ? firstName : @"")];
+    
+    [self setNormalizedName:theName];
+    [theName release];
 }
 
-- (void)refreshSortableName{ // "Lastname Firstname" (no comma, von, or jr)
-    [sortableName release];
+- (void)refreshSortableName{ // "Lastname Firstname" (no comma, von, or jr), with braces removed
     
-    BOOL FIRST = !emptyStr(firstName);
-    BOOL LAST = !emptyStr(lastName);
+    BOOL FIRST = ![NSString isEmptyString:firstName];
+    BOOL LAST = ![NSString isEmptyString:lastName];
     
-    sortableName = [[NSString stringWithFormat:@"%@%@%@", 
-        (LAST ? lastName : @""),
-        (FIRST ? @" " : @""),
-        (FIRST ? firstName : @"")] retain];
+    NSMutableString *theName = [[NSMutableString alloc] initWithCapacity:14];
+    [theName appendString:(LAST ? lastName : @"")];
+    [theName appendString:(FIRST ? @" " : @"")];
+    [theName appendString:(FIRST ? firstName : @"")];
+
+    static NSCharacterSet *braceSet = nil;
+    if(braceSet == nil)
+        braceSet = [[NSCharacterSet characterSetWithCharactersInString:@"}{"] retain];
+    [theName replaceAllOccurrencesOfCharactersInSet:braceSet withString:@""];
+    
+    [self setSortableName:theName];
+    [theName release];
+}
+
+- (void)setSortableName:(NSString *)theName{
+    if(sortableName != theName){
+        [sortableName release];
+        sortableName = [theName copy];
+    }
+}
+
+- (void)setNormalizedName:(NSString *)theName{
+    if(normalizedName != theName){
+        [normalizedName release];
+        normalizedName = [theName copy];
+    }
 }
 
 - (NSString *)sortableName{
     return sortableName;
 }
 
+- (void)setVonPart:(NSString *)newVonPart{
+    if(vonPart != newVonPart){
+        [vonPart release];
+        vonPart = [newVonPart copy];
+    }
+}
+
+- (void)setLastName:(NSString *)newLastName{
+    if(lastName != newLastName){
+        [lastName release];
+        lastName = [newLastName copy];
+    }
+}
+
+- (void)setFirstName:(NSString *)newFirstName{
+    if(firstName != newFirstName){
+        [firstName release];
+        firstName = [newFirstName copy];
+    }
+}
+
+- (void)setJrPart:(NSString *)newJrPart{
+    if(jrPart != newJrPart){
+        [jrPart release];
+        jrPart = [newJrPart copy];
+    }
+}
 
 - (NSString *)name{
     return name;
@@ -205,68 +275,82 @@ You may almost always use the first form; you shouldn’t if either there’s a Jr p
     return [[s copy] autorelease];
 }
 
-/*
-Sets all the different variables for partial names and so on from a given string. 
- 
-Note: The strings returned by the bt_split_name function seem to be in the wrong encoding – UTF-8 is treated as ASCII. This is manually fixed for the firstName, lastName,  jrPart and vonPart variables.
-*/
 - (void)setName:(NSString *)newName{
+    
+    if(newName == name)
+        return;
+    
     if ([[self publication] document])
-		[[NSApp delegate] setDocumentForErrors:[[self publication] document]];
+		[[BDSKErrorObjectController sharedErrorObjectController] setDocumentForErrors:[[self publication] document]];
 	
     bt_name *theName;
     int i = 0;
-    NSMutableString *tmpStr = nil;
     
-    if(newName == name){
-            return;
-    }
+    // use this as a buffer for appending separators
+    NSMutableString *mutableString = [[NSMutableString alloc] initWithCapacity:14];
+    NSString *tmpStr = nil;
+    
     [name release];
     name = [newName copy];
 
+    // pass the name as a UTF8 string, since btparse doesn't work with UniChars
     theName = bt_split_name((char *)[name UTF8String],(char *)[name UTF8String],0,0);
     
+    [mutableString setString:@""];
+    
     // get tokens from first part
-    tmpStr = [NSMutableString string];
     for (i = 0; i < theName->part_len[BTN_FIRST]; i++)
     {
-        [tmpStr appendString:[NSString stringWithUTF8String:theName->parts[BTN_FIRST][i]]];
+        tmpStr = [[NSString alloc] initWithUTF8String:(theName->parts[BTN_FIRST][i])];
+        [mutableString appendString:tmpStr];
+        [tmpStr release];
+
         if(i >= 0 && i < theName->part_len[BTN_FIRST]-1)
-            [tmpStr appendString:@" "];
+            [mutableString appendString:@" "];
     }
-    firstName = [[NSString alloc] initWithData:[tmpStr dataUsingEncoding:NSUTF8StringEncoding allowLossyConversion:YES]  encoding:NSUTF8StringEncoding]; 
-		    
+    [self setFirstName:mutableString];
+    
+    [mutableString setString:@""];
     // get tokens from von part
-    tmpStr = [NSMutableString string];
     for (i = 0; i < theName->part_len[BTN_VON]; i++)
     {
-        [tmpStr appendString:[NSString stringWithUTF8String:theName->parts[BTN_VON][i]]];
+        tmpStr = [[NSString alloc] initWithUTF8String:(theName->parts[BTN_VON][i])];
+        [mutableString appendString:tmpStr];
+        [tmpStr release];
+
         if(i >= 0 && i < theName->part_len[BTN_VON]-1)
-            [tmpStr appendString:@" "];
+            [mutableString appendString:@" "];
 
     }
-    vonPart = [[NSString alloc] initWithData:[tmpStr dataUsingEncoding:NSUTF8StringEncoding allowLossyConversion:YES]  encoding:NSUTF8StringEncoding]; 
+    [self setVonPart:mutableString];
 	
+    [mutableString setString:@""];
 	// get tokens from last part
-    tmpStr = [NSMutableString string];
     for (i = 0; i < theName->part_len[BTN_LAST]; i++)
     {
-        [tmpStr appendString:[NSString stringWithUTF8String:theName->parts[BTN_LAST][i]]];
+        tmpStr = [[NSString alloc] initWithUTF8String:(theName->parts[BTN_LAST][i])];
+        [mutableString appendString:tmpStr];
+        [tmpStr release];
+
         if(i >= 0 && i < theName->part_len[BTN_LAST]-1)
-            [tmpStr appendString:@" "];
+            [mutableString appendString:@" "];
     }
-    lastName = [[NSString alloc] initWithData:[tmpStr dataUsingEncoding:NSUTF8StringEncoding allowLossyConversion:YES]  encoding:NSUTF8StringEncoding]; 
+    [self setLastName:mutableString];
 	
-    
+    [mutableString setString:@""];
     // get tokens from jr part
-    tmpStr = [NSMutableString string];    
     for (i = 0; i < theName->part_len[BTN_JR]; i++)
     {
-        [tmpStr appendString:[NSString stringWithUTF8String:theName->parts[BTN_JR][i]]];
+        tmpStr = [[NSString alloc] initWithUTF8String:(theName->parts[BTN_JR][i])];
+        [mutableString appendString:tmpStr];
+        [tmpStr release];
+        
         if(i >= 0 && i < theName->part_len[BTN_JR]-1)
-            [tmpStr appendString:@" "];
+            [mutableString appendString:@" "];
     }
-    jrPart = [[NSString alloc] initWithData:[tmpStr dataUsingEncoding:NSUTF8StringEncoding allowLossyConversion:YES]  encoding:NSUTF8StringEncoding]; 
+    [self setJrPart:jrPart];
+    
+    [mutableString release];
 	
     [self refreshNormalizedName];
     [self refreshSortableName];

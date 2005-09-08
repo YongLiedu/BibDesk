@@ -1,10 +1,40 @@
 //
-//  BibDocument+Validation.m
-//  Bibdesk
+//  BibDocument+Menus.m
+//  BibDesk
 //
 //  Created by Sven-S. Porst on Fri Jul 30 2004.
-//  Copyright (c) 2004 __MyCompanyName__. All rights reserved.
-//
+/*
+ This software is Copyright (c) 2004,2005
+ Sven-S. Porst. All rights reserved.
+
+ Redistribution and use in source and binary forms, with or without
+ modification, are permitted provided that the following conditions
+ are met:
+
+ - Redistributions of source code must retain the above copyright
+   notice, this list of conditions and the following disclaimer.
+
+ - Redistributions in binary form must reproduce the above copyright
+    notice, this list of conditions and the following disclaimer in
+    the documentation and/or other materials provided with the
+    distribution.
+
+ - Neither the name of Sven-S. Porst nor the names of any
+    contributors may be used to endorse or promote products derived
+    from this software without specific prior written permission.
+
+ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+ "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+ LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+ A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+ OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+ SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+ LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+ DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+ THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+ (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ */
 
 #import "BibDocument+Menus.h"
 
@@ -21,7 +51,13 @@ Broken out of BibDocument and split up into smaller parts to make things more ma
 
 	// handle copy menu items
 	// go through hell
-	if (act == @selector(copyAsTex:)) {
+	if (act == @selector(cut:)) {
+		return [self validateCutMenuItem:menuItem];
+	}
+	else if (act == @selector(copy:)) {
+		return [self validateCopyMenuItem:menuItem];
+	}
+	else if (act == @selector(copyAsTex:)) {
 		return [self validateCopyAsTeXMenuItem:menuItem];
 	}
 	else if (act == @selector(copyAsBibTex:)) {
@@ -39,6 +75,9 @@ Broken out of BibDocument and split up into smaller parts to make things more ma
 	else if (act == @selector(editPubCmd:)) {
 		return [self validateEditSelectionMenuItem:menuItem];
 	}
+	else if (act == @selector(duplicateTitleToBooktitle:)) {
+		return [self validateDuplicateTitleToBooktitleMenuItem:menuItem];
+	}
 	else if (act == @selector(generateCiteKey:)) {
 		return [self validateGenerateCiteKeyMenuItem:menuItem];
 	}
@@ -50,6 +89,12 @@ Broken out of BibDocument and split up into smaller parts to make things more ma
 	}
 	else if(act == @selector(emailPubCmd:)) {
 		return ([self numberOfSelectedPubs] != 0);
+	}
+	else if(act == @selector(openLinkedFile:)) {
+		return [self validateOpenLinkedFileMenuItem:menuItem];
+	}
+	else if(act == @selector(revealLinkedFile:)) {
+		return [self validateRevealLinkedFileMenuItem:menuItem];
 	}
 	else if([[menuItem representedObject] isEqualToString:@"showHideCustomCiteMenuItem"] ){		
 		if(showingCustomCiteDrawer){
@@ -76,30 +121,44 @@ Broken out of BibDocument and split up into smaller parts to make things more ma
 		return [self validateNewPubFromFileMenuItem:menuItem];
 	} else if ([menuItem action] == @selector(importFromWebAction:)) {
 		return [self validateNewPubFromWebMenuItem:menuItem];
-	}
-//	else if ([[menuItem representedObject] isEqualToString:@"displayMenuItem"]) {
-//		// update the display menu. Is this smart enough?
-//		[menuItem setSubmenu:contextualMenu];
-//		return YES;
-//	}
-    
-    else if (act == @selector(makeNewEmptyCollection:)){
-        return [[self fileType] isEqualToString:@"BibDesk Library"];        
-    }else if (act == @selector(makeNewExternalSource:)){
-        return [[self fileType] isEqualToString:@"BibDesk Library"];        
-    }else if (act == @selector(makeNewNotepad:)){
-        return [[self fileType] isEqualToString:@"BibDesk Library"];        
-    }else if (act == @selector(editExportSettingsAction:)){ 
-        
-        // and selection is a collection:
-        return [[self fileType] isEqualToString:@"BibDesk Library"];        
-    }else{
+	} else if ([menuItem action] == @selector(selectCrossrefParentAction:)) {
+        return [self validateSelectCrossrefParentMenuItem:menuItem];
+    } else if ([menuItem action] == @selector(createNewPubUsingCrossrefAction:)) {
+        return [self validateCreateNewPubUsingCrossrefMenuItem:menuItem];
+    } else if ([menuItem action] == @selector(copyAsRIS:)) {
+        return [self validateCopyAsRISMenuItem:menuItem];
+    } else if ([menuItem action] == @selector(duplicate:)) {
+        return [self validateDuplicateMenuItem:menuItem];
+    } else {
 		return [super validateMenuItem:menuItem];
     }
-	/*   if([@@ [menuItem title] isEqualToString:@"the one for blogging the item"]){
-		if(BDSK_USING_JAGUAR){return NO}; @@@@@ -- even better, get IBOutlet to that item, then in awakeFromNib, remove it if BDSK_USING_JAGUAR.
-    } */
 }
+
+
+
+- (BOOL) validateCutMenuItem:(NSMenuItem*) menuItem {
+	if ([self numberOfSelectedPubs] == 0) {
+		// no selection
+		return NO;
+	}
+	else {
+		// multiple selection
+		return YES;
+	}
+}	
+
+
+
+- (BOOL) validateCopyMenuItem:(NSMenuItem*) menuItem {
+	if ([self numberOfSelectedPubs] == 0) {
+		// no selection
+		return NO;
+	}
+	else {
+		// multiple selection
+		return YES;
+	}
+}	
 
 
 
@@ -247,30 +306,35 @@ Broken out of BibDocument and split up into smaller parts to make things more ma
 		return NO;
 	}
 	
-	if ([[menuItem menu] supermenu]) {
-		return ([self numberOfSelectedPubs] != 0);
+	if ([self numberOfSelectedPubs] == 0) {
+		// no selection
+		s = NSLocalizedString(@"PDF", @"PDF");
+		[menuItem setTitle:s];
+		return NO;
 	}
-	else {
-		// action menu
-		if ([self numberOfSelectedPubs] == 0) {
-			// no selection
-			s = NSLocalizedString(@"Copy Bibliography Entry as Image", @"Copy Bibliography Entry as Image"); 
-			[menuItem setTitle:s];
-			return NO;
-		}
-		else if ([self numberOfSelectedPubs] == 1) {
-			// single selection
-			s = NSLocalizedString(@"Copy Bibliography Entry as Image", @"Copy Bibliography Entry as Image"); 
-			[menuItem setTitle:s];
-			return YES;	
+	else if ([self numberOfSelectedPubs] == 1) {
+		// single selection
+		if ([[menuItem menu] supermenu]) {
+			s = NSLocalizedString(@"PDF for %@", @"PDF for %@");
 		}
 		else {
-			// multiple selection
-			s = NSLocalizedString(@"Copy %i Bibliography Entries as Image", @"Copy %i Bibliography Entries as Image"); 
-			[menuItem setTitle:[NSString stringWithFormat:s, [self numberOfSelectedPubs]]];
-			return YES;	
+			s = NSLocalizedString(@"Copy PDF for %@", @"Copy PDF for %@");
 		}
-	}	
+		NSString * citeKey = [(BibItem*)[shownPublications objectAtIndex:[[[self selectedPubEnumerator] nextObject] intValue]] citeKey];
+		[menuItem setTitle:[NSString stringWithFormat:s, citeKey]];
+		return YES;
+	}
+	else {
+		// multiple selection
+		if ([[menuItem menu] supermenu]) {
+			s = NSLocalizedString(@"PDF for %i Items", @"PDF for %i Items");
+		}
+		else {
+			s = NSLocalizedString(@"Copy PDF for %i Items", @"Copy PDF for %i Items");
+		}
+		[menuItem setTitle:[NSString stringWithFormat:s, [self numberOfSelectedPubs]]];
+		return YES;
+	}
 }
 
 
@@ -282,33 +346,70 @@ Broken out of BibDocument and split up into smaller parts to make things more ma
 		return NO;
 	}
 	
-	if ([[menuItem menu] supermenu]) {
-		return ([self numberOfSelectedPubs] != 0);
+	if ([self numberOfSelectedPubs] == 0) {
+		// no selection
+		s = NSLocalizedString(@"Text", @"Text");
+		[menuItem setTitle:s];
+		return NO;
 	}
-	else {
-		// action menu
-		if ([self numberOfSelectedPubs] == 0) {
-			// no selection
-			s = NSLocalizedString(@"Copy Bibliography Entry as Text", @"Copy Bibliography Entry as Text"); 
-			[menuItem setTitle:s];
-			return NO;
-		}
-		else if ([self numberOfSelectedPubs] == 1) {
-			// single selection
-			s = NSLocalizedString(@"Copy Bibliography Entry as Text", @"Copy Bibliography Entry as Text"); 
-			[menuItem setTitle:s];
-			return YES;	
+	else if ([self numberOfSelectedPubs] == 1) {
+		// single selection
+		if ([[menuItem menu] supermenu]) {
+			s = NSLocalizedString(@"Text for %@", @"Text for %@");
 		}
 		else {
-			// multiple selection
-			s = NSLocalizedString(@"Copy %i Bibliography Entries as Text", @"Copy %i Bibliography Entries as Text"); 
-			[menuItem setTitle:[NSString stringWithFormat:s, [self numberOfSelectedPubs]]];
-			return YES;	
+			s = NSLocalizedString(@"Copy Text for %@", @"Copy Text for %@");
 		}
-	}	
+		NSString * citeKey = [(BibItem*)[shownPublications objectAtIndex:[[[self selectedPubEnumerator] nextObject] intValue]] citeKey];
+		[menuItem setTitle:[NSString stringWithFormat:s, citeKey]];
+		return YES;
+	}
+	else {
+		// multiple selection
+		if ([[menuItem menu] supermenu]) {
+			s = NSLocalizedString(@"Text for %i Items", @"Text for %i Items");
+		}
+		else {
+			s = NSLocalizedString(@"Copy Text for %i Items", @"Copy Text for %i Items");
+		}
+		[menuItem setTitle:[NSString stringWithFormat:s, [self numberOfSelectedPubs]]];
+		return YES;
+	}
 }
 
-
+- (BOOL)validateCopyAsRISMenuItem:(NSMenuItem *)menuItem{
+	NSString * s;
+	
+	if ([self numberOfSelectedPubs] == 0) {
+		// no selection
+		s = NSLocalizedString(@"RIS Record", @"RIS Record");
+		[menuItem setTitle:s];
+		return NO;
+	}
+	else if ([self numberOfSelectedPubs] == 1) {
+		// single selection
+		if ([[menuItem menu] supermenu]) {
+			s = NSLocalizedString(@"RIS Record for %@", @"RIS Record for %@");
+		}
+		else {
+			s = NSLocalizedString(@"Copy RIS Record for %@", @"Copy RIS Record for %@");
+		}
+		NSString * citeKey = [(BibItem*)[shownPublications objectAtIndex:[[[self selectedPubEnumerator] nextObject] intValue]] citeKey];
+		[menuItem setTitle:[NSString stringWithFormat:s, citeKey]];
+		return YES;
+	}
+	else {
+		// multiple selection
+		if ([[menuItem menu] supermenu]) {
+			s = NSLocalizedString(@"%i RIS Records", @"%i RIS Records");
+		}
+		else {
+			s = NSLocalizedString(@"Copy %i RIS Records", @"Copy %i RIS Records");
+		}
+		[menuItem setTitle:[NSString stringWithFormat:s, [self numberOfSelectedPubs]]];
+		return YES;
+	}
+}	
 
 - (BOOL) validateEditSelectionMenuItem:(NSMenuItem*) menuItem {
 	NSString * s;
@@ -338,6 +439,97 @@ Broken out of BibDocument and split up into smaller parts to make things more ma
 	}
 }	
 
+
+- (BOOL) validateOpenLinkedFileMenuItem:(NSMenuItem*) menuItem {
+	NSString * s;
+	BibItem *selectedBI = nil;
+	NSString *lurl = nil;
+	
+	if ([self numberOfSelectedPubs] == 0) {
+		// no selection
+		s = NSLocalizedString(@"Open Linked File", @"Open Linked File");
+		[menuItem setTitle:s];
+		return NO;
+	}
+	else if ([self numberOfSelectedPubs] == 1) {
+		// single selection
+		s = NSLocalizedString(@"Open Linked File", @"Open Linked File");
+		[menuItem setTitle:s];
+		selectedBI = [shownPublications objectAtIndex:[[[self selectedPublications] objectAtIndex:0] intValue] usingLock:pubsLock];
+		lurl = [selectedBI localURLPath];
+		return (lurl && [[NSFileManager defaultManager] fileExistsAtPath:lurl]);
+	}
+	else {
+		s = NSLocalizedString(@"Open %i Linked Files", @"Open %i Linked Files");
+		[menuItem setTitle:[NSString stringWithFormat:s, [self numberOfSelectedPubs]]];
+		NSEnumerator *e = [self selectedPubEnumerator];
+		NSNumber *i;
+		while(i = [e nextObject]){
+			selectedBI = [shownPublications objectAtIndex:[[[self selectedPublications] objectAtIndex:0] intValue] usingLock:pubsLock];
+			lurl = [selectedBI localURLPath];
+			if (lurl && [[NSFileManager defaultManager] fileExistsAtPath:lurl])
+				return YES;
+		}
+		return NO;
+	}
+}	
+
+- (BOOL) validateRevealLinkedFileMenuItem:(NSMenuItem*) menuItem {
+	NSString * s;
+	BibItem *selectedBI = nil;
+	NSString *lurl = nil;
+	
+	if ([self numberOfSelectedPubs] == 0) {
+		// no selection
+		s = NSLocalizedString(@"Reveal Linked File in Finder", @"Reveal Linked File in Finder");
+		[menuItem setTitle:s];
+		return NO;
+	}
+	else if ([self numberOfSelectedPubs] == 1) {
+		// single selection
+		s = NSLocalizedString(@"Reveal Linked File in Finder", @"Reveal Linked File in Finder");
+		[menuItem setTitle:s];
+		selectedBI = [shownPublications objectAtIndex:[[[self selectedPublications] objectAtIndex:0] intValue] usingLock:pubsLock];
+		lurl = [selectedBI localURLPath];
+		return (lurl && [[NSFileManager defaultManager] fileExistsAtPath:lurl]);
+	}
+	else {
+		s = NSLocalizedString(@"Reveal %i Linked Files in Finder", @"Reveal %i Linked Files in Finder");
+		[menuItem setTitle:[NSString stringWithFormat:s, [self numberOfSelectedPubs]]];
+		NSEnumerator *e = [self selectedPubEnumerator];
+		NSNumber *i;
+		while(i = [e nextObject]){
+			selectedBI = [shownPublications objectAtIndex:[[[self selectedPublications] objectAtIndex:0] intValue] usingLock:pubsLock];
+			lurl = [selectedBI localURLPath];
+			if (lurl && [[NSFileManager defaultManager] fileExistsAtPath:lurl])
+				return YES;
+		}
+		return NO;
+	}
+}	
+
+
+- (BOOL) validateDuplicateTitleToBooktitleMenuItem:(NSMenuItem*) menuItem {
+	NSString * s;
+	
+	if ([self numberOfSelectedPubs] == 0) {
+		// no selection
+		s = NSLocalizedString(@"Duplicate Title to Booktitle", @"Duplicate Title to Booktitle");
+		[menuItem setTitle:s];
+		return NO;
+	}
+	else if ([self numberOfSelectedPubs] == 1) {
+		// single selection
+		s = NSLocalizedString(@"Duplicate Title to Booktitle", @"Duplicate Title to Booktitle");
+		[menuItem setTitle:[NSString stringWithFormat:s]];
+		return YES;
+	}
+	else {
+		s = NSLocalizedString(@"Duplicate %i Titles to Booktitles", @"Duplicate %i Titles to Booktitles");
+		[menuItem setTitle:[NSString stringWithFormat:s, [self numberOfSelectedPubs]]];
+		return YES;
+	}
+}
 
 
 - (BOOL) validateGenerateCiteKeyMenuItem:(NSMenuItem*) menuItem {
@@ -394,13 +586,13 @@ Broken out of BibDocument and split up into smaller parts to make things more ma
 	
 	if (n <= 1) {
 		// no selection or single selection
-		s = [NSString stringWithFormat:@"%@%C",NSLocalizedString(@"Delete", @"Delete..."),0x2026];
+		s = NSLocalizedString(@"Delete", @"Delete");
 		[menuItem setTitle:s];
 		return (n==1);
 	}
 	else {
 		// multiple selection
-		s = [NSString stringWithFormat:@"%@%C",NSLocalizedString(@"Delete %i Publications", @"Delete %i Publications..."),0x2026];
+		s = NSLocalizedString(@"Delete %i Publications", @"Delete %i Publications");
 		[menuItem setTitle:[NSString stringWithFormat:s, n]];
 		return YES;
 	}
@@ -459,6 +651,40 @@ Broken out of BibDocument and split up into smaller parts to make things more ma
 }
 
 
+- (BOOL)validateSelectCrossrefParentMenuItem:(NSMenuItem *)menuItem{
+    NSString *s = NSLocalizedString(@"Select Parent Publication", @"Select the crossref parent of this pub");
+    [menuItem setTitle:s];
+    if([self numberOfSelectedPubs] == 1){
+        BibItem *selectedBI = [shownPublications objectAtIndex:[[[self selectedPublications] lastObject] intValue]];
+        if(![NSString isEmptyString:[selectedBI valueOfField:BDSKCrossrefString inherit:NO]])
+            return YES;
+    }
+	return NO;
+}
+
+- (BOOL)validateCreateNewPubUsingCrossrefMenuItem:(NSMenuItem *)menuItem{
+    NSString *s = NSLocalizedString(@"New Publication With Crossref", @"New publication with this pub as parent");
+    [menuItem setTitle:s];
+    if([self numberOfSelectedPubs] == 1){
+        BibItem *selectedBI = [shownPublications objectAtIndex:[[[self selectedPublications] lastObject] intValue]];
+        
+        // only valid if the selected pub (parent-to-be) doesn't have a crossref field
+        if([NSString isEmptyString:[selectedBI valueOfField:BDSKCrossrefString inherit:NO]])
+            return YES;
+    }
+	return NO;
+}
+
+- (BOOL)validateDuplicateMenuItem:(NSMenuItem *)menuItem{
+	if ([self numberOfSelectedPubs] == 0) {
+		// no selection
+		return NO;
+	}
+	else {
+		// multiple selection
+		return YES;
+	}
+} 
 
 /* respond to the clear: action, so we can validate the Delete item in the edit menu.
 */

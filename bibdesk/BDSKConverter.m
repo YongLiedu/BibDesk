@@ -1,22 +1,52 @@
 //  BDSKConverter.m
 //  Created by Michael McCracken on Thu Mar 07 2002.
 /*
-This software is Copyright (c) 2001,2002, Michael O. McCracken
-All rights reserved.
+ This software is Copyright (c) 2001,2002,2003,2004,2005
+ Michael O. McCracken. All rights reserved.
 
-Redistribution and use in source and binary forms, with or without modification, are permitted provided that the following conditions are met:
+ Redistribution and use in source and binary forms, with or without
+ modification, are permitted provided that the following conditions
+ are met:
 
-- Redistributions of source code must retain the above copyright notice, this list of conditions and the following disclaimer.
--  Redistributions in binary form must reproduce the above copyright notice, this list of conditions and the following disclaimer in the documentation and/or other materials provided with the distribution.
--  Neither the name of Michael O. McCracken nor the names of any contributors may be used to endorse or promote products derived from this software without specific prior written permission.
+ - Redistributions of source code must retain the above copyright
+   notice, this list of conditions and the following disclaimer.
 
-THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-*/
+ - Redistributions in binary form must reproduce the above copyright
+    notice, this list of conditions and the following disclaimer in
+    the documentation and/or other materials provided with the
+    distribution.
+
+ - Neither the name of Michael O. McCracken nor the names of any
+    contributors may be used to endorse or promote products derived
+    from this software without specific prior written permission.
+
+ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+ "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+ LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+ A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+ OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+ SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+ LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+ DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+ THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+ (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ */
 
 #import "BDSKConverter.h"
 #import "NSString_BDSKExtensions.h"
 #import "BDSKComplexString.h"
 #import "BibAppController.h"
+
+@interface BDSKConverter (Private)
+- (void)setDetexifyAccents:(NSDictionary *)newAccents;
+- (void)setAccentCharacterSet:(NSCharacterSet *)charSet;
+- (void)setBaseCharacterSetForTeX:(NSCharacterSet *)charSet;
+- (void)setTexifyAccents:(NSDictionary *)newAccents;
+- (void)setFinalCharSet:(NSCharacterSet *)charSet;
+- (void)setTexifyConversions:(NSDictionary *)newConversions;
+- (void)setDeTexifyConversions:(NSDictionary *)newConversions;
+@end
 
 @implementation BDSKConverter
 
@@ -48,27 +78,16 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
     
 
 - (void)loadDict{
-    // first make sure that we release, as this may be called by the character conversion editor
-    [finalCharSet release];
-    [accentCharSet release];
-    [texifyConversions release];
-    [detexifyConversions release];
-    [texifyAccents release];
-    [detexifyAccents release];
-    [baseCharacterSetForTeX release];
     
     NSDictionary *wholeDict = [NSDictionary dictionaryWithContentsOfFile:[[[NSBundle mainBundle] resourcePath] stringByAppendingPathComponent:CHARACTER_CONVERSION_FILENAME]];
 	NSDictionary *userWholeDict = nil;
     // look for the user file
     NSFileManager *fm = [NSFileManager defaultManager];
-    NSString *applicationSupportPath = [[fm applicationSupportDirectory:kUserDomain] stringByAppendingPathComponent:@"BibDesk"];
-    NSString *charConvPath = [applicationSupportPath stringByAppendingPathComponent:CHARACTER_CONVERSION_FILENAME];
+    NSString *charConvPath = [[fm currentApplicationSupportPathForCurrentUser] stringByAppendingPathComponent:CHARACTER_CONVERSION_FILENAME];
 	
 	if ([fm fileExistsAtPath:charConvPath]) {
 		userWholeDict = [NSDictionary dictionaryWithContentsOfFile:charConvPath];
-    } else {
-		userWholeDict = nil;
-	}
+    }
     
 	//create a characterset from the characters we know how to convert
     NSMutableCharacterSet *workingSet;
@@ -88,8 +107,11 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 	}
     
     // set up the dictionaries
-    NSMutableDictionary *tmpDetexifyDict = [NSMutableDictionary dictionaryWithDictionary:[wholeDict objectForKey:TEX_TO_ROMAN_KEY]];
-    NSMutableDictionary *tmpTexifyDict = [NSMutableDictionary dictionaryWithDictionary:[wholeDict objectForKey:ROMAN_TO_TEX_KEY]];
+    NSMutableDictionary *tmpDetexifyDict = [NSMutableDictionary dictionary];
+    [tmpDetexifyDict addEntriesFromDictionary:[wholeDict objectForKey:TEX_TO_ROMAN_KEY]];
+    
+    NSMutableDictionary *tmpTexifyDict = [NSMutableDictionary dictionary];
+    [tmpTexifyDict addEntriesFromDictionary:[wholeDict objectForKey:ROMAN_TO_TEX_KEY]];
     [tmpTexifyDict addEntriesFromDictionary:[wholeDict objectForKey:ONE_WAY_CONVERSION_KEY]];
     
 	if (userWholeDict) {
@@ -106,30 +128,23 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
     }
 	
 	// set the ivars
-    finalCharSet = [workingSet copy];
-	texifyConversions = [tmpTexifyDict copy];
-	detexifyConversions = [tmpDetexifyDict copy];
-    
-    if(!texifyConversions){
-        texifyConversions = [[NSDictionary dictionary] retain]; // an empty one won't break the code.
-    }
-	if(!detexifyConversions){
-        detexifyConversions = [[NSDictionary dictionary] retain]; // an empty one won't break the code.
-    }
-    
-	[workingSet release];
-    
+    [self setFinalCharSet:workingSet];
+    [workingSet release];
+
+    [self setTexifyConversions:tmpTexifyDict];
+    [self setDeTexifyConversions:tmpDetexifyDict];
+            
 	// build a character set of [a-z][A-Z] representing the base character set that we can decompose and recompose as TeX
     NSRange ucRange = NSMakeRange('A', 26);
     NSRange lcRange = NSMakeRange('a', 26);
     workingSet = [[NSCharacterSet characterSetWithRange:ucRange] mutableCopy];
     [workingSet addCharactersInRange:lcRange];
-    baseCharacterSetForTeX = [workingSet copy];
+    [self setBaseCharacterSetForTeX:workingSet];
     [workingSet release];
 	
-    texifyAccents = [[wholeDict objectForKey:ROMAN_TO_TEX_ACCENTS_KEY] retain];
-    accentCharSet = [[NSCharacterSet characterSetWithCharactersInString:[[texifyAccents allKeys] componentsJoinedByString:@""]] retain];
-	detexifyAccents = [[wholeDict objectForKey:TEX_TO_ROMAN_ACCENTS_KEY] retain];
+    [self setTexifyAccents:[wholeDict objectForKey:ROMAN_TO_TEX_ACCENTS_KEY]];
+    [self setAccentCharacterSet:[NSCharacterSet characterSetWithCharactersInString:[[texifyAccents allKeys] componentsJoinedByString:@""]]];
+    [self setDetexifyAccents:[wholeDict objectForKey:TEX_TO_ROMAN_ACCENTS_KEY]];
 }
 
 - (NSString *)stringByTeXifyingString:(NSString *)s{
@@ -142,10 +157,11 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 		
 		while(node = [nodeEnum nextObject]){
 			if([node type] == BSN_STRING)
-				newNode = [BDSKStringNode nodeWithQuotedString:[self stringByTeXifyingString:[node value]]];
+				newNode = [[BDSKStringNode alloc] initWithQuotedString:[self stringByTeXifyingString:[node value]]];
 			else 
-				newNode = [[node copy] autorelease];
+				newNode = [node copy];
 			[nodes addObject:newNode];
+			[newNode release];
 		}
 		return [NSString complexStringWithArray:nodes macroResolver:[cs macroResolver]];
 	}
@@ -267,6 +283,11 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 }
 
 - (NSString *)stringByDeTeXifyingString:(NSString *)s{
+
+    if([NSString isEmptyString:s]){
+        return @"";
+    }
+    
 	// deTeXify only string nodes of complex strings;
 	if([s isComplex]){
 		BDSKComplexString *cs = (BDSKComplexString *)s;
@@ -276,26 +297,22 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 		
 		while(node = [nodeEnum nextObject]){
 			if([node type] == BSN_STRING)
-				newNode = [BDSKStringNode nodeWithQuotedString:[self stringByDeTeXifyingString:[node value]]];
+				newNode = [[BDSKStringNode alloc] initWithQuotedString:[self stringByDeTeXifyingString:[node value]]];
 			else 
-				newNode = [[node copy] autorelease];
+				newNode = [node copy];
 			[nodes addObject:newNode];
+			[newNode release];
 		}
 		return [NSString complexStringWithArray:nodes macroResolver:[cs macroResolver]];
 	}
 	
-    NSScanner *scanner = [NSScanner scannerWithString:s];
     NSString *tmpPass;
     NSString *tmpConv;
     NSString *tmpConvB;
     NSString *TEXString;
-    NSMutableString *convertedSoFar = [[NSMutableString alloc] initWithCapacity:10];
 
-    if(!s || [s isEqualToString:@""]){
-        [convertedSoFar release];
-        return [NSString string];
-    }
-    
+    NSMutableString *convertedSoFar = [[NSMutableString alloc] initWithCapacity:10];
+    NSScanner *scanner = [[NSScanner alloc] initWithString:s];
     [scanner setCharactersToBeSkipped:nil];
     //    NSLog(@"scanning string: %@",s);
     while(![scanner isAtEnd]){
@@ -322,8 +339,9 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 			[convertedSoFar appendString:tmpConv];
         }
     }
+    [scanner release];
     
-  return [convertedSoFar autorelease]; 
+    return [convertedSoFar autorelease]; 
 }
 
 - (NSString *)composedStringFromTeXString:(NSString *)texString{
@@ -351,6 +369,59 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 			return [[character stringByAppendingString:accent] precomposedStringWithCanonicalMapping];
 	}
 	return nil;
+}
+
+@end
+
+@implementation BDSKConverter (Private)
+
+- (void)setDetexifyAccents:(NSDictionary *)newAccents{
+    if(detexifyAccents != newAccents){
+        [detexifyAccents release];
+        detexifyAccents = [newAccents copy];
+    }
+}
+
+- (void)setAccentCharacterSet:(NSCharacterSet *)charSet{
+    if(accentCharSet != charSet){
+        [accentCharSet release];
+        accentCharSet = [charSet copy];
+    }
+}
+
+- (void)setBaseCharacterSetForTeX:(NSCharacterSet *)charSet{
+    if(baseCharacterSetForTeX != charSet){
+        [baseCharacterSetForTeX release];
+        baseCharacterSetForTeX = [charSet copy];
+    }
+}
+
+- (void)setTexifyAccents:(NSDictionary *)newAccents{
+    if(texifyAccents != newAccents){
+        [texifyAccents release];
+        texifyAccents = [newAccents copy];
+    }
+}
+
+- (void)setFinalCharSet:(NSCharacterSet *)charSet{
+    if(finalCharSet != charSet){
+        [finalCharSet release];
+        finalCharSet = [charSet copy];
+    }
+}
+
+- (void)setTexifyConversions:(NSDictionary *)newConversions{
+    if(texifyConversions != newConversions){
+        [texifyConversions release];
+        texifyConversions = [newConversions copy];
+    }
+}
+
+- (void)setDeTexifyConversions:(NSDictionary *)newConversions{
+    if(detexifyConversions != newConversions){
+        [detexifyConversions release];
+        detexifyConversions = [newConversions copy];
+    }
 }
 
 @end

@@ -1,6 +1,6 @@
 //
 //  BibDocument+Scripting.m
-//  Bibdesk
+//  BibDesk
 //
 //  Created by Sven-S. Porst on Thu Jul 08 2004.
 //  Copyright (c) 2004 __MyCompanyName__. All rights reserved.
@@ -23,17 +23,17 @@ Scripting Key-Value coding methods to access publications
 
 - (void)insertInPublications:(BibItem *)pub  atIndex:(unsigned int)index {
 	[self insertPublication:pub atIndex:index];
-	[[self undoManager] setActionName:NSLocalizedString(@"Insert Publication",@"")];
+	[[self undoManager] setActionName:NSLocalizedString(@"AppleScript",@"Undo action name for AppleScript")];
 }
 
 - (void)insertInPublications:(BibItem *)pub {
 	[self addPublication:pub];
-	[[self undoManager] setActionName:NSLocalizedString(@"Add Publication",@"")];
+	[[self undoManager] setActionName:NSLocalizedString(@"AppleScript",@"Undo action name for AppleScript")];
 }
 
 - (void)removeFromPublicationsAtIndex:(unsigned int)index {
 	[self removePublication:[publications objectAtIndex:index]];
-	[[self undoManager] setActionName:NSLocalizedString(@"Delete Publication",@"")];
+	[[self undoManager] setActionName:NSLocalizedString(@"AppleScript",@"Undo action name for AppleScript")];
 }
 
 
@@ -41,23 +41,24 @@ Scripting Key-Value coding methods to access publications
 Scripting Key-Value coding method to access an author by his name
 */
 - (BibAuthor*) valueInAuthorsWithName:(NSString*) name {
+    // create a new author so we can use BibAuthor's isEqual: method for comparison
+    // instead of trying to do string comparisons
+    BibAuthor *newAuth = [BibAuthor authorWithName:name andPub:nil];
+    
 	NSEnumerator *pubEnum = [publications objectEnumerator];
 	NSEnumerator *authEnum;
 	BibItem *pub;
 	BibAuthor *auth;
-	BibAuthor *altAuth = nil;
+
 	while (pub = [pubEnum nextObject]) {
 		authEnum = [[pub pubAuthors] objectEnumerator];
 		while (auth = [authEnum nextObject]) {
-			if ([[auth normalizedName] isEqualToString:name]) {
+			if ([auth isEqual:newAuth]) {
 				return auth;
-			}
-			if ([[auth name] isEqualToString:name]) {
-				altAuth = auth;
 			}
 		}
 	}
-	return altAuth;
+	return nil;
 }
 
 - (BibAuthor*) valueInAuthorsAtIndex:(unsigned int)index {
@@ -73,29 +74,6 @@ Scripting Key-Value coding method to access an author by his name
 	if (index < [auths count]) 
 		return [[auths allObjects] objectAtIndex:index];
 	return nil;
-}
-
-
-/* ssp: 2004-07-22
-Accessor to get the current state of the filter field.
-*/
--(NSString*) filterField {
-	return [searchField stringValue];
-}
-
-
-/* ssp: 2004-04-03
-Sets the filter field to a specified string.
-Have to make it firstResponder first as otherwise it doesn't update (show clear cell) corectly.
-*/
-- (void)setFilterField:(NSString*) filterterm {
-    NSResponder * oldFirstResponder = [documentWindow firstResponder];
-    [documentWindow makeFirstResponder:searchField];
-    
-    [searchField setObjectValue:filterterm];
-    [self searchFieldAction:searchField];
-    
-    [documentWindow makeFirstResponder:oldFirstResponder];
 }
 
 
@@ -146,20 +124,14 @@ Getting and setting the selection of the table
 }
 
 
-
-/* ssp
-Return styled text for a bibstring.
-*/
 - (NSTextStorage*) textStorageForBibString:(NSString*) bibString {
-    NSData *d;
-	if([PDFpreviewer PDFFromString:bibString])
-        d = [PDFpreviewer RTFPreviewData];
-    else
-        return nil;
+    NSData *data = nil;
+    if([texTask runWithBibTeXString:bibString generateRTF:YES] && [texTask hasRTFData])
+        data = [texTask RTFData];
     
-	NSDictionary * myDict;
-	
-	return [[[NSTextStorage alloc] initWithRTF:d documentAttributes:&myDict] autorelease];
+    if(!data) return nil;
+    	
+	return [[[NSTextStorage alloc] initWithRTF:data documentAttributes:NULL] autorelease];
 }
 
 @end

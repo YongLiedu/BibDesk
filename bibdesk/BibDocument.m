@@ -2,17 +2,37 @@
 
 //  Created by Michael McCracken on Mon Dec 17 2001.
 /*
-This software is Copyright (c) 2001,2002, Michael O. McCracken
-All rights reserved.
+ This software is Copyright (c) 2001,2002,2003,2004,2005
+ Michael O. McCracken. All rights reserved.
 
-Redistribution and use in source and binary forms, with or without modification, are permitted provided that the following conditions are met:
+ Redistribution and use in source and binary forms, with or without
+ modification, are permitted provided that the following conditions
+ are met:
 
-- Redistributions of source code must retain the above copyright notice, this list of conditions and the following disclaimer.
--  Redistributions in binary form must reproduce the above copyright notice, this list of conditions and the following disclaimer in the documentation and/or other materials provided with the distribution.
--  Neither the name of Michael O. McCracken nor the names of any contributors may be used to endorse or promote products derived from this software without specific prior written permission.
+ - Redistributions of source code must retain the above copyright
+   notice, this list of conditions and the following disclaimer.
 
-THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-*/
+ - Redistributions in binary form must reproduce the above copyright
+    notice, this list of conditions and the following disclaimer in
+    the documentation and/or other materials provided with the
+    distribution.
+
+ - Neither the name of Michael O. McCracken nor the names of any
+    contributors may be used to endorse or promote products derived
+    from this software without specific prior written permission.
+
+ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+ "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+ LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+ A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+ OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+ SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+ LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+ DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+ THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+ (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ */
 
 #import "BibDocument.h"
 #import "BibItem.h"
@@ -24,6 +44,9 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 #import "BDSKUndoManager.h"
 #import "RYZImagePopUpButtonCell.h"
 #import "MultiplePageView.h"
+#import <OmniAppKit/OAInternetConfig.h>
+#import <OmniFoundation/CFDictionary-OFExtensions.h>
+#import "BDSKPrintableView.h"
 
 #include <stdio.h>
 
@@ -31,8 +54,7 @@ NSString *LocalDragPasteboardName = @"edu.ucsd.cs.mmccrack.bibdesk: Local Public
 NSString *BDSKBibTeXStringPboardType = @"edu.ucsd.cs.mmcrack.bibdesk: Local BibTeX String Pasteboard";
 NSString *BDSKBibItemLocalDragPboardType = @"edu.ucsd.cs.mmccrack.bibdesk: Local BibItem Pasteboard type";
 
-
-#import "btparse.h"
+#import <BTParse/btparse.h>
 
 @implementation BibDocument
 
@@ -41,23 +63,29 @@ NSString *BDSKBibItemLocalDragPboardType = @"edu.ucsd.cs.mmccrack.bibdesk: Local
         publications = [[NSMutableArray alloc] initWithCapacity:1];
         shownPublications = [[NSMutableArray alloc] initWithCapacity:1];
         pubsLock = [[NSLock alloc] init];
+        
+        documentIsClosing = NO;
         frontMatter = [[NSMutableString alloc] initWithString:@""];
 
         quickSearchKey = [[[OFPreferenceWrapper sharedPreferenceWrapper] objectForKey:BDSKCurrentQuickSearchKey] retain];
         if(!quickSearchKey){
             quickSearchKey = [[NSString alloc] initWithString:BDSKTitleString];
         }
-        PDFpreviewer = [BDSKPreviewer sharedPreviewer];
         localDragPboard = [[NSPasteboard pasteboardWithName:LocalDragPasteboardName] retain];
         draggedItems = [[NSMutableArray alloc] initWithCapacity:1];
 		
+		texTask = [[BDSKTeXTask alloc] initWithFileName:@"bibcopy"];
+		[texTask setDelegate:self];
+		
         BD_windowControllers = [[NSMutableArray alloc] initWithCapacity:1];
         
-        macroDefinitions = [[NSMutableDictionary alloc] initWithCapacity:10];
+        macroDefinitions = OFCreateCaseInsensitiveKeyMutableDictionary();
         
         BDSKUndoManager *newUndoManager = [[[BDSKUndoManager alloc] init] autorelease];
         [newUndoManager setDelegate:self];
         [self setUndoManager:newUndoManager];
+		
+		itemsForCiteKeys = [[OFMultiValueDictionary alloc] initWithCaseInsensitiveKeys:YES];
 		
         // Register as observer of font change events.
         [[NSNotificationCenter defaultCenter] addObserver:self
@@ -70,10 +98,10 @@ NSString *BDSKBibItemLocalDragPboardType = @"edu.ucsd.cs.mmccrack.bibdesk: Local
 													 name:BDSKPreviewDisplayChangedNotification
 												   object:nil];
 
-		// register for general UI changes notifications:
+		// register for selection changes notifications:
 		[[NSNotificationCenter defaultCenter] addObserver:self
-												 selector:@selector(handleUpdateUINotification:)
-													 name:BDSKDocumentUpdateUINotification
+												 selector:@selector(handleTableSelectionChangedNotification:)
+													 name:BDSKTableSelectionChangedNotification
 												   object:self];
 
 		// register for tablecolumn changes notifications:
@@ -81,12 +109,11 @@ NSString *BDSKBibItemLocalDragPboardType = @"edu.ucsd.cs.mmccrack.bibdesk: Local
 												 selector:@selector(handleTableColumnChangedNotification:)
 													 name:BDSKTableColumnChangedNotification
 												   object:nil];
-
-		// want to register for changes to the custom string array too...
-		[[NSNotificationCenter defaultCenter] addObserver:self
-												 selector:@selector(handleCustomStringsChangedNotification:)
-													 name:BDSKCustomStringsChangedNotification
-												   object:nil];
+        
+        [[NSNotificationCenter defaultCenter] addObserver:self
+												 selector:@selector(handleResortDocumentNotification:)
+													 name:BDSKResortDocumentNotification
+												   object:nil];        
 
 		//  register to observe for item change notifications here.
 		[[NSNotificationCenter defaultCenter] addObserver:self
@@ -97,6 +124,11 @@ NSString *BDSKBibItemLocalDragPboardType = @"edu.ucsd.cs.mmccrack.bibdesk: Local
 		// register to observe for add/delete items.
 		[[NSNotificationCenter defaultCenter] addObserver:self
 												 selector:@selector(handleBibItemAddDelNotification:)
+													 name:BDSKDocSetPublicationsNotification
+												   object:self];
+
+		[[NSNotificationCenter defaultCenter] addObserver:self
+												 selector:@selector(handleBibItemAddDelNotification:)
 													 name:BDSKDocAddItemNotification
 												   object:self];
 
@@ -104,7 +136,17 @@ NSString *BDSKBibItemLocalDragPboardType = @"edu.ucsd.cs.mmccrack.bibdesk: Local
 												 selector:@selector(handleBibItemAddDelNotification:)
 													 name:BDSKDocDelItemNotification
                                                    object:self];
+        
+        [[NSNotificationCenter defaultCenter] addObserver:self
+                                                 selector:@selector(handleMacroChangedNotification:)
+                                                     name:BDSKBibDocMacroKeyChangedNotification
+                                                   object:nil];
 
+        [[NSNotificationCenter defaultCenter] addObserver:self
+                                                 selector:@selector(handleMacroChangedNotification:)
+                                                     name:BDSKBibDocMacroDefinitionChangedNotification
+                                                   object:nil];
+        
         // It's wrong that we have to manually register for this, since the document is the window's delegate in IB (and debugging/logging appears to confirm this).
         // However, we don't get this notification, and it's critical to clean up when closing the document window; this fixes #1097306, a crash when closing the
         // document window if an editor is open.  I can't reproduce with a test document-based project, so something may be hosed in the nib.
@@ -136,7 +178,6 @@ NSString *BDSKBibItemLocalDragPboardType = @"edu.ucsd.cs.mmccrack.bibdesk: Local
    
     [tableView setDoubleAction:@selector(editPubCmd:)];
     [tableView registerForDraggedTypes:[NSArray arrayWithObjects:NSStringPboardType, NSFilenamesPboardType, @"CorePasteboardFlavorType 0x57454253", nil]];
-    [sourceList registerForDraggedTypes:[NSArray arrayWithObjects:NSStringPboardType, NSFilenamesPboardType, BDSKBibItemLocalDragPboardType, nil]];
 
     [splitView setPositionAutosaveName:[self fileName]];
     
@@ -157,7 +198,7 @@ NSString *BDSKBibItemLocalDragPboardType = @"edu.ucsd.cs.mmccrack.bibdesk: Local
     // finally, make sure the font is correct initially:
 	[self setTableFont];
 	
-	// unfortunately we cannot set this in BI
+	// unfortunately we cannot set this in IB
 	[actionMenuButton setArrowImage:[NSImage imageNamed:@"ArrowPointingDown"]];
 	[actionMenuButton setShowsMenuWhenIconClicked:YES];
 	[[actionMenuButton cell] setAltersStateOfSelectedItem:NO];
@@ -183,6 +224,12 @@ NSString *BDSKBibItemLocalDragPboardType = @"edu.ucsd.cs.mmccrack.bibdesk: Local
     [saveTextEncodingPopupButton addItemsWithTitles:[[BDSKStringEncodingManager sharedEncodingManager] availableEncodingDisplayedNames]];
     
 	[addFieldComboBox setFormatter:[[[BDSKFieldNameFormatter alloc] init] autorelease]];
+        
+    if([documentWindow respondsToSelector:@selector(setAutorecalculatesKeyViewLoop:)])
+        [documentWindow setAutorecalculatesKeyViewLoop:YES];
+    
+    // hold onto this until we dealloc, or else we can get crashes when messaging the tableview in dealloc if dealloc is delayed at all
+    [documentWindow retain];
 }
 
 - (void)dealloc{
@@ -191,17 +238,20 @@ NSString *BDSKBibItemLocalDragPboardType = @"edu.ucsd.cs.mmccrack.bibdesk: Local
 #endif
     [tableView setDelegate:nil];
     [tableView setDataSource:nil];
+    [documentWindow release]; // retained in awakeFromNib
     if ([self undoManager]) {
         [[self undoManager] removeAllActionsWithTarget:self];
     }
     [[NSNotificationCenter defaultCenter] removeObserver:self];
-	[[NSApp delegate] removeErrorObjsForDocument:self];
+	[[BDSKErrorObjectController sharedErrorObjectController] removeErrorObjsForDocument:self];
     [macroDefinitions release];
+    [itemsForCiteKeys release];
+    // set pub document ivars to nil, or we get a crash when they message the undo manager in dealloc (only happens if you edit, click to close the doc, then save)
+    [publications makeObjectsPerformSelector:@selector(setDocument:) withObject:nil];
     [publications release];
     [shownPublications release];
     [pubsLock release];
     [frontMatter release];
-    [quickSearchTextDict release];
     [quickSearchKey release];
     [customStringArray release];
     [toolbarItems release];
@@ -209,10 +259,12 @@ NSString *BDSKBibItemLocalDragPboardType = @"edu.ucsd.cs.mmccrack.bibdesk: Local
     [BD_windowControllers release];
     [localDragPboard release];
     [draggedItems release];
+	[texTask release];
     [macroWC release];
     [tipRegex release];
     [andRegex release];
     [orRegex release];
+    [promiseDragColumnIdentifier release];
     [super dealloc];
 }
 
@@ -223,21 +275,28 @@ NSString *BDSKBibItemLocalDragPboardType = @"edu.ucsd.cs.mmccrack.bibdesk: Local
 
 - (BOOL)undoManagerShouldUndoChange:(id)sender{
 	if (![self isDocumentEdited]) {
-        int button = NSRunAlertPanel(NSLocalizedString(@"Warning", @""),
-                                     NSLocalizedString(@"You are about to undo past the last point this file was saved. Do you want to do this?", @""),
-                                     NSLocalizedString(@"OK",@"OK"), 
-									 NSLocalizedString(@"Cancel",@"Cancel"), nil);
-		return (button == NSOKButton);
+		[NSApp beginSheet:undoAlertSheet
+		   modalForWindow:documentWindow
+						  modalDelegate:self
+		   didEndSelector:NULL
+							contextInfo:nil];
+		int rv = [NSApp runModalForWindow:undoAlertSheet];
+		[NSApp endSheet:undoAlertSheet];
+		[undoAlertSheet orderOut:self];
+		if (rv == NSAlertAlternateReturn)
+			return NO;
 	}
 	return YES;
 }
 
+- (IBAction)dismissUndoAlertSheet:(id)sender{
+	[NSApp stopModalWithCode:[sender tag]];
+}
 
 - (void)setPublications:(NSArray *)newPubs{
 	if(newPubs != publications){
 		NSUndoManager *undoManager = [self undoManager];
 		[[undoManager prepareWithInvocationTarget:self] setPublications:publications];
-		[undoManager setActionName:NSLocalizedString(@"Set Publications",@"")];
 		
 		[publications autorelease];
 		publications = [newPubs mutableCopy];
@@ -248,15 +307,15 @@ NSString *BDSKBibItemLocalDragPboardType = @"edu.ucsd.cs.mmccrack.bibdesk: Local
 			[pub setDocument:self];
 		}
 		
-		NSDictionary *notifInfo = [NSDictionary dictionaryWithObjectsAndKeys:newPubs, @"pubs", nil];
-		[[NSNotificationCenter defaultCenter] postNotificationName:@"Set the publications in document"
+		NSDictionary *notifInfo = [NSDictionary dictionaryWithObjectsAndKeys:newPubs, @"pubs",  @"YES", @"lastRequest", nil];
+		[[NSNotificationCenter defaultCenter] postNotificationName:BDSKDocSetPublicationsNotification
 															object:self
 														  userInfo:notifInfo];
     }
 }
 
 - (NSMutableArray *) publications{
-    return [[publications retain] autorelease];
+    return publications;
 }
 
 - (void)insertPublication:(BibItem *)pub atIndex:(unsigned int)index {
@@ -268,13 +327,9 @@ NSString *BDSKBibItemLocalDragPboardType = @"edu.ucsd.cs.mmccrack.bibdesk: Local
 	[[undoManager prepareWithInvocationTarget:self] removePublication:pub];
 	
     [publications insertObject:pub atIndex:index usingLock:pubsLock]; 
-	// always add new pubs to the shown array
-	// I do not know how to add it at the right place when satisfies the search
-    if([[(BDSK_USING_JAGUAR ? searchFieldTextField : searchField) stringValue] isEqualToString:@""]){
-        [shownPublications insertObject:pub atIndex:index usingLock:pubsLock];
-        [self sortPubsByColumn:nil];
-    }
 	[pub setDocument:self];
+    
+    [itemsForCiteKeys addObject:pub forKey:[pub citeKey]];
 	
 	NSDictionary *notifInfo = [NSDictionary dictionaryWithObjectsAndKeys:pub, @"pub",
 		(last ? @"YES" : @"NO"), @"lastRequest", nil];
@@ -291,40 +346,47 @@ NSString *BDSKBibItemLocalDragPboardType = @"edu.ucsd.cs.mmccrack.bibdesk: Local
     [self insertPublication:pub atIndex:0 lastRequest:last]; // insert new pubs at the beginning, so item number is handled properly
 }
 
+
+- (void)addPublications:(NSArray *)pubArray{
+	int i = [pubArray count];
+	
+	// pubs are added at the beginning, so we add them in opposite order
+	while(i--){
+		[self addPublication:[pubArray objectAtIndex:i] lastRequest:(i == 0)];
+	}
+}
+
 - (void)removePublication:(BibItem *)pub{
 	[self removePublication:pub lastRequest:YES];
 }
 
 - (void)removePublication:(BibItem *)pub lastRequest:(BOOL)last{
+	int index = [publications indexOfObjectIdenticalTo:pub];
 	NSUndoManager *undoManager = [self undoManager];
-	[[undoManager prepareWithInvocationTarget:self] addPublication:pub];
+	[[undoManager prepareWithInvocationTarget:self] insertPublication:pub atIndex:index];
 	
 	NSDictionary *notifInfo = [NSDictionary dictionaryWithObjectsAndKeys:self, @"Sender", nil];
 	[[NSNotificationCenter defaultCenter] postNotificationName:BDSKDocWillRemoveItemNotification
 														object:pub
 													  userInfo:notifInfo];	
 	
+    [itemsForCiteKeys removeObject:pub forKey:[pub citeKey]];
+
+#ifdef BDSK_USING_TIGER
+    if(floor(NSAppKitVersionNumber) <= NSAppKitVersionNumber10_3){}
+    else
+        [[NSFileManager defaultManager] removeSpotlightCacheForItemNamed:[pub citeKey]];
+#endif
+    
 	[pub setDocument:nil];
 	[publications removeObjectIdenticalTo:pub usingLock:pubsLock];
 	[shownPublications removeObjectIdenticalTo:pub usingLock:pubsLock];
-	
+	    
 	notifInfo = [NSDictionary dictionaryWithObjectsAndKeys:pub, @"pub",
 		(last ? @"YES" : @"NO"), @"lastRequest", nil];
 	[[NSNotificationCenter defaultCenter] postNotificationName:BDSKDocDelItemNotification
 														object:self
 													  userInfo:notifInfo];	
-}
-
-- (void)handleBibItemAddDelNotification:(NSNotification *)notification{
-	NSDictionary *userInfo = [notification userInfo];
-	BOOL wasLastRequest = [[userInfo objectForKey:@"lastRequest"] isEqualToString:@"YES"];
-
-	if(wasLastRequest){
-	//	NSLog(@"was last request in handleBibItemAddDel");
-		// This method should also check the publication to see if it's selected?
-		// and maybe also resort it... - maybe not resort this.
-        [self updateUI];
-	}
 }
 
 - (NSArray *)publicationsForAuthor:(BibAuthor *)anAuthor{
@@ -343,30 +405,34 @@ NSString *BDSKBibItemLocalDragPboardType = @"edu.ucsd.cs.mmccrack.bibdesk: Local
     return anAuthorPubs;
 }
 
-
 - (BOOL)citeKeyIsUsed:(NSString *)aCiteKey byItemOtherThan:(BibItem *)anItem{
-    NSEnumerator *bibE = [publications objectEnumerator];
-    BibItem *bi = nil;
-    while(bi = [bibE nextObject]){
-        if (bi == anItem) continue;
-        if ([[bi citeKey] isEqualToString:aCiteKey]) {
-            return YES;
-        }
-    }
-    return NO;
+    NSArray *items = [[self itemsForCiteKeys] arrayForKey:aCiteKey];
+    
+	if ([items count] > 1)
+		return YES;
+	if ([items count] == 1 && [items objectAtIndex:0] != anItem)	
+		return YES;
+	return NO;
 }
 
 - (IBAction)generateCiteKey:(id)sender
 {
+	if ([self numberOfSelectedPubs] == 0) return;
+	
 	NSEnumerator *selEnum = [self selectedPubEnumerator];
 	NSNumber *row;
 	BibItem *aPub;
 	
+    // first we make sure all edits are committed
+	[[NSNotificationCenter defaultCenter] postNotificationName:BDSKFinalizeChangesNotification
+                                                        object:self
+                                                      userInfo:[NSDictionary dictionary]];
+	
 	while (row = [selEnum nextObject]) {
-		aPub = [shownPublications objectAtIndex:[row intValue]];
+		aPub = [shownPublications objectAtIndex:[row intValue] usingLock:pubsLock];
 		[aPub setCiteKey:[aPub suggestedCiteKey]];
 	}
-    [self updateUI];
+	[[self undoManager] setActionName:([self numberOfSelectedPubs] > 1 ? NSLocalizedString(@"Generate Cite Keys",@"") : NSLocalizedString(@"Generate Cite Key",@""))];
 }
 
 - (NSString *)windowNibName{
@@ -385,7 +451,7 @@ NSString *BDSKBibItemLocalDragPboardType = @"edu.ucsd.cs.mmccrack.bibdesk: Local
     [self sortPubsByDefaultColumn];
     [self setTableFont];
     [self updateUI];
-
+	[self updatePreviews:nil]; // just to be sure
 }
 
 - (void)addWindowController:(NSWindowController *)windowController{
@@ -410,24 +476,10 @@ NSString *BDSKBibItemLocalDragPboardType = @"edu.ucsd.cs.mmccrack.bibdesk: Local
     }
 }
 
-- (void)showWindows{
-    [super showWindows];
-    NSAppleEventManager *sam = [NSAppleEventManager sharedAppleEventManager];
-    if(![sam respondsToSelector:@selector(currentAppleEvent)]) // 10.3 only
-        return;
-
-    // on 10.4 systems, we get a search string keyword from an open document event initiated from Spotlight search results
-    NSAppleEventDescriptor *desc = [sam performSelector:@selector(currentAppleEvent)];
-    NSString *searchString = [[desc descriptorForKeyword:'stxt'] stringValue]; // FIXME: keyword is keyAESearchText
-    if(searchString && [self respondsToSelector:@selector(setFilterField:)])
-        [self performSelector:@selector(setFilterField:) withObject:searchString];
-}
-
 // select duplicates, then allow user to delete/copy/whatever
 - (IBAction)selectDuplicates:(id)sender{
     
-    if([self respondsToSelector:@selector(setFilterField:)])
-        [self performSelector:@selector(setFilterField:) withObject:@""]; // make sure we can see everything
+	[self setFilterField:nil]; // make sure we can see everything
     
     [documentWindow makeFirstResponder:tableView]; // make sure tableview has the focus
     [tableView deselectAll:nil];
@@ -438,21 +490,24 @@ NSString *BDSKBibItemLocalDragPboardType = @"edu.ucsd.cs.mmccrack.bibdesk: Local
     
     NSEnumerator *e = [pubsToRemove objectEnumerator];
     BibItem *anItem;
-    unsigned index;
 
-    while(anItem = [e nextObject]){
-        index = (sortDescending ? [shownPublications count] - 1 - [shownPublications indexOfObjectIdenticalTo:anItem] : [shownPublications indexOfObjectIdenticalTo:anItem]);
-        [tableView selectRow:index byExtendingSelection:YES];
-    }
+    while(anItem = [e nextObject])
+        [tableView selectRow:[shownPublications indexOfObjectIdenticalTo:anItem usingLock:pubsLock] byExtendingSelection:YES];
 
     if([pubsToRemove count])
-        [tableView scrollRowToVisible:index];  // make sure at least one item is visible
+        [tableView scrollRowToVisible:[tableView selectedRow]];  // make sure at least one item is visible
     else
         NSBeep();
 
     // update status line after the updateUI notification, or else it gets overwritten
-    [infoLine performSelector:@selector(setStringValue:) withObject:[NSString stringWithFormat:@"%i %@", [pubsToRemove count], NSLocalizedString(@"duplicate publications found.", @"")] afterDelay:0.01];
+    [self setStatus:[NSString stringWithFormat:@"%i %@", [pubsToRemove count], NSLocalizedString(@"duplicate publications found.", @"")] immediate:NO];
     [pubsToRemove release];
+}
+
+- (void)canCloseDocumentWithDelegate:(id)delegate shouldCloseSelector:(SEL)shouldCloseSelector contextInfo:(void *)contextInfo;
+{
+    documentIsClosing = YES;
+    [super canCloseDocumentWithDelegate:delegate shouldCloseSelector:shouldCloseSelector contextInfo:contextInfo];
 }
 
 #pragma mark -
@@ -500,7 +555,7 @@ NSString *BDSKBibItemLocalDragPboardType = @"edu.ucsd.cs.mmccrack.bibdesk: Local
 // returning NO keeps the document window from closing if the save was initiated by a close
 // action, so the user gets a second chance at fixing the problem
 - (BOOL)writeToFile:(NSString *)fileName ofType:(NSString *)docType{
-    BOOL success;
+    volatile BOOL success;
     NS_DURING
         success = [super writeToFile:fileName ofType:docType];
     NS_HANDLER
@@ -515,12 +570,15 @@ NSString *BDSKBibItemLocalDragPboardType = @"edu.ucsd.cs.mmccrack.bibdesk: Local
             [localException raise];
         }
     NS_ENDHANDLER
+    
+    NSDictionary *infoDict = [[NSDictionary alloc] initWithObjectsAndKeys:[self publications], @"publications", [self fileName], @"fileName", nil];
+    [[NSApp delegate] rebuildMetadataCache:infoDict];
+    [infoDict release];
         
     return success;
 }
 
 - (IBAction)saveDocument:(id)sender{
-
     [super saveDocument:sender];
     if([[OFPreferenceWrapper sharedPreferenceWrapper] integerForKey:BDSKAutoSaveAsRSSKey] == NSOnState
        && ![[self fileType] isEqualToString:@"Rich Site Summary file"]){
@@ -530,6 +588,18 @@ NSString *BDSKBibItemLocalDragPboardType = @"edu.ucsd.cs.mmccrack.bibdesk: Local
 #endif
         [self exportAsRSS:nil];
     }
+	// needed because of finalize changes
+	[self performSelector:@selector(clearChangeCount) withObject:nil afterDelay:0.01];
+}
+
+- (IBAction)saveDocumentAs:(id)sender{
+    [super saveDocumentAs:sender];
+	// needed because of finalize changes
+	[self performSelector:@selector(clearChangeCount) withObject:nil afterDelay:0.01];
+}
+
+- (void)clearChangeCount{
+	[self updateChangeCount:NSChangeCleared];
 }
 
 - (IBAction)exportAsAtom:(id)sender{
@@ -617,10 +687,11 @@ NSString *BDSKBibItemLocalDragPboardType = @"edu.ucsd.cs.mmccrack.bibdesk: Local
 
 - (NSData *)dataRepresentationOfType:(NSString *)aType
 {
-    [[NSNotificationCenter defaultCenter] postNotificationName:BDSKDocumentWillSaveNotification
+    // first we make sure all edits are committed
+	[[NSNotificationCenter defaultCenter] postNotificationName:BDSKFinalizeChangesNotification
                                                         object:self
                                                       userInfo:[NSDictionary dictionary]];
-    
+	
     if ([aType isEqualToString:@"bibTeX database"]){
         return [self bibDataRepresentationDroppingInternal:NO];
     }else if ([aType isEqualToString:@"Rich Site Summary file"]){
@@ -686,7 +757,6 @@ stringByAppendingPathComponent:@"BibDesk"]; */
           } else {
               [localException raise];
           }
-            [localException raise];
         NS_ENDHANDLER
     }
     [d appendData:[@"</channel>\n</rss>" dataUsingEncoding:NSASCIIStringEncoding  allowLossyConversion:YES]];
@@ -771,13 +841,16 @@ stringByAppendingPathComponent:@"BibDesk"]; */
 
 - (NSData *)bibTeXDataWithEncoding:(NSStringEncoding)encoding droppingInternal:(BOOL)drop{
     
-    BibItem *tmp;
-    NSEnumerator *e = [publications objectEnumerator];
     NSMutableData *d = [NSMutableData data];
-
+    
     if(encoding == 0)
         [NSException raise:@"String encoding exception" format:@"Sender did not specify an encoding to %@.", NSStringFromSelector(_cmd)];
-
+    
+	if([[OFPreferenceWrapper sharedPreferenceWrapper] boolForKey:BDSKAutoSortForCrossrefsKey])
+		[self performSortForCrossrefs];
+    
+    BOOL shouldAppendFrontMatter = YES;
+	
     if([[OFPreferenceWrapper sharedPreferenceWrapper] boolForKey:BDSKShouldUseTemplateFile]){
         NSMutableString *templateFile = [NSMutableString stringWithContentsOfFile:[[[OFPreferenceWrapper sharedPreferenceWrapper] stringForKey:BDSKOutputTemplateFileKey] stringByExpandingTildeInPath]];
         
@@ -787,23 +860,32 @@ stringByAppendingPathComponent:@"BibDesk"]; */
 
         [templateFile appendFormat:@"\n%%%% Saved with string encoding %@ \n\n", encodingName];
         
+        // remove all whitespace so we can make a comparison; just collapsing isn't quite good enough, unfortunately
+        NSString *collapsedTemplate = [templateFile stringByRemovingWhitespace];
+        NSString *collapsedFrontMatter = [frontMatter stringByRemovingWhitespace];
+        if(![NSString isEmptyString:collapsedFrontMatter] && [collapsedTemplate containsString:collapsedFrontMatter]){
+            NSLog(@"*** WARNING! *** Found duplicate preamble %@.  Using template from preferences.", frontMatter);
+            shouldAppendFrontMatter = NO;
+        }
+        
         [d appendData:[templateFile dataUsingEncoding:encoding allowLossyConversion:YES]];
     }
     
-    // keep this regardless of the prefs setting for the template
-    [d appendData:[frontMatter dataUsingEncoding:encoding allowLossyConversion:YES]];
+    // only append this if it wasn't redundant (this assumes that the original frontmatter is either a subset of the necessary frontmatter, or that the user's preferences should override in case of a conflict)
+    if(shouldAppendFrontMatter){
+        [frontMatter appendString:@"\n\n"];
+        [d appendData:[frontMatter dataUsingEncoding:encoding allowLossyConversion:YES]];
+    }
+        
     
     // output the document's macros:
-    NSString *macroString = nil;
-    NSArray *macros = [[macroDefinitions allKeys] sortedArrayUsingSelector:@selector(compare:)];
+	[d appendData:[[self bibTeXMacroString] dataUsingEncoding:encoding allowLossyConversion:YES]];
     
     // output the bibs
-    foreach(macro, macros){
-        macroString = [NSString stringWithFormat:@"\n@STRING{%@ = \"%@\"}\n",macro,[macroDefinitions objectForKey:macro]];
-        [d appendData:[macroString dataUsingEncoding:encoding
-                                allowLossyConversion:YES]];
-    }
-    
+
+    NSEnumerator *e = [publications objectEnumerator];
+    BibItem *tmp;
+
     while(tmp = [e nextObject]){
         [d appendData:[[NSString stringWithString:@"\n\n"] dataUsingEncoding:encoding  allowLossyConversion:YES]];
         [d appendData:[[tmp bibTeXStringDroppingInternal:drop] dataUsingEncoding:encoding allowLossyConversion:YES]];
@@ -855,14 +937,16 @@ stringByAppendingPathComponent:@"BibDesk"]; */
                                                        @"alert title"),
                                      NSLocalizedString(@"To re-read the file as BibTeX and see if the import was successful, use the \"Validate\" button.",
                                                        @"Validate file or skip."),
-                                     @"Validate",@"Skip", nil, nil);
+                                     NSLocalizedString(@"Validate", @"Validate"),
+									 NSLocalizedString(@"Skip", @"Skip"), 
+									 nil, nil);
             // let NSDocument name it
             [self setFileName:nil];
             [self setFileType:@"bibTeX database"];  // this is the only type we support via the save command
             if(rv == NSAlertDefaultReturn){
                 // per user feedback, give an option to run the file through the BibTeX parser to see if we can open our own BibTeX representation
                 // it is necessary to write the data to a file in order to use the error panel to jump to the offending line
-                NSString *tempFilePath = [NSTemporaryDirectory() stringByAppendingPathComponent:[[NSProcessInfo processInfo] globallyUniqueString]];
+				NSString * tempFilePath = [[NSApp delegate] temporaryFilePath:[[self fileName] lastPathComponent] createDirectory:NO];
                 [[self bibTeXDataWithEncoding:[[OFPreferenceWrapper sharedPreferenceWrapper] integerForKey:BDSKDefaultStringEncodingKey] droppingInternal:NO] writeToFile:tempFilePath atomically:YES];
                 [[NSApp delegate] openBibTeXFile:tempFilePath withEncoding:[[OFPreferenceWrapper sharedPreferenceWrapper] integerForKey:BDSKDefaultStringEncodingKey]];
                 // [self performSelector:@selector(close) withObject:nil afterDelay:0]; // closes the window, but it's weird to have it open, then close
@@ -872,6 +956,26 @@ stringByAppendingPathComponent:@"BibDesk"]; */
         
     } else return NO;  // if super failed
     
+}
+
+- (BOOL)revertToSavedFromFile:(NSString *)fileName ofType:(NSString *)type{
+	if([super revertToSavedFromFile:fileName ofType:type]){
+		[tableView deselectAll:self]; // clear before resorting
+		[self searchFieldAction:searchField]; // redo the search
+        [self sortPubsByColumn:nil]; // resort
+		return YES;
+	}
+	return NO;
+}
+
+- (BOOL)revertToSavedFromURL:(NSURL *)aURL ofType:(NSString *)type{
+	if([super revertToSavedFromURL:aURL ofType:type]){
+        [tableView deselectAll:self]; // clear before resorting
+		[self searchFieldAction:searchField]; // redo the search
+        [self sortPubsByColumn:nil]; // resort
+		return YES;
+	}
+	return NO;
 }
 
 - (BOOL)loadDataRepresentation:(NSData *)data ofType:(NSString *)aType
@@ -908,7 +1012,7 @@ stringByAppendingPathComponent:@"BibDesk"]; */
     }
     dictionary = [NSMutableDictionary dictionaryWithCapacity:10];
     
-    [[NSApp delegate] setDocumentForErrors:self];
+    [[BDSKErrorObjectController sharedErrorObjectController] setDocumentForErrors:self];
 	newPubs = [PubMedParser itemsFromString:dataString
                                       error:&hadProblems
                                 frontMatter:frontMatter
@@ -923,15 +1027,15 @@ stringByAppendingPathComponent:@"BibDesk"]; */
                              NSLocalizedString(@"Edit file", @""));
         if (rv == NSAlertDefaultReturn) {
             // the user said to give up
-			[[NSApp delegate] removeErrorObjsForDocument:nil]; // this removes errors from a previous failed load
-			[[NSApp delegate] handoverErrorObjsForDocument:self]; // this dereferences the doc from the errors, so they won't be removed when the document is deallocated
+			[[BDSKErrorObjectController sharedErrorObjectController] removeErrorObjsForDocument:nil]; // this removes errors from a previous failed load
+			[[BDSKErrorObjectController sharedErrorObjectController] handoverErrorObjsForDocument:self]; // this dereferences the doc from the errors, so they won't be removed when the document is deallocated
             return NO;
         }else if (rv == NSAlertAlternateReturn){
             // the user said to keep going, so if they save, they might clobber data...
         }else if(rv == NSAlertOtherReturn){
             // they said to edit the file.
-            [[NSApp delegate] openEditWindowForDocument:self];
-            [[NSApp delegate] showErrorPanel:self];
+            [[BDSKErrorObjectController sharedErrorObjectController] openEditWindowForDocument:self];
+            [[BDSKErrorObjectController sharedErrorObjectController] showErrorPanel:self];
             return NO;
         }
     }
@@ -944,6 +1048,8 @@ stringByAppendingPathComponent:@"BibDesk"]; */
 	while (pub = [pubEnum nextObject]) {
 		[pub setDocument:self];
 	}
+	
+	[self rebuildItemsForCiteKeys];
     
     [shownPublications setArray:publications];
     // since we can't save pubmed files as pubmed files:
@@ -983,7 +1089,7 @@ stringByAppendingPathComponent:@"BibDesk"]; */
 //    NSDate *start = [NSDate date];
 //    NSLog(@"start: %@", [start description]);
         
-    [[NSApp delegate] setDocumentForErrors:self];
+    [[BDSKErrorObjectController sharedErrorObjectController] setDocumentForErrors:self];
 	
 	newPubs = [BibTeXParser itemsFromData:data
                                     error:&hadProblems
@@ -1002,15 +1108,15 @@ stringByAppendingPathComponent:@"BibDesk"]; */
                              NSLocalizedString(@"Edit file", @""));
         if (rv == NSAlertDefaultReturn) {
             // the user said to give up
-			[[NSApp delegate] removeErrorObjsForDocument:nil]; // this removes errors from a previous failed load
-			[[NSApp delegate] handoverErrorObjsForDocument:self]; // this dereferences the doc from the errors, so they won't be removed when the document is deallocated
+			[[BDSKErrorObjectController sharedErrorObjectController] removeErrorObjsForDocument:nil]; // this removes errors from a previous failed load
+			[[BDSKErrorObjectController sharedErrorObjectController] handoverErrorObjsForDocument:self]; // this dereferences the doc from the errors, so they won't be removed when the document is deallocated
             return NO;
         }else if (rv == NSAlertAlternateReturn){
             // the user said to keep going, so if they save, they might clobber data...
         }else if(rv == NSAlertOtherReturn){
             // they said to edit the file.
-            [[NSApp delegate] openEditWindowForDocument:self];
-            [[NSApp delegate] showErrorPanel:self];
+            [[BDSKErrorObjectController sharedErrorObjectController] openEditWindowForDocument:self];
+            [[BDSKErrorObjectController sharedErrorObjectController] showErrorPanel:self];
             return NO;
         }
     }
@@ -1023,6 +1129,8 @@ stringByAppendingPathComponent:@"BibDesk"]; */
 	while (pub = [pubEnum nextObject]) {
 		[pub setDocument:self];
 	}
+	
+	[self rebuildItemsForCiteKeys];
     
 	[shownPublications setArray:publications];
     return YES;
@@ -1039,60 +1147,33 @@ stringByAppendingPathComponent:@"BibDesk"]; */
         return;
     }
 	
+	NSEnumerator *delEnum = [self selectedPubEnumerator]; // this is an array of indices, not pubs
+	NSMutableArray *pubsToDelete = [NSMutableArray array];
+	NSNumber *row;
+
+	while(row = [delEnum nextObject]){ // make an array of BibItems, since the removePublication: method takes those as args; don't remove based on index, as those change after removal!
+		[pubsToDelete addObject:[shownPublications objectAtIndex:[row intValue] usingLock:pubsLock]];
+	}
+	
+	delEnum = [pubsToDelete objectEnumerator];
+	BibItem *aBibItem = nil;
+	int numDeletedPubs = 0;
+	
+	while(aBibItem = [delEnum nextObject]){
+		numDeletedPubs ++;
+		[self removePublication:aBibItem lastRequest:(numDeletedPubs == numSelectedPubs)];
+	}
+        
 	NSString * pubSingularPlural;
 	if (numSelectedPubs == 1) {
-		pubSingularPlural= NSLocalizedString(@"publication", @"publication");
+		pubSingularPlural = NSLocalizedString(@"Publication", @"publication");
 	} else {
-		pubSingularPlural = NSLocalizedString(@"publications", @"publications");
+		pubSingularPlural = NSLocalizedString(@"Publications", @"publications");
 	}
 	
+    [self setStatus:[NSString stringWithFormat:NSLocalizedString(@"Deleted %i %@",@"Deleted %i %@ [i-> number, @-> publication(s)]"),numSelectedPubs, pubSingularPlural] immediate:NO];
 	
-	NSBeginCriticalAlertSheet([NSString stringWithFormat:NSLocalizedString(@"Delete %@",@"Delete %@"), pubSingularPlural],NSLocalizedString(@"Delete",@"Delete"),NSLocalizedString(@"Cancel",@"Cancel"),nil,documentWindow,self,@selector(deleteSheetDidEnd:returnCode:contextInfo:),NULL,nil,NSLocalizedString(@"Delete %i %@?",@"Delete %i %@? [i-> number, @-> publication(s)]"),numSelectedPubs, pubSingularPlural);
-	
-}
-
-
-- (void) deleteSheetDidEnd:(NSWindow *)sheet returnCode:(int)rv contextInfo:(void *)contextInfo {
-    if (rv == NSAlertDefaultReturn) {
-        //the user said to delete.
-        NSEnumerator *delEnum = [self selectedPubEnumerator]; // this is an array of indices, not pubs
-        NSMutableArray *pubsToDelete = [NSMutableArray array];
-        NSNumber *row;
-
-        while(row = [delEnum nextObject]){ // make an array of BibItems, since the removePublication: method takes those as args; don't remove based on index, as those change after removal!
-            [pubsToDelete addObject:[shownPublications objectAtIndex:[row intValue]]];
-        }
-        
-        delEnum = [pubsToDelete objectEnumerator];
-        BibItem *aBibItem = nil;
-        int numSelectedPubs = [self numberOfSelectedPubs];
-        int numDeletedPubs = 0;
-        
-        while(aBibItem = [delEnum nextObject]){
-            numDeletedPubs ++;
-            if(numDeletedPubs == numSelectedPubs){
-                [self removePublication:aBibItem lastRequest:YES];
-            }else{
-                [self removePublication:aBibItem lastRequest:NO];
-            }
-        }
-        
-        NSString * pubSingularPlural;
-	if (numSelectedPubs == 1) {
-            pubSingularPlural= NSLocalizedString(@"Remove Publication", @"");
-	} else {
-            pubSingularPlural = NSLocalizedString(@"Remove Publications", @"");
-	}
-        
-        if (numDeletedPubs > 0) { // why is this test here?
-            [[self undoManager] setActionName:pubSingularPlural];
-            [tableView deselectAll:nil];
-            [self updateUI];
-        }
-        
-    }else{
-        //the user canceled, do nothing.
-    }
+	[[self undoManager] setActionName:[NSString stringWithFormat:NSLocalizedString(@"Remove %@", @"Remove Publication(s)"),pubSingularPlural]];
 }
 
 
@@ -1178,7 +1259,6 @@ stringByAppendingPathComponent:@"BibDesk"]; */
 
 - (void)setupSearchField{
 	// called in awakeFromNib
-	    quickSearchTextDict = [[[OFPreferenceWrapper sharedPreferenceWrapper] objectForKey:BDSKCurrentQuickSearchTextDictKey] mutableCopy];
 	id searchCellOrTextField = nil;
 	
 
@@ -1204,7 +1284,7 @@ stringByAppendingPathComponent:@"BibDesk"]; */
 		searchField = (id) [[NSSearchField alloc] initWithFrame:[[searchFieldBox contentView] frame]];
 
 		[searchFieldBox setContentView:searchField];
-                [searchField release];
+        [searchField release];
 				
 		searchCellOrTextField = [searchField cell];
 		[searchCellOrTextField setSendsWholeSearchString:NO]; // don't wait for Enter key press.
@@ -1214,30 +1294,26 @@ stringByAppendingPathComponent:@"BibDesk"]; */
 		
 		[searchField setDelegate:self];
 		[(NSCell *)searchField setAction:@selector(searchFieldAction:)];
+        		
+		// set the search key's menuitem to NSOnState
+        [self setSelectedSearchFieldKey:quickSearchKey];
 		
-		// fit into tab key loop - doesn't work yet
-/*		[actionMenuButton setNextKeyView:searchField];
-		[searchField setNextKeyView:tableView]; 
-		*/
 	}
-	
-	if(quickSearchTextDict){
-/*		if([quickSearchTextDict objectForKey:quickSearchKey]){
-			[searchCellOrTextField setStringValue:
-				[quickSearchTextDict objectForKey:quickSearchKey]];
-			if(BDSK_USING_JAGUAR){
-				[quickSearchClearButton setEnabled:YES];
-			}
-		}else{
-			[searchCellOrTextField setStringValue:@""];
-		}
-*/		
-	}else{
-		quickSearchTextDict = [[NSMutableDictionary dictionaryWithCapacity:4] retain];
-	}
-	
-	// [self setSelectedSearchFieldKey:quickSearchKey];
-	
+		
+}
+
+-(NSString*) filterField {
+	return [searchField stringValue];
+}
+
+- (void)setFilterField:(NSString*) filterterm {
+    NSResponder * oldFirstResponder = [documentWindow firstResponder];
+    [documentWindow makeFirstResponder:searchField];
+    
+    [searchField setObjectValue:filterterm];
+    [self searchFieldAction:searchField];
+    
+    [documentWindow makeFirstResponder:oldFirstResponder];
 }
 
 - (IBAction)searchFieldChangeKey:(id)sender{
@@ -1262,9 +1338,6 @@ stringByAppendingPathComponent:@"BibDesk"]; */
 		NSSearchFieldCell *searchCell = [searchField cell];
 		searchCellOrTextField = searchCell;	
 		[searchCell setPlaceholderString:[NSString stringWithFormat:NSLocalizedString(@"Search by %@",@""),newKey]];
-		
-		[searchField setNextKeyView:tableView];
-		[tableView setNextKeyView:searchField];
 	
 		NSMenu *templateMenu = [searchCell searchMenuTemplate];
 		if(![quickSearchKey isEqualToString:newKey]){
@@ -1279,24 +1352,12 @@ stringByAppendingPathComponent:@"BibDesk"]; */
 		[searchCell setSearchMenuTemplate:templateMenu];
 		
 		if(newKey != quickSearchKey){
-			
-			
 			[newKey retain];
 			[quickSearchKey release];
 			quickSearchKey = newKey;
 		}
 		
 	}
-
-	/*
-	NSString *newQueryString = [quickSearchTextDict objectForKey:newKey];
-    if(newQueryString){
-        [searchCellOrTextField setStringValue:newQueryString];
-    }else{
-        [searchCellOrTextField setStringValue:@""];
-		newQueryString = @"";
-    }
-	 */
  
 	// NSLog(@"in setSelectedSearchFieldKey, newQueryString is [%@]", newQueryString);
 	[self hidePublicationsWithoutSubstring:[searchCellOrTextField stringValue] //newQueryString
@@ -1435,7 +1496,7 @@ stringByAppendingPathComponent:@"BibDesk"]; */
 - (void)controlTextDidChange:(NSNotification *)notif{
     id sender = [notif object];
 	if(sender == searchFieldTextField){
-		if([[searchFieldTextField stringValue] isEqualToString:@""]){
+		if([NSString isEmptyString:[searchFieldTextField stringValue]]){
 			[quickSearchClearButton setEnabled:NO];
 		}else{
 			[quickSearchClearButton setEnabled:YES];
@@ -1453,58 +1514,34 @@ stringByAppendingPathComponent:@"BibDesk"]; */
 #pragma mark -
 
 - (void)hidePublicationsWithoutSubstring:(NSString *)substring inField:(NSString *)field{
-    if([substring isEqualToString:@""]){
+	NSMutableArray *pubsToSelect = nil;
+	
+    if([NSString isEmptyString:substring]){
         // if it's an empty string, cache the selected BibItems for later selection, so the items remain selected after clearing the field
-        NSMutableArray *pubsToSelect = nil;
-
         if([tableView numberOfSelectedRows]){
-            NSEnumerator *selE = [self selectedPubEnumerator]; // this is an array of indices, not pubs
             pubsToSelect = [NSMutableArray array];
+            NSEnumerator *selE = [self selectedPubEnumerator]; // this is an array of indices, not pubs
             NSNumber *row;
             
             while(row = [selE nextObject]){ // make an array of BibItems, since the removePublication: method takes those as args; don't remove based on index, as those change after removal!
-                [pubsToSelect addObject:[shownPublications objectAtIndex:[row intValue]]];
-            }
-            
+                [pubsToSelect addObject:[shownPublications objectAtIndex:[row intValue] usingLock:pubsLock]];
+			}
         }
         
         [shownPublications setArray:publications];
-        [self sortPubsByColumn:nil]; // resort
-
-        if(pubsToSelect){
-            [tableView deselectAll:nil]; // deselect all, or we'll extend the selection to include previously selected row indexes
-            [tableView reloadData]; // have to reload so the rows get set up right, but a full updateUI flashes the preview, which is annoying
-            // now select the items that were previously selected
-            NSEnumerator *oldSelE = [pubsToSelect objectEnumerator];
-            BibItem *anItem;
-            unsigned index;
-            while(anItem = [oldSelE nextObject]){
-                index = (sortDescending ? [shownPublications count] - 1 - [shownPublications indexOfObjectIdenticalTo:anItem] : [shownPublications indexOfObjectIdenticalTo:anItem]);
-                [tableView selectRow:index byExtendingSelection:YES];
-            }
-            
-            [tableView scrollRowToVisible:index]; // just go to the last one
-        }       
-        [self updateUI];
-        return;
-    }
-    [shownPublications setArray:[self publicationsWithSubstring:substring
-                                                        inField:field
-                                                       forArray:publications]];
-    
-    [quickSearchTextDict setObject:substring
-                            forKey:field];
-    
-    [[OFPreferenceWrapper sharedPreferenceWrapper] setObject:[[quickSearchTextDict copy] autorelease]
-                                                      forKey:BDSKCurrentQuickSearchTextDictKey];
-    [[OFPreferenceWrapper sharedPreferenceWrapper] autoSynchronize];
-
-    [tableView deselectAll:nil];
-    [self sortPubsByColumn:nil];
-    [self updateUI]; // calls reloadData
-    if([shownPublications count] == 1)
-        [tableView selectAll:self];
-
+	}else{
+		[shownPublications setArray:[self publicationsWithSubstring:substring
+															inField:field
+														   forArray:publications]];
+		if([shownPublications count] == 1)
+			pubsToSelect = [NSMutableArray arrayWithObject:[shownPublications lastObject]];
+	}
+	
+	[tableView deselectAll:nil];
+	[self sortPubsByColumn:nil]; // resort
+	[self updateUI];
+	if(pubsToSelect)
+		[self highlightBibs:pubsToSelect];
 }
 
 - (void)cacheQuickSearchRegexes{
@@ -1524,35 +1561,29 @@ stringByAppendingPathComponent:@"BibDesk"]; */
     if(![substring canBeConvertedToEncoding:NSASCIIStringEncoding])
         doLossySearch = NO;
     
-    NSString *selectorString;
-    BOOL isGeneric = NO;
+    SEL accessor = NULL;
     
     if([field isEqualToString:BDSKTitleString]){
-        selectorString = @"title";
+        accessor = NSSelectorFromString(@"title");
     } else if([field isEqualToString:BDSKAuthorString]){
-		selectorString = @"bibtexAuthorString";
+		accessor = NSSelectorFromString(@"bibTeXAuthorString");
 	} else if([field isEqualToString:BDSKDateString]){
-		selectorString = @"calendarDateDescription";
+		accessor = NSSelectorFromString(@"calendarDateDescription");
 	} else if([field isEqualToString:BDSKDateModifiedString] ||
 			  [field isEqualToString:@"Modified"]){
-		selectorString = @"calendarDateModifiedDescription";
+		accessor = NSSelectorFromString(@"calendarDateModifiedDescription");
 	} else if([field isEqualToString:BDSKDateCreatedString] ||
 			  [field isEqualToString:@"Added"] ||
 			  [field isEqualToString:@"Created"]){
-		selectorString = @"calendarDateCreatedDescription";
+		accessor = NSSelectorFromString(@"calendarDateCreatedDescription");
 	} else if([field isEqualToString:@"All Fields"]){
-		selectorString = @"allFieldsString";
+		accessor = NSSelectorFromString(@"allFieldsString");
 	} else if([field isEqualToString:BDSKTypeString] || 
 			  [field isEqualToString:@"Pub Type"]){
-		selectorString = @"type";
-	} else  if([field isEqualToString:BDSKCiteKeyString] ||
-			   [field isEqualToString:@"Citekey"] ||
-			   [field isEqualToString:@"Cite-Key"] ||
-			   [field isEqualToString:@"Key"]){
-		selectorString = @"citeKey";
-	} else {
-        isGeneric = YES; // this means that we don't have an accessor for it in BibItem
-    }
+		accessor = NSSelectorFromString(@"type");
+	} else  if([field isEqualToString:BDSKCiteKeyString]){
+		accessor = NSSelectorFromString(@"citeKey");
+	}
 //    The AGRegexes are now ivars, but I've left them here as comments in the relevant places.
 //    I'm also leaving AND/OR in the comments, but the code uses +| to be compatible with Spotlight query syntax; it's harder to see
 //    what's going on with all of the escapes, though.
@@ -1575,7 +1606,7 @@ stringByAppendingPathComponent:@"BibDesk"]; */
 
     while(m = [e nextObject]){ // get the resulting string from the match, and strip the AND from it; there might be a better way, but this works
         s = [[m group] stringByTrimmingCharactersInSet:trimSet];
-        if(s && ![s isEqualToString:@""])
+        if(![NSString isEmptyString:s])
             [andArray addObject:s];
     }
     // NSLog(@"final andArray is %@", andArray);
@@ -1587,7 +1618,7 @@ stringByAppendingPathComponent:@"BibDesk"]; */
     
     while(m = [e nextObject]){ // now get all of the OR strings and strip the OR from them
         s = [[m group] stringByTrimmingCharactersInSet:trimSet];
-        if(s && ![s isEqualToString:@""])
+        if(![NSString isEmptyString:s])
             [orArray addObject:s];
     }
     // NSLog(@"orArray has %@", orArray);
@@ -1603,7 +1634,7 @@ stringByAppendingPathComponent:@"BibDesk"]; */
     NSString *accessorResult;
     
     // for each AND term, enumerate the entire publications array and search for a match; if we get a match, add it to a mutable set
-    if(isGeneric){ // use the -[BibItem valueOfField:] method to get the substring we want to search in, if it's not a "standard" one
+    if(accessor == NULL){ // use the -[BibItem valueOfField:] method to get the substring we want to search in, if it's not a "standard" one
         NSString *value = nil;
         while(componentSubstring = [andEnum nextObject]){ // strip the accents from the search string, and from the string we get from BibItem
             
@@ -1632,7 +1663,7 @@ stringByAppendingPathComponent:@"BibDesk"]; */
             
             pubEnum = [arrayToSearch objectEnumerator];
             while(pub = [pubEnum nextObject]){
-                accessorResult = [pub performSelector:NSSelectorFromString(selectorString) withObject:nil];
+                accessorResult = [pub performSelector:accessor withObject:nil];
                 accessorResult = [accessorResult stringByRemovingCurlyBraces];
                 if(doLossySearch)
                     accessorResult = [NSString lossyASCIIStringWithString:accessorResult];
@@ -1651,7 +1682,7 @@ stringByAppendingPathComponent:@"BibDesk"]; */
     // Get all of the OR matches, each in a separate set added to orResultsArray
     NSMutableArray *orResultsArray = [NSMutableArray array];
     
-    if(isGeneric){ // use the -[BibItem valueOfField:] method to get the substring we want to search in, if it's not a "standard" one
+    if(accessor == NULL){ // use the -[BibItem valueOfField:] method to get the substring we want to search in, if it's not a "standard" one
         while(componentSubstring = [orEnum nextObject]){
             
             NSString *value = nil;
@@ -1680,7 +1711,7 @@ stringByAppendingPathComponent:@"BibDesk"]; */
             
             pubEnum = [arrayToSearch objectEnumerator];
             while(pub = [pubEnum nextObject]){
-                accessorResult = [pub performSelector:NSSelectorFromString(selectorString) withObject:nil];
+                accessorResult = [pub performSelector:accessor withObject:nil];
                 accessorResult = [accessorResult stringByRemovingCurlyBraces];
                 if(doLossySearch)
                     accessorResult = [NSString lossyASCIIStringWithString:accessorResult];
@@ -1731,6 +1762,9 @@ NSComparisonResult compareSetLengths(NSSet *set1, NSSet *set2, void *context){
 
 - (void)sortPubsByColumn:(NSTableColumn *)tableColumn{
     
+    // this is a hack to keep us from getting selection change notifications while sorting (which updates the TeX and attributed text previews)
+    [tableView setDelegate:nil];
+    
     // cache the selection; this works for multiple publications
     NSMutableArray *pubsToSelect = nil;    
     if([tableView numberOfSelectedRows]){
@@ -1739,7 +1773,7 @@ NSComparisonResult compareSetLengths(NSSet *set1, NSSet *set2, void *context){
         NSNumber *row;
         
         while(row = [selE nextObject]){ // make an array of BibItems, since indices will change
-            [pubsToSelect addObject:[shownPublications objectAtIndex:[row intValue]]];
+            [pubsToSelect addObject:[shownPublications objectAtIndex:[row intValue] usingLock:pubsLock]];
         }
         
     }
@@ -1770,54 +1804,58 @@ NSComparisonResult compareSetLengths(NSSet *set1, NSSet *set2, void *context){
     
 	NSString *tcID = [tableColumn identifier];
 	// resorting should happen whenever you click.
-	if([tcID caseInsensitiveCompare:BDSKCiteKeyString] == NSOrderedSame ||
-       [tcID caseInsensitiveCompare:@"CiteKey"] == NSOrderedSame ||
-       [tcID caseInsensitiveCompare:@"Cite-Key"] == NSOrderedSame ||
-       [tcID caseInsensitiveCompare:@"Key"]== NSOrderedSame){
+	if([tcID isEqualToString:BDSKCiteKeyString]){
 		
-		[shownPublications sortUsingSelector:@selector(keyCompare:)];
+		[shownPublications sortUsingSelector:@selector(keyCompare:) ascending:!sortDescending usingLock:pubsLock];
 	}else if([tcID isEqualToString:BDSKTitleString]){
 		
-		[shownPublications sortUsingSelector:@selector(titleWithoutTeXCompare:)];
+		[shownPublications sortUsingSelector:@selector(titleWithoutTeXCompare:) ascending:!sortDescending usingLock:pubsLock];
 		
 	}else if([tcID isEqualToString:BDSKContainerString]){
 		
-		[shownPublications sortUsingSelector:@selector(containerWithoutTeXCompare:)];
+		[shownPublications sortUsingSelector:@selector(containerWithoutTeXCompare:) ascending:!sortDescending usingLock:pubsLock];
 	}else if([tcID isEqualToString:BDSKDateString]){
 		
-		[shownPublications sortUsingSelector:@selector(dateCompare:)];
+		[shownPublications sortUsingSelector:@selector(dateCompare:) ascending:!sortDescending usingLock:pubsLock];
 	}else if([tcID isEqualToString:BDSKDateCreatedString] ||
 			 [tcID isEqualToString:@"Added"] ||
 			 [tcID isEqualToString:@"Created"]){
 		
-		[shownPublications sortUsingSelector:@selector(createdDateCompare:)];
+		[shownPublications sortUsingSelector:@selector(createdDateCompare:) ascending:!sortDescending usingLock:pubsLock];
 	}else if([tcID isEqualToString:BDSKDateModifiedString] ||
 			 [tcID isEqualToString:@"Modified"]){
 		
-		[shownPublications sortUsingSelector:@selector(modDateCompare:)];
+		[shownPublications sortUsingSelector:@selector(modDateCompare:) ascending:!sortDescending usingLock:pubsLock];
 	}else if([tcID isEqualToString:BDSKFirstAuthorString]){
 		
-		[shownPublications sortUsingSelector:@selector(auth1Compare:)];
+		[shownPublications sortUsingSelector:@selector(auth1Compare:) ascending:!sortDescending usingLock:pubsLock];
 	}else if([tcID isEqualToString:BDSKSecondAuthorString]){
 		
-		[shownPublications sortUsingSelector:@selector(auth2Compare:)];
+		[shownPublications sortUsingSelector:@selector(auth2Compare:) ascending:!sortDescending usingLock:pubsLock];
 	}else if([tcID isEqualToString:BDSKThirdAuthorString]){
 		
-		[shownPublications sortUsingSelector:@selector(auth3Compare:)];
+		[shownPublications sortUsingSelector:@selector(auth3Compare:) ascending:!sortDescending usingLock:pubsLock];
 	}else if([tcID isEqualToString:BDSKAuthorString] ||
 			 [tcID isEqualToString:@"Authors"]){
 		
-		[shownPublications sortUsingSelector:@selector(authorCompare:)];
+		[shownPublications sortUsingSelector:@selector(authorCompare:) ascending:!sortDescending usingLock:pubsLock];
 	}else if([tcID isEqualToString:BDSKTypeString]){
 		
-		[shownPublications sortUsingSelector:@selector(pubTypeCompare:)];
+		[shownPublications sortUsingSelector:@selector(pubTypeCompare:) ascending:!sortDescending usingLock:pubsLock];
     }else if([tcID isEqualToString:BDSKItemNumberString]){
 		
-		[shownPublications sortUsingSelector:@selector(fileOrderCompare:)];
+		[shownPublications sortUsingSelector:@selector(fileOrderCompare:) ascending:!sortDescending usingLock:pubsLock];
         
+    }else if([tcID isEqualToString:BDSKBooktitleString]){
+        
+        [shownPublications sortUsingSelector:@selector(bookTitleWithoutTeXCompare:) ascending:!sortDescending usingLock:pubsLock];
     }else{
-		
-		[shownPublications sortUsingFunction:generalBibItemCompareFunc context:tcID];
+        [pubsLock lock];
+		if(sortDescending)
+            [shownPublications sortUsingFunction:reverseGeneralBibItemCompareFunc context:tcID];
+        else
+            [shownPublications sortUsingFunction:generalBibItemCompareFunc context:tcID];
+        [pubsLock unlock];
 	}
 	
 	
@@ -1828,22 +1866,15 @@ NSComparisonResult compareSetLengths(NSSet *set1, NSSet *set2, void *context){
                                    [NSImage imageNamed:@"sort-up"])
                    inTableColumn: tableColumn];
 
+    // have to reload so the rows get set up right, but a full updateUI flashes the preview, which is annoying (and the preview won't change if we're maintaining the selection)
+    [tableView reloadData];
+
     // fix the selection
-    if(pubsToSelect){
-        [tableView deselectAll:nil]; // deselect all, or we'll extend the selection to include previously selected row indexes
-        [tableView reloadData]; // have to reload so the rows get set up right, but a full updateUI flashes the preview, which is annoying
-                                // now select the items that were previously selected
-        NSEnumerator *oldSelE = [pubsToSelect objectEnumerator];
-        BibItem *anItem;
-        unsigned index;
-        while(anItem = [oldSelE nextObject]){
-            index = (sortDescending ? [shownPublications count] - 1 - [shownPublications indexOfObjectIdenticalTo:anItem] : [shownPublications indexOfObjectIdenticalTo:anItem]);
-            [tableView selectRow:index byExtendingSelection:YES];
-        }
-        
-        [tableView scrollRowToVisible:index]; // just go to the last one
-    }
-    [self updateUI]; // needed to reset the previews
+    [self highlightBibs:pubsToSelect];
+    [tableView scrollRowToVisible:[tableView selectedRow]]; // just go to the last one
+
+    // reset ourself as delegate
+    [tableView setDelegate:self];
 }
 
 - (void) tableView: (NSTableView *) theTableView didClickTableColumn: (NSTableColumn *) tableColumn{
@@ -1855,29 +1886,33 @@ NSComparisonResult compareSetLengths(NSSet *set1, NSSet *set2, void *context){
 
 }
 
+NSComparisonResult reverseGeneralBibItemCompareFunc(id item1, id item2, void *context){
+    return generalBibItemCompareFunc(item2, item1, context);
+}
 
-int generalBibItemCompareFunc(id item1, id item2, void *context){
+NSComparisonResult generalBibItemCompareFunc(id item1, id item2, void *context){
 	NSString *tableColumnName = (NSString *)context;
 
-	NSString *keyPath = [NSString stringWithFormat:@"pubFields.%@", tableColumnName];
-	NSString *value1 = (NSString *)[item1 valueForKeyPath:keyPath];
-    NSString *value2 = (NSString *)[item2 valueForKeyPath:keyPath];
-    
+    id value1 = [item1 valueOfField:tableColumnName];
+    id value2 = [item2 valueOfField:tableColumnName];
+        
 	if (value1 == nil) {
-		NSLog(@"a value is nil!");
 		return (value2 == nil)? NSOrderedSame : NSOrderedDescending;
 	} else if (value2 == nil) {
-		NSLog(@"a value is nil!");
 		return NSOrderedAscending;
 	}
-	return [value1 localizedCaseInsensitiveNumericCompare:value2];
+    
+    if([value1 isKindOfClass:[NSString class]])
+        return [value1 localizedCaseInsensitiveNumericCompare:value2];
+    else
+        return [(NSNumber *)value1 compare:(NSNumber *)value2]; // meaningless casts to shut the compiler up
 }
 
 - (void)sortPubsByDefaultColumn{
     OFPreferenceWrapper *defaults = [OFPreferenceWrapper sharedPreferenceWrapper];
     
     NSString *colName = [defaults objectForKey:BDSKDefaultSortedTableColumnKey];
-    if([colName isEqualToString:@""])
+    if([NSString isEmptyString:colName])
         return;
     
     NSTableColumn *tc = [tableView tableColumnWithIdentifier:colName];
@@ -1886,7 +1921,7 @@ int generalBibItemCompareFunc(id item1, id item2, void *context){
     
     lastSelectedColumnForSort = [tc retain];
     sortDescending = [defaults boolForKey:BDSKDefaultSortedTableColumnIsDescendingKey];
-    [self sortPubsByColumn:tc];
+    [self sortPubsByColumn:nil];
     [tableView setHighlightedTableColumn:tc];
 }
 
@@ -1896,95 +1931,82 @@ int generalBibItemCompareFunc(id item1, id item2, void *context){
     NSEnumerator *e = [self selectedPubEnumerator];
     NSNumber *i;
     BibItem *pub = nil;
-    NSFileWrapper *fw = nil;
-    NSTextAttachment *att = nil;
+    
     NSFileManager *dfm = [NSFileManager defaultManager];
     NSString *pubPath = nil;
-    NSMutableAttributedString *body = [[NSMutableAttributedString alloc] init];
+    NSMutableString *body = [NSMutableString string];
     NSMutableArray *files = [NSMutableArray array];
-    //    BOOL sent = NO;
-
-    // other way:
-    NSPasteboard *pb = [NSPasteboard pasteboardWithName:@"BDMailPasteboard"];
-    NSArray *types = [NSArray arrayWithObjects:NSFilenamesPboardType,nil];
-        //NSRTFDPboardType,nil];
-    [pb declareTypes:types owner:self];
     
     while (i = [e nextObject]) {
-        pub = [shownPublications objectAtIndex:[i intValue]];
+        pub = [shownPublications objectAtIndex:[i intValue] usingLock:pubsLock];
         pubPath = [pub localURLPath];
-       
-        if([dfm fileExistsAtPath:pubPath]){
+        
+        if([dfm fileExistsAtPath:pubPath])
             [files addObject:pubPath];
-            fw = [[NSFileWrapper alloc] initWithPath:pubPath];
-            att = [[NSTextAttachment alloc] initWithFileWrapper:fw];
-
-            [body appendAttributedString:[NSAttributedString attributedStringWithAttachment:att]];
-            [fw release]; [att release];
-        }
+        
+        // use the detexified version without internal fields, since TeXification introduces things that 
+        // AppleScript can't deal with (OAInternetConfig may end up using AS)
+        [body appendString:[pub bibTeXStringUnexpandedAndDeTeXifiedWithoutInternalFields]];
+        [body appendString:@"\n\n"];
     }
-
-
-    /* This doesn't seem to work:
-        [pb setData:[body RTFDFromRange:NSMakeRange(0,[body length]) documentAttributes:nil]
-            forType:NSRTFDPboardType];*/
-
-    [pb setPropertyList:files forType:NSFilenamesPboardType];
-
-    NSPerformService(@"Mail/Send File",pb); // Note: only works with Mail.app.
     
-    //sent = [NSMailDelivery deliverMessage:body
-    //                             headers: headers
-     //                             format: NSMIMEMailFormat
-     //                           protocol: nil];
+    // ampersands are common in publication names
+    [body replaceOccurrencesOfString:@"&" withString:@"\\&" options:NSLiteralSearch range:NSMakeRange(0, [body length])];
+    // escape backslashes
+    [body replaceOccurrencesOfString:@"\\" withString:@"\\\\" options:NSLiteralSearch range:NSMakeRange(0, [body length])];
+    // escape double quotes
+    [body replaceOccurrencesOfString:@"\"" withString:@"\\\"" options:NSLiteralSearch range:NSMakeRange(0, [body length])];
 
-    //if(!sent){
-   //     [NSException raise:BDSKUnimplementedException format:@"Can't handle errors in mail sending yet."];
-   // }
+    // OAInternetConfig will use the default mail helper (at least it works with Mail.app and Entourage)
+    OAInternetConfig *ic = [OAInternetConfig internetConfig];
+    [ic launchMailTo:nil
+          carbonCopy:nil
+     blindCarbonCopy:nil
+             subject:@"BibDesk references"
+                body:body
+         attachments:files];
 
-    [body release];
 }
 
 
 - (IBAction)editPubCmd:(id)sender{
     NSString *colID = nil;
-    BibItem *pub = nil;
-    int row = [tableView selectedRow];// was : [tableView clickedRow];
-    int sortedRow = (sortDescending ? [shownPublications count] - 1 - row : row);
-
+	NSArray *localFileFields = [[OFPreferenceWrapper sharedPreferenceWrapper] stringArrayForKey:BDSKLocalFileFieldsKey];
+	NSArray *remoteURLFields = [[OFPreferenceWrapper sharedPreferenceWrapper] stringArrayForKey:BDSKRemoteURLFieldsKey];
 
     if([tableView clickedColumn] != -1){
-	colID = [[[tableView tableColumns] objectAtIndex:[tableView clickedColumn]] identifier];
-    }else{
-	colID = @"";
+		colID = [[[tableView tableColumns] objectAtIndex:[tableView clickedColumn]] identifier];
     }
-    if([colID isEqualToString:BDSKLocalUrlString]){
-        pub = [shownPublications objectAtIndex:sortedRow];
-        [[NSWorkspace sharedWorkspace] openFile:[pub localURLPath]];
-    }else if([colID isEqualToString:BDSKUrlString]){
-        pub = [shownPublications objectAtIndex:sortedRow];
-        [[NSWorkspace sharedWorkspace] openURL:[NSURL URLWithString:[pub valueOfField:BDSKUrlString]]];
-        // @@ http-adding: change valueOfField to [pub url] and have it auto-add http://
+    if(colID && [localFileFields containsObject:colID]){
+		[self multipleOpenFileSheetDidEnd:nil returnCode:NSAlertAlternateReturn contextInfo:[colID retain]];
+    }else if(colID && [remoteURLFields containsObject:colID]){
+		[self multipleOpenURLSheetDidEnd:nil returnCode:NSAlertAlternateReturn contextInfo:[colID retain]];
     }else{
 		int n = [self numberOfSelectedPubs];
-		if ( n > 6) {
-		// Do we really want a gazillion of editor windows?
-			NSBeginAlertSheet(NSLocalizedString(@"Edit publications", @"Edit publications (multiple open warning)"), NSLocalizedString(@"Cancel", @"Cancel"), NSLocalizedString(@"Open", @"multiple open warning Open button"), nil, documentWindow, self, @selector(multipleEditSheetDidEnd:returnCode:contextInfo:), NULL, nil, NSLocalizedString(@"Bibdesk is about to open %i editor windows. Do you want to proceed?" , @"mulitple open warning question"), n);
-		}
-		else {
+		if (n > 6) {
+			// Do we really want a gazillion of editor windows?
+			NSBeginAlertSheet(NSLocalizedString(@"Edit publications", @"Edit publications (multiple open warning)"), 
+							  NSLocalizedString(@"Cancel", @"Cancel"), 
+							  NSLocalizedString(@"Open", @"multiple open warning Open button"), 
+							  nil, 
+							  documentWindow, self, 
+							  @selector(multipleEditSheetDidEnd:returnCode:contextInfo:), NULL, 
+							  nil, 
+							  NSLocalizedString(@"BibDesk is about to open %i editor windows. Do you want to proceed?" , @"mulitple open warning question"), n);
+		} else {
 			[self multipleEditSheetDidEnd:nil returnCode:NSAlertAlternateReturn contextInfo:nil];
 		}
 	}
 }
 
--(void) multipleEditSheetDidEnd:(NSWindow *)sheet returnCode:(int)returnCode contextInfo:(void *)contextInfo {
+- (void)multipleEditSheetDidEnd:(NSWindow *)sheet returnCode:(int)returnCode contextInfo:(void *)contextInfo {
 	NSEnumerator *e = [self selectedPubEnumerator];
 	NSNumber * i;
 	
 	if (returnCode == NSAlertAlternateReturn ) {
 		// the user said to go ahead
 		while (i = [e nextObject]) {
-			[self editPub:[shownPublications objectAtIndex:[i intValue]]];
+			[self editPub:[shownPublications objectAtIndex:[i intValue] usingLock:pubsLock]];
 		}
 	}
 	// otherwise do nothing
@@ -1994,21 +2016,130 @@ int generalBibItemCompareFunc(id item1, id item2, void *context){
 - (void)editPub:(BibItem *)pub{
     BibEditor *e = [pub editorObj];
     if(e == nil){
-        e = [[[BibEditor alloc] initWithBibItem:pub document:self] autorelease];
+        e = [[BibEditor alloc] initWithBibItem:pub document:self];
         [self addWindowController:e];
+        [e release];
     }
     [e show];
+}
+
+- (IBAction)openLinkedFile:(id)sender{
+	int n = [self numberOfSelectedPubs];
+	NSString *field = [sender representedObject];
+	if (n > 6) {
+		// Do we really want a gazillion of files to open?
+		NSBeginAlertSheet(NSLocalizedString(@"Open Linked Files", @"Open Linked Files (multiple open warning)"), 
+						  NSLocalizedString(@"Cancel", @"Cancel"), 
+						  NSLocalizedString(@"Open", @"multiple open warning Open button"), 
+						  nil, 
+						  documentWindow, self, 
+						  @selector(multipleOpenFileSheetDidEnd:returnCode:contextInfo:), NULL, 
+						  [field retain], 
+						  NSLocalizedString(@"BibDesk is about to open %i linked files. Do you want to proceed?" , @"mulitple open linked files question"), n);
+	} else {
+		[self multipleOpenFileSheetDidEnd:nil returnCode:NSAlertAlternateReturn contextInfo:[field retain]];
+	}
+}
+
+-(void)multipleOpenFileSheetDidEnd:(NSWindow *)sheet returnCode:(int)returnCode contextInfo:(void *)contextInfo {
+	NSEnumerator *e = [self selectedPubEnumerator];
+	NSNumber * i;
+	BibItem *pub;
+	NSString *field = (NSString *)contextInfo;
+	
+	if (returnCode == NSAlertAlternateReturn ) {
+		// the user said to go ahead
+		while (i = [e nextObject]) {
+			pub = [shownPublications objectAtIndex:[i intValue] usingLock:pubsLock];
+			[[NSWorkspace sharedWorkspace] openFile:[pub localFilePathForField:field]];
+		}
+	}
+	// otherwise do nothing
+	[field release];
+}
+
+- (IBAction)revealLinkedFile:(id)sender{
+	int n = [self numberOfSelectedPubs];
+	NSString *field = [sender representedObject];
+	if (n > 6) {
+		// Do we really want a gazillion of Finder windows?
+		NSBeginAlertSheet(NSLocalizedString(@"Reveal Linked Files", @"Reveal Linked Files (multiple reveal warning)"), 
+						  NSLocalizedString(@"Cancel", @"Cancel"), 
+						  NSLocalizedString(@"Reveal", @"multiple reveal warning Reveal button"), 
+						  nil, 
+						  documentWindow, self, 
+						  @selector(multipleRevealFileSheetDidEnd:returnCode:contextInfo:), NULL, 
+						  [field retain], 
+						  NSLocalizedString(@"BibDesk is about to reveal %i linked files. Do you want to proceed?" , @"mulitple reveal linked files question"), n);
+	} else {
+		[self multipleRevealFileSheetDidEnd:nil returnCode:NSAlertAlternateReturn contextInfo:[field retain]];
+	}
+}
+
+- (void)multipleRevealFileSheetDidEnd:(NSWindow *)sheet returnCode:(int)returnCode contextInfo:(void *)contextInfo {
+	NSEnumerator *e = [self selectedPubEnumerator];
+	NSNumber * i;
+	BibItem *pub;
+	NSString *field = (NSString *)contextInfo;
+	
+	if (returnCode == NSAlertAlternateReturn ) {
+		// the user said to go ahead
+		while (i = [e nextObject]) {
+			pub = [shownPublications objectAtIndex:[i intValue] usingLock:pubsLock];
+			[[NSWorkspace sharedWorkspace]  selectFile:[pub localFilePathForField:field] inFileViewerRootedAtPath:nil];
+		}
+	}
+	// otherwise do nothing
+	[field release];
+}
+
+- (IBAction)openRemoteURL:(id)sender{
+	int n = [self numberOfSelectedPubs];
+	NSString *field = [sender representedObject];
+	if (n > 6) {
+		// Do we really want a gazillion of Finder windows?
+		NSBeginAlertSheet(NSLocalizedString(@"Open Remote URL", @"Open Remote URL (multiple open warning)"), 
+						  NSLocalizedString(@"Cancel", @"Cancel"), 
+						  NSLocalizedString(@"Open", @"multiple open warning Open button"), 
+						  nil, 
+						  documentWindow, self, 
+						  @selector(multipleOpenURLSheetDidEnd:returnCode:contextInfo:), NULL, 
+						  [field retain], 
+						  NSLocalizedString(@"BibDesk is about to open %i URLs. Do you want to proceed?" , @"mulitple open URLs question"), n);
+	} else {
+		[self multipleOpenURLSheetDidEnd:nil returnCode:NSAlertAlternateReturn contextInfo:[field retain]];
+	}
+}
+
+- (void)multipleOpenURLSheetDidEnd:(NSWindow *)sheet returnCode:(int)returnCode contextInfo:(void *)contextInfo {
+	NSEnumerator *e = [self selectedPubEnumerator];
+	NSNumber * i;
+	BibItem *pub;
+	NSString *field = (NSString *)contextInfo;
+	
+	if (returnCode == NSAlertAlternateReturn ) {
+		// the user said to go ahead
+		while (i = [e nextObject]) {
+			pub = [shownPublications objectAtIndex:[i intValue] usingLock:pubsLock];
+			[[NSWorkspace sharedWorkspace] openURL:[pub remoteURLForField:field]];
+		}
+	}
+	// otherwise do nothing
+	[field release];
 }
 
 #pragma mark Pasteboard || copy
 
 - (IBAction)cut:(id)sender{ // puts the pubs on the pasteboard, using the default implementation, then deletes them
+	if ([self numberOfSelectedPubs] == 0) return;
+	
     [self copy:self];
-    [self deleteSheetDidEnd:nil returnCode:NSAlertDefaultReturn contextInfo:nil]; // use this method directly, so you don't get the warning (if it was a mistake, paste them back)
     [self delPub:self];
 }
 
 - (IBAction)copy:(id)sender{
+	if ([self numberOfSelectedPubs] == 0) return;
+	
     OFPreferenceWrapper *sud = [OFPreferenceWrapper sharedPreferenceWrapper];
     if([[sud objectForKey:BDSKDragCopyKey] intValue] == 0){
         [self copyAsBibTex:self];
@@ -2022,123 +2153,140 @@ int generalBibItemCompareFunc(id item1, id item2, void *context){
 }
 
 - (IBAction)copyAsBibTex:(id)sender{
-    NSPasteboard *pasteboard = [NSPasteboard pasteboardWithName:NSGeneralPboard];
-    NSEnumerator *e = [self selectedPubEnumerator];
-    NSMutableString *s = [[NSMutableString string] retain];
-    NSNumber *i;
-    [pasteboard declareTypes:[NSArray arrayWithObject:NSStringPboardType] owner:nil];
-    while(i=[e nextObject]){
-	    [s appendString:@"\n"];
-        [s appendString:[[shownPublications objectAtIndex:[i intValue]] bibTeXString]];
-		[s appendString:@"\n"];
-    }
-    [pasteboard setString:s forType:NSStringPboardType];
+    NSPasteboard *pboard = [NSPasteboard pasteboardWithName:NSGeneralPboard];
+    
+    [pboard declareTypes:[NSArray arrayWithObject:NSStringPboardType] owner:nil];
+    [pboard setString:[self bibTeXStringForPublications:[self selectedPublications]]
+			  forType:NSStringPboardType];
 }    
 
 - (IBAction)copyAsPublicBibTex:(id)sender{
-    NSPasteboard *pasteboard = [NSPasteboard pasteboardWithName:NSGeneralPboard];
-    NSEnumerator *e = [self selectedPubEnumerator];
-    NSMutableString *s = [[NSMutableString string] retain];
-    NSNumber *i;
-    [pasteboard declareTypes:[NSArray arrayWithObject:NSStringPboardType] owner:nil];
-    while(i=[e nextObject]){
-	    [s appendString:@"\n"];
-        [s appendString:[[shownPublications objectAtIndex:[i intValue]] bibTeXStringDroppingInternal:YES]];
-		[s appendString:@"\n"];
-    }
-    [pasteboard setString:s forType:NSStringPboardType];
+    NSPasteboard *pboard = [NSPasteboard pasteboardWithName:NSGeneralPboard];
+    
+    [pboard declareTypes:[NSArray arrayWithObject:NSStringPboardType] owner:nil];
+    [pboard setString:[self bibTeXStringDroppingInternal:YES forPublications:[self selectedPublications]]
+			  forType:NSStringPboardType];
 }    
 
 - (IBAction)copyAsTex:(id)sender{
-    NSPasteboard *pasteboard = [NSPasteboard pasteboardWithName:NSGeneralPboard];
+    NSPasteboard *pboard = [NSPasteboard pasteboardWithName:NSGeneralPboard];
 
-    [pasteboard declareTypes:[NSArray arrayWithObjects:NSStringPboardType, BDSKBibTeXStringPboardType, nil] owner:nil];
-    [pasteboard setString:[self citeStringForSelection] forType:NSStringPboardType];
-    
-    NSEnumerator *e = [self selectedPubEnumerator];
-    NSMutableString *s = [[NSMutableString string] retain];
-    NSNumber *i;
-    while(i=[e nextObject]){
-        [s appendString:[[shownPublications objectAtIndex:[i intValue]] bibTeXString]];
-    }
-    [pasteboard setString:s forType:BDSKBibTeXStringPboardType];
-    
+    [pboard declareTypes:[NSArray arrayWithObjects:NSStringPboardType, BDSKBibTeXStringPboardType, nil] owner:nil];
+    [pboard setString:[self citeStringForSelection] 
+			  forType:NSStringPboardType];
+    [pboard setString:[self bibTeXStringForPublications:[self selectedPublications]]
+			  forType:BDSKBibTeXStringPboardType];
 }
+
+- (IBAction)copyAsRIS:(id)sender{
+    NSPasteboard *pboard = [NSPasteboard pasteboardWithName:NSGeneralPboard];
+    NSEnumerator *e = [self selectedPubEnumerator];
+    NSMutableString *s = [NSMutableString string];
+    NSNumber *i;
+    [pboard declareTypes:[NSArray arrayWithObject:NSStringPboardType] owner:nil];
+    while(i=[e nextObject]){
+	    [s appendString:@"\n"];
+        [s appendString:[[shownPublications objectAtIndex:[i intValue] usingLock:pubsLock] RISStringValue]];
+		[s appendString:@"\n"];
+    }
+    [pboard setString:s forType:NSStringPboardType];
+}    
+
+- (IBAction)copyAsPDF:(id)sender{
+    NSPasteboard *pboard = [NSPasteboard pasteboardWithName:NSGeneralPboard];
+	NSString *bibString = [self bibTeXStringForPublications:[self selectedPublications]];
+	NSData *data = nil;
+	
+    [pboard declareTypes:[NSArray arrayWithObjects:NSPDFPboardType, BDSKBibTeXStringPboardType, nil] owner:nil];
+    [pboard setString:bibString forType:BDSKBibTeXStringPboardType];
+	if([[[BDSKPreviewer sharedPreviewer] window] isVisible] && 
+	   (data = [[BDSKPreviewer sharedPreviewer] PDFData])){
+		// the previewer is up to date, so we reuse it's PDF data
+		[pboard setData:data forType:NSPDFPboardType];
+	}else if([texTask runWithBibTeXString:bibString generateRTF:NO] && (data = [texTask PDFData])){
+		// we'll generate it ourselves then
+		[pboard setData:data forType:NSPDFPboardType];
+	}else{
+		// we couldn't get the RTF data
+		NSBeep();
+	}
+}
+
+- (IBAction)copyAsRTF:(id)sender{
+    NSPasteboard *pboard = [NSPasteboard pasteboardWithName:NSGeneralPboard];
+	NSString *bibString = [self bibTeXStringForPublications:[self selectedPublications]];
+	NSData *data = nil;
+    
+    [pboard declareTypes:[NSArray arrayWithObjects:NSRTFPboardType, BDSKBibTeXStringPboardType, nil] owner:nil];
+    [pboard setString:bibString forType:BDSKBibTeXStringPboardType];
+	if([[[BDSKPreviewer sharedPreviewer] window] isVisible] && 
+	   (data = [[BDSKPreviewer sharedPreviewer] RTFData])){
+		// the previewer is up to date, so we reuse it's RTF data
+		[pboard setData:data forType:NSRTFPboardType];
+	}else if([texTask runWithBibTeXString:bibString generateRTF:YES] && (data = [texTask RTFData])){
+		// we'll generate it ourselves then
+		[pboard setData:data forType:NSRTFPboardType];
+	}else{
+		// we couldn't get the RTF data
+		NSBeep();
+	}
+}
+
 
 - (NSString *)citeStringForSelection{
-    return [self citeStringForPublications:[self selectedPublications]];
+    return [self citeStringForPublications:[self selectedPublications]
+								citeString:[[OFPreferenceWrapper sharedPreferenceWrapper] stringForKey:BDSKCiteStringKey]];
 }
 
-- (NSString *)citeStringForPublications:(NSArray *)items{
+- (NSString *)citeStringForPublications:(NSArray *)items citeString:(NSString *)citeString{
 	OFPreferenceWrapper *sud = [OFPreferenceWrapper sharedPreferenceWrapper];
-	NSString *startCiteBracket = [sud stringForKey:BDSKCiteStartBracketKey]; 
-	NSString *citeString = [sud stringForKey:BDSKCiteStringKey];
-    NSMutableString *s = [NSMutableString stringWithFormat:@"\\%@%@", citeString, startCiteBracket];
-	NSString *endCiteBracket = [sud stringForKey:BDSKCiteEndBracketKey]; 
+	BOOL prependTilde = [sud boolForKey:BDSKCitePrependTildeKey];
+	NSString *startCite = [NSString stringWithFormat:@"%@\\%@%@", (prependTilde? @"~" : @""), citeString, [sud stringForKey:BDSKCiteStartBracketKey]]; 
+	NSString *endCite = [sud stringForKey:BDSKCiteEndBracketKey]; 
+    NSMutableString *s = [NSMutableString stringWithString:startCite];
 	
-    NSNumber *i;
     BOOL sep = [sud boolForKey:BDSKSeparateCiteKey];
+	NSString *separator = (sep)? [NSString stringWithFormat:@"%@%@", endCite, startCite] : @",";
+    NSNumber *i;
+	BOOL first = YES;
     
     NSEnumerator *e = [items objectEnumerator];
-    while(i=[e nextObject]){
-        [s appendString:[[shownPublications objectAtIndex:[i intValue]] citeKey]];
-        if(sep)
-            [s appendString:[NSString stringWithFormat:@"%@ \\%@%@", endCiteBracket, citeString, startCiteBracket]];
-        else
-            [s appendString:@","];
+    while(i = [e nextObject]){
+		if(first) first = NO;
+		else [s appendString:separator];
+        [s appendString:[[shownPublications objectAtIndex:[i intValue] usingLock:pubsLock] citeKey]];
     }
-    if(sep)
-        [s replaceCharactersInRange:[s rangeOfString:[NSString stringWithFormat:@"%@ \\%@%@", endCiteBracket, citeString, startCiteBracket]
-											 options:NSBackwardsSearch] withString:endCiteBracket];
-    else
-        [s replaceCharactersInRange:[s rangeOfString:@"," options:NSBackwardsSearch] withString:endCiteBracket];
-	
+	[s appendString:endCite];
 	
 	return s;
 }
 
-
-
-- (IBAction)copyAsPDF:(id)sender{
-    NSPasteboard *pb = [NSPasteboard pasteboardWithName:NSGeneralPboard];
-    NSData *d = nil;
-    NSNumber *i;
-    NSEnumerator *e = [self selectedPubEnumerator];
-    NSMutableString *bibString = [NSMutableString string];
-
-    [pb declareTypes:[NSArray arrayWithObject:NSPDFPboardType] owner:nil];
-    while(i = [e nextObject]){
-        [bibString appendString:[[shownPublications objectAtIndex:[i intValue]] bibTeXString]];
-    }
-    [pb setString:bibString forType:BDSKBibTeXStringPboardType];
-    d = [PDFpreviewer PDFDataFromString:bibString];
-    if(d != nil)
-        [pb setData:d forType:NSPDFPboardType];
-    else
-        NSBeep();
+- (NSString *)bibTeXStringForPublications:(NSArray *)items{
+	return [self bibTeXStringDroppingInternal:NO forPublications:items];
 }
 
-- (IBAction)copyAsRTF:(id)sender{
-    NSPasteboard *pb = [NSPasteboard pasteboardWithName:NSGeneralPboard];
-    NSData *d;
+- (NSString *)bibTeXStringDroppingInternal:(BOOL)drop forPublications:(NSArray *)items{
+    NSMutableString *s = [NSMutableString string];
+	NSEnumerator *e = [items objectEnumerator];
     NSNumber *i;
-    NSEnumerator *e = [self selectedPubEnumerator];
-    NSMutableString *bibString = [NSMutableString string];
-    
-    [pb declareTypes:[NSArray arrayWithObject:NSRTFPboardType] owner:nil];
+	BibItem *pub;
+	
     while(i = [e nextObject]){
-        [bibString appendString:[[shownPublications objectAtIndex:[i intValue]] bibTeXString]];
+		pub = [shownPublications objectAtIndex:[i intValue] usingLock:pubsLock];
+		NS_DURING
+			[s appendString:@"\n"];
+			[s appendString:[pub bibTeXStringDroppingInternal:drop]];
+			[s appendString:@"\n"];
+		NS_HANDLER
+			if([[localException name] isEqualToString:BDSKTeXifyException])
+				NSLog(@"Discarding exception raised for item \"%@\"", [pub citeKey]);
+			else
+				[localException raise];
+		NS_ENDHANDLER
     }
-    [pb setString:bibString forType:BDSKBibTeXStringPboardType];
-    if([PDFpreviewer PDFFromString:bibString]){
-        d = [PDFpreviewer RTFPreviewData];
-        [pb setData:d forType:NSRTFPboardType];
-    } else {
-        NSBeep();
-    }
-    
+	
+	return s;
 }
-
 
 #pragma mark Pasteboard || paste
 
@@ -2146,9 +2294,6 @@ int generalBibItemCompareFunc(id item1, id item2, void *context){
 // paste: get text, parse it as bibtex, add the entry to publications and (optionally) edit it.
 // ----------------------------------------------------------------------------------------
 
-
-/* ssp: 2004-07-19
-*/ 
 - (IBAction)paste:(id)sender{
     NSPasteboard *pasteboard = [NSPasteboard pasteboardWithName:NSGeneralPboard];
 	NSString * error;
@@ -2160,7 +2305,24 @@ int generalBibItemCompareFunc(id item1, id item2, void *context){
 	}
 }
 
-
+- (IBAction)duplicate:(id)sender{
+    NSEnumerator *selPubs = [self selectedPubEnumerator];
+    NSNumber *i;
+    NSMutableArray *newPubs = [NSMutableArray array];
+    BibItem *aPub;
+    while(i = [selPubs nextObject]){
+        aPub = [[shownPublications objectAtIndex:[i intValue] usingLock:pubsLock] copy];
+        [newPubs addObject:aPub];
+        [aPub release];
+    }
+    
+    [self addPublications:newPubs]; // notification will take care of clearing the search/sorting
+    [self highlightBibs:newPubs];
+    
+    if([[OFPreferenceWrapper sharedPreferenceWrapper] boolForKey:BDSKEditOnPasteKey]) {
+        [self editPubCmd:nil]; // this will aske the user when there are many pubs
+    }
+}
 
 - (void)createNewBlankPub{
     [self createNewBlankPubAndEdit:NO];
@@ -2171,7 +2333,7 @@ int generalBibItemCompareFunc(id item1, id item2, void *context){
 
     [self addPublication:newBI];
 	[[self undoManager] setActionName:NSLocalizedString(@"Add Publication",@"")];
-    
+    [self highlightBib:newBI];
     if(yn == YES)
     {
         [self editPub:newBI];
@@ -2195,7 +2357,7 @@ int generalBibItemCompareFunc(id item1, id item2, void *context){
                 NSArray * pbArray = [pb propertyListForType:NSFilenamesPboardType]; // we will get an array
                 return [self addPublicationsForFiles:pbArray error:error];
             } else {
-                *error = NSLocalizedString(@"didn't find anything appropriate on the pasteboard", @"Bibdesk couldn't find any files or bibliography information in the data it received.");
+                *error = NSLocalizedString(@"didn't find anything appropriate on the pasteboard", @"BibDesk couldn't find any files or bibliography information in the data it received.");
                 return NO;
             }
         }
@@ -2218,7 +2380,7 @@ int generalBibItemCompareFunc(id item1, id item2, void *context){
     if([pbString isRISString])
         isRIS = YES;
     
-	[[NSApp delegate] setDocumentForErrors:self];
+	[[BDSKErrorObjectController sharedErrorObjectController] setDocumentForErrors:self];
     if(isRIS){
         newPubs = [PubMedParser itemsFromString:pbString error:&hadProblems];
     } else {
@@ -2243,30 +2405,27 @@ int generalBibItemCompareFunc(id item1, id item2, void *context){
 			// the user said to keep going, so if they save, they might clobber data...
 		}else if(rv == NSAlertOtherReturn){
 			// they said to edit the file.
-			NSString * tempFileName = [NSTemporaryDirectory() stringByAppendingPathComponent:[[NSProcessInfo processInfo] globallyUniqueString]];
+			NSString * tempFileName = [[NSApp delegate] temporaryFilePath:[[self fileName] lastPathComponent] createDirectory:NO];
 			[data writeToFile:tempFileName atomically:YES];
-			[[NSApp delegate] openEditWindowWithFile:tempFileName];
-			[[NSApp delegate] showErrorPanel:self];			
+			[[BDSKErrorObjectController sharedErrorObjectController] openEditWindowWithFile:tempFileName];
+			[[BDSKErrorObjectController sharedErrorObjectController] showErrorPanel:self];			
 		}		
 	}
 
 	if ([newPubs count] == 0) {
-		*error = NSLocalizedString(@"couldn't analyse string", @"Bibdesk couldn't find bibliography data in the text it received.");
+		*error = NSLocalizedString(@"couldn't analyse string", @"BibDesk couldn't find bibliography data in the text it received.");
 		return NO;
 	}
 	
+	[self addPublications:newPubs];
+	[self highlightBibs:newPubs];
 	
-	NSEnumerator * newPubE = [newPubs objectEnumerator];
-	BibItem * newBI = nil;
-
-	while(newBI = [newPubE nextObject]){		
-		[self addPublication:newBI];
-		
-		if([[OFPreferenceWrapper sharedPreferenceWrapper] boolForKey:BDSKEditOnPasteKey]) {
-			[self editPub:newBI];
-		}
+	if([[OFPreferenceWrapper sharedPreferenceWrapper] boolForKey:BDSKEditOnPasteKey]) {
+		[self editPubCmd:nil]; // this will aske the user when there are many pubs
 	}
+	
 	[[self undoManager] setActionName:NSLocalizedString(@"Add Publication",@"")];
+	
 	return YES;
 }
 
@@ -2281,13 +2440,15 @@ This method always returns YES. Even if some or many operations fail.
 - (BOOL) addPublicationsForFiles:(NSArray*) filenames error:(NSString**) error {
 	OFPreferenceWrapper *pw = [OFPreferenceWrapper sharedPreferenceWrapper];
 
-	NSEnumerator * fileNameEnum = [filenames objectEnumerator];
+	NSEnumerator * e = [filenames objectEnumerator];
 	NSString * fnStr = nil;
 	NSURL * url = nil;
+	NSMutableArray *newPubs = [NSMutableArray arrayWithCapacity:1];
+	BibItem * newBI;
 	
-	while(fnStr = [fileNameEnum nextObject]){
+	while(fnStr = [e nextObject]){
 		if(url = [NSURL fileURLWithPath:fnStr]){
-			BibItem * newBI = [[BibItem alloc] init];
+			newBI = [[BibItem alloc] init];
             
 			NSString *newUrl = [[NSURL fileURLWithPath:
 				[fnStr stringByExpandingTildeInPath]]absoluteString];
@@ -2296,20 +2457,23 @@ This method always returns YES. Even if some or many operations fail.
 			
 			[newBI autoFilePaper];
 			
-			[self addPublication:newBI];
+			[newPubs addObject:newBI];
             [newBI release];
-			
-			[self updateUI];
-			
-			if([pw boolForKey:BDSKEditOnPasteKey]){
-				[self editPub:newBI];
-				//[[newBI editorObj] fixEditedStatus];  - deprecated
-			}
 		}
 	}
-	if ([filenames count] > 0) {
-		[[self undoManager] setActionName:NSLocalizedString(@"Add Publication",@"")];
+	
+	if ([newPubs count] == 0) 
+		return YES;
+	
+	[self addPublications:newPubs];
+	[self highlightBibs:newPubs];
+	
+	if([pw boolForKey:BDSKEditOnPasteKey]) {
+		[self editPubCmd:nil]; // this will ask the user when there are many pubs
 	}
+	
+	[[self undoManager] setActionName:NSLocalizedString(@"Add Publication",@"")];
+	
 	return YES;
 }
 
@@ -2317,10 +2481,13 @@ This method always returns YES. Even if some or many operations fail.
 
 //note - ********** the notification handling method will add NSTableColumn instances to the tableColumns dictionary.
 - (void)setupTableColumns{
-	NSArray *prefsShownColNamesArray = [[OFPreferenceWrapper sharedPreferenceWrapper] arrayForKey:BDSKShownColsNamesKey];
+	OFPreferenceWrapper *pw = [OFPreferenceWrapper sharedPreferenceWrapper];
+	NSArray *prefsShownColNamesArray = [pw arrayForKey:BDSKShownColsNamesKey];
     NSEnumerator *shownColNamesE = [prefsShownColNamesArray objectEnumerator];
     NSTableColumn *tc;
     NSString *colName;
+	NSArray *localFileFields = [[OFPreferenceWrapper sharedPreferenceWrapper] stringArrayForKey:BDSKLocalFileFieldsKey];
+	NSArray *remoteURLFields = [[OFPreferenceWrapper sharedPreferenceWrapper] stringArrayForKey:BDSKRemoteURLFieldsKey];
 
     NSDictionary *tcWidthsByIdentifier = [[OFPreferenceWrapper sharedPreferenceWrapper] objectForKey:BDSKColumnWidthsKey];
     NSNumber *tcWidth = nil;
@@ -2334,15 +2501,18 @@ This method always returns YES. Even if some or many operations fail.
 		if(tc == nil){
 			// it is a new column, so create it
 			tc = [[[NSTableColumn alloc] initWithIdentifier:colName] autorelease];
-			[tc setResizable:YES];
+            if([tc respondsToSelector:@selector(setResizingMask:)])
+                [tc setResizingMask:(NSTableColumnAutoresizingMask | NSTableColumnUserResizingMask)];
+            else
+                [tc setResizable:YES];
 			[tc setEditable:NO];
-            if([colName isEqualToString:BDSKLocalUrlString] ||
-               [colName isEqualToString:BDSKUrlString]){
+            if([localFileFields containsObject:colName] ||
+               [remoteURLFields containsObject:colName]){
                 [tc setDataCell:imageCell];
             }
 			if([colName isEqualToString:BDSKLocalUrlString]){
 				NSImage * pdfImage = [NSImage imageNamed:@"TinyFile"];
-				[[tc headerCell] setImage:pdfImage];
+				[(NSCell *)[tc headerCell] setImage:pdfImage];
 			}else{	
 				[[tc headerCell] setStringValue:NSLocalizedStringFromTable(colName, @"BibTeXKeys", @"")];
 			}
@@ -2362,7 +2532,6 @@ This method always returns YES. Even if some or many operations fail.
 
 		[tableView addTableColumn:tc];
     }
-    
     [self setTableFont];
 }
 
@@ -2371,7 +2540,9 @@ This method always returns YES. Even if some or many operations fail.
     [NSApp endSheet:addFieldSheet returnCode:[sender tag]];
 }
 
-- (NSMenu *)menuForTableColumn:(NSTableColumn *)tc row:(int)row{
+- (NSMenu *)tableView:(NSTableView *)tv menuForTableHeaderColumn:(NSTableColumn *)tc{
+	if(tv != tableView)
+		return nil;
 	// for now, just returns the same all the time.
 	// Could customize menu for details of selected item.
 	return columnsMenu;
@@ -2391,6 +2562,7 @@ This method always returns YES. Even if some or many operations fail.
     }
     [[OFPreferenceWrapper sharedPreferenceWrapper] setObject:prefsShownColNamesMutableArray
                                                       forKey:BDSKShownColsNamesKey];
+    [prefsShownColNamesMutableArray release];
     [self setupTableColumns];
     [self updateUI];
 	[[NSNotificationCenter defaultCenter] postNotificationName:BDSKTableColumnChangedNotification
@@ -2453,30 +2625,41 @@ This method always returns YES. Even if some or many operations fail.
  Returns action/contextual menu that contains items appropriate for the current selection.
  The code may need to be revised if the menu's contents are changed.
 */
-- (NSMenu*) menuForTableViewSelection:(NSTableView *)theTableView {
-	NSMenu * myMenu = nil;
-    if(tableView == theTableView){
-        myMenu = [[actionMenu copy] autorelease];
-    }else{
-        myMenu = [[sourceListActionMenu copy] autorelease];
-    }
+- (NSMenu *)tableView:tv menuForTableColumn:(NSTableColumn *)tc row:(int)row {
+    if(tv != tableView)
+		return nil;
+	
+	NSMenu *myMenu = nil;
+	NSString *tcId = [tc identifier];
+	NSArray *localFileFields = [[OFPreferenceWrapper sharedPreferenceWrapper] stringArrayForKey:BDSKLocalFileFieldsKey];
+	NSArray *remoteURLFields = [[OFPreferenceWrapper sharedPreferenceWrapper] stringArrayForKey:BDSKRemoteURLFieldsKey];
+	
+	if([localFileFields containsObject:tcId]){
+		myMenu = [[fileMenu copy] autorelease];
+		[[myMenu itemAtIndex:0] setRepresentedObject:tcId];
+		[[myMenu itemAtIndex:1] setRepresentedObject:tcId];
+	}else if([remoteURLFields containsObject:tcId]){
+		myMenu = [[URLMenu copy] autorelease];
+		[[myMenu itemAtIndex:0] setRepresentedObject:tcId];
+	}else{
+		myMenu = [[actionMenu copy] autorelease];
+	}
 	
 	// kick out every item we won't need:
-	NSEnumerator * itemEnum = [[myMenu itemArray] objectEnumerator];
-	NSMenuItem * theItem = nil;
+	NSMenuItem *theItem = nil;
+	int i = [myMenu numberOfItems];
 	
-	while (theItem = (NSMenuItem*) [itemEnum nextObject]) {
-		if (![self validateMenuItem:theItem]) {
+	while (--i >= 0) {
+		theItem = (NSMenuItem*)[myMenu itemAtIndex:i];
+		if (![self validateMenuItem:theItem] ||
+			((i == [myMenu numberOfItems] - 1 || i == 0) && [theItem isSeparatorItem])) {
 			[myMenu removeItem:theItem];
 		}
 	}
 	
-	int n = [myMenu numberOfItems] -1;
+	if([myMenu numberOfItems] == 0)
+		return nil;
 	
-	if ([[myMenu itemAtIndex:n] isSeparatorItem]) {
-		// last item is separator => remove
-		[myMenu removeItemAtIndex:n];
-	}	
 	return myMenu;
 }
 
@@ -2492,20 +2675,23 @@ This method always returns YES. Even if some or many operations fail.
 }
 
 - (void)handlePreviewDisplayChangedNotification:(NSNotification *)notification{
-    [self displayPreviewForItems:[self selectedPubEnumerator]];
-}
-
-- (void)handleCustomStringsChangedNotification:(NSNotification *)notification{
-    [customStringArray setArray:[[OFPreferenceWrapper sharedPreferenceWrapper] arrayForKey:BDSKCustomCiteStringsKey]];
-    [ccTableView reloadData];
+    // note: this is only supposed to handle the pretty-printed preview, /not/ the TeX preview
+    [self displayPreviewForItems:[self selectedPublications]];
 }
 
 - (void)handleFontChangedNotification:(NSNotification *)notification{
 	[self setTableFont];
 }
 
-- (void)handleUpdateUINotification:(NSNotification *)notification{
-    [self updateUI];
+- (void)handleBibItemAddDelNotification:(NSNotification *)notification{
+	NSDictionary *userInfo = [notification userInfo];
+	BOOL wasLastRequest = [[userInfo objectForKey:@"lastRequest"] isEqualToString:@"YES"];
+
+	if(wasLastRequest){
+        [tableView deselectAll:self]; // clear before resorting
+        [self setFilterField:nil]; // clear the search
+        [self sortPubsByColumn:nil]; // resort
+	}
 }
 
 - (void)handleBibItemChangedNotification:(NSNotification *)notification{
@@ -2519,132 +2705,248 @@ This method always returns YES. Even if some or many operations fail.
     //NSLog(@"got handleBibItemChangedNotification in %@", [[self fileName] lastPathComponent]);
 
 	NSString *changedKey = [userInfo objectForKey:@"key"];
+        
+    if([changedKey isEqualToString:BDSKCiteKeyString]){
+        BibItem *pub = [notification object];
+        NSString *oldKey = [userInfo objectForKey:@"oldCiteKey"];
+        [itemsForCiteKeys removeObjectIdenticalTo:pub forKey:oldKey];
+        [itemsForCiteKeys addObject:pub forKey:[pub citeKey]];
+    }
     
-	if(!changedKey){
-		[self updateUI];
-		return;
-	}
-		
-	if([quickSearchKey isEqualToString:changedKey] || 
-	   [quickSearchKey isEqualToString:@"All Fields"]){
-		if(BDSK_USING_JAGUAR){
+    // don't perform a search if the search field is empty
+	if(![[(BDSK_USING_JAGUAR ? searchFieldTextField : searchField) stringValue] isEqualToString:@""] && 
+       ([quickSearchKey isEqualToString:changedKey] || [quickSearchKey isEqualToString:@"All Fields"]) ){
+		if(BDSK_USING_JAGUAR)
 			[self searchFieldAction:searchFieldTextField];
-		}else{
-			[NSObject cancelPreviousPerformRequestsWithTarget:self
-								 selector:@selector(searchFieldAction:)
-								   object:searchField];
-			[self performSelector:@selector(searchFieldAction:)
-				   withObject:searchField
-				   afterDelay:0.5];
+		else
+            [self searchFieldAction:searchField];
+	} else { // quicksearch won't update it for us
+        if([[lastSelectedColumnForSort identifier] isEqualToString:changedKey])
+            [self sortPubsByColumn:nil]; // resort if the changed value was in the currently sorted column
+        [self updateUI];
+        [self updatePreviews:nil];
+    }	
+}
 
-		}
-	}
-	// should: also check if we're filtering by the key that was changed and refilter.
-	// should: need to save the highlighted pub and rehighlight after sort...
+- (void)handleMacroChangedNotification:(NSNotification *)aNotification{
+	id sender = [aNotification object];
+	if([sender isKindOfClass:[BibDocument class]] && sender != self)
+		return; // only macro changes for ourselves or the global macros
 	
+    [tableView reloadData];
+    [self updatePreviews:nil];
+}
+
+- (void)handleTableSelectionChangedNotification:(NSNotification *)notification{
+    [self updatePreviews:nil];
+    [self updateActionMenus:nil];
+}
+
+- (void)handleResortDocumentNotification:(NSNotification *)notification{
+    [self sortPubsByColumn:nil];
 }
 
 #pragma mark UI updating
 
 - (void)updatePreviews:(NSNotification *)aNotification{
+    // Coalesce these notifications here, since something like select all -> generate cite keys will force a preview update for every
+    // changed key, so we have to update all the previews each time.  This should be safer than using cancelPrevious... since those
+    // don't get performed on the main thread (apparently), and can lead to problems.
+    [self queueSelectorOnce:@selector(handlePrivateUpdatePreviews)];
+}
+
+- (void)handlePrivateUpdatePreviews{
+
+    OBASSERT([NSThread inMainThread]);
+    
+    if(documentIsClosing)
+        return; // not safe to use any UI-related methods now, since we're called from a queue, possibly after the tableview is garbage
+        
+    NSArray *selPubs = [self selectedPublications];
     
     //take care of the preview field (NSTextView below the pub table); if the enumerator is nil, the view will get cleared out
-    [self displayPreviewForItems:[self selectedPubEnumerator]];
-    // (don't just pass it 'e' - it needs its own enum.)
-    if([[OFPreferenceWrapper sharedPreferenceWrapper] boolForKey:BDSKUsesTeXKey]){
-        NSMutableString *bibString = [NSMutableString string];
+    [self displayPreviewForItems:selPubs];
+
+    if(!selPubs){
+		// clear the previews
+		[[BDSKPreviewer sharedPreviewer] updateWithBibTeXString:nil];
+        return;
+	}
+
+    if([[OFPreferenceWrapper sharedPreferenceWrapper] boolForKey:BDSKUsesTeXKey] &&
+	   [[[BDSKPreviewer sharedPreviewer] window] isVisible]){
+
+        unsigned numberOfPubs = [selPubs count];
+        
+        NSMutableString *bibString = [[NSMutableString alloc] initWithCapacity:(numberOfPubs * 100)];
 
         // in case there are @preambles in it
         [bibString appendString:frontMatter];
         [bibString appendString:@"\n"];
         
-        // passing the expanded bibtex string causes problems with accented months, so we'll let BibTeX expand things
-        NSArray *macros = [macroDefinitions allKeys];
-        foreach(macro, macros){
-            [bibString appendFormat:@"@STRING{%@ = \"%@\"}\n",macro,[macroDefinitions objectForKey:macro]];
+        [bibString appendString:[self bibTeXMacroString]];
+        
+        NSEnumerator *e = [selPubs objectEnumerator];
+        NSNumber *i;
+        BibItem *aPub = nil;
+		NSMutableArray *selItems = [[NSMutableArray alloc] initWithCapacity:numberOfPubs];
+		NSMutableSet *parentItems = [[NSMutableSet alloc] initWithCapacity:numberOfPubs];
+		NSMutableArray *selParentItems = [[NSMutableArray alloc] initWithCapacity:numberOfPubs];
+        
+		while(i = [e nextObject]){
+            aPub = [shownPublications objectAtIndex:[i intValue] usingLock:pubsLock];
+			[selItems addObject:aPub];
+
+            if([aPub crossrefParent])
+                [parentItems addObject:[aPub crossrefParent]];
+            
+        }// while i is num of selected row 
+		
+		e = [selItems objectEnumerator];
+		while(aPub = [e nextObject]){
+			if([parentItems containsObject:aPub]){
+				[parentItems removeObject:aPub];
+				[selParentItems addObject:aPub];
+			}else{
+                NS_DURING
+                    [bibString appendString:[aPub bibTeXString]];
+                NS_HANDLER
+                    if([[localException name] isEqualToString:BDSKTeXifyException])
+                        NSLog(@"Discarding exception raised for item \"%@\"", [aPub citeKey]);
+                    else
+                        [localException raise];
+                NS_ENDHANDLER
+			}
+		}
+        
+		e = [selParentItems objectEnumerator];
+		while(aPub = [e nextObject]){
+            NS_DURING
+                [bibString appendString:[aPub bibTeXString]];
+            NS_HANDLER
+                if([[localException name] isEqualToString:BDSKTeXifyException])
+                    NSLog(@"Discarding exception raised for item \"%@\"", [aPub citeKey]);
+                else
+                    [localException raise];
+            NS_ENDHANDLER
         }
         
-        NSNumber *i;
-        NSEnumerator *e = [self selectedPubEnumerator];
+        e = [parentItems objectEnumerator];        
+		while(aPub = [e nextObject]){
+            NS_DURING
+                [bibString appendString:[aPub bibTeXString]];
+            NS_HANDLER
+                if([[localException name] isEqualToString:BDSKTeXifyException])
+                    NSLog(@"Discarding exception raised for item \"%@\"", [aPub citeKey]);
+            else
+                [localException raise];
+            NS_ENDHANDLER
+        }
+                        
+        [selItems release];
+        [parentItems release];
+        [selParentItems release];
         
-        while(i = [e nextObject]){
-            [bibString appendString:[[shownPublications objectAtIndex:[i intValue]] bibTeXString]];
-        }// while i is num of selected row                  
-        [NSThread detachNewThreadSelector:@selector(PDFFromString:)
-                                 toTarget:PDFpreviewer
-                               withObject:bibString];
+        [[BDSKPreviewer sharedPreviewer] updateWithBibTeXString:bibString];
+        [bibString release];
     }
 }
 
-- (void)displayPreviewForItems:(NSEnumerator *)enumerator{
-    NSNumber *i;
-    NSDictionary *titleAttributes = [NSDictionary dictionaryWithObjects:[NSArray arrayWithObjects:[NSNumber numberWithInt:1], nil]
-                                                                forKeys:[NSArray arrayWithObjects:NSUnderlineStyleAttributeName,  nil]];
-    NSMutableAttributedString *s;
-    if(![previewField lockFocusIfCanDraw])
+- (void)displayPreviewForItems:(NSArray *)itemIndexes{
+
+    if(NSIsEmptyRect([previewField visibleRect]))
         return;
+        
+    static NSDictionary *titleAttributes;
+    if(titleAttributes == nil)
+        titleAttributes = [[NSDictionary alloc] initWithObjects:[NSArray arrayWithObjects:[NSNumber numberWithInt:1], nil]
+                                                        forKeys:[NSArray arrayWithObjects:NSUnderlineStyleAttributeName,  nil]];
+    static NSAttributedString *noAttrDoubleLineFeed;
+    if(noAttrDoubleLineFeed == nil)
+        noAttrDoubleLineFeed = [[NSAttributedString alloc] initWithString:@"\n\n" attributes:nil];
     
-    [previewField setString:@""];
+    NSMutableAttributedString *s;
+    NSNumber *i;
+  
     int maxItems = [[OFPreferenceWrapper sharedPreferenceWrapper] integerForKey:BDSKPreviewMaxNumberKey];
     int itemCount = 0;
     
     NSTextStorage *textStorage = [previewField textStorage];
-    [textStorage fixesAttributesLazily];
+
+    // do this _before_ messing with the text storage; otherwise you can have a leftover selection that ends up being out of range
+    NSRange zeroRange = NSMakeRange(0, 0);
+    if([previewField respondsToSelector:@selector(setSelectedRanges:)]){
+        static NSArray *zeroRanges = nil;
+        if(!zeroRanges) zeroRanges = [[NSArray alloc] initWithObjects:[NSValue valueWithRange:zeroRange], nil];
+        [previewField setSelectedRanges:zeroRanges];
+    } else {
+        [previewField setSelectedRange:zeroRange];
+    }
+            
+    NSLayoutManager *layoutManager = [[textStorage layoutManagers] lastObject];
+    [layoutManager retain];
+    [textStorage removeLayoutManager:layoutManager]; // optimization: make sure the layout manager doesn't do any work while we're loading
+
     [textStorage beginEditing];
+    [[textStorage mutableString] setString:@""];
+    
+    NSEnumerator *enumerator = [itemIndexes objectEnumerator];
+    
+    unsigned int numberOfSelectedPubs = [itemIndexes count];
 
     while((i = [enumerator nextObject]) && (maxItems == 0 || itemCount < maxItems)){
+                
 		itemCount++;
+        NSString *fieldValue;
 
         switch([[OFPreferenceWrapper sharedPreferenceWrapper] integerForKey:BDSKPreviewDisplayKey]){
             case 0:                
                 if(itemCount > 1)
                     [[textStorage mutableString] appendCharacter:NSFormFeedCharacter]; // page break for printing; doesn't display
-                [textStorage appendAttributedString:[[shownPublications objectAtIndex:[i intValue]] attributedStringValue]];
+                [textStorage appendAttributedString:[[shownPublications objectAtIndex:[i intValue] usingLock:pubsLock] attributedStringValue]];
                 break;
             case 1:
                 // special handling for annote-only
                 // Write out the title
-                if([self numberOfSelectedPubs] > 1){
-                    s = [[[NSMutableAttributedString alloc] initWithString:[[shownPublications objectAtIndex:[i intValue]] title]
-                                                         attributes:titleAttributes] autorelease];
-                    [s appendAttributedString:[[[NSAttributedString alloc] initWithString:@"\n\n"
-                                                                                  attributes:nil] autorelease]];
+                if(numberOfSelectedPubs > 1){
+                    s = [[[NSMutableAttributedString alloc] initWithString:[[shownPublications objectAtIndex:[i intValue] usingLock:pubsLock] displayTitle]
+                                                               attributes:titleAttributes] autorelease];
+                    [s appendAttributedString:noAttrDoubleLineFeed];
                     [textStorage appendAttributedString:s];
                 }
-
-                if([[[shownPublications objectAtIndex:[i intValue]] valueOfField:BDSKAnnoteString] isEqualToString:@""]){
+                fieldValue = [[shownPublications objectAtIndex:[i intValue] usingLock:pubsLock] valueOfField:BDSKAnnoteString inherit:NO];
+                if([fieldValue isEqualToString:@""]){
                     [[textStorage mutableString] appendString:NSLocalizedString(@"No notes.",@"")];
                 }else{
-                    [[textStorage mutableString] appendString:[[shownPublications objectAtIndex:[i intValue]] valueOfField:BDSKAnnoteString]];
+                    [[textStorage mutableString] appendString:fieldValue];
                 }
                 break;
             case 2:
                 // special handling for abstract-only
                 // Write out the title
-                if([self numberOfSelectedPubs] > 1){
-                    s = [[[NSMutableAttributedString alloc] initWithString:[[shownPublications objectAtIndex:[i intValue]] title]
+                if(numberOfSelectedPubs > 1){
+                    s = [[[NSMutableAttributedString alloc] initWithString:[[shownPublications objectAtIndex:[i intValue] usingLock:pubsLock] displayTitle]
                                                                 attributes:titleAttributes] autorelease];
-                    [s appendAttributedString:[[[NSAttributedString alloc] initWithString:@"\n\n"
-                                                                               attributes:nil] autorelease]];
+                    [s appendAttributedString:noAttrDoubleLineFeed];
                     [textStorage appendAttributedString:s];
                 }
-                
-                if([[[shownPublications objectAtIndex:[i intValue]] valueOfField:BDSKAbstractString] isEqualToString:@""]){
+                fieldValue = [[shownPublications objectAtIndex:[i intValue] usingLock:pubsLock] valueOfField:BDSKAbstractString inherit:NO];
+                if([fieldValue isEqualToString:@""]){
                     [[textStorage mutableString] appendString:NSLocalizedString(@"No abstract.",@"")];
                 }else{
-                    [[textStorage mutableString] appendString:[[shownPublications objectAtIndex:[i intValue]] valueOfField:BDSKAbstractString]];
+                    [[textStorage mutableString] appendString:fieldValue];
                 }
                 break;                
         }
         [[textStorage mutableString] appendString:@"\n\n"];
+        
     }
     [textStorage endEditing];
-    [textStorage ensureAttributesAreFixedInRange:NSMakeRange(0, [textStorage length])];
-
-    [previewField unlockFocus];
+    [textStorage addLayoutManager:layoutManager];
+    [layoutManager release];
 }
 
-- (void)updateUI{ // not thread safe
+- (void)updateUI{
 	[tableView reloadData];
     
 	int shownPubsCount = [shownPublications count];
@@ -2655,14 +2957,11 @@ This method always returns YES. Even if some or many operations fail.
 	if (shownPubsCount != totalPubsCount) { 
 		// inform people
         NSString *ofStr = NSLocalizedString(@"of", @"of");
-		[infoLine setStringValue: [NSString stringWithFormat:@"%d %@ %d %@", shownPubsCount, ofStr, totalPubsCount, totalStr]];
+		[self setStatus: [NSString stringWithFormat:@"%d %@ %d %@", shownPubsCount, ofStr, totalPubsCount, totalStr]];
 	}
 	else {
-		[infoLine setStringValue:[NSString stringWithFormat:@"%d %@", totalPubsCount, totalStr]];
+		[self setStatus:[NSString stringWithFormat:@"%d %@", totalPubsCount, totalStr]];
 	}
-	
-    [self updatePreviews:nil];
-    [self updateActionMenus:nil];
 }
 
 - (void)setTableFont{
@@ -2676,20 +2975,48 @@ This method always returns YES. Even if some or many operations fail.
     [tableView reloadData]; // othewise the change isn't immediately visible
 }
 
+- (BOOL)highlightItemForPartialItem:(NSDictionary *)partialItem{
+    
+    [tableView deselectAll:self];
+    [self setFilterField:nil];
+    
+    NSString *itemKey = [partialItem objectForKey:BDSKCiteKeyString];
+    NSEnumerator *pubEnum = [shownPublications objectEnumerator];
+    BibItem *anItem;
+    BOOL matchFound = NO;
+    
+    while(anItem = [pubEnum nextObject]){
+        if([[anItem citeKey] isEqualToString:itemKey]){
+            [self highlightBib:anItem];
+            matchFound = YES;
+        }
+    }
+    return matchFound;
+}
+
 - (void)highlightBib:(BibItem *)bib{
     [self highlightBib:bib byExtendingSelection:NO];
 }
 
 - (void)highlightBib:(BibItem *)bib byExtendingSelection:(BOOL)yn{
  
-    int i = [shownPublications indexOfObjectIdenticalTo:bib];
-    i = (sortDescending ? [shownPublications count] - 1 - i : i);
-    
+    int i = [shownPublications indexOfObjectIdenticalTo:bib usingLock:pubsLock];    
 
     if(i != NSNotFound && i != -1){
         [tableView selectRow:i byExtendingSelection:yn];
         [tableView scrollRowToVisible:i];
     }
+}
+
+- (void)highlightBibs:(NSArray *)bibArray{
+	NSEnumerator *pubEnum = [bibArray objectEnumerator];
+	BibItem *bib;
+	
+	[tableView deselectAll:nil];
+	
+	while(bib = [pubEnum nextObject]){
+		[self highlightBib:bib byExtendingSelection:YES];
+	}
 }
 
 - (IBAction)toggleStatusBar:(id)sender{
@@ -2716,8 +3043,29 @@ This method always returns YES. Even if some or many operations fail.
 	[[OFPreferenceWrapper sharedPreferenceWrapper] setBool:showStatus forKey:BDSKShowStatusBarKey];
 }
 
-#pragma mark
-#pragma mark || Custom cite drawer stuff
+- (void)setStatus:(NSString *)status {
+	[self setStatus:status immediate:YES];
+}
+
+- (void)setStatus:(NSString *)status immediate:(BOOL)now {
+	if(now)
+		[infoLine setStringValue:status];
+	else
+		[infoLine performSelector:@selector(setStringValue:) withObject:status afterDelay:0.01];
+}
+
+#pragma mark TeXTask delegate
+
+- (BOOL)texTaskShouldStartRunning:(BDSKTeXTask *)aTexTask{
+	[self setStatus:[NSString stringWithFormat:@"%@%C",NSLocalizedString(@"Generating data. Please wait", @"Generating data. Please wait..."), 0x2026]];
+	return YES;
+}
+
+- (void)texTask:(BDSKTeXTask *)aTexTask finishedWithResult:(BOOL)success{
+	[self updateUI];
+}
+
+#pragma mark Custom cite drawer stuff
 
 - (IBAction)toggleShowingCustomCiteDrawer:(id)sender{
     [customCiteDrawer toggle:sender];
@@ -2748,35 +3096,23 @@ This method always returns YES. Even if some or many operations fail.
     [[OFPreferenceWrapper sharedPreferenceWrapper] setObject:customStringArray forKey:BDSKCustomCiteStringsKey];
 }
 
-
-
 - (int)numberOfSelectedPubs{
-    return [[self selectedPublications] count];
+    return [tableView numberOfSelectedRows];
 }
-
 
 - (NSEnumerator *)selectedPubEnumerator{
     return [[self selectedPublications] objectEnumerator];
 }
 
 - (NSArray *)selectedPublications{
-    id item = nil;
-    NSEnumerator *itemsE = nil;
-    NSMutableArray *itemIndexes = [NSMutableArray arrayWithCapacity:10];
+
+    if([tableView selectedRow] == -1)
+        return nil;
     
-	// selectedRowEnum has to check sortDescending.. : ->
-	if(sortDescending){
-		int count = [shownPublications count];
-		itemsE = [tableView selectedRowEnumerator];
-		while(item = [itemsE nextObject]){
-			[itemIndexes addObject:[NSNumber numberWithInt:(count-[item intValue]- 1)]];
-		}
-		return itemIndexes;
-	}else{
-		return [[tableView selectedRowEnumerator] allObjects];
-	}
-    
+    return [[tableView selectedRowEnumerator] allObjects];
 }
+
+#pragma mark Main window stuff
 
 - (void)windowWillClose:(NSNotification *)notification{
     if([notification object] != documentWindow) // this is critical; see note where we register for this notification
@@ -2784,18 +3120,28 @@ This method always returns YES. Even if some or many operations fail.
     [[NSNotificationCenter defaultCenter] postNotificationName:BDSKDocumentWindowWillCloseNotification
                                                         object:self
                                                       userInfo:[NSDictionary dictionary]];
-    [[NSApp delegate] removeErrorObjsForDocument:self];
+    [[BDSKErrorObjectController sharedErrorObjectController] removeErrorObjsForDocument:self];
     [customCiteDrawer close];
 
     [[OFPreferenceWrapper sharedPreferenceWrapper] setObject:[lastSelectedColumnForSort identifier] forKey:BDSKDefaultSortedTableColumnKey];
-    [[OFPreferenceWrapper sharedPreferenceWrapper] setBool:(!sortDescending) forKey:BDSKDefaultSortedTableColumnIsDescendingKey];
-    
+    [[OFPreferenceWrapper sharedPreferenceWrapper] setBool:sortDescending forKey:BDSKDefaultSortedTableColumnIsDescendingKey];
+
+    // reset the previewer; don't send [self updatePreviews:] here, as the tableview will be gone by the time the queue posts the notification
+    if([[OFPreferenceWrapper sharedPreferenceWrapper] boolForKey:BDSKUsesTeXKey] &&
+       [[[BDSKPreviewer sharedPreviewer] window] isVisible] &&
+       [tableView selectedRow] != -1 )
+        [[BDSKPreviewer sharedPreviewer] updateWithBibTeXString:nil];    
 }
 
 - (void)pageDownInPreview:(id)sender{
     NSPoint p = [previewField scrollPositionAsPercentage];
-    if(p.y > 0.99){ // select next row if the last scroll put us at the end
+    
+    float pageheight = NSHeight([[[previewField enclosingScrollView] documentView] bounds]);
+    float viewheight = NSHeight([[previewField enclosingScrollView] documentVisibleRect]);
+    
+    if(p.y > 0.99 || viewheight >= pageheight){ // select next row if the last scroll put us at the end
         [tableView selectRow:([tableView selectedRow] + 1) byExtendingSelection:NO];
+        [tableView scrollRowToVisible:[tableView selectedRow]];
         return; // adjust page next time
     }
     [previewField pageDown:sender];
@@ -2803,8 +3149,10 @@ This method always returns YES. Even if some or many operations fail.
 
 - (void)pageUpInPreview:(id)sender{
     NSPoint p = [previewField scrollPositionAsPercentage];
+    
     if(p.y < 0.01){ // select previous row if we're already at the top
         [tableView selectRow:([tableView selectedRow] - 1) byExtendingSelection:NO];
+        [tableView scrollRowToVisible:[tableView selectedRow]];
         return; // adjust page next time
     }
     [previewField pageUp:sender];
@@ -2834,14 +3182,15 @@ This method always returns YES. Even if some or many operations fail.
 
 #pragma mark macro stuff
 
-- (NSMutableDictionary *)macroDefinitions {
-    return [[macroDefinitions retain] autorelease];
+- (NSDictionary *)macroDefinitions {
+    return macroDefinitions;
 }
 
-- (void)setMacroDefinitions:(NSMutableDictionary *)newMacroDefinitions {
+- (void)setMacroDefinitions:(NSDictionary *)newMacroDefinitions {
     if (macroDefinitions != newMacroDefinitions) {
         [macroDefinitions release];
-        macroDefinitions = [newMacroDefinitions mutableCopy];
+        macroDefinitions = OFCreateCaseInsensitiveKeyMutableDictionary();
+        [macroDefinitions setDictionary:newMacroDefinitions];
     }
 }
 
@@ -2850,15 +3199,11 @@ This method always returns YES. Even if some or many operations fail.
 }
 
 - (void)changeMacroKey:(NSString *)oldKey to:(NSString *)newKey{
-    NSUndoManager *undoMan = [self undoManager];
     if([macroDefinitions objectForKey:oldKey] == nil)
         [NSException raise:NSInvalidArgumentException
                     format:@"tried to change the value of a macro key that doesn't exist"];
-    [[undoMan prepareWithInvocationTarget:self]
+    [[[self undoManager] prepareWithInvocationTarget:self]
         changeMacroKey:newKey to:oldKey];
-    if(![undoMan isUndoing])
-        [undoMan setActionName:NSLocalizedString(@"Change Macro Key",
-                                                 @"change macro key action name for undo")];
     NSString *val = [macroDefinitions valueForKey:oldKey];
     [val retain]; // so the next line doesn't kill it
     [macroDefinitions removeObjectForKey:oldKey];
@@ -2867,81 +3212,88 @@ This method always returns YES. Even if some or many operations fail.
 	NSDictionary *notifInfo = [NSDictionary dictionaryWithObjectsAndKeys:newKey, @"newKey", oldKey, @"oldKey", nil];
     [[NSNotificationCenter defaultCenter] postNotificationName:BDSKBibDocMacroKeyChangedNotification
 														object:self
-													  userInfo:notifInfo];
-    [self updateUI];
-    
+													  userInfo:notifInfo];    
 }
 
 - (void)addMacroDefinition:(NSString *)macroString forMacro:(NSString *)macroKey{
-    NSUndoManager *undoMan = [self undoManager];
     // we're adding a new one, so to undo, we remove.
-    [[undoMan prepareWithInvocationTarget:self]
+    [[[self undoManager] prepareWithInvocationTarget:self]
             removeMacro:macroKey];
-    if(![undoMan isUndoing])
-        [undoMan setActionName:NSLocalizedString(@"Add Macro",
-                                                 @"add macro action name for undo")];
 
     [macroDefinitions setObject:macroString forKey:macroKey];
 	
 	NSDictionary *notifInfo = [NSDictionary dictionaryWithObjectsAndKeys:macroKey, @"macroKey", @"Add macro", @"type", nil];
     [[NSNotificationCenter defaultCenter] postNotificationName:BDSKBibDocMacroDefinitionChangedNotification
 														object:self
-													  userInfo:notifInfo];
-    [self updateUI];
-    
+													  userInfo:notifInfo];    
 }
 
 - (void)setMacroDefinition:(NSString *)newDefinition forMacro:(NSString *)macroKey{
     NSString *oldDef = [macroDefinitions objectForKey:macroKey];
-    NSUndoManager *undoMan = [self undoManager];
     // we're just changing an existing one, so to undo, we change back.
-    [[undoMan prepareWithInvocationTarget:self]
+    [[[self undoManager] prepareWithInvocationTarget:self]
             setMacroDefinition:oldDef forMacro:macroKey];
-    if(![undoMan isUndoing])
-        [undoMan setActionName:NSLocalizedString(@"Change Macro Definition",
-                                                 @"change macrodef action name for undo")];
     [macroDefinitions setObject:newDefinition forKey:macroKey];
 
 	NSDictionary *notifInfo = [NSDictionary dictionaryWithObjectsAndKeys:macroKey, @"macroKey", @"Change macro", @"type", nil];
     [[NSNotificationCenter defaultCenter] postNotificationName:BDSKBibDocMacroDefinitionChangedNotification
 														object:self
-													  userInfo:notifInfo];
-    [self updateUI];
-    
+													  userInfo:notifInfo];    
 }
 
 
 - (void)removeMacro:(NSString *)macroKey{
     NSString *currentValue = [macroDefinitions objectForKey:macroKey];
-    NSUndoManager *undoMan = [self undoManager];
     if(!currentValue){
         return;
     }else{
-        [[undoMan prepareWithInvocationTarget:self]
+        [[[self undoManager] prepareWithInvocationTarget:self]
         addMacroDefinition:currentValue
                   forMacro:macroKey];
-        if(![undoMan isUndoing])
-            [undoMan setActionName:NSLocalizedString(@"Delete Macro",
-                                                     @"delete macro action name for undo")];
     }
     [macroDefinitions removeObjectForKey:macroKey];
 	
 	NSDictionary *notifInfo = [NSDictionary dictionaryWithObjectsAndKeys:macroKey, @"macroKey", @"Remove macro", @"type", nil];
     [[NSNotificationCenter defaultCenter] postNotificationName:BDSKBibDocMacroDefinitionChangedNotification
 														object:self
-													  userInfo:notifInfo];
-    [self updateUI];
-    
+													  userInfo:notifInfo];    
 }
 
 - (NSString *)valueOfMacro:(NSString *)macroString{
     // Note we treat upper and lowercase values the same, 
     // because that's how btparse gives the string constants to us.
     // It is not quite correct because bibtex does discriminate,
-    // but this is the best we can do.
-    return [macroDefinitions objectForKey:[macroString lowercaseString]];
+    // but this is the best we can do.  The OFCreateCaseInsensitiveKeyMutableDictionary()
+    // is used to create a dictionary with case-insensitive keys.
+    return [macroDefinitions objectForKey:macroString];
 }
 
+- (NSString *)bibTeXMacroString{
+    BOOL shouldTeXify = [[OFPreferenceWrapper sharedPreferenceWrapper] boolForKey:BDSKShouldTeXifyWhenSavingAndCopyingKey];
+	NSMutableString *macroString = [NSMutableString string];
+    NSString *value;
+    NSArray *macros = [[macroDefinitions allKeys] sortedArrayUsingSelector:@selector(compare:)];
+    
+    foreach(macro, macros){
+		value = [macroDefinitions objectForKey:macro];
+		if(shouldTeXify){
+			
+			NS_DURING
+				value = [[BDSKConverter sharedConverter] stringByTeXifyingString:value];
+			NS_HANDLER
+				if([[localException name] isEqualToString:BDSKTeXifyException]){
+					int i = NSRunAlertPanel(NSLocalizedString(@"Character Conversion Error", @"Title of alert when an error happens"),
+											[NSString stringWithFormat: NSLocalizedString(@"An unrecognized character in the \"%@\" macro could not be converted to TeX.", @"Informative alert text when the error happens."), macro],
+											nil, nil, nil, nil);
+				}
+                                [localException raise]; // re-raise; we localized the error, but the sender needs to know we failed
+			NS_ENDHANDLER
+							
+		}                
+        [macroString appendFormat:@"\n@STRING{%@ = \"%@\"}\n", macro, value];
+    }
+	return macroString;
+}
 
 - (IBAction)showMacrosWindow:(id)sender{
     if (!macroWC){
@@ -2952,70 +3304,142 @@ This method always returns YES. Even if some or many operations fail.
 }
 
 #pragma mark
+#pragma mark Crossref support
+
+- (void)rebuildItemsForCiteKeys{
+	[pubsLock lock];
+	BibItem *pub;
+	NSEnumerator *e = [publications objectEnumerator];
+	
+	[itemsForCiteKeys release];
+	itemsForCiteKeys = [[OFMultiValueDictionary alloc] initWithCaseInsensitiveKeys:YES];
+	while(pub = [e nextObject])
+		[itemsForCiteKeys addObject:pub forKey:[pub citeKey]];
+	[pubsLock unlock];
+}
+
+- (OFMultiValueDictionary *)itemsForCiteKeys{
+	return itemsForCiteKeys;
+}
+
+- (BibItem *)publicationForCiteKey:(NSString *)key{
+	if ([NSString isEmptyString:key]) 
+		return nil;
+    
+	NSArray *items = [[self itemsForCiteKeys] arrayForKey:key];
+	
+	if ([items count] == 0)
+		return nil;
+    // may have duplicate items for the same key, so just return the first one
+    return [items objectAtIndex:0];
+}
+
+- (BOOL)citeKeyIsCrossreffed:(NSString *)key{
+	if ([NSString isEmptyString:key]) 
+		return NO;
+    
+	NSEnumerator *pubEnum = [publications objectEnumerator];
+	BibItem *pub;
+	
+	while (pub = [pubEnum nextObject]) {
+		if ([key caseInsensitiveCompare:[pub valueOfField:BDSKCrossrefString inherit:NO]] == NSOrderedSame) {
+			return YES;
+        }
+	}
+	return NO;
+}
+
+- (void)performSortForCrossrefs{
+	NSEnumerator *pubEnum = [[[publications copy] autorelease] objectEnumerator];
+	BibItem *pub = nil;
+	BibItem *parent;
+	NSString *key;
+	NSMutableSet *prevKeys = [NSMutableSet set];
+	BOOL moved = NO;
+	
+	// We only move parents that come after a child.
+	while (pub = [pubEnum nextObject]){
+		key = [[pub valueOfField:BDSKCrossrefString inherit:NO] lowercaseString];
+		if (![NSString isEmptyString:key] && [prevKeys containsObject:key]) {
+            [prevKeys removeObject:key];
+			parent = [self publicationForCiteKey:key];
+			[publications removeObjectIdenticalTo:parent usingLock:pubsLock];
+			[publications addObject:parent usingLock:pubsLock];
+			moved = YES;
+		}
+		[prevKeys addObject:[[pub citeKey] lowercaseString]];
+	}
+	
+	if (moved) {
+		[self sortPubsByColumn:nil];
+		[self setStatus:NSLocalizedString(@"Publications sorted for cross references.", @"")];
+	}
+}
+
+- (IBAction)sortForCrossrefs:(id)sender{
+	NSUndoManager *undoManager = [self undoManager];
+	[[undoManager prepareWithInvocationTarget:self] setPublications:publications];
+	[undoManager setActionName:NSLocalizedString(@"Sort Publications",@"")];
+	
+	[self performSortForCrossrefs];
+}
+
+- (IBAction)selectCrossrefParentAction:(id)sender{
+    BibItem *selectedBI = [shownPublications objectAtIndex:[[[self selectedPublications] lastObject] intValue] usingLock:pubsLock];
+    NSString *crossref = [selectedBI valueOfField:BDSKCrossrefString inherit:NO];
+    [tableView deselectAll:nil];
+    BibItem *parent = [self publicationForCiteKey:crossref];
+    if(crossref && parent){
+        [self highlightBib:parent];
+        [tableView scrollRowToVisible:[tableView selectedRow]];
+    } else
+        NSBeep(); // if no parent found
+}
+
+- (IBAction)createNewPubUsingCrossrefAction:(id)sender{
+    BibItem *selectedBI = [shownPublications objectAtIndex:[[[self selectedPublications] lastObject] intValue] usingLock:pubsLock];
+    BibItem *newBI = [[BibItem alloc] init];
+    [newBI setField:BDSKCrossrefString toValue:[selectedBI citeKey]];
+    [self addPublication:newBI];
+    [newBI release];
+    [self editPub:newBI];
+}
+
+- (IBAction)duplicateTitleToBooktitle:(id)sender{
+	if ([self numberOfSelectedPubs] == 0) return;
+	
+	int rv = NSRunAlertPanel(NSLocalizedString(@"Overwrite Booktitle?", @""),
+							 NSLocalizedString(@"Do you want me to overwrite the Booktitle field when it was already entered?", @""),
+							 NSLocalizedString(@"Don't Overwrite", @"Don't Overwrite"),
+							 NSLocalizedString(@"Overwrite", @"Overwrite"),
+							 nil, nil);
+	BOOL overwrite = (rv == NSAlertAlternateReturn);
+	
+	NSSet *parentTypes = [NSSet setWithArray:[[OFPreferenceWrapper sharedPreferenceWrapper] arrayForKey:BDSKTypesForDuplicateBooktitleKey]];
+	NSEnumerator *selEnum = [self selectedPubEnumerator];
+	NSNumber *row;
+	BibItem *aPub;
+	
+    // first we make sure all edits are committed
+	[[NSNotificationCenter defaultCenter] postNotificationName:BDSKFinalizeChangesNotification
+                                                        object:self
+                                                      userInfo:[NSDictionary dictionary]];
+	
+	while (row = [selEnum nextObject]) {
+		aPub = [shownPublications objectAtIndex:[row intValue] usingLock:pubsLock];
+		if([parentTypes containsObject:[aPub type]])
+			[aPub duplicateTitleToBooktitleOverwriting:overwrite];
+	}
+	[[self undoManager] setActionName:([self numberOfSelectedPubs] > 1 ? NSLocalizedString(@"Duplicate Titles",@"") : NSLocalizedString(@"Duplicate Title",@""))];
+}
+
+#pragma mark
 #pragma mark Printing support
 
 - (NSView *)printableView{
-    
-/// Code for splitting it into pages, mostly taken from TextEdit.  Since each "page" (except the last) has an NSFormFeedCharacter appended to it in the preview field,
-/// we make as many text containers as we have pages, and the typesetter will then force a page break at each form feed.  It's not clear from the docs that this won't
-/// work without a scroll view, but I get an empty view without it.
-    
-    NSScrollView *theScrollView = [[[NSScrollView alloc] init] autorelease]; // this will retain the other views
-    NSClipView *clipView = [[NSClipView alloc] init];
-    MultiplePageView *pagesView = [[MultiplePageView alloc] init];
-
-    [clipView setDocumentView:pagesView];
-    [pagesView release]; // retained by the clip view
-
-    [theScrollView setContentView:clipView];
-    [clipView release]; // retained by the scroll view
-    
-    [pagesView setPrintInfo:[self printInfo]];
-
-    // set up the text object NSTextStorage->NSLayoutManager->((NSTextContainer->NSTextView) * numberOfPages)
-    NSTextStorage *textStorage = [[NSTextStorage alloc] initWithAttributedString:[previewField textStorage]]; // it seems like this leaks, but if I autorelease, the pages are empty
-    NSLayoutManager *lm = [[NSLayoutManager alloc] init];
-    [textStorage addLayoutManager:lm];
-    [lm release]; // owned by the text storage
-    
-    unsigned numberOfPages = [tableView numberOfSelectedRows];
-    [pagesView setNumberOfPages:numberOfPages];
-    
-    NSTextContainer *textContainer;
-    NSTextView *textView;
-    NSSize textSize = [pagesView documentSizeInPage];
-    
-    while(numberOfPages){
-            
-        textContainer = [[NSTextContainer alloc] initWithContainerSize:textSize];
-            
-        textView = [[NSTextView alloc] initWithFrame:[pagesView documentRectForPageNumber:([tableView numberOfSelectedRows] - numberOfPages)] textContainer:textContainer];
-        [textView setHorizontallyResizable:NO];
-        [textView setVerticallyResizable:NO];
-        
-        [pagesView addSubview:textView];
-        
-        [[[textStorage layoutManagers] objectAtIndex:0] addTextContainer:textContainer];
-
-        [textView release];
-        [textContainer release];
-        numberOfPages--;
-    }
-    
-    // force layout before printing
-    unsigned len;
-    unsigned loc = INT_MAX;
-    if (loc > 0 && (len = [textStorage length]) > 0) {
-        NSRange glyphRange;
-        if (loc >= len) loc = len - 1;
-        /* Find out which glyph index the desired character index corresponds to */
-        glyphRange = [[[textStorage layoutManagers] objectAtIndex:0] glyphRangeForCharacterRange:NSMakeRange(loc, 1) actualCharacterRange:NULL];
-        if (glyphRange.location > 0) {
-            /* Now cause layout by asking a question which has to determine where the glyph is */
-            (void)[[[textStorage layoutManagers] objectAtIndex:0] textContainerForGlyphAtIndex:glyphRange.location - 1 effectiveRange:NULL];
-        }
-    }
-    return pagesView; // this has the content
+    BDSKPrintableView *printableView = [[BDSKPrintableView alloc] initForScreenDisplay:NO];
+    [printableView setAttributedString:[previewField textStorage]];    
+    return [printableView autorelease];
 }
 
 - (void)printShowingPrintPanel:(BOOL)showPanels {
@@ -3042,8 +3466,13 @@ This method always returns YES. Even if some or many operations fail.
 	NSMutableArray *selPubs = [NSMutableArray array];
 	NSNumber *row;
 
+    // first we make sure all edits are committed
+	[[NSNotificationCenter defaultCenter] postNotificationName:BDSKFinalizeChangesNotification
+                                                        object:self
+                                                      userInfo:[NSDictionary dictionary]];
+	
 	while(row = [selEnum nextObject]){
-		[selPubs addObject:[shownPublications objectAtIndex:[row intValue]]];
+		[selPubs addObject:[shownPublications objectAtIndex:[row intValue] usingLock:pubsLock]];
 	}
 	[[BibFiler sharedFiler] filePapers:selPubs fromDocument:self ask:YES];
 	
@@ -3089,6 +3518,22 @@ This method always returns YES. Even if some or many operations fail.
 #pragma mark Text import sheet support
 
 - (IBAction)importFromPasteboardAction:(id)sender{
+    
+    NSPasteboard *pasteboard = [NSPasteboard pasteboardWithName:NSGeneralPboard];
+    NSArray *types = [pasteboard types];
+    
+    if([types containsObject:NSStringPboardType]){
+        NSString *pboardString = [pasteboard stringForType:NSStringPboardType];
+        NSString *errorString = nil;
+        
+        if([pboardString isRISString] || [pboardString isBibTeXString]){ // sniff the string to see if we should add it directly
+            [self addPublicationsForString:pboardString error:&errorString];
+            
+            if(!errorString)
+                return; // it worked, so we're done here
+        }
+    }
+    
     BDSKTextImportController *tic = [(BDSKTextImportController *)[BDSKTextImportController alloc] initWithDocument:self];
 
     [tic beginSheetForPasteboardModalForWindow:documentWindow

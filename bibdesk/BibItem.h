@@ -1,8 +1,8 @@
 // BibItem.h
 // Created by Michael McCracken on Tue Dec 18 2001.
 /*
- This software is Copyright (c) 2001,2002, Michael O. McCracken
- All rights reserved.
+ This software is Copyright (c) 2001,2002,2003,2004,2005
+ Michael O. McCracken. All rights reserved.
 
  Redistribution and use in source and binary forms, with or without
  modification, are permitted provided that the following conditions
@@ -68,7 +68,6 @@
     NSString *pubType;
     NSMutableDictionary *pubFields;
     NSMutableArray *pubAuthors;
-    NSMutableArray *requiredFieldNames;     /*! @var  this is for 'bibtex required fields'*/
     BibEditor *editorObj; /*! @var if we have an editor, don't create a new one. */
 	BOOL needsToBeFiled;
 	BibDocument *document;
@@ -98,14 +97,11 @@
 - (id)initWithType:(NSString *)type fileType:(NSString *)inFileType pubFields:(NSDictionary *)fieldsDict authors:(NSMutableArray *)authArray createdDate:(NSCalendarDate *)date;
 
 /*!
-  @method makeType:
-    @abstract Change the type of a BibItem.
-    @discussion Changes the type of a BibItem, and rearranges the dictionary. Currently it keeps all the fields that have any text in them, so changing from one type to another with all fields filled in will give you the union of their entries.
-
- @param type the type (as a NSString *) that you want to make the receiver.
-    
+    @method makeType
+    @abstract Setup the type of a BibItem.
+    @discussion Rearranges the dictionary for the current type. Currently it keeps all the fields that have any text in them, so changing from one type to another with all fields filled in will give you the union of their entries.
 */
-- (void)makeType:(NSString *)type;
+- (void)makeType;
 
 /*!
     @method dealloc
@@ -113,17 +109,6 @@
 */
 - (void)dealloc;
 
-/*!
-@method isRequired:
-    @abstract Abstract??
-    @discussion This checks for a string that is an entry type identifier (like "Author") and tells you whether or not it is a bibtex-required entry.
-
- @param rString The string to be checked. (not a great name, no.)
- @result Whether or not rString was required
-    
-*/
-- (BOOL)isRequired:(NSString *)rString; // @@type - move to type class.
-- (NSMutableArray*) requiredFieldNames;
 - (BibDocument *)document;
 - (void)setDocument:(BibDocument *)newDocument;
 
@@ -159,36 +144,199 @@
 - (void)setFileType:(NSString *)someFileType;
 
 
+
+/*!
+    @method numberOfAuthors
+    @abstract Calls numberOfAuthorsInheriting: with inherit set to YES. 
+    @discussion (discussion)
+    
+*/
 - (int)numberOfAuthors;
+
+/*!
+    @method numberOfAuthorsInheriting:
+    @abstract Returns the number of authors.
+	@param inherit Boolean, if set follows the Crossref to find inherited authors.
+    @discussion (discussion)
+    
+*/
+- (int)numberOfAuthorsInheriting:(BOOL)inherit;
+
+/*!
+    @method pubAuthors
+    @abstract Calls pubAuthorsInheriting: with inherit set to YES. 
+    @discussion (discussion)
+    
+*/
 - (NSArray *)pubAuthors;
+
+/*!
+    @method pubAuthorsInheriting:
+    @abstract Returns the authors array of the publication.
+	@param inherit Boolean, if set follows the Crossref to find inherited authors.
+    @discussion (discussion)
+    
+*/
+- (NSArray *)pubAuthorsInheriting:(BOOL)inherit;
+
+/*!
+    @method     pubAuthorsAsStrings
+    @abstract   Returns an array of normalized names for the publications authors.
+    @discussion (comprehensive description)
+    @result     (description)
+*/
+- (NSArray *)pubAuthorsAsStrings;
+
+/*!
+    @method addAuthorWithName:
+    @abstract Add an author to the authors array. 
+	@param newAuthorName The name of the new author.
+    @discussion (discussion)
+    
+*/
 - (void)addAuthorWithName:(NSString *)newAuthorName;
 
 /*!
-    @method authorAtIndex
-    @abstract returns the author at index index.
+    @method authorAtIndex:
+    @abstract Calls authorAtIndex:inherit: with inherit set to YES. 
+	@param index The index for the author
     @discussion zero-based indexing
     
 */
 - (BibAuthor *)authorAtIndex:(int)index;
 
-- (NSString *)bibtexAuthorString;
+/*!
+    @method authorAtIndex:inherit:
+    @abstract Returns the author at index index.
+	@param index The index for the author
+	@param inherit Boolean, if set follows the Crossref to find inherited authors.
+    @discussion zero-based indexing
+    
+*/
+- (BibAuthor *)authorAtIndex:(int)index inherit:(BOOL)inherit;
+
+/*!
+    @method bibTeXAuthorString
+    @abstract Calls bibTeXAuthorStringNormalized:inherit: with normalized set to NO and inherit set to YES.
+    @discussion (discussion)
+    
+*/
+- (NSString *)bibTeXAuthorString;
+
+/*!
+    @method bibTeXAuthorStringNormalized:
+    @abstract Calls bibTeXAuthorStringNormalized:inherit: with inherit set to YES.
+	@param normalized Boolean, if set uses the normalized names of the authors. 
+    @discussion (discussion)
+    
+*/
+- (NSString *)bibTeXAuthorStringNormalized:(BOOL)normalized;
+
+/*!
+    @method bibTeXAuthorStringNormalized:inherit:
+    @abstract Returns the BibTeX string value for the authors. 
+	@param normalized Boolean, if set uses the normalized names of the authors. 
+	@param inherit Boolean, if set follows the Crossref to find inherited authors.
+    @discussion (discussion)
+    
+*/
+- (NSString *)bibTeXAuthorStringNormalized:(BOOL)normalized inherit:(BOOL)inherit;
+
+/*!
+    @method setAuthorsFromBibtexString:
+    @abstract Sets the authors array by parsing a BibTeX string value for the authors. 
+	@param aString The bibTeX string value for the authors. 
+    @discussion (discussion)
+    
+*/
 - (void)setAuthorsFromBibtexString:(NSString *)aString;
 
-- (NSString *)title;
-- (void)setTitle:(NSString *)title;
+/*!
+    @method crossrefParent
+    @abstract Returns the item linked to by the Crossref field, or nil when the Crossref field is not set or the item cannot be found. 
+    @discussion (discussion)
+    
+*/
+- (BibItem *)crossrefParent;
 
+/*!
+    @method title
+    @abstract Returns the title. This can be inherited from the Crossref parent. 
+    @discussion (discussion)
+    
+*/
+- (NSString *)title;
+
+/*!
+    @method displayTitle
+    @abstract Returns the title used for displays and dragged file names. This can be inherited from the Crossref parent. It is never nil or an empty string.
+    @discussion (discussion)
+    
+*/
+- (NSString *)displayTitle;
+
+/*!
+    @method container
+    @abstract Returns the title of the container item, such as the proceedings or journal. 
+    @discussion (discussion)
+    
+*/
 - (NSString *)container;
 
+/*!
+    @method setDate:
+    @abstract Set the date. 
+	@param newDate The new date to set.
+    @discussion (discussion)
+    
+*/
 - (void)setDate: (NSCalendarDate *)newDate;
+
+/*!
+    @method date
+    @abstract Calls dateInheriting: with inherit set to YES. 
+    @discussion (discussion)
+    
+*/
 - (NSCalendarDate *)date;
+
+/*!
+    @method dateInheriting:
+    @abstract Returns the date. This was formed from the Year and Month fields. 
+	@param inherit Boolean, if set follows the Crossref to find inherited date.
+    @discussion (discussion)
+    
+*/
+- (NSCalendarDate *)dateInheriting:(BOOL)inherit;
 
 - (NSCalendarDate *)dateCreated;
 - (void)setDateCreated:(NSCalendarDate *)newDateCreated;
 - (NSCalendarDate *)dateModified;
 - (void)setDateModified:(NSCalendarDate *)newDateModified;
 
-
-- (void)setType: (NSString *)newType;
+/*!
+	@method     setPubType:
+	@abstract   Basic setter for the publication type, for initialization. Sets up the fields if necessary.
+	@discussion -
+*/
+- (void)setPubType:(NSString *)newType;
+/*!
+	@method     setType:
+	@abstract   Basic setter for the publication type, calls setType:withModdate: with the current date.
+	@discussion -
+*/
+- (void)setType:(NSString *)newType;
+/*!
+	@method     setType:withModDate:
+	@abstract   Basic setter for the publication type, with undo. Sets up the fields if necessary.
+	@discussion -
+*/
+- (void)setType:(NSString *)newType withModDate:(NSCalendarDate *)date;
+/*!
+	@method     type
+	@abstract   Returns the publication type.
+	@discussion -
+*/
 - (NSString *)type;
 
 /*!
@@ -284,13 +432,29 @@
 */
 - (void)updateMetadataForKey:(NSString *)key;
 
-- (void)setRequiredFieldNames: (NSArray *)newRequiredFieldNames;
 - (void)setField: (NSString *)key toValue: (NSString *)value;
 - (void)setField: (NSString *)key toValue: (NSString *)value withModDate:(NSCalendarDate *)date;
 
+/*!
+    @method valueOfField:
+    @abstract Calls valueOfField:inherit: with inherit set to YES. 
+	@param key The field name.
+    @discussion (discussion)
+    
+*/
 - (NSString *)valueOfField: (NSString *)key;
 
-- (NSString *)acronymValueOfField:(NSString *)key;
+/*!
+    @method valueOfField:inherit:
+    @abstract Returns the value of a field. 
+	@param key The field name.
+	@param inherit Boolean, if set follows the Crossref to find inherited date.
+    @discussion (discussion)
+    
+*/
+- (NSString *)valueOfField: (NSString *)key inherit: (BOOL)inherit;
+
+- (NSString *)acronymValueOfField:(NSString *)key ignore:(unsigned int)ignoreLength;
 
 - (void)removeField: (NSString *)key;
 - (void)removeField: (NSString *)key withModDate:(NSCalendarDate *)date;
@@ -299,14 +463,6 @@
 - (void)addField:(NSString *)key withModDate:(NSCalendarDate *)date;
 
 - (NSMutableDictionary *)pubFields;
-
-/*!
-    @method PDFValue
-    @abstract Returns the bibtex formatted pdf image with the user-specified style. 
-    @discussion «discussion»
-    
-*/
-- (NSData *)PDFValue;
 
 /*!
     @method bibTeXString
@@ -363,7 +519,7 @@
 /*!
     @method     attributedStringValue
     @abstract   Returns an attributed string representation of the receiver, suitable for display purposes
-    @discussion Uses the default font family set in the preferences
+    @discussion Uses the default font family set in the preferences. It follows the Crossref parent for unset fields. 
     @result     (description)
 */
 - (NSAttributedString *)attributedStringValue;
@@ -407,21 +563,68 @@
 - (NSString *)allFieldsString; 
 
 /*!
+    @method     URLForField:
+    @abstract   Returns a valid URL for the field (either a file URL or internet URL) or nil.
+    @discussion Calls remote or local URL methods as appropriate to take care of percent escapes.
+    @param      field (description)
+    @result     (description)
+*/
+- (NSURL *)URLForField:(NSString *)field;
+
+/*!
+    @method     remoteURL
+    @abstract   Calls remoteURLForField: with the Url field.
+    @discussion (comprehensive description)
+    @result     (description)
+*/
+- (NSURL *)remoteURL;
+
+/*!
+    @method     remoteURLForField:
+    @abstract   Returns a valid URL or nil for the given field.  Adds percent escapes as necessary, as online databases can return doi (and other?)
+                string representations of URLs which are invalid according to the relevant RFC.
+    @discussion (comprehensive description)
+    @param      field the field name linking the local file.
+    @result     (description)
+*/
+- (NSURL *)remoteURLForField:(NSString *)field;
+
+/*!
     @method     localURLPath
-    @abstract   Calls localURLPathRelativeTo: with the path to the document.
+    @abstract   Calls localURLPathInheriting: with inherit set to YES. 
     @discussion -
     @result     a complete path with no tildes, or nil if an error occurred.
 */
 - (NSString *)localURLPath; 
 
 /*!
-    @method     localURLPathRelativeTo:
-    @abstract   attempts to return a path to the local-url file, relative to the base parameter
-    @discussion If the local-url field is a relative path, this will prepend base to it and return the path from building a URL with the result. If the value of local-url is a valid file url already, base is ignored. Base is also ignored if the value of local-url is an absolute path or has a tilde.
-    @param      base a path to serve as the base for resolving the relative path.
+    @method     localURLPathInheriting:
+    @abstract   Calls localFilePathForField:relativeTo:inherit: with the Local-Url field and the path to the document.
+	@param      inherit Boolean, if set follows the Crossref to find inherited date.
+    @discussion -
     @result     a complete path with no tildes, or nil if an error occurred.
 */
-- (NSString *)localURLPathRelativeTo:(NSString *)base; 
+- (NSString *)localURLPathInheriting:(BOOL)inherit;
+
+/*!
+    @method     localFilePathForField:
+    @abstract   Calls localFilePathForField:relativeTo:inherit: with the path to the document and inherit set to YES.
+    @discussion -
+    @param      field the field name linking the local file.
+    @result     a complete path with no tildes, or nil if an error occurred.
+*/
+- (NSString *)localFilePathForField:(NSString *)field; 
+
+/*!
+    @method     localFilePathForField:inherit:
+    @abstract   attempts to return a path to the local file linked through the field, relative to the base parameter
+    @discussion If the local-url field is a relative path, this will prepend base to it and return the path from building a URL with the result. If the value of local-url is a valid file url already, base is ignored. Base is also ignored if the value of local-url is an absolute path or has a tilde.
+    @param      field the field name linking the local file.
+    @param      base a path to serve as the base for resolving the relative path.
+	@param      inherit Boolean, if set follows the Crossref to find inherited date.
+    @result     a complete path with no tildes, or nil if an error occurred.
+*/
+- (NSString *)localFilePathForField:(NSString *)field relativeTo:(NSString *)base inherit:(BOOL)inherit;
 
 /*!
     @method suggestedLocalUrl
@@ -460,6 +663,9 @@
 - (void)autoFilePaper;
 
 - (void)typeInfoDidChange:(NSNotification *)aNotification;
+
+- (void)duplicateTitleToBooktitleOverwriting:(BOOL)overwrite;
+
 @end
 
 

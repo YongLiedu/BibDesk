@@ -1,12 +1,45 @@
 //
 //  BDSKTextImportController.m
-//  Bibdesk
+//  BibDesk
 //
 //  Created by Michael McCracken on 4/13/05.
-//  Copyright 2005 __MyCompanyName__. All rights reserved.
-//
+/*
+ This software is Copyright (c) 2005
+ Michael O. McCracken. All rights reserved.
+
+ Redistribution and use in source and binary forms, with or without
+ modification, are permitted provided that the following conditions
+ are met:
+
+ - Redistributions of source code must retain the above copyright
+   notice, this list of conditions and the following disclaimer.
+
+ - Redistributions in binary form must reproduce the above copyright
+    notice, this list of conditions and the following disclaimer in
+    the documentation and/or other materials provided with the
+    distribution.
+
+ - Neither the name of Michael O. McCracken nor the names of any
+    contributors may be used to endorse or promote products derived
+    from this software without specific prior written permission.
+
+ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+ "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+ LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+ A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+ OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+ SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+ LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+ DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+ THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+ (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ */
 
 #import "BDSKTextImportController.h"
+#import "BDSKFormCellFormatter.h"
+#import "BDSKCiteKeyFormatter.h"
+#import "BDSKFieldNameFormatter.h"
 #import <Carbon/Carbon.h>
 
 @implementation BDSKTextImportController
@@ -18,6 +51,7 @@
         item = [[BibItem alloc] init];
         fields = [[NSMutableArray alloc] init];
 		bookmarks = [[NSMutableArray alloc] init];
+	 	formatters = [[NSMutableDictionary alloc] initWithCapacity:15];
         showingWebView = NO;
         itemsAdded = 0;
 		
@@ -31,6 +65,7 @@
 				[bookmarks addObject:[[bm mutableCopy] autorelease]];
 			}
 		}
+		macroTextFieldWC = [[MacroTextFieldWindowController alloc] init];
     }
     return self;
 }
@@ -39,15 +74,16 @@
     [item release];
     [fields release];
     [bookmarks release];
+    [formatters release];
     [sourceBox release];
     [webViewView release];
+	[macroTextFieldWC release];
     [super dealloc];
 }
 
 - (void)awakeFromNib{
 	[itemTableView registerForDraggedTypes:[NSArray arrayWithObject:NSStringPboardType]];
     [statusLine setStringValue:@""];
-    [citeKeyLine setStringValue:[item citeKey]];
 	[webViewBox setContentViewMargins:NSZeroSize];
 	[webViewBox setContentView:webView];
     [self setupTypeUI];
@@ -55,6 +91,15 @@
     [webViewView retain];
     [itemTableView setDoubleAction:@selector(addTextToCurrentFieldAction:)];
     [self setWindowFrameAutosaveName:@"BDSKTextImportController Frame Autosave Name"];
+	[fieldNameField setFormatter:[[[BDSKFieldNameFormatter alloc] init] autorelease]];
+	// Set the properties of actionMenuButton that cannot be set in IB
+	[actionMenuButton setAlternateImage:[NSImage imageNamed:@"Action_Pressed"]];
+	[actionMenuButton setArrowImage:nil];
+	[actionMenuButton setShowsMenuWhenIconClicked:YES];
+	[[actionMenuButton cell] setAltersStateOfSelectedItem:NO];
+	[[actionMenuButton cell] setAlwaysUsesFirstItemAsSelected:NO];
+	[[actionMenuButton cell] setUsesItemFromMenu:NO];
+	[[actionMenuButton cell] setRefreshesMenu:NO];
 }
 
 
@@ -81,9 +126,10 @@
 		[self setShowingWebView:NO];
 		
         NSString *pbString = nil;
-        NSData *pbData = [pb dataForType:pbType];
+        NSData *pbData;
         
 		if([pbType isEqualToString:NSRTFPboardType]){
+            pbData = [pb dataForType:pbType];
             pbString = [[[NSAttributedString alloc] initWithRTF:pbData
                                              documentAttributes:NULL] autorelease];
             pbString = [[(NSAttributedString *)pbString string] stringByRemovingSurroundingWhitespace];
@@ -96,6 +142,7 @@
 			}
             
 		}else if([pbType isEqualToString:NSRTFDPboardType]){
+            pbData = [pb dataForType:pbType];
             pbString = [[[NSAttributedString alloc] initWithRTFD:pbData
                                               documentAttributes:NULL] autorelease];
             pbString = [[(NSAttributedString *)pbString string] stringByRemovingSurroundingWhitespace];
@@ -108,6 +155,7 @@
             }
             
 		}else if([pbType isEqualToString:NSStringPboardType]){
+            pbData = [pb dataForType:pbType];
             pbString = [pb stringForType:pbType];
             pbString = [pbString stringByRemovingSurroundingWhitespace];
 			if([pbString rangeOfString:@"http://"].location == 0){
@@ -117,7 +165,7 @@
             }
 		}else {
 			
-			[sourceTextView setString:@""];
+			[sourceTextView setString:NSLocalizedString(@"Sorry, BibDesk can't read this data type.", @"warning message when choosing \"new publication from pasteboard\" for an unsupported type")];
 		}
 	}
 }
@@ -131,6 +179,17 @@
         
 }
 
+- (void)setShowingWebView:(BOOL)showWebView{
+	if (showWebView != showingWebView) {
+		showingWebView = showWebView;
+		if (showingWebView) {
+			[webViewView setFrame:[sourceBox frame]];
+			[splitView replaceSubview:sourceBox with:webViewView];
+		} else {
+			[splitView replaceSubview:webViewView with:sourceBox];
+		}
+	}
+}
 
 - (void)setupTypeUI{
 
@@ -150,22 +209,10 @@
     [itemTableView reloadData];
 }
 
-- (void)setShowingWebView:(BOOL)showWebView{
-	if (showWebView != showingWebView) {
-		showingWebView = showWebView;
-		if (showingWebView) {
-			[webViewView setFrame:[sourceBox frame]];
-			[splitView replaceSubview:sourceBox with:webViewView];
-		} else {
-			[splitView replaceSubview:webViewView with:sourceBox];
-		}
-	}
-}
-
 - (void)setType:(NSString *)type{
     
     [itemTypeButton selectItemWithTitle:type];
-    [item makeType:type];
+    [item setType:type];
 
     BibTypeManager *typeMan = [BibTypeManager sharedManager];
 
@@ -173,20 +220,22 @@
     
     [fields addObjectsFromArray:[typeMan requiredFieldsForType:type]];
     [fields addObjectsFromArray:[typeMan optionalFieldsForType:type]];
-    [fields addObjectsFromArray:[typeMan userDefaultFieldsForType:type]];
-	if (![fields containsObject:BDSKLocalUrlString]) 
-		[fields addObject:BDSKLocalUrlString];
-	if (![fields containsObject:BDSKUrlString]) 
-		[fields addObject:BDSKUrlString];
 	
+	NSEnumerator *fieldEnum = [[typeMan userDefaultFieldsForType:type] objectEnumerator];
+	NSString *field = nil;
+	// the default fields can contain fields already contained in typeInfo
+	while (field = [fieldEnum nextObject]) {
+		if (![fields containsObject:field])
+			[fields addObject:field];
+	}
+	if(![fields containsObject:BDSKLocalUrlString])
+		[fields addObject:BDSKLocalUrlString];
+	if(![fields containsObject:BDSKUrlString])
+		[fields addObject:BDSKUrlString];
 }
 
-// this should be called by the caller when the sheet is removed
-- (void)cleanup{
-    [self cancelDownload];
-	[webView stopLoading:nil];
-}
-		
+#pragma mark Calling the main sheet
+
 - (void)beginSheetForPasteboardModalForWindow:(NSWindow *)docWindow modalDelegate:(id)modalDelegate didEndSelector:(SEL)didEndSelector contextInfo:(void *)contextInfo{
 	// we start with the pasteboard data, so we can directly show the main sheet 
 	if (![NSBundle loadNibNamed:[self windowNibName] owner:self]) return; // make sure we loaded the nib
@@ -251,31 +300,53 @@
 					   contextInfo:[[NSNumber alloc] initWithBool:YES]];
 }
 
+// this should be called by the caller when the sheet is removed
+- (void)cleanup{
+    [self cancelDownload];
+	[webView stopLoading:nil];
+}
+
 #pragma mark Actions
-- (IBAction)addCurrentItemAction:(id)sender{
+
+- (IBAction)addItemAction:(id)sender{
     // make the tableview stop editing:
     [[self window] makeFirstResponder:[self window]];
     
-    [document addPublication:[item autorelease]];
+    [document addPublication:item];
+	[item setCiteKey:[item suggestedCiteKey]]; // only now can we generate, due to unique specifiers
+	[item release];
 
     [statusLine setStringValue:[NSString stringWithFormat:NSLocalizedString(@"%d publication%@ added.", @"format string for pubs added. args: one int for number added then one string for plural string."), ++itemsAdded, (itemsAdded > 1 ? @"s" : @"")]];
 
     item = [[BibItem alloc] init];
     [itemTypeButton selectItemWithTitle:[item type]];
-    [citeKeyLine setStringValue:[item citeKey]];
     [itemTableView reloadData];
 }
 
-- (IBAction)stopAddingAction:(id)sender{
+- (IBAction)closeAction:(id)sender{
+    // make the tableview stop editing:
+    [[self window] makeFirstResponder:[self window]];
     [[self window] orderOut:sender];
     [NSApp endSheet:[self window] returnCode:[sender tag]];
+}
+
+- (IBAction)addItemAndCloseAction:(id)sender{
+	[self addItemAction:sender];
+	[self closeAction:sender];
+}
+
+- (IBAction)showHelpAction:(id)sender{
+    
+    OSStatus err = AHLookupAnchor((CFStringRef)@"BibDesk Help", (CFStringRef)@"Adding-References-From-Text-Sources");
+    if (err == kAHInternalErr || err == kAHInternalErr){
+        NSLog(@"Help Book: error looking up anchor \"Adding-References-From-Text-Sources\"");
+    }
 }
 
 - (IBAction)addTextToCurrentFieldAction:(id)sender{
     
     [self addCurrentSelectionToFieldAtIndex:[sender selectedRow]];
 }
-
 
 - (void)addCurrentSelectionToFieldAtIndex:(int)index{    
     NSString *selKey = [fields objectAtIndex:index];
@@ -298,9 +369,7 @@
     }
     [item setField:selKey toValue:selString];
     
-    [item setCiteKey:[item suggestedCiteKey]];
-    [citeKeyLine setStringValue:[item citeKey]];
-    
+	[[item undoManager] setActionName:NSLocalizedString(@"Edit Publication",@"")];
     [itemTableView reloadData];
 }
 
@@ -309,15 +378,18 @@
     [self setType:type];
     [[OFPreferenceWrapper sharedPreferenceWrapper] setObject:type
                                                       forKey:BDSKPubTypeStringKey];
-    [item setCiteKey:[item suggestedCiteKey]];
-    [citeKeyLine setStringValue:[item citeKey]];
 
+	[[item undoManager] setActionName:NSLocalizedString(@"Change Type",@"")];
     [itemTableView reloadData];
 }
+
+#pragma mark | Pasteboard import
 
 - (IBAction)importFromPasteboardAction:(id)sender{
 	[self loadPasteboardData];
 }
+
+#pragma mark | File import
 
 - (IBAction)importFromFileAction:(id)sender{
     NSOpenPanel *oPanel = [NSOpenPanel openPanel];
@@ -388,6 +460,8 @@
 
     }        
 }
+
+#pragma mark | Web import
 
 - (IBAction)importFromWebAction:(id)sender{
 	NSEnumerator *bEnum = [bookmarks objectEnumerator];
@@ -488,21 +562,49 @@
 	}
 }
 
-- (IBAction)showHelpAction:(id)sender{
-    
-    OSErr err = AHLookupAnchor((CFStringRef)@"BibDesk Help", (CFStringRef)@"Adding-from-Text");
-    if (err == kAHInternalErr || err == kAHInternalErr){
-        NSLog(@"Help Book: error looking up anchor \"Adding-from-Text\"");
-    }
+#pragma mark | Add field
+
+- (IBAction)addField:(id)sender{
+    [fieldNameField setStringValue:@""];
+    [NSApp beginSheet:addFieldSheet
+       modalForWindow:[self window]
+        modalDelegate:self
+       didEndSelector:@selector(addFieldSheetDidEnd:returnCode:contextInfo:)
+          contextInfo:nil];
 }
 
-#pragma mark WebView contextual menu actions
+- (IBAction)dismissAddFieldSheet:(id)sender{
+    [addFieldSheet orderOut:sender];
+    [NSApp endSheet:addFieldSheet returnCode:[sender tag]];
+}
+
+- (void)addFieldSheetDidEnd:(NSWindow *)sheet
+                 returnCode:(int)returnCode
+                contextInfo:(void *)contextInfo{
+    if(returnCode == NSOKButton){
+        if(![fields containsObject:[fieldNameField stringValue]]){
+			NSString *name = [[fieldNameField stringValue] capitalizedString]; // add it as a capitalized string to avoid duplicates
+			int row = [fields count];
+			
+			[fields addObject:name];
+			[item addField:name];
+			[[item undoManager] setActionName:NSLocalizedString(@"Add Field",@"")];
+			[itemTableView reloadData];
+			[itemTableView selectRow:row byExtendingSelection:NO];
+			[itemTableView editColumn:2 row:row withEvent:nil select:YES];
+        }
+    }
+    // else, nothing.
+}
+
+#pragma mark | WebView contextual menu actions
 
 - (void)copyLocationAsRemoteUrl:(id)sender{
 	NSString *URLString = [[[[[webView mainFrame] dataSource] request] URL] absoluteString];
 	
 	if (URLString) {
 		[item setField:BDSKUrlString toValue:URLString];
+		[[item undoManager] setActionName:NSLocalizedString(@"Edit Publication",@"")];
 		[itemTableView reloadData];
 	}
 }
@@ -512,6 +614,7 @@
 	
 	if (URLString) {
 		[item setField:BDSKUrlString toValue:URLString];
+		[[item undoManager] setActionName:NSLocalizedString(@"Edit Publication",@"")];
 		[itemTableView reloadData];
 	}
 }
@@ -546,6 +649,8 @@
 			
 			[item setField:BDSKLocalUrlString toValue:fileURLString];
 			[item autoFilePaper];
+			
+			[[item undoManager] setActionName:NSLocalizedString(@"Edit Publication",@"")];
 		} else {
 			NSLog(@"Could not write downloaded file.");
 		}
@@ -633,6 +738,7 @@
 	[item setField:BDSKLocalUrlString toValue:fileURLString];
 	[item autoFilePaper];
 	
+	[[item undoManager] setActionName:NSLocalizedString(@"Edit Publication",@"")];
 	[itemTableView reloadData];
 }
 
@@ -731,6 +837,8 @@
 	} else if ([menuItem action] == @selector(importFromWebAction:)) {
 		[menuItem setTitle:[NSString stringWithFormat:@"%@%C", NSLocalizedString(@"Load Website",@"Load Website"),0x2026]];
 		return YES;
+	} else if ([menuItem action] == @selector(editSelectedFieldAsRawBibTeX:)) {
+		return ([itemTableView selectedRow] != -1 && ![[macroTextFieldWC window] isVisible]);
 	}
 	return YES;
 }
@@ -959,6 +1067,44 @@
 					  errorDescription);
 }
 
+#pragma mark Macro editing
+
+- (IBAction)editSelectedFieldAsRawBibTeX:(id)sender{
+	int row = [itemTableView selectedRow];
+	if (row == -1) 
+		return;
+	if([itemTableView editedRow] != row)
+		[itemTableView editColumn:2 row:row withEvent:nil select:YES];
+    [self editSelectedCellAsMacro];
+}
+
+- (BOOL)editSelectedCellAsMacro{
+	int row = [itemTableView selectedRow];
+	if (row == -1) 
+		return NO;
+	NSString *value = [item valueOfField:[fields objectAtIndex:row]];
+	return [macroTextFieldWC editCellOfView:itemTableView
+									  atRow:row
+									 column:2
+								  withValue:value
+							  macroResolver:document
+								   delegate:self
+						  shouldEndSelector:NULL
+							 didEndSelector:@selector(macroEditorDidEndEditing:withValue:contextInfo:)
+								contextInfo:nil];
+}
+
+- (void)macroEditorDidEndEditing:(NSControl *)control withValue:(NSString *)value contextInfo:(void *)contextInfo{
+    int selRow = [itemTableView selectedRow];
+    NSString *fieldName = [fields objectAtIndex:selRow];
+	NSString *prevValue = [item valueOfField:fieldName];
+    
+    if(![value isEqualAsComplexString:prevValue]){
+		[item setField:fieldName toValue:value];
+	}
+	[itemTableView reloadData];
+}
+
 #pragma mark TableView Data source
 
 - (int)numberOfRowsInTableView:(NSTableView *)tableView{
@@ -980,27 +1126,21 @@
     }
 }
 
-- (BOOL)tableView:(NSTableView *)tableView shouldEditTableColumn:(NSTableColumn *)tableColumn row:(int)row{
-    NSString *tcID = [tableColumn identifier];
-    if([tcID isEqualToString:@"FieldName"] ||
-       [tcID isEqualToString:@"Num"] ){
-        return NO;
-    }
-    return YES;
-}
-
-
 - (void)tableView:(NSTableView *)tableView setObjectValue:(id)object forTableColumn:(NSTableColumn *)tableColumn row:(int)row{
-    NSString *tcID = [tableColumn identifier];
+    if ([[macroTextFieldWC window] isVisible])
+		return;
+	NSString *tcID = [tableColumn identifier];
     if([tcID isEqualToString:@"FieldName"] ||
        [tcID isEqualToString:@"Num"] ){
         return; // don't edit the first column. Shouldn't happen anyway.
     }
     
     NSString *key = [fields objectAtIndex:row];
+    if([object isEqualToString:[item valueOfField:key]])
+		return;
     [item setField:key toValue:object];
-    [item setCiteKey:[item suggestedCiteKey]];
-    [citeKeyLine setStringValue:[item citeKey]];
+	
+	[[item undoManager] setActionName:NSLocalizedString(@"Edit Publication",@"")];
 }
 
 // This method is called after it has been determined that a drag should begin, but before the drag has been started.  To refuse the drag, return NO.  To start a drag, return YES and place the drag data onto the pasteboard (data, owner, etc...).  The drag image and other drag related information will be set up and provided by the table view once this call returns with YES.  The rows array is the list of row numbers that will be participating in the drag.
@@ -1023,9 +1163,50 @@
 
         NSString *key = [fields objectAtIndex:row];
         [item setField:key toValue:[pb stringForType:NSStringPboardType]];
+		
+		[[item undoManager] setActionName:NSLocalizedString(@"Edit Publication",@"")];
         [itemTableView reloadData];
     }
     return YES;
+}
+
+#pragma mark TableView delegate methods
+
+- (BOOL)tableView:(NSTableView *)tableView shouldEditTableColumn:(NSTableColumn *)tableColumn row:(int)row{
+    NSString *tcID = [tableColumn identifier];
+    if([tcID isEqualToString:@"FieldName"] ||
+       [tcID isEqualToString:@"Num"] ){
+        return NO;
+    }
+	NSString *value = [item valueOfField:[fields objectAtIndex:row]];
+	if([value isComplex]){
+		[tableView selectRow:row byExtendingSelection:NO];
+		return [self editSelectedCellAsMacro];
+	}else
+		return YES;
+}
+
+- (void)tableView:(NSTableView *)tv willDisplayCell:(id)cell forTableColumn:(NSTableColumn *)tableColumn row:(int)row{
+	if([[tableColumn identifier] isEqualToString:@"FieldValue"]){
+		NSFormatter *formatter = [self formatterForEntry:[fields objectAtIndex:row]];
+		if ([formatter isKindOfClass:[BDSKFormCellFormatter class]])	
+			[(BDSKFormCellFormatter *)formatter setHighlighted:[tv isRowSelected:row]];
+		[cell setFormatter:formatter];
+	}
+}
+
+- (NSFormatter *)formatterForEntry:(NSString *)entry{
+    NSFormatter *formatter = [formatters objectForKey:entry];
+    if (formatter == nil) {
+		if ([entry isEqualToString:BDSKCrossrefString]) {
+			formatter = [[BDSKCiteKeyFormatter alloc] init]; // a crossref field is a cite key
+		} else {
+			formatter = [[BDSKFormCellFormatter alloc] initWithEntry:entry];
+        }
+		[formatters setObject:formatter forKey:entry];
+        [formatter release];
+    }
+    return formatter;
 }
 
 #pragma mark Splitview delegate methods

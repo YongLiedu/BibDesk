@@ -215,7 +215,7 @@
 	<key>Roman to TeX Accents</key>
 	<dict>
 		<key>̊</key>
-		<string>r</string>
+		<string>r </string>
 		<key>̀</key>
 		<string>`</string>
 		<key>́</key>

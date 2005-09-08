@@ -1,14 +1,46 @@
 //
 //  BibPref_InputManager.m
-//  Bibdesk
+//  BibDesk
 //
 //  Created by Adam Maxwell on Fri Aug 27 2004.
-//  Copyright (c) 2004 Adam R. Maxwell. All rights reserved.
-//
+/*
+ This software is Copyright (c) 2004,2005
+ Adam Maxwell. All rights reserved.
+
+ Redistribution and use in source and binary forms, with or without
+ modification, are permitted provided that the following conditions
+ are met:
+
+ - Redistributions of source code must retain the above copyright
+   notice, this list of conditions and the following disclaimer.
+
+ - Redistributions in binary form must reproduce the above copyright
+    notice, this list of conditions and the following disclaimer in
+    the documentation and/or other materials provided with the
+    distribution.
+
+ - Neither the name of Adam Maxwell nor the names of any
+    contributors may be used to endorse or promote products derived
+    from this software without specific prior written permission.
+
+ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+ "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+ LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+ A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+ OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+ SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+ LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+ DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+ THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+ (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ */
+
 
 
 #import "BibPref_InputManager.h"
 #import "BibTypeManager.h"
+#import "NSImage+Toolbox.h"
 
 NSString *BDSKInputManagerID = @"net.sourceforge.bibdesk.inputmanager";
 NSString *BDSKInputManagerLoadableApplications = @"Application bundles that we recognize";
@@ -141,23 +173,7 @@ NSString *BDSKInputManagerLoadableApplications = @"Application bundles that we r
         image = [[NSWorkspace sharedWorkspace] iconForFile:path];
     } else {
         // if LS failed us (my cache was corrupt when I wrote this code, so it's been tested)
-        IconRef genericIconRef;
-        OSStatus getIconErr = GetIconRef( kOnSystemDisk,
-                                          kSystemIconsCreator,
-                                          kAlertCautionIcon,
-                                          &genericIconRef );
-        NSAssert1( (!getIconErr), @"Couldn't get kAlertCautionIcon, error %d.", getIconErr); // now you're really out of luck
-        image = [[[NSImage alloc] initWithSize:NSMakeSize(size, size)] autorelease];
-        CGRect iconCGRect = CGRectMake(0, 0, size, size);
-        [image lockFocus];
-        PlotIconRefInContext( (CGContextRef)[[NSGraphicsContext currentContext] graphicsPort], // borrowed from BibEditor code
-                              &iconCGRect,
-                              kAlignAbsoluteCenter,
-                              kTransformNone,
-                              NULL,
-                              kPlotIconRefNormalFlags,
-                              genericIconRef);
-        [image unlockFocus];
+		image = [NSImage cautionIconImage];
         [aCell setStringValue:[NSString stringWithFormat:NSLocalizedString(@"Error %d, LaunchServices can't find %@",@""), err, inBundleID]];
     }
 
@@ -300,6 +316,8 @@ NSString *BDSKInputManagerLoadableApplications = @"Application bundles that we r
 	BibTypeManager *typeMan = [BibTypeManager sharedManager];
 	NSMutableSet *fieldNameSet = [NSMutableSet setWithSet:[typeMan allFieldNames]];
 	[fieldNameSet minusSet:[NSSet setWithObjects:BDSKLocalUrlString, BDSKUrlString, BDSKAbstractString, BDSKAnnoteString, BDSKYearString, BDSKVolumeString, BDSKNumberString, BDSKPagesString, nil]];
+	[fieldNameSet minusSet:[NSSet setWithArray:[defaults stringArrayForKey:BDSKLocalFileFieldsKey]]];
+	[fieldNameSet minusSet:[NSSet setWithArray:[defaults stringArrayForKey:BDSKRemoteURLFieldsKey]]];
 	NSMutableArray *fieldNames = [[fieldNameSet allObjects] mutableCopy];
 	[fieldNames sortUsingSelector:@selector(caseInsensitiveCompare:)];
 	[fieldNames removeObjectsInArray:enabledEditorAutocompletionStrings];

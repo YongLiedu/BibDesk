@@ -1,6 +1,6 @@
 //
 //  BibItemClassDescription.h
-//  Bibdesk
+//  BibDesk
 //
 //  Created by Sven-S. Porst on Sat Jul 10 2004.
 //  Copyright (c) 2004 __MyCompanyName__. All rights reserved.
@@ -19,16 +19,20 @@
 
 - (BibAuthor*)valueInAuthorsWithName:(NSString*)name;
 
-- (NSMutableDictionary *)fields;
-
 - (void) setBibTeXString:(NSString*) btString;
+
+- (NSString *)ASCiteKey;
+- (void)setASCiteKey:(NSString *)newKey;
+
+- (NSString*)ASTitle;
+- (void)setASTitle:(NSString *)newTitle;
 
 // wrapping original methods 
 - (NSDate*) ASDateCreated;
 - (NSDate*) ASDateModified;
 
 // more (pseudo) accessors for key-value coding
-- (NSString*) remoteURL;
+- (NSString*) remoteURLString;
 - (void) setRemoteURL:(NSString*) newURL;
 
 - (NSString*) localURL;

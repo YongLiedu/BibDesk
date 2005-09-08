@@ -65,6 +65,9 @@ will translate this file into the necessary scriptSuite and scriptTerminology fi
                     <property name="name" code="pnam" type="string" description="The name of the field" access="r">
                         <cocoa method="name"/>
                     </property>  
+                    <property name="BibTeX string" code="BTeX" type="string" description="The value of the field as raw BibTeX">
+                        <cocoa method="bibTeXString"/>
+                    </property>  
 			     </properties>
 			</class>
 
@@ -114,13 +117,13 @@ will translate this file into the necessary scriptSuite and scriptTerminology fi
                 <cocoa class="BibItem"/>
                 <properties>
 					<property name="cite key" code="ckey" type="string" description="Key for citing the publication.">
-						<cocoa method="citeKey"/>
+						<cocoa method="ASCiteKey"/>
 					</property>  
 					<property name="generated cite key" code="gcky" type="string" description="Auto-generated key for the publication." access="r">
 						<cocoa method="suggestedCiteKey"/>
 					</property>  
 					<property name="title" code="titl" type="string" description="The publication's title.">
-						<cocoa method="title"/>
+						<cocoa method="ASTitle"/>
 					</property>  
                     <property name="abstract" code="abst" type="string" description="The publication's abstract.">
                         <cocoa method="abstract"/>
@@ -132,10 +135,10 @@ will translate this file into the necessary scriptSuite and scriptTerminology fi
 						<cocoa method="localURL"/>
 					</property>  
 					<property name="URL" code="rURL" type="string" description="URL pointing to the publication.">
-						<cocoa method="remoteURL"/>
+						<cocoa method="remoteURLString"/>
 					</property>  
 					<property name="type" code="type" type="string" description="The publication's type. E.g. article, book, unpublished.">
-						<cocoa method="type"/>
+						<cocoa method="ASType"/>
 						<!-- Provide constants for these? This might be bad wrt to using types which aren't provided as constants. -->
 					</property>  
 					
@@ -165,17 +168,18 @@ will translate this file into the necessary scriptSuite and scriptTerminology fi
 						<cocoa method="attributedStringValue"/>
 					</property>                      
 					
-					<property name="note" code="note" type="string" description="Annotations for the publication as seen in the “Annote” tab.">
+					<property name="note" code="note" type="string" description="Annotations for the publication as seen in the Annote tab.">
                         <cocoa method="annotation"/>
                     </property>  
 
 					<property name="BibTeX string" code="BTeX" type="string" description="String for BibTeX entry. Can be set only at or immediately after initialization.">
 						<cocoa method="bibTeXString"/>
-					</property>  
+					</property>
+                    
+                    <property name="RIS string" code="RISs" type="string" description="RIS representation of the publication record." access="r">
+                        <cocoa method="RISStringValue"/>
+                    </property>
 					
-					<property name="fields record" code="flds" type="record" description="Fields with data about the publication. These may vary from publication to publication." hidden="">
-						<cocoa method="fields"/>
-					</property>  
 					<property name="document" code="docu" type="document" description="The bibliography containing this publication record." access="r">
 						<cocoa method="document"/>
 					</property>  

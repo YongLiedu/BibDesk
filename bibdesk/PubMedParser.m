@@ -1,22 +1,45 @@
 //
 //  PubMedParser.m
-//  Bibdesk
+//  BibDesk
 //
 //  Created by Michael McCracken on Sun Nov 16 2003.
-//  Copyright (c) 2003 __MyCompanyName__. All rights reserved.
-//
+/*
+ This software is Copyright (c) 2003,2004,2005
+ Michael O. McCracken. All rights reserved.
+
+ Redistribution and use in source and binary forms, with or without
+ modification, are permitted provided that the following conditions
+ are met:
+
+ - Redistributions of source code must retain the above copyright
+   notice, this list of conditions and the following disclaimer.
+
+ - Redistributions in binary form must reproduce the above copyright
+    notice, this list of conditions and the following disclaimer in
+    the documentation and/or other materials provided with the
+    distribution.
+
+ - Neither the name of Michael O. McCracken nor the names of any
+    contributors may be used to endorse or promote products derived
+    from this software without specific prior written permission.
+
+ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+ "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+ LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+ A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+ OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+ SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+ LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+ DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+ THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+ (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ */
 
 #import "PubMedParser.h"
 #import "html2tex.h"
 
 @interface PubMedParser (Private)
-//
-// Private function for cleaning up reference miner output for Amazon references.  Use an NSLog to see
-// what it's giving us, then compare with <http://www.refman.com/support/risformat_intro.asp>.  We'll
-// fix it up enough to separate the references and save typing the author/title, but the date is just
-// too messed up to bother with.
-//
-NSString *StringByFixingReferenceMinerString(NSString *aString);
 
 /*!
 @function	addStringToDict
@@ -26,7 +49,7 @@ NSString *StringByFixingReferenceMinerString(NSString *aString);
  @param	pubDict NSMutableDictionary containing the current publication.
  @param	theKey NSString object with the key that we are adding an item to (e.g. <tt>Author</tt>).
  */
-void addStringToDict(NSString *wholeValue, NSMutableDictionary *pubDict, NSString *theKey);
+void addStringToDict(NSMutableString *wholeValue, NSMutableDictionary *pubDict, NSString *theKey);
 /*!
 @function   isDuplicateAuthor
  @abstract   Check to see if we have a duplicate author in the list
@@ -46,14 +69,16 @@ BOOL isDuplicateAuthor(NSString *oldList, NSString *newAuthor);
  */
 void mergePageNumbers(NSMutableDictionary *dict);
 /*!
-@method     bibitemWithPubMedDictionary:fileOrder:
- @abstract   Convenience method which returns an autoreleased BibItem when given a pubDict object which
- may represent PubMed or other RIS information.
- @discussion (comprehensive description)
- @param      pubDict Dictionary containing an RIS representation of a bib item.
- @result     A new, autoreleased BibItem, of type BibTeX.
+@function   chooseAuthors
+ @abstract   PubMed has full author tags (FAU) which duplicate the AU. If available, we use those 
+ for the Author field as it contains more information, otherwise we take AU. 
+ @param      dict NSMutableDictionary containing a single RIS bibliography entry
  */
-+ (BibItem *)bibitemWithPubMedDictionary:(NSMutableDictionary *)pubDict;
+void chooseAuthors(NSMutableDictionary *dict);
+
+// creates a new BibItem from the dictionary and date passed; the date should be nil for paste/drag files
+// caller is responsible for releasing the returned item
+BibItem *createBibItemWithPubMedDictionary(NSMutableDictionary *pubDict, NSCalendarDate *date);
 @end
 
 @implementation PubMedParser
@@ -68,22 +93,333 @@ void mergePageNumbers(NSMutableDictionary *dict);
                         frontMatter:(NSMutableString *)frontMatter
                            filePath:(NSString *)filePath{
     
-    if([itemString rangeOfString:@"Amazon" options:nil range:NSMakeRange(0,6)].location != NSNotFound)
-        itemString = StringByFixingReferenceMinerString(itemString); // run a crude hack for fixing the broken RIS that we get for Amazon entries from Reference Miner
+    // make sure that we only have one type of space and line break to deal with, since HTML copy/paste can have odd whitespace characters
+    itemString = [itemString stringByNormalizingSpacesAndLineBreaks];
+    
+    if([itemString rangeOfString:@"Amazon" options:0 range:NSMakeRange(0,6)].location != NSNotFound)
+        itemString = [itemString stringByFixingReferenceMinerString]; // run a crude hack for fixing the broken RIS that we get for Amazon entries from Reference Miner
+    
+    // the only problem here is the stuff that Ref Miner prepends to the PMID; other than that, it's just PubMed output
+    if([itemString rangeOfString:@"PubMed,RM" options:0 range:NSMakeRange(0, 9)].location != NSNotFound)
+        itemString = [itemString stringByFixingRefMinerPubMedTags];
+    
+    if([itemString rangeOfString:@"PMID- " options:0 range:NSMakeRange(0, 10)].location != NSNotFound)
+        itemString = [itemString stringByAddingRISEndTagsToPubMedString];
     
     BibItem *newBI = nil;
-
-    // BibAppController *appController = (BibAppController *)[NSApp delegate]; // used to add autocomplete entries.
-
-    NSMutableArray *returnArray = [NSMutableArray arrayWithCapacity:1];
+    NSMutableArray *returnArray = [NSMutableArray arrayWithCapacity:10];
     
     //dictionary is the publication entry
     NSMutableDictionary *pubDict = [[NSMutableDictionary alloc] init];
     
+    NSArray *sourceLines = [itemString sourceLinesBySplittingString];
+    
+    NSEnumerator *sourceLineE = [sourceLines objectEnumerator];
+    NSString *sourceLine = nil;
+    
+    NSString *tag = nil;
+    NSString *value = nil;
+    NSMutableString *mutableValue = [NSMutableString string];
+    BibTypeManager *typeManager = [BibTypeManager sharedManager];
+    NSCharacterSet *whitespaceAndNewlineCharacterSet = [NSCharacterSet whitespaceAndNewlineCharacterSet];
+    
+    // This is used for stripping extraneous characters from BibTeX year fields
+    AGRegex *findYearString = [AGRegex regexWithPattern:@"(.*)(\\d{4})(.*)"];
+    
+    while(sourceLine = [sourceLineE nextObject]){
+
+        if(([sourceLine length] > 5 && [[sourceLine substringWithRange:NSMakeRange(4,2)] isEqualToString:@"- "]) ||
+           [sourceLine isEqualToString:@"ER  -"]){
+			// this is a "key - value" line
+			
+			// first save the last key/value pair if necessary
+			if(tag && ![tag isEqualToString:@"ER"]){
+				addStringToDict(mutableValue, pubDict, tag);
+			}
+			
+			// get the tag...
+            tag = [[sourceLine substringWithRange:NSMakeRange(0,4)] 
+						stringByTrimmingCharactersInSet:whitespaceAndNewlineCharacterSet];
+			
+			if([tag isEqualToString:@"ER"]){
+				// we are done with this publication
+				
+				if([[pubDict allKeys] count] > 0){
+					newBI = createBibItemWithPubMedDictionary(pubDict, ([filePath isEqualToString:@"Paste/Drag"] ? [NSCalendarDate date] : nil));
+					[returnArray addObject:newBI];
+					[newBI release];
+				}
+				
+				// reset these for the next pub
+				[pubDict removeAllObjects];
+				
+				// we don't care about the rest, ER has no value
+				continue;
+			}
+			
+			// get the value...
+			value = [[sourceLine substringWithRange:NSMakeRange(6,[sourceLine length]-6)]
+						stringByTrimmingCharactersInSet:whitespaceAndNewlineCharacterSet];
+			
+			// don't convert specials in URL fields, bug #1244625, are there other tags?
+			if([tag isEqualToString:@"UR"])
+				value = [value stringByConvertingHTMLToTeX];
+		
+			// Scopus returns a PY with //// after it.  Others may return a full date, where BibTeX wants a year.  
+			// Use a regex to find a substring with four consecutive digits and use that instead.  Not sure how robust this is.
+			if([[typeManager fieldNameForPubMedTag:tag] isEqualToString:BDSKYearString])
+				value = [findYearString replaceWithString:@"$2" inString:value];
+			
+			[mutableValue setString:value];                
+			
+		} else {
+			// this is a continuation of a multiline value
+			[mutableValue appendString:@" "];
+			[mutableValue appendString:[sourceLine stringByTrimmingCharactersInSet:whitespaceAndNewlineCharacterSet]];
+        }
+        
+    }
+    
+    *hadProblems = NO;
+    [pubDict release];
+    return returnArray;
+}
+
+@end
+
+@implementation PubMedParser (Private)
+
+void addStringToDict(NSMutableString *value, NSMutableDictionary *pubDict, NSString *tag){
+	NSString *key;
+	NSString *oldString;
+    NSString *newString;
+	
+	// we handle fieldnames for authors later, as FAU can duplicate AU. All others are treated as AU. 
+	if([tag isEqualToString:@"A1"] || [tag isEqualToString:@"A2"] || [tag isEqualToString:@"A3"])
+		tag = @"AU";
+	key = [[BibTypeManager sharedManager] fieldNameForPubMedTag:tag];
+	if(key == nil || [key isEqualToString:BDSKAuthorString]) key = tag;
+	oldString = [pubDict objectForKey:key];
+	
+	BOOL isAuthor = ([key isEqualToString:@"FAU"] ||
+					 [key isEqualToString:@"AU"] ||
+					 [key isEqualToString:BDSKEditorString]);
+    if(isAuthor)
+		[value replaceOccurrencesOfString:@"." withString:@". " 
+			options:NSLiteralSearch range:NSMakeRange(0, [value length])];
+	
+	// concatenate authors and keywords, as they can appear multiple times
+	// other duplicates keys should have at least different tags, so we use the tag instead
+	if(![NSString isEmptyString:oldString]){
+		if(isAuthor){
+			if(isDuplicateAuthor(oldString, value)){
+				NSLog(@"Not adding duplicate author %@", value);
+			}else{
+				newString = [[NSString alloc] initWithFormat:@"%@ and %@", oldString, value];
+				[pubDict setObject:newString forKey:key];
+                [newString release];
+			}
+			return;
+        }else if( [key isEqualToString:BDSKKeywordsString]){
+			newString = [[NSString alloc] initWithFormat:@"%@, %@", oldString, value];
+			[pubDict setObject:newString forKey:key];
+            [newString release];
+			return;
+		}else{
+			// we already had a tag mapping to the same fieldname, so use the tag instead
+			key = tag;
+		}
+    }
+	// the default, just set the value
+	newString = [value copy];
+	[pubDict setObject:newString forKey:key];
+	[newString release];
+}
+
+BOOL isDuplicateAuthor(NSString *oldList, NSString *newAuthor){ // check to see if it's a duplicate; this relies on the whitespace around the " and ", and is basically a hack for Scopus
+    NSArray *oldAuthArray = [oldList componentsSeparatedByString:@" and "];
+    return [oldAuthArray containsObject:newAuthor];
+}
+
+void chooseAuthors(NSMutableDictionary *dict){
+    NSString *authors;
+    
+    if(authors = [dict objectForKey:@"FAU"]){
+        [dict setObject:authors forKey:BDSKAuthorString];
+		[dict removeObjectForKey:@"FAU"];
+		// should we remove the AU also?
+    }else if(authors = [dict objectForKey:@"AU"]){
+        [dict setObject:authors forKey:BDSKAuthorString];
+		[dict removeObjectForKey:@"AU"];
+	}
+}
+
+BibItem *createBibItemWithPubMedDictionary(NSMutableDictionary *pubDict, NSCalendarDate *date)
+{
+    
+    BibTypeManager *typeManager = [BibTypeManager sharedManager];
+    BibItem *newBI = nil;
+    
+    // fix up the page numbers if necessary
+    mergePageNumbers(pubDict);
+	// choose the authors from the FAU or AU tag as available
+    chooseAuthors(pubDict);
+	
+    newBI = [[BibItem alloc] initWithType:@"misc"
+								 fileType:BDSKBibtexString
+								pubFields:pubDict
+								  authors:nil
+							  createdDate:date];
+    // set the pub type if we know the bibtex equivalent, otherwise leave it as misc
+    if([typeManager bibtexTypeForPubMedType:[pubDict objectForKey:@"TY"]] != nil){ // "standard" RIS, if such a thing exists
+        [newBI setPubType:[typeManager bibtexTypeForPubMedType:[pubDict objectForKey:@"TY"]]];
+    } else if([typeManager bibtexTypeForPubMedType:[pubDict objectForKey:@"PT"]] != nil){ // Medline RIS
+		[newBI setPubType:[typeManager bibtexTypeForPubMedType:[pubDict objectForKey:@"PT"]]];
+    }
+    // set the citekey, since RIS/Medline types don't have a citekey field
+    [newBI setCiteKeyString:[newBI suggestedCiteKey]];
+    
+    return newBI;
+}
+
+void mergePageNumbers(NSMutableDictionary *dict)
+{
+    NSArray *keys = [dict allKeys];
+    NSString *merge;
+    
+   if([keys containsObject:@"SP"] && [keys containsObject:@"EP"]){
+        merge = [[[dict objectForKey:@"SP"] stringByAppendingString:@"--"] stringByAppendingString:[dict objectForKey:@"EP"]];
+        [dict setObject:merge forKey:BDSKPagesString];
+        [dict removeObjectForKey:@"SP"];
+        [dict removeObjectForKey:@"EP"];
+   }
+}
+
+@end
+
+@implementation NSString (RISExtensions)
+
+- (NSString *)stringByConvertingHTMLToTeX;
+{
+    static NSCharacterSet *asciiSet = nil;
+    if(asciiSet == nil)
+        asciiSet = [[NSCharacterSet characterSetWithRange:NSMakeRange(0, 127)] retain];
+    
+    // set these up here, so we don't autorelease them every time we parse an entry
+    // Some entries from Compendex have spaces in the tags, which is why we match 0-1 spaces between each character.
+    static AGRegex *findSubscriptLeadingTag = nil;
+    if(findSubscriptLeadingTag == nil)
+        findSubscriptLeadingTag = [[AGRegex alloc] initWithPattern:@"< ?s ?u ?b ?>"];
+    static AGRegex *findSubscriptOrSuperscriptTrailingTag = nil;
+    if(findSubscriptOrSuperscriptTrailingTag == nil)
+        findSubscriptOrSuperscriptTrailingTag = [[AGRegex alloc] initWithPattern:@"< ?/ ?s ?u ?[bp] ?>"];
+    static AGRegex *findSuperscriptLeadingTag = nil;
+    if(findSuperscriptLeadingTag == nil)
+        findSuperscriptLeadingTag = [[AGRegex alloc] initWithPattern:@"< ?s ?u ?p ?>"];
+    
+    // This one might require some explanation.  An entry with TI of "Flapping flight as a bifurcation in Re<sub>&omega;</sub>"
+    // was run through the html conversion to give "...Re<sub>$\omega$</sub>", then the find sub/super regex replaced the sub tags to give
+    // "...Re$_$omega$$", which LaTeX barfed on.  So, we now search for <sub></sub> tags with matching dollar signs inside, and remove the inner
+    // dollar signs, since we'll use the dollar signs from our subsequent regex search and replace; however, we have to
+    // reject the case where there is a <sub><\sub> by matching [^<]+ (at least one character which is not <), or else it goes to the next </sub> tag
+    // and deletes dollar signs that it shouldn't touch.  Yuck.
+    static AGRegex *findNestedDollar = nil;
+    if(findNestedDollar == nil)
+        findNestedDollar = [[AGRegex alloc] initWithPattern:@"(< ?s ?u ?[bp] ?>[^<]+)(\\$)(.*)(\\$)(.*< ?/ ?s ?u ?[bp] ?>)"];
+    
+    // Run the value string through the HTML2LaTeX conversion, to clean up &theta; and friends.
+    // NB: do this before the regex find/replace on <sub> and <sup> tags, or else your LaTeX math
+    // stuff will get munged.  Unfortunately, the C code for HTML2LaTeX will destroy accented characters, so we only send it ASCII, and just keep
+    // the accented characters to let BDSKConverter deal with them later.
+    
+    NSScanner *scanner = [[NSScanner alloc] initWithString:self];
+    NSString *asciiAndHTMLChars, *nonAsciiAndHTMLChars;
+    NSMutableString *fullString = [[NSMutableString alloc] initWithCapacity:[self length]];
+    
+    while(![scanner isAtEnd]){
+        if([scanner scanCharactersFromSet:asciiSet intoString:&asciiAndHTMLChars])
+            [fullString appendString:[NSString TeXStringWithHTMLString:asciiAndHTMLChars]];
+		if([scanner scanUpToCharactersFromSet:asciiSet intoString:&nonAsciiAndHTMLChars])
+			[fullString appendString:nonAsciiAndHTMLChars];
+    }
+    [scanner release];
+    
+    NSString *newValue = [[fullString copy] autorelease];
+    [fullString release];
+    
+    // see if we have nested math modes and try to fix them; see note earlier on findNestedDollar
+    if([findNestedDollar findInString:newValue] != nil){
+        NSLog(@"WARNING: found nested math mode; trying to repair...");
+        newValue = [findNestedDollar replaceWithString:@"$1$3$5"
+                                              inString:newValue];
+    }
+    
+    // Do a regex find and replace to put LaTeX subscripts and superscripts in place of the HTML
+    // that Compendex (and possibly others) give us.
+    newValue = [findSubscriptLeadingTag replaceWithString:@"\\$_{" inString:newValue];
+    newValue = [findSuperscriptLeadingTag replaceWithString:@"\\$^{" inString:newValue];
+    newValue = [findSubscriptOrSuperscriptTrailingTag replaceWithString:@"}\\$" inString:newValue];
+    
+    return newValue;
+}
+
+- (NSString *)stringByFixingRefMinerPubMedTags;
+{    
+    // Reference Miner puts its own goo at the front of each entry, so we remove it.  From looking at
+    // the input string in gdb, we're getting something like "PubMed,RM122,PMID- 15639629," as the first line.
+    AGRegex *startTags = [AGRegex regexWithPattern:@"^PubMed,RM[0-9]{3}," options:AGRegexMultiline];
+    return [startTags replaceWithString:@"" inString:self];
+}
+
+- (NSString *)stringByFixingReferenceMinerString;
+{
+    //
+    // For cleaning up reference miner output for Amazon references.  Use an NSLog to see
+    // what it's giving us, then compare with <http://www.refman.com/support/risformat_intro.asp>.  We'll
+    // fix it up enough to separate the references and save typing the author/title, but the date is just
+    // too messed up to bother with.
+    //
+	NSString *tmpStr;
+	
+    // this is what Ref Miner uses to mark the beginning; should be TY key instead, so we'll fake it; this means the actual type doesn't get set
+    AGRegex *start = [AGRegex regexWithPattern:@"^Amazon,RM[0-9]{3}," options:AGRegexMultiline];
+    tmpStr = [start replaceWithString:@"" inString:self];
+    
+    start = [AGRegex regexWithPattern:@"^ITEM" options:AGRegexMultiline];
+    tmpStr = [start replaceWithString:@"TY  - " inString:tmpStr];
+    
+    // special case for handling the url; others we just won't worry about
+    AGRegex *url = [AGRegex regexWithPattern:@"^URL- " options:AGRegexMultiline];
+    tmpStr = [url replaceWithString:@"UR  - " inString:tmpStr];
+    
+    AGRegex *tag2Regex = [AGRegex regexWithPattern:@"^([A-Z]{2})- " options:AGRegexMultiline];
+    tmpStr = [tag2Regex replaceWithString:@"$1  - " inString:tmpStr];
+    
+    AGRegex *tag3Regex = [AGRegex regexWithPattern:@"^([A-Z]{3})- " options:AGRegexMultiline];
+    tmpStr = [tag3Regex replaceWithString:@"$1 - " inString:tmpStr];
+    
+    AGRegex *ends = [AGRegex regexWithPattern:@"(?<!\\A)^TY  - " options:AGRegexMultiline];
+    tmpStr = [ends replaceWithString:@"ER  - \r\nTY  - " inString:tmpStr];
+	
+    return [tmpStr stringByAppendingString:@"\r\nER  - "];	
+}
+
+- (NSString *)stringByAddingRISEndTagsToPubMedString;
+{
+	NSString *tmpStr;
+	
+    AGRegex *start = [AGRegex regexWithPattern:@"(?<!\\A)^PMID- " options:AGRegexMultiline];
+    tmpStr = [start replaceWithString:@"ER  - \r\nPMID- " inString:self];
+	
+    return [tmpStr stringByAppendingString:@"\r\nER  - "];
+}
+
+- (NSArray *)sourceLinesBySplittingString;
+{
     // ARM:  This code came from Art Isbell to cocoa-dev on Tue Jul 10 22:13:11 2001.  Comments are his.
     //       We were using componentsSeparatedByString:@"\r", but this is not robust.  Files from ScienceDirect
     //       have \n as newlines, so this code handles those cases as well as PubMed.
-    unsigned stringLength = [itemString length];  // start cocoadev
+    unsigned stringLength = [self length];
     unsigned startIndex;
     unsigned lineEndIndex = 0;
     unsigned contentsEndIndex;
@@ -94,291 +430,29 @@ void mergePageNumbers(NSMutableDictionary *dict);
     // invalid termination test which might exist in this untested example :-)
     while (lineEndIndex < stringLength)
     {
-	// Include only a single character in range.¬† Not sure whether
-	// this will work with empty lines, but if not, try a length of 0.
-	range = NSMakeRange(lineEndIndex, 1);
-	[itemString getLineStart:&startIndex end:&lineEndIndex 
-		     contentsEnd:&contentsEndIndex forRange:range];
-	
-	// If you want to exclude line terminators...
-	[sourceLines addObject:[itemString 
-	 substringWithRange:NSMakeRange(startIndex, contentsEndIndex - 
-					startIndex)]];
-    } // end cocoadev
-
-    
-    NSEnumerator *sourceLineE = [sourceLines objectEnumerator];
-    NSString *sourceLine = nil;
-    NSString *key = nil;
-    NSString *bibTeXKey = nil;
-    NSMutableString *wholeValue = [NSMutableString string];
-    NSString *value = nil;
-    BibTypeManager *typeManager = [BibTypeManager sharedManager];
-    NSCharacterSet *whitespaceNewlineSet = [NSCharacterSet whitespaceAndNewlineCharacterSet];
-    NSCharacterSet *newlineSet = [NSCharacterSet characterSetWithCharactersInString:@"\n"];
-    NSCharacterSet *asciiSet = [NSCharacterSet characterSetWithRange:NSMakeRange(0, 127)];
-    BOOL haveFAU = NO;
-    BOOL usingAU = NO;
-    
-    NSString *prefix = nil;
-    
-    // set these up here, so we don't autorelease them every time we parse an entry
-    // Some entries from Compendex have spaces in the tags, which is why we match 0-1 spaces between each character.
-    AGRegex *findSubscriptLeadingTag = [AGRegex regexWithPattern:@"< ?s ?u ?b ?>"];
-    AGRegex *findSubscriptOrSuperscriptTrailingTag = [AGRegex regexWithPattern:@"< ?/ ?s ?u ?[bp] ?>"];
-    AGRegex *findSuperscriptLeadingTag = [AGRegex regexWithPattern:@"< ?s ?u ?p ?>"];
-    
-    // This one might require some explanation.  An entry with TI of "Flapping flight as a bifurcation in Re<sub>&omega;</sub>"
-    // was run through the html conversion to give "...Re<sub>$\omega$</sub>", then the find sub/super regex replaced the sub tags to give
-    // "...Re$_$omega$$", which LaTeX barfed on.  So, we now search for <sub></sub> tags with matching dollar signs inside, and remove the inner
-    // dollar signs, since we'll use the dollar signs from our subsequent regex search and replace; however, we have to
-    // reject the case where there is a <sub><\sub> by matching [^<]+ (at least one character which is not <), or else it goes to the next </sub> tag
-    // and deletes dollar signs that it shouldn't touch.  Yuck.
-    AGRegex *findNestedDollar = [AGRegex regexWithPattern:@"(< ?s ?u ?[bp] ?>[^<]+)(\\$)(.*)(\\$)(.*< ?/ ?s ?u ?[bp] ?>)"];
-    
-    // This is used for stripping extraneous characters from BibTeX year fields
-    AGRegex *findYearString = [AGRegex regexWithPattern:@"(.*)(\\d{4})(.*)"];
-    
-    while(sourceLine = [sourceLineE nextObject]){
-  
-    NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
-    // NSLog(@"allocating pool at start");        
-        sourceLine = [sourceLine stringByTrimmingCharactersInSet:newlineSet];
-        //NSLog(@" = [%@]",sourceLine);        
-        if([sourceLine length] > 5){
-
-            prefix = [[sourceLine substringWithRange:NSMakeRange(0,4)] stringByTrimmingCharactersInSet:whitespaceNewlineSet];
-            
-            
-            if([[sourceLine substringWithRange:NSMakeRange(4,1)] isEqualToString:@"-"]){
-                // this is a "key - value" line
-                
-                value = [sourceLine substringWithRange:NSMakeRange(6,[sourceLine length]-6)];
-                value = [value stringByTrimmingCharactersInSet:whitespaceNewlineSet];
-
-                // Run the value string through the HTML2LaTeX conversion, to clean up &theta; and friends.
-                // NB: do this before the regex find/replace on <sub> and <sup> tags, or else your LaTeX math
-                // stuff will get munged.  Unfortunately, the C code for HTML2LaTeX will destroy accented characters, so we only send it ASCII, and just keep
-                // the accented characters to let BDSKConverter deal with them later.
-                
-                NSScanner *scanner = [NSScanner scannerWithString:value];
-                NSString *asciiAndHTMLChars;
-                NSMutableString *fullString = [NSMutableString string];
-                unsigned index = 0;
-                
-                while(![scanner isAtEnd]){
-                    if([scanner scanCharactersFromSet:asciiSet intoString:&asciiAndHTMLChars]){
-                        index = [scanner scanLocation];
-                        [fullString appendString:TeXStringWithHTMLString([asciiAndHTMLChars UTF8String], stdout, NULL, [asciiAndHTMLChars length], NO, NO, NO)];
-                    } else {
-                        [fullString appendString:[value substringWithRange:NSMakeRange(index, 1)]];
-                        [scanner setScanLocation:(index + 1)];
-                    }
-                }
-                value = [[fullString copy] autorelease];
-                
-                // see if we have nested math modes and try to fix them; see note earlier on findNestedDollar
-                if([findNestedDollar findInString:value] != nil){
-                    NSLog(@"WARNING: found nested math mode; trying to repair...");
-                     // NSLog(@"Original string was %@", value);
-                    value = [findNestedDollar replaceWithString:@"$1$3$5"
-                                                       inString:value];
-                     // NSLog(@"String is now %@", value);
-                }
-                
-                // Do a regex find and replace to put LaTeX subscripts and superscripts in place of the HTML
-                // that Compendex (and possibly others) give us.
-                value = [findSubscriptLeadingTag replaceWithString:@"\\$_{"
-                                                          inString:value];
-                value = [findSuperscriptLeadingTag replaceWithString:@"\\$^{"
-                                                            inString:value];
-                value = [findSubscriptOrSuperscriptTrailingTag replaceWithString:@"}\\$"
-                                                                        inString:value];
-                
-                if([prefix isEqualToString:@"PMID"] || [prefix isEqualToString:@"TY"]){ // ARM:  PMID for Medline, TY for Elsevier-ScienceDirect.  I hope.
-                    // we have a new publication
-                    if([[pubDict allKeys] count] > 0){
-                        // and we've already seen an old one: so save the old one off -
-			            newBI = [self bibitemWithPubMedDictionary:pubDict];
-                        [returnArray addObject:newBI];
-                    }
-                    [pubDict removeAllObjects];
-                    [pubDict setObject:value forKey:prefix];
-		    // reset these for the next pub
-		    haveFAU = NO;
-		    usingAU = NO;
-                    
-                }else{
-                    // we just have a new key in the same publication.
-                    // key is still the old value. prefix has the new key.
-					//    NSLog(@"old key     - [%@]", key);
-					//    NSLog(@"new, prefix - [%@]", prefix);
-                    if(key){
-						//	    NSLog(@"  inserting obj [%@] for key [%@]", wholeValue, key);
-						// ARM:  I removed FAU = Author from the dictionary, because we need to discriminate between FAU and AU
-						// and handle the case where AU occurs before FAU.  The final setObject: forKey: was blowing away
-						// the AU values, otherwise, because it recognized FAU as Author.
-						if([key isEqualToString:@"FAU"] && usingAU==NO){
-                                                    haveFAU = YES;  // use full author info
-                                                    [wholeValue replaceOccurrencesOfString:@"." 
-                                                                                withString:@". "
-                                                                                   options:NSLiteralSearch
-                                                                                     range:NSMakeRange(0, [wholeValue length])];
-                                                    addStringToDict([[wholeValue copy] autorelease], pubDict, BDSKAuthorString);
-						}else{
-						    // If we didn't get a FAU key (shows up first in PubMed), fall back to AU
-						    // AU is not in the dictionary, so we don't get confused with FAU
-						    if([key isEqualToString:@"AU"] && haveFAU==NO){
-							usingAU = YES;  // use AU info, and put FAU in its own field if it occurred too late
-                                                        [wholeValue replaceOccurrencesOfString:@"." 
-                                                                                    withString:@". "
-                                                                                       options:NSLiteralSearch
-                                                                                         range:NSMakeRange(0, [wholeValue length])];
-							addStringToDict([[wholeValue copy] autorelease], pubDict, BDSKAuthorString);
-						    }else{
-							// If we didn't get a FAU or AU, see if we have A1.  This is yet another variant of RIS.
-							if([key isEqualToString:@"A1"] && haveFAU==NO){
-							    usingAU = YES;  // use A1 info, and put FAU in its own field if it occurred too late
-                                                            [wholeValue replaceOccurrencesOfString:@"." 
-                                                                                        withString:@". "
-                                                                                           options:NSLiteralSearch
-                                                                                             range:NSMakeRange(0, [wholeValue length])];
-							    addStringToDict([[wholeValue copy] autorelease], pubDict, BDSKAuthorString);
-							}else{
-							    if([key isEqualToString:BDSKKeywordsString]){ // may have multiple keywords, so concatenate them
-                                    addStringToDict([[wholeValue copy] autorelease], pubDict, BDSKKeywordsString);
-							    }else{
-                                    if([key isEqualToString:BDSKEditorString]){ // may have multiple editors, so concatenate them
-                                        addStringToDict([[wholeValue copy] autorelease], pubDict, BDSKEditorString);
-                                    } else {
-                                        [pubDict setObject:[[wholeValue copy] autorelease] forKey:key];
-                                    }
-							    }
-							}
-						    }
-						}
-                    }
-                    
-                    bibTeXKey = [typeManager fieldNameForPubMedTag:prefix];
-                    
-                    if([bibTeXKey isEqualToString:BDSKYearString]){ 
-                        // Scopus returns a PY with //// after it.  Others may return a full date, where BibTeX wants a year.  
-                        // Use a regex to find a substring with four consecutive digits and use that instead.  Not sure how robust this is.
-                        value = [findYearString replaceWithString:@"$2"
-                                                         inString:value];
-                    }                      
-
-                    [wholeValue setString:value];
-                    
-                    if(bibTeXKey){
-                        key = [bibTeXKey retain];  // retain needed for local autorelease pool
-                    }else{
-                        key = [prefix retain];     // retain needed for local autorelease pool
-                    }
-                    
-                    key = [key stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceCharacterSet]];
-                }
-
-            }else{
-                [wholeValue appendString:@" "];
-                [wholeValue appendString:[sourceLine stringByTrimmingCharactersInSet:whitespaceNewlineSet]];
-                // NSLog(@"cont. [%@]", sourceLine);
-            }
-            
-        }
-        [pool release]; 
-        // NSLog(@"releasing pool");
+        // Include only a single character in range.  Not sure whether
+        // this will work with empty lines, but if not, try a length of 0.
+        range = NSMakeRange(lineEndIndex, 1);
+        [self getLineStart:&startIndex 
+                          end:&lineEndIndex 
+                  contentsEnd:&contentsEndIndex 
+                     forRange:range];
+        
+        // If you want to exclude line terminators...
+        [sourceLines addObject:[self substringWithRange:NSMakeRange(startIndex, contentsEndIndex - startIndex)]];
     }
+    return sourceLines;
+}
     
-
-    
-    if([[pubDict allKeys] count] > 0){
-	newBI = [self bibitemWithPubMedDictionary:pubDict];
-	[returnArray addObject:newBI];
-    }
-    //    NSLog(@"pubDict is %@", pubDict);
-    *hadProblems = NO;
-    [pubDict release];
-    return returnArray;
-}
-
-void addStringToDict(NSString *wholeValue, NSMutableDictionary *pubDict, NSString *theKey){
-    NSString *oldString = [pubDict objectForKey:theKey];
-    if(!oldString){
-        [pubDict setObject:wholeValue forKey:theKey];
-    } else {
-        if( [theKey isEqualToString:BDSKAuthorString] && isDuplicateAuthor(oldString, wholeValue)==YES ){
-            NSLog(@"Not adding duplicate author %@", wholeValue);
-            return;
-        }
-        NSString *newString = [NSString stringWithFormat:@"%@ and %@", oldString, wholeValue];
-        [pubDict setObject:newString forKey:theKey];
-    }
-}
-
-BOOL isDuplicateAuthor(NSString *oldList, NSString *newAuthor){ // check to see if it's a duplicate; this relies on the whitespace around the " and ", and is basically a hack for Scopus
-    NSArray *oldAuthArray = [oldList componentsSeparatedByString:@" and "];
-    return [oldAuthArray containsObject:newAuthor];
-}
-
-void mergePageNumbers(NSMutableDictionary *dict){
-    NSArray *keys = [dict allKeys];
-    NSString *merge;
-    
-    if([keys containsObject:@"SP"] && [keys containsObject:@"EP"]){
-	merge = [[[dict objectForKey:@"SP"] stringByAppendingString:@"--"] stringByAppendingString:[dict objectForKey:@"EP"]];
-	[dict setObject:merge forKey:BDSKPagesString];
-    }
-}
-
-NSString *StringByFixingReferenceMinerString(NSString *aString)
++ (NSString *)TeXStringWithHTMLString:(NSString *)htmlString;
 {
-    // this is what Ref Miner uses to mark the beginning; should be TY key instead, so we'll fake it; this means the actual TY doesn't get set
-    AGRegex *start = [AGRegex regexWithPattern:@"ITEM"];
-    aString = [start replaceWithString:@"TY  - " inString:aString];
-    
-    // special case for handling the url; others we just won't worry about
-    AGRegex *url = [AGRegex regexWithPattern:@"URL- "];
-    aString = [url replaceWithString:@"UR  - " inString:aString];
-    
-    AGRegex *tagRegex = [AGRegex regexWithPattern:@"([A-Z]+)- "];
-    aString = [tagRegex replaceWithString:@"$1  - " inString:aString];
-    
-    return aString;
-}
-
-
-+ (BibItem *)bibitemWithPubMedDictionary:(NSMutableDictionary *)pubDict{
-    
-    BibTypeManager *typeManager = [BibTypeManager sharedManager];
-    BibItem *newBI = nil;
-    
-    // fix up the page numbers if necessary
-    mergePageNumbers(pubDict);
-    
-    newBI = [[BibItem alloc] initWithType:@"misc"
-								 fileType:BDSKBibtexString
-								pubFields:pubDict
-								  authors:nil
-							  createdDate:nil];
-    // set the pub type if we know the bibtex equivalent, otherwise leave it as misc
-    if([typeManager bibtexTypeForPubMedType:[pubDict objectForKey:@"TY"]] != nil){ // "standard" RIS, if such a thing exists
-        [newBI setType:[typeManager bibtexTypeForPubMedType:[pubDict objectForKey:@"TY"]]];
-    } else {
-        if([typeManager bibtexTypeForPubMedType:[pubDict objectForKey:@"PT"]] != nil){ // Medline RIS
-            [newBI setType:[typeManager bibtexTypeForPubMedType:[pubDict objectForKey:@"PT"]]];
-        }
-    }
-    // set the citekey, since RIS/Medline types don't have a citekey field
-    [newBI setCiteKeyString:[newBI suggestedCiteKey]];
-    
-    return [newBI autorelease];
-}
-
-
-NSString* TeXStringWithHTMLString(const char *str, FILE *freport, char *html_fn, int ln,
-			   BOOL in_math, BOOL in_verb, BOOL in_alltt)
-{  
+    const char *str = [htmlString UTF8String];
+    int ln = strlen(str);
+    FILE *freport = stdout;
+    char *html_fn = NULL;
+    BOOL in_math = NO;
+    BOOL in_verb = NO;
+    BOOL in_alltt = NO;
     
 // ARM:  this code was taken directly from HTML2LaTeX.  I modified it to return
 // an NSString object, since working with FILE* streams led to really nasty problems
@@ -409,7 +483,7 @@ http://home.planet.nl/~faase009/GNU.txt
 */
      
 
-    NSMutableString *mString = [NSMutableString string];
+    NSMutableString *mString = [NSMutableString stringWithCapacity:ln];
     
     BOOL option_warn = YES;
     
@@ -540,7 +614,7 @@ http://home.planet.nl/~faase009/GNU.txt
                             else
                                 [mString appendFormat:@"{%s$}", o];
                         else
-                            [mString appendFormat:@"%s\n", o];
+                            [mString appendFormat:@"%s", o];
                     }
                     else if (in_math)
                     {   if (ch == '#' || ch == '%')
@@ -551,19 +625,19 @@ http://home.planet.nl/~faase009/GNU.txt
                     else
                     {   switch(ch)
                     {   case '\0' : break;
-                                        case '\t': [mString appendString:@"        \n"]; break;
+                                        case '\t': [mString appendString:@"        "]; break;
 					case '_': case '{': case '}':
 					case '#': case '$': case '%':
                        [mString appendFormat:@"{\\%c}", ch]; break;
-                                        case '@' : [mString appendFormat:@"{\\char64}\n"]; break;
+                                        case '@' : [mString appendFormat:@"{\\char64}"]; break;
 					case '[' :
 					case ']' : [mString appendFormat:@"{$%c$}", ch]; break;
-					case '"' : [mString appendString:@"{\\tt{}\"{}}\n"]; break;
-					case '~' : [mString appendString:@"\\~{}\n"]; break;
-                                        case '^' : [mString appendString:@"\\^{}\n"]; break;
-					case '|' : [mString appendString:@"{$|$}\n"]; break;
-					case '\\': [mString appendString:@"{$\\backslash$}\n"]; break;
-					case '&' : [mString appendString:@"\\&\n"]; break;
+					case '"' : [mString appendString:@"{\\tt{}\"{}}"]; break;
+					case '~' : [mString appendString:@"\\~{}"]; break;
+                                        case '^' : [mString appendString:@"\\^{}"]; break;
+					case '|' : [mString appendString:@"{$|$}"]; break;
+					case '\\': [mString appendString:@"{$\\backslash$}"]; break;
+					case '&' : [mString appendString:@"\\&"]; break;
                                         default: [mString appendFormat:@"%c", ch]; break;
                     }
                     }
