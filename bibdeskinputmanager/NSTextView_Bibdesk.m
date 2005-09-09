@@ -3,8 +3,38 @@
 //  BibDeskInputManager
 //
 //  Created by Sven-S. Porst on Sat Jul 17 2004.
-//  Copyright (c) 2004 __MyCompanyName__. All rights reserved.
-//
+/*
+ This software is Copyright (c) 2004,2005
+ Sven-S. Porst. All rights reserved.
+ 
+ Redistribution and use in source and binary forms, with or without
+ modification, are permitted provided that the following conditions
+ are met:
+ 
+ - Redistributions of source code must retain the above copyright
+ notice, this list of conditions and the following disclaimer.
+ 
+ - Redistributions in binary form must reproduce the above copyright
+ notice, this list of conditions and the following disclaimer in
+ the documentation and/or other materials provided with the
+ distribution.
+ 
+ - Neither the name of Sven-S. Porst nor the names of any
+ contributors may be used to endorse or promote products derived
+ from this software without specific prior written permission.
+ 
+ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+ "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+ LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+ A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+ OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+ SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+ LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+ DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+ THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+ (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ */
 
 #import "NSTextView_Bibdesk.h"
 #import <Foundation/Foundation.h>
@@ -15,6 +45,9 @@ static BOOL debug = NO;
 
 NSString *BDSKInputManagerID = @"net.sourceforge.bibdesk.inputmanager";
 NSString *BDSKInputManagerLoadableApplications = @"Application bundles that we recognize";
+
+static NSString *kBibDeskInsertion = nil;
+static NSString *kHint = nil;
 
 static NSString *kScriptName = @"Bibdesk";
 static NSString *kScriptType = @"scpt";
@@ -27,11 +60,14 @@ extern void _objc_resolve_categories_for_class(struct objc_class *cls);
 + (void)load{
     
     NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
-        
+    
+    if(kBibDeskInsertion == nil)
+        kBibDeskInsertion = [NSLocalizedString(@" (Bibdesk)", @"") retain];
+    if(kHint == nil)
+        kHint = [NSLocalizedString(@"Type } or , to insert the current item.",@"") retain];
+    
     NSString *bundleID = [[NSBundle mainBundle] bundleIdentifier]; // for the app we are loading into
     NSArray *array = [[[NSUserDefaults standardUserDefaults] persistentDomainForName:BDSKInputManagerID] objectForKey:BDSKInputManagerLoadableApplications];
-    if(!array)
-        array = [[[NSArray alloc] init] autorelease];
 
     if(debug) NSLog(@"We should enable for %@", [array description]);
   
@@ -49,12 +85,19 @@ extern void _objc_resolve_categories_for_class(struct objc_class *cls);
     if(debug && yn) NSLog(@"Found a match; enabling autocompletion for %@", bundleID);
 
     if(yn && [[self superclass] instancesRespondToSelector:@selector(completionsForPartialWordRange:indexOfSelectedItem:)]){
-	if(debug) NSLog(@"%@ performing posing for %@", [self class], [self superclass]);
-	[self poseAsClass:[NSTextView class]];
-	if(debug) [self printSelectorList:[self superclass]];
+        if(debug) NSLog(@"%@ performing posing for %@", [self class], [self superclass]);
+        if(debug) [self printSelectorList:[self superclass]];
+
+        class_poseAs((Class)self, ((Class)self)->super_class);
     }
     
     [pool release];
+}
+
+- (void)dealloc{
+    [kBibDeskInsertion release];
+    [kHint release];
+    [super dealloc];
 }
 
 + (void)printSelectorList:(id)anObject{
@@ -74,6 +117,9 @@ extern void _objc_resolve_categories_for_class(struct objc_class *cls);
     }
 }
 
+#pragma mark -
+#pragma mark Reference-searching heuristics
+
 // ** Check to see if it's TeX
 //  - look back to see if { ; if no brace, return not TeX
 //  - if { found, look back between insertion point and { to find comma; check to see if it's BibTeX, then return the match range
@@ -85,11 +131,6 @@ extern void _objc_resolve_categories_for_class(struct objc_class *cls);
 //  - now we have the last [, see if there is a cite immediately preceding it using rangeOfString:@"cite" || rangeOfString:@"bibentry"
 //  - if there were no brackets, but there was a double curly brace, then check for a jurabib citation
 // ** After all of this, we've searched back to a brace, and then checked for a cite command with two optional parameters
-
-NSRange SafeBackwardSearchRange(NSRange startRange, unsigned seekLength){
-    unsigned minLoc = ( (startRange.location > seekLength) ? seekLength : startRange.location);
-    return NSMakeRange(startRange.location - minLoc, minLoc);
-}
 
 - (BOOL)isBibTeXCitation:(NSRange)braceRange{
     NSString *str = [[self textStorage] string];
@@ -145,11 +186,6 @@ NSRange SafeBackwardSearchRange(NSRange startRange, unsigned seekLength){
     return NO;
 }
 
-NSRange SafeForwardSearchRange( unsigned startLoc, unsigned seekLength, unsigned maxLoc ){
-    seekLength = ( (startLoc + seekLength > maxLoc) ? maxLoc - startLoc : seekLength );
-    return NSMakeRange(startLoc, seekLength);
-}
-            
 - (NSRange)citeKeyRange{
     NSString *str = [[self textStorage] string];
     NSRange r = [self selectedRange]; // here's the insertion point
@@ -190,10 +226,10 @@ NSRange SafeForwardSearchRange( unsigned startLoc, unsigned seekLength, unsigned
     return [s rangeOfString:@"\\ref{" options:NSBackwardsSearch range:SafeBackwardSearchRange(r, 12)]; // make this a fairly small range, otherwise bad thing can happen when inserting
 }
 
-/* ssp: 2004-07-18
-Override usual behaviour so we can have dots, colons and hyphens in our cite keys
-requires X.3
-*/
+#pragma mark -
+#pragma mark AppKit overrides
+
+// Override usual behaviour so we can have dots, colons and hyphens in our cite keys
 - (NSRange)rangeForUserCompletion {
     NSRange r = [self citeKeyRange];
     if (r.location != NSNotFound) {
@@ -202,43 +238,37 @@ requires X.3
     return [super rangeForUserCompletion];
 }
 
-
-/* ssp: 2004-07-18
-Provide own completions based on results by Bibdesk
-Should check whether Bibdesk is available first
-setting initial selection in list to second item doesn't work
-requires X.3
-*/
+// Provide own completions based on results by Bibdesk.  
+// Should check whether Bibdesk is available first.  
+// Setting initial selection in list to second item doesn't work.  
+// Requires X.3
 - (NSArray *)completionsForPartialWordRange:(NSRange)charRange indexOfSelectedItem:(int *)index	{
 	NSString *s = [[self textStorage] string];
-        NSRange refLabelRange = [self refLabelRange];
-        NSRange keyRange = ( (refLabelRange.location == NSNotFound) ? [self citeKeyRange] : NSMakeRange(NSNotFound, 0) ); // don't bother checking for a citekey if this is a \ref
+    NSRange refLabelRange = [self refLabelRange];
+    NSRange keyRange = ( (refLabelRange.location == NSNotFound) ? [self citeKeyRange] : NSMakeRange(NSNotFound, 0) ); // don't bother checking for a citekey if this is a \ref
 	
 	if(keyRange.location != NSNotFound){
                 
-            NSString *end = [[s substringWithRange:keyRange] stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceCharacterSet]];
-		
-		// code shamelessly lifted from Buzz Anderson's ASHandlerTest example app
-		// Performance gain if we stored the script permanently? But where to store it?
-		/* Locate the script within the bundle */
-		NSString *scriptPath = [[NSBundle bundleWithIdentifier:BDSKInputManagerID] pathForResource:kScriptName ofType: kScriptType];
-		NSURL *scriptURL = [NSURL fileURLWithPath: scriptPath];
+        NSString *end = [[s substringWithRange:keyRange] stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceCharacterSet]];
 		
 		NSDictionary *errorInfo = nil;
-		NSAppleScript *script = [[[NSAppleScript alloc] initWithContentsOfURL:scriptURL error:&errorInfo] autorelease];
+		static NSAppleScript *script = nil;
+        if(script == nil){
+            NSURL *scriptURL = [NSURL fileURLWithPath:[[NSBundle bundleWithIdentifier:BDSKInputManagerID] pathForResource:kScriptName ofType: kScriptType]];
+            script = [[NSAppleScript alloc] initWithContentsOfURL:scriptURL error:&errorInfo];
+            if(errorInfo != nil) script = nil;
+        }
 		
-		/* See if there were any errors loading the script */
 		if (script && !errorInfo) {
 			
 			/* We have to construct an AppleEvent descriptor to contain the arguments for our handler call.  Remember that this list is 1, rather than 0, based. */
-			NSAppleEventDescriptor *arguments = [[[NSAppleEventDescriptor alloc] initListDescriptor] autorelease];
+			NSAppleEventDescriptor *arguments = [[NSAppleEventDescriptor alloc] initListDescriptor];
 			[arguments insertDescriptor: [NSAppleEventDescriptor descriptorWithString:end] atIndex: 1] ;
-			
-			errorInfo = nil;
 			
 			/* Call the handler using the method in our special NSAppleScript category */
 			NSAppleEventDescriptor *result = [script callHandler: kHandlerName withArguments: arguments errorInfo: &errorInfo];
-			
+			[arguments release];
+            
 			if (!errorInfo ) {
 				
 				int n;
@@ -249,23 +279,19 @@ requires X.3
 					NSAppleEventDescriptor *stringAEDesc;
 					NSString *completionString;
 					
-					while (n) {
+					do {
 						// run through the list top to bottom, keeping in mind it is 1 based.
 						stringAEDesc = [result descriptorAtIndex:n];
 						// insert 'identification string at end so we'll recognise our own completions in -insertCompletion:for...
 						completionString = [[stringAEDesc stringValue] stringByAppendingString:kBibDeskInsertion];
 						
-						n--;
 						// add in at beginning of array
 						[returnArray insertObject:completionString atIndex:0];
-					}			
+					} while(--n);			
 					
 					if ([returnArray count]  == 1) {
 						// if we have only one item for completion, artificially add a second one, so the user can review the full information before adding it to the document.
 						[returnArray addObject:kHint];
-						//  also set the index to 1, so the 'heading' line isn't selected initially.
-						// THIS DOESN'T SEEM TO WORK!
-						// *index = 1;
 					}
 					
 					return returnArray;
@@ -313,63 +339,46 @@ requires X.3
             [labelScanner release];
             return [[setOfLabels allObjects] sortedArrayUsingFunction:arraySort context:NULL]; // return the set as an array, sorted alphabetically
         }
-            
         
 	return [super completionsForPartialWordRange:charRange indexOfSelectedItem:index];
 }
 
-NSComparisonResult arraySort(NSString *str1, NSString *str2, void *context){
-    return [str1 compare:str2];
-}
-
-
-/* ssp: 2004-07-18
-finish off the completion, inserting just the cite key
-requires X.3
-*/
+// finish off the completion, inserting just the cite key
 - (void)insertCompletion:(NSString *)word forPartialWordRange:(NSRange)charRange movement:(int)movement isFinal:(BOOL)flag {
     
 	if (!flag || ([word rangeOfString:kBibDeskInsertion].location == NSNotFound)) {
 		// this is just a preliminary completion (suggestion) or the word wasn't suggested by us anyway, so let the text system deal with this
-                if([self refLabelRange].location != NSNotFound){ 
-                    charRange = [self refLabelRange]; // if it's a \ref completion, set the selection properly, otherwise we can overwrite \ref{ itself
-                    charRange.location += 5; // length of the \ref{ string
-                }
+        if([self refLabelRange].location != NSNotFound){ 
+            charRange = [self refLabelRange]; // if it's a \ref completion, set the selection properly, otherwise we can overwrite \ref{ itself
+            charRange.location += 5; // length of the \ref{ string
+        }
 		[super insertCompletion:word forPartialWordRange:charRange movement:movement isFinal:flag];
-	}
-	else {
-		// final step
-		
-		/*
-		 doesn't work
-		if([word isEqualToString:kHint]) {
-			// don't do anything if we get the heading 
-			[super insertCompletion:@"" forPartialWordRange:charRange movement:NSCancelTextMovement isFinal:YES];
-			return;
-		}
-		*/
-	
+	} else {	
 		// strip the comment for this, this assumes cite keys can't have spaces in them
 		NSRange firstSpace = [word rangeOfString:@" "];
-		NSString * replacementString = [word substringToIndex:firstSpace.location];
-                if([self refLabelRange].location != NSNotFound){
-                    charRange = [self refLabelRange]; // if it's a \ref completion, set the selection properly, otherwise we can overwrite \ref{ itself
-                    charRange.location += 5; // length of the \ref{ string
-                }
+		NSString *replacementString = [word substringToIndex:firstSpace.location];
+        
+        if([self refLabelRange].location != NSNotFound){
+            charRange = [self refLabelRange]; // if it's a \ref completion, set the selection properly, otherwise we can overwrite \ref{ itself
+            charRange.location += 5; // length of the \ref{ string
+        }
 
 		// add a little twist, so we can end completion by entering }
 		// sadly NSCancelTextMovement  and NSOtherTextMovement both are 0, so we can't really tell the difference from movement alone
-		int newMovement = movement;
-		NSEvent * theEvent = [NSApp currentEvent];
-		if ((movement == 0) && ([theEvent type] == NSKeyDown)) {
+		NSEvent *theEvent = [NSApp currentEvent];
+		if ((movement == NSRightTextMovement) && ([theEvent type] == NSKeyDown)) {
 			// we've got a key event
 			if ([[theEvent characters] isEqualToString:@"}"]) {
-				// with a closing bracket 
-				newMovement = NSRightTextMovement;
+                int possibleBraceIndex = charRange.location + [word length];
+                NSString *string = [self string];
+                if(possibleBraceIndex < [string length]){
+                    if([string characterAtIndex:possibleBraceIndex] == '}') // some applications (e.g. iTeXMac) may already have inserted a '}' character for us, so delete that one so we don't end up with a duplicate
+                        [[self textStorage] deleteCharactersInRange:NSMakeRange(possibleBraceIndex, 1)];
+                }
 			}
 		}			
 		
-		[super insertCompletion:replacementString forPartialWordRange:charRange movement:newMovement isFinal:flag];
+		[super insertCompletion:replacementString forPartialWordRange:charRange movement:movement isFinal:flag];
 	}
 
 }
