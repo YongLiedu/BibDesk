@@ -220,10 +220,16 @@ extern void _objc_resolve_categories_for_class(struct objc_class *cls);
     return finalRange;
 }
                 
-- (NSRange)refLabelRange{
+- (NSRange)refLabelRangeForType:(BOOL *)isPageRef{
     NSString *s = [[self textStorage] string];
     NSRange r = [self selectedRange];
-    return [s rangeOfString:@"\\ref{" options:NSBackwardsSearch range:SafeBackwardSearchRange(r, 12)]; // make this a fairly small range, otherwise bad thing can happen when inserting
+    *isPageRef = NO;
+    NSRange foundRange = [s rangeOfString:@"\\ref{" options:NSBackwardsSearch range:SafeBackwardSearchRange(r, 12)];
+    if(foundRange.location == NSNotFound){
+        foundRange = [s rangeOfString:@"\\pageref{" options:NSBackwardsSearch range:SafeBackwardSearchRange(r, 12)];
+        *isPageRef = YES;
+    }
+    return foundRange; // make this a fairly small range, otherwise bad things can happen when inserting
 }
 
 #pragma mark -
@@ -232,9 +238,12 @@ extern void _objc_resolve_categories_for_class(struct objc_class *cls);
 // Override usual behaviour so we can have dots, colons and hyphens in our cite keys
 - (NSRange)rangeForUserCompletion {
     NSRange r = [self citeKeyRange];
-    if (r.location != NSNotFound) {
-	return r;
-    }
+    BOOL ispageref = NO;
+    if (r.location != NSNotFound)
+        return r;
+    else r = [self refLabelRangeForType:&ispageref];
+    if (r.location != NSNotFound)
+        return r;
     return [super rangeForUserCompletion];
 }
 
@@ -244,7 +253,8 @@ extern void _objc_resolve_categories_for_class(struct objc_class *cls);
 // Requires X.3
 - (NSArray *)completionsForPartialWordRange:(NSRange)charRange indexOfSelectedItem:(int *)index	{
 	NSString *s = [[self textStorage] string];
-    NSRange refLabelRange = [self refLabelRange];
+    BOOL isPageRefLabel = NO;
+    NSRange refLabelRange = [self refLabelRangeForType:&isPageRefLabel];
     NSRange keyRange = ( (refLabelRange.location == NSNotFound) ? [self citeKeyRange] : NSMakeRange(NSNotFound, 0) ); // don't bother checking for a citekey if this is a \ref
 	
 	if(keyRange.location != NSNotFound){
@@ -325,7 +335,7 @@ extern void _objc_resolve_categories_for_class(struct objc_class *cls);
             NSString *scanFormat;
 
             if(hint == nil){
-                scanFormat = [NSString stringWithString:@"\\label{"];
+                scanFormat = @"\\label{";
             } else {
                 scanFormat = [@"\\label{" stringByAppendingString:hint];
             }
@@ -346,21 +356,21 @@ extern void _objc_resolve_categories_for_class(struct objc_class *cls);
 // finish off the completion, inserting just the cite key
 - (void)insertCompletion:(NSString *)word forPartialWordRange:(NSRange)charRange movement:(int)movement isFinal:(BOOL)flag {
     
+    BOOL isPageRef = NO;
+    NSRange refLabelRange = [self refLabelRangeForType:&isPageRef];
+    unsigned int refLabelLength = (isPageRef ? 9 : 5);
+    
 	if (!flag || ([word rangeOfString:kBibDeskInsertion].location == NSNotFound)) {
 		// this is just a preliminary completion (suggestion) or the word wasn't suggested by us anyway, so let the text system deal with this
-        if([self refLabelRange].location != NSNotFound){ 
-            charRange = [self refLabelRange]; // if it's a \ref completion, set the selection properly, otherwise we can overwrite \ref{ itself
-            charRange.location += 5; // length of the \ref{ string
-        }
 		[super insertCompletion:word forPartialWordRange:charRange movement:movement isFinal:flag];
 	} else {	
 		// strip the comment for this, this assumes cite keys can't have spaces in them
 		NSRange firstSpace = [word rangeOfString:@" "];
 		NSString *replacementString = [word substringToIndex:firstSpace.location];
         
-        if([self refLabelRange].location != NSNotFound){
-            charRange = [self refLabelRange]; // if it's a \ref completion, set the selection properly, otherwise we can overwrite \ref{ itself
-            charRange.location += 5; // length of the \ref{ string
+        if(refLabelRange.location != NSNotFound){
+            charRange = refLabelRange; // if it's a \ref completion, set the selection properly, otherwise we can overwrite \ref{ itself
+            charRange.location += refLabelLength; // length of the \ref{ or \pageref{ string
         }
 
 		// add a little twist, so we can end completion by entering }
