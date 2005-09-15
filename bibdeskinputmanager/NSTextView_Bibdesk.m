@@ -359,6 +359,11 @@ extern void _objc_resolve_categories_for_class(struct objc_class *cls);
     BOOL isPageRef = NO;
     NSRange refLabelRange = [self refLabelRangeForType:&isPageRef];
     unsigned int refLabelLength = (isPageRef ? 9 : 5);
+    if(refLabelRange.location != NSNotFound){
+        charRange = refLabelRange; // if it's a \ref completion, set the selection properly, otherwise we can overwrite \ref{ itself
+        charRange.location += refLabelLength; // length of the \ref{ or \pageref{ string
+        charRange.length -= refLabelLength;
+    }
     
 	if (!flag || ([word rangeOfString:kBibDeskInsertion].location == NSNotFound)) {
 		// this is just a preliminary completion (suggestion) or the word wasn't suggested by us anyway, so let the text system deal with this
@@ -367,11 +372,6 @@ extern void _objc_resolve_categories_for_class(struct objc_class *cls);
 		// strip the comment for this, this assumes cite keys can't have spaces in them
 		NSRange firstSpace = [word rangeOfString:@" "];
 		NSString *replacementString = [word substringToIndex:firstSpace.location];
-        
-        if(refLabelRange.location != NSNotFound){
-            charRange = refLabelRange; // if it's a \ref completion, set the selection properly, otherwise we can overwrite \ref{ itself
-            charRange.location += refLabelLength; // length of the \ref{ or \pageref{ string
-        }
 
 		// add a little twist, so we can end completion by entering }
 		// sadly NSCancelTextMovement  and NSOtherTextMovement both are 0, so we can't really tell the difference from movement alone
