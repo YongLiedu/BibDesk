@@ -41,17 +41,17 @@
 #import </usr/include/objc/objc-class.h>
 #import </usr/include/objc/Protocol.h>
 
-static BOOL debug = NO;
+static BOOL BDSKInputManagerDebug = NO;
 
 NSString *BDSKInputManagerID = @"net.sourceforge.bibdesk.inputmanager";
 NSString *BDSKInputManagerLoadableApplications = @"Application bundles that we recognize";
 
-static NSString *kBibDeskInsertion = nil;
-static NSString *kHint = nil;
+static NSString *BDSKInsertionString = nil;
+static NSString *BDSKHintString = nil;
 
-static NSString *kScriptName = @"Bibdesk";
-static NSString *kScriptType = @"scpt";
-static NSString *kHandlerName = @"getcitekeys";
+static NSString *BDSKScriptName = @"Bibdesk";
+static NSString *BDSKScriptType = @"scpt";
+static NSString *BDSKHandlerName = @"getcitekeys";
 
 extern void _objc_resolve_categories_for_class(struct objc_class *cls);
 
@@ -61,15 +61,15 @@ extern void _objc_resolve_categories_for_class(struct objc_class *cls);
     
     NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
     
-    if(kBibDeskInsertion == nil)
-        kBibDeskInsertion = [NSLocalizedString(@" (Bibdesk)", @"") retain];
-    if(kHint == nil)
-        kHint = [NSLocalizedString(@"Type } or , to insert the current item.",@"") retain];
+    if(BDSKInsertionString == nil)
+        BDSKInsertionString = [NSLocalizedString(@" (Bibdesk)", @"") retain];
+    if(BDSKHintString == nil)
+        BDSKHintString = [NSLocalizedString(@"Type } or , to insert the current item.",@"") retain];
     
     NSString *bundleID = [[NSBundle mainBundle] bundleIdentifier]; // for the app we are loading into
     NSArray *array = [[[NSUserDefaults standardUserDefaults] persistentDomainForName:BDSKInputManagerID] objectForKey:BDSKInputManagerLoadableApplications];
 
-    if(debug) NSLog(@"We should enable for %@", [array description]);
+    if(BDSKInputManagerDebug) NSLog(@"We should enable for %@", [array description]);
   
     NSEnumerator *e = [array objectEnumerator];
     NSString *str;
@@ -82,11 +82,11 @@ extern void _objc_resolve_categories_for_class(struct objc_class *cls);
         }
     }
 
-    if(debug && yn) NSLog(@"Found a match; enabling autocompletion for %@", bundleID);
+    if(BDSKInputManagerDebug && yn) NSLog(@"Found a match; enabling autocompletion for %@", bundleID);
 
     if(yn && [[self superclass] instancesRespondToSelector:@selector(completionsForPartialWordRange:indexOfSelectedItem:)]){
-        if(debug) NSLog(@"%@ performing posing for %@", [self class], [self superclass]);
-        if(debug) [self printSelectorList:[self superclass]];
+        if(BDSKInputManagerDebug) NSLog(@"%@ performing posing for %@", [self class], [self superclass]);
+        if(BDSKInputManagerDebug) [self printSelectorList:[self superclass]];
 
         class_poseAs((Class)self, ((Class)self)->super_class);
     }
@@ -95,8 +95,8 @@ extern void _objc_resolve_categories_for_class(struct objc_class *cls);
 }
 
 - (void)dealloc{
-    [kBibDeskInsertion release];
-    [kHint release];
+    [BDSKInsertionString release];
+    [BDSKHintString release];
     [super dealloc];
 }
 
@@ -264,7 +264,7 @@ extern void _objc_resolve_categories_for_class(struct objc_class *cls);
 		NSDictionary *errorInfo = nil;
 		static NSAppleScript *script = nil;
         if(script == nil){
-            NSURL *scriptURL = [NSURL fileURLWithPath:[[NSBundle bundleWithIdentifier:BDSKInputManagerID] pathForResource:kScriptName ofType: kScriptType]];
+            NSURL *scriptURL = [NSURL fileURLWithPath:[[NSBundle bundleWithIdentifier:BDSKInputManagerID] pathForResource:BDSKScriptName ofType: BDSKScriptType]];
             script = [[NSAppleScript alloc] initWithContentsOfURL:scriptURL error:&errorInfo];
             if(errorInfo != nil) script = nil;
         }
@@ -276,7 +276,7 @@ extern void _objc_resolve_categories_for_class(struct objc_class *cls);
 			[arguments insertDescriptor: [NSAppleEventDescriptor descriptorWithString:end] atIndex: 1] ;
 			
 			/* Call the handler using the method in our special NSAppleScript category */
-			NSAppleEventDescriptor *result = [script callHandler: kHandlerName withArguments: arguments errorInfo: &errorInfo];
+			NSAppleEventDescriptor *result = [script callHandler: BDSKHandlerName withArguments: arguments errorInfo: &errorInfo];
 			[arguments release];
             
 			if (!errorInfo ) {
@@ -293,7 +293,7 @@ extern void _objc_resolve_categories_for_class(struct objc_class *cls);
 						// run through the list top to bottom, keeping in mind it is 1 based.
 						stringAEDesc = [result descriptorAtIndex:n];
 						// insert 'identification string at end so we'll recognise our own completions in -insertCompletion:for...
-						completionString = [[stringAEDesc stringValue] stringByAppendingString:kBibDeskInsertion];
+						completionString = [[stringAEDesc stringValue] stringByAppendingString:BDSKInsertionString];
 						
 						// add in at beginning of array
 						[returnArray insertObject:completionString atIndex:0];
@@ -301,7 +301,7 @@ extern void _objc_resolve_categories_for_class(struct objc_class *cls);
 					
 					if ([returnArray count]  == 1) {
 						// if we have only one item for completion, artificially add a second one, so the user can review the full information before adding it to the document.
-						[returnArray addObject:kHint];
+						[returnArray addObject:BDSKHintString];
 					}
 					
 					return returnArray;
@@ -344,7 +344,7 @@ extern void _objc_resolve_categories_for_class(struct objc_class *cls);
                 [labelScanner scanUpToString:scanFormat intoString:nil]; // scan for strings with \label{hint in them
                 [labelScanner scanString:@"\\label{" intoString:nil];    // scan away the \label{
                 [labelScanner scanUpToString:@"}" intoString:&scanned];  // scan up to the next brace
-                if(scanned != nil) [setOfLabels addObject:[scanned stringByAppendingString:kBibDeskInsertion]]; // add it to the set
+                if(scanned != nil) [setOfLabels addObject:[scanned stringByAppendingString:BDSKInsertionString]]; // add it to the set
             }
             [labelScanner release];
             return [[setOfLabels allObjects] sortedArrayUsingFunction:arraySort context:NULL]; // return the set as an array, sorted alphabetically
@@ -365,7 +365,7 @@ extern void _objc_resolve_categories_for_class(struct objc_class *cls);
         charRange.length -= refLabelLength;
     }
     
-	if (!flag || ([word rangeOfString:kBibDeskInsertion].location == NSNotFound)) {
+	if (!flag || ([word rangeOfString:BDSKInsertionString].location == NSNotFound)) {
 		// this is just a preliminary completion (suggestion) or the word wasn't suggested by us anyway, so let the text system deal with this
 		[super insertCompletion:word forPartialWordRange:charRange movement:movement isFinal:flag];
 	} else {	
