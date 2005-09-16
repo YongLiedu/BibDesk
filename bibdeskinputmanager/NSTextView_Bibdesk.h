@@ -58,6 +58,10 @@ extern NSString *BDSKInputManagerLoadableApplications;
     @param      braceRange The range of the first curly brace that you're interested in
     @discussion Uses some slightly bizarre heuristics for searching, but seems to work.  See the implementation for comments on why it works this way.
 */
+
+@end
+@interface NSTextView (BDSKCompletion)
+
 - (BOOL)isBibTeXCitation:(NSRange)braceRange;
 - (NSRange) citeKeyRange;
 @end

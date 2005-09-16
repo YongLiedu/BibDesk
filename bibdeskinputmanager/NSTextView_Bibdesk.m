@@ -55,6 +55,75 @@ static NSString *BDSKHandlerName = @"getcitekeys";
 
 extern void _objc_resolve_categories_for_class(struct objc_class *cls);
 
+// The functions with an OB prefix are from OmniBase/OBUtilities.m
+// and are covered by the Omni source license, and may only be used or
+// reproduced in accordance with that license.
+// http://www.omnigroup.com/developer/sourcecode/sourcelicense/
+
+static void _OBRegisterMethod(IMP methodImp, Class class, const char *methodTypes, SEL selector)
+{
+    struct objc_method_list *newMethodList;
+    
+    newMethodList = (struct objc_method_list *) NSZoneMalloc(NSDefaultMallocZone(), sizeof(struct objc_method_list));
+    
+    newMethodList->method_count = 1;
+    newMethodList->method_list[0].method_name = selector;
+    newMethodList->method_list[0].method_imp = methodImp;
+    newMethodList->method_list[0].method_types = (char *)methodTypes;
+    
+    class_addMethods(class, newMethodList);
+}
+
+IMP OBRegisterInstanceMethodWithSelector(Class aClass, SEL oldSelector, SEL newSelector)
+{
+    struct objc_method *thisMethod;
+    IMP oldImp = NULL;
+    
+    if ((thisMethod = class_getInstanceMethod(aClass, oldSelector))) {
+        oldImp = thisMethod->method_imp;
+        _OBRegisterMethod(thisMethod->method_imp, aClass, thisMethod->method_types, newSelector);
+    }
+    
+    return oldImp;
+}
+
+IMP OBReplaceMethodImplementation(Class aClass, SEL oldSelector, IMP newImp)
+{
+    struct objc_method *thisMethod;
+    IMP oldImp = NULL;
+    extern void _objc_flush_caches(Class);
+    
+    if ((thisMethod = class_getInstanceMethod(aClass, oldSelector))) {
+        oldImp = thisMethod->method_imp;
+        
+        // Replace the method in place
+        thisMethod->method_imp = newImp;
+        
+        // Flush the method cache
+        _objc_flush_caches(aClass);
+    }
+    
+    return oldImp;
+}
+
+IMP OBReplaceMethodImplementationWithSelector(Class aClass, SEL oldSelector, SEL newSelector)
+{
+    struct objc_method *newMethod;
+    
+    newMethod = class_getInstanceMethod(aClass, newSelector);
+    NSCAssert(newMethod != nil, @"new method must not be nil");
+    
+    return OBReplaceMethodImplementation(aClass, oldSelector, newMethod->method_imp);
+}
+
+// The compiler won't allow us to call the IMP directly if it returns an NSRange, so I followed Apple's code at
+// http://developer.apple.com/documentation/Performance/Conceptual/CodeSpeed/CodeSpeed.pdf
+typedef NSRange (*originalRangeIMP)(id object, SEL selector);
+static originalRangeIMP originalRange = NULL;
+
+static IMP originalInsert = NULL;
+static IMP originalCompletions = NULL;
+
 @implementation NSTextView_Bibdesk
 
 + (void)load{
@@ -88,7 +157,9 @@ extern void _objc_resolve_categories_for_class(struct objc_class *cls);
         if(BDSKInputManagerDebug) NSLog(@"%@ performing posing for %@", [self class], [self superclass]);
         if(BDSKInputManagerDebug) [self printSelectorList:[self superclass]];
 
-        class_poseAs((Class)self, ((Class)self)->super_class);
+        originalInsert = OBReplaceMethodImplementationWithSelector(self, @selector(insertCompletion:forPartialWordRange:movement:isFinal:), @selector(_insertCompletion:forPartialWordRange:movement:isFinal:));
+        originalRange = (originalRangeIMP)OBReplaceMethodImplementationWithSelector(self,@selector(rangeForUserCompletion),@selector(_rangeForUserCompletion));
+        originalCompletions = OBReplaceMethodImplementationWithSelector(self,@selector(completionsForPartialWordRange:indexOfSelectedItem:),@selector(_completionsForPartialWordRange:indexOfSelectedItem:));
     }
     
     [pool release];
@@ -116,6 +187,10 @@ extern void _objc_resolve_categories_for_class(struct objc_class *cls);
 	}
     }
 }
+
+@end
+
+@implementation NSTextView (BDSKCompletion)
 
 #pragma mark -
 #pragma mark Reference-searching heuristics
@@ -236,7 +311,7 @@ extern void _objc_resolve_categories_for_class(struct objc_class *cls);
 #pragma mark AppKit overrides
 
 // Override usual behaviour so we can have dots, colons and hyphens in our cite keys
-- (NSRange)rangeForUserCompletion {
+- (NSRange)_rangeForUserCompletion {
     NSRange r = [self citeKeyRange];
     BOOL ispageref = NO;
     if (r.location != NSNotFound)
@@ -244,14 +319,14 @@ extern void _objc_resolve_categories_for_class(struct objc_class *cls);
     else r = [self refLabelRangeForType:&ispageref];
     if (r.location != NSNotFound)
         return r;
-    return [super rangeForUserCompletion];
+    return originalRange(self, _cmd);
 }
 
 // Provide own completions based on results by Bibdesk.  
 // Should check whether Bibdesk is available first.  
 // Setting initial selection in list to second item doesn't work.  
 // Requires X.3
-- (NSArray *)completionsForPartialWordRange:(NSRange)charRange indexOfSelectedItem:(int *)index	{
+- (NSArray *)_completionsForPartialWordRange:(NSRange)charRange indexOfSelectedItem:(int *)index	{
 	NSString *s = [[self textStorage] string];
     BOOL isPageRefLabel = NO;
     NSRange refLabelRange = [self refLabelRangeForType:&isPageRefLabel];
@@ -349,16 +424,16 @@ extern void _objc_resolve_categories_for_class(struct objc_class *cls);
             [labelScanner release];
             return [[setOfLabels allObjects] sortedArrayUsingFunction:arraySort context:NULL]; // return the set as an array, sorted alphabetically
         }
-        
-	return [super completionsForPartialWordRange:charRange indexOfSelectedItem:index];
+	return originalCompletions(self, _cmd, charRange, index);
 }
 
 // finish off the completion, inserting just the cite key
-- (void)insertCompletion:(NSString *)word forPartialWordRange:(NSRange)charRange movement:(int)movement isFinal:(BOOL)flag {
+- (void)_insertCompletion:(NSString *)word forPartialWordRange:(NSRange)charRange movement:(int)movement isFinal:(BOOL)flag {
     
     BOOL isPageRef = NO;
     NSRange refLabelRange = [self refLabelRangeForType:&isPageRef];
     unsigned int refLabelLength = (isPageRef ? 9 : 5);
+    
     if(refLabelRange.location != NSNotFound){
         charRange = refLabelRange; // if it's a \ref completion, set the selection properly, otherwise we can overwrite \ref{ itself
         charRange.location += refLabelLength; // length of the \ref{ or \pageref{ string
@@ -367,11 +442,11 @@ extern void _objc_resolve_categories_for_class(struct objc_class *cls);
     
 	if (!flag || ([word rangeOfString:BDSKInsertionString].location == NSNotFound)) {
 		// this is just a preliminary completion (suggestion) or the word wasn't suggested by us anyway, so let the text system deal with this
-		[super insertCompletion:word forPartialWordRange:charRange movement:movement isFinal:flag];
+		originalInsert(self, _cmd, word, charRange, movement, flag);
 	} else {	
 		// strip the comment for this, this assumes cite keys can't have spaces in them
 		NSRange firstSpace = [word rangeOfString:@" "];
-		NSString *replacementString = [word substringToIndex:firstSpace.location];
+		word = [word substringToIndex:firstSpace.location];
 
 		// add a little twist, so we can end completion by entering }
 		// sadly NSCancelTextMovement  and NSOtherTextMovement both are 0, so we can't really tell the difference from movement alone
@@ -388,7 +463,7 @@ extern void _objc_resolve_categories_for_class(struct objc_class *cls);
 			}
 		}			
 		
-		[super insertCompletion:replacementString forPartialWordRange:charRange movement:movement isFinal:flag];
+		originalInsert(self, _cmd, word, charRange, movement, flag);
 	}
 
 }
