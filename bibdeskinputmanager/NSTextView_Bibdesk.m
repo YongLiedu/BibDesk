@@ -118,11 +118,10 @@ IMP OBReplaceMethodImplementationWithSelector(Class aClass, SEL oldSelector, SEL
 
 // The compiler won't allow us to call the IMP directly if it returns an NSRange, so I followed Apple's code at
 // http://developer.apple.com/documentation/Performance/Conceptual/CodeSpeed/CodeSpeed.pdf
-typedef NSRange (*originalRangeIMP)(id object, SEL selector);
-static originalRangeIMP originalRange = NULL;
-
-static IMP originalInsert = NULL;
-static IMP originalCompletions = NULL;
+// See also the places where Omni uses OBReplaceMethod... calls in OmniAppKit, which is easier to follow.
+static NSRange (*originalRangeIMP)(id, SEL) = NULL;
+static void (*originalInsertIMP)(id, SEL, NSString *, NSRange, int, BOOL) = NULL;
+static id (*originalCompletionsIMP)(id, SEL, NSRange, int *) = NULL;
 
 @implementation NSTextView_Bibdesk
 
@@ -130,6 +129,7 @@ static IMP originalCompletions = NULL;
     
     NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
     
+    // ARM: we just leak these strings; since the bundle only gets loaded once, it's not worth replacing dealloc
     if(BDSKInsertionString == nil)
         BDSKInsertionString = [NSLocalizedString(@" (Bibdesk)", @"") retain];
     if(BDSKHintString == nil)
@@ -154,21 +154,16 @@ static IMP originalCompletions = NULL;
     if(BDSKInputManagerDebug && yn) NSLog(@"Found a match; enabling autocompletion for %@", bundleID);
 
     if(yn && [[self superclass] instancesRespondToSelector:@selector(completionsForPartialWordRange:indexOfSelectedItem:)]){
-        if(BDSKInputManagerDebug) NSLog(@"%@ performing posing for %@", [self class], [self superclass]);
+        if(BDSKInputManagerDebug) NSLog(@"%@ replacing methods for %@", [self class], [self superclass]);
         if(BDSKInputManagerDebug) [self printSelectorList:[self superclass]];
 
-        originalInsert = OBReplaceMethodImplementationWithSelector(self, @selector(insertCompletion:forPartialWordRange:movement:isFinal:), @selector(_insertCompletion:forPartialWordRange:movement:isFinal:));
-        originalRange = (originalRangeIMP)OBReplaceMethodImplementationWithSelector(self,@selector(rangeForUserCompletion),@selector(_rangeForUserCompletion));
-        originalCompletions = OBReplaceMethodImplementationWithSelector(self,@selector(completionsForPartialWordRange:indexOfSelectedItem:),@selector(_completionsForPartialWordRange:indexOfSelectedItem:));
+        // Class posing was cleaner and probably safer than swizzling, but led to unresolved problems with internationalized versions of TeXShop+OgreKit refusing text input for the Ogre find panel.  I think this is an OgreKit bug.
+        originalInsertIMP = (typeof(originalInsertIMP))OBReplaceMethodImplementationWithSelector(self, @selector(insertCompletion:forPartialWordRange:movement:isFinal:), @selector(_insertCompletion:forPartialWordRange:movement:isFinal:));
+        originalRangeIMP = (typeof(originalRangeIMP))OBReplaceMethodImplementationWithSelector(self,@selector(rangeForUserCompletion),@selector(_rangeForUserCompletion));
+        originalCompletionsIMP = (typeof(originalCompletionsIMP))OBReplaceMethodImplementationWithSelector(self,@selector(completionsForPartialWordRange:indexOfSelectedItem:),@selector(_completionsForPartialWordRange:indexOfSelectedItem:));
     }
     
     [pool release];
-}
-
-- (void)dealloc{
-    [BDSKInsertionString release];
-    [BDSKHintString release];
-    [super dealloc];
 }
 
 + (void)printSelectorList:(id)anObject{
@@ -319,7 +314,7 @@ static IMP originalCompletions = NULL;
     else r = [self refLabelRangeForType:&ispageref];
     if (r.location != NSNotFound)
         return r;
-    return originalRange(self, _cmd);
+    return originalRangeIMP(self, _cmd);
 }
 
 // Provide own completions based on results by Bibdesk.  
@@ -424,7 +419,7 @@ static IMP originalCompletions = NULL;
             [labelScanner release];
             return [[setOfLabels allObjects] sortedArrayUsingFunction:arraySort context:NULL]; // return the set as an array, sorted alphabetically
         }
-	return originalCompletions(self, _cmd, charRange, index);
+	return originalCompletionsIMP(self, _cmd, charRange, index);
 }
 
 // finish off the completion, inserting just the cite key
@@ -442,7 +437,7 @@ static IMP originalCompletions = NULL;
     
 	if (!flag || ([word rangeOfString:BDSKInsertionString].location == NSNotFound)) {
 		// this is just a preliminary completion (suggestion) or the word wasn't suggested by us anyway, so let the text system deal with this
-		originalInsert(self, _cmd, word, charRange, movement, flag);
+		originalInsertIMP(self, _cmd, word, charRange, movement, flag);
 	} else {	
 		// strip the comment for this, this assumes cite keys can't have spaces in them
 		NSRange firstSpace = [word rangeOfString:@" "];
@@ -463,7 +458,7 @@ static IMP originalCompletions = NULL;
 			}
 		}			
 		
-		originalInsert(self, _cmd, word, charRange, movement, flag);
+		originalInsertIMP(self, _cmd, word, charRange, movement, flag);
 	}
 
 }
