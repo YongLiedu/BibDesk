@@ -155,12 +155,17 @@ static id (*originalCompletionsIMP)(id, SEL, NSRange, int *) = NULL;
 
     if(yn && [[self superclass] instancesRespondToSelector:@selector(completionsForPartialWordRange:indexOfSelectedItem:)]){
         if(BDSKInputManagerDebug) NSLog(@"%@ replacing methods for %@", [self class], [self superclass]);
-        if(BDSKInputManagerDebug) [self printSelectorList:[self superclass]];
 
         // Class posing was cleaner and probably safer than swizzling, but led to unresolved problems with internationalized versions of TeXShop+OgreKit refusing text input for the Ogre find panel.  I think this is an OgreKit bug.
         originalInsertIMP = (typeof(originalInsertIMP))OBReplaceMethodImplementationWithSelector(self, @selector(insertCompletion:forPartialWordRange:movement:isFinal:), @selector(_insertCompletion:forPartialWordRange:movement:isFinal:));
+        if(BDSKInputManagerDebug) NSAssert(originalInsertIMP != NULL, @"replacement of insertCompletion:forPartialWordRange:movement:isFinal: failed");
+        
         originalRangeIMP = (typeof(originalRangeIMP))OBReplaceMethodImplementationWithSelector(self,@selector(rangeForUserCompletion),@selector(_rangeForUserCompletion));
+        if(BDSKInputManagerDebug) NSAssert(originalRangeIMP != NULL, @"replacement of rangeForUserCompletion failed");
+
         originalCompletionsIMP = (typeof(originalCompletionsIMP))OBReplaceMethodImplementationWithSelector(self,@selector(completionsForPartialWordRange:indexOfSelectedItem:),@selector(_completionsForPartialWordRange:indexOfSelectedItem:));
+        if(BDSKInputManagerDebug) NSAssert(originalCompletionsIMP != NULL, @"replacement of completionsForPartialWordRange:indexOfSelectedItem: failed");
+
     }
     
     [pool release];
@@ -309,11 +314,16 @@ static id (*originalCompletionsIMP)(id, SEL, NSRange, int *) = NULL;
 - (NSRange)_rangeForUserCompletion {
     NSRange r = [self citeKeyRange];
     BOOL ispageref = NO;
-    if (r.location != NSNotFound)
+    if (r.location != NSNotFound){
+        if(BDSKInputManagerDebug) NSLog(@"Found a cite key");
         return r;
+    }
     else r = [self refLabelRangeForType:&ispageref];
-    if (r.location != NSNotFound)
+    if (r.location != NSNotFound){
+        if(BDSKInputManagerDebug) NSLog(@"Found a ref label");
         return r;
+    }
+    if(BDSKInputManagerDebug) NSLog(@"Couldn't find a \\ref or \\cite; using default implementation");
     return originalRangeIMP(self, _cmd);
 }
 
@@ -330,13 +340,18 @@ static id (*originalCompletionsIMP)(id, SEL, NSRange, int *) = NULL;
 	if(keyRange.location != NSNotFound){
                 
         NSString *end = [[s substringWithRange:keyRange] stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceCharacterSet]];
+        if(BDSKInputManagerDebug) NSLog(@"%@ has string end: %@", NSStringFromSelector(_cmd), end);
 		
 		NSDictionary *errorInfo = nil;
 		static NSAppleScript *script = nil;
         if(script == nil){
             NSURL *scriptURL = [NSURL fileURLWithPath:[[NSBundle bundleWithIdentifier:BDSKInputManagerID] pathForResource:BDSKScriptName ofType: BDSKScriptType]];
             script = [[NSAppleScript alloc] initWithContentsOfURL:scriptURL error:&errorInfo];
-            if(errorInfo != nil) script = nil;
+            if(errorInfo != nil){
+                [script release];
+                script = nil;
+                NSLog(@"*** Failed to initialize script at URL %@ because of error %@", scriptURL, errorInfo);
+            }
         }
 		
 		if (script && !errorInfo) {
@@ -374,10 +389,15 @@ static id (*originalCompletionsIMP)(id, SEL, NSRange, int *) = NULL;
 						[returnArray addObject:BDSKHintString];
 					}
 					
+                    if(BDSKInputManagerDebug) NSLog(@"%@ will return result %@", NSStringFromSelector(_cmd), returnArray);
 					return returnArray;
 				} 
 			} // no script running error	
+            if(errorInfo) NSLog(@"*** Failed to run script %@ because of error %@", script, errorInfo);
+
 		} // no script loading error
+        if(errorInfo) NSLog(@"*** Failed to run script %@ because of error %@", script, errorInfo);
+
 	} // location > 5
         
         if(refLabelRange.location != NSNotFound){
