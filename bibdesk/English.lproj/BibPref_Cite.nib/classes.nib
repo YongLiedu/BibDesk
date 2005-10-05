@@ -8,6 +8,7 @@
         {
             ACTIONS = {
                 changeCopyBehavior = id; 
+                changePrependTilde = id; 
                 changeSeparateCite = id; 
                 citeStringFieldChanged = id; 
                 setCitationBracketStyle = id; 
@@ -19,6 +20,7 @@
                 citeBracketRadio = NSMatrix; 
                 citeStringField = NSTextField; 
                 dragCopyRadio = NSMatrix; 
+                prependTildeCheckButton = NSButton; 
                 separateCiteCheckButton = NSButton; 
             }; 
             SUPERCLASS = OAPreferenceClient; 

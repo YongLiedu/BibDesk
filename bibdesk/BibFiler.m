@@ -1,10 +1,40 @@
 //
 //  BibFiler.m
-//  Bibdesk
+//  BibDesk
 //
 //  Created by Michael McCracken on Fri Apr 30 2004.
-//  Copyright (c) 2004 __MyCompanyName__. All rights reserved.
-//
+/*
+ This software is Copyright (c) 2004,2005
+ Michael O. McCracken. All rights reserved.
+
+ Redistribution and use in source and binary forms, with or without
+ modification, are permitted provided that the following conditions
+ are met:
+
+ - Redistributions of source code must retain the above copyright
+   notice, this list of conditions and the following disclaimer.
+
+ - Redistributions in binary form must reproduce the above copyright
+    notice, this list of conditions and the following disclaimer in
+    the documentation and/or other materials provided with the
+    distribution.
+
+ - Neither the name of Michael O. McCracken nor the names of any
+    contributors may be used to endorse or promote products derived
+    from this software without specific prior written permission.
+
+ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+ "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+ LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+ A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+ OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+ SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+ LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+ DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+ THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+ (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ */
 
 #import "BibFiler.h"
 #import "NSImage+Toolbox.h"
@@ -56,10 +86,10 @@ static BibFiler *sharedFiler = nil;
 	
 	if(ask){
 		rv = NSRunAlertPanel(NSLocalizedString(@"Consolidate Linked Files",@""),
-							NSLocalizedString(@"This will put all files linked to the selected items in your Papers Folder, according to the format string. Do you want me to generate a new location for all linked files, or only for those for which all the bibliographical information used in the generated file name has been set?",@""),
-							NSLocalizedString(@"Move All",@"Move All"),
-							NSLocalizedString(@"Cancel",@"Cancel"), 
-							NSLocalizedString(@"Move Complete Only",@"Move Complete Only"));
+							 NSLocalizedString(@"This will put all files linked to the selected items in your Papers Folder, according to the format string. Do you want me to generate a new location for all linked files, or only for those for which all the bibliographical information used in the generated file name has been set?",@""),
+							 NSLocalizedString(@"Move All",@"Move All"),
+							 NSLocalizedString(@"Cancel",@"Cancel"), 
+							 NSLocalizedString(@"Move Complete Only",@"Move Complete Only"));
 		if(rv == NSAlertOtherReturn){
 			moveAll = NO;
 		}else if(rv == NSAlertAlternateReturn){
@@ -73,7 +103,7 @@ static BibFiler *sharedFiler = nil;
 	[self prepareMoveForDocument:doc number:[NSNumber numberWithInt:[papers count]]];
 	
 	foreach(paper , papers){
-		path = [paper localURLPath];
+		path = [paper localURLPathInheriting:NO];
 		newPath = [[NSURL URLWithString:[paper suggestedLocalUrl]] path];
 		[self movePath:path toPath:newPath forPaper:paper fromDocument:doc moveAll:moveAll];
 	}
@@ -87,8 +117,7 @@ static BibFiler *sharedFiler = nil;
 		[progressIndicator displayIfNeeded];
 	}
         
-	if(path == nil || [path isEqualToString:@""] |
-	   newPath == nil || [newPath isEqualToString:@""] || 
+	if([NSString isEmptyString:path] | [NSString isEmptyString:newPath] || 
 	   [path isEqualToString:newPath])
 		return;
 	
@@ -100,6 +129,7 @@ static BibFiler *sharedFiler = nil;
 	NSFileManager *fm = [NSFileManager defaultManager];
 	// filemanager needs aliases resolved for moving and existence checks
 	// ...however we want to move aliases, not their targets
+	// so we resolve aliases in the path to the containing folder
     NSString *resolvedNewPath = nil;
     NS_DURING
 		resolvedNewPath = [[fm resolveAliasesInPath:[newPath stringByDeletingLastPathComponent]] 
@@ -131,26 +161,41 @@ static BibFiler *sharedFiler = nil;
 			}
 		}else{
 			if([fm fileExistsAtPath:resolvedPath]){
-				NSString *fileType = [[fm fileAttributesAtPath:resolvedPath traverseLink:NO] objectForKey:NSFileType];
-                NS_DURING
-                    [fm createPathToFile:resolvedNewPath attributes:nil]; // create parent directories if necessary (OmniFoundation)
-                NS_HANDLER
-                    NSLog(@"Ignoring exception %@ raised while creating path %@", [localException name], resolvedNewPath);
-                    status = NSLocalizedString(@"Unable to create the parent directory structure.", @"");
-                    statusFlag = statusFlag | BDSKUnableToCreateParentMask;
-                NS_ENDHANDLER
-				if(statusFlag == BDSKNoErrorMask){
-					// unfortunately NSFileManager cannot reliably move symlinks...
-					if([fileType isEqualToString:NSFileTypeSymbolicLink]){
-						NSString *pathContent = [fm pathContentOfSymbolicLinkAtPath:resolvedPath];
-						if(![pathContent hasPrefix:@"/"]){// it links to a relative path
-							pathContent = [[resolvedPath stringByDeletingLastPathComponent] stringByAppendingPathComponent:pathContent];
-						}
-						if([fm createSymbolicLinkAtPath:resolvedNewPath pathContent:pathContent]){
-							if(![fm removeFileAtPath:resolvedPath handler:self]){
-								status = [errorString autorelease];
+				if([fm isDeletableFileAtPath:resolvedPath]){
+					NSString *fileType = [[fm fileAttributesAtPath:resolvedPath traverseLink:NO] objectForKey:NSFileType];
+					NS_DURING
+						[fm createPathToFile:resolvedNewPath attributes:nil]; // create parent directories if necessary (OmniFoundation)
+					NS_HANDLER
+						NSLog(@"Ignoring exception %@ raised while creating path %@", [localException name], resolvedNewPath);
+						status = NSLocalizedString(@"Unable to create the parent directory structure.", @"");
+						statusFlag = statusFlag | BDSKUnableToCreateParentMask;
+					NS_ENDHANDLER
+					if(statusFlag == BDSKNoErrorMask){
+						// unfortunately NSFileManager cannot reliably move symlinks...
+						if([fileType isEqualToString:NSFileTypeSymbolicLink]){
+							NSString *pathContent = [fm pathContentOfSymbolicLinkAtPath:resolvedPath];
+							if(![pathContent hasPrefix:@"/"]){// it links to a relative path
+								pathContent = [[resolvedPath stringByDeletingLastPathComponent] stringByAppendingPathComponent:pathContent];
+							}
+							if([fm createSymbolicLinkAtPath:resolvedNewPath pathContent:pathContent]){
+								if(![fm removeFileAtPath:resolvedPath handler:self]){
+									// error remove original file
+									// should we remove the new symlink and not set Local-Url?
+									status = [errorString autorelease];
+									statusFlag = statusFlag | BDSKMoveErrorMask;
+								}
+								[paper setField:@"Local-Url" toValue:[[NSURL fileURLWithPath:newPath] absoluteString]];
+								//status = NSLocalizedString(@"Successfully moved.",@"");
+								
+								NSUndoManager *undoManager = [doc undoManager];
+								[[undoManager prepareWithInvocationTarget:self] 
+									movePath:newPath toPath:path forPaper:paper fromDocument:doc moveAll:YES];
+								moveCount++;
+							}else{ // error creating symlink
+								status = NSLocalizedString(@"Could not move symbolic link.", @"");
 								statusFlag = statusFlag | BDSKMoveErrorMask;
 							}
+						}else if([fm movePath:resolvedPath toPath:resolvedNewPath handler:self]){
 							[paper setField:@"Local-Url" toValue:[[NSURL fileURLWithPath:newPath] absoluteString]];
 							//status = NSLocalizedString(@"Successfully moved.",@"");
 							
@@ -158,24 +203,16 @@ static BibFiler *sharedFiler = nil;
 							[[undoManager prepareWithInvocationTarget:self] 
 								movePath:newPath toPath:path forPaper:paper fromDocument:doc moveAll:YES];
 							moveCount++;
-						}else{
-							status = NSLocalizedString(@"Could not move symbolic link.", @"");
+						}else{ // error while moving file
+							status = [errorString autorelease];
 							statusFlag = statusFlag | BDSKMoveErrorMask;
 						}
-					}else if([fm movePath:resolvedPath toPath:resolvedNewPath handler:self]){
-						[paper setField:@"Local-Url" toValue:[[NSURL fileURLWithPath:newPath] absoluteString]];
-						//status = NSLocalizedString(@"Successfully moved.",@"");
-						
-						NSUndoManager *undoManager = [doc undoManager];
-						[[undoManager prepareWithInvocationTarget:self] 
-							movePath:newPath toPath:path forPaper:paper fromDocument:doc moveAll:YES];
-						moveCount++;
-					}else{
-						status = [errorString autorelease];
-						statusFlag = statusFlag | BDSKMoveErrorMask;
 					}
+				}else{ // file is not deletable
+					status = NSLocalizedString(@"Could not move read-only file.", @"");
+					statusFlag = statusFlag | BDSKMoveErrorMask;
 				}
-			}else{
+			}else{ // file does not exist
 				status = NSLocalizedString(@"The linked file does not exist.", @"");
 				statusFlag = statusFlag | BDSKOldFileDoesNotExistMask;
 			}
@@ -279,16 +316,10 @@ objectValueForTableColumn:(NSTableColumn *)tableColumn
 		return [dict objectForKey:@"status"];
 	}else if([tcid isEqualToString:@"icon"]){
 		NSString *path = [[dict objectForKey:@"oloc"] stringByExpandingTildeInPath];
-		NSString *extension = [path pathExtension];
 		if(path && [[NSFileManager defaultManager] fileExistsAtPath:path]){
-				if(![extension isEqualToString:@""]){
-						// use the NSImage method, as it seems to be faster, but only for files with extensions
-						return [NSImage imageForFileType:extension];
-				} else {
-						return [[NSWorkspace sharedWorkspace] iconForFile:path];
-				}
+            return [NSImage smallImageForFile:path];
 		}else{
-				return nil;
+            return nil;
 		}
 	}
 	else return @"??";

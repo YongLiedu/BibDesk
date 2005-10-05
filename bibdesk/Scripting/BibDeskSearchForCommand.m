@@ -1,6 +1,6 @@
 //
 //  BibDeskSearchForCommand.m
-//  Bibdesk
+//  BibDesk
 //
 //  Created by Sven-S. Porst on Wed Jul 21 2004.
 //  Copyright (c) 2004 __MyCompanyName__. All rights reserved.
@@ -93,7 +93,7 @@ A further improvement could extend this work on lists as well. But would anybody
 
 	
 	if (forCompletion) {
-		/* we're doing this for completion, so return a different array. Instead of an array of publications (BibItems) this will simply be an array of strings containing the cite key, the authors' surnames and the title for the publication. This could be sufficient for completion and allows the application possibly integrating with Bibdesk to remain ignorant of the inner workings of BibItems.
+		/* we're doing this for completion, so return a different array. Instead of an array of publications (BibItems) this will simply be an array of strings containing the cite key, the authors' surnames and the title for the publication. This could be sufficient for completion and allows the application possibly integrating with BibDesk to remain ignorant of the inner workings of BibItems.
 		*/
 		int i = 0;
 		int n = [results count];
@@ -188,18 +188,21 @@ The string is of the form citeKey % author1surname-author2surname, title.
 */
 - (id) objectForCompletion {
 	// concatenate author surnames first
-	NSEnumerator * authEnum = [pubAuthors objectEnumerator];
-	BibAuthor * auth = nil;
+	NSEnumerator *authEnum = [pubAuthors objectEnumerator];
+	BibAuthor *auth = nil;
 	NSMutableString * surnames = [NSMutableString string];
 	auth = [authEnum nextObject];
 	if (auth) {
 		[surnames appendString:[auth lastName]];	
-		while (auth = [authEnum nextObject]) {
-			[surnames appendFormat:@"-%@", [auth lastName]];
-		}
+		if([pubAuthors count] > 2){
+            [surnames appendString:@" et al"];
+		} else {
+            while (auth = [authEnum nextObject])
+                [surnames appendFormat:@"-%@", [auth lastName]];
+        }
 	}
 	
 	return [[self citeKey] stringByAppendingFormat: @" %% %@, %@", surnames, [self title]];
-	// return [NSDictionary dictionaryWithObjectsAndKeys:[self citeKey], @"citeKey", surnames, @"surnames", [self title], @"title",nil];	
+	
 }
 @end

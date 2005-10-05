@@ -2,17 +2,37 @@
 
 //  Created by Michael McCracken on Mon Dec 17 2001.
 /*
-This software is Copyright (c) 2001,2002, Michael O. McCracken
-All rights reserved.
+ This software is Copyright (c) 2001,2002,2003,2004,2005
+ Michael O. McCracken. All rights reserved.
 
-Redistribution and use in source and binary forms, with or without modification, are permitted provided that the following conditions are met:
+ Redistribution and use in source and binary forms, with or without
+ modification, are permitted provided that the following conditions
+ are met:
 
-- Redistributions of source code must retain the above copyright notice, this list of conditions and the following disclaimer.
--  Redistributions in binary form must reproduce the above copyright notice, this list of conditions and the following disclaimer in the documentation and/or other materials provided with the distribution.
--  Neither the name of Michael O. McCracken nor the names of any contributors may be used to endorse or promote products derived from this software without specific prior written permission.
+ - Redistributions of source code must retain the above copyright
+   notice, this list of conditions and the following disclaimer.
 
-THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-*/
+ - Redistributions in binary form must reproduce the above copyright
+    notice, this list of conditions and the following disclaimer in
+    the documentation and/or other materials provided with the
+    distribution.
+
+ - Neither the name of Michael O. McCracken nor the names of any
+    contributors may be used to endorse or promote products derived
+    from this software without specific prior written permission.
+
+ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+ "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+ LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+ A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+ OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+ SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+ LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+ DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+ THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+ (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ */
 
 /*! @header BibDocument.h
     @discussion This defines a subclass of NSDocument that reads and writes BibTeX entries. It handles the main document window.
@@ -23,6 +43,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 #import <Cocoa/Cocoa.h>
 #import "BibPrefController.h"
 #import "BDSKPreviewer.h"
+#import "BDSKTeXTask.h"
 #import "BDSKDragTableView.h"
 #import "BDSKCustomCiteTableView.h"
 #import "BDSKConverter.h"
@@ -36,9 +57,12 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 #import "BDSKFileContentsFilter.h"
 #import "ApplicationServices/ApplicationServices.h"
 #import "RYZImagePopUpButton.h"
+#import "BDSKRatingButton.h"
 
 #import "MacroWindowController.h"
 #import "BDSKTextImportController.h"
+#import <OmniFoundation/OFMultiValueDictionary.h>
+#import "BDSKErrorObjectController.h"
 
 @class BDSKCustomCiteTableView;
 @class BibItem;
@@ -46,13 +70,11 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 @class BibAuthor;
 @class AGRegex;
 
-// Local drag pasteboard currently stores bibtex string data to drag between open docs
-// and pointer data to drag within a doc. 
-// It might be a good idea sometime to replace cross-doc dragging with archived BibItems
-// due to encoding issues.
-extern NSString* LocalDragPasteboardName;
+// Some pasteboard types used by the document fro dragging and copying.
+// private type used for local drag/drop and copy/paste and delayed RTF/PDF generated data
 extern NSString* BDSKBibTeXStringPboardType;
-extern NSString *BDSKBibItemLocalDragPboardType;
+// pasteboard type from Reference Miner, determined using Pasteboard Peeker
+extern NSString* BDSKReferenceMinerStringPboardType;
 
 /*!
     @class BibDocument
@@ -71,6 +93,8 @@ extern NSString *BDSKBibItemLocalDragPboardType;
     IBOutlet OASplitView* splitView;
     // for the splitview double-click handling
     float lastPreviewHeight;
+	
+	IBOutlet NSWindow *undoAlertSheet;
 
 #pragma mark Toolbar variable declarations
 
@@ -89,11 +113,12 @@ extern NSString *BDSKBibItemLocalDragPboardType;
 	IBOutlet NSBox *searchFieldBox;
 	IBOutlet NSView *searchFieldView; 
 	NSToolbarItem *searchFieldToolbarItem;
-        AGRegex *tipRegex;
-        AGRegex *andRegex;
-        AGRegex *orRegex;
+    AGRegex *tipRegex;
+    AGRegex *andRegex;
+    AGRegex *orRegex;
 
 	IBOutlet NSTextField *infoLine;
+    IBOutlet NSTextField *infoLineBackground;
 
 #pragma mark Custom Cite-String drawer variable declarations:
 
@@ -111,16 +136,14 @@ extern NSString *BDSKBibItemLocalDragPboardType;
     NSLock *pubsLock;
 
     NSString *quickSearchKey;
-    NSMutableDictionary *quickSearchTextDict;
    
 	NSMutableString *frontMatter;    // for preambles, and stuff
-    BDSKPreviewer *PDFpreviewer;
     NSTableColumn *lastSelectedColumnForSort;
     BOOL sortDescending;
 	BOOL showStatus;
     NSMutableArray *BD_windowControllers; // private ivar for maintaining relationship with the docs windowcontrollers
-
-    NSPasteboard *localDragPboard;
+	
+	BDSKTeXTask *texTask;
     // ----------------------------------------------------------------------------------------
     // general dialog used for adding 'fields' (used for adding contextual menus,)
     // and for adding quicksearch sortkeys.)
@@ -136,6 +159,8 @@ extern NSString *BDSKBibItemLocalDragPboardType;
 	
     // --------------------------------------------------------------------------------------
     IBOutlet NSMenu * columnsMenu;
+	IBOutlet NSMenu * fileMenu;
+	IBOutlet NSMenu * URLMenu;
 	IBOutlet NSMenu * actionMenu;
 	IBOutlet RYZImagePopUpButton * actionMenuButton;
 	IBOutlet NSMenuItem * actionMenuFirstItem;
@@ -150,23 +175,17 @@ extern NSString *BDSKBibItemLocalDragPboardType;
     IBOutlet NSView *SaveEncodingAccessoryView;
     IBOutlet NSPopUpButton *saveTextEncodingPopupButton;
     NSStringEncoding documentStringEncoding;
-    
-    // stuff for the Source List for .bdsk type files.
-    // Note: the outlets should migrate to a window controller.
-    IBOutlet NSOutlineView *sourceList;
-    IBOutlet NSButton *addSourceListItemButton;
-    IBOutlet NSMenu *sourceListActionMenu;
-    
-    IBOutlet NSWindow *editExportSettingsWindow;
-    IBOutlet NSPopUpButton *exporterSelectionPopUp;
-    IBOutlet NSButton *exporterEnabledCheckButton;
-    IBOutlet NSView *exporterSubView;
-    
+        
     // view:
     NSMutableArray *draggedItems; // an array to temporarily hold references to dragged items used locally.
-    
+	
     NSMutableDictionary *macroDefinitions;	
     MacroWindowController *macroWC;
+    
+    OFMultiValueDictionary *itemsForCiteKeys;
+    BOOL documentIsClosing;
+    
+    NSString *promiseDragColumnIdentifier;
 }
 
 
@@ -195,6 +214,8 @@ extern NSString *BDSKBibItemLocalDragPboardType;
 
 */
 - (void)dealloc;
+
+- (IBAction)dismissUndoAlertSheet:(id)sender;
 
 /*!
     @method     setupSearchField
@@ -260,28 +281,86 @@ extern NSString *BDSKBibItemLocalDragPboardType;
 - (IBAction)exportAsAtom:(id)sender;
 
 /*!
-    @method     exportEncodedBib:
+    @method     exportAsEncodedBib:
     @abstract   Action method to export BibTex data
     @discussion This calls exportAsFileType:@"bib" droppingInternal:NO.
     @param      sender anything
 */
-- (IBAction)exportEncodedBib:(id)sender;
+- (IBAction)exportAsEncodedBib:(id)sender;
 
 /*!
-    @method     exportEncodedBib:
+    @method     exportAsEncodedBib:
     @abstract   Action method to export BibTex data without internal fields
     @discussion This calls exportAsFileType:@"bib" droppingInternal:YES.
     @param      sender anything
 */
-- (IBAction)exportEncodedPublicBib:(id)sender;
+- (IBAction)exportAsEncodedPublicBib:(id)sender;
 
 /*!
-    @method     exportRIS:
+    @method     exportAsRIS:
     @abstract   Action method to export RIS
     @discussion This calls exportAsFileType:@"ris" droppingInternal:NO.
     @param      sender anything
 */
-- (IBAction)exportRIS:(id)sender;
+- (IBAction)exportAsRIS:(id)sender;
+
+/*!
+    @method     exportSelectionAsRSS:
+    @abstract   Action method to export RSS XML
+    @discussion  This calls exportSelectionAsFileType:@"rss" droppingInternal:NO.
+    @param      sender anything
+*/
+- (IBAction)exportSelectionAsRSS:(id)sender;
+
+/*!
+@method     exportSelectionAsHTML:
+     @abstract   Action method to export HTML
+     @discussion  This calls exportSelectionAsFileType:@"html" droppingInternal:NO.
+     @param      sender anything
+*/
+- (IBAction)exportSelectionAsHTML:(id)sender;
+
+/*!
+@method     exportSelectionAsMODS:
+     @abstract   Action method to export MODS XML. 
+     @discussion  This calls exportSelectionAsFileType:@"mods" droppingInternal:NO.
+ It should not be considered robust currently.
+     @param      sender anything
+*/
+- (IBAction)exportSelectionAsMODS:(id)sender;
+
+/*!
+@method     exportSelectionAsAtom:
+     @abstract   Action method to export ATOM XML for syndication.
+     @discussion  This calls exportSelectionAsFileType:@"mods" droppingInternal:NO.
+     It should not be considered robust currently.
+     @param      sender anything
+*/
+- (IBAction)exportSelectionAsAtom:(id)sender;
+
+/*!
+    @method     exportSelectionAsEncodedBib:
+    @abstract   Action method to export BibTex data
+    @discussion This calls exportSelectionAsFileType:@"bib" droppingInternal:NO.
+    @param      sender anything
+*/
+- (IBAction)exportSelectionAsEncodedBib:(id)sender;
+
+/*!
+    @method     exportSelectionAsEncodedBib:
+    @abstract   Action method to export BibTex data without internal fields
+    @discussion This calls exportSelectionAsFileType:@"bib" droppingInternal:YES.
+    @param      sender anything
+*/
+- (IBAction)exportSelectionAsEncodedPublicBib:(id)sender;
+
+/*!
+    @method     exportSelectionAsRIS:
+    @abstract   Action method to export RIS
+    @discussion This calls exportSelectionAsFileType:@"ris" droppingInternal:NO.
+    @param      sender anything
+*/
+- (IBAction)exportSelectionAsRIS:(id)sender;
 
 /*!
     @method     exportAsFileType:droppingInternal:
@@ -290,9 +369,10 @@ extern NSString *BDSKBibItemLocalDragPboardType;
  This method just opens a save panel, with the appropriate accessory view.
  On return from the save panel, Cocoa calls our method savePanelDidEnd:returnCode:contextInfo:
  @param      fileType A string representing the type to export.
+ @param      selected A boolean specifying whether to use the selection or all the publications. 
  @param      drop A boolean specifying whether internal fields should be dropped. 
 */
-- (void)exportAsFileType:(NSString *)fileType droppingInternal:(BOOL)drop;
+- (void)exportAsFileType:(NSString *)fileType selected:(BOOL)selected droppingInternal:(BOOL)drop;
 
 /*!
     @method     savePanelDidEnd:returnCode:contextInfo:
@@ -306,23 +386,16 @@ extern NSString *BDSKBibItemLocalDragPboardType;
 */
 - (void)savePanelDidEnd:(NSWindow *)sheet returnCode:(int)returnCode contextInfo:(void *)contextInfo;
 
-- (NSData *)rssDataRepresentation;
-/*!
-    @method     bibDataRepresentation
-    @abstract   BibTeX representation of the entire document.
-    @discussion Uses the document's string encoding as returned by -[BibDocument documentStringEncoding], which is the encoding used when opening the document.
-    @param      drop Boolean determines whether internal fields should be dropped from the bibtex strings.
-	@result     (description)
-*/
-- (NSData *)bibDataRepresentationDroppingInternal:(BOOL)drop;
+- (NSData *)rssDataForPublications:(NSArray *)items;
 
 /*!
-    @method     htmlDataRepresentation
+    @method     htmlDataForSelection:
     @abstract   (description)
     @discussion (description)
+    @param      selected (description)
     @result     (description)
 */
-- (NSData *)htmlDataRepresentation;
+- (NSData *)htmlDataForSelection:(BOOL)selected;
 
 /*!
     @method     publicationsAsHTML
@@ -332,33 +405,53 @@ extern NSString *BDSKBibItemLocalDragPboardType;
 */
 - (NSString *)publicationsAsHTML;
 
-- (NSData *)atomDataRepresentation;
-- (NSData *)MODSDataRepresentation;
 /*!
-    @method     bibTeXDataWithEncoding:
+    @method     selectionAsHTML
+    @abstract   (description)
+    @discussion (description)
+    @result     (description)
+*/
+- (NSString *)selectionAsHTML;
+
+/*!
+    @method     HTMLStringForPublications:
+    @abstract   (description)
+    @discussion (description)
+    @param      items (description)
+    @result     (description)
+*/
+- (NSString *)HTMLStringForPublications:(NSArray *)items;
+
+- (NSData *)atomDataForPublications:(NSArray *)items;
+- (NSData *)MODSDataForPublications:(NSArray *)items;
+/*!
+    @method     bibTeXDataForPublications:encoding:
     @abstract   Returns all of the BibItems as BibTeX with the specified string encoding.
     @discussion Used for export operations (saving with a specified string encoding, which is not necessarily the document's string encoding).
+    @param      items (description)
     @param      encoding (description)
     @param      drop (description)
     @result     (description)
 */
-- (NSData *)bibTeXDataWithEncoding:(NSStringEncoding)encoding droppingInternal:(BOOL)drop;
+- (NSData *)bibTeXDataForPublications:(NSArray *)items encoding:(NSStringEncoding)encoding droppingInternal:(BOOL)drop;
 
 /*!
-    @method     RISDataWithEncoding:
+    @method     RISDataForPublications:encoding:
     @abstract   Returns document contents in RIS form as NSData, in the specified string encoding.
     @discussion (comprehensive description)
+    @param      items (description)
     @param      encoding (description)
     @result     (description)
 */
-- (NSData *)RISDataWithEncoding:(NSStringEncoding)encoding;
+- (NSData *)RISDataForPublications:(NSArray *)items encoding:(NSStringEncoding)encoding;
 /*!
-    @method     RISDataRepresentation
+    @method     RISDataForPublications:(NSArray *)items
     @abstract   Returns document contents in RIS form as NSData, using the document's specified string encoding.
     @discussion (comprehensive description)
+    @param      items (description)
     @result     (description)
 */
-- (NSData *)RISDataRepresentation;
+- (NSData *)RISDataForPublications:(NSArray *)items;
 
 - (BOOL)loadDataRepresentation:(NSData *)data ofType:(NSString *)aType;
 - (BOOL)loadBibTeXDataRepresentation:(NSData *)data encoding:(NSStringEncoding)encoding;
@@ -387,7 +480,17 @@ extern NSString *BDSKBibItemLocalDragPboardType;
 
 - (IBAction)selectDuplicates:(id)sender;
 
+- (IBAction)sortForCrossrefs:(id)sender;
+
+- (void)performSortForCrossrefs;
+
+- (IBAction)duplicateTitleToBooktitle:(id)sender;
+
 #pragma mark searchField functions
+
+- (NSString*) filterField;
+
+- (void)setFilterField:(NSString*) filterterm;
 
 /*!
     @method     makeSearchFieldKey:
@@ -473,10 +576,10 @@ extern NSString *BDSKBibItemLocalDragPboardType;
 /*!
     @method displayPreviewForItems
     @abstract Handles writing the preview pane. (Not the PDF Preview)
-    @discussion items is an enumerator of NSNumbers that are the row indices of the selected items.
+    @discussion itemIndexes is an array of NSNumbers that are the row indices of the selected items.
     
 */
-- (void)displayPreviewForItems:(NSEnumerator *)enumerator;
+- (void)displayPreviewForItems:(NSArray *)itemIndexes;
 
 /*!
 @method emailPubCmd
@@ -511,6 +614,54 @@ extern NSString *BDSKBibItemLocalDragPboardType;
 - (void)editPub:(BibItem *)pub;
 
 /*!
+    @method openLinkedFile:
+    @abstract Opens the linked file of the selected publication with the default application
+    @discussion - 
+    @param sender The sender. Not used.
+*/
+- (IBAction)openLinkedFile:(id)sender;
+
+/*!
+    @method multipleOpenFileSheetDidEnd:retrunCode:contextInfo:
+	@abstract evaluates answer to the sheet whether we want to open many linked files
+	@discussion only opens the linked files when NSAlertAlternateReturn is passed, we also call this for cases with few linked files to do the opening
+	@param sheet (not used), returnCode (used to evaluate answer), contextInfo (not used)
+*/
+-(void) multipleOpenFileSheetDidEnd:(NSWindow *)sheet returnCode:(int)returnCode contextInfo:(void *)contextInfo;
+
+/*!
+    @method revealLinkedFile:
+    @abstract Reveals the linked file of the selected publication in the Finder
+    @discussion 
+    @param sender The sender. Not used.
+*/
+- (IBAction)revealLinkedFile:(id)sender;
+
+/*!
+    @method multipleRevealFileSheetDidEnd:retrunCode:contextInfo:
+	@abstract evaluates answer to the sheet whether we want to reveal many linked files
+	@discussion only reveals the linked files when NSAlertAlternateReturn is passed, we also call this for cases with few linked files to do the revealing
+	@param sheet (not used), returnCode (used to evaluate answer), contextInfo (not used)
+*/
+-(void) multipleRevealFileSheetDidEnd:(NSWindow *)sheet returnCode:(int)returnCode contextInfo:(void *)contextInfo;
+
+/*!
+    @method openRemoteURL:
+    @abstract Opens the remote URL of the selected publication in the default browser
+    @discussion - 
+    @param sender The sender. Not used.
+*/
+- (IBAction)openRemoteURL:(id)sender;
+
+/*!
+    @method multipleOpenURLSheetDidEnd:retrunCode:contextInfo:
+	@abstract evaluates answer to the sheet whether we want to open many remote URLs
+	@discussion only opens the URLs when NSAlertAlternateReturn is passed, we also call this for cases with few linked files to do the opening
+	@param sheet (not used), returnCode (used to evaluate answer), contextInfo (not used)
+*/
+-(void) multipleOpenURLSheetDidEnd:(NSWindow *)sheet returnCode:(int)returnCode contextInfo:(void *)contextInfo;
+
+/*!
     @method cut
     @abstract delete and copy according to the preference
     @discussion deletes the currently selected publications and uses copy to put a representation on the general pasteboard. Does not call the delete sheet; you can paste them back. 
@@ -543,44 +694,66 @@ extern NSString *BDSKBibItemLocalDragPboardType;
 - (IBAction)copyAsPublicBibTex:(id)sender;
 
 /*!
-    @method copyAsTex
- @abstract copy as tex citation (\\cite{})
- @discussion puts the appropriate citations of the currently selected publications onto the general pasteboard.
- @param sender The sender. Not used.
+	@method copyAsTex
+	@abstract copy as tex citation (\\cite{})
+	@discussion puts the appropriate citations of the currently selected publications onto the general pasteboard.
+	@param sender The sender. Not used.
 */
 - (IBAction)copyAsTex:(id)sender;
 
-
 /*!
-    @method citeStringForSelection
-	 @abstract auxiliary method for generating cite string
-	 @discussion generates appropriate cite command from the document's current selection by calling citeStringForPublication.
-*/
-- (NSString *)citeStringForSelection;
-
-/*!
-    @method citeStringForPublications
- @abstract  method for generating cite string
- @discussion generates appropriate cite command from the given items 
-*/
-
-- (NSString *)citeStringForPublications:(NSArray *)items;
-
-/*!
-    @method copyAsPDF
- @abstract copy as PDF typeset image
- @discussion puts the typeset image of the currently selected publications onto the general pasteboard rendered using tex and bibtex and the user's selected style file.
- @param sender The sender. Not used.
+	@method copyAsPDF
+	@abstract copy as PDF typeset image
+	@discussion puts the typeset image of the currently selected publications onto the general pasteboard rendered using tex and bibtex and the user's selected style file.
+	@param sender The sender. Not used.
  */
 - (IBAction)copyAsPDF:(id)sender;
 
 /*!
-@method copyAsRTF
-@abstract copy as RTF typeset image
-@discussion puts the typeset image of the currently selected publications onto the general pasteboard rendered using tex and bibtex and the user's selected style file.
-@param sender The sender. Not used.
+	@method copyAsRTF
+	@abstract copy as RTF typeset image
+	@discussion puts the typeset image of the currently selected publications onto the general pasteboard rendered using tex and bibtex and the user's selected style file.
+	@param sender The sender. Not used.
 */
 - (IBAction)copyAsRTF:(id)sender;
+
+/*!
+	@method copyAsLaTeX
+	@abstract copy as LaTeX string
+	@discussion puts the LaTeX bibliography of the currently selected publications onto the general pasteboard rendered using tex and bibtex and the user's selected style file.
+	@param sender The sender. Not used.
+*/
+- (IBAction)copyAsLaTeX:(id)sender;
+
+
+/*!
+	@method citeStringForSelection
+	@abstract auxiliary method for generating cite string
+	@discussion generates appropriate cite command from the document's current selection by calling citeStringForPublication.
+*/
+- (NSString *)citeStringForSelection;
+
+/*!
+	@method citeStringForPublications:citeString:
+	@abstract  method for generating cite string
+	@discussion generates appropriate cite command from the given items 
+*/
+
+- (NSString *)citeStringForPublications:(NSArray *)items citeString:(NSString *)citeString;
+
+/*!
+	@method bibTeXStringForPublications
+	@abstract auxiliary method for generating bibtex string for publication items
+	@discussion generates appropriate bibtex string from the document's current selection by calling bibTeXStringDroppingInternal:droppingInternal:.
+*/
+- (NSString *)bibTeXStringForPublications:(NSArray *)items;
+
+/*!
+	@method bibTeXStringDroppingInternal:forPublications:
+	@abstract auxiliary method for generating bibtex string for publication items
+	@discussion generates appropriate bibtex string from given items.
+*/
+- (NSString *)bibTeXStringDroppingInternal:(BOOL)drop forPublications:(NSArray *)items;
 
 /*!
     @method setPublications
@@ -608,6 +781,8 @@ extern NSString *BDSKBibItemLocalDragPboardType;
 
 - (void)addPublication:(BibItem *)pub;
 
+- (void)addPublications:(NSArray *)pubArray;
+
 - (void)removePublication:(BibItem *)pub;
 
 /*!
@@ -626,7 +801,7 @@ extern NSString *BDSKBibItemLocalDragPboardType;
 - (void)sortPubsByDefaultColumn;
 #pragma mark bibtex macro support
 
-- (NSMutableDictionary *)macroDefinitions;
+- (NSDictionary *)macroDefinitions;
 
 /*!
     @method     setMacroDefinitions:
@@ -635,7 +810,7 @@ extern NSString *BDSKBibItemLocalDragPboardType;
  It's intended to be used with file parsers to add many defs at once.
     @param      newMacroDefinitions (description)
 */
-- (void)setMacroDefinitions:(NSMutableDictionary *)newMacroDefinitions;
+- (void)setMacroDefinitions:(NSDictionary *)newMacroDefinitions;
 
 /*!
     @method     addMacroDefinitionWithoutUndo:forMacro:
@@ -699,6 +874,38 @@ extern NSString *BDSKBibItemLocalDragPboardType;
 */
 - (void)setMacroDefinition:(NSString *)newDefinition forMacro:(NSString *)macroKey;
 
+
+/*!
+    @method     bibTeXMacroString:
+    @abstract   returns the bibTeX string for the macro definitons.
+    @discussion TeXifies the expanded values when the pref option is set.
+    @result     (description)
+*/
+- (NSString *)bibTeXMacroString;
+
+- (BOOL)citeKeyIsCrossreffed:(NSString *)key;
+
+- (void)rebuildItemsForCiteKeys;
+
+/*!
+    @method     itemsForCiteKeys
+    @abstract   Returns a dictionary of publications for cite keys. It can have multiple items for a single key.
+    @discussion Keys are case insensitive. Always use this accessor, not the ivar itself, as the ivar is build in this method. 
+    @result     (description)
+*/
+- (OFMultiValueDictionary *)itemsForCiteKeys;
+
+/*!
+    @method     publicationForCiteKey:
+    @abstract   Returns a publication matching the given citekey, using a case-insensitive comparison.
+    @discussion Used for finding parent items for crossref lookups, which require case-insensitivity in cite-keys.
+                The case conversion is handled by this method, though, and the caller shouldn't be concerned with it.
+    @param      key (description)
+    @result     (description)
+*/
+- (BibItem *)publicationForCiteKey:(NSString *)key;
+
+
     /*!
 @method citeKeyIsUsed:byItemOtherThan
      @abstract tells whether aCiteKey is in the dict.
@@ -736,13 +943,13 @@ extern NSString *BDSKBibItemLocalDragPboardType;
 - (void)createNewBlankPubAndEdit:(BOOL)yn;
 
 /*!
-    @method handleUpdateUINotification
-    @abstract listens for notification telling us to update UI.
+    @method handleTableSelectionChangedNotification:
+    @abstract listens for notification of changes in the selection of the main table.
     @discussion \253discussion\273
     
 */
 
-- (void)handleUpdateUINotification:(NSNotification *)notification;
+- (void)handleTableSelectionChangedNotification:(NSNotification *)notification;
 
 /*!
     @method updateUI
@@ -758,16 +965,8 @@ extern NSString *BDSKBibItemLocalDragPboardType;
     
 */
 - (void)setupTableColumns;
-
-int generalBibItemCompareFunc(id item1, id item2, void *context);
-
-/*!
-	@method menuForTableColumn:row:
- @abstract \253Abstract\273
- @discussion \253discussion\273
- 
-*/
-- (NSMenu *)menuForTableColumn:(NSTableColumn *)tc row:(int)row;
+NSComparisonResult reverseGeneralBibItemCompareFunc(id item1, id item2, void *context);
+NSComparisonResult generalBibItemCompareFunc(id item1, id item2, void *context);
 
 /*!
     @method columnsMenuSelectTableColumn
@@ -800,15 +999,6 @@ int generalBibItemCompareFunc(id item1, id item2, void *context);
 - (void)addTableColumnSheetDidEnd:(NSWindow *)sheet
                        returnCode:(int) returnCode
                       contextInfo:(void *)contextInfo;
-
-/*!
-    @method menuForTableViewSelection...
-	@abstract called when an action/contextual menu is needed for a particular tableView
-	@discussion uses the menu wired up as actionMenu and removes every item that doesn't validate.
-Uses the tableview argument to determine which actionMenu it should validate.
- */
-- (NSMenu *)menuForTableViewSelection:(NSTableView *)theTableView;
-
 
 
 /*!
@@ -877,11 +1067,18 @@ Uses the tableview argument to determine which actionMenu it should validate.
 */
 - (NSEnumerator *)selectedPubEnumerator;
 
+- (BOOL)highlightItemForPartialItem:(NSDictionary *)partialItem;
+
 - (void)highlightBib:(BibItem *)bib;
 
 - (void)highlightBib:(BibItem *)bib byExtendingSelection:(BOOL)yn;
 
+- (void)highlightBibs:(NSArray *)bibArray;
+
 - (IBAction)toggleStatusBar:(id)sender;
+
+- (void)setStatus:(NSString *)status;
+- (void)setStatus:(NSString *)status immediate:(BOOL)now;
 
 - (IBAction)toggleShowingCustomCiteDrawer:(id)sender;
 
@@ -930,7 +1127,6 @@ Uses the tableview argument to determine which actionMenu it should validate.
 */
 NSComparisonResult compareSetLengths(NSSet *set1, NSSet *set2, void *context);
 
-- (IBAction)exportEncodedBib:(id)sender;
 - (NSStringEncoding)documentStringEncoding;
 - (void)setDocumentStringEncoding:(NSStringEncoding)encoding;
 

@@ -2,17 +2,37 @@
 
 //  Created by Michael McCracken on Mon Dec 24 2001.
 /*
-This software is Copyright (c) 2002, Michael O. McCracken
-All rights reserved.
+ This software is Copyright (c) 2001,2002,2003,2004,2005
+ Michael O. McCracken. All rights reserved.
 
-Redistribution and use in source and binary forms, with or without modification, are permitted provided that the following conditions are met:
+ Redistribution and use in source and binary forms, with or without
+ modification, are permitted provided that the following conditions
+ are met:
 
-- Redistributions of source code must retain the above copyright notice, this list of conditions and the following disclaimer.
--  Redistributions in binary form must reproduce the above copyright notice, this list of conditions and the following disclaimer in the documentation and/or other materials provided with the distribution.
--  Neither the name of Michael O. McCracken nor the names of any contributors may be used to endorse or promote products derived from this software without specific prior written permission.
+ - Redistributions of source code must retain the above copyright
+   notice, this list of conditions and the following disclaimer.
 
-THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-*/
+ - Redistributions in binary form must reproduce the above copyright
+    notice, this list of conditions and the following disclaimer in
+    the documentation and/or other materials provided with the
+    distribution.
+
+ - Neither the name of Michael O. McCracken nor the names of any
+    contributors may be used to endorse or promote products derived
+    from this software without specific prior written permission.
+
+ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+ "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+ LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+ A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+ OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+ SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+ LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+ DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+ THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+ (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ */
 
 /*! @header BibEditor.h
     @discussion The class for editing BibItems. Handles the UI for the fields and notes.
@@ -31,22 +51,31 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 #import "BibPersonController.h"
 #import "RYZImagePopUpButton.h"
 #import "RYZImagePopUpButtonCell.h"
+#import "BDSKRatingButton.h"
 #import "MacroTextFieldWindowController.h"
 #import "BDSKMenuItem.h"
+#import "BDSKForm.h"
 
+// core pasteboard type for webloc files
+extern NSString* BDSKWeblocFilePboardType;
 
 /*!
     @class BibEditor
     @abstract WindowController for the edit window
     @discussion Subclass of the NSWindowController class, This handles making, reversing and keeping track of changes to the BibItem, and displaying a nice GUI.
 */
-@interface BibEditor : NSWindowController {
+@interface BibEditor : NSWindowController <BDSKFormDelegate> {
     IBOutlet NSPopUpButton *bibTypeButton;
-    IBOutlet NSForm *bibFields;
+    IBOutlet BDSKForm *bibFields;
     IBOutlet NSTabView *tabView;
     IBOutlet NSTextView *notesView;
     IBOutlet NSTextView *abstractView;
     IBOutlet NSTextView* rssDescriptionView;
+	NSTextView *currentEditedView;
+    NSUndoManager *notesViewUndoManager;
+    NSUndoManager *abstractViewUndoManager;
+    NSUndoManager *rssDescriptionViewUndoManager;
+    
     IBOutlet NSTextField* citeKeyField;
 //    IBOutlet NSButton* viewLocalButton;
 	IBOutlet RYZImagePopUpButton *viewLocalButton;
@@ -70,6 +99,9 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
     IBOutlet NSButton* delFieldButtonCancel;
     IBOutlet NSWindow* delFieldWindow;
     // ----------------------------------------------------------------------------------------
+	// Rating button:
+    IBOutlet BDSKRatingButton* ratingButton;
+    // ----------------------------------------------------------------------------------------
     NSString *currentType;
     BibItem *theBib;
     BibDocument *theDocument;
@@ -82,6 +114,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
     IBOutlet NSScrollView* documentSnoopScrollView;
     IBOutlet NSView* pdfSnoopContainerView;
 	BOOL pdfSnoopViewLoaded;
+	int drawerState;
 // ----------------------------------------------------------------------------------------
 // doc textpreview stuff
 // ----------------------------------------------------------------------------------------
@@ -124,7 +157,12 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 	// edit field stuff
 	BOOL forceEndEditing;
     NSMutableDictionary *toolbarItems;
-    NSControl *currentControl;
+
+    BOOL didSetupForm;
+    
+    IBOutlet NSPanel *editInheritedWarningSheet;
+    IBOutlet NSButton *dontWarnOnEditInheritedCheckButton;
+
 }
 
 /*!
@@ -197,6 +235,9 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
                  returnCode:(int) returnCode
                 contextInfo:(void *)contextInfo;
 
+- (IBAction)dismissEditInheritedSheet:(id)sender;
+
+- (IBAction)changeWarnOnEditInherited:(id)sender;
 
 /*!
     @method     editSelectedFieldAsRawBibTeX:
@@ -220,11 +261,12 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 - (void)setStatus:(NSString *)status;
 
 /*!
-    @method     finalizeChanges
+    @method     finalizeChanges:
     @abstract   Makes sure that edits of fields are submitted.
     @discussion (comprehensive description)
+    @param      aNotification Unused
 */
-- (void)finalizeChanges;
+- (void)finalizeChanges:(NSNotification *)aNotification;
 
 /*!
     @method     viewLocal
@@ -235,24 +277,24 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 
 /*!
     @method     getSafariRecentDownloadsMenu
-    @abstract   Returns an array of menuItem's for local paths of recent downloads from Safari.
+    @abstract   Returns a menu of items for local paths of recent downloads from Safari. Returns nil if there are no valid items.
     @discussion (comprehensive description)
 */
-- (NSArray *)getSafariRecentDownloadsMenu;
+- (NSMenu *)getSafariRecentDownloadsMenu;
 
 /*!
     @method     getSafariRecentURLsMenu
-    @abstract   Returns an array of menuItem's for remote URLs of recent downloads from Safari.
+    @abstract   Returns a menu of items for remote URLs of recent downloads from Safari. Returns nil if there are no valid items.
     @discussion (comprehensive description)
 */
-- (NSArray *)getSafariRecentURLsMenu;
+- (NSMenu *)getSafariRecentURLsMenu;
 
 /*!
     @method     getSafariRecentURLsMenu
-    @abstract   Returns an array of menuItem's for remote URLs of recent downloads from Safari.
+    @abstract   Returns a menu of items for local paths of recent documents from Preview. Returns nil if there are no valid items.
     @discussion (comprehensive description)
 */
-- (NSArray *)getPreviewRecentDocumentsMenu;
+- (NSMenu *)getPreviewRecentDocumentsMenu;
 
 /*!
     @method     setLocalURLPathFromMenuItem
@@ -308,9 +350,8 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
     @discussion (comprehensive description)
 */
 - (void)updateTypePopup;
-//- (IBAction)textFieldDidChange:(id)sender;
-- (IBAction)textFieldDidEndEditing:(id)sender;
-//- (void)closeSheetDidEnd:(NSWindow *)sheet returnCode:(int)returnCode contextInfo:(void  *)contextInfo;
+
+- (IBAction)changeRating:(id)sender;
 
 /*!
     @method     updateDocumentSnoopButton
@@ -369,6 +410,13 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 - (IBAction)generateLocalUrl:(id)sender;
 
 /*!
+    @method     duplicateTitleToBooktitle:
+    @abstract   Action to copy the title field to the booktitle field. Overwrites the booktitle field.
+    @discussion (comprehensive description)
+*/
+- (IBAction)duplicateTitleToBooktitle:(id)sender;
+
+/*!
     @method     makeKeyField:
     @abstract   Selects the field and makes it key. 
     @discussion (comprehensive description)
@@ -377,10 +425,17 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 
 - (void)bibDidChange:(NSNotification *)notification;
 - (void)typeInfoDidChange:(NSNotification *)aNotification;
+- (void)macrosDidChange:(NSNotification *)aNotification;
 
-- (void)docWillSave:(NSNotification *)notification;
 - (void)bibWillBeRemoved:(NSNotification *)notification;
 - (void)docWindowWillClose:(NSNotification *)notification;
+
+/*!
+	@method     openParentItem:
+	@abstract   opens an editor for the crossref parent item.
+	@discussion (description)
+*/
+- (void)openParentItem:(id)sender;
 
 /*!
     @method     showPersonDetail:
@@ -406,11 +461,10 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 #pragma mark Macro support
     
 /*!
-    @method     editFormCellAsMacro:
+    @method     editSelectedFormCellAsMacro
     @abstract   pops up a window above the form cell with extra info about a macro.
     @discussion (description)
-    @param      cell (description)
 */
-- (void)editFormCellAsMacro:(NSFormCell *)cell;
+- (BOOL)editSelectedFormCellAsMacro;
 
 @end

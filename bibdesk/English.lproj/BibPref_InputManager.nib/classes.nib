@@ -14,7 +14,7 @@
                 acTabView = NSTabView; 
                 addFieldComboBox = NSComboBox; 
                 addFieldSheet = NSPanel; 
-                appList = NSTableView; 
+                appList = OAGradientTableView; 
                 editorAutocompletionStringsTableView = NSTableView; 
                 enableButton = NSButton; 
             }; 
@@ -26,6 +26,7 @@
             LANGUAGE = ObjC; 
             SUPERCLASS = NSObject; 
         }, 
+        {CLASS = OAGradientTableView; LANGUAGE = ObjC; SUPERCLASS = NSTableView; }, 
         {
             ACTIONS = {restoreDefaults = id; setValueForSender = id; }; 
             CLASS = OAPreferenceClient; 
