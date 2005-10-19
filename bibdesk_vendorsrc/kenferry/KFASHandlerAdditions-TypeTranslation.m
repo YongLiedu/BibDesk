@@ -47,6 +47,11 @@
                                  atIndex:i++];
         }
     }
+    else if ([self respondsToSelector:@selector(objectSpecifier)] &&
+             [NSScriptObjectSpecifier instancesRespondToSelector:@selector(_asDescriptor)]) // use the script object specifier
+    {
+        resultDesc = [[self objectSpecifier] performSelector:@selector(_asDescriptor)];
+    }
     else // encode the description as a fallback - this is pretty useless, only helpful for debugging
     {
         resultDesc = [[self description] aeDescriptorValue];

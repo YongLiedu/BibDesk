@@ -38,6 +38,21 @@ extern NSString *KFASException;
 - (id)executeHandler:(NSString *)handlerName
 withParametersFromArray:(NSArray *)argumentsArray;
 
+- (id)executeHandler:(NSString *)handlerName
+		   withLabel:(AEKeyword)keyWord
+		andParameter:(id)arg;
+
+- (id)executeHandler:(NSString *)handlerName
+withLabelsAndParameters:(AEKeyword)firstKeyWord, ...;
+
+- (id)executeHandler:(AEEventID)handlerID
+		   fromSuite:(AEEventClass)suiteID
+		   withLabel:(AEKeyword)keyWord
+		andParameter:(id)arg;
+
+- (id)executeHandler:(AEEventID)handlerID
+		   fromSuite:(AEEventClass)suiteID
+withLabelsAndParameters:(AEKeyword)firstKeyWord, ...;
 
 // Methods below are for compatibility with KFAppleScriptHandlerAdditions 2.0.
 // I'd recommend using the new versions if you're starting a new project.

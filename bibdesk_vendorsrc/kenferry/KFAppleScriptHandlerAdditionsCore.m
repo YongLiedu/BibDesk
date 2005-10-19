@@ -18,6 +18,9 @@
 #ifndef kASSubroutineEvent
 #define kASSubroutineEvent 'psbr'
 #endif
+#ifndef kASPrepositionalSubroutine
+#define kASPrepositionalSubroutine 'psbr'
+#endif
 #ifndef kASAppleScriptSuite
 #define kASAppleScriptSuite 'ascr'
 #endif
@@ -27,12 +30,15 @@
 #ifndef keyASUserRecordFields
 #define keyASUserRecordFields 'usrf'
 #endif
+#ifndef keyASPrepositionGiven
+#define keyASPrepositionGiven 'givn'
+#endif
 
 NSString *KFASException = @"KFASException";
 
 @implementation NSAppleScript (KFAppleScriptHandlerAdditions)
 
-// All other execute methods cascade down to this one.
+// All other execute methods cascade down to this or the next one.
 - (NSAppleEventDescriptor *)kfExecuteWithoutTranslationHandler:(NSString *)handlerName
                                                          error:(NSDictionary **)errorInfo
                                             withParametersDesc:(NSAppleEventDescriptor *)argumentsDesc
@@ -58,6 +64,73 @@ NSString *KFASException = @"KFASException";
     
     // set up the arguments
     [event setParamDescriptor:argumentsDesc forKeyword:keyDirectObject];
+    
+    // execute
+    resultDesc = [self executeAppleEvent:event error:errorInfo];
+    
+    // cleanup
+    [event release];
+    
+    return(resultDesc);
+}
+
+// for routines with labeled parameters
+- (NSAppleEventDescriptor *)kfExecuteWithoutTranslationHandler:(NSString *)handlerName
+													   eventID:(AEEventID)eventID
+													 fromSuite:(AEEventClass)suiteID
+                                                         error:(NSDictionary **)errorInfo
+												withFirstLabel:(AEKeyword)aKeyWord
+										   parametersAndLabels:(va_list)anArgList
+{
+    NSAppleEventDescriptor* event;
+    NSAppleEventDescriptor* targetAddress;
+    NSAppleEventDescriptor* resultDesc;
+    
+    int pid = [[NSProcessInfo processInfo] processIdentifier];
+    targetAddress = [NSAppleEventDescriptor descriptorWithDescriptorType:typeKernelProcessID
+                                                                   bytes:&pid
+                                                                  length:sizeof(pid)];
+    event = [[NSAppleEventDescriptor alloc] initWithEventClass:suiteID
+                                                       eventID:eventID
+                                              targetDescriptor:targetAddress
+                                                      returnID:kAutoGenerateReturnID
+                                                 transactionID:kAnyTransactionID];
+    
+    // set up the handler
+	if ( handlerName != nil )
+	{
+		NSAppleEventDescriptor* subroutineDescriptor = [NSAppleEventDescriptor descriptorWithString:[handlerName lowercaseString]];
+		[event setParamDescriptor:subroutineDescriptor  forKeyword:keyASSubroutineName];
+    }
+	
+    // set up the arguments
+	do
+	{
+		id theObject = va_arg( anArgList, id );
+
+		if( aKeyWord == keyASPrepositionGiven )
+		{
+			NSAppleEventDescriptor *theUserRecord = [NSAppleEventDescriptor listDescriptor];
+			if( theUserRecord )
+			{
+				unsigned int theIndex = 1;
+				do
+				{
+					NSString* theKey = va_arg( anArgList, id );
+					NSParameterAssert( theKey != nil );
+					[theUserRecord insertDescriptor:[[theKey description] aeDescriptorValue] atIndex:theIndex++];
+					[theUserRecord insertDescriptor:[theObject aeDescriptorValue] atIndex:theIndex++];
+				}
+				while( (theObject = va_arg( anArgList, id ) ) != nil );
+			}
+
+			[event setParamDescriptor:[theUserRecord aeDescriptorValue] forKeyword:keyASUserRecordFields];
+			break; // all the arguments have been passed
+		}
+		else
+			[event setParamDescriptor:[theObject aeDescriptorValue] forKeyword:aKeyWord];
+	}
+	while( (aKeyWord = va_arg( anArgList, AEKeyword ) ) != nil );
     
     // execute
     resultDesc = [self executeAppleEvent:event error:errorInfo];
@@ -100,7 +173,7 @@ NSString *KFASException = @"KFASException";
     }
 }
 
-// these next four execute methods make up the recommended API.
+// these next four execute methods make up the recommended API for subroutines with positional parameters.
 // Each calls upon the next and the last calls kfExecuteWithoutTranslationHandler:error:withParametersDesc:.
 - (id)executeHandler:(NSString *)handlerName
 {
@@ -157,6 +230,80 @@ withParametersFromArray:(NSArray *)argumentsArray
     return([resultDesc objCObjectValue]);
 }
 
+// these next four execute methods make up the recommended API for subroutines with labeled parameters.
+// The first and third one call upon the next which calls kfExecuteWithoutTranslationHandler:eventID:fromSuite:error:withFirstLabel:parametersAndLabels:.
+- (id)executeHandler:(NSString *)handlerName
+		   withLabel:(AEKeyword)keyWord
+		andParameter:(id)arg
+{
+    if (arg == nil)
+    {
+        [NSException raise:NSInvalidArgumentException format:@"Parameter cannot be nil."];
+    }
+    
+    return([self executeHandler:handlerName
+		withLabelsAndParameters:keyWord, arg, nil]);
+}
+
+- (id)executeHandler:(NSString *)handlerName
+withLabelsAndParameters:(AEKeyword)firstKeyWord, ...
+{
+    NSAppleEventDescriptor* resultDesc;
+    NSDictionary* errorInfo = nil;
+	va_list	theArgList;
+	va_start( theArgList, firstKeyWord );
+    resultDesc = [self kfExecuteWithoutTranslationHandler:handlerName
+												  eventID:kASPrepositionalSubroutine
+												fromSuite:kASAppleScriptSuite
+                                                    error:&errorInfo
+										   withFirstLabel:firstKeyWord
+									  parametersAndLabels:theArgList];
+	va_end( theArgList );
+    if (errorInfo != nil)
+    {
+        [self kfHandleASError:errorInfo];
+    }
+    
+    return([resultDesc objCObjectValue]);
+}
+
+- (id)executeHandler:(AEEventID)handlerID
+		   fromSuite:(AEEventClass)suiteID
+		   withLabel:(AEKeyword)keyWord
+		andParameter:(id)arg
+{
+    if (arg == nil)
+    {
+        [NSException raise:NSInvalidArgumentException format:@"Parameter cannot be nil."];
+    }
+    
+    return([self executeHandler:handlerID
+					  fromSuite:suiteID
+		withLabelsAndParameters:keyWord, arg, nil]);
+}
+
+- (id)executeHandler:(AEEventID)handlerID
+		   fromSuite:(AEEventClass)suiteID
+withLabelsAndParameters:(AEKeyword)firstKeyWord, ...
+{
+    NSAppleEventDescriptor* resultDesc;
+    NSDictionary* errorInfo = nil;
+	va_list	theArgList;
+	va_start( theArgList, firstKeyWord );
+    resultDesc = [self kfExecuteWithoutTranslationHandler:nil
+												  eventID:handlerID
+												fromSuite:suiteID
+                                                    error:&errorInfo
+										   withFirstLabel:firstKeyWord
+									  parametersAndLabels:theArgList];
+	va_end( theArgList );
+    if (errorInfo != nil)
+    {
+        [self kfHandleASError:errorInfo];
+    }
+    
+    return([resultDesc objCObjectValue]);
+}
 
 // compatibility methods.  It'd be a little strong to call these deprecated, but I think 
 // the above batch are more convenient.  Who wants to deal with an error dictionary?  
