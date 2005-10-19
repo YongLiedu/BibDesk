@@ -15,16 +15,16 @@
 
 
 @interface BDSKMainWindowController : NSWindowController {
-    IBOutlet NSTreeController *sourceListTreeController;
+
     IBOutlet NSOutlineView *sourceList;
     IBOutlet NSArrayController *selectedItemsArrayController;
-
+    NSMutableArray *topLevelSourceListItems;
+    
     IBOutlet NSSplitView *mainSplitView;
     
     // Display Controller stuff
     NSDictionary *displayControllersInfoDict;
     NSMutableArray *displayControllers;
-    NSString *currentEntityClassName;
     NSMutableDictionary *currentDisplayControllerForEntity;
     id currentDisplayController;
     IBOutlet NSView *currentDisplayView;
@@ -37,19 +37,24 @@
 - (void)bindDisplayController:(id)displayController;
 - (void)unbindDisplayController:(id)displayController;
 
-- (void)selectedEntityClassDidChange;
+- (void)setupTopLevelSourceListItems;
+- (void)reloadSourceList;
+
+- (NSSet *)sourceListSelectedItems;
 
 // actions
-- (IBAction)addNewGroupFromSourceListSelection:(id)sender;
-- (IBAction)addNewItemFromSourceListSelection:(id)sender;
+- (IBAction)addNewGroupFromSourceListSelection:(id)container;
+- (IBAction)addNewItemFromSourceListSelection:(id)container;
 
-- (IBAction)addNewPublication:(id)sender;
-- (IBAction)addNewPublicationGroup:(id)sender;
+- (IBAction)addNewPublicationToContainer:(id)container;
+- (IBAction)addNewPublicationGroupToContainer:(id)container;
 
-- (IBAction)addNewNote:(id)sender;
-- (IBAction)addNewNoteGroup:(id)sender;
+- (IBAction)addNewNoteToContainer:(id)container;
+- (IBAction)addNewNoteGroupToContainer:(id)container;
 
-- (IBAction)addNewPerson:(id)sender;
-- (IBAction)addNewPersonGroup:(id)sender;
+- (IBAction)addNewPersonToContainer:(id)container;
+- (IBAction)addNewPersonGroupToContainer:(id)container;
+
+- (IBAction)importFromBibTeXFile:(id)sender;
 
 @end
