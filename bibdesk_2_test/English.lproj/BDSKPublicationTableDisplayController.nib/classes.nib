@@ -3,7 +3,11 @@
         {
             CLASS = BDSKPublicationTableDisplayController; 
             LANGUAGE = ObjC; 
-            OUTLETS = {itemsArrayController = NSArrayController; mainView = NSView; }; 
+            OUTLETS = {
+                itemsArrayController = NSArrayController; 
+                mainView = NSView; 
+                selectionDetailsBox = ImageBackgroundBox; 
+            }; 
             SUPERCLASS = NSObject; 
         }, 
         {
@@ -12,7 +16,8 @@
             OUTLETS = {itemSource = id; mainView = NSView; }; 
             SUPERCLASS = NSObject; 
         }, 
-        {CLASS = FirstResponder; LANGUAGE = ObjC; SUPERCLASS = NSObject; }
+        {CLASS = FirstResponder; LANGUAGE = ObjC; SUPERCLASS = NSObject; }, 
+        {CLASS = ImageBackgroundBox; LANGUAGE = ObjC; SUPERCLASS = NSBox; }
     ); 
     IBVersion = 1; 
 }
