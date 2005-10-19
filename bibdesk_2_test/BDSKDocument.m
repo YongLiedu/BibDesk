@@ -66,12 +66,33 @@
     NSMutableSet *set = [pubGroup mutableSetValueForKey:@"items"];
     [set addObject:pub];
     
+    id note = [NSEntityDescription insertNewObjectForEntityForName:@"Note"
+                                           inManagedObjectContext:managedObjectContext];
+    [note setValue:@"note1" forKey:@"name"];
+    [note setValue:@"value of note1" forKey:@"value"];
+    [[pub mutableSetValueForKey:@"notes"] addObject:note];
+    
+    
     id person = [NSEntityDescription insertNewObjectForEntityForName:PersonEntityName
                                               inManagedObjectContext:managedObjectContext];
-    [person setValue:@"test first name"
-           forKey:@"firstNamePart"];
+    [person setValue:@"blow"
+              forKey:@"lastNamePart"];
+    [person setValue:@"joe"
+              forKey:@"firstNamePart"];
     NSMutableSet *set2 = [personGroup mutableSetValueForKey:@"items"];
     [set2 addObject:person];
+
+    id person2 = [NSEntityDescription insertNewObjectForEntityForName:PersonEntityName
+                                            inManagedObjectContext:managedObjectContext];
+    [person2 setValue:@"blow"
+              forKey:@"lastNamePart"];
+    [person2 setValue:@"john"
+              forKey:@"firstNamePart"];
+    [set2 addObject:person2];
+    id tag = [NSEntityDescription insertNewObjectForEntityForName:@"Tag"
+                                           inManagedObjectContext:managedObjectContext];
+    [tag setValue:@"johnblowgroup" forKey:@"name"];
+    [[person2 mutableSetValueForKey:@"tags"] addObject:tag];
     
     id relationship = [NSEntityDescription insertNewObjectForEntityForName:ContributorPublicationRelationshipEntityName
                                               inManagedObjectContext:managedObjectContext];
@@ -81,6 +102,19 @@
                     forKey:@"contributor"];
     [relationship setValue:pub
                     forKey:@"publication"];
+    
+    relationship = [NSEntityDescription insertNewObjectForEntityForName:ContributorPublicationRelationshipEntityName
+                                                 inManagedObjectContext:managedObjectContext];
+    [relationship setValue:@"author"
+                    forKey:@"relationshipType"];
+    [relationship setValue:person2
+                    forKey:@"contributor"];
+    [relationship setValue:pub
+                    forKey:@"publication"];
+    tag = [NSEntityDescription insertNewObjectForEntityForName:@"Tag"
+                                           inManagedObjectContext:managedObjectContext];
+    [tag setValue:@"tagsRCool" forKey:@"name"];
+    [[pub mutableSetValueForKey:@"tags"] addObject:tag];
             
     return self;
 }
