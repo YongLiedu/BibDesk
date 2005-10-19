@@ -22,9 +22,14 @@
     return mainView;
 }
 
+
+- (void)awakeFromNib{
+    [selectionDetailsBox setBackgroundImage:[NSImage imageNamed:@"coffeeStain"]];
+}
+
+
 - (NSArrayController *)itemsArrayController{
     return itemsArrayController;
 }
-
 
 @end

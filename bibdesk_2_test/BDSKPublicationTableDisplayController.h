@@ -7,11 +7,13 @@
 //
 
 #import <Cocoa/Cocoa.h>
+#import "ImageBackgroundBox.h"
 
 
 @interface BDSKPublicationTableDisplayController : NSObject {
     IBOutlet NSView *mainView;
     IBOutlet NSArrayController *itemsArrayController;
+    IBOutlet ImageBackgroundBox *selectionDetailsBox;
 }
 
 - (NSView *)view;
