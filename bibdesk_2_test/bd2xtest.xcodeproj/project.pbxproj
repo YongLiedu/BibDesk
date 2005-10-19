@@ -20,7 +20,6 @@
 		2744F57208889FC3001E0CC9 /* BDSKPersonTableDisplayController.m in Sources */ = {isa = PBXBuildFile; fileRef = 2744F56208889FC2001E0CC9 /* BDSKPersonTableDisplayController.m */; };
 		2744F57308889FC3001E0CC9 /* BDSKPublicationGroup.m in Sources */ = {isa = PBXBuildFile; fileRef = 2744F56408889FC2001E0CC9 /* BDSKPublicationGroup.m */; };
 		2744F57408889FC3001E0CC9 /* BDSKPublicationTableDisplayController.m in Sources */ = {isa = PBXBuildFile; fileRef = 2744F56608889FC2001E0CC9 /* BDSKPublicationTableDisplayController.m */; };
-		2744F57508889FC3001E0CC9 /* BDSKSourceListTreeController.m in Sources */ = {isa = PBXBuildFile; fileRef = 2744F56808889FC2001E0CC9 /* BDSKSourceListTreeController.m */; };
 		2744F57608889FC3001E0CC9 /* DisplayControllers.plist in Resources */ = {isa = PBXBuildFile; fileRef = 2744F56908889FC2001E0CC9 /* DisplayControllers.plist */; };
 		2744F57708889FC3001E0CC9 /* ImageAndTextCell.m in Sources */ = {isa = PBXBuildFile; fileRef = 2744F56B08889FC2001E0CC9 /* ImageAndTextCell.m */; };
 		2744F5800888A087001E0CC9 /* BDSKMainWindow.nib in Resources */ = {isa = PBXBuildFile; fileRef = 2744F5780888A087001E0CC9 /* BDSKMainWindow.nib */; };
@@ -28,6 +27,9 @@
 		2744F5820888A087001E0CC9 /* BDSKPersonTableDisplayController.nib in Resources */ = {isa = PBXBuildFile; fileRef = 2744F57C0888A087001E0CC9 /* BDSKPersonTableDisplayController.nib */; };
 		2744F5830888A087001E0CC9 /* BDSKPublicationTableDisplayController.nib in Resources */ = {isa = PBXBuildFile; fileRef = 2744F57E0888A087001E0CC9 /* BDSKPublicationTableDisplayController.nib */; };
 		27667443088DC007004CA127 /* BDSKContributor.m in Sources */ = {isa = PBXBuildFile; fileRef = 27667442088DC007004CA127 /* BDSKContributor.m */; };
+		277D91FE0896251C004C4105 /* ImageBackgroundBox.m in Sources */ = {isa = PBXBuildFile; fileRef = 277D91FD0896251C004C4105 /* ImageBackgroundBox.m */; };
+		277D9232089627C7004C4105 /* coffeeStain.jpg in Resources */ = {isa = PBXBuildFile; fileRef = 277D9231089627C7004C4105 /* coffeeStain.jpg */; };
+		27BBB2BE08C5019600403839 /* BTParse.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 27BBB2BD08C5019600403839 /* BTParse.framework */; };
 		27DE02E1088B51CF0003C1E9 /* BDSKPublication.m in Sources */ = {isa = PBXBuildFile; fileRef = 27DE02E0088B51CF0003C1E9 /* BDSKPublication.m */; };
 		8D11072A0486CEB800E47090 /* MainMenu.nib in Resources */ = {isa = PBXBuildFile; fileRef = 29B97318FDCFA39411CA2CEA /* MainMenu.nib */; };
 		8D11072B0486CEB800E47090 /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = 089C165CFE840E0CC02AAC07 /* InfoPlist.strings */; };
@@ -92,8 +94,6 @@
 		2744F56408889FC2001E0CC9 /* BDSKPublicationGroup.m */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.objc; path = BDSKPublicationGroup.m; sourceTree = "<group>"; };
 		2744F56508889FC2001E0CC9 /* BDSKPublicationTableDisplayController.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = BDSKPublicationTableDisplayController.h; sourceTree = "<group>"; };
 		2744F56608889FC2001E0CC9 /* BDSKPublicationTableDisplayController.m */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.objc; path = BDSKPublicationTableDisplayController.m; sourceTree = "<group>"; };
-		2744F56708889FC2001E0CC9 /* BDSKSourceListTreeController.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = BDSKSourceListTreeController.h; sourceTree = "<group>"; };
-		2744F56808889FC2001E0CC9 /* BDSKSourceListTreeController.m */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.objc; path = BDSKSourceListTreeController.m; sourceTree = "<group>"; };
 		2744F56908889FC2001E0CC9 /* DisplayControllers.plist */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = text.plist; path = DisplayControllers.plist; sourceTree = "<group>"; };
 		2744F56A08889FC2001E0CC9 /* ImageAndTextCell.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = ImageAndTextCell.h; sourceTree = "<group>"; };
 		2744F56B08889FC2001E0CC9 /* ImageAndTextCell.m */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.objc; path = ImageAndTextCell.m; sourceTree = "<group>"; };
@@ -103,6 +103,10 @@
 		2744F57F0888A087001E0CC9 /* English */ = {isa = PBXFileReference; lastKnownFileType = wrapper.nib; name = English; path = English.lproj/BDSKPublicationTableDisplayController.nib; sourceTree = "<group>"; };
 		27667441088DC007004CA127 /* BDSKContributor.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BDSKContributor.h; sourceTree = "<group>"; };
 		27667442088DC007004CA127 /* BDSKContributor.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BDSKContributor.m; sourceTree = "<group>"; };
+		277D91FC0896251C004C4105 /* ImageBackgroundBox.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ImageBackgroundBox.h; sourceTree = "<group>"; };
+		277D91FD0896251C004C4105 /* ImageBackgroundBox.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ImageBackgroundBox.m; sourceTree = "<group>"; };
+		277D9231089627C7004C4105 /* coffeeStain.jpg */ = {isa = PBXFileReference; lastKnownFileType = image.jpeg; name = coffeeStain.jpg; path = Images/coffeeStain.jpg; sourceTree = "<group>"; };
+		27BBB2BD08C5019600403839 /* BTParse.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = BTParse.framework; path = ../Development/BTParse.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		27DE02DF088B51CF0003C1E9 /* BDSKPublication.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BDSKPublication.h; sourceTree = "<group>"; };
 		27DE02E0088B51CF0003C1E9 /* BDSKPublication.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BDSKPublication.m; sourceTree = "<group>"; };
 		29B97316FDCFA39411CA2CEA /* main.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = main.m; sourceTree = "<group>"; };
@@ -120,6 +124,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				8D11072F0486CEB800E47090 /* Cocoa.framework in Frameworks */,
+				27BBB2BE08C5019600403839 /* BTParse.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -204,6 +209,8 @@
 		27224262088A50350000CF76 /* Views / Appkit Extensions */ = {
 			isa = PBXGroup;
 			children = (
+				277D91FC0896251C004C4105 /* ImageBackgroundBox.h */,
+				277D91FD0896251C004C4105 /* ImageBackgroundBox.m */,
 				2744F56A08889FC2001E0CC9 /* ImageAndTextCell.h */,
 				2744F56B08889FC2001E0CC9 /* ImageAndTextCell.m */,
 			);
@@ -220,10 +227,16 @@
 				2744F56208889FC2001E0CC9 /* BDSKPersonTableDisplayController.m */,
 				2744F56508889FC2001E0CC9 /* BDSKPublicationTableDisplayController.h */,
 				2744F56608889FC2001E0CC9 /* BDSKPublicationTableDisplayController.m */,
-				2744F56708889FC2001E0CC9 /* BDSKSourceListTreeController.h */,
-				2744F56808889FC2001E0CC9 /* BDSKSourceListTreeController.m */,
 			);
 			name = "Display Controllers";
+			sourceTree = "<group>";
+		};
+		277D9234089627D4004C4105 /* Images */ = {
+			isa = PBXGroup;
+			children = (
+				277D9231089627C7004C4105 /* coffeeStain.jpg */,
+			);
+			name = Images;
 			sourceTree = "<group>";
 		};
 		29B97314FDCFA39411CA2CEA /* bd2xtest */ = {
@@ -250,6 +263,7 @@
 		29B97317FDCFA39411CA2CEA /* Resources */ = {
 			isa = PBXGroup;
 			children = (
+				277D9234089627D4004C4105 /* Images */,
 				2744F5780888A087001E0CC9 /* BDSKMainWindow.nib */,
 				2744F57A0888A087001E0CC9 /* BDSKNoteTableDisplayController.nib */,
 				2744F57C0888A087001E0CC9 /* BDSKPersonTableDisplayController.nib */,
@@ -264,6 +278,7 @@
 		29B97323FDCFA39411CA2CEA /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				27BBB2BD08C5019600403839 /* BTParse.framework */,
 				1058C7A0FEA54F0111CA2CBB /* Linked Frameworks */,
 				1058C7A2FEA54F0111CA2CBB /* Other Frameworks */,
 			);
@@ -335,6 +350,7 @@
 				2744F5810888A087001E0CC9 /* BDSKNoteTableDisplayController.nib in Resources */,
 				2744F5820888A087001E0CC9 /* BDSKPersonTableDisplayController.nib in Resources */,
 				2744F5830888A087001E0CC9 /* BDSKPublicationTableDisplayController.nib in Resources */,
+				277D9232089627C7004C4105 /* coffeeStain.jpg in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -355,7 +371,6 @@
 				2744F57208889FC3001E0CC9 /* BDSKPersonTableDisplayController.m in Sources */,
 				2744F57308889FC3001E0CC9 /* BDSKPublicationGroup.m in Sources */,
 				2744F57408889FC3001E0CC9 /* BDSKPublicationTableDisplayController.m in Sources */,
-				2744F57508889FC3001E0CC9 /* BDSKSourceListTreeController.m in Sources */,
 				2744F57708889FC3001E0CC9 /* ImageAndTextCell.m in Sources */,
 				2728359C088B063300F5A02B /* BDSKEntityValueTransformers.m in Sources */,
 				272835BB088B08B300F5A02B /* BDSKBD2AppDelegate.m in Sources */,
@@ -363,6 +378,7 @@
 				2728360E088B0D0500F5A02B /* BDSKPerson.m in Sources */,
 				27DE02E1088B51CF0003C1E9 /* BDSKPublication.m in Sources */,
 				27667443088DC007004CA127 /* BDSKContributor.m in Sources */,
+				277D91FE0896251C004C4105 /* ImageBackgroundBox.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
