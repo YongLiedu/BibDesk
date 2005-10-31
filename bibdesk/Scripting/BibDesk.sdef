@@ -65,6 +65,9 @@ will translate this file into the necessary scriptSuite and scriptTerminology fi
                     <property name="name" code="pnam" type="string" description="The name of the field" access="r">
                         <cocoa method="name"/>
                     </property>  
+                    <property name="BibTeX string" code="BTeX" type="string" description="The value of the field as raw BibTeX">
+                        <cocoa method="bibTeXString"/>
+                    </property>  
 			     </properties>
 			</class>
 
@@ -114,13 +117,13 @@ will translate this file into the necessary scriptSuite and scriptTerminology fi
                 <cocoa class="BibItem"/>
                 <properties>
 					<property name="cite key" code="ckey" type="string" description="Key for citing the publication.">
-						<cocoa method="citeKey"/>
+						<cocoa method="ASCiteKey"/>
 					</property>  
 					<property name="generated cite key" code="gcky" type="string" description="Auto-generated key for the publication." access="r">
 						<cocoa method="suggestedCiteKey"/>
 					</property>  
 					<property name="title" code="titl" type="string" description="The publication's title.">
-						<cocoa method="title"/>
+						<cocoa method="ASTitle"/>
 					</property>  
                     <property name="abstract" code="abst" type="string" description="The publication's abstract.">
                         <cocoa method="abstract"/>
@@ -132,11 +135,17 @@ will translate this file into the necessary scriptSuite and scriptTerminology fi
 						<cocoa method="localURL"/>
 					</property>  
 					<property name="URL" code="rURL" type="string" description="URL pointing to the publication.">
-						<cocoa method="remoteURL"/>
+						<cocoa method="remoteURLString"/>
 					</property>  
 					<property name="type" code="type" type="string" description="The publication's type. E.g. article, book, unpublished.">
-						<cocoa method="type"/>
+						<cocoa method="ASType"/>
 						<!-- Provide constants for these? This might be bad wrt to using types which aren't provided as constants. -->
+					</property>  
+					<property name="rating" code="rate" type="integer" description="The publication's rating.">
+						<cocoa method="ASRating"/>
+					</property>  
+					<property name="read" code="read" type="boolean" description="The publication's Read flag.">
+						<cocoa method="ASRead"/>
 					</property>  
 					
 					<property name="publication date" code="pdat" type="date" description="Deprecated. Use publication year and publication month instead." hidden="">
@@ -165,17 +174,18 @@ will translate this file into the necessary scriptSuite and scriptTerminology fi
 						<cocoa method="attributedStringValue"/>
 					</property>                      
 					
-					<property name="note" code="note" type="string" description="Annotations for the publication as seen in the “Annote” tab.">
+					<property name="note" code="note" type="string" description="Annotations for the publication as seen in the Annote tab.">
                         <cocoa method="annotation"/>
                     </property>  
 
 					<property name="BibTeX string" code="BTeX" type="string" description="String for BibTeX entry. Can be set only at or immediately after initialization.">
 						<cocoa method="bibTeXString"/>
-					</property>  
+					</property>
+                    
+                    <property name="RIS string" code="RISs" type="string" description="RIS representation of the publication record." access="r">
+                        <cocoa method="RISStringValue"/>
+                    </property>
 					
-					<property name="fields record" code="flds" type="record" description="Fields with data about the publication. These may vary from publication to publication." hidden="">
-						<cocoa method="fields"/>
-					</property>  
 					<property name="document" code="docu" type="document" description="The bibliography containing this publication record." access="r">
 						<cocoa method="document"/>
 					</property>  
@@ -199,6 +209,29 @@ will translate this file into the necessary scriptSuite and scriptTerminology fi
 
 
 
+			<class name="script hook" plural="script hooks" code="bshk" description="A script hook." inherits="NSCoreSuite.AbstractObject">
+                <cocoa class="BDSKScriptHook"/>
+                <properties>
+					<property name="name" code="pnam" type="string" description="Name of the script hook." access="r">
+						<cocoa method="ASName"/>
+					</property>  
+					<property name="id" code="ID  " type="number" description="Unique ID of the script hook." access="r">
+						<cocoa method="ASUniqueID"/>
+					</property>  
+					<property name="field name" code="fnam" type="string" description="Name of the field relevant for the script hook. This is only set when the there are relevant old and new values for the script hook." access="r">
+						<cocoa method="ASField"/>
+					</property>  
+					<property name="old values" code="oVal" type="list of string" description="List of old values for the field relevant for the script hook. This is only set if the field name is set." access="r">
+						<cocoa method="ASOldValues"/>
+					</property>  
+					<property name="new values" code="nVal" type="list of string" description="List of new values for the field relevant for the script hook. This is only set if the field name is set." access="r">
+						<cocoa method="ASNewValues"/>
+					</property>  
+			     </properties>
+			</class>
+
+
+
 
 			<class name="application" plural="applications" code="capp" description="Bibdesk's top level scripting object." inherits="NSCoreSuite.NSApplication">
                 <cocoa class="NSApplication"/>
@@ -217,9 +250,15 @@ will translate this file into the necessary scriptSuite and scriptTerminology fi
 			         <element type="document" description="The bibliography files currently opened by Bibdesk.">
 			             <cocoa method="orderedDocuments"/>
 			         </element>
+			         <element type="script hook" description="The script hook rules known by Bibdesk." access="r">
+			             <cocoa method="scriptHooks"/>
+			         </element>
 			     </elements>
                 <responds-to-commands>
                     <responds-to name="search">
+						<cocoa method=""/>
+					</responds-to>
+                    <responds-to name="parse format">
 						<cocoa method=""/>
 					</responds-to>
                 </responds-to-commands>
@@ -259,7 +298,28 @@ will translate this file into the necessary scriptSuite and scriptTerminology fi
 					<cocoa key="forCompletion"/>
 				</parameter>				
 				<result type="list of publication | list of string" description="list of results"/>
+			</command>
+			
+			
+			<command name="parse format" code="BDSKpfmt" description="Parses a format string for a field from a publication. Does not set the field.">
+				<cocoa name="ParseFormat" class="BibDeskParseFormatCommand"/>
+				<direct-parameter type="string" description="The format string to parse."/>
+				<parameter name="for" type="field | string" code="for " description="The field or field name for which to parse the format string.">
+					<cocoa key="for"/>
+				</parameter>
+				<parameter name="from" type="publication" code="from" optional="optional" description="The publication for which to parse the format string. This is required if the field name was given as a string.">
+					<cocoa key="from"/>
+				</parameter>
 			</command>	
+			
+			
+			<command name="perform BibDesk action with publications" code="BDSKpAct" description="Script handler invoked by script hooks.">
+				<cocoa name="PerformBibdeskActionWithPublications" class="NSScriptCommand"/>
+				<direct-parameter type="list of publication" description="A list of publications that is acted upon."/>
+				<parameter name="for script hook" type="script hook" code="fshk" description="The script hook that was invoked.">
+					<cocoa key="forScriptHook"/>
+				</parameter>
+			</command>
 			
 		</commands>
     </suite>

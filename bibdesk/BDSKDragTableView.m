@@ -1,89 +1,139 @@
+// BDSKDragTableView.m
+
 /*
-This software is Copyright (c) 2002, Michael O. McCracken
-All rights reserved.
+ This software is Copyright (c) 2002,2003,2004,2005
+ Michael O. McCracken. All rights reserved.
 
-Redistribution and use in source and binary forms, with or without modification, are permitted provided that the following conditions are met:
+ Redistribution and use in source and binary forms, with or without
+ modification, are permitted provided that the following conditions
+ are met:
 
-- Redistributions of source code must retain the above copyright notice, this list of conditions and the following disclaimer.
--  Redistributions in binary form must reproduce the above copyright notice, this list of conditions and the following disclaimer in the documentation and/or other materials provided with the distribution.
--  Neither the name of Michael O. McCracken nor the names of any contributors may be used to endorse or promote products derived from this software without specific prior written permission.
+ - Redistributions of source code must retain the above copyright
+   notice, this list of conditions and the following disclaimer.
 
-THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-*/
+ - Redistributions in binary form must reproduce the above copyright
+    notice, this list of conditions and the following disclaimer in
+    the documentation and/or other materials provided with the
+    distribution.
+
+ - Neither the name of Michael O. McCracken nor the names of any
+    contributors may be used to endorse or promote products derived
+    from this software without specific prior written permission.
+
+ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+ "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+ LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+ A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+ OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+ SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+ LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+ DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+ THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+ (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ */
 
 #import "BDSKDragTableView.h"
 #import "BibDocument.h"
 #import "BibDocument_DataSource.h"
+#import "NSImage+Toolbox.h"
+#import "NSBezierPath_BDSKExtensions.h"
 
 static NSColor *sStripeColor = nil;
 
 @implementation BDSKDragTableView
 
-// this, of course, relies heavily on the fact that the datasource is a bibdocument... i guess it'll break horribly if I ever try to make the tableview
-// self contained (maybe not, huh)
+// This method computes and returns an image to use for dragging.  Override this to return a custom image.  'dragRows' represents the rows participating in the drag.  'dragEvent' is a reference to the mouse down event that began the drag.  'dragImageOffset' is an in/out parameter.  This method will be called with dragImageOffset set to NSZeroPoint, but it can be modified to re-position the returned image.  A dragImageOffset of NSZeroPoint will cause the image to be centered under the mouse.
+
 - (NSImage*)dragImageForRows:(NSArray*)dragRows event:(NSEvent*)dragEvent dragImageOffset:(NSPointPointer)dragImageOffset{
     NSImage *image = nil;
-    NSAttributedString *string;
-    NSString *s;
-    NSSize maxSize = NSMakeSize(600,200); // tunable...
-    NSSize stringSize;
+    NSString *s = nil;
     
     NSPasteboard *pb = [NSPasteboard pasteboardWithName:NSDragPboard];
-    NSArray *types = [pb types];
+    NSString *dragType = [pb availableTypeFromArray:[NSArray arrayWithObjects:NSFilenamesPboardType, NSURLPboardType, NSFilesPromisePboardType, NSPDFPboardType, NSRTFPboardType, NSStringPboardType, nil]];
+	
+    if([dragType isEqualToString:NSFilenamesPboardType]){
+        image = [NSImage imageForFile:[[pb propertyListForType:NSFilenamesPboardType] objectAtIndex:0]];
     
-    if([[pb types] containsObject:NSFileContentsPboardType]){
-        NSString *path = [[pb propertyListForType:NSFilenamesPboardType] objectAtIndex:0];
-        // NSLog(@"types has %@", types);
-        return [[NSWorkspace sharedWorkspace] iconForFile:path];
-    }
+    }else if([dragType isEqualToString:NSURLPboardType]){
+        image = [[[NSImage imageForURL:[NSURL URLFromPasteboard:pb]] copy] autorelease];
+        [image setSize:NSMakeSize(32,32)];
     
-    if([[pb availableTypeFromArray:types] isEqualToString:NSStringPboardType]){
+	}else if([dragType isEqualToString:NSFilesPromisePboardType]){
+        image = [NSImage imageForFile:[[pb propertyListForType:NSFilesPromisePboardType] lastObject]];
+        
+    }else if([dragType isEqualToString:NSStringPboardType]){
         s = [pb stringForType:NSStringPboardType];  // draw the string from the drag pboard, if it's available
-    } else {
+    
+	} else {
         s = [[self dataSource] citeStringForRows:dragRows tableViewDragSource:self];
     }
     
     if(s){
-        string = [[[NSAttributedString alloc] initWithString:s] autorelease];
-        image = [[[NSImage alloc] init] autorelease];
-        stringSize = [string size];
-        if(stringSize.width == 0 || stringSize.height == 0){
+		NSAttributedString *attrString;
+		int maxLength  = 2000; // tunable...
+		NSSize maxSize = NSMakeSize(600,200); // tunable...
+		NSSize size;
+		NSRect rect = NSZeroRect;
+		NSPoint point = NSMakePoint(3.0, 2.0);
+		NSColor *color = [NSColor secondarySelectedControlColor];
+		
+        attrString = [[[NSAttributedString alloc] initWithString:([s length] > maxLength)? [s substringToIndex:maxLength] : s] autorelease];
+        size = [attrString size];
+        if(size.width == 0 || size.height == 0){
             NSLog(@"string size was zero");
-            stringSize = maxSize; // work around bug in NSAttributedString
+            size = maxSize; // work around bug in NSAttributedString
         }
-        if(stringSize.width > maxSize.width)
-            stringSize.width = maxSize.width += 4.0;
-        if(stringSize.height > maxSize.height)
-            stringSize.height = maxSize.height += 4.0; // 4.0 from oakit
-        [image setSize:stringSize];
+        if(size.width > maxSize.width)
+            size.width = maxSize.width += 4.0;
+        if(size.height > maxSize.height)
+            size.height = maxSize.height += 4.0; // 4.0 from oakit
+        
+		size.width += 2 * point.x;
+		size.height += 2 * point.y;
+		rect.size = size;
+		rect = NSInsetRect(rect, 1.0, 1.0); // inset by half of the linewidth
+                
+		image = [[[NSImage alloc] initWithSize:size] autorelease];
         
         [image lockFocus];
-        [string drawAtPoint:NSZeroPoint];
-        //[s drawWithFont:[NSFont systemFontOfSize:12.0] color:[NSColor textColor] alignment:NSCenterTextAlignment verticallyCenter:YES inRectangle:(NSRect){NSMakePoint(0, -2), stringSize}];
-        [image unlockFocus];
+		
+		[[color colorWithAlphaComponent:0.2] set];
+		[NSBezierPath fillRoundRectInRect:rect radius:4.0];
+		[[color colorWithAlphaComponent:0.8] set];
+		[NSBezierPath setDefaultLineWidth:2.0];
+		[NSBezierPath strokeRoundRectInRect:rect radius:4.0];
+		
+        [attrString drawAtPoint:point];
         
+        // draw a count of the rows being dragged, similar to Mail.app
+        NSMutableAttributedString *countString = [[[NSMutableAttributedString alloc] initWithString:[NSString stringWithFormat:@"%i", [dragRows count]]] autorelease];
+        [countString addAttribute:NSForegroundColorAttributeName value:[NSColor whiteColor] range:NSMakeRange(0, [countString length])];		
+        NSSize countSize = [countString size];
+        NSRect countRect = NSMakeRect(NSMaxX(rect) - 3 * countSize.width, countSize.width, countSize.width, countSize.height);
+        [[NSColor redColor] set];
+        [NSBezierPath fillHorizontalOvalAroundRect:countRect];
+        [countString drawInRect:countRect];
+        
+        [image unlockFocus];
+	}
+	
+    if(image){
+		NSImage *dragImage = [[NSImage alloc] initWithSize:[image size]];
+		
+		[dragImage lockFocus];
+        [image compositeToPoint:NSZeroPoint operation:NSCompositeCopy fraction:0.6];
+        [dragImage unlockFocus];
+		
+		return [dragImage autorelease];
 	}else{
-        image = [super dragImageForRows:dragRows event:dragEvent dragImageOffset:dragImageOffset];
+        return [super dragImageForRows:dragRows event:dragEvent dragImageOffset:dragImageOffset];
     }
-    //*dragImageOffset = NSMakePoint(([image size].width)/2.0, 0.0);
-    return image;
 }
-// This method computes and returns an image to use for dragging.  Override this to return a custom image.  'dragRows' represents the rows participating in the drag.  'dragEvent' is a reference to the mouse down event that began the drag.  'dragImageOffset' is an in/out parameter.  This method will be called with dragImageOffset set to NSZeroPoint, but it can be modified to re-position the returned image.  A dragImageOffset of NSZeroPoint will cause the image to be centered under the mouse.
-
-
 
 - (NSDragOperation)draggingSourceOperationMaskForLocal:(BOOL)isLocal {
     if (isLocal) return NSDragOperationEvery; // might want more than this later, maybe?
     else return NSDragOperationCopy;
-}
-
--(id)init{
-    if(self=[super init]){
-     //   ownedPublications = [NSMutableArray arrayWithCapacity:1];
-      //  [self setDataSource:self];
-        //NSLog(@"*SHOULDNT HAPPEN* called init of tableview");
-    }
-    return self;
 }
 
 - (void)awakeFromNib{
@@ -108,29 +158,19 @@ static NSColor *sStripeColor = nil;
 
 -(NSMenu*)menuForEvent:(NSEvent *)evt {
 	id theDelegate = [self delegate];
-	NSPoint pt=[self convertPoint:[evt locationInWindow] fromView:nil];
-	int column=[self columnAtPoint:pt];
-	int row=[self rowAtPoint:pt];
+	NSPoint pt = [self convertPoint:[evt locationInWindow] fromView:nil];
+	int column = [self columnAtPoint:pt];
+	int row = [self rowAtPoint:pt];
+	NSTableColumn *tableColumn = nil;
 	
-	if (column >= 0 && row >= 0 && [theDelegate respondsToSelector:@selector(menuForTableViewSelection:)]) {
+	if (column >= 0 && row >= 0 && [theDelegate respondsToSelector:@selector(tableView:menuForTableColumn:row:)]) {
 		// select the clicked row if it isn't selected yet
-		if (![self isRowSelected:row]){
+		if (![self isRowSelected:row])
 			[self selectRow:row byExtendingSelection:NO];
-		}
-		return (NSMenu*)[theDelegate menuForTableViewSelection:self];	
+		return [theDelegate tableView:self menuForTableColumn:[[self tableColumns] objectAtIndex:column] row:row];	
 	}
 	return nil; 
 } 
-
-
-- (void)setOwnedPublications:(NSMutableArray *)pubs{
-    [ownedPublications autorelease];
-    ownedPublications = [pubs retain];
-}
-
-- (NSMutableArray *)ownedPublications{
-    return [ownedPublications retain];
-}
 
 - (void)keyDown:(NSEvent *)event{
     unichar c = [[event characters] characterAtIndex:0];
@@ -142,6 +182,10 @@ static NSColor *sStripeColor = nil;
              c == NSEnterCharacter ||
              c == NSCarriageReturnCharacter){
         [[self delegate] editPubCmd:nil];
+    }else if(c == NSTabCharacter) {
+        [[self window] selectNextKeyView:self];
+    }else if(c == NSBackTabCharacter) { // shift-tab
+        [[self window] selectPreviousKeyView:self];
     }else if(c == 0x0020){ // spacebar to page down in the lower pane of the BibDocument splitview, shift-space to page up
         if([event modifierFlags] & NSShiftKeyMask)
             [[self delegate] pageUpInPreview:nil];
@@ -153,29 +197,35 @@ static NSColor *sStripeColor = nil;
     }else if(c == NSPageUpFunctionKey){
         [[self enclosingScrollView] pageUp:self];
     }else if(c == NSUpArrowFunctionKey){
-        [self selectRow:([self selectedRow] - 1) byExtendingSelection:NO];
-        [self scrollRowToVisible:[self selectedRow]];
+        NSArray *selRows = [[self selectedRowEnumerator] allObjects];
+        int row = ([selRows count] != 0 ? [[selRows objectAtIndex:0] intValue] : 0);
+        row = MAX(0, (row - 1));
+        [self selectRow:row byExtendingSelection:([event modifierFlags] | NSShiftKeyMask)];
+        [self scrollRowToVisible:row];
     }else if(c == NSDownArrowFunctionKey){
-        [self selectRow:([self selectedRow] + 1) byExtendingSelection:NO];
-        [self scrollRowToVisible:[self selectedRow]];
+        NSArray *selRows = [[self selectedRowEnumerator] allObjects];
+        int row = ([selRows count] != 0 ? [[selRows lastObject] intValue] : [self numberOfRows] - 1);
+        row = MIN([self numberOfRows] - 1, (row + 1));
+        [self selectRow:row byExtendingSelection:([event modifierFlags] | NSShiftKeyMask)];
+        [self scrollRowToVisible:row];
     // pass it on the typeahead selector
     }else if ([alnum characterIsMember:c]) {
-        [typeAheadHelper rebuildTypeAheadSearchCache]; // if we resorted or searched, the cache is stale
         [typeAheadHelper newProcessKeyDownCharacter:c];
     }else{
         [super keyDown:event];
     }
 }
 
+- (void)reloadData{
+    [super reloadData];
+    [typeAheadHelper rebuildTypeAheadSearchCache]; // if we resorted or searched, the cache is stale
+}
+
 // a convenience method.
 - (void)removeAllTableColumns{
-    NSEnumerator *e = [[self tableColumns] objectEnumerator];
-    NSTableColumn *tc;
-
-    while (tc = [e nextObject]) {
-        [self removeTableColumn:tc];
+    while ([self numberOfColumns] > 0) {
+        [self removeTableColumn:[[self tableColumns] objectAtIndex:0]];
     }
-    
 }
 
 // Bogarted from apple sample code
@@ -197,7 +247,6 @@ static NSColor *sStripeColor = nil;
 // so you can follow the rows easier with your eyes.
 - (void) drawStripesInRect:(NSRect)clipRect {
     NSRect stripeRect;
-    // UNUSED OFPreferenceWrapper *pw = [OFPreferenceWrapper sharedPreferenceWrapper];
     float fullRowHeight = [self rowHeight] + [self intercellSpacing].height;
     float clipBottom = NSMaxY(clipRect);
     int firstStripe = clipRect.origin.y / fullRowHeight;
@@ -210,15 +259,10 @@ static NSColor *sStripeColor = nil;
     stripeRect.size.height = fullRowHeight;
     // set the color
     if (sStripeColor == nil){
-        sStripeColor = [[NSColor colorWithCalibratedRed:STRIPE_RED //[pw floatForKey:BDSKRowColorRedKey]
-                                                  green:STRIPE_GREEN //[pw floatForKey:BDSKRowColorGreenKey]
-                                                   blue:STRIPE_BLUE //[pw floatForKey:BDSKRowColorBlueKey]
+        sStripeColor = [[NSColor colorWithCalibratedRed:STRIPE_RED
+                                                  green:STRIPE_GREEN
+                                                   blue:STRIPE_BLUE
                                                   alpha:1.0] retain];
-        /* trying to figure out why the preferences don't seem to be set correctly:
-        NSLog(@"r %f g %f b %f", STRIPE_RED, STRIPE_GREEN, STRIPE_BLUE);
-        NSLog(@"%@, %f", BDSKRowColorRedKey, [pw floatForKey:BDSKRowColorRedKey]);
-        NSLog(@"%@ %f", BDSKRowColorBlueKey, [pw floatForKey:BDSKRowColorBlueKey]);
-        NSLog(@"%@ %f", BDSKRowColorGreenKey, [pw floatForKey:BDSKRowColorGreenKey]); */
     }
     [sStripeColor set];
     // and draw the stripes
@@ -227,44 +271,31 @@ static NSColor *sStripeColor = nil;
         stripeRect.origin.y += fullRowHeight * 2.0;
     }
 }
-/*
- - (void)drawRow:(int)rowIndex clipRect:(NSRect)clipRect{
-     if(rowIndex % 2 == 0){
-         [sStripeColor set];
-         NSRectFill(clipRect);
-     }
-     [super drawRow:rowIndex clipRect:clipRect];
- }*/
 
 // ----------------------------------------------------------------------------------------
-#pragma mark || tableView datasource methods
+#pragma mark || tableView menu validation
 // ----------------------------------------------------------------------------------------
 
-// this was part of an attempt to make BDSKTableView self-contained. Not currently in use.
-- (int)numberOfRowsInTableView:(NSTableView *)tView{
-    ////NSLog(@"calling myself!");
-    return [ownedPublications count];
+// this is necessary as the NSTableView-OAExtensions defines these actions accordingly
+- (BOOL)validateMenuItem:(id<NSMenuItem>)menuItem{
+	SEL action = [menuItem action];
+	if (action == @selector(delete:) || action == @selector(cut:) || 
+		action == @selector(copy:) || action == @selector(paste:) || 
+		action == @selector(duplicate:) || action == @selector(selectAll:)) {
+		
+		if ([_dataSource respondsToSelector:action]) {
+			if ([_dataSource respondsToSelector:@selector(validateMenuItem:)]) {
+				return [_dataSource validateMenuItem:menuItem];
+			}
+		} else if ([_delegate respondsToSelector:action]) {
+			if ([_delegate respondsToSelector:@selector(validateMenuItem:)]) {
+				return [_delegate validateMenuItem:menuItem];
+			}
+		}
+		// this is our default
+		return (action == @selector(paste:) || [self numberOfSelectedRows] > 0);
+	}
 }
-
-// this was part of an attempt to make BDSKTableView self-contained. Not currently in use.
-//- (id)tableView:(NSTableView *)tView objectValueForTableColumn:(NSTableColumn *)tableColumn row:(int)row{
-//    if([[tableColumn identifier] isEqualToString: BDSKCiteKeyString] ){
-//        return [[ownedPublications objectAtIndex:row] citeKey];
-//    }
-//    if([[tableColumn identifier] isEqualToString: BDSKTitleString] ){
-//        return [[ownedPublications objectAtIndex:row] title];
-//    }
-//    if([[tableColumn identifier] isEqualToString: BDSKDateString] ){
-//        if([[ownedPublications objectAtIndex:row] date] == nil)
-//            return @"No date";
-//        else
-//            return [[[ownedPublications objectAtIndex:row] date] descriptionWithCalendarFormat:@"%b %Y"];
-//    }else{
-//        return nil; // This really shouldn't happen. Maybe I should abort here, but I won't
-//    }
-//}
-
-
 
 @end
 
@@ -274,17 +305,33 @@ static NSColor *sStripeColor = nil;
 - (NSMenu *)menuForEvent:(NSEvent *)theEvent {
 	NSTableView * myTV = [self tableView];
 	BibDocument * theDelegate = [myTV delegate];
-	NSPoint pt=[self convertPoint:[theEvent locationInWindow] fromView:nil];
-	int column=[self columnAtPoint:pt];
-	int row=0;
+	NSPoint pt = [self convertPoint:[theEvent locationInWindow] fromView:nil];
+	int column = [self columnAtPoint:pt];
+	NSTableColumn *tableColumn = nil;
     
-	if ([theDelegate respondsToSelector:@selector(menuForTableColumn:row:)]) {
-        if(column == -1)
-            return [theDelegate menuForTableColumn:nil row:row];
-        else
-            return [theDelegate menuForTableColumn:[[myTV tableColumns] objectAtIndex:column] row:row];
+	if ([theDelegate respondsToSelector:@selector(tableView:menuForTableHeaderColumn:)]) {
+        if(column != -1)
+            tableColumn = [[myTV tableColumns] objectAtIndex:column];
+		return [theDelegate tableView:myTV menuForTableHeaderColumn:tableColumn];
 	}
 	return nil;
+}
+
+- (void)mouseDown:(NSEvent *)theEvent{
+    // mouseDown in the table header has peculiar behavior for a double-click if you use -[NSTableView setDoubleAction:] on the
+    // tableview itself.  The header sends a double-click action to the tableview row/cell that's selected.  
+    // Since none of Apple's apps does this, we'll follow suit and just resort.
+    if([theEvent clickCount] > 1)
+        theEvent = [NSEvent mouseEventWithType:[theEvent type]
+                                      location:[theEvent locationInWindow]
+                                 modifierFlags:[theEvent modifierFlags]
+                                     timestamp:[theEvent timestamp]
+                                  windowNumber:[theEvent windowNumber]
+                                       context:[theEvent context]
+                                   eventNumber:[theEvent eventNumber]
+                                    clickCount:1
+                                      pressure:[theEvent pressure]];
+    [super mouseDown:theEvent];
 }
 
 @end

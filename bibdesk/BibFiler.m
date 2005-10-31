@@ -1,13 +1,46 @@
 //
 //  BibFiler.m
-//  Bibdesk
+//  BibDesk
 //
 //  Created by Michael McCracken on Fri Apr 30 2004.
-//  Copyright (c) 2004 __MyCompanyName__. All rights reserved.
-//
+/*
+ This software is Copyright (c) 2004,2005
+ Michael O. McCracken. All rights reserved.
+
+ Redistribution and use in source and binary forms, with or without
+ modification, are permitted provided that the following conditions
+ are met:
+
+ - Redistributions of source code must retain the above copyright
+   notice, this list of conditions and the following disclaimer.
+
+ - Redistributions in binary form must reproduce the above copyright
+    notice, this list of conditions and the following disclaimer in
+    the documentation and/or other materials provided with the
+    distribution.
+
+ - Neither the name of Michael O. McCracken nor the names of any
+    contributors may be used to endorse or promote products derived
+    from this software without specific prior written permission.
+
+ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+ "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+ LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+ A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+ OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+ SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+ LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+ DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+ THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+ (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ */
 
 #import "BibFiler.h"
 #import "NSImage+Toolbox.h"
+#import "BDSKScriptHookManager.h"
+#import <OmniAppKit/OATextWithIconCell.h>
+#import <OmniAppKit/NSTableView-OAExtensions.h>
 
 static BibFiler *sharedFiler = nil;
 
@@ -22,15 +55,24 @@ static BibFiler *sharedFiler = nil;
 
 - (id)init{
 	if(self = [super init]){
-		fileInfoDicts = [[NSMutableArray arrayWithCapacity:10] retain];
-		
+		errorInfoDicts = [[NSMutableArray arrayWithCapacity:10] retain];
 	}
 	return self;
 }
 
 - (void)dealloc{
-	[fileInfoDicts release];
+	[errorInfoDicts release];
 	[super dealloc];
+}
+
+- (void)awakeFromNib{
+	// this isn't set properly in the nib because OATextWithIconCell does not override initWithCoder
+	OATextWithIconCell *cell = [[tv tableColumnWithIdentifier:@"oloc"] dataCell];
+	[cell setDrawsHighlight:YES];
+	[cell setImagePosition:NSImageLeft];
+	cell = [[tv tableColumnWithIdentifier:@"nloc"] dataCell];
+	[cell setDrawsHighlight:YES];
+	[cell setImagePosition:NSImageLeft];
 }
 
 #pragma mark Auto file methods
@@ -40,7 +82,7 @@ static BibFiler *sharedFiler = nil;
 	NSString *papersFolderPath = [[OFPreferenceWrapper sharedPreferenceWrapper] stringForKey:BDSKPapersFolderPathKey];
 	BOOL isDir;
 	int rv;
-	BOOL moveAll = YES;
+	BOOL check = NO;
 
 	if(!([fm fileExistsAtPath:[fm resolveAliasesInPath:papersFolderPath] isDirectory:&isDir] && isDir)){
 		// The directory isn't there or isn't a directory, so pop up an alert.
@@ -56,89 +98,155 @@ static BibFiler *sharedFiler = nil;
 	
 	if(ask){
 		rv = NSRunAlertPanel(NSLocalizedString(@"Consolidate Linked Files",@""),
-							NSLocalizedString(@"This will put all files linked to the selected items in your Papers Folder, according to the format string. Do you want me to generate a new location for all linked files, or only for those for which all the bibliographical information used in the generated file name has been set?",@""),
-							NSLocalizedString(@"Move All",@"Move All"),
-							NSLocalizedString(@"Cancel",@"Cancel"), 
-							NSLocalizedString(@"Move Complete Only",@"Move Complete Only"));
+							 NSLocalizedString(@"This will put all files linked to the selected items in your Papers Folder, according to the format string. Do you want me to generate a new location for all linked files, or only for those for which all the bibliographical information used in the generated file name has been set?",@""),
+							 NSLocalizedString(@"Move All",@"Move All"),
+							 NSLocalizedString(@"Cancel",@"Cancel"), 
+							 NSLocalizedString(@"Move Complete Only",@"Move Complete Only"));
 		if(rv == NSAlertOtherReturn){
-			moveAll = NO;
+			check = YES;
 		}else if(rv == NSAlertAlternateReturn){
 			return;
 		}
 	}
 	
-	NSString *path = nil;
-	NSString *newPath = nil;
-	
-	[self prepareMoveForDocument:doc number:[NSNumber numberWithInt:[papers count]]];
-	
-	foreach(paper , papers){
-		path = [paper localURLPath];
-		newPath = [[NSURL URLWithString:[paper suggestedLocalUrl]] path];
-		[self movePath:path toPath:newPath forPaper:paper fromDocument:doc moveAll:moveAll];
-	}
-	
-	[self finishMoveForDocument:doc];
+	[self movePapers:papers fromDocument:doc checkComplete:check];
 }
 
-- (void)movePath:(NSString *)path toPath:(NSString *)newPath forPaper:(BibItem *)paper fromDocument:(BibDocument *)doc moveAll:(BOOL)moveAll{
-	if (progressSheet) {
-		[progressIndicator incrementBy:1.0];
-		[progressIndicator displayIfNeeded];
-	}
-        
-	if(path == nil || [path isEqualToString:@""] |
-	   newPath == nil || [newPath isEqualToString:@""] || 
-	   [path isEqualToString:newPath])
-		return;
-	
-	NSMutableDictionary *info = [NSMutableDictionary dictionaryWithObjectsAndKeys:
-			[path stringByAbbreviatingWithTildeInPath], @"oloc", 
-			[newPath stringByAbbreviatingWithTildeInPath], @"nloc", nil];
+- (void)movePapers:(NSArray *)paperInfos fromDocument:(BibDocument *)doc checkComplete:(BOOL)check{
+	NSFileManager *fm = [NSFileManager defaultManager];
+	int numberOfPapers = [paperInfos count];
+	NSEnumerator *paperEnum = [paperInfos objectEnumerator];
+	id paperInfo = nil;
+	BibItem *paper = nil;
+	NSString *path = nil;
+	NSString *newPath = nil;
+	NSString *resolvedPath = nil;
+	NSString *resolvedNewPath = nil;
+	NSMutableArray *fileInfoDicts = [NSMutableArray arrayWithCapacity:numberOfPapers];
+	NSMutableDictionary *info = nil;
 	NSString *status = nil;
 	int statusFlag = BDSKNoErrorMask;
-	NSFileManager *fm = [NSFileManager defaultManager];
-	// filemanager needs aliases resolved for moving and existence checks
-	// ...however we want to move aliases, not their targets
-    NSString *resolvedNewPath = nil;
-    NS_DURING
-		resolvedNewPath = [[fm resolveAliasesInPath:[newPath stringByDeletingLastPathComponent]] 
-					 stringByAppendingPathComponent:[newPath lastPathComponent]];
-    NS_HANDLER
-        NSLog(@"Ignoring exception %@ raised while resolving aliases in %@", [localException name], newPath);
-        status = NSLocalizedString(@"Unable to resolve aliases in path.", @"");
-        statusFlag = statusFlag | BDSKUnableToResolveAliasMask;
-    NS_ENDHANDLER
-    
-    NSString *resolvedPath = nil;
-    NS_DURING
-        resolvedPath = [[fm resolveAliasesInPath:[path stringByDeletingLastPathComponent]] 
-                  stringByAppendingPathComponent:[path lastPathComponent]];
-    NS_HANDLER
-        NSLog(@"Ignoring exception %@ raised while resolving aliases in %@", [localException name], path);
-        status = NSLocalizedString(@"Unable to resolve aliases in path.", @"");
-        statusFlag = statusFlag | BDSKUnableToResolveAliasMask;
-    NS_ENDHANDLER
 	
-	if( (moveAll || [paper canSetLocalUrl]) && statusFlag == BDSKNoErrorMask){
-		if([fm fileExistsAtPath:resolvedNewPath]){
-			statusFlag = statusFlag | BDSKGeneratedFileExistsMask;
-			if([fm fileExistsAtPath:resolvedPath]){
-				status = NSLocalizedString(@"A file already exists at the generated location.",@"");
-			}else{
-				status = NSLocalizedString(@"The linked file does not exists, while a file already exists at the generated location.", @"");
-				statusFlag = statusFlag | BDSKOldFileDoesNotExistMask;
-			}
+	if (numberOfPapers == 0)
+		return;
+	
+	if (numberOfPapers > 1 && [NSBundle loadNibNamed:@"AutoFileProgress" owner:self]) {
+		[NSApp beginSheet:progressSheet
+		   modalForWindow:[doc windowForSheet]
+			modalDelegate:self
+		   didEndSelector:NULL
+			  contextInfo:nil];
+		[progressIndicator setMaxValue:numberOfPapers];
+		[progressIndicator setDoubleValue:0.0];
+		[progressIndicator displayIfNeeded];
+	}
+	
+	BDSKScriptHook *scriptHook = [[BDSKScriptHookManager sharedManager] makeScriptHookWithName:BDSKWillAutoFileScriptHookName];
+	NSMutableArray *papers = nil;
+	NSMutableArray *oldValues = nil;
+	NSMutableArray *newValues = nil;
+	NSString *oldValue = nil;
+	NSString *newValue = nil;
+	
+	if(scriptHook){
+		papers = [NSMutableArray arrayWithCapacity:[paperInfos count]];
+		while (paperInfo = [paperEnum nextObject]) {
+			if([paperInfo isKindOfClass:[BibItem class]])
+				[papers addObject:paperInfo];
+			else
+				[papers addObject:[paperInfo objectForKey:@"paper"]];
+		}
+		// we don't set the fieldName and the old/new values as the newValues are not reliable
+		[[BDSKScriptHookManager sharedManager] runScriptHook:scriptHook forPublications:papers];
+	}
+	
+	scriptHook = [[BDSKScriptHookManager sharedManager] makeScriptHookWithName:BDSKDidAutoFileScriptHookName];
+	if(scriptHook){
+		papers = [NSMutableArray arrayWithCapacity:[paperInfos count]];
+		oldValues = [NSMutableArray arrayWithCapacity:[paperInfos count]];
+		newValues = [NSMutableArray arrayWithCapacity:[paperInfos count]];
+	}
+	
+	paperEnum = [paperInfos objectEnumerator];
+	while (paperInfo = [paperEnum nextObject]) {
+		
+		if([paperInfo isKindOfClass:[BibItem class]]){
+			// autofile action: an array of BibItems
+			paper = (BibItem *)paperInfo;
+			path = [paper localURLPathInheriting:NO];
+			newPath = [[NSURL URLWithString:[paper suggestedLocalUrl]] path];
 		}else{
-			if([fm fileExistsAtPath:resolvedPath]){
+			// undo: a list of info dictionaries. We should move the file back!
+			paper = [paperInfo objectForKey:@"paper"];
+			path = [paperInfo objectForKey:@"nloc"];
+			newPath = [paperInfo objectForKey:@"oloc"];
+		}
+		
+		if(progressSheet){
+			[progressIndicator incrementBy:1.0];
+			[progressIndicator displayIfNeeded];
+		}
+			
+		if([NSString isEmptyString:path] || [NSString isEmptyString:newPath] || 
+		   [path isEqualToString:newPath])
+			continue;
+		
+		info = [NSMutableDictionary dictionaryWithCapacity:5];
+		[info setObject:paper forKey:@"paper"];
+		[info setObject:path forKey:@"oloc"];
+		[info setObject:newPath forKey:@"nloc"];
+		status = nil;
+		statusFlag = BDSKNoErrorMask;
+		// filemanager needs aliases resolved for moving and existence checks
+		// ...however we want to move aliases, not their targets
+		// so we resolve aliases in the path to the containing folder
+		NS_DURING
+			resolvedNewPath = [[fm resolveAliasesInPath:[newPath stringByDeletingLastPathComponent]] 
+						 stringByAppendingPathComponent:[newPath lastPathComponent]];
+		NS_HANDLER
+			NSLog(@"Ignoring exception %@ raised while resolving aliases in %@", [localException name], newPath);
+			status = NSLocalizedString(@"Unable to resolve aliases in path.", @"");
+			statusFlag = statusFlag | BDSKUnableToResolveAliasMask;
+		NS_ENDHANDLER
+		
+		NS_DURING
+			resolvedPath = [[fm resolveAliasesInPath:[path stringByDeletingLastPathComponent]] 
+					  stringByAppendingPathComponent:[path lastPathComponent]];
+		NS_HANDLER
+			NSLog(@"Ignoring exception %@ raised while resolving aliases in %@", [localException name], path);
+			status = NSLocalizedString(@"Unable to resolve aliases in path.", @"");
+			statusFlag = statusFlag | BDSKUnableToResolveAliasMask;
+		NS_ENDHANDLER
+		
+		if(check && ![paper canSetLocalUrl]){
+			status = NSLocalizedString(@"Incomplete information to generate the file name.",@"");
+			statusFlag = statusFlag | BDSKIncompleteFieldsMask;
+		}
+		
+		if(statusFlag == BDSKNoErrorMask){
+			if([fm fileExistsAtPath:resolvedNewPath]){
+				statusFlag = statusFlag | BDSKGeneratedFileExistsMask;
+				if([fm fileExistsAtPath:resolvedPath]){
+					status = NSLocalizedString(@"A file already exists at the generated location.",@"");
+				}else{
+					status = NSLocalizedString(@"The linked file does not exists, while a file already exists at the generated location.", @"");
+					statusFlag = statusFlag | BDSKOldFileDoesNotExistMask;
+				}
+			}else if(![fm fileExistsAtPath:resolvedPath]){
+				status = NSLocalizedString(@"The linked file does not exist.", @"");
+				statusFlag = statusFlag | BDSKOldFileDoesNotExistMask;
+			}else if(![fm isDeletableFileAtPath:resolvedPath]){
+				status = NSLocalizedString(@"Could not move read-only file.", @"");
+				statusFlag = statusFlag | BDSKMoveErrorMask;
+			}else{
 				NSString *fileType = [[fm fileAttributesAtPath:resolvedPath traverseLink:NO] objectForKey:NSFileType];
-                NS_DURING
-                    [fm createPathToFile:resolvedNewPath attributes:nil]; // create parent directories if necessary (OmniFoundation)
-                NS_HANDLER
-                    NSLog(@"Ignoring exception %@ raised while creating path %@", [localException name], resolvedNewPath);
-                    status = NSLocalizedString(@"Unable to create the parent directory structure.", @"");
-                    statusFlag = statusFlag | BDSKUnableToCreateParentMask;
-                NS_ENDHANDLER
+				NS_DURING
+					[fm createPathToFile:resolvedNewPath attributes:nil]; // create parent directories if necessary (OmniFoundation)
+				NS_HANDLER
+					NSLog(@"Ignoring exception %@ raised while creating path %@", [localException name], resolvedNewPath);
+					status = NSLocalizedString(@"Unable to create the parent directory structure.", @"");
+					statusFlag = statusFlag | BDSKUnableToCreateParentMask;
+				NS_ENDHANDLER
 				if(statusFlag == BDSKNoErrorMask){
 					// unfortunately NSFileManager cannot reliably move symlinks...
 					if([fileType isEqualToString:NSFileTypeSymbolicLink]){
@@ -146,83 +254,71 @@ static BibFiler *sharedFiler = nil;
 						if(![pathContent hasPrefix:@"/"]){// it links to a relative path
 							pathContent = [[resolvedPath stringByDeletingLastPathComponent] stringByAppendingPathComponent:pathContent];
 						}
-						if([fm createSymbolicLinkAtPath:resolvedNewPath pathContent:pathContent]){
+						if(![fm createSymbolicLinkAtPath:resolvedNewPath pathContent:pathContent]){
+							status = NSLocalizedString(@"Could not move symbolic link.", @"");
+							statusFlag = statusFlag | BDSKMoveErrorMask;
+						}else{
 							if(![fm removeFileAtPath:resolvedPath handler:self]){
+								// error remove original file
+								// should we remove the new symlink and not set Local-Url?
 								status = [errorString autorelease];
 								statusFlag = statusFlag | BDSKMoveErrorMask;
 							}
-							[paper setField:@"Local-Url" toValue:[[NSURL fileURLWithPath:newPath] absoluteString]];
+							oldValue  = [paper valueOfField:BDSKLocalUrlString inherit:NO];
+							newValue  = [[NSURL fileURLWithPath:newPath] absoluteString];
+							[paper setField:BDSKLocalUrlString toValue:newValue];
+							if(scriptHook){
+								[papers addObject:paper];
+								[oldValues addObject:oldValue];
+								[newValues addObject:newValue];
+							}
 							//status = NSLocalizedString(@"Successfully moved.",@"");
-							
-							NSUndoManager *undoManager = [doc undoManager];
-							[[undoManager prepareWithInvocationTarget:self] 
-								movePath:newPath toPath:path forPaper:paper fromDocument:doc moveAll:YES];
-							moveCount++;
-						}else{
-							status = NSLocalizedString(@"Could not move symbolic link.", @"");
-							statusFlag = statusFlag | BDSKMoveErrorMask;
 						}
 					}else if([fm movePath:resolvedPath toPath:resolvedNewPath handler:self]){
-						[paper setField:@"Local-Url" toValue:[[NSURL fileURLWithPath:newPath] absoluteString]];
+						oldValue  = [paper valueOfField:BDSKLocalUrlString inherit:NO];
+						newValue  = [[NSURL fileURLWithPath:newPath] absoluteString];
+						[paper setField:BDSKLocalUrlString toValue:newValue];
+						if(scriptHook){
+							[papers addObject:paper];
+							[oldValues addObject:oldValue];
+							[newValues addObject:newValue];
+						}
 						//status = NSLocalizedString(@"Successfully moved.",@"");
-						
-						NSUndoManager *undoManager = [doc undoManager];
-						[[undoManager prepareWithInvocationTarget:self] 
-							movePath:newPath toPath:path forPaper:paper fromDocument:doc moveAll:YES];
-						moveCount++;
-					}else{
+					}else{ // error while moving file
+						// if the new file was created, should we set the Local-Url and run the scripthook, or remove it?
 						status = [errorString autorelease];
 						statusFlag = statusFlag | BDSKMoveErrorMask;
 					}
 				}
-			}else{
-				status = NSLocalizedString(@"The linked file does not exist.", @"");
-				statusFlag = statusFlag | BDSKOldFileDoesNotExistMask;
 			}
 		}
-	}else{
-		status = NSLocalizedString(@"Incomplete information to generate the file name.",@"");
-		statusFlag = statusFlag | BDSKIncompleteFieldsMask;
+		
+		if(statusFlag == BDSKNoErrorMask){
+			[fileInfoDicts addObject:info];
+		}else{
+			[info setObject:status forKey:@"status"];
+			[info setObject:[NSNumber numberWithInt:statusFlag] forKey:@"flag"];
+			[errorInfoDicts addObject:info];
+		}
 	}
-	movableCount++;
 	
-	if(statusFlag != BDSKNoErrorMask){
-		[info setObject:status forKey:@"status"];
-		[info setObject:[NSNumber numberWithInt:statusFlag] forKey:@"flag"];
-		[fileInfoDicts addObject:info];
+	if(scriptHook){
+		[scriptHook setField:BDSKLocalUrlString];
+		[scriptHook setOldValues:oldValues];
+		[scriptHook setNewValues:newValues];
+		[[BDSKScriptHookManager sharedManager] runScriptHook:scriptHook forPublications:papers];
 	}
-}
-
-- (void)prepareMoveForDocument:(BibDocument *)doc number:(NSNumber *)number{
-	NSUndoManager *undoManager = [doc undoManager];
-	[[undoManager prepareWithInvocationTarget:self] finishMoveForDocument:doc];
 	
-	moveCount = 0;
-	movableCount = 0;
-	[fileInfoDicts removeAllObjects];
-	
-	if ([number intValue] > 1 && [NSBundle loadNibNamed:@"AutoFileProgress" owner:self]) {
-		[NSApp beginSheet:progressSheet
-		   modalForWindow:[doc windowForSheet]
-			modalDelegate:self
-		   didEndSelector:NULL
-			  contextInfo:nil];
-		[progressIndicator setMaxValue:[number doubleValue]];
-		[progressIndicator setDoubleValue:0.0];
-		[progressIndicator displayIfNeeded];
-	}
-}
-
-- (void)finishMoveForDocument:(BibDocument *)doc{
-	NSUndoManager *undoManager = [doc undoManager];
-	[[undoManager prepareWithInvocationTarget:self] prepareMoveForDocument:doc number:[NSNumber numberWithInt:moveCount]];
-	
-	if (progressSheet) {
+	if(progressSheet){
 		[progressSheet orderOut:nil];
 		[NSApp endSheet:progressSheet returnCode:0];
 	}
 	
-	if([fileInfoDicts count] > 0){
+	NSUndoManager *undoManager = [doc undoManager];
+	[[undoManager prepareWithInvocationTarget:self] 
+		movePapers:fileInfoDicts fromDocument:doc checkComplete:NO];
+	
+	if([errorInfoDicts count] > 0){
 		[self showProblems];
 	}
 }
@@ -238,20 +334,16 @@ static BibFiler *sharedFiler = nil;
 
 	[tv reloadData];
 	[infoTextField setStringValue:NSLocalizedString(@"There were problems moving the following files to the generated file location, according to the format string.",@"description string")];
-	[iconView setImage:[NSImage imageWithLargeIconForToolboxCode:kAlertNoteIcon]];
+	[iconView setImage:[NSImage imageNamed:@"NSApplicationIcon"]];
 	[tv setDoubleAction:@selector(showFile:)];
 	[tv setTarget:self];
 	[window makeKeyAndOrderFront:self];
 }
 
 - (IBAction)done:(id)sender{
-	[self doCleanup];
-}
-
-- (void)doCleanup{
-	currentPapers = nil;
-	currentDocument = nil;
 	[window close];
+	[errorInfoDicts removeAllObjects];
+	[tv reloadData]; // this is necessary to avoid an exception
 }
 
 - (BOOL)fileManager:(NSFileManager *)manager shouldProceedAfterError:(NSDictionary *)errorInfo{
@@ -262,44 +354,40 @@ static BibFiler *sharedFiler = nil;
 #pragma mark table view stuff
 
 - (int)numberOfRowsInTableView:(NSTableView *)tableView{
-	return [fileInfoDicts count]; 
+	return [errorInfoDicts count]; 
 }
 
-- (id)tableView:(NSTableView *)tableView 
-objectValueForTableColumn:(NSTableColumn *)tableColumn 
-			row:(int)row{
+- (id)tableView:(NSTableView *)tableView objectValueForTableColumn:(NSTableColumn *)tableColumn row:(int)row{
 	NSString *tcid = [tableColumn identifier];
-	NSDictionary *dict = [fileInfoDicts objectAtIndex:row];
+	NSDictionary *dict = [errorInfoDicts objectAtIndex:row];
 	
 	if([tcid isEqualToString:@"oloc"]){
-		return [dict objectForKey:@"oloc"];
+		NSString *path = [dict objectForKey:@"oloc"];
+		if(path && [[NSFileManager defaultManager] fileExistsAtPath:path]){
+			return [NSDictionary dictionaryWithObjectsAndKeys:
+						[path stringByAbbreviatingWithTildeInPath], OATextWithIconCellStringKey, 
+						[NSImage smallImageForFile:path], OATextWithIconCellImageKey, nil];
+		} else {
+			return [path stringByAbbreviatingWithTildeInPath];
+		}
 	}else if([tcid isEqualToString:@"nloc"]){
-		return [dict objectForKey:@"nloc"];
+		NSString *path = [dict objectForKey:@"nloc"];
+		if(path && [[NSFileManager defaultManager] fileExistsAtPath:path]){
+			return [NSDictionary dictionaryWithObjectsAndKeys:
+						[path stringByAbbreviatingWithTildeInPath], OATextWithIconCellStringKey, 
+						[NSImage smallImageForFile:path], OATextWithIconCellImageKey, nil];
+		} else {
+			return [path stringByAbbreviatingWithTildeInPath];
+		}
 	}else if([tcid isEqualToString:@"status"]){
 		return [dict objectForKey:@"status"];
-	}else if([tcid isEqualToString:@"icon"]){
-		NSString *path = [[dict objectForKey:@"oloc"] stringByExpandingTildeInPath];
-		NSString *extension = [path pathExtension];
-		if(path && [[NSFileManager defaultManager] fileExistsAtPath:path]){
-				if(![extension isEqualToString:@""]){
-						// use the NSImage method, as it seems to be faster, but only for files with extensions
-						return [NSImage imageForFileType:extension];
-				} else {
-						return [[NSWorkspace sharedWorkspace] iconForFile:path];
-				}
-		}else{
-				return nil;
-		}
 	}
-	else return @"??";
+	return nil;
 }
 
-- (void)tableView:(NSTableView *)tableView
-  willDisplayCell:(id)cell
-   forTableColumn:(NSTableColumn *)tableColumn 
-			  row:(int)row{
+- (void)tableView:(NSTableView *)tableView willDisplayCell:(id)cell forTableColumn:(NSTableColumn *)tableColumn row:(int)row{
 	NSString *tcid = [tableColumn identifier];
-	NSDictionary *dict = [fileInfoDicts objectAtIndex:row];
+	NSDictionary *dict = [errorInfoDicts objectAtIndex:row];
 	int statusFlag = [[dict objectForKey:@"flag"] intValue];
 		
 	if([tcid isEqualToString:@"oloc"]){
@@ -319,18 +407,22 @@ objectValueForTableColumn:(NSTableColumn *)tableColumn
 	}
 }
 
+- (NSString *)tableView:(NSTableView *)tableView tooltipForRow:(int)row column:(int)column{
+	NSString *tcid = [[[tv tableColumns] objectAtIndex:column] identifier];
+	return [[errorInfoDicts objectAtIndex:row] objectForKey:tcid];
+}
+
 - (IBAction)showFile:(id)sender{
+	int column = [tv clickedColumn];
 	NSString *tcid;
-	NSDictionary *dict = [fileInfoDicts objectAtIndex:[tv clickedRow]];
+	NSDictionary *dict = [errorInfoDicts objectAtIndex:[tv clickedRow]];
 	NSString *path;
 	int statusFlag = [[dict objectForKey:@"flag"] intValue];
 
-	if([tv clickedColumn] != -1){
-		tcid = [[[tv tableColumns] objectAtIndex:[tv clickedColumn]] identifier];
-	}else{
-		tcid = @"";
-	}
-
+	if(column == -1)
+		return;
+	
+	tcid = [[[tv tableColumns] objectAtIndex:column] identifier];
 	if([tcid isEqualToString:@"oloc"] || [tcid isEqualToString:@"icon"]){
 		if(statusFlag & BDSKOldFileDoesNotExistMask)
 			return;
@@ -342,9 +434,8 @@ objectValueForTableColumn:(NSTableColumn *)tableColumn
 		path = [[dict objectForKey:@"nloc"] stringByExpandingTildeInPath];
 		[[NSWorkspace sharedWorkspace]  selectFile:path inFileViewerRootedAtPath:nil];
 	}else if([tcid isEqualToString:@"status"]){
-		NSRunAlertPanel(nil,
-						[dict objectForKey:@"status"],
-						NSLocalizedString(@"OK",@"OK"),nil,nil);
+		BibItem *pub = [dict objectForKey:@"paper"];
+		[[pub document] editPub:pub];
 	}
 }
 

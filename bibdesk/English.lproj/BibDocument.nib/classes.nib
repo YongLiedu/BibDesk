@@ -3,20 +3,35 @@
         {CLASS = BDSKCustomCiteTableView; LANGUAGE = ObjC; SUPERCLASS = NSTableView; }, 
         {CLASS = BDSKDragOutlineView; LANGUAGE = ObjC; SUPERCLASS = NSOutlineView; }, 
         {CLASS = BDSKDragTableView; LANGUAGE = ObjC; SUPERCLASS = NSTableView; }, 
+        {CLASS = BDSKGroupCell; LANGUAGE = ObjC; SUPERCLASS = OATextWithIconCell; }, 
+        {
+            CLASS = BDSKGroupTableView; 
+            LANGUAGE = ObjC; 
+            SUPERCLASS = OAGradientTableView; 
+        }, 
+        {
+            CLASS = BDSKGroupTextFieldCell; 
+            LANGUAGE = ObjC; 
+            SUPERCLASS = NSTextFieldCell; 
+        }, 
         {
             CLASS = BDSKPopUpButtonCell; 
             LANGUAGE = ObjC; 
             SUPERCLASS = NSPopUpButtonCell; 
         }, 
+        {CLASS = BDSKSplitView; LANGUAGE = ObjC; SUPERCLASS = OASplitView; }, 
         {
             ACTIONS = {
                 addCustomCiteString = id; 
+                addGroupFieldAction = id; 
+                changeGroupFieldAction = id; 
                 clearQuickSearch = id; 
                 columnsMenuAddTableColumn = id; 
                 columnsMenuSelectTableColumn = id; 
                 consolidateLinkedFiles = id; 
                 copy = id; 
                 copyAsBibTex = id; 
+                copyAsLaTeX = id; 
                 copyAsPDF = id; 
                 copyAsPublicBibTex = id; 
                 copyAsRTF = id; 
@@ -25,25 +40,46 @@
                 delPub = id; 
                 dismissAddFieldSheet = id; 
                 dismissDelFieldSheet = id; 
+                dismissUndoAlertSheet = id; 
+                duplicateTitleToBooktitle = id; 
                 editPubCmd = id; 
                 emailPubCmd = id; 
                 exportAsAtom = id; 
+                exportAsEncodedBib = id; 
+                exportAsEncodedPublicBib = id; 
                 exportAsHTML = id; 
                 exportAsMODS = id; 
+                exportAsRIS = id; 
                 exportAsRSS = id; 
-                exportEncodedBib = id; 
+                exportSelectionAsAtom = id; 
+                exportSelectionAsEncodedBib = id; 
+                exportSelectionAsEncodedPublicBib = id; 
+                exportSelectionAsHTML = id; 
+                exportSelectionAsMODS = id; 
+                exportSelectionAsRIS = id; 
+                exportSelectionAsRSS = id; 
                 generateCiteKey = id; 
+                importFromFileAction = id; 
+                importFromPasteboardAction = id; 
+                importFromWebAction = id; 
                 makeSearchFieldKey = id; 
                 newPub = id; 
+                openLinkedFile = id; 
+                openRemoteURL = id; 
                 pageDownInPreview = id; 
+                pageUpInPreview = id; 
                 paste = id; 
                 postItemToWeblog = id; 
                 quickSearchAddField = id; 
                 quickSearchRemoveField = id; 
                 removeCustomCiteString = id; 
+                removeGroupFieldAction = id; 
+                revealLinkedFile = id; 
                 searchFieldAction = id; 
                 searchFieldChangeKey = id; 
+                selectDuplicates = id; 
                 showMacrosWindow = id; 
+                sortForCrossrefs = id; 
                 splitViewDoubleClick = id; 
                 toggleShowingCustomCiteDrawer = id; 
                 toggleStatusBar = id; 
@@ -52,6 +88,7 @@
             LANGUAGE = ObjC; 
             OUTLETS = {
                 SaveEncodingAccessoryView = NSView; 
+                URLMenu = NSMenu; 
                 actionMenu = NSMenu; 
                 actionMenuButton = RYZImagePopUpButton; 
                 actionMenuFirstItem = NSMenuItem; 
@@ -60,7 +97,6 @@
                 addFieldComboBox = NSComboBox; 
                 addFieldPrompt = NSTextField; 
                 addFieldSheet = NSWindow; 
-                addSourceListItemButton = NSButton; 
                 ccTableView = BDSKCustomCiteTableView; 
                 columnsMenu = NSMenu; 
                 ctxCopyBibTex = NSMenuItem; 
@@ -71,11 +107,11 @@
                 delFieldPrompt = NSTextField; 
                 delFieldSheet = NSWindow; 
                 documentWindow = NSWindow; 
-                editExportSettingsWindow = NSWindow; 
-                exporterEnabledCheckButton = NSButton; 
-                exporterSelectionPopUp = NSPopUpButton; 
-                exporterSubView = NSView; 
+                fileMenu = NSMenu; 
+                groupSplitView = OASplitView; 
+                groupTableView = BDSKGroupTableView; 
                 infoLine = NSTextField; 
+                infoLineBackground = NSTextField; 
                 previewField = NSTextView; 
                 quickSearchButton = NSPopUpButton; 
                 quickSearchClearButton = NSButton; 
@@ -84,25 +120,30 @@
                 rssExportForm = NSForm; 
                 rssExportTextField = NSTextField; 
                 saveTextEncodingPopupButton = NSPopUpButton; 
-                searchField = id; 
+                searchField = NSTextField; 
                 searchFieldBox = NSBox; 
-                searchFieldTextField = NSTextField; 
                 searchFieldView = NSView; 
-                sourceList = NSOutlineView; 
-                sourceListActionMenu = NSMenu; 
                 splitView = OASplitView; 
                 tableView = BDSKDragTableView; 
+                undoAlertSheet = NSWindow; 
             }; 
             SUPERCLASS = NSDocument; 
         }, 
         {
-            ACTIONS = {clearQuickSearch = id; }; 
+            ACTIONS = {
+                clearQuickSearch = id; 
+                copyAsRIS = id; 
+                createNewPubUsingCrossrefAction = id; 
+                selectCrossrefParentAction = id; 
+            }; 
             CLASS = FirstResponder; 
             LANGUAGE = ObjC; 
             SUPERCLASS = NSObject; 
         }, 
         {CLASS = MyTextField; LANGUAGE = ObjC; SUPERCLASS = NSTextField; }, 
+        {CLASS = OAGradientTableView; LANGUAGE = ObjC; SUPERCLASS = NSTableView; }, 
         {CLASS = OASplitView; LANGUAGE = ObjC; SUPERCLASS = NSSplitView; }, 
+        {CLASS = OATextWithIconCell; LANGUAGE = ObjC; SUPERCLASS = NSTextFieldCell; }, 
         {CLASS = RYZImagePopUpButton; LANGUAGE = ObjC; SUPERCLASS = NSPopUpButton; }
     ); 
     IBVersion = 1; 

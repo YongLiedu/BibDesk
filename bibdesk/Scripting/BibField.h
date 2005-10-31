@@ -1,6 +1,6 @@
 //
 //  BibField.h
-//  Bibdesk
+//  BibDesk
 //
 //  Created by Christiaan Hofman on 27/11/04.
 //  Copyright 2004 __MyCompanyName__. All rights reserved.
@@ -20,5 +20,10 @@
 
 - (NSString *)value;
 - (void)setValue:(NSString *)newValue;
+
+- (BibItem *)publication;
+
+- (NSString *)bibTeXString;
+- (void)setBibTeXString:(NSString *)newValue;
 
 @end

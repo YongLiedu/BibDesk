@@ -1,11 +1,40 @@
 //
 //  BibDocument+Scripting.m
-//  Bibdesk
+//  BibDesk
 //
 //  Created by Sven-S. Porst on Thu Jul 08 2004.
-//  Copyright (c) 2004 __MyCompanyName__. All rights reserved.
-//
-
+/*
+ This software is Copyright (c) 2004,2005
+ Sven-S. Porst. All rights reserved.
+ 
+ Redistribution and use in source and binary forms, with or without
+ modification, are permitted provided that the following conditions
+ are met:
+ 
+ - Redistributions of source code must retain the above copyright
+ notice, this list of conditions and the following disclaimer.
+ 
+ - Redistributions in binary form must reproduce the above copyright
+ notice, this list of conditions and the following disclaimer in
+ the documentation and/or other materials provided with the
+ distribution.
+ 
+ - Neither the name of Sven-S. Porst nor the names of any
+ contributors may be used to endorse or promote products derived
+ from this software without specific prior written permission.
+ 
+ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+ "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+ LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+ A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+ OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+ SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+ LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+ DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+ THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+ (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ */
 #import "BibDocument+Scripting.h"
 
 
@@ -23,17 +52,17 @@ Scripting Key-Value coding methods to access publications
 
 - (void)insertInPublications:(BibItem *)pub  atIndex:(unsigned int)index {
 	[self insertPublication:pub atIndex:index];
-	[[self undoManager] setActionName:NSLocalizedString(@"Insert Publication",@"")];
+	[[self undoManager] setActionName:NSLocalizedString(@"AppleScript",@"Undo action name for AppleScript")];
 }
 
 - (void)insertInPublications:(BibItem *)pub {
 	[self addPublication:pub];
-	[[self undoManager] setActionName:NSLocalizedString(@"Add Publication",@"")];
+	[[self undoManager] setActionName:NSLocalizedString(@"AppleScript",@"Undo action name for AppleScript")];
 }
 
 - (void)removeFromPublicationsAtIndex:(unsigned int)index {
 	[self removePublication:[publications objectAtIndex:index]];
-	[[self undoManager] setActionName:NSLocalizedString(@"Delete Publication",@"")];
+	[[self undoManager] setActionName:NSLocalizedString(@"AppleScript",@"Undo action name for AppleScript")];
 }
 
 
@@ -41,23 +70,24 @@ Scripting Key-Value coding methods to access publications
 Scripting Key-Value coding method to access an author by his name
 */
 - (BibAuthor*) valueInAuthorsWithName:(NSString*) name {
+    // create a new author so we can use BibAuthor's isEqual: method for comparison
+    // instead of trying to do string comparisons
+    BibAuthor *newAuth = [BibAuthor authorWithName:name andPub:nil];
+    
 	NSEnumerator *pubEnum = [publications objectEnumerator];
 	NSEnumerator *authEnum;
 	BibItem *pub;
 	BibAuthor *auth;
-	BibAuthor *altAuth = nil;
+
 	while (pub = [pubEnum nextObject]) {
 		authEnum = [[pub pubAuthors] objectEnumerator];
 		while (auth = [authEnum nextObject]) {
-			if ([[auth normalizedName] isEqualToString:name]) {
+			if ([auth isEqual:newAuth]) {
 				return auth;
-			}
-			if ([[auth name] isEqualToString:name]) {
-				altAuth = auth;
 			}
 		}
 	}
-	return altAuth;
+	return nil;
 }
 
 - (BibAuthor*) valueInAuthorsAtIndex:(unsigned int)index {
@@ -73,29 +103,6 @@ Scripting Key-Value coding method to access an author by his name
 	if (index < [auths count]) 
 		return [[auths allObjects] objectAtIndex:index];
 	return nil;
-}
-
-
-/* ssp: 2004-07-22
-Accessor to get the current state of the filter field.
-*/
--(NSString*) filterField {
-	return [searchField stringValue];
-}
-
-
-/* ssp: 2004-04-03
-Sets the filter field to a specified string.
-Have to make it firstResponder first as otherwise it doesn't update (show clear cell) corectly.
-*/
-- (void)setFilterField:(NSString*) filterterm {
-    NSResponder * oldFirstResponder = [documentWindow firstResponder];
-    [documentWindow makeFirstResponder:searchField];
-    
-    [searchField setObjectValue:filterterm];
-    [self searchFieldAction:searchField];
-    
-    [documentWindow makeFirstResponder:oldFirstResponder];
 }
 
 
@@ -146,20 +153,14 @@ Getting and setting the selection of the table
 }
 
 
-
-/* ssp
-Return styled text for a bibstring.
-*/
 - (NSTextStorage*) textStorageForBibString:(NSString*) bibString {
-    NSData *d;
-	if([PDFpreviewer PDFFromString:bibString])
-        d = [PDFpreviewer RTFPreviewData];
-    else
-        return nil;
+    NSData *data = nil;
+    if([texTask runWithBibTeXString:bibString] && [texTask hasRTFData])
+        data = [texTask RTFData];
     
-	NSDictionary * myDict;
-	
-	return [[[NSTextStorage alloc] initWithRTF:d documentAttributes:&myDict] autorelease];
+    if(!data) return nil;
+    	
+	return [[[NSTextStorage alloc] initWithRTF:data documentAttributes:NULL] autorelease];
 }
 
 @end
