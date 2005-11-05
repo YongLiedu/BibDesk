@@ -218,13 +218,17 @@
 
 -(void)drawRect:(NSRect)rect {
 	[super drawRect:rect];
-	if(!highlight)  
-		return;
 	
-	[NSGraphicsContext saveGraphicsState];
-	NSSetFocusRingStyle(NSFocusRingOnly);
-	NSRectFill([self bounds]);
-	[NSGraphicsContext restoreGraphicsState];
+	if(highlight || 
+	   ([[self window] firstResponder] == self &&
+		[[self window] isKeyWindow] &&
+		[[self cell] acceptsFirstResponder]))  {
+	
+		[NSGraphicsContext saveGraphicsState];
+		NSSetFocusRingStyle(NSFocusRingOnly);
+		NSRectFill([self bounds]);
+		[NSGraphicsContext restoreGraphicsState];
+	}
 }
 
 @end
