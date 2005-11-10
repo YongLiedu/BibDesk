@@ -26,25 +26,6 @@
 		F93566920912D570002B6957 /* AGRegex.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F93566740912D56F002B6957 /* AGRegex.framework */; };
 /* End PBXBuildFile section */
 
-/* Begin PBXBuildRule section */
-		F93566A90912D5B4002B6957 /* PBXBuildRule */ = {
-			isa = PBXBuildRule;
-			compilerSpec = com.apple.compilers.gcc.3_3;
-			fileType = sourcecode.c;
-			isEditable = 1;
-			outputFiles = (
-			);
-		};
-		F93566AA0912D5C2002B6957 /* PBXBuildRule */ = {
-			isa = PBXBuildRule;
-			compilerSpec = com.apple.compilers.gcc.3_3;
-			fileType = sourcecode.asm;
-			isEditable = 1;
-			outputFiles = (
-			);
-		};
-/* End PBXBuildRule section */
-
 /* Begin PBXBuildStyle section */
 		014CEA440018CDF011CA2923 /* Development */ = {
 			isa = PBXBuildStyle;
@@ -235,8 +216,6 @@
 				F935666E0912D56F002B6957 /* Rez */,
 			);
 			buildRules = (
-				F93566AA0912D5C2002B6957 /* PBXBuildRule */,
-				F93566A90912D5B4002B6957 /* PBXBuildRule */,
 			);
 			buildSettings = {
 				DYLIB_COMPATIBILITY_VERSION = 1;
