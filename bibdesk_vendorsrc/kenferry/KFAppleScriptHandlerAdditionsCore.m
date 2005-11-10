@@ -194,7 +194,7 @@ NSString *KFASException = @"KFASException";
 }
 
 - (id)executeHandler:(NSString *)handlerName
-      withParameters:(NSObject *)firstArg, ...
+      withParameters:(id)firstArg, ...
 {
     NSMutableArray *argumentsArray;
     va_list argList;
@@ -332,7 +332,7 @@ withLabelsAndParameters:(AEKeyword)firstKeyWord, ...
 
 - (id)executeHandler:(NSString *)handlerName
                error:(NSDictionary **)errorInfo
-      withParameters:(NSObject *)firstArg, ...
+      withParameters:(id)firstArg, ...
 {
     NSMutableArray *argumentsArray;
     va_list argList;
