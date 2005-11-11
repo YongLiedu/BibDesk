@@ -83,7 +83,8 @@ RCS_ID("$Header: /Network/Source/CVS/OmniGroup/Frameworks/OmniAppKit/Inspector.s
 
 - (void)_refreshImage;
 {
-#ifdef MAC_OS_X_VERSION_10_2
+#if 0
+// was ifdef MAC_OS_X_VERSION_10_2
     NSRect windowFrame = [self bounds];
     unsigned int width = rint(NSWidth(windowFrame));
     unsigned int height = rint(NSHeight(windowFrame));

@@ -179,7 +179,8 @@ NSString *OAColorXMLAdditionalColorSpace = @"OAColorXMLAdditionalColorSpace";
     return [bitmapImageRep representationUsingType:NSPNGFileType properties:nil];
 }
 
-#ifdef MAC_OS_X_VERSION_10_2
+#if 0
+// was ifdef MAC_OS_X_VERSION_10_2
 
 + (NSColorList *)_combinedColorList;
 {
