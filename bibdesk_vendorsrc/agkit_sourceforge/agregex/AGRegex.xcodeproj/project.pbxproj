@@ -93,7 +93,7 @@
 		F93566730912D56F002B6957 /* Info-AGRegex.plist */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = "Info-AGRegex.plist"; sourceTree = "<group>"; };
 		F93566740912D56F002B6957 /* AGRegex.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = AGRegex.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		F935668D0912D56F002B6957 /* Info-RegexTest.plist */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = "Info-RegexTest.plist"; sourceTree = "<group>"; };
-		F935668E0912D570002B6957 /* RegexTest.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = RegexTest.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		F935668E0912D570002B6957 /* RegexTest.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = RegexTest.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		F986DBD403876F3201A58F65 /* README.txt */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = text; path = README.txt; sourceTree = "<group>"; };
 		F98CF71E0387044501DE5C57 /* AGRegex.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = AGRegex.h; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -533,18 +533,36 @@
 		F93566980912D572002B6957 /* Development */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				ARCHS = (
+					ppc,
+					i386,
+				);
+				MACOSX_DEPLOYMENT_TARGET = 10.4;
+				SDKROOT = /Developer/SDKs/MacOSX10.4u.sdk;
 			};
 			name = Development;
 		};
 		F93566990912D572002B6957 /* Deployment */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				ARCHS = (
+					ppc,
+					i386,
+				);
+				MACOSX_DEPLOYMENT_TARGET = 10.4;
+				SDKROOT = /Developer/SDKs/MacOSX10.4u.sdk;
 			};
 			name = Deployment;
 		};
 		F935669A0912D572002B6957 /* Default */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				ARCHS = (
+					ppc,
+					i386,
+				);
+				MACOSX_DEPLOYMENT_TARGET = 10.4;
+				SDKROOT = /Developer/SDKs/MacOSX10.4u.sdk;
 			};
 			name = Default;
 		};

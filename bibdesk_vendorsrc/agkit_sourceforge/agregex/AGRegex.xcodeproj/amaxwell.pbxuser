@@ -1,7 +1,7 @@
 // !$*UTF8*$!
 {
 	0867D690FE84028FC02AAC07 /* Project object */ = {
-		activeBuildConfigurationName = Deployment;
+		activeBuildConfigurationName = Development;
 		activeBuildStyle = 014CEA440018CDF011CA2923 /* Development */;
 		activeExecutable = F935668F0912D570002B6957 /* RegexTest */;
 		activeTarget = F935665E0912D56F002B6957 /* AGRegex */;
@@ -54,11 +54,19 @@
 					PBXFileDataSource_Warnings_ColumnID,
 				);
 			};
-			PBXPerProjectTemplateStateSaveDate = 152229446;
-			PBXWorkspaceStateSaveDate = 152229446;
+			PBXPerProjectTemplateStateSaveDate = 153718798;
+			PBXWorkspaceStateSaveDate = 153718798;
 		};
 		sourceControlManager = F935669B0912D572002B6957 /* Source Control */;
 		userBuildSettings = {
+		};
+	};
+	24ADE661050886DD00DAF17A /* pcre.c */ = {
+		uiCtxt = {
+			sepNavIntBoundsRect = "{{0, 0}, {680, 106358}}";
+			sepNavSelRange = "{117367, 16}";
+			sepNavVisRect = "{{0, 53474}, {680, 587}}";
+			sepNavWindowFrame = "{{38, 19}, {725, 701}}";
 		};
 	};
 	F935665E0912D56F002B6957 /* AGRegex */ = {
@@ -85,10 +93,9 @@
 		);
 		argumentStrings = (
 		);
+		autoAttachOnCrash = 1;
 		configStateDict = {
 		};
-		cppStopOnCatchEnabled = 0;
-		cppStopOnThrowEnabled = 0;
 		customDataFormattersEnabled = 1;
 		debuggerPlugin = GDBDebugging;
 		disassemblyDisplayState = 0;
