@@ -36,7 +36,7 @@ fi
 if [ "${BUILD_STYLE}" == "Development" ] ; then
         echo "D"`cat $VAR_FILE` > build_number.temp
 else
-        ocvs commit -F $VAR_FILE -f $VAR_FILE
+#        ocvs commit -F $VAR_FILE -f $VAR_FILE
         cp $VAR_FILE build_number.temp
 fi
 
