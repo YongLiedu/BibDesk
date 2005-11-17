@@ -124,7 +124,7 @@
 		6AA8E25B07171EEB00287131 /* rfc2821.txt */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = text; path = rfc2821.txt; sourceTree = "<group>"; };
 		6AF6C3BD06B061CF00C4D0C9 /* ILCrashReporter.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ILCrashReporter.h; sourceTree = "<group>"; wrapsLines = 0; };
 		6AF6C3BE06B061CF00C4D0C9 /* ILCrashReporter.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ILCrashReporter.m; sourceTree = "<group>"; };
-		6AF6C41806B18B4800C4D0C9 /* CrashReporter.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = CrashReporter.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		6AF6C41806B18B4800C4D0C9 /* CrashReporter.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = CrashReporter.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		6AF6C41D06B18B7700C4D0C9 /* CrashReporter-Info.plist */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = text.xml; path = "CrashReporter-Info.plist"; sourceTree = "<group>"; };
 		6AF6C41E06B18B7700C4D0C9 /* CrashReporterAppDelegate.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = CrashReporterAppDelegate.h; sourceTree = "<group>"; };
 		6AF6C41F06B18B7700C4D0C9 /* CrashReporterAppDelegate.m */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.objc; path = CrashReporterAppDelegate.m; sourceTree = "<group>"; };
@@ -754,7 +754,7 @@
 		};
 		6A0728F908551A2000BC12AD /* Development */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = 6A07290408551AF000BC12AD /* Development.xcconfig */;
+			baseConfigurationReference = 6A07290C08551BCB00BC12AD /* Deployment.xcconfig */;
 			buildSettings = {
 				DYLIB_COMPATIBILITY_VERSION = 1;
 				DYLIB_CURRENT_VERSION = 1;
@@ -773,6 +773,7 @@
 				LIBRARY_SEARCH_PATHS = "";
 				LIBRARY_STYLE = Dynamic;
 				MACH_O_TYPE = mh_dylib;
+				MACOSX_DEPLOYMENT_TARGET = 10.3;
 				OTHER_LDFLAGS = (
 					"-seg1addr",
 					0xEBF80000,
@@ -813,6 +814,7 @@
 				LIBRARY_SEARCH_PATHS = "";
 				LIBRARY_STYLE = Dynamic;
 				MACH_O_TYPE = mh_dylib;
+				MACOSX_DEPLOYMENT_TARGET = 10.3;
 				OTHER_LDFLAGS = (
 					"-seg1addr",
 					0xEBF80000,
@@ -831,6 +833,7 @@
 		};
 		6A0728FB08551A2000BC12AD /* Development 10.2 */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = 6A07290C08551BCB00BC12AD /* Deployment.xcconfig */;
 			buildSettings = {
 				DYLIB_COMPATIBILITY_VERSION = 1;
 				DYLIB_CURRENT_VERSION = 1;
@@ -854,6 +857,7 @@
 				LIBRARY_SEARCH_PATHS = "";
 				LIBRARY_STYLE = Dynamic;
 				MACH_O_TYPE = mh_dylib;
+				MACOSX_DEPLOYMENT_TARGET = 10.3;
 				OTHER_LDFLAGS = (
 					"-seg1addr",
 					0xEBF80000,
@@ -872,6 +876,7 @@
 		};
 		6A0728FC08551A2000BC12AD /* Default */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = 6A07290C08551BCB00BC12AD /* Deployment.xcconfig */;
 			buildSettings = {
 				DYLIB_COMPATIBILITY_VERSION = 1;
 				DYLIB_CURRENT_VERSION = 1;
@@ -890,6 +895,7 @@
 				LIBRARY_SEARCH_PATHS = "";
 				LIBRARY_STYLE = Dynamic;
 				MACH_O_TYPE = mh_dylib;
+				MACOSX_DEPLOYMENT_TARGET = 10.3;
 				OTHER_LDFLAGS = (
 					"-seg1addr",
 					0xEBF80000,
@@ -913,9 +919,7 @@
 					ppc,
 					i386,
 				);
-				GCC_VERSION_i386 = 4.0;
-				GCC_VERSION_ppc = 3.3;
-				MACOSX_DEPLOYMENT_TARGET = 10.2;
+				MACOSX_DEPLOYMENT_TARGET = 10.3;
 				SDKROOT = /Developer/SDKs/MacOSX10.4u.sdk;
 			};
 			name = Development;
@@ -927,9 +931,7 @@
 					ppc,
 					i386,
 				);
-				GCC_VERSION_i386 = 4.0;
-				GCC_VERSION_ppc = 3.3;
-				MACOSX_DEPLOYMENT_TARGET = 10.2;
+				MACOSX_DEPLOYMENT_TARGET = 10.3;
 				SDKROOT = /Developer/SDKs/MacOSX10.4u.sdk;
 			};
 			name = Deployment;
@@ -941,9 +943,7 @@
 					ppc,
 					i386,
 				);
-				GCC_VERSION_i386 = 4.0;
-				GCC_VERSION_ppc = 3.3;
-				MACOSX_DEPLOYMENT_TARGET = 10.2;
+				MACOSX_DEPLOYMENT_TARGET = 10.3;
 				SDKROOT = /Developer/SDKs/MacOSX10.4u.sdk;
 			};
 			name = "Development 10.2";
@@ -955,9 +955,7 @@
 					ppc,
 					i386,
 				);
-				GCC_VERSION_i386 = 4.0;
-				GCC_VERSION_ppc = 3.3;
-				MACOSX_DEPLOYMENT_TARGET = 10.2;
+				MACOSX_DEPLOYMENT_TARGET = 10.3;
 				SDKROOT = /Developer/SDKs/MacOSX10.4u.sdk;
 			};
 			name = Default;

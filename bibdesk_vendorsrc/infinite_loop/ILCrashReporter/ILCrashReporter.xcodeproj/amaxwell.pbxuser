@@ -1,7 +1,7 @@
 // !$*UTF8*$!
 {
 	0867D690FE84028FC02AAC07 /* Project object */ = {
-		activeBuildConfigurationName = Development;
+		activeBuildConfigurationName = Deployment;
 		activeBuildStyle = 014CEA440018CDF011CA2923 /* Development */;
 		activeExecutable = F9E07FE0092161ED007BCDD4 /* CrashReporter */;
 		activeTarget = 8DC2EF4F0486A6940098B216 /* ILCrashReporter */;
@@ -32,8 +32,30 @@
 					PBXFileDataSource_Target_ColumnID,
 				);
 			};
-			PBXPerProjectTemplateStateSaveDate = 153443002;
-			PBXWorkspaceStateSaveDate = 153443002;
+			PBXConfiguration.PBXTargetDataSource.PBXTargetDataSource = {
+				PBXFileTableDataSourceColumnSortingDirectionKey = "-1";
+				PBXFileTableDataSourceColumnSortingKey = PBXFileDataSource_Filename_ColumnID;
+				PBXFileTableDataSourceColumnWidthsKey = (
+					20,
+					200,
+					63,
+					20,
+					48,
+					43,
+					43,
+				);
+				PBXFileTableDataSourceColumnsKey = (
+					PBXFileDataSource_FiletypeID,
+					PBXFileDataSource_Filename_ColumnID,
+					PBXTargetDataSource_PrimaryAttribute,
+					PBXFileDataSource_Built_ColumnID,
+					PBXFileDataSource_ObjectSize_ColumnID,
+					PBXFileDataSource_Errors_ColumnID,
+					PBXFileDataSource_Warnings_ColumnID,
+				);
+			};
+			PBXPerProjectTemplateStateSaveDate = 153877471;
+			PBXWorkspaceStateSaveDate = 153877471;
 		};
 		sourceControlManager = F9E07FED0921620F007BCDD4 /* Source Control */;
 		userBuildSettings = {
@@ -53,6 +75,30 @@
 			sepNavSelRange = "{0, 0}";
 			sepNavVisRect = "{{0, 0}, {805, 737}}";
 			sepNavWindowFrame = "{{107, 62}, {850, 851}}";
+		};
+	};
+	6A6B21A507105ABE00057057 /* GenBuildNumber.sh */ = {
+		uiCtxt = {
+			sepNavIntBoundsRect = "{{0, 0}, {805, 812}}";
+			sepNavSelRange = "{755, 0}";
+			sepNavVisRect = "{{0, 74}, {805, 738}}";
+			sepNavWindowFrame = "{{107, 61}, {850, 852}}";
+		};
+	};
+	6A6B21AC07105B2400057057 /* version_number */ = {
+		uiCtxt = {
+			sepNavIntBoundsRect = "{{0, 0}, {805, 738}}";
+			sepNavSelRange = "{0, 0}";
+			sepNavVisRect = "{{0, 0}, {805, 738}}";
+			sepNavWindowFrame = "{{153, 19}, {850, 852}}";
+		};
+	};
+	6A6B22B107109A9200057057 /* DoBuild.sh */ = {
+		uiCtxt = {
+			sepNavIntBoundsRect = "{{0, 0}, {805, 738}}";
+			sepNavSelRange = "{181, 0}";
+			sepNavVisRect = "{{0, 0}, {805, 738}}";
+			sepNavWindowFrame = "{{84, 82}, {850, 852}}";
 		};
 	};
 	6A91A29106D23716005F6DC0 /* SMTPMailDelivery.m */ = {
@@ -84,6 +130,14 @@
 		executables = (
 			F9E07FE0092161ED007BCDD4 /* CrashReporter */,
 		);
+	};
+	6AF6C45106B1B38700C4D0C9 /* LinkComponents.sh */ = {
+		uiCtxt = {
+			sepNavIntBoundsRect = "{{0, 0}, {805, 738}}";
+			sepNavSelRange = "{0, 0}";
+			sepNavVisRect = "{{0, 0}, {805, 738}}";
+			sepNavWindowFrame = "{{130, 40}, {850, 852}}";
+		};
 	};
 	8DC2EF4F0486A6940098B216 /* ILCrashReporter */ = {
 		activeExec = 0;
