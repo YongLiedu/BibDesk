@@ -319,7 +319,9 @@
 				} else if([nextEvent type] == NSLeftMouseDraggedMask) {
 					// NSLog(@"drag event %@" , nextEvent);
 					shouldSendAction = NO;
-					[self showMenuInView:controlView withEvent:nextEvent];
+					if ([controlView respondsToSelector:@selector(startDraggingWithEvent:)] == NO ||
+						[controlView performSelector:@selector(startDraggingWithEvent:) withObject:nextEvent] == NO)
+						[self showMenuInView:controlView withEvent:nextEvent];
 
 				} else {
 					// NSLog(@"periodicEvent %@", nextEvent);

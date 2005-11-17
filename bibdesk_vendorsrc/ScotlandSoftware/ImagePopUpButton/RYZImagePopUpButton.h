@@ -35,3 +35,9 @@
 - (BOOL)canReceiveDrag:(id <NSDraggingInfo>)sender forView:(id)view;
 - (BOOL)receiveDrag:(id <NSDraggingInfo>)sender forView:(id)view;
 @end
+
+@interface NSObject (RYZImagePopUpButtonDraggingSource)
+- (BOOL)imagePopUpButton:(RYZImagePopUpButton *)view writeDataToPasteboard:(NSPasteboard *)pasteboard;
+- (NSArray *)imagePopUpButton:(RYZImagePopUpButton *)view namesOfPromisedFilesDroppedAtDestination:(NSURL *)dropDestination;
+- (void)imagePopUpButton:(RYZImagePopUpButton *)view concludeDragOperation:(NSDragOperation)operation;
+@end

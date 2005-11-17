@@ -180,6 +180,47 @@
     [[self cell] setIconActionEnabled: iconActionEnabled];
 }
 
+- (unsigned int)draggingSourceOperationMaskForLocal:(BOOL)isLocal {
+    return NSDragOperationCopy;
+}
+
+- (BOOL)startDraggingWithEvent:(NSEvent *)theEvent {
+	NSPasteboard *pboard = [NSPasteboard pasteboardWithName:NSDragPboard];
+	
+	if ([[[self cell] delegate] respondsToSelector:@selector(imagePopUpButton:writeDataToPasteboard:)] == NO ||
+		[[[self cell] delegate] imagePopUpButton:self writeDataToPasteboard:pboard] == NO) 
+		return NO;
+		
+	NSImage *iconImage;
+	NSSize size = [[self cell] iconSize];
+	NSImage *dragImage = [[[NSImage alloc] initWithSize:size] autorelease];
+	NSPoint mouseLoc = [self convertPoint:[theEvent locationInWindow] fromView:nil];
+	
+	if ([[self cell] usesItemFromMenu] == NO) {
+		iconImage = [self iconImage];
+	} else {
+		iconImage = [[self selectedItem] image];
+	}
+	[dragImage lockFocus];
+	[iconImage compositeToPoint:NSZeroPoint operation:NSCompositeCopy fraction:0.6];
+	[dragImage unlockFocus];
+
+	[self dragImage:dragImage at:mouseLoc offset:NSZeroSize event:theEvent pasteboard:pboard source:self slideBack:YES];
+	
+	return YES;
+}
+
+- (NSArray *)namesOfPromisedFilesDroppedAtDestination:(NSURL *)dropDestination {
+	if ([[[self cell] delegate] respondsToSelector:@selector(imagePopUpButton:namesOfPromisedFilesDroppedAtDestination:)])
+		return [[[self cell] delegate] imagePopUpButton:self namesOfPromisedFilesDroppedAtDestination:dropDestination];
+	return nil;
+}
+
+- (void)draggedImage:(NSImage *)anImage endedAt:(NSPoint)aPoint operation:(NSDragOperation)operation{
+	if ([[[self cell] delegate] respondsToSelector:@selector(imagePopUpButton:concludeDragOperation:)])
+		return [[[self cell] delegate] imagePopUpButton:self concludeDragOperation:operation];
+}
+
 - (NSDragOperation)draggingEntered:(id <NSDraggingInfo>)sender {
     NSDragOperation sourceDragMask = [sender draggingSourceOperationMask];
 	
