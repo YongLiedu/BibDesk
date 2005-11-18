@@ -196,6 +196,9 @@
 	NSImage *dragImage = [[[NSImage alloc] initWithSize:size] autorelease];
 	NSPoint mouseLoc = [self convertPoint:[theEvent locationInWindow] fromView:nil];
 	
+	mouseLoc.x -= size.width / 2;
+	mouseLoc.y += size.height / 2;
+	
 	if ([[self cell] usesItemFromMenu] == NO) {
 		iconImage = [self iconImage];
 	} else {
