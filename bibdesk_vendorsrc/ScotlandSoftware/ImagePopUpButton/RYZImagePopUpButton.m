@@ -180,6 +180,8 @@
     [[self cell] setIconActionEnabled: iconActionEnabled];
 }
 
+#pragma mark Dragging source
+
 - (unsigned int)draggingSourceOperationMaskForLocal:(BOOL)isLocal {
     return NSDragOperationCopy;
 }
@@ -224,15 +226,17 @@
 		return [[[self cell] delegate] imagePopUpButton:self concludeDragOperation:operation];
 }
 
+#pragma mark Dragging destination
+
 - (NSDragOperation)draggingEntered:(id <NSDraggingInfo>)sender {
     NSDragOperation sourceDragMask = [sender draggingSourceOperationMask];
 	
     id delegate = [[self cell] delegate];
     if (delegate &&
 	 	(sourceDragMask & NSDragOperationCopy) && 
-        [delegate respondsToSelector:@selector(receiveDrag:forView:)] && 
-        [delegate respondsToSelector:@selector(canReceiveDrag:forView:)] && 
-        [delegate canReceiveDrag:sender forView:self]) {
+        [delegate respondsToSelector:@selector(imagePopUpButton:receiveDrag:)] && 
+        [delegate respondsToSelector:@selector(imagePopUpButton:canReceiveDrag:)] && 
+        [delegate imagePopUpButton:self canReceiveDrag:sender]) {
 		
 		highlight = YES;
 		[self setKeyboardFocusRingNeedsDisplayInRect:[self bounds]];
@@ -257,7 +261,7 @@
     
     if(delegate == nil) return NO;
     
-    return [delegate receiveDrag:sender forView:self];
+    return [delegate imagePopUpButton:self receiveDrag:sender];
 }
 
 -(void)drawRect:(NSRect)rect {

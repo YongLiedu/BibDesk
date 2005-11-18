@@ -32,8 +32,8 @@
 @end
 
 @interface NSObject (RYZImagePopUpButtonDraggingDestination)
-- (BOOL)canReceiveDrag:(id <NSDraggingInfo>)sender forView:(id)view;
-- (BOOL)receiveDrag:(id <NSDraggingInfo>)sender forView:(id)view;
+- (BOOL)imagePopUpButton:(RYZImagePopUpButton *)view canReceiveDrag:(id <NSDraggingInfo>)sender;
+- (BOOL)imagePopUpButton:(RYZImagePopUpButton *)view receiveDrag:(id <NSDraggingInfo>)sender;
 @end
 
 @interface NSObject (RYZImagePopUpButtonDraggingSource)
