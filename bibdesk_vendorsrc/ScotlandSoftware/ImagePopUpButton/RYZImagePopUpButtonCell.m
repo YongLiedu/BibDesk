@@ -316,7 +316,7 @@
 						[self showMenuInView:controlView withEvent:nextEvent];
 					}
 					
-				} else if([nextEvent type] == NSLeftMouseDraggedMask) {
+				} else if([nextEvent type] == NSLeftMouseDragged) {
 					// NSLog(@"drag event %@" , nextEvent);
 					shouldSendAction = NO;
 					if ([controlView respondsToSelector:@selector(startDraggingWithEvent:)] == NO ||
@@ -324,7 +324,7 @@
 						[self showMenuInView:controlView withEvent:nextEvent];
 
 				} else {
-					// NSLog(@"periodicEvent %@", nextEvent);
+					// NSLog(@"periodic event %@", nextEvent);
 					shouldSendAction = NO;
 					
 					// showMenu expects a mouseEvent, 
