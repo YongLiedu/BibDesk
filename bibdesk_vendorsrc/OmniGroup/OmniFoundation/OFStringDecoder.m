@@ -10,6 +10,7 @@
 #import <CoreFoundation/CFCharacterSet.h>
 #import <Foundation/Foundation.h>
 #import <OmniBase/OmniBase.h>
+#import <pthread.h>
 
 //#define OSX_10_1_KLUDGE
 
