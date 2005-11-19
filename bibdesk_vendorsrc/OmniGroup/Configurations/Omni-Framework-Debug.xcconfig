@@ -6,8 +6,7 @@ OMNI_CONFIG_COMMENT = Common settings for Debug configurations of Framework targ
 
 OMNI_FRAMEWORK_TARGET_PATH = @executable_path/../Frameworks
 DYLIB_INSTALL_NAME_BASE = $(OMNI_FRAMEWORK_TARGET_PATH)
-INSTALL_PATH = 
-SKIP_INSTALL = YES
+SKIP_INSTALL = NO
 
 OMNI_CONFIG_COMMENT = Common settings for Framework targets
 
