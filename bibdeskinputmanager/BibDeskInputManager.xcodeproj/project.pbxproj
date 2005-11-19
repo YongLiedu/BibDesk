@@ -355,7 +355,7 @@
 /* End PBXVariantGroup section */
 
 /* Begin XCBuildConfiguration section */
-		CE67E7BB092C9C3700410758 /* Development */ = {
+		CE67E7BB092C9C3700410758 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				COPY_PHASE_STRIP = NO;
@@ -389,9 +389,9 @@
 				WRAPPER_EXTENSION = bundle;
 				ZERO_LINK = NO;
 			};
-			name = Development;
+			name = Debug;
 		};
-		CE67E7BC092C9C3700410758 /* Deployment */ = {
+		CE67E7BC092C9C3700410758 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				COPY_PHASE_STRIP = YES;
@@ -421,7 +421,7 @@
 				WRAPPER_EXTENSION = bundle;
 				ZERO_LINK = NO;
 			};
-			name = Deployment;
+			name = Release;
 		};
 		CE67E7BD092C9C3700410758 /* Default */ = {
 			isa = XCBuildConfiguration;
@@ -452,7 +452,7 @@
 			};
 			name = Default;
 		};
-		CE67E7BF092C9C3700410758 /* Development */ = {
+		CE67E7BF092C9C3700410758 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				COPY_PHASE_STRIP = NO;
@@ -475,9 +475,9 @@
 				);
 				ZERO_LINK = NO;
 			};
-			name = Development;
+			name = Debug;
 		};
-		CE67E7C0092C9C3700410758 /* Deployment */ = {
+		CE67E7C0092C9C3700410758 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				COPY_PHASE_STRIP = YES;
@@ -495,7 +495,7 @@
 				);
 				ZERO_LINK = NO;
 			};
-			name = Deployment;
+			name = Release;
 		};
 		CE67E7C1092C9C3700410758 /* Default */ = {
 			isa = XCBuildConfiguration;
@@ -513,21 +513,33 @@
 			};
 			name = Default;
 		};
-		CE67E7C3092C9C3700410758 /* Development */ = {
+		CE67E7C3092C9C3700410758 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				ARCHS = (
+					ppc,
+					i386,
+				);
 			};
-			name = Development;
+			name = Debug;
 		};
-		CE67E7C4092C9C3700410758 /* Deployment */ = {
+		CE67E7C4092C9C3700410758 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				ARCHS = (
+					ppc,
+					i386,
+				);
 			};
-			name = Deployment;
+			name = Release;
 		};
 		CE67E7C5092C9C3700410758 /* Default */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				ARCHS = (
+					ppc,
+					i386,
+				);
 			};
 			name = Default;
 		};
@@ -537,8 +549,8 @@
 		CE67E7BA092C9C3700410758 /* Build configuration list for PBXNativeTarget "BibDeskInputManager" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
-				CE67E7BB092C9C3700410758 /* Development */,
-				CE67E7BC092C9C3700410758 /* Deployment */,
+				CE67E7BB092C9C3700410758 /* Debug */,
+				CE67E7BC092C9C3700410758 /* Release */,
 				CE67E7BD092C9C3700410758 /* Default */,
 			);
 			defaultConfigurationIsVisible = 0;
@@ -547,8 +559,8 @@
 		CE67E7BE092C9C3700410758 /* Build configuration list for PBXAggregateTarget "Install" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
-				CE67E7BF092C9C3700410758 /* Development */,
-				CE67E7C0092C9C3700410758 /* Deployment */,
+				CE67E7BF092C9C3700410758 /* Debug */,
+				CE67E7C0092C9C3700410758 /* Release */,
 				CE67E7C1092C9C3700410758 /* Default */,
 			);
 			defaultConfigurationIsVisible = 0;
@@ -557,8 +569,8 @@
 		CE67E7C2092C9C3700410758 /* Build configuration list for PBXProject "BibDeskInputManager" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
-				CE67E7C3092C9C3700410758 /* Development */,
-				CE67E7C4092C9C3700410758 /* Deployment */,
+				CE67E7C3092C9C3700410758 /* Debug */,
+				CE67E7C4092C9C3700410758 /* Release */,
 				CE67E7C5092C9C3700410758 /* Default */,
 			);
 			defaultConfigurationIsVisible = 0;
