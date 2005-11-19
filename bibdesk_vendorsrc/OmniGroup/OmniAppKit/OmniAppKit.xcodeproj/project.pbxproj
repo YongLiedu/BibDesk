@@ -28,7 +28,7 @@
 		4AA1E69808AA764600E2FF6B /* OAFontCache.h in Headers */ = {isa = PBXBuildFile; fileRef = 00E51F04FE8AB2E911C9CC38 /* OAFontCache.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		4AA1E69908AA764600E2FF6B /* OAPasteboardHelper.h in Headers */ = {isa = PBXBuildFile; fileRef = 00E51F05FE8AB2E911C9CC38 /* OAPasteboardHelper.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		4AA1E69A08AA764600E2FF6B /* OARegExFindPattern.h in Headers */ = {isa = PBXBuildFile; fileRef = 137CBE730118A5EC7F000001 /* OARegExFindPattern.h */; settings = {ATTRIBUTES = (Public, ); }; };
-		4AA1E69B08AA764600E2FF6B /* OAScriptMenuItem.h in Headers */ = {isa = PBXBuildFile; fileRef = F5A5A4B4023E8BE501B4A65D /* OAScriptMenuItem.h */; };
+		4AA1E69B08AA764600E2FF6B /* OAScriptMenuItem.h in Headers */ = {isa = PBXBuildFile; fileRef = F5A5A4B4023E8BE501B4A65D /* OAScriptMenuItem.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		4AA1E69C08AA764600E2FF6B /* OAScriptToolbarHelper.h in Headers */ = {isa = PBXBuildFile; fileRef = F57089B301FEA73201B4A65B /* OAScriptToolbarHelper.h */; };
 		4AA1E69D08AA764600E2FF6B /* OASheetRequest.h in Headers */ = {isa = PBXBuildFile; fileRef = 4A04B9CB047BFCE40097A149 /* OASheetRequest.h */; };
 		4AA1E69E08AA764600E2FF6B /* OAToolbarWindowController.h in Headers */ = {isa = PBXBuildFile; fileRef = F59B07CF01FE36AE01B4A65D /* OAToolbarWindowController.h */; settings = {ATTRIBUTES = (Public, ); }; };
@@ -629,7 +629,7 @@
 		4A9FDD380655955D0097A149 /* OAController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = OAController.m; sourceTree = "<group>"; };
 		4AA1E7F908AA764600E2FF6B /* OmniAppKit.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = OmniAppKit.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		4AA1E81108AA764700E2FF6B /* OAUnitTests.otest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = OAUnitTests.otest; sourceTree = BUILT_PRODUCTS_DIR; };
-		4AA1E81E08AA764700E2FF6B /* OAMakeImageSizeIntegral */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = OAMakeImageSizeIntegral; sourceTree = BUILT_PRODUCTS_DIR; };
+		4AA1E81E08AA764700E2FF6B /* OAMakeImageSizeIntegral */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = "compiled.mach-o.executable"; path = OAMakeImageSizeIntegral; sourceTree = BUILT_PRODUCTS_DIR; };
 		4AA1E82C08AA764700E2FF6B /* OAPatternColorPicker.bundle */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = OAPatternColorPicker.bundle; sourceTree = BUILT_PRODUCTS_DIR; };
 		4AA1EBCD08AA772700E2FF6B /* Omni-Application-Coverage.xcconfig */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xcconfig; path = "Omni-Application-Coverage.xcconfig"; sourceTree = "<group>"; };
 		4AA1EBCE08AA772700E2FF6B /* Omni-Application-Debug.xcconfig */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xcconfig; path = "Omni-Application-Debug.xcconfig"; sourceTree = "<group>"; };
@@ -1639,7 +1639,7 @@
 				4AA1EBD508AA772700E2FF6B /* Omni-Tool-Release.xcconfig */,
 			);
 			name = Configurations;
-			path = ../../Configurations;
+			path = ../Configurations;
 			sourceTree = SOURCE_ROOT;
 		};
 		4AD042FC03FAB2D400278BF4 /* ThirdParty */ = {
@@ -2600,6 +2600,7 @@
 			baseConfigurationReference = 4AA1EBD108AA772700E2FF6B /* Omni-Framework-Debug.xcconfig */;
 			buildSettings = {
 				INFOPLIST_FILE = Info.plist;
+				OTHER_CFLAGS = "-DOMNI_BUNDLE_IDENTIFIER=@\\\"$(OMNI_BUNDLE_IDENTIFIER)\\\"";
 				PRODUCT_NAME = OmniAppKit;
 				SECTORDER_FLAGS = (
 					"-sectorder",
