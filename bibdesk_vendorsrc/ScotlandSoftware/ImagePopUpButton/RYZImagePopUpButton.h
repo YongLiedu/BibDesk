@@ -2,6 +2,7 @@
 {
 	NSTimer *currentTimer;
 	BOOL highlight;
+	id delegate;
 }
 
 // --- Getting and setting the icon size ---
@@ -29,6 +30,18 @@
 - (BOOL)iconActionEnabled;
 - (void)setIconActionEnabled:(BOOL)iconActionEnabled;
 
+- (BOOL)refreshesMenu;
+- (void)setRefreshesMenu:(BOOL)refreshesMenu;
+
+- (id)delegate;
+- (void)setDelegate:(id)newDelegate;
+
+- (NSMenu *)menuForCell:(id)cell;
+
+@end
+
+@interface NSObject (RYZImagePopUpButtonDelegate)
+- (NSMenu *)menuForImagePopUpButton:(RYZImagePopUpButton *)view;
 @end
 
 @interface NSObject (RYZImagePopUpButtonDraggingDestination)

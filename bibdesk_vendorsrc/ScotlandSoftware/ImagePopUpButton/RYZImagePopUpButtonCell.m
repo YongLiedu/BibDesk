@@ -55,8 +55,6 @@
 		[self setIconImage:[coder decodeObjectForKey:@"iconImage"]];
 		[self setArrowImage:[coder decodeObjectForKey:@"arrowImage"]];
 		
-		[self setDelegate:[coder decodeObjectForKey:@"delegate"]];
-		
 		// hack to always get regular controls in a toolbar customization palette, there should be a better way
 		[self setControlSize:NSRegularControlSize];
 	}
@@ -74,7 +72,6 @@
 	[encoder encodeBool:RYZ_alwaysUsesFirstItemAsSelected forKey:@"alwaysUsesFirstItemAsSelected"];
 	[encoder encodeBool:RYZ_refreshesMenu forKey:@"refreshesMenu"];
 	
-	[encoder encodeConditionalObject:RYZ_delegate forKey:@"delegate"];
 	[encoder encodeObject:RYZ_iconImage forKey:@"iconImage"];
 	
 	[encoder encodeObject:RYZ_arrowImage forKey:@"arrowImage"];
@@ -87,17 +84,6 @@
     [RYZ_arrowImage release];
     [super dealloc];
 }
-
-- (id)delegate 
-{
-    return RYZ_delegate;
-}
-
-- (void)setDelegate:(id)newDelegate 
-{
-	RYZ_delegate = newDelegate;
-}
-
 
 
 // --------------------------------------------
@@ -391,8 +377,8 @@
                                           pressure: [event pressure]];
     }
 	
-	if ([self refreshesMenu]) {
-		[self setMenu:[[self delegate] menuForImagePopUpButtonCell:self]];
+	if ([self refreshesMenu] && [controlView respondsToSelector:@selector(menuForCell:)]) {
+		[self setMenu:[controlView performSelector:@selector(menuForCell:) withObject:self]];
 	}
 	[NSMenu popUpContextMenu: [self menu]  withEvent: newEvent  forView: controlView];
 }

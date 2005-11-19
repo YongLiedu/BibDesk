@@ -8,11 +8,7 @@
 	BOOL RYZ_iconActionEnabled;
 	BOOL RYZ_alwaysUsesFirstItemAsSelected;
 	BOOL RYZ_refreshesMenu;
-	id RYZ_delegate;
 }
-
-- (id)delegate;
-- (void)setDelegate:(id)newDelegate;
 
 // -- Setting if the icon is enabled, leaves the menu enabled --
 // -- meaningless if showsmenuwheniconclicked is true.
@@ -54,15 +50,3 @@
 - (NSSize)iconDrawSize;
 
 @end
-
-// Method that may be implemented by the delegate
-@interface NSObject (RYZPopUpDelegate)
-
-/*!
- @method     menuForImagePopUpButtonCell:
- @abstract   Delegate method to get the current menu for the image popup button cell.
- @discussion (comprehensive description)
-*/
-- (NSMenu *)menuForImagePopUpButtonCell:(RYZImagePopUpButtonCell *)cell;
-@end
-

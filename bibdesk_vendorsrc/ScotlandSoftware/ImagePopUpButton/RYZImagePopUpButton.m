@@ -17,11 +17,22 @@
 //      Initializing in IB
 // --------------------------------------------
 
+- (id)initWithFrame:(NSRect)frameRect {
+	if (self = [super initWithFrame:frameRect]) {
+		currentTimer = nil;
+		highlight = NO;
+		delegate = nil;
+	}
+	return self;
+}
+
 - (id)initWithCoder:(NSCoder *)coder
 {
 	if (self = [super initWithCoder:coder]) {
 		currentTimer = nil;
 		highlight = NO;
+		[self setDelegate:[coder decodeObjectForKey:@"delegate"]];
+		
 		if (![[self cell] isKindOfClass:[RYZImagePopUpButtonCell class]]) {
 			RYZImagePopUpButtonCell *cell = [[[RYZImagePopUpButtonCell alloc] init] autorelease];
 			
@@ -40,9 +51,23 @@
 	return self;
 }
 
+- (void)encodeWithCoder:(NSCoder *)encoder
+{
+	[super encodeWithCoder:encoder];
+	[encoder encodeConditionalObject:delegate forKey:@"delegate"];
+}
+
 - (void)dealloc{
 	[currentTimer invalidate];
 	[super dealloc];
+}
+
+- (id)delegate {
+    return delegate;
+}
+
+- (void)setDelegate:(id)newDelegate {
+	delegate = newDelegate;
 }
 
 // --------------------------------------------
@@ -180,6 +205,31 @@
     [[self cell] setIconActionEnabled: iconActionEnabled];
 }
 
+// ----------------------------------------------
+//      Getting and setting the refreshes menu flag
+// ----------------------------------------------
+
+- (BOOL)refreshesMenu
+{
+    return [[self cell] refreshesMenu];
+}
+
+
+- (void)setRefreshesMenu:(BOOL)refreshesMenu
+{
+    [[self cell] setRefreshesMenu:refreshesMenu];
+}
+
+- (NSMenu *)menuForCell:(id)cell
+{
+	if ([self refreshesMenu] && 
+		[delegate respondsToSelector:@selector(menuForImagePopUpButton:)]) {
+		return [delegate menuForImagePopUpButton:self];
+	} else {
+		return [cell menu];
+	}
+}
+
 #pragma mark Dragging source
 
 - (unsigned int)draggingSourceOperationMaskForLocal:(BOOL)isLocal {
@@ -189,8 +239,8 @@
 - (BOOL)startDraggingWithEvent:(NSEvent *)theEvent {
 	NSPasteboard *pboard = [NSPasteboard pasteboardWithName:NSDragPboard];
 	
-	if ([[[self cell] delegate] respondsToSelector:@selector(imagePopUpButton:writeDataToPasteboard:)] == NO ||
-		[[[self cell] delegate] imagePopUpButton:self writeDataToPasteboard:pboard] == NO) 
+	if ([delegate respondsToSelector:@selector(imagePopUpButton:writeDataToPasteboard:)] == NO ||
+		[delegate imagePopUpButton:self writeDataToPasteboard:pboard] == NO) 
 		return NO;
 		
 	NSImage *iconImage;
@@ -216,14 +266,14 @@
 }
 
 - (NSArray *)namesOfPromisedFilesDroppedAtDestination:(NSURL *)dropDestination {
-	if ([[[self cell] delegate] respondsToSelector:@selector(imagePopUpButton:namesOfPromisedFilesDroppedAtDestination:)])
-		return [[[self cell] delegate] imagePopUpButton:self namesOfPromisedFilesDroppedAtDestination:dropDestination];
+	if ([delegate respondsToSelector:@selector(imagePopUpButton:namesOfPromisedFilesDroppedAtDestination:)])
+		return [delegate imagePopUpButton:self namesOfPromisedFilesDroppedAtDestination:dropDestination];
 	return nil;
 }
 
 - (void)draggedImage:(NSImage *)anImage endedAt:(NSPoint)aPoint operation:(NSDragOperation)operation{
-	if ([[[self cell] delegate] respondsToSelector:@selector(imagePopUpButton:concludeDragOperation:)])
-		return [[[self cell] delegate] imagePopUpButton:self concludeDragOperation:operation];
+	if ([delegate respondsToSelector:@selector(imagePopUpButton:concludeDragOperation:)])
+		return [delegate imagePopUpButton:self concludeDragOperation:operation];
 }
 
 #pragma mark Dragging destination
@@ -231,7 +281,6 @@
 - (NSDragOperation)draggingEntered:(id <NSDraggingInfo>)sender {
     NSDragOperation sourceDragMask = [sender draggingSourceOperationMask];
 	
-    id delegate = [[self cell] delegate];
     if (delegate &&
 	 	(sourceDragMask & NSDragOperationCopy) && 
         [delegate respondsToSelector:@selector(imagePopUpButton:receiveDrag:)] && 
@@ -257,8 +306,6 @@
 } 
 
 - (BOOL)performDragOperation:(id <NSDraggingInfo>)sender {
-	id delegate = [[self cell] delegate];
-    
     if(delegate == nil) return NO;
     
     return [delegate imagePopUpButton:self receiveDrag:sender];
