@@ -13,7 +13,9 @@
 
 RCS_ID("$Header$");
 
-NSString *OFUserCancelledActionErrorKey = OMNI_BUNDLE_IDENTIFIER @".ErrorDomain.ErrorDueToUserCancel";
+#warning ARM: modified
+/* this was OMNI_BUNDLE_IDENTIFIER instead of the hard-coded bundle name, which is properly set in the target; the compiler gave an error, and I gave up on figuring out what's wrong here */
+NSString *OFUserCancelledActionErrorKey = @"com.omnigroup.framework.OmniFoundation" @".ErrorDomain.ErrorDueToUserCancel";
 
 static NSMutableDictionary *_createUserInfo(NSString *firstKey, va_list args)
 {
