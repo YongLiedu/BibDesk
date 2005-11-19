@@ -4,6 +4,8 @@ OMNI_CONFIG_RCSID = $Header$
 
 OMNI_CONFIG_COMMENT = Common settings for Debug configurations of Framework targets
 
+OMNI_FRAMEWORK_TARGET_PATH = @executable_path/../Frameworks
+DYLIB_INSTALL_NAME_BASE = $(OMNI_FRAMEWORK_TARGET_PATH)
 INSTALL_PATH = 
 SKIP_INSTALL = YES
 
