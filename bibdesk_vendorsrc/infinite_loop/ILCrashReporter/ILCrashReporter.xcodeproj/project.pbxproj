@@ -637,7 +637,7 @@
 /* End PBXVariantGroup section */
 
 /* Begin XCBuildConfiguration section */
-		6A0728F408551A2000BC12AD /* Development */ = {
+		6A0728F408551A2000BC12AD /* Debug */ = {
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = 6A07290C08551BCB00BC12AD /* Deployment.xcconfig */;
 			buildSettings = {
@@ -669,9 +669,9 @@
 				WARNING_CFLAGS = "-Wmost";
 				ZERO_LINK = NO;
 			};
-			name = Development;
+			name = Debug;
 		};
-		6A0728F508551A2000BC12AD /* Deployment */ = {
+		6A0728F508551A2000BC12AD /* Release */ = {
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = 6A07290C08551BCB00BC12AD /* Deployment.xcconfig */;
 			buildSettings = {
@@ -697,7 +697,7 @@
 				WARNING_CFLAGS = "-Wmost";
 				ZERO_LINK = NO;
 			};
-			name = Deployment;
+			name = Release;
 		};
 		6A0728F608551A2000BC12AD /* Development 10.2 */ = {
 			isa = XCBuildConfiguration;
@@ -752,7 +752,7 @@
 			};
 			name = Default;
 		};
-		6A0728F908551A2000BC12AD /* Development */ = {
+		6A0728F908551A2000BC12AD /* Debug */ = {
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = 6A07290C08551BCB00BC12AD /* Deployment.xcconfig */;
 			buildSettings = {
@@ -789,9 +789,9 @@
 				WRAPPER_EXTENSION = framework;
 				ZERO_LINK = NO;
 			};
-			name = Development;
+			name = Debug;
 		};
-		6A0728FA08551A2000BC12AD /* Deployment */ = {
+		6A0728FA08551A2000BC12AD /* Release */ = {
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = 6A07290C08551BCB00BC12AD /* Deployment.xcconfig */;
 			buildSettings = {
@@ -829,7 +829,7 @@
 				);
 				WRAPPER_EXTENSION = framework;
 			};
-			name = Deployment;
+			name = Release;
 		};
 		6A0728FB08551A2000BC12AD /* Development 10.2 */ = {
 			isa = XCBuildConfiguration;
@@ -912,7 +912,7 @@
 			};
 			name = Default;
 		};
-		6A0728FE08551A2000BC12AD /* Development */ = {
+		6A0728FE08551A2000BC12AD /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ARCHS = (
@@ -922,9 +922,9 @@
 				MACOSX_DEPLOYMENT_TARGET = 10.3;
 				SDKROOT = /Developer/SDKs/MacOSX10.4u.sdk;
 			};
-			name = Development;
+			name = Debug;
 		};
-		6A0728FF08551A2000BC12AD /* Deployment */ = {
+		6A0728FF08551A2000BC12AD /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ARCHS = (
@@ -934,7 +934,7 @@
 				MACOSX_DEPLOYMENT_TARGET = 10.3;
 				SDKROOT = /Developer/SDKs/MacOSX10.4u.sdk;
 			};
-			name = Deployment;
+			name = Release;
 		};
 		6A07290008551A2000BC12AD /* Development 10.2 */ = {
 			isa = XCBuildConfiguration;
@@ -966,8 +966,8 @@
 		6A0728F308551A2000BC12AD /* Build configuration list for PBXNativeTarget "CrashReporter" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
-				6A0728F408551A2000BC12AD /* Development */,
-				6A0728F508551A2000BC12AD /* Deployment */,
+				6A0728F408551A2000BC12AD /* Debug */,
+				6A0728F508551A2000BC12AD /* Release */,
 				6A0728F608551A2000BC12AD /* Development 10.2 */,
 				6A0728F708551A2000BC12AD /* Default */,
 			);
@@ -977,8 +977,8 @@
 		6A0728F808551A2000BC12AD /* Build configuration list for PBXNativeTarget "ILCrashReporter" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
-				6A0728F908551A2000BC12AD /* Development */,
-				6A0728FA08551A2000BC12AD /* Deployment */,
+				6A0728F908551A2000BC12AD /* Debug */,
+				6A0728FA08551A2000BC12AD /* Release */,
 				6A0728FB08551A2000BC12AD /* Development 10.2 */,
 				6A0728FC08551A2000BC12AD /* Default */,
 			);
@@ -988,8 +988,8 @@
 		6A0728FD08551A2000BC12AD /* Build configuration list for PBXProject "ILCrashReporter" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
-				6A0728FE08551A2000BC12AD /* Development */,
-				6A0728FF08551A2000BC12AD /* Deployment */,
+				6A0728FE08551A2000BC12AD /* Debug */,
+				6A0728FF08551A2000BC12AD /* Release */,
 				6A07290008551A2000BC12AD /* Development 10.2 */,
 				6A07290108551A2000BC12AD /* Default */,
 			);

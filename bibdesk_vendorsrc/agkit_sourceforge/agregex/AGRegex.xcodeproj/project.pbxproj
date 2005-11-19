@@ -374,7 +374,7 @@
 /* End PBXTargetDependency section */
 
 /* Begin XCBuildConfiguration section */
-		F93566700912D56F002B6957 /* Development */ = {
+		F93566700912D56F002B6957 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				COPY_PHASE_STRIP = NO;
@@ -406,9 +406,9 @@
 				WRAPPER_EXTENSION = framework;
 				ZERO_LINK = YES;
 			};
-			name = Development;
+			name = Debug;
 		};
-		F93566710912D56F002B6957 /* Deployment */ = {
+		F93566710912D56F002B6957 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				COPY_PHASE_STRIP = YES;
@@ -437,7 +437,7 @@
 				WRAPPER_EXTENSION = framework;
 				ZERO_LINK = NO;
 			};
-			name = Deployment;
+			name = Release;
 		};
 		F93566720912D56F002B6957 /* Default */ = {
 			isa = XCBuildConfiguration;
@@ -467,7 +467,7 @@
 			};
 			name = Default;
 		};
-		F935668A0912D56F002B6957 /* Development */ = {
+		F935668A0912D56F002B6957 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				COPY_PHASE_STRIP = NO;
@@ -489,9 +489,9 @@
 				WRAPPER_EXTENSION = app;
 				ZERO_LINK = YES;
 			};
-			name = Development;
+			name = Debug;
 		};
-		F935668B0912D56F002B6957 /* Deployment */ = {
+		F935668B0912D56F002B6957 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				COPY_PHASE_STRIP = YES;
@@ -510,7 +510,7 @@
 				WRAPPER_EXTENSION = app;
 				ZERO_LINK = NO;
 			};
-			name = Deployment;
+			name = Release;
 		};
 		F935668C0912D56F002B6957 /* Default */ = {
 			isa = XCBuildConfiguration;
@@ -530,7 +530,7 @@
 			};
 			name = Default;
 		};
-		F93566980912D572002B6957 /* Development */ = {
+		F93566980912D572002B6957 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ARCHS = (
@@ -540,9 +540,9 @@
 				MACOSX_DEPLOYMENT_TARGET = 10.4;
 				SDKROOT = /Developer/SDKs/MacOSX10.4u.sdk;
 			};
-			name = Development;
+			name = Debug;
 		};
-		F93566990912D572002B6957 /* Deployment */ = {
+		F93566990912D572002B6957 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ARCHS = (
@@ -552,7 +552,7 @@
 				MACOSX_DEPLOYMENT_TARGET = 10.4;
 				SDKROOT = /Developer/SDKs/MacOSX10.4u.sdk;
 			};
-			name = Deployment;
+			name = Release;
 		};
 		F935669A0912D572002B6957 /* Default */ = {
 			isa = XCBuildConfiguration;
@@ -572,8 +572,8 @@
 		F935666F0912D56F002B6957 /* Build configuration list for PBXNativeTarget "AGRegex" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
-				F93566700912D56F002B6957 /* Development */,
-				F93566710912D56F002B6957 /* Deployment */,
+				F93566700912D56F002B6957 /* Debug */,
+				F93566710912D56F002B6957 /* Release */,
 				F93566720912D56F002B6957 /* Default */,
 			);
 			defaultConfigurationIsVisible = 0;
@@ -582,8 +582,8 @@
 		F93566890912D56F002B6957 /* Build configuration list for PBXNativeTarget "RegexTest" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
-				F935668A0912D56F002B6957 /* Development */,
-				F935668B0912D56F002B6957 /* Deployment */,
+				F935668A0912D56F002B6957 /* Debug */,
+				F935668B0912D56F002B6957 /* Release */,
 				F935668C0912D56F002B6957 /* Default */,
 			);
 			defaultConfigurationIsVisible = 0;
@@ -592,8 +592,8 @@
 		F93566970912D572002B6957 /* Build configuration list for PBXProject "AGRegex" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
-				F93566980912D572002B6957 /* Development */,
-				F93566990912D572002B6957 /* Deployment */,
+				F93566980912D572002B6957 /* Debug */,
+				F93566990912D572002B6957 /* Release */,
 				F935669A0912D572002B6957 /* Default */,
 			);
 			defaultConfigurationIsVisible = 0;

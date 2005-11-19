@@ -1,7 +1,7 @@
 // !$*UTF8*$!
 {
 	0867D690FE84028FC02AAC07 /* Project object */ = {
-		activeBuildConfigurationName = Development;
+		activeBuildConfigurationName = Debug;
 		activeBuildStyle = 014CEA440018CDF011CA2923 /* Development */;
 		activeExecutable = F935668F0912D570002B6957 /* RegexTest */;
 		activeTarget = F935665E0912D56F002B6957 /* AGRegex */;
@@ -54,8 +54,8 @@
 					PBXFileDataSource_Warnings_ColumnID,
 				);
 			};
-			PBXPerProjectTemplateStateSaveDate = 153718798;
-			PBXWorkspaceStateSaveDate = 153718798;
+			PBXPerProjectTemplateStateSaveDate = 154117573;
+			PBXWorkspaceStateSaveDate = 154117573;
 		};
 		sourceControlManager = F935669B0912D572002B6957 /* Source Control */;
 		userBuildSettings = {
@@ -120,5 +120,13 @@
 	F935669C0912D572002B6957 /* Code sense */ = {
 		isa = PBXCodeSenseManager;
 		indexTemplatePath = "";
+	};
+	F986DBD403876F3201A58F65 /* README.txt */ = {
+		uiCtxt = {
+			sepNavIntBoundsRect = "{{0, 0}, {680, 587}}";
+			sepNavSelRange = "{0, 0}";
+			sepNavVisRect = "{{0, 0}, {680, 587}}";
+			sepNavWindowFrame = "{{15, 40}, {725, 701}}";
+		};
 	};
 }
