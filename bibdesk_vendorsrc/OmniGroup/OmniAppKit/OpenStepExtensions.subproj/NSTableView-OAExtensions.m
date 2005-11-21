@@ -256,7 +256,8 @@ static OATypeAheadSelectionHelper *TypeAheadHelper = nil;
     
     point = [self convertPoint:[event locationInWindow] fromView:nil];
     rowIndex = [self rowAtPoint:point];
-    columnIndex = [self rowAtPoint:point];
+    // Christiaan M. Hofman: fixed bug in following line
+	columnIndex = [self columnAtPoint:point]; 
     if (rowIndex >= 0 && columnIndex >= 0) {
         if (![self isRowSelected:rowIndex])
             [self selectRow:rowIndex byExtendingSelection:NO];
