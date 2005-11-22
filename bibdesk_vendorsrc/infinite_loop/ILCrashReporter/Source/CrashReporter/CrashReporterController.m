@@ -9,6 +9,7 @@
 #import <fcntl.h>
 #import <sys/types.h>
 #import <sys/stat.h>
+#import <sys/sysctl.h>
 #import <unistd.h>
 #import <AddressBook/AddressBook.h>
 #import "CrashReporterController.h"
@@ -18,8 +19,9 @@
 - (void)setupLocalizedFields;
 - (void)fillOutUserCredentials;
 - (NSString*)gatherCrashLog:(NSString*)appName;
-- (NSString*)gatherCrashLogForApp:(NSString*)appName fromLocation:(NSString*)crashLogPath;
+- (NSString*)gatherCrashLogForApplication:(NSString*)appName fromLocation:(NSString*)crashLogPath;
 - (NSString*)gatherConsoleLogForApplication:(NSString*)appName withProcessID:(int)processID;
+- (NSString*)currentArchitecture;
 
 @end
 
@@ -190,13 +192,13 @@
 	NSString* crashLog = nil;
 	
 	// First try in NSHomeDirectory()...
-	crashLog = [self gatherCrashLogForApp:appName
-							 fromLocation:[NSHomeDirectory() stringByAppendingPathComponent:@"Library/Logs/CrashReporter"]];
+	crashLog = [self gatherCrashLogForApplication:appName
+									 fromLocation:[NSHomeDirectory() stringByAppendingPathComponent:@"Library/Logs/CrashReporter"]];
 	
 	// ...but if that doesn't work, try /Library/Logs/CrashReporter
 	if(!crashLog) {
-		crashLog = [self gatherCrashLogForApp:appName
-								 fromLocation:@"/Library/Logs/CrashReporter"];
+		crashLog = [self gatherCrashLogForApplication:appName
+										 fromLocation:@"/Library/Logs/CrashReporter"];
 	}
 	
 	// If we still can't find it, use placeholders and log a message
@@ -208,7 +210,7 @@
 	return crashLog;
 }
 
-- (NSString*)gatherCrashLogForApp:(NSString*)appName fromLocation:(NSString*)crashLogPath
+- (NSString*)gatherCrashLogForApplication:(NSString*)appName fromLocation:(NSString*)crashLogPath
 {
 	NSString	*crashLogName;
 	NSString	*crashLog = nil;
@@ -231,6 +233,21 @@
 				logRange.location = delimRng.location + delimRng.length;
 				logRange.length = [crashLog length] - logRange.location;
 				crashLog = [crashLog substringWithRange:logRange];
+				
+				// Insert a line to make it easier to match stripped universal binary versions with the unstripped version
+				if(crashLog)
+				{
+					NSRange		logInsertPoint;
+					
+					logInsertPoint = [crashLog rangeOfString:@"Date/Time:"];
+					if((logInsertPoint.length != 0) && (logInsertPoint.location != NSNotFound))
+					{
+						crashLog = [NSString stringWithFormat:@"%@Architecture:   %@\n%@",
+							[crashLog substringToIndex:logInsertPoint.location],
+							[self currentArchitecture],
+							[crashLog substringFromIndex:logInsertPoint.location]];
+					}
+				}
 			}
 		}
 		else
@@ -255,9 +272,52 @@
 	if([mgr fileExistsAtPath:path])
 	{
 		consoleLog = [NSString stringWithContentsOfFile:path];
+		
+		// Limit the console log to 512 KB to prevent over-stuffing the receiving email account
+		if([consoleLog length] > 512*1024)
+			consoleLog = [consoleLog substringToIndex:512*1024];
 	}
 	
 	return consoleLog;
+}
+
+- (NSString*)currentArchitecture
+{
+	size_t size;
+	cpu_type_t	cputype;
+	cpu_subtype_t	subtype;
+	
+	size = sizeof(cputype);
+	if(sysctlbyname("hw.cputype", &cputype, &size, NULL, 0) < 0)
+		cputype = 0;
+	size = sizeof(subtype);
+	if(sysctlbyname("hw.cpusubtype", &subtype, &size, NULL, 0) < 0)
+		subtype = 0;
+	
+	switch(cputype)
+	{
+		case CPU_TYPE_I386:
+			return @"i386";
+			
+		case CPU_TYPE_POWERPC:
+			switch(subtype)
+			{
+				case CPU_SUBTYPE_POWERPC_970:
+					return @"ppc970";
+					
+				case CPU_SUBTYPE_POWERPC_7400:
+				case CPU_SUBTYPE_POWERPC_7450:
+					return @"ppc7400";
+					
+				default:
+					return @"ppc";
+			}
+			
+		case CPU_TYPE_POWERPC64:
+			return @"ppc64";
+	}
+	
+	return @"unknown";
 }
 
 @end

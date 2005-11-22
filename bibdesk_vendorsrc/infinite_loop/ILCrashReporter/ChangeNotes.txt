@@ -1,3 +1,8 @@
+1.2.3 (v46)
+- Crash reports now contain the machine architecture to help matching stack crawls from universal binaries
+- Attached console logs are now limited to 512 KB to prevent overloading email accounts
+
+
 1.2.2 (v41)
 
 - The framework should now be useable on Mac OS X 10.2 and newer for PowerPC as well as Intel architectures
