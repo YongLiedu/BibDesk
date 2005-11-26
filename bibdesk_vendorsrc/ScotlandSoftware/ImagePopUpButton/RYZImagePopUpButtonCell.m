@@ -1,4 +1,5 @@
 #import "RYZImagePopUpButtonCell.h"
+#import "RYZImagePopUpButton.h"
 
 @interface RYZImagePopUpButtonCell (Private)
 - (void)setButtonCell:(NSButtonCell *)buttonCell;

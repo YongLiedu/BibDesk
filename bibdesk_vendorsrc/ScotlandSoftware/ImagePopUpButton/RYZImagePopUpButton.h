@@ -19,7 +19,7 @@
 - (NSImage *)iconImage;
 - (void)setIconImage:(NSImage *)iconImage;
 - (void)fadeIconImageToImage:(NSImage *)iconImage;
-
+- (void)timerFired:(NSTimer *)timer;
 
 // --- Getting and setting the arrow image ---
 - (NSImage *)arrowImage;
@@ -37,6 +37,8 @@
 - (void)setDelegate:(id)newDelegate;
 
 - (NSMenu *)menuForCell:(id)cell;
+
+- (BOOL)startDraggingWithEvent:(NSEvent *)theEvent;
 
 @end
 
