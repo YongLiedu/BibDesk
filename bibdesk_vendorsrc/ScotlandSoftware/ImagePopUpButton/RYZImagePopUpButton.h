@@ -1,3 +1,5 @@
+#import "RYZImagePopUpButtonCell.h"
+
 @interface RYZImagePopUpButton : NSPopUpButton
 {
 	NSTimer *currentTimer;

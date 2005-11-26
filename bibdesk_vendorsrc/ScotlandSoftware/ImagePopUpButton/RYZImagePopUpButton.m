@@ -1,6 +1,4 @@
 #import "RYZImagePopUpButton.h"
-#import "RYZImagePopUpButtonCell.h"
-
 
 @implementation RYZImagePopUpButton
 
