@@ -23,7 +23,7 @@
 
 #import <Cocoa/Cocoa.h>
 
-
+extern NSString *BDSKParserErrorNotification;
 
 @interface BDSKErrObj : NSObject{
     NSString *fileName;
