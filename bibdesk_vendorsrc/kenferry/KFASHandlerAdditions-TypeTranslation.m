@@ -17,6 +17,10 @@
 #define keyASUserRecordFields 'usrf'
 #endif
 
+@interface NSScriptObjectSpecifier (Private)
+- (NSAppleEventDescriptor *)_asDescriptor;
+@end
+
 @interface NSAppleEventDescriptor (KFAppleScriptHandlerAdditionsPrivate)
 +(void)kfSetUpHandlerDict;
 @end
