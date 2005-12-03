@@ -69,16 +69,18 @@ static OATypeAheadSelectionHelper *TypeAheadHelper = nil;
 
 - (void)_replacementTextDidEndEditing:(NSNotification *)notification;
 {
-    if ([[[notification userInfo] objectForKey:@"NSTextMovement"] intValue] == NSReturnTextMovement && ![self _shouldEditNextItemWhenEditingEnds]) {
+    // ARM:  the original implementation of this only checked for NSReturnTextMovement, and we need to check for NSTabTextMovement as well
+    int textMovement = [[[notification userInfo] objectForKey:@"NSTextMovement"] intValue];
+    if ( (textMovement == NSReturnTextMovement || textMovement == NSTabTextMovement) && ![self _shouldEditNextItemWhenEditingEnds]) {
         // This is ugly, but just about the only way to do it. NSTableView is determined to select and edit something else, even the text field that it just finished editing, unless we mislead it about what key was pressed to end editing.
         NSMutableDictionary *newUserInfo;
         NSNotification *newNotification;
-
+        
         newUserInfo = [NSMutableDictionary dictionaryWithDictionary:[notification userInfo]];
         [newUserInfo setObject:[NSNumber numberWithInt:NSIllegalTextMovement] forKey:@"NSTextMovement"];
         newNotification = [NSNotification notificationWithName:[notification name] object:[notification object] userInfo:newUserInfo];        
         originalTextDidEndEditing(self, _cmd, newNotification);
-
+        
         // For some reason we lose firstResponder status when when we do the above.
         [[self window] makeFirstResponder:self];
     } else {
