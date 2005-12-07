@@ -3,7 +3,7 @@
 CC=gcc
 MKDIR=mkdir -p
 
-CFLAGS:=-DUNIX
+CFLAGS:=-DUNIX -isysroot /Developer/SDKs/MacOSX10.4u.sdk -arch i386 -arch ppc
 #CFLAGS:=-DMSDOS         #Windows/DOS
 #CFLAGS:=-DMAC_CLASSIC   #MacOS 8/9
 #CFLAGS:=-DOS2           #OS/2
@@ -35,6 +35,7 @@ CFG_INSTALL=$(PREFIX)/share/latex2rtf/cfg
 CFLAGS:=$(CFLAGS) -g -Wall -fsigned-char
 
 LIBS=
+#LIBS=-Wl,-syslibroot,/Developer/SDKs/MacOSX10.4u.sdk
 #LIBS=-lMallocDebug -force_flat_namespace
 
 VERSION:="`scripts/version`"
