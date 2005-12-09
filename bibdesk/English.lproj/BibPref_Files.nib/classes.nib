@@ -3,7 +3,9 @@
         {
             ACTIONS = {
                 editTemplateFile = id; 
+                setAutosaveTime = id; 
                 setDefaultStringEncoding = id; 
+                setShouldAutosave = id; 
                 showConversionEditor = id; 
                 toggleAutoSaveAsRSSChanged = id; 
                 toggleSaveAnnoteAndAbstractAtEnd = id; 
@@ -16,6 +18,9 @@
             LANGUAGE = ObjC; 
             OUTLETS = {
                 autoSaveAsRSSButton = NSButton; 
+                autosaveDocumentButton = NSButton; 
+                autosaveTimeField = NSTextField; 
+                autosaveTimeStepper = NSStepper; 
                 encodingPopUp = NSPopUpButton; 
                 outputTemplateFileButton = NSButton; 
                 saveAnnoteAndAbstractAtEndButton = NSButton; 

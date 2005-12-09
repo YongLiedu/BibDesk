@@ -4,9 +4,14 @@
             ACTIONS = {
                 changeLocalUrlLowercase = id; 
                 choosePapersFolderLocationAction = id; 
+                clearPapersFolderLocationAction = id; 
+                closeFormatSheet = id; 
                 formatHelp = id; 
                 localUrlFormatAdd = id; 
                 localUrlFormatChanged = id; 
+                localUrlHelp = id; 
+                setFormatCleanOption = id; 
+                showFormatSheet = id; 
                 showLocalUrlFormatWarning = id; 
                 toggleFilePapersAutomaticallyAction = id; 
             }; 
@@ -14,11 +19,16 @@
             LANGUAGE = ObjC; 
             OUTLETS = {
                 choosePapersFolderLocationButton = NSButton; 
+                clearPapersFolderLocationButton = NSButton; 
                 filePapersAutomaticallyCheckButton = NSButton; 
+                formatCleanRadio = NSMatrix; 
                 formatField = NSTextField; 
                 formatLowercaseCheckButton = NSButton; 
                 formatPresetPopUp = NSPopUpButton; 
+                formatPresetSheetPopUp = NSPopUpButton; 
                 formatRepositoryPopUp = NSPopUpButton; 
+                formatSheet = NSPanel; 
+                formatSheetField = NSTextField; 
                 formatWarningButton = NSButton; 
                 papersFolderLocationTextField = NSTextField; 
                 previewTextField = NSTextField; 

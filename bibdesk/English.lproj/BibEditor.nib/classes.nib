@@ -1,26 +1,34 @@
 {
     IBClasses = (
-        {CLASS = BDSKDragForm; LANGUAGE = ObjC; SUPERCLASS = NSForm; }, 
         {CLASS = BDSKDragWindow; LANGUAGE = ObjC; SUPERCLASS = NSWindow; }, 
+        {CLASS = BDSKEdgeView; LANGUAGE = ObjC; SUPERCLASS = NSView; }, 
+        {CLASS = BDSKForm; LANGUAGE = ObjC; SUPERCLASS = NSForm; }, 
+        {CLASS = BDSKFormCell; LANGUAGE = ObjC; SUPERCLASS = NSFormCell; }, 
+        {CLASS = BDSKGradientView; LANGUAGE = ObjC; SUPERCLASS = NSView; }, 
         {
             CLASS = BDSKPreviewer; 
             LANGUAGE = ObjC; 
             OUTLETS = {imagePreviewView = NSImageView; }; 
             SUPERCLASS = NSWindowController; 
         }, 
+        {CLASS = BDSKRatingButton; LANGUAGE = ObjC; SUPERCLASS = NSButton; }, 
+        {CLASS = BDSKSplitView; LANGUAGE = ObjC; SUPERCLASS = OASplitView; }, 
+        {CLASS = BDSKStatusBar; LANGUAGE = ObjC; SUPERCLASS = BDSKGradientView; }, 
+        {CLASS = BDSKUndoTextView; LANGUAGE = ObjC; SUPERCLASS = NSTextView; }, 
         {
             ACTIONS = {
-                addAuthors = id; 
                 bibTypeDidChange = id; 
+                changeRating = id; 
                 chooseLocalURL = id; 
                 citeKeyDidChange = id; 
-                dismissAddAuthorSheet = id; 
                 dismissAddField = id; 
                 dismissDelField = id; 
                 downloadLinkedFileAsLocalUrl = id; 
+                duplicateTitleToBooktitle = id; 
                 editSelectedFieldAsRawBibTeX = id; 
                 generateCiteKey = id; 
                 generateLocalUrl = id; 
+                openParentItem = id; 
                 raiseAddField = id; 
                 raiseDelField = id; 
                 saveFileAsLocalUrl = id; 
@@ -28,7 +36,6 @@
                 setRemoteURLFromMenuItem = id; 
                 showCiteKeyWarning = id; 
                 showPersonDetailCmd = id; 
-                textFieldDidEndEditing = id; 
                 toggleSnoopDrawer = id; 
                 toggleStatusBar = id; 
                 viewLocal = id; 
@@ -39,11 +46,9 @@
             OUTLETS = {
                 abstractView = NSTextView; 
                 actionMenuButton = RYZImagePopUpButton; 
-                addAuthorSheet = NSPanel; 
-                addAuthorTextView = NSTextView; 
                 authorScrollView = NSScrollView; 
                 authorTableView = NSTableView; 
-                bibFields = NSForm; 
+                bibFields = BDSKForm; 
                 bibTypeButton = NSPopUpButton; 
                 citeKeyField = NSTextField; 
                 citeKeyWarningButton = NSButton; 
@@ -56,6 +61,7 @@
                 documentSnoopImageView = PDFImageView; 
                 documentSnoopScrollView = NSScrollView; 
                 documentSnoopTextView = NSTextView; 
+                extraBibFields = NSMatrix; 
                 fieldsScrollView = NSScrollView; 
                 newFieldButtonCancel = NSButton; 
                 newFieldButtonOK = NSButton; 
@@ -65,7 +71,8 @@
                 pdfSnoopContainerView = NSView; 
                 remoteSnoopWebView = WebView; 
                 rssDescriptionView = NSTextView; 
-                statusLine = NSTextField; 
+                splitView = OASplitView; 
+                statusBar = BDSKStatusBar; 
                 tabView = NSTabView; 
                 textSnoopContainerView = NSView; 
                 viewLocalButton = RYZImagePopUpButton; 
@@ -76,6 +83,8 @@
         }, 
         {CLASS = DraggableScrollView; LANGUAGE = ObjC; SUPERCLASS = NSScrollView; }, 
         {CLASS = FirstResponder; LANGUAGE = ObjC; SUPERCLASS = NSObject; }, 
+        {CLASS = NSObject; LANGUAGE = ObjC; }, 
+        {CLASS = OASplitView; LANGUAGE = ObjC; SUPERCLASS = NSSplitView; }, 
         {CLASS = PDFImageView; LANGUAGE = ObjC; SUPERCLASS = NSImageView; }, 
         {CLASS = RYZImagePopUpButton; LANGUAGE = ObjC; SUPERCLASS = NSPopUpButton; }, 
         {

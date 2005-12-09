@@ -3,13 +3,51 @@
 //  Bibdesk
 //
 //  Created by Christiaan Hofman on 17/3/05.
-//  Copyright 2005 __MyCompanyName__. All rights reserved.
-//
+/*
+ This software is Copyright (c) 2005
+ Christiaan Hofman. All rights reserved.
+
+ Redistribution and use in source and binary forms, with or without
+ modification, are permitted provided that the following conditions
+ are met:
+
+ - Redistributions of source code must retain the above copyright
+   notice, this list of conditions and the following disclaimer.
+
+ - Redistributions in binary form must reproduce the above copyright
+    notice, this list of conditions and the following disclaimer in
+    the documentation and/or other materials provided with the
+    distribution.
+
+ - Neither the name of Christiaan Hofman nor the names of any
+    contributors may be used to endorse or promote products derived
+    from this software without specific prior written permission.
+
+ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+ "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+ LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+ A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+ OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+ SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+ LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+ DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+ THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+ (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ */
 
 #import "BDSKFilterController.h"
 
 
 @implementation BDSKFilterController
+
+- (id)init
+{
+	BDSKFilter *aFilter = [[BDSKFilter alloc] init];
+	self = [self initWithFilter:aFilter];
+	[aFilter release];
+	return self;
+}
 
 - (id)initWithFilter:(BDSKFilter *)aFilter
 {
@@ -17,7 +55,6 @@
     if (self) {
 		filter = [aFilter retain];
 		[self setConditionControllers:[NSMutableArray arrayWithCapacity:[[filter conditions] count]]];
-		[self setEnabled:[filter enabled]];
 		[self setConjunction:[filter conjunction]];
     }
     return self;
@@ -55,18 +92,19 @@
 
 - (void)updateUI {
 	if ([conditionControllers count] == 1) {
-		[enabledCheckButton setTitle:NSLocalizedString(@"Match the following condition:", @"")];
+		[messageStartTextField setStringValue:NSLocalizedString(@"Match the following condition:", @"")];
 		[conjunctionPopUp setHidden:YES];
-		[messageTextField setHidden:YES];
+		[messageEndTextField setHidden:YES];
 	} else {
-		[enabledCheckButton setTitle:NSLocalizedString(@"Match", @"")];
+		[messageStartTextField setStringValue:NSLocalizedString(@"Match", @"")];
 		[conjunctionPopUp setHidden:NO];
-		[messageTextField setHidden:NO];
+		[messageEndTextField setHidden:NO];
 	}
+	[messageStartTextField sizeToFit];
 	
 	int dHeight = -[stackView frame].size.height;
 	if ([conditionControllers count]) 
-		dHeight += [[[conditionControllers objectAtIndex:0] view] frame].size.height * [conditionControllers count];
+		dHeight += [[(BDSKConditionController *)[conditionControllers objectAtIndex:0] view] frame].size.height * [conditionControllers count];
 	NSRect winFrame = [[self window] frame];
 	winFrame.size.height += dHeight;
 	winFrame.origin.y -= dHeight;
@@ -81,18 +119,38 @@
 	NSEnumerator *cEnum = [conditionControllers objectEnumerator];
 	BDSKConditionController *controller = nil;
 	
+	if (![[self window] makeFirstResponder:[self window]])
+		[[self window] endEditingFor:nil];
+	
 	while (controller = [cEnum nextObject]) {
 		[conditions addObject:[controller condition]];
 	}
 	[filter setConditions:conditions];
-	[filter setEnabled:[self enabled]];
 	[filter setConjunction:[self conjunction]];
 	
-	[self close];
+	[[filter undoManager] setActionName:NSLocalizedString(@"Edit Smart Group", @"Edit smart group")];
+	
+    if ([[self window] isSheet]) {
+		[[NSNotificationCenter defaultCenter] postNotificationName:NSWindowWillCloseNotification object:[self window]];
+		[[self window] orderOut:sender];
+		[NSApp endSheet:[self window] returnCode:NSOKButton];
+	} else {
+		[[self window] performClose:sender];
+	}
 }
 
 - (IBAction)cancel:(id)sender {
-	[self close];
+    if ([[self window] isSheet]) {
+		[[NSNotificationCenter defaultCenter] postNotificationName:NSWindowWillCloseNotification object:[self window]];
+		[[self window] orderOut:sender];
+		[NSApp endSheet:[self window] returnCode:NSCancelButton];
+	} else {
+		[[self window] performClose:sender];
+	}
+}
+
+- (BDSKFilter *)filter {
+	return [[filter retain] autorelease];
 }
 
 - (void)insertNewConditionAfter:(BDSKConditionController *)aConditionController {
@@ -122,14 +180,6 @@
         [conditionControllers release];
         conditionControllers = [newConditionControllers mutableCopy];
     }
-}
-
-- (BOOL)enabled {
-    return enabled;
-}
-
-- (void)setEnabled:(BOOL)newEnabled {
-	enabled = newEnabled;
 }
 
 - (BDSKConjunction)conjunction {

@@ -1,19 +1,38 @@
 //  BDSKPreviewer.h
 
 //  Created by Michael McCracken on Tue Jan 29 2002.
-
 /*
-This software is Copyright (c) 2002, Michael O. McCracken
-All rights reserved.
+ This software is Copyright (c) 2002,2003,2004,2005
+ Michael O. McCracken. All rights reserved.
 
-Redistribution and use in source and binary forms, with or without modification, are permitted provided that the following conditions are met:
+ Redistribution and use in source and binary forms, with or without
+ modification, are permitted provided that the following conditions
+ are met:
 
-- Redistributions of source code must retain the above copyright notice, this list of conditions and the following disclaimer.
--  Redistributions in binary form must reproduce the above copyright notice, this list of conditions and the following disclaimer in the documentation and/or other materials provided with the distribution.
--  Neither the name of Michael O. McCracken nor the names of any contributors may be used to endorse or promote products derived from this software without specific prior written permission.
+ - Redistributions of source code must retain the above copyright
+   notice, this list of conditions and the following disclaimer.
 
-THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-*/
+ - Redistributions in binary form must reproduce the above copyright
+    notice, this list of conditions and the following disclaimer in
+    the documentation and/or other materials provided with the
+    distribution.
+
+ - Neither the name of Michael O. McCracken nor the names of any
+    contributors may be used to endorse or promote products derived
+    from this software without specific prior written permission.
+
+ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+ "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+ LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+ A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+ OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+ SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+ LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+ DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+ THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+ (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ */
 
 /*! @header BDSKPreviewer.h
     @discussion Contains class declaration for the Tex task manager and preview window.
@@ -21,10 +40,14 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 
 #import <Cocoa/Cocoa.h>
 #import "PDFImageView.h"
-#import "BDOrganizedLock.h"
-
+#import "BibPrefController.h"
+#import <OmniFoundation/OFWeakRetainConcreteImplementation.h>
+#import "BDSKTeXTask.h"
+#import "BDSKOverlay.h"
+#import "BDSKZoomablePDFView.h"
 
 @class BibDocument;
+@class BDSKPreviewMessageQueue;
 
 /*!
     @class BDSKPreviewer
@@ -32,106 +55,133 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
     @discussion ...
 */
 @interface BDSKPreviewer : NSWindowController {
-    NSString *usertexTemplatePath;
-    NSString *texTemplatePath;
-    NSString *finalPDFPath;
-    NSString *nopreviewPDFPath;
-    NSString *tmpBibFilePath;
-    NSImageView *imageView;
-    NSImage *image;
-    NSBundle *bundle;
-    BOOL working;
-    BibDocument *theDoc;
-    NSString *applicationSupportPath;
-    NSLock *countLock;
-    NSLock *workingLock;
-    IBOutlet NSSplitView *splitView;
+	BDSKTeXTask *texTask;
+	
+    id pdfView;
     IBOutlet PDFImageView *imagePreviewView;
-    NSString *rtfFilePath;
-    NSAttributedString *rtfString;
     IBOutlet NSTextView *rtfPreviewView;
     IBOutlet NSTabView *tabView;
-    NSString *binPathDir;
-    BDOrganizedLock *theLock;
+    IBOutlet NSProgressIndicator *progressIndicator;
+    IBOutlet BDSKOverlay *progressOverlay;
+    
+    BDSKPreviewMessageQueue *messageQueue;
+	volatile int previewState;
+    
+    OFSimpleLockType drawingLock;
+    OFSimpleLockType stateLock;
+    OFSimpleLockType awakeLock;
 }
+
 /*!
     @method sharedPreviewer
     @abstract accesses the single object
- @result Pointer to the single BDSKPreviewer instance.
-    
+	@result Pointer to the single BDSKPreviewer instance.
 */
 + (BDSKPreviewer *)sharedPreviewer;
 
 /*!
-    @method PDFFromString:
-    @abstract given a string, displays the PDF preview
-    @discussion takes the string as a bibtex entry or entries, inserts appropriate values into a template, runs LaTeX, BibTeX, LaTeX, LateX, and loads the file as PDF into its imageview
-    @param str the bibtex source
- @result YES indicates success... <em>might not be correct - I don't use the result</em>
+    @method toggleShowingPreviewPanel:
+    @abstract Action to toggle the visibility of the previewer
+    @param sender The sender of the action
 */
-- (BOOL)PDFFromString:(NSString *)str;
+- (IBAction)toggleShowingPreviewPanel:(id)sender;
 
 /*!
- @method previewTexTasks:
- @abstract given a filename as string, run NSTasks for LaTeX on it
- @discussion assumes that the .tex file is created elsewhere, and the working directory is Application Support/BibDesk
- @param fileName the filename as a string
- */
-
-- (BOOL)previewTexTasks:(NSString *)fileName;
-
-
-/*!
-@method PDFDataFromString:
-    @abstract given a string, gives PDF of the preview as NSData
-    @discussion takes the string as a bibtex entry or entries, inserts appropriate values into a template, runs LaTeX, BibTeX, LaTeX, LateX, and returns the PDF file as an NSData object.
- @param str  The bibtex source
- @result pointer to autoreleased (?) NSData object that contains the PDF Data of the preview
+    @method showPreviewPanel:
+    @abstract Action to show the previewer
+    @param sender The sender of the action
 */
-- (NSData *)PDFDataFromString:(NSString *)str;
+- (IBAction)showPreviewPanel:(id)sender;
 
 /*!
- @method rtfStringPreview:
- @abstract gives an RTF of the file at rtfFilePath as an NSAttributedString
- @discussion generally used to read the rtf file generated by latex2rtf
- @param rtfFilePath the path to the rtf file
- @result pointer to the NSString with the RTF data
+    @method hidePreviewPanel:
+    @abstract Action to hide the previewer
+    @param sender The sender of the action
 */
-- (NSAttributedString *)rtfStringPreview:(NSString *)filePath;
+- (IBAction)hidePreviewPanel:(id)sender;
+
+- (void)shouldShowTeXPreferences:(NSWindow *)sheet returnCode:(int)returnCode contextInfo:(void *)contextInfo;
+- (void)handlePreviewNeedsUpdate:(NSNotification *)notification;
 
 /*!
- @method RTFPreviewData:
- @abstract gives the RTF of the preview as NSData
- @discussion reads the rtf file generated by latex2rtf
- @param str the bibtex source
- @result pointer to the NSData with the RTF data
+    @method updateWithBibTeXString:
+    @abstract Given a BibTeX string, generates the PDF and RTF data and updates the previews
+    @discussion Takes the bibtex string, runs aproprate TeX tasks, and loads the resulting PDF and RTF into their views.
+		Pass nil to reset the previews to their default state, showing the nopreview message. 
+		This is the main method to be called from outside, and is completely thread safe. 
+    @param bibStr The bibtex string source
 */
-
-- (NSData *)RTFPreviewData;
+- (void)updateWithBibTeXString:(NSString *)bibStr;
 
 /*!
- @method displayRTFPreviewFromData:
- @abstract puts data in a textview
- @discussion takes rtfDataFromString, and puts it into a textview in the preview panel
- @param str the RTF string
- @result should return Y if successful...
+    @method     drawPreviewsForState:
+    @abstract   This will draw the previews or message in the appropriate views.
+    @discussion This method sets the state flag and puts -performDrawingForState: on the main queue for drawing.
+	@param		state An integer indicating the preview state for which to draw.
 */
-- (BOOL)displayRTFPreviewFromData:(NSData *)rtfdata;
+- (void)drawPreviewsForState:(int)state;
 
 /*!
-    @method     resetPreviews
-    @abstract   Set the preview views to a no-selection state.
-    @discussion Presently, this uses a file called nopreview.pdf which lives in the Resources folder
-		for the PDFImageView, and the same text is entered in the text view (RTF preview view).
+    @method     performDrawingForState:
+    @abstract   Draws the previews or a message in their appropriate views and starts or stops the spinner.
+    @discussion This should only be called from the main thread. Don't call it directly, use -drawPreviewsForState.
+	@param		state An integer indicating the preview state for which to draw.
 */
-- (void)resetPreviews;
+- (void)performDrawingForState:(int)state;
 
 /*!
-    @method     performDrawing
-    @abstract   Draws the previews in their appropriate views, in a thread-safe manner.
+    @method     PDFData
+    @abstract   Returns the PDF data in the preview if it is valid. Otherwise returns nil.
+    @discussion Any data is considered invalid if the previews were reset, our window is not visible, 
+		or there are updates waiting. This should be thread safe. 
+*/
+- (NSData *)PDFData;
+
+/*!
+    @method     RTFData
+    @abstract   Returns the RTF data in the preview if it is valid. Otherwise returns nil.
+    @discussion Any data is considered invalid if the previews were reset, our window is not visible, 
+		or there are updates waiting. This should be thread safe. 
+*/
+- (NSData *)RTFData;
+
+/*!
+    @method     LaTeXString
+    @abstract   Returns the LaTeX string for the preview if it is valid. Otherwise returns nil.
+    @discussion Any data is considered invalid if the previews were reset, our window is not visible, 
+		or there are updates waiting. This should be thread safe. 
+*/
+- (NSString *)LaTeXString;
+
+/*!
+    @method     isEmpty
+    @abstract   Returns YES if the previews were empty, and should show the default message for an empty selection. 
+    @discussion This is mostly a convenience accessor to check if our data is valid. This accessor is thread safe. 
+*/
+- (BOOL)isEmpty;
+
+/*!
+    @method     previewState
+    @abstract   Returns an integer indicating the currently expected state of the previews.
+    @discussion This accessor is thread safe. 
+	@result		An integer indicating the currently expected state. 0 = empty, 1 = waiting, 2 = showing. 
+*/
+- (int)previewState;
+
+/*!
+    @method     changePreviewState:
+    @abstract   Sets the current preview state to a new value. Returns a boolean to indicate whether a change was made. 
+    @discussion This accessor is thread safe. 
+	@param		state The integer indicating the state to set
+	@result		A boolean, return NO if the current state was aleady in the requested state.
+*/
+- (BOOL)changePreviewState:(int)state;
+
+/*!
+    @method     handleApplicationWillTerminate:
+    @abstract   Perform cleanup actions here, since this object never gets deallocated.
     @discussion (comprehensive description)
+    @param      notification (description)
 */
-- (void)performDrawing;
+- (void)handleApplicationWillTerminate:(NSNotification *)notification;
 @end
-
-

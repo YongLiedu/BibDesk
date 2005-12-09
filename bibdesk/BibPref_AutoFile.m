@@ -1,89 +1,136 @@
 //
 //  BibPref_AutoFile.m
-//  Bibdesk
+//  BibDesk
 //
 //  Created by Michael McCracken on Wed Oct 08 2003.
-//  Copyright (c) 2003 __MyCompanyName__. All rights reserved.
-//
+/*
+ This software is Copyright (c) 2003,2004,2005
+ Michael O. McCracken. All rights reserved.
+
+ Redistribution and use in source and binary forms, with or without
+ modification, are permitted provided that the following conditions
+ are met:
+
+ - Redistributions of source code must retain the above copyright
+   notice, this list of conditions and the following disclaimer.
+
+ - Redistributions in binary form must reproduce the above copyright
+    notice, this list of conditions and the following disclaimer in
+    the documentation and/or other materials provided with the
+    distribution.
+
+ - Neither the name of Michael O. McCracken nor the names of any
+    contributors may be used to endorse or promote products derived
+    from this software without specific prior written permission.
+
+ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+ "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+ LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+ A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+ OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+ SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+ LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+ DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+ THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+ (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ */
 
 #import "BibPref_AutoFile.h"
 #import "NSImage+Toolbox.h"
-#import <Carbon/Carbon.h>
+#import "BDSKAlert.h"
+#import "BDSKFormatParser.h"
+#import "BibAppController.h"
 
 #define MAX_PREVIEW_WIDTH	501.0
+#define MAX_FORMAT_WIDTH	288.0
 
 @implementation BibPref_AutoFile
 
+// these should correspond to the items in the popups set in IB
+static NSString *presetFormatStrings[] = {@"%L", @"%l%n0%e", @"%a1/%Y%u0.pdf", @"%a1/%T5.pdf"};
+static NSString *repositorySpecifierStrings[] = {@"", @"%a00", @"%A0", @"%t0", @"%T0", @"%Y", @"%y", @"%m", @"%k0", @"%L", @"%l", @"%e", @"%f{}0", @"%c{}", @"%f{Cite Key}", @"%r2", @"%R2", @"%d2", @"%u0", @"%U0", @"%n0", @"%0", @"%%"};
+
+- (id)initWithTitle:(NSString *)newTitle defaultsArray:(NSArray *)newDefaultsArray controller:(OAPreferenceController *)controller{
+	if(self = [super initWithTitle:newTitle defaultsArray:newDefaultsArray controller:controller]){
+		// use a BibItem with some data to build the preview cite key
+		NSDictionary *previewFields = [NSDictionary dictionaryWithObjectsAndKeys:
+			@"BibDesk, a great application to manage your bibliographies", BDSKTitleString, 
+			@"McCracken, M. and Maxwell, A. and Howison, J. and Routley, M. and Spiegel, S.  and Porst, S. S. and Hofman, C. M.", BDSKAuthorString, 
+			@"2004", BDSKYearString, @"11", BDSKMonthString, 
+			@"SourceForge", BDSKJournalString, @"1", BDSKVolumeString, @"96", BDSKPagesString, 
+			@"Keyword1,Keyword2", BDSKKeywordsString, 
+			@"Local File Name.pdf", BDSKLocalUrlString, nil];
+		previewItem = [[BibItem alloc] initWithType:[defaults stringForKey:BDSKPubTypeStringKey]
+										   fileType:BDSKBibtexString
+										  pubFields:previewFields
+											authors:nil
+										createdDate:[NSCalendarDate calendarDate]];
+	}
+	return self;
+}
+
+- (void)dealloc{
+	[previewItem release];
+	[super dealloc];
+}
+
 - (void)updateUI{
     NSString *formatString = [defaults stringForKey:BDSKLocalUrlFormatKey];
+	NSAttributedString *attrFormat = nil;
     int formatPresetChoice = [defaults integerForKey:BDSKLocalUrlFormatPresetKey];
 	BOOL custom = (formatPresetChoice == 0);
     NSString * error;
+	NSString *papersFolder = [[defaults objectForKey:BDSKPapersFolderPathKey] stringByAbbreviatingWithTildeInPath];
+	NSRect frame;
 	
     [filePapersAutomaticallyCheckButton setState:[defaults boolForKey:BDSKFilePapersAutomaticallyKey] ? NSOnState : NSOffState];
 
-    [papersFolderLocationTextField setStringValue:[[defaults objectForKey:BDSKPapersFolderPathKey] stringByAbbreviatingWithTildeInPath]];
+    if ([NSString isEmptyString:papersFolder]) {
+		[papersFolderLocationTextField setStringValue:NSLocalizedString(@"Use Document Folder",@"")];
+		[papersFolderLocationTextField setEnabled:NO];
+		[choosePapersFolderLocationButton setEnabled:NO];
+		[clearPapersFolderLocationButton setState:NSOffState];
+	} else {
+		[papersFolderLocationTextField setStringValue:papersFolder];
+		[papersFolderLocationTextField setEnabled:YES];
+		[choosePapersFolderLocationButton setEnabled:YES];
+		[clearPapersFolderLocationButton setState:NSOnState];
+	}
 
     [formatLowercaseCheckButton setState:[defaults boolForKey:BDSKLocalUrlLowercaseKey] ? NSOnState : NSOffState];
-	if ([[BDSKFormatParser sharedParser] validateFormat:&formatString forField:BDSKLocalUrlString inFileType:BDSKBibtexString error:&error]) {
+    [formatCleanRadio selectCellWithTag:[defaults integerForKey:BDSKLocalUrlCleanOptionKey]];
+	
+	if ([BDSKFormatParser validateFormat:&formatString attributedFormat:&attrFormat forField:BDSKLocalUrlString inFileType:BDSKBibtexString error:&error]) {
 		[self setLocalUrlFormatInvalidWarning:NO message:nil];
 		
 		// use a BibItem with some data to build the preview local-url
-		BibItem *tmpBI = [[BibItem alloc] init];
-		[tmpBI setField:BDSKTitleString toValue:@"Bibdesk, a great application to manage your bibliographies"];
-		[tmpBI setField:BDSKAuthorString toValue:@"McCracken, M. and Maxwell, A. and Howison, J. and Routley, M. and Spiegel, S.  and Porst, S. S. and Hofman, C. M."];
-		[tmpBI setField:BDSKYearString toValue:@"2004"];
-		[tmpBI setField:BDSKMonthString toValue:@"11"];
-		[tmpBI setField:BDSKJournalString toValue:@"SourceForge"];
-		[tmpBI setField:BDSKVolumeString toValue:@"1"];
-		[tmpBI setField:BDSKPagesString toValue:@"96"];
-		[tmpBI setField:BDSKKeywordsString toValue:@"Keyword1,Keyword2"];
-		[tmpBI setField:BDSKLocalUrlString toValue:@"Local File Name.pdf"];
-		[previewTextField setStringValue:[[[NSURL URLWithString:[tmpBI suggestedLocalUrl]] path] stringByAbbreviatingWithTildeInPath]];
+		[previewTextField setStringValue:[[[NSURL URLWithString:[previewItem suggestedLocalUrl]] path] stringByAbbreviatingWithTildeInPath]];
 		[previewTextField sizeToFit];
-		NSRect frame = [previewTextField frame];
+		frame = [previewTextField frame];
 		if (frame.size.width > MAX_PREVIEW_WIDTH) {
 			frame.size.width = MAX_PREVIEW_WIDTH;
 			[previewTextField setFrame:frame];
 		}
 		[controlBox setNeedsDisplay:YES];
-		[tmpBI release];
 	} else {
 		[self setLocalUrlFormatInvalidWarning:YES message:error];
 		[previewTextField setStringValue:NSLocalizedString(@"Invalid Format", @"Local-url preview for invalid format")];
+		if (![formatSheet isVisible])
+			[self showFormatSheet:self];
 	}
 	[formatPresetPopUp selectItemAtIndex:[formatPresetPopUp indexOfItemWithTag:formatPresetChoice]];
-    [formatField setStringValue:formatString];
-	[formatField setEnabled:custom];
-	if([formatRepositoryPopUp respondsToSelector:@selector(setHidden:)])
-	    [formatRepositoryPopUp setHidden:!custom];
-	[formatRepositoryPopUp setEnabled:custom];
-}
-
-- (void)resignCurrentPreferenceClient{
-	NSString *formatString = [formatField stringValue];
-	NSString *error;
-	NSString *alternateButton = nil;
-	int rv;
-	
-	if (![[BDSKFormatParser sharedParser] validateFormat:&formatString forField:BDSKLocalUrlString inFileType:BDSKBibtexString error:&error]) {
-		formatString = [defaults stringForKey:BDSKLocalUrlFormatKey];
-		if ([[BDSKFormatParser sharedParser] validateFormat:&formatString forField:BDSKLocalUrlString inFileType:BDSKBibtexString error:NULL]) {
-			// The currently set local-url format is valid, so we can keep it 
-			alternateButton = NSLocalizedString(@"Revert to Last", @"Revert to Last Valid Local-Url Format");
-		}
-		rv = NSRunCriticalAlertPanel(NSLocalizedString(@"Invalid Local-Url Format",@""), 
-									 @"%@",
-									 NSLocalizedString(@"Revert to Default", @"Revert to Default Local-Url Format"), 
-									 alternateButton, 
-									 nil,
-									 error, nil);
-		if (rv == NSAlertDefaultReturn){
-			formatString = [[[OFPreferenceWrapper sharedPreferenceWrapper] preferenceForKey:BDSKLocalUrlFormatKey] defaultObjectValue];
-			[[OFPreferenceWrapper sharedPreferenceWrapper] setObject:formatString forKey:BDSKLocalUrlFormatKey];
-			[[NSApp delegate] setRequiredFieldsForLocalUrl: [[BDSKFormatParser sharedParser] requiredFieldsForFormat:formatString]];
-		}
+	[formatPresetSheetPopUp selectItemAtIndex:[formatPresetPopUp indexOfItemWithTag:formatPresetChoice]];
+	[formatField setAttributedStringValue:attrFormat];
+	[formatField sizeToFit];
+	frame = [formatField frame];
+	if (frame.size.width > MAX_FORMAT_WIDTH) {
+		frame.size.width = MAX_FORMAT_WIDTH;
+		[formatField setFrame:frame];
 	}
+	[formatSheetField setAttributedStringValue:attrFormat];
+	[formatSheetField setEnabled:custom];
+	[formatRepositoryPopUp setHidden:!custom];
 }
 
 - (IBAction)choosePapersFolderLocationAction:(id)sender{
@@ -91,18 +138,32 @@
 	[openPanel setAllowsMultipleSelection:NO];
 	[openPanel setCanChooseFiles:NO];
 	[openPanel setCanChooseDirectories:YES];
-	if([openPanel respondsToSelector:@selector(setCanCreateDirectories:)]){
-		[openPanel setCanCreateDirectories:YES];
-	}
+	[openPanel setCanCreateDirectories:YES];
     [openPanel setPrompt:NSLocalizedString(@"Choose", @"Choose directory")];
+    [openPanel beginSheetForDirectory:nil 
+								 file:nil
+								types:nil
+					   modalForWindow:[[OAPreferenceController sharedPreferenceController] window] 
+						modalDelegate:self 
+					   didEndSelector:@selector(openPanelDidEnd:returnCode:contextInfo:) 
+						  contextInfo:NULL];
+}
 
-	if ([openPanel runModalForTypes:nil] != NSOKButton)
-	{
-		return;
+- (void)openPanelDidEnd:(NSOpenPanel *)sheet returnCode:(int)returnCode contextInfo:(void *)contextInfo {
+	if (returnCode == NSOKButton) {
+		NSString *path = [[sheet filenames] objectAtIndex: 0];
+		[defaults setObject:path forKey:BDSKPapersFolderPathKey];
 	}
-	NSString *path = [[openPanel filenames] objectAtIndex: 0];
-	[papersFolderLocationTextField setStringValue:[path stringByAbbreviatingWithTildeInPath]];
-	[defaults setObject:path forKey:BDSKPapersFolderPathKey];
+	[self updateUI];
+}
+
+- (IBAction)clearPapersFolderLocationAction:(id)sender{
+	if ([sender state] == NSOnState) {
+		[self choosePapersFolderLocationAction:sender];
+	} else {
+		[defaults setObject:@"" forKey:BDSKPapersFolderPathKey];
+		[self updateUI];
+	}
 }
 
 - (IBAction)toggleFilePapersAutomaticallyAction:(id)sender{
@@ -112,14 +173,12 @@
 
 #pragma mark Local-Url format stuff
 
+- (IBAction)localUrlHelp:(id)sender{
+	[[NSHelpManager sharedHelpManager] openHelpAnchor:@"AutoFile" inBook:@"BibDesk Help"];
+}
+
 - (IBAction)formatHelp:(id)sender{
-	// Panther only
-	//[[NSHelpManager sharedHelpManager] openHelpAnchor:@"citekeyFormat" inBook:@"BibDesk Help"];
-	// ..or we need Carbon/AppleHelp.h
-	OSErr err = AHLookupAnchor((CFStringRef)@"BibDesk Help",(CFStringRef)@"Citation-Key-Format-Reference");
-    if (err == kAHInternalErr || err == kAHInternalErr){
-        NSLog(@"Help Book: error looking up anchor \"Citation-Key-Format-Reference\"");
-    }
+	[[NSHelpManager sharedHelpManager] openHelpAnchor:@"Autogeneration-Format-Syntax" inBook:@"BibDesk Help"];
 }
 
 - (IBAction)changeLocalUrlLowercase:(id)sender{
@@ -127,22 +186,26 @@
 	[self updateUI];
 }
 
+- (IBAction)setFormatCleanOption:(id)sender{
+	[defaults setInteger:[[sender selectedCell] tag] forKey:BDSKLocalUrlCleanOptionKey];
+}
+
 - (IBAction)localUrlFormatAdd:(id)sender{
-	NSArray *specifierStrings = [NSArray arrayWithObjects:@"", @"%a00", @"%A0", @"%t0", @"%T0", @"%Y", @"%y", @"%m", @"%k0", @"%L", @"%l", @"%e", @"%f{}0", @"%c{}", @"%r2", @"%R2", @"%d2", @"%u0", @"%U0", @"%n0", @"%0", @"%%", nil];
-	NSString *newSpecifier = [specifierStrings objectAtIndex:[formatRepositoryPopUp indexOfSelectedItem]];
-    NSText *fieldEditor = [formatField currentEditor];
+	int index = [formatRepositoryPopUp indexOfSelectedItem];
+	NSString *newSpecifier = repositorySpecifierStrings[index];
+    NSText *fieldEditor = [formatSheetField currentEditor];
 	NSRange selRange;
 	
-	if (!newSpecifier || [newSpecifier isEqualToString:@""])
+	if ([NSString isEmptyString:newSpecifier])
 		return;
 	
     if (fieldEditor) {
 		selRange = NSMakeRange([fieldEditor selectedRange].location + 2, [newSpecifier length] - 2);
 		[fieldEditor insertText:newSpecifier];
 	} else {
-		NSString *formatString = [formatField stringValue];
+		NSString *formatString = [formatSheetField stringValue];
 		selRange = NSMakeRange([formatString length] + 2, [newSpecifier length] - 2);
-		[formatField setStringValue:[formatString stringByAppendingString:newSpecifier]];
+		[formatSheetField setStringValue:[formatString stringByAppendingString:newSpecifier]];
 	}
 	
 	// this handles the new defaults and the UI update
@@ -157,67 +220,129 @@
 		selRange.location += 1;
 		selRange.length = 0;
 	}
-	[formatField selectText:self];
-	[[formatField currentEditor] setSelectedRange:selRange];
+	else if ([newSpecifier isEqualToString:@"%f{Cite Key}"]) {
+		selRange.location += 10;
+		selRange.length = 0;
+	}
+	[formatSheetField selectText:self];
+	[[formatSheetField currentEditor] setSelectedRange:selRange];
 }
 
 - (IBAction)localUrlFormatChanged:(id)sender{
 	int presetChoice = 0;
 	NSString *formatString;
 	
-	if (sender == formatPresetPopUp) {
-		presetChoice = [[formatPresetPopUp selectedItem] tag];
+	if (sender == formatPresetPopUp || sender == formatPresetSheetPopUp) {
+		presetChoice = [[sender selectedItem] tag];
 		if (presetChoice == [defaults integerForKey:BDSKLocalUrlFormatPresetKey]) 
 			return; // nothing changed
 		[defaults setInteger:presetChoice forKey:BDSKLocalUrlFormatPresetKey];
-		switch (presetChoice) {
-			case 1:
-				formatString = @"%L";
-				break;
-			case 2:
-				formatString = @"%l%n0%e";
-				break;
-			case 3:
-				formatString = @"%a1/%Y%u0.pdf";
-				break;
-			case 4:
-				formatString = @"%a1/%T5.pdf";
-				break;
-			default:
-				formatString = [formatField stringValue];
+		if (presetChoice > 0) {
+			formatString = presetFormatStrings[presetChoice - 1];
+		} else if (presetChoice == 0) {
+			formatString = [formatSheetField stringValue];
+			if (sender == formatPresetPopUp)
+				[self showFormatSheet:self];
+		} else {
+			return;
 		}
 		// this one is always valid
 		[defaults setObject:formatString forKey:BDSKLocalUrlFormatKey];
 	}
 	else { //changed the text field or added from the repository
-		NSString *error;
-		formatString = [formatField stringValue];
+		NSString *error = nil;
+		NSAttributedString *attrFormat = nil;
+		formatString = [formatSheetField stringValue];
 		//if ([formatString isEqualToString:[defaults stringForKey:BDSKLocalUrlFormatKey]]) return; // nothing changed
-		if ([[BDSKFormatParser sharedParser] validateFormat:&formatString forField:BDSKLocalUrlString inFileType:BDSKBibtexString error:&error]) {
+		if ([BDSKFormatParser validateFormat:&formatString attributedFormat:&attrFormat forField:BDSKLocalUrlString inFileType:BDSKBibtexString error:&error]) {
 			[defaults setObject:formatString forKey:BDSKLocalUrlFormatKey];
 		}
 		else {
 			[self setLocalUrlFormatInvalidWarning:YES message:error];
+			[formatSheetField setAttributedStringValue:attrFormat];
 			return;
 		}
 	}
-	[[NSApp delegate] setRequiredFieldsForLocalUrl: [[BDSKFormatParser sharedParser] requiredFieldsForFormat:formatString]];
+	[[NSApp delegate] setRequiredFieldsForLocalUrl: [BDSKFormatParser requiredFieldsForFormat:formatString]];
 	[self updateUI];
+}
+
+#pragma mark Format sheet stuff
+
+- (IBAction)showFormatSheet:(id)sender{
+	
+    [NSApp beginSheet:formatSheet
+       modalForWindow:[[self controlBox] window]
+        modalDelegate:self
+       didEndSelector:NULL
+          contextInfo:nil];
+}
+
+- (BOOL)canCloseFormatSheet{
+	NSString *formatString = [formatSheetField stringValue];
+	NSString *error = nil;
+	NSString *otherButton = nil;
+	
+	if ([formatSheet makeFirstResponder:nil])
+		[formatSheet endEditingFor:nil];
+	
+	if ([BDSKFormatParser validateFormat:&formatString forField:BDSKCiteKeyString inFileType:BDSKBibtexString error:&error]) 
+		return YES;
+	
+	formatString = [defaults stringForKey:BDSKLocalUrlFormatKey];
+	if ([BDSKFormatParser validateFormat:&formatString forField:BDSKLocalUrlString inFileType:BDSKBibtexString error:NULL]) {
+		// The currently set local-url format is valid, so we can keep it 
+		otherButton = NSLocalizedString(@"Revert to Last", @"Revert to Last Valid Local-Url Format");
+	}
+	
+	BDSKAlert *alert = [BDSKAlert alertWithMessageText:NSLocalizedString(@"Invalid Local-Url Format",@"") 
+										 defaultButton:NSLocalizedString(@"Keep Editing", @"Keep Editing") 
+									   alternateButton:NSLocalizedString(@"Revert to Default", @"Revert to Default Local-Url Format") 
+										   otherButton:otherButton
+							 informativeTextWithFormat:@"%@", error];
+	int rv = [alert runSheetModalForWindow:formatSheet
+							 modalDelegate:nil
+							didEndSelector:NULL 
+						didDismissSelector:NULL 
+							   contextInfo:NULL];
+	
+	if (rv == NSAlertDefaultReturn){
+		[formatSheetField selectText:self];
+		return NO;
+	} else if (rv == NSAlertAlternateReturn){
+		formatString = [[[OFPreferenceWrapper sharedPreferenceWrapper] preferenceForKey:BDSKLocalUrlFormatKey] defaultObjectValue];
+		[[OFPreferenceWrapper sharedPreferenceWrapper] setObject:formatString forKey:BDSKLocalUrlFormatKey];
+		[[NSApp delegate] setRequiredFieldsForLocalUrl: [BDSKFormatParser requiredFieldsForFormat:formatString]];
+	}
+	[self updateUI];
+	return YES;
+}
+
+- (IBAction)closeFormatSheet:(id)sender{
+    if([self canCloseFormatSheet]){
+        [formatSheet orderOut:sender];
+        [NSApp endSheet:formatSheet];
+    }
 }
 
 #pragma mark Invalid format warning stuff
 
 - (IBAction)showLocalUrlFormatWarning:(id)sender{
 	NSString *msg = [sender toolTip];
-	int rv;
 	
-	if (msg == nil || [msg isEqualToString:@""]) {
+	if ([NSString isEmptyString:msg]) {
 		msg = NSLocalizedString(@"The format string you entered contains invalid format specifiers.",@"");
 	}
-	rv = NSRunCriticalAlertPanel(NSLocalizedString(@"",@""), 
-								 @"%@",
-								 NSLocalizedString(@"OK",@"OK"), nil, nil, 
-								 msg, nil);
+	
+	NSAlert *alert = [NSAlert alertWithMessageText:NSLocalizedString(@"Invalid Local-Url Format",@"") 
+									 defaultButton:NSLocalizedString(@"OK",@"OK") 
+								   alternateButton:nil 
+									   otherButton:nil 
+						 informativeTextWithFormat:@"%@", msg];
+	[alert beginSheetModalForWindow:formatSheet 
+					  modalDelegate:nil
+					 didEndSelector:NULL 
+						contextInfo:NULL];
 }
 
 - (void)setLocalUrlFormatInvalidWarning:(BOOL)set message:message{
@@ -229,7 +354,7 @@
 		[formatWarningButton setToolTip:NSLocalizedString(@"",@"")]; // @@ this should be nil?
 	}
 	[formatWarningButton setEnabled:set];
-	[formatField setTextColor:(set ? [NSColor redColor] : [NSColor blackColor])]; // overdone?
+	[formatSheetField setTextColor:(set ? [NSColor redColor] : [NSColor blackColor])]; // overdone?
 }
 
 @end

@@ -14,12 +14,10 @@
         {
             ACTIONS = {
                 changeEditOnPaste = id; 
-                changePreviewDisplay = id; 
-                changePreviewMaxNumber = id; 
                 changeStartupBehavior = id; 
+                changeWarnOnDelete = id; 
+                changeWarnOnRenameGroup = id; 
                 chooseAutoOpenFile = id; 
-                chooseFont = id; 
-                selectPreviewFont = id; 
                 setAutoOpenFilePath = id; 
                 toggleAutoCheckForUpdates = id; 
             }; 
@@ -28,14 +26,10 @@
             OUTLETS = {
                 checkForUpdatesButton = NSButton; 
                 defaultBibFileTextField = NSTextField; 
-                displayPrefRadioMatrix = NSMatrix; 
                 editOnPasteButton = NSButton; 
-                openSheetAccessoryView = NSView; 
-                previewFontPopup = NSPopUpButton; 
-                previewMaxNumberComboBox = NSComboBox; 
                 startupBehaviorRadio = NSMatrix; 
-                tableViewFontPopup = NSPopUpButton; 
-                tableViewFontSizeField = NSTextField; 
+                warnOnDeleteButton = NSButton; 
+                warnOnRenameGroupButton = NSButton; 
             }; 
             SUPERCLASS = OAPreferenceClient; 
         }, 

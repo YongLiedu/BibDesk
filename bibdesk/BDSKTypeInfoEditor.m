@@ -1,15 +1,47 @@
 //
 //  BDSKTypeInfoEditor.m
-//  Bibdesk
+//  BibDesk
 //
 //  Created by Christiaan Hofman on 5/4/05.
-//  Copyright 2005 __MyCompanyName__. All rights reserved.
-//
+/*
+ This software is Copyright (c) 2005
+ Christiaan Hofman. All rights reserved.
+
+ Redistribution and use in source and binary forms, with or without
+ modification, are permitted provided that the following conditions
+ are met:
+
+ - Redistributions of source code must retain the above copyright
+   notice, this list of conditions and the following disclaimer.
+
+ - Redistributions in binary form must reproduce the above copyright
+    notice, this list of conditions and the following disclaimer in
+    the documentation and/or other materials provided with the
+    distribution.
+
+ - Neither the name of Christiaan Hofman nor the names of any
+    contributors may be used to endorse or promote products derived
+    from this software without specific prior written permission.
+
+ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+ "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+ LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+ A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+ OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+ SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+ LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+ DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+ THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+ (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ */
 
 #import "BDSKTypeInfoEditor.h"
 #import "BDSKFieldNameFormatter.h"
+#import "BDSKTypeNameFormatter.h"
 #import "BibAppController.h"
 #import "BibTypeManager.h"
+#import "NSFileManager_BDSKExtensions.h"
 
 #define BDSKTypeInfoRowsPboardType	@"BDSKTypeInfoRowsPboardType"
 
@@ -58,8 +90,9 @@ static BDSKTypeInfoEditor *sharedTypeInfoEditor;
     [optionalTableView registerForDraggedTypes:[NSArray arrayWithObject:BDSKTypeInfoRowsPboardType]];
 	
     BDSKFieldNameFormatter *fieldNameFormatter = [[[BDSKFieldNameFormatter alloc] init] autorelease];
+    BDSKTypeNameFormatter *typeNameFormatter = [[[BDSKTypeNameFormatter alloc] init] autorelease];
     NSTableColumn *tc = [typeTableView tableColumnWithIdentifier:@"type"];
-    [[tc dataCell] setFormatter:fieldNameFormatter];
+    [[tc dataCell] setFormatter:typeNameFormatter];
 	tc = [requiredTableView tableColumnWithIdentifier:@"required"];
     [[tc dataCell] setFormatter:fieldNameFormatter];
 	tc = [optionalTableView tableColumnWithIdentifier:@"optional"];
@@ -111,9 +144,6 @@ static BDSKTypeInfoEditor *sharedTypeInfoEditor;
 	}
 	NSMutableDictionary *newDict = [NSMutableDictionary dictionaryWithObjectsAndKeys: requiredFields, REQUIRED_KEY, optionalFields, OPTIONAL_KEY, nil];
 	[fieldsForTypesDict setObject:newDict forKey:newType];
-	
-	// select the new type
-	[typeTableView selectRow:[types indexOfObject:newType] byExtendingSelection:NO];
 }
 
 - (void)setCurrentType:(NSString *)newCurrentType {
@@ -145,7 +175,12 @@ static BDSKTypeInfoEditor *sharedTypeInfoEditor;
 - (IBAction)cancel:(id)sender {
     [[self window] makeFirstResponder:nil]; // commit edit before reloading
 	[self revertTypes];
-	[self close];
+    if ([[self window] isSheet]) {
+		[[self window] orderOut:sender];
+		[NSApp endSheet:[self window] returnCode:[sender tag]];
+	} else {
+		[[self window] performClose:sender];
+	}
 }
 
 - (IBAction)saveChanges:(id)sender {
@@ -172,7 +207,12 @@ static BDSKTypeInfoEditor *sharedTypeInfoEditor;
 	
 	[self setDocumentEdited:NO];
 	
-	[self close];
+    if ([[self window] isSheet]) {
+		[[self window] orderOut:sender];
+		[NSApp endSheet:[self window] returnCode:[sender tag]];
+	} else {
+		[[self window] performClose:sender];
+	}
 }
 
 - (IBAction)addType:(id)sender {
@@ -186,7 +226,7 @@ static BDSKTypeInfoEditor *sharedTypeInfoEditor;
     [typeTableView reloadData];
 	
     int row = [types indexOfObject:newType];
-    [typeTableView selectRow:row byExtendingSelection:NO];
+    [typeTableView selectRowIndexes:[NSIndexSet indexSetWithIndex:row] byExtendingSelection:NO];
 	[[[typeTableView tableColumnWithIdentifier:@"type"] dataCell] setEnabled:YES];
     [typeTableView editColumn:0 row:row withEvent:nil select:YES];
 	
@@ -194,18 +234,13 @@ static BDSKTypeInfoEditor *sharedTypeInfoEditor;
 }
 
 - (IBAction)removeType:(id)sender {
-	NSEnumerator *typeEnum = [typeTableView selectedRowEnumerator];
-	NSNumber *row;
-	NSMutableArray *typesToRemove = [NSMutableArray arrayWithCapacity:1];
+	NSIndexSet *indexesToRemove = [typeTableView selectedRowIndexes];
+	NSArray *typesToRemove = [types objectsAtIndexes:indexesToRemove];
 	
 	// make sure we stop editing
 	[[self window] makeFirstResponder:typeTableView];
 	
-	
-	while (row = [typeEnum nextObject]) {
-		[typesToRemove addObject:[types objectAtIndex:[row intValue]]];
-	}
-	[types removeObjectsInArray:typesToRemove];
+	[types removeObjectsAtIndexes:indexesToRemove];
 	[fieldsForTypesDict removeObjectsForKeys:typesToRemove];
 	
     [typeTableView reloadData];
@@ -225,7 +260,7 @@ static BDSKTypeInfoEditor *sharedTypeInfoEditor;
     [requiredTableView reloadData];
 	
     int row = [currentRequiredFields indexOfObject:newField];
-    [requiredTableView selectRow:row byExtendingSelection:NO];
+    [requiredTableView selectRowIndexes:[NSIndexSet indexSetWithIndex:row] byExtendingSelection:NO];
 	[[[requiredTableView tableColumnWithIdentifier:@"required"] dataCell] setEnabled:YES];
     [requiredTableView editColumn:0 row:row withEvent:nil select:YES];
 	
@@ -233,17 +268,12 @@ static BDSKTypeInfoEditor *sharedTypeInfoEditor;
 }
 
 - (IBAction)removeRequired:(id)sender  {
-	NSEnumerator *fieldEnum = [requiredTableView selectedRowEnumerator];
-	NSNumber *row;
-	NSMutableArray *fieldsToRemove = [NSMutableArray arrayWithCapacity:1];
+	NSIndexSet *indexesToRemove = [requiredTableView selectedRowIndexes];
 	
 	// make sure we stop editing
 	[[self window] makeFirstResponder:requiredTableView];
 	
-	while (row = [fieldEnum nextObject]) {
-		[fieldsToRemove addObject:[currentRequiredFields objectAtIndex:[row intValue]]];
-	}
-	[currentRequiredFields removeObjectsInArray:fieldsToRemove];
+	[currentRequiredFields removeObjectsAtIndexes:indexesToRemove];
 	
     [requiredTableView reloadData];
     [requiredTableView deselectAll:nil];
@@ -262,7 +292,7 @@ static BDSKTypeInfoEditor *sharedTypeInfoEditor;
     [optionalTableView reloadData];
 	
     int row = [currentOptionalFields indexOfObject:newField];
-    [optionalTableView selectRow:row byExtendingSelection:NO];
+    [optionalTableView selectRowIndexes:[NSIndexSet indexSetWithIndex:row] byExtendingSelection:NO];
 	[[[optionalTableView tableColumnWithIdentifier:@"optional"] dataCell] setEnabled:YES];
     [optionalTableView editColumn:0 row:row withEvent:nil select:YES];
 	
@@ -270,18 +300,12 @@ static BDSKTypeInfoEditor *sharedTypeInfoEditor;
 }
 
 - (IBAction)removeOptional:(id)sender {
-	NSEnumerator *fieldEnum = [optionalTableView selectedRowEnumerator];
-	NSNumber *row;
-	NSMutableArray *fieldsToRemove = [NSMutableArray arrayWithCapacity:1];
+	NSIndexSet *indexesToRemove = [optionalTableView selectedRowIndexes];
 	
 	// make sure we stop editing
 	[[self window] makeFirstResponder:optionalTableView];
 
-	
-	while (row = [fieldEnum nextObject]) {
-		[fieldsToRemove addObject:[currentOptionalFields objectAtIndex:[row intValue]]];
-	}
-	[currentOptionalFields removeObjectsInArray:fieldsToRemove];
+	[currentOptionalFields removeObjectsAtIndexes:indexesToRemove];
 	
 	[optionalTableView reloadData];
 	[optionalTableView deselectAll:nil];
@@ -343,9 +367,21 @@ static BDSKTypeInfoEditor *sharedTypeInfoEditor;
 	return YES; // any other fields of default types can be removed
 }
 
+- (BOOL)canEditTableView:(NSTableView *)tv row:(int)row{
+	if (tv == typeTableView)
+		return [self canEditType:[types objectAtIndex:row]];
+	if ([self canEditType:currentType])
+		return YES; // if we can edit the type, we can edit all the fields
+	if (tv == requiredTableView)
+		return [self canEditField:[currentRequiredFields objectAtIndex:row]];
+	if (tv == optionalTableView)
+		return [self canEditField:[currentOptionalFields objectAtIndex:row]];
+    return NO;
+}
+
 - (void)updateButtons {
-	NSEnumerator *rowEnum;
-	NSNumber *row;
+	NSIndexSet *rowIndexes;
+	int row;
 	BOOL canRemove;
 	NSString *value;
 	
@@ -354,14 +390,16 @@ static BDSKTypeInfoEditor *sharedTypeInfoEditor;
 	if ([typeTableView numberOfSelectedRows] == 0) {
 		[removeTypeButton setEnabled:NO];
 	} else {
-		rowEnum = [typeTableView selectedRowEnumerator];
+		rowIndexes = [typeTableView selectedRowIndexes];
+		row = [rowIndexes firstIndex];
 		canRemove = YES;
-		while (row = [rowEnum nextObject]) {
-			value = [types objectAtIndex:[row intValue]];
+		while (row != NSNotFound) {
+			value = [types objectAtIndex:row];
 			if (![self canEditType:value]) {
 				canRemove = NO;
 				break;
 			}
+			row = [rowIndexes indexGreaterThanIndex:row];
 		}
 		[removeTypeButton setEnabled:canRemove];
 	}
@@ -371,14 +409,16 @@ static BDSKTypeInfoEditor *sharedTypeInfoEditor;
 	if ([requiredTableView numberOfSelectedRows] == 0) {
 		[removeRequiredButton setEnabled:NO];
 	} else {
-		rowEnum = [requiredTableView selectedRowEnumerator];
+		rowIndexes = [requiredTableView selectedRowIndexes];
+		row = [rowIndexes firstIndex];
 		canRemove = YES;
-		while (row = [rowEnum nextObject]) {
-			value = [currentRequiredFields objectAtIndex:[row intValue]];
+		while (row != NSNotFound) {
+			value = [currentRequiredFields objectAtIndex:row];
 			if (![self canEditField:value]) {
 				canRemove = NO;
 				break;
 			}
+			row = [rowIndexes indexGreaterThanIndex:row];
 		}
 		[removeRequiredButton setEnabled:canRemove];
 	}
@@ -388,14 +428,16 @@ static BDSKTypeInfoEditor *sharedTypeInfoEditor;
 	if ([optionalTableView numberOfSelectedRows] == 0) {
 		[removeOptionalButton setEnabled:NO];
 	} else {
-		rowEnum = [optionalTableView selectedRowEnumerator];
+		rowIndexes = [optionalTableView selectedRowIndexes];
+		row = [rowIndexes firstIndex];
 		canRemove = YES;
-		while (row = [rowEnum nextObject]) {
-			value = [currentOptionalFields objectAtIndex:[row intValue]];
+		while (row != NSNotFound) {
+			value = [currentOptionalFields objectAtIndex:row];
 			if (![self canEditField:value]) {
 				canRemove = NO;
 				break;
 			}
+			row = [rowIndexes indexGreaterThanIndex:row];
 		}
 		[removeOptionalButton setEnabled:canRemove];
 	}
@@ -418,6 +460,8 @@ static BDSKTypeInfoEditor *sharedTypeInfoEditor;
 	else if (tv == optionalTableView) {
 		return [currentOptionalFields count];
 	}
+    // not reached
+    return 0;
 }
 
 - (id)tableView:(NSTableView *)tv objectValueForTableColumn:(NSTableColumn *)tableColumn row:(int)row{
@@ -430,6 +474,8 @@ static BDSKTypeInfoEditor *sharedTypeInfoEditor;
 	else if (tv == optionalTableView) {
 		return [currentOptionalFields objectAtIndex:row];
 	}
+    // not reached
+    return nil;
 }
 
 - (void)tableView:(NSTableView *)tv setObjectValue:(id)object forTableColumn:(NSTableColumn *)tableColumn row:(int)row {
@@ -478,23 +524,17 @@ static BDSKTypeInfoEditor *sharedTypeInfoEditor;
 
 #pragma mark NSTableview delegate
 
+- (BOOL)tableView:(NSTableView *)tv shouldEditTableColumn:(NSTableColumn *)tableColumn row:(int)row{
+	return [self canEditTableView:tv row:row];
+}
+
 - (void)tableView:(NSTableView *)tv willDisplayCell:(id)cell forTableColumn:(NSTableColumn *)tableColumn row:(int)row {
-	NSString *value;
-	if (tv == typeTableView) {
-		value = [types objectAtIndex:row];
-		[cell setEnabled:[self canEditType:value]];
-	}
-	else if ([self canEditType:currentType]) {
-		 // if we can edit the type, we can edit all the fields
-		[cell setEnabled:YES];
-	}
-	else if (tv == requiredTableView) {
-		value = [currentRequiredFields objectAtIndex:row];
-		[cell setEnabled:[self canEditField:value]];
-	}
-	else if (tv == optionalTableView) {
-		value = [currentOptionalFields objectAtIndex:row];
-		[cell setEnabled:[self canEditField:value]];
+	if ([self canEditTableView:tv row:row]) {
+		[cell setTextColor:[NSColor controlTextColor]]; // when selected, this is automatically changed to white
+	} else if ([[self window] isKeyWindow] && [[self window] firstResponder] == tv && [tv isRowSelected:row]) {
+		[cell setTextColor:[NSColor lightGrayColor]]; // selected disabled
+	} else {
+		[cell setTextColor:[NSColor darkGrayColor]]; // unselected disabled
 	}
 }
 
@@ -526,9 +566,11 @@ static BDSKTypeInfoEditor *sharedTypeInfoEditor;
 	NSEnumerator *rowEnum = [rows objectEnumerator];
 	NSNumber *rowNum;
 	int i;
-	int offset = 0;
+	int insertRow = row;
 	NSMutableArray *fields = nil;
-	NSString *field;
+	NSArray *draggedFields;
+	NSMutableIndexSet *removeIndexes = [NSMutableIndexSet indexSet];
+	NSIndexSet *insertIndexes;
 	
 	// find the array of fields
 	if (tv == typeTableView) {
@@ -541,28 +583,26 @@ static BDSKTypeInfoEditor *sharedTypeInfoEditor;
 	
 	NSAssert(fields != nil, @"An error occurred:  fields must not be nil when dragging");
 	
-	// move the rows
 	while (rowNum = [rowEnum nextObject]) {
-		i = [rowNum intValue] - offset;
-		if (i < row) {
-			--row;
-			++offset;
-		}
-		field = [[fields objectAtIndex:i] retain];
-		[fields removeObjectAtIndex:i];
-		[fields insertObject:field atIndex:row++];
-        [field release];
+		i = [rowNum intValue];
+		if (i < row) insertRow--;
+		[removeIndexes addIndex:i];
 	}
 	
-	//select the moved rows
-	[tv deselectAll:nil];
-	for (i = row; i > (row - [rows count]); i--) {
-		[tv selectRow:i-1 byExtendingSelection:[tv allowsMultipleSelection]];
-	}
+	draggedFields = [fields objectsAtIndexes:removeIndexes];
+	insertIndexes = [NSIndexSet indexSetWithIndexesInRange:NSMakeRange(insertRow, [rows count])];
+	[fields removeObjectsAtIndexes:removeIndexes];
+	[fields insertObjects:draggedFields atIndexes:insertIndexes];
 	
+	// select the moved rows
+	if(![tv allowsMultipleSelection])
+		insertIndexes = [NSIndexSet indexSetWithIndex:[insertIndexes firstIndex]];
+	[tv selectRowIndexes:insertIndexes byExtendingSelection:NO];
 	[tv reloadData];
 	
 	[self setDocumentEdited:YES];
+    
+    return YES;
 }
 
 #pragma mark NSTableView notifications

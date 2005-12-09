@@ -1,13 +1,84 @@
 //
 //  BDSKTextImportController.m
-//  Bibdesk
+//  BibDesk
 //
 //  Created by Michael McCracken on 4/13/05.
-//  Copyright 2005 __MyCompanyName__. All rights reserved.
-//
+/*
+ This software is Copyright (c) 2005
+ Michael O. McCracken. All rights reserved.
+
+ Redistribution and use in source and binary forms, with or without
+ modification, are permitted provided that the following conditions
+ are met:
+
+ - Redistributions of source code must retain the above copyright
+   notice, this list of conditions and the following disclaimer.
+
+ - Redistributions in binary form must reproduce the above copyright
+    notice, this list of conditions and the following disclaimer in
+    the documentation and/or other materials provided with the
+    distribution.
+
+ - Neither the name of Michael O. McCracken nor the names of any
+    contributors may be used to endorse or promote products derived
+    from this software without specific prior written permission.
+
+ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+ "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+ LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+ A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+ OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+ SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+ LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+ DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+ THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+ (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ */
 
 #import "BDSKTextImportController.h"
-#import <Carbon/Carbon.h>
+#import "BDSKFormCellFormatter.h"
+#import "BDSKCiteKeyFormatter.h"
+#import "BDSKFieldNameFormatter.h"
+#import "BDSKEdgeView.h"
+#import <WebKit/WebKit.h>
+#import "BibDocument.h"
+#import "RYZImagePopUpButtonCell.h"
+#import "NSFileManager_BDSKExtensions.h"
+
+@interface BDSKTextImportController (Private)
+
+- (void)loadPasteboardData;
+- (void)showWebViewWithURLString:(NSString *)urlString;
+- (void)setShowingWebView:(BOOL)showWebView;
+- (void)setupTypeUI;
+- (void)setType:(NSString *)type;
+
+- (void)sheetDidEnd:(NSPanel *)sheet returnCode:(int)returnCode contextInfo:(void *)contextInfo;
+
+- (void)openPanelDidEnd:(NSOpenPanel *)sheet returnCode:(int)returnCode contextInfo:(void *)contextInfo;
+- (void)urlSheetDidEnd:(NSPanel *)sheet returnCode:(int)returnCode contextInfo:(void *)contextInfo;
+- (void)savePanelDidEnd:(NSSavePanel *)sheet returnCode:(int)returnCode contextInfo:(void *)contextInfo;
+- (void)addFieldSheetDidEnd:(NSWindow *)sheet returnCode:(int)returnCode contextInfo:(void *)contextInfo;
+
+- (void)setLoading:(BOOL)loading;
+
+- (void)cancelDownload;
+- (void)setLocalUrlFromDownload;
+- (void)setDownloading:(BOOL)downloading;
+- (void)saveDownloadPanelDidEnd:(NSSavePanel *)sheet returnCode:(int)returnCode contextInfo:(void *)contextInfo;
+
+- (void)addCurrentSelectionToFieldAtIndex:(int)index;
+- (NSFormatter *)formatterForEntry:(NSString *)entry;
+
+- (void)addBookmarkWithURLString:(NSString *)URLString title:(NSString *)title;
+- (void)saveBookmarks;
+- (void)addBookmarkSheetDidEnd:(NSOpenPanel *)sheet returnCode:(int)returnCode contextInfo:(void *)contextInfo;
+
+- (BOOL)editSelectedCellAsMacro;
+- (void)macroEditorDidEndEditing:(NSControl *)control withValue:(NSString *)value contextInfo:(void *)contextInfo;
+
+@end
 
 @implementation BDSKTextImportController
 
@@ -18,8 +89,10 @@
         item = [[BibItem alloc] init];
         fields = [[NSMutableArray alloc] init];
 		bookmarks = [[NSMutableArray alloc] init];
+	 	formatters = [[NSMutableDictionary alloc] initWithCapacity:15];
         showingWebView = NO;
         itemsAdded = 0;
+		webSelection = nil;
 		
 		NSString *applicationSupportPath = [[[NSFileManager defaultManager] applicationSupportDirectory:kUserDomain] stringByAppendingPathComponent:@"BibDesk"]; 
 		NSString *bookmarksPath = [applicationSupportPath stringByAppendingPathComponent:@"Bookmarks.plist"];
@@ -31,6 +104,7 @@
 				[bookmarks addObject:[[bm mutableCopy] autorelease]];
 			}
 		}
+		macroTextFieldWC = [[MacroTextFieldWindowController alloc] init];
     }
     return self;
 }
@@ -39,164 +113,57 @@
     [item release];
     [fields release];
     [bookmarks release];
+    [formatters release];
     [sourceBox release];
     [webViewView release];
+	[macroTextFieldWC release];
+	[webSelection release];
     [super dealloc];
 }
 
 - (void)awakeFromNib{
 	[itemTableView registerForDraggedTypes:[NSArray arrayWithObject:NSStringPboardType]];
     [statusLine setStringValue:@""];
-    [citeKeyLine setStringValue:[item citeKey]];
-	[webViewBox setContentViewMargins:NSZeroSize];
+	[webViewBox setEdges:BDSKEveryEdgeMask];
+	[webViewBox setColor:[NSColor lightGrayColor] forEdge:NSMaxYEdge];
 	[webViewBox setContentView:webView];
     [self setupTypeUI];
     [sourceBox retain];
     [webViewView retain];
+	[webView setEditingDelegate:self];
     [itemTableView setDoubleAction:@selector(addTextToCurrentFieldAction:)];
     [self setWindowFrameAutosaveName:@"BDSKTextImportController Frame Autosave Name"];
+	[fieldNameField setFormatter:[[[BDSKFieldNameFormatter alloc] init] autorelease]];
+	// Set the properties of actionMenuButton that cannot be set in IB
+	[actionMenuButton setAlternateImage:[NSImage imageNamed:@"Action_Pressed"]];
+	[actionMenuButton setArrowImage:nil];
+	[actionMenuButton setShowsMenuWhenIconClicked:YES];
+	[[actionMenuButton cell] setAltersStateOfSelectedItem:NO];
+	[[actionMenuButton cell] setAlwaysUsesFirstItemAsSelected:NO];
+	[[actionMenuButton cell] setUsesItemFromMenu:NO];
+	[[actionMenuButton cell] setRefreshesMenu:NO];
 }
 
+#pragma mark Calling the main sheet
 
-- (void)loadPasteboardData{
-    NSPasteboard* pb = [NSPasteboard generalPasteboard];
-
-    NSArray *typeArray = [NSArray arrayWithObjects:NSURLPboardType, NSRTFDPboardType, 
-        NSRTFPboardType, NSStringPboardType, nil];
-    
-    NSString *pbType = [pb availableTypeFromArray:typeArray];    
-    if([pbType isEqualToString:NSURLPboardType]){
-        // setup webview and load page
-        
-		[self setShowingWebView:YES];
-        
-        NSArray *urls = (NSArray *)[pb propertyListForType:pbType];
-        NSURL *url = [NSURL URLWithString:[urls objectAtIndex:0]];
-        NSURLRequest *urlreq = [NSURLRequest requestWithURL:url];
-        
-        [[webView mainFrame] loadRequest:urlreq];
-        
-    }else{
-		
-		[self setShowingWebView:NO];
-		
-        NSString *pbString = nil;
-        NSData *pbData = [pb dataForType:pbType];
-        
-		if([pbType isEqualToString:NSRTFPboardType]){
-            pbString = [[[NSAttributedString alloc] initWithRTF:pbData
-                                             documentAttributes:NULL] autorelease];
-            pbString = [[(NSAttributedString *)pbString string] stringByRemovingSurroundingWhitespace];
-
-            if([pbString rangeOfString:@"http://"].location == 0){
-                [self showWebViewWithURLString:pbString];
-            }else{
-                NSRange r = NSMakeRange(0,[[sourceTextView string] length]);
-                [sourceTextView replaceCharactersInRange:r withRTF:pbData];
-			}
-            
-		}else if([pbType isEqualToString:NSRTFDPboardType]){
-            pbString = [[[NSAttributedString alloc] initWithRTFD:pbData
-                                              documentAttributes:NULL] autorelease];
-            pbString = [[(NSAttributedString *)pbString string] stringByRemovingSurroundingWhitespace];
-            
-            if([pbString rangeOfString:@"http://"].location == 0){
-                [self showWebViewWithURLString:pbString];
-            }else{
-                NSRange r = NSMakeRange(0,[[sourceTextView string] length]);
-                [sourceTextView replaceCharactersInRange:r withRTFD:pbData];
-            }
-            
-		}else if([pbType isEqualToString:NSStringPboardType]){
-            pbString = [pb stringForType:pbType];
-            pbString = [pbString stringByRemovingSurroundingWhitespace];
-			if([pbString rangeOfString:@"http://"].location == 0){
-                [self showWebViewWithURLString:pbString];
-            }else{
-                [sourceTextView setString:pbString];
-            }
-		}else {
-			
-			[sourceTextView setString:@""];
-		}
-	}
-}
-
-- (void)showWebViewWithURLString:(NSString *)urlString{
-    [self setShowingWebView:YES];
-    NSURL *url = [NSURL URLWithString:[urlString stringByRemovingSurroundingWhitespace]];
-    NSURLRequest *urlreq = [NSURLRequest requestWithURL:url];
-    
-    [[webView mainFrame] loadRequest:urlreq];
-        
-}
-
-
-- (void)setupTypeUI{
-
-    // setup the type popup:
-    NSEnumerator *typeNamesE = [[[BibTypeManager sharedManager] bibTypesForFileType:[item fileType]] objectEnumerator];
-    NSString *typeName = nil;
-    
-    [itemTypeButton removeAllItems];
-    while(typeName = [typeNamesE nextObject]){
-        [itemTypeButton addItemWithTitle:typeName];
-    }
-    
-    NSString *type = [[OFPreferenceWrapper sharedPreferenceWrapper] objectForKey:BDSKPubTypeStringKey];
-    
-    [self setType:type];
-    
-    [itemTableView reloadData];
-}
-
-- (void)setShowingWebView:(BOOL)showWebView{
-	if (showWebView != showingWebView) {
-		showingWebView = showWebView;
-		if (showingWebView) {
-			[webViewView setFrame:[sourceBox frame]];
-			[splitView replaceSubview:sourceBox with:webViewView];
-		} else {
-			[splitView replaceSubview:webViewView with:sourceBox];
-		}
-	}
-}
-
-- (void)setType:(NSString *)type{
-    
-    [itemTypeButton selectItemWithTitle:type];
-    [item makeType:type];
-
-    BibTypeManager *typeMan = [BibTypeManager sharedManager];
-
-    [fields removeAllObjects];
-    
-    [fields addObjectsFromArray:[typeMan requiredFieldsForType:type]];
-    [fields addObjectsFromArray:[typeMan optionalFieldsForType:type]];
-    [fields addObjectsFromArray:[typeMan userDefaultFieldsForType:type]];
-	if (![fields containsObject:BDSKLocalUrlString]) 
-		[fields addObject:BDSKLocalUrlString];
-	if (![fields containsObject:BDSKUrlString]) 
-		[fields addObject:BDSKUrlString];
-	
-}
-
-// this should be called by the caller when the sheet is removed
-- (void)cleanup{
-    [self cancelDownload];
-	[webView stopLoading:nil];
-}
-		
 - (void)beginSheetForPasteboardModalForWindow:(NSWindow *)docWindow modalDelegate:(id)modalDelegate didEndSelector:(SEL)didEndSelector contextInfo:(void *)contextInfo{
 	// we start with the pasteboard data, so we can directly show the main sheet 
 	if (![NSBundle loadNibNamed:[self windowNibName] owner:self]) return; // make sure we loaded the nib
 	[self loadPasteboardData];
 	
+	// remember the arguments to pass in the callback later
+	theDocWindow = docWindow;
+	theModalDelegate = modalDelegate;
+	theDidEndSelector = didEndSelector;
+	theContextInfo = contextInfo;
+	
+	[self retain]; // make sure we stay around till we are done
+	
 	[NSApp beginSheet:[self window]
 	   modalForWindow:docWindow
-		modalDelegate:modalDelegate
-	   didEndSelector:didEndSelector
-		  contextInfo:contextInfo];
+		modalDelegate:self
+	   didEndSelector:@selector(sheetDidEnd:returnCode:contextInfo:) 
+		  contextInfo:NULL];
 }
 
 - (void)beginSheetForWebModalForWindow:(NSWindow *)docWindow modalDelegate:(id)modalDelegate didEndSelector:(SEL)didEndSelector contextInfo:(void *)contextInfo{
@@ -214,13 +181,15 @@
 		[bookmarkPopUpButton addItemWithTitle:[bm objectForKey:@"Title"]];
 	}
 	
-	// remember the arguments to pass for the main sheet later
+	// remember the arguments to pass in the callback later
 	theDocWindow = [docWindow retain];
 	theModalDelegate = [modalDelegate retain];
 	theDidEndSelector = didEndSelector;
-	theContextInfo = contextInfo; // this one should be retained by the caller if it is non-nil
+	theContextInfo = contextInfo;
 	
-	// now show the URL sheet
+	[self retain]; // make sure we stay around till we are done
+	
+	// now show the URL sheet. We will show the main sheet when that is done.
 	[NSApp beginSheet:urlSheet
 	   modalForWindow:docWindow
 		modalDelegate:self
@@ -232,11 +201,13 @@
 	// we start with a file, so we first ask for the file to load
 	if (![NSBundle loadNibNamed:[self windowNibName] owner:self]) return; // make sure we loaded the nib
 	
-	// remember the arguments to pass for the main sheet later
-	theDocWindow = [docWindow retain];
-	theModalDelegate = [modalDelegate retain];
+	// remember the arguments to pass in the callback later
+	theDocWindow = docWindow;
+	theModalDelegate = modalDelegate;
 	theDidEndSelector = didEndSelector;
-	theContextInfo = contextInfo; // this one should be retained by the caller if it is non-nil
+	theContextInfo = contextInfo;
+	
+	[self retain]; // make sure we stay around till we are done
 	
 	NSOpenPanel *oPanel = [NSOpenPanel openPanel];
 	[oPanel setAllowsMultipleSelection:NO];
@@ -252,23 +223,36 @@
 }
 
 #pragma mark Actions
-- (IBAction)addCurrentItemAction:(id)sender{
+
+- (IBAction)addItemAction:(id)sender{
     // make the tableview stop editing:
     [[self window] makeFirstResponder:[self window]];
     
-    [document addPublication:[item autorelease]];
+    [document addPublication:item];
+	[item setCiteKey:[item suggestedCiteKey]]; // only now can we generate, due to unique specifiers
+	[item release];
 
     [statusLine setStringValue:[NSString stringWithFormat:NSLocalizedString(@"%d publication%@ added.", @"format string for pubs added. args: one int for number added then one string for plural string."), ++itemsAdded, (itemsAdded > 1 ? @"s" : @"")]];
 
     item = [[BibItem alloc] init];
     [itemTypeButton selectItemWithTitle:[item type]];
-    [citeKeyLine setStringValue:[item citeKey]];
     [itemTableView reloadData];
 }
 
-- (IBAction)stopAddingAction:(id)sender{
-    [[self window] orderOut:sender];
-    [NSApp endSheet:[self window] returnCode:[sender tag]];
+- (IBAction)closeAction:(id)sender{
+    // make the tableview stop editing:
+    [[self window] makeFirstResponder:[self window]];
+    [NSApp endSheet:[self window] returnCode:[sender tag]]; 
+	// closing the window will be done in the callback
+}
+
+- (IBAction)addItemAndCloseAction:(id)sender{
+	[self addItemAction:sender];
+	[self closeAction:sender];
+}
+
+- (IBAction)showHelpAction:(id)sender{
+	[[NSHelpManager sharedHelpManager] openHelpAnchor:@"Adding-References-From-Text-Sources" inBook:@"BibDesk Help"];
 }
 
 - (IBAction)addTextToCurrentFieldAction:(id)sender{
@@ -276,117 +260,18 @@
     [self addCurrentSelectionToFieldAtIndex:[sender selectedRow]];
 }
 
-
-- (void)addCurrentSelectionToFieldAtIndex:(int)index{    
-    NSString *selKey = [fields objectAtIndex:index];
-    NSString *selString = nil;
-
-    if(showingWebView){
-		NSView *docView = [[[webView mainFrame] frameView] documentView];
-		if (![docView conformsToProtocol:@protocol(WebDocumentText)]) return;
-		selString = [docView selectedString];
-        NSLog(@"selstr %@", selString);
-    }else{
-        NSRange selRange = [sourceTextView selectedRange];
-        NSLayoutManager *layoutManager = [sourceTextView layoutManager];
-        NSColor *foregroundColor = [NSColor lightGrayColor]; 
-        NSDictionary *highlightAttrs = [NSDictionary dictionaryWithObjectsAndKeys: foregroundColor, NSForegroundColorAttributeName, nil];
-
-        selString = [[sourceTextView string] substringWithRange:selRange];
-        [layoutManager addTemporaryAttributes:highlightAttrs
-                            forCharacterRange:selRange];
-    }
-    [item setField:selKey toValue:selString];
-    
-    [item setCiteKey:[item suggestedCiteKey]];
-    [citeKeyLine setStringValue:[item citeKey]];
-    
-    [itemTableView reloadData];
-}
-
 - (IBAction)changeTypeOfBibAction:(id)sender{
     NSString *type = [[sender selectedItem] title];
     [self setType:type];
     [[OFPreferenceWrapper sharedPreferenceWrapper] setObject:type
                                                       forKey:BDSKPubTypeStringKey];
-    [item setCiteKey:[item suggestedCiteKey]];
-    [citeKeyLine setStringValue:[item citeKey]];
 
+	[[item undoManager] setActionName:NSLocalizedString(@"Change Type",@"")];
     [itemTableView reloadData];
 }
 
 - (IBAction)importFromPasteboardAction:(id)sender{
 	[self loadPasteboardData];
-}
-
-- (IBAction)importFromFileAction:(id)sender{
-    NSOpenPanel *oPanel = [NSOpenPanel openPanel];
-    [oPanel setAllowsMultipleSelection:NO];
-    [oPanel setCanChooseDirectories:NO];
-
-    [oPanel beginSheetForDirectory:nil 
-                              file:nil 
-							 types:nil
-                    modalForWindow:[self window]
-                     modalDelegate:self 
-                    didEndSelector:@selector(openPanelDidEnd:returnCode:contextInfo:) 
-                       contextInfo:nil];
-}
-
-- (void)openPanelDidEnd:(NSOpenPanel *)sheet returnCode:(int)returnCode contextInfo:(void *)contextInfo{
-	// this variable is true when we called the open sheet initially before showing the main window 
-	BOOL initialFileLoad = [[(NSNumber *)contextInfo autorelease] boolValue];
-	
-	if (initialFileLoad) {
-		// this is the initial web load, the main window is not yet there
-		
-		// we need to release these, as we had retained them
-		[theDocWindow autorelease];
-		[theModalDelegate autorelease];
-		
-		if (returnCode == NSOKButton) {
-			// show the main window and pass it the information initially given by the modalDelegate
-			
-			[NSApp beginSheet:[self window]
-			   modalForWindow:theDocWindow
-				modalDelegate:theModalDelegate
-			   didEndSelector:theDidEndSelector
-				  contextInfo:theContextInfo];
-			
-		} else {
-			// the user cancelled. As we don't end the main sheet we have to call the didEndSelector ourselves
-			
-			NSMethodSignature *signature = [theModalDelegate methodSignatureForSelector:theDidEndSelector];
-			NSInvocation *invocation = [NSInvocation invocationWithMethodSignature:signature];
-			[invocation setSelector:theDidEndSelector];
-			[invocation setArgument:&sheet atIndex:2];
-			[invocation setArgument:&returnCode atIndex:3];
-			[invocation setArgument:&theContextInfo atIndex:4];
-			[invocation invokeWithTarget:theModalDelegate];
-			
-		}
-	}
-	
-	// now do the things we need to do always
-    if(returnCode == NSOKButton){
-        NSString *fileName = [sheet filename];
-		NSURL *url = [NSURL fileURLWithPath:fileName];
-		NSTextStorage *text = [sourceTextView textStorage];
-		NSLayoutManager *layoutManager = [[text layoutManagers] objectAtIndex:0];
-
-		[[text mutableString] setString:@""];	// Empty the document
-		
-		[self setShowingWebView:NO];
-		
-		[layoutManager retain];			// Temporarily remove layout manager so it doesn't do any work while loading
-		[text removeLayoutManager:layoutManager];
-		[text beginEditing];			// Bracket with begin/end editing for efficiency
-		[text readFromURL:url options:nil documentAttributes:NULL];	// Read!
-		[text endEditing];
-		[text addLayoutManager:layoutManager];	// Hook layout manager back up
-		[layoutManager release];
-
-    }        
 }
 
 - (IBAction)importFromWebAction:(id)sender{
@@ -403,7 +288,7 @@
        modalForWindow:[self window]
         modalDelegate:self
        didEndSelector:@selector(urlSheetDidEnd:returnCode:contextInfo:)
-          contextInfo:nil];
+          contextInfo:NULL];
 }
 
 - (IBAction)dismissUrlSheet:(id)sender{
@@ -411,62 +296,18 @@
     [NSApp endSheet:urlSheet returnCode:[sender tag]];
 }
 
-- (void)urlSheetDidEnd:(NSPanel *)sheet returnCode:(int)returnCode contextInfo:(void *)contextInfo{
-	// this variable is true when we called the URL sheet initially before showing the main window 
-	BOOL initialWebLoad = [[(NSNumber *)contextInfo autorelease] boolValue];
-	
-	if (initialWebLoad) {
-		// this is the initial web load, the main window is not yet there
-		
-		// we need to release these, as we had retained them
-		[theDocWindow autorelease];
-		[theModalDelegate autorelease];
-		
-		if (returnCode == NSOKButton) {
-			// show the main window and pass it the information initially given by the modalDelegate
-			
-			[NSApp beginSheet:[self window]
-			   modalForWindow:theDocWindow
-				modalDelegate:theModalDelegate
-			   didEndSelector:theDidEndSelector
-				  contextInfo:theContextInfo];
-			
-		} else {
-			// the user cancelled. As we don't end the main sheet we have to call the didEndSelector ourselves
-			
-			NSMethodSignature *signature = [theModalDelegate methodSignatureForSelector:theDidEndSelector];
-			NSInvocation *invocation = [NSInvocation invocationWithMethodSignature:signature];
-			[invocation setSelector:theDidEndSelector];
-			[invocation setArgument:&sheet atIndex:2];
-			[invocation setArgument:&returnCode atIndex:3];
-			[invocation setArgument:&theContextInfo atIndex:4];
-			[invocation invokeWithTarget:theModalDelegate];
-			
-		}
-	}
-	
-	// now do the things we need to do always
-    if(returnCode == NSOKButton){
-		// setup webview and load page
-        
-		[self setShowingWebView:YES];
-        
-        NSString *urlString = [urlTextField stringValue];
-        
-        if([urlString rangeOfString:@"://"].location == NSNotFound)
-            urlString = [@"http://" stringByAppendingString:urlString];
-        
-        NSURL *url = [NSURL URLWithString:urlString];
-        
-        if(url == nil){
-            [sheet orderOut:nil];
-            NSBeginAlertSheet(NSLocalizedString(@"Error", @""), nil, nil, nil, [self window], nil, nil, nil, nil, 
-                              NSLocalizedString(@"Mac OS X does not recognize this as a valid URL.  Please re-enter the address and try again.", @"") );
-        } else {        
-            NSURLRequest *urlreq = [NSURLRequest requestWithURL:url];
-            [[webView mainFrame] loadRequest:urlreq];
-        }
-    }        
+- (IBAction)importFromFileAction:(id)sender{
+    NSOpenPanel *oPanel = [NSOpenPanel openPanel];
+    [oPanel setAllowsMultipleSelection:NO];
+    [oPanel setCanChooseDirectories:NO];
+
+    [oPanel beginSheetForDirectory:nil 
+                              file:nil 
+							 types:nil
+                    modalForWindow:[self window]
+                     modalDelegate:self 
+                    didEndSelector:@selector(openPanelDidEnd:returnCode:contextInfo:) 
+                       contextInfo:nil];
 }
 
 - (IBAction)chooseBookmarkAction:(id)sender{
@@ -476,6 +317,11 @@
     
 	[urlSheet orderOut:sender];
     [NSApp endSheet:urlSheet returnCode:1];
+}
+
+- (IBAction)dismissAddBookmarkSheet:(id)sender{
+    [addBookmarkSheet orderOut:sender];
+    [NSApp endSheet:addBookmarkSheet returnCode:[sender tag]];
 }
 
 - (IBAction)stopOrReloadAction:(id)sender{
@@ -488,12 +334,27 @@
 	}
 }
 
-- (IBAction)showHelpAction:(id)sender{
-    
-    OSErr err = AHLookupAnchor((CFStringRef)@"BibDesk Help", (CFStringRef)@"Adding-from-Text");
-    if (err == kAHInternalErr || err == kAHInternalErr){
-        NSLog(@"Help Book: error looking up anchor \"Adding-from-Text\"");
-    }
+- (IBAction)addField:(id)sender{
+    [fieldNameField setStringValue:@""];
+    [NSApp beginSheet:addFieldSheet
+       modalForWindow:[self window]
+        modalDelegate:self
+       didEndSelector:@selector(addFieldSheetDidEnd:returnCode:contextInfo:)
+          contextInfo:nil];
+}
+
+- (IBAction)dismissAddFieldSheet:(id)sender{
+    [addFieldSheet orderOut:sender];
+    [NSApp endSheet:addFieldSheet returnCode:[sender tag]];
+}
+
+- (IBAction)editSelectedFieldAsRawBibTeX:(id)sender{
+	int row = [itemTableView selectedRow];
+	if (row == -1) 
+		return;
+	if([itemTableView editedRow] != row)
+		[itemTableView editColumn:2 row:row withEvent:nil select:YES];
+    [self editSelectedCellAsMacro];
 }
 
 #pragma mark WebView contextual menu actions
@@ -503,6 +364,7 @@
 	
 	if (URLString) {
 		[item setField:BDSKUrlString toValue:URLString];
+		[[item undoManager] setActionName:NSLocalizedString(@"Edit Publication",@"")];
 		[itemTableView reloadData];
 	}
 }
@@ -512,6 +374,7 @@
 	
 	if (URLString) {
 		[item setField:BDSKUrlString toValue:URLString];
+		[[item undoManager] setActionName:NSLocalizedString(@"Edit Publication",@"")];
 		[itemTableView reloadData];
 	}
 }
@@ -536,22 +399,6 @@
                      modalDelegate:self 
                     didEndSelector:@selector(savePanelDidEnd:returnCode:contextInfo:) 
                        contextInfo:nil];
-}
-
-- (void)savePanelDidEnd:(NSSavePanel *)sheet returnCode:(int)returnCode contextInfo:(void *)contextInfo{
-    
-	if (returnCode == NSOKButton) {
-		if ([[[[webView mainFrame] dataSource] data] writeToFile:[sheet filename] atomically:YES]) {
-			NSString *fileURLString = [[NSURL fileURLWithPath:[sheet filename]] absoluteString];
-			
-			[item setField:BDSKLocalUrlString toValue:fileURLString];
-			[item autoFilePaper];
-		} else {
-			NSLog(@"Could not write downloaded file.");
-		}
-    }
-
-    [itemTableView reloadData];
 }
 
 - (void)downloadLinkedFileAsLocalUrl:(id)sender{
@@ -588,13 +435,307 @@
 	[self addBookmarkWithURLString:URLString title:title];
 }
 
-#pragma mark Page loading methods
+@end
 
 
-- (void)cancelLoad{
-	[webView stopLoading:self];
-	[self setLoading:NO];
+@implementation BDSKTextImportController (Private)
+
+#pragma mark Setup
+
+- (void)loadPasteboardData{
+    NSPasteboard* pb = [NSPasteboard generalPasteboard];
+
+    NSArray *typeArray = [NSArray arrayWithObjects:NSURLPboardType, NSRTFDPboardType, 
+        NSRTFPboardType, NSStringPboardType, nil];
+    
+    NSString *pbType = [pb availableTypeFromArray:typeArray];    
+    if([pbType isEqualToString:NSURLPboardType]){
+        // setup webview and load page
+        
+		[self setShowingWebView:YES];
+        
+        NSArray *urls = (NSArray *)[pb propertyListForType:pbType];
+        NSURL *url = [NSURL URLWithString:[urls objectAtIndex:0]];
+        NSURLRequest *urlreq = [NSURLRequest requestWithURL:url];
+        
+        [[webView mainFrame] loadRequest:urlreq];
+        
+    }else{
+		
+		[self setShowingWebView:NO];
+		
+        NSString *pbString = nil;
+        NSData *pbData;
+        
+		if([pbType isEqualToString:NSRTFPboardType]){
+            pbData = [pb dataForType:pbType];
+            pbString = [[[NSAttributedString alloc] initWithRTF:pbData
+                                             documentAttributes:NULL] autorelease];
+            pbString = [[(NSAttributedString *)pbString string] stringByRemovingSurroundingWhitespace];
+
+            if([pbString rangeOfString:@"http://"].location == 0){
+                [self showWebViewWithURLString:pbString];
+            }else{
+                NSRange r = NSMakeRange(0,[[sourceTextView string] length]);
+                [sourceTextView replaceCharactersInRange:r withRTF:pbData];
+			}
+            
+		}else if([pbType isEqualToString:NSRTFDPboardType]){
+            pbData = [pb dataForType:pbType];
+            pbString = [[[NSAttributedString alloc] initWithRTFD:pbData
+                                              documentAttributes:NULL] autorelease];
+            pbString = [[(NSAttributedString *)pbString string] stringByRemovingSurroundingWhitespace];
+            
+            if([pbString rangeOfString:@"http://"].location == 0){
+                [self showWebViewWithURLString:pbString];
+            }else{
+                NSRange r = NSMakeRange(0,[[sourceTextView string] length]);
+                [sourceTextView replaceCharactersInRange:r withRTFD:pbData];
+            }
+            
+		}else if([pbType isEqualToString:NSStringPboardType]){
+            pbData = [pb dataForType:pbType];
+            pbString = [pb stringForType:pbType];
+            pbString = [pbString stringByRemovingSurroundingWhitespace];
+			if([pbString rangeOfString:@"http://"].location == 0){
+                [self showWebViewWithURLString:pbString];
+            }else{
+                [sourceTextView setString:pbString];
+            }
+		}else {
+			
+			[sourceTextView setString:NSLocalizedString(@"Sorry, BibDesk can't read this data type.", @"warning message when choosing \"new publication from pasteboard\" for an unsupported type")];
+		}
+	}
 }
+
+- (void)showWebViewWithURLString:(NSString *)urlString{
+    [self setShowingWebView:YES];
+    NSURL *url = [NSURL URLWithString:[urlString stringByRemovingSurroundingWhitespace]];
+    NSURLRequest *urlreq = [NSURLRequest requestWithURL:url];
+    
+    [[webView mainFrame] loadRequest:urlreq];
+        
+}
+
+- (void)setShowingWebView:(BOOL)showWebView{
+	if (showWebView != showingWebView) {
+		showingWebView = showWebView;
+		if (showingWebView) {
+			[webViewView setFrame:[sourceBox frame]];
+			[splitView replaceSubview:sourceBox with:webViewView];
+		} else {
+			[splitView replaceSubview:webViewView with:sourceBox];
+		}
+	}
+}
+
+- (void)setupTypeUI{
+
+    // setup the type popup:
+    NSEnumerator *typeNamesE = [[[BibTypeManager sharedManager] bibTypesForFileType:[item fileType]] objectEnumerator];
+    NSString *typeName = nil;
+    
+    [itemTypeButton removeAllItems];
+    while(typeName = [typeNamesE nextObject]){
+        [itemTypeButton addItemWithTitle:typeName];
+    }
+    
+    NSString *type = [[OFPreferenceWrapper sharedPreferenceWrapper] objectForKey:BDSKPubTypeStringKey];
+    
+    [self setType:type];
+    
+    [itemTableView reloadData];
+}
+
+- (void)setType:(NSString *)type{
+    
+    [itemTypeButton selectItemWithTitle:type];
+    [item setType:type];
+
+    BibTypeManager *typeMan = [BibTypeManager sharedManager];
+
+    [fields removeAllObjects];
+    
+    [fields addObjectsFromArray:[typeMan requiredFieldsForType:type]];
+    [fields addObjectsFromArray:[typeMan optionalFieldsForType:type]];
+	
+	NSEnumerator *fieldEnum = [[typeMan userDefaultFieldsForType:type] objectEnumerator];
+	NSString *field = nil;
+	// the default fields can contain fields already contained in typeInfo
+	while (field = [fieldEnum nextObject]) {
+		if (![fields containsObject:field])
+			[fields addObject:field];
+	}
+	if(![fields containsObject:BDSKLocalUrlString])
+		[fields addObject:BDSKLocalUrlString];
+	if(![fields containsObject:BDSKUrlString])
+		[fields addObject:BDSKUrlString];
+}
+
+#pragma mark Sheet callbacks
+
+- (void)sheetDidEnd:(NSPanel *)sheet returnCode:(int)returnCode contextInfo:(void *)contextInfo {
+	
+	if (theModalDelegate != nil && theDidEndSelector != NULL) {
+		NSMethodSignature *signature = [theModalDelegate methodSignatureForSelector:theDidEndSelector];
+		NSInvocation *invocation = [NSInvocation invocationWithMethodSignature:signature];
+		[invocation setSelector:theDidEndSelector];
+		[invocation setArgument:&self atIndex:2];
+		[invocation setArgument:&returnCode atIndex:3];
+		[invocation setArgument:&theContextInfo atIndex:4];
+		[invocation invokeWithTarget:theModalDelegate];
+	}
+	
+	theDocWindow = nil;
+	theModalDelegate = nil;
+	theDidEndSelector = NULL;
+	theContextInfo = NULL;
+	
+	[[self window] orderOut:self];
+	// cleanup
+    [self cancelDownload];
+	[webView stopLoading:nil];
+	
+	[self release]; // we are done, balance retain from beginSheet... methods
+}
+
+- (void)openPanelDidEnd:(NSOpenPanel *)sheet returnCode:(int)returnCode contextInfo:(void *)contextInfo{
+	// this variable is true when we called the open sheet initially before showing the main window 
+	BOOL initialFileLoad = [[(NSNumber *)contextInfo autorelease] boolValue];
+	
+	if (initialFileLoad) {
+		// this is the initial web load, the main window is not yet there
+		
+		if (returnCode == NSOKButton) {
+			// show the main window
+			
+			[NSApp beginSheet:[self window]
+			   modalForWindow:theDocWindow
+				modalDelegate:self
+			   didEndSelector:@selector(sheetDidEnd:returnCode:contextInfo:) 
+				  contextInfo:NULL];
+			
+		} else {
+			// the user cancelled. As we don't end the main sheet we have to call our didEndSelector ourselves
+			
+			[self sheetDidEnd:sheet returnCode:returnCode contextInfo:contextInfo];
+			return;
+		}
+	}
+	
+	// now do the things we need to do always
+    if(returnCode == NSOKButton){
+        NSString *fileName = [sheet filename];
+		NSURL *url = [NSURL fileURLWithPath:fileName];
+		NSTextStorage *text = [sourceTextView textStorage];
+		NSLayoutManager *layoutManager = [[text layoutManagers] objectAtIndex:0];
+
+		[[text mutableString] setString:@""];	// Empty the document
+		
+		[self setShowingWebView:NO];
+		
+		[layoutManager retain];			// Temporarily remove layout manager so it doesn't do any work while loading
+		[text removeLayoutManager:layoutManager];
+		[text beginEditing];			// Bracket with begin/end editing for efficiency
+		[text readFromURL:url options:nil documentAttributes:NULL];	// Read!
+		[text endEditing];
+		[text addLayoutManager:layoutManager];	// Hook layout manager back up
+		[layoutManager release];
+
+    }        
+}
+
+- (void)urlSheetDidEnd:(NSPanel *)sheet returnCode:(int)returnCode contextInfo:(void *)contextInfo{
+	// this variable is true when we called the URL sheet initially before showing the main window 
+	BOOL initialWebLoad = [[(NSNumber *)contextInfo autorelease] boolValue];
+	
+	if (initialWebLoad) {
+		// this is the initial web load, the main window is not yet there
+		
+		// we need to release these, as we had retained them
+		[theDocWindow autorelease];
+		[theModalDelegate autorelease];
+		
+		if (returnCode == NSOKButton) {
+			// show the main window
+			
+			[NSApp beginSheet:[self window]
+			   modalForWindow:theDocWindow
+				modalDelegate:self
+			   didEndSelector:@selector(sheetDidEnd:returnCode:contextInfo:) 
+				  contextInfo:NULL];
+			
+		} else {
+			// the user cancelled. As we don't end the main sheet we have to call our didEndSelector ourselves
+			
+			[self sheetDidEnd:sheet returnCode:returnCode contextInfo:contextInfo];
+			return;
+		}
+	}
+	
+	// now do the things we need to do always
+    if(returnCode == NSOKButton){
+		// setup webview and load page
+        
+		[self setShowingWebView:YES];
+        
+        NSString *urlString = [urlTextField stringValue];
+        
+        if([urlString rangeOfString:@"://"].location == NSNotFound)
+            urlString = [@"http://" stringByAppendingString:urlString];
+        
+        NSURL *url = [NSURL URLWithString:urlString];
+        
+        if(url == nil){
+            [sheet orderOut:nil];
+            NSBeginAlertSheet(NSLocalizedString(@"Error", @""), nil, nil, nil, [self window], nil, nil, nil, nil, 
+                              NSLocalizedString(@"Mac OS X does not recognize this as a valid URL.  Please re-enter the address and try again.", @"") );
+        } else {        
+            NSURLRequest *urlreq = [NSURLRequest requestWithURL:url];
+            [[webView mainFrame] loadRequest:urlreq];
+        }
+    }        
+}
+
+- (void)addFieldSheetDidEnd:(NSWindow *)sheet
+                 returnCode:(int)returnCode
+                contextInfo:(void *)contextInfo{
+    if(returnCode == NSOKButton){
+        if(![fields containsObject:[fieldNameField stringValue]]){
+			NSString *name = [[fieldNameField stringValue] capitalizedString]; // add it as a capitalized string to avoid duplicates
+			int row = [fields count];
+			
+			[fields addObject:name];
+			[item addField:name];
+			[[item undoManager] setActionName:NSLocalizedString(@"Add Field",@"")];
+			[itemTableView reloadData];
+			[itemTableView selectRowIndexes:[NSIndexSet indexSetWithIndex:row] byExtendingSelection:NO];
+			[itemTableView editColumn:2 row:row withEvent:nil select:YES];
+        }
+    }
+    // else, nothing.
+}
+
+- (void)savePanelDidEnd:(NSSavePanel *)sheet returnCode:(int)returnCode contextInfo:(void *)contextInfo{
+    
+	if (returnCode == NSOKButton) {
+		if ([[[[webView mainFrame] dataSource] data] writeToFile:[sheet filename] atomically:YES]) {
+			NSString *fileURLString = [[NSURL fileURLWithPath:[sheet filename]] absoluteString];
+			
+			[item setField:BDSKLocalUrlString toValue:fileURLString];
+			[item autoFilePaper];
+			
+			[[item undoManager] setActionName:NSLocalizedString(@"Edit Publication",@"")];
+		} else {
+			NSLog(@"Could not write downloaded file.");
+		}
+    }
+
+    [itemTableView reloadData];
+}
+
+#pragma mark Page loading methods
 
 - (void)setLoading:(BOOL)loading{
     if (isLoading != loading) {
@@ -633,6 +774,7 @@
 	[item setField:BDSKLocalUrlString toValue:fileURLString];
 	[item autoFilePaper];
 	
+	[[item undoManager] setActionName:NSLocalizedString(@"Edit Publication",@"")];
 	[itemTableView reloadData];
 }
 
@@ -685,11 +827,6 @@
           contextInfo:[URLString retain]];
 }
 
-- (IBAction)dismissAddBookmarkSheet:(id)sender{
-    [addBookmarkSheet orderOut:sender];
-    [NSApp endSheet:addBookmarkSheet returnCode:[sender tag]];
-}
-
 - (void)addBookmarkSheetDidEnd:(NSOpenPanel *)sheet returnCode:(int)returnCode contextInfo:(void *)contextInfo{
     NSString *URLString = (NSString *)contextInfo;
 	if (returnCode == NSOKButton) {
@@ -731,6 +868,8 @@
 	} else if ([menuItem action] == @selector(importFromWebAction:)) {
 		[menuItem setTitle:[NSString stringWithFormat:@"%@%C", NSLocalizedString(@"Load Website",@"Load Website"),0x2026]];
 		return YES;
+	} else if ([menuItem action] == @selector(editSelectedFieldAsRawBibTeX:)) {
+		return ([itemTableView selectedRow] != -1 && ![[macroTextFieldWC window] isVisible]);
 	}
 	return YES;
 }
@@ -758,21 +897,21 @@
 			
 			[menuItems addObject:menuItem];
 			
-			menuItem = [[NSMenuItem alloc] initWithTitle:NSLocalizedString(@"Copy Link To Url Field",@"Copy link to url field")
+			menuItem = [[NSMenuItem allocWithZone:[NSMenu menuZone]] initWithTitle:NSLocalizedString(@"Copy Link To Url Field",@"Copy link to url field")
 											  action:@selector(copyLinkedLocationAsRemoteUrl:)
 									   keyEquivalent:@""];
 			[menuItem setTarget:self];
 			[menuItem setRepresentedObject:linkURL];
 			[menuItems addObject:[menuItem autorelease]];
 			
-			menuItem = [[NSMenuItem alloc] initWithTitle:[NSString stringWithFormat:@"%@%C",NSLocalizedString(@"Save Link As Local File",@"Save link as local file"),0x2026]
+			menuItem = [[NSMenuItem allocWithZone:[NSMenu menuZone]] initWithTitle:[NSString stringWithFormat:@"%@%C",NSLocalizedString(@"Save Link As Local File",@"Save link as local file"),0x2026]
 											  action:@selector(downloadLinkedFileAsLocalUrl:)
 									   keyEquivalent:@""];
 			[menuItem setTarget:self];
 			[menuItem setRepresentedObject:linkURL];
 			[menuItems addObject:[menuItem autorelease]];
 			
-			menuItem = [[NSMenuItem alloc] initWithTitle:[NSString stringWithFormat:@"%@%C",NSLocalizedString(@"Bookmark Link",@"Bookmark linked page"),0x2026]
+			menuItem = [[NSMenuItem allocWithZone:[NSMenu menuZone]] initWithTitle:[NSString stringWithFormat:@"%@%C",NSLocalizedString(@"Bookmark Link",@"Bookmark linked page"),0x2026]
 											  action:@selector(bookmarkLink:)
 									   keyEquivalent:@""];
 			[menuItem setTarget:self];
@@ -785,19 +924,19 @@
 	if ([menuItems count] > 0) 
 		[menuItems addObject:[NSMenuItem separatorItem]];
 		
-	menuItem = [[NSMenuItem alloc] initWithTitle:NSLocalizedString(@"Copy Page Location To Url Field",@"Copy page location to url field")
+	menuItem = [[NSMenuItem allocWithZone:[NSMenu menuZone]] initWithTitle:NSLocalizedString(@"Copy Page Location To Url Field",@"Copy page location to url field")
 									  action:@selector(copyLocationAsRemoteUrl:)
 							   keyEquivalent:@""];
 	[menuItem setTarget:self];
 	[menuItems addObject:[menuItem autorelease]];
 	
-	menuItem = [[NSMenuItem alloc] initWithTitle:[NSString stringWithFormat:@"%@%C",NSLocalizedString(@"Save Page As Local File",@"Save page as local file"),0x2026]
+	menuItem = [[NSMenuItem allocWithZone:[NSMenu menuZone]] initWithTitle:[NSString stringWithFormat:@"%@%C",NSLocalizedString(@"Save Page As Local File",@"Save page as local file"),0x2026]
 									  action:@selector(saveFileAsLocalUrl:)
 							   keyEquivalent:@""];
 	[menuItem setTarget:self];
 	[menuItems addObject:[menuItem autorelease]];
 	
-	menuItem = [[NSMenuItem alloc] initWithTitle:[NSString stringWithFormat:@"%@%C",NSLocalizedString(@"Bookmark This Page",@"Bookmark this page"),0x2026]
+	menuItem = [[NSMenuItem allocWithZone:[NSMenu menuZone]] initWithTitle:[NSString stringWithFormat:@"%@%C",NSLocalizedString(@"Bookmark This Page",@"Bookmark this page"),0x2026]
 									  action:@selector(bookmarkPage:)
 							   keyEquivalent:@""];
 	[menuItem setTarget:self];
@@ -806,22 +945,22 @@
 	// navigation items
 	[menuItems addObject:[NSMenuItem separatorItem]];
 	
-	menuItem = [[NSMenuItem alloc] initWithTitle:NSLocalizedString(@"Back",@"Back")
+	menuItem = [[NSMenuItem allocWithZone:[NSMenu menuZone]] initWithTitle:NSLocalizedString(@"Back",@"Back")
 									  action:@selector(goBack:)
 							   keyEquivalent:@"["];
 	[menuItems addObject:[menuItem autorelease]];
 	
-	menuItem = [[NSMenuItem alloc] initWithTitle:NSLocalizedString(@"Forward",@"Forward")
+	menuItem = [[NSMenuItem allocWithZone:[NSMenu menuZone]] initWithTitle:NSLocalizedString(@"Forward",@"Forward")
 									  action:@selector(goForward:)
 							   keyEquivalent:@"]"];
 	[menuItems addObject:[menuItem autorelease]];
 	
-	menuItem = [[NSMenuItem alloc] initWithTitle:NSLocalizedString(@"Reload",@"Reload")
+	menuItem = [[NSMenuItem allocWithZone:[NSMenu menuZone]] initWithTitle:NSLocalizedString(@"Reload",@"Reload")
 									  action:@selector(reload:)
 							   keyEquivalent:@"r"];
 	[menuItems addObject:[menuItem autorelease]];
 	
-	menuItem = [[NSMenuItem alloc] initWithTitle:NSLocalizedString(@"Stop",@"Stop")
+	menuItem = [[NSMenuItem allocWithZone:[NSMenu menuZone]] initWithTitle:NSLocalizedString(@"Stop",@"Stop")
 									  action:@selector(stopLoading:)
 							   keyEquivalent:@""];
 	[menuItems addObject:[menuItem autorelease]];
@@ -829,17 +968,30 @@
 	// text size items
 	[menuItems addObject:[NSMenuItem separatorItem]];
 	
-	menuItem = [[NSMenuItem alloc] initWithTitle:NSLocalizedString(@"Increase Text Size",@"Increase Text Size")
+	menuItem = [[NSMenuItem allocWithZone:[NSMenu menuZone]] initWithTitle:NSLocalizedString(@"Increase Text Size",@"Increase Text Size")
 									  action:@selector(makeTextLarger:)
 							   keyEquivalent:@""];
 	[menuItems addObject:[menuItem autorelease]];
 	
-	menuItem = [[NSMenuItem alloc] initWithTitle:NSLocalizedString(@"Decrease Text Size",@"Increase Text Size")
+	menuItem = [[NSMenuItem allocWithZone:[NSMenu menuZone]] initWithTitle:NSLocalizedString(@"Decrease Text Size",@"Increase Text Size")
 									  action:@selector(makeTextSmaller:)
 							   keyEquivalent:@""];
 	[menuItems addObject:[menuItem autorelease]];
 	
 	return menuItems;
+}
+
+#pragma mark WebEditingDelegate methods
+
+// workaround for webview bug, which looses its selection when the focus changes to another view
+- (void)webViewDidChangeSelection:(NSNotification *)notification{
+	NSView *docView = [[[[notification object] mainFrame] frameView] documentView];
+	if (![docView conformsToProtocol:@protocol(WebDocumentText)]) return;
+	NSString *selString = [docView selectedString];
+	if ([NSString isEmptyString:selString] || selString == webSelection)
+		return;
+	[webSelection release];
+	webSelection = [selString copy];
 }
 
 #pragma mark WebFrameLoadDelegate methods
@@ -959,6 +1111,77 @@
 					  errorDescription);
 }
 
+#pragma mark Editing
+
+- (void)addCurrentSelectionToFieldAtIndex:(int)index{    
+    NSString *selKey = [fields objectAtIndex:index];
+    NSString *selString = nil;
+
+    if(showingWebView){
+		selString = webSelection;
+        //NSLog(@"selstr %@", selString);
+    }else{
+        NSRange selRange = [sourceTextView selectedRange];
+        NSLayoutManager *layoutManager = [sourceTextView layoutManager];
+        NSColor *foregroundColor = [NSColor lightGrayColor]; 
+        NSDictionary *highlightAttrs = [NSDictionary dictionaryWithObjectsAndKeys: foregroundColor, NSForegroundColorAttributeName, nil];
+
+        selString = [[sourceTextView string] substringWithRange:selRange];
+        [layoutManager addTemporaryAttributes:highlightAttrs
+                            forCharacterRange:selRange];
+    }
+	if ([NSString isEmptyString:selString] == YES)
+		return;
+	
+    [item setField:selKey toValue:selString];
+    
+	[[item undoManager] setActionName:NSLocalizedString(@"Edit Publication",@"")];
+    [itemTableView reloadData];
+}
+
+- (NSFormatter *)formatterForEntry:(NSString *)entry{
+    NSFormatter *formatter = [formatters objectForKey:entry];
+    if (formatter == nil) {
+		if ([entry isEqualToString:BDSKCrossrefString]) {
+			formatter = [[BDSKCiteKeyFormatter alloc] init]; // a crossref field is a cite key
+		} else {
+			formatter = [[BDSKFormCellFormatter alloc] initWithEntry:entry];
+        }
+		[formatters setObject:formatter forKey:entry];
+        [formatter release];
+    }
+    return formatter;
+}
+
+#pragma mark Macro editing
+
+- (BOOL)editSelectedCellAsMacro{
+	int row = [itemTableView selectedRow];
+	if (row == -1) 
+		return NO;
+	NSString *value = [item valueOfField:[fields objectAtIndex:row]];
+	return [macroTextFieldWC editCellOfView:itemTableView
+									  atRow:row
+									 column:2
+								  withValue:value
+							  macroResolver:document
+								   delegate:self
+						  shouldEndSelector:NULL
+							 didEndSelector:@selector(macroEditorDidEndEditing:withValue:contextInfo:)
+								contextInfo:nil];
+}
+
+- (void)macroEditorDidEndEditing:(NSControl *)control withValue:(NSString *)value contextInfo:(void *)contextInfo{
+    int selRow = [itemTableView selectedRow];
+    NSString *fieldName = [fields objectAtIndex:selRow];
+	NSString *prevValue = [item valueOfField:fieldName];
+    
+    if(![value isEqualAsComplexString:prevValue]){
+		[item setField:fieldName toValue:value];
+	}
+	[itemTableView reloadData];
+}
+
 #pragma mark TableView Data source
 
 - (int)numberOfRowsInTableView:(NSTableView *)tableView{
@@ -980,32 +1203,21 @@
     }
 }
 
-- (BOOL)tableView:(NSTableView *)tableView shouldEditTableColumn:(NSTableColumn *)tableColumn row:(int)row{
-    NSString *tcID = [tableColumn identifier];
-    if([tcID isEqualToString:@"FieldName"] ||
-       [tcID isEqualToString:@"Num"] ){
-        return NO;
-    }
-    return YES;
-}
-
-
 - (void)tableView:(NSTableView *)tableView setObjectValue:(id)object forTableColumn:(NSTableColumn *)tableColumn row:(int)row{
-    NSString *tcID = [tableColumn identifier];
+    if ([[macroTextFieldWC window] isVisible])
+		return;
+	NSString *tcID = [tableColumn identifier];
     if([tcID isEqualToString:@"FieldName"] ||
        [tcID isEqualToString:@"Num"] ){
         return; // don't edit the first column. Shouldn't happen anyway.
     }
     
     NSString *key = [fields objectAtIndex:row];
+    if([object isEqualToString:[item valueOfField:key]])
+		return;
     [item setField:key toValue:object];
-    [item setCiteKey:[item suggestedCiteKey]];
-    [citeKeyLine setStringValue:[item citeKey]];
-}
-
-// This method is called after it has been determined that a drag should begin, but before the drag has been started.  To refuse the drag, return NO.  To start a drag, return YES and place the drag data onto the pasteboard (data, owner, etc...).  The drag image and other drag related information will be set up and provided by the table view once this call returns with YES.  The rows array is the list of row numbers that will be participating in the drag.
-- (BOOL)tableView:(NSTableView *)tv writeRows:(NSArray*)rows toPasteboard:(NSPasteboard*)pboard{
-    return NO;   
+	
+	[[item undoManager] setActionName:NSLocalizedString(@"Edit Publication",@"")];
 }
 
 // This method is used by NSTableView to determine a valid drop target.  Based on the mouse position, the table view will suggest a proposed drop location.  This method must return a value that indicates which dragging operation the data source will perform.  The data source may "re-target" a drop if desired by calling setDropRow:dropOperation: and returning something other than NSDragOperationNone.  One may choose to re-target for various reasons (eg. for better visual feedback when inserting into a sorted position).
@@ -1023,9 +1235,53 @@
 
         NSString *key = [fields objectAtIndex:row];
         [item setField:key toValue:[pb stringForType:NSStringPboardType]];
+		
+		[[item undoManager] setActionName:NSLocalizedString(@"Edit Publication",@"")];
         [itemTableView reloadData];
     }
     return YES;
+}
+
+// this is used by the paste: action defined in NSTableView-OAExtensions
+- (void)tableView:(NSTableView *)tv addItemsFromPasteboard:(NSPasteboard *)pboard{
+	int index = [tv selectedRow];
+	NSString *type = [pboard availableTypeFromArray:[NSArray arrayWithObject:NSStringPboardType]];
+	
+	if (type == nil || index == -1)
+		return;
+	
+    NSString *selKey = [fields objectAtIndex:index];
+	NSString *string = [pboard stringForType:NSStringPboardType];
+	
+	[item setField:selKey toValue:string];
+    
+	[[item undoManager] setActionName:NSLocalizedString(@"Edit Publication",@"")];
+    [itemTableView reloadData];
+}
+
+#pragma mark TableView delegate methods
+
+- (BOOL)tableView:(NSTableView *)tableView shouldEditTableColumn:(NSTableColumn *)tableColumn row:(int)row{
+    NSString *tcID = [tableColumn identifier];
+    if([tcID isEqualToString:@"FieldName"] ||
+       [tcID isEqualToString:@"Num"] ){
+        return NO;
+    }
+	NSString *value = [item valueOfField:[fields objectAtIndex:row]];
+	if([value isComplex]){
+		[tableView selectRowIndexes:[NSIndexSet indexSetWithIndex:row] byExtendingSelection:NO];
+		return [self editSelectedCellAsMacro];
+	}else
+		return YES;
+}
+
+- (void)tableView:(NSTableView *)tv willDisplayCell:(id)cell forTableColumn:(NSTableColumn *)tableColumn row:(int)row{
+	if([[tableColumn identifier] isEqualToString:@"FieldValue"]){
+		NSFormatter *formatter = [self formatterForEntry:[fields objectAtIndex:row]];
+		if ([formatter isKindOfClass:[BDSKFormCellFormatter class]])	
+			[(BDSKFormCellFormatter *)formatter setHighlighted:[tv isRowSelected:row]];
+		[cell setFormatter:formatter];
+	}
 }
 
 #pragma mark Splitview delegate methods
@@ -1042,25 +1298,31 @@
 
 
 @implementation TextImportItemTableView
-- (NSDragOperation)draggingSourceOperationMaskForLocal:(BOOL)isLocal {
-    if (isLocal) return NSDragOperationEvery;
-    else return NSDragOperationCopy;
-}
 
 - (BOOL)performKeyEquivalent:(NSEvent *)theEvent{
     
     NSString *chars = [theEvent charactersIgnoringModifiers];
     unsigned int flags = [theEvent modifierFlags];
     
-    if (flags | NSCommandKeyMask && 
+    if (flags & NSCommandKeyMask && 
         [chars containsCharacterInSet:[NSCharacterSet characterSetWithCharactersInString:@"01234567890"]]) {
 
-        unsigned index = (unsigned)[chars characterAtIndex:0];
-        [[self delegate] addCurrentSelectionToFieldAtIndex:index-48]; // 48 is the char value of 0.
+        unsigned index = (unsigned)([chars characterAtIndex:0] - '0');
+        [[self dataSource] addCurrentSelectionToFieldAtIndex:index];
         return YES;
     }
     
     return [super performKeyEquivalent:theEvent];
+}
+
+// this will only be called by the field editor on 10.3 and greater
+- (NSArray *)textView:(NSTextView *)textView completions:(NSArray *)words forPartialWordRange:(NSRange)charRange indexOfSelectedItem:(int *)index{
+    // if this is a raw edit, the delegate is a MacroTextFieldWindowController, which knows about the macro resolver
+    if([[self delegate] respondsToSelector:_cmd])
+        return [(id)[self delegate] textView:textView completions:words forPartialWordRange:charRange indexOfSelectedItem:index];
+    else
+        // you probably don't want super's dictionary lookup if you're entering a macro
+        return [super textView:textView completions:words forPartialWordRange:charRange indexOfSelectedItem:index];
 }
 
 @end

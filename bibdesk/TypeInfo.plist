@@ -100,6 +100,8 @@
 		<string>Journal</string>
 		<key>KW</key>
 		<string>Keywords</string>
+		<key>L1</key>
+		<string>Local-Url</string>
 		<key>LA</key>
 		<string>Language</string>
 		<key>MH</key>
@@ -108,6 +110,8 @@
 		<string>Annote</string>
 		<key>N2</key>
 		<string>Abstract</string>
+		<key>New item</key>
+		<string></string>
 		<key>PG</key>
 		<string>Pages</string>
 		<key>PY</key>
@@ -584,18 +588,18 @@
 		</dict>
 		<key>commented</key>
 		<dict/>
-		<key>electronic</key>
-		<dict>
-			<key>self</key>
-			<array>
-				<string>online system or service</string>
-			</array>
-		</dict>
 		<key>conference</key>
 		<dict>
 			<key>host</key>
 			<array>
 				<string>conference publication</string>
+			</array>
+		</dict>
+		<key>electronic</key>
+		<dict>
+			<key>self</key>
+			<array>
+				<string>online system or service</string>
 			</array>
 		</dict>
 		<key>glossdef</key>

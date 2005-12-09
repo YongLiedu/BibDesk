@@ -1,17 +1,44 @@
+// BibPref_TeX.m
+// BibDesk
+// Created by Michael McCracken, 2002
 /*
-This software is Copyright (c) 2002, Michael O. McCracken
-All rights reserved.
+ This software is Copyright (c) 2002,2003,2004,2005
+ Michael O. McCracken. All rights reserved.
 
-Redistribution and use in source and binary forms, with or without modification, are permitted provided that the following conditions are met:
+ Redistribution and use in source and binary forms, with or without
+ modification, are permitted provided that the following conditions
+ are met:
 
-- Redistributions of source code must retain the above copyright notice, this list of conditions and the following disclaimer.
--  Redistributions in binary form must reproduce the above copyright notice, this list of conditions and the following disclaimer in the documentation and/or other materials provided with the distribution.
--  Neither the name of Michael O. McCracken nor the names of any contributors may be used to endorse or promote products derived from this software without specific prior written permission.
+ - Redistributions of source code must retain the above copyright
+   notice, this list of conditions and the following disclaimer.
 
-THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-*/
+ - Redistributions in binary form must reproduce the above copyright
+    notice, this list of conditions and the following disclaimer in
+    the documentation and/or other materials provided with the
+    distribution.
+
+ - Neither the name of Michael O. McCracken nor the names of any
+    contributors may be used to endorse or promote products derived
+    from this software without specific prior written permission.
+
+ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+ "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+ LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+ A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+ OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+ SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+ LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+ DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+ THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+ (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ */
 
 #import "BibPref_TeX.h"
+#import "BDSKPreviewer.h"
+#import "NSFileManager_BDSKExtensions.h"
+
+#define BDSK_TEX_DOWNLOAD_URL @"http://ii2.sourceforge.net/tex-index.html"
 
 @implementation BibPref_TeX
 
@@ -43,14 +70,6 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
     [defaults setObject:[sender stringValue] forKey:BDSKBibTeXBinPathKey];
 }
 
-- (void)alertDidEnd:(NSAlert *)alert returnCode:(int)returnCode contextInfo:(void *)control{
-    if(returnCode == NSOKButton)
-        [[alert window] orderOut:nil];
-    NSText *fe = [[[OAPreferenceController sharedPreferenceController] window] fieldEditor:YES forObject:control];
-    [(NSTextField *)control selectText:nil];
-    [fe setSelectedRange:NSMakeRange([[fe string] length], 0)];
-}
-
 - (IBAction)changeUsesTeX:(id)sender{
     if ([sender state] == NSOffState) {
         [bibTeXStyle setEnabled:NO];
@@ -62,9 +81,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
         [defaults setBool:NO forKey:BDSKUsesTeXKey];
 		
 		// hide preview panel if necessary
-		if ([[NSApp delegate] isShowingPreviewPanel]) {
-			[[NSApp delegate] hidePreviewPanel:self];
-		}
+		[[BDSKPreviewer sharedPreviewer] hidePreviewPanel:self];
     }else{
 		// Check that executable paths are valid
 	    if ([self checkBibTexBinPath] && [self checkTexBinPath]) {
@@ -78,11 +95,6 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 			[bibTeXStyle setEnabled:YES];
 			
 			[defaults setBool:YES forKey:BDSKUsesTeXKey];
-		
-			// show preview panel if necessary
-			if ([[defaults objectForKey:@"BDSK Showing Preview Key"] isEqualToString:@"showing"]) {
-				[[NSApp delegate] showPreviewPanel:self];
-			}
 		}
     }
 }
@@ -92,10 +104,10 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
   [self changeTexBinPath:texBinaryPath];
 
   if( ![[NSFileManager defaultManager] isExecutableFileAtPath:[defaults objectForKey:BDSKTeXBinPathKey]] ) {
-    [self warnAndDisablePreview:[defaults objectForKey:BDSKTeXBinPathKey]];
-	return FALSE;
+       [self warnAndDisablePreview:texBinaryPath];
+       return NO;
    } else {
-	return TRUE;
+       return YES;
    }
 }
 
@@ -104,29 +116,35 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
   [self changeBibTexBinPath:bibtexBinaryPath];
 
   if( ![[NSFileManager defaultManager] isExecutableFileAtPath:[defaults objectForKey:BDSKBibTeXBinPathKey]] ) {
-    [self warnAndDisablePreview:[defaults objectForKey:BDSKBibTeXBinPathKey]];
-	return FALSE;
+       [self warnAndDisablePreview:bibtexBinaryPath];
+       return NO;
    } else {
-	return TRUE;
+       return YES;
    }
 }
 		
-- (void) warnAndDisablePreview:(NSString *) errStr {
-        NSBeep();
-        NSAlert *anAlert = [NSAlert alertWithMessageText:NSLocalizedString(@"Error!",@"Error!")
-					   defaultButton:nil
-					 alternateButton:nil
-					     otherButton:nil
-			       informativeTextWithFormat:NSLocalizedString(@"The file %@ does not exist or is not executable. Previewing is disabled. Please set an appropriate path and re-enable previewing.",@""), errStr];
-	[anAlert beginSheetModalForWindow:[[OAPreferenceController sharedPreferenceController] window]
-			    modalDelegate:nil
-			   didEndSelector:nil
-			      contextInfo:nil];
-				  
-		//Disable previewing
-		[usesTeXButton setState:NSOffState];
-		[self changeUsesTeX:usesTeXButton];
-    }
+- (void) warnAndDisablePreview:(NSTextField *)textField {
+	NSBeep();
+	NSBeginAlertSheet(NSLocalizedString(@"Invalid Path",@"Invalid binary path for TeX preview"), 
+					  nil, nil, nil, 
+					  [[self controlBox] window], 
+					  self, 
+					  @selector(alertSheetDidEnd:returnCode:contextInfo:), 
+					  NULL, 
+					  textField, 
+					  NSLocalizedString(@"The file %@ does not exist or is not executable. Previewing is disabled. Please set an appropriate path and re-enable previewing.",@""), 
+					  [textField stringValue]);
+	
+	//Disable previewing
+	[usesTeXButton setState:NSOffState];
+	[self changeUsesTeX:usesTeXButton];
+}
+
+- (void)alertSheetDidEnd:(NSPanel *)sheet returnCode:(int)returnCode contextInfo:(void *)control{
+    NSText *fe = [[[self controlBox] window] fieldEditor:YES forObject:control];
+    [(NSTextField *)control selectText:nil];
+    [fe setSelectedRange:NSMakeRange([[fe string] length], 0)];
+}
 
 - (IBAction)changeStyle:(id)sender{
     [defaults setObject:[sender stringValue] forKey:BDSKBTStyleKey];
@@ -135,7 +153,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 
 - (IBAction)openTeXpreviewFile:(id)sender{
     // Edit the TeX template in the Application Support folder
-    NSString *applicationSupportPath = [[[NSFileManager defaultManager] applicationSupportDirectory:kUserDomain] stringByAppendingPathComponent:@"BibDesk"];
+    NSString *applicationSupportPath = [[NSFileManager defaultManager] currentApplicationSupportPathForCurrentUser];
     
     // edit the previewtemplate.tex file, so the bibpreview.tex is only edited by PDFPreviewer
     NSString *path = [applicationSupportPath stringByAppendingPathComponent:@"previewtemplate.tex"];
@@ -151,7 +169,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 
 
 - (IBAction)downloadTeX:(id)sender {
-	[[NSWorkspace sharedWorkspace] openURL:[NSURL URLWithString:BDSKTEXDOWNLOADURL]];
+	[[NSWorkspace sharedWorkspace] openURL:[NSURL URLWithString:BDSK_TEX_DOWNLOAD_URL]];
 }
 
 - (IBAction)changeDefaultTeXEncoding:(id)sender{

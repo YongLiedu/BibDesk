@@ -1,13 +1,44 @@
 //
 //  BibTypeManager.m
-//  Bibdesk
+//  BibDesk
 //
 //  Created by Michael McCracken on Thu Nov 28 2002.
-//  Copyright (c) 2002 __MyCompanyName__. All rights reserved.
-//
+/*
+ This software is Copyright (c) 2002,2003,2004,2005
+ Michael O. McCracken. All rights reserved.
+
+ Redistribution and use in source and binary forms, with or without
+ modification, are permitted provided that the following conditions
+ are met:
+
+ - Redistributions of source code must retain the above copyright
+   notice, this list of conditions and the following disclaimer.
+
+ - Redistributions in binary form must reproduce the above copyright
+    notice, this list of conditions and the following disclaimer in
+    the documentation and/or other materials provided with the
+    distribution.
+
+ - Neither the name of Michael O. McCracken nor the names of any
+    contributors may be used to endorse or promote products derived
+    from this software without specific prior written permission.
+
+ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+ "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+ LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+ A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+ OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+ SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+ LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+ DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+ THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+ (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ */
 
 #import "BibTypeManager.h"
 #import "BibAppController.h"
+#import "NSFileManager_BDSKExtensions.h"
 
 static BibTypeManager *sharedInstance = nil;
 
@@ -19,6 +50,9 @@ static BibTypeManager *sharedInstance = nil;
 
 - (id)init{
     self = [super init];
+    
+    if(!self)
+        return nil;
 	
 	[self reloadTypeInfo];
 	
@@ -33,19 +67,40 @@ static BibTypeManager *sharedInstance = nil;
     
     // this is used for generated cite keys, very strict!
 	strictInvalidCiteKeyCharSet = [[validSet invertedSet] copy];  // don't release this
-    
+    [validSet release];
+
 	// this set is used for warning the user on manual entry of a local-url; allows non-ASCII characters and some math symbols
     invalidLocalUrlCharSet = [[NSCharacterSet characterSetWithCharactersInString:@":"] retain];
     
 	// this is used for generated local urls
 	strictInvalidLocalUrlCharSet = [invalidLocalUrlCharSet copy];  // don't release this
-        
-        [validSet release];
+    
+	// see the URI specifications for the valid characters
+	validSet = [[NSCharacterSet characterSetWithRange:NSMakeRange( (unsigned int)'a', 26)] mutableCopy];
+    [validSet addCharactersInRange:NSMakeRange( (unsigned int)'A', 26)];
+    [validSet addCharactersInString:@"-._~:/?#[]@!$&'()*+,;="];
 	
-    return self;
+	// this set is used for warning the user on manual entry of a remote url
+    invalidRemoteUrlCharSet = [[validSet invertedSet] copy];
+    [validSet release];
+    
+	// this is used for generated remote urls
+	strictInvalidRemoteUrlCharSet = [invalidRemoteUrlCharSet copy];  // don't release this
+	
+	invalidGeneralCharSet = [[NSCharacterSet alloc] init];
+	
+	strictInvalidGeneralCharSet = [[NSCharacterSet alloc] init];
+	
+	[[NSNotificationCenter defaultCenter] addObserver:self
+											 selector:@selector(customFieldsDidChange:)
+												 name:BDSKCustomFieldsChangedNotification
+											   object:nil];
+    
+	return self;
 }
 
 - (void)dealloc{
+	[[NSNotificationCenter defaultCenter] removeObserver:self];
 	[fileTypesDict release];
 	[fieldsForTypesDict release];
 	[typesForFileTypeDict release];
@@ -57,70 +112,121 @@ static BibTypeManager *sharedInstance = nil;
 	[strictInvalidCiteKeyCharSet release];
 	[invalidLocalUrlCharSet release];
 	[strictInvalidLocalUrlCharSet release];
+	[invalidRemoteUrlCharSet release];
+	[strictInvalidRemoteUrlCharSet release];
+	[invalidGeneralCharSet release];
+	[strictInvalidGeneralCharSet release];
 	[super dealloc];
 }
 
 - (void)reloadTypeInfo{
-    // First make sure we release the ivars. This does nothing at init.
-	[fileTypesDict release];
-	fileTypesDict = nil;
-	[fieldsForTypesDict release];
-	fieldsForTypesDict = nil;
-	[typesForFileTypeDict release];
-	typesForFileTypeDict = nil;
-	[fieldNameForPubMedTagDict release];
-	fieldNameForPubMedTagDict = nil;
-	[bibtexTypeForPubMedTypeDict release];
-	bibtexTypeForPubMedTypeDict = nil;
-	[MODSGenresForBibTeXTypeDict release];
-	MODSGenresForBibTeXTypeDict = nil;
-	[allFieldNames release];
-	allFieldNames = nil;
 	
 	// Load the TypeInfo plists
 	NSDictionary *typeInfoDict = [NSDictionary dictionaryWithContentsOfFile:[[[NSBundle mainBundle] resourcePath] stringByAppendingPathComponent:TYPE_INFO_FILENAME]];
 
 	NSFileManager *fm = [NSFileManager defaultManager];
-	NSString *applicationSupportPath = [[fm applicationSupportDirectory:kUserDomain] stringByAppendingPathComponent:@"BibDesk"];
-	NSString *userTypeInfoPath = [applicationSupportPath stringByAppendingPathComponent:TYPE_INFO_FILENAME];
+	NSString *userTypeInfoPath = [[fm currentApplicationSupportPathForCurrentUser] stringByAppendingPathComponent:TYPE_INFO_FILENAME];
 	NSDictionary *userTypeInfoDict;
 	
 	if ([fm fileExistsAtPath:userTypeInfoPath]) {
 		userTypeInfoDict = [NSDictionary dictionaryWithContentsOfFile:userTypeInfoPath];
-		
 		// set all the lists we support in the user file
-		fieldsForTypesDict = [[userTypeInfoDict objectForKey:FIELDS_FOR_TYPES_KEY] retain];
-		typesForFileTypeDict = [[NSDictionary dictionaryWithObjectsAndKeys: 
-				[[userTypeInfoDict objectForKey:TYPES_FOR_FILE_TYPE_KEY] objectForKey:BDSKBibtexString], BDSKBibtexString, 
-				[[typeInfoDict objectForKey:TYPES_FOR_FILE_TYPE_KEY] objectForKey:@"PubMed"], @"PubMed", nil] retain];
-	}
-	
-	if (fieldsForTypesDict == nil)
-		fieldsForTypesDict = [[typeInfoDict objectForKey:FIELDS_FOR_TYPES_KEY] retain];
-	if (typesForFileTypeDict == nil)
-		typesForFileTypeDict = [[typeInfoDict objectForKey:TYPES_FOR_FILE_TYPE_KEY] retain];
-	fileTypesDict = [[typeInfoDict objectForKey:FILE_TYPES_KEY] retain];
-	fieldNameForPubMedTagDict = [[typeInfoDict objectForKey:BIBTEX_FIELDS_FOR_PUBMED_TAGS_KEY] retain];
-	bibtexTypeForPubMedTypeDict = [[typeInfoDict objectForKey:BIBTEX_TYPES_FOR_PUBMED_TYPES_KEY] retain];
-	MODSGenresForBibTeXTypeDict = [[typeInfoDict objectForKey:MODS_GENRES_FOR_BIBTEX_TYPES_KEY] retain];
+        [self setFieldsForTypesDict:[userTypeInfoDict objectForKey:FIELDS_FOR_TYPES_KEY]];
+        [self setTypesForFileTypeDict:[NSDictionary dictionaryWithObjectsAndKeys: 
+            [[userTypeInfoDict objectForKey:TYPES_FOR_FILE_TYPE_KEY] objectForKey:BDSKBibtexString], BDSKBibtexString, 
+            [[typeInfoDict objectForKey:TYPES_FOR_FILE_TYPE_KEY] objectForKey:@"PubMed"], @"PubMed", nil]];
+	} else {
+        [self setFieldsForTypesDict:[typeInfoDict objectForKey:FIELDS_FOR_TYPES_KEY]];
+        [self setTypesForFileTypeDict:[typeInfoDict objectForKey:TYPES_FOR_FILE_TYPE_KEY]];
+    }
 
-	NSMutableSet *allFields = [NSMutableSet setWithCapacity:30];
-	NSEnumerator *typeEnum = [[[typeInfoDict objectForKey:TYPES_FOR_FILE_TYPE_KEY] objectForKey:BDSKBibtexString] objectEnumerator];
-	NSString *type;
+    [self setFileTypesDict:[typeInfoDict objectForKey:FILE_TYPES_KEY]];
+    [self setFieldNameForPubMedTagDict:[typeInfoDict objectForKey:BIBTEX_FIELDS_FOR_PUBMED_TAGS_KEY]];
+    [self setBibtexTypeForPubMedTypeDict:[typeInfoDict objectForKey:BIBTEX_TYPES_FOR_PUBMED_TYPES_KEY]];
+    [self setMODSGenresForBibTeXTypeDict:[typeInfoDict objectForKey:MODS_GENRES_FOR_BIBTEX_TYPES_KEY]];
 	
-	while (type = [typeEnum nextObject]) {
-		[allFields addObjectsFromArray:[[fieldsForTypesDict objectForKey:type] objectForKey:REQUIRED_KEY]];
-		[allFields addObjectsFromArray:[[fieldsForTypesDict objectForKey:type] objectForKey:OPTIONAL_KEY]];
-	}
-	[allFields addObjectsFromArray:[[OFPreferenceWrapper sharedPreferenceWrapper] stringArrayForKey:BDSKDefaultFieldsKey]];
-	allFieldNames = [allFields copy];
+	[self reloadAllFieldNames];
 	
 	[[NSNotificationCenter defaultCenter] postNotificationName:BDSKBibTypeInfoChangedNotification
 														object:self
 													  userInfo:[NSDictionary dictionary]];
 }
 
-#pragma mark Accessors
+- (void)reloadAllFieldNames {
+	NSMutableSet *allFields = [NSMutableSet setWithCapacity:30];
+	NSEnumerator *typeEnum = [[self bibTypesForFileType:BDSKBibtexString] objectEnumerator];
+	NSString *type;
+	
+	while (type = [typeEnum nextObject]) {
+		[allFields addObjectsFromArray:[[fieldsForTypesDict objectForKey:type] objectForKey:REQUIRED_KEY]];
+		[allFields addObjectsFromArray:[[fieldsForTypesDict objectForKey:type] objectForKey:OPTIONAL_KEY]];
+	}
+	OFPreferenceWrapper *pw = [OFPreferenceWrapper sharedPreferenceWrapper];
+	[allFields addObjectsFromArray:[pw stringArrayForKey:BDSKDefaultFieldsKey]];
+	[allFields addObjectsFromArray:[pw stringArrayForKey:BDSKLocalFileFieldsKey]];
+	[allFields addObjectsFromArray:[pw stringArrayForKey:BDSKRemoteURLFieldsKey]];
+	[allFields addObjectsFromArray:[pw stringArrayForKey:BDSKBooleanFieldsKey]];
+	[allFields addObjectsFromArray:[pw stringArrayForKey:BDSKRatingFieldsKey]];
+	
+    [self setAllFieldNames:allFields];
+}
+
+- (void)customFieldsDidChange:(NSNotification *)notification {
+	[self reloadAllFieldNames];
+}
+
+#pragma mark Setters
+
+- (void)setAllFieldNames:(NSSet *)newNames{
+    if(allFieldNames != newNames){
+        [allFieldNames release];
+        allFieldNames = [newNames copy];
+    }
+}
+
+- (void)setMODSGenresForBibTeXTypeDict:(NSDictionary *)newNames{
+    if(MODSGenresForBibTeXTypeDict != newNames){
+        [MODSGenresForBibTeXTypeDict release];
+        MODSGenresForBibTeXTypeDict = [newNames copy];
+    }
+}
+
+- (void)setBibtexTypeForPubMedTypeDict:(NSDictionary *)newNames{
+    if(bibtexTypeForPubMedTypeDict != newNames){
+        [bibtexTypeForPubMedTypeDict release];
+        bibtexTypeForPubMedTypeDict = [newNames copy];
+    }
+}
+
+- (void)setFieldNameForPubMedTagDict:(NSDictionary *)newNames{
+    if(fieldNameForPubMedTagDict != newNames){
+        [fieldNameForPubMedTagDict release];
+        fieldNameForPubMedTagDict = [newNames copy];
+    }
+}
+
+- (void)setFileTypesDict:(NSDictionary *)newTypes{
+    if(fileTypesDict != newTypes){
+        [fileTypesDict release];
+        fileTypesDict = [newTypes copy];
+    }
+}
+
+- (void)setFieldsForTypesDict:(NSDictionary *)newFields{
+    if(fieldsForTypesDict != newFields){
+        [fieldsForTypesDict release];
+        fieldsForTypesDict = [newFields copy];
+    }
+}
+
+- (void)setTypesForFileTypeDict:(NSDictionary *)newTypes{
+    if(typesForFileTypeDict != newTypes){
+        [typesForFileTypeDict release];
+        typesForFileTypeDict = [newTypes copy];
+    }
+}
+
+#pragma mark Getters
 
 - (NSString *)defaultTypeForFileFormat:(NSString *)fileFormat{
      return [[fileTypesDict objectForKey:fileFormat] objectForKey:@"DefaultType"];
@@ -150,6 +256,13 @@ static BibTypeManager *sharedInstance = nil;
 
 - (NSArray *)userDefaultFieldsForType:(NSString *)type{
     return [[OFPreferenceWrapper sharedPreferenceWrapper] stringArrayForKey:BDSKDefaultFieldsKey];
+}
+
+- (NSSet *)singleValuedGroupFields{
+	NSMutableSet *singleValuedFields = [NSMutableSet setWithObjects:BDSKTypeString, BDSKJournalString, BDSKYearString, BDSKMonthString, nil];
+	[singleValuedFields addObjectsFromArray:[[OFPreferenceWrapper sharedPreferenceWrapper] stringArrayForKey:BDSKRatingFieldsKey]];
+	[singleValuedFields addObjectsFromArray:[[OFPreferenceWrapper sharedPreferenceWrapper] stringArrayForKey:BDSKBooleanFieldsKey]];
+	return singleValuedFields;
 }
 
 - (NSArray *)bibTypesForFileType:(NSString *)fileType{
@@ -187,23 +300,29 @@ static BibTypeManager *sharedInstance = nil;
 #pragma mark Character sets
 
 - (NSCharacterSet *)invalidCharactersForField:(NSString *)fieldName inFileType:(NSString *)type{
-	if( [type isEqualToString:BDSKBibtexString] && [fieldName isEqualToString:BDSKCiteKeyString]){
+	if( [fieldName isEqualToString:BDSKCiteKeyString]){
 		return invalidCiteKeyCharSet;
 	}
-	if([fieldName isEqualToString:BDSKLocalUrlString]){
+	if([[[OFPreferenceWrapper sharedPreferenceWrapper] stringArrayForKey:BDSKLocalFileFieldsKey] containsObject:fieldName]){
 		return invalidLocalUrlCharSet;
 	}
-	[NSException raise:BDSKUnimplementedException format:@"invalidCharactersForField is partly implemented"];
+	if([[[OFPreferenceWrapper sharedPreferenceWrapper] stringArrayForKey:BDSKRemoteURLFieldsKey] containsObject:fieldName]){
+		return invalidRemoteUrlCharSet;
+	}
+	return invalidGeneralCharSet;
 }
 
 - (NSCharacterSet *)strictInvalidCharactersForField:(NSString *)fieldName inFileType:(NSString *)type{
-	if( [type isEqualToString:BDSKBibtexString] && [fieldName isEqualToString:BDSKCiteKeyString]){
+	if( [fieldName isEqualToString:BDSKCiteKeyString]){
 		return strictInvalidCiteKeyCharSet;
 	}
-	if([fieldName isEqualToString:BDSKLocalUrlString]){
+	if([[[OFPreferenceWrapper sharedPreferenceWrapper] stringArrayForKey:BDSKLocalFileFieldsKey] containsObject:fieldName]){
 		return strictInvalidLocalUrlCharSet;
 	}
-	[NSException raise:BDSKUnimplementedException format:@"strictInvalidCharactersForField is partly implemented"];
+	if([[[OFPreferenceWrapper sharedPreferenceWrapper] stringArrayForKey:BDSKRemoteURLFieldsKey] containsObject:fieldName]){
+		return strictInvalidRemoteUrlCharSet;
+	}
+	return strictInvalidGeneralCharSet;
 }
 
 - (NSCharacterSet *)invalidFieldNameCharacterSetForFileType:(NSString *)type{
@@ -211,6 +330,8 @@ static BibTypeManager *sharedInstance = nil;
         return invalidCiteKeyCharSet;
     else
         [NSException raise:BDSKUnimplementedException format:@"invalidFieldNameCharacterSetForFileType is only implemented for BibTeX"];
+    // not reached
+    return nil;
 }
 
 - (NSCharacterSet *)fragileCiteKeyCharacterSet{

@@ -1,31 +1,60 @@
 //
 //  BibPref_InputManager.m
-//  Bibdesk
+//  BibDesk
 //
 //  Created by Adam Maxwell on Fri Aug 27 2004.
-//  Copyright (c) 2004 Adam R. Maxwell. All rights reserved.
-//
+/*
+ This software is Copyright (c) 2004,2005
+ Adam Maxwell. All rights reserved.
+
+ Redistribution and use in source and binary forms, with or without
+ modification, are permitted provided that the following conditions
+ are met:
+
+ - Redistributions of source code must retain the above copyright
+   notice, this list of conditions and the following disclaimer.
+
+ - Redistributions in binary form must reproduce the above copyright
+    notice, this list of conditions and the following disclaimer in
+    the documentation and/or other materials provided with the
+    distribution.
+
+ - Neither the name of Adam Maxwell nor the names of any
+    contributors may be used to endorse or promote products derived
+    from this software without specific prior written permission.
+
+ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+ "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+ LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+ A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+ OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+ SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+ LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+ DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+ THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+ (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ */
+
 
 
 #import "BibPref_InputManager.h"
 #import "BibTypeManager.h"
+#import "NSImage+Toolbox.h"
 
 NSString *BDSKInputManagerID = @"net.sourceforge.bibdesk.inputmanager";
 NSString *BDSKInputManagerLoadableApplications = @"Application bundles that we recognize";
+
+static int tableIconSize = 24;
 
 @implementation BibPref_InputManager
 
 - (void)awakeFromNib{
     [super awakeFromNib];
-    NSWorkspace *ws = [NSWorkspace sharedWorkspace];
     
     NSString *libraryPath = [NSSearchPathForDirectoriesInDomains(NSLibraryDirectory, NSUserDomainMask, YES) objectAtIndex:0];
     inputManagerPath = [[libraryPath stringByAppendingPathComponent:@"/InputManagers/BibDeskInputManager"] retain];
-    
-    if(![ws respondsToSelector:@selector(absolutePathForAppBundleWithIdentifier:)]){ // check the OS version
-        [enableButton setEnabled:NO];
-    }
-        
+            
     CFPropertyListRef prefs = CFPreferencesCopyAppValue( (CFStringRef)BDSKInputManagerLoadableApplications,
                                                       (CFStringRef)BDSKInputManagerID );
                                                       
@@ -36,10 +65,10 @@ NSString *BDSKInputManagerLoadableApplications = @"Application bundles that we r
         [appListArray addObject:@"com.apple.textedit"];
     }
     	
-    [[appList tableColumnWithIdentifier:@"AppList"] setDataCell:[[[NSBrowserCell alloc] init] autorelease]];
+    [[appList tableColumnWithIdentifier:@"AppList"] setDataCell:[[[OATextWithIconCell alloc] init] autorelease]];
+    [appList setRowHeight:(tableIconSize + 2)];
 
-    if(![self isInstalledVersionCurrent] && 
-       [ws respondsToSelector:@selector(absolutePathForAppBundleWithIdentifier:)] ){ // make sure we're on 10.3, also
+    if(![self isInstalledVersionCurrent]){
         [enableButton setTitle:@"Update"];
         NSAlert *anAlert = [NSAlert alertWithMessageText:@"Update Available!"
                                            defaultButton:NSLocalizedString(@"Update", @"Update")
@@ -58,7 +87,6 @@ NSString *BDSKInputManagerLoadableApplications = @"Application bundles that we r
         enabledEditorAutocompletionStrings = [[NSMutableArray array] retain];
     }
     [[editorAutocompletionStringsTableView tableColumnWithIdentifier:@"CompList"] setDataCell:[[[NSTextFieldCell alloc] init] autorelease]];
-    [appList setRowHeight:(16 + 2)]; // icon is 16x16
     NSLayoutManager *lm = [[NSLayoutManager alloc] init];
     [editorAutocompletionStringsTableView setRowHeight:[lm defaultLineHeightForFont:[NSFont systemFontOfSize:[NSFont systemFontSize]]]];
     [lm release];
@@ -124,7 +152,6 @@ NSString *BDSKInputManagerLoadableApplications = @"Application bundles that we r
     NSString *inBundleID = [appListArray objectAtIndex:rowIndex];
     CFURLRef outAppURL = nil;
     NSImage *image = nil;
-    int size = 16;
     
     OSStatus err = LSFindApplicationForInfo( kLSUnknownCreator,
                                              (CFStringRef)inBundleID,
@@ -132,8 +159,8 @@ NSString *BDSKInputManagerLoadableApplications = @"Application bundles that we r
                                              NULL,
                                              &outAppURL );
     
-    // NSAssert1( (!err), @"Couldn't find icon for application %@", inBundleID);
-    if(!err){
+    OBPRECONDITION(err == noErr);
+    if(err == noErr){
         NSString *path = [(NSURL *)outAppURL path];
         CFRelease(outAppURL);
         [aCell setStringValue:[[path lastPathComponent] stringByDeletingPathExtension]];
@@ -141,29 +168,25 @@ NSString *BDSKInputManagerLoadableApplications = @"Application bundles that we r
         image = [[NSWorkspace sharedWorkspace] iconForFile:path];
     } else {
         // if LS failed us (my cache was corrupt when I wrote this code, so it's been tested)
-        IconRef genericIconRef;
-        OSStatus getIconErr = GetIconRef( kOnSystemDisk,
-                                          kSystemIconsCreator,
-                                          kAlertCautionIcon,
-                                          &genericIconRef );
-        NSAssert1( (!getIconErr), @"Couldn't get kAlertCautionIcon, error %d.", getIconErr); // now you're really out of luck
-        image = [[[NSImage alloc] initWithSize:NSMakeSize(size, size)] autorelease];
-        CGRect iconCGRect = CGRectMake(0, 0, size, size);
-        [image lockFocus];
-        PlotIconRefInContext( (CGContextRef)[[NSGraphicsContext currentContext] graphicsPort], // borrowed from BibEditor code
-                              &iconCGRect,
-                              kAlignAbsoluteCenter,
-                              kTransformNone,
-                              NULL,
-                              kPlotIconRefNormalFlags,
-                              genericIconRef);
-        [image unlockFocus];
+		image = [NSImage cautionIconImage];
         [aCell setStringValue:[NSString stringWithFormat:NSLocalizedString(@"Error %d, LaunchServices can't find %@",@""), err, inBundleID]];
     }
 
-    [image setSize:NSMakeSize(size, size)];
-    [aCell setImage:image];
-    [aCell setLeaf:YES];
+    OBPOSTCONDITION(image != nil);
+    
+    NSRect srcRect = {NSZeroPoint, [image size]};
+    NSSize dstSize = NSMakeSize(tableIconSize, tableIconSize);
+    NSRect dstRect = {NSZeroPoint, dstSize};
+    
+    NSImage *cellImage = [[NSImage alloc] initWithSize:dstSize];
+    [cellImage lockFocus];
+    [[NSGraphicsContext currentContext] setImageInterpolation:NSImageInterpolationHigh];
+    [image drawInRect:dstRect fromRect:srcRect operation:NSCompositeCopy fraction:1.0];
+    [cellImage unlockFocus];
+    
+    [aCell setIcon:cellImage];
+    [cellImage release];
+    [aCell setDrawsHighlight:NO];
 }
 
 #pragma mark Citekey autocompletion
@@ -220,14 +243,6 @@ NSString *BDSKInputManagerLoadableApplications = @"Application bundles that we r
 }
 
 - (IBAction)addApplication:(id)sender{
-    if(![[NSWorkspace sharedWorkspace] respondsToSelector:@selector(absolutePathForAppBundleWithIdentifier:)]){ // check the OS version
-        [sender setEnabled:NO];
-        NSBeginAlertSheet(NSLocalizedString(@"Error!", @"Error!"),
-                          nil, nil, nil, [[OAPreferenceController sharedPreferenceController] window], nil, nil, nil, nil,
-                          NSLocalizedString(@"You appear to be using a system version earlier than 10.3.  Cite-key autocompletion requires Mac OS X 10.3 or greater.",
-                                            @"You appear to be using a system version earlier than 10.3.  Cite-key autocompletion requires Mac OS X 10.3 or greater.") );
-        return;
-    }
     
     NSOpenPanel *op = [NSOpenPanel openPanel];
     [op setCanChooseDirectories:NO];
@@ -299,7 +314,7 @@ NSString *BDSKInputManagerLoadableApplications = @"Application bundles that we r
     // first we fill the popup
 	BibTypeManager *typeMan = [BibTypeManager sharedManager];
 	NSMutableSet *fieldNameSet = [NSMutableSet setWithSet:[typeMan allFieldNames]];
-	[fieldNameSet minusSet:[NSSet setWithObjects:BDSKLocalUrlString, BDSKUrlString, BDSKAbstractString, BDSKAnnoteString, BDSKYearString, BDSKVolumeString, BDSKNumberString, BDSKPagesString, nil]];
+	[fieldNameSet minusSet:[NSSet setWithObjects:BDSKLocalUrlString, BDSKUrlString, BDSKAbstractString, BDSKAnnoteString, BDSKYearString, BDSKVolumeString, BDSKNumberString, BDSKPagesString, BDSKRatingString, BDSKReadString, nil]];
 	NSMutableArray *fieldNames = [[fieldNameSet allObjects] mutableCopy];
 	[fieldNames sortUsingSelector:@selector(caseInsensitiveCompare:)];
 	[fieldNames removeObjectsInArray:enabledEditorAutocompletionStrings];
