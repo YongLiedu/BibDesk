@@ -56,5 +56,5 @@
 @interface NSObject (RYZImagePopUpButtonDraggingSource)
 - (BOOL)imagePopUpButton:(RYZImagePopUpButton *)view writeDataToPasteboard:(NSPasteboard *)pasteboard;
 - (NSArray *)imagePopUpButton:(RYZImagePopUpButton *)view namesOfPromisedFilesDroppedAtDestination:(NSURL *)dropDestination;
-- (void)imagePopUpButton:(RYZImagePopUpButton *)view concludeDragOperation:(NSDragOperation)operation;
+- (void)imagePopUpButton:(RYZImagePopUpButton *)view cleanUpAfterDragOperation:(NSDragOperation)operation;
 @end

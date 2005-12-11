@@ -270,8 +270,8 @@
 }
 
 - (void)draggedImage:(NSImage *)anImage endedAt:(NSPoint)aPoint operation:(NSDragOperation)operation{
-	if ([delegate respondsToSelector:@selector(imagePopUpButton:concludeDragOperation:)])
-		return [delegate imagePopUpButton:self concludeDragOperation:operation];
+	if ([delegate respondsToSelector:@selector(imagePopUpButton:cleanUpAfterDragOperation:)])
+		return [delegate imagePopUpButton:self cleanUpAfterDragOperation:operation];
 }
 
 #pragma mark Dragging destination
