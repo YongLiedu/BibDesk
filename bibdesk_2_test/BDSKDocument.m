@@ -89,7 +89,7 @@
     [person2 setValue:@"john"
               forKey:@"firstNamePart"];
     [set2 addObject:person2];
-    id tag = [NSEntityDescription insertNewObjectForEntityForName:@"Tag"
+    id tag = [NSEntityDescription insertNewObjectForEntityForName:TagEntityName
                                            inManagedObjectContext:managedObjectContext];
     [tag setValue:@"johnblowgroup" forKey:@"name"];
     [[person2 mutableSetValueForKey:@"tags"] addObject:tag];
@@ -102,6 +102,9 @@
                     forKey:@"contributor"];
     [relationship setValue:pub
                     forKey:@"publication"];
+
+    id contributorPublicationRelationships = [pub mutableSetValueForKey:@"contributorRelationships"];
+    [contributorPublicationRelationships addObject:relationship];
     
     relationship = [NSEntityDescription insertNewObjectForEntityForName:ContributorPublicationRelationshipEntityName
                                                  inManagedObjectContext:managedObjectContext];
@@ -111,10 +114,50 @@
                     forKey:@"contributor"];
     [relationship setValue:pub
                     forKey:@"publication"];
-    tag = [NSEntityDescription insertNewObjectForEntityForName:@"Tag"
+    
+    
+    [contributorPublicationRelationships addObject:relationship];
+    
+    tag = [NSEntityDescription insertNewObjectForEntityForName:TagEntityName
                                            inManagedObjectContext:managedObjectContext];
     [tag setValue:@"tagsRCool" forKey:@"name"];
     [[pub mutableSetValueForKey:@"tags"] addObject:tag];
+    
+    id institution1 = [NSEntityDescription insertNewObjectForEntityForName:@"Institution" inManagedObjectContext:managedObjectContext];
+    
+    [institution1 setValue:@"Penn State" forKey:@"name"];
+    
+    id institution2 = [NSEntityDescription insertNewObjectForEntityForName:@"Institution" inManagedObjectContext:managedObjectContext];
+    
+    [institution2 setValue:@"UC San Diego" forKey:@"name"];
+    
+    
+    id institutionRelationship1 = [NSEntityDescription insertNewObjectForEntityForName:PersonInstitutionRelationshipEntityName
+                                                               inManagedObjectContext:managedObjectContext];
+    [institutionRelationship1 setValue:@"phd student"
+                               forKey:@"relationshipType"];
+    [institutionRelationship1 setValue:person
+                               forKey:@"person"];
+    [institutionRelationship1 setValue:institution1
+                               forKey:@"institution"];
+    [institutionRelationship1 setValue:[NSDate dateWithNaturalLanguageString:@"8/30/1997"]
+                                forKey:@"startDate"];
+    [institutionRelationship1 setValue:[NSDate dateWithNaturalLanguageString:@"4/1/2001"]
+                                forKey:@"endDate"];
+        
+    
+    id institutionRelationship2 = [NSEntityDescription insertNewObjectForEntityForName:PersonInstitutionRelationshipEntityName
+                                                               inManagedObjectContext:managedObjectContext];
+    [institutionRelationship2 setValue:@"phd student"
+                               forKey:@"relationshipType"];
+    [institutionRelationship2 setValue:person
+                               forKey:@"person"];
+    [institutionRelationship2 setValue:institution2
+                               forKey:@"institution"];
+
+    [institutionRelationship2 setValue:[NSDate dateWithNaturalLanguageString:@"9/11/2001"]
+                                forKey:@"startDate"];
+    
             
     return self;
 }
