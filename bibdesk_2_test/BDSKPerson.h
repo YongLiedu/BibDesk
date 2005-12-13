@@ -8,7 +8,7 @@
 
 #import <Cocoa/Cocoa.h>
 #import "BDSKContributor.h"
-
+#import "BDSKPersonInstitutionRelationship.h"
 
 @interface BDSKPerson : BDSKContributor {
 
@@ -16,5 +16,8 @@
 
 - (NSString *)stringValueForSearch;
 - (NSString *)name;
+
+- (BDSKPersonInstitutionRelationship *)currentInstitutionRelationship;
+- (NSString *)currentInstitutionRelationshipDisplayString;
 
 @end

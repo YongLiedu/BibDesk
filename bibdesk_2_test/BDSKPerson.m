@@ -44,4 +44,35 @@
         (FIRST ? firstName : @"")];
 }
 
+- (BDSKPersonInstitutionRelationship *)currentInstitutionRelationship{
+    NSMutableSet *institutionRelationships = [self valueForKey:@"institutionRelationships"];
+    NSEnumerator *instRelEnumerator = [institutionRelationships objectEnumerator];
+    id instRel = nil;
+    NSDate *mostRecentDate = [NSDate distantPast];
+    id mostRecentInstRel = nil;
+    
+    // find the relationship with the most recent start date:
+    while (instRel = [instRelEnumerator nextObject]) {
+        NSDate *startDate = [instRel valueForKey:@"startDate"];
+        if([startDate timeIntervalSinceDate:mostRecentDate] > 0){
+            mostRecentDate = startDate;
+            mostRecentInstRel = instRel;
+        }
+    }
+    return mostRecentInstRel;
+}
+
+- (NSString *)currentInstitutionRelationshipDisplayString{
+    BDSKPersonInstitutionRelationship *instRel = [self currentInstitutionRelationship];
+    
+    NSString *instName = [instRel valueForKeyPath:@"institution.name"];
+    NSString *relType = [instRel valueForKey:@"relationshipType"];
+    NSDate *startDate = [instRel valueForKey:@"startDate"];
+    NSString *startDateString = [startDate descriptionWithCalendarFormat:@"%m/%y" 
+                                                                timeZone:nil 
+                                                                  locale:nil];
+
+    return [NSString stringWithFormat:@"%@, %@ (since %@)", relType, instName, startDateString];
+}
+
 @end
