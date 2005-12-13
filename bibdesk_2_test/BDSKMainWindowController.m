@@ -163,6 +163,7 @@
     while (displayControllerClassName = [displayControllerClassNameE nextObject]){
         Class controllerClass = NSClassFromString(displayControllerClassName);
         id controllerObject = [[controllerClass alloc] init];
+        [controllerObject setDocument:[self document]];
         [displayControllers addObject:controllerObject];
 
         NSDictionary *infoDict = [displayControllersInfoDict objectForKey:displayControllerClassName];

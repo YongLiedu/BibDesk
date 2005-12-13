@@ -8,13 +8,17 @@
 
 #import <Cocoa/Cocoa.h>
 
-
 @interface BDSKPersonTableDisplayController : NSObject {
     IBOutlet NSView *mainView;  
     IBOutlet NSArrayController *itemsArrayController;
+    NSDocument *document;
 }
 
 - (NSView *)view;
 - (NSArrayController *)itemsArrayController;
+
+- (NSDocument *)document;
+- (void)setDocument:(NSDocument *)newDocument;
+- (NSManagedObjectContext *)managedObjectContext;
 
 @end

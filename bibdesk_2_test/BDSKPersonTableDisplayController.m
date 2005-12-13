@@ -15,6 +15,7 @@
     [super dealloc];
 }
 
+
 - (NSView *)view{
     if(!mainView){
         [NSBundle loadNibNamed:@"BDSKPersonTableDisplayController" owner:self];
@@ -26,5 +27,21 @@
 - (NSArrayController *)itemsArrayController{
     return itemsArrayController;
 }
+
+
+- (NSDocument *)document{
+    return document;
+}
+
+
+- (void)setDocument:(NSDocument *)newDocument{
+    document = newDocument;
+}
+
+
+- (NSManagedObjectContext *)managedObjectContext{
+    return [[self document] managedObjectContext];
+}
+
 
 @end

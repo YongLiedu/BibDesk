@@ -8,13 +8,17 @@
 
 #import <Cocoa/Cocoa.h>
 
-
 @interface BDSKNoteTableDisplayController : NSObject {
     IBOutlet NSView *mainView;
     IBOutlet NSArrayController *itemsArrayController;
+    NSDocument *document;
 }
 
 - (NSArrayController *)itemsArrayController;
 - (NSView *)view;
+
+- (NSDocument *)document;
+
+- (void)setDocument:(NSDocument *)newDocument;
 
 @end

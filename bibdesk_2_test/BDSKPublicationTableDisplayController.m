@@ -32,4 +32,13 @@
     return itemsArrayController;
 }
 
+
+- (NSDocument *)document{
+    return document;
+}
+
+- (void)setDocument:(NSDocument *)newDocument{
+    document = newDocument;
+}
+
 @end

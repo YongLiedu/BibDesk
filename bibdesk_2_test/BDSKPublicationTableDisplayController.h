@@ -7,6 +7,7 @@
 //
 
 #import <Cocoa/Cocoa.h>
+
 #import "ImageBackgroundBox.h"
 
 
@@ -14,9 +15,13 @@
     IBOutlet NSView *mainView;
     IBOutlet NSArrayController *itemsArrayController;
     IBOutlet ImageBackgroundBox *selectionDetailsBox;
+    NSDocument *document;
 }
 
 - (NSView *)view;
 - (NSArrayController *)itemsArrayController;
+
+- (NSDocument *)document;
+- (void)setDocument:(NSDocument *)newDocument;
 
 @end

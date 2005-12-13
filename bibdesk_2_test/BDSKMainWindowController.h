@@ -7,8 +7,8 @@
 //
 
 #import <Cocoa/Cocoa.h>
-#import "BDSKDocument.h"
 #import "ImageAndTextCell.h"
+#import "BDSKDataModelNames.h"
 
 #import "BDSKPublicationTableDisplayController.h" // @@ TODO: itemdisplayflex this should be temporary
 #import "BDSKNoteTableDisplayController.h" // @@ TODO: itemdisplayflex this should be temporary
