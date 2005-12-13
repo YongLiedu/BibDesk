@@ -38,7 +38,8 @@ typedef struct {
 #ifdef SUPPORT_UTF8
 // count the number of UTF-8 characters in a string
 // there is probably a better way to do this but this works for now
-static int utf8charcount(const char *str, int len) {
+static inline
+int utf8charcount(UInt8 *str, int len) {
 	int chars, pos;
 	unsigned char c;
 	for (pos = chars = 0; pos < len; pos++) {
@@ -155,15 +156,41 @@ static AGRegex *backrefPattern;
 		options |= PCRE_NOTEOL;
 	// allocate match vector
 	NSAssert1(matchv = malloc(sizeof(int) * groupCount * 3), @"couldn't allocate match vector for %d items", groupCount * 3);
-
+    
+    // ARM:  Here's another performance hit with the UTF8 conversion
 	// convert character range to byte range
-	range.length = strlen([[str substringWithRange:range] UTF8String]);
-	range.location = strlen([[str substringToIndex:range.location] UTF8String]);
-	// try match
-	if ((error = pcre_exec(regex, extra, [str UTF8String], range.location + range.length, range.location, options, matchv, groupCount * 3)) == PCRE_ERROR_NOMATCH) {
+    CFIndex convertedIndex;
+    CFStringGetBytes((CFStringRef)str, CFRangeMake(range.location, range.length), kCFStringEncodingUTF8, 0, FALSE, NULL, UINT_MAX, &convertedIndex);
+	range.length = convertedIndex;
+    CFStringGetBytes((CFStringRef)str, CFRangeMake(0, range.location), kCFStringEncodingUTF8, 0, FALSE, NULL, UINT_MAX, &convertedIndex);
+	range.location = convertedIndex;
+        
+    // convert to UTF8; we take the long way round, but it's much cheaper than -[NSString UTF8String], especially since we dispose of this when done (but alloca() usually works)
+    CFIndex bufLen;
+    CFRange fullRange = CFRangeMake(0, [str length]);
+    CFIndex converted;
+    converted = CFStringGetBytes((CFStringRef)str, fullRange, kCFStringEncodingUTF8, 0, FALSE, NULL, UINT_MAX, &bufLen);
+    NSAssert1(converted == [str length], @"String %@ was not converted to UTF-8 correctly", str);
+    
+    UInt8 *buffer = alloca((bufLen + 1) * sizeof(UInt8));
+    BOOL usedStack = YES;
+    if(buffer == NULL){
+        usedStack = NO;
+        buffer = NSZoneMalloc(NSDefaultMallocZone(), (bufLen + 1) * sizeof(UInt8));
+        NSAssert1(buffer != NULL, @"Unable to allocate buffer of length %d and size UInt8", bufLen);
+    }
+    CFStringGetBytes((CFStringRef)str, fullRange, kCFStringEncodingUTF8, 0, FALSE, buffer, converted, NULL);
+    buffer[bufLen] = '\0'; // null terminate to make this a cstring
+    
+    // try match
+	if ((error = pcre_exec(regex, extra, (char *)buffer, range.location + range.length, range.location, options, matchv, groupCount * 3)) == PCRE_ERROR_NOMATCH) {
 		free(matchv);
+        if(usedStack == NO)
+            NSZoneFree(NSDefaultMallocZone(), buffer);
 		return nil;
 	}
+    if(usedStack == NO)
+        NSZoneFree(NSDefaultMallocZone(), buffer);
 	// should not get any error besides PCRE_ERROR_NOMATCH
 	NSAssert1(error > 0, @"unexpected error pcre_exec(): %d", error);
 	// return the match, match object takes ownership of matchv
@@ -404,8 +431,30 @@ static AGRegex *backrefPattern;
 	end = matchv[2 * idx + 1];
 	if (start < 0)
 		return NSMakeRange(NSNotFound, 0);
-	// convert byte locations to character locations
-	return NSMakeRange(utf8charcount([string UTF8String], start), utf8charcount([string UTF8String] + start, end - start));
+    
+    // ARM:  Calling [string UTF8String] can get expensive in terms of memory, since it creates autoreleased NSData instances; if this method gets called frequently, we can end up in big trouble (this happens when you do replaceWithString: on a very long string).
+    CFIndex bufLen;
+    CFRange fullRange = CFRangeMake(0, [string length]);
+    CFIndex converted;
+    converted = CFStringGetBytes((CFStringRef)string, fullRange, kCFStringEncodingUTF8, 0, FALSE, NULL, UINT_MAX, &bufLen);
+    NSAssert1(converted == [string length], @"String %@ was not converted to UTF-8 correctly", string);
+    
+    UInt8 *buffer = alloca(bufLen * sizeof(UInt8));
+    BOOL usedStack = YES;
+    if(buffer == NULL){
+        usedStack = NO;
+        buffer = NSZoneMalloc(NSDefaultMallocZone(), bufLen * sizeof(UInt8));
+        NSAssert1(buffer != NULL, @"Unable to allocate buffer of length %d and size UInt8", bufLen);
+    }
+    CFStringGetBytes((CFStringRef)string, fullRange, kCFStringEncodingUTF8, 0, FALSE, buffer, converted, NULL);
+
+    // convert byte locations to character locations (doesn't require null-terminated string)
+    NSRange theRange = NSMakeRange(utf8charcount(buffer, start), utf8charcount(buffer + start, end - start));
+
+    if(usedStack == NO)
+        NSZoneFree(NSDefaultMallocZone(), buffer);
+    
+	return theRange;
 }
 
 - (NSRange)rangeNamed:(NSString *)name {
