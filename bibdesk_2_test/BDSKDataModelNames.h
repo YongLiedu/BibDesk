@@ -19,4 +19,7 @@
 #define NoteGroupEntityName @"NoteGroup"
 #define NoteEntityName @"Note"
 
+#define TagEntityName @"Tag"
+
 #define ContributorPublicationRelationshipEntityName @"ContributorPublicationRelationship"
+#define PersonInstitutionRelationshipEntityName @"PersonInstitutionRelationship"
