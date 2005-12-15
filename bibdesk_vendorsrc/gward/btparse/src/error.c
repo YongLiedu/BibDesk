@@ -30,9 +30,15 @@
 #include "my_dmalloc.h"
 
 NSString *BDSKParserErrorNotification = @"BDSKParserErrorNotification";
+NSString *BDSKParserHarmlessWarningString = @"harmless";
 
 @implementation BDSKErrObj
 + (BOOL)accessInstanceVariablesDirectly{ return YES; }
+
+- (NSString *)description{
+    return [NSString stringWithFormat:@"File name: %@, Document: %@, line number: %d \n\t item: %@, error class: %@, error message: %@", fileName, document, lineNumber, itemDescription, errorClassName, errorMessage];
+}
+
 @end
 //
 // ----------------------------------------------------------------------------------------
@@ -137,6 +143,8 @@ void print_error (bt_error *err)
    }
 
    name = errclass_names[(int) err->class];
+   if (name == NULL)
+       name = (char *)[BDSKParserHarmlessWarningString cString]; /* BTERR_NOTIFY used for lexical buffer overflow warnings */
    if (name)
    {
        if (something_printed){
@@ -156,11 +164,9 @@ void print_error (bt_error *err)
 
    [errString appendString:[NSString stringWithCString:err->message]];
    [errObj setValue:[NSString stringWithCString:err->message] forKey:@"errorMessage"];
-   /*   [[NSNotificationCenter defaultCenter] postNotificationName:@"BTPARSE ERROR" object:errObj]; */
-   /*   ARM: changed from "BTPARSE ERROR" to "A parsing error occurred" (BDSKParserErrorNotification) */
 
    NSNotification *errNotif = [NSNotification notificationWithName:BDSKParserErrorNotification object:errObj];
-   
+
    [[NSNotificationQueue defaultQueue] enqueueNotification:errNotif
                                               postingStyle:NSPostWhenIdle
                                               coalesceMask:NSNotificationCoalescingOnSender

@@ -24,6 +24,7 @@
 #import <Cocoa/Cocoa.h>
 
 extern NSString *BDSKParserErrorNotification;
+extern NSString *BDSKParserHarmlessWarningString;
 
 @interface BDSKErrObj : NSObject{
     NSString *fileName;
