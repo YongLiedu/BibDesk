@@ -94,6 +94,10 @@ static CFDataRef HandleToData(Handle inHandle)
 
 static OSStatus PathToFSRef(CFStringRef inPath, FSRef *outRef)
 {
+    if (inPath == NULL) {
+        return fnfErr;
+    }
+    
     CFURLRef	tempURL = NULL;
     Boolean	gotRef = false;
     
