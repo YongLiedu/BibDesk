@@ -72,8 +72,10 @@ static char 	zzebuf[70];
 #define ZZINC
 #endif
 
-
-#define ZZGETC_STREAM {zzchar = getc(zzstream_in); zzclass = ZZSHIFT(zzchar);}
+/* ARM: modified to use getc_unlocked since we're not multithreaded and no one writes
+ * to the stream.  The bt_parse... entry points now use flockfile() explicitly so
+ * we are still safe, and this avoids the __spin_lock on each getc call             */
+#define ZZGETC_STREAM {zzchar = getc_unlocked(zzstream_in); zzclass = ZZSHIFT(zzchar);}
 #define ZZGETC_FUNC {zzchar = (*zzfunc_in)(); zzclass = ZZSHIFT(zzchar);}
 #define ZZGETC_STR { 			\
 	if (*zzstr_in){				\

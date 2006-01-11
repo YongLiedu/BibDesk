@@ -178,7 +178,8 @@ cleanup_prev_file(void)
 {
    if(prev_file != NULL)
    {
-       clearerr(prev_file);
+       clearerr (prev_file);
+       funlockfile (prev_file);
        prev_file = NULL;
        free_lex_buffer ();
    }
@@ -332,6 +333,7 @@ AST * bt_parse_entry (FILE *    infile,
    {
       if (prev_file != NULL)            /* haven't already done the cleanup */
       {
+         funlockfile (infile);
          prev_file = NULL;
          finish_parse (&err_counts);
       }
@@ -397,6 +399,8 @@ AST * bt_parse_entry (FILE *    infile,
 #endif
    if (prev_file == NULL)               /* only read from input stream if */
    {                                    /* starting afresh with a file */
+      /* ARM: btparse isn't threadsafe, so AST can use getc_unlocked() */
+      flockfile (infile);
       start_parse (infile, NULL, 0);
       prev_file = infile;
    }
@@ -487,6 +491,7 @@ AST * bt_parse_file (char *    filename,
       InputFilename = "(stdin)";
       infile = stdin;
    }
+   flockfile (infile);
 
    entries = NULL;
    last = NULL;
@@ -517,6 +522,7 @@ AST * bt_parse_file (char *    filename,
 
 #endif
 
+   funlockfile (infile);
    fclose (infile);
    InputFilename = NULL;
    if (status) *status = overall_status;
