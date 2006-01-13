@@ -63,7 +63,10 @@ extern NSString *BDSKInputManagerLoadableApplications;
 @interface NSTextView (BDSKCompletion)
 
 - (BOOL)isBibTeXCitation:(NSRange)braceRange;
-- (NSRange) citeKeyRange;
+- (NSRange)citeKeyRange;
+- (NSRange)rangeForBibTeXUserCompletion;
+- (NSArray *)completionsForBibTeXPartialWordRange:(NSRange)charRange indexOfSelectedItem:(int *)index;
+
 @end
 
 
@@ -97,9 +100,4 @@ static inline
 NSRange SafeForwardSearchRange( unsigned startLoc, unsigned seekLength, unsigned maxLoc ){
     seekLength = ( (startLoc + seekLength > maxLoc) ? maxLoc - startLoc : seekLength );
     return NSMakeRange(startLoc, seekLength);
-}
-
-static inline
-NSComparisonResult arraySort(NSString *str1, NSString *str2, void *context){
-    return [str1 compare:str2];
 }

@@ -42,13 +42,10 @@
 #import </usr/include/objc/Protocol.h>
 #import "BDSKTextViewCompletionController.h"
 
-static BOOL BDSKInputManagerDebug = NO;
-
 NSString *BDSKInputManagerID = @"net.sourceforge.bibdesk.inputmanager";
 NSString *BDSKInputManagerLoadableApplications = @"Application bundles that we recognize";
 
 static NSString *BDSKInsertionString = nil;
-static NSString *BDSKHintString = nil;
 
 static NSString *BDSKScriptName = @"Bibdesk";
 static NSString *BDSKScriptType = @"scpt";
@@ -122,9 +119,7 @@ IMP OBReplaceMethodImplementationWithSelector(Class aClass, SEL oldSelector, SEL
 // The compiler won't allow us to call the IMP directly if it returns an NSRange, so I followed Apple's code at
 // http://developer.apple.com/documentation/Performance/Conceptual/CodeSpeed/CodeSpeed.pdf
 // See also the places where Omni uses OBReplaceMethod... calls in OmniAppKit, which is easier to follow.
-static NSRange (*originalRangeIMP)(id, SEL) = NULL;
 static void (*originalInsertIMP)(id, SEL, NSString *, NSRange, int, BOOL) = NULL;
-static id (*originalCompletionsIMP)(id, SEL, NSRange, int *) = NULL;
 static void (*originalKeyDownIMP)(id, SEL, id) = NULL;
 
 @implementation NSTextView_Bibdesk
@@ -137,13 +132,9 @@ static void (*originalKeyDownIMP)(id, SEL, id) = NULL;
     // ARM: we just leak these strings; since the bundle only gets loaded once, it's not worth replacing dealloc
     if(BDSKInsertionString == nil)
         BDSKInsertionString = [NSLocalizedString(@" (Bibdesk)", @"") retain];
-    if(BDSKHintString == nil)
-        BDSKHintString = [NSLocalizedString(@"Type } or , to insert the current item.",@"") retain];
-    
+
     NSString *bundleID = [[NSBundle mainBundle] bundleIdentifier]; // for the app we are loading into
     NSArray *array = [[[NSUserDefaults standardUserDefaults] persistentDomainForName:BDSKInputManagerID] objectForKey:BDSKInputManagerLoadableApplications];
-
-    if(BDSKInputManagerDebug) NSLog(@"We should enable for %@", [array description]);
   
     NSEnumerator *e = [array objectEnumerator];
     NSString *str;
@@ -156,21 +147,10 @@ static void (*originalKeyDownIMP)(id, SEL, id) = NULL;
         }
     }
 
-    if(BDSKInputManagerDebug && yn) NSLog(@"Found a match; enabling autocompletion for %@", bundleID);
-
     if(yn && [[self superclass] instancesRespondToSelector:@selector(completionsForPartialWordRange:indexOfSelectedItem:)]){
-        if(BDSKInputManagerDebug) NSLog(@"%@ replacing methods for %@", [self class], [self superclass]);
-        // class_poseAs(self, NSClassFromString(@"NSTextView"));
 
         // Class posing was cleaner and probably safer than swizzling, but led to unresolved problems with internationalized versions of TeXShop+OgreKit refusing text input for the Ogre find panel.  I think this is an OgreKit bug.
         originalInsertIMP = (typeof(originalInsertIMP))OBReplaceMethodImplementationWithSelector(self, @selector(insertCompletion:forPartialWordRange:movement:isFinal:), @selector(replacementInsertCompletion:forPartialWordRange:movement:isFinal:));
-        if(BDSKInputManagerDebug) NSAssert(originalInsertIMP != NULL, @"replacement of insertCompletion:forPartialWordRange:movement:isFinal: failed");
-        
-        originalRangeIMP = (typeof(originalRangeIMP))OBReplaceMethodImplementationWithSelector(self,@selector(rangeForUserCompletion),@selector(replacementRangeForUserCompletion));
-        if(BDSKInputManagerDebug) NSAssert(originalRangeIMP != NULL, @"replacement of rangeForUserCompletion failed");
-
-        originalCompletionsIMP = (typeof(originalCompletionsIMP))OBReplaceMethodImplementationWithSelector(self,@selector(completionsForPartialWordRange:indexOfSelectedItem:),@selector(replacementCompletionsForPartialWordRange:indexOfSelectedItem:));
-        if(BDSKInputManagerDebug) NSAssert(originalCompletionsIMP != NULL, @"replacement of completionsForPartialWordRange:indexOfSelectedItem: failed");
         
         originalKeyDownIMP = (typeof(originalKeyDownIMP))OBReplaceMethodImplementationWithSelector(self, @selector(keyDown:), @selector(replacementKeyDown:));
 
@@ -241,18 +221,42 @@ static void (*originalKeyDownIMP)(id, SEL, id) = NULL;
     return point;
 }
 
+// this returns -1 for compatibility with the completion controller indexOfSelectedItem parameter
+static inline int
+BDIndexOfItemInArrayWithPrefix(NSArray *array, NSString *prefix)
+{
+    unsigned idx, count = [array count];
+    for(idx = 0; idx < count; idx++){
+        if([[array objectAtIndex:idx] hasPrefix:prefix])
+            return idx;
+    }
+    
+    return -1;
+}
+
 - (void)complete:(id)sender;
 {
-    NSRange selRange = [self rangeForUserCompletion];
+    NSRange selRange = [self rangeForBibTeXUserCompletion];
     NSString *string = [self string];
-    if(selRange.location == NSNotFound || [string isEqualToString:@""])
+    if([string isEqualToString:@""])
         return;
     
     // make sure to initialize this
     int idx = -1;
-    NSArray *completions = [self completionsForPartialWordRange:selRange indexOfSelectedItem:&idx];
-#warning idx is always -1
-    // don't select an item
+    NSArray *completions = nil;
+    
+    if(selRange.location != NSNotFound){
+        completions = [self completionsForBibTeXPartialWordRange:selRange indexOfSelectedItem:&idx];
+    } else {
+        // not a \cite or \ref, so get the default set of completions from the speller and return that
+        selRange = [self rangeForUserCompletion];
+        if(selRange.location == NSNotFound)
+            return;
+        
+        completions = [[NSSpellChecker sharedSpellChecker] completionsForPartialWordRange:selRange inString:string language:nil inSpellDocumentWithTag:[self spellCheckerDocumentTag]];
+        idx = BDIndexOfItemInArrayWithPrefix(completions, [string substringWithRange:selRange]);
+    }
+    
     [completionController displayCompletions:completions indexOfSelectedItem:idx forPartialWordRange:selRange originalString:[string substringWithRange:selRange] atPoint:[self locationForCompletionWindow] forTextView:self];
 }
 
@@ -281,6 +285,11 @@ static void (*originalKeyDownIMP)(id, SEL, id) = NULL;
             case 0x0020: // spacebar
                 [super keyDown:event]; // @@ doesn't work...subclass tableview?  we don't want the completion controller to insert, as this may just be a separator between words
                 break;
+            case '}':
+                [completionController endDisplay];
+                [self setSelectedRange:NSMakeRange(NSMaxRange([self selectedRange]), 0)];
+                [[[self textStorage] mutableString] appendString:@"}"];
+                break;
             default:
                 originalKeyDownIMP(self, _cmd, event);
                 [completionController handleKeyDown:event];
@@ -304,7 +313,8 @@ static void (*originalKeyDownIMP)(id, SEL, id) = NULL;
 // ** After all of this, we've searched back to a brace, and then checked for a cite command with two optional parameters
 
 - (BOOL)isBibTeXCitation:(NSRange)braceRange{
-    NSString *str = [[self textStorage] string];
+    
+    NSString *str = [self string];
     NSRange citeSearchRange = NSMakeRange(NSNotFound, 0);
     NSRange doubleBracketRange = NSMakeRange(NSNotFound, 0);
 
@@ -358,7 +368,8 @@ static void (*originalKeyDownIMP)(id, SEL, id) = NULL;
 }
 
 - (NSRange)citeKeyRange{
-    NSString *str = [[self textStorage] string];
+    
+    NSString *str = [self string];
     NSRange r = [self selectedRange]; // here's the insertion point
     NSRange commaRange;
     NSRange finalRange;
@@ -392,7 +403,8 @@ static void (*originalKeyDownIMP)(id, SEL, id) = NULL;
 }
                 
 - (NSRange)refLabelRangeForType:(BOOL *)isPageRef{
-    NSString *s = [[self textStorage] string];
+    
+    NSString *s = [self string];
     NSRange r = [self selectedRange];
     *isPageRef = NO;
     NSRange foundRange = [s rangeOfString:@"\\ref{" options:NSBackwardsSearch range:SafeBackwardSearchRange(r, 12)];
@@ -407,36 +419,33 @@ static void (*originalKeyDownIMP)(id, SEL, id) = NULL;
 #pragma mark AppKit overrides
 
 // Override usual behaviour so we can have dots, colons and hyphens in our cite keys
-- (NSRange)replacementRangeForUserCompletion {
+- (NSRange)rangeForBibTeXUserCompletion{
+    
     NSRange r = [self citeKeyRange];
     BOOL ispageref = NO;
-    if (r.location != NSNotFound){
-        if(BDSKInputManagerDebug) NSLog(@"Found a cite key");
-        return r;
-    }
-    else r = [self refLabelRangeForType:&ispageref];
-    if (r.location != NSNotFound){
-        if(BDSKInputManagerDebug) NSLog(@"Found a ref label");
-        return r;
-    }
-    if(BDSKInputManagerDebug) NSLog(@"Couldn't find a \\ref or \\cite; using default implementation");
-    return originalRangeIMP(self, _cmd);
+    if (r.location == NSNotFound)
+        r = [self refLabelRangeForType:&ispageref];
+    return r;
 }
 
 // Provide own completions based on results by Bibdesk.  
 // Should check whether Bibdesk is available first.  
 // Setting initial selection in list to second item doesn't work.  
 // Requires X.3
-- (NSArray *)replacementCompletionsForPartialWordRange:(NSRange)charRange indexOfSelectedItem:(int *)index	{
+- (NSArray *)completionsForBibTeXPartialWordRange:(NSRange)charRange indexOfSelectedItem:(int *)index{
+    
 	NSString *s = [[self textStorage] string];
     BOOL isPageRefLabel = NO;
     NSRange refLabelRange = [self refLabelRangeForType:&isPageRefLabel];
-    NSRange keyRange = ( (refLabelRange.location == NSNotFound) ? [self citeKeyRange] : NSMakeRange(NSNotFound, 0) ); // don't bother checking for a citekey if this is a \ref
-	
+    
+    // don't bother checking for a citekey if this is a \ref
+    NSRange keyRange = ( (refLabelRange.location == NSNotFound) ? [self citeKeyRange] : NSMakeRange(NSNotFound, 0) ); 
+    NSMutableArray *returnArray = [NSMutableArray array];
+    int n;
+
 	if(keyRange.location != NSNotFound){
                 
         NSString *end = [[s substringWithRange:keyRange] stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceCharacterSet]];
-        if(BDSKInputManagerDebug) NSLog(@"%@ has string end: %@", NSStringFromSelector(_cmd), end);
 		
 		NSDictionary *errorInfo = nil;
 		static NSAppleScript *script = nil;
@@ -460,13 +469,9 @@ static void (*originalKeyDownIMP)(id, SEL, id) = NULL;
 			NSAppleEventDescriptor *result = [script callHandler: BDSKHandlerName withArguments: arguments errorInfo: &errorInfo];
 			[arguments release];
             
-			if (!errorInfo ) {
+			if (!errorInfo) {
 				
-				int n;
-				
-				if (result &&  (n = [result numberOfItems])) {
-					NSMutableArray *returnArray = [NSMutableArray array];
-					
+				if (result &&  (n = [result numberOfItems])) {					
 					NSAppleEventDescriptor *stringAEDesc;
 					NSString *completionString;
 					
@@ -478,64 +483,58 @@ static void (*originalKeyDownIMP)(id, SEL, id) = NULL;
 						
 						// add in at beginning of array
 						[returnArray insertObject:completionString atIndex:0];
-					} while(--n);			
-					
-					if ([returnArray count]  == 1) {
-						// if we have only one item for completion, artificially add a second one, so the user can review the full information before adding it to the document.
-						[returnArray addObject:BDSKHintString];
-					}
-					
-                    if(BDSKInputManagerDebug) NSLog(@"%@ will return result %@", NSStringFromSelector(_cmd), returnArray);
-					return returnArray;
+					} while(--n);								
 				} 
 			} // no script running error	
             if(errorInfo) NSLog(@"*** Failed to run script %@ because of error %@", script, errorInfo);
 
 		} // no script loading error
         if(errorInfo) NSLog(@"*** Failed to run script %@ because of error %@", script, errorInfo);
-
-	} // location > 5
         
-        if(refLabelRange.location != NSNotFound){
-            NSString *hintPossibilities = nil;
-            unsigned hintLocation = refLabelRange.location + refLabelRange.length;
-            unsigned maxHintLen = [s length] - hintLocation;
-            
-            hintPossibilities = [s substringWithRange:NSMakeRange(hintLocation, ( (maxHintLen <= 7) ? maxHintLen : 7 ) )];
-            
-            // scan up to a space or newline, since those shouldn't occur in a label, and use that as a hint for the \label scanner
-            // if hintPossibilities is nil, don't scan, but hint needs to be nil since we check for that later
-            NSString *hint = nil;
-            if(hintPossibilities != nil){
-                NSScanner *hintScanner = [[NSScanner alloc] initWithString:hintPossibilities];
-                NSCharacterSet *stopSet = [NSCharacterSet characterSetWithCharactersInString:@"} \n\t"];
-                [hintScanner setCharactersToBeSkipped:nil];
-                [hintScanner scanUpToCharactersFromSet:stopSet intoString:&hint];
-                [hintScanner release];
-            }
-            
-            NSScanner *labelScanner = [[NSScanner alloc] initWithString:s];
-            [labelScanner setCharactersToBeSkipped:nil];
-            NSString *scanned = nil;
-            NSMutableSet *setOfLabels = [NSMutableSet setWithCapacity:10];
-            NSString *scanFormat;
+        *index = BDIndexOfItemInArrayWithPrefix(returnArray, end);
 
-            if(hint == nil){
-                scanFormat = @"\\label{";
-            } else {
-                scanFormat = [@"\\label{" stringByAppendingString:hint];
-            }
-            
-            while(![labelScanner isAtEnd]){
-                [labelScanner scanUpToString:scanFormat intoString:nil]; // scan for strings with \label{hint in them
-                [labelScanner scanString:@"\\label{" intoString:nil];    // scan away the \label{
-                [labelScanner scanUpToString:@"}" intoString:&scanned];  // scan up to the next brace
-                if(scanned != nil) [setOfLabels addObject:[scanned stringByAppendingString:BDSKInsertionString]]; // add it to the set
-            }
-            [labelScanner release];
-            return [[setOfLabels allObjects] sortedArrayUsingFunction:arraySort context:NULL]; // return the set as an array, sorted alphabetically
+	} else if(refLabelRange.location != NSNotFound){
+        NSString *hintPossibilities = nil;
+        unsigned hintLocation = refLabelRange.location + refLabelRange.length;
+        unsigned maxHintLen = [s length] - hintLocation;
+        
+        hintPossibilities = [s substringWithRange:NSMakeRange(hintLocation, ( (maxHintLen <= 7) ? maxHintLen : 7 ) )];
+        
+        // scan up to a space or newline, since those shouldn't occur in a label, and use that as a hint for the \label scanner
+        // if hintPossibilities is nil, don't scan, but hint needs to be nil since we check for that later
+        NSString *hint = nil;
+        if(hintPossibilities != nil){
+            NSScanner *hintScanner = [[NSScanner alloc] initWithString:hintPossibilities];
+            NSCharacterSet *stopSet = [NSCharacterSet characterSetWithCharactersInString:@"} \n\t"];
+            [hintScanner setCharactersToBeSkipped:nil];
+            [hintScanner scanUpToCharactersFromSet:stopSet intoString:&hint];
+            [hintScanner release];
         }
-	return originalCompletionsIMP(self, _cmd, charRange, index);
+        
+        NSScanner *labelScanner = [[NSScanner alloc] initWithString:s];
+        [labelScanner setCharactersToBeSkipped:nil];
+        NSString *scanned = nil;
+        NSMutableSet *setOfLabels = [NSMutableSet setWithCapacity:10];
+        NSString *scanFormat;
+
+        if(hint == nil){
+            scanFormat = @"\\label{";
+        } else {
+            scanFormat = [@"\\label{" stringByAppendingString:hint];
+        }
+        
+        while(![labelScanner isAtEnd]){
+            [labelScanner scanUpToString:scanFormat intoString:nil]; // scan for strings with \label{hint in them
+            [labelScanner scanString:@"\\label{" intoString:nil];    // scan away the \label{
+            [labelScanner scanUpToString:@"}" intoString:&scanned];  // scan up to the next brace
+            if(scanned != nil) [setOfLabels addObject:[scanned stringByAppendingString:BDSKInsertionString]]; // add it to the set
+        }
+        [labelScanner release];
+        // return the set as an array, sorted alphabetically
+        [returnArray setArray:[[setOfLabels allObjects] sortedArrayUsingSelector:@selector(localizedCaseInsensitiveCompare:)]]; 
+        *index = BDIndexOfItemInArrayWithPrefix(returnArray, hint);
+    }
+	return returnArray;
 }
 
 // finish off the completion, inserting just the cite key
@@ -550,7 +549,8 @@ static void (*originalKeyDownIMP)(id, SEL, id) = NULL;
         charRange.location += refLabelLength; // length of the \ref{ or \pageref{ string
         charRange.length -= refLabelLength;
     }
-    
+    originalInsertIMP(self, _cmd, word, charRange, movement, flag);
+
 	if (!flag || ([word rangeOfString:BDSKInsertionString].location == NSNotFound)) {
 		// this is just a preliminary completion (suggestion) or the word wasn't suggested by us anyway, so let the text system deal with this
 		originalInsertIMP(self, _cmd, word, charRange, movement, flag);
@@ -558,21 +558,6 @@ static void (*originalKeyDownIMP)(id, SEL, id) = NULL;
 		// strip the comment for this, this assumes cite keys can't have spaces in them
 		NSRange firstSpace = [word rangeOfString:@" "];
 		word = [word substringToIndex:firstSpace.location];
-
-		// add a little twist, so we can end completion by entering }
-		// sadly NSCancelTextMovement  and NSOtherTextMovement both are 0, so we can't really tell the difference from movement alone
-		NSEvent *theEvent = [NSApp currentEvent];
-		if ((movement == NSRightTextMovement) && ([theEvent type] == NSKeyDown)) {
-			// we've got a key event
-			if ([[theEvent characters] isEqualToString:@"}"]) {
-                int possibleBraceIndex = charRange.location + [word length];
-                NSString *string = [self string];
-                if(possibleBraceIndex < [string length]){
-                    if([string characterAtIndex:possibleBraceIndex] == '}') // some applications (e.g. iTeXMac) may already have inserted a '}' character for us, so delete that one so we don't end up with a duplicate
-                        [[self textStorage] deleteCharactersInRange:NSMakeRange(possibleBraceIndex, 1)];
-                }
-			}
-		}			
 		
 		originalInsertIMP(self, _cmd, word, charRange, movement, flag);
 	}
