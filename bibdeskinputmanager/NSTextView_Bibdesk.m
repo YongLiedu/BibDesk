@@ -557,18 +557,33 @@ BDIndexOfItemInArrayWithPrefix(NSArray *array, NSString *prefix)
 	return returnArray;
 }
 
+// for legacy reasons, rangeForUserCompletion gives us an incorrect range for replacement; since it's compatible with searching and I don't feel like changing all the range code, we'll fix it up here
+- (void)fixRange:(NSRange *)range{    
+    NSString *string = [self string];
+    
+    NSRange selRange = [self selectedRange];
+    unsigned minLoc = ( (selRange.location > 100) ? 100 : selRange.location);
+    NSRange safeRange = NSMakeRange(selRange.location - minLoc, minLoc);
+    
+    NSRange braceRange = [string rangeOfString:@"{" options:NSBackwardsSearch | NSLiteralSearch range:safeRange]; // look for an opening brace
+    NSRange commaRange = [string rangeOfString:@"," options:NSBackwardsSearch | NSLiteralSearch range:safeRange]; // look for a comma
+    unsigned maxLoc = [[self string] length];
+    
+    if(braceRange.location != NSNotFound && braceRange.location < range->location){
+        // we found the brace, which must exist if we're here; if not, we won't adjust anything, though
+        if(commaRange.location != NSNotFound && commaRange.location > braceRange.location)
+            range->location = MIN(commaRange.location + 1, maxLoc);
+        else
+            range->location = MIN(braceRange.location + 1, maxLoc);
+    }
+}
+
 // finish off the completion, inserting just the cite key
 - (void)replacementInsertCompletion:(NSString *)word forPartialWordRange:(NSRange)charRange movement:(int)movement isFinal:(BOOL)flag {
-#warning need to fix charRange for multiple citations
-    BOOL isPageRef = NO;
-    NSRange refLabelRange = [self refLabelRangeForType:&isPageRef];
-    unsigned int refLabelLength = (isPageRef ? 9 : 5);
     
-    if(refLabelRange.location != NSNotFound){
-        charRange = refLabelRange; // if it's a \ref completion, set the selection properly, otherwise we can overwrite \ref{ itself
-        charRange.location += refLabelLength; // length of the \ref{ or \pageref{ string
-        charRange.length -= refLabelLength;
-    }
+    if(isCompletingTeX)
+        [self fixRange:&charRange];
+    
     originalInsertIMP(self, _cmd, word, charRange, movement, flag);
 
 	if (!flag || ([word rangeOfString:BDSKInsertionString].location == NSNotFound)) {
