@@ -40,6 +40,7 @@
 #import <Foundation/Foundation.h>
 #import </usr/include/objc/objc-class.h>
 #import </usr/include/objc/Protocol.h>
+#import "BDSKTextViewCompletionController.h"
 
 static BOOL BDSKInputManagerDebug = NO;
 
@@ -52,6 +53,8 @@ static NSString *BDSKHintString = nil;
 static NSString *BDSKScriptName = @"Bibdesk";
 static NSString *BDSKScriptType = @"scpt";
 static NSString *BDSKHandlerName = @"getcitekeys";
+
+static BDSKTextViewCompletionController *completionController = nil;
 
 extern void _objc_resolve_categories_for_class(struct objc_class *cls);
 
@@ -122,13 +125,15 @@ IMP OBReplaceMethodImplementationWithSelector(Class aClass, SEL oldSelector, SEL
 static NSRange (*originalRangeIMP)(id, SEL) = NULL;
 static void (*originalInsertIMP)(id, SEL, NSString *, NSRange, int, BOOL) = NULL;
 static id (*originalCompletionsIMP)(id, SEL, NSRange, int *) = NULL;
+static void (*originalKeyDownIMP)(id, SEL, id) = NULL;
 
 @implementation NSTextView_Bibdesk
 
 + (void)load{
     
     NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
-    
+    completionController = [BDSKTextViewCompletionController sharedController];
+    NSAssert(completionController != nil, @"unable to load BDSKCompletionController");
     // ARM: we just leak these strings; since the bundle only gets loaded once, it's not worth replacing dealloc
     if(BDSKInsertionString == nil)
         BDSKInsertionString = [NSLocalizedString(@" (Bibdesk)", @"") retain];
@@ -155,16 +160,19 @@ static id (*originalCompletionsIMP)(id, SEL, NSRange, int *) = NULL;
 
     if(yn && [[self superclass] instancesRespondToSelector:@selector(completionsForPartialWordRange:indexOfSelectedItem:)]){
         if(BDSKInputManagerDebug) NSLog(@"%@ replacing methods for %@", [self class], [self superclass]);
+        // class_poseAs(self, NSClassFromString(@"NSTextView"));
 
         // Class posing was cleaner and probably safer than swizzling, but led to unresolved problems with internationalized versions of TeXShop+OgreKit refusing text input for the Ogre find panel.  I think this is an OgreKit bug.
-        originalInsertIMP = (typeof(originalInsertIMP))OBReplaceMethodImplementationWithSelector(self, @selector(insertCompletion:forPartialWordRange:movement:isFinal:), @selector(_insertCompletion:forPartialWordRange:movement:isFinal:));
+        originalInsertIMP = (typeof(originalInsertIMP))OBReplaceMethodImplementationWithSelector(self, @selector(insertCompletion:forPartialWordRange:movement:isFinal:), @selector(replacementInsertCompletion:forPartialWordRange:movement:isFinal:));
         if(BDSKInputManagerDebug) NSAssert(originalInsertIMP != NULL, @"replacement of insertCompletion:forPartialWordRange:movement:isFinal: failed");
         
-        originalRangeIMP = (typeof(originalRangeIMP))OBReplaceMethodImplementationWithSelector(self,@selector(rangeForUserCompletion),@selector(_rangeForUserCompletion));
+        originalRangeIMP = (typeof(originalRangeIMP))OBReplaceMethodImplementationWithSelector(self,@selector(rangeForUserCompletion),@selector(replacementRangeForUserCompletion));
         if(BDSKInputManagerDebug) NSAssert(originalRangeIMP != NULL, @"replacement of rangeForUserCompletion failed");
 
-        originalCompletionsIMP = (typeof(originalCompletionsIMP))OBReplaceMethodImplementationWithSelector(self,@selector(completionsForPartialWordRange:indexOfSelectedItem:),@selector(_completionsForPartialWordRange:indexOfSelectedItem:));
+        originalCompletionsIMP = (typeof(originalCompletionsIMP))OBReplaceMethodImplementationWithSelector(self,@selector(completionsForPartialWordRange:indexOfSelectedItem:),@selector(replacementCompletionsForPartialWordRange:indexOfSelectedItem:));
         if(BDSKInputManagerDebug) NSAssert(originalCompletionsIMP != NULL, @"replacement of completionsForPartialWordRange:indexOfSelectedItem: failed");
+        
+        originalKeyDownIMP = (typeof(originalKeyDownIMP))OBReplaceMethodImplementationWithSelector(self, @selector(keyDown:), @selector(replacementKeyDown:));
 
     }
     
@@ -191,6 +199,94 @@ static id (*originalCompletionsIMP)(id, SEL, NSRange, int *) = NULL;
 @end
 
 @implementation NSTextView (BDSKCompletion)
+
+- (NSPoint)locationForCompletionWindow;
+{
+    NSPoint point;
+    
+    NSRange selRange = [self rangeForUserCompletion];    
+    NSLayoutManager *layoutManager = [self layoutManager];
+    
+    // get the rect for the first glyph in our affected range
+    NSRange glyphRange = [layoutManager glyphRangeForCharacterRange:selRange actualCharacterRange:NULL];
+    NSRect rect = NSZeroRect;
+    
+    // check length, or the layout manager will raise an exception
+    if(glyphRange.length > 0){
+        rect = [layoutManager lineFragmentRectForGlyphAtIndex:glyphRange.location effectiveRange:NULL];
+        
+        // the above gives the rect for the full line
+        NSPoint glyphLoc = [layoutManager locationForGlyphAtIndex:glyphRange.location];
+        point.x += glyphLoc.x;
+    }
+    
+    point = rect.origin;
+    
+    // adjust for the line height
+    point.y += NSHeight(rect);
+    
+    // adjust for the text container origin
+    NSPoint tcOrigin = [self textContainerOrigin];
+    point.x += tcOrigin.x;
+    point.y += tcOrigin.y;
+    
+    // make sure we have integral coordinates
+    point.x = ceilf(point.x);
+    point.y = ceilf(point.y);
+    
+    // convert to screen coordinates
+    point = [self convertPoint:point toView:nil];
+    point = [[self window] convertBaseToScreen:point];  
+    
+    return point;
+}
+
+- (void)complete:(id)sender;
+{
+    NSRange selRange = [self rangeForUserCompletion];
+    NSString *string = [self string];
+    if(selRange.location == NSNotFound || [string isEqualToString:@""])
+        return;
+    
+    // make sure to initialize this
+    int idx = -1;
+    NSArray *completions = [self completionsForPartialWordRange:selRange indexOfSelectedItem:&idx];
+#warning idx is always -1
+    // don't select an item
+    [completionController displayCompletions:completions indexOfSelectedItem:idx forPartialWordRange:selRange originalString:[string substringWithRange:selRange] atPoint:[self locationForCompletionWindow] forTextView:self];
+}
+
+- (void)replacementKeyDown:(NSEvent *)event {
+    BOOL wasVisibleBeforeEvent = [[completionController completionWindow] isVisible];
+    
+    // delay this so we can trap the arrow keys
+    if(wasVisibleBeforeEvent == NO)
+        originalKeyDownIMP(self, _cmd, event);
+    else if([completionController currentTextView] == self){
+        unichar ch = [[event characters] characterAtIndex:0];
+        switch(ch){
+            // let the completion controller handle these, since we don't want to change the insertion point!
+            case NSUpArrowFunctionKey:
+            case NSDownArrowFunctionKey:
+            case NSRightArrowFunctionKey:
+            case NSLeftArrowFunctionKey:
+                [completionController handleKeyDown:event];
+                break;
+            case 0x001B: // esc key; if we just displayed the window, we don't want to hide it immediately
+                [completionController endDisplayNoComplete];
+                break;
+            case NSTabCharacter: // in normal text views, the completion controller handles this just fine, but the field editor handles tab differently; sending super will move us to the next field
+                [completionController handleKeyDown:event];
+                break;
+            case 0x0020: // spacebar
+                [super keyDown:event]; // @@ doesn't work...subclass tableview?  we don't want the completion controller to insert, as this may just be a separator between words
+                break;
+            default:
+                originalKeyDownIMP(self, _cmd, event);
+                [completionController handleKeyDown:event];
+        }
+    }
+}
 
 #pragma mark -
 #pragma mark Reference-searching heuristics
@@ -281,7 +377,7 @@ static id (*originalCompletionsIMP)(id, SEL, NSRange, int *) = NULL;
     }
 
     if([self isBibTeXCitation:braceRange]){
-        if(commaRange.location != NSNotFound){
+        if(commaRange.location != NSNotFound && r.location > commaRange.location){
             maxLoc = ( (commaRange.location + 1 > r.location) ? commaRange.location : commaRange.location + 1 );
             finalRange = SafeForwardSearchRange(maxLoc, r.location - commaRange.location - 1, r.location);
         } else {
@@ -311,7 +407,7 @@ static id (*originalCompletionsIMP)(id, SEL, NSRange, int *) = NULL;
 #pragma mark AppKit overrides
 
 // Override usual behaviour so we can have dots, colons and hyphens in our cite keys
-- (NSRange)_rangeForUserCompletion {
+- (NSRange)replacementRangeForUserCompletion {
     NSRange r = [self citeKeyRange];
     BOOL ispageref = NO;
     if (r.location != NSNotFound){
@@ -331,7 +427,7 @@ static id (*originalCompletionsIMP)(id, SEL, NSRange, int *) = NULL;
 // Should check whether Bibdesk is available first.  
 // Setting initial selection in list to second item doesn't work.  
 // Requires X.3
-- (NSArray *)_completionsForPartialWordRange:(NSRange)charRange indexOfSelectedItem:(int *)index	{
+- (NSArray *)replacementCompletionsForPartialWordRange:(NSRange)charRange indexOfSelectedItem:(int *)index	{
 	NSString *s = [[self textStorage] string];
     BOOL isPageRefLabel = NO;
     NSRange refLabelRange = [self refLabelRangeForType:&isPageRefLabel];
@@ -443,7 +539,7 @@ static id (*originalCompletionsIMP)(id, SEL, NSRange, int *) = NULL;
 }
 
 // finish off the completion, inserting just the cite key
-- (void)_insertCompletion:(NSString *)word forPartialWordRange:(NSRange)charRange movement:(int)movement isFinal:(BOOL)flag {
+- (void)replacementInsertCompletion:(NSString *)word forPartialWordRange:(NSRange)charRange movement:(int)movement isFinal:(BOOL)flag {
     
     BOOL isPageRef = NO;
     NSRange refLabelRange = [self refLabelRangeForType:&isPageRef];
