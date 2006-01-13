@@ -119,6 +119,7 @@ IMP OBReplaceMethodImplementationWithSelector(Class aClass, SEL oldSelector, SEL
 // The compiler won't allow us to call the IMP directly if it returns an NSRange, so I followed Apple's code at
 // http://developer.apple.com/documentation/Performance/Conceptual/CodeSpeed/CodeSpeed.pdf
 // See also the places where Omni uses OBReplaceMethod... calls in OmniAppKit, which is easier to follow.
+static NSRange (*originalRangeIMP)(id, SEL) = NULL;
 static void (*originalInsertIMP)(id, SEL, NSString *, NSRange, int, BOOL) = NULL;
 static void (*originalKeyDownIMP)(id, SEL, id) = NULL;
 
@@ -151,7 +152,7 @@ static void (*originalKeyDownIMP)(id, SEL, id) = NULL;
 
         // Class posing was cleaner and probably safer than swizzling, but led to unresolved problems with internationalized versions of TeXShop+OgreKit refusing text input for the Ogre find panel.  I think this is an OgreKit bug.
         originalInsertIMP = (typeof(originalInsertIMP))OBReplaceMethodImplementationWithSelector(self, @selector(insertCompletion:forPartialWordRange:movement:isFinal:), @selector(replacementInsertCompletion:forPartialWordRange:movement:isFinal:));
-        
+        originalRangeIMP = (typeof(originalRangeIMP))OBReplaceMethodImplementationWithSelector(self,@selector(rangeForUserCompletion),@selector(replacementRangeForUserCompletion));
         originalKeyDownIMP = (typeof(originalKeyDownIMP))OBReplaceMethodImplementationWithSelector(self, @selector(keyDown:), @selector(replacementKeyDown:));
 
     }
@@ -221,44 +222,21 @@ static void (*originalKeyDownIMP)(id, SEL, id) = NULL;
     return point;
 }
 
-// this returns -1 for compatibility with the completion controller indexOfSelectedItem parameter
-static inline int
-BDIndexOfItemInArrayWithPrefix(NSArray *array, NSString *prefix)
-{
-    unsigned idx, count = [array count];
-    for(idx = 0; idx < count; idx++){
-        if([[array objectAtIndex:idx] hasPrefix:prefix])
-            return idx;
-    }
-    
-    return -1;
-}
-
 - (void)complete:(id)sender;
 {
-    NSRange selRange = [self rangeForBibTeXUserCompletion];
+    NSRange selRange = [self rangeForUserCompletion];
     NSString *string = [self string];
-    if([string isEqualToString:@""])
+    if(selRange.location == NSNotFound || [string isEqualToString:@""])
         return;
     
     // make sure to initialize this
     int idx = -1;
-    NSArray *completions = nil;
-    
-    if(selRange.location != NSNotFound){
-        completions = [self completionsForBibTeXPartialWordRange:selRange indexOfSelectedItem:&idx];
-    } else {
-        // not a \cite or \ref, so get the default set of completions from the speller and return that
-        selRange = [self rangeForUserCompletion];
-        if(selRange.location == NSNotFound)
-            return;
-        
-        completions = [[NSSpellChecker sharedSpellChecker] completionsForPartialWordRange:selRange inString:string language:nil inSpellDocumentWithTag:[self spellCheckerDocumentTag]];
-        idx = BDIndexOfItemInArrayWithPrefix(completions, [string substringWithRange:selRange]);
-    }
+    NSArray *completions = [self completionsForPartialWordRange:selRange indexOfSelectedItem:&idx];
     
     [completionController displayCompletions:completions indexOfSelectedItem:idx forPartialWordRange:selRange originalString:[string substringWithRange:selRange] atPoint:[self locationForCompletionWindow] forTextView:self];
 }
+
+static BOOL isCompletingTeX = NO;
 
 - (void)replacementKeyDown:(NSEvent *)event {
     BOOL wasVisibleBeforeEvent = [[completionController completionWindow] isVisible];
@@ -279,16 +257,32 @@ BDIndexOfItemInArrayWithPrefix(NSArray *array, NSString *prefix)
             case 0x001B: // esc key; if we just displayed the window, we don't want to hide it immediately
                 [completionController endDisplayNoComplete];
                 break;
-            case NSTabCharacter: // in normal text views, the completion controller handles this just fine, but the field editor handles tab differently; sending super will move us to the next field
+            case NSTabCharacter:
                 [completionController handleKeyDown:event];
                 break;
             case 0x0020: // spacebar
-                [super keyDown:event]; // @@ doesn't work...subclass tableview?  we don't want the completion controller to insert, as this may just be a separator between words
+                originalKeyDownIMP(self, _cmd, event);
                 break;
-            case '}':
-                [completionController endDisplay];
-                [self setSelectedRange:NSMakeRange(NSMaxRange([self selectedRange]), 0)];
-                [[[self textStorage] mutableString] appendString:@"}"];
+            case 0x002C: // comma
+                if(isCompletingTeX){
+                    [completionController endDisplay];
+                    [self setSelectedRange:NSMakeRange(NSMaxRange([self selectedRange]), 0)];
+                    [[[self textStorage] mutableString] appendString:@","];   
+                    [self complete:nil];
+                } else {
+                    originalKeyDownIMP(self, _cmd, event);
+                    [completionController handleKeyDown:event];
+                }
+                break;
+            case 0x007D: // right curly brace
+                if(isCompletingTeX){
+                    [completionController endDisplay];
+                    [self setSelectedRange:NSMakeRange(NSMaxRange([self selectedRange]), 0)];
+                    [[[self textStorage] mutableString] appendString:@"}"];
+                } else {
+                    originalKeyDownIMP(self, _cmd, event);
+                    [completionController handleKeyDown:event];
+                }
                 break;
             default:
                 originalKeyDownIMP(self, _cmd, event);
@@ -428,13 +422,35 @@ BDIndexOfItemInArrayWithPrefix(NSArray *array, NSString *prefix)
     return r;
 }
 
+// we replace this method since the completion controller uses it to update
+- (NSRange)replacementRangeForUserCompletion{
+    
+    NSRange range = [self rangeForBibTeXUserCompletion];
+    isCompletingTeX = range.location != NSNotFound;
+    
+    return range.location != NSNotFound ? range : originalRangeIMP(self, _cmd);
+}
+
+// this returns -1 for compatibility with the completion controller indexOfSelectedItem parameter
+static inline int
+BDIndexOfItemInArrayWithPrefix(NSArray *array, NSString *prefix)
+{
+    unsigned idx, count = [array count];
+    for(idx = 0; idx < count; idx++){
+        if([[array objectAtIndex:idx] hasPrefix:prefix])
+            return idx;
+    }
+    
+    return -1;
+}
+
 // Provide own completions based on results by Bibdesk.  
 // Should check whether Bibdesk is available first.  
 // Setting initial selection in list to second item doesn't work.  
 // Requires X.3
-- (NSArray *)completionsForBibTeXPartialWordRange:(NSRange)charRange indexOfSelectedItem:(int *)index{
+- (NSArray *)completionsForPartialWordRange:(NSRange)charRange indexOfSelectedItem:(int *)index{
     
-	NSString *s = [[self textStorage] string];
+	NSString *s = [self string];
     BOOL isPageRefLabel = NO;
     NSRange refLabelRange = [self refLabelRangeForType:&isPageRefLabel];
     
@@ -533,13 +549,17 @@ BDIndexOfItemInArrayWithPrefix(NSArray *array, NSString *prefix)
         // return the set as an array, sorted alphabetically
         [returnArray setArray:[[setOfLabels allObjects] sortedArrayUsingSelector:@selector(localizedCaseInsensitiveCompare:)]]; 
         *index = BDIndexOfItemInArrayWithPrefix(returnArray, hint);
+    } else {
+        // return the spellchecker's guesses
+        returnArray = (NSMutableArray *)[[NSSpellChecker sharedSpellChecker] completionsForPartialWordRange:charRange inString:s language:nil inSpellDocumentWithTag:[self spellCheckerDocumentTag]];
+        *index = BDIndexOfItemInArrayWithPrefix(returnArray, [s substringWithRange:charRange]);        
     }
 	return returnArray;
 }
 
 // finish off the completion, inserting just the cite key
 - (void)replacementInsertCompletion:(NSString *)word forPartialWordRange:(NSRange)charRange movement:(int)movement isFinal:(BOOL)flag {
-    
+#warning need to fix charRange for multiple citations
     BOOL isPageRef = NO;
     NSRange refLabelRange = [self refLabelRangeForType:&isPageRef];
     unsigned int refLabelLength = (isPageRef ? 9 : 5);
@@ -553,7 +573,9 @@ BDIndexOfItemInArrayWithPrefix(NSArray *array, NSString *prefix)
 
 	if (!flag || ([word rangeOfString:BDSKInsertionString].location == NSNotFound)) {
 		// this is just a preliminary completion (suggestion) or the word wasn't suggested by us anyway, so let the text system deal with this
+        [[self undoManager] disableUndoRegistration];
 		originalInsertIMP(self, _cmd, word, charRange, movement, flag);
+        [[self undoManager] enableUndoRegistration];
 	} else {	
 		// strip the comment for this, this assumes cite keys can't have spaces in them
 		NSRange firstSpace = [word rangeOfString:@" "];

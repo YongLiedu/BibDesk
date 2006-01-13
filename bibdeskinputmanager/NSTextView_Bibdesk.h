@@ -65,7 +65,6 @@ extern NSString *BDSKInputManagerLoadableApplications;
 - (BOOL)isBibTeXCitation:(NSRange)braceRange;
 - (NSRange)citeKeyRange;
 - (NSRange)rangeForBibTeXUserCompletion;
-- (NSArray *)completionsForBibTeXPartialWordRange:(NSRange)charRange indexOfSelectedItem:(int *)index;
 
 @end
 
