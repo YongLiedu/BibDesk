@@ -123,6 +123,7 @@ static NSRange (*originalRangeIMP)(id, SEL) = NULL;
 static void (*originalInsertIMP)(id, SEL, NSString *, NSRange, int, BOOL) = NULL;
 static void (*originalKeyDownIMP)(id, SEL, id) = NULL;
 static id (*originalCompletionsIMP)(id, SEL, NSRange, int *) = NULL;
+static void (*originalCompleteIMP)(id, SEL, id) = NULL;
 
 @implementation NSTextView_Bibdesk
 
@@ -158,6 +159,7 @@ static id (*originalCompletionsIMP)(id, SEL, NSRange, int *) = NULL;
         
         // have to replace this one since we don't call the delegate method from our implementation, and we don't want to override unless the user chooses to do so
         originalCompletionsIMP = (typeof(originalCompletionsIMP))OBReplaceMethodImplementationWithSelector(self, @selector(completionsForPartialWordRange:indexOfSelectedItem:),@selector(replacementCompletionsForPartialWordRange:indexOfSelectedItem:));
+        originalCompleteIMP = (typeof(originalCompleteIMP))OBReplaceMethodImplementationWithSelector(self, @selector(complete:), @selector(replacementComplete:));
     }
     
     [pool release];
@@ -225,7 +227,7 @@ static id (*originalCompletionsIMP)(id, SEL, NSRange, int *) = NULL;
     return point;
 }
 
-- (void)complete:(id)sender;
+- (void)replacementComplete:(id)sender;
 {
     NSRange selRange = [self rangeForUserCompletion];
     NSString *string = [self string];
