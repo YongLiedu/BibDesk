@@ -122,6 +122,7 @@ IMP OBReplaceMethodImplementationWithSelector(Class aClass, SEL oldSelector, SEL
 static NSRange (*originalRangeIMP)(id, SEL) = NULL;
 static void (*originalInsertIMP)(id, SEL, NSString *, NSRange, int, BOOL) = NULL;
 static void (*originalKeyDownIMP)(id, SEL, id) = NULL;
+static id (*originalCompletionsIMP)(id, SEL, NSRange, int *) = NULL;
 
 @implementation NSTextView_Bibdesk
 
@@ -154,7 +155,9 @@ static void (*originalKeyDownIMP)(id, SEL, id) = NULL;
         originalInsertIMP = (typeof(originalInsertIMP))OBReplaceMethodImplementationWithSelector(self, @selector(insertCompletion:forPartialWordRange:movement:isFinal:), @selector(replacementInsertCompletion:forPartialWordRange:movement:isFinal:));
         originalRangeIMP = (typeof(originalRangeIMP))OBReplaceMethodImplementationWithSelector(self,@selector(rangeForUserCompletion),@selector(replacementRangeForUserCompletion));
         originalKeyDownIMP = (typeof(originalKeyDownIMP))OBReplaceMethodImplementationWithSelector(self, @selector(keyDown:), @selector(replacementKeyDown:));
-
+        
+        // have to replace this one since we don't call the delegate method from our implementation, and we don't want to override unless the user chooses to do so
+        originalCompletionsIMP = (typeof(originalCompletionsIMP))OBReplaceMethodImplementationWithSelector(self, @selector(completionsForPartialWordRange:indexOfSelectedItem:),@selector(replacementCompletionsForPartialWordRange:indexOfSelectedItem:));
     }
     
     [pool release];
@@ -448,7 +451,7 @@ BDIndexOfItemInArrayWithPrefix(NSArray *array, NSString *prefix)
 // Should check whether Bibdesk is available first.  
 // Setting initial selection in list to second item doesn't work.  
 // Requires X.3
-- (NSArray *)completionsForPartialWordRange:(NSRange)charRange indexOfSelectedItem:(int *)index{
+- (NSArray *)replacementCompletionsForPartialWordRange:(NSRange)charRange indexOfSelectedItem:(int *)index{
     
 	NSString *s = [self string];
     BOOL isPageRefLabel = NO;
