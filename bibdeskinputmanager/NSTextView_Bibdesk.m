@@ -188,7 +188,7 @@ static void (*originalCompleteIMP)(id, SEL, id) = NULL;
 
 - (NSPoint)locationForCompletionWindow;
 {
-    NSPoint point;
+    NSPoint point = NSZeroPoint;
     
     NSRange selRange = [self rangeForUserCompletion];    
     NSLayoutManager *layoutManager = [self layoutManager];
@@ -200,16 +200,16 @@ static void (*originalCompleteIMP)(id, SEL, id) = NULL;
     // check length, or the layout manager will raise an exception
     if(glyphRange.length > 0){
         rect = [layoutManager lineFragmentRectForGlyphAtIndex:glyphRange.location effectiveRange:NULL];
+        point = rect.origin;
         
         // the above gives the rect for the full line
         NSPoint glyphLoc = [layoutManager locationForGlyphAtIndex:glyphRange.location];
         point.x += glyphLoc.x;
+        // don't adjust based on glyphLoc.y; we'll use the lineFragmentRect for that
     }
     
-    point = rect.origin;
-    
-    // adjust for the line height
-    point.y += NSHeight(rect);
+    // adjust for the line height + border/focus ring
+    point.y += NSHeight(rect) + 3;
     
     // adjust for the text container origin
     NSPoint tcOrigin = [self textContainerOrigin];
