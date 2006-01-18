@@ -58,34 +58,7 @@ extern void _objc_resolve_categories_for_class(struct objc_class *cls);
 // reproduced in accordance with that license.
 // http://www.omnigroup.com/developer/sourcecode/sourcelicense/
 
-static void _OBRegisterMethod(IMP methodImp, Class class, const char *methodTypes, SEL selector)
-{
-    struct objc_method_list *newMethodList;
-    
-    newMethodList = (struct objc_method_list *) NSZoneMalloc(NSDefaultMallocZone(), sizeof(struct objc_method_list));
-    
-    newMethodList->method_count = 1;
-    newMethodList->method_list[0].method_name = selector;
-    newMethodList->method_list[0].method_imp = methodImp;
-    newMethodList->method_list[0].method_types = (char *)methodTypes;
-    
-    class_addMethods(class, newMethodList);
-}
-
-IMP OBRegisterInstanceMethodWithSelector(Class aClass, SEL oldSelector, SEL newSelector)
-{
-    struct objc_method *thisMethod;
-    IMP oldImp = NULL;
-    
-    if ((thisMethod = class_getInstanceMethod(aClass, oldSelector))) {
-        oldImp = thisMethod->method_imp;
-        _OBRegisterMethod(thisMethod->method_imp, aClass, thisMethod->method_types, newSelector);
-    }
-    
-    return oldImp;
-}
-
-IMP OBReplaceMethodImplementation(Class aClass, SEL oldSelector, IMP newImp)
+static IMP OBBDSKReplaceMethodImplementation(Class aClass, SEL oldSelector, IMP newImp)
 {
     struct objc_method *thisMethod;
     IMP oldImp = NULL;
@@ -104,14 +77,14 @@ IMP OBReplaceMethodImplementation(Class aClass, SEL oldSelector, IMP newImp)
     return oldImp;
 }
 
-IMP OBReplaceMethodImplementationWithSelector(Class aClass, SEL oldSelector, SEL newSelector)
+static IMP OBBDSKReplaceMethodImplementationWithSelector(Class aClass, SEL oldSelector, SEL newSelector)
 {
     struct objc_method *newMethod;
     
     newMethod = class_getInstanceMethod(aClass, newSelector);
     NSCAssert(newMethod != nil, @"new method must not be nil");
     
-    return OBReplaceMethodImplementation(aClass, oldSelector, newMethod->method_imp);
+    return OBBDSKReplaceMethodImplementation(aClass, oldSelector, newMethod->method_imp);
 }
 
 // The compiler won't allow us to call the IMP directly if it returns an NSRange, so I followed Apple's code at
@@ -152,13 +125,13 @@ static void (*originalCompleteIMP)(id, SEL, id) = NULL;
         NSAssert([BDSKTextViewCompletionController sharedController] != nil, @"unable to load BDSKCompletionController");
         
         // Class posing was cleaner and probably safer than swizzling, but led to unresolved problems with internationalized versions of TeXShop+OgreKit refusing text input for the Ogre find panel.  I think this is an OgreKit bug.
-        originalInsertIMP = (typeof(originalInsertIMP))OBReplaceMethodImplementationWithSelector(self, @selector(insertCompletion:forPartialWordRange:movement:isFinal:), @selector(replacementInsertCompletion:forPartialWordRange:movement:isFinal:));
-        originalRangeIMP = (typeof(originalRangeIMP))OBReplaceMethodImplementationWithSelector(self,@selector(rangeForUserCompletion),@selector(replacementRangeForUserCompletion));
-        originalKeyDownIMP = (typeof(originalKeyDownIMP))OBReplaceMethodImplementationWithSelector(self, @selector(keyDown:), @selector(replacementKeyDown:));
+        originalInsertIMP = (typeof(originalInsertIMP))OBBDSKReplaceMethodImplementationWithSelector(self, @selector(insertCompletion:forPartialWordRange:movement:isFinal:), @selector(replacementInsertCompletion:forPartialWordRange:movement:isFinal:));
+        originalRangeIMP = (typeof(originalRangeIMP))OBBDSKReplaceMethodImplementationWithSelector(self,@selector(rangeForUserCompletion),@selector(replacementRangeForUserCompletion));
+        originalKeyDownIMP = (typeof(originalKeyDownIMP))OBBDSKReplaceMethodImplementationWithSelector(self, @selector(keyDown:), @selector(replacementKeyDown:));
         
         // have to replace this one since we don't call the delegate method from our implementation, and we don't want to override unless the user chooses to do so
-        originalCompletionsIMP = (typeof(originalCompletionsIMP))OBReplaceMethodImplementationWithSelector(self, @selector(completionsForPartialWordRange:indexOfSelectedItem:),@selector(replacementCompletionsForPartialWordRange:indexOfSelectedItem:));
-        originalCompleteIMP = (typeof(originalCompleteIMP))OBReplaceMethodImplementationWithSelector(self, @selector(complete:), @selector(replacementComplete:));
+        originalCompletionsIMP = (typeof(originalCompletionsIMP))OBBDSKReplaceMethodImplementationWithSelector(self, @selector(completionsForPartialWordRange:indexOfSelectedItem:),@selector(replacementCompletionsForPartialWordRange:indexOfSelectedItem:));
+        originalCompleteIMP = (typeof(originalCompleteIMP))OBBDSKReplaceMethodImplementationWithSelector(self, @selector(complete:), @selector(replacementComplete:));
     }
     
     [pool release];
