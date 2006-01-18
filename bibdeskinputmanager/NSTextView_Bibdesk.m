@@ -130,8 +130,7 @@ static void (*originalCompleteIMP)(id, SEL, id) = NULL;
 + (void)load{
     
     NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
-    completionController = [BDSKTextViewCompletionController sharedController];
-    NSAssert(completionController != nil, @"unable to load BDSKCompletionController");
+
     // ARM: we just leak these strings; since the bundle only gets loaded once, it's not worth replacing dealloc
     if(BDSKInsertionString == nil)
         BDSKInsertionString = [NSLocalizedString(@" (Bibdesk)", @"") retain];
@@ -152,6 +151,9 @@ static void (*originalCompleteIMP)(id, SEL, id) = NULL;
 
     if(yn && [[self superclass] instancesRespondToSelector:@selector(completionsForPartialWordRange:indexOfSelectedItem:)]){
 
+        completionController = [BDSKTextViewCompletionController sharedController];
+        NSAssert(completionController != nil, @"unable to load BDSKCompletionController");
+        
         // Class posing was cleaner and probably safer than swizzling, but led to unresolved problems with internationalized versions of TeXShop+OgreKit refusing text input for the Ogre find panel.  I think this is an OgreKit bug.
         originalInsertIMP = (typeof(originalInsertIMP))OBReplaceMethodImplementationWithSelector(self, @selector(insertCompletion:forPartialWordRange:movement:isFinal:), @selector(replacementInsertCompletion:forPartialWordRange:movement:isFinal:));
         originalRangeIMP = (typeof(originalRangeIMP))OBReplaceMethodImplementationWithSelector(self,@selector(rangeForUserCompletion),@selector(replacementRangeForUserCompletion));
