@@ -40,7 +40,7 @@
 #import <Foundation/Foundation.h>
 #import </usr/include/objc/objc-class.h>
 #import </usr/include/objc/Protocol.h>
-#import "BDSKTextViewCompletionController.h"
+#import "BDSKPluginTextViewCompletionController.h"
 
 NSString *BDSKInputManagerID = @"net.sourceforge.bibdesk.inputmanager";
 NSString *BDSKInputManagerLoadableApplications = @"Application bundles that we recognize";
@@ -122,7 +122,7 @@ static void (*originalCompleteIMP)(id, SEL, id) = NULL;
 
     if(yn && [[self superclass] instancesRespondToSelector:@selector(completionsForPartialWordRange:indexOfSelectedItem:)]){
 
-        NSAssert([BDSKTextViewCompletionController sharedController] != nil, @"unable to load BDSKCompletionController");
+        NSAssert([BDSKPluginTextViewCompletionController sharedController] != nil, @"unable to load BDSKCompletionController");
         
         // Class posing was cleaner and probably safer than swizzling, but led to unresolved problems with internationalized versions of TeXShop+OgreKit refusing text input for the Ogre find panel.  I think this is an OgreKit bug.
         originalInsertIMP = (typeof(originalInsertIMP))OBBDSKReplaceMethodImplementationWithSelector(self, @selector(insertCompletion:forPartialWordRange:movement:isFinal:), @selector(replacementInsertCompletion:forPartialWordRange:movement:isFinal:));
@@ -158,11 +158,16 @@ static void (*originalCompleteIMP)(id, SEL, id) = NULL;
 
 @implementation NSTextView (BDSKCompletion)
 
-- (NSPoint)locationForCompletionWindow;
+- (NSPoint)pluginLocationForCompletionWindow;
 {
     NSPoint point = NSZeroPoint;
     
-    NSRange selRange = [self rangeForUserCompletion];    
+    NSRange selRange = [self rangeForUserCompletion];
+    
+    // @@ hack: if there is no character at this point (it may be just an accent), our line fragment rect will not be accurate for what we really need, so returning NSZeroPoint indicates to the caller that this is invalid
+    if(selRange.length == 0 || selRange.location == NSNotFound)
+        return point;
+    
     NSLayoutManager *layoutManager = [self layoutManager];
     
     // get the rect for the first glyph in our affected range
@@ -210,18 +215,18 @@ static void (*originalCompleteIMP)(id, SEL, id) = NULL;
     int idx = -1;
     NSArray *completions = [self completionsForPartialWordRange:selRange indexOfSelectedItem:&idx];
     
-    [[BDSKTextViewCompletionController sharedController] displayCompletions:completions indexOfSelectedItem:idx forPartialWordRange:selRange originalString:[string substringWithRange:selRange] atPoint:[self locationForCompletionWindow] forTextView:self];
+    [[BDSKPluginTextViewCompletionController sharedController] displayCompletions:completions indexOfSelectedItem:idx forPartialWordRange:selRange originalString:[string substringWithRange:selRange] atPoint:[self pluginLocationForCompletionWindow] forTextView:self];
 }
 
 static BOOL isCompletingTeX = NO;
 
 - (void)replacementKeyDown:(NSEvent *)event {
-    BOOL wasVisibleBeforeEvent = [[[BDSKTextViewCompletionController sharedController] completionWindow] isVisible];
+    BOOL wasVisibleBeforeEvent = [[[BDSKPluginTextViewCompletionController sharedController] completionWindow] isVisible];
     
     // delay this so we can trap the arrow keys
     if(wasVisibleBeforeEvent == NO)
         originalKeyDownIMP(self, _cmd, event);
-    else if([[BDSKTextViewCompletionController sharedController] currentTextView] == self){
+    else if([[BDSKPluginTextViewCompletionController sharedController] currentTextView] == self){
         unichar ch = [[event characters] characterAtIndex:0];
         switch(ch){
             // let the completion controller handle these, since we don't want to change the insertion point!
@@ -229,41 +234,41 @@ static BOOL isCompletingTeX = NO;
             case NSDownArrowFunctionKey:
             case NSRightArrowFunctionKey:
             case NSLeftArrowFunctionKey:
-                [[BDSKTextViewCompletionController sharedController] handleKeyDown:event];
+                [[BDSKPluginTextViewCompletionController sharedController] handleKeyDown:event];
                 break;
             case 0x001B: // esc key; if we just displayed the window, we don't want to hide it immediately
-                [[BDSKTextViewCompletionController sharedController] endDisplayNoComplete];
+                [[BDSKPluginTextViewCompletionController sharedController] endDisplayNoComplete];
                 break;
             case NSTabCharacter:
-                [[BDSKTextViewCompletionController sharedController] handleKeyDown:event];
+                [[BDSKPluginTextViewCompletionController sharedController] handleKeyDown:event];
                 break;
             case 0x0020: // spacebar
                 originalKeyDownIMP(self, _cmd, event);
                 break;
             case 0x002C: // comma
                 if(isCompletingTeX){
-                    [[BDSKTextViewCompletionController sharedController] endDisplay];
+                    [[BDSKPluginTextViewCompletionController sharedController] endDisplay];
                     [self setSelectedRange:NSMakeRange(NSMaxRange([self selectedRange]), 0)];
                     [[[self textStorage] mutableString] appendString:@","];   
                     [self complete:nil];
                 } else {
                     originalKeyDownIMP(self, _cmd, event);
-                    [[BDSKTextViewCompletionController sharedController] handleKeyDown:event];
+                    [[BDSKPluginTextViewCompletionController sharedController] handleKeyDown:event];
                 }
                 break;
             case 0x007D: // right curly brace
                 if(isCompletingTeX){
-                    [[BDSKTextViewCompletionController sharedController] endDisplay];
+                    [[BDSKPluginTextViewCompletionController sharedController] endDisplay];
                     [self setSelectedRange:NSMakeRange(NSMaxRange([self selectedRange]), 0)];
                     [[[self textStorage] mutableString] appendString:@"}"];
                 } else {
                     originalKeyDownIMP(self, _cmd, event);
-                    [[BDSKTextViewCompletionController sharedController] handleKeyDown:event];
+                    [[BDSKPluginTextViewCompletionController sharedController] handleKeyDown:event];
                 }
                 break;
             default:
                 originalKeyDownIMP(self, _cmd, event);
-                [[BDSKTextViewCompletionController sharedController] handleKeyDown:event];
+                [[BDSKPluginTextViewCompletionController sharedController] handleKeyDown:event];
         }
     }
 }

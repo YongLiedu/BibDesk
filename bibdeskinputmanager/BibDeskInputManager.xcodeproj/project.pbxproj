@@ -37,12 +37,12 @@
 		8D5B49B0048680CD000E48DA /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = 089C167DFE841241C02AAC07 /* InfoPlist.strings */; };
 		8D5B49B4048680CD000E48DA /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1058C7ADFEA557BF11CA2CBB /* Cocoa.framework */; };
 		F900148B0709EAF2002EC8DF /* BibDeskInputManager.bundle in CopyFiles */ = {isa = PBXBuildFile; fileRef = 8D5B49B6048680CD000E48DA /* BibDeskInputManager.bundle */; };
+		F972E8BA098D4CB200AB38BC /* BDSKPluginTextViewCompletionController.h in Headers */ = {isa = PBXBuildFile; fileRef = F972E8B8098D4CB200AB38BC /* BDSKPluginTextViewCompletionController.h */; };
+		F972E8BB098D4CB200AB38BC /* BDSKPluginTextViewCompletionController.m in Sources */ = {isa = PBXBuildFile; fileRef = F972E8B9098D4CB200AB38BC /* BDSKPluginTextViewCompletionController.m */; };
 		F9BC91EB06E0EB2E00B42137 /* BibDeskInputManager.bundle in CopyFiles */ = {isa = PBXBuildFile; fileRef = 8D5B49B6048680CD000E48DA /* BibDeskInputManager.bundle */; };
 		F9BC91F806E0EB4000B42137 /* Info in CopyFiles */ = {isa = PBXBuildFile; fileRef = F9D86A1106B33EFD00F2DE7D /* Info */; };
 		F9BEBE1D06B42D3C00AA486C /* BD Input Manager.icns in Resources */ = {isa = PBXBuildFile; fileRef = F9BEBE1C06B42D3C00AA486C /* BD Input Manager.icns */; };
 		F9BFE18E06FA98910019E8AB /* Bibdesk_Prefix.pch in Headers */ = {isa = PBXBuildFile; fileRef = F9BFE18A06FA98910019E8AB /* Bibdesk_Prefix.pch */; };
-		F9C4C5290977674500DF25F3 /* BDSKTextViewCompletionController.h in Headers */ = {isa = PBXBuildFile; fileRef = F9C4C5270977674500DF25F3 /* BDSKTextViewCompletionController.h */; };
-		F9C4C52A0977674500DF25F3 /* BDSKTextViewCompletionController.m in Sources */ = {isa = PBXBuildFile; fileRef = F9C4C5280977674500DF25F3 /* BDSKTextViewCompletionController.m */; };
 		F9D86A0506B33E2000F2DE7D /* Bibdesk.scpt in Resources */ = {isa = PBXBuildFile; fileRef = F9D86A0006B33E2000F2DE7D /* Bibdesk.scpt */; };
 		F9D86A0606B33E2000F2DE7D /* NSTextView_Bibdesk.h in Headers */ = {isa = PBXBuildFile; fileRef = F9D86A0106B33E2000F2DE7D /* NSTextView_Bibdesk.h */; };
 		F9D86A0706B33E2000F2DE7D /* NSTextView_Bibdesk.m in Sources */ = {isa = PBXBuildFile; fileRef = F9D86A0206B33E2000F2DE7D /* NSTextView_Bibdesk.m */; };
@@ -119,10 +119,10 @@
 		1058C7ADFEA557BF11CA2CBB /* Cocoa.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Cocoa.framework; path = /System/Library/Frameworks/Cocoa.framework; sourceTree = "<absolute>"; };
 		8D5B49B6048680CD000E48DA /* BibDeskInputManager.bundle */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = BibDeskInputManager.bundle; sourceTree = BUILT_PRODUCTS_DIR; };
 		8D5B49B7048680CD000E48DA /* Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xml; path = Info.plist; sourceTree = "<group>"; };
+		F972E8B8098D4CB200AB38BC /* BDSKPluginTextViewCompletionController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BDSKPluginTextViewCompletionController.h; sourceTree = "<group>"; };
+		F972E8B9098D4CB200AB38BC /* BDSKPluginTextViewCompletionController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BDSKPluginTextViewCompletionController.m; sourceTree = "<group>"; };
 		F9BEBE1C06B42D3C00AA486C /* BD Input Manager.icns */ = {isa = PBXFileReference; lastKnownFileType = image.icns; path = "BD Input Manager.icns"; sourceTree = "<group>"; };
 		F9BFE18A06FA98910019E8AB /* Bibdesk_Prefix.pch */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = Bibdesk_Prefix.pch; sourceTree = "<group>"; };
-		F9C4C5270977674500DF25F3 /* BDSKTextViewCompletionController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = BDSKTextViewCompletionController.h; path = "../bibdesk-1x/BDSKTextViewCompletionController.h"; sourceTree = SOURCE_ROOT; };
-		F9C4C5280977674500DF25F3 /* BDSKTextViewCompletionController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = BDSKTextViewCompletionController.m; path = "../bibdesk-1x/BDSKTextViewCompletionController.m"; sourceTree = SOURCE_ROOT; };
 		F9D86A0006B33E2000F2DE7D /* Bibdesk.scpt */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.scpt; path = Bibdesk.scpt; sourceTree = "<group>"; };
 		F9D86A0106B33E2000F2DE7D /* NSTextView_Bibdesk.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = NSTextView_Bibdesk.h; sourceTree = "<group>"; };
 		F9D86A0206B33E2000F2DE7D /* NSTextView_Bibdesk.m */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.objc; path = NSTextView_Bibdesk.m; sourceTree = "<group>"; };
@@ -179,8 +179,8 @@
 		08FB77AFFE84173DC02AAC07 /* Classes */ = {
 			isa = PBXGroup;
 			children = (
-				F9C4C5270977674500DF25F3 /* BDSKTextViewCompletionController.h */,
-				F9C4C5280977674500DF25F3 /* BDSKTextViewCompletionController.m */,
+				F972E8B8098D4CB200AB38BC /* BDSKPluginTextViewCompletionController.h */,
+				F972E8B9098D4CB200AB38BC /* BDSKPluginTextViewCompletionController.m */,
 				F9D86A0106B33E2000F2DE7D /* NSTextView_Bibdesk.h */,
 				F9D86A0206B33E2000F2DE7D /* NSTextView_Bibdesk.m */,
 				F9D86A0306B33E2000F2DE7D /* NSAppleScript+HandlerCalls.h */,
@@ -232,7 +232,7 @@
 				F9D86A0606B33E2000F2DE7D /* NSTextView_Bibdesk.h in Headers */,
 				F9D86A0806B33E2000F2DE7D /* NSAppleScript+HandlerCalls.h in Headers */,
 				F9BFE18E06FA98910019E8AB /* Bibdesk_Prefix.pch in Headers */,
-				F9C4C5290977674500DF25F3 /* BDSKTextViewCompletionController.h in Headers */,
+				F972E8BA098D4CB200AB38BC /* BDSKPluginTextViewCompletionController.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -337,7 +337,7 @@
 			files = (
 				F9D86A0706B33E2000F2DE7D /* NSTextView_Bibdesk.m in Sources */,
 				F9D86A0906B33E2000F2DE7D /* NSAppleScript+HandlerCalls.m in Sources */,
-				F9C4C52A0977674500DF25F3 /* BDSKTextViewCompletionController.m in Sources */,
+				F972E8BB098D4CB200AB38BC /* BDSKPluginTextViewCompletionController.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
