@@ -1,22 +1,13 @@
 {
     IBClasses = (
         {
-            ACTIONS = {
-                addApplication = id; 
-                addAutocompleteString = id; 
-                enableAutocompletion = id; 
-                removeApplication = id; 
-                removeAutocompleteString = id; 
-            }; 
+            ACTIONS = {addApplication = id; enableAutocompletion = id; removeApplication = id; }; 
             CLASS = "BibPref_InputManager"; 
             LANGUAGE = ObjC; 
             OUTLETS = {
-                acTabView = NSTabView; 
-                addFieldComboBox = NSComboBox; 
-                addFieldSheet = NSPanel; 
-                appList = NSTableView; 
-                editorAutocompletionStringsTableView = NSTableView; 
+                arrayController = NSArrayController; 
                 enableButton = NSButton; 
+                tableView = OAGradientTableView; 
             }; 
             SUPERCLASS = OAPreferenceClient; 
         }, 
@@ -26,6 +17,7 @@
             LANGUAGE = ObjC; 
             SUPERCLASS = NSObject; 
         }, 
+        {CLASS = OAGradientTableView; LANGUAGE = ObjC; SUPERCLASS = NSTableView; }, 
         {
             ACTIONS = {restoreDefaults = id; setValueForSender = id; }; 
             CLASS = OAPreferenceClient; 

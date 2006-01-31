@@ -1,12 +1,45 @@
 //
 //  BibItemClassDescription.m
-//  Bibdesk
+//  BibDesk
 //
 //  Created by Sven-S. Porst on Sat Jul 10 2004.
-//  Copyright (c) 2004 __MyCompanyName__. All rights reserved.
-//
-
+/*
+ This software is Copyright (c) 2004,2005,2006
+ Sven-S. Porst. All rights reserved.
+ 
+ Redistribution and use in source and binary forms, with or without
+ modification, are permitted provided that the following conditions
+ are met:
+ 
+ - Redistributions of source code must retain the above copyright
+ notice, this list of conditions and the following disclaimer.
+ 
+ - Redistributions in binary form must reproduce the above copyright
+ notice, this list of conditions and the following disclaimer in
+ the documentation and/or other materials provided with the
+ distribution.
+ 
+ - Neither the name of Sven-S. Porst nor the names of any
+ contributors may be used to endorse or promote products derived
+ from this software without specific prior written permission.
+ 
+ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+ "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+ LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+ A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+ OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+ SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+ LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+ DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+ THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+ (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ */
 #import "BibItem+Scripting.h"
+#import "BibAuthor.h"
+#import "BibPrefController.h"
+#import "BibDocument.h"
+#import "BibTeXParser.h"
 
 /* ssp
 A Category on BibItem with a few additional methods to enable and enhance its scriptability beyond what comes for free with key value coding.
@@ -32,18 +65,6 @@ A Category on BibItem with a few additional methods to enable and enhance its sc
 }
 
 
-/*
- ssp: 2004-07-10
- Seems to be a better naming for pubFields as there also is a setFields method.
- In AppleScript this provides an NSDictionary with all the available fields (including those containing empty strings - perhaps some cleaning should be done there). 
- See BD Test.scpt for instructions on how to actually use this record in AppleScript.
- http://earthlingsoft.net/ssp/blog/2004/07/cocoa_and_applescript#812
- gives insight on what's going on there. Perhaps it's worth to implement some other NSSetCommand to make things easier - but I don't know how to do that right now.
-*/
-- (NSMutableDictionary *)fields{
-    return [self pubFields];
-}
-
 /* cmh:
  Access to arbitrary fields through 'proxy' objects BibField. 
  These are simply wrappers for the accessors in BibItem. 
@@ -56,30 +77,31 @@ A Category on BibItem with a few additional methods to enable and enhance its sc
 - (NSArray *)bibFields
 {
 	NSEnumerator *fEnum = [pubFields keyEnumerator];
-	NSString *name;
-	NSMutableDictionary *bibFields = [[NSMutableDictionary dictionaryWithCapacity:1] retain];
+	NSString *name = nil;
+	BibField *field = nil;
+	NSMutableArray *bibFields = [NSMutableArray arrayWithCapacity:5];
 	
 	while (name = [fEnum nextObject]) {
-		name = [name capitalizedString];
-		if (![@"" isEqualToString:[self valueOfField:name]])
-			[bibFields setObject:[[[BibField alloc] initWithName:name bibItem:self] autorelease] forKey:name];
+		field = [[BibField alloc] initWithName:[name capitalizedString] bibItem:self];
+		[bibFields addObject:field];
+		[field release];
 	}
-	return [bibFields allValues];
+	return bibFields;
 }
 
 - (BibAuthor *)valueInAuthorsWithName:(NSString *)name {
+    // create a new author so we can use BibAuthor's isEqual: method for comparison
+    // instead of trying to do string comparisons
+    BibAuthor *newAuth = [BibAuthor authorWithName:name andPub:nil];
 	NSEnumerator *authEnum = [[self pubAuthors] objectEnumerator];
 	BibAuthor *auth;
-	BibAuthor *altAuth = nil;
+	
 	while (auth = [authEnum nextObject]) {
-		if ([[auth normalizedName] isEqualToString:name]) {
+		if ([auth isEqual:newAuth]) {
 			return auth;
 		}
-		if ([[auth name] isEqualToString:name]) {
-			altAuth = auth;
-		}
 	}
-	return altAuth;
+	return nil;
 }
 
 /* ssp: 2004-09-21
@@ -88,31 +110,62 @@ Extra wrapping of the created and modified date methods to
 - do some NSDate -> NSCalendarDate conversion
 */
 
+- (NSString *)asType {
+	return [self type];
+}
+
+- (void)setAsType:(NSString *)newType {
+	[self setType:(NSString *)newType];
+	[[self undoManager] setActionName:NSLocalizedString(@"AppleScript",@"Undo action name for AppleScript")];
+}
+
+- (NSString *)asCiteKey {
+	return [self citeKey];
+}
+
+- (void)setAsCiteKey:(NSString *)newKey {
+	[self setCiteKey:(NSString *)newKey];
+	[[self undoManager] setActionName:NSLocalizedString(@"AppleScript",@"Undo action name for AppleScript")];
+}
+
+- (NSString*)asTitle {
+	return [self valueOfField:BDSKTitleString];
+}
+
+- (void)setAsTitle:(NSString*)newTitle {
+	[self setField:BDSKTitleString toValue:newTitle];
+	[[self undoManager] setActionName:NSLocalizedString(@"AppleScript",@"Undo action name for AppleScript")];
+}
+
 - (NSString *) month {
-	return [self valueOfField:BDSKMonthString];
+	NSString *month = [self valueOfField:BDSKMonthString];
+	return month ? month : @"";
 }
 
 - (void) setMonth:(NSString*) newMonth {
 	[self setField:BDSKMonthString toValue:newMonth];
+	[[self undoManager] setActionName:NSLocalizedString(@"AppleScript",@"Undo action name for AppleScript")];
 }
 
 - (NSString *) year {
-	return [self valueOfField:BDSKYearString];
+	NSString *year = [self valueOfField:BDSKYearString];
+	return year ? year : @"";
 }
 
 - (void) setYear:(NSString*) newYear {
 	[self setField:BDSKYearString toValue:newYear];
+	[[self undoManager] setActionName:NSLocalizedString(@"AppleScript",@"Undo action name for AppleScript")];
 }
 
 
-- (NSDate*) ASDateCreated {
+- (NSDate*)asDateCreated {
 	NSDate * d = [self dateCreated];
 	
 	if (!d) return [NSDate dateWithTimeIntervalSince1970:0];
 	else return d;
 }
 
-- (NSDate*) ASDateModified {
+- (NSDate*)asDateModified {
 	NSDate * d = [self dateModified];
 	
 	if (!d) return [NSDate dateWithTimeIntervalSince1970:0];
@@ -128,57 +181,90 @@ Extra wrapping of the created and modified date methods to
  Extra key-value-style accessor methods for the local and distant URLs, abstract and notes
  These might be particularly useful for scripting, so having them right in the scripting dictionary rather than hidden in the 'fields' record should be useful.
  I assume the same could be achieved more easily using -valueForUndefinedKey:, but that's X.3 and up 
- I am using generic NSStrings here. NSURLs and NSFileHandles might be nicer but as things are handled as strings both in the Bibdesk backend and in AppleScript there wouldn't be much point to it.
+ I am using generic NSStrings here. NSURLs and NSFileHandles might be nicer but as things are handled as strings both in the BibDesk backend and in AppleScript there wouldn't be much point to it.
  Any policies on whether to rather return copies of the strings in question here?
 */
-- (NSString*) remoteURL {
-	return [self valueOfField:BDSKUrlString];
+- (NSString*) remoteURLString {
+	NSString *remoteURL = [[self remoteURL] absoluteString];
+	return remoteURL ? remoteURL : @"";
 }
 
 - (void) setRemoteURL:(NSString*) newURL{
 	[self setField:BDSKUrlString toValue:newURL];
+	[[self undoManager] setActionName:NSLocalizedString(@"AppleScript",@"Undo action name for AppleScript")];
 }
 
 - (NSString*) localURL {
-	return [self localURLPath];
+	NSString *localURL = [self localURLPath];
+	return localURL ? localURL : @"";
 }
 
 - (void) setLocalURL:(NSString*) newPath {
 	if ([newPath hasPrefix:@"file://"])
 		[self setField:BDSKLocalUrlString toValue:newPath];
-	[self setField:BDSKLocalUrlString toValue:[NSURL fileURLWithPath:[newPath stringByExpandingTildeInPath]]];
+	NSString *newURL = [[NSURL fileURLWithPath:[newPath stringByExpandingTildeInPath]] absoluteString];
+	[self setField:BDSKLocalUrlString toValue:newURL];
+	[[self undoManager] setActionName:NSLocalizedString(@"AppleScript",@"Undo action name for AppleScript")];
 }
 
 - (NSString*) abstract {
-	return [self valueOfField:BDSKAbstractString];
+	return [self valueOfField:BDSKAbstractString inherit:NO];
 }
 
 - (void) setAbstract:(NSString*) newAbstract {
 	[self setField:BDSKAbstractString toValue:newAbstract];
+	[[self undoManager] setActionName:NSLocalizedString(@"AppleScript",@"Undo action name for AppleScript")];
 }
 
 - (NSString*) annotation {
-	return [self valueOfField:BDSKAnnoteString];
+	return [self valueOfField:BDSKAnnoteString inherit:NO];
 }
 
 - (void) setAnnotation:(NSString*) newAnnotation {
 	[self setField:BDSKAnnoteString toValue:newAnnotation];
+	[[self undoManager] setActionName:NSLocalizedString(@"AppleScript",@"Undo action name for AppleScript")];
 }
 
-- (NSString*) RSSDescription {
+- (NSString*)rssDescription {
 	return [self valueOfField:BDSKRssDescriptionString];
 }
 
-- (void) setRSSDescription:(NSString*) newDesc {
+- (void) setRssDescription:(NSString*) newDesc {
 	[self setField:BDSKRssDescriptionString toValue:newDesc];
+	[[self undoManager] setActionName:NSLocalizedString(@"AppleScript",@"Undo action name for AppleScript")];
+}
+
+- (NSString*)rssString {
+	NSString *value = [self RSSValue];
+	return value ? value : @"";
+}
+
+- (NSString*)risString {
+	NSString *value = [self RISStringValue];
+	return value ? value : @"";
+}
+
+- (NSTextStorage *)styledTextValue {
+	return [[[NSTextStorage alloc] initWithAttributedString:[self attributedStringValue]] autorelease];
 }
 
 - (NSString *)keywords{
-    return [self valueOfField:BDSKKeywordsString];
+    NSString *keywords = [self valueOfField:BDSKKeywordsString];
+	return keywords ? keywords : @"";
 }
 
 - (void)setKeywords:(NSString *)keywords{
     [self setField:BDSKKeywordsString toValue:keywords];
+	[[self undoManager] setActionName:NSLocalizedString(@"AppleScript",@"Undo action name for AppleScript")];
+}
+
+- (int)asRating{
+    return [self rating];
+}
+
+- (void)setAsRating:(int)rating{
+    [self setRating:rating];
+	[[self undoManager] setActionName:NSLocalizedString(@"AppleScript",@"Undo action name for AppleScript")];
 }
 
 /*
@@ -203,14 +289,13 @@ Extra wrapping of the created and modified date methods to
 	}
 
 	BOOL hadProblems = NO;
-    [[NSApp delegate] setDocumentForErrors:[self document]];
-    NSArray * newPubs = [BibTeXParser itemsFromData:data error:&hadProblems];
+    NSArray * newPubs = [BibTeXParser itemsFromData:data error:&hadProblems document:[self document]];
 	
 	// try to do some error handling for AppleScript
 	if(hadProblems) {
 		if (cmd) {
 			[cmd setScriptErrorNumber:NSInternalScriptError];
-			[cmd setScriptErrorString:[NSString stringWithFormat:NSLocalizedString(@"Bibdesk failed to process the BibTeX entry %@. It may be malformed.",@"Bibdesk failed to process the BibTeX entry %@. It may be malformed."), btString]];
+			[cmd setScriptErrorString:[NSString stringWithFormat:NSLocalizedString(@"BibDesk failed to process the BibTeX entry %@. It may be malformed.",@"BibDesk failed to process the BibTeX entry %@. It may be malformed."), btString]];
 		}
 		return;
 	}
@@ -219,16 +304,18 @@ Extra wrapping of the created and modified date methods to
 	BibItem * newPub = [newPubs objectAtIndex:0];
 	
 	// a parsed pub has no creation date set, so we need to copy first
-	NSString *createdDate = [self valueOfField:BDSKDateCreatedString];
-	if (createdDate && ![createdDate isEqualToString:@""])
+	NSString *createdDate = [self valueOfField:BDSKDateCreatedString inherit:NO];
+	if (![NSString isEmptyString:createdDate])
 		[newPub setField:BDSKDateCreatedString toValue:createdDate];
 	
 	// ... and replace the current record with it.
 	// hopefully, I don't understand the whole filetypes/pubtypes stuff	
-	[self makeType:[newPub type]];
+	[self setType:[newPub type]];
 	[self setFileType:[newPub fileType]];
 	[self setCiteKey:[newPub citeKey]];
-	[self setFields:[newPub fields]];
+	[self setFields:[newPub pubFields]];
+	
+	[[self undoManager] setActionName:NSLocalizedString(@"AppleScript",@"Undo action name for AppleScript")];
 	// NSLog([newPub description]);
 }
 

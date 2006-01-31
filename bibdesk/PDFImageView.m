@@ -23,9 +23,16 @@
 
 #pragma mark PUBLIC INSTANCE METHODS
 
-//	loadFromPath: -- Load the PDF at the specified path into the view.
+- (void)loadFromPath:(NSString *)path;
+{
+    NSData *pdfData = [[NSData alloc] initWithContentsOfFile:path];
+    [self loadData:pdfData];
+    [pdfData release];
+}
+
+//	loadData: -- Load the PDF data into the view.
 //	This automatically resizes the view to fit all pages of the document.
-- (void) loadFromPath: (NSString *) path
+- (void) loadData: (NSData *) data
 {
     NSPDFImageRep	*pdfRep;
     NSImage			*pdfImage;
@@ -33,9 +40,10 @@
 
     //	Load the file into an image-representation,
     //	then create an image and add the representation to it.
-    pdfRep = [NSPDFImageRep imageRepWithContentsOfFile: path];
-    pdfImage = [[[NSImage alloc] init] autorelease];
+    pdfRep = [[NSPDFImageRep alloc] initWithData: data];
+    pdfImage = [[NSImage alloc] init];
     [pdfImage addRepresentation: pdfRep];
+    [pdfRep release];
 
     //	Figure our frame by getting the bounds, which is really the size
     //	of one page, and multiplying the height by the page count.
@@ -44,6 +52,7 @@
 
     //	Install the image (remember, we're an NSImageView subclass)
     [self setImage: pdfImage];
+    [pdfImage release];
 
     //	Set our frame to match the PDF's full height (all pages)
     //	(don't involve our override of -setFrame:, or things won't work right)

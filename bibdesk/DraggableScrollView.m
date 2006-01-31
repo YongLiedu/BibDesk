@@ -6,6 +6,7 @@
 
 #import "DraggableScrollView.h"
 #import <OmniAppKit/NSView-OAExtensions.h>
+#import "BDSKHeaderPopUpButton.h"
 
 @implementation DraggableScrollView
 
@@ -22,45 +23,7 @@
 */   
 static NSString *BDSKDefaultScaleMenuLabels[] = {/* @"Set...", */ @"10%", @"25%", @"50%", @"75%", @"100%", @"128%", @"150%", @"200%", @"400%", @"800%"};
 static float BDSKDefaultScaleMenuFactors[] = {/* 0.0, */ 0.1, 0.25, 0.5, 0.75, 1.0, 1.28, 1.5, 2.0, 4.0, 8.0};
-static unsigned BDSKDefaultScaleMenuSelectedItemIndex = 4;
 static float BDSKScaleMenuFontSize = 11.0;
-
-#pragma mark Class method for cursor
-
-// Cursors -- Return the open and closed grab hand cursors for dragging
-// Needed as the system ones are 10.3 only
-+ (NSCursor *) openHandCursor
-{
-    static NSCursor	*openHandCursor = nil;
-
-    if (openHandCursor == nil)
-    {
-        NSImage		*image;
-
-        image = [NSImage imageNamed: @"openHandCursor"];
-        openHandCursor = [[NSCursor alloc] initWithImage: image
-            hotSpot: NSMakePoint (8, 8)]; // guess that the center is good
-    }
-
-    return openHandCursor;
-}
-
-+ (NSCursor *) closedHandCursor
-{
-    static NSCursor	*closedHandCursor = nil;
-
-    if (closedHandCursor == nil)
-    {
-        NSImage		*image;
-
-        image = [NSImage imageNamed: @"closedHandCursor"];
-        closedHandCursor = [[NSCursor alloc] initWithImage: image
-            hotSpot: NSMakePoint (8, 8)]; // guess that the center is good
-    }
-
-    return closedHandCursor;
-}
-
 
 #pragma mark Instance methods
 
@@ -114,7 +77,7 @@ static float BDSKScaleMenuFontSize = 11.0;
 - (void)clipViewBoundsDidChange
 {
 	if ([self canScroll]) {
-        [self setDocumentCursor: [[self class] openHandCursor]];
+        [self setDocumentCursor: [NSCursor openHandCursor]];
     } else {
         [self setDocumentCursor: [NSCursor arrowCursor]];
 	}
@@ -129,7 +92,7 @@ static float BDSKScaleMenuFontSize = 11.0;
     BOOL			keepGoing;
     BOOL			result = NO;
 
-	[[[self class] closedHandCursor] push];
+	[[NSCursor closedHandCursor] push];
 	initialLocation = [theEvent locationInWindow];
     visibleRect = [[self documentView] visibleRect];
     keepGoing = YES;
@@ -185,9 +148,7 @@ static float BDSKScaleMenuFontSize = 11.0;
         id curItem;
 
         // create it
-        scalePopUpButton = [[NSPopUpButton allocWithZone:[self zone]] initWithFrame:NSMakeRect(0.0, 0.0, 1.0, 1.0) pullsDown:NO];
-        [[scalePopUpButton cell] setBezelStyle:NSShadowlessSquareBezelStyle];
-        [[scalePopUpButton cell] setArrowPosition:NSPopUpArrowAtBottom];
+        scalePopUpButton = [[BDSKHeaderPopUpButton allocWithZone:[self zone]] initWithFrame:NSMakeRect(0.0, 0.0, 1.0, 1.0) pullsDown:NO];
         [[scalePopUpButton cell] setControlSize:[[self horizontalScroller] controlSize]];
 		
         // fill it
@@ -221,17 +182,17 @@ static float BDSKScaleMenuFontSize = 11.0;
 }
 
 - (void)drawRect:(NSRect)rect {
-    NSRect verticalLineRect;
-    
     [super drawRect:rect];
 
     if ([scalePopUpButton superview]) {
-        verticalLineRect = [scalePopUpButton frame];
-        verticalLineRect.origin.x -= 1.0;
-        verticalLineRect.size.width = 1.0;
-        if (NSIntersectsRect(rect, verticalLineRect)) {
-            [[NSColor blackColor] set];
-            NSRectFill(verticalLineRect);
+        NSRect shadowRect = [scalePopUpButton frame];
+        shadowRect.origin.x -= 1.0;
+        shadowRect.origin.y -= 1.0;
+        shadowRect.size.width += 1.0;
+        shadowRect.size.height += 1.0;
+        if (NSIntersectsRect(rect, shadowRect)) {
+            [[NSColor lightGrayColor] set];
+            NSRectFill(shadowRect);
         }
     }
 }
@@ -310,12 +271,12 @@ static float BDSKScaleMenuFontSize = 11.0;
         buttonFrame = [scalePopUpButton frame];
 
         // Now we'll just adjust the horizontal scroller size and set the button size and location.
-        horizScrollerFrame.size.width = horizScrollerFrame.size.width - buttonFrame.size.width;
+        horizScrollerFrame.size.width = horizScrollerFrame.size.width - buttonFrame.size.width - 1.0;
         [horizScroller setFrameSize:horizScrollerFrame.size];
 
-        buttonFrame.origin.x = NSMaxX(horizScrollerFrame);
-        buttonFrame.size.height = horizScrollerFrame.size.height + 1.0;
-        buttonFrame.origin.y = [self bounds].size.height - buttonFrame.size.height + 1.0;
+        buttonFrame.origin.x = NSMaxX(horizScrollerFrame) + 1.0;
+        buttonFrame.origin.y = horizScrollerFrame.origin.y + 1.0;
+        buttonFrame.size.height = horizScrollerFrame.size.height - 1.0;
         [scalePopUpButton setFrame:buttonFrame];
     }
 }

@@ -10,7 +10,12 @@
 	<array>
 		<integer>46</integer>
 	</array>
+	<key>IBOpenObjects</key>
+	<array>
+		<integer>5</integer>
+		<integer>85</integer>
+	</array>
 	<key>IBSystem Version</key>
-	<string>7U16</string>
+	<string>7W98</string>
 </dict>
 </plist>

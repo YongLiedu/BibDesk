@@ -1,24 +1,47 @@
 //
 //  BDSKFormatParser.h
-//  Bibdesk
+//  BibDesk
 //
 //  Created by Christiaan Hofman on 17/4/05.
-//  Copyright 2005 __MyCompanyName__. All rights reserved.
-//
+/*
+ This software is Copyright (c) 2005,2006
+ Christiaan Hofman. All rights reserved.
+
+ Redistribution and use in source and binary forms, with or without
+ modification, are permitted provided that the following conditions
+ are met:
+
+ - Redistributions of source code must retain the above copyright
+   notice, this list of conditions and the following disclaimer.
+
+ - Redistributions in binary form must reproduce the above copyright
+    notice, this list of conditions and the following disclaimer in
+    the documentation and/or other materials provided with the
+    distribution.
+
+ - Neither the name of Christiaan Hofman nor the names of any
+    contributors may be used to endorse or promote products derived
+    from this software without specific prior written permission.
+
+ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+ "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+ LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+ A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+ OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+ SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+ LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+ DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+ THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+ (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ */
 
 #import <Cocoa/Cocoa.h>
 
 @class BibItem;
 
 @interface BDSKFormatParser : NSObject {
-	NSCharacterSet *validSpecifierChars;
-	NSCharacterSet *validUniqueSpecifierChars;
-	NSCharacterSet *validEscapeSpecifierChars;
-	NSCharacterSet *validArgSpecifierChars;
-	NSCharacterSet *validOptArgSpecifierChars;
 }
-
-+ (BDSKFormatParser *)sharedParser;
 
 /*!
     @method parseFormat:forField:ofItem:
@@ -29,7 +52,7 @@
     @param pub The BibItem for which to parse the format
 	@result The parsed format string 
 */
-- (NSString *)parseFormat:(NSString *)format forField:(NSString *)fieldName ofItem:(BibItem *)pub;
++ (NSString *)parseFormat:(NSString *)format forField:(NSString *)fieldName ofItem:(BibItem *)pub;
 
 /*!
     @method uniqueString:suffix:forField:ofItem:numberOfChars:from:to:force:
@@ -45,7 +68,7 @@
 	@param force Determines whether to allow for more characters to force a unique key
 	@result A string value for field in type that starts with baseString and is unique when force is YES
 */
-- (NSString *)uniqueString:(NSString *)baseString 
++ (NSString *)uniqueString:(NSString *)baseString 
 					suffix:(NSString *)suffix
 				  forField:(NSString *)fieldName 
 					ofItem:(BibItem *)pub
@@ -62,7 +85,7 @@
     @param fieldName The name of the field (e.g. "Author")
 	@param pub The item for which to check validity
 */
-- (BOOL)stringIsValid:(NSString *)proposedStr forField:(NSString *)fieldName ofItem:(BibItem *)pub;
++ (BOOL)stringIsValid:(NSString *)proposedStr forField:(NSString *)fieldName ofItem:(BibItem *)pub;
 
 /*!
  @method stringBySanitizingString:forField:inFieldType:
@@ -73,7 +96,7 @@
  @param type The reference type (e.g. BibTeX, RIS)
  @result The sanitized string
 */
-- (NSString *)stringBySanitizingString:(NSString *)string forField:(NSString *)fieldName inFileType:(NSString *)type;
++ (NSString *)stringBySanitizingString:(NSString *)string forField:(NSString *)fieldName inFileType:(NSString *)type;
 
 /*!
  @method stringByStrictlySanitizingString:forField:inFieldType:
@@ -84,7 +107,7 @@
  @param type The reference type (e.g. BibTeX, RIS)
  @result The sanitized string
 */
-- (NSString *)stringByStrictlySanitizingString:(NSString *)string forField:(NSString *)fieldName inFileType:(NSString *)type;
++ (NSString *)stringByStrictlySanitizingString:(NSString *)string forField:(NSString *)fieldName inFileType:(NSString *)type;
 
 /*!
  @method stringBySanitizedCiteKeyString
@@ -96,7 +119,20 @@
  @param error An error string returned when the format is not valid
  @result The sanitized string
 */
-- (BOOL)validateFormat:(NSString **)formatString forField:(NSString *)fieldName inFileType:(NSString *)type error:(NSString **)error;
++ (BOOL)validateFormat:(NSString **)formatString forField:(NSString *)fieldName inFileType:(NSString *)type error:(NSString **)error;
+
+/*!
+ @method stringBySanitizedCiteKeyString
+ @abstract Validate a format string to use for a field in a type
+ @discussion Checks for valid specifiers and calls stringBySanitizingString:forField:inFieldType: on other parts of the string. Might change the format string.
+ @param formatString The format string to check
+ @param attrFormatString Is set to a sanitized attributedString version of the format string.
+ @param fieldName The name of the field (e.g. "Author")
+ @param type The reference type (e.g. BibTeX, RIS)
+ @param error An error string returned when the format is not valid
+ @result The sanitized string
+*/
++ (BOOL)validateFormat:(NSString **)formatString attributedFormat:(NSAttributedString **)attrFormatString forField:(NSString *)fieldName inFileType:(NSString *)type error:(NSString **)error;
 
 /*!
  @method requiredFieldsForFormat
@@ -105,6 +141,20 @@
  @param formatString The format string to check
  @result Array of required field names
 */
-- (NSArray *)requiredFieldsForFormat:(NSString *)formatString;
++ (NSArray *)requiredFieldsForFormat:(NSString *)formatString;
 
+@end
+
+@interface BDSKFormatStringFieldEditor : NSTextView {
+    NSString *parseField;
+    NSString *parseFileType;
+} 
+- (id)initWithFrame:(NSRect)frameRect parseField:(NSString *)field fileType:(NSString *)fileType;
+@end
+
+@interface BDSKFormatStringFormatter : NSFormatter {
+    NSString *parseField;
+    NSString *parseFileType;
+}
+- (id)initWithField:(NSString *)field fileType:(NSString *)fileType;
 @end

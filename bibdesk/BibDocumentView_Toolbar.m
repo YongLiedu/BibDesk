@@ -2,19 +2,41 @@
 
 //  Created by Michael McCracken on Wed Jul 03 2002.
 /*
-This software is Copyright (c) 2002, Michael O. McCracken
-All rights reserved.
+ This software is Copyright (c) 2002,2003,2004,2005,2006
+ Michael O. McCracken. All rights reserved.
 
-Redistribution and use in source and binary forms, with or without modification, are permitted provided that the following conditions are met:
+ Redistribution and use in source and binary forms, with or without
+ modification, are permitted provided that the following conditions
+ are met:
 
-- Redistributions of source code must retain the above copyright notice, this list of conditions and the following disclaimer.
--  Redistributions in binary form must reproduce the above copyright notice, this list of conditions and the following disclaimer in the documentation and/or other materials provided with the distribution.
--  Neither the name of Michael O. McCracken nor the names of any contributors may be used to endorse or promote products derived from this software without specific prior written permission.
+ - Redistributions of source code must retain the above copyright
+   notice, this list of conditions and the following disclaimer.
 
-THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-*/
+ - Redistributions in binary form must reproduce the above copyright
+    notice, this list of conditions and the following disclaimer in
+    the documentation and/or other materials provided with the
+    distribution.
+
+ - Neither the name of Michael O. McCracken nor the names of any
+    contributors may be used to endorse or promote products derived
+    from this software without specific prior written permission.
+
+ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+ "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+ LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+ A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+ OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+ SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+ LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+ DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+ THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+ (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ */
 
 #import "BibDocumentView_Toolbar.h"
+#import "BibDocument_Search.h"
+#import "BibAppController.h"
 
 NSString* 	BibDocToolbarIdentifier 		= @"BibDesk Browser Toolbar Identifier";
 NSString*	NewDocToolbarItemIdentifier 	= @"New Document Item Identifier";
@@ -34,7 +56,6 @@ NSString*	ToggleCiteDrawerToolbarItemIdentifier 	= @"Toggle Cite Drawer Identifi
 // label, palettelabel, toolTip, action, and menu can all be NULL, depending upon what you want the item to do
 static void addToolbarItem(NSMutableDictionary *theDict,NSString *identifier,NSString *label,NSString *paletteLabel,NSString *toolTip,id target,SEL settingSelector, id itemContent,SEL action, NSMenuItem *menuItem)
 {
-    NSMenuItem *mItem;
     // here we create the NSToolbarItem and setup its attributes in line with the parameters
     NSToolbarItem *item = [[[NSToolbarItem alloc] initWithItemIdentifier:identifier] autorelease];
     [item setLabel:label];
@@ -88,7 +109,7 @@ static void addToolbarItem(NSMutableDictionary *theDict,NSString *identifier,NSS
                    NSLocalizedString(@"Delete Selected Publication(s)",@""),
                    self, @selector(setImage:),  
 				   [NSImage imageWithLargeIconForToolboxCode:kToolbarDeleteIcon],
-				   @selector(delPub:),
+				   @selector(deleteSelectedPubs:),
                    nil);
 
     addToolbarItem(toolbarItems, EditDocToolbarItemIdentifier,
@@ -128,21 +149,22 @@ static void addToolbarItem(NSMutableDictionary *theDict,NSString *identifier,NSS
                    @selector(toggleShowingCustomCiteDrawer:), nil);
 	
 	
-	menuItem = [[[NSMenuItem alloc] initWithTitle:NSLocalizedString(@"Search",@"") 
-										   action:@selector(find:)
+	menuItem = [[[NSMenuItem allocWithZone:[NSMenu menuZone]] initWithTitle:NSLocalizedString(@"Search",@"") 
+										   action:@selector(performFindPanelAction:)
 									keyEquivalent:@""] autorelease];
+	[menuItem setTag:NSFindPanelActionShowFindPanel];
 	[menuItem setTarget:self];
     addToolbarItem(toolbarItems, SearchFieldDocToolbarItemIdentifier,
                    NSLocalizedString(@"Search",@""),
                    NSLocalizedString(@"Search",@""),
-                   NSLocalizedString(@"Search using Boolean AND and OR, see Help for details",@""),
+                   NSLocalizedString(@"Search using Boolean '+' and '|', see Help for details",@""),
                    self, @selector(setView:),
-                   searchFieldView,
-                   NULL, 
+                   searchField,
+                   @selector(searchFieldAction:), 
 				   menuItem);
 	
 	
-	menuItem = [[[NSMenuItem alloc] initWithTitle:NSLocalizedString(@"Action",@"") 
+	menuItem = [[[NSMenuItem allocWithZone:[NSMenu menuZone]] initWithTitle:NSLocalizedString(@"Action",@"") 
 										   action:NULL 
 									keyEquivalent:@""] autorelease];
 	[menuItem setSubmenu: actionMenu];
@@ -157,17 +179,6 @@ static void addToolbarItem(NSMutableDictionary *theDict,NSString *identifier,NSS
     
     // Attach the toolbar to the document window
     [documentWindow setToolbar: toolbar];
-}
-
-- (IBAction)find:(id)sender{
-    NSToolbar *tb = [documentWindow toolbar];
-    [tb setVisible:YES];
-    if([tb displayMode] == NSToolbarDisplayModeLabelOnly)
-	[tb setDisplayMode:NSToolbarDisplayModeIconAndLabel];
-    if(BDSK_USING_JAGUAR)
-	[searchFieldTextField selectText:nil];
-    else
-	[searchField selectText:nil];
 }
 
 - (NSToolbarItem *) toolbar: (NSToolbar *)toolbar
@@ -271,10 +282,11 @@ static void addToolbarItem(NSMutableDictionary *theDict,NSString *identifier,NSS
     BOOL enable = YES;
     if ([[toolbarItem itemIdentifier] isEqualToString: NSToolbarPrintItemIdentifier]) {
 		enable = [self validatePrintDocumentMenuItem:nil];
-    }else if([[toolbarItem itemIdentifier] isEqualToString: DelDocToolbarItemIdentifier]
-             || [[toolbarItem itemIdentifier] isEqualToString: EditDocToolbarItemIdentifier]
+    }else if([[toolbarItem itemIdentifier] isEqualToString: EditDocToolbarItemIdentifier]
 			 || [[toolbarItem itemIdentifier] isEqualToString: ActionMenuToolbarItemIdentifier]){
         if([self numberOfSelectedPubs] == 0) enable = NO;
+    }else if([[toolbarItem itemIdentifier] isEqualToString: DelDocToolbarItemIdentifier]){
+        if([self numberOfSelectedPubs] == 0 || [documentWindow isKeyWindow] == NO) enable = NO;  // disable click-through
     }
 
     return enable;
