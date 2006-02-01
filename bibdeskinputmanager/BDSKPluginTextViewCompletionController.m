@@ -268,7 +268,6 @@ static int BDSKCompletionMinHeight = 20;
 {
     NSRect contentRect = NSMakeRect(0, 0, BDSKCompletionMaxWidth, BDSKCompletionMaxHeight);
     completionWindow = [[BDSKTextViewCompletionWindow alloc] initWithContentRect:contentRect styleMask:NSBorderlessWindowMask backing:NSBackingStoreBuffered defer:NO];
-    [completionWindow setDelegate:self];
     [completionWindow setReleasedWhenClosed:NO];
     
     tableView = [[NSTableView alloc] initWithFrame:contentRect];
@@ -422,6 +421,11 @@ static int BDSKCompletionMinHeight = 20;
 // explicitly note that we want these to return NO, even though that's the default for windows created in code
 - (BOOL)canBecomeKeyWindow { return NO; }
 - (BOOL)canBecomeMainWindow { return NO; }
+
+    // possible fix for assertion failure in -[NSWindow setRepresentedFilename] on 10.3.9
+- (NSString *)representedFilename { return @""; }
+- (void)setRepresentedFilename:(NSString *)path { (void)0; }
+
 
 @end
 
