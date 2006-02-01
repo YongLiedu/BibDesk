@@ -234,9 +234,11 @@ static BOOL isCompletingTeX = NO;
             case NSDownArrowFunctionKey:
             case NSRightArrowFunctionKey:
             case NSLeftArrowFunctionKey:
+            case NSNewlineCharacter:
+            case NSCarriageReturnCharacter:
                 [[BDSKPluginTextViewCompletionController sharedController] handleKeyDown:event];
                 break;
-            case 0x001B: // esc key; if we just displayed the window, we don't want to hide it immediately
+            case 0x001B: // esc key
                 [[BDSKPluginTextViewCompletionController sharedController] endDisplayNoComplete];
                 break;
             case NSTabCharacter:
@@ -245,12 +247,12 @@ static BOOL isCompletingTeX = NO;
             case 0x0020: // spacebar
                 originalKeyDownIMP(self, _cmd, event);
                 break;
-            case 0x002C: // comma
+            case 0x002C: // comma; used to separate cite entries
                 if(isCompletingTeX){
                     [[BDSKPluginTextViewCompletionController sharedController] endDisplay];
+                    // clear the selection so we don't overwrite it
                     [self setSelectedRange:NSMakeRange(NSMaxRange([self selectedRange]), 0)];
-                    [[[self textStorage] mutableString] appendString:@","];   
-                    [self complete:nil];
+                    [self interpretKeyEvents:[NSArray arrayWithObject:event]]; // should call insertText:
                 } else {
                     originalKeyDownIMP(self, _cmd, event);
                     [[BDSKPluginTextViewCompletionController sharedController] handleKeyDown:event];
@@ -259,8 +261,9 @@ static BOOL isCompletingTeX = NO;
             case 0x007D: // right curly brace
                 if(isCompletingTeX){
                     [[BDSKPluginTextViewCompletionController sharedController] endDisplay];
+                    // clear the selection so we don't overwrite it
                     [self setSelectedRange:NSMakeRange(NSMaxRange([self selectedRange]), 0)];
-                    [[[self textStorage] mutableString] appendString:@"}"];
+                    [self interpretKeyEvents:[NSArray arrayWithObject:event]]; // should call insertText:
                 } else {
                     originalKeyDownIMP(self, _cmd, event);
                     [[BDSKPluginTextViewCompletionController sharedController] handleKeyDown:event];
