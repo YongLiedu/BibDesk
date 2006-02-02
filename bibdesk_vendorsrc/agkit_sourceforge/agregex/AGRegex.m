@@ -29,6 +29,8 @@
 #define CASE_MODIFIER_STRING(m)		[(m) groupAtIndex:4]
 #define LITERAL_ESCAPE_STRING(m)	[(m) groupAtIndex:5]
 
+#define SAFE_ALLOCA_SIZE (8 * 8192)
+
 // information about a case modifier
 typedef struct {
 	unsigned location;
@@ -172,12 +174,15 @@ static AGRegex *backrefPattern;
     converted = CFStringGetBytes((CFStringRef)str, fullRange, kCFStringEncodingUTF8, 0, FALSE, NULL, UINT_MAX, &bufLen);
     NSAssert1(converted == [str length], @"String %@ was not converted to UTF-8 correctly", str);
     
-    UInt8 *buffer = alloca((bufLen + 1) * sizeof(UInt8));
+    UInt8 *buffer = NULL;
+    size_t bufSize = (bufLen + 1) * sizeof(UInt8);
     BOOL usedStack = YES;
+    buffer = bufSize < SAFE_ALLOCA_SIZE ? alloca(bufSize) : NULL;
+
     if(buffer == NULL){
         usedStack = NO;
-        buffer = NSZoneMalloc(NSDefaultMallocZone(), (bufLen + 1) * sizeof(UInt8));
-        NSAssert1(buffer != NULL, @"Unable to allocate buffer of length %d and size UInt8", bufLen);
+        buffer = NSZoneMalloc(NSDefaultMallocZone(), bufSize);
+        NSAssert1(buffer != NULL, @"Unable to allocate buffer of length %d and size UInt8", bufLen + 1);
     }
     CFStringGetBytes((CFStringRef)str, fullRange, kCFStringEncodingUTF8, 0, FALSE, buffer, converted, NULL);
     buffer[bufLen] = '\0'; // null terminate to make this a cstring
@@ -439,11 +444,13 @@ static AGRegex *backrefPattern;
     converted = CFStringGetBytes((CFStringRef)string, fullRange, kCFStringEncodingUTF8, 0, FALSE, NULL, UINT_MAX, &bufLen);
     NSAssert1(converted == [string length], @"String %@ was not converted to UTF-8 correctly", string);
     
-    UInt8 *buffer = alloca(bufLen * sizeof(UInt8));
+    UInt8 *buffer = NULL;
+    size_t bufSize = bufLen * sizeof(UInt8);
     BOOL usedStack = YES;
+    buffer = bufSize < SAFE_ALLOCA_SIZE ? alloca(bufSize) : NULL;
     if(buffer == NULL){
         usedStack = NO;
-        buffer = NSZoneMalloc(NSDefaultMallocZone(), bufLen * sizeof(UInt8));
+        buffer = NSZoneMalloc(NSDefaultMallocZone(), bufSize);
         NSAssert1(buffer != NULL, @"Unable to allocate buffer of length %d and size UInt8", bufLen);
     }
     CFStringGetBytes((CFStringRef)string, fullRange, kCFStringEncodingUTF8, 0, FALSE, buffer, converted, NULL);
