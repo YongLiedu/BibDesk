@@ -165,8 +165,14 @@ static void (*originalCompleteIMP)(id, SEL, id) = NULL;
     NSRange selRange = [self rangeForUserCompletion];
     
     // @@ hack: if there is no character at this point (it may be just an accent), our line fragment rect will not be accurate for what we really need, so returning NSZeroPoint indicates to the caller that this is invalid
-    if(selRange.length == 0 || selRange.location == NSNotFound)
+    if(selRange.location == NSNotFound)
         return point;
+    
+    // if it's just at a brace, as in \ref{, backtrack a single character and use that point
+    if(selRange.length == 0 && selRange.location - 1 > 0){
+        selRange.length = 1;
+        selRange.location -= 1;
+    }
     
     NSLayoutManager *layoutManager = [self layoutManager];
     
@@ -385,13 +391,16 @@ static BOOL isCompletingTeX = NO;
     
     NSString *s = [self string];
     NSRange r = [self selectedRange];
-    *isPageRef = NO;
+    if(isPageRef) *isPageRef = NO;
     NSRange foundRange = [s rangeOfString:@"\\ref{" options:NSBackwardsSearch range:SafeBackwardSearchRange(r, 12)];
     if(foundRange.location == NSNotFound){
         foundRange = [s rangeOfString:@"\\pageref{" options:NSBackwardsSearch range:SafeBackwardSearchRange(r, 12)];
-        *isPageRef = YES;
+        if(isPageRef) *isPageRef = YES;
     }
-    return foundRange; // make this a fairly small range, otherwise bad things can happen when inserting
+    unsigned idx = NSMaxRange(foundRange);
+    idx = (idx < r.location ? r.location - idx : 0);
+    
+    return NSMakeRange(NSMaxRange(foundRange), idx);
 }
 
 #pragma mark -
@@ -400,11 +409,8 @@ static BOOL isCompletingTeX = NO;
 // Override usual behaviour so we can have dots, colons and hyphens in our cite keys
 - (NSRange)rangeForBibTeXUserCompletion{
     
-    NSRange r = [self citeKeyRange];
-    BOOL ispageref = NO;
-    if (r.location == NSNotFound)
-        r = [self refLabelRangeForType:&ispageref];
-    return r;
+    NSRange range = [self citeKeyRange];
+    return range.location == NSNotFound ? [self refLabelRangeForType:NULL] : range;
 }
 
 // we replace this method since the completion controller uses it to update
@@ -495,34 +501,15 @@ BDIndexOfItemInArrayWithPrefix(NSArray *array, NSString *prefix)
         *index = BDIndexOfItemInArrayWithPrefix(returnArray, end);
 
 	} else if(refLabelRange.location != NSNotFound){
-        NSString *hintPossibilities = nil;
-        unsigned hintLocation = refLabelRange.location + refLabelRange.length;
-        unsigned maxHintLen = [s length] - hintLocation;
-        
-        hintPossibilities = [s substringWithRange:NSMakeRange(hintLocation, ( (maxHintLen <= 7) ? maxHintLen : 7 ) )];
-        
-        // scan up to a space or newline, since those shouldn't occur in a label, and use that as a hint for the \label scanner
-        // if hintPossibilities is nil, don't scan, but hint needs to be nil since we check for that later
-        NSString *hint = nil;
-        if(hintPossibilities != nil){
-            NSScanner *hintScanner = [[NSScanner alloc] initWithString:hintPossibilities];
-            NSCharacterSet *stopSet = [NSCharacterSet characterSetWithCharactersInString:@"} \n\t"];
-            [hintScanner setCharactersToBeSkipped:nil];
-            [hintScanner scanUpToCharactersFromSet:stopSet intoString:&hint];
-            [hintScanner release];
-        }
-        
+        NSString *hint = [s substringWithRange:refLabelRange];
+
         NSScanner *labelScanner = [[NSScanner alloc] initWithString:s];
         [labelScanner setCharactersToBeSkipped:nil];
         NSString *scanned = nil;
         NSMutableSet *setOfLabels = [NSMutableSet setWithCapacity:10];
         NSString *scanFormat;
 
-        if(hint == nil){
-            scanFormat = @"\\label{";
-        } else {
-            scanFormat = [@"\\label{" stringByAppendingString:hint];
-        }
+        scanFormat = [@"\\label{" stringByAppendingString:hint];
         
         while(![labelScanner isAtEnd]){
             [labelScanner scanUpToString:scanFormat intoString:nil]; // scan for strings with \label{hint in them
@@ -566,7 +553,7 @@ BDIndexOfItemInArrayWithPrefix(NSArray *array, NSString *prefix)
 // finish off the completion, inserting just the cite key
 - (void)replacementInsertCompletion:(NSString *)word forPartialWordRange:(NSRange)charRange movement:(int)movement isFinal:(BOOL)flag {
     
-    if(isCompletingTeX)
+    if(isCompletingTeX || [self refLabelRangeForType:NULL].location != NSNotFound)
         [self fixRange:&charRange];
     
     originalInsertIMP(self, _cmd, word, charRange, movement, flag);
