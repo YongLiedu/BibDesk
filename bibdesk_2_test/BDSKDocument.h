@@ -8,10 +8,16 @@
 #import "BDSKDataModelNames.h"
 #import "BDSKMainWindowController.h"
 
+#define BDSKPublicationPboardType @"BDSKPublicationPboardType"
+#define BDSKPersonPboardType @"BDSKPersonPboardType"
+#define BDSKNotePboardType @"BDSKNotePboardType"
+
 @interface BDSKDocument : NSPersistentDocument {
 }
 
-- (NSManagedObject *)rootPubGroup;
+- (NSManagedObject *)rootPublicationGroup;
 - (NSManagedObject *)rootPersonGroup;
+- (NSManagedObject *)rootNoteGroup;
+- (NSManagedObject *)rootGroupForEntityName:(NSString *)entityName;
 
 @end
