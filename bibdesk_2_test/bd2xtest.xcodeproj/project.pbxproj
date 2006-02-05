@@ -48,6 +48,9 @@
 		CEC5AF27098F7AAF00DE1DB2 /* Remove.tiff in Resources */ = {isa = PBXBuildFile; fileRef = CEC5AF25098F7AAF00DE1DB2 /* Remove.tiff */; };
 		CEC5AF2F098F7AF400DE1DB2 /* BDSKSecondaryWindow.nib in Resources */ = {isa = PBXBuildFile; fileRef = CEC5AF2A098F7AF400DE1DB2 /* BDSKSecondaryWindow.nib */; };
 		CED1D9AA0995FF760017917B /* NSTableView_BDSKExtensions.m in Sources */ = {isa = PBXBuildFile; fileRef = CED1D9A90995FF760017917B /* NSTableView_BDSKExtensions.m */; };
+		CED1DB2A099628FF0017917B /* BDSKInspectorWindowController.m in Sources */ = {isa = PBXBuildFile; fileRef = CED1DB29099628FF0017917B /* BDSKInspectorWindowController.m */; };
+		CED1DB700996300F0017917B /* BDSKNoteWindow.nib in Resources */ = {isa = PBXBuildFile; fileRef = CED1DB6E0996300F0017917B /* BDSKNoteWindow.nib */; };
+		CED1DBE2099637B30017917B /* BDSKTagWindow.nib in Resources */ = {isa = PBXBuildFile; fileRef = CED1DBE0099637B30017917B /* BDSKTagWindow.nib */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXBuildStyle section */
@@ -147,6 +150,10 @@
 		CEC5AF2B098F7AF400DE1DB2 /* English */ = {isa = PBXFileReference; lastKnownFileType = wrapper.nib; name = English; path = English.lproj/BDSKSecondaryWindow.nib; sourceTree = "<group>"; };
 		CED1D9A80995FF760017917B /* NSTableView_BDSKExtensions.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = NSTableView_BDSKExtensions.h; sourceTree = "<group>"; };
 		CED1D9A90995FF760017917B /* NSTableView_BDSKExtensions.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = NSTableView_BDSKExtensions.m; sourceTree = "<group>"; };
+		CED1DB28099628FF0017917B /* BDSKInspectorWindowController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BDSKInspectorWindowController.h; sourceTree = "<group>"; };
+		CED1DB29099628FF0017917B /* BDSKInspectorWindowController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BDSKInspectorWindowController.m; sourceTree = "<group>"; };
+		CED1DB6F0996300F0017917B /* English */ = {isa = PBXFileReference; lastKnownFileType = wrapper.nib; name = English; path = English.lproj/BDSKNoteWindow.nib; sourceTree = "<group>"; };
+		CED1DBE1099637B30017917B /* English */ = {isa = PBXFileReference; lastKnownFileType = wrapper.nib; name = English; path = English.lproj/BDSKTagWindow.nib; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -295,6 +302,8 @@
 				277D9234089627D4004C4105 /* Images */,
 				2744F5780888A087001E0CC9 /* BDSKMainWindow.nib */,
 				CEC5AF2A098F7AF400DE1DB2 /* BDSKSecondaryWindow.nib */,
+				CED1DB6E0996300F0017917B /* BDSKNoteWindow.nib */,
+				CED1DBE0099637B30017917B /* BDSKTagWindow.nib */,
 				2744F57E0888A087001E0CC9 /* BDSKPublicationTableDisplayController.nib */,
 				2744F57C0888A087001E0CC9 /* BDSKPersonTableDisplayController.nib */,
 				2744F57A0888A087001E0CC9 /* BDSKNoteTableDisplayController.nib */,
@@ -330,6 +339,8 @@
 				2744F55908889FC2001E0CC9 /* BDSKMainWindowController.m */,
 				CEC5AF01098F7A0000DE1DB2 /* BDSKSecondaryWindowController.h */,
 				CEC5AF02098F7A0000DE1DB2 /* BDSKSecondaryWindowController.m */,
+				CED1DB28099628FF0017917B /* BDSKInspectorWindowController.h */,
+				CED1DB29099628FF0017917B /* BDSKInspectorWindowController.m */,
 			);
 			name = "Window Controllers";
 			sourceTree = "<group>";
@@ -440,6 +451,8 @@
 				CE2AEF8B09952A6400473196 /* GroupIcon.tiff in Resources */,
 				CE2AEF8C09952A6400473196 /* RootGroupIcon.tiff in Resources */,
 				CE2AEF8D09952A6400473196 /* SmartGroupIcon.tiff in Resources */,
+				CED1DB700996300F0017917B /* BDSKNoteWindow.nib in Resources */,
+				CED1DBE2099637B30017917B /* BDSKTagWindow.nib in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -473,6 +486,7 @@
 				CE6D83A60994CFA500D01A71 /* BDSKSmartGroup.m in Sources */,
 				CE4B96DC0994DD97000447D2 /* BDSKGroup.m in Sources */,
 				CED1D9AA0995FF760017917B /* NSTableView_BDSKExtensions.m in Sources */,
+				CED1DB2A099628FF0017917B /* BDSKInspectorWindowController.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -533,6 +547,22 @@
 				CEC5AF2B098F7AF400DE1DB2 /* English */,
 			);
 			name = BDSKSecondaryWindow.nib;
+			sourceTree = "<group>";
+		};
+		CED1DB6E0996300F0017917B /* BDSKNoteWindow.nib */ = {
+			isa = PBXVariantGroup;
+			children = (
+				CED1DB6F0996300F0017917B /* English */,
+			);
+			name = BDSKNoteWindow.nib;
+			sourceTree = "<group>";
+		};
+		CED1DBE0099637B30017917B /* BDSKTagWindow.nib */ = {
+			isa = PBXVariantGroup;
+			children = (
+				CED1DBE1099637B30017917B /* English */,
+			);
+			name = BDSKTagWindow.nib;
 			sourceTree = "<group>";
 		};
 /* End PBXVariantGroup section */
