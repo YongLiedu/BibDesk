@@ -22,7 +22,11 @@
             ACTIONS = {addNewItem = id; }; 
             CLASS = BDSKSecondaryWindowController; 
             LANGUAGE = ObjC; 
-            OUTLETS = {currentDisplayController = id; currentDisplayView = NSView; }; 
+            OUTLETS = {
+                currentDisplayController = id; 
+                currentDisplayView = NSView; 
+                searchField = NSSearchField; 
+            }; 
             SUPERCLASS = NSWindowController; 
         }, 
         {CLASS = FirstResponder; LANGUAGE = ObjC; SUPERCLASS = NSObject; }, 
