@@ -1,0 +1,20 @@
+{
+    IBClasses = (
+        {CLASS = BDSKDocument; LANGUAGE = ObjC; SUPERCLASS = NSPersistentDocument; }, 
+        {
+            ACTIONS = {addNewItem = id; }; 
+            CLASS = BDSKItemsWindowController; 
+            LANGUAGE = ObjC; 
+            OUTLETS = {currentDisplayController = id; currentDisplayView = NSView; }; 
+            SUPERCLASS = NSWindowController; 
+        }, 
+        {
+            CLASS = BDSKSourceListTreeController; 
+            LANGUAGE = ObjC; 
+            SUPERCLASS = NSTreeController; 
+        }, 
+        {CLASS = FirstResponder; LANGUAGE = ObjC; SUPERCLASS = NSObject; }, 
+        {CLASS = NSPersistentDocument; LANGUAGE = ObjC; SUPERCLASS = NSDocument; }
+    ); 
+    IBVersion = 1; 
+}
