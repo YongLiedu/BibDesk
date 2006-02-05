@@ -83,7 +83,7 @@
 		[pboard setData:[NSArchiver archivedDataWithRootObject:rowIndexes] forType:BDSKContributorRowsPboardType];
         return YES;
 	} else if (tv == itemsTableView) {
-        return [self writeRowsWithIndexes:rowIndexes toPasteboard:pboard forType:BDSKPersonPboardType];
+        return [self writeRowsWithIndexes:rowIndexes toPasteboard:pboard forType:BDSKPublicationPboardType];
 	}
     
 	return NO;
