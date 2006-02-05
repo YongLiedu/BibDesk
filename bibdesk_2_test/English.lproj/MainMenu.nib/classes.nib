@@ -3,6 +3,10 @@
         {CLASS = BDSKBD2AppDelegate; LANGUAGE = ObjC; SUPERCLASS = NSObject; }, 
         {
             ACTIONS = {
+                addNewGroupFromSourceListSelection = id; 
+                addNewItem = id; 
+                addNewItemFromSourceListSelection = id; 
+                addNewSmartGroupFromSourceListSelection = id; 
                 importDocumentUsingPhonyCiteKeys = id; 
                 importFromBibTeXFile = id; 
                 oneShotImportFromBibTeXFile = id; 
