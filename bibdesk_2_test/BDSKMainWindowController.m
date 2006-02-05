@@ -60,6 +60,10 @@
     [self reloadSourceList];
 }
 
+- (NSString *)windowTitleForDocumentDisplayName:(NSString *)displayName{
+    return displayName;
+}
+
 #pragma mark Source List setup
 
 - (void)reloadSourceList{
