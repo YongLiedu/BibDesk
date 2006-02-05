@@ -184,12 +184,11 @@
                 [removedPersons addObject:mo];
                 [insertedPersons addObject:person];
 			}
-            [itemsArrayController removeObjects:removedPersons];
-            
             NSDictionary *userInfo = [NSDictionary dictionaryWithObjectsAndKeys:removedPersons, @"removedPersons", insertedPersons, @"insertedPersons", nil];
             [[NSNotificationCenter defaultCenter] postNotificationName:@"BDSKPersonWasReplacedNotification"
                                                                 object:self
                                                               userInfo:userInfo];
+            [itemsArrayController removeObjects:removedPersons];
             [removedPersons release];
             
 			return YES;
