@@ -1,19 +1,28 @@
 {
     IBClasses = (
         {
+            ACTIONS = {addContributor = id; }; 
             CLASS = BDSKPublicationTableDisplayController; 
             LANGUAGE = ObjC; 
             OUTLETS = {
-                itemsArrayController = NSArrayController; 
-                mainView = NSView; 
-                selectionDetailsBox = ImageBackgroundBox; 
+                contributorsArrayController = NSArrayController; 
+                contributorsTableView = NSTableView; 
+                notesArrayController = NSArrayController; 
+                notesTableView = NSTableView; 
+                tagsArrayController = NSArrayController; 
+                tagsTableView = NSTableView; 
             }; 
-            SUPERCLASS = NSObject; 
+            SUPERCLASS = BDSKTableDisplayController; 
         }, 
         {
             CLASS = BDSKTableDisplayController; 
             LANGUAGE = ObjC; 
-            OUTLETS = {itemSource = id; mainView = NSView; }; 
+            OUTLETS = {
+                itemsArrayController = NSArrayController; 
+                itemsTableView = NSTableView; 
+                mainView = NSView; 
+                selectionDetailsBox = ImageBackgroundBox; 
+            }; 
             SUPERCLASS = NSObject; 
         }, 
         {CLASS = FirstResponder; LANGUAGE = ObjC; SUPERCLASS = NSObject; }, 
