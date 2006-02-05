@@ -7,12 +7,11 @@
 //
 
 #import <Cocoa/Cocoa.h>
+#import "BDSKGroup.h"
 
 
-@interface BDSKNoteGroup : NSManagedObject {
+@interface BDSKNoteGroup : BDSKGroup {
 
 }
-
-- (NSImage *)icon;
 
 @end
