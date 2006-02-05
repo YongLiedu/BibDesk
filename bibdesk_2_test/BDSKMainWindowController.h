@@ -7,54 +7,46 @@
 //
 
 #import <Cocoa/Cocoa.h>
-#import "ImageAndTextCell.h"
-#import "BDSKDataModelNames.h"
-
-#import "BDSKPublicationTableDisplayController.h" // @@ TODO: itemdisplayflex this should be temporary
-#import "BDSKNoteTableDisplayController.h" // @@ TODO: itemdisplayflex this should be temporary
+#import "BDSKSecondaryWindowController.h"
 
 
-@interface BDSKMainWindowController : NSWindowController {
+@interface BDSKMainWindowController : BDSKSecondaryWindowController {
 
     IBOutlet NSOutlineView *sourceList;
     IBOutlet NSArrayController *selectedItemsArrayController;
+    IBOutlet NSTreeController *sourceListTreeController;
     NSMutableArray *topLevelSourceListItems;
-    
-    IBOutlet NSSplitView *mainSplitView;
-    
-    // Display Controller stuff
-    NSDictionary *displayControllersInfoDict;
-    NSMutableArray *displayControllers;
-    NSMutableDictionary *currentDisplayControllerForEntity;
-    id currentDisplayController;
-    IBOutlet NSView *currentDisplayView;
+    NSIndexPath *sourceListSelectedIndexPath;
 }
 
-- (void)setupDisplayControllers;
-- (NSArray *)displayControllersForCurrentType;
-- (void)setDisplayController:(id)newDisplayController;
+- (NSArray *)topLevelSourceListItems;
+- (unsigned)countOfTopLevelSourceListItems;
+- (id)objectInTopLevelSourceListItemsAtIndex:(unsigned)index;
+- (void)insertObject:(id)obj inTopLevelSourceListItemsAtIndex:(unsigned)index;
+- (void)removeObjectFromTopLevelSourceListItemsAtIndex:(unsigned)index;
 
-- (void)bindDisplayController:(id)displayController;
-- (void)unbindDisplayController:(id)displayController;
+- (NSSet *)sourceListSelectedItems;
+- (void)addSourceListSelectedItemsObject:(id)obj;
+- (void)removeSourceListSelectedItemsObject:(id)obj;
+
+- (NSIndexPath *)sourceListSelectedIndexPath;
+- (void)setSourceListSelectedIndexPath:(NSIndexPath *)indexPath;
 
 - (void)setupTopLevelSourceListItems;
 - (void)reloadSourceList;
 
-- (NSSet *)sourceListSelectedItems;
-
 // actions
-- (IBAction)addNewGroupFromSourceListSelection:(id)container;
-- (IBAction)addNewItemFromSourceListSelection:(id)container;
+- (IBAction)showWindowForSourceListSelection:(id)sender;
 
-- (IBAction)addNewPublicationToContainer:(id)container;
-- (IBAction)addNewPublicationGroupToContainer:(id)container;
+- (IBAction)addNewItemFromSourceListSelection:(id)sender;
+- (IBAction)addNewGroupFromSourceListSelection:(id)sender;
+- (IBAction)addNewSmartGroupFromSourceListSelection:(id)sender;
 
-- (IBAction)addNewNoteToContainer:(id)container;
-- (IBAction)addNewNoteGroupToContainer:(id)container;
+- (void)addNewPublicationGroupToContainer:(id)container;
+- (void)addNewPersonGroupToContainer:(id)container;
+- (void)addNewNoteGroupToContainer:(id)container;
+- (void)addNewSmartGroupToContainer:(id)container;
 
-- (IBAction)addNewPersonToContainer:(id)container;
-- (IBAction)addNewPersonGroupToContainer:(id)container;
-
-- (IBAction)importFromBibTeXFile:(id)sender;
+- (void)importFromBibTeXFile:(id)sender;
 
 @end

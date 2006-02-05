@@ -7,68 +7,57 @@
 //
 
 #import "BDSKMainWindowController.h"
+#import "BDSKDataModelNames.h"
+#import "BDSKDocument.h"
+#import "BDSKGroup.h"
+#import "ImageAndTextCell.h"
+
+#import "BDSKPublicationTableDisplayController.h" // @@ TODO: itemdisplayflex this should be temporary
+#import "BDSKNoteTableDisplayController.h" // @@ TODO: itemdisplayflex this should be temporary
 
 
 @implementation BDSKMainWindowController
 
++ (void)initialize {
+    [self setKeys:[NSArray arrayWithObject:@"sourceGroup"] triggerChangeNotificationsForDependentKey:@"sourceListSelectedItems"];
+}
+
 - (id)initWithWindowNibName:(NSString *)windowNibName{
     if (self = [super initWithWindowNibName:windowNibName]){
         topLevelSourceListItems = [[NSMutableArray alloc] initWithCapacity:5];
-        displayControllersInfoDict = [[NSDictionary alloc] initWithContentsOfFile:[[NSBundle mainBundle] pathForResource:@"DisplayControllers" ofType:@"plist"]];
-        displayControllers = [[NSMutableArray alloc] initWithCapacity:10];
-        currentDisplayControllerForEntity = [[NSMutableDictionary alloc] initWithCapacity:10];
+        sourceListSelectedIndexPath = nil;
     }
     
     return self;
 }
 
 - (void)awakeFromNib{
+    // this sets up the displayControllers
+    [super awakeFromNib];
+
+    NSSortDescriptor *sortDescriptor = [[NSSortDescriptor alloc] initWithKey:@"priority" ascending:NO];
+    [sourceListTreeController setSortDescriptors:[NSArray arrayWithObject:sortDescriptor]];
+    [sortDescriptor release];    
     
     [self setupTopLevelSourceListItems];
     
-    [self setupDisplayControllers];
-
     NSTableColumn *tc = [sourceList tableColumnWithIdentifier:@"mainColumn"];
     [tc setDataCell:[[[ImageAndTextCell alloc] init] autorelease]];
+    
+    [sourceListTreeController addObserver:self forKeyPath:@"selectedObjects" options:0 context:NULL];
+    [sourceList selectRow:0 byExtendingSelection:NO]; //@@TODO: might want to store last row as a pref
+
+	[sourceList registerForDraggedTypes:[NSArray arrayWithObjects:BDSKPublicationPboardType, BDSKPersonPboardType, BDSKNotePboardType, nil]];
 }
 
 - (void)dealloc{
+    [sourceListTreeController removeObserver:self forKeyPath:@"selectedObjects"];
     [topLevelSourceListItems release];
-    [displayControllers release];
-    [currentDisplayControllerForEntity release];        
-    [displayControllersInfoDict release];
     [super dealloc];
 }
 
 -(void)windowDidLoad{ 
     [self reloadSourceList];
-    [sourceList selectRow:0 byExtendingSelection:NO]; //@@TODO: might want to store last row as a pref
-}
-
-#pragma mark Accessors
-
-- (NSArray *)displayControllers{ return displayControllers;}
-
-// TODO: this is totally incomplete.
-- (NSArray *)displayControllersForCurrentType{
-    NSSet* currentTypes = nil; // temporary, removed treecontroller.
-    NSLog(@"displayControllersForCurrentType - currentTypes is %@.", currentTypes);
-    
-    return [NSArray arrayWithObjects:currentDisplayController, nil];
-}
-
-- (void)setDisplayController:(id)newDisplayController{
-    if(newDisplayController != currentDisplayController){
-        [currentDisplayController autorelease];
-        if(currentDisplayController)
-            [self unbindDisplayController:currentDisplayController];
-        
-        [mainSplitView replaceSubview:currentDisplayView with:[newDisplayController view]];
-
-        currentDisplayView = [newDisplayController view];
-        currentDisplayController = [newDisplayController retain];
-        [self bindDisplayController:currentDisplayController];
-    }
 }
 
 #pragma mark Source List setup
@@ -79,181 +68,104 @@
 
 
 - (void)setupTopLevelSourceListItems{
-    NSPredicate *rootItemPredicate = [NSPredicate predicateWithFormat:@"isRoot == YES"];
-    
-    NSManagedObjectContext *moc = [[self document] managedObjectContext];
-    NSFetchRequest *fetchRequest = [[NSFetchRequest alloc] init];
-    [fetchRequest setPredicate:rootItemPredicate];
-    
-    NSError *fetchError = nil;
-    NSArray *fetchResults;
-    
-    @try {
-        [fetchRequest setEntity:[NSEntityDescription entityForName:PublicationGroupEntityName
-                                            inManagedObjectContext:moc]];
-        fetchResults = [moc executeFetchRequest:fetchRequest error:&fetchError];
-    } @catch (NSException *exception) {
-        [fetchRequest release];
-        [exception raise];
-    }
-    
-    if ((fetchResults != nil) && ([fetchResults count] == 1) && (fetchError == nil)) {
-        [topLevelSourceListItems addObject:[fetchResults objectAtIndex:0]];
-    }
-    
-    if (fetchError != nil) {
-        [self presentError:fetchError];
-    }
-
-    @try {
-        [fetchRequest setEntity:[NSEntityDescription entityForName:PersonGroupEntityName
-                                            inManagedObjectContext:moc]];
-        fetchResults = [moc executeFetchRequest:fetchRequest error:&fetchError];
-
-    } @catch(NSException *exception) {
-        [fetchRequest release];
-        [exception raise];
-    }
-    
-    if ((fetchResults != nil) && ([fetchResults count] == 1) && (fetchError == nil)) {
-        [topLevelSourceListItems addObject:[fetchResults objectAtIndex:0]];
-    }
-    
-    if (fetchError != nil) {
-        [self presentError:fetchError];
-    }
-  
-    @try {
-        [fetchRequest setEntity:[NSEntityDescription entityForName:NoteGroupEntityName
-                                            inManagedObjectContext:moc]];
-        fetchResults = [moc executeFetchRequest:fetchRequest error:&fetchError];
-        
-    } @catch(NSException *exception) {
-        [fetchRequest release];
-        [exception raise];
-    }
-    
-    if ((fetchResults != nil) && ([fetchResults count] == 1) && (fetchError == nil)) {
-        [topLevelSourceListItems addObject:[fetchResults objectAtIndex:0]];
-    }
-    
-    if (fetchError != nil) {
-        [self presentError:fetchError];
-    }
-    
-    
+	BDSKDocument *doc = (BDSKDocument *)[self document];
+    id rootGroup = nil;
+    if (rootGroup = [doc rootPublicationGroup])
+        [topLevelSourceListItems addObject:rootGroup];
+    if (rootGroup = [doc rootPersonGroup])
+        [topLevelSourceListItems addObject:rootGroup];
+    if (rootGroup = [doc rootNoteGroup])
+        [topLevelSourceListItems addObject:rootGroup];
 }
 
 #pragma mark Accessors
 
+- (NSArray *)topLevelSourceListItems {
+    return [[topLevelSourceListItems retain] autorelease];
+}
+
+- (unsigned)countOfTopLevelSourceListItems {
+    return [topLevelSourceListItems count];
+}
+
+- (id)objectInTopLevelSourceListItemsAtIndex:(unsigned)index {
+    return [topLevelSourceListItems objectAtIndex:index];
+}
+
+- (void)insertObject:(id)obj inTopLevelSourceListItemsAtIndex:(unsigned)index {
+    [topLevelSourceListItems insertObject:obj atIndex:index];
+}
+
+- (void)removeObjectFromTopLevelSourceListItemsAtIndex:(unsigned)index {
+    [topLevelSourceListItems removeObjectAtIndex:index];
+}
+
 - (NSSet *)sourceListSelectedItems{
-    id selectedGroup = [sourceList itemAtRow:[sourceList selectedRow]];
-    return [selectedGroup valueForKey:@"items"];
+    id selectedGroup = [self sourceGroup];
+    return [selectedGroup valueForKey:@"itemsInSelfOrChildren"];
 }
 
+- (void)addSourceListSelectedItemsObject:(id)obj{
+    id selectedGroup = [self sourceGroup];
+    [[selectedGroup mutableSetValueForKey:@"items"] addObject:obj];
+}
 
-#pragma mark Display Controller management
+- (void)removeSourceListSelectedItemsObject:(id)obj{
+    id selectedGroup = [self sourceGroup];
+    [[selectedGroup mutableSetValueForKey:@"items"] removeObject:obj];
+}
 
-- (void)setupDisplayControllers{
-    
-    NSArray *displayControllerClassNames = [displayControllersInfoDict allKeys];
-    NSEnumerator *displayControllerClassNameE = [displayControllerClassNames objectEnumerator];
-    NSString *displayControllerClassName = nil;
-    
-    while (displayControllerClassName = [displayControllerClassNameE nextObject]){
-        Class controllerClass = NSClassFromString(displayControllerClassName);
-        id controllerObject = [[controllerClass alloc] init];
-        [controllerObject setDocument:[self document]];
-        [displayControllers addObject:controllerObject];
+- (NSIndexPath *)sourceListSelectedIndexPath {
+    return sourceListSelectedIndexPath;
+}
 
-        NSDictionary *infoDict = [displayControllersInfoDict objectForKey:displayControllerClassName];
-           
-        //TODO: for now we have a 1:1 between DCs and entity names. 
-        // this code will need to get smarter when that changes.
-        NSString *displayableClass = [[infoDict objectForKey:@"DisplayableClasses"] objectAtIndex:0];
-        [currentDisplayControllerForEntity setObject:controllerObject
-                                              forKey:displayableClass];
+- (void)setSourceListSelectedIndexPath:(NSIndexPath *)indexPath {
+    if (indexPath != sourceListSelectedIndexPath) {
+        [sourceListSelectedIndexPath release];
+        sourceListSelectedIndexPath = [indexPath copy];
+        [self setSourceGroup:[[sourceListTreeController selectedObjects] lastObject]];
     }
-    
 }
-
-
-- (void)bindDisplayController:(id)displayController{
-    NSDictionary *options = [NSDictionary dictionaryWithObjectsAndKeys:[NSNumber numberWithBool:NO], NSRaisesForNotApplicableKeysBindingOption, [NSNumber numberWithBool:YES], NSConditionallySetsEnabledBindingOption, nil];
-    // TODO: in future, this should create multiple bindings.?    
-    [[displayController itemsArrayController] bind:@"contentSet" toObject:self
-                                       withKeyPath:@"sourceListSelectedItems" options:options];
-    
-}
-
-
-// TODO: as the above method creates multiple bindings, this one will have to keep up.
-// mb the display controllers themselves should be 
-- (void)unbindDisplayController:(id)displayController{
-    [[displayController itemsArrayController] unbind:@"contentSet"];
-}
-
 
 #pragma mark Actions
 
-- (IBAction)addNewGroupFromSourceListSelection:(id)sender{
-    id obj = [sourceList itemAtRow:[sourceList selectedRow]];
-    NSString *entityName = [[obj entity] name];
-        
-    if ([entityName isEqualToString:@"PublicationGroup"]){
-        [self addNewPublicationGroupToContainer:obj];
-        [self reloadSourceList];
-        return;
-    }
-    if ([entityName isEqualToString:@"NoteGroup"]){
-        [self addNewNoteGroupToContainer:obj];
-        [self reloadSourceList];
-        return;
-    }
-    if ([entityName isEqualToString:@"PersonGroup"]){
-        [self addNewPersonGroupToContainer:obj]; 
-        [self reloadSourceList];
-        return;
-    }
-    else NSBeep();
+- (IBAction)showWindowForSourceListSelection:(id)sender{
+    BDSKSecondaryWindowController *swc = [[BDSKSecondaryWindowController alloc] initWithWindowNibName:@"BDSKSecondaryWindow"];
+    id selectedGroup = [self sourceGroup];
+	[swc setSourceGroup:selectedGroup];
+	[[self document] addWindowController:[swc autorelease]];
+	[swc showWindow:sender];
 }
 
 - (IBAction)addNewItemFromSourceListSelection:(id)sender{
-    id obj = [sourceList itemAtRow:[sourceList selectedRow]];
-    NSString *entityName = [[obj entity] name];
+    [super addNewItem:sender];
+}
 
-    NSLog(@"entityName in addNewItemFrom is %@, obj is %@", entityName, obj);
+- (IBAction)addNewSmartGroupFromSourceListSelection:(id)sender{
+    id obj = [self sourceGroup];
     
-    if ([entityName isEqualToString:@"PublicationGroup"]){
-        [self addNewPublicationToContainer:obj];
-        [self reloadSourceList];
-        return;
+    if ([[obj valueForKey:@"isRoot"] boolValue] == YES) {
+        [self addNewSmartGroupToContainer:obj];
+    } else NSBeep();
+}
+
+- (IBAction)addNewGroupFromSourceListSelection:(id)sender{
+    id obj = [self sourceGroup];
+    NSString *entityName = [obj valueForKey:@"itemEntityName"];
+        
+    if ([entityName isEqualToString:PublicationEntityName]){
+        [self addNewPublicationGroupToContainer:obj];
     }
-    if ([entityName isEqualToString:@"NoteGroup"]){
-        [self addNewNoteToContainer:obj];
-        [self reloadSourceList];
-        return;
+    else if ([entityName isEqualToString:NoteEntityName]){
+        [self addNewNoteGroupToContainer:obj];
     }
-    if ([entityName isEqualToString:@"PersonGroup"]){
-        [self addNewPersonToContainer:obj];
-        [self reloadSourceList];
-        return;
+    else if ([entityName isEqualToString:PersonEntityName]){
+        [self addNewPersonGroupToContainer:obj]; 
     }
     else NSBeep();
 }
 
-- (IBAction)addNewPublicationToContainer:(id)container{
-    NSManagedObjectContext *managedObjectContext = [[self document] managedObjectContext];
-    id newPublication = [NSEntityDescription insertNewObjectForEntityForName:PublicationEntityName
-                                           inManagedObjectContext:managedObjectContext];
-    
-    NSMutableSet *publications = [container mutableSetValueForKey:@"items"];
-    [self willChangeValueForKey:@"sourceListSelectedItems"];    
-    [publications addObject:newPublication];
-    [self didChangeValueForKey:@"sourceListSelectedItems"];
-}
-
-- (IBAction)addNewPublicationGroupToContainer:(id)container{
+- (void)addNewPublicationGroupToContainer:(id)container{
     NSManagedObjectContext *managedObjectContext = [[self document] managedObjectContext];
     id newPublicationGroup = [NSEntityDescription insertNewObjectForEntityForName:PublicationGroupEntityName
                                                   inManagedObjectContext:managedObjectContext];
@@ -264,41 +176,7 @@
     [children addObject:newPublicationGroup];
 }
 
-
-- (IBAction)addNewNoteToContainer:(id)container{
-    NSManagedObjectContext *managedObjectContext = [[self document] managedObjectContext];
-    id newNote = [NSEntityDescription insertNewObjectForEntityForName:NoteEntityName
-                                               inManagedObjectContext:managedObjectContext];
-    
-    NSMutableSet *notes = [container mutableSetValueForKey:@"items"];
-    [self willChangeValueForKey:@"sourceListSelectedItems"];
-    [notes addObject:newNote];
-    [self didChangeValueForKey:@"sourceListSelectedItems"];
-}
-
-- (IBAction)addNewNoteGroupToContainer:(id)container{
-    NSManagedObjectContext *managedObjectContext = [[self document] managedObjectContext];
-    id newNoteGroup = [NSEntityDescription insertNewObjectForEntityForName:NoteGroupEntityName
-                                                 inManagedObjectContext:managedObjectContext];
-    
-    [newNoteGroup setValue:@"Untitled Note Group" forKey:@"name"];
-
-    NSMutableSet *children = [container mutableSetValueForKey:@"children"];
-    [children addObject:newNoteGroup];
-}
-
-- (IBAction)addNewPersonToContainer:(id)container{
-    NSManagedObjectContext *managedObjectContext = [[self document] managedObjectContext];
-    id newPerson = [NSEntityDescription insertNewObjectForEntityForName:PersonEntityName
-                                               inManagedObjectContext:managedObjectContext];
-
-    NSMutableSet *people = [container mutableSetValueForKey:@"items"];
-    [self willChangeValueForKey:@"sourceListSelectedItems"];
-    [people addObject:newPerson];
-    [self didChangeValueForKey:@"sourceListSelectedItems"];
-}
-
-- (IBAction)addNewPersonGroupToContainer:(id)container{
+- (void)addNewPersonGroupToContainer:(id)container{
     NSManagedObjectContext *managedObjectContext = [[self document] managedObjectContext];
     id newPersonGroup = [NSEntityDescription insertNewObjectForEntityForName:PersonGroupEntityName
                                                     inManagedObjectContext:managedObjectContext];
@@ -309,83 +187,107 @@
     [children addObject:newPersonGroup];
 }
 
-#pragma mark Source List Outline View Delegate Methods and such
+- (void)addNewNoteGroupToContainer:(id)container{
+    NSManagedObjectContext *managedObjectContext = [[self document] managedObjectContext];
+    id newNoteGroup = [NSEntityDescription insertNewObjectForEntityForName:NoteGroupEntityName
+                                                 inManagedObjectContext:managedObjectContext];
+    
+    [newNoteGroup setValue:@"Untitled Note Group" forKey:@"name"];
 
-
-- (id)outlineView:(NSOutlineView *)outlineView child:(int)index ofItem:(id)item{
-    if (item == nil) {
-        return [topLevelSourceListItems objectAtIndex:index];
-    } else {
-        return [[[item valueForKey:@"children"] allObjects] objectAtIndex:index];
-    }
+    NSMutableSet *children = [container mutableSetValueForKey:@"children"];
+    [children addObject:newNoteGroup];
 }
 
+- (void)addNewSmartGroupToContainer:(id)container{
+    NSManagedObjectContext *managedObjectContext = [[self document] managedObjectContext];
+    id newSmartGroup = [NSEntityDescription insertNewObjectForEntityForName:SmartGroupEntityName
+                                                 inManagedObjectContext:managedObjectContext];
+    
+    [newSmartGroup setValue:[container valueForKey:@"itemEntityName"] forKey:@"itemEntityName"];
+    [newSmartGroup setValue:@"Untitled Smart Group" forKey:@"name"];
+
+    NSMutableSet *children = [container mutableSetValueForKey:@"children"];
+    [children addObject:newSmartGroup];
+}
+
+#pragma mark Source List Outline View DataSource Methods and such
+
+// these are required by the protocol, but unused
+- (id)outlineView:(NSOutlineView *)outlineView child:(int)index ofItem:(id)item{
+    return nil;
+}
 
 - (BOOL)outlineView:(NSOutlineView *)outlineView isItemExpandable:(id)item{
-    if (item == nil) {
-        return YES;
-    }else{
-        return [[item valueForKey:@"children"] count] > 0;
-    }
+    return NO;
 }
-
 
 - (int)outlineView:(NSOutlineView *)outlineView numberOfChildrenOfItem:(id)item{
-    if (item == nil) {
-        return [topLevelSourceListItems count];
-    }else{
-        return [[item valueForKey:@"children"] count];
-    }
+    return 0;
 }
-
 
 - (id)outlineView:(NSOutlineView *)outlineView objectValueForTableColumn:(NSTableColumn *)tableColumn byItem:(id)item{
-    if (item == nil) return nil;
-    
-    return [item valueForKey:@"name"];
+    return nil;
 }
 
-
-- (void)outlineViewSelectionDidChange:(NSNotification *)notification{
-    if ([notification object] != sourceList) return;
+- (NSDragOperation)outlineView:(NSOutlineView *)outlineView validateDrop:(id <NSDraggingInfo>)info proposedItem:(id)item proposedChildIndex:(int)index{
+    NSPasteboard *pboard = [info draggingPasteboard];
+    id groupItem = [item valueForKey:@"observedObject"];
+    NSString *entityName = [groupItem valueForKey:@"itemEntityName"];
+    NSString *pboardType = nil;
     
-    id item = [sourceList itemAtRow:[sourceList selectedRow]];
-    NSString *entityClassName = NSStringFromClass([item class]);
-    id newDisplayController = [currentDisplayControllerForEntity objectForKey:entityClassName];
+    if ([groupItem isSmart])
+        return NSDragOperationNone;
     
-    [self willChangeValueForKey:@"sourceListSelectedItems"];
-    if (newDisplayController != currentDisplayController){
-        [self unbindDisplayController:currentDisplayController];
-        [self setDisplayController:newDisplayController];
-    }
-    [self didChangeValueForKey:@"sourceListSelectedItems"];
+    if ([entityName isEqualToString:PublicationEntityName])
+        pboardType = BDSKPublicationPboardType;
+    else if ([entityName isEqualToString:PersonEntityName])
+        pboardType = BDSKPersonPboardType;
+    else if ([entityName isEqualToString:NoteEntityName])
+        pboardType = BDSKNotePboardType;
+    else return NSDragOperationNone;
+    
+    if ([pboard availableTypeFromArray:[NSArray arrayWithObjects:pboardType, nil]] == nil)
+        return NSDragOperationNone;
+    if (index != NSOutlineViewDropOnItemIndex)
+        [outlineView setDropItem:item dropChildIndex:NSOutlineViewDropOnItemIndex];
+    
+    if ([[[info draggingSource] dataSource] document] != [self document])
+        return NSDragOperationNone;
+    
+    return NSDragOperationLink;
 }
 
-- (void)outlineView:(NSOutlineView *)olv 
-    willDisplayCell:(NSCell *)cell 
-     forTableColumn:(NSTableColumn *)tableColumn
-               item:(id)item {    
+- (BOOL)outlineView:(NSOutlineView *)outlineView acceptDrop:(id <NSDraggingInfo>)info item:(id)item childIndex:(int)index{
+    NSPasteboard *pboard = [info draggingPasteboard];
+    id groupItem = [item valueForKey:@"observedObject"];
+    NSString *entityName = [groupItem valueForKey:@"itemEntityName"];
+    NSString *pboardType = nil;
     
-    if ([[tableColumn identifier] isEqualToString:@"mainColumn"]) {
-        [(ImageAndTextCell*)cell setLeftImage:[item icon]];
-    }
-}
-
-- (BOOL)outlineView:(NSOutlineView *)outlineView 
-shouldEditTableColumn:(NSTableColumn *)tableColumn 
-               item:(id)item{
-    if([[tableColumn identifier] isEqualToString:@"mainColumn"]){
-        return ![item valueForKey:@"isRoot"];
-    }else{
+    if ([groupItem isSmart])
         return NO;
-    }
     
-}
-
-//@@TODO: how to get new names if I can't enable editing?
-- (void)outlineView:(NSOutlineView *)outlineView setObjectValue:(id)object forTableColumn:(NSTableColumn *)tableColumn byItem:(id)item{
-    NSLog(@"foo");
-    return;
+    if ([entityName isEqualToString:PublicationEntityName])
+        pboardType = BDSKPublicationPboardType;
+    else if ([entityName isEqualToString:PersonEntityName])
+        pboardType = BDSKPersonPboardType;
+    else if ([entityName isEqualToString:NoteEntityName])
+        pboardType = BDSKNotePboardType;
+    else return NO;
+    
+    if ([pboard availableTypeFromArray:[NSArray arrayWithObjects:pboardType, nil]] == nil)
+        return NO;
+    
+	NSArray *draggedURIs = [NSUnarchiver unarchiveObjectWithData:[pboard dataForType:pboardType]];
+	NSEnumerator *uriE = [draggedURIs objectEnumerator];
+	NSManagedObjectContext *moc = [[self document] managedObjectContext];
+	NSURL *moURI;
+	NSMutableSet *items = [groupItem mutableSetValueForKey:@"items"];
+	while (moURI = [uriE nextObject]) {
+		NSManagedObject *item = [moc objectWithID:[[moc persistentStoreCoordinator] managedObjectIDForURIRepresentation:moURI]];
+		if ([items containsObject:item] == NO)
+			[items addObject:item];
+	}
+	return YES;
 }
 
 #pragma mark other file format stuff
@@ -411,6 +313,22 @@ shouldEditTableColumn:(NSTableColumn *)tableColumn
     // call into BDSKBibTeXParser stuff to get managed objects
     
     // insert into document's MOC
+}
+
+// TODO: implementation
+- (void)importFromBibTeXFile:(id)sender{
+
+}
+
+#pragma mark KVO
+
+- (void)observeValueForKeyPath:(NSString *)keyPath ofObject:(id)object change:(NSDictionary *)change context:(void *)context
+{
+    if (object == sourceListTreeController && [keyPath isEqual:@"selectedObjects"]) {
+        NSArray *selectedItems = [sourceListTreeController selectedObjects];
+        if ([selectedItems count] > 0)
+            [self setSourceGroup:[selectedItems lastObject]];
+    }
 }
 
 @end
