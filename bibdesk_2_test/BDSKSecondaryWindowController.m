@@ -96,16 +96,8 @@
 	}
 }
 
-- (NSArray *)displayControllers{
-	return displayControllers;
-}
-
-// TODO: this is totally incomplete.
-- (NSArray *)displayControllersForCurrentType{
-    NSSet* currentTypes = nil; // temporary, removed treecontroller.
-    NSLog(@"displayControllersForCurrentType - currentTypes is %@.", currentTypes);
-    
-    return [NSArray arrayWithObjects:currentDisplayController, nil];
+- (id)displayController{
+    return currentDisplayController;
 }
 
 - (void)setDisplayController:(id)newDisplayController{
@@ -121,6 +113,18 @@
         currentDisplayController = [newDisplayController retain];
         [self bindDisplayController:currentDisplayController];
     }
+}
+
+- (NSArray *)displayControllers{
+	return displayControllers;
+}
+
+// TODO: this is totally incomplete.
+- (NSArray *)displayControllersForCurrentType{
+    NSSet* currentTypes = nil; // temporary, removed treecontroller.
+    NSLog(@"displayControllersForCurrentType - currentTypes is %@.", currentTypes);
+    
+    return [NSArray arrayWithObjects:currentDisplayController, nil];
 }
 
 

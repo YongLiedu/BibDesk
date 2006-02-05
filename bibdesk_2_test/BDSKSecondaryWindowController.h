@@ -25,8 +25,11 @@
 - (BDSKGroup *)sourceGroup;
 - (void)setSourceGroup:(BDSKGroup *)newSourceGroup;
 
-- (NSArray *)displayControllersForCurrentType;
+- (id)displayController;
 - (void)setDisplayController:(id)newDisplayController;
+
+- (NSArray *)displayControllers;
+- (NSArray *)displayControllersForCurrentType;
 
 - (void)setupDisplayControllers;
 - (void)bindDisplayController:(id)displayController;
