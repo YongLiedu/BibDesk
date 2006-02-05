@@ -8,7 +8,6 @@
 
 #import <Cocoa/Cocoa.h>
 
-static long instanceID = 0;
 
 @interface BDSKContributor : NSManagedObject {
 

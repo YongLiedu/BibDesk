@@ -11,6 +11,8 @@
 
 @implementation BDSKContributor
 
+static long instanceID = 0;
+
 - (id)initWithEntity:(NSEntityDescription*)entity insertIntoManagedObjectContext:(NSManagedObjectContext*)context{
     if(self = [super initWithEntity:entity insertIntoManagedObjectContext:context]){
         [self setPrimitiveValue:[NSNumber numberWithLong:instanceID++] forKey:@"contributorID"];
