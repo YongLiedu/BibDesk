@@ -7,6 +7,8 @@
 //
 
 #import "BDSKNoteTableDisplayController.h"
+#import "BDSKDocument.h"
+#import "NSTableView_BDSKExtensions.h"
 
 
 @implementation BDSKNoteTableDisplayController
@@ -15,26 +17,59 @@
     [super dealloc];
 }
 
-- (NSView *)view{
-    if(!mainView){
-        [NSBundle loadNibNamed:@"BDSKNoteTableDisplayController" owner:self];
-    }
-    return mainView;
+- (NSString *)viewNibName{
+    return @"BDSKNoteTableDisplayController";
 }
 
-
-- (NSArrayController *)itemsArrayController{
-    return itemsArrayController;
+- (void)awakeFromNib{
+	[super awakeFromNib];
 }
 
+#pragma mark Actions
 
-- (NSDocument *)document{
-    return document;
+- (IBAction)addNote:(id)sender {
+	NSManagedObjectContext *moc = [self managedObjectContext];
+	NSManagedObject *note = [NSEntityDescription insertNewObjectForEntityForName:NoteEntityName inManagedObjectContext:moc];
+    [itemsArrayController addObject:note];
+    [moc processPendingChanges];
+    [itemsArrayController setSelectedObjects:[NSArray arrayWithObject:note]];
 }
 
-- (void)setDocument:(NSDocument *)newDocument{
-    document = newDocument;
+- (IBAction)removeNotes:(NSArray *)selectedItems {
+	NSManagedObjectContext *moc = [self managedObjectContext];
+	NSEnumerator *selEnum = [selectedItems objectEnumerator];
+	NSManagedObject *note;
+	while (note = [selEnum nextObject]) 
+		[moc deleteObject:note];
+    [moc processPendingChanges];
 }
 
+#pragma mark NSTableView DataSource protocol
+
+// dummy implementation as the NSTableView DataSource protocols requires these methods
+- (int)numberOfRowsInTableView:(NSTableView *)tv {
+	return 0;
+}
+
+// dummy implementation as the NSTableView DataSource protocols requires these methods
+- (id)tableView:(NSTableView *)tv objectValueForTableColumn:(NSTableColumn *)tableColumn row:(int)row {
+	return nil;
+}
+
+- (BOOL)tableView:(NSTableView *)tv writeRowsWithIndexes:(NSIndexSet *)rowIndexes toPasteboard:(NSPasteboard *)pboard {
+	if (tv == itemsTableView) {
+        return [self writeRowsWithIndexes:rowIndexes toPasteboard:pboard forType:BDSKNotePboardType];
+	}
+    
+	return NO;
+}
+
+- (NSDragOperation)tableView:(NSTableView*)tv validateDrop:(id <NSDraggingInfo>)info proposedRow:(int)row proposedDropOperation:(NSTableViewDropOperation)op {
+	return NSDragOperationNone;
+}
+
+- (BOOL)tableView:(NSTableView *)tv acceptDrop:(id <NSDraggingInfo>)info row:(int)row dropOperation:(NSTableViewDropOperation)op {
+	return NO;
+}
 
 @end

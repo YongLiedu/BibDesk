@@ -7,18 +7,12 @@
 //
 
 #import <Cocoa/Cocoa.h>
+#import "BDSKTableDisplayController.h"
 
-@interface BDSKNoteTableDisplayController : NSObject {
-    IBOutlet NSView *mainView;
-    IBOutlet NSArrayController *itemsArrayController;
-    NSDocument *document;
+@interface BDSKNoteTableDisplayController : BDSKTableDisplayController {
 }
 
-- (NSArrayController *)itemsArrayController;
-- (NSView *)view;
-
-- (NSDocument *)document;
-
-- (void)setDocument:(NSDocument *)newDocument;
+- (IBAction)addNote:(id)sender;
+- (IBAction)removeNotes:(NSArray *)selectedItems;
 
 @end

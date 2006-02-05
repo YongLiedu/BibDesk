@@ -7,38 +7,208 @@
 //
 
 #import "BDSKPublicationTableDisplayController.h"
+#import "BDSKDocument.h"
+#import "NSTableView_BDSKExtensions.h"
 
+#define BDSKContributorRowsPboardType @"BDSKContributorRowsPboardType"
 
 @implementation BDSKPublicationTableDisplayController
 
 - (void)dealloc{
+	[contributorsArrayController release];
+	[tagsArrayController release];
+	[notesArrayController release];
     [super dealloc];
 }
 
-- (NSView *)view{
-    if(!mainView){
-        [NSBundle loadNibNamed:@"BDSKPublicationTableDisplayController" owner:self];
-    }
-    return mainView;
+- (NSString *)viewNibName{
+	return @"BDSKPublicationTableDisplayController";
 }
-
 
 - (void)awakeFromNib{
-    [selectionDetailsBox setBackgroundImage:[NSImage imageNamed:@"coffeeStain"]];
+	[super awakeFromNib];
+	NSSortDescriptor *sortDescriptor = [[NSSortDescriptor alloc] initWithKey:@"index" ascending:YES];
+    [contributorsArrayController setSortDescriptors:[NSArray arrayWithObject:sortDescriptor]];
+	[sortDescriptor release];
+	[itemsTableView registerForDraggedTypes:[NSArray arrayWithObjects:BDSKPersonPboardType, BDSKNotePboardType, nil]];
+	[contributorsTableView registerForDraggedTypes:[NSArray arrayWithObjects:BDSKContributorRowsPboardType, BDSKPersonPboardType, nil]];
+	[notesTableView registerForDraggedTypes:[NSArray arrayWithObjects:BDSKNotePboardType, nil]];
+	[contributorsTableView setDraggingSourceOperationMask:NSDragOperationEvery forLocal:YES]; // NSDragOperationMove is not included in the default mask
 }
 
+#pragma mark Actions
 
-- (NSArrayController *)itemsArrayController{
-    return itemsArrayController;
+- (IBAction)addPublication:(id)sender {
+	NSManagedObjectContext *moc = [self managedObjectContext];
+	NSManagedObject *publication = [NSEntityDescription insertNewObjectForEntityForName:PublicationEntityName inManagedObjectContext:moc];
+    [itemsArrayController addObject:publication];
+    [moc processPendingChanges];
+    [itemsArrayController setSelectedObjects:[NSArray arrayWithObject:publication]];
 }
 
-
-- (NSDocument *)document{
-    return document;
+- (IBAction)removePublications:(NSArray *)selectedItems {
+	NSManagedObjectContext *moc = [self managedObjectContext];
+	NSEnumerator *selEnum = [selectedItems objectEnumerator];
+	NSManagedObject *publication;
+	while (publication = [selEnum nextObject]) 
+		[moc deleteObject:publication];
+    [moc processPendingChanges];
 }
 
-- (void)setDocument:(NSDocument *)newDocument{
-    document = newDocument;
+- (IBAction)addContributor:(id)sender {
+	NSManagedObjectContext *moc = [self managedObjectContext];
+	NSManagedObject *person = [NSEntityDescription insertNewObjectForEntityForName:PersonEntityName inManagedObjectContext:moc];
+	NSManagedObject *relationship = [NSEntityDescription insertNewObjectForEntityForName:ContributorPublicationRelationshipEntityName inManagedObjectContext:moc];
+	[relationship setValue:[NSNumber numberWithInt:[[contributorsArrayController arrangedObjects] count]] forKey:@"index"];
+	[relationship setValue:person forKey:@"contributor"];
+	[relationship setValue:@"author" forKey:@"relationshipType"];
+	[contributorsArrayController addObject:relationship];
+}
+
+#pragma mark NSTableView DataSource protocol
+
+// dummy implementation as the NSTableView DataSource protocols requires these methods
+- (int)numberOfRowsInTableView:(NSTableView *)tv {
+	return 0;
+}
+
+// dummy implementation as the NSTableView DataSource protocols requires these methods
+- (id)tableView:(NSTableView *)tv objectValueForTableColumn:(NSTableColumn *)tableColumn row:(int)row {
+	return nil;
+}
+
+- (BOOL)tableView:(NSTableView *)tv writeRowsWithIndexes:(NSIndexSet *)rowIndexes toPasteboard:(NSPasteboard *)pboard {
+	if (tv == contributorsTableView) {
+		[pboard declareTypes: [NSArray arrayWithObject:BDSKContributorRowsPboardType] owner:self];
+		[pboard setData:[NSArchiver archivedDataWithRootObject:rowIndexes] forType:BDSKContributorRowsPboardType];
+        return YES;
+	} else if (tv == itemsTableView) {
+        return [self writeRowsWithIndexes:rowIndexes toPasteboard:pboard forType:BDSKPersonPboardType];
+	}
+    
+	return NO;
+}
+
+- (NSDragOperation)tableView:(NSTableView*)tv validateDrop:(id <NSDraggingInfo>)info proposedRow:(int)row proposedDropOperation:(NSTableViewDropOperation)op {
+	NSPasteboard *pboard = [info draggingPasteboard];
+	
+    if (tv == contributorsTableView) {
+        
+		if ([[itemsArrayController selectedObjects] count] != 1)
+			return NSDragOperationNone;
+		NSString *type = [pboard availableTypeFromArray:[NSArray arrayWithObjects:BDSKContributorRowsPboardType, BDSKPersonPboardType, nil]];
+        if ([tv setValidDropRow:row dropOperation:NSTableViewDropAbove] == NO)
+            return NSDragOperationNone;
+		if ([type isEqualToString:BDSKContributorRowsPboardType] && [info draggingSource] == tv) 
+			return NSDragOperationMove;
+		else if ([type isEqualToString:BDSKPersonPboardType]) {
+			if ([[[info draggingSource] dataSource] document] == [self document])
+				return NSDragOperationLink;
+			else
+				return NSDragOperationCopy;
+		}
+        
+	} else if (tv == notesTableView) {
+        
+		if ([[itemsArrayController selectedObjects] count] != 1)
+			return NSDragOperationNone;
+		NSString *type = [pboard availableTypeFromArray:[NSArray arrayWithObjects:BDSKNotePboardType, nil]];
+        if ([tv setValidDropRow:row dropOperation:NSTableViewDropAbove] == NO)
+            return NSDragOperationNone;
+		if ([type isEqualToString:BDSKNotePboardType]) {
+			if ([[[info draggingSource] dataSource] document] == [self document])
+				return NSDragOperationLink;
+			else
+				return NSDragOperationCopy;
+		}
+        
+	} else if (tv == itemsTableView) {
+        
+		NSPasteboard *pboard = [info draggingPasteboard];
+		NSString *type = [pboard availableTypeFromArray:[NSArray arrayWithObjects:BDSKPersonPboardType, BDSKNotePboardType, nil]];
+        if ([tv setValidDropRow:row dropOperation:NSTableViewDropOn] == NO)
+            return NSDragOperationNone;
+		if ([type isEqualToString:BDSKPersonPboardType] || [type isEqualToString:BDSKNotePboardType]) {
+			if ([[[info draggingSource] dataSource] document] == [self document])
+				return NSDragOperationLink;
+			else
+				return NSDragOperationCopy;
+		}
+        
+	}
+    
+	return NSDragOperationNone;
+}
+
+- (BOOL)tableView:(NSTableView *)tv acceptDrop:(id <NSDraggingInfo>)info row:(int)row dropOperation:(NSTableViewDropOperation)op {
+	NSPasteboard *pboard = [info draggingPasteboard];
+    
+	if (tv == contributorsTableView) {
+        
+		NSString *type = [pboard availableTypeFromArray:[NSArray arrayWithObjects:BDSKContributorRowsPboardType, BDSKPersonPboardType, nil]];
+		
+        if ([type isEqualToString:BDSKContributorRowsPboardType]) {
+			
+            if (!([info draggingSourceOperationMask] & NSDragOperationMove) || [info draggingSource] != tv)
+				return NO;
+			
+            NSData *rowData = [pboard dataForType:BDSKContributorRowsPboardType];
+			NSIndexSet *removeIndexes = [NSUnarchiver unarchiveObjectWithData:rowData];
+			int i, count;
+			NSNumber *number;
+			int insertRow = row;
+			NSIndexSet *insertIndexes;
+			NSArray *draggedObjects;
+			NSMutableIndexSet *indexesBeforeInsertion = [removeIndexes mutableCopy];
+			
+            if ([removeIndexes lastIndex] >= row) 
+				[indexesBeforeInsertion removeIndexesInRange:NSMakeRange(row, [removeIndexes lastIndex] - row + 1)];
+			insertRow = row - [indexesBeforeInsertion count];
+			[indexesBeforeInsertion release];
+			insertIndexes = [NSIndexSet indexSetWithIndexesInRange:NSMakeRange(insertRow, [removeIndexes count])];
+			NSMutableArray *relationships = [[contributorsArrayController arrangedObjects] mutableCopy];
+			NSSortDescriptor *sortDescriptor = [[NSSortDescriptor alloc] initWithKey:@"index" ascending:YES];
+			[relationships sortUsingDescriptors:[NSArray arrayWithObject:sortDescriptor]];
+			[sortDescriptor release];
+			draggedObjects = [relationships objectsAtIndexes:removeIndexes];
+			[relationships removeObjectsAtIndexes:removeIndexes];
+			[relationships insertObjects:draggedObjects atIndexes:insertIndexes];
+			count = [relationships count];
+			for (i = 0; i < count; i++) {
+				number = [[NSNumber alloc] initWithInt:i];
+				[[relationships objectAtIndex:i] setValue:number forKey:@"index"];
+				[number release];
+			}
+			[relationships release];
+			[contributorsArrayController rearrangeObjects];
+			return YES;
+            
+		} else if ([type isEqualToString:BDSKPersonPboardType]) {
+			
+            if ([info draggingSourceOperationMask] & NSDragOperationLink)
+				return [self addRelationshipsFromPasteboard:pboard forType:type parentRow:-1 keyPath:@"contributorRelationships.contributor"];
+		}
+        
+	} else if (tv == itemsTableView) {
+        
+		if (!([info draggingSourceOperationMask] & NSDragOperationLink))
+			return NO;
+		NSString *type = [pboard availableTypeFromArray:[NSArray arrayWithObjects:BDSKPersonPboardType, BDSKNotePboardType, nil]];
+		if ([type isEqualToString:BDSKPersonPboardType])
+			return [self addRelationshipsFromPasteboard:pboard forType:type parentRow:row keyPath:@"contributorRelationships.contributor"];
+		else if ([type isEqualToString:BDSKNotePboardType])
+			return [self addRelationshipsFromPasteboard:pboard forType:type parentRow:row keyPath:@"notes"];
+        
+	} else if (tv == notesTableView) {
+        
+		NSString *type = [pboard availableTypeFromArray:[NSArray arrayWithObjects:BDSKNotePboardType, nil]];
+		if (([info draggingSourceOperationMask] & NSDragOperationLink) &&
+			[type isEqualToString:BDSKNotePboardType])
+			return [self addRelationshipsFromPasteboard:pboard forType:type parentRow:-1 keyPath:@"notes"];
+        
+	}
+    
+	return NO;
 }
 
 @end

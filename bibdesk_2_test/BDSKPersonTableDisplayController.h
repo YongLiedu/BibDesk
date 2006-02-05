@@ -7,18 +7,17 @@
 //
 
 #import <Cocoa/Cocoa.h>
+#import "BDSKTableDisplayController.h"
 
-@interface BDSKPersonTableDisplayController : NSObject {
-    IBOutlet NSView *mainView;  
-    IBOutlet NSArrayController *itemsArrayController;
-    NSDocument *document;
+@interface BDSKPersonTableDisplayController : BDSKTableDisplayController {
+    IBOutlet NSArrayController *publicationsArrayController;
+    IBOutlet NSArrayController *tagsArrayController;
+    IBOutlet NSTableView *publicationsTableView;
+    IBOutlet NSTableView *tagsTableView;
 }
 
-- (NSView *)view;
-- (NSArrayController *)itemsArrayController;
-
-- (NSDocument *)document;
-- (void)setDocument:(NSDocument *)newDocument;
-- (NSManagedObjectContext *)managedObjectContext;
+- (IBAction)addPerson:(id)sender;
+- (IBAction)removePersons:(NSArray *)selectedItems;
+- (IBAction)addPublication:(id)sender;
 
 @end

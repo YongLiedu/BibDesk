@@ -7,21 +7,20 @@
 //
 
 #import <Cocoa/Cocoa.h>
+#import "BDSKTableDisplayController.h"
 
-#import "ImageBackgroundBox.h"
 
-
-@interface BDSKPublicationTableDisplayController : NSObject {
-    IBOutlet NSView *mainView;
-    IBOutlet NSArrayController *itemsArrayController;
-    IBOutlet ImageBackgroundBox *selectionDetailsBox;
-    NSDocument *document;
+@interface BDSKPublicationTableDisplayController : BDSKTableDisplayController {
+    IBOutlet NSArrayController *contributorsArrayController;
+    IBOutlet NSArrayController *tagsArrayController;
+    IBOutlet NSArrayController *notesArrayController;
+	IBOutlet NSTableView *contributorsTableView;
+	IBOutlet NSTableView *tagsTableView;
+	IBOutlet NSTableView *notesTableView;
 }
 
-- (NSView *)view;
-- (NSArrayController *)itemsArrayController;
-
-- (NSDocument *)document;
-- (void)setDocument:(NSDocument *)newDocument;
+- (IBAction)addPublication:(id)sender;
+- (IBAction)removePublications:(NSArray *)selectedItems;
+- (IBAction)addContributor:(id)sender;
 
 @end
