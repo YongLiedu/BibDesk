@@ -7,6 +7,7 @@
 //
 
 #import "BDSKBD2AppDelegate.h"
+#import "BDSKInspectorWindowController.h"
 
 
 @implementation BDSKBD2AppDelegate
@@ -18,6 +19,14 @@
         autorelease];
     [NSValueTransformer setValueTransformer:groupToItemNameTransformer
                                     forName:@"BDSKGroupEntityToItemDisplayNameTransformer"];
+}
+
+- (IBAction)showNoteWindow:(id)sender {
+    [[BDSKNoteWindowController sharedController] showWindow:sender];
+}
+
+- (IBAction)showTagWindow:(id)sender {
+    [[BDSKTagWindowController sharedController] showWindow:sender];
 }
 
 @end

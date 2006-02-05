@@ -13,4 +13,7 @@
 
 }
 
+- (IBAction)showNoteWindow:(id)sender;
+- (IBAction)showTagWindow:(id)sender;
+
 @end

@@ -1,6 +1,11 @@
 {
     IBClasses = (
-        {CLASS = BDSKBD2AppDelegate; LANGUAGE = ObjC; SUPERCLASS = NSObject; }, 
+        {
+            ACTIONS = {showNoteWindow = id; showTagWindow = id; }; 
+            CLASS = BDSKBD2AppDelegate; 
+            LANGUAGE = ObjC; 
+            SUPERCLASS = NSObject; 
+        }, 
         {
             ACTIONS = {
                 addNewGroupFromSourceListSelection = id; 
