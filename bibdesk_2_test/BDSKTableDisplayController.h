@@ -29,6 +29,8 @@
 - (NSArrayController *)itemsArrayController;
 - (NSTableView *)itemsTableView;
 
+- (NSArray *)filterPredicates;
+
 - (BOOL)writeRowsWithIndexes:(NSIndexSet *)rowIndexes toPasteboard:(NSPasteboard *)pboard forType:(NSString *)type;
 - (BOOL)addRelationshipsFromPasteboard:(NSPasteboard *)pboard forType:(NSString *)type parentRow:(int)row keyPath:(NSString *)keyPath;
 

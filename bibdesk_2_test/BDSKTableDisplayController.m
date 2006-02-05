@@ -70,6 +70,11 @@
 	return [(NSPersistentDocument *)document managedObjectContext];
 }
 
+- (NSArray *)filterPredicates {
+    // should be implemented by the subclasses
+    return nil;
+}
+
 // drag/drop
 
 - (BOOL)writeRowsWithIndexes:(NSIndexSet *)rowIndexes toPasteboard:(NSPasteboard *)pboard forType:(NSString *)type {

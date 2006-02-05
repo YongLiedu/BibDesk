@@ -58,6 +58,19 @@
 	[publicationsArrayController addObject:relationship];
 }
 
+#pragma mark Filter predicate binding
+
+- (NSArray *)filterPredicates {
+    static NSMutableArray *filterPredicates = nil;
+    if (filterPredicates == nil) {
+        NSDictionary *options;
+        filterPredicates = [[NSMutableArray alloc] initWithCapacity:1];
+        options = [NSDictionary dictionaryWithObjectsAndKeys:@"Name", NSDisplayNameBindingOption, @"name contains[c] $value", NSPredicateFormatBindingOption, nil];
+        [filterPredicates addObject:options];
+    }
+    return filterPredicates;
+}
+
 #pragma mark NSTableView DataSource protocol
 
 // dummy implementation as the NSTableView DataSource protocols requires these methods

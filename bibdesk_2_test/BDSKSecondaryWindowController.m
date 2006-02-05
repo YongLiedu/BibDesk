@@ -162,13 +162,30 @@
     // TODO: in future, this should create multiple bindings.?    
     [[displayController itemsArrayController] bind:@"contentSet" toObject:self
                                        withKeyPath:@"sourceGroup.itemsInSelfOrChildren" options:options];
+    // TODO: in future, this should create multiple bindings.?    
     
+    NSArray *filterPredicates = [displayController filterPredicates];
+    int i, count = [filterPredicates count];
+    NSString *key = @"predicate";
+    for (i = 0; i < count; i++) {
+        if (i > 0) 
+            key = [NSString stringWithFormat:@"predicate%i", i+1];
+        options = [filterPredicates objectAtIndex:i];
+        [searchField bind:key toObject:[displayController itemsArrayController]
+                           withKeyPath:@"filterPredicate" options:options];
+    }
 }
 
 
 // TODO: as the above method creates multiple bindings, this one will have to keep up.
 // mb the display controllers themselves should be 
 - (void)unbindDisplayController:(id)displayController{
+    int i = [[displayController filterPredicates] count];
+    NSString *key;
+    while (i-- > 0) {
+        key = (i == 0) ? @"predicate" : [NSString stringWithFormat:@"predicate%i", i+1];
+        [searchField unbind:key];
+    }
 	[[displayController itemsArrayController] unbind:@"contentSet"];
 }
 
