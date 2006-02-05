@@ -12,13 +12,10 @@
 @implementation BDSKSmartGroup 
 
 - (void)commonAwake {
+    [super commonAwake];
+    
     items = nil;
     
-    [[NSNotificationCenter defaultCenter] addObserver:self 
-                                             selector:@selector(managedObjectContextObjectsDidChange:) 
-                                                 name:NSManagedObjectContextObjectsDidChangeNotification 
-                                               object:[self managedObjectContext]];        
-
     [self willAccessValueForKey:@"priority"];
     [self setValue:[NSNumber numberWithInt:2] forKeyPath:@"priority"];
     [self didAccessValueForKey:@"priority"];
@@ -26,20 +23,10 @@
 
 - (void)awakeFromInsert  {
     [super awakeFromInsert];
-    [self commonAwake];
     [self setPredicate:[NSPredicate predicateWithValue:YES]];
 }
 
-- (void)awakeFromFetch  {
-    [super awakeFromFetch];
-    [self commonAwake];
-}
-
 - (void)didTurnIntoFault {
-    [[NSNotificationCenter defaultCenter] removeObserver:self 
-                                                    name:NSManagedObjectContextObjectsDidChangeNotification 
-                                                  object:[self managedObjectContext]];
-
     [items release];
     items = nil;
     [fetchRequest release];
@@ -51,10 +38,6 @@
 }
 
 - (void)dealloc {
-    [[NSNotificationCenter defaultCenter] removeObserver:self 
-                                                    name:NSManagedObjectContextObjectsDidChangeNotification 
-                                                  object:[self managedObjectContext]];
-
     [items release];
     items = nil;
     [fetchRequest release];

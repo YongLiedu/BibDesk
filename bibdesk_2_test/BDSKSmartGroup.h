@@ -30,6 +30,5 @@
 - (NSSet *)items;
 
 - (void)refresh;
-- (void)managedObjectContextObjectsDidChange:(NSNotification *)notification;
 
 @end

@@ -20,9 +20,63 @@
         triggerChangeNotificationsForDependentKey:@"icon"];
 }
 
+- (void)commonAwake {
+    [[NSNotificationCenter defaultCenter] addObserver:self 
+                                             selector:@selector(managedObjectContextObjectsDidChange:) 
+                                                 name:NSManagedObjectContextObjectsDidChangeNotification 
+                                               object:[self managedObjectContext]];        
+}
+
+- (void)awakeFromInsert  {
+    [super awakeFromInsert];
+    [self commonAwake];
+}
+
+- (void)awakeFromFetch  {
+    [super awakeFromFetch];
+    [self commonAwake];
+}
+
+- (void)didTurnIntoFault {
+    [[NSNotificationCenter defaultCenter] removeObserver:self 
+                                                    name:NSManagedObjectContextObjectsDidChangeNotification 
+                                                  object:[self managedObjectContext]];
+
+    [cachedIcon release];
+    cachedIcon = nil;
+    
+    [super didTurnIntoFault];
+}
+
 - (void)dealloc {
+    [[NSNotificationCenter defaultCenter] removeObserver:self 
+                                                    name:NSManagedObjectContextObjectsDidChangeNotification 
+                                                  object:[self managedObjectContext]];
+
     [cachedIcon release];
     [super dealloc];
+}
+
+- (void)managedObjectContextObjectsDidChange:(NSNotification *)notification {
+    if ([self isSmart])
+        return;
+    
+	NSEnumerator *enumerator;
+	id object;
+	BOOL refresh = NO;
+    
+	NSSet *deleted = [[notification userInfo] objectForKey:NSDeletedObjectsKey];
+    NSMutableSet *items = [self mutableSetValueForKey:@"items"];
+    
+	enumerator = [deleted objectEnumerator];	
+	while ((refresh == NO) && (object = [enumerator nextObject])) {
+		if ([items containsObject:object]) {
+			refresh = YES;	
+		}
+	}
+    if (refresh) {
+		[items minusSet:deleted];
+    }
 }
 
 - (NSString *)groupImageName {

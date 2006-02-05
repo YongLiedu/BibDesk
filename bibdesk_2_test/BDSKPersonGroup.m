@@ -14,20 +14,11 @@
 @implementation BDSKPersonGroup
 
 - (void)commonAwake {
+    [super commonAwake];
     [[NSNotificationCenter defaultCenter] addObserver:self 
                                              selector:@selector(replacePerson:) 
                                                  name:@"BDSKPersonWasReplacedNotification" 
                                                object:nil];        
-}
-
-- (void)awakeFromInsert  {
-    [super awakeFromInsert];
-    [self commonAwake];
-}
-
-- (void)awakeFromFetch  {
-    [super awakeFromFetch];
-    [self commonAwake];
 }
 
 - (void)didTurnIntoFault {

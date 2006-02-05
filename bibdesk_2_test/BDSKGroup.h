@@ -11,7 +11,9 @@
 
 @interface BDSKGroup :  NSManagedObject {
     NSImage *cachedIcon;
+
 }
+- (void)commonAwake;
 
 - (NSString *)groupImageName;
 - (NSImage *)icon;
@@ -26,5 +28,7 @@
 - (NSSet *)itemsInSelfOrChildren;
 - (void)addItemsInSelfOrChildrenObject:(id)obj;
 - (void)removeItemsInSelfOrChildrenObject:(id)obj;
+
+- (void)managedObjectContextObjectsDidChange:(NSNotification *)notification;
 
 @end
