@@ -10,6 +10,8 @@
  *
  */
 
+#define SmartGroupEntityName @"SmartGroup"
+
 #define PublicationGroupEntityName @"PublicationGroup"
 #define PublicationEntityName @"Publication"
 
