@@ -35,6 +35,19 @@
 		8D11072B0486CEB800E47090 /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = 089C165CFE840E0CC02AAC07 /* InfoPlist.strings */; };
 		8D11072D0486CEB800E47090 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 29B97316FDCFA39411CA2CEA /* main.m */; settings = {ATTRIBUTES = (); }; };
 		8D11072F0486CEB800E47090 /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1058C7A1FEA54F0111CA2CBB /* Cocoa.framework */; };
+		CE2AEF8B09952A6400473196 /* GroupIcon.tiff in Resources */ = {isa = PBXBuildFile; fileRef = CE2AEF8809952A6400473196 /* GroupIcon.tiff */; };
+		CE2AEF8C09952A6400473196 /* RootGroupIcon.tiff in Resources */ = {isa = PBXBuildFile; fileRef = CE2AEF8909952A6400473196 /* RootGroupIcon.tiff */; };
+		CE2AEF8D09952A6400473196 /* SmartGroupIcon.tiff in Resources */ = {isa = PBXBuildFile; fileRef = CE2AEF8A09952A6400473196 /* SmartGroupIcon.tiff */; };
+		CE4B96DC0994DD97000447D2 /* BDSKGroup.m in Sources */ = {isa = PBXBuildFile; fileRef = CE4B96DB0994DD96000447D2 /* BDSKGroup.m */; };
+		CE6D83A60994CFA500D01A71 /* BDSKSmartGroup.m in Sources */ = {isa = PBXBuildFile; fileRef = CE6D83A50994CFA500D01A71 /* BDSKSmartGroup.m */; };
+		CEC5AF05098F7A0000DE1DB2 /* BDSKSecondaryWindowController.m in Sources */ = {isa = PBXBuildFile; fileRef = CEC5AF02098F7A0000DE1DB2 /* BDSKSecondaryWindowController.m */; };
+		CEC5AF06098F7A0000DE1DB2 /* BDSKTableDisplayController.m in Sources */ = {isa = PBXBuildFile; fileRef = CEC5AF04098F7A0000DE1DB2 /* BDSKTableDisplayController.m */; };
+		CEC5AF22098F7A9F00DE1DB2 /* Add_Pressed.tiff in Resources */ = {isa = PBXBuildFile; fileRef = CEC5AF20098F7A9F00DE1DB2 /* Add_Pressed.tiff */; };
+		CEC5AF23098F7A9F00DE1DB2 /* Add.tiff in Resources */ = {isa = PBXBuildFile; fileRef = CEC5AF21098F7A9F00DE1DB2 /* Add.tiff */; };
+		CEC5AF26098F7AAF00DE1DB2 /* Remove_Pressed.tiff in Resources */ = {isa = PBXBuildFile; fileRef = CEC5AF24098F7AAF00DE1DB2 /* Remove_Pressed.tiff */; };
+		CEC5AF27098F7AAF00DE1DB2 /* Remove.tiff in Resources */ = {isa = PBXBuildFile; fileRef = CEC5AF25098F7AAF00DE1DB2 /* Remove.tiff */; };
+		CEC5AF2F098F7AF400DE1DB2 /* BDSKSecondaryWindow.nib in Resources */ = {isa = PBXBuildFile; fileRef = CEC5AF2A098F7AF400DE1DB2 /* BDSKSecondaryWindow.nib */; };
+		CED1D9AA0995FF760017917B /* NSTableView_BDSKExtensions.m in Sources */ = {isa = PBXBuildFile; fileRef = CED1D9A90995FF760017917B /* NSTableView_BDSKExtensions.m */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXBuildStyle section */
@@ -116,6 +129,24 @@
 		32CA4F630368D1EE00C91783 /* bd2xtest_Prefix.pch */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = bd2xtest_Prefix.pch; sourceTree = "<group>"; };
 		8D1107310486CEB800E47090 /* Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
 		8D1107320486CEB800E47090 /* bd2xtest.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = bd2xtest.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		CE2AEF8809952A6400473196 /* GroupIcon.tiff */ = {isa = PBXFileReference; lastKnownFileType = image.tiff; name = GroupIcon.tiff; path = Images/GroupIcon.tiff; sourceTree = "<group>"; };
+		CE2AEF8909952A6400473196 /* RootGroupIcon.tiff */ = {isa = PBXFileReference; lastKnownFileType = image.tiff; name = RootGroupIcon.tiff; path = Images/RootGroupIcon.tiff; sourceTree = "<group>"; };
+		CE2AEF8A09952A6400473196 /* SmartGroupIcon.tiff */ = {isa = PBXFileReference; lastKnownFileType = image.tiff; name = SmartGroupIcon.tiff; path = Images/SmartGroupIcon.tiff; sourceTree = "<group>"; };
+		CE4B96DA0994DD96000447D2 /* BDSKGroup.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BDSKGroup.h; sourceTree = "<group>"; };
+		CE4B96DB0994DD96000447D2 /* BDSKGroup.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BDSKGroup.m; sourceTree = "<group>"; };
+		CE6D83A40994CFA500D01A71 /* BDSKSmartGroup.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BDSKSmartGroup.h; sourceTree = "<group>"; };
+		CE6D83A50994CFA500D01A71 /* BDSKSmartGroup.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BDSKSmartGroup.m; sourceTree = "<group>"; };
+		CEC5AF01098F7A0000DE1DB2 /* BDSKSecondaryWindowController.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = BDSKSecondaryWindowController.h; sourceTree = "<group>"; };
+		CEC5AF02098F7A0000DE1DB2 /* BDSKSecondaryWindowController.m */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.objc; path = BDSKSecondaryWindowController.m; sourceTree = "<group>"; };
+		CEC5AF03098F7A0000DE1DB2 /* BDSKTableDisplayController.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = BDSKTableDisplayController.h; sourceTree = "<group>"; };
+		CEC5AF04098F7A0000DE1DB2 /* BDSKTableDisplayController.m */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.objc; path = BDSKTableDisplayController.m; sourceTree = "<group>"; };
+		CEC5AF20098F7A9F00DE1DB2 /* Add_Pressed.tiff */ = {isa = PBXFileReference; lastKnownFileType = image.tiff; name = Add_Pressed.tiff; path = Images/Add_Pressed.tiff; sourceTree = "<group>"; };
+		CEC5AF21098F7A9F00DE1DB2 /* Add.tiff */ = {isa = PBXFileReference; lastKnownFileType = image.tiff; name = Add.tiff; path = Images/Add.tiff; sourceTree = "<group>"; };
+		CEC5AF24098F7AAF00DE1DB2 /* Remove_Pressed.tiff */ = {isa = PBXFileReference; lastKnownFileType = image.tiff; name = Remove_Pressed.tiff; path = Images/Remove_Pressed.tiff; sourceTree = "<group>"; };
+		CEC5AF25098F7AAF00DE1DB2 /* Remove.tiff */ = {isa = PBXFileReference; lastKnownFileType = image.tiff; name = Remove.tiff; path = Images/Remove.tiff; sourceTree = "<group>"; };
+		CEC5AF2B098F7AF400DE1DB2 /* English */ = {isa = PBXFileReference; lastKnownFileType = wrapper.nib; name = English; path = English.lproj/BDSKSecondaryWindow.nib; sourceTree = "<group>"; };
+		CED1D9A80995FF760017917B /* NSTableView_BDSKExtensions.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = NSTableView_BDSKExtensions.h; sourceTree = "<group>"; };
+		CED1D9A90995FF760017917B /* NSTableView_BDSKExtensions.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = NSTableView_BDSKExtensions.m; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -174,24 +205,11 @@
 		2722425D088A500E0000CF76 /* Data Model */ = {
 			isa = PBXGroup;
 			children = (
-				27DE02DF088B51CF0003C1E9 /* BDSKPublication.h */,
-				27DE02E0088B51CF0003C1E9 /* BDSKPublication.m */,
-				2728360C088B0D0500F5A02B /* BDSKPerson.h */,
-				2728360D088B0D0500F5A02B /* BDSKPerson.m */,
-				2744F55A08889FC2001E0CC9 /* BDSKModel-0.1.xcdatamodel */,
-				27283603088B0CBE00F5A02B /* BDSKNote.h */,
-				27283604088B0CBE00F5A02B /* BDSKNote.m */,
 				2744F55508889FC2001E0CC9 /* BDSKDataModelNames.h */,
 				2744F55608889FC2001E0CC9 /* BDSKDocument.h */,
 				2744F55708889FC2001E0CC9 /* BDSKDocument.m */,
-				2744F55B08889FC2001E0CC9 /* BDSKNoteGroup.h */,
-				2744F55C08889FC2001E0CC9 /* BDSKNoteGroup.m */,
-				2744F55F08889FC2001E0CC9 /* BDSKPersonGroup.h */,
-				2744F56008889FC2001E0CC9 /* BDSKPersonGroup.m */,
-				2744F56308889FC2001E0CC9 /* BDSKPublicationGroup.h */,
-				2744F56408889FC2001E0CC9 /* BDSKPublicationGroup.m */,
-				27667441088DC007004CA127 /* BDSKContributor.h */,
-				27667442088DC007004CA127 /* BDSKContributor.m */,
+				CEC5B020098FA2E000DE1DB2 /* Data */,
+				CEC5B01F098FA2D200DE1DB2 /* Groups */,
 			);
 			name = "Data Model";
 			sourceTree = "<group>";
@@ -199,8 +217,7 @@
 		2722425E088A50270000CF76 /* Controllers */ = {
 			isa = PBXGroup;
 			children = (
-				2744F55808889FC2001E0CC9 /* BDSKMainWindowController.h */,
-				2744F55908889FC2001E0CC9 /* BDSKMainWindowController.m */,
+				CE2AEEA30995231400473196 /* Window Controllers */,
 				27224263088A50590000CF76 /* Display Controllers */,
 			);
 			name = Controllers;
@@ -213,6 +230,8 @@
 				277D91FD0896251C004C4105 /* ImageBackgroundBox.m */,
 				2744F56A08889FC2001E0CC9 /* ImageAndTextCell.h */,
 				2744F56B08889FC2001E0CC9 /* ImageAndTextCell.m */,
+				CED1D9A80995FF760017917B /* NSTableView_BDSKExtensions.h */,
+				CED1D9A90995FF760017917B /* NSTableView_BDSKExtensions.m */,
 			);
 			name = "Views / Appkit Extensions";
 			sourceTree = "<group>";
@@ -220,6 +239,8 @@
 		27224263088A50590000CF76 /* Display Controllers */ = {
 			isa = PBXGroup;
 			children = (
+				CEC5AF03098F7A0000DE1DB2 /* BDSKTableDisplayController.h */,
+				CEC5AF04098F7A0000DE1DB2 /* BDSKTableDisplayController.m */,
 				2744F56908889FC2001E0CC9 /* DisplayControllers.plist */,
 				2744F55D08889FC2001E0CC9 /* BDSKNoteTableDisplayController.h */,
 				2744F55E08889FC2001E0CC9 /* BDSKNoteTableDisplayController.m */,
@@ -234,6 +255,13 @@
 		277D9234089627D4004C4105 /* Images */ = {
 			isa = PBXGroup;
 			children = (
+				CE2AEF8809952A6400473196 /* GroupIcon.tiff */,
+				CE2AEF8909952A6400473196 /* RootGroupIcon.tiff */,
+				CE2AEF8A09952A6400473196 /* SmartGroupIcon.tiff */,
+				CEC5AF20098F7A9F00DE1DB2 /* Add_Pressed.tiff */,
+				CEC5AF21098F7A9F00DE1DB2 /* Add.tiff */,
+				CEC5AF24098F7AAF00DE1DB2 /* Remove_Pressed.tiff */,
+				CEC5AF25098F7AAF00DE1DB2 /* Remove.tiff */,
 				277D9231089627C7004C4105 /* coffeeStain.jpg */,
 			);
 			name = Images;
@@ -242,6 +270,7 @@
 		29B97314FDCFA39411CA2CEA /* bd2xtest */ = {
 			isa = PBXGroup;
 			children = (
+				CE2AEE970995228E00473196 /* Models */,
 				080E96DDFE201D6D7F000001 /* Classes */,
 				29B97315FDCFA39411CA2CEA /* Other Sources */,
 				29B97317FDCFA39411CA2CEA /* Resources */,
@@ -265,12 +294,13 @@
 			children = (
 				277D9234089627D4004C4105 /* Images */,
 				2744F5780888A087001E0CC9 /* BDSKMainWindow.nib */,
-				2744F57A0888A087001E0CC9 /* BDSKNoteTableDisplayController.nib */,
-				2744F57C0888A087001E0CC9 /* BDSKPersonTableDisplayController.nib */,
+				CEC5AF2A098F7AF400DE1DB2 /* BDSKSecondaryWindow.nib */,
 				2744F57E0888A087001E0CC9 /* BDSKPublicationTableDisplayController.nib */,
+				2744F57C0888A087001E0CC9 /* BDSKPersonTableDisplayController.nib */,
+				2744F57A0888A087001E0CC9 /* BDSKNoteTableDisplayController.nib */,
+				29B97318FDCFA39411CA2CEA /* MainMenu.nib */,
 				8D1107310486CEB800E47090 /* Info.plist */,
 				089C165CFE840E0CC02AAC07 /* InfoPlist.strings */,
-				29B97318FDCFA39411CA2CEA /* MainMenu.nib */,
 			);
 			name = Resources;
 			sourceTree = "<group>";
@@ -283,6 +313,57 @@
 				1058C7A2FEA54F0111CA2CBB /* Other Frameworks */,
 			);
 			name = Frameworks;
+			sourceTree = "<group>";
+		};
+		CE2AEE970995228E00473196 /* Models */ = {
+			isa = PBXGroup;
+			children = (
+				2744F55A08889FC2001E0CC9 /* BDSKModel-0.1.xcdatamodel */,
+			);
+			name = Models;
+			sourceTree = "<group>";
+		};
+		CE2AEEA30995231400473196 /* Window Controllers */ = {
+			isa = PBXGroup;
+			children = (
+				2744F55808889FC2001E0CC9 /* BDSKMainWindowController.h */,
+				2744F55908889FC2001E0CC9 /* BDSKMainWindowController.m */,
+				CEC5AF01098F7A0000DE1DB2 /* BDSKSecondaryWindowController.h */,
+				CEC5AF02098F7A0000DE1DB2 /* BDSKSecondaryWindowController.m */,
+			);
+			name = "Window Controllers";
+			sourceTree = "<group>";
+		};
+		CEC5B01F098FA2D200DE1DB2 /* Groups */ = {
+			isa = PBXGroup;
+			children = (
+				CE4B96DA0994DD96000447D2 /* BDSKGroup.h */,
+				CE4B96DB0994DD96000447D2 /* BDSKGroup.m */,
+				2744F56308889FC2001E0CC9 /* BDSKPublicationGroup.h */,
+				2744F56408889FC2001E0CC9 /* BDSKPublicationGroup.m */,
+				2744F55F08889FC2001E0CC9 /* BDSKPersonGroup.h */,
+				2744F56008889FC2001E0CC9 /* BDSKPersonGroup.m */,
+				2744F55B08889FC2001E0CC9 /* BDSKNoteGroup.h */,
+				2744F55C08889FC2001E0CC9 /* BDSKNoteGroup.m */,
+				CE6D83A40994CFA500D01A71 /* BDSKSmartGroup.h */,
+				CE6D83A50994CFA500D01A71 /* BDSKSmartGroup.m */,
+			);
+			name = Groups;
+			sourceTree = "<group>";
+		};
+		CEC5B020098FA2E000DE1DB2 /* Data */ = {
+			isa = PBXGroup;
+			children = (
+				27DE02DF088B51CF0003C1E9 /* BDSKPublication.h */,
+				27DE02E0088B51CF0003C1E9 /* BDSKPublication.m */,
+				27667441088DC007004CA127 /* BDSKContributor.h */,
+				27667442088DC007004CA127 /* BDSKContributor.m */,
+				2728360C088B0D0500F5A02B /* BDSKPerson.h */,
+				2728360D088B0D0500F5A02B /* BDSKPerson.m */,
+				27283603088B0CBE00F5A02B /* BDSKNote.h */,
+				27283604088B0CBE00F5A02B /* BDSKNote.m */,
+			);
+			name = Data;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -351,6 +432,14 @@
 				2744F5820888A087001E0CC9 /* BDSKPersonTableDisplayController.nib in Resources */,
 				2744F5830888A087001E0CC9 /* BDSKPublicationTableDisplayController.nib in Resources */,
 				277D9232089627C7004C4105 /* coffeeStain.jpg in Resources */,
+				CEC5AF22098F7A9F00DE1DB2 /* Add_Pressed.tiff in Resources */,
+				CEC5AF23098F7A9F00DE1DB2 /* Add.tiff in Resources */,
+				CEC5AF26098F7AAF00DE1DB2 /* Remove_Pressed.tiff in Resources */,
+				CEC5AF27098F7AAF00DE1DB2 /* Remove.tiff in Resources */,
+				CEC5AF2F098F7AF400DE1DB2 /* BDSKSecondaryWindow.nib in Resources */,
+				CE2AEF8B09952A6400473196 /* GroupIcon.tiff in Resources */,
+				CE2AEF8C09952A6400473196 /* RootGroupIcon.tiff in Resources */,
+				CE2AEF8D09952A6400473196 /* SmartGroupIcon.tiff in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -379,6 +468,11 @@
 				27DE02E1088B51CF0003C1E9 /* BDSKPublication.m in Sources */,
 				27667443088DC007004CA127 /* BDSKContributor.m in Sources */,
 				277D91FE0896251C004C4105 /* ImageBackgroundBox.m in Sources */,
+				CEC5AF05098F7A0000DE1DB2 /* BDSKSecondaryWindowController.m in Sources */,
+				CEC5AF06098F7A0000DE1DB2 /* BDSKTableDisplayController.m in Sources */,
+				CE6D83A60994CFA500D01A71 /* BDSKSmartGroup.m in Sources */,
+				CE4B96DC0994DD97000447D2 /* BDSKGroup.m in Sources */,
+				CED1D9AA0995FF760017917B /* NSTableView_BDSKExtensions.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -431,6 +525,14 @@
 				29B97319FDCFA39411CA2CEA /* English */,
 			);
 			name = MainMenu.nib;
+			sourceTree = "<group>";
+		};
+		CEC5AF2A098F7AF400DE1DB2 /* BDSKSecondaryWindow.nib */ = {
+			isa = PBXVariantGroup;
+			children = (
+				CEC5AF2B098F7AF400DE1DB2 /* English */,
+			);
+			name = BDSKSecondaryWindow.nib;
 			sourceTree = "<group>";
 		};
 /* End PBXVariantGroup section */
