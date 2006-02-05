@@ -25,6 +25,15 @@
     return leftImage;
 }
 
+- (void)setObjectValue:(id)value{
+    if ([value isKindOfClass:[NSDictionary class]]) {
+        [super setObjectValue:[value objectForKey:@"name"]];
+        [self setLeftImage:[value objectForKey:@"icon"]];
+    } else {
+        [super setObjectValue:value];
+    }
+}
+
 - (NSRect)leftImageFrameForCellFrame:(NSRect)cellFrame {
     if (leftImage != nil) {
         NSRect leftImageFrame;
