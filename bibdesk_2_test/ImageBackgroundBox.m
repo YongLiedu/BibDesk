@@ -20,13 +20,12 @@
 }
 
 - (void)drawRect:(NSRect)rect {
-    [[NSColor whiteColor] set];
-    NSRectFill(rect);
-    if(backgroundImage){
-        [backgroundImage compositeToPoint:[self bounds].origin 
-                                operation:NSCompositeSourceOver
-                                 fraction:0.2];
-    }
+    if (backgroundImage) {
+        [[NSColor colorWithPatternImage:backgroundImage] set];
+    } else {
+		[[NSColor whiteColor] set];
+	}
+	NSRectFill(rect);
 }
 
 - (NSImage *)backgroundImage{
@@ -34,10 +33,18 @@
 }
 
 - (void)setBackgroundImage:(NSImage *)image{
-    if(image != backgroundImage){
-        [image autorelease];
-        backgroundImage = [image retain];
-    }
+	[backgroundImage autorelease];
+	if (image) {
+		NSRect rect = {NSZeroPoint, [image size]};
+		backgroundImage = [[NSImage alloc] initWithSize:rect.size];
+		[backgroundImage lockFocus];
+		[[NSColor whiteColor] set];
+		NSRectFill(rect);
+		[image compositeToPoint:NSZeroPoint operation:NSCompositeSourceOver fraction:0.2];
+		[backgroundImage unlockFocus];
+	} else {
+		backgroundImage = nil;
+	}
 }
 
 @end
