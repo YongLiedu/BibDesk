@@ -1,15 +1,14 @@
 {
-    "BDSKPublicationTableDisplayController" = { 
-        DisplayableClasses = ("BDSKPublicationGroup");
-        Bindings = ();
-    };
     "BDSKNoteTableDisplayController" = {    
-        DisplayableClasses = ("BDSKNoteGroup");
+        DisplayableEntities = ("Note");
         Bindings = ();
     };
     "BDSKPersonTableDisplayController" = {    
-        DisplayableClasses = ("BDSKPersonGroup");
+        DisplayableEntities = ("Person");
         Bindings = ();
     };
-
+    "BDSKPublicationTableDisplayController" = { 
+        DisplayableEntities = ("Publication");
+        Bindings = ();
+    };
 }
