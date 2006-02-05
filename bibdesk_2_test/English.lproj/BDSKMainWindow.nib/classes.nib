@@ -5,29 +5,25 @@
             ACTIONS = {
                 addNewGroupFromSourceListSelection = id; 
                 addNewItemFromSourceListSelection = id; 
-                addNewNote = id; 
-                addNewNoteGroup = id; 
-                addNewPerson = id; 
-                addNewPersonGroup = id; 
-                addNewPublication = id; 
-                addNewPublicationGroup = id; 
+                addNewSmartGroupFromSourceListSelection = id; 
+                importFromBibTeXFile = id; 
+                showWindowForSourceListSelection = id; 
             }; 
             CLASS = BDSKMainWindowController; 
             LANGUAGE = ObjC; 
             OUTLETS = {
-                currentDisplayController = id; 
-                currentDisplayView = NSView; 
-                mainSplitView = NSSplitView; 
                 selectedItemsArrayController = NSArrayController; 
                 sourceList = NSOutlineView; 
                 sourceListTreeController = NSTreeController; 
             }; 
-            SUPERCLASS = NSWindowController; 
+            SUPERCLASS = BDSKSecondaryWindowController; 
         }, 
         {
-            CLASS = BDSKSourceListTreeController; 
+            ACTIONS = {addNewItem = id; }; 
+            CLASS = BDSKSecondaryWindowController; 
             LANGUAGE = ObjC; 
-            SUPERCLASS = NSTreeController; 
+            OUTLETS = {currentDisplayController = id; currentDisplayView = NSView; }; 
+            SUPERCLASS = NSWindowController; 
         }, 
         {CLASS = FirstResponder; LANGUAGE = ObjC; SUPERCLASS = NSObject; }, 
         {CLASS = NSPersistentDocument; LANGUAGE = ObjC; SUPERCLASS = NSDocument; }
