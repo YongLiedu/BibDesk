@@ -20,6 +20,7 @@
     NSMutableDictionary *currentDisplayControllerForEntity;
     id currentDisplayController;
     IBOutlet NSView *currentDisplayView;
+    IBOutlet NSSearchField *searchField;
 }
 
 - (BDSKGroup *)sourceGroup;
