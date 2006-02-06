@@ -11,6 +11,7 @@
 #import "BDSKDocument.h"
 #import "BDSKGroup.h"
 #import "ImageAndTextCell.h"
+#import "BDSKBibTeXParser.h"
 
 #import "BDSKPublicationTableDisplayController.h" // @@ TODO: itemdisplayflex this should be temporary
 #import "BDSKNoteTableDisplayController.h" // @@ TODO: itemdisplayflex this should be temporary
@@ -307,16 +308,19 @@
 - (IBAction)oneShotImportFromBibTeXFile:(id)sender{
     // open file chooser
     
-    NSOpenPanel *op = [NSOpenPanel openPanel];
-    [op runModalForDirectory:nil
-                        file:@""];
-    NSLog(@"import chose %@", [op filenames]);
+    NSOpenPanel *openPanel = [NSOpenPanel openPanel];
+    int returnCode = [openPanel runModalForTypes:[NSArray arrayWithObject:@"bib"]];
+    if (returnCode == NSCancelButton)
+        return;
     
-    // [self importUsingImporter:[BDSKBibTeXImporter sharedImporter] ];
+	NSString *path = [[openPanel filenames] objectAtIndex: 0];
+	if (path == nil)
+		return;
+
+    NSData *data = [NSData dataWithContentsOfFile:path];
+    BOOL hadProblems = NO;
     
-    // call into BDSKBibTeXParser stuff to get managed objects
-    
-    // insert into document's MOC
+    [BDSKBibTeXParser itemsFromData:data error:&hadProblems document:(BDSKDocument *)[self document]];
 }
 
 // TODO: implementation
