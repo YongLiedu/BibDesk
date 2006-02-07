@@ -10,15 +10,12 @@
 #import <BTParse/btparse.h>
 #import <BTParse/error.h>
 #import <Carbon/Carbon.h>
-#include <stdio.h>
 #import "BDSKDocument.h"
 
 
 @interface BDSKBibTeXParser (Private)
 
 + (NSString *)stringFromBTField:(AST *)field fieldName:(NSString *)fieldName filePath:(NSString *)filePath document:(BDSKDocument *)document;
-+ (NSManagedObject *)publicationFromDictionary:(NSDictionary *)dictionary document:(BDSKDocument *)document;
-+ (void)deletePublicationsAndRelationships:(NSSet *)publications document:(BDSKDocument *)document;
 
 @end
 
@@ -36,8 +33,6 @@
     int ok = 1;
     long cidx = 0; // used to scan through buf for annotes.
     int braceDepth = 0;
-    
-    NSManagedObject *newPublication = nil;
 
     // Strings read from file and added to Dictionary object
     char *fieldname = "\0";
@@ -48,12 +43,13 @@
     AST *field = NULL;
 
     NSString *entryType = nil;
-    NSMutableSet *returnSet = [[NSMutableSet alloc] initWithCapacity:1];
+    NSMutableSet *pubSet = [[NSMutableSet alloc] initWithCapacity:1];
     
     const char *buf = NULL;
 
     //dictionary is the bibtex entry
-    NSMutableDictionary *dictionary = [NSMutableDictionary dictionaryWithCapacity:6];
+    NSMutableDictionary *pubDict = [NSMutableDictionary dictionaryWithCapacity:6];
+    NSDictionary *tmpDict;
     
     const char * fs_path = NULL;
     FILE *infile = NULL;
@@ -170,7 +166,11 @@
                             }else if(buf[cidx-1] == '"'){
                                 // scan up to the next quote.
                                 for(; buf[cidx] != '"'; cidx++);
-                            }else [NSException raise:NSInternalInconsistencyException format:@"Unexpected delimiter \"%@\" reached at line %d", [NSString stringWithBytes:&buf[cidx-1] encoding:parserEncoding], field->line];
+                            }else{ 
+                                bt_cleanup();
+                                fclose(infile);
+                                [NSException raise:NSInternalInconsistencyException format:@"Unexpected delimiter \"%@\" reached at line %d", [[[NSString alloc] initWithBytes:&buf[cidx-1] length:1 encoding:parserEncoding] autorelease], field->line];
+                            }
                             tmpStr = [[NSString alloc] initWithBytes:&buf[field->down->offset] length:(cidx- (field->down->offset)) encoding:parserEncoding];
                             // TODO: deTeXify
                             complexString = [tmpStr autorelease];
@@ -181,27 +181,31 @@
                         complexString = [self stringFromBTField:field fieldName:sFieldName filePath:filePath document:document];
                     }
                     
-                    [dictionary setObject:complexString forKey:sFieldName];
+                    if([sFieldName isEqualToString:@"Author"] || [sFieldName isEqualToString:@"Editor"]){
+                        [pubDict setObject:[self personNamesFromBibTeXString:complexString] forKey:sFieldName];
+                    }else{
+                        [pubDict setObject:complexString forKey:sFieldName];
+                    }
                     
                 }// end while field - process next bt field                    
 
                 tmpStr = [[NSString alloc] initWithBytes:bt_entry_key(entry) encoding:parserEncoding];
-                [dictionary setObject:tmpStr forKey:@"Cite Key"];
+                [pubDict setObject:tmpStr forKey:@"Cite Key"];
                 [tmpStr release];
                 
-                [dictionary setObject:[entryType lowercaseString] forKey:@"Type"];
+                [pubDict setObject:[entryType lowercaseString] forKey:@"Publication Type"];
                 
                 if ([filePath isEqualToString:@"Paste/Drag"]) {
                     NSString *dateStr = [[NSCalendarDate date] description];
-                    [dictionary setObject:dateStr forKey:@"Date-Added"];
-                    [dictionary setObject:dateStr forKey:@"Date-Modified"];
+                    [pubDict setObject:dateStr forKey:@"Date-Added"];
+                    [pubDict setObject:dateStr forKey:@"Date-Modified"];
                 }
                 
-                newPublication = [self publicationFromDictionary:dictionary document:document];
+                tmpDict = [[NSDictionary alloc] initWithDictionary:pubDict];
+                [pubSet addObject:tmpDict];
+                [tmpDict release];
                 
-                [returnSet addObject:newPublication];
-                
-                [dictionary removeAllObjects];
+                [pubDict removeAllObjects];
             } // end generate BibItem from ENTRY metatype.
         }else{
             // wasn't ok, record it and deal with it later.
@@ -216,14 +220,18 @@
     fclose(infile);
     // @@readonly free(buf);
     
+    NSSet *returnSet = nil;
+    
     if(*hadProblems){
-        NSLog(@"Problems parsing BibTeX");
-        // is there a way to never add them in the first place?
-        [self deletePublicationsAndRelationships:returnSet document:document];
-        [returnSet removeAllObjects];
+        //NSLog(@"Problems parsing BibTeX");
+        returnSet = [NSSet set];
+    }else{
+        returnSet = [document newPublicationsFromDictionaries:pubSet];
     }
     
-    return [returnSet autorelease];
+    [pubSet release];
+    
+    return returnSet;
 }
 
 + (NSArray *)personNamesFromBibTeXString:(NSString *)aString{
@@ -379,96 +387,6 @@
     return returnValue;
 }
 
-+ (NSManagedObject *)publicationFromDictionary:(NSDictionary *)dictionary document:(BDSKDocument *)document{
-    NSManagedObjectContext *moc = [document managedObjectContext];
-	
-    NSManagedObject *publication = [NSEntityDescription insertNewObjectForEntityForName:@"Publication" inManagedObjectContext:moc];
-    
-    NSMutableSet *keyValuePairs = [publication mutableSetValueForKey:@"keyValuePairs"];
-    NSMutableSet *contributors = [publication mutableSetValueForKey:@"contributorRelationships"];
-    NSMutableSet *notes = [publication mutableSetValueForKey:@"notes"];
-    
-    NSEnumerator *keyEnum = [dictionary keyEnumerator];
-    NSString *key;
-    NSString *value;
-    
-    while (key = [keyEnum nextObject]) {
-        value = [dictionary objectForKey:key];
-        key = [key capitalizedString];
-        if ([key isEqualToString:@"Author"] || [key isEqualToString:@"Editor"]) {
-            NSArray *names = [self personNamesFromBibTeXString:value];
-            NSEnumerator *nameEnum = [names objectEnumerator];
-            NSString *name;
-            NSManagedObject *person;
-            NSManagedObject *relationship;
-            while (name = [nameEnum nextObject]) {
-                 // TODO: identify persons with the same name
-                 person = [NSEntityDescription insertNewObjectForEntityForName:@"Person" inManagedObjectContext:moc];
-                 relationship = [NSEntityDescription insertNewObjectForEntityForName:@"ContributorPublicationRelationship" inManagedObjectContext:moc];
-                 [person setValue:name forKey:@"name"];
-                 [relationship setValue:person forKey:@"contributor"];
-                 [relationship setValue:[key lowercaseString] forKey:@"relationshipType"];
-                 [relationship setValue:[NSNumber numberWithInt:[contributors count]] forKey:@"index"];
-                 [contributors addObject:relationship];
-            }
-        } else if ([key isEqualToString:@"Annotation"]) {
-            NSManagedObject *note = [NSEntityDescription insertNewObjectForEntityForName:@"Note" inManagedObjectContext:moc];
-            [notes addObject:note];
-        } else if ([key isEqualToString:@"Journal"]) {
-            NSManagedObject *venue = [NSEntityDescription insertNewObjectForEntityForName:@"Venue" inManagedObjectContext:moc];
-            [venue setValue:value forKey:@"name"];
-            [publication setValue:venue forKey:@"venue"];
-        } else if ([key isEqualToString:@"Cite Key"]) {
-            [publication setValue:value forKey:@"citeKey"];
-        } else if ([key isEqualToString:@"Title"]) {
-            [publication setValue:value forKey:@"title"];
-        } else if ([key isEqualToString:@"Short-Title"]) {
-            [publication setValue:value forKey:@"shortTitle"];
-        } else if ([key isEqualToString:@"Date-Added"]) {
-            [publication setValue:[NSDate dateWithNaturalLanguageString:value] forKey:@"dateAdded"];
-        } else if ([key isEqualToString:@"Date-Modified"]) {
-            [publication setValue:[NSDate dateWithNaturalLanguageString:value] forKey:@"dateChanged"];
-        } else {
-            NSManagedObject *keyValuePair = [NSEntityDescription insertNewObjectForEntityForName:@"KeyValuePair" inManagedObjectContext:moc];
-            [keyValuePair setValue:key forKey:@"key"];
-            [keyValuePair setValue:value forKey:@"value"];
-            [keyValuePairs addObject:keyValuePair];
-        }
-    }
-    return publication;
-}
-
-+ (void)deletePublicationsAndRelationships:(NSSet *)publications document:(BDSKDocument *)document{
-    NSManagedObjectContext *moc = [document managedObjectContext];
-    NSEnumerator *moEnum;
-    NSManagedObject *mo;
-    
-    moEnum = [[publications valueForKeyPath:@"@distinctUnionOfSets.contributorRelationships.contributor"] objectEnumerator];
-    while (mo = [moEnum nextObject]) {
-        [moc deleteObject:mo]; // this implicitly deletes the relationship entity
-    }
-    
-    moEnum = [[publications valueForKeyPath:@"@distinctUnionOfSets.notes"] objectEnumerator];
-    while (mo = [moEnum nextObject]) {
-        [moc deleteObject:mo];
-    }
-    
-    moEnum = [[publications valueForKeyPath:@"@distinctUnionOfSets.keyValuePairs"] objectEnumerator];
-    while (mo = [moEnum nextObject]) {
-        [moc deleteObject:mo];
-    }
-    
-    moEnum = [[publications valueForKeyPath:@"venue"] objectEnumerator];
-    while (mo = [moEnum nextObject]) {
-        [moc deleteObject:mo];
-    }
-    
-    moEnum = [publications objectEnumerator];
-    while (mo = [moEnum nextObject]) {
-        [moc deleteObject:mo];
-    }
-}
-
 @end
 
 
@@ -484,7 +402,7 @@
 
 @end
 
-
+// copied from OmniFoundation/NSData-OFExtensions.m
 @implementation NSData (BDSKExtensions)
 
 /*" Creates a stdio FILE pointer for reading from the receiver via the funopen() BSD facility.  The receiver is automatically retained until the returned FILE is closed. "*/
