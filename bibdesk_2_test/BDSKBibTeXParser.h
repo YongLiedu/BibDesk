@@ -7,7 +7,6 @@
 //
 
 #import <Cocoa/Cocoa.h>
-#import <Carbon/Carbon.h>
 
 @class BDSKDocument;
 
@@ -17,6 +16,8 @@
 
 + (NSSet *)itemsFromData:(NSData *)data error:(BOOL *)hadProblems document:(BDSKDocument *)document;
 + (NSSet *)itemsFromData:(NSData *)data error:(BOOL *)hadProblems frontMatter:(NSMutableString *)frontMatter filePath:(NSString *)filePath document:(BDSKDocument *)document;
++ (NSArray *)personNamesFromBibTeXString:(NSString *)aString;
++ (NSDictionary *)splitPersonName:(NSString *)newName;
 
 @end
 

@@ -9,19 +9,19 @@
 #import "BDSKBibTeXParser.h"
 #import <BTParse/btparse.h>
 #import <BTParse/error.h>
+#import <Carbon/Carbon.h>
 #include <stdio.h>
 #import "BDSKDocument.h"
-#import <CoreFoundation/CoreFoundation.h>
 
 
 @interface BDSKBibTeXParser (Private)
 
-NSString *stringFromBTField(AST *field, NSString *fieldName, NSString *filePath, BDSKDocument *document);
-NSArray *personNamesFromBibTeXString(NSString *aString);
-NSManagedObject *publicationFromDictionary(NSString *citeKey, NSDictionary *dictionary, BDSKDocument *document);
-void deletePublicationsAndRelationships(NSSet *publications, BDSKDocument *document);
++ (NSString *)stringFromBTField:(AST *)field fieldName:(NSString *)fieldName filePath:(NSString *)filePath document:(BDSKDocument *)document;
++ (NSManagedObject *)publicationFromDictionary:(NSDictionary *)dictionary document:(BDSKDocument *)document;
++ (void)deletePublicationsAndRelationships:(NSSet *)publications document:(BDSKDocument *)document;
 
 @end
+
 
 @implementation BDSKBibTeXParser
 
@@ -178,7 +178,7 @@ void deletePublicationsAndRelationships(NSSet *publications, BDSKDocument *docum
                             *hadProblems = YES;
                         }
                     }else{
-                        complexString = stringFromBTField(field, sFieldName, filePath, document);
+                        complexString = [self stringFromBTField:field fieldName:sFieldName filePath:filePath document:document];
                     }
                     
                     [dictionary setObject:complexString forKey:sFieldName];
@@ -186,14 +186,18 @@ void deletePublicationsAndRelationships(NSSet *publications, BDSKDocument *docum
                 }// end while field - process next bt field                    
 
                 tmpStr = [[NSString alloc] initWithBytes:bt_entry_key(entry) encoding:parserEncoding];
+                [dictionary setObject:tmpStr forKey:@"Cite Key"];
+                [tmpStr release];
+                
                 [dictionary setObject:[entryType lowercaseString] forKey:@"Type"];
+                
                 if ([filePath isEqualToString:@"Paste/Drag"]) {
                     NSString *dateStr = [[NSCalendarDate date] description];
                     [dictionary setObject:dateStr forKey:@"Date-Added"];
                     [dictionary setObject:dateStr forKey:@"Date-Modified"];
                 }
-                newPublication = publicationFromDictionary(tmpStr, dictionary, document);
-                [tmpStr release];
+                
+                newPublication = [self publicationFromDictionary:dictionary document:document];
                 
                 [returnSet addObject:newPublication];
                 
@@ -215,18 +219,141 @@ void deletePublicationsAndRelationships(NSSet *publications, BDSKDocument *docum
     if(*hadProblems){
         NSLog(@"Problems parsing BibTeX");
         // is there a way to never add them in the first place?
-        deletePublicationsAndRelationships(returnSet, document);
+        [self deletePublicationsAndRelationships:returnSet document:document];
         [returnSet removeAllObjects];
     }
     
     return [returnSet autorelease];
 }
 
++ (NSArray *)personNamesFromBibTeXString:(NSString *)aString{
+    char *str = nil;
+	NSMutableArray *namesArray = [[NSMutableArray alloc] initWithCapacity:1];
+    
+    if (aString == nil || [aString isEqualToString:@""]){
+        return [namesArray autorelease];
+    }
+    
+    str = (char *)[aString UTF8String];
+    
+    // we're supposed to collapse whitespace before using bt_split_name, and author names with surrounding whitespace don't display in the table (probably for that reason)
+    bt_postprocess_string(str, BTO_COLLAPSE);
+    
+    bt_stringlist *sl = nil;
+    int i=0;
+    
+    NSString *s;
+    
+    // used as an error description
+    NSString *shortDescription = [[NSString alloc] initWithFormat:NSLocalizedString(@"reading authors string %@", @"need an string format specifier"), aString];
+    
+    sl = bt_split_list(str, "and", "BibTeX Name", 0, (char *)[shortDescription UTF8String]);
+    
+    if (sl != nil) {
+        for(i=0; i < sl->num_items; i++){
+            if(sl->items[i] != nil){
+                s = [[NSString alloc] initWithUTF8String:(sl->items[i])];
+				[namesArray addObject:s];
+                [s release];
+            }
+        }
+        bt_free_list(sl); // hey! got to free the memory!
+    }
+    [shortDescription release];
+	
+	return [namesArray autorelease];
+}
+
++ (NSDictionary *)splitPersonName:(NSString *)newName{
+    NSMutableDictionary *dictionary = [[NSMutableDictionary alloc] initWithCapacity:4];
+    NSString *namePart;
+    
+    bt_name *theName;
+    int i = 0;
+    
+    // use this as a buffer for appending separators
+    NSMutableString *mutableString = [[NSMutableString alloc] initWithCapacity:14];
+    NSString *tmpStr = nil;
+    
+    // pass the name as a UTF8 string, since btparse doesn't work with UniChars
+    theName = bt_split_name((char *)[newName UTF8String],(char *)[newName UTF8String],0,0);
+    
+    [mutableString setString:@""];
+    // get tokens from first part
+    for (i = 0; i < theName->part_len[BTN_FIRST]; i++)
+    {
+        tmpStr = [[NSString alloc] initWithUTF8String:(theName->parts[BTN_FIRST][i])];
+        [mutableString appendString:tmpStr];
+        [tmpStr release];
+        
+        if(i >= 0 && i < theName->part_len[BTN_FIRST]-1)
+            [mutableString appendString:@" "];
+    }
+    namePart = [mutableString copy];
+    [dictionary setObject:namePart forKey:@"firstNamePart"];
+    [namePart release];
+    
+    [mutableString setString:@""];
+    // get tokens from von part
+    for (i = 0; i < theName->part_len[BTN_VON]; i++)
+    {
+        tmpStr = [[NSString alloc] initWithUTF8String:(theName->parts[BTN_VON][i])];
+        [mutableString appendString:tmpStr];
+        [tmpStr release];
+        
+        if(i >= 0 && i < theName->part_len[BTN_VON]-1)
+            [mutableString appendString:@" "];
+        
+    }
+    namePart = [mutableString copy];
+    [dictionary setObject:namePart forKey:@"vonNamePart"];
+    [namePart release];
+    
+    [mutableString setString:@""];
+	// get tokens from last part
+    for (i = 0; i < theName->part_len[BTN_LAST]; i++)
+    {
+        tmpStr = [[NSString alloc] initWithUTF8String:(theName->parts[BTN_LAST][i])];
+        [mutableString appendString:tmpStr];
+        [tmpStr release];
+        
+        if(i >= 0 && i < theName->part_len[BTN_LAST]-1)
+            [mutableString appendString:@" "];
+    }
+    namePart = [mutableString copy];
+    [dictionary setObject:namePart forKey:@"lastNamePart"];
+    [namePart release];
+    
+    [mutableString setString:@""];
+    // get tokens from jr part
+    for (i = 0; i < theName->part_len[BTN_JR]; i++)
+    {
+        tmpStr = [[NSString alloc] initWithUTF8String:(theName->parts[BTN_JR][i])];
+        [mutableString appendString:tmpStr];
+        [tmpStr release];
+        
+        if(i >= 0 && i < theName->part_len[BTN_JR]-1)
+            [mutableString appendString:@" "];
+    }
+    namePart = [mutableString copy];
+    [dictionary setObject:namePart forKey:@"jrNamePart"];
+    [namePart release];
+    
+    [mutableString release];
+    
+    bt_free_name(theName);
+    
+    return [dictionary autorelease];
+}
+
 @end
 
 
+@implementation BDSKBibTeXParser (Private)
+
+
 // TODO: deTeXify
-NSString *stringFromBTField(AST *field, NSString *fieldName, NSString *filePath, BDSKDocument *document){
++ (NSString *)stringFromBTField:(AST *)field fieldName:(NSString *)fieldName filePath:(NSString *)filePath document:(BDSKDocument *)document{
     NSMutableString *returnValue = [[NSMutableString alloc] init];
     NSString *s = nil;
     AST *simple_value;
@@ -252,45 +379,7 @@ NSString *stringFromBTField(AST *field, NSString *fieldName, NSString *filePath,
     return returnValue;
 }
 
-NSArray *personNamesFromBibTeXString(NSString *aString){
-    char *str = nil;
-	NSMutableArray *namesArray = [[NSMutableArray alloc] initWithCapacity:1];
-    
-    if (aString == nil || [aString isEqualToString:@""]){
-        return [namesArray autorelease];
-    }
-    
-    // TODO: we're supposed to collapse whitespace before using bt_split_name, and author names with surrounding whitespace don't display in the table (probably for that reason)
-    //aString = [aString fastStringByCollapsingWhitespaceAndRemovingSurroundingWhitespace];
-    
-    str = (char *)[aString UTF8String];
-    
-    bt_stringlist *sl = nil;
-    int i=0;
-    
-    NSString *s;
-    
-    // used as an error description
-    NSString *shortDescription = [[NSString alloc] initWithFormat:NSLocalizedString(@"reading authors string %@", @"need an string format specifier"), aString];
-    
-    sl = bt_split_list(str, "and", "BibTex Name", 0, (char *)[shortDescription UTF8String]);
-    
-    if (sl != nil) {
-        for(i=0; i < sl->num_items; i++){
-            if(sl->items[i] != nil){
-                s = [[NSString alloc] initWithUTF8String:(sl->items[i])];
-				[namesArray addObject:s];
-                [s release];
-            }
-        }
-        bt_free_list(sl); // hey! got to free the memory!
-    }
-    [shortDescription release];
-	
-	return [namesArray autorelease];
-}
-
-NSManagedObject *publicationFromDictionary(NSString *citeKey, NSDictionary *dictionary, BDSKDocument *document){
++ (NSManagedObject *)publicationFromDictionary:(NSDictionary *)dictionary document:(BDSKDocument *)document{
     NSManagedObjectContext *moc = [document managedObjectContext];
 	
     NSManagedObject *publication = [NSEntityDescription insertNewObjectForEntityForName:@"Publication" inManagedObjectContext:moc];
@@ -303,17 +392,11 @@ NSManagedObject *publicationFromDictionary(NSString *citeKey, NSDictionary *dict
     NSString *key;
     NSString *value;
     
-    //[publications setValue:citeKey forKey:@"citeKey"];
-    NSManagedObject *keyValuePair = [NSEntityDescription insertNewObjectForEntityForName:@"KeyValuePair" inManagedObjectContext:moc];
-    [keyValuePair setValue:@"Cite-Key" forKey:@"key"];
-    [keyValuePair setValue:citeKey forKey:@"value"];
-    [keyValuePairs addObject:keyValuePair];
-    
     while (key = [keyEnum nextObject]) {
         value = [dictionary objectForKey:key];
         key = [key capitalizedString];
         if ([key isEqualToString:@"Author"] || [key isEqualToString:@"Editor"]) {
-            NSArray *names = personNamesFromBibTeXString(value);
+            NSArray *names = [self personNamesFromBibTeXString:value];
             NSEnumerator *nameEnum = [names objectEnumerator];
             NSString *name;
             NSManagedObject *person;
@@ -335,6 +418,8 @@ NSManagedObject *publicationFromDictionary(NSString *citeKey, NSDictionary *dict
             NSManagedObject *venue = [NSEntityDescription insertNewObjectForEntityForName:@"Venue" inManagedObjectContext:moc];
             [venue setValue:value forKey:@"name"];
             [publication setValue:venue forKey:@"venue"];
+        } else if ([key isEqualToString:@"Cite Key"]) {
+            [publication setValue:value forKey:@"citeKey"];
         } else if ([key isEqualToString:@"Title"]) {
             [publication setValue:value forKey:@"title"];
         } else if ([key isEqualToString:@"Short-Title"]) {
@@ -353,7 +438,7 @@ NSManagedObject *publicationFromDictionary(NSString *citeKey, NSDictionary *dict
     return publication;
 }
 
-void deletePublicationsAndRelationships(NSSet *publications, BDSKDocument *document){
++ (void)deletePublicationsAndRelationships:(NSSet *)publications document:(BDSKDocument *)document{
     NSManagedObjectContext *moc = [document managedObjectContext];
     NSEnumerator *moEnum;
     NSManagedObject *mo;
@@ -383,6 +468,8 @@ void deletePublicationsAndRelationships(NSSet *publications, BDSKDocument *docum
         [moc deleteObject:mo];
     }
 }
+
+@end
 
 
 @implementation NSString (BDSKExtensions)
