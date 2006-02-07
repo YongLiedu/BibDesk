@@ -355,29 +355,32 @@ NSManagedObject *publicationFromDictionary(NSString *citeKey, NSDictionary *dict
 
 void deletePublicationsAndRelationships(NSSet *publications, BDSKDocument *document){
     NSManagedObjectContext *moc = [document managedObjectContext];
-    NSEnumerator *pubEnum = [publications objectEnumerator];
-    NSManagedObject *pub;
+    NSEnumerator *moEnum;
+    NSManagedObject *mo;
     
-    while (pub = [pubEnum nextObject]) {
-        NSEnumerator *relationshipEnum = [[publications valueForKey:@"contributorRelationships"] objectEnumerator];
-        NSManagedObject *relationship;
-        while (relationship = [relationshipEnum nextObject]) {
-            if (relationship = [[relationship valueForKey:@"contributor"] anyObject]) {
-                [moc deleteObject:relationship]; // this implicitly deletes the relationship entity
-            }
-        }
-        relationshipEnum = [[publications valueForKey:@"notes"] objectEnumerator];
-        while (relationship = [[relationshipEnum nextObject] anyObject]) {
-            [moc deleteObject:relationship];
-        }
-        if (relationship = [[publications valueForKey:@"venue"] anyObject]) {
-            [moc deleteObject:relationship];
-        }
-        relationshipEnum = [[publications valueForKey:@"keyValuePairs"] objectEnumerator];
-        while (relationship = [[relationshipEnum nextObject] anyObject]) {
-            [moc deleteObject:relationship];
-        }
-        [moc deleteObject:pub];
+    moEnum = [[publications valueForKeyPath:@"@distinctUnionOfSets.contributorRelationships.contributor"] objectEnumerator];
+    while (mo = [moEnum nextObject]) {
+        [moc deleteObject:mo]; // this implicitly deletes the relationship entity
+    }
+    
+    moEnum = [[publications valueForKeyPath:@"@distinctUnionOfSets.notes"] objectEnumerator];
+    while (mo = [moEnum nextObject]) {
+        [moc deleteObject:mo];
+    }
+    
+    moEnum = [[publications valueForKeyPath:@"@distinctUnionOfSets.keyValuePairs"] objectEnumerator];
+    while (mo = [moEnum nextObject]) {
+        [moc deleteObject:mo];
+    }
+    
+    moEnum = [[publications valueForKeyPath:@"venue"] objectEnumerator];
+    while (mo = [moEnum nextObject]) {
+        [moc deleteObject:mo];
+    }
+    
+    moEnum = [publications objectEnumerator];
+    while (mo = [moEnum nextObject]) {
+        [moc deleteObject:mo];
     }
 }
 
