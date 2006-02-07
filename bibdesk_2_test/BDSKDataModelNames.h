@@ -21,6 +21,12 @@
 #define NoteGroupEntityName @"NoteGroup"
 #define NoteEntityName @"Note"
 
+#define InstitutionGroupEntityName @"InstitutionGroup"
+#define InstitutionEntityName @"Institution"
+
+#define VenueGroupEntityName @"VenueGroup"
+#define VenueEntityName @"Venue"
+
 #define TagEntityName @"Tag"
 
 #define ContributorPublicationRelationshipEntityName @"ContributorPublicationRelationship"
