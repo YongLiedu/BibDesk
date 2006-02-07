@@ -11,6 +11,8 @@
 #define BDSKPublicationPboardType @"BDSKPublicationPboardType"
 #define BDSKPersonPboardType @"BDSKPersonPboardType"
 #define BDSKNotePboardType @"BDSKNotePboardType"
+#define BDSKInstitutionPboardType @"BDSKInstitutionPboardType"
+#define BDSKVenuePboardType @"BDSKVenuePboardType"
 
 @interface BDSKDocument : NSPersistentDocument {
 }
@@ -18,6 +20,10 @@
 - (NSManagedObject *)rootPublicationGroup;
 - (NSManagedObject *)rootPersonGroup;
 - (NSManagedObject *)rootNoteGroup;
+- (NSManagedObject *)rootInstitutionGroup;
+- (NSManagedObject *)rootVenueGroup;
 - (NSManagedObject *)rootGroupForEntityName:(NSString *)entityName;
+
+- (NSSet *)newPublicationsFromDictionaries:(NSSet *)dictionarySet;
 
 @end

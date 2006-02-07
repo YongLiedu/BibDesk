@@ -17,6 +17,10 @@
         [rootGroup setValue:@"RootGroupIcon" forKey:@"groupImageName"];
         rootGroup = [self rootNoteGroup];
         [rootGroup setValue:@"RootGroupIcon" forKey:@"groupImageName"];
+        rootGroup = [self rootInstitutionGroup];
+        [rootGroup setValue:@"RootGroupIcon" forKey:@"groupImageName"];
+        rootGroup = [self rootVenueGroup];
+        [rootGroup setValue:@"RootGroupIcon" forKey:@"groupImageName"];
     }
     return self;
 }
@@ -74,6 +78,32 @@
                  forKey:@"priority"];
     [noteGroup setValue:@"RootGroupIcon"
                  forKey:@"groupImageName"];
+    
+    id institutionGroup = [NSEntityDescription insertNewObjectForEntityForName:SmartGroupEntityName
+                                             inManagedObjectContext:managedObjectContext];
+    [institutionGroup setValue:[NSNumber numberWithBool:YES]
+                        forKey:@"isRoot"];
+    [institutionGroup setValue:NSLocalizedString(@"All Institutions", @"Top level Institution group name")
+                        forKey:@"name"];
+    [institutionGroup setValue:InstitutionEntityName
+                        forKey:@"itemEntityName"];
+    [institutionGroup setValue:[NSNumber numberWithShort:6]
+                        forKey:@"priority"];
+    [institutionGroup setValue:@"RootGroupIcon"
+                        forKey:@"groupImageName"];
+    
+    id venueGroup = [NSEntityDescription insertNewObjectForEntityForName:SmartGroupEntityName
+                                             inManagedObjectContext:managedObjectContext];
+    [venueGroup setValue:[NSNumber numberWithBool:YES]
+                  forKey:@"isRoot"];
+    [venueGroup setValue:NSLocalizedString(@"All Venues", @"Top level Venue group name")
+                  forKey:@"name"];
+    [venueGroup setValue:VenueEntityName
+                  forKey:@"itemEntityName"];
+    [venueGroup setValue:[NSNumber numberWithShort:5]
+                  forKey:@"priority"];
+    [venueGroup setValue:@"RootGroupIcon"
+                  forKey:@"groupImageName"];
     
     [managedObjectContext processPendingChanges];
     [[managedObjectContext undoManager] enableUndoRegistration];
@@ -178,6 +208,8 @@
     // user interface preparation code
 }
 
+#pragma mark Default root groups
+
 - (NSManagedObject *)rootPublicationGroup{
 	return [self rootGroupForEntityName:PublicationEntityName];
 }
@@ -188,6 +220,14 @@
 
 - (NSManagedObject *)rootNoteGroup{
 	return [self rootGroupForEntityName:NoteEntityName];
+}
+
+- (NSManagedObject *)rootInstitutionGroup{
+	return [self rootGroupForEntityName:InstitutionEntityName];
+}
+
+- (NSManagedObject *)rootVenueGroup{
+	return [self rootGroupForEntityName:VenueEntityName];
 }
 
 - (NSManagedObject *)rootGroupForEntityName:(NSString *)entityName{
@@ -218,6 +258,79 @@
     }
     
     return nil;   
+}
+
+#pragma mark Add new publications from parsed info
+
+- (NSSet *)newPublicationsFromDictionaries:(NSSet *)dictionarySet{
+    NSManagedObjectContext *moc = [self managedObjectContext];
+    
+    NSMutableSet *returnSet = [[NSMutableSet alloc] initWithCapacity:[dictionarySet count]];
+    NSEnumerator *dictEnum = [dictionarySet objectEnumerator];
+    NSDictionary *dict;
+    
+    while (dict = [dictEnum nextObject]) {
+        
+        NSManagedObject *publication = [NSEntityDescription insertNewObjectForEntityForName:@"Publication" inManagedObjectContext:moc];
+        
+        NSMutableSet *keyValuePairs = [publication mutableSetValueForKey:@"keyValuePairs"];
+        NSMutableSet *contributors = [publication mutableSetValueForKey:@"contributorRelationships"];
+        NSMutableSet *notes = [publication mutableSetValueForKey:@"notes"];
+        
+        NSEnumerator *keyEnum = [dict keyEnumerator];
+        NSString *key;
+        id value;
+        
+        while (key = [keyEnum nextObject]) {
+            value = [dict objectForKey:key];
+            key = [key capitalizedString];
+            if ([key isEqualToString:@"Author"] || [key isEqualToString:@"Editor"]) {
+                NSArray *names = ([value isKindOfClass:[NSArray class]]) ? value : [NSArray arrayWithObject:value];
+                NSEnumerator *nameEnum = [names objectEnumerator];
+                NSString *name;
+                NSManagedObject *person;
+                NSManagedObject *relationship;
+                while (name = [nameEnum nextObject]) {
+                     // TODO: identify persons with the same name
+                     person = [NSEntityDescription insertNewObjectForEntityForName:PersonEntityName inManagedObjectContext:moc];
+                     relationship = [NSEntityDescription insertNewObjectForEntityForName:ContributorPublicationRelationshipEntityName inManagedObjectContext:moc];
+                     [person setValue:name forKey:@"name"];
+                     [relationship setValue:person forKey:@"contributor"];
+                     [relationship setValue:[key lowercaseString] forKey:@"relationshipType"];
+                     [relationship setValue:[NSNumber numberWithInt:[contributors count]] forKey:@"index"];
+                     [contributors addObject:relationship];
+                }
+            } else if ([key isEqualToString:@"Annotation"]) {
+                NSManagedObject *note = [NSEntityDescription insertNewObjectForEntityForName:NoteEntityName inManagedObjectContext:moc];
+                [notes addObject:note];
+            } else if ([key isEqualToString:@"Journal"]) {
+                NSManagedObject *venue = [NSEntityDescription insertNewObjectForEntityForName:VenueEntityName inManagedObjectContext:moc];
+                [venue setValue:value forKey:@"name"];
+                [publication setValue:venue forKey:@"venue"];
+            } else if ([key isEqualToString:@"Publication Type"]) {
+                [publication setValue:value forKey:@"publicationType"];
+            } else if ([key isEqualToString:@"Cite Key"]) {
+                [publication setValue:value forKey:@"citeKey"];
+            } else if ([key isEqualToString:@"Title"]) {
+                [publication setValue:value forKey:@"title"];
+            } else if ([key isEqualToString:@"Short-Title"]) {
+                [publication setValue:value forKey:@"shortTitle"];
+            } else if ([key isEqualToString:@"Date-Added"]) {
+                [publication setValue:[NSDate dateWithNaturalLanguageString:value] forKey:@"dateAdded"];
+            } else if ([key isEqualToString:@"Date-Modified"]) {
+                [publication setValue:[NSDate dateWithNaturalLanguageString:value] forKey:@"dateChanged"];
+            } else {
+                NSManagedObject *keyValuePair = [NSEntityDescription insertNewObjectForEntityForName:@"KeyValuePair" inManagedObjectContext:moc];
+                [keyValuePair setValue:key forKey:@"key"];
+                [keyValuePair setValue:value forKey:@"value"];
+                [keyValuePairs addObject:keyValuePair];
+            }
+        }
+        
+        [returnSet addObject:publication];
+    }
+    
+    return [returnSet autorelease];
 }
 
 @end
