@@ -7,6 +7,7 @@
 //
 
 #import "BDSKPerson.h"
+#import "BDSKBibTeXParser.h"
 
 
 @implementation BDSKPerson
@@ -45,42 +46,11 @@
 }
 
 - (void)setName:(NSString *)newName{
-	// TODO: more intelligent name parsing, maybe using btparse?
-	NSCharacterSet *wsCharSet = [NSCharacterSet whitespaceCharacterSet];
-	NSString *firstNamePart = nil;
-	NSString *lastNamePart = nil;
-	NSString *vonNamePart = nil;
-	NSString *jrNamePart = nil;
-	NSArray *components = [newName componentsSeparatedByString:@","];
-	int count = [components count];
-	if (count == 1) {
-		components = [[[components objectAtIndex:0] stringByTrimmingCharactersInSet:wsCharSet] componentsSeparatedByString:@" "];
-		count = [components count];
-		if (count > 1) {
-			firstNamePart = [[components objectAtIndex:0] stringByTrimmingCharactersInSet:wsCharSet];
-			if (count > 2) {
-				vonNamePart = [[components objectAtIndex:1] stringByTrimmingCharactersInSet:wsCharSet];
-				components = [components subarrayWithRange:NSMakeRange(2, count - 2)];
-			} else {
-				components = [components subarrayWithRange:NSMakeRange(1, count - 1)];
-			}
-		}
-	} else {
-		firstNamePart = [[components lastObject] stringByTrimmingCharactersInSet:wsCharSet];
-		if (count == 3) 
-			jrNamePart = [[components objectAtIndex:1] stringByTrimmingCharactersInSet:wsCharSet];
-		components = [[[components objectAtIndex:0] stringByTrimmingCharactersInSet:wsCharSet] componentsSeparatedByString:@" "];
-		count = [components count];
-		if (count > 1) {
-			vonNamePart = [[components objectAtIndex:0] stringByTrimmingCharactersInSet:wsCharSet];
-			components = [components subarrayWithRange:NSMakeRange(1, count - 1)];
-		}
-	}
-	lastNamePart = [components componentsJoinedByString:@" "];
-	[self setValue:firstNamePart forKey:@"firstNamePart"];
-	[self setValue:lastNamePart forKey:@"lastNamePart"];
-	[self setValue:vonNamePart forKey:@"vonNamePart"];
-	[self setValue:jrNamePart forKey:@"jrNamePart"];
+    NSDictionary *dict = [BDSKBibTeXParser splitPersonName:newName];
+	[self setValue:[dict objectForKey:@"firstNamePart"] forKey:@"firstNamePart"];
+	[self setValue:[dict objectForKey:@"lastNamePart"] forKey:@"lastNamePart"];
+	[self setValue:[dict objectForKey:@"vonNamePart"] forKey:@"vonNamePart"];
+	[self setValue:[dict objectForKey:@"jrNamePart"] forKey:@"jrNamePart"];
 }
 
 - (BDSKPersonInstitutionRelationship *)currentInstitutionRelationship{
