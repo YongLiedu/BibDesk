@@ -19,6 +19,7 @@
                 itemsArrayController = NSArrayController; 
                 itemsTableView = NSTableView; 
                 mainView = NSView; 
+                ownerController = NSObjectController; 
                 selectionDetailsBox = ImageBackgroundBox; 
             }; 
             SUPERCLASS = NSObject; 

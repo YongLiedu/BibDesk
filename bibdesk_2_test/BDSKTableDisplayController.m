@@ -31,6 +31,15 @@
     [super dealloc];
 }
 
+- (void)setupBinding:(id)controller{
+    // fix for binding-to-nib-owner-bug
+    if (controller != nil) {
+        [ownerController setContent:self];
+    } else {
+        [ownerController setContent:nil];
+    }
+}
+
 - (void)awakeFromNib{
     [selectionDetailsBox setBackgroundImage:[NSImage imageNamed:@"coffeeStain"]];
 }
@@ -117,7 +126,8 @@
 	NSURL *moURI;
 	NSManagedObject *parent = [[itemsArrayController arrangedObjects] objectAtIndex:row];
 	NSString *entityName = [[[[[parent entity] relationshipsByName] objectForKey:relationshipKey] destinationEntity] name];
-	NSMutableSet *relationships = [parent mutableSetValueForKey:relationshipKey];
+	BOOL isToMany = [[[[parent entity] relationshipsByName] objectForKey:relationshipKey] isToMany];
+	NSMutableSet *relationships = (isToMany) ? [parent mutableSetValueForKey:relationshipKey] : nil;
 	NSSet *children = relationships;
 	BOOL hasIndex = NO;
 	
@@ -144,8 +154,13 @@
 					[relationship setValue:@"institution" forKey:@"relationshipType"];
 			}
 			[relationship setValue:child forKey:childKey];
-		}	
-		[relationships addObject:relationship];
+		}
+        if (isToMany == YES) {
+            [relationships addObject:relationship];
+        } else {
+            [parent setValue:relationship forKey:relationshipKey];
+            return YES;
+        }
 	}
     
 	return YES;

@@ -12,6 +12,7 @@
 
 @interface BDSKTableDisplayController : NSObject {
     IBOutlet NSView *mainView;
+    IBOutlet NSObjectController *ownerController;
     IBOutlet NSArrayController *itemsArrayController;
     IBOutlet NSTableView *itemsTableView;
     IBOutlet ImageBackgroundBox *selectionDetailsBox;
@@ -30,6 +31,8 @@
 - (NSTableView *)itemsTableView;
 
 - (NSArray *)filterPredicates;
+
+- (void)setupBinding:(id)controller;
 
 - (BOOL)writeRowsWithIndexes:(NSIndexSet *)rowIndexes toPasteboard:(NSPasteboard *)pboard forType:(NSString *)type;
 - (BOOL)addRelationshipsFromPasteboard:(NSPasteboard *)pboard forType:(NSString *)type parentRow:(int)row keyPath:(NSString *)keyPath;

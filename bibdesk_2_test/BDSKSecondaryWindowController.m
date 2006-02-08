@@ -54,6 +54,7 @@
 }
 
 - (void)windowWillClose:(NSNotification *)notification{
+    [self setDisplayController:nil]; // needed to remove the bindings in the displayController
 	[[self document] removeWindowController:self];
 }
 
@@ -106,12 +107,16 @@
         if(currentDisplayController)
             [self unbindDisplayController:currentDisplayController];
         
-        [[newDisplayController view] setFrame:[currentDisplayView frame]];
-        [[currentDisplayView superview] replaceSubview:currentDisplayView with:[newDisplayController view]];
-
-        currentDisplayView = [newDisplayController view];
-        currentDisplayController = [newDisplayController retain];
-        [self bindDisplayController:currentDisplayController];
+        if (newDisplayController != nil) {
+            [[newDisplayController view] setFrame:[currentDisplayView frame]];
+            [[currentDisplayView superview] replaceSubview:currentDisplayView with:[newDisplayController view]];
+            currentDisplayView = [newDisplayController view];
+            currentDisplayController = [newDisplayController retain];
+            [self bindDisplayController:currentDisplayController];
+        } else {
+            currentDisplayView = nil;
+            currentDisplayController = nil;
+        }
     }
 }
 
@@ -155,7 +160,8 @@
 
 
 - (void)bindDisplayController:(id)displayController{
-    // TODO: bind to a particular group
+    [displayController setupBinding:self];
+    
 	// Not binding the contentSet will get all the managed objects for the entity
 	// Binding contentSet will not update a dynamic smart group
     NSDictionary *options = [NSDictionary dictionaryWithObjectsAndKeys:[NSNumber numberWithBool:NO], NSRaisesForNotApplicableKeysBindingOption, [NSNumber numberWithBool:YES], NSConditionallySetsEnabledBindingOption, [NSNumber numberWithBool:YES], NSDeletesObjectsOnRemoveBindingsOption, nil];
@@ -180,6 +186,8 @@
 // TODO: as the above method creates multiple bindings, this one will have to keep up.
 // mb the display controllers themselves should be 
 - (void)unbindDisplayController:(id)displayController{
+    [displayController setupBinding:nil];
+    
     int i = [[displayController filterPredicates] count];
     NSString *key;
     while (i-- > 0) {
