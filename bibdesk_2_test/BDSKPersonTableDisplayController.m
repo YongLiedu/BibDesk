@@ -25,8 +25,9 @@
 
 - (void)awakeFromNib{
 	[super awakeFromNib];
-	[itemsTableView registerForDraggedTypes:[NSArray arrayWithObjects:BDSKPublicationPboardType, BDSKPersonPboardType, nil]];
+	[itemsTableView registerForDraggedTypes:[NSArray arrayWithObjects:BDSKPublicationPboardType, BDSKPersonPboardType, BDSKInstitutionPboardType, nil]];
 	[publicationsTableView registerForDraggedTypes:[NSArray arrayWithObjects:BDSKPublicationPboardType, nil]];
+	[tagsTableView registerForDraggedTypes:[NSArray arrayWithObjects:BDSKTagPboardType, nil]];
 }
 
 #pragma mark Actions
@@ -56,6 +57,15 @@
 	[relationship setValue:publication forKey:@"publication"];
 	[relationship setValue:@"author" forKey:@"relationshipType"];
 	[publicationsArrayController addObject:relationship];
+}
+
+- (IBAction)addInstitution:(id)sender{
+	NSManagedObjectContext *moc = [self managedObjectContext];
+	NSManagedObject *institution = [NSEntityDescription insertNewObjectForEntityForName:InstitutionEntityName inManagedObjectContext:moc];
+	NSManagedObject *relationship = [NSEntityDescription insertNewObjectForEntityForName:PersonInstitutionRelationshipEntityName inManagedObjectContext:moc];
+	[relationship setValue:institution forKey:@"institution"];
+	[relationship setValue:@"institution" forKey:@"relationshipType"];
+	[institutionsArrayController addObject:relationship];
 }
 
 #pragma mark Filter predicate binding
@@ -98,22 +108,33 @@
 			return NSDragOperationNone;
 		NSPasteboard *pboard = [info draggingPasteboard];
 		NSString *type = [pboard availableTypeFromArray:[NSArray arrayWithObjects:BDSKPublicationPboardType, nil]];
-        if ([tv setValidDropRow:row dropOperation:NSTableViewDropAbove] == NO)
-            return NSDragOperationNone;
 		if ([type isEqualToString:BDSKPublicationPboardType]) {
+			[tv setDropRow:-1 dropOperation:NSTableViewDropOn];
 			if ([[[info draggingSource] dataSource] document] == [self document])
 				return NSDragOperationLink;
 			else
 				return NSDragOperationCopy;
 		}
         
+    } else if (tv == tagsTableView) {
+		
+        if ([[itemsArrayController selectedObjects] count] != 1)
+			return NSDragOperationNone;
+		NSPasteboard *pboard = [info draggingPasteboard];
+		NSString *type = [pboard availableTypeFromArray:[NSArray arrayWithObjects:BDSKTagPboardType, nil]];
+		if ([type isEqualToString:BDSKTagPboardType]) {
+			[tv setDropRow:-1 dropOperation:NSTableViewDropOn];
+			if ([[[info draggingSource] dataSource] document] == [self document])
+				return NSDragOperationLink;
+			else
+				return NSDragOperationCopy;
+		}
 	} else if (tv == itemsTableView) {
 		
         NSPasteboard *pboard = [info draggingPasteboard];
 		NSString *type = [pboard availableTypeFromArray:[NSArray arrayWithObjects:BDSKPublicationPboardType, BDSKPersonPboardType, nil]];
 		if ([type isEqualToString:BDSKPublicationPboardType]) {
-            if ([tv setValidDropRow:row dropOperation:NSTableViewDropAbove] == NO)
-                return NSDragOperationNone;
+			[tv setDropRow:-1 dropOperation:NSTableViewDropOn];
             if ([[[info draggingSource] dataSource] document] == [self document])
 				return NSDragOperationLink;
 			else
@@ -139,15 +160,26 @@
 			[type isEqualToString:BDSKPublicationPboardType])
 			return [self addRelationshipsFromPasteboard:pboard forType:type parentRow:-1 keyPath:@"publicationRelationships.publication"];
         
+	} else if (tv == tagsTableView) {
+        
+        NSString *type = [pboard availableTypeFromArray:[NSArray arrayWithObjects:BDSKTagPboardType, nil]];
+		if (([info draggingSourceOperationMask] & NSDragOperationLink) &&
+			[type isEqualToString:BDSKTagPboardType])
+			return [self addRelationshipsFromPasteboard:pboard forType:type parentRow:-1 keyPath:@"tags"];
+        
     } else if (tv == itemsTableView) {
 		
         if (!([info draggingSourceOperationMask] & NSDragOperationLink))
 			return NO;
-		NSString *type = [pboard availableTypeFromArray:[NSArray arrayWithObjects:BDSKPublicationPboardType, BDSKPersonPboardType, nil]];
+		NSString *type = [pboard availableTypeFromArray:[NSArray arrayWithObjects:BDSKPublicationPboardType, BDSKPersonPboardType, BDSKInstitutionPboardType, nil]];
 		
         if ([type isEqualToString:BDSKPublicationPboardType]) {
 			
             return [self addRelationshipsFromPasteboard:pboard forType:type parentRow:row keyPath:@"publicationRelationships.publication"];
+            
+        } else if ([type isEqualToString:BDSKInstitutionPboardType]) {
+			
+            return [self addRelationshipsFromPasteboard:pboard forType:type parentRow:row keyPath:@"institutionRelationships.institution"];
             
 		} else if ([type isEqualToString:BDSKPersonPboardType]) {
 			

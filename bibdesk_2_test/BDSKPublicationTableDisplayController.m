@@ -111,11 +111,12 @@
 		if ([[itemsArrayController selectedObjects] count] != 1)
 			return NSDragOperationNone;
 		NSString *type = [pboard availableTypeFromArray:[NSArray arrayWithObjects:BDSKContributorRowsPboardType, BDSKPersonPboardType, nil]];
-        if ([tv setValidDropRow:row dropOperation:NSTableViewDropAbove] == NO)
-            return NSDragOperationNone;
-		if ([type isEqualToString:BDSKContributorRowsPboardType] && [info draggingSource] == tv) 
+		if ([type isEqualToString:BDSKContributorRowsPboardType] && [info draggingSource] == tv) {
+            if ([tv setValidDropRow:row dropOperation:NSTableViewDropAbove] == NO)
+                return NSDragOperationNone;
 			return NSDragOperationMove;
-		else if ([type isEqualToString:BDSKPersonPboardType]) {
+		} else if ([type isEqualToString:BDSKPersonPboardType]) {
+			[tv setDropRow:-1 dropOperation:NSTableViewDropOn];
 			if ([[[info draggingSource] dataSource] document] == [self document])
 				return NSDragOperationLink;
 			else
@@ -126,9 +127,8 @@
         
 		NSPasteboard *pboard = [info draggingPasteboard];
 		NSString *type = [pboard availableTypeFromArray:[NSArray arrayWithObjects:BDSKPersonPboardType, BDSKInstitutionPboardType, BDSKVenuePboardType, nil]];
-        if ([tv setValidDropRow:row dropOperation:NSTableViewDropOn] == NO)
-            return NSDragOperationNone;
 		if ([type isEqualToString:BDSKPersonPboardType] || [type isEqualToString:BDSKInstitutionPboardType] || [type isEqualToString:BDSKVenuePboardType]) {
+			[tv setDropRow:-1 dropOperation:NSTableViewDropOn];
 			if ([[[info draggingSource] dataSource] document] == [self document])
 				return NSDragOperationLink;
 			else
@@ -195,11 +195,11 @@
 			return NO;
 		NSString *type = [pboard availableTypeFromArray:[NSArray arrayWithObjects:BDSKPersonPboardType, BDSKInstitutionPboardType, BDSKVenuePboardType, nil]];
 		if ([type isEqualToString:BDSKPersonPboardType])
-			return [self addRelationshipsFromPasteboard:pboard forType:type parentRow:row keyPath:@"contributorRelationships.contributor"];
+			return [self addRelationshipsFromPasteboard:pboard forType:type parentRow:-1 keyPath:@"contributorRelationships.contributor"];
 		else if ([type isEqualToString:BDSKInstitutionPboardType])
-			return [self addRelationshipsFromPasteboard:pboard forType:type parentRow:row keyPath:@"contributorRelationships.contributor"];
+			return [self addRelationshipsFromPasteboard:pboard forType:type parentRow:-1 keyPath:@"contributorRelationships.contributor"];
         else if ([type isEqualToString:BDSKVenuePboardType])
-			return [self addRelationshipsFromPasteboard:pboard forType:type parentRow:row keyPath:@"venue"];
+			return [self addRelationshipsFromPasteboard:pboard forType:type parentRow:-1 keyPath:@"venue"];
         
 	}
     
