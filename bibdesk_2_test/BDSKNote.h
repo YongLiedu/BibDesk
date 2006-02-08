@@ -13,6 +13,4 @@
 
 }
 
-- (NSString *)stringValueForSearch;
-
 @end

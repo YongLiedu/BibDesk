@@ -11,10 +11,4 @@
 
 @implementation BDSKNote
 
-- (NSString *)stringValueForSearch{
-    NSString *val = [self valueForKey:@"value"];
-    NSLog(@"getting search value in note: %@", val);
-    return val;
-}
-
 @end

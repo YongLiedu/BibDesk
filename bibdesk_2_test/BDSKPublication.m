@@ -23,11 +23,6 @@
 	[super dealloc];
 }
 
-- (NSString *)stringValueForSearch{
-    return [NSString stringWithFormat:@"%@ %@", [self valueForKey:@"title"],
-        [self valueForKey:@"shortTitle"]];
-}
-
 - (void)observeValueForKeyPath:(NSString *)keyPath ofObject:(id)object change:(NSDictionary *)change context:(void *)context {
     if ([keyPath isEqual:@"contributorRelationships"]) {
 		switch ([[change objectForKey:NSKeyValueChangeKindKey] intValue]) {

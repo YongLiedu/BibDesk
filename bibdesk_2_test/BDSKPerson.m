@@ -18,13 +18,6 @@
     triggerChangeNotificationsForDependentKey:@"name"];
 }
 
-- (NSString *)stringValueForSearch{
-    return [NSString stringWithFormat:@"%@ %@ %@ %@", [self valueForKey:@"firstNamePart"],
-        [self valueForKey:@"vonNamePart"],
-        [self valueForKey:@"lastNamePart"],
-        [self valueForKey:@"jrNamePart"]];
-}
-
 - (NSString *)name{
     NSString *firstName = [self valueForKey:@"firstNamePart"];
     NSString *vonPart = [self valueForKey:@"vonNamePart"];

@@ -14,8 +14,6 @@
 
 }
 
-- (NSString *)stringValueForSearch;
-
 - (NSString *)name;
 - (void)setName:(NSString *)newName;
 
