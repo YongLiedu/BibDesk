@@ -48,15 +48,6 @@
     [super didTurnIntoFault];
 }
 
-- (void)dealloc {
-    [[NSNotificationCenter defaultCenter] removeObserver:self 
-                                                    name:NSManagedObjectContextObjectsDidChangeNotification 
-                                                  object:[self managedObjectContext]];
-
-    [cachedIcon release];
-    [super dealloc];
-}
-
 - (void)managedObjectContextObjectsDidChange:(NSNotification *)notification {
     if ([self isSmart])
         return;

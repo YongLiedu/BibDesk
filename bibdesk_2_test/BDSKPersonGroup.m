@@ -25,12 +25,7 @@
     [[NSNotificationCenter defaultCenter] removeObserver:self 
                                                     name:@"BDSKPersonWasReplacedNotification" 
                                                   object:nil];
-}
-- (void)dealloc {
-    [[NSNotificationCenter defaultCenter] removeObserver:self 
-                                                    name:@"BDSKPersonWasReplacedNotification" 
-                                                  object:nil];
-    [super dealloc];
+    [super didTurnIntoFault];
 }
 
 - (NSString *)itemEntityName {

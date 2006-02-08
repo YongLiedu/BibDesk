@@ -37,17 +37,6 @@
     [super didTurnIntoFault];
 }
 
-- (void)dealloc {
-    [items release];
-    items = nil;
-    [fetchRequest release];
-    fetchRequest = nil;
-    [predicate release];
-    predicate = nil;
-    
-    [super dealloc];
-}
-
 - (void)refresh {
 	[self willChangeValueForKey:@"items"];
 	[items release];
