@@ -30,9 +30,8 @@
 	NSSortDescriptor *sortDescriptor = [[NSSortDescriptor alloc] initWithKey:@"index" ascending:YES];
     [contributorsArrayController setSortDescriptors:[NSArray arrayWithObject:sortDescriptor]];
 	[sortDescriptor release];
-	[itemsTableView registerForDraggedTypes:[NSArray arrayWithObjects:BDSKPersonPboardType, BDSKNotePboardType, nil]];
+	[itemsTableView registerForDraggedTypes:[NSArray arrayWithObjects:BDSKPersonPboardType, BDSKInstitutionPboardType, BDSKVenuePboardType, nil]];
 	[contributorsTableView registerForDraggedTypes:[NSArray arrayWithObjects:BDSKContributorRowsPboardType, BDSKPersonPboardType, nil]];
-	[notesTableView registerForDraggedTypes:[NSArray arrayWithObjects:BDSKNotePboardType, nil]];
 	[contributorsTableView setDraggingSourceOperationMask:NSDragOperationEvery forLocal:YES]; // NSDragOperationMove is not included in the default mask
 }
 
@@ -123,27 +122,13 @@
 				return NSDragOperationCopy;
 		}
         
-	} else if (tv == notesTableView) {
-        
-		if ([[itemsArrayController selectedObjects] count] != 1)
-			return NSDragOperationNone;
-		NSString *type = [pboard availableTypeFromArray:[NSArray arrayWithObjects:BDSKNotePboardType, nil]];
-        if ([tv setValidDropRow:row dropOperation:NSTableViewDropAbove] == NO)
-            return NSDragOperationNone;
-		if ([type isEqualToString:BDSKNotePboardType]) {
-			if ([[[info draggingSource] dataSource] document] == [self document])
-				return NSDragOperationLink;
-			else
-				return NSDragOperationCopy;
-		}
-        
 	} else if (tv == itemsTableView) {
         
 		NSPasteboard *pboard = [info draggingPasteboard];
-		NSString *type = [pboard availableTypeFromArray:[NSArray arrayWithObjects:BDSKPersonPboardType, BDSKNotePboardType, nil]];
+		NSString *type = [pboard availableTypeFromArray:[NSArray arrayWithObjects:BDSKPersonPboardType, BDSKInstitutionPboardType, BDSKVenuePboardType, nil]];
         if ([tv setValidDropRow:row dropOperation:NSTableViewDropOn] == NO)
             return NSDragOperationNone;
-		if ([type isEqualToString:BDSKPersonPboardType] || [type isEqualToString:BDSKNotePboardType]) {
+		if ([type isEqualToString:BDSKPersonPboardType] || [type isEqualToString:BDSKInstitutionPboardType] || [type isEqualToString:BDSKVenuePboardType]) {
 			if ([[[info draggingSource] dataSource] document] == [self document])
 				return NSDragOperationLink;
 			else
@@ -208,18 +193,13 @@
         
 		if (!([info draggingSourceOperationMask] & NSDragOperationLink))
 			return NO;
-		NSString *type = [pboard availableTypeFromArray:[NSArray arrayWithObjects:BDSKPersonPboardType, BDSKNotePboardType, nil]];
+		NSString *type = [pboard availableTypeFromArray:[NSArray arrayWithObjects:BDSKPersonPboardType, BDSKInstitutionPboardType, BDSKVenuePboardType, nil]];
 		if ([type isEqualToString:BDSKPersonPboardType])
 			return [self addRelationshipsFromPasteboard:pboard forType:type parentRow:row keyPath:@"contributorRelationships.contributor"];
-		else if ([type isEqualToString:BDSKNotePboardType])
-			return [self addRelationshipsFromPasteboard:pboard forType:type parentRow:row keyPath:@"notes"];
-        
-	} else if (tv == notesTableView) {
-        
-		NSString *type = [pboard availableTypeFromArray:[NSArray arrayWithObjects:BDSKNotePboardType, nil]];
-		if (([info draggingSourceOperationMask] & NSDragOperationLink) &&
-			[type isEqualToString:BDSKNotePboardType])
-			return [self addRelationshipsFromPasteboard:pboard forType:type parentRow:-1 keyPath:@"notes"];
+		else if ([type isEqualToString:BDSKInstitutionPboardType])
+			return [self addRelationshipsFromPasteboard:pboard forType:type parentRow:row keyPath:@"contributorRelationships.contributor"];
+        else if ([type isEqualToString:BDSKVenuePboardType])
+			return [self addRelationshipsFromPasteboard:pboard forType:type parentRow:row keyPath:@"venue"];
         
 	}
     

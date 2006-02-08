@@ -72,10 +72,6 @@
 }
 
 - (BOOL)tableView:(NSTableView *)tv writeRowsWithIndexes:(NSIndexSet *)rowIndexes toPasteboard:(NSPasteboard *)pboard {
-	if (tv == itemsTableView) {
-        return [self writeRowsWithIndexes:rowIndexes toPasteboard:pboard forType:BDSKNotePboardType];
-	}
-    
 	return NO;
 }
 
