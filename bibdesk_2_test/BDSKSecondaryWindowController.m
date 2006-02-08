@@ -43,6 +43,7 @@
 }
 
 - (void)dealloc{
+    [displayControllers makeObjectsPerformSelector:@selector(setupBinding:) withObject:nil];
     [displayControllers release];
     [currentDisplayControllerForEntity release];        
     [displayControllersInfoDict release];
@@ -145,6 +146,7 @@
         Class controllerClass = NSClassFromString(displayControllerClassName);
         BDSKTableDisplayController *controllerObject = [[controllerClass alloc] init];
         [controllerObject setDocument:[self document]];
+        [controllerObject setupBinding:self];
         [displayControllers addObject:controllerObject];
 
         NSDictionary *infoDict = [displayControllersInfoDict objectForKey:displayControllerClassName];
@@ -160,8 +162,6 @@
 
 
 - (void)bindDisplayController:(id)displayController{
-    [displayController setupBinding:self];
-    
 	// Not binding the contentSet will get all the managed objects for the entity
 	// Binding contentSet will not update a dynamic smart group
     NSDictionary *options = [NSDictionary dictionaryWithObjectsAndKeys:[NSNumber numberWithBool:NO], NSRaisesForNotApplicableKeysBindingOption, [NSNumber numberWithBool:YES], NSConditionallySetsEnabledBindingOption, [NSNumber numberWithBool:YES], NSDeletesObjectsOnRemoveBindingsOption, nil];
@@ -186,8 +186,6 @@
 // TODO: as the above method creates multiple bindings, this one will have to keep up.
 // mb the display controllers themselves should be 
 - (void)unbindDisplayController:(id)displayController{
-    [displayController setupBinding:nil];
-    
     int i = [[displayController filterPredicates] count];
     NSString *key;
     while (i-- > 0) {
