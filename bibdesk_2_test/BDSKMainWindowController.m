@@ -81,6 +81,12 @@
         [topLevelSourceListItems addObject:rootGroup];
     if (rootGroup = [doc rootNoteGroup])
         [topLevelSourceListItems addObject:rootGroup];
+    if (rootGroup = [doc rootInstitutionGroup])
+        [topLevelSourceListItems addObject:rootGroup];
+    if (rootGroup = [doc rootVenueGroup])
+        [topLevelSourceListItems addObject:rootGroup];
+    if (rootGroup = [doc rootTagGroup])
+        [topLevelSourceListItems addObject:rootGroup];
 }
 
 #pragma mark Accessors

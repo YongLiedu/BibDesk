@@ -1,4 +1,8 @@
 {
+    "BDSKInstitutionTableDisplayController" = {    
+        DisplayableEntities = ("Institution");
+        Bindings = ();
+    };
     "BDSKNoteTableDisplayController" = {    
         DisplayableEntities = ("Note");
         Bindings = ();
@@ -9,6 +13,14 @@
     };
     "BDSKPublicationTableDisplayController" = { 
         DisplayableEntities = ("Publication");
+        Bindings = ();
+    };
+    "BDSKVenueTableDisplayController" = {    
+        DisplayableEntities = ("Venue");
+        Bindings = ();
+    };
+    "BDSKTagTableDisplayController" = {    
+        DisplayableEntities = ("Tag");
         Bindings = ();
     };
 }
