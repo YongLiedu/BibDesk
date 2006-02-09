@@ -7,9 +7,10 @@
 //
 
 #import <Cocoa/Cocoa.h>
+#import "BDSKGroup.h"
 
 
-@interface BDSKVenueGroup : NSManagedObject {
+@interface BDSKVenueGroup : BDSKGroup {
 
 }
 
