@@ -8,11 +8,12 @@
 #import "BDSKDataModelNames.h"
 #import "BDSKMainWindowController.h"
 
-#define BDSKPublicationPboardType @"BDSKPublicationPboardType"
-#define BDSKPersonPboardType @"BDSKPersonPboardType"
-#define BDSKNotePboardType @"BDSKNotePboardType"
-#define BDSKInstitutionPboardType @"BDSKInstitutionPboardType"
-#define BDSKVenuePboardType @"BDSKVenuePboardType"
+extern NSString *BDSKPublicationPboardType;
+extern NSString *BDSKPersonPboardType;
+extern NSString *BDSKNotePboardType;
+extern NSString *BDSKInstitutionPboardType;
+extern NSString *BDSKVenuePboardType;
+extern NSString *BDSKTagPboardType;
 
 @interface BDSKDocument : NSPersistentDocument {
 }
@@ -23,6 +24,7 @@
 - (NSManagedObject *)rootInstitutionGroup;
 - (NSManagedObject *)rootVenueGroup;
 - (NSManagedObject *)rootGroupForEntityName:(NSString *)entityName;
+- (NSManagedObject *)rootTagGroup;
 
 - (NSSet *)newPublicationsFromDictionaries:(NSSet *)dictionarySet;
 
