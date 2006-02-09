@@ -21,21 +21,27 @@ NSString *BDSKTagPboardType = @"BDSKTagPboardType";
         id rootGroup = [self rootPublicationGroup];
         [rootGroup setValue:@"RootGroupIcon" forKey:@"groupImageName"];
         [rootGroup setValue:[NSNumber numberWithBool:NO] forKey:@"canEdit"];
+        [rootGroup setValue:[NSNumber numberWithBool:NO] forKey:@"canEditName"];
         rootGroup = [self rootPersonGroup];
         [rootGroup setValue:@"RootGroupIcon" forKey:@"groupImageName"];
         [rootGroup setValue:[NSNumber numberWithBool:NO] forKey:@"canEdit"];
+        [rootGroup setValue:[NSNumber numberWithBool:NO] forKey:@"canEditName"];
         rootGroup = [self rootNoteGroup];
         [rootGroup setValue:@"RootGroupIcon" forKey:@"groupImageName"];
         [rootGroup setValue:[NSNumber numberWithBool:NO] forKey:@"canEdit"];
+        [rootGroup setValue:[NSNumber numberWithBool:NO] forKey:@"canEditName"];
         rootGroup = [self rootInstitutionGroup];
         [rootGroup setValue:@"RootGroupIcon" forKey:@"groupImageName"];
         [rootGroup setValue:[NSNumber numberWithBool:NO] forKey:@"canEdit"];
+        [rootGroup setValue:[NSNumber numberWithBool:NO] forKey:@"canEditName"];
         rootGroup = [self rootVenueGroup];
         [rootGroup setValue:@"RootGroupIcon" forKey:@"groupImageName"];
         [rootGroup setValue:[NSNumber numberWithBool:NO] forKey:@"canEdit"];
+        [rootGroup setValue:[NSNumber numberWithBool:NO] forKey:@"canEditName"];
         rootGroup = [self rootTagGroup];
         [rootGroup setValue:@"RootGroupIcon" forKey:@"groupImageName"];
         [rootGroup setValue:[NSNumber numberWithBool:NO] forKey:@"canEdit"];
+        [rootGroup setValue:[NSNumber numberWithBool:NO] forKey:@"canEditName"];
     }
     return self;
 }
@@ -61,6 +67,8 @@ NSString *BDSKTagPboardType = @"BDSKTagPboardType";
                 forKey:@"isRoot"];
     [pubGroup setValue:[NSNumber numberWithBool:NO]
                 forKey:@"canEdit"];
+    [pubGroup setValue:[NSNumber numberWithBool:NO]
+                forKey:@"canEditName"];
     [pubGroup setValue:NSLocalizedString(@"All Publications", @"Top level Publication group name")
                 forKey:@"name"];
     [pubGroup setValue:PublicationEntityName
@@ -76,6 +84,8 @@ NSString *BDSKTagPboardType = @"BDSKTagPboardType";
                    forKey:@"isRoot"];
     [personGroup setValue:[NSNumber numberWithBool:NO]
                    forKey:@"canEdit"];
+    [personGroup setValue:[NSNumber numberWithBool:NO]
+                   forKey:@"canEditName"];
     [personGroup setValue:NSLocalizedString(@"All People", @"Top level Person group name")
                    forKey:@"name"];
     [personGroup setValue:PersonEntityName
@@ -91,6 +101,8 @@ NSString *BDSKTagPboardType = @"BDSKTagPboardType";
                  forKey:@"isRoot"];
     [noteGroup setValue:[NSNumber numberWithBool:NO]
                  forKey:@"canEdit"];
+    [noteGroup setValue:[NSNumber numberWithBool:NO]
+                 forKey:@"canEditName"];
     [noteGroup setValue:NSLocalizedString(@"All Notes", @"Top level Note group name")
                  forKey:@"name"];
     [noteGroup setValue:NoteEntityName
@@ -106,6 +118,8 @@ NSString *BDSKTagPboardType = @"BDSKTagPboardType";
                         forKey:@"isRoot"];
     [institutionGroup setValue:[NSNumber numberWithBool:NO]
                         forKey:@"canEdit"];
+    [institutionGroup setValue:[NSNumber numberWithBool:NO]
+                        forKey:@"canEditName"];
     [institutionGroup setValue:NSLocalizedString(@"All Institutions", @"Top level Institution group name")
                         forKey:@"name"];
     [institutionGroup setValue:InstitutionEntityName
@@ -121,6 +135,8 @@ NSString *BDSKTagPboardType = @"BDSKTagPboardType";
                   forKey:@"isRoot"];
     [venueGroup setValue:[NSNumber numberWithBool:NO]
                   forKey:@"canEdit"];
+    [venueGroup setValue:[NSNumber numberWithBool:NO]
+                  forKey:@"canEditName"];
     [venueGroup setValue:NSLocalizedString(@"All Venues", @"Top level Venue group name")
                   forKey:@"name"];
     [venueGroup setValue:VenueEntityName
@@ -136,6 +152,8 @@ NSString *BDSKTagPboardType = @"BDSKTagPboardType";
                 forKey:@"isRoot"];
     [tagGroup setValue:[NSNumber numberWithBool:NO]
                 forKey:@"canEdit"];
+    [tagGroup setValue:[NSNumber numberWithBool:NO]
+                forKey:@"canEditName"];
     [tagGroup setValue:NSLocalizedString(@"All Tags", @"Top level Tag group name")
                 forKey:@"name"];
     [tagGroup setValue:TagEntityName
