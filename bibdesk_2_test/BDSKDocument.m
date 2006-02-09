@@ -6,6 +6,13 @@
 
 #import "BDSKDocument.h"
 
+NSString *BDSKPublicationPboardType = @"BDSKPublicationPboardType";
+NSString *BDSKPersonPboardType = @"BDSKPersonPboardType";
+NSString *BDSKNotePboardType = @"BDSKNotePboardType";
+NSString *BDSKInstitutionPboardType = @"BDSKInstitutionPboardType";
+NSString *BDSKVenuePboardType = @"BDSKVenuePboardType";
+NSString *BDSKTagPboardType = @"BDSKTagPboardType";
+
 @implementation BDSKDocument
 
 - (id)init{
@@ -13,14 +20,22 @@
     if (self != nil) {
         id rootGroup = [self rootPublicationGroup];
         [rootGroup setValue:@"RootGroupIcon" forKey:@"groupImageName"];
+        [rootGroup setValue:[NSNumber numberWithBool:NO] forKey:@"canEdit"];
         rootGroup = [self rootPersonGroup];
         [rootGroup setValue:@"RootGroupIcon" forKey:@"groupImageName"];
+        [rootGroup setValue:[NSNumber numberWithBool:NO] forKey:@"canEdit"];
         rootGroup = [self rootNoteGroup];
         [rootGroup setValue:@"RootGroupIcon" forKey:@"groupImageName"];
+        [rootGroup setValue:[NSNumber numberWithBool:NO] forKey:@"canEdit"];
         rootGroup = [self rootInstitutionGroup];
         [rootGroup setValue:@"RootGroupIcon" forKey:@"groupImageName"];
+        [rootGroup setValue:[NSNumber numberWithBool:NO] forKey:@"canEdit"];
         rootGroup = [self rootVenueGroup];
         [rootGroup setValue:@"RootGroupIcon" forKey:@"groupImageName"];
+        [rootGroup setValue:[NSNumber numberWithBool:NO] forKey:@"canEdit"];
+        rootGroup = [self rootTagGroup];
+        [rootGroup setValue:@"RootGroupIcon" forKey:@"groupImageName"];
+        [rootGroup setValue:[NSNumber numberWithBool:NO] forKey:@"canEdit"];
     }
     return self;
 }
@@ -44,6 +59,8 @@
                                                   inManagedObjectContext:managedObjectContext];
     [pubGroup setValue:[NSNumber numberWithBool:YES]
                 forKey:@"isRoot"];
+    [pubGroup setValue:[NSNumber numberWithBool:NO]
+                forKey:@"canEdit"];
     [pubGroup setValue:NSLocalizedString(@"All Publications", @"Top level Publication group name")
                 forKey:@"name"];
     [pubGroup setValue:PublicationEntityName
@@ -57,6 +74,8 @@
                                              inManagedObjectContext:managedObjectContext];
     [personGroup setValue:[NSNumber numberWithBool:YES]
                    forKey:@"isRoot"];
+    [personGroup setValue:[NSNumber numberWithBool:NO]
+                   forKey:@"canEdit"];
     [personGroup setValue:NSLocalizedString(@"All People", @"Top level Person group name")
                    forKey:@"name"];
     [personGroup setValue:PersonEntityName
@@ -70,6 +89,8 @@
                                              inManagedObjectContext:managedObjectContext];
     [noteGroup setValue:[NSNumber numberWithBool:YES]
                  forKey:@"isRoot"];
+    [noteGroup setValue:[NSNumber numberWithBool:NO]
+                 forKey:@"canEdit"];
     [noteGroup setValue:NSLocalizedString(@"All Notes", @"Top level Note group name")
                  forKey:@"name"];
     [noteGroup setValue:NoteEntityName
@@ -83,6 +104,8 @@
                                              inManagedObjectContext:managedObjectContext];
     [institutionGroup setValue:[NSNumber numberWithBool:YES]
                         forKey:@"isRoot"];
+    [institutionGroup setValue:[NSNumber numberWithBool:NO]
+                        forKey:@"canEdit"];
     [institutionGroup setValue:NSLocalizedString(@"All Institutions", @"Top level Institution group name")
                         forKey:@"name"];
     [institutionGroup setValue:InstitutionEntityName
@@ -96,6 +119,8 @@
                                              inManagedObjectContext:managedObjectContext];
     [venueGroup setValue:[NSNumber numberWithBool:YES]
                   forKey:@"isRoot"];
+    [venueGroup setValue:[NSNumber numberWithBool:NO]
+                  forKey:@"canEdit"];
     [venueGroup setValue:NSLocalizedString(@"All Venues", @"Top level Venue group name")
                   forKey:@"name"];
     [venueGroup setValue:VenueEntityName
@@ -104,6 +129,21 @@
                   forKey:@"priority"];
     [venueGroup setValue:@"RootGroupIcon"
                   forKey:@"groupImageName"];
+    
+    id tagGroup = [NSEntityDescription insertNewObjectForEntityForName:SmartGroupEntityName
+                                             inManagedObjectContext:managedObjectContext];
+    [tagGroup setValue:[NSNumber numberWithBool:YES]
+                forKey:@"isRoot"];
+    [tagGroup setValue:[NSNumber numberWithBool:NO]
+                forKey:@"canEdit"];
+    [tagGroup setValue:NSLocalizedString(@"All Tags", @"Top level Tag group name")
+                forKey:@"name"];
+    [tagGroup setValue:TagEntityName
+                forKey:@"itemEntityName"];
+    [tagGroup setValue:[NSNumber numberWithShort:4]
+                forKey:@"priority"];
+    [tagGroup setValue:@"RootGroupIcon"
+                forKey:@"groupImageName"];
     
     [managedObjectContext processPendingChanges];
     [[managedObjectContext undoManager] enableUndoRegistration];
@@ -228,6 +268,10 @@
 
 - (NSManagedObject *)rootVenueGroup{
 	return [self rootGroupForEntityName:VenueEntityName];
+}
+
+- (NSManagedObject *)rootTagGroup{
+	return [self rootGroupForEntityName:TagEntityName];
 }
 
 - (NSManagedObject *)rootGroupForEntityName:(NSString *)entityName{
