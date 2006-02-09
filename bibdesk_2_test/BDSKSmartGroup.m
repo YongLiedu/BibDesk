@@ -14,6 +14,7 @@
 - (id)initWithEntity:(NSEntityDescription*)entity insertIntoManagedObjectContext:(NSManagedObjectContext*)context{
 	if (self = [super initWithEntity:entity insertIntoManagedObjectContext:context]) {
 		canEdit = YES;
+        canEditName = YES;
 	}
 	return self;
 }
@@ -163,13 +164,20 @@
     return YES;
 }
 
-
 - (BOOL)canEdit {
     return canEdit;
 }
 
 - (void)setCanEdit:(BOOL)flag {
     canEdit = flag;
+}
+
+- (BOOL)canEditName {
+    return canEditName;
+}
+
+- (void)setCanEditName:(BOOL)flag {
+    canEditName = flag;
 }
 
 - (NSSet *)items {

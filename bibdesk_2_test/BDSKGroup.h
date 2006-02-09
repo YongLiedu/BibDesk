@@ -24,6 +24,7 @@
 - (BOOL)isSmart;
 
 - (BOOL)canEdit;
+- (BOOL)canEditName;
 
 - (NSString *)itemEntityName;
 

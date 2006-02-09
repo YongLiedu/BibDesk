@@ -16,6 +16,7 @@
     NSSet *items;
     NSString *groupImageName;
     BOOL canEdit;
+    BOOL canEditName;
 }
 
 - (NSPredicate *)predicate;

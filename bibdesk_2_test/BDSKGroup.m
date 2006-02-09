@@ -99,6 +99,10 @@
     return NO;
 }
 
+- (BOOL)canEditName {
+    return YES;
+}
+
 - (NSString *)itemEntityName {
     // implemented by subclass
     return nil;

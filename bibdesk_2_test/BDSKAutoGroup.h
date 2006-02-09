@@ -13,6 +13,7 @@
 @interface BDSKAutoGroup : BDSKGroup {
     NSMutableSet *children;
     BOOL isToMany;
+    BOOL recreatingChildren;
 }
 
 - (NSString *)itemEntityName;

@@ -21,9 +21,22 @@
 
 - (void)refresh {
 	[self willChangeValueForKey:@"children"];
+    
+    if ([children count]) {
+        
+        NSManagedObjectContext *moc = [self managedObjectContext];
+        NSEnumerator *childEnum = [children objectEnumerator];
+        NSManagedObject *child;
+        
+        while (child = [childEnum nextObject]) {
+            [moc deleteObject:child];
+        }
+    }
+    
 	[children release];
     children = nil;    
-	[self didChangeValueForKey:@"children"];
+	
+    [self didChangeValueForKey:@"children"];
 }
 
 - (void)managedObjectContextObjectsDidChange:(NSNotification *)notification {
@@ -113,6 +126,10 @@
     return YES;
 }
 
+- (BOOL)canEdit {
+    return YES;
+}
+
 - (NSSet *)items {
     return [NSSet set];
 }
@@ -127,8 +144,11 @@
         NSString *propertyName = [self itemPropertyName];
         
         children = [[NSMutableSet alloc] init];
-        if (entityName == nil || propertyName == nil) 
+        if (entityName == nil || propertyName == nil || recreatingChildren == YES) 
             return children;
+        
+        // our fetchRequest later can call -children while we are building, effectively adding them twice. Is there a better way to avoid?
+        recreatingChildren = YES;
         
         NSManagedObjectContext *moc = [self managedObjectContext];
         NSEntityDescription *entity = [NSEntityDescription entityForName:entityName inManagedObjectContext:moc];
@@ -154,9 +174,12 @@
             [child setValue:entityName forKey:@"itemEntityName"];
             [child setValue:value forKey:@"name"];
             [child setValue:[NSNumber numberWithBool:NO] forKey:@"canEdit"];
+            [child setValue:[NSNumber numberWithBool:NO] forKey:@"canEditName"];
             [child setPredicate:[NSPredicate predicateWithFormat:predicateFormat, propertyName, value]];
             [children addObject:child];
         }
+        
+        recreatingChildren = NO;
     }
     return children;
 }
