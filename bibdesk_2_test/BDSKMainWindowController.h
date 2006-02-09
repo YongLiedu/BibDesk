@@ -15,25 +15,11 @@
     IBOutlet NSOutlineView *sourceList;
     IBOutlet NSArrayController *selectedItemsArrayController;
     IBOutlet NSTreeController *sourceListTreeController;
-    NSMutableArray *topLevelSourceListItems;
-    NSIndexPath *sourceListSelectedIndexPath;
 }
-
-- (NSArray *)topLevelSourceListItems;
-- (unsigned)countOfTopLevelSourceListItems;
-- (id)objectInTopLevelSourceListItemsAtIndex:(unsigned)index;
-- (void)insertObject:(id)obj inTopLevelSourceListItemsAtIndex:(unsigned)index;
-- (void)removeObjectFromTopLevelSourceListItemsAtIndex:(unsigned)index;
 
 - (NSSet *)sourceListSelectedItems;
 - (void)addSourceListSelectedItemsObject:(id)obj;
 - (void)removeSourceListSelectedItemsObject:(id)obj;
-
-- (NSIndexPath *)sourceListSelectedIndexPath;
-- (void)setSourceListSelectedIndexPath:(NSIndexPath *)indexPath;
-
-- (void)setupTopLevelSourceListItems;
-- (void)reloadSourceList;
 
 // actions
 - (IBAction)showWindowForSourceListSelection:(id)sender;

@@ -25,8 +25,6 @@
 
 - (id)initWithWindowNibName:(NSString *)windowNibName{
     if (self = [super initWithWindowNibName:windowNibName]){
-        topLevelSourceListItems = [[NSMutableArray alloc] initWithCapacity:5];
-        sourceListSelectedIndexPath = nil;
     }
     
     return self;
@@ -40,76 +38,28 @@
     [sourceListTreeController setSortDescriptors:[NSArray arrayWithObject:sortDescriptor]];
     [sortDescriptor release];    
     
-    [self setupTopLevelSourceListItems];
-    
     NSTableColumn *tc = [sourceList tableColumnWithIdentifier:@"mainColumn"];
     [tc setDataCell:[[[ImageAndTextCell alloc] init] autorelease]];
     
     [sourceListTreeController addObserver:self forKeyPath:@"selectedObjects" options:0 context:NULL];
     [sourceList selectRow:0 byExtendingSelection:NO]; //@@TODO: might want to store last row as a pref
 
-	[sourceList registerForDraggedTypes:[NSArray arrayWithObjects:BDSKPublicationPboardType, BDSKPersonPboardType, BDSKNotePboardType, nil]];
+	[sourceList registerForDraggedTypes:[NSArray arrayWithObjects:BDSKPublicationPboardType, BDSKPersonPboardType, BDSKInstitutionPboardType, BDSKVenuePboardType, BDSKNotePboardType, BDSKTagPboardType, nil]];
 }
 
 - (void)dealloc{
     [sourceListTreeController removeObserver:self forKeyPath:@"selectedObjects"];
-    [topLevelSourceListItems release];
     [super dealloc];
 }
 
 -(void)windowDidLoad{ 
-    [self reloadSourceList];
 }
 
 - (NSString *)windowTitleForDocumentDisplayName:(NSString *)displayName{
     return displayName;
 }
 
-#pragma mark Source List setup
-
-- (void)reloadSourceList{
-    [sourceList reloadData];
-}
-
-
-- (void)setupTopLevelSourceListItems{
-	BDSKDocument *doc = (BDSKDocument *)[self document];
-    id rootGroup = nil;
-    if (rootGroup = [doc rootPublicationGroup])
-        [topLevelSourceListItems addObject:rootGroup];
-    if (rootGroup = [doc rootPersonGroup])
-        [topLevelSourceListItems addObject:rootGroup];
-    if (rootGroup = [doc rootNoteGroup])
-        [topLevelSourceListItems addObject:rootGroup];
-    if (rootGroup = [doc rootInstitutionGroup])
-        [topLevelSourceListItems addObject:rootGroup];
-    if (rootGroup = [doc rootVenueGroup])
-        [topLevelSourceListItems addObject:rootGroup];
-    if (rootGroup = [doc rootTagGroup])
-        [topLevelSourceListItems addObject:rootGroup];
-}
-
 #pragma mark Accessors
-
-- (NSArray *)topLevelSourceListItems {
-    return [[topLevelSourceListItems retain] autorelease];
-}
-
-- (unsigned)countOfTopLevelSourceListItems {
-    return [topLevelSourceListItems count];
-}
-
-- (id)objectInTopLevelSourceListItemsAtIndex:(unsigned)index {
-    return [topLevelSourceListItems objectAtIndex:index];
-}
-
-- (void)insertObject:(id)obj inTopLevelSourceListItemsAtIndex:(unsigned)index {
-    [topLevelSourceListItems insertObject:obj atIndex:index];
-}
-
-- (void)removeObjectFromTopLevelSourceListItemsAtIndex:(unsigned)index {
-    [topLevelSourceListItems removeObjectAtIndex:index];
-}
 
 - (NSSet *)sourceListSelectedItems{
     id selectedGroup = [self sourceGroup];
@@ -124,18 +74,6 @@
 - (void)removeSourceListSelectedItemsObject:(id)obj{
     id selectedGroup = [self sourceGroup];
     [[selectedGroup mutableSetValueForKey:@"items"] removeObject:obj];
-}
-
-- (NSIndexPath *)sourceListSelectedIndexPath {
-    return sourceListSelectedIndexPath;
-}
-
-- (void)setSourceListSelectedIndexPath:(NSIndexPath *)indexPath {
-    if (indexPath != sourceListSelectedIndexPath) {
-        [sourceListSelectedIndexPath release];
-        sourceListSelectedIndexPath = [indexPath copy];
-        [self setSourceGroup:[[sourceListTreeController selectedObjects] lastObject]];
-    }
 }
 
 #pragma mark Actions
@@ -253,8 +191,14 @@
         pboardType = BDSKPublicationPboardType;
     else if ([entityName isEqualToString:PersonEntityName])
         pboardType = BDSKPersonPboardType;
+    else if ([entityName isEqualToString:InstitutionEntityName])
+        pboardType = BDSKInstitutionPboardType;
+    else if ([entityName isEqualToString:VenueEntityName])
+        pboardType = BDSKVenuePboardType;
     else if ([entityName isEqualToString:NoteEntityName])
         pboardType = BDSKNotePboardType;
+    else if ([entityName isEqualToString:TagEntityName])
+        pboardType = BDSKTagPboardType;
     else return NSDragOperationNone;
     
     if ([pboard availableTypeFromArray:[NSArray arrayWithObjects:pboardType, nil]] == nil)
@@ -281,8 +225,14 @@
         pboardType = BDSKPublicationPboardType;
     else if ([entityName isEqualToString:PersonEntityName])
         pboardType = BDSKPersonPboardType;
+    else if ([entityName isEqualToString:InstitutionEntityName])
+        pboardType = BDSKInstitutionPboardType;
+    else if ([entityName isEqualToString:VenueEntityName])
+        pboardType = BDSKVenuePboardType;
     else if ([entityName isEqualToString:NoteEntityName])
         pboardType = BDSKNotePboardType;
+    else if ([entityName isEqualToString:TagEntityName])
+        pboardType = BDSKTagPboardType;
     else return NO;
     
     if ([pboard availableTypeFromArray:[NSArray arrayWithObjects:pboardType, nil]] == nil)
