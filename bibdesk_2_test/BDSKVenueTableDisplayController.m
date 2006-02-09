@@ -86,7 +86,8 @@
         NSPasteboard *pboard = [info draggingPasteboard];
 		NSString *type = [pboard availableTypeFromArray:[NSArray arrayWithObjects:BDSKPublicationPboardType, nil]];
 		if ([type isEqualToString:BDSKPublicationPboardType]) {
-			[tv setDropRow:-1 dropOperation:NSTableViewDropOn];
+            if ([tv setValidDropRow:row dropOperation:NSTableViewDropOn] == NO)
+                return NSDragOperationNone;
 			if ([[[info draggingSource] dataSource] document] == [self document])
 				return NSDragOperationLink;
 			else
@@ -111,7 +112,7 @@
         NSString *type = [pboard availableTypeFromArray:[NSArray arrayWithObjects:BDSKPublicationPboardType, nil]];
 		if (([info draggingSourceOperationMask] & NSDragOperationLink) &&
 			[type isEqualToString:BDSKPublicationPboardType])
-			return [self addRelationshipsFromPasteboard:pboard forType:type parentRow:-1 keyPath:@"publication"];
+			return [self addRelationshipsFromPasteboard:pboard forType:type parentRow:row keyPath:@"publication"];
         
 	}
     

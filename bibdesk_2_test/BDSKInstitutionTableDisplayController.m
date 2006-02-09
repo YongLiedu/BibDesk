@@ -26,7 +26,7 @@
 
 - (void)awakeFromNib{
 	[super awakeFromNib];
-	[itemsTableView registerForDraggedTypes:[NSArray arrayWithObjects:BDSKPublicationPboardType, BDSKPersonPboardType, nil]];
+	[itemsTableView registerForDraggedTypes:[NSArray arrayWithObjects:BDSKPublicationPboardType, BDSKPersonPboardType, BDSKTagPboardType, nil]];
 	[personsTableView registerForDraggedTypes:[NSArray arrayWithObjects:BDSKPersonPboardType, nil]];
 	[publicationsTableView registerForDraggedTypes:[NSArray arrayWithObjects:BDSKPublicationPboardType, nil]];
 	[tagsTableView registerForDraggedTypes:[NSArray arrayWithObjects:BDSKTagPboardType, nil]];
@@ -151,9 +151,9 @@
 	} else if (tv == itemsTableView) {
 		
         NSPasteboard *pboard = [info draggingPasteboard];
-		NSString *type = [pboard availableTypeFromArray:[NSArray arrayWithObjects:BDSKPublicationPboardType, BDSKPersonPboardType, nil]];
-		if ([type isEqualToString:BDSKPublicationPboardType] || [type isEqualToString:BDSKPersonPboardType]) {
-            if ([tv setValidDropRow:row dropOperation:NSTableViewDropAbove] == NO)
+		NSString *type = [pboard availableTypeFromArray:[NSArray arrayWithObjects:BDSKPublicationPboardType, BDSKPersonPboardType, BDSKTagPboardType, nil]];
+		if ([type isEqualToString:BDSKPublicationPboardType] || [type isEqualToString:BDSKPersonPboardType] || [type isEqualToString:BDSKTagPboardType]) {
+            if ([tv setValidDropRow:row dropOperation:NSTableViewDropOn] == NO)
                 return NSDragOperationNone;
             if ([[[info draggingSource] dataSource] document] == [self document])
 				return NSDragOperationLink;
@@ -187,15 +187,19 @@
 		
         if (!([info draggingSourceOperationMask] & NSDragOperationLink))
 			return NO;
-		NSString *type = [pboard availableTypeFromArray:[NSArray arrayWithObjects:BDSKPublicationPboardType, BDSKPersonPboardType, nil]];
+		NSString *type = [pboard availableTypeFromArray:[NSArray arrayWithObjects:BDSKPublicationPboardType, BDSKPersonPboardType, BDSKTagPboardType, nil]];
 		
         if ([type isEqualToString:BDSKPublicationPboardType]) {
 			
-            return [self addRelationshipsFromPasteboard:pboard forType:type parentRow:-1 keyPath:@"publicationRelationships.publication"];
+            return [self addRelationshipsFromPasteboard:pboard forType:type parentRow:row keyPath:@"publicationRelationships.publication"];
             
         } else if ([type isEqualToString:BDSKPersonPboardType]) {
 			
-            return [self addRelationshipsFromPasteboard:pboard forType:type parentRow:-1 keyPath:@"personRelationships.person"];
+            return [self addRelationshipsFromPasteboard:pboard forType:type parentRow:row keyPath:@"personRelationships.person"];
+            
+        } else if ([type isEqualToString:BDSKTagPboardType]) {
+			
+            return [self addRelationshipsFromPasteboard:pboard forType:type parentRow:row keyPath:@"tags"];
             
 		}
 	}

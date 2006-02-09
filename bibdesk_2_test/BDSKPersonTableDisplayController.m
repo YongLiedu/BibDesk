@@ -149,15 +149,14 @@
 		
         NSPasteboard *pboard = [info draggingPasteboard];
 		NSString *type = [pboard availableTypeFromArray:[NSArray arrayWithObjects:BDSKPublicationPboardType, BDSKPersonPboardType, BDSKInstitutionPboardType, BDSKTagPboardType, nil]];
+        if ([tv setValidDropRow:row dropOperation:NSTableViewDropOn] == NO)
+            return NSDragOperationNone;
 		if ([type isEqualToString:BDSKPublicationPboardType] || [type isEqualToString:BDSKInstitutionPboardType] || [type isEqualToString:BDSKTagPboardType]) {
-			[tv setDropRow:-1 dropOperation:NSTableViewDropOn];
             if ([[[info draggingSource] dataSource] document] == [self document])
 				return NSDragOperationLink;
 			else
 				return NSDragOperationCopy;
 		} else if ([type isEqualToString:BDSKPersonPboardType] && [info draggingSource] == tv) {
-            if ([tv setValidDropRow:row dropOperation:NSTableViewDropOn] == NO)
-                return NSDragOperationNone;
 			return NSDragOperationLink;
         }
         
