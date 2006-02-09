@@ -153,6 +153,7 @@
             child = [NSEntityDescription insertNewObjectForEntityForName:SmartGroupEntityName inManagedObjectContext:moc];
             [child setValue:entityName forKey:@"itemEntityName"];
             [child setValue:value forKey:@"name"];
+            [child setValue:[NSNumber numberWithBool:NO] forKey:@"canEdit"];
             [child setPredicate:[NSPredicate predicateWithFormat:predicateFormat, propertyName, value]];
             [children addObject:child];
         }

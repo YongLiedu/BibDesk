@@ -15,6 +15,7 @@
     NSPredicate *predicate;          
     NSSet *items;
     NSString *groupImageName;
+    BOOL canEdit;
 }
 
 - (NSPredicate *)predicate;
@@ -26,6 +27,8 @@
 - (NSFetchRequest *)fetchRequest;
 
 - (void)setGroupImageName:(NSString *)imageName;
+
+- (void)setCanEdit:(BOOL)flag;
 
 - (NSSet *)items;
 

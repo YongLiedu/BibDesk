@@ -23,6 +23,8 @@
 
 - (BOOL)isSmart;
 
+- (BOOL)canEdit;
+
 - (NSString *)itemEntityName;
 
 - (NSSet *)itemsInSelfOrChildren;

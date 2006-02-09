@@ -11,6 +11,13 @@
 
 @implementation BDSKSmartGroup 
 
+- (id)initWithEntity:(NSEntityDescription*)entity insertIntoManagedObjectContext:(NSManagedObjectContext*)context{
+	if (self = [super initWithEntity:entity insertIntoManagedObjectContext:context]) {
+		canEdit = YES;
+	}
+	return self;
+}
+
 - (void)commonAwake {
     [super commonAwake];
     
@@ -156,6 +163,15 @@
     return YES;
 }
 
+
+- (BOOL)canEdit {
+    return canEdit;
+}
+
+- (void)setCanEdit:(BOOL)flag {
+    canEdit = flag;
+}
+
 - (NSSet *)items {
     if (items == nil)  {
         NSError *error = nil;
@@ -167,9 +183,8 @@
     return items;
 }
 
-- (void)setItems:(NSSet *)newRecipes  {
+- (void)setItems:(NSSet *)newItems  {
     // noop   
 }
-
 
 @end
