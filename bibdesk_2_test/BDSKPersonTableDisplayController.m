@@ -25,8 +25,9 @@
 
 - (void)awakeFromNib{
 	[super awakeFromNib];
-	[itemsTableView registerForDraggedTypes:[NSArray arrayWithObjects:BDSKPublicationPboardType, BDSKPersonPboardType, BDSKInstitutionPboardType, nil]];
+	[itemsTableView registerForDraggedTypes:[NSArray arrayWithObjects:BDSKPublicationPboardType, BDSKPersonPboardType, BDSKInstitutionPboardType, BDSKTagPboardType, nil]];
 	[publicationsTableView registerForDraggedTypes:[NSArray arrayWithObjects:BDSKPublicationPboardType, nil]];
+	[institutionsTableView registerForDraggedTypes:[NSArray arrayWithObjects:BDSKInstitutionPboardType, nil]];
 	[tagsTableView registerForDraggedTypes:[NSArray arrayWithObjects:BDSKTagPboardType, nil]];
 }
 
@@ -116,6 +117,20 @@
 				return NSDragOperationCopy;
 		}
         
+	} else if (tv == institutionsTableView) {
+		
+        if ([[itemsArrayController selectedObjects] count] != 1)
+			return NSDragOperationNone;
+		NSPasteboard *pboard = [info draggingPasteboard];
+		NSString *type = [pboard availableTypeFromArray:[NSArray arrayWithObjects:BDSKInstitutionPboardType, nil]];
+		if ([type isEqualToString:BDSKInstitutionPboardType]) {
+			[tv setDropRow:-1 dropOperation:NSTableViewDropOn];
+			if ([[[info draggingSource] dataSource] document] == [self document])
+				return NSDragOperationLink;
+			else
+				return NSDragOperationCopy;
+		}
+        
     } else if (tv == tagsTableView) {
 		
         if ([[itemsArrayController selectedObjects] count] != 1)
@@ -129,11 +144,12 @@
 			else
 				return NSDragOperationCopy;
 		}
+        
 	} else if (tv == itemsTableView) {
 		
         NSPasteboard *pboard = [info draggingPasteboard];
-		NSString *type = [pboard availableTypeFromArray:[NSArray arrayWithObjects:BDSKPublicationPboardType, BDSKPersonPboardType, nil]];
-		if ([type isEqualToString:BDSKPublicationPboardType]) {
+		NSString *type = [pboard availableTypeFromArray:[NSArray arrayWithObjects:BDSKPublicationPboardType, BDSKPersonPboardType, BDSKInstitutionPboardType, BDSKTagPboardType, nil]];
+		if ([type isEqualToString:BDSKPublicationPboardType] || [type isEqualToString:BDSKInstitutionPboardType] || [type isEqualToString:BDSKTagPboardType]) {
 			[tv setDropRow:-1 dropOperation:NSTableViewDropOn];
             if ([[[info draggingSource] dataSource] document] == [self document])
 				return NSDragOperationLink;
@@ -167,11 +183,18 @@
 			[type isEqualToString:BDSKTagPboardType])
 			return [self addRelationshipsFromPasteboard:pboard forType:type parentRow:-1 keyPath:@"tags"];
         
+	} else if (tv == institutionsTableView) {
+        
+        NSString *type = [pboard availableTypeFromArray:[NSArray arrayWithObjects:BDSKInstitutionPboardType, nil]];
+		if (([info draggingSourceOperationMask] & NSDragOperationLink) &&
+			[type isEqualToString:BDSKInstitutionPboardType])
+			return [self addRelationshipsFromPasteboard:pboard forType:type parentRow:-1 keyPath:@"institutionRelationships.institution"];
+        
     } else if (tv == itemsTableView) {
 		
         if (!([info draggingSourceOperationMask] & NSDragOperationLink))
 			return NO;
-		NSString *type = [pboard availableTypeFromArray:[NSArray arrayWithObjects:BDSKPublicationPboardType, BDSKPersonPboardType, BDSKInstitutionPboardType, nil]];
+		NSString *type = [pboard availableTypeFromArray:[NSArray arrayWithObjects:BDSKPublicationPboardType, BDSKPersonPboardType, BDSKInstitutionPboardType, BDSKTagPboardType, nil]];
 		
         if ([type isEqualToString:BDSKPublicationPboardType]) {
 			
@@ -180,6 +203,10 @@
         } else if ([type isEqualToString:BDSKInstitutionPboardType]) {
 			
             return [self addRelationshipsFromPasteboard:pboard forType:type parentRow:row keyPath:@"institutionRelationships.institution"];
+            
+        } else if ([type isEqualToString:BDSKTagPboardType]) {
+			
+            return [self addRelationshipsFromPasteboard:pboard forType:type parentRow:row keyPath:@"tags"];
             
 		} else if ([type isEqualToString:BDSKPersonPboardType]) {
 			

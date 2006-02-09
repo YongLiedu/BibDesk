@@ -11,13 +11,16 @@
 
 @interface BDSKPersonTableDisplayController : BDSKTableDisplayController {
     IBOutlet NSArrayController *publicationsArrayController;
+    IBOutlet NSArrayController *institutionsArrayController;
     IBOutlet NSArrayController *tagsArrayController;
     IBOutlet NSTableView *publicationsTableView;
+    IBOutlet NSTableView *institutionsTableView;
     IBOutlet NSTableView *tagsTableView;
 }
 
 - (IBAction)addPerson:(id)sender;
 - (IBAction)removePersons:(NSArray *)selectedItems;
 - (IBAction)addPublication:(id)sender;
+- (IBAction)addInstitution:(id)sender;
 
 @end

@@ -23,6 +23,7 @@
 
 - (void)awakeFromNib{
 	[super awakeFromNib];
+	[itemsTableView registerForDraggedTypes:[NSArray arrayWithObjects:BDSKPublicationPboardType, BDSKPersonPboardType, BDSKInstitutionPboardType, nil]];
 }
 
 #pragma mark Actions
@@ -78,10 +79,33 @@
 }
 
 - (NSDragOperation)tableView:(NSTableView*)tv validateDrop:(id <NSDraggingInfo>)info proposedRow:(int)row proposedDropOperation:(NSTableViewDropOperation)op {
+	if (tv == itemsTableView) {
+        
+		NSPasteboard *pboard = [info draggingPasteboard];
+		NSString *type = [pboard availableTypeFromArray:[NSArray arrayWithObjects:BDSKPublicationPboardType, BDSKPersonPboardType, BDSKInstitutionPboardType, nil]];
+		if ([type isEqualToString:BDSKPublicationPboardType] || [type isEqualToString:BDSKPersonPboardType] || [type isEqualToString:BDSKInstitutionPboardType]) {
+			[tv setDropRow:-1 dropOperation:NSTableViewDropOn];
+			if ([[[info draggingSource] dataSource] document] == [self document])
+				return NSDragOperationLink;
+			else
+				return NSDragOperationCopy;
+		}
+        
+	}
 	return NSDragOperationNone;
 }
 
 - (BOOL)tableView:(NSTableView *)tv acceptDrop:(id <NSDraggingInfo>)info row:(int)row dropOperation:(NSTableViewDropOperation)op {
+	if (tv == itemsTableView) {
+        
+		NSPasteboard *pboard = [info draggingPasteboard];
+		NSString *type = [pboard availableTypeFromArray:[NSArray arrayWithObjects:BDSKPublicationPboardType, BDSKPersonPboardType, BDSKInstitutionPboardType, nil]];
+		if (([info draggingSourceOperationMask] & NSDragOperationLink) &&
+			[type isEqualToString:BDSKPublicationPboardType] || [type isEqualToString:BDSKPersonPboardType] || [type isEqualToString:BDSKInstitutionPboardType]) 
+			return [self addRelationshipsFromPasteboard:pboard forType:type parentRow:-1 keyPath:@"items"];
+        
+	}
+    
 	return NO;
 }
 
