@@ -18,15 +18,16 @@
 #define PersonGroupEntityName @"PersonGroup"
 #define PersonEntityName @"Person"
 
-#define NoteGroupEntityName @"NoteGroup"
-#define NoteEntityName @"Note"
-
 #define InstitutionGroupEntityName @"InstitutionGroup"
 #define InstitutionEntityName @"Institution"
 
 #define VenueGroupEntityName @"VenueGroup"
 #define VenueEntityName @"Venue"
 
+#define NoteGroupEntityName @"NoteGroup"
+#define NoteEntityName @"Note"
+
+#define TagGroupEntityName @"TagGroup"
 #define TagEntityName @"Tag"
 
 #define ContributorPublicationRelationshipEntityName @"ContributorPublicationRelationship"
