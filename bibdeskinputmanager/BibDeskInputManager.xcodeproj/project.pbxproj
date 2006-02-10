@@ -37,8 +37,6 @@
 		8D5B49B0048680CD000E48DA /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = 089C167DFE841241C02AAC07 /* InfoPlist.strings */; };
 		8D5B49B4048680CD000E48DA /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1058C7ADFEA557BF11CA2CBB /* Cocoa.framework */; };
 		F900148B0709EAF2002EC8DF /* BibDeskInputManager.bundle in CopyFiles */ = {isa = PBXBuildFile; fileRef = 8D5B49B6048680CD000E48DA /* BibDeskInputManager.bundle */; };
-		F972E8BA098D4CB200AB38BC /* BDSKPluginTextViewCompletionController.h in Headers */ = {isa = PBXBuildFile; fileRef = F972E8B8098D4CB200AB38BC /* BDSKPluginTextViewCompletionController.h */; };
-		F972E8BB098D4CB200AB38BC /* BDSKPluginTextViewCompletionController.m in Sources */ = {isa = PBXBuildFile; fileRef = F972E8B9098D4CB200AB38BC /* BDSKPluginTextViewCompletionController.m */; };
 		F9BC91EB06E0EB2E00B42137 /* BibDeskInputManager.bundle in CopyFiles */ = {isa = PBXBuildFile; fileRef = 8D5B49B6048680CD000E48DA /* BibDeskInputManager.bundle */; };
 		F9BC91F806E0EB4000B42137 /* Info in CopyFiles */ = {isa = PBXBuildFile; fileRef = F9D86A1106B33EFD00F2DE7D /* Info */; };
 		F9BEBE1D06B42D3C00AA486C /* BD Input Manager.icns in Resources */ = {isa = PBXBuildFile; fileRef = F9BEBE1C06B42D3C00AA486C /* BD Input Manager.icns */; };
@@ -232,7 +230,6 @@
 				F9D86A0606B33E2000F2DE7D /* NSTextView_Bibdesk.h in Headers */,
 				F9D86A0806B33E2000F2DE7D /* NSAppleScript+HandlerCalls.h in Headers */,
 				F9BFE18E06FA98910019E8AB /* Bibdesk_Prefix.pch in Headers */,
-				F972E8BA098D4CB200AB38BC /* BDSKPluginTextViewCompletionController.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -337,7 +334,6 @@
 			files = (
 				F9D86A0706B33E2000F2DE7D /* NSTextView_Bibdesk.m in Sources */,
 				F9D86A0906B33E2000F2DE7D /* NSAppleScript+HandlerCalls.m in Sources */,
-				F972E8BB098D4CB200AB38BC /* BDSKPluginTextViewCompletionController.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

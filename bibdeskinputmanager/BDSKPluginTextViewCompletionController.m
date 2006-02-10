@@ -66,6 +66,7 @@ static id sharedController = nil;
 
 - (id)init;
 {
+    NSAssert(0, @"This class is obsolete.  Update from BibDesk before using.");
     self = [super init];
     
     [self setupWindow];

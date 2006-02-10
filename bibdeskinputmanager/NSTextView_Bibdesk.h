@@ -43,14 +43,6 @@ extern NSString *BDSKInputManagerLoadableApplications;
 #define noScriptErr 0
 
 @interface NSTextView_Bibdesk: NSTextView
-/*!
-    @method     printSelectorList:
-    @abstract   Print a list to standard output of all the selectors to which a class object responds.
-                Used only for debugging at this time.
-    @param      anObject The object of interest.  Note that [self super] will not get the superclass
-                of self; you need to use [self superclass] for this.
-*/
-+ (void)printSelectorList:(id)anObject;
 
 /*!
     @method    isBibTeXCitation:
@@ -65,7 +57,6 @@ extern NSString *BDSKInputManagerLoadableApplications;
 - (BOOL)isBibTeXCitation:(NSRange)braceRange;
 - (NSRange)citeKeyRange;
 - (NSRange)rangeForBibTeXUserCompletion;
-- (NSPoint)pluginLocationForCompletionWindow;
 
 @end
 

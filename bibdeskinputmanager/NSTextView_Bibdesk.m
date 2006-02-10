@@ -40,7 +40,6 @@
 #import <Foundation/Foundation.h>
 #import </usr/include/objc/objc-class.h>
 #import </usr/include/objc/Protocol.h>
-#import "BDSKPluginTextViewCompletionController.h"
 
 NSString *BDSKInputManagerID = @"net.sourceforge.bibdesk.inputmanager";
 NSString *BDSKInputManagerLoadableApplications = @"Application bundles that we recognize";
@@ -92,9 +91,7 @@ static IMP OBBDSKReplaceMethodImplementationWithSelector(Class aClass, SEL oldSe
 // See also the places where Omni uses OBReplaceMethod... calls in OmniAppKit, which is easier to follow.
 static NSRange (*originalRangeIMP)(id, SEL) = NULL;
 static void (*originalInsertIMP)(id, SEL, NSString *, NSRange, int, BOOL) = NULL;
-static void (*originalKeyDownIMP)(id, SEL, id) = NULL;
 static id (*originalCompletionsIMP)(id, SEL, NSRange, int *) = NULL;
-static void (*originalCompleteIMP)(id, SEL, id) = NULL;
 
 @implementation NSTextView_Bibdesk
 
@@ -121,166 +118,21 @@ static void (*originalCompleteIMP)(id, SEL, id) = NULL;
     }
 
     if(yn && [[self superclass] instancesRespondToSelector:@selector(completionsForPartialWordRange:indexOfSelectedItem:)]){
-
-        NSAssert([BDSKPluginTextViewCompletionController sharedController] != nil, @"unable to load BDSKCompletionController");
         
         // Class posing was cleaner and probably safer than swizzling, but led to unresolved problems with internationalized versions of TeXShop+OgreKit refusing text input for the Ogre find panel.  I think this is an OgreKit bug.
         originalInsertIMP = (typeof(originalInsertIMP))OBBDSKReplaceMethodImplementationWithSelector(self, @selector(insertCompletion:forPartialWordRange:movement:isFinal:), @selector(replacementInsertCompletion:forPartialWordRange:movement:isFinal:));
         originalRangeIMP = (typeof(originalRangeIMP))OBBDSKReplaceMethodImplementationWithSelector(self,@selector(rangeForUserCompletion),@selector(replacementRangeForUserCompletion));
-        originalKeyDownIMP = (typeof(originalKeyDownIMP))OBBDSKReplaceMethodImplementationWithSelector(self, @selector(keyDown:), @selector(replacementKeyDown:));
         
         // have to replace this one since we don't call the delegate method from our implementation, and we don't want to override unless the user chooses to do so
         originalCompletionsIMP = (typeof(originalCompletionsIMP))OBBDSKReplaceMethodImplementationWithSelector(self, @selector(completionsForPartialWordRange:indexOfSelectedItem:),@selector(replacementCompletionsForPartialWordRange:indexOfSelectedItem:));
-        originalCompleteIMP = (typeof(originalCompleteIMP))OBBDSKReplaceMethodImplementationWithSelector(self, @selector(complete:), @selector(replacementComplete:));
     }
     
     [pool release];
 }
 
-+ (void)printSelectorList:(id)anObject{
-    int k = 0;
-    void *iterator = 0;
-    struct objc_method_list *mlist;
-        
-    _objc_resolve_categories_for_class([anObject class]);
-        
-    while( mlist = class_nextMethodList( [anObject class], &iterator ) ){
-	for(k=0; k<mlist->method_count; k++){
-	     NSLog(@"%@ implements %s",[anObject class], mlist->method_list[k].method_name);
-	    if( strcmp( sel_getName(mlist->method_list[k].method_name), "complete:") == 0 ){
-		NSLog(@"found a complete: selector with imp (0x%08x)", (int)(mlist->method_list[k].method_imp) );
-	    }
-	}
-    }
-}
-
 @end
 
 @implementation NSTextView (BDSKCompletion)
-
-- (NSPoint)pluginLocationForCompletionWindow;
-{
-    NSPoint point = NSZeroPoint;
-    
-    NSRange selRange = [self rangeForUserCompletion];
-    
-    // @@ hack: if there is no character at this point (it may be just an accent), our line fragment rect will not be accurate for what we really need, so returning NSZeroPoint indicates to the caller that this is invalid
-    if(selRange.location == NSNotFound)
-        return point;
-    
-    // if it's just at a brace, as in \ref{, backtrack a single character and use that point
-    if(selRange.length == 0 && selRange.location - 1 > 0){
-        selRange.length = 1;
-        selRange.location -= 1;
-    }
-    
-    NSLayoutManager *layoutManager = [self layoutManager];
-    
-    // get the rect for the first glyph in our affected range
-    NSRange glyphRange = [layoutManager glyphRangeForCharacterRange:selRange actualCharacterRange:NULL];
-    NSRect rect = NSZeroRect;
-    
-    // check length, or the layout manager will raise an exception
-    if(glyphRange.length > 0){
-        rect = [layoutManager lineFragmentRectForGlyphAtIndex:glyphRange.location effectiveRange:NULL];
-        point = rect.origin;
-        
-        // the above gives the rect for the full line
-        NSPoint glyphLoc = [layoutManager locationForGlyphAtIndex:glyphRange.location];
-        point.x += glyphLoc.x;
-        // don't adjust based on glyphLoc.y; we'll use the lineFragmentRect for that
-    }
-    
-    // adjust for the line height + border/focus ring
-    point.y += NSHeight(rect) + 3;
-    
-    // adjust for the text container origin
-    NSPoint tcOrigin = [self textContainerOrigin];
-    point.x += tcOrigin.x;
-    point.y += tcOrigin.y;
-    
-    // make sure we have integral coordinates
-    point.x = ceilf(point.x);
-    point.y = ceilf(point.y);
-    
-    // convert to screen coordinates
-    point = [self convertPoint:point toView:nil];
-    point = [[self window] convertBaseToScreen:point];  
-    
-    return point;
-}
-
-- (void)replacementComplete:(id)sender;
-{
-    NSRange selRange = [self rangeForUserCompletion];
-    NSString *string = [self string];
-    if(selRange.location == NSNotFound || [string isEqualToString:@""])
-        return;
-    
-    // make sure to initialize this
-    int idx = -1;
-    NSArray *completions = [self completionsForPartialWordRange:selRange indexOfSelectedItem:&idx];
-    
-    [[BDSKPluginTextViewCompletionController sharedController] displayCompletions:completions indexOfSelectedItem:idx forPartialWordRange:selRange originalString:[string substringWithRange:selRange] atPoint:[self pluginLocationForCompletionWindow] forTextView:self];
-}
-
-static BOOL isCompletingTeX = NO;
-
-- (void)replacementKeyDown:(NSEvent *)event {
-    BOOL wasVisibleBeforeEvent = [[[BDSKPluginTextViewCompletionController sharedController] completionWindow] isVisible];
-    
-    // delay this so we can trap the arrow keys
-    if(wasVisibleBeforeEvent == NO)
-        originalKeyDownIMP(self, _cmd, event);
-    else if([[BDSKPluginTextViewCompletionController sharedController] currentTextView] == self){
-        unichar ch = [[event characters] characterAtIndex:0];
-        switch(ch){
-            // let the completion controller handle these, since we don't want to change the insertion point!
-            case NSUpArrowFunctionKey:
-            case NSDownArrowFunctionKey:
-            case NSRightArrowFunctionKey:
-            case NSLeftArrowFunctionKey:
-            case NSNewlineCharacter:
-            case NSCarriageReturnCharacter:
-                [[BDSKPluginTextViewCompletionController sharedController] handleKeyDown:event];
-                break;
-            case 0x001B: // esc key
-                [[BDSKPluginTextViewCompletionController sharedController] endDisplayNoComplete];
-                break;
-            case NSTabCharacter:
-                [[BDSKPluginTextViewCompletionController sharedController] handleKeyDown:event];
-                break;
-            case 0x0020: // spacebar
-                originalKeyDownIMP(self, _cmd, event);
-                break;
-            case 0x002C: // comma; used to separate cite entries
-                if(isCompletingTeX){
-                    [[BDSKPluginTextViewCompletionController sharedController] endDisplay];
-                    // clear the selection so we don't overwrite it
-                    [self setSelectedRange:NSMakeRange(NSMaxRange([self selectedRange]), 0)];
-                    [self interpretKeyEvents:[NSArray arrayWithObject:event]]; // should call insertText:
-                } else {
-                    originalKeyDownIMP(self, _cmd, event);
-                    [[BDSKPluginTextViewCompletionController sharedController] handleKeyDown:event];
-                }
-                break;
-            case 0x007D: // right curly brace
-                if(isCompletingTeX){
-                    [[BDSKPluginTextViewCompletionController sharedController] endDisplay];
-                    // clear the selection so we don't overwrite it
-                    [self setSelectedRange:NSMakeRange(NSMaxRange([self selectedRange]), 0)];
-                    [self interpretKeyEvents:[NSArray arrayWithObject:event]]; // should call insertText:
-                } else {
-                    originalKeyDownIMP(self, _cmd, event);
-                    [[BDSKPluginTextViewCompletionController sharedController] handleKeyDown:event];
-                }
-                break;
-            default:
-                originalKeyDownIMP(self, _cmd, event);
-                [[BDSKPluginTextViewCompletionController sharedController] handleKeyDown:event];
-        }
-    }
-}
 
 #pragma mark -
 #pragma mark Reference-searching heuristics
@@ -413,6 +265,8 @@ static BOOL isCompletingTeX = NO;
     return range.location == NSNotFound ? [self refLabelRangeForType:NULL] : range;
 }
 
+static BOOL isCompletingTeX = NO;
+
 // we replace this method since the completion controller uses it to update
 - (NSRange)replacementRangeForUserCompletion{
     
@@ -422,7 +276,7 @@ static BOOL isCompletingTeX = NO;
     return range.location != NSNotFound ? range : originalRangeIMP(self, _cmd);
 }
 
-// this returns -1 for compatibility with the completion controller indexOfSelectedItem parameter
+// this returns -1 instead of NSNotFound for compatibility with the completion controller indexOfSelectedItem parameter
 static inline int
 BDIndexOfItemInArrayWithPrefix(NSArray *array, NSString *prefix)
 {
@@ -560,9 +414,7 @@ BDIndexOfItemInArrayWithPrefix(NSArray *array, NSString *prefix)
 
 	if (!flag || ([word rangeOfString:BDSKInsertionString].location == NSNotFound)) {
 		// this is just a preliminary completion (suggestion) or the word wasn't suggested by us anyway, so let the text system deal with this
-        [[self undoManager] disableUndoRegistration];
 		originalInsertIMP(self, _cmd, word, charRange, movement, flag);
-        [[self undoManager] enableUndoRegistration];
 	} else {	
 		// strip the comment for this, this assumes cite keys can't have spaces in them
 		NSRange firstSpace = [word rangeOfString:@" "];
