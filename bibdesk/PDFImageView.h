@@ -15,9 +15,11 @@
 
 #pragma mark PUBLIC INSTANCE METHODS
 
-//	loadFromPath: -- Load the PDF at the specified path into the view.
+//	loadData: -- Load the PDF data into the view.
 //	This automatically resizes the view to fit all pages of the document.
-- (void) loadFromPath: (NSString *) path;
+- (void) loadData: (NSData *) data;
+
+- (void)loadFromPath:(NSString *)path;
 
 @end
 

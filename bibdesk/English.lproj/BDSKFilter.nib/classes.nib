@@ -6,8 +6,8 @@
             LANGUAGE = ObjC; 
             OUTLETS = {
                 conjunctionPopUp = NSPopUpButton; 
-                enabledCheckButton = NSButton; 
-                messageTextField = NSTextField; 
+                messageEndTextField = NSTextField; 
+                messageStartTextField = NSTextField; 
                 ownerController = NSObjectController; 
                 stackView = OAStackView; 
             }; 

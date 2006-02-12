@@ -1,22 +1,13 @@
 {
     IBClasses = (
         {
-            ACTIONS = {
-                addCondition = id; 
-                addNewKey = id; 
-                changeKey = id; 
-                dismissAddKeySheet = id; 
-                removeCondition = id; 
-            }; 
+            ACTIONS = {addNewCondition = id; removeThisCondition = id; }; 
             CLASS = BDSKConditionController; 
             LANGUAGE = ObjC; 
             OUTLETS = {
                 addButton = NSButton; 
-                addKeySheet = NSWindow; 
                 comparisonPopUp = NSPopUpButton; 
-                itemTypePopUp = NSPopUpButton; 
-                keyPopUp = NSPopUpButton; 
-                newKeyField = NSTextField; 
+                keyComboBox = NSComboBox; 
                 ownerController = NSObjectController; 
                 removeButton = NSButton; 
                 valueTextField = NSTextField; 
