@@ -16,15 +16,16 @@ extern NSString *BDSKVenuePboardType;
 extern NSString *BDSKTagPboardType;
 
 @interface BDSKDocument : NSPersistentDocument {
+    id inMemoryStore;
 }
 
-- (NSManagedObject *)rootPublicationGroup;
-- (NSManagedObject *)rootPersonGroup;
-- (NSManagedObject *)rootNoteGroup;
-- (NSManagedObject *)rootInstitutionGroup;
-- (NSManagedObject *)rootVenueGroup;
-- (NSManagedObject *)rootGroupForEntityName:(NSString *)entityName;
-- (NSManagedObject *)rootTagGroup;
+- (NSManagedObject *)publicationLibraryGroup;
+- (NSManagedObject *)personLibraryGroup;
+- (NSManagedObject *)noteLibraryGroup;
+- (NSManagedObject *)institutionLibraryGroup;
+- (NSManagedObject *)venueLibraryGroup;
+- (NSManagedObject *)tagLibraryGroup;
+- (NSManagedObject *)libraryGroupForEntityName:(NSString *)entityName;
 
 - (NSSet *)newPublicationsFromDictionaries:(NSSet *)dictionarySet;
 

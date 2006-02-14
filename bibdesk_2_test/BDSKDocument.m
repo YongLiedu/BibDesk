@@ -18,30 +18,56 @@ NSString *BDSKTagPboardType = @"BDSKTagPboardType";
 - (id)init{
     self = [super init];
     if (self != nil) {
-        id rootGroup = [self rootPublicationGroup];
-        [rootGroup setValue:@"RootGroupIcon" forKey:@"groupImageName"];
-        [rootGroup setValue:[NSNumber numberWithBool:NO] forKey:@"canEdit"];
-        [rootGroup setValue:[NSNumber numberWithBool:NO] forKey:@"canEditName"];
-        rootGroup = [self rootPersonGroup];
-        [rootGroup setValue:@"RootGroupIcon" forKey:@"groupImageName"];
-        [rootGroup setValue:[NSNumber numberWithBool:NO] forKey:@"canEdit"];
-        [rootGroup setValue:[NSNumber numberWithBool:NO] forKey:@"canEditName"];
-        rootGroup = [self rootNoteGroup];
-        [rootGroup setValue:@"RootGroupIcon" forKey:@"groupImageName"];
-        [rootGroup setValue:[NSNumber numberWithBool:NO] forKey:@"canEdit"];
-        [rootGroup setValue:[NSNumber numberWithBool:NO] forKey:@"canEditName"];
-        rootGroup = [self rootInstitutionGroup];
-        [rootGroup setValue:@"RootGroupIcon" forKey:@"groupImageName"];
-        [rootGroup setValue:[NSNumber numberWithBool:NO] forKey:@"canEdit"];
-        [rootGroup setValue:[NSNumber numberWithBool:NO] forKey:@"canEditName"];
-        rootGroup = [self rootVenueGroup];
-        [rootGroup setValue:@"RootGroupIcon" forKey:@"groupImageName"];
-        [rootGroup setValue:[NSNumber numberWithBool:NO] forKey:@"canEdit"];
-        [rootGroup setValue:[NSNumber numberWithBool:NO] forKey:@"canEditName"];
-        rootGroup = [self rootTagGroup];
-        [rootGroup setValue:@"RootGroupIcon" forKey:@"groupImageName"];
-        [rootGroup setValue:[NSNumber numberWithBool:NO] forKey:@"canEdit"];
-        [rootGroup setValue:[NSNumber numberWithBool:NO] forKey:@"canEditName"];
+        NSManagedObjectContext *context = [self managedObjectContext];
+        NSPersistentStoreCoordinator *coordinator = [context persistentStoreCoordinator];
+        
+        if (coordinator != nil) {
+            inMemoryStore = [[coordinator addPersistentStoreWithType:NSInMemoryStoreType configuration:@"InMemoryConfiguration" URL:nil options:nil error:nil] retain];
+        }
+        
+        // add the library groups
+        // disable undo, because we don't want the document to be dirtied
+        
+        [[context undoManager] disableUndoRegistration];
+        
+        id libraryGroup = [NSEntityDescription insertNewObjectForEntityForName:LibraryGroupEntityName
+                                                        inManagedObjectContext:[self managedObjectContext]];
+        [libraryGroup setValue:PublicationEntityName forKey:@"itemEntityName"];
+        [libraryGroup setValue:NSLocalizedString(@"All Publications", @"Top level Publication group name") forKey:@"name"];
+        [libraryGroup setValue:[NSNumber numberWithShort:9] forKey:@"priority"];
+        
+        libraryGroup = [NSEntityDescription insertNewObjectForEntityForName:LibraryGroupEntityName
+                                                     inManagedObjectContext:[self managedObjectContext]];
+        [libraryGroup setValue:PersonEntityName forKey:@"itemEntityName"];
+        [libraryGroup setValue:NSLocalizedString(@"All People", @"Top level Person group name") forKey:@"name"];
+        [libraryGroup setValue:[NSNumber numberWithShort:8] forKey:@"priority"];
+        
+        libraryGroup = [NSEntityDescription insertNewObjectForEntityForName:LibraryGroupEntityName
+                                                     inManagedObjectContext:[self managedObjectContext]];
+        [libraryGroup setValue:NoteEntityName forKey:@"itemEntityName"];
+        [libraryGroup setValue:NSLocalizedString(@"All Notes", @"Top level Note group name") forKey:@"name"];
+        [libraryGroup setValue:[NSNumber numberWithShort:7] forKey:@"priority"];
+        
+        libraryGroup = [NSEntityDescription insertNewObjectForEntityForName:LibraryGroupEntityName
+                                                     inManagedObjectContext:[self managedObjectContext]];
+        [libraryGroup setValue:InstitutionEntityName forKey:@"itemEntityName"];
+        [libraryGroup setValue:NSLocalizedString(@"All Institutions", @"Top level Institution group name") forKey:@"name"];
+        [libraryGroup setValue:[NSNumber numberWithShort:6] forKey:@"priority"];
+        
+        libraryGroup = [NSEntityDescription insertNewObjectForEntityForName:LibraryGroupEntityName
+                                                     inManagedObjectContext:[self managedObjectContext]];
+        [libraryGroup setValue:VenueEntityName forKey:@"itemEntityName"];
+        [libraryGroup setValue:NSLocalizedString(@"All Venues", @"Top level Venue group name") forKey:@"name"];
+        [libraryGroup setValue:[NSNumber numberWithShort:5] forKey:@"priority"];
+        
+        libraryGroup = [NSEntityDescription insertNewObjectForEntityForName:LibraryGroupEntityName
+                                                     inManagedObjectContext:[self managedObjectContext]];
+        [libraryGroup setValue:TagEntityName forKey:@"itemEntityName"];
+        [libraryGroup setValue:NSLocalizedString(@"All Tags", @"Top level Tag group name") forKey:@"name"];
+        [libraryGroup setValue:[NSNumber numberWithShort:4] forKey:@"priority"];
+        
+        [context processPendingChanges];
+        [[context undoManager] enableUndoRegistration];
     }
     return self;
 }
@@ -53,121 +79,9 @@ NSString *BDSKTagPboardType = @"BDSKTagPboardType";
     self = [super initWithType:typeName error:outError];
     if (self == nil)
         return nil;
-    
-    NSManagedObjectContext *managedObjectContext = [self managedObjectContext];
-    
-	// first create the root groups
-	// disable undo when we add them, so the document does not appear edited
-	
-    [[managedObjectContext undoManager] disableUndoRegistration];
-	
-    id pubGroup = [NSEntityDescription insertNewObjectForEntityForName:SmartGroupEntityName
-                                                  inManagedObjectContext:managedObjectContext];
-    [pubGroup setValue:[NSNumber numberWithBool:YES]
-                forKey:@"isRoot"];
-    [pubGroup setValue:[NSNumber numberWithBool:NO]
-                forKey:@"canEdit"];
-    [pubGroup setValue:[NSNumber numberWithBool:NO]
-                forKey:@"canEditName"];
-    [pubGroup setValue:NSLocalizedString(@"All Publications", @"Top level Publication group name")
-                forKey:@"name"];
-    [pubGroup setValue:PublicationEntityName
-                forKey:@"itemEntityName"];
-    [pubGroup setValue:[NSNumber numberWithShort:9]
-                forKey:@"priority"];
-    [pubGroup setValue:@"RootGroupIcon"
-                forKey:@"groupImageName"];
-    
-    id personGroup = [NSEntityDescription insertNewObjectForEntityForName:SmartGroupEntityName
-                                             inManagedObjectContext:managedObjectContext];
-    [personGroup setValue:[NSNumber numberWithBool:YES]
-                   forKey:@"isRoot"];
-    [personGroup setValue:[NSNumber numberWithBool:NO]
-                   forKey:@"canEdit"];
-    [personGroup setValue:[NSNumber numberWithBool:NO]
-                   forKey:@"canEditName"];
-    [personGroup setValue:NSLocalizedString(@"All People", @"Top level Person group name")
-                   forKey:@"name"];
-    [personGroup setValue:PersonEntityName
-                   forKey:@"itemEntityName"];
-    [personGroup setValue:[NSNumber numberWithShort:8]
-                   forKey:@"priority"];
-    [personGroup setValue:@"RootGroupIcon"
-                   forKey:@"groupImageName"];
-    
-    id noteGroup = [NSEntityDescription insertNewObjectForEntityForName:SmartGroupEntityName
-                                             inManagedObjectContext:managedObjectContext];
-    [noteGroup setValue:[NSNumber numberWithBool:YES]
-                 forKey:@"isRoot"];
-    [noteGroup setValue:[NSNumber numberWithBool:NO]
-                 forKey:@"canEdit"];
-    [noteGroup setValue:[NSNumber numberWithBool:NO]
-                 forKey:@"canEditName"];
-    [noteGroup setValue:NSLocalizedString(@"All Notes", @"Top level Note group name")
-                 forKey:@"name"];
-    [noteGroup setValue:NoteEntityName
-                 forKey:@"itemEntityName"];
-    [noteGroup setValue:[NSNumber numberWithShort:7]
-                 forKey:@"priority"];
-    [noteGroup setValue:@"RootGroupIcon"
-                 forKey:@"groupImageName"];
-    
-    id institutionGroup = [NSEntityDescription insertNewObjectForEntityForName:SmartGroupEntityName
-                                             inManagedObjectContext:managedObjectContext];
-    [institutionGroup setValue:[NSNumber numberWithBool:YES]
-                        forKey:@"isRoot"];
-    [institutionGroup setValue:[NSNumber numberWithBool:NO]
-                        forKey:@"canEdit"];
-    [institutionGroup setValue:[NSNumber numberWithBool:NO]
-                        forKey:@"canEditName"];
-    [institutionGroup setValue:NSLocalizedString(@"All Institutions", @"Top level Institution group name")
-                        forKey:@"name"];
-    [institutionGroup setValue:InstitutionEntityName
-                        forKey:@"itemEntityName"];
-    [institutionGroup setValue:[NSNumber numberWithShort:6]
-                        forKey:@"priority"];
-    [institutionGroup setValue:@"RootGroupIcon"
-                        forKey:@"groupImageName"];
-    
-    id venueGroup = [NSEntityDescription insertNewObjectForEntityForName:SmartGroupEntityName
-                                             inManagedObjectContext:managedObjectContext];
-    [venueGroup setValue:[NSNumber numberWithBool:YES]
-                  forKey:@"isRoot"];
-    [venueGroup setValue:[NSNumber numberWithBool:NO]
-                  forKey:@"canEdit"];
-    [venueGroup setValue:[NSNumber numberWithBool:NO]
-                  forKey:@"canEditName"];
-    [venueGroup setValue:NSLocalizedString(@"All Venues", @"Top level Venue group name")
-                  forKey:@"name"];
-    [venueGroup setValue:VenueEntityName
-                  forKey:@"itemEntityName"];
-    [venueGroup setValue:[NSNumber numberWithShort:5]
-                  forKey:@"priority"];
-    [venueGroup setValue:@"RootGroupIcon"
-                  forKey:@"groupImageName"];
-    
-    id tagGroup = [NSEntityDescription insertNewObjectForEntityForName:SmartGroupEntityName
-                                             inManagedObjectContext:managedObjectContext];
-    [tagGroup setValue:[NSNumber numberWithBool:YES]
-                forKey:@"isRoot"];
-    [tagGroup setValue:[NSNumber numberWithBool:NO]
-                forKey:@"canEdit"];
-    [tagGroup setValue:[NSNumber numberWithBool:NO]
-                forKey:@"canEditName"];
-    [tagGroup setValue:NSLocalizedString(@"All Tags", @"Top level Tag group name")
-                forKey:@"name"];
-    [tagGroup setValue:TagEntityName
-                forKey:@"itemEntityName"];
-    [tagGroup setValue:[NSNumber numberWithShort:4]
-                forKey:@"priority"];
-    [tagGroup setValue:@"RootGroupIcon"
-                forKey:@"groupImageName"];
-    
-    [managedObjectContext processPendingChanges];
-    [[managedObjectContext undoManager] enableUndoRegistration];
-    
-    // temporary data set up with one relationship
-    
+   
+    // temporary data set up
+     NSManagedObjectContext *managedObjectContext = [self managedObjectContext];
     
     id pub = [NSEntityDescription insertNewObjectForEntityForName:PublicationEntityName
                                                  inManagedObjectContext:managedObjectContext];
@@ -251,6 +165,7 @@ NSString *BDSKTagPboardType = @"BDSKTagPboardType";
 
 - (void)dealloc {
 	[[NSNotificationCenter defaultCenter] removeObserver:self];
+    [inMemoryStore release];
 	[super dealloc];
 }
 
@@ -266,49 +181,49 @@ NSString *BDSKTagPboardType = @"BDSKTagPboardType";
     // user interface preparation code
 }
 
-#pragma mark Default root groups
+#pragma mark Default library groups
 
-- (NSManagedObject *)rootPublicationGroup{
-	return [self rootGroupForEntityName:PublicationEntityName];
+- (NSManagedObject *)publicationLibraryGroup{
+	return [self libraryGroupForEntityName:PublicationEntityName];
 }
 
-- (NSManagedObject *)rootPersonGroup{
-	return [self rootGroupForEntityName:PersonEntityName];
+- (NSManagedObject *)personLibraryGroup{
+	return [self libraryGroupForEntityName:PersonEntityName];
 }
 
-- (NSManagedObject *)rootNoteGroup{
-	return [self rootGroupForEntityName:NoteEntityName];
+- (NSManagedObject *)noteLibraryGroup{
+	return [self libraryGroupForEntityName:NoteEntityName];
 }
 
-- (NSManagedObject *)rootInstitutionGroup{
-	return [self rootGroupForEntityName:InstitutionEntityName];
+- (NSManagedObject *)institutionLibraryGroup{
+	return [self libraryGroupForEntityName:InstitutionEntityName];
 }
 
-- (NSManagedObject *)rootVenueGroup{
-	return [self rootGroupForEntityName:VenueEntityName];
+- (NSManagedObject *)venueLibraryGroup{
+	return [self libraryGroupForEntityName:VenueEntityName];
 }
 
-- (NSManagedObject *)rootTagGroup{
-	return [self rootGroupForEntityName:TagEntityName];
+- (NSManagedObject *)tagLibraryGroup{
+	return [self libraryGroupForEntityName:TagEntityName];
 }
 
-- (NSManagedObject *)rootGroupForEntityName:(NSString *)entityName{
+- (NSManagedObject *)libraryGroupForEntityName:(NSString *)entityName{
     
-    NSPredicate *rootItemPredicate = [NSPredicate predicateWithFormat:@"(isRoot == YES) AND (itemEntityName == %@)", entityName];
+    NSPredicate *predicate = [NSPredicate predicateWithFormat:@"itemEntityName == %@", entityName];
     NSManagedObjectContext *moc = [self managedObjectContext];
-    NSFetchRequest *groupFetchRequest = [[NSFetchRequest alloc] init];
+    NSFetchRequest *fetchRequest = [[NSFetchRequest alloc] init];
 
-    [groupFetchRequest setPredicate:rootItemPredicate];
+    [fetchRequest setPredicate:predicate];
     
     NSError *fetchError = nil;
     NSArray *fetchResults;
     @try {
-        NSEntityDescription *entity = [NSEntityDescription entityForName:SmartGroupEntityName
+        NSEntityDescription *entity = [NSEntityDescription entityForName:LibraryGroupEntityName
                                                   inManagedObjectContext:moc];
-        [groupFetchRequest setEntity:entity];
-        fetchResults = [moc executeFetchRequest:groupFetchRequest error:&fetchError];
+        [fetchRequest setEntity:entity];
+        fetchResults = [moc executeFetchRequest:fetchRequest error:&fetchError];
     } @finally {
-        [groupFetchRequest release];
+        [fetchRequest release];
     }
     if ((fetchResults != nil) && ([fetchResults count] == 1) && (fetchError == nil)) {
         
