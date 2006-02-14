@@ -11,12 +11,27 @@
 
 @implementation BDSKSmartGroup 
 
++ (void)initialize {
+    // we need to call super's implementation, even though the docs say not to, because otherwise we loose dependent keys
+    [super initialize]; 
+    [self setKeys:[NSArray arrayWithObjects:@"predicateData", @"itemEntityName", nil]
+        triggerChangeNotificationsForDependentKey:@"fetchRequest"];
+    [self setKeys:[NSArray arrayWithObjects:@"fetchRequest", nil]
+        triggerChangeNotificationsForDependentKey:@"items"];
+}
+
 - (id)initWithEntity:(NSEntityDescription*)entity insertIntoManagedObjectContext:(NSManagedObjectContext*)context{
 	if (self = [super initWithEntity:entity insertIntoManagedObjectContext:context]) {
 		canEdit = YES;
         canEditName = YES;
+		[self addObserver:self forKeyPath:@"fetchRequest" options:0 context:NULL];
 	}
 	return self;
+}
+
+- (void)dealloc{
+	[self removeObserver:self forKeyPath:@"fetchRequest"];
+	[super dealloc];
 }
 
 - (void)commonAwake {
@@ -34,13 +49,13 @@
     [self setPredicate:[NSPredicate predicateWithValue:YES]];
 }
 
+- (void)awakeFromFetch {
+    [super awakeFromFetch];
+}
+
 - (void)didTurnIntoFault {
     [items release];
     items = nil;
-    [fetchRequest release];
-    fetchRequest = nil;
-    [predicate release];
-    predicate = nil;
     
     [super didTurnIntoFault];
 }
@@ -48,43 +63,32 @@
 - (void)refresh {
 	[self willChangeValueForKey:@"items"];
 	[items release];
-    items = nil;    
+    items = nil;
 	[self didChangeValueForKey:@"items"];
 }
 
 - (void)managedObjectContextObjectsDidChange:(NSNotification *)notification {
-	NSEnumerator *enumerator;
+    NSDictionary *userInfo = [notification userInfo];
+    NSMutableSet *modifiedObjects = [NSMutableSet set];
+	
+	[modifiedObjects unionSet:[userInfo objectForKey:NSUpdatedObjectsKey]];
+	[modifiedObjects unionSet:[userInfo objectForKey:NSInsertedObjectsKey]];
+	[modifiedObjects unionSet:[userInfo objectForKey:NSDeletedObjectsKey]];
+	
+    // TODO: can depend on other entities through relationships
+    NSEntityDescription *entity = [NSEntityDescription entityForName:[self itemEntityName] inManagedObjectContext:[self managedObjectContext]];
+	NSEnumerator *enumerator = [modifiedObjects objectEnumerator];	
 	id object;
 	BOOL refresh = NO;
 	
-	NSEntityDescription *entity = [[self fetchRequest] entity];
-	
-	NSSet *updated = [[notification userInfo] objectForKey:NSUpdatedObjectsKey];
-	NSSet *inserted = [[notification userInfo] objectForKey:NSInsertedObjectsKey];
-	NSSet *deleted = [[notification userInfo] objectForKey:NSDeletedObjectsKey];
-	
-	enumerator = [updated objectEnumerator];	
-	while ((refresh == NO) && (object = [enumerator nextObject])) {
+	while (object = [enumerator nextObject]) {
 		if ([object entity] == entity) {
-			refresh = YES;	
-		}
-	}
-
-	enumerator = [inserted objectEnumerator];	
-	while ((refresh == NO) && (object = [enumerator nextObject])) {
-		if ([object entity] == entity) {
-			refresh = YES;	
-		}
-	}
-
-	enumerator = [deleted objectEnumerator];	
-	while ((refresh == NO) && (object = [enumerator nextObject])) {
-		if ([object entity] == entity) {
-			refresh = YES;	
+			refresh = YES;
+            break;
 		}
 	}
 	    
-    if ( (refresh == NO) && (([updated count] == 0) && ([inserted count] == 0) && ([deleted count] == 0))) {
+    if (refresh == NO && [modifiedObjects count] == 0) {
         refresh = YES;
     }
 	
@@ -96,38 +100,31 @@
 #pragma mark Accessors
 
 - (NSFetchRequest *)fetchRequest  {
-    if ( fetchRequest == nil ) {
+    NSFetchRequest *fetchRequest;
+    [self willAccessValueForKey:@"fetchRequest"];
+    fetchRequest = [self primitiveValueForKey:@"fetchRequest"];
+    [self didAccessValueForKey:@"fetchRequest"];
+    
+    if (fetchRequest == nil) {
         NSString *entityName = [self itemEntityName];
-        fetchRequest = [[NSFetchRequest alloc] init];
+        NSData *predicateData = [self valueForKey:@"predicateData"];
+        fetchRequest = [[[NSFetchRequest alloc] init] autorelease];
         [fetchRequest setEntity: [NSEntityDescription entityForName:entityName inManagedObjectContext:[self managedObjectContext]]];
-        [fetchRequest setPredicate:[self predicate]];
+        if (predicateData != nil) {
+            [fetchRequest setPredicate:[NSKeyedUnarchiver unarchiveObjectWithData:predicateData]];
+        }
+        [self setPrimitiveValue:fetchRequest forKey:@"fetchRequest"];
     }
+    
     return fetchRequest;
 }
 
 - (NSPredicate *)predicate {
-    NSData *predicateData;
-    if (predicate == nil) {
-        predicateData = [self valueForKey:@"predicateData"];
-        if (predicateData != nil) {
-            predicate = [(NSPredicate *)[NSKeyedUnarchiver unarchiveObjectWithData:predicateData] retain];
-        }
-    }
-    return predicate;
+    return [[self fetchRequest] predicate];
 }
 
-- (void)setPredicate: (NSPredicate *)newPredicate {
-    if (predicate != newPredicate)  {
-        [predicate autorelease];
-        if (newPredicate == nil) {
-            newPredicate = [NSPredicate predicateWithValue:YES];
-        }
-        predicate = [newPredicate retain];
-		NSData *predicateData = [NSKeyedArchiver archivedDataWithRootObject:predicate];
-        [self setValue: predicateData forKey: @"predicateData"];
-        [[self fetchRequest] setPredicate:predicate];
-		[self refresh];
-    }
+- (void)setPredicate:(NSPredicate *)newPredicate {
+    [[self fetchRequest] setPredicate:newPredicate];
 }
 
 - (NSString *)itemEntityName {
@@ -142,8 +139,10 @@
     [self willChangeValueForKey: @"itemEntityName"];
     [self setPrimitiveValue:entityName forKey:@"itemEntityName"];
     [self didChangeValueForKey:@"itemEntityName"];
-    [[self fetchRequest] setEntity:[NSEntityDescription entityForName:entityName inManagedObjectContext:[self managedObjectContext]]];
-    [self setPredicate:[NSPredicate predicateWithValue:YES]];
+    
+    NSFetchRequest *fetchRequest = [self fetchRequest];
+    [fetchRequest setEntity:[NSEntityDescription entityForName:entityName inManagedObjectContext:[self managedObjectContext]]];
+    [fetchRequest setPredicate:[NSPredicate predicateWithValue:YES]];
 }
 
 
@@ -193,6 +192,45 @@
 
 - (void)setItems:(NSSet *)newItems  {
     // noop   
+}
+
+- (void)willSave {
+    NSPredicate *predicate = [[self primitiveValueForKey:@"fetchRequest"] predicate];
+    NSData *predicateData = nil;
+    
+    if (predicate != nil) {
+        predicateData = [NSKeyedArchiver archivedDataWithRootObject:predicate];
+    }
+    [self setPrimitiveValue:predicateData forKey:@"predicateData"];
+    
+    [super willSave];
+}
+
+- (void)observeValueForKeyPath:(NSString *)keyPath ofObject:(id)object change:(NSDictionary *)change context:(void *)context {
+    if ([keyPath isEqualToString:@"fetchRequest"]) {
+        [self refresh];
+    }
+}
+
+@end
+
+
+@implementation BDSKLibraryGroup 
+
+- (BOOL)isRoot {
+    return YES;
+}
+
+- (BOOL)canEdit {
+    return NO;
+}
+
+- (BOOL)canEditName {
+    return NO;
+}
+
+- (NSString *)groupImageName {
+    return (groupImageName != nil) ? groupImageName : @"RootGroupIcon";
 }
 
 @end

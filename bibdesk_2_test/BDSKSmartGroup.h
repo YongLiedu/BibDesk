@@ -11,8 +11,6 @@
 
 
 @interface BDSKSmartGroup :  BDSKGroup {
-    NSFetchRequest *fetchRequest;       
-    NSPredicate *predicate;          
     NSSet *items;
     NSString *groupImageName;
     BOOL canEdit;
@@ -35,4 +33,8 @@
 
 - (void)refresh;
 
+@end
+
+@interface BDSKLibraryGroup :  BDSKSmartGroup {
+}
 @end
