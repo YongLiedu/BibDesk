@@ -199,60 +199,26 @@
 #pragma mark Actions
 
 - (IBAction)addNewItem:(id)sender{
-    NSManagedObject *obj = [self sourceGroup];
-    NSString *entityName = [[obj entity] name];
+    NSManagedObject *selectedGroup = [self sourceGroup];
+    NSString *entityName = [selectedGroup valueForKey:@"itemEntityName"];
+    NSString *groupEntityName = [[selectedGroup  entity] name];
+    BOOL isSmart = [[selectedGroup valueForKey:@"isSmart"] boolValue];
 
-    NSLog(@"entityName in addNewItemFrom is %@, obj is %@", entityName, obj);
+    //NSLog(@"entityName in addNewItemFrom is %@, obj is %@", entityName, obj);
     
-    if ([entityName isEqualToString:PublicationGroupEntityName]){
-        [self addNewPublicationToContainer:obj];
+    if (isSmart == YES && [groupEntityName isEqualToString:LibraryGroupEntityName] == NO) {
+        NSBeep();
+        return;
     }
-    if ([entityName isEqualToString:NoteGroupEntityName]){
-        [self addNewNoteToContainer:obj];
-    }
-    if ([entityName isEqualToString:PersonGroupEntityName]){
-        [self addNewPersonToContainer:obj];
-    }
-    if ([entityName isEqualToString:SmartGroupEntityName]){
-        if ([[obj valueForKey:@"isRoot"] boolValue] == YES)
-            [self addNewItemToRootContainer:obj];
-        else
-            NSBeep();
-    }
-    else NSBeep();
-}
-
-- (void)addNewPublicationToContainer:(id)container{
-    NSManagedObjectContext *managedObjectContext = [[self document] managedObjectContext];
-    NSManagedObject *newPublication = [NSEntityDescription insertNewObjectForEntityForName:PublicationEntityName
-                                           inManagedObjectContext:managedObjectContext];
     
-    NSMutableSet *publications = [container mutableSetValueForKey:@"items"];
-    [publications addObject:newPublication];
-}
-
-- (void)addNewPersonToContainer:(id)container{
-    NSManagedObjectContext *managedObjectContext = [[self document] managedObjectContext];
-    NSManagedObject *newPerson = [NSEntityDescription insertNewObjectForEntityForName:PersonEntityName
-                                               inManagedObjectContext:managedObjectContext];
-
-    NSMutableSet *people = [container mutableSetValueForKey:@"items"];
-    [people addObject:newPerson];
-}
-
-- (void)addNewNoteToContainer:(id)container{
-    NSManagedObjectContext *managedObjectContext = [[self document] managedObjectContext];
-    NSManagedObject *newNote = [NSEntityDescription insertNewObjectForEntityForName:NoteEntityName
-                                               inManagedObjectContext:managedObjectContext];
+    NSManagedObjectContext *context = [[self document] managedObjectContext];
+    NSManagedObject *newItem = [NSEntityDescription insertNewObjectForEntityForName:entityName
+                                                             inManagedObjectContext:context];
     
-    NSMutableSet *notes = [container mutableSetValueForKey:@"items"];
-    [notes addObject:newNote];
-}
-
-- (void)addNewItemToRootContainer:(id)container{
-    NSManagedObjectContext *managedObjectContext = [[self document] managedObjectContext];
-    [NSEntityDescription insertNewObjectForEntityForName:[container valueForKey:@"itemEntityName"]
-                                  inManagedObjectContext:managedObjectContext];
+    if (isSmart == NO) {
+        NSMutableSet *items = [selectedGroup mutableSetValueForKey:@"items"];
+        [items addObject:newItem];
+    }
 }
 
 @end

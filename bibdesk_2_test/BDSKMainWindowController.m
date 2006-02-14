@@ -86,77 +86,114 @@
 	[swc showWindow:sender];
 }
 
-- (IBAction)addNewItemFromSourceListSelection:(id)sender{
-    [super addNewItem:sender];
-}
-
-- (IBAction)addNewSmartGroupFromSourceListSelection:(id)sender{
-    id obj = [self sourceGroup];
+- (IBAction)addNewGroup:(id)sender{
+    NSManagedObject *selectedGroup = [self sourceGroup];
+    NSString *entityName = [selectedGroup valueForKey:@"itemEntityName"];
+    BOOL isSmart = [[selectedGroup valueForKey:@"isSmart"] boolValue];
+    NSString *groupEntityName;
     
-    if ([[obj valueForKey:@"isRoot"] boolValue] == YES) {
-        [self addNewSmartGroupToContainer:obj];
-    } else NSBeep();
-}
-
-- (IBAction)addNewGroupFromSourceListSelection:(id)sender{
-    id obj = [self sourceGroup];
-    NSString *entityName = [obj valueForKey:@"itemEntityName"];
-        
     if ([entityName isEqualToString:PublicationEntityName]){
-        [self addNewPublicationGroupToContainer:obj];
+        groupEntityName = PublicationGroupEntityName;
+    } else if ([entityName isEqualToString:PersonEntityName]){
+        groupEntityName = PersonGroupEntityName;
+    } else if ([entityName isEqualToString:NoteEntityName]){
+        groupEntityName = NoteGroupEntityName;
+    } else if ([entityName isEqualToString:InstitutionEntityName]){
+        groupEntityName = InstitutionGroupEntityName;
+    } else if ([entityName isEqualToString:VenueEntityName]){
+        groupEntityName = VenueGroupEntityName;
+    } else if ([entityName isEqualToString:TagEntityName]){
+        groupEntityName = TagGroupEntityName;
+    } else {
+        NSBeep();
+        return;
     }
-    else if ([entityName isEqualToString:NoteEntityName]){
-        [self addNewNoteGroupToContainer:obj];
+    
+    NSManagedObjectContext *context = [[self document] managedObjectContext];
+    id newGroup = [NSEntityDescription insertNewObjectForEntityForName:groupEntityName
+                                                inManagedObjectContext:context];
+    
+    [newGroup setValue:@"Untitled Group" forKey:@"name"];
+    
+    if (isSmart == NO && [[[selectedGroup entity] name] isEqualToString:AutoChildGroupEntityName]) {
+        // for non-smart groups we add the new groups as a child
+        [newGroup setValue:[NSNumber numberWithBool:NO] forKey:@"isRoot"];
+        [[selectedGroup mutableSetValueForKey:@"children"] addObject:newGroup];
+    } else {
+        // for smart groups (including auto groups) we add the new groups as root
+        [newGroup setValue:[NSNumber numberWithBool:YES] forKey:@"isRoot"];
     }
-    else if ([entityName isEqualToString:PersonEntityName]){
-        [self addNewPersonGroupToContainer:obj]; 
+}
+
+- (IBAction)addNewSmartGroup:(id)sender{
+    NSManagedObject *selectedGroup = [self sourceGroup];
+    NSString *entityName = [selectedGroup valueForKey:@"itemEntityName"];
+    NSString *predicateFormat;
+    
+    // TODO: predicate editing
+    // here we just put some arbitrary predicate
+    if ([entityName isEqualToString:PublicationEntityName]){
+        predicateFormat = @"any contributorRelationships.contributor.lastName like[c] %@";
+    } else if ([entityName isEqualToString:PersonEntityName]){
+        predicateFormat = @"lastName like[c] %@";
+    } else if ([entityName isEqualToString:NoteEntityName]){
+        predicateFormat = @"value contains[c] %@";
+    } else if ([entityName isEqualToString:InstitutionEntityName]){
+        predicateFormat = @"any personRelationships.person.lastName like[c] %@";
+    } else if ([entityName isEqualToString:VenueEntityName]){
+        predicateFormat = @"any publications.contributorRelationships.contributor.lastName like[c] %@";
+    } else if ([entityName isEqualToString:TagEntityName]){
+        predicateFormat = @"name like[c] %@";
+    } else {
+        NSBeep();
+        return;
     }
-    else NSBeep();
-}
-
-- (void)addNewPublicationGroupToContainer:(id)container{
-    NSManagedObjectContext *managedObjectContext = [[self document] managedObjectContext];
-    id newPublicationGroup = [NSEntityDescription insertNewObjectForEntityForName:PublicationGroupEntityName
-                                                  inManagedObjectContext:managedObjectContext];
+    NSPredicate *predicate = [NSPredicate predicateWithFormat:predicateFormat, @"Blow"];
     
-    [newPublicationGroup setValue:@"Untitled Publication Group" forKey:@"name"];
-
-    NSMutableSet *children = [container mutableSetValueForKey:@"children"];
-    [children addObject:newPublicationGroup];
-}
-
-- (void)addNewPersonGroupToContainer:(id)container{
-    NSManagedObjectContext *managedObjectContext = [[self document] managedObjectContext];
-    id newPersonGroup = [NSEntityDescription insertNewObjectForEntityForName:PersonGroupEntityName
-                                                    inManagedObjectContext:managedObjectContext];
-    
-    [newPersonGroup setValue:@"Untitled Person Group" forKey:@"name"];
-
-    NSMutableSet *children = [container mutableSetValueForKey:@"children"];
-    [children addObject:newPersonGroup];
-}
-
-- (void)addNewNoteGroupToContainer:(id)container{
-    NSManagedObjectContext *managedObjectContext = [[self document] managedObjectContext];
-    id newNoteGroup = [NSEntityDescription insertNewObjectForEntityForName:NoteGroupEntityName
-                                                 inManagedObjectContext:managedObjectContext];
-    
-    [newNoteGroup setValue:@"Untitled Note Group" forKey:@"name"];
-
-    NSMutableSet *children = [container mutableSetValueForKey:@"children"];
-    [children addObject:newNoteGroup];
-}
-
-- (void)addNewSmartGroupToContainer:(id)container{
-    NSManagedObjectContext *managedObjectContext = [[self document] managedObjectContext];
+    NSManagedObjectContext *context = [[self document] managedObjectContext];
     id newSmartGroup = [NSEntityDescription insertNewObjectForEntityForName:SmartGroupEntityName
-                                                 inManagedObjectContext:managedObjectContext];
+                                                     inManagedObjectContext:context];
     
-    [newSmartGroup setValue:[container valueForKey:@"itemEntityName"] forKey:@"itemEntityName"];
+    // we always add smart groups as root, as for now they don't take their items from the parent
+    [newSmartGroup setValue:entityName forKey:@"itemEntityName"];
+    [newSmartGroup setValue:predicate forKey:@"predicate"];
+    [newSmartGroup setValue:[NSNumber numberWithBool:YES] forKey:@"isRoot"];
     [newSmartGroup setValue:@"Untitled Smart Group" forKey:@"name"];
+}
 
-    NSMutableSet *children = [container mutableSetValueForKey:@"children"];
-    [children addObject:newSmartGroup];
+- (IBAction)addNewAutoGroup:(id)sender{
+    NSManagedObject *selectedGroup = [self sourceGroup];
+    NSString *entityName = [selectedGroup valueForKey:@"itemEntityName"];
+    NSString *propertyName;
+    
+    // TODO: propertyName editing
+    // here we just put some arbitrary propertyName
+    if ([entityName isEqualToString:PublicationEntityName]){
+        propertyName = @"contributorRelationships.contributor.name";
+    } else if ([entityName isEqualToString:PersonEntityName]){
+        propertyName = @"publicationRelationships.publication.title";
+    } else if ([entityName isEqualToString:NoteEntityName]){
+        propertyName = @"name";
+    } else if ([entityName isEqualToString:InstitutionEntityName]){
+        propertyName = @"name";
+    } else if ([entityName isEqualToString:VenueEntityName]){
+        propertyName = @"name";
+    } else if ([entityName isEqualToString:TagEntityName]){
+        propertyName = @"name";
+    } else {
+        NSBeep();
+        return;
+    }
+    
+    NSManagedObjectContext *context = [[self document] managedObjectContext];
+    id newAutoGroup = [NSEntityDescription insertNewObjectForEntityForName:AutoGroupEntityName
+                                                    inManagedObjectContext:context];
+    
+    // we always add auto groups as root
+    [newAutoGroup setValue:entityName forKey:@"itemEntityName"];
+    [newAutoGroup setValue:propertyName forKey:@"itemPropertyName"];
+    [newAutoGroup setValue:[NSNumber numberWithBool:YES] forKey:@"isRoot"];
+    [newAutoGroup setValue:@"Untitled Auto Group" forKey:@"name"];
 }
 
 #pragma mark Source List Outline View DataSource Methods and such

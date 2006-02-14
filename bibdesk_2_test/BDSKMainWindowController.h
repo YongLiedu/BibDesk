@@ -24,14 +24,9 @@
 // actions
 - (IBAction)showWindowForSourceListSelection:(id)sender;
 
-- (IBAction)addNewItemFromSourceListSelection:(id)sender;
-- (IBAction)addNewGroupFromSourceListSelection:(id)sender;
-- (IBAction)addNewSmartGroupFromSourceListSelection:(id)sender;
-
-- (void)addNewPublicationGroupToContainer:(id)container;
-- (void)addNewPersonGroupToContainer:(id)container;
-- (void)addNewNoteGroupToContainer:(id)container;
-- (void)addNewSmartGroupToContainer:(id)container;
+- (IBAction)addNewGroup:(id)sender;
+- (IBAction)addNewSmartGroup:(id)sender;
+- (IBAction)addNewAutoGroup:(id)sender;
 
 - (void)importFromBibTeXFile:(id)sender;
 

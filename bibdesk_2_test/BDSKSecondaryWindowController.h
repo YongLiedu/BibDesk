@@ -39,9 +39,4 @@
 // actions
 - (IBAction)addNewItem:(id)sender;
 
-- (void)addNewPublicationToContainer:(id)container;
-- (void)addNewPersonToContainer:(id)container;
-- (void)addNewNoteToContainer:(id)container;
-- (void)addNewItemToRootContainer:(id)container;
-
 @end
