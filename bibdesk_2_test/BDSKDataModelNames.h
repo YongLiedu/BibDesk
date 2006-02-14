@@ -11,6 +11,9 @@
  */
 
 #define SmartGroupEntityName @"SmartGroup"
+#define LibraryGroupEntityName @"LibraryGroup"
+#define AutoGroupEntityName @"AutoGroup"
+#define AutoChildGroupEntityName @"AutoChildGroup"
 
 #define PublicationGroupEntityName @"PublicationGroup"
 #define PublicationEntityName @"Publication"
