@@ -23,7 +23,23 @@
 - (void)setItemPropertyName:(NSString *)propertyName;
 
 - (void)refresh;
+- (void)reset;
 
 - (NSSet *)items;
+
+@end
+
+
+@interface BDSKAutoChildGroup : BDSKGroup {
+    NSSet *items;
+}
+
+- (NSString *)itemEntityName;
+- (void)setItemEntityName:(NSString *)entityName;
+
+- (NSSet *)items;
+- (void)setItems:(NSSet *)newItems;
+
+- (NSSet *)children;
 
 @end
