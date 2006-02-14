@@ -3,9 +3,9 @@
         {CLASS = BDSKDocument; LANGUAGE = ObjC; SUPERCLASS = NSPersistentDocument; }, 
         {
             ACTIONS = {
-                addNewGroupFromSourceListSelection = id; 
-                addNewItemFromSourceListSelection = id; 
-                addNewSmartGroupFromSourceListSelection = id; 
+                addNewAutoGroup = id; 
+                addNewGroup = id; 
+                addNewSmartGroup = id; 
                 importFromBibTeXFile = id; 
                 showWindowForSourceListSelection = id; 
             }; 

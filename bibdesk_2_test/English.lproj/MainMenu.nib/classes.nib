@@ -8,10 +8,10 @@
         }, 
         {
             ACTIONS = {
-                addNewGroupFromSourceListSelection = id; 
+                addNewAutoGroup = id; 
+                addNewGroup = id; 
                 addNewItem = id; 
-                addNewItemFromSourceListSelection = id; 
-                addNewSmartGroupFromSourceListSelection = id; 
+                addNewSmartGroup = id; 
                 importDocumentUsingPhonyCiteKeys = id; 
                 importFromBibTeXFile = id; 
                 oneShotImportFromBibTeXFile = id; 
