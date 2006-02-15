@@ -211,6 +211,14 @@
     // noop   
 }
 
+- (NSSet *)children {
+    return [NSSet set];
+}
+
+- (void)setChildren:(NSSet *)newChildren  {
+    // noop
+}
+
 - (void)willSave {
     NSPredicate *predicate = [[self primitiveValueForKey:@"fetchRequest"] predicate];
     NSData *predicateData = nil;

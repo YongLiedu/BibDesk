@@ -32,6 +32,8 @@
 - (NSSet *)items;
 - (NSSet *)itemsInSelfOrChildren;
 
+- (NSSet *)children;
+
 - (void)commonAwake;
 - (void)refresh;
 - (void)managedObjectContextObjectsDidChange:(NSNotification *)notification;
