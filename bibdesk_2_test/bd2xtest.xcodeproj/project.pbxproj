@@ -14,11 +14,8 @@
 		2744F56C08889FC2001E0CC9 /* BDSKDocument.m in Sources */ = {isa = PBXBuildFile; fileRef = 2744F55708889FC2001E0CC9 /* BDSKDocument.m */; };
 		2744F56D08889FC2001E0CC9 /* BDSKMainWindowController.m in Sources */ = {isa = PBXBuildFile; fileRef = 2744F55908889FC2001E0CC9 /* BDSKMainWindowController.m */; };
 		2744F56E08889FC2001E0CC9 /* BDSKModel-0.1.xcdatamodel in Sources */ = {isa = PBXBuildFile; fileRef = 2744F55A08889FC2001E0CC9 /* BDSKModel-0.1.xcdatamodel */; };
-		2744F56F08889FC2001E0CC9 /* BDSKNoteGroup.m in Sources */ = {isa = PBXBuildFile; fileRef = 2744F55C08889FC2001E0CC9 /* BDSKNoteGroup.m */; };
 		2744F57008889FC3001E0CC9 /* BDSKNoteTableDisplayController.m in Sources */ = {isa = PBXBuildFile; fileRef = 2744F55E08889FC2001E0CC9 /* BDSKNoteTableDisplayController.m */; };
-		2744F57108889FC3001E0CC9 /* BDSKPersonGroup.m in Sources */ = {isa = PBXBuildFile; fileRef = 2744F56008889FC2001E0CC9 /* BDSKPersonGroup.m */; };
 		2744F57208889FC3001E0CC9 /* BDSKPersonTableDisplayController.m in Sources */ = {isa = PBXBuildFile; fileRef = 2744F56208889FC2001E0CC9 /* BDSKPersonTableDisplayController.m */; };
-		2744F57308889FC3001E0CC9 /* BDSKPublicationGroup.m in Sources */ = {isa = PBXBuildFile; fileRef = 2744F56408889FC2001E0CC9 /* BDSKPublicationGroup.m */; };
 		2744F57408889FC3001E0CC9 /* BDSKPublicationTableDisplayController.m in Sources */ = {isa = PBXBuildFile; fileRef = 2744F56608889FC2001E0CC9 /* BDSKPublicationTableDisplayController.m */; };
 		2744F57608889FC3001E0CC9 /* DisplayControllers.plist in Resources */ = {isa = PBXBuildFile; fileRef = 2744F56908889FC2001E0CC9 /* DisplayControllers.plist */; };
 		2744F57708889FC3001E0CC9 /* ImageAndTextCell.m in Sources */ = {isa = PBXBuildFile; fileRef = 2744F56B08889FC2001E0CC9 /* ImageAndTextCell.m */; };
@@ -43,10 +40,10 @@
 		CE5139030997A6D900C73C64 /* BDSKBibTeXParser.m in Sources */ = {isa = PBXBuildFile; fileRef = CE51379209977D9400C73C64 /* BDSKBibTeXParser.m */; };
 		CE5139C30997A87A00C73C64 /* Carbon.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = CE5139C20997A87A00C73C64 /* Carbon.framework */; };
 		CE6D83A60994CFA500D01A71 /* BDSKSmartGroup.m in Sources */ = {isa = PBXBuildFile; fileRef = CE6D83A50994CFA500D01A71 /* BDSKSmartGroup.m */; };
+		CE82DA2E09A32BC40027F436 /* BDSKStaticGroup.h in CopyFiles */ = {isa = PBXBuildFile; fileRef = CE82DA2C09A32BC40027F436 /* BDSKStaticGroup.h */; };
+		CE82DA2F09A32BC40027F436 /* BDSKStaticGroup.m in Sources */ = {isa = PBXBuildFile; fileRef = CE82DA2D09A32BC40027F436 /* BDSKStaticGroup.m */; };
 		CEB343A4099A11D500601FBA /* BDSKTag.h in CopyFiles */ = {isa = PBXBuildFile; fileRef = CEB3439E099A11D500601FBA /* BDSKTag.h */; };
 		CEB343A5099A11D500601FBA /* BDSKTag.m in Sources */ = {isa = PBXBuildFile; fileRef = CEB3439F099A11D500601FBA /* BDSKTag.m */; };
-		CEB343A6099A11D500601FBA /* BDSKTagGroup.h in CopyFiles */ = {isa = PBXBuildFile; fileRef = CEB343A0099A11D500601FBA /* BDSKTagGroup.h */; };
-		CEB343A7099A11D500601FBA /* BDSKTagGroup.m in Sources */ = {isa = PBXBuildFile; fileRef = CEB343A1099A11D500601FBA /* BDSKTagGroup.m */; };
 		CEB343A8099A11D500601FBA /* BDSKTagTableDisplayController.h in CopyFiles */ = {isa = PBXBuildFile; fileRef = CEB343A2099A11D500601FBA /* BDSKTagTableDisplayController.h */; };
 		CEB343A9099A11D500601FBA /* BDSKTagTableDisplayController.m in Sources */ = {isa = PBXBuildFile; fileRef = CEB343A3099A11D500601FBA /* BDSKTagTableDisplayController.m */; };
 		CEB3441D099A17B000601FBA /* BDSKTagTableDisplayController.nib in Resources */ = {isa = PBXBuildFile; fileRef = CEB3441B099A17B000601FBA /* BDSKTagTableDisplayController.nib */; };
@@ -55,9 +52,7 @@
 		CEB797C0099823AD00AAB226 /* BDSKInstitution.m in Sources */ = {isa = PBXBuildFile; fileRef = CEB797B6099823AD00AAB226 /* BDSKInstitution.m */; };
 		CEB797C2099823AD00AAB226 /* BDSKInstitutionTableDisplayController.m in Sources */ = {isa = PBXBuildFile; fileRef = CEB797B8099823AD00AAB226 /* BDSKInstitutionTableDisplayController.m */; };
 		CEB797C4099823AD00AAB226 /* BDSKVenue.m in Sources */ = {isa = PBXBuildFile; fileRef = CEB797BA099823AD00AAB226 /* BDSKVenue.m */; };
-		CEB797C6099823AD00AAB226 /* BDSKVenueGroup.m in Sources */ = {isa = PBXBuildFile; fileRef = CEB797BC099823AD00AAB226 /* BDSKVenueGroup.m */; };
 		CEB797C8099823AD00AAB226 /* BDSKVenueTableDisplayController.m in Sources */ = {isa = PBXBuildFile; fileRef = CEB797BE099823AD00AAB226 /* BDSKVenueTableDisplayController.m */; };
-		CEB797E70998247500AAB226 /* BDSKInstitutionGroup.m in Sources */ = {isa = PBXBuildFile; fileRef = CEB797E50998247500AAB226 /* BDSKInstitutionGroup.m */; };
 		CEB798400998272D00AAB226 /* BDSKInstitutionTableDisplayController.nib in Resources */ = {isa = PBXBuildFile; fileRef = CEB7983C0998272D00AAB226 /* BDSKInstitutionTableDisplayController.nib */; };
 		CEB798410998272D00AAB226 /* BDSKVenueTableDisplayController.nib in Resources */ = {isa = PBXBuildFile; fileRef = CEB7983E0998272D00AAB226 /* BDSKVenueTableDisplayController.nib */; };
 		CEC5AF05098F7A0000DE1DB2 /* BDSKSecondaryWindowController.m in Sources */ = {isa = PBXBuildFile; fileRef = CEC5AF02098F7A0000DE1DB2 /* BDSKSecondaryWindowController.m */; };
@@ -119,9 +114,9 @@
 			files = (
 				CE5139020997A6C000C73C64 /* BTParse.framework in CopyFiles */,
 				CEB343A4099A11D500601FBA /* BDSKTag.h in CopyFiles */,
-				CEB343A6099A11D500601FBA /* BDSKTagGroup.h in CopyFiles */,
 				CEB343A8099A11D500601FBA /* BDSKTagTableDisplayController.h in CopyFiles */,
 				CEB344A4099A4BCD00601FBA /* BDSKAutoGroup.h in CopyFiles */,
+				CE82DA2E09A32BC40027F436 /* BDSKStaticGroup.h in CopyFiles */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -145,16 +140,10 @@
 		2744F55808889FC2001E0CC9 /* BDSKMainWindowController.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = BDSKMainWindowController.h; sourceTree = "<group>"; };
 		2744F55908889FC2001E0CC9 /* BDSKMainWindowController.m */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.objc; path = BDSKMainWindowController.m; sourceTree = "<group>"; };
 		2744F55A08889FC2001E0CC9 /* BDSKModel-0.1.xcdatamodel */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = wrapper.xcdatamodel; path = "BDSKModel-0.1.xcdatamodel"; sourceTree = "<group>"; };
-		2744F55B08889FC2001E0CC9 /* BDSKNoteGroup.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = BDSKNoteGroup.h; sourceTree = "<group>"; };
-		2744F55C08889FC2001E0CC9 /* BDSKNoteGroup.m */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.objc; path = BDSKNoteGroup.m; sourceTree = "<group>"; };
 		2744F55D08889FC2001E0CC9 /* BDSKNoteTableDisplayController.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = BDSKNoteTableDisplayController.h; sourceTree = "<group>"; };
 		2744F55E08889FC2001E0CC9 /* BDSKNoteTableDisplayController.m */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.objc; path = BDSKNoteTableDisplayController.m; sourceTree = "<group>"; };
-		2744F55F08889FC2001E0CC9 /* BDSKPersonGroup.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = BDSKPersonGroup.h; sourceTree = "<group>"; };
-		2744F56008889FC2001E0CC9 /* BDSKPersonGroup.m */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.objc; path = BDSKPersonGroup.m; sourceTree = "<group>"; };
 		2744F56108889FC2001E0CC9 /* BDSKPersonTableDisplayController.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = BDSKPersonTableDisplayController.h; sourceTree = "<group>"; };
 		2744F56208889FC2001E0CC9 /* BDSKPersonTableDisplayController.m */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.objc; path = BDSKPersonTableDisplayController.m; sourceTree = "<group>"; };
-		2744F56308889FC2001E0CC9 /* BDSKPublicationGroup.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = BDSKPublicationGroup.h; sourceTree = "<group>"; };
-		2744F56408889FC2001E0CC9 /* BDSKPublicationGroup.m */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.objc; path = BDSKPublicationGroup.m; sourceTree = "<group>"; };
 		2744F56508889FC2001E0CC9 /* BDSKPublicationTableDisplayController.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = BDSKPublicationTableDisplayController.h; sourceTree = "<group>"; };
 		2744F56608889FC2001E0CC9 /* BDSKPublicationTableDisplayController.m */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.objc; path = BDSKPublicationTableDisplayController.m; sourceTree = "<group>"; };
 		2744F56908889FC2001E0CC9 /* DisplayControllers.plist */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = text.plist; path = DisplayControllers.plist; sourceTree = "<group>"; };
@@ -190,10 +179,10 @@
 		CE5139C20997A87A00C73C64 /* Carbon.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Carbon.framework; path = /System/Library/Frameworks/Carbon.framework; sourceTree = "<absolute>"; };
 		CE6D83A40994CFA500D01A71 /* BDSKSmartGroup.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BDSKSmartGroup.h; sourceTree = "<group>"; };
 		CE6D83A50994CFA500D01A71 /* BDSKSmartGroup.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BDSKSmartGroup.m; sourceTree = "<group>"; };
+		CE82DA2C09A32BC40027F436 /* BDSKStaticGroup.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BDSKStaticGroup.h; sourceTree = "<group>"; };
+		CE82DA2D09A32BC40027F436 /* BDSKStaticGroup.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BDSKStaticGroup.m; sourceTree = "<group>"; };
 		CEB3439E099A11D500601FBA /* BDSKTag.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = BDSKTag.h; sourceTree = "<group>"; };
 		CEB3439F099A11D500601FBA /* BDSKTag.m */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.objc; path = BDSKTag.m; sourceTree = "<group>"; };
-		CEB343A0099A11D500601FBA /* BDSKTagGroup.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = BDSKTagGroup.h; sourceTree = "<group>"; };
-		CEB343A1099A11D500601FBA /* BDSKTagGroup.m */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.objc; path = BDSKTagGroup.m; sourceTree = "<group>"; };
 		CEB343A2099A11D500601FBA /* BDSKTagTableDisplayController.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = BDSKTagTableDisplayController.h; sourceTree = "<group>"; };
 		CEB343A3099A11D500601FBA /* BDSKTagTableDisplayController.m */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.objc; path = BDSKTagTableDisplayController.m; sourceTree = "<group>"; };
 		CEB3441C099A17B000601FBA /* English */ = {isa = PBXFileReference; lastKnownFileType = wrapper.nib; name = English; path = English.lproj/BDSKTagTableDisplayController.nib; sourceTree = "<group>"; };
@@ -205,12 +194,8 @@
 		CEB797B8099823AD00AAB226 /* BDSKInstitutionTableDisplayController.m */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.objc; path = BDSKInstitutionTableDisplayController.m; sourceTree = "<group>"; };
 		CEB797B9099823AD00AAB226 /* BDSKVenue.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = BDSKVenue.h; sourceTree = "<group>"; };
 		CEB797BA099823AD00AAB226 /* BDSKVenue.m */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.objc; path = BDSKVenue.m; sourceTree = "<group>"; };
-		CEB797BB099823AD00AAB226 /* BDSKVenueGroup.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = BDSKVenueGroup.h; sourceTree = "<group>"; };
-		CEB797BC099823AD00AAB226 /* BDSKVenueGroup.m */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.objc; path = BDSKVenueGroup.m; sourceTree = "<group>"; };
 		CEB797BD099823AD00AAB226 /* BDSKVenueTableDisplayController.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = BDSKVenueTableDisplayController.h; sourceTree = "<group>"; };
 		CEB797BE099823AD00AAB226 /* BDSKVenueTableDisplayController.m */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.objc; path = BDSKVenueTableDisplayController.m; sourceTree = "<group>"; };
-		CEB797E40998247500AAB226 /* BDSKInstitutionGroup.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = BDSKInstitutionGroup.h; sourceTree = "<group>"; };
-		CEB797E50998247500AAB226 /* BDSKInstitutionGroup.m */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.objc; path = BDSKInstitutionGroup.m; sourceTree = "<group>"; };
 		CEB7983D0998272D00AAB226 /* English */ = {isa = PBXFileReference; lastKnownFileType = wrapper.nib; name = English; path = English.lproj/BDSKInstitutionTableDisplayController.nib; sourceTree = "<group>"; };
 		CEB7983F0998272D00AAB226 /* English */ = {isa = PBXFileReference; lastKnownFileType = wrapper.nib; name = English; path = English.lproj/BDSKVenueTableDisplayController.nib; sourceTree = "<group>"; };
 		CEC5AF01098F7A0000DE1DB2 /* BDSKSecondaryWindowController.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = BDSKSecondaryWindowController.h; sourceTree = "<group>"; };
@@ -454,18 +439,8 @@
 			children = (
 				CE4B96DA0994DD96000447D2 /* BDSKGroup.h */,
 				CE4B96DB0994DD96000447D2 /* BDSKGroup.m */,
-				2744F56308889FC2001E0CC9 /* BDSKPublicationGroup.h */,
-				2744F56408889FC2001E0CC9 /* BDSKPublicationGroup.m */,
-				2744F55F08889FC2001E0CC9 /* BDSKPersonGroup.h */,
-				2744F56008889FC2001E0CC9 /* BDSKPersonGroup.m */,
-				2744F55B08889FC2001E0CC9 /* BDSKNoteGroup.h */,
-				2744F55C08889FC2001E0CC9 /* BDSKNoteGroup.m */,
-				CEB797BB099823AD00AAB226 /* BDSKVenueGroup.h */,
-				CEB797BC099823AD00AAB226 /* BDSKVenueGroup.m */,
-				CEB797E40998247500AAB226 /* BDSKInstitutionGroup.h */,
-				CEB797E50998247500AAB226 /* BDSKInstitutionGroup.m */,
-				CEB343A0099A11D500601FBA /* BDSKTagGroup.h */,
-				CEB343A1099A11D500601FBA /* BDSKTagGroup.m */,
+				CE82DA2C09A32BC40027F436 /* BDSKStaticGroup.h */,
+				CE82DA2D09A32BC40027F436 /* BDSKStaticGroup.m */,
 				CE6D83A40994CFA500D01A71 /* BDSKSmartGroup.h */,
 				CE6D83A50994CFA500D01A71 /* BDSKSmartGroup.m */,
 				CEB344A2099A4BCD00601FBA /* BDSKAutoGroup.h */,
@@ -605,11 +580,8 @@
 				2744F56C08889FC2001E0CC9 /* BDSKDocument.m in Sources */,
 				2744F56D08889FC2001E0CC9 /* BDSKMainWindowController.m in Sources */,
 				2744F56E08889FC2001E0CC9 /* BDSKModel-0.1.xcdatamodel in Sources */,
-				2744F56F08889FC2001E0CC9 /* BDSKNoteGroup.m in Sources */,
 				2744F57008889FC3001E0CC9 /* BDSKNoteTableDisplayController.m in Sources */,
-				2744F57108889FC3001E0CC9 /* BDSKPersonGroup.m in Sources */,
 				2744F57208889FC3001E0CC9 /* BDSKPersonTableDisplayController.m in Sources */,
-				2744F57308889FC3001E0CC9 /* BDSKPublicationGroup.m in Sources */,
 				2744F57408889FC3001E0CC9 /* BDSKPublicationTableDisplayController.m in Sources */,
 				2744F57708889FC3001E0CC9 /* ImageAndTextCell.m in Sources */,
 				2728359C088B063300F5A02B /* BDSKEntityValueTransformers.m in Sources */,
@@ -629,13 +601,11 @@
 				CEB797C0099823AD00AAB226 /* BDSKInstitution.m in Sources */,
 				CEB797C2099823AD00AAB226 /* BDSKInstitutionTableDisplayController.m in Sources */,
 				CEB797C4099823AD00AAB226 /* BDSKVenue.m in Sources */,
-				CEB797C6099823AD00AAB226 /* BDSKVenueGroup.m in Sources */,
 				CEB797C8099823AD00AAB226 /* BDSKVenueTableDisplayController.m in Sources */,
-				CEB797E70998247500AAB226 /* BDSKInstitutionGroup.m in Sources */,
 				CEB343A5099A11D500601FBA /* BDSKTag.m in Sources */,
-				CEB343A7099A11D500601FBA /* BDSKTagGroup.m in Sources */,
 				CEB343A9099A11D500601FBA /* BDSKTagTableDisplayController.m in Sources */,
 				CEB344A5099A4BCD00601FBA /* BDSKAutoGroup.m in Sources */,
+				CE82DA2F09A32BC40027F436 /* BDSKStaticGroup.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
