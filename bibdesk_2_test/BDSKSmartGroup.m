@@ -24,11 +24,15 @@
 	if (self = [super initWithEntity:entity insertIntoManagedObjectContext:context]) {
 		canEdit = YES;
         canEditName = YES;
+        
+        [self addObserver:self forKeyPath:@"fetchRequest" options:0 context:NULL];
 	}
 	return self;
 }
 
 - (void)dealloc{
+    [self removeObserver:self forKeyPath:@"fetchRequest"];
+    
 	[super dealloc];
 }
 
@@ -38,8 +42,6 @@
                                              selector:@selector(managedObjectContextObjectsDidChange:) 
                                                  name:NSManagedObjectContextObjectsDidChangeNotification 
                                                object:[self managedObjectContext]];        
-    
-    [self addObserver:self forKeyPath:@"fetchRequest" options:0 context:NULL];
     
     items = nil;
     
@@ -60,8 +62,10 @@
 }
 
 - (void)didTurnIntoFault {
-	[self removeObserver:self forKeyPath:@"fetchRequest"];
-    
+    [[NSNotificationCenter defaultCenter] removeObserver:self 
+                                                    name:NSManagedObjectContextObjectsDidChangeNotification 
+                                                  object:[self managedObjectContext]];
+	
     [items release];
     items = nil;
     
@@ -101,8 +105,7 @@
     }
 	
     if (refresh) {
-        // we need to call it this way, or the document gets an extra changeCount. Don't ask me why...
-		[self performSelector:@selector(refresh) withObject:nil afterDelay:0.0];
+		[self refresh];
     }
 }
 

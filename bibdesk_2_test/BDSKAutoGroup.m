@@ -17,22 +17,22 @@
 - (id)initWithEntity:(NSEntityDescription*)entity insertIntoManagedObjectContext:(NSManagedObjectContext*)context{
 	if (self = [super initWithEntity:entity insertIntoManagedObjectContext:context]) {
 		children = nil;
-		items = nil;
         isToMany = NO;
         recreatingChildren = NO;
+        [self addObserver:self forKeyPath:@"itemPropertyName" options:0 context:NULL];
+        [self addObserver:self forKeyPath:@"itemEntityName" options:0 context:NULL];
 	}
 	return self;
 }
 
 - (void)dealloc{
+	[self removeObserver:self forKeyPath:@"itemPropertyName"];
+	[self removeObserver:self forKeyPath:@"itemEntityName"];
 	[super dealloc];
 }
 
 - (void)commonAwake {
     [super commonAwake];
-    
-    [self addObserver:self forKeyPath:@"itemPropertyName" options:0 context:NULL];
-    [self addObserver:self forKeyPath:@"itemEntityName" options:0 context:NULL];
     
     [self willAccessValueForKey:@"priority"];
     [self setValue:[NSNumber numberWithInt:2] forKeyPath:@"priority"];
@@ -42,9 +42,6 @@
 }
 
 - (void)didTurnIntoFault {
-	[self removeObserver:self forKeyPath:@"itemPropertyName"];
-	[self removeObserver:self forKeyPath:@"itemEntityName"];
-    
     if ([children count]) {
         
         NSManagedObjectContext *moc = [self managedObjectContext];
@@ -86,7 +83,7 @@
     [self refresh];
 }
 
-- (void)refresh {
+- (void)refreshChildren {
     NSManagedObjectContext *moc = [self managedObjectContext];
     [moc processPendingChanges];
     [[moc undoManager] disableUndoRegistration];
@@ -101,7 +98,7 @@
     }    
     
     [self willChangeValueForKey:@"children"];
-    
+   
 	[children release];
     children = nil;    
     
@@ -109,8 +106,12 @@
 	
     [moc processPendingChanges];
     [[moc undoManager] enableUndoRegistration];
-    
+}
+
+- (void)refresh {    
     [super refresh]; // refresh items
+    // we need to call it this way, or the document gets an extra changeCount when this is called in managedObjectContextObjectsDidChange. Don't ask me why...
+    [self performSelector:@selector(refreshChildren) withObject:nil afterDelay:0.0];
 }
 
 #pragma mark Accessors
@@ -148,7 +149,7 @@
         NSString *allValuesKeyPath = (isToMany) ? [NSString stringWithFormat:@"@distinctUnionOfSets.%@", propertyName] : propertyName;
         NSSet *allItems = [self items];
         NSArray *allItemsArray = [allItems allObjects];
-        NSSet *allValues = [[self items] valueForKeyPath:allValuesKeyPath];
+        NSSet *allValues = [allItems valueForKeyPath:allValuesKeyPath];
         NSEnumerator *valueEnum = [allValues objectEnumerator];
         id value;
         BDSKSmartGroup *child;
