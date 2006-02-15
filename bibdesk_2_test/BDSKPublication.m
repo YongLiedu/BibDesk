@@ -23,6 +23,17 @@
 	[super dealloc];
 }
 
+- (id)valueForUndefinedKey:(NSString *)key {
+    NSEnumerator *pairEnum = [[self valueForKey:@"keyValuePairs"] objectEnumerator];
+    id pair;
+    
+    while (pair = [pairEnum nextObject]) {
+        if ([[pair valueForKey:@"key"] caseInsensitiveCompare:key] == NSOrderedSame)
+            return [pair valueForKey:@"value"];
+    }
+    return nil;
+}
+
 - (void)observeValueForKeyPath:(NSString *)keyPath ofObject:(id)object change:(NSDictionary *)change context:(void *)context {
     if ([keyPath isEqual:@"contributorRelationships"]) {
 		switch ([[change objectForKey:NSKeyValueChangeKindKey] intValue]) {
