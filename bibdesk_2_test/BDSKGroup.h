@@ -13,6 +13,9 @@
     NSImage *cachedIcon;
 }
 
+- (NSString *)itemEntityName;
+- (void)setItemEntityName:(NSString *)entityName;
+
 - (NSString *)groupImageName;
 - (NSImage *)icon;
 

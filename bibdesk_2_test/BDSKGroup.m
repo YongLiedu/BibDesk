@@ -20,6 +20,20 @@
         triggerChangeNotificationsForDependentKey:@"icon"];
 }
 
+- (NSString *)itemEntityName {
+    NSString *entityName = nil;
+    [self willAccessValueForKey:@"itemEntityName"];
+    entityName = [self primitiveValueForKey:@"itemEntityName"];
+    [self didAccessValueForKey:@"itemEntityName"];
+    return entityName;
+}
+
+- (void)setItemEntityName:(NSString *)entityName {
+    [self willChangeValueForKey: @"itemEntityName"];
+    [self setPrimitiveValue:entityName forKey:@"itemEntityName"];
+    [self didChangeValueForKey:@"itemEntityName"];
+}
+
 - (NSString *)groupImageName {
     return @"GroupIcon";
 }
