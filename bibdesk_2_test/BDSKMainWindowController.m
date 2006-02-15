@@ -90,29 +90,12 @@
     NSManagedObject *selectedGroup = [self sourceGroup];
     NSString *entityName = [selectedGroup valueForKey:@"itemEntityName"];
     BOOL isSmart = [[selectedGroup valueForKey:@"isSmart"] boolValue];
-    NSString *groupEntityName;
-    
-    if ([entityName isEqualToString:PublicationEntityName]){
-        groupEntityName = PublicationGroupEntityName;
-    } else if ([entityName isEqualToString:PersonEntityName]){
-        groupEntityName = PersonGroupEntityName;
-    } else if ([entityName isEqualToString:NoteEntityName]){
-        groupEntityName = NoteGroupEntityName;
-    } else if ([entityName isEqualToString:InstitutionEntityName]){
-        groupEntityName = InstitutionGroupEntityName;
-    } else if ([entityName isEqualToString:VenueEntityName]){
-        groupEntityName = VenueGroupEntityName;
-    } else if ([entityName isEqualToString:TagEntityName]){
-        groupEntityName = TagGroupEntityName;
-    } else {
-        NSBeep();
-        return;
-    }
     
     NSManagedObjectContext *context = [[self document] managedObjectContext];
-    id newGroup = [NSEntityDescription insertNewObjectForEntityForName:groupEntityName
+    id newGroup = [NSEntityDescription insertNewObjectForEntityForName:StaticGroupEntityName
                                                 inManagedObjectContext:context];
     
+    [newGroup setValue:entityName forKey:@"itemEntityName"];
     [newGroup setValue:@"Untitled Group" forKey:@"name"];
     
     if (isSmart == NO && [[[selectedGroup entity] name] isEqualToString:AutoChildGroupEntityName]) {
