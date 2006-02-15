@@ -7,25 +7,19 @@
 //
 
 #import <Cocoa/Cocoa.h>
-#import "BDSKGroup.h"
+#import "BDSKSmartGroup.h"
 
 
-@interface BDSKAutoGroup : BDSKGroup {
+@interface BDSKAutoGroup : BDSKSmartGroup {
     NSMutableSet *children;
     BOOL isToMany;
     BOOL recreatingChildren;
 }
 
-- (NSString *)itemEntityName;
-- (void)setItemEntityName:(NSString *)entityName;
-
 - (NSString *)itemPropertyName;
 - (void)setItemPropertyName:(NSString *)propertyName;
 
-- (void)refresh;
 - (void)reset;
-
-- (NSSet *)items;
 
 @end
 
@@ -33,9 +27,6 @@
 @interface BDSKAutoChildGroup : BDSKGroup {
     NSSet *items;
 }
-
-- (NSString *)itemEntityName;
-- (void)setItemEntityName:(NSString *)entityName;
 
 - (NSSet *)items;
 - (void)setItems:(NSSet *)newItems;

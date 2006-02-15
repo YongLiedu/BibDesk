@@ -24,18 +24,22 @@
 	if (self = [super initWithEntity:entity insertIntoManagedObjectContext:context]) {
 		canEdit = YES;
         canEditName = YES;
-		[self addObserver:self forKeyPath:@"fetchRequest" options:0 context:NULL];
 	}
 	return self;
 }
 
 - (void)dealloc{
-	[self removeObserver:self forKeyPath:@"fetchRequest"];
 	[super dealloc];
 }
 
+
 - (void)commonAwake {
-    [super commonAwake];
+    [[NSNotificationCenter defaultCenter] addObserver:self 
+                                             selector:@selector(managedObjectContextObjectsDidChange:) 
+                                                 name:NSManagedObjectContextObjectsDidChangeNotification 
+                                               object:[self managedObjectContext]];        
+    
+    [self addObserver:self forKeyPath:@"fetchRequest" options:0 context:NULL];
     
     items = nil;
     
@@ -46,14 +50,18 @@
 
 - (void)awakeFromInsert  {
     [super awakeFromInsert];
+    [self commonAwake];
     [self setPredicate:[NSPredicate predicateWithValue:YES]];
 }
 
 - (void)awakeFromFetch {
     [super awakeFromFetch];
+    [self commonAwake];
 }
 
 - (void)didTurnIntoFault {
+	[self removeObserver:self forKeyPath:@"fetchRequest"];
+    
     [items release];
     items = nil;
     
@@ -93,7 +101,8 @@
     }
 	
     if (refresh) {
-		[self refresh];
+        // we need to call it this way, or the document gets an extra changeCount. Don't ask me why...
+		[self performSelector:@selector(refresh) withObject:nil afterDelay:0.0];
     }
 }
 
@@ -191,6 +200,14 @@
 }
 
 - (void)setItems:(NSSet *)newItems  {
+    // noop   
+}
+
+- (NSSet *)itemsInSelfOrChildren {
+    return [self items];
+}
+
+- (void)setItemsInSelfOrChildren:(NSSet *)newItems {
     // noop   
 }
 

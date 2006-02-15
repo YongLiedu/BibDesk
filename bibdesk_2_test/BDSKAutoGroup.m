@@ -17,26 +17,34 @@
 - (id)initWithEntity:(NSEntityDescription*)entity insertIntoManagedObjectContext:(NSManagedObjectContext*)context{
 	if (self = [super initWithEntity:entity insertIntoManagedObjectContext:context]) {
 		children = nil;
+		items = nil;
         isToMany = NO;
         recreatingChildren = NO;
-		[self addObserver:self forKeyPath:@"itemPropertyName" options:0 context:NULL];
-		[self addObserver:self forKeyPath:@"itemEntityName" options:0 context:NULL];
 	}
 	return self;
 }
 
 - (void)dealloc{
-	[self removeObserver:self forKeyPath:@"itemPropertyName"];
-	[self removeObserver:self forKeyPath:@"itemEntityName"];
 	[super dealloc];
 }
 
 - (void)commonAwake {
     [super commonAwake];
+    
+    [self addObserver:self forKeyPath:@"itemPropertyName" options:0 context:NULL];
+    [self addObserver:self forKeyPath:@"itemEntityName" options:0 context:NULL];
+    
+    [self willAccessValueForKey:@"priority"];
+    [self setValue:[NSNumber numberWithInt:2] forKeyPath:@"priority"];
+    [self didAccessValueForKey:@"priority"];
+    
     [self reset]; // is this necessary?
 }
 
 - (void)didTurnIntoFault {
+	[self removeObserver:self forKeyPath:@"itemPropertyName"];
+	[self removeObserver:self forKeyPath:@"itemEntityName"];
+    
     if ([children count]) {
         
         NSManagedObjectContext *moc = [self managedObjectContext];
@@ -101,54 +109,14 @@
 	
     [moc processPendingChanges];
     [[moc undoManager] enableUndoRegistration];
-}
-
-- (void)managedObjectContextObjectsDidChange:(NSNotification *)notification {
-    NSDictionary *userInfo = [notification userInfo];
-    NSMutableSet *modifiedObjects = [NSMutableSet set];
     
-    // TODO: maybe we can be more smart and filter entities relevant for us
-    NSSet *itemEntityNames = [NSSet setWithObjects:PublicationEntityName, PersonEntityName, InstitutionEntityName, VenueEntityName, NoteEntityName, TagEntityName, nil];
-	
-	[modifiedObjects unionSet:[userInfo objectForKey:NSUpdatedObjectsKey]];
-	[modifiedObjects unionSet:[userInfo objectForKey:NSInsertedObjectsKey]];
-	[modifiedObjects unionSet:[userInfo objectForKey:NSDeletedObjectsKey]];
-	
-	NSEnumerator *enumerator = [modifiedObjects objectEnumerator];	
-	id object;
-	BOOL refresh = NO;
-	
-    while (object = [enumerator nextObject]) {
-		if ([itemEntityNames containsObject:[[object entity] name]]) {
-			refresh = YES;
-            break;
-		}
-	}
-	    
-    if (refresh == NO && [modifiedObjects count] == 0) {
-        refresh = YES;
-    }
-	
-    if (refresh) {
-        // we need to call it this way, or the document gets an extra changeCount. Don't ask me why...
-		[self performSelector:@selector(refresh) withObject:nil afterDelay:0.0];
-    }
+    [super refresh]; // refresh items
 }
 
 #pragma mark Accessors
 
-- (NSString *)itemEntityName {
-    NSString *entityName = nil;
-    [self willAccessValueForKey:@"itemEntityName"];
-    entityName = [self primitiveValueForKey:@"itemEntityName"];
-    [self didAccessValueForKey:@"itemEntityName"];
-    return entityName;
-}
-
-- (void)setItemEntityName:(NSString *)entityName {
-    [self willChangeValueForKey:@"itemEntityName"];
-    [self setPrimitiveValue:entityName forKey:@"itemEntityName"];
-    [self didChangeValueForKey:@"itemEntityName"];
+- (void)setPredicate:(NSPredicate *)newPredicate {
+    // noop, we always want the TRUE predicate
 }
 
 - (NSString *)itemPropertyName {
@@ -165,27 +133,6 @@
     [self didChangeValueForKey:@"itemPropertyName"];
 }
 
-- (NSString *)groupImageName {  
-    // TODO: add new icon
-    return @"SmartGroupIcon";
-}
-
-- (BOOL)isSmart {
-    return YES;
-}
-
-- (BOOL)canEdit {
-    return YES;
-}
-
-- (NSSet *)items {
-    return [NSSet set];
-}
-
-- (void)setItems:(NSSet *)newItems  {
-    // noop   
-}
-
 - (NSSet *)children {
     if (children == nil)  {
         NSString *entityName = [self itemEntityName];
@@ -195,24 +142,13 @@
         if (entityName == nil || propertyName == nil || recreatingChildren == YES) 
             return children;
         
-        // our fetchRequest later can call -children while we are building, effectively adding them twice. Is there a better way to avoid?
+        // our fetchRequest in -items can call -children while we are building, effectively adding them twice. Is there a better way to avoid?
         recreatingChildren = YES;
         
-        NSManagedObjectContext *moc = [self managedObjectContext];
-        NSEntityDescription *entity = [NSEntityDescription entityForName:entityName inManagedObjectContext:moc];
-        
-        NSFetchRequest *fetchRequest = [[NSFetchRequest alloc] init];
-        NSError *error = nil;
-        NSArray *results = nil;
-        
-        // maybe we should get the document's root group instead?
-        [fetchRequest setEntity:entity];
-        @try {  results = [moc executeFetchRequest:fetchRequest error:&error];  }
-        @catch ( NSException *e ) {  /* no-op */ }
-        [fetchRequest release];
-        
         NSString *allValuesKeyPath = (isToMany) ? [NSString stringWithFormat:@"@distinctUnionOfSets.%@", propertyName] : propertyName;
-        NSSet *allValues = [results valueForKeyPath:allValuesKeyPath];
+        NSSet *allItems = [self items];
+        NSArray *allItemsArray = [allItems allObjects];
+        NSSet *allValues = [[self items] valueForKeyPath:allValuesKeyPath];
         NSEnumerator *valueEnum = [allValues objectEnumerator];
         id value;
         BDSKSmartGroup *child;
@@ -221,6 +157,7 @@
         NSPredicate *predicate;
 	
         // adding the children should not be undoable
+        NSManagedObjectContext *moc = [self managedObjectContext];
         [moc processPendingChanges];
         [[moc undoManager] disableUndoRegistration];
         
@@ -229,7 +166,7 @@
             [child setValue:entityName forKey:@"itemEntityName"];
             [child setValue:value forKey:@"name"];
             predicate = [NSPredicate predicateWithFormat:predicateFormat, propertyName, value];
-            childItems = [[NSSet alloc] initWithArray:[results filteredArrayUsingPredicate:predicate]];
+            childItems = [[NSSet alloc] initWithArray:[allItemsArray filteredArrayUsingPredicate:predicate]];
             [child setValue:childItems forKey:@"items"];
             [childItems release];
             [children addObject:child];
@@ -260,9 +197,13 @@
 
 @implementation BDSKAutoChildGroup
 
-- (void)commonAwake {
-    [super commonAwake];
-    
+- (void)awakeFromInsert {
+    [super awakeFromInsert];
+    items = nil;
+}
+
+- (void)awakeFromFetch {
+    [super awakeFromFetch];
     items = nil;
 }
 
@@ -274,20 +215,6 @@
 }
 
 #pragma mark Accessors
-
-- (NSString *)itemEntityName {
-    NSString *entityName = nil;
-    [self willAccessValueForKey:@"itemEntityName"];
-    entityName = [self primitiveValueForKey:@"itemEntityName"];
-    [self didAccessValueForKey:@"itemEntityName"];
-    return entityName;
-}
-
-- (void)setItemEntityName:(NSString *)entityName {
-    [self willChangeValueForKey: @"itemEntityName"];
-    [self setPrimitiveValue:entityName forKey:@"itemEntityName"];
-    [self didChangeValueForKey:@"itemEntityName"];
-}
 
 - (BOOL)canEdit {
     return NO;
@@ -309,7 +236,7 @@
 }
 
 - (NSSet *)children {
-    return nil;
+    return [NSSet set];
 }
 
 - (void)setChildren:(NSSet *)newChildren  {

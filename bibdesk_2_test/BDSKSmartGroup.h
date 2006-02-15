@@ -30,8 +30,11 @@
 - (void)setCanEdit:(BOOL)flag;
 
 - (NSSet *)items;
+- (NSSet *)itemsInSelfOrChildren;
 
+- (void)commonAwake;
 - (void)refresh;
+- (void)managedObjectContextObjectsDidChange:(NSNotification *)notification;
 
 @end
 

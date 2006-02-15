@@ -2,8 +2,8 @@
 //  BDSKGroup.h
 //  bd2xtest
 //
-//  Created by Christiaan Hofman on 4/2/06.
-//  Copyright 2006 __MyCompanyName__. All rights reserved.
+//  Created by Christiaan Hofman on 2/4/06.
+//  Copyright 2006. All rights reserved.
 //
 
 #import <CoreData/CoreData.h>
@@ -11,9 +11,7 @@
 
 @interface BDSKGroup :  NSManagedObject {
     NSImage *cachedIcon;
-
 }
-- (void)commonAwake;
 
 - (NSString *)groupImageName;
 - (NSImage *)icon;
@@ -25,13 +23,5 @@
 
 - (BOOL)canEdit;
 - (BOOL)canEditName;
-
-- (NSString *)itemEntityName;
-
-- (NSSet *)itemsInSelfOrChildren;
-- (void)addItemsInSelfOrChildrenObject:(id)obj;
-- (void)removeItemsInSelfOrChildrenObject:(id)obj;
-
-- (void)managedObjectContextObjectsDidChange:(NSNotification *)notification;
 
 @end
