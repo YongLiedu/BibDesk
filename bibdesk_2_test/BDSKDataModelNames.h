@@ -10,27 +10,17 @@
  *
  */
 
+#define StaticGroupEntityName @"StaticGroup"
 #define SmartGroupEntityName @"SmartGroup"
 #define LibraryGroupEntityName @"LibraryGroup"
 #define AutoGroupEntityName @"AutoGroup"
 #define AutoChildGroupEntityName @"AutoChildGroup"
 
-#define PublicationGroupEntityName @"PublicationGroup"
 #define PublicationEntityName @"Publication"
-
-#define PersonGroupEntityName @"PersonGroup"
 #define PersonEntityName @"Person"
-
-#define InstitutionGroupEntityName @"InstitutionGroup"
 #define InstitutionEntityName @"Institution"
-
-#define VenueGroupEntityName @"VenueGroup"
 #define VenueEntityName @"Venue"
-
-#define NoteGroupEntityName @"NoteGroup"
 #define NoteEntityName @"Note"
-
-#define TagGroupEntityName @"TagGroup"
 #define TagEntityName @"Tag"
 
 #define ContributorPublicationRelationshipEntityName @"ContributorPublicationRelationship"
