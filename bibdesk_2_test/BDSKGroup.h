@@ -23,6 +23,7 @@
 - (void)setNameAndIcon:(NSString *)name;
 
 - (BOOL)isSmart;
+- (BOOL)isAuto;
 
 - (BOOL)canEdit;
 - (BOOL)canEditName;

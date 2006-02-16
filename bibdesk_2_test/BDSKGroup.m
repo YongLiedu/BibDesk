@@ -59,6 +59,10 @@
     return NO;
 }
 
+- (BOOL)isAuto {
+    return NO;
+}
+
 - (BOOL)canEdit {
     return NO;
 }

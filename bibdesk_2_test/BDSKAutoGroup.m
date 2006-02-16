@@ -134,6 +134,10 @@
     [self didChangeValueForKey:@"itemPropertyName"];
 }
 
+- (BOOL)isAuto {
+    return YES;
+}
+
 - (NSSet *)children {
     if (children == nil)  {
         NSString *entityName = [self itemEntityName];
