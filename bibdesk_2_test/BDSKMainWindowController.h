@@ -28,6 +28,11 @@
 - (IBAction)addNewSmartGroup:(id)sender;
 - (IBAction)addNewAutoGroup:(id)sender;
 
+- (IBAction)editSmartGroup:(id)sender;
+- (IBAction)editAutoGroup:(id)sender;
+
+- (IBAction)getInfo:(id)sender;
+
 - (void)importFromBibTeXFile:(id)sender;
 
 @end

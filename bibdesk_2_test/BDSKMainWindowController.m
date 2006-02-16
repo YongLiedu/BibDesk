@@ -12,6 +12,8 @@
 #import "BDSKGroup.h"
 #import "ImageAndTextCell.h"
 #import "BDSKBibTeXParser.h"
+#import "BDSKSmartGroupEditor.h"
+#import "BDSKAutoGroupEditor.h"
 
 #import "BDSKPublicationTableDisplayController.h" // @@ TODO: itemdisplayflex this should be temporary
 #import "BDSKNoteTableDisplayController.h" // @@ TODO: itemdisplayflex this should be temporary
@@ -106,32 +108,13 @@
         // for smart groups (including auto groups) we add the new groups as root
         [newGroup setValue:[NSNumber numberWithBool:YES] forKey:@"isRoot"];
     }
+    
+    [context processPendingChanges];
 }
 
 - (IBAction)addNewSmartGroup:(id)sender{
     NSManagedObject *selectedGroup = [self sourceGroup];
     NSString *entityName = [selectedGroup valueForKey:@"itemEntityName"];
-    NSString *predicateFormat;
-    
-    // TODO: predicate editing
-    // here we just put some arbitrary predicate
-    if ([entityName isEqualToString:PublicationEntityName]){
-        predicateFormat = @"any contributorRelationships.contributor.lastName like[c] %@";
-    } else if ([entityName isEqualToString:PersonEntityName]){
-        predicateFormat = @"lastName like[c] %@";
-    } else if ([entityName isEqualToString:NoteEntityName]){
-        predicateFormat = @"value contains[c] %@";
-    } else if ([entityName isEqualToString:InstitutionEntityName]){
-        predicateFormat = @"any personRelationships.person.lastName like[c] %@";
-    } else if ([entityName isEqualToString:VenueEntityName]){
-        predicateFormat = @"any publications.contributorRelationships.contributor.lastName like[c] %@";
-    } else if ([entityName isEqualToString:TagEntityName]){
-        predicateFormat = @"name like[c] %@";
-    } else {
-        NSBeep();
-        return;
-    }
-    NSPredicate *predicate = [NSPredicate predicateWithFormat:predicateFormat, @"Blow"];
     
     NSManagedObjectContext *context = [[self document] managedObjectContext];
     id newSmartGroup = [NSEntityDescription insertNewObjectForEntityForName:SmartGroupEntityName
@@ -139,34 +122,16 @@
     
     // we always add smart groups as root, as for now they don't take their items from the parent
     [newSmartGroup setValue:entityName forKey:@"itemEntityName"];
-    [newSmartGroup setValue:predicate forKey:@"predicate"];
     [newSmartGroup setValue:[NSNumber numberWithBool:YES] forKey:@"isRoot"];
     [newSmartGroup setValue:@"Untitled Smart Group" forKey:@"name"];
+    
+    [context processPendingChanges];
+    // TODO: select the new group and edit. How to select?
 }
 
 - (IBAction)addNewAutoGroup:(id)sender{
     NSManagedObject *selectedGroup = [self sourceGroup];
     NSString *entityName = [selectedGroup valueForKey:@"itemEntityName"];
-    NSString *propertyName;
-    
-    // TODO: propertyName editing
-    // here we just put some arbitrary propertyName
-    if ([entityName isEqualToString:PublicationEntityName]){
-        propertyName = @"contributorRelationships.contributor.name";
-    } else if ([entityName isEqualToString:PersonEntityName]){
-        propertyName = @"publicationRelationships.publication.title";
-    } else if ([entityName isEqualToString:NoteEntityName]){
-        propertyName = @"name";
-    } else if ([entityName isEqualToString:InstitutionEntityName]){
-        propertyName = @"name";
-    } else if ([entityName isEqualToString:VenueEntityName]){
-        propertyName = @"name";
-    } else if ([entityName isEqualToString:TagEntityName]){
-        propertyName = @"name";
-    } else {
-        NSBeep();
-        return;
-    }
     
     NSManagedObjectContext *context = [[self document] managedObjectContext];
     id newAutoGroup = [NSEntityDescription insertNewObjectForEntityForName:AutoGroupEntityName
@@ -174,9 +139,98 @@
     
     // we always add auto groups as root
     [newAutoGroup setValue:entityName forKey:@"itemEntityName"];
-    [newAutoGroup setValue:propertyName forKey:@"itemPropertyName"];
     [newAutoGroup setValue:[NSNumber numberWithBool:YES] forKey:@"isRoot"];
     [newAutoGroup setValue:@"Untitled Auto Group" forKey:@"name"];
+    
+    [context processPendingChanges];
+    // TODO: select the new group and edit. How to select?
+}
+
+- (IBAction)editSmartGroup:(id)sender{
+    id selectedGroup = [self sourceGroup];
+    if ([selectedGroup isSmart] == NO || [selectedGroup isAuto] == YES) 
+        return;
+    
+    BDSKSmartGroupEditor *editor = [[BDSKSmartGroupEditor alloc] init];
+    NSString *entityName = [selectedGroup valueForKey:@"itemEntityName"];
+    NSPredicate *predicate = [selectedGroup valueForKey:@"predicate"];
+    [editor setManagedObjectContext:[[self document] managedObjectContext]];
+    [editor setEntityName:entityName];
+    [editor setPredicate:predicate];
+    
+    [NSApp beginSheet:[editor window] 
+       modalForWindow:[self window] 
+        modalDelegate:self 
+       didEndSelector:@selector(editSmartGroupSheetDidEnd:returnCode:contextInfo:) 
+          contextInfo:editor];
+}
+
+- (void)editSmartGroupSheetDidEnd:(NSWindow *)sheet returnCode:(int)returnCode contextInfo:(BDSKSmartGroupEditor *)editor {
+    id selectedGroup = [self sourceGroup];
+    if (returnCode == NSOKButton) {
+        if ([editor commitEditing]) {
+            @try {
+                NSString *entityName = [editor entityName];
+                NSPredicate *predicate = [editor predicate];
+                [selectedGroup setValue:entityName forKey:@"itemEntityName"];
+                [selectedGroup setValue:predicate forKey:@"predicate"];
+            } 
+            @catch ( NSException *e ) {
+                // an invalid predicate shouldn't get here, but if it does, we will reset the value
+                [selectedGroup setValue:nil forKey:@"predicate"];
+            }
+        }
+    }
+    [editor reset];
+    [editor release];
+}
+
+- (IBAction)editAutoGroup:(id)sender{
+    id selectedGroup = [self sourceGroup];
+    if ([selectedGroup isAuto] == NO) 
+        return;
+    
+    BDSKAutoGroupEditor *editor = [[BDSKAutoGroupEditor alloc] init];
+    NSString *entityName = [selectedGroup valueForKey:@"itemEntityName"];
+    NSString *propertyName = [selectedGroup valueForKey:@"itemPropertyName"];
+    [editor setManagedObjectContext:[[self document] managedObjectContext]];
+    [editor setEntityName:entityName];
+    [editor setPropertyName:propertyName];
+    
+    [NSApp beginSheet:[editor window] 
+       modalForWindow:[self window] 
+        modalDelegate:self 
+       didEndSelector:@selector(editAutoGroupSheetDidEnd:returnCode:contextInfo:) 
+          contextInfo:editor];
+}
+
+- (void)editAutoGroupSheetDidEnd:(NSWindow *)sheet returnCode:(int)returnCode contextInfo:(BDSKAutoGroupEditor *)editor {
+    id selectedGroup = [self sourceGroup];
+    if (returnCode == NSOKButton) {
+        if ([editor commitEditing]) {
+            @try {
+                NSString *entityName = [editor entityName];
+                NSString *propertyName = [editor propertyName];
+                [selectedGroup setValue:entityName forKey:@"itemEntityName"];
+                [selectedGroup setValue:propertyName forKey:@"itemPropertyName"];
+            } 
+            @catch ( NSException *e ) {
+                // an invalid edit shouldn't get here, but if it does, we will reset the value
+                [selectedGroup setValue:nil forKey:@"itemPropertyName"];
+            }
+        }
+    }
+    [editor reset];
+    [editor release];
+}
+
+- (IBAction)getInfo:(id)sender{
+    id selectedGroup = [self sourceGroup];
+    if ([selectedGroup isAuto]) {
+        [self editAutoGroup:sender];
+    } else if ([selectedGroup isSmart]) {
+        [self editSmartGroup:sender];
+    }
 }
 
 #pragma mark Source List Outline View DataSource Methods and such
