@@ -22,6 +22,8 @@
 
 - (void)setMainWindow:(NSWindow *)mainWindow;
 
+- (NSManagedObjectContext *)managedObjectContext;
+
 - (void)bindWindowController:(NSWindowController *)controller;
 - (void)unbindWindowController:(NSWindowController *)controller;
 
@@ -31,4 +33,8 @@
 @interface BDSKNoteWindowController : BDSKInspectorWindowController {} @end
 
 
-@interface BDSKTagWindowController : BDSKInspectorWindowController {} @end
+@interface BDSKTagWindowController : BDSKInspectorWindowController {} 
+
+- (void)selectItem:(NSArray *)selectedItems;
+
+@end

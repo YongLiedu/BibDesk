@@ -81,26 +81,31 @@
                 [self unbindWindowController:observedWindowController];
             [observedWindowController release];
             observedWindowController = [controller retain];
+            [self didChangeValueForKey:@"managedObjectContext"];
             [self bindWindowController:observedWindowController];
         }
     } else if (controller == nil && observedWindowController != nil) {
         [self unbindWindowController:observedWindowController];
+        [self willChangeValueForKey:@"managedObjectContext"];
         [observedWindowController release];
         observedWindowController = nil;
+        [self didChangeValueForKey:@"managedObjectContext"];
     }
+}
+
+- (NSManagedObjectContext *)managedObjectContext {
+    return [[observedWindowController document] managedObjectContext];
 }
 
 - (void)bindWindowController:(NSWindowController *)controller{
     NSDictionary *options = [NSDictionary dictionaryWithObjectsAndKeys:[NSNumber numberWithBool:NO], NSRaisesForNotApplicableKeysBindingOption, [NSNumber numberWithBool:YES], NSConditionallySetsEnabledBindingOption, nil];
     NSString *keyPath = [NSString stringWithFormat:@"displayController.itemsArrayController.selection.%@", [self keyPathForBinding]];
-    [itemsArrayController bind:@"managedObjectContext" toObject:controller withKeyPath:@"document.managedObjectContext" options:0];
     [itemsArrayController bind:@"contentSet" toObject:controller withKeyPath:keyPath options:options];
     [itemsArrayController rearrangeObjects];
 }
 
 - (void)unbindWindowController:(NSWindowController *)controller{
 	[itemsArrayController unbind:@"contentSet"];
-	[itemsArrayController unbind:@"managedObjectContext"];
 }
 
 @end
@@ -124,5 +129,17 @@
 - (NSString *)windowTitle { return @"Tags"; }
 
 - (NSString *)keyPathForBinding { return @"tags"; }
+
+- (void)selectItem:(NSArray *)selectedItems {
+    id item = [selectedItems lastObject];
+    NSString *entityName = [[item entity] name];
+    
+    if (observedWindowController == nil || item == nil || 
+        [[[(BDSKSecondaryWindowController *)observedWindowController sourceGroup] valueForKey:@"itemEntityName"] isEqualToString:entityName] == NO) 
+        return;
+        
+    NSArrayController *arrayController = [observedWindowController valueForKeyPath:@"displayController.itemsArrayController"];
+    [arrayController setSelectedObjects:selectedItems];
+}
 
 @end
