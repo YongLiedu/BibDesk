@@ -219,6 +219,9 @@
         NSMutableSet *items = [selectedGroup mutableSetValueForKey:@"items"];
         [items addObject:newItem];
     }
+    
+    [context processPendingChanges];
+    [[currentDisplayController itemsArrayController] setSelectedObjects:[NSArray arrayWithObject:newItem]];
 }
 
 @end
