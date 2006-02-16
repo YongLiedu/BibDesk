@@ -13,4 +13,7 @@
 
 }
 
+- (NSString *)name;
+- (void)setName:(NSString *)value;
+
 @end

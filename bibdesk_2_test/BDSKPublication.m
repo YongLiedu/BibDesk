@@ -11,6 +11,11 @@
 
 @implementation BDSKPublication
 
++ (void)initialize {
+    [self setKeys:[NSArray arrayWithObjects:@"title", nil]
+        triggerChangeNotificationsForDependentKey:@"name"];
+}
+
 - (id)initWithEntity:(NSEntityDescription*)entity insertIntoManagedObjectContext:(NSManagedObjectContext*)context{
 	if (self = [super initWithEntity:entity insertIntoManagedObjectContext:context]) {
 		[self addObserver:self forKeyPath:@"contributorRelationships" options:0 context:NULL];
@@ -23,6 +28,16 @@
 	[super dealloc];
 }
 
+#pragma mark Accessors
+
+- (NSString *)name {
+    return [self valueForKey:@"title"];
+}
+
+- (void)setName:(NSString *)value {
+    [self setValue:value forKey:@"title"];
+}
+
 - (id)valueForUndefinedKey:(NSString *)key {
     NSEnumerator *pairEnum = [[self valueForKey:@"keyValuePairs"] objectEnumerator];
     id pair;
@@ -33,6 +48,8 @@
     }
     return nil;
 }
+
+#pragma mark KVO
 
 - (void)observeValueForKeyPath:(NSString *)keyPath ofObject:(id)object change:(NSDictionary *)change context:(void *)context {
     if ([keyPath isEqual:@"contributorRelationships"]) {
