@@ -12,6 +12,7 @@
                 addNewGroup = id; 
                 addNewItem = id; 
                 addNewSmartGroup = id; 
+                getInfo = id; 
                 importDocumentUsingPhonyCiteKeys = id; 
                 importFromBibTeXFile = id; 
                 oneShotImportFromBibTeXFile = id; 
