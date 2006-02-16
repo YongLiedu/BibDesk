@@ -40,6 +40,16 @@
 		CE5139030997A6D900C73C64 /* BDSKBibTeXParser.m in Sources */ = {isa = PBXBuildFile; fileRef = CE51379209977D9400C73C64 /* BDSKBibTeXParser.m */; };
 		CE5139C30997A87A00C73C64 /* Carbon.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = CE5139C20997A87A00C73C64 /* Carbon.framework */; };
 		CE6D83A60994CFA500D01A71 /* BDSKSmartGroup.m in Sources */ = {isa = PBXBuildFile; fileRef = CE6D83A50994CFA500D01A71 /* BDSKSmartGroup.m */; };
+		CE7B178F09A47322003C5A46 /* BDSKSmartGroupEditor.h in CopyFiles */ = {isa = PBXBuildFile; fileRef = CE7B178B09A47322003C5A46 /* BDSKSmartGroupEditor.h */; };
+		CE7B179009A47322003C5A46 /* BDSKSmartGroupEditor.m in Sources */ = {isa = PBXBuildFile; fileRef = CE7B178C09A47322003C5A46 /* BDSKSmartGroupEditor.m */; };
+		CE7B179109A47322003C5A46 /* BDSKComparisonPredicateController.h in CopyFiles */ = {isa = PBXBuildFile; fileRef = CE7B178D09A47322003C5A46 /* BDSKComparisonPredicateController.h */; };
+		CE7B179209A47322003C5A46 /* BDSKComparisonPredicateController.m in Sources */ = {isa = PBXBuildFile; fileRef = CE7B178E09A47322003C5A46 /* BDSKComparisonPredicateController.m */; };
+		CE7B17AF09A473D8003C5A46 /* BDSKComparisonPredicateView.nib in Resources */ = {isa = PBXBuildFile; fileRef = CE7B17AB09A473D8003C5A46 /* BDSKComparisonPredicateView.nib */; };
+		CE7B17B009A473D8003C5A46 /* BDSKSmartGroupEditor.nib in Resources */ = {isa = PBXBuildFile; fileRef = CE7B17AD09A473D8003C5A46 /* BDSKSmartGroupEditor.nib */; };
+		CE7B187709A4758B003C5A46 /* PredicateRules.plist in Resources */ = {isa = PBXBuildFile; fileRef = CE7B187609A4758B003C5A46 /* PredicateRules.plist */; };
+		CE7B197109A49F08003C5A46 /* BDSKAutoGroupEditor.h in CopyFiles */ = {isa = PBXBuildFile; fileRef = CE7B196F09A49F08003C5A46 /* BDSKAutoGroupEditor.h */; };
+		CE7B197209A49F08003C5A46 /* BDSKAutoGroupEditor.m in Sources */ = {isa = PBXBuildFile; fileRef = CE7B197009A49F08003C5A46 /* BDSKAutoGroupEditor.m */; };
+		CE7B19AD09A4A309003C5A46 /* BDSKAutoGroupEditor.nib in Resources */ = {isa = PBXBuildFile; fileRef = CE7B19AB09A4A309003C5A46 /* BDSKAutoGroupEditor.nib */; };
 		CE82DA2E09A32BC40027F436 /* BDSKStaticGroup.h in CopyFiles */ = {isa = PBXBuildFile; fileRef = CE82DA2C09A32BC40027F436 /* BDSKStaticGroup.h */; };
 		CE82DA2F09A32BC40027F436 /* BDSKStaticGroup.m in Sources */ = {isa = PBXBuildFile; fileRef = CE82DA2D09A32BC40027F436 /* BDSKStaticGroup.m */; };
 		CEB343A4099A11D500601FBA /* BDSKTag.h in CopyFiles */ = {isa = PBXBuildFile; fileRef = CEB3439E099A11D500601FBA /* BDSKTag.h */; };
@@ -117,6 +127,9 @@
 				CEB343A8099A11D500601FBA /* BDSKTagTableDisplayController.h in CopyFiles */,
 				CEB344A4099A4BCD00601FBA /* BDSKAutoGroup.h in CopyFiles */,
 				CE82DA2E09A32BC40027F436 /* BDSKStaticGroup.h in CopyFiles */,
+				CE7B178F09A47322003C5A46 /* BDSKSmartGroupEditor.h in CopyFiles */,
+				CE7B179109A47322003C5A46 /* BDSKComparisonPredicateController.h in CopyFiles */,
+				CE7B197109A49F08003C5A46 /* BDSKAutoGroupEditor.h in CopyFiles */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -179,6 +192,16 @@
 		CE5139C20997A87A00C73C64 /* Carbon.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Carbon.framework; path = /System/Library/Frameworks/Carbon.framework; sourceTree = "<absolute>"; };
 		CE6D83A40994CFA500D01A71 /* BDSKSmartGroup.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BDSKSmartGroup.h; sourceTree = "<group>"; };
 		CE6D83A50994CFA500D01A71 /* BDSKSmartGroup.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BDSKSmartGroup.m; sourceTree = "<group>"; };
+		CE7B178B09A47322003C5A46 /* BDSKSmartGroupEditor.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = BDSKSmartGroupEditor.h; sourceTree = "<group>"; };
+		CE7B178C09A47322003C5A46 /* BDSKSmartGroupEditor.m */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.objc; path = BDSKSmartGroupEditor.m; sourceTree = "<group>"; };
+		CE7B178D09A47322003C5A46 /* BDSKComparisonPredicateController.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = BDSKComparisonPredicateController.h; sourceTree = "<group>"; };
+		CE7B178E09A47322003C5A46 /* BDSKComparisonPredicateController.m */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.objc; path = BDSKComparisonPredicateController.m; sourceTree = "<group>"; };
+		CE7B17AC09A473D8003C5A46 /* English */ = {isa = PBXFileReference; lastKnownFileType = wrapper.nib; name = English; path = English.lproj/BDSKComparisonPredicateView.nib; sourceTree = "<group>"; };
+		CE7B17AE09A473D8003C5A46 /* English */ = {isa = PBXFileReference; lastKnownFileType = wrapper.nib; name = English; path = English.lproj/BDSKSmartGroupEditor.nib; sourceTree = "<group>"; };
+		CE7B187609A4758B003C5A46 /* PredicateRules.plist */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = text.plist; path = PredicateRules.plist; sourceTree = "<group>"; };
+		CE7B196F09A49F08003C5A46 /* BDSKAutoGroupEditor.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BDSKAutoGroupEditor.h; sourceTree = "<group>"; };
+		CE7B197009A49F08003C5A46 /* BDSKAutoGroupEditor.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BDSKAutoGroupEditor.m; sourceTree = "<group>"; };
+		CE7B19AC09A4A309003C5A46 /* English */ = {isa = PBXFileReference; lastKnownFileType = wrapper.nib; name = English; path = English.lproj/BDSKAutoGroupEditor.nib; sourceTree = "<group>"; };
 		CE82DA2C09A32BC40027F436 /* BDSKStaticGroup.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BDSKStaticGroup.h; sourceTree = "<group>"; };
 		CE82DA2D09A32BC40027F436 /* BDSKStaticGroup.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BDSKStaticGroup.m; sourceTree = "<group>"; };
 		CEB3439E099A11D500601FBA /* BDSKTag.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = BDSKTag.h; sourceTree = "<group>"; };
@@ -289,6 +312,7 @@
 			children = (
 				CE2AEEA30995231400473196 /* Window Controllers */,
 				27224263088A50590000CF76 /* Display Controllers */,
+				CE7B17A609A47366003C5A46 /* Group Editors */,
 			);
 			name = Controllers;
 			sourceTree = "<group>";
@@ -369,7 +393,6 @@
 		29B97317FDCFA39411CA2CEA /* Resources */ = {
 			isa = PBXGroup;
 			children = (
-				CEB3441B099A17B000601FBA /* BDSKTagTableDisplayController.nib */,
 				277D9234089627D4004C4105 /* Images */,
 				2744F5780888A087001E0CC9 /* BDSKMainWindow.nib */,
 				CEC5AF2A098F7AF400DE1DB2 /* BDSKSecondaryWindow.nib */,
@@ -377,12 +400,17 @@
 				CED1DBE0099637B30017917B /* BDSKTagWindow.nib */,
 				2744F57E0888A087001E0CC9 /* BDSKPublicationTableDisplayController.nib */,
 				2744F57C0888A087001E0CC9 /* BDSKPersonTableDisplayController.nib */,
-				2744F57A0888A087001E0CC9 /* BDSKNoteTableDisplayController.nib */,
 				CEB7983C0998272D00AAB226 /* BDSKInstitutionTableDisplayController.nib */,
 				CEB7983E0998272D00AAB226 /* BDSKVenueTableDisplayController.nib */,
+				2744F57A0888A087001E0CC9 /* BDSKNoteTableDisplayController.nib */,
+				CEB3441B099A17B000601FBA /* BDSKTagTableDisplayController.nib */,
+				CE7B17AD09A473D8003C5A46 /* BDSKSmartGroupEditor.nib */,
+				CE7B17AB09A473D8003C5A46 /* BDSKComparisonPredicateView.nib */,
+				CE7B19AB09A4A309003C5A46 /* BDSKAutoGroupEditor.nib */,
 				29B97318FDCFA39411CA2CEA /* MainMenu.nib */,
 				8D1107310486CEB800E47090 /* Info.plist */,
 				089C165CFE840E0CC02AAC07 /* InfoPlist.strings */,
+				CE7B187609A4758B003C5A46 /* PredicateRules.plist */,
 			);
 			name = Resources;
 			sourceTree = "<group>";
@@ -432,6 +460,19 @@
 				CE51383209978ED200C73C64 /* BTParse.framework */,
 			);
 			name = Products;
+			sourceTree = "<group>";
+		};
+		CE7B17A609A47366003C5A46 /* Group Editors */ = {
+			isa = PBXGroup;
+			children = (
+				CE7B178B09A47322003C5A46 /* BDSKSmartGroupEditor.h */,
+				CE7B178C09A47322003C5A46 /* BDSKSmartGroupEditor.m */,
+				CE7B178D09A47322003C5A46 /* BDSKComparisonPredicateController.h */,
+				CE7B178E09A47322003C5A46 /* BDSKComparisonPredicateController.m */,
+				CE7B196F09A49F08003C5A46 /* BDSKAutoGroupEditor.h */,
+				CE7B197009A49F08003C5A46 /* BDSKAutoGroupEditor.m */,
+			);
+			name = "Group Editors";
 			sourceTree = "<group>";
 		};
 		CEC5B01F098FA2D200DE1DB2 /* Groups */ = {
@@ -566,6 +607,10 @@
 				CEB798400998272D00AAB226 /* BDSKInstitutionTableDisplayController.nib in Resources */,
 				CEB798410998272D00AAB226 /* BDSKVenueTableDisplayController.nib in Resources */,
 				CEB3441D099A17B000601FBA /* BDSKTagTableDisplayController.nib in Resources */,
+				CE7B17AF09A473D8003C5A46 /* BDSKComparisonPredicateView.nib in Resources */,
+				CE7B17B009A473D8003C5A46 /* BDSKSmartGroupEditor.nib in Resources */,
+				CE7B187709A4758B003C5A46 /* PredicateRules.plist in Resources */,
+				CE7B19AD09A4A309003C5A46 /* BDSKAutoGroupEditor.nib in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -606,6 +651,9 @@
 				CEB343A9099A11D500601FBA /* BDSKTagTableDisplayController.m in Sources */,
 				CEB344A5099A4BCD00601FBA /* BDSKAutoGroup.m in Sources */,
 				CE82DA2F09A32BC40027F436 /* BDSKStaticGroup.m in Sources */,
+				CE7B179009A47322003C5A46 /* BDSKSmartGroupEditor.m in Sources */,
+				CE7B179209A47322003C5A46 /* BDSKComparisonPredicateController.m in Sources */,
+				CE7B197209A49F08003C5A46 /* BDSKAutoGroupEditor.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -658,6 +706,30 @@
 				29B97319FDCFA39411CA2CEA /* English */,
 			);
 			name = MainMenu.nib;
+			sourceTree = "<group>";
+		};
+		CE7B17AB09A473D8003C5A46 /* BDSKComparisonPredicateView.nib */ = {
+			isa = PBXVariantGroup;
+			children = (
+				CE7B17AC09A473D8003C5A46 /* English */,
+			);
+			name = BDSKComparisonPredicateView.nib;
+			sourceTree = "<group>";
+		};
+		CE7B17AD09A473D8003C5A46 /* BDSKSmartGroupEditor.nib */ = {
+			isa = PBXVariantGroup;
+			children = (
+				CE7B17AE09A473D8003C5A46 /* English */,
+			);
+			name = BDSKSmartGroupEditor.nib;
+			sourceTree = "<group>";
+		};
+		CE7B19AB09A4A309003C5A46 /* BDSKAutoGroupEditor.nib */ = {
+			isa = PBXVariantGroup;
+			children = (
+				CE7B19AC09A4A309003C5A46 /* English */,
+			);
+			name = BDSKAutoGroupEditor.nib;
 			sourceTree = "<group>";
 		};
 		CEB3441B099A17B000601FBA /* BDSKTagTableDisplayController.nib */ = {
