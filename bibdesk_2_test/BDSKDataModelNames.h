@@ -13,8 +13,7 @@
 #define StaticGroupEntityName @"StaticGroup"
 #define SmartGroupEntityName @"SmartGroup"
 #define LibraryGroupEntityName @"LibraryGroup"
-#define AutoGroupEntityName @"AutoGroup"
-#define AutoChildGroupEntityName @"AutoChildGroup"
+#define CategoryGroupEntityName @"CategoryGroup"
 
 #define PublicationEntityName @"Publication"
 #define PersonEntityName @"Person"
