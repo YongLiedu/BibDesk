@@ -92,7 +92,7 @@
 }
 
 - (IBAction)addNewGroup:(id)sender{
-    NSManagedObject *selectedGroup = [self sourceGroup];
+    BDSKGroup *selectedGroup = [self sourceGroup];
     NSString *entityName = [selectedGroup valueForKey:@"itemEntityName"];
     BOOL canAddChildren = ([selectedGroup isSmart] == NO && [selectedGroup isCategory] == NO);
     
