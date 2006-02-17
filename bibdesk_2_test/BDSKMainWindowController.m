@@ -103,7 +103,7 @@
     [newGroup setValue:entityName forKey:@"itemEntityName"];
     [newGroup setValue:@"Untitled Group" forKey:@"name"];
     
-    if (canAddChildren == NO) {
+    if (canAddChildren == YES) {
         // for non-smart groups we add the new groups as a child
         [newGroup setValue:[NSNumber numberWithBool:NO] forKey:@"isRoot"];
         [[selectedGroup mutableSetValueForKey:@"children"] addObject:newGroup];
