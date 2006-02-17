@@ -28,7 +28,6 @@
 - (id)initWithEditor:(BDSKSmartGroupEditor *)anEditor {
     if (self = [super init]) {
         smartGroupEditor = anEditor;
-        predicateRules = [[NSDictionary alloc] initWithContentsOfFile:[[[NSBundle mainBundle] resourcePath] stringByAppendingPathComponent:@"PredicateRules.plist"]];
 		propertyName = nil;
 		operatorName = nil;
 		searchValue = nil;
@@ -46,7 +45,6 @@
     [propertyName release], propertyName = nil;
     [operatorName release], operatorName = nil;
     [searchValue release], searchValue = nil;
-    [predicateRules release], predicateRules = nil;
     [view release], view = nil;
 	[ownerController release], ownerController = nil;
     [super dealloc];
@@ -252,28 +250,20 @@
 }
 
 - (NSPredicateOperatorType)operatorType {
-    return [[predicateRules objectForKey:@"operatorTypes"] indexOfObject:[self operatorName]];
+	return [[self smartGroupEditor] operatorTypeForOperatorName:[self operatorName]];
 }
 
-- (void)setOperatorType:(NSPredicateOperatorType)type {
-    [self setOperatorName:[[predicateRules objectForKey:@"operatorTypes"] objectAtIndex:type]];
+- (void)setOperatorType:(NSPredicateOperatorType)operatorType {
+    [self setOperatorName:[[self smartGroupEditor] operatorNameForOperatorType:operatorType]];
 }
 
 - (NSArray *)operatorNames {
     NSString *typeName = [self attributeTypeName];
-    NSArray *operatorNames = [[predicateRules objectForKey:@"operatorNames"] objectForKey:typeName];
-    
-    return (operatorNames != nil) ? operatorNames : [NSArray array];
+	return [[self smartGroupEditor] operatorNamesForTypeName:typeName];
 }
 
 - (NSArray *)propertyNames {
-    NSString *entityName = [smartGroupEditor entityName];
-    NSArray *propertyNames = nil;
-    
-    if (entityName != nil)
-        propertyNames = [[predicateRules objectForKey:@"propertyNames"] objectForKey:entityName];
-    
-    return (propertyNames != nil) ? propertyNames : [NSArray array];
+	return [[self smartGroupEditor] propertyNames];
 }
 
 #pragma mark NSEditorRegistration

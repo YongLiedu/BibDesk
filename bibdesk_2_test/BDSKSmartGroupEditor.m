@@ -12,11 +12,20 @@
 
 @implementation BDSKSmartGroupEditor
 
++ (void)initialize {
+    [self setKeys:[NSArray arrayWithObjects:@"entityName", nil]
+        triggerChangeNotificationsForDependentKey:@"propertyNames"];
+    [self setKeys:[NSArray arrayWithObjects:@"propertyName", nil]
+        triggerChangeNotificationsForDependentKey:@"categoryPropertyName"];
+}
+
 - (id)init {
     if (self = [super initWithWindowNibName:[self windowNibName]]) {
         managedObjectContext = nil;
         entityName = nil;
+        propertyName = nil;
         conjunction = 0;
+        predicateRules = [[NSDictionary alloc] initWithContentsOfFile:[[[NSBundle mainBundle] resourcePath] stringByAppendingPathComponent:@"PredicateRules.plist"]];
         controllers = [[NSMutableArray alloc] init];
         editors = CFArrayCreateMutable(kCFAllocatorMallocZone, 0, NULL);
     }
@@ -28,6 +37,8 @@
     CFRelease(editors), editors = nil;
     [controllers release], controllers = nil;
     [entityName release], entityName = nil;
+    [propertyName release], propertyName = nil;
+    [predicateRules release], predicateRules = nil;
     [managedObjectContext release], managedObjectContext = nil;
     [super dealloc];
 }
@@ -44,6 +55,8 @@
     [self willChangeValueForKey:@"isCompound"];
     [controllers removeAllObjects];
     [self didChangeValueForKey:@"isCompound"];
+    
+    [self setPropertyName:nil];
 }
 
 #pragma mark Actions
@@ -107,6 +120,27 @@
         entityName = [newEntityName retain];
         [self reset];
     }
+}
+
+- (NSString *)propertyName {
+	return propertyName;
+}
+
+- (void)setPropertyName:(NSString *)newPropertyName {
+	if (newPropertyName != propertyName) {
+        [propertyName release]; 
+        propertyName = [newPropertyName retain];
+    }
+}
+
+- (id)categoryPropertyName {
+	return (propertyName == nil) ? (id)[NSNull null] : propertyName;
+}
+
+- (void)setCategoryPropertyName:(id)newPropertyName {
+    if (newPropertyName == [NSNull null] || NSIsControllerMarker(propertyName)) 
+        newPropertyName = nil;
+    [self setPropertyName:newPropertyName];
 }
 
 - (int)conjunction {
@@ -175,6 +209,38 @@
     return [NSArray arrayWithObjects:PublicationEntityName, PersonEntityName, InstitutionEntityName, VenueEntityName, NoteEntityName, TagEntityName, nil];
 }
 
+- (NSArray *)propertyNames {
+    NSArray *propertyNames = nil;
+    
+    if (entityName != nil)
+        propertyNames = [[predicateRules objectForKey:@"propertyNames"] objectForKey:entityName];
+    
+    return (propertyNames != nil) ? propertyNames : [NSArray array];
+}
+
+- (NSArray *)categoryPropertyNames {
+    NSMutableArray *propertyNames = [NSMutableArray arrayWithObject:[NSDictionary dictionaryWithObjectsAndKeys:[NSNull null], @"propertyName", @"No Categories", @"displayName", @"", @"type", nil]];
+    
+    if (entityName != nil)
+        [propertyNames addObjectsFromArray:[[predicateRules objectForKey:@"propertyNames"] objectForKey:entityName]];
+    
+    return (propertyNames != nil) ? propertyNames : [NSArray array];
+}
+
+- (NSArray *)operatorNamesForTypeName:(NSString *)attributeTypeName {
+    NSArray *operatorNames = [[predicateRules objectForKey:@"operatorNames"] objectForKey:attributeTypeName];
+    
+    return (operatorNames != nil) ? operatorNames : [NSArray array];
+}
+
+- (NSPredicateOperatorType)operatorTypeForOperatorName:(NSString *)operatorName {
+    return [[predicateRules objectForKey:@"operatorTypes"] indexOfObject:operatorName];
+}
+
+- (NSString *)operatorNameForOperatorType:(NSPredicateOperatorType)operatorType {
+    return [[predicateRules objectForKey:@"operatorTypes"] objectAtIndex:operatorType];
+}
+
 - (BOOL)isCompound {
     return ([controllers count] > 1);
 }
@@ -206,7 +272,11 @@
 	}
     
     // ensure the predicate is valid
-    @try { [self predicate]; }
+    @try { 
+        [self entityName]; 
+        [self propertyName]; 
+        [self predicate];
+    }
     
     @catch ( NSException *e ) {  
         // present an alert about the problem
@@ -237,7 +307,7 @@
 
 - (NSSize)minimumSize { 
     NSArray *subviews = [self subviews];
-    float height = ([subviews count] > 0) ? NSMaxY([[subviews lastObject] frame]) : 32.0f;
+    float height = ([subviews count] > 0) ? NSMaxY([[subviews lastObject] frame]) : 10.0f;
     return NSMakeSize(NSWidth([self frame]), height);
 }
 

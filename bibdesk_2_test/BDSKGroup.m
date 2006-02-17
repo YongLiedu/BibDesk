@@ -55,24 +55,16 @@
     [self setValue:name forKey:@"name"];
 }
 
-- (BOOL)isSmart {
-    return NO;
-}
+- (BOOL)isSmart { return NO; }
 
-- (BOOL)isAuto {
-    return NO;
-}
+- (BOOL)isCategory { return NO; }
 
-- (BOOL)canEdit {
-    return NO;
-}
+- (BOOL)isLeaf { return NO; }
 
-- (BOOL)canEditName {
-    return YES;
-}
+- (BOOL)canEdit { return NO; }
 
-- (NSSet *)itemsInSelfOrChildren {
-    return [self valueForKey:@"items"];
-}
+- (BOOL)canEditName { return YES; }
+
+- (NSSet *)itemsInSelfOrChildren { return [self valueForKey:@"items"]; }
 
 @end

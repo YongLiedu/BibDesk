@@ -18,7 +18,6 @@
     NSString *propertyName;
     NSString *operatorName;
     NSString *searchValue;
-    NSDictionary *predicateRules;
 }
 
 - (id)initWithEditor:(BDSKSmartGroupEditor *)anEditor;

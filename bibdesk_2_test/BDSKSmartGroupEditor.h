@@ -16,7 +16,9 @@
     IBOutlet BDSKPredicateView *mainView;
     NSManagedObjectContext *managedObjectContext;
     NSString *entityName;
+    NSString *propertyName;
     int conjunction;
+    NSDictionary *predicateRules;
     NSMutableArray *controllers;
     CFArrayRef editors;
 }
@@ -30,6 +32,9 @@
 - (NSString *)entityName;
 - (void)setEntityName:(NSString *)newEntityName;
 
+- (NSString *)propertyName;
+- (void)setPropertyName:(NSString *)newPropertyName;
+
 - (int)conjunction;
 - (void)setConjunction:(int)value;
 
@@ -37,6 +42,11 @@
 - (void)setPredicate:(NSPredicate *)newPredicate;
 
 - (NSArray *)entityNames;
+- (NSArray *)propertyNames;
+
+- (NSArray *)operatorNamesForTypeName:(NSString *)attributeTypeName;
+- (NSPredicateOperatorType)operatorTypeForOperatorName:(NSString *)operatorName;
+- (NSString *)operatorNameForOperatorType:(NSPredicateOperatorType)operatorType;
 
 - (BOOL)isCompound;
 

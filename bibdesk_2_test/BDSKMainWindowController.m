@@ -13,7 +13,6 @@
 #import "ImageAndTextCell.h"
 #import "BDSKBibTeXParser.h"
 #import "BDSKSmartGroupEditor.h"
-#import "BDSKAutoGroupEditor.h"
 
 #import "BDSKPublicationTableDisplayController.h" // @@ TODO: itemdisplayflex this should be temporary
 #import "BDSKNoteTableDisplayController.h" // @@ TODO: itemdisplayflex this should be temporary
@@ -81,8 +80,12 @@
 #pragma mark Actions
 
 - (IBAction)showWindowForSourceListSelection:(id)sender{
-    BDSKSecondaryWindowController *swc = [[BDSKSecondaryWindowController alloc] initWithWindowNibName:@"BDSKSecondaryWindow"];
     id selectedGroup = [self sourceGroup];
+    if ([selectedGroup isCategory]) {
+        NSBeep();
+        return;
+    }
+    BDSKSecondaryWindowController *swc = [[BDSKSecondaryWindowController alloc] initWithWindowNibName:@"BDSKSecondaryWindow"];
 	[swc setSourceGroup:selectedGroup];
 	[[self document] addWindowController:[swc autorelease]];
 	[swc showWindow:sender];
@@ -91,7 +94,7 @@
 - (IBAction)addNewGroup:(id)sender{
     NSManagedObject *selectedGroup = [self sourceGroup];
     NSString *entityName = [selectedGroup valueForKey:@"itemEntityName"];
-    BOOL isSmart = [[selectedGroup valueForKey:@"isSmart"] boolValue];
+    BOOL canAddChildren = ([selectedGroup isSmart] == NO && [selectedGroup isCategory] == NO);
     
     NSManagedObjectContext *context = [[self document] managedObjectContext];
     id newGroup = [NSEntityDescription insertNewObjectForEntityForName:StaticGroupEntityName
@@ -100,7 +103,7 @@
     [newGroup setValue:entityName forKey:@"itemEntityName"];
     [newGroup setValue:@"Untitled Group" forKey:@"name"];
     
-    if (isSmart == NO && [[[selectedGroup entity] name] isEqualToString:AutoChildGroupEntityName]) {
+    if (canAddChildren == NO) {
         // for non-smart groups we add the new groups as a child
         [newGroup setValue:[NSNumber numberWithBool:NO] forKey:@"isRoot"];
         [[selectedGroup mutableSetValueForKey:@"children"] addObject:newGroup];
@@ -129,33 +132,18 @@
     // TODO: select the new group and edit. How to select?
 }
 
-- (IBAction)addNewAutoGroup:(id)sender{
-    NSManagedObject *selectedGroup = [self sourceGroup];
-    NSString *entityName = [selectedGroup valueForKey:@"itemEntityName"];
-    
-    NSManagedObjectContext *context = [[self document] managedObjectContext];
-    id newAutoGroup = [NSEntityDescription insertNewObjectForEntityForName:AutoGroupEntityName
-                                                    inManagedObjectContext:context];
-    
-    // we always add auto groups as root
-    [newAutoGroup setValue:entityName forKey:@"itemEntityName"];
-    [newAutoGroup setValue:[NSNumber numberWithBool:YES] forKey:@"isRoot"];
-    [newAutoGroup setValue:@"Untitled Auto Group" forKey:@"name"];
-    
-    [context processPendingChanges];
-    // TODO: select the new group and edit. How to select?
-}
-
 - (IBAction)editSmartGroup:(id)sender{
     id selectedGroup = [self sourceGroup];
-    if ([selectedGroup isSmart] == NO || [selectedGroup isAuto] == YES) 
+    if ([selectedGroup isSmart] == NO) 
         return;
     
     BDSKSmartGroupEditor *editor = [[BDSKSmartGroupEditor alloc] init];
     NSString *entityName = [selectedGroup valueForKey:@"itemEntityName"];
+    NSString *propertyName = [selectedGroup valueForKey:@"itemPropertyName"];
     NSPredicate *predicate = [selectedGroup valueForKey:@"predicate"];
     [editor setManagedObjectContext:[[self document] managedObjectContext]];
     [editor setEntityName:entityName];
+    [editor setPropertyName:propertyName];
     [editor setPredicate:predicate];
     
     [NSApp beginSheet:[editor window] 
@@ -171,8 +159,10 @@
         if ([editor commitEditing]) {
             @try {
                 NSString *entityName = [editor entityName];
+                NSString *propertyName = [editor propertyName];
                 NSPredicate *predicate = [editor predicate];
                 [selectedGroup setValue:entityName forKey:@"itemEntityName"];
+                [selectedGroup setValue:propertyName forKey:@"itemPropertyName"];
                 [selectedGroup setValue:predicate forKey:@"predicate"];
             } 
             @catch ( NSException *e ) {
@@ -185,50 +175,9 @@
     [editor release];
 }
 
-- (IBAction)editAutoGroup:(id)sender{
-    id selectedGroup = [self sourceGroup];
-    if ([selectedGroup isAuto] == NO) 
-        return;
-    
-    BDSKAutoGroupEditor *editor = [[BDSKAutoGroupEditor alloc] init];
-    NSString *entityName = [selectedGroup valueForKey:@"itemEntityName"];
-    NSString *propertyName = [selectedGroup valueForKey:@"itemPropertyName"];
-    [editor setManagedObjectContext:[[self document] managedObjectContext]];
-    [editor setEntityName:entityName];
-    [editor setPropertyName:propertyName];
-    
-    [NSApp beginSheet:[editor window] 
-       modalForWindow:[self window] 
-        modalDelegate:self 
-       didEndSelector:@selector(editAutoGroupSheetDidEnd:returnCode:contextInfo:) 
-          contextInfo:editor];
-}
-
-- (void)editAutoGroupSheetDidEnd:(NSWindow *)sheet returnCode:(int)returnCode contextInfo:(BDSKAutoGroupEditor *)editor {
-    id selectedGroup = [self sourceGroup];
-    if (returnCode == NSOKButton) {
-        if ([editor commitEditing]) {
-            @try {
-                NSString *entityName = [editor entityName];
-                NSString *propertyName = [editor propertyName];
-                [selectedGroup setValue:entityName forKey:@"itemEntityName"];
-                [selectedGroup setValue:propertyName forKey:@"itemPropertyName"];
-            } 
-            @catch ( NSException *e ) {
-                // an invalid edit shouldn't get here, but if it does, we will reset the value
-                [selectedGroup setValue:nil forKey:@"itemPropertyName"];
-            }
-        }
-    }
-    [editor reset];
-    [editor release];
-}
-
 - (IBAction)getInfo:(id)sender{
     id selectedGroup = [self sourceGroup];
-    if ([selectedGroup isAuto]) {
-        [self editAutoGroup:sender];
-    } else if ([selectedGroup isSmart]) {
+    if ([selectedGroup isSmart]) {
         [self editSmartGroup:sender];
     }
 }

@@ -22,8 +22,12 @@
 - (NSDictionary *)nameAndIcon;
 - (void)setNameAndIcon:(NSString *)name;
 
+- (NSSet *)itemsInSelfOrChildren;
+
 - (BOOL)isSmart;
-- (BOOL)isAuto;
+- (BOOL)isCategory;
+
+- (BOOL)isLeaf;
 
 - (BOOL)canEdit;
 - (BOOL)canEditName;

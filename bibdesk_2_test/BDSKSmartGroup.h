@@ -10,11 +10,12 @@
 #import "BDSKGroup.h"
 
 
-@interface BDSKSmartGroup :  BDSKGroup {
+@interface BDSKSmartGroup : BDSKGroup {
     NSSet *items;
+    NSMutableSet *children;
     NSString *groupImageName;
-    BOOL canEdit;
-    BOOL canEditName;
+    BOOL isToMany;
+    BOOL recreatingChildren;
 }
 
 - (NSPredicate *)predicate;
@@ -23,23 +24,38 @@
 - (NSString *)itemEntityName;
 - (void)setItemEntityName:(NSString *)entityName;
 
+- (NSString *)itemPropertyName;
+- (void)setItemPropertyName:(NSString *)propertyName;
+
 - (NSFetchRequest *)fetchRequest;
 
 - (void)setGroupImageName:(NSString *)imageName;
-
-- (void)setCanEdit:(BOOL)flag;
 
 - (NSSet *)items;
 - (NSSet *)itemsInSelfOrChildren;
 
 - (NSSet *)children;
 
-- (void)commonAwake;
-- (void)refresh;
+- (void)refreshItems;
+- (void)refreshChildren;
+- (void)refreshMetaData;
 - (void)managedObjectContextObjectsDidChange:(NSNotification *)notification;
 
 @end
 
+
 @interface BDSKLibraryGroup :  BDSKSmartGroup {
 }
+@end
+
+
+@interface BDSKCategoryGroup : BDSKGroup {
+    NSSet *items;
+}
+
+- (NSSet *)items;
+- (void)setItems:(NSSet *)newItems;
+
+- (NSSet *)children;
+
 @end

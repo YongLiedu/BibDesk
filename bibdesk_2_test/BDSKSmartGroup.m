@@ -7,6 +7,7 @@
 //
 
 #import "BDSKSmartGroup.h"
+#import "BDSKDataModelNames.h"
 
 
 @implementation BDSKSmartGroup 
@@ -22,15 +23,16 @@
 
 - (id)initWithEntity:(NSEntityDescription*)entity insertIntoManagedObjectContext:(NSManagedObjectContext*)context{
 	if (self = [super initWithEntity:entity insertIntoManagedObjectContext:context]) {
-		canEdit = YES;
-        canEditName = YES;
-        
+        [self addObserver:self forKeyPath:@"itemPropertyName" options:0 context:NULL];
+        [self addObserver:self forKeyPath:@"itemEntityName" options:0 context:NULL];
         [self addObserver:self forKeyPath:@"fetchRequest" options:0 context:NULL];
 	}
 	return self;
 }
 
 - (void)dealloc{
+	[self removeObserver:self forKeyPath:@"itemPropertyName"];
+	[self removeObserver:self forKeyPath:@"itemEntityName"];
     [self removeObserver:self forKeyPath:@"fetchRequest"];
     
 	[super dealloc];
@@ -44,10 +46,13 @@
                                                object:[self managedObjectContext]];        
     
     items = nil;
+    children = nil;
     
     [self willAccessValueForKey:@"priority"];
     [self setValue:[NSNumber numberWithInt:2] forKeyPath:@"priority"];
     [self didAccessValueForKey:@"priority"];
+    
+    [self refreshMetaData];
 }
 
 - (void)awakeFromInsert  {
@@ -69,14 +74,71 @@
     [items release];
     items = nil;
     
+    if ([children count]) {
+        NSManagedObjectContext *moc = [self managedObjectContext];
+        NSEnumerator *childEnum = [children objectEnumerator];
+        NSManagedObject *child;
+        
+        [moc processPendingChanges];
+        [[moc undoManager] disableUndoRegistration];
+        
+        while (child = [childEnum nextObject]) {
+            [moc deleteObject:child];
+        }
+        
+        [moc processPendingChanges];
+        [[moc undoManager] enableUndoRegistration];
+    }
+    
+	[children release];
+    children = nil;    
+    
     [super didTurnIntoFault];
 }
 
-- (void)refresh {
+- (void)refreshMetaData {
+    NSString *propertyName = [self itemPropertyName];
+    NSString *entityName = [self itemEntityName];
+    
+    if (propertyName != nil && entityName != nil) {
+        NSString *firstKey = [[propertyName componentsSeparatedByString:@"."] objectAtIndex:0];
+        NSManagedObjectContext *moc = [self managedObjectContext];
+        NSEntityDescription *entity = [NSEntityDescription entityForName:entityName inManagedObjectContext:moc];
+        
+        isToMany = [[[entity relationshipsByName] objectForKey:firstKey] isToMany];
+    } else {
+        isToMany = NO;
+    }
+}
+
+- (void)refreshItems {
 	[self willChangeValueForKey:@"items"];
 	[items release];
     items = nil;
 	[self didChangeValueForKey:@"items"];
+}
+
+- (void)refreshChildren {
+    NSManagedObjectContext *moc = [self managedObjectContext];
+    [moc processPendingChanges];
+    [[moc undoManager] disableUndoRegistration];
+    
+    if ([children count]) {
+        NSEnumerator *childEnum = [children objectEnumerator];
+        NSManagedObject *child;
+        
+        while (child = [childEnum nextObject]) {
+            [moc deleteObject:child];
+        }
+    }    
+    
+    [self willChangeValueForKey:@"children"];
+	[children release];
+    children = nil;    
+    [self didChangeValueForKey:@"children"];
+    
+    [moc processPendingChanges];
+    [[moc undoManager] enableUndoRegistration];
 }
 
 - (void)managedObjectContextObjectsDidChange:(NSNotification *)notification {
@@ -105,8 +167,22 @@
     }
 	
     if (refresh) {
-		[self refresh];
+		[self refreshItems];
+        // we need to call it this way, or the document gets an extra changeCount when this is called in managedObjectContextObjectsDidChange. Don't ask me why...
+        [self performSelector:@selector(refreshChildren) withObject:nil afterDelay:0.0];
     }
+}
+
+- (void)willSave {
+    NSPredicate *predicate = [[self primitiveValueForKey:@"fetchRequest"] predicate];
+    NSData *predicateData = nil;
+    
+    if (predicate != nil) {
+        predicateData = [NSKeyedArchiver archivedDataWithRootObject:predicate];
+    }
+    [self setPrimitiveValue:predicateData forKey:@"predicateData"];
+    
+    [super willSave];
 }
 
 #pragma mark Accessors
@@ -155,8 +231,23 @@
     NSFetchRequest *fetchRequest = [self fetchRequest];
     [fetchRequest setEntity:[NSEntityDescription entityForName:entityName inManagedObjectContext:[self managedObjectContext]]];
     [fetchRequest setPredicate:[NSPredicate predicateWithValue:YES]];
+
+    [self setValue:nil forKey:@"itemPropertyName"];
 }
 
+- (NSString *)itemPropertyName {
+    NSString *propertyName = nil;
+    [self willAccessValueForKey:@"itemPropertyName"];
+    propertyName = [self primitiveValueForKey:@"itemPropertyName"];
+    [self didAccessValueForKey:@"itemPropertyName"];
+    return propertyName;
+}
+
+- (void)setItemPropertyName:(NSString *)propertyName {
+    [self willChangeValueForKey: @"itemPropertyName"];
+    [self setPrimitiveValue:propertyName forKey:@"itemPropertyName"];
+    [self didChangeValueForKey:@"itemPropertyName"];
+}
 
 - (void)setGroupImageName:(NSString *)imageName {
     if (![groupImageName isEqualToString:imageName]) {
@@ -171,25 +262,13 @@
     return (groupImageName != nil) ? groupImageName : @"SmartGroupIcon";
 }
 
-- (BOOL)isSmart {
-    return YES;
-}
+- (BOOL)isSmart { return YES; }
 
-- (BOOL)canEdit {
-    return canEdit;
-}
+- (BOOL)isLeaf { return ([self valueForKey:@"itemPropertyName"] == nil); }
 
-- (void)setCanEdit:(BOOL)flag {
-    canEdit = flag;
-}
+- (BOOL)canEdit { return YES; }
 
-- (BOOL)canEditName {
-    return canEditName;
-}
-
-- (void)setCanEditName:(BOOL)flag {
-    canEditName = flag;
-}
+- (BOOL)canEditName { return YES; }
 
 - (NSSet *)items {
     if (items == nil)  {
@@ -202,41 +281,70 @@
     return items;
 }
 
-- (void)setItems:(NSSet *)newItems  {
-    // noop   
-}
+- (void)setItems:(NSSet *)newItems  { /* no-op */ }
 
-- (NSSet *)itemsInSelfOrChildren {
-    return [self items];
-}
+- (NSSet *)itemsInSelfOrChildren { return [self items]; }
 
-- (void)setItemsInSelfOrChildren:(NSSet *)newItems {
-    // noop   
-}
+- (void)setItemsInSelfOrChildren:(NSSet *)newItems { /* no-op */ }
 
 - (NSSet *)children {
-    return [NSSet set];
-}
-
-- (void)setChildren:(NSSet *)newChildren  {
-    // noop
-}
-
-- (void)willSave {
-    NSPredicate *predicate = [[self primitiveValueForKey:@"fetchRequest"] predicate];
-    NSData *predicateData = nil;
-    
-    if (predicate != nil) {
-        predicateData = [NSKeyedArchiver archivedDataWithRootObject:predicate];
+    if (children == nil)  {
+        NSString *entityName = [self itemEntityName];
+        NSString *propertyName = [self itemPropertyName];
+        
+        if (entityName == nil || propertyName == nil || recreatingChildren == YES) 
+            return [NSSet set];
+        
+        // our fetchRequest in -items can call -children while we are building, effectively adding them twice. Is there a better way to avoid?
+        recreatingChildren = YES;
+        
+        children = [[NSMutableSet alloc] init];
+        
+        NSString *allValuesKeyPath = (isToMany) ? [NSString stringWithFormat:@"@distinctUnionOfSets.%@", propertyName] : propertyName;
+        NSSet *allItems = [self items];
+        NSArray *allItemsArray = [allItems allObjects];
+        NSSet *allValues = [allItems valueForKeyPath:allValuesKeyPath];
+        NSEnumerator *valueEnum = [allValues objectEnumerator];
+        id value;
+        BDSKSmartGroup *child;
+        NSString *predicateFormat = (isToMany) ? @"any %K == %@" : @"%K == %@";
+        NSSet *childItems;
+        NSPredicate *predicate;
+	
+        // adding the children should not be undoable
+        NSManagedObjectContext *moc = [self managedObjectContext];
+        [moc processPendingChanges];
+        [[moc undoManager] disableUndoRegistration];
+        
+        while (value = [valueEnum nextObject]) {
+            child = [NSEntityDescription insertNewObjectForEntityForName:CategoryGroupEntityName inManagedObjectContext:moc];
+            [child setValue:entityName forKey:@"itemEntityName"];
+            [child setValue:value forKey:@"name"];
+            predicate = [NSPredicate predicateWithFormat:predicateFormat, propertyName, value];
+            childItems = [[NSSet alloc] initWithArray:[allItemsArray filteredArrayUsingPredicate:predicate]];
+            [child setValue:childItems forKey:@"items"];
+            [childItems release];
+            [children addObject:child];
+        }
+	
+        [moc processPendingChanges];
+        [[moc undoManager] enableUndoRegistration];
+        
+        recreatingChildren = NO;
     }
-    [self setPrimitiveValue:predicateData forKey:@"predicateData"];
-    
-    [super willSave];
+    return children;
 }
+
+- (void)setChildren:(NSSet *)newChildren { /* no-op */ }
+
+#pragma mark KVO
 
 - (void)observeValueForKeyPath:(NSString *)keyPath ofObject:(id)object change:(NSDictionary *)change context:(void *)context {
-    if ([keyPath isEqualToString:@"fetchRequest"]) {
-        [self refresh];
+    if ([keyPath isEqualToString:@"itemEntityName"] || [keyPath isEqualToString:@"itemPropertyName"]) {
+        [self refreshMetaData];
+    } else if ([keyPath isEqualToString:@"fetchRequest"]) {
+        [self refreshItems];
+        [self refreshChildren];
     }
 }
 
@@ -245,20 +353,69 @@
 
 @implementation BDSKLibraryGroup 
 
-- (BOOL)isRoot {
-    return YES;
-}
+- (BOOL)isRoot { return YES; }
 
-- (BOOL)canEdit {
-    return NO;
-}
+- (BOOL)isLeaf { return YES; }
 
-- (BOOL)canEditName {
-    return NO;
-}
+- (BOOL)canEdit { return NO; }
+
+- (BOOL)canEditName { return NO; }
 
 - (NSString *)groupImageName {
     return (groupImageName != nil) ? groupImageName : @"RootGroupIcon";
 }
+
+- (NSString *)itemPropertyName { return nil; }
+
+- (void)setItemPropertyName:(NSString *)propertyName { /* no-op */ }
+
+- (NSSet *)children { return [NSSet set]; }
+
+@end
+
+
+@implementation BDSKCategoryGroup
+
+- (void)awakeFromInsert {
+    [super awakeFromInsert];
+    items = nil;
+}
+
+- (void)awakeFromFetch {
+    [super awakeFromFetch];
+    items = nil;
+}
+
+- (void)didTurnIntoFault {
+    [items release];
+    items = nil;
+    
+    [super didTurnIntoFault];
+}
+
+#pragma mark Accessors
+
+- (BOOL)isCategory { return YES; }
+
+- (BOOL)isRoot { return NO; }
+
+- (BOOL)isLeaf { return YES; }
+
+- (BOOL)canEdit { return NO; }
+
+- (BOOL)canEditName { return NO; }
+
+- (NSSet *)items { return items; }
+
+- (void)setItems:(NSSet *)newItems  {
+    if (items != newItems) {
+        [items release];
+        items = [newItems retain];
+    }
+}
+
+- (NSSet *)children { return [NSSet set]; }
+
+- (void)setChildren:(NSSet *)newChildren  { /* no-op */ }
 
 @end
