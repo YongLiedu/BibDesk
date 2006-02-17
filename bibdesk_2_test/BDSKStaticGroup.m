@@ -93,6 +93,8 @@
 
 #pragma mark Accessors
 
+- (BOOL)isLeaf { return ([[self valueForKey:@"children"] count] == 0); }
+
 - (NSSet *)itemsInSelfOrChildren {
     NSMutableSet *myPubs = [NSMutableSet setWithCapacity:10];
     [myPubs unionSet:[self valueForKey:@"items"]];
