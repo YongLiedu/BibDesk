@@ -8,7 +8,6 @@
         }, 
         {
             ACTIONS = {
-                addNewAutoGroup = id; 
                 addNewGroup = id; 
                 addNewItem = id; 
                 addNewSmartGroup = id; 
