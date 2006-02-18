@@ -146,11 +146,11 @@ NSString *BDSKAddOtherMarker = @"BDSKAddOtherMarker";
         if ([newPropertyName hasSuffix:@".name"]) {
             [newDisplayName appendString:[[newDisplayName substringWithRange:NSMakeRange(13, [newPropertyName length] - 5)] capitalizedString]];
             [newDisplayName appendString:@" Name"];
-        } else if ([newPropertyName hasSuffix:@".lastName"]) {
-            [newDisplayName appendString:[[newDisplayName substringWithRange:NSMakeRange(13, [newPropertyName length] - 9)] capitalizedString]];
+        } else if ([newPropertyName hasSuffix:@".lastNamePart"]) {
+            [newDisplayName appendString:[[newDisplayName substringWithRange:NSMakeRange(13, [newPropertyName length] - 13)] capitalizedString]];
             [newDisplayName appendString:@" Last Name"];
-        } else if ([newPropertyName hasSuffix:@".firstName"]) {
-            [newDisplayName appendString:[[newDisplayName substringWithRange:NSMakeRange(13, [newPropertyName length] - 10)] capitalizedString]];
+        } else if ([newPropertyName hasSuffix:@".firstNamePart"]) {
+            [newDisplayName appendString:[[newDisplayName substringWithRange:NSMakeRange(13, [newPropertyName length] - 14)] capitalizedString]];
             [newDisplayName appendString:@" First Name"];
         } else return nil;
     } else {
@@ -188,11 +188,11 @@ NSString *BDSKAddOtherMarker = @"BDSKAddOtherMarker";
     } else if ([newDisplayName hasSuffix:@" Last Name"]) {
         [newPropertyName appendString:@"contributors/"];
         [newPropertyName appendString:[newDisplayName substringToIndex:[newDisplayName length] - 10]];
-        [newPropertyName appendString:@".lastName"];
+        [newPropertyName appendString:@".lastNamePart"];
     } else if ([newDisplayName hasSuffix:@" First Name"]) {
         [newPropertyName appendString:@"contributors/"];
         [newPropertyName appendString:[newDisplayName substringToIndex:[newDisplayName length] - 11]];
-        [newPropertyName appendString:@".firstName"];
+        [newPropertyName appendString:@".firstNamePart"];
     } else {
         [newPropertyName appendString:newDisplayName];
     }
