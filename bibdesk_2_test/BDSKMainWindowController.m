@@ -134,7 +134,7 @@
 
 - (IBAction)editSmartGroup:(id)sender{
     id selectedGroup = [self sourceGroup];
-    if ([selectedGroup isSmart] == NO) 
+    if ([selectedGroup canEdit] == NO) 
         return;
     
     BDSKSmartGroupEditor *editor = [[BDSKSmartGroupEditor alloc] init];
@@ -177,7 +177,7 @@
 
 - (IBAction)getInfo:(id)sender{
     id selectedGroup = [self sourceGroup];
-    if ([selectedGroup isSmart]) {
+    if ([selectedGroup canEdit] && [selectedGroup isSmart]) {
         [self editSmartGroup:sender];
     }
 }
@@ -207,7 +207,7 @@
     NSString *entityName = [groupItem valueForKey:@"itemEntityName"];
     NSString *pboardType = nil;
     
-    if ([groupItem isSmart])
+    if ([groupItem isSmart] || [groupItem isCategory])
         return NSDragOperationNone;
     
     if ([entityName isEqualToString:PublicationEntityName])
@@ -241,7 +241,7 @@
     NSString *entityName = [groupItem valueForKey:@"itemEntityName"];
     NSString *pboardType = nil;
     
-    if ([groupItem isSmart])
+    if ([groupItem isSmart] || [groupItem isCategory])
         return NO;
     
     if ([entityName isEqualToString:PublicationEntityName])
