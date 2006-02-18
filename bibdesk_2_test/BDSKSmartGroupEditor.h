@@ -9,16 +9,22 @@
 #import <Cocoa/Cocoa.h>
 #import "BDSKComparisonPredicateController.h"
 
+extern NSString *BDSKNoCategoriesMarker;
+extern NSString *BDSKAddOtherMarker;
+
 @class BDSKPredicateView;
 
 
 @interface BDSKSmartGroupEditor : NSWindowController {
     IBOutlet BDSKPredicateView *mainView;
+    IBOutlet NSWindow *addPropertySheet;
     NSManagedObjectContext *managedObjectContext;
     NSString *entityName;
     NSString *propertyName;
+    NSString *addedPropertyName;
     int conjunction;
     NSDictionary *predicateRules;
+    NSMutableArray *publicationPropertyNames;
     NSMutableArray *controllers;
     CFArrayRef editors;
 }
@@ -48,11 +54,20 @@
 - (NSPredicateOperatorType)operatorTypeForOperatorName:(NSString *)operatorName;
 - (NSString *)operatorNameForOperatorType:(NSPredicateOperatorType)operatorType;
 
+- (NSString *)addedPropertyName;
+- (void)setAddedPropertyName:(NSString *)newPropertyName;
+
 - (BOOL)isCompound;
 
 - (void)reset;
 
 - (IBAction)closeEditor:(id)sender;
+
+- (IBAction)addNewProperty:(id)sender;
+- (IBAction)closeAddPropertySheet:(id)sender;
+
+- (NSString *)addNewPropertyForPropertyName:(NSString *)newPropertyName;
+- (NSString *)addNewPropertyForDisplayName:(NSString *)newDisplayName;
  
 @end
 

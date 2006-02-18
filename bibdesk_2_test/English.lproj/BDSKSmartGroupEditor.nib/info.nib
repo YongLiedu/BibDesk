@@ -6,9 +6,14 @@
 	<string>243 69 356 240 0 0 1440 938 </string>
 	<key>IBFramework Version</key>
 	<string>443.0</string>
+	<key>IBLockedObjects</key>
+	<array>
+		<integer>166</integer>
+	</array>
 	<key>IBOpenObjects</key>
 	<array>
 		<integer>6</integer>
+		<integer>166</integer>
 	</array>
 	<key>IBSystem Version</key>
 	<string>8G32</string>

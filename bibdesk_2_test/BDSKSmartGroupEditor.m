@@ -10,6 +10,10 @@
 #import "BDSKDataModelNames.h"
 
 
+NSString *BDSKNoCategoriesMarker = @"BDSKNoCategoriesMarker";
+NSString *BDSKAddOtherMarker = @"BDSKAddOtherMarker";
+
+
 @implementation BDSKSmartGroupEditor
 
 + (void)initialize {
@@ -26,6 +30,8 @@
         propertyName = nil;
         conjunction = 0;
         predicateRules = [[NSDictionary alloc] initWithContentsOfFile:[[[NSBundle mainBundle] resourcePath] stringByAppendingPathComponent:@"PredicateRules.plist"]];
+        publicationPropertyNames = [[NSMutableArray alloc] initWithArray:[[predicateRules objectForKey:@"propertyNames"] objectForKey:PublicationEntityName]];
+        [publicationPropertyNames addObject:[NSDictionary dictionaryWithObjectsAndKeys:BDSKAddOtherMarker, @"propertyName", [NSString stringWithFormat:@"Add Other%C",0x2026], @"displayName", @"", @"type", nil]];
         controllers = [[NSMutableArray alloc] init];
         editors = CFArrayCreateMutable(kCFAllocatorMallocZone, 0, NULL);
     }
@@ -38,6 +44,7 @@
     [controllers release], controllers = nil;
     [entityName release], entityName = nil;
     [propertyName release], propertyName = nil;
+    [publicationPropertyNames release], predicateRules = nil;
     [predicateRules release], predicateRules = nil;
     [managedObjectContext release], managedObjectContext = nil;
     [super dealloc];
@@ -97,6 +104,114 @@
 	}
 }
 
+- (IBAction)addNewProperty:(id)sender {
+    [NSApp beginSheet:addPropertySheet
+       modalForWindow:[self window] 
+        modalDelegate:self 
+       didEndSelector:@selector(addPropertySheetDidEnd:returnCode:contextInfo:) 
+          contextInfo:nil];
+}
+
+- (IBAction)closeAddPropertySheet:(id)sender {
+    [addPropertySheet orderOut:sender];
+    [NSApp endSheet:addPropertySheet returnCode:[sender tag]];
+}
+
+- (void)addPropertySheetDidEnd:(NSWindow *)sheet returnCode:(int)returnCode contextInfo:(void *)contextInfo {
+    if (returnCode == NSOKButton) {
+        NSString *newPropertyName = [self addNewPropertyForDisplayName:[self addedPropertyName]];
+        if (newPropertyName != nil) {
+            [self setPropertyName:newPropertyName];
+        } else {
+            NSBeep();
+        }
+    }
+    [self setAddedPropertyName:nil];
+}
+
+// TODO: room for improvement
+- (NSString *)addNewPropertyForPropertyName:(NSString *)newPropertyName {
+    if ([[self entityName] isEqualToString:PublicationEntityName] == NO)
+        return nil;
+    if ([[publicationPropertyNames valueForKeyPath:@"@distinctUnionOfObjects.propertyName"] containsObject:newPropertyName] == YES) 
+        return newPropertyName;
+    NSMutableString *newDisplayName = [[NSMutableString alloc] initWithCapacity:[newPropertyName length]];
+    
+    if ([newPropertyName hasPrefix:@"contributors/"]) {
+        if ([newPropertyName hasSuffix:@".name"]) {
+            [newDisplayName appendString:[[newDisplayName substringWithRange:NSMakeRange(13, [newPropertyName length] - 5)] capitalizedString]];
+            [newDisplayName appendString:@" Name"];
+        } else if ([newPropertyName hasSuffix:@".lastName"]) {
+            [newDisplayName appendString:[[newDisplayName substringWithRange:NSMakeRange(13, [newPropertyName length] - 9)] capitalizedString]];
+            [newDisplayName appendString:@" Last Name"];
+        } else if ([newPropertyName hasSuffix:@".firstName"]) {
+            [newDisplayName appendString:[[newDisplayName substringWithRange:NSMakeRange(13, [newPropertyName length] - 10)] capitalizedString]];
+            [newDisplayName appendString:@" First Name"];
+        } else return nil;
+    } else {
+        [newDisplayName appendString:[newPropertyName capitalizedString]];
+    }
+    NSCharacterSet *dashCharacterSet = [NSCharacterSet characterSetWithRange:NSMakeRange('-',0)];
+    NSRange range = [newPropertyName rangeOfCharacterFromSet:dashCharacterSet];
+    while (range.location != NSNotFound) {
+        [newDisplayName replaceCharactersInRange:range withString:@" "];
+        range = [newDisplayName rangeOfCharacterFromSet:dashCharacterSet];
+    }
+    NSDictionary *propertyDict = [NSDictionary dictionaryWithObjectsAndKeys:newPropertyName, @"propertyName", newDisplayName, @"displayName", @"string", @"type", nil];
+    
+    [self willChangeValueForKey:@"propertyNames"];
+    [self willChangeValueForKey:@"categoryPropertyNames"];
+    [publicationPropertyNames insertObject:propertyDict atIndex:[publicationPropertyNames count] - 1];
+    [self didChangeValueForKey:@"categoryPropertyNames"];
+    [self didChangeValueForKey:@"propertyNames"];
+    
+    [newDisplayName release];
+    return newPropertyName;
+}
+
+// TODO: room for improvement
+- (NSString *)addNewPropertyForDisplayName:(NSString *)newDisplayName {
+    if ([[self entityName] isEqualToString:PublicationEntityName] == NO)
+        return nil;
+    
+    NSMutableString *newPropertyName = [[NSMutableString alloc] initWithCapacity:[newDisplayName length]];
+    
+    if ([newDisplayName hasSuffix:@" Name"] ) {
+        [newPropertyName appendString:@"contributors/"];
+        [newPropertyName appendString:[newDisplayName substringToIndex:[newDisplayName length] - 5]];
+        [newPropertyName appendString:@".name"];
+    } else if ([newDisplayName hasSuffix:@" Last Name"]) {
+        [newPropertyName appendString:@"contributors/"];
+        [newPropertyName appendString:[newDisplayName substringToIndex:[newDisplayName length] - 10]];
+        [newPropertyName appendString:@".lastName"];
+    } else if ([newDisplayName hasSuffix:@" First Name"]) {
+        [newPropertyName appendString:@"contributors/"];
+        [newPropertyName appendString:[newDisplayName substringToIndex:[newDisplayName length] - 11]];
+        [newPropertyName appendString:@".firstName"];
+    } else {
+        [newPropertyName appendString:newDisplayName];
+    }
+    NSRange range = [newPropertyName rangeOfCharacterFromSet:[NSCharacterSet whitespaceCharacterSet]];
+    while (range.location != NSNotFound) {
+        [newPropertyName replaceCharactersInRange:range withString:@"-"];
+        range = [newPropertyName rangeOfCharacterFromSet:[NSCharacterSet whitespaceCharacterSet]];
+    }
+    
+    if ([[publicationPropertyNames valueForKeyPath:@"@distinctUnionOfObjects.propertyName"] containsObject:newPropertyName] == YES)
+        return newPropertyName;
+    
+    NSDictionary *propertyDict = [NSDictionary dictionaryWithObjectsAndKeys:newPropertyName, @"propertyName", newDisplayName, @"displayName", @"string", @"type", nil];
+    
+    [self willChangeValueForKey:@"propertyNames"];
+    [self willChangeValueForKey:@"categoryPropertyNames"];
+    [publicationPropertyNames insertObject:propertyDict atIndex:[publicationPropertyNames count] - 1];
+    [self didChangeValueForKey:@"categoryPropertyNames"];
+    [self didChangeValueForKey:@"propertyNames"];
+    
+    [newPropertyName release];
+    return newPropertyName;
+}
+
 #pragma mark Accessors
 
 - (NSManagedObjectContext *)managedObjectContext {
@@ -128,18 +243,26 @@
 
 - (void)setPropertyName:(NSString *)newPropertyName {
 	if (newPropertyName != propertyName) {
+        if ([self addNewPropertyForPropertyName:newPropertyName]) {
+            NSBeep();
+            return;
+        }
         [propertyName release]; 
         propertyName = [newPropertyName retain];
     }
 }
 
 - (id)categoryPropertyName {
-	return (propertyName == nil) ? (id)[NSNull null] : propertyName;
+	return (propertyName == nil) ? BDSKNoCategoriesMarker : propertyName;
 }
 
 - (void)setCategoryPropertyName:(id)newPropertyName {
-    if (newPropertyName == [NSNull null] || NSIsControllerMarker(propertyName)) 
+    if (newPropertyName == BDSKNoCategoriesMarker || NSIsControllerMarker(propertyName)) {
         newPropertyName = nil;
+    } else if (newPropertyName == BDSKAddOtherMarker) {
+        [self addNewProperty:self];
+        return;
+    }
     [self setPropertyName:newPropertyName];
 }
 
@@ -205,6 +328,17 @@
     }    
 }
 
+- (NSString *)addedPropertyName {
+	return addedPropertyName;
+}
+
+- (void)setAddedPropertyName:(NSString *)newPropertyName {
+	if (newPropertyName != addedPropertyName) {
+        [addedPropertyName release]; 
+        addedPropertyName = [newPropertyName retain];
+    }
+}
+
 - (NSArray *)entityNames {
     return [NSArray arrayWithObjects:PublicationEntityName, PersonEntityName, InstitutionEntityName, VenueEntityName, NoteEntityName, TagEntityName, nil];
 }
@@ -212,17 +346,21 @@
 - (NSArray *)propertyNames {
     NSArray *propertyNames = nil;
     
-    if (entityName != nil)
-        propertyNames = [[predicateRules objectForKey:@"propertyNames"] objectForKey:entityName];
+    if (entityName != nil) {
+        if ([entityName isEqualToString:PublicationEntityName])
+            propertyNames = publicationPropertyNames;
+        else
+            propertyNames = [[predicateRules objectForKey:@"propertyNames"] objectForKey:entityName];
+    }
     
     return (propertyNames != nil) ? propertyNames : [NSArray array];
 }
 
 - (NSArray *)categoryPropertyNames {
-    NSMutableArray *propertyNames = [NSMutableArray arrayWithObject:[NSDictionary dictionaryWithObjectsAndKeys:[NSNull null], @"propertyName", @"No Categories", @"displayName", @"", @"type", nil]];
+    NSMutableArray *propertyNames = [NSMutableArray arrayWithObject:[NSDictionary dictionaryWithObjectsAndKeys:BDSKNoCategoriesMarker, @"propertyName", @"No Categories", @"displayName", @"", @"type", nil]];
     
     if (entityName != nil)
-        [propertyNames addObjectsFromArray:[[predicateRules objectForKey:@"propertyNames"] objectForKey:entityName]];
+        [propertyNames addObjectsFromArray:[self propertyNames]];
     
     return (propertyNames != nil) ? propertyNames : [NSArray array];
 }

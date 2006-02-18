@@ -2,10 +2,10 @@
     IBClasses = (
         {CLASS = BDSKPredicateView; LANGUAGE = ObjC; SUPERCLASS = NSView; }, 
         {
-            ACTIONS = {add = id; closeEditor = id; remove = id; }; 
+            ACTIONS = {add = id; closeAddPropertySheet = id; closeEditor = id; remove = id; }; 
             CLASS = BDSKSmartGroupEditor; 
             LANGUAGE = ObjC; 
-            OUTLETS = {mainView = BDSKPredicateView; }; 
+            OUTLETS = {addPropertySheet = NSWindow; mainView = BDSKPredicateView; }; 
             SUPERCLASS = NSWindowController; 
         }, 
         {

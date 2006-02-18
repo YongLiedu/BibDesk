@@ -78,7 +78,6 @@
 }
 
 // TODO: we might want to allow negated predicates, so we can support "does not contain" etc., maybe also custom operator types
-// TODO: adding arbitrary keys (keyValuePairs)
 - (NSPredicate *)predicate {
     id value = [self searchValue];
     NSString *typeName = [self attributeTypeName];
@@ -124,15 +123,25 @@
     
     NSComparisonPredicate *predicate = (NSComparisonPredicate *)newPredicate;
     int operatorType = [predicate predicateOperatorType];
+    NSString *newPropertyName;
+    NSString *newSearchValue;
     
-    // The IN operator type corresonds to "foo contains'f'", but the expressions are reversed to look like "'f' IN foo" so we need to special case
+    // The IN operator type corresponds to "foo contains'f'", but the expressions are reversed to look like "'f' IN foo" so we need to special case
     if (operatorType == NSInPredicateOperatorType) {
-        [self setPropertyName:[[predicate rightExpression] keyPath]];
-        [self setSearchValue:[[predicate leftExpression] constantValue]];
+        newPropertyName = [[predicate rightExpression] keyPath];
+        newSearchValue = [[predicate leftExpression] constantValue];
     } else {
-        [self setPropertyName:[[predicate leftExpression] keyPath]];
-        [self setSearchValue:[[predicate rightExpression] constantValue]];
+        newPropertyName = [[predicate leftExpression] keyPath];
+        newSearchValue = [[predicate rightExpression] constantValue];
     }
+    if (newPropertyName != nil) {
+        if ([[self smartGroupEditor] addNewPropertyForPropertyName:newPropertyName] == nil) {
+            NSBeep();
+        }
+    }
+    
+    [self setPropertyName:newPropertyName];
+    [self setSearchValue:newSearchValue];
     [self setOperatorType:operatorType];
 }
 
@@ -141,6 +150,10 @@
 }
 
 - (void)setPropertyName:(NSString *)value {
+    if (value == BDSKAddOtherMarker) {
+        [[self smartGroupEditor] addNewProperty:self];
+        return;
+    }
     if (propertyName != value) {
         [propertyName release];
         propertyName = [value retain];
@@ -188,7 +201,7 @@
             for (i = 0; i < count; i++) {
                 key = [components objectAtIndex:i];
                 relationship = [[entity relationshipsByName] objectForKey:key];
-                if ([relationship isToMany])
+                if (relationship == nil || [relationship isToMany])
                     return YES;
                 entity = [relationship destinationEntity];
             }
