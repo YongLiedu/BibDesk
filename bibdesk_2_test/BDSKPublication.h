@@ -16,4 +16,9 @@
 - (NSString *)name;
 - (void)setName:(NSString *)value;
 
+- (NSSet *)authors;
+- (NSSet *)editors;
+- (NSSet *)institutions;
+- (NSSet *)contributorsOfType:(NSString *)type;
+
 @end

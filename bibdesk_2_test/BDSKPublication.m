@@ -7,6 +7,7 @@
 //
 
 #import "BDSKPublication.h"
+#import "BDSKDataModelNames.h"
 
 
 @implementation BDSKPublication
@@ -38,13 +39,64 @@
     [self setValue:value forKey:@"title"];
 }
 
-- (id)valueForUndefinedKey:(NSString *)key {
-    NSEnumerator *pairEnum = [[self valueForKey:@"keyValuePairs"] objectEnumerator];
-    id pair;
+- (NSSet *)authors {
+    return [self relationshipdOfType:@"authors"];
+}
+
+- (NSSet *)editors {
+    return [self relationshipdOfType:@"editors"];
+}
+
+- (NSSet *)institutions {
+    static NSPredicate *institutionPredicate = nil;
+    if (institutionPredicate == nil) {
+        institutionPredicate = [[NSPredicate predicateWithFormat:@"contributor.entity.name == %@", InstitutionEntityName] retain];
+    }
+    NSSet *relationships = [self valueForKey:@"contributorRelationships"];
+    NSMutableSet *institutions = [[NSMutableSet alloc] initWithCapacity:[relationships count]];
+    NSEnumerator *relationshipEnum = [relationships objectEnumerator];
+    id relationship;
     
-    while (pair = [pairEnum nextObject]) {
-        if ([[pair valueForKey:@"key"] caseInsensitiveCompare:key] == NSOrderedSame)
-            return [pair valueForKey:@"value"];
+    while (relationship = [relationshipEnum nextObject]) {
+        if ([institutionPredicate evaluateWithObject:relationship] == YES) 
+            [institutions addObject:[relationship valueForKey:@"contributor"]];
+    }
+    return [institutions autorelease];
+}
+
+- (NSSet *)contributorsOfType:(NSString *)type {
+    static NSMutableDictionary *contributorPredicates = nil;
+    if (contributorPredicates == nil) {
+        contributorPredicates = [[NSMutableDictionary dictionaryWithCapacity:1];
+    }
+    NSPredicate *predicate = [contributorPredicates objectForKey:type];
+    if (predicate == nil) {
+        predicate = [NSPredicate predicateWithFormat:@"relationshipType like[c] %@", type];
+        [contributorPredicates setObject:predicate forKey:type];
+    }
+    NSSet *relationships = [self valueForKey:@"contributorRelationships"];
+    NSMutableSet *contributors = [[NSMutableSet alloc] initWithCapacity:[relationships count]];
+    NSEnumerator *relationshipEnum = [relationships objectEnumerator];
+    id relationship;
+    
+    while (relationship = [relationshipEnum nextObject]) {
+        if ([predicate evaluateWithObject:relationship] == YES) 
+            [contributors addObject:[relationship valueForKey:@"contributor"]];
+    }
+    return [contributors autorelease];
+}
+
+- (id)valueForUndefinedKey:(NSString *)key {
+    if ([key hasSuffix:@"contributors/"]) {
+        return [self contributorsOfType:[key substringFromIndex:13]];
+    } else {
+        NSEnumerator *pairEnum = [[self valueForKey:@"keyValuePairs"] objectEnumerator];
+        id pair;
+        
+        while (pair = [pairEnum nextObject]) {
+            if ([[pair valueForKey:@"key"] caseInsensitiveCompare:key] == NSOrderedSame)
+                return [pair valueForKey:@"value"];
+        }
     }
     return nil;
 }
