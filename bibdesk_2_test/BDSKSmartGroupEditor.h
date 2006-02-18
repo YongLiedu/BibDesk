@@ -9,8 +9,8 @@
 #import <Cocoa/Cocoa.h>
 #import "BDSKComparisonPredicateController.h"
 
-extern NSString *BDSKNoCategoriesMarker;
-extern NSString *BDSKAddOtherMarker;
+extern id BDSKNoCategoriesMarker;
+extern id BDSKAddOtherMarker;
 
 @class BDSKPredicateView;
 

@@ -10,8 +10,26 @@
 #import "BDSKDataModelNames.h"
 
 
-NSString *BDSKNoCategoriesMarker = @"BDSKNoCategoriesMarker";
-NSString *BDSKAddOtherMarker = @"BDSKAddOtherMarker";
+@interface BDSKMarker : NSObject {} 
+@end
+
+@implementation BDSKMarker 
+
+id BDSKNoCategoriesMarker;
+id BDSKAddOtherMarker;
+
++ (void)load {
+    BDSKNoCategoriesMarker = (BDSKMarker *)NSAllocateObject(self, 0, NSDefaultMallocZone());
+    BDSKAddOtherMarker = (BDSKMarker *)NSAllocateObject(self, 0, NSDefaultMallocZone());
+}
+
++ (id)allocWithZone:(NSZone *)zone { return nil; }
+- (id)copyWithZone:(NSZone *)zone { return self; }
+- (id)autorelease { return self; }
+- (void)release {}
+- (id)retain { return self; }
+
+@end
 
 
 @implementation BDSKSmartGroupEditor
