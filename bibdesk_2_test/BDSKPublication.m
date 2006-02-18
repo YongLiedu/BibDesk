@@ -40,11 +40,11 @@
 }
 
 - (NSSet *)authors {
-    return [self relationshipdOfType:@"authors"];
+    return [self contributorsOfType:@"authors"];
 }
 
 - (NSSet *)editors {
-    return [self relationshipdOfType:@"editors"];
+    return [self contributorsOfType:@"editors"];
 }
 
 - (NSSet *)institutions {
@@ -67,7 +67,7 @@
 - (NSSet *)contributorsOfType:(NSString *)type {
     static NSMutableDictionary *contributorPredicates = nil;
     if (contributorPredicates == nil) {
-        contributorPredicates = [[NSMutableDictionary dictionaryWithCapacity:1];
+        contributorPredicates = [NSMutableDictionary dictionaryWithCapacity:1];
     }
     NSPredicate *predicate = [contributorPredicates objectForKey:type];
     if (predicate == nil) {
