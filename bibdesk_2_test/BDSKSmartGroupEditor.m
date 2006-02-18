@@ -105,11 +105,13 @@ NSString *BDSKAddOtherMarker = @"BDSKAddOtherMarker";
 }
 
 - (IBAction)addNewProperty:(id)sender {
+    [self setAddedPropertyName:nil];
+    
     [NSApp beginSheet:addPropertySheet
        modalForWindow:[self window] 
         modalDelegate:self 
        didEndSelector:@selector(addPropertySheetDidEnd:returnCode:contextInfo:) 
-          contextInfo:nil];
+          contextInfo:[sender retain]];
 }
 
 - (IBAction)closeAddPropertySheet:(id)sender {
@@ -117,16 +119,19 @@ NSString *BDSKAddOtherMarker = @"BDSKAddOtherMarker";
     [NSApp endSheet:addPropertySheet returnCode:[sender tag]];
 }
 
-- (void)addPropertySheetDidEnd:(NSWindow *)sheet returnCode:(int)returnCode contextInfo:(void *)contextInfo {
+- (void)addPropertySheetDidEnd:(NSWindow *)sheet returnCode:(int)returnCode contextInfo:(id)sender {
     if (returnCode == NSOKButton) {
         NSString *newPropertyName = [self addNewPropertyForDisplayName:[self addedPropertyName]];
         if (newPropertyName != nil) {
-            [self setPropertyName:newPropertyName];
+            [sender setPropertyName:newPropertyName];
         } else {
+            [sender setPropertyName:[sender propertyName]];
             NSBeep();
         }
+    } else {
+        [sender setPropertyName:[sender propertyName]];
     }
-    [self setAddedPropertyName:nil];
+    [sender release];
 }
 
 // TODO: room for improvement
@@ -171,7 +176,7 @@ NSString *BDSKAddOtherMarker = @"BDSKAddOtherMarker";
 
 // TODO: room for improvement
 - (NSString *)addNewPropertyForDisplayName:(NSString *)newDisplayName {
-    if ([[self entityName] isEqualToString:PublicationEntityName] == NO)
+    if ([[self entityName] isEqualToString:PublicationEntityName] == NO || newDisplayName == nil || [newDisplayName isEqualToString:@""])
         return nil;
     
     NSMutableString *newPropertyName = [[NSMutableString alloc] initWithCapacity:[newDisplayName length]];
@@ -243,7 +248,7 @@ NSString *BDSKAddOtherMarker = @"BDSKAddOtherMarker";
 
 - (void)setPropertyName:(NSString *)newPropertyName {
 	if (newPropertyName != propertyName) {
-        if ([self addNewPropertyForPropertyName:newPropertyName]) {
+        if (newPropertyName != nil && [self addNewPropertyForPropertyName:newPropertyName] == nil) {
             NSBeep();
             return;
         }
