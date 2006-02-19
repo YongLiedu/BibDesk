@@ -1,12 +1,14 @@
 {
     IBClasses = (
         {
-            ACTIONS = {addContributor = id; }; 
+            ACTIONS = {addContributor = id; addPublication = id; removePublications = id; }; 
             CLASS = BDSKPublicationTableDisplayController; 
             LANGUAGE = ObjC; 
             OUTLETS = {
                 contributorsArrayController = NSArrayController; 
                 contributorsTableView = NSTableView; 
+                keyValuePairsController = NSArrayController; 
+                keyValuePairsTableView = NSTableView; 
                 notesArrayController = NSArrayController; 
                 notesTableView = NSTableView; 
                 tagsArrayController = NSArrayController; 

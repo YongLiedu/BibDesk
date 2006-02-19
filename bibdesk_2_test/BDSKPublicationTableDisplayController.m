@@ -18,6 +18,7 @@
 	[contributorsArrayController release];
 	[tagsArrayController release];
 	[notesArrayController release];
+	[keyValuePairsController release];
     [super dealloc];
 }
 

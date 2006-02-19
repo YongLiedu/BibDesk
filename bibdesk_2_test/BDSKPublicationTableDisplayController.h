@@ -14,9 +14,11 @@
     IBOutlet NSArrayController *contributorsArrayController;
     IBOutlet NSArrayController *tagsArrayController;
     IBOutlet NSArrayController *notesArrayController;
+    IBOutlet NSArrayController *keyValuePairsController;
 	IBOutlet NSTableView *contributorsTableView;
 	IBOutlet NSTableView *tagsTableView;
 	IBOutlet NSTableView *notesTableView;
+	IBOutlet NSTableView *keyValuePairsTableView;
 }
 
 - (IBAction)addPublication:(id)sender;
