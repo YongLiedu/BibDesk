@@ -5,6 +5,7 @@
 //  Copyright Michael McCracken 2005 . All rights reserved.
 
 #import "BDSKDocument.h"
+#import "BDSKBibTeXParser.h"
 
 NSString *BDSKPublicationPboardType = @"BDSKPublicationPboardType";
 NSString *BDSKPersonPboardType = @"BDSKPersonPboardType";
@@ -179,6 +180,38 @@ NSString *BDSKTagPboardType = @"BDSKTagPboardType";
 - (void)windowControllerDidLoadNib:(NSWindowController *)windowController{
     [super windowControllerDidLoadNib:windowController];
     // user interface preparation code
+}
+
+- (BOOL)configurePersistentStoreCoordinatorForURL:(NSURL *)url ofType:(NSString *)fileType error:(NSError **)error {
+    NSPersistentStoreCoordinator *coordinator = [[self managedObjectContext] persistentStoreCoordinator];
+    NSString *storeType = [self persistentStoreTypeForFileType:fileType];
+    NSError *outError = nil;
+    
+    [coordinator addPersistentStoreWithType:storeType configuration:@"PersistentConfiguration" URL:url options:nil error:&outError];
+    
+    if (outError != nil) {
+        if (error != NULL) 
+            *error = outError; 
+        return NO;
+    }
+    return YES;
+}
+
+- (BOOL)readFromURL:(NSURL *)absoluteURL ofType:(NSString *)typeName error:(NSError **)outError {
+    if ([typeName isEqualToString:@"BibTeX database"]) {
+        NSData *data = [NSData dataWithContentsOfURL:absoluteURL];
+        BOOL hadProblems = NO;
+        
+        [BDSKBibTeXParser itemsFromData:data error:&hadProblems frontMatter:nil filePath:[self fileName] document:self];
+        
+        if (hadProblems == YES) {
+            // TODO: set outError, or better have the parser set it
+            return NO;
+        }
+        return YES;
+    } else {
+        return [super readFromURL:absoluteURL ofType:typeName error:outError];
+    }
 }
 
 #pragma mark Default library groups
