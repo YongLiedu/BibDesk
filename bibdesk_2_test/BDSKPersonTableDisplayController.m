@@ -13,13 +13,7 @@
 
 @implementation BDSKPersonTableDisplayController
 
-- (void)dealloc{
-	[publicationsArrayController release];
-	[tagsArrayController release];
-    [super dealloc];
-}
-
-- (NSString *)viewNibName{
+- (NSString *)windowNibName{
     return @"BDSKPersonTableDisplayController";
 }
 

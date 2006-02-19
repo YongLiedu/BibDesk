@@ -1,10 +1,17 @@
 {
     IBClasses = (
         {
-            ACTIONS = {addPublication = id; }; 
+            ACTIONS = {
+                addInstitution = id; 
+                addPerson = id; 
+                addPublication = id; 
+                removePersons = id; 
+            }; 
             CLASS = BDSKPersonTableDisplayController; 
             LANGUAGE = ObjC; 
             OUTLETS = {
+                institutionsArrayController = NSArrayController; 
+                institutionsTableView = NSTableView; 
                 publicationsArrayController = NSArrayController; 
                 publicationsTableView = NSTableView; 
                 tagsArrayController = NSArrayController; 
@@ -19,10 +26,9 @@
                 itemsArrayController = NSArrayController; 
                 itemsTableView = NSTableView; 
                 mainView = NSView; 
-                ownerController = NSObjectController; 
                 selectionDetailsBox = ImageBackgroundBox; 
             }; 
-            SUPERCLASS = NSObject; 
+            SUPERCLASS = NSWindowController; 
         }, 
         {CLASS = FirstResponder; LANGUAGE = ObjC; SUPERCLASS = NSObject; }, 
         {CLASS = ImageBackgroundBox; LANGUAGE = ObjC; SUPERCLASS = NSBox; }

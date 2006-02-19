@@ -47,7 +47,6 @@
 }
 
 - (void)dealloc{
-    [displayControllers makeObjectsPerformSelector:@selector(setupBinding:) withObject:nil];
     [displayControllers release];
     [currentDisplayControllerForEntity release];        
     [displayControllersInfoDict release];
@@ -153,7 +152,6 @@
         Class controllerClass = NSClassFromString(displayControllerClassName);
         BDSKTableDisplayController *controllerObject = [[controllerClass alloc] init];
         [controllerObject setDocument:[self document]];
-        [controllerObject setupBinding:self];
         [displayControllers addObject:controllerObject];
 
         NSDictionary *infoDict = [displayControllersInfoDict objectForKey:displayControllerClassName];

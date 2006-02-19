@@ -13,11 +13,7 @@
 
 @implementation BDSKNoteTableDisplayController
 
-- (void)dealloc{
-    [super dealloc];
-}
-
-- (NSString *)viewNibName{
+- (NSString *)windowNibName{
     return @"BDSKNoteTableDisplayController";
 }
 

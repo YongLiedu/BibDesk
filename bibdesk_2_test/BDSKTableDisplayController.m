@@ -18,42 +18,30 @@
 
 - (id)init{
 	if (self = [super init]) {
-		mainView = nil;
 		document = nil;
-		[NSBundle loadNibNamed:[self viewNibName] owner:self];
 	}
 	return self;
 }
 
 - (void)dealloc{
-	[itemsArrayController release];
 	[mainView release];
     [super dealloc];
 }
 
-- (void)setupBinding:(id)controller{
-    // fix for binding-to-nib-owner-bug
-    if (controller != nil) {
-        [ownerController setContent:self];
-    } else {
-        [ownerController setContent:nil];
-    }
-}
-
 - (void)awakeFromNib{
     [selectionDetailsBox setBackgroundImage:[NSImage imageNamed:@"coffeeStain"]];
+    [mainView retain];
+    [self setWindow:nil];
+}
+
+- (void)windowDidLoad {
 }
 
 - (NSView *)view{
     if(mainView == nil){
-        [NSBundle loadNibNamed:[self viewNibName] owner:self];
+        [NSBundle loadNibNamed:[self windowNibName] owner:self];
     }
     return mainView;
-}
-
-- (NSString *)viewNibName{
-	[NSException raise:@"BDSKUnimplementedException" format:@"Display controller class %@ does not implement -viewNibname.", [self class]];
-	return nil;
 }
 
 - (NSArrayController *)itemsArrayController{

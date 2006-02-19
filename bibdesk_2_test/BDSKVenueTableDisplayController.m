@@ -13,12 +13,7 @@
 
 @implementation BDSKVenueTableDisplayController
 
-- (void)dealloc{
-	[publicationsArrayController release];
-	[super dealloc];
-}
-
-- (NSString *)viewNibName{
+- (NSString *)windowNibName{
     return @"BDSKVenueTableDisplayController";
 }
 

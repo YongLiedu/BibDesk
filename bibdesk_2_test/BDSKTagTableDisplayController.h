@@ -10,6 +10,8 @@
 #import "BDSKTableDisplayController.h"
 
 @interface BDSKTagTableDisplayController : BDSKTableDisplayController {
+    IBOutlet NSArrayController *taggedItemsArrayController;
+    IBOutlet NSTableView *taggedItemsTableView;
 }
 
 - (IBAction)addTag:(id)sender;

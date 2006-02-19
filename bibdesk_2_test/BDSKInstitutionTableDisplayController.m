@@ -14,13 +14,10 @@
 @implementation BDSKInstitutionTableDisplayController
 
 - (void)dealloc{
-	[personsArrayController release];
-	[publicationsArrayController release];
-	[tagsArrayController release];
     [super dealloc];
 }
 
-- (NSString *)viewNibName{
+- (NSString *)windowNibName{
     return @"BDSKInstitutionTableDisplayController";
 }
 
