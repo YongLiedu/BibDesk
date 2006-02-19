@@ -72,6 +72,22 @@
 			<key>NSPersistentStoreTypeKey</key>
 			<string>SQLite</string>
 		</dict>
+		<dict>
+			<key>CFBundleTypeExtensions</key>
+			<array>
+				<string>bib</string>
+			</array>
+			<key>CFBundleTypeName</key>
+			<string>BibTeX database</string>
+			<key>CFBundleTypeRole</key>
+			<string>Viewer</string>
+			<key>LSTypeIsPackage</key>
+			<false/>
+			<key>NSDocumentClass</key>
+			<string>BDSKDocument</string>
+			<key>NSPersistentStoreTypeKey</key>
+			<string>InMemory</string>
+		</dict>
 	</array>
 	<key>CFBundleExecutable</key>
 	<string>bd2xtest</string>
