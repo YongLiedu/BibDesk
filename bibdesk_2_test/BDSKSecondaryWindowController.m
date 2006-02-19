@@ -17,6 +17,10 @@
 
 @implementation BDSKSecondaryWindowController
 
++ (void)initialize{
+   [self setKeys:[NSArray arrayWithObject:@"document"] triggerChangeNotificationsForDependentKey:@"managedObjectContext"];
+}
+
 - (id)initWithWindowNibName:(NSString *)windowNibName{
     if (self = [super initWithWindowNibName:windowNibName]){
         displayControllersInfoDict = [[NSDictionary alloc] initWithContentsOfFile:[[NSBundle mainBundle] pathForResource:@"DisplayControllers" ofType:@"plist"]];
@@ -56,7 +60,6 @@
 
 - (void)windowWillClose:(NSNotification *)notification{
     [self setDisplayController:nil]; // needed to remove the bindings in the displayController
-	[[self document] removeWindowController:self];
 }
 
 - (NSString *)windowTitleForDocumentDisplayName:(NSString *)displayName{
@@ -68,6 +71,10 @@
 }
 
 #pragma mark Accessors
+
+- (NSManagedObjectContext *)managedObjectContext {
+	return [[self document] managedObjectContext];
+}
 
 - (BDSKGroup *)sourceGroup{
 	return sourceGroup;
@@ -211,7 +218,7 @@
         return;
     }
     
-    NSManagedObjectContext *context = [[self document] managedObjectContext];
+    NSManagedObjectContext *context = [self managedObjectContext];
     NSManagedObject *newItem = [NSEntityDescription insertNewObjectForEntityForName:entityName
                                                              inManagedObjectContext:context];
     

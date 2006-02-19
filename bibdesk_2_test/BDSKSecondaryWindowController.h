@@ -23,6 +23,8 @@
     IBOutlet NSSearchField *searchField;
 }
 
+- (NSManagedObjectContext *)managedObjectContext;
+
 - (BDSKGroup *)sourceGroup;
 - (void)setSourceGroup:(BDSKGroup *)newSourceGroup;
 

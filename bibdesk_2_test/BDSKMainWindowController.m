@@ -96,7 +96,7 @@
     NSString *entityName = [selectedGroup valueForKey:@"itemEntityName"];
     BOOL canAddChildren = ([selectedGroup isSmart] == NO && [selectedGroup isCategory] == NO);
     
-    NSManagedObjectContext *context = [[self document] managedObjectContext];
+    NSManagedObjectContext *context = [self managedObjectContext];
     id newGroup = [NSEntityDescription insertNewObjectForEntityForName:StaticGroupEntityName
                                                 inManagedObjectContext:context];
     
@@ -119,7 +119,7 @@
     NSManagedObject *selectedGroup = [self sourceGroup];
     NSString *entityName = [selectedGroup valueForKey:@"itemEntityName"];
     
-    NSManagedObjectContext *context = [[self document] managedObjectContext];
+    NSManagedObjectContext *context = [self managedObjectContext];
     id newSmartGroup = [NSEntityDescription insertNewObjectForEntityForName:SmartGroupEntityName
                                                      inManagedObjectContext:context];
     
@@ -141,7 +141,7 @@
     NSString *entityName = [selectedGroup valueForKey:@"itemEntityName"];
     NSString *propertyName = [selectedGroup valueForKey:@"itemPropertyName"];
     NSPredicate *predicate = [selectedGroup valueForKey:@"predicate"];
-    [editor setManagedObjectContext:[[self document] managedObjectContext]];
+    [editor setManagedObjectContext:[self managedObjectContext]];
     [editor setEntityName:entityName];
     [editor setPropertyName:propertyName];
     [editor setPredicate:predicate];
@@ -263,7 +263,7 @@
     
 	NSArray *draggedURIs = [NSUnarchiver unarchiveObjectWithData:[pboard dataForType:pboardType]];
 	NSEnumerator *uriE = [draggedURIs objectEnumerator];
-	NSManagedObjectContext *moc = [[self document] managedObjectContext];
+	NSManagedObjectContext *moc = [self managedObjectContext];
 	NSURL *moURI;
 	NSMutableSet *items = [groupItem mutableSetValueForKey:@"items"];
 	while (moURI = [uriE nextObject]) {
