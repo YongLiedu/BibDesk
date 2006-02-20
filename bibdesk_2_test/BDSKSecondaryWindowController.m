@@ -153,6 +153,7 @@
         BDSKTableDisplayController *controllerObject = [[controllerClass alloc] init];
         [controllerObject setDocument:[self document]];
         [displayControllers addObject:controllerObject];
+        [controllerObject release];
 
         NSDictionary *infoDict = [displayControllersInfoDict objectForKey:displayControllerClassName];
            
