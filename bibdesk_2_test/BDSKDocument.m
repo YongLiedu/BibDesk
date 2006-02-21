@@ -200,12 +200,12 @@ NSString *BDSKTagPboardType = @"BDSKTagPboardType";
 - (BOOL)readFromURL:(NSURL *)absoluteURL ofType:(NSString *)typeName error:(NSError **)outError {
     if ([typeName isEqualToString:@"BibTeX database"]) {
         NSData *data = [NSData dataWithContentsOfURL:absoluteURL];
-        BOOL hadProblems = NO;
+        NSError *error = nil;
         
-        [BDSKBibTeXParser itemsFromData:data error:&hadProblems frontMatter:nil filePath:[self fileName] document:self];
+        [BDSKBibTeXParser itemsFromData:data error:&error frontMatter:nil filePath:[self fileName] document:self];
         
-        if (hadProblems == YES) {
-            // TODO: set outError, or better have the parser set it
+        if (error) {
+            if (outError) *outError = error;
             return NO;
         }
         return YES;

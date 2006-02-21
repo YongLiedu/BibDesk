@@ -14,8 +14,8 @@
 @interface BDSKBibTeXParser : NSObject {
 }
 
-+ (NSSet *)itemsFromData:(NSData *)data error:(BOOL *)hadProblems document:(BDSKDocument *)document;
-+ (NSSet *)itemsFromData:(NSData *)data error:(BOOL *)hadProblems frontMatter:(NSMutableString *)frontMatter filePath:(NSString *)filePath document:(BDSKDocument *)document;
++ (NSSet *)itemsFromData:(NSData *)data error:(NSError **)outError document:(BDSKDocument *)document;
++ (NSSet *)itemsFromData:(NSData *)data error:(NSError **)outError frontMatter:(NSMutableString *)frontMatter filePath:(NSString *)filePath document:(BDSKDocument *)document;
 + (NSArray *)personNamesFromBibTeXString:(NSString *)aString;
 + (NSDictionary *)splitPersonName:(NSString *)newName;
 

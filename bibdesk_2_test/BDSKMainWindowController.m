@@ -297,9 +297,9 @@
 		return;
 
     NSData *data = [NSData dataWithContentsOfFile:path];
-    BOOL hadProblems = NO;
+    NSError *error = nil;
     
-    [BDSKBibTeXParser itemsFromData:data error:&hadProblems document:(BDSKDocument *)[self document]];
+    [BDSKBibTeXParser itemsFromData:data error:&error document:(BDSKDocument *)[self document]];
 }
 
 // TODO: implementation
