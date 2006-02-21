@@ -14,10 +14,6 @@
 
 - (void)commonAwake {
     [[NSNotificationCenter defaultCenter] addObserver:self 
-                                             selector:@selector(managedObjectContextObjectsDidChange:) 
-                                                 name:NSManagedObjectContextObjectsDidChangeNotification 
-                                               object:[self managedObjectContext]];        
-    [[NSNotificationCenter defaultCenter] addObserver:self 
                                              selector:@selector(replacePerson:) 
                                                  name:@"BDSKPersonWasReplacedNotification" 
                                                object:nil];        
@@ -35,9 +31,6 @@
 
 - (void)didTurnIntoFault {
     [[NSNotificationCenter defaultCenter] removeObserver:self 
-                                                    name:NSManagedObjectContextObjectsDidChangeNotification 
-                                                  object:[self managedObjectContext]];
-    [[NSNotificationCenter defaultCenter] removeObserver:self 
                                                     name:@"BDSKPersonWasReplacedNotification" 
                                                   object:nil];
 
@@ -45,28 +38,6 @@
     cachedIcon = nil;
     
     [super didTurnIntoFault];
-}
-
-- (void)managedObjectContextObjectsDidChange:(NSNotification *)notification {
-    if ([self isSmart])
-        return;
-    
-	NSEnumerator *enumerator;
-	id object;
-	BOOL refresh = NO;
-    
-	NSSet *deleted = [[notification userInfo] objectForKey:NSDeletedObjectsKey];
-    NSMutableSet *items = [self mutableSetValueForKey:@"items"];
-    
-	enumerator = [deleted objectEnumerator];	
-	while ((refresh == NO) && (object = [enumerator nextObject])) {
-		if ([items containsObject:object]) {
-			refresh = YES;	
-		}
-	}
-    if (refresh) {
-		[items minusSet:deleted];
-    }
 }
 
 - (void)replacePerson:(NSNotification *)notification {

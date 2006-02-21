@@ -18,7 +18,6 @@
 - (void)removeItemsInSelfOrChildrenObject:(id)obj;
 
 - (void)commonAwake;
-- (void)managedObjectContextObjectsDidChange:(NSNotification *)notification;
 - (void)replacePerson:(NSNotification *)notification;
 
 @end
