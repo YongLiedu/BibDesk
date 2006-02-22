@@ -187,6 +187,14 @@
     id selectedGroup = [self sourceGroup];
     if ([selectedGroup canEdit] && [selectedGroup isSmart]) {
         [self editSmartGroup:sender];
+    } else {
+        NSString *entityName = [selectedGroup valueForKey:@"itemEntityName"];
+        NSAlert *alert = [[[NSAlert alloc] init] autorelease];
+        [alert addButtonWithTitle:NSLocalizedString(@"OK", @"OK")];
+        [alert setAlertStyle:NSInformationalAlertStyle];
+        [alert setMessageText:([selectedGroup isSmart]) ? NSLocalizedString(@"Library", @"Library") : NSLocalizedString(@"Group", @"Group")];
+        [alert setInformativeText:[NSString stringWithFormat:NSLocalizedString(@"This group contains %@ items.", @""), entityName]];
+        [alert beginSheetModalForWindow:[self window] modalDelegate:nil didEndSelector:NULL contextInfo:NULL];
     }
 }
 
