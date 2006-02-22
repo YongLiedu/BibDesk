@@ -12,6 +12,13 @@
 
 @implementation BDSKStaticGroup 
 
++ (void)initialize {
+    // we need to call super's implementation, even though the docs say not to, because otherwise we loose dependent keys
+    [super initialize]; 
+    [self setKeys:[NSArray arrayWithObjects:@"children", nil]
+        triggerChangeNotificationsForDependentKey:@"isLeaf"];
+}
+
 - (void)commonAwake {
     [[NSNotificationCenter defaultCenter] addObserver:self 
                                              selector:@selector(replacePerson:) 

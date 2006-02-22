@@ -19,6 +19,8 @@
         triggerChangeNotificationsForDependentKey:@"fetchRequest"];
     [self setKeys:[NSArray arrayWithObjects:@"fetchRequest", nil]
         triggerChangeNotificationsForDependentKey:@"items"];
+    [self setKeys:[NSArray arrayWithObjects:@"itemPropertyName", nil]
+        triggerChangeNotificationsForDependentKey:@"isLeaf"];
 }
 
 - (id)initWithEntity:(NSEntityDescription*)entity insertIntoManagedObjectContext:(NSManagedObjectContext*)context{
@@ -276,14 +278,14 @@
 - (NSSet *)items {
     if (items == nil)  {
         BDSKGroup *parent = [self valueForKey:@"parent"];
-        if (parent) {
+        if (parent == nil) {
             NSError *error = nil;
             NSArray *results = nil;
             @try {  results = [[self managedObjectContext] executeFetchRequest:[self fetchRequest] error:&error];  }
             @catch ( NSException *e ) {  /* no-op */ }
             items = ( error != nil || results == nil) ? [[NSSet alloc] init] : [[NSSet alloc] initWithArray:results];
         } else {
-            NSMutableArray *results = [[[parent valueForKey:@"items"] allObjects] mutableCopy];
+            NSMutableArray *results = [[[parent valueForKey:@"itemsInSelfOrChildren"] allObjects] mutableCopy];
             NSString *entityName = [self itemEntityName];
             NSPredicate *predicate = [self predicate];
             if (entityName && predicate) {
