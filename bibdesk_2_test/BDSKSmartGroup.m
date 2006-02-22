@@ -23,6 +23,7 @@
 
 - (id)initWithEntity:(NSEntityDescription*)entity insertIntoManagedObjectContext:(NSManagedObjectContext*)context{
 	if (self = [super initWithEntity:entity insertIntoManagedObjectContext:context]) {
+        [self addObserver:self forKeyPath:@"parent" options:0 context:NULL];
         [self addObserver:self forKeyPath:@"itemPropertyName" options:0 context:NULL];
         [self addObserver:self forKeyPath:@"itemEntityName" options:0 context:NULL];
         [self addObserver:self forKeyPath:@"fetchRequest" options:0 context:NULL];
@@ -31,6 +32,7 @@
 }
 
 - (void)dealloc{
+	[self removeObserver:self forKeyPath:@"parent"];
 	[self removeObserver:self forKeyPath:@"itemPropertyName"];
 	[self removeObserver:self forKeyPath:@"itemEntityName"];
     [self removeObserver:self forKeyPath:@"fetchRequest"];
@@ -151,12 +153,13 @@
 	
     // TODO: can depend on other entities through relationships
     NSEntityDescription *entity = [NSEntityDescription entityForName:[self itemEntityName] inManagedObjectContext:[self managedObjectContext]];
-	NSEnumerator *enumerator = [modifiedObjects objectEnumerator];	
+	BDSKGroup *parent = [self valueForKey:@"parent"];
+    NSEnumerator *enumerator = [modifiedObjects objectEnumerator];	
 	id object;
 	BOOL refresh = NO;
 	
 	while (object = [enumerator nextObject]) {
-		if ([object entity] == entity) {
+		if ([object entity] == entity || object == parent) {
 			refresh = YES;
             break;
 		}
@@ -272,11 +275,25 @@
 
 - (NSSet *)items {
     if (items == nil)  {
-        NSError *error = nil;
-        NSArray *results = nil;
-        @try {  results = [[self managedObjectContext] executeFetchRequest:[self fetchRequest] error:&error];  }
-        @catch ( NSException *e ) {  /* no-op */ }
-        items = ( error != nil || results == nil) ? [[NSSet alloc] init] : [[NSSet alloc] initWithArray:results];
+        BDSKGroup *parent = [self valueForKey:@"parent"];
+        if (parent) {
+            NSError *error = nil;
+            NSArray *results = nil;
+            @try {  results = [[self managedObjectContext] executeFetchRequest:[self fetchRequest] error:&error];  }
+            @catch ( NSException *e ) {  /* no-op */ }
+            items = ( error != nil || results == nil) ? [[NSSet alloc] init] : [[NSSet alloc] initWithArray:results];
+        } else {
+            NSMutableArray *results = [[[parent valueForKey:@"items"] allObjects] mutableCopy];
+            NSString *entityName = [self itemEntityName];
+            NSPredicate *predicate = [self predicate];
+            if (entityName && predicate) {
+                // TODO: we should also match subentities
+                NSPredicate *entityPredicate = [NSPredicate predicateWithFormat:@"entity.name == %@", entityName];
+                [results filterUsingPredicate:[NSCompoundPredicate andPredicateWithSubpredicates:[NSArray arrayWithObjects:entityPredicate, predicate, nil]]];
+            }
+            items = [[NSSet alloc] initWithArray:results];
+            [results release];
+        }
     }
     return items;
 }
@@ -342,7 +359,7 @@
 - (void)observeValueForKeyPath:(NSString *)keyPath ofObject:(id)object change:(NSDictionary *)change context:(void *)context {
     if ([keyPath isEqualToString:@"itemEntityName"] || [keyPath isEqualToString:@"itemPropertyName"]) {
         [self refreshMetaData];
-    } else if ([keyPath isEqualToString:@"fetchRequest"]) {
+    } else if ([keyPath isEqualToString:@"fetchRequest"] || [keyPath isEqualToString:@"parent"]) {
         [self refreshItems];
         [self refreshChildren];
     }

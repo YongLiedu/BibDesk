@@ -116,17 +116,25 @@
 }
 
 - (IBAction)addNewSmartGroup:(id)sender{
-    NSManagedObject *selectedGroup = [self sourceGroup];
+    BDSKGroup *selectedGroup = [self sourceGroup];
     NSString *entityName = [selectedGroup valueForKey:@"itemEntityName"];
+    BOOL canAddChildren = ([selectedGroup isSmart] == NO && [selectedGroup isCategory] == NO);
     
     NSManagedObjectContext *context = [self managedObjectContext];
     id newSmartGroup = [NSEntityDescription insertNewObjectForEntityForName:SmartGroupEntityName
                                                      inManagedObjectContext:context];
     
-    // we always add smart groups as root, as for now they don't take their items from the parent
     [newSmartGroup setValue:entityName forKey:@"itemEntityName"];
-    [newSmartGroup setValue:[NSNumber numberWithBool:YES] forKey:@"isRoot"];
     [newSmartGroup setValue:@"Untitled Smart Group" forKey:@"name"];
+    
+    if (canAddChildren == YES) {
+        // for non-smart groups we add the new groups as a child
+        [newSmartGroup setValue:[NSNumber numberWithBool:NO] forKey:@"isRoot"];
+        [[selectedGroup mutableSetValueForKey:@"children"] addObject:newSmartGroup];
+    } else {
+        // for smart groups (including auto groups) we add the new groups as root
+        [newSmartGroup setValue:[NSNumber numberWithBool:YES] forKey:@"isRoot"];
+    }
     
     [context processPendingChanges];
     // TODO: select the new group and edit. How to select?
