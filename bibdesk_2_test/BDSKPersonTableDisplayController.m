@@ -214,7 +214,6 @@
 			NSManagedObject *mo;
 			NSEnumerator *relationshipE;
             NSMutableArray *removedPersons = [[NSMutableArray alloc] initWithCapacity:[draggedURIs count]];
-            NSMutableArray *insertedPersons = [[NSMutableArray alloc] initWithCapacity:[draggedURIs count]];
 			
             while (moURI = [uriE nextObject]) {
 				mo = [moc objectWithID:[[moc persistentStoreCoordinator] managedObjectIDForURIRepresentation:moURI]];
@@ -246,14 +245,10 @@
 				}
 				[[person mutableSetValueForKey:@"notes"] unionSet:[mo valueForKey:@"notes"]];
 				[[person mutableSetValueForKey:@"tags"] unionSet:[mo valueForKey:@"tags"]];
+				[[person mutableSetValueForKey:@"containingGroups"] unionSet:[mo valueForKey:@"containingGroups"]];
                 [removedPersons addObject:mo];
-                [insertedPersons addObject:person];
 			}
-            NSDictionary *userInfo = [NSDictionary dictionaryWithObjectsAndKeys:removedPersons, @"removedPersons", insertedPersons, @"insertedPersons", nil];
-            [[NSNotificationCenter defaultCenter] postNotificationName:@"BDSKPersonWasReplacedNotification"
-                                                                object:self
-                                                              userInfo:userInfo];
-            [itemsArrayController removeObjects:removedPersons];
+            [self removePersons:removedPersons];
             [removedPersons release];
             
 			return YES;

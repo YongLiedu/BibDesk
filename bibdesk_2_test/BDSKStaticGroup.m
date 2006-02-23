@@ -19,54 +19,11 @@
         triggerChangeNotificationsForDependentKey:@"isLeaf"];
 }
 
-- (void)commonAwake {
-    [[NSNotificationCenter defaultCenter] addObserver:self 
-                                             selector:@selector(replacePerson:) 
-                                                 name:@"BDSKPersonWasReplacedNotification" 
-                                               object:nil];        
-}
-
-- (void)awakeFromInsert  {
-    [super awakeFromInsert];
-    [self commonAwake];
-}
-
-- (void)awakeFromFetch  {
-    [super awakeFromFetch];
-    [self commonAwake];
-}
-
 - (void)didTurnIntoFault {
-    [[NSNotificationCenter defaultCenter] removeObserver:self 
-                                                    name:@"BDSKPersonWasReplacedNotification" 
-                                                  object:nil];
-
     [cachedIcon release];
     cachedIcon = nil;
     
     [super didTurnIntoFault];
-}
-
-- (void)replacePerson:(NSNotification *)notification {
-    NSString *entityName = [self itemEntityName];
-    if ([entityName isEqualToString:PersonEntityName] == NO)
-        return;
-    
-    NSDictionary *userInfo = [notification userInfo];
-    NSEnumerator *removedE = [[userInfo objectForKey:@"removedPersons"] objectEnumerator];
-    NSEnumerator *insertedE = [[userInfo objectForKey:@"insertedPersons"] objectEnumerator];
-    NSManagedObject *removedPerson;
-    NSManagedObject *insertedPerson;
-    NSMutableSet *items = [self mutableSetValueForKey:@"items"];
-    
-    while ((removedPerson = [removedE nextObject]) && (insertedPerson = [insertedE nextObject])) {
-        if ([removedPerson managedObjectContext] != [self managedObjectContext]) 
-            continue;
-        if ([items containsObject:removedPerson] == NO)
-            continue;
-        [items removeObject:removedPerson];
-        [items addObject:insertedPerson];
-    }
 }
 
 #pragma mark Accessors

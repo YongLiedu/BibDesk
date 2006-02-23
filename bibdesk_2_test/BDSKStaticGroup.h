@@ -17,7 +17,4 @@
 - (void)addItemsInSelfOrChildrenObject:(id)obj;
 - (void)removeItemsInSelfOrChildrenObject:(id)obj;
 
-- (void)commonAwake;
-- (void)replacePerson:(NSNotification *)notification;
-
 @end
