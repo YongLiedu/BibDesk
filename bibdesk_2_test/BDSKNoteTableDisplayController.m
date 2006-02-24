@@ -38,6 +38,8 @@
 	while (note = [selEnum nextObject]) 
 		[moc deleteObject:note];
     [moc processPendingChanges];
+    // dirty fix for CoreData bug, which registers an extra change when objects are deleted
+    [[self document] updateChangeCount:NSChangeUndone];
 }
 
 #pragma mark Filter predicate binding

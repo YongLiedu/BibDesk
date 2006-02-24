@@ -24,5 +24,7 @@
 - (IBAction)addPublication:(id)sender;
 - (IBAction)removePublications:(NSArray *)selectedItems;
 - (IBAction)addContributor:(id)sender;
+- (IBAction)removeContributors:(NSArray *)selectedContributors;
+- (IBAction)removeNotes:(NSArray *)selectedNotes;
 
 @end

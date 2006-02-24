@@ -46,6 +46,8 @@
 	while (institution = [selEnum nextObject]) 
 		[moc deleteObject:institution];
     [moc processPendingChanges];
+    // dirty fix for CoreData bug, which registers an extra change when objects are deleted
+    [[self document] updateChangeCount:NSChangeUndone];
 }
 
 - (IBAction)addPerson:(id)sender {
@@ -57,6 +59,12 @@
 	[personsArrayController addObject:relationship];
 }
 
+- (IBAction)removePersons:(NSArray *)selectedPersons {
+	[personsArrayController removeObjects:selectedPersons];
+    // dirty fix for CoreData bug, which registers an extra change when objects are deleted
+    [[self document] updateChangeCount:NSChangeUndone];
+}
+
 - (IBAction)addPublication:(id)sender{
 	NSManagedObjectContext *moc = [self managedObjectContext];
 	NSManagedObject *publication = [NSEntityDescription insertNewObjectForEntityForName:PublicationEntityName inManagedObjectContext:moc];
@@ -65,6 +73,12 @@
 	[relationship setValue:publication forKey:@"publication"];
 	[relationship setValue:@"institution" forKey:@"relationshipType"];
 	[publicationsArrayController addObject:relationship];
+}
+
+- (IBAction)removePublications:(NSArray *)selectedPublications {
+	[publicationsArrayController removeObjects:selectedPublications];
+    // dirty fix for CoreData bug, which registers an extra change when objects are deleted
+    [[self document] updateChangeCount:NSChangeUndone];
 }
 
 #pragma mark Filter predicate binding

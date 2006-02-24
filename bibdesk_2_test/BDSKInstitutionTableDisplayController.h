@@ -21,6 +21,8 @@
 - (IBAction)addInstitution:(id)sender;
 - (IBAction)removeInstitutions:(NSArray *)selectedItems;
 - (IBAction)addPerson:(id)sender;
+- (IBAction)removePersons:(NSArray *)selectedPersons;
 - (IBAction)addPublication:(id)sender;
+- (IBAction)removePublications:(NSArray *)selectedPublications;
 
 @end

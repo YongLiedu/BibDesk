@@ -40,6 +40,8 @@
 	while (venue = [selEnum nextObject]) 
 		[moc deleteObject:venue];
     [moc processPendingChanges];
+    // dirty fix for CoreData bug, which registers an extra change when objects are deleted
+    [[self document] updateChangeCount:NSChangeUndone];
 }
 
 #pragma mark NSTableView DataSource protocol
