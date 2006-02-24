@@ -56,6 +56,11 @@
     return nil;
 }
 
+- (BOOL)deletesObjectsOnRemove {
+    // should be implemented by concrete subclass
+    return NO;
+}
+
 - (void)windowDidLoad {
     [super windowDidLoad];
     [[self window] setTitle:[self windowTitle]];
@@ -72,40 +77,23 @@
     [self setMainWindow:nil];
 }
 
-- (void)setMainWindow:(NSWindow *)mainWindow {
-    NSWindowController *controller = [mainWindow windowController];
+- (NSWindowController *)observedWindowController {
+    return observedWindowController;
+}
 
-    if (controller && [controller isKindOfClass:[BDSKSecondaryWindowController class]]) {
-        if (controller != observedWindowController) {
-            if (observedWindowController != nil)
-                [self unbindWindowController:observedWindowController];
-            [observedWindowController release];
-            observedWindowController = [controller retain];
-            [self didChangeValueForKey:@"managedObjectContext"];
-            [self bindWindowController:observedWindowController];
-        }
-    } else if (controller == nil && observedWindowController != nil) {
-        [self unbindWindowController:observedWindowController];
-        [self willChangeValueForKey:@"managedObjectContext"];
+- (void)setObservedWindowController:(NSWindowController *)controller {
+    if (controller != observedWindowController) {
         [observedWindowController release];
-        observedWindowController = nil;
-        [self didChangeValueForKey:@"managedObjectContext"];
+        observedWindowController = [controller retain];
     }
 }
 
-- (NSManagedObjectContext *)managedObjectContext {
-    return [[observedWindowController document] managedObjectContext];
-}
+- (void)setMainWindow:(NSWindow *)mainWindow {
+    NSWindowController *controller = [mainWindow windowController];
 
-- (void)bindWindowController:(NSWindowController *)controller{
-    NSDictionary *options = [NSDictionary dictionaryWithObjectsAndKeys:[NSNumber numberWithBool:NO], NSRaisesForNotApplicableKeysBindingOption, [NSNumber numberWithBool:YES], NSConditionallySetsEnabledBindingOption, nil];
-    NSString *keyPath = [NSString stringWithFormat:@"displayController.itemsArrayController.selection.%@", [self keyPathForBinding]];
-    [itemsArrayController bind:@"contentSet" toObject:controller withKeyPath:keyPath options:options];
-    [itemsArrayController rearrangeObjects];
-}
-
-- (void)unbindWindowController:(NSWindowController *)controller{
-	[itemsArrayController unbind:@"contentSet"];
+    if ([controller isKindOfClass:[BDSKSecondaryWindowController class]] == NO) 
+        controller = nil;
+    [self setObservedWindowController:controller];
 }
 
 @end
@@ -115,9 +103,13 @@
 
 - (NSString *)windowNibName { return @"BDSKNoteWindow"; }
 
-- (NSString *)windowTitle { return @"Notes"; }
+- (NSString *)windowTitle { return NSLocalizedString(@"Notes", @"Notes window title"); }
 
-- (NSString *)keyPathForBinding { return @"notes"; }
+- (void)removeNotes:(NSArray *)selectedItems {
+    [itemsArrayController removeObjects:selectedItems];
+    // dirty fix for CoreData bug, which registers an extra change when objects are deleted
+    [[observedWindowController document] updateChangeCount:NSChangeUndone];
+}
 
 @end
 
@@ -126,9 +118,7 @@
 
 - (NSString *)windowNibName { return @"BDSKTagWindow"; }
 
-- (NSString *)windowTitle { return @"Tags"; }
-
-- (NSString *)keyPathForBinding { return @"tags"; }
+- (NSString *)windowTitle { return NSLocalizedString(@"Tags", @"Tags window title"); }
 
 - (void)selectItem:(NSArray *)selectedItems {
     id item = [selectedItems lastObject];

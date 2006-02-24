@@ -18,19 +18,19 @@
 
 - (NSString *)windowNibName;
 - (NSString *)windowTitle;
-- (NSString *)keyPathForBinding;
 
 - (void)setMainWindow:(NSWindow *)mainWindow;
-
-- (NSManagedObjectContext *)managedObjectContext;
-
-- (void)bindWindowController:(NSWindowController *)controller;
-- (void)unbindWindowController:(NSWindowController *)controller;
+- (NSWindowController *)observedWindowController;
+- (void)setObservedWindowController:(NSWindowController *)controller;
 
 @end
 
 
-@interface BDSKNoteWindowController : BDSKInspectorWindowController {} @end
+@interface BDSKNoteWindowController : BDSKInspectorWindowController {} 
+
+- (void)removeNotes:(NSArray *)selectedNotes;
+
+@end
 
 
 @interface BDSKTagWindowController : BDSKInspectorWindowController {} 
