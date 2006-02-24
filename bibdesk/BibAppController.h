@@ -2,29 +2,42 @@
 
 //  Created by Michael McCracken on Sat Jan 19 2002.
 /*
-This software is Copyright (c) 2002, Michael O. McCracken
-All rights reserved.
+ This software is Copyright (c) 2002,2003,2004,2005,2006
+ Michael O. McCracken. All rights reserved.
 
-Redistribution and use in source and binary forms, with or without modification, are permitted provided that the following conditions are met:
+ Redistribution and use in source and binary forms, with or without
+ modification, are permitted provided that the following conditions
+ are met:
 
-- Redistributions of source code must retain the above copyright notice, this list of conditions and the following disclaimer.
--  Redistributions in binary form must reproduce the above copyright notice, this list of conditions and the following disclaimer in the documentation and/or other materials provided with the distribution.
--  Neither the name of Michael O. McCracken nor the names of any contributors may be used to endorse or promote products derived from this software without specific prior written permission.
+ - Redistributions of source code must retain the above copyright
+   notice, this list of conditions and the following disclaimer.
 
-THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-*/
+ - Redistributions in binary form must reproduce the above copyright
+    notice, this list of conditions and the following disclaimer in
+    the documentation and/or other materials provided with the
+    distribution.
+
+ - Neither the name of Michael O. McCracken nor the names of any
+    contributors may be used to endorse or promote products derived
+    from this software without specific prior written permission.
+
+ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+ "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+ LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+ A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+ OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+ SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+ LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+ DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+ THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+ (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ */
 
 #import <Cocoa/Cocoa.h>
 
-#import "BibPrefController.h";
-#import "BDSKFormCellFormatter.h";
-#import "BDSKShellTask.h";
-#import <OmniAppKit/OAScriptMenuItem.h>
-#import <ILCrashReporter/ILCrashReporter.h>
-#import "NSMutableArray+ThreadSafety.h"
-#import "NSMutableDictionary+ThreadSafety.h"
-#import "BDSKStringEncodingManager.h"
-
+@class OFMessageQueue;
+@class BibDocument;
 
 /*!
     @class BibAppController
@@ -36,22 +49,9 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 
 
 @interface BibAppController : NSDocumentController {
-    BOOL showingPreviewPanel;
-
-    // error-handling stuff:
-    IBOutlet NSPanel* errorPanel;
-    IBOutlet NSTableView *errorTableView;
-    NSMutableArray *errors;
-    IBOutlet NSTextView *sourceEditTextView;
-    IBOutlet NSWindow *sourceEditWindow;
-    NSString *currentFileName;
-    NSDocument *currentDocumentForErrors;
 	
     // global auto-completion dictionary:
-    NSLock *acLock;
     NSMutableDictionary *autoCompletionDict;
-    NSMutableDictionary *formatters;
-    NSCharacterSet *autocompletePunctuationCharacterSet;
 	
 	// auto generation format
 	NSArray *requiredFieldsForCiteKey;
@@ -69,32 +69,28 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
     IBOutlet NSTextView* readmeTextView;
     IBOutlet NSWindow* readmeWindow;
 	
-	IBOutlet NSMenuItem * displayMenuItem;
+	IBOutlet NSMenuItem * columnsMenuItem;
+	IBOutlet NSMenuItem * groupSortMenuItem;
 	
-	IBOutlet NSMenuItem* showHidePreviewMenuItem;
 	IBOutlet NSMenuItem* showHideCustomCiteStringsMenuItem;
-	IBOutlet NSMenuItem* showHideErrorsMenuItem;
 
+    NSLock *metadataCacheLock;
+    volatile BOOL canWriteMetadata;
+    OFMessageQueue *metadataMessageQueue;
 }
 
-/* Accessor methods for the displayMenuItem */
-- (NSMenuItem*) displayMenuItem;
+- (NSString *)temporaryBaseDirectoryCreating:(BOOL)create;
+- (NSString *)temporaryFilePath:(NSString *)fileName createDirectory:(BOOL)create;
+
+/* Accessor methods for the columnsMenuItem */
+- (NSMenuItem*) columnsMenuItem;
+/* Accessor methods for the groupSortMenuItem */
+- (NSMenuItem*) groupSortMenuItem;
 	
 - (void)updateColumnsMenu;
 
 
 #pragma mark Overridden NSDocumentController methods
-
-
-
-/*!
-    @method     newBDSKLibrary:
-    @abstract   responds to the New Library menu command in File.
-    @discussion (description)
-    @param      sender (description)
-    @result     (description)
-*/
-- (IBAction)newBDSKLibrary:(id)sender;
 
 /*!
     @method     openDocument:
@@ -119,7 +115,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
     @abstract Imports a bibtex file with a specific encoding.  Useful if there are non-ASCII characters in the file.
     @discussion
  */
-- (void)openBibTeXFile:(NSString *)filePath withEncoding:(NSStringEncoding)encoding;
+- (id)openBibTeXFile:(NSString *)filePath withEncoding:(NSStringEncoding)encoding;
 
 /*!
     @method     openRISFile:withEncoding:
@@ -128,12 +124,25 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
     @param      filePath (description)
     @param      encoding (description)
 */
-- (void)openRISFile:(NSString *)filePath withEncoding:(NSStringEncoding)encoding;
+- (id)openRISFile:(NSString *)filePath withEncoding:(NSStringEncoding)encoding;
 
+/*!
+    @method     openBibTeXFileUsingPhonyCiteKeys:withEncoding:
+    @abstract   Generates temporary cite keys in order to keep btparse from choking on files exported from Endnote or BookEnds.
+    @discussion Uses a regular expression to find and replace empty cite keys, according to a fairly limited pattern.
+                A new, untitled document is created, and a warning about the invalid temporary keys is shown after opening.
+    @param      filePath The file to open
+    @param      encoding File's character encoding
+*/
+- (id)openBibTeXFileUsingPhonyCiteKeys:(NSString *)filePath withEncoding:(NSStringEncoding)encoding;
+
+- (void)handleTableColumnsChangedNotification:(NSNotification *)notification;
 - (NSArray *)requiredFieldsForCiteKey;
 - (void)setRequiredFieldsForCiteKey:(NSArray *)newFields;
 - (NSArray *)requiredFieldsForLocalUrl;
 - (void)setRequiredFieldsForLocalUrl:(NSArray *)newFields;
+
+- (NSString *)folderPathForFilingPapersFromDocument:(BibDocument *)document;
 
 /*!
 @method addString:forCompletionEntry:
@@ -142,20 +151,6 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
     
 */
 - (void)addString:(NSString *)string forCompletionEntry:(NSString *)entry;
-/*!
-    @method     autoCompletePunctuationCharacterSet
-    @abstract   Possible separators for punctuation marks recognized for autocompletion
-    @discussion Typically comma, colon, and semicolon, at least in US English usage.
-    @result     NSCharacterSet with the currenctly recognized separator characters; retained by the sender
-*/
-- (NSCharacterSet *)autoCompletePunctuationCharacterSet;
-/*!
-    @method formatterForEntry
-    @abstract returns the singleton formatter for a particular entry
-    @discussion «discussion»
-    
-*/
-- (NSFormatter *)formatterForEntry:(NSString *)entry;
 
 /*!
     @method stringsForCompletionEntry
@@ -163,34 +158,34 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
     @discussion «discussion»
     
 */
-- (NSArray *)stringsForCompletionEntry:(NSString *)entry;
+- (NSSet *)stringsForCompletionEntry:(NSString *)entry;
 
-- (IBAction)toggleShowingErrorPanel:(id)sender;
-- (IBAction)hideErrorPanel:(id)sender;
-- (IBAction)showErrorPanel:(id)sender;
-- (void)removeErrorObjsForDocument:(NSDocument *)doc;
-- (void)handoverErrorObjsForDocument:(NSDocument *)doc;
-- (void)setDocumentForErrors:(NSDocument *)doc;
-- (void)updateErrorPanelUI;
-- (IBAction)gotoError:(id)sender;
-- (void)gotoErrorObj:(id)errObj;
-- (void)openEditWindowWithFile:(NSString *)fileName;
-- (void)openEditWindowForDocument:(NSDocument *)doc;
+- (NSRange)entry:(NSString *)entry rangeForUserCompletion:(NSRange)charRange ofString:(NSString *)fullString;
 
-- (IBAction)reopenDocument:(id)sender;
+/*!
+    @method     entry:completions:forPartialWordRange:ofString:indexOfSelectedItem:
+    @abstract   Returns an array of possible completions for the substring in charRange of fullString.
+    @discussion Used in control:textView:completions:forPartialWordRange:indexOfSelectedItem: delegate methods
+    @result     
+*/
+- (NSArray *)entry:(NSString *)entry completions:(NSArray *)words forPartialWordRange:(NSRange)charRange ofString:(NSString *)fullString indexOfSelectedItem:(int *)index;
 
+- (NSRange)rangeForUserCompletion:(NSRange)charRange forBibTeXStringString:(NSString *)fullString;
+- (NSArray *)possibleMatches:(NSDictionary *)definitions forBibTeXStringString:(NSString *)fullString partialWordRange:(NSRange)charRange indexOfBestMatch:(int *)index;
+
+- (void)checkForUpdatesInBackground;
+- (void)displayUpdateAvailableWindow:(NSString *)latestVersionNumber;
 - (IBAction)visitWebSite:(id)sender;
 - (IBAction)checkForUpdates:(id)sender;
 
 - (IBAction)showPreferencePanel:(id)sender;
-
+- (IBAction)toggleShowingErrorPanel:(id)sender;
 - (IBAction)toggleShowingPreviewPanel:(id)sender;
-- (IBAction)showPreviewPanel:(id)sender;
-- (IBAction)hidePreviewPanel:(id)sender;
-- (BOOL) isShowingPreviewPanel;
 
 - (IBAction)showReadMeFile:(id)sender;
 - (IBAction)showRelNotes:(id)sender;
+- (BOOL)isInputManagerInstalledAndCurrent:(BOOL *)current;
+- (void)showInputManagerUpdateAlert;
 
 // ----------------------------------------------------------------------------------------
 // A first attempt at a service.
@@ -210,25 +205,15 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
  You the programmer should never have to call this explicitly (There is a better way)
     @param pboard The pasteboard that we read from & write to for the service.
 */
-- (void)completeCitationFromSelection:(NSPasteboard *)pboard
-                             userData:(NSString *)userData
-                                error:(NSString **)error;
+- (void)completeCitationFromSelection:(NSPasteboard *)pboard userData:(NSString *)userData error:(NSString **)error;
 
-- (void)completeCiteKeyFromSelection:(NSPasteboard *)pboard
-                             userData:(NSString *)userData
-                                error:(NSString **)error;
+- (void)completeCiteKeyFromSelection:(NSPasteboard *)pboard userData:(NSString *)userData error:(NSString **)error;
 
-- (void)showPubWithKey:(NSPasteboard *)pboard
-			  userData:(NSString *)userData
-				 error:(NSString **)error;
+- (void)showPubWithKey:(NSPasteboard *)pboard userData:(NSString *)userData error:(NSString **)error;
 
-- (void)newRISDocumentFromSelection:(NSPasteboard *)pboard
-		       userData:(NSString *)userData
-			  error:(NSString **)error;
+- (void)newDocumentFromSelection:(NSPasteboard *)pboard userData:(NSString *)userData error:(NSString **)error;
 
-- (void)addPublicationsFromSelection:(NSPasteboard *)pboard
-						   userData:(NSString *)userData
-							  error:(NSString **)error;
+- (void)addPublicationsFromSelection:(NSPasteboard *)pboard userData:(NSString *)userData error:(NSString **)error;
 
 /*!
     @method     itemsMatchingSearchConstraints:
@@ -246,10 +231,20 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
     @result     (description)
 */
 - (NSSet *)itemsMatchingCiteKey:(NSString *)citeKeyString;
-@end
 
-@interface NSFileManager (BibDeskAdditions)
-
-- (NSString *)applicationSupportDirectory:(SInt16)domain;
+/*!
+    @method     rebuildMetadataCache:
+    @abstract   Rebuilds the metadata cache for a userInfo object which must be key-value coding compliant for the keys fileName and publications (BibDocument).
+    @discussion (comprehensive description)
+    @param      document (description)
+*/
+- (void)rebuildMetadataCache:(id)userInfo;
+/*!
+    @method     privateRebuildMetadataCache:
+    @abstract   Private method; do not use this, but use the public rebuildMetadataCache which queues this method properly.
+    @discussion (comprehensive description)
+    @param      userInfo (description)
+*/
+- (void)privateRebuildMetadataCache:(id)userInfo;
 
 @end

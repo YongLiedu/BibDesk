@@ -73,6 +73,8 @@
 		<string>{\^E}</string>
 		<key>Ë</key>
 		<string>{\"E}</string>
+		<key>Ì</key>
+		<string>{\`I}</string>
 		<key>Í</key>
 		<string>{\'I}</string>
 		<key>Î</key>
@@ -120,13 +122,13 @@
 		<key>ë</key>
 		<string>{\"e}</string>
 		<key>ì</key>
-		<string>{\`i}</string>
+		<string>{\`\i}</string>
 		<key>í</key>
-		<string>{\'i}</string>
+		<string>{\'\i}</string>
 		<key>î</key>
-		<string>{\^i}</string>
+		<string>{\^\i}</string>
 		<key>ï</key>
-		<string>{\"i}</string>
+		<string>{\"\i}</string>
 		<key>ñ</key>
 		<string>{\~n}</string>
 		<key>ò</key>
@@ -214,8 +216,6 @@
 	</dict>
 	<key>Roman to TeX Accents</key>
 	<dict>
-		<key>̊</key>
-		<string>r</string>
 		<key>̀</key>
 		<string>`</string>
 		<key>́</key>
@@ -232,6 +232,8 @@
 		<string>.</string>
 		<key>̈</key>
 		<string>"</string>
+		<key>̊</key>
+		<string>r </string>
 		<key>̋</key>
 		<string>H </string>
 		<key>̌</key>
@@ -242,6 +244,8 @@
 		<string>d </string>
 		<key>̧</key>
 		<string>c </string>
+		<key>̨</key>
+		<string>k </string>
 	</dict>
 	<key>TeX to Roman</key>
 	<dict>
@@ -259,12 +263,12 @@
 		<string>Ü</string>
 		<key>{\"Y}</key>
 		<string>Ÿ</string>
+		<key>{\"\i}</key>
+		<string>ï</string>
 		<key>{\"a}</key>
 		<string>ä</string>
 		<key>{\"e}</key>
 		<string>ë</string>
-		<key>{\"i}</key>
-		<string>ï</string>
 		<key>{\"o}</key>
 		<string>ö</string>
 		<key>{\"u}</key>
@@ -281,14 +285,14 @@
 		<string>Ó</string>
 		<key>{\'U}</key>
 		<string>Ú</string>
+		<key>{\'\i}</key>
+		<string>í</string>
 		<key>{\'a}</key>
 		<string>á</string>
 		<key>{\'c}</key>
 		<string>ć</string>
 		<key>{\'e}</key>
 		<string>é</string>
-		<key>{\'i}</key>
-		<string>í</string>
 		<key>{\'o}</key>
 		<string>ó</string>
 		<key>{\'u}</key>
@@ -327,22 +331,24 @@
 		<string>Ô</string>
 		<key>{\^U}</key>
 		<string>Û</string>
+		<key>{\^\i}</key>
+		<string>î</string>
 		<key>{\^a}</key>
 		<string>â</string>
 		<key>{\^e}</key>
 		<string>ê</string>
-		<key>{\^i}</key>
-		<string>î</string>
 		<key>{\^o}</key>
 		<string>ô</string>
 		<key>{\^u}</key>
 		<string>û</string>
+		<key>{\`I}</key>
+		<string>Ì</string>
+		<key>{\`\i}</key>
+		<string>ì</string>
 		<key>{\`a}</key>
 		<string>à</string>
 		<key>{\`e}</key>
 		<string>è</string>
-		<key>{\`i}</key>
-		<string>ì</string>
 		<key>{\`o}</key>
 		<string>ò</string>
 		<key>{\`u}</key>
@@ -440,6 +446,8 @@
 		<string>̧</string>
 		<key>d</key>
 		<string>̣</string>
+		<key>k</key>
+		<string>̨</string>
 		<key>r</key>
 		<string>̊</string>
 		<key>u</key>

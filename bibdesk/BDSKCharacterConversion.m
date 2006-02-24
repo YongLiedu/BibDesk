@@ -1,14 +1,44 @@
-//
 //  BDSKCharacterConversion.m
-//  Bibdesk
+//  BibDesk
 //
 //  Created by Christiaan Hofman on 5/4/05.
-//  Copyright 2005 __MyCompanyName__. All rights reserved.
-//
+/*
+ This software is Copyright (c) 2005,2006
+ Christiaan Hofman. All rights reserved.
+
+ Redistribution and use in source and binary forms, with or without
+ modification, are permitted provided that the following conditions
+ are met:
+
+ - Redistributions of source code must retain the above copyright
+   notice, this list of conditions and the following disclaimer.
+
+ - Redistributions in binary form must reproduce the above copyright
+    notice, this list of conditions and the following disclaimer in
+    the documentation and/or other materials provided with the
+    distribution.
+
+ - Neither the name of Christiaan Hofman nor the names of any
+    contributors may be used to endorse or promote products derived
+    from this software without specific prior written permission.
+
+ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+ "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+ LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+ A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+ OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+ SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+ LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+ DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+ THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+ (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ */
 
 #import "BDSKCharacterConversion.h"
 #import "BibAppController.h"
 #import "BDSKConverter.h"
+#import "NSFileManager_BDSKExtensions.h"
 
 static BDSKCharacterConversion *sharedConversionEditor;
 
@@ -157,7 +187,12 @@ static BDSKCharacterConversion *sharedConversionEditor;
     [self finalizeChangesIgnoringEdit:YES]; // commit edit before reloading
 	[self updateDicts];
     [tableView reloadData];
-	[self close];
+    if ([[self window] isSheet]) {
+		[[self window] orderOut:sender];
+		[NSApp endSheet:[self window] returnCode:[sender tag]];
+	} else {
+		[[self window] performClose:sender];
+	}
 }
 
 - (IBAction)saveChanges:(id)sender {
@@ -200,7 +235,12 @@ static BDSKCharacterConversion *sharedConversionEditor;
 	
 	[self setDocumentEdited:NO];
 	
-	[self close];
+    if ([[self window] isSheet]) {
+		[[self window] orderOut:sender];
+		[NSApp endSheet:[self window] returnCode:[sender tag]];
+	} else {
+		[[self window] performClose:sender];
+	}
 }
 
 - (IBAction)changeList:(id)sender {
@@ -226,7 +266,7 @@ static BDSKCharacterConversion *sharedConversionEditor;
     [tableView reloadData];
 	
     int row = [currentArray indexOfObject:newRoman];
-    [tableView selectRow:row byExtendingSelection:NO];
+    [tableView selectRowIndexes:[NSIndexSet indexSetWithIndex:row] byExtendingSelection:NO];
     [tableView editColumn:0 row:row withEvent:nil select:YES];
 	
 	[self setDocumentEdited:YES];
@@ -238,8 +278,12 @@ static BDSKCharacterConversion *sharedConversionEditor;
 	int row = [tableView selectedRow];
 	if (row == -1) return;
 	NSString *oldRoman = [currentArray objectAtIndex:row];
+	NSString *oldTex = [currentDict objectForKey:oldRoman];
 	[currentArray removeObject:oldRoman];
 	[currentDict removeObjectForKey:oldRoman];
+	[romanSet removeObject:oldRoman];
+	if ([self listType] == 2)
+		[texSet removeObject:oldTex];
 	
 	validRoman = YES;
 	validTex = YES;
@@ -320,8 +364,10 @@ static BDSKCharacterConversion *sharedConversionEditor;
 				[tableView reloadData];
 			} else {
 				[currentDict setObject:object forKey:roman];
-				[texSet removeObject:tex];
-				[texSet addObject:object];
+				if ([self listType] == 2) {
+					[texSet removeObject:tex];
+					[texSet addObject:object];
+				}
 				
 				validTex = YES;
 				

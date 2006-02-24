@@ -6,8 +6,12 @@
                 changeCiteKeyLowercase = id; 
                 citeKeyFormatAdd = id; 
                 citeKeyFormatChanged = id; 
+                citeKeyHelp = id; 
+                closeFormatSheet = id; 
                 formatHelp = id; 
+                setFormatCleanOption = id; 
                 showCiteKeyFormatWarning = id; 
+                showFormatSheet = id; 
             }; 
             CLASS = "BibPref_CiteKey"; 
             LANGUAGE = ObjC; 
@@ -15,9 +19,13 @@
                 citeKeyAutogenerateCheckButton = NSButton; 
                 citeKeyLine = NSTextField; 
                 citeKeyLowercaseCheckButton = NSButton; 
+                formatCleanRadio = NSMatrix; 
                 formatField = NSTextField; 
                 formatPresetPopUp = NSPopUpButton; 
+                formatPresetSheetPopUp = NSPopUpButton; 
                 formatRepositoryPopUp = NSPopUpButton; 
+                formatSheet = NSPanel; 
+                formatSheetField = NSTextField; 
                 formatWarningButton = NSButton; 
             }; 
             SUPERCLASS = OAPreferenceClient; 

@@ -1,27 +1,10 @@
 {
     IBClasses = (
         {
-            ACTIONS = {
-                addCondition = id; 
-                addNewKey = id; 
-                changeKey = id; 
-                dismissAddKeySheet = id; 
-                removeCondition = id; 
-            }; 
-            CLASS = BDSKConditionController; 
+            ACTIONS = {remove = id; }; 
+            CLASS = BDSKComparisonPredicateController; 
             LANGUAGE = ObjC; 
-            OUTLETS = {
-                addButton = NSButton; 
-                addKeySheet = NSWindow; 
-                comparisonPopUp = NSPopUpButton; 
-                itemTypePopUp = NSPopUpButton; 
-                keyPopUp = NSPopUpButton; 
-                newKeyField = NSTextField; 
-                ownerController = NSObjectController; 
-                removeButton = NSButton; 
-                valueTextField = NSTextField; 
-                view = NSView; 
-            }; 
+            OUTLETS = {ownerController = NSObjectController; view = NSView; }; 
             SUPERCLASS = NSObject; 
         }, 
         {CLASS = FirstResponder; LANGUAGE = ObjC; SUPERCLASS = NSObject; }

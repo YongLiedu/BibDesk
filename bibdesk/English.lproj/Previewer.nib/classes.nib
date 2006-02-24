@@ -1,12 +1,15 @@
 {
     IBClasses = (
+        {CLASS = BDSKOverlay; LANGUAGE = ObjC; SUPERCLASS = NSPanel; }, 
         {
             CLASS = BDSKPreviewer; 
             LANGUAGE = ObjC; 
             OUTLETS = {
                 imagePreviewView = PDFImageView; 
+                pdfView = id; 
+                progressIndicator = NSProgressIndicator; 
+                progressOverlay = BDSKOverlay; 
                 rtfPreviewView = NSTextView; 
-                splitView = NSSplitView; 
                 tabView = NSTabView; 
             }; 
             SUPERCLASS = NSWindowController; 
