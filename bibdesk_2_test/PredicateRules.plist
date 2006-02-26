@@ -179,7 +179,7 @@
                 type = "string";
             },
             {
-                propertyName = "tag.name";
+                propertyName = "tags.name";
                 displayName = "Tag";
                 type = "string";
             },
@@ -203,13 +203,11 @@
                 displayName = "Publication Type";
                 type = "string";
             },
-/*
             {
-                propertyName = "keyValuePairs.$KEY";
-                displayName = "$CAPITALIZED_KEY";
+                propertyName = "publicationStatus";
+                displayName = "Publication Status";
                 type = "string";
             }
-*/
         );
         Tag = (
             {
