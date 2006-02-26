@@ -40,11 +40,11 @@
 }
 
 - (NSSet *)authors {
-    return [self contributorsOfType:@"authors"];
+    return [self contributorsOfType:@"author"];
 }
 
 - (NSSet *)editors {
-    return [self contributorsOfType:@"editors"];
+    return [self contributorsOfType:@"editor"];
 }
 
 - (NSSet *)institutions {
@@ -67,7 +67,7 @@
 - (NSSet *)contributorsOfType:(NSString *)type {
     static NSMutableDictionary *contributorPredicates = nil;
     if (contributorPredicates == nil) {
-        contributorPredicates = [NSMutableDictionary dictionaryWithCapacity:1];
+        contributorPredicates = [[NSMutableDictionary alloc] initWithCapacity:1];
     }
     NSPredicate *predicate = [contributorPredicates objectForKey:type];
     if (predicate == nil) {
@@ -87,7 +87,7 @@
 }
 
 - (id)valueForUndefinedKey:(NSString *)key {
-    if ([key hasSuffix:@"contributors/"]) {
+    if ([key hasPrefix:@"contributors/"]) {
         return [self contributorsOfType:[key substringFromIndex:13]];
     } else {
         NSEnumerator *pairEnum = [[self valueForKey:@"keyValuePairs"] objectEnumerator];
