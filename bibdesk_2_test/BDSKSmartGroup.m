@@ -101,17 +101,27 @@
 }
 
 - (void)refreshMetaData {
-    NSString *propertyName = [self itemPropertyName];
+    NSManagedObjectContext *context = [self managedObjectContext];
     NSString *entityName = [self itemEntityName];
+    NSString *propertyName = [self itemPropertyName];
+    NSEntityDescription *entity = [NSEntityDescription entityForName:entityName inManagedObjectContext:context];
     
-    if (propertyName != nil && entityName != nil) {
-        NSString *firstKey = [[propertyName componentsSeparatedByString:@"."] objectAtIndex:0];
-        NSManagedObjectContext *moc = [self managedObjectContext];
-        NSEntityDescription *entity = [NSEntityDescription entityForName:entityName inManagedObjectContext:moc];
-        
-        isToMany = [[[entity relationshipsByName] objectForKey:firstKey] isToMany];
-    } else {
-        isToMany = NO;
+    isToMany = NO;
+    
+    if (propertyName == nil || entity == nil)   
+        return;
+    
+    NSArray *components = [propertyName componentsSeparatedByString:@"."];
+    int i, count = [components count] - 1;
+    NSRelationshipDescription *relationship;
+    
+    for (i = 0; i < count; i++) {
+        relationship = [[entity relationshipsByName] objectForKey:[components objectAtIndex:i]];
+        if (relationship == nil || [relationship isToMany]) {
+            isToMany = YES;
+            return;
+        }
+        entity = [relationship destinationEntity];
     }
 }
 
