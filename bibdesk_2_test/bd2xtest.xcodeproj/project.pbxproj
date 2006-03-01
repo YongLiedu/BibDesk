@@ -96,11 +96,11 @@
 /* End PBXBuildStyle section */
 
 /* Begin PBXContainerItemProxy section */
-		CEB8AD2509B228420059A7EB /* PBXContainerItemProxy */ = {
+		CEB8B51809B5248F0059A7EB /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = CE51382D09978ED200C73C64 /* BTParse.xcodeproj */;
 			proxyType = 2;
-			remoteGlobalIDString = 8DC2EF5B0486A6940098B216;
+			remoteGlobalIDString = 8DC2EF5B0486A6940098B216 /* BTParse.framework */;
 			remoteInfo = BTParse;
 		};
 /* End PBXContainerItemProxy section */
@@ -171,7 +171,7 @@
 		CE4B96DB0994DD96000447D2 /* BDSKGroup.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BDSKGroup.m; sourceTree = "<group>"; };
 		CE51379109977D9400C73C64 /* BDSKBibTeXParser.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BDSKBibTeXParser.h; sourceTree = "<group>"; };
 		CE51379209977D9400C73C64 /* BDSKBibTeXParser.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BDSKBibTeXParser.m; sourceTree = "<group>"; };
-		CE51382D09978ED200C73C64 /* BTParse.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = BTParse.xcodeproj; path = ../../branches/BR_1x/bibdesk/BTParse/BTParse.xcodeproj; sourceTree = SOURCE_ROOT; };
+		CE51382D09978ED200C73C64 /* BTParse.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = BTParse.xcodeproj; path = ../bibdesk/BTParse/BTParse.xcodeproj; sourceTree = SOURCE_ROOT; };
 		CE5139C20997A87A00C73C64 /* Carbon.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Carbon.framework; path = /System/Library/Frameworks/Carbon.framework; sourceTree = "<absolute>"; };
 		CE6D83A40994CFA500D01A71 /* BDSKSmartGroup.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BDSKSmartGroup.h; sourceTree = "<group>"; };
 		CE6D83A50994CFA500D01A71 /* BDSKSmartGroup.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BDSKSmartGroup.m; sourceTree = "<group>"; };
@@ -442,10 +442,10 @@
 			name = "Group Editors";
 			sourceTree = "<group>";
 		};
-		CEB8AD2209B228420059A7EB /* Products */ = {
+		CEB8B51509B5248F0059A7EB /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				CEB8AD2609B228420059A7EB /* BTParse.framework */,
+				CEB8B51909B5248F0059A7EB /* BTParse.framework */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -534,7 +534,7 @@
 			projectDirPath = "";
 			projectReferences = (
 				{
-					ProductGroup = CEB8AD2209B228420059A7EB /* Products */;
+					ProductGroup = CEB8B51509B5248F0059A7EB /* Products */;
 					ProjectRef = CE51382D09978ED200C73C64 /* BTParse.xcodeproj */;
 				},
 			);
@@ -545,11 +545,11 @@
 /* End PBXProject section */
 
 /* Begin PBXReferenceProxy section */
-		CEB8AD2609B228420059A7EB /* BTParse.framework */ = {
+		CEB8B51909B5248F0059A7EB /* BTParse.framework */ = {
 			isa = PBXReferenceProxy;
 			fileType = wrapper.framework;
 			path = BTParse.framework;
-			remoteRef = CEB8AD2509B228420059A7EB /* PBXContainerItemProxy */;
+			remoteRef = CEB8B51809B5248F0059A7EB /* PBXContainerItemProxy */;
 			sourceTree = BUILT_PRODUCTS_DIR;
 		};
 /* End PBXReferenceProxy section */
