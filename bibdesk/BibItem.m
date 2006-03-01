@@ -1198,7 +1198,7 @@ static NSParagraphStyle* bodyParagraphStyle = nil;
                 // make this a clickable link if possible, showing an abbreviated path for file URLs
                 NSURL *theURL = [self URLForField:key];
 				if(theURL != nil){
-                    valueStr = [[NSMutableAttributedString alloc] initWithString:([theURL isFileURL] ? [[theURL path] stringByAbbreviatingWithTildeInPath] : [theURL absoluteString]) attributes:bodyAttributes];
+                    valueStr = [[NSMutableAttributedString alloc] initWithString:([theURL isFileURL] ? [[theURL path] stringByAbbreviatingWithTildeInPath] : [self valueOfField:key]) attributes:bodyAttributes];
                     [(NSMutableAttributedString *)valueStr addAttribute:NSLinkAttributeName value:theURL range:NSMakeRange(0, [valueStr length])];
                 }
   
