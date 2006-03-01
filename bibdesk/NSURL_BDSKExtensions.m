@@ -160,6 +160,11 @@ CFURLRef BDCopyFileURLResolvingAliases(CFURLRef fileURL)
     
 + (NSURL *)URLWithStringByNormalizingPercentEscapes:(NSString *)string;
 {
+    return [self URLWithStringByNormalizingPercentEscapes:string baseURL:nil];
+}
+
++ (NSURL *)URLWithStringByNormalizingPercentEscapes:(NSString *)string baseURL:(NSURL *)baseURL;
+{
     CFStringRef urlString = (CFStringRef)string;
 
     if(BDIsEmptyString(urlString))
@@ -170,13 +175,12 @@ CFURLRef BDCopyFileURLResolvingAliases(CFURLRef fileURL)
     CFStringRef unescapedString = CFURLCreateStringByReplacingPercentEscapes(allocator, urlString, CFSTR(""));
     if(unescapedString == NULL) return nil;
     
-    // we need to validate URL strings, as some doi URL's contain characters that need to be escaped
+    // we need to validate URL strings, as some DOI URL's contain characters that need to be escaped
     // CFURLCreateStringByAddingPercentEscapes incorrectly escapes fragment separators, so we'll ignore those
     urlString = CFURLCreateStringByAddingPercentEscapes(allocator, unescapedString, CFSTR("#"), NULL, kCFStringEncodingUTF8);
     CFRelease(unescapedString);
     
-    // could try adding base URLs to resolve against, if theURL is not valid?
-    CFURLRef theURL = CFURLCreateWithString(allocator, urlString, NULL);
+    CFURLRef theURL = CFURLCreateWithString(allocator, urlString, (CFURLRef)baseURL);
     CFRelease(urlString);
     
     return [(NSURL *)theURL autorelease];

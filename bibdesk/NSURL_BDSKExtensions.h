@@ -43,6 +43,7 @@
 - (NSURL *)fileURLByResolvingAliases;
 - (NSURL *)fileURLByResolvingAliasesBeforeLastPathComponent;
 + (NSURL *)URLWithStringByNormalizingPercentEscapes:(NSString *)string;
++ (NSURL *)URLWithStringByNormalizingPercentEscapes:(NSString *)string baseURL:(NSURL *)baseURL;
 
 @end
 
