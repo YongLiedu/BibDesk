@@ -184,6 +184,23 @@ CFURLRef BDCopyFileURLResolvingAliases(CFURLRef fileURL)
     CFRelease(urlString);
     
     return [(NSURL *)theURL autorelease];
-}    
+}  
+
+// these characters are not valid in any part of a URL; taken from CFURL.c, sURLValidCharacters[] array
++ (NSCharacterSet *)illegalURLCharacterSet;
+{
+    static NSCharacterSet *charSet = nil;
+    if(charSet == nil){
+        NSMutableCharacterSet *validSet = (NSMutableCharacterSet *)[NSMutableCharacterSet characterSetWithCharactersInString:@"!$"];
+        [validSet addCharactersInRange:NSMakeRange(38, 59-38)];
+        [validSet addCharactersInString:@"="];
+        [validSet addCharactersInRange:NSMakeRange(63, 90-63)];
+        [validSet addCharactersInString:@"_"];
+        [validSet addCharactersInRange:NSMakeRange(97, 122-97)];
+        [validSet addCharactersInString:@"~"];
+        charSet = [[validSet invertedSet] copy];
+    }
+    return charSet;
+}
 
 @end

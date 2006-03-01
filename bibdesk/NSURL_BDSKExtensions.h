@@ -44,7 +44,7 @@
 - (NSURL *)fileURLByResolvingAliasesBeforeLastPathComponent;
 + (NSURL *)URLWithStringByNormalizingPercentEscapes:(NSString *)string;
 + (NSURL *)URLWithStringByNormalizingPercentEscapes:(NSString *)string baseURL:(NSURL *)baseURL;
-
++ (NSCharacterSet *)illegalURLCharacterSet;
 @end
 
 CFURLRef BDCopyFileURLResolvingAliases(CFURLRef fileURL);
