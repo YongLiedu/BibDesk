@@ -1096,8 +1096,9 @@ NSString *BDSKBibItemPboardType = @"edu.ucsd.mmccrack.bibdesk BibItem pboard typ
 {
 	NSStringEncoding encoding = [[OFPreferenceWrapper sharedPreferenceWrapper] integerForKey:BDSKDefaultStringEncodingKey];
 	
-	// we set the file type to BibTeX as that retains the complete information in the file
-	[self setFileType:@"bibTeX database"];
+	// for types we only view, we set the file type to BibTeX as that retains the complete information in the file
+	if([aType isEqualToString:@"RIS/Medline File"] == NO)
+        [self setFileType:@"bibTeX database"];
     BOOL success;
     NSData *data = [NSData dataWithContentsOfURL:absoluteURL];
     
