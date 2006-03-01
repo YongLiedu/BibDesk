@@ -422,6 +422,7 @@
 					<key>Remote URL Fields</key>
 					<array>
 						<string>Url</string>
+                        <string>Doi</string>
 					</array>
 					<key>Three state fields</key>
 					<array/>
@@ -570,6 +571,10 @@
                     <false/>
                     <key>BDSKShouldWritePDFMetadata</key>
                     <false/>
+                    <key>BDSKEditorFontNameKey</key>
+                    <string></string>
+                    <key>BDSKEditorFontSizeKey</key>
+                    <string>0.0</string>
 					<key>Column Widths by Name</key>
 					<dict>
 						<key>1st Author</key>
