@@ -329,10 +329,11 @@ NSString *BDSKBibItemPboardType = @"edu.ucsd.mmccrack.bibdesk BibItem pboard typ
         
         if(searchString != nil){
             // We want to handle open events for our Spotlight cache files differently; rather than setting the search field, we can jump to them immediately since they have richer context.  This code gets the path of the document being opened in order to check the file extension.
-            NSString *fURLString = [[[openEvent descriptorForKeyword:keyAEResult] coerceToDescriptorType:typeFileURL] stringValue];
-            NSURL *fileURL = nil;
-            if(fURLString != nil)
-                fileURL = [(id)CFURLCreateWithFileSystemPath(CFAllocatorGetDefault(), (CFStringRef)fURLString, kCFURLHFSPathStyle, FALSE) autorelease];
+            NSString *hfsPath = [[[openEvent descriptorForKeyword:keyAEResult] coerceToDescriptorType:typeFileURL] stringValue];
+            
+            // hfsPath will be nil for under some conditions, which seems strange
+            if(hfsPath == nil) NSLog(@"No path available from event %@ (descriptor %@)", openEvent, [openEvent descriptorForKeyword:keyAEResult]);
+            NSURL *fileURL = (hfsPath == nil ? nil : [(id)CFURLCreateWithFileSystemPath(CFAllocatorGetDefault(), (CFStringRef)hfsPath, kCFURLHFSPathStyle, FALSE) autorelease]);
             
             OBPOSTCONDITION(fileURL != nil);
             if(fileURL == nil || [[[NSWorkspace sharedWorkspace] UTIForURL:fileURL] isEqualToUTI:@"net.sourceforge.bibdesk.bdskcache"] == NO){
