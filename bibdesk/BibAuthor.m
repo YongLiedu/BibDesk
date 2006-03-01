@@ -86,10 +86,7 @@ static BibAuthor *emptyAuthorInstance = nil;
     
     [person release];
     
-    if([NSString isEmptyString:name])
-        return [BibAuthor emptyAuthor];
-    
-    BibAuthor *author = [BibAuthor authorWithName:name andPub:aPub];
+    BibAuthor *author = [NSString isEmptyString:name] ? [BibAuthor emptyAuthor] : [BibAuthor authorWithName:name andPub:aPub];
     [name release];
     
     return author;
