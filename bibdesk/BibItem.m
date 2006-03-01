@@ -1645,7 +1645,13 @@ static NSParagraphStyle* bodyParagraphStyle = nil;
 }
 
 - (NSURL *)remoteURLForField:(NSString *)field{
-    return [NSURL URLWithStringByNormalizingPercentEscapes:[pubFields objectForKey:field usingLock:bibLock]];
+    NSString *value = [pubFields objectForKey:field usingLock:bibLock];
+    NSURL *baseURL = nil;
+    
+    // resolve DOI fields against a base URL if necessary, so they can be used directly
+    if([field isEqualToString:@"Doi"] && [value rangeOfString:@"://"].length == 0)
+        baseURL = [NSURL URLWithString:@"http://dx.doi.org/"];
+    return [NSURL URLWithStringByNormalizingPercentEscapes:value baseURL:baseURL];
 }
 
 - (NSString *)localURLPath{
