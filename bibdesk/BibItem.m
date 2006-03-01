@@ -1648,9 +1648,14 @@ static NSParagraphStyle* bodyParagraphStyle = nil;
     NSString *value = [pubFields objectForKey:field usingLock:bibLock];
     NSURL *baseURL = nil;
     
-    // resolve DOI fields against a base URL if necessary, so they can be used directly
-    if([field isEqualToString:@"Doi"] && [value rangeOfString:@"://"].length == 0)
+    // resolve DOI fields against a base URL if necessary, so they can be opened directly by NSWorkspace
+    if([field isEqualToString:@"Doi"] && [value rangeOfString:@"://"].length == 0){
         baseURL = [NSURL URLWithString:@"http://dx.doi.org/"];
+        // remove the doi: prefix, which is required for a valid DOI, but may not be present
+        NSRange range = [value rangeOfString:@"doi:"];
+        if(range.length)
+            value = [value substringFromIndex:NSMaxRange(range)];
+    }
     return [NSURL URLWithStringByNormalizingPercentEscapes:value baseURL:baseURL];
 }
 
