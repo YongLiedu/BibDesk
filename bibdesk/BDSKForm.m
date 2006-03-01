@@ -127,10 +127,18 @@
 							NSImage *iconImage;
 							NSImage *dragImage = [[NSImage alloc] initWithSize:NSMakeSize(32.0,32.0)];
                             iconImage = [[self delegate] respondsToSelector:@selector(dragIconForFormCell:)] ? [[self delegate] dragIconForFormCell:cell] : [[self delegate] fileIconForFormCell:cell];
+                            
+                            // copy the image so we can resize the copy without affecting any cached images
+                            iconImage = [iconImage copy];
+                            [iconImage setScalesWhenResized:YES];
+                            [iconImage setSize:NSMakeSize(32.0, 32.0)];
 
+                            // composite for transparency
 							[dragImage lockFocus];
 							[iconImage compositeToPoint:NSZeroPoint operation:NSCompositeCopy fraction:0.6];
 							[dragImage unlockFocus];
+                            
+                            [iconImage release];
 							
 							mouseLoc.x -= 16;
 							mouseLoc.y += 16;
