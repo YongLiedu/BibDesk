@@ -56,8 +56,7 @@ static NSString *BDSKEditorTextViewFontChangedNotification = nil;
     // this change shouldn't dirty our document
     [[self undoManager] disableUndoRegistration];
 
-    // probably not necessary, but won't hurt
-    [super changeFont:sender];
+    // was calling [super changeFont:] here, but that did something to raise an exception when sending disableUndoRegistration
     
     // get the new font from the font panel
     NSFontManager *fontManager = [NSFontManager sharedFontManager];
