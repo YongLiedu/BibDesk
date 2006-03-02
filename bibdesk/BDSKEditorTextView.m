@@ -9,8 +9,18 @@
 #import "BDSKEditorTextView.h"
 #import "NSURL_BDSKExtensions.h"
 
+// these constants are private to the textview
 static NSString *BDSKEditorFontNameKey = @"BDSKEditorFontNameKey";
 static NSString *BDSKEditorFontSizeKey = @"BDSKEditorFontSizeKey";
+static NSString *BDSKEditorTextViewFontChangedNotification = nil;
+
+@interface BDSKEditorTextView (Private)
+
+- (void)handleFontChangedNotification:(NSNotification *)note;
+- (NSString *)URLStringFromRange:(NSRange *)startRange inString:(NSString *)string;
+- (void)fixAttributesForURLs;
+
+@end
 
 @implementation BDSKEditorTextView
 
@@ -27,10 +37,25 @@ static NSString *BDSKEditorFontSizeKey = @"BDSKEditorFontSizeKey";
     
     [self setFont:font];
     [[self textStorage] setDelegate:self];
+    
+    // make sure no one else uses this notification name, since it's going into the default notification center
+    if(BDSKEditorTextViewFontChangedNotification == nil)
+        BDSKEditorTextViewFontChangedNotification = [[[NSProcessInfo processInfo] globallyUniqueString] copy];
+    
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(handleFontChangedNotification:) name:BDSKEditorTextViewFontChangedNotification object:nil];
+}
+
+- (void)dealloc
+{
+    [[NSNotificationCenter defaultCenter] removeObserver:self];
+    [super dealloc];
 }
 
 - (void)changeFont:(id)sender
 {
+    // this change shouldn't dirty our document
+    [[self undoManager] disableUndoRegistration];
+
     // probably not necessary, but won't hurt
     [super changeFont:sender];
     
@@ -38,102 +63,19 @@ static NSString *BDSKEditorFontSizeKey = @"BDSKEditorFontSizeKey";
     NSFontManager *fontManager = [NSFontManager sharedFontManager];
     NSFont *font = [fontManager convertFont:[fontManager selectedFont]];
     
-    // apply the new font to the entire range; this shouldn't dirty the document, though
+    // apply the new font to the entire range
     NSTextStorage *textStorage = [self textStorage];
-    [[self undoManager] disableUndoRegistration];
     [textStorage beginEditing];
     [textStorage addAttribute:NSFontAttributeName value:font range:NSMakeRange(0, [textStorage length])];
     [textStorage endEditing];
+    
     [[self undoManager] enableUndoRegistration];
 
     // save it to prefs for next time
     [[OFPreferenceWrapper sharedPreferenceWrapper] setObject:[font fontName] forKey:BDSKEditorFontNameKey];
     [[OFPreferenceWrapper sharedPreferenceWrapper] setFloat:[font pointSize] forKey:BDSKEditorFontSizeKey];
-}
-
-static inline BOOL checkForPercentEscapeFromIndex(NSString *string, unsigned startIndex)
-{
-    NSCParameterAssert([string length] > startIndex);
-    // require % and two additional chars
-    if([string characterAtIndex:startIndex] != '%' || [string length] <= (startIndex + 2))
-        return NO;
     
-    unichar ch1 = [string characterAtIndex:(startIndex + 1)];
-    unichar ch2 = [string characterAtIndex:(startIndex + 2)];
-    return ((ch1 <= '9' && ch1 >= '0') && (ch2 <= '9' && ch2 >= '0')) ? YES : NO;
-}
-
-// searches backwards; forwards search uses edited range as word boundary
-- (NSString *)URLStringFromRange:(NSRange *)startRange inString:(NSString *)string
-{
-    NSRange range;
-    NSRange searchRange = NSMakeRange(0, startRange->location);
-    
-    do {
-        range = [string rangeOfCharacterFromSet:[NSURL illegalURLCharacterSet] options:NSBackwardsSearch range:searchRange];
-        
-        // if we didn't find one, reset the range to the last useful value and break
-        if(range.location == NSNotFound){
-            range.location = searchRange.location;
-            break;
-        }
-           
-        // move the search range interval towards the beginning of the string
-        searchRange.length = range.location;
-           
-    } while (checkForPercentEscapeFromIndex(string, range.location));
-
-    NSString *lastWord = nil;
-    if(range.length){
-        
-        // skip the illegal character
-        range.location += 1;
-
-        NSRange endRange;
-        searchRange = NSMakeRange(range.location, [string length] - range.location);
-        
-        do {
-            endRange = [string rangeOfCharacterFromSet:[NSURL illegalURLCharacterSet] options:0 range:searchRange];
-            
-            // if the entire string is valid...
-            if(endRange.location == NSNotFound){
-                endRange = NSMakeRange([string length], 0);
-                break;
-            }
-            
-            // move the search range interval towards the end of the string
-            searchRange = NSMakeRange(searchRange.location, endRange.location - searchRange.location);
-            
-        } while (checkForPercentEscapeFromIndex(string, endRange.location));
-        
-        range = NSMakeRange(range.location, endRange.location - range.location);
-        if(range.length) lastWord = [string substringWithRange:range];    
-        *startRange = range;
-    }
-    return lastWord;
-}
-
-- (void)fixAttributesForURLs
-{
-    NSTextStorage *textStorage = [self textStorage];
-    NSString *string = [textStorage string];
-    
-    int start, length = [string length];
-    NSRange wordRange, range = NSMakeRange(0, 0);
-    NSString *urlString;
-    NSURL *url;
-    
-    do {
-        start = NSMaxRange(range);
-        range = [string rangeOfString:@"://" options:0 range:NSMakeRange(start, length - start)];
-        
-        if(range.length){
-            urlString = [self URLStringFromRange:&range inString:string];
-            url = urlString ? [[NSURL alloc] initWithString:urlString] : nil;
-            if([url scheme]) [textStorage addAttribute:NSLinkAttributeName value:url range:range];
-        }
-        
-    } while (range.length);
+    [[NSNotificationCenter defaultCenter] postNotificationName:BDSKEditorTextViewFontChangedNotification object:self];
 }
 
 - (void)textStorageDidProcessEditing:(NSNotification *)notification
@@ -159,6 +101,106 @@ static inline BOOL checkForPercentEscapeFromIndex(NSString *string, unsigned sta
     } else {
         NSLog(@"I am confused: edited range is %@", NSStringFromRange(editedRange));
     }
+}
+
+@end
+
+@implementation BDSKEditorTextView (Private)
+
+- (void)handleFontChangedNotification:(NSNotification *)note;
+{
+    if([note object] != self){
+        NSLog(@"%@ fix me", NSStringFromSelector(_cmd));
+    }
+}
+
+static inline BOOL hasValidPercentEscapeFromIndex(NSString *string, unsigned startIndex)
+{
+    NSCParameterAssert(startIndex == 0 || [string length] > startIndex);
+    // require % and at least two additional chars
+    if([string isEqualToString:@""] || [string characterAtIndex:startIndex] != '%' || [string length] <= (startIndex + 2))
+        return NO;
+    
+    // both characters following the % should be digits 0-9
+    unichar ch1 = [string characterAtIndex:(startIndex + 1)];
+    unichar ch2 = [string characterAtIndex:(startIndex + 2)];
+    return ((ch1 <= '9' && ch1 >= '0') && (ch2 <= '9' && ch2 >= '0')) ? YES : NO;
+}
+
+// Starts in the middle of a "word" (some range of interest) and searches forward and backward to find boundaries marked by characters that would be illegal for a URL
+- (NSString *)URLStringFromRange:(NSRange *)startRange inString:(NSString *)string
+{
+    unsigned startIdx = NSNotFound, endIdx = NSNotFound;
+    NSRange range = NSMakeRange(0, startRange->location);
+    
+    do {
+        range = [string rangeOfCharacterFromSet:[NSURL illegalURLCharacterSet] options:NSBackwardsSearch range:range];
+        
+        if(range.location != NSNotFound){
+            // advance past the illegal character
+            startIdx = range.location + 1;
+        } else {
+            // this has a URL as the first word in the string
+            startIdx = 0;
+            break;
+        }
+        
+        // move the search range interval towards the beginning of the string
+        range = NSMakeRange(0, range.location);
+           
+    } while (startIdx != NSNotFound && hasValidPercentEscapeFromIndex(string, startIdx - 1));
+
+    NSString *lastWord = nil;
+    if(startIdx != NSNotFound){
+
+        range = NSMakeRange(startRange->location, [string length] - startRange->location);
+        
+        do {
+            range = [string rangeOfCharacterFromSet:[NSURL illegalURLCharacterSet] options:0 range:range];
+
+            // if the entire string is valid...
+            if(range.location == NSNotFound){
+                endIdx = [string length];
+                break;
+            } else {
+                endIdx = range.location;
+            }
+            
+            // move the search range interval towards the end of the string
+            range = NSMakeRange(range.location + 1, [string length] - range.location - 1);
+            
+        } while (endIdx != NSNotFound && hasValidPercentEscapeFromIndex(string, endIdx));
+        
+        if(endIdx != NSNotFound && startIdx != NSNotFound && endIdx > startIdx){
+            range = NSMakeRange(startIdx, endIdx - startIdx);
+            lastWord = [string substringWithRange:range]; 
+            *startRange = range;
+        }
+    }
+    return lastWord;
+}
+
+- (void)fixAttributesForURLs;
+{
+    NSTextStorage *textStorage = [self textStorage];
+    NSString *string = [textStorage string];
+    
+    int start, length = [string length];
+    NSRange wordRange, range = NSMakeRange(0, 0);
+    NSString *urlString;
+    NSURL *url;
+    
+    do {
+        start = NSMaxRange(range);
+        range = [string rangeOfString:@"://" options:0 range:NSMakeRange(start, length - start)];
+        
+        if(range.length){
+            urlString = [self URLStringFromRange:&range inString:string];
+            url = urlString ? [[NSURL alloc] initWithString:urlString] : nil;
+            if([url scheme]) [textStorage addAttribute:NSLinkAttributeName value:url range:range];
+        }
+        
+    } while (range.length);
 }
 
 @end
