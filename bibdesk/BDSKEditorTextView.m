@@ -19,6 +19,7 @@ static NSString *BDSKEditorTextViewFontChangedNotification = nil;
 - (void)handleFontChangedNotification:(NSNotification *)note;
 - (NSString *)URLStringFromRange:(NSRange *)startRange inString:(NSString *)string;
 - (void)fixAttributesForURLs;
+- (void)updateFontFromPreferences;
 
 @end
 
@@ -26,17 +27,9 @@ static NSString *BDSKEditorTextViewFontChangedNotification = nil;
 
 - (void)awakeFromNib
 {
-    NSString *fontName = [[OFPreferenceWrapper sharedPreferenceWrapper] objectForKey:BDSKEditorFontNameKey];
-    float fontSize = [[OFPreferenceWrapper sharedPreferenceWrapper] floatForKey:BDSKEditorFontSizeKey];
-    NSFont *font = nil;
-    if(fontName != nil)
-        font = [NSFont fontWithName:fontName size:fontSize];
-    // could be nil
-    if(font == nil)
-        font = [NSFont systemFontOfSize:[NSFont systemFontSize]];
-    
-    [self setFont:font];
     [[self textStorage] setDelegate:self];
+    
+    [self updateFontFromPreferences];
     
     // make sure no one else uses this notification name, since it's going into the default notification center
     if(BDSKEditorTextViewFontChangedNotification == nil)
@@ -53,27 +46,18 @@ static NSString *BDSKEditorTextViewFontChangedNotification = nil;
 
 - (void)changeFont:(id)sender
 {
-    // this change shouldn't dirty our document
-    [[self undoManager] disableUndoRegistration];
-
-    // was calling [super changeFont:] here, but that did something to raise an exception when sending disableUndoRegistration
-    
     // get the new font from the font panel
     NSFontManager *fontManager = [NSFontManager sharedFontManager];
     NSFont *font = [fontManager convertFont:[fontManager selectedFont]];
     
-    // apply the new font to the entire range
-    NSTextStorage *textStorage = [self textStorage];
-    [textStorage beginEditing];
-    [textStorage addAttribute:NSFontAttributeName value:font range:NSMakeRange(0, [textStorage length])];
-    [textStorage endEditing];
-    
-    [[self undoManager] enableUndoRegistration];
-
     // save it to prefs for next time
     [[OFPreferenceWrapper sharedPreferenceWrapper] setObject:[font fontName] forKey:BDSKEditorFontNameKey];
     [[OFPreferenceWrapper sharedPreferenceWrapper] setFloat:[font pointSize] forKey:BDSKEditorFontSizeKey];
     
+    // update the entire text storage
+    [self updateFontFromPreferences];
+    
+    // make sure other views know the font has changed
     [[NSNotificationCenter defaultCenter] postNotificationName:BDSKEditorTextViewFontChangedNotification object:self];
 }
 
@@ -106,13 +90,15 @@ static NSString *BDSKEditorTextViewFontChangedNotification = nil;
 
 @implementation BDSKEditorTextView (Private)
 
+// We get this notification when some other textview changes the font prefs
 - (void)handleFontChangedNotification:(NSNotification *)note;
 {
-    if([note object] != self){
-        NSLog(@"%@ fix me", NSStringFromSelector(_cmd));
-    }
+    // this shouldn't cause a notification loop, but let's be careful anyway
+    if([note object] != self)
+        [self updateFontFromPreferences];
 }
 
+// Determine if a % character is followed by two digits (valid in a URL)
 static inline BOOL hasValidPercentEscapeFromIndex(NSString *string, unsigned startIndex)
 {
     NSCParameterAssert(startIndex == 0 || [string length] > startIndex);
@@ -126,7 +112,8 @@ static inline BOOL hasValidPercentEscapeFromIndex(NSString *string, unsigned sta
     return ((ch1 <= '9' && ch1 >= '0') && (ch2 <= '9' && ch2 >= '0')) ? YES : NO;
 }
 
-// Starts in the middle of a "word" (some range of interest) and searches forward and backward to find boundaries marked by characters that would be illegal for a URL
+/* Starts in the middle of a "word" (some range of interest) and searches forward and backward to find boundaries marked by characters that would be illegal for a URL.  Note that this may not be a valid URL in itself; it is just bounded by URL-like markers.
+*/
 - (NSString *)URLStringFromRange:(NSRange *)startRange inString:(NSString *)string
 {
     unsigned startIdx = NSNotFound, endIdx = NSNotFound;
@@ -179,6 +166,7 @@ static inline BOOL hasValidPercentEscapeFromIndex(NSString *string, unsigned sta
     return lastWord;
 }
 
+// fixes the attributes for the entire text storage; inefficient for large strings
 - (void)fixAttributesForURLs;
 {
     NSTextStorage *textStorage = [self textStorage];
@@ -200,6 +188,34 @@ static inline BOOL hasValidPercentEscapeFromIndex(NSString *string, unsigned sta
         }
         
     } while (range.length);
+}
+
+// used only for reading the default font from prefs and then changing the font of the text storage
+- (void)updateFontFromPreferences;
+{
+    NSString *fontName = [[OFPreferenceWrapper sharedPreferenceWrapper] objectForKey:BDSKEditorFontNameKey];
+    float fontSize = [[OFPreferenceWrapper sharedPreferenceWrapper] floatForKey:BDSKEditorFontSizeKey];
+    NSFont *font = nil;
+    
+    if(fontName != nil)
+        font = [NSFont fontWithName:fontName size:fontSize];
+    
+    // NSFont itself could be nil
+    if(font == nil)
+        font = [NSFont systemFontOfSize:[NSFont systemFontSize]];
+    
+    [self setFont:font];
+    
+    // we don't want this to dirty the document
+    [[self undoManager] disableUndoRegistration];
+    
+    // apply the new font to the entire range
+    NSTextStorage *textStorage = [self textStorage];
+    [textStorage beginEditing];
+    [textStorage addAttribute:NSFontAttributeName value:font range:NSMakeRange(0, [textStorage length])];
+    [textStorage endEditing];
+    
+    [[self undoManager] enableUndoRegistration];
 }
 
 @end
