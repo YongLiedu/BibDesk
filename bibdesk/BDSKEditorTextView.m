@@ -186,7 +186,7 @@ static inline BOOL hasValidPercentEscapeFromIndex(NSString *string, unsigned sta
     NSString *string = [textStorage string];
     
     int start, length = [string length];
-    NSRange wordRange, range = NSMakeRange(0, 0);
+    NSRange range = NSMakeRange(0, 0);
     NSString *urlString;
     NSURL *url;
     
