@@ -68,6 +68,7 @@
 #import "BibDocument_Groups.h"
 #import "NSArray_BDSKExtensions.h"
 #import "NSWorkspace_BDSKExtensions.h"
+#import <SystemConfiguration/SystemConfiguration.h>
 
 @implementation BibAppController
 
@@ -969,8 +970,35 @@
 
 #pragma mark Panels
 
+- (BOOL)checkForNetworkAvailabilityAndDisplayWarning:(BOOL)displayWarning{
+    
+    BOOL result = NO;
+    SCNetworkConnectionFlags flags;
+    const char *hostName = "bibdesk.sourceforge.net";
+        
+    if( SCNetworkCheckReachabilityByName(hostName, &flags) ){
+        result = !(flags & kSCNetworkFlagsConnectionRequired) && (flags & kSCNetworkFlagsReachable);
+    }
+    
+    if(result == NO){
+        if(displayWarning)
+            NSRunAlertPanel(NSLocalizedString(@"Network Unavailable", @""), NSLocalizedString(@"BibDesk is unable to establish a network connection.", @""), nil, nil, nil);
+        else
+            NSLog(@"Unable to contact %s, possibly because your network is down or a firewall is prevening the connection.", hostName);
+    }
+    
+    return result;
+}
+
 - (void)checkForUpdatesInBackground{
+    
     NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
+    
+    // CFURLCreateDataAndPropertiesFromResource can eventually crash if the network isn't available, so we'll check for it
+    if([self checkForNetworkAvailabilityAndDisplayWarning:NO] == NO){
+        [pool release];
+        return;
+    }
     
     if(![NSThread setThreadPriority:0])
         NSLog(@"failed to set update check thread priority");
@@ -981,12 +1009,7 @@
     CFDataRef theData = NULL;
     SInt32 status;
     
-    if(CFURLCreateDataAndPropertiesFromResource(kCFAllocatorDefault,
-                                                (CFURLRef)theURL,
-                                                &theData,
-                                                NULL,
-                                                NULL,
-                                                &status))
+    if(CFURLCreateDataAndPropertiesFromResource(kCFAllocatorDefault, (CFURLRef)theURL, &theData, NULL, NULL, &status))
     {
         NSString *err = nil;
         NSDictionary *prodVersionDict = [NSPropertyListSerialization propertyListFromData:(NSData *)theData
@@ -1027,6 +1050,10 @@
 }
 
 - (IBAction)checkForUpdates:(id)sender{
+    
+    // check for network availability and display a warning if it's down
+    if([self checkForNetworkAvailabilityAndDisplayWarning:YES] == NO)
+        return;
         
     NSString *currVersionNumber = [[[NSBundle bundleForClass:[self class]]
         infoDictionary] objectForKey:@"CFBundleShortVersionString"];
