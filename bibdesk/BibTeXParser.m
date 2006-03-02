@@ -61,7 +61,7 @@ static NSString * checkAndTranslateString(NSString *s, int line, NSString *fileP
 // private function to get array value from field:
 // "foo" # macro # {string} # 19
 // becomes an autoreleased array of dicts of different types.
-static NSString *stringFromBTField(AST *field,  NSString *fieldName,  NSString *filePath, id <BDSKMacroResolver> theDocument);
+static NSString *stringFromBTField(AST *field,  NSString *fieldName,  NSString *filePath, id <BDSKMacroResolver> theDocument, NSStringEncoding parserEncoding);
 
 @end
 
@@ -255,7 +255,7 @@ static NSString *stringFromBTField(AST *field,  NSString *fieldName,  NSString *
                                 OFError(&error, BDSKParserError, NSLocalizedDescriptionKey, NSLocalizedString(@"Unable to parse string as BibTeX", @""), nil);
                             }
                         }else{
-                            complexString = stringFromBTField(field, sFieldName, filePath, aDocument); // handles TeXification
+                            complexString = stringFromBTField(field, sFieldName, filePath, aDocument, parserEncoding); // handles TeXification
                         }
                         
                         // add the expanded values to the autocomplete dictionary
@@ -367,7 +367,7 @@ static NSString *stringFromBTField(AST *field,  NSString *fieldName,  NSString *
 	entry = bt_parse_entry_s((char *)[entryString UTF8String], NULL, 1, options, &ok);
 	if(ok){
 		field = bt_next_field(entry, NULL, &fieldname);
-		valueString = stringFromBTField(field, nil, nil, aDocument);
+		valueString = stringFromBTField(field, nil, nil, aDocument, NSUTF8StringEncoding);
 	}else{
         OFError(&error, BDSKParserError, NSLocalizedDescriptionKey, NSLocalizedString(@"Unable to parse string as BibTeX", @""), nil);
 	}
@@ -617,13 +617,11 @@ static NSString * checkAndTranslateString(NSString *s, int line, NSString *fileP
     return sDeTexified;
 }
 
-static NSString *stringFromBTField(AST *field, NSString *fieldName, NSString *filePath, id <BDSKMacroResolver> document){
+static NSString *stringFromBTField(AST *field, NSString *fieldName, NSString *filePath, id <BDSKMacroResolver> document, NSStringEncoding parserEncoding){
     NSMutableArray *stringValueArray = [[NSMutableArray alloc] initWithCapacity:5];
     NSString *s = nil;
     BDSKStringNode *sNode = nil;
     AST *simple_value;
-    
-    NSStringEncoding parserEncoding = (document != nil ? [(BibDocument *)document documentStringEncoding] : NSUTF8StringEncoding);
     
 	if(field->nodetype != BTAST_FIELD){
 		NSLog(@"error! expected field here");
