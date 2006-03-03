@@ -35,6 +35,7 @@
 		CE2AEF8B09952A6400473196 /* GroupIcon.tiff in Resources */ = {isa = PBXBuildFile; fileRef = CE2AEF8809952A6400473196 /* GroupIcon.tiff */; };
 		CE2AEF8C09952A6400473196 /* RootGroupIcon.tiff in Resources */ = {isa = PBXBuildFile; fileRef = CE2AEF8909952A6400473196 /* RootGroupIcon.tiff */; };
 		CE2AEF8D09952A6400473196 /* SmartGroupIcon.tiff in Resources */ = {isa = PBXBuildFile; fileRef = CE2AEF8A09952A6400473196 /* SmartGroupIcon.tiff */; };
+		CE3ACF7809B7D07300391900 /* FolderGroupIcon.tiff in Resources */ = {isa = PBXBuildFile; fileRef = CE3ACF7709B7D07300391900 /* FolderGroupIcon.tiff */; };
 		CE4B96DC0994DD97000447D2 /* BDSKGroup.m in Sources */ = {isa = PBXBuildFile; fileRef = CE4B96DB0994DD96000447D2 /* BDSKGroup.m */; };
 		CE5139020997A6C000C73C64 /* BTParse.framework in CopyFiles */ = {isa = PBXBuildFile; fileRef = 27BBB2BD08C5019600403839 /* BTParse.framework */; };
 		CE5139030997A6D900C73C64 /* BDSKBibTeXParser.m in Sources */ = {isa = PBXBuildFile; fileRef = CE51379209977D9400C73C64 /* BDSKBibTeXParser.m */; };
@@ -100,7 +101,7 @@
 			isa = PBXContainerItemProxy;
 			containerPortal = CE51382D09978ED200C73C64 /* BTParse.xcodeproj */;
 			proxyType = 2;
-			remoteGlobalIDString = 8DC2EF5B0486A6940098B216 /* BTParse.framework */;
+			remoteGlobalIDString = 8DC2EF5B0486A6940098B216;
 			remoteInfo = BTParse;
 		};
 /* End PBXContainerItemProxy section */
@@ -167,6 +168,7 @@
 		CE2AEF8809952A6400473196 /* GroupIcon.tiff */ = {isa = PBXFileReference; lastKnownFileType = image.tiff; name = GroupIcon.tiff; path = Images/GroupIcon.tiff; sourceTree = "<group>"; };
 		CE2AEF8909952A6400473196 /* RootGroupIcon.tiff */ = {isa = PBXFileReference; lastKnownFileType = image.tiff; name = RootGroupIcon.tiff; path = Images/RootGroupIcon.tiff; sourceTree = "<group>"; };
 		CE2AEF8A09952A6400473196 /* SmartGroupIcon.tiff */ = {isa = PBXFileReference; lastKnownFileType = image.tiff; name = SmartGroupIcon.tiff; path = Images/SmartGroupIcon.tiff; sourceTree = "<group>"; };
+		CE3ACF7709B7D07300391900 /* FolderGroupIcon.tiff */ = {isa = PBXFileReference; lastKnownFileType = image.tiff; path = FolderGroupIcon.tiff; sourceTree = "<group>"; };
 		CE4B96DA0994DD96000447D2 /* BDSKGroup.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BDSKGroup.h; sourceTree = "<group>"; };
 		CE4B96DB0994DD96000447D2 /* BDSKGroup.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BDSKGroup.m; sourceTree = "<group>"; };
 		CE51379109977D9400C73C64 /* BDSKBibTeXParser.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BDSKBibTeXParser.h; sourceTree = "<group>"; };
@@ -334,6 +336,7 @@
 			isa = PBXGroup;
 			children = (
 				CE2AEF8809952A6400473196 /* GroupIcon.tiff */,
+				CE3ACF7709B7D07300391900 /* FolderGroupIcon.tiff */,
 				CE2AEF8909952A6400473196 /* RootGroupIcon.tiff */,
 				CE2AEF8A09952A6400473196 /* SmartGroupIcon.tiff */,
 				CEC5AF20098F7A9F00DE1DB2 /* Add_Pressed.tiff */,
@@ -583,6 +586,7 @@
 				CE7B17AF09A473D8003C5A46 /* BDSKComparisonPredicateView.nib in Resources */,
 				CE7B17B009A473D8003C5A46 /* BDSKSmartGroupEditor.nib in Resources */,
 				CE7B187709A4758B003C5A46 /* PredicateRules.plist in Resources */,
+				CE3ACF7809B7D07300391900 /* FolderGroupIcon.tiff in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
