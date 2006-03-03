@@ -40,7 +40,9 @@
     [sortDescriptor release];    
     
     NSTableColumn *tc = [sourceList tableColumnWithIdentifier:@"mainColumn"];
-    [tc setDataCell:[[[ImageAndTextCell alloc] init] autorelease]];
+    ImageAndTextCell *cell = [[[ImageAndTextCell alloc] init] autorelease];
+    [cell setLineBreakMode:NSLineBreakByTruncatingTail];
+    [tc setDataCell:cell];
     
     [sourceListTreeController addObserver:self forKeyPath:@"selectedObjects" options:0 context:NULL];
     [sourceList selectRow:0 byExtendingSelection:NO]; //@@TODO: might want to store last row as a pref
@@ -63,28 +65,33 @@
 #pragma mark Accessors
 
 - (NSSet *)sourceListSelectedItems{
-    id selectedGroup = [self sourceGroup];
-    return [selectedGroup valueForKey:@"itemsInSelfOrChildren"];
+    BDSKGroup *selectedGroup = [self sourceGroup];
+    if (NSIsControllerMarker(selectedGroup)) 
+        return [NSSet set];
+    return [selectedGroup valueForKey:@"items"];
 }
 
 - (void)addSourceListSelectedItemsObject:(id)obj{
-    id selectedGroup = [self sourceGroup];
-    [[selectedGroup mutableSetValueForKey:@"items"] addObject:obj];
+    BDSKGroup *selectedGroup = [self sourceGroup];
+    if (NSIsControllerMarker(selectedGroup) == NO) 
+        [[selectedGroup mutableSetValueForKey:@"items"] addObject:obj];
 }
 
 - (void)removeSourceListSelectedItemsObject:(id)obj{
-    id selectedGroup = [self sourceGroup];
-    [[selectedGroup mutableSetValueForKey:@"items"] removeObject:obj];
+    BDSKGroup *selectedGroup = [self sourceGroup];
+    if (NSIsControllerMarker(selectedGroup) == NO) 
+        [[selectedGroup mutableSetValueForKey:@"items"] removeObject:obj];
 }
 
 #pragma mark Actions
 
 - (IBAction)showWindowForSourceListSelection:(id)sender{
-    id selectedGroup = [self sourceGroup];
-    if ([selectedGroup isCategory]) {
+    BDSKGroup *selectedGroup = [self sourceGroup];
+    if (NSIsControllerMarker(selectedGroup) || [selectedGroup isCategory]) {
         NSBeep();
         return;
     }
+    
     BDSKSecondaryWindowController *swc = [[BDSKSecondaryWindowController alloc] initWithWindowNibName:@"BDSKSecondaryWindow"];
 	[swc setSourceGroup:selectedGroup];
 	[[self document] addWindowController:[swc autorelease]];
@@ -93,9 +100,12 @@
 
 - (IBAction)addNewGroup:(id)sender{
     BDSKGroup *selectedGroup = [self sourceGroup];
-    NSString *entityName = [selectedGroup valueForKey:@"itemEntityName"];
-    BOOL canAddChildren = ([selectedGroup isSmart] == NO && [selectedGroup isCategory] == NO);
+    if (NSIsControllerMarker(selectedGroup)) {
+        NSBeep();
+        return;
+    }
     
+    NSString *entityName = [selectedGroup valueForKey:@"itemEntityName"];
     NSManagedObjectContext *context = [self managedObjectContext];
     id newGroup = [NSEntityDescription insertNewObjectForEntityForName:StaticGroupEntityName
                                                 inManagedObjectContext:context];
@@ -103,23 +113,47 @@
     [newGroup setValue:entityName forKey:@"itemEntityName"];
     [newGroup setValue:@"Untitled Group" forKey:@"name"];
     
-    if (canAddChildren == YES) {
-        // for non-smart groups we add the new groups as a child
-        [newGroup setValue:[NSNumber numberWithBool:NO] forKey:@"isRoot"];
+    if ([selectedGroup canAddChildren] == YES) {
+        // for folder groups we add the new group as a child
         [[selectedGroup mutableSetValueForKey:@"children"] addObject:newGroup];
-    } else {
-        // for smart groups (including auto groups) we add the new groups as root
-        [newGroup setValue:[NSNumber numberWithBool:YES] forKey:@"isRoot"];
     }
     
     [context processPendingChanges];
+    // TODO: select the new group and edit. How to select?
+}
+
+- (IBAction)addNewFolderGroup:(id)sender{
+    BDSKGroup *selectedGroup = [self sourceGroup];
+    if (NSIsControllerMarker(selectedGroup)) {
+        NSBeep();
+        return;
+    }
+    
+    NSString *entityName = [selectedGroup valueForKey:@"itemEntityName"];
+    NSManagedObjectContext *context = [self managedObjectContext];
+    id newFolderGroup = [NSEntityDescription insertNewObjectForEntityForName:FolderGroupEntityName
+                                                      inManagedObjectContext:context];
+    
+    [newFolderGroup setValue:entityName forKey:@"itemEntityName"];
+    [newFolderGroup setValue:@"Untitled Folder" forKey:@"name"];
+    
+    if ([selectedGroup canAddChildren] == YES) {
+        // for non-smart groups we add the new group as a child
+        [[selectedGroup mutableSetValueForKey:@"children"] addObject:newFolderGroup];
+    }
+    
+    [context processPendingChanges];
+    // TODO: select the new group and edit. How to select?
 }
 
 - (IBAction)addNewSmartGroup:(id)sender{
     BDSKGroup *selectedGroup = [self sourceGroup];
-    NSString *entityName = [selectedGroup valueForKey:@"itemEntityName"];
-    BOOL canAddChildren = ([selectedGroup isSmart] == NO && [selectedGroup isCategory] == NO);
+    if (NSIsControllerMarker(selectedGroup)) {
+        NSBeep();
+        return;
+    }
     
+    NSString *entityName = [selectedGroup valueForKey:@"itemEntityName"];
     NSManagedObjectContext *context = [self managedObjectContext];
     id newSmartGroup = [NSEntityDescription insertNewObjectForEntityForName:SmartGroupEntityName
                                                      inManagedObjectContext:context];
@@ -127,13 +161,9 @@
     [newSmartGroup setValue:entityName forKey:@"itemEntityName"];
     [newSmartGroup setValue:@"Untitled Smart Group" forKey:@"name"];
     
-    if (canAddChildren == YES) {
-        // for non-smart groups we add the new groups as a child
-        [newSmartGroup setValue:[NSNumber numberWithBool:NO] forKey:@"isRoot"];
+    if ([selectedGroup canAddChildren] == YES || [selectedGroup isStatic] == YES) {
+        // for non-smart groups we add the new group as a child
         [[selectedGroup mutableSetValueForKey:@"children"] addObject:newSmartGroup];
-    } else {
-        // for smart groups (including auto groups) we add the new groups as root
-        [newSmartGroup setValue:[NSNumber numberWithBool:YES] forKey:@"isRoot"];
     }
     
     [context processPendingChanges];
@@ -142,8 +172,10 @@
 
 - (IBAction)editSmartGroup:(id)sender{
     id selectedGroup = [self sourceGroup];
-    if ([selectedGroup canEdit] == NO) 
+    if (NSIsControllerMarker(selectedGroup) || [selectedGroup canEdit] == NO) {
+        NSBeep();
         return;
+    }
     
     BDSKSmartGroupEditor *editor = [[BDSKSmartGroupEditor alloc] init];
     NSString *entityName = [selectedGroup valueForKey:@"itemEntityName"];
@@ -153,6 +185,7 @@
     [editor setEntityName:entityName];
     [editor setPropertyName:propertyName];
     [editor setPredicate:predicate];
+    [editor setCanChangeEntityName:[selectedGroup isRoot]];
     
     [NSApp beginSheet:[editor window] 
        modalForWindow:[self window] 
@@ -164,6 +197,7 @@
 - (void)editSmartGroupSheetDidEnd:(NSWindow *)sheet returnCode:(int)returnCode contextInfo:(BDSKSmartGroupEditor *)editor {
     id selectedGroup = [self sourceGroup];
     if (returnCode == NSOKButton) {
+    
         if ([editor commitEditing]) {
             @try {
                 NSString *entityName = [editor entityName];
@@ -185,7 +219,9 @@
 
 - (IBAction)getInfo:(id)sender{
     id selectedGroup = [self sourceGroup];
-    if ([selectedGroup canEdit] && [selectedGroup isSmart]) {
+    if (NSIsControllerMarker(selectedGroup)) {
+        NSBeep();
+    } else if ([selectedGroup canEdit] == YES) {
         [self editSmartGroup:sender];
     } else {
         NSString *entityName = [selectedGroup valueForKey:@"itemEntityName"];
@@ -223,7 +259,7 @@
     NSString *entityName = [groupItem valueForKey:@"itemEntityName"];
     NSString *pboardType = nil;
     
-    if ([groupItem isSmart] || [groupItem isCategory])
+    if ([groupItem isStatic] == NO)
         return NSDragOperationNone;
     
     if ([entityName isEqualToString:PublicationEntityName])

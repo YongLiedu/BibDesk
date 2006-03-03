@@ -12,12 +12,12 @@
 @implementation BDSKGroup 
 
 + (void)initialize {
-    [self setKeys:[NSArray arrayWithObjects:@"items", @"children", nil] 
-        triggerChangeNotificationsForDependentKey:@"itemsInSelfOrChildren"];
     [self setKeys:[NSArray arrayWithObjects:@"name", @"groupImageName", nil] 
         triggerChangeNotificationsForDependentKey:@"nameAndIcon"];
     [self setKeys:[NSArray arrayWithObjects:@"groupImageName", nil] 
         triggerChangeNotificationsForDependentKey:@"icon"];
+    [self setKeys:[NSArray arrayWithObjects:@"parent", nil] 
+        triggerChangeNotificationsForDependentKey:@"isRoot"];
 }
 
 - (NSString *)itemEntityName {
@@ -55,16 +55,22 @@
     [self setValue:name forKey:@"name"];
 }
 
+- (BOOL)isRoot { return ([self valueForKey:@"parent"] == nil); }
+
+- (BOOL)isLeaf { return NO; }
+
 - (BOOL)isSmart { return NO; }
+
+- (BOOL)isStatic { return NO; }
 
 - (BOOL)isCategory { return NO; }
 
-- (BOOL)isLeaf { return NO; }
+- (BOOL)canAddChildren { return NO; }
+
+- (BOOL)canAddItems { return NO; }
 
 - (BOOL)canEdit { return NO; }
 
 - (BOOL)canEditName { return YES; }
-
-- (NSSet *)itemsInSelfOrChildren { return [self valueForKey:@"items"]; }
 
 @end

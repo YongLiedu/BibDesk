@@ -25,6 +25,7 @@
 - (IBAction)showWindowForSourceListSelection:(id)sender;
 
 - (IBAction)addNewGroup:(id)sender;
+- (IBAction)addNewFolderGroup:(id)sender;
 - (IBAction)addNewSmartGroup:(id)sender;
 
 - (IBAction)editSmartGroup:(id)sender;

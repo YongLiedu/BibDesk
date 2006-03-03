@@ -259,7 +259,7 @@
 }
 
 - (void)setItemPropertyName:(NSString *)propertyName {
-    [self willChangeValueForKey: @"itemPropertyName"];
+    [self willChangeValueForKey:@"itemPropertyName"];
     [self setPrimitiveValue:propertyName forKey:@"itemPropertyName"];
     [self didChangeValueForKey:@"itemPropertyName"];
 }
@@ -277,9 +277,9 @@
     return (groupImageName != nil) ? groupImageName : @"SmartGroupIcon";
 }
 
-- (BOOL)isSmart { return YES; }
-
 - (BOOL)isLeaf { return ([self valueForKey:@"itemPropertyName"] == nil); }
+
+- (BOOL)isSmart { return YES; }
 
 - (BOOL)canEdit { return YES; }
 
@@ -288,14 +288,8 @@
 - (NSSet *)items {
     if (items == nil)  {
         BDSKGroup *parent = [self valueForKey:@"parent"];
-        if (parent == nil) {
-            NSError *error = nil;
-            NSArray *results = nil;
-            @try {  results = [[self managedObjectContext] executeFetchRequest:[self fetchRequest] error:&error];  }
-            @catch ( NSException *e ) {  /* no-op */ }
-            items = ( error != nil || results == nil) ? [[NSSet alloc] init] : [[NSSet alloc] initWithArray:results];
-        } else {
-            NSMutableArray *results = [[[parent valueForKey:@"itemsInSelfOrChildren"] allObjects] mutableCopy];
+        if (parent != nil && [parent isStatic] == YES) {
+            NSMutableArray *results = [[[parent valueForKey:@"items"] allObjects] mutableCopy];
             NSString *entityName = [self itemEntityName];
             NSPredicate *predicate = [self predicate];
             if (entityName && predicate) {
@@ -305,16 +299,18 @@
             }
             items = [[NSSet alloc] initWithArray:results];
             [results release];
+        } else {
+            NSError *error = nil;
+            NSArray *results = nil;
+            @try {  results = [[self managedObjectContext] executeFetchRequest:[self fetchRequest] error:&error];  }
+            @catch ( NSException *e ) {  /* no-op */ }
+            items = ( error != nil || results == nil) ? [[NSSet alloc] init] : [[NSSet alloc] initWithArray:results];
         }
     }
     return items;
 }
 
 - (void)setItems:(NSSet *)newItems  { /* no-op */ }
-
-- (NSSet *)itemsInSelfOrChildren { return [self items]; }
-
-- (void)setItemsInSelfOrChildren:(NSSet *)newItems { /* no-op */ }
 
 - (NSSet *)children {
     if (children == nil)  {
@@ -386,6 +382,8 @@
 
 - (BOOL)isLeaf { return YES; }
 
+- (BOOL)canAddItems { return YES; }
+
 - (BOOL)canEdit { return NO; }
 
 - (BOOL)canEditName { return NO; }
@@ -424,11 +422,11 @@
 
 #pragma mark Accessors
 
-- (BOOL)isCategory { return YES; }
-
 - (BOOL)isRoot { return NO; }
 
 - (BOOL)isLeaf { return YES; }
+
+- (BOOL)isCategory { return YES; }
 
 - (BOOL)canEdit { return NO; }
 

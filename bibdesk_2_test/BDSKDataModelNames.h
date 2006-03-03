@@ -11,6 +11,7 @@
  */
 
 #define StaticGroupEntityName @"StaticGroup"
+#define FolderGroupEntityName @"FolderGroup"
 #define SmartGroupEntityName @"SmartGroup"
 #define LibraryGroupEntityName @"LibraryGroup"
 #define CategoryGroupEntityName @"CategoryGroup"

@@ -19,65 +19,53 @@
         triggerChangeNotificationsForDependentKey:@"isLeaf"];
 }
 
-- (void)didTurnIntoFault {
-    [cachedIcon release];
-    cachedIcon = nil;
-    
-    [super didTurnIntoFault];
+#pragma mark Accessors
+
+- (NSString *)groupImageName {
+    return @"GroupIcon";
+}
+
+- (BOOL)isLeaf { return ([[self valueForKey:@"children"] count] == 0); }
+
+- (BOOL)isStatic { return YES; }
+
+- (BOOL)canAddItems { return YES; }
+
+@end
+
+
+@implementation BDSKFolderGroup 
+
++ (void)initialize {
+    // we need to call super's implementation, even though the docs say not to, because otherwise we loose dependent keys
+    [super initialize]; 
+    [self setKeys:[NSArray arrayWithObjects:@"children", nil]
+        triggerChangeNotificationsForDependentKey:@"isLeaf"];
+    [self setKeys:[NSArray arrayWithObjects:@"children", nil]
+        triggerChangeNotificationsForDependentKey:@"items"];
 }
 
 #pragma mark Accessors
 
+- (NSString *)groupImageName {
+    return @"FolderGroupIcon";
+}
+
 - (BOOL)isLeaf { return ([[self valueForKey:@"children"] count] == 0); }
 
-- (NSSet *)itemsInSelfOrChildren {
+- (BOOL)canAddChildren { return YES; }
+
+- (NSSet *)items {
     NSMutableSet *myPubs = [NSMutableSet setWithCapacity:10];
-    [myPubs unionSet:[self valueForKey:@"items"]];
-    
     NSSet *children = [self valueForKey:@"children"];
     NSEnumerator *childE = [children objectEnumerator];
     id child = nil;
     while (child = [childE nextObject]) {
-        if ([child isSmart] == NO)
-            [myPubs unionSet:[child valueForKey:@"itemsInSelfOrChildren"]];
+        [myPubs unionSet:[child valueForKey:@"items"]];
     }
     return myPubs;
 }
 
-- (void)addItemsInSelfOrChildrenObject:(id)obj {
-    NSSet *children = [self valueForKey:@"children"];
-    NSEnumerator *childE = [children objectEnumerator];
-    id child = nil;
-    while (child = [childE nextObject]) {
-        if ([child isSmart] == NO && [[child valueForKey:@"itemsInSelfOrChildren"] containsObject:obj])
-            return;
-    }
-    
-    NSSet *changedObjects = [[NSSet alloc] initWithObjects:&obj count:1];
-    [self willChangeValueForKey:@"itemsInSelfOrChildren" withSetMutation:NSKeyValueUnionSetMutation usingObjects:changedObjects];
-    
-    [[self mutableSetValueForKey:@"items"] addObject:obj];
-    
-    [self didChangeValueForKey:@"itemsInSelfOrChildren" withSetMutation:NSKeyValueUnionSetMutation usingObjects:changedObjects];
-    [changedObjects release];
-}
-
-- (void)removeItemsInSelfOrChildrenObject:(id)obj {
-    NSSet *changedObjects = [[NSSet alloc] initWithObjects:&obj count:1];
-    [self willChangeValueForKey:@"itemsInSelfOrChildren" withSetMutation:NSKeyValueMinusSetMutation usingObjects:changedObjects];
-    
-    [[self mutableSetValueForKey:@"items"] removeObject:obj];
-    
-    NSSet *children = [self valueForKey:@"children"];
-    NSEnumerator *childE = [children objectEnumerator];
-    id child = nil;
-    while (child = [childE nextObject]) {
-        if ([child isSmart] == NO)
-            [child removeItemsInSelfOrChildrenObject:obj];
-    }
-    
-    [self didChangeValueForKey:@"itemsInSelfOrChildren" withSetMutation:NSKeyValueMinusSetMutation usingObjects:changedObjects];
-    [changedObjects release];
-}
+- (void)setItems:(NSSet *)newItems  { /* no-op */ }
 
 @end

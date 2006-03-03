@@ -173,7 +173,7 @@
     NSDictionary *options = [NSDictionary dictionaryWithObjectsAndKeys:[NSNumber numberWithBool:NO], NSRaisesForNotApplicableKeysBindingOption, [NSNumber numberWithBool:YES], NSConditionallySetsEnabledBindingOption, [NSNumber numberWithBool:YES], NSDeletesObjectsOnRemoveBindingsOption, nil];
     // TODO: in future, this should create multiple bindings.?    
     [[displayController itemsArrayController] bind:@"contentSet" toObject:self
-                                       withKeyPath:@"sourceGroup.itemsInSelfOrChildren" options:options];
+                                       withKeyPath:@"sourceGroup.items" options:options];
     // TODO: in future, this should create multiple bindings.?    
     
     NSArray *filterPredicates = [displayController filterPredicates];
@@ -205,23 +205,18 @@
 #pragma mark Actions
 
 - (IBAction)addNewItem:(id)sender{
-    NSManagedObject *selectedGroup = [self sourceGroup];
-    NSString *entityName = [selectedGroup valueForKey:@"itemEntityName"];
-    NSString *groupEntityName = [[selectedGroup  entity] name];
-    BOOL isSmart = [[selectedGroup valueForKey:@"isSmart"] boolValue];
-
-    //NSLog(@"entityName in addNewItemFrom is %@, obj is %@", entityName, obj);
-    
-    if (isSmart == YES && [groupEntityName isEqualToString:LibraryGroupEntityName] == NO) {
+    BDSKGroup *selectedGroup = [self sourceGroup];
+    if (NSIsControllerMarker(selectedGroup) || [selectedGroup canAddItems] == NO) {
         NSBeep();
         return;
     }
     
+    NSString *entityName = [selectedGroup valueForKey:@"itemEntityName"];
     NSManagedObjectContext *context = [self managedObjectContext];
     NSManagedObject *newItem = [NSEntityDescription insertNewObjectForEntityForName:entityName
                                                              inManagedObjectContext:context];
     
-    if (isSmart == NO) {
+    if ([selectedGroup isStatic] == YES) {
         NSMutableSet *items = [selectedGroup mutableSetValueForKey:@"items"];
         [items addObject:newItem];
     }

@@ -9,7 +9,7 @@
 #import <CoreData/CoreData.h>
 
 
-@interface BDSKGroup :  NSManagedObject {
+@interface BDSKGroup : NSManagedObject {
     NSImage *cachedIcon;
 }
 
@@ -22,12 +22,15 @@
 - (NSDictionary *)nameAndIcon;
 - (void)setNameAndIcon:(NSString *)name;
 
-- (NSSet *)itemsInSelfOrChildren;
+- (BOOL)isRoot;
+- (BOOL)isLeaf;
 
 - (BOOL)isSmart;
+- (BOOL)isStatic;
 - (BOOL)isCategory;
 
-- (BOOL)isLeaf;
+- (BOOL)canAddItems;
+- (BOOL)canAddChildren;
 
 - (BOOL)canEdit;
 - (BOOL)canEditName;

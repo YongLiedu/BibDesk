@@ -23,6 +23,7 @@ extern id BDSKAddOtherMarker;
     NSString *propertyName;
     NSString *addedPropertyName;
     int conjunction;
+    BOOL canChangeEntityName;
     NSDictionary *predicateRules;
     NSMutableArray *publicationPropertyNames;
     NSMutableArray *controllers;
@@ -58,6 +59,9 @@ extern id BDSKAddOtherMarker;
 - (void)setAddedPropertyName:(NSString *)newPropertyName;
 
 - (BOOL)isCompound;
+
+- (BOOL)canChangeEntityName;
+- (void)setCanChangeEntityName:(BOOL)flag;
 
 - (void)reset;
 

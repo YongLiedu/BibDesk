@@ -8,6 +8,7 @@
         }, 
         {
             ACTIONS = {
+                addNewFolderGroup = id; 
                 addNewGroup = id; 
                 addNewItem = id; 
                 addNewSmartGroup = id; 

@@ -32,7 +32,6 @@
 - (void)setGroupImageName:(NSString *)imageName;
 
 - (NSSet *)items;
-- (NSSet *)itemsInSelfOrChildren;
 
 - (NSSet *)children;
 

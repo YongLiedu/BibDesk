@@ -406,6 +406,14 @@ id BDSKAddOtherMarker;
     return ([controllers count] > 1);
 }
 
+- (BOOL)canChangeEntityName {
+    return canChangeEntityName;
+}
+
+- (void)setCanChangeEntityName:(BOOL)flag {
+    canChangeEntityName = flag;
+}
+
 #pragma mark NSEditorRegistration
 
 - (void)objectDidBeginEditing:(id)editor {

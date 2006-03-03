@@ -13,8 +13,12 @@
 @interface BDSKStaticGroup :  BDSKGroup {
 }
 
-- (NSSet *)itemsInSelfOrChildren;
-- (void)addItemsInSelfOrChildrenObject:(id)obj;
-- (void)removeItemsInSelfOrChildrenObject:(id)obj;
+@end
+
+
+@interface BDSKFolderGroup :  BDSKGroup {
+}
+
+- (NSSet *)items;
 
 @end
