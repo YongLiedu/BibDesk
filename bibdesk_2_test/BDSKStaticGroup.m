@@ -45,6 +45,22 @@
         triggerChangeNotificationsForDependentKey:@"items"];
 }
 
+- (void)commonAwake {
+    [self willAccessValueForKey:@"priority"];
+    [self setValue:[NSNumber numberWithInt:2] forKeyPath:@"priority"];
+    [self didAccessValueForKey:@"priority"];
+}
+
+- (void)awakeFromInsert  {
+    [super awakeFromInsert];
+    [self commonAwake];
+}
+
+- (void)awakeFromFetch {
+    [super awakeFromFetch];
+    [self commonAwake];
+}
+
 #pragma mark Accessors
 
 - (NSString *)groupImageName {

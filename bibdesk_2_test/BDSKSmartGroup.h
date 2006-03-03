@@ -13,7 +13,6 @@
 @interface BDSKSmartGroup : BDSKGroup {
     NSSet *items;
     NSMutableSet *children;
-    NSString *groupImageName;
     BOOL isToMany;
     BOOL recreatingChildren;
 }
@@ -29,8 +28,6 @@
 
 - (NSFetchRequest *)fetchRequest;
 
-- (void)setGroupImageName:(NSString *)imageName;
-
 - (NSSet *)items;
 
 - (NSSet *)children;
@@ -44,7 +41,11 @@
 
 
 @interface BDSKLibraryGroup :  BDSKSmartGroup {
+    NSString *groupImageName;
 }
+
+- (void)setGroupImageName:(NSString *)imageName;
+
 @end
 
 
@@ -54,7 +55,5 @@
 
 - (NSSet *)items;
 - (void)setItems:(NSSet *)newItems;
-
-- (NSSet *)children;
 
 @end

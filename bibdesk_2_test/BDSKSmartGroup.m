@@ -42,7 +42,6 @@
 	[super dealloc];
 }
 
-
 - (void)commonAwake {
     [[NSNotificationCenter defaultCenter] addObserver:self 
                                              selector:@selector(managedObjectContextObjectsDidChange:) 
@@ -53,7 +52,7 @@
     children = nil;
     
     [self willAccessValueForKey:@"priority"];
-    [self setValue:[NSNumber numberWithInt:2] forKeyPath:@"priority"];
+    [self setValue:[NSNumber numberWithInt:1] forKeyPath:@"priority"];
     [self didAccessValueForKey:@"priority"];
     
     [self refreshMetaData];
@@ -264,17 +263,8 @@
     [self didChangeValueForKey:@"itemPropertyName"];
 }
 
-- (void)setGroupImageName:(NSString *)imageName {
-    if (![groupImageName isEqualToString:imageName]) {
-        [groupImageName release];
-        groupImageName = [imageName retain];
-        [cachedIcon release];
-        cachedIcon = nil;
-    }
-}
-
 - (NSString *)groupImageName {
-    return (groupImageName != nil) ? groupImageName : @"SmartGroupIcon";
+    return @"SmartGroupIcon";
 }
 
 - (BOOL)isLeaf { return ([self valueForKey:@"itemPropertyName"] == nil); }
@@ -388,8 +378,17 @@
 
 - (BOOL)canEditName { return NO; }
 
+- (void)setGroupImageName:(NSString *)imageName {
+    if (![groupImageName isEqualToString:imageName]) {
+        [groupImageName release];
+        groupImageName = [imageName retain];
+        [cachedIcon release];
+        cachedIcon = nil;
+    }
+}
+
 - (NSString *)groupImageName {
-    return (groupImageName != nil) ? groupImageName : @"RootGroupIcon";
+    return (groupImageName != nil) ? groupImageName : @"LibraryGroupIcon";
 }
 
 - (NSString *)itemPropertyName { return nil; }
