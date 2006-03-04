@@ -136,7 +136,7 @@ NSString *BDSKBibItemPboardType = @"edu.ucsd.mmccrack.bibdesk BibItem pboard typ
         [newUndoManager setDelegate:self];
         [self setUndoManager:newUndoManager];
 		
-		itemsForCiteKeys = [[OFMultiValueDictionary alloc] initWithCaseInsensitiveKeys:YES];
+        itemsForCiteKeys = [[OFMultiValueDictionary alloc] initWithKeyCallBacks:&BDSKCaseInsensitiveStringKeyDictionaryCallBacks];
 		
 		promisedPboardTypes = [[NSMutableDictionary alloc] initWithCapacity:2];
 		
@@ -3332,7 +3332,7 @@ NSString *BDSKBibItemPboardType = @"edu.ucsd.mmccrack.bibdesk BibItem pboard typ
 
 - (void)rebuildItemsForCiteKeys{
 	[itemsForCiteKeys release];
-	itemsForCiteKeys = [[OFMultiValueDictionary alloc] initWithCaseInsensitiveKeys:YES];
+    itemsForCiteKeys = [[OFMultiValueDictionary alloc] initWithKeyCallBacks:&BDSKCaseInsensitiveStringKeyDictionaryCallBacks];
 	NSArray *pubs = [publications copy];
 	[self addToItemsForCiteKeys:pubs];
 	[pubs release];
