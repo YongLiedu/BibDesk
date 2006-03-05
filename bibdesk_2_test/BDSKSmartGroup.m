@@ -331,6 +331,18 @@
         [moc processPendingChanges];
         [[moc undoManager] disableUndoRegistration];
         
+        predicate = [NSPredicate predicateWithFormat:(isToMany) ? @"all %K == nil" : @"%K == nil", propertyName];
+        childItems = [[NSSet alloc] initWithArray:[allItemsArray filteredArrayUsingPredicate:predicate]];
+        if ([childItems count] > 0) {
+            child = [NSEntityDescription insertNewObjectForEntityForName:CategoryGroupEntityName inManagedObjectContext:moc];
+            [child setValue:entityName forKey:@"itemEntityName"];
+            [child setValue:[NSString stringWithFormat:NSLocalizedString(@"Empty", @"Empty"), propertyName] forKey:@"name"];
+            [child setValue:childItems forKey:@"items"];
+            [child setValue:[NSNumber numberWithInt:1] forKey:@"priority"];
+            [children addObject:child];
+        }
+        [childItems release];
+        
         while (value = [valueEnum nextObject]) {
             child = [NSEntityDescription insertNewObjectForEntityForName:CategoryGroupEntityName inManagedObjectContext:moc];
             [child setValue:entityName forKey:@"itemEntityName"];
@@ -355,8 +367,11 @@
 #pragma mark KVO
 
 - (void)observeValueForKeyPath:(NSString *)keyPath ofObject:(id)object change:(NSDictionary *)change context:(void *)context {
-    if ([keyPath isEqualToString:@"itemEntityName"] || [keyPath isEqualToString:@"itemPropertyName"]) {
+    if ([keyPath isEqualToString:@"itemEntityName"]) {
         [self refreshMetaData];
+    } else if ([keyPath isEqualToString:@"itemPropertyName"]) {
+        [self refreshMetaData];
+        [self refreshChildren];
     } else if ([keyPath isEqualToString:@"fetchRequest"] || [keyPath isEqualToString:@"parent"]) {
         [self refreshItems];
         [self refreshChildren];
