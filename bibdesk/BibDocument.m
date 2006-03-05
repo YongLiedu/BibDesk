@@ -352,9 +352,15 @@ NSString *BDSKBibItemPboardType = @"edu.ucsd.mmccrack.bibdesk BibItem pboard typ
     
     // set the frame from prefs first, or setFrameAutosaveName: will overwrite the prefs with the nib values if it returns NO
     [[aController window] setFrameUsingName:@"Main Window Frame Autosave"];
-    // we should only cascade windows if we have multiple editors open; bug #1299305. The second window will however not be cascading relative to the first
-    if ([[aController window] setFrameAutosaveName:@"Main Window Frame Autosave"])
-        [aController setShouldCascadeWindows:NO];
+    // we should only cascade windows if we have multiple documents open; bug #1299305
+    // the default cascading does not reset the next location when all windows have closed, so we do cascading ourselves
+    static NSPoint nextWindowLocation = {0.0, 0.0};
+    [aController setShouldCascadeWindows:NO];
+    if ([[aController window] setFrameAutosaveName:@"Main Window Frame Autosave"]) {
+        NSRect windowFrame = [[aController window] frame];
+        nextWindowLocation = NSMakePoint(NSMinX(windowFrame), NSMaxY(windowFrame));
+    }
+    nextWindowLocation = [[aController window] cascadeTopLeftFromPoint:nextWindowLocation];
     
     [documentWindow makeFirstResponder:tableView];	
     [tableView removeAllTableColumns];
