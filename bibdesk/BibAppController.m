@@ -1492,6 +1492,7 @@ OFWeakRetainConcreteImplementation_NULL_IMPLEMENTATION
         NSString *citeKey;
         BibItem *anItem;
         NSDate *dateModified;
+        NSCharacterSet *invalidFilenameCharSet = [NSCharacterSet characterSetWithCharactersInString:@":/"];
         
         BDAlias *alias = [[BDAlias alloc] initWithPath:docPath];
         if(alias == nil){
@@ -1563,7 +1564,8 @@ OFWeakRetainConcreteImplementation_NULL_IMPLEMENTATION
             [metadata setValue:array forKey:(NSString *)kMDItemWhereFroms];
             [array release];
 			
-            tmpPath = [cachePath stringByAppendingPathComponent:[citeKey stringByAppendingPathExtension:@"bdskcache"]];
+            tmpPath = [citeKey stringByReplacingCharactersInSet:invalidFilenameCharSet withString:@"%"];
+            tmpPath = [cachePath stringByAppendingPathComponent:[tmpPath stringByAppendingPathExtension:@"bdskcache"]];
             
             // save the plist; we can get an error if these are not plist objects, or the file couldn't be written
             if([metadata writeToFile:tmpPath atomically:YES] == NO){
