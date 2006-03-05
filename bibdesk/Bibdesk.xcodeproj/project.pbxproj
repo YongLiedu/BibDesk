@@ -419,7 +419,6 @@
 		F9022DCC0758088000C3F701 /* key.tiff in Resources */ = {isa = PBXBuildFile; fileRef = F9022DB10758088000C3F701 /* key.tiff */; };
 		F9022DCD0758088000C3F701 /* newdoc.tiff in Resources */ = {isa = PBXBuildFile; fileRef = F9022DB20758088000C3F701 /* newdoc.tiff */; };
 		F9022DCE0758088000C3F701 /* preview.tiff in Resources */ = {isa = PBXBuildFile; fileRef = F9022DB30758088000C3F701 /* preview.tiff */; };
-		F9022DCF0758088000C3F701 /* previewdoc.tiff in Resources */ = {isa = PBXBuildFile; fileRef = F9022DB40758088000C3F701 /* previewdoc.tiff */; };
 		F9022DD00758088000C3F701 /* QuestionMarkFile.tiff in Resources */ = {isa = PBXBuildFile; fileRef = F9022DB50758088000C3F701 /* QuestionMarkFile.tiff */; };
 		F9022DD10758088000C3F701 /* Remove_Pressed.tiff in Resources */ = {isa = PBXBuildFile; fileRef = F9022DB60758088000C3F701 /* Remove_Pressed.tiff */; };
 		F9022DD20758088000C3F701 /* Remove.tiff in Resources */ = {isa = PBXBuildFile; fileRef = F9022DB70758088000C3F701 /* Remove.tiff */; };
@@ -1247,7 +1246,6 @@
 		F9022DB10758088000C3F701 /* key.tiff */ = {isa = PBXFileReference; lastKnownFileType = image.tiff; name = key.tiff; path = Images/key.tiff; sourceTree = "<group>"; };
 		F9022DB20758088000C3F701 /* newdoc.tiff */ = {isa = PBXFileReference; lastKnownFileType = image.tiff; name = newdoc.tiff; path = Images/newdoc.tiff; sourceTree = "<group>"; };
 		F9022DB30758088000C3F701 /* preview.tiff */ = {isa = PBXFileReference; lastKnownFileType = image.tiff; name = preview.tiff; path = Images/preview.tiff; sourceTree = "<group>"; };
-		F9022DB40758088000C3F701 /* previewdoc.tiff */ = {isa = PBXFileReference; lastKnownFileType = image.tiff; name = previewdoc.tiff; path = Images/previewdoc.tiff; sourceTree = "<group>"; };
 		F9022DB50758088000C3F701 /* QuestionMarkFile.tiff */ = {isa = PBXFileReference; lastKnownFileType = image.tiff; name = QuestionMarkFile.tiff; path = Images/QuestionMarkFile.tiff; sourceTree = "<group>"; };
 		F9022DB60758088000C3F701 /* Remove_Pressed.tiff */ = {isa = PBXFileReference; lastKnownFileType = image.tiff; name = Remove_Pressed.tiff; path = Images/Remove_Pressed.tiff; sourceTree = "<group>"; };
 		F9022DB70758088000C3F701 /* Remove.tiff */ = {isa = PBXFileReference; lastKnownFileType = image.tiff; name = Remove.tiff; path = Images/Remove.tiff; sourceTree = "<group>"; };
@@ -1912,7 +1910,6 @@
 				F9022DB10758088000C3F701 /* key.tiff */,
 				F9022DB20758088000C3F701 /* newdoc.tiff */,
 				F9022DB30758088000C3F701 /* preview.tiff */,
-				F9022DB40758088000C3F701 /* previewdoc.tiff */,
 				F9022DB50758088000C3F701 /* QuestionMarkFile.tiff */,
 				3DFF35620816B5780052F37C /* reload_small.tiff */,
 				F9022DB60758088000C3F701 /* Remove_Pressed.tiff */,
@@ -2893,7 +2890,6 @@
 				F9022DCC0758088000C3F701 /* key.tiff in Resources */,
 				F9022DCD0758088000C3F701 /* newdoc.tiff in Resources */,
 				F9022DCE0758088000C3F701 /* preview.tiff in Resources */,
-				F9022DCF0758088000C3F701 /* previewdoc.tiff in Resources */,
 				F9022DD00758088000C3F701 /* QuestionMarkFile.tiff in Resources */,
 				F9022DD10758088000C3F701 /* Remove_Pressed.tiff in Resources */,
 				F9022DD20758088000C3F701 /* Remove.tiff in Resources */,
