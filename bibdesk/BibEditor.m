@@ -331,8 +331,9 @@ static int numberOfOpenEditors = 0;
     [self setupToolbar];
     
     [[self window] setFrameUsingName:BDSKBibEditorFrameAutosaveName];
-    [[self window] setFrameAutosaveName:BDSKBibEditorFrameAutosaveName];
-    // we should only cascade editor windows if we have multiple editors open; bug #1299305, but just setting the flag to NO doesn't work.
+    // we should only cascade editor windows if we have multiple editors open; bug #1299305. The second window will however not be cascading relative to the first
+    if ([[self window] setFrameAutosaveName:BDSKBibEditorFrameAutosaveName])
+        [self setShouldCascadeWindows:NO];
 
     [splitView setPositionAutosaveName:@"OASplitView Position BibEditor"];
 
