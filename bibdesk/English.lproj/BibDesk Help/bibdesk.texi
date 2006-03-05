@@ -2346,9 +2346,14 @@ automatically move files.
 
 @prefitem{Papers folder location} Papers that are automatically filed by BibDesk will 
 be moved to this folder or a subfolder. The format string used to generate the location of the 
-moved papers is relative to this folder. When the papers forlder is empty, the folder 
+moved papers is relative to this folder. When the papers folder is empty, the folder 
 containing the document to which the items belong will be used. To get this behavior, deselect 
 the checkbox.
+
+@prefitem{Use relative path for Local-Url} When this option is selected, the Local-Url will be 
+set to the path relative to the document's location, rather than the full URL. 
+This option is only available when the papers folder is empty. When you choose this option, 
+make sure that any document is saved before activating AutoFile. 
 
 @prefitem{File papers automatically} When you select this option, BibDesk will automatically 
 move files into the papers folder hierarchy for new items. The new location will be build 
@@ -2388,6 +2393,8 @@ a string from capitalization. You can choose to remove those braces from the
 generated cite key. You can additionally choose to remove TeX commands. This will 
 also remove the braces. The Windows option will remove also characters that are illegal 
 in file names on Windows systems, so you can share the files with a Windows machine. 
+Choosing the Non-ASCII option will ensure that the generated file name contains 
+only ASCII characters; accented characters are converted if possible. 
 
 @c --------------------------------------------------------------------------------------
 
