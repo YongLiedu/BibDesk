@@ -43,6 +43,7 @@
 #import <OmniAppKit/OATextWithIconCell.h>
 #import <OmniAppKit/NSTableView-OAExtensions.h>
 #import "BibDocument.h"
+#import "BibAppController.h"
 
 static BibFiler *sharedFiler = nil;
 
@@ -136,6 +137,8 @@ static BibFiler *sharedFiler = nil;
 	NSMutableDictionary *info = nil;
 	NSString *status = nil;
 	int statusFlag = BDSKNoErrorMask;
+	BOOL useRelativePath = [[OFPreferenceWrapper sharedPreferenceWrapper] boolForKey:BDSKAutoFileUsesRelativePathKey];
+    NSString *papersFolderPath = [[[NSApp delegate] folderPathForFilingPapersFromDocument:doc] stringByAppendingString:@"/"];
 	
 	if (numberOfPapers == 0)
 		return;
@@ -298,9 +301,17 @@ static BibFiler *sharedFiler = nil;
 			// should we remove the new file and not set the Local-Url when we couldn't remove the old file?
 			oldValue  = [[NSURL fileURLWithPath:path] absoluteString]; // we don't use the field value, as we might have already changed it in undo or find/replace
 			newValue  = [[NSURL fileURLWithPath:newPath] absoluteString];
-			if(initial) // otherwise will be done by undo of setField:
-				[paper setField:field toValue:newValue];
-			if(scriptHook){
+			if(initial) {// otherwise will be done by undo of setField:
+                if(useRelativePath){
+                    NSString *relativePath = newPath;
+                    if ([newPath hasPrefix:papersFolderPath])
+                        [newPath substringFromIndex:[papersFolderPath length]];
+                    [paper setField:field toValue:relativePath];
+                }else{
+                    [paper setField:field toValue:newValue];
+                }
+			}
+            if(scriptHook){
 				[papers addObject:paper];
 				[oldValues addObject:oldValue];
 				[newValues addObject:newValue];

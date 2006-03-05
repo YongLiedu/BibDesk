@@ -140,6 +140,7 @@ extern NSString *BDSKRowColorBlueKey;
 
 extern NSString *BDSKPapersFolderPathKey;
 extern NSString *BDSKFilePapersAutomaticallyKey;
+extern NSString *BDSKAutoFileUsesRelativePathKey;
 extern NSString *BDSKLocalUrlFormatKey;
 extern NSString *BDSKLocalUrlFormatPresetKey;
 extern NSString *BDSKLocalUrlLowercaseKey;

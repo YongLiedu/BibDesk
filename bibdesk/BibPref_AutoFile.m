@@ -109,11 +109,14 @@ static NSString *repositorySpecifierStrings[] = {@"", @"%a00", @"%A0", @"%t0", @
 		[papersFolderLocationTextField setEnabled:NO];
 		[choosePapersFolderLocationButton setEnabled:NO];
 		[clearPapersFolderLocationButton setState:NSOffState];
+		[useRelativePathCheckButton setEnabled:YES];
 	} else {
 		[papersFolderLocationTextField setStringValue:papersFolder];
 		[papersFolderLocationTextField setEnabled:YES];
 		[choosePapersFolderLocationButton setEnabled:YES];
 		[clearPapersFolderLocationButton setState:NSOnState];
+		[useRelativePathCheckButton setState:NSOffState];
+		[useRelativePathCheckButton setEnabled:NO];
 	}
 
     [formatLowercaseCheckButton setState:[defaults boolForKey:BDSKLocalUrlLowercaseKey] ? NSOnState : NSOffState];
@@ -182,11 +185,17 @@ static NSString *repositorySpecifierStrings[] = {@"", @"%a00", @"%A0", @"%t0", @
 
 - (IBAction)clearPapersFolderLocationAction:(id)sender{
 	if ([sender state] == NSOnState) {
+        [defaults setBool:NO forKey:BDSKAutoFileUsesRelativePathKey];
 		[self choosePapersFolderLocationAction:sender];
 	} else {
 		[defaults setObject:@"" forKey:BDSKPapersFolderPathKey];
 		[self updateUI];
 	}
+}
+
+- (IBAction)toggleUseRelativePathAction:(id)sender{
+	[defaults setBool:([useRelativePathCheckButton state] == NSOnState)
+			   forKey:BDSKAutoFileUsesRelativePathKey];
 }
 
 - (IBAction)toggleFilePapersAutomaticallyAction:(id)sender{

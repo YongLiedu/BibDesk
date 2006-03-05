@@ -240,6 +240,8 @@
 				<integer>1</integer>
 				<key>defaultsDictionary</key>
 				<dict>
+					<key>AutoFile uses relative path</key>
+					<false/>
 					<key>File papers into the papers folder automatically</key>
 					<false/>
 					<key>Local-Url Clean Braces or TeX</key>
