@@ -266,6 +266,26 @@
 	[self scrollRowToVisible:0];
 }
 
+- (void)changeFont:(id)sender {
+	NSFontManager *fontManager = [NSFontManager sharedFontManager];
+	NSFont *selectedFont = [fontManager selectedFont];
+	if (selectedFont == nil)
+		selectedFont = [NSFont systemFontOfSize:[NSFont systemFontSize]];
+	NSFont *font = [fontManager convertFont:selectedFont];
+    
+    [[OFPreferenceWrapper sharedPreferenceWrapper] setObject:[font fontName] forKey:BDSKTableViewFontKey];
+    [[OFPreferenceWrapper sharedPreferenceWrapper] setFloat:[font pointSize] forKey:BDSKTableViewFontSizeKey];
+    
+    [[NSNotificationCenter defaultCenter] postNotificationName:BDSKTableViewFontChangedNotification object:nil];
+}
+
+- (BOOL)acceptsFirstResponder{
+    NSString *fontName = [[OFPreferenceWrapper sharedPreferenceWrapper] objectForKey:BDSKTableViewFontKey];
+    float fontSize = [[OFPreferenceWrapper sharedPreferenceWrapper] floatForKey:BDSKTableViewFontSizeKey];
+	[[NSFontManager sharedFontManager] setSelectedFont:[NSFont fontWithName:fontName size:fontSize] isMultiple:NO];
+    return [super acceptsFirstResponder];
+}
+
 @end
 
 @implementation BDSKGroupTableHeaderView 

@@ -54,6 +54,7 @@
 - (void)handleClipViewFrameChangedNotification:(NSNotification *)note;
 - (void)handleFontChangedNotification:(NSNotification *)note;
 - (void)updateHighlights;
+- (void)changeFont:(id)sender;
 
 @end
 

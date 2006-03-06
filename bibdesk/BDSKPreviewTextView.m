@@ -13,9 +13,11 @@
 @implementation BDSKPreviewTextView
 
 - (void)updateFontPanel {
-    NSString *fontName = [[OFPreferenceWrapper sharedPreferenceWrapper] objectForKey:BDSKPreviewPaneFontFamilyKey];
-    float fontSize = [[OFPreferenceWrapper sharedPreferenceWrapper] floatForKey:BDSKPreviewPaneFontChangedNotification];
-	[[NSFontManager sharedFontManager] setSelectedFont:[NSFont fontWithName:fontName size:fontSize] isMultiple:NO];
+    if ([[self window] firstResponder] == self) {
+        NSString *fontName = [[OFPreferenceWrapper sharedPreferenceWrapper] objectForKey:BDSKPreviewPaneFontFamilyKey];
+        float fontSize = [[OFPreferenceWrapper sharedPreferenceWrapper] floatForKey:BDSKPreviewPaneFontChangedNotification];
+        [[NSFontManager sharedFontManager] setSelectedFont:[NSFont fontWithName:fontName size:fontSize] isMultiple:NO];
+    }
 }
 
 - (void)changeFont:(id)sender {

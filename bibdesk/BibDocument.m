@@ -2892,21 +2892,8 @@ NSString *BDSKBibItemPboardType = @"edu.ucsd.mmccrack.bibdesk BibItem pboard typ
     [[NSFontManager sharedFontManager] orderFrontFontPanel:sender];
     
     id firstResponder = [documentWindow firstResponder];
-    if (firstResponder != tableView && firstResponder != groupTableView && firstResponder != documentWindow)
+    if (firstResponder != tableView && firstResponder != groupTableView)
         [documentWindow makeFirstResponder:tableView];
-}
-
-- (void)changeFont:(id)sender {
-	NSFontManager *fontManager = [NSFontManager sharedFontManager];
-	NSFont *selectedFont = [fontManager selectedFont];
-	if (selectedFont == nil)
-		selectedFont = [NSFont systemFontOfSize:[NSFont systemFontSize]];
-	NSFont *font = [fontManager convertFont:selectedFont];
-    
-    [[OFPreferenceWrapper sharedPreferenceWrapper] setObject:[font fontName] forKey:BDSKTableViewFontKey];
-    [[OFPreferenceWrapper sharedPreferenceWrapper] setFloat:[font pointSize] forKey:BDSKTableViewFontSizeKey];
-    
-    [[NSNotificationCenter defaultCenter] postNotificationName:BDSKTableViewFontChangedNotification object:nil];
 }
 
 #pragma mark TeXTask delegate

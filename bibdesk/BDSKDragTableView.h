@@ -51,6 +51,7 @@
 }
 
 - (void)removeAllTableColumns;
+- (void)changeFont:(id)sender;
 @end
 
 @interface NSObject (BDSKDragTableViewDataSource)
