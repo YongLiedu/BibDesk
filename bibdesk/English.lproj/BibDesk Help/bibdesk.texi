@@ -1890,17 +1890,15 @@ This preference pane lets you control the overall appearance of the main window.
 
 @image{gfx/displayPrefs}
 
-@prefitem{Publication List} You can set the font family and size used in the publications list. 
-In the table, you can add a custom set of words, such as 'the' and 'a', that will 
-be ignored when sorting the table.
+@prefitem{Words to ignore for sorting} In the table, you can add a custom set of words, such as 'the' and 'a', 
+that will be ignored when sorting the table.
 
-@prefitem{Name Display} You can change the way names are displayed in the 'Author' column and in
-the lower pane of the main browser window.
-
-@prefitem{Preview Pane} Select what you want the lower pane of the main browser window to show. 
+@prefitem{Content} Select what you want the lower preview pane of the main browser window to show. 
 You can limit the maximal number of items to be shown in the lower pane. Note that generating the 
 preview can be slow when many items are chosen. 
-The Font family popup menu allows you to choose the font used for the preview pane. 
+
+@prefitem{Name display} You can change the way names are displayed in the 'Author' column and in
+the lower preview pane of the main browser window.
 
 @c --------------------------------------------------------------------------------------
 
