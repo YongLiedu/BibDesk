@@ -1,28 +1,16 @@
 {
     IBClasses = (
         {
-            ACTIONS = {
-                addTerm = id; 
-                changeAuthorDisplay = id; 
-                changePreviewDisplay = id; 
-                changePreviewMaxNumber = id; 
-                chooseFont = id; 
-                removeSelectedTerm = id; 
-                selectPreviewFont = id; 
-            }; 
+            ACTIONS = {addTerm = id; changeAuthorDisplay = id; removeSelectedTerm = id; }; 
             CLASS = "BibPref_Display"; 
             LANGUAGE = ObjC; 
             OUTLETS = {
                 addButton = NSButton; 
                 authorNameMatrix = NSMatrix; 
                 displayPrefRadioMatrix = NSMatrix; 
-                previewFontPopup = NSPopUpButton; 
-                previewFontSizeField = NSTextField; 
                 previewMaxNumberComboBox = NSComboBox; 
                 removeButton = NSButton; 
                 tableView = NSTableView; 
-                tableViewFontPopup = NSPopUpButton; 
-                tableViewFontSizeField = NSTextField; 
             }; 
             SUPERCLASS = OAPreferenceClient; 
         }, 

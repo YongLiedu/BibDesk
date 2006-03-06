@@ -44,38 +44,11 @@
 - (void)awakeFromNib{
     [super awakeFromNib];
     
-    NSMutableArray *availableFontFamilies = [[[NSFontManager sharedFontManager] availableFontFamilies] mutableCopy];
-    
-    [previewFontPopup removeAllItems];
-    [previewFontPopup addItemsWithTitles:[availableFontFamilies sortedArrayUsingSelector:@selector(compare:)]];
-    [previewFontPopup selectItemWithTitle:[defaults objectForKey:BDSKPreviewPaneFontFamilyKey]];
-    [availableFontFamilies release];
-    
-    NSMutableArray *availableFonts = [[[NSFontManager sharedFontManager] availableFonts] mutableCopy];
-    
-    [tableViewFontPopup removeAllItems];
-    [tableViewFontPopup addItemsWithTitles:[availableFonts sortedArrayUsingSelector:@selector(compare:)]];
-    [tableViewFontPopup selectItemWithTitle:[defaults objectForKey:BDSKTableViewFontKey]];
-    [availableFonts release];
-    
     [previewMaxNumberComboBox addItemsWithObjectValues:[NSArray arrayWithObjects:NSLocalizedString(@"All", @"All"), @"1", @"5", @"10", @"20", nil]];
     [self updateUI];
 }
 
-- (IBAction)selectPreviewFont:(id)sender{
-    if([sender isKindOfClass:[NSPopUpButton class]])
-        [defaults setObject:[sender titleOfSelectedItem] forKey:BDSKPreviewPaneFontFamilyKey];
-    else if([sender isKindOfClass:[NSTextField class]])
-        [defaults setFloat:[previewFontSizeField floatValue] forKey:BDSKPreviewBaseFontSizeKey];
-    
-    [[NSNotificationCenter defaultCenter] postNotificationName:BDSKPreviewPaneFontChangedNotification object:nil];
-    [[NSNotificationCenter defaultCenter] postNotificationName:BDSKPreviewDisplayChangedNotification object:nil];
-}
-
 - (void)updateUI{
-    [tableViewFontSizeField setFloatValue:[defaults floatForKey:BDSKTableViewFontSizeKey]];
-    [previewFontSizeField setFloatValue:[defaults floatForKey:BDSKPreviewBaseFontSizeKey]];
-    
     [displayPrefRadioMatrix selectCellWithTag:[defaults integerForKey:BDSKPreviewDisplayKey]];
 	
     int maxNumber = [defaults integerForKey:BDSKPreviewMaxNumberKey];
@@ -125,16 +98,6 @@
 		[[NSNotificationCenter defaultCenter] postNotificationName:BDSKPreviewDisplayChangedNotification object:nil];
 	}
 	[self updateUI];
-}
-
-- (IBAction)chooseFont:(id)sender{
-    if([sender isKindOfClass:[NSPopUpButton class]])
-        [defaults setObject:[sender titleOfSelectedItem] forKey:BDSKTableViewFontKey];
-    else if([sender isKindOfClass:[NSTextField class]])
-        [defaults setFloat:[sender floatValue] forKey:BDSKTableViewFontSizeKey];
-    
-    [[NSNotificationCenter defaultCenter] postNotificationName:BDSKTableViewFontChangedNotification
-                                                        object:nil];
 }
 
 //

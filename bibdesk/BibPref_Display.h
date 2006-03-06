@@ -44,11 +44,6 @@
     IBOutlet NSMatrix* displayPrefRadioMatrix;
     IBOutlet NSComboBox *previewMaxNumberComboBox;
     
-    IBOutlet NSPopUpButton *previewFontPopup;
-    IBOutlet NSTextField *previewFontSizeField;
-    IBOutlet NSPopUpButton *tableViewFontPopup;
-    IBOutlet NSTextField *tableViewFontSizeField;
-    
     // sorting
     IBOutlet NSButton *addButton;
     IBOutlet NSButton *removeButton;
@@ -56,12 +51,6 @@
     
     IBOutlet NSMatrix *authorNameMatrix;
 }
-
-// tableview font selection:
-- (IBAction)chooseFont:(id)sender;
-- (IBAction)changePreviewDisplay:(id)sender;
-- (IBAction)changePreviewMaxNumber:(id)sender;
-- (IBAction)selectPreviewFont:(id)sender;
 
 - (IBAction)addTerm:(id)sender;
 - (IBAction)removeSelectedTerm:(id)sender;
