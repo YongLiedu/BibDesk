@@ -20,6 +20,7 @@
             LANGUAGE = ObjC; 
             SUPERCLASS = NSPopUpButtonCell; 
         }, 
+        {CLASS = BDSKPreviewTextView; LANGUAGE = ObjC; SUPERCLASS = NSTextView; }, 
         {CLASS = BDSKSplitView; LANGUAGE = ObjC; SUPERCLASS = OASplitView; }, 
         {CLASS = BDSKStatusBar; LANGUAGE = ObjC; SUPERCLASS = BDSKGradientView; }, 
         {
@@ -28,6 +29,7 @@
                 addGroupFieldAction = id; 
                 addSmartGroupAction = id; 
                 changeGroupFieldAction = id; 
+                changeTableFont = id; 
                 clearQuickSearch = id; 
                 columnsMenuAddTableColumn = id; 
                 columnsMenuSelectTableColumn = id; 
