@@ -29,7 +29,8 @@
                 addGroupFieldAction = id; 
                 addSmartGroupAction = id; 
                 changeGroupFieldAction = id; 
-                changeTableFont = id; 
+                changeGroupTableFont = id; 
+                changeMainTableFont = id; 
                 clearQuickSearch = id; 
                 columnsMenuAddTableColumn = id; 
                 columnsMenuSelectTableColumn = id; 

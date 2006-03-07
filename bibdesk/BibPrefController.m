@@ -112,8 +112,12 @@ NSString *BDSKShowStatusBarKey = @"Show Status Bar";
 NSString *BDSKShowEditorStatusBarKey = @"Show Editor Status Bar";
 NSString *BDSKShowFindStatusBarKey = @"Show Find Status Bar";
 
-NSString *BDSKTableViewFontKey = @"TableView Font";
-NSString *BDSKTableViewFontSizeKey = @"TableView Font Size";
+NSString *BDSKMainTableViewFontNameKey = @"BDSKMainTableViewFontNameKey";
+NSString *BDSKMainTableViewFontSizeKey = @"BDSKMainTableViewFontSizeKey";
+NSString *BDSKGroupTableViewFontNameKey = @"BDSKGroupTableViewFontNameKey";
+NSString *BDSKGroupTableViewFontSizeKey = @"BDSKGroupTableViewFontSizeKey";
+NSString *BDSKPersonTableViewFontNameKey = @"BDSKPersonTableViewFontNameKey";
+NSString *BDSKPersonTableViewFontSizeKey = @"BDSKPersonTableViewFontSizeKey";
 NSString *BDSKPreviewDisplayKey = @"Preview Pane Displays What?";
 NSString *BDSKPreviewMaxNumberKey = @"Maximum Number of Items in Preview Pane";
 
@@ -232,7 +236,9 @@ NSString *BDSKAddressString = @"Address";
 #pragma mark ||  Notification name strings
 NSString *BDSKFinalizeChangesNotification = @"Finalize Changes Notification";
 NSString *BDSKDocumentWindowWillCloseNotification = @"Document Window Will Close Notification";
-NSString *BDSKTableViewFontChangedNotification = @"Tableview font selection is changing Notification";
+NSString *BDSKMainTableViewFontChangedNotification = @"BDSKMainTableViewFontChangedNotification";
+NSString *BDSKGroupTableViewFontChangedNotification = @"BDSKGroupTableViewFontChangedNotification";
+NSString *BDSKPersonTableViewFontChangedNotification = @"BDSKPersonTableViewFontChangedNotification";
 NSString *BDSKPreviewDisplayChangedNotification = @"Preview Pane Preference Change Notification";
 NSString *BDSKPreviewNeedsUpdateNotification = @"Preview Needs Update Notification";
 NSString *BDSKTableColumnChangedNotification = @"TableColumnChangedNotification";

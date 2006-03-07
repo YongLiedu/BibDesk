@@ -462,9 +462,17 @@
 					<integer>12</integer>
 					<key>Maximum Number of Items in Preview Pane</key>
 					<integer>0</integer>
-					<key>TableView Font</key>
+					<key>BDSKMainTableViewFontNameKey</key>
 					<string>LucidaGrande</string>
-					<key>TableView Font Size</key>
+					<key>BDSKMainTableViewFontSizeKey</key>
+					<real>0.0</real>
+					<key>BDSKGroupTableViewFontNameKey</key>
+					<string>LucidaGrande</string>
+					<key>BDSKGroupTableViewFontSizeKey</key>
+					<real>0.0</real>
+					<key>BDSKPersonTableViewFontNameKey</key>
+					<string>LucidaGrande</string>
+					<key>BDSKPersonTableViewFontSizeKey</key>
 					<real>0.0</real>
 					<key>Terms ignored when sorting</key>
 					<array/>

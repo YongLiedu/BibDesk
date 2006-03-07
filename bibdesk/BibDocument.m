@@ -2857,15 +2857,26 @@ NSString *BDSKBibItemPboardType = @"edu.ucsd.mmccrack.bibdesk BibItem pboard typ
 		[statusBar performSelector:@selector(setStringValue:) withObject:status afterDelay:0.01];
 }
 
-- (IBAction)changeTableFont:(id)sender{
-    NSString *fontName = [[OFPreferenceWrapper sharedPreferenceWrapper] objectForKey:BDSKTableViewFontKey];
-    float fontSize = [[OFPreferenceWrapper sharedPreferenceWrapper] floatForKey:BDSKTableViewFontSizeKey];
+- (IBAction)changeMainTableFont:(id)sender{
+    NSString *fontName = [[OFPreferenceWrapper sharedPreferenceWrapper] objectForKey:BDSKMainTableViewFontNameKey];
+    float fontSize = [[OFPreferenceWrapper sharedPreferenceWrapper] floatForKey:BDSKMainTableViewFontSizeKey];
 	[[NSFontManager sharedFontManager] setSelectedFont:[NSFont fontWithName:fontName size:fontSize] isMultiple:NO];
     [[NSFontManager sharedFontManager] orderFrontFontPanel:sender];
     
     id firstResponder = [documentWindow firstResponder];
-    if (firstResponder != tableView && firstResponder != groupTableView)
+    if (firstResponder != tableView)
         [documentWindow makeFirstResponder:tableView];
+}
+
+- (IBAction)changeGroupTableFont:(id)sender{
+    NSString *fontName = [[OFPreferenceWrapper sharedPreferenceWrapper] objectForKey:BDSKGroupTableViewFontNameKey];
+    float fontSize = [[OFPreferenceWrapper sharedPreferenceWrapper] floatForKey:BDSKGroupTableViewFontSizeKey];
+	[[NSFontManager sharedFontManager] setSelectedFont:[NSFont fontWithName:fontName size:fontSize] isMultiple:NO];
+    [[NSFontManager sharedFontManager] orderFrontFontPanel:sender];
+    
+    id firstResponder = [documentWindow firstResponder];
+    if (firstResponder != groupTableView)
+        [documentWindow makeFirstResponder:groupTableView];
 }
 
 #pragma mark TeXTask delegate

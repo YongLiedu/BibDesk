@@ -119,7 +119,6 @@
 - (void)saveSortDescriptors;
 - (void)cancelCurrentSearch:(id)sender;
 - (void)restoreDocumentState:(id)sender;
-- (void)setTableFont;
 - (void)setMaxValueWithDouble:(double)doubleValue;
 - (void)setMinValueWithDouble:(double)doubleValue;
 

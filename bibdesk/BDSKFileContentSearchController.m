@@ -100,7 +100,6 @@ const CFDictionaryValueCallBacks BDSKNSRetainedPointerDictionaryValueCallbacks =
     
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(handleDocumentCloseNotification:) name:BDSKDocumentWindowWillCloseNotification object:nil];
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(windowDidBecomeMain:) name:NSWindowDidBecomeMainNotification object:nil];
-    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(setTableFont) name:BDSKTableViewFontChangedNotification object:nil];
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(handleApplicationWillTerminate:) name:NSApplicationWillTerminateNotification object:nil];
     
     // this lock is used any time the mutable indexDictionary ivar is accessed
@@ -172,7 +171,6 @@ const CFDictionaryValueCallBacks BDSKNSRetainedPointerDictionaryValueCallbacks =
     [[tableView tableColumnWithIdentifier:@"name"] setDataCell:textCell];
     [textCell release];
     
-    [self setTableFont];
     [self setupToolbar];
     [[self window] makeFirstResponder:searchField];
     
@@ -616,18 +614,29 @@ const CFDictionaryValueCallBacks BDSKNSRetainedPointerDictionaryValueCallbacks =
     return currentDocument;
 }
 
+#pragma mark TableView delegate
+
 // Use the same font as the document tableview
-- (void)setTableFont
-{
-    NSFont *font = [NSFont fontWithName:[[OFPreferenceWrapper sharedPreferenceWrapper] objectForKey:BDSKTableViewFontKey]
-                                   size:[[OFPreferenceWrapper sharedPreferenceWrapper] floatForKey:BDSKTableViewFontSizeKey]];
-	
-	[tableView setFont:font];
-    NSLayoutManager *lm = [[NSLayoutManager alloc] init];
-    [tableView setRowHeight:([lm defaultLineHeightForFont:font] + 2)];
-    [lm release];
-	[tableView tile];
-    [tableView reloadData]; // otherwise the change isn't immediately visible
+
+- (NSString *)tableViewFontNamePreferenceKey:(NSTableView *)tv {
+    if (tv == tableView)
+        return BDSKMainTableViewFontNameKey;
+    else 
+        return nil;
+}
+
+- (NSString *)tableViewFontSizePreferenceKey:(NSTableView *)tv {
+    if (tv == tableView)
+        return BDSKMainTableViewFontSizeKey;
+    else 
+        return nil;
+}
+
+- (NSString *)tableViewFontChangedNotificationName:(NSTableView *)tv {
+    if (tv == tableView)
+        return BDSKMainTableViewFontChangedNotification;
+    else 
+        return nil;
 }
 
 #pragma mark -

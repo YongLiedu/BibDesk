@@ -306,22 +306,28 @@
 }
 
 - (NSString *)tableViewFontNamePreferenceKey:(NSTableView *)tv {
-    if (tv == tableView || tv == groupTableView)
-        return BDSKTableViewFontKey;
+    if (tv == tableView)
+        return BDSKMainTableViewFontNameKey;
+    else if (tv == groupTableView)
+        return BDSKGroupTableViewFontNameKey;
     else 
         return nil;
 }
 
 - (NSString *)tableViewFontSizePreferenceKey:(NSTableView *)tv {
-    if (tv == tableView || tv == groupTableView)
-        return BDSKTableViewFontSizeKey;
+    if (tv == tableView)
+        return BDSKMainTableViewFontSizeKey;
+    else if (tv == groupTableView)
+        return BDSKGroupTableViewFontSizeKey;
     else 
         return nil;
 }
 
 - (NSString *)tableViewFontChangedNotificationName:(NSTableView *)tv {
-    if (tv == tableView || tv == groupTableView)
-        return BDSKTableViewFontChangedNotification;
+    if (tv == tableView)
+        return BDSKMainTableViewFontChangedNotification;
+    else if (tv == groupTableView)
+        return BDSKGroupTableViewFontChangedNotification;
     else 
         return nil;
 }

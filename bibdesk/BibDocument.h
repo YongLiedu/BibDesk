@@ -1022,7 +1022,8 @@ extern NSString *BDSKBibItemPboardType;
 - (void)setStatus:(NSString *)status;
 - (void)setStatus:(NSString *)status immediate:(BOOL)now;
 
-- (IBAction)changeTableFont:(id)sender;
+- (IBAction)changeMainTableFont:(id)sender;
+- (IBAction)changeGroupTableFont:(id)sender;
 
 - (IBAction)toggleShowingCustomCiteDrawer:(id)sender;
 
