@@ -44,6 +44,7 @@
 #import "BDSKHeaderPopUpButtonCell.h"
 #import "NSBezierPath_BDSKExtensions.h"
 #import "BibDocument_Groups.h"
+#import "NSTableView_BDSKExtensions.h"
 
 @implementation BDSKGroupTableView
 
@@ -70,13 +71,8 @@
 	[self setHeaderView:customTableHeaderView];	
     [customTableHeaderView release];
     
-    [self handleFontChangedNotification:nil];
+    [super awakeFromNib]; // this updates the font
     
-	[[NSNotificationCenter defaultCenter] addObserver:self
-                                             selector:@selector(handleFontChangedNotification:)
-                                                 name:BDSKTableViewFontChangedNotification
-                                               object:nil];
-	
     OBPRECONDITION([[self enclosingScrollView] contentView]);
     [[NSNotificationCenter defaultCenter] addObserver:self
                                              selector:@selector(handleClipViewFrameChangedNotification:)
@@ -118,11 +114,16 @@
     [[self cornerView] setNeedsDisplay:YES];
 }
 
-- (void)handleFontChangedNotification:(NSNotification *)note
+- (void)tableViewFontChanged:(NSNotification *)note
 {
-    // The font we're using now
-    NSFont *font = [NSFont fontWithName:[[OFPreferenceWrapper sharedPreferenceWrapper] objectForKey:BDSKTableViewFontKey]
-                                   size:[[OFPreferenceWrapper sharedPreferenceWrapper] floatForKey:BDSKTableViewFontSizeKey]];
+    // overwrite this as we want to change the intercellspacing
+    NSString *fontNamePrefKey = [self fontNamePreferenceKey];
+    NSString *fontSizePrefKey = [self fontSizePreferenceKey];
+    if (fontNamePrefKey == nil || fontSizePrefKey == nil) 
+        return;
+    NSString *fontName = [[OFPreferenceWrapper sharedPreferenceWrapper] objectForKey:fontNamePrefKey];
+    float fontSize = [[OFPreferenceWrapper sharedPreferenceWrapper] floatForKey:fontSizePrefKey];
+    NSFont *font = [NSFont fontWithName:fontName size:fontSize];
 	
 	[self setFont:font];
     // let the cell calculate the row height for us, so the text baseline isn't fouled up

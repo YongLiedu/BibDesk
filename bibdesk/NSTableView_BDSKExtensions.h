@@ -44,8 +44,22 @@
 - (void)replacementReloadData;
 - (void)replacementNoteNumberOfRowsChanged;
 - (void)rebuildToolTips;
+- (BOOL)replacementBecomeFirstResponder;
+- (void)replacementDealloc;
+- (void)awakeFromNib;
+- (void)changeFont:(id)sender;
+- (void)tableViewFontChanged:(NSNotification *)notification;
+- (NSString *)fontNamePreferenceKey;
+- (NSString *)fontSizePreferenceKey;
+- (NSString *)fontChangedNotificationName;
 @end
 
 @interface NSObject (NSTableBDSKExtendedDataSource)
 - (NSString *)tableView:(NSTableView *)aTableView toolTipForTableColumn:(NSTableColumn *)aTableColumn row:(int)rowIndex;
+@end
+
+@interface NSObject (NSTableBDSKExtendedDelegate)
+- (NSString *)tableViewFontNamePreferenceKey:(NSTableView *)aTableView;
+- (NSString *)tableViewFontSizePreferenceKey:(NSTableView *)aTableView;
+- (NSString *)tableViewFontChangedNotificationName:(NSTableView *)aTableView;
 @end

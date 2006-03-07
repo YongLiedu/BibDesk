@@ -305,6 +305,27 @@
 	return YES;
 }
 
+- (NSString *)tableViewFontNamePreferenceKey:(NSTableView *)tv {
+    if (tv == tableView || tv == groupTableView)
+        return BDSKTableViewFontKey;
+    else 
+        return nil;
+}
+
+- (NSString *)tableViewFontSizePreferenceKey:(NSTableView *)tv {
+    if (tv == tableView || tv == groupTableView)
+        return BDSKTableViewFontSizeKey;
+    else 
+        return nil;
+}
+
+- (NSString *)tableViewFontChangedNotificationName:(NSTableView *)tv {
+    if (tv == tableView || tv == groupTableView)
+        return BDSKTableViewFontChangedNotification;
+    else 
+        return nil;
+}
+
 #pragma mark TableView dragging source
 
 // for 10.3 compatibility and OmniAppKit dataSource methods

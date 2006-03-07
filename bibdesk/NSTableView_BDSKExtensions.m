@@ -38,18 +38,23 @@
 
 #import "NSTableView_BDSKExtensions.h"
 #import "BDSKFieldEditor.h"
+#import "BibPrefController.h"
 
 @implementation NSTableView (BDSKExtensions)
 
 static IMP originalSetDataSource;
 static IMP originalReloadData;
 static IMP originalNoteNumberOfRowsChanged;
+static BOOL (*originalBecomeFirstResponder)(id self, SEL _cmd);
+static IMP originalDealloc;
 
 + (void)didLoad;
 {
     originalSetDataSource = OBReplaceMethodImplementationWithSelector(self, @selector(setDataSource:), @selector(replacementSetDataSource:));
     originalReloadData = OBReplaceMethodImplementationWithSelector(self, @selector(reloadData), @selector(replacementReloadData));
     originalNoteNumberOfRowsChanged = OBReplaceMethodImplementationWithSelector(self, @selector(noteNumberOfRowsChanged), @selector(replacementNoteNumberOfRowsChanged));
+    originalBecomeFirstResponder = (typeof(originalBecomeFirstResponder))OBReplaceMethodImplementationWithSelector(self, @selector(becomeFirstResponder), @selector(replacementBecomeFirstResponder));
+    originalDealloc = OBReplaceMethodImplementationWithSelector(self, @selector(dealloc), @selector(replacementDealloc));
 }
 
 - (BOOL)validateDelegatedMenuItem:(id<NSMenuItem>)menuItem defaultDataSourceSelector:(SEL)dataSourceSelector{
@@ -168,6 +173,95 @@ static IMP originalNoteNumberOfRowsChanged;
 		return [_dataSource tableView:self toolTipForTableColumn:tableColumn row:row];
 	}
 	return nil;
+}
+
+- (NSString *)fontNamePreferenceKey{
+    if ([[self delegate] respondsToSelector:@selector(tableViewFontNamePreferenceKey:)])
+        return [[self delegate] tableViewFontNamePreferenceKey:self];
+    return nil;
+}
+
+- (NSString *)fontSizePreferenceKey{
+    if ([[self delegate] respondsToSelector:@selector(tableViewFontSizePreferenceKey:)])
+        return [[self delegate] tableViewFontSizePreferenceKey:self];
+    return nil;
+}
+
+- (NSString *)fontChangedNotificationName{
+    if ([[self delegate] respondsToSelector:@selector(tableViewFontChangedNotificationName:)])
+        return [[self delegate] tableViewFontChangedNotificationName:self];
+    return nil;
+}
+
+- (BOOL)replacementBecomeFirstResponder {
+    NSString *fontNamePrefKey = [self fontNamePreferenceKey];
+    NSString *fontSizePrefKey = [self fontSizePreferenceKey];
+    if (fontNamePrefKey != nil && fontSizePrefKey != nil) {
+        NSString *fontName = [[OFPreferenceWrapper sharedPreferenceWrapper] objectForKey:fontNamePrefKey];
+        float fontSize = [[OFPreferenceWrapper sharedPreferenceWrapper] floatForKey:fontSizePrefKey];
+        [[NSFontManager sharedFontManager] setSelectedFont:[NSFont fontWithName:fontName size:fontSize] isMultiple:NO];
+	}
+    return originalBecomeFirstResponder(self, _cmd);
+}
+
+- (void)replacementDealloc {
+    NSString *fontChangedNoteName = [self fontChangedNotificationName];
+    if (fontChangedNoteName != nil) {
+        [[NSNotificationCenter defaultCenter] removeObserver:self];
+    }
+    originalDealloc(self, _cmd);
+}
+
+- (void)awakeFromNib {
+    // there was no original awakeFromNib
+    NSString *fontChangedNoteName = [self fontChangedNotificationName];
+    if (fontChangedNoteName != nil) {
+        [self tableViewFontChanged:nil];
+        [[NSNotificationCenter defaultCenter] addObserver:self
+                                                 selector:@selector(tableViewFontChanged:)
+                                                     name:fontChangedNoteName
+                                                   object:nil];
+    }
+}
+
+- (void)changeFont:(id)sender {
+    NSString *fontNamePrefKey = [self fontNamePreferenceKey];
+    NSString *fontSizePrefKey = [self fontSizePreferenceKey];
+    if (fontNamePrefKey == nil || fontSizePrefKey == nil) 
+        return;
+	NSFontManager *fontManager = [NSFontManager sharedFontManager];
+	NSFont *selectedFont = [fontManager selectedFont];
+	if (selectedFont == nil)
+		selectedFont = [NSFont systemFontOfSize:[NSFont systemFontSize]];
+	NSFont *font = [fontManager convertFont:selectedFont];
+    
+    [[OFPreferenceWrapper sharedPreferenceWrapper] setObject:[font fontName] forKey:fontNamePrefKey];
+    [[OFPreferenceWrapper sharedPreferenceWrapper] setFloat:[font pointSize] forKey:fontSizePrefKey];
+    
+    NSString *fontChangedNoteName = [self fontChangedNotificationName];
+    if (fontChangedNoteName != nil) 
+        [[NSNotificationCenter defaultCenter] postNotificationName:fontChangedNoteName object:self];
+    else 
+        [self tableViewFontChanged:nil];
+}
+
+- (void)tableViewFontChanged:(NSNotification *)notification {
+    NSString *fontNamePrefKey = [self fontNamePreferenceKey];
+    NSString *fontSizePrefKey = [self fontSizePreferenceKey];
+    if (fontNamePrefKey == nil || fontSizePrefKey == nil) 
+        return;
+    NSString *fontName = [[OFPreferenceWrapper sharedPreferenceWrapper] objectForKey:fontNamePrefKey];
+    float fontSize = [[OFPreferenceWrapper sharedPreferenceWrapper] floatForKey:fontSizePrefKey];
+    NSFont *font = [NSFont fontWithName:fontName size:fontSize];
+	
+	[self setFont:font];
+    
+    NSLayoutManager *lm = [[NSLayoutManager alloc] init];
+    [self setRowHeight:([lm defaultLineHeightForFont:font] + 2.0f)];
+    [lm release];
+    
+	[self tile];
+    [self reloadData]; // othewise the change isn't immediately visible
 }
 
 @end

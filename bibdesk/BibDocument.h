@@ -985,22 +985,6 @@ extern NSString *BDSKBibItemPboardType;
     @param      notification (description)
 */
 - (void)handleBibItemAddDelNotification:(NSNotification *)notification;
-/*!
-    @method handleFontChangedNotification
-    @abstract responds to font change notification by calling setTableFont
-    @discussion
-    
-*/
-- (void)handleFontChangedNotification:(NSNotification *)notification;
-
-
-	/*!
-    @method setTableFont
-	 @abstract sets the font of the tableView.
-	 @discussion 
-	 
-	 */
-- (void)setTableFont;
 
 	
 /*!

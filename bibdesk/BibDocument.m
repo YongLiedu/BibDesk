@@ -86,6 +86,7 @@
 #import "BDSKPreviewMessageQueue.h"
 #import "NSArray_BDSKExtensions.h"
 #import "NSTextView_BDSKExtensions.h"
+#import "NSTableView_BDSKExtensions.h"
 #import "BDSKWebOfScienceParser.h"
 #import "NSMutableDictionary+ThreadSafety.h"
 #import "NSSet_BDSKExtensions.h"
@@ -140,12 +141,6 @@ NSString *BDSKBibItemPboardType = @"edu.ucsd.mmccrack.bibdesk BibItem pboard typ
 		
 		promisedPboardTypes = [[NSMutableDictionary alloc] initWithCapacity:2];
 		
-        // Register as observer of font change events.
-        [[NSNotificationCenter defaultCenter] addObserver:self
-												 selector:@selector(handleFontChangedNotification:)
-													 name:BDSKTableViewFontChangedNotification
-												   object:nil];
-
 		[[NSNotificationCenter defaultCenter] addObserver:self
 												 selector:@selector(handlePreviewDisplayChangedNotification:)
 													 name:BDSKPreviewDisplayChangedNotification
@@ -271,9 +266,6 @@ NSString *BDSKBibItemPboardType = @"edu.ucsd.mmccrack.bibdesk BibItem pboard typ
 
 	showingCustomCiteDrawer = NO;
 	
-    // finally, make sure the font is correct initially:
-	[self setTableFont];
-	
 	// unfortunately we cannot set this in IB
 	[actionMenuButton setArrowImage:[NSImage imageNamed:@"ArrowPointingDown"]];
 	[actionMenuButton setShowsMenuWhenIconClicked:YES];
@@ -366,7 +358,6 @@ NSString *BDSKBibItemPboardType = @"edu.ucsd.mmccrack.bibdesk BibItem pboard typ
     [tableView removeAllTableColumns];
 	[self setupTableColumns]; // calling it here mostly just makes sure that the menu is set up.
     [self sortPubsByDefaultColumn];
-    [self setTableFont];
 }
 
 - (void)addWindowController:(NSWindowController *)windowController{
@@ -2407,7 +2398,7 @@ NSString *BDSKBibItemPboardType = @"edu.ucsd.mmccrack.bibdesk BibItem pboard typ
 
 		[tableView addTableColumn:tc];
     }
-    [self setTableFont];
+    [tableView tableViewFontChanged:nil];
 }
 
 - (IBAction)dismissAddFieldSheet:(id)sender{
@@ -2563,10 +2554,6 @@ NSString *BDSKBibItemPboardType = @"edu.ucsd.mmccrack.bibdesk BibItem pboard typ
 - (void)handlePreviewDisplayChangedNotification:(NSNotification *)notification{
     // note: this is only supposed to handle the pretty-printed preview, /not/ the TeX preview
     [self displayPreviewForItems:[self selectedPublications]];
-}
-
-- (void)handleFontChangedNotification:(NSNotification *)notification{
-	[self setTableFont];
 }
 
 - (void)handleBibItemAddDelNotification:(NSNotification *)notification{
@@ -2803,21 +2790,6 @@ NSString *BDSKBibItemPboardType = @"edu.ucsd.mmccrack.bibdesk BibItem pboard typ
 	}
 	[self setStatus:statusStr];
     [statusStr release];
-}
-
-- (void)setTableFont{
-    // The font we're using now
-    NSFont *font = [NSFont fontWithName:[[OFPreferenceWrapper sharedPreferenceWrapper] objectForKey:BDSKTableViewFontKey]
-                                   size:[[OFPreferenceWrapper sharedPreferenceWrapper] floatForKey:BDSKTableViewFontSizeKey]];
-	
-	[tableView setFont:font];
-    
-    NSLayoutManager *lm = [[NSLayoutManager alloc] init];
-    [tableView setRowHeight:([lm defaultLineHeightForFont:font] + 2.0f)];
-    [lm release];
-    
-	[tableView tile];
-    [tableView reloadData]; // othewise the change isn't immediately visible
 }
 
 - (BOOL)highlightItemForPartialItem:(NSDictionary *)partialItem{
