@@ -1488,11 +1488,10 @@ OFWeakRetainConcreteImplementation_NULL_IMPLEMENTATION
             @throw [NSException exceptionWithName:NSInternalInconsistencyException reason:[NSString stringWithFormat:@"Unable to build metadata cache for document at path \"%@\"", docPath] userInfo:nil];
         }
         
-        NSString *tmpPath;
+        NSString *path;
         NSString *citeKey;
         BibItem *anItem;
         NSDate *dateModified;
-        NSCharacterSet *invalidFilenameCharSet = [NSCharacterSet characterSetWithCharactersInString:@":/"];
         
         BDAlias *alias = [[BDAlias alloc] initWithPath:docPath];
         if(alias == nil){
@@ -1564,13 +1563,21 @@ OFWeakRetainConcreteImplementation_NULL_IMPLEMENTATION
             [metadata setValue:array forKey:(NSString *)kMDItemWhereFroms];
             [array release];
 			
-            tmpPath = [citeKey stringByReplacingCharactersInSet:invalidFilenameCharSet withString:@"%"];
-            tmpPath = [cachePath stringByAppendingPathComponent:[tmpPath stringByAppendingPathExtension:@"bdskcache"]];
+            // We use citeKey as the file's name, since it needs to be unique and static (relatively speaking), so we can overwrite the old cache content with newer content when saving the document.  We replace pathSeparator in paths, as we can't create subdirectories with -[NSDictionary writeToFile:] (currently this is the POSIX path separator).
+            path = citeKey;
+            NSString *pathSeparator = [NSString pathSeparator];
+            if([path rangeOfString:pathSeparator].length){
+                NSMutableString *mutablePath = [[path mutableCopy] autorelease];
+                // replace with % as it can't occur in a cite key, so will still be unique
+                [mutablePath replaceOccurrencesOfString:pathSeparator withString:@"%" options:0 range:NSMakeRange(0, [path length])];
+                path = mutablePath;
+            }
+            path = [cachePath stringByAppendingPathComponent:[path stringByAppendingPathExtension:@"bdskcache"]];
             
-            // save the plist; we can get an error if these are not plist objects, or the file couldn't be written
-            if([metadata writeToFile:tmpPath atomically:YES] == NO){
-                error = [NSError errorWithDomain:NSCocoaErrorDomain code:NSFileWriteUnknownError userInfo:[NSDictionary dictionaryWithObjectsAndKeys:NSLocalizedString(@"Unable to save metadata cache file.", @""), NSLocalizedDescriptionKey, tmpPath, NSFilePathErrorKey, nil]];
-                @throw [NSException exceptionWithName:NSInternalInconsistencyException reason:[NSString stringWithFormat:@"Unable to create file %@", tmpPath] userInfo:nil];
+            // Save the plist; we can get an error if these are not plist objects, or the file couldn't be written.  The first case is a programmer error, and the second should have been caught much earlier in this code.
+            if([metadata writeToFile:path atomically:YES] == NO){
+                error = [NSError errorWithDomain:NSCocoaErrorDomain code:NSFileWriteUnknownError userInfo:[NSDictionary dictionaryWithObjectsAndKeys:NSLocalizedString(@"Unable to save metadata cache file.", @""), NSLocalizedDescriptionKey, path, NSFilePathErrorKey, nil]];
+                @throw [NSException exceptionWithName:NSInternalInconsistencyException reason:[NSString stringWithFormat:@"Unable to create file %@", path] userInfo:nil];
             }                
             [metadata removeAllObjects];
         }
