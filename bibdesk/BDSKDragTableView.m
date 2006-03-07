@@ -142,11 +142,11 @@
     [[NSNotificationCenter defaultCenter] postNotificationName:BDSKTableViewFontChangedNotification object:nil];
 }
 
-- (BOOL)acceptsFirstResponder{
+- (BOOL)becomeFirstResponder{
     NSString *fontName = [[OFPreferenceWrapper sharedPreferenceWrapper] objectForKey:BDSKTableViewFontKey];
     float fontSize = [[OFPreferenceWrapper sharedPreferenceWrapper] floatForKey:BDSKTableViewFontSizeKey];
 	[[NSFontManager sharedFontManager] setSelectedFont:[NSFont fontWithName:fontName size:fontSize] isMultiple:NO];
-    return [super acceptsFirstResponder];
+    return [super becomeFirstResponder];
 }
 
 @end
