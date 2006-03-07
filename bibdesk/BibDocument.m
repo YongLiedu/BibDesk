@@ -2196,10 +2196,7 @@ NSString *BDSKBibItemPboardType = @"edu.ucsd.mmccrack.bibdesk BibItem pboard typ
     
     // use this for a subsort
     NSString *lastSortedTableColumnIdentifier = [lastSelectedColumnForSort identifier];
-    
-    // this is a hack to keep us from getting selection change notifications while sorting (which updates the TeX and attributed text previews)
-    [tableView setDelegate:nil];
-    
+        
     // cache the selection; this works for multiple publications
     NSArray *pubsToSelect = nil;
     if([tableView numberOfSelectedRows])
@@ -2234,6 +2231,11 @@ NSString *BDSKBibItemPboardType = @"edu.ucsd.mmccrack.bibdesk BibItem pboard typ
     
     NSArray *sortDescriptors = [NSArray arrayWithObjects:[self sortDescriptorForTableColumnIdentifier:[tableColumn identifier] ascending:!sortDescending], [self sortDescriptorForTableColumnIdentifier:lastSortedTableColumnIdentifier ascending:!sortDescending], nil];
     [tableView setSortDescriptors:sortDescriptors]; // just using this to store them; it's really a no-op
+    
+
+    // @@ DON'T RETURN WITHOUT RESETTING THIS!
+    // this is a hack to keep us from getting selection change notifications while sorting (which updates the TeX and attributed text previews)
+    [tableView setDelegate:nil];
     
     // sort by new primary column, subsort with previous primary column
     [shownPublications sortUsingDescriptors:sortDescriptors];
