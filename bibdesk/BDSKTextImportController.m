@@ -70,7 +70,7 @@
 - (void)setDownloading:(BOOL)downloading;
 - (void)saveDownloadPanelDidEnd:(NSSavePanel *)sheet returnCode:(int)returnCode contextInfo:(void *)contextInfo;
 
-- (void)addCurrentSelectionToFieldAtIndex:(int)index;
+- (BOOL)addCurrentSelectionToFieldAtIndex:(int)index;
 
 - (void)addBookmarkWithURLString:(NSString *)URLString title:(NSString *)title;
 - (void)saveBookmarks;
@@ -267,7 +267,8 @@
 
 - (IBAction)addTextToCurrentFieldAction:(id)sender{
     
-    [self addCurrentSelectionToFieldAtIndex:[sender selectedRow]];
+    if ([self addCurrentSelectionToFieldAtIndex:[sender selectedRow]] == NO)
+        NSBeep();
 }
 
 - (IBAction)changeTypeOfBibAction:(id)sender{
@@ -1131,7 +1132,10 @@
 
 #pragma mark Editing
 
-- (void)addCurrentSelectionToFieldAtIndex:(int)index{    
+- (BOOL)addCurrentSelectionToFieldAtIndex:(int)index{
+    if ([fields count] >= index)
+        return NO;
+    
     NSString *selKey = [fields objectAtIndex:index];
     NSString *selString = nil;
 
@@ -1149,12 +1153,13 @@
                             forCharacterRange:selRange];
     }
 	if ([NSString isEmptyString:selString] == YES)
-		return;
+		return NO;
 	
     [item setField:selKey toValue:selString];
     
 	[[item undoManager] setActionName:NSLocalizedString(@"Edit Publication",@"")];
     [itemTableView reloadData];
+    return YES;
 }
 
 - (NSRange)control:(NSControl *)control textView:(NSTextView *)textView rangeForUserCompletion:(NSRange)charRange {
@@ -1352,19 +1357,32 @@
 
 - (BOOL)performKeyEquivalent:(NSEvent *)theEvent{
     
-    NSString *chars = [theEvent charactersIgnoringModifiers];
+    unichar c = [[theEvent charactersIgnoringModifiers] characterAtIndex:0];
     unsigned int flags = [theEvent modifierFlags];
     
-    if (flags & NSCommandKeyMask && 
-        [chars containsCharacterInSet:[NSCharacterSet characterSetWithCharactersInString:@"0123456789"]]) {
+    if (flags & NSCommandKeyMask) {
+        NSRange range = [@")!@#$%^&*(" rangeOfCharacterFromSet:[NSCharacterSet characterSetWithRange:NSMakeRange(c,1)]];
+        if (range.location != NSNotFound) {
+            unsigned index = (unsigned)(range.location);
+            if (flags & NSAlternateKeyMask)
+                index += 10;
+            if ([[self dataSource] addCurrentSelectionToFieldAtIndex:index] == NO) {
+                NSBeep();
+                return NO;
+            } else return YES;
+        
+        } else if (c >= '0' && c <= '9') {
 
-        unsigned index = (unsigned)([chars characterAtIndex:0] - '0');
-		if (flags & NSAlternateKeyMask)
-			index += 10;
-		if (flags & NSShiftKeyMask)
-			index += 20;
-        [[self dataSource] addCurrentSelectionToFieldAtIndex:index];
-        return YES;
+            unsigned index = (unsigned)(c - '0');
+            if (flags & NSAlternateKeyMask)
+                index += 10;
+            if (flags & NSShiftKeyMask)
+                index += 20;
+            if ([[self dataSource] addCurrentSelectionToFieldAtIndex:index]) {
+                NSBeep();
+                return NO;
+            } else return YES;
+        }
     }
     
     return [super performKeyEquivalent:theEvent];
