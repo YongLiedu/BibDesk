@@ -205,10 +205,7 @@ static IMP originalDealloc;
 }
 
 - (void)replacementDealloc {
-    NSString *fontChangedNoteName = [self fontChangedNotificationName];
-    if (fontChangedNoteName != nil) {
-        [[NSNotificationCenter defaultCenter] removeObserver:self];
-    }
+    [[NSNotificationCenter defaultCenter] removeObserver:self];
     originalDealloc(self, _cmd);
 }
 
