@@ -72,6 +72,10 @@
 
 - (BOOL)addCurrentSelectionToFieldAtIndex:(int)index;
 
+- (void)startTemporaryTypeAheadMode;
+- (void)endTemporaryTypeAheadModeAndSet:(BOOL)flag;
+- (BOOL)isInTemporaryTypeAheadMode;
+
 - (void)addBookmarkWithURLString:(NSString *)URLString title:(NSString *)title;
 - (void)saveBookmarks;
 - (void)addBookmarkSheetDidEnd:(NSOpenPanel *)sheet returnCode:(int)returnCode contextInfo:(void *)contextInfo;
@@ -1340,6 +1344,65 @@
 	}
 }
 
+#pragma mark || Methods to support the type-ahead selector.
+
+- (void)updateTypeAheadStatus:(NSString *)searchString{
+    if(!searchString)
+        [statusLine setStringValue:[self isInTemporaryTypeAheadMode] ? @"Press Enter to set or Tab to cancel." : @""]; // resets the status line to its default value
+    else
+        [statusLine setStringValue:[NSString stringWithFormat:@"%@ \"%@\"", NSLocalizedString(@"Finding field:", @""), [searchString capitalizedString]]];
+}
+
+- (NSArray *)typeAheadSelectionItems{
+    return fields;
+}
+    // This is where we build the list of possible items which the user can select by typing the first few letters. You should return an array of NSStrings.
+
+- (NSString *)currentlySelectedItem{
+    int row = [itemTableView selectedRow];
+    if (row == -1)
+        return nil;
+    return [fields objectAtIndex:row];
+}
+// Type-ahead-selection behavior can change if an item is currently selected (especially if the item was selected by type-ahead-selection). Return nil if you have no selection or a multiple selection.
+
+// fixme -  also need to call the processkeychars in keydown...
+- (void)typeAheadSelectItemAtIndex:(int)itemIndex{
+    NSResponder *responder = [[self window] firstResponder];
+    OBPRECONDITION(responder == itemTableView);
+    [itemTableView selectRowIndexes:[NSIndexSet indexSetWithIndex:itemIndex] byExtendingSelection:NO];
+    [itemTableView scrollRowToVisible:itemIndex];
+}
+// We call this when a type-ahead-selection match has been made; you should select the item based on its index in the array you provided in -typeAheadSelectionItems.
+
+- (void)startTemporaryTypeAheadMode{
+    if (temporaryTypeAheadMode == YES)
+        return;
+    temporaryTypeAheadMode = YES;
+    savedFirstResponder = [[self window] firstResponder];
+    if ([savedFirstResponder isKindOfClass:[NSTextView class]] && [(NSTextView *)savedFirstResponder isFieldEditor]) {
+        savedFirstResponder = [(NSTextView *)savedFirstResponder delegate];
+    }
+    [[self window] makeFirstResponder:itemTableView];
+    [statusLine setStringValue:NSLocalizedString(@"Start typing to select a field. Press Enter to set or Tab to cancel.", @"")];
+}
+
+- (void)endTemporaryTypeAheadModeAndSet:(BOOL)flag{
+    if (temporaryTypeAheadMode == NO)
+        return;
+    temporaryTypeAheadMode = NO;
+    [[self window] makeFirstResponder:savedFirstResponder];
+    savedFirstResponder = nil;
+    [statusLine setStringValue:@""];
+    if (flag)
+        [self addTextToCurrentFieldAction:itemTableView];
+    [statusLine setStringValue:@""];
+}
+
+- (BOOL)isInTemporaryTypeAheadMode{
+    return temporaryTypeAheadMode;
+}
+
 #pragma mark Splitview delegate methods
 
 - (float)splitView:(NSSplitView *)sender constrainMinCoordinate:(float)proposedMin ofSubviewAt:(int)offset{
@@ -1373,7 +1436,7 @@
             } else return YES;
         
         } else if (c >= '0' && c <= '9') {
-
+        
             unsigned index = (unsigned)(c - '0');
             if (flags & NSAlternateKeyMask)
                 index += 10;
@@ -1383,10 +1446,60 @@
                 NSBeep();
                 return NO;
             } else return YES;
+        
+        } else if ([[self dataSource] isInTemporaryTypeAheadMode] == NO && (c == '=' || c == '+')) {
+        
+            [[self dataSource] startTemporaryTypeAheadMode];
+            return YES;
         }
     }
     
     return [super performKeyEquivalent:theEvent];
+}
+
+- (void)keyDown:(NSEvent *)event{
+    unichar c = [[event characters] characterAtIndex:0];
+    NSCharacterSet *alnum = [NSCharacterSet alphanumericCharacterSet];
+    
+    if ([[self dataSource] isInTemporaryTypeAheadMode]) {
+        if (c == NSTabCharacter || c == 0x001b) {
+            [[self dataSource] endTemporaryTypeAheadModeAndSet:NO];
+            return;
+        } else if (c == NSCarriageReturnCharacter || c == NSEnterCharacter || c == NSNewlineCharacter) {
+            [[self dataSource] endTemporaryTypeAheadModeAndSet:YES];
+            return;
+        } else if ([alnum characterIsMember:c] == NO && c != NSDownArrowFunctionKey && c != NSUpArrowFunctionKey) {
+            NSBeep();
+            return;
+        }
+    }
+    
+    if ([alnum characterIsMember:c]) {
+        [typeAheadHelper newProcessKeyDownCharacter:c];
+    }else{
+        [super keyDown:event];
+    }
+}
+
+- (BOOL)resignFirstResponder {
+    [[self dataSource] endTemporaryTypeAheadModeAndSet:NO];
+    return [super resignFirstResponder];
+}
+
+- (void)awakeFromNib{
+    typeAheadHelper = [[OATypeAheadSelectionHelper alloc] init];
+    [typeAheadHelper setDataSource:[self delegate]];
+    [typeAheadHelper setCyclesSimilarResults:YES];
+}
+
+- (void)dealloc{
+    [typeAheadHelper release];
+    [super dealloc];
+}
+
+- (void)reloadData{
+    [super reloadData];
+    [typeAheadHelper queueSelectorOnce:@selector(rebuildTypeAheadSearchCache)];
 }
 
 @end

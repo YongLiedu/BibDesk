@@ -41,6 +41,8 @@
 #import "BibTypeManager.h"
 #import "MacroTextFieldWindowController.h"
 #import "RYZImagePopUpButton.h"
+#import <OmniAppKit/OATypeAheadSelectionHelper.h>
+#import "OATypeAheadSelectionHelper_Extensions.h"
 
 @class BibDocument;
 @class BDSKEdgeView;
@@ -98,6 +100,9 @@
 	void *theContextInfo;
 	
 	MacroTableViewWindowController *macroTextFieldWC;
+    
+    BOOL temporaryTypeAheadMode;
+    NSResponder *savedFirstResponder;
 }
 
 - (id)initWithDocument:(BibDocument *)doc;
@@ -133,5 +138,6 @@
 @end
 
 @interface TextImportItemTableView : NSTableView {
+    OATypeAheadSelectionHelper *typeAheadHelper;
 }
 @end
