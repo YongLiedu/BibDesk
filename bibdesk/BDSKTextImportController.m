@@ -1361,9 +1361,10 @@
     unsigned int flags = [theEvent modifierFlags];
     
     if (flags & NSCommandKeyMask) {
+        // these are returned for digits and the shift modifier, at least with the standard keyboard
         NSRange range = [@")!@#$%^&*(" rangeOfCharacterFromSet:[NSCharacterSet characterSetWithRange:NSMakeRange(c,1)]];
         if (range.location != NSNotFound) {
-            unsigned index = (unsigned)(range.location);
+            unsigned index = (unsigned)(range.location + 20);
             if (flags & NSAlternateKeyMask)
                 index += 10;
             if ([[self dataSource] addCurrentSelectionToFieldAtIndex:index] == NO) {
