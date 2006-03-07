@@ -1133,7 +1133,7 @@
 #pragma mark Editing
 
 - (BOOL)addCurrentSelectionToFieldAtIndex:(int)index{
-    if ([fields count] >= index)
+    if ([fields count] <= index)
         return NO;
     
     NSString *selKey = [fields objectAtIndex:index];
