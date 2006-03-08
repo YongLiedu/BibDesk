@@ -40,6 +40,7 @@
 #import <OmniAppKit/NSView-OAExtensions.h>
 #import <OmniBase/OBUtilities.h>
 #import "BDSKHeaderPopUpButton.h"
+#import <OmniFoundation/NSString-OFExtensions.h>
 
 @interface NSScrollView (BDSKZoomablePDFViewExtensions)
 @end
@@ -161,6 +162,26 @@ static float BDSKScaleMenuFontSize = 11.0;
     [self updatePasteboardInfo];
 }
 
+- (void)saveDocumentSheetDidEnd:(NSSavePanel *)sheet returnCode:(int)returnCode  contextInfo:(void  *)contextInfo;
+{
+    NSError *error = nil;
+    if(returnCode == NSOKButton){
+        // -[PDFDocument writeToURL:] returns YES even if you don't have write permission, so we'll use NSData
+        NSData *data = [[self document] dataRepresentation];
+        
+        if([data writeToURL:[sheet URL] options:NSAtomicWrite error:&error] == NO){
+            [sheet orderOut:nil];
+            [self presentError:error];
+        }
+    }
+}
+    
+- (void)saveDocumentAs:(id)sender;
+{
+    NSString *name = [[[[self document] documentURL] path] lastPathComponent];
+    [[NSSavePanel savePanel] beginSheetForDirectory:nil file:(name ? name : NSLocalizedString(@"Untitled.pdf", @"")) modalForWindow:[self window] modalDelegate:self didEndSelector:@selector(saveDocumentSheetDidEnd:returnCode:contextInfo:) contextInfo:NULL];
+}
+
 - (NSMenu *)menuForEvent:(NSEvent *)theEvent;
 {
     NSMenu *menu = [super menuForEvent:theEvent];
@@ -170,6 +191,10 @@ static float BDSKScaleMenuFontSize = 11.0;
     [item release];
     
     item = [[NSMenuItem allocWithZone:[NSMenu menuZone]] initWithTitle:NSLocalizedString(@"Copy Text", @"") action:@selector(copyAsText:) keyEquivalent:@""];
+    [menu addItem:item];
+    [item release];
+    
+    item = [[NSMenuItem allocWithZone:[NSMenu menuZone]] initWithTitle:[NSString stringWithFormat:@"%@ %@", NSLocalizedString(@"Save As", @""), [NSString horizontalEllipsisString]] action:@selector(saveDocumentAs:) keyEquivalent:@""];
     [menu addItem:item];
     [item release];
 
