@@ -654,7 +654,7 @@ The groupedPublications array is a subset of the publications array, developed b
 		   didEndSelector:NULL
 			  contextInfo:nil];
 		[filterController release];
-	} else if ([currentGroupField isEqualToString:BDSKAuthorString] || [currentGroupField isEqualToString:BDSKEditorString]) {
+	} else if ([[[BibTypeManager sharedManager] personFieldsSet] containsObject:currentGroupField]) {
 		BibAuthor *person = (BibAuthor *)[group name];
 		OBASSERT(person != nil && [person isKindOfClass:[BibAuthor class]]);
 		BibPersonController *pc = [person personController];

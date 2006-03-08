@@ -37,6 +37,7 @@
  */
 
 #import "BibPersonController.h"
+#import "BibTypeManager.h"
 #import "BibDocument.h"
 #import "BibAuthor.h"
 #import "BibItem.h"
@@ -201,7 +202,7 @@
     BibItem *pub = nil;
     
     // @@ maybe handle this in the type manager?
-    NSArray *fieldNames = [NSArray arrayWithObjects:BDSKAuthorString, BDSKEditorString, nil];
+    NSArray *fieldNames = [[[BibTypeManager sharedManager] personFieldsSet] allObjects];
     NSArray *peopleFromString;
     CFIndex numberOfFields = [fieldNames count];
     NSString *fieldName;

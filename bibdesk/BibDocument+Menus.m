@@ -620,7 +620,7 @@
 	int row = [groupTableView selectedRow];
 	if ([groupTableView numberOfSelectedRows] == 1 && row > 0) {
 		// single smart group selection
-		if (row <= [smartGroups count] || [currentGroupField isEqualToString:BDSKAuthorString] || [currentGroupField isEqualToString:BDSKEditorString])
+		if (row <= [smartGroups count] || [[[BibTypeManager sharedManager] personFieldsSet] containsObject:currentGroupField])
 			return YES;
 		else
 			return NO;
