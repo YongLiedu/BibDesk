@@ -460,7 +460,7 @@
                 if([self numberOfSelectedRows] == 1)
                     [self editColumn:0 row:[self selectedRow] withEvent:nil select:YES];
     }else if ([alnum characterIsMember:c]) {
-        [typeAheadHelper newProcessKeyDownCharacter:c];
+        [typeAheadHelper substringProcessKeyDownCharacter:c];
     }else{
         [super keyDown:event];
     }

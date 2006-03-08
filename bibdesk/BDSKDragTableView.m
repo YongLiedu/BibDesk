@@ -84,7 +84,7 @@
         [self scrollRowToVisible:row];
     // pass it on the typeahead selector
     }else if ([alnum characterIsMember:c]) {
-        [typeAheadHelper newProcessKeyDownCharacter:c];
+        [typeAheadHelper substringProcessKeyDownCharacter:c];
     }else{
         [super keyDown:event];
     }

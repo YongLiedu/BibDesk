@@ -427,6 +427,10 @@ static int MAX_RATING = 5;
 	return [self localizedCaseInsensitiveNumericCompare:other];
 }    
 
+- (BOOL)containsString:(NSString *)searchString options:(unsigned int)mask range:(NSRange)aRange{
+    return !searchString || [searchString length] == 0 || [self rangeOfString:searchString options:mask range:aRange].length > 0;
+}
+
 #pragma mark -
 
 - (BOOL)booleanValue{

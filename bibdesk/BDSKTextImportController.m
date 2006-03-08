@@ -1475,7 +1475,7 @@
     }
     
     if ([alnum characterIsMember:c]) {
-        [typeAheadHelper newProcessKeyDownCharacter:c];
+        [typeAheadHelper prefixProcessKeyDownCharacter:c];
     }else{
         [super keyDown:event];
     }
