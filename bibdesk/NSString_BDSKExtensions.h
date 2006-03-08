@@ -271,7 +271,7 @@ An inline buffer is used for speed in accessing each character.
     @param      other (description)
     @result     (description)
 */
-- (NSComparisonResult)triStateCompare:(NSString *)other{
+- (NSComparisonResult)triStateCompare:(NSString *)other;
 
 #pragma mark -
 
