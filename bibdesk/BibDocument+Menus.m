@@ -94,7 +94,7 @@
 			if (n <= 1)
 				s = NSLocalizedString(@"BibTeX Record", @"BibTeX Record");
 			else
-				s = NSLocalizedString(@"BibTeX Records", @"BibTeX Records");
+				s = [NSString stringWithFormat:NSLocalizedString(@"%i BibTeX Records", @"%i BibTeX Records"), n];
 			break;
 		case BDSKCiteDragCopyType:
 			do {
