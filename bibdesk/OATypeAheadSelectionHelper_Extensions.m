@@ -41,11 +41,13 @@
 @interface OATypeAheadSelectionHelper (BDSKPrivate)
 - (void)_replacementDealloc;
 - (void)_replacementTypeAheadSearchTimeout;
+- (int)_indexOfItemWithSubstring:(NSString *)substring afterIndex:(unsigned int)selectedIndex;
 @end
 
 @interface OATypeAheadSelectionHelper (OmniPrivate)
 // this is in Omni's implementation
 - (void)_typeAheadSearchTimeout;
+- (int)_indexOfItemWithPrefix:(NSString *)prefix afterIndex:(unsigned int)selectedIndex;
 @end
 
 // Use to implement a display like OmniWeb's when you start typing a link title; we should probably just use our own subclass here
@@ -76,57 +78,7 @@ static IMP originalDeallocIMP;
     originalTypeAheadSearchTimeoutIMP(self, _cmd);
 }
 
-@end
-
-@implementation OATypeAheadSelectionHelper (BDSKExtensions)
-
-- (void)newProcessKeyDownCharacter:(unichar)character;
-{
-    OFScheduler *scheduler;
-    NSString *selectedItem;
-    int selectedIndex, foundIndex;
-    unsigned int searchStringLength;
-
-    OBPRECONDITION(_dataSource != nil);
-
-    // Create the search string the first time around
-    if (typeAheadSearchString == nil)
-        typeAheadSearchString = [[NSMutableString alloc] init];
-
-    // Append the new character to the search string
-    [typeAheadSearchString appendCharacter:character];
-    
-    if([_dataSource respondsToSelector:@selector(updateTypeAheadStatus:)])
-        [_dataSource updateTypeAheadStatus:typeAheadSearchString];
-
-    // Reset the timer if it hasn't expired yet
-    scheduler = [OFScheduler mainScheduler];
-    if (typeAheadTimeoutEvent != nil) {
-        [scheduler abortEvent:typeAheadTimeoutEvent];
-        [typeAheadTimeoutEvent release];
-        typeAheadTimeoutEvent = nil;
-    }
-    typeAheadTimeoutEvent = [[scheduler scheduleSelector:@selector(_typeAheadSearchTimeout) onObject:self afterTime:0.7] retain];
-
-    selectedItem = [_dataSource currentlySelectedItem];
-
-    searchStringLength = [typeAheadSearchString length];
-    
-    // The Omni implementation of this looks for a prefix; we're searching for a substring
-    if (searchStringLength > 1 && [selectedItem length] >= searchStringLength && [selectedItem containsString:typeAheadSearchString options:NSCaseInsensitiveSearch])
-        return; // Avoid flashing a selection all over the place while you're still typing the thing you have selected
-
-    if (flags.cycleResults && selectedItem)
-        selectedIndex = [typeAheadSearchCache indexOfObject:selectedItem];
-    else
-        selectedIndex = NSNotFound;
-    foundIndex = [self _indexOfItemWithSubstring:typeAheadSearchString afterIndex:selectedIndex];
-
-    if (foundIndex != NSNotFound)
-        [_dataSource typeAheadSelectItemAtIndex:foundIndex];
-}
-
-- (int)_indexOfItemWithSubstring:(NSString *)substring afterIndex:(int)selectedIndex
+- (int)_indexOfItemWithSubstring:(NSString *)substring afterIndex:(unsigned int)selectedIndex
 {
     unsigned int labelIndex, foundIndex, labelCount;
     unsigned int substringLength;
@@ -164,6 +116,73 @@ static IMP originalDeallocIMP;
     }
 
     return NSNotFound;
+}
+
+@end
+
+@implementation OATypeAheadSelectionHelper (BDSKExtensions)
+
+- (void)prefixProcessKeyDownCharacter:(unichar)character;
+{
+    [self processKeyDownCharacter:character matchPrefix:YES];
+}
+
+- (void)substringProcessKeyDownCharacter:(unichar)character;
+{
+    [self processKeyDownCharacter:character matchPrefix:NO];
+}
+
+- (void)processKeyDownCharacter:(unichar)character matchPrefix:(BOOL)matchPrefix;
+{
+    OFScheduler *scheduler;
+    NSString *selectedItem;
+    int selectedIndex, foundIndex;
+    unsigned int searchStringLength;
+    unsigned int selectedItemLength;
+    NSRange range;
+
+    OBPRECONDITION(_dataSource != nil);
+
+    // Create the search string the first time around
+    if (typeAheadSearchString == nil)
+        typeAheadSearchString = [[NSMutableString alloc] init];
+
+    // Append the new character to the search string
+    [typeAheadSearchString appendCharacter:character];
+    
+    if([_dataSource respondsToSelector:@selector(updateTypeAheadStatus:)])
+        [_dataSource updateTypeAheadStatus:typeAheadSearchString];
+
+    // Reset the timer if it hasn't expired yet
+    scheduler = [OFScheduler mainScheduler];
+    if (typeAheadTimeoutEvent != nil) {
+        [scheduler abortEvent:typeAheadTimeoutEvent];
+        [typeAheadTimeoutEvent release];
+        typeAheadTimeoutEvent = nil;
+    }
+    typeAheadTimeoutEvent = [[scheduler scheduleSelector:@selector(_typeAheadSearchTimeout) onObject:self afterTime:0.7] retain];
+
+    selectedItem = [_dataSource currentlySelectedItem];
+
+    searchStringLength = [typeAheadSearchString length];
+    selectedItemLength = [selectedItem length];
+    
+    // The Omni implementation of this looks for a prefix; we might be searching for a substring
+    range = NSMakeRange(0, matchPrefix ? searchStringLength : selectedItemLength);
+    if (searchStringLength > 1 && selectedItemLength >= searchStringLength && [selectedItem containsString:typeAheadSearchString options:NSCaseInsensitiveSearch range:range])
+        return; // Avoid flashing a selection all over the place while you're still typing the thing you have selected
+
+    if (flags.cycleResults && selectedItem)
+        selectedIndex = [typeAheadSearchCache indexOfObject:selectedItem];
+    else
+        selectedIndex = NSNotFound;
+    if (matchPrefix)
+        foundIndex = [self _indexOfItemWithPrefix:typeAheadSearchString afterIndex:selectedIndex];
+    else
+        foundIndex = [self _indexOfItemWithSubstring:typeAheadSearchString afterIndex:selectedIndex];
+
+    if (foundIndex != NSNotFound)
+        [_dataSource typeAheadSelectItemAtIndex:foundIndex];
 }
 
 @end

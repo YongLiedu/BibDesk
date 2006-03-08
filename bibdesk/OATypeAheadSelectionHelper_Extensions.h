@@ -42,6 +42,7 @@
 
 @interface OATypeAheadSelectionHelper (BDSKExtensions)
 
-- (void)newProcessKeyDownCharacter:(unichar)character;
-- (int)_indexOfItemWithSubstring:(NSString *)substring afterIndex:(int)selectedIndex;
+- (void)prefixProcessKeyDownCharacter:(unichar)character;
+- (void)substringProcessKeyDownCharacter:(unichar)character;
+- (void)processKeyDownCharacter:(unichar)character matchPrefix:(BOOL)matchPrefix;
 @end
