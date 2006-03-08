@@ -83,7 +83,10 @@
             if(!font){
                 font = [NSFont fontWithName:[tryFamily stringByAppendingString:@" Black Italic"] size:size];
                 if(!font){
-                    font = [NSFont boldSystemFontOfSize:size];
+                    font = [self convertFont:[NSFont fontWithName:tryFamily size:size] toHaveTrait:(NSBoldFontMask | NSItalicFontMask)];
+                    if(!font){
+                        font = [NSFont boldSystemFontOfSize:size];
+                    }
                 }
             }
         }
@@ -109,9 +112,12 @@
     
     NSFont *font = [NSFont fontWithName:[tryFamily stringByAppendingString:@" Bold"] size:size];
     if(!font){
-        [NSFont fontWithName:[tryFamily stringByAppendingString:@" Black"] size:size];
+        font = [NSFont fontWithName:[tryFamily stringByAppendingString:@" Black"] size:size];
         if(!font){
-            font = [NSFont boldSystemFontOfSize:size];
+            font = [self convertFont:[NSFont fontWithName:tryFamily size:size] toHaveTrait:NSBoldFontMask];
+            if(!font){
+                font = [NSFont boldSystemFontOfSize:size];
+            }
         }
     }
     return font;
