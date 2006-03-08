@@ -426,21 +426,11 @@ static int MAX_RATING = 5;
 	return [self localizedCaseInsensitiveNumericCompare:other];
 }    
 
-- (NSComparisonResult)sortCompare:(NSString *)other{
-    BOOL otherIsEmpty = [NSString isEmptyString:other];
-	if ([self isEqualToString:@""]) {
-		return (otherIsEmpty)? NSOrderedSame : NSOrderedDescending;
-	} else if (otherIsEmpty) {
-		return NSOrderedAscending;
-	}
-	return [self localizedCaseInsensitiveNumericCompare:other];
-}    
-
 - (NSComparisonResult)triStateCompare:(NSString *)other{
     // we order increasingly as 0, -1, 1
     int myValue = [self triStateValue];
     int otherValue = [other triStateValue];
-    if myValue == otherValue
+    if (myValue == otherValue)
         return NSOrderedSame;
     else if (myValue == 0 || otherValue == 1)
         return NSOrderedAscending;
