@@ -1447,7 +1447,7 @@
                 return NO;
             } else return YES;
         
-        } else if ([[self dataSource] isInTemporaryTypeAheadMode] == NO && (c == '=' || c == '+')) {
+        } else if ([[self dataSource] isInTemporaryTypeAheadMode] == NO && c == '=') {
         
             [[self dataSource] startTemporaryTypeAheadMode];
             return YES;
