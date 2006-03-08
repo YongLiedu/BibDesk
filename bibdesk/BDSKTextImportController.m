@@ -1442,7 +1442,7 @@
                 index += 10;
             if (flags & NSShiftKeyMask)
                 index += 20;
-            if ([[self dataSource] addCurrentSelectionToFieldAtIndex:index]) {
+            if ([[self dataSource] addCurrentSelectionToFieldAtIndex:index] == NO) {
                 NSBeep();
                 return NO;
             } else return YES;
@@ -1488,11 +1488,12 @@
 
 - (void)awakeFromNib{
     typeAheadHelper = [[OATypeAheadSelectionHelper alloc] init];
-    [typeAheadHelper setDataSource:[self delegate]];
+    [typeAheadHelper setDataSource:[self dataSource]];
     [typeAheadHelper setCyclesSimilarResults:YES];
 }
 
 - (void)dealloc{
+    [typeAheadHelper setDataSource:nil];
     [typeAheadHelper release];
     [super dealloc];
 }
