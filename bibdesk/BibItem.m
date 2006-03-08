@@ -1011,7 +1011,7 @@ static NSParagraphStyle* bodyParagraphStyle = nil;
 }
 
 - (id)valueForUndefinedKey:(NSString *)key{
-    return [self valueOfField:key];
+    return [self valueOfGenericField:key];
 }
 
 - (NSString *)valueOfField: (NSString *)key{

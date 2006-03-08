@@ -265,15 +265,13 @@ An inline buffer is used for speed in accessing each character.
 - (NSComparisonResult)sortCompare:(NSString *)other;
 
 /*!
-    @method     containsString:options:range:
-    @abstract   Determine whether a string contains searchString in aRange using mask as search options.
+    @method     triStateCompare:
+    @abstract   For sorting triState string values
     @discussion (comprehensive description)
-    @param      searchString (description)
-    @param      mask (description)
-    @param      aRange (description)
+    @param      other (description)
     @result     (description)
 */
-- (BOOL)containsString:(NSString *)searchString options:(unsigned int)mask range:(NSRange)aRange;
+- (NSComparisonResult)triStateCompare:(NSString *)other{
 
 #pragma mark -
 
@@ -294,6 +292,17 @@ An inline buffer is used for speed in accessing each character.
     @result     (description)
 */
 - (NSArray *)componentsSeparatedByCharactersInSet:(NSCharacterSet *)charSet trimWhitespace:(BOOL)trim;
+
+/*!
+    @method     containsString:options:range:
+    @abstract   Determine whether a string contains searchString in aRange using mask as search options.
+    @discussion (comprehensive description)
+    @param      searchString (description)
+    @param      mask (description)
+    @param      aRange (description)
+    @result     (description)
+*/
+- (BOOL)containsString:(NSString *)searchString options:(unsigned int)mask range:(NSRange)aRange;
 
 /*!
 @method     containsWord:

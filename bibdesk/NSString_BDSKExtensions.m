@@ -49,6 +49,7 @@ static AGRegex *andRegex = nil;
 static AGRegex *orRegex = nil;
 static NSString *yesString = nil;
 static NSString *noString = nil;
+static NSString *mixedString = nil;
 
 @implementation NSString (BDSKExtensions)
 
@@ -63,6 +64,8 @@ static NSString *noString = nil;
     
     yesString = [NSLocalizedString(@"Yes", @"Yes") copy];
     noString = [NSLocalizedString(@"No", @"No") copy];
+    mixedString = [NSLocalizedString(@"-", @"indeterminate or mixed value indicator") copy];
+    
 }
 
 + (NSString *)hexStringForCharacter:(unichar)ch{
@@ -105,10 +108,6 @@ static int MAX_RATING = 5;
 }
 
 + (NSString *)stringWithTriStateValue:(NSCellStateValue)triStateValue {
-    static NSString *mixedString = nil;
-    if(mixedString == nil)
-		mixedString = NSLocalizedString(@"-", @"indeterminate or mixed value indicator");
-    
     switch (triStateValue) {
         case NSOffState:
             return noString;
@@ -427,9 +426,27 @@ static int MAX_RATING = 5;
 	return [self localizedCaseInsensitiveNumericCompare:other];
 }    
 
-- (BOOL)containsString:(NSString *)searchString options:(unsigned int)mask range:(NSRange)aRange{
-    return !searchString || [searchString length] == 0 || [self rangeOfString:searchString options:mask range:aRange].length > 0;
-}
+- (NSComparisonResult)sortCompare:(NSString *)other{
+    BOOL otherIsEmpty = [NSString isEmptyString:other];
+	if ([self isEqualToString:@""]) {
+		return (otherIsEmpty)? NSOrderedSame : NSOrderedDescending;
+	} else if (otherIsEmpty) {
+		return NSOrderedAscending;
+	}
+	return [self localizedCaseInsensitiveNumericCompare:other];
+}    
+
+- (NSComparisonResult)triStateCompare:(NSString *)other{
+    // we order increasingly as 0, -1, 1
+    int myValue = [self triStateValue];
+    int otherValue = [other triStateValue];
+    if myValue == otherValue
+        return NSOrderedSame;
+    else if (myValue == 0 || otherValue == 1)
+        return NSOrderedAscending;
+    else 
+        return NSOrderedDescending;
+}    
 
 #pragma mark -
 
@@ -446,6 +463,10 @@ static int MAX_RATING = 5;
 - (NSArray *)componentsSeparatedByCharactersInSet:(NSCharacterSet *)charSet trimWhitespace:(BOOL)trim;
 {
     return [(id)BDStringCreateComponentsSeparatedByCharacterSetTrimWhitespace(CFAllocatorGetDefault(), (CFStringRef)self, (CFCharacterSetRef)charSet, trim) autorelease];
+}
+
+- (BOOL)containsString:(NSString *)searchString options:(unsigned int)mask range:(NSRange)aRange{
+    return !searchString || [searchString length] == 0 || [self rangeOfString:searchString options:mask range:aRange].length > 0;
 }
 
 - (BOOL)containsWord:(NSString *)aWord{

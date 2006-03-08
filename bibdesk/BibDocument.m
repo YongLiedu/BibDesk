@@ -2177,8 +2177,11 @@ NSString *BDSKBibItemPboardType = @"edu.ucsd.mmccrack.bibdesk BibItem pboard typ
         sortDescriptor = [[BDSKTableSortDescriptor alloc] initWithKey:@"stringCache.Booktitle" ascending:ascend selector:@selector(localizedCompare:)];
         
     }else if([[[OFPreferenceWrapper sharedPreferenceWrapper] stringArrayForKey:BDSKBooleanFieldsKey] containsObject:tcID] ||
-             [[[OFPreferenceWrapper sharedPreferenceWrapper] stringArrayForKey:BDSKTriStateFieldsKey] containsObject:tcID] || 
-             [[[OFPreferenceWrapper sharedPreferenceWrapper] stringArrayForKey:BDSKRatingFieldsKey] containsObject:tcID]){
+             [[[OFPreferenceWrapper sharedPreferenceWrapper] stringArrayForKey:BDSKTriStateFieldsKey] containsObject:tcID]){
+        
+        sortDescriptor = [[NSSortDescriptor alloc] initWithKey:tcID ascending:ascend selector:@selector(triStateCompare:)];
+        
+    }else if([[[OFPreferenceWrapper sharedPreferenceWrapper] stringArrayForKey:BDSKRatingFieldsKey] containsObject:tcID]){
         
         // Use NSSortDescriptor instead of the BDSKTableSortDescriptor, so 0 values are handled correctly; if we ever store these as NSNumbers, the selector must be changed to compare:.
         sortDescriptor = [[NSSortDescriptor alloc] initWithKey:tcID ascending:ascend selector:@selector(numericCompare:)];
