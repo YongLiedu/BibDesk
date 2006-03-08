@@ -815,7 +815,7 @@ The selected text will be added to the frontmost document in BibDesk automatical
 @image{gfx/textImport}
 
 If you have a source of references that isn't in a structured form,
-you can use the @menutitle{Add New Publications from Pasteboard} menu item in the
+you can use the @menutitle{Add New Publications from Clipboard} menu item in the
 @menutitle{Publication} menu (or the key shortcut @optcmd{L}) to open a
 sheet that lets you add references by selecting text and assigning
 that text to fields in a new reference. You can also choose the 
@@ -858,13 +858,17 @@ information. Edit and make any other changes you want by
 double-clicking on the rightmost column of the table.
 
 @kindex Cmd-0 - Cmd-9
+@kindex Cmd-=
 
-You can make adding data faster by just double-clicking the name of
+You can make adding data faster by double-clicking the name of
 the field you want the selected text to fill and it will be added for
-you. You can also use the key shortcuts @cmd{0} through @cmd{9} to
-copy the selected text over to the corresponding field.
-
-@c note: Double-clicking to transfer the data does not work for the webpage view yet.
+you. You can also use the key shortcuts @cmd{&#0048} through @cmd{9} or 
+@optcmd{&#0048} through @optcmd{9} to copy the selected text over to the 
+corresponding field. Alternatively, you can type @cmd{=} to temporarily 
+move to the table to select a field to fill. After that, start typing 
+the field name or use the arrow keys to find the field and hit the 
+Enter key to fill it and return to what you were doing. Use the 
+Tab or Escape key to just go back without filling the field. 
 
 @c --------------------------------------------------------------------------------------
 
