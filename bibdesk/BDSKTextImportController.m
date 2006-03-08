@@ -1458,23 +1458,31 @@
 }
 
 - (void)keyDown:(NSEvent *)event{
-    unichar c = [[event characters] characterAtIndex:0];
-    NSCharacterSet *alnum = [NSCharacterSet alphanumericCharacterSet];
+    NSString *chars = [event charactersIgnoringModifiers];
+    unichar c = ([chars length]) ? [chars characterAtIndex:0] : 0;
+    unsigned int flags = ([event modifierFlags] & 0xffff0000U);
+    
+    static NSCharacterSet *fieldNameCharSet = nil;
+    if (fieldNameCharSet == nil) 
+        fieldNameCharSet = [[[[BibTypeManager sharedManager] strictInvalidCharactersForField:BDSKCiteKeyString inFileType:BDSKBibtexString] invertedSet] copy];
     
     if ([[self dataSource] isInTemporaryTypeAheadMode]) {
-        if (c == NSTabCharacter || c == 0x001b) {
+        if (flags != 0) {
+            NSBeep();
+            return;
+        } else if (c == NSTabCharacter || c == 0x001b) {
             [[self dataSource] endTemporaryTypeAheadModeAndSet:NO];
             return;
         } else if (c == NSCarriageReturnCharacter || c == NSEnterCharacter || c == NSNewlineCharacter) {
             [[self dataSource] endTemporaryTypeAheadModeAndSet:YES];
             return;
-        } else if ([alnum characterIsMember:c] == NO && c != NSDownArrowFunctionKey && c != NSUpArrowFunctionKey) {
+        } else if ([fieldNameCharSet characterIsMember:c] == NO && c != NSDownArrowFunctionKey && c != NSUpArrowFunctionKey) {
             NSBeep();
             return;
         }
     }
     
-    if ([alnum characterIsMember:c]) {
+    if ([fieldNameCharSet characterIsMember:c] && flags == 0) {
         [typeAheadHelper prefixProcessKeyDownCharacter:c];
     }else{
         [super keyDown:event];

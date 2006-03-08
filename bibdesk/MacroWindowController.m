@@ -451,6 +451,7 @@
 - (void)keyDown:(NSEvent *)event{
     unichar c = [[event characters] characterAtIndex:0];
     NSCharacterSet *alnum = [NSCharacterSet alphanumericCharacterSet];
+    unsigned int flags = ([event modifierFlags] & 0xffff0000U);
     if (c == NSDeleteCharacter ||
         c == NSBackspaceCharacter) {
         [[self delegate] removeSelectedMacros:nil];
@@ -459,7 +460,7 @@
              c == NSCarriageReturnCharacter){
                 if([self numberOfSelectedRows] == 1)
                     [self editColumn:0 row:[self selectedRow] withEvent:nil select:YES];
-    }else if ([alnum characterIsMember:c]) {
+    }else if ([alnum characterIsMember:c] && flags == 0) {
         [typeAheadHelper substringProcessKeyDownCharacter:c];
     }else{
         [super keyDown:event];

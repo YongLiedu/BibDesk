@@ -39,6 +39,7 @@
 #import <Cocoa/Cocoa.h>
 #import <OmniAppKit/OAGradientTableView.h>
 #import <OmniAppKit/OATypeAheadSelectionHelper.h>
+#import "OATypeAheadSelectionHelper_Extensions.h"
 
 @class BDSKGroupTableView;
 

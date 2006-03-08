@@ -53,6 +53,7 @@
 - (void)keyDown:(NSEvent *)event{
     unichar c = [[event characters] characterAtIndex:0];
     NSCharacterSet *alnum = [NSCharacterSet alphanumericCharacterSet];
+    unsigned int flags = ([event modifierFlags] & 0xffff0000U);
     if (c == 0x0020){ // spacebar to page down in the lower pane of the BibDocument splitview, shift-space to page up
         if([event modifierFlags] & NSShiftKeyMask)
             [[self delegate] pageUpInPreview:nil];
@@ -83,7 +84,7 @@
         [self selectRowIndexes:[NSIndexSet indexSetWithIndex:row] byExtendingSelection:([event modifierFlags] | NSShiftKeyMask)];
         [self scrollRowToVisible:row];
     // pass it on the typeahead selector
-    }else if ([alnum characterIsMember:c]) {
+    }else if ([alnum characterIsMember:c] && flags == 0) {
         [typeAheadHelper substringProcessKeyDownCharacter:c];
     }else{
         [super keyDown:event];
