@@ -216,7 +216,7 @@ extern NSString *BDSKAuthorEditorString;
 extern NSString *BDSKItemNumberString;
 extern NSString *BDSKTypeString;
 extern NSString *BDSKAddressString;
-
+extern NSString *BDSKDoiString;
 
 #pragma mark ||  Notification name strings
 extern NSString *BDSKFinalizeChangesNotification;

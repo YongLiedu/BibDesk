@@ -1649,7 +1649,7 @@ static NSParagraphStyle* bodyParagraphStyle = nil;
     NSURL *baseURL = nil;
     
     // resolve DOI fields against a base URL if necessary, so they can be opened directly by NSWorkspace
-    if([field isEqualToString:@"Doi"] && [value rangeOfString:@"://"].length == 0){
+    if([field isEqualToString:BDSKDoiString] && [value rangeOfString:@"://"].length == 0){
         baseURL = [NSURL URLWithString:@"http://dx.doi.org/"];
         // remove the doi: prefix, which is required for a valid DOI, but may not be present
         NSRange range = [value rangeOfString:@"doi:"];

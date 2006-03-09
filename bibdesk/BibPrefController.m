@@ -232,6 +232,7 @@ NSString *BDSKAuthorEditorString = @"Author or Editor";
 NSString *BDSKItemNumberString = @"Item Number";
 NSString *BDSKTypeString = @"Type";
 NSString *BDSKAddressString = @"Address";
+NSString *BDSKDoiString = @"Doi";
 
 #pragma mark ||  Notification name strings
 NSString *BDSKFinalizeChangesNotification = @"Finalize Changes Notification";
