@@ -49,6 +49,7 @@
 - (void)awakeFromNib;
 - (void)changeFont:(id)sender;
 - (void)tableViewFontChanged:(NSNotification *)notification;
+- (void)updateFontPanel:(NSNotification *)notification;
 - (NSString *)fontNamePreferenceKey;
 - (NSString *)fontSizePreferenceKey;
 - (NSString *)fontChangedNotificationName;

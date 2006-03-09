@@ -194,13 +194,7 @@ static IMP originalDealloc;
 }
 
 - (BOOL)replacementBecomeFirstResponder {
-    NSString *fontNamePrefKey = [self fontNamePreferenceKey];
-    NSString *fontSizePrefKey = [self fontSizePreferenceKey];
-    if (fontNamePrefKey != nil && fontSizePrefKey != nil) {
-        NSString *fontName = [[OFPreferenceWrapper sharedPreferenceWrapper] objectForKey:fontNamePrefKey];
-        float fontSize = [[OFPreferenceWrapper sharedPreferenceWrapper] floatForKey:fontSizePrefKey];
-        [[NSFontManager sharedFontManager] setSelectedFont:[NSFont fontWithName:fontName size:fontSize] isMultiple:NO];
-	}
+    [self updateFontPanel:nil];
     return originalBecomeFirstResponder(self, _cmd);
 }
 
@@ -212,12 +206,18 @@ static IMP originalDealloc;
 - (void)awakeFromNib {
     // there was no original awakeFromNib
     NSString *fontChangedNoteName = [self fontChangedNotificationName];
+    [self tableViewFontChanged:nil];
     if (fontChangedNoteName != nil) {
-        [self tableViewFontChanged:nil];
         [[NSNotificationCenter defaultCenter] addObserver:self
                                                  selector:@selector(tableViewFontChanged:)
                                                      name:fontChangedNoteName
                                                    object:nil];
+     }
+     if ([self fontNamePreferenceKey] != nil) {
+        [[NSNotificationCenter defaultCenter] addObserver:self
+                                                 selector:@selector(updateFontPanel:)
+                                                     name:NSWindowDidBecomeKeyNotification
+                                                   object:[self window]];
     }
 }
 
@@ -259,6 +259,16 @@ static IMP originalDealloc;
     
 	[self tile];
     [self reloadData]; // othewise the change isn't immediately visible
+}
+
+- (void)updateFontPanel:(NSNotification *)notification {
+    NSString *fontNamePrefKey = [self fontNamePreferenceKey];
+    NSString *fontSizePrefKey = [self fontSizePreferenceKey];
+    if (fontNamePrefKey != nil && fontSizePrefKey != nil) {
+        NSString *fontName = [[OFPreferenceWrapper sharedPreferenceWrapper] objectForKey:fontNamePrefKey];
+        float fontSize = [[OFPreferenceWrapper sharedPreferenceWrapper] floatForKey:fontSizePrefKey];
+        [[NSFontManager sharedFontManager] setSelectedFont:[NSFont fontWithName:fontName size:fontSize] isMultiple:NO];
+	}
 }
 
 @end
