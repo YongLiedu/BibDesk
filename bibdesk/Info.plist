@@ -459,7 +459,7 @@
 					<key>Font family to use for RTF preview display</key>
 					<string>Gill Sans</string>
 					<key>Font size for preview pane in document view</key>
-					<integer>12</integer>
+					<real>12.0</real>
 					<key>Maximum Number of Items in Preview Pane</key>
 					<integer>0</integer>
 					<key>BDSKMainTableViewFontNameKey</key>
@@ -474,6 +474,10 @@
 					<string>LucidaGrande</string>
 					<key>BDSKPersonTableViewFontSizeKey</key>
 					<real>0.0</real>
+                    <key>BDSKEditorFontNameKey</key>
+                    <string>Helvetica</string>
+                    <key>BDSKEditorFontSizeKey</key>
+                    <real>0.0</real>
 					<key>Terms ignored when sorting</key>
 					<array/>
                     <key>BDSKShouldDisplayFirstNamesKey</key>
@@ -581,10 +585,6 @@
                     <false/>
                     <key>BDSKShouldWritePDFMetadata</key>
                     <false/>
-                    <key>BDSKEditorFontNameKey</key>
-                    <string></string>
-                    <key>BDSKEditorFontSizeKey</key>
-                    <string>0.0</string>
 					<key>Column Widths by Name</key>
 					<dict>
 						<key>1st Author</key>
