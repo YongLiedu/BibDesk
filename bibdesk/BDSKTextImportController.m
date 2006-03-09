@@ -1368,8 +1368,7 @@
 
 // fixme -  also need to call the processkeychars in keydown...
 - (void)typeAheadSelectItemAtIndex:(int)itemIndex{
-    NSResponder *responder = [[self window] firstResponder];
-    OBPRECONDITION(responder == itemTableView);
+    OBPRECONDITION([[self window] firstResponder] == itemTableView);
     [itemTableView selectRowIndexes:[NSIndexSet indexSetWithIndex:itemIndex] byExtendingSelection:NO];
     [itemTableView scrollRowToVisible:itemIndex];
 }
