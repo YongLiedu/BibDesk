@@ -52,6 +52,12 @@ enum {
     BDSKUnableToCreateParentMask = 64
 };
 
+enum {
+    BDSKInitialAutoFileOptionMask = 1,
+    BDSKCheckCompleteAutoFileOptionMask = 2,
+    BDSKForceAutoFileOptionMask = 4
+};
+
 @interface BibFiler : NSObject {
 	IBOutlet NSWindow *window;
 	IBOutlet NSTableView *tv;
@@ -61,6 +67,10 @@ enum {
 	IBOutlet NSPanel *progressSheet;
 	IBOutlet NSProgressIndicator *progressIndicator;
 	
+    BibDocument *document;
+    NSString *fieldName;
+    int options;
+    
 	NSMutableArray *errorInfoDicts;
 	NSString *errorString;
 }
@@ -79,19 +89,21 @@ It calls the necessary methods to do the move and generates the new locations fo
 - (void)filePapers:(NSArray *)papers fromDocument:(BibDocument *)doc ask:(BOOL)ask;
 
 /*!
-	@method		movePapers:forField:fromDocument:checkComplete:initialMove:
+	@method		movePapers:forField:fromDocument:options:
 	@abstract	Tries to move list of papers from a document.
 	@param		paperInfos A list of BibItems or a info dictionaries containing a BibItem and file paths to move between.
 	@param		field The field for which to move the linked files.
 	@param		doc The parent document of the papers. 
-	@param		check Boolean determines whether to check if all necessary bibliography fields are set before moving.
-	@param		initial Boolean determines whether the move is an initial move or undo of a move.
+	@param		mask Integer, see the AutoFileOptionMask enum for options. 
 	@discussion This is the core method to move files. 
 It is undoable, but only moves that were succesfull are registered for undo. 
 It can handle aliases and symlinks, also when they occur in the middle of the paths. 
 Aliases and symlinks are moved unresolved. Relative paths in symlinks will be made absolute. 
+BDSKInitialAutoFileOptionMask should be used for initial autofile moves, the new path will be generated. 
+BDSKCheckCompleteAutoFileOptionMask indicates that for initial moves a check will be done whether all required fields are set. 
+BDSKForceAutoFileOptionMask forces AutoFiling, even if there may be problems moving the file. 
 */
-- (void)movePapers:(NSArray *)paperInfos forField:(NSString *)field fromDocument:(BibDocument *)doc checkComplete:(BOOL)check initialMove:(BOOL)initial;
+- (void)movePapers:(NSArray *)paperInfos forField:(NSString *)field fromDocument:(BibDocument *)doc options:(int)masks;
 
 /*!
 	@method		showProblems
@@ -106,6 +118,20 @@ Aliases and symlinks are moved unresolved. Relative paths in symlinks will be ma
 	@discussion -
 */
 - (IBAction)done:(id)sender;
+
+/*!
+	@method		tryAgain:
+	@abstract	Action for the problems view button, cleans up, and tries to move again.
+	@discussion If the sender's tag is 1, it files with the BDSKForceAutoFileOptionMask set. 
+*/
+- (IBAction)tryAgain:(id)sender;
+
+/*!
+	@method		dump:
+	@abstract	Action for the problems view button, dumps the errors on the desktop. 
+	@discussion -
+*/
+- (IBAction)dump:(id)sender;
 
 /*!
 	@method		fileManager:shouldProceedAfterError:

@@ -44,6 +44,7 @@
 #import <OmniAppKit/NSTableView-OAExtensions.h>
 #import "BibDocument.h"
 #import "BibAppController.h"
+#import "NSFileManager_BDSKExtensions.h"
 
 static BibFiler *sharedFiler = nil;
 
@@ -72,16 +73,17 @@ static BibFiler *sharedFiler = nil;
 }
 
 - (void)dealloc{
+    [[NSNotificationCenter defaultCenter] removeObserver:self];
 	[errorInfoDicts release];
 	[super dealloc];
 }
 
 - (void)awakeFromNib{
 	// this isn't set properly in the nib because OATextWithIconCell does not override initWithCoder
-	OATextWithIconCell *cell = [[tv tableColumnWithIdentifier:@"oloc"] dataCell];
+	OATextWithIconCell *cell = [[tv tableColumnWithIdentifier:@"oldPath"] dataCell];
 	[cell setDrawsHighlight:YES];
 	[cell setImagePosition:NSImageLeft];
-	cell = [[tv tableColumnWithIdentifier:@"nloc"] dataCell];
+	cell = [[tv tableColumnWithIdentifier:@"newPath"] dataCell];
 	[cell setDrawsHighlight:YES];
 	[cell setImagePosition:NSImageLeft];
 }
@@ -120,10 +122,12 @@ static BibFiler *sharedFiler = nil;
 		}
 	}
 	
-	[self movePapers:papers forField:BDSKLocalUrlString fromDocument:doc checkComplete:check initialMove:YES];
+    int mask = BDSKInitialAutoFileOptionMask;
+    if (check == YES) mask |= BDSKCheckCompleteAutoFileOptionMask;
+	[self movePapers:papers forField:BDSKLocalUrlString fromDocument:doc options:mask];
 }
 
-- (void)movePapers:(NSArray *)paperInfos forField:(NSString *)field fromDocument:(BibDocument *)doc checkComplete:(BOOL)check initialMove:(BOOL)initial{
+- (void)movePapers:(NSArray *)paperInfos forField:(NSString *)field fromDocument:(BibDocument *)doc options:(int)mask{
 	NSFileManager *fm = [NSFileManager defaultManager];
 	int numberOfPapers = [paperInfos count];
 	NSEnumerator *paperEnum = [paperInfos objectEnumerator];
@@ -137,9 +141,15 @@ static BibFiler *sharedFiler = nil;
 	NSMutableDictionary *info = nil;
 	NSString *status = nil;
 	int statusFlag = BDSKNoErrorMask;
+    NSString *fix = nil;
 	BOOL useRelativePath = [[OFPreferenceWrapper sharedPreferenceWrapper] boolForKey:BDSKAutoFileUsesRelativePathKey];
     NSString *papersFolderPath = [[[NSApp delegate] folderPathForFilingPapersFromDocument:doc] stringByAppendingString:@"/"];
 	
+    BOOL initial = (mask & BDSKInitialAutoFileOptionMask);
+    BOOL force = (mask & BDSKForceAutoFileOptionMask);
+    BOOL check = (initial == YES) && (force == NO) && (mask & BDSKCheckCompleteAutoFileOptionMask);
+    BOOL ignoreMove = NO;
+    
 	if (numberOfPapers == 0)
 		return;
 	
@@ -195,8 +205,8 @@ static BibFiler *sharedFiler = nil;
 		}else{
 			// undo: a list of info dictionaries. We should move the file back!
 			paper = [paperInfo objectForKey:@"paper"];
-			path = [paperInfo objectForKey:@"nloc"];
-			newPath = [paperInfo objectForKey:@"oloc"];
+			path = [paperInfo objectForKey:@"oldPath"];
+			newPath = [paperInfo objectForKey:@"newPath"];
 		}
 		
 		if(progressSheet){
@@ -210,10 +220,10 @@ static BibFiler *sharedFiler = nil;
 		
 		info = [NSMutableDictionary dictionaryWithCapacity:5];
 		[info setObject:paper forKey:@"paper"];
-		[info setObject:path forKey:@"oloc"];
-		[info setObject:newPath forKey:@"nloc"];
 		status = nil;
+		fix = nil;
 		statusFlag = BDSKNoErrorMask;
+        ignoreMove = NO;
 		// filemanager needs aliases resolved for moving and existence checks
 		// ...however we want to move aliases, not their targets
 		// so we resolve aliases in the path to the containing folder
@@ -221,8 +231,8 @@ static BibFiler *sharedFiler = nil;
 			resolvedNewPath = [[fm resolveAliasesInPath:[newPath stringByDeletingLastPathComponent]] 
 						 stringByAppendingPathComponent:[newPath lastPathComponent]];
 		NS_HANDLER
-			NSLog(@"Ignoring exception %@ raised while resolving aliases in %@", [localException name], newPath);
-			status = NSLocalizedString(@"Unable to resolve aliases in path.", @"");
+            NSLog(@"Ignoring exception %@ raised while resolving aliases in %@", [localException name], newPath);
+			status = NSLocalizedString(@"Unable to resolve aliases in path.\nFix: cannot fix.", @"");
 			statusFlag = statusFlag | BDSKUnableToResolveAliasMask;
 		NS_ENDHANDLER
 		
@@ -230,32 +240,52 @@ static BibFiler *sharedFiler = nil;
 			resolvedPath = [[fm resolveAliasesInPath:[path stringByDeletingLastPathComponent]] 
 					  stringByAppendingPathComponent:[path lastPathComponent]];
 		NS_HANDLER
-			NSLog(@"Ignoring exception %@ raised while resolving aliases in %@", [localException name], path);
+            NSLog(@"Ignoring exception %@ raised while resolving aliases in %@", [localException name], path);
 			status = NSLocalizedString(@"Unable to resolve aliases in path.", @"");
 			statusFlag = statusFlag | BDSKUnableToResolveAliasMask;
 		NS_ENDHANDLER
 		
 		if(check && ![paper canSetLocalUrl]){
-			status = NSLocalizedString(@"Incomplete information to generate the file name.",@"");
+            status = NSLocalizedString(@"Incomplete information to generate the file name.",@"");
+            fix = NSLocalizedString(@"Move anyway.",@"");
 			statusFlag = statusFlag | BDSKIncompleteFieldsMask;
 		}
 		
 		if(statusFlag == BDSKNoErrorMask){
 			if([fm fileExistsAtPath:resolvedNewPath]){
-				statusFlag = statusFlag | BDSKGeneratedFileExistsMask;
 				if([fm fileExistsAtPath:resolvedPath]){
-					status = NSLocalizedString(@"A file already exists at the generated location.",@"");
+                    if(force == YES){
+                        NSString *backupPath = [[fm desktopPathForCurrentUser] stringByAppendingPathComponent:[resolvedNewPath lastPathComponent]];
+                        backupPath = [fm uniqueFilePath:backupPath createDirectory:NO];
+                        if(![fm movePath:resolvedNewPath toPath:backupPath handler:self]){
+                            status = [errorString autorelease];
+                            statusFlag = statusFlag | BDSKGeneratedFileExistsMask | BDSKRemoveErrorMask;
+                        }
+                    }else{
+                        status = NSLocalizedString(@"A file already exists at the generated location.",@"");
+                        fix = NSLocalizedString(@"Overwrite existing file.",@"");
+                        statusFlag = statusFlag | BDSKGeneratedFileExistsMask;
+                    }
 				}else{
-					status = NSLocalizedString(@"The linked file does not exists, while a file already exists at the generated location.", @"");
-					statusFlag = statusFlag | BDSKOldFileDoesNotExistMask;
+                    if(force == YES){
+                        ignoreMove = YES;
+                    }else{
+                        status = NSLocalizedString(@"The linked file does not exists, while a file already exists at the generated location.", @"");
+                        fix = NSLocalizedString(@"Link to existing file.", @"");
+                        statusFlag = statusFlag | BDSKOldFileDoesNotExistMask | BDSKGeneratedFileExistsMask;
+                    }
 				}
 			}else if(![fm fileExistsAtPath:resolvedPath]){
 				status = NSLocalizedString(@"The linked file does not exist.", @"");
 				statusFlag = statusFlag | BDSKOldFileDoesNotExistMask;
 			}else if(![fm isDeletableFileAtPath:resolvedPath]){
-				status = NSLocalizedString(@"Could not move read-only file.", @"");
-				statusFlag = statusFlag | BDSKMoveErrorMask;
-			}else{
+                if(force == NO){
+                    status = NSLocalizedString(@"Could not move read-only file.", @"");
+                    fix = NSLocalizedString(@"Copy the original file.", @"");
+                    statusFlag = statusFlag | BDSKMoveErrorMask;
+                }
+			}
+            if(statusFlag == BDSKNoErrorMask || ignoreMove){
 				NSString *fileType = [[fm fileAttributesAtPath:resolvedPath traverseLink:NO] objectForKey:NSFileType];
 				NS_DURING
 					[fm createPathToFile:resolvedNewPath attributes:nil]; // create parent directories if necessary (OmniFoundation)
@@ -276,19 +306,28 @@ static BibFiler *sharedFiler = nil;
 							statusFlag = statusFlag | BDSKMoveErrorMask;
 						}else{
 							if(![fm removeFileAtPath:resolvedPath handler:self]){
-								// error remove original file
-								// should we remove the new symlink and not set Local-Url?
-								status = [errorString autorelease];
-								statusFlag = statusFlag | BDSKRemoveErrorMask;
+								if (force == NO){
+                                    status = [NSString stringWithFormat:@"@%@ %@", NSLocalizedString(@"Could not remove original.", @""), [errorString autorelease]];
+                                    fix = NSLocalizedString(@"Copy the original file.", @"");
+                                    statusFlag = statusFlag | BDSKRemoveErrorMask;
+                                    //cleanup: remove new file
+                                    [fm removeFileAtPath:resolvedNewPath handler:nil];
+                                }
 							}
 							//status = NSLocalizedString(@"Successfully moved.",@"");
 						}
 					}else if([fm movePath:resolvedPath toPath:resolvedNewPath handler:self]){
 						//status = NSLocalizedString(@"Successfully moved.",@"");
 					}else if([fm fileExistsAtPath:resolvedNewPath]){ // error remove original file
-						// should we remove the new file and not set the Local-Url?
-						status = [errorString autorelease];
-						statusFlag = statusFlag | BDSKRemoveErrorMask;
+						if(force == NO){
+                            status = [NSString stringWithFormat:@"@%@ %@", NSLocalizedString(@"Could not remove original.", @""), [errorString autorelease]];
+                            fix = NSLocalizedString(@"Copy the original file.", @"");
+                            statusFlag = statusFlag | BDSKRemoveErrorMask;
+                            // cleanup: move back
+                            if(![fm movePath:resolvedNewPath toPath:resolvedPath handler:nil] && [fm fileExistsAtPath:resolvedPath]){
+                                [fm removeFileAtPath:resolvedNewPath handler:nil];
+                            }
+                        }
 					}else{ // other error while moving file
 						status = [errorString autorelease];
 						statusFlag = statusFlag | BDSKMoveErrorMask;
@@ -297,8 +336,7 @@ static BibFiler *sharedFiler = nil;
 			}
 		}
 		
-		if(statusFlag == BDSKNoErrorMask || statusFlag == BDSKRemoveErrorMask){ 
-			// should we remove the new file and not set the Local-Url when we couldn't remove the old file?
+		if(statusFlag == BDSKNoErrorMask){ 
 			oldValue  = [[NSURL fileURLWithPath:path] absoluteString]; // we don't use the field value, as we might have already changed it in undo or find/replace
 			newValue  = [[NSURL fileURLWithPath:newPath] absoluteString];
 			if(initial) {// otherwise will be done by undo of setField:
@@ -316,14 +354,19 @@ static BibFiler *sharedFiler = nil;
 				[oldValues addObject:oldValue];
 				[newValues addObject:newValue];
 			}
-		}
-		if(statusFlag == BDSKNoErrorMask){
-			// should we activate undo when we couldn't remove the old file?
+			// switch them as this is used in undo
+            [info setObject:path forKey:@"newPath"];
+            [info setObject:newPath forKey:@"oldPath"];
 			[fileInfoDicts addObject:info];
 		}else{
+            [info setObject:path forKey:@"oldPath"];
+            [info setObject:newPath forKey:@"newPath"];
 			[info setObject:status forKey:@"status"];
 			[info setObject:[NSNumber numberWithInt:statusFlag] forKey:@"flag"];
-			[self insertObject:info inErrorInfoDictsAtIndex:[self countOfErrorInfoDicts]];
+            if(fix != nil){
+                [info setObject:fix forKey:@"fix"];
+			}
+            [self insertObject:info inErrorInfoDictsAtIndex:[self countOfErrorInfoDicts]];
 		}
 	}
 	
@@ -341,11 +384,24 @@ static BibFiler *sharedFiler = nil;
 	
 	NSUndoManager *undoManager = [doc undoManager];
 	[[undoManager prepareWithInvocationTarget:self] 
-		movePapers:fileInfoDicts forField:field fromDocument:doc checkComplete:NO initialMove:NO];
+		movePapers:fileInfoDicts forField:field fromDocument:doc options:0];
 	
 	if([self countOfErrorInfoDicts] > 0){
+        document = [doc retain];
+        fieldName = [field retain];
+        options = mask;
 		[self showProblems];
-	}
+    }
+}
+
+- (void)windowWillClose:(NSNotification *)notification{
+	[[self mutableArrayValueForKey:@"errorInfoDicts"] removeAllObjects];
+	[tv reloadData]; // this is necessary to avoid an exception
+    [document release];
+    document = nil;
+    [fieldName release];
+    fieldName = nil;
+    options = 0;
 }
 
 - (void)showProblems{
@@ -363,12 +419,72 @@ static BibFiler *sharedFiler = nil;
 	[tv setDoubleAction:@selector(showFile:)];
 	[tv setTarget:self];
 	[window makeKeyAndOrderFront:self];
+    [[NSNotificationCenter defaultCenter] addObserver:self
+                                             selector:@selector(windowWillClose:)
+                                                 name:NSWindowWillCloseNotification
+                                               object:window];
 }
 
 - (IBAction)done:(id)sender{
-	[window close];
-	[[self mutableArrayValueForKey:@"errorInfoDicts"] removeAllObjects];
-	[tv reloadData]; // this is necessary to avoid an exception
+    [window close];
+}
+
+- (IBAction)tryAgain:(id)sender{
+    int force = [sender tag];
+	NSDictionary *info = nil;
+    int i, count = [self countOfErrorInfoDicts];
+	NSMutableArray *fileInfoDicts = [NSMutableArray arrayWithCapacity:count];
+    
+    for (i = 0; i < count; i++) {
+        info = [self objectInErrorInfoDictsAtIndex:i];
+        if ([[info objectForKey:@"select"] boolValue] == YES) {
+            if (options & BDSKInitialAutoFileOptionMask) {
+                [fileInfoDicts addObject:[info objectForKey:@"paper"]];
+            } else {
+                [fileInfoDicts addObject:info];
+            }
+        }
+    }
+    
+    BibDocument *doc = [[document retain] autorelease];
+    NSString *field = [[fieldName retain] autorelease];
+    int mask = (options & BDSKInitialAutoFileOptionMask);
+    mask |= (force == 1) ? BDSKForceAutoFileOptionMask : (options & BDSKCheckCompleteAutoFileOptionMask);
+    
+    [window close];
+    
+    if([fileInfoDicts count] != 0){
+        [self movePapers:fileInfoDicts forField:field fromDocument:doc options:mask];
+    }
+}
+
+- (IBAction)dump:(id)sender{
+    NSMutableString *string = [NSMutableString string];
+	NSDictionary *info = nil;
+    int i, count = [self countOfErrorInfoDicts];
+    
+    for (i = 0; i < count; i++) {
+        info = [self objectInErrorInfoDictsAtIndex:i];
+        [string appendStrings:NSLocalizedString(@"Publication key: ", @""),
+                              [[info objectForKey:@"paper"] citeKey], @"\n", 
+                              NSLocalizedString(@"Original path: ", @""),
+                              [info objectForKey:@"oldPath"], @"\n", 
+                              NSLocalizedString(@"New path: ", @""),
+                              [info objectForKey:@"newPath"], @"\n", 
+                              NSLocalizedString(@"Status: ",@""),
+                              [info objectForKey:@"status"], @"\n", 
+                              NSLocalizedString(@"Fix: ", @""),
+                              (([info objectForKey:@"fix"] == nil) ? NSLocalizedString(@"Cannot fix.", @"") : [info objectForKey:@"fix"]),
+                              @"\n\n", nil];
+    }
+    
+    NSString *fileName = NSLocalizedString(@"BibDesk AutoFile Errors",@"Filename for dumped autofile errors.");
+    NSString *path = [[NSFileManager defaultManager] desktopPathForCurrentUser];
+    if (path == nil)
+        return;
+    path = [[[NSFileManager defaultManager] uniqueFilePath:[path stringByAppendingPathComponent:fileName] createDirectory:NO] stringByAppendingPathExtension:@"txt"];
+    
+    [string writeToFile:path atomically:YES];
 }
 
 - (BOOL)fileManager:(NSFileManager *)manager shouldProceedAfterError:(NSDictionary *)errorInfo{
@@ -401,7 +517,11 @@ static BibFiler *sharedFiler = nil;
 #pragma mark table view stuff
 
 - (NSString *)tableView:(NSTableView *)tableView toolTipForTableColumn:(NSTableColumn *)tableColumn row:(int)row{
-	return [[self objectInErrorInfoDictsAtIndex:row] objectForKey:[tableColumn identifier]];
+	NSString *tcid = [tableColumn identifier];
+    if ([tcid isEqualToString:@"select"]) {
+        return NSLocalizedString(@"Select items to Try Again or to Force.", @"");
+    }
+    return [[self objectInErrorInfoDictsAtIndex:row] objectForKey:tcid];
 }
 
 - (IBAction)showFile:(id)sender{
@@ -415,15 +535,15 @@ static BibFiler *sharedFiler = nil;
 		return;
 	
 	tcid = [[[tv tableColumns] objectAtIndex:column] identifier];
-	if([tcid isEqualToString:@"oloc"] || [tcid isEqualToString:@"icon"]){
+	if([tcid isEqualToString:@"oldPath"] || [tcid isEqualToString:@"icon"]){
 		if(statusFlag & BDSKOldFileDoesNotExistMask)
 			return;
-		path = [[dict objectForKey:@"oloc"] stringByExpandingTildeInPath];
+		path = [[dict objectForKey:@"oldPath"] stringByExpandingTildeInPath];
 		[[NSWorkspace sharedWorkspace]  selectFile:path inFileViewerRootedAtPath:nil];
-	}else if([tcid isEqualToString:@"nloc"]){
+	}else if([tcid isEqualToString:@"newPath"]){
 		if(!(statusFlag & BDSKGeneratedFileExistsMask))
 			return;
-		path = [[dict objectForKey:@"nloc"] stringByExpandingTildeInPath];
+		path = [[dict objectForKey:@"newPath"] stringByExpandingTildeInPath];
 		[[NSWorkspace sharedWorkspace]  selectFile:path inFileViewerRootedAtPath:nil];
 	}else if([tcid isEqualToString:@"status"]){
 		BibItem *pub = [dict objectForKey:@"paper"];

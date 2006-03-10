@@ -520,6 +520,42 @@ static int numberOfOpenEditors = 0;
 
 }
 
+- (IBAction)moveLinkedFile:(id)sender{
+    NSString *field = [sender representedObject];
+    if (field == nil)
+		field = BDSKLocalUrlString;
+    
+    NSSavePanel *sPanel = [NSSavePanel savePanel];
+    [sPanel setPrompt:NSLocalizedString(@"Move", @"Move file")];
+	
+    [sPanel beginSheetForDirectory:nil 
+                              file:nil 
+                    modalForWindow:[self window] 
+                     modalDelegate:self 
+                    didEndSelector:@selector(moveLinkedFilePanelDidEnd:returnCode:contextInfo:) 
+                       contextInfo:[field retain]];
+}
+
+- (void)moveLinkedFilePanelDidEnd:(NSSavePanel *)sheet returnCode:(int)returnCode contextInfo:(void *)contextInfo{
+    NSString *field = (NSString *)contextInfo;
+
+    if(returnCode == NSOKButton){
+        NSString *oldPath = [theBib localFilePathForField:field];
+        NSString *newPath = [sheet filename];
+        // we set them in opposite order, as it mimics undo
+        if([NSString isEmptyString:oldPath] == NO){
+            NSArray *paperInfos = [NSArray arrayWithObject:[NSDictionary dictionaryWithObjectsAndKeys:theBib, @"paper", oldPath, @"oldPath", newPath, @"newPath", nil]];
+            
+            [theBib setField:field toValue:[[NSURL fileURLWithPath:newPath] absoluteString]];
+            [[BibFiler sharedFiler] movePapers:paperInfos forField:field fromDocument:theDocument options:0];
+            
+            [[[self window] undoManager] setActionName:NSLocalizedString(@"Edit Publication",@"")];
+		}
+    }
+    
+    [field release];
+}
+
 - (NSMenu *)submenuForMenuItem:(NSMenuItem *)menuItem{
 	if (menuItem == [viewLocalToolbarItem menuFormRepresentation]) {
 		return [self menuForImagePopUpButton:viewLocalButton];
@@ -552,6 +588,12 @@ static int numberOfOpenEditors = 0;
 			[item release];
 			item = [[NSMenuItem allocWithZone:[NSMenu menuZone]] initWithTitle:[NSString stringWithFormat:NSLocalizedString(@"Reveal %@ in Finder",@"Reveal Local-Url in finder"), field]
 											  action:@selector(revealLinkedFile:)
+									   keyEquivalent:@""];
+			[item setRepresentedObject:field];
+			[menu addItem:item];
+			[item release];
+			item = [[NSMenuItem allocWithZone:[NSMenu menuZone]] initWithTitle:[NSString stringWithFormat:NSLocalizedString(@"Move %@%C",@"Move Local-Url..."), field, 0x2026]
+											  action:@selector(moveLinkedFile:)
 									   keyEquivalent:@""];
 			[item setRepresentedObject:field];
 			[menu addItem:item];
@@ -851,6 +893,15 @@ static int numberOfOpenEditors = 0;
 		NSURL *lurl = [[theBib URLForField:field] fileURLByResolvingAliases];
 		if ([[menuItem menu] supermenu])
 			[menuItem setTitle:NSLocalizedString(@"Reveal Linked File in Finder", @"Reveal Linked File in Finder")];
+		return (lurl == nil ? NO : YES);
+	}
+	else if ([menuItem action] == @selector(moveLinkedFile:)) {
+		NSString *field = (NSString *)[menuItem representedObject];
+		if (field == nil)
+			field = BDSKLocalUrlString;
+		NSURL *lurl = [[theBib URLForField:field] fileURLByResolvingAliases];
+		if ([[menuItem menu] supermenu])
+			[menuItem setTitle:NSLocalizedString(@"Move Linked File", @"Move Linked File")];
 		return (lurl == nil ? NO : YES);
 	}
 	else if ([menuItem action] == @selector(toggleSnoopDrawer:)) {

@@ -825,7 +825,7 @@ enum {
 		newPath = [bibItem localFilePathForField:field];
 		// we set them in opposite order, as it mimics undo
 		if([NSString isEmptyString:oldPath] == NO)
-			[paperInfos addObject:[NSDictionary dictionaryWithObjectsAndKeys:bibItem, @"paper", oldPath, @"nloc", newPath, @"oloc", nil]];
+			[paperInfos addObject:[NSDictionary dictionaryWithObjectsAndKeys:bibItem, @"paper", oldPath, @"oldPath", newPath, @"newPath", nil]];
 	}
 }
 
@@ -886,7 +886,7 @@ enum {
     }
 	
 	if([paperInfos count])
-		[[BibFiler sharedFiler] movePapers:paperInfos forField:field fromDocument:theDocument checkComplete:NO initialMove:NO];
+		[[BibFiler sharedFiler] movePapers:paperInfos forField:field fromDocument:theDocument options:0];
 	
 	return number;
 }
@@ -940,7 +940,7 @@ enum {
     }
 	
 	if([paperInfos count])
-		[[BibFiler sharedFiler] movePapers:paperInfos forField:field fromDocument:theDocument checkComplete:NO initialMove:NO];
+		[[BibFiler sharedFiler] movePapers:paperInfos forField:field fromDocument:theDocument options:0];
 	
 	return number;
 }
@@ -974,7 +974,7 @@ enum {
     }
 	
 	if([paperInfos count])
-		[[BibFiler sharedFiler] movePapers:paperInfos forField:field fromDocument:theDocument checkComplete:NO initialMove:NO];
+		[[BibFiler sharedFiler] movePapers:paperInfos forField:field fromDocument:theDocument options:0];
 	
 	return number;
 }

@@ -1,18 +1,25 @@
 {
     IBClasses = (
         {
-            ACTIONS = {done = id; }; 
+            ACTIONS = {done = id; dump = id; showFile = id; tryAgain = id; }; 
             CLASS = BibFiler; 
             LANGUAGE = ObjC; 
             OUTLETS = {
                 iconView = NSImageView; 
                 infoTextField = NSTextField; 
+                progressIndicator = NSProgressIndicator; 
+                progressSheet = NSPanel; 
                 tv = NSTableView; 
                 window = NSWindow; 
             }; 
             SUPERCLASS = NSObject; 
         }, 
-        {CLASS = FirstResponder; LANGUAGE = ObjC; SUPERCLASS = NSObject; }, 
+        {
+            ACTIONS = {"" = id; }; 
+            CLASS = FirstResponder; 
+            LANGUAGE = ObjC; 
+            SUPERCLASS = NSObject; 
+        }, 
         {CLASS = OATextWithIconCell; LANGUAGE = ObjC; SUPERCLASS = NSTextFieldCell; }, 
         {CLASS = "java.lang.Object"; LANGUAGE = Java; }
     ); 

@@ -215,6 +215,7 @@ extern NSString* BDSKWeblocFilePboardType;
     @discussion (comprehensive description)
 */
 - (IBAction)chooseLocalURL:(id)sender;
+- (void)chooseLocalURLPanelDidEnd:(NSOpenPanel *)sheet returnCode:(int)returnCode contextInfo:(void *)contextInfo;
 
 - (IBAction)toggleStatusBar:(id)sender;
 
@@ -286,6 +287,14 @@ extern NSString* BDSKWeblocFilePboardType;
 - (IBAction)revealLinkedFile:(id)sender;
 
 /*!
+    @method     moveLocalURL:
+    @abstract   Action to move a local file using the Save dialog. 
+    @discussion (comprehensive description)
+*/
+- (IBAction)moveLinkedFile:(id)sender;
+- (void)moveLinkedFilePanelDidEnd:(NSSavePanel *)sheet returnCode:(int)returnCode contextInfo:(void *)contextInfo;
+
+/*!
     @method     getSafariRecentDownloadsMenu
     @abstract   Returns a menu of items for local paths of recent downloads from Safari. Returns nil if there are no valid items.
     @discussion (comprehensive description)
@@ -312,7 +321,6 @@ extern NSString* BDSKWeblocFilePboardType;
     @discussion (comprehensive description)
 */
 - (void)setLocalURLPathFromMenuItem:(NSMenuItem *)sender;
-- (void)chooseLocalURLPanelDidEnd:(NSOpenPanel *)sheet returnCode:(int)returnCode contextInfo:(void *)contextInfo;
 
 /*!
     @method     setRemoteURLFromMenuItem
