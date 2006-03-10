@@ -159,6 +159,35 @@ typedef struct WLDragMapEntryStruct
     return retStr;
 }
 
+- (NSString *)desktopPathForCurrentUser{
+    
+    NSString *path = nil;
+    FSRef foundRef;
+    OSStatus err = noErr;
+    CFURLRef url = NULL;
+    BOOL isDir = YES;
+    
+    err = FSFindFolder(kUserDomain,  kDesktopFolderType, kCreateFolder, &foundRef);
+    if(err == noErr){
+        url = CFURLCreateFromFSRef(kCFAllocatorDefault, &foundRef);
+    }
+    
+    if(url != NULL){
+        path = [(NSURL *)url path];
+        CFRelease(url);
+    }
+    
+    if(path == nil){
+        path = [NSHomeDirectory() stringByAppendingPathComponent:@"Desktop"];
+        if([self fileExistsAtPath:path isDirectory:&isDir] == NO || isDir == NO){
+            NSLog(@"The system was unable to find your Desktop folder.", @"");
+            return nil;
+        }
+    }
+    
+    return path;
+}
+
 - (NSString *)uniqueFilePath:(NSString *)path createDirectory:(BOOL)create{
 	NSString *basePath = [path stringByDeletingPathExtension];
     NSString *extension = [path pathExtension];
