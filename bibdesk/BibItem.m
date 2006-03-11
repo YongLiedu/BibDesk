@@ -576,6 +576,86 @@ static NSParagraphStyle* bodyParagraphStyle = nil;
 	return [authNames componentsJoinedByString:@" and "];
 }
 
+#pragma mark Author or Editor Handling code
+
+- (int)numberOfAuthorsOrEditors{
+	return [self numberOfAuthorsOrEditorsInheriting:YES];
+}
+
+- (int)numberOfAuthorsOrEditorsInheriting:(BOOL)inherit{
+    return [[self pubAuthorsInheriting:inherit] count];
+}
+
+- (BibAuthor *)firstAuthorOrEditor{ 
+	return [self authorOrEditorAtIndex:0]; 
+}
+
+- (BibAuthor *)secondAuthorOrEditor{ 
+	return [self authorOrEditorAtIndex:1]; 
+}
+
+- (BibAuthor *)thirdAuthorOrEditor{ 
+	return [self authorOrEditorAtIndex:2]; 
+}
+
+- (NSArray *)pubAuthorsOrEditors{
+	return [self pubAuthorsOrEditorsInheriting:YES];
+}
+
+- (NSArray *)pubAuthorsOrEditorsInheriting:(BOOL)inherit{
+    NSArray *auths = [self peopleArrayForField:BDSKAuthorString inherit:inherit];
+    if ([auths count] == 0)
+        auths = [self peopleArrayForField:BDSKEditorString inherit:inherit];
+    return auths;
+}
+
+// returns a string similar to bibtexAuthorString, but removes the "and" separator and can optionally abbreviate first names
+- (NSString *)pubAuthorsOrEditorsForDisplay{
+    NSArray *authors = [self pubAuthorsOrEditors];
+    unsigned idx, maxIdx = [authors count];
+    NSMutableArray *array = [[NSMutableArray alloc] initWithCapacity:[authors count]];
+    BibAuthor *author;        
+        
+    OFPreferenceWrapper *prefs = [OFPreferenceWrapper sharedPreferenceWrapper];
+    BOOL displayFirst = [prefs boolForKey:BDSKShouldDisplayFirstNamesKey];
+    BOOL displayAbbreviated = [prefs boolForKey:BDSKShouldAbbreviateFirstNamesKey];
+    BOOL displayLastFirst = [prefs boolForKey:BDSKShouldDisplayLastNameFirstKey];
+    
+    NSString *name = nil;
+    // add all the names as strings
+    for(idx = 0; idx < maxIdx; idx++){
+        author = [authors objectAtIndex:idx];
+        if(displayFirst == NO){
+            name = [author lastName]; // and then ignore the other options
+        } else {
+            if(displayLastFirst)
+                name = displayAbbreviated ? [author abbreviatedNormalizedName] : [author normalizedName];
+            else
+                name = displayAbbreviated ? [author abbreviatedName] : [author name];
+        }
+        OBPOSTCONDITION(name);
+        [array addObject:name];
+        name = nil;
+    }
+    
+    NSString *string = displayLastFirst ? [array componentsJoinedByString:@" and "] : [array componentsJoinedByCommaAndAnd];
+    [array release];
+    
+    return string;
+}
+
+- (BibAuthor *)authorOrEditorAtIndex:(int)index{ 
+    return [self authorOrEditorAtIndex:index inherit:YES];
+}
+
+- (BibAuthor *)authorOrEditorAtIndex:(int)index inherit:(BOOL)inherit{ 
+	NSArray *auths = [self pubAuthorsOrEditorsInheriting:inherit];
+	if ([auths count] > index)
+        return [(NSMutableArray *)auths objectAtIndex:index usingLock:bibLock]; // not too nice. Is the lock necessary?
+    else
+        return [BibAuthor emptyAuthor];
+}
+
 #pragma mark Accessors
 
 - (BibItem *)crossrefParent{

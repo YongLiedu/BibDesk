@@ -2164,6 +2164,19 @@ NSString *BDSKBibItemPboardType = @"edu.ucsd.mmccrack.bibdesk BibItem pboard typ
 		
         sortDescriptor = [[BDSKTableSortDescriptor alloc] initWithKey:@"thirdAuthor" ascending:ascend selector:@selector(sortCompare:)];
         
+	}else if([tcID isEqualToString:BDSKFirstAuthorEditorString] ||
+             [tcID isEqualToString:BDSKAuthorEditorString]){
+        
+        sortDescriptor = [[BDSKTableSortDescriptor alloc] initWithKey:@"firstAuthorOrEditor" ascending:ascend selector:@selector(sortCompare:)];
+        
+	}else if([tcID isEqualToString:BDSKSecondAuthorString]){
+		
+        sortDescriptor = [[BDSKTableSortDescriptor alloc] initWithKey:@"secondAuthorOrEditor" ascending:ascend selector:@selector(sortCompare:)];
+		
+	}else if([tcID isEqualToString:BDSKThirdAuthorString]){
+		
+        sortDescriptor = [[BDSKTableSortDescriptor alloc] initWithKey:@"thirdAuthorOrEditor" ascending:ascend selector:@selector(sortCompare:)];
+        
 	}else if([tcID isEqualToString:BDSKTypeString]){
         
         sortDescriptor = [[BDSKTableSortDescriptor alloc] initWithKey:@"type" ascending:ascend selector:@selector(localizedCaseInsensitiveCompare:)];
@@ -2446,7 +2459,7 @@ NSString *BDSKBibItemPboardType = @"edu.ucsd.mmccrack.bibdesk BibItem pboard typ
 	NSArray *prefsShownColNamesArray = [pw arrayForKey:BDSKShownColsNamesKey];
 	BibTypeManager *typeMan = [BibTypeManager sharedManager];
 	NSMutableSet *fieldNameSet = [NSMutableSet setWithSet:[typeMan allFieldNames]];
-	[fieldNameSet unionSet:[NSSet setWithObjects:BDSKCiteKeyString, BDSKDateString, @"Added", @"Modified", BDSKFirstAuthorString, BDSKSecondAuthorString, BDSKThirdAuthorString, BDSKItemNumberString, BDSKContainerString, nil]];
+	[fieldNameSet unionSet:[NSSet setWithObjects:BDSKCiteKeyString, BDSKDateString, @"Added", @"Modified", BDSKFirstAuthorString, BDSKSecondAuthorString, BDSKThirdAuthorString, BDSKFirstAuthorEditorString, BDSKSecondAuthorEditorString, BDSKThirdAuthorEditorString, BDSKAuthorEditorString, BDSKItemNumberString, BDSKContainerString, nil]];
 	NSMutableArray *colNames = [[fieldNameSet allObjects] mutableCopy];
 	[colNames sortUsingSelector:@selector(caseInsensitiveCompare:)];
 	[colNames removeObjectsInArray:prefsShownColNamesArray];

@@ -121,9 +121,18 @@
 			return [pub authorAtIndex:1]; 
         }else if([tcID isEqualToString: BDSKThirdAuthorString] ){
 			return [pub authorAtIndex:2];
+        }else if([tcID isEqualToString: BDSKFirstAuthorEditorString] ){
+			return [pub authorOrEditorAtIndex:0];
+        }else if([tcID isEqualToString: BDSKSecondAuthorEditorString] ){
+			return [pub authorOrEditorAtIndex:1]; 
+        }else if([tcID isEqualToString: BDSKThirdAuthorEditorString] ){
+			return [pub authorOrEditorAtIndex:2];
 		} else if([tcID isEqualToString:BDSKAuthorString] ||
 				   [tcID isEqualToString:@"Authors"]) {
 			return [pub pubAuthorsForDisplay];
+		} else if([tcID isEqualToString:BDSKAuthorEditorString] ||
+                   [tcID isEqualToString:@"Authors Or Editors"]) {
+			return [pub pubAuthorsOrEditorsForDisplay];
         }else if([typeManager isURLField:tcID]){
             return [pub smallImageForURLField:tcID];
 		}else if([typeManager isRatingField:tcID]){

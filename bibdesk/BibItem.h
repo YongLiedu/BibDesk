@@ -229,6 +229,67 @@
 - (NSString *)bibTeXAuthorStringNormalized:(BOOL)normalized inherit:(BOOL)inherit;
 
 /*!
+    @method numberOfAuthorsOrEditors
+    @abstract Calls numberOfAuthorsOrEditorsInheriting: with inherit set to YES. 
+    @discussion (discussion)
+    
+*/
+- (int)numberOfAuthorsOrEditors;
+
+/*!
+    @method numberOfAuthorsOrEditorsInheriting:
+    @abstract Returns the number of authors or editors.
+	@param inherit Boolean, if set follows the Crossref to find inherited authors.
+    @discussion (discussion)
+    
+*/
+- (int)numberOfAuthorsOrEditorsInheriting:(BOOL)inherit;
+
+/*!
+    @method pubAuthorsOrEditors
+    @abstract Calls pubAuthorsOrEditorsInheriting: with inherit set to YES. 
+    @discussion (discussion)
+    
+*/
+- (NSArray *)pubAuthorsOrEditors;
+
+/*!
+    @method pubAuthorsOrEditorsInheriting:
+    @abstract Returns the authors or editors array of the publication.
+	@param inherit Boolean, if set follows the Crossref to find inherited authors.
+    @discussion (discussion)
+    
+*/
+- (NSArray *)pubAuthorsOrEditorsInheriting:(BOOL)inherit;
+
+/*!
+    @method     pubAuthorsOreditorsForDisplay
+    @abstract   Returns authors or editors in a string form, according to the user's display preferences.
+    @discussion (comprehensive description)
+    @result     (description)
+*/
+- (NSString *)pubAuthorsOrEditorsForDisplay;
+
+/*!
+    @method authorOrEditorAtIndex:
+    @abstract Calls authorOrEditorAtIndex:inherit: with inherit set to YES. 
+	@param index The index for the author
+    @discussion zero-based indexing
+    
+*/
+- (BibAuthor *)authorOrEditorAtIndex:(int)index;
+
+/*!
+    @method authorOrEditorAtIndex:inherit:
+    @abstract Returns the author or editor at index index.
+	@param index The index for the author
+	@param inherit Boolean, if set follows the Crossref to find inherited authors.
+    @discussion zero-based indexing
+    
+*/
+- (BibAuthor *)authorOrEditorAtIndex:(int)index inherit:(BOOL)inherit;
+
+/*!
     @method crossrefParent
     @abstract Returns the item linked to by the Crossref field, or nil when the Crossref field is not set or the item cannot be found. 
     @discussion (discussion)
