@@ -2416,6 +2416,7 @@ NSString *BDSKBibItemPboardType = @"edu.ucsd.mmccrack.bibdesk BibItem pboard typ
 
 		[tableView addTableColumn:tc];
     }
+    [tableView setHighlightedTableColumn: lastSelectedColumnForSort]; 
     [tableView tableViewFontChanged:nil];
 }
 
