@@ -118,7 +118,7 @@
 		<key>IP</key>
 		<string>Number</string>
 		<key>IS</key>
-		<string>Number</string>
+		<string>Issn</string>
 		<key>JA</key>
 		<string>Journal</string>
 		<key>JF</key>
