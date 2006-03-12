@@ -1,10 +1,12 @@
 {
     IBClasses = (
+        {CLASS = BDSKTextWithIconCell; LANGUAGE = ObjC; SUPERCLASS = NSTextFieldCell; }, 
         {
             ACTIONS = {done = id; dump = id; showFile = id; tryAgain = id; }; 
             CLASS = BibFiler; 
             LANGUAGE = ObjC; 
             OUTLETS = {
+                contextMenu = NSMenu; 
                 iconView = NSImageView; 
                 infoTextField = NSTextField; 
                 progressIndicator = NSProgressIndicator; 
@@ -20,7 +22,6 @@
             LANGUAGE = ObjC; 
             SUPERCLASS = NSObject; 
         }, 
-        {CLASS = OATextWithIconCell; LANGUAGE = ObjC; SUPERCLASS = NSTextFieldCell; }, 
         {CLASS = "java.lang.Object"; LANGUAGE = Java; }
     ); 
     IBVersion = 1; 

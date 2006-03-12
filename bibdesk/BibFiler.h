@@ -63,6 +63,7 @@ enum {
 	IBOutlet NSTableView *tv;
 	IBOutlet NSTextField *infoTextField;
 	IBOutlet NSImageView *iconView;
+	IBOutlet NSMenu *contextMenu;
 	
 	IBOutlet NSPanel *progressSheet;
 	IBOutlet NSProgressIndicator *progressIndicator;
@@ -72,7 +73,6 @@ enum {
     int options;
     
 	NSMutableArray *errorInfoDicts;
-	NSString *errorString;
 }
 
 + (BibFiler *)sharedFiler;
@@ -132,13 +132,6 @@ BDSKForceAutoFileOptionMask forces AutoFiling, even if there may be problems mov
 	@discussion -
 */
 - (IBAction)dump:(id)sender;
-
-/*!
-	@method		fileManager:shouldProceedAfterError:
-	@abstract	NSFileManager delegate method.
-	@discussion -
-*/
-- (BOOL)fileManager:(NSFileManager *)manager shouldProceedAfterError:(NSDictionary *)errorInfo;
 
 /*!
 	@method		showFile:
