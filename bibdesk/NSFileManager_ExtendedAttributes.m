@@ -56,7 +56,7 @@ static NSString *xattrError(int err, const char *path);
     
     if(status == -1){
         errMsg = xattrError(errno, fsPath);
-        if(error) *error = [NSError errorWithDomain:NSPOSIXErrorDomain code:errno userInfo:[NSDictionary dictionaryWithObjectsAndKeys:NSFilePathErrorKey, path, NSLocalizedDescriptionKey, errMsg, nil]];
+        if(error) *error = [NSError errorWithDomain:NSPOSIXErrorDomain code:errno userInfo:[NSDictionary dictionaryWithObjectsAndKeys:path, NSFilePathErrorKey, errMsg, NSLocalizedDescriptionKey, nil]];
         return nil;
     }
     
@@ -68,7 +68,7 @@ static NSString *xattrError(int err, const char *path);
     
     if(status == -1){
         errMsg = xattrError(errno, fsPath);
-        if(error) *error = [NSError errorWithDomain:NSPOSIXErrorDomain code:errno userInfo:[NSDictionary dictionaryWithObjectsAndKeys:NSFilePathErrorKey, path, NSLocalizedDescriptionKey, errMsg, nil]];
+        if(error) *error = [NSError errorWithDomain:NSPOSIXErrorDomain code:errno userInfo:[NSDictionary dictionaryWithObjectsAndKeys:path, NSFilePathErrorKey, errMsg, NSLocalizedDescriptionKey, nil]];
         NSZoneFree(zone, namebuf);
         return nil;
     }
@@ -113,7 +113,7 @@ static NSString *xattrError(int err, const char *path);
             [array addObject:string];
             [string release];
         } else {
-            if(error) *error = [NSError errorWithDomain:NSCocoaErrorDomain code:0 userInfo:[NSDictionary dictionaryWithObjectsAndKeys:NSFilePathErrorKey, path, NSStringEncodingErrorKey, @"Unable to convert to a string", nil]]; 
+            if(error) *error = [NSError errorWithDomain:NSCocoaErrorDomain code:0 userInfo:[NSDictionary dictionaryWithObjectsAndKeys:path, NSFilePathErrorKey, [NSNumber numberWithInt:NSUTF8StringEncoding], NSStringEncodingErrorKey, NSLocalizedString(@"unable to convert to a string", @""), NSLocalizedDescriptionKey, nil]]; 
             return nil;
         }
     }
@@ -166,7 +166,7 @@ static NSString *xattrError(int err, const char *path);
     
     if(status == -1){
         errMsg = xattrError(errno, fsPath);
-        if(error) *error = [NSError errorWithDomain:NSPOSIXErrorDomain code:errno userInfo:[NSDictionary dictionaryWithObjectsAndKeys:NSFilePathErrorKey, path, NSLocalizedDescriptionKey, errMsg, nil]];
+        if(error) *error = [NSError errorWithDomain:NSPOSIXErrorDomain code:errno userInfo:[NSDictionary dictionaryWithObjectsAndKeys:path, NSFilePathErrorKey, errMsg, NSLocalizedDescriptionKey, nil]];
         return nil;
     }
     
@@ -177,7 +177,7 @@ static NSString *xattrError(int err, const char *path);
     
     if(status == -1){
         errMsg = xattrError(errno, fsPath);
-        if(error) *error = [NSError errorWithDomain:NSPOSIXErrorDomain code:errno userInfo:[NSDictionary dictionaryWithObjectsAndKeys:NSFilePathErrorKey, path, NSLocalizedDescriptionKey, errMsg, nil]];
+        if(error) *error = [NSError errorWithDomain:NSPOSIXErrorDomain code:errno userInfo:[NSDictionary dictionaryWithObjectsAndKeys:path, NSFilePathErrorKey, errMsg, NSLocalizedDescriptionKey, nil]];
         NSZoneFree(NSDefaultMallocZone(), namebuf);
         return nil;
     }
@@ -240,7 +240,7 @@ static NSString *xattrError(int err, const char *path);
     
     if(status == -1){
         errMsg = xattrError(errno, fsPath);
-        if(error) *error = [NSError errorWithDomain:NSPOSIXErrorDomain code:errno userInfo:[NSDictionary dictionaryWithObjectsAndKeys:NSFilePathErrorKey, path, NSLocalizedDescriptionKey, errMsg, nil]];
+        if(error) *error = [NSError errorWithDomain:NSPOSIXErrorDomain code:errno userInfo:[NSDictionary dictionaryWithObjectsAndKeys:path, NSFilePathErrorKey, errMsg, NSLocalizedDescriptionKey, nil]];
         return NO;
     } else 
         return YES;
@@ -248,7 +248,7 @@ static NSString *xattrError(int err, const char *path);
 
 - (BOOL)removeExtendedAttribute:(NSString *)attr atPath:(NSString *)path traverseLink:(BOOL)follow error:(NSError **)error;
 {
-
+    NSParameterAssert(path != nil);
     const char *fsPath = [self fileSystemRepresentationWithPath:path];
     const char *attrName = [attr UTF8String];
     NSString *errMsg;
@@ -264,7 +264,7 @@ static NSString *xattrError(int err, const char *path);
     
     if(status == -1){
         errMsg = xattrError(errno, fsPath);
-        if(error) *error = [NSError errorWithDomain:NSPOSIXErrorDomain code:errno userInfo:[NSDictionary dictionaryWithObjectsAndKeys:NSFilePathErrorKey, path, NSLocalizedDescriptionKey, errMsg, nil]];
+        if(error) *error = [NSError errorWithDomain:NSPOSIXErrorDomain code:errno userInfo:[NSDictionary dictionaryWithObjectsAndKeys:path, NSFilePathErrorKey, errMsg, NSLocalizedDescriptionKey, nil]];
         return NO;
     } else 
         return YES;    
@@ -272,7 +272,7 @@ static NSString *xattrError(int err, const char *path);
 }
 
 // guaranteed to return non-nil
-NSString *xattrError(int err, const char *myPath)
+static NSString *xattrError(int err, const char *myPath)
 {
     char *errMsg = NULL;
     switch (err)
@@ -376,10 +376,18 @@ NSString *xattrError(int err, const char *myPath)
         }
         
     }
+    
     @catch(id exception){
         
         if([exception isEqual:privateException]){
-            [NSError errorWithDomain:NSCocoaErrorDomain code:errno userInfo:[NSDictionary dictionaryWithObjectsAndKeys:NSFilePathErrorKey, [fileURL path], NSLocalizedDescriptionKey, errMsg, nil]];
+            NSMutableDictionary *userInfo = [NSMutableDictionary dictionaryWithCapacity:3];
+            if([fileURL path])
+                [userInfo setObject:[fileURL path] forKey:NSFilePathErrorKey];
+            if(errMsg != nil)
+                [userInfo setObject:errMsg forKey:NSLocalizedDescriptionKey];
+            if(error != nil)
+                [userInfo setObject:error forKey:NSUnderlyingErrorKey];
+            error = [NSError errorWithDomain:NSCocoaErrorDomain code:0 userInfo:userInfo];
         } else @throw;
     }
     
@@ -387,7 +395,10 @@ NSString *xattrError(int err, const char *myPath)
         [document release];
     }
     
-    if(outError) *outError = error;
+    if(outError)
+        *outError = error;
+    else
+        NSLog(@"%@ %@", self, error);
     return metadata; // may be nil
 }
 
@@ -418,7 +429,8 @@ NSString *xattrError(int err, const char *myPath)
         
         [document setDocumentAttributes:[attributes dictionary]];
         
-        if([document writeToURL:fileURL] == NO){
+        // -[PDFDocument writeToURL:] returns YES even if it fails rdar://problem/4475062
+        if([[document dataRepresentation] writeToURL:fileURL options:NSAtomicWrite error:&error] == NO){
             errMsg = NSLocalizedString(@"Unable to save PDF file.", @"");
             [document release];
             @throw privateException;
@@ -429,8 +441,18 @@ NSString *xattrError(int err, const char *myPath)
     @catch(id exception){
         
         if([exception isEqual:privateException]){
-            [NSError errorWithDomain:NSCocoaErrorDomain code:errno userInfo:[NSDictionary dictionaryWithObjectsAndKeys:NSFilePathErrorKey, [fileURL path], NSLocalizedDescriptionKey, errMsg, nil]];
-            if(outError) *outError = error;
+            NSMutableDictionary *userInfo = [NSMutableDictionary dictionaryWithCapacity:3];
+            if([fileURL path])
+                [userInfo setObject:[fileURL path] forKey:NSFilePathErrorKey];
+            if(errMsg != nil)
+                [userInfo setObject:errMsg forKey:NSLocalizedDescriptionKey];
+            if(error != nil)
+                [userInfo setObject:error forKey:NSUnderlyingErrorKey];
+            error = [NSError errorWithDomain:NSCocoaErrorDomain code:0 userInfo:userInfo];
+            if(outError)
+                *outError = error;
+            else
+                NSLog(@"%@ %@", self, error);
             return NO;
         } else @throw;
     }
