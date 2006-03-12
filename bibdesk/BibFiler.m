@@ -138,7 +138,7 @@ static BibFiler *sharedFiler = nil;
 	if (numberOfPapers == 0)
 		return;
 	
-	if (initial == YES && [field isEqualToString:BDSKLocalUrlString] == NO)
+	if (initial && [field isEqualToString:BDSKLocalUrlString] == NO)
         [NSException raise:BDSKUnimplementedException format:@"%@ is only implemented for the Local-Url field for initial moves.",NSStringFromSelector(_cmd)];
 	
 	if (numberOfPapers > 1 && [NSBundle loadNibNamed:@"AutoFileProgress" owner:self]) {
@@ -210,7 +210,7 @@ static BibFiler *sharedFiler = nil;
         if(check && ![paper canSetLocalUrl]){
             
             [info setObject:NSLocalizedString(@"Incomplete information to generate file name.",@"") forKey:@"status"];
-            [info setObject:[NSNumber numberWithInt:BDSKIncompleteFieldsMask] forKey:@"flag"];
+            [info setObject:[NSNumber numberWithInt:BDSKIncompleteFieldsErrorMask] forKey:@"flag"];
             [info setObject:NSLocalizedString(@"Move anyway.",@"") forKey:@"fix"];
             [info setObject:path forKey:@"oldPath"];
             [info setObject:newPath forKey:@"newPath"];
@@ -451,13 +451,13 @@ static BibFiler *sharedFiler = nil;
     
     switch(type){
         case 0:
-            if(statusFlag & BDSKOldFileDoesNotExistMask)
+            if(statusFlag & BDSKSourceFileDoesNotExistErrorMask)
                 return;
             path = [[dict objectForKey:@"oldPath"] stringByExpandingTildeInPath];
             [[NSWorkspace sharedWorkspace]  selectFile:path inFileViewerRootedAtPath:nil];
             break;
         case 1:
-            if(!(statusFlag & BDSKGeneratedFileExistsMask))
+            if(!(statusFlag & BDSKTargetFileExistsErrorMask))
                 return;
             path = [[dict objectForKey:@"newPath"] stringByExpandingTildeInPath];
             [[NSWorkspace sharedWorkspace]  selectFile:path inFileViewerRootedAtPath:nil];
@@ -483,7 +483,7 @@ static BibFiler *sharedFiler = nil;
     NSString *resolvedNewPath = nil;
     NSString *status = nil;
     NSString *fix = nil;
-    int statusFlag = BDSKNoErrorMask;
+    int statusFlag = BDSKNoError;
     BOOL ignoreMove = NO;
     
     // filemanager needs aliases resolved for moving and existence checks
@@ -495,7 +495,7 @@ static BibFiler *sharedFiler = nil;
     NS_HANDLER
         NSLog(@"Ignoring exception %@ raised while resolving aliases in %@", [localException name], newPath);
         status = NSLocalizedString(@"Unable to resolve aliases in path.", @"");
-        statusFlag = statusFlag | BDSKUnableToResolveAliasMask;
+        statusFlag =  BDSKCannotResolveAliasErrorMask;
     NS_ENDHANDLER
     
     NS_DURING
@@ -504,53 +504,61 @@ static BibFiler *sharedFiler = nil;
     NS_HANDLER
         NSLog(@"Ignoring exception %@ raised while resolving aliases in %@", [localException name], path);
         status = NSLocalizedString(@"Unable to resolve aliases in path.", @"");
-        statusFlag = statusFlag | BDSKUnableToResolveAliasMask;
+        statusFlag = BDSKCannotResolveAliasErrorMask;
     NS_ENDHANDLER
     
-    if(statusFlag == BDSKNoErrorMask){
+    if(statusFlag == BDSKNoError){
         if([self fileExistsAtPath:resolvedNewPath]){
             if([self fileExistsAtPath:resolvedPath]){
-                if(force == YES){
+                if(force){
                     NSString *backupPath = [[self desktopPathForCurrentUser] stringByAppendingPathComponent:[resolvedNewPath lastPathComponent]];
                     backupPath = [self uniqueFilePath:backupPath createDirectory:NO];
-                    if(![self movePath:resolvedNewPath toPath:backupPath handler:self]){
+                    if([self movePath:resolvedNewPath toPath:backupPath handler:self]){
                         status = NSLocalizedString(@"Unable to remove existing file at target location.",@"");
-                        statusFlag = statusFlag | BDSKGeneratedFileExistsMask | BDSKRemoveErrorMask;
+                        statusFlag = BDSKTargetFileExistsErrorMask | BDSKCannotRemoveFileErrorMask;
+                        // cleanup: move back
+                        if(![self movePath:backupPath toPath:resolvedNewPath handler:nil] && [self fileExistsAtPath:resolvedNewPath]){
+                            [self removeFileAtPath:backupPath handler:nil];
+                        }
                     }
                 }else{
-                    status = NSLocalizedString(@"File exists at target location.",@"");
-                    fix = NSLocalizedString(@"Overwrite existing file.",@"");
-                    statusFlag = statusFlag | BDSKGeneratedFileExistsMask;
+                    if([self isDeletableFileAtPath:resolvedNewPath]){
+                        status = NSLocalizedString(@"File exists at target location.",@"");
+                        fix = NSLocalizedString(@"Overwrite existing file.",@"");
+                    }else{
+                        status = NSLocalizedString(@"Undeletable file exists at target location.",@"");
+                    }
+                    statusFlag = BDSKTargetFileExistsErrorMask;
                 }
             }else{
-                if(force == YES){
+                if(force){
                     ignoreMove = YES;
                 }else{
-                    status = NSLocalizedString(@"Linked file does not exist, file exists at target location.", @"");
-                    fix = NSLocalizedString(@"Link to existing file.", @"");
-                    statusFlag = statusFlag | BDSKOldFileDoesNotExistMask | BDSKGeneratedFileExistsMask;
+                    status = NSLocalizedString(@"Original file does not exist, file exists at target location.", @"");
+                    fix = NSLocalizedString(@"Use existing file at target location.", @"");
+                    statusFlag = BDSKSourceFileDoesNotExistErrorMask | BDSKTargetFileExistsErrorMask;
                 }
             }
         }else if(![self fileExistsAtPath:resolvedPath]){
-            status = NSLocalizedString(@"Linked file does not exist.", @"");
-            statusFlag = statusFlag | BDSKOldFileDoesNotExistMask;
+            status = NSLocalizedString(@"Original file does not exist.", @"");
+            statusFlag = BDSKSourceFileDoesNotExistErrorMask;
         }else if(![self isDeletableFileAtPath:resolvedPath]){
             if(force == NO){
                 status = NSLocalizedString(@"Unable to move read-only file.", @"");
                 fix = NSLocalizedString(@"Copy original file.", @"");
-                statusFlag = statusFlag | BDSKMoveErrorMask;
+                statusFlag = BDSKCannotMoveFileErrorMask;
             }
         }
-        if(statusFlag == BDSKNoErrorMask || ignoreMove){
+        if(statusFlag == BDSKNoError && ignoreMove == NO){
             NSString *fileType = [[self fileAttributesAtPath:resolvedPath traverseLink:NO] objectForKey:NSFileType];
             NS_DURING
                 [self createPathToFile:resolvedNewPath attributes:nil]; // create parent directories if necessary (OmniFoundation)
             NS_HANDLER
                 NSLog(@"Ignoring exception %@ raised while creating path %@", [localException name], resolvedNewPath);
                 status = NSLocalizedString(@"Unable to create parent directory.", @"");
-                statusFlag = statusFlag | BDSKUnableToCreateParentMask;
+                statusFlag = BDSKCannotCreateParentErrorMask;
             NS_ENDHANDLER
-            if(statusFlag == BDSKNoErrorMask){
+            if(statusFlag == BDSKNoError){
                 // unfortunately NSFileManager cannot reliably move symlinks...
                 if([fileType isEqualToString:NSFileTypeSymbolicLink]){
                     NSString *pathContent = [self pathContentOfSymbolicLinkAtPath:resolvedPath];
@@ -559,45 +567,44 @@ static BibFiler *sharedFiler = nil;
                     }
                     if(![self createSymbolicLinkAtPath:resolvedNewPath pathContent:pathContent]){
                         status = NSLocalizedString(@"Unable to move symbolic link.", @"");
-                        statusFlag = statusFlag | BDSKMoveErrorMask;
+                        statusFlag = BDSKCannotMoveFileErrorMask;
                     }else{
                         if(![self removeFileAtPath:resolvedPath handler:self]){
                             if (force == NO){
                                 status = NSLocalizedString(@"Unable to remove original.", @"");
                                 fix = NSLocalizedString(@"Copy original file.", @"");
-                                statusFlag = statusFlag | BDSKRemoveErrorMask;
+                                statusFlag = BDSKCannotRemoveFileErrorMask;
                                 //cleanup: remove new file
                                 [self removeFileAtPath:resolvedNewPath handler:nil];
                             }
                         }
-                        //status = NSLocalizedString(@"Successfully moved.",@"");
                     }
-                }else if([self movePath:resolvedPath toPath:resolvedNewPath handler:self]){
-                    //status = NSLocalizedString(@"Successfully moved.",@"");
-                }else if([self fileExistsAtPath:resolvedNewPath]){ // error remove original file
-                    if(force == NO){
-                        status = NSLocalizedString(@"Unable to remove original.", @"");
-                        fix = NSLocalizedString(@"Copy original file.", @"");
-                        statusFlag = statusFlag | BDSKRemoveErrorMask;
-                        // cleanup: move back
-                        if(![self movePath:resolvedNewPath toPath:resolvedPath handler:nil] && [self fileExistsAtPath:resolvedPath]){
-                            [self removeFileAtPath:resolvedNewPath handler:nil];
+                }else if(![self movePath:resolvedPath toPath:resolvedNewPath handler:self]){
+                    if([self fileExistsAtPath:resolvedNewPath]){ // error remove original file
+                        if(force == NO){
+                            status = NSLocalizedString(@"Unable to remove original file.", @"");
+                            fix = NSLocalizedString(@"Copy original file.", @"");
+                            statusFlag = BDSKCannotRemoveFileErrorMask;
+                            // cleanup: move back
+                            if(![self movePath:resolvedNewPath toPath:resolvedPath handler:nil] && [self fileExistsAtPath:resolvedPath]){
+                                [self removeFileAtPath:resolvedNewPath handler:nil];
+                            }
                         }
+                    }else{ // other error while moving file
+                        status = NSLocalizedString(@"Unable to move file.", @"");
+                        statusFlag = BDSKCannotMoveFileErrorMask;
                     }
-                }else{ // other error while moving file
-                    status = NSLocalizedString(@"Unable to move file.", @"");
-                    statusFlag = statusFlag | BDSKMoveErrorMask;
                 }
             }
         }
     }
     
-    if(statusFlag != BDSKNoErrorMask){
+    if(statusFlag != BDSKNoError){
         if(error){
             NSMutableDictionary *userInfo = [NSMutableDictionary dictionaryWithObjectsAndKeys:status, NSLocalizedDescriptionKey, nil];
             if (fix != nil)
                 [userInfo setObject:fix forKey:NSLocalizedRecoverySuggestionErrorKey];
-            NSError *error = [NSError errorWithDomain:@"BibFilerErrorDomain" code:statusFlag userInfo:userInfo];
+            *error = [NSError errorWithDomain:@"BibFilerErrorDomain" code:statusFlag userInfo:userInfo];
         }
         return NO;
     }

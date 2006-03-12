@@ -42,14 +42,14 @@
 @class BibDocument;
 
 enum {
-	BDSKNoErrorMask = 0,
-	BDSKOldFileDoesNotExistMask = 1,
-	BDSKGeneratedFileExistsMask = 2,
-	BDSKIncompleteFieldsMask = 4,
-	BDSKMoveErrorMask = 8,
-	BDSKRemoveErrorMask = 16,
-    BDSKUnableToResolveAliasMask = 32,
-    BDSKUnableToCreateParentMask = 64
+	BDSKNoError = 0,
+	BDSKSourceFileDoesNotExistErrorMask = 1,
+	BDSKTargetFileExistsErrorMask = 2,
+	BDSKCannotMoveFileErrorMask = 4,
+	BDSKCannotRemoveFileErrorMask = 8,
+    BDSKCannotResolveAliasErrorMask = 16,
+    BDSKCannotCreateParentErrorMask = 32,
+	BDSKIncompleteFieldsErrorMask = 64
 };
 
 enum {

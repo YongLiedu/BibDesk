@@ -52,7 +52,7 @@
 
 - (id)transformedValue:(id)flag {
 	int statusFlag = [flag intValue];
-	if (statusFlag & BDSKOldFileDoesNotExistMask) {
+	if (statusFlag & BDSKSourceFileDoesNotExistErrorMask) {
 		return [NSColor grayColor];
 	} else {
 		return [NSColor controlTextColor];
@@ -74,9 +74,9 @@
 
 - (id)transformedValue:(id)flag {
 	int statusFlag = [flag intValue];
-	if (statusFlag & BDSKGeneratedFileExistsMask) {
+	if (statusFlag & BDSKTargetFileExistsErrorMask) {
 		return [NSColor controlTextColor];
-	} else if (statusFlag & BDSKIncompleteFieldsMask) {
+	} else if (statusFlag & BDSKIncompleteFieldsErrorMask) {
 		return [NSColor redColor];
 	} else {
 		return [NSColor controlTextColor];
