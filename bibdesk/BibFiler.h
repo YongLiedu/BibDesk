@@ -147,3 +147,19 @@ BDSKForceAutoFileOptionMask forces AutoFiling, even if there may be problems mov
 - (void)removeObjectFromErrorInfoDictsAtIndex:(unsigned)index;
 
 @end
+
+
+@interface NSFileManager (BibFilerExtensions)
+
+/*!
+	@method		movePath:toPath:force:error:
+	@abstract	Extension to movePath:toPath:handler: which can handle symlinks and aliases, and allows for forcing a move when otherwise move errors occur.
+	@param		path The path to the file to move. 
+	@param		newPath The pathwhere the file should move to. 
+	@param		force Boolean. If YES, overwrite an existing file or copy a non-removable file. 
+	@param		error An NSError object set when an error occurs.
+	@discussion -
+*/
+- (BOOL)movePath:(NSString *)path toPath:(NSString *)newPath force:(BOOL)force error:(NSError **)error;
+
+@end
