@@ -55,14 +55,21 @@ static NSMutableParagraphStyle *BDSKTextWithIconCellParagraphStyle = nil;
 
 - (id)init;
 {
-    if ([super initTextCell:@""] == nil)
-        return nil;
-    
-    [self setImagePosition:NSImageLeft];
-    [self setEditable:YES];
-    [self setDrawsHighlight:YES];
-    [self setScrollable:YES];
-    
+    if (self = [super initTextCell:@""]) {
+        [self setImagePosition:NSImageLeft];
+        [self setEditable:YES];
+        [self setDrawsHighlight:YES];
+        [self setScrollable:YES];
+    }
+    return self;
+}
+
+- (id)initWithCoder:(NSCoder *)coder;
+{
+    if (self = [super initWithCoder:coder]) {
+        [self setImagePosition:NSImageLeft];
+        [self setDrawsHighlight:YES];
+    }
     return self;
 }
 
