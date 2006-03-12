@@ -166,7 +166,7 @@ static float BDSKScaleMenuFontSize = 11.0;
 {
     NSError *error = nil;
     if(returnCode == NSOKButton){
-        // -[PDFDocument writeToURL:] returns YES even if you don't have write permission, so we'll use NSData
+        // -[PDFDocument writeToURL:] returns YES even if you don't have write permission, so we'll use NSData rdar://problem/4475062
         NSData *data = [[self document] dataRepresentation];
         
         if([data writeToURL:[sheet URL] options:NSAtomicWrite error:&error] == NO){
