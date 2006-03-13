@@ -501,10 +501,12 @@ static BibFiler *sharedFiler = nil;
                 if(force){
                     NSString *backupPath = [[self desktopPathForCurrentUser] stringByAppendingPathComponent:[resolvedNewPath lastPathComponent]];
                     backupPath = [self uniqueFilePath:backupPath createDirectory:NO];
-                    if([self movePath:resolvedNewPath toPath:backupPath handler:self]){
+                    if(![self movePath:resolvedNewPath toPath:backupPath force:NO error:NULL] && 
+                        [self fileExistsAtPath:resolvedNewPath] && 
+                        ![self removeFileAtPath:resolvedNewPath handler:nil]){
                         status = NSLocalizedString(@"Unable to remove existing file at target location.",@"");
                         statusFlag = BDSKTargetFileExistsErrorMask | BDSKCannotRemoveFileErrorMask;
-                        // cleanup: move back
+                        // cleanup: move back backup
                         if(![self movePath:backupPath toPath:resolvedNewPath handler:nil] && [self fileExistsAtPath:resolvedNewPath]){
                             [self removeFileAtPath:backupPath handler:nil];
                         }
