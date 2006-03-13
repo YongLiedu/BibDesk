@@ -275,12 +275,15 @@ static BibFiler *sharedFiler = nil;
 								NSLocalizedString(@"OK",@"OK"),nil,nil);
 		return;
 	}
-
 	[tv reloadData];
-	[infoTextField setStringValue:NSLocalizedString(@"There were problems moving the following files to the generated file location, according to the format string.",@"description string")];
+    if (options & BDSKInitialAutoFileOptionMask)
+        [infoTextField setStringValue:NSLocalizedString(@"There were problems moving the following files to the location generated using the format string. You can retry to move items selected in the first column.",@"description string")];
+    else
+        [infoTextField setStringValue:NSLocalizedString(@"There were problems moving the following files to the target location. You can retry to move items selected in the first column.",@"description string")];
 	[iconView setImage:[NSImage imageNamed:@"NSApplicationIcon"]];
 	[tv setDoubleAction:@selector(showFile:)];
 	[tv setTarget:self];
+    [forceCheckButton setState:NSOffState];
 	[window makeKeyAndOrderFront:self];
     [[NSNotificationCenter defaultCenter] addObserver:self
                                              selector:@selector(windowWillClose:)
@@ -293,7 +296,6 @@ static BibFiler *sharedFiler = nil;
 }
 
 - (IBAction)tryAgain:(id)sender{
-    int force = [sender tag];
 	NSDictionary *info = nil;
     int i, count = [self countOfErrorInfoDicts];
 	NSMutableArray *fileInfoDicts = [NSMutableArray arrayWithCapacity:count];
@@ -326,7 +328,7 @@ static BibFiler *sharedFiler = nil;
     BibDocument *doc = [[document retain] autorelease];
     NSString *field = [[fieldName retain] autorelease];
     int mask = (options & BDSKInitialAutoFileOptionMask);
-    mask |= (force == 1) ? BDSKForceAutoFileOptionMask : (options & BDSKCheckCompleteAutoFileOptionMask);
+    mask |= ([forceCheckButton state]) ? BDSKForceAutoFileOptionMask : (options & BDSKCheckCompleteAutoFileOptionMask);
     
     [window close];
     

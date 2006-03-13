@@ -63,6 +63,7 @@ enum {
 	IBOutlet NSTableView *tv;
 	IBOutlet NSTextField *infoTextField;
 	IBOutlet NSImageView *iconView;
+	IBOutlet NSButton *forceCheckButton;
 	IBOutlet NSMenu *contextMenu;
 	
 	IBOutlet NSPanel *progressSheet;
