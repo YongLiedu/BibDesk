@@ -102,10 +102,10 @@ static BibFiler *sharedFiler = nil;
 	if(ask){
 		rv = NSRunAlertPanel(NSLocalizedString(@"Consolidate Linked Files",@""),
 							 NSLocalizedString(@"This will put all files linked to the selected items in your Papers Folder, according to the format string. Do you want me to generate a new location for all linked files, or only for those for which all the bibliographical information used in the generated file name has been set?",@""),
-							 NSLocalizedString(@"Move All",@"Move All"),
+							 NSLocalizedString(@"Move Complete Only",@"Move Complete Only"),
 							 NSLocalizedString(@"Cancel",@"Cancel"), 
-							 NSLocalizedString(@"Move Complete Only",@"Move Complete Only"));
-		if(rv == NSAlertOtherReturn){
+							 NSLocalizedString(@"Move All",@"Move All"));
+		if(rv == NSAlertDefaultReturn){
 			check = YES;
 		}else if(rv == NSAlertAlternateReturn){
 			return;
