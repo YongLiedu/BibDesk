@@ -3562,14 +3562,26 @@ NSString *BDSKBibItemPboardType = @"edu.ucsd.mmccrack.bibdesk BibItem pboard typ
 
 #pragma mark 
 #pragma mark AutoFile stuff
+
 - (IBAction)consolidateLinkedFiles:(id)sender{
+    BOOL check = YES;
+    int rv = NSRunAlertPanel(NSLocalizedString(@"Consolidate Linked Files",@""),
+                             NSLocalizedString(@"This will put all files linked to the selected items in your Papers Folder, according to the format string. Do you want me to generate a new location for all linked files, or only for those for which all the bibliographical information used in the generated file name has been set?",@""),
+                             NSLocalizedString(@"Move Complete Only",@"Move Complete Only"),
+                             NSLocalizedString(@"Cancel",@"Cancel"), 
+                             NSLocalizedString(@"Move All",@"Move All"));
+    if(rv == NSAlertOtherReturn){
+        check = NO;
+    }else if(rv == NSAlertAlternateReturn){
+        return;
+    }
 
     // first we make sure all edits are committed
 	[[NSNotificationCenter defaultCenter] postNotificationName:BDSKFinalizeChangesNotification
                                                         object:self
                                                       userInfo:[NSDictionary dictionary]];
 
-	[[BibFiler sharedFiler] filePapers:[self selectedPublications] fromDocument:self ask:YES];
+	[[BibFiler sharedFiler] filePapers:[self selectedPublications] fromDocument:self check:check];
 	
 	[[self undoManager] setActionName:NSLocalizedString(@"Consolidate Files",@"")];
 }

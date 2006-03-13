@@ -1855,7 +1855,7 @@ static NSParagraphStyle* bodyParagraphStyle = nil;
 	if ([self canSetLocalUrl]) {
 		[[BibFiler sharedFiler] filePapers:[NSArray arrayWithObject:self]
 							  fromDocument:[self document] 
-									   ask:NO]; 
+                                     check:NO]; 
 		return YES;
 	} else {
 		[self setNeedsToBeFiled:YES];

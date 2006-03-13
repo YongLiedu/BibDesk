@@ -78,15 +78,15 @@ enum {
 + (BibFiler *)sharedFiler;
 
 /*!
-	@method		filePapers:fromDocument:doc:ask:
+	@method		filePapers:fromDocument:doc:check:
 	@abstract	Main auto-file routine to file papers in the Papers folder according to a generated location.
 	@param		papers The BibItemsfor which linked files should be moved.
 	@param		doc The parent document of the papers. 
-	@param		ask Boolean determines whether to ask the user to proceed or to move only entries with all necessary fields set. 
+	@param		check Boolean determines whether to move only entries with all necessary fields set. 
 	@discussion	This is the main method that should be used to autofile papers.
 It calls the necessary methods to do the move and generates the new locations for the papers. 
 */
-- (void)filePapers:(NSArray *)papers fromDocument:(BibDocument *)doc ask:(BOOL)ask;
+- (void)filePapers:(NSArray *)papers fromDocument:(BibDocument *)doc check:(BOOL)check;
 
 /*!
 	@method		movePapers:forField:fromDocument:options:

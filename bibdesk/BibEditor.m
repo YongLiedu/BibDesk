@@ -1008,7 +1008,7 @@ static int numberOfOpenEditors = 0;
 		// autofile paper if we have enough information
 		if ( [[OFPreferenceWrapper sharedPreferenceWrapper] boolForKey:BDSKFilePapersAutomaticallyKey] &&
 			 [theBib needsToBeFiled] && [theBib canSetLocalUrl] ) {
-			[[BibFiler sharedFiler] filePapers:[NSArray arrayWithObject:theBib] fromDocument:[theBib document] ask:NO];
+			[[BibFiler sharedFiler] filePapers:[NSArray arrayWithObject:theBib] fromDocument:[theBib document] check:NO];
 			[theBib setNeedsToBeFiled:NO]; // unset the flag even when we fail, to avoid retrying at every edit
 			[self setStatus:NSLocalizedString(@"Autofiled linked file.",@"Autofiled linked file.")];
 		}
@@ -1110,7 +1110,7 @@ static int numberOfOpenEditors = 0;
 		}
 	}
 	
-	[[BibFiler sharedFiler] filePapers:[NSArray arrayWithObject:theBib] fromDocument:[theBib document] ask:NO];
+	[[BibFiler sharedFiler] filePapers:[NSArray arrayWithObject:theBib] fromDocument:[theBib document] check:NO];
 	
 	[tabView selectFirstTabViewItem:self];
 	
@@ -1635,7 +1635,7 @@ static int numberOfOpenEditors = 0;
     // autofile paper if we have enough information
     if ( [[OFPreferenceWrapper sharedPreferenceWrapper] boolForKey:BDSKFilePapersAutomaticallyKey] &&
          [theBib needsToBeFiled] && [theBib canSetLocalUrl] ) {
-        [[BibFiler sharedFiler] filePapers:[NSArray arrayWithObject:theBib] fromDocument:[theBib document] ask:NO];
+        [[BibFiler sharedFiler] filePapers:[NSArray arrayWithObject:theBib] fromDocument:[theBib document] check:NO];
         [theBib setNeedsToBeFiled:NO]; // unset the flag even when we fail, to avoid retrying at every edit
 		if (![status isEqualToString:@""]) {
 			[status appendString:@" "];
