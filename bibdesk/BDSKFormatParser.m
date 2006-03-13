@@ -64,8 +64,6 @@
 	NSArray *localFileFields = [[OFPreferenceWrapper sharedPreferenceWrapper] stringArrayForKey:BDSKLocalFileFieldsKey];
 	BOOL isLocalFile = [localFileFields containsObject:fieldName];
 	
-	// seed for random letters or characters
-	srand(time(NULL));
 	[scanner setCharactersToBeSkipped:nil];
 	
 	while (![scanner isAtEnd]) {
