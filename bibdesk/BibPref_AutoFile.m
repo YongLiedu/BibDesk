@@ -165,6 +165,7 @@ static NSString *repositorySpecifierStrings[] = {@"", @"%a00", @"%A0", @"%t0", @
 	[openPanel setCanChooseFiles:NO];
 	[openPanel setCanChooseDirectories:YES];
 	[openPanel setCanCreateDirectories:YES];
+	[openPanel setResolvesAliases:NO];
     [openPanel setPrompt:NSLocalizedString(@"Choose", @"Choose directory")];
     [openPanel beginSheetForDirectory:nil 
 								 file:nil
@@ -412,6 +413,11 @@ static NSString *repositorySpecifierStrings[] = {@"", @"%a00", @"%A0", @"%t0", @
     BOOL isDir;
     // we want to return the original value if it's valid, not the expanded path; the action method should expand it
     NSString *pathString = [string stringByStandardizingPath];
+    NS_DURING
+        pathString = [[NSFileManager defaultManager] resolveAliasesInPath:pathString];
+    NS_HANDLER
+        NSLog(@"Ignoring exception %@ raised while resolving aliases in %@", [localException name], pathString);
+    NS_ENDHANDLER
     if([[NSFileManager defaultManager] fileExistsAtPath:pathString isDirectory:&isDir] == NO){
         if(error)
             *error = [NSString stringWithFormat:NSLocalizedString(@"The directory \"%@\" does not exist.", @""), pathString];
