@@ -50,22 +50,31 @@ static NSString *BDSKEditorTextViewFontChangedNotification = nil;
 - (NSString *)URLStringFromRange:(NSRange *)startRange inString:(NSString *)string;
 - (void)fixAttributesForURLs;
 - (void)updateFontFromPreferences;
+- (void)doCommonSetup;
 
 @end
 
 @implementation BDSKEditorTextView
 
-- (void)awakeFromNib
++ (void)initialize
 {
-    [[self textStorage] setDelegate:self];
-    
-    [self updateFontFromPreferences];
-    
     // make sure no one else uses this notification name, since it's going into the default notification center
     if(BDSKEditorTextViewFontChangedNotification == nil)
         BDSKEditorTextViewFontChangedNotification = [[[NSProcessInfo processInfo] globallyUniqueString] copy];
-    
-    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(handleFontChangedNotification:) name:BDSKEditorTextViewFontChangedNotification object:nil];
+}    
+
+- (id)initWithCoder:(NSCoder *)coder
+{
+    self = [super initWithCoder:coder];
+    [self doCommonSetup];
+    return self;
+}
+
+- (id)initWithFrame:(NSRect)frameRect textContainer:(NSTextContainer *)container;
+{
+    self = [super initWithFrame:frameRect textContainer:container];
+    [self doCommonSetup];
+    return self;    
 }
 
 - (void)dealloc
@@ -234,18 +243,17 @@ static inline BOOL hasValidPercentEscapeFromIndex(NSString *string, unsigned sta
     if(font == nil)
         font = [NSFont systemFontOfSize:[NSFont systemFontSize]];
     
+    // this changes the font of the entire text storage without undo
     [self setFont:font];
-    
-    // we don't want this to dirty the document
-    [[self undoManager] disableUndoRegistration];
-    
-    // apply the new font to the entire range
-    NSTextStorage *textStorage = [self textStorage];
-    [textStorage beginEditing];
-    [textStorage addAttribute:NSFontAttributeName value:font range:NSMakeRange(0, [textStorage length])];
-    [textStorage endEditing];
-    
-    [[self undoManager] enableUndoRegistration];
 }
+
+- (void)doCommonSetup;
+{
+    OBPRECONDITION([self textStorage]);
+
+    [[self textStorage] setDelegate:self];
+    [self updateFontFromPreferences];
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(handleFontChangedNotification:) name:BDSKEditorTextViewFontChangedNotification object:nil];
+}    
 
 @end
