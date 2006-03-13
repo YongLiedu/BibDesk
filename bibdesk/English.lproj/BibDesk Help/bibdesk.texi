@@ -1599,7 +1599,7 @@ that is used for the Local-Url.
 @image{gfx/consolidateLinkedFilesDialog}
 
 If any files can not be moved or renamed for some reason, an error
-dialog will show you what the problems were:
+dialog will show you what the problems were. 
 
 @image{gfx/consolidateLinkedFilesErrorWindow}
 
@@ -1607,6 +1607,13 @@ dialog will show you what the problems were:
 @cindex autofile, undo
 @cindex undo, consolidating linked files
 @cindex consolidating linked files, undo
+
+You can choose to retry AutoFile. Select the items which you want to try again 
+using the check boxes in the first column. Then press the @buttontitle{Try Again} button. 
+If you check the button below the table, the retried moves will be forced as described 
+in the Fix column. You can inspect the linked files or inspect the related publication items 
+by double clicking in the table. You can also write a copy of the error information 
+on the Desktop by hitting the @buttontitle{Dump} button.
 
 Consolidating linked files is undoable, so feel free to experiment.
 
