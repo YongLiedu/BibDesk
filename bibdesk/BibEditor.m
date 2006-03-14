@@ -527,6 +527,7 @@ static int numberOfOpenEditors = 0;
     
     NSSavePanel *sPanel = [NSSavePanel savePanel];
     [sPanel setPrompt:NSLocalizedString(@"Move", @"Move file")];
+    [sPanel setNameFieldLabel:NSLocalizedString(@"Move To:", @"Move To: label")];
 	
     [sPanel beginSheetForDirectory:nil 
                               file:nil 
