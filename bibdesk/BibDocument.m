@@ -1918,12 +1918,15 @@ NSString *BDSKBibItemPboardType = @"edu.ucsd.mmccrack.bibdesk BibItem pboard typ
         case BDSKWOSStringType:
             newPubs = [BDSKWebOfScienceParser itemsFromString:string error:&parseError];
             break;
+        case BDSKUnknownStringType:
+            break;
         default:
             [NSException raise:NSInternalInconsistencyException format:@"Type %d is not supported", type];
     }
 
+    // The parser methods may return a non-empty array (partial data) if they failed; we check for parseError != nil as an error condition, then, although that's generally not correct
 	if(parseError != nil) {
-		// original code follows:
+
 		// run a modal dialog asking if we want to use partial data or give up
 		int rv = 0;
 		rv = NSRunAlertPanel(NSLocalizedString(@"Error reading file!",@""),
@@ -1946,6 +1949,7 @@ NSString *BDSKBibItemPboardType = @"edu.ucsd.mmccrack.bibdesk BibItem pboard typ
 		}		
 	}
 
+    // we reach this for unsupported data types (BDSKUnknownStringType)
 	if ([newPubs count] == 0 && parseError == nil)
         OFError(&parseError, BDSKParserError, NSLocalizedDescriptionKey, NSLocalizedString(@"BibDesk couldn't find bibliography data in this text.", @"Error message when pasting unknown text in."), nil);
 

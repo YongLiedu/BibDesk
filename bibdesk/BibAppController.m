@@ -1366,24 +1366,23 @@
 
 }
 
+// this gets called when text is dropped on the dock icon
 - (void)newDocumentFromSelection:(NSPasteboard *)pboard userData:(NSString *)userData error:(NSString **)error{	
-    NSArray *types = [pboard types];
-    if (![types containsObject:NSStringPboardType]) {
-        *error = NSLocalizedString(@"Error: couldn't read data from string.",
-                                   @"pboard couldn't give string.");
-        return;
-    }
-    NSString *pboardString = [pboard stringForType:NSStringPboardType];    
 
     BibDocument *doc = [[[BibDocument alloc] init] autorelease];
+    NSError *nsError = nil;
     
-    if([doc loadDataRepresentation:[pboardString dataUsingEncoding:[[OFPreferenceWrapper sharedPreferenceWrapper] integerForKey:BDSKDefaultStringEncodingKey]] ofType:nil]){
-        [[NSDocumentController sharedDocumentController] setShouldCreateUI:YES];
-        [[NSDocumentController sharedDocumentController] addDocument:doc];
+    if([doc addPublicationsFromPasteboard:pboard error:&nsError]){
+        [self setShouldCreateUI:YES];
+        [self addDocument:doc];
         [doc makeWindowControllers];
         [doc showWindows];
     } else {
-        *error = NSLocalizedString(@"Unable to interpret text as bibliography data.", @"");
+        if(error)
+            *error = nsError == nil ? NSLocalizedString(@"Unable to interpret text as bibliography data.", @"") : [nsError localizedDescription];
+        // @@ 10.3 compatibility
+        if([self respondsToSelector:@selector(presentError:)])
+            [self presentError:nsError];
     }
 }
 
