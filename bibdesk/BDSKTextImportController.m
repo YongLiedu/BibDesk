@@ -882,7 +882,7 @@
 	if ([menuItem action] == @selector(saveFileAsLocalUrl:)) {
 		return ![[[webView mainFrame] dataSource] isLoading];
 	} else if ([menuItem action] == @selector(importFromPasteboardAction:)) {
-		[menuItem setTitle:NSLocalizedString(@"Load Pasteboard",@"Load Pasteboard")];
+		[menuItem setTitle:NSLocalizedString(@"Load Clipboard",@"Load Clipboard")];
 		return YES;
 	} else if ([menuItem action] == @selector(importFromFileAction:)) {
 		[menuItem setTitle:[NSString stringWithFormat:@"%@%C", NSLocalizedString(@"Load File",@"Load File"),0x2026]];
