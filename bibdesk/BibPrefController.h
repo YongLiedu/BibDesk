@@ -65,6 +65,7 @@ extern NSString *BDSKShouldTeXifyWhenSavingAndCopyingKey;
 extern NSString *BDSKTeXPreviewFileEncodingKey;
 extern NSString *BDSKDefaultBibFilePathKey;
 extern NSString *BDSKStartupBehaviorKey;
+extern NSString *BDSKLastOpenFileNamesKey;
 extern NSString *BDSKAutoCheckForUpdatesKey;
 extern NSString *BDSKDragCopyKey;
 extern NSString *BDSKUsesTeXKey;

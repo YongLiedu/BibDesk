@@ -343,7 +343,16 @@
             return NO;
         case 3:
             [[NSDocumentController sharedDocumentController] openDocumentWithContentsOfFile:
-			[[OFPreferenceWrapper sharedPreferenceWrapper] objectForKey:BDSKDefaultBibFilePathKey] display:YES];
+                [[OFPreferenceWrapper sharedPreferenceWrapper] objectForKey:BDSKDefaultBibFilePathKey] display:YES];
+            return NO;
+        case 4:
+            do{
+                NSArray *files = [[OFPreferenceWrapper sharedPreferenceWrapper] objectForKey:BDSKLastOpenFileNamesKey];
+                NSEnumerator *fileEnum = [files objectEnumerator];
+                NSString *file;
+                while (file = [fileEnum nextObject]) 
+                    [[NSDocumentController sharedDocumentController] openDocumentWithContentsOfFile:file display:YES];
+            }while(0);
             return NO;
         default:
             return NO;
@@ -1408,6 +1417,9 @@ OFWeakRetainConcreteImplementation_NULL_IMPLEMENTATION
     [metadataCacheLock lock];
     canWriteMetadata = NO;
     [metadataCacheLock unlock];
+    
+    NSArray *fileNames = [[[NSDocumentController sharedDocumentController] documents] valueForKeyPath:@"@distinctUnionOfObjects.fileName"];
+    [[OFPreferenceWrapper sharedPreferenceWrapper] setObject:fileNames forKey:BDSKLastOpenFileNamesKey];
 }
 
 - (id)openDocumentWithContentsOfURL:(NSURL *)absoluteURL display:(BOOL)displayDocument error:(NSError **)outError{

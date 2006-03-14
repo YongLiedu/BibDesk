@@ -634,6 +634,8 @@
 					<string>Title</string>
 					<key>Last launched version number</key>
 					<string>0</string>
+					<key>Last Open FileNames</key>
+					<array/>
 					<key>NSToolbar Configuration OAPreferences</key>
 					<string></string>
 					<key>Preview PDF Scale Factor</key>

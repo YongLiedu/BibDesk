@@ -66,6 +66,7 @@ NSString *BDSKAllFieldsString = nil;
 
 NSString *BDSKDefaultBibFilePathKey = @"Default Bib File";
 NSString *BDSKStartupBehaviorKey = @"Startup Behavior";
+NSString *BDSKLastOpenFileNamesKey = @"Last Open FileNames";
 NSString *BDSKAutoCheckForUpdatesKey = @"Check for updates when starting";
 NSString *BDSKShouldUseTemplateFile = @"Write template file when saving";
 NSString *BDSKShowingPreviewKey = @"Showing Preview";
