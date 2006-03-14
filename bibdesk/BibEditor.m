@@ -1616,11 +1616,34 @@ static int numberOfOpenEditors = 0;
 }
 
 - (void)recordChangingField:(NSString *)fieldName toValue:(NSString *)value{
-
     NSString *oldValue = [[[theBib valueOfField:fieldName] copy] autorelease];
+    BOOL isLocalFile = [[BibTypeManager sharedManager] isLocalURLField:fieldName];
+    NSURL *oldURL = (isLocalFile) ? [[theBib URLForField:fieldName] fileURLByResolvingAliases] : nil;
+    
     [theBib setField:fieldName toValue:value];
 	
 	[[[self window] undoManager] setActionName:NSLocalizedString(@"Edit Publication",@"")];
+    
+    if (isLocalFile) {
+        NSString *newPath = [theBib localFilePathForField:fieldName];
+        if (oldURL != nil && [[NSFileManager defaultManager] fileExistsAtPath:newPath] == NO) {
+            BDSKAlert *alert = [BDSKAlert alertWithMessageText:NSLocalizedString(@"Move File?", @"Move File?") 
+                                                 defaultButton:NSLocalizedString(@"Yes", @"Yes") 
+                                               alternateButton:NSLocalizedString(@"No", @"No") 
+                                                   otherButton:nil
+                                     informativeTextWithFormat:NSLocalizedString(@"Do you want me to move the linked file to the new location?", @"") ];
+
+            int rv = [alert runSheetModalForWindow:[self window]
+                                     modalDelegate:self
+                                    didEndSelector:NULL
+                                didDismissSelector:NULL
+                                       contextInfo:nil];
+            if (rv == NSAlertDefaultReturn) {
+                NSArray *paperInfos = [NSArray arrayWithObject:[NSDictionary dictionaryWithObjectsAndKeys:theBib, @"paper", [oldURL path], @"oldPath", newPath, @"newPath", nil]];
+                [[BibFiler sharedFiler] movePapers:paperInfos forField:fieldName fromDocument:theDocument options:0];
+            }
+        }
+    }
     
 	NSMutableString *status = [NSMutableString stringWithString:@""];
 	
