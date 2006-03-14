@@ -823,7 +823,6 @@ enum {
 	[bibItem setField:field toValue:newValue];
 	if(shouldMove){
 		newPath = [bibItem localFilePathForField:field];
-		// we set them in opposite order, as it mimics undo
 		if([NSString isEmptyString:oldPath] == NO)
 			[paperInfos addObject:[NSDictionary dictionaryWithObjectsAndKeys:bibItem, @"paper", oldPath, @"oldPath", newPath, @"newPath", nil]];
 	}

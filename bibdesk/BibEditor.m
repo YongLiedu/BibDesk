@@ -542,7 +542,6 @@ static int numberOfOpenEditors = 0;
     if(returnCode == NSOKButton){
         NSString *oldPath = [theBib localFilePathForField:field];
         NSString *newPath = [sheet filename];
-        // we set them in opposite order, as it mimics undo
         if([NSString isEmptyString:oldPath] == NO){
             NSArray *paperInfos = [NSArray arrayWithObject:[NSDictionary dictionaryWithObjectsAndKeys:theBib, @"paper", oldPath, @"oldPath", newPath, @"newPath", nil]];
             
