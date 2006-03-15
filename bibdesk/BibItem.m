@@ -1731,10 +1731,11 @@ static NSParagraphStyle* bodyParagraphStyle = nil;
     // resolve DOI fields against a base URL if necessary, so they can be opened directly by NSWorkspace
     if([field isEqualToString:BDSKDoiString] && [value rangeOfString:@"://"].length == 0){
         baseURL = [NSURL URLWithString:@"http://dx.doi.org/"];
-        // remove the doi: prefix, which is required for a valid DOI, but may not be present
-        NSRange range = [value rangeOfString:@"doi:"];
-        if(range.length)
-            value = [value substringFromIndex:NSMaxRange(range)];
+        // remove any text prefix, which is not required for a valid DOI, but may be present; DOI starts with "10"
+        // http://www.doi.org/handbook_2000/enumeration.html#2.2
+        NSRange range = [value rangeOfCharacterFromSet:[NSCharacterSet decimalDigitCharacterSet]];
+        if(range.length && range.location > 0)
+            value = [value substringFromIndex:range.location];
     }
     return [NSURL URLWithStringByNormalizingPercentEscapes:value baseURL:baseURL];
 }
