@@ -192,15 +192,15 @@
     switch ([fontElementPopup indexOfSelectedItem]) {
         case 0:
             fontNameKey = BDSKMainTableViewFontNameKey;
-            fontSizeKey = BDSKMainTableViewFontNameKey;
+            fontSizeKey = BDSKMainTableViewFontSizeKey;
             break;
         case 1:
             fontNameKey = BDSKGroupTableViewFontNameKey;
-            fontSizeKey = BDSKGroupTableViewFontNameKey;
+            fontSizeKey = BDSKGroupTableViewFontSizeKey;
             break;
         case 2:
             fontNameKey = BDSKPersonTableViewFontNameKey;
-            fontSizeKey = BDSKPersonTableViewFontNameKey;
+            fontSizeKey = BDSKPersonTableViewFontSizeKey;
             break;
         case 3:
             fontNameKey = BDSKPreviewPaneFontFamilyKey;
@@ -219,17 +219,17 @@
     switch ([fontElementPopup indexOfSelectedItem]) {
         case 0:
             fontNameKey = BDSKMainTableViewFontNameKey;
-            fontSizeKey = BDSKMainTableViewFontNameKey;
+            fontSizeKey = BDSKMainTableViewFontSizeKey;
             notificationName = BDSKMainTableViewFontChangedNotification;
             break;
         case 1:
             fontNameKey = BDSKGroupTableViewFontNameKey;
-            fontSizeKey = BDSKGroupTableViewFontNameKey;
+            fontSizeKey = BDSKGroupTableViewFontSizeKey;
             notificationName = BDSKGroupTableViewFontChangedNotification;
             break;
         case 2:
             fontNameKey = BDSKPersonTableViewFontNameKey;
-            fontSizeKey = BDSKPersonTableViewFontNameKey;
+            fontSizeKey = BDSKPersonTableViewFontSizeKey;
             notificationName = BDSKPersonTableViewFontChangedNotification;
             break;
         case 3:
@@ -304,10 +304,11 @@
 
 - (void)changeFont:(id)sender{
 	NSFontManager *fontManager = [NSFontManager sharedFontManager];
-	NSFont *selectedFont = [fontManager selectedFont];
-	if (selectedFont == nil)
-		selectedFont = [NSFont systemFontOfSize:[NSFont systemFontSize]];
-	NSFont *font = [fontManager convertFont:selectedFont];
+	NSFont *font = [delegate fontButtonFont:self];
+	
+    if (font == nil)
+		font = [NSFont systemFontOfSize:[NSFont systemFontSize]];
+    font = [fontManager convertFont:font];
     
     [delegate fontButton:self setFont:font];
 }
