@@ -349,9 +349,14 @@
             do{
                 NSArray *files = [[OFPreferenceWrapper sharedPreferenceWrapper] objectForKey:BDSKLastOpenFileNamesKey];
                 NSEnumerator *fileEnum = [files objectEnumerator];
+                NSDictionary *dict;
                 NSString *file;
-                while (file = [fileEnum nextObject]) 
+                while (dict = [fileEnum nextObject]){ 
+                    file = [[BDAlias aliasWithData:[dict objectForKey:@"_BDAlias"]] fullPath];
+                    if(file == nil)
+                        file = [dict objectForKey:@"fileName"];
                     [[NSDocumentController sharedDocumentController] openDocumentWithContentsOfFile:file display:YES];
+                }
             }while(0);
             return NO;
         default:
@@ -1418,7 +1423,17 @@ OFWeakRetainConcreteImplementation_NULL_IMPLEMENTATION
     [metadataCacheLock unlock];
     
     NSArray *fileNames = [[[NSDocumentController sharedDocumentController] documents] valueForKeyPath:@"@distinctUnionOfObjects.fileName"];
-    [[OFPreferenceWrapper sharedPreferenceWrapper] setObject:fileNames forKey:BDSKLastOpenFileNamesKey];
+    NSMutableArray *array = [NSMutableArray arrayWithCapacity:[fileNames count]];
+    NSEnumerator *fEnum = [fileNames objectEnumerator];
+    NSString *fileName;
+    while(fileName = [fEnum nextObject]){
+        NSData *data = [[BDAlias aliasWithPath:fileName] aliasData];
+        if(data)
+            [array addObject:[NSDictionary dictionaryWithObjectsAndKeys:fileName, @"fileName", data, @"_BDAlias", nil]];
+        else
+            [array addObject:[NSDictionary dictionaryWithObjectsAndKeys:fileName, @"fileName", nil]];
+    }
+    [[OFPreferenceWrapper sharedPreferenceWrapper] setObject:array forKey:BDSKLastOpenFileNamesKey];
 }
 
 - (id)openDocumentWithContentsOfURL:(NSURL *)absoluteURL display:(BOOL)displayDocument error:(NSError **)outError{
