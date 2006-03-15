@@ -39,10 +39,16 @@
 #import <Cocoa/Cocoa.h>
 #import "BibPrefController.h"
 
-@interface BibPref_Display : OAPreferenceClient {
+@class BDSKFontButton;
+@protocol BDSKFontButtonDelegate;
+
+@interface BibPref_Display : OAPreferenceClient <BDSKFontButtonDelegate> {
     // display pref radio matrix
     IBOutlet NSMatrix* displayPrefRadioMatrix;
     IBOutlet NSComboBox *previewMaxNumberComboBox;
+    
+    IBOutlet NSPopUpButton *fontElementPopup;
+    IBOutlet BDSKFontButton *fontButton;
     
     // sorting
     IBOutlet NSButton *addButton;
@@ -55,6 +61,27 @@
 - (IBAction)addTerm:(id)sender;
 - (IBAction)removeSelectedTerm:(id)sender;
 
+- (IBAction)changeFontElement:(id)sender;
+
 - (IBAction)changeAuthorDisplay:(id)sender;
 
 @end
+
+
+@interface BDSKFontButton : NSButton {
+    id delegate;
+}
+
+- (id)delegate;
+- (void)setDelegate:(id)newDelegate;
+- (void)changeFont:(id)sender;
+- (void)updateFontPanel:(NSNotification *)notification;
+- (void)chooseFont:(id)sender;
+
+@end
+
+
+@protocol BDSKFontButtonDelegate <NSObject>
+- (NSFont *)fontButtonFont:(BDSKFontButton *)button;
+- (void)fontButton:(BDSKFontButton *)button setFont:(NSFont *)font;
+@end 

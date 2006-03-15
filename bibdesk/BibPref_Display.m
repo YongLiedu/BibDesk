@@ -185,4 +185,137 @@
     [[NSNotificationCenter defaultCenter] postNotificationName:BDSKResortDocumentNotification object:nil];
 }
 
+
+- (NSFont *)fontButtonFont:(BDSKFontButton *)button{
+    NSString *fontNameKey = nil;
+    NSString *fontSizeKey = nil;
+    switch ([fontElementPopup indexOfSelectedItem]) {
+        case 0:
+            fontNameKey = BDSKMainTableViewFontNameKey;
+            fontSizeKey = BDSKMainTableViewFontNameKey;
+            break;
+        case 1:
+            fontNameKey = BDSKGroupTableViewFontNameKey;
+            fontSizeKey = BDSKGroupTableViewFontNameKey;
+            break;
+        case 2:
+            fontNameKey = BDSKPersonTableViewFontNameKey;
+            fontSizeKey = BDSKPersonTableViewFontNameKey;
+            break;
+        case 3:
+            fontNameKey = BDSKPreviewPaneFontFamilyKey;
+            fontSizeKey = BDSKPreviewBaseFontSizeKey;
+            break;
+        default:
+            return nil;
+    }
+    return [NSFont fontWithName:[defaults objectForKey:fontNameKey] size:[defaults floatForKey:fontSizeKey]];
+}
+
+- (void)fontButton:(BDSKFontButton *)button setFont:(NSFont *)font{
+    NSString *fontNameKey = nil;
+    NSString *fontSizeKey = nil;
+    NSString *notificationName = nil;
+    switch ([fontElementPopup indexOfSelectedItem]) {
+        case 0:
+            fontNameKey = BDSKMainTableViewFontNameKey;
+            fontSizeKey = BDSKMainTableViewFontNameKey;
+            notificationName = BDSKMainTableViewFontChangedNotification;
+            break;
+        case 1:
+            fontNameKey = BDSKGroupTableViewFontNameKey;
+            fontSizeKey = BDSKGroupTableViewFontNameKey;
+            notificationName = BDSKGroupTableViewFontChangedNotification;
+            break;
+        case 2:
+            fontNameKey = BDSKPersonTableViewFontNameKey;
+            fontSizeKey = BDSKPersonTableViewFontNameKey;
+            notificationName = BDSKPersonTableViewFontChangedNotification;
+            break;
+        case 3:
+            [defaults setObject:[font familyName] forKey:BDSKPreviewPaneFontFamilyKey];
+            [defaults setFloat:[font pointSize] forKey:BDSKPreviewBaseFontSizeKey];
+            [[NSNotificationCenter defaultCenter] postNotificationName:BDSKPreviewPaneFontChangedNotification object:nil];
+            [[NSNotificationCenter defaultCenter] postNotificationName:BDSKPreviewDisplayChangedNotification object:nil];
+        default:
+            return;
+    }
+    [defaults setObject:[font fontName] forKey:fontNameKey];
+    [defaults setFloat:[font pointSize] forKey:fontSizeKey];
+    [[NSNotificationCenter defaultCenter] postNotificationName:notificationName object:nil];
+}
+
+- (IBAction)changeFontElement:(id)sender{
+    [fontButton chooseFont:sender];
+}
+
+@end
+
+
+@implementation BDSKFontButton 
+
+- (id)initWithFrame:(NSRect)frameRect{
+    if (self = [super initWithFrame:frameRect]) {
+        delegate = nil;
+        [self setTarget:self];
+        [self setAction:@selector(chooseFont:)];
+    }
+    return self;
+}
+
+- (void)dealloc{
+    [[NSNotificationCenter defaultCenter] removeObserver:self];
+    [super dealloc];
+}
+
+- (void)updateFontPanel:(NSNotification *)notification{
+	NSFont *font = [delegate fontButtonFont:self];
+    if (font == nil)
+		font = [NSFont systemFontOfSize:[NSFont systemFontSize]];
+	[[NSFontManager sharedFontManager] setSelectedFont:font isMultiple:NO];
+}
+
+- (void)awakeFromNib{
+    [self setTarget:self];
+    [self setAction:@selector(chooseFont:)];
+    [[NSNotificationCenter defaultCenter] addObserver:self
+                                             selector:@selector(updateFontPanel:)
+                                                 name:NSWindowDidBecomeKeyNotification
+                                               object:[self window]];
+}
+
+- (BOOL)becomeFirstResponder{
+    [self updateFontPanel:nil];
+    return [super becomeFirstResponder];
+}
+
+- (BOOL)resignFirstResponder {
+	[[[NSFontManager sharedFontManager] fontPanel:NO] performClose:self];
+    return [super resignFirstResponder];
+}
+
+- (id)delegate{
+    return delegate;
+}
+
+- (void)setDelegate:(id)newDelegate{
+    delegate = newDelegate;
+}
+
+- (void)changeFont:(id)sender{
+	NSFontManager *fontManager = [NSFontManager sharedFontManager];
+	NSFont *selectedFont = [fontManager selectedFont];
+	if (selectedFont == nil)
+		selectedFont = [NSFont systemFontOfSize:[NSFont systemFontSize]];
+	NSFont *font = [fontManager convertFont:selectedFont];
+    
+    [delegate fontButton:self setFont:font];
+}
+
+- (void)chooseFont:(id)sender{
+    [self updateFontPanel:nil];
+    [[self window] makeFirstResponder:self];
+    [[NSFontManager sharedFontManager] orderFrontFontPanel:sender];
+}
+
 @end

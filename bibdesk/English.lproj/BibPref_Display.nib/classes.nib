@@ -1,13 +1,26 @@
 {
     IBClasses = (
         {
-            ACTIONS = {addTerm = id; changeAuthorDisplay = id; removeSelectedTerm = id; }; 
+            CLASS = BDSKFontButton; 
+            LANGUAGE = ObjC; 
+            OUTLETS = {delegate = id; }; 
+            SUPERCLASS = NSButton; 
+        }, 
+        {
+            ACTIONS = {
+                addTerm = id; 
+                changeAuthorDisplay = id; 
+                changeFontElement = id; 
+                removeSelectedTerm = id; 
+            }; 
             CLASS = "BibPref_Display"; 
             LANGUAGE = ObjC; 
             OUTLETS = {
                 addButton = NSButton; 
                 authorNameMatrix = NSMatrix; 
                 displayPrefRadioMatrix = NSMatrix; 
+                fontButton = BDSKFontButton; 
+                fontElementPopup = NSPopUpButton; 
                 previewMaxNumberComboBox = NSComboBox; 
                 removeButton = NSButton; 
                 tableView = NSTableView; 
