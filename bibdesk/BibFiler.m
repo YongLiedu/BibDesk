@@ -324,11 +324,11 @@ static BibFiler *sharedFiler = nil;
                                            alternateButton:nil
                                                otherButton:nil
                              informativeTextWithFormat:NSLocalizedString(@"Please select the items you want to auto file again or press Done.", @"")];
-        int rv = [alert runSheetModalForWindow:window
-                                 modalDelegate:nil
-                                didEndSelector:NULL 
-                            didDismissSelector:NULL 
-                                   contextInfo:NULL];
+        [alert runSheetModalForWindow:window
+                        modalDelegate:nil
+                       didEndSelector:NULL 
+                   didDismissSelector:NULL 
+                          contextInfo:NULL];
         return;
     }
     
