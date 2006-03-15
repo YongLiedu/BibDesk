@@ -87,7 +87,15 @@ static NSString *BDSKEditorTextViewFontChangedNotification = nil;
 {
     // get the new font from the font panel
     NSFontManager *fontManager = [NSFontManager sharedFontManager];
-    NSFont *font = [fontManager convertFont:[fontManager selectedFont]];
+    NSString *fontName = [[OFPreferenceWrapper sharedPreferenceWrapper] objectForKey:BDSKEditorFontNameKey];
+    float fontSize = [[OFPreferenceWrapper sharedPreferenceWrapper] floatForKey:BDSKEditorFontSizeKey];
+    NSFont *font = nil;
+    
+    if(fontName != nil)
+        font = [NSFont fontWithName:fontName size:fontSize];
+    if(font == nil)
+        font = [NSFont systemFontOfSize:[NSFont systemFontSize]];
+    font = [fontManager convertFont:font];
     
     // save it to prefs for next time
     [[OFPreferenceWrapper sharedPreferenceWrapper] setObject:[font fontName] forKey:BDSKEditorFontNameKey];

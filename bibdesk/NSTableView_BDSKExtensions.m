@@ -226,11 +226,16 @@ static IMP originalDealloc;
     NSString *fontSizePrefKey = [self fontSizePreferenceKey];
     if (fontNamePrefKey == nil || fontSizePrefKey == nil) 
         return;
-	NSFontManager *fontManager = [NSFontManager sharedFontManager];
-	NSFont *selectedFont = [fontManager selectedFont];
-	if (selectedFont == nil)
-		selectedFont = [NSFont systemFontOfSize:[NSFont systemFontSize]];
-	NSFont *font = [fontManager convertFont:selectedFont];
+    NSFontManager *fontManager = [NSFontManager sharedFontManager];
+    NSString *fontName = [[OFPreferenceWrapper sharedPreferenceWrapper] objectForKey:fontNamePrefKey];
+    float fontSize = [[OFPreferenceWrapper sharedPreferenceWrapper] floatForKey:fontSizePrefKey];
+	NSFont *font = nil;
+    
+    if(fontName != nil)
+        font = [NSFont fontWithName:fontName size:fontSize];
+    if(font == nil)
+        font = [NSFont systemFontOfSize:[NSFont systemFontSize]];
+    font = [fontManager convertFont:font];
     
     [[OFPreferenceWrapper sharedPreferenceWrapper] setObject:[font fontName] forKey:fontNamePrefKey];
     [[OFPreferenceWrapper sharedPreferenceWrapper] setFloat:[font pointSize] forKey:fontSizePrefKey];
@@ -249,7 +254,12 @@ static IMP originalDealloc;
         return;
     NSString *fontName = [[OFPreferenceWrapper sharedPreferenceWrapper] objectForKey:fontNamePrefKey];
     float fontSize = [[OFPreferenceWrapper sharedPreferenceWrapper] floatForKey:fontSizePrefKey];
-    NSFont *font = [NSFont fontWithName:fontName size:fontSize];
+	NSFont *font = nil;
+    
+    if(fontName != nil)
+        font = [NSFont fontWithName:fontName size:fontSize];
+    if(font == nil)
+        font = [NSFont systemFontOfSize:[NSFont systemFontSize]];
 	
 	[self setFont:font];
     
