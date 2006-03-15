@@ -681,6 +681,10 @@
     return ([self numberOfSelectedPubs] > 0 && [[[BibTypeManager sharedManager] singleValuedGroupFields] containsObject:[self currentGroupField]]  == NO && [[[BibTypeManager sharedManager] personFieldsSet] containsObject:[self currentGroupField]] == NO);
 }
 
+- (BOOL)validateRevertDocumentToSavedMenuItem:(NSMenuItem *)menuItem {
+    return [self isDocumentEdited];
+}
+
 - (BOOL) validateMenuItem:(NSMenuItem*)menuItem{
 	SEL act = [menuItem action];
 
@@ -800,6 +804,9 @@
     }
     else if (act == @selector(editNewGroupWithSelection:)){
         return [self validateEditNewGroupWithSelectionMenuItem:menuItem];
+    }
+    else if (act == @selector(revertDocumentToSaved:)){
+        return [self validateRevertDocumentToSavedMenuItem:menuItem];
     }
     else {
 		return [super validateMenuItem:menuItem];
