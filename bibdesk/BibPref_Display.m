@@ -206,6 +206,10 @@
             fontNameKey = BDSKPreviewPaneFontFamilyKey;
             fontSizeKey = BDSKPreviewBaseFontSizeKey;
             break;
+        case 4:
+            fontNameKey = BDSKEditorFontNameKey;
+            fontSizeKey = BDSKEditorFontSizeKey;
+            break;
         default:
             return nil;
     }
@@ -237,6 +241,12 @@
             [defaults setFloat:[font pointSize] forKey:BDSKPreviewBaseFontSizeKey];
             [[NSNotificationCenter defaultCenter] postNotificationName:BDSKPreviewPaneFontChangedNotification object:nil];
             [[NSNotificationCenter defaultCenter] postNotificationName:BDSKPreviewDisplayChangedNotification object:nil];
+            return;
+        case 4:
+            fontNameKey = BDSKEditorFontNameKey;
+            fontSizeKey = BDSKEditorFontSizeKey;
+            notificationName = BDSKEditorTextViewFontChangedNotification;
+            break;
         default:
             return;
     }

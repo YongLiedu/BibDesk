@@ -38,11 +38,7 @@
 
 #import "BDSKEditorTextView.h"
 #import "NSURL_BDSKExtensions.h"
-
-// these constants are private to the textview
-static NSString *BDSKEditorFontNameKey = @"BDSKEditorFontNameKey";
-static NSString *BDSKEditorFontSizeKey = @"BDSKEditorFontSizeKey";
-static NSString *BDSKEditorTextViewFontChangedNotification = nil;
+#import "BibPrefController.h"
 
 @interface BDSKEditorTextView (Private)
 
@@ -55,13 +51,6 @@ static NSString *BDSKEditorTextViewFontChangedNotification = nil;
 @end
 
 @implementation BDSKEditorTextView
-
-+ (void)initialize
-{
-    // make sure no one else uses this notification name, since it's going into the default notification center
-    if(BDSKEditorTextViewFontChangedNotification == nil)
-        BDSKEditorTextViewFontChangedNotification = [[[NSProcessInfo processInfo] globallyUniqueString] copy];
-}    
 
 - (id)initWithCoder:(NSCoder *)coder
 {

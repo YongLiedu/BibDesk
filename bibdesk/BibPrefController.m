@@ -119,6 +119,8 @@ NSString *BDSKGroupTableViewFontNameKey = @"BDSKGroupTableViewFontNameKey";
 NSString *BDSKGroupTableViewFontSizeKey = @"BDSKGroupTableViewFontSizeKey";
 NSString *BDSKPersonTableViewFontNameKey = @"BDSKPersonTableViewFontNameKey";
 NSString *BDSKPersonTableViewFontSizeKey = @"BDSKPersonTableViewFontSizeKey";
+NSString *BDSKEditorFontNameKey = @"BDSKEditorFontNameKey";
+NSString *BDSKEditorFontSizeKey = @"BDSKEditorFontSizeKey";
 NSString *BDSKPreviewDisplayKey = @"Preview Pane Displays What?";
 NSString *BDSKPreviewMaxNumberKey = @"Maximum Number of Items in Preview Pane";
 
@@ -246,6 +248,7 @@ NSString *BDSKDocumentWindowWillCloseNotification = @"Document Window Will Close
 NSString *BDSKMainTableViewFontChangedNotification = @"BDSKMainTableViewFontChangedNotification";
 NSString *BDSKGroupTableViewFontChangedNotification = @"BDSKGroupTableViewFontChangedNotification";
 NSString *BDSKPersonTableViewFontChangedNotification = @"BDSKPersonTableViewFontChangedNotification";
+NSString *BDSKEditorTextViewFontChangedNotification = @"BDSKEditorTextViewFontChangedNotification";
 NSString *BDSKPreviewDisplayChangedNotification = @"Preview Pane Preference Change Notification";
 NSString *BDSKPreviewNeedsUpdateNotification = @"Preview Needs Update Notification";
 NSString *BDSKTableColumnChangedNotification = @"TableColumnChangedNotification";
