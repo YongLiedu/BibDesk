@@ -192,11 +192,11 @@ CFURLRef BDCopyFileURLResolvingAliases(CFURLRef fileURL)
     static NSCharacterSet *charSet = nil;
     if(charSet == nil){
         NSMutableCharacterSet *validSet = (NSMutableCharacterSet *)[NSMutableCharacterSet characterSetWithCharactersInString:@"!$"];
-        [validSet addCharactersInRange:NSMakeRange(38, 59-38)];
+        [validSet addCharactersInRange:NSMakeRange('&', 22)]; // '&' - ';'
         [validSet addCharactersInString:@"="];
-        [validSet addCharactersInRange:NSMakeRange(63, 90-63)];
+        [validSet addCharactersInRange:NSMakeRange('?', 28)]; // '?' - 'Z'
         [validSet addCharactersInString:@"_"];
-        [validSet addCharactersInRange:NSMakeRange(97, 122-97)];
+        [validSet addCharactersInRange:NSMakeRange('a', 26)]; // 'a' - 'z'
         [validSet addCharactersInString:@"~"];
         charSet = [[validSet invertedSet] copy];
     }
