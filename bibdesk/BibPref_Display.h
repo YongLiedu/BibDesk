@@ -61,6 +61,8 @@
 - (IBAction)changeAuthorDisplay:(id)sender;
 
 - (void)changeFont:(id)sender;
+- (IBAction)changeFontElement:(id)sender;
+
 - (NSFont *)currentFont;
 - (void)setCurrentFont:(NSFont *)font;
 - (void)updateFontPanel:(NSNotification *)notification;

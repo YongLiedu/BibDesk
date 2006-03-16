@@ -266,6 +266,11 @@
     [self setCurrentFont:font];
 }
 
+- (IBAction)changeFontElement:(id)sender{
+    [self updateFontPanel:nil];
+    [[NSFontManager sharedFontManager] orderFrontFontPanel:sender];
+}
+
 - (void)updateFontPanel:(NSNotification *)notification{
 	NSFont *font = [self currentFont];
     if (font == nil)
