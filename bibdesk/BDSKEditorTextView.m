@@ -74,17 +74,9 @@
 
 - (void)changeFont:(id)sender
 {
-    // get the new font from the font panel
-    NSFontManager *fontManager = [NSFontManager sharedFontManager];
-    NSString *fontName = [[OFPreferenceWrapper sharedPreferenceWrapper] objectForKey:BDSKEditorFontNameKey];
-    float fontSize = [[OFPreferenceWrapper sharedPreferenceWrapper] floatForKey:BDSKEditorFontSizeKey];
-    NSFont *font = nil;
-    
-    if(fontName != nil)
-        font = [NSFont fontWithName:fontName size:fontSize];
-    if(font == nil)
-        font = [NSFont systemFontOfSize:[NSFont systemFontSize]];
-    font = [fontManager convertFont:font];
+    // convert the current font to the new font from the font panel
+    // returns current font in case of a conversion failure
+    NSFont *font = [[NSFontManager sharedFontManager] convertFont:[self font]];
     
     // save it to prefs for next time
     [[OFPreferenceWrapper sharedPreferenceWrapper] setObject:[font fontName] forKey:BDSKEditorFontNameKey];
