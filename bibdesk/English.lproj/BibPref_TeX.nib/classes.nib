@@ -28,7 +28,6 @@
                 bibtexBinaryPath = NSTextField; 
                 encodingPopUpButton = NSPopUpButton; 
                 texBinaryPath = NSTextField; 
-                texPrefsBox = NSBox; 
                 usesTeXButton = NSButton; 
             }; 
             SUPERCLASS = OAPreferenceClient; 
