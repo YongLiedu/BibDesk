@@ -186,7 +186,7 @@
 }
 
 
-- (NSFont *)fontButtonFont:(BDSKFontButton *)button{
+- (NSFont *)currentFont{
     NSString *fontNameKey = nil;
     NSString *fontSizeKey = nil;
     switch ([fontElementPopup indexOfSelectedItem]) {
@@ -216,7 +216,7 @@
     return [NSFont fontWithName:[defaults objectForKey:fontNameKey] size:[defaults floatForKey:fontSizeKey]];
 }
 
-- (void)fontButton:(BDSKFontButton *)button setFont:(NSFont *)font{
+- (void)setCurrentFont:(NSFont *)font{
     NSString *fontNameKey = nil;
     NSString *fontSizeKey = nil;
     NSString *notificationName = nil;
@@ -255,78 +255,61 @@
     [[NSNotificationCenter defaultCenter] postNotificationName:notificationName object:nil];
 }
 
-- (IBAction)changeFontElement:(id)sender{
-    [fontButton chooseFont:sender];
-}
-
-@end
-
-
-@implementation BDSKFontButton 
-
-- (id)initWithFrame:(NSRect)frameRect{
-    if (self = [super initWithFrame:frameRect]) {
-        delegate = nil;
-        [self setTarget:self];
-        [self setAction:@selector(chooseFont:)];
-    }
-    return self;
-}
-
-- (void)dealloc{
-    [[NSNotificationCenter defaultCenter] removeObserver:self];
-    [super dealloc];
-}
-
-- (void)updateFontPanel:(NSNotification *)notification{
-	NSFont *font = [delegate fontButtonFont:self];
-    if (font == nil)
-		font = [NSFont systemFontOfSize:[NSFont systemFontSize]];
-	[[NSFontManager sharedFontManager] setSelectedFont:font isMultiple:NO];
-}
-
-- (void)awakeFromNib{
-    [self setTarget:self];
-    [self setAction:@selector(chooseFont:)];
-    [[NSNotificationCenter defaultCenter] addObserver:self
-                                             selector:@selector(updateFontPanel:)
-                                                 name:NSWindowDidBecomeKeyNotification
-                                               object:[self window]];
-}
-
-- (BOOL)becomeFirstResponder{
-    [self updateFontPanel:nil];
-    return [super becomeFirstResponder];
-}
-
-- (BOOL)resignFirstResponder {
-	[[[NSFontManager sharedFontManager] fontPanel:NO] performClose:self];
-    return [super resignFirstResponder];
-}
-
-- (id)delegate{
-    return delegate;
-}
-
-- (void)setDelegate:(id)newDelegate{
-    delegate = newDelegate;
-}
-
 - (void)changeFont:(id)sender{
 	NSFontManager *fontManager = [NSFontManager sharedFontManager];
-	NSFont *font = [delegate fontButtonFont:self];
+	NSFont *font = [self currentFont];
 	
     if (font == nil)
 		font = [NSFont systemFontOfSize:[NSFont systemFontSize]];
     font = [fontManager convertFont:font];
     
-    [delegate fontButton:self setFont:font];
+    [self setCurrentFont:font];
 }
 
-- (void)chooseFont:(id)sender{
+- (void)updateFontPanel:(NSNotification *)notification{
+	NSFont *font = [self currentFont];
+    if (font == nil)
+		font = [NSFont systemFontOfSize:[NSFont systemFontSize]];
+	[[NSFontManager sharedFontManager] setSelectedFont:font isMultiple:NO];
+	[[NSFontManager sharedFontManager] setAction:@selector(localChangeFont:)];
+}
+
+- (void)resetFontPanel:(NSNotification *)notification{
+	[[NSFontManager sharedFontManager] setAction:@selector(changeFont:)];
+}
+
+- (void)didBecomeCurrentPreferenceClient{
     [self updateFontPanel:nil];
-    [[self window] makeFirstResponder:self];
-    [[NSFontManager sharedFontManager] orderFrontFontPanel:sender];
+    [[NSNotificationCenter defaultCenter] addObserver:self
+                                             selector:@selector(updateFontPanel:)
+                                                 name:NSWindowDidBecomeMainNotification
+                                               object:[[self controlBox] window]];
+    [[NSNotificationCenter defaultCenter] addObserver:self
+                                             selector:@selector(resetFontPanel:)
+                                                 name:NSWindowDidResignMainNotification
+                                               object:[[self controlBox] window]];
+}
+
+- (void)resignCurrentPreferenceClient{
+    [self resetFontPanel:nil];
+    [[NSNotificationCenter defaultCenter] removeObserver:self
+                                                    name:NSWindowDidBecomeMainNotification
+                                                  object:[[self controlBox] window]];
+    [[NSNotificationCenter defaultCenter] removeObserver:self
+                                                    name:NSWindowDidResignMainNotification
+                                                  object:[[self controlBox] window]];
+    
 }
 
 @end
+
+
+@implementation OAPreferenceController (BDSKFontExtension)
+
+- (void)localChangeFont:(id)sender{
+    if ([nonretained_currentClient respondsToSelector:@selector(changeFont:)])
+        [nonretained_currentClient performSelector:@selector(changeFont:) withObject:sender];
+}
+
+@end
+
