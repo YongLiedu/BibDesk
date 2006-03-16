@@ -685,6 +685,12 @@
     return [self isDocumentEdited];
 }
 
+
+- (BOOL)validateChangePreviewDisplayMenuItem:(NSMenuItem *)menuItem {
+    [menuItem setState:([menuItem tag] == [[OFPreferenceWrapper sharedPreferenceWrapper] integerForKey:BDSKPreviewDisplayKey]) ? NSOnState : NSOffState];
+    return YES;
+}
+
 - (BOOL) validateMenuItem:(NSMenuItem*)menuItem{
 	SEL act = [menuItem action];
 
@@ -807,6 +813,9 @@
     }
     else if (act == @selector(revertDocumentToSaved:)){
         return [self validateRevertDocumentToSavedMenuItem:menuItem];
+    }
+    else if (act == @selector(changePreviewDisplay:)){
+        return [self validateChangePreviewDisplayMenuItem:menuItem];
     }
     else {
 		return [super validateMenuItem:menuItem];

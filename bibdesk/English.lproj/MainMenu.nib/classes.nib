@@ -94,6 +94,7 @@
                 addSmartGroupAction = id; 
                 alternateCut = id; 
                 alternateDelete = id; 
+                changePreviewDisplay = id; 
                 columnsMenuAddTableColumn = id; 
                 consolidateLinkedFiles = id; 
                 copyAsAction = id; 

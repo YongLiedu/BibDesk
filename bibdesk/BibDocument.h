@@ -1025,6 +1025,8 @@ extern NSString *BDSKBibItemPboardType;
 - (IBAction)changeMainTableFont:(id)sender;
 - (IBAction)changeGroupTableFont:(id)sender;
 
+- (IBAction)changePreviewDisplay:(id)sender;
+
 - (IBAction)toggleShowingCustomCiteDrawer:(id)sender;
 
 - (IBAction)addCustomCiteString:(id)sender;

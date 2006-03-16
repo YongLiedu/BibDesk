@@ -2864,11 +2864,6 @@ NSString *BDSKBibItemPboardType = @"edu.ucsd.mmccrack.bibdesk BibItem pboard typ
     }
 }
 
-- (IBAction)toggleStatusBar:(id)sender{
-	[statusBar toggleBelowView:groupSplitView offset:1.0];
-	[[OFPreferenceWrapper sharedPreferenceWrapper] setBool:[statusBar isVisible] forKey:BDSKShowStatusBarKey];
-}
-
 - (void)setStatus:(NSString *)status {
 	[self setStatus:status immediate:YES];
 }
@@ -2878,6 +2873,13 @@ NSString *BDSKBibItemPboardType = @"edu.ucsd.mmccrack.bibdesk BibItem pboard typ
 		[statusBar setStringValue:status];
 	else
 		[statusBar performSelector:@selector(setStringValue:) withObject:status afterDelay:0.01];
+}
+
+#pragma mark View Actions
+
+- (IBAction)toggleStatusBar:(id)sender{
+	[statusBar toggleBelowView:groupSplitView offset:1.0];
+	[[OFPreferenceWrapper sharedPreferenceWrapper] setBool:[statusBar isVisible] forKey:BDSKShowStatusBarKey];
 }
 
 - (IBAction)changeMainTableFont:(id)sender{
@@ -2900,6 +2902,14 @@ NSString *BDSKBibItemPboardType = @"edu.ucsd.mmccrack.bibdesk BibItem pboard typ
     id firstResponder = [documentWindow firstResponder];
     if (firstResponder != groupTableView)
         [documentWindow makeFirstResponder:groupTableView];
+}
+
+- (IBAction)changePreviewDisplay:(id)sender{
+    int tag = [sender tag];
+    if(tag != [[OFPreferenceWrapper sharedPreferenceWrapper] integerForKey:BDSKPreviewDisplayKey]){
+        [[OFPreferenceWrapper sharedPreferenceWrapper] setInteger:tag forKey:BDSKPreviewDisplayKey];
+        [[NSNotificationCenter defaultCenter] postNotificationName:BDSKPreviewDisplayChangedNotification object:nil];
+    }
 }
 
 #pragma mark TeXTask delegate
