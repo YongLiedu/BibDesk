@@ -174,6 +174,7 @@ extern NSString *BDSKCurrentGroupFieldKey;
 extern NSString *BDSKDefaultGroupFieldSeparatorKey;
 extern NSString *BDSKTableHeaderImagesKey;
 extern NSString *BDSKTableHeaderTitlesKey;
+extern NSString *BDSKCiteseerHostKey;
 
 extern NSString *BDSKShouldDisplayFirstNamesKey;
 extern NSString *BDSKShouldAbbreviateFirstNamesKey;
@@ -221,6 +222,7 @@ extern NSString *BDSKItemNumberString;
 extern NSString *BDSKTypeString;
 extern NSString *BDSKAddressString;
 extern NSString *BDSKDoiString;
+extern NSString *BDSKCiteseerUrlString;
 
 #pragma mark ||  Notification name strings
 extern NSString *BDSKFinalizeChangesNotification;

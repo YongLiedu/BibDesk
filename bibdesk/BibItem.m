@@ -1730,12 +1730,20 @@ static NSParagraphStyle* bodyParagraphStyle = nil;
     
     // resolve DOI fields against a base URL if necessary, so they can be opened directly by NSWorkspace
     if([field isEqualToString:BDSKDoiString] && [value rangeOfString:@"://"].length == 0){
+        // DOI manual says this is a safe URL to resolve with for the foreseeable future
         baseURL = [NSURL URLWithString:@"http://dx.doi.org/"];
         // remove any text prefix, which is not required for a valid DOI, but may be present; DOI starts with "10"
         // http://www.doi.org/handbook_2000/enumeration.html#2.2
         NSRange range = [value rangeOfCharacterFromSet:[NSCharacterSet decimalDigitCharacterSet]];
         if(range.length && range.location > 0)
             value = [value substringFromIndex:range.location];
+    } else if([field isEqualToString:BDSKCiteseerUrlString] && [value rangeOfString:@"://"].length == 0){
+        // JabRef and CiteSeer use Citeseerurl for CiteSeer links
+        // cache this base URL; it's a hidden pref, so you have to quit/relaunch to set it anyway
+        static NSURL *citeSeerBaseURL = nil;
+        if(citeSeerBaseURL == nil)
+            citeSeerBaseURL = [[NSURL alloc] initWithString:[[OFPreferenceWrapper sharedPreferenceWrapper] objectForKey:BDSKCiteseerHostKey]];
+        baseURL = citeSeerBaseURL;
     }
     return [NSURL URLWithStringByNormalizingPercentEscapes:value baseURL:baseURL];
 }

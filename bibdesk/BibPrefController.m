@@ -190,6 +190,7 @@ NSString *BDSKDefaultGroupFieldSeparatorKey = @"BDSKDefaultGroupFieldSeparatorKe
 
 NSString *BDSKTableHeaderImagesKey = @"BDSKTableHeaderImages";
 NSString *BDSKTableHeaderTitlesKey = @"BDSKTableHeaderTitles";
+NSString *BDSKCiteseerHostKey = @"BDSKCiteseerHostKey";
 
 NSString *BDSKShouldDisplayFirstNamesKey = @"BDSKShouldDisplayFirstNamesKey";
 NSString *BDSKShouldAbbreviateFirstNamesKey = @"BDSKShouldAbbreviateFirstNamesKey";
@@ -237,6 +238,7 @@ NSString *BDSKItemNumberString = @"Item Number";
 NSString *BDSKTypeString = @"Type";
 NSString *BDSKAddressString = @"Address";
 NSString *BDSKDoiString = @"Doi";
+NSString *BDSKCiteseerUrlString = @"Citeseerurl";
 
 #pragma mark ||  Notification name strings
 NSString *BDSKFinalizeChangesNotification = @"Finalize Changes Notification";

@@ -425,6 +425,7 @@
 					<array>
 						<string>Url</string>
                         <string>Doi</string>
+                        <string>Citeseerurl</string>
 					</array>
 					<key>Three state fields</key>
 					<array/>
@@ -585,6 +586,8 @@
                     <false/>
                     <key>BDSKShouldWritePDFMetadata</key>
                     <false/>
+                    <key>BDSKCiteseerHostKey</key>
+                    <string>http://citeseer.ist.psu.edu/</string>
 					<key>Column Widths by Name</key>
 					<dict>
 						<key>1st Author</key>
