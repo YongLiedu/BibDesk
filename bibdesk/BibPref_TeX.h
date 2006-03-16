@@ -43,7 +43,6 @@
 @interface BibPref_TeX : OAPreferenceClient
 {
     IBOutlet NSButton *usesTeXButton;
-    IBOutlet NSBox *texPrefsBox;
     IBOutlet NSTextField *texBinaryPath;
     IBOutlet NSTextField *bibtexBinaryPath;
     IBOutlet NSTextField *bibTeXStyle;
