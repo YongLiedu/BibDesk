@@ -12,6 +12,8 @@
                 changeAuthorDisplay = id; 
                 changeFont = id; 
                 changeFontElement = id; 
+                changePreviewDisplay = id; 
+                changePreviewMaxNumber = id; 
                 removeSelectedTerm = id; 
             }; 
             CLASS = "BibPref_Display"; 

@@ -55,6 +55,9 @@
     IBOutlet NSMatrix *authorNameMatrix;
 }
 
+- (IBAction)changePreviewDisplay:(id)sender;
+- (IBAction)changePreviewMaxNumber:(id)sender;
+
 - (IBAction)addTerm:(id)sender;
 - (IBAction)removeSelectedTerm:(id)sender;
 
