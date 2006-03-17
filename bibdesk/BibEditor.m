@@ -69,6 +69,7 @@
 #import "NSURL_BDSKExtensions.h"
 #import "BDSKPreviewer.h"
 #import "NSWorkspace_BDSKExtensions.h"
+#import "BDSKPersistentSearch.h"
 
 NSString *BDSKWeblocFilePboardType = @"CorePasteboardFlavorType 0x75726C20";
 static NSString *BDSKBibEditorFrameAutosaveName = @"BibEditor window autosave name";
@@ -846,9 +847,38 @@ static int numberOfOpenEditors = 0;
             [item release];
         }
     }  
-    [globalRecentPaths release];
-    [previewRecentPaths release];
-	
+    
+    NSMutableSet *allPaths = [NSMutableSet setWithSet:globalRecentPaths];
+    [allPaths unionSet:previewRecentPaths];
+    
+    NSString *query = @"(* = \"pdf*\"wcd || kMDItemTextContent = \"pdf*\"cd) && (kMDItemContentTypeTree = 'com.adobe.pdf') && (kMDItemFSContentChangeDate >= $time.today(-7)) && (kMDItemContentType != com.apple.mail.emlx) && (kMDItemContentType != public.vcard)";
+    // this should always return nil on OS versions < 10.4
+    [[BDSKPersistentSearch sharedSearch] addQuery:query scopes:[NSArray arrayWithObject:(NSString *)kMDQueryScopeHome]];
+	NSArray *paths = [[BDSKPersistentSearch sharedSearch] resultsForQuery:query attribute:(NSString *)kMDItemPath];
+    
+    e = [paths objectEnumerator];
+    BOOL added = NO;
+    while(filePath = [e nextObject]){
+        
+        if(![allPaths containsObject:filePath]){
+            if(added == NO)
+                [menu addItem:[NSMenuItem separatorItem]];
+
+            added = YES;
+            
+            NSString *fileName = [filePath lastPathComponent];
+            NSImage *image = [NSImage smallImageForFile:filePath];
+            
+            NSMenuItem *item = [[NSMenuItem allocWithZone:[NSMenu menuZone]] initWithTitle:fileName
+                                                                                    action:@selector(setLocalURLPathFromMenuItem:)
+                                                                             keyEquivalent:@""];
+            [item setRepresentedObject:filePath];
+            [item setImage:image];
+            [menu addItem:item];
+            [item release];
+        }
+    }
+    
 	if ([menu numberOfItems] > 0)
 		return [menu autorelease];
 	
