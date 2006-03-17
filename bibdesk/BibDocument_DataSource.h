@@ -57,4 +57,6 @@ available from the receiving pastebaord."*/
 
 - (BOOL) containsURL;
 
+- (BOOL)containsUnparseableFile;
+
 @end

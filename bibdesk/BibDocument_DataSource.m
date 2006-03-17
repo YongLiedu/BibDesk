@@ -54,6 +54,7 @@
 #import "BibTypeManager.h"
 #import "NSURL_BDSKExtensions.h"
 #import "NSFileManager_ExtendedAttributes.h"
+#import "NSSet_BDSKExtensions.h"
 
 @implementation BibDocument (DataSource)
 
@@ -811,8 +812,9 @@
 			// can't copy onto same table
 			return NSDragOperationNone;
 		}
-        // set drop row to -1 and NSTableViewDropOperation to NSTableViewDropOn, since we don't target specific rows http://www.corbinstreehouse.com/blog/?p=123
-		[tv setDropRow:-1 dropOperation:NSTableViewDropOn];
+        // set drop row to -1 and NSTableViewDropOperation to NSTableViewDropOn, when we don't target specific rows http://www.corbinstreehouse.com/blog/?p=123
+        if(row == -1 || op == NSTableViewDropAbove || [[info draggingPasteboard] containsUnparseableFile] == NO)
+            [tv setDropRow:-1 dropOperation:NSTableViewDropOn];
 		if([info draggingSource]) {
 			// drag from another window
             return NSDragOperationCopy;    
@@ -846,12 +848,27 @@
     if(tv == (NSTableView *)ccTableView){
         return NO; // can't drag into that tv.
     } else if(tv == tableView){
-        [groupTableView selectRowIndexes:[NSIndexSet indexSetWithIndex:0] byExtendingSelection:NO];
-        
-        BOOL result = [self addPublicationsFromPasteboard:pboard error:NULL];
-        
-        if (result) [self updateUI];
-        return result;
+		if(row != -1 && [pboard availableTypeFromArray:[NSArray arrayWithObjects:NSFilenamesPboardType, nil]] != nil){
+        	NSArray *fileNames = [pboard propertyListForType:NSFilenamesPboardType];
+			if ([fileNames count] == 0)
+				return NO;
+			NSURL *fileURL = [NSURL fileURLWithPath:[[fileNames objectAtIndex:0] stringByExpandingTildeInPath]];
+            BibItem *pub = [shownPublications objectAtIndex:row];
+            if (fileURL == nil || [fileURL isEqual:[pub localFileURLForField:BDSKLocalUrlString]])
+                return NO;
+                    
+            [pub setField:BDSKLocalUrlString toValue:[fileURL absoluteString]];
+            [pub autoFilePaper];
+            [[pub undoManager] setActionName:NSLocalizedString(@"Edit Publication",@"")];
+            return YES;
+        }else{
+            [groupTableView selectRowIndexes:[NSIndexSet indexSetWithIndex:0] byExtendingSelection:NO];
+            
+            BOOL result = [self addPublicationsFromPasteboard:pboard error:NULL];
+            
+            if (result) [self updateUI];
+            return result;
+        }
     } else if(tv == groupTableView){
         NSArray *pubs = nil;
         
@@ -1091,5 +1108,40 @@ available from the receiving pastebaord."*/
 
 - (BOOL) containsURL
 {return [self hasType:NSURLPboardType];}
+
+- (BOOL)containsUnparseableFile{
+    NSString *type = [self availableTypeFromArray:[NSArray arrayWithObjects:BDSKBibItemPboardType, BDSKReferenceMinerStringPboardType, NSStringPboardType, NSFilenamesPboardType, nil]];
+    
+    if([type isEqualToString:NSFilenamesPboardType] == NO)
+        return NO;
+    
+    NSArray *fileNames = [self propertyListForType:NSFilenamesPboardType];
+    
+    if([fileNames count] != 1)  
+        return NO;
+        
+    NSString *fileName = [fileNames lastObject];
+    NSSet *unreadableTypes = [NSSet caseInsensitiveStringSetWithObjects:@"pdf", @"ps", @"eps", @"doc", @"htm", @"textClipping", @"webloc", @"html", @"rtf", @"tiff", @"tif", @"png", @"jpg", @"jpeg", nil];
+    
+    if([unreadableTypes containsObject:[fileName pathExtension]])
+        return YES;
+    
+    NSData *contentData = [[NSData alloc] initWithContentsOfFile:fileName];
+    NSString *contentString = [[NSString alloc] initWithData:contentData encoding:NSUTF8StringEncoding];
+    if(contentString == nil){
+        NSLog(@"unable to interpret file %@ using encoding %@; trying %@", [fileName lastPathComponent], [NSString localizedNameOfStringEncoding:NSUTF8StringEncoding], [NSString localizedNameOfStringEncoding:NSISOLatin1StringEncoding]);
+        contentString = [[NSString alloc] initWithData:contentData encoding:NSISOLatin1StringEncoding];
+    }
+    [contentData release];
+    
+    if(contentString == nil)
+        return YES;
+    if([contentString contentStringType] == BDSKUnknownStringType){
+        [contentString release];
+        return YES;
+    }
+    [contentString release];
+    return NO;
+}
 
 @end
