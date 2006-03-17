@@ -548,6 +548,8 @@
 		F9484D8E08D68C3200153BDA /* KFAppleScriptHandlerAdditionsCore.m in Sources */ = {isa = PBXBuildFile; fileRef = F9484D8A08D68C3200153BDA /* KFAppleScriptHandlerAdditionsCore.m */; };
 		F9484D8F08D68C3200153BDA /* KFASHandlerAdditions-TypeTranslation.h in Headers */ = {isa = PBXBuildFile; fileRef = F9484D8B08D68C3200153BDA /* KFASHandlerAdditions-TypeTranslation.h */; };
 		F9484D9008D68C3200153BDA /* KFASHandlerAdditions-TypeTranslation.m in Sources */ = {isa = PBXBuildFile; fileRef = F9484D8C08D68C3200153BDA /* KFASHandlerAdditions-TypeTranslation.m */; };
+		F94DE74B09CB46FF00B5FD51 /* BDSKPersistentSearch.h in Headers */ = {isa = PBXBuildFile; fileRef = F94DE74909CB46FF00B5FD51 /* BDSKPersistentSearch.h */; };
+		F94DE74C09CB46FF00B5FD51 /* BDSKPersistentSearch.m in Sources */ = {isa = PBXBuildFile; fileRef = F94DE74A09CB46FF00B5FD51 /* BDSKPersistentSearch.m */; };
 		F9569C2D08415E8300316D02 /* BDSKForm.h in Headers */ = {isa = PBXBuildFile; fileRef = F9569C2B08415E8300316D02 /* BDSKForm.h */; };
 		F9569C2E08415E8300316D02 /* BDSKForm.m in Sources */ = {isa = PBXBuildFile; fileRef = F9569C2C08415E8300316D02 /* BDSKForm.m */; };
 		F95CC0C2087F5378002C5694 /* NSFileManager_BDSKExtensions.h in Headers */ = {isa = PBXBuildFile; fileRef = F95CC0C0087F5378002C5694 /* NSFileManager_BDSKExtensions.h */; };
@@ -1332,6 +1334,8 @@
 		F9484D8A08D68C3200153BDA /* KFAppleScriptHandlerAdditionsCore.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = KFAppleScriptHandlerAdditionsCore.m; path = ../bibdesk_vendorsrc/kenferry/KFAppleScriptHandlerAdditionsCore.m; sourceTree = SOURCE_ROOT; };
 		F9484D8B08D68C3200153BDA /* KFASHandlerAdditions-TypeTranslation.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = "KFASHandlerAdditions-TypeTranslation.h"; path = "../bibdesk_vendorsrc/kenferry/KFASHandlerAdditions-TypeTranslation.h"; sourceTree = SOURCE_ROOT; };
 		F9484D8C08D68C3200153BDA /* KFASHandlerAdditions-TypeTranslation.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = "KFASHandlerAdditions-TypeTranslation.m"; path = "../bibdesk_vendorsrc/kenferry/KFASHandlerAdditions-TypeTranslation.m"; sourceTree = SOURCE_ROOT; };
+		F94DE74909CB46FF00B5FD51 /* BDSKPersistentSearch.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BDSKPersistentSearch.h; sourceTree = "<group>"; };
+		F94DE74A09CB46FF00B5FD51 /* BDSKPersistentSearch.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BDSKPersistentSearch.m; sourceTree = "<group>"; };
 		F9569C2B08415E8300316D02 /* BDSKForm.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BDSKForm.h; sourceTree = "<group>"; };
 		F9569C2C08415E8300316D02 /* BDSKForm.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BDSKForm.m; sourceTree = "<group>"; };
 		F95CC0C0087F5378002C5694 /* NSFileManager_BDSKExtensions.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = NSFileManager_BDSKExtensions.h; sourceTree = "<group>"; };
@@ -1793,6 +1797,7 @@
 				F96769FF0916B63900B42F6A /* BDSKCountedSet.m */,
 				CE38FB8B091D94A100BCB69D /* BDSKFilter.m */,
 				CE21D10909208B9D0075E607 /* BDSKGroup.m */,
+				F94DE74A09CB46FF00B5FD51 /* BDSKPersistentSearch.m */,
 				CED65AB30906BCC6003EED90 /* BDSKScriptHook.m */,
 				F925332208FC9FB80045D563 /* BDSKSearchIndex.m */,
 				F9025DAA0969AB69008A551C /* BDSKStringNode.m */,
@@ -2014,6 +2019,7 @@
 				F941B7E808AA574200F04ECD /* BDSKOverlay.h */,
 				CEF9433F092656BB00750FFA /* BDSKPathIconTransformer.h */,
 				CEF9420F0926458C00750FFA /* BDSKPathColorTransformer.h */,
+				F94DE74909CB46FF00B5FD51 /* BDSKPersistentSearch.h */,
 				F9022C57075802E300C3F701 /* BDSKPreviewer.h */,
 				F9DB863D08A07ADC00CB3D53 /* BDSKPreviewMessageQueue.h */,
 				CE59A37F09BC80A100AF3935 /* BDSKPreviewTextView.h */,
@@ -2391,6 +2397,7 @@
 				F9F0C95009A95725004BBE5E /* PDFMetadata.h in Headers */,
 				F941135409B549BF00EE8463 /* BDSKEditorTextView.h in Headers */,
 				CE59A38109BC80A100AF3935 /* BDSKPreviewTextView.h in Headers */,
+				F94DE74B09CB46FF00B5FD51 /* BDSKPersistentSearch.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -3294,6 +3301,7 @@
 				F91F286A09A6684900419960 /* PDFMetadata.m in Sources */,
 				F941135509B549BF00EE8463 /* BDSKEditorTextView.m in Sources */,
 				CE59A38209BC80A100AF3935 /* BDSKPreviewTextView.m in Sources */,
+				F94DE74C09CB46FF00B5FD51 /* BDSKPersistentSearch.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
