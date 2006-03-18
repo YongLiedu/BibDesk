@@ -619,7 +619,7 @@ static int numberOfOpenEditors = 0;
 		
 		// get Preview recent documents
 		if (submenu = [self getPreviewRecentDocumentsMenu]) {
-			item = [[NSMenuItem allocWithZone:[NSMenu menuZone]] initWithTitle:NSLocalizedString(@"Link to Recently Opened File",@"Link to Recently Opened File")
+			item = [[NSMenuItem allocWithZone:[NSMenu menuZone]] initWithTitle:NSLocalizedString(@"Link to Recent File",@"Link to Recently Opened or Modified File")
 											  action:NULL
 									   keyEquivalent:@""];
 			[item setSubmenu:submenu];
@@ -807,16 +807,20 @@ static int numberOfOpenEditors = 0;
 	
 	if(historyArray) CFRelease(historyArray);
     
-    NSMenu *menu = [[NSMenu allocWithZone:[NSMenu menuZone]] init];
+    NSMenu *menu = [[[NSMenu allocWithZone:[NSMenu menuZone]] init] autorelease];
+    
+    NSString *fileName;
+    NSImage *image;
+    NSMenuItem *item;
 
     // now add all of the items from Preview, which are most likely what we want
     e = [previewRecentPaths objectEnumerator];
     while(filePath = [e nextObject]){
         if([[NSFileManager defaultManager] fileExistsAtPath:filePath]){
-            NSString *fileName = [filePath lastPathComponent];
-            NSImage *image = [NSImage smallImageForFile:filePath];
+            fileName = [filePath lastPathComponent];
+            image = [NSImage smallImageForFile:filePath];
             
-            NSMenuItem *item = [[NSMenuItem allocWithZone:[NSMenu menuZone]] initWithTitle:fileName
+            item = [[NSMenuItem allocWithZone:[NSMenu menuZone]] initWithTitle:fileName
                                                           action:@selector(setLocalURLPathFromMenuItem:)
                                                    keyEquivalent:@""];
             [item setRepresentedObject:filePath];
@@ -835,10 +839,10 @@ static int numberOfOpenEditors = 0;
     while(filePath = [e nextObject]){
         
         if(![previewRecentPaths containsObject:filePath] && [[NSFileManager defaultManager] fileExistsAtPath:filePath]){
-            NSString *fileName = [filePath lastPathComponent];
-            NSImage *image = [NSImage smallImageForFile:filePath];
+            fileName = [filePath lastPathComponent];
+            image = [NSImage smallImageForFile:filePath];
             
-            NSMenuItem *item = [[NSMenuItem allocWithZone:[NSMenu menuZone]] initWithTitle:fileName
+            item = [[NSMenuItem allocWithZone:[NSMenu menuZone]] initWithTitle:fileName
                                                           action:@selector(setLocalURLPathFromMenuItem:)
                                                    keyEquivalent:@""];
             [item setRepresentedObject:filePath];
@@ -848,28 +852,37 @@ static int numberOfOpenEditors = 0;
         }
     }  
     
-    NSMutableSet *allPaths = [NSMutableSet setWithSet:globalRecentPaths];
+    // union these sets to get all the paths that we've added so far
+    NSMutableSet *allPaths = [[NSMutableSet alloc] initWithSet:globalRecentPaths];
     [allPaths unionSet:previewRecentPaths];
     
+    [globalRecentPaths release];
+    [previewRecentPaths release];
+    
+    // this was copied verbatim from a Finder saved search for all PDF documents modified today
     NSString *query = @"(* = \"pdf*\"wcd || kMDItemTextContent = \"pdf*\"cd) && (kMDItemContentTypeTree = 'com.adobe.pdf') && (kMDItemFSContentChangeDate >= $time.today(-7)) && (kMDItemContentType != com.apple.mail.emlx) && (kMDItemContentType != public.vcard)";
+    NSArray *paths = nil;
+    
     // this should always return nil on OS versions < 10.4
-    [[BDSKPersistentSearch sharedSearch] addQuery:query scopes:[NSArray arrayWithObject:(NSString *)kMDQueryScopeHome]];
-	NSArray *paths = [[BDSKPersistentSearch sharedSearch] resultsForQuery:query attribute:(NSString *)kMDItemPath];
+    if(nil != [BDSKPersistentSearch sharedSearch]){
+        [[BDSKPersistentSearch sharedSearch] addQuery:query scopes:[NSArray arrayWithObject:(NSString *)kMDQueryScopeHome]];
+        paths = [[BDSKPersistentSearch sharedSearch] resultsForQuery:query attribute:(NSString *)kMDItemPath];
+    }
     
     e = [paths objectEnumerator];
     BOOL added = NO;
     while(filePath = [e nextObject]){
         
         if(![allPaths containsObject:filePath]){
-            if(added == NO)
-                [menu addItem:[NSMenuItem separatorItem]];
-
+            
+            // add a separator item to the menu
+            if(added == NO) [menu addItem:[NSMenuItem separatorItem]];
             added = YES;
             
-            NSString *fileName = [filePath lastPathComponent];
-            NSImage *image = [NSImage smallImageForFile:filePath];
+            fileName = [filePath lastPathComponent];
+            image = [NSImage smallImageForFile:filePath];
             
-            NSMenuItem *item = [[NSMenuItem allocWithZone:[NSMenu menuZone]] initWithTitle:fileName
+            item = [[NSMenuItem allocWithZone:[NSMenu menuZone]] initWithTitle:fileName
                                                                                     action:@selector(setLocalURLPathFromMenuItem:)
                                                                              keyEquivalent:@""];
             [item setRepresentedObject:filePath];
@@ -878,12 +891,9 @@ static int numberOfOpenEditors = 0;
             [item release];
         }
     }
+    [allPaths release];
     
-	if ([menu numberOfItems] > 0)
-		return [menu autorelease];
-	
-	[menu release];
-	return nil;
+	return ([menu numberOfItems] > 0) ? menu : nil;
 }
 
 - (void)dummy:(id)obj{}
