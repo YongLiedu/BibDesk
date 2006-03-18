@@ -47,6 +47,7 @@
 #import "NSFileManager_BDSKExtensions.h"
 #import "BibAppController.h"
 #import "BDSKFieldEditor.h"
+#import "BDSKFieldSheetController.h"
 
 @interface BDSKTextImportController (Private)
 
@@ -61,7 +62,6 @@
 - (void)openPanelDidEnd:(NSOpenPanel *)sheet returnCode:(int)returnCode contextInfo:(void *)contextInfo;
 - (void)urlSheetDidEnd:(NSPanel *)sheet returnCode:(int)returnCode contextInfo:(void *)contextInfo;
 - (void)savePanelDidEnd:(NSSavePanel *)sheet returnCode:(int)returnCode contextInfo:(void *)contextInfo;
-- (void)addFieldSheetDidEnd:(NSWindow *)sheet returnCode:(int)returnCode contextInfo:(void *)contextInfo;
 
 - (void)setLoading:(BOOL)loading;
 
@@ -144,7 +144,6 @@
 	[webView setEditingDelegate:self];
     [itemTableView setDoubleAction:@selector(addTextToCurrentFieldAction:)];
     [self setWindowFrameAutosaveName:@"BDSKTextImportController Frame Autosave Name"];
-	[fieldNameField setFormatter:[[[BDSKFieldNameFormatter alloc] init] autorelease]];
 	// Set the properties of actionMenuButton that cannot be set in IB
 	[actionMenuButton setAlternateImage:[NSImage imageNamed:@"Action_Pressed"]];
 	[actionMenuButton setArrowImage:nil];
@@ -350,17 +349,30 @@
 }
 
 - (IBAction)addField:(id)sender{
-    [fieldNameField setStringValue:@""];
-    [NSApp beginSheet:addFieldSheet
-       modalForWindow:[self window]
-        modalDelegate:self
-       didEndSelector:@selector(addFieldSheetDidEnd:returnCode:contextInfo:)
-          contextInfo:nil];
-}
-
-- (IBAction)dismissAddFieldSheet:(id)sender{
-    [addFieldSheet orderOut:sender];
-    [NSApp endSheet:addFieldSheet returnCode:[sender tag]];
+	BibTypeManager *typeMan = [BibTypeManager sharedManager];
+    NSArray *currentFields = [[item pubFields] allKeys];
+	NSMutableArray *fieldNames = [[[typeMan allFieldNames] allObjects] mutableCopy];
+    [fieldNames removeObjectsInArray:currentFields];
+	[fieldNames sortUsingSelector:@selector(caseInsensitiveCompare:)];
+    
+    BDSKAddFieldSheetController *addFieldController = [[BDSKAddFieldSheetController alloc] initWithPrompt:NSLocalizedString(@"Name of field to add:",@"")
+                                                                                              fieldsArray:fieldNames];
+	[fieldNames release];
+	NSString *newField = [addFieldController runSheetModalForWindow:[self window]];
+    [addFieldController release];
+    newField = [newField capitalizedString];
+    
+    if(newField == nil || [fields containsObject:newField])
+        return;
+    
+    int row = [fields count];
+    
+    [fields addObject:newField];
+    [item addField:newField];
+    [[item undoManager] setActionName:NSLocalizedString(@"Add Field",@"")];
+    [itemTableView reloadData];
+    [itemTableView selectRowIndexes:[NSIndexSet indexSetWithIndex:row] byExtendingSelection:NO];
+    [itemTableView editColumn:2 row:row withEvent:nil select:YES];
 }
 
 - (IBAction)editSelectedFieldAsRawBibTeX:(id)sender{
@@ -718,25 +730,6 @@
             [[webView mainFrame] loadRequest:urlreq];
         }
     }        
-}
-
-- (void)addFieldSheetDidEnd:(NSWindow *)sheet
-                 returnCode:(int)returnCode
-                contextInfo:(void *)contextInfo{
-    if(returnCode == NSOKButton){
-        if(![fields containsObject:[fieldNameField stringValue]]){
-			NSString *name = [[fieldNameField stringValue] capitalizedString]; // add it as a capitalized string to avoid duplicates
-			int row = [fields count];
-			
-			[fields addObject:name];
-			[item addField:name];
-			[[item undoManager] setActionName:NSLocalizedString(@"Add Field",@"")];
-			[itemTableView reloadData];
-			[itemTableView selectRowIndexes:[NSIndexSet indexSetWithIndex:row] byExtendingSelection:NO];
-			[itemTableView editColumn:2 row:row withEvent:nil select:YES];
-        }
-    }
-    // else, nothing.
 }
 
 - (void)savePanelDidEnd:(NSSavePanel *)sheet returnCode:(int)returnCode contextInfo:(void *)contextInfo{

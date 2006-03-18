@@ -96,18 +96,6 @@ extern NSString* BDSKWeblocFilePboardType;
     IBOutlet NSScrollView *fieldsScrollView;
 	IBOutlet RYZImagePopUpButton *actionMenuButton;
     // ----------------------------------------------------------------------------------------
-    // New-field Sheet stuff:
-    IBOutlet NSTextField *newFieldName;
-    IBOutlet NSButton* newFieldButtonOK;
-    IBOutlet NSButton* newFieldButtonCancel;
-    IBOutlet NSWindow* newFieldWindow;
-    // ----------------------------------------------------------------------------------------
-	// Delete-field Sheet stuff:
-    IBOutlet NSPopUpButton *delFieldPopUp;
-    IBOutlet NSButton* delFieldButtonOK;
-    IBOutlet NSButton* delFieldButtonCancel;
-    IBOutlet NSWindow* delFieldWindow;
-    // ----------------------------------------------------------------------------------------
     NSString *currentType;
     BibItem *theBib;
     BibDocument *theDocument;
@@ -223,19 +211,11 @@ extern NSString* BDSKWeblocFilePboardType;
 // Add-field sheet support
 // ----------------------------------------------------------------------------------------
 - (IBAction)raiseAddField:(id)sender;
-- (IBAction)dismissAddField:(id)sender;
-- (void)addFieldSheetDidEnd:(NSWindow *)sheet
-                 returnCode:(int) returnCode
-                contextInfo:(void *)contextInfo;
 
 // ----------------------------------------------------------------------------------------
 // Delete-field sheet support
 // ----------------------------------------------------------------------------------------
 - (IBAction)raiseDelField:(id)sender;
-- (IBAction)dismissDelField:(id)sender;
-- (void)delFieldSheetDidEnd:(NSWindow *)sheet
-                 returnCode:(int) returnCode
-                contextInfo:(void *)contextInfo;
 
 /*!
     @method     editSelectedFieldAsRawBibTeX:

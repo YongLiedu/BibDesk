@@ -88,18 +88,7 @@
      */
 - (IBAction)quickSearchAddField:(id)sender;
 
-- (void)quickSearchAddFieldSheetDidEnd:(NSWindow *)sheet
-                            returnCode:(int) returnCode
-                           contextInfo:(void *)contextInfo;
-
-
 - (IBAction)quickSearchRemoveField:(id)sender;
-
-- (IBAction)dismissDelFieldSheet:(id)sender;
-
-- (void)quickSearchDelFieldSheetDidEnd:(NSWindow *)sheet
-							returnCode:(int) returnCode
-						   contextInfo:(void *)contextInfo;
 
 - (IBAction)searchFieldAction:(id)sender;
 

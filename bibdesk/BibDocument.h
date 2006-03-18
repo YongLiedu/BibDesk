@@ -139,18 +139,6 @@ extern NSString *BDSKBibItemPboardType;
     NSMutableArray *windowControllers; // private ivar for maintaining relationship with the docs windowcontrollers
 	
 	BDSKTeXTask *texTask;
-    // ----------------------------------------------------------------------------------------
-    // general dialog used for adding 'fields' (used for adding contextual menus,)
-    // and for adding quicksearch sortkeys.)
-    IBOutlet NSWindow *addFieldSheet;
-    // and its prompt:
-    IBOutlet NSTextField* addFieldPrompt;
-	IBOutlet NSComboBox* addFieldComboBox;
-	
-	// dialog for removing 'fields'.
-	IBOutlet NSWindow *delFieldSheet;
-	IBOutlet NSTextField* delFieldPrompt;
-	IBOutlet NSPopUpButton* delFieldPopupButton;
 	
     // --------------------------------------------------------------------------------------
 	IBOutlet NSMenu * fileMenu;
@@ -942,24 +930,6 @@ extern NSString *BDSKBibItemPboardType;
     
 */
 - (IBAction)columnsMenuAddTableColumn:(id)sender;
-/*!
-    @method dismissAddFieldSheet
-    @abstract called when OK or Cancel is pressed on the sheet
-    @discussion \253discussion\273
-    
-*/
-- (IBAction)dismissAddFieldSheet:(id)sender;
-
-/*!
-    @method addTableColumnSheetDidEnd...
-    @abstract called after sheet ended to incorporate changes
-    @discussion \253discussion\273
-    
-*/
-- (void)addTableColumnSheetDidEnd:(NSWindow *)sheet
-                       returnCode:(int) returnCode
-                      contextInfo:(void *)contextInfo;
-
 
 /*!
     @method handleTableColumnChangedNotification

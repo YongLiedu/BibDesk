@@ -41,6 +41,7 @@
 #import <AGRegex/AGRegex.h>
 #import "BibItem.h"
 #import "CFString_BDSKExtensions.h"
+#import "BDSKFieldSheetController.h"
 
 static NSString *BDSKFileContentLocalizedString = nil;
 
@@ -230,88 +231,54 @@ static NSString *BDSKFileContentLocalizedString = nil;
 	BibTypeManager *typeMan = [BibTypeManager sharedManager];
 	NSMutableSet *fieldNameSet = [NSMutableSet setWithSet:[typeMan allFieldNames]];
 	[fieldNameSet unionSet:[NSSet setWithObjects:BDSKCiteKeyString, BDSKDateString, @"Added", @"Modified", nil]];
-	NSMutableArray *colNames = [[fieldNameSet allObjects] mutableCopy];
-	[colNames removeObjectsInArray:prefsQuickSearchKeysArray];
-	[colNames sortUsingSelector:@selector(caseInsensitiveCompare:)];
-	
-	[addFieldComboBox removeAllItems];
-	[addFieldComboBox addItemsWithObjectValues:colNames];
-    [addFieldPrompt setStringValue:NSLocalizedString(@"Name of field to search:",@"")];
-	
-	[colNames release];
+	NSMutableArray *searchKeys = [[fieldNameSet allObjects] mutableCopy];
+	[searchKeys removeObjectsInArray:prefsQuickSearchKeysArray];
+	[searchKeys sortUsingSelector:@selector(caseInsensitiveCompare:)];
     
-	[NSApp beginSheet:addFieldSheet
-       modalForWindow:documentWindow
-        modalDelegate:self
-       didEndSelector:@selector(quickSearchAddFieldSheetDidEnd:returnCode:contextInfo:)
-          contextInfo:nil];
-}
-
-- (void)quickSearchAddFieldSheetDidEnd:(NSWindow *)sheet
-							returnCode:(int) returnCode
-						   contextInfo:(void *)contextInfo{
+    BDSKAddFieldSheetController *addFieldController = [[BDSKAddFieldSheetController alloc] initWithPrompt:NSLocalizedString(@"Name of field to search:",@"")
+                                                                                              fieldsArray:searchKeys];
+	[searchKeys release];
+	NSString *newSearchKey = [addFieldController runSheetModalForWindow:documentWindow];
+    [addFieldController release];
 	
-    NSMutableArray *searchKeys = nil;
-	NSSearchFieldCell *searchFieldCell = [searchField cell];
-	NSString *newFieldTitle = nil;
-	
-    if(returnCode == 1){
-        newFieldTitle = [[addFieldComboBox stringValue] capitalizedString];
-		searchKeys = [NSMutableArray arrayWithCapacity:10];
-        [searchKeys addObjectsFromArray:[[OFPreferenceWrapper sharedPreferenceWrapper] arrayForKey:BDSKQuickSearchKeys]];
-        [searchKeys addObject:newFieldTitle];
-        [[OFPreferenceWrapper sharedPreferenceWrapper] setObject:searchKeys
-                                                          forKey:BDSKQuickSearchKeys];
-        
-        // this will sort the menu items for us
-        [searchFieldCell setSearchMenuTemplate:[self searchFieldMenu]];
-		[self setSelectedSearchFieldKey:newFieldTitle];
-    }else{
-        // cancel. we don't have to do anything..?
-		
-    }
+    if(newSearchKey = nil)
+        return;
+    
+    newSearchKey = [newSearchKey capitalizedString];
+    searchKeys = [NSMutableArray arrayWithCapacity:10];
+    [searchKeys addObjectsFromArray:[[OFPreferenceWrapper sharedPreferenceWrapper] arrayForKey:BDSKQuickSearchKeys]];
+    [searchKeys addObject:newSearchKey];
+    [[OFPreferenceWrapper sharedPreferenceWrapper] setObject:searchKeys
+                                                      forKey:BDSKQuickSearchKeys];
+    
+    // this will sort the menu items for us
+    [[searchField cell] setSearchMenuTemplate:[self searchFieldMenu]];
+    [self setSelectedSearchFieldKey:newSearchKey];
 }
 
 - (IBAction)quickSearchRemoveField:(id)sender{
-    [delFieldPrompt setStringValue:NSLocalizedString(@"Name of search field to remove:",@"")];
     NSMutableArray *searchKeys = [NSMutableArray arrayWithCapacity:10];
     [searchKeys addObjectsFromArray:[[OFPreferenceWrapper sharedPreferenceWrapper] arrayForKey:BDSKQuickSearchKeys]];
     [searchKeys sortUsingSelector:@selector(caseInsensitiveCompare:)];
 
-	[delFieldPopupButton removeAllItems];
-	[delFieldPopupButton addItemsWithTitles:searchKeys];
-	
-	[NSApp beginSheet:delFieldSheet
-       modalForWindow:documentWindow
-        modalDelegate:self
-       didEndSelector:@selector(quickSearchDelFieldSheetDidEnd:returnCode:contextInfo:)
-          contextInfo:NULL];
-}
+    BDSKAddFieldSheetController *removeFieldController = [[BDSKRemoveFieldSheetController alloc] initWithPrompt:NSLocalizedString(@"Name of search field to remove:",@"")
+                                                                                                    fieldsArray:searchKeys];
+	NSString *oldSearchKey = [removeFieldController runSheetModalForWindow:documentWindow];
+    [removeFieldController release];
+    
+    if(oldSearchKey == nil)
+        return;
+    
+    searchKeys = [NSMutableArray arrayWithCapacity:10];
+    [searchKeys addObjectsFromArray:[[OFPreferenceWrapper sharedPreferenceWrapper] arrayForKey:BDSKQuickSearchKeys]];
 
-- (IBAction)dismissDelFieldSheet:(id)sender{
-    [delFieldSheet orderOut:sender];
-    [NSApp endSheet:delFieldSheet returnCode:[sender tag]];
-}
+    [searchKeys removeObject:oldSearchKey];
+    [[OFPreferenceWrapper sharedPreferenceWrapper] setObject:searchKeys
+                                                      forKey:BDSKQuickSearchKeys];
 
-- (void)quickSearchDelFieldSheetDidEnd:(NSWindow *)sheet
-							returnCode:(int) returnCode
-						   contextInfo:(void *)contextInfo{
-   
-    if(returnCode == 1){
-        NSMutableArray *searchKeys = [NSMutableArray arrayWithCapacity:10];
-        [searchKeys addObjectsFromArray:[[OFPreferenceWrapper sharedPreferenceWrapper] arrayForKey:BDSKQuickSearchKeys]];
-
-        [searchKeys removeObject:[[delFieldPopupButton selectedItem] title]];
-        [[OFPreferenceWrapper sharedPreferenceWrapper] setObject:searchKeys
-                                                          forKey:BDSKQuickSearchKeys];
-
-		[[searchField cell] setSearchMenuTemplate:[self searchFieldMenu]];
-        if([quickSearchKey isEqualToString:[[delFieldPopupButton selectedItem] title]])
-            [self setSelectedSearchFieldKey:BDSKAllFieldsString];
-    }else{
-        // cancel. we don't have to do anything..?
-       
-    }
+    [[searchField cell] setSearchMenuTemplate:[self searchFieldMenu]];
+    if([quickSearchKey isEqualToString:oldSearchKey])
+        [self setSelectedSearchFieldKey:BDSKAllFieldsString];
 }
 
 - (IBAction)searchFieldAction:(id)sender{

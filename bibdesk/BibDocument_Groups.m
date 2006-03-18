@@ -44,6 +44,7 @@
 #import "BibDocument_Search.h"
 #import "BDSKGroup.h"
 #import "BDSKAlert.h"
+#import "BDSKFieldSheetController.h"
 #import "BDSKCountedSet.h"
 #import "BibAuthor.h"
 #import "BibAppController.h"
@@ -469,94 +470,72 @@ The groupedPublications array is a subset of the publications array, developed b
 	NSMutableArray *colNames = [[fieldNameSet allObjects] mutableCopy];
 	[colNames sortUsingSelector:@selector(caseInsensitiveCompare:)];
 	
-	[addFieldComboBox removeAllItems];
-	[addFieldComboBox addItemsWithObjectValues:colNames];
-    [addFieldPrompt setStringValue:NSLocalizedString(@"Name of group field:",@"")];
-	
+    BDSKAddFieldSheetController *addFieldController = [[BDSKAddFieldSheetController alloc] initWithPrompt:NSLocalizedString(@"Name of group field:",@"")
+                                                                                              fieldsArray:colNames];
 	[colNames release];
+	NSString *newGroupField = [addFieldController runSheetModalForWindow:documentWindow];
+    [addFieldController release];
     
-	[NSApp beginSheet:addFieldSheet
-       modalForWindow:documentWindow
-        modalDelegate:self
-       didEndSelector:@selector(addGroupFieldSheetDidEnd:returnCode:contextInfo:)
-          contextInfo:headerCell];
-
-}    
-
-- (void)addGroupFieldSheetDidEnd:(NSWindow *)sheet returnCode:(int) returnCode contextInfo:(void *)contextInfo{
-	if(returnCode == 0)
-		return;
-	
-	NSString *field = [[addFieldComboBox stringValue] capitalizedString];
+    if(newGroupField == nil)
+        return;
     
-	if([[[BibTypeManager sharedManager] invalidGroupFields] containsObject:field]){
+	if([[[BibTypeManager sharedManager] invalidGroupFields] containsObject:newGroupField]){
         NSBeginAlertSheet(NSLocalizedString(@"Invalid Field", @"Invalid Field"),
                           nil, nil, nil, documentWindow, nil, nil, nil, nil,
-                          [NSString stringWithFormat:NSLocalizedString(@"The field \"%@\" can not be used for groups.", @""), field] );
+                          [NSString stringWithFormat:NSLocalizedString(@"The field \"%@\" can not be used for groups.", @""), newGroupField] );
 		return;
 	}
 	
-    NSPopUpButtonCell *cell = contextInfo;
 	NSMutableArray *array = [[[OFPreferenceWrapper sharedPreferenceWrapper] stringArrayForKey:BDSKGroupFieldsKey] mutableCopy];
-	[array addObject:field];
+	[array addObject:newGroupField];
 	[[OFPreferenceWrapper sharedPreferenceWrapper] setObject:array forKey:BDSKGroupFieldsKey];	
     
     [[NSNotificationCenter defaultCenter] postNotificationName:BDSKGroupAddRemoveNotification
                                                         object:self
-                                                      userInfo:[NSDictionary dictionaryWithObjectsAndKeys:field, NSKeyValueChangeNewKey, [NSNumber numberWithInt:NSKeyValueChangeInsertion], NSKeyValueChangeKindKey, nil]];        
+                                                      userInfo:[NSDictionary dictionaryWithObjectsAndKeys:newGroupField, NSKeyValueChangeNewKey, [NSNumber numberWithInt:NSKeyValueChangeInsertion], NSKeyValueChangeKindKey, nil]];        
     
-	[cell insertItemWithTitle:field atIndex:[array count] - 1];
-	[self setCurrentGroupField:field];
-	[cell selectItemWithTitle:currentGroupField];
+	[headerCell insertItemWithTitle:newGroupField atIndex:[array count] - 1];
+	[self setCurrentGroupField:newGroupField];
+	[headerCell selectItemWithTitle:currentGroupField];
 	
 	[[NSNotificationCenter defaultCenter] postNotificationName:BDSKGroupFieldChangedNotification
 														object:self
 													  userInfo:[NSDictionary dictionary]];
     [array release];
-}
+}    
 
 - (void)removeGroupFieldAction:(id)sender{
 	BDSKGroupTableHeaderView *headerView = (BDSKGroupTableHeaderView *)[groupTableView headerView];
 	NSPopUpButtonCell *headerCell = [headerView popUpHeaderCell];
 	
 	[headerCell selectItemWithTitle:currentGroupField];
-
-    [delFieldPrompt setStringValue:NSLocalizedString(@"Group field to remove:",@"")];
-    [delFieldPopupButton removeAllItems];
     
-    [delFieldPopupButton addItemsWithTitles:[[OFPreferenceWrapper sharedPreferenceWrapper] stringArrayForKey:BDSKGroupFieldsKey]];
+    BDSKAddFieldSheetController *removeFieldController = [[BDSKRemoveFieldSheetController alloc] initWithPrompt:NSLocalizedString(@"Group field to remove:",@"")
+                                                            fieldsArray:[[OFPreferenceWrapper sharedPreferenceWrapper] stringArrayForKey:BDSKGroupFieldsKey]];
+	NSString *oldGroupField = [removeFieldController runSheetModalForWindow:documentWindow];
+    [removeFieldController release];
     
-    [NSApp beginSheet:delFieldSheet
-       modalForWindow:documentWindow
-        modalDelegate:self
-       didEndSelector:@selector(removeGroupFieldSheetDidEnd:returnCode:contextInfo:)
-          contextInfo:headerCell];
-}
-
-- (void)removeGroupFieldSheetDidEnd:(NSWindow *)sheet returnCode:(int) returnCode contextInfo:(void *)contextInfo{
-    NSPopUpButtonCell *cell = contextInfo;
+    if(oldGroupField == nil)
+        return;
     
-    if(returnCode == 1){
-        NSString *field = [[delFieldPopupButton selectedItem] title];
-        NSMutableArray *array = [[[OFPreferenceWrapper sharedPreferenceWrapper] stringArrayForKey:BDSKGroupFieldsKey] mutableCopy];
-        [array removeObject:field];
-        [[OFPreferenceWrapper sharedPreferenceWrapper] setObject:array forKey:BDSKGroupFieldsKey];
-        [array release];
+    NSMutableArray *array = [[[OFPreferenceWrapper sharedPreferenceWrapper] stringArrayForKey:BDSKGroupFieldsKey] mutableCopy];
+    [array removeObject:oldGroupField];
+    [[OFPreferenceWrapper sharedPreferenceWrapper] setObject:array forKey:BDSKGroupFieldsKey];
+    [array release];
+    
+    [headerCell removeItemWithTitle:oldGroupField];
+    if([oldGroupField isEqualToString:currentGroupField]){
+        [self setCurrentGroupField:[[headerCell itemAtIndex:0] title]];
+        [headerCell selectItemWithTitle:currentGroupField];
         
-        [cell removeItemWithTitle:field];
-		if([field isEqualToString:currentGroupField]){
-			[self setCurrentGroupField:[[cell itemAtIndex:0] title]];
-			[cell selectItemWithTitle:currentGroupField];
-			
-			[[NSNotificationCenter defaultCenter] postNotificationName:BDSKGroupFieldChangedNotification
-																object:self
-															  userInfo:[NSDictionary dictionary]];
-		}
-        
-        [[NSNotificationCenter defaultCenter] postNotificationName:BDSKGroupAddRemoveNotification
+        [[NSNotificationCenter defaultCenter] postNotificationName:BDSKGroupFieldChangedNotification
                                                             object:self
-                                                          userInfo:[NSDictionary dictionaryWithObjectsAndKeys:field, NSKeyValueChangeNewKey, [NSNumber numberWithInt:NSKeyValueChangeRemoval], NSKeyValueChangeKindKey, nil]];        
+                                                          userInfo:[NSDictionary dictionary]];
     }
+    
+    [[NSNotificationCenter defaultCenter] postNotificationName:BDSKGroupAddRemoveNotification
+                                                        object:self
+                                                      userInfo:[NSDictionary dictionaryWithObjectsAndKeys:oldGroupField, NSKeyValueChangeNewKey, [NSNumber numberWithInt:NSKeyValueChangeRemoval], NSKeyValueChangeKindKey, nil]];        
 }
 
 - (void)handleGroupAddRemoveNotification:(NSNotification *)notification{

@@ -15,7 +15,6 @@
                 copyLinkedLocationAsRemoteUrl = id; 
                 copyLocationAsRemoteUrl = id; 
                 dismissAddBookmarkSheet = id; 
-                dismissAddFieldSheet = id; 
                 dismissUrlSheet = id; 
                 downloadLinkedFileAsLocalUrl = id; 
                 editSelectedFieldAsRawBibTeX = id; 
@@ -31,11 +30,9 @@
             OUTLETS = {
                 actionMenuButton = RYZImagePopUpButton; 
                 addBookmarkSheet = NSPanel; 
-                addFieldSheet = NSPanel; 
                 backButton = NSButton; 
                 bookmarkField = NSTextField; 
                 bookmarkPopUpButton = NSPopUpButton; 
-                fieldNameField = NSTextField; 
                 forwardButton = NSButton; 
                 itemTableView = NSTableView; 
                 itemTypeButton = NSPopUpButton; 

@@ -47,6 +47,7 @@
 #import "KFAppleScriptHandlerAdditionsCore.h"
 #import "NSString_BDSKExtensions.h"
 #import "BDSKAlert.h"
+#import "BDSKFieldSheetController.h"
 #import "BibFiler.h"
 
 #import "BibItem.h"
@@ -346,7 +347,6 @@ static int numberOfOpenEditors = 0;
     [splitView setPositionAutosaveName:@"OASplitView Position BibEditor"];
 
     [citeKeyField setFormatter:citeKeyFormatter];
-    [newFieldName setFormatter:fieldNameFormatter];
 
     [self setupTypePopUp];
     [self setupForm];
@@ -1355,35 +1355,28 @@ static int numberOfOpenEditors = 0;
 
 // raises the add field sheet
 - (IBAction)raiseAddField:(id)sender{
-    [newFieldName setStringValue:@""];
-    [NSApp beginSheet:newFieldWindow
-       modalForWindow:[self window]
-        modalDelegate:self
-       didEndSelector:@selector(addFieldSheetDidEnd:returnCode:contextInfo:)
-          contextInfo:nil];
-}
-//dismisses it
-- (IBAction)dismissAddField:(id)sender{
-    [newFieldWindow orderOut:sender];
-    [NSApp endSheet:newFieldWindow returnCode:[sender tag]];
-}
-
-// tag, and hence return code is 0 for OK and 1 for cancel.
-// called upon dismissal
-- (void)addFieldSheetDidEnd:(NSWindow *)sheet
-                 returnCode:(int) returnCode
-                contextInfo:(void *)contextInfo{
-    if(returnCode == NSOKButton){
-        if(![[[theBib pubFields] allKeys] containsObject:[newFieldName stringValue]]){
-		NSString *name = [[newFieldName stringValue] capitalizedString]; // add it as a capitalized string to avoid duplicates
-
-		[theBib addField:name];
+	BibTypeManager *typeMan = [BibTypeManager sharedManager];
+    NSArray *currentFields = [[theBib pubFields] allKeys];
+	NSMutableArray *fieldNames = [[[typeMan allFieldNames] allObjects] mutableCopy];
+    [fieldNames removeObjectsInArray:currentFields];
+	[fieldNames sortUsingSelector:@selector(caseInsensitiveCompare:)];
+    
+    BDSKAddFieldSheetController *addFieldController = [[BDSKAddFieldSheetController alloc] initWithPrompt:NSLocalizedString(@"Name of field to add:",@"")
+                                                                                              fieldsArray:fieldNames];
+	[fieldNames release];
+	NSString *newField = [addFieldController runSheetModalForWindow:[self window]];
+    [addFieldController release];
+    
+    if(newField == nil)
+        return;
+    
+    newField = [newField capitalizedString];
+    if([currentFields containsObject:newField] == NO){
+		[theBib addField:newField];
 		[[[self window] undoManager] setActionName:NSLocalizedString(@"Add Field",@"")];
 		[self setupForm];
-		[self makeKeyField:name];
-        }
+		[self makeKeyField:newField];
     }
-    // else, nothing.
 }
 
 - (void)makeKeyField:(NSString *)fieldName{
@@ -1411,52 +1404,34 @@ static int numberOfOpenEditors = 0;
 	[removableFields removeObjectsInArray:[typeMan requiredFieldsForType:currentType]];
 	[removableFields removeObjectsInArray:[typeMan optionalFieldsForType:currentType]];
 	[removableFields removeObjectsInArray:[typeMan userDefaultFieldsForType:currentType]];
+    
+    NSString *prompt = NSLocalizedString(@"Name of field to remove:",@"");
 	if ([removableFields count]) {
 		[removableFields sortUsingSelector:@selector(caseInsensitiveCompare:)];
-		[delFieldPopUp setEnabled:YES];
 	} else {
-		[removableFields addObject:NSLocalizedString(@"No fields to remove",@"")];
-		[delFieldPopUp setEnabled:NO];
+		prompt = NSLocalizedString(@"No fields to remove",@"");
 	}
     
-	[delFieldPopUp removeAllItems];
-    [delFieldPopUp addItemsWithTitles:removableFields];
+    BDSKAddFieldSheetController *removeFieldController = [[BDSKRemoveFieldSheetController alloc] initWithPrompt:prompt
+                                                                                                    fieldsArray:removableFields];
+	[removableFields release];
     
     NSString *selectedCellTitle = [[bibFields selectedCell] title];
-    if([[delFieldPopUp itemTitles] containsObject:selectedCellTitle]){
-        [delFieldPopUp selectItemWithTitle:selectedCellTitle];
+    if([removableFields containsObject:selectedCellTitle]){
+        [removeFieldController setField:selectedCellTitle];
         // if we don't deselect this cell, we can't remove it from the form
         [self finalizeChangesPreservingSelection:NO];
-    } else {
-        [delFieldPopUp selectItemAtIndex:0];
     }
 	
-	[removableFields release];
+	NSString *oldField = [removeFieldController runSheetModalForWindow:[self window]];
+    [removeFieldController release];
+    
+    if(oldField == nil || [removableFields count] == 0)
+        return;
 	
-    [NSApp beginSheet:delFieldWindow
-       modalForWindow:[self window]
-        modalDelegate:self
-       didEndSelector:@selector(delFieldSheetDidEnd:returnCode:contextInfo:)
-          contextInfo:nil];
-}
-
-//dismisses it
-- (IBAction)dismissDelField:(id)sender{
-    [delFieldWindow orderOut:sender];
-    [NSApp endSheet:delFieldWindow returnCode:[sender tag]];
-}
-
-// tag, and hence return code is 0 for delete and 1 for cancel.
-// called upon dismissal
-- (void)delFieldSheetDidEnd:(NSWindow *)sheet
-                 returnCode:(int) returnCode
-                contextInfo:(void *)contextInfo{
-    if(returnCode == NSOKButton){
-        [theBib removeField:[delFieldPopUp titleOfSelectedItem]];
-		[[[self window] undoManager] setActionName:NSLocalizedString(@"Remove Field",@"")];
-        [self setupForm];
-    }
-    // else, nothing.
+    [theBib removeField:oldField];
+    [[[self window] undoManager] setActionName:NSLocalizedString(@"Remove Field",@"")];
+    [self setupForm];
 }
 
 #pragma mark Text Change handling

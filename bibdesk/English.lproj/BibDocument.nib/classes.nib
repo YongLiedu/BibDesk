@@ -40,8 +40,6 @@
                 createNewPubUsingCrossrefAction = id; 
                 cut = id; 
                 deleteSelectedPubs = id; 
-                dismissAddFieldSheet = id; 
-                dismissDelFieldSheet = id; 
                 duplicateTitleToBooktitle = id; 
                 editAction = id; 
                 editGroupAction = id; 
@@ -103,17 +101,11 @@
                 actionMenuButton = RYZImagePopUpButton; 
                 actionMenuFirstItem = NSMenuItem; 
                 addCustomCiteStringButton = NSButton; 
-                addFieldComboBox = NSComboBox; 
-                addFieldPrompt = NSTextField; 
-                addFieldSheet = NSWindow; 
                 ccTableView = BDSKCustomCiteTableView; 
                 ctxCopyBibTex = NSMenuItem; 
                 ctxCopyPDF = NSMenuItem; 
                 ctxCopyTex = NSMenuItem; 
                 customCiteDrawer = NSDrawer; 
-                delFieldPopupButton = NSPopUpButton; 
-                delFieldPrompt = NSTextField; 
-                delFieldSheet = NSWindow; 
                 documentWindow = NSWindow; 
                 fileMenu = NSMenu; 
                 fileSearchController = id; 

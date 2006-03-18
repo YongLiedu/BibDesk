@@ -70,9 +70,7 @@
     IBOutlet NSButton *forwardButton;
     IBOutlet NSButton *stopOrReloadButton;
     IBOutlet NSTextField *bookmarkField;
-    IBOutlet NSTextField *fieldNameField;
     IBOutlet NSPanel *addBookmarkSheet;
-    IBOutlet NSPanel *addFieldSheet;
     
 	BibDocument* document;
     BibItem* item;
@@ -125,7 +123,6 @@
 - (IBAction)dismissAddBookmarkSheet:(id)sender;
 - (IBAction)stopOrReloadAction:(id)sender;
 - (IBAction)addField:(id)sender;
-- (IBAction)dismissAddFieldSheet:(id)sender;
 - (IBAction)editSelectedFieldAsRawBibTeX:(id)sender;
 
 - (void)copyLocationAsRemoteUrl:(id)sender;

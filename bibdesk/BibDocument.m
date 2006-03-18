@@ -60,6 +60,7 @@
 #import "BibDocument_Search.h"
 #import "BDSKTableSortDescriptor.h"
 #import "BDSKAlert.h"
+#import "BDSKFieldSheetController.h"
 #import "BDSKPreviewer.h"
 
 #import "BDSKTeXTask.h"
@@ -297,8 +298,6 @@ NSString *BDSKBibItemPboardType = @"edu.ucsd.mmccrack.bibdesk BibItem pboard typ
 	
     [saveTextEncodingPopupButton removeAllItems];
     [saveTextEncodingPopupButton addItemsWithTitles:[[BDSKStringEncodingManager sharedEncodingManager] availableEncodingDisplayedNames]];
-    
-	[addFieldComboBox setFormatter:[[[BDSKFieldNameFormatter alloc] init] autorelease]];
         
     if([documentWindow respondsToSelector:@selector(setAutorecalculatesKeyViewLoop:)])
         [documentWindow setAutorecalculatesKeyViewLoop:YES];
@@ -2424,11 +2423,6 @@ NSString *BDSKBibItemPboardType = @"edu.ucsd.mmccrack.bibdesk BibItem pboard typ
     [tableView tableViewFontChanged:nil];
 }
 
-- (IBAction)dismissAddFieldSheet:(id)sender{
-    [addFieldSheet orderOut:sender];
-    [NSApp endSheet:addFieldSheet returnCode:[sender tag]];
-}
-
 - (NSMenu *)tableView:(NSTableView *)tv menuForTableHeaderColumn:(NSTableColumn *)tc{
 	if(tv != tableView)
 		return nil;
@@ -2469,46 +2463,32 @@ NSString *BDSKBibItemPboardType = @"edu.ucsd.mmccrack.bibdesk BibItem pboard typ
 	[colNames sortUsingSelector:@selector(caseInsensitiveCompare:)];
 	[colNames removeObjectsInArray:prefsShownColNamesArray];
 	
-	[addFieldComboBox removeAllItems];
-	[addFieldComboBox addItemsWithObjectValues:colNames];
-    [addFieldPrompt setStringValue:NSLocalizedString(@"Name of column to add:",@"")];
-	
+    BDSKAddFieldSheetController *addFieldController = [[BDSKAddFieldSheetController alloc] initWithPrompt:NSLocalizedString(@"Name of column to add:",@"")
+                                                                                              fieldsArray:colNames];
 	[colNames release];
+	NSString *newColumnName = [addFieldController runSheetModalForWindow:documentWindow];
+    [addFieldController release];
     
-	[NSApp beginSheet:addFieldSheet
-       modalForWindow:documentWindow
-        modalDelegate:self
-       didEndSelector:@selector(addTableColumnSheetDidEnd:returnCode:contextInfo:)
-          contextInfo:nil];
+    if(newColumnName == nil)
+        return;
     
-}
+    NSMutableArray *prefsShownColNamesMutableArray = [[[[OFPreferenceWrapper sharedPreferenceWrapper] arrayForKey:BDSKShownColsNamesKey] mutableCopy] autorelease];
 
-- (void)addTableColumnSheetDidEnd:(NSWindow *)sheet
-                       returnCode:(int) returnCode
-                      contextInfo:(void *)contextInfo{
+    // Check if an object already exists in the tableview, bail without notification if it does
+    // This means we can't have a column more than once.
+    if ([prefsShownColNamesMutableArray containsObject:newColumnName])
+        return;
 
-    if(returnCode == 1){
-		NSMutableArray *prefsShownColNamesMutableArray = [[[[OFPreferenceWrapper sharedPreferenceWrapper] arrayForKey:BDSKShownColsNamesKey] mutableCopy] autorelease];
-        NSString *newColumnName = [addFieldComboBox stringValue];
-
-		// Check if an object already exists in the tableview, bail without notification if it does
-		// This means we can't have a column more than once.
-		if ([prefsShownColNamesMutableArray containsObject:newColumnName])
-			return;
-
-		// Store the new column in the preferences
-        [prefsShownColNamesMutableArray addObject:newColumnName];
-        [[OFPreferenceWrapper sharedPreferenceWrapper] setObject:prefsShownColNamesMutableArray
-                                                          forKey:BDSKShownColsNamesKey];
-        
-		// Actually redraw the view now with the new column.
-		[self setupTableColumns];
-        [self updateUI];
-        [[NSNotificationCenter defaultCenter] postNotificationName:BDSKTableColumnChangedNotification
-                                                            object:self];
-    }else{
-        //do nothing (because nothing was entered or selected)
-    }
+    // Store the new column in the preferences
+    [prefsShownColNamesMutableArray addObject:newColumnName];
+    [[OFPreferenceWrapper sharedPreferenceWrapper] setObject:prefsShownColNamesMutableArray
+                                                      forKey:BDSKShownColsNamesKey];
+    
+    // Actually redraw the view now with the new column.
+    [self setupTableColumns];
+    [self updateUI];
+    [[NSNotificationCenter defaultCenter] postNotificationName:BDSKTableColumnChangedNotification
+                                                        object:self];
 }
 
 /*

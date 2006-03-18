@@ -66,7 +66,6 @@
 - (void)changeGroupFieldAction:(id)sender;
 - (void)addGroupFieldAction:(id)sender;
 - (void)removeGroupFieldAction:(id)sender;
-- (void)removeGroupFieldSheetDidEnd:(NSWindow *)sheet returnCode:(int) returnCode contextInfo:(void *)contextInfo;
 - (void)handleGroupFieldChangedNotification:(NSNotification *)notification;
 - (void)handleGroupAddRemoveNotification:(NSNotification *)notification;
 
@@ -80,7 +79,6 @@
 - (IBAction)editNewGroupWithSelection:(id)sender;
 - (NSData *)serializedSmartGroupsData;
 - (void)addSmartGroupsFromSerializedData:(NSData *)data;
-- (void)addGroupFieldSheetDidEnd:(NSWindow *)sheet returnCode:(int) returnCode contextInfo:(void *)contextInfo;
 - (void)addSmartGroupSheetDidEnd:(NSWindow *)sheet returnCode:(int) returnCode contextInfo:(void *)contextInfo;
 
 - (void)handleFilterChangedNotification:(NSNotification *)notification;
