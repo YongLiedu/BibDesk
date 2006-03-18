@@ -114,6 +114,9 @@
     }
 }
 
+// make sure the font and other attributes get fixed when pasting text
+- (void)paste:(id)sender {  [self pasteAsPlainText:sender]; }
+
 @end
 
 @implementation BDSKEditorTextView (Private)
