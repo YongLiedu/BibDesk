@@ -241,19 +241,18 @@ static NSString *BDSKFileContentLocalizedString = nil;
 	NSString *newSearchKey = [addFieldController runSheetModalForWindow:documentWindow];
     [addFieldController release];
 	
-    if(newSearchKey = nil)
-        return;
-    
-    newSearchKey = [newSearchKey capitalizedString];
-    searchKeys = [NSMutableArray arrayWithCapacity:10];
-    [searchKeys addObjectsFromArray:[[OFPreferenceWrapper sharedPreferenceWrapper] arrayForKey:BDSKQuickSearchKeys]];
-    [searchKeys addObject:newSearchKey];
-    [[OFPreferenceWrapper sharedPreferenceWrapper] setObject:searchKeys
-                                                      forKey:BDSKQuickSearchKeys];
-    
-    // this will sort the menu items for us
-    [[searchField cell] setSearchMenuTemplate:[self searchFieldMenu]];
-    [self setSelectedSearchFieldKey:newSearchKey];
+    if(nil != newSearchKey){    
+        newSearchKey = [newSearchKey capitalizedString];
+        searchKeys = [NSMutableArray arrayWithCapacity:10];
+        [searchKeys addObjectsFromArray:[[OFPreferenceWrapper sharedPreferenceWrapper] arrayForKey:BDSKQuickSearchKeys]];
+        [searchKeys addObject:newSearchKey];
+        [[OFPreferenceWrapper sharedPreferenceWrapper] setObject:searchKeys
+                                                          forKey:BDSKQuickSearchKeys];
+        
+        // this will sort the menu items for us
+        [[searchField cell] setSearchMenuTemplate:[self searchFieldMenu]];
+        [self setSelectedSearchFieldKey:newSearchKey];
+    }
 }
 
 - (IBAction)quickSearchRemoveField:(id)sender{
