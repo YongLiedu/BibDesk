@@ -296,6 +296,14 @@ extern NSString* BDSKWeblocFilePboardType;
 - (NSMenu *)getPreviewRecentDocumentsMenu;
 
 /*!
+    @method     recentDownloadsMenu
+    @abstract   Returns recently modified files in the system download directory using Spotlight.
+    @discussion (comprehensive description)
+    @result     (description)
+*/
+- (NSMenu *)recentDownloadsMenu;
+
+/*!
     @method     setLocalURLPathFromMenuItem
     @abstract   Action to select a local file path from a menu item.
     @discussion (comprehensive description)

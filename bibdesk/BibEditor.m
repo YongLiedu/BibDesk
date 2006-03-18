@@ -615,11 +615,17 @@ static int numberOfOpenEditors = 0;
 			[item setSubmenu:submenu];
 			[menu addItem:item];
 			[item release];
-		}
+		} else if(submenu = [self recentDownloadsMenu]){
+            // get recent downloads (Tiger only) by searching the system downloads directory
+            item = [[NSMenuItem allocWithZone:[NSMenu menuZone]] initWithTitle:NSLocalizedString(@"Link to Recent Download", @"") action:NULL keyEquivalent:@""];
+            [item setSubmenu:submenu];
+            [menu addItem:item];
+            [item release];
+        }
 		
 		// get Preview recent documents
 		if (submenu = [self getPreviewRecentDocumentsMenu]) {
-			item = [[NSMenuItem allocWithZone:[NSMenu menuZone]] initWithTitle:NSLocalizedString(@"Link to Recent File",@"Link to Recently Opened or Modified File")
+			item = [[NSMenuItem allocWithZone:[NSMenu menuZone]] initWithTitle:NSLocalizedString(@"Link to Recently Opened File",@"Link to Recently Opened or Modified File")
 											  action:NULL
 									   keyEquivalent:@""];
 			[item setSubmenu:submenu];
@@ -851,47 +857,46 @@ static int numberOfOpenEditors = 0;
             [item release];
         }
     }  
-    
-    // union these sets to get all the paths that we've added so far
-    NSMutableSet *allPaths = [[NSMutableSet alloc] initWithSet:globalRecentPaths];
-    [allPaths unionSet:previewRecentPaths];
-    
+        
     [globalRecentPaths release];
     [previewRecentPaths release];
     
-    // this was copied verbatim from a Finder saved search for all PDF documents modified today
-    NSString *query = @"(* = \"pdf*\"wcd || kMDItemTextContent = \"pdf*\"cd) && (kMDItemContentTypeTree = 'com.adobe.pdf') && (kMDItemFSContentChangeDate >= $time.today(-7)) && (kMDItemContentType != com.apple.mail.emlx) && (kMDItemContentType != public.vcard)";
+	return ([menu numberOfItems] > 0) ? menu : nil;
+}
+
+- (NSMenu *)recentDownloadsMenu{
+    
     NSArray *paths = nil;
     
     // this should always return nil on OS versions < 10.4
     if(nil != [BDSKPersistentSearch sharedSearch]){
-        [[BDSKPersistentSearch sharedSearch] addQuery:query scopes:[NSArray arrayWithObject:(NSString *)kMDQueryScopeHome]];
+        
+        // this was copied verbatim from a Finder saved search for all documents modified in the last week
+        NSString *query = @"(kMDItemContentTypeTree = 'public.content') && (kMDItemFSContentChangeDate >= $time.today(-7)) && (kMDItemContentType != com.apple.mail.emlx) && (kMDItemContentType != public.vcard)";
+        
+        // limit the scope to the default downloads directory (from Internet Config)
+        [[BDSKPersistentSearch sharedSearch] addQuery:query scopes:[NSArray arrayWithObject:[[NSFileManager defaultManager] internetConfigDownloadURL]]];
         paths = [[BDSKPersistentSearch sharedSearch] resultsForQuery:query attribute:(NSString *)kMDItemPath];
     }
     
-    e = [paths objectEnumerator];
-    BOOL added = NO;
+    NSEnumerator *e = [paths objectEnumerator];
+    
+    NSString *filePath;
+    NSImage *image;
+    NSMenuItem *item;
+    NSMenu *menu = [[[NSMenu allocWithZone:[NSMenu menuZone]] init] autorelease];
+    
     while(filePath = [e nextObject]){
+        image = [NSImage smallImageForFile:filePath];
         
-        if(![allPaths containsObject:filePath]){
-            
-            // add a separator item to the menu
-            if(added == NO) [menu addItem:[NSMenuItem separatorItem]];
-            added = YES;
-            
-            fileName = [filePath lastPathComponent];
-            image = [NSImage smallImageForFile:filePath];
-            
-            item = [[NSMenuItem allocWithZone:[NSMenu menuZone]] initWithTitle:fileName
-                                                                                    action:@selector(setLocalURLPathFromMenuItem:)
-                                                                             keyEquivalent:@""];
-            [item setRepresentedObject:filePath];
-            [item setImage:image];
-            [menu addItem:item];
-            [item release];
-        }
+        item = [[NSMenuItem allocWithZone:[NSMenu menuZone]] initWithTitle:[filePath lastPathComponent]
+                                                                    action:@selector(setLocalURLPathFromMenuItem:)
+                                                             keyEquivalent:@""];
+        [item setRepresentedObject:filePath];
+        [item setImage:image];
+        [menu addItem:item];
+        [item release];
     }
-    [allPaths release];
     
 	return ([menu numberOfItems] > 0) ? menu : nil;
 }
