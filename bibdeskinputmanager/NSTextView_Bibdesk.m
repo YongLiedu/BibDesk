@@ -239,15 +239,23 @@ static id (*originalCompletionsIMP)(id, SEL, NSRange, int *) = NULL;
     return finalRange;
 }
                 
-- (NSRange)refLabelRangeForType:(BOOL *)isPageRef{
+- (NSRange)refLabelRange{
     
     NSString *s = [self string];
     NSRange r = [self selectedRange];
-    if(isPageRef) *isPageRef = NO;
-    NSRange foundRange = [s rangeOfString:@"\\ref{" options:NSBackwardsSearch range:SafeBackwardSearchRange(r, 12)];
+    NSRange searchRange = SafeBackwardSearchRange(r, 12);
+    
+    // look for standard \ref
+    NSRange foundRange = [s rangeOfString:@"\\ref{" options:NSBackwardsSearch range:searchRange];
+    
     if(foundRange.location == NSNotFound){
-        foundRange = [s rangeOfString:@"\\pageref{" options:NSBackwardsSearch range:SafeBackwardSearchRange(r, 12)];
-        if(isPageRef) *isPageRef = YES;
+        
+        // maybe it's a pageref
+        foundRange = [s rangeOfString:@"\\pageref{" options:NSBackwardsSearch range:searchRange];
+        
+        // could also be an eqref (amsmath)
+        if(foundRange.location == NSNotFound)
+            foundRange = [s rangeOfString:@"\\eqref{" options:NSBackwardsSearch range:searchRange];
     }
     unsigned idx = NSMaxRange(foundRange);
     idx = (idx < r.location ? r.location - idx : 0);
@@ -262,7 +270,7 @@ static id (*originalCompletionsIMP)(id, SEL, NSRange, int *) = NULL;
 - (NSRange)rangeForBibTeXUserCompletion{
     
     NSRange range = [self citeKeyRange];
-    return range.location == NSNotFound ? [self refLabelRangeForType:NULL] : range;
+    return range.location == NSNotFound ? [self refLabelRange] : range;
 }
 
 static BOOL isCompletingTeX = NO;
@@ -296,8 +304,7 @@ BDIndexOfItemInArrayWithPrefix(NSArray *array, NSString *prefix)
 - (NSArray *)replacementCompletionsForPartialWordRange:(NSRange)charRange indexOfSelectedItem:(int *)index{
     
 	NSString *s = [self string];
-    BOOL isPageRefLabel = NO;
-    NSRange refLabelRange = [self refLabelRangeForType:&isPageRefLabel];
+    NSRange refLabelRange = [self refLabelRange];
     
     // don't bother checking for a citekey if this is a \ref
     NSRange keyRange = ( (refLabelRange.location == NSNotFound) ? [self citeKeyRange] : NSMakeRange(NSNotFound, 0) ); 
@@ -407,7 +414,7 @@ BDIndexOfItemInArrayWithPrefix(NSArray *array, NSString *prefix)
 // finish off the completion, inserting just the cite key
 - (void)replacementInsertCompletion:(NSString *)word forPartialWordRange:(NSRange)charRange movement:(int)movement isFinal:(BOOL)flag {
     
-    if(isCompletingTeX || [self refLabelRangeForType:NULL].location != NSNotFound)
+    if(isCompletingTeX || [self refLabelRange].location != NSNotFound)
         [self fixRange:&charRange];
     
     originalInsertIMP(self, _cmd, word, charRange, movement, flag);
