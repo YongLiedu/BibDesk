@@ -45,6 +45,7 @@
 - (NSString *)currentApplicationSupportPathForCurrentUser;
 - (NSString *)applicationSupportDirectory:(SInt16)domain;
 - (NSString *)desktopPathForCurrentUser;
+- (NSURL *)internetConfigDownloadURL;
 
 /*!
     @method     createWeblocFileAtPath:withURL:

@@ -205,6 +205,37 @@ typedef struct WLDragMapEntryStruct
 	return path;
 }
 
+// note: IC is not thread safe
+- (NSURL *)internetConfigDownloadURL;
+{
+    OSStatus err;
+	ICInstance inst;
+	ICAttr junk = 0;
+	ICFileSpec spec;
+    
+	CFURLRef pathURL = NULL;
+	long size = sizeof(ICFileSpec);
+    FSRef pathRef;
+	
+	err = ICStart(&inst, '????');
+	
+	if (err == noErr)
+	{
+		//Get the downloads folder
+		err = ICGetPref(inst, kICDownloadFolder, &junk, &spec, &size);
+        
+        // convert FSSpec to FSRef
+        err = FSpMakeFSRef(&(spec.fss), &pathRef);
+        
+        if(err == noErr)
+            pathURL = CFURLCreateFromFSRef(CFAllocatorGetDefault(), &pathRef);
+        
+		ICStop(inst);
+	}
+    
+    return [(id)pathURL autorelease];
+}
+
 - (NSString *)spotlightCacheFolderPathByCreating:(NSError **)anError{
 
     NSString *cachePath = nil;
@@ -414,7 +445,6 @@ typedef struct WLDragMapEntryStruct
 - (void)createWeblocFilesInBackgroundThread:(NSDictionary *)fullPathDict{
     [NSThread detachNewThreadSelector:@selector(createWeblocFiles:) toTarget:self withObject:fullPathDict];
 }
-
 
 @end
 
