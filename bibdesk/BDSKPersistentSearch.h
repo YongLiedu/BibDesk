@@ -48,6 +48,7 @@
 
 // queryString syntax is same as MDQuery (can be copied directly from a Finder saved search)
 // returns NO if there was an error in creating the asynchronous query
+// searchScopes is an array of NSURL or NSString path objects
 - (BOOL)addQuery:(NSString *)queryString scopes:(NSArray *)searchScopes;
 
 // returns nil if no results (yet)

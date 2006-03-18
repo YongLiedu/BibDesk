@@ -71,27 +71,31 @@ static id sharedSearch = nil;
 - (BOOL)addQuery:(NSString *)queryString scopes:(NSArray *)searchScopes;
 {
     NSParameterAssert(queryString != nil);
-    
-    // already present in the dictionary, so just return YES
-    if(CFDictionaryGetValue(queries, (const void *)queryString))
-        return YES;
-    
     BOOL success = YES;
+    MDQueryRef mdQuery = NULL;
     
-    MDQueryRef mdQuery = MDQueryCreate(CFAllocatorGetDefault(), (CFStringRef)queryString, NULL, NULL);
-    
-    // mdQuery is NULL on failure
-    if(mdQuery != NULL){
-        MDQuerySetSearchScope(mdQuery, (CFArrayRef)searchScopes, 0);
-    
-        // create and execute an asynchronous query that will watch the file system for us
-        // we currently ignore notifications; callers just take what they can get from resultsForQuery:attribute:
-        if(MDQueryExecute(mdQuery, kMDQueryWantsUpdates))
-            CFDictionaryAddValue(queries, (const void *)queryString, mdQuery);
-        else
-            success = NO;
+    if(CFDictionaryGetValueIfPresent(queries, (CFStringRef)queryString, (const void **)&mdQuery)){
         
-        CFRelease(mdQuery);
+        // already present in the dictionary, so just modify the scope
+        MDQuerySetSearchScope(mdQuery, (CFArrayRef)searchScopes, 0);
+
+    } else {
+    
+        mdQuery = MDQueryCreate(CFAllocatorGetDefault(), (CFStringRef)queryString, NULL, NULL);
+    
+        // mdQuery is NULL on failure
+        if(mdQuery != NULL){
+            MDQuerySetSearchScope(mdQuery, (CFArrayRef)searchScopes, 0);
+        
+            // create and execute an asynchronous query that will watch the file system for us
+            // we currently ignore notifications; callers just take what they can get from resultsForQuery:attribute:
+            if(MDQueryExecute(mdQuery, kMDQueryWantsUpdates))
+                CFDictionaryAddValue(queries, (const void *)queryString, mdQuery);
+            else
+                success = NO;
+            
+            CFRelease(mdQuery);
+        }
     }
     
     return success;
