@@ -212,6 +212,21 @@ static inline BOOL forwardSelectorForCompletionInTextView(SEL selector, NSTextVi
 	return charRange;
 }
 
+// override this method since 10.3 won't insert anything if ([word length] == 1)
+- (void)insertCompletion:(NSString *)word forPartialWordRange:(NSRange)charRange movement:(int)movement isFinal:(BOOL)flag;
+{
+    NSRange selRange = [self selectedRange];
+    NSRange replaceRange = NSUnionRange(charRange, selRange);
+
+    // call shouldChangeTextInRange:replacementString: to get undo support
+    if([self shouldChangeTextInRange:replaceRange replacementString:word]){
+        [self replaceCharactersInRange:replaceRange withString:word];
+
+        selRange = NSMakeRange(selRange.location, [word length]);
+        [self setSelectedRange:(flag ? NSMakeRange(replaceRange.location + [word length], 0) : selRange)];
+    }
+}
+
 #pragma mark Auto-completion methods
 
 - (NSArray *)completionsForPartialWordRange:(NSRange)charRange indexOfSelectedItem:(int *)index;
@@ -236,7 +251,7 @@ static inline BOOL forwardSelectorForCompletionInTextView(SEL selector, NSTextVi
     // forward this method so the controller can handle cancellation and undo
     if(forwardSelectorForCompletionInTextView(_cmd, self))
         return;
-    
+
     NSRange selRange = [self rangeForUserCompletion];
     NSString *string = [self string];
     if(selRange.location == NSNotFound || [string isEqualToString:@""] || selRange.length == 0)
