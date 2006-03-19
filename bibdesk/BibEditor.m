@@ -609,14 +609,16 @@ static int numberOfOpenEditors = 0;
 		
 		// get Safari recent downloads
 		if (submenu = [self getSafariRecentDownloadsMenu]) {
-			item = [[NSMenuItem allocWithZone:[NSMenu menuZone]] initWithTitle:NSLocalizedString(@"Link to Download URL",@"Link to Download URL")
+			item = [[NSMenuItem allocWithZone:[NSMenu menuZone]] initWithTitle:NSLocalizedString(@"Safari Recent Downloads",@"Link to Download URL")
 											  action:NULL
 									   keyEquivalent:@""];
 			[item setSubmenu:submenu];
 			[menu addItem:item];
 			[item release];
-		} else if(submenu = [self recentDownloadsMenu]){
-            // get recent downloads (Tiger only) by searching the system downloads directory
+		}
+        // get recent downloads (Tiger only) by searching the system downloads directory
+        // should work for browsers other than Safari, if they use IC to get/set the download directory
+        if(submenu = [self recentDownloadsMenu]){
             item = [[NSMenuItem allocWithZone:[NSMenu menuZone]] initWithTitle:NSLocalizedString(@"Link to Recent Download", @"") action:NULL keyEquivalent:@""];
             [item setSubmenu:submenu];
             [menu addItem:item];
@@ -692,17 +694,18 @@ static int numberOfOpenEditors = 0;
 	
 	NSDictionary *dict = [NSDictionary dictionaryWithContentsOfFile:downloadPlistFileName];
 	NSArray *historyArray = [dict objectForKey:@"DownloadHistory"];
-	
-	if (![historyArray count])
-		return nil;
-	
-	NSMenu *menu = [[NSMenu allocWithZone:[NSMenu menuZone]] init];
+		
+	NSMenu *menu = [[[NSMenu allocWithZone:[NSMenu menuZone]] init] autorelease];
 	int i = 0;
 	
 	for (i = 0; i < [historyArray count]; i ++){
 		NSDictionary *itemDict = [historyArray objectAtIndex:i];
 		NSString *filePath = [itemDict objectForKey:@"DownloadEntryPath"];
-		filePath = [filePath stringByExpandingTildeInPath];
+		filePath = [filePath stringByStandardizingPath];
+        
+        // after uncompressing the file, the original path is gone
+        if([[NSFileManager defaultManager] fileExistsAtPath:filePath] == NO)
+            filePath = [[itemDict objectForKey:@"DownloadEntryPostPath"] stringByStandardizingPath];
 		if([[NSFileManager defaultManager] fileExistsAtPath:filePath]){
 			NSString *fileName = [filePath lastPathComponent];
 			NSImage *image = [[NSWorkspace sharedWorkspace] iconForFile:filePath];
@@ -718,11 +721,8 @@ static int numberOfOpenEditors = 0;
 		}
 	}
 	
-	if ([menu numberOfItems] > 0)
-		return [menu autorelease];
-	
-	[menu release];
-	return nil;
+	return [menu numberOfItems] > 0 ? menu : nil;
+
 }
 
 
