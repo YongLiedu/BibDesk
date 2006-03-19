@@ -859,6 +859,7 @@
                     
             [pub setField:BDSKLocalUrlString toValue:[fileURL absoluteString]];
             [pub autoFilePaper];
+            [self highlightBib:pub];
             [[pub undoManager] setActionName:NSLocalizedString(@"Edit Publication",@"")];
             return YES;
         }else{
