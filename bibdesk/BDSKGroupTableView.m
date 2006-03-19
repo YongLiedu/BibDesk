@@ -155,11 +155,12 @@
     drawRect.size.height -= heightOffset;
     drawRect.origin.y += heightOffset/2.0;
     
+    [NSBezierPath setDefaultLineWidth:1.5];
+    
     [[highlightColor colorWithAlphaComponent:0.2] set];
     [NSBezierPath fillRoundRectInRect:drawRect radius:4.0];
     
     [[highlightColor colorWithAlphaComponent:0.8] set];
-    [NSBezierPath setDefaultLineWidth:1.5];
     [NSBezierPath strokeRoundRectInRect:drawRect radius:4.0];
     
     [NSGraphicsContext restoreGraphicsState];
