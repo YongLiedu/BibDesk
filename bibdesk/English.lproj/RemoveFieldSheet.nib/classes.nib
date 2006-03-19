@@ -3,19 +3,23 @@
         {
             CLASS = BDSKAddFieldSheetController; 
             LANGUAGE = ObjC; 
-            OUTLETS = {fieldComboBox = NSComboBox; }; 
             SUPERCLASS = BDSKFieldSheetController; 
         }, 
         {
             ACTIONS = {dismiss = id; }; 
             CLASS = BDSKFieldSheetController; 
             LANGUAGE = ObjC; 
+            OUTLETS = {
+                cancelButton = NSButton; 
+                fieldsControl = NSControl; 
+                okButton = NSButton; 
+                promptField = NSTextField; 
+            }; 
             SUPERCLASS = NSWindowController; 
         }, 
         {
             CLASS = BDSKRemoveFieldSheetController; 
             LANGUAGE = ObjC; 
-            OUTLETS = {fieldPopup = NSPopUpButton; }; 
             SUPERCLASS = BDSKFieldSheetController; 
         }, 
         {CLASS = FirstResponder; LANGUAGE = ObjC; SUPERCLASS = NSObject; }

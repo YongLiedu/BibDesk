@@ -4,6 +4,10 @@
 
 @interface BDSKFieldSheetController : NSWindowController
 {
+    IBOutlet NSControl *fieldsControl;
+    IBOutlet NSButton *okButton;
+    IBOutlet NSButton *cancelButton;
+    IBOutlet NSTextField *promptField;
     NSString *prompt;
     NSArray *fieldsArray;
     NSString *field;
@@ -20,15 +24,14 @@
 
 - (NSString *)runSheetModalForWindow:(NSWindow *)parentWindow;
 - (IBAction)dismiss:(id)sender;
+- (void)fixSizes;
 
 @end
 
 @interface BDSKAddFieldSheetController : BDSKFieldSheetController {
-    IBOutlet NSComboBox *fieldComboBox;
 }
 @end
 
 @interface BDSKRemoveFieldSheetController : BDSKFieldSheetController {
-    IBOutlet NSPopUpButton *fieldPopup;
 }
 @end

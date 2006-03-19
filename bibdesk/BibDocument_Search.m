@@ -235,24 +235,25 @@ static NSString *BDSKFileContentLocalizedString = nil;
 	[searchKeys removeObjectsInArray:prefsQuickSearchKeysArray];
 	[searchKeys sortUsingSelector:@selector(caseInsensitiveCompare:)];
     
-    BDSKAddFieldSheetController *addFieldController = [[BDSKAddFieldSheetController alloc] initWithPrompt:NSLocalizedString(@"Name of field to search:",@"")
+    BDSKAddFieldSheetController *addFieldController = [[BDSKAddFieldSheetController alloc] initWithPrompt:NSLocalizedString(@"Field to search:",@"")
                                                                                               fieldsArray:searchKeys];
 	[searchKeys release];
 	NSString *newSearchKey = [addFieldController runSheetModalForWindow:documentWindow];
     [addFieldController release];
 	
-    if(nil != newSearchKey){    
-        newSearchKey = [newSearchKey capitalizedString];
-        searchKeys = [NSMutableArray arrayWithCapacity:10];
-        [searchKeys addObjectsFromArray:[[OFPreferenceWrapper sharedPreferenceWrapper] arrayForKey:BDSKQuickSearchKeys]];
-        [searchKeys addObject:newSearchKey];
-        [[OFPreferenceWrapper sharedPreferenceWrapper] setObject:searchKeys
-                                                          forKey:BDSKQuickSearchKeys];
-        
-        // this will sort the menu items for us
-        [[searchField cell] setSearchMenuTemplate:[self searchFieldMenu]];
-        [self setSelectedSearchFieldKey:newSearchKey];
-    }
+    if(newSearchKey == nil)
+        return;
+    
+    newSearchKey = [newSearchKey capitalizedString];
+    searchKeys = [NSMutableArray arrayWithCapacity:10];
+    [searchKeys addObjectsFromArray:[[OFPreferenceWrapper sharedPreferenceWrapper] arrayForKey:BDSKQuickSearchKeys]];
+    [searchKeys addObject:newSearchKey];
+    [[OFPreferenceWrapper sharedPreferenceWrapper] setObject:searchKeys
+                                                      forKey:BDSKQuickSearchKeys];
+    
+    // this will sort the menu items for us
+    [[searchField cell] setSearchMenuTemplate:[self searchFieldMenu]];
+    [self setSelectedSearchFieldKey:newSearchKey];
 }
 
 - (IBAction)quickSearchRemoveField:(id)sender{
@@ -260,12 +261,19 @@ static NSString *BDSKFileContentLocalizedString = nil;
     [searchKeys addObjectsFromArray:[[OFPreferenceWrapper sharedPreferenceWrapper] arrayForKey:BDSKQuickSearchKeys]];
     [searchKeys sortUsingSelector:@selector(caseInsensitiveCompare:)];
 
-    BDSKAddFieldSheetController *removeFieldController = [[BDSKRemoveFieldSheetController alloc] initWithPrompt:NSLocalizedString(@"Name of search field to remove:",@"")
+    NSString *prompt = NSLocalizedString(@"Search field to remove:",@"");
+	if ([searchKeys count]) {
+		[searchKeys sortUsingSelector:@selector(caseInsensitiveCompare:)];
+	} else {
+		prompt = NSLocalizedString(@"No search fields to remove",@"");
+	}
+    
+    BDSKAddFieldSheetController *removeFieldController = [[BDSKRemoveFieldSheetController alloc] initWithPrompt:prompt
                                                                                                     fieldsArray:searchKeys];
 	NSString *oldSearchKey = [removeFieldController runSheetModalForWindow:documentWindow];
     [removeFieldController release];
     
-    if(oldSearchKey == nil)
+    if(oldSearchKey == nil || [searchKeys count] == 0)
         return;
     
     searchKeys = [NSMutableArray arrayWithCapacity:10];

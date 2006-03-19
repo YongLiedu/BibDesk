@@ -6,9 +6,7 @@
 - (id)initWithPrompt:(NSString *)promptString fieldsArray:(NSArray *)fields{
     if (self = [super init]) {
         [self window]; // make sure the nib is loaded
-        prompt = nil;
         field = nil;
-        fieldsArray = nil;
         [self setPrompt:promptString];
         [self setFieldsArray:fields];
     }
@@ -22,6 +20,20 @@
     [super dealloc];
 }
 
+- (void)awakeFromNib{
+}
+
+- (void)fixSizes{
+    NSRect fieldsFrame = [fieldsControl frame];
+    NSRect oldPromptFrame = [promptField frame];
+    [promptField setStringValue:(prompt)? prompt : @""];
+    [promptField sizeToFit];
+    NSRect newPromptFrame = [promptField frame];
+    float dw = NSWidth(newPromptFrame) - NSWidth(oldPromptFrame);
+    fieldsFrame.size.width -= dw;
+    fieldsFrame.origin.x += dw;
+    [fieldsControl setFrame:fieldsFrame];
+}
 
 - (NSString *)field{
     return field;
@@ -48,6 +60,7 @@
 - (void)setPrompt:(NSString *)promptString{
     [prompt release];
     prompt = [promptString retain];
+    [self fixSizes];
 }
 
 - (NSString *)runSheetModalForWindow:(NSWindow *)parentWindow{
@@ -79,7 +92,8 @@
 @implementation BDSKAddFieldSheetController
 
 - (void)awakeFromNib{
-	[fieldComboBox setFormatter:[[[BDSKFieldNameFormatter alloc] init] autorelease]];
+    [super awakeFromNib];
+	[(NSTextField *)fieldsControl setFormatter:[[[BDSKFieldNameFormatter alloc] init] autorelease]];
 }
 
 - (NSString *)windowNibName{
@@ -96,8 +110,12 @@
 
 - (void)setFieldsArray:(NSArray *)array{
     [super setFieldsArray:array];
-    if ([fieldsArray count])
+    if ([fieldsArray count]) {
         [self setField:[fieldsArray objectAtIndex:0]];
+        [okButton setEnabled:YES];
+    } else {
+        [okButton setEnabled:NO];
+    }
 }
 
 @end
