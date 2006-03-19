@@ -100,6 +100,7 @@ static id sharedController = nil;
     int row = [tableView selectedRow];
     if(row != -1){
         NSString *string = [completions objectAtIndex:row];
+        
         // NSTextView makes this an undoable operation, even if isFinal == NO, but I don't think that's right
         [[textView undoManager] disableUndoRegistration];
         [textView insertCompletion:string forPartialWordRange:[textView rangeForUserCompletion] movement:movement isFinal:NO]; 
@@ -165,7 +166,7 @@ static id sharedController = nil;
     // do nothing; displaying an empty window can lead to oddities when typing, since we get keystrokes as well as the editor
     if([array count] == 0 || NSEqualPoints(point, NSZeroPoint))
         return;
-    
+
     // don't automatically insert when updating if we're not supposed to insert now
     shouldInsert = (indexOfSelectedItem >= 0);
     
@@ -447,9 +448,4 @@ static int BDSKCompletionMinHeight = 20;
 - (BOOL)canBecomeKeyWindow { return NO; }
 - (BOOL)canBecomeMainWindow { return NO; }
 
-// possible fix for assertion failure in -[NSWindow setRepresentedFilename] on 10.3.9
-- (NSString *)representedFilename { return @""; }
-- (void)setRepresentedFilename:(NSString *)path { (void)0; }
-
 @end
-
