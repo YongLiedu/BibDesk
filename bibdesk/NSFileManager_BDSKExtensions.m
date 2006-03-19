@@ -217,7 +217,7 @@ typedef struct WLDragMapEntryStruct
 	long size = sizeof(ICFileSpec);
     FSRef pathRef;
 	
-	err = ICStart(&inst, '????');
+	err = ICStart(&inst, 'BDSK');
 	
 	if (err == noErr)
 	{
