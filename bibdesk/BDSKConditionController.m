@@ -60,10 +60,9 @@
         condition = [aCondition retain];
 		canRemove = [filterController canRemoveCondition];
 		
-		NSMutableSet *keySet = [NSMutableSet setWithSet:[[BibTypeManager sharedManager] allFieldNames]];
-		[keySet unionSet:[NSSet setWithObjects:BDSKDateCreatedString, BDSKDateModifiedString, BDSKAllFieldsString, nil]];
-		keys = [[keySet allObjects] mutableCopy];
-		[keys sortUsingSelector:@selector(caseInsensitiveCompare:)];
+        BibTypeManager *typeMan = [BibTypeManager sharedManager];
+        keys = [[typeMan allFieldNamesIncluding:[NSArray arrayWithObjects:BDSKDateCreatedString, BDSKDateModifiedString, BDSKAllFieldsString, nil]
+                                      excluding:nil] mutableCopy];
 		
 		BOOL success = [NSBundle loadNibNamed:@"BDSKCondition" owner:self];
 		if (!success) {

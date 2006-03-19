@@ -2454,18 +2454,12 @@ NSString *BDSKBibItemPboardType = @"edu.ucsd.mmccrack.bibdesk BibItem pboard typ
 
 - (IBAction)columnsMenuAddTableColumn:(id)sender{
     // first we fill the popup
-	OFPreferenceWrapper *pw = [OFPreferenceWrapper sharedPreferenceWrapper];
-	NSArray *prefsShownColNamesArray = [pw arrayForKey:BDSKShownColsNamesKey];
 	BibTypeManager *typeMan = [BibTypeManager sharedManager];
-	NSMutableSet *fieldNameSet = [NSMutableSet setWithSet:[typeMan allFieldNames]];
-	[fieldNameSet unionSet:[NSSet setWithObjects:BDSKCiteKeyString, BDSKDateString, @"Added", @"Modified", BDSKFirstAuthorString, BDSKSecondAuthorString, BDSKThirdAuthorString, BDSKFirstAuthorEditorString, BDSKSecondAuthorEditorString, BDSKThirdAuthorEditorString, BDSKAuthorEditorString, BDSKItemNumberString, BDSKContainerString, nil]];
-	NSMutableArray *colNames = [[fieldNameSet allObjects] mutableCopy];
-	[colNames sortUsingSelector:@selector(caseInsensitiveCompare:)];
-	[colNames removeObjectsInArray:prefsShownColNamesArray];
-	
+    NSArray *colNames = [typeMan allFieldNamesIncluding:[NSArray arrayWithObjects:BDSKCiteKeyString, BDSKDateString, @"Added", @"Modified", BDSKFirstAuthorString, BDSKSecondAuthorString, BDSKThirdAuthorString, BDSKFirstAuthorEditorString, BDSKSecondAuthorEditorString, BDSKThirdAuthorEditorString, BDSKAuthorEditorString, BDSKItemNumberString, BDSKContainerString, nil]
+                                              excluding:[[OFPreferenceWrapper sharedPreferenceWrapper] arrayForKey:BDSKShownColsNamesKey]];
+    
     BDSKAddFieldSheetController *addFieldController = [[BDSKAddFieldSheetController alloc] initWithPrompt:NSLocalizedString(@"Name of column to add:",@"")
                                                                                               fieldsArray:colNames];
-	[colNames release];
 	NSString *newColumnName = [addFieldController runSheetModalForWindow:documentWindow];
     [addFieldController release];
     

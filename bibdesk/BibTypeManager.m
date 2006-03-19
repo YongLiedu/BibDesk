@@ -368,6 +368,16 @@ static BibTypeManager *sharedInstance = nil;
     return allFieldNames;
 }
 
+- (NSArray *)allFieldNamesIncluding:(NSArray *)include excluding:(NSArray *)exclude{
+    NSMutableArray *fieldNames = [[allFieldNames allObjects] mutableCopy];
+    if ([include count])
+        [fieldNames addObjectsFromArray:include];
+    if([exclude count])
+        [fieldNames removeObjectsInArray:exclude];
+    [fieldNames sortUsingSelector:@selector(caseInsensitiveCompare:)];
+    return [fieldNames autorelease];
+}
+
 - (NSArray *)requiredFieldsForType:(NSString *)type{
     NSDictionary *fieldsForType = [fieldsForTypesDict objectForKey:type];
 	if(fieldsForType){

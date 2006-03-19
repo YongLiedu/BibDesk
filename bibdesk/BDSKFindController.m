@@ -114,12 +114,9 @@ enum {
 }
 
 - (void)awakeFromNib{
-	BibTypeManager *typeMan = [BibTypeManager sharedManager];
-	NSMutableArray *fields = [[[typeMan allFieldNames] allObjects] mutableCopy];
-	[fields sortUsingSelector:@selector(caseInsensitiveCompare:)];
+    NSArray *fields = [[BibTypeManager sharedManager] allFieldNamesIncluding:nil excluding:nil];
 	[fieldToSearchComboBox removeAllItems];
 	[fieldToSearchComboBox addItemsWithObjectValues:fields];
-    [fields release];
 
     // make sure we enter valid field names
     BDSKFieldNameFormatter *formatter = [[BDSKFieldNameFormatter alloc] init];

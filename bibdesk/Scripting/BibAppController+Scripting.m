@@ -59,7 +59,7 @@ Category on BibAppController making the papers folder readable for scripting
 }
 
 - (NSArray *)allFieldNames {
-	return [[[[BibTypeManager sharedManager] allFieldNames] allObjects] sortedArrayUsingSelector:@selector(caseInsensitiveCompare:)];
+	return [[BibTypeManager sharedManager] allFieldNamesIncluding:nil excluding:nil];
 }
 
 - (BDSKScriptHook *)valueInScriptHooksWithUniqueID:(NSNumber *)uniqueID {

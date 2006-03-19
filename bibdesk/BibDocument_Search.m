@@ -226,18 +226,12 @@ static NSString *BDSKFileContentLocalizedString = nil;
 
 - (IBAction)quickSearchAddField:(id)sender{
     // first we fill the popup
-	OFPreferenceWrapper *pw = [OFPreferenceWrapper sharedPreferenceWrapper];
-	NSArray *prefsQuickSearchKeysArray = [pw arrayForKey:BDSKQuickSearchKeys];
-	BibTypeManager *typeMan = [BibTypeManager sharedManager];
-	NSMutableSet *fieldNameSet = [NSMutableSet setWithSet:[typeMan allFieldNames]];
-	[fieldNameSet unionSet:[NSSet setWithObjects:BDSKCiteKeyString, BDSKDateString, @"Added", @"Modified", nil]];
-	NSMutableArray *searchKeys = [[fieldNameSet allObjects] mutableCopy];
-	[searchKeys removeObjectsInArray:prefsQuickSearchKeysArray];
-	[searchKeys sortUsingSelector:@selector(caseInsensitiveCompare:)];
+    BibTypeManager *typeMan = [BibTypeManager sharedManager];
+    NSArray *searchKeys = [typeMan allFieldNamesIncluding:[NSArray arrayWithObjects:BDSKCiteKeyString, BDSKDateString, @"Added", @"Modified", nil]
+                                                excluding:[[OFPreferenceWrapper sharedPreferenceWrapper] arrayForKey:BDSKQuickSearchKeys]];
     
     BDSKAddFieldSheetController *addFieldController = [[BDSKAddFieldSheetController alloc] initWithPrompt:NSLocalizedString(@"Field to search:",@"")
                                                                                               fieldsArray:searchKeys];
-	[searchKeys release];
 	NSString *newSearchKey = [addFieldController runSheetModalForWindow:documentWindow];
     [addFieldController release];
 	
@@ -245,10 +239,10 @@ static NSString *BDSKFileContentLocalizedString = nil;
         return;
     
     newSearchKey = [newSearchKey capitalizedString];
-    searchKeys = [NSMutableArray arrayWithCapacity:10];
-    [searchKeys addObjectsFromArray:[[OFPreferenceWrapper sharedPreferenceWrapper] arrayForKey:BDSKQuickSearchKeys]];
-    [searchKeys addObject:newSearchKey];
-    [[OFPreferenceWrapper sharedPreferenceWrapper] setObject:searchKeys
+    NSMutableArray *newSearchKeys = [NSMutableArray arrayWithCapacity:10];
+    [newSearchKeys addObjectsFromArray:[[OFPreferenceWrapper sharedPreferenceWrapper] arrayForKey:BDSKQuickSearchKeys]];
+    [newSearchKeys addObject:newSearchKey];
+    [[OFPreferenceWrapper sharedPreferenceWrapper] setObject:newSearchKeys
                                                       forKey:BDSKQuickSearchKeys];
     
     // this will sort the menu items for us

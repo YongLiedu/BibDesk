@@ -113,6 +113,7 @@
 
 - (NSString *)defaultTypeForFileFormat:(NSString *)fileFormat;
 - (NSSet *)allFieldNames;
+- (NSArray *)allFieldNamesIncluding:(NSArray *)include excluding:(NSArray *)exclude;
 - (NSArray *)requiredFieldsForType:(NSString *)type;
 - (NSArray *)optionalFieldsForType:(NSString *)type;
 - (NSArray *)userDefaultFieldsForType:(NSString *)type;

@@ -463,16 +463,11 @@ The groupedPublications array is a subset of the publications array, developed b
 	[headerCell selectItemWithTitle:currentGroupField];
     
 	BibTypeManager *typeMan = [BibTypeManager sharedManager];
-	NSMutableSet *fieldNameSet = [NSMutableSet setWithSet:[typeMan allFieldNames]];
-	[fieldNameSet addObject:BDSKTypeString];
-	[fieldNameSet addObject:BDSKCrossrefString];
-	[fieldNameSet minusSet:[typeMan invalidGroupFields]];
-	NSMutableArray *colNames = [[fieldNameSet allObjects] mutableCopy];
-	[colNames sortUsingSelector:@selector(caseInsensitiveCompare:)];
-	
+    NSArray *colNames = [typeMan allFieldNamesIncluding:[NSArray arrayWithObjects:BDSKTypeString, BDSKCrossrefString, nil]
+                                              excluding:[[typeMan invalidGroupFields] allObjects]];
+    
     BDSKAddFieldSheetController *addFieldController = [[BDSKAddFieldSheetController alloc] initWithPrompt:NSLocalizedString(@"Name of group field:",@"")
                                                                                               fieldsArray:colNames];
-	[colNames release];
 	NSString *newGroupField = [addFieldController runSheetModalForWindow:documentWindow];
     [addFieldController release];
     

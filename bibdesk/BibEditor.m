@@ -1370,15 +1370,12 @@ static int numberOfOpenEditors = 0;
 
 // raises the add field sheet
 - (IBAction)raiseAddField:(id)sender{
-	BibTypeManager *typeMan = [BibTypeManager sharedManager];
+    BibTypeManager *typeMan = [BibTypeManager sharedManager];
     NSArray *currentFields = [[theBib pubFields] allKeys];
-	NSMutableArray *fieldNames = [[[typeMan allFieldNames] allObjects] mutableCopy];
-    [fieldNames removeObjectsInArray:currentFields];
-	[fieldNames sortUsingSelector:@selector(caseInsensitiveCompare:)];
+    NSArray *fieldNames = [typeMan allFieldNamesIncluding:nil excluding:currentFields];
     
     BDSKAddFieldSheetController *addFieldController = [[BDSKAddFieldSheetController alloc] initWithPrompt:NSLocalizedString(@"Name of field to add:",@"")
                                                                                               fieldsArray:fieldNames];
-	[fieldNames release];
 	NSString *newField = [addFieldController runSheetModalForWindow:[self window]];
     [addFieldController release];
     
