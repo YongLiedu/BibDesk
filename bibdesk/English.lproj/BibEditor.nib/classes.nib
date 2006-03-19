@@ -15,6 +15,7 @@
         {CLASS = BDSKRatingButton; LANGUAGE = ObjC; SUPERCLASS = NSButton; }, 
         {CLASS = BDSKSplitView; LANGUAGE = ObjC; SUPERCLASS = OASplitView; }, 
         {CLASS = BDSKStatusBar; LANGUAGE = ObjC; SUPERCLASS = BDSKGradientView; }, 
+        {CLASS = BDSKTabView; LANGUAGE = ObjC; SUPERCLASS = NSTabView; }, 
         {CLASS = BDSKUndoTextView; LANGUAGE = ObjC; SUPERCLASS = NSTextView; }, 
         {
             ACTIONS = {

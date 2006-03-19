@@ -474,3 +474,8 @@ extern NSString* BDSKWeblocFilePboardType;
 - (void)macrosDidChange:(NSNotification *)aNotification;
 
 @end
+
+
+@interface BDSKTabView : NSTabView {}
+@end
+

@@ -3035,3 +3035,28 @@ static int numberOfOpenEditors = 0;
 }
 
 @end
+
+
+@implementation BDSKTabView
+
+- (BOOL)performKeyEquivalent:(NSEvent *)theEvent{
+    unichar c = [[theEvent charactersIgnoringModifiers] characterAtIndex:0];
+    unsigned int flags = [theEvent modifierFlags];
+    
+    if((c == NSRightArrowFunctionKey || c == NSDownArrowFunctionKey) && (flags & NSCommandKeyMask) && (flags & NSAlternateKeyMask)){
+        if([self indexOfTabViewItem:[self selectedTabViewItem]] == [self numberOfTabViewItems] - 1)
+            [self selectFirstTabViewItem:nil];
+        else
+            [self selectNextTabViewItem:nil];
+        return YES;
+    }else if((c == NSLeftArrowFunctionKey || c == NSUpArrowFunctionKey)  && (flags & NSCommandKeyMask) && (flags & NSAlternateKeyMask)){
+        if([self indexOfTabViewItem:[self selectedTabViewItem]] == 0)
+            [self selectLastTabViewItem:nil];
+        else
+            [self selectPreviousTabViewItem:nil];
+        return YES;
+    }
+    return [super performKeyEquivalent:theEvent];
+}
+
+@end
