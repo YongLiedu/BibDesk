@@ -266,7 +266,7 @@ static int MAX_RATING = 5;
     
     // AGRegex doesn't recognize \r as a $, so we normalize it first (bug #1420791)
     NSString *normalizedString = [self stringByNormalizingSpacesAndLineBreaks];
-    BOOL found = ([[btRegex findAllInString:normalizedString] count] > 0);
+    BOOL found = ([btRegex findInString:normalizedString] != nil);
     [btRegex release];
     return found;
 }
