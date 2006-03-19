@@ -35,6 +35,7 @@
 
 #import "BDSKDragTableView.h"
 #import "BibDocument.h"
+#import "NSBezierPath_BDSKExtensions.h"
 
 @implementation BDSKDragTableView
 
@@ -129,6 +130,31 @@
 	[super draggedImage:anImage endedAt:aPoint operation:operation];
 	if([[self dataSource] respondsToSelector:@selector(tableView:concludeDragOperation:)]) 
 		[[self dataSource] tableView:self concludeDragOperation:operation];
+}
+
+-(void)_drawDropHighlightOnRow:(int)rowIndex{
+    NSColor *highlightColor = [NSColor alternateSelectedControlColor];
+    float lineWidth = 2.0;
+    
+    [self lockFocus];
+    [NSGraphicsContext saveGraphicsState];
+    
+    NSRect drawRect = (rowIndex == -1) ? [self visibleRect] : [self rectOfRow:rowIndex];
+    
+    drawRect = NSInsetRect(drawRect, lineWidth/2.0, lineWidth/2.0);
+    
+    NSBezierPath *path = [NSBezierPath bezierPathWithRoundRectInRect:drawRect radius:4.0];
+    
+    [path setLineWidth:lineWidth];
+    
+    [[highlightColor colorWithAlphaComponent:0.2] set];
+    [path fill];
+    
+    [[highlightColor colorWithAlphaComponent:0.8] set];
+    [path stroke];
+    
+    [NSGraphicsContext restoreGraphicsState];
+    [self unlockFocus];
 }
 
 @end
