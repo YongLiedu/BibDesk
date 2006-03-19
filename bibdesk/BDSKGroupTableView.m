@@ -141,7 +141,7 @@
 
 - (void)drawDropHighlightOnRow:(int)rowIndex usingColor:(NSColor *)highlightColor
 {
-    float widthOffset = [self intercellSpacing].width;
+    float lineWidth = 2.0;
     float heightOffset = [self intercellSpacing].height / 2;
     
     [self lockFocus];
@@ -149,19 +149,21 @@
     
     NSRect drawRect = [self rectOfRow:rowIndex];
     
-    drawRect.size.width -= widthOffset;
-    drawRect.origin.x += widthOffset/2.0;
+    drawRect.size.width -= lineWidth;
+    drawRect.origin.x += lineWidth/2.0;
     
     drawRect.size.height -= heightOffset;
     drawRect.origin.y += heightOffset/2.0;
     
-    [NSBezierPath setDefaultLineWidth:1.5];
+    NSBezierPath *path = [NSBezierPath bezierPathWithRoundRectInRect:drawRect radius:4.0];
+    
+    [path setLineWidth:lineWidth];
     
     [[highlightColor colorWithAlphaComponent:0.2] set];
-    [NSBezierPath fillRoundRectInRect:drawRect radius:4.0];
+    [path fill];
     
     [[highlightColor colorWithAlphaComponent:0.8] set];
-    [NSBezierPath strokeRoundRectInRect:drawRect radius:4.0];
+    [path stroke];
     
     [NSGraphicsContext restoreGraphicsState];
     [self unlockFocus];
