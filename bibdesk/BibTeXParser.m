@@ -361,7 +361,8 @@ static NSString *stringFromBTField(AST *field,  NSString *fieldName,  NSString *
     NSString *macroString;
     
     FILE *stream = [[aString dataUsingEncoding:NSUTF8StringEncoding] openReadOnlyStandardIOFile];
-    
+#warning FIXME
+// macro parsing is not correct here; need to traverse the AST
     while(entry = bt_parse_entry(stream, NULL, 0, &ok)){
         if(entry == NULL && ok) // this is the exit condition
             break;
