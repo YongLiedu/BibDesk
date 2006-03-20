@@ -121,6 +121,7 @@ static NSString *stringFromBTField(AST *field,  NSString *fieldName,  NSString *
 
     bt_initialize();
     bt_set_stringopts(BTE_PREAMBLE, BTO_EXPAND);
+    bt_set_stringopts(BTE_MACRODEF, BTO_MINIMAL);
     bt_set_stringopts(BTE_REGULAR, BTO_COLLAPSE);
     
     NSString *tmpStr = nil;
@@ -158,15 +159,52 @@ static NSString *stringFromBTField(AST *field,  NSString *fieldName,  NSString *
                         }
                         [frontMatter appendString:@"\"}"];
                     }else if(frontMatter && [entryType isEqualToString:@"string"]){
+                        
+                        // get the field name
                         field = bt_next_field (entry, NULL, &fieldname);
                         NSString *macroKey = [[NSString alloc] initWithCString:field->text usingEncoding:parserEncoding];
-                        tmpStr = [[NSString alloc] initWithCString:field->down->text usingEncoding:parserEncoding];                        
-                        NSString *macroString = checkAndTranslateString(tmpStr, field->line, filePath, parserEncoding); // check for bad characters, deTeXify
-                        [tmpStr release];
-                        if(aDocument)
-                            [aDocument addMacroDefinitionWithoutUndo:macroString
-                                                            forMacro:macroKey];
+                        
+                        AST *value = NULL;
+                        bt_nodetype type;
+                        bt_nodetype prev_type = BTAST_BOGUS;
+                        BOOL paste = NO;
+                        NSMutableString *macroString = [[NSMutableString alloc] initWithCapacity:10];
+                        
+                        // we need to traverse the AST to get each component of the field's value
+                        while(value = bt_next_value(field, value, &type, NULL)){
+                            char *text = value->text;
+                            if(text){
+#warning FIXME
+                                /* This is almost correct, but I'm not sure where the error is now.
+                                
+                                @STRING{IEEE_CU_GLOBECOM = "IEEE Global Telecommun. Conf. (GLOBECOM)" }
+                                @STRING{IEEE_C_GLOBECOM = "Proc. " # IEEE_CU_GLOBECOM }
+                                
+                                loading this and then saving it gives
+                                
+                                @STRING{ieee_c_globecom = "Proc. " # IEEE_CU_GLOBECOM"}
+                                @STRING{ieee_cu_globecom = "IEEE Global Telecommun. Conf. (GLOBECOM)"}
+
+                                which has incorrect quoting in the first @string.  This may need to be fixed
+                                elsewhere in the macro code; I'm fairly sure we don't expand macros in @strings,
+                                but we should at least try to write this out correctly */
+                                
+                                // only strings should be quoted
+                                if(paste && prev_type == BTAST_STRING) [macroString appendString:@"\""];
+                                if(paste)[macroString appendString:@" # "];
+                                
+                                tmpStr = [[NSString alloc] initWithCString:text usingEncoding:parserEncoding];
+                                [macroString appendString:tmpStr];
+                                [tmpStr release];
+                                paste = YES;
+                            }
+                            prev_type = type;
+                        }
+                        
+                        if(aDocument)[aDocument addMacroDefinitionWithoutUndo:macroString forMacro:macroKey];
                         [macroKey release];
+                        [macroString release];
+
                     }else if(frontMatter && [entryType isEqualToString:@"comment"]){
                         NSMutableString *commentStr = [[NSMutableString alloc] init];
                         field = NULL;
@@ -315,8 +353,7 @@ static NSString *stringFromBTField(AST *field,  NSString *fieldName,  NSString *
     char *fieldName = NULL;
     
     bt_initialize();
-    bt_set_stringopts(BTE_PREAMBLE, BTO_EXPAND);
-    bt_set_stringopts(BTE_REGULAR, BTO_MINIMAL);
+    bt_set_stringopts(BTE_MACRODEF, BTO_MINIMAL);
     boolean ok;
     *hadProblems = NO;
     
