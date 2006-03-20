@@ -3160,7 +3160,7 @@ NSString *BDSKBibItemPboardType = @"edu.ucsd.mmccrack.bibdesk BibItem pboard typ
                     @throw;
             }							
 		}                
-        [macroString appendFormat:@"\n@STRING{%@ = \"%@\"}\n", macro, value];
+        [macroString appendStrings:@"\n@string{", macro, @" = ", [value stringAsBibTeXString], @"}\n", nil];
     }
 	return macroString;
 }
