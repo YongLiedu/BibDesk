@@ -43,39 +43,7 @@
 #pragma mark -
 #pragma mark Private complex string expansion
 
-// stores system-defined macros for the months.
-// we grab their localized versions for display.
-static NSDictionary *globalMacroDefs; 
 static NSCharacterSet *macroCharSet = nil;
-
-// look up a macro definition from the preferences dictionary
-static inline
-CFStringRef __BDGetValueOfMacroFromPreferences(CFStringRef aMacro)
-{
-    CFPropertyListRef dict = CFPreferencesCopyAppValue((CFStringRef)BDSKBibStyleMacroDefinitionsKey, kCFPreferencesCurrentApplication);
-    if(dict == NULL)
-        return NULL;
-    
-    CFMutableStringRef lcMacro = CFStringCreateMutableCopy(CFAllocatorGetDefault(), 0, aMacro);
-    CFStringLowercase(lcMacro, NULL);
-    CFStringRef val = CFDictionaryGetValue(dict, lcMacro);
-    CFRelease(lcMacro);
-    CFRelease(dict);
-    
-    return val;
-}
-
-static inline
-CFStringRef __BDResolveMacro(id <BDSKMacroResolver>macroResolver, CFStringRef nodeVal)
-{
-    CFStringRef expandedValue = nil;
-    if(macroResolver == nil)
-        macroResolver = [BDSKGlobalMacroResolver defaultMacroResolver];
-    if(expandedValue = (CFStringRef)[macroResolver valueOfMacro:(NSString *)nodeVal])
-        return expandedValue;
-    
-    return (CFStringRef)[globalMacroDefs objectForKey:(NSString *)nodeVal];
-}   
 
 /*
  This function is an example of how to subvert object-oriented programming; it depends on implementation details of the objects and accesses fields directly.  This is justified since the complex string expansion is a low-level function that gets called by the NSString primitive methods, and it needs to be as fast as possible.  Alternatively, we could store the nodes in a buffer at creation time, but the performance gain isn't worth losing the features of NSArray at this point.
@@ -121,7 +89,10 @@ CFStringRef __BDStringCreateByCopyingExpandedValue(BDSKComplexString *cxString)
     
     id <BDSKMacroResolver>macroResolver = ((struct { @defs(BDSKComplexString) } *)cxString)->macroResolver;
     
-    OBASSERT((macroResolver != nil) ? [macroResolver conformsToProtocol:@protocol(BDSKMacroResolver)] : 1);
+    if(macroResolver == nil)
+        macroResolver = [BDSKGlobalMacroResolver defaultMacroResolver];
+    
+    OBASSERT([macroResolver conformsToProtocol:@protocol(BDSKMacroResolver)]);
     
     // Guess at size of (50 * (no. of nodes)); this is likely too high, but resizing is a sizeable performance hit.
     CFMutableStringRef mutStr = CFStringCreateMutable(CFAllocatorGetDefault(), (iMax * 50));
@@ -134,7 +105,9 @@ CFStringRef __BDStringCreateByCopyingExpandedValue(BDSKComplexString *cxString)
         node = *stringNodeIdx++;
         nodeVal = (CFStringRef)(node->value);
         if(node->type == BSN_MACRODEF){
-            expandedValue = __BDResolveMacro(macroResolver, nodeVal);
+            expandedValue = (CFStringRef)[macroResolver valueOfMacro:(NSString *)nodeVal];
+            if(expandedValue == nil && macroResolver != [BDSKGlobalMacroResolver defaultMacroResolver])
+                expandedValue = (CFStringRef)[[BDSKGlobalMacroResolver defaultMacroResolver] valueOfMacro:(NSString *)nodeVal];
             CFStringAppend(mutStr, (expandedValue != nil ? expandedValue : nodeVal));
         } else {
             CFStringAppend(mutStr, nodeVal);
@@ -153,9 +126,6 @@ CFStringRef __BDStringCreateByCopyingExpandedValue(BDSKComplexString *cxString)
 + (void)initialize{
     
     OBINITIALIZE;
-    
-    globalMacroDefs = [[NSMutableDictionary alloc] initWithObjects:[[NSUserDefaults standardUserDefaults] objectForKey:NSMonthNameArray]
-                                                               forKeys:[NSArray arrayWithObjects:@"jan", @"feb", @"mar", @"apr", @"may", @"jun", @"jul", @"aug", @"sep", @"oct", @"nov", @"dec", nil]];
     
     NSMutableCharacterSet *tmpSet = [[NSMutableCharacterSet alloc] init];
     [tmpSet addCharactersInRange:NSMakeRange(48,10)]; // 0-9

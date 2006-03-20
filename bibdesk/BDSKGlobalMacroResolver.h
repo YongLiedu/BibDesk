@@ -41,6 +41,7 @@
 
 
 @interface BDSKGlobalMacroResolver : NSObject <BDSKMacroResolver> {
+    NSMutableDictionary *standardMacroDefinitions;
     NSMutableDictionary *macroDefinitions;
 }
 

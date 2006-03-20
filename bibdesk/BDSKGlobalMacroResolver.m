@@ -42,7 +42,9 @@
 
 @implementation BDSKGlobalMacroResolver
 
-static BDSKGlobalMacroResolver *defaultMacroResolver = nil;
+// stores system-defined macros for the months.
+// we grab their localized versions for display.
+static BDSKGlobalMacroResolver *defaultMacroResolver; 
 
 + (BDSKGlobalMacroResolver *)defaultMacroResolver{
     if(defaultMacroResolver == nil)
@@ -52,7 +54,13 @@ static BDSKGlobalMacroResolver *defaultMacroResolver = nil;
 
 - (id)init{
     if (self = [super init]) {
-        macroDefinitions = [[NSMutableDictionary alloc] initWithCapacity:10];
+        // Note we treat upper and lowercase values the same, 
+        // because that's how btparse gives the string constants to us.
+        // It is not quite correct because bibtex does discriminate,
+        // but this is the best we can do.  The OFCreateCaseInsensitiveKeyMutableDictionary()
+        // is used to create a dictionary with case-insensitive keys.
+        standardMacroDefinitions = (NSMutableDictionary *)BDSKCreateCaseInsensitiveKeyMutableDictionary();
+        macroDefinitions = (NSMutableDictionary *)BDSKCreateCaseInsensitiveKeyMutableDictionary();
         [self loadMacrosFromPreferences];
     }
     return self;
@@ -64,17 +72,30 @@ static BDSKGlobalMacroResolver *defaultMacroResolver = nil;
 }
 
 - (void)loadMacrosFromPreferences{
-    // legacy, load old style prefs
-    NSDictionary *macros = [[OFPreferenceWrapper sharedPreferenceWrapper] dictionaryForKey:BDSKBibStyleMacroDefinitionsKey];
-    [macroDefinitions addEntriesFromDictionary:macros];
+    // stores system-defined macros for the months.
+    // we grab their localized versions for display.
+    NSDictionary *standardDefs = [NSDictionary dictionaryWithObjects:[[NSUserDefaults standardUserDefaults] objectForKey:NSMonthNameArray]
+                                                             forKeys:[NSArray arrayWithObjects:@"jan", @"feb", @"mar", @"apr", @"may", @"jun", @"jul", @"aug", @"sep", @"oct", @"nov", @"dec", nil]];
+    [standardMacroDefinitions addEntriesFromDictionary:standardDefs];
     
-    macros = [[OFPreferenceWrapper sharedPreferenceWrapper] dictionaryForKey:BDSKGlobalMacroDefinitionsKey];
+    OFPreferenceWrapper *pw = [OFPreferenceWrapper sharedPreferenceWrapper];
+    // legacy, load old style prefs
+    NSDictionary *oldMacros = [pw dictionaryForKey:BDSKBibStyleMacroDefinitionsKey];
+    if (oldMacros)
+        [macroDefinitions addEntriesFromDictionary:oldMacros];
+    
+    NSDictionary *macros = [pw dictionaryForKey:BDSKGlobalMacroDefinitionsKey];
     NSEnumerator *keyEnum = [macros keyEnumerator];
     NSString *key;
     
     while (key = [keyEnum nextObject]) {
         [macroDefinitions setObject:[NSString complexStringWithBibTeXString:[macros objectForKey:key] macroResolver:self]
                              forKey:key];
+    }
+    if(oldMacros){
+        // we remove the old style prefs, as they are now merged with the new ones
+        [pw removeObjectForKey:BDSKBibStyleMacroDefinitionsKey];
+        [self synchronizePreferences];
     }
 }
 
@@ -89,6 +110,7 @@ static BDSKGlobalMacroResolver *defaultMacroResolver = nil;
     [[OFPreferenceWrapper sharedPreferenceWrapper] setObject:macros forKey:BDSKGlobalMacroDefinitionsKey];
 }
 
+// should we create an undomanager?
 - (NSUndoManager *)undoManager{
     return nil;
 }
@@ -188,12 +210,10 @@ static BDSKGlobalMacroResolver *defaultMacroResolver = nil;
 }
 
 - (NSString *)valueOfMacro:(NSString *)macroString{
-    // Note we treat upper and lowercase values the same, 
-    // because that's how btparse gives the string constants to us.
-    // It is not quite correct because bibtex does discriminate,
-    // but this is the best we can do.  The OFCreateCaseInsensitiveKeyMutableDictionary()
-    // is used to create a dictionary with case-insensitive keys.
-    return [macroDefinitions objectForKey:macroString];
+    NSString *value = [macroDefinitions objectForKey:macroString];
+    if(value == nil)
+        value = [standardMacroDefinitions objectForKey:macroString];
+    return value;
 }
 
 @end
