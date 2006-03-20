@@ -64,9 +64,6 @@ static NSString * checkAndTranslateString(NSString *s, int line, NSString *fileP
 // becomes an autoreleased array of dicts of different types.
 static NSString *stringFromBTField(AST *field,  NSString *fieldName,  NSString *filePath, id <BDSKMacroResolver> theDocument, NSStringEncoding parserEncoding);
 
-// private function to check if a macro definition leads to a circular definition.
-static BOOL isCircularMacro(NSString *macroKey, NSString *macroString, id <BDSKMacroResolver> document);
-
 @end
 
 @implementation BibTeXParser
@@ -169,7 +166,7 @@ static BOOL isCircularMacro(NSString *macroKey, NSString *macroString, id <BDSKM
                         NSString *macroKey = [NSString stringWithCString: field->text usingEncoding:parserEncoding];
                         NSString *macroString = stringFromBTField(field, sFieldName, filePath, aDocument, parserEncoding); // handles TeXification
                         id macroResolver = (aDocument) ? aDocument : [BDSKGlobalMacroResolver defaultMacroResolver];
-                        if(isCircularMacro(macroKey, macroString, macroResolver))
+                        if([BDSKComplexString isCircularMacro:macroKey forDefinition:macroString macroResolver:macroResolver])
                             NSLog(@"Macro leads to circular definition, ignored: %@ = %@", macroKey, [macroString stringAsBibTeXString]);
                         else
                             [macroResolver addMacroDefinitionWithoutUndo:macroString forMacro:macroKey];
@@ -344,7 +341,7 @@ static BOOL isCircularMacro(NSString *macroKey, NSString *macroString, id <BDSKM
         field = bt_next_field(entry, NULL, &fieldName);
         macroKey = [NSString stringWithCString: field->text usingEncoding:NSUTF8StringEncoding];
         macroString = stringFromBTField(field, nil, @"Paste/Drag", aDocument, NSUTF8StringEncoding); // handles TeXification
-        if(isCircularMacro(macroKey, macroString, aDocument))
+        if([BDSKComplexString isCircularMacro:macroKey forDefinition:macroString macroResolver:aDocument])
             NSLog(@"Macro leads to circular definition, ignored: %@ = %@", macroKey, [macroString stringAsBibTeXString]);
         else
             [retDict setObject:macroString forKey:macroKey];
@@ -455,7 +452,7 @@ static BOOL isCircularMacro(NSString *macroKey, NSString *macroString, id <BDSKM
         
         key = [key stringByRemovingSurroundingWhitespace];
         value = [NSString complexStringWithBibTeXString:value macroResolver:macroResolver];
-        if(isCircularMacro(key, value, macroResolver))
+        if([BDSKComplexString isCircularMacro:key forDefinition:value macroResolver:macroResolver])
             NSLog(@"Macro leads to circular definition, ignored: %@ = %@", key, [value stringAsBibTeXString]);
         else
             [bstMacros setObject:value forKey:key];
@@ -665,45 +662,4 @@ static NSString *stringFromBTField(AST *field, NSString *fieldName, NSString *fi
     [stringValueArray release];
     
     return returnValue;
-}
-
-static BOOL isCircularMacro(NSString *macroKey, NSString *macroString, id <BDSKMacroResolver> document){
-    if([macroString isComplex] == NO)
-        return NO;
-    NSMutableArray *descendents = [NSMutableArray arrayWithObject:macroString];
-    
-    while([descendents count] > 0){
-        NSArray *values = [descendents copy];
-        NSEnumerator *valueE = [values objectEnumerator];
-        NSString *value;
-        
-        [values release];
-        [descendents removeAllObjects];
-        
-        while(value = [valueE nextObject]){
-            if([value isComplex] == NO || [(BDSKComplexString *)value macroResolver] != document)
-                continue;
-            
-            NSArray *nodes = [(BDSKComplexString *)value nodes];
-            NSEnumerator *nodeE = [nodes objectEnumerator];
-            BDSKStringNode *node;
-            
-            while(node = [nodeE nextObject]){
-                if([node type] != BSN_MACRODEF)
-                    continue;
-                
-                NSString *key = [node value];
-                
-                if([key caseInsensitiveCompare:macroKey] == NSOrderedSame)
-                    return YES;
-                if(document)
-                    value = [document valueOfMacro:key];
-                else
-                    value = key;// get from prefs
-                if(value != nil)
-                    [descendents addObject:value];
-            }
-        }
-    }
-    return NO;
 }

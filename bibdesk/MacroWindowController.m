@@ -293,6 +293,16 @@
 			return;
 		}
 		
+        NSDictionary *macroDefinitions = [(id <BDSKMacroResolver>)macroDataSource macroDefinitions];
+		if([BDSKComplexString isCircularMacro:object forDefinition:[macroDefinitions objectForKey:key] macroResolver:macroDataSource]){
+			NSRunAlertPanel(NSLocalizedString(@"Circular Macro", @"Circular Macro"),
+							NSLocalizedString(@"The macro you try to define would lead to circular definition.", @""),
+							NSLocalizedString(@"OK", @"OK"), nil, nil);
+			
+			[tableView reloadData];
+			return;
+		}
+		
         [(id <BDSKMacroResolver>)macroDataSource changeMacroKey:key to:object];
 		
 		[undoMan setActionName:NSLocalizedString(@"Change Macro Key", @"change macro key action name for undo")];
@@ -310,6 +320,16 @@
 			return;
 		}
 		
+		
+		if([BDSKComplexString isCircularMacro:key forDefinition:object macroResolver:macroDataSource]){
+			NSRunAlertPanel(NSLocalizedString(@"Circular Macro", @"Circular Macro"),
+							NSLocalizedString(@"The macro you try to define would lead to circular definition.", @""),
+							NSLocalizedString(@"OK", @"OK"), nil, nil);
+			
+			[tableView reloadData];
+			return;
+		}
+        
 		[(id <BDSKMacroResolver>)macroDataSource setMacroDefinition:object forMacro:key];
 		
 		[undoMan setActionName:NSLocalizedString(@"Change Macro Definition", @"change macrodef action name for undo")];
@@ -364,6 +384,7 @@
 		document = (BibDocument *)macroDataSource;
 	
     BOOL hadProblems = NO;
+    BOOL hadCircular = NO;
     NSMutableDictionary *defs = [NSMutableDictionary dictionary];
     
     if([aString rangeOfString:@"@string" options:NSCaseInsensitiveSearch].location != NSNotFound)
@@ -377,11 +398,20 @@
     
     while(macroKey = [e nextObject]){
         macroString = [defs objectForKey:macroKey];
-        [(id <BDSKMacroResolver>)macroDataSource setMacroDefinition:macroString forMacro:macroKey];
-		[[[self window] undoManager] setActionName:NSLocalizedString(@"Change Macro Definition", @"change macrodef action name for undo")];
+        if([BDSKComplexString isCircularMacro:macroKey forDefinition:macroString macroResolver:macroDataSource] == NO)
+            [(id <BDSKMacroResolver>)macroDataSource setMacroDefinition:macroString forMacro:macroKey];
+		else
+            hadCircular = YES;
+        [[[self window] undoManager] setActionName:NSLocalizedString(@"Change Macro Definition", @"change macrodef action name for undo")];
     }
     [self refreshMacros];
     [tableView reloadData];
+    
+    if(hadCircular){
+        NSRunAlertPanel(NSLocalizedString(@"Circular Macros", @"Circular Macros"),
+                        NSLocalizedString(@"Some macros you try to define would lead to circular definition and were ignored.", @""),
+                        NSLocalizedString(@"OK", @"OK"), nil, nil);
+    }
     return !hadProblems;
 }
 
