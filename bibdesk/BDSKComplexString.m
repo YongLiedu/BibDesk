@@ -38,6 +38,7 @@
 #import <OmniFoundation/NSMutableString-OFExtensions.h>
 #import <OmniBase/OmniBase.h>
 #import "BDSKStringNode.h"
+#import "BDSKGlobalMacroResolver.h"
 
 #pragma mark -
 #pragma mark Private complex string expansion
@@ -74,7 +75,7 @@ CFStringRef __BDResolveMacro(id <BDSKMacroResolver>macroResolver, CFStringRef no
     // there was no expansion. Check the system global dict first.
     expandedValue = (CFStringRef)[globalMacroDefs objectForKey:(NSString *)nodeVal];
 
-    return expandedValue ? expandedValue : __BDGetValueOfMacroFromPreferences(nodeVal);
+    return expandedValue ? expandedValue : (CFStringRef)[[BDSKGlobalMacroResolver defaultMacroResolver] valueOfMacro:(NSString *)nodeVal];
 }   
 
 /*
@@ -183,7 +184,7 @@ CFStringRef __BDStringCreateByCopyingExpandedValue(BDSKComplexString *cxString)
 		if(theMacroResolver) {
 			macroResolver = theMacroResolver;
 		} else {
-            //OBPRECONDITION(macroResolver != nil);
+            macroResolver = [BDSKGlobalMacroResolver defaultMacroResolver];
 		}
 		complex = YES;
 	}		
@@ -200,7 +201,7 @@ CFStringRef __BDStringCreateByCopyingExpandedValue(BDSKComplexString *cxString)
 			nodes = [[NSArray allocWithZone:[self zone]] initWithArray:[(BDSKComplexString *)aValue nodes] copyItems:YES];
 			macroResolver = [(BDSKComplexString *)aValue macroResolver];
 			if (macroResolver == nil) {
-                //OBPRECONDITION(macroResolver != nil);
+                macroResolver = [BDSKGlobalMacroResolver defaultMacroResolver];
 			}
 			complex = YES;
 		} else {
