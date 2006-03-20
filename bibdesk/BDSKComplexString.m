@@ -69,13 +69,12 @@ static inline
 CFStringRef __BDResolveMacro(id <BDSKMacroResolver>macroResolver, CFStringRef nodeVal)
 {
     CFStringRef expandedValue = nil;
-    if(macroResolver && (expandedValue = (CFStringRef)[macroResolver valueOfMacro:(NSString *)nodeVal]))
+    if(macroResolver == nil)
+        macroResolver = [BDSKGlobalMacroResolver defaultMacroResolver];
+    if(expandedValue = (CFStringRef)[macroResolver valueOfMacro:(NSString *)nodeVal])
         return expandedValue;
-
-    // there was no expansion. Check the system global dict first.
-    expandedValue = (CFStringRef)[globalMacroDefs objectForKey:(NSString *)nodeVal];
-
-    return expandedValue ? expandedValue : (CFStringRef)[[BDSKGlobalMacroResolver defaultMacroResolver] valueOfMacro:(NSString *)nodeVal];
+    
+    return (CFStringRef)[globalMacroDefs objectForKey:(NSString *)nodeVal];
 }   
 
 /*
