@@ -495,6 +495,10 @@ enum {
 
     NSMutableDictionary *existingMacros = [[self macroDefinitions] mutableCopy];
     NSString *currentDef = [existingMacros objectForKey:macroKey];
+    if(currentDef == nil){
+        [self addMacroDefinition:newDefinition forMacro:macroKey];
+        return;
+    }
     [[[self undoManager] prepareWithInvocationTarget:self]
             setMacroDefinition:currentDef forMacro:macroKey];
     [existingMacros setObject:newDefinition forKey:macroKey];

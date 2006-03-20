@@ -3097,6 +3097,10 @@ NSString *BDSKBibItemPboardType = @"edu.ucsd.mmccrack.bibdesk BibItem pboard typ
 
 - (void)setMacroDefinition:(NSString *)newDefinition forMacro:(NSString *)macroKey{
     NSString *oldDef = [macroDefinitions objectForKey:macroKey];
+    if(oldDef == nil){
+        [self addMacroDefinition:newDefinition forMacro:macroKey];
+        return;
+    }
     // we're just changing an existing one, so to undo, we change back.
     [[[self undoManager] prepareWithInvocationTarget:self]
             setMacroDefinition:oldDef forMacro:macroKey];
