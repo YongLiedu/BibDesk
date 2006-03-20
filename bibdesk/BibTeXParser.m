@@ -50,6 +50,7 @@
 #import "BibAuthor.h"
 #import "BDSKErrorObjectController.h"
 #import "BDSKStringNode.h"
+#import "BDSKGlobalMacroResolver.h"
 
 static NSString *BibTeXParserInternalException = @"BibTeXParserInternalException";
 
@@ -162,48 +163,10 @@ static NSString *stringFromBTField(AST *field,  NSString *fieldName,  NSString *
                         
                         // get the field name
                         field = bt_next_field (entry, NULL, &fieldname);
-                        NSString *macroKey = [[NSString alloc] initWithCString:field->text usingEncoding:parserEncoding];
-                        
-                        AST *value = NULL;
-                        bt_nodetype type;
-                        bt_nodetype prev_type = BTAST_BOGUS;
-                        BOOL paste = NO;
-                        NSMutableString *macroString = [[NSMutableString alloc] initWithCapacity:10];
-                        
-                        // we need to traverse the AST to get each component of the field's value
-                        while(value = bt_next_value(field, value, &type, NULL)){
-                            char *text = value->text;
-                            if(text){
-#warning FIXME
-                                /* This is almost correct, but I'm not sure where the error is now.
-                                
-                                @STRING{IEEE_CU_GLOBECOM = "IEEE Global Telecommun. Conf. (GLOBECOM)" }
-                                @STRING{IEEE_C_GLOBECOM = "Proc. " # IEEE_CU_GLOBECOM }
-                                
-                                loading this and then saving it gives
-                                
-                                @STRING{ieee_c_globecom = "Proc. " # IEEE_CU_GLOBECOM"}
-                                @STRING{ieee_cu_globecom = "IEEE Global Telecommun. Conf. (GLOBECOM)"}
-
-                                which has incorrect quoting in the first @string.  This may need to be fixed
-                                elsewhere in the macro code; I'm fairly sure we don't expand macros in @strings,
-                                but we should at least try to write this out correctly */
-                                
-                                // only strings should be quoted
-                                if(paste && prev_type == BTAST_STRING) [macroString appendString:@"\""];
-                                if(paste)[macroString appendString:@" # "];
-                                
-                                tmpStr = [[NSString alloc] initWithCString:text usingEncoding:parserEncoding];
-                                [macroString appendString:tmpStr];
-                                [tmpStr release];
-                                paste = YES;
-                            }
-                            prev_type = type;
-                        }
-                        
-                        if(aDocument)[aDocument addMacroDefinitionWithoutUndo:macroString forMacro:macroKey];
-                        [macroKey release];
-                        [macroString release];
+                        NSString *macroKey = [NSString stringWithCString: field->text usingEncoding:parserEncoding];
+                        NSString *macroString = stringFromBTField(field, sFieldName, filePath, aDocument, parserEncoding); // handles TeXification
+                        id macroResolver = (aDocument) ? aDocument : [BDSKGlobalMacroResolver defaultMacroResolver];
+                        [macroResolver addMacroDefinitionWithoutUndo:macroString forMacro:macroKey];
 
                     }else if(frontMatter && [entryType isEqualToString:@"comment"]){
                         NSMutableString *commentStr = [[NSMutableString alloc] init];
@@ -361,8 +324,7 @@ static NSString *stringFromBTField(AST *field,  NSString *fieldName,  NSString *
     NSString *macroString;
     
     FILE *stream = [[aString dataUsingEncoding:NSUTF8StringEncoding] openReadOnlyStandardIOFile];
-#warning FIXME
-// macro parsing is not correct here; need to traverse the AST
+    
     while(entry = bt_parse_entry(stream, NULL, 0, &ok)){
         if(entry == NULL && ok) // this is the exit condition
             break;
@@ -375,8 +337,7 @@ static NSString *stringFromBTField(AST *field,  NSString *fieldName,  NSString *
             break;
         field = bt_next_field(entry, NULL, &fieldName);
         macroKey = [NSString stringWithCString: field->text usingEncoding:NSUTF8StringEncoding];
-        macroString = [NSString stringWithCString: field->down->text usingEncoding:NSUTF8StringEncoding];
-		macroString = checkAndTranslateString(macroString, field->line, @"Paste/Drag", NSUTF8StringEncoding); // check for bad characters, TeXify
+        macroString = stringFromBTField(field, nil, @"Paste/Drag", aDocument, NSUTF8StringEncoding); // handles TeXification
         [retDict setObject:macroString forKey:macroKey];
         
         bt_free_ast(entry);
@@ -722,3 +683,43 @@ static NSString *stringFromBTField(AST *field, NSString *fieldName, NSString *fi
     return returnValue;
 }
 
+static BOOL isCircularMacro(NSString *macroKey, NSString *macroString, id <BDSKMacroResolver> document){
+    if([macroString isComplex] == NO)
+        return NO;
+    NSMutableArray *descendents = [NSMutableArray arrayWithObject:macroString];
+    
+    while([descendents count] > 0){
+        NSArray *values = [descendents copy];
+        NSEnumerator *valueE = [values objectEnumerator];
+        NSString *value;
+        
+        [values release];
+        [descendents removeAllObjects];
+        
+        while(value = [valueE nextObject]){
+            if([value isComplex] == NO || [(BDSKComplexString *)value macroResolver] != document)
+                continue;
+            
+            NSArray *nodes = [(BDSKComplexString *)value nodes];
+            NSEnumerator *nodeE = [nodes objectEnumerator];
+            BDSKStringNode *node;
+            
+            while(node = [nodeE nextObject]){
+                if([node type] != BSN_MACRODEF)
+                    continue;
+                
+                NSString *key = [node value];
+                
+                if([key caseInsensitiveCompare:macroKey] == NSOrderedSame)
+                    return YES;
+                if(document)
+                    value = [document valueOfMacro:key];
+                else
+                    value = key;// get from prefs
+                if(value != nil)
+                    [descendents addObject:value];
+            }
+        }
+    }
+    return NO;
+}
