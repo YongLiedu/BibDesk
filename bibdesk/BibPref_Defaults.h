@@ -39,7 +39,7 @@
 #import "BDSKFieldNameFormatter.h"
 #import "MacroWindowController.h"
 
-@interface BibPref_Defaults : OAPreferenceClient <BDSKMacroResolver>
+@interface BibPref_Defaults : OAPreferenceClient
 {
     IBOutlet NSButton* delSelectedDefaultFieldButton;
     IBOutlet NSButton* addDefaultFieldButton;

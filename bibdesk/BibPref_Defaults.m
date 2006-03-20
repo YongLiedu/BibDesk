@@ -36,6 +36,7 @@
 #import "BibPref_Defaults.h"
 #import "BDSKTypeInfoEditor.h"
 #import "BibTeXParser.h"
+#import "BDSKGlobalMacroResolver.h"
 
 // this corresponds with the menu item order in the nib
 enum {
@@ -373,7 +374,7 @@ enum {
 - (IBAction)showMacrosWindow:(id)sender{
 	if (!macroWC){
 		macroWC = [[MacroWindowController alloc] init];
-		[macroWC setMacroDataSource:self];
+		[macroWC setMacroDataSource:[BDSKGlobalMacroResolver defaultMacroResolver]];
 	}
 	[NSApp beginSheet:[macroWC window]
        modalForWindow:[[self controlBox] window]
@@ -388,132 +389,6 @@ enum {
 
 - (NSUndoManager *)undoManager{
     return [[[OAPreferenceController sharedPreferenceController] window] undoManager];
-}
-
-- (NSDictionary *)macroDefinitions{
-    Boolean synced = CFPreferencesSynchronize(kCFPreferencesCurrentApplication, kCFPreferencesCurrentUser, kCFPreferencesCurrentHost);
-    if(synced == FALSE)
-        [NSException raise:NSInternalInconsistencyException format:@"failed to synchronize preferences"];
-
-    CFPropertyListRef dict = CFPreferencesCopyAppValue((CFStringRef)BDSKBibStyleMacroDefinitionsKey, kCFPreferencesCurrentApplication);
-    
-	if(dict == NULL)
-		return [NSDictionary dictionary];
-    else
-        return [(NSDictionary *)dict autorelease];
-}
-
-- (void)setMacroDefinitions:(NSDictionary *)newMacroDefinitions{
-    CFPreferencesSetAppValue((CFStringRef)BDSKBibStyleMacroDefinitionsKey, newMacroDefinitions, kCFPreferencesCurrentApplication);
-    Boolean synced = CFPreferencesSynchronize(kCFPreferencesCurrentApplication, kCFPreferencesCurrentUser, kCFPreferencesCurrentHost);
-    if(synced == FALSE)
-        [NSException raise:NSInternalInconsistencyException format:@"failed to synchronize preferences"];
-}
-
-- (void)addMacroDefinition:(NSString *)macroString forMacro:(NSString *)macroKey{
-    [[[self undoManager] prepareWithInvocationTarget:self] removeMacro:macroKey];
-    [self addMacroDefinitionWithoutUndo:macroString forMacro:macroKey];
-}
-
-- (void)addMacroDefinitionWithoutUndo:(NSString *)macroString forMacro:(NSString *)macroKey{
-    NSMutableDictionary *existingMacros = [[self macroDefinitions] mutableCopy];
-    [existingMacros setObject:macroString forKey:macroKey];
-    
-    CFPreferencesSetAppValue((CFStringRef)BDSKBibStyleMacroDefinitionsKey, existingMacros, kCFPreferencesCurrentApplication);
-    Boolean synced = CFPreferencesSynchronize(kCFPreferencesCurrentApplication, kCFPreferencesCurrentUser, kCFPreferencesCurrentHost);
-    if(synced == FALSE)
-        [NSException raise:NSInternalInconsistencyException format:@"failed to synchronize preferences"];
-    
-	[existingMacros release];
-	
-    NSDictionary *notifInfo = [NSDictionary dictionaryWithObjectsAndKeys:macroKey, @"macroKey", @"Add macro", @"type", nil];
-    [[NSNotificationCenter defaultCenter] postNotificationName:BDSKBibDocMacroDefinitionChangedNotification
-														object:self
-													  userInfo:notifInfo];
-}    
-
-- (NSString *)valueOfMacro:(NSString *)macro{
-    CFPropertyListRef dict = CFPreferencesCopyAppValue((CFStringRef)BDSKBibStyleMacroDefinitionsKey, kCFPreferencesCurrentApplication);
-    NSString *val = [(NSDictionary *)dict objectForKey:[macro lowercaseString]];
-    if(dict != NULL) CFRelease(dict);
-    return val;
-}
-
-- (void)removeMacro:(NSString *)macroKey{
-    NSMutableDictionary *existingMacros = [[self macroDefinitions] mutableCopy];
-    NSString *currentValue = [existingMacros objectForKey:macroKey];
-    
-    if(!currentValue){
-        return;
-    }else{
-        [[[self undoManager] prepareWithInvocationTarget:self]
-        addMacroDefinition:currentValue
-                  forMacro:macroKey];
-    }
-    [existingMacros removeObjectForKey:macroKey];
-    
-    CFPreferencesSetAppValue((CFStringRef)BDSKBibStyleMacroDefinitionsKey, existingMacros, kCFPreferencesCurrentApplication);
-    Boolean synced = CFPreferencesSynchronize(kCFPreferencesCurrentApplication, kCFPreferencesCurrentUser, kCFPreferencesCurrentHost);
-    if(synced == FALSE)
-        [NSException raise:NSInternalInconsistencyException format:@"failed to synchronize preferences"];
-	
-	[existingMacros release];
-	
-    NSDictionary *notifInfo = [NSDictionary dictionaryWithObjectsAndKeys:macroKey, @"macroKey", @"Remove macro", @"type", nil];
-    [[NSNotificationCenter defaultCenter] postNotificationName:BDSKBibDocMacroDefinitionChangedNotification
-														object:self
-													  userInfo:notifInfo];    
-}
-
-- (void)changeMacroKey:(NSString *)oldKey to:(NSString *)newKey{
-    NSMutableDictionary *existingMacros = [[self macroDefinitions] mutableCopy];
-    NSString *oldValue = [existingMacros objectForKey:oldKey];
-    if(oldValue == nil)
-        [NSException raise:NSInvalidArgumentException format:@"tried to change the value of a nonexistent macro key %@", oldKey];
-    [oldValue retain];
-
-    [existingMacros removeObjectForKey:oldKey];
-    [existingMacros setObject:oldValue forKey:newKey];
-    [oldValue release];
-
-    CFPreferencesSetAppValue((CFStringRef)BDSKBibStyleMacroDefinitionsKey, existingMacros, kCFPreferencesCurrentApplication);
-    Boolean synced = CFPreferencesSynchronize(kCFPreferencesCurrentApplication, kCFPreferencesCurrentUser, kCFPreferencesCurrentHost);
-    if(synced == FALSE)
-        [NSException raise:NSInternalInconsistencyException format:@"failed to synchronize preferences"];
-	
-	[existingMacros release];
-	
-    NSDictionary *notifInfo = [NSDictionary dictionaryWithObjectsAndKeys:newKey, @"newKey", oldKey, @"oldKey", nil];
-    [[NSNotificationCenter defaultCenter] postNotificationName:BDSKBibDocMacroKeyChangedNotification
-														object:self
-													  userInfo:notifInfo];
-}
-
-- (void)setMacroDefinition:(NSString *)newDefinition forMacro:(NSString *)macroKey{
-    if(!newDefinition)
-        [NSException raise:NSInvalidArgumentException format:@"attempt to set nil macro definition for key %@", macroKey];
-
-    NSMutableDictionary *existingMacros = [[self macroDefinitions] mutableCopy];
-    NSString *currentDef = [existingMacros objectForKey:macroKey];
-    if(currentDef == nil){
-        [self addMacroDefinition:newDefinition forMacro:macroKey];
-        return;
-    }
-    [[[self undoManager] prepareWithInvocationTarget:self]
-            setMacroDefinition:currentDef forMacro:macroKey];
-    [existingMacros setObject:newDefinition forKey:macroKey];
-    
-    CFPreferencesSetAppValue((CFStringRef)BDSKBibStyleMacroDefinitionsKey, existingMacros, kCFPreferencesCurrentApplication);
-    Boolean synced = CFPreferencesSynchronize(kCFPreferencesCurrentApplication, kCFPreferencesCurrentUser, kCFPreferencesCurrentHost);
-    if(synced == FALSE)
-        [NSException raise:NSInternalInconsistencyException format:@"failed to synchronize preferences"];
-	
-	[existingMacros release];
-	
-    NSDictionary *notifInfo = [NSDictionary dictionaryWithObjectsAndKeys:macroKey, @"macroKey", @"Change macro", @"type", nil];
-    [[NSNotificationCenter defaultCenter] postNotificationName:BDSKBibDocMacroDefinitionChangedNotification
-														object:self
-													  userInfo:notifInfo];
 }
 
 @end
