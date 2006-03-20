@@ -158,6 +158,7 @@ extern NSString *BDSKSnoopDrawerSavedSizeKey;
 extern NSString *BDSKShouldSaveNormalizedAuthorNamesKey;
 extern NSString *BDSKSaveAnnoteAndAbstractAtEndOfItemKey;
 extern NSString *BDSKBibStyleMacroDefinitionsKey;
+extern NSString *BDSKGlobalMacroDefinitionsKey;
 
 extern NSString *BDSKFindControllerDefaultFindAndReplaceTypeKey;
 extern NSString *BDSKFindControllerSearchScopeKey;

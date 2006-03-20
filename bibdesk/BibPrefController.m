@@ -172,6 +172,7 @@ NSString *BDSKSnoopDrawerSavedSizeKey = @"Saved size of BibEditor document snoop
 NSString *BDSKShouldSaveNormalizedAuthorNamesKey = @"Save normalized names in BibTeX files";
 NSString *BDSKSaveAnnoteAndAbstractAtEndOfItemKey = @"Save Annote and Abstract at End of Item";
 NSString *BDSKBibStyleMacroDefinitionsKey = @"Macro definitions from bib style file";
+NSString *BDSKGlobalMacroDefinitionsKey = @"BDSKGlobalMacroDefinitionsKey";
 
 NSString *BDSKFindControllerDefaultFindAndReplaceTypeKey = @"Default field for find and replace";
 NSString *BDSKFindControllerSearchScopeKey = @"Search scope for find and replace";
