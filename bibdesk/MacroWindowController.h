@@ -62,6 +62,9 @@
 
 - (IBAction)closeAction:(id)sender;
 
+- (IBAction)editSelectedFieldAsRawBibTeX:(id)sender;
+- (BOOL)editSelectedCellAsMacro;
+
 - (void)handleMacroKeyChangedNotification:(NSNotification *)notif;
 - (void)handleMacroChangedNotification:(NSNotification *)notif;
 

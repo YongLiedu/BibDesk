@@ -216,6 +216,15 @@
 
 #pragma mark Macro editing
 
+- (IBAction)editSelectedFieldAsRawBibTeX:(id)sender{
+	int row = [tableView selectedRow];
+	if (row == -1) 
+		return;
+    [self editSelectedCellAsMacro];
+	if([tableView editedRow] != row)
+		[tableView editColumn:1 row:row withEvent:nil select:YES];
+}
+
 - (BOOL)editSelectedCellAsMacro{
 	int row = [tableView selectedRow];
 	if ([macroTextFieldWC isEditing] || row == -1) 
@@ -273,7 +282,7 @@
     
     if([[tableColumn identifier] isEqualToString:@"macro"]){
         // do nothing if there was no change.
-        if([key isEqualAsComplexString:object]) return;
+        if([key isEqualToString:object]) return;
                 
 		if([object isEqualToString:@""]){
 			NSRunAlertPanel(NSLocalizedString(@"Empty Macro", @"Empty Macro"),
@@ -296,7 +305,7 @@
         NSDictionary *macroDefinitions = [(id <BDSKMacroResolver>)macroDataSource macroDefinitions];
 		if([BDSKComplexString isCircularMacro:object forDefinition:[macroDefinitions objectForKey:key] macroResolver:macroDataSource]){
 			NSRunAlertPanel(NSLocalizedString(@"Circular Macro", @"Circular Macro"),
-							NSLocalizedString(@"The macro you try to define would lead to circular definition.", @""),
+							NSLocalizedString(@"The macro you try to define would lead to a circular definition.", @""),
 							NSLocalizedString(@"OK", @"OK"), nil, nil);
 			
 			[tableView reloadData];
@@ -309,7 +318,7 @@
 
     }else{
         // do nothing if there was no change.
-        if([[macroDefinitions objectForKey:key] isEqualToString:object]) return;
+        if([[macroDefinitions objectForKey:key] isEqualAsComplexString:object]) return;
         
 		if(![object isStringTeXQuotingBalancedWithBraces:YES connected:NO]){
 			NSRunAlertPanel(NSLocalizedString(@"Invalid Value", @"Invalid Value"),
@@ -323,7 +332,7 @@
 		
 		if([BDSKComplexString isCircularMacro:key forDefinition:object macroResolver:macroDataSource]){
 			NSRunAlertPanel(NSLocalizedString(@"Circular Macro", @"Circular Macro"),
-							NSLocalizedString(@"The macro you try to define would lead to circular definition.", @""),
+							NSLocalizedString(@"The macro you try to define would lead to a circular definition.", @""),
 							NSLocalizedString(@"OK", @"OK"), nil, nil);
 			
 			[tableView reloadData];
@@ -334,6 +343,14 @@
 		
 		[undoMan setActionName:NSLocalizedString(@"Change Macro Definition", @"change macrodef action name for undo")];
     }
+}
+
+#pragma mark tableview delegate methods
+
+- (void)tableView:(NSTableView *)tv willDisplayCell:(id)cell forTableColumn:(NSTableColumn *)tableColumn row:(int)row{
+	if([[tableColumn identifier] isEqualToString:@"definition"]){
+        [tableCellFormatter setHighlighted:[tv isRowSelected:row]];
+	}
 }
 
 #pragma mark || dragging operations
@@ -409,7 +426,7 @@
     
     if(hadCircular){
         NSRunAlertPanel(NSLocalizedString(@"Circular Macros", @"Circular Macros"),
-                        NSLocalizedString(@"Some macros you try to define would lead to circular definition and were ignored.", @""),
+                        NSLocalizedString(@"Some macros you try to define would lead to circular definitions and were ignored.", @""),
                         NSLocalizedString(@"OK", @"OK"), nil, nil);
     }
     return !hadProblems;
