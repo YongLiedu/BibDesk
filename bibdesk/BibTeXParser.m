@@ -383,6 +383,8 @@ static NSString *stringFromBTField(AST *field,  NSString *fieldName,  NSString *
 + (NSDictionary *)macrosFromBibTeXStyle:(NSString *)styleContents document:(BibDocument *)aDocument{
 	[[BDSKErrorObjectController sharedErrorObjectController] setDocumentForErrors:aDocument];
     
+    id macroResolver = (aDocument) ? aDocument : [BDSKGlobalMacroResolver defaultMacroResolver];
+    
     NSScanner *scanner = [[NSScanner alloc] initWithString:styleContents];
     [scanner setCharactersToBeSkipped:nil];
     
@@ -418,63 +420,32 @@ static NSString *stringFromBTField(AST *field,  NSString *fieldName,  NSString *
         if(![scanner scanString:@"{" intoString:nil] || [scanner isAtEnd])
 			continue;
 		
-		ch = [styleContents characterAtIndex:[scanner scanLocation]];
         value = [NSMutableString string];
-		
-		if(ch == '{'){
-			
-			[scanner setScanLocation:[scanner scanLocation] + 1];
-			nesting = 1;
-			while(nesting > 0 && ![scanner isAtEnd]){
-				if([scanner scanUpToCharactersFromSet:bracesCharSet intoString:&s])
-					[value appendString:s];
-				if([scanner isAtEnd]) break;
-				if([styleContents characterAtIndex:[scanner scanLocation] - 1] != '\\'){
-					// we found an unquoted brace
-					ch = [styleContents characterAtIndex:[scanner scanLocation]];
-					if(ch == '}'){
-						--nesting;
-					}else{
-						++nesting;
-					}
-					if (nesting > 0) // we don't include the outer braces
-						[value appendFormat:@"%C",ch];
-				}
-				[scanner setScanLocation:[scanner scanLocation] + 1];
-			}
-			if(nesting > 0){
-				//NSLog(@"Unbalanced braces in macro definition.");
-				continue;
-			}
-			
-		}else if(ch == '"'){
-			
-			[scanner setScanLocation:[scanner scanLocation] + 1];
-			nesting = 1;
-			while(nesting > 0 && ![scanner isAtEnd]){
-				if ([scanner scanUpToString:@"\"" intoString:&s])
-					[value appendString:s];
-				if(![scanner isAtEnd]){
-					if([styleContents characterAtIndex:[scanner scanLocation] - 1] == '\\')
-						[value appendString:@"\""];
-					else 
-						nesting = 0;
-					[scanner setScanLocation:[scanner scanLocation] + 1];
-				}
-			}
-			if(nesting > 0 || ![value isStringTeXQuotingBalancedWithBraces:YES connected:NO]){
-				//NSLog(@"Unbalanced braces in macro definition");
-				continue;
-			}
-			
-		}else{
-			//NSLog(@"Missing braces around macro definition");
-			continue;
-		}
+        nesting = 1;
+        while(nesting > 0 && ![scanner isAtEnd]){
+            if([scanner scanUpToCharactersFromSet:bracesCharSet intoString:&s])
+                [value appendString:s];
+            if([scanner isAtEnd]) break;
+            if([styleContents characterAtIndex:[scanner scanLocation] - 1] != '\\'){
+                // we found an unquoted brace
+                ch = [styleContents characterAtIndex:[scanner scanLocation]];
+                if(ch == '}'){
+                    --nesting;
+                }else{
+                    ++nesting;
+                }
+                if (nesting > 0) // we don't include the outer braces
+                    [value appendFormat:@"%C",ch];
+            }
+            [scanner setScanLocation:[scanner scanLocation] + 1];
+        }
+        if(nesting > 0)
+            continue;
         
         [value removeSurroundingWhitespace];
         
-        [bstMacros setObject:value forKey:[key stringByRemovingSurroundingWhitespace]];
+        [bstMacros setObject:[NSString complexStringWithBibTeXString:value macroResolver:macroResolver]
+                      forKey:[key stringByRemovingSurroundingWhitespace]];
 		
     }
 	
