@@ -40,11 +40,16 @@
 #import "BibPrefController.h" // for notification name declarations
 #import <OmniFoundation/NSUndoManager-OFExtensions.h> // for isUndoingOrRedoing
 #import <OmniFoundation/NSString-OFExtensions.h>
+#import "MacroTextFieldWindowController.h"
+
+@class BDSKFormCellFormatter;
 
 @interface MacroWindowController : NSWindowController {
     id macroDataSource;
     NSMutableArray *macros;
     IBOutlet NSTableView *tableView;
+	BDSKFormCellFormatter *tableCellFormatter;
+	MacroTableViewWindowController *macroTextFieldWC;
 }
 
 - (void)setMacroDataSource:(id)newMacroDataSource;

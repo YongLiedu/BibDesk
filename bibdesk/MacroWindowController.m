@@ -40,6 +40,7 @@
 #import "NSString_BDSKExtensions.h"
 #import "OmniFoundation/NSData-OFExtensions.h"
 #import "BibTeXParser.h"
+#import "BDSKFormCellFormatter.h"
 
 #import <OmniAppKit/OATypeAheadSelectionHelper.h>
 #import "OATypeAheadSelectionHelper_Extensions.h"
@@ -52,6 +53,8 @@
         // a shadow array to keep the macro keys of the document.
         macros = [[NSMutableArray alloc] initWithCapacity:5];
                 
+		tableCellFormatter = [[BDSKFormCellFormatter alloc] initWithDelegate:self macroResolver:nil];
+		macroTextFieldWC = [[MacroTableViewWindowController alloc] init];
     }
     return self;
 }
@@ -59,6 +62,8 @@
 - (void)dealloc{
     [[NSNotificationCenter defaultCenter] removeObserver:self];
     [macros release];
+    [tableCellFormatter release];
+	[macroTextFieldWC release];
     [super dealloc];
 }
 
@@ -68,6 +73,8 @@
         [[self window] setTitle:[NSString stringWithFormat:@"%@: %@", [[self window] title], [[self macroDataSource] displayName]]];
     [[tc dataCell] setFormatter:[[[MacroKeyFormatter alloc] init] autorelease]];
     [tableView registerForDraggedTypes:[NSArray arrayWithObject:NSStringPboardType]];
+    tc = [tableView tableColumnWithIdentifier:@"definition"];
+    [[tc dataCell] setFormatter:tableCellFormatter];
     [tableView reloadData];
 }
 
@@ -84,6 +91,7 @@
     }
 	
 	macroDataSource = newMacroDataSource;
+    [tableCellFormatter setMacroResolver:newMacroDataSource];
     // register to listen for changes in the macros.
     // mostly used to correctly catch undo changes.
     // there are 4 notifications, but for now our 
@@ -206,6 +214,38 @@
 	}
 }
 
+#pragma mark Macro editing
+
+- (BOOL)editSelectedCellAsMacro{
+	int row = [tableView selectedRow];
+	if ([macroTextFieldWC isEditing] || row == -1) 
+		return NO;
+    NSDictionary *macroDefinitions = [(id <BDSKMacroResolver>)macroDataSource macroDefinitions];
+    NSString *key = [macros objectAtIndex:row];
+	NSString *value = [macroDefinitions objectForKey:key];
+	NSText *fieldEditor = [tableView currentEditor];
+	[tableCellFormatter setEditAsComplexString:YES];
+	if (fieldEditor) {
+		[fieldEditor setString:[tableCellFormatter editingStringForObjectValue:value]];
+		[[[tableView tableColumnWithIdentifier:@"value"] dataCellForRow:row] setObjectValue:value];
+		[fieldEditor selectAll:self];
+	}
+	return [macroTextFieldWC attachToView:tableView atRow:row column:1 withValue:value];
+}
+
+#pragma mark BDSKMacroFormatter delegate
+
+- (BOOL)formatter:(BDSKFormCellFormatter *)formatter shouldEditAsComplexString:(NSString *)object {
+	return [self editSelectedCellAsMacro];
+}
+
+#pragma mark NSControl text delegate
+
+- (void)controlTextDidEndEditing:(NSNotification *)aNotification {
+	if ([aNotification object] == tableView)
+		[tableCellFormatter setEditAsComplexString:NO];
+}
+
 #pragma mark tableView datasource methods
 
 - (int)numberOfRowsInTableView:(NSTableView *)tv{
@@ -233,7 +273,7 @@
     
     if([[tableColumn identifier] isEqualToString:@"macro"]){
         // do nothing if there was no change.
-        if([key isEqualToString:object]) return;
+        if([key isEqualAsComplexString:object]) return;
                 
 		if([object isEqualToString:@""]){
 			NSRunAlertPanel(NSLocalizedString(@"Empty Macro", @"Empty Macro"),
