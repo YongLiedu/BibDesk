@@ -39,6 +39,7 @@
 #import "NSTableView_BDSKExtensions.h"
 #import "BDSKFieldEditor.h"
 #import "BibPrefController.h"
+#import "NSBezierPath_BDSKExtensions.h"
 
 @implementation NSTableView (BDSKExtensions)
 
@@ -279,6 +280,35 @@ static IMP originalDealloc;
         float fontSize = [[OFPreferenceWrapper sharedPreferenceWrapper] floatForKey:fontSizePrefKey];
         [[NSFontManager sharedFontManager] setSelectedFont:[NSFont fontWithName:fontName size:fontSize] isMultiple:NO];
 	}
+}
+
+// we override this private method to draw something nicer than the default ugly black square
+// from http://www.cocoadev.com/index.pl?UglyBlackHighlightRectWhenDraggingToNSTableView
+// modified to use -intercellSpacing and save/restore graphics state
+
+-(void)_drawDropHighlightOnRow:(int)rowIndex{
+    NSColor *highlightColor = [NSColor alternateSelectedControlColor];
+    float lineWidth = 2.0;
+    
+    [self lockFocus];
+    [NSGraphicsContext saveGraphicsState];
+    
+    NSRect drawRect = (rowIndex == -1) ? [self visibleRect] : [self rectOfRow:rowIndex];
+    
+    drawRect = NSInsetRect(drawRect, lineWidth/2.0, lineWidth/2.0);
+    
+    NSBezierPath *path = [NSBezierPath bezierPathWithRoundRectInRect:drawRect radius:4.0];
+    
+    [path setLineWidth:lineWidth];
+    
+    [[highlightColor colorWithAlphaComponent:0.2] set];
+    [path fill];
+    
+    [[highlightColor colorWithAlphaComponent:0.8] set];
+    [path stroke];
+    
+    [NSGraphicsContext restoreGraphicsState];
+    [self unlockFocus];
 }
 
 @end
