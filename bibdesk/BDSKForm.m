@@ -41,6 +41,7 @@
 #import "NSImage+Toolbox.h"
 #import "BibEditor.h"
 #import "BDSKFieldEditor.h"
+#import "NSBezierPath_BDSKExtensions.h"
 
 // private methods for getting the rect(s) of each cell in the matrix
 @interface BDSKForm (Private)
@@ -79,12 +80,27 @@
 
 -(void)drawRect:(NSRect)rect{
 	[super drawRect:rect];
-	if (!highlight || dragRow == -1) return;
-	
-	[NSGraphicsContext saveGraphicsState];
-	NSSetFocusRingStyle(NSFocusRingOnly);
-	NSRectFill([self cellFrameAtRow:dragRow column:0]);
-	[NSGraphicsContext restoreGraphicsState];
+    
+	if (highlight && dragRow != -1) {
+        NSColor *highlightColor = [NSColor alternateSelectedControlColor];
+        float lineWidth = 2.0;
+        
+        NSRect highlightRect = NSInsetRect([self cellFrameAtRow:dragRow column:0], lineWidth/2.0, lineWidth/2.0);
+        
+        NSBezierPath *path = [NSBezierPath bezierPathWithRoundRectInRect:highlightRect radius:4.0];
+        
+        [path setLineWidth:lineWidth];
+        
+        [NSGraphicsContext saveGraphicsState];
+        
+        [[highlightColor colorWithAlphaComponent:0.2] set];
+        [path fill];
+        
+        [[highlightColor colorWithAlphaComponent:0.8] set];
+        [path stroke];
+        
+        [NSGraphicsContext restoreGraphicsState];
+	}
 }
 
 - (void)dealloc{
