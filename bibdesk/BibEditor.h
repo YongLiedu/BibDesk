@@ -56,9 +56,6 @@
 @class BDSKAlert;
 @class BibAuthor;
 
-// core pasteboard type for webloc files
-extern NSString* BDSKWeblocFilePboardType;
-
 /*!
     @class BibEditor
     @abstract WindowController for the edit window

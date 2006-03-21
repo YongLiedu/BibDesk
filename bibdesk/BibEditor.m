@@ -72,7 +72,6 @@
 #import "NSWorkspace_BDSKExtensions.h"
 #import "BDSKPersistentSearch.h"
 
-NSString *BDSKWeblocFilePboardType = @"CorePasteboardFlavorType 0x75726C20";
 static NSString *BDSKBibEditorFrameAutosaveName = @"BibEditor window autosave name";
 
 enum{

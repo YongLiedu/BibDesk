@@ -55,6 +55,7 @@
 #import "NSURL_BDSKExtensions.h"
 #import "NSFileManager_ExtendedAttributes.h"
 #import "NSSet_BDSKExtensions.h"
+#import "BibEditor.h"
 
 @implementation BibDocument (DataSource)
 
@@ -805,17 +806,24 @@
                  proposedRow:(int)row
        proposedDropOperation:(NSTableViewDropOperation)op{
     
+    NSPasteboard *pboard = [info draggingPasteboard];
+    NSString *type = [pboard availableTypeFromArray:[NSArray arrayWithObjects:BDSKBibItemPboardType, BDSKWeblocFilePboardType, BDSKReferenceMinerStringPboardType, NSStringPboardType, NSFilenamesPboardType, NSURLPboardType, nil]];
+    
     if(tv == (NSTableView *)ccTableView){
         return NSDragOperationNone;// can't drag into that tv.
     }else if(tv == tableView){
-		if([info draggingSource] == tableView || [info draggingSource] == groupTableView) {
+		if([info draggingSource] == tableView || [info draggingSource] == groupTableView || type == nil) {
 			// can't copy onto same table
 			return NSDragOperationNone;
 		}
         // set drop row to -1 and NSTableViewDropOperation to NSTableViewDropOn, when we don't target specific rows http://www.corbinstreehouse.com/blog/?p=123
-        if(row == -1 || op == NSTableViewDropAbove || [[info draggingPasteboard] containsUnparseableFile] == NO)
+        if(row == -1 || op == NSTableViewDropAbove){
             [tv setDropRow:-1 dropOperation:NSTableViewDropOn];
-		if([info draggingSource]) {
+		}else if(([type isEqualToString:NSFilenamesPboardType] == NO || [[info draggingPasteboard] containsUnparseableFile] == NO) &&
+                 [type isEqualToString:BDSKWeblocFilePboardType] == NO && [type isEqualToString:NSURLPboardType] == NO){
+            [tv setDropRow:-1 dropOperation:NSTableViewDropOn];
+        }
+        if([info draggingSource]) {
 			// drag from another window
             return NSDragOperationCopy;    
         } else {
@@ -824,7 +832,7 @@
         }
     }else if(tv == groupTableView){
         // not sure why this check is necessary, but it silences an error message when you drag off the list of items
-        if([info draggingSource] == groupTableView || row >= [tv numberOfRows] || row <= [smartGroups count]) 
+        if([info draggingSource] == groupTableView || row >= [tv numberOfRows] || row <= [smartGroups count] || (type == nil && [info draggingSource] != tableView)) 
             return NSDragOperationNone;
         
         // here we actually target a specific row
@@ -844,24 +852,39 @@
     dropOperation:(NSTableViewDropOperation)op{
 	
     NSPasteboard *pboard = [info draggingPasteboard];
+    NSString *type = [pboard availableTypeFromArray:[NSArray arrayWithObjects:BDSKBibItemPboardType, BDSKWeblocFilePboardType, BDSKReferenceMinerStringPboardType, NSStringPboardType, NSFilenamesPboardType, NSURLPboardType, nil]];
 	
     if(tv == (NSTableView *)ccTableView){
         return NO; // can't drag into that tv.
     } else if(tv == tableView){
-		if(row != -1 && [pboard availableTypeFromArray:[NSArray arrayWithObjects:NSFilenamesPboardType, nil]] != nil){
-        	NSArray *fileNames = [pboard propertyListForType:NSFilenamesPboardType];
-			if ([fileNames count] == 0)
-				return NO;
-			NSURL *fileURL = [NSURL fileURLWithPath:[[fileNames objectAtIndex:0] stringByExpandingTildeInPath]];
+		if(row != -1){
             BibItem *pub = [shownPublications objectAtIndex:row];
-            if (fileURL == nil || [fileURL isEqual:[pub localFileURLForField:BDSKLocalUrlString]])
+            NSURL *theURL = nil;
+            
+            if([type isEqualToString:NSFilenamesPboardType]){
+                NSArray *fileNames = [pboard propertyListForType:NSFilenamesPboardType];
+                if ([fileNames count] == 0)
+                    return NO;
+                theURL = [NSURL fileURLWithPath:[[fileNames objectAtIndex:0] stringByExpandingTildeInPath]];
+            }else if([type isEqualToString:BDSKWeblocFilePboardType]){
+                theURL = [NSURL URLWithString:[pboard stringForType:BDSKWeblocFilePboardType]];
+            }else if([type isEqualToString:NSURLPboardType]){
+                theURL = [NSURL URLFromPasteboard:pboard];
+            }else return NO;
+            
+            NSString *field = ([theURL isFileURL]) ? BDSKLocalUrlString : BDSKUrlString;
+            
+            if(theURL == nil || [theURL isEqual:[pub URLForField:field]])
                 return NO;
-                    
-            [pub setField:BDSKLocalUrlString toValue:[fileURL absoluteString]];
-            [pub autoFilePaper];
+            
+            [pub setField:field toValue:[theURL absoluteString]];
+            if([field isEqualToString:BDSKLocalUrlString])
+                [pub autoFilePaper];
+            
             [self highlightBib:pub];
             [[pub undoManager] setActionName:NSLocalizedString(@"Edit Publication",@"")];
             return YES;
+            
         }else{
             [groupTableView selectRowIndexes:[NSIndexSet indexSetWithIndex:0] byExtendingSelection:NO];
             
@@ -880,7 +903,7 @@
         BDSKGroup *group = [[[self objectInGroupsAtIndex:row] retain] autorelease];
         BOOL shouldSelect = [[self selectedGroups] containsObject:group];
 		
-        if([info draggingSource] == tableView || [info draggingSource] == groupTableView){
+        if([info draggingSource] == tableView){
             // we already have these publications, so we just want to add them to the group, not the document
             
 			pubs = [self promisedItemsForPasteboard:[NSPasteboard pasteboardWithName:NSDragPboard]];
@@ -1111,9 +1134,9 @@ available from the receiving pastebaord."*/
 {return [self hasType:NSURLPboardType];}
 
 - (BOOL)containsUnparseableFile{
-    NSString *type = [self availableTypeFromArray:[NSArray arrayWithObjects:BDSKBibItemPboardType, BDSKReferenceMinerStringPboardType, NSStringPboardType, NSFilenamesPboardType, nil]];
+    NSString *type = [self availableTypeFromArray:[NSArray arrayWithObject:NSFilenamesPboardType]];
     
-    if([type isEqualToString:NSFilenamesPboardType] == NO)
+    if(type == nil)
         return NO;
     
     NSArray *fileNames = [self propertyListForType:NSFilenamesPboardType];

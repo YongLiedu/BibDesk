@@ -78,11 +78,11 @@ enum {
 	BDSKRISDragCopyType
 };
 
-// Some pasteboard types used by the document fro dragging and copying.
-// pasteboard type from Reference Miner, determined using Pasteboard Peeker
-extern NSString* BDSKReferenceMinerStringPboardType;
+// Some pasteboard types used by the document for dragging and copying.
+extern NSString* BDSKReferenceMinerStringPboardType; // pasteboard type from Reference Miner, determined using Pasteboard Peeker
 extern NSString *BDSKBibItemIndexPboardType;
 extern NSString *BDSKBibItemPboardType;
+extern NSString* BDSKWeblocFilePboardType; // core pasteboard type for webloc files
 
 /*!
     @class BibDocument
@@ -858,7 +858,7 @@ extern NSString *BDSKBibItemPboardType;
 - (NSArray *)newPublicationsForString:(NSString *)string type:(int)type error:(NSError **)error;
 - (NSArray *)newPublicationsForFiles:(NSArray *)filenames error:(NSError **)error;
 - (NSArray *)extractPublicationsFromFiles:(NSArray *)filenames unparseableFiles:(NSMutableArray *)unparseableFiles;
-
+- (NSArray *)newPublicationForURL:(NSURL *)url error:(NSError **)error;
 
 // Private methods
 /*!

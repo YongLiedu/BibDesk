@@ -97,6 +97,7 @@
 NSString *BDSKReferenceMinerStringPboardType = @"CorePasteboardFlavorType 0x57454253";
 NSString *BDSKBibItemIndexPboardType = @"edu.ucsd.mmccrack.bibdesk shownPublications index type";
 NSString *BDSKBibItemPboardType = @"edu.ucsd.mmccrack.bibdesk BibItem pboard type";
+NSString *BDSKWeblocFilePboardType = @"CorePasteboardFlavorType 0x75726C20";
 
 
 #import <BTParse/btparse.h>
@@ -241,7 +242,7 @@ NSString *BDSKBibItemPboardType = @"edu.ucsd.mmccrack.bibdesk BibItem pboard typ
 	[self setupSearchField];
    
     [tableView setDoubleAction:@selector(editPubCmd:)];
-    NSMutableArray *dragTypes = [NSMutableArray arrayWithObjects:BDSKBibItemPboardType, NSStringPboardType, NSFilenamesPboardType, BDSKReferenceMinerStringPboardType, nil];
+    NSMutableArray *dragTypes = [NSMutableArray arrayWithObjects:BDSKBibItemPboardType, BDSKWeblocFilePboardType, BDSKReferenceMinerStringPboardType, NSStringPboardType, NSFilenamesPboardType, NSURLPboardType, nil];
     [tableView registerForDraggedTypes:[[dragTypes copy] autorelease]];
     [dragTypes addObject:BDSKBibItemIndexPboardType];
     [groupTableView registerForDraggedTypes:dragTypes];
@@ -1833,7 +1834,7 @@ NSString *BDSKBibItemPboardType = @"edu.ucsd.mmccrack.bibdesk BibItem pboard typ
 
 - (BOOL)addPublicationsFromPasteboard:(NSPasteboard *)pb error:(NSError **)outError{
 	// these are the types we support, the order here is important!
-    NSString *type = [pb availableTypeFromArray:[NSArray arrayWithObjects:BDSKBibItemPboardType, BDSKReferenceMinerStringPboardType, NSStringPboardType, NSFilenamesPboardType, nil]];
+    NSString *type = [pb availableTypeFromArray:[NSArray arrayWithObjects:BDSKBibItemPboardType, BDSKWeblocFilePboardType, BDSKReferenceMinerStringPboardType, NSStringPboardType, NSFilenamesPboardType, NSURLPboardType, nil]];
     NSArray *newPubs = nil;
     NSArray *newFilePubs = nil;
 	NSError *error = nil;
@@ -1859,6 +1860,18 @@ NSString *BDSKBibItemPboardType = @"edu.ucsd.mmccrack.bibdesk BibItem pboard typ
             newPubs = [newPubs arrayByAddingObjectsFromArray:newFilePubs];
         }
         [unparseableFiles release];
+    }else if([type isEqualToString:BDSKWeblocFilePboardType]){
+        NSURL *pbURL = [NSURL URLWithString:[pb stringForType:BDSKWeblocFilePboardType]]; 	
+		if([pbURL isFileURL])
+            newPubs = newFilePubs = [self newPublicationsForFiles:[NSArray arrayWithObject:[pbURL path]] error:&error];
+        else
+            newPubs = [self newPublicationForURL:pbURL error:&error];
+    }else if([type isEqualToString:NSURLPboardType]){
+        NSURL *pbURL = [NSURL URLFromPasteboard:pb]; 	
+		if([pbURL isFileURL])
+            newPubs = newFilePubs = [self newPublicationsForFiles:[NSArray arrayWithObject:[pbURL path]] error:&error];
+        else
+            newPubs = [self newPublicationForURL:pbURL error:&error];
 	}else{
         // errors are key, value
         OFError(&error, BDSKParserError, NSLocalizedDescriptionKey, NSLocalizedString(@"Did not find anything appropriate on the pasteboard", @"BibDesk couldn't find any files or bibliography information in the data it received."), nil);
@@ -2038,6 +2051,19 @@ NSString *BDSKBibItemPboardType = @"edu.ucsd.mmccrack.bibdesk BibItem pboard typ
 	}
 	
 	return newPubs;
+}
+
+- (NSArray *)newPublicationForURL:(NSURL *)url error:(NSError **)error {
+    if(url == nil){
+        OFError(error, BDSKParserError, NSLocalizedDescriptionKey, NSLocalizedString(@"Did not find expected URL on the pasteboard", @"BibDesk couldn't find any URL in the data it received."), nil);
+        return nil;
+    }
+    
+	BibItem *newBI = [[[BibItem alloc] init] autorelease];
+    
+    [newBI setField:BDSKUrlString toValue:[url absoluteString]];
+    
+	return [NSArray arrayWithObject:newBI];
 }
 
 #pragma mark Lazy Pasteboard
