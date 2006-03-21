@@ -214,6 +214,16 @@
 	[RYZ_buttonCell setEnabled:flag];
 }
 
+- (BOOL)showsFirstResponder
+{
+	return [RYZ_buttonCell showsFirstResponder];
+}
+
+- (void)setShowsFirstResponder:(BOOL)flag
+{
+	[RYZ_buttonCell setShowsFirstResponder:flag];
+}
+
 - (void)setUsesItemFromMenu:(BOOL)flag
 {
 	[super setUsesItemFromMenu:flag];
@@ -467,15 +477,6 @@
 			[RYZ_buttonCell setAlternateImage: popUpImage];
 			[popUpImage release];
 		}
-		
-		if ( [[controlView window] firstResponder] == controlView &&
-			 [controlView respondsToSelector: @selector(selectedCell)] &&
-			 [controlView performSelector: @selector(selectedCell)] == self) {
-			[RYZ_buttonCell setShowsFirstResponder: YES];
-		} else {
-			[RYZ_buttonCell setShowsFirstResponder: NO];
-		}
-		
     }
 	//   NSLog(@"cellFrame: %@  selectedItem: %@", NSStringFromRect(cellFrame), [[self selectedItem] title]);
 	

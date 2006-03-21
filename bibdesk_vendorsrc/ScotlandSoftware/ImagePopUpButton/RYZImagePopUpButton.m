@@ -1,4 +1,5 @@
 #import "RYZImagePopUpButton.h"
+#import "NSBezierPath_BDSKExtensions.h"
 
 @implementation RYZImagePopUpButton
 
@@ -312,15 +313,25 @@
 -(void)drawRect:(NSRect)rect {
 	[super drawRect:rect];
 	
-	if(highlight || 
-	   ([[self window] firstResponder] == self &&
-		[[self window] isKeyWindow] &&
-		[[self cell] acceptsFirstResponder]))  {
-	
-		[NSGraphicsContext saveGraphicsState];
-		NSSetFocusRingStyle(NSFocusRingOnly);
-		NSRectFill([self bounds]);
-		[NSGraphicsContext restoreGraphicsState];
+	if (highlight)  {
+        NSColor *highlightColor = [NSColor alternateSelectedControlColor];
+        float lineWidth = 2.0;
+        
+        NSRect highlightRect = NSInsetRect([self bounds], lineWidth/2.0, lineWidth/2.0);
+        
+        NSBezierPath *path = [NSBezierPath bezierPathWithRoundRectInRect:highlightRect radius:4.0];
+        
+        [path setLineWidth:lineWidth];
+        
+        [NSGraphicsContext saveGraphicsState];
+        
+        [[highlightColor colorWithAlphaComponent:0.2] set];
+        [path fill];
+        
+        [[highlightColor colorWithAlphaComponent:0.8] set];
+        [path stroke];
+        
+        [NSGraphicsContext restoreGraphicsState];
 	}
 }
 
