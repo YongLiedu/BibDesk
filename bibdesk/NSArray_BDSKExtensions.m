@@ -129,6 +129,7 @@
 - (NSArray *)objectsAtIndexes:(NSIndexSet *)indexes;
 {
     OBASSERT(floor(NSAppKitVersionNumber) <= NSAppKitVersionNumber10_3);
+    NSParameterAssert(indexes != nil);
     
     // could be more clever/efficient by using getObjects:range:
     unsigned index;
@@ -159,6 +160,7 @@
 {
     OBASSERT(floor(NSAppKitVersionNumber) <= NSAppKitVersionNumber10_3);
 	OBASSERT([objects count] == [indexes count]);
+    NSParameterAssert(indexes != nil);
 
     unsigned index = [indexes firstIndex];
     unsigned i = 0;
@@ -171,6 +173,7 @@
 - (void)removeObjectsAtIndexes:(NSIndexSet *)indexes;
 {
     OBASSERT(floor(NSAppKitVersionNumber) <= NSAppKitVersionNumber10_3);
+    NSParameterAssert(indexes != nil);
 
     // remove from the end of the array; removing from the beginning will change the indexing
     unsigned index = [indexes lastIndex];
