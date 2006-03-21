@@ -287,7 +287,7 @@
         [delegate imagePopUpButton:self canReceiveDrag:sender]) {
 		
 		highlight = YES;
-		[self setKeyboardFocusRingNeedsDisplayInRect:[self bounds]];
+        [self setNeedsDisplay:YES];
 		return NSDragOperationCopy;
     }
     return NSDragOperationNone;
@@ -295,12 +295,12 @@
 
 - (void)draggingExited:(id <NSDraggingInfo>)sender {
     highlight = NO;
-	[self setKeyboardFocusRingNeedsDisplayInRect:[self bounds]];
+	[self setNeedsDisplay:YES];
 }
 
 - (BOOL)prepareForDragOperation:(id <NSDraggingInfo>)sender {
 	highlight = NO;
-	[self setKeyboardFocusRingNeedsDisplayInRect:[self bounds]];
+	[self setNeedsDisplay:YES];
 	return YES;
 } 
 
