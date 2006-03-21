@@ -79,6 +79,7 @@ extern NSString* BDSKWeblocFilePboardType;
     NSUndoManager *notesViewUndoManager;
     NSUndoManager *abstractViewUndoManager;
     NSUndoManager *rssDescriptionViewUndoManager;
+    BOOL ignoreFieldChange;
     // for the splitview double-click handling
     float lastMatrixHeight;
 	

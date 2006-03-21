@@ -1872,29 +1872,31 @@ static int numberOfOpenEditors = 0;
 		[authorTableView reloadData];
 	}
     else if([changeKey isEqualToString:BDSKAnnoteString]){
+        if(ignoreFieldChange) return;
         // make a copy of the current value, so we don't overwrite it when we set the field value to the text storage
         NSString *tmpValue = [[theBib valueOfField:BDSKAnnoteString inherit:NO] copy];
         [notesView setString:(tmpValue == nil ? @"" : tmpValue)];
         [tmpValue release];
-        // set this in pubFields directly, so we don't go into an endless loop
         if(currentEditedView == notesView)
-            [[theBib pubFields] setValue:[[notesView textStorage] mutableString] forKey:BDSKAnnoteString];
+            [[self window] makeFirstResponder:[self window]];
         [notesViewUndoManager removeAllActions];
     }
     else if([changeKey isEqualToString:BDSKAbstractString]){
+        if(ignoreFieldChange) return;
         NSString *tmpValue = [[theBib valueOfField:BDSKAbstractString inherit:NO] copy];
         [abstractView setString:(tmpValue == nil ? @"" : tmpValue)];
         [tmpValue release];
         if(currentEditedView == abstractView)
-            [[theBib pubFields] setValue:[[abstractView textStorage] mutableString] forKey:BDSKAbstractString];
+            [[self window] makeFirstResponder:[self window]];
         [abstractViewUndoManager removeAllActions];
     }
     else if([changeKey isEqualToString:BDSKRssDescriptionString]){
+        if(ignoreFieldChange) return;
         NSString *tmpValue = [[theBib valueOfField:BDSKRssDescriptionString inherit:NO] copy];
         [rssDescriptionView setString:(tmpValue == nil ? @"" : tmpValue)];
         [tmpValue release];
         if(currentEditedView == rssDescriptionView)
-            [[theBib pubFields] setValue:[[rssDescriptionView textStorage] mutableString] forKey:BDSKRssDescriptionString];
+            [[self window] makeFirstResponder:[self window]];
         [rssDescriptionViewUndoManager removeAllActions];
     }
             
@@ -1953,7 +1955,7 @@ static int numberOfOpenEditors = 0;
     // are automatically tracked.  We still have to update the UI manually.
     // The contents of the text views are initialized with the current contents of the BibItem in windowWillLoad:
 	currentEditedView = [aNotification object];
-    
+    ignoreFieldChange = YES;
     // we need to preserve selection manually; otherwise you end up editing at the end of the string after the call to setField: below
     NSRange selRange = [currentEditedView selectedRange];
     if(currentEditedView == notesView){
@@ -1968,6 +1970,7 @@ static int numberOfOpenEditors = 0;
     }
     if(selRange.location != NSNotFound && selRange.location < [[currentEditedView string] length])
         [currentEditedView setSelectedRange:selRange];
+    ignoreFieldChange = NO;
 }
 
 // Clear all the undo actions when changing tab items, just in case; otherwise we
