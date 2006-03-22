@@ -121,16 +121,6 @@ static BDSKGlobalMacroResolver *defaultMacroResolver;
     return macroDefinitions;
 }
 
-- (void)setMacroDefinitions:(NSDictionary *)newMacroDefinitions {
-    if (macroDefinitions != newMacroDefinitions) {
-        [macroDefinitions release];
-        macroDefinitions = BDSKCreateCaseInsensitiveKeyMutableDictionary();
-        [macroDefinitions setDictionary:newMacroDefinitions];
-        
-        [self synchronizePreferences];
-    }
-}
-
 - (void)addMacroDefinitionWithoutUndo:(NSString *)macroString forMacro:(NSString *)macroKey{
     [macroDefinitions setObject:macroString forKey:macroKey];
     

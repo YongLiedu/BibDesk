@@ -3079,14 +3079,6 @@ NSString *BDSKWeblocFilePboardType = @"CorePasteboardFlavorType 0x75726C20";
     return macroDefinitions;
 }
 
-- (void)setMacroDefinitions:(NSDictionary *)newMacroDefinitions {
-    if (macroDefinitions != newMacroDefinitions) {
-        [macroDefinitions release];
-        macroDefinitions = BDSKCreateCaseInsensitiveKeyMutableDictionary();
-        [macroDefinitions setDictionary:newMacroDefinitions];
-    }
-}
-
 - (void)addMacroDefinitionWithoutUndo:(NSString *)macroString forMacro:(NSString *)macroKey{
     [macroDefinitions setObject:macroString forKey:macroKey];
 }

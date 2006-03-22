@@ -734,15 +734,6 @@ extern NSString* BDSKWeblocFilePboardType; // core pasteboard type for webloc fi
 - (NSDictionary *)macroDefinitions;
 
 /*!
-    @method     setMacroDefinitions:
-    @abstract   setter for macroDefinitions
-    @discussion not to be used as part of UI - it doesn't invoke undo.
- It's intended to be used with file parsers to add many defs at once.
-    @param      newMacroDefinitions (description)
-*/
-- (void)setMacroDefinitions:(NSDictionary *)newMacroDefinitions;
-
-/*!
     @method     addMacroDefinitionWithoutUndo:forMacro:
      @abstract   changes the definition for a macro
      @discussion overwrites an existing one if it exists. not undoable.

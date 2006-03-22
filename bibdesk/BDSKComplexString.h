@@ -42,7 +42,6 @@
 @protocol BDSKMacroResolver <NSObject>
 
 - (NSDictionary *)macroDefinitions;
-- (void)setMacroDefinitions:(NSDictionary *)newMacroDefinitions;
 - (void)addMacroDefinition:(NSString *)macroString forMacro:(NSString *)macroKey;
 - (NSString *)valueOfMacro:(NSString *)macro;
 - (void)removeMacro:(NSString *)macroKey;
