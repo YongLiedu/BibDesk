@@ -137,7 +137,7 @@ enum {
     [RSSDescriptionFieldTextField setFormatter:fieldNameFormatter];
     [[[[defaultFieldsTableView tableColumns] objectAtIndex:0] dataCell] setFormatter:fieldNameFormatter];
     [fieldNameFormatter release];
-    
+    [globalMacroFilesTableView registerForDraggedTypes:[NSArray arrayWithObject:NSFilenamesPboardType]];
 }
 
 - (void)updateButtons{
@@ -301,6 +301,39 @@ enum {
         }
         [globalMacroFilesTableView reloadData];
     }
+}
+
+#pragma mark | TableView Dragging
+
+- (NSDragOperation)tableView:(NSTableView*)tableView validateDrop:(id <NSDraggingInfo>)info proposedRow:(int)row proposedDropOperation:(NSTableViewDropOperation)op{
+    if (tableView != globalMacroFilesTableView) 
+        return NSDragOperationNone;
+    return NSDragOperationEvery;
+}
+
+- (BOOL)tableView:(NSTableView *)tableView acceptDrop:(id <NSDraggingInfo> )info row:(int)row dropOperation:(NSTableViewDropOperation)op{
+    if (tableView != globalMacroFilesTableView) 
+        return NO;
+    NSPasteboard *pboard = [info draggingPasteboard];
+    if([pboard availableTypeFromArray:[NSArray arrayWithObject:NSFilenamesPboardType]] == nil)
+        return NO;
+    NSArray *fileNames = [pboard propertyListForType:NSFilenamesPboardType];
+    NSEnumerator *fileEnum = [fileNames objectEnumerator];
+    NSString *file;
+    NSFileManager *fm = [NSFileManager defaultManager];
+    
+    while (file = [fileEnum nextObject]) {
+        NSString *extension = [file pathExtension];
+        if ([fm fileExistsAtPath:[file stringByStandardizingPath]] == NO ||
+            ([extension caseInsensitiveCompare:@"bib"] != NSOrderedSame && [extension caseInsensitiveCompare:@"bst"] != NSOrderedSame))
+            continue;
+        [globalMacroFiles addObject:file];
+    }
+    [defaults setObject:globalMacroFiles forKey:BDSKGlobalMacroFilesKey];
+    [[BDSKGlobalMacroResolver defaultMacroResolver] resetMacrosFromFiles];
+    [globalMacroFilesTableView reloadData];
+    
+    return YES;
 }
 
 #pragma mark TableView Delegate methods

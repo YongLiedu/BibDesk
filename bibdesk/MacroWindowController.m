@@ -72,7 +72,7 @@
     if([[self macroDataSource] respondsToSelector:@selector(displayName)])
         [[self window] setTitle:[NSString stringWithFormat:@"%@: %@", [[self window] title], [[self macroDataSource] displayName]]];
     [[tc dataCell] setFormatter:[[[MacroKeyFormatter alloc] init] autorelease]];
-    [tableView registerForDraggedTypes:[NSArray arrayWithObject:NSStringPboardType]];
+    [tableView registerForDraggedTypes:[NSArray arrayWithObjects:NSStringPboardType, NSFilenamesPboardType, nil]];
     tc = [tableView tableColumnWithIdentifier:@"definition"];
     [[tc dataCell] setFormatter:tableCellFormatter];
     [tableView reloadData];
@@ -374,22 +374,58 @@
     
 }
 
+- (NSDragOperation)tableView:(NSTableView*)tv validateDrop:(id <NSDraggingInfo>)info proposedRow:(int)row proposedDropOperation:(NSTableViewDropOperation)op{
+    if ([info draggingSource]) {
+        if([info draggingSource] == tableView)
+        {
+            // can't copy onto same table
+            return NSDragOperationNone;
+        }
+        [tv setDropRow:-1 dropOperation:NSTableViewDropOn];
+        return NSDragOperationCopy;    
+    }else{
+        //it's not from me
+        [tv setDropRow:-1 dropOperation:NSTableViewDropOn];
+        return NSDragOperationEvery; // if it's not from me, copying is OK
+    }
+}
+
+- (BOOL)tableView:(NSTableView *)tv acceptDrop:(id <NSDraggingInfo> )info row:(int)row dropOperation:(NSTableViewDropOperation)op{
+    NSPasteboard *pboard = [info draggingPasteboard];
+    NSString *type = [pboard availableTypeFromArray:[NSArray arrayWithObjects:NSStringPboardType, NSFilenamesPboardType, nil]];
+    
+    if([type isEqualToString:NSStringPboardType]) {
+        NSString *pboardStr = [pboard stringForType:NSStringPboardType];
+        return [self addMacrosFromBibTeXString:pboardStr];
+    } else if ([type isEqualToString:NSFilenamesPboardType]) {
+        NSArray *fileNames = [pboard propertyListForType:NSFilenamesPboardType];
+        NSEnumerator *fileEnum = [fileNames objectEnumerator];
+        NSString *file;
+        NSFileManager *fm = [NSFileManager defaultManager];
+        BOOL ok = NO;
+        
+        while (file = [fileEnum nextObject]) {
+            NSString *extension = [file pathExtension];
+            file = [file stringByStandardizingPath];
+            if ([fm fileExistsAtPath:file] == NO ||
+                ([extension caseInsensitiveCompare:@"bib"] != NSOrderedSame && [extension caseInsensitiveCompare:@"bst"] != NSOrderedSame))
+                continue;
+            NSString *fileStr = [NSString stringWithContentsOfFile:file];
+            if (fileStr != nil)
+                ok = ok || [self addMacrosFromBibTeXString:fileStr];
+        }
+        [NSString stringWithContentsOfFile:file];
+        return ok;
+    } else
+        return NO;
+}
+
 // called from tableView paste: action defined in NSTableView_OAExtensions
 - (void)tableView:(NSTableView *)tv addItemsFromPasteboard:(NSPasteboard *)pboard{
     if(![[pboard types] containsObject:NSStringPboardType])
         return;
     NSString *pboardStr = [pboard stringForType:NSStringPboardType];
     [self addMacrosFromBibTeXString:pboardStr];
-}
-
-- (BOOL)tableView:(NSTableView *)tv acceptDrop:(id <NSDraggingInfo> )info row:(int)row dropOperation:(NSTableViewDropOperation)op{
-    NSPasteboard *pboard = [info draggingPasteboard];
-
-    if(![[pboard types] containsObject:NSStringPboardType])
-        return NO;
-
-    NSString *pboardStr = [pboard stringForType:NSStringPboardType];
-    return [self addMacrosFromBibTeXString:pboardStr];
 }
 
 // called from tableView delete: action defined in NSTableView_OAExtensions
@@ -432,22 +468,6 @@
                         NSLocalizedString(@"OK", @"OK"), nil, nil);
     }
     return !hadProblems;
-}
-
-- (NSDragOperation)tableView:(NSTableView*)tv validateDrop:(id <NSDraggingInfo>)info proposedRow:(int)row proposedDropOperation:(NSTableViewDropOperation)op{
-    if ([info draggingSource]) {
-        if([info draggingSource] == tableView)
-        {
-            // can't copy onto same table
-            return NSDragOperationNone;
-        }
-        [tv setDropRow:-1 dropOperation:NSTableViewDropOn];
-        return NSDragOperationCopy;    
-    }else{
-        //it's not from me
-        [tv setDropRow:-1 dropOperation:NSTableViewDropOn];
-        return NSDragOperationEvery; // if it's not from me, copying is OK
-    }
 }
 
 #pragma mark || Methods to support the type-ahead selector.
