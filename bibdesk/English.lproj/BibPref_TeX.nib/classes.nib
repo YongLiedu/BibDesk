@@ -1,17 +1,6 @@
 {
     IBClasses = (
         {
-            ACTIONS = {changeStartupBehavior = id; }; 
-            CLASS = "BibPref_Startup"; 
-            LANGUAGE = ObjC; 
-            OUTLETS = {
-                defaultBibFileField = NSTextField; 
-                openSheetAccessoryView = NSView; 
-                startupBehaviorRadio = NSMatrix; 
-            }; 
-            SUPERCLASS = OAPreferenceClient; 
-        }, 
-        {
             ACTIONS = {
                 changeBibTexBinPath = id; 
                 changeDefaultTeXEncoding = id; 
@@ -19,7 +8,8 @@
                 changeTexBinPath = id; 
                 changeUsesTeX = id; 
                 downloadTeX = id; 
-                openTeXpreviewFile = id; 
+                openTeXPreviewFile = id; 
+                resetTeXPreviewFile = id; 
             }; 
             CLASS = "BibPref_TeX"; 
             LANGUAGE = ObjC; 

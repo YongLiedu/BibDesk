@@ -151,7 +151,7 @@
 	[[NSNotificationCenter defaultCenter] postNotificationName:BDSKPreviewNeedsUpdateNotification object:self];
 }
 
-- (IBAction)openTeXpreviewFile:(id)sender{
+- (IBAction)openTeXPreviewFile:(id)sender{
     // Edit the TeX template in the Application Support folder
     NSString *applicationSupportPath = [[NSFileManager defaultManager] currentApplicationSupportPathForCurrentUser];
     
@@ -167,6 +167,16 @@
 	    NSLog(@"The url is not a FileURL.");
 }
 
+- (IBAction)resetTeXPreviewFile:(id)sender{
+    NSFileManager *fileManager = [NSFileManager defaultManager];
+    NSString *applicationSupportPath = [[NSFileManager defaultManager] currentApplicationSupportPathForCurrentUser];
+    NSString *previewTemplatePath = [applicationSupportPath stringByAppendingPathComponent:@"previewtemplate.tex"];
+    if([fileManager fileExistsAtPath:previewTemplatePath])
+        [fileManager removeFileAtPath:previewTemplatePath handler:nil];
+    // copy template.txt file from the bundle
+    [fileManager copyPath:[[NSBundle mainBundle] pathForResource:@"template" ofType:@"txt"]
+                   toPath:previewTemplatePath handler:nil];
+}
 
 - (IBAction)downloadTeX:(id)sender {
 	[[NSWorkspace sharedWorkspace] openURL:[NSURL URLWithString:BDSK_TEX_DOWNLOAD_URL]];

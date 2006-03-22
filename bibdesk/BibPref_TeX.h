@@ -58,7 +58,8 @@
 - (void) warnAndDisablePreview:(NSTextField *)textField;
 - (void)alertSheetDidEnd:(NSPanel *)sheet returnCode:(int)returnCode contextInfo:(void *)control;
 - (IBAction)changeStyle:(id)sender;
-- (IBAction)openTeXpreviewFile:(id)sender;
+- (IBAction)resetTeXPreviewFile:(id)sender;
+- (IBAction)openTeXPreviewFile:(id)sender;
 - (IBAction)downloadTeX:(id)sender;
 - (IBAction)changeDefaultTeXEncoding:(id)sender;
 
