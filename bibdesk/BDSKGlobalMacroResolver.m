@@ -132,8 +132,17 @@ static BDSKGlobalMacroResolver *defaultMacroResolver;
         else if ([[file pathExtension] caseInsensitiveCompare:@"bst"] == NSOrderedSame)
             macroDefs = [BibTeXParser macrosFromBibTeXStyle:fileContent document:nil];
         else continue;
-        if (hadProblems == NO)
-            [fileMacroDefinitions addEntriesFromDictionary:macroDefs];
+        if (hadProblems == NO) {
+            NSEnumerator *macroE = [macroDefs keyEnumerator];
+            NSString *macroKey;
+            NSString *macroString;
+            
+            while (macroKey = [macroE nextObject]) {
+                macroString = [macroDefs objectForKey:macroKey];
+                if([BDSKComplexString isCircularMacro:macroKey forDefinition:macroString macroResolver:self] == NO)
+                    [fileMacroDefinitions setObject:macroString forKey:macroKey];
+            }
+        }
     }
 }
 
