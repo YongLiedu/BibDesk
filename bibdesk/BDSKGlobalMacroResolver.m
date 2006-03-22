@@ -103,7 +103,6 @@ static BDSKGlobalMacroResolver *defaultMacroResolver;
     NSMutableDictionary *macros = [[NSMutableDictionary alloc] initWithCapacity:[macroDefinitions count]];
     NSEnumerator *keyEnum = [macroDefinitions keyEnumerator];
     NSString *key;
-    NSString *value;
     while (key = [keyEnum nextObject]) {
         [macros setObject:[[macroDefinitions objectForKey:key] stringAsBibTeXString] forKey:key];
     }
