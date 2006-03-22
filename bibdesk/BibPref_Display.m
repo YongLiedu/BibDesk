@@ -44,6 +44,11 @@
 - (void)awakeFromNib{
     [super awakeFromNib];
     
+    [[NSNotificationCenter defaultCenter] addObserver:self
+                                             selector:@selector(handlePreviewDisplayChangedNotification:)
+                                                 name:BDSKPreviewDisplayChangedNotification
+                                               object:nil];
+    
     [previewMaxNumberComboBox addItemsWithObjectValues:[NSArray arrayWithObjects:NSLocalizedString(@"All", @"All"), @"1", @"5", @"10", @"20", nil]];
     [self updateUI];
 }
@@ -82,6 +87,10 @@
     }
     
 }    
+
+- (void)handlePreviewDisplayChangedNotification:(NSNotification *)notification{
+    [self updateUI];
+}
 
 - (IBAction)changePreviewDisplay:(id)sender{
     int tag = [[sender selectedCell] tag];
