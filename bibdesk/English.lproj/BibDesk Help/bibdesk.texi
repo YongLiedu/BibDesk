@@ -1033,15 +1033,15 @@ See the @ref{BibTeX Intro} for more information of macros in BibTeX, and
 @image{gfx/macrosWindow}
 
 Macro definitions consist of a pair of a macro key, which is used in 
-the raw BibteX string, and a definition string. Note that the definition 
-string is the expanded string value, so it does not include the surrounding 
-braces of a raw BibTeX string. 
+the raw BibTeX string, and a definition string. The definition can in fact 
+be a raw BibTeX string, containing macros itself. 
 
 You can add a macro definition by pressing the @buttontitle{+} button. 
 Pressing the @buttontitle{-} button removes the selected macro defintions. 
 You can edit the key and the definition value by double clicking the 
 corresponding cell in the table, or by pressing the return key when an item
-is selected.
+is selected. See @ref{Editing Fields with Macros} about how to edit the definition
+value as a raw BibTeX string. 
 
 For quick searches through the list without using the mouse, you can type a
 few characters of any word in the definition string you are looking for,
@@ -1896,7 +1896,7 @@ These warnings can also be deactivated from the warning dialog.
 
 @cindex appearance
 @cindex fonts
-@kindex{Cmd-T}
+@kindex Cmd-T
 
 This preference pane lets you control the overall appearance of the main window. 
 
@@ -1981,6 +1981,9 @@ opened so that accented characters display properly.
 
 @prefitem{Unicode to TeX Conversion} Characters will only be converted to TeX when this 
 checkbox for character conversion is marked. Otherwise, they are written out as displayed in BibDesk.
+You can add @ref{Custom Character Conversions} by clicking the @buttontitle{Edit@dots{}} button. 
+The custom character conversions can be removed by clicking the @buttontitle{Reset} button. 
+Be careful though, as you can not undo this action. 
 
 The next four preference options control what data will be written when you save a BibTeX .bib file. 
 
@@ -1997,11 +2000,13 @@ can restrict data loss on systems with restricted internal memory.
 @prefitem{Write template file at the front of every file when saving} If you select this 
 option, the template file will be written at the front of every BibTeX file when it is saved. 
 You can view and edit the template file by clicking the @buttontitle{Edit@dots{}} button. 
+You can reset the template file to the default by clicking the @buttontitle{Reset} button. 
+Be careful though, as you can not undo this action. 
 
 @prefitem{Automatically save RSS feeds} The RSS publishing preferences control the RSS export features. 
 If you check this option, everytime you save a .bib file, a correspondingly named 
 .rss file will be saved in the same directory. To find out more about RSS, follow the link 
-@uref{href="http://www.cs.ucsd.edu/~mmccrack/AboutRSS.html}">.
+@uref{http://www.cs.ucsd.edu/~mmccrack/AboutRSS.html}.
 
 @prefitem{Display warnings when opening a file} If you check this option, the warnings and errors 
 will be shown automatically when you open a file that contains errors. Note that you can always check the 
@@ -2092,9 +2097,11 @@ can be specified here.  This is a list of generic styles that may or may not exi
 you need to use a style that is not in the menu, make sure it's in a location that TeX searches, (commonly
 @code{~/Library/texmf/bibtex/bst}), and type the name of the style directly into the text box.
 
-@prefitem{TeX template} Clicking the button lets you change the template file that is added to the beginning of every saved bib file. 
-for generating the preview. This template file is a great place to put your macros, copyright info (if applicable), 
-or shameless plugs for your software :)
+@prefitem{TeX template} Clicking the @buttontitle{Edit@dots{}} button lets you change the 
+template file that is added to the beginning of every saved bib file. for generating the preview. 
+This template file is a great place to put your macros, copyright info (if applicable), 
+or shameless plugs for your software :) You can reset the template file to the default by 
+clicking the @buttontitle{Reset} button. Be careful though, as this action cannot be undone. 
 
 @prefitem{TeX template encoding} The encoding popup lets you choose the encoding that is appropriate for the template file and the 
 TeX program you are using. Note that the standard pdflatex and style files does not allow arbitrary 
