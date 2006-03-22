@@ -528,6 +528,7 @@ static int numberOfOpenEditors = 0;
     NSSavePanel *sPanel = [NSSavePanel savePanel];
     [sPanel setPrompt:NSLocalizedString(@"Move", @"Move file")];
     [sPanel setNameFieldLabel:NSLocalizedString(@"Move To:", @"Move To: label")];
+    [sPanel setDirectory:[[theBib localFilePathForField:field] stringByDeletingLastPathComponent]];
 	
     [sPanel beginSheetForDirectory:nil 
                               file:nil 
@@ -2113,8 +2114,20 @@ static int numberOfOpenEditors = 0;
 
 - (BOOL)canReceiveDrag:(id <NSDraggingInfo>)sender forField:(NSString *)field{
 	NSPasteboard *pboard = [sender draggingPasteboard];
+    id dragSource = [sender draggingSource];
+    NSString *dragSourceField = nil;
 	NSString *dragType;
 	
+    if(dragSource == viewLocalButton)
+        dragSourceField = BDSKLocalUrlString;
+    else if(dragSource == viewRemoteButton)
+        dragSourceField = BDSKUrlString;
+    else if(dragSource == bibFields)
+        dragSourceField = [[bibFields dragSourceCell] title];
+    
+    if ([field isEqualToString:dragSourceField])
+        return NO;
+    
 	// we put webloc types first, as we always want to accept them for remote URLs, but never for local files
 	dragType = [pboard availableTypeFromArray:[NSArray arrayWithObjects:BDSKWeblocFilePboardType, NSFilenamesPboardType, NSURLPboardType, nil]];
 	
@@ -2149,7 +2162,7 @@ static int numberOfOpenEditors = 0;
 - (BOOL)receiveDrag:(id <NSDraggingInfo>)sender forField:(NSString *)field{
 	NSPasteboard *pboard = [sender draggingPasteboard];
 	NSString *dragType;
-    	    
+    
 	// we put webloc types first, as we always want to accept them for remote URLs, but never for local files
 	dragType = [pboard availableTypeFromArray:[NSArray arrayWithObjects:BDSKWeblocFilePboardType, NSFilenamesPboardType, NSURLPboardType, nil]];
     
