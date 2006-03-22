@@ -191,7 +191,9 @@
 // we want to have the same undoManager as our document, so we use this 
 // NSWindow delegate method to return the doc's undomanager.
 - (NSUndoManager *)windowWillReturnUndoManager:(NSWindow *)sender{
-	return [(NSWindowController *)macroDataSource undoManager];
+    if([macroDataSource respondsToSelector:@selector(undoManager)])
+        return [(id)macroDataSource undoManager];
+    return nil;
 }
 
 - (void)showWindow:(id)sender{
