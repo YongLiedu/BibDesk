@@ -55,15 +55,20 @@ static BDSKGlobalMacroResolver *defaultMacroResolver;
 
 - (id)init{
     if (self = [super init]) {
+        // store system-defined macros for the months.
+        // we grab their localized versions for display.
+        NSDictionary *standardDefs = [NSDictionary dictionaryWithObjects:[[NSUserDefaults standardUserDefaults] objectForKey:NSMonthNameArray]
+                                                                 forKeys:[NSArray arrayWithObjects:@"jan", @"feb", @"mar", @"apr", @"may", @"jun", @"jul", @"aug", @"sep", @"oct", @"nov", @"dec", nil]];
         // Note we treat upper and lowercase values the same, 
         // because that's how btparse gives the string constants to us.
         // It is not quite correct because bibtex does discriminate,
         // but this is the best we can do.  The OFCreateCaseInsensitiveKeyMutableDictionary()
         // is used to create a dictionary with case-insensitive keys.
         standardMacroDefinitions = (NSMutableDictionary *)BDSKCreateCaseInsensitiveKeyMutableDictionary();
-        fileMacroDefinitions = nil; // these need to be loaded lazily, because the parser can call us, leading to a crash
-        macroDefinitions = (NSMutableDictionary *)BDSKCreateCaseInsensitiveKeyMutableDictionary();
-        [self loadMacrosFromPreferences];
+        [standardMacroDefinitions addEntriesFromDictionary:standardDefs];
+        // these need to be loaded lazily, because loading them can use ourselves, but we aren't yet initialized
+        fileMacroDefinitions = nil; 
+        macroDefinitions = nil;
     }
     return self;
 }
@@ -76,25 +81,21 @@ static BDSKGlobalMacroResolver *defaultMacroResolver;
 }
 
 - (void)loadMacrosFromPreferences{
-    // stores system-defined macros for the months.
-    // we grab their localized versions for display.
-    NSDictionary *standardDefs = [NSDictionary dictionaryWithObjects:[[NSUserDefaults standardUserDefaults] objectForKey:NSMonthNameArray]
-                                                             forKeys:[NSArray arrayWithObjects:@"jan", @"feb", @"mar", @"apr", @"may", @"jun", @"jul", @"aug", @"sep", @"oct", @"nov", @"dec", nil]];
-    [standardMacroDefinitions addEntriesFromDictionary:standardDefs];
-    
     OFPreferenceWrapper *pw = [OFPreferenceWrapper sharedPreferenceWrapper];
+    
+    macroDefinitions = (NSMutableDictionary *)BDSKCreateCaseInsensitiveKeyMutableDictionary();
     
     // legacy, load old style prefs
     NSDictionary *oldMacros = [pw dictionaryForKey:BDSKBibStyleMacroDefinitionsKey];
     if (oldMacros)
-        [macroDefinitions addEntriesFromDictionary:oldMacros];
+        [[self macroDefinitions] addEntriesFromDictionary:oldMacros];
     
     NSDictionary *macros = [pw dictionaryForKey:BDSKGlobalMacroDefinitionsKey];
     NSEnumerator *keyEnum = [macros keyEnumerator];
     NSString *key;
     
     while (key = [keyEnum nextObject]) {
-        [macroDefinitions setObject:[NSString complexStringWithBibTeXString:[macros objectForKey:key] macroResolver:self]
+        [[self macroDefinitions] setObject:[NSString complexStringWithBibTeXString:[macros objectForKey:key] macroResolver:self]
                              forKey:key];
     }
     if(oldMacros){
@@ -105,11 +106,11 @@ static BDSKGlobalMacroResolver *defaultMacroResolver;
 }
 
 - (void)synchronizePreferences{
-    NSMutableDictionary *macros = [[NSMutableDictionary alloc] initWithCapacity:[macroDefinitions count]];
-    NSEnumerator *keyEnum = [macroDefinitions keyEnumerator];
+    NSMutableDictionary *macros = [[NSMutableDictionary alloc] initWithCapacity:[[self macroDefinitions] count]];
+    NSEnumerator *keyEnum = [[self macroDefinitions] keyEnumerator];
     NSString *key;
     while (key = [keyEnum nextObject]) {
-        [macros setObject:[[macroDefinitions objectForKey:key] stringAsBibTeXString] forKey:key];
+        [macros setObject:[[[self macroDefinitions] objectForKey:key] stringAsBibTeXString] forKey:key];
     }
     [[OFPreferenceWrapper sharedPreferenceWrapper] setObject:macros forKey:BDSKGlobalMacroDefinitionsKey];
 }
@@ -168,25 +169,27 @@ static BDSKGlobalMacroResolver *defaultMacroResolver;
 #pragma mark BDSKMacroResolver protocol
 
 - (NSDictionary *)macroDefinitions {
+    if (macroDefinitions == nil)
+        [self loadMacrosFromPreferences];
     return macroDefinitions;
 }
 
 - (void)addMacroDefinitionWithoutUndo:(NSString *)macroString forMacro:(NSString *)macroKey{
-    [macroDefinitions setObject:macroString forKey:macroKey];
+    [[self macroDefinitions] setObject:macroString forKey:macroKey];
     
     [self synchronizePreferences];
 }
 
 - (void)changeMacroKey:(NSString *)oldKey to:(NSString *)newKey{
-    if([macroDefinitions objectForKey:oldKey] == nil)
+    if([[self macroDefinitions] objectForKey:oldKey] == nil)
         [NSException raise:NSInvalidArgumentException
                     format:@"tried to change the value of a macro key that doesn't exist"];
     [[[self undoManager] prepareWithInvocationTarget:self]
         changeMacroKey:newKey to:oldKey];
-    NSString *val = [macroDefinitions valueForKey:oldKey];
+    NSString *val = [[self macroDefinitions] valueForKey:oldKey];
     [val retain]; // so the next line doesn't kill it
-    [macroDefinitions removeObjectForKey:oldKey];
-    [macroDefinitions setObject:[val autorelease] forKey:newKey];
+    [[self macroDefinitions] removeObjectForKey:oldKey];
+    [[self macroDefinitions] setObject:[val autorelease] forKey:newKey];
     
     [self synchronizePreferences];
 	
@@ -201,7 +204,7 @@ static BDSKGlobalMacroResolver *defaultMacroResolver;
     [[[self undoManager] prepareWithInvocationTarget:self]
             removeMacro:macroKey];
 
-    [macroDefinitions setObject:macroString forKey:macroKey];
+    [[self macroDefinitions] setObject:macroString forKey:macroKey];
     
     [self synchronizePreferences];
 	
@@ -212,7 +215,7 @@ static BDSKGlobalMacroResolver *defaultMacroResolver;
 }
 
 - (void)setMacroDefinition:(NSString *)newDefinition forMacro:(NSString *)macroKey{
-    NSString *oldDef = [macroDefinitions objectForKey:macroKey];
+    NSString *oldDef = [[self macroDefinitions] objectForKey:macroKey];
     if(oldDef == nil){
         [self addMacroDefinition:newDefinition forMacro:macroKey];
         return;
@@ -220,7 +223,7 @@ static BDSKGlobalMacroResolver *defaultMacroResolver;
     // we're just changing an existing one, so to undo, we change back.
     [[[self undoManager] prepareWithInvocationTarget:self]
             setMacroDefinition:oldDef forMacro:macroKey];
-    [macroDefinitions setObject:newDefinition forKey:macroKey];
+    [[self macroDefinitions] setObject:newDefinition forKey:macroKey];
     
     [self synchronizePreferences];
 
@@ -231,7 +234,7 @@ static BDSKGlobalMacroResolver *defaultMacroResolver;
 }
 
 - (void)removeMacro:(NSString *)macroKey{
-    NSString *currentValue = [macroDefinitions objectForKey:macroKey];
+    NSString *currentValue = [[self macroDefinitions] objectForKey:macroKey];
     if(!currentValue){
         return;
     }else{
@@ -239,7 +242,7 @@ static BDSKGlobalMacroResolver *defaultMacroResolver;
         addMacroDefinition:currentValue
                   forMacro:macroKey];
     }
-    [macroDefinitions removeObjectForKey:macroKey];
+    [[self macroDefinitions] removeObjectForKey:macroKey];
     
     [self synchronizePreferences];
 	
@@ -250,7 +253,7 @@ static BDSKGlobalMacroResolver *defaultMacroResolver;
 }
 
 - (NSString *)valueOfMacro:(NSString *)macroString{
-    NSString *value = [macroDefinitions objectForKey:macroString];
+    NSString *value = [[self macroDefinitions] objectForKey:macroString];
     if(value == nil)
         value = [[self fileMacroDefinitions] objectForKey:macroString];
     if(value == nil)
