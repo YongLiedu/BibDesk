@@ -279,6 +279,27 @@ enum {
             [[customFieldsArray objectAtIndex:row] setObject:object forKey:colID];
         }
         [self updatePrefs];
+    } else if (tableView == globalMacroFilesTableView) {
+        NSString *pathString = [object stringByStandardizingPath];
+        NSString *extension = [object pathExtension];
+        BOOL isDir = NO;
+        NSString *error = nil;
+        
+        if([[NSFileManager defaultManager] fileExistsAtPath:pathString isDirectory:&isDir] == NO){
+            error = [NSString stringWithFormat:NSLocalizedString(@"The file \"%@\" does not exist.", @""), object];
+        } else if (isDir == YES) {
+            error = [NSString stringWithFormat:NSLocalizedString(@"\"%@\" is not a file.", @""), object];
+        } else if ([extension caseInsensitiveCompare:@"bib"] != NSOrderedSame && [extension caseInsensitiveCompare:@"bst"] != NSOrderedSame) {
+            error = [NSString stringWithFormat:NSLocalizedString(@"The file \"%@\" is neither a BibTeX bibliography file nor a BibTeX style file.", @""), object];
+        }
+        if (error) {
+            NSBeginAlertSheet(NSLocalizedString(@"Invalid Macro File", @""), nil, nil, nil, globalMacroFileSheet, nil, NULL, NULL, NULL, error);
+        } else {
+            [globalMacroFiles replaceObjectAtIndex:row withObject:object];
+            [defaults setObject:globalMacroFiles forKey:BDSKGlobalMacroFilesKey];
+            [[BDSKGlobalMacroResolver defaultMacroResolver] updateMacrosFromFiles];
+        }
+        [globalMacroFilesTableView reloadData];
     }
 }
 
@@ -294,6 +315,8 @@ enum {
         else if([field isEqualToString:BDSKRatingString] &&
                 ([colID isEqualToString:@"field"] || [colID isEqualToString:@"type"]))
             return NO;
+        return YES;
+    } else if (tableView == globalMacroFilesTableView) {
         return YES;
     }
     return NO;
