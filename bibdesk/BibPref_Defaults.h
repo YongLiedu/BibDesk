@@ -70,3 +70,5 @@
 - (IBAction)delGlobalMacroFiles:(id)sender;
 
 @end
+
+@interface MacroFileTableView : NSTableView {} @end

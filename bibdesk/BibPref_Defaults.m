@@ -514,3 +514,28 @@ enum {
 }
 
 @end
+
+@implementation MacroFileTableView
+
+- (NSDragOperation)draggingSourceOperationMaskForLocal:(BOOL)isLocal {
+    return NSDragOperationCopy;
+}
+
+- (void)keyDown:(NSEvent *)event{
+    unichar c = [[event characters] characterAtIndex:0];
+    NSCharacterSet *alnum = [NSCharacterSet alphanumericCharacterSet];
+    unsigned int flags = ([event modifierFlags] & 0xffff0000U);
+    if (c == NSDeleteCharacter ||
+        c == NSBackspaceCharacter) {
+        [[self delegate] delGlobalMacroFiles:nil];
+    }else if(c == NSNewlineCharacter ||
+             c == NSEnterCharacter ||
+             c == NSCarriageReturnCharacter){
+                if([self numberOfSelectedRows] == 1)
+                    [self editColumn:0 row:[self selectedRow] withEvent:nil select:YES];
+    }else{
+        [super keyDown:event];
+    }
+}
+
+@end
