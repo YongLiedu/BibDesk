@@ -397,6 +397,10 @@
 				<integer>2</integer>
 				<key>defaultsDictionary</key>
 				<dict>
+					<key>BDSKGlobalMacroDefinitionsKey</key>
+					<dict/>
+					<key>Macro definitions from bib style file</key>
+					<dict/>
 					<key>BDSKTableHeaderImages</key>
 					<dict/>
 					<key>BDSKTableHeaderTitles</key>
