@@ -85,13 +85,12 @@ static BDSKGlobalMacroResolver *defaultMacroResolver;
     OFPreferenceWrapper *pw = [OFPreferenceWrapper sharedPreferenceWrapper];
     NSEnumerator *fileE = [[pw stringArrayForKey:BDSKGlobalMacroFilesKey] objectEnumerator];
     NSString *file;
-    NSString *string;
     BOOL hadProblems;
     
     while (file = [fileE nextObject]) {
         NSString *fileContent = [NSString stringWithContentsOfFile:file];
         NSDictionary *macroDefs;
-        if (string == nil) continue;
+        if (fileContent == nil) continue;
         hadProblems = NO;
         if ([[file pathExtension] isEqualToString:@"bib"])
             macroDefs = [BibTeXParser macrosFromBibTeXString:fileContent hadProblems:&hadProblems document:nil];
@@ -135,7 +134,6 @@ static BDSKGlobalMacroResolver *defaultMacroResolver;
     OFPreferenceWrapper *pw = [OFPreferenceWrapper sharedPreferenceWrapper];
     NSEnumerator *fileE = [[pw stringArrayForKey:BDSKGlobalMacroFilesKey] objectEnumerator];
     NSString *file;
-    NSString *string;
     BOOL hadProblems;
     
     [fileMacroDefinitions removeAllObjects];
@@ -143,7 +141,7 @@ static BDSKGlobalMacroResolver *defaultMacroResolver;
     while (file = [fileE nextObject]) {
         NSString *fileContent = [NSString stringWithContentsOfFile:file];
         NSDictionary *macroDefs;
-        if (string == nil) continue;
+        if (fileContent == nil) continue;
         hadProblems = NO;
         if ([[file pathExtension] isEqualToString:@"bib"])
             macroDefs = [BibTeXParser macrosFromBibTeXString:fileContent hadProblems:&hadProblems document:nil];
