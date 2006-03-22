@@ -297,7 +297,7 @@ enum {
         } else {
             [globalMacroFiles replaceObjectAtIndex:row withObject:object];
             [defaults setObject:globalMacroFiles forKey:BDSKGlobalMacroFilesKey];
-            [[BDSKGlobalMacroResolver defaultMacroResolver] updateMacrosFromFiles];
+            [[BDSKGlobalMacroResolver defaultMacroResolver] resetMacrosFromFiles];
         }
         [globalMacroFilesTableView reloadData];
     }
@@ -444,7 +444,7 @@ enum {
     [openPanel setCanChooseDirectories:NO];
     [openPanel setPrompt:NSLocalizedString(@"Choose", @"Choose file")];
 
-    [openPanel beginSheetForDirectory:nil 
+    [openPanel beginSheetForDirectory:@"/usr" 
                                  file:nil 
                                 types:[NSArray arrayWithObjects:@"bib", @"bst", nil] 
                        modalForWindow:globalMacroFileSheet
@@ -467,7 +467,7 @@ enum {
     
     [globalMacroFilesTableView reloadData];
     [defaults setObject:globalMacroFiles forKey:BDSKGlobalMacroFilesKey];
-    [[BDSKGlobalMacroResolver defaultMacroResolver] updateMacrosFromFiles];
+    [[BDSKGlobalMacroResolver defaultMacroResolver] resetMacrosFromFiles];
 }
 
 - (IBAction)delGlobalMacroFiles:(id)sender{
@@ -477,7 +477,7 @@ enum {
     
     [globalMacroFilesTableView reloadData];
     [defaults setObject:globalMacroFiles forKey:BDSKGlobalMacroFilesKey];
-    [[BDSKGlobalMacroResolver defaultMacroResolver] updateMacrosFromFiles];
+    [[BDSKGlobalMacroResolver defaultMacroResolver] resetMacrosFromFiles];
 }
 
 @end
