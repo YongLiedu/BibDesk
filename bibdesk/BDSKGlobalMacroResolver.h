@@ -49,7 +49,8 @@
 + (BDSKGlobalMacroResolver *)defaultMacroResolver;
 
 - (void)loadMacrosFromPreferences;
+- (void)loadMacrosFromFiles;
 - (void)synchronizePreferences;
-- (void)updateMacrosFromFiles;
+- (void)resetMacrosFromFiles;
 
 @end

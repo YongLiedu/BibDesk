@@ -61,7 +61,7 @@ static BDSKGlobalMacroResolver *defaultMacroResolver;
         // but this is the best we can do.  The OFCreateCaseInsensitiveKeyMutableDictionary()
         // is used to create a dictionary with case-insensitive keys.
         standardMacroDefinitions = (NSMutableDictionary *)BDSKCreateCaseInsensitiveKeyMutableDictionary();
-        fileMacroDefinitions = (NSMutableDictionary *)BDSKCreateCaseInsensitiveKeyMutableDictionary();
+        fileMacroDefinitions = nil; // these need to be loaded lazily, because the parser can call us, leading to a crash
         macroDefinitions = (NSMutableDictionary *)BDSKCreateCaseInsensitiveKeyMutableDictionary();
         [self loadMacrosFromPreferences];
     }
@@ -83,22 +83,6 @@ static BDSKGlobalMacroResolver *defaultMacroResolver;
     [standardMacroDefinitions addEntriesFromDictionary:standardDefs];
     
     OFPreferenceWrapper *pw = [OFPreferenceWrapper sharedPreferenceWrapper];
-    NSEnumerator *fileE = [[pw stringArrayForKey:BDSKGlobalMacroFilesKey] objectEnumerator];
-    NSString *file;
-    BOOL hadProblems;
-    
-    while (file = [fileE nextObject]) {
-        NSString *fileContent = [NSString stringWithContentsOfFile:file];
-        NSDictionary *macroDefs;
-        if (fileContent == nil) continue;
-        hadProblems = NO;
-        if ([[file pathExtension] isEqualToString:@"bib"])
-            macroDefs = [BibTeXParser macrosFromBibTeXString:fileContent hadProblems:&hadProblems document:nil];
-        else
-            macroDefs = [BibTeXParser macrosFromBibTeXStyle:fileContent document:nil];
-        if (hadProblems == NO)
-            [fileMacroDefinitions addEntriesFromDictionary:macroDefs];
-    }
     
     // legacy, load old style prefs
     NSDictionary *oldMacros = [pw dictionaryForKey:BDSKBibStyleMacroDefinitionsKey];
@@ -130,30 +114,41 @@ static BDSKGlobalMacroResolver *defaultMacroResolver;
     [[OFPreferenceWrapper sharedPreferenceWrapper] setObject:macros forKey:BDSKGlobalMacroDefinitionsKey];
 }
 
-- (void)updateMacrosFromFiles{
+- (void)loadMacrosFromFiles{
     OFPreferenceWrapper *pw = [OFPreferenceWrapper sharedPreferenceWrapper];
     NSEnumerator *fileE = [[pw stringArrayForKey:BDSKGlobalMacroFilesKey] objectEnumerator];
     NSString *file;
     BOOL hadProblems;
     
-    [fileMacroDefinitions removeAllObjects];
+    fileMacroDefinitions = (NSMutableDictionary *)BDSKCreateCaseInsensitiveKeyMutableDictionary();
     
     while (file = [fileE nextObject]) {
         NSString *fileContent = [NSString stringWithContentsOfFile:file];
-        NSDictionary *macroDefs;
+        NSDictionary *macroDefs = nil;
         if (fileContent == nil) continue;
         hadProblems = NO;
-        if ([[file pathExtension] isEqualToString:@"bib"])
+        if ([[file pathExtension] caseInsensitiveCompare:@"bib"] == NSOrderedSame)
             macroDefs = [BibTeXParser macrosFromBibTeXString:fileContent hadProblems:&hadProblems document:nil];
-        else
+        else if ([[file pathExtension] caseInsensitiveCompare:@"bst"] == NSOrderedSame)
             macroDefs = [BibTeXParser macrosFromBibTeXStyle:fileContent document:nil];
+        else continue;
         if (hadProblems == NO)
             [fileMacroDefinitions addEntriesFromDictionary:macroDefs];
     }
-    
+}
+
+- (void)resetMacrosFromFiles{
+    [fileMacroDefinitions release];
+    fileMacroDefinitions = nil;
     [[NSNotificationCenter defaultCenter] postNotificationName:BDSKBibDocMacroDefinitionChangedNotification
 														object:self
 													  userInfo:[NSDictionary dictionary]];    
+}
+
+- (NSDictionary *)fileMacroDefinitions{
+    if (fileMacroDefinitions == nil)
+        [self loadMacrosFromFiles];
+    return fileMacroDefinitions;
 }
 
 // should we create an undomanager?
@@ -248,7 +243,7 @@ static BDSKGlobalMacroResolver *defaultMacroResolver;
 - (NSString *)valueOfMacro:(NSString *)macroString{
     NSString *value = [macroDefinitions objectForKey:macroString];
     if(value == nil)
-        value = [fileMacroDefinitions objectForKey:macroString];
+        value = [[self fileMacroDefinitions] objectForKey:macroString];
     if(value == nil)
         value = [standardMacroDefinitions objectForKey:macroString];
     return value;
