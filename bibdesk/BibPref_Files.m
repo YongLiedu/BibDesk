@@ -39,7 +39,9 @@
 #import "BibPref_Files.h"
 #import "BibAppController.h"
 #import "BDSKCharacterConversion.h"
+#import "BDSKConverter.h"
 #import "BDSKErrorObjectController.h"
+#import "NSFileManager_BDSKExtensions.h"
 
 @implementation BibPref_Files
 
@@ -130,12 +132,31 @@
             NSBeep();
 }
 
+- (IBAction)resetTemplateFile:(id)sender{
+    NSFileManager *fileManager = [NSFileManager defaultManager];
+    NSString *templateFilePath = [[defaults stringForKey:BDSKOutputTemplateFileKey] stringByExpandingTildeInPath];
+    if([fileManager fileExistsAtPath:templateFilePath])
+        [fileManager removeFileAtPath:templateFilePath handler:nil];
+    // copy template.txt file from the bundle
+    [fileManager copyPath:[[NSBundle mainBundle] pathForResource:@"template" ofType:@"txt"]
+                   toPath:templateFilePath handler:nil];
+}
+
 - (IBAction)showConversionEditor:(id)sender{
 	[NSApp beginSheet:[[BDSKCharacterConversion sharedConversionEditor] window]
        modalForWindow:[[self controlBox] window]
         modalDelegate:nil
        didEndSelector:NULL
           contextInfo:nil];
+}
+
+- (IBAction)resetConversions:(id)sender{
+    NSFileManager *fileManager = [NSFileManager defaultManager];
+	NSString *conversionsFilePath = [[fileManager currentApplicationSupportPathForCurrentUser] stringByAppendingPathComponent:CHARACTER_CONVERSION_FILENAME];
+    if([fileManager fileExistsAtPath:conversionsFilePath])
+        [fileManager removeFileAtPath:conversionsFilePath handler:nil];
+	// tell the converter to reload its dictionaries
+	[[BDSKConverter sharedConverter] loadDict];
 }
 
 - (IBAction)setAutosaveTime:(id)sender;

@@ -3,6 +3,8 @@
         {
             ACTIONS = {
                 editTemplateFile = id; 
+                resetConversions = id; 
+                resetTemplateFile = id; 
                 setAutosaveTime = id; 
                 setDefaultStringEncoding = id; 
                 setShouldAutosave = id; 

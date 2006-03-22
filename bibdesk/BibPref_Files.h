@@ -65,7 +65,9 @@
 - (IBAction)toggleShouldUseTemplateFile:(id)sender;
 - (IBAction)toggleAutoSaveAsRSSChanged:(id)sender;
 - (IBAction)editTemplateFile:(id)sender;
+- (IBAction)resetTemplateFile:(id)sender;
 - (IBAction)showConversionEditor:(id)sender;
+- (IBAction)resetConversions:(id)sender;
 
 - (IBAction)setShouldAutosave:(id)sender;
 - (IBAction)setAutosaveTime:(id)sender;
