@@ -92,7 +92,7 @@ static BDSKCharacterConversion *sharedConversionEditor;
 - (void)updateDicts {
 	// try to read the user file in the Application Support directory
 	NSFileManager *fm = [NSFileManager defaultManager];
-	NSString *applicationSupportPath = [[fm applicationSupportDirectory:kUserDomain] stringByAppendingPathComponent:@"BibDesk"];
+	NSString *applicationSupportPath = [fm currentApplicationSupportPathForCurrentUser];
 	NSString *charConvPath = [applicationSupportPath stringByAppendingPathComponent:CHARACTER_CONVERSION_FILENAME];
 	NSDictionary *tmpDict = [NSDictionary dictionaryWithContentsOfFile:[[[NSBundle mainBundle] resourcePath] stringByAppendingPathComponent:CHARACTER_CONVERSION_FILENAME]];
 	
@@ -225,7 +225,7 @@ static BDSKCharacterConversion *sharedConversionEditor;
 	if (error) {
 		NSLog(@"Error writing: %@", error);
 	} else {
-		NSString *applicationSupportPath = [[[NSFileManager defaultManager] applicationSupportDirectory:kUserDomain] stringByAppendingPathComponent:@"BibDesk"]; 
+		NSString *applicationSupportPath = [[NSFileManager defaultManager] currentApplicationSupportPathForCurrentUser]; 
 		NSString *charConvPath = [applicationSupportPath stringByAppendingPathComponent:CHARACTER_CONVERSION_FILENAME];
 		[data writeToFile:charConvPath atomically:YES];
 	}

@@ -198,7 +198,7 @@ static BDSKTypeInfoEditor *sharedTypeInfoEditor;
 	if (error) {
 		NSLog(@"Error writing: %@", error);
 	} else {
-		NSString *applicationSupportPath = [[[NSFileManager defaultManager] applicationSupportDirectory:kUserDomain] stringByAppendingPathComponent:@"BibDesk"]; 
+		NSString *applicationSupportPath = [[NSFileManager defaultManager] currentApplicationSupportPathForCurrentUser]; 
 		NSString *typeInfoPath = [applicationSupportPath stringByAppendingPathComponent:TYPE_INFO_FILENAME];
 		[data writeToFile:typeInfoPath atomically:YES];
 	}
