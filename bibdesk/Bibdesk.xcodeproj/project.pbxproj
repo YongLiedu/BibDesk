@@ -294,6 +294,10 @@
 		CE392F5E08D04083001CEAC8 /* BDSKRatingButton.m in Sources */ = {isa = PBXBuildFile; fileRef = CE392F5C08D04083001CEAC8 /* BDSKRatingButton.m */; };
 		CE3B5E7C09CEDE470017D339 /* BDSKGlobalMacroResolver.h in Headers */ = {isa = PBXBuildFile; fileRef = CE3B5E7A09CEDE470017D339 /* BDSKGlobalMacroResolver.h */; };
 		CE3B5E7D09CEDE470017D339 /* BDSKGlobalMacroResolver.m in Sources */ = {isa = PBXBuildFile; fileRef = CE3B5E7B09CEDE470017D339 /* BDSKGlobalMacroResolver.m */; };
+		CE3B682A09D1B0190017D339 /* BDSKImagePopUpButton.h in Headers */ = {isa = PBXBuildFile; fileRef = CE3B682609D1B0190017D339 /* BDSKImagePopUpButton.h */; };
+		CE3B682B09D1B0190017D339 /* BDSKImagePopUpButton.m in Sources */ = {isa = PBXBuildFile; fileRef = CE3B682709D1B0190017D339 /* BDSKImagePopUpButton.m */; };
+		CE3B682C09D1B0190017D339 /* BDSKImagePopUpButtonCell.h in Headers */ = {isa = PBXBuildFile; fileRef = CE3B682809D1B0190017D339 /* BDSKImagePopUpButtonCell.h */; };
+		CE3B682D09D1B0190017D339 /* BDSKImagePopUpButtonCell.m in Sources */ = {isa = PBXBuildFile; fileRef = CE3B682909D1B0190017D339 /* BDSKImagePopUpButtonCell.m */; };
 		CE59A38109BC80A100AF3935 /* BDSKPreviewTextView.h in Headers */ = {isa = PBXBuildFile; fileRef = CE59A37F09BC80A100AF3935 /* BDSKPreviewTextView.h */; };
 		CE59A38209BC80A100AF3935 /* BDSKPreviewTextView.m in Sources */ = {isa = PBXBuildFile; fileRef = CE59A38009BC80A100AF3935 /* BDSKPreviewTextView.m */; };
 		CE67E316092B569000410758 /* BibEditorDrawer.nib in Resources */ = {isa = PBXBuildFile; fileRef = CE67E314092B569000410758 /* BibEditorDrawer.nib */; };
@@ -344,8 +348,6 @@
 		CEF94415092668EA00750FFA /* BDSKTableSortDescriptor.m in Sources */ = {isa = PBXBuildFile; fileRef = CEF94413092668EA00750FFA /* BDSKTableSortDescriptor.m */; };
 		F9022C1D0758013E00C3F701 /* BDAlias.m in Sources */ = {isa = PBXBuildFile; fileRef = F9022C1C0758013E00C3F701 /* BDAlias.m */; };
 		F9022C250758018600C3F701 /* NSString+Templating.m in Sources */ = {isa = PBXBuildFile; fileRef = F9022C240758018600C3F701 /* NSString+Templating.m */; };
-		F9022C2D075801AC00C3F701 /* RYZImagePopUpButton.m in Sources */ = {isa = PBXBuildFile; fileRef = F9022C2A075801AC00C3F701 /* RYZImagePopUpButton.m */; };
-		F9022C2E075801AC00C3F701 /* RYZImagePopUpButtonCell.m in Sources */ = {isa = PBXBuildFile; fileRef = F9022C2C075801AC00C3F701 /* RYZImagePopUpButtonCell.m */; };
 		F9022C4A0758027800C3F701 /* BDSKCiteKeyFormatter.m in Sources */ = {isa = PBXBuildFile; fileRef = F9022C390758027800C3F701 /* BDSKCiteKeyFormatter.m */; };
 		F9022C4B0758027800C3F701 /* BDSKConverter.m in Sources */ = {isa = PBXBuildFile; fileRef = F9022C3B0758027800C3F701 /* BDSKConverter.m */; };
 		F9022C4C0758027800C3F701 /* BDSKCustomCiteTableView.m in Sources */ = {isa = PBXBuildFile; fileRef = F9022C3D0758027800C3F701 /* BDSKCustomCiteTableView.m */; };
@@ -503,8 +505,6 @@
 		F918103D07583A5B00CF822D /* OATypeAheadSelectionHelper_Extensions.h in Headers */ = {isa = PBXBuildFile; fileRef = F9022CA20758038000C3F701 /* OATypeAheadSelectionHelper_Extensions.h */; };
 		F918103E07583A5B00CF822D /* PDFImageView.h in Headers */ = {isa = PBXBuildFile; fileRef = F9022CA40758038000C3F701 /* PDFImageView.h */; };
 		F918103F07583A5B00CF822D /* PubMedParser.h in Headers */ = {isa = PBXBuildFile; fileRef = F9022CA60758038000C3F701 /* PubMedParser.h */; };
-		F918104007583A5B00CF822D /* RYZImagePopUpButton.h in Headers */ = {isa = PBXBuildFile; fileRef = F9022C29075801AC00C3F701 /* RYZImagePopUpButton.h */; };
-		F918104107583A5B00CF822D /* RYZImagePopUpButtonCell.h in Headers */ = {isa = PBXBuildFile; fileRef = F9022C2B075801AC00C3F701 /* RYZImagePopUpButtonCell.h */; };
 		F918104207583A5B00CF822D /* WeblogAEKeywords.h in Headers */ = {isa = PBXBuildFile; fileRef = F9022DDD075808EB00C3F701 /* WeblogAEKeywords.h */; };
 		F91A2D6E089A7D4B0009B1C1 /* BDSKZoomablePDFView.m in Sources */ = {isa = PBXBuildFile; fileRef = F98F33C90892D4B700C1427D /* BDSKZoomablePDFView.m */; };
 		F91A2EBC089A7D670009B1C1 /* OmniBase.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F9022DE50758095000C3F701 /* OmniBase.framework */; };
@@ -1054,7 +1054,7 @@
 		3DFF35600816B55B0052F37C /* forward_small.tiff */ = {isa = PBXFileReference; lastKnownFileType = image.tiff; name = forward_small.tiff; path = Images/forward_small.tiff; sourceTree = "<group>"; };
 		3DFF35620816B5780052F37C /* reload_small.tiff */ = {isa = PBXFileReference; lastKnownFileType = image.tiff; name = reload_small.tiff; path = Images/reload_small.tiff; sourceTree = "<group>"; };
 		8D1107310486CEB800E47090 /* Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
-		8D1107320486CEB800E47090 /* BibDesk.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = BibDesk.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		8D1107320486CEB800E47090 /* BibDesk.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = BibDesk.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		CE1A7ED4090BDEB600ACC864 /* BDSKHeaderPopUpButtonCell.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BDSKHeaderPopUpButtonCell.h; sourceTree = "<group>"; };
 		CE1A7ED5090BDEB600ACC864 /* BDSKHeaderPopUpButtonCell.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BDSKHeaderPopUpButtonCell.m; sourceTree = "<group>"; };
 		CE1A7EDD090BDF1C00ACC864 /* BDSKHeaderPopUpButton.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BDSKHeaderPopUpButton.h; sourceTree = "<group>"; };
@@ -1088,6 +1088,10 @@
 		CE392F5C08D04083001CEAC8 /* BDSKRatingButton.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BDSKRatingButton.m; sourceTree = "<group>"; };
 		CE3B5E7A09CEDE470017D339 /* BDSKGlobalMacroResolver.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BDSKGlobalMacroResolver.h; sourceTree = "<group>"; };
 		CE3B5E7B09CEDE470017D339 /* BDSKGlobalMacroResolver.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BDSKGlobalMacroResolver.m; sourceTree = "<group>"; };
+		CE3B682609D1B0190017D339 /* BDSKImagePopUpButton.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = BDSKImagePopUpButton.h; sourceTree = "<group>"; };
+		CE3B682709D1B0190017D339 /* BDSKImagePopUpButton.m */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.objc; path = BDSKImagePopUpButton.m; sourceTree = "<group>"; };
+		CE3B682809D1B0190017D339 /* BDSKImagePopUpButtonCell.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = BDSKImagePopUpButtonCell.h; sourceTree = "<group>"; };
+		CE3B682909D1B0190017D339 /* BDSKImagePopUpButtonCell.m */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.objc; path = BDSKImagePopUpButtonCell.m; sourceTree = "<group>"; };
 		CE59A37F09BC80A100AF3935 /* BDSKPreviewTextView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BDSKPreviewTextView.h; sourceTree = "<group>"; };
 		CE59A38009BC80A100AF3935 /* BDSKPreviewTextView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BDSKPreviewTextView.m; sourceTree = "<group>"; };
 		CE67E315092B569000410758 /* English */ = {isa = PBXFileReference; lastKnownFileType = wrapper.nib; name = English; path = English.lproj/BibEditorDrawer.nib; sourceTree = "<group>"; };
@@ -1139,10 +1143,6 @@
 		F9022C1C0758013E00C3F701 /* BDAlias.m */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.objc; name = BDAlias.m; path = ../bibdesk_vendorsrc/BDistributed/BDAlias/BDAlias.m; sourceTree = "<group>"; };
 		F9022C230758018600C3F701 /* NSString+Templating.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; name = "NSString+Templating.h"; path = "../bibdesk_vendorsrc/scifihifi/NSString_Templating/NSString+Templating.h"; sourceTree = "<group>"; };
 		F9022C240758018600C3F701 /* NSString+Templating.m */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.objc; name = "NSString+Templating.m"; path = "../bibdesk_vendorsrc/scifihifi/NSString_Templating/NSString+Templating.m"; sourceTree = "<group>"; };
-		F9022C29075801AC00C3F701 /* RYZImagePopUpButton.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; name = RYZImagePopUpButton.h; path = ../bibdesk_vendorsrc/ScotlandSoftware/ImagePopUpButton/RYZImagePopUpButton.h; sourceTree = "<group>"; };
-		F9022C2A075801AC00C3F701 /* RYZImagePopUpButton.m */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.objc; name = RYZImagePopUpButton.m; path = ../bibdesk_vendorsrc/ScotlandSoftware/ImagePopUpButton/RYZImagePopUpButton.m; sourceTree = "<group>"; };
-		F9022C2B075801AC00C3F701 /* RYZImagePopUpButtonCell.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; name = RYZImagePopUpButtonCell.h; path = ../bibdesk_vendorsrc/ScotlandSoftware/ImagePopUpButton/RYZImagePopUpButtonCell.h; sourceTree = "<group>"; };
-		F9022C2C075801AC00C3F701 /* RYZImagePopUpButtonCell.m */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.objc; name = RYZImagePopUpButtonCell.m; path = ../bibdesk_vendorsrc/ScotlandSoftware/ImagePopUpButton/RYZImagePopUpButtonCell.m; sourceTree = "<group>"; };
 		F9022C380758027800C3F701 /* BDSKCiteKeyFormatter.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = BDSKCiteKeyFormatter.h; sourceTree = "<group>"; };
 		F9022C390758027800C3F701 /* BDSKCiteKeyFormatter.m */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.objc; path = BDSKCiteKeyFormatter.m; sourceTree = "<group>"; };
 		F9022C3A0758027800C3F701 /* BDSKConverter.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = BDSKConverter.h; sourceTree = "<group>"; };
@@ -1605,8 +1605,6 @@
 				F9484D8A08D68C3200153BDA /* KFAppleScriptHandlerAdditionsCore.m */,
 				F9484D8B08D68C3200153BDA /* KFASHandlerAdditions-TypeTranslation.h */,
 				F9484D8C08D68C3200153BDA /* KFASHandlerAdditions-TypeTranslation.m */,
-				F9022C2A075801AC00C3F701 /* RYZImagePopUpButton.m */,
-				F9022C2C075801AC00C3F701 /* RYZImagePopUpButtonCell.m */,
 				F9022C240758018600C3F701 /* NSString+Templating.m */,
 				F9022C1C0758013E00C3F701 /* BDAlias.m */,
 				32CA4F630368D1EE00C91783 /* Bibdesk_Prefix.pch */,
@@ -1721,6 +1719,8 @@
 				F97BE8F00907321F0063504B /* BDSKGroupTableView.m */,
 				CE1A7EDE090BDF1C00ACC864 /* BDSKHeaderPopUpButton.m */,
 				CE1A7ED5090BDEB600ACC864 /* BDSKHeaderPopUpButtonCell.m */,
+				CE3B682709D1B0190017D339 /* BDSKImagePopUpButton.m */,
+				CE3B682909D1B0190017D339 /* BDSKImagePopUpButtonCell.m */,
 				F9022C54075802E300C3F701 /* BDSKLinkButton.m */,
 				3DE391F107FF260D00BE3AE7 /* BDSKMenuItem.m */,
 				F941B7E908AA574200F04ECD /* BDSKOverlay.m */,
@@ -2031,6 +2031,8 @@
 				F97BE8EF0907321F0063504B /* BDSKGroupTableView.h */,
 				CE1A7ED4090BDEB600ACC864 /* BDSKHeaderPopUpButtonCell.h */,
 				CE1A7EDD090BDF1C00ACC864 /* BDSKHeaderPopUpButton.h */,
+				CE3B682609D1B0190017D339 /* BDSKImagePopUpButton.h */,
+				CE3B682809D1B0190017D339 /* BDSKImagePopUpButtonCell.h */,
 				CEAE613C097FF60A000B618C /* BDSKJSTORParser.h */,
 				F9022C53075802E300C3F701 /* BDSKLinkButton.h */,
 				3DE391F007FF260D00BE3AE7 /* BDSKMenuItem.h */,
@@ -2135,8 +2137,6 @@
 				F9022CA40758038000C3F701 /* PDFImageView.h */,
 				F91F284609A661A700419960 /* PDFMetadata.h */,
 				F9022CA60758038000C3F701 /* PubMedParser.h */,
-				F9022C29075801AC00C3F701 /* RYZImagePopUpButton.h */,
-				F9022C2B075801AC00C3F701 /* RYZImagePopUpButtonCell.h */,
 				F9022DDD075808EB00C3F701 /* WeblogAEKeywords.h */,
 			);
 			name = Headers;
@@ -2310,8 +2310,6 @@
 				F918103D07583A5B00CF822D /* OATypeAheadSelectionHelper_Extensions.h in Headers */,
 				F918103E07583A5B00CF822D /* PDFImageView.h in Headers */,
 				F918103F07583A5B00CF822D /* PubMedParser.h in Headers */,
-				F918104007583A5B00CF822D /* RYZImagePopUpButton.h in Headers */,
-				F918104107583A5B00CF822D /* RYZImagePopUpButtonCell.h in Headers */,
 				F918104207583A5B00CF822D /* WeblogAEKeywords.h in Headers */,
 				3DD300F4075C0532003FD2D7 /* BibField.h in Headers */,
 				F920DAFF075C2B69000C5FCA /* BibAppController+Scripting.h in Headers */,
@@ -2418,6 +2416,8 @@
 				F94DE74B09CB46FF00B5FD51 /* BDSKPersistentSearch.h in Headers */,
 				CEF7295609CC88AB00802D48 /* BDSKFieldSheetController.h in Headers */,
 				CE3B5E7C09CEDE470017D339 /* BDSKGlobalMacroResolver.h in Headers */,
+				CE3B682A09D1B0190017D339 /* BDSKImagePopUpButton.h in Headers */,
+				CE3B682C09D1B0190017D339 /* BDSKImagePopUpButtonCell.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -3186,8 +3186,6 @@
 				8D11072D0486CEB800E47090 /* main.m in Sources */,
 				F9022C1D0758013E00C3F701 /* BDAlias.m in Sources */,
 				F9022C250758018600C3F701 /* NSString+Templating.m in Sources */,
-				F9022C2D075801AC00C3F701 /* RYZImagePopUpButton.m in Sources */,
-				F9022C2E075801AC00C3F701 /* RYZImagePopUpButtonCell.m in Sources */,
 				F9022C4A0758027800C3F701 /* BDSKCiteKeyFormatter.m in Sources */,
 				F9022C4B0758027800C3F701 /* BDSKConverter.m in Sources */,
 				F9022C4C0758027800C3F701 /* BDSKCustomCiteTableView.m in Sources */,
@@ -3326,6 +3324,8 @@
 				F94DE74C09CB46FF00B5FD51 /* BDSKPersistentSearch.m in Sources */,
 				CEF7295709CC88AB00802D48 /* BDSKFieldSheetController.m in Sources */,
 				CE3B5E7D09CEDE470017D339 /* BDSKGlobalMacroResolver.m in Sources */,
+				CE3B682B09D1B0190017D339 /* BDSKImagePopUpButton.m in Sources */,
+				CE3B682D09D1B0190017D339 /* BDSKImagePopUpButtonCell.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
