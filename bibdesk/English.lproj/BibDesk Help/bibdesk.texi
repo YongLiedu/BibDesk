@@ -2233,7 +2233,11 @@ for more details).  A document's definitions will always override the global def
 in case of a conflict.
 
 You can also add a collection of files from which global macro definitions will be 
-read on startup. 
+read on startup. You will not see those macros in the macro editor, 
+but they will be used when no other macro definition is found in the document or the global macros. 
+You can add are either bibliography files (@samp{.bib} extension) or bibliography style 
+files (@samp{.bst} extension). To add files from which global macros are read, click the 
+@buttontitle{Files@dots{}} button in the Defaults preference pane.
 
 
 @node Adding Custom Column Header Images and Titles
