@@ -6,6 +6,7 @@
         {CLASS = BDSKForm; LANGUAGE = ObjC; SUPERCLASS = NSForm; }, 
         {CLASS = BDSKFormCell; LANGUAGE = ObjC; SUPERCLASS = NSFormCell; }, 
         {CLASS = BDSKGradientView; LANGUAGE = ObjC; SUPERCLASS = NSView; }, 
+        {CLASS = BDSKImagePopUpButton; LANGUAGE = ObjC; SUPERCLASS = NSPopUpButton; }, 
         {
             CLASS = BDSKPreviewer; 
             LANGUAGE = ObjC; 
@@ -83,7 +84,6 @@
         {CLASS = NSObject; LANGUAGE = ObjC; }, 
         {CLASS = OASplitView; LANGUAGE = ObjC; SUPERCLASS = NSSplitView; }, 
         {CLASS = PDFImageView; LANGUAGE = ObjC; SUPERCLASS = NSImageView; }, 
-        {CLASS = RYZImagePopUpButton; LANGUAGE = ObjC; SUPERCLASS = NSPopUpButton; }, 
         {
             CLASS = RYZImagePopUpButtonCell; 
             LANGUAGE = ObjC; 

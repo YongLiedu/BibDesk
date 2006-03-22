@@ -15,6 +15,7 @@
             LANGUAGE = ObjC; 
             SUPERCLASS = NSTextFieldCell; 
         }, 
+        {CLASS = BDSKImagePopUpButton; LANGUAGE = ObjC; SUPERCLASS = NSPopUpButton; }, 
         {
             CLASS = BDSKPopUpButtonCell; 
             LANGUAGE = ObjC; 
@@ -136,8 +137,7 @@
         {CLASS = MyTextField; LANGUAGE = ObjC; SUPERCLASS = NSTextField; }, 
         {CLASS = OAGradientTableView; LANGUAGE = ObjC; SUPERCLASS = NSTableView; }, 
         {CLASS = OASplitView; LANGUAGE = ObjC; SUPERCLASS = NSSplitView; }, 
-        {CLASS = OATextWithIconCell; LANGUAGE = ObjC; SUPERCLASS = NSTextFieldCell; }, 
-        {CLASS = RYZImagePopUpButton; LANGUAGE = ObjC; SUPERCLASS = NSPopUpButton; }
+        {CLASS = OATextWithIconCell; LANGUAGE = ObjC; SUPERCLASS = NSTextFieldCell; }
     ); 
     IBVersion = 1; 
 }

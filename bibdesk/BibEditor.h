@@ -49,7 +49,7 @@
 @class BDSKFieldNameFormatter;
 @class BDSKFormCellFormatter;
 @class MacroFormWindowController;
-@class RYZImagePopUpButton;
+@class BDSKImagePopUpButton;
 @class BibItem;
 @class BDSKStatusBar;
 @class BibDocument;
@@ -85,14 +85,14 @@
 	BDSKRatingButtonCell *ratingButtonCell;
     
     IBOutlet NSTextField* citeKeyField;
-	IBOutlet RYZImagePopUpButton *viewLocalButton;
-    IBOutlet RYZImagePopUpButton *viewRemoteButton;
-    IBOutlet RYZImagePopUpButton *documentSnoopButton;
+	IBOutlet BDSKImagePopUpButton *viewLocalButton;
+    IBOutlet BDSKImagePopUpButton *viewRemoteButton;
+    IBOutlet BDSKImagePopUpButton *documentSnoopButton;
 	NSToolbarItem *viewLocalToolbarItem;
 	NSToolbarItem *viewRemoteToolbarItem;
 	NSToolbarItem *documentSnoopToolbarItem;
     IBOutlet NSScrollView *fieldsScrollView;
-	IBOutlet RYZImagePopUpButton *actionMenuButton;
+	IBOutlet BDSKImagePopUpButton *actionMenuButton;
     // ----------------------------------------------------------------------------------------
     NSString *currentType;
     BibItem *theBib;

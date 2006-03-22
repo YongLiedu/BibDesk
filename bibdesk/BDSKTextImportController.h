@@ -40,7 +40,7 @@
 #import "BibItem.h"
 #import "BibTypeManager.h"
 #import "MacroTextFieldWindowController.h"
-#import "RYZImagePopUpButton.h"
+#import "BDSKImagePopUpButton.h"
 #import <OmniAppKit/OATypeAheadSelectionHelper.h>
 #import "OATypeAheadSelectionHelper_Extensions.h"
 
@@ -56,7 +56,7 @@
     IBOutlet NSTableView* itemTableView;
     IBOutlet NSTextField* statusLine;
     IBOutlet NSPopUpButton* itemTypeButton;
-    IBOutlet RYZImagePopUpButton *actionMenuButton;
+    IBOutlet BDSKImagePopUpButton *actionMenuButton;
     IBOutlet NSSplitView* splitView;
     IBOutlet NSBox* sourceBox;
     IBOutlet WebView* webView;

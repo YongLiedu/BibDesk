@@ -74,7 +74,7 @@
 #import "BibFiler.h"
 
 #import "ApplicationServices/ApplicationServices.h"
-#import "RYZImagePopUpButton.h"
+#import "BDSKImagePopUpButton.h"
 #import "BDSKRatingButton.h"
 
 #import "MacroWindowController.h"
@@ -276,7 +276,7 @@ NSString *BDSKWeblocFilePboardType = @"CorePasteboardFlavorType 0x75726C20";
 	[[actionMenuButton cell] setUsesItemFromMenu:NO];
 	[[actionMenuButton cell] setRefreshesMenu:NO];
 	
-	RYZImagePopUpButton *cornerViewButton = (RYZImagePopUpButton*)[tableView cornerView];
+	BDSKImagePopUpButton *cornerViewButton = (BDSKImagePopUpButton*)[tableView cornerView];
 	[cornerViewButton setAlternateImage:[NSImage imageNamed:@"cornerColumns_Pressed"]];
 	[cornerViewButton setShowsMenuWhenIconClicked:YES];
 	[[cornerViewButton cell] setAltersStateOfSelectedItem:NO];

@@ -55,7 +55,7 @@
 @class BDSKAlert;
 @class BDSKStatusBar;
 @class BDSKTeXTask;
-@class RYZImagePopUpButton;
+@class BDSKImagePopUpButton;
 @class MacroWindowController;
 @class BDSKDragTableView;
 
@@ -145,7 +145,7 @@ extern NSString* BDSKWeblocFilePboardType; // core pasteboard type for webloc fi
 	IBOutlet NSMenu * URLMenu;
 	IBOutlet NSMenu * smartGroupMenu;
 	IBOutlet NSMenu * actionMenu;
-	IBOutlet RYZImagePopUpButton * actionMenuButton;
+	IBOutlet BDSKImagePopUpButton * actionMenuButton;
 	IBOutlet NSMenuItem * actionMenuFirstItem;
 
     // ----------------------------------------------------------------------------------------

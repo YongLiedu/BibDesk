@@ -43,7 +43,7 @@
 #import "BDSKEdgeView.h"
 #import <WebKit/WebKit.h>
 #import "BibDocument.h"
-#import "RYZImagePopUpButtonCell.h"
+#import "BDSKImagePopUpButtonCell.h"
 #import "NSFileManager_BDSKExtensions.h"
 #import "BibAppController.h"
 #import "BDSKFieldEditor.h"

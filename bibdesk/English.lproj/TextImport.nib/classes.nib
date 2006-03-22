@@ -1,6 +1,7 @@
 {
     IBClasses = (
         {CLASS = BDSKEdgeView; LANGUAGE = ObjC; SUPERCLASS = NSView; }, 
+        {CLASS = BDSKImagePopUpButton; LANGUAGE = ObjC; SUPERCLASS = NSPopUpButton; }, 
         {
             ACTIONS = {
                 addField = id; 
@@ -52,7 +53,6 @@
             SUPERCLASS = NSWindowController; 
         }, 
         {CLASS = FirstResponder; LANGUAGE = ObjC; SUPERCLASS = NSObject; }, 
-        {CLASS = RYZImagePopUpButton; LANGUAGE = ObjC; SUPERCLASS = NSPopUpButton; }, 
         {CLASS = TextImportItemTableView; LANGUAGE = ObjC; SUPERCLASS = NSTableView; }
     ); 
     IBVersion = 1; 

@@ -57,7 +57,7 @@
 #import "BibAppController.h"
 #import "PDFImageView.h"
 #import "BibPersonController.h"
-#import "RYZImagePopUpButton.h"
+#import "BDSKImagePopUpButton.h"
 #import "BDSKRatingButton.h"
 #import "MacroTextFieldWindowController.h"
 #import "BDSKMenuItem.h"
@@ -570,7 +570,7 @@ static int numberOfOpenEditors = 0;
 	return nil;
 }
 
-- (NSMenu *)menuForImagePopUpButton:(RYZImagePopUpButton *)view{
+- (NSMenu *)menuForImagePopUpButton:(BDSKImagePopUpButton *)view{
 	NSMenu *menu = [[NSMenu allocWithZone:[NSMenu menuZone]] init];
 	NSMenu *submenu;
 	NSMenuItem *item;
@@ -2230,7 +2230,7 @@ static int numberOfOpenEditors = 0;
 	return NO;
 }
 
-- (BOOL)imagePopUpButton:(RYZImagePopUpButton *)view canReceiveDrag:(id <NSDraggingInfo>)sender{
+- (BOOL)imagePopUpButton:(BDSKImagePopUpButton *)view canReceiveDrag:(id <NSDraggingInfo>)sender{
 	if (view == [sender draggingSource])
 		return NO;
 	NSString *field = nil;
@@ -2241,7 +2241,7 @@ static int numberOfOpenEditors = 0;
 	return [self canReceiveDrag:sender forField:field];
 }
 
-- (BOOL)imagePopUpButton:(RYZImagePopUpButton *)view receiveDrag:(id <NSDraggingInfo>)sender{
+- (BOOL)imagePopUpButton:(BDSKImagePopUpButton *)view receiveDrag:(id <NSDraggingInfo>)sender{
 	NSString *field = nil;
 	if (view == viewLocalButton)
 		field = BDSKLocalUrlString;
@@ -2348,7 +2348,7 @@ static int numberOfOpenEditors = 0;
 	[self cleanUpAfterDragOperation:operation forField:field];
 }
 
-- (BOOL)imagePopUpButton:(RYZImagePopUpButton *)view writeDataToPasteboard:(NSPasteboard *)pasteboard {
+- (BOOL)imagePopUpButton:(BDSKImagePopUpButton *)view writeDataToPasteboard:(NSPasteboard *)pasteboard {
 	NSString *field = nil;
 	if (view == viewLocalButton)
 		field = BDSKLocalUrlString;
@@ -2359,7 +2359,7 @@ static int numberOfOpenEditors = 0;
 	return NO;
 }
 
-- (NSArray *)imagePopUpButton:(RYZImagePopUpButton *)view namesOfPromisedFilesDroppedAtDestination:(NSURL *)dropDestination {
+- (NSArray *)imagePopUpButton:(BDSKImagePopUpButton *)view namesOfPromisedFilesDroppedAtDestination:(NSURL *)dropDestination {
 	NSString *field = nil;
 	if (view == viewLocalButton)
 		field = BDSKLocalUrlString;
@@ -2370,7 +2370,7 @@ static int numberOfOpenEditors = 0;
 	return nil;
 }
 
-- (void)imagePopUpButton:(RYZImagePopUpButton *)view cleanUpAfterDragOperation:(NSDragOperation)operation {
+- (void)imagePopUpButton:(BDSKImagePopUpButton *)view cleanUpAfterDragOperation:(NSDragOperation)operation {
 	NSString *field = nil;
 	if (view == viewLocalButton)
 		field = BDSKLocalUrlString;
