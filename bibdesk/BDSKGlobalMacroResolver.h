@@ -42,6 +42,7 @@
 
 @interface BDSKGlobalMacroResolver : NSObject <BDSKMacroResolver> {
     NSMutableDictionary *standardMacroDefinitions;
+    NSMutableDictionary *fileMacroDefinitions;
     NSMutableDictionary *macroDefinitions;
 }
 
@@ -49,5 +50,6 @@
 
 - (void)loadMacrosFromPreferences;
 - (void)synchronizePreferences;
+- (void)updateMacrosFromFiles;
 
 @end

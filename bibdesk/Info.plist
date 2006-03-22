@@ -399,6 +399,8 @@
 				<dict>
 					<key>BDSKGlobalMacroDefinitionsKey</key>
 					<dict/>
+					<key>BDSKGlobalMacroFilesKey</key>
+					<array/>
 					<key>Macro definitions from bib style file</key>
 					<dict/>
 					<key>BDSKTableHeaderImages</key>

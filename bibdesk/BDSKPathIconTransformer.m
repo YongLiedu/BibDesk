@@ -54,6 +54,7 @@
 
 - (id)transformedValue:(id)path {
 	NSString *abbrevPath = [path stringByAbbreviatingWithTildeInPath];
+    path = [path stringByStandardizingPath];
 	if(path && [[NSFileManager defaultManager] fileExistsAtPath:path]){
 		return [NSDictionary dictionaryWithObjectsAndKeys:
 					abbrevPath, OATextWithIconCellStringKey, 

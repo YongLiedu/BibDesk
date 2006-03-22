@@ -37,6 +37,7 @@
 #import "BDSKTypeInfoEditor.h"
 #import "BibTeXParser.h"
 #import "BDSKGlobalMacroResolver.h"
+#import "BDSKPathIconTransformer.h"
 
 // this corresponds with the menu item order in the nib
 enum {
@@ -52,7 +53,9 @@ enum {
 
 - (id)initWithTitle:(NSString *)newTitle defaultsArray:(NSArray *)newDefaultsArray controller:(OAPreferenceController *)controller{
 	if(self = [super initWithTitle:newTitle defaultsArray:newDefaultsArray controller:controller]){
-		customFieldsArray = [[NSMutableArray alloc] initWithCapacity:6];
+        globalMacroFiles = [[NSMutableArray alloc] initWithArray:[defaults stringArrayForKey:BDSKGlobalMacroFilesKey]];
+       
+        customFieldsArray = [[NSMutableArray alloc] initWithCapacity:6];
 		customFieldsSet = [[NSMutableSet alloc] initWithCapacity:6];
 		
 		// initialize the default fields from the prefs
@@ -228,6 +231,7 @@ enum {
 }
 
 - (void)dealloc{
+    [globalMacroFiles release];
     [customFieldsArray release];
     [customFieldsSet release];
     [macroWC release];
@@ -239,71 +243,90 @@ enum {
 #pragma mark TableView DataSource methods
 
 - (int)numberOfRowsInTableView:(NSTableView *)tableView{
-	return [customFieldsArray count];
+    if (tableView == defaultFieldsTableView)
+        return [customFieldsArray count];
+    else if (tableView == globalMacroFilesTableView)
+        return [globalMacroFiles count];
+    return 0;
 }
 
 - (id)tableView:(NSTableView *)tableView objectValueForTableColumn:(NSTableColumn *)tableColumn row:(int)row{
-	return [[customFieldsArray objectAtIndex:row] objectForKey:[tableColumn identifier]];
+    if (tableView == defaultFieldsTableView) {
+        return [[customFieldsArray objectAtIndex:row] objectForKey:[tableColumn identifier]];
+    } else if (tableView == globalMacroFilesTableView) {
+        NSValueTransformer *transformer = [NSValueTransformer valueTransformerForName:@"BDSKPathIconTransformer"]; 
+        return [transformer transformedValue:[globalMacroFiles objectAtIndex:row]];
+    }
+    return nil;
 }
 
 - (void)tableView:(NSTableView *)tableView setObjectValue:(id)object forTableColumn:(NSTableColumn *)tableColumn row:(int)row{
-	NSString *colID = [tableColumn identifier];
-	NSString *field = [[customFieldsArray objectAtIndex:row] objectForKey:@"field"];
-	
-	if([colID isEqualToString:@"field"]){
-		if([customFieldsSet containsObject:object])
-			return; // don't add duplicate fields
-		[customFieldsSet removeObject:field];
-		if([object isEqualToString:@""]){
-			[customFieldsArray removeObjectAtIndex:row];
-		}else{
-			[[customFieldsArray objectAtIndex:row] setObject:object forKey:colID];
-			[customFieldsSet addObject:object];
-		}
-	}else{
-		[[customFieldsArray objectAtIndex:row] setObject:object forKey:colID];
-	}
-	[self updatePrefs];
+    if (tableView == defaultFieldsTableView) {
+        NSString *colID = [tableColumn identifier];
+        NSString *field = [[customFieldsArray objectAtIndex:row] objectForKey:@"field"];
+        
+        if([colID isEqualToString:@"field"]){
+            if([customFieldsSet containsObject:object])
+                return; // don't add duplicate fields
+            [customFieldsSet removeObject:field];
+            if([object isEqualToString:@""]){
+                [customFieldsArray removeObjectAtIndex:row];
+            }else{
+                [[customFieldsArray objectAtIndex:row] setObject:object forKey:colID];
+                [customFieldsSet addObject:object];
+            }
+        }else{
+            [[customFieldsArray objectAtIndex:row] setObject:object forKey:colID];
+        }
+        [self updatePrefs];
+    }
 }
 
 #pragma mark TableView Delegate methods
 
 - (BOOL)tableView:(NSTableView *)tableView shouldEditTableColumn:(NSTableColumn *)tableColumn row:(int)row{
-	NSString *colID = [tableColumn identifier];
-	NSString *field = [[customFieldsArray objectAtIndex:row] objectForKey:@"field"];
-	
-	if([field isEqualToString:BDSKLocalUrlString] || [field isEqualToString:BDSKUrlString])
-		return NO;
-	else if([field isEqualToString:BDSKRatingString] &&
-			([colID isEqualToString:@"field"] || [colID isEqualToString:@"type"]))
-		return NO;
-	return YES;
+    if (tableView == defaultFieldsTableView) {
+        NSString *colID = [tableColumn identifier];
+        NSString *field = [[customFieldsArray objectAtIndex:row] objectForKey:@"field"];
+        
+        if([field isEqualToString:BDSKLocalUrlString] || [field isEqualToString:BDSKUrlString])
+            return NO;
+        else if([field isEqualToString:BDSKRatingString] &&
+                ([colID isEqualToString:@"field"] || [colID isEqualToString:@"type"]))
+            return NO;
+        return YES;
+    }
+    return NO;
 }
 
 - (void)tableView:(NSTableView *)tableView willDisplayCell:(id)cell forTableColumn:(NSTableColumn *)tableColumn row:(int)row{
-	NSString *colID = [tableColumn identifier];
-	NSString *field = [[customFieldsArray objectAtIndex:row] objectForKey:@"field"];
-	
-	if([field isEqualToString:BDSKLocalUrlString] || [field isEqualToString:BDSKUrlString])
-		[cell setEnabled:NO];
-	else if([field isEqualToString:BDSKRatingString] &&
-			([colID isEqualToString:@"field"] || [colID isEqualToString:@"type"]))
-		[cell setEnabled:NO];
-	else
-		[cell setEnabled:YES];
+    if (tableView == defaultFieldsTableView) {
+        NSString *colID = [tableColumn identifier];
+        NSString *field = [[customFieldsArray objectAtIndex:row] objectForKey:@"field"];
+        
+        if([field isEqualToString:BDSKLocalUrlString] || [field isEqualToString:BDSKUrlString])
+            [cell setEnabled:NO];
+        else if([field isEqualToString:BDSKRatingString] &&
+                ([colID isEqualToString:@"field"] || [colID isEqualToString:@"type"]))
+            [cell setEnabled:NO];
+        else
+            [cell setEnabled:YES];
+    }
 }
 
 - (void)tableViewSelectionDidChange:(NSNotification *)aNotification{
-	int row = [defaultFieldsTableView selectedRow];
-	if(row == -1){
-		[delSelectedDefaultFieldButton setEnabled:NO];
-		return;
-	}
-	NSString *field = [[customFieldsArray objectAtIndex:row] objectForKey:@"field"];
-	if([field isEqualToString:BDSKLocalUrlString] || [field isEqualToString:BDSKUrlString] || [field isEqualToString:BDSKRatingString])
-		[delSelectedDefaultFieldButton setEnabled:NO];
-	else
-		[delSelectedDefaultFieldButton setEnabled:YES];
+    if ([aNotification object] == defaultFieldsTableView) {
+        int row = [defaultFieldsTableView selectedRow];
+        if(row == -1){
+            [delSelectedDefaultFieldButton setEnabled:NO];
+            return;
+        }
+        NSString *field = [[customFieldsArray objectAtIndex:row] objectForKey:@"field"];
+        if([field isEqualToString:BDSKLocalUrlString] || [field isEqualToString:BDSKUrlString] || [field isEqualToString:BDSKRatingString])
+            [delSelectedDefaultFieldButton setEnabled:NO];
+        else
+            [delSelectedDefaultFieldButton setEnabled:YES];
+    }
 }
 
 #pragma mark Add and Del fields buttons
@@ -366,11 +389,6 @@ enum {
 
 #pragma mark BST macro methods
 
-// Stores global macro definitions in the preferences; useful if you keep them in a separate file.
-// We handle .bib (@string) and .bst (MACRO) style definitions, via drag-and-drop or paste.
-
-#pragma mark Macro Window Controller support
-
 - (IBAction)showMacrosWindow:(id)sender{
 	if (!macroWC){
 		macroWC = [[MacroWindowController alloc] init];
@@ -383,12 +401,60 @@ enum {
           contextInfo:nil];
 }
 
-- (NSString *)displayName{
-    return NSLocalizedString(@"Global Macro Definitions", @"");
+- (IBAction)showMacroFileWindow:(id)sender{
+	[NSApp beginSheet:globalMacroFileSheet
+       modalForWindow:[[self controlBox] window]
+        modalDelegate:nil
+       didEndSelector:NULL
+          contextInfo:nil];
 }
 
-- (NSUndoManager *)undoManager{
-    return [[[OAPreferenceController sharedPreferenceController] window] undoManager];
+- (IBAction)closeMacroFileWindow:(id)sender{
+    [globalMacroFileSheet orderOut:sender];
+    [NSApp endSheet:globalMacroFileSheet];
+}
+
+- (IBAction)addGlobalMacroFile:(id)sender{
+    NSOpenPanel *openPanel = [NSOpenPanel openPanel];
+    [openPanel setAllowsMultipleSelection:YES];
+    [openPanel setResolvesAliases:NO];
+    [openPanel setCanChooseDirectories:NO];
+    [openPanel setPrompt:NSLocalizedString(@"Choose", @"Choose file")];
+
+    [openPanel beginSheetForDirectory:nil 
+                                 file:nil 
+                                types:[NSArray arrayWithObjects:@"bib", @"bst", nil] 
+                       modalForWindow:globalMacroFileSheet
+                        modalDelegate:self 
+                       didEndSelector:@selector(addGlobalMacroFilePanelDidEnd:returnCode:contextInfo:) 
+                          contextInfo:nil];
+}
+
+- (void)addGlobalMacroFilePanelDidEnd:(NSOpenPanel *)openPanel returnCode:(int)returnCode contextInfo:(void *)contextInfo{
+    if(returnCode == NSCancelButton)
+        return;
+    
+    NSEnumerator *fileEnum = [[openPanel filenames] objectEnumerator];
+    NSString *file;
+    
+    while(file = [fileEnum nextObject]){
+        if ([globalMacroFiles containsObject:file] == NO)
+            [globalMacroFiles addObject:file];
+    }
+    
+    [globalMacroFilesTableView reloadData];
+    [defaults setObject:globalMacroFiles forKey:BDSKGlobalMacroFilesKey];
+    [[BDSKGlobalMacroResolver defaultMacroResolver] updateMacrosFromFiles];
+}
+
+- (IBAction)delGlobalMacroFiles:(id)sender{
+    NSIndexSet *indexes = [globalMacroFilesTableView selectedRowIndexes];
+    
+    [globalMacroFiles removeObjectsAtIndexes:indexes];
+    
+    [globalMacroFilesTableView reloadData];
+    [defaults setObject:globalMacroFiles forKey:BDSKGlobalMacroFilesKey];
+    [[BDSKGlobalMacroResolver defaultMacroResolver] updateMacrosFromFiles];
 }
 
 @end

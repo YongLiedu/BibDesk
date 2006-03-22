@@ -159,6 +159,7 @@ extern NSString *BDSKShouldSaveNormalizedAuthorNamesKey;
 extern NSString *BDSKSaveAnnoteAndAbstractAtEndOfItemKey;
 extern NSString *BDSKBibStyleMacroDefinitionsKey;
 extern NSString *BDSKGlobalMacroDefinitionsKey;
+extern NSString *BDSKGlobalMacroFilesKey;
 
 extern NSString *BDSKFindControllerDefaultFindAndReplaceTypeKey;
 extern NSString *BDSKFindControllerSearchScopeKey;

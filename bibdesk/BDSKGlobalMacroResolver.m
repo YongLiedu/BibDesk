@@ -39,6 +39,7 @@
 #import "BDSKGlobalMacroResolver.h"
 #import "BibPrefController.h"
 #import "NSMutableDictionary+ThreadSafety.h"
+#import "BibTeXParser.h"
 
 @implementation BDSKGlobalMacroResolver
 
@@ -60,6 +61,7 @@ static BDSKGlobalMacroResolver *defaultMacroResolver;
         // but this is the best we can do.  The OFCreateCaseInsensitiveKeyMutableDictionary()
         // is used to create a dictionary with case-insensitive keys.
         standardMacroDefinitions = (NSMutableDictionary *)BDSKCreateCaseInsensitiveKeyMutableDictionary();
+        fileMacroDefinitions = (NSMutableDictionary *)BDSKCreateCaseInsensitiveKeyMutableDictionary();
         macroDefinitions = (NSMutableDictionary *)BDSKCreateCaseInsensitiveKeyMutableDictionary();
         [self loadMacrosFromPreferences];
     }
@@ -67,6 +69,8 @@ static BDSKGlobalMacroResolver *defaultMacroResolver;
 }
 
 - (void)dealloc {
+    [standardMacroDefinitions release];
+    [fileMacroDefinitions release];
     [macroDefinitions release];
     [super dealloc];
 }
@@ -79,6 +83,24 @@ static BDSKGlobalMacroResolver *defaultMacroResolver;
     [standardMacroDefinitions addEntriesFromDictionary:standardDefs];
     
     OFPreferenceWrapper *pw = [OFPreferenceWrapper sharedPreferenceWrapper];
+    NSEnumerator *fileE = [[pw stringArrayForKey:BDSKGlobalMacroFilesKey] objectEnumerator];
+    NSString *file;
+    NSString *string;
+    BOOL hadProblems;
+    
+    while (file = [fileE nextObject]) {
+        NSString *fileContent = [NSString stringWithContentsOfFile:file];
+        NSDictionary *macroDefs;
+        if (string == nil) continue;
+        hadProblems = NO;
+        if ([[file pathExtension] isEqualToString:@"bib"])
+            macroDefs = [BibTeXParser macrosFromBibTeXString:fileContent hadProblems:&hadProblems document:nil];
+        else
+            macroDefs = [BibTeXParser macrosFromBibTeXStyle:fileContent document:nil];
+        if (hadProblems == NO)
+            [fileMacroDefinitions addEntriesFromDictionary:macroDefs];
+    }
+    
     // legacy, load old style prefs
     NSDictionary *oldMacros = [pw dictionaryForKey:BDSKBibStyleMacroDefinitionsKey];
     if (oldMacros)
@@ -107,6 +129,33 @@ static BDSKGlobalMacroResolver *defaultMacroResolver;
         [macros setObject:[[macroDefinitions objectForKey:key] stringAsBibTeXString] forKey:key];
     }
     [[OFPreferenceWrapper sharedPreferenceWrapper] setObject:macros forKey:BDSKGlobalMacroDefinitionsKey];
+}
+
+- (void)updateMacrosFromFiles{
+    OFPreferenceWrapper *pw = [OFPreferenceWrapper sharedPreferenceWrapper];
+    NSEnumerator *fileE = [[pw stringArrayForKey:BDSKGlobalMacroFilesKey] objectEnumerator];
+    NSString *file;
+    NSString *string;
+    BOOL hadProblems;
+    
+    [fileMacroDefinitions removeAllObjects];
+    
+    while (file = [fileE nextObject]) {
+        NSString *fileContent = [NSString stringWithContentsOfFile:file];
+        NSDictionary *macroDefs;
+        if (string == nil) continue;
+        hadProblems = NO;
+        if ([[file pathExtension] isEqualToString:@"bib"])
+            macroDefs = [BibTeXParser macrosFromBibTeXString:fileContent hadProblems:&hadProblems document:nil];
+        else
+            macroDefs = [BibTeXParser macrosFromBibTeXStyle:fileContent document:nil];
+        if (hadProblems == NO)
+            [fileMacroDefinitions addEntriesFromDictionary:macroDefs];
+    }
+    
+    [[NSNotificationCenter defaultCenter] postNotificationName:BDSKBibDocMacroDefinitionChangedNotification
+														object:self
+													  userInfo:[NSDictionary dictionary]];    
 }
 
 // should we create an undomanager?
@@ -200,6 +249,8 @@ static BDSKGlobalMacroResolver *defaultMacroResolver;
 
 - (NSString *)valueOfMacro:(NSString *)macroString{
     NSString *value = [macroDefinitions objectForKey:macroString];
+    if(value == nil)
+        value = [fileMacroDefinitions objectForKey:macroString];
     if(value == nil)
         value = [standardMacroDefinitions objectForKey:macroString];
     return value;

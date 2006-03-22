@@ -173,6 +173,7 @@ NSString *BDSKShouldSaveNormalizedAuthorNamesKey = @"Save normalized names in Bi
 NSString *BDSKSaveAnnoteAndAbstractAtEndOfItemKey = @"Save Annote and Abstract at End of Item";
 NSString *BDSKBibStyleMacroDefinitionsKey = @"Macro definitions from bib style file";
 NSString *BDSKGlobalMacroDefinitionsKey = @"BDSKGlobalMacroDefinitionsKey";
+NSString *BDSKGlobalMacroFilesKey = @"BDSKGlobalMacroFilesKey";
 
 NSString *BDSKFindControllerDefaultFindAndReplaceTypeKey = @"Default field for find and replace";
 NSString *BDSKFindControllerSearchScopeKey = @"Search scope for find and replace";

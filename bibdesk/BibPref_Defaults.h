@@ -39,10 +39,14 @@
 #import "BDSKFieldNameFormatter.h"
 #import "MacroWindowController.h"
 
+@class BDSKPathIconTransformer;
+
 @interface BibPref_Defaults : OAPreferenceClient
 {
     IBOutlet NSButton* delSelectedDefaultFieldButton;
     IBOutlet NSButton* addDefaultFieldButton;
+    IBOutlet NSWindow* globalMacroFileSheet;
+    IBOutlet NSTableView* globalMacroFilesTableView;
     IBOutlet NSTableView* defaultFieldsTableView;
     IBOutlet NSMatrix* RSSDescriptionFieldMatrix;
     IBOutlet NSTextField* RSSDescriptionFieldTextField;
@@ -50,6 +54,7 @@
     IBOutlet NSMenu *fieldTypeMenu;
     NSMutableArray *customFieldsArray;
     NSMutableSet *customFieldsSet;
+    NSMutableArray *globalMacroFiles;
     MacroWindowController *macroWC;
 }
 
@@ -57,6 +62,11 @@
 - (IBAction)addDefaultField:(id)sender;
 - (IBAction)showTypeInfoEditor:(id)sender;
 - (IBAction)RSSDescriptionFieldChanged:(id)sender;
+
 - (IBAction)showMacrosWindow:(id)sender;
+- (IBAction)showMacroFileWindow:(id)sender;
+- (IBAction)closeMacroFileWindow:(id)sender;
+- (IBAction)addGlobalMacroFile:(id)sender;
+- (IBAction)delGlobalMacroFiles:(id)sender;
 
 @end

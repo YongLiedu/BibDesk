@@ -1,10 +1,15 @@
 {
     IBClasses = (
+        {CLASS = BDSKTextWithIconCell; LANGUAGE = ObjC; SUPERCLASS = NSTextFieldCell; }, 
         {
             ACTIONS = {
                 RSSDescriptionFieldChanged = id; 
                 addDefaultField = id; 
+                addGlobalMacroFile = id; 
+                closeMacroFileWindow = id; 
+                delGlobalMacroFiles = id; 
                 delSelectedDefaultField = id; 
+                showMacroFileWindow = id; 
                 showMacrosWindow = id; 
                 showTypeInfoEditor = id; 
             }; 
@@ -18,17 +23,8 @@
                 delSelectedDefaultFieldButton = NSButton; 
                 editGlobalMacroDefsButton = NSButton; 
                 fieldTypeMenu = NSMenu; 
-            }; 
-            SUPERCLASS = OAPreferenceClient; 
-        }, 
-        {
-            ACTIONS = {changeStartupBehavior = id; }; 
-            CLASS = "BibPref_Startup"; 
-            LANGUAGE = ObjC; 
-            OUTLETS = {
-                defaultBibFileField = NSTextField; 
-                openSheetAccessoryView = NSView; 
-                startupBehaviorRadio = NSMatrix; 
+                globalMacroFileSheet = NSWindow; 
+                globalMacroFilesTableView = NSTableView; 
             }; 
             SUPERCLASS = OAPreferenceClient; 
         }, 
