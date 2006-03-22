@@ -439,11 +439,11 @@
             // can't copy onto same table
             return NSDragOperationNone;
         }
-        [tv setDropRow:[tv numberOfRows] dropOperation:NSDragOperationCopy];
+        [tv setDropRow:-1 dropOperation:NSTableViewDropOn];
         return NSDragOperationCopy;    
     }else{
         //it's not from me
-        [tv setDropRow:[tv numberOfRows] dropOperation:NSDragOperationCopy];
+        [tv setDropRow:-1 dropOperation:NSTableViewDropOn];
         return NSDragOperationEvery; // if it's not from me, copying is OK
     }
 }
