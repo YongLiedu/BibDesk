@@ -684,11 +684,11 @@
 				if ([sud boolForKey:BDSKCitePrependTildeKey])
 					[s appendString:@"~"];
 				[s appendString:@"\\"];
-				[s appendString:[sud stringForKey:BDSKCiteStartBracketKey]];
 				if (tv == ccTableView) 
 					[s appendString:[customStringArray objectAtIndex:[dragRows firstIndex]]];
 				else
 					[s appendString:[sud stringForKey:BDSKCiteStringKey]];
+				[s appendString:[sud stringForKey:BDSKCiteStartBracketKey]];
 				[s appendString:[firstItem citeKey]];
 				if (count > 1 && sep == NO) {
 					[s appendString:@","];
