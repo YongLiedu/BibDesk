@@ -225,9 +225,7 @@ static NSString *stringFromBTField(AST *field,  NSString *fieldName,  NSString *
                         sFieldName = [tmpStr capitalizedString];
                         [tmpStr release];
                         
-                        if([sFieldName isEqualToString:BDSKAnnoteString] || 
-                           [sFieldName isEqualToString:BDSKAbstractString] || 
-                           [sFieldName isEqualToString:BDSKRssDescriptionString]){
+                        if([[BibTypeManager sharedManager] isNoteField:sFieldName]){
                             if(field->down){
                                 cidx = field->down->offset;
                                 

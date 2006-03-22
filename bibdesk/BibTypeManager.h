@@ -129,11 +129,13 @@
 - (BOOL)isLocalURLField:(NSString *)field;    
 - (NSSet *)localURLFieldsSet;
 - (NSSet *)allURLFieldsSet;
+- (NSSet *)noteFieldsSet;
 
 - (NSSet *)personFieldsSet;
 - (BOOL)isRatingField:(NSString *)field;
 - (BOOL)isTriStateField:(NSString *)field;
 - (BOOL)isBooleanField:(NSString *)field;
+- (BOOL)isNoteField:(NSString *)field;
 
 /*!
     @method     RISTagForBibTeXFieldName:

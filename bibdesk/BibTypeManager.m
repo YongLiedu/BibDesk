@@ -508,6 +508,10 @@ static BibTypeManager *sharedInstance = nil;
     return set;
 }
 
+- (NSSet *)noteFieldsSet{
+    return [NSSet setWithObjects:BDSKAnnoteString, BDSKAbstractString, BDSKRssDescriptionString, nil];
+}
+
 - (BOOL)isRatingField:(NSString *)field{
     return [ratingFieldsSet containsObject:field];
 }
@@ -518,6 +522,10 @@ static BibTypeManager *sharedInstance = nil;
 
 - (BOOL)isBooleanField:(NSString *)field{
     return [booleanFieldsSet containsObject:field];
+}
+
+- (BOOL)isNoteField:(NSString *)field{
+    return [[self noteFieldsSet] containsObject:field];
 }
 
 - (NSSet *)personFieldsSet{

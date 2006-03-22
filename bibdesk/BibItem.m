@@ -1251,9 +1251,12 @@ static NSParagraphStyle* bodyParagraphStyle = nil;
 
     NSCalendarDate *date = nil;
     NSString *stringValue = nil;
+    BOOL notNote = NO;
     
     while(key = [e nextObject]){
-        if(![[self valueOfField:key] isEqualToString:@""] &&
+		notNote = ![[BibTypeManager sharedManager] isNoteField:key];
+        
+        if(![[self valueOfField:key inherit:notNote] isEqualToString:@""] &&
            ![key isEqualToString:BDSKTitleString]){
 			
 			valueStr = nil;
@@ -1287,9 +1290,7 @@ static NSParagraphStyle* bodyParagraphStyle = nil;
 				valueStr = [[NSAttributedString alloc] initWithString:[NSString ratingStringWithInteger:rating]
 														   attributes:bodyAttributes];                
 			}else{
-				BOOL notAnnoteOrAbstract = !([key isEqualToString:BDSKAnnoteString] || [key isEqualToString:BDSKAbstractString]);
-				
-				valueStr = [[self attributedStringByParsingTeX:[self valueOfField:key inherit:notAnnoteOrAbstract] inField:@"Body" defaultStyle:bodyParagraphStyle collapse:notAnnoteOrAbstract] retain];
+				valueStr = [[self attributedStringByParsingTeX:[self valueOfField:key inherit:notNote] inField:@"Body" defaultStyle:bodyParagraphStyle collapse:notNote] retain];
 			}
 			
             // the valueStr will be an empty NSConcreteAttributedString if created with a nil argument, so we check for nil before creating it
@@ -1477,16 +1478,16 @@ static NSParagraphStyle* bodyParagraphStyle = nil;
     NSMutableArray *keys = [[pubFields allKeysUsingLock:bibLock] mutableCopy];
 	NSEnumerator *e;
     
+    BibTypeManager *btm = [BibTypeManager sharedManager];
     NSString *type = [self type];
     NSAssert1(type != nil, @"Tried to use a nil pubtype in %@.  You will need to quit and relaunch BibDesk after fixing the error manually.", self );
 	[keys sortUsingSelector:@selector(caseInsensitiveCompare:)];
 	if ([pw boolForKey:BDSKSaveAnnoteAndAbstractAtEndOfItemKey]) {
-		NSArray *finalKeys = [NSArray arrayWithObjects:BDSKAbstractString, BDSKAnnoteString, nil];
+		NSArray *finalKeys = [[btm noteFieldsSet] allObjects];
 		[keys removeObjectsInArray:finalKeys]; // make sure these fields are at the end, as they can be long
 		[keys addObjectsFromArray:finalKeys];
 	}
 	if (drop) {
-		BibTypeManager *btm = [BibTypeManager sharedManager];
         knownKeys = [[NSMutableSet alloc] initWithCapacity:14];
 		[knownKeys addObjectsFromArray:[btm requiredFieldsForType:type]];
 		[knownKeys addObjectsFromArray:[btm optionalFieldsForType:type]];
