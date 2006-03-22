@@ -81,6 +81,8 @@
 - (void)setDelegate:(id <BDSKFormDelegate>)aDelegate;
 - (id <BDSKFormDelegate>)delegate;
 
+- (id)dragSourceCell;
+
 @end
 
 #define BDSKFormConcreteImplementation_NULL_IMPLEMENTATION                                           \

@@ -159,9 +159,9 @@
 							mouseLoc.x -= 16;
 							mouseLoc.y += 16;
 							
-							[self dragImage:dragImage at:mouseLoc offset:NSZeroSize event:theEvent pasteboard:pboard source:self slideBack:YES];
-							
 							[self setDragSourceCell:cell];
+                            
+							[self dragImage:dragImage at:mouseLoc offset:NSZeroSize event:theEvent pasteboard:pboard source:self slideBack:YES];
 						}
 						
 						// we shouldn't follow the mouse events anymore
@@ -241,6 +241,10 @@
     [attrTitle release];
     
     return theCell;
+}
+
+- (id)dragSourceCell{
+    return dragSourceCell;
 }
 
 #pragma mark NSDraggingDestination protocol 
