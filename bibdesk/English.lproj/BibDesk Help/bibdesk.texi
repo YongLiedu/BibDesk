@@ -2141,7 +2141,9 @@ but you can also supply here your own custom field.
 @prefitem{Custom BibTeX Types and Fields} Clicking the button allows you to add new types and add new fields 
 to existing fields. 
 
-@prefitem{Global BibTeX Macros} Clicking this button allows you to add global macro definitions. 
+@prefitem{Global BibTeX Macros} Clicking the @buttontitle{Edit@dots{}} button allows you to add global macro definitions. 
+You can also select BibTeX (style) files from which global macro definitions will be loaded, 
+after clicking the @buttontitle{Files@dots{}} button.
 
 @subheading Advanced
 
@@ -2229,6 +2231,9 @@ If you want to add these definitions to a file, you can copy and paste or drag a
 drop them into a document's macro editor as well (see @ref{Editing a Document's Macro Definitions}
 for more details).  A document's definitions will always override the global definitions,
 in case of a conflict.
+
+You can also add a collection of files from which global macro definitions will be 
+read on startup. 
 
 
 @node Adding Custom Column Header Images and Titles
