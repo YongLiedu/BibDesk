@@ -4,10 +4,15 @@
         {CLASS = MacroDragTableView; LANGUAGE = ObjC; SUPERCLASS = NSTableView; }, 
         {CLASS = MacroKeyFormatter; LANGUAGE = ObjC; SUPERCLASS = NSFormatter; }, 
         {
-            ACTIONS = {addMacro = id; closeAction = id; removeSelectedMacros = id; }; 
+            ACTIONS = {
+                addMacro = id; 
+                closeAction = id; 
+                editSelectedFieldAsRawBibTeX = id; 
+                removeSelectedMacros = id; 
+            }; 
             CLASS = MacroWindowController; 
             LANGUAGE = ObjC; 
-            OUTLETS = {macroDataSource = id; tableView = NSTableView; }; 
+            OUTLETS = {closeButton = NSButton; macroDataSource = id; tableView = NSTableView; }; 
             SUPERCLASS = NSWindowController; 
         }
     ); 

@@ -45,9 +45,10 @@
 @class BDSKFormCellFormatter;
 
 @interface MacroWindowController : NSWindowController {
+    IBOutlet NSTableView *tableView;
+    IBOutlet NSButton *closeButton;
     id macroDataSource;
     NSMutableArray *macros;
-    IBOutlet NSTableView *tableView;
 	BDSKFormCellFormatter *tableCellFormatter;
 	MacroTableViewWindowController *macroTextFieldWC;
 }
@@ -60,6 +61,7 @@
 - (IBAction)removeSelectedMacros:(id)sender;
 - (BOOL)addMacrosFromBibTeXString:(NSString *)aString;
 
+- (void)setSheet:(BOOL)flag;
 - (IBAction)closeAction:(id)sender;
 
 - (IBAction)editSelectedFieldAsRawBibTeX:(id)sender;

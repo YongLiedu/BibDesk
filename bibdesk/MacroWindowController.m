@@ -196,8 +196,14 @@
     return nil;
 }
 
+- (void)setSheet:(BOOL)flag{
+    [self window];
+    [closeButton setKeyEquivalent:flag ? @"\E" : @""];
+}
+
 - (void)showWindow:(id)sender{
     [tableView reloadData];
+    [self setSheet:NO];
     [super showWindow:sender];
 }
 

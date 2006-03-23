@@ -449,6 +449,7 @@ enum {
 	if (!macroWC){
 		macroWC = [[MacroWindowController alloc] init];
 		[macroWC setMacroDataSource:[BDSKGlobalMacroResolver defaultMacroResolver]];
+        [macroWC setSheet:YES];
 	}
 	[NSApp beginSheet:[macroWC window]
        modalForWindow:[[self controlBox] window]
