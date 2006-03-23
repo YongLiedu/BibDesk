@@ -42,6 +42,7 @@
 #import "BibDocumentView_Toolbar.h"
 #import "BibAppController.h"
 #import "BibPrefController.h"
+#import "BibPersonController.h"
 
 #import "BDSKUndoManager.h"
 #import "MultiplePageView.h"
@@ -130,8 +131,6 @@ NSString *BDSKWeblocFilePboardType = @"CorePasteboardFlavorType 0x75726C20";
 		
 		texTask = [[BDSKTeXTask alloc] initWithFileName:@"bibcopy"];
 		[texTask setDelegate:self];
-		
-        windowControllers = [[NSMutableArray alloc] initWithCapacity:1];
         
         macroDefinitions = BDSKCreateCaseInsensitiveKeyMutableDictionary();
         
@@ -142,6 +141,8 @@ NSString *BDSKWeblocFilePboardType = @"CorePasteboardFlavorType 0x75726C20";
         itemsForCiteKeys = [[OFMultiValueDictionary alloc] initWithKeyCallBacks:&BDSKCaseInsensitiveStringKeyDictionaryCallBacks];
 		
 		promisedPboardTypes = [[NSMutableDictionary alloc] initWithCapacity:2];
+        
+        isDocumentClosed = NO;
 		
 		[[NSNotificationCenter defaultCenter] addObserver:self
 												 selector:@selector(handlePreviewDisplayChangedNotification:)
@@ -340,6 +341,9 @@ NSString *BDSKWeblocFilePboardType = @"CorePasteboardFlavorType 0x75726C20";
 - (void)windowControllerDidLoadNib:(NSWindowController *) aController
 {
     [super windowControllerDidLoadNib:aController];
+    
+    [aController setShouldCloseDocument:YES];
+    
     [self setupToolbar];
     
     // set the frame from prefs first, or setFrameAutosaveName: will overwrite the prefs with the nib values if it returns NO
@@ -358,23 +362,6 @@ NSString *BDSKWeblocFilePboardType = @"CorePasteboardFlavorType 0x75726C20";
     [tableView removeAllTableColumns];
 	[self setupTableColumns]; // calling it here mostly just makes sure that the menu is set up.
     [self sortPubsByDefaultColumn];
-}
-
-- (void)addWindowController:(NSWindowController *)windowController{
-/* ARM:  if the window controller being added to the document's list only has a weak reference to the document (i.e. it doesn't retain its document/data), it needs to be added to the windowControllers ivar, rather than using the NSDocument implementation.  NSDocument assumes that your windowcontrollers retain the document, and this causes problems when we close a doc window while an auxiliary windowcontroller (e.g. BibEditor) is open, since we close those in doc windowWillClose:.  The AppKit allows the document to close, even if it's dirty, since it thinks your other windowcontroller is still hanging around with the data!
-    */
-    if([windowController window] == documentWindow)
-        [super addWindowController:windowController];
-    else
-        [windowControllers addObject:windowController];
-}
-
-- (void)removeWindowController:(NSWindowController *)windowController{
-    // see note in addWindowController: override
-    if([windowController window] == documentWindow)
-        [super removeWindowController:windowController];
-    else
-        [windowControllers removeObject:windowController];
 }
 
 - (void)dealloc{
@@ -403,7 +390,6 @@ NSString *BDSKWeblocFilePboardType = @"CorePasteboardFlavorType 0x75726C20";
     [customStringArray release];
     [toolbarItems release];
 	[statusBar release];
-    [windowControllers release];
 	[texTask release];
     [macroWC release];
     [promiseDragColumnIdentifier release];
@@ -1450,7 +1436,7 @@ NSString *BDSKWeblocFilePboardType = @"CorePasteboardFlavorType 0x75726C20";
 //@@ notifications - when adding pub notifications is fully implemented we won't need this.
 - (void)editPub:(BibItem *)pub{
     BibEditor *e = nil;
-	NSEnumerator *wcEnum = [windowControllers objectEnumerator];
+	NSEnumerator *wcEnum = [[self windowControllers] objectEnumerator];
 	NSWindowController *wc;
 	
 	while(wc = [wcEnum nextObject]){
@@ -1465,6 +1451,18 @@ NSString *BDSKWeblocFilePboardType = @"CorePasteboardFlavorType 0x75726C20";
         [e release];
     }
     [e show];
+}
+
+- (void)showPerson:(BibAuthor *)person{
+    OBASSERT(person != nil && [person isKindOfClass:[BibAuthor class]]);
+    BibPersonController *pc = [person personController];
+    
+    if(pc == nil){
+        pc = [[BibPersonController alloc] initWithPerson:person];
+        [self addWindowController:pc];
+        [pc release];
+    }
+    [pc show];
 }
 
 - (IBAction)selectAllPublications:(id)sender {
@@ -2654,6 +2652,9 @@ NSString *BDSKWeblocFilePboardType = @"CorePasteboardFlavorType 0x75726C20";
 #pragma mark UI updating
 
 - (void)handlePrivateUpdatePreviews{
+    // we can be called from a queue after the document was closed
+    if (isDocumentClosed)
+        return;
 
     OBASSERT([NSThread inMainThread]);
             
@@ -2680,7 +2681,8 @@ NSString *BDSKWeblocFilePboardType = @"CorePasteboardFlavorType 0x75726C20";
     // Coalesce these notifications here, since something like select all -> generate cite keys will force a preview update for every
     // changed key, so we have to update all the previews each time.  This should be safer than using cancelPrevious... since those
     // don't get performed on the main thread (apparently), and can lead to problems.
-    [self queueSelectorOnce:@selector(handlePrivateUpdatePreviews)];
+    if (isDocumentClosed == NO)
+        [self queueSelectorOnce:@selector(handlePrivateUpdatePreviews)];
 }
 
 - (void)displayPreviewForItems:(NSArray *)items{
@@ -2983,6 +2985,7 @@ NSString *BDSKWeblocFilePboardType = @"CorePasteboardFlavorType 0x75726C20";
     [[NSNotificationCenter defaultCenter] postNotificationName:BDSKDocumentWindowWillCloseNotification
                                                         object:self
                                                       userInfo:[NSDictionary dictionary]];
+    isDocumentClosed = YES;
     [[BDSKErrorObjectController sharedErrorObjectController] removeErrorObjsForDocument:self];
     [customCiteDrawer close];
     [self saveSortOrder];

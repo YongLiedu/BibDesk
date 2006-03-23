@@ -136,7 +136,6 @@ extern NSString* BDSKWeblocFilePboardType; // core pasteboard type for webloc fi
     NSString *sortGroupsKey;
     BOOL sortDescending;
     BOOL sortGroupsDescending;
-    NSMutableArray *windowControllers; // private ivar for maintaining relationship with the docs windowcontrollers
 	
 	BDSKTeXTask *texTask;
 	
@@ -179,6 +178,8 @@ extern NSString* BDSKWeblocFilePboardType; // core pasteboard type for webloc fi
 	
 	NSMutableDictionary *promisedPboardTypes;
     NSSaveOperationType currentSaveOperationType; // used to check for autosave during writeToFile:ofType:
+    
+    BOOL isDocumentClosed;
 }
 
 
@@ -560,6 +561,14 @@ extern NSString* BDSKWeblocFilePboardType; // core pasteboard type for webloc fi
  @param pub The BibItem that should be edited.
 */
 - (void)editPub:(BibItem *)pub;
+
+/*!
+    @method showPerson:
+    @abstract Opens the personcontroller window
+    @discussion Creates a personcontroller if one doesn't exist, and tells it to show itself. 
+    @param person The BibAuthor that should be displayed.
+*/
+- (void)showPerson:(BibAuthor *)person;
 
 /*!
     @method selectAllPublications:
