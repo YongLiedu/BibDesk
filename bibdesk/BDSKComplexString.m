@@ -89,10 +89,7 @@ CFStringRef __BDStringCreateByCopyingExpandedValue(BDSKComplexString *cxString)
     
     id <BDSKMacroResolver>macroResolver = ((struct { @defs(BDSKComplexString) } *)cxString)->macroResolver;
     
-    if(macroResolver == nil)
-        macroResolver = [BDSKGlobalMacroResolver defaultMacroResolver];
-    
-    OBASSERT([macroResolver conformsToProtocol:@protocol(BDSKMacroResolver)]);
+    OBASSERT(macroResolver == nil || [macroResolver conformsToProtocol:@protocol(BDSKMacroResolver)]);
     
     // Guess at size of (50 * (no. of nodes)); this is likely too high, but resizing is a sizeable performance hit.
     CFMutableStringRef mutStr = CFStringCreateMutable(CFAllocatorGetDefault(), (iMax * 50));
@@ -150,11 +147,7 @@ CFStringRef __BDStringCreateByCopyingExpandedValue(BDSKComplexString *cxString)
 - (id)initWithArray:(NSArray *)a macroResolver:(id)theMacroResolver{
     if (self = [super init]) {
         nodes = [[NSArray allocWithZone:[self zone]] initWithArray:a copyItems:YES];
-		if(theMacroResolver) {
-			macroResolver = theMacroResolver;
-		} else {
-            macroResolver = [BDSKGlobalMacroResolver defaultMacroResolver];
-		}
+        [self setMacroResolver:theMacroResolver];
 		complex = YES;
 	}		
     return self;
@@ -168,10 +161,7 @@ CFStringRef __BDStringCreateByCopyingExpandedValue(BDSKComplexString *cxString)
 		}
 		if ([aValue isComplex]) {
 			nodes = [[NSArray allocWithZone:[self zone]] initWithArray:[(BDSKComplexString *)aValue nodes] copyItems:YES];
-			macroResolver = [(BDSKComplexString *)aValue macroResolver];
-			if (macroResolver == nil) {
-                macroResolver = [BDSKGlobalMacroResolver defaultMacroResolver];
-			}
+			[self setMacroResolver:[(BDSKComplexString *)aValue macroResolver]];
 			complex = YES;
 		} else {
 			if ([aValue isInherited]) {
@@ -196,7 +186,11 @@ CFStringRef __BDStringCreateByCopyingExpandedValue(BDSKComplexString *cxString)
 /* NSCopying protocol */
 // NSShouldRetainWithZone returns NO on 10.4.4 for NULL or NSDefaultMallocZone rdar://problem/4409099
 - (id)copyWithZone:(NSZone *)zone{
-    return [self retain];
+    // we can't just retain, as the macroResolver is not guaranteed to stay the same
+    BDSKComplexString *copy = [[BDSKComplexString allocWithZone:zone] initWithArray:nodes macroResolver:macroResolver];
+    copy->complex = complex;
+    copy->inherited = inherited;
+    return copy;
 }
 
 /* NSCoding protocol */
@@ -463,12 +457,11 @@ CFStringRef __BDStringCreateByCopyingExpandedValue(BDSKComplexString *cxString)
 }
 
 - (id <BDSKMacroResolver>)macroResolver{
-    return macroResolver;
+    return (macroResolver == nil) ? [BDSKGlobalMacroResolver defaultMacroResolver] : macroResolver;
 }
 
 - (void)setMacroResolver:(id <BDSKMacroResolver>)newMacroResolver{
-	if (newMacroResolver != macroResolver)
-		macroResolver = newMacroResolver;
+    macroResolver = (newMacroResolver == [BDSKGlobalMacroResolver defaultMacroResolver]) ? nil : newMacroResolver;
 }
 
 + (BOOL)isCircularMacro:(NSString *)macroKey forDefinition:(NSString *)macroString macroResolver:(id <BDSKMacroResolver>)macroResolver{
