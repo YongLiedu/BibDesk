@@ -48,7 +48,6 @@
 @interface BibPersonController : NSWindowController {
     BibAuthor *person;
     NSArray *publications;
-	BibDocument *document;
 	float lastPickerHeight;
     IBOutlet NSTextField *nameTextField;
     IBOutlet BDSKDragImageView *imageView;
@@ -59,7 +58,7 @@
 }
 
 #pragma mark initialization
-- (id)initWithPerson:(BibAuthor *)aPerson document:(BibDocument *)doc;
+- (id)initWithPerson:(BibAuthor *)aPerson;
 - (void)awakeFromNib;
 
 #pragma mark accessors
@@ -73,7 +72,6 @@
 - (void)updateUI;
 - (void)handlePubListChanged:(NSNotification *)notification;
 - (void)handleBibItemChanged:(NSNotification *)note;
-- (void)handleDocWindowWillClose:(NSNotification *)note;
 - (void)openSelectedPub:(id)sender;
 - (IBAction)changeName:(id)sender;
 - (void)changeNameToString:(NSString *)newNameString;

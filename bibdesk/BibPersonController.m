@@ -53,16 +53,14 @@
 
 - (NSString *)windowNibName{return @"BibPersonView";}
 
-- (id)initWithPerson:(BibAuthor *)aPerson document:(BibDocument *)doc{
+- (id)initWithPerson:(BibAuthor *)aPerson{
 
     self = [super initWithWindowNibName:@"BibPersonView"];
 	if(self){
         [self setPerson:aPerson];
-        publications = [[doc publicationsForAuthor:aPerson] copy];
+        publications = nil;
         
         [person setPersonController:self];
-        
-        document = doc;
         
         [[self window] setDelegate:self];
 	}
@@ -100,10 +98,6 @@
                                              selector:@selector(handleBibItemChanged:)
                                                  name:BDSKBibItemChangedNotification
                                                object:nil];
-	[[NSNotificationCenter defaultCenter] addObserver:self
-											 selector:@selector(handleDocWindowWillClose:)
-												 name:BDSKDocumentWindowWillCloseNotification
-											   object:document];
 
 	[self updateUI];
     [pubsTableView setDoubleAction:@selector(openSelectedPub:)];
@@ -114,6 +108,8 @@
 #pragma mark accessors
 
 - (NSArray *)publications{
+    if (publications == nil)
+        publications = [[(BibDocument *)[self document] publicationsForAuthor:person] copy];
     return publications;
 }
 
@@ -157,24 +153,18 @@
 
 - (void)handleBibItemChanged:(NSNotification *)note{
     // we may be adding or removing items, so we can't check publications for containment
-    [self setPublications:[document publicationsForAuthor:person]];
-}
-
-- (void)handleDocWindowWillClose:(NSNotification *)note{
-    [document removeWindowController:self];
-	[[self window] close];
+    [self setPublications:[(BibDocument *)[self document] publicationsForAuthor:person]];
 }
 
 - (void)windowWillClose:(NSNotification *)notification{
 	// bind-to-owner bug workaround
 	[ownerController setContent:nil];
-	[document removeWindowController:self];
 }
 
 - (void)openSelectedPub:(id)sender{
     int row = [pubsTableView selectedRow];
     NSAssert(row >= 0, @"Cannot perform double-click action when no row is selected");
-    [document editPub:[publications objectAtIndex:row]];
+    [(BibDocument *)[self document] editPub:[publications objectAtIndex:row]];
 }
 
 - (void)changeNameWarningSheetDidEnd:(NSWindow *)sheet returnCode:(int)returnCode newName:(NSString *)newNameString;
