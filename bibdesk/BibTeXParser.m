@@ -387,8 +387,6 @@ static NSString *stringFromBTField(AST *field,  NSString *fieldName,  NSString *
 + (NSDictionary *)macrosFromBibTeXStyle:(NSString *)styleContents document:(BibDocument *)aDocument{
 	[[BDSKErrorObjectController sharedErrorObjectController] setDocumentForErrors:aDocument];
     
-    id macroResolver = (aDocument) ? (id <BDSKMacroResolver>)aDocument : [BDSKGlobalMacroResolver defaultMacroResolver];
-    
     NSScanner *scanner = [[NSScanner alloc] initWithString:styleContents];
     [scanner setCharactersToBeSkipped:nil];
     
@@ -449,8 +447,8 @@ static NSString *stringFromBTField(AST *field,  NSString *fieldName,  NSString *
         [value removeSurroundingWhitespace];
         
         key = [key stringByRemovingSurroundingWhitespace];
-        value = [NSString complexStringWithBibTeXString:value macroResolver:macroResolver];
-        if([BDSKComplexString isCircularMacro:key forDefinition:value macroResolver:macroResolver])
+        value = [NSString complexStringWithBibTeXString:value macroResolver:aDocument];
+        if([BDSKComplexString isCircularMacro:key forDefinition:value macroResolver:aDocument])
             NSLog(@"Macro leads to circular definition, ignored: %@ = %@", key, [value stringAsBibTeXString]);
         else
             [bstMacros setObject:value forKey:key];
