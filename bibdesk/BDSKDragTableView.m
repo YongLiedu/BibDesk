@@ -46,6 +46,7 @@
 }
 
 - (void)dealloc{
+    [typeAheadHelper setDataSource:nil];
     [typeAheadHelper release];
     [super dealloc];
 }
