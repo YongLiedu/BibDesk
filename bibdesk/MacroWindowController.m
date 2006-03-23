@@ -454,7 +454,7 @@
     if([aString rangeOfString:@"@string" options:NSCaseInsensitiveSearch].location != NSNotFound)
         [defs addEntriesFromDictionary:[BibTeXParser macrosFromBibTeXString:aString hadProblems:&hadProblems document:document]];
             
-    if([aString rangeOfString:@"@MACRO"].location != NSNotFound)
+    if([aString rangeOfString:@"MACRO"].location != NSNotFound)
         [defs addEntriesFromDictionary:[BibTeXParser macrosFromBibTeXStyle:aString document:document]]; // in case these are style defs
 
     NSEnumerator *e = [defs keyEnumerator];
@@ -474,7 +474,7 @@
     
     if(hadCircular){
         NSRunAlertPanel(NSLocalizedString(@"Circular Macros", @"Circular Macros"),
-                        NSLocalizedString(@"Some macros you try to define would lead to circular definitions and were ignored.", @""),
+                        NSLocalizedString(@"Some macros you tried to add would lead to circular definitions and were ignored.", @""),
                         NSLocalizedString(@"OK", @"OK"), nil, nil);
     }
     return !hadProblems;
