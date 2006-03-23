@@ -73,7 +73,7 @@
 /*!
     @method     macrosFromBibTeXString:hadProblems:document:
     @abstract   Parses a BibTeX string as @string{} declarations, and returns a dictionary of keys and definitions.
-    @discussion 
+    @discussion The returned macros can contain circular macro definitions.
     @param      aString BibTeX as NSString
     @param      hadProblems (description)
     @param      aDocument (description)
@@ -86,6 +86,7 @@
     @method     macrosFromBibTeXStyle:document:
     @abstract   Returns a dictionary of macro definitions from a BibTeX style file (.bst extension).
     @discussion The definitions take the form <tt>MACRO {ibmjrd} {"IBM Journal of Research and Development"}</tt>
+                The returned macros can contain circular macro definitions.
     @param      styleContents The contents of the bst file as a string
     @param      aDocument (description)
     @result     Returns nil if nothing was found or an error occurred.

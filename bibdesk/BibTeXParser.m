@@ -160,17 +160,17 @@ static NSString *stringFromBTField(AST *field,  NSString *fieldName,  NSString *
                         }
                         [frontMatter appendString:@"\"}"];
                     }else if(frontMatter && [entryType isEqualToString:@"string"]){
-                        
-                        // get the field name
-                        field = bt_next_field (entry, NULL, &fieldname);
-                        NSString *macroKey = [NSString stringWithCString: field->text usingEncoding:parserEncoding];
-                        NSString *macroString = stringFromBTField(field, sFieldName, filePath, aDocument, parserEncoding); // handles TeXification
-                        id macroResolver = (aDocument) ? aDocument : [BDSKGlobalMacroResolver defaultMacroResolver];
-                        if([BDSKComplexString isCircularMacro:macroKey forDefinition:macroString macroResolver:macroResolver])
-                            NSLog(@"Macro leads to circular definition, ignored: %@ = %@", macroKey, [macroString stringAsBibTeXString]);
-                        else
-                            [macroResolver addMacroDefinitionWithoutUndo:macroString forMacro:macroKey];
-
+                        // macros are ignored when they don't belong to a document
+                        if(aDocument){
+                            // get the field name
+                            field = bt_next_field (entry, NULL, &fieldname);
+                            NSString *macroKey = [NSString stringWithCString: field->text usingEncoding:parserEncoding];
+                            NSString *macroString = stringFromBTField(field, sFieldName, filePath, aDocument, parserEncoding); // handles TeXification
+                            if([BDSKComplexString isCircularMacro:macroKey forDefinition:macroString macroResolver:aDocument])
+                                NSLog(@"Macro leads to circular definition, ignored: %@ = %@", macroKey, [macroString stringAsBibTeXString]);
+                            else
+                                [aDocument addMacroDefinitionWithoutUndo:macroString forMacro:macroKey];
+                        }
                     }else if(frontMatter && [entryType isEqualToString:@"comment"]){
                         NSMutableString *commentStr = [[NSMutableString alloc] init];
                         field = NULL;
@@ -339,10 +339,7 @@ static NSString *stringFromBTField(AST *field,  NSString *fieldName,  NSString *
         field = bt_next_field(entry, NULL, &fieldName);
         macroKey = [NSString stringWithCString: field->text usingEncoding:NSUTF8StringEncoding];
         macroString = stringFromBTField(field, nil, @"Paste/Drag", aDocument, NSUTF8StringEncoding); // handles TeXification
-        if([BDSKComplexString isCircularMacro:macroKey forDefinition:macroString macroResolver:aDocument])
-            NSLog(@"Macro leads to circular definition, ignored: %@ = %@", macroKey, [macroString stringAsBibTeXString]);
-        else
-            [retDict setObject:macroString forKey:macroKey];
+        [retDict setObject:macroString forKey:macroKey];
         
         bt_free_ast(entry);
         entry = NULL;
@@ -448,10 +445,7 @@ static NSString *stringFromBTField(AST *field,  NSString *fieldName,  NSString *
         
         key = [key stringByRemovingSurroundingWhitespace];
         value = [NSString complexStringWithBibTeXString:value macroResolver:aDocument];
-        if([BDSKComplexString isCircularMacro:key forDefinition:value macroResolver:aDocument])
-            NSLog(@"Macro leads to circular definition, ignored: %@ = %@", key, [value stringAsBibTeXString]);
-        else
-            [bstMacros setObject:value forKey:key];
+        [bstMacros setObject:value forKey:key];
 		
     }
 	
