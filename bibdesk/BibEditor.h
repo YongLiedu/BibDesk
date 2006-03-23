@@ -182,13 +182,6 @@
 - (void)show;
 
 /*!
-    @method     setDocument:
-    @discussion   overrides the default impl. to just save a ref to the doc and not mess with the title.
-*/
-- (void)setDocument:(NSDocument *)d;
-//- (NSDocument *)document; is intentionally unimplemented.
-
-/*!
     @method     fixURLs
     @abstract   Updates the views for changes in either local or remote URLs. Updates the popup buttons and the drawer contents, if necessary. 
     @discussion (comprehensive description)
@@ -436,7 +429,6 @@
 - (void)shouldCloseSheetDidEnd:(NSWindow *)sheet returnCode:(int)returnCode contextInfo:(void *)contextInfo;
 
 - (void)bibWillBeRemoved:(NSNotification *)notification;
-- (void)docWindowWillClose:(NSNotification *)notification;
 
 /*!
 	@method     openParentItem:

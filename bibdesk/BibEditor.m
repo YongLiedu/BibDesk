@@ -56,7 +56,6 @@
 #import "BDSKFormCellFormatter.h"
 #import "BibAppController.h"
 #import "PDFImageView.h"
-#import "BibPersonController.h"
 #import "BDSKImagePopUpButton.h"
 #import "BDSKRatingButton.h"
 #import "MacroTextFieldWindowController.h"
@@ -2004,19 +2003,9 @@ static int numberOfOpenEditors = 0;
 	if ([pubs containsObject:theBib])
 		[self close];
 }
-	
-- (void)docWindowWillClose:(NSNotification *)notification{
-	[[self window] close];
-}
 
 - (IBAction)showMacrosWindow:(id)sender{
     [theDocument showMacrosWindow:self];
-}
-
-// Note:  implementing setDocument or -document can have strange side effects with our document window controller array at present.
-// every window controller subclass managed by the document needs to have this implemented in order for automatic closing/releasing,
-// but we're doing it manually at present.
-- (void)setDocument:(NSDocument *)d{
 }
 
 - (void)saveDocument:(id)sender{
@@ -2728,7 +2717,6 @@ static int numberOfOpenEditors = 0;
 	
     // @@ problem here:  BibEditor is the delegate for a lot of things, and if they get messaged before the window goes away, but after the editor goes away, we have crashes.  In particular, the finalizeChanges (or something?) ends up causing the window and form to be redisplayed if a form cell is selected when you close the window, and the form sends formCellHasArrowButton to a garbage editor.  Rather than set the delegate of all objects to nil here, we'll just hang around a bit longer.
     [[self retain] autorelease];
-    [theDocument removeWindowController:self];
 }
 
 - (NSArray *)webView:(WebView *)sender contextMenuItemsForElement:(NSDictionary *)element defaultMenuItems:(NSArray *)defaultMenuItems{
@@ -2859,13 +2847,7 @@ static int numberOfOpenEditors = 0;
 }
 
 - (void)showPersonDetail:(BibAuthor *)person{
-	BibPersonController *pc = [person personController];
-	if(pc == nil){
-        pc = [[BibPersonController alloc] initWithPerson:person document:theDocument];
-        [theDocument addWindowController:pc];
-        [pc release];
-	}
-	[pc show];
+    [theDocument showPerson:person];
 }
 
 #pragma mark Splitview delegate methods
@@ -3026,10 +3008,6 @@ static int numberOfOpenEditors = 0;
 	[[NSNotificationCenter defaultCenter] addObserver:self
 											 selector:@selector(finalizeChanges:)
 												 name:BDSKFinalizeChangesNotification
-											   object:theDocument];
-	[[NSNotificationCenter defaultCenter] addObserver:self
-											 selector:@selector(docWindowWillClose:)
-												 name:BDSKDocumentWindowWillCloseNotification
 											   object:theDocument];
 	[[NSNotificationCenter defaultCenter] addObserver:self
 											 selector:@selector(typeInfoDidChange:)
