@@ -204,6 +204,7 @@
 - (void)windowWillClose:(NSNotification *)notification{
 	if(![[self window] makeFirstResponder:[self window]])
         [[self window] endEditingFor:nil];
+    [self setMacroDataSource:nil];
 }
 
 - (IBAction)closeAction:(id)sender{
@@ -362,13 +363,15 @@
     NSEnumerator *e = [rows objectEnumerator];
     NSNumber *row;
     NSString *key;
+    NSString *value;
     NSMutableString *pboardStr = [NSMutableString string];
     NSDictionary *macroDefinitions = [(id <BDSKMacroResolver>)macroDataSource macroDefinitions];
     [pboard declareTypes:[NSArray arrayWithObject:NSStringPboardType] owner:nil];
 
     while(row = [e nextObject]){
         key = [macros objectAtIndex:[row intValue]];
-        [pboardStr appendFormat:@"@STRING{%@ = \"%@\"}\n", key, [macroDefinitions objectForKey:key]];
+        value = [[macroDefinitions objectForKey:key] stringAsBibTeXString];
+        [pboardStr appendStrings:@"@string{", key, @" = ", value, @"}\n", nil];
     }
     return [pboard setString:pboardStr forType:NSStringPboardType];
     
@@ -445,7 +448,8 @@
     if([aString rangeOfString:@"@string" options:NSCaseInsensitiveSearch].location != NSNotFound)
         [defs addEntriesFromDictionary:[BibTeXParser macrosFromBibTeXString:aString hadProblems:&hadProblems document:document]];
             
-    [defs addEntriesFromDictionary:[BibTeXParser macrosFromBibTeXStyle:aString document:document]]; // in case these are style defs
+    if([aString rangeOfString:@"@MACRO"].location != NSNotFound)
+        [defs addEntriesFromDictionary:[BibTeXParser macrosFromBibTeXStyle:aString document:document]]; // in case these are style defs
 
     NSEnumerator *e = [defs keyEnumerator];
     NSString *macroKey;
