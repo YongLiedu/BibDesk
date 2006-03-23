@@ -127,21 +127,23 @@
     NSFont *font = [NSFont fontWithName:fontName size:fontSize];
 	
 	[self setFont:font];
-    // let the cell calculate the row height for us, so the text baseline isn't fouled up
-    float rowHeight = [[[[self tableColumns] objectAtIndex:0] dataCell] cellSize].height;
+    
+    // This is how IB calculates row height based on font http://lists.apple.com/archives/cocoa-dev/2006/Mar/msg01591.html
+    NSSize textSize = [@"" sizeWithAttributes:[NSDictionary dictionaryWithObject:font forKey:NSFontAttributeName]];
+    float rowHeight = textSize.height;
     [self setRowHeight:rowHeight];
     
     // default is (3.0, 2.0); use a larger spacing for the gradient and drop highlights
     NSSize intercellSize = NSMakeSize(3.0, rowHeight / 2);
     [self setIntercellSpacing:intercellSize];
-    
+
 	[self tile];
     [self reloadData]; // otherwise the change isn't immediately visible
 }
 
 - (void)drawDropHighlightOnRow:(int)rowIndex usingColor:(NSColor *)highlightColor
 {
-    float lineWidth = 2.0;
+    float lineWidth = 1.0f;
     float heightOffset = [self intercellSpacing].height / 2;
     
     [self lockFocus];
@@ -149,8 +151,8 @@
     
     NSRect drawRect = [self rectOfRow:rowIndex];
     
-    drawRect.size.width -= lineWidth;
-    drawRect.origin.x += lineWidth/2.0;
+    drawRect.size.width -= 2 * lineWidth;
+    drawRect.origin.x += lineWidth;
     
     drawRect.size.height -= heightOffset;
     drawRect.origin.y += heightOffset/2.0;
