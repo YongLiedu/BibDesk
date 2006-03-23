@@ -95,6 +95,7 @@ static BDSKGlobalMacroResolver *defaultMacroResolver;
     NSString *key;
     
     while (key = [keyEnum nextObject]) {
+        // we don't check for circular macros, there shouldn't be any. Or do we want to be paranoid?
         [macroDefinitions setObject:[NSString complexStringWithBibTeXString:[macros objectForKey:key] macroResolver:self]
                              forKey:key];
     }
@@ -140,7 +141,9 @@ static BDSKGlobalMacroResolver *defaultMacroResolver;
             
             while (macroKey = [macroE nextObject]) {
                 macroString = [macroDefs objectForKey:macroKey];
-                if([BDSKComplexString isCircularMacro:macroKey forDefinition:macroString macroResolver:self] == NO)
+                if([BDSKComplexString isCircularMacro:macroKey forDefinition:macroString macroResolver:self])
+                    NSLog(@"Macro from file %@ leads to circular definition, ignored: %@ = %@", file, macroKey, [macroString stringAsBibTeXString]);
+                else
                     [fileMacroDefinitions setObject:macroString forKey:macroKey];
             }
         }
