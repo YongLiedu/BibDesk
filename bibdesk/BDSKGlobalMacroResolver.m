@@ -87,7 +87,7 @@ static BDSKGlobalMacroResolver *defaultMacroResolver;
     
     // legacy, load old style prefs
     NSDictionary *oldMacros = [pw dictionaryForKey:BDSKBibStyleMacroDefinitionsKey];
-    if (oldMacros)
+    if ([oldMacros count])
         [macroDefinitions addEntriesFromDictionary:oldMacros];
     
     NSDictionary *macros = [pw dictionaryForKey:BDSKGlobalMacroDefinitionsKey];
@@ -98,7 +98,7 @@ static BDSKGlobalMacroResolver *defaultMacroResolver;
         [macroDefinitions setObject:[NSString complexStringWithBibTeXString:[macros objectForKey:key] macroResolver:self]
                              forKey:key];
     }
-    if(oldMacros){
+    if ([oldMacros count]) {
         // we remove the old style prefs, as they are now merged with the new ones
         [pw removeObjectForKey:BDSKBibStyleMacroDefinitionsKey];
         [self synchronizePreferences];
