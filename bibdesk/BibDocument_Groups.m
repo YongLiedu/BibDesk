@@ -49,7 +49,6 @@
 #import "BibAuthor.h"
 #import "BibAppController.h"
 #import "BibTypeManager.h"
-#import "BibPersonController.h"
 
 @implementation BibDocument (Groups)
 
@@ -629,16 +628,7 @@ The groupedPublications array is a subset of the publications array, developed b
 			  contextInfo:nil];
 		[filterController release];
 	} else if ([[[BibTypeManager sharedManager] personFieldsSet] containsObject:currentGroupField]) {
-		BibAuthor *person = (BibAuthor *)[group name];
-		OBASSERT(person != nil && [person isKindOfClass:[BibAuthor class]]);
-		BibPersonController *pc = [person personController];
-		
-		if(pc == nil){
-			pc = [[BibPersonController alloc] initWithPerson:person document:self];
-			[self addWindowController:pc];
-			[pc release];
-		}
-		[pc show];
+		[self showPerson:(BibAuthor *)[group name]];
 	}
 }
 
