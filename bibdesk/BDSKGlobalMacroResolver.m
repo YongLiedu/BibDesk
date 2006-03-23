@@ -88,14 +88,14 @@ static BDSKGlobalMacroResolver *defaultMacroResolver;
     // legacy, load old style prefs
     NSDictionary *oldMacros = [pw dictionaryForKey:BDSKBibStyleMacroDefinitionsKey];
     if (oldMacros)
-        [[self macroDefinitions] addEntriesFromDictionary:oldMacros];
+        [macroDefinitions addEntriesFromDictionary:oldMacros];
     
     NSDictionary *macros = [pw dictionaryForKey:BDSKGlobalMacroDefinitionsKey];
     NSEnumerator *keyEnum = [macros keyEnumerator];
     NSString *key;
     
     while (key = [keyEnum nextObject]) {
-        [[self macroDefinitions] setObject:[NSString complexStringWithBibTeXString:[macros objectForKey:key] macroResolver:self]
+        [macroDefinitions setObject:[NSString complexStringWithBibTeXString:[macros objectForKey:key] macroResolver:self]
                              forKey:key];
     }
     if(oldMacros){
@@ -175,21 +175,25 @@ static BDSKGlobalMacroResolver *defaultMacroResolver;
 }
 
 - (void)addMacroDefinitionWithoutUndo:(NSString *)macroString forMacro:(NSString *)macroKey{
-    [[self macroDefinitions] setObject:macroString forKey:macroKey];
+    if (macroDefinitions == nil)
+        [self loadMacrosFromPreferences];
+    [macroDefinitions setObject:macroString forKey:macroKey];
     
     [self synchronizePreferences];
 }
 
 - (void)changeMacroKey:(NSString *)oldKey to:(NSString *)newKey{
-    if([[self macroDefinitions] objectForKey:oldKey] == nil)
+    if (macroDefinitions == nil)
+        [self loadMacrosFromPreferences];
+    if([macroDefinitions objectForKey:oldKey] == nil)
         [NSException raise:NSInvalidArgumentException
                     format:@"tried to change the value of a macro key that doesn't exist"];
     [[[self undoManager] prepareWithInvocationTarget:self]
         changeMacroKey:newKey to:oldKey];
-    NSString *val = [[self macroDefinitions] valueForKey:oldKey];
+    NSString *val = [macroDefinitions valueForKey:oldKey];
     [val retain]; // so the next line doesn't kill it
-    [[self macroDefinitions] removeObjectForKey:oldKey];
-    [[self macroDefinitions] setObject:[val autorelease] forKey:newKey];
+    [macroDefinitions removeObjectForKey:oldKey];
+    [macroDefinitions setObject:[val autorelease] forKey:newKey];
     
     [self synchronizePreferences];
 	
@@ -200,11 +204,13 @@ static BDSKGlobalMacroResolver *defaultMacroResolver;
 }
 
 - (void)addMacroDefinition:(NSString *)macroString forMacro:(NSString *)macroKey{
+    if (macroDefinitions == nil)
+        [self loadMacrosFromPreferences];
     // we're adding a new one, so to undo, we remove.
     [[[self undoManager] prepareWithInvocationTarget:self]
             removeMacro:macroKey];
 
-    [[self macroDefinitions] setObject:macroString forKey:macroKey];
+    [macroDefinitions setObject:macroString forKey:macroKey];
     
     [self synchronizePreferences];
 	
@@ -215,7 +221,9 @@ static BDSKGlobalMacroResolver *defaultMacroResolver;
 }
 
 - (void)setMacroDefinition:(NSString *)newDefinition forMacro:(NSString *)macroKey{
-    NSString *oldDef = [[self macroDefinitions] objectForKey:macroKey];
+    if (macroDefinitions == nil)
+        [self loadMacrosFromPreferences];
+    NSString *oldDef = [macroDefinitions objectForKey:macroKey];
     if(oldDef == nil){
         [self addMacroDefinition:newDefinition forMacro:macroKey];
         return;
@@ -223,7 +231,7 @@ static BDSKGlobalMacroResolver *defaultMacroResolver;
     // we're just changing an existing one, so to undo, we change back.
     [[[self undoManager] prepareWithInvocationTarget:self]
             setMacroDefinition:oldDef forMacro:macroKey];
-    [[self macroDefinitions] setObject:newDefinition forKey:macroKey];
+    [macroDefinitions setObject:newDefinition forKey:macroKey];
     
     [self synchronizePreferences];
 
@@ -234,7 +242,9 @@ static BDSKGlobalMacroResolver *defaultMacroResolver;
 }
 
 - (void)removeMacro:(NSString *)macroKey{
-    NSString *currentValue = [[self macroDefinitions] objectForKey:macroKey];
+    if (macroDefinitions == nil)
+        [self loadMacrosFromPreferences];
+    NSString *currentValue = [macroDefinitions objectForKey:macroKey];
     if(!currentValue){
         return;
     }else{
@@ -242,7 +252,7 @@ static BDSKGlobalMacroResolver *defaultMacroResolver;
         addMacroDefinition:currentValue
                   forMacro:macroKey];
     }
-    [[self macroDefinitions] removeObjectForKey:macroKey];
+    [macroDefinitions removeObjectForKey:macroKey];
     
     [self synchronizePreferences];
 	
