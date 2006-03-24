@@ -147,7 +147,7 @@ CFStringRef __BDStringCreateByCopyingExpandedValue(BDSKComplexString *cxString)
 - (id)initWithArray:(NSArray *)a macroResolver:(id)theMacroResolver{
     if (self = [super init]) {
         nodes = [[NSArray allocWithZone:[self zone]] initWithArray:a copyItems:YES];
-        [self setMacroResolver:theMacroResolver];
+        macroResolver = (theMacroResolver == [BDSKGlobalMacroResolver defaultMacroResolver]) ? nil : theMacroResolver;
 		complex = YES;
 	}		
     return self;
@@ -161,7 +161,9 @@ CFStringRef __BDStringCreateByCopyingExpandedValue(BDSKComplexString *cxString)
 		}
 		if ([aValue isComplex]) {
 			nodes = [[NSArray allocWithZone:[self zone]] initWithArray:[(BDSKComplexString *)aValue nodes] copyItems:YES];
-			[self setMacroResolver:[(BDSKComplexString *)aValue macroResolver]];
+			macroResolver = [(BDSKComplexString *)aValue macroResolver];
+            if (macroResolver == [BDSKGlobalMacroResolver defaultMacroResolver]) 
+                macroResolver = nil;
 			complex = YES;
 		} else {
 			if ([aValue isInherited]) {
@@ -186,29 +188,30 @@ CFStringRef __BDStringCreateByCopyingExpandedValue(BDSKComplexString *cxString)
 /* NSCopying protocol */
 // NSShouldRetainWithZone returns NO on 10.4.4 for NULL or NSDefaultMallocZone rdar://problem/4409099
 - (id)copyWithZone:(NSZone *)zone{
-    // we can't just retain, as the macroResolver is not guaranteed to stay the same
-    BDSKComplexString *copy = [[BDSKComplexString allocWithZone:zone] initWithArray:nodes macroResolver:macroResolver];
-    copy->complex = complex;
-    copy->inherited = inherited;
-    return copy;
+    return [self retain];
 }
 
 /* NSCoding protocol */
 
 - (id)initWithCoder:(NSCoder *)coder{
 	if (self = [super initWithCoder:coder]) {
+        OBASSERT([coder isKindOfClass:[NSKeyedUnarchiver class]]);
 		nodes = [[coder decodeObjectForKey:@"nodes"] retain];
-		[self setMacroResolver:[coder decodeObjectForKey:@"macroResolver"]];
 		complex = [coder decodeBoolForKey:@"complex"];
 		inherited = [coder decodeBoolForKey:@"inherited"];
+        NSKeyedUnarchiver *unarchiver = (NSKeyedUnarchiver *)coder;
+        if ([[unarchiver delegate] respondsToSelector:@selector(unarchiverMacroResolver:)]) {
+            macroResolver = [[unarchiver delegate] unarchiverMacroResolver:unarchiver];
+        } else
+            macroResolver = nil;
 	}
 	return self;
 }
 
 - (void)encodeWithCoder:(NSCoder *)coder{
+    OBASSERT([coder isKindOfClass:[NSKeyedArchiver class]]);
 	[super encodeWithCoder:coder];
     [coder encodeObject:nodes forKey:@"nodes"];
-    [coder encodeConditionalObject:macroResolver forKey:@"macroResolver"];
 	[coder encodeBool:complex forKey:@"complex"];
 	[coder encodeBool:inherited forKey:@"inherited"];
 }
@@ -254,15 +257,13 @@ CFStringRef __BDStringCreateByCopyingExpandedValue(BDSKComplexString *cxString)
 #pragma mark overridden methods from the ComplexStringExtensions
 
 - (id)copyUninheritedWithZone:(NSZone *)zone{
-    NSString *cs;
 	
-	if ([self isComplex]) {
-		cs = [[BDSKComplexString allocWithZone:zone] initWithArray:nodes
-													 macroResolver:macroResolver];
-    } else { // must be inherited with a single string node
-		cs = [[[nodes objectAtIndex:0] value] copyWithZone:zone];
-	}
-	return cs;
+	if (inherited == NO) 
+        return [self retain];
+	else if (complex == YES) 
+        return [[BDSKComplexString allocWithZone:zone] initWithArray:nodes macroResolver:macroResolver];
+    else // must be inherited with a single string node
+        return [[[nodes objectAtIndex:0] value] copyWithZone:zone];
 }
 
 - (BOOL)isComplex {
@@ -458,10 +459,6 @@ CFStringRef __BDStringCreateByCopyingExpandedValue(BDSKComplexString *cxString)
 
 - (id <BDSKMacroResolver>)macroResolver{
     return (macroResolver == nil) ? [BDSKGlobalMacroResolver defaultMacroResolver] : macroResolver;
-}
-
-- (void)setMacroResolver:(id <BDSKMacroResolver>)newMacroResolver{
-    macroResolver = (newMacroResolver == [BDSKGlobalMacroResolver defaultMacroResolver]) ? nil : newMacroResolver;
 }
 
 + (BOOL)isCircularMacro:(NSString *)macroKey forDefinition:(NSString *)macroString macroResolver:(id <BDSKMacroResolver>)macroResolver{

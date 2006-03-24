@@ -42,6 +42,7 @@
 #import <OmniFoundation/OFObject.h>
 
 @class BibDocument, BDSKGroup, BibAuthor, BDSKBibItemStringCache;
+@protocol BDSKMacroResolver;
 
 /*!
 @class BibItem
@@ -545,20 +546,6 @@
 	@discussion -
 */
 - (void)setFields: (NSDictionary *)newFields;
-
-/*!
-	@method    copyComplexStringValues 
-	@abstract  Copies all field values which are complex strings. 
-	@discussion -
-*/
-- (void)copyComplexStringValues;
-
-/*!
-	@method    updateComplexStringValues 
-	@abstract  Updates the macroResolver for all field values which are complex strings. 
-	@discussion -
-*/
-- (void)updateComplexStringValues;
 
 - (void)setField: (NSString *)key toValue: (NSString *)value;
 - (void)setField: (NSString *)key toValue: (NSString *)value withModDate:(NSCalendarDate *)date;

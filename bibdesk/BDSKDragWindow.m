@@ -103,7 +103,8 @@
 		if(error != nil) return NO;
 	}else if([pboardType isEqualToString:BDSKBibItemPboardType]){
 		NSData *pbData = [pboard dataForType:BDSKBibItemPboardType];
-		draggedPubs = [NSKeyedUnarchiver unarchiveObjectWithData:pbData];
+        // we can't just unarchive, as this gives complex strings with the wrong macroResolver
+		draggedPubs = [[editorBib document] newPublicationsFromArchivedData:pbData];
 	}else{
 		// we did not find a valid dragtype
 		return NO;

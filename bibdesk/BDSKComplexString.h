@@ -52,6 +52,10 @@
 @end
 
 
+@interface NSKeyedUnarchiver (NSKeyedUnarchiverComplexStringDelegate)
+- (id <BDSKMacroResolver>)unarchiverMacroResolver:(NSKeyedUnarchiver *)unarchiver;
+@end
+
 /* BDSKComplexString is a string that may be a concatenation of strings, 
     some of which are macros.
    It's a concrete subclass of NSString, which means it can be used 
@@ -104,15 +108,6 @@
     @result     -
 */
 - (id <BDSKMacroResolver>)macroResolver;
-
-/*!
-    @method     setMacroResolver:
-    @abstract   Sets the object used to resolve macros in the complex string.
-    @discussion (description)
-	@param		newMacroResolver The new macro resolver, should implement the BDSKMacroResolver protocol.
-    @result     -
-*/
-- (void)setMacroResolver:(id <BDSKMacroResolver>)newMacroResolver;
 
 /*!
     @method     isCircularMacro:forDefinition:macroResolver:

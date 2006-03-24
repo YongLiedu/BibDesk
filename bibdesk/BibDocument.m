@@ -1839,7 +1839,7 @@ NSString *BDSKWeblocFilePboardType = @"CorePasteboardFlavorType 0x75726C20";
     
     if([type isEqualToString:BDSKBibItemPboardType]){
         NSData *pbData = [pb dataForType:BDSKBibItemPboardType];
-		newPubs = [NSKeyedUnarchiver unarchiveObjectWithData:pbData];
+		newPubs = [self newPublicationsFromArchivedData:pbData];
     } else if([type isEqualToString:BDSKReferenceMinerStringPboardType]){ // pasteboard type from Reference Miner, determined using Pasteboard Peeker
         NSString *pbString = [pb stringForType:BDSKReferenceMinerStringPboardType]; 	
         // sniffing the string for RIS is broken because RefMiner puts junk at the beginning
@@ -1908,6 +1908,23 @@ NSString *BDSKWeblocFilePboardType = @"CorePasteboardFlavorType 0x75726C20";
     [self updateLastImportGroupFromDate:addDate toDate:[NSDate dateWithTimeIntervalSinceNow:1.0]];
     
     return YES;
+}
+
+- (NSArray *)newPublicationsFromArchivedData:(NSData *)data{
+    NSKeyedUnarchiver *unarchiver = [[NSKeyedUnarchiver alloc] initForReadingWithData:data];
+    
+    // we set the delegate so we can pass it the macroresolver for any complex string it might decode
+    [unarchiver setDelegate:self];
+    
+    NSArray *newPubs = [unarchiver decodeObject];
+    [unarchiver finishDecoding];
+    [unarchiver release];
+    
+    return newPubs;
+}
+
+- (id <BDSKMacroResolver>)unarchiverMacroResolver:(NSKeyedUnarchiver *)unarchiver{
+    return self;
 }
 
 - (NSArray *)newPublicationsForString:(NSString *)string type:(int)type error:(NSError **)outError {

@@ -195,6 +195,7 @@ static NSParagraphStyle* bodyParagraphStyle = nil;
     return self;
 }
 
+// Never copy between different documents, as this messes up the macroResolver for complex string values
 - (id)copyWithZone:(NSZone *)zone{
     BibItem *theCopy = [[[self class] allocWithZone: zone] initWithType:pubType
                                                                fileType:fileType
@@ -203,8 +204,6 @@ static NSParagraphStyle* bodyParagraphStyle = nil;
 															createdDate:[NSCalendarDate calendarDate]];
     [theCopy setCiteKeyString: citeKey];
     [theCopy setDate: pubDate];
-	
-	[theCopy copyComplexStringValues];
 	
     return theCopy;
 }
@@ -302,7 +301,6 @@ static NSParagraphStyle* bodyParagraphStyle = nil;
 - (void)setDocument:(BibDocument *)newDocument {
     if (document != newDocument) {
 		document = newDocument;
-		[self updateComplexStringValues];
 	}
 }
 
@@ -1014,36 +1012,6 @@ static NSParagraphStyle* bodyParagraphStyle = nil;
 															object:self
 														  userInfo:notifInfo];
     }
-}
-
-- (void)copyComplexStringValues{
-	NSEnumerator *fEnum = [pubFields keyEnumerator];
-	NSString *field;
-	NSString *value;
-	BDSKComplexString *complexValue;
-	
-	while (field = [fEnum nextObject]) {
-		value = [pubFields objectForKey:field usingLock:bibLock];
-		if ([value isComplex]) {
-			complexValue = [(BDSKComplexString*)value copy];
-			[complexValue setMacroResolver:[self document]];
-			[pubFields setObject:complexValue forKey:field usingLock:bibLock];
-            [complexValue release];
-		}
-	}
-}
-
-- (void)updateComplexStringValues{
-	NSEnumerator *fEnum = [pubFields keyEnumerator];
-	NSString *field;
-	NSString *value;
-	
-	while (field = [fEnum nextObject]) {
-		value = [pubFields objectForKey:field usingLock:bibLock];
-		if ([value isComplex]) {
-			[(BDSKComplexString*)value setMacroResolver:[self document]];
-		}
-	}
 }
 
 #pragma mark Key Value Coding
