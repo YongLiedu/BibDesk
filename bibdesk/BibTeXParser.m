@@ -139,29 +139,28 @@ static NSString *stringFromBTField(AST *field,  NSString *fieldName,  NSString *
                 if (bt_entry_metatype (entry) != BTE_REGULAR){
                     // put preambles etc. into the frontmatter string so we carry them along.
                     
-                    if (frontMatter && [entryType isEqualToString:@"preamble"]){
-                        [frontMatter appendString:@"\n@preamble{\""];
-                        field = NULL;
-                        bt_nodetype type = BTAST_STRING;
-                        BOOL paste = NO;
-                        // bt_get_text() just gives us \\ne for the field, so we'll manually traverse it and poke around in the AST to get what we want.  This is sort of nasty, so if someone finds a better way, go for it.
-                        while(field = bt_next_value(entry, field, &type, NULL)){
-                            char *text = field->text;
-                            if(text){
-                                if(paste) [frontMatter appendString:@"\" #\n   \""];
-                                tmpStr = [[NSString alloc] initWithCString:text usingEncoding:parserEncoding];
-                                if(tmpStr) 
-                                    [frontMatter appendString:tmpStr];
-                                else
-                                    NSLog(@"Possible encoding error: unable to create NSString from %s", text);
-                                [tmpStr release];
-                                paste = YES;
+                    if (frontMatter) {
+                        if ([entryType isEqualToString:@"preamble"]){
+                            [frontMatter appendString:@"\n@preamble{\""];
+                            field = NULL;
+                            bt_nodetype type = BTAST_STRING;
+                            BOOL paste = NO;
+                            // bt_get_text() just gives us \\ne for the field, so we'll manually traverse it and poke around in the AST to get what we want.  This is sort of nasty, so if someone finds a better way, go for it.
+                            while(field = bt_next_value(entry, field, &type, NULL)){
+                                char *text = field->text;
+                                if(text){
+                                    if(paste) [frontMatter appendString:@"\" #\n   \""];
+                                    tmpStr = [[NSString alloc] initWithCString:text usingEncoding:parserEncoding];
+                                    if(tmpStr) 
+                                        [frontMatter appendString:tmpStr];
+                                    else
+                                        NSLog(@"Possible encoding error: unable to create NSString from %s", text);
+                                    [tmpStr release];
+                                    paste = YES;
+                                }
                             }
-                        }
-                        [frontMatter appendString:@"\"}"];
-                    }else if(frontMatter && [entryType isEqualToString:@"string"]){
-                        // macros are ignored when they don't belong to a document
-                        if(aDocument){
+                            [frontMatter appendString:@"\"}"];
+                        }else if([entryType isEqualToString:@"string"]){
                             // get the field name
                             field = bt_next_field (entry, NULL, &fieldname);
                             NSString *macroKey = [NSString stringWithCString: field->text usingEncoding:parserEncoding];
@@ -170,52 +169,53 @@ static NSString *stringFromBTField(AST *field,  NSString *fieldName,  NSString *
                                 NSLog(@"Macro leads to circular definition, ignored: %@ = %@", macroKey, [macroString stringAsBibTeXString]);
                             else
                                 [aDocument addMacroDefinitionWithoutUndo:macroString forMacro:macroKey];
-                        }
-                    }else if(frontMatter && [entryType isEqualToString:@"comment"]){
-                        NSMutableString *commentStr = [[NSMutableString alloc] init];
-                        field = NULL;
-                        char *text = NULL;
-                        
-                        // this is our identifier string for a smart group
-                        const char *smartGroupStr = "BibDesk Smart Groups";
-                        size_t smartGroupStrLength = strlen(smartGroupStr);
-                        Boolean isSmartGroup = FALSE;
-                        
-                        while(field = bt_next_value(entry, field, NULL, &text)){
-                            if(text){
-                                if(strlen(text) >= smartGroupStrLength && strncmp(text, smartGroupStr, smartGroupStrLength) == 0)
-                                    isSmartGroup = TRUE;
-                                
-                                // encoding will be UTF-8 for the plist, so make sure we use it for each line
-                                tmpStr = [[NSString alloc] initWithCString:text usingEncoding:(isSmartGroup ? NSUTF8StringEncoding : parserEncoding)];
-                                
-                                if(tmpStr) 
-                                    [commentStr appendString:tmpStr];
-                                else
-                                    NSLog(@"Possible encoding error: unable to create NSString from %s", text);
-                                [tmpStr release];
-                            }
-                        }
-                        if(isSmartGroup == TRUE){
-                            if(aDocument){
-                                NSRange range = [commentStr rangeOfString:@"{"];
-                                if(range.location != NSNotFound){
-                                    [commentStr deleteCharactersInRange:NSMakeRange(0,NSMaxRange(range))];
-                                    range = [commentStr rangeOfString:@"}" options:NSBackwardsSearch];
-                                    if(range.location != NSNotFound){
-                                        [commentStr deleteCharactersInRange:NSMakeRange(range.location,[commentStr length] - range.location)];
-                                        [(BibDocument *)aDocument addSmartGroupsFromSerializedData:[commentStr dataUsingEncoding:NSUTF8StringEncoding]];
-                                    }
+                        }else if([entryType isEqualToString:@"comment"]){
+                            NSMutableString *commentStr = [[NSMutableString alloc] init];
+                            field = NULL;
+                            char *text = NULL;
+                            
+                            // this is our identifier string for a smart group
+                            const char *smartGroupStr = "BibDesk Smart Groups";
+                            size_t smartGroupStrLength = strlen(smartGroupStr);
+                            Boolean isSmartGroup = FALSE;
+                            
+                            while(field = bt_next_value(entry, field, NULL, &text)){
+                                if(text){
+                                    if(strlen(text) >= smartGroupStrLength && strncmp(text, smartGroupStr, smartGroupStrLength) == 0)
+                                        isSmartGroup = TRUE;
+                                    
+                                    // encoding will be UTF-8 for the plist, so make sure we use it for each line
+                                    tmpStr = [[NSString alloc] initWithCString:text usingEncoding:(isSmartGroup ? NSUTF8StringEncoding : parserEncoding)];
+                                    
+                                    if(tmpStr) 
+                                        [commentStr appendString:tmpStr];
+                                    else
+                                        NSLog(@"Possible encoding error: unable to create NSString from %s", text);
+                                    [tmpStr release];
                                 }
                             }
-                        }else{
-                            [frontMatter appendString:@"\n@comment{"];
-                            [frontMatter appendString:commentStr];
-                            [frontMatter appendString:@"}"];
+                            if(isSmartGroup == TRUE){
+                                if(aDocument){
+                                    NSRange range = [commentStr rangeOfString:@"{"];
+                                    if(range.location != NSNotFound){
+                                        [commentStr deleteCharactersInRange:NSMakeRange(0,NSMaxRange(range))];
+                                        range = [commentStr rangeOfString:@"}" options:NSBackwardsSearch];
+                                        if(range.location != NSNotFound){
+                                            [commentStr deleteCharactersInRange:NSMakeRange(range.location,[commentStr length] - range.location)];
+                                            [(BibDocument *)aDocument addSmartGroupsFromSerializedData:[commentStr dataUsingEncoding:NSUTF8StringEncoding]];
+                                        }
+                                    }
+                                }
+                            }else{
+                                [frontMatter appendString:@"\n@comment{"];
+                                [frontMatter appendString:commentStr];
+                                [frontMatter appendString:@"}"];
+                            }
+                            [commentStr release];
                         }
-                        [commentStr release];
-                    }
+                    } // end if frontMatter
                 }else{
+                    // regular field
                     field = NULL;
                     // Special case handling of abstract & annote is to avoid losing newlines in preexisting files.
                     while (field = bt_next_field (entry, field, &fieldname))
