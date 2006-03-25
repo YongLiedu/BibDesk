@@ -90,12 +90,16 @@
 		switch([pbString contentStringType]){
 			case BDSKBibTeXStringType:
 				draggedPubs = [BibTeXParser itemsFromData:[pboard dataForType:NSStringPboardType] error:&error document:[editorBib document]];
+                break;
 			case BDSKRISStringType:
 				draggedPubs = [PubMedParser itemsFromString:pbString error:&error];
+                break;
 			case BDSKJSTORStringType:
 				draggedPubs = [BDSKJSTORParser itemsFromString:pbString error:&error];
+                break;
 			case BDSKWOSStringType:
 				draggedPubs = [BDSKWebOfScienceParser itemsFromString:pbString error:&error];
+                break;
 			default:
 				OBASSERT_NOT_REACHED("Unsupported data type");
 				return NO;
