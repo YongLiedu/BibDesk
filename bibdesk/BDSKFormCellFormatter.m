@@ -38,12 +38,6 @@
 #import "BDSKComplexString.h"
 #import "NSString_BDSKExtensions.h"
 
-//  About this file: BDSKFormCellFormatter
-//
-//  This is an NSFormatter subclass that provides for the autocompletion
-//  facility in the NSFormCells that populate the form in the BibEditor window.
-//
-
 @implementation BDSKFormCellFormatter
 
 - (id)init {
@@ -131,6 +125,12 @@
     
     [self setParseError:nil];
     [self setParsedString:nil];
+    
+    // convert newlines to a single space, then collapse (mainly for paste/drag text, RFE #1457532)
+    if([string containsCharacterInSet:[NSCharacterSet newlineCharacterSet]]){
+        string = [string stringByReplacingCharactersInSet:[NSCharacterSet newlineCharacterSet] withString:@" "];
+        string = [string fastStringByCollapsingWhitespaceAndRemovingSurroundingWhitespace];
+    }
     
     @try{
         if (editAsComplexString) {
