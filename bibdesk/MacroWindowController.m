@@ -328,16 +328,6 @@
     }else{
         // do nothing if there was no change.
         if([[macroDefinitions objectForKey:key] isEqualAsComplexString:object]) return;
-        
-		if(![object isStringTeXQuotingBalancedWithBraces:YES connected:NO]){
-			NSRunAlertPanel(NSLocalizedString(@"Invalid Value", @"Invalid Value"),
-							NSLocalizedString(@"The value you entered contains unbalanced braces and cannot be saved.", @""),
-							NSLocalizedString(@"OK", @"OK"), nil, nil);
-			
-			[tableView reloadData];
-			return;
-		}
-		
 		
 		if([BDSKComplexString isCircularMacro:key forDefinition:object macroResolver:macroDataSource]){
 			NSRunAlertPanel(NSLocalizedString(@"Circular Macro", @"Circular Macro"),
