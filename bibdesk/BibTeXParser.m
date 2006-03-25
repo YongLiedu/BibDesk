@@ -327,20 +327,18 @@ static NSString *stringFromBTField(AST *field,  NSString *fieldName,  NSString *
     FILE *stream = [[aString dataUsingEncoding:NSUTF8StringEncoding] openReadOnlyStandardIOFile];
     
     while(entry = bt_parse_entry(stream, NULL, 0, &ok)){
-        if(entry == NULL && ok) // this is the exit condition
-            break;
-        if(!ok){
-            *hadProblems = YES;
+        if(entry == NULL){ // this is the exit condition
+            if(!ok)
+                *hadProblems = YES;
             break;
         }
         entryType = bt_entry_type(entry);
-        if(strcmp(entryType, "string") != 0)
-            break;
-        field = bt_next_field(entry, NULL, &fieldName);
-        macroKey = [NSString stringWithCString: field->text usingEncoding:NSUTF8StringEncoding];
-        macroString = stringFromBTField(field, nil, @"Paste/Drag", aDocument, NSUTF8StringEncoding); // handles TeXification
-        [retDict setObject:macroString forKey:macroKey];
-        
+        if(strcmp(entryType, "string") == 0){
+            field = bt_next_field(entry, NULL, &fieldName);
+            macroKey = [NSString stringWithCString: field->text usingEncoding:NSUTF8StringEncoding];
+            macroString = stringFromBTField(field, nil, @"Paste/Drag", aDocument, NSUTF8StringEncoding); // handles TeXification
+            [retDict setObject:macroString forKey:macroKey];
+        }
         bt_free_ast(entry);
         entry = NULL;
         field = NULL;
