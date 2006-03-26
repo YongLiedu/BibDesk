@@ -393,6 +393,8 @@ static NSParagraphStyle* bodyParagraphStyle = nil;
 
 // accessors for fileorder
 - (NSNumber *)fileOrder{
+    if (document == nil)
+        return 0;
     return [NSNumber numberWithInt:[[document publications] indexOfObjectIdenticalTo:self] + 1];
 }
 
