@@ -42,6 +42,10 @@ extern NSString *BDSKNetServiceDomain;
 
 @interface BibDocument (Sharing)
 
+- (void)enableSharedBrowsing;
+- (void)disableSharedBrowsing;
+- (NSString *)netServiceName;
+
 - (void)enableSharing;
 - (void)disableSharing;
 

@@ -306,12 +306,8 @@ NSString *BDSKWeblocFilePboardType = @"CorePasteboardFlavorType 0x75726C20";
     // this is in -awakeFromNib instead of -init since we need the document's fileName set up
     sharedGroups = nil;
     if(floor(NSAppKitVersionNumber) > NSAppKitVersionNumber10_3){
-        sharedGroups = [[NSMutableArray alloc] initWithCapacity:5];
-        if([[OFPreferenceWrapper sharedPreferenceWrapper] boolForKey:BDSKShouldLookForSharedFilesKey]){
-            browser = [[NSNetServiceBrowser alloc] init];
-            [browser setDelegate:self];
-            [browser searchForServicesOfType:BDSKNetServiceDomain inDomain:@""];
-        }
+        if([[OFPreferenceWrapper sharedPreferenceWrapper] boolForKey:BDSKShouldLookForSharedFilesKey])
+            [self enableSharedBrowsing];
         if([[OFPreferenceWrapper sharedPreferenceWrapper] boolForKey:BDSKShouldShareFilesKey])
             [self enableSharing];
     }

@@ -38,6 +38,7 @@
 
 #import "BibDocument_Sharing.h"
 #import "BDSKGroup.h"
+#import "NSArray_BDSKExtensions.h"
 
 #include <sys/socket.h>
 #include <netinet/in.h>
@@ -58,19 +59,19 @@ NSString *BDSKNetServiceDomain = @"_bdsk._tcp.";
 // This object is the delegate of its NSNetServiceBrowser object. We're only interested in services-related methods, so that's what we'll call.
 - (void)netServiceBrowser:(NSNetServiceBrowser *)aNetServiceBrowser didFindService:(NSNetService *)aNetService moreComing:(BOOL)moreComing 
 {
-    BDSKLOGIMETHOD();
 #warning fixme
     // we need to keep from adding our own host's services, but this is convenient for testing
-    NSLog(@"my host name: %@, adding service from host name: %@", [[NSProcessInfo processInfo] hostName], [aNetService hostName]);
-    BDSKSharedGroup *group = [[BDSKSharedGroup alloc] initWithService:aNetService];
-    [sharedGroups addObject:group];
-    [group release];
-    [groupTableView reloadData];
+    // should be able to check the prefix of the string against our own host name
+    if([[self netServiceName] isEqualToString:[aNetService name]] == NO){
+        BDSKSharedGroup *group = [[BDSKSharedGroup alloc] initWithService:aNetService];
+        [sharedGroups addObject:group];
+        [group release];
+        [groupTableView reloadData];
+    }
 }
 
 - (void)netServiceBrowser:(NSNetServiceBrowser *)aNetServiceBrowser didRemoveService:(NSNetService *)aNetService moreComing:(BOOL)moreComing
 {
-    BDSKLOGIMETHOD();
     NSEnumerator *e = [sharedGroups objectEnumerator];
     NSMutableArray *array = [NSMutableArray array];
     BDSKSharedGroup *group;
@@ -80,6 +81,40 @@ NSString *BDSKNetServiceDomain = @"_bdsk._tcp.";
     
     [sharedGroups setArray:array];
     [groupTableView reloadData];
+}
+
+// need notification handlers for enable/disable listening as well, for changes from prefs
+- (void)enableSharedBrowsing;
+{
+    // lazily create the shared resources
+    NSAssert(sharedGroups == nil, @"It is an error to enable browsing twice");
+    
+    sharedGroups = [[NSMutableArray alloc] initWithCapacity:5];
+    browser = [[NSNetServiceBrowser alloc] init];
+    [browser setDelegate:self];
+    [browser searchForServicesOfType:BDSKNetServiceDomain inDomain:@""];    
+}
+
+- (void)disableSharedBrowsing;
+{
+    [sharedGroups release];
+    sharedGroups = nil;
+    [browser release];
+    browser = nil;
+    [groupTableView reloadData];
+}
+
+- (NSString *)netServiceName;
+{
+    NSString *serviceName = [[[self fileName] lastPathComponent] stringByDeletingPathExtension];
+    // @@ probably shouldn't share unsaved files
+    if(serviceName == nil) serviceName = [self displayName];
+    NSString *hostName = [(id)SCDynamicStoreCopyComputerName(NULL, NULL) autorelease];
+    if(hostName == nil){
+        NSLog(@"Unable to get hostname with SCDynamicStoreCopyComputerName");
+        hostName = [[[[NSProcessInfo processInfo] hostName] componentsSeparatedByString:@"."] firstObject];
+    }
+    return [NSString stringWithFormat:@"%@ - %@", hostName, serviceName];
 }
 
 #pragma mark Exporting our data
@@ -119,11 +154,8 @@ NSString *BDSKNetServiceDomain = @"_bdsk._tcp.";
     }
     
     if(!netService) {
-        // lazily instantiate the NSNetService object that will advertise on our behalf.
-        NSString *serviceName = [[self fileName] lastPathComponent];
-        if(serviceName == nil) 
-            serviceName = [NSString stringWithFormat:@"%@ (%@)", [self displayName], NSFullUserName()];
-        netService = [[NSNetService alloc] initWithDomain:@"" type:BDSKNetServiceDomain name:serviceName port:chosenPort];
+        // lazily instantiate the NSNetService object that will advertise on our behalf
+        netService = [[NSNetService alloc] initWithDomain:@"" type:BDSKNetServiceDomain name:[self netServiceName] port:chosenPort];
         [netService setDelegate:self];
     }
     
@@ -136,7 +168,6 @@ NSString *BDSKNetServiceDomain = @"_bdsk._tcp.";
 
 - (void)disableSharing
 {
-    BDSKLOGIMETHOD();
     if(netService && listeningSocket){
         [netService stop];
         [netService release];
@@ -162,7 +193,6 @@ NSString *BDSKNetServiceDomain = @"_bdsk._tcp.";
 // This object is the delegate of its NSNetService. It should implement the NSNetServiceDelegateMethods that are relevant for publication (see NSNetServices.h).
 - (void)netService:(NSNetService *)sender didNotPublish:(NSDictionary *)errorDict
 {
-    BDSKLOGIMETHOD();
     // @@ taken from Apple's code; add more error messages (use NSError and present?)
     // Display some meaningful error message here, using the longerStatusText as the explanation.
     if([[errorDict objectForKey:NSNetServicesErrorCode] intValue] == NSNetServicesCollisionError) {
@@ -178,7 +208,6 @@ NSString *BDSKNetServiceDomain = @"_bdsk._tcp.";
 
 - (void)netServiceDidStop:(NSNetService *)sender
 {
-    BDSKLOGIMETHOD();
     // We'll need to release the NSNetService sending this, since we want to recreate it in sync with the socket at the other end. Since there's only the one NSNetService in this application, we can just release it.
     [netService release];
     netService = nil;
@@ -187,7 +216,6 @@ NSString *BDSKNetServiceDomain = @"_bdsk._tcp.";
 // This object is also listening for notifications from its NSFileHandle.
 // When an incoming connection is seen by the listeningSocket object, we get the NSFileHandle representing the near end of the connection. We write the data to this NSFileHandle instance.
 - (void)connectionReceived:(NSNotification *)aNotification{
-    BDSKLOGIMETHOD();
     NSFileHandle *incomingConnection = [[aNotification userInfo] objectForKey:NSFileHandleNotificationFileHandleItem];
     NSData *dataToSend = [NSKeyedArchiver archivedDataWithRootObject:publications];
     [[aNotification object] acceptConnectionInBackgroundAndNotify];
