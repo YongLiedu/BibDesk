@@ -421,11 +421,7 @@ static NSString *BDSKAllPublicationsLocalizedString = nil;
     [super dealloc];
 }
 
-- (NSString *)name
-{
-    NSString *theName = [service name];
-    return theName ? theName : [NSString stringWithFormat:@"<%@ %p>", [self class], self];
-}
+- (NSString *)name { return [service name]; }
 
 - (NSString *)description
 {
