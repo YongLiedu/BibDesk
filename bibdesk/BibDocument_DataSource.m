@@ -365,6 +365,8 @@
     NSArray *pubs = nil;
 	
 	OBPRECONDITION(pboard == [NSPasteboard pasteboardWithName:NSDragPboard] || pboard == [NSPasteboard pasteboardWithName:NSGeneralPboard]);
+
+    dragFromSharedGroups = NO;
 	
     if(tv == groupTableView){
 		if([rowIndexes containsIndex:0]){
@@ -396,6 +398,7 @@
                               NSLocalizedString(@"The groups you want to drag do not contain any items.", @""));
             return NO;
         }
+        dragFromSharedGroups = ([rowIndexes firstIndex] > [smartGroups count]  && [rowIndexes lastIndex] <= [smartGroups count]  + [sharedGroups count]);
 			
     } else if(tv == (NSTableView *)ccTableView){
 		// drag from the custom cite drawer table
@@ -414,10 +417,15 @@
         // so that the regular code still works
         pubs = [self selectedPublications];
         dragCopyType = 1; // only type that makes sense here
-        // NSLog(@"rows is %@", rows);
+        
+        NSIndexSet *indexes = [groupTableView selectedRowIndexes];
+        dragFromSharedGroups = ([indexes firstIndex] > [smartGroups count]  && [indexes lastIndex] <= [smartGroups count]  + [sharedGroups count]);
     }else{
 		// drag from the main table
 		pubs = [shownPublications objectsAtIndexes:rowIndexes];
+        
+        NSIndexSet *indexes = [groupTableView selectedRowIndexes];
+        dragFromSharedGroups = ([indexes firstIndex] > [smartGroups count]  && [indexes lastIndex] <= [smartGroups count]  + [sharedGroups count]);
 
 		if(pboard == [NSPasteboard pasteboardWithName:NSDragPboard]){
 			// see where we clicked in the table
@@ -823,7 +831,13 @@
     if(tv == (NSTableView *)ccTableView){
         return NSDragOperationNone;// can't drag into that tv.
     }else if(tv == tableView){
-		if([info draggingSource] == tableView || [info draggingSource] == groupTableView || type == nil) {
+		if(type == nil) 
+			return NSDragOperationNone;
+		if ([info draggingSource] == groupTableView && dragFromSharedGroups && [groupTableView selectedRow] == 0) {
+            [tv setDropRow:-1 dropOperation:NSTableViewDropOn];
+            return NSDragOperationCopy;
+        }
+        if([info draggingSource] == tableView || [info draggingSource] == groupTableView || type == nil) {
 			// can't copy onto same table
 			return NSDragOperationNone;
 		}
@@ -842,6 +856,10 @@
             return NSDragOperationEvery; // if it's not from me, copying is OK
         }
     }else if(tv == groupTableView){
+		if (([info draggingSource] == groupTableView || [info draggingSource] == tableView) && dragFromSharedGroups && row == 0) {
+            [tv setDropRow:row dropOperation:NSTableViewDropOn];
+            return NSDragOperationCopy;
+        }
         // not sure why this check is necessary, but it silences an error message when you drag off the list of items
         if([info draggingSource] == groupTableView || row >= [tv numberOfRows] || row <= [smartGroups count] + [sharedGroups count] || (type == nil && [info draggingSource] != tableView)) 
             return NSDragOperationNone;
@@ -907,14 +925,18 @@
     } else if(tv == groupTableView){
         NSArray *pubs = nil;
         
-        if([info draggingSource] == groupTableView || row <= [smartGroups count])
-			return NO;
-        
         // retain is required to fix bug #1356183
         BDSKGroup *group = [[[self objectInGroupsAtIndex:row] retain] autorelease];
         BOOL shouldSelect = [[self selectedGroups] containsObject:group];
 		
-        if([info draggingSource] == tableView){
+		if (([info draggingSource] == groupTableView || [info draggingSource] == tableView) && dragFromSharedGroups && row == 0) {
+            if([self addPublicationsFromPasteboard:pboard error:NULL] == NO)
+                return NO;
+            
+            pubs = [self selectedPublications];            
+        } else if([info draggingSource] == groupTableView || row <= [smartGroups count] + [sharedGroups count]) {
+            return NO;
+        } else if([info draggingSource] == tableView){
             // we already have these publications, so we just want to add them to the group, not the document
             
 			pubs = [self promisedItemsForPasteboard:[NSPasteboard pasteboardWithName:NSDragPboard]];
