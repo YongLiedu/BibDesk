@@ -219,9 +219,9 @@ NSString *BDSKNetServiceDomain = @"_bdsk._tcp.";
 - (void)connectionReceived:(NSNotification *)aNotification{
     NSFileHandle *incomingConnection = [[aNotification userInfo] objectForKey:NSFileHandleNotificationFileHandleItem];
     NSData *dataToSend = [NSKeyedArchiver archivedDataWithRootObject:publications];
-    [[aNotification object] acceptConnectionInBackgroundAndNotify];
     [incomingConnection writeData:dataToSend];
     [incomingConnection closeFile];
+    [[aNotification object] acceptConnectionInBackgroundAndNotify];
 }
 
 @end
