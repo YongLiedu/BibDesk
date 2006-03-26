@@ -276,6 +276,8 @@ NSString *BDSKCustomFieldsChangedNotification = @"Custom Fields Changed Notifica
 NSString *BDSKResortDocumentNotification = @"Update table sort";
 NSString *BDSKFilterChangedNotification = @"Filter Changed Notification";
 NSString *BDSKStopWordsChangedNotification = @"BDSKStopWordsChangedNotification";
+NSString *BDSKSharingChangedNotification = @"BDSKSharingChangedNotification";
+NSString *BDSKSharedBrowsingChangedNotification = @"BDSKSharedBrowsingChangedNotification";
 
 #pragma mark Exception name strings
 

@@ -114,10 +114,12 @@
 
 - (IBAction)changeShareFiles:(id)sender{
     [defaults setBool:([sender state] == NSOnState) forKey:BDSKShouldShareFilesKey];
+	[[NSNotificationCenter defaultCenter] postNotificationName:BDSKSharingChangedNotification object:self];
 }
 
 - (IBAction)changeLookForSharedFiles:(id)sender{
     [defaults setBool:([sender state] == NSOnState) forKey:BDSKShouldLookForSharedFilesKey];
+	[[NSNotificationCenter defaultCenter] postNotificationName:BDSKSharedBrowsingChangedNotification object:self];
 }
 
 - (IBAction)changeWarnOnDelete:(id)sender{

@@ -211,6 +211,16 @@ NSString *BDSKWeblocFilePboardType = @"CorePasteboardFlavorType 0x75726C20";
                                                    object:nil];
         
         [[NSNotificationCenter defaultCenter] addObserver:self
+                                                 selector:@selector(handleSharingChangedNotification:)
+                                                     name:BDSKSharingChangedNotification
+                                                   object:nil];
+        
+        [[NSNotificationCenter defaultCenter] addObserver:self
+                                                 selector:@selector(handleSharedBrowsingChangedNotification:)
+                                                     name:BDSKSharedBrowsingChangedNotification
+                                                   object:nil];
+        
+        [[NSNotificationCenter defaultCenter] addObserver:self
                                                  selector:@selector(handleApplicationWillTerminateNotification:)
                                                      name:NSApplicationWillTerminateNotification
                                                    object:nil];
@@ -2672,6 +2682,20 @@ NSString *BDSKWeblocFilePboardType = @"CorePasteboardFlavorType 0x75726C20";
 
 - (void)handleResortDocumentNotification:(NSNotification *)notification{
     [self sortPubsByColumn:nil];
+}
+
+- (void)handleSharingChangedNotification:(NSNotification *)notification{
+    if ([[OFPreferenceWrapper sharedPreferenceWrapper] boolForKey:BDSKShouldShareFilesKey])
+        [self enableSharing];
+    else
+        [self disableSharing];
+}
+
+- (void)handleSharedBrowsingChangedNotification:(NSNotification *)notification{
+    if ([[OFPreferenceWrapper sharedPreferenceWrapper] boolForKey:BDSKShouldLookForSharedFilesKey])
+        [self enableSharedBrowsing];
+    else
+        [self disableSharedBrowsing];
 }
 
 - (void)handleApplicationWillTerminateNotification:(NSNotification *)notification{
