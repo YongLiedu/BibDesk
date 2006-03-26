@@ -442,6 +442,10 @@ static NSString *BDSKAllPublicationsLocalizedString = nil;
 
 - (NSNetService *)service { return service; }
 
+- (NSImage *)icon {
+	return [NSImage smallImageNamed:@"sharedFolderIcon"];
+}
+
 - (BOOL)isShared { return YES; }
 
 - (BOOL)hasEditableName { return NO; }
