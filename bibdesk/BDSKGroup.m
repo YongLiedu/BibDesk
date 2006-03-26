@@ -443,21 +443,8 @@ static NSString *BDSKAllPublicationsLocalizedString = nil;
 - (NSNetService *)service { return service; }
 
 - (NSImage *)icon {
-    static NSImage *image = nil;
-    if(image == nil){
-        image = [[NSImage smallImageNamed:@"sharedFolderIcon"] copy];
-        NSImage *bonjour = [NSImage imageNamed:@"bonjourIcon"];
-        [bonjour setScalesWhenResized:YES];
-        [bonjour setSize:NSMakeSize(10, 10)];
-        [image lockFocus];
-        [bonjour compositeToPoint:NSMakePoint(4, 2) operation:NSCompositeSourceOver];
-        [image unlockFocus];
-    }
-    return image;
+	return [NSImage smallImageNamed:@"sharedFolderIcon"];
 }
-//- (NSImage *)icon {
-//	return [NSImage smallImageNamed:@"sharedFolderIcon"];
-//}
 
 - (BOOL)isShared { return YES; }
 
