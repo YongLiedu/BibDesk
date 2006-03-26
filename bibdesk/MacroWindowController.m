@@ -41,6 +41,7 @@
 #import "OmniFoundation/NSData-OFExtensions.h"
 #import "BibTeXParser.h"
 #import "BDSKFormCellFormatter.h"
+#import "BDSKMacroResolver.h"
 
 #import <OmniAppKit/OATypeAheadSelectionHelper.h>
 #import "OATypeAheadSelectionHelper_Extensions.h"
@@ -95,7 +96,7 @@
     if (macroDataSource) {
 		[[NSNotificationCenter defaultCenter]
 				addObserver:self
-				   selector:@selector(handleMacroKeyChangedNotification:)
+				   selector:@selector(handleMacroChangedNotification:)
 					   name:BDSKMacroDefinitionChangedNotification
 					 object:macroDataSource];
     }
@@ -108,34 +109,31 @@
 }
 
 - (void)refreshMacros{
-    NSDictionary *macroDefinitions = [(id <BDSKMacroResolver>)macroDataSource macroDefinitions];
+    NSDictionary *macroDefinitions = [(BDSKMacroResolver *)macroDataSource macroDefinitions];
     [macros release];
     macros = [[[macroDefinitions allKeys] sortedArrayUsingSelector:@selector(compare:)] mutableCopy];
 }
 
 - (void)handleMacroChangedNotification:(NSNotification *)notif{
-    NSString *type = [[notif userInfo] objectForKey:@"type"];
-    NSString *key = [[notif userInfo] objectForKey:@"macroKey"];
+    NSDictionary *info = [notif userInfo];
+    NSString *type = [info objectForKey:@"type"];
 	if ([type isEqualToString:@"Add macro"]) {
+        NSString *key = [info objectForKey:@"macroKey"];
 		[macros addObject:key];
 	} else if ([type isEqualToString:@"Remove macro"]) {
+        NSString *key = [info objectForKey:@"macroKey"];
 		[macros removeObject:key];
+	} else if ([type isEqualToString:@"Change key"]) {
+        NSString *newKey = [info objectForKey:@"newKey"];
+        NSString *oldKey = [info objectForKey:@"oldKey"];
+        int indexOfOldKey = [macros indexOfObject:oldKey];
+        [macros replaceObjectAtIndex:indexOfOldKey withObject:newKey];
 	}
     [tableView reloadData];
 }
 
-- (void)handleMacroKeyChangedNotification:(NSNotification *)notif{
-    NSDictionary *info = [notif userInfo];
-    NSString *newKey = [info objectForKey:@"newKey"];
-    NSString *oldKey = [info objectForKey:@"oldKey"];
-    int indexOfOldKey = [macros indexOfObject:oldKey];
-    [macros replaceObjectAtIndex:indexOfOldKey
-                      withObject:newKey];
-    [tableView reloadData];
-}
-
 - (IBAction)addMacro:(id)sender{
-    NSDictionary *macroDefinitions = [(id <BDSKMacroResolver>)macroDataSource macroDefinitions];
+    NSDictionary *macroDefinitions = [(BDSKMacroResolver *)macroDataSource macroDefinitions];
     // find a unique new macro key
     int i = 0;
     NSString *newKey = [NSString stringWithString:@"newMacro"];
@@ -143,7 +141,7 @@
         newKey = [NSString stringWithFormat:@"macro%d", ++i];
     }
     
-    [(id <BDSKMacroResolver>)macroDataSource addMacroDefinition:@"definition"
+    [(BDSKMacroResolver *)macroDataSource addMacroDefinition:@"definition"
                                                        forMacro:newKey];
     [[[self window] undoManager] setActionName:NSLocalizedString(@"Add Macro", @"add macro action name for undo")];
 	
@@ -171,7 +169,7 @@
 
     while(row != NSNotFound){
         NSString *key = [shadowOfMacros objectAtIndex:row];
-        [(id <BDSKMacroResolver>)macroDataSource removeMacro:key];
+        [(BDSKMacroResolver *)macroDataSource removeMacro:key];
 		[[[self window] undoManager] setActionName:NSLocalizedString(@"Delete Macro", @"delete macro action name for undo")];
 		row = [rowIndexes indexGreaterThanIndex:row];
     }
@@ -229,7 +227,7 @@
 	int row = [tableView selectedRow];
 	if ([macroTextFieldWC isEditing] || row == -1) 
 		return NO;
-    NSDictionary *macroDefinitions = [(id <BDSKMacroResolver>)macroDataSource macroDefinitions];
+    NSDictionary *macroDefinitions = [(BDSKMacroResolver *)macroDataSource macroDefinitions];
     NSString *key = [macros objectAtIndex:row];
 	NSString *value = [macroDefinitions objectForKey:key];
 	NSText *fieldEditor = [tableView currentEditor];
@@ -262,7 +260,7 @@
 }
 
 - (id)tableView:(NSTableView *)tv objectValueForTableColumn:(NSTableColumn *)tableColumn row:(int)row{
-    NSDictionary *macroDefinitions = [(id <BDSKMacroResolver>)macroDataSource macroDefinitions];
+    NSDictionary *macroDefinitions = [(BDSKMacroResolver *)macroDataSource macroDefinitions];
     NSString *key = [macros objectAtIndex:row];
     
     if([[tableColumn identifier] isEqualToString:@"macro"]){
@@ -277,7 +275,7 @@
     NSUndoManager *undoMan = [[self window] undoManager];
 	if([undoMan isUndoingOrRedoing]) return;
     NSParameterAssert(row >= 0 && row < [macros count]);    
-    NSDictionary *macroDefinitions = [(id <BDSKMacroResolver>)macroDataSource macroDefinitions];
+    NSDictionary *macroDefinitions = [(BDSKMacroResolver *)macroDataSource macroDefinitions];
     NSString *key = [macros objectAtIndex:row];
     
     if([[tableColumn identifier] isEqualToString:@"macro"]){
@@ -302,7 +300,7 @@
 			return;
 		}
 		
-        NSDictionary *macroDefinitions = [(id <BDSKMacroResolver>)macroDataSource macroDefinitions];
+        NSDictionary *macroDefinitions = [(BDSKMacroResolver *)macroDataSource macroDefinitions];
 		if([BDSKComplexString isCircularMacro:object forDefinition:[macroDefinitions objectForKey:key] macroResolver:macroDataSource]){
 			NSRunAlertPanel(NSLocalizedString(@"Circular Macro", @"Circular Macro"),
 							NSLocalizedString(@"The macro you try to define would lead to a circular definition.", @""),
@@ -312,7 +310,7 @@
 			return;
 		}
 		
-        [(id <BDSKMacroResolver>)macroDataSource changeMacroKey:key to:object];
+        [(BDSKMacroResolver *)macroDataSource changeMacroKey:key to:object];
 		
 		[undoMan setActionName:NSLocalizedString(@"Change Macro Key", @"change macro key action name for undo")];
 
@@ -329,7 +327,7 @@
 			return;
 		}
         
-		[(id <BDSKMacroResolver>)macroDataSource setMacroDefinition:object forMacro:key];
+		[(BDSKMacroResolver *)macroDataSource setMacroDefinition:object forMacro:key];
 		
 		[undoMan setActionName:NSLocalizedString(@"Change Macro Definition", @"change macrodef action name for undo")];
     }
@@ -352,7 +350,7 @@
     NSString *key;
     NSString *value;
     NSMutableString *pboardStr = [NSMutableString string];
-    NSDictionary *macroDefinitions = [(id <BDSKMacroResolver>)macroDataSource macroDefinitions];
+    NSDictionary *macroDefinitions = [(BDSKMacroResolver *)macroDataSource macroDefinitions];
     [pboard declareTypes:[NSArray arrayWithObject:NSStringPboardType] owner:nil];
 
     while(row = [e nextObject]){
@@ -445,7 +443,7 @@
     while(macroKey = [e nextObject]){
         macroString = [defs objectForKey:macroKey];
         if([BDSKComplexString isCircularMacro:macroKey forDefinition:macroString macroResolver:macroDataSource] == NO)
-            [(id <BDSKMacroResolver>)macroDataSource setMacroDefinition:macroString forMacro:macroKey];
+            [(BDSKMacroResolver *)macroDataSource setMacroDefinition:macroString forMacro:macroKey];
 		else
             hadCircular = YES;
         [[[self window] undoManager] setActionName:NSLocalizedString(@"Change Macro Definition", @"change macrodef action name for undo")];
