@@ -82,11 +82,7 @@
     if (macroDataSource) {
 		[[NSNotificationCenter defaultCenter]
 				removeObserver:self
-						  name:BDSKBibDocMacroKeyChangedNotification
-						object:macroDataSource];
-		[[NSNotificationCenter defaultCenter]
-				removeObserver:self
-						  name:BDSKBibDocMacroDefinitionChangedNotification
+						  name:BDSKMacroDefinitionChangedNotification
 						object:macroDataSource];
     }
 	
@@ -100,12 +96,7 @@
 		[[NSNotificationCenter defaultCenter]
 				addObserver:self
 				   selector:@selector(handleMacroKeyChangedNotification:)
-					   name:BDSKBibDocMacroKeyChangedNotification
-					 object:macroDataSource];
-		[[NSNotificationCenter defaultCenter]
-				addObserver:self
-				   selector:@selector(handleMacroChangedNotification:)
-					   name:BDSKBibDocMacroDefinitionChangedNotification
+					   name:BDSKMacroDefinitionChangedNotification
 					 object:macroDataSource];
     }
     

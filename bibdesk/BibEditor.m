@@ -3019,11 +3019,7 @@ static int numberOfOpenEditors = 0;
 											   object:nil];
 	[[NSNotificationCenter defaultCenter] addObserver:self
 											 selector:@selector(macrosDidChange:)
-												 name:BDSKBibDocMacroDefinitionChangedNotification
-											   object:nil];
-	[[NSNotificationCenter defaultCenter] addObserver:self
-											 selector:@selector(macrosDidChange:)
-												 name:BDSKBibDocMacroKeyChangedNotification
+												 name:BDSKMacroDefinitionChangedNotification
 											   object:nil];
 }
 

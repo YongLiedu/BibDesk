@@ -201,17 +201,12 @@ NSString *BDSKWeblocFilePboardType = @"CorePasteboardFlavorType 0x75726C20";
         
         [[NSNotificationCenter defaultCenter] addObserver:self
                                                  selector:@selector(handleMacroChangedNotification:)
-                                                     name:BDSKBibDocMacroKeyChangedNotification
+                                                     name:BDSKMacroDefinitionChangedNotification
                                                    object:nil];
 
         [[NSNotificationCenter defaultCenter] addObserver:self
                                                  selector:@selector(handleFilterChangedNotification:)
                                                      name:BDSKFilterChangedNotification
-                                                   object:nil];
-        
-        [[NSNotificationCenter defaultCenter] addObserver:self
-                                                 selector:@selector(handleMacroChangedNotification:)
-                                                     name:BDSKBibDocMacroDefinitionChangedNotification
                                                    object:nil];
         
         [[NSNotificationCenter defaultCenter] addObserver:self
@@ -3136,10 +3131,7 @@ NSString *BDSKWeblocFilePboardType = @"CorePasteboardFlavorType 0x75726C20";
     [macroDefinitions removeObjectForKey:oldKey];
     [macroDefinitions setObject:[val autorelease] forKey:newKey];
 	
-	NSDictionary *notifInfo = [NSDictionary dictionaryWithObjectsAndKeys:newKey, @"newKey", oldKey, @"oldKey", nil];
-    [[NSNotificationCenter defaultCenter] postNotificationName:BDSKBibDocMacroKeyChangedNotification
-														object:self
-													  userInfo:notifInfo];    
+    [[NSNotificationCenter defaultCenter] postNotificationName:BDSKMacroDefinitionChangedNotification object:self];    
 }
 
 - (void)addMacroDefinition:(NSString *)macroString forMacro:(NSString *)macroKey{
@@ -3149,10 +3141,7 @@ NSString *BDSKWeblocFilePboardType = @"CorePasteboardFlavorType 0x75726C20";
 
     [macroDefinitions setObject:macroString forKey:macroKey];
 	
-	NSDictionary *notifInfo = [NSDictionary dictionaryWithObjectsAndKeys:macroKey, @"macroKey", @"Add macro", @"type", nil];
-    [[NSNotificationCenter defaultCenter] postNotificationName:BDSKBibDocMacroDefinitionChangedNotification
-														object:self
-													  userInfo:notifInfo];    
+    [[NSNotificationCenter defaultCenter] postNotificationName:BDSKMacroDefinitionChangedNotification object:self];    
 }
 
 - (void)setMacroDefinition:(NSString *)newDefinition forMacro:(NSString *)macroKey{
@@ -3166,10 +3155,7 @@ NSString *BDSKWeblocFilePboardType = @"CorePasteboardFlavorType 0x75726C20";
             setMacroDefinition:oldDef forMacro:macroKey];
     [macroDefinitions setObject:newDefinition forKey:macroKey];
 
-	NSDictionary *notifInfo = [NSDictionary dictionaryWithObjectsAndKeys:macroKey, @"macroKey", @"Change macro", @"type", nil];
-    [[NSNotificationCenter defaultCenter] postNotificationName:BDSKBibDocMacroDefinitionChangedNotification
-														object:self
-													  userInfo:notifInfo];    
+    [[NSNotificationCenter defaultCenter] postNotificationName:BDSKMacroDefinitionChangedNotification object:self];    
 }
 
 
@@ -3184,10 +3170,7 @@ NSString *BDSKWeblocFilePboardType = @"CorePasteboardFlavorType 0x75726C20";
     }
     [macroDefinitions removeObjectForKey:macroKey];
 	
-	NSDictionary *notifInfo = [NSDictionary dictionaryWithObjectsAndKeys:macroKey, @"macroKey", @"Remove macro", @"type", nil];
-    [[NSNotificationCenter defaultCenter] postNotificationName:BDSKBibDocMacroDefinitionChangedNotification
-														object:self
-													  userInfo:notifInfo];    
+    [[NSNotificationCenter defaultCenter] postNotificationName:BDSKMacroDefinitionChangedNotification object:self];    
 }
 
 - (NSString *)valueOfMacro:(NSString *)macroString{

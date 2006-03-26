@@ -803,7 +803,7 @@ extern NSString* BDSKWeblocFilePboardType; // core pasteboard type for webloc fi
 /*!
     @method     setMacroDefinition:forMacro:
     @abstract   sets the value of an existing macro.
-    @discussion sends BDSKBibDocMacroDefinitionChangedNotification.
+    @discussion sends BDSKMacroDefinitionChangedNotification.
     @param      newDefinition (description)
     @param      macroKey (description)
 */
