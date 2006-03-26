@@ -58,6 +58,7 @@
 @class BDSKImagePopUpButton;
 @class MacroWindowController;
 @class BDSKDragTableView;
+@class BDSKMacroResolver;
 
 enum {
 	BDSKOperationIgnore = NSAlertDefaultReturn, // 1
@@ -90,7 +91,7 @@ extern NSString* BDSKWeblocFilePboardType; // core pasteboard type for webloc fi
     @discussion This is the document class. It keeps an array of BibItems (called (NSMutableArray *)publications) and handles the quick search box. It delegates PDF generation to a BDSKPreviewer.
 */
 
-@interface BibDocument : NSDocument <BDSKMacroResolver, BDSKGroupTableDelegate, BDSKSearchContentView>
+@interface BibDocument : NSDocument <BDSKGroupTableDelegate, BDSKSearchContentView>
 {
     IBOutlet NSTextView *previewField;
     IBOutlet NSWindow* documentWindow;
@@ -157,7 +158,7 @@ extern NSString* BDSKWeblocFilePboardType; // core pasteboard type for webloc fi
     IBOutlet NSPopUpButton *saveTextEncodingPopupButton;
     NSStringEncoding documentStringEncoding;
 	
-    NSMutableDictionary *macroDefinitions;	
+    BDSKMacroResolver *macroResolver;
     MacroWindowController *macroWC;
     
     OFMultiValueDictionary *itemsForCiteKeys;
@@ -745,78 +746,10 @@ extern NSString* BDSKWeblocFilePboardType; // core pasteboard type for webloc fi
 
 #pragma mark bibtex macro support
 
-- (NSDictionary *)macroDefinitions;
+- (BDSKMacroResolver *)macroResolver;
 
-/*!
-    @method     addMacroDefinitionWithoutUndo:forMacro:
-     @abstract   changes the definition for a macro
-     @discussion overwrites an existing one if it exists. not undoable.
- for use with parsers.
-     @param      macroString (description)
-     @param      macroKey (description)
-     */
-- (void)addMacroDefinitionWithoutUndo:(NSString *)macroString forMacro:(NSString *)macroKey;
-
-/*!
-    @method     addMacroDefinition:forMacro:
-    @abstract   changes the definition for a macro
-    @discussion overwrites an existing one if it exists. undoable.
- sends BDSKBibDocMacroAddedNotification
-    @param      macroString (description)
-    @param      macroKey (description)
-*/
-- (void)addMacroDefinition:(NSString *)macroString forMacro:(NSString *)macroKey;
-
-/*!
-    @method     valueOfMacro:
-    @abstract   returns the expanded value of a macro
-    @discussion undoable.
-    @param      macroString (description)
-    @result     (description)
-*/
-- (NSString *)valueOfMacro:(NSString *)macroString;
-
-/*!
-    @method     removeMacro:
-    @abstract   deletes a macro. 
-    @discussion does nothing if macroKey isn't a current macro. if it does something, it's undoable.
-    @param      macroKey (description)
-*/
-- (void)removeMacro:(NSString *)macroKey;
-
-    /*!
-    @method     showMacrosWindow:
-     @abstract   shows the macro editing window
-     @param      sender 
-     */
 - (IBAction)showMacrosWindow:(id)sender;
 
-/*!
-    @method     changeMacroKey:to:
-    @abstract   changes a key but keeps the value the same.
-    @discussion sends bdskbibdocmacrokeychangednotification.
-    @param      oldKey (description)
-    @param      newKey (description)
-*/
-- (void)changeMacroKey:(NSString *)oldKey to:(NSString *)newKey;
-
-/*!
-    @method     setMacroDefinition:forMacro:
-    @abstract   sets the value of an existing macro.
-    @discussion sends BDSKMacroDefinitionChangedNotification.
-    @param      newDefinition (description)
-    @param      macroKey (description)
-*/
-- (void)setMacroDefinition:(NSString *)newDefinition forMacro:(NSString *)macroKey;
-
-
-/*!
-    @method     bibTeXMacroString:
-    @abstract   returns the bibTeX string for the macro definitons.
-    @discussion TeXifies the expanded values when the pref option is set.
-    @result     (description)
-*/
-- (NSString *)bibTeXMacroString;
 - (void)handleMacroChangedNotification:(NSNotification *)aNotification;
 
 - (BOOL)citeKeyIsCrossreffed:(NSString *)key;

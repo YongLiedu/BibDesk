@@ -78,6 +78,7 @@
 #import "BDSKImagePopUpButton.h"
 #import "BDSKRatingButton.h"
 
+#import "BDSKMacroResolver.h"
 #import "MacroWindowController.h"
 #import "BDSKTextImportController.h"
 #import "BDSKErrorObjectController.h"
@@ -133,7 +134,7 @@ NSString *BDSKWeblocFilePboardType = @"CorePasteboardFlavorType 0x75726C20";
 		texTask = [[BDSKTeXTask alloc] initWithFileName:@"bibcopy"];
 		[texTask setDelegate:self];
         
-        macroDefinitions = BDSKCreateCaseInsensitiveKeyMutableDictionary();
+        macroResolver = [(BDSKMacroResolver *)[BDSKMacroResolver alloc] initWithDocument:self];
         
         BDSKUndoManager *newUndoManager = [[[BDSKUndoManager alloc] init] autorelease];
         [newUndoManager setDelegate:self];
@@ -386,7 +387,7 @@ NSString *BDSKWeblocFilePboardType = @"CorePasteboardFlavorType 0x75726C20";
     }
     [[NSNotificationCenter defaultCenter] removeObserver:self];
 	[[BDSKErrorObjectController sharedErrorObjectController] removeErrorObjsForDocument:self];
-    [macroDefinitions release];
+    [macroResolver release];
     [itemsForCiteKeys release];
     // set pub document ivars to nil, or we get a crash when they message the undo manager in dealloc (only happens if you edit, click to close the doc, then save)
     [publications makeObjectsPerformSelector:@selector(setDocument:) withObject:nil];
@@ -995,7 +996,7 @@ NSString *BDSKWeblocFilePboardType = @"CorePasteboardFlavorType 0x75726C20";
         
     
     // output the document's macros:
-	[d appendData:[[self bibTeXMacroString] dataUsingEncoding:encoding allowLossyConversion:YES]];
+	[d appendData:[[[self macroResolver] bibTeXString] dataUsingEncoding:encoding allowLossyConversion:YES]];
     
     // output the bibs
     
@@ -1709,7 +1710,7 @@ NSString *BDSKWeblocFilePboardType = @"CorePasteboardFlavorType 0x75726C20";
 	[bibString appendString:@"\n"];
 	
     @try{
-        [bibString appendString:[self bibTeXMacroString]];
+        [bibString appendString:[[self macroResolver] bibTeXString]];
     }
     @catch(id exception){
         if([exception isKindOfClass:[NSException class]] && [[exception name] isEqualToString:BDSKTeXifyException])
@@ -1937,8 +1938,8 @@ NSString *BDSKWeblocFilePboardType = @"CorePasteboardFlavorType 0x75726C20";
     return newPubs;
 }
 
-- (id <BDSKMacroResolver>)unarchiverMacroResolver:(NSKeyedUnarchiver *)unarchiver{
-    return self;
+- (BDSKMacroResolver *)unarchiverMacroResolver:(NSKeyedUnarchiver *)unarchiver{
+    return macroResolver;
 }
 
 - (NSArray *)newPublicationsForString:(NSString *)string type:(int)type error:(NSError **)outError {
@@ -3112,106 +3113,14 @@ NSString *BDSKWeblocFilePboardType = @"CorePasteboardFlavorType 0x75726C20";
 
 #pragma mark Macro stuff
 
-- (NSDictionary *)macroDefinitions {
-    return macroDefinitions;
-}
-
-- (void)addMacroDefinitionWithoutUndo:(NSString *)macroString forMacro:(NSString *)macroKey{
-    [macroDefinitions setObject:macroString forKey:macroKey];
-}
-
-- (void)changeMacroKey:(NSString *)oldKey to:(NSString *)newKey{
-    if([macroDefinitions objectForKey:oldKey] == nil)
-        [NSException raise:NSInvalidArgumentException
-                    format:@"tried to change the value of a macro key that doesn't exist"];
-    [[[self undoManager] prepareWithInvocationTarget:self]
-        changeMacroKey:newKey to:oldKey];
-    NSString *val = [macroDefinitions valueForKey:oldKey];
-    [val retain]; // so the next line doesn't kill it
-    [macroDefinitions removeObjectForKey:oldKey];
-    [macroDefinitions setObject:[val autorelease] forKey:newKey];
-	
-    [[NSNotificationCenter defaultCenter] postNotificationName:BDSKMacroDefinitionChangedNotification object:self];    
-}
-
-- (void)addMacroDefinition:(NSString *)macroString forMacro:(NSString *)macroKey{
-    // we're adding a new one, so to undo, we remove.
-    [[[self undoManager] prepareWithInvocationTarget:self]
-            removeMacro:macroKey];
-
-    [macroDefinitions setObject:macroString forKey:macroKey];
-	
-    [[NSNotificationCenter defaultCenter] postNotificationName:BDSKMacroDefinitionChangedNotification object:self];    
-}
-
-- (void)setMacroDefinition:(NSString *)newDefinition forMacro:(NSString *)macroKey{
-    NSString *oldDef = [macroDefinitions objectForKey:macroKey];
-    if(oldDef == nil){
-        [self addMacroDefinition:newDefinition forMacro:macroKey];
-        return;
-    }
-    // we're just changing an existing one, so to undo, we change back.
-    [[[self undoManager] prepareWithInvocationTarget:self]
-            setMacroDefinition:oldDef forMacro:macroKey];
-    [macroDefinitions setObject:newDefinition forKey:macroKey];
-
-    [[NSNotificationCenter defaultCenter] postNotificationName:BDSKMacroDefinitionChangedNotification object:self];    
-}
-
-
-- (void)removeMacro:(NSString *)macroKey{
-    NSString *currentValue = [macroDefinitions objectForKey:macroKey];
-    if(!currentValue){
-        return;
-    }else{
-        [[[self undoManager] prepareWithInvocationTarget:self]
-        addMacroDefinition:currentValue
-                  forMacro:macroKey];
-    }
-    [macroDefinitions removeObjectForKey:macroKey];
-	
-    [[NSNotificationCenter defaultCenter] postNotificationName:BDSKMacroDefinitionChangedNotification object:self];    
-}
-
-- (NSString *)valueOfMacro:(NSString *)macroString{
-    // Note we treat upper and lowercase values the same, 
-    // because that's how btparse gives the string constants to us.
-    // It is not quite correct because bibtex does discriminate,
-    // but this is the best we can do.  The OFCreateCaseInsensitiveKeyMutableDictionary()
-    // is used to create a dictionary with case-insensitive keys.
-    return [macroDefinitions objectForKey:macroString];
-}
-
-- (NSString *)bibTeXMacroString{
-    BOOL shouldTeXify = [[OFPreferenceWrapper sharedPreferenceWrapper] boolForKey:BDSKShouldTeXifyWhenSavingAndCopyingKey];
-	NSMutableString *macroString = [NSMutableString string];
-    NSString *value;
-    NSArray *macros = [[macroDefinitions allKeys] sortedArrayUsingSelector:@selector(compare:)];
-    
-    foreach(macro, macros){
-		value = [macroDefinitions objectForKey:macro];
-		if(shouldTeXify){
-			
-			@try{
-				value = [[BDSKConverter sharedConverter] stringByTeXifyingString:value];
-			}
-            @catch(id localException){
-				if([localException isKindOfClass:[NSException class]] && [[localException name] isEqualToString:BDSKTeXifyException]){
-                    NSException *exception = [NSException exceptionWithName:BDSKTeXifyException reason:[NSString stringWithFormat:NSLocalizedString(@"Character \"%@\" in the macro %@ can't be converted to TeX.", @"character conversion warning"), [localException reason], macro] userInfo:[NSDictionary dictionary]];
-                    @throw exception;
-				} else 
-                    @throw;
-            }							
-		}                
-        [macroString appendStrings:@"\n@string{", macro, @" = ", [value stringAsBibTeXString], @"}\n", nil];
-    }
-	return macroString;
+- (BDSKMacroResolver *)macroResolver{
+    return macroResolver;
 }
 
 - (IBAction)showMacrosWindow:(id)sender{
     if (!macroWC){
         macroWC = [[MacroWindowController alloc] init];
-        [macroWC setMacroDataSource:self];
+        [macroWC setMacroDataSource:[self macroResolver]];
     }
     [macroWC showWindow:self];
 }
