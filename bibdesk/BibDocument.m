@@ -1442,7 +1442,8 @@ NSString *BDSKWeblocFilePboardType = @"CorePasteboardFlavorType 0x75726C20";
 	if (returnCode == NSAlertAlternateReturn ) {
 		// the user said to go ahead
 		while (pub = [e nextObject]) {
-			[self editPub:pub];
+            if ([pub document] == self)
+                [self editPub:pub];
 		}
 	}
 	// otherwise do nothing

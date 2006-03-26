@@ -337,29 +337,31 @@ The groupedPublications array is a subset of the publications array, developed b
 
 - (NSArray *)publicationsInCurrentGroups{
     NSArray *selectedGroups = [self selectedGroups];
+    NSMutableArray *filteredArray;
     
     // optimize for a common case
-    if([selectedGroups containsObject:allPublicationsGroup])
-        return publications;
-    
-    NSArray *array = [publications copy];
-    NSMutableArray *filteredArray = [[NSMutableArray alloc] initWithCapacity:[array count]];
-	NSEnumerator *pubEnum = [array objectEnumerator];
-	BibItem *pub;
-	NSEnumerator *groupEnum;
-	BDSKGroup *group;
-	[array release];
-	
-	while (pub = [pubEnum nextObject]) {
-		groupEnum = [selectedGroups objectEnumerator];
-		while (group = [groupEnum nextObject]) {
-			if ([group containsItem:pub]) {
-				[filteredArray addObject:pub];
-				break;
-			}
-		}
-	}
-    
+    if ([selectedGroups containsObject:allPublicationsGroup]) {
+        filteredArray = [publications copy];
+    } else {
+        NSArray *array = [publications copy];
+        NSEnumerator *pubEnum = [array objectEnumerator];
+        BibItem *pub;
+        NSEnumerator *groupEnum;
+        BDSKGroup *group;
+        
+        filteredArray = [[NSMutableArray alloc] initWithCapacity:[array count]];
+        [array release];
+        
+        while (pub = [pubEnum nextObject]) {
+            groupEnum = [selectedGroups objectEnumerator];
+            while (group = [groupEnum nextObject]) {
+                if ([group containsItem:pub]) {
+                    [filteredArray addObject:pub];
+                    break;
+                }
+            }
+        }
+    }
     [filteredArray addObjectsFromArray:[self selectedSharedPublications]];
 	
 	return [filteredArray autorelease];
@@ -652,7 +654,7 @@ The groupedPublications array is a subset of the publications array, developed b
 		   didEndSelector:NULL
 			  contextInfo:nil];
 		[filterController release];
-	} else if (row > [smartGroups count] + [sharedGroups count] && [[[BibTypeManager sharedManager] personFieldsSet] containsObject:currentGroupField]) {
+	} else if ([group isShared] == NO && [[[BibTypeManager sharedManager] personFieldsSet] containsObject:currentGroupField]) {
 		[self showPerson:(BibAuthor *)[group name]];
 	}
 }
