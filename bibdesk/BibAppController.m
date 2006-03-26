@@ -797,6 +797,9 @@
 #pragma mark Auto-completion stuff
 
 - (void)addString:(NSString *)string forCompletionEntry:(NSString *)entry{
+    // adding complex strings can lead to a crash after the containing document closes, and it is rather meaningless anyway
+    if ([string isComplex])
+        return;
     
     // @@ could move this to the type manager and union all excluded fields
     static NSSet *numericFields = nil;
