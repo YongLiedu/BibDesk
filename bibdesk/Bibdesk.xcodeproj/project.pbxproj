@@ -292,8 +292,8 @@
 		CE392ED508D034E4001CEAC8 /* BDSKRatingButtonCell.m in Sources */ = {isa = PBXBuildFile; fileRef = CE392ED308D034E4001CEAC8 /* BDSKRatingButtonCell.m */; };
 		CE392F5D08D04083001CEAC8 /* BDSKRatingButton.h in Headers */ = {isa = PBXBuildFile; fileRef = CE392F5B08D04083001CEAC8 /* BDSKRatingButton.h */; };
 		CE392F5E08D04083001CEAC8 /* BDSKRatingButton.m in Sources */ = {isa = PBXBuildFile; fileRef = CE392F5C08D04083001CEAC8 /* BDSKRatingButton.m */; };
-		CE3B5E7C09CEDE470017D339 /* BDSKGlobalMacroResolver.h in Headers */ = {isa = PBXBuildFile; fileRef = CE3B5E7A09CEDE470017D339 /* BDSKGlobalMacroResolver.h */; };
-		CE3B5E7D09CEDE470017D339 /* BDSKGlobalMacroResolver.m in Sources */ = {isa = PBXBuildFile; fileRef = CE3B5E7B09CEDE470017D339 /* BDSKGlobalMacroResolver.m */; };
+		CE3B5E7C09CEDE470017D339 /* BDSKMacroResolver.h in Headers */ = {isa = PBXBuildFile; fileRef = CE3B5E7A09CEDE470017D339 /* BDSKMacroResolver.h */; };
+		CE3B5E7D09CEDE470017D339 /* BDSKMacroResolver.m in Sources */ = {isa = PBXBuildFile; fileRef = CE3B5E7B09CEDE470017D339 /* BDSKMacroResolver.m */; };
 		CE3B682A09D1B0190017D339 /* BDSKImagePopUpButton.h in Headers */ = {isa = PBXBuildFile; fileRef = CE3B682609D1B0190017D339 /* BDSKImagePopUpButton.h */; };
 		CE3B682B09D1B0190017D339 /* BDSKImagePopUpButton.m in Sources */ = {isa = PBXBuildFile; fileRef = CE3B682709D1B0190017D339 /* BDSKImagePopUpButton.m */; };
 		CE3B682C09D1B0190017D339 /* BDSKImagePopUpButtonCell.h in Headers */ = {isa = PBXBuildFile; fileRef = CE3B682809D1B0190017D339 /* BDSKImagePopUpButtonCell.h */; };
@@ -1088,8 +1088,8 @@
 		CE392ED308D034E4001CEAC8 /* BDSKRatingButtonCell.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BDSKRatingButtonCell.m; sourceTree = "<group>"; };
 		CE392F5B08D04083001CEAC8 /* BDSKRatingButton.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BDSKRatingButton.h; sourceTree = "<group>"; };
 		CE392F5C08D04083001CEAC8 /* BDSKRatingButton.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BDSKRatingButton.m; sourceTree = "<group>"; };
-		CE3B5E7A09CEDE470017D339 /* BDSKGlobalMacroResolver.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BDSKGlobalMacroResolver.h; sourceTree = "<group>"; };
-		CE3B5E7B09CEDE470017D339 /* BDSKGlobalMacroResolver.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BDSKGlobalMacroResolver.m; sourceTree = "<group>"; };
+		CE3B5E7A09CEDE470017D339 /* BDSKMacroResolver.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BDSKMacroResolver.h; sourceTree = "<group>"; };
+		CE3B5E7B09CEDE470017D339 /* BDSKMacroResolver.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BDSKMacroResolver.m; sourceTree = "<group>"; };
 		CE3B682609D1B0190017D339 /* BDSKImagePopUpButton.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = BDSKImagePopUpButton.h; sourceTree = "<group>"; };
 		CE3B682709D1B0190017D339 /* BDSKImagePopUpButton.m */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.objc; path = BDSKImagePopUpButton.m; sourceTree = "<group>"; };
 		CE3B682809D1B0190017D339 /* BDSKImagePopUpButtonCell.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = BDSKImagePopUpButtonCell.h; sourceTree = "<group>"; };
@@ -1847,7 +1847,7 @@
 			isa = PBXGroup;
 			children = (
 				F9A6742907D04E8000782ACD /* BDSKFontManager.m */,
-				CE3B5E7B09CEDE470017D339 /* BDSKGlobalMacroResolver.m */,
+				CE3B5E7B09CEDE470017D339 /* BDSKMacroResolver.m */,
 				F9DB863E08A07ADC00CB3D53 /* BDSKPreviewMessageQueue.m */,
 				CED65AB50906BCC6003EED90 /* BDSKScriptHookManager.m */,
 				F9F78CD307D5320D004B68AF /* BDSKStringEncodingManager.m */,
@@ -2029,7 +2029,6 @@
 				3D44F5600812A91D003C67F0 /* BDSKFormatParser.h */,
 				F9D3E283088DA01F00E70D49 /* BDSKFormCell.h */,
 				F9022C480758027800C3F701 /* BDSKFormCellFormatter.h */,
-				CE3B5E7A09CEDE470017D339 /* BDSKGlobalMacroResolver.h */,
 				F9706DE309102DF500526FC8 /* BDSKGradientView.h */,
 				CE21D10809208B9D0075E607 /* BDSKGroup.h */,
 				CE2AFE570911425F00E65C87 /* BDSKGroupCell.h */,
@@ -2040,6 +2039,7 @@
 				CE3B682809D1B0190017D339 /* BDSKImagePopUpButtonCell.h */,
 				CEAE613C097FF60A000B618C /* BDSKJSTORParser.h */,
 				F9022C53075802E300C3F701 /* BDSKLinkButton.h */,
+				CE3B5E7A09CEDE470017D339 /* BDSKMacroResolver.h */,
 				3DE391F007FF260D00BE3AE7 /* BDSKMenuItem.h */,
 				F941B7E808AA574200F04ECD /* BDSKOverlay.h */,
 				CEF9433F092656BB00750FFA /* BDSKPathIconTransformer.h */,
@@ -2421,7 +2421,7 @@
 				CE59A38109BC80A100AF3935 /* BDSKPreviewTextView.h in Headers */,
 				F94DE74B09CB46FF00B5FD51 /* BDSKPersistentSearch.h in Headers */,
 				CEF7295609CC88AB00802D48 /* BDSKFieldSheetController.h in Headers */,
-				CE3B5E7C09CEDE470017D339 /* BDSKGlobalMacroResolver.h in Headers */,
+				CE3B5E7C09CEDE470017D339 /* BDSKMacroResolver.h in Headers */,
 				CE3B682A09D1B0190017D339 /* BDSKImagePopUpButton.h in Headers */,
 				CE3B682C09D1B0190017D339 /* BDSKImagePopUpButtonCell.h in Headers */,
 				F9F31CD009D61BB4008910D9 /* BibDocument_Sharing.h in Headers */,
@@ -3330,7 +3330,7 @@
 				CE59A38209BC80A100AF3935 /* BDSKPreviewTextView.m in Sources */,
 				F94DE74C09CB46FF00B5FD51 /* BDSKPersistentSearch.m in Sources */,
 				CEF7295709CC88AB00802D48 /* BDSKFieldSheetController.m in Sources */,
-				CE3B5E7D09CEDE470017D339 /* BDSKGlobalMacroResolver.m in Sources */,
+				CE3B5E7D09CEDE470017D339 /* BDSKMacroResolver.m in Sources */,
 				CE3B682B09D1B0190017D339 /* BDSKImagePopUpButton.m in Sources */,
 				CE3B682D09D1B0190017D339 /* BDSKImagePopUpButtonCell.m in Sources */,
 				F9F31CD109D61BB4008910D9 /* BibDocument_Sharing.m in Sources */,
