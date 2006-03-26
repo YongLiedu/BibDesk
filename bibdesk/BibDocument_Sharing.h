@@ -49,4 +49,6 @@ extern NSString *BDSKNetServiceDomain;
 - (void)enableSharing;
 - (void)disableSharing;
 
+- (void)connectionReceived:(NSNotification *)aNotification;
+
 @end

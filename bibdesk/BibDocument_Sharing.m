@@ -39,6 +39,7 @@
 #import "BibDocument_Sharing.h"
 #import "BDSKGroup.h"
 #import "NSArray_BDSKExtensions.h"
+#import <SystemConfiguration/SystemConfiguration.h>
 
 #include <sys/socket.h>
 #include <netinet/in.h>
