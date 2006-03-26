@@ -51,6 +51,10 @@
     prevStartupBehaviorTag = [[defaults objectForKey:BDSKStartupBehaviorKey] intValue];
     
     [editOnPasteButton setState:[defaults boolForKey:BDSKEditOnPasteKey] ? NSOnState : NSOffState];
+    
+    [shareFilesButton setState:[defaults boolForKey:BDSKShouldShareFilesKey] ? NSOnState : NSOffState];
+    
+    [lookForShareFilesButton setState:[defaults boolForKey:BDSKShouldLookForSharedFilesKey] ? NSOnState : NSOffState];
 
     [checkForUpdatesButton setState:([defaults boolForKey:BDSKAutoCheckForUpdatesKey] == YES) ? NSOnState : NSOffState];
 
@@ -106,6 +110,14 @@
 
 - (IBAction)changeEditOnPaste:(id)sender{
     [defaults setBool:([sender state] == NSOnState) forKey:BDSKEditOnPasteKey];
+}
+
+- (IBAction)changeShareFiles:(id)sender{
+    [defaults setBool:([sender state] == NSOnState) forKey:BDSKShouldShareFilesKey];
+}
+
+- (IBAction)changeLookForSharedFiles:(id)sender{
+    [defaults setBool:([sender state] == NSOnState) forKey:BDSKShouldLookForSharedFilesKey];
 }
 
 - (IBAction)changeWarnOnDelete:(id)sender{

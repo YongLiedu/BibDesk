@@ -14,6 +14,8 @@
         {
             ACTIONS = {
                 changeEditOnPaste = id; 
+                changeLookForSharedFiles = id; 
+                changeShareFiles = id; 
                 changeStartupBehavior = id; 
                 changeWarnOnDelete = id; 
                 changeWarnOnRemovalFromGroup = id; 
@@ -28,6 +30,8 @@
                 checkForUpdatesButton = NSButton; 
                 defaultBibFileTextField = NSTextField; 
                 editOnPasteButton = NSButton; 
+                lookForSharedFilesButton = NSButton; 
+                shareFilesButton = NSButton; 
                 startupBehaviorRadio = NSMatrix; 
                 warnOnDeleteButton = NSButton; 
                 warnOnRemovalFromGroupButton = NSButton; 

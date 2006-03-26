@@ -572,6 +572,10 @@
 						<string>Keywords</string>
 						<string>Group</string>
 					</array>
+					<key>BDSKShouldLookForSharedFilesKey</key>
+					<false/>
+					<key>BDSKShouldShareFilesKey</key>
+					<false/>
 					<key>BDSKWarnOnDelete</key>
 					<true/>
 					<key>BDSKWarnOnRemovalFromGroupKey</key>

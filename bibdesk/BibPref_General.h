@@ -44,6 +44,8 @@
 	
 	IBOutlet NSButton* editOnPasteButton;
     IBOutlet NSButton *checkForUpdatesButton;
+    IBOutlet NSButton *shareFilesButton;
+    IBOutlet NSButton *lookForSharedFilesButton;
     IBOutlet NSButton *warnOnDeleteButton;
     IBOutlet NSButton *warnOnRemovalFromGroupButton;
     IBOutlet NSButton *warnOnRenameGroupButton;
@@ -56,6 +58,8 @@
 - (IBAction) chooseAutoOpenFile:(id) sender;
 - (IBAction)toggleAutoCheckForUpdates:(id)sender;
 - (IBAction)changeEditOnPaste:(id)sender;
+- (IBAction)changeShareFiles:(id)sender;
+- (IBAction)changeLookForSharedFiles:(id)sender;
 - (IBAction)changeWarnOnDelete:(id)sender;
 - (IBAction)changeWarnOnRemovalFromGroup:(id)sender;
 - (IBAction)changeWarnOnRenameGroup:(id)sender;
