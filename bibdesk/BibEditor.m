@@ -70,6 +70,7 @@
 #import "BDSKPreviewer.h"
 #import "NSWorkspace_BDSKExtensions.h"
 #import "BDSKPersistentSearch.h"
+#import "BDSKMacroResolver.h"
 
 static NSString *BDSKBibEditorFrameAutosaveName = @"BibEditor window autosave name";
 
@@ -111,7 +112,7 @@ static int numberOfOpenEditors = 0;
     fieldNumbers = [[NSMutableDictionary dictionaryWithCapacity:1] retain];
     citeKeyFormatter = [[BDSKCiteKeyFormatter alloc] init];
     fieldNameFormatter = [[BDSKFieldNameFormatter alloc] init];
-    formCellFormatter = [[BDSKFormCellFormatter alloc] initWithDelegate:self macroResolver:doc];
+    formCellFormatter = [[BDSKFormCellFormatter alloc] initWithDelegate:self macroResolver:[doc macroResolver]];
 	
     theBib = aBib;
     currentType = [[theBib type] retain];    // do this once in init so it's right at the start.
@@ -2085,7 +2086,7 @@ static int numberOfOpenEditors = 0;
     if (control != bibFields) {
 		return words;
 	} else if ([macroTextFieldWC isEditing]) {
-		return [[NSApp delegate] possibleMatches:[theDocument macroDefinitions] 
+		return [[NSApp delegate] possibleMatches:[[theDocument macroResolver] macroDefinitions] 
 						   forBibTeXStringString:[textView string] 
 								partialWordRange:charRange 
 								indexOfBestMatch:index];

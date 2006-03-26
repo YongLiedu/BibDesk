@@ -39,21 +39,10 @@
 #import <Foundation/Foundation.h>
 #import "BibPrefController.h"
 
-@protocol BDSKMacroResolver <NSObject>
-
-- (NSDictionary *)macroDefinitions;
-- (void)addMacroDefinition:(NSString *)macroString forMacro:(NSString *)macroKey;
-- (NSString *)valueOfMacro:(NSString *)macro;
-- (void)removeMacro:(NSString *)macroKey;
-- (void)changeMacroKey:(NSString *)oldKey to:(NSString *)newKey;
-- (void)setMacroDefinition:(NSString *)newDefinition forMacro:(NSString *)macroKey;
-- (void)addMacroDefinitionWithoutUndo:(NSString *)macroString forMacro:(NSString *)macroKey;
-
-@end
-
+@class BDSKMacroResolver;
 
 @interface NSKeyedUnarchiver (NSKeyedUnarchiverComplexStringDelegate)
-- (id <BDSKMacroResolver>)unarchiverMacroResolver:(NSKeyedUnarchiver *)unarchiver;
+- (BDSKMacroResolver *)unarchiverMacroResolver:(NSKeyedUnarchiver *)unarchiver;
 @end
 
 /* BDSKComplexString is a string that may be a concatenation of strings, 
@@ -68,7 +57,7 @@
 @interface BDSKComplexString : NSString <NSCopying, NSCoding>{
   NSArray *nodes;			/* an array of BDSKStringNodes. */
 
-  id macroResolver;
+  BDSKMacroResolver *macroResolver;
   
   BOOL complex;
   BOOL inherited;
@@ -82,7 +71,7 @@
     @param		macroResolver The macro resolver used to resolve macros in the complex string.
     @result     -
 */
-- (id)initWithArray:(NSArray *)a macroResolver:(id)theMacroResolver;
+- (id)initWithArray:(NSArray *)a macroResolver:(BDSKMacroResolver *)theMacroResolver;
 
 /*!
     @method     initWithInheritedValue:
@@ -107,7 +96,7 @@
     @discussion (description)
     @result     -
 */
-- (id <BDSKMacroResolver>)macroResolver;
+- (BDSKMacroResolver *)macroResolver;
 
 /*!
     @method     isCircularMacro:forDefinition:macroResolver:
@@ -118,7 +107,7 @@
 	@param		macroResolver The macro resolver 
     @result     -
 */
-+ (BOOL)isCircularMacro:(NSString *)macroKey forDefinition:(NSString *)macroString macroResolver:(id <BDSKMacroResolver>)macroResolver;
++ (BOOL)isCircularMacro:(NSString *)macroKey forDefinition:(NSString *)macroString macroResolver:(BDSKMacroResolver *)macroResolver;
 
 @end
 
@@ -136,7 +125,7 @@
     @param		macroResolver The macro resolver used to resolve macros in the complex string.
     @result     - 
 */
-+ (id)complexStringWithArray:(NSArray *)a  macroResolver:(id<BDSKMacroResolver>)macroResolver;
++ (id)complexStringWithArray:(NSArray *)a  macroResolver:(BDSKMacroResolver *)macroResolver;
 
 /*!
     @method     complexStringWithBibTeXString:macroResolver:
@@ -146,7 +135,7 @@
     @param		macroResolver The macro resolver used to resolve macros in the complex string.
     @result     - 
 */
-+ (id)complexStringWithBibTeXString:(NSString *)btstring macroResolver:(id<BDSKMacroResolver>)theMacroResolver;
++ (id)complexStringWithBibTeXString:(NSString *)btstring macroResolver:(BDSKMacroResolver *)theMacroResolver;
 
 /*!
     @method     stringWithInheritedValue:

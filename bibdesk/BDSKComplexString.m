@@ -38,7 +38,7 @@
 #import <OmniFoundation/NSMutableString-OFExtensions.h>
 #import <OmniBase/OmniBase.h>
 #import "BDSKStringNode.h"
-#import "BDSKGlobalMacroResolver.h"
+#import "BDSKMacroResolver.h"
 
 #pragma mark -
 #pragma mark Private complex string expansion
@@ -49,7 +49,7 @@ static NSCharacterSet *macroCharSet = nil;
  This function is an example of how to subvert object-oriented programming; it depends on implementation details of the objects and accesses fields directly.  This is justified since the complex string expansion is a low-level function that gets called by the NSString primitive methods, and it needs to be as fast as possible.  Alternatively, we could store the nodes in a buffer at creation time, but the performance gain isn't worth losing the features of NSArray at this point.
  
  Assumptions: cxString->nodes is an NSArray containing only BDSKStringNodes
-              cxString->macroResolver conforms to <BDSKMacroResolver>
+              cxString->macroResolveris a BDSKMacroResolver
               BDSKStringNode fields are public
 */
 #define SAFE_ALLOCA_SIZE (8 * 8192)
@@ -87,9 +87,7 @@ CFStringRef __BDStringCreateByCopyingExpandedValue(BDSKComplexString *cxString)
     // This avoids the overhead of calling objectAtIndex: or using an enumerator, since we can now just increment a pointer to traverse the contents of the array.
     [nodes getObjects:stringNodes];
     
-    id <BDSKMacroResolver>macroResolver = ((struct { @defs(BDSKComplexString) } *)cxString)->macroResolver;
-    
-    OBASSERT(macroResolver == nil || [macroResolver conformsToProtocol:@protocol(BDSKMacroResolver)]);
+    BDSKMacroResolver *macroResolver = ((struct { @defs(BDSKComplexString) } *)cxString)->macroResolver;
     
     // Guess at size of (50 * (no. of nodes)); this is likely too high, but resizing is a sizeable performance hit.
     CFMutableStringRef mutStr = CFStringCreateMutable(CFAllocatorGetDefault(), (iMax * 50));
@@ -103,8 +101,8 @@ CFStringRef __BDStringCreateByCopyingExpandedValue(BDSKComplexString *cxString)
         nodeVal = (CFStringRef)(node->value);
         if(node->type == BSN_MACRODEF){
             expandedValue = (CFStringRef)[macroResolver valueOfMacro:(NSString *)nodeVal];
-            if(expandedValue == nil && macroResolver != [BDSKGlobalMacroResolver defaultMacroResolver])
-                expandedValue = (CFStringRef)[[BDSKGlobalMacroResolver defaultMacroResolver] valueOfMacro:(NSString *)nodeVal];
+            if(expandedValue == nil && macroResolver != [BDSKMacroResolver defaultMacroResolver])
+                expandedValue = (CFStringRef)[[BDSKMacroResolver defaultMacroResolver] valueOfMacro:(NSString *)nodeVal];
             CFStringAppend(mutStr, (expandedValue != nil ? expandedValue : nodeVal));
         } else {
             CFStringAppend(mutStr, nodeVal);
@@ -144,10 +142,10 @@ CFStringRef __BDStringCreateByCopyingExpandedValue(BDSKComplexString *cxString)
 }
 
 /* designated initializer */
-- (id)initWithArray:(NSArray *)a macroResolver:(id)theMacroResolver{
+- (id)initWithArray:(NSArray *)a macroResolver:(BDSKMacroResolver *)theMacroResolver{
     if (self = [super init]) {
         nodes = [[NSArray allocWithZone:[self zone]] initWithArray:a copyItems:YES];
-        macroResolver = (theMacroResolver == [BDSKGlobalMacroResolver defaultMacroResolver]) ? nil : theMacroResolver;
+        macroResolver = (theMacroResolver == [BDSKMacroResolver defaultMacroResolver]) ? nil : theMacroResolver;
 		complex = YES;
 	}		
     return self;
@@ -162,7 +160,7 @@ CFStringRef __BDStringCreateByCopyingExpandedValue(BDSKComplexString *cxString)
 		if ([aValue isComplex]) {
 			nodes = [[NSArray allocWithZone:[self zone]] initWithArray:[(BDSKComplexString *)aValue nodes] copyItems:YES];
 			macroResolver = [(BDSKComplexString *)aValue macroResolver];
-            if (macroResolver == [BDSKGlobalMacroResolver defaultMacroResolver]) 
+            if (macroResolver == [BDSKMacroResolver defaultMacroResolver]) 
                 macroResolver = nil;
 			complex = YES;
 		} else {
@@ -457,17 +455,17 @@ CFStringRef __BDStringCreateByCopyingExpandedValue(BDSKComplexString *cxString)
     return nodes;
 }
 
-- (id <BDSKMacroResolver>)macroResolver{
-    return (macroResolver == nil) ? [BDSKGlobalMacroResolver defaultMacroResolver] : macroResolver;
+- (BDSKMacroResolver *)macroResolver{
+    return (macroResolver == nil) ? [BDSKMacroResolver defaultMacroResolver] : macroResolver;
 }
 
-+ (BOOL)isCircularMacro:(NSString *)macroKey forDefinition:(NSString *)macroString macroResolver:(id <BDSKMacroResolver>)macroResolver{
++ (BOOL)isCircularMacro:(NSString *)macroKey forDefinition:(NSString *)macroString macroResolver:(BDSKMacroResolver *)macroResolver{
     if([macroString isComplex] == NO)
         return NO;
     NSMutableArray *descendents = [NSMutableArray arrayWithObject:macroString];
     
     if (macroResolver == nil)
-        macroResolver = [BDSKGlobalMacroResolver defaultMacroResolver];
+        macroResolver = [BDSKMacroResolver defaultMacroResolver];
     
     while([descendents count] > 0){
         NSArray *values = [descendents copy];
@@ -506,7 +504,7 @@ CFStringRef __BDStringCreateByCopyingExpandedValue(BDSKComplexString *cxString)
 
 @implementation NSString (ComplexStringExtensions)
 
-- (id)initWithBibTeXString:(NSString *)btstring macroResolver:(id<BDSKMacroResolver>)theMacroResolver{
+- (id)initWithBibTeXString:(NSString *)btstring macroResolver:(BDSKMacroResolver *)theMacroResolver{
     // needed for correct zoning
 	NSZone *theZone = [self zone];
 	// we don't need ourselves, as we return a concrete subclass
@@ -659,11 +657,11 @@ CFStringRef __BDStringCreateByCopyingExpandedValue(BDSKComplexString *cxString)
     return retVal;
 }
 
-+ (id)complexStringWithBibTeXString:(NSString *)btstring macroResolver:(id<BDSKMacroResolver>)theMacroResolver{
++ (id)complexStringWithBibTeXString:(NSString *)btstring macroResolver:(BDSKMacroResolver *)theMacroResolver{
     return [[[self alloc] initWithBibTeXString:btstring macroResolver:theMacroResolver] autorelease];
 }
 
-+ (id)complexStringWithArray:(NSArray *)a macroResolver:(id<BDSKMacroResolver>)theMacroResolver{
++ (id)complexStringWithArray:(NSArray *)a macroResolver:(BDSKMacroResolver *)theMacroResolver{
     [self release]; // we could check to see if([self isKindOfClass:[BDSKComplexString class]]) and then use [self initWith..], but it's easier just to release self (self will usually be NSPlaceholderString anyway) and return the desired object
     return [[[BDSKComplexString alloc] initWithArray:a macroResolver:theMacroResolver] autorelease];
 }

@@ -47,7 +47,7 @@
 	BOOL highlighted;
 }
 
-- (id)initWithDelegate:(id)anObject macroResolver:(id<BDSKMacroResolver>)aMacroResolver;
+- (id)initWithDelegate:(id)anObject macroResolver:(BDSKMacroResolver *)aMacroResolver;
 
 - (NSString *)parsedString;
 - (void)setParsedString:(NSString *)newString;
@@ -56,7 +56,7 @@
 - (void)setParseError:(NSString *)newError;
 
 - (id)macroResolver;
-- (void)setMacroResolver:(id<BDSKMacroResolver>)newMacroResolver;
+- (void)setMacroResolver:(BDSKMacroResolver *)newMacroResolver;
 
 - (BOOL)editAsComplexString;
 - (void)setEditAsComplexString:(BOOL)newEditAsComplexString;

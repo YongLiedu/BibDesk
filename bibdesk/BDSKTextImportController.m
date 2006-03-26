@@ -48,6 +48,7 @@
 #import "BibAppController.h"
 #import "BDSKFieldEditor.h"
 #import "BDSKFieldSheetController.h"
+#import "BDSKMacroResolver.h"
 
 @interface BDSKTextImportController (Private)
 
@@ -96,7 +97,7 @@
         showingWebView = NO;
         itemsAdded = [[NSMutableArray alloc] init];
 		webSelection = nil;
-		tableCellFormatter = [[BDSKFormCellFormatter alloc] initWithDelegate:self macroResolver:doc];
+		tableCellFormatter = [[BDSKFormCellFormatter alloc] initWithDelegate:self macroResolver:[doc macroResolver]];
 		crossrefFormatter = [[BDSKCiteKeyFormatter alloc] init];
 		
 		NSString *applicationSupportPath = [[NSFileManager defaultManager] currentApplicationSupportPathForCurrentUser]; 
@@ -1175,7 +1176,7 @@
     if (control != itemTableView) {
 		return words;
 	} else if ([macroTextFieldWC isEditing]) {
-		return [[NSApp delegate] possibleMatches:[document macroDefinitions] 
+		return [[NSApp delegate] possibleMatches:[[document macroResolver] macroDefinitions] 
 						   forBibTeXStringString:[textView string] 
 								partialWordRange:charRange 
 								indexOfBestMatch:index];

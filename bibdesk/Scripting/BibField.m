@@ -102,7 +102,7 @@ A wrapper object around the fields to access them in AppleScript.
 
 - (void)setBibTeXString:(NSString *)newValue {
     NS_DURING
-		NSString *value = [NSString complexStringWithBibTeXString:newValue macroResolver:[bibItem document]];
+		NSString *value = [NSString complexStringWithBibTeXString:newValue macroResolver:[[bibItem document] macroResolver]];
 		[bibItem setField:name toValue:value];
     NS_HANDLER
 		NSBeep();

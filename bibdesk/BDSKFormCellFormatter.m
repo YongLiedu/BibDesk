@@ -44,7 +44,7 @@
     return [self initWithDelegate:nil macroResolver:nil];
 }
 
-- (id)initWithDelegate:(id)anObject macroResolver:(id<BDSKMacroResolver>)aMacroResolver {
+- (id)initWithDelegate:(id)anObject macroResolver:(BDSKMacroResolver *)aMacroResolver {
     if (self = [super init]) {
 		parsedString = nil;
 		parseError = nil;
@@ -199,7 +199,7 @@
     return macroResolver;
 }
 
-- (void)setMacroResolver:(id<BDSKMacroResolver>)newMacroResolver {
+- (void)setMacroResolver:(BDSKMacroResolver *)newMacroResolver {
     macroResolver = newMacroResolver;
 }
 

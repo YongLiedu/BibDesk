@@ -50,7 +50,7 @@
 #import "BibAuthor.h"
 #import "BDSKErrorObjectController.h"
 #import "BDSKStringNode.h"
-#import "BDSKGlobalMacroResolver.h"
+#import "BDSKMacroResolver.h"
 
 static NSString *BibTeXParserInternalException = @"BibTeXParserInternalException";
 
@@ -62,7 +62,7 @@ static NSString * checkAndTranslateString(NSString *s, int line, NSString *fileP
 // private function to get array value from field:
 // "foo" # macro # {string} # 19
 // becomes an autoreleased array of dicts of different types.
-static NSString *stringFromBTField(AST *field,  NSString *fieldName,  NSString *filePath, id <BDSKMacroResolver> theDocument, NSStringEncoding parserEncoding);
+static NSString *stringFromBTField(AST *field,  NSString *fieldName,  NSString *filePath, BibDocument * theDocument, NSStringEncoding parserEncoding);
 
 @end
 
@@ -71,11 +71,11 @@ static NSString *stringFromBTField(AST *field,  NSString *fieldName,  NSString *
 /// libbtparse methods
 + (NSMutableArray *)itemsFromData:(NSData *)inData
                               error:(NSError **)outError
-						   document:(id <BDSKMacroResolver>)aDocument{
+						   document:(BibDocument *)aDocument{
     return [self itemsFromData:inData error:outError frontMatter:nil filePath:@"Paste/Drag" document:aDocument];
 }
 
-+ (NSMutableArray *)itemsFromData:(NSData *)inData error:(NSError **)outError frontMatter:(NSMutableString *)frontMatter filePath:(NSString *)filePath document:(id <BDSKMacroResolver>)aDocument{
++ (NSMutableArray *)itemsFromData:(NSData *)inData error:(NSError **)outError frontMatter:(NSMutableString *)frontMatter filePath:(NSString *)filePath document:(BibDocument *)aDocument{
 	[[BDSKErrorObjectController sharedErrorObjectController] setDocumentForErrors:aDocument];
     
 	if(![inData length]) // btparse chokes on non-BibTeX or empty data, so we'll at least check for zero length
@@ -86,6 +86,8 @@ static NSString *stringFromBTField(AST *field,  NSString *fieldName,  NSString *
     int braceDepth = 0;
     
     BibItem *newBI = nil;
+    
+    BDSKMacroResolver *macroResolver = [aDocument macroResolver];
 
     // Strings read from file and added to Dictionary object
     char *fieldname = "\0";
@@ -165,10 +167,10 @@ static NSString *stringFromBTField(AST *field,  NSString *fieldName,  NSString *
                             field = bt_next_field (entry, NULL, &fieldname);
                             NSString *macroKey = [NSString stringWithCString: field->text usingEncoding:parserEncoding];
                             NSString *macroString = stringFromBTField(field, sFieldName, filePath, aDocument, parserEncoding); // handles TeXification
-                            if([BDSKComplexString isCircularMacro:macroKey forDefinition:macroString macroResolver:aDocument])
+                            if([BDSKComplexString isCircularMacro:macroKey forDefinition:macroString macroResolver:macroResolver])
                                 NSLog(@"Macro leads to circular definition, ignored: %@ = %@", macroKey, [macroString stringAsBibTeXString]);
                             else
-                                [aDocument addMacroDefinitionWithoutUndo:macroString forMacro:macroKey];
+                                [macroResolver addMacroDefinitionWithoutUndo:macroString forMacro:macroKey];
                         }else if([entryType isEqualToString:@"comment"]){
                             NSMutableString *commentStr = [[NSMutableString alloc] init];
                             field = NULL;
@@ -442,7 +444,7 @@ static NSString *stringFromBTField(AST *field,  NSString *fieldName,  NSString *
         [value removeSurroundingWhitespace];
         
         key = [key stringByRemovingSurroundingWhitespace];
-        value = [NSString complexStringWithBibTeXString:value macroResolver:aDocument];
+        value = [NSString complexStringWithBibTeXString:value macroResolver:[aDocument macroResolver]];
         [bstMacros setObject:value forKey:key];
 		
     }
@@ -585,7 +587,7 @@ static NSString * checkAndTranslateString(NSString *s, int line, NSString *fileP
     return sDeTexified;
 }
 
-static NSString *stringFromBTField(AST *field, NSString *fieldName, NSString *filePath, id <BDSKMacroResolver> document, NSStringEncoding parserEncoding){
+static NSString *stringFromBTField(AST *field, NSString *fieldName, NSString *filePath, BibDocument * document, NSStringEncoding parserEncoding){
     NSMutableArray *stringValueArray = [[NSMutableArray alloc] initWithCapacity:5];
     NSString *s = nil;
     BDSKStringNode *sNode = nil;
@@ -645,7 +647,7 @@ static NSString *stringFromBTField(AST *field, NSString *fieldName, NSString *fi
        [(BDSKStringNode *)[stringValueArray objectAtIndex:0] type] == BSN_STRING){
         returnValue = [[[(BDSKStringNode *)[stringValueArray objectAtIndex:0] value] copy] autorelease]; // an NSString
     } else {
-        returnValue = [NSString complexStringWithArray:stringValueArray macroResolver:document];
+        returnValue = [NSString complexStringWithArray:stringValueArray macroResolver:[document macroResolver]];
     }
     [stringValueArray release];
     

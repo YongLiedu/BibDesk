@@ -51,7 +51,7 @@
     @param      aDocument (description)
     @result     (description)
 */
-+ (NSMutableArray *)itemsFromData:(NSData *)inData error:(NSError **)outError document:(id <BDSKMacroResolver>)aDocument;
++ (NSMutableArray *)itemsFromData:(NSData *)inData error:(NSError **)outError document:(BibDocument *)aDocument;
 
 /*!
     @method     itemsFromData:error:frontMatter:filePath:document:
@@ -68,7 +68,7 @@
                             error:(NSError **)outError
                       frontMatter:(NSMutableString *)frontMatter
                          filePath:(NSString *)filePath
-						 document:(id <BDSKMacroResolver>)aDocument;
+						 document:(BibDocument *)aDocument;
 
 /*!
     @method     macrosFromBibTeXString:hadProblems:document:

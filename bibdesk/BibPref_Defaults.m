@@ -36,7 +36,7 @@
 #import "BibPref_Defaults.h"
 #import "BDSKTypeInfoEditor.h"
 #import "BibTeXParser.h"
-#import "BDSKGlobalMacroResolver.h"
+#import "BDSKMacroResolver.h"
 #import "BDSKPathIconTransformer.h"
 
 // this corresponds with the menu item order in the nib
@@ -297,7 +297,7 @@ enum {
         } else {
             [globalMacroFiles replaceObjectAtIndex:row withObject:object];
             [defaults setObject:globalMacroFiles forKey:BDSKGlobalMacroFilesKey];
-            [[BDSKGlobalMacroResolver defaultMacroResolver] resetMacrosFromFiles];
+            [[NSNotificationCenter defaultCenter] postNotificationName:BDSKMacroFilesChangedNotification object:self];
         }
         [globalMacroFilesTableView reloadData];
     }
@@ -330,7 +330,9 @@ enum {
         [globalMacroFiles addObject:file];
     }
     [defaults setObject:globalMacroFiles forKey:BDSKGlobalMacroFilesKey];
-    [[BDSKGlobalMacroResolver defaultMacroResolver] resetMacrosFromFiles];
+    
+	[[NSNotificationCenter defaultCenter] postNotificationName:BDSKMacroFilesChangedNotification object:self];
+    
     [globalMacroFilesTableView reloadData];
     
     return YES;
@@ -448,7 +450,7 @@ enum {
 - (IBAction)showMacrosWindow:(id)sender{
 	if (!macroWC){
 		macroWC = [[MacroWindowController alloc] init];
-		[macroWC setMacroDataSource:[BDSKGlobalMacroResolver defaultMacroResolver]];
+		[macroWC setMacroDataSource:[BDSKMacroResolver defaultMacroResolver]];
         [macroWC setSheet:YES];
 	}
 	[NSApp beginSheet:[macroWC window]
@@ -501,7 +503,7 @@ enum {
     
     [globalMacroFilesTableView reloadData];
     [defaults setObject:globalMacroFiles forKey:BDSKGlobalMacroFilesKey];
-    [[BDSKGlobalMacroResolver defaultMacroResolver] resetMacrosFromFiles];
+	[[NSNotificationCenter defaultCenter] postNotificationName:BDSKMacroFilesChangedNotification object:self];
 }
 
 - (IBAction)delGlobalMacroFiles:(id)sender{
@@ -511,7 +513,7 @@ enum {
     
     [globalMacroFilesTableView reloadData];
     [defaults setObject:globalMacroFiles forKey:BDSKGlobalMacroFilesKey];
-    [[BDSKGlobalMacroResolver defaultMacroResolver] resetMacrosFromFiles];
+	[[NSNotificationCenter defaultCenter] postNotificationName:BDSKMacroFilesChangedNotification object:self];
 }
 
 @end
