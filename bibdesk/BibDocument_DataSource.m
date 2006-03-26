@@ -843,7 +843,7 @@
         }
     }else if(tv == groupTableView){
         // not sure why this check is necessary, but it silences an error message when you drag off the list of items
-        if([info draggingSource] == groupTableView || row >= [tv numberOfRows] || row <= [smartGroups count] || (type == nil && [info draggingSource] != tableView)) 
+        if([info draggingSource] == groupTableView || row >= [tv numberOfRows] || row <= [smartGroups count] + [sharedGroups count] || (type == nil && [info draggingSource] != tableView)) 
             return NSDragOperationNone;
         
         // here we actually target a specific row
