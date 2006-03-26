@@ -261,10 +261,6 @@ static BDSKGlobalMacroResolver *defaultMacroResolver;
         fileMacroDefinitions = nil; 
 		
         [[NSNotificationCenter defaultCenter] addObserver:self
-												 selector:@selector(handleMacrosChanged:)
-													 name:BDSKMacroDefinitionChangedNotification
-												   object:nil];
-        [[NSNotificationCenter defaultCenter] addObserver:self
 												 selector:@selector(handleMacroFilesChanged:)
 													 name:BDSKMacroFilesChangedNotification
 												   object:nil];
