@@ -199,6 +199,9 @@ NSString *BDSKCiteseerHostKey = @"BDSKCiteseerHostKey";
 NSString *BDSKShouldDisplayFirstNamesKey = @"BDSKShouldDisplayFirstNamesKey";
 NSString *BDSKShouldAbbreviateFirstNamesKey = @"BDSKShouldAbbreviateFirstNamesKey";
 NSString *BDSKShouldDisplayLastNameFirstKey = @"BDSKShouldDisplayLastNameFirstKey";
+NSString *BDSKShouldShareFilesKey = @"BDSKShouldShareFilesKey";
+NSString *BDSKShouldLookForSharedFilesKey = @"BDSKShouldLookForSharedFilesKey";
+
 
 #pragma mark Field name strings
 

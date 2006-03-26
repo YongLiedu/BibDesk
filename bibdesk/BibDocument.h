@@ -174,6 +174,11 @@ extern NSString* BDSKWeblocFilePboardType; // core pasteboard type for webloc fi
     IBOutlet OASplitView *groupSplitView;
 	float lastGroupViewWidth;
     
+    NSMutableArray *sharedGroups;
+    NSNetServiceBrowser *browser;
+    NSNetService *netService;
+    NSFileHandle *listeningSocket;
+    
     id fileSearchController;
 	
 	NSMutableDictionary *promisedPboardTypes;

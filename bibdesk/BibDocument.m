@@ -94,6 +94,7 @@
 #import "NSSet_BDSKExtensions.h"
 #import "NSFileManager_ExtendedAttributes.h"
 #import "PDFMetadata.h"
+#import "BibDocument_Sharing.h"
 
 NSString *BDSKReferenceMinerStringPboardType = @"CorePasteboardFlavorType 0x57454253";
 NSString *BDSKBibItemIndexPboardType = @"edu.ucsd.mmccrack.bibdesk shownPublications index type";
@@ -227,12 +228,13 @@ NSString *BDSKWeblocFilePboardType = @"CorePasteboardFlavorType 0x75726C20";
 		customStringArray = [[NSMutableArray arrayWithCapacity:6] retain];
 		[customStringArray setArray:[[OFPreferenceWrapper sharedPreferenceWrapper] arrayForKey:BDSKCustomCiteStringsKey]];
         
-        [self setDocumentStringEncoding:[[OFPreferenceWrapper sharedPreferenceWrapper] integerForKey:BDSKDefaultStringEncodingKey]]; // need to set this for new documents
+        // need to set this for new documents
+        [self setDocumentStringEncoding:[[OFPreferenceWrapper sharedPreferenceWrapper] integerForKey:BDSKDefaultStringEncodingKey]]; 
 
 		sortDescending = NO;
 		sortGroupsDescending = NO;
 		sortGroupsKey = [BDSKGroupCellStringKey retain];
-
+        
     }
     return self;
 }
@@ -303,10 +305,25 @@ NSString *BDSKWeblocFilePboardType = @"CorePasteboardFlavorType 0x75726C20";
         
     if([documentWindow respondsToSelector:@selector(setAutorecalculatesKeyViewLoop:)])
         [documentWindow setAutorecalculatesKeyViewLoop:YES];
+
+    // array of BDSKSharedGroup objects and zeroconf support; 10.4 only for now
+    // this is in -awakeFromNib instead of -init since we need the document's fileName set up
+    sharedGroups = nil;
+    if(floor(NSAppKitVersionNumber) > NSAppKitVersionNumber10_3){
+        sharedGroups = [[NSMutableArray alloc] initWithCapacity:5];
+        if([[OFPreferenceWrapper sharedPreferenceWrapper] boolForKey:BDSKShouldLookForSharedFilesKey]){
+            browser = [[NSNetServiceBrowser alloc] init];
+            [browser setDelegate:self];
+            [browser searchForServicesOfType:BDSKNetServiceDomain inDomain:@""];
+        }
+        if([[OFPreferenceWrapper sharedPreferenceWrapper] boolForKey:BDSKShouldShareFilesKey])
+            [self enableSharing];
+    }
     
     // @@ awakeFromNib is called long after the document's data is loaded, so the UI update from setPublications is too early when loading a new document; there may be a better way to do this
     [self updateGroupsPreservingSelection:NO];
     [self updateAllSmartGroups];
+
 }
 
 - (NSString *)windowNibName{
@@ -396,6 +413,8 @@ NSString *BDSKWeblocFilePboardType = @"CorePasteboardFlavorType 0x75726C20";
     [lastSelectedColumnForSort release];
     [sortGroupsKey release];
 	[promisedPboardTypes release];
+    [sharedGroups release];
+    [browser release];
     [super dealloc];
 }
 
@@ -2664,6 +2683,7 @@ NSString *BDSKWeblocFilePboardType = @"CorePasteboardFlavorType 0x75726C20";
 
 - (void)handleApplicationWillTerminateNotification:(NSNotification *)notification{
     [self saveSortOrder];
+    [self disableSharing];
 }
 
 #pragma mark UI updating
@@ -3015,6 +3035,8 @@ NSString *BDSKWeblocFilePboardType = @"CorePasteboardFlavorType 0x75726C20";
 	
 	[self providePromisedTypes];
 	
+    [self disableSharing];
+
     // safety call here, in case the pasteboard is retaining the document; we don't want notifications after the window closes, since all the pointers to UI elements will be garbage
     [[NSNotificationCenter defaultCenter] removeObserver:self];
 

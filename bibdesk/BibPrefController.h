@@ -179,6 +179,8 @@ extern NSString *BDSKDefaultGroupFieldSeparatorKey;
 extern NSString *BDSKTableHeaderImagesKey;
 extern NSString *BDSKTableHeaderTitlesKey;
 extern NSString *BDSKCiteseerHostKey;
+extern NSString *BDSKShouldShareFilesKey;
+extern NSString *BDSKShouldLookForSharedFilesKey;
 
 extern NSString *BDSKShouldDisplayFirstNamesKey;
 extern NSString *BDSKShouldAbbreviateFirstNamesKey;

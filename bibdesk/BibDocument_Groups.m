@@ -55,17 +55,20 @@
 #pragma mark Indexed accessors
 
 - (unsigned int)countOfGroups {
-    return [smartGroups count] + [groups count] + 1;
+    return [smartGroups count] + [groups count] + 1 + [sharedGroups count];
 }
 
 - (BDSKGroup *)objectInGroupsAtIndex:(unsigned int)index {
 	unsigned int smartCount = [smartGroups count];
+    unsigned int sharedCount = [sharedGroups count];
 	if (index == 0)
 		return allPublicationsGroup;
 	else if (index <= smartCount)
 		return [smartGroups objectAtIndex:index - 1];
-	else
-		return [groups objectAtIndex:index - smartCount - 1];
+	else if (index <= smartCount + sharedCount)
+        return [sharedGroups objectAtIndex:index - smartCount - 1];
+    else
+		return [groups objectAtIndex:index - smartCount - sharedCount - 1];
 }
 
 // mutable to-many accessor:  not presently used
@@ -75,7 +78,7 @@
     
     if(index == 0)
         return;
-    
+#warning fixme    
     unsigned int smartCount = [smartGroups count];
 	
 	if ([group isSmart]) // we don't care about the index, as we resort anyway. This activates undo
@@ -162,6 +165,24 @@ The groupedPublications array is a subset of the publications array, developed b
         rowIndex = [rowIndexes indexGreaterThanIndex:rowIndex];
 	}
 	return [array autorelease];
+}
+
+- (NSArray *)selectedSharedPublications
+{
+    NSMutableArray *array = [NSMutableArray array];
+    BDSKGroup *group;
+    
+    NSIndexSet *rowIndexes = [groupTableView selectedRowIndexes];
+    unsigned int rowIndex = [rowIndexes firstIndex];
+	
+	while(rowIndexes != nil && rowIndex != NSNotFound){
+        group = [self objectInGroupsAtIndex:rowIndex];
+        if([sharedGroups containsObjectIdenticalTo:group])
+            [array addObjectsFromArray:[(BDSKSharedGroup *)group publications]];
+        rowIndex = [rowIndexes indexGreaterThanIndex:rowIndex];
+	}
+    
+    return array;
 }
 
 #pragma mark UI updating
@@ -338,6 +359,8 @@ The groupedPublications array is a subset of the publications array, developed b
 			}
 		}
 	}
+    
+    [filteredArray addObjectsFromArray:[self selectedSharedPublications]];
 	
 	return [filteredArray autorelease];
 }
@@ -351,15 +374,17 @@ The groupedPublications array is a subset of the publications array, developed b
     NSIndexSet *visibleIndexes = [NSIndexSet indexSetWithIndexesInRange:indexRange];
     int cnt = [visibleIndexes count];
 	int smartCount = [smartGroups count];
-
+    int sharedCount = [sharedGroups count];
+    
     // Mutable dictionary with fixed capacity using NSObjects for keys with ints for values; this gives us a fast lookup of row name->index.  Dictionaries can use any pointer-size element for a key or value; see /Developer/Examples/CoreFoundation/Dictionary.  Keys are retained rather than copied for efficiency.  Shark says that BibAuthors are created with alloc/init when using the copy callbacks, so NSShouldRetainWithZone() must be returning NO?
     CFMutableDictionaryRef rowDict = CFDictionaryCreateMutable(CFAllocatorGetDefault(), cnt, &OFNSObjectDictionaryKeyCallbacks, &OFIntegerDictionaryValueCallbacks);
     
     cnt = [visibleIndexes firstIndex];
     
+    // exclude smart and shared groups
     while(cnt != NSNotFound){
-		if(cnt > smartCount)
-			CFDictionaryAddValue(rowDict, (void *)[[groups objectAtIndex:cnt - smartCount - 1] name], (void *)cnt);
+		if(cnt > (smartCount + sharedCount))
+			CFDictionaryAddValue(rowDict, (void *)[[groups objectAtIndex:cnt - smartCount - sharedCount - 1] name], (void *)cnt);
         cnt = [visibleIndexes indexGreaterThanIndex:cnt];
     }
     
