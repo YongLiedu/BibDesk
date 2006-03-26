@@ -373,19 +373,23 @@
 			// multiple dragged rows always are the selected rows
 			pubs = [[groupedPublications copy] autorelease];
 		}else if([rowIndexes count] == 1){
-			// a single row, not necessarily the selected one
-			BDSKGroup *group = [self objectInGroupsAtIndex:[rowIndexes firstIndex]];
-			NSArray *allPubs = [publications copy];
-			NSMutableArray *pubsInGroup = [NSMutableArray arrayWithCapacity:[allPubs count]];
-			NSEnumerator *pubEnum = [allPubs objectEnumerator];
-			BibItem *pub;
-			[allPubs release];
-			
-			while (pub = [pubEnum nextObject]) {
-				if ([group containsItem:pub]) 
-					[pubsInGroup addObject:pub];
-			}
-			pubs = pubsInGroup;
+            // a single row, not necessarily the selected one
+            BDSKGroup *group = [self objectInGroupsAtIndex:[rowIndexes firstIndex]];
+            if ([group isShared]) {
+                pubs = [(BDSKSharedGroup *)group publications];
+			} else {
+                NSArray *allPubs = [publications copy];
+                NSMutableArray *pubsInGroup = [NSMutableArray arrayWithCapacity:[allPubs count]];
+                NSEnumerator *pubEnum = [allPubs objectEnumerator];
+                BibItem *pub;
+                [allPubs release];
+                
+                while (pub = [pubEnum nextObject]) {
+                    if ([group containsItem:pub]) 
+                        [pubsInGroup addObject:pub];
+                }
+                pubs = pubsInGroup;
+            }
 		}
 		if([pubs count] == 0){
             NSBeginAlertSheet(NSLocalizedString(@"Empty Groups", @""),nil,nil,nil,documentWindow,nil,NULL,NULL,NULL,
