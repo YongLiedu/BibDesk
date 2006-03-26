@@ -3029,6 +3029,8 @@ NSString *BDSKWeblocFilePboardType = @"CorePasteboardFlavorType 0x75726C20";
 	[self providePromisedTypes];
 	
     [self disableSharing];
+    // avoid getting any further callbacks from the browser
+    [self disableSharedBrowsing];
 
     // safety call here, in case the pasteboard is retaining the document; we don't want notifications after the window closes, since all the pointers to UI elements will be garbage
     [[NSNotificationCenter defaultCenter] removeObserver:self];
