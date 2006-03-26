@@ -386,6 +386,79 @@ static NSString *BDSKAllPublicationsLocalizedString = nil;
 
 @end
 
+@implementation BDSKSharedGroup
+
+- (id)initWithService:(NSNetService *)aService;
+{
+    NSParameterAssert(aService != nil);
+    if(self = [super initWithName:@"" key:@"" count:0]){
+        service = [aService retain];
+        [service resolveWithTimeout:5.0];
+
+        data = [[NSMutableData alloc] initWithCapacity:10^6];
+        downloadComplete = NO;
+        
+        NSInputStream *istream;
+        [service getInputStream:&istream outputStream:NULL];
+        [istream setDelegate:self];
+        [istream scheduleInRunLoop:[NSRunLoop currentRunLoop] forMode:NSDefaultRunLoopMode];
+        [istream open];
+    }
+    
+    return self;
+}
+
+- (void)dealloc
+{
+    [service release];
+    [data release];
+    [super dealloc];
+}
+
+- (NSString *)name
+{
+    NSString *theName = [service name];
+    return theName ? theName : [NSString stringWithFormat:@"<%@ %p>", [self class], self];
+}
+
+- (NSString *)description
+{
+    return [NSString stringWithFormat:@"<%@ %p>: {\n\tdownload complete: %@\n\tdata length: %d\n\tname: %@\nservice: %@\n }", [self class], self, (downloadComplete ? @"yes" : @"no"), [data length], [self name], service];
+}
+
+- (NSArray *)publications
+{
+    return downloadComplete == NO || [data length] == 0 ? nil : [NSKeyedUnarchiver unarchiveObjectWithData:data];
+}
+
+- (NSNetService *)service { return service; }
+- (BOOL)hasEditableName { return NO; }
+
+- (void)stream:(NSStream *)aStream handleEvent:(NSStreamEvent)event
+{
+    switch(event){
+        case NSStreamEventHasBytesAvailable:
+            // compiler barfs on the next line
+            [(id)nil release];
+            uint8_t readBuffer[4096];
+            int amountRead = 0;
+            NSInputStream *is = (NSInputStream *)aStream;
+            amountRead = [is read:readBuffer maxLength:4096];
+            [data appendBytes:readBuffer length:amountRead];
+            break;
+        case NSStreamEventEndEncountered:
+            [(NSInputStream *)aStream close];
+            downloadComplete = YES;
+            break;
+        default:
+            break;
+    }
+}
+
+@end
+
+
+
 #pragma mark NSString category for KVC
 
 @interface NSString (BDSKGroup) @end

@@ -240,3 +240,16 @@
 - (NSArray *)filterItems:(NSArray *)items;
 
 @end
+
+@interface BDSKSharedGroup : BDSKGroup
+{
+    NSNetService *service;
+    NSMutableData *data;
+    BOOL downloadComplete;
+}
+
+- (id)initWithService:(NSNetService *)aService;
+- (NSArray *)publications;
+- (NSNetService *)service;
+
+@end
