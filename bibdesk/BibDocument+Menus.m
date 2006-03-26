@@ -605,9 +605,10 @@
 } 
 
 - (BOOL) validateRenameGroupMenuItem:(NSMenuItem *)menuItem{
-	
+	int row = [groupTableView selectedRow];
 	if ([groupTableView numberOfSelectedRows] == 1 &&
-		[groupTableView selectedRow] > 0) {
+		row > 0 &&
+        [[self objectInGroupsAtIndex:row] hasEditableName]) {
 		// single group selection
 		return YES;
 	} else {
@@ -620,7 +621,8 @@
 	int row = [groupTableView selectedRow];
 	if ([groupTableView numberOfSelectedRows] == 1 && row > 0) {
 		// single smart group selection
-		if (row <= [smartGroups count] || [[[BibTypeManager sharedManager] personFieldsSet] containsObject:currentGroupField])
+		if (row <= [smartGroups count] || 
+            (row > [smartGroups count] + [sharedGroups count] && [[[BibTypeManager sharedManager] personFieldsSet] containsObject:currentGroupField]))
 			return YES;
 		else
 			return NO;

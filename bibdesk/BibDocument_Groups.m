@@ -652,7 +652,7 @@ The groupedPublications array is a subset of the publications array, developed b
 		   didEndSelector:NULL
 			  contextInfo:nil];
 		[filterController release];
-	} else if ([[[BibTypeManager sharedManager] personFieldsSet] containsObject:currentGroupField]) {
+	} else if (row > [smartGroups count] + [sharedGroups count] && [[[BibTypeManager sharedManager] personFieldsSet] containsObject:currentGroupField]) {
 		[self showPerson:(BibAuthor *)[group name]];
 	}
 }

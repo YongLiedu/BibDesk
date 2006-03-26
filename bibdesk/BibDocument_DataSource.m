@@ -235,7 +235,7 @@
 	}else if(tv == groupTableView){
 		if ([[self objectInGroupsAtIndex:row] hasEditableName] == NO) 
 			return NO;
-		else if (row > [smartGroups count] &&
+		else if (row > [smartGroups count] + [sharedGroups count] &&
 				 [[OFPreferenceWrapper sharedPreferenceWrapper] boolForKey:BDSKWarnOnRenameGroupKey]) {
 			
 			BDSKAlert *alert = [BDSKAlert alertWithMessageText:NSLocalizedString(@"Warning", @"Warning")
