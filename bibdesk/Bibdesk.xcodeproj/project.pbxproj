@@ -278,6 +278,7 @@
 		CE2AFE5A0911425F00E65C87 /* BDSKGroupCell.m in Sources */ = {isa = PBXBuildFile; fileRef = CE2AFE580911425F00E65C87 /* BDSKGroupCell.m */; };
 		CE30FAD70919713100CB1A19 /* BDSKStatusBar.h in Headers */ = {isa = PBXBuildFile; fileRef = CE30FAD50919713100CB1A19 /* BDSKStatusBar.h */; };
 		CE30FAD80919713100CB1A19 /* BDSKStatusBar.m in Sources */ = {isa = PBXBuildFile; fileRef = CE30FAD60919713100CB1A19 /* BDSKStatusBar.m */; };
+		CE386D0709D7075C00B9D1F0 /* sharedFolderIcon.tiff in Resources */ = {isa = PBXBuildFile; fileRef = CE386D0609D7075C00B9D1F0 /* sharedFolderIcon.tiff */; };
 		CE38FB86091D946A00BCB69D /* BDSKCondition.h in Headers */ = {isa = PBXBuildFile; fileRef = CE38FB82091D946900BCB69D /* BDSKCondition.h */; };
 		CE38FB87091D946A00BCB69D /* BDSKCondition.m in Sources */ = {isa = PBXBuildFile; fileRef = CE38FB83091D946900BCB69D /* BDSKCondition.m */; };
 		CE38FB88091D946A00BCB69D /* BDSKConditionController.h in Headers */ = {isa = PBXBuildFile; fileRef = CE38FB84091D946A00BCB69D /* BDSKConditionController.h */; };
@@ -1074,6 +1075,7 @@
 		CE2AFE580911425F00E65C87 /* BDSKGroupCell.m */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.objc; path = BDSKGroupCell.m; sourceTree = "<group>"; };
 		CE30FAD50919713100CB1A19 /* BDSKStatusBar.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BDSKStatusBar.h; sourceTree = "<group>"; };
 		CE30FAD60919713100CB1A19 /* BDSKStatusBar.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BDSKStatusBar.m; sourceTree = "<group>"; };
+		CE386D0609D7075C00B9D1F0 /* sharedFolderIcon.tiff */ = {isa = PBXFileReference; lastKnownFileType = image.tiff; name = sharedFolderIcon.tiff; path = Images/sharedFolderIcon.tiff; sourceTree = "<group>"; };
 		CE38FB82091D946900BCB69D /* BDSKCondition.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = BDSKCondition.h; sourceTree = "<group>"; };
 		CE38FB83091D946900BCB69D /* BDSKCondition.m */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.objc; path = BDSKCondition.m; sourceTree = "<group>"; };
 		CE38FB84091D946A00BCB69D /* BDSKConditionController.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = BDSKConditionController.h; sourceTree = "<group>"; };
@@ -1910,7 +1912,6 @@
 		F9022DDA0758089500C3F701 /* Images */ = {
 			isa = PBXGroup;
 			children = (
-				F93840890906DD1F00FC37F2 /* scripthook.tiff */,
 				F9022DA20758088000C3F701 /* Action_Pressed.tiff */,
 				F9022DA30758088000C3F701 /* Action.tiff */,
 				F9022DA40758088000C3F701 /* Add_Pressed.tiff */,
@@ -1951,10 +1952,12 @@
 				F9022DB80758088000C3F701 /* risDocIcon.icns */,
 				F9022DB90758088000C3F701 /* rss.tiff */,
 				F91B5CDF076579FE0011ED22 /* rssTemplate.txt */,
+				F93840890906DD1F00FC37F2 /* scripthook.tiff */,
 				F9EF21C708B1575D00AAC9A9 /* ScrollArrowLeft_Pressed.tiff */,
 				F9EF21C808B1575D00AAC9A9 /* ScrollArrowLeft.tiff */,
 				F9EF21C908B1575D00AAC9A9 /* ScrollArrowRight_Pressed.tiff */,
 				F9EF21CA08B1575D00AAC9A9 /* ScrollArrowRight.tiff */,
+				CE386D0609D7075C00B9D1F0 /* sharedFolderIcon.tiff */,
 				F97BF343090B19520063504B /* smartFolderIcon.tiff */,
 				3DBB79BF081538CA0050C0CD /* stop_small.tiff */,
 				F9022DBA0758088000C3F701 /* startup.tiff */,
@@ -2996,6 +2999,7 @@
 				CEBB8D8809C8B0D90074C79E /* Font.tiff in Resources */,
 				CEF7295A09CC88EB00802D48 /* AddFieldSheet.nib in Resources */,
 				CEF7295D09CC890400802D48 /* RemoveFieldSheet.nib in Resources */,
+				CE386D0709D7075C00B9D1F0 /* sharedFolderIcon.tiff in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
