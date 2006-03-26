@@ -1915,7 +1915,7 @@ static NSParagraphStyle* bodyParagraphStyle = nil;
 	id groupName = [group name];
 	NSString *field = [group key];
 	OBASSERT(field != nil);
-    if([[self groupsForField:field] containsObject:groupName])
+    if(document == nil || [[self groupsForField:field] containsObject:groupName])
         return BDSKOperationIgnore;
 	
 	// otherwise build it if we have a value
@@ -1966,7 +1966,7 @@ static NSParagraphStyle* bodyParagraphStyle = nil;
 	NSString *field = [group key];
 	OBASSERT(field != nil);
 	NSSet *groupNames = [groups objectForKey:field];
-    if([groupNames containsObject:groupName] == NO)
+    if(document == nil || [groupNames containsObject:groupName] == NO)
         return BDSKOperationIgnore;
 	
 	// otherwise build it if we have a value
@@ -2099,7 +2099,7 @@ static NSParagraphStyle* bodyParagraphStyle = nil;
 	NSString *field = [group key];
 	OBASSERT(field != nil);
 	NSSet *groupNames = [groups objectForKey:field];
-    if([groupNames containsObject:groupName] == NO)
+    if(document == nil || [groupNames containsObject:groupName] == NO)
         return BDSKOperationIgnore;
 	
 	// otherwise build it if we have a value
