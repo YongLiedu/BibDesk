@@ -621,7 +621,14 @@
 				}
 			}
 		}else if([type isEqualToString:BDSKBibItemPboardType]){
-			[pboard setData:[NSKeyedArchiver archivedDataWithRootObject:items] forType:BDSKBibItemPboardType];
+            NSMutableData *data = [NSMutableData data];
+            NSKeyedArchiver *archiver = [[NSKeyedArchiver alloc] initForWritingWithMutableData:data];
+            
+            [archiver encodeObject:items forKey:@"publications"];
+            [archiver finishEncoding];
+            [archiver release];
+			
+            [pboard setData:data forType:BDSKBibItemPboardType];
 		}
 	}
 	[self removePromisedType:type forPasteboard:pboard];

@@ -1928,7 +1928,7 @@ NSString *BDSKWeblocFilePboardType = @"CorePasteboardFlavorType 0x75726C20";
     // we set the delegate so we can pass it the macroresolver for any complex string it might decode
     [unarchiver setDelegate:self];
     
-    NSArray *newPubs = [unarchiver decodeObject];
+    NSArray *newPubs = [unarchiver decodeObjectForKey:@"publications"];
     [unarchiver finishDecoding];
     [unarchiver release];
     
