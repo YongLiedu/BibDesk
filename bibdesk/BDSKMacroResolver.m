@@ -36,7 +36,7 @@
  OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#import "BDSKGlobalMacroResolver.h"
+#import "BDSKMacroResolver.h"
 #import "BibPrefController.h"
 #import "BDSKComplexString.h"
 #import "NSMutableDictionary+ThreadSafety.h"
@@ -60,6 +60,7 @@
 
 @interface BDSKMacroResolver (Private)
 - (void)loadMacroDefinitions;
+- (void)synchronize;
 @end
 
 
@@ -158,7 +159,10 @@ static BDSKGlobalMacroResolver *defaultMacroResolver;
 	
     [self synchronize];
     
-    [[NSNotificationCenter defaultCenter] postNotificationName:BDSKMacroDefinitionChangedNotification object:self];    
+    NSDictionary *userInfo = [NSDictionary dictionaryWithObjectsAndKeys:@"Change key", @"type", oldKey, @"oldKey", newKey, @"newKey", nil];
+    [[NSNotificationCenter defaultCenter] postNotificationName:BDSKMacroDefinitionChangedNotification 
+                                                        object:self
+                                                      userInfo:userInfo];    
 }
 
 - (void)addMacroDefinition:(NSString *)macroString forMacro:(NSString *)macroKey{
@@ -172,7 +176,10 @@ static BDSKGlobalMacroResolver *defaultMacroResolver;
 	
     [self synchronize];
 	
-    [[NSNotificationCenter defaultCenter] postNotificationName:BDSKMacroDefinitionChangedNotification object:self];    
+    NSDictionary *userInfo = [NSDictionary dictionaryWithObjectsAndKeys:@"Add macro", @"type", macroKey, @"macroKey", nil];
+    [[NSNotificationCenter defaultCenter] postNotificationName:BDSKMacroDefinitionChangedNotification 
+                                                        object:self
+                                                      userInfo:userInfo];    
 }
 
 - (void)setMacroDefinition:(NSString *)newDefinition forMacro:(NSString *)macroKey{
@@ -190,7 +197,10 @@ static BDSKGlobalMacroResolver *defaultMacroResolver;
 	
     [self synchronize];
 
-    [[NSNotificationCenter defaultCenter] postNotificationName:BDSKMacroDefinitionChangedNotification object:self];    
+    NSDictionary *userInfo = [NSDictionary dictionaryWithObjectsAndKeys:@"Change macro", @"type", macroKey, @"macroKey", nil];
+    [[NSNotificationCenter defaultCenter] postNotificationName:BDSKMacroDefinitionChangedNotification 
+                                                        object:self
+                                                      userInfo:userInfo];    
 }
 
 - (void)removeMacro:(NSString *)macroKey{
@@ -208,7 +218,10 @@ static BDSKGlobalMacroResolver *defaultMacroResolver;
 	
     [self synchronize];
 	
-    [[NSNotificationCenter defaultCenter] postNotificationName:BDSKMacroDefinitionChangedNotification object:self];    
+    NSDictionary *userInfo = [NSDictionary dictionaryWithObjectsAndKeys:@"Remove macro", @"type", macroKey, @"macroKey", nil];
+    [[NSNotificationCenter defaultCenter] postNotificationName:BDSKMacroDefinitionChangedNotification 
+                                                        object:self
+                                                      userInfo:userInfo];    
 }
 
 - (NSString *)valueOfMacro:(NSString *)macroString{
@@ -228,6 +241,8 @@ static BDSKGlobalMacroResolver *defaultMacroResolver;
     // is used to create a dictionary with case-insensitive keys.
     macroDefinitions = (NSMutableDictionary *)BDSKCreateCaseInsensitiveKeyMutableDictionary();
 }
+
+- (void)synchronize{}
 
 @end
 
