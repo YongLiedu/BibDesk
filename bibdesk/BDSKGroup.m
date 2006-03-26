@@ -159,6 +159,10 @@
 	return NO;
 }
 
+- (BOOL)isShared {
+	return NO;
+}
+
 // custom accessors
 
 - (NSString *)stringValue {
@@ -396,6 +400,7 @@ static NSString *BDSKAllPublicationsLocalizedString = nil;
         [service resolveWithTimeout:5.0];
 
         data = [[NSMutableData alloc] initWithCapacity:10^6];
+        publications = nil;
         downloadComplete = NO;
         
         NSInputStream *istream;
@@ -412,6 +417,7 @@ static NSString *BDSKAllPublicationsLocalizedString = nil;
 {
     [service release];
     [data release];
+    [publications release];
     [super dealloc];
 }
 
@@ -428,10 +434,20 @@ static NSString *BDSKAllPublicationsLocalizedString = nil;
 
 - (NSArray *)publications
 {
-    return downloadComplete == NO || [data length] == 0 ? nil : [NSKeyedUnarchiver unarchiveObjectWithData:data];
+    if (publications == nil && downloadComplete == YES && [data length] != 0)
+        publications = [[NSKeyedUnarchiver unarchiveObjectWithData:data] retain];
+    return publications;
+}
+
+
+- (BOOL)containsItem:(BibItem *)item {
+    return [[self publications] containsObject:item];
 }
 
 - (NSNetService *)service { return service; }
+
+- (BOOL)isShared { return YES; }
+
 - (BOOL)hasEditableName { return NO; }
 
 - (void)stream:(NSStream *)aStream handleEvent:(NSStreamEvent)event
@@ -449,6 +465,7 @@ static NSString *BDSKAllPublicationsLocalizedString = nil;
         case NSStreamEventEndEncountered:
             [(NSInputStream *)aStream close];
             downloadComplete = YES;
+            [self setCount:[[self publications] count]];
             break;
         default:
             break;

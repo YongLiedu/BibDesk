@@ -118,6 +118,13 @@
 - (BOOL)isSmart;
 
 /*!
+	@method isShared
+	@abstract Boolean, returns whether the receiver is a shared group. 
+	@discussion -
+*/
+- (BOOL)isShared;
+
+/*!
 	@method stringValue
 	@abstract Returns string value of the name.
 	@discussion -
@@ -245,6 +252,7 @@
 {
     NSNetService *service;
     NSMutableData *data;
+    NSArray *publications;
     BOOL downloadComplete;
 }
 
