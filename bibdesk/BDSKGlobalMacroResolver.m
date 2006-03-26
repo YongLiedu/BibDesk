@@ -1,5 +1,5 @@
 //
-//  BDSKGlobalMacroResolver.m
+//  BDSKMacroResolver.m
 //  Bibdesk
 //
 //  Created by Christiaan Hofman on 3/20/06.
@@ -38,49 +38,233 @@
 
 #import "BDSKGlobalMacroResolver.h"
 #import "BibPrefController.h"
+#import "BDSKComplexString.h"
 #import "NSMutableDictionary+ThreadSafety.h"
+#import "BDSKConverter.h"
 #import "BibTeXParser.h"
+#import "BibDocument.h"
 
-@implementation BDSKGlobalMacroResolver
 
-// stores system-defined macros for the months.
-// we grab their localized versions for display.
+@interface BDSKGlobalMacroResolver : BDSKMacroResolver {
+    NSMutableDictionary *standardMacroDefinitions;
+    NSMutableDictionary *fileMacroDefinitions;
+}
+
+- (NSDictionary *)fileMacroDefinitions;
+- (void)loadMacrosFromFiles;
+- (void)synchronize;
+- (void)handleMacroFilesChanged:(NSNotification *)notification;
+
+@end
+
+
+@interface BDSKMacroResolver (Private)
+- (void)loadMacroDefinitions;
+@end
+
+
+@implementation BDSKMacroResolver
+
 static BDSKGlobalMacroResolver *defaultMacroResolver; 
 
-+ (BDSKGlobalMacroResolver *)defaultMacroResolver{
++ (id)defaultMacroResolver{
     if(defaultMacroResolver == nil)
         defaultMacroResolver = [[BDSKGlobalMacroResolver alloc] init];
     return defaultMacroResolver;
 }
 
 - (id)init{
+    self = [self initWithDocument:nil];
+    return self;
+}
+
+- (id)initWithDocument:(BibDocument *)aDocument{
     if (self = [super init]) {
-        // store system-defined macros for the months.
-        // we grab their localized versions for display.
-        NSDictionary *standardDefs = [NSDictionary dictionaryWithObjects:[[NSUserDefaults standardUserDefaults] objectForKey:NSMonthNameArray]
-                                                                 forKeys:[NSArray arrayWithObjects:@"jan", @"feb", @"mar", @"apr", @"may", @"jun", @"jul", @"aug", @"sep", @"oct", @"nov", @"dec", nil]];
-        // Note we treat upper and lowercase values the same, 
-        // because that's how btparse gives the string constants to us.
-        // It is not quite correct because bibtex does discriminate,
-        // but this is the best we can do.  The OFCreateCaseInsensitiveKeyMutableDictionary()
-        // is used to create a dictionary with case-insensitive keys.
-        standardMacroDefinitions = (NSMutableDictionary *)BDSKCreateCaseInsensitiveKeyMutableDictionary();
-        [standardMacroDefinitions addEntriesFromDictionary:standardDefs];
-        // these need to be loaded lazily, because loading them can use ourselves, but we aren't yet initialized
-        fileMacroDefinitions = nil; 
         macroDefinitions = nil;
+        document = aDocument;
     }
     return self;
 }
 
 - (void)dealloc {
-    [standardMacroDefinitions release];
-    [fileMacroDefinitions release];
     [macroDefinitions release];
+    document = nil;
     [super dealloc];
 }
 
-- (void)loadMacrosFromPreferences{
+- (BibDocument *)document{
+    return document;
+}
+
+- (NSUndoManager *)undoManager{
+    return [document undoManager];
+}
+
+
+- (NSString *)bibTeXString{
+    BOOL shouldTeXify = [[OFPreferenceWrapper sharedPreferenceWrapper] boolForKey:BDSKShouldTeXifyWhenSavingAndCopyingKey];
+	NSMutableString *macroString = [NSMutableString string];
+    NSString *value;
+    NSArray *macros = [[[self macroDefinitions] allKeys] sortedArrayUsingSelector:@selector(compare:)];
+    NSEnumerator *macroEnum = [macros objectEnumerator];
+    NSString *macro;
+    
+    while (macro = [macroEnum nextObject]){
+		value = [[self macroDefinitions] objectForKey:macro];
+		if(shouldTeXify){
+			
+			@try{
+				value = [[BDSKConverter sharedConverter] stringByTeXifyingString:value];
+			}
+            @catch(id localException){
+				if([localException isKindOfClass:[NSException class]] && [[localException name] isEqualToString:BDSKTeXifyException]){
+                    NSException *exception = [NSException exceptionWithName:BDSKTeXifyException reason:[NSString stringWithFormat:NSLocalizedString(@"Character \"%@\" in the macro %@ can't be converted to TeX.", @"character conversion warning"), [localException reason], macro] userInfo:[NSDictionary dictionary]];
+                    @throw exception;
+				} else 
+                    @throw;
+            }							
+		}                
+        [macroString appendStrings:@"\n@string{", macro, @" = ", [value stringAsBibTeXString], @"}\n", nil];
+    }
+	return macroString;
+}
+
+#pragma mark BDSKMacroResolver protocol
+
+- (NSDictionary *)macroDefinitions {
+    if (macroDefinitions == nil)
+        [self loadMacroDefinitions];
+    return macroDefinitions;
+}
+
+- (void)addMacroDefinitionWithoutUndo:(NSString *)macroString forMacro:(NSString *)macroKey{
+    if (macroDefinitions == nil)
+        [self loadMacroDefinitions];
+    [macroDefinitions setObject:macroString forKey:macroKey];
+}
+
+- (void)changeMacroKey:(NSString *)oldKey to:(NSString *)newKey{
+    if (macroDefinitions == nil)
+        [self loadMacroDefinitions];
+    if([macroDefinitions objectForKey:oldKey] == nil)
+        [NSException raise:NSInvalidArgumentException
+                    format:@"tried to change the value of a macro key that doesn't exist"];
+    [[[self undoManager] prepareWithInvocationTarget:self]
+        changeMacroKey:newKey to:oldKey];
+    NSString *val = [macroDefinitions valueForKey:oldKey];
+    [val retain]; // so the next line doesn't kill it
+    [macroDefinitions removeObjectForKey:oldKey];
+    [macroDefinitions setObject:[val autorelease] forKey:newKey];
+	
+    [self synchronize];
+    
+    [[NSNotificationCenter defaultCenter] postNotificationName:BDSKMacroDefinitionChangedNotification object:self];    
+}
+
+- (void)addMacroDefinition:(NSString *)macroString forMacro:(NSString *)macroKey{
+    if (macroDefinitions == nil)
+        [self loadMacroDefinitions];
+    // we're adding a new one, so to undo, we remove.
+    [[[self undoManager] prepareWithInvocationTarget:self]
+            removeMacro:macroKey];
+
+    [macroDefinitions setObject:macroString forKey:macroKey];
+	
+    [self synchronize];
+	
+    [[NSNotificationCenter defaultCenter] postNotificationName:BDSKMacroDefinitionChangedNotification object:self];    
+}
+
+- (void)setMacroDefinition:(NSString *)newDefinition forMacro:(NSString *)macroKey{
+    if (macroDefinitions == nil)
+        [self loadMacroDefinitions];
+    NSString *oldDef = [macroDefinitions objectForKey:macroKey];
+    if(oldDef == nil){
+        [self addMacroDefinition:newDefinition forMacro:macroKey];
+        return;
+    }
+    // we're just changing an existing one, so to undo, we change back.
+    [[[self undoManager] prepareWithInvocationTarget:self]
+            setMacroDefinition:oldDef forMacro:macroKey];
+    [macroDefinitions setObject:newDefinition forKey:macroKey];
+	
+    [self synchronize];
+
+    [[NSNotificationCenter defaultCenter] postNotificationName:BDSKMacroDefinitionChangedNotification object:self];    
+}
+
+- (void)removeMacro:(NSString *)macroKey{
+    if (macroDefinitions == nil)
+        [self loadMacroDefinitions];
+    NSString *currentValue = [macroDefinitions objectForKey:macroKey];
+    if(!currentValue){
+        return;
+    }else{
+        [[[self undoManager] prepareWithInvocationTarget:self]
+              addMacroDefinition:currentValue
+                        forMacro:macroKey];
+    }
+    [macroDefinitions removeObjectForKey:macroKey];
+	
+    [self synchronize];
+	
+    [[NSNotificationCenter defaultCenter] postNotificationName:BDSKMacroDefinitionChangedNotification object:self];    
+}
+
+- (NSString *)valueOfMacro:(NSString *)macroString{
+    return [[self macroDefinitions] objectForKey:macroString];
+}
+
+@end
+
+
+@implementation BDSKMacroResolver (Private)
+
+- (void)loadMacroDefinitions{
+    // Note we treat upper and lowercase values the same, 
+    // because that's how btparse gives the string constants to us.
+    // It is not quite correct because bibtex does discriminate,
+    // but this is the best we can do.  The OFCreateCaseInsensitiveKeyMutableDictionary()
+    // is used to create a dictionary with case-insensitive keys.
+    macroDefinitions = (NSMutableDictionary *)BDSKCreateCaseInsensitiveKeyMutableDictionary();
+}
+
+@end
+
+
+@implementation BDSKGlobalMacroResolver
+
+- (id)initWithDocument:(BibDocument *)aDocument{
+    if (self = [super initWithDocument:nil]) {
+        // store system-defined macros for the months.
+        // we grab their localized versions for display.
+        NSDictionary *standardDefs = [NSDictionary dictionaryWithObjects:[[NSUserDefaults standardUserDefaults] objectForKey:NSMonthNameArray]
+                                                                 forKeys:[NSArray arrayWithObjects:@"jan", @"feb", @"mar", @"apr", @"may", @"jun", @"jul", @"aug", @"sep", @"oct", @"nov", @"dec", nil]];
+        standardMacroDefinitions = (NSMutableDictionary *)BDSKCreateCaseInsensitiveKeyMutableDictionary();
+        [standardMacroDefinitions addEntriesFromDictionary:standardDefs];
+        // these need to be loaded lazily, because loading them can use ourselves, but we aren't yet initialized
+        fileMacroDefinitions = nil; 
+		
+        [[NSNotificationCenter defaultCenter] addObserver:self
+												 selector:@selector(handleMacrosChanged:)
+													 name:BDSKMacroDefinitionChangedNotification
+												   object:nil];
+        [[NSNotificationCenter defaultCenter] addObserver:self
+												 selector:@selector(handleMacroFilesChanged:)
+													 name:BDSKMacroFilesChangedNotification
+												   object:nil];
+    }
+    return self;
+}
+
+- (void)dealloc {
+    [[NSNotificationCenter defaultCenter] removeObserver:self];
+    [standardMacroDefinitions release];
+    [fileMacroDefinitions release];
+    [super dealloc];
+}
+
+- (void)loadMacroDefinitions{
     OFPreferenceWrapper *pw = [OFPreferenceWrapper sharedPreferenceWrapper];
     
     macroDefinitions = (NSMutableDictionary *)BDSKCreateCaseInsensitiveKeyMutableDictionary();
@@ -102,18 +286,8 @@ static BDSKGlobalMacroResolver *defaultMacroResolver;
     if ([oldMacros count]) {
         // we remove the old style prefs, as they are now merged with the new ones
         [pw removeObjectForKey:BDSKBibStyleMacroDefinitionsKey];
-        [self synchronizePreferences];
+        [self synchronize];
     }
-}
-
-- (void)synchronizePreferences{
-    NSMutableDictionary *macros = [[NSMutableDictionary alloc] initWithCapacity:[[self macroDefinitions] count]];
-    NSEnumerator *keyEnum = [[self macroDefinitions] keyEnumerator];
-    NSString *key;
-    while (key = [keyEnum nextObject]) {
-        [macros setObject:[[[self macroDefinitions] objectForKey:key] stringAsBibTeXString] forKey:key];
-    }
-    [[OFPreferenceWrapper sharedPreferenceWrapper] setObject:macros forKey:BDSKGlobalMacroDefinitionsKey];
 }
 
 - (void)loadMacrosFromFiles{
@@ -150,119 +324,26 @@ static BDSKGlobalMacroResolver *defaultMacroResolver;
     }
 }
 
-- (void)resetMacrosFromFiles{
+- (void)synchronize{
+    NSMutableDictionary *macros = [[NSMutableDictionary alloc] initWithCapacity:[[self macroDefinitions] count]];
+    NSEnumerator *keyEnum = [[self macroDefinitions] keyEnumerator];
+    NSString *key;
+    while (key = [keyEnum nextObject]) {
+        [macros setObject:[[[self macroDefinitions] objectForKey:key] stringAsBibTeXString] forKey:key];
+    }
+    [[OFPreferenceWrapper sharedPreferenceWrapper] setObject:macros forKey:BDSKGlobalMacroDefinitionsKey];
+}
+
+- (void)handleMacroFilesChanged:(NSNotification *)notification{
     [fileMacroDefinitions release];
     fileMacroDefinitions = nil;
-    [[NSNotificationCenter defaultCenter] postNotificationName:BDSKBibDocMacroDefinitionChangedNotification
-														object:self
-													  userInfo:[NSDictionary dictionary]];    
+    [[NSNotificationCenter defaultCenter] postNotificationName:BDSKMacroDefinitionChangedNotification object:self];    
 }
 
 - (NSDictionary *)fileMacroDefinitions{
     if (fileMacroDefinitions == nil)
         [self loadMacrosFromFiles];
     return fileMacroDefinitions;
-}
-
-// should we create an undomanager?
-- (NSUndoManager *)undoManager{
-    return nil;
-}
-
-#pragma mark BDSKMacroResolver protocol
-
-- (NSDictionary *)macroDefinitions {
-    if (macroDefinitions == nil)
-        [self loadMacrosFromPreferences];
-    return macroDefinitions;
-}
-
-- (void)addMacroDefinitionWithoutUndo:(NSString *)macroString forMacro:(NSString *)macroKey{
-    if (macroDefinitions == nil)
-        [self loadMacrosFromPreferences];
-    [macroDefinitions setObject:macroString forKey:macroKey];
-    
-    [self synchronizePreferences];
-}
-
-- (void)changeMacroKey:(NSString *)oldKey to:(NSString *)newKey{
-    if (macroDefinitions == nil)
-        [self loadMacrosFromPreferences];
-    if([macroDefinitions objectForKey:oldKey] == nil)
-        [NSException raise:NSInvalidArgumentException
-                    format:@"tried to change the value of a macro key that doesn't exist"];
-    [[[self undoManager] prepareWithInvocationTarget:self]
-        changeMacroKey:newKey to:oldKey];
-    NSString *val = [macroDefinitions valueForKey:oldKey];
-    [val retain]; // so the next line doesn't kill it
-    [macroDefinitions removeObjectForKey:oldKey];
-    [macroDefinitions setObject:[val autorelease] forKey:newKey];
-    
-    [self synchronizePreferences];
-	
-	NSDictionary *notifInfo = [NSDictionary dictionaryWithObjectsAndKeys:newKey, @"newKey", oldKey, @"oldKey", nil];
-    [[NSNotificationCenter defaultCenter] postNotificationName:BDSKBibDocMacroKeyChangedNotification
-														object:self
-													  userInfo:notifInfo];    
-}
-
-- (void)addMacroDefinition:(NSString *)macroString forMacro:(NSString *)macroKey{
-    if (macroDefinitions == nil)
-        [self loadMacrosFromPreferences];
-    // we're adding a new one, so to undo, we remove.
-    [[[self undoManager] prepareWithInvocationTarget:self]
-            removeMacro:macroKey];
-
-    [macroDefinitions setObject:macroString forKey:macroKey];
-    
-    [self synchronizePreferences];
-	
-	NSDictionary *notifInfo = [NSDictionary dictionaryWithObjectsAndKeys:macroKey, @"macroKey", @"Add macro", @"type", nil];
-    [[NSNotificationCenter defaultCenter] postNotificationName:BDSKBibDocMacroDefinitionChangedNotification
-														object:self
-													  userInfo:notifInfo];    
-}
-
-- (void)setMacroDefinition:(NSString *)newDefinition forMacro:(NSString *)macroKey{
-    if (macroDefinitions == nil)
-        [self loadMacrosFromPreferences];
-    NSString *oldDef = [macroDefinitions objectForKey:macroKey];
-    if(oldDef == nil){
-        [self addMacroDefinition:newDefinition forMacro:macroKey];
-        return;
-    }
-    // we're just changing an existing one, so to undo, we change back.
-    [[[self undoManager] prepareWithInvocationTarget:self]
-            setMacroDefinition:oldDef forMacro:macroKey];
-    [macroDefinitions setObject:newDefinition forKey:macroKey];
-    
-    [self synchronizePreferences];
-
-	NSDictionary *notifInfo = [NSDictionary dictionaryWithObjectsAndKeys:macroKey, @"macroKey", @"Change macro", @"type", nil];
-    [[NSNotificationCenter defaultCenter] postNotificationName:BDSKBibDocMacroDefinitionChangedNotification
-														object:self
-													  userInfo:notifInfo];    
-}
-
-- (void)removeMacro:(NSString *)macroKey{
-    if (macroDefinitions == nil)
-        [self loadMacrosFromPreferences];
-    NSString *currentValue = [macroDefinitions objectForKey:macroKey];
-    if(!currentValue){
-        return;
-    }else{
-        [[[self undoManager] prepareWithInvocationTarget:self]
-        addMacroDefinition:currentValue
-                  forMacro:macroKey];
-    }
-    [macroDefinitions removeObjectForKey:macroKey];
-    
-    [self synchronizePreferences];
-	
-	NSDictionary *notifInfo = [NSDictionary dictionaryWithObjectsAndKeys:macroKey, @"macroKey", @"Remove macro", @"type", nil];
-    [[NSNotificationCenter defaultCenter] postNotificationName:BDSKBibDocMacroDefinitionChangedNotification
-														object:self
-													  userInfo:notifInfo];    
 }
 
 - (NSString *)valueOfMacro:(NSString *)macroString{

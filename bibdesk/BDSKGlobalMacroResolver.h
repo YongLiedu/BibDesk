@@ -1,5 +1,5 @@
 //
-//  BDSKGlobalMacroResolver.h
+//  BDSKMacroResolver.h
 //  Bibdesk
 //
 //  Created by Christiaan Hofman on 3/20/06.
@@ -37,20 +37,27 @@
  */
 
 #import <Cocoa/Cocoa.h>
-#import "BDSKComplexString.h"
 
+@class BibDocument;
 
-@interface BDSKGlobalMacroResolver : NSObject <BDSKMacroResolver> {
-    NSMutableDictionary *standardMacroDefinitions;
-    NSMutableDictionary *fileMacroDefinitions;
+@interface BDSKMacroResolver : NSObject {
     NSMutableDictionary *macroDefinitions;
+    BibDocument *document;
 }
 
-+ (BDSKGlobalMacroResolver *)defaultMacroResolver;
++ (id)defaultMacroResolver;
 
-- (void)loadMacrosFromPreferences;
-- (void)loadMacrosFromFiles;
-- (void)synchronizePreferences;
-- (void)resetMacrosFromFiles;
+- (id)initWithDocument:(BibDocument *)aDocument;
+
+- (BibDocument *)document;
+- (NSUndoManager *)undoManager;
+
+- (NSDictionary *)macroDefinitions;
+- (void)addMacroDefinition:(NSString *)macroString forMacro:(NSString *)macroKey;
+- (NSString *)valueOfMacro:(NSString *)macro;
+- (void)removeMacro:(NSString *)macroKey;
+- (void)changeMacroKey:(NSString *)oldKey to:(NSString *)newKey;
+- (void)setMacroDefinition:(NSString *)newDefinition forMacro:(NSString *)macroKey;
+- (void)addMacroDefinitionWithoutUndo:(NSString *)macroString forMacro:(NSString *)macroKey;
 
 @end
