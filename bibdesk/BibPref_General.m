@@ -54,7 +54,7 @@
     
     [shareFilesButton setState:[defaults boolForKey:BDSKShouldShareFilesKey] ? NSOnState : NSOffState];
     
-    [lookForShareFilesButton setState:[defaults boolForKey:BDSKShouldLookForSharedFilesKey] ? NSOnState : NSOffState];
+    [lookForSharedFilesButton setState:[defaults boolForKey:BDSKShouldLookForSharedFilesKey] ? NSOnState : NSOffState];
 
     [checkForUpdatesButton setState:([defaults boolForKey:BDSKAutoCheckForUpdatesKey] == YES) ? NSOnState : NSOffState];
 
