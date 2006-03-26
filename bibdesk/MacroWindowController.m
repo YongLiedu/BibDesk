@@ -80,6 +80,9 @@
 }
 
 - (void)setMacroDataSource:(id)newMacroDataSource{
+    if (newMacroDataSource == macroDataSource)
+        return;
+    
     if (macroDataSource) {
 		[[NSNotificationCenter defaultCenter]
 				removeObserver:self
@@ -93,7 +96,7 @@
     // mostly used to correctly catch undo changes.
     // there are 4 notifications, but for now our 
     // response is the same for all of them.
-    if (macroDataSource) {
+    if (newMacroDataSource) {
 		[[NSNotificationCenter defaultCenter]
 				addObserver:self
 				   selector:@selector(handleMacroChangedNotification:)
