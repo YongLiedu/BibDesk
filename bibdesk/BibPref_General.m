@@ -55,6 +55,14 @@
     [shareFilesButton setState:[defaults boolForKey:BDSKShouldShareFilesKey] ? NSOnState : NSOffState];
     
     [lookForSharedFilesButton setState:[defaults boolForKey:BDSKShouldLookForSharedFilesKey] ? NSOnState : NSOffState];
+    
+    if(floor(NSAppKitVersionNumber) <= NSAppKitVersionNumber10_3){
+        NSString *disabledTip = NSLocalizedString(@"Bonjour sharing is only supported on Mac OS X Tiger at this time.", @"");
+        [shareFilesButton setEnabled:NO];
+        [shareFilesButton setToolTip:disabledTip];
+        [lookForSharedFilesButton setEnabled:NO];
+        [lookForSharedFilesButton setToolTip:disabledTip];
+    }
 
     [checkForUpdatesButton setState:([defaults boolForKey:BDSKAutoCheckForUpdatesKey] == YES) ? NSOnState : NSOffState];
 
