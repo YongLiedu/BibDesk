@@ -78,15 +78,15 @@
     
     if(index == 0)
         return;
-#warning fixme    
     unsigned int smartCount = [smartGroups count];
+    unsigned int sharedCount = [sharedGroups count];
 	
 	if ([group isSmart]) // we don't care about the index, as we resort anyway. This activates undo
 		[self addSmartGroup:(BDSKSmartGroup *)group];
-	OBASSERT(index > smartCount);
-	if(index <= smartCount)
+	OBASSERT(index > smartCount + sharedCount);
+	if(index <= smartCount + sharedCount)
 		return;
-	[groups insertObject:group atIndex:(index - smartCount - 1)]; 
+	[groups insertObject:group atIndex:(index - smartCount - sharedCount - 1)]; 
 }
 
 // mutable to-many accessor:  not presently used
