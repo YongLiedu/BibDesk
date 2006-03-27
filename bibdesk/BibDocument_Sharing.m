@@ -63,7 +63,7 @@ static NSString *hostName;
 
 // This object is the delegate of its NSNetServiceBrowser object. We're only interested in services-related methods, so that's what we'll call.
 - (void)netServiceBrowser:(NSNetServiceBrowser *)aNetServiceBrowser didFindService:(NSNetService *)aNetService moreComing:(BOOL)moreComing 
-{
+{NSLog(@"%@",[aNetService TXTRecordData]);
     // can use this case for debugging with a single machine; only ignores this document
     if([[NSUserDefaults standardUserDefaults] boolForKey:@"BDSKEnableSharingWithSelfKey"] && [[self netServiceName] isEqualToString:[aNetService name]] == NO){
         BDSKSharedGroup *group = [[BDSKSharedGroup alloc] initWithService:aNetService];
