@@ -46,6 +46,7 @@
 #import "BibAppController.h"
 #import "NSString_BDSKExtensions.h"
 #import "BibDocument.h"
+#import "NSDate_BDSKExtensions.h"
 
 @implementation BDSKFormatParser
 
@@ -255,23 +256,32 @@
 					break;
 				case 'y':
 					// year without century
-					if ([pub date]) {
-						string = [[pub date] descriptionWithCalendarFormat:@"%y"];
+                    string = [pub valueOfField:BDSKYearString];
+                    if ([NSString isEmptyString:string] == NO) {
+                        NSDate *date = [[NSDate alloc] initWithMonthDayYearString:[NSString stringWithFormat:@"6-15-%@", string]];
+						string = [date descriptionWithCalendarFormat:@"%y" timeZone:nil locale:nil];
 						[parsedStr appendString:string];
+                        [date release];
 					}
 					break;
 				case 'Y':
 					// year with century
-					if ([pub date]) {
-						string = [[pub date] descriptionWithCalendarFormat:@"%Y"];
+                    string = [pub valueOfField:BDSKYearString];
+                    if ([NSString isEmptyString:string] == NO) {
+                        NSDate *date = [[NSDate alloc] initWithMonthDayYearString:[NSString stringWithFormat:@"6-15-%@", string]];
+						string = [date descriptionWithCalendarFormat:@"%Y" timeZone:nil locale:nil];
 						[parsedStr appendString:string];
+                        [date release];
 					}
 					break;
 				case 'm':
 					// month
-					if ([pub date] && ![NSString isEmptyString:[pub valueOfField:BDSKMonthString]]) {
-						string = [[pub date] descriptionWithCalendarFormat:@"%m"];
+                    string = [pub valueOfField:BDSKMonthString];
+                    if ([NSString isEmptyString:string] == NO) {
+                        NSDate *date = [[NSDate alloc] initWithMonthDayYearString:[NSString stringWithFormat:@"%@-15-2000", string]];
+						string = [date descriptionWithCalendarFormat:@"%m" timeZone:nil locale:nil];
 						[parsedStr appendString:string];
+                        [date release];
 					}
 					break;
 				case 'k':
