@@ -403,11 +403,12 @@ static NSString *BDSKAllPublicationsLocalizedString = nil;
         publications = nil;
         downloadComplete = NO;
         
-        NSInputStream *istream;
-        [service getInputStream:&istream outputStream:NULL];
-        [istream setDelegate:self];
-        [istream scheduleInRunLoop:[NSRunLoop currentRunLoop] forMode:NSDefaultRunLoopMode];
-        [istream open];
+        // get the stream, and retain a reference to it so we can close it when deallocing
+        [service getInputStream:&inputStream outputStream:NULL];
+        [inputStream retain];
+        [inputStream setDelegate:self];
+        [inputStream scheduleInRunLoop:[NSRunLoop currentRunLoop] forMode:NSDefaultRunLoopMode];
+        [inputStream open];
     }
     
     return self;
@@ -415,6 +416,10 @@ static NSString *BDSKAllPublicationsLocalizedString = nil;
 
 - (void)dealloc
 {
+    // ensure the stream gets removed from the run loop, so it doesn't message us anymore
+    [inputStream close];
+    [inputStream setDelegate:nil];
+    [inputStream release];
     [service release];
     [data release];
     [publications release];
@@ -463,9 +468,14 @@ static NSString *BDSKAllPublicationsLocalizedString = nil;
             [data appendBytes:readBuffer length:amountRead];
             break;
         case NSStreamEventEndEncountered:
+            // close to remove from the run loop
             [(NSInputStream *)aStream close];
             downloadComplete = YES;
             [self setCount:[[self publications] count]];
+            break;
+        case NSStreamEventErrorOccurred:
+            NSLog(@"Stream event error occurred; sharing %@ won't work.", [self name]);
+            // could close here?
             break;
         default:
             break;

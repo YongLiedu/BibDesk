@@ -254,6 +254,8 @@
     NSMutableData *data;
     NSArray *publications;
     BOOL downloadComplete;
+    
+    NSInputStream *inputStream;
 }
 
 - (id)initWithService:(NSNetService *)aService;
