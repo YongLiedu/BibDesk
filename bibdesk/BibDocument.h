@@ -81,7 +81,6 @@ enum {
 
 // Some pasteboard types used by the document for dragging and copying.
 extern NSString* BDSKReferenceMinerStringPboardType; // pasteboard type from Reference Miner, determined using Pasteboard Peeker
-extern NSString *BDSKBibItemIndexPboardType;
 extern NSString *BDSKBibItemPboardType;
 extern NSString* BDSKWeblocFilePboardType; // core pasteboard type for webloc files
 

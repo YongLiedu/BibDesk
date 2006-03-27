@@ -98,7 +98,6 @@
 #import "BibDocument_Sharing.h"
 
 NSString *BDSKReferenceMinerStringPboardType = @"CorePasteboardFlavorType 0x57454253";
-NSString *BDSKBibItemIndexPboardType = @"edu.ucsd.mmccrack.bibdesk shownPublications index type";
 NSString *BDSKBibItemPboardType = @"edu.ucsd.mmccrack.bibdesk BibItem pboard type";
 NSString *BDSKWeblocFilePboardType = @"CorePasteboardFlavorType 0x75726C20";
 
@@ -251,9 +250,8 @@ NSString *BDSKWeblocFilePboardType = @"CorePasteboardFlavorType 0x75726C20";
 	[self setupSearchField];
    
     [tableView setDoubleAction:@selector(editPubCmd:)];
-    NSMutableArray *dragTypes = [NSMutableArray arrayWithObjects:BDSKBibItemPboardType, BDSKWeblocFilePboardType, BDSKReferenceMinerStringPboardType, NSStringPboardType, NSFilenamesPboardType, NSURLPboardType, nil];
-    [tableView registerForDraggedTypes:[[dragTypes copy] autorelease]];
-    [dragTypes addObject:BDSKBibItemIndexPboardType];
+    NSArray *dragTypes = [NSArray arrayWithObjects:BDSKBibItemPboardType, BDSKWeblocFilePboardType, BDSKReferenceMinerStringPboardType, NSStringPboardType, NSFilenamesPboardType, NSURLPboardType, nil];
+    [tableView registerForDraggedTypes:dragTypes];
     [groupTableView registerForDraggedTypes:dragTypes];
 
     NSString *filename = [[self fileName] lastPathComponent];
