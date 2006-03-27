@@ -270,3 +270,4 @@ extern NSString *BDSKUnimplementedException;
 
 #pragma mark Error name strings
 extern const char *BDSKParserError;
+extern const char *BDSKNetworkError;

@@ -486,7 +486,7 @@ static NSString *BDSKAllPublicationsLocalizedString = nil;
             NSError *error = [aStream streamError];
             // log to the console for more detailed diagnostics
             NSLog(@" *** sharing error for %@: %@", [self description], error);
-            OFError(&error, "BDSKSharingError", NSLocalizedDescriptionKey, NSLocalizedString(@"Unable to Read Shared File", @""), NSLocalizedRecoverySuggestionErrorKey, NSLocalizedString(@"You may wish to disable and re-enable sharing in BibDesk's preferences to see if the error persists.", @""), nil);
+            OFError(&error, BDSKNetworkError, NSLocalizedDescriptionKey, NSLocalizedString(@"Unable to Read Shared File", @""), NSLocalizedRecoverySuggestionErrorKey, NSLocalizedString(@"You may wish to disable and re-enable sharing in BibDesk's preferences to see if the error persists.", @""), nil);
             
             // this will get annoying if the streams are really unreliable
             [NSApp presentError:error];

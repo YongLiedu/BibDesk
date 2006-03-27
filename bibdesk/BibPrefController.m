@@ -288,3 +288,4 @@ NSString *BDSKUnimplementedException = @"BDSKUnimplementedException";
 
 #pragma mark Error name strings
 const char *BDSKParserError = "BDSKParserError";
+const char *BDSKNetworkError = "BDSKNetworkError";

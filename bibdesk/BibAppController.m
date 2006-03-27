@@ -987,7 +987,7 @@
 
 #pragma mark Panels
 
-- (BOOL)checkForNetworkAvailabilityAndDisplayWarning:(BOOL)displayWarning{
+- (BOOL)checkForNetworkAvailability:(NSError **)error{
     
     BOOL result = NO;
     SCNetworkConnectionFlags flags;
@@ -998,8 +998,8 @@
     }
     
     if(result == NO){
-        if(displayWarning)
-            NSRunAlertPanel(NSLocalizedString(@"Network Unavailable", @""), NSLocalizedString(@"BibDesk is unable to establish a network connection.", @""), nil, nil, nil);
+        if(error)
+            OFError(error, BDSKNetworkError, NSLocalizedDescriptionKey, NSLocalizedString(@"Network Unavailable", @""), NSLocalizedRecoverySuggestionErrorKey, NSLocalizedString(@"BibDesk is unable to establish a network connection, possibly because your network is down or a firewall is blocking the connection.", @""), nil);
         else
             NSLog(@"Unable to contact %s, possibly because your network is down or a firewall is prevening the connection.", hostName);
     }
@@ -1012,7 +1012,7 @@
     NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
     
     // CFURLCreateDataAndPropertiesFromResource can eventually crash if the network isn't available, so we'll check for it
-    if([self checkForNetworkAvailabilityAndDisplayWarning:NO] == NO){
+    if([self checkForNetworkAvailability:NULL] == NO){
         [pool release];
         return;
     }
@@ -1036,7 +1036,10 @@
         if(theData != NULL) CFRelease(theData);
         
         NSString *latestVersionNumber = [prodVersionDict valueForKey:@"BibDesk"];
-        if(prodVersionDict != nil){
+        if(err != nil){
+            NSLog(@"Unable to create property list from update check download");
+            [err release];
+        } else if(prodVersionDict != nil){
             OFVersionNumber *remoteVersion = [[OFVersionNumber alloc] initWithVersionString:latestVersionNumber];
             OFVersionNumber *localVersion = [[OFVersionNumber alloc] initWithVersionString:currVersionNumber];
             
@@ -1069,8 +1072,11 @@
 - (IBAction)checkForUpdates:(id)sender{
     
     // check for network availability and display a warning if it's down
-    if([self checkForNetworkAvailabilityAndDisplayWarning:YES] == NO)
+    NSError *error = nil;
+    if([self checkForNetworkAvailability:&error] == NO){
+        [self presentError:error];
         return;
+    }
         
     NSString *currVersionNumber = [[[NSBundle bundleForClass:[self class]]
         infoDictionary] objectForKey:@"CFBundleShortVersionString"];
