@@ -930,10 +930,7 @@
         BOOL shouldSelect = [[self selectedGroups] containsObject:group];
 		
 		if (([info draggingSource] == groupTableView || [info draggingSource] == tableView) && dragFromSharedGroups && row == 0) {
-            if([self addPublicationsFromPasteboard:pboard error:NULL] == NO)
-                return NO;
-            
-            pubs = [self selectedPublications];            
+            return [self addPublicationsFromPasteboard:pboard error:NULL];
         } else if([info draggingSource] == groupTableView || row <= [smartGroups count] + [sharedGroups count]) {
             return NO;
         } else if([info draggingSource] == tableView){
