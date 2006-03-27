@@ -224,6 +224,7 @@ static BDSKCharacterConversion *sharedConversionEditor;
 													errorDescription:&error];
 	if (error) {
 		NSLog(@"Error writing: %@", error);
+        [error release];
 	} else {
 		NSString *applicationSupportPath = [[NSFileManager defaultManager] currentApplicationSupportPathForCurrentUser]; 
 		NSString *charConvPath = [applicationSupportPath stringByAppendingPathComponent:CHARACTER_CONVERSION_FILENAME];

@@ -197,6 +197,7 @@ static BDSKTypeInfoEditor *sharedTypeInfoEditor;
 													errorDescription:&error];
 	if (error) {
 		NSLog(@"Error writing: %@", error);
+        [error release];
 	} else {
 		NSString *applicationSupportPath = [[NSFileManager defaultManager] currentApplicationSupportPathForCurrentUser]; 
 		NSString *typeInfoPath = [applicationSupportPath stringByAppendingPathComponent:TYPE_INFO_FILENAME];

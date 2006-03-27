@@ -859,6 +859,7 @@
 													errorDescription:&error];
 	if (error) {
 		NSLog(@"Error writing bookmarks: %@", error);
+        [error release];
 		return;
 	}
 	

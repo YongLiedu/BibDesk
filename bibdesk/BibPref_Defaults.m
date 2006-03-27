@@ -526,8 +526,6 @@ enum {
 
 - (void)keyDown:(NSEvent *)event{
     unichar c = [[event characters] characterAtIndex:0];
-    NSCharacterSet *alnum = [NSCharacterSet alphanumericCharacterSet];
-    unsigned int flags = ([event modifierFlags] & 0xffff0000U);
     if (c == NSDeleteCharacter ||
         c == NSBackspaceCharacter) {
         [[self delegate] delGlobalMacroFiles:nil];

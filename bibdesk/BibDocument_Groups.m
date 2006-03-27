@@ -994,6 +994,7 @@ The groupedPublications array is a subset of the publications array, developed b
     	
 	if (error) {
 		NSLog(@"Error serializing: %@", error);
+        [error release];
 		return nil;
 	}
 	return data;
@@ -1009,6 +1010,7 @@ The groupedPublications array is a subset of the publications array, developed b
 	
 	if (error) {
 		NSLog(@"Error deserializing: %@", error);
+        [error release];
 		return;
 	}
 	if ([plist isKindOfClass:[NSArray class]] == NO) {
