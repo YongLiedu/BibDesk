@@ -402,13 +402,7 @@ static NSString *BDSKAllPublicationsLocalizedString = nil;
         data = [[NSMutableData alloc] initWithCapacity:10^6];
         publications = nil;
         downloadComplete = NO;
-        
-        // get the stream, and retain a reference to it so we can close it when deallocing
-        [service getInputStream:&inputStream outputStream:NULL];
-        [inputStream retain];
-        [inputStream setDelegate:self];
-        [inputStream scheduleInRunLoop:[NSRunLoop currentRunLoop] forMode:NSDefaultRunLoopMode];
-        [inputStream open];
+        inputStream = nil;
     }
     
     return self;
@@ -424,6 +418,19 @@ static NSString *BDSKAllPublicationsLocalizedString = nil;
     [data release];
     [publications release];
     [super dealloc];
+}
+
+// we allow calling this at any time
+- (void)scheduleStreamIfNecessary;
+{
+    if(inputStream == nil){
+        // get the stream, and retain a reference to it so we can close it when deallocing
+        [service getInputStream:&inputStream outputStream:NULL];
+        [inputStream retain];
+        [inputStream setDelegate:self];
+        [inputStream scheduleInRunLoop:[NSRunLoop currentRunLoop] forMode:NSDefaultRunLoopMode];
+        [inputStream open];
+    }
 }
 
 - (NSString *)name { return [service name]; }
@@ -459,7 +466,7 @@ static NSString *BDSKAllPublicationsLocalizedString = nil;
 {
     switch(event){
         case NSStreamEventHasBytesAvailable:
-            // compiler barfs on the next line
+            // compiler barfs unless we include a bogus line here
             [(id)nil release];
             uint8_t readBuffer[4096];
             int amountRead = 0;
@@ -474,8 +481,22 @@ static NSString *BDSKAllPublicationsLocalizedString = nil;
             [self setCount:[[self publications] count]];
             break;
         case NSStreamEventErrorOccurred:
-            NSLog(@"Stream event error occurred; sharing %@ won't work.", [self name]);
-            // could close here?
+            // compiler barfs unless we include a bogus line here
+            [(id)nil release];
+            NSError *error = [aStream streamError];
+            // log to the console for more detailed diagnostics
+            NSLog(@" *** sharing error for %@: %@", [self description], error);
+            OFError(&error, "BDSKSharingError", NSLocalizedDescriptionKey, NSLocalizedString(@"Unable to Read Shared File", @""), NSLocalizedRecoverySuggestionErrorKey, NSLocalizedString(@"You may wish to disable and re-enable sharing in BibDesk's preferences to see if the error persists.", @""), nil);
+            
+            // this will get annoying if the streams are really unreliable
+            [NSApp presentError:error];
+            // docs indicate the stream can't be re-used after an error occurs, so go ahead and close it
+            [aStream close];
+            
+            // allow the user to try again; otherwise this group is one-shot only (this should be the same as aStream, but someday we may handle output as well)
+            [inputStream close];
+            [inputStream release];
+            inputStream = nil;
             break;
         default:
             break;

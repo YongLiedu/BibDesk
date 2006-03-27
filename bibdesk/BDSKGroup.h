@@ -259,6 +259,7 @@
 }
 
 - (id)initWithService:(NSNetService *)aService;
+- (void)scheduleStreamIfNecessary;
 - (NSArray *)publications;
 - (NSNetService *)service;
 
