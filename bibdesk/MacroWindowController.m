@@ -425,9 +425,7 @@
 }
 
 - (BOOL)addMacrosFromBibTeXString:(NSString *)aString{
-	BibDocument *document = nil;
-    if([macroDataSource isKindOfClass:[BibDocument class]])
-		document = (BibDocument *)macroDataSource;
+	BibDocument *document = [macroDataSource document];
 	
     BOOL hadProblems = NO;
     BOOL hadCircular = NO;
