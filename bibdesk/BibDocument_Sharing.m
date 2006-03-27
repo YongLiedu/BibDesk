@@ -48,6 +48,10 @@
 // @@ register with http://www.dns-sd.org/ServiceTypes.html
 NSString *BDSKNetServiceDomain = @"_bdsk._tcp.";
 
+// @@ can we listen for SC changes and set this appropriately?  (affects remote display)
+// this is used to determine if a service listed in the browser is from the local host
+static NSString *hostName;
+
 /* Much of this was borrowed from Apple's sample code and modified to fit our needs
     file://localhost/Developer/Examples/Foundation/PictureSharing/
     file://localhost/Developer/Examples/Foundation/PictureSharingBrowser/
@@ -60,10 +64,15 @@ NSString *BDSKNetServiceDomain = @"_bdsk._tcp.";
 // This object is the delegate of its NSNetServiceBrowser object. We're only interested in services-related methods, so that's what we'll call.
 - (void)netServiceBrowser:(NSNetServiceBrowser *)aNetServiceBrowser didFindService:(NSNetService *)aNetService moreComing:(BOOL)moreComing 
 {
-#warning fixme
-    // we need to keep from adding our own host's services, but this is convenient for testing
-    // should be able to check the prefix of the string against our own host name
-    if([[self netServiceName] isEqualToString:[aNetService name]] == NO){
+    // can use this case for debugging with a single machine; only ignores this document
+    if([[NSUserDefaults standardUserDefaults] boolForKey:@"BDSKEnableSharingWithSelfKey"] && [[self netServiceName] isEqualToString:[aNetService name]] == NO){
+        BDSKSharedGroup *group = [[BDSKSharedGroup alloc] initWithService:aNetService];
+        [sharedGroups addObject:group];
+        [group release];
+        [groupTableView reloadData];
+    } 
+    // we want to ignore our own shared services, as the write/read occur on the same run loop, and our file handle blocks
+    else if([[aNetService name] hasCaseInsensitivePrefix:hostName] == NO){
         BDSKSharedGroup *group = [[BDSKSharedGroup alloc] initWithService:aNetService];
         [sharedGroups addObject:group];
         [group release];
@@ -110,10 +119,12 @@ NSString *BDSKNetServiceDomain = @"_bdsk._tcp.";
     NSString *serviceName = [[[self fileName] lastPathComponent] stringByDeletingPathExtension];
     // @@ probably shouldn't share unsaved files
     if(serviceName == nil) serviceName = [self displayName];
-    NSString *hostName = [(id)SCDynamicStoreCopyComputerName(NULL, NULL) autorelease];
     if(hostName == nil){
-        NSLog(@"Unable to get hostname with SCDynamicStoreCopyComputerName");
-        hostName = [[[[NSProcessInfo processInfo] hostName] componentsSeparatedByString:@"."] firstObject];
+        hostName = (NSString *)SCDynamicStoreCopyComputerName(NULL, NULL);
+        if(hostName == nil){
+            NSLog(@"Unable to get hostname with SCDynamicStoreCopyComputerName");
+            hostName = [[[[[NSProcessInfo processInfo] hostName] componentsSeparatedByString:@"."] firstObject] copy];
+        }
     }
     return [NSString stringWithFormat:@"%@ - %@", hostName, serviceName];
 }
@@ -180,31 +191,54 @@ NSString *BDSKNetServiceDomain = @"_bdsk._tcp.";
     }
 }
 
-// @@ add prefs to enable/disable
-- (void)handleDisableSharingNotification:(NSNotification *)note
-{
-    [self disableSharing];
-}    
-
-- (void)handleEnableSharingNotification:(NSNotification *)note
-{
-    [self enableSharing];
-}    
-
-// This object is the delegate of its NSNetService. It should implement the NSNetServiceDelegateMethods that are relevant for publication (see NSNetServices.h).
 - (void)netService:(NSNetService *)sender didNotPublish:(NSDictionary *)errorDict
 {
-    // @@ taken from Apple's code; add more error messages (use NSError and present?)
-    // Display some meaningful error message here, using the longerStatusText as the explanation.
-    if([[errorDict objectForKey:NSNetServicesErrorCode] intValue] == NSNetServicesCollisionError) {
-        NSLog(@"A name collision occurred. A service is already running with that name someplace else.");
-    } else {
-        NSLog(@"Some other unknown error occurred.");
+    int err = [[errorDict objectForKey:NSNetServicesErrorCode] intValue];
+    NSString *errorMessage = nil;
+    switch(err){
+        case NSNetServicesUnknownError:
+            errorMessage = @"Unknown net services error";
+            break;
+        case NSNetServicesCollisionError:
+            errorMessage = @"Net services collision error";
+            break;
+        case NSNetServicesNotFoundError:
+            errorMessage = @"Net services not found error";
+            break;
+        case NSNetServicesActivityInProgress:
+            errorMessage = @"Net services reports activity in progress";
+            break;
+        case NSNetServicesBadArgumentError:
+            errorMessage = @"Net services bad argument error";
+            break;
+        case NSNetServicesCancelledError:
+            errorMessage = @"Cancelled net service";
+            break;
+        case NSNetServicesInvalidError:
+            errorMessage = @"Net services invalid error";
+            break;
+        case NSNetServicesTimeoutError:
+            errorMessage = @"Net services timeout error";
+            break;
+        default:
+            errorMessage = @"Unrecognized error code from net services";
+            break;
     }
+    
+    errorMessage = NSLocalizedString(errorMessage, @"");
+    NSLog(@"-[%@ %@] reports \"%@\"", [self class], NSStringFromSelector(_cmd), errorMessage);
+    
+    NSString *errorDescription = NSLocalizedString(@"Unable to Share This Document", @"");
+    NSString *recoverySuggestion = NSLocalizedString(@"You may wish to disable and re-enable sharing in BibDesk's preferences to see if the error persists.", @"");
+    NSError *error = [NSError errorWithDomain:NSCocoaErrorDomain code:err userInfo:[NSDictionary dictionaryWithObjectsAndKeys:errorDescription, NSLocalizedDescriptionKey, errorMessage, NSLocalizedFailureReasonErrorKey, recoverySuggestion, NSLocalizedRecoverySuggestionErrorKey, nil]];
+
     [listeningSocket release];
     listeningSocket = nil;
     [netService release];
     netService = nil;
+    
+    // show the error in a modal dialog
+    [self presentError:error];
 }
 
 - (void)netServiceDidStop:(NSNetService *)sender
