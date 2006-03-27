@@ -72,7 +72,7 @@ static NSString *hostName;
         [groupTableView reloadData];
     } 
     // we want to ignore our own shared services, as the write/read occur on the same run loop, and our file handle blocks
-    else if([[aNetService name] hasCaseInsensitivePrefix:hostName] == NO){
+    else if([[aNetService name] hasPrefix:[NSString stringWithFormat:@"%@ - ", hostName]] == NO){
         BDSKSharedGroup *group = [[BDSKSharedGroup alloc] initWithService:aNetService];
         [sharedGroups addObject:group];
         [group release];
