@@ -39,6 +39,7 @@
 #import "BDSKMacroResolver.h"
 #import "BibPrefController.h"
 #import "BDSKComplexString.h"
+#import "BDSKStringNode.h"
 #import "NSMutableDictionary+ThreadSafety.h"
 #import "BDSKConverter.h"
 #import "BibTeXParser.h"
@@ -103,15 +104,61 @@ static BDSKGlobalMacroResolver *defaultMacroResolver;
 
 
 - (NSString *)bibTeXString{
-    BOOL shouldTeXify = [[OFPreferenceWrapper sharedPreferenceWrapper] boolForKey:BDSKShouldTeXifyWhenSavingAndCopyingKey];
-	NSMutableString *macroString = [NSMutableString string];
-    NSString *value;
-    NSArray *macros = [[[self macroDefinitions] allKeys] sortedArrayUsingSelector:@selector(compare:)];
+    if (macroDefinitions == nil)
+        return @"";
+    
+    // bibtex requires that macros whose definitions contain macros are ordered in the document after the macros on which they depend
+    NSArray *macros = [[macroDefinitions allKeys] sortedArrayUsingSelector:@selector(compare:)];
+    NSMutableArray *orderedMacros = [NSMutableArray arrayWithCapacity:[macros count]];
     NSEnumerator *macroEnum = [macros objectEnumerator];
     NSString *macro;
+    NSString *value;
     
     while (macro = [macroEnum nextObject]){
-		value = [[self macroDefinitions] objectForKey:macro];
+        if ([orderedMacros containsObject:macro])
+            continue;
+        value = [macroDefinitions objectForKey:macro];
+        
+        if ([value isComplex]) {
+            // we have to insert macros on which this depends in opposite order of the hierarchy
+            int index = [orderedMacros count];
+            NSMutableArray *descendents = [NSMutableArray arrayWithObject:value];
+            
+            while ([descendents count] > 0) {
+                NSArray *values = [descendents copy];
+                NSEnumerator *valueE = [values objectEnumerator];
+                [values release];
+                [descendents removeAllObjects];
+                
+                while(value = [valueE nextObject]){
+                    NSEnumerator *nodeE = [[value nodes] objectEnumerator];
+                    BDSKStringNode *node;
+                    
+                    while(node = [nodeE nextObject]){
+                        if([node type] != BSN_MACRODEF)
+                            continue;
+                        
+                        NSString *key = [node value];
+                        
+                        if([orderedMacros containsObject:key])
+                            continue;
+                        [orderedMacros insertObject:key atIndex:index];
+                        value = [macroDefinitions objectForKey:key];
+                        if ([value isComplex])
+                            [descendents addObject:value];
+                    }
+                }
+            }
+        }
+        [orderedMacros addObject:macro];
+    }
+
+    BOOL shouldTeXify = [[OFPreferenceWrapper sharedPreferenceWrapper] boolForKey:BDSKShouldTeXifyWhenSavingAndCopyingKey];
+	NSMutableString *macroString = [NSMutableString string];
+    macroEnum = [orderedMacros objectEnumerator];
+    
+    while (macro = [macroEnum nextObject]){
+		value = [macroDefinitions objectForKey:macro];
 		if(shouldTeXify){
 			
 			@try{
