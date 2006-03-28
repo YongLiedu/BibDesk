@@ -262,5 +262,6 @@
 - (void)scheduleStreamIfNecessary;
 - (NSArray *)publications;
 - (NSNetService *)service;
+- (void)closeInputStream;
 
 @end

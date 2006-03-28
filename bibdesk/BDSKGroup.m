@@ -411,16 +411,14 @@ static NSString *BDSKAllPublicationsLocalizedString = nil;
 - (void)dealloc
 {
     // ensure the stream gets removed from the run loop, so it doesn't message us anymore
-    [inputStream close];
-    [inputStream setDelegate:nil];
-    [inputStream release];
+    [self closeInputStream];
     [service release];
     [data release];
     [publications release];
     [super dealloc];
 }
 
-// we allow calling this at any time
+// we allow calling this repeatedly
 - (void)scheduleStreamIfNecessary;
 {
     if(inputStream == nil){
@@ -433,6 +431,15 @@ static NSString *BDSKAllPublicationsLocalizedString = nil;
     }
 }
 
+- (void)closeInputStream;
+{
+    [inputStream close];
+    [inputStream setDelegate:nil];
+    [inputStream removeFromRunLoop:[NSRunLoop currentRunLoop] forMode:NSDefaultRunLoopMode];
+    [inputStream release];
+    inputStream = nil;
+}
+    
 - (NSString *)name { return [service name]; }
 
 - (NSString *)description
@@ -494,9 +501,8 @@ static NSString *BDSKAllPublicationsLocalizedString = nil;
             [aStream close];
             
             // allow the user to try again; otherwise this group is one-shot only (this should be the same as aStream, but someday we may handle output as well)
-            [inputStream close];
-            [inputStream release];
-            inputStream = nil;
+            [self closeInputStream];
+
             break;
         default:
             break;
