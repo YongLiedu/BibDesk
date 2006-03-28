@@ -62,6 +62,7 @@
 - (IBAction)addDefaultField:(id)sender;
 - (IBAction)showTypeInfoEditor:(id)sender;
 - (IBAction)RSSDescriptionFieldChanged:(id)sender;
+- (void)addGlobalMacroFilePanelDidEnd:(NSOpenPanel *)openPanel returnCode:(int)returnCode contextInfo:(void *)contextInfo;
 
 - (IBAction)showMacrosWindow:(id)sender;
 - (IBAction)showMacroFileWindow:(id)sender;

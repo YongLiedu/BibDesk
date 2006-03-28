@@ -57,6 +57,7 @@
 
 - (IBAction)changePreviewDisplay:(id)sender;
 - (IBAction)changePreviewMaxNumber:(id)sender;
+- (void)handlePreviewDisplayChangedNotification:(NSNotification *)notification;
 
 - (IBAction)addTerm:(id)sender;
 - (IBAction)removeSelectedTerm:(id)sender;
