@@ -116,7 +116,8 @@
 - (void)refreshMacros{
     NSDictionary *macroDefinitions = [(BDSKMacroResolver *)macroDataSource macroDefinitions];
     [macros release];
-    macros = [[[macroDefinitions allKeys] sortedArrayUsingSelector:@selector(compare:)] mutableCopy];
+    macros = [[macroDefinitions allKeys] mutableCopy];
+    [macros sortUsingSelector:@selector(compare:)];
 }
 
 - (void)handleMacroChangedNotification:(NSNotification *)notif{
@@ -204,7 +205,6 @@
 - (void)windowWillClose:(NSNotification *)notification{
 	if(![[self window] makeFirstResponder:[self window]])
         [[self window] endEditingFor:nil];
-    [self setMacroDataSource:nil];
 }
 
 - (IBAction)closeAction:(id)sender{
