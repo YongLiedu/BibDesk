@@ -491,8 +491,9 @@ The groupedPublications array is a subset of the publications array, developed b
 	[headerCell selectItemWithTitle:currentGroupField];
     
 	BibTypeManager *typeMan = [BibTypeManager sharedManager];
+	NSArray *groupFields = [[OFPreferenceWrapper sharedPreferenceWrapper] stringArrayForKey:BDSKGroupFieldsKey];
     NSArray *colNames = [typeMan allFieldNamesIncluding:[NSArray arrayWithObjects:BDSKTypeString, BDSKCrossrefString, nil]
-                                              excluding:[[typeMan invalidGroupFields] allObjects]];
+                                              excluding:[[[typeMan invalidGroupFields] allObjects] arrayByAddingObjectsFromArray:groupFields]];
     
     BDSKAddFieldSheetController *addFieldController = [[BDSKAddFieldSheetController alloc] initWithPrompt:NSLocalizedString(@"Name of group field:",@"")
                                                                                               fieldsArray:colNames];
@@ -509,7 +510,7 @@ The groupedPublications array is a subset of the publications array, developed b
 		return;
 	}
 	
-	NSMutableArray *array = [[[OFPreferenceWrapper sharedPreferenceWrapper] stringArrayForKey:BDSKGroupFieldsKey] mutableCopy];
+	NSMutableArray *array = [groupFields mutableCopy];
 	[array addObject:newGroupField];
 	[[OFPreferenceWrapper sharedPreferenceWrapper] setObject:array forKey:BDSKGroupFieldsKey];	
     
@@ -517,7 +518,7 @@ The groupedPublications array is a subset of the publications array, developed b
                                                         object:self
                                                       userInfo:[NSDictionary dictionaryWithObjectsAndKeys:newGroupField, NSKeyValueChangeNewKey, [NSNumber numberWithInt:NSKeyValueChangeInsertion], NSKeyValueChangeKindKey, nil]];        
     
-	[headerCell insertItemWithTitle:newGroupField atIndex:[array count] - 1];
+	[headerCell insertItemWithTitle:newGroupField atIndex:[groupFields count]];
 	[self setCurrentGroupField:newGroupField];
 	[headerCell selectItemWithTitle:currentGroupField];
 	
