@@ -137,8 +137,8 @@ CFStringRef __BDStringCreateByCopyingExpandedValue(BDSKComplexString *cxString)
 }
 
 - (id)init{
-    self = [self initWithArray:nil macroResolver:nil];
-	return self;
+    [self release];
+	return @"";
 }
 
 /* designated initializer */
@@ -149,8 +149,9 @@ CFStringRef __BDStringCreateByCopyingExpandedValue(BDSKComplexString *cxString)
             return nil;
         }
         if ([nodesArray count] == 1 && [(BDSKStringNode *)[nodesArray objectAtIndex:0] type] == BSN_STRING) {
+            NSString *string = [[(BDSKStringNode *)[nodesArray objectAtIndex:0] value] retain];
             [self release];
-            return [[[(BDSKStringNode *)[nodesArray objectAtIndex:0] value] retain] autorelease];
+            return string;
         }
         nodes = [nodesArray copyWithZone:[self zone]];
         // we don't retain, as the macroResolver might retain us as a macro value
@@ -429,7 +430,7 @@ CFStringRef __BDStringCreateByCopyingExpandedValue(BDSKComplexString *cxString)
 #pragma mark complex string methods
 
 - (BDSKMacroResolver *)macroResolver{
-    return (macroResolver == nil && isComplex == YES) ? [BDSKMacroResolver defaultMacroResolver] : macroResolver;
+    return (macroResolver == nil && complex == YES) ? [BDSKMacroResolver defaultMacroResolver] : macroResolver;
 }
 
 + (BOOL)isCircularMacro:(NSString *)macroKey forDefinition:(NSString *)macroString macroResolver:(BDSKMacroResolver *)macroResolver{
