@@ -65,6 +65,16 @@ static void SCDynamicStoreChanged(SCDynamicStoreRef store, CFArrayRef changedKey
     [computerName release];
     computerName = nil;
 }
+static NSString *BDSKComputerName() {
+    if(computerName == nil){
+        computerName = (NSString *)SCDynamicStoreCopyComputerName(dynamicStore, NULL);
+        if(computerName == nil){
+            NSLog(@"Unable to get computer name with SCDynamicStoreCopyComputerName");
+            computerName = [[[[[NSProcessInfo processInfo] hostName] componentsSeparatedByString:@"."] firstObject] copy];
+        }
+    }
+    return computerName;
+}
 
 @implementation BibDocument (Sharing)
 
@@ -108,7 +118,7 @@ static void SCDynamicStoreChanged(SCDynamicStoreRef store, CFArrayRef changedKey
         [groupTableView reloadData];
     } 
     // we want to ignore our own shared services, as the write/read occur on the same run loop, and our file handle blocks
-    else if([[aNetService name] hasPrefix:[NSString stringWithFormat:@"%@ - ", [self computerName]]] == NO){
+    else if([[aNetService name] hasPrefix:[NSString stringWithFormat:@"%@ - ", BDSKComputerName()]] == NO){
         BDSKSharedGroup *group = [[BDSKSharedGroup alloc] initWithService:aNetService];
         [sharedGroups addObject:group];
         [group release];
@@ -151,18 +161,6 @@ static void SCDynamicStoreChanged(SCDynamicStoreRef store, CFArrayRef changedKey
     [groupTableView reloadData];
 }
 
-- (NSString *)computerName;
-{
-    if(computerName == nil){
-        computerName = (NSString *)SCDynamicStoreCopyComputerName(dynamicStore, NULL);
-        if(computerName == nil){
-            NSLog(@"Unable to get computer name with SCDynamicStoreCopyComputerName");
-            computerName = [[[[[NSProcessInfo processInfo] hostName] componentsSeparatedByString:@"."] firstObject] copy];
-        }
-    }
-    return comuputerName;
-}
-
 - (NSString *)netServiceName;
 {
     NSString *documentName = [[[self fileName] lastPathComponent] stringByDeletingPathExtension];
@@ -172,7 +170,7 @@ static void SCDynamicStoreChanged(SCDynamicStoreRef store, CFArrayRef changedKey
     // docs say to use computer name instead of host name http://developer.apple.com/qa/qa2001/qa1228.html
     
     // we append document name since the same computer vends multiple documents
-    return [NSString stringWithFormat:@"%@ - %@", [self computerName], documentName];
+    return [NSString stringWithFormat:@"%@ - %@", BDSKComputerName(), documentName];
 }
 
 #pragma mark Exporting our data
