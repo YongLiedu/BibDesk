@@ -297,9 +297,24 @@ static NSString *BDSKComputerName() {
 - (void)connectionReceived:(NSNotification *)aNotification{
     NSFileHandle *incomingConnection = [[aNotification userInfo] objectForKey:NSFileHandleNotificationFileHandleItem];
     NSData *dataToSend = [NSKeyedArchiver archivedDataWithRootObject:publications];
-    [incomingConnection writeData:dataToSend];
+    if(dataToSend != nil){
+        // If we want to make this cross-platform (say if JabRef wanted to add Bonjour support), we could pass BibTeX as another key in the dictionary, and use an XML plist for reading at the other end
+        NSDictionary *dictionary = [NSDictionary dictionaryWithObjectsAndKeys:dataToSend, [BibDocument keyForSharedArchivedData], nil];
+        NSString *errorString = nil;
+        dataToSend = [NSPropertyListSerialization dataFromPropertyList:dictionary format:NSPropertyListBinaryFormat_v1_0 errorDescription:&errorString];
+        if(errorString != nil){
+            NSLog(@"Error serializing publications for sharing: %@", errorString);
+            [errorString release];
+        }
+    }
+    if(dataToSend != nil)
+        [incomingConnection writeData:dataToSend];
+    else
+        NSLog(@"Unknown error occurred; no data to share.");
     [incomingConnection closeFile];
     [[aNotification object] acceptConnectionInBackgroundAndNotify];
 }
+
++ (NSString *)keyForSharedArchivedData { return @"publications_v1"; }
 
 @end

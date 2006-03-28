@@ -390,6 +390,10 @@ static NSString *BDSKAllPublicationsLocalizedString = nil;
 
 @end
 
+/* Subclass for Bonjour sharing.  Designated initializer takes an NSNetService as parameter. */
+
+#import "BibDocument_Sharing.h"
+
 @implementation BDSKSharedGroup
 
 - (id)initWithService:(NSNetService *)aService;
@@ -449,8 +453,15 @@ static NSString *BDSKAllPublicationsLocalizedString = nil;
 
 - (NSArray *)publications
 {
-    if (publications == nil && downloadComplete == YES && [data length] != 0)
-        publications = [[NSKeyedUnarchiver unarchiveObjectWithData:data] retain];
+    if (publications == nil && downloadComplete == YES && [data length] != 0){
+        NSString *errorString = nil;
+        NSDictionary *dictionary = [NSPropertyListSerialization propertyListFromData:data mutabilityOption:NSPropertyListImmutable format:NULL errorDescription:&errorString];
+        if(errorString != nil){
+            NSLog(@"Error reading shared data: %@", errorString);
+            [errorString release];
+        } else
+            publications = [[NSKeyedUnarchiver unarchiveObjectWithData:[dictionary objectForKey:[BibDocument keyForSharedArchivedData]]] retain];
+    }
     return publications;
 }
 

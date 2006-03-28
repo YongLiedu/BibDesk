@@ -51,4 +51,7 @@ extern NSString *BDSKNetServiceDomain;
 
 - (void)connectionReceived:(NSNotification *)aNotification;
 
+// use class methods to access keys in the serialized shared dictionary
++ (NSString *)keyForSharedArchivedData;
+
 @end
