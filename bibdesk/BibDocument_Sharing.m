@@ -48,16 +48,52 @@
 // @@ register with http://www.dns-sd.org/ServiceTypes.html
 NSString *BDSKNetServiceDomain = @"_bdsk._tcp.";
 
-// @@ can we listen for SC changes and set this appropriately?  (affects remote display)
-// this is used to determine if a service listed in the browser is from the local host
-static NSString *hostName;
+// This is used to determine if a service listed in the browser is from the local host and for display
+static NSString *computerName = nil;
 
 /* Much of this was borrowed from Apple's sample code and modified to fit our needs
     file://localhost/Developer/Examples/Foundation/PictureSharing/
     file://localhost/Developer/Examples/Foundation/PictureSharingBrowser/
 */
 
+static SCDynamicStoreRef dynamicStore = NULL;
+static const void *retainCallBack(const void *info) { return [(id)info retain]; }
+static void releaseCallBack(const void *info) { [(id)info release]; }
+static CFStringRef copyDescriptionCallBack(const void *info) { return (CFStringRef)[[(id)info description] copy]; }
+static void SCDynamicStoreChanged(SCDynamicStoreRef store, CFArrayRef changedKeys, void *info)
+{
+    [computerName release];
+    computerName = nil;
+}
+
 @implementation BibDocument (Sharing)
+
++ (void)didLoad;
+{
+    /* Ensure that computer name changes are propagated as future clients connect to a document.  We could register for this notification on a per-document basis and force a restart, but it's probably not worth while unless name changes cause a problem.  Also, note that the OS will change the computer name to avoid conflicts by appending "(2)" or similar to the previous name, which is likely the most common scenario.
+    */
+    if(dynamicStore == NULL){
+        CFAllocatorRef alloc = CFAllocatorGetDefault();
+        SCDynamicStoreContext SCNSObjectContext = {
+            0,                         // version
+            (id)nil,                   // any NSCF type
+            &retainCallBack,
+            &releaseCallBack,
+            &copyDescriptionCallBack
+        };
+        dynamicStore = SCDynamicStoreCreate(alloc, (CFStringRef)[[NSBundle mainBundle] objectForInfoDictionaryKey:(NSString *)kCFBundleIdentifierKey], &SCDynamicStoreChanged, &SCNSObjectContext);
+        CFRunLoopSourceRef rlSource = SCDynamicStoreCreateRunLoopSource(alloc, dynamicStore, 0);
+        CFRunLoopAddSource(CFRunLoopGetCurrent(), rlSource, kCFRunLoopCommonModes);
+        CFRelease(rlSource);
+        CFStringRef key = SCDynamicStoreKeyCreateComputerName(alloc);
+        CFArrayRef keys = CFArrayCreate(alloc, (const void **)&key, 1, &kCFTypeArrayCallBacks);
+        CFRelease(key);
+        
+        if(SCDynamicStoreSetNotificationKeys(dynamicStore, keys, NULL) == FALSE)
+            fprintf(stderr, "%s: unable to register for dynamic store notifications.\n", __PRETTY_FUNCTION__);
+        CFRelease(keys);
+    }
+}
 
 #pragma mark Reading other data
 
@@ -72,7 +108,7 @@ static NSString *hostName;
         [groupTableView reloadData];
     } 
     // we want to ignore our own shared services, as the write/read occur on the same run loop, and our file handle blocks
-    else if([[aNetService name] hasPrefix:[NSString stringWithFormat:@"%@ - ", hostName]] == NO){
+    else if([[aNetService name] hasPrefix:[NSString stringWithFormat:@"%@ - ", computerName]] == NO){
         BDSKSharedGroup *group = [[BDSKSharedGroup alloc] initWithService:aNetService];
         [sharedGroups addObject:group];
         [group release];
@@ -85,6 +121,8 @@ static NSString *hostName;
     NSEnumerator *e = [sharedGroups objectEnumerator];
     NSMutableArray *array = [NSMutableArray array];
     BDSKSharedGroup *group;
+    
+    // create an array of the groups we should keep by comparing services with the one that just went away
     while(group = [e nextObject])
         if([[group service] isEqual:aNetService] == NO)
             [array addObject:group];
@@ -93,7 +131,6 @@ static NSString *hostName;
     [groupTableView reloadData];
 }
 
-// need notification handlers for enable/disable listening as well, for changes from prefs
 - (void)enableSharedBrowsing;
 {
     // lazily create the shared resources
@@ -116,17 +153,21 @@ static NSString *hostName;
 
 - (NSString *)netServiceName;
 {
-    NSString *serviceName = [[[self fileName] lastPathComponent] stringByDeletingPathExtension];
+    NSString *documentName = [[[self fileName] lastPathComponent] stringByDeletingPathExtension];
     // @@ probably shouldn't share unsaved files
-    if(serviceName == nil) serviceName = [self displayName];
-    if(hostName == nil){
-        hostName = (NSString *)SCDynamicStoreCopyComputerName(NULL, NULL);
-        if(hostName == nil){
-            NSLog(@"Unable to get hostname with SCDynamicStoreCopyComputerName");
-            hostName = [[[[[NSProcessInfo processInfo] hostName] componentsSeparatedByString:@"."] firstObject] copy];
+    if(documentName == nil) documentName = [self displayName];
+    
+    // docs say to use computer name instead of host name http://developer.apple.com/qa/qa2001/qa1228.html
+    if(computerName == nil){
+        computerName = (NSString *)SCDynamicStoreCopyComputerName(dynamicStore, NULL);
+        if(computerName == nil){
+            NSLog(@"Unable to get computer name with SCDynamicStoreCopyComputerName");
+            computerName = [[[[[NSProcessInfo processInfo] hostName] componentsSeparatedByString:@"."] firstObject] copy];
         }
     }
-    return [NSString stringWithFormat:@"%@ - %@", hostName, serviceName];
+    
+    // we append document name since the same computer vends multiple documents
+    return [NSString stringWithFormat:@"%@ - %@", computerName, documentName];
 }
 
 #pragma mark Exporting our data
