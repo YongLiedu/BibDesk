@@ -326,7 +326,7 @@ static BDSKGlobalMacroResolver *defaultMacroResolver;
             
             while (macroKey = [macroE nextObject]) {
                 macroString = [macroDefs objectForKey:macroKey];
-                if([BDSKComplexString isCircularMacro:macroKey forDefinition:macroString macroResolver:self])
+                if([BDSKComplexString isCircularMacro:macroKey forDefinition:macroString])
                     NSLog(@"Macro from file %@ leads to circular definition, ignored: %@ = %@", file, macroKey, [macroString stringAsBibTeXString]);
                 else
                     [fileMacroDefinitions setObject:macroString forKey:macroKey];

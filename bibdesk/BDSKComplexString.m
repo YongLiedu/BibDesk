@@ -45,24 +45,11 @@
 
 static NSCharacterSet *macroCharSet = nil;
 
-/*
- This function is an example of how to subvert object-oriented programming; it depends on implementation details of the objects and accesses fields directly.  This is justified since the complex string expansion is a low-level function that gets called by the NSString primitive methods, and it needs to be as fast as possible.  Alternatively, we could store the nodes in a buffer at creation time, but the performance gain isn't worth losing the features of NSArray at this point.
- 
- Assumptions: cxString->nodes is an NSArray containing only BDSKStringNodes
-              cxString->macroResolveris a BDSKMacroResolver
-              BDSKStringNode fields are public
-*/
 #define SAFE_ALLOCA_SIZE (8 * 8192)
 
 static inline
-CFStringRef __BDStringCreateByCopyingExpandedValue(BDSKComplexString *cxString)
+CFStringRef __BDStringCreateByCopyingExpandedValue(NSArray *nodes, BDSKMacroResolver *macroResolver)
 {
-    
-    // If this was an instance method instead of a function, we could do this without @defs
-    NSArray *nodes = ((struct { @defs(BDSKComplexString) } *)cxString)->nodes;
-	if (nodes == nil)
-		return nil;
-	    
 	BDSKStringNode *node = nil;
     BDSKStringNode **stringNodes;
     int iMax = [nodes count];
@@ -86,8 +73,6 @@ CFStringRef __BDStringCreateByCopyingExpandedValue(BDSKComplexString *cxString)
 
     // This avoids the overhead of calling objectAtIndex: or using an enumerator, since we can now just increment a pointer to traverse the contents of the array.
     [nodes getObjects:stringNodes];
-    
-    BDSKMacroResolver *macroResolver = ((struct { @defs(BDSKComplexString) } *)cxString)->macroResolver;
     
     // Guess at size of (50 * (no. of nodes)); this is likely too high, but resizing is a sizeable performance hit.
     CFMutableStringRef mutStr = CFStringCreateMutable(CFAllocatorGetDefault(), (iMax * 50));
@@ -221,14 +206,14 @@ CFStringRef __BDStringCreateByCopyingExpandedValue(BDSKComplexString *cxString)
 /* A bunch of methods that have to be overridden in a concrete subclass of NSString */
 
 - (unsigned int)length{
-    CFStringRef expVal = __BDStringCreateByCopyingExpandedValue(self);
+    CFStringRef expVal = __BDStringCreateByCopyingExpandedValue(nodes, macroResolver);
     unsigned len = CFStringGetLength(expVal);
     if(expVal != NULL) CFRelease(expVal);
     return len;
 }
 
 - (unichar)characterAtIndex:(unsigned)index{
-    CFStringRef expVal = __BDStringCreateByCopyingExpandedValue(self);
+    CFStringRef expVal = __BDStringCreateByCopyingExpandedValue(nodes, macroResolver);
     unichar ch = CFStringGetCharacterAtIndex(expVal, index);
     if(expVal != NULL) CFRelease(expVal);
     return ch;
@@ -237,14 +222,14 @@ CFStringRef __BDStringCreateByCopyingExpandedValue(BDSKComplexString *cxString)
 /* Overridden NSString performance methods */
 
 - (void)getCharacters:(unichar *)buffer{
-    CFStringRef expVal = __BDStringCreateByCopyingExpandedValue(self);
+    CFStringRef expVal = __BDStringCreateByCopyingExpandedValue(nodes, macroResolver);
     CFRange fullRange = CFRangeMake(0, CFStringGetLength(expVal));
     CFStringGetCharacters(expVal, fullRange, buffer);
     if(expVal != NULL) CFRelease(expVal);
 }
 
 - (void)getCharacters:(unichar *)buffer range:(NSRange)aRange{
-    CFStringRef expVal = __BDStringCreateByCopyingExpandedValue(self);
+    CFStringRef expVal = __BDStringCreateByCopyingExpandedValue(nodes, macroResolver);
     CFRange range = CFRangeMake(aRange.location, aRange.length);
     CFStringGetCharacters(expVal, range, buffer);
     if(expVal != NULL) CFRelease(expVal);
@@ -332,7 +317,7 @@ CFStringRef __BDStringCreateByCopyingExpandedValue(BDSKComplexString *cxString)
 }
 
 - (NSString *)stringAsExpandedBibTeXString{
-    NSString *expValue = (NSString *)__BDStringCreateByCopyingExpandedValue(self);
+    NSString *expValue = (NSString *)__BDStringCreateByCopyingExpandedValue(nodes, macroResolver);
     if(expValue == nil)
         return @"";
     
@@ -433,13 +418,12 @@ CFStringRef __BDStringCreateByCopyingExpandedValue(BDSKComplexString *cxString)
     return (macroResolver == nil && complex == YES) ? [BDSKMacroResolver defaultMacroResolver] : macroResolver;
 }
 
-+ (BOOL)isCircularMacro:(NSString *)macroKey forDefinition:(NSString *)macroString macroResolver:(BDSKMacroResolver *)macroResolver{
++ (BOOL)isCircularMacro:(NSString *)macroKey forDefinition:(NSString *)macroString{
     if([macroString isComplex] == NO)
         return NO;
-    NSMutableArray *descendents = [NSMutableArray arrayWithObject:macroString];
     
-    if (macroResolver == nil)
-        macroResolver = [BDSKMacroResolver defaultMacroResolver];
+    BDSKMacroResolver *macroResolver = [(BDSKComplexString *)macroString macroResolver];
+    NSMutableArray *descendents = [NSMutableArray arrayWithObject:macroString];
     
     while([descendents count] > 0){
         NSArray *values = [descendents copy];
@@ -450,9 +434,6 @@ CFStringRef __BDStringCreateByCopyingExpandedValue(BDSKComplexString *cxString)
         [descendents removeAllObjects];
         
         while(value = [valueE nextObject]){
-            if([value isComplex] == NO || [(BDSKComplexString *)value macroResolver] != macroResolver)
-                continue;
-            
             NSEnumerator *nodeE = [[value nodes] objectEnumerator];
             BDSKStringNode *node;
             
@@ -465,7 +446,7 @@ CFStringRef __BDStringCreateByCopyingExpandedValue(BDSKComplexString *cxString)
                 if([key caseInsensitiveCompare:macroKey] == NSOrderedSame)
                     return YES;
                 value = [macroResolver valueOfMacro:key];
-                if(value != nil)
+                if([value isComplex] == YES)
                     [descendents addObject:value];
             }
         }

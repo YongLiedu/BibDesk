@@ -41,7 +41,7 @@
 
 @class BDSKMacroResolver;
 
-@interface NSKeyedUnarchiver (NSKeyedUnarchiverComplexStringDelegate)
+@interface NSObject (NSKeyedUnarchiverComplexStringDelegate)
 - (BDSKMacroResolver *)unarchiverMacroResolver:(NSKeyedUnarchiver *)unarchiver;
 @end
 
@@ -91,15 +91,14 @@
 - (BDSKMacroResolver *)macroResolver;
 
 /*!
-    @method     isCircularMacro:forDefinition:macroResolver:
+    @method     isCircularMacro:forDefinition:
     @abstract   Checks whether a macro will lead to a circular definition
     @discussion (description)
 	@param		macroKey The key for the macro
 	@param		macroString The definition of the macro
-	@param		macroResolver The macro resolver 
     @result     -
 */
-+ (BOOL)isCircularMacro:(NSString *)macroKey forDefinition:(NSString *)macroString macroResolver:(BDSKMacroResolver *)macroResolver;
++ (BOOL)isCircularMacro:(NSString *)macroKey forDefinition:(NSString *)macroString;
 
 @end
 
