@@ -47,7 +47,13 @@
 #import "OATypeAheadSelectionHelper_Extensions.h"
 
 @implementation MacroWindowController
-- (id) init {
+
+- (id)init {
+    self = [self initWithMacroDataSource:nil];
+    return self;
+}
+
+- (id)initWithMacroDataSource:(BDSKMacroResolver *)aMacroDataSource {
     if (self = [super initWithWindowNibName:@"MacroWindow"]) {
         macroDataSource = nil;
         
@@ -56,6 +62,8 @@
                 
 		tableCellFormatter = [[BDSKFormCellFormatter alloc] initWithDelegate:self macroResolver:nil];
 		macroTextFieldWC = [[MacroTableViewWindowController alloc] init];
+        
+        [self setMacroDataSource:aMacroDataSource];
     }
     return self;
 }
@@ -71,8 +79,6 @@
 
 - (void)awakeFromNib{
     NSTableColumn *tc = [tableView tableColumnWithIdentifier:@"macro"];
-    if([[self macroDataSource] respondsToSelector:@selector(displayName)])
-        [[self window] setTitle:[NSString stringWithFormat:@"%@: %@", [[self window] title], [[self macroDataSource] displayName]]];
     [[tc dataCell] setFormatter:[[[MacroKeyFormatter alloc] init] autorelease]];
     [tableView registerForDraggedTypes:[NSArray arrayWithObjects:NSStringPboardType, NSFilenamesPboardType, nil]];
     tc = [tableView tableColumnWithIdentifier:@"definition"];

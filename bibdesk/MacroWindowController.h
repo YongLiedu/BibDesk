@@ -53,6 +53,8 @@
 	MacroTableViewWindowController *macroTextFieldWC;
 }
 
+- (id)initWithMacroDataSource:(BDSKMacroResolver *)aMacroDataSource;
+
 - (void)setMacroDataSource:(id)newMacroDataSource;
 - (id)macroDataSource;
 - (void)refreshMacros;
