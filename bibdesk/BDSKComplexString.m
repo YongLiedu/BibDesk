@@ -44,6 +44,7 @@
 #pragma mark Private complex string expansion
 
 static NSCharacterSet *macroCharSet = nil;
+static NSZone *complexStringExpansionZone = NULL;
 
 #define SAFE_ALLOCA_SIZE (8 * 8192)
 
@@ -54,25 +55,21 @@ CFStringRef __BDStringCreateByCopyingExpandedValue(NSArray *nodes, BDSKMacroReso
     BDSKStringNode **stringNodes;
     int iMax = [nodes count];
     
-    // This zone will automatically be resized as necessary, but won't free the underlying memory; we could statically allocate memory for stringNodes with NSZoneMalloc and then realloc as needed, but then we run into multithreading problems writing to the same memory location.  Using NSZoneMalloc/NSZoneFree allows us to avoid the overhead of malloc/free doing their own zone lookups.
-    static NSZone *zone = NULL;
-    if(!zone){
-        zone = NSCreateZone(1024, 1024, NO);
-        NSSetZoneName(zone, @"BDSKComplexStringExpansionZone");
-    }
-    
+    if(nodes == nil || iMax == 0)
+        return nil;
+        
     // Allocate memory on the stack using alloca() if possible, so we don't have malloc/free overhead; since the array of string nodes is typically small, this should almost always work.
     BOOL usedMalloc = NO;
     size_t bufSize = sizeof(BDSKStringNode *) * iMax;
     if(bufSize < SAFE_ALLOCA_SIZE){
         stringNodes = (BDSKStringNode **)alloca(bufSize);
         usedMalloc = NO;
-    } else if(stringNodes = (BDSKStringNode **)NSZoneMalloc(zone, bufSize))
+    } else if(stringNodes = (BDSKStringNode **)NSZoneMalloc(complexStringExpansionZone, bufSize))
         usedMalloc = YES;
-    else [NSException raise:NSInternalInconsistencyException format:@"Unable to malloc memory in zone %@", NSZoneName(zone)];
+    else [NSException raise:NSInternalInconsistencyException format:@"Unable to malloc memory in zone %@", NSZoneName(complexStringExpansionZone)];
 
     // This avoids the overhead of calling objectAtIndex: or using an enumerator, since we can now just increment a pointer to traverse the contents of the array.
-    [nodes getObjects:stringNodes];
+    CFArrayGetValues((CFArrayRef)nodes, (CFRange){0, iMax}, (const void **)stringNodes);
     
     // Guess at size of (50 * (no. of nodes)); this is likely too high, but resizing is a sizeable performance hit.
     CFMutableStringRef mutStr = CFStringCreateMutable(CFAllocatorGetDefault(), (iMax * 50));
@@ -96,7 +93,7 @@ CFStringRef __BDStringCreateByCopyingExpandedValue(NSArray *nodes, BDSKMacroReso
     
     OBPOSTCONDITION(!BDIsEmptyString(mutStr));
     
-    if(usedMalloc) NSZoneFree(zone, stringNodes);
+    if(usedMalloc) NSZoneFree(complexStringExpansionZone, stringNodes);
     
     return mutStr;
 }
@@ -114,6 +111,12 @@ CFStringRef __BDStringCreateByCopyingExpandedValue(NSArray *nodes, BDSKMacroReso
     [tmpSet addCharactersInString:@"!$&*+-./:;<>?[]^_`|"]; // see the btparse documentation
     macroCharSet = [tmpSet copy];
     [tmpSet release];
+    
+    // This zone will automatically be resized as necessary, but won't free the underlying memory; we could statically allocate memory for stringNodes with NSZoneMalloc and then realloc as needed, but then we run into multithreading problems writing to the same memory location.  Using NSZoneMalloc/NSZoneFree allows us to avoid the overhead of malloc/free doing their own zone lookups.
+    if(complexStringExpansionZone == NULL){
+        complexStringExpansionZone = NSCreateZone(1024, 1024, NO);
+        NSSetZoneName(complexStringExpansionZone, @"BDSKComplexStringExpansionZone");
+    }    
 
 }
 
@@ -360,7 +363,6 @@ CFStringRef __BDStringCreateByCopyingExpandedValue(NSArray *nodes, BDSKMacroReso
 	NSArray *targetNodes = [target nodes];
 	NSArray *replNodes = [replacement nodes];
 	NSString *newString;
-	BDSKStringNode *node;
 	
 	unsigned int num = 0;
 	int tNum = [targetNodes count];
