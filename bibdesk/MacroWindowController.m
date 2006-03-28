@@ -65,6 +65,7 @@
     [macros release];
     [tableCellFormatter release];
 	[macroTextFieldWC release];
+	[macroDataSource release];
     [super dealloc];
 }
 
@@ -90,7 +91,8 @@
 						object:macroDataSource];
     }
 	
-	macroDataSource = newMacroDataSource;
+	[macroDataSource release];
+	macroDataSource = [newMacroDataSource retain];
     [tableCellFormatter setMacroResolver:newMacroDataSource];
     // register to listen for changes in the macros.
     // mostly used to correctly catch undo changes.

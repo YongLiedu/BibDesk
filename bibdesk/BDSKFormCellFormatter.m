@@ -57,6 +57,7 @@
 }
 
 - (void)dealloc {
+    [macroResolver release];
     [parsedString release];
     [parseError release];
     [super dealloc];
@@ -200,7 +201,10 @@
 }
 
 - (void)setMacroResolver:(BDSKMacroResolver *)newMacroResolver {
-    macroResolver = newMacroResolver;
+    if (macroResolver != newMacroResolver) {
+        [macroResolver release];
+        macroResolver = [newMacroResolver retain];
+    }
 }
 
 - (BOOL)editAsComplexString {
