@@ -108,7 +108,7 @@ static void SCDynamicStoreChanged(SCDynamicStoreRef store, CFArrayRef changedKey
         [groupTableView reloadData];
     } 
     // we want to ignore our own shared services, as the write/read occur on the same run loop, and our file handle blocks
-    else if([[aNetService name] hasPrefix:[NSString stringWithFormat:@"%@ - ", computerName]] == NO){
+    else if([[aNetService name] hasPrefix:[NSString stringWithFormat:@"%@ - ", [self computerName]]] == NO){
         BDSKSharedGroup *group = [[BDSKSharedGroup alloc] initWithService:aNetService];
         [sharedGroups addObject:group];
         [group release];
@@ -151,13 +151,8 @@ static void SCDynamicStoreChanged(SCDynamicStoreRef store, CFArrayRef changedKey
     [groupTableView reloadData];
 }
 
-- (NSString *)netServiceName;
+- (NSString *)computerName;
 {
-    NSString *documentName = [[[self fileName] lastPathComponent] stringByDeletingPathExtension];
-    // @@ probably shouldn't share unsaved files
-    if(documentName == nil) documentName = [self displayName];
-    
-    // docs say to use computer name instead of host name http://developer.apple.com/qa/qa2001/qa1228.html
     if(computerName == nil){
         computerName = (NSString *)SCDynamicStoreCopyComputerName(dynamicStore, NULL);
         if(computerName == nil){
@@ -165,9 +160,19 @@ static void SCDynamicStoreChanged(SCDynamicStoreRef store, CFArrayRef changedKey
             computerName = [[[[[NSProcessInfo processInfo] hostName] componentsSeparatedByString:@"."] firstObject] copy];
         }
     }
+    return comuputerName;
+}
+
+- (NSString *)netServiceName;
+{
+    NSString *documentName = [[[self fileName] lastPathComponent] stringByDeletingPathExtension];
+    // @@ probably shouldn't share unsaved files
+    if(documentName == nil) documentName = [self displayName];
+    
+    // docs say to use computer name instead of host name http://developer.apple.com/qa/qa2001/qa1228.html
     
     // we append document name since the same computer vends multiple documents
-    return [NSString stringWithFormat:@"%@ - %@", computerName, documentName];
+    return [NSString stringWithFormat:@"%@ - %@", [self computerName], documentName];
 }
 
 #pragma mark Exporting our data
