@@ -167,10 +167,26 @@ static NSString *stringFromBTField(AST *field,  NSString *fieldName,  NSString *
                             field = bt_next_field (entry, NULL, &fieldname);
                             NSString *macroKey = [NSString stringWithCString: field->text usingEncoding:parserEncoding];
                             NSString *macroString = stringFromBTField(field, sFieldName, filePath, aDocument, parserEncoding); // handles TeXification
-                            if([BDSKComplexString isCircularMacro:macroKey forDefinition:macroString])
-                                NSLog(@"Macro leads to circular definition, ignored: %@ = %@", macroKey, [macroString stringAsBibTeXString]);
-                            else
+                            if([BDSKComplexString isCircularMacro:macroKey forDefinition:macroString]){
+                                NSString *type = NSLocalizedString(@"Error", @"");
+                                NSString *message = NSLocalizedString(@"Macro leads to circular definition, ignored.", @"");
+
+                                BDSKErrObj *errorObject = [[BDSKErrObj alloc] init];
+                                [errorObject setValue:filePath forKey:@"fileName"];
+                                [errorObject setValue:[NSNumber numberWithInt:field->line] forKey:@"lineNumber"];
+                                [errorObject setValue:type forKey:@"errorClassName"];
+                                [errorObject setValue:message forKey:@"errorMessage"];
+                                
+                                [[NSNotificationCenter defaultCenter] postNotificationName:BDSKParserErrorNotification
+                                                                                    object:errorObject];
+                                [errorObject release];
+                                // make sure the error panel is displayed, regardless of prefs; we can't show the "Keep going/data loss" alert, though
+                                [[BDSKErrorObjectController sharedErrorObjectController] performSelectorOnMainThread:@selector(showErrorPanel:) withObject:nil waitUntilDone:NO];
+                                
+                                OFError(&error, BDSKParserError, NSLocalizedDescriptionKey, NSLocalizedString(@"Circular macro ignored.", @""), nil);
+                            }else{
                                 [macroResolver addMacroDefinitionWithoutUndo:macroString forMacro:macroKey];
+                            }
                         }else if([entryType isEqualToString:@"comment"]){
                             NSMutableString *commentStr = [[NSMutableString alloc] init];
                             field = NULL;
