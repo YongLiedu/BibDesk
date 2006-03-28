@@ -142,9 +142,18 @@ CFStringRef __BDStringCreateByCopyingExpandedValue(BDSKComplexString *cxString)
 }
 
 /* designated initializer */
-- (id)initWithArray:(NSArray *)a macroResolver:(BDSKMacroResolver *)theMacroResolver{
+- (id)initWithArray:(NSArray *)nodesArray macroResolver:(BDSKMacroResolver *)theMacroResolver{
     if (self = [super init]) {
-        nodes = [[NSArray allocWithZone:[self zone]] initWithArray:a copyItems:YES];
+        if ([nodesArray count] == 0) {
+            [self release];
+            return nil;
+        }
+        if ([nodesArray count] == 1 && [(BDSKStringNode *)[nodesArray objectAtIndex:0] type] == BSN_STRING) {
+            [self release];
+            return [[[(BDSKStringNode *)[nodesArray objectAtIndex:0] value] retain] autorelease];
+        }
+        nodes = [nodesArray copyWithZone:[self zone]];
+        // we don't retain, as the macroResolver might retain us as a macro value
         macroResolver = (theMacroResolver == [BDSKMacroResolver defaultMacroResolver]) ? nil : theMacroResolver;
 		complex = YES;
 	}		
@@ -154,26 +163,18 @@ CFStringRef __BDStringCreateByCopyingExpandedValue(BDSKComplexString *cxString)
 - (id)initWithInheritedValue:(NSString *)aValue {
     if (self = [super init]) {
 		if (aValue == nil) {
-			[self release]; // should we do this?
+			[self release];
 			return nil;
 		}
-		if ([aValue isComplex]) {
-			nodes = [[NSArray allocWithZone:[self zone]] initWithArray:[(BDSKComplexString *)aValue nodes] copyItems:YES];
+        
+        nodes = [[aValue nodes] retain];
+        complex = [aValue isComplex];
+		inherited = YES;
+		if (complex) {
 			macroResolver = [(BDSKComplexString *)aValue macroResolver];
             if (macroResolver == [BDSKMacroResolver defaultMacroResolver]) 
                 macroResolver = nil;
-			complex = YES;
-		} else {
-			if ([aValue isInherited]) {
-				nodes = [[NSArray allocWithZone:[self zone]] initWithArray:[(BDSKComplexString *)aValue nodes] copyItems:YES];
-			} else {
-				BDSKStringNode *node = [[BDSKStringNode allocWithZone:[self zone]] initWithQuotedString:aValue];
-				nodes = [[NSArray allocWithZone:[self zone]] initWithObjects:node, nil];
-				[node release];
-			}
-			complex = NO;
 		}
-		inherited = YES;
 	}
 	return self;
 }
@@ -258,10 +259,8 @@ CFStringRef __BDStringCreateByCopyingExpandedValue(BDSKComplexString *cxString)
 	
 	if (inherited == NO) 
         return [self retain];
-	else if (complex == YES) 
+	else 
         return [[BDSKComplexString allocWithZone:zone] initWithArray:nodes macroResolver:macroResolver];
-    else // must be inherited with a single string node
-        return [[[nodes objectAtIndex:0] value] copyWithZone:zone];
 }
 
 - (BOOL)isComplex {
@@ -272,11 +271,15 @@ CFStringRef __BDStringCreateByCopyingExpandedValue(BDSKComplexString *cxString)
     return inherited;
 }
 
+- (NSArray *)nodes{
+    return nodes;
+}
+
 - (BOOL)isEqualAsComplexString:(NSString *)other{
 	if ([self isComplex]) {
 		if (![other isComplex])
 			return NO;
-		return [[self nodes] isEqualToArray:[(BDSKComplexString*)other nodes]];
+		return [[self nodes] isEqualToArray:[other nodes]];
 	} else {
 		return [self isEqualToString:other];
 	}
@@ -288,7 +291,7 @@ CFStringRef __BDStringCreateByCopyingExpandedValue(BDSKComplexString *cxString)
 			return NSOrderedDescending;
 		
 		NSEnumerator *nodeE = [nodes objectEnumerator];
-		NSEnumerator *otherNodeE = [[(BDSKComplexString *)other nodes] objectEnumerator];
+		NSEnumerator *otherNodeE = [[other nodes] objectEnumerator];
 		BDSKStringNode *node = nil;
 		BDSKStringNode *otherNode = nil;
 		NSComparisonResult comp;
@@ -343,17 +346,9 @@ CFStringRef __BDStringCreateByCopyingExpandedValue(BDSKComplexString *cxString)
 
 - (BOOL)hasSubstring:(NSString *)target options:(unsigned)opts{
 	if ([self isInherited] && ![self isComplex])
-		return [[nodes objectAtIndex:0] hasSubstring:target options:opts];
+		return [[[nodes objectAtIndex:0] value] hasSubstring:target options:opts];
 	
-	NSArray *targetNodes;
-	
-	if ([target isComplex]) {
-		targetNodes = [(BDSKComplexString *)target nodes];
-	} else {
-		BDSKStringNode *node = [[BDSKStringNode alloc] initWithQuotedString:target];
-		targetNodes = [NSArray arrayWithObject:node];
-		[node release];
-	}
+	NSArray *targetNodes = [target nodes];
 	
 	int tNum = [targetNodes count];
 	int max = [nodes count] - tNum;
@@ -376,25 +371,10 @@ CFStringRef __BDStringCreateByCopyingExpandedValue(BDSKComplexString *cxString)
 
 - (NSString *)stringByReplacingOccurrencesOfString:(NSString *)target withString:(NSString *)replacement options:(unsigned)opts replacements:(unsigned int *)number{
 	NSMutableArray *newNodes = [nodes mutableCopy];
-	NSArray *targetNodes;
-	NSArray *replNodes;
+	NSArray *targetNodes = [target nodes];
+	NSArray *replNodes = [replacement nodes];
 	NSString *newString;
 	BDSKStringNode *node;
-	
-	if ([target isComplex]) {
-		targetNodes = [(BDSKComplexString *)target nodes];
-	} else {
-		node = [[BDSKStringNode alloc] initWithQuotedString:target];
-		targetNodes = [NSArray arrayWithObject:node];
-		[node release];
-	}
-	if ([replacement isComplex]) {
-		replNodes = [(BDSKComplexString *)replacement nodes];
-	} else {
-		node = [[BDSKStringNode alloc] initWithQuotedString:replacement];
-		replNodes = [NSArray arrayWithObject:node];
-		[node release];
-	}
 	
 	unsigned int num = 0;
 	int tNum = [targetNodes count];
@@ -406,7 +386,7 @@ CFStringRef __BDStringCreateByCopyingExpandedValue(BDSKComplexString *cxString)
 	
 	if ([self isInherited] || max < min) {
 		*number = 0;
-		return [[self copy] autorelease]; // should copy because of macroResolver
+		return [[self retain] autorelease];
 	}
 	
 	if (opts & NSAnchoredSearch) {
@@ -436,12 +416,9 @@ CFStringRef __BDStringCreateByCopyingExpandedValue(BDSKComplexString *cxString)
 	}
 	
 	if (num) {
-		if ([newNodes count] == 1 && [(BDSKStringNode *)[newNodes objectAtIndex:0] type] == BSN_STRING)
-			newString = [[[(BDSKStringNode *)[newNodes objectAtIndex:0] value] retain] autorelease];
-		else 
-			newString = [BDSKComplexString complexStringWithArray:newNodes macroResolver:[self macroResolver]];
+        newString = [BDSKComplexString complexStringWithArray:newNodes macroResolver:macroResolver];
 	} else {
-		newString = [[self copy] autorelease]; // should copy because of macroResolver
+		newString = [[self retain] autorelease];
 	} 
 	[newNodes release];
 	
@@ -451,12 +428,8 @@ CFStringRef __BDStringCreateByCopyingExpandedValue(BDSKComplexString *cxString)
 
 #pragma mark complex string methods
 
-- (NSArray *)nodes{
-    return nodes;
-}
-
 - (BDSKMacroResolver *)macroResolver{
-    return (macroResolver == nil) ? [BDSKMacroResolver defaultMacroResolver] : macroResolver;
+    return (macroResolver == nil && isComplex == YES) ? [BDSKMacroResolver defaultMacroResolver] : macroResolver;
 }
 
 + (BOOL)isCircularMacro:(NSString *)macroKey forDefinition:(NSString *)macroString macroResolver:(BDSKMacroResolver *)macroResolver{
@@ -479,8 +452,7 @@ CFStringRef __BDStringCreateByCopyingExpandedValue(BDSKComplexString *cxString)
             if([value isComplex] == NO || [(BDSKComplexString *)value macroResolver] != macroResolver)
                 continue;
             
-            NSArray *nodes = [(BDSKComplexString *)value nodes];
-            NSEnumerator *nodeE = [nodes objectEnumerator];
+            NSEnumerator *nodeE = [[value nodes] objectEnumerator];
             BDSKStringNode *node;
             
             while(node = [nodeE nextObject]){
@@ -644,13 +616,7 @@ CFStringRef __BDStringCreateByCopyingExpandedValue(BDSKComplexString *cxString)
         }
     }
     
-    id retVal;
-    // if we have a single string-type node, we return an NSString
-    if ([returnNodes count] == 1 && [(BDSKStringNode*)[returnNodes objectAtIndex:0] type] == BSN_STRING) {
-        retVal = [[NSString allocWithZone:theZone] initWithString:[[returnNodes objectAtIndex:0] value]];
-    } else {
-        retVal = [[BDSKComplexString allocWithZone:theZone] initWithArray:returnNodes macroResolver:theMacroResolver];
-    }
+    id retVal = [[BDSKComplexString allocWithZone:theZone] initWithArray:returnNodes macroResolver:theMacroResolver];
     [sc release];
     [returnNodes release];
     
@@ -661,9 +627,9 @@ CFStringRef __BDStringCreateByCopyingExpandedValue(BDSKComplexString *cxString)
     return [[[self alloc] initWithBibTeXString:btstring macroResolver:theMacroResolver] autorelease];
 }
 
-+ (id)complexStringWithArray:(NSArray *)a macroResolver:(BDSKMacroResolver *)theMacroResolver{
++ (id)complexStringWithArray:(NSArray *)nodesArray macroResolver:(BDSKMacroResolver *)theMacroResolver{
     [self release]; // we could check to see if([self isKindOfClass:[BDSKComplexString class]]) and then use [self initWith..], but it's easier just to release self (self will usually be NSPlaceholderString anyway) and return the desired object
-    return [[[BDSKComplexString alloc] initWithArray:a macroResolver:theMacroResolver] autorelease];
+    return [[[BDSKComplexString alloc] initWithArray:nodesArray macroResolver:theMacroResolver] autorelease];
 }
 
 + (id)stringWithInheritedValue:(NSString *)aValue{
@@ -685,6 +651,13 @@ CFStringRef __BDStringCreateByCopyingExpandedValue(BDSKComplexString *cxString)
 
 - (BOOL)isInherited{
 	return NO;
+}
+
+- (NSArray *)nodes{
+    BDSKStringNode *node = [[BDSKStringNode alloc] initWithQuotedString:self];
+    NSArray *nodes = [NSArray arrayWithObject:node];
+    [node release];
+    return nodes;
 }
 
 - (BOOL)isEqualAsComplexString:(NSString *)other{

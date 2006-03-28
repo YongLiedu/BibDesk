@@ -66,12 +66,12 @@
 /*!
     @method     initWithArray:
     @abstract   Initializes a complex string with an array of string nodes and a macroresolver. This is the designated initializer. 
-    @discussion (description)
-    @param		a An array of BDSKStringNodes
+    @discussion Returns a non-complex string when the array contains a single string-type node.
+    @param		nodesArray An array of BDSKStringNodes
     @param		macroResolver The macro resolver used to resolve macros in the complex string.
     @result     -
 */
-- (id)initWithArray:(NSArray *)a macroResolver:(BDSKMacroResolver *)theMacroResolver;
+- (id)initWithArray:(NSArray *)nodesArray macroResolver:(BDSKMacroResolver *)theMacroResolver;
 
 /*!
     @method     initWithInheritedValue:
@@ -81,14 +81,6 @@
     @result     -
 */
 - (id)initWithInheritedValue:(NSString *)aValue;
-
-/*!
-    @method     nodes
-    @abstract   The nodes of the complex string
-    @discussion (description)
-    @result     -
-*/
-- (NSArray *)nodes;
 
 /*!
     @method     macroResolver
@@ -121,11 +113,11 @@
     @method     complexStringWithArray:macroResolver:
     @abstract   Returns a newly allocated and initialized complex string build with an array of BDSKStringNodes as its nodes.
     @discussion -
-    @param		a An array of BDSKStringNodes
+    @param		nodesArray An array of BDSKStringNodes
     @param		macroResolver The macro resolver used to resolve macros in the complex string.
     @result     - 
 */
-+ (id)complexStringWithArray:(NSArray *)a  macroResolver:(BDSKMacroResolver *)macroResolver;
++ (id)complexStringWithArray:(NSArray *)nodesArray  macroResolver:(BDSKMacroResolver *)macroResolver;
 
 /*!
     @method     complexStringWithBibTeXString:macroResolver:
@@ -180,6 +172,14 @@
 - (BOOL)isInherited;
 
 /*!
+    @method     nodes
+    @abstract   The string nodes of the string. Returns an array containing a single string-type node when the receiver is not complex.
+    @discussion (description)
+    @result     -
+*/
+- (NSArray *)nodes;
+
+/*!
     @method     isEqualAsComplexString:
     @abstract   Returns YES if both are to be considered the same as complex strings
     @discussion Returns YES if the receiver and other are both simple strings (i.e. either an NSString or simple BDSKComplexString, not necessarily the same class) with the same value, or both BDSKComplexStrings with the same nodes. 
@@ -226,7 +226,7 @@
 /*!
     @method     hasSubstring:options:
     @abstract   Boolean, checks whether the receiver has target as a substring. 
-    @discussion When the receiver is not complex and target is complex, or if target is not complex and the receiver is not complex, always returns NO. 
+    @discussion When the receiver is not complex and target is complex always returns NO. 
     @result     (description)
 */
 - (BOOL)hasSubstring:(NSString *)target options:(unsigned)opts;
@@ -234,8 +234,8 @@
 /*!
     @method     stringByReplacingOccurrencesOfString:withString:options:replacements:
     @abstract   Returns a string formed by replacing occurrences of target by replacement, using the search options opts. The last argument is set to the number of replacements set.
-    @discussion When the receiver is not complex and target is complex, or if target is not complex and the receiver is not complex, returns the receiver. 
-When the receiver is complex, only whole node matches are replaced. 
+    @discussion When the receiver is not complex and target is complex, or if the receiver is inherited, returns the receiver. 
+                When the receiver is complex, only whole node matches are replaced. 
     @result     (description)
 */
 - (NSString *)stringByReplacingOccurrencesOfString:(NSString *)target withString:(NSString *)replacement options:(unsigned)opts replacements:(unsigned int *)number;

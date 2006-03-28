@@ -639,16 +639,8 @@ static NSString *stringFromBTField(AST *field, NSString *fieldName, NSString *fi
             simple_value = simple_value->right;
 	} // while simple_value
 	
-    NSString *returnValue = nil;
-
-    // Common case: return a solo string as a non-complex string.
-    
-    if([stringValueArray count] == 1 &&
-       [(BDSKStringNode *)[stringValueArray objectAtIndex:0] type] == BSN_STRING){
-        returnValue = [[[(BDSKStringNode *)[stringValueArray objectAtIndex:0] value] copy] autorelease]; // an NSString
-    } else {
-        returnValue = [NSString complexStringWithArray:stringValueArray macroResolver:[document macroResolver]];
-    }
+    // This will return a single string-type node as a non-complex string.
+    NSString *returnValue = [NSString complexStringWithArray:stringValueArray macroResolver:[document macroResolver]];
     [stringValueArray release];
     
     return returnValue;
