@@ -84,6 +84,8 @@
 }	
 
 - (BOOL) validateCopyAsMenuItem:(NSMenuItem*) menuItem {
+    OFPreferenceWrapper *sud = [OFPreferenceWrapper sharedPreferenceWrapper];
+    BOOL usesTeX = [sud boolForKey:BDSKUsesTeXKey];
 	int copyType = [menuItem tag];
 	NSString *s = nil;
 	NSString *copyString = NSLocalizedString(@"Copy", @"Copy");
@@ -98,7 +100,6 @@
 			break;
 		case BDSKCiteDragCopyType:
 			do {
-				OFPreferenceWrapper *sud = [OFPreferenceWrapper sharedPreferenceWrapper];
 				// figure out correct name for TeX as chosen in prefs
 				NSString *startCiteBracket = [sud stringForKey:BDSKCiteStartBracketKey]; 
 				NSString *TeXName = (![startCiteBracket isEqualToString:@"["]) ? @"TeX" : @"ConTeXt";
@@ -111,24 +112,32 @@
 			} while (0);
 			break;
 		case BDSKPDFDragCopyType:
+            if (usesTeX == NO)
+                n = 0;
 			if (n <= 1)
 				s = NSLocalizedString(@"PDF", @"PDF");
 			else
 				s = [NSString stringWithFormat:NSLocalizedString(@"PDF for %i Items", @"PDF for %i Items"), n];
 			break;
 		case BDSKRTFDragCopyType:
+            if (usesTeX == NO)
+                n = 0;
 			if (n <= 1)
 				s = NSLocalizedString(@"Text", @"Text");
 			else
 				s = [NSString stringWithFormat:NSLocalizedString(@"Text for %i Items", @"Text for %i Items"), n];
 			break;
 		case BDSKLaTeXDragCopyType:
+            if (usesTeX == NO)
+                n = 0;
 			if (n <= 1)
 				s = NSLocalizedString(@"LaTeX", @"LaTeX");
 			else
 				s = [NSString stringWithFormat:NSLocalizedString(@"LaTeX for %i Items", @"LaTeX for %i Items"), n];
 			break;
 		case BDSKLTBDragCopyType:
+            if (usesTeX == NO)
+                n = 0;
 			if (n <= 1)
 				s = NSLocalizedString(@"Amsrefs LaTeX", @"Amsrefs LaTeX");
 			else
