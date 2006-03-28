@@ -3040,6 +3040,7 @@ NSString *BDSKWeblocFilePboardType = @"CorePasteboardFlavorType 0x75726C20";
     isDocumentClosed = YES;
     [[BDSKErrorObjectController sharedErrorObjectController] removeErrorObjsForDocument:self];
     [customCiteDrawer close];
+    [macroWC close];
     [self saveSortOrder];
     
     // reset the previewer; don't send [self updatePreviews:] here, as the tableview will be gone by the time the queue posts the notification
