@@ -45,6 +45,7 @@
 
 static NSCharacterSet *macroCharSet = nil;
 static NSZone *complexStringExpansionZone = NULL;
+static Class BDSKComplexStringClass = Nil;
 
 #define SAFE_ALLOCA_SIZE (8 * 8192)
 
@@ -116,7 +117,9 @@ CFStringRef __BDStringCreateByCopyingExpandedValue(NSArray *nodes, BDSKMacroReso
     if(complexStringExpansionZone == NULL){
         complexStringExpansionZone = NSCreateZone(1024, 1024, NO);
         NSSetZoneName(complexStringExpansionZone, @"BDSKComplexStringExpansionZone");
-    }    
+    } 
+    
+    BDSKComplexStringClass = self;
 
 }
 
@@ -126,7 +129,7 @@ CFStringRef __BDStringCreateByCopyingExpandedValue(NSArray *nodes, BDSKMacroReso
 
 - (id)init{
     [self release];
-	return @"";
+	return [@"" retain];
 }
 
 /* designated initializer */
@@ -181,24 +184,35 @@ CFStringRef __BDStringCreateByCopyingExpandedValue(NSArray *nodes, BDSKMacroReso
 
 /* NSCoding protocol */
 
+/* In fixing bug #1460089, experiment shows that we need to override -classForKeyedArchiver, since NSArchiver seems to encode NSString subclasses as NSStrings.  
+
+With that change, our NSCoding methods get called, but calling -[super initWithCoder:] causes an NSInvalidArgumentException since it apparently calls -initWithCharactersNoCopy:length:freeWhenDone: on the abstract NSString class:
+
+#2	0x92a6a208 in -[NSString initWithCharactersNoCopy:length:freeWhenDone:]
+#3	0x92a69c8c in -[NSString initWithString:]
+#4	0x929840d0 in -[NSString initWithCoder:]
+#5	0x0002a16c in -[BDSKComplexString initWithCoder:] at StringCoder.m:35
+
+Rather than relying on the same call sequence to be used, I think we should ignore super's implementation.
+*/
+
+- (Class)classForKeyedArchiver { return BDSKComplexStringClass; }
+
 - (id)initWithCoder:(NSCoder *)coder{
-	if (self = [super initWithCoder:coder]) {
-        OBASSERT([coder isKindOfClass:[NSKeyedUnarchiver class]]);
-		nodes = [[coder decodeObjectForKey:@"nodes"] retain];
-		complex = [coder decodeBoolForKey:@"complex"];
-		inherited = [coder decodeBoolForKey:@"inherited"];
-        NSKeyedUnarchiver *unarchiver = (NSKeyedUnarchiver *)coder;
-        if ([[unarchiver delegate] respondsToSelector:@selector(unarchiverMacroResolver:)]) {
-            macroResolver = [[unarchiver delegate] unarchiverMacroResolver:unarchiver];
-        } else
-            macroResolver = nil;
-	}
+    OBASSERT([coder isKindOfClass:[NSKeyedUnarchiver class]]);
+    nodes = [[coder decodeObjectForKey:@"nodes"] retain];
+    complex = [coder decodeBoolForKey:@"complex"];
+    inherited = [coder decodeBoolForKey:@"inherited"];
+    NSKeyedUnarchiver *unarchiver = (NSKeyedUnarchiver *)coder;
+    if ([[unarchiver delegate] respondsToSelector:@selector(unarchiverMacroResolver:)]) {
+        macroResolver = [[unarchiver delegate] unarchiverMacroResolver:unarchiver];
+    } else
+        macroResolver = nil;
 	return self;
 }
 
 - (void)encodeWithCoder:(NSCoder *)coder{
     OBASSERT([coder isKindOfClass:[NSKeyedArchiver class]]);
-	[super encodeWithCoder:coder];
     [coder encodeObject:nodes forKey:@"nodes"];
 	[coder encodeBool:complex forKey:@"complex"];
 	[coder encodeBool:inherited forKey:@"inherited"];
