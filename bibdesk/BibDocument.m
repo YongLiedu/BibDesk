@@ -1343,8 +1343,11 @@ NSString *BDSKWeblocFilePboardType = @"CorePasteboardFlavorType 0x75726C20";
 			return;
 	}
 
+    // deletion changes the scroll position
+    NSPoint scrollLocation = [[tableView enclosingScrollView] scrollPositionAsPercentage];
     unsigned lastIndex = [[tableView selectedRowIndexes] lastIndex];
 	[self removePublications:[self selectedPublications]];
+    [[tableView enclosingScrollView] setScrollPositionAsPercentage:scrollLocation];
     
     // should select the publication following the last deleted publication (if any)
 	if(lastIndex >= [tableView numberOfRows])
