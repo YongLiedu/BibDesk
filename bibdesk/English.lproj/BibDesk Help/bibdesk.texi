@@ -763,7 +763,7 @@ the following sections.
 
 References can also be added to a bibliography by dragging an entry
 from a text source (text editor, web browser) into BibDesk's main publications
-list.  The text can be BibTeX or RIS (Reference Manager) formatted text.
+list.  The text can be BibTeX, RIS (Reference Manager), JSTOR or ISI Web Of Science formatted text.
 Here's a fancy picture:
 
 @image{gfx/dragIntoBib}
@@ -782,7 +782,7 @@ when dragging to an editor, simply hold down the option key while you drag.
 
 References can be added to a publications list by copying them from another
 source and pasting them into BibDesk's main window.  The text being pasted must
-be BibTeX or RIS (Reference Manager) formatted text, or an error will occur.
+be BibTeX, RIS (Reference Manager), JSTOR or ISI Web Of Science formatted text, or an error will occur.
 
 @node Services
 @subsection Services
