@@ -1010,7 +1010,6 @@
 		27D4FB5407DE7A83001CAB00 /* Notes */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = text; path = Notes; sourceTree = SOURCE_ROOT; };
 		27D4FB5707DE7A97001CAB00 /* build_instructions.tex */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = text; path = build_instructions.tex; sourceTree = "<group>"; };
 		27D4FB5807DE7A97001CAB00 /* HackingBibDesk.rtf */ = {isa = PBXFileReference; lastKnownFileType = text.rtf; path = HackingBibDesk.rtf; sourceTree = "<group>"; };
-		27D4FB5907DE7A97001CAB00 /* Scripting Notes */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = text; path = "Scripting Notes"; sourceTree = "<group>"; };
 		27E89E220805E9F500E4DA08 /* applehelp.init */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = text; name = applehelp.init; path = "BibDesk Help/applehelp.init"; sourceTree = "<group>"; };
 		27E89E230805E9F500E4DA08 /* version.texi */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = text; name = version.texi; path = "English.lproj/BibDesk Help/version.texi"; sourceTree = "<group>"; };
 		27E89E240805E9F500E4DA08 /* bibdesk.texi */ = {isa = PBXFileReference; fileEncoding = 4; languageSpecificationIdentifier = man; lastKnownFileType = text; name = bibdesk.texi; path = "English.lproj/BibDesk Help/bibdesk.texi"; sourceTree = "<group>"; };
@@ -1058,7 +1057,7 @@
 		3DFF35600816B55B0052F37C /* forward_small.tiff */ = {isa = PBXFileReference; lastKnownFileType = image.tiff; name = forward_small.tiff; path = Images/forward_small.tiff; sourceTree = "<group>"; };
 		3DFF35620816B5780052F37C /* reload_small.tiff */ = {isa = PBXFileReference; lastKnownFileType = image.tiff; name = reload_small.tiff; path = Images/reload_small.tiff; sourceTree = "<group>"; };
 		8D1107310486CEB800E47090 /* Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
-		8D1107320486CEB800E47090 /* BibDesk.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = BibDesk.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		8D1107320486CEB800E47090 /* BibDesk.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = BibDesk.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		CE1A7ED4090BDEB600ACC864 /* BDSKHeaderPopUpButtonCell.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BDSKHeaderPopUpButtonCell.h; sourceTree = "<group>"; };
 		CE1A7ED5090BDEB600ACC864 /* BDSKHeaderPopUpButtonCell.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BDSKHeaderPopUpButtonCell.m; sourceTree = "<group>"; };
 		CE1A7EDD090BDF1C00ACC864 /* BDSKHeaderPopUpButton.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BDSKHeaderPopUpButton.h; sourceTree = "<group>"; };
@@ -1583,7 +1582,6 @@
 			children = (
 				27D4FB5707DE7A97001CAB00 /* build_instructions.tex */,
 				27D4FB5807DE7A97001CAB00 /* HackingBibDesk.rtf */,
-				27D4FB5907DE7A97001CAB00 /* Scripting Notes */,
 				27D4FB5407DE7A83001CAB00 /* Notes */,
 			);
 			path = DeveloperDocumentation;
