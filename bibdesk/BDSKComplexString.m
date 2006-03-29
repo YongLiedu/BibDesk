@@ -199,16 +199,18 @@ Rather than relying on the same call sequence to be used, I think we should igno
 - (Class)classForKeyedArchiver { return BDSKComplexStringClass; }
 
 - (id)initWithCoder:(NSCoder *)coder{
-    OBASSERT([coder isKindOfClass:[NSKeyedUnarchiver class]]);
-    nodes = [[coder decodeObjectForKey:@"nodes"] retain];
-    complex = [coder decodeBoolForKey:@"complex"];
-    inherited = [coder decodeBoolForKey:@"inherited"];
-    NSKeyedUnarchiver *unarchiver = (NSKeyedUnarchiver *)coder;
-    if ([[unarchiver delegate] respondsToSelector:@selector(unarchiverMacroResolver:)]) {
-        macroResolver = [[unarchiver delegate] unarchiverMacroResolver:unarchiver];
-    } else
-        macroResolver = nil;
-	return self;
+    if (self = [super init]) {
+        OBASSERT([coder isKindOfClass:[NSKeyedUnarchiver class]]);
+        nodes = [[coder decodeObjectForKey:@"nodes"] retain];
+        complex = [coder decodeBoolForKey:@"complex"];
+        inherited = [coder decodeBoolForKey:@"inherited"];
+        NSKeyedUnarchiver *unarchiver = (NSKeyedUnarchiver *)coder;
+        if ([[unarchiver delegate] respondsToSelector:@selector(unarchiverMacroResolver:)]) {
+            macroResolver = [[unarchiver delegate] unarchiverMacroResolver:unarchiver];
+        } else
+            macroResolver = nil;
+	}
+    return self;
 }
 
 - (void)encodeWithCoder:(NSCoder *)coder{
