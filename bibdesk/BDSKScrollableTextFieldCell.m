@@ -159,9 +159,9 @@
 	
 	if (isClipped) {
 		if (scrollStep == maxScrollStep) 
-			textOrigin.x = textRect.size.width - [self stringWidth];
+			textOrigin.x -= [self stringWidth] - NSWidth(textRect);
 		else
-			textOrigin.x -= scrollStep * textRect.size.width / 2;
+			textOrigin.x -= scrollStep * NSWidth(textRect) / 2;
 	}
 	
 	// draw the (clipped) text
@@ -205,9 +205,12 @@
 - (void)stringHasChanged {
 	float stringWidth = [self stringWidth];
 	NSRect cellFrame = [[self controlView] bounds];
-	NSRect textRect;
+    
+    isClipped = NO;
 	
-	if (cellFrame.size.width > 2 && stringWidth > cellFrame.size.width - 2.0)
+    NSRect textRect = [self textRectForBounds:cellFrame];
+	
+	if (NSWidth(textRect) > 2.0 && stringWidth > NSWidth(textRect) - 2.0)
 		isClipped = YES;
 	else 
 		isClipped = NO;
@@ -215,7 +218,7 @@
 	textRect = NSInsetRect([self textRectForBounds:cellFrame], 1.0, 0.0);
 	
 	scrollStep = 0;
-	maxScrollStep = ceil(2 * stringWidth / textRect.size.width) - 2;
+	maxScrollStep = ceil(2 * stringWidth / NSWidth(textRect)) - 2;
 	if (maxScrollStep < 0 ) 
 		maxScrollStep = 0;
 }

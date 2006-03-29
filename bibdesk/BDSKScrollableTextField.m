@@ -134,4 +134,16 @@
 		[(BDSKScrollableTextFieldCell *)[self cell] stringHasChanged];
 }
 
+- (void)setFrame:(NSRect)frameRect {
+    [super setFrame:frameRect];
+	if ([[self cell] isKindOfClass:[BDSKScrollableTextFieldCell class]])
+		[(BDSKScrollableTextFieldCell *)[self cell] stringHasChanged];
+}
+
+- (void)setFrameSize:(NSSize)newSize {
+    [super setFrameSize:newSize];
+	if ([[self cell] isKindOfClass:[BDSKScrollableTextFieldCell class]])
+		[(BDSKScrollableTextFieldCell *)[self cell] stringHasChanged];
+}
+
 @end
