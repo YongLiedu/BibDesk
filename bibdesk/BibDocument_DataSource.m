@@ -93,7 +93,11 @@
         if([tcID isEqualToString:BDSKCiteKeyString]){
             return [pub citeKey];
         }else if([tcID isEqualToString:BDSKItemNumberString]){
-            return [pub fileOrder];
+            NSNumber *value = [pub fileOrder];
+            if ([value intValue] == 0)
+                return @"";
+            else
+                return value;
         }else if([tcID isEqualToString: BDSKTitleString] ){
 			return [pub title];
 		}else if([tcID isEqualToString: BDSKContainerString] ){
