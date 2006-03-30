@@ -42,7 +42,7 @@
 #import <OmniFoundation/NSThread-OFExtensions.h>
 #import "BibDocument.h"
 #import "BDSKFontManager.h"
-
+#import "NSArray_BDSKExtensions.h"
 #import "BDSKPrintableView.h"
 
 enum {
@@ -180,7 +180,9 @@ static BDSKPreviewer *thePreviewer;
 }
 
 - (void)handlePreviewNeedsUpdate:(NSNotification *)notification {
-	[[[NSDocumentController sharedDocumentController] currentDocument] updatePreviews:nil];
+    id document = [[NSApp orderedDocuments] firstObject];
+    if(document && [document respondsToSelector:@selector(updatePreviews:)])
+        [document updatePreviews:nil];
 }
 
 - (void)printDocument:(id)sender{ // first responder gets this
