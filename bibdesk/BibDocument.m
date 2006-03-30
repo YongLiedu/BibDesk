@@ -1756,7 +1756,7 @@ NSString *BDSKWeblocFilePboardType = @"CorePasteboardFlavorType 0x75726C20";
 			[selParentItems addObject:aPub];
 		}else{
 			NS_DURING
-				[bibString appendString:[aPub bibTeXStringDroppingInternal:YES]];
+				[bibString appendString:[aPub bibTeXStringDroppingInternal:NO]];
 			NS_HANDLER
 				if([[localException name] isEqualToString:BDSKTeXifyException])
 					NSLog(@"Discarding exception raised for item \"%@\"", [aPub citeKey]);
@@ -1769,7 +1769,7 @@ NSString *BDSKWeblocFilePboardType = @"CorePasteboardFlavorType 0x75726C20";
 	e = [selParentItems objectEnumerator];
 	while(aPub = [e nextObject]){
 		NS_DURING
-			[bibString appendString:[aPub bibTeXStringDroppingInternal:YES]];
+			[bibString appendString:[aPub bibTeXStringDroppingInternal:NO]];
 		NS_HANDLER
 			if([[localException name] isEqualToString:BDSKTeXifyException])
 				NSLog(@"Discarding exception raised for item \"%@\"", [aPub citeKey]);
@@ -1781,7 +1781,7 @@ NSString *BDSKWeblocFilePboardType = @"CorePasteboardFlavorType 0x75726C20";
 	e = [parentItems objectEnumerator];        
 	while(aPub = [e nextObject]){
 		NS_DURING
-			[bibString appendString:[aPub bibTeXStringDroppingInternal:YES]];
+			[bibString appendString:[aPub bibTeXStringDroppingInternal:NO]];
 		NS_HANDLER
 			if([[localException name] isEqualToString:BDSKTeXifyException])
 				NSLog(@"Discarding exception raised for item \"%@\"", [aPub citeKey]);
