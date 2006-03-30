@@ -49,7 +49,8 @@
 
 - (BOOL) validateCutMenuItem:(NSMenuItem*) menuItem {
 	if ([documentWindow firstResponder] != tableView ||
-		[self numberOfSelectedPubs] == 0) {
+		[self numberOfSelectedPubs] == 0 ||
+        [[self selectedGroups] firstObjectCommonWithArray:sharedGroups] != nil) {
 		// no selection
 		return NO;
 	}
@@ -61,7 +62,8 @@
 
 - (BOOL) validateAlternateCutMenuItem:(NSMenuItem*) menuItem {
 	if ([documentWindow firstResponder] != tableView ||
-		[self numberOfSelectedPubs] == 0) {
+		[self numberOfSelectedPubs] == 0 ||
+        [[self selectedGroups] firstObjectCommonWithArray:sharedGroups] != nil) {
 		// no selection
 		return NO;
 	}
@@ -194,7 +196,8 @@
 
 - (BOOL)validateDuplicateMenuItem:(NSMenuItem *)menuItem{
 	if ([documentWindow firstResponder] != tableView ||
-		[self numberOfSelectedPubs] == 0)
+		[self numberOfSelectedPubs] == 0 ||
+        [[self selectedGroups] firstObjectCommonWithArray:sharedGroups] != nil)
 		return NO;
 	return YES;
 }
@@ -231,7 +234,8 @@
 	NSString * s;
 	int n = [self numberOfSelectedPubs];
 	
-	if (n == 0) {
+	if (n == 0 ||
+        [[self selectedGroups] firstObjectCommonWithArray:sharedGroups] != nil) {
 		// no selection
 		if (![[menuItem menu] supermenu]) {
 			s = NSLocalizedString(@"Delete", @"Delete");
@@ -270,7 +274,7 @@
         NSEnumerator *groupEnum = [selectedGroups objectEnumerator];
         BDSKGroup *group;
         while (group = [groupEnum nextObject]) {
-             if([group isSmart] == NO)
+             if([group isSmart] == NO && [group isShared] == NO)
                 m++;
         }
     }
@@ -413,7 +417,8 @@
 - (BOOL) validateDuplicateTitleToBooktitleMenuItem:(NSMenuItem*) menuItem {
 	NSString * s;
 	
-	if ([self numberOfSelectedPubs] == 0) {
+	if ([self numberOfSelectedPubs] == 0 ||
+        [[self selectedGroups] firstObjectCommonWithArray:sharedGroups] != nil) {
 		// no selection
 		s = NSLocalizedString(@"Duplicate Title to Booktitle", @"Duplicate Title to Booktitle");
 		[menuItem setTitle:s];
@@ -434,7 +439,8 @@
 - (BOOL) validateGenerateCiteKeyMenuItem:(NSMenuItem*) menuItem {
 	NSString * s;
 	
-	if ([self numberOfSelectedPubs] == 0) {
+	if ([self numberOfSelectedPubs] == 0 || 
+        [[self selectedGroups] firstObjectCommonWithArray:sharedGroups] != nil) {
 		// no selection
 		s = NSLocalizedString(@"Generate Cite Key", @"Generate Cite Key");
 		[menuItem setTitle:s];
@@ -456,7 +462,8 @@
 - (BOOL) validateConsolidateLinkedFilesMenuItem:(NSMenuItem*) menuItem {
 	NSString * s;
 	
-	if ([self numberOfSelectedPubs] == 0) {
+	if ([self numberOfSelectedPubs] == 0 ||
+        [[self selectedGroups] firstObjectCommonWithArray:sharedGroups] != nil) {
 		// no selection
 		s = [NSString stringWithFormat:@"%@%C",NSLocalizedString(@"Consolidate Linked Files", @"Consolidate Linked Files..."),0x2026];
 		[menuItem setTitle:s];

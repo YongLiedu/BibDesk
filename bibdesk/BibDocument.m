@@ -1290,7 +1290,7 @@ NSString *BDSKWeblocFilePboardType = @"CorePasteboardFlavorType 0x75726C20";
             NSEnumerator *groupEnum = [selectedGroups objectEnumerator];
             BDSKGroup *group;
             while(group = [groupEnum nextObject]){
-                if([group isSmart] == NO){
+                if([group isSmart] == NO && [group isShared] == NO){
                     canRemove = YES;
                     break;
                 }
@@ -1324,7 +1324,8 @@ NSString *BDSKWeblocFilePboardType = @"CorePasteboardFlavorType 0x75726C20";
 - (IBAction)deleteSelectedPubs:(id)sender{
 	int numSelectedPubs = [self numberOfSelectedPubs];
 	
-    if (numSelectedPubs == 0) {
+    if (numSelectedPubs == 0 ||
+        [[self selectedGroups] firstObjectCommonWithArray:sharedGroups] != nil) {
         return;
     }
 	
@@ -1816,7 +1817,8 @@ NSString *BDSKWeblocFilePboardType = @"CorePasteboardFlavorType 0x75726C20";
 // Don't use the default action in NSTableView-OAExtensions here, as it uses another pasteboard and some more overhead
 - (IBAction)duplicate:(id)sender{
 	if ([documentWindow firstResponder] != tableView ||
-		[self numberOfSelectedPubs] == 0) {
+		[self numberOfSelectedPubs] == 0 ||
+        [[self selectedGroups] firstObjectCommonWithArray:sharedGroups] != nil) {
 		NSBeep();
 		return;
 	}
@@ -3168,7 +3170,8 @@ NSString *BDSKWeblocFilePboardType = @"CorePasteboardFlavorType 0x75726C20";
 - (IBAction)generateCiteKey:(id)sender
 {
     unsigned int numberOfSelectedPubs = [self numberOfSelectedPubs];
-	if (numberOfSelectedPubs == 0) return;
+	if (numberOfSelectedPubs == 0 ||
+        [[self selectedGroups] firstObjectCommonWithArray:sharedGroups] != nil) return;
 	
 	NSEnumerator *selEnum = [[self selectedPublications] objectEnumerator];
 	BibItem *aPub;
@@ -3475,7 +3478,8 @@ NSString *BDSKWeblocFilePboardType = @"CorePasteboardFlavorType 0x75726C20";
 }
 
 - (IBAction)duplicateTitleToBooktitle:(id)sender{
-	if ([self numberOfSelectedPubs] == 0) return;
+	if ([self numberOfSelectedPubs] == 0 ||
+        [[self selectedGroups] firstObjectCommonWithArray:sharedGroups] != nil) return;
 	
 	BDSKAlert *alert = [BDSKAlert alertWithMessageText:NSLocalizedString(@"Overwrite Booktitle?", @"")
 										 defaultButton:NSLocalizedString(@"Don't Overwrite", @"Don't Overwrite")
@@ -3535,6 +3539,10 @@ NSString *BDSKWeblocFilePboardType = @"CorePasteboardFlavorType 0x75726C20";
 #pragma mark AutoFile stuff
 
 - (IBAction)consolidateLinkedFiles:(id)sender{
+    if ([[self selectedGroups] firstObjectCommonWithArray:sharedGroups] != nil) {
+        NSBeep();
+        return;
+    }
     BOOL check = YES;
     int rv = NSRunAlertPanel(NSLocalizedString(@"Consolidate Linked Files",@""),
                              NSLocalizedString(@"This will put all files linked to the selected items in your Papers Folder, according to the format string. Do you want me to generate a new location for all linked files, or only for those for which all the bibliographical information used in the generated file name has been set?",@""),
