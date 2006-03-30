@@ -401,7 +401,6 @@ static NSString *BDSKAllPublicationsLocalizedString = nil;
     NSParameterAssert(aService != nil);
     if(self = [super initWithName:@"" key:@"" count:0]){
         service = [aService retain];
-        [service resolveWithTimeout:5.0];
 
         data = [[NSMutableData alloc] initWithCapacity:10^6];
         publications = nil;
