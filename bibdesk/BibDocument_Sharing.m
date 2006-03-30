@@ -139,11 +139,6 @@ static NSString *BDSKComputerName() {
         [group release];
         [groupTableView reloadData]; 
         
-		[[NSNotificationCenter defaultCenter] addObserver:self
-												 selector:@selector(handleSharedGroupFinishedNotification:)
-													 name:BDSKSharedGroupFinishedNotification
-												   object:group];
-        
         // remove from the list of unresolved services
         [unresolvedNetServices removeObject:aNetService];
         
@@ -169,13 +164,8 @@ static NSString *BDSKComputerName() {
     
     // create an array of the groups we should keep by comparing services with the one that just went away
     while(group = [e nextObject])
-        if([[group service] isEqual:aNetService]) {
-            [[NSNotificationCenter defaultCenter] removeObserver:self
-                                                            name:BDSKSharedGroupFinishedNotification
-                                                          object:group];
-        } else {
+        if([[group service] isEqual:aNetService] == NO)
             [array addObject:group];
-        }
     
     [sharedGroups setArray:array];
     [groupTableView reloadData];

@@ -204,10 +204,17 @@ The groupedPublications array is a subset of the publications array, developed b
 
 - (void)handleSharedGroupFinishedNotification:(NSNotification *)notification{
     BDSKGroup *group = [notification object];
-    if ([[self selectedGroups] containsObject:group])
-        [self updateGroupsPreservingSelection:YES];
-    else
+    
+    if([sharedGroups containsObject:group] == NO)
+        return;
+    
+    if([sortGroupsKey isEqualToString:BDSKGroupCellCountKey]){
+        [self sortGroupsByKey:sortGroupsKey];
+    }else{
         [groupTableView reloadData];
+        if ([[self selectedGroups] containsObject:group])
+            [self displaySelectedGroups];
+    }
 }
 
 // this method uses counted sets to compute the number of publications per group; each group object is just a name
@@ -917,6 +924,7 @@ The groupedPublications array is a subset of the publications array, developed b
     
     [groups sortUsingDescriptors:sortDescriptors];
     [smartGroups sortUsingDescriptors:sortDescriptors];
+    [sharedGroups sortUsingDescriptors:sortDescriptors];
 	
     if (emptyGroup != nil) {
         [groups insertObject:emptyGroup atIndex:0];
