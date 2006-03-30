@@ -459,8 +459,13 @@ static NSString *BDSKAllPublicationsLocalizedString = nil;
         if(errorString != nil){
             NSLog(@"Error reading shared data: %@", errorString);
             [errorString release];
-        } else
-            publications = [[NSKeyedUnarchiver unarchiveObjectWithData:[dictionary objectForKey:[BibDocument keyForSharedArchivedData]]] retain];
+        } else {
+            NSData *archive = [dictionary objectForKey:[BibDocument keyForSharedArchivedData]];
+            if(archive != nil)
+                publications = [[NSKeyedUnarchiver unarchiveObjectWithData:archive] retain];
+            else
+                NSLog(@"no publication data in shared stream");
+        }
     }
     return publications;
 }
