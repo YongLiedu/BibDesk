@@ -127,13 +127,9 @@ static NSString *BDSKComputerName() {
 
     // In general, we want to ignore our own shared services, as the write/read occur on the same run loop, and our file handle blocks; hence, we listen here for the resolve and then check the TXT record to see where the service came from.
 
-    // can use this case for debugging with a single machine; only ignores this document
-    if([[NSUserDefaults standardUserDefaults] boolForKey:@"BDSKEnableSharingWithSelfKey"] && [[self netServiceName] isEqualToString:[aNetService name]] == NO){
-        BDSKSharedGroup *group = [[BDSKSharedGroup alloc] initWithService:aNetService];
-        [sharedGroups addObject:group];
-        [group release];
-        [groupTableView reloadData];
-    } else if([NSString isEmptyString:serviceIdentifier] == NO && [serviceIdentifier isEqualToString:uniqueIdentifier] == NO){
+    // second part for debugging with a single machine; only ignores this document
+   if(([NSString isEmptyString:serviceIdentifier] == NO && [serviceIdentifier isEqualToString:uniqueIdentifier] == NO) ||
+      ([[NSUserDefaults standardUserDefaults] boolForKey:@"BDSKEnableSharingWithSelfKey"] && [[self netServiceName] isEqualToString:[aNetService name]] == NO)){
         BDSKSharedGroup *group = [[BDSKSharedGroup alloc] initWithService:aNetService];
         [sharedGroups addObject:group];
         [group release];
