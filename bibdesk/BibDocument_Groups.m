@@ -201,6 +201,15 @@ The groupedPublications array is a subset of the publications array, developed b
 	[self updateAllSmartGroups];
 }
 
+
+- (void)handleSharedGroupFinishedNotification:(NSNotification *)notification{
+    BDSKGroup *group = [notification object];
+    if ([[self selectedGroups] containsObject:group])
+        [self updateGroupsPreservingSelection:YES];
+    else
+        [groupTableView reloadData];
+}
+
 // this method uses counted sets to compute the number of publications per group; each group object is just a name
 // and a count, and a group knows how to compare itself with other groups for sorting/equality, but doesn't know 
 // which pubs are associated with it

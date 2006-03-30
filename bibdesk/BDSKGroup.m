@@ -489,36 +489,38 @@ static NSString *BDSKAllPublicationsLocalizedString = nil;
 {
     switch(event){
         case NSStreamEventHasBytesAvailable:
-            // compiler barfs unless we include a bogus line here
-            [(id)nil release];
-            uint8_t readBuffer[4096];
-            int amountRead = 0;
-            NSInputStream *is = (NSInputStream *)aStream;
-            amountRead = [is read:readBuffer maxLength:4096];
-            [data appendBytes:readBuffer length:amountRead];
+            do {
+                // compiler barfs unless we include a bogus line here
+                [(id)nil release];
+                uint8_t readBuffer[4096];
+                int amountRead = 0;
+                NSInputStream *is = (NSInputStream *)aStream;
+                amountRead = [is read:readBuffer maxLength:4096];
+                [data appendBytes:readBuffer length:amountRead];
+            } while (0);
             break;
         case NSStreamEventEndEncountered:
             // close to remove from the run loop
             [(NSInputStream *)aStream close];
             downloadComplete = YES;
             [self setCount:[[self publications] count]];
+            [[NSNotificationCenter defaultCenter] postNotificationName:BDSKSharedGroupFinishedNotification object:self];
             break;
         case NSStreamEventErrorOccurred:
-            // compiler barfs unless we include a bogus line here
-            [(id)nil release];
-            NSError *error = [aStream streamError];
-            // log to the console for more detailed diagnostics
-            NSLog(@" *** sharing error for %@: %@", [self description], error);
-            OFError(&error, BDSKNetworkError, NSLocalizedDescriptionKey, NSLocalizedString(@"Unable to Read Shared File", @""), NSLocalizedRecoverySuggestionErrorKey, NSLocalizedString(@"You may wish to disable and re-enable sharing in BibDesk's preferences to see if the error persists.", @""), nil);
-            
-            // this will get annoying if the streams are really unreliable
-            [NSApp presentError:error];
-            // docs indicate the stream can't be re-used after an error occurs, so go ahead and close it
-            [aStream close];
-            
-            // allow the user to try again; otherwise this group is one-shot only (this should be the same as aStream, but someday we may handle output as well)
-            [self closeInputStream];
-
+            do {
+                NSError *error = [aStream streamError];
+                // log to the console for more detailed diagnostics
+                NSLog(@" *** sharing error for %@: %@", [self description], error);
+                OFError(&error, BDSKNetworkError, NSLocalizedDescriptionKey, NSLocalizedString(@"Unable to Read Shared File", @""), NSLocalizedRecoverySuggestionErrorKey, NSLocalizedString(@"You may wish to disable and re-enable sharing in BibDesk's preferences to see if the error persists.", @""), nil);
+                
+                // this will get annoying if the streams are really unreliable
+                [NSApp presentError:error];
+                // docs indicate the stream can't be re-used after an error occurs, so go ahead and close it
+                [aStream close];
+                
+                // allow the user to try again; otherwise this group is one-shot only (this should be the same as aStream, but someday we may handle output as well)
+                [self closeInputStream];
+            } while (0);
             break;
         default:
             break;

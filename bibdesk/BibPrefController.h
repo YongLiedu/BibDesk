@@ -261,6 +261,7 @@ extern NSString *BDSKFilterChangedNotification;
 extern NSString *BDSKStopWordsChangedNotification;
 extern NSString *BDSKSharingChangedNotification;
 extern NSString *BDSKSharedBrowsingChangedNotification;
+extern NSString *BDSKSharedGroupFinishedNotification;
 
 #pragma mark Exception name strings
 extern NSString *BDSKComplexStringException;

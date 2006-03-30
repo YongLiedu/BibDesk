@@ -69,6 +69,7 @@
 - (void)removeGroupFieldAction:(id)sender;
 - (void)handleGroupFieldChangedNotification:(NSNotification *)notification;
 - (void)handleGroupAddRemoveNotification:(NSNotification *)notification;
+- (void)handleSharedGroupFinishedNotification:(NSNotification *)notification;
 
 - (IBAction)sortGroupsByGroup:(id)sender;
 - (IBAction)sortGroupsByCount:(id)sender;

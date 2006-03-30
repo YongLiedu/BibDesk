@@ -278,6 +278,7 @@ NSString *BDSKFilterChangedNotification = @"Filter Changed Notification";
 NSString *BDSKStopWordsChangedNotification = @"BDSKStopWordsChangedNotification";
 NSString *BDSKSharingChangedNotification = @"BDSKSharingChangedNotification";
 NSString *BDSKSharedBrowsingChangedNotification = @"BDSKSharedBrowsingChangedNotification";
+NSString *BDSKSharedGroupFinishedNotification = @"BDSKSharedGroupFinishedNotification";
 
 #pragma mark Exception name strings
 
