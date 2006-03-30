@@ -127,7 +127,7 @@
 		currentTimer = nil;
     }
 	
-    if(![self iconImage]){
+    if([self iconImage] == nil || iconImage == nil){
         [self setIconImage:iconImage];
         return;
     }
