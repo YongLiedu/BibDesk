@@ -101,6 +101,7 @@ static IMP originalDeallocIMP;
     while (!looped) {
         NSString *label;
         unsigned int labelLength;
+        int location;
 
         foundIndex = labelIndex++;
         if (labelIndex == labelCount)
@@ -111,8 +112,11 @@ static IMP originalDeallocIMP;
         labelLength = [label length];
         if (labelLength < substringLength)
             continue;
-        if ([label rangeOfString:substring options:NSCaseInsensitiveSearch].location != NSNotFound)
-            return foundIndex;
+        location = [label rangeOfString:substring options:NSCaseInsensitiveSearch].location;
+        if (location != NSNotFound) {
+            if (location == 0 || [[NSCharacterSet letterCharacterSet] characterIsMember:[label characterAtIndex:location - 1]] == NO)
+                return foundIndex;
+        }
     }
 
     return NSNotFound;
