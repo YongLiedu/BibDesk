@@ -313,7 +313,7 @@ static void mergePageNumbers(NSMutableDictionary *dict)
        [merge release];
        
        [dict removeObjectForKey:RISStartPageString];
-       [dict removeObjectForKey:RISStartPageString];
+       [dict removeObjectForKey:RISEndPageString];
    }
 }
 
