@@ -239,6 +239,7 @@ NSString *BDSKWeblocFilePboardType = @"CorePasteboardFlavorType 0x75726C20";
 		sortDescending = NO;
 		sortGroupsDescending = NO;
 		sortGroupsKey = [BDSKGroupCellStringKey retain];
+        unresolvedNetServices = [[NSMutableArray alloc] initWithCapacity:10];
         
     }
     return self;
@@ -413,6 +414,7 @@ NSString *BDSKWeblocFilePboardType = @"CorePasteboardFlavorType 0x75726C20";
     [lastSelectedColumnForSort release];
     [sortGroupsKey release];
 	[promisedPboardTypes release];
+    [unresolvedNetServices release];
     [sharedGroups release];
     [browser release];
     [super dealloc];

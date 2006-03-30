@@ -178,6 +178,7 @@ extern NSString* BDSKWeblocFilePboardType; // core pasteboard type for webloc fi
     NSNetServiceBrowser *browser;
     NSNetService *netService;
     NSFileHandle *listeningSocket;
+    NSMutableArray *unresolvedNetServices;
     
     BOOL dragFromSharedGroups;
     

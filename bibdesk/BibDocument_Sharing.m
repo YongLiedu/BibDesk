@@ -47,6 +47,7 @@
 
 // @@ register with http://www.dns-sd.org/ServiceTypes.html
 NSString *BDSKNetServiceDomain = @"_bdsk._tcp.";
+static NSString *uniqueIdentifier = nil;
 
 // This is used to determine if a service listed in the browser is from the local host and for display
 static NSString *computerName = nil;
@@ -103,27 +104,56 @@ static NSString *BDSKComputerName() {
             fprintf(stderr, "%s: unable to register for dynamic store notifications.\n", __PRETTY_FUNCTION__);
         CFRelease(keys);
     }
+    
+    // use to identify services sent from this machine
+    if(uniqueIdentifier == nil){
+        // http://developer.apple.com/qa/qa2001/qa1306.html indicates that ASCII 1 is used to separate TXT records, so creating a TXT dictionary with a globallyUniqueString directly is almost guaranteed to fail; therefore, we'll replace it with something that doesn't seem to appear in globallyUniqueString objects.
+        NSMutableString *pInfo = [[[NSProcessInfo processInfo] globallyUniqueString] mutableCopy];
+        [pInfo replaceOccurrencesOfString:@"1" withString:@"~" options:0 range:NSMakeRange(0, [pInfo length])];
+        uniqueIdentifier = [pInfo copy];
+        [pInfo release];
+    }
 }
 
 #pragma mark Reading other data
 
-// This object is the delegate of its NSNetServiceBrowser object. We're only interested in services-related methods, so that's what we'll call.
-- (void)netServiceBrowser:(NSNetServiceBrowser *)aNetServiceBrowser didFindService:(NSNetService *)aNetService moreComing:(BOOL)moreComing 
-{
+- (void)netServiceDidResolveAddress:(NSNetService *)aNetService
+{    
+    NSData *TXTData = [aNetService TXTRecordData];
+    
+    // +[NSNetService dictionaryFromTXTRecordData:] will crash if you pass a nil data
+    NSDictionary *TXTDictionary = TXTData ? [NSNetService dictionaryFromTXTRecordData:TXTData] : nil;
+    NSString *serviceIdentifier = [[NSString alloc] initWithData:[TXTDictionary objectForKey:@"hostid"] encoding:NSUTF8StringEncoding];
+
+    // In general, we want to ignore our own shared services, as the write/read occur on the same run loop, and our file handle blocks; hence, we listen here for the resolve and then check the TXT record to see where the service came from.
+
     // can use this case for debugging with a single machine; only ignores this document
     if([[NSUserDefaults standardUserDefaults] boolForKey:@"BDSKEnableSharingWithSelfKey"] && [[self netServiceName] isEqualToString:[aNetService name]] == NO){
         BDSKSharedGroup *group = [[BDSKSharedGroup alloc] initWithService:aNetService];
         [sharedGroups addObject:group];
         [group release];
         [groupTableView reloadData];
-    } 
-    // we want to ignore our own shared services, as the write/read occur on the same run loop, and our file handle blocks
-    else if([[aNetService name] hasPrefix:[NSString stringWithFormat:@"%@ - ", BDSKComputerName()]] == NO){
+    } else if([NSString isEmptyString:serviceIdentifier] == NO && [serviceIdentifier isEqualToString:uniqueIdentifier] == NO){
         BDSKSharedGroup *group = [[BDSKSharedGroup alloc] initWithService:aNetService];
         [sharedGroups addObject:group];
         [group release];
-        [groupTableView reloadData];
+        [groupTableView reloadData]; 
+        
+        // remove from the list of unresolved services
+        [unresolvedNetServices removeObject:aNetService];
+        
+        // we don't want it to message this object again
+        [aNetService setDelegate:nil];
     }
+}
+
+- (void)netServiceBrowser:(NSNetServiceBrowser *)aNetServiceBrowser didFindService:(NSNetService *)aNetService moreComing:(BOOL)moreComing 
+{
+    // set as delegate and resolve, so we can find out if this originated from the localhost or a remote machine
+    // we can't access TXT records until the service is resolved (this is documented in CFNetService, not NSNetService)
+    [aNetService setDelegate:self];
+    [aNetService resolveWithTimeout:5.0];
+    [unresolvedNetServices addObject:aNetService];
 }
 
 - (void)netServiceBrowser:(NSNetServiceBrowser *)aNetServiceBrowser didRemoveService:(NSNetService *)aNetService moreComing:(BOOL)moreComing
@@ -213,6 +243,8 @@ static NSString *BDSKComputerName() {
         // lazily instantiate the NSNetService object that will advertise on our behalf
         netService = [[NSNetService alloc] initWithDomain:@"" type:BDSKNetServiceDomain name:[self netServiceName] port:chosenPort];
         [netService setDelegate:self];
+        NSData *TXTData = [NSNetService dataFromTXTRecordDictionary:[NSDictionary dictionaryWithObject:uniqueIdentifier forKey:@"hostid"]];
+        [netService setTXTRecordData:TXTData];
     }
     
     if(netService && listeningSocket){
