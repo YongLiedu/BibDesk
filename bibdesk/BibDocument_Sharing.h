@@ -42,6 +42,8 @@ extern NSString *BDSKNetServiceDomain;
 
 @interface BibDocument (Sharing)
 
+- (void)handleComputerNameChangedNotification:(NSNotification *)note;
+
 - (void)enableSharedBrowsing;
 - (void)disableSharedBrowsing;
 - (NSString *)netServiceName;

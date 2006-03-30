@@ -61,11 +61,12 @@ static SCDynamicStoreRef dynamicStore = NULL;
 static const void *retainCallBack(const void *info) { return [(id)info retain]; }
 static void releaseCallBack(const void *info) { [(id)info release]; }
 static CFStringRef copyDescriptionCallBack(const void *info) { return (CFStringRef)[[(id)info description] copy]; }
+// convert this to an NSNotification
 static void SCDynamicStoreChanged(SCDynamicStoreRef store, CFArrayRef changedKeys, void *info)
 {
-    [computerName release];
-    computerName = nil;
+    [[NSNotificationCenter defaultCenter] postNotificationName:BDSKComputerNameChangedNotification object:nil];
 }
+
 static NSString *BDSKComputerName() {
     if(computerName == nil){
         computerName = (NSString *)SCDynamicStoreCopyComputerName(dynamicStore, NULL);
@@ -81,7 +82,7 @@ static NSString *BDSKComputerName() {
 
 + (void)didLoad;
 {
-    /* Ensure that computer name changes are propagated as future clients connect to a document.  We could register for this notification on a per-document basis and force a restart, but it's probably not worth while unless name changes cause a problem.  Also, note that the OS will change the computer name to avoid conflicts by appending "(2)" or similar to the previous name, which is likely the most common scenario.
+    /* Ensure that computer name changes are propagated as future clients connect to a document.  Also, note that the OS will change the computer name to avoid conflicts by appending "(2)" or similar to the previous name, which is likely the most common scenario.
     */
     if(dynamicStore == NULL){
         CFAllocatorRef alloc = CFAllocatorGetDefault();
@@ -107,12 +108,23 @@ static NSString *BDSKComputerName() {
     
     // use to identify services sent from this machine
     if(uniqueIdentifier == nil){
-        // http://developer.apple.com/qa/qa2001/qa1306.html indicates that ASCII 1 is used to separate TXT records, so creating a TXT dictionary with a globallyUniqueString directly is almost guaranteed to fail; therefore, we'll replace it with something that doesn't seem to appear in globallyUniqueString objects.
+        /* http://developer.apple.com/qa/qa2001/qa1306.html indicates that ASCII 1 is used to separate old style TXT records, so creating a TXT dictionary with a globallyUniqueString directly is almost guaranteed to fail since they contain alphanumeric characters and underscores; therefore, we'll replace it with something that doesn't seem to appear in globallyUniqueString objects.  An alternative might be to use address comparison, but the docs indicate that the stable identifier for a service is its name, since port number, IP address, and host name can be ephemeral.  Unfortunately, we can't use the service name to determine if a service should be ignored, since we want to ignore all shares from a particular process, not just a given document.
+        */
         NSMutableString *pInfo = [[[NSProcessInfo processInfo] globallyUniqueString] mutableCopy];
         [pInfo replaceOccurrencesOfString:@"1" withString:@"~" options:0 range:NSMakeRange(0, [pInfo length])];
         uniqueIdentifier = [pInfo copy];
         [pInfo release];
     }
+}
+
+- (void)handleComputerNameChangedNotification:(NSNotification *)note;
+{
+    [computerName release];
+    computerName = nil;
+    
+    // restart sharing so the name propagates correctly; avoid conflicts with other users' share names
+    [self disableSharing];
+    [self enableSharing];
 }
 
 #pragma mark Reading other data
@@ -127,19 +139,25 @@ static NSString *BDSKComputerName() {
 
     // In general, we want to ignore our own shared services, as the write/read occur on the same run loop, and our file handle blocks; hence, we listen here for the resolve and then check the TXT record to see where the service came from.
 
-    // second part for debugging with a single machine; only ignores this document
-   if(([NSString isEmptyString:serviceIdentifier] == NO && [serviceIdentifier isEqualToString:uniqueIdentifier] == NO) ||
-      ([[NSUserDefaults standardUserDefaults] boolForKey:@"BDSKEnableSharingWithSelfKey"] && [[self netServiceName] isEqualToString:[aNetService name]] == NO)){
-        BDSKSharedGroup *group = [[BDSKSharedGroup alloc] initWithService:aNetService];
-        [sharedGroups addObject:group];
-        [group release];
-        [groupTableView reloadData]; 
+    // Ignore this document; quit/relaunch opening the same doc  can give us a stale service (from the previous run).  Since SystemConfiguration guarantees that we have a unique computer name, this should be safe.
+    if([[self netServiceName] isEqualToString:[aNetService name]] == NO){
+
+        // WARNING:  enabling sharing with self can lead to hangs if you use a large file; launching a separate BibDesk process should work around that
         
-        // remove from the list of unresolved services
-        [unresolvedNetServices removeObject:aNetService];
-        
-        // we don't want it to message this object again
-        [aNetService setDelegate:nil];
+        // see if service is from this machine (case 1) or we are testing with a single machine (case 2)
+        if(([NSString isEmptyString:serviceIdentifier] == NO && [serviceIdentifier isEqualToString:uniqueIdentifier] == NO) ||
+           ([[NSUserDefaults standardUserDefaults] boolForKey:@"BDSKEnableSharingWithSelfKey"])){
+            BDSKSharedGroup *group = [[BDSKSharedGroup alloc] initWithService:aNetService];
+            [sharedGroups addObject:group];
+            [group release];
+            [groupTableView reloadData]; 
+            
+            // remove from the list of unresolved services
+            [unresolvedNetServices removeObject:aNetService];
+            
+            // we don't want it to message this object again
+            [aNetService setDelegate:nil];
+        }
     }
 }
 

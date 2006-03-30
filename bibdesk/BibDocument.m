@@ -229,6 +229,11 @@ NSString *BDSKWeblocFilePboardType = @"CorePasteboardFlavorType 0x75726C20";
                                                      name:NSApplicationWillTerminateNotification
                                                    object:nil];
         
+        [[NSNotificationCenter defaultCenter] addObserver:self
+                                                 selector:@selector(handleComputerNameChangedNotification:)
+                                                     name:BDSKComputerNameChangedNotification
+                                                   object:nil];
+        
         // @@ ARM: required for 10.3.9 as of 2 December 2005; the delegate notification isn't received by the document
         [[NSNotificationCenter defaultCenter] addObserver:self
                                                  selector:@selector(windowWillClose:)
