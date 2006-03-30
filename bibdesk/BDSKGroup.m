@@ -489,8 +489,6 @@ static NSString *BDSKAllPublicationsLocalizedString = nil;
     switch(event){
         case NSStreamEventHasBytesAvailable:
             do {
-                // compiler barfs unless we include a bogus line here
-                [(id)nil release];
                 uint8_t readBuffer[4096];
                 int amountRead = 0;
                 NSInputStream *is = (NSInputStream *)aStream;
