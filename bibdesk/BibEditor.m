@@ -148,6 +148,7 @@ static int numberOfOpenEditors = 0;
 
 - (void)windowDidLoad{
 	[self setCiteKeyDuplicateWarning:![self citeKeyIsValid:[theBib citeKey]]];
+    [documentSnoopButton setIconImage:nil];
     [self fixURLs];
 }
 
