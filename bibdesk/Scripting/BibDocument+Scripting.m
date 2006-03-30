@@ -39,6 +39,7 @@
 #import "BibAuthor.h"
 #import "BibItem.h"
 #import "BDSKTeXTask.h"
+#import "BDSKGroup.h"
 
 /* ssp
 Category on BibDocument to implement a few additional functions needed for scripting
@@ -122,7 +123,13 @@ Getting the displayed publications.
 Getting and setting the selection of the table
 */
 - (NSArray*) selection { 
-    return [self selectedPublications]; 
+    NSMutableArray *selection = [[self selectedPublications] mutableCopy];
+    NSEnumerator *sharedE = [sharedGroups objectEnumerator];
+    BDSKSharedGroup *shared;
+    
+    while (shared = [sharedE nextObject]) 
+        [selection removeObjectsInArray:[shared publications]];
+    return [selection autorelease];
 }
 
 
