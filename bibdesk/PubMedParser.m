@@ -281,7 +281,7 @@ static BibItem *createBibItemWithPubMedDictionary(NSMutableDictionary *pubDict, 
 	// choose the authors from the FAU or AU tag as available
     chooseAuthors(pubDict);
 	
-    newBI = [[BibItem alloc] initWithType:@"misc"
+    newBI = [[BibItem alloc] initWithType:@"article"
 								 fileType:BDSKBibtexString
 								pubFields:pubDict
 								  authors:nil
