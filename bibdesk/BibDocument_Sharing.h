@@ -57,4 +57,9 @@ extern NSString *BDSKComputerName();
 // use class methods to access keys in the serialized shared dictionary
 + (NSString *)keyForSharedArchivedData;
 
++ (NSString *)serviceNameForKeychain;
++ (NSString *)TXTKeyForPassword;
++ (NSString *)TXTKeyForUniqueIdentifier;
++ (NSData *)sharingPasswordForCurrentUserUnhashed;
++ (NSString *)TXTKeyForComputerName;
 @end

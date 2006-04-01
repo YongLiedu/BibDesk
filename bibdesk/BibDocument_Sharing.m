@@ -40,6 +40,7 @@
 #import "BDSKGroup.h"
 #import "NSArray_BDSKExtensions.h"
 #import <SystemConfiguration/SystemConfiguration.h>
+#import <Security/Security.h>
 
 #include <sys/socket.h>
 #include <netinet/in.h>
@@ -125,6 +126,31 @@ NSString *BDSKComputerName() {
     }
 }
 
+// @@ move these to an NSNetService category?
++ (NSString *)serviceNameForKeychain { return @"BibDesk Sharing"; }
++ (NSString *)TXTKeyForPassword { return @"pass"; }
++ (NSString *)TXTKeyForUniqueIdentifier { return @"hostid"; }
++ (NSString *)TXTKeyForComputerName { return @"compname"; }
+
++ (NSData *)sharingPasswordForCurrentUserUnhashed;
+{
+    // find pw from keychain
+    OSStatus err;
+    
+    void *passwordData = NULL;
+    UInt32 passwordLength = 0;
+    NSData *data = nil;
+    
+    const char *serviceName = [[BibDocument serviceNameForKeychain] UTF8String];
+    const char *userName = [NSUserName() UTF8String];
+    
+    err = SecKeychainFindGenericPassword(NULL, strlen(serviceName), serviceName, strlen(userName), userName, &passwordLength, &passwordData, NULL);
+    data = [NSData dataWithBytes:passwordData length:passwordLength];
+    SecKeychainItemFreeContent(NULL, passwordData);
+
+    return data;
+}    
+
 - (void)restartSharingIfNeeded;
 {
     if([[OFPreferenceWrapper sharedPreferenceWrapper] boolForKey:BDSKShouldShareFilesKey]){
@@ -155,7 +181,7 @@ NSString *BDSKComputerName() {
     
     // +[NSNetService dictionaryFromTXTRecordData:] will crash if you pass a nil data
     NSDictionary *TXTDictionary = TXTData ? [NSNetService dictionaryFromTXTRecordData:TXTData] : nil;
-    NSString *serviceIdentifier = [[NSString alloc] initWithData:[TXTDictionary objectForKey:@"hostid"] encoding:NSUTF8StringEncoding];
+    NSString *serviceIdentifier = [[NSString alloc] initWithData:[TXTDictionary objectForKey:[BibDocument TXTKeyForUniqueIdentifier]] encoding:NSUTF8StringEncoding];
 
     // In general, we want to ignore our own shared services, as the write/read occur on the same run loop, and our file handle blocks; hence, we listen here for the resolve and then check the TXT record to see where the service came from.
 
@@ -167,6 +193,10 @@ NSString *BDSKComputerName() {
         // see if service is from this machine (case 1) or we are testing with a single machine (case 2)
         if(([NSString isEmptyString:serviceIdentifier] == NO && [serviceIdentifier isEqualToString:uniqueIdentifier] == NO) ||
            ([[NSUserDefaults standardUserDefaults] boolForKey:@"BDSKEnableSharingWithSelfKey"])){
+            
+            // we don't want it to message the document again
+            [aNetService setDelegate:nil];
+
             BDSKSharedGroup *group = [[BDSKSharedGroup alloc] initWithService:aNetService];
             [sharedGroups addObject:group];
             [group release];
@@ -174,9 +204,6 @@ NSString *BDSKComputerName() {
             
             // remove from the list of unresolved services
             [unresolvedNetServices removeObject:aNetService];
-            
-            // we don't want it to message this object again
-            [aNetService setDelegate:nil];
         }
     }
 }
@@ -280,7 +307,17 @@ NSString *BDSKComputerName() {
         // lazily instantiate the NSNetService object that will advertise on our behalf
         netService = [[NSNetService alloc] initWithDomain:@"" type:BDSKNetServiceDomain name:[self netServiceName] port:chosenPort];
         [netService setDelegate:self];
-        NSData *TXTData = [NSNetService dataFromTXTRecordDictionary:[NSDictionary dictionaryWithObject:uniqueIdentifier forKey:@"hostid"]];
+        NSMutableDictionary *dictionary = [NSMutableDictionary dictionary];
+        [dictionary setObject:uniqueIdentifier forKey:[BibDocument TXTKeyForUniqueIdentifier]];
+        if([[OFPreferenceWrapper sharedPreferenceWrapper] boolForKey:BDSKSharingRequiresPasswordKey]){
+            NSData *pwData = [BibDocument sharingPasswordForCurrentUserUnhashed];
+            // hash with sha1 so we're not sending it in the clear
+            if(pwData != nil)
+                [dictionary setObject:[pwData sha1Signature] forKey:[BibDocument TXTKeyForPassword]];
+            [dictionary setObject:BDSKComputerName() forKey:[BibDocument TXTKeyForComputerName]];
+        }
+        NSData *TXTData = [NSNetService dataFromTXTRecordDictionary:dictionary];
+        OBPOSTCONDITION(TXTData != nil);
         [netService setTXTRecordData:TXTData];
     }
     

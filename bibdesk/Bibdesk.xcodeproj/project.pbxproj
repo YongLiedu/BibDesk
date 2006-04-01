@@ -539,6 +539,10 @@
 		F925352908FDFAE40045D563 /* BDSKSearchResult.h in Headers */ = {isa = PBXBuildFile; fileRef = F925352708FDFAE40045D563 /* BDSKSearchResult.h */; };
 		F925352A08FDFAE40045D563 /* BDSKSearchResult.m in Sources */ = {isa = PBXBuildFile; fileRef = F925352808FDFAE40045D563 /* BDSKSearchResult.m */; };
 		F9273968078E58A600609739 /* Bibdesk_Prefix.pch in Headers */ = {isa = PBXBuildFile; fileRef = 32CA4F630368D1EE00C91783 /* Bibdesk_Prefix.pch */; };
+		F92ECBA009DEF86600A244D0 /* Security.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F92ECB6B09DEF86500A244D0 /* Security.framework */; };
+		F92ECBF109DF09C200A244D0 /* BDSKPasswordController.nib in Resources */ = {isa = PBXBuildFile; fileRef = F92ECBEF09DF09C200A244D0 /* BDSKPasswordController.nib */; };
+		F92ECBF409DF09DA00A244D0 /* BDSKPasswordController.h in Headers */ = {isa = PBXBuildFile; fileRef = F92ECBF209DF09DA00A244D0 /* BDSKPasswordController.h */; };
+		F92ECBF509DF09DA00A244D0 /* BDSKPasswordController.m in Sources */ = {isa = PBXBuildFile; fileRef = F92ECBF309DF09DA00A244D0 /* BDSKPasswordController.m */; };
 		F92F4E450788DEC5001B8F82 /* BibPref_Files.nib in Resources */ = {isa = PBXBuildFile; fileRef = F92F4E430788DEC5001B8F82 /* BibPref_Files.nib */; };
 		F92F4E470788DEDD001B8F82 /* genericBibDocIcon.tiff in Resources */ = {isa = PBXBuildFile; fileRef = F92F4E460788DEDD001B8F82 /* genericBibDocIcon.tiff */; };
 		F92F4E4E0788DEFC001B8F82 /* BibPref_Files.h in Headers */ = {isa = PBXBuildFile; fileRef = F92F4E4C0788DEFC001B8F82 /* BibPref_Files.h */; };
@@ -1336,6 +1340,10 @@
 		F925332208FC9FB80045D563 /* BDSKSearchIndex.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BDSKSearchIndex.m; sourceTree = "<group>"; };
 		F925352708FDFAE40045D563 /* BDSKSearchResult.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BDSKSearchResult.h; sourceTree = "<group>"; };
 		F925352808FDFAE40045D563 /* BDSKSearchResult.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BDSKSearchResult.m; sourceTree = "<group>"; };
+		F92ECB6B09DEF86500A244D0 /* Security.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Security.framework; path = /System/Library/Frameworks/Security.framework; sourceTree = "<absolute>"; };
+		F92ECBF009DF09C200A244D0 /* English */ = {isa = PBXFileReference; lastKnownFileType = wrapper.nib; name = English; path = English.lproj/BDSKPasswordController.nib; sourceTree = "<group>"; };
+		F92ECBF209DF09DA00A244D0 /* BDSKPasswordController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BDSKPasswordController.h; sourceTree = "<group>"; };
+		F92ECBF309DF09DA00A244D0 /* BDSKPasswordController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BDSKPasswordController.m; sourceTree = "<group>"; };
 		F92F4E440788DEC5001B8F82 /* English */ = {isa = PBXFileReference; lastKnownFileType = wrapper.nib; name = English; path = English.lproj/BibPref_Files.nib; sourceTree = "<group>"; };
 		F92F4E460788DEDD001B8F82 /* genericBibDocIcon.tiff */ = {isa = PBXFileReference; lastKnownFileType = image.tiff; name = genericBibDocIcon.tiff; path = Images/genericBibDocIcon.tiff; sourceTree = "<group>"; };
 		F92F4E4C0788DEFC001B8F82 /* BibPref_Files.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = BibPref_Files.h; sourceTree = "<group>"; };
@@ -1487,6 +1495,7 @@
 				F91B7F28092BEB5A00976F6F /* AddressBook.framework in Frameworks */,
 				F91B8027092BFF6100976F6F /* ILCrashReporter.framework in Frameworks */,
 				F9DF3BC209B7605E00342ADE /* SystemConfiguration.framework in Frameworks */,
+				F92ECBA009DEF86600A244D0 /* Security.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1685,6 +1694,7 @@
 				F9022D410758073E00C3F701 /* cfg */,
 				F9022D2C0758069E00C3F701 /* BibDeskInputManager */,
 				F95D3FA509DDF51D00D793A6 /* BibPref_Sharing.nib */,
+				F92ECBEF09DF09C200A244D0 /* BDSKPasswordController.nib */,
 			);
 			includeInIndex = 1;
 			name = Resources;
@@ -1693,6 +1703,7 @@
 		29B97323FDCFA39411CA2CEA /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				F92ECB6B09DEF86500A244D0 /* Security.framework */,
 				F9DF3BC109B7605E00342ADE /* SystemConfiguration.framework */,
 				F91B8026092BFF6100976F6F /* ILCrashReporter.framework */,
 				F91B7F27092BEB5A00976F6F /* AddressBook.framework */,
@@ -1802,6 +1813,7 @@
 				F9252E2108F60D170045D563 /* BDSKFileContentSearchController.m */,
 				CE38FB8D091D94A100BCB69D /* BDSKFilterController.m */,
 				F97965F0086909EA00050427 /* BDSKFindController.m */,
+				F92ECBF309DF09DA00A244D0 /* BDSKPasswordController.m */,
 				F9022C58075802E300C3F701 /* BDSKPreviewer.m */,
 				27AFAF9B080D1E1B0096F5D2 /* BDSKTextImportController.m */,
 				F98AA6800971E3F400184BD8 /* BDSKTextViewCompletionController.m */,
@@ -2053,6 +2065,7 @@
 				CE3B5E7A09CEDE470017D339 /* BDSKMacroResolver.h */,
 				3DE391F007FF260D00BE3AE7 /* BDSKMenuItem.h */,
 				F941B7E808AA574200F04ECD /* BDSKOverlay.h */,
+				F92ECBF209DF09DA00A244D0 /* BDSKPasswordController.h */,
 				CEF9433F092656BB00750FFA /* BDSKPathIconTransformer.h */,
 				CEF9420F0926458C00750FFA /* BDSKPathColorTransformer.h */,
 				F94DE74909CB46FF00B5FD51 /* BDSKPersistentSearch.h */,
@@ -2439,6 +2452,7 @@
 				CE3B682C09D1B0190017D339 /* BDSKImagePopUpButtonCell.h in Headers */,
 				F9F31CD009D61BB4008910D9 /* BibDocument_Sharing.h in Headers */,
 				F95D3FAE09DDF6A900D793A6 /* BibPref_Sharing.h in Headers */,
+				F92ECBF409DF09DA00A244D0 /* BDSKPasswordController.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -3013,6 +3027,7 @@
 				CE386D0709D7075C00B9D1F0 /* sharedFolderIcon.tiff in Resources */,
 				F9E362DF09D70D71002EA893 /* bonjourIcon.tiff in Resources */,
 				F95D3FA709DDF51D00D793A6 /* BibPref_Sharing.nib in Resources */,
+				F92ECBF109DF09C200A244D0 /* BDSKPasswordController.nib in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -3352,6 +3367,7 @@
 				CE3B682D09D1B0190017D339 /* BDSKImagePopUpButtonCell.m in Sources */,
 				F9F31CD109D61BB4008910D9 /* BibDocument_Sharing.m in Sources */,
 				F95D3FAF09DDF6A900D793A6 /* BibPref_Sharing.m in Sources */,
+				F92ECBF509DF09DA00A244D0 /* BDSKPasswordController.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -3733,6 +3749,14 @@
 				F9252E2508F60D520045D563 /* English */,
 			);
 			name = BDSKFileContentSearch.nib;
+			sourceTree = "<group>";
+		};
+		F92ECBEF09DF09C200A244D0 /* BDSKPasswordController.nib */ = {
+			isa = PBXVariantGroup;
+			children = (
+				F92ECBF009DF09C200A244D0 /* English */,
+			);
+			name = BDSKPasswordController.nib;
 			sourceTree = "<group>";
 		};
 		F92F4E430788DEC5001B8F82 /* BibPref_Files.nib */ = {

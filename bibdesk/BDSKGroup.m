@@ -393,6 +393,8 @@ static NSString *BDSKAllPublicationsLocalizedString = nil;
 /* Subclass for Bonjour sharing.  Designated initializer takes an NSNetService as parameter. */
 
 #import "BibDocument_Sharing.h"
+#import <Security/Security.h>
+#import "BDSKPasswordController.h"
 
 @implementation BDSKSharedGroup
 
@@ -450,6 +452,73 @@ static NSString *BDSKAllPublicationsLocalizedString = nil;
     return [NSString stringWithFormat:@"<%@ %p>: {\n\tdownload complete: %@\n\tdata length: %d\n\tname: %@\nservice: %@\n }", [self class], self, (downloadComplete ? @"yes" : @"no"), [data length], [self name], service];
 }
 
+- (NSData *)passwordForResolvedService:(NSNetService *)aNetService;
+{
+    // get the service name, use to get pw from keychain
+    // hash it, then convert to TXT form
+    // re-get pw from TXT dict
+    OSStatus err;
+    
+    // we use the computer name instead of a particular service name, since the same computer vends multiple services (all with the same password)
+    NSData *TXTData = [aNetService TXTRecordData];
+    NSDictionary *dictionary = nil;
+    if(TXTData)
+        dictionary = [NSNetService dictionaryFromTXTRecordData:TXTData];
+    TXTData = [dictionary objectForKey:[BibDocument TXTKeyForComputerName]];
+    const char *serverName = [TXTData bytes];
+    NSAssert([TXTData length], @"no computer name in TXT record");
+    
+    void *password = NULL;
+    UInt32 passwordLength = 0;
+    NSData *pwData = nil;
+    
+    err = SecKeychainFindGenericPassword(NULL, [TXTData length], serverName, 0, NULL, &passwordLength, &password, NULL);
+    if(err == noErr){
+        pwData = [NSData dataWithBytes:password length:passwordLength];
+        SecKeychainItemFreeContent(NULL, password);
+        
+        // hash it for comparison, since we hash before putting it in the TXT
+        pwData = [pwData sha1Signature];
+        
+        // now transform it to a TXT dictionary and back again, in case it does something weird with the pw
+        // this is not very nice...
+        NSDictionary *dict = [NSDictionary dictionaryWithObject:pwData forKey:@"key"];
+        pwData = [NSNetService dataFromTXTRecordDictionary:dict];
+        dict = [NSNetService dictionaryFromTXTRecordData:pwData];
+        pwData = [dict objectForKey:@"key"];
+    }
+    return pwData;
+}
+
+- (BOOL)didAuthenticateToResolvedService:(NSNetService *)aNetService;
+{
+    // get the password from the remote service
+    NSData *TXTData = [aNetService TXTRecordData];
+    NSDictionary *dictionary = TXTData ? [NSNetService dictionaryFromTXTRecordData:TXTData] : nil;
+    NSData *requiredPassword = [dictionary objectForKey:[BibDocument TXTKeyForPassword]];
+    
+    // get pw from keychain or prompt for pw, then store in keychain
+    NSData *pwData = [self passwordForResolvedService:aNetService];
+    BOOL match = [requiredPassword isEqual:pwData];
+    if(requiredPassword != nil && match == NO){
+        BDSKPasswordController *pwController = [[BDSKPasswordController alloc] init];
+        int rv;
+        do {
+            rv = [pwController runModalForService:aNetService];
+            // re-fetch from the keychain
+            pwData = [self passwordForResolvedService:aNetService];
+            match = [requiredPassword isEqual:pwData];
+            if(match == NO)
+                [pwController setStatus:NSLocalizedString(@"Incorrect Password", @"")];
+        } while(rv && match == NO);
+        
+        [pwController close];
+        [pwController release];
+    }
+    
+    return requiredPassword == nil || match ? YES : NO;
+}
+
 - (NSArray *)publications
 {
     if (publications == nil && downloadComplete == YES && [data length] != 0){
@@ -460,10 +529,10 @@ static NSString *BDSKAllPublicationsLocalizedString = nil;
             [errorString release];
         } else {
             NSData *archive = [dictionary objectForKey:[BibDocument keyForSharedArchivedData]];
-            if(archive != nil)
+            if(archive != nil && [self didAuthenticateToResolvedService:[self service]])
                 publications = [[NSKeyedUnarchiver unarchiveObjectWithData:archive] retain];
             else
-                NSLog(@"no publication data in shared stream");
+                NSLog(@"no publication data in shared stream, or no password");
         }
     }
     return publications;
@@ -501,7 +570,8 @@ static NSString *BDSKAllPublicationsLocalizedString = nil;
             [(NSInputStream *)aStream close];
             downloadComplete = YES;
             [self setCount:[[self publications] count]];
-            [[NSNotificationCenter defaultCenter] postNotificationName:BDSKSharedGroupFinishedNotification object:self];
+            if([self count]) /* don't post if count == 0, since we may not have had a password */
+                [[NSNotificationCenter defaultCenter] postNotificationName:BDSKSharedGroupFinishedNotification object:self];
             break;
         case NSStreamEventErrorOccurred:
             do {

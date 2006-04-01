@@ -40,6 +40,7 @@
 #import "BibPref_Sharing.h"
 #import "BibPrefController.h"
 #import "BibDocument_Sharing.h"
+#import <Security/Security.h>
 
 @implementation BibPref_Sharing
 
@@ -48,6 +49,13 @@
     [super awakeFromNib];
     
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(handleSharingNameChanged:) name:BDSKSharingNameChangedNotification object:nil];
+    
+    NSData *pwData = [BibDocument sharingPasswordForCurrentUserUnhashed];
+    if(pwData != nil){
+        NSString *pwString = [[NSString alloc] initWithData:pwData encoding:NSUTF8StringEncoding];
+        [passwordField setStringValue:pwString];
+        [pwString release];
+    }    
 }
 
 - (void)dealloc
@@ -76,8 +84,8 @@
         [enableBrowsingButton setToolTip:disabledTip];
     }
     
-    [usePasswordButton setEnabled:NO];
-    [passwordField setEnabled:NO];
+    [usePasswordButton setState:[defaults boolForKey:BDSKSharingRequiresPasswordKey] ? NSOnState : NSOffState];
+    [passwordField setEnabled:[defaults boolForKey:BDSKSharingRequiresPasswordKey]];
     
     NSString *name = [defaults objectForKey:BDSKSharingNameKey];
     if([NSString isEmptyString:name])
@@ -87,10 +95,43 @@
 
 - (IBAction)togglePassword:(id)sender
 {
+    [defaults setBool:([sender state] == NSOnState) forKey:BDSKSharingRequiresPasswordKey];
+    [self updateUI];
 }
 
 - (IBAction)changePassword:(id)sender
 {
+    const void *passwordData = NULL;
+    SecKeychainItemRef itemRef = NULL;    
+    const char *userName = [NSUserName() UTF8String];
+    const char *serviceName = [[BibDocument serviceNameForKeychain] UTF8String];
+    
+    OSStatus err;
+    
+    NSString *password = [sender stringValue];
+    NSParameterAssert(password != nil);
+    
+    UInt32 passwordLength = 0;
+    err = SecKeychainFindGenericPassword(NULL, strlen(serviceName), serviceName, strlen(userName), userName, &passwordLength, (void **)&passwordData, &itemRef);
+    if(err == noErr){
+        // pw was on keychain, so change it
+        SecKeychainItemFreeContent(NULL, (void *)passwordData);
+        passwordData = NULL;
+        
+        passwordData = [password UTF8String];
+        SecKeychainAttribute attrs[] = {
+        { kSecAccountItemAttr, strlen(userName), (char *)userName },
+        { kSecServiceItemAttr, strlen(serviceName), (char *)serviceName } };
+        const SecKeychainAttributeList attributes = { sizeof(attrs) / sizeof(attrs[0]), attrs };
+        
+        err = SecKeychainItemModifyAttributesAndData(itemRef, &attributes, strlen(passwordData), passwordData);
+    } else {
+        // pw not on keychain, so add it
+        passwordData = [password UTF8String];
+        err = SecKeychainAddGenericPassword(NULL, strlen(serviceName), serviceName, strlen(userName), userName, strlen(passwordData), passwordData, &itemRef);    
+    }
+    
+    NSAssert1(err == noErr, @"error %d occurred setting password", err);    
 }
 
 // setting to the empty string will restore the default

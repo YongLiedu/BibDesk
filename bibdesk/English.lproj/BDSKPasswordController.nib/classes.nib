@@ -4,7 +4,7 @@
             ACTIONS = {buttonAction = id; changePassword = id; }; 
             CLASS = BDSKPasswordController; 
             LANGUAGE = ObjC; 
-            OUTLETS = {passwordField = NSSecureTextField; }; 
+            OUTLETS = {passwordField = NSSecureTextField; service = id; statusField = NSTextField; }; 
             SUPERCLASS = NSWindowController; 
         }, 
         {CLASS = FirstResponder; LANGUAGE = ObjC; SUPERCLASS = NSObject; }
