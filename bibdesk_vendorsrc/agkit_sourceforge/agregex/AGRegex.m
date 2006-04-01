@@ -184,7 +184,7 @@ static AGRegex *backrefPattern;
         buffer = NSZoneMalloc(NSDefaultMallocZone(), bufSize);
         NSAssert1(buffer != NULL, @"Unable to allocate buffer of length %d and size UInt8", bufLen + 1);
     }
-    CFStringGetBytes((CFStringRef)str, fullRange, kCFStringEncodingUTF8, 0, FALSE, buffer, converted, NULL);
+    CFStringGetBytes((CFStringRef)str, fullRange, kCFStringEncodingUTF8, 0, FALSE, buffer, bufSize, NULL);
     buffer[bufLen] = '\0'; // null terminate to make this a cstring
     
     // try match
@@ -436,7 +436,6 @@ static AGRegex *backrefPattern;
 	end = matchv[2 * idx + 1];
 	if (start < 0)
 		return NSMakeRange(NSNotFound, 0);
-    
     // ARM:  Calling [string UTF8String] can get expensive in terms of memory, since it creates autoreleased NSData instances; if this method gets called frequently, we can end up in big trouble (this happens when you do replaceWithString: on a very long string).
     CFIndex bufLen;
     CFRange fullRange = CFRangeMake(0, [string length]);
@@ -445,7 +444,7 @@ static AGRegex *backrefPattern;
     NSAssert1(converted == [string length], @"String %@ was not converted to UTF-8 correctly", string);
     
     UInt8 *buffer = NULL;
-    size_t bufSize = bufLen * sizeof(UInt8);
+    size_t bufSize = (bufLen) * sizeof(UInt8);
     BOOL usedStack = YES;
     buffer = bufSize < SAFE_ALLOCA_SIZE ? alloca(bufSize) : NULL;
     if(buffer == NULL){
@@ -453,11 +452,11 @@ static AGRegex *backrefPattern;
         buffer = NSZoneMalloc(NSDefaultMallocZone(), bufSize);
         NSAssert1(buffer != NULL, @"Unable to allocate buffer of length %d and size UInt8", bufLen);
     }
-    CFStringGetBytes((CFStringRef)string, fullRange, kCFStringEncodingUTF8, 0, FALSE, buffer, converted, NULL);
+    CFStringGetBytes((CFStringRef)string, fullRange, kCFStringEncodingUTF8, 0, FALSE, buffer, bufSize, NULL);
 
     // convert byte locations to character locations (doesn't require null-terminated string)
     NSRange theRange = NSMakeRange(utf8charcount(buffer, start), utf8charcount(buffer + start, end - start));
-
+    
     if(usedStack == NO)
         NSZoneFree(NSDefaultMallocZone(), buffer);
     
