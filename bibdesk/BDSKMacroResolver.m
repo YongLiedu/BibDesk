@@ -159,7 +159,7 @@ static BDSKGlobalMacroResolver *defaultMacroResolver;
         if([key caseInsensitiveCompare:macroKey] == NSOrderedSame)
             return YES;
         
-        NSString *value = [macroDefinitions objectForKey:key];
+        NSString *value = [self valueOfMacro:key];
         if ([self macroDefinition:value dependsOnMacro:macroKey])
             return YES;
     }
