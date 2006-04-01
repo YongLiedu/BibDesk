@@ -181,6 +181,8 @@ extern NSString *BDSKTableHeaderTitlesKey;
 extern NSString *BDSKCiteseerHostKey;
 extern NSString *BDSKShouldShareFilesKey;
 extern NSString *BDSKShouldLookForSharedFilesKey;
+extern NSString *BDSKSharingRequiresPasswordKey;
+extern NSString *BDSKSharingNameKey;
 
 extern NSString *BDSKShouldDisplayFirstNamesKey;
 extern NSString *BDSKShouldAbbreviateFirstNamesKey;
@@ -263,6 +265,7 @@ extern NSString *BDSKSharingChangedNotification;
 extern NSString *BDSKSharedBrowsingChangedNotification;
 extern NSString *BDSKSharedGroupFinishedNotification;
 extern NSString *BDSKComputerNameChangedNotification;
+extern NSString *BDSKSharingNameChangedNotification;
 
 #pragma mark Exception name strings
 extern NSString *BDSKComplexStringException;

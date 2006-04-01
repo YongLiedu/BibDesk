@@ -1,8 +1,9 @@
 //
-//  BibDocument_Sharing.h
-//  Bibdesk
+//  BibPref_Sharing.h
+//  BibDesk
 //
-//  Created by Adam Maxwell on 03/25/06.
+//  Created by Adam Maxwell on Fri Mar 31 2006.
+//  Copyright (c) 2006 Adam R. Maxwell. All rights reserved.
 /*
  This software is Copyright (c) 2006
  Adam Maxwell. All rights reserved.
@@ -36,25 +37,21 @@
  OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#import "BibDocument.h"
+#import <Cocoa/Cocoa.h>
 
-extern NSString *BDSKNetServiceDomain;
-extern NSString *BDSKComputerName();
+@interface BibPref_Sharing : OAPreferenceClient
+{
+    IBOutlet NSButton *enableBrowsingButton;
+    IBOutlet NSButton *enableSharingButton;
+    IBOutlet NSButton *usePasswordButton;
+    IBOutlet NSSecureTextField *passwordField;
+    IBOutlet NSTextField *sharedNameField;
+}
+- (void)handleSharingNameChanged:(NSNotification *)aNotification;
 
-@interface BibDocument (Sharing)
-
-- (void)handleComputerNameChangedNotification:(NSNotification *)note;
-
-- (void)enableSharedBrowsing;
-- (void)disableSharedBrowsing;
-- (NSString *)netServiceName;
-
-- (void)enableSharing;
-- (void)disableSharing;
-
-- (void)connectionReceived:(NSNotification *)aNotification;
-
-// use class methods to access keys in the serialized shared dictionary
-+ (NSString *)keyForSharedArchivedData;
-
+- (IBAction)changePassword:(id)sender;
+- (IBAction)changeSharedName:(id)sender;
+- (IBAction)toggleBrowsing:(id)sender;
+- (IBAction)togglePassword:(id)sender;
+- (IBAction)toggleSharing:(id)sender;
 @end

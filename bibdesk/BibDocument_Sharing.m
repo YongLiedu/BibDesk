@@ -64,10 +64,18 @@ static CFStringRef copyDescriptionCallBack(const void *info) { return (CFStringR
 // convert this to an NSNotification
 static void SCDynamicStoreChanged(SCDynamicStoreRef store, CFArrayRef changedKeys, void *info)
 {
+    // clear this here, since the other handlers may depend on it
+    [computerName release];
+    computerName = nil;
+        
     [[NSNotificationCenter defaultCenter] postNotificationName:BDSKComputerNameChangedNotification object:nil];
+    
+    // update the text field in prefs if necessary (or that could listen for computer name changes...)
+    if([NSString isEmptyString:[[OFPreferenceWrapper sharedPreferenceWrapper] objectForKey:BDSKSharingNameKey]])
+        [[NSNotificationCenter defaultCenter] postNotificationName:BDSKSharingNameChangedNotification object:nil];
 }
 
-static NSString *BDSKComputerName() {
+NSString *BDSKComputerName() {
     if(computerName == nil){
         computerName = (NSString *)SCDynamicStoreCopyComputerName(dynamicStore, NULL);
         if(computerName == nil){
@@ -117,14 +125,26 @@ static NSString *BDSKComputerName() {
     }
 }
 
+- (void)restartSharingIfNeeded;
+{
+    if([[OFPreferenceWrapper sharedPreferenceWrapper] boolForKey:BDSKShouldShareFilesKey]){
+        [self disableSharing];
+        [self enableSharing];
+    }
+}
+
+//  handle changes from the OS
 - (void)handleComputerNameChangedNotification:(NSNotification *)note;
 {
-    [computerName release];
-    computerName = nil;
-    
-    // restart sharing so the name propagates correctly; avoid conflicts with other users' share names
-    [self disableSharing];
-    [self enableSharing];
+    // if we're using the computer name, restart sharing so the name propagates correctly; avoid conflicts with other users' share names
+    if([NSString isEmptyString:[[OFPreferenceWrapper sharedPreferenceWrapper] objectForKey:BDSKSharingNameKey]])
+        [self restartSharingIfNeeded];
+}
+
+// handle changes from prefs
+- (void)handleSharingNameChangedNotification:(NSNotification *)note;
+{
+    [self restartSharingIfNeeded];
 }
 
 #pragma mark Reading other data
@@ -214,7 +234,10 @@ static NSString *BDSKComputerName() {
     // docs say to use computer name instead of host name http://developer.apple.com/qa/qa2001/qa1228.html
     
     // we append document name since the same computer vends multiple documents
-    return [NSString stringWithFormat:@"%@ - %@", BDSKComputerName(), documentName];
+    NSString *sharingName = [[OFPreferenceWrapper sharedPreferenceWrapper] objectForKey:BDSKSharingNameKey];
+    if([NSString isEmptyString:sharingName])
+        sharingName = BDSKComputerName();
+    return [NSString stringWithFormat:@"%@ - %@", sharingName, documentName];
 }
 
 #pragma mark Exporting our data

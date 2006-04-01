@@ -201,6 +201,8 @@ NSString *BDSKShouldAbbreviateFirstNamesKey = @"BDSKShouldAbbreviateFirstNamesKe
 NSString *BDSKShouldDisplayLastNameFirstKey = @"BDSKShouldDisplayLastNameFirstKey";
 NSString *BDSKShouldShareFilesKey = @"BDSKShouldShareFilesKey";
 NSString *BDSKShouldLookForSharedFilesKey = @"BDSKShouldLookForSharedFilesKey";
+NSString *BDSKSharingRequiresPasswordKey = @"BDSKBrowsingRequiresPasswordKey";
+NSString *BDSKSharingNameKey = @"BDSKSharingNameKey";
 
 
 #pragma mark Field name strings
@@ -280,6 +282,7 @@ NSString *BDSKSharingChangedNotification = @"BDSKSharingChangedNotification";
 NSString *BDSKSharedBrowsingChangedNotification = @"BDSKSharedBrowsingChangedNotification";
 NSString *BDSKSharedGroupFinishedNotification = @"BDSKSharedGroupFinishedNotification";
 NSString *BDSKComputerNameChangedNotification = @"BDSKComputerNameChangedNotification";
+NSString *BDSKSharingNameChangedNotification = @"BDSKSharingNameChangedNotification";
 
 #pragma mark Exception name strings
 

@@ -52,18 +52,6 @@
     
     [editOnPasteButton setState:[defaults boolForKey:BDSKEditOnPasteKey] ? NSOnState : NSOffState];
     
-    [shareFilesButton setState:[defaults boolForKey:BDSKShouldShareFilesKey] ? NSOnState : NSOffState];
-    
-    [lookForSharedFilesButton setState:[defaults boolForKey:BDSKShouldLookForSharedFilesKey] ? NSOnState : NSOffState];
-    
-    if(floor(NSAppKitVersionNumber) <= NSAppKitVersionNumber10_3){
-        NSString *disabledTip = NSLocalizedString(@"Bonjour sharing is only supported on Mac OS X Tiger at this time.", @"");
-        [shareFilesButton setEnabled:NO];
-        [shareFilesButton setToolTip:disabledTip];
-        [lookForSharedFilesButton setEnabled:NO];
-        [lookForSharedFilesButton setToolTip:disabledTip];
-    }
-
     [checkForUpdatesButton setState:([defaults boolForKey:BDSKAutoCheckForUpdatesKey] == YES) ? NSOnState : NSOffState];
 
     [warnOnDeleteButton setState:([defaults boolForKey:BDSKWarnOnDeleteKey] == YES) ? NSOnState : NSOffState];
@@ -118,16 +106,6 @@
 
 - (IBAction)changeEditOnPaste:(id)sender{
     [defaults setBool:([sender state] == NSOnState) forKey:BDSKEditOnPasteKey];
-}
-
-- (IBAction)changeShareFiles:(id)sender{
-    [defaults setBool:([sender state] == NSOnState) forKey:BDSKShouldShareFilesKey];
-	[[NSNotificationCenter defaultCenter] postNotificationName:BDSKSharingChangedNotification object:self];
-}
-
-- (IBAction)changeLookForSharedFiles:(id)sender{
-    [defaults setBool:([sender state] == NSOnState) forKey:BDSKShouldLookForSharedFilesKey];
-	[[NSNotificationCenter defaultCenter] postNotificationName:BDSKSharedBrowsingChangedNotification object:self];
 }
 
 - (IBAction)changeWarnOnDelete:(id)sender{
