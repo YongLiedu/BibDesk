@@ -59,3 +59,12 @@ static inline Boolean BDIsNewlineCharacter(UniChar c)
     // minor optimization: check for an ASCII character, since those are most common in TeX
     return ( (c <= 0x007E && c >= 0x0021) ? NO : CFCharacterSetIsCharacterMember((CFCharacterSetRef)[NSCharacterSet newlineCharacterSet], c) );
 }
+
+static inline Boolean BDStringHasAccentedCharacters(CFStringRef string)
+{
+    CFMutableStringRef mutableString = CFStringCreateMutableCopy(CFAllocatorGetDefault(), CFStringGetLength(string), string);
+    CFStringNormalize(mutableString, kCFStringNormalizationFormD);
+    Boolean success = CFStringFindCharacterFromSet(mutableString, CFCharacterSetGetPredefined(kCFCharacterSetNonBase), CFRangeMake(0, CFStringGetLength(mutableString)), 0, NULL);
+    CFRelease(mutableString);
+    return success;
+}
