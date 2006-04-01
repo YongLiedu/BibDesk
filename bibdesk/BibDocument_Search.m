@@ -328,16 +328,12 @@ NSRange rangeOfStringUsingLossyTargetString(NSString *substring, NSString *targe
     [mutableCopy deleteCharactersInCharacterSet:[NSCharacterSet curlyBraceCharacterSet]];
     
     if(lossy){
-        // get ASCII data from the mutable string, and convert it to a new NSString
-        NSData *data = [mutableCopy dataUsingEncoding:NSASCIIStringEncoding allowLossyConversion:YES];
-        targetString = [[NSString alloc] initWithData:data encoding:NSASCIIStringEncoding];
-        range = [targetString rangeOfString:substring options:options];
-        [targetString release];
-    } else {
-        // search directly in the mutable string
-        range = [mutableCopy rangeOfString:substring options:options];
+        CFStringNormalize((CFMutableStringRef)mutableCopy, kCFStringNormalizationFormD);
+        BDDeleteCharactersInCharacterSet((CFMutableStringRef)mutableCopy, CFCharacterSetGetPredefined(kCFCharacterSetNonBase));
     }
     
+    range = [mutableCopy rangeOfString:substring options:options];
+
     [mutableCopy release];
     return range;
 }
@@ -348,7 +344,7 @@ NSRange rangeOfStringUsingLossyTargetString(NSString *substring, NSString *targe
     if([substring rangeOfCharacterFromSet:[NSCharacterSet uppercaseLetterCharacterSet]].location != NSNotFound)
         searchMask = 0;
     BOOL doLossySearch = YES;
-    if(![substring canBeConvertedToEncoding:NSASCIIStringEncoding])
+    if(BDStringHasAccentedCharacters((CFStringRef)substring))
         doLossySearch = NO;
     
     SEL accessor = NULL;
