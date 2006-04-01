@@ -528,6 +528,8 @@ static NSString *BDSKAllPublicationsLocalizedString = nil;
             NSLog(@"Error reading shared data: %@", errorString);
             [errorString release];
         } else {
+            /* NOTE: this is not a secure service; the server shouldn't send any data until the appropriate password has been sent.  At present, it's only a way to prevent casual browsing of your bib files, but perhaps we shouldn't enable this unless it's bulletproof...
+            */
             NSData *archive = [dictionary objectForKey:[BibDocument keyForSharedArchivedData]];
             if(archive != nil && [self didAuthenticateToResolvedService:[self service]])
                 publications = [[NSKeyedUnarchiver unarchiveObjectWithData:archive] retain];
