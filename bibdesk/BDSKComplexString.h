@@ -90,16 +90,6 @@
 */
 - (BDSKMacroResolver *)macroResolver;
 
-/*!
-    @method     isCircularMacro:forDefinition:
-    @abstract   Checks whether a macro will lead to a circular definition
-    @discussion (description)
-	@param		macroKey The key for the macro
-	@param		macroString The definition of the macro
-    @result     -
-*/
-+ (BOOL)isCircularMacro:(NSString *)macroKey forDefinition:(NSString *)macroString;
-
 @end
 
 /* These is a category on NSString containing the class factory methods for 

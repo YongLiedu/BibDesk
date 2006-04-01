@@ -167,7 +167,7 @@ static NSString *stringFromBTField(AST *field,  NSString *fieldName,  NSString *
                             field = bt_next_field (entry, NULL, &fieldname);
                             NSString *macroKey = [NSString stringWithCString: field->text usingEncoding:parserEncoding];
                             NSString *macroString = stringFromBTField(field, sFieldName, filePath, aDocument, parserEncoding); // handles TeXification
-                            if([BDSKComplexString isCircularMacro:macroKey forDefinition:macroString]){
+                            if([macroResolver macroDefinition:macroString dependsOnMacro:macroKey]){
                                 NSString *type = NSLocalizedString(@"Error", @"");
                                 NSString *message = NSLocalizedString(@"Macro leads to circular definition, ignored.", @"");
 

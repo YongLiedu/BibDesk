@@ -62,6 +62,7 @@
 @interface BDSKMacroResolver (Private)
 - (void)loadMacroDefinitions;
 - (void)synchronize;
+- (void)addMacro:(NSString *)macroKey toArray:(NSMutableArray *)array;
 @end
 
 
@@ -102,7 +103,6 @@ static BDSKGlobalMacroResolver *defaultMacroResolver;
     return [document undoManager];
 }
 
-
 - (NSString *)bibTeXString{
     if (macroDefinitions == nil)
         return @"";
@@ -112,50 +112,14 @@ static BDSKGlobalMacroResolver *defaultMacroResolver;
     NSMutableArray *orderedMacros = [NSMutableArray arrayWithCapacity:[macros count]];
     NSEnumerator *macroEnum = [macros objectEnumerator];
     NSString *macro;
-    NSString *value;
     
-    while (macro = [macroEnum nextObject]){
-        if ([orderedMacros containsObject:macro])
-            continue;
-        value = [macroDefinitions objectForKey:macro];
-        
-        if ([value isComplex]) {
-            // we have to insert macros on which this depends in opposite order of the hierarchy
-            int index = [orderedMacros count];
-            NSMutableArray *descendents = [NSMutableArray arrayWithObject:value];
-            
-            while ([descendents count] > 0) {
-                NSArray *values = [descendents copy];
-                NSEnumerator *valueE = [values objectEnumerator];
-                [values release];
-                [descendents removeAllObjects];
-                
-                while(value = [valueE nextObject]){
-                    NSEnumerator *nodeE = [[value nodes] objectEnumerator];
-                    BDSKStringNode *node;
-                    
-                    while(node = [nodeE nextObject]){
-                        if([node type] != BSN_MACRODEF)
-                            continue;
-                        
-                        NSString *key = [node value];
-                        
-                        if([orderedMacros containsObject:key])
-                            continue;
-                        [orderedMacros insertObject:key atIndex:index];
-                        value = [macroDefinitions objectForKey:key];
-                        if ([value isComplex])
-                            [descendents addObject:value];
-                    }
-                }
-            }
-        }
-        [orderedMacros addObject:macro];
-    }
-
+    while (macro = [macroEnum nextObject])
+        [self addMacro:macro toArray:orderedMacros];
+    
     BOOL shouldTeXify = [[OFPreferenceWrapper sharedPreferenceWrapper] boolForKey:BDSKShouldTeXifyWhenSavingAndCopyingKey];
 	NSMutableString *macroString = [NSMutableString string];
     macroEnum = [orderedMacros objectEnumerator];
+    NSString *value;
     
     while (macro = [macroEnum nextObject]){
 		value = [macroDefinitions objectForKey:macro];
@@ -175,6 +139,31 @@ static BDSKGlobalMacroResolver *defaultMacroResolver;
         [macroString appendStrings:@"\n@string{", macro, @" = ", [value stringAsBibTeXString], @"}\n", nil];
     }
 	return macroString;
+}
+
+- (BOOL)macroDefinition:(NSString *)macroDef dependsOnMacro:(NSString *)macroKey{
+    if ([macroDef isComplex] == NO) 
+        return NO;
+    
+    OBASSERT([(BDSKComplexString *)macroDef macroResolver] == self);
+    
+    NSEnumerator *nodeE = [[macroDef nodes] objectEnumerator];
+    BDSKStringNode *node;
+    
+    while(node = [nodeE nextObject]){
+        if([node type] != BSN_MACRODEF)
+            continue;
+        
+        NSString *key = [node value];
+        
+        if([key caseInsensitiveCompare:macroKey] == NSOrderedSame)
+            return YES;
+        
+        NSString *value = [macroDefinitions objectForKey:key];
+        if ([self macroDefinition:value dependsOnMacro:macroKey])
+            return YES;
+    }
+    return NO;
 }
 
 #pragma mark BDSKMacroResolver protocol
@@ -291,6 +280,31 @@ static BDSKGlobalMacroResolver *defaultMacroResolver;
 
 - (void)synchronize{}
 
+- (void)addMacro:(NSString *)macroKey toArray:(NSMutableArray *)array{
+    if([array containsObject:macroKey])
+        return;
+    NSString *value = [macroDefinitions objectForKey:macroKey];
+    
+    // if the definition is complex, we first have to add the macros that appear there
+    if ([value isComplex]) {
+        NSEnumerator *nodeE = [[value nodes] objectEnumerator];
+        BDSKStringNode *node;
+        
+        while(node = [nodeE nextObject]){
+            if([node type] != BSN_MACRODEF)
+                continue;
+            
+            NSString *key = [node value];
+            
+            if([array containsObject:key])
+                continue;
+            
+            [self addMacro:key toArray:array];
+        }
+    }
+    [array addObject:macroKey];
+}
+
 @end
 
 
@@ -373,7 +387,7 @@ static BDSKGlobalMacroResolver *defaultMacroResolver;
             
             while (macroKey = [macroE nextObject]) {
                 macroString = [macroDefs objectForKey:macroKey];
-                if([BDSKComplexString isCircularMacro:macroKey forDefinition:macroString])
+                if([self macroDefinition:macroString dependsOnMacro:macroKey])
                     NSLog(@"Macro from file %@ leads to circular definition, ignored: %@ = %@", file, macroKey, [macroString stringAsBibTeXString]);
                 else
                     [fileMacroDefinitions setObject:macroString forKey:macroKey];

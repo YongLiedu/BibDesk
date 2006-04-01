@@ -52,6 +52,7 @@
 - (BibDocument *)document;
 - (NSUndoManager *)undoManager;
 - (NSString *)bibTeXString;
+- (BOOL)macroDefinition:(NSString *)macroDef dependsOnMacro:(NSString *)macroKey;
 
 - (NSDictionary *)macroDefinitions;
 - (void)addMacroDefinition:(NSString *)macroString forMacro:(NSString *)macroKey;

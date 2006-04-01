@@ -312,7 +312,7 @@
 		}
 		
         NSDictionary *macroDefinitions = [(BDSKMacroResolver *)macroDataSource macroDefinitions];
-		if([BDSKComplexString isCircularMacro:object forDefinition:[macroDefinitions objectForKey:key]]){
+		if([macroDataSource macroDefinition:[macroDefinitions objectForKey:key] dependsOnMacro:object]){
 			NSRunAlertPanel(NSLocalizedString(@"Circular Macro", @"Circular Macro"),
 							NSLocalizedString(@"The macro you try to define would lead to a circular definition.", @""),
 							NSLocalizedString(@"OK", @"OK"), nil, nil);
@@ -329,7 +329,7 @@
         // do nothing if there was no change.
         if([[macroDefinitions objectForKey:key] isEqualAsComplexString:object]) return;
 		
-		if([BDSKComplexString isCircularMacro:key forDefinition:object]){
+		if([macroDataSource macroDefinition:object dependsOnMacro:key]){
 			NSRunAlertPanel(NSLocalizedString(@"Circular Macro", @"Circular Macro"),
 							NSLocalizedString(@"The macro you try to define would lead to a circular definition.", @""),
 							NSLocalizedString(@"OK", @"OK"), nil, nil);
@@ -451,7 +451,7 @@
     
     while(macroKey = [e nextObject]){
         macroString = [defs objectForKey:macroKey];
-        if([BDSKComplexString isCircularMacro:macroKey forDefinition:macroString] == NO)
+		if([macroDataSource macroDefinition:macroString dependsOnMacro:macroKey] == NO)
             [(BDSKMacroResolver *)macroDataSource setMacroDefinition:macroString forMacro:macroKey];
 		else
             hadCircular = YES;

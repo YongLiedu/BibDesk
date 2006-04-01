@@ -436,42 +436,6 @@ Rather than relying on the same call sequence to be used, I think we should igno
     return (macroResolver == nil && complex == YES) ? [BDSKMacroResolver defaultMacroResolver] : macroResolver;
 }
 
-+ (BOOL)isCircularMacro:(NSString *)macroKey forDefinition:(NSString *)macroString{
-    if([macroString isComplex] == NO)
-        return NO;
-    
-    BDSKMacroResolver *macroResolver = [(BDSKComplexString *)macroString macroResolver];
-    NSMutableArray *descendents = [NSMutableArray arrayWithObject:macroString];
-    
-    while([descendents count] > 0){
-        NSArray *values = [descendents copy];
-        NSEnumerator *valueE = [values objectEnumerator];
-        NSString *value;
-        
-        [values release];
-        [descendents removeAllObjects];
-        
-        while(value = [valueE nextObject]){
-            NSEnumerator *nodeE = [[value nodes] objectEnumerator];
-            BDSKStringNode *node;
-            
-            while(node = [nodeE nextObject]){
-                if([node type] != BSN_MACRODEF)
-                    continue;
-                
-                NSString *key = [node value];
-                
-                if([key caseInsensitiveCompare:macroKey] == NSOrderedSame)
-                    return YES;
-                value = [macroResolver valueOfMacro:key];
-                if([value isComplex] == YES)
-                    [descendents addObject:value];
-            }
-        }
-    }
-    return NO;
-}
-
 @end
 
 @implementation NSString (ComplexStringExtensions)
