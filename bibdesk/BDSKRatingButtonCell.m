@@ -130,8 +130,14 @@
 }
 
 - (BOOL)trackMouse:(NSEvent *)theEvent inRect:(NSRect)cellFrame ofView:(NSView *)controlView untilMouseUp:(BOOL)untilMouseUp {
-	BOOL keepOn = YES;
 	NSPoint mouseLoc = [controlView convertPoint:[theEvent locationInWindow] fromView:nil];
+    
+    if ([self startTrackingAt:mouseLoc inView:controlView] == NO)
+        return NO;
+    
+	BOOL keepOn = YES;
+    BOOL mouseWentUp = NO;
+    NSPoint lastLoc = mouseLoc;
 	float border = ([self isBordered] ? 1 : 0);
 	float margin = 0;
 	float offset;
@@ -175,29 +181,36 @@
 	}
 	
 	while (keepOn) {
+		lastLoc = mouseLoc;
 		theEvent = [[controlView window] nextEventMatchingMask: NSLeftMouseUpMask | NSLeftMouseDraggedMask];
-		mouseLoc = [controlView convertPoint:[theEvent locationInWindow] fromView:nil];
+        mouseLoc = [controlView convertPoint:[theEvent locationInWindow] fromView:nil];
 		offset = mouseLoc.x - buttonRect.origin.x - margin;
 		if (offset < border)
 			offset = border;
-		switch ([theEvent type]) {
-			case NSLeftMouseUp:
-				keepOn = NO;
-			case NSLeftMouseDragged:
-				newRating = (offset < 2) ? 0 : ceil(offset / OUTER_SIZE);
-				if (newRating > maxRating)
-					newRating = maxRating;
-				if (rating != newRating) {
-					rating = newRating;
-					[controlView setNeedsDisplayInRect:buttonRect];
-				}
-				if (keepOn == NO && [self target] && [self action])
-					[[self target] performSelector:[self action] withObject:controlView];
-				break;
-			default:
-				break;
-		}
+        if (keepOn == YES && [self continueTracking:lastLoc at:mouseLoc inView:controlView] == NO) {
+            keepOn = NO;
+        } else {
+            switch ([theEvent type]) {
+                case NSLeftMouseUp:
+                    keepOn = NO;
+                    mouseWentUp = YES;
+                case NSLeftMouseDragged:
+                    newRating = (offset < 2) ? 0 : ceil(offset / OUTER_SIZE);
+                    if (newRating > maxRating)
+                        newRating = maxRating;
+                    if (rating != newRating) {
+                        rating = newRating;
+                        [controlView setNeedsDisplayInRect:buttonRect];
+                    }
+                    if (keepOn == NO && [self target] && [self action])
+                        [[self target] performSelector:[self action] withObject:controlView];
+                    break;
+                default:
+                    break;
+            }
+        }
 	}
+    [self stopTracking:lastLoc at:mouseLoc inView:controlView mouseIsUp:mouseWentUp];
 	return YES;
 }
 
@@ -300,14 +313,14 @@
 		margin = border;
 	
 	NSRect rect = NSMakeRect(NSMinX(buttonRect) + margin + (OUTER_SIZE - MARKER_SIZE) / 2, NSMinY(buttonRect) + (NSHeight(buttonRect) - MARKER_SIZE) / 2, MARKER_SIZE, MARKER_SIZE);
-	NSColor *color = [NSColor grayColor];
+	NSColor *color = ([self isEnabled]) ? [NSColor grayColor] : [NSColor lightGrayColor];
 	BOOL selected = NO;
 	int i = 0;
 	
 	if ([controlView isKindOfClass:[NSTableView class]]) {
 		NSTableView *tv = (NSTableView *)controlView;
 		if ([[tv window] isKeyWindow] && [[tv window] firstResponder] == tv && [tv isRowSelected:[tv rowAtPoint:cellFrame.origin]]) {
-			color = [NSColor whiteColor];
+			color = ([self isEnabled]) ? [NSColor whiteColor] : [NSColor lightGrayColor];
 			selected = YES;
 		}
 	}
@@ -330,7 +343,7 @@
 		rect.origin.x += OUTER_SIZE;
 	}
 	
-	if ((selected || [self isBordered]) && rating < maxRating) {
+	if ((selected || [self isBordered]) && [self isEnabled] && rating < maxRating) {
 		rect.size = NSMakeSize(PLACEHOLDER_SIZE, PLACEHOLDER_SIZE);
 		rect.origin.x += (MARKER_SIZE - PLACEHOLDER_SIZE) / 2;
 		rect.origin.y += (MARKER_SIZE - PLACEHOLDER_SIZE) / 2;
