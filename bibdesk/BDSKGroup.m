@@ -42,6 +42,7 @@
 #import "NSImage+Toolbox.h"
 #import "BibItem.h"
 #import "BibAuthor.h"
+#import "BDSKSharingBrowser.h"
 #import <OmniBase/OBUtilities.h>
 
 
@@ -464,7 +465,7 @@ static NSString *BDSKAllPublicationsLocalizedString = nil;
     NSDictionary *dictionary = nil;
     if(TXTData)
         dictionary = [NSNetService dictionaryFromTXTRecordData:TXTData];
-    TXTData = [dictionary objectForKey:[BibDocument TXTComputerNameKey]];
+    TXTData = [dictionary objectForKey:BDSKTXTComputerNameKey];
     // if the computerName is nil, no password is required
     if(TXTData == nil)
         return nil;
@@ -497,7 +498,7 @@ static NSString *BDSKAllPublicationsLocalizedString = nil;
     // get the password from the remote service
     NSData *TXTData = [aNetService TXTRecordData];
     NSDictionary *dictionary = TXTData ? [NSNetService dictionaryFromTXTRecordData:TXTData] : nil;
-    NSData *requiredPassword = [dictionary objectForKey:[BibDocument TXTPasswordKey]];
+    NSData *requiredPassword = [dictionary objectForKey:BDSKTXTPasswordKey];
     
     // get pw from keychain or prompt for pw, then store in keychain
     NSData *pwData = [self passwordForResolvedService:aNetService];
@@ -532,7 +533,7 @@ static NSString *BDSKAllPublicationsLocalizedString = nil;
         } else {
             /* NOTE: this is not a secure service; the server shouldn't send any data until the appropriate password has been sent.  At present, it's only a way to prevent casual browsing of your bib files, but perhaps we shouldn't enable this unless it's bulletproof...
             */
-            NSData *archive = [dictionary objectForKey:[BibDocument sharedArchivedDataKey]];
+            NSData *archive = [dictionary objectForKey:BDSKSharedArchivedDataKey];
             if(archive != nil){
                 if([self didAuthenticateToResolvedService:[self service]]){
                     publications = [[NSKeyedUnarchiver unarchiveObjectWithData:archive] retain];

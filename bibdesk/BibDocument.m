@@ -215,13 +215,13 @@ NSString *BDSKWeblocFilePboardType = @"CorePasteboardFlavorType 0x75726C20";
 												   object:nil];
         
         [[NSNotificationCenter defaultCenter] addObserver:self
-                                                 selector:@selector(handleSharingChangedNotification:)
-                                                     name:BDSKSharingChangedNotification
+                                                 selector:@selector(handleSharedGroupsChangedNotification:)
+                                                     name:BDSKSharedGroupsChangedNotification
                                                    object:nil];
         
         [[NSNotificationCenter defaultCenter] addObserver:self
-                                                 selector:@selector(handleSharedBrowsingChangedNotification:)
-                                                     name:BDSKSharedBrowsingChangedNotification
+                                                 selector:@selector(handleSharingChangedNotification:)
+                                                     name:BDSKSharingChangedNotification
                                                    object:nil];
         
         [[NSNotificationCenter defaultCenter] addObserver:self
@@ -249,7 +249,6 @@ NSString *BDSKWeblocFilePboardType = @"CorePasteboardFlavorType 0x75726C20";
 		sortDescending = NO;
 		sortGroupsDescending = NO;
 		sortGroupsKey = [BDSKGroupCellStringKey retain];
-        unresolvedNetServices = [[NSMutableArray alloc] initWithCapacity:10];
         
     }
     return self;
@@ -326,7 +325,7 @@ NSString *BDSKWeblocFilePboardType = @"CorePasteboardFlavorType 0x75726C20";
     sharedGroups = nil;
     if(floor(NSAppKitVersionNumber) > NSAppKitVersionNumber10_3){
         if([[OFPreferenceWrapper sharedPreferenceWrapper] boolForKey:BDSKShouldLookForSharedFilesKey])
-            [self enableSharedBrowsing];
+            [self handleSharedGroupsChangedNotification:nil];
         if([[OFPreferenceWrapper sharedPreferenceWrapper] boolForKey:BDSKShouldShareFilesKey])
             [self enableSharing];
     }
@@ -424,9 +423,7 @@ NSString *BDSKWeblocFilePboardType = @"CorePasteboardFlavorType 0x75726C20";
     [lastSelectedColumnForSort release];
     [sortGroupsKey release];
 	[promisedPboardTypes release];
-    [unresolvedNetServices release];
     [sharedGroups release];
-    [browser release];
     [super dealloc];
 }
 
@@ -2695,13 +2692,6 @@ NSString *BDSKWeblocFilePboardType = @"CorePasteboardFlavorType 0x75726C20";
         [self disableSharing];
 }
 
-- (void)handleSharedBrowsingChangedNotification:(NSNotification *)notification{
-    if ([[OFPreferenceWrapper sharedPreferenceWrapper] boolForKey:BDSKShouldLookForSharedFilesKey])
-        [self enableSharedBrowsing];
-    else
-        [self disableSharedBrowsing];
-}
-
 - (void)handleApplicationWillTerminateNotification:(NSNotification *)notification{
     [self saveSortOrder];
     [self disableSharing];
@@ -3060,8 +3050,6 @@ NSString *BDSKWeblocFilePboardType = @"CorePasteboardFlavorType 0x75726C20";
 	[self providePromisedTypes];
 	
     [self disableSharing];
-    // avoid getting any further callbacks from the browser
-    [self disableSharedBrowsing];
 
     // safety call here, in case the pasteboard is retaining the document; we don't want notifications after the window closes, since all the pointers to UI elements will be garbage
     [[NSNotificationCenter defaultCenter] removeObserver:self];

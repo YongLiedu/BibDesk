@@ -262,7 +262,7 @@ extern NSString *BDSKResortDocumentNotification;
 extern NSString *BDSKFilterChangedNotification;
 extern NSString *BDSKStopWordsChangedNotification;
 extern NSString *BDSKSharingChangedNotification;
-extern NSString *BDSKSharedBrowsingChangedNotification;
+extern NSString *BDSKSharedGroupsChangedNotification;
 extern NSString *BDSKSharedGroupFinishedNotification;
 extern NSString *BDSKComputerNameChangedNotification;
 extern NSString *BDSKSharingNameChangedNotification;

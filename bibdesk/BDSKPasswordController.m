@@ -40,7 +40,7 @@
 
 #import "BDSKPasswordController.h"
 #import <Security/Security.h>
-#import "BibDocument_Sharing.h"
+#import "BDSKSharingBrowser.h"
 
 @implementation BDSKPasswordController
 
@@ -90,7 +90,7 @@
     NSDictionary *dictionary = nil;
     if(TXTData)
         dictionary = [NSNetService dictionaryFromTXTRecordData:TXTData];
-    TXTData = [dictionary objectForKey:[BibDocument TXTComputerNameKey]];
+    TXTData = [dictionary objectForKey:BDSKTXTComputerNameKey];
     const char *serverName = [TXTData bytes];
     UInt32 serverNameLength = [TXTData length];
     NSAssert([TXTData length], @"no computer name in TXT record");

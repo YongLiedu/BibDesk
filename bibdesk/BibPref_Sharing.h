@@ -48,11 +48,14 @@
     IBOutlet NSTextField *sharedNameField;
     IBOutlet NSTextField *statusField;
 }
-- (void)handleSharingNameChanged:(NSNotification *)aNotification;
 
 - (IBAction)changePassword:(id)sender;
 - (IBAction)changeSharedName:(id)sender;
 - (IBAction)toggleBrowsing:(id)sender;
 - (IBAction)togglePassword:(id)sender;
 - (IBAction)toggleSharing:(id)sender;
+
+- (void)handleSharingNameChanged:(NSNotification *)aNotification;
+- (void)handleSharedGroupsChanged:(NSNotification *)aNotification;
+
 @end

@@ -175,10 +175,8 @@ extern NSString* BDSKWeblocFilePboardType; // core pasteboard type for webloc fi
 	float lastGroupViewWidth;
     
     NSMutableArray *sharedGroups;
-    NSNetServiceBrowser *browser;
     NSNetService *netService;
     NSFileHandle *listeningSocket;
-    NSMutableArray *unresolvedNetServices;
     
     BOOL dragFromSharedGroups;
     
@@ -792,7 +790,6 @@ extern NSString* BDSKWeblocFilePboardType; // core pasteboard type for webloc fi
 
 // Bonjour sharing notifications
 - (void)handleSharingChangedNotification:(NSNotification *)notification;
-- (void)handleSharedBrowsingChangedNotification:(NSNotification *)notification;
 
 /*!
     @method     numberOfSelectedPubs

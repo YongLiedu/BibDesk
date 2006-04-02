@@ -38,34 +38,17 @@
 
 #import "BibDocument.h"
 
-extern NSString *BDSKNetServiceDomain;
-extern NSString *BDSKComputerName();
-
 @interface BibDocument (Sharing)
 
-- (void)handleComputerNameChangedNotification:(NSNotification *)note;
-
-- (void)enableSharedBrowsing;
-- (void)disableSharedBrowsing;
 - (NSString *)netServiceName;
 
 - (void)enableSharing;
 - (void)disableSharing;
 - (void)restartSharingIfNeeded;
 
-- (void)connectionReceived:(NSNotification *)aNotification;
-
-// use class methods to access keys in the serialized shared dictionary
-+ (NSString *)sharedArchivedDataKey;
-
-+ (NSString *)TXTPasswordKey;
-+ (NSString *)TXTUniqueIdentifierKey;
-+ (NSString *)TXTComputerNameKey;
-+ (NSString *)TXTVersionKey;
-
-+ (NSString *)serviceNameForKeychain;
-+ (NSData *)sharingPasswordForCurrentUserUnhashed;
-+ (NSString *)sharingName;
 + (NSNumber *)numberOfConnections;
+
+- (void)handleComputerNameChangedNotification:(NSNotification *)note;
+- (void)handleSharingNameChangedNotification:(NSNotification *)note;
 
 @end

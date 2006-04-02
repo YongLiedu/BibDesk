@@ -40,6 +40,7 @@
 #import "BibPref_Sharing.h"
 #import "BibPrefController.h"
 #import "BibDocument_Sharing.h"
+#import "BDSKSharingBrowser.h"
 #import <Security/Security.h>
 
 @implementation BibPref_Sharing
@@ -49,8 +50,9 @@
     [super awakeFromNib];
     
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(handleSharingNameChanged:) name:BDSKSharingNameChangedNotification object:nil];
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(handleSharedGroupsChanged:) name:BDSKSharedGroupsChangedNotification object:nil];
     
-    NSData *pwData = [BibDocument sharingPasswordForCurrentUserUnhashed];
+    NSData *pwData = [[BDSKSharingBrowser sharedBrowser] sharingPasswordForCurrentUserUnhashed];
     if(pwData != nil){
         NSString *pwString = [[NSString alloc] initWithData:pwData encoding:NSUTF8StringEncoding];
         [passwordField setStringValue:pwString];
@@ -70,6 +72,11 @@
         [self updateUI];
 }
 
+- (void)handleSharedGroupsChanged:(NSNotification *)aNotification;
+{
+    [self updateUI];
+}
+
 - (void)updateUI
 {
     [enableSharingButton setState:[defaults boolForKey:BDSKShouldShareFilesKey] ? NSOnState : NSOffState];
@@ -87,11 +94,16 @@
     [usePasswordButton setState:[defaults boolForKey:BDSKSharingRequiresPasswordKey] ? NSOnState : NSOffState];
     [passwordField setEnabled:[defaults boolForKey:BDSKSharingRequiresPasswordKey]];
     
-    [sharedNameField setStringValue:[BibDocument sharingName]];
-    if([defaults boolForKey:BDSKShouldShareFilesKey])
-        [statusField setStringValue:[NSString stringWithFormat:NSLocalizedString(@"Status:  On, %@ users connected", @"single NSString specifier; Bonjour sharing status"), [BibDocument numberOfConnections]]];
-    else
+    [sharedNameField setStringValue:[[BDSKSharingBrowser sharedBrowser] sharingName]];
+    if([defaults boolForKey:BDSKShouldShareFilesKey]){
+        NSNumber *number = [BibDocument numberOfConnections];
+        if([number intValue]  == 1)
+            [statusField setStringValue:NSLocalizedString(@"Status:  On, 1 user connected", @"Bonjour sharing status")];
+        else
+            [statusField setStringValue:[NSString stringWithFormat:NSLocalizedString(@"Status:  On, %@ users connected", @"single NSString specifier; Bonjour sharing status"), number]];
+    }else{
         [statusField setStringValue:NSLocalizedString(@"Status:  Off", @"Bonjour sharing status")];
+    }
 }
 
 - (IBAction)togglePassword:(id)sender
@@ -105,7 +117,7 @@
     const void *passwordData = NULL;
     SecKeychainItemRef itemRef = NULL;    
     const char *userName = [NSUserName() UTF8String];
-    const char *serviceName = [[BibDocument serviceNameForKeychain] UTF8String];
+    const char *serviceName = [BDSKServiceNameForKeychain UTF8String];
     
     OSStatus err;
     
@@ -145,8 +157,12 @@
 
 - (IBAction)toggleBrowsing:(id)sender
 {
-    [defaults setBool:([sender state] == NSOnState) forKey:BDSKShouldLookForSharedFilesKey];
-	[[NSNotificationCenter defaultCenter] postNotificationName:BDSKSharedBrowsingChangedNotification object:self];
+    BOOL flag = ([sender state] == NSOnState);
+    [defaults setBool:flag forKey:BDSKShouldLookForSharedFilesKey];
+    if(flag == YES)
+        [[BDSKSharingBrowser sharedBrowser] enableSharedBrowsing];
+    else
+        [[BDSKSharingBrowser sharedBrowser] disableSharedBrowsing];
 }
 
 - (IBAction)toggleSharing:(id)sender

@@ -69,6 +69,7 @@
 #import "NSArray_BDSKExtensions.h"
 #import "NSWorkspace_BDSKExtensions.h"
 #import <SystemConfiguration/SystemConfiguration.h>
+#import "BDSKSharingBrowser.h"
 
 @implementation BibAppController
 
@@ -233,6 +234,11 @@
 			[[OFPreferenceWrapper sharedPreferenceWrapper] setObject:ratingFields forKey:BDSKRatingFieldsKey];
 		}
 		[ratingFields release];
+        
+        if(floor(NSAppKitVersionNumber) > NSAppKitVersionNumber10_3 &&
+           [[OFPreferenceWrapper sharedPreferenceWrapper] boolForKey:BDSKShouldLookForSharedFilesKey]){
+            [[BDSKSharingBrowser sharedBrowser] enableSharedBrowsing];
+        }
         
         // @@ NSDocumentController autosave is 10.4 only
 		if([self respondsToSelector:@selector(setAutosavingDelay:)] && [[OFPreferenceWrapper sharedPreferenceWrapper] boolForKey:BDSKShouldAutosaveDocumentKey])

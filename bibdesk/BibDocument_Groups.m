@@ -49,6 +49,7 @@
 #import "BibAuthor.h"
 #import "BibAppController.h"
 #import "BibTypeManager.h"
+#import "BDSKSharingBrowser.h"
 
 @implementation BibDocument (Groups)
 
@@ -215,6 +216,17 @@ The groupedPublications array is a subset of the publications array, developed b
         if ([[self selectedGroups] containsObject:group])
             [self displaySelectedGroups];
     }
+}
+
+- (void)handleSharedGroupsChangedNotification:(NSNotification *)notification{
+    NSArray *array = [[BDSKSharingBrowser sharedBrowser] sharedGroups];
+    
+    [sharedGroups release];
+    sharedGroups = nil;
+    if (array != nil)
+        sharedGroups = [array copy];
+    
+    [groupTableView reloadData];
 }
 
 // this method uses counted sets to compute the number of publications per group; each group object is just a name
