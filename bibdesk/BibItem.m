@@ -1538,7 +1538,7 @@ static NSParagraphStyle* bodyParagraphStyle = nil;
     return [self bibTeXStringByExpandingMacros:NO dropInternal:YES texify:NO];
 }
 
-#define AddXMLField(t,f) value = [self valueOfField:f]; [s appendFormat:@"<%@>%@</%@>\n", t, value ? [value stringByEscapingBasicXMLEntitiesUsingUTF8] : @"", t]
+#define AddXMLField(t,f) value = [self valueOfField:f]; if ([NSString isEmptyString:value] == NO) [s appendFormat:@"<%@>%@</%@>\n", t, [value stringByEscapingBasicXMLEntitiesUsingUTF8], t]
 
 - (NSString *)MODSString{
     NSDictionary *genreForTypeDict = [[BibTypeManager sharedManager] MODSGenresForBibTeXType:[self type]];
