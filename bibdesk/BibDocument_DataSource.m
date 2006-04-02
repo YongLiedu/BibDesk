@@ -262,6 +262,15 @@
     return NO;
 }
 
+- (void)tableView:(NSTableView *)tv willDisplayCell:(id)aCell forTableColumn:(NSTableColumn *)aTableColumn row:(int)row{
+    if (tv == tableView && [aCell isKindOfClass:[NSButtonCell class]]) {
+        if (row != -1 && [[shownPublications objectAtIndex:row] document] == nil) 
+            [aCell setEnabled:NO];
+        else
+            [aCell setEnabled:YES];
+    }
+}
+
 - (void)tableViewSelectionDidChange:(NSNotification *)aNotification{
 	NSTableView *tv = [aNotification object];
     if(tv == tableView){
@@ -846,7 +855,7 @@
 			return NSDragOperationNone;
 		}
         // set drop row to -1 and NSTableViewDropOperation to NSTableViewDropOn, when we don't target specific rows http://www.corbinstreehouse.com/blog/?p=123
-        if(row == -1 || op == NSTableViewDropAbove){
+        if(row == -1 || op == NSTableViewDropAbove || [[shownPublications objectAtIndex:row] document] == nil){
             [tv setDropRow:-1 dropOperation:NSTableViewDropOn];
 		}else if(([type isEqualToString:NSFilenamesPboardType] == NO || [[info draggingPasteboard] containsUnparseableFile] == NO) &&
                  [type isEqualToString:BDSKWeblocFilePboardType] == NO && [type isEqualToString:NSURLPboardType] == NO){
@@ -894,7 +903,9 @@
             BibItem *pub = [shownPublications objectAtIndex:row];
             NSURL *theURL = nil;
             
-            if([type isEqualToString:NSFilenamesPboardType]){
+            if([pub document] == nil){
+                return NO;
+            }else if([type isEqualToString:NSFilenamesPboardType]){
                 NSArray *fileNames = [pboard propertyListForType:NSFilenamesPboardType];
                 if ([fileNames count] == 0)
                     return NO;
