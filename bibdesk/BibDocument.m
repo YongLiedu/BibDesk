@@ -2876,7 +2876,8 @@ NSString *BDSKWeblocFilePboardType = @"CorePasteboardFlavorType 0x75726C20";
 		[statusStr appendFormat:@"%i %@ ", shownPubsCount, ofStr];
 	}
 	[statusStr appendFormat:@"%i %@", groupPubsCount, (groupPubsCount == 1) ? NSLocalizedString(@"publication", @"publication") : NSLocalizedString(@"publications", @"publications")];
-	if (groupPubsCount != totalPubsCount) { 
+	if (groupPubsCount != totalPubsCount &&
+        [[self selectedGroups] firstObjectCommonWithArray:sharedGroups] == nil) {
 		NSString *groupStr = ([groupTableView numberOfSelectedRows] == 1) ?
 			[NSString stringWithFormat:@"%@ %@", NSLocalizedString(@"group", @"group"), [[[self selectedGroups] lastObject] stringValue]] :
 			NSLocalizedString(@"multiple groups", @"multiple groups");
