@@ -465,9 +465,11 @@ static NSString *BDSKAllPublicationsLocalizedString = nil;
     if(TXTData)
         dictionary = [NSNetService dictionaryFromTXTRecordData:TXTData];
     TXTData = [dictionary objectForKey:[BibDocument TXTComputerNameKey]];
-    const char *serverName = [TXTData bytes];
-    NSAssert([TXTData length], @"no computer name in TXT record");
+    // if the computerName is nil, no password is required
+    if(TXTData == nil)
+        return nil;
     
+    const char *serverName = [TXTData bytes];
     void *password = NULL;
     UInt32 passwordLength = 0;
     NSData *pwData = nil;
@@ -487,7 +489,7 @@ static NSString *BDSKAllPublicationsLocalizedString = nil;
         dict = [NSNetService dictionaryFromTXTRecordData:pwData];
         pwData = [dict objectForKey:@"key"];
     }
-    return pwData;
+    return pwData == nil ? [NSData data] : pwData;
 }
 
 - (BOOL)didAuthenticateToResolvedService:(NSNetService *)aNetService;
@@ -531,10 +533,14 @@ static NSString *BDSKAllPublicationsLocalizedString = nil;
             /* NOTE: this is not a secure service; the server shouldn't send any data until the appropriate password has been sent.  At present, it's only a way to prevent casual browsing of your bib files, but perhaps we shouldn't enable this unless it's bulletproof...
             */
             NSData *archive = [dictionary objectForKey:[BibDocument sharedArchivedDataKey]];
-            if(archive != nil && [self didAuthenticateToResolvedService:[self service]])
-                publications = [[NSKeyedUnarchiver unarchiveObjectWithData:archive] retain];
-            else
-                NSLog(@"no publication data in shared stream, or no password");
+            if(archive != nil){
+                if([self didAuthenticateToResolvedService:[self service]]){
+                    publications = [[NSKeyedUnarchiver unarchiveObjectWithData:archive] retain];
+                }else{
+                    publications = [[NSArray alloc] init];
+                    NSLog(@"couldn't match password");
+                }
+            }
         }
     }
     return publications;
