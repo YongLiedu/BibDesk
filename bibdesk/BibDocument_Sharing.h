@@ -51,15 +51,20 @@ extern NSString *BDSKComputerName();
 
 - (void)enableSharing;
 - (void)disableSharing;
+- (void)restartSharingIfNeeded;
 
 - (void)connectionReceived:(NSNotification *)aNotification;
 
 // use class methods to access keys in the serialized shared dictionary
-+ (NSString *)keyForSharedArchivedData;
++ (NSString *)sharedArchivedDataKey;
+
++ (NSString *)TXTPasswordKey;
++ (NSString *)TXTUniqueIdentifierKey;
++ (NSString *)TXTComputerNameKey;
++ (NSString *)TXTVersionKey;
 
 + (NSString *)serviceNameForKeychain;
-+ (NSString *)TXTKeyForPassword;
-+ (NSString *)TXTKeyForUniqueIdentifier;
 + (NSData *)sharingPasswordForCurrentUserUnhashed;
-+ (NSString *)TXTKeyForComputerName;
++ (NSString *)sharingName;
+
 @end

@@ -126,11 +126,16 @@ NSString *BDSKComputerName() {
     }
 }
 
-// @@ move these to an NSNetService category?
+#pragma mark Convenience methods
+
+// this is the name of our keychain entry
 + (NSString *)serviceNameForKeychain { return @"BibDesk Sharing"; }
-+ (NSString *)TXTKeyForPassword { return @"pass"; }
-+ (NSString *)TXTKeyForUniqueIdentifier { return @"hostid"; }
-+ (NSString *)TXTKeyForComputerName { return @"compname"; }
+
+// TXT record keys
++ (NSString *)TXTPasswordKey { return @"pass"; }
++ (NSString *)TXTUniqueIdentifierKey { return @"hostid"; }
++ (NSString *)TXTComputerNameKey { return @"name"; }
++ (NSString *)TXTVersionKey { return @"txtvers"; }
 
 + (NSData *)sharingPasswordForCurrentUserUnhashed;
 {
@@ -149,14 +154,15 @@ NSString *BDSKComputerName() {
     SecKeychainItemFreeContent(NULL, passwordData);
 
     return data;
-}    
+}
 
-- (void)restartSharingIfNeeded;
+// base name for sharing (also used for storing remote host names in keychain)
++ (NSString *)sharingName;
 {
-    if([[OFPreferenceWrapper sharedPreferenceWrapper] boolForKey:BDSKShouldShareFilesKey]){
-        [self disableSharing];
-        [self enableSharing];
-    }
+    NSString *sharingName = [[OFPreferenceWrapper sharedPreferenceWrapper] objectForKey:BDSKSharingNameKey];
+    if([NSString isEmptyString:sharingName])
+        sharingName = BDSKComputerName();
+    return sharingName;
 }
 
 //  handle changes from the OS
@@ -181,7 +187,7 @@ NSString *BDSKComputerName() {
     
     // +[NSNetService dictionaryFromTXTRecordData:] will crash if you pass a nil data
     NSDictionary *TXTDictionary = TXTData ? [NSNetService dictionaryFromTXTRecordData:TXTData] : nil;
-    NSString *serviceIdentifier = [[NSString alloc] initWithData:[TXTDictionary objectForKey:[BibDocument TXTKeyForUniqueIdentifier]] encoding:NSUTF8StringEncoding];
+    NSString *serviceIdentifier = [[NSString alloc] initWithData:[TXTDictionary objectForKey:[BibDocument TXTUniqueIdentifierKey]] encoding:NSUTF8StringEncoding];
 
     // In general, we want to ignore our own shared services, as the write/read occur on the same run loop, and our file handle blocks; hence, we listen here for the resolve and then check the TXT record to see where the service came from.
 
@@ -259,12 +265,8 @@ NSString *BDSKComputerName() {
     if(documentName == nil) documentName = [self displayName];
     
     // docs say to use computer name instead of host name http://developer.apple.com/qa/qa2001/qa1228.html
-    
     // we append document name since the same computer vends multiple documents
-    NSString *sharingName = [[OFPreferenceWrapper sharedPreferenceWrapper] objectForKey:BDSKSharingNameKey];
-    if([NSString isEmptyString:sharingName])
-        sharingName = BDSKComputerName();
-    return [NSString stringWithFormat:@"%@ - %@", sharingName, documentName];
+    return [NSString stringWithFormat:@"%@ - %@", [BibDocument sharingName], documentName];
 }
 
 #pragma mark Exporting our data
@@ -307,14 +309,16 @@ NSString *BDSKComputerName() {
         // lazily instantiate the NSNetService object that will advertise on our behalf
         netService = [[NSNetService alloc] initWithDomain:@"" type:BDSKNetServiceDomain name:[self netServiceName] port:chosenPort];
         [netService setDelegate:self];
-        NSMutableDictionary *dictionary = [NSMutableDictionary dictionary];
-        [dictionary setObject:uniqueIdentifier forKey:[BibDocument TXTKeyForUniqueIdentifier]];
+        NSMutableDictionary *dictionary = [NSMutableDictionary dictionaryWithCapacity:4];
+        [dictionary setObject:uniqueIdentifier forKey:[BibDocument TXTUniqueIdentifierKey]];
+        [dictionary setObject:@"0" forKey:[BibDocument TXTVersionKey]];
+        
         if([[OFPreferenceWrapper sharedPreferenceWrapper] boolForKey:BDSKSharingRequiresPasswordKey]){
             NSData *pwData = [BibDocument sharingPasswordForCurrentUserUnhashed];
             // hash with sha1 so we're not sending it in the clear
             if(pwData != nil)
-                [dictionary setObject:[pwData sha1Signature] forKey:[BibDocument TXTKeyForPassword]];
-            [dictionary setObject:BDSKComputerName() forKey:[BibDocument TXTKeyForComputerName]];
+                [dictionary setObject:[pwData sha1Signature] forKey:[BibDocument TXTPasswordKey]];
+            [dictionary setObject:[BibDocument sharingName] forKey:[BibDocument TXTComputerNameKey]];
         }
         NSData *TXTData = [NSNetService dataFromTXTRecordDictionary:dictionary];
         OBPOSTCONDITION(TXTData != nil);
@@ -338,6 +342,14 @@ NSString *BDSKComputerName() {
         // There is at present no way to get an NSFileHandle to -stop- listening for events, so we'll just have to tear it down and recreate it the next time we need it.
         [listeningSocket release];
         listeningSocket = nil;
+    }
+}
+
+- (void)restartSharingIfNeeded;
+{
+    if([[OFPreferenceWrapper sharedPreferenceWrapper] boolForKey:BDSKShouldShareFilesKey]){
+        [self disableSharing];
+        [self enableSharing];
     }
 }
 
@@ -405,7 +417,7 @@ NSString *BDSKComputerName() {
     NSData *dataToSend = [NSKeyedArchiver archivedDataWithRootObject:publications];
     if(dataToSend != nil){
         // If we want to make this cross-platform (say if JabRef wanted to add Bonjour support), we could pass BibTeX as another key in the dictionary, and use an XML plist for reading at the other end
-        NSDictionary *dictionary = [NSDictionary dictionaryWithObjectsAndKeys:dataToSend, [BibDocument keyForSharedArchivedData], nil];
+        NSDictionary *dictionary = [NSDictionary dictionaryWithObjectsAndKeys:dataToSend, [BibDocument sharedArchivedDataKey], nil];
         NSString *errorString = nil;
         dataToSend = [NSPropertyListSerialization dataFromPropertyList:dictionary format:NSPropertyListBinaryFormat_v1_0 errorDescription:&errorString];
         if(errorString != nil){
@@ -421,6 +433,6 @@ NSString *BDSKComputerName() {
     [[aNotification object] acceptConnectionInBackgroundAndNotify];
 }
 
-+ (NSString *)keyForSharedArchivedData { return @"publications_v1"; }
++ (NSString *)sharedArchivedDataKey { return @"publications_v1"; }
 
 @end

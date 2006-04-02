@@ -464,7 +464,7 @@ static NSString *BDSKAllPublicationsLocalizedString = nil;
     NSDictionary *dictionary = nil;
     if(TXTData)
         dictionary = [NSNetService dictionaryFromTXTRecordData:TXTData];
-    TXTData = [dictionary objectForKey:[BibDocument TXTKeyForComputerName]];
+    TXTData = [dictionary objectForKey:[BibDocument TXTComputerNameKey]];
     const char *serverName = [TXTData bytes];
     NSAssert([TXTData length], @"no computer name in TXT record");
     
@@ -495,7 +495,7 @@ static NSString *BDSKAllPublicationsLocalizedString = nil;
     // get the password from the remote service
     NSData *TXTData = [aNetService TXTRecordData];
     NSDictionary *dictionary = TXTData ? [NSNetService dictionaryFromTXTRecordData:TXTData] : nil;
-    NSData *requiredPassword = [dictionary objectForKey:[BibDocument TXTKeyForPassword]];
+    NSData *requiredPassword = [dictionary objectForKey:[BibDocument TXTPasswordKey]];
     
     // get pw from keychain or prompt for pw, then store in keychain
     NSData *pwData = [self passwordForResolvedService:aNetService];
@@ -530,7 +530,7 @@ static NSString *BDSKAllPublicationsLocalizedString = nil;
         } else {
             /* NOTE: this is not a secure service; the server shouldn't send any data until the appropriate password has been sent.  At present, it's only a way to prevent casual browsing of your bib files, but perhaps we shouldn't enable this unless it's bulletproof...
             */
-            NSData *archive = [dictionary objectForKey:[BibDocument keyForSharedArchivedData]];
+            NSData *archive = [dictionary objectForKey:[BibDocument sharedArchivedDataKey]];
             if(archive != nil && [self didAuthenticateToResolvedService:[self service]])
                 publications = [[NSKeyedUnarchiver unarchiveObjectWithData:archive] retain];
             else

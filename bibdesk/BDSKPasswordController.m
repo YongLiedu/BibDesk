@@ -90,7 +90,7 @@
     NSDictionary *dictionary = nil;
     if(TXTData)
         dictionary = [NSNetService dictionaryFromTXTRecordData:TXTData];
-    TXTData = [dictionary objectForKey:[BibDocument TXTKeyForComputerName]];
+    TXTData = [dictionary objectForKey:[BibDocument TXTComputerNameKey]];
     const char *serverName = [TXTData bytes];
     UInt32 serverNameLength = [TXTData length];
     NSAssert([TXTData length], @"no computer name in TXT record");

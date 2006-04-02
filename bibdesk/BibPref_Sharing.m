@@ -87,10 +87,7 @@
     [usePasswordButton setState:[defaults boolForKey:BDSKSharingRequiresPasswordKey] ? NSOnState : NSOffState];
     [passwordField setEnabled:[defaults boolForKey:BDSKSharingRequiresPasswordKey]];
     
-    NSString *name = [defaults objectForKey:BDSKSharingNameKey];
-    if([NSString isEmptyString:name])
-        name = BDSKComputerName();
-    [sharedNameField setStringValue:name];
+    [sharedNameField setStringValue:[BibDocument sharingName]];
 }
 
 - (IBAction)togglePassword:(id)sender
