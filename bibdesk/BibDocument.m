@@ -662,83 +662,43 @@ NSString *BDSKWeblocFilePboardType = @"CorePasteboardFlavorType 0x75726C20";
 - (IBAction)saveDocument:(id)sender{
     [super saveDocument:sender];
     if([[OFPreferenceWrapper sharedPreferenceWrapper] integerForKey:BDSKAutoSaveAsRSSKey] == NSOnState && ![[self fileType] isEqualToString:@"Rich Site Summary file"])
-    [self exportAsRSS:nil];
+        [self exportAsFileType:@"rss" selected:NO droppingInternal:NO];
 }
 
 - (void)clearChangeCount{
 	[self updateChangeCount:NSChangeCleared];
 }
 
-- (IBAction)exportAsAtom:(id)sender{
-    [self exportAsFileType:@"atom" selected:NO droppingInternal:NO];
+- (IBAction)exportAsAction:(id)sender{
+    NSString *fileType = @"bib";
+    switch([sender tag]){
+        case 0: fileType = @"bib"; break;
+        case 1: fileType = @"bib"; break;
+        case 2: fileType = @"ris"; break;
+        case 3: fileType = @"ltb"; break;
+        case 4: fileType = @"html"; break;
+        case 5: fileType = @"mods"; break;
+        case 6: fileType = @"xml"; break;
+        case 7: fileType = @"atom"; break;
+        case 8: fileType = @"rss"; break;
+    }
+    [self exportAsFileType:fileType selected:NO droppingInternal:([sender tag] == 1)];
 }
 
-- (IBAction)exportAsMODS:(id)sender{
-    [self exportAsFileType:@"mods" selected:NO droppingInternal:NO];
-}
-
-- (IBAction)exportAsEndNote:(id)sender{
-    [self exportAsFileType:@"xml" selected:NO droppingInternal:NO];
-}
-
-- (IBAction)exportAsHTML:(id)sender{
-    [self exportAsFileType:@"html" selected:NO droppingInternal:NO];
-}
-
-- (IBAction)exportAsRSS:(id)sender{
-    [self exportAsFileType:@"rss" selected:NO droppingInternal:NO];
-}
-
-- (IBAction)exportAsEncodedBib:(id)sender{
-    [self exportAsFileType:@"bib" selected:NO droppingInternal:NO];
-}
-
-- (IBAction)exportAsEncodedPublicBib:(id)sender{
-    [self exportAsFileType:@"bib" selected:NO droppingInternal:YES];
-}
-
-- (IBAction)exportAsRIS:(id)sender{
-    [self exportAsFileType:@"ris" selected:NO droppingInternal:NO];
-}
-
-- (IBAction)exportAsLTB:(id)sender{
-    [self exportAsFileType:@"ltb" selected:NO droppingInternal:NO];
-}
-
-- (IBAction)exportSelectionAsAtom:(id)sender{
-    [self exportAsFileType:@"atom" selected:YES droppingInternal:NO];
-}
-
-- (IBAction)exportSelectionAsMODS:(id)sender{
-    [self exportAsFileType:@"mods" selected:YES droppingInternal:NO];
-}
-
-- (IBAction)exportSelectionAsEndNote:(id)sender{
-    [self exportAsFileType:@"xml" selected:YES droppingInternal:NO];
-}
-
-- (IBAction)exportSelectionAsHTML:(id)sender{
-    [self exportAsFileType:@"html" selected:YES droppingInternal:NO];
-}
-
-- (IBAction)exportSelectionAsRSS:(id)sender{
-    [self exportAsFileType:@"rss" selected:YES droppingInternal:NO];
-}
-
-- (IBAction)exportSelectionAsEncodedBib:(id)sender{
-    [self exportAsFileType:@"bib" selected:YES droppingInternal:NO];
-}
-
-- (IBAction)exportSelectionAsEncodedPublicBib:(id)sender{
-    [self exportAsFileType:@"bib" selected:YES droppingInternal:YES];
-}
-
-- (IBAction)exportSelectionAsRIS:(id)sender{
-    [self exportAsFileType:@"ris" selected:YES droppingInternal:NO];
-}
-
-- (IBAction)exportSelectionAsLTB:(id)sender{
-    [self exportAsFileType:@"ltb" selected:YES droppingInternal:NO];
+- (IBAction)exportSelectionAsAction:(id)sender{
+    NSString *fileType = @"bib";
+    switch([sender tag]){
+        case 0: fileType = @"bib"; break;
+        case 1: fileType = @"bib"; break;
+        case 2: fileType = @"ris"; break;
+        case 3: fileType = @"ltb"; break;
+        case 4: fileType = @"html"; break;
+        case 5: fileType = @"mods"; break;
+        case 6: fileType = @"xml"; break;
+        case 7: fileType = @"atom"; break;
+        case 8: fileType = @"rss"; break;
+    }
+    [self exportAsFileType:fileType selected:YES droppingInternal:([sender tag] == 1)];
 }
 
 - (void)exportAsFileType:(NSString *)fileType selected:(BOOL)selected droppingInternal:(BOOL)drop{

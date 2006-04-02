@@ -227,154 +227,20 @@ extern NSString* BDSKWeblocFilePboardType; // core pasteboard type for webloc fi
 - (NSArray *)publicationsForAuthor:(BibAuthor *)anAuthor;
 
 /*!
-    @method     exportAsRSS:
-    @abstract   Action method to export RSS XML
-    @discussion  This calls exportAsFileType:@"rss" droppingInternal:NO.
+    @method     exportAsAction:
+    @abstract   Action method to export in a particular format.
+    @discussion  This calls exportAsFileType:selected:droppingInternal:. The fileType is determined by the sender's tag.
     @param      sender anything
 */
-- (IBAction)exportAsRSS:(id)sender;
+- (IBAction)exportAsAction:(id)sender;
 
 /*!
-@method     exportAsHTML:
-     @abstract   Action method to export HTML
-     @discussion  This calls exportAsFileType:@"html" droppingInternal:NO.
-     @param      sender anything
-*/
-- (IBAction)exportAsHTML:(id)sender;
-
-/*!
-@method     exportAsMODS:
-     @abstract   Action method to export MODS XML. 
-     @discussion  This calls exportAsFileType:@"mods" droppingInternal:NO.
- It should not be considered robust currently.
-     @param      sender anything
-*/
-- (IBAction)exportAsMODS:(id)sender;
-
-/*!
-@method     exportAsEndNote:
-     @abstract   Action method to export EndNote XML. 
-     @discussion  This calls exportAsFileType:@"xml" droppingInternal:NO.
- It should not be considered robust currently.
-     @param      sender anything
-*/
-- (IBAction)exportAsEndNote:(id)sender;
-
-/*!
-@method     exportAsAtom:
-     @abstract   Action method to export ATOM XML for syndication.
-     @discussion  This calls exportAsFileType:@"mods" droppingInternal:NO.
-     It should not be considered robust currently.
-     @param      sender anything
-*/
-- (IBAction)exportAsAtom:(id)sender;
-
-/*!
-    @method     exportAsEncodedBib:
-    @abstract   Action method to export BibTex data
-    @discussion This calls exportAsFileType:@"bib" droppingInternal:NO.
+    @method     exportSelectionAsAction:
+    @abstract   Action method to export the selection in a particular format.
+    @discussion  This calls exportAsFileType:selected:droppingInternal:. The fileType is determined by the sender's tag.
     @param      sender anything
 */
-- (IBAction)exportAsEncodedBib:(id)sender;
-
-/*!
-    @method     exportAsEncodedBib:
-    @abstract   Action method to export BibTex data without internal fields
-    @discussion This calls exportAsFileType:@"bib" droppingInternal:YES.
-    @param      sender anything
-*/
-- (IBAction)exportAsEncodedPublicBib:(id)sender;
-
-/*!
-    @method     exportAsRIS:
-    @abstract   Action method to export RIS
-    @discussion This calls exportAsFileType:@"ris" droppingInternal:NO.
-    @param      sender anything
-*/
-- (IBAction)exportAsRIS:(id)sender;
-
-/*!
-    @method     exportAsLTB:
-    @abstract   Action method to export an amsrefs ltb database
-    @discussion This calls exportAsFileType:@"ltb" droppingInternal:NO.
-    @param      sender anything
-*/
-- (IBAction)exportAsLTB:(id)sender;
-
-/*!
-    @method     exportSelectionAsRSS:
-    @abstract   Action method to export RSS XML
-    @discussion  This calls exportSelectionAsFileType:@"rss" droppingInternal:NO.
-    @param      sender anything
-*/
-- (IBAction)exportSelectionAsRSS:(id)sender;
-
-/*!
-@method     exportSelectionAsHTML:
-     @abstract   Action method to export HTML
-     @discussion  This calls exportSelectionAsFileType:@"html" droppingInternal:NO.
-     @param      sender anything
-*/
-- (IBAction)exportSelectionAsHTML:(id)sender;
-
-/*!
-@method     exportSelectionAsMODS:
-     @abstract   Action method to export MODS XML. 
-     @discussion  This calls exportSelectionAsFileType:@"mods" droppingInternal:NO.
- It should not be considered robust currently.
-     @param      sender anything
-*/
-- (IBAction)exportSelectionAsMODS:(id)sender;
-
-/*!
-@method     exportSelectionAsEndNote:
-     @abstract   Action method to export EndNote XML. 
-     @discussion  This calls exportSelectionAsFileType:@"xml" droppingInternal:NO.
- It should not be considered robust currently.
-     @param      sender anything
-*/
-- (IBAction)exportSelectionAsEndNote:(id)sender;
-
-/*!
-@method     exportSelectionAsAtom:
-     @abstract   Action method to export ATOM XML for syndication.
-     @discussion  This calls exportSelectionAsFileType:@"mods" droppingInternal:NO.
-     It should not be considered robust currently.
-     @param      sender anything
-*/
-- (IBAction)exportSelectionAsAtom:(id)sender;
-
-/*!
-    @method     exportSelectionAsEncodedBib:
-    @abstract   Action method to export BibTex data
-    @discussion This calls exportSelectionAsFileType:@"bib" droppingInternal:NO.
-    @param      sender anything
-*/
-- (IBAction)exportSelectionAsEncodedBib:(id)sender;
-
-/*!
-    @method     exportSelectionAsEncodedBib:
-    @abstract   Action method to export BibTex data without internal fields
-    @discussion This calls exportSelectionAsFileType:@"bib" droppingInternal:YES.
-    @param      sender anything
-*/
-- (IBAction)exportSelectionAsEncodedPublicBib:(id)sender;
-
-/*!
-    @method     exportSelectionAsRIS:
-    @abstract   Action method to export RIS
-    @discussion This calls exportSelectionAsFileType:@"ris" droppingInternal:NO.
-    @param      sender anything
-*/
-- (IBAction)exportSelectionAsRIS:(id)sender;
-
-/*!
-    @method     exportSelectionAsLTB:
-    @abstract   Action method to export an amsrefs ltb database
-    @discussion This calls exportSelectionAsFileType:@"ltb" droppingInternal:NO.
-    @param      sender anything
-*/
-- (IBAction)exportSelectionAsLTB:(id)sender;
+- (IBAction)exportSelectionAsAction:(id)sender;
 
 /*!
     @method     exportAsFileType:droppingInternal:
