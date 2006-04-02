@@ -194,6 +194,10 @@
 	return ([documentWindow firstResponder] != tableView ? NO : YES);
 }
 
+- (BOOL)validateExportSelectionMenuItem:(NSMenuItem *)menuItem{
+    return ([self numberOfSelectedPubs] != 0);
+}
+
 - (BOOL)validateDuplicateMenuItem:(NSMenuItem *)menuItem{
 	if ([documentWindow firstResponder] != tableView ||
 		[self numberOfSelectedPubs] == 0 ||
@@ -734,6 +738,9 @@
 	}
 	else if (act == @selector(editPubCmd:)) {
 		return [self validateEditSelectionMenuItem:menuItem];
+	}
+	else if (act == @selector(exportSelectionAsAction:)) {
+		return [self validateExportSelectionMenuItem:menuItem];
 	}
 	else if (act == @selector(duplicateTitleToBooktitle:)) {
 		return [self validateDuplicateTitleToBooktitleMenuItem:menuItem];
