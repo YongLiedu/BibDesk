@@ -252,6 +252,15 @@ extern NSString* BDSKWeblocFilePboardType; // core pasteboard type for webloc fi
 - (IBAction)exportAsMODS:(id)sender;
 
 /*!
+@method     exportAsEndNote:
+     @abstract   Action method to export EndNote XML. 
+     @discussion  This calls exportAsFileType:@"xml" droppingInternal:NO.
+ It should not be considered robust currently.
+     @param      sender anything
+*/
+- (IBAction)exportAsEndNote:(id)sender;
+
+/*!
 @method     exportAsAtom:
      @abstract   Action method to export ATOM XML for syndication.
      @discussion  This calls exportAsFileType:@"mods" droppingInternal:NO.
@@ -316,6 +325,15 @@ extern NSString* BDSKWeblocFilePboardType; // core pasteboard type for webloc fi
      @param      sender anything
 */
 - (IBAction)exportSelectionAsMODS:(id)sender;
+
+/*!
+@method     exportSelectionAsEndNote:
+     @abstract   Action method to export EndNote XML. 
+     @discussion  This calls exportSelectionAsFileType:@"xml" droppingInternal:NO.
+ It should not be considered robust currently.
+     @param      sender anything
+*/
+- (IBAction)exportSelectionAsEndNote:(id)sender;
 
 /*!
 @method     exportSelectionAsAtom:
@@ -427,6 +445,7 @@ extern NSString* BDSKWeblocFilePboardType; // core pasteboard type for webloc fi
 
 - (NSData *)atomDataForPublications:(NSArray *)items;
 - (NSData *)MODSDataForPublications:(NSArray *)items;
+- (NSData *)endNoteDataForPublications:(NSArray *)items;
 /*!
     @method     bibTeXDataForPublications:encoding:
     @abstract   Returns all of the BibItems as BibTeX with the specified string encoding.

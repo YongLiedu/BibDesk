@@ -677,6 +677,10 @@ NSString *BDSKWeblocFilePboardType = @"CorePasteboardFlavorType 0x75726C20";
     [self exportAsFileType:@"mods" selected:NO droppingInternal:NO];
 }
 
+- (IBAction)exportAsEndNote:(id)sender{
+    [self exportAsFileType:@"xml" selected:NO droppingInternal:NO];
+}
+
 - (IBAction)exportAsHTML:(id)sender{
     [self exportAsFileType:@"html" selected:NO droppingInternal:NO];
 }
@@ -707,6 +711,10 @@ NSString *BDSKWeblocFilePboardType = @"CorePasteboardFlavorType 0x75726C20";
 
 - (IBAction)exportSelectionAsMODS:(id)sender{
     [self exportAsFileType:@"mods" selected:YES droppingInternal:NO];
+}
+
+- (IBAction)exportSelectionAsEndNote:(id)sender{
+    [self exportAsFileType:@"xml" selected:YES droppingInternal:NO];
 }
 
 - (IBAction)exportSelectionAsHTML:(id)sender{
@@ -781,6 +789,8 @@ NSString *BDSKWeblocFilePboardType = @"CorePasteboardFlavorType 0x75726C20";
             fileData = [self htmlDataForSelection:selected];
         }else if([fileType isEqualToString:@"mods"]){
             fileData = [self MODSDataForPublications:items];
+        }else if([fileType isEqualToString:@"xml"]){
+            fileData = [self endNoteDataForPublications:items];
         }else if([fileType isEqualToString:@"atom"]){
             fileData = [self atomDataForPublications:items];
         }else if([fileType isEqualToString:@"bib"]){            
@@ -826,6 +836,8 @@ NSString *BDSKWeblocFilePboardType = @"CorePasteboardFlavorType 0x75726C20";
         data = [self htmlDataForSelection:NO];
     }else if ([aType isEqualToString:@"MODS"]){
         data = [self MODSDataForPublications:publications];
+    }else if ([aType isEqualToString:@"EndNote XML"]){
+        data = [self endNoteDataForPublications:publications];
     }else if ([aType isEqualToString:@"ATOM"]){
         data = [self atomDataForPublications:publications];
     }else if ([aType isEqualToString:@"RIS/Medline File"]){
@@ -968,6 +980,23 @@ NSString *BDSKWeblocFilePboardType = @"CorePasteboardFlavorType 0x75726C20";
         AddDataFromString(@"\n");
     }
     AddDataFromString(@"</modsCollection>");
+    
+    return d;
+}
+
+- (NSData *)endNoteDataForPublications:(NSArray *)items{
+    NSEnumerator *e = [items objectEnumerator];
+	BibItem *pub = nil;
+    NSMutableData *d = [NSMutableData data];
+    
+    if([items count]) NSParameterAssert([[items objectAtIndex:0] isKindOfClass:[BibItem class]]);
+
+    AddDataFromString(@"<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<xml>\n<records>\n");
+	while(pub = [e nextObject]){
+        AddDataFromString([pub endNoteString]);
+        AddDataFromString(@"\n");
+    }
+    AddDataFromString(@"</records>\n</xml>\n");
     
     return d;
 }

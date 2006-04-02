@@ -1538,16 +1538,19 @@ static NSParagraphStyle* bodyParagraphStyle = nil;
     return [self bibTeXStringByExpandingMacros:NO dropInternal:YES texify:NO];
 }
 
+#define AddXMLField(t,f) value = [self valueOfField:f]; [s appendFormat:@"<%@>%@</%@>\n", t, value ? [value stringByEscapingBasicXMLEntitiesUsingUTF8] : @"", t]
+
 - (NSString *)MODSString{
     NSDictionary *genreForTypeDict = [[BibTypeManager sharedManager] MODSGenresForBibTeXType:[self type]];
-    NSMutableString *s = [NSMutableString stringWithString:@"<mods>"];
+    NSMutableString *s = [NSMutableString stringWithString:@"<mods>\n"];
     unsigned i = 0;
+    NSString *value;
     
-    [s appendFormat:@"<titleInfo> <title>%@ </title>", [[self valueOfField:BDSKTitleString] stringByEscapingBasicXMLEntitiesUsingUTF8]];
-    
+    [s appendString:@"<titleInfo>\n"];
+    AddXMLField(@"title",BDSKTitleString);
+    [s appendString:@"</titleInfo>\n"];
     // note: may in the future want to output subtitles.
 
-    [s appendString:@"</titleInfo>\n"];
     NSArray *pubAuthors = [self pubAuthors];
     
     foreach (author, pubAuthors){
@@ -1556,19 +1559,19 @@ static NSParagraphStyle* bodyParagraphStyle = nil;
     }
 
     // NOTE: this isn't always text. what are the special case pubtypes?
-    [s appendString:@"<typeOfResource>text</typeOfResource>"];
+    [s appendString:@"<typeOfResource>text</typeOfResource>\n"];
     
     NSArray *genresForSelf = [genreForTypeDict objectForKey:@"self"];
     if(genresForSelf){
         for(i = 0; i < [genresForSelf count]; i++){
-            [s appendFormat:@"<genre>%@</genre>", [genresForSelf objectAtIndex:i]];
+            [s appendStrings:@"<genre>", [genresForSelf objectAtIndex:i], @"</genre>\n", nil];
         }
     }
 
     // HOST INFO
     NSArray *genresForHost = [genreForTypeDict objectForKey:@"host"];
     if(genresForHost){
-        [s appendString:@"<relatedItem type=\"host\">"];
+        [s appendString:@"<relatedItem type=\"host\">\n"];
         
         NSString *hostTitle = nil;
         
@@ -1579,14 +1582,162 @@ static NSParagraphStyle* bodyParagraphStyle = nil;
             hostTitle = [self valueOfField:BDSKJournalString];
         }
         hostTitle = [hostTitle stringByEscapingBasicXMLEntitiesUsingUTF8];
-        [s appendFormat:@"<titleInfo><title>%@</title></titleInfo>", (hostTitle ? hostTitle : @"unknown")];
+        [s appendString:@"<titleInfo>\n"];
+        AddXMLField(@"title",hostTitle);
+        [s appendString:@"</titleInfo>\n"];
         
-        [s appendString:@"</relatedItem>"];
+        [s appendString:@"</relatedItem>\n"];
     }
 
-    [s appendFormat:@"<identifier type=\"citekey\">%@</identifier>", [[self citeKey] stringByEscapingBasicXMLEntitiesUsingUTF8]];
+    [s appendStrings:@"<identifier type=\"citekey\">", [[self citeKey] stringByEscapingBasicXMLEntitiesUsingUTF8], @"</identifier>\n", nil];
     
     [s appendString:@"</mods>"];
+    return s;
+}
+
+- (NSString *)endNoteString{
+    NSMutableString *s = [NSMutableString stringWithString:@"<record>\n"];
+    NSString *value;
+    
+    int refTypeID;
+    NSString *entryType = [self type];
+    NSString *publisherField = BDSKPublisherString;
+    NSString *organizationField = @"Organization";
+    NSString *authorField = BDSKAuthorString;
+    NSString *editorField = BDSKEditorString;
+    NSString *isbnField = @"Isbn";
+    NSString *numberField = BDSKNumberString;
+    NSString *booktitleField = BDSKBooktitleString;
+    
+    if([entryType isEqualToString:@"misc"]){
+        refTypeID = 13; // generic
+        publisherField = @"Howpublished";
+    }else if([entryType isEqualToString:@"inbook"]){
+        refTypeID = 5; // book section
+    }else if([entryType isEqualToString:@"incollection"]){
+        refTypeID = 5; // book section
+    }else if([entryType isEqualToString:@"inproceedings"]){
+        refTypeID = 10; // conference proceedings
+    }else if([entryType isEqualToString:@"proceedings"]){
+        refTypeID = 10; // conference proceedings
+    }else if([entryType isEqualToString:@"manual"]){
+        refTypeID = 9; // computer program
+        publisherField = @"Organization";
+        organizationField = @"";
+    }else if([entryType isEqualToString:@"techreport"]){
+        refTypeID = 27; // report
+        isbnField = BDSKNumberString;
+        numberField = @"";
+        publisherField = @"Institution";
+    }else if([entryType isEqualToString:@"mastersthesis"]){
+        refTypeID = 32; // thesis
+        publisherField = @"School";
+    }else if([entryType isEqualToString:@"phdthesis"]){
+        refTypeID = 32; // thesis
+    }else if([entryType isEqualToString:@"unpublished"]){
+        refTypeID = 34;
+    }else if([entryType isEqualToString:@"article"]){
+        refTypeID = 17; // journal article
+        isbnField = @"Issn";
+        booktitleField = BDSKJournalString;
+        if ([NSString isEmptyString:[self valueOfField:BDSKVolumeString]] && [NSString isEmptyString:[self valueOfField:BDSKNumberString]])
+            refTypeID = 23; // newspaper article
+    }else if([entryType isEqualToString:@"book"]){
+        refTypeID = 6; // book
+        booktitleField = BDSKSeriesString;
+        if([self numberOfAuthors] == 0){
+            refTypeID = 28; // edited book
+            authorField = BDSKEditorString;
+            editorField = @"";
+        }
+    }else{
+        refTypeID = 13;
+    }
+    
+    // begin writing record
+    
+    // ref-type
+    [s appendFormat:@"<ref-type>%i</ref-type>\n", refTypeID];
+    
+    // contributors
+    
+    NSEnumerator *authorE;
+    BibAuthor *author;
+    
+    [s appendString:@"<contributors>\n"];
+    
+    authorE = [[self peopleArrayForField:authorField] objectEnumerator];
+    [s appendString:@"<authors>\n"];
+    while (author = [authorE nextObject]){
+        [s appendStrings:@"<author>", [[author normalizedName] stringByEscapingBasicXMLEntitiesUsingUTF8], @"</author>\n", nil];
+    }
+    [s appendString:@"</authors>\n"];
+    
+    authorE = [[self peopleArrayForField:editorField] objectEnumerator];
+    [s appendString:@"<secondary-authors>\n"];
+    while (author = [authorE nextObject]){
+        [s appendStrings:@"<author>", [[author normalizedName] stringByEscapingBasicXMLEntitiesUsingUTF8], @"</author>\n", nil];
+    }
+    [s appendString:@"</secondary-authors>\n"];
+    
+    authorE = [[self peopleArrayForField:organizationField] objectEnumerator];
+    [s appendString:@"<tertiary-authors>\n"];
+    while (author = [authorE nextObject]){
+        [s appendStrings:@"<author>", [[author normalizedName] stringByEscapingBasicXMLEntitiesUsingUTF8], @"</author>\n", nil];
+    }
+    [s appendString:@"</tertiary-authors>\n"];
+    
+    [s appendString:@"</contributors>\n"];
+    
+    // titles
+    
+    [s appendString:@"<titles>\n"];
+    AddXMLField(@"title",BDSKTitleString);
+    AddXMLField(@"secondary-title",booktitleField);
+    AddXMLField(@"tertiary-title",BDSKSeriesString);
+    [s appendString:@"</titles>\n"];
+    
+    // publication info
+    
+    AddXMLField(@"volume",BDSKVolumeString);
+    AddXMLField(@"number",numberField);
+    AddXMLField(@"edition",@"Edition");
+    AddXMLField(@"pages",BDSKPagesString);
+    AddXMLField(@"section",BDSKChapterString);
+    AddXMLField(@"pub-location",BDSKAddressString);
+    AddXMLField(@"publisher",publisherField);
+    AddXMLField(@"isbn",isbnField);
+    AddXMLField(@"work-type",BDSKTypeString);
+    
+    // dates
+    
+    [s appendString:@"<dates>\n"];
+    AddXMLField(@"year",BDSKYearString);
+    [s appendString:@"<pub-dates>\n"];
+    AddXMLField(@"month",BDSKMonthString);
+    [s appendString:@"</pub-dates>\n</dates>\n"];
+    
+    // meta-data
+    
+    [s appendStrings:@"<label>", [[self citeKey] stringByEscapingBasicXMLEntitiesUsingUTF8], @"</label>\n", nil];
+    [s appendString:@"<keywords>\n"];
+    AddXMLField(@"keyword",BDSKKeywordsString);
+    [s appendString:@"<keywords>\n"];
+    [s appendString:@"<urls>\n"];
+    AddXMLField(@"pdf-urls",BDSKLocalUrlString);
+    AddXMLField(@"related-urls",BDSKUrlString);
+    [s appendString:@"</urls>\n"];
+    AddXMLField(@"abstract",BDSKAbstractString);
+    AddXMLField(@"research-notes",BDSKAnnoteString);
+    AddXMLField(@"notes",@"Note");
+    
+    // custom
+    
+    [s appendStrings:@"<custom3>", entryType, @"<custom3>/n", nil];
+    AddXMLField(@"custom4",BDSKCrossrefString);
+    
+    [s appendString:@"</record>"];
+    
     return s;
 }
 

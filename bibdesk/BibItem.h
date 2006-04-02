@@ -657,6 +657,7 @@
      */
 
 - (NSString *)MODSString;
+- (NSString *)endNoteString;
 
 
 /*!

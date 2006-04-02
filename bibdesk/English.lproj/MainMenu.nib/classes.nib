@@ -113,6 +113,7 @@
                 exportAsAtom = id; 
                 exportAsEncodedBib = id; 
                 exportAsEncodedPublicBib = id; 
+                exportAsEndNote = id; 
                 exportAsHTML = id; 
                 exportAsLTB = id; 
                 exportAsMODS = id; 
@@ -121,6 +122,7 @@
                 exportSelectionAsAtom = id; 
                 exportSelectionAsEncodedBib = id; 
                 exportSelectionAsEncodedPublicBib = id; 
+                exportSelectionAsEndNote = id; 
                 exportSelectionAsHTML = id; 
                 exportSelectionAsLTB = id; 
                 exportSelectionAsMODS = id; 
