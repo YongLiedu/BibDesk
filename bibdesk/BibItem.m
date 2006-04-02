@@ -1714,7 +1714,7 @@ static NSParagraphStyle* bodyParagraphStyle = nil;
     [s appendString:@"<dates>\n"];
     AddXMLField(@"year",BDSKYearString);
     [s appendString:@"<pub-dates>\n"];
-    AddXMLField(@"month",BDSKMonthString);
+    AddXMLField(@"date",BDSKMonthString);
     [s appendString:@"</pub-dates>\n</dates>\n"];
     
     // meta-data
