@@ -1,21 +1,8 @@
 {
     IBClasses = (
         {
-            ACTIONS = {changePreviewDisplay = id; changeShownColumns = id; chooseFont = id; }; 
-            CLASS = "BibPref_Display"; 
-            LANGUAGE = ObjC; 
-            OUTLETS = {
-                displayPrefRadioMatrix = NSMatrix; 
-                fontPreviewField = NSTextField; 
-                showColsButtons = NSMatrix; 
-            }; 
-            SUPERCLASS = OAPreferenceClient; 
-        }, 
-        {
             ACTIONS = {
                 changeEditOnPaste = id; 
-                changeLookForSharedFiles = id; 
-                changeShareFiles = id; 
                 changeStartupBehavior = id; 
                 changeWarnOnDelete = id; 
                 changeWarnOnRemovalFromGroup = id; 
@@ -30,23 +17,10 @@
                 checkForUpdatesButton = NSButton; 
                 defaultBibFileTextField = NSTextField; 
                 editOnPasteButton = NSButton; 
-                lookForSharedFilesButton = NSButton; 
-                shareFilesButton = NSButton; 
                 startupBehaviorRadio = NSMatrix; 
                 warnOnDeleteButton = NSButton; 
                 warnOnRemovalFromGroupButton = NSButton; 
                 warnOnRenameGroupButton = NSButton; 
-            }; 
-            SUPERCLASS = OAPreferenceClient; 
-        }, 
-        {
-            ACTIONS = {changeStartupBehavior = id; }; 
-            CLASS = "BibPref_Startup"; 
-            LANGUAGE = ObjC; 
-            OUTLETS = {
-                defaultBibFileField = NSTextField; 
-                openSheetAccessoryView = NSView; 
-                startupBehaviorRadio = NSMatrix; 
             }; 
             SUPERCLASS = OAPreferenceClient; 
         }, 
