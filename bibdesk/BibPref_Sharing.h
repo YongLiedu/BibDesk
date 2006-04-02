@@ -46,6 +46,7 @@
     IBOutlet NSButton *usePasswordButton;
     IBOutlet NSSecureTextField *passwordField;
     IBOutlet NSTextField *sharedNameField;
+    IBOutlet NSTextField *statusField;
 }
 - (void)handleSharingNameChanged:(NSNotification *)aNotification;
 

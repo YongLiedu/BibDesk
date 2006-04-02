@@ -66,5 +66,6 @@ extern NSString *BDSKComputerName();
 + (NSString *)serviceNameForKeychain;
 + (NSData *)sharingPasswordForCurrentUserUnhashed;
 + (NSString *)sharingName;
++ (NSNumber *)numberOfConnections;
 
 @end

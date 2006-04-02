@@ -46,6 +46,8 @@
 #include <netinet/in.h>
 #include <unistd.h>
 
+static uint32_t numberOfConnections = 0;
+
 // @@ register with http://www.dns-sd.org/ServiceTypes.html
 NSString *BDSKNetServiceDomain = @"_bdsk._tcp.";
 static NSString *uniqueIdentifier = nil;
@@ -137,6 +139,9 @@ NSString *BDSKComputerName() {
 + (NSString *)TXTComputerNameKey { return @"name"; }
 + (NSString *)TXTVersionKey { return @"txtvers"; }
 
++ (NSString *)sharedArchivedDataKey { return @"publications_v1"; }
+
+// convenience method for keychain
 + (NSData *)sharingPasswordForCurrentUserUnhashed;
 {
     // find pw from keychain
@@ -164,6 +169,8 @@ NSString *BDSKComputerName() {
         sharingName = BDSKComputerName();
     return sharingName;
 }
+
++ (NSNumber *)numberOfConnections { return [NSNumber numberWithUnsignedInt:numberOfConnections]; }
 
 //  handle changes from the OS
 - (void)handleComputerNameChangedNotification:(NSNotification *)note;
@@ -408,11 +415,16 @@ NSString *BDSKComputerName() {
     // We'll need to release the NSNetService sending this, since we want to recreate it in sync with the socket at the other end. Since there's only the one NSNetService in this application, we can just release it.
     [netService release];
     netService = nil;
+    numberOfConnections--;
 }
 
 // This object is also listening for notifications from its NSFileHandle.
 // When an incoming connection is seen by the listeningSocket object, we get the NSFileHandle representing the near end of the connection. We write the data to this NSFileHandle instance.
 - (void)connectionReceived:(NSNotification *)aNotification{
+    
+    // no attempt to separate out unique machines
+    numberOfConnections++;
+    
     NSFileHandle *incomingConnection = [[aNotification userInfo] objectForKey:NSFileHandleNotificationFileHandleItem];
     NSData *dataToSend = [NSKeyedArchiver archivedDataWithRootObject:publications];
     if(dataToSend != nil){
@@ -432,7 +444,5 @@ NSString *BDSKComputerName() {
     [incomingConnection closeFile];
     [[aNotification object] acceptConnectionInBackgroundAndNotify];
 }
-
-+ (NSString *)sharedArchivedDataKey { return @"publications_v1"; }
 
 @end

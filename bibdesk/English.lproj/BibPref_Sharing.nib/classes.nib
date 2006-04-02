@@ -15,6 +15,7 @@
                 enableSharingButton = NSButton; 
                 passwordField = NSSecureTextField; 
                 sharedNameField = NSTextField; 
+                statusField = NSTextField; 
                 usePasswordButton = NSButton; 
             }; 
             SUPERCLASS = OAPreferenceClient; 

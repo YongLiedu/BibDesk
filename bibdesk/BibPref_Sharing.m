@@ -88,6 +88,10 @@
     [passwordField setEnabled:[defaults boolForKey:BDSKSharingRequiresPasswordKey]];
     
     [sharedNameField setStringValue:[BibDocument sharingName]];
+    if([defaults boolForKey:BDSKShouldShareFilesKey])
+        [statusField setStringValue:[NSString stringWithFormat:NSLocalizedString(@"Status:  On, %@ users connected", @"single NSString specifier; Bonjour sharing status"), [BibDocument numberOfConnections]]];
+    else
+        [statusField setStringValue:NSLocalizedString(@"Status:  Off", @"Bonjour sharing status")];
 }
 
 - (IBAction)togglePassword:(id)sender
