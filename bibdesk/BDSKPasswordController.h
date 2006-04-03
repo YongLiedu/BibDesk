@@ -39,7 +39,7 @@
 
 #import <Cocoa/Cocoa.h>
 
-extern const char *BDSKServiceNameForKeychain;
+extern NSString *BDSKServiceNameForKeychain;
 
 @interface BDSKPasswordController : NSWindowController
 {
@@ -55,5 +55,6 @@ extern const char *BDSKServiceNameForKeychain;
 - (IBAction)buttonAction:(id)sender;
 
 + (NSData *)sharingPasswordForCurrentUserUnhashed;
++ (void)addOrModifyPassword:(NSString *)password serverName:(NSString *)serverName userName:(NSString *)userName;
 
 @end

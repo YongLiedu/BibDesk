@@ -43,7 +43,7 @@
 #import "BDSKSharingBrowser.h"
 #import "BDSKSharingServer.h"
 
-const char *BDSKServiceNameForKeychain = "BibDesk Sharing";
+NSString *BDSKServiceNameForKeychain = @"BibDesk Sharing";
 
 @implementation BDSKPasswordController
 
@@ -83,45 +83,22 @@ const char *BDSKServiceNameForKeychain = "BibDesk Sharing";
 {
     NSAssert(service != nil, @"net service is nil");
     NSAssert([service name] != nil, @"tried to set password for unresolved service");
-    
-    const void *passwordData = NULL;
-    SecKeychainItemRef itemRef = NULL;    
-    const char *userName = [NSUserName() UTF8String];
-    OSStatus err;
-    
+        
     NSData *TXTData = [service TXTRecordData];
     NSDictionary *dictionary = nil;
     if(TXTData)
         dictionary = [NSNetService dictionaryFromTXTRecordData:TXTData];
     TXTData = [dictionary objectForKey:BDSKTXTComputerNameKey];
-    const char *serverName = [TXTData bytes];
-    UInt32 serverNameLength = [TXTData length];
     NSAssert([TXTData length], @"no computer name in TXT record");
     
     NSString *password = [passwordField stringValue];
     NSParameterAssert(password != nil);
-
-    UInt32 passwordLength = 0;
-    err = SecKeychainFindGenericPassword(NULL, serverNameLength, serverName, strlen(userName), userName, &passwordLength, (void **)&passwordData, &itemRef);
     
-    if(err == noErr){
-        // password was on keychain, so flush the buffer and then modify the keychain
-        SecKeychainItemFreeContent(NULL, (void *)passwordData);
-        passwordData = NULL;
+    // append our service name to the server name for remote services
+    NSString *serverName = [NSString stringWithData:TXTData encoding:NSUTF8StringEncoding];
+    serverName = [serverName stringByAppendingFormat:@" - %@", BDSKServiceNameForKeychain];
     
-        passwordData = [password UTF8String];
-        SecKeychainAttribute attrs[] = {
-        { kSecAccountItemAttr, strlen(userName), (char *)userName },
-        { kSecServiceItemAttr, serverNameLength, (char *)serverName } };
-        const SecKeychainAttributeList attributes = { sizeof(attrs) / sizeof(attrs[0]), attrs };
-        
-        err = SecKeychainItemModifyAttributesAndData(itemRef, &attributes, strlen(passwordData), passwordData);
-    } else if(err == errSecItemNotFound){
-        // password not on keychain, so add it
-        passwordData = [password UTF8String];
-        err = SecKeychainAddGenericPassword(NULL, serverNameLength, serverName, strlen(userName), userName, strlen(passwordData), passwordData, &itemRef);    
-    } else 
-        NSLog(@"Error %d occurred setting password", err);
+    [BDSKPasswordController addOrModifyPassword:password serverName:serverName userName:nil];
 }
 
 - (IBAction)buttonAction:(id)sender
@@ -147,7 +124,7 @@ const char *BDSKServiceNameForKeychain = "BibDesk Sharing";
     UInt32 passwordLength = 0;
     NSData *data = nil;
     
-    const char *serviceName = BDSKServiceNameForKeychain;
+    const char *serviceName = [BDSKServiceNameForKeychain UTF8String];
     const char *userName = [NSUserName() UTF8String];
     
     err = SecKeychainFindGenericPassword(NULL, strlen(serviceName), serviceName, strlen(userName), userName, &passwordLength, &passwordData, NULL);
@@ -155,6 +132,42 @@ const char *BDSKServiceNameForKeychain = "BibDesk Sharing";
     SecKeychainItemFreeContent(NULL, passwordData);
     
     return data;
+}
+
++ (void)addOrModifyPassword:(NSString *)password serverName:(NSString *)serverName userName:(NSString *)userName;
+{
+    // default is to use current user's username
+    const char *userNameCString = userName == nil ? [NSUserName() UTF8String] : [userName UTF8String];
+    
+    NSParameterAssert(serverName != nil);
+    const char *serverNameCString = [serverName UTF8String];
+    
+    OSStatus err;
+    SecKeychainItemRef itemRef = NULL;    
+    const void *passwordData = NULL;
+    UInt32 passwordLength = 0;
+    
+    // first see if the password exists in the keychain
+    err = SecKeychainFindGenericPassword(NULL, strlen(serverNameCString), serverNameCString, strlen(userNameCString), userNameCString, &passwordLength, (void **)&passwordData, &itemRef);
+    
+    if(err == noErr){
+        // password was on keychain, so flush the buffer and then modify the keychain
+        SecKeychainItemFreeContent(NULL, (void *)passwordData);
+        passwordData = NULL;
+        
+        passwordData = [password UTF8String];
+        SecKeychainAttribute attrs[] = {
+        { kSecAccountItemAttr, strlen(userNameCString), (char *)userNameCString },
+        { kSecServiceItemAttr, strlen(serverNameCString), (char *)serverNameCString } };
+        const SecKeychainAttributeList attributes = { sizeof(attrs) / sizeof(attrs[0]), attrs };
+        
+        err = SecKeychainItemModifyAttributesAndData(itemRef, &attributes, strlen(passwordData), passwordData);
+    } else if(err == errSecItemNotFound){
+        // password not on keychain, so add it
+        passwordData = [password UTF8String];
+        err = SecKeychainAddGenericPassword(NULL, strlen(serverNameCString), serverNameCString, strlen(userNameCString), userNameCString, strlen(passwordData), passwordData, &itemRef);    
+    } else 
+        NSLog(@"Error %d occurred setting password", err);
 }
 
 @end

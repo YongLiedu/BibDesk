@@ -116,37 +116,7 @@
 
 - (IBAction)changePassword:(id)sender
 {
-    const void *passwordData = NULL;
-    SecKeychainItemRef itemRef = NULL;    
-    const char *userName = [NSUserName() UTF8String];
-    const char *serviceName = BDSKServiceNameForKeychain;
-    
-    OSStatus err;
-    
-    NSString *password = [sender stringValue];
-    NSParameterAssert(password != nil);
-    
-    UInt32 passwordLength = 0;
-    err = SecKeychainFindGenericPassword(NULL, strlen(serviceName), serviceName, strlen(userName), userName, &passwordLength, (void **)&passwordData, &itemRef);
-    if(err == noErr){
-        // pw was on keychain, so change it
-        SecKeychainItemFreeContent(NULL, (void *)passwordData);
-        passwordData = NULL;
-        
-        passwordData = [password UTF8String];
-        SecKeychainAttribute attrs[] = {
-        { kSecAccountItemAttr, strlen(userName), (char *)userName },
-        { kSecServiceItemAttr, strlen(serviceName), (char *)serviceName } };
-        const SecKeychainAttributeList attributes = { sizeof(attrs) / sizeof(attrs[0]), attrs };
-        
-        err = SecKeychainItemModifyAttributesAndData(itemRef, &attributes, strlen(passwordData), passwordData);
-    } else {
-        // pw not on keychain, so add it
-        passwordData = [password UTF8String];
-        err = SecKeychainAddGenericPassword(NULL, strlen(serviceName), serviceName, strlen(userName), userName, strlen(passwordData), passwordData, &itemRef);    
-    }
-    
-    NSAssert1(err == noErr, @"error %d occurred setting password", err);    
+    [BDSKPasswordController addOrModifyPassword:[sender stringValue] serverName:BDSKServiceNameForKeychain userName:nil];
     [[NSNotificationCenter defaultCenter] postNotificationName:BDSKSharingPasswordChangedNotification object:nil];
 }
 
