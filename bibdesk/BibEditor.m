@@ -129,11 +129,6 @@ static int numberOfOpenEditors = 0;
 	forceEndEditing = NO;
     didSetupForm = NO;
 	
-    // this should probably be moved around.
-    [[self window] setTitle:[theBib displayTitle]];
-    [[self window] setDelegate:self];
-    [[self window] registerForDraggedTypes:[NSArray arrayWithObjects:BDSKBibItemPboardType, 
-            NSStringPboardType, nil]];					
     macroTextFieldWC = [[MacroFormWindowController alloc] init];
     
     notesViewUndoManager = [[NSUndoManager alloc] init];
@@ -147,9 +142,15 @@ static int numberOfOpenEditors = 0;
 }
 
 - (void)windowDidLoad{
+    [[self window] setDelegate:self];
+    [[self window] registerForDraggedTypes:[NSArray arrayWithObjects:BDSKBibItemPboardType, NSStringPboardType, nil]];					
 	[self setCiteKeyDuplicateWarning:![self citeKeyIsValid:[theBib citeKey]]];
     [documentSnoopButton setIconImage:nil];
     [self fixURLs];
+}
+
+- (NSString *)windowTitleForDocumentDisplayName:(NSString *)displayName{
+    return [theBib displayTitle];
 }
 
 - (BibItem *)currentBib{
@@ -1866,7 +1867,7 @@ static int numberOfOpenEditors = 0;
 		webSnoopViewLoaded = NO;
 		[self fixURLs];
 	}
-	else if([changeKey isEqualToString:BDSKTitleString]){
+	else if([changeKey isEqualToString:BDSKTitleString] || [changeKey isEqualToString:BDSKChapterString] || [changeKey isEqualToString:BDSKPagesString]){
 		[[self window] setTitle:[theBib displayTitle]];
 	}
 	else if([changeKey isEqualToString:BDSKAuthorString]){
