@@ -274,12 +274,6 @@
 			name:BDSKTableColumnChangedNotification
 			object:nil];
     
-    // start the sharing service when necessary
-    [[NSNotificationCenter defaultCenter] addObserver:self
-                                             selector:@selector(handleSharingChangedNotification:)
-                                                 name:BDSKSharingChangedNotification
-                                               object:nil];
-	
 	[openTextEncodingPopupButton removeAllItems];
 	[openTextEncodingPopupButton addItemsWithTitles:[[BDSKStringEncodingManager sharedEncodingManager] availableEncodingDisplayedNames]];
 
@@ -418,14 +412,6 @@
             [[BDSKSharingServer defaultServer] enableSharing];
     }
     
-}
-
-
-- (void)handleSharingChangedNotification:(NSNotification *)notification{
-    if ([[OFPreferenceWrapper sharedPreferenceWrapper] boolForKey:BDSKShouldShareFilesKey])
-        [[BDSKSharingServer defaultServer] enableSharing];
-    else
-        [[BDSKSharingServer defaultServer] disableSharing];
 }
 
 - (IBAction)showReadMeFile:(id)sender{
