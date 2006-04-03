@@ -248,6 +248,7 @@ NSString *BDSKComputerName() {
         // There is at present no way to get an NSFileHandle to -stop- listening for events, so we'll just have to tear it down and recreate it the next time we need it.
         [listeningSocket release];
         listeningSocket = nil;
+        numberOfConnections = 0;
     }
 }
 
@@ -314,13 +315,10 @@ NSString *BDSKComputerName() {
     // We'll need to release the NSNetService sending this, since we want to recreate it in sync with the socket at the other end. Since there's only the one NSNetService in this application, we can just release it.
     [netService release];
     netService = nil;
-    numberOfConnections--;
 }
 
 - (NSArray *)snapshotOfPublications
 {
-    BDSKLOGIMETHOD();
-
     NSEnumerator *docE = [[[NSDocumentController sharedDocumentController] documents] objectEnumerator];
     NSMutableSet *set = [(id)CFSetCreateMutable(CFAllocatorGetDefault(), 0, &BDSKBibItemEqualityCallBacks) autorelease];
     id document = nil;
@@ -332,8 +330,8 @@ NSString *BDSKComputerName() {
 // This object is also listening for notifications from its NSFileHandle.
 // When an incoming connection is seen by the listeningSocket object, we get the NSFileHandle representing the near end of the connection. We write the data to this NSFileHandle instance.
 - (void)connectionReceived:(NSNotification *)aNotification{
-    BDSKLOGIMETHOD();
-    // no attempt to separate out unique machines
+
+    // @@ this is not decremented properly; we'd need a two-way connection to keep track for real, I think
     numberOfConnections++;
     
     NSFileHandle *incomingConnection = [[aNotification userInfo] objectForKey:NSFileHandleNotificationFileHandleItem];
