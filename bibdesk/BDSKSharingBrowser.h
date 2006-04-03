@@ -54,6 +54,7 @@ extern NSString *BDSKComputerName();
 
 - (void)enableSharedBrowsing;
 - (void)disableSharedBrowsing;
+- (void)restartSharedBrowsingIfNeeded;
 
 + (NSString *)uniqueIdentifier;
 

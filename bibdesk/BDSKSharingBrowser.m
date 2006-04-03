@@ -159,6 +159,14 @@ static BDSKSharingBrowser *sharedBrowser = nil;
     [[NSNotificationCenter defaultCenter] postNotificationName:BDSKSharedGroupsChangedNotification object:self];
 }
 
+- (void)restartSharedBrowsingIfNeeded;
+{
+    if([[OFPreferenceWrapper sharedPreferenceWrapper] boolForKey:BDSKShouldLookForSharedFilesKey]){
+        [self disableSharedBrowsing];
+        [self enableSharedBrowsing];
+    }
+}
+
 + (NSString *)uniqueIdentifier;
 {
     // use to identify services sent from this machine

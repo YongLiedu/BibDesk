@@ -96,6 +96,7 @@
 #import "NSFileManager_ExtendedAttributes.h"
 #import "PDFMetadata.h"
 #import "BDSKSharingServer.h"
+#import "BDSKSharingBrowser.h"
 
 NSString *BDSKReferenceMinerStringPboardType = @"CorePasteboardFlavorType 0x57454253";
 NSString *BDSKBibItemPboardType = @"edu.ucsd.mmccrack.bibdesk BibItem pboard type";
@@ -2940,6 +2941,11 @@ NSString *BDSKWeblocFilePboardType = @"CorePasteboardFlavorType 0x75726C20";
         [[OFPreferenceWrapper sharedPreferenceWrapper] setInteger:tag forKey:BDSKPreviewDisplayKey];
         [[NSNotificationCenter defaultCenter] postNotificationName:BDSKPreviewDisplayChangedNotification object:nil];
     }
+}
+
+- (IBAction)refreshSharing:(id)sender{
+    [[BDSKSharingServer defaultServer] restartSharingIfNeeded];
+    [[BDSKSharingBrowser sharedBrowser] restartSharedBrowsingIfNeeded];
 }
 
 #pragma mark TeXTask delegate
