@@ -177,6 +177,8 @@
 
     [defaults setBool:([sender state] == NSOnState) forKey:BDSKShouldShareFilesKey];
 	[[NSNotificationCenter defaultCenter] postNotificationName:BDSKSharingChangedNotification object:self];
+    
+    [self updateUI];
 }
 
 @end
