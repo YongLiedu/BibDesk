@@ -283,6 +283,7 @@ NSString *BDSKSharedGroupsChangedNotification = @"BDSKSharedGroupsChangedNotific
 NSString *BDSKSharedGroupFinishedNotification = @"BDSKSharedGroupFinishedNotification";
 NSString *BDSKComputerNameChangedNotification = @"BDSKComputerNameChangedNotification";
 NSString *BDSKSharingNameChangedNotification = @"BDSKSharingNameChangedNotification";
+NSString *BDSKSharingPasswordChangedNotification = @"BDSKSharingPasswordChangedNotification";
 
 #pragma mark Exception name strings
 

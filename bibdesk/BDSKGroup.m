@@ -393,7 +393,7 @@ static NSString *BDSKAllPublicationsLocalizedString = nil;
 
 /* Subclass for Bonjour sharing.  Designated initializer takes an NSNetService as parameter. */
 
-#import "BibDocument_Sharing.h"
+#import "BDSKSharingServer.h"
 #import <Security/Security.h>
 #import "BDSKPasswordController.h"
 
@@ -462,13 +462,14 @@ static NSString *BDSKAllPublicationsLocalizedString = nil;
     
     // we use the computer name instead of a particular service name, since the same computer vends multiple services (all with the same password)
     NSData *TXTData = [aNetService TXTRecordData];
-    NSDictionary *dictionary = nil;
-    if(TXTData)
-        dictionary = [NSNetService dictionaryFromTXTRecordData:TXTData];
-    TXTData = [dictionary objectForKey:BDSKTXTComputerNameKey];
-    // if the computerName is nil, no password is required
-    if(TXTData == nil)
+    NSAssert1(TXTData != nil, @"invalid NSNetService instance %@ does not contain a TXT record", aNetService);
+    NSDictionary *dictionary = [NSNetService dictionaryFromTXTRecordData:TXTData];
+    
+    // @@ don't bother with password lookup if the comparison isn't necessary
+    if([dictionary objectForKey:BDSKTXTPasswordKey] == nil)
         return nil;
+    
+    TXTData = [dictionary objectForKey:BDSKTXTComputerNameKey];
     
     const char *serverName = [TXTData bytes];
     void *password = NULL;

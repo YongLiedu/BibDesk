@@ -174,11 +174,8 @@ extern NSString* BDSKWeblocFilePboardType; // core pasteboard type for webloc fi
     IBOutlet OASplitView *groupSplitView;
 	float lastGroupViewWidth;
     
-    NSMutableArray *sharedGroups;
-    NSNetService *netService;
-    NSFileHandle *listeningSocket;
-    
     BOOL dragFromSharedGroups;
+    NSMutableArray *sharedGroups;
     
     id fileSearchController;
 	
@@ -788,8 +785,6 @@ extern NSString* BDSKWeblocFilePboardType; // core pasteboard type for webloc fi
 */
 - (void)handleBibItemChangedNotification:(NSNotification *)notification;
 
-// Bonjour sharing notifications
-- (void)handleSharingChangedNotification:(NSNotification *)notification;
 
 /*!
     @method     numberOfSelectedPubs

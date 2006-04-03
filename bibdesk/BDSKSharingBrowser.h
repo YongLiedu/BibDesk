@@ -40,15 +40,6 @@
 
 extern NSString *BDSKNetServiceDomain;
 
-extern NSString *BDSKServiceNameForKeychain;
-
-extern NSString *BDSKTXTPasswordKey;
-extern NSString *BDSKTXTUniqueIdentifierKey;
-extern NSString *BDSKTXTComputerNameKey;
-extern NSString *BDSKTXTVersionKey;
-
-extern NSString *BDSKSharedArchivedDataKey;
-
 extern NSString *BDSKComputerName();
 
 @interface BDSKSharingBrowser : NSObject {
@@ -64,8 +55,6 @@ extern NSString *BDSKComputerName();
 - (void)enableSharedBrowsing;
 - (void)disableSharedBrowsing;
 
-- (NSData *)sharingPasswordForCurrentUserUnhashed;
-- (NSString *)uniqueIdentifier;
-- (NSString *)sharingName;
++ (NSString *)uniqueIdentifier;
 
 @end

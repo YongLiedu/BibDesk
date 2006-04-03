@@ -1,8 +1,8 @@
 //
-//  BibDocument_Sharing.h
+//  BDSKSharingServer.h
 //  Bibdesk
 //
-//  Created by Adam Maxwell on 03/25/06.
+//  Created by Adam Maxwell on 04/02/06.
 /*
  This software is Copyright (c) 2006
  Adam Maxwell. All rights reserved.
@@ -36,19 +36,31 @@
  OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#import "BibDocument.h"
+#import <Cocoa/Cocoa.h>
 
-@interface BibDocument (Sharing)
+extern NSString *BDSKTXTPasswordKey;
+extern NSString *BDSKTXTUniqueIdentifierKey;
+extern NSString *BDSKTXTComputerNameKey;
+extern NSString *BDSKTXTVersionKey;
 
-- (NSString *)netServiceName;
+extern NSString *BDSKSharedArchivedDataKey;
+
+
+@interface BDSKSharingServer : NSObject {
+    NSNetService *netService;
+    NSFileHandle *listeningSocket;
+}
+
++ (id)defaultServer;
++ (NSString *)sharingName;
++ (NSNumber *)numberOfConnections;
+
+- (void)handleComputerNameChangedNotification:(NSNotification *)note;
+- (void)connectionReceived:(NSNotification *)aNotification;
+- (void)handlePasswordChangedNotification:(NSNotification *)note;
 
 - (void)enableSharing;
 - (void)disableSharing;
 - (void)restartSharingIfNeeded;
-
-+ (NSNumber *)numberOfConnections;
-
-- (void)handleComputerNameChangedNotification:(NSNotification *)note;
-- (void)handleSharingNameChangedNotification:(NSNotification *)note;
 
 @end

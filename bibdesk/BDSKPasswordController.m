@@ -41,6 +41,9 @@
 #import "BDSKPasswordController.h"
 #import <Security/Security.h>
 #import "BDSKSharingBrowser.h"
+#import "BDSKSharingServer.h"
+
+const char *BDSKServiceNameForKeychain = "BibDesk Sharing";
 
 @implementation BDSKPasswordController
 
@@ -132,6 +135,26 @@
     
     // this is the only way out of the modal session
     [NSApp stopModal];
+}
+
+// convenience method for keychain
++ (NSData *)sharingPasswordForCurrentUserUnhashed;
+{
+    // find pw from keychain
+    OSStatus err;
+    
+    void *passwordData = NULL;
+    UInt32 passwordLength = 0;
+    NSData *data = nil;
+    
+    const char *serviceName = BDSKServiceNameForKeychain;
+    const char *userName = [NSUserName() UTF8String];
+    
+    err = SecKeychainFindGenericPassword(NULL, strlen(serviceName), serviceName, strlen(userName), userName, &passwordLength, &passwordData, NULL);
+    data = [NSData dataWithBytes:passwordData length:passwordLength];
+    SecKeychainItemFreeContent(NULL, passwordData);
+    
+    return data;
 }
 
 @end

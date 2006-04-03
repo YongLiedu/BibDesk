@@ -70,6 +70,7 @@
 #import "NSWorkspace_BDSKExtensions.h"
 #import <SystemConfiguration/SystemConfiguration.h>
 #import "BDSKSharingBrowser.h"
+#import "BDSKSharingServer.h"
 
 @implementation BibAppController
 
@@ -272,6 +273,12 @@
 			selector:@selector(handleTableColumnsChangedNotification:)
 			name:BDSKTableColumnChangedNotification
 			object:nil];
+    
+    // start the sharing service when necessary
+    [[NSNotificationCenter defaultCenter] addObserver:self
+                                             selector:@selector(handleSharingChangedNotification:)
+                                                 name:BDSKSharingChangedNotification
+                                               object:nil];
 	
 	[openTextEncodingPopupButton removeAllItems];
 	[openTextEncodingPopupButton addItemsWithTitles:[[BDSKStringEncodingManager sharedEncodingManager] availableEncodingDisplayedNames]];
@@ -403,6 +410,22 @@
 	
 	if([[OFPreferenceWrapper sharedPreferenceWrapper] boolForKey:BDSKShowingPreviewKey])
 		[[BDSKPreviewer sharedPreviewer] showPreviewPanel:self];
+    
+    // array of BDSKSharedGroup objects and zeroconf support; 10.4 only for now
+    // this is in -awakeFromNib instead of -init since we need the document's fileName set up
+    if(floor(NSAppKitVersionNumber) > NSAppKitVersionNumber10_3){
+        if([[OFPreferenceWrapper sharedPreferenceWrapper] boolForKey:BDSKShouldShareFilesKey])
+            [[BDSKSharingServer defaultServer] enableSharing];
+    }
+    
+}
+
+
+- (void)handleSharingChangedNotification:(NSNotification *)notification{
+    if ([[OFPreferenceWrapper sharedPreferenceWrapper] boolForKey:BDSKShouldShareFilesKey])
+        [[BDSKSharingServer defaultServer] enableSharing];
+    else
+        [[BDSKSharingServer defaultServer] disableSharing];
 }
 
 - (IBAction)showReadMeFile:(id)sender{
@@ -1449,6 +1472,7 @@ OFWeakRetainConcreteImplementation_NULL_IMPLEMENTATION
             [array addObject:[NSDictionary dictionaryWithObjectsAndKeys:fileName, @"fileName", nil]];
     }
     [[OFPreferenceWrapper sharedPreferenceWrapper] setObject:array forKey:BDSKLastOpenFileNamesKey];
+    [[BDSKSharingServer defaultServer] disableSharing];
 }
 
 - (id)openDocumentWithContentsOfURL:(NSURL *)absoluteURL display:(BOOL)displayDocument error:(NSError **)outError{

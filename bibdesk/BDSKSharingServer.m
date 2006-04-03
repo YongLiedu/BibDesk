@@ -1,8 +1,8 @@
 //
-//  BibDocument_Sharing.m
+//  BDSKSharingServer.m
 //  Bibdesk
 //
-//  Created by Adam Maxwell on 03/25/06.
+//  Created by Adam Maxwell on 04/02/06.
 /*
  This software is Copyright (c) 2006
  Adam Maxwell. All rights reserved.
@@ -36,30 +36,125 @@
  OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#import "BibDocument_Sharing.h"
+#import "BDSKSharingServer.h"
 #import "BDSKGroup.h"
 #import "BDSKSharingBrowser.h"
+#import "BDSKPasswordController.h"
+#import <SystemConfiguration/SystemConfiguration.h>
+#import "NSArray_BDSKExtensions.h"
+#import "BibItem.h"
 
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <unistd.h>
 
+static id sharedInstance = nil;
 static uint32_t numberOfConnections = 0;
 
-@implementation BibDocument (Sharing)
+// TXT record keys
+NSString *BDSKTXTPasswordKey = @"pass";
+NSString *BDSKTXTUniqueIdentifierKey = @"hostid";
+NSString *BDSKTXTComputerNameKey = @"name";
+NSString *BDSKTXTVersionKey = @"txtvers";
 
-- (NSString *)netServiceName;
+NSString *BDSKSharedArchivedDataKey = @"publications_v1";
+
+// This is the computer name as set in sys prefs (sharing)
+static NSString *computerName = nil;
+
+static SCDynamicStoreRef dynamicStore = NULL;
+static const void *retainCallBack(const void *info) { return [(id)info retain]; }
+static void releaseCallBack(const void *info) { [(id)info release]; }
+static CFStringRef copyDescriptionCallBack(const void *info) { return (CFStringRef)[[(id)info description] copy]; }
+// convert this to an NSNotification
+static void SCDynamicStoreChanged(SCDynamicStoreRef store, CFArrayRef changedKeys, void *info)
 {
-    NSString *documentName = [[[self fileName] lastPathComponent] stringByDeletingPathExtension];
-    // @@ probably shouldn't share unsaved files
-    if(documentName == nil) documentName = [self displayName];
+    // clear this here, since the other handlers may depend on it
+    [computerName release];
+    computerName = nil;
     
+    [[NSNotificationCenter defaultCenter] postNotificationName:BDSKComputerNameChangedNotification object:nil];
+    
+    // update the text field in prefs if necessary (or that could listen for computer name changes...)
+    if([NSString isEmptyString:[[OFPreferenceWrapper sharedPreferenceWrapper] objectForKey:BDSKSharingNameKey]])
+        [[NSNotificationCenter defaultCenter] postNotificationName:BDSKSharingNameChangedNotification object:nil];
+}
+
+NSString *BDSKComputerName() {
+    if(computerName == nil){
+        computerName = (NSString *)SCDynamicStoreCopyComputerName(dynamicStore, NULL);
+        if(computerName == nil){
+            NSLog(@"Unable to get computer name with SCDynamicStoreCopyComputerName");
+            computerName = [[[[[NSProcessInfo processInfo] hostName] componentsSeparatedByString:@"."] firstObject] copy];
+        }
+    }
+    return computerName;
+}
+
+@implementation BDSKSharingServer
+
++ (void)didLoad;
+{
+    /* Ensure that computer name changes are propagated as future clients connect to a document.  Also, note that the OS will change the computer name to avoid conflicts by appending "(2)" or similar to the previous name, which is likely the most common scenario.
+    */
+    if(dynamicStore == NULL){
+        CFAllocatorRef alloc = CFAllocatorGetDefault();
+        SCDynamicStoreContext SCNSObjectContext = {
+            0,                         // version
+            (id)nil,                   // any NSCF type
+            &retainCallBack,
+            &releaseCallBack,
+            &copyDescriptionCallBack
+        };
+        dynamicStore = SCDynamicStoreCreate(alloc, (CFStringRef)[[NSBundle mainBundle] objectForInfoDictionaryKey:(NSString *)kCFBundleIdentifierKey], &SCDynamicStoreChanged, &SCNSObjectContext);
+        CFRunLoopSourceRef rlSource = SCDynamicStoreCreateRunLoopSource(alloc, dynamicStore, 0);
+        CFRunLoopAddSource(CFRunLoopGetCurrent(), rlSource, kCFRunLoopCommonModes);
+        CFRelease(rlSource);
+        CFStringRef key = SCDynamicStoreKeyCreateComputerName(alloc);
+        CFArrayRef keys = CFArrayCreate(alloc, (const void **)&key, 1, &kCFTypeArrayCallBacks);
+        CFRelease(key);
+        
+        if(SCDynamicStoreSetNotificationKeys(dynamicStore, keys, NULL) == FALSE)
+            fprintf(stderr, "unable to register for dynamic store notifications.\n");
+        CFRelease(keys);
+    }
+    
+}
+
+// base name for sharing (also used for storing remote host names in keychain)
++ (NSString *)sharingName;
+{
     // docs say to use computer name instead of host name http://developer.apple.com/qa/qa2001/qa1228.html
-    // we append document name since the same computer vends multiple documents
-    return [NSString stringWithFormat:@"%@ - %@", [[BDSKSharingBrowser sharedBrowser] sharingName], documentName];
+    NSString *sharingName = [[OFPreferenceWrapper sharedPreferenceWrapper] objectForKey:BDSKSharingNameKey];
+    if([NSString isEmptyString:sharingName])
+        sharingName = BDSKComputerName();
+    return sharingName;
+}
+
++ (id)defaultServer;
+{
+    if(sharedInstance == nil && (floor(NSAppKitVersionNumber) > NSAppKitVersionNumber10_3))
+        sharedInstance = [[self alloc] init];
+    return sharedInstance;
 }
 
 + (NSNumber *)numberOfConnections { return [NSNumber numberWithUnsignedInt:numberOfConnections]; }
+
+- (id)init
+{
+    if(self = [super init]){
+        [[NSNotificationCenter defaultCenter] addObserver:self
+                                                 selector:@selector(handleComputerNameChangedNotification:)
+                                                     name:BDSKComputerNameChangedNotification
+                                                   object:nil];
+        
+        [[NSNotificationCenter defaultCenter] addObserver:self
+                                                 selector:@selector(handlePasswordChangedNotification:)
+                                                     name:BDSKSharingPasswordChangedNotification
+                                                   object:nil];
+    }
+    return self;
+}
 
 //  handle changes from the OS
 - (void)handleComputerNameChangedNotification:(NSNotification *)note;
@@ -71,6 +166,11 @@ static uint32_t numberOfConnections = 0;
 
 // handle changes from prefs
 - (void)handleSharingNameChangedNotification:(NSNotification *)note;
+{
+    [self restartSharingIfNeeded];
+}
+
+- (void)handlePasswordChangedNotification:(NSNotification *)note;
 {
     [self restartSharingIfNeeded];
 }
@@ -113,18 +213,18 @@ static uint32_t numberOfConnections = 0;
     
     if(!netService) {
         // lazily instantiate the NSNetService object that will advertise on our behalf
-        netService = [[NSNetService alloc] initWithDomain:@"" type:BDSKNetServiceDomain name:[self netServiceName] port:chosenPort];
+        netService = [[NSNetService alloc] initWithDomain:@"" type:BDSKNetServiceDomain name:[BDSKSharingServer sharingName] port:chosenPort];
         [netService setDelegate:self];
         NSMutableDictionary *dictionary = [NSMutableDictionary dictionaryWithCapacity:4];
-        [dictionary setObject:[[BDSKSharingBrowser sharedBrowser] uniqueIdentifier] forKey:BDSKTXTUniqueIdentifierKey];
+        [dictionary setObject:[BDSKSharingBrowser uniqueIdentifier] forKey:BDSKTXTUniqueIdentifierKey];
         [dictionary setObject:@"0" forKey:BDSKTXTVersionKey];
-        
+        [dictionary setObject:[BDSKSharingServer sharingName] forKey:BDSKTXTComputerNameKey];
+
         if([[OFPreferenceWrapper sharedPreferenceWrapper] boolForKey:BDSKSharingRequiresPasswordKey]){
-            NSData *pwData = [[BDSKSharingBrowser sharedBrowser] sharingPasswordForCurrentUserUnhashed];
+            NSData *pwData = [BDSKPasswordController sharingPasswordForCurrentUserUnhashed];
             // hash with sha1 so we're not sending it in the clear
             if(pwData != nil)
                 [dictionary setObject:[pwData sha1Signature] forKey:BDSKTXTPasswordKey];
-            [dictionary setObject:[[BDSKSharingBrowser sharedBrowser] sharingName] forKey:BDSKTXTComputerNameKey];
         }
         NSData *TXTData = [NSNetService dataFromTXTRecordDictionary:dictionary];
         OBPOSTCONDITION(TXTData != nil);
@@ -206,7 +306,7 @@ static uint32_t numberOfConnections = 0;
     netService = nil;
     
     // show the error in a modal dialog
-    [self presentError:error];
+    [NSApp presentError:error];
 }
 
 - (void)netServiceDidStop:(NSNetService *)sender
@@ -217,15 +317,27 @@ static uint32_t numberOfConnections = 0;
     numberOfConnections--;
 }
 
+- (NSArray *)snapshotOfPublications
+{
+    BDSKLOGIMETHOD();
+
+    NSEnumerator *docE = [[[NSDocumentController sharedDocumentController] documents] objectEnumerator];
+    NSMutableSet *set = [(id)CFSetCreateMutable(CFAllocatorGetDefault(), 0, &BDSKBibItemEqualityCallBacks) autorelease];
+    id document = nil;
+    while(document = [docE nextObject])
+        [set addObjectsFromArray:[document publications]];
+    return [set allObjects];
+}
+
 // This object is also listening for notifications from its NSFileHandle.
 // When an incoming connection is seen by the listeningSocket object, we get the NSFileHandle representing the near end of the connection. We write the data to this NSFileHandle instance.
 - (void)connectionReceived:(NSNotification *)aNotification{
-    
+    BDSKLOGIMETHOD();
     // no attempt to separate out unique machines
     numberOfConnections++;
     
     NSFileHandle *incomingConnection = [[aNotification userInfo] objectForKey:NSFileHandleNotificationFileHandleItem];
-    NSData *dataToSend = [NSKeyedArchiver archivedDataWithRootObject:publications];
+    NSData *dataToSend = [NSKeyedArchiver archivedDataWithRootObject:[self snapshotOfPublications]];
     if(dataToSend != nil){
         // If we want to make this cross-platform (say if JabRef wanted to add Bonjour support), we could pass BibTeX as another key in the dictionary, and use an XML plist for reading at the other end
         NSDictionary *dictionary = [NSDictionary dictionaryWithObjectsAndKeys:dataToSend, BDSKSharedArchivedDataKey, nil];

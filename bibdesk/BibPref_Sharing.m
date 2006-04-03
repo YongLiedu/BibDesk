@@ -39,9 +39,10 @@
 
 #import "BibPref_Sharing.h"
 #import "BibPrefController.h"
-#import "BibDocument_Sharing.h"
 #import "BDSKSharingBrowser.h"
 #import <Security/Security.h>
+#import "BDSKSharingServer.h"
+#import "BDSKPasswordController.h"
 
 @implementation BibPref_Sharing
 
@@ -52,7 +53,7 @@
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(handleSharingNameChanged:) name:BDSKSharingNameChangedNotification object:nil];
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(handleSharedGroupsChanged:) name:BDSKSharedGroupsChangedNotification object:nil];
     
-    NSData *pwData = [[BDSKSharingBrowser sharedBrowser] sharingPasswordForCurrentUserUnhashed];
+    NSData *pwData = [BDSKPasswordController sharingPasswordForCurrentUserUnhashed];
     if(pwData != nil){
         NSString *pwString = [[NSString alloc] initWithData:pwData encoding:NSUTF8StringEncoding];
         [passwordField setStringValue:pwString];
@@ -94,9 +95,9 @@
     [usePasswordButton setState:[defaults boolForKey:BDSKSharingRequiresPasswordKey] ? NSOnState : NSOffState];
     [passwordField setEnabled:[defaults boolForKey:BDSKSharingRequiresPasswordKey]];
     
-    [sharedNameField setStringValue:[[BDSKSharingBrowser sharedBrowser] sharingName]];
+    [sharedNameField setStringValue:[BDSKSharingServer sharingName]];
     if([defaults boolForKey:BDSKShouldShareFilesKey]){
-        NSNumber *number = [BibDocument numberOfConnections];
+        NSNumber *number = [BDSKSharingServer numberOfConnections];
         if([number intValue]  == 1)
             [statusField setStringValue:NSLocalizedString(@"Status:  On, 1 user connected", @"Bonjour sharing status")];
         else
@@ -110,6 +111,7 @@
 {
     [defaults setBool:([sender state] == NSOnState) forKey:BDSKSharingRequiresPasswordKey];
     [self updateUI];
+    [[NSNotificationCenter defaultCenter] postNotificationName:BDSKSharingPasswordChangedNotification object:nil];
 }
 
 - (IBAction)changePassword:(id)sender
@@ -117,7 +119,7 @@
     const void *passwordData = NULL;
     SecKeychainItemRef itemRef = NULL;    
     const char *userName = [NSUserName() UTF8String];
-    const char *serviceName = [BDSKServiceNameForKeychain UTF8String];
+    const char *serviceName = BDSKServiceNameForKeychain;
     
     OSStatus err;
     
@@ -145,6 +147,7 @@
     }
     
     NSAssert1(err == noErr, @"error %d occurred setting password", err);    
+    [[NSNotificationCenter defaultCenter] postNotificationName:BDSKSharingPasswordChangedNotification object:nil];
 }
 
 // setting to the empty string will restore the default

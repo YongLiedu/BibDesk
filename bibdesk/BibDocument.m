@@ -95,7 +95,7 @@
 #import "NSSet_BDSKExtensions.h"
 #import "NSFileManager_ExtendedAttributes.h"
 #import "PDFMetadata.h"
-#import "BibDocument_Sharing.h"
+#import "BDSKSharingServer.h"
 
 NSString *BDSKReferenceMinerStringPboardType = @"CorePasteboardFlavorType 0x57454253";
 NSString *BDSKBibItemPboardType = @"edu.ucsd.mmccrack.bibdesk BibItem pboard type";
@@ -220,18 +220,8 @@ NSString *BDSKWeblocFilePboardType = @"CorePasteboardFlavorType 0x75726C20";
                                                    object:nil];
         
         [[NSNotificationCenter defaultCenter] addObserver:self
-                                                 selector:@selector(handleSharingChangedNotification:)
-                                                     name:BDSKSharingChangedNotification
-                                                   object:nil];
-        
-        [[NSNotificationCenter defaultCenter] addObserver:self
                                                  selector:@selector(handleApplicationWillTerminateNotification:)
                                                      name:NSApplicationWillTerminateNotification
-                                                   object:nil];
-        
-        [[NSNotificationCenter defaultCenter] addObserver:self
-                                                 selector:@selector(handleComputerNameChangedNotification:)
-                                                     name:BDSKComputerNameChangedNotification
                                                    object:nil];
         
         // @@ ARM: required for 10.3.9 as of 2 December 2005; the delegate notification isn't received by the document
@@ -319,16 +309,13 @@ NSString *BDSKWeblocFilePboardType = @"CorePasteboardFlavorType 0x75726C20";
         
     if([documentWindow respondsToSelector:@selector(setAutorecalculatesKeyViewLoop:)])
         [documentWindow setAutorecalculatesKeyViewLoop:YES];
-
+    
     // array of BDSKSharedGroup objects and zeroconf support; 10.4 only for now
-    // this is in -awakeFromNib instead of -init since we need the document's fileName set up
     sharedGroups = nil;
     if(floor(NSAppKitVersionNumber) > NSAppKitVersionNumber10_3){
         if([[OFPreferenceWrapper sharedPreferenceWrapper] boolForKey:BDSKShouldLookForSharedFilesKey])
             [self handleSharedGroupsChangedNotification:nil];
-        if([[OFPreferenceWrapper sharedPreferenceWrapper] boolForKey:BDSKShouldShareFilesKey])
-            [self enableSharing];
-    }
+    }    
     
     // @@ awakeFromNib is called long after the document's data is loaded, so the UI update from setPublications is too early when loading a new document; there may be a better way to do this
     [self updateGroupsPreservingSelection:NO];
@@ -2685,16 +2672,8 @@ NSString *BDSKWeblocFilePboardType = @"CorePasteboardFlavorType 0x75726C20";
     [self sortPubsByColumn:nil];
 }
 
-- (void)handleSharingChangedNotification:(NSNotification *)notification{
-    if ([[OFPreferenceWrapper sharedPreferenceWrapper] boolForKey:BDSKShouldShareFilesKey])
-        [self enableSharing];
-    else
-        [self disableSharing];
-}
-
 - (void)handleApplicationWillTerminateNotification:(NSNotification *)notification{
     [self saveSortOrder];
-    [self disableSharing];
 }
 
 #pragma mark UI updating
@@ -3049,8 +3028,6 @@ NSString *BDSKWeblocFilePboardType = @"CorePasteboardFlavorType 0x75726C20";
 	
 	[self providePromisedTypes];
 	
-    [self disableSharing];
-
     // safety call here, in case the pasteboard is retaining the document; we don't want notifications after the window closes, since all the pointers to UI elements will be garbage
     [[NSNotificationCenter defaultCenter] removeObserver:self];
 

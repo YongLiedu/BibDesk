@@ -41,95 +41,14 @@
 #import "BibDocument_Groups.h"
 #import "BDSKGroup.h"
 #import "NSArray_BDSKExtensions.h"
-#import <SystemConfiguration/SystemConfiguration.h>
-#import <Security/Security.h>
-
-#include <sys/socket.h>
-#include <netinet/in.h>
-#include <unistd.h>
+#import "BDSKSharingServer.h"
 
 // @@ register with http://www.dns-sd.org/ServiceTypes.html
 NSString *BDSKNetServiceDomain = @"_bdsk._tcp.";
 
-NSString *BDSKServiceNameForKeychain = @"BibDesk Sharing";
-
-// TXT record keys
-NSString *BDSKTXTPasswordKey = @"pass";
-NSString *BDSKTXTUniqueIdentifierKey = @"hostid";
-NSString *BDSKTXTComputerNameKey = @"name";
-NSString *BDSKTXTVersionKey = @"txtvers";
-
-NSString *BDSKSharedArchivedDataKey = @"publications_v1";
-
-// This is used to determine if a service listed in the browser is from the local host and for display
-static NSString *computerName = nil;
-
-/* Much of this was borrowed from Apple's sample code and modified to fit our needs
-    file://localhost/Developer/Examples/Foundation/PictureSharing/
-    file://localhost/Developer/Examples/Foundation/PictureSharingBrowser/
-*/
-
-static SCDynamicStoreRef dynamicStore = NULL;
-static const void *retainCallBack(const void *info) { return [(id)info retain]; }
-static void releaseCallBack(const void *info) { [(id)info release]; }
-static CFStringRef copyDescriptionCallBack(const void *info) { return (CFStringRef)[[(id)info description] copy]; }
-// convert this to an NSNotification
-static void SCDynamicStoreChanged(SCDynamicStoreRef store, CFArrayRef changedKeys, void *info)
-{
-    // clear this here, since the other handlers may depend on it
-    [computerName release];
-    computerName = nil;
-        
-    [[NSNotificationCenter defaultCenter] postNotificationName:BDSKComputerNameChangedNotification object:nil];
-    
-    // update the text field in prefs if necessary (or that could listen for computer name changes...)
-    if([NSString isEmptyString:[[OFPreferenceWrapper sharedPreferenceWrapper] objectForKey:BDSKSharingNameKey]])
-        [[NSNotificationCenter defaultCenter] postNotificationName:BDSKSharingNameChangedNotification object:nil];
-}
-
-NSString *BDSKComputerName() {
-    if(computerName == nil){
-        computerName = (NSString *)SCDynamicStoreCopyComputerName(dynamicStore, NULL);
-        if(computerName == nil){
-            NSLog(@"Unable to get computer name with SCDynamicStoreCopyComputerName");
-            computerName = [[[[[NSProcessInfo processInfo] hostName] componentsSeparatedByString:@"."] firstObject] copy];
-        }
-    }
-    return computerName;
-}
-
-
 @implementation BDSKSharingBrowser
 
 static BDSKSharingBrowser *sharedBrowser = nil;
-
-+ (void)didLoad;
-{
-    /* Ensure that computer name changes are propagated as future clients connect to a document.  Also, note that the OS will change the computer name to avoid conflicts by appending "(2)" or similar to the previous name, which is likely the most common scenario.
-    */
-    if(dynamicStore == NULL){
-        CFAllocatorRef alloc = CFAllocatorGetDefault();
-        SCDynamicStoreContext SCNSObjectContext = {
-            0,                         // version
-            (id)nil,                   // any NSCF type
-            &retainCallBack,
-            &releaseCallBack,
-            &copyDescriptionCallBack
-        };
-        dynamicStore = SCDynamicStoreCreate(alloc, (CFStringRef)[[NSBundle mainBundle] objectForInfoDictionaryKey:(NSString *)kCFBundleIdentifierKey], &SCDynamicStoreChanged, &SCNSObjectContext);
-        CFRunLoopSourceRef rlSource = SCDynamicStoreCreateRunLoopSource(alloc, dynamicStore, 0);
-        CFRunLoopAddSource(CFRunLoopGetCurrent(), rlSource, kCFRunLoopCommonModes);
-        CFRelease(rlSource);
-        CFStringRef key = SCDynamicStoreKeyCreateComputerName(alloc);
-        CFArrayRef keys = CFArrayCreate(alloc, (const void **)&key, 1, &kCFTypeArrayCallBacks);
-        CFRelease(key);
-        
-        if(SCDynamicStoreSetNotificationKeys(dynamicStore, keys, NULL) == FALSE)
-            fprintf(stderr, "%s: unable to register for dynamic store notifications.\n", __PRETTY_FUNCTION__);
-        CFRelease(keys);
-    }
-    
-}
 
 + (id)sharedBrowser{
     if(sharedBrowser == nil)
@@ -146,54 +65,15 @@ static BDSKSharingBrowser *sharedBrowser = nil;
     return self;
 }
 
+- (void)dealloc{
+    [sharedGroups release];
+    [browser release];
+    [unresolvedNetServices release];
+    [super dealloc];
+}
+
 - (NSArray *)sharedGroups{
     return sharedGroups;
-}
-
-#pragma mark Convenience methods
-
-// convenience method for keychain
-- (NSData *)sharingPasswordForCurrentUserUnhashed;
-{
-    // find pw from keychain
-    OSStatus err;
-    
-    void *passwordData = NULL;
-    UInt32 passwordLength = 0;
-    NSData *data = nil;
-    
-    const char *serviceName = [BDSKServiceNameForKeychain UTF8String];
-    const char *userName = [NSUserName() UTF8String];
-    
-    err = SecKeychainFindGenericPassword(NULL, strlen(serviceName), serviceName, strlen(userName), userName, &passwordLength, &passwordData, NULL);
-    data = [NSData dataWithBytes:passwordData length:passwordLength];
-    SecKeychainItemFreeContent(NULL, passwordData);
-
-    return data;
-}
-
-- (NSString *)uniqueIdentifier;
-{
-    // use to identify services sent from this machine
-    static NSString *uniqueIdentifier = nil;
-    if(uniqueIdentifier == nil){
-        /* http://developer.apple.com/qa/qa2001/qa1306.html indicates that ASCII 1 is used to separate old style TXT records, so creating a TXT dictionary with a globallyUniqueString directly is almost guaranteed to fail since they contain alphanumeric characters and underscores; therefore, we'll replace it with something that doesn't seem to appear in globallyUniqueString objects.  An alternative might be to use address comparison, but the docs indicate that the stable identifier for a service is its name, since port number, IP address, and host name can be ephemeral.  Unfortunately, we can't use the service name to determine if a service should be ignored, since we want to ignore all shares from a particular process, not just a given document.
-        */
-        NSMutableString *pInfo = [[[NSProcessInfo processInfo] globallyUniqueString] mutableCopy];
-        [pInfo replaceOccurrencesOfString:@"1" withString:@"~" options:0 range:NSMakeRange(0, [pInfo length])];
-        uniqueIdentifier = [pInfo copy];
-        [pInfo release];
-    }
-    return uniqueIdentifier;
-}
-
-// base name for sharing (also used for storing remote host names in keychain)
-- (NSString *)sharingName;
-{
-    NSString *sharingName = [[OFPreferenceWrapper sharedPreferenceWrapper] objectForKey:BDSKSharingNameKey];
-    if([NSString isEmptyString:sharingName])
-        sharingName = BDSKComputerName();
-    return sharingName;
 }
 
 #pragma mark Reading other data
@@ -209,12 +89,12 @@ static BDSKSharingBrowser *sharedBrowser = nil;
     // In general, we want to ignore our own shared services, as the write/read occur on the same run loop, and our file handle blocks; hence, we listen here for the resolve and then check the TXT record to see where the service came from.
 
     // Ignore our own services; quit/relaunch opening the same doc  can give us a stale service (from the previous run).  Since SystemConfiguration guarantees that we have a unique computer name, this should be safe.
-    if([[[[NSDocumentController sharedDocumentController] documents] valueForKeyPath:@"@distinctUnionOfObjects.netServiceName"] containsObject:[aNetService name]] == NO){
+    if([[BDSKSharingServer sharingName] isEqual:[aNetService name]] == NO){
 
         // WARNING:  enabling sharing with self can lead to hangs if you use a large file; launching a separate BibDesk process should work around that
         
         // see if service is from this machine (case 1) or we are testing with a single machine (case 2)
-        if([NSString isEmptyString:serviceIdentifier] == NO && [serviceIdentifier isEqualToString:[self uniqueIdentifier]] == NO){
+        if([NSString isEmptyString:serviceIdentifier] == NO && [serviceIdentifier isEqualToString:[BDSKSharingBrowser uniqueIdentifier]] == NO){
             
             // we don't want it to message us again
             [aNetService setDelegate:nil];
@@ -277,6 +157,21 @@ static BDSKSharingBrowser *sharedBrowser = nil;
     browser = nil;
     
     [[NSNotificationCenter defaultCenter] postNotificationName:BDSKSharedGroupsChangedNotification object:self];
+}
+
++ (NSString *)uniqueIdentifier;
+{
+    // use to identify services sent from this machine
+    static NSString *uniqueIdentifier = nil;
+    if(uniqueIdentifier == nil){
+        /* http://developer.apple.com/qa/qa2001/qa1306.html indicates that ASCII 1 is used to separate old style TXT records, so creating a TXT dictionary with a globallyUniqueString directly is almost guaranteed to fail since they contain alphanumeric characters and underscores; therefore, we'll replace it with something that doesn't seem to appear in globallyUniqueString objects.  An alternative might be to use address comparison, but the docs indicate that the stable identifier for a service is its name, since port number, IP address, and host name can be ephemeral.  Unfortunately, we can't use the service name to determine if a service should be ignored, since we want to ignore all shares from a particular process, not just a given document.
+        */
+        NSMutableString *pInfo = [[[NSProcessInfo processInfo] globallyUniqueString] mutableCopy];
+        [pInfo replaceOccurrencesOfString:@"1" withString:@"~" options:0 range:NSMakeRange(0, [pInfo length])];
+        uniqueIdentifier = [pInfo copy];
+        [pInfo release];
+    }
+    return uniqueIdentifier;
 }
 
 @end
