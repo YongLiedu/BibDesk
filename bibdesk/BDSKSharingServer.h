@@ -51,6 +51,8 @@ extern NSString *BDSKSharedArchivedDataKey;
     NSFileHandle *listeningSocket;
 }
 
++ (NSString *)sharingServiceName;
+
 + (id)defaultServer;
 + (NSString *)sharingName;
 + (NSNumber *)numberOfConnections;

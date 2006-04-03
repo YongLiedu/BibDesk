@@ -131,6 +131,15 @@ NSString *BDSKComputerName() {
     return sharingName;
 }
 
+#warning change for release
+// this is for testing purposes, so we can run several apps on the same computer
++ (NSString *)sharingServiceName;
+{
+    static int r = 0;
+    while (r == 0) r = rand() % 100;
+    return [NSString stringWithFormat:@"%@%i", [self sharingName], r];
+}
+
 + (id)defaultServer;
 {
     if(sharedInstance == nil && (floor(NSAppKitVersionNumber) > NSAppKitVersionNumber10_3))
@@ -213,7 +222,7 @@ NSString *BDSKComputerName() {
     
     if(!netService) {
         // lazily instantiate the NSNetService object that will advertise on our behalf
-        netService = [[NSNetService alloc] initWithDomain:@"" type:BDSKNetServiceDomain name:[BDSKSharingServer sharingName] port:chosenPort];
+        netService = [[NSNetService alloc] initWithDomain:@"" type:BDSKNetServiceDomain name:[BDSKSharingServer sharingServiceName] port:chosenPort];
         [netService setDelegate:self];
         NSMutableDictionary *dictionary = [NSMutableDictionary dictionaryWithCapacity:4];
         [dictionary setObject:[BDSKSharingBrowser uniqueIdentifier] forKey:BDSKTXTUniqueIdentifierKey];
