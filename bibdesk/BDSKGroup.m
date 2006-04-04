@@ -479,6 +479,8 @@ static NSString *BDSKAllPublicationsLocalizedString = nil;
     BOOL match = [requiredPassword isEqual:pwData];
     if(match == NO){
         BDSKPasswordController *pwController = [[BDSKPasswordController alloc] init];
+        [pwController window];
+        [pwController setStatus:[NSString stringWithFormat:NSLocalizedString(@"Password for %@", @""), [aNetService name]]];
         int rv;
         do {
             rv = [pwController runModalForName:serverName];
