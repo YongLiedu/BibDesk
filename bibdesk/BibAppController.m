@@ -236,11 +236,6 @@
 		}
 		[ratingFields release];
         
-        if(floor(NSAppKitVersionNumber) > NSAppKitVersionNumber10_3 &&
-           [[OFPreferenceWrapper sharedPreferenceWrapper] boolForKey:BDSKShouldLookForSharedFilesKey]){
-            [[BDSKSharingBrowser sharedBrowser] enableSharedBrowsing];
-        }
-        
         // @@ NSDocumentController autosave is 10.4 only
 		if([self respondsToSelector:@selector(setAutosavingDelay:)] && [[OFPreferenceWrapper sharedPreferenceWrapper] boolForKey:BDSKShouldAutosaveDocumentKey])
 		    [self setAutosavingDelay:[[OFPreferenceWrapper sharedPreferenceWrapper] integerForKey:BDSKAutosaveTimeIntervalKey]];
@@ -404,13 +399,6 @@
 	
 	if([[OFPreferenceWrapper sharedPreferenceWrapper] boolForKey:BDSKShowingPreviewKey])
 		[[BDSKPreviewer sharedPreviewer] showPreviewPanel:self];
-    
-    // array of BDSKSharedGroup objects and zeroconf support; 10.4 only for now
-    // this is in -awakeFromNib instead of -init since we need the document's fileName set up
-    if(floor(NSAppKitVersionNumber) > NSAppKitVersionNumber10_3){
-        if([[OFPreferenceWrapper sharedPreferenceWrapper] boolForKey:BDSKShouldShareFilesKey])
-            [[BDSKSharingServer defaultServer] enableSharing];
-    }
     
 }
 

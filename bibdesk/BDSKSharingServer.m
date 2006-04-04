@@ -188,6 +188,11 @@ NSString *BDSKComputerName() {
 
 - (void)enableSharing
 {
+    if(netService && listeningSocket){
+        // we're already sharing
+        return;
+    }
+    
     uint16_t chosenPort = 0;
     
     // Here, create the socket from traditional BSD socket calls, and then set up an NSFileHandle with that to listen for incoming connections.

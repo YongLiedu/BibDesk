@@ -312,10 +312,14 @@ NSString *BDSKWeblocFilePboardType = @"CorePasteboardFlavorType 0x75726C20";
         [documentWindow setAutorecalculatesKeyViewLoop:YES];
     
     // array of BDSKSharedGroup objects and zeroconf support; 10.4 only for now
+    // doesn't do anything when already enabled
+    // we don't do this in appcontroller as we want our data to be loaded
     sharedGroups = nil;
     if(floor(NSAppKitVersionNumber) > NSAppKitVersionNumber10_3){
         if([[OFPreferenceWrapper sharedPreferenceWrapper] boolForKey:BDSKShouldLookForSharedFilesKey])
-            [self handleSharedGroupsChangedNotification:nil];
+            [[BDSKSharingBrowser sharedBrowser] enableSharedBrowsing];
+        if([[OFPreferenceWrapper sharedPreferenceWrapper] boolForKey:BDSKShouldShareFilesKey])
+            [[BDSKSharingServer defaultServer] enableSharing];
     }    
     
     // @@ awakeFromNib is called long after the document's data is loaded, so the UI update from setPublications is too early when loading a new document; there may be a better way to do this

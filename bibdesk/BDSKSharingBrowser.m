@@ -138,25 +138,26 @@ static BDSKSharingBrowser *sharedBrowser = nil;
 
 - (void)enableSharedBrowsing;
 {
-    // lazily create the shared resources
-    NSAssert(sharedGroups == nil, @"It is an error to enable browsing twice");
-    
-    sharedGroups = [[NSMutableArray alloc] initWithCapacity:5];
-    browser = [[NSNetServiceBrowser alloc] init];
-    [browser setDelegate:self];
-    [browser searchForServicesOfType:BDSKNetServiceDomain inDomain:@""];    
-    
-    [[NSNotificationCenter defaultCenter] postNotificationName:BDSKSharedGroupsChangedNotification object:self];
+    if(sharedGroups == nil){
+        sharedGroups = [[NSMutableArray alloc] initWithCapacity:5];
+        browser = [[NSNetServiceBrowser alloc] init];
+        [browser setDelegate:self];
+        [browser searchForServicesOfType:BDSKNetServiceDomain inDomain:@""];    
+        
+        [[NSNotificationCenter defaultCenter] postNotificationName:BDSKSharedGroupsChangedNotification object:self];
+    }
 }
 
 - (void)disableSharedBrowsing;
 {
-    [sharedGroups release];
-    sharedGroups = nil;
-    [browser release];
-    browser = nil;
-    
-    [[NSNotificationCenter defaultCenter] postNotificationName:BDSKSharedGroupsChangedNotification object:self];
+    if(sharedGroups != nil){
+        [sharedGroups release];
+        sharedGroups = nil;
+        [browser release];
+        browser = nil;
+        
+        [[NSNotificationCenter defaultCenter] postNotificationName:BDSKSharedGroupsChangedNotification object:self];
+    }
 }
 
 - (void)restartSharedBrowsingIfNeeded;
