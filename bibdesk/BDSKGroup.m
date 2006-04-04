@@ -453,47 +453,6 @@ static NSString *BDSKAllPublicationsLocalizedString = nil;
     return [NSString stringWithFormat:@"<%@ %p>: {\n\tdownload complete: %@\n\tdata length: %d\n\tname: %@\nservice: %@\n }", [self class], self, (downloadComplete ? @"yes" : @"no"), [data length], [self name], service];
 }
 
-- (NSData *)passwordForResolvedService:(NSNetService *)aNetService;
-{
-    // get the service name, use to get pw from keychain
-    // hash it, then convert to TXT form
-    // re-get pw from TXT dict
-    OSStatus err;
-    
-    // we use the computer name instead of a particular service name, since the same computer vends multiple services (all with the same password)
-    NSData *TXTData = [aNetService TXTRecordData];
-    NSAssert1(TXTData != nil, @"invalid NSNetService instance %@ does not contain a TXT record", aNetService);
-    NSDictionary *dictionary = [NSNetService dictionaryFromTXTRecordData:TXTData];
-    
-    // @@ don't bother with password lookup if the comparison isn't necessary
-    if([dictionary objectForKey:BDSKTXTPasswordKey] == nil)
-        return nil;
-    
-    TXTData = [dictionary objectForKey:BDSKTXTComputerNameKey];
-    
-    const char *serverName = [TXTData bytes];
-    void *password = NULL;
-    UInt32 passwordLength = 0;
-    NSData *pwData = nil;
-    
-    err = SecKeychainFindGenericPassword(NULL, [TXTData length], serverName, 0, NULL, &passwordLength, &password, NULL);
-    if(err == noErr){
-        pwData = [NSData dataWithBytes:password length:passwordLength];
-        SecKeychainItemFreeContent(NULL, password);
-        
-        // hash it for comparison, since we hash before putting it in the TXT
-        pwData = [pwData sha1Signature];
-        
-        // now transform it to a TXT dictionary and back again, in case it does something weird with the pw
-        // this is not very nice...
-        NSDictionary *dict = [NSDictionary dictionaryWithObject:pwData forKey:@"key"];
-        pwData = [NSNetService dataFromTXTRecordDictionary:dict];
-        dict = [NSNetService dictionaryFromTXTRecordData:pwData];
-        pwData = [dict objectForKey:@"key"];
-    }
-    return pwData == nil ? [NSData data] : pwData;
-}
-
 - (BOOL)didAuthenticateToResolvedService:(NSNetService *)aNetService;
 {
     // get the password from the remote service
@@ -501,16 +460,30 @@ static NSString *BDSKAllPublicationsLocalizedString = nil;
     NSDictionary *dictionary = TXTData ? [NSNetService dictionaryFromTXTRecordData:TXTData] : nil;
     NSData *requiredPassword = [dictionary objectForKey:BDSKTXTPasswordKey];
     
+    // @@ don't bother with password lookup if the comparison isn't necessary
+    if(requiredPassword == nil)
+        return YES;
+    
+    // we use the computer name instead of a particular service name, since the same computer vends multiple services (all with the same password)
+    NSAssert1(TXTData != nil, @"invalid NSNetService instance %@ does not contain a TXT record", aNetService);
+    
+    TXTData = [dictionary objectForKey:BDSKTXTComputerNameKey];
+    NSAssert([TXTData length], @"no computer name in TXT record");
+    
+    // append our service name to the server name for remote services
+    NSString *serverName = [NSString stringWithData:TXTData encoding:NSUTF8StringEncoding];
+    serverName = [serverName stringByAppendingFormat:@" - %@", BDSKServiceNameForKeychain];
+    
     // get pw from keychain or prompt for pw, then store in keychain
-    NSData *pwData = [self passwordForResolvedService:aNetService];
+    NSData *pwData = [BDSKPasswordController passwordForName:serverName];
     BOOL match = [requiredPassword isEqual:pwData];
-    if(requiredPassword != nil && match == NO){
+    if(match == NO){
         BDSKPasswordController *pwController = [[BDSKPasswordController alloc] init];
         int rv;
         do {
-            rv = [pwController runModalForService:aNetService];
+            rv = [pwController runModalForName:serverName];
             // re-fetch from the keychain
-            pwData = [self passwordForResolvedService:aNetService];
+            pwData = [BDSKPasswordController passwordForName:serverName];
             match = [requiredPassword isEqual:pwData];
             if(match == NO)
                 [pwController setStatus:NSLocalizedString(@"Incorrect Password", @"")];
@@ -520,7 +493,7 @@ static NSString *BDSKAllPublicationsLocalizedString = nil;
         [pwController release];
     }
     
-    return requiredPassword == nil || match ? YES : NO;
+    return match;
 }
 
 - (NSArray *)publications

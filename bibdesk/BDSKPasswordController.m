@@ -54,23 +54,23 @@ NSString *BDSKServiceNameForKeychain = @"BibDesk Sharing";
 
 - (void)dealloc
 {
-    [self setService:nil];
+    [self setName:nil];
     [super dealloc];
 }
 
-- (void)setService:(id)aService;
+- (void)setName:(NSString *)aName;
 {
-    if(service != aService){
-        [service release];
-        service = [aService retain];
+    if(name != aName){
+        [name release];
+        name = [aName retain];
     }
 }
 
-- (int)runModalForService:(id)aService;
+- (int)runModalForName:(NSString *)aName;
 {
-    [self setService:aService];    
-    [NSApp runModalForWindow:[self window]];    
-    [self setService:nil];
+    [self setName:aName];    
+    int returnValue = [NSApp runModalForWindow:[self window]];    
+    [self setName:nil];
     
     return returnValue;
 }
@@ -81,37 +81,17 @@ NSString *BDSKServiceNameForKeychain = @"BibDesk Sharing";
 
 - (IBAction)changePassword:(id)sender
 {
-    NSAssert(service != nil, @"net service is nil");
-    NSAssert([service name] != nil, @"tried to set password for unresolved service");
-        
-    NSData *TXTData = [service TXTRecordData];
-    NSDictionary *dictionary = nil;
-    if(TXTData)
-        dictionary = [NSNetService dictionaryFromTXTRecordData:TXTData];
-    TXTData = [dictionary objectForKey:BDSKTXTComputerNameKey];
-    NSAssert([TXTData length], @"no computer name in TXT record");
+    NSAssert(name != nil, @"name is nil");
     
     NSString *password = [passwordField stringValue];
     NSParameterAssert(password != nil);
     
-    // append our service name to the server name for remote services
-    NSString *serverName = [NSString stringWithData:TXTData encoding:NSUTF8StringEncoding];
-    serverName = [serverName stringByAppendingFormat:@" - %@", BDSKServiceNameForKeychain];
-    
-    [BDSKPasswordController addOrModifyPassword:password serverName:serverName userName:nil];
+    [BDSKPasswordController addOrModifyPassword:password name:name userName:nil];
 }
 
 - (IBAction)buttonAction:(id)sender
 {    
-    int tag = [sender tag];
-    if(tag == 0)
-        returnValue = 1;
-
-    if(tag == 1)
-        returnValue = 0;
-    
-    // this is the only way out of the modal session
-    [NSApp stopModal];
+    [NSApp stopModalWithCode:[sender tag]];
 }
 
 // convenience method for keychain
@@ -134,13 +114,13 @@ NSString *BDSKServiceNameForKeychain = @"BibDesk Sharing";
     return data;
 }
 
-+ (void)addOrModifyPassword:(NSString *)password serverName:(NSString *)serverName userName:(NSString *)userName;
++ (void)addOrModifyPassword:(NSString *)password name:(NSString *)name userName:(NSString *)userName;
 {
     // default is to use current user's username
     const char *userNameCString = userName == nil ? [NSUserName() UTF8String] : [userName UTF8String];
     
-    NSParameterAssert(serverName != nil);
-    const char *serverNameCString = [serverName UTF8String];
+    NSParameterAssert(name != nil);
+    const char *nameCString = [name UTF8String];
     
     OSStatus err;
     SecKeychainItemRef itemRef = NULL;    
@@ -148,7 +128,7 @@ NSString *BDSKServiceNameForKeychain = @"BibDesk Sharing";
     UInt32 passwordLength = 0;
     
     // first see if the password exists in the keychain
-    err = SecKeychainFindGenericPassword(NULL, strlen(serverNameCString), serverNameCString, strlen(userNameCString), userNameCString, &passwordLength, (void **)&passwordData, &itemRef);
+    err = SecKeychainFindGenericPassword(NULL, strlen(nameCString), nameCString, strlen(userNameCString), userNameCString, &passwordLength, (void **)&passwordData, &itemRef);
     
     if(err == noErr){
         // password was on keychain, so flush the buffer and then modify the keychain
@@ -158,16 +138,46 @@ NSString *BDSKServiceNameForKeychain = @"BibDesk Sharing";
         passwordData = [password UTF8String];
         SecKeychainAttribute attrs[] = {
         { kSecAccountItemAttr, strlen(userNameCString), (char *)userNameCString },
-        { kSecServiceItemAttr, strlen(serverNameCString), (char *)serverNameCString } };
+        { kSecServiceItemAttr, strlen(nameCString), (char *)nameCString } };
         const SecKeychainAttributeList attributes = { sizeof(attrs) / sizeof(attrs[0]), attrs };
         
         err = SecKeychainItemModifyAttributesAndData(itemRef, &attributes, strlen(passwordData), passwordData);
     } else if(err == errSecItemNotFound){
         // password not on keychain, so add it
         passwordData = [password UTF8String];
-        err = SecKeychainAddGenericPassword(NULL, strlen(serverNameCString), serverNameCString, strlen(userNameCString), userNameCString, strlen(passwordData), passwordData, &itemRef);    
+        err = SecKeychainAddGenericPassword(NULL, strlen(nameCString), nameCString, strlen(userNameCString), userNameCString, strlen(passwordData), passwordData, &itemRef);    
     } else 
         NSLog(@"Error %d occurred setting password", err);
+}
+
++ (NSData *)passwordForName:(NSString *)name;
+{
+    // get the service name, use to get pw from keychain
+    // hash it, then convert to TXT form
+    // re-get pw from TXT dict
+    OSStatus err;
+    
+    const char *nameCString = [name UTF8String];
+    void *password = NULL;
+    UInt32 passwordLength = 0;
+    NSData *pwData = nil;
+    
+    err = SecKeychainFindGenericPassword(NULL, strlen(nameCString), nameCString, 0, NULL, &passwordLength, &password, NULL);
+    if(err == noErr){
+        pwData = [NSData dataWithBytes:password length:passwordLength];
+        SecKeychainItemFreeContent(NULL, password);
+        
+        // hash it for comparison, since we hash before putting it in the TXT
+        pwData = [pwData sha1Signature];
+        
+        // now transform it to a TXT dictionary and back again, in case it does something weird with the pw
+        // this is not very nice...
+        NSDictionary *dict = [NSDictionary dictionaryWithObject:pwData forKey:@"key"];
+        pwData = [NSNetService dataFromTXTRecordDictionary:dict];
+        dict = [NSNetService dictionaryFromTXTRecordData:pwData];
+        pwData = [dict objectForKey:@"key"];
+    }
+    return pwData;
 }
 
 @end

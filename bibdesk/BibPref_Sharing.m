@@ -116,7 +116,7 @@
 
 - (IBAction)changePassword:(id)sender
 {
-    [BDSKPasswordController addOrModifyPassword:[sender stringValue] serverName:BDSKServiceNameForKeychain userName:nil];
+    [BDSKPasswordController addOrModifyPassword:[sender stringValue] name:BDSKServiceNameForKeychain userName:nil];
     [[NSNotificationCenter defaultCenter] postNotificationName:BDSKSharingPasswordChangedNotification object:nil];
 }
 

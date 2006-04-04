@@ -43,18 +43,18 @@ extern NSString *BDSKServiceNameForKeychain;
 
 @interface BDSKPasswordController : NSWindowController
 {
-    id service;
-    int returnValue;
+    NSString *name;
     IBOutlet NSSecureTextField *passwordField;
     IBOutlet NSTextField *statusField;
 }
-- (void)setService:(id)aService;
+- (void)setName:(NSString *)aName;
 - (void)setStatus:(NSString *)status;
-- (int)runModalForService:(id)aService;
+- (int)runModalForName:(NSString *)aName;
 - (IBAction)changePassword:(id)sender;
 - (IBAction)buttonAction:(id)sender;
 
 + (NSData *)sharingPasswordForCurrentUserUnhashed;
-+ (void)addOrModifyPassword:(NSString *)password serverName:(NSString *)serverName userName:(NSString *)userName;
++ (void)addOrModifyPassword:(NSString *)password name:(NSString *)name userName:(NSString *)userName;
++ (NSData *)passwordForName:(NSString *)name;
 
 @end
