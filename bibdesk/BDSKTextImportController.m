@@ -1458,7 +1458,9 @@
         fieldNameCharSet = [[[[BibTypeManager sharedManager] strictInvalidCharactersForField:BDSKCiteKeyString inFileType:BDSKBibtexString] invertedSet] copy];
     
     if ([[self dataSource] isInTemporaryTypeAheadMode]) {
-        if (flags != 0) {
+        if (c == NSDownArrowFunctionKey || c == NSUpArrowFunctionKey) {
+            // we allow navigation in the table using arrow keys
+        } else if (flags != 0) {
             NSBeep();
             return;
         } else if (c == NSTabCharacter || c == 0x001b) {
@@ -1467,7 +1469,7 @@
         } else if (c == NSCarriageReturnCharacter || c == NSEnterCharacter || c == NSNewlineCharacter) {
             [[self dataSource] endTemporaryTypeAheadModeAndSet:YES];
             return;
-        } else if ([fieldNameCharSet characterIsMember:c] == NO && c != NSDownArrowFunctionKey && c != NSUpArrowFunctionKey) {
+        } else if ([fieldNameCharSet characterIsMember:c] == NO) {
             NSBeep();
             return;
         }
