@@ -294,8 +294,31 @@
 	}
 	[panel setTitle: title];
 	
+    // see if we should resize the message text
+    NSRect frame = [panel frame];
+    NSRect infoRect = [informationField frame];
+    
+    NSTextStorage *textStorage = [[[NSTextStorage alloc] initWithAttributedString:[informationField attributedStringValue]] autorelease];
+    NSTextContainer *textContainer = [[[NSTextContainer alloc] initWithContainerSize:NSMakeSize(NSWidth(infoRect), 100.0)] autorelease];
+    NSLayoutManager *layoutManager = [[[NSLayoutManager alloc] init] autorelease];
+    
+    [layoutManager addTextContainer:textContainer];
+    [textStorage addLayoutManager:layoutManager];
+    [layoutManager glyphRangeForTextContainer:textContainer];
+    
+    int numLines = ceilf(NSHeight([layoutManager usedRectForTextContainer:textContainer]) / 13.0);
+
+    if (numLines > 3) {
+        // I don't know why it uses a different lineheight from the layoutManager...
+        float extraHeight = numLines * 14.0 - NSHeight(infoRect);
+        frame.size.height += extraHeight;
+        infoRect.size.height += extraHeight;
+        infoRect.origin.y -= extraHeight;
+        [informationField setFrame:infoRect];
+		[panel setFrame:frame display:NO];
+    }
+    
 	if (hasCheckButton == NO) {
-		NSRect frame = [panel frame];
 		frame.size.height -= 22.0;
 		[checkButton removeFromSuperview];
 		[panel setFrame:frame display:NO];
