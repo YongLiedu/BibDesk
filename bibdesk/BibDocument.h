@@ -432,16 +432,6 @@ extern NSString* BDSKWeblocFilePboardType; // core pasteboard type for webloc fi
 */
 - (IBAction)editPubCmd:(id)sender;
 
-
-/*!
-    @method multipleEditSheetDidEnd:retrunCode:contextInfo:
-	@abstract evaluates answer to the sheet whether we want to open many editor windows 
-	@discussion only opens the windows when NSAlertAlternateReturn is passed, we also call this for cases with few open windows to do the opening
-	@param sheet (not used), returnCode (used to evaluate answer), contextInfo (not used)
-*/
--(void) multipleEditSheetDidEnd:(NSWindow *)sheet returnCode:(int)returnCode contextInfo:(void *)contextInfo;
-
-
 /*!
     @method editPub
  @abstract Opens the edit window
@@ -483,14 +473,6 @@ extern NSString* BDSKWeblocFilePboardType; // core pasteboard type for webloc fi
 - (IBAction)openLinkedFile:(id)sender;
 
 /*!
-    @method multipleOpenFileSheetDidEnd:retrunCode:contextInfo:
-	@abstract evaluates answer to the sheet whether we want to open many linked files
-	@discussion only opens the linked files when NSAlertAlternateReturn is passed, we also call this for cases with few linked files to do the opening
-	@param sheet (not used), returnCode (used to evaluate answer), contextInfo (not used)
-*/
--(void) multipleOpenFileSheetDidEnd:(NSWindow *)sheet returnCode:(int)returnCode contextInfo:(void *)contextInfo;
-
-/*!
     @method revealLinkedFile:
     @abstract Reveals the linked file of the selected publication in the Finder
     @discussion 
@@ -499,28 +481,12 @@ extern NSString* BDSKWeblocFilePboardType; // core pasteboard type for webloc fi
 - (IBAction)revealLinkedFile:(id)sender;
 
 /*!
-    @method multipleRevealFileSheetDidEnd:retrunCode:contextInfo:
-	@abstract evaluates answer to the sheet whether we want to reveal many linked files
-	@discussion only reveals the linked files when NSAlertAlternateReturn is passed, we also call this for cases with few linked files to do the revealing
-	@param sheet (not used), returnCode (used to evaluate answer), contextInfo (not used)
-*/
--(void) multipleRevealFileSheetDidEnd:(NSWindow *)sheet returnCode:(int)returnCode contextInfo:(void *)contextInfo;
-
-/*!
     @method openRemoteURL:
     @abstract Opens the remote URL of the selected publication in the default browser
     @discussion - 
     @param sender The sender. Not used.
 */
 - (IBAction)openRemoteURL:(id)sender;
-
-/*!
-    @method multipleOpenURLSheetDidEnd:retrunCode:contextInfo:
-	@abstract evaluates answer to the sheet whether we want to open many remote URLs
-	@discussion only opens the URLs when NSAlertAlternateReturn is passed, we also call this for cases with few linked files to do the opening
-	@param sheet (not used), returnCode (used to evaluate answer), contextInfo (not used)
-*/
--(void) multipleOpenURLSheetDidEnd:(NSWindow *)sheet returnCode:(int)returnCode contextInfo:(void *)contextInfo;
 
 /*!
     @method editAction:

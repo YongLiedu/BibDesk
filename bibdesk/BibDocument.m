@@ -1412,39 +1412,34 @@ NSString *BDSKWeblocFilePboardType = @"CorePasteboardFlavorType 0x75726C20";
 		colID = [[[tableView tableColumns] objectAtIndex:[tableView clickedColumn]] identifier];
     }
     if([[BibTypeManager sharedManager] isLocalURLField:colID]){
-		[self multipleOpenFileSheetDidEnd:nil returnCode:NSAlertAlternateReturn contextInfo:[colID retain]];
+		[self openLinkedFile:colID];
     }else if([[BibTypeManager sharedManager] isRemoteURLField:colID]){
-		[self multipleOpenURLSheetDidEnd:nil returnCode:NSAlertAlternateReturn contextInfo:[colID retain]];
+		[self openRemoteURL:colID];
     }else{
 		int n = [self numberOfSelectedPubs];
+        int rv = NSAlertAlternateReturn;
 		if (n > 6) {
-			// Do we really want a gazillion of editor windows?
-			NSBeginAlertSheet(NSLocalizedString(@"Edit publications", @"Edit publications (multiple open warning)"), 
-							  NSLocalizedString(@"No", @"Cancel"), 
-							  NSLocalizedString(@"Yes", @"multiple open warning Open button"), 
-							  nil, 
-							  documentWindow, self, 
-							  @selector(multipleEditSheetDidEnd:returnCode:contextInfo:), NULL, 
-							  nil, 
-							  NSLocalizedString(@"BibDesk is about to open %i editor windows.  Is this really what you want?" , @"multiple editor open warning question"), n);
-		} else {
-			[self multipleEditSheetDidEnd:nil returnCode:NSAlertAlternateReturn contextInfo:nil];
+            // Do we really want a gazillion of editor windows?
+			BDSKAlert *alert = [BDSKAlert alertWithMessageText:NSLocalizedString(@"Edit publications", @"Edit publications (multiple open warning)")
+												 defaultButton:NSLocalizedString(@"No", @"No")
+											   alternateButton:NSLocalizedString(@"Yes", @"Yes")
+												   otherButton:nil
+									 informativeTextWithFormat:[NSString stringWithFormat:NSLocalizedString(@"BibDesk is about to open %i editor windows.  Is this really what you want?" , @"multiple editor open warning question"), n]];
+			rv = [alert runSheetModalForWindow:documentWindow
+								 modalDelegate:nil
+								didEndSelector:NULL 
+							didDismissSelector:NULL 
+								   contextInfo:NULL];
+		} 
+        if(rv == NSAlertAlternateReturn){
+            NSEnumerator *e = [[self selectedPublications] objectEnumerator];
+            BibItem *pub;
+            while (pub = [e nextObject]) {
+                if ([pub document] == self)
+                    [self editPub:pub];
+            }
 		}
 	}
-}
-
-- (void)multipleEditSheetDidEnd:(NSWindow *)sheet returnCode:(int)returnCode contextInfo:(void *)contextInfo {
-	NSEnumerator *e = [[self selectedPublications] objectEnumerator];
-	BibItem *pub;
-	
-	if (returnCode == NSAlertAlternateReturn ) {
-		// the user said to go ahead
-		while (pub = [e nextObject]) {
-            if ([pub document] == self)
-                [self editPub:pub];
-		}
-	}
-	// otherwise do nothing
 }
 
 //@@ notifications - when adding pub notifications is fully implemented we won't need this.
@@ -1489,122 +1484,119 @@ NSString *BDSKWeblocFilePboardType = @"CorePasteboardFlavorType 0x75726C20";
 
 - (IBAction)openLinkedFile:(id)sender{
 	int n = [self numberOfSelectedPubs];
-	NSString *field = [sender representedObject];
+	NSString *field;
+    if ([field isKindOfClass:[NSString class]])
+        field = sender;
+    else 
+        field = [sender representedObject];
     if (field == nil)
 		field = BDSKLocalUrlString;
-	if (n > 6) {
-		// Do we really want a gazillion of files to open?
-		NSBeginAlertSheet(NSLocalizedString(@"Open Linked Files", @"Open Linked Files (multiple open warning)"), 
-						  NSLocalizedString(@"No", @"No"), 
-						  NSLocalizedString(@"Open", @"multiple open warning Open button"), 
-						  nil, 
-						  documentWindow, self, 
-						  @selector(multipleOpenFileSheetDidEnd:returnCode:contextInfo:), NULL, 
-						  [field retain], 
-						  NSLocalizedString(@"BibDesk is about to open %i linked files. Do you want to proceed?" , @"mulitple open linked files question"), n);
-	} else {
-		[self multipleOpenFileSheetDidEnd:nil returnCode:NSAlertAlternateReturn contextInfo:[field retain]];
+    
+    int rv = NSAlertAlternateReturn;
+    if (n > 6) {
+		// Do we really want a gazillion of files open?
+        BDSKAlert *alert = [BDSKAlert alertWithMessageText:NSLocalizedString(@"Open Linked Files", @"Open Linked Files (multiple open warning)")
+                                             defaultButton:NSLocalizedString(@"No", @"No")
+                                           alternateButton:NSLocalizedString(@"Open", @"multiple open warning Open button")
+                                               otherButton:nil
+                                 informativeTextWithFormat:[NSString stringWithFormat:NSLocalizedString(@"BibDesk is about to open %i linked files. Do you want to proceed?" , @"mulitple open linked files question"), n]];
+        rv = [alert runSheetModalForWindow:documentWindow
+                             modalDelegate:nil
+                            didEndSelector:NULL 
+                        didDismissSelector:NULL 
+                               contextInfo:NULL];
 	}
-}
-
--(void)multipleOpenFileSheetDidEnd:(NSWindow *)sheet returnCode:(int)returnCode contextInfo:(void *)contextInfo {
-	NSEnumerator *e = [[self selectedPublications] objectEnumerator];
-	BibItem *pub;
-	NSString *field = (NSString *)contextInfo;
-    
-    NSString *searchString;
-    // See bug #1344720; don't search if this is a known field (Title, Author, etc.).  This feature can be annoying because Preview.app zooms in on the search result in this case, in spite of your zoom settings (bug report filed with Apple).
-    if([quickSearchKey isEqualToString:BDSKKeywordsString] || [quickSearchKey isEqualToString:BDSKAllFieldsString])
-        searchString = [searchField stringValue];
-    else
-        searchString = @"";
-    
-    NSURL *fileURL;
-	
-	if (returnCode == NSAlertAlternateReturn ) {
-		// the user said to go ahead
-		while (pub = [e nextObject]) {
+    if(rv == NSAlertAlternateReturn){
+        NSEnumerator *e = [[self selectedPublications] objectEnumerator];
+        BibItem *pub;
+        NSURL *fileURL;
+        
+        NSString *searchString;
+        // See bug #1344720; don't search if this is a known field (Title, Author, etc.).  This feature can be annoying because Preview.app zooms in on the search result in this case, in spite of your zoom settings (bug report filed with Apple).
+        if([quickSearchKey isEqualToString:BDSKKeywordsString] || [quickSearchKey isEqualToString:BDSKAllFieldsString])
+            searchString = [searchField stringValue];
+        else
+            searchString = @"";
+        
+        // the user said to go ahead
+        while (pub = [e nextObject]) {
             fileURL = [pub URLForField:field];
-			if(fileURL == nil) continue;
+            if(fileURL == nil) continue;
             if(floor(NSAppKitVersionNumber) <= NSAppKitVersionNumber10_3){
                 [[NSWorkspace sharedWorkspace] openURL:fileURL];
             } else {
                 [[NSWorkspace sharedWorkspace] openURL:fileURL withSearchString:searchString];
             }
-		}
+        }
 	}
-	// otherwise do nothing
-	[field release];
 }
 
 - (IBAction)revealLinkedFile:(id)sender{
 	int n = [self numberOfSelectedPubs];
-	NSString *field = [sender representedObject];
+	NSString *field;
+    if ([field isKindOfClass:[NSString class]])
+        field = sender;
+    else 
+        field = [sender representedObject];
     if (field == nil)
 		field = BDSKLocalUrlString;
-	if (n > 6) {
+    
+    int rv = NSAlertAlternateReturn;
+    if (n > 6) {
 		// Do we really want a gazillion of Finder windows?
-		NSBeginAlertSheet(NSLocalizedString(@"Reveal Linked Files", @"Reveal Linked Files (multiple reveal warning)"), 
-						  NSLocalizedString(@"No", @"No"), 
-						  NSLocalizedString(@"Reveal", @"multiple reveal warning Reveal button"), 
-						  nil, 
-						  documentWindow, self, 
-						  @selector(multipleRevealFileSheetDidEnd:returnCode:contextInfo:), NULL, 
-						  [field retain], 
-						  NSLocalizedString(@"BibDesk is about to reveal %i linked files. Do you want to proceed?" , @"mulitple reveal linked files question"), n);
-	} else {
-		[self multipleRevealFileSheetDidEnd:nil returnCode:NSAlertAlternateReturn contextInfo:[field retain]];
+        BDSKAlert *alert = [BDSKAlert alertWithMessageText:NSLocalizedString(@"Reveal Linked Files", @"Reveal Linked Files (multiple reveal warning)")
+                                             defaultButton:NSLocalizedString(@"No", @"No")
+                                           alternateButton:NSLocalizedString(@"Reveal", @"multiple reveal warning Reveal button")
+                                               otherButton:nil
+                                 informativeTextWithFormat:[NSString stringWithFormat:NSLocalizedString(@"BibDesk is about to reveal %i linked files. Do you want to proceed?" , @"mulitple reveal linked files question"), n]];
+        rv = [alert runSheetModalForWindow:documentWindow
+                             modalDelegate:nil
+                            didEndSelector:NULL 
+                        didDismissSelector:NULL 
+                               contextInfo:NULL];
 	}
-}
-
-- (void)multipleRevealFileSheetDidEnd:(NSWindow *)sheet returnCode:(int)returnCode contextInfo:(void *)contextInfo {
-	NSEnumerator *e = [[self selectedPublications] objectEnumerator];
-	BibItem *pub;
-	NSString *field = (NSString *)contextInfo;
-	
-	if (returnCode == NSAlertAlternateReturn ) {
-		// the user said to go ahead
-		while (pub = [e nextObject]) {
-			[[NSWorkspace sharedWorkspace]  selectFile:[pub localFilePathForField:field] inFileViewerRootedAtPath:nil];
-		}
+    if(rv == NSAlertAlternateReturn){
+        NSEnumerator *e = [[self selectedPublications] objectEnumerator];
+        BibItem *pub;
+        
+        while (pub = [e nextObject]) {
+            [[NSWorkspace sharedWorkspace]  selectFile:[pub localFilePathForField:field] inFileViewerRootedAtPath:nil];
+        }
 	}
-	// otherwise do nothing
-	[field release];
 }
 
 - (IBAction)openRemoteURL:(id)sender{
 	int n = [self numberOfSelectedPubs];
-	NSString *field = [sender representedObject];
+	NSString *field;
+    if ([field isKindOfClass:[NSString class]])
+        field = sender;
+    else 
+        field = [sender representedObject];
     if (field == nil)
 		field = BDSKUrlString;
-	if (n > 6) {
-		// Do we really want a gazillion of Finder windows?
-		NSBeginAlertSheet(NSLocalizedString(@"Open Remote URL", @"Open Remote URL (multiple open warning)"), 
-						  NSLocalizedString(@"No", @"No"), 
-						  NSLocalizedString(@"Open", @"multiple open warning Open button"), 
-						  nil, 
-						  documentWindow, self, 
-						  @selector(multipleOpenURLSheetDidEnd:returnCode:contextInfo:), NULL, 
-						  [field retain], 
-						  NSLocalizedString(@"BibDesk is about to open %i URLs. Do you want to proceed?" , @"mulitple open URLs question"), n);
-	} else {
-		[self multipleOpenURLSheetDidEnd:nil returnCode:NSAlertAlternateReturn contextInfo:[field retain]];
+    
+    int rv = NSAlertAlternateReturn;
+    if (n > 6) {
+		// Do we really want a gazillion of browser windows?
+        BDSKAlert *alert = [BDSKAlert alertWithMessageText:NSLocalizedString(@"Open Remote URL", @"Open Remote URL (multiple open warning)")
+                                             defaultButton:NSLocalizedString(@"No", @"No")
+                                           alternateButton:NSLocalizedString(@"Open", @"multiple open warning Open button")
+                                               otherButton:nil
+                                 informativeTextWithFormat:[NSString stringWithFormat:NSLocalizedString(@"BibDesk is about to open %i URLs. Do you want to proceed?" , @"mulitple open URLs question"), n]];
+        rv = [alert runSheetModalForWindow:documentWindow
+                             modalDelegate:nil
+                            didEndSelector:NULL 
+                        didDismissSelector:NULL 
+                               contextInfo:NULL];
 	}
-}
-
-- (void)multipleOpenURLSheetDidEnd:(NSWindow *)sheet returnCode:(int)returnCode contextInfo:(void *)contextInfo {
-	NSEnumerator *e = [[self selectedPublications] objectEnumerator];
-	BibItem *pub;
-	NSString *field = (NSString *)contextInfo;
-	
-	if (returnCode == NSAlertAlternateReturn ) {
-		// the user said to go ahead
+    if(rv == NSAlertAlternateReturn){
+        NSEnumerator *e = [[self selectedPublications] objectEnumerator];
+        BibItem *pub;
+        
 		while (pub = [e nextObject]) {
 			[[NSWorkspace sharedWorkspace] openURL:[pub remoteURLForField:field]];
 		}
 	}
-	// otherwise do nothing
-	[field release];
 }
 
 - (void)editAction:(id)sender {
