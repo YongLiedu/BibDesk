@@ -86,6 +86,13 @@
     [tableView reloadData];
 }
 
+- (NSString *)windowTitleForDocumentDisplayName:(NSString *)displayName{
+    NSString *title = NSLocalizedString(@"Macros", @"title for macros window");
+    if ([NSString isEmptyString:displayName] == NO)
+        title = [NSString stringWithFormat:@"%@ - %@", title, displayName];
+    return title;
+}
+
 - (void)setMacroDataSource:(id)newMacroDataSource{
     if (newMacroDataSource == macroDataSource)
         return;

@@ -3026,8 +3026,6 @@ NSString *BDSKWeblocFilePboardType = @"CorePasteboardFlavorType 0x75726C20";
     isDocumentClosed = YES;
     [[BDSKErrorObjectController sharedErrorObjectController] removeErrorObjsForDocument:self];
     [customCiteDrawer close];
-    [macroWC close];
-    [macroWC setMacroDataSource:nil];
     [self saveSortOrder];
     
     // reset the previewer; don't send [self updatePreviews:] here, as the tableview will be gone by the time the queue posts the notification
@@ -3123,8 +3121,11 @@ NSString *BDSKWeblocFilePboardType = @"CorePasteboardFlavorType 0x75726C20";
 }
 
 - (IBAction)showMacrosWindow:(id)sender{
-    if (!macroWC){
+    if (!macroWC) {
         macroWC = [[MacroWindowController alloc] initWithMacroDataSource:[self macroResolver]];
+    }
+    if ([[self windowControllers] containsObject:macroWC] == NO) {
+        [self addWindowController:macroWC];
     }
     [macroWC showWindow:self];
 }
