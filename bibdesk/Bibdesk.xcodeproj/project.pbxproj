@@ -302,6 +302,8 @@
 		CE518F2709E526E000E97C3A /* BDSKTextViewFindController.h in Headers */ = {isa = PBXBuildFile; fileRef = CE518F2509E526E000E97C3A /* BDSKTextViewFindController.h */; };
 		CE518F2809E526E000E97C3A /* BDSKTextViewFindController.m in Sources */ = {isa = PBXBuildFile; fileRef = CE518F2609E526E000E97C3A /* BDSKTextViewFindController.m */; };
 		CE518F6609E52D6A00E97C3A /* BDSKTextViewFindPanel.nib in Resources */ = {isa = PBXBuildFile; fileRef = CE518F6409E52D6A00E97C3A /* BDSKTextViewFindPanel.nib */; };
+		CE51914C09E5615400E97C3A /* BDSKRegExFindPattern.m in Sources */ = {isa = PBXBuildFile; fileRef = CE51914A09E5615300E97C3A /* BDSKRegExFindPattern.m */; };
+		CE51914D09E5615400E97C3A /* BDSKRegExFindPattern.h in Headers */ = {isa = PBXBuildFile; fileRef = CE51914B09E5615400E97C3A /* BDSKRegExFindPattern.h */; };
 		CE59A38109BC80A100AF3935 /* BDSKPreviewTextView.h in Headers */ = {isa = PBXBuildFile; fileRef = CE59A37F09BC80A100AF3935 /* BDSKPreviewTextView.h */; };
 		CE59A38209BC80A100AF3935 /* BDSKPreviewTextView.m in Sources */ = {isa = PBXBuildFile; fileRef = CE59A38009BC80A100AF3935 /* BDSKPreviewTextView.m */; };
 		CE67E316092B569000410758 /* BibEditorDrawer.nib in Resources */ = {isa = PBXBuildFile; fileRef = CE67E314092B569000410758 /* BibEditorDrawer.nib */; };
@@ -1111,6 +1113,8 @@
 		CE518F2509E526E000E97C3A /* BDSKTextViewFindController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BDSKTextViewFindController.h; sourceTree = "<group>"; };
 		CE518F2609E526E000E97C3A /* BDSKTextViewFindController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BDSKTextViewFindController.m; sourceTree = "<group>"; };
 		CE518F6509E52D6A00E97C3A /* English */ = {isa = PBXFileReference; lastKnownFileType = wrapper.nib; name = English; path = English.lproj/BDSKTextViewFindPanel.nib; sourceTree = "<group>"; };
+		CE51914A09E5615300E97C3A /* BDSKRegExFindPattern.m */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.objc; path = BDSKRegExFindPattern.m; sourceTree = "<group>"; };
+		CE51914B09E5615400E97C3A /* BDSKRegExFindPattern.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = BDSKRegExFindPattern.h; sourceTree = "<group>"; };
 		CE59A37F09BC80A100AF3935 /* BDSKPreviewTextView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BDSKPreviewTextView.h; sourceTree = "<group>"; };
 		CE59A38009BC80A100AF3935 /* BDSKPreviewTextView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BDSKPreviewTextView.m; sourceTree = "<group>"; };
 		CE67E315092B569000410758 /* English */ = {isa = PBXFileReference; lastKnownFileType = wrapper.nib; name = English; path = English.lproj/BibEditorDrawer.nib; sourceTree = "<group>"; };
@@ -1850,6 +1854,7 @@
 				CE38FB8B091D94A100BCB69D /* BDSKFilter.m */,
 				CE21D10909208B9D0075E607 /* BDSKGroup.m */,
 				F94DE74A09CB46FF00B5FD51 /* BDSKPersistentSearch.m */,
+				CE51914A09E5615300E97C3A /* BDSKRegExFindPattern.m */,
 				CED65AB30906BCC6003EED90 /* BDSKScriptHook.m */,
 				F925332208FC9FB80045D563 /* BDSKSearchIndex.m */,
 				F9025DAA0969AB69008A551C /* BDSKStringNode.m */,
@@ -2088,6 +2093,7 @@
 				F961FA9408C9429700332460 /* BDSKPrintableView.h */,
 				CE392F5B08D04083001CEAC8 /* BDSKRatingButton.h */,
 				CE392ED208D034E4001CEAC8 /* BDSKRatingButtonCell.h */,
+				CE51914B09E5615400E97C3A /* BDSKRegExFindPattern.h */,
 				CED65AB20906BCC6003EED90 /* BDSKScriptHook.h */,
 				CED65DCA0907A338003EED90 /* BDSKScriptHook+Scripting.h */,
 				CED65AB40906BCC6003EED90 /* BDSKScriptHookManager.h */,
@@ -2470,6 +2476,7 @@
 				CE6FB32209DFFCB5005E3E14 /* BDSKSharingBrowser.h in Headers */,
 				F92ED7CC09E0A93400A244D0 /* BDSKSharingServer.h in Headers */,
 				CE518F2709E526E000E97C3A /* BDSKTextViewFindController.h in Headers */,
+				CE51914D09E5615400E97C3A /* BDSKRegExFindPattern.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -3388,6 +3395,7 @@
 				CE6FB32309DFFCB5005E3E14 /* BDSKSharingBrowser.m in Sources */,
 				F92ED7CD09E0A93400A244D0 /* BDSKSharingServer.m in Sources */,
 				CE518F2809E526E000E97C3A /* BDSKTextViewFindController.m in Sources */,
+				CE51914C09E5615400E97C3A /* BDSKRegExFindPattern.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
