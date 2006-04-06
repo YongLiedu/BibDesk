@@ -304,6 +304,8 @@
 		CE518F6609E52D6A00E97C3A /* BDSKTextViewFindPanel.nib in Resources */ = {isa = PBXBuildFile; fileRef = CE518F6409E52D6A00E97C3A /* BDSKTextViewFindPanel.nib */; };
 		CE51914C09E5615400E97C3A /* BDSKRegExFindPattern.m in Sources */ = {isa = PBXBuildFile; fileRef = CE51914A09E5615300E97C3A /* BDSKRegExFindPattern.m */; };
 		CE51914D09E5615400E97C3A /* BDSKRegExFindPattern.h in Headers */ = {isa = PBXBuildFile; fileRef = CE51914B09E5615400E97C3A /* BDSKRegExFindPattern.h */; };
+		CE51922009E5755600E97C3A /* BDSKFindFieldEditor.h in Headers */ = {isa = PBXBuildFile; fileRef = CE51921E09E5755600E97C3A /* BDSKFindFieldEditor.h */; };
+		CE51922109E5755600E97C3A /* BDSKFindFieldEditor.m in Sources */ = {isa = PBXBuildFile; fileRef = CE51921F09E5755600E97C3A /* BDSKFindFieldEditor.m */; };
 		CE59A38109BC80A100AF3935 /* BDSKPreviewTextView.h in Headers */ = {isa = PBXBuildFile; fileRef = CE59A37F09BC80A100AF3935 /* BDSKPreviewTextView.h */; };
 		CE59A38209BC80A100AF3935 /* BDSKPreviewTextView.m in Sources */ = {isa = PBXBuildFile; fileRef = CE59A38009BC80A100AF3935 /* BDSKPreviewTextView.m */; };
 		CE67E316092B569000410758 /* BibEditorDrawer.nib in Resources */ = {isa = PBXBuildFile; fileRef = CE67E314092B569000410758 /* BibEditorDrawer.nib */; };
@@ -1115,6 +1117,8 @@
 		CE518F6509E52D6A00E97C3A /* English */ = {isa = PBXFileReference; lastKnownFileType = wrapper.nib; name = English; path = English.lproj/BDSKTextViewFindPanel.nib; sourceTree = "<group>"; };
 		CE51914A09E5615300E97C3A /* BDSKRegExFindPattern.m */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.objc; path = BDSKRegExFindPattern.m; sourceTree = "<group>"; };
 		CE51914B09E5615400E97C3A /* BDSKRegExFindPattern.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = BDSKRegExFindPattern.h; sourceTree = "<group>"; };
+		CE51921E09E5755600E97C3A /* BDSKFindFieldEditor.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BDSKFindFieldEditor.h; sourceTree = "<group>"; };
+		CE51921F09E5755600E97C3A /* BDSKFindFieldEditor.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BDSKFindFieldEditor.m; sourceTree = "<group>"; };
 		CE59A37F09BC80A100AF3935 /* BDSKPreviewTextView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BDSKPreviewTextView.h; sourceTree = "<group>"; };
 		CE59A38009BC80A100AF3935 /* BDSKPreviewTextView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BDSKPreviewTextView.m; sourceTree = "<group>"; };
 		CE67E315092B569000410758 /* English */ = {isa = PBXFileReference; lastKnownFileType = wrapper.nib; name = English; path = English.lproj/BibEditorDrawer.nib; sourceTree = "<group>"; };
@@ -1751,6 +1755,7 @@
 				CE2837400917D31D006B4C63 /* BDSKEdgeView.m */,
 				F941135309B549BF00EE8463 /* BDSKEditorTextView.m */,
 				CE9F853F0956A2C50073FCAD /* BDSKFieldEditor.m */,
+				CE51921F09E5755600E97C3A /* BDSKFindFieldEditor.m */,
 				F9569C2C08415E8300316D02 /* BDSKForm.m */,
 				F9D3E284088DA01F00E70D49 /* BDSKFormCell.m */,
 				F9706DE409102DF500526FC8 /* BDSKGradientView.m */,
@@ -2065,6 +2070,7 @@
 				CE38FB8A091D94A100BCB69D /* BDSKFilter.h */,
 				CE38FB8C091D94A100BCB69D /* BDSKFilterController.h */,
 				F97965EF086909EA00050427 /* BDSKFindController.h */,
+				CE51921E09E5755600E97C3A /* BDSKFindFieldEditor.h */,
 				F9A6742807D04E8000782ACD /* BDSKFontManager.h */,
 				F9569C2B08415E8300316D02 /* BDSKForm.h */,
 				3D44F5600812A91D003C67F0 /* BDSKFormatParser.h */,
@@ -2477,6 +2483,7 @@
 				F92ED7CC09E0A93400A244D0 /* BDSKSharingServer.h in Headers */,
 				CE518F2709E526E000E97C3A /* BDSKTextViewFindController.h in Headers */,
 				CE51914D09E5615400E97C3A /* BDSKRegExFindPattern.h in Headers */,
+				CE51922009E5755600E97C3A /* BDSKFindFieldEditor.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -3396,6 +3403,7 @@
 				F92ED7CD09E0A93400A244D0 /* BDSKSharingServer.m in Sources */,
 				CE518F2809E526E000E97C3A /* BDSKTextViewFindController.m in Sources */,
 				CE51914C09E5615400E97C3A /* BDSKRegExFindPattern.m in Sources */,
+				CE51922109E5755600E97C3A /* BDSKFindFieldEditor.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
