@@ -180,6 +180,13 @@
 - (void)setFindFromSelection;
 
 /*!
+    @method     replace
+    @abstract   Replaces in the selected item if there is a selection.
+    @discussion (comprehensive description)
+*/
+- (void)replace;
+
+/*!
     @method     findAndHighlightWithReplace:next:
     @abstract   Replaces in the selected item if there is a selection and replace is YES, then highlights the next match.
                 Search wraps around by default.

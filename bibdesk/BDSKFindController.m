@@ -580,7 +580,9 @@ enum {
 		case NSFindPanelActionReplaceAll:
 			[self replaceAllInSelection:NO];
 			break;
-		case NSFindPanelActionReplace: // we don't have a replace action, so we use replace & find
+		case NSFindPanelActionReplace:
+			[self replace];
+			break;
 		case NSFindPanelActionReplaceAndFind:
 			[self findAndHighlightWithReplace:YES next:YES];
 			break;
@@ -608,6 +610,29 @@ enum {
 		return;
 	}
 	[self setFindString:selString];
+}
+
+- (void)replace{
+	[statusBar setStringValue:@""];
+    
+    BibDocument *theDocument = [[NSDocumentController sharedDocumentController] currentDocument];
+    if(!theDocument){
+        NSBeep();
+		[statusBar setStringValue:NSLocalizedString(@"No document selected",@"")];
+        return;
+	}
+    
+    BibItem *selItem = [[[theDocument selectedPublications] objectEnumerator] nextObject];
+    
+    if(selItem == nil){
+        NSBeep();
+		[statusBar setStringValue:NSLocalizedString(@"Nothing selected",@"")];
+        return;
+    }
+
+    [self findAndReplaceInItems:[NSArray arrayWithObject:selItem] ofDocument:theDocument];
+    // make sure we only highlight this item
+    [theDocument highlightBib:selItem];
 }
 
 - (void)findAndHighlightWithReplace:(BOOL)replace next:(BOOL)next{
