@@ -39,9 +39,9 @@
 #import <Cocoa/Cocoa.h>
 #import <OmniAppKit/OAFindController.h>
 
-
 @interface BDSKTextViewFindController : OAFindController {
     IBOutlet NSPopUpButton *findTypePopUp;
+    NSTextView *findFieldEditor;
 }
 - (IBAction)performFindPanelAction:(id)sender;
 @end

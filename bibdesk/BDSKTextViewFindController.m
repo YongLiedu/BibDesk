@@ -40,6 +40,7 @@
 #import <OmniAppKit/OAFindPattern.h>
 #import <AGRegex/AGRegex.h>
 #import "BDSKRegExFindPattern.h"
+#import "BDSKFindFieldEditor.h"
 
 /* Almost all of this code is copy-and-paste from OAFindController, except that we replace the findTypeMatrix by findTypePopUp and use our interface */
 
@@ -52,6 +53,18 @@ static NSString *BDSKTextViewFindPanelTitle = @"Find";
 
 @implementation BDSKTextViewFindController
 
+- (id)init {
+    if (self = [super init]) {
+		findFieldEditor = nil;
+    }
+    return self;
+}
+
+- (void)dealloc {
+    [findFieldEditor release];
+    [super dealloc];
+}
+
 - (IBAction)performFindPanelAction:(id)sender;
 {
 	switch ([sender tag]) {
@@ -59,10 +72,10 @@ static NSString *BDSKTextViewFindPanelTitle = @"Find";
 			[self showFindPanel:sender];
 			break;
 		case NSFindPanelActionNext:
-			[self findNext:sender];
+			[self panelFindNext:sender];
 			break;
 		case NSFindPanelActionPrevious:
-			[self findPrevious:sender];
+			[self panelFindPrevious:sender];
 			break;
 		case NSFindPanelActionReplaceAll:
 			[self replaceAll:sender];
@@ -81,6 +94,31 @@ static NSString *BDSKTextViewFindPanelTitle = @"Find";
 			[self replaceAll:sender];
 			break;
 	}
+}
+
+- (BOOL)validateMenuItem:(id <NSMenuItem>)menuItem{
+    if ([menuItem action] == @selector(performFindPanelAction:)) {
+		switch ([menuItem tag]) {
+			case NSFindPanelActionShowFindPanel:
+			case NSFindPanelActionNext:
+			case NSFindPanelActionPrevious:
+			case NSFindPanelActionReplaceAll:
+			case NSFindPanelActionReplace:
+			case NSFindPanelActionReplaceAndFind:
+			case NSFindPanelActionSetFindString:
+				return YES;
+			default:
+				return NO;
+		}
+	}
+	return YES;
+}
+
+- (id)windowWillReturnFieldEditor:(NSWindow *)sender toObject:(id)anObject {
+	if (findFieldEditor == nil) {
+		findFieldEditor = [[BDSKFindFieldEditor alloc] initWithFrame:NSZeroRect];
+	}
+	return findFieldEditor;
 }
 
 - (IBAction)findTypeChanged:(id)sender;
