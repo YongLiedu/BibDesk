@@ -227,7 +227,3 @@
 - (void)setField:field ofItem:bibItem toValue:newValue withInfos:(NSMutableArray *)paperInfos;
 
 @end
-
-@interface BDSKFindFieldEditor : NSTextView {
-}
-@end

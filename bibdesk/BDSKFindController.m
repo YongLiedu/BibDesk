@@ -48,6 +48,7 @@
 #import "BibItem.h"
 #import "BibFiler.h"
 #import "BDSKAlert.h"
+#import "BDSKFindFieldEditor.h"
 
 #define MAX_HISTORY_COUNT	10
 
@@ -545,10 +546,10 @@ enum {
 			case NSFindPanelActionNext:
 			case NSFindPanelActionPrevious:
 			case NSFindPanelActionReplaceAll:
+			case NSFindPanelActionReplace:
 			case NSFindPanelActionReplaceAndFind:
 			case NSFindPanelActionSetFindString:
 				return YES;
-			case NSFindPanelActionReplace:
 			default:
 				return NO;
 		}
@@ -1059,32 +1060,6 @@ enum {
 		findFieldEditor = [[BDSKFindFieldEditor alloc] initWithFrame:NSZeroRect];
 	}
 	return findFieldEditor;
-}
-
-@end
-
-@implementation BDSKFindFieldEditor
-
-- (id)initWithFrame:(NSRect)frameRect {
-	if (self = [super initWithFrame:frameRect]) {
-		[self setFieldEditor:YES];
-		[self setUsesFindPanel:YES];
-	}
-	return self;
-}
-
-- (IBAction)performFindPanelAction:(id)sender {
-	if ([[[self window] delegate] respondsToSelector:@selector(performFindPanelAction:)]) 
-		[[[self window] delegate] performFindPanelAction:sender];
-	else
-		[super performFindPanelAction:sender];
-}
-
-- (BOOL)validateMenuItem:(id<NSMenuItem>)menuItem {
-	if ([[[self window] delegate] respondsToSelector:@selector(validateMenuItem:)] && [menuItem action] == @selector(performFindPanelAction:)) 
-		return [[[self window] delegate] validateMenuItem:menuItem];
-	else
-		return [super validateMenuItem:menuItem];
 }
 
 @end
