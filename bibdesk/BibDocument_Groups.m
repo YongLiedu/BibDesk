@@ -224,7 +224,7 @@ The groupedPublications array is a subset of the publications array, developed b
     [sharedGroups release];
     sharedGroups = nil;
     if (array != nil)
-        sharedGroups = [array copy];
+        sharedGroups = [array mutableCopy];
     
     [groupTableView reloadData];
 }
