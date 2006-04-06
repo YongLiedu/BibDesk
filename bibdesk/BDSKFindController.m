@@ -257,7 +257,6 @@ enum {
 - (void)setSearchType:(int)newSearchType {
     if (searchType != newSearchType) {
         searchType = newSearchType;
-		[self updateUI];
     }
 }
 
@@ -891,6 +890,10 @@ enum {
 		paperInfos = [NSMutableArray arrayWithCapacity:[arrayOfPubs count]];
 
     while(bibItem = [pubE nextObject]){
+        // don't touch shared items
+        if ([bibItem document] != theDocument) 
+            continue;
+        
         origStr = [bibItem valueOfField:field inherit:NO];
         
         if(origStr == nil || findAsMacro != [origStr isComplex])
@@ -939,6 +942,10 @@ enum {
 		paperInfos = [NSMutableArray arrayWithCapacity:[arrayOfPubs count]];
 	
     while(bibItem = [pubE nextObject]){
+        // don't touch shared items
+        if ([bibItem document] != theDocument) 
+            continue;
+        
         origStr = [bibItem valueOfField:field inherit:NO];
         
         if(origStr == nil || findAsMacro != [origStr isComplex])
@@ -991,6 +998,10 @@ enum {
 		paperInfos = [NSMutableArray arrayWithCapacity:[arrayOfPubs count]];
 
     while(bibItem = [pubE nextObject]){
+        // don't touch shared items
+        if ([bibItem document] != theDocument) 
+            continue;
+        
         origStr = [bibItem valueOfField:field inherit:NO];
 		if([replStr compareAsComplexString:origStr] != NSOrderedSame){
 			[self setField:field ofItem:bibItem toValue:replStr withInfos:paperInfos];
