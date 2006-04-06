@@ -1412,9 +1412,9 @@ NSString *BDSKWeblocFilePboardType = @"CorePasteboardFlavorType 0x75726C20";
 		colID = [[[tableView tableColumns] objectAtIndex:[tableView clickedColumn]] identifier];
     }
     if([[BibTypeManager sharedManager] isLocalURLField:colID]){
-		[self openLinkedFile:colID];
+		[self openLinkedFileForField:colID];
     }else if([[BibTypeManager sharedManager] isRemoteURLField:colID]){
-		[self openRemoteURL:colID];
+		[self openRemoteURLForField:colID];
     }else{
 		int n = [self numberOfSelectedPubs];
         int rv = NSAlertAlternateReturn;
@@ -1483,14 +1483,14 @@ NSString *BDSKWeblocFilePboardType = @"CorePasteboardFlavorType 0x75726C20";
 }
 
 - (IBAction)openLinkedFile:(id)sender{
-	int n = [self numberOfSelectedPubs];
-	NSString *field;
-    if ([field isKindOfClass:[NSString class]])
-        field = sender;
-    else 
-        field = [sender representedObject];
+	NSString *field = [sender representedObject];
     if (field == nil)
-		field = BDSKLocalUrlString;
+		field = BDSKUrlString;
+    [self openLinkedFileForField:field];
+}
+
+- (void)openLinkedFileForField:(NSString *)field{
+	int n = [self numberOfSelectedPubs];
     
     int rv = NSAlertAlternateReturn;
     if (n > 6) {
@@ -1532,14 +1532,14 @@ NSString *BDSKWeblocFilePboardType = @"CorePasteboardFlavorType 0x75726C20";
 }
 
 - (IBAction)revealLinkedFile:(id)sender{
-	int n = [self numberOfSelectedPubs];
-	NSString *field;
-    if ([field isKindOfClass:[NSString class]])
-        field = sender;
-    else 
-        field = [sender representedObject];
+	NSString *field = [sender representedObject];
     if (field == nil)
-		field = BDSKLocalUrlString;
+		field = BDSKUrlString;
+    [self revealLinkedFileForField:field];
+}
+
+- (void)revealLinkedFileForField:(NSString *)field{
+	int n = [self numberOfSelectedPubs];
     
     int rv = NSAlertAlternateReturn;
     if (n > 6) {
@@ -1566,14 +1566,14 @@ NSString *BDSKWeblocFilePboardType = @"CorePasteboardFlavorType 0x75726C20";
 }
 
 - (IBAction)openRemoteURL:(id)sender{
-	int n = [self numberOfSelectedPubs];
-	NSString *field;
-    if ([field isKindOfClass:[NSString class]])
-        field = sender;
-    else 
-        field = [sender representedObject];
+	NSString *field = [sender representedObject];
     if (field == nil)
 		field = BDSKUrlString;
+    [self openRemoteURLForField:field];
+}
+
+- (void)openRemoteURLForField:(NSString *)field{
+	int n = [self numberOfSelectedPubs];
     
     int rv = NSAlertAlternateReturn;
     if (n > 6) {

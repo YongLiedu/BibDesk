@@ -472,6 +472,8 @@ extern NSString* BDSKWeblocFilePboardType; // core pasteboard type for webloc fi
 */
 - (IBAction)openLinkedFile:(id)sender;
 
+- (void)openLinkedFileForField:(NSString *)field;
+
 /*!
     @method revealLinkedFile:
     @abstract Reveals the linked file of the selected publication in the Finder
@@ -480,6 +482,8 @@ extern NSString* BDSKWeblocFilePboardType; // core pasteboard type for webloc fi
 */
 - (IBAction)revealLinkedFile:(id)sender;
 
+- (void)revealLinkedFileForField:(NSString *)field;
+
 /*!
     @method openRemoteURL:
     @abstract Opens the remote URL of the selected publication in the default browser
@@ -487,6 +491,8 @@ extern NSString* BDSKWeblocFilePboardType; // core pasteboard type for webloc fi
     @param sender The sender. Not used.
 */
 - (IBAction)openRemoteURL:(id)sender;
+
+- (void)openRemoteURLForField:(NSString *)field;
 
 /*!
     @method editAction:
