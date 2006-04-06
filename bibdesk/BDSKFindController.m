@@ -155,19 +155,13 @@ enum {
 }
 
 - (void)updateUI{
-    BOOL enabled = YES;
-    
 	if(![self findAsMacro] && [self replaceAsMacro]){
-        enabled = NO;
+        [searchScopePopUpButton setEnabled:NO];
 		[statusBar setStringValue:NSLocalizedString(@"With these settings, only full strings will be replaced",@"")];
 	}else{
-        enabled = YES;
+        [searchScopePopUpButton setEnabled:YES];
 		[statusBar setStringValue:@""];
     }
-	
-    if([self searchType] == FCRegexSearch)
-        enabled = NO;
-	[searchScopePopUpButton setEnabled:enabled];
     
 	if ([self overwrite]) {
 		if ([self searchSelection])
