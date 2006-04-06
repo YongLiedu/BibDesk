@@ -38,7 +38,8 @@
 
 #import "BDSKTextViewFindController.h"
 #import <OmniAppKit/OAFindPattern.h>
-#import <OmniAppKit/OARegExFindPattern.h>
+#import <AGRegex/AGRegex.h>
+#import "BDSKRegExFindPattern.h"
 
 /* Almost all of this code is copy-and-paste from OAFindController, except that we replace the findTypeMatrix by findTypePopUp and use our interface */
 
@@ -84,45 +85,18 @@ static NSString *BDSKTextViewFindPanelTitle = @"Find";
 
 - (IBAction)findTypeChanged:(id)sender;
 {
-    NSView *contentView = nil;
-    NSView *nextKeyView = nil;
-    
-    // add the new controls
-    switch([[findTypePopUp selectedItem] tag]) {
-        case 0:
-            contentView = stringControlsView;
-            nextKeyView = ignoreCaseButton;
-            break;
-        case 1:
-            contentView = regularExpressionControlsView;
-            nextKeyView = subexpressionPopUp;
-            break;
-    }
-
-    [additionalControlsBox setContentView:contentView];
-    [findTypePopUp setNextKeyView:nextKeyView];
+    [wholeWordButton setEnabled:([[findTypePopUp selectedItem] tag] == 0)];
 }
 
 - (void)controlTextDidEndEditing:(NSNotification *)aNotification
 {
-    OFRegularExpression *expression;
-    int subexpressionCount, numberOfItems;
-    NSString *subexpressionFormatString;
-    
-    subexpressionFormatString = NSLocalizedStringFromTableInBundle(@"Subexpression #%d", @"OmniAppKit", [OAFindController bundle], "Contents of popup in regular expression find options");
-    
-    expression = [[OFRegularExpression alloc] initWithString:[[searchTextForm cellAtIndex:0] stringValue]];
-    if (expression) {
-        subexpressionCount = [expression subexpressionCount];
-        [expression release];
-        numberOfItems = [subexpressionPopUp numberOfItems] - 1;
-        
-        while (numberOfItems > subexpressionCount)
-            [subexpressionPopUp removeItemAtIndex:numberOfItems--];
-        while (subexpressionCount > numberOfItems)
-            [subexpressionPopUp addItemWithTitle:[NSString stringWithFormat:subexpressionFormatString, ++numberOfItems]];
-    } else {
-        [findTypePopUp selectItemWithTag:1];
+    if ([aNotification object] == searchTextForm) {
+        // validate the search string as a regex
+        AGRegex *regex = [AGRegex regexWithPattern:[[searchTextForm cellAtIndex:0] stringValue]];
+        if (regex == nil) {
+            NSBeep();
+            [findTypePopUp selectItemWithTag:0];
+        }
     }
 }
 
@@ -154,14 +128,14 @@ static NSString *BDSKTextViewFindPanelTitle = @"Find";
     if (![findString length])
         return nil;
 
-    if ([[findTypePopUp selectedItem] tag] == 1) {
+    if ([[findTypePopUp selectedItem] tag] == 0) {
         pattern = [[OAFindPattern alloc] initWithString:findString ignoreCase:[ignoreCaseButton state] wholeWord:[wholeWordButton state] backwards:backwardsFlag];
     } else {
         int subexpression;
         
         [self controlTextDidEndEditing:nil]; // make sure the subexpressionPopUp is set correctly
         subexpression = [subexpressionPopUp indexOfSelectedItem] - 1;
-        pattern = [[OARegExFindPattern alloc] initWithString:findString selectedSubexpression:subexpression backwards:backwardsFlag];
+        pattern = [[BDSKRegExFindPattern alloc] initWithString:findString ignoreCase:[ignoreCaseButton state] backwards:backwardsFlag];
     }
     
     [currentPattern release];
