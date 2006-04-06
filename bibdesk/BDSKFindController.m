@@ -155,11 +155,20 @@ enum {
 }
 
 - (void)updateUI{
-	if(![self findAsMacro] && [self replaceAsMacro])
+    BOOL enabled = YES;
+    
+	if(![self findAsMacro] && [self replaceAsMacro]){
+        enabled = NO;
 		[statusBar setStringValue:NSLocalizedString(@"With these settings, only full strings will be replaced",@"")];
-	else
+	}else{
+        enabled = YES;
 		[statusBar setStringValue:@""];
+    }
 	
+    if([self searchType] == FCRegexSearch)
+        enabled = NO;
+	[searchScopePopUpButton setEnabled:enabled];
+    
 	if ([self overwrite]) {
 		if ([self searchSelection])
 			[self setReplaceAllTooltip:NSLocalizedString(@"Overwrite or add the field in all selected publications.", @"")];
@@ -254,6 +263,7 @@ enum {
 - (void)setSearchType:(int)newSearchType {
     if (searchType != newSearchType) {
         searchType = newSearchType;
+		[self updateUI];
     }
 }
 
