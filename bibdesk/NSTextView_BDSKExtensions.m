@@ -37,44 +37,17 @@
 #import "NSTextView_BDSKExtensions.h"
 #import "BibPrefController.h"
 #import <OmniFoundation/OmniFoundation.h>
+#import "BDSKTextViewFindController.h"
 
 
 @implementation NSTextView (BDSKExtensions)
 
-static OAFindController *findController;
-
-+ (void)didLoad;
-{
-    findController = [[OAFindController alloc] init];
-}
+static BDSKTextViewFindController *findController = nil;
 
 - (IBAction)performFindPanelAction:(id)sender{
-	switch ([sender tag]) {
-		case NSFindPanelActionShowFindPanel:
-			[findController showFindPanel:sender];
-			break;
-		case NSFindPanelActionNext:
-			[findController findNext:sender];
-			break;
-		case NSFindPanelActionPrevious:
-			[findController findPrevious:sender];
-			break;
-		case NSFindPanelActionReplaceAll:
-			[findController replaceAll:sender];
-			break;
-		case NSFindPanelActionReplace:
-            [findController replace:sender];
-            break;
-		case NSFindPanelActionReplaceAndFind:
-			[findController replaceAndFind:sender];
-			break;
-		case NSFindPanelActionSetFindString:
-			[findController enterSelection:sender];
-			break;
-		case NSFindPanelActionReplaceAllInSelection:
-			// this is handled by the find controller buttons; no menu item support
-			break;
-	}
+    if (findController == nil)
+        findController = [[BDSKTextViewFindController alloc] init];
+	[findController performFindPanelAction:sender];
 }
 
 
