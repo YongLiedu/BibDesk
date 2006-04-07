@@ -60,9 +60,6 @@ NSString *BDSKTXTVersionKey = @"txtvers";
 
 NSString *BDSKSharedArchivedDataKey = @"publications_v1";
 
-// This is the computer name as set in sys prefs (sharing)
-static NSString *computerName = nil;
-
 static SCDynamicStoreRef dynamicStore = NULL;
 static const void *retainCallBack(const void *info) { return [(id)info retain]; }
 static void releaseCallBack(const void *info) { [(id)info release]; }
@@ -70,10 +67,6 @@ static CFStringRef copyDescriptionCallBack(const void *info) { return (CFStringR
 // convert this to an NSNotification
 static void SCDynamicStoreChanged(SCDynamicStoreRef store, CFArrayRef changedKeys, void *info)
 {
-    // clear this here, since the other handlers may depend on it
-    [computerName release];
-    computerName = nil;
-    
     [[NSNotificationCenter defaultCenter] postNotificationName:BDSKComputerNameChangedNotification object:nil];
     
     // update the text field in prefs if necessary (or that could listen for computer name changes...)
@@ -81,15 +74,9 @@ static void SCDynamicStoreChanged(SCDynamicStoreRef store, CFArrayRef changedKey
         [[NSNotificationCenter defaultCenter] postNotificationName:BDSKSharingNameChangedNotification object:nil];
 }
 
+// This is the computer name as set in sys prefs (sharing)
 NSString *BDSKComputerName() {
-    if(computerName == nil){
-        computerName = (NSString *)SCDynamicStoreCopyComputerName(dynamicStore, NULL);
-        if(computerName == nil){
-            NSLog(@"Unable to get computer name with SCDynamicStoreCopyComputerName");
-            computerName = [[[[[NSProcessInfo processInfo] hostName] componentsSeparatedByString:@"."] firstObject] copy];
-        }
-    }
-    return computerName;
+    return [(id)SCDynamicStoreCopyComputerName(dynamicStore, NULL) autorelease];
 }
 
 @implementation BDSKSharingServer

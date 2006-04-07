@@ -197,16 +197,18 @@
         
         
         [proxyObject setProtocolForProxy:@protocol(BDSKSharingProtocol)];
-        [proxyObject registerHostNameForNotifications:[NSDictionary dictionaryWithObjectsAndKeys:[[NSHost currentHost] name], @"hostname", serverSharingName, @"portname", nil]];
         
-        [publications release];
+        // need hostname and portname for the NSSocketPort connection on the other end
+        // use computer as the notification identifier for this host on the other end
+        [proxyObject registerHostNameForNotifications:[NSDictionary dictionaryWithObjectsAndKeys:[[NSHost currentHost] name], @"hostname", serverSharingName, @"portname", [BDSKSharingServer sharingName], @"computer", nil]];
+        
+        [publications autorelease];
         publications = nil;
 
         // this is really slow, because it ends up copying each object; are these passed by reference?
         //publications = [[proxyObject snapshotOfPublications] copy];
         
         NSData *proxyData = [proxyObject archivedSnapshotOfPublications];
-        NSLog(@"received data of length %d", [proxyData length]);
         
         if([proxyData length] != 0){
             NSString *errorString = nil;
@@ -248,8 +250,8 @@
     if(needsUpdate == YES || publications == nil){
         [NSThread detachNewThreadSelector:@selector(retrievePublications) toTarget:self withObject:nil];
     }
-    // this will likely be nil the first time
-    return publications;
+    // this will likely be nil the first time; retain since our server thread could release it at any time
+    return [[publications retain] autorelease];
 }
 
 

@@ -58,8 +58,8 @@ extern NSString *BDSKSharedArchivedDataKey;
 @protocol BDSKSharingProtocol
 
 - (NSData *)archivedSnapshotOfPublications;
-- (oneway void)registerHostNameForNotifications:(NSDictionary *)info;
-- (NSArray *)snapshotOfPublications;
+- (oneway void)registerHostNameForNotifications:(bycopy NSDictionary *)info;
+- (bycopy NSArray *)snapshotOfPublications;
 - (oneway void)notifyObserversOfChange;
 
 @end
