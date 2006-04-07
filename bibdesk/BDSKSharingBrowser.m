@@ -134,7 +134,7 @@ static BDSKSharingBrowser *sharedBrowser = nil;
     
     [sharedGroups setArray:array];
     
-    [[NSNotificationCenter defaultCenter] postNotificationName:BDSKSharedGroupsChangedNotification object:self];
+    [[NSNotificationCenter defaultCenter] postNotificationName:BDSKSharedGroupsChangedNotification object:self userInfo:[NSDictionary dictionaryWithObject:aNetService forKey:@"removedservice"]];
 }
 
 - (void)enableSharedBrowsing;
