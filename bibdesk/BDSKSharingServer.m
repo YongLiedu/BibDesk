@@ -427,7 +427,12 @@ NSString *BDSKComputerName() {
 
 - (BOOL)authenticateComponents:(NSArray *)components withData:(NSData *)authenticationData
 {
-    return ([authenticationData isEqual:[[BDSKPasswordController sharingPasswordForCurrentUserUnhashed] sha1Signature]]);
+    BOOL status = YES;
+    if([[OFPreferenceWrapper sharedPreferenceWrapper] boolForKey:BDSKSharingRequiresPasswordKey]){
+        NSData *myPasswordHashed = [[BDSKPasswordController sharingPasswordForCurrentUserUnhashed] sha1Signature];
+        status = [authenticationData isEqual:myPasswordHashed];
+    }
+    return status;
 }
 
 // don't put these in a category, since we have formal protocols to deal with
