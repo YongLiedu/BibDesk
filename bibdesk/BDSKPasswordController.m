@@ -150,11 +150,9 @@ NSString *BDSKServiceNameForKeychain = @"BibDesk Sharing";
         NSLog(@"Error %d occurred setting password", err);
 }
 
-+ (NSData *)passwordForName:(NSString *)name;
++ (NSData *)passwordHashedForKeychainServiceName:(NSString *)name;
 {
-    // get the service name, use to get pw from keychain
-    // hash it, then convert to TXT form
-    // re-get pw from TXT dict
+    // use the service name to get pw from keychain and hash it with sha1 for comparison purposes
     OSStatus err;
     
     const char *nameCString = [name UTF8String];
@@ -169,15 +167,13 @@ NSString *BDSKServiceNameForKeychain = @"BibDesk Sharing";
         
         // hash it for comparison, since we hash before putting it in the TXT
         pwData = [pwData sha1Signature];
-        
-        // now transform it to a TXT dictionary and back again, in case it does something weird with the pw
-        // this is not very nice...
-        NSDictionary *dict = [NSDictionary dictionaryWithObject:pwData forKey:@"key"];
-        pwData = [NSNetService dataFromTXTRecordDictionary:dict];
-        dict = [NSNetService dictionaryFromTXTRecordData:pwData];
-        pwData = [dict objectForKey:@"key"];
     }
     return pwData;
+}
+
++ (NSString *)keychainServiceNameWithComputerName:(NSString *)computerName;
+{
+    return [NSString stringWithFormat:@"%@ - %@", computerName, BDSKServiceNameForKeychain];
 }
 
 @end

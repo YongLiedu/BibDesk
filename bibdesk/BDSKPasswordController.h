@@ -55,6 +55,7 @@ extern NSString *BDSKServiceNameForKeychain;
 
 + (NSData *)sharingPasswordForCurrentUserUnhashed;
 + (void)addOrModifyPassword:(NSString *)password name:(NSString *)name userName:(NSString *)userName;
-+ (NSData *)passwordForName:(NSString *)name;
++ (NSData *)passwordHashedForKeychainServiceName:(NSString *)name;
++ (NSString *)keychainServiceNameWithComputerName:(NSString *)computerName;
 
 @end
