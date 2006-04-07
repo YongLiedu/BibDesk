@@ -86,18 +86,14 @@ static BDSKSharingBrowser *sharedBrowser = nil;
     // +[NSNetService dictionaryFromTXTRecordData:] will crash if you pass a nil data
     NSDictionary *TXTDictionary = TXTData ? [NSNetService dictionaryFromTXTRecordData:TXTData] : nil;
     NSString *serviceIdentifier = [[NSString alloc] initWithData:[TXTDictionary objectForKey:BDSKTXTUniqueIdentifierKey] encoding:NSUTF8StringEncoding];
+    [serviceIdentifier autorelease];
 
-    // In general, we want to ignore our own shared services, as the write/read occur on the same run loop, and our file handle blocks; hence, we listen here for the resolve and then check the TXT record to see where the service came from.
+    // In general, we want to ignore our own shared services, although this doesn't cause problems with the run loop anymore (since the DO servers have their own threads)
 
     // Ignore our own services; quit/relaunch opening the same doc  can give us a stale service (from the previous run).  Since SystemConfiguration guarantees that we have a unique computer name, this should be safe.
-    if([[BDSKSharingServer sharingName] isEqual:[aNetService name]] == NO){
+    if([NSString isEmptyString:serviceIdentifier] == NO && ([[BDSKSharingServer sharingName] isEqual:[aNetService name]] == NO || [[NSUserDefaults standardUserDefaults] boolForKey:@"BDSKEnableSharingWithSelfKey"])){
 
-        // WARNING:  enabling sharing with self can lead to hangs if you use a large file; launching a separate BibDesk process should work around that
-        
-        // see if service is from this machine (case 1) or we are testing with a single machine (case 2)
-        if([NSString isEmptyString:serviceIdentifier] == NO && [serviceIdentifier isEqualToString:[BDSKSharingBrowser uniqueIdentifier]] == NO){
-            
-            // we don't want it to message us again
+        // we don't want it to message us again
             [aNetService setDelegate:nil];
 
             BDSKSharedGroup *group = [[BDSKSharedGroup alloc] initWithService:aNetService];
@@ -108,8 +104,8 @@ static BDSKSharingBrowser *sharedBrowser = nil;
             [unresolvedNetServices removeObject:aNetService];
             
             [[NSNotificationCenter defaultCenter] postNotificationName:BDSKSharedGroupsChangedNotification object:self];
-        }
     }
+
 }
 
 - (void)netServiceBrowser:(NSNetServiceBrowser *)aNetServiceBrowser didFindService:(NSNetService *)aNetService moreComing:(BOOL)moreComing 
