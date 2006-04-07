@@ -67,8 +67,11 @@
         serverSharingName = [[NSString alloc] initWithFormat:@"%@%@%d", [[NSHost currentHost] name], [[self class] description], connectionIdx++];
         // this just needs to be unique on localhost
         localConnectionName = [[NSString alloc] initWithFormat:@"%@%d", [[self class] description], connectionIdx++];
-        shouldKeepRunning = 1;
-        isRetrieving = 0;
+        
+        // set up flags
+        flags.shouldKeepRunning = 1;
+        flags.isRetrieving = 0;
+        flags.authenticationFailed = 0;
         
         [NSThread detachNewThreadSelector:@selector(runDOServer) toTarget:self withObject:nil];
     }
@@ -88,12 +91,11 @@
 
 - (oneway void)setNeedsUpdate:(BOOL)flag
 {
-    @synchronized(self){
-        needsUpdate = flag;
-    }
+    // this is only called from the DO thread
+    needsUpdate = flag;
 }
 
-/* @@ Warning: retain cycle, since the NSThread we detach in -init retains us (and we keep running it).  Best option may be to convert this server to a separate object, and each shared group will "own" one, and then stop it when the group is deallocated.  For now, we have the document (owner) call stopDOServer when releasing the groups. */
+/* @@ Warning: retain cycle, since the NSThread we detach in -init retains us (and we keep running it).  Best option may be to convert this server to a separate object, and each shared group will "own" one, and then stop it when the group is deallocated.  For now, we have the document (owner) call stopDOServer when releasing the groups, which ensures that we are dealloced properly. */
 
 - (void)_cleanupBDSKSharedGroupDOServer;
 {
@@ -115,7 +117,7 @@
 - (void)stopDOServer;
 {
     // we're in the main thread, so set the stop flag
-    OSAtomicCompareAndSwap32Barrier(1, 0, (int32_t *)&shouldKeepRunning);
+    OSAtomicCompareAndSwap32Barrier(1, 0, (int32_t *)&flags.shouldKeepRunning);
     NSConnection *conn = [NSConnection connectionWithRegisteredName:localConnectionName host:nil];
     if(conn == nil)
         NSLog(@"unable to get thread connection");
@@ -143,14 +145,20 @@
 {
     NSData *password = [BDSKPasswordController passwordHashedForKeychainServiceName:[BDSKPasswordController keychainServiceNameWithComputerName:[self name]]];
 
-    if(password == nil){
+    if(password == nil || flags.authenticationFailed == 1){
         NSLog(@"no password, need to prompt; thread is %@", [NSThread currentThread]);
+        
+#warning FIXME this hangs, at least on localhost
         [self performSelectorOnMainThread:@selector(runPasswordPrompt) withObject:nil waitUntilDone:YES];
         NSLog(@"retrying password from keychain...");
         password = [BDSKPasswordController passwordHashedForKeychainServiceName:[BDSKPasswordController keychainServiceNameWithComputerName:[self name]]];
+        
+        // reset this; the connection will change it back if we fail again
+        OSAtomicCompareAndSwap32Barrier(1, 0, (int32_t *)&flags.authenticationFailed);
     }
     
-    return password;
+    // doc says we're required to return empty NSData instead of nil
+    return password ? password : [NSData data];
 }
 
 - (void)runDOServer;
@@ -158,7 +166,7 @@
         
     NSAutoreleasePool *pool = [NSAutoreleasePool new];
     
-    OSAtomicCompareAndSwap32Barrier(0, 1, (int32_t *)&shouldKeepRunning);
+    OSAtomicCompareAndSwap32Barrier(0, 1, (int32_t *)&flags.shouldKeepRunning);
     NSSocketPort *receivePort = [[[NSSocketPort alloc] init] autorelease];
     
     @try {
@@ -186,14 +194,14 @@
             [pool release];
             pool = [NSAutoreleasePool new];
             CFRunLoopRun();
-        } while (shouldKeepRunning == 1);
+        } while (flags.shouldKeepRunning == 1);
     }
     @catch(id exception) {
         [connection release];
         connection = nil;
         NSLog(@"Discarding exception %@ raised in object %@", exception, self);
-        // reset the flag
-        OSAtomicCompareAndSwap32Barrier(1, 0, (int32_t *)&shouldKeepRunning);
+        // reset the flag so we can start over; shouldn't be necessary
+        OSAtomicCompareAndSwap32Barrier(0, 1, (int32_t *)&flags.shouldKeepRunning);
     }
     
     @finally {
@@ -212,10 +220,11 @@
 
 - (void)_retrievePublicationsBDSKSharedGroupDOServer;
 {
+
+    // set so we don't try calling this multiple times
+    OSAtomicCompareAndSwap32Barrier(0, 1, (int32_t *)&flags.isRetrieving);
+
     NSAutoreleasePool *pool = [NSAutoreleasePool new];
-    
-    OSAtomicCompareAndSwap32Barrier(1, 0, (int32_t *)&shouldKeepRunning);
-    OSAtomicCompareAndSwap32Barrier(1, 0, (int32_t *)&isRetrieving);
 
     @try {
         NSConnection *conn = nil;
@@ -238,10 +247,12 @@
             [conn setDelegate:self];
             proxyObject = [conn rootProxy];
         }
-#warning auth failure
-        // what should we do when we catch an authentication failure exception?
         @catch (id exception) {
-            NSLog(@"client: %@", exception);
+            // flag authentication failures so we get a prompt the next time around (in case our password was wrong)
+            if([exception respondsToSelector:@selector(name)] && [[exception name] isEqualToString:NSFailedAuthenticationException])
+                OSAtomicCompareAndSwap32Barrier(0, 1, (int32_t *)&flags.authenticationFailed);
+            else
+                NSLog(@"client: %@", exception);
             conn = nil;
             proxyObject = nil;
         }
@@ -284,7 +295,7 @@
     }
     @finally{
         [pool release];
-        OSAtomicCompareAndSwap32Barrier(0, 1, (int32_t *)&isRetrieving);
+        OSAtomicCompareAndSwap32Barrier(1, 0, (int32_t *)&flags.isRetrieving);
     }
 }
 
@@ -298,7 +309,7 @@
 
 - (NSArray *)publications
 {
-    if(isRetrieving == 0 && (needsUpdate == YES || publications == nil)){
+    if(flags.isRetrieving == 0 && (needsUpdate == YES || publications == nil)){
         [self retrievePublications];
     }
     // this will likely be nil the first time; retain since our server thread could release it at any time

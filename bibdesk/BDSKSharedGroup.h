@@ -39,14 +39,19 @@
 #import <Cocoa/Cocoa.h>
 #import "BDSKGroup.h"
 
+typedef struct _BDSKSharedGroupFlags {
+    volatile int32_t shouldKeepRunning __attribute__ ((aligned (4)));
+    volatile int32_t isRetrieving __attribute__ ((aligned (4)));
+    volatile int32_t authenticationFailed __attribute__ ((aligned (4)));
+} BDSKSharedGroupFlags;    
+
 @interface BDSKSharedGroup : BDSKGroup
 {
     NSNetService *service;
     NSArray *publications;
     NSConnection *connection;
     BOOL needsUpdate;
-    volatile int32_t shouldKeepRunning __attribute__ ((aligned (4)));
-    volatile int32_t isRetrieving __attribute__ ((aligned (4)));
+    BDSKSharedGroupFlags flags;
 
     NSString *serverSharingName;
     NSString *localConnectionName;
