@@ -61,6 +61,7 @@ extern NSString *BDSKSharedArchivedDataKey;
 - (oneway void)registerHostNameForNotifications:(bycopy NSDictionary *)info;
 - (bycopy NSArray *)snapshotOfPublications;
 - (oneway void)notifyObserversOfChange;
+- (oneway void)removeRemoteObserverNamed:(NSString *)computerName;
 
 @end
 
@@ -68,8 +69,7 @@ extern NSString *BDSKSharedArchivedDataKey;
     NSConnection *connection;
     
     NSNetService *netService;
-    NSFileHandle *listeningSocket;
-    NSMutableSet *notifyTable;
+    NSMutableDictionary *objectsToNotify;
     volatile int32_t shouldKeepRunning __attribute__ ((aligned (4)));
 }
 
