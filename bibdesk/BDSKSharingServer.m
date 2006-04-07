@@ -198,7 +198,7 @@ NSString *BDSKComputerName() {
     if(shouldKeepRunning == 1){
         NSConnection *conn = [NSConnection connectionWithRegisteredName:[BDSKSharingServer localConnectionName] host:nil];
         if(conn == nil)
-            NSLog(@"unable to get thread connection");
+            NSLog(@"-[%@ %@]: unable to get thread connection", [self class], NSStringFromSelector(_cmd));
         id proxy = [conn rootProxy];
         [proxy setProtocolForProxy:@protocol(BDSKSharingProtocol)];
         [proxy notifyObserversOfChange];
@@ -219,7 +219,7 @@ NSString *BDSKComputerName() {
                 
         NSConnection *conn = [NSConnection connectionWithRegisteredName:[BDSKSharingServer localConnectionName] host:nil];
         if(conn == nil)
-            NSLog(@"unable to get thread connection");
+            NSLog(@"-[%@ %@]: unable to get thread connection", [self class], NSStringFromSelector(_cmd));
         id proxy = [conn rootProxy];
         [proxy setProtocolForProxy:@protocol(BDSKSharingProtocol)];
         
@@ -254,7 +254,7 @@ NSString *BDSKComputerName() {
     OSAtomicCompareAndSwap32Barrier(1, 0, (int32_t *)&shouldKeepRunning);
     NSConnection *conn = [NSConnection connectionWithRegisteredName:[BDSKSharingServer localConnectionName] host:nil];
     if(conn == nil)
-        NSLog(@"unable to get thread connection");
+        NSLog(@"-[%@ %@]: unable to get thread connection", [self class], NSStringFromSelector(_cmd));
     id proxy = [conn rootProxy];
     [proxy _cleanupBDSKSharingDOServer];   
 }
