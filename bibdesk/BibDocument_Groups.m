@@ -50,6 +50,7 @@
 #import "BibAppController.h"
 #import "BibTypeManager.h"
 #import "BDSKSharingBrowser.h"
+#import "BDSKSharedGroup.h"
 
 @implementation BibDocument (Groups)
 
@@ -179,7 +180,6 @@ The groupedPublications array is a subset of the publications array, developed b
 	while(rowIndexes != nil && rowIndex != NSNotFound){
         group = [self objectInGroupsAtIndex:rowIndex];
         if([sharedGroups containsObjectIdenticalTo:group]){
-            [(BDSKSharedGroup *)group scheduleStreamIfNecessary];
             [array addObjectsFromArray:[(BDSKSharedGroup *)group publications]];
         }
         rowIndex = [rowIndexes indexGreaterThanIndex:rowIndex];

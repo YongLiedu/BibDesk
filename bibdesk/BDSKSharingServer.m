@@ -43,13 +43,14 @@
 #import <SystemConfiguration/SystemConfiguration.h>
 #import "NSArray_BDSKExtensions.h"
 #import "BibItem.h"
+#import "BibDocument.h"
+#import <libkern/OSAtomic.h>
 
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <unistd.h>
 
 static id sharedInstance = nil;
-static uint32_t numberOfConnections = 0;
 
 // TXT record keys
 NSString *BDSKTXTPasswordKey = @"pass";
@@ -128,17 +129,18 @@ NSString *BDSKComputerName() {
     NSString *sharingName = [[OFPreferenceWrapper sharedPreferenceWrapper] objectForKey:BDSKSharingNameKey];
     if([NSString isEmptyString:sharingName])
         sharingName = BDSKComputerName();
+   
+    // this is for testing purposes, so we can run several apps on the same computer
+    if([[NSUserDefaults standardUserDefaults] boolForKey:@"BDSKEnableSharingWithSelfKey"]){
+        static int r = 0;
+        while (r == 0) r = rand() % 100;
+        sharingName = [NSString stringWithFormat:@"%@%i", sharingName, r];
+    }        
     return sharingName;
 }
 
-#warning change for release
-// this is for testing purposes, so we can run several apps on the same computer
-+ (NSString *)sharingServiceName;
-{
-    static int r = 0;
-    while (r == 0) r = rand() % 100;
-    return [NSString stringWithFormat:@"%@%i", [self sharingName], r];
-}
+// name for localhost thread connection
++ (NSString *)localConnectionName { return [[self class] description]; }
 
 + (id)defaultServer;
 {
@@ -146,8 +148,6 @@ NSString *BDSKComputerName() {
         sharedInstance = [[self alloc] init];
     return sharedInstance;
 }
-
-+ (NSNumber *)numberOfConnections { return [NSNumber numberWithUnsignedInt:numberOfConnections]; }
 
 - (id)init
 {
@@ -161,8 +161,46 @@ NSString *BDSKComputerName() {
                                                  selector:@selector(handlePasswordChangedNotification:)
                                                      name:BDSKSharingPasswordChangedNotification
                                                    object:nil];
+        
+#warning use other notifications?
+        [[NSNotificationCenter defaultCenter] addObserver:self
+                                                 selector:@selector(handleBibItemAddDelNotification:)
+                                                     name:BDSKDocAddItemNotification
+                                                   object:nil];
+
+        [[NSNotificationCenter defaultCenter] addObserver:self
+                                                 selector:@selector(handleBibItemAddDelNotification:)
+                                                     name:BDSKDocDelItemNotification
+                                                   object:nil];
+        
+        notifyTable = [[NSMutableSet alloc] init];
+        shouldKeepRunning = 1;
     }
     return self;
+}
+
+- (void)dealloc
+{
+    [[NSNotificationCenter defaultCenter] removeObserver:self];
+    [connection release];
+    [notifyTable release];
+    [super dealloc];
+}
+
+- (NSNumber *)numberOfConnections { return [NSNumber numberWithUnsignedInt:[notifyTable count]]; }
+
+// we'll get this on the main thread, and pass it off to our secondary thread to notify everyone else
+- (void)handleBibItemAddDelNotification:(NSNotification *)note;
+{
+    // not the default connection here; we want to call our background thread, but only if it's running
+    if(shouldKeepRunning == 1){
+        NSConnection *conn = [NSConnection connectionWithRegisteredName:[BDSKSharingServer localConnectionName] host:nil];
+        if(conn == nil)
+            NSLog(@"unable to get thread connection");
+        id proxy = [conn rootProxy];
+        [proxy setProtocolForProxy:@protocol(BDSKSharingProtocol)];
+        [proxy notifyObserversOfChange];
+    }
 }
 
 //  handle changes from the OS
@@ -186,21 +224,130 @@ NSString *BDSKComputerName() {
 
 #pragma mark Exporting our data
 
+#warning remove observers when necessary (browser notification?)
+
+- (oneway void)notifyObserversOfChange
+{
+    // here is where we notify other hosts that something changed
+    NSEnumerator *e = [[NSSet setWithSet:notifyTable] objectEnumerator];
+    NSDictionary *info;
+    while(info = [e nextObject]){
+        NSString *hostName = [info objectForKey:@"hostname"];
+        NSString *portName = [info objectForKey:@"portname"];
+        NSPort *sendPort = [[NSSocketPortNameServer sharedInstance] portForName:portName host:hostName];
+        
+        NSConnection *conn = nil;
+        id proxyObject;
+        @try {
+            conn = [NSConnection connectionWithReceivePort:nil sendPort:sendPort];
+            proxyObject = [conn rootProxy];
+        }
+        @catch (id exception) {
+            NSLog(@"client: %@", exception);
+            conn = nil;
+            proxyObject = nil;
+        }
+        [proxyObject setProtocolForProxy:@protocol(BDSKClientProtocol)];
+        if(proxyObject)
+            [proxyObject setNeedsUpdate:YES];
+        else
+            NSLog(@"server: unable to get proxy object for shared group");
+    }
+        
+}
+
+- (oneway void)registerHostNameForNotifications:(NSDictionary *)info
+{
+    [notifyTable addObject:info];
+}
+
+- (void)_cleanupBDSKSharingDOServer
+{
+    [[NSSocketPortNameServer sharedInstance] removePortForName:[BDSKSharingServer sharingName]];
+    [connection invalidate];
+    [connection setRootObject:nil];
+    [connection release];
+    connection = nil;
+    
+    // default connection retains us as well
+    [[NSConnection defaultConnection] setRootObject:nil];
+    [[NSConnection defaultConnection] registerName:nil];
+    
+    // this seems dirty, but we need to unblock and allow the thread to release us
+    CFRunLoopStop( CFRunLoopGetCurrent() );
+}
+    
+- (void)stopDOServer
+{
+    // we're in the main thread, so set the stop flag
+    // the connect to the remote port should tickle the runloop and cause the thread to exit after cleanup
+    OSAtomicCompareAndSwap32Barrier(1, 0, (int32_t *)&shouldKeepRunning);
+    NSConnection *conn = [NSConnection connectionWithRegisteredName:[BDSKSharingServer localConnectionName] host:nil];
+    if(conn == nil)
+        NSLog(@"unable to get thread connection");
+    id proxy = [conn rootProxy];
+    [proxy _cleanupBDSKSharingDOServer];   
+    [notifyTable removeAllObjects];
+}
+
+- (void)runDOServer
+{
+
+    NSAutoreleasePool *pool = [NSAutoreleasePool new];
+
+    OSAtomicCompareAndSwap32Barrier(0, 1, (int32_t *)&shouldKeepRunning);
+    
+    // setup our DO server that will handle requests for publications and passwords
+    NSSocketPort *receivePort = [[[NSSocketPort alloc] init] autorelease];
+    @try {
+        if([[NSSocketPortNameServer sharedInstance] registerPort:receivePort name:[BDSKSharingServer sharingName]] == NO)
+            @throw [NSString stringWithFormat:@"Unable to register port %@ and name %@", receivePort, [BDSKSharingServer sharingName]];
+        connection = [[NSConnection alloc] initWithReceivePort:receivePort sendPort:nil];
+        [connection setRootObject:self];
+        
+        // we'll use this to communicate between threads on the localhost
+        // @@ does this succeed after a stop/restart with a new thread?
+        NSConnection *threadConnection = [NSConnection defaultConnection];
+        if(threadConnection == nil)
+            @throw @"Unable to get default connection";
+        [threadConnection setRootObject:self];
+        if([threadConnection registerName:[BDSKSharingServer localConnectionName]] == NO)
+            @throw @"Unable to register local connection";
+
+        do {
+            [pool release];
+            pool = [NSAutoreleasePool new];
+            CFRunLoopRun();
+        } while (shouldKeepRunning == 1);
+    }
+    @catch(id exception) {
+        [connection release];
+        connection = nil;
+        NSLog(@"Discarding exception %@ raised in object %@", exception, self);
+        // reset the flag
+        OSAtomicCompareAndSwap32Barrier(1, 0, (int32_t *)&shouldKeepRunning);
+    }
+    
+    @finally {
+        [pool release];
+    }
+    
+}
+
 - (void)enableSharing
 {
-    if(netService && listeningSocket){
+    if(netService){
         // we're already sharing
         return;
     }
     
     uint16_t chosenPort = 0;
     
-    // Here, create the socket from traditional BSD socket calls, and then set up an NSFileHandle with that to listen for incoming connections.
+    // Here, create the socket from traditional BSD socket calls
     int fdForListening;
     struct sockaddr_in serverAddress;
     socklen_t namelen = sizeof(serverAddress);
     
-    // In order to use NSFileHandle's acceptConnectionInBackgroundAndNotify method, we need to create a file descriptor that is itself a socket, bind that socket, and then set it up for listening. At this point, it's ready to be handed off to acceptConnectionInBackgroundAndNotify.
     if((fdForListening = socket(AF_INET, SOCK_STREAM, 0)) > 0) {
         memset(&serverAddress, 0, sizeof(serverAddress));
         serverAddress.sin_family = AF_INET;
@@ -219,50 +366,34 @@ NSString *BDSKComputerName() {
         }
         
         chosenPort = ntohs(serverAddress.sin_port);
-        
-        if(listen(fdForListening, 1) == 0) {
-            listeningSocket = [[NSFileHandle alloc] initWithFileDescriptor:fdForListening closeOnDealloc:YES];
-        }
     }
     
-    if(!netService) {
-        // lazily instantiate the NSNetService object that will advertise on our behalf
-        netService = [[NSNetService alloc] initWithDomain:@"" type:BDSKNetServiceDomain name:[BDSKSharingServer sharingServiceName] port:chosenPort];
-        [netService setDelegate:self];
-        NSMutableDictionary *dictionary = [NSMutableDictionary dictionaryWithCapacity:4];
-        [dictionary setObject:[BDSKSharingBrowser uniqueIdentifier] forKey:BDSKTXTUniqueIdentifierKey];
-        [dictionary setObject:@"0" forKey:BDSKTXTVersionKey];
-        [dictionary setObject:[BDSKSharingServer sharingName] forKey:BDSKTXTComputerNameKey];
+    // lazily instantiate the NSNetService object that will advertise on our behalf
+    netService = [[NSNetService alloc] initWithDomain:@"" type:BDSKNetServiceDomain name:[BDSKSharingServer sharingName] port:chosenPort];
+    [netService setDelegate:self];
+    NSMutableDictionary *dictionary = [NSMutableDictionary dictionaryWithCapacity:4];
+#warning remove?
+    // computer name should be always up-to-date and unique now
+    [dictionary setObject:[BDSKSharingBrowser uniqueIdentifier] forKey:BDSKTXTUniqueIdentifierKey];
+    [dictionary setObject:@"0" forKey:BDSKTXTVersionKey];
+    [dictionary setObject:[BDSKSharingServer sharingName] forKey:BDSKTXTComputerNameKey];
+    [netService setTXTRecordData:[NSNetService dataFromTXTRecordDictionary:dictionary]];
+    
+    [NSThread detachNewThreadSelector:@selector(runDOServer) toTarget:self withObject:nil];
+    
+    // our DO server will also use Bonjour, but this gives us a browseable name
+    [netService publish];
 
-        if([[OFPreferenceWrapper sharedPreferenceWrapper] boolForKey:BDSKSharingRequiresPasswordKey]){
-            NSData *pwData = [BDSKPasswordController sharingPasswordForCurrentUserUnhashed];
-            // hash with sha1 so we're not sending it in the clear
-            if(pwData != nil)
-                [dictionary setObject:[pwData sha1Signature] forKey:BDSKTXTPasswordKey];
-        }
-        NSData *TXTData = [NSNetService dataFromTXTRecordDictionary:dictionary];
-        OBPOSTCONDITION(TXTData != nil);
-        [netService setTXTRecordData:TXTData];
-    }
-    
-    if(netService && listeningSocket){
-        [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(connectionReceived:) name:NSFileHandleConnectionAcceptedNotification object:listeningSocket];
-        [listeningSocket acceptConnectionInBackgroundAndNotify];
-        [netService publish];
-    }
 }
 
 - (void)disableSharing
 {
-    if(netService && listeningSocket){
+    if(netService != nil && shouldKeepRunning == 1){
         [netService stop];
         [netService release];
         netService = nil;
-        [[NSNotificationCenter defaultCenter] removeObserver:self name:NSFileHandleConnectionAcceptedNotification object:listeningSocket];
-        // There is at present no way to get an NSFileHandle to -stop- listening for events, so we'll just have to tear it down and recreate it the next time we need it.
-        [listeningSocket release];
-        listeningSocket = nil;
-        numberOfConnections = 0;
+        
+        [self stopDOServer];
     }
 }
 
@@ -326,29 +457,27 @@ NSString *BDSKComputerName() {
 
 - (void)netServiceDidStop:(NSNetService *)sender
 {
-    // We'll need to release the NSNetService sending this, since we want to recreate it in sync with the socket at the other end. Since there's only the one NSNetService in this application, we can just release it.
+    // We'll need to release the NSNetService sending this, since we want to recreate it in sync with the socket at the other end. Since there's only the one NSNetService in this server, we can just release it.
     [netService release];
     netService = nil;
 }
 
 - (NSArray *)snapshotOfPublications
 {
-    NSEnumerator *docE = [[[NSDocumentController sharedDocumentController] documents] objectEnumerator];
-    NSMutableSet *set = [(id)CFSetCreateMutable(CFAllocatorGetDefault(), 0, &BDSKBibItemEqualityCallBacks) autorelease];
-    id document = nil;
-    while(document = [docE nextObject])
-        [set addObjectsFromArray:[document publications]];
+    NSMutableSet *set = nil;
+    
+    @synchronized([NSDocumentController sharedDocumentController]){
+        NSEnumerator *docE = [[[[[NSDocumentController sharedDocumentController] documents] copy] autorelease] objectEnumerator];
+        set = [(id)CFSetCreateMutable(CFAllocatorGetDefault(), 0, &BDSKBibItemEqualityCallBacks) autorelease];
+        id document = nil;
+        while(document = [docE nextObject])
+            [set addObjectsFromArray:[document publications]];
+    }
     return [set allObjects];
 }
 
-// This object is also listening for notifications from its NSFileHandle.
-// When an incoming connection is seen by the listeningSocket object, we get the NSFileHandle representing the near end of the connection. We write the data to this NSFileHandle instance.
-- (void)connectionReceived:(NSNotification *)aNotification{
-
-    // @@ this is not decremented properly; we'd need a two-way connection to keep track for real, I think
-    numberOfConnections++;
-    
-    NSFileHandle *incomingConnection = [[aNotification userInfo] objectForKey:NSFileHandleNotificationFileHandleItem];
+- (NSData *)archivedSnapshotOfPublications
+{
     NSData *dataToSend = [NSKeyedArchiver archivedDataWithRootObject:[self snapshotOfPublications]];
     if(dataToSend != nil){
         // If we want to make this cross-platform (say if JabRef wanted to add Bonjour support), we could pass BibTeX as another key in the dictionary, and use an XML plist for reading at the other end
@@ -360,12 +489,7 @@ NSString *BDSKComputerName() {
             [errorString release];
         }
     }
-    if(dataToSend != nil)
-        [incomingConnection writeData:dataToSend];
-    else
-        NSLog(@"Unknown error occurred; no data to share.");
-    [incomingConnection closeFile];
-    [[aNotification object] acceptConnectionInBackgroundAndNotify];
+    return dataToSend;
 }
 
 @end

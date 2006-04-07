@@ -415,6 +415,8 @@ NSString *BDSKWeblocFilePboardType = @"CorePasteboardFlavorType 0x75726C20";
     [lastSelectedColumnForSort release];
     [sortGroupsKey release];
 	[promisedPboardTypes release];
+    // @@ hack
+    [sharedGroups makeObjectsPerformSelector:@selector(stopDOServer)];
     [sharedGroups release];
     [super dealloc];
 }

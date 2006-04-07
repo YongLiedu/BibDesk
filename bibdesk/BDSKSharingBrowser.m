@@ -42,6 +42,7 @@
 #import "BDSKGroup.h"
 #import "NSArray_BDSKExtensions.h"
 #import "BDSKSharingServer.h"
+#import "BDSKSharedGroup.h"
 
 // @@ register with http://www.dns-sd.org/ServiceTypes.html
 NSString *BDSKNetServiceDomain = @"_bdsk._tcp.";
@@ -89,7 +90,7 @@ static BDSKSharingBrowser *sharedBrowser = nil;
     // In general, we want to ignore our own shared services, as the write/read occur on the same run loop, and our file handle blocks; hence, we listen here for the resolve and then check the TXT record to see where the service came from.
 
     // Ignore our own services; quit/relaunch opening the same doc  can give us a stale service (from the previous run).  Since SystemConfiguration guarantees that we have a unique computer name, this should be safe.
-    if([[BDSKSharingServer sharingServiceName] isEqual:[aNetService name]] == NO){
+    if([[BDSKSharingServer sharingName] isEqual:[aNetService name]] == NO){
 
         // WARNING:  enabling sharing with self can lead to hangs if you use a large file; launching a separate BibDesk process should work around that
         

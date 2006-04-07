@@ -554,6 +554,8 @@
 		F92ECBF509DF09DA00A244D0 /* BDSKPasswordController.m in Sources */ = {isa = PBXBuildFile; fileRef = F92ECBF309DF09DA00A244D0 /* BDSKPasswordController.m */; };
 		F92ED7CC09E0A93400A244D0 /* BDSKSharingServer.h in Headers */ = {isa = PBXBuildFile; fileRef = F92ED7CA09E0A93400A244D0 /* BDSKSharingServer.h */; };
 		F92ED7CD09E0A93400A244D0 /* BDSKSharingServer.m in Sources */ = {isa = PBXBuildFile; fileRef = F92ED7CB09E0A93400A244D0 /* BDSKSharingServer.m */; };
+		F92EF32209E6242200A244D0 /* BDSKSharedGroup.h in Headers */ = {isa = PBXBuildFile; fileRef = F92EF32009E6242100A244D0 /* BDSKSharedGroup.h */; };
+		F92EF32309E6242200A244D0 /* BDSKSharedGroup.m in Sources */ = {isa = PBXBuildFile; fileRef = F92EF32109E6242100A244D0 /* BDSKSharedGroup.m */; };
 		F92F4E450788DEC5001B8F82 /* BibPref_Files.nib in Resources */ = {isa = PBXBuildFile; fileRef = F92F4E430788DEC5001B8F82 /* BibPref_Files.nib */; };
 		F92F4E470788DEDD001B8F82 /* genericBibDocIcon.tiff in Resources */ = {isa = PBXBuildFile; fileRef = F92F4E460788DEDD001B8F82 /* genericBibDocIcon.tiff */; };
 		F92F4E4E0788DEFC001B8F82 /* BibPref_Files.h in Headers */ = {isa = PBXBuildFile; fileRef = F92F4E4C0788DEFC001B8F82 /* BibPref_Files.h */; };
@@ -1073,7 +1075,7 @@
 		3DFF35600816B55B0052F37C /* forward_small.tiff */ = {isa = PBXFileReference; lastKnownFileType = image.tiff; name = forward_small.tiff; path = Images/forward_small.tiff; sourceTree = "<group>"; };
 		3DFF35620816B5780052F37C /* reload_small.tiff */ = {isa = PBXFileReference; lastKnownFileType = image.tiff; name = reload_small.tiff; path = Images/reload_small.tiff; sourceTree = "<group>"; };
 		8D1107310486CEB800E47090 /* Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
-		8D1107320486CEB800E47090 /* BibDesk.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = BibDesk.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		8D1107320486CEB800E47090 /* BibDesk.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = BibDesk.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		CE1A7ED4090BDEB600ACC864 /* BDSKHeaderPopUpButtonCell.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BDSKHeaderPopUpButtonCell.h; sourceTree = "<group>"; };
 		CE1A7ED5090BDEB600ACC864 /* BDSKHeaderPopUpButtonCell.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BDSKHeaderPopUpButtonCell.m; sourceTree = "<group>"; };
 		CE1A7EDD090BDF1C00ACC864 /* BDSKHeaderPopUpButton.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BDSKHeaderPopUpButton.h; sourceTree = "<group>"; };
@@ -1364,6 +1366,8 @@
 		F92ECBF309DF09DA00A244D0 /* BDSKPasswordController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BDSKPasswordController.m; sourceTree = "<group>"; };
 		F92ED7CA09E0A93400A244D0 /* BDSKSharingServer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BDSKSharingServer.h; sourceTree = "<group>"; };
 		F92ED7CB09E0A93400A244D0 /* BDSKSharingServer.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BDSKSharingServer.m; sourceTree = "<group>"; };
+		F92EF32009E6242100A244D0 /* BDSKSharedGroup.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BDSKSharedGroup.h; sourceTree = "<group>"; };
+		F92EF32109E6242100A244D0 /* BDSKSharedGroup.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BDSKSharedGroup.m; sourceTree = "<group>"; };
 		F92F4E440788DEC5001B8F82 /* English */ = {isa = PBXFileReference; lastKnownFileType = wrapper.nib; name = English; path = English.lproj/BibPref_Files.nib; sourceTree = "<group>"; };
 		F92F4E460788DEDD001B8F82 /* genericBibDocIcon.tiff */ = {isa = PBXFileReference; lastKnownFileType = image.tiff; name = genericBibDocIcon.tiff; path = Images/genericBibDocIcon.tiff; sourceTree = "<group>"; };
 		F92F4E4C0788DEFC001B8F82 /* BibPref_Files.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = BibPref_Files.h; sourceTree = "<group>"; };
@@ -1862,6 +1866,7 @@
 				CE51914A09E5615300E97C3A /* BDSKRegExFindPattern.m */,
 				CED65AB30906BCC6003EED90 /* BDSKScriptHook.m */,
 				F925332208FC9FB80045D563 /* BDSKSearchIndex.m */,
+				F92EF32109E6242100A244D0 /* BDSKSharedGroup.m */,
 				F9025DAA0969AB69008A551C /* BDSKStringNode.m */,
 				F9022C60075802E300C3F701 /* BibAuthor.m */,
 				F9022C6E075802E300C3F701 /* BibItem.m */,
@@ -2108,6 +2113,7 @@
 				F9EF21B208B1572500AAC9A9 /* BDSKScrollableTextField.h */,
 				F925332108FC9FB80045D563 /* BDSKSearchIndex.h */,
 				F925352708FDFAE40045D563 /* BDSKSearchResult.h */,
+				F92EF32009E6242100A244D0 /* BDSKSharedGroup.h */,
 				CE6FB32009DFFCB5005E3E14 /* BDSKSharingBrowser.h */,
 				F92ED7CA09E0A93400A244D0 /* BDSKSharingServer.h */,
 				F9022C59075802E300C3F701 /* BDSKShellTask.h */,
@@ -2484,6 +2490,7 @@
 				CE518F2709E526E000E97C3A /* BDSKTextViewFindController.h in Headers */,
 				CE51914D09E5615400E97C3A /* BDSKRegExFindPattern.h in Headers */,
 				CE51922009E5755600E97C3A /* BDSKFindFieldEditor.h in Headers */,
+				F92EF32209E6242200A244D0 /* BDSKSharedGroup.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -3404,6 +3411,7 @@
 				CE518F2809E526E000E97C3A /* BDSKTextViewFindController.m in Sources */,
 				CE51914C09E5615400E97C3A /* BDSKRegExFindPattern.m in Sources */,
 				CE51922109E5755600E97C3A /* BDSKFindFieldEditor.m in Sources */,
+				F92EF32309E6242200A244D0 /* BDSKSharedGroup.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

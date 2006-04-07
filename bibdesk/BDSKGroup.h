@@ -247,21 +247,3 @@
 - (NSArray *)filterItems:(NSArray *)items;
 
 @end
-
-@interface BDSKSharedGroup : BDSKGroup
-{
-    NSNetService *service;
-    NSMutableData *data;
-    NSArray *publications;
-    BOOL downloadComplete;
-    
-    NSInputStream *inputStream;
-}
-
-- (id)initWithService:(NSNetService *)aService;
-- (void)scheduleStreamIfNecessary;
-- (NSArray *)publications;
-- (NSNetService *)service;
-- (void)closeInputStream;
-
-@end

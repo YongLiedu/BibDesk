@@ -97,7 +97,7 @@
     
     [sharedNameField setStringValue:[BDSKSharingServer sharingName]];
     if([defaults boolForKey:BDSKShouldShareFilesKey]){
-        NSNumber *number = [BDSKSharingServer numberOfConnections];
+        NSNumber *number = [[BDSKSharingServer defaultServer] numberOfConnections];
         if([number intValue]  == 1)
             [statusField setStringValue:NSLocalizedString(@"Status:  On, 1 user connected", @"Bonjour sharing status")];
         else

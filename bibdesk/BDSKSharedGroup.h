@@ -1,8 +1,8 @@
 //
-//  BDSKSharingServer.h
+//  BDSKSharedGroup.h
 //  Bibdesk
 //
-//  Created by Adam Maxwell on 04/02/06.
+//  Created by Adam Maxwell on 04/03/06.
 /*
  This software is Copyright (c) 2006
  Adam Maxwell. All rights reserved.
@@ -37,51 +37,26 @@
  */
 
 #import <Cocoa/Cocoa.h>
+#import "BDSKGroup.h"
 
-extern NSString *BDSKTXTPasswordKey;
-extern NSString *BDSKTXTUniqueIdentifierKey;
-extern NSString *BDSKTXTComputerNameKey;
-extern NSString *BDSKTXTVersionKey;
-
-#define DO_TCP_PORT 64000
-
-extern NSString *BDSKSharedArchivedDataKey;
-
-// implemented by the shared group
-@protocol BDSKClientProtocol
-
-- (oneway void)setNeedsUpdate:(BOOL)flag;
-
-@end
-
-// implemented by the server
-@protocol BDSKSharingProtocol
-
-- (NSData *)archivedSnapshotOfPublications;
-- (oneway void)registerHostNameForNotifications:(NSDictionary *)info;
-- (NSArray *)snapshotOfPublications;
-- (oneway void)notifyObserversOfChange;
-
-@end
-
-@interface BDSKSharingServer : NSObject <BDSKSharingProtocol> {
+@interface BDSKSharedGroup : BDSKGroup
+{
+    NSNetService *service;
+    NSArray *publications;
     NSConnection *connection;
-    
-    NSNetService *netService;
-    NSFileHandle *listeningSocket;
-    NSMutableSet *notifyTable;
+    BOOL needsUpdate;
     volatile int32_t shouldKeepRunning __attribute__ ((aligned (4)));
+
+    NSString *serverSharingName;
+    NSString *localConnectionName;
 }
 
-+ (id)defaultServer;
-+ (NSString *)sharingName;
-- (NSNumber *)numberOfConnections;
+- (id)initWithService:(NSNetService *)aService;
+- (NSArray *)publications;
+- (NSNetService *)service;
 
-- (void)handleComputerNameChangedNotification:(NSNotification *)note;
-- (void)handlePasswordChangedNotification:(NSNotification *)note;
+- (void)stopDOServer;
+- (void)runDOServer;
 
-- (void)enableSharing;
-- (void)disableSharing;
-- (void)restartSharingIfNeeded;
 
 @end

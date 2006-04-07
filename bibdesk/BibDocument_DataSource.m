@@ -56,6 +56,7 @@
 #import "NSFileManager_ExtendedAttributes.h"
 #import "NSSet_BDSKExtensions.h"
 #import "BibEditor.h"
+#import "BDSKSharedGroup.h"
 
 @implementation BibDocument (DataSource)
 
