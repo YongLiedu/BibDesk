@@ -418,6 +418,18 @@ NSString *BDSKComputerName() {
 #pragma mark -
 #pragma mark Server Thread
 
+- (BOOL)connection:(NSConnection *)parentConnection shouldMakeNewConnection:(NSConnection *)newConnection
+{
+    // set the child connection's delegate so we get authentication messages
+    [newConnection setDelegate:self];
+    return YES;
+}
+
+- (BOOL)authenticateComponents:(NSArray *)components withData:(NSData *)authenticationData
+{
+    return ([authenticationData isEqual:[[BDSKPasswordController sharingPasswordForCurrentUserUnhashed] sha1Signature]]);
+}
+
 // don't put these in a category, since we have formal protocols to deal with
 
 - (void)runDOServer
@@ -436,6 +448,9 @@ NSString *BDSKComputerName() {
             @throw [NSString stringWithFormat:@"Unable to register port %@ and name %@", receivePort, [BDSKSharingServer sharingName]];
         connection = [[NSConnection alloc] initWithReceivePort:receivePort sendPort:nil];
         [connection setRootObject:self];
+        
+        // so we get connection:shouldMakeNewConnection: messages
+        [connection setDelegate:self];
         
         // we'll use this to communicate between threads on the localhost
         // @@ does this succeed after a stop/restart with a new thread?

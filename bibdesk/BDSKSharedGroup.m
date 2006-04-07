@@ -115,6 +115,36 @@
     [proxy _cleanupBDSKSharedGroupDOServer];
 }
 
+- (BOOL)connection:(NSConnection *)parentConnection shouldMakeNewConnection:(NSConnection *)newConnection
+{
+    // set the child connection's delegate so we get authentication messages
+    [newConnection setDelegate:self];
+    return YES;
+}
+
+- (void)runPasswordPrompt
+{
+    NSAssert([NSThread inMainThread] == 1, @"password controller must be run from the main thread");
+    BDSKPasswordController *pwc = [[BDSKPasswordController alloc] init];
+    [pwc runModalForName:[BDSKPasswordController keychainServiceNameWithComputerName:[self name]]];
+    [pwc close];
+    [pwc release];
+}
+
+- (NSData *)authenticationDataForComponents:(NSArray *)components;
+{
+    NSData *password = [BDSKPasswordController passwordHashedForKeychainServiceName:[BDSKPasswordController keychainServiceNameWithComputerName:[self name]]];
+
+    if(password == nil){
+        NSLog(@"no password, need to prompt; thread is %@", [NSThread currentThread]);
+        [self performSelectorOnMainThread:@selector(runPasswordPrompt) withObject:nil waitUntilDone:YES];
+        NSLog(@"retrying password from keychain...");
+        password = [BDSKPasswordController passwordHashedForKeychainServiceName:[BDSKPasswordController keychainServiceNameWithComputerName:[self name]]];
+    }
+    
+    return password;
+}
+
 - (void)runDOServer;
 {
         
@@ -133,6 +163,9 @@
         
         // connection retains us also...
         [connection setRootObject:self];
+        
+        // for authentication
+        [connection setDelegate:self];
         
         // we'll use this to communicate between threads on the localhost
         // @@ does this succeed after a stop/restart with a new thread?
@@ -237,7 +270,7 @@
     }
 }
 
-- (NSString *)name { return [service name]; }
+- (NSString *)name { return [[[service name] retain] autorelease]; }
 
 
 - (NSString *)description
