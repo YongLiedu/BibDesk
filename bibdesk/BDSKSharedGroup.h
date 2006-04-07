@@ -46,6 +46,7 @@
     NSConnection *connection;
     BOOL needsUpdate;
     volatile int32_t shouldKeepRunning __attribute__ ((aligned (4)));
+    volatile int32_t isRetrieving __attribute__ ((aligned (4)));
 
     NSString *serverSharingName;
     NSString *localConnectionName;

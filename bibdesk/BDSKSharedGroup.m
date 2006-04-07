@@ -44,6 +44,13 @@
 
 #import <libkern/OSAtomic.h>
 
+@interface BDSKSharedGroup (ServerThread)
+
+- (void)_cleanupBDSKSharedGroupDOServer;
+- (void)_retrievePublicationsBDSKSharedGroupDOServer;
+
+@end
+
 @implementation BDSKSharedGroup
 
 - (id)initWithService:(NSNetService *)aService;
@@ -61,6 +68,7 @@
         // this just needs to be unique on localhost
         localConnectionName = [[NSString alloc] initWithFormat:@"%@%d", [[self class] description], connectionIdx++];
         shouldKeepRunning = 1;
+        isRetrieving = 0;
         
         [NSThread detachNewThreadSelector:@selector(runDOServer) toTarget:self withObject:nil];
     }
@@ -87,7 +95,7 @@
 
 /* @@ Warning: retain cycle, since the NSThread we detach in -init retains us (and we keep running it).  Best option may be to convert this server to a separate object, and each shared group will "own" one, and then stop it when the group is deallocated.  For now, we have the document (owner) call stopDOServer when releasing the groups. */
 
-- (void)_cleanupBDSKSharedGroupDOServer
+- (void)_cleanupBDSKSharedGroupDOServer;
 {
     // must be on the background thread, or the connection won't be removed from the correct run loop
     [[NSSocketPortNameServer sharedInstance] removePortForName:serverSharingName];
@@ -151,7 +159,6 @@
     NSAutoreleasePool *pool = [NSAutoreleasePool new];
     
     OSAtomicCompareAndSwap32Barrier(0, 1, (int32_t *)&shouldKeepRunning);
-    
     NSSocketPort *receivePort = [[[NSSocketPort alloc] init] autorelease];
     
     @try {
@@ -164,8 +171,7 @@
         // connection retains us also...
         [connection setRootObject:self];
         
-        // for authentication
-        [connection setDelegate:self];
+        // don't set the delegate, as we don't authenticate connections here (this connection won't be used if we can't authenticate in the first place)
         
         // we'll use this to communicate between threads on the localhost
         // @@ does this succeed after a stop/restart with a new thread?
@@ -197,8 +203,20 @@
 
 - (void)retrievePublications;
 {
+    NSConnection *conn = [NSConnection connectionWithRegisteredName:localConnectionName host:nil];
+    if(conn == nil)
+        NSLog(@"unable to get thread connection");
+    id proxy = [conn rootProxy];
+    [proxy _retrievePublicationsBDSKSharedGroupDOServer]; 
+}
+
+- (void)_retrievePublicationsBDSKSharedGroupDOServer;
+{
     NSAutoreleasePool *pool = [NSAutoreleasePool new];
     
+    OSAtomicCompareAndSwap32Barrier(1, 0, (int32_t *)&shouldKeepRunning);
+    OSAtomicCompareAndSwap32Barrier(1, 0, (int32_t *)&isRetrieving);
+
     @try {
         NSConnection *conn = nil;
         id proxyObject;
@@ -216,18 +234,17 @@
             NSLog(@"client: unable to look up server");
         @try {
             conn = [NSConnection connectionWithReceivePort:nil sendPort:sendPort];
+            // ask for password
+            [conn setDelegate:self];
             proxyObject = [conn rootProxy];
         }
+#warning auth failure
+        // what should we do when we catch an authentication failure exception?
         @catch (id exception) {
             NSLog(@"client: %@", exception);
             conn = nil;
             proxyObject = nil;
         }
-        if(proxyObject == nil)
-            NSLog(@"client: getting proxy failed");
-        else
-            NSLog(@"client: proxy is %@", proxyObject);
-        
         
         [proxyObject setProtocolForProxy:@protocol(BDSKSharingProtocol)];
         
@@ -267,6 +284,7 @@
     }
     @finally{
         [pool release];
+        OSAtomicCompareAndSwap32Barrier(0, 1, (int32_t *)&isRetrieving);
     }
 }
 
@@ -280,8 +298,8 @@
 
 - (NSArray *)publications
 {
-    if(needsUpdate == YES || publications == nil){
-        [NSThread detachNewThreadSelector:@selector(retrievePublications) toTarget:self withObject:nil];
+    if(isRetrieving == 0 && (needsUpdate == YES || publications == nil)){
+        [self retrievePublications];
     }
     // this will likely be nil the first time; retain since our server thread could release it at any time
     return [[publications retain] autorelease];
