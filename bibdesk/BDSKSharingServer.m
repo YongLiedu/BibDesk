@@ -51,6 +51,7 @@
 #include <unistd.h>
 
 static id sharedInstance = nil;
+static int localConnectionCount = 0;
 
 // TXT record keys
 NSString *BDSKTXTPasswordKey = @"pass";
@@ -127,7 +128,9 @@ NSString *BDSKComputerName() {
 }
 
 // name for localhost thread connection
-+ (NSString *)localConnectionName { return [[self class] description]; }
++ (NSString *)localConnectionName { 
+    return [NSString stringWithFormat:@"%@%d", [[self class] description], localConnectionCount]; 
+}
 
 + (id)defaultServer;
 {
@@ -324,7 +327,9 @@ NSString *BDSKComputerName() {
 {
     if([[OFPreferenceWrapper sharedPreferenceWrapper] boolForKey:BDSKShouldShareFilesKey]){
         [self disableSharing];
-        [self enableSharing];
+        
+        // give the server a moment to stop
+        [self performSelector:@selector(enableSharing) withObject:nil afterDelay:3.0];
     }
 }
 
@@ -444,6 +449,7 @@ NSString *BDSKComputerName() {
 {
     // detach a new thread to run this
     NSAssert([NSThread inMainThread] == NO, @"do not run the server in the main thread");
+    NSAssert(connection == nil, @"server is already running");
     
     NSAutoreleasePool *pool = [NSAutoreleasePool new];
     
@@ -466,6 +472,9 @@ NSString *BDSKComputerName() {
         if(threadConnection == nil)
             @throw @"Unable to get default connection";
         [threadConnection setRootObject:self];
+        
+        // @@ workaround: ensure that the name is unique, or else registerName: fails when we restart (in spite of explicitly deregistering it)
+        localConnectionCount++;
         if([threadConnection registerName:[BDSKSharingServer localConnectionName]] == NO)
             @throw @"Unable to register local connection";
         
@@ -478,6 +487,15 @@ NSString *BDSKComputerName() {
     @catch(id exception) {
         [connection release];
         connection = nil;
+        
+        [[NSConnection defaultConnection] setRootObject:nil];
+        [[NSConnection defaultConnection] registerName:nil];
+
+        // browsers shouldn't see us if this failed
+        [netService stop];
+        [netService release];
+        netService = nil;
+        
         NSLog(@"Discarding exception %@ raised in object %@", exception, self);
         // reset the flag
         OSAtomicCompareAndSwap32Barrier(1, 0, (int32_t *)&shouldKeepRunning);
