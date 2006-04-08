@@ -67,6 +67,7 @@
         serverSharingName = [[NSString alloc] initWithFormat:@"%@%@%d", [[NSHost currentHost] name], [[self class] description], connectionIdx++];
         // this just needs to be unique on localhost
         localConnectionName = [[NSString alloc] initWithFormat:@"%@%d", [[self class] description], connectionIdx++];
+
         mainThreadConnection = [[NSConnection alloc] initWithReceivePort:[NSPort port] sendPort:nil];
         [mainThreadConnection setRootObject:self];
         [mainThreadConnection enableMultipleThreads];
@@ -75,8 +76,11 @@
         flags.shouldKeepRunning = 1;
         flags.isRetrieving = 0;
         flags.authenticationFailed = 0;
-        
+        connection = nil;
+
+        // if we detach in -publications, connection setup doesn't happen in time
         [NSThread detachNewThreadSelector:@selector(runDOServer) toTarget:self withObject:nil];
+
     }
     
     return self;
@@ -85,10 +89,7 @@
 - (void)dealloc
 {
     [self stopDOServer];
-    [mainThreadConnection invalidate];
-    [mainThreadConnection setRootObject:nil];
-    [mainThreadConnection release];
-    
+
     [service release];
     [publications release];
     [serverSharingName release];
@@ -102,7 +103,7 @@
     needsUpdate = flag;
 }
 
-/* @@ Warning: retain cycle, since the NSThread we detach in -init retains us (and we keep running it).  Best option may be to convert this server to a separate object, and each shared group will "own" one, and then stop it when the group is deallocated.  For now, we have the document (owner) call stopDOServer when releasing the groups, which ensures that we are dealloced properly. */
+/* @@ Warning: retain cycle, since the NSThread retains us (and we keep running it).  Best option may be to convert this server to a separate object, and each shared group will "own" one, and then stop it when the group is deallocated.  For now, we have the document (owner) call stopDOServer when releasing the groups, which ensures that we are dealloced properly. */
 
 - (void)_cleanupBDSKSharedGroupDOServer;
 {
@@ -130,6 +131,11 @@
         NSLog(@"-[%@ %@]: unable to get thread connection", [self class], NSStringFromSelector(_cmd));
     id proxy = [conn rootProxy];
     [proxy _cleanupBDSKSharedGroupDOServer];
+        
+    [mainThreadConnection invalidate];
+    [mainThreadConnection setRootObject:nil];
+    [mainThreadConnection release];
+    mainThreadConnection = nil;
 }
 
 - (BOOL)connection:(NSConnection *)parentConnection shouldMakeNewConnection:(NSConnection *)newConnection
