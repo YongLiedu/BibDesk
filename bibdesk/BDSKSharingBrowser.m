@@ -126,9 +126,12 @@ static BDSKSharingBrowser *sharedBrowser = nil;
     BDSKSharedGroup *group;
     
     // create an array of the groups we should keep by comparing services with the one that just went away
-    while(group = [e nextObject])
+    while(group = [e nextObject]){
         if([[group service] isEqual:aNetService] == NO)
             [array addObject:group];
+        else
+            [group stopDOServer];
+    }
     
     [sharedGroups setArray:array];
     
