@@ -2638,6 +2638,7 @@
 				8D11072C0486CEB800E47090 /* Sources */,
 				8D11072E0486CEB800E47090 /* Frameworks */,
 				F9022E8B07580A7C00C3F701 /* CopyFiles */,
+				F9FF213B09E83BAB00BB1706 /* ShellScript */,
 				F920DB22075C2D40000C5FCA /* Rez */,
 				F91B5C4E076412A10011ED22 /* CopyFiles */,
 				F91E54660853576600208CDF /* ShellScript */,
@@ -3224,6 +3225,19 @@
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
 			shellScript = "##\n## This takes a while to generate, so it's not worth\n## the wait for development builds.\n##\nif [ ${BUILD_STYLE} = \"Debug\" ]; then\n# Check to see if a previous version exists and create it\n# if not, or else pbxcp will complain.\nif [ -f \"English.lproj/Localizable.strings\" ]; then\nexit 0\nfi\nfi\n#\n# Run the genstrings build phase\n#\ncd ${SOURCE_ROOT} && \\\nif [ -f \"English.lproj/Localizable.strings\" ]; then\nmv English.lproj/Localizable.strings English.lproj/Localizable.strings.bak \nfi\n/usr/bin/genstrings -o ${SOURCE_ROOT}/English.lproj \\\n-skipTable BibTeXKeys -skipTable ZoomValues \\\n`/usr/bin/find . -type file -name \"*.[mh]\"`";
+		};
+		F9FF213B09E83BAB00BB1706 /* ShellScript */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+			);
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "if [ ${BUILD_STYLE} = \"Debug\" ]; then\nexit 0\nfi\n\necho \"*** stripping header files from frameworks ***\"\ncd ${BUILT_PRODUCTS_DIR}/${FRAMEWORKS_FOLDER_PATH} && \\\nfind . -type file -name \"*.h\" -delete\nexit 0";
 		};
 /* End PBXShellScriptBuildPhase section */
 
