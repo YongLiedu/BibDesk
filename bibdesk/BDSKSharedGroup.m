@@ -379,7 +379,11 @@
 
 
 - (BOOL)containsItem:(BibItem *)item {
-    return [[self publications] containsObject:item];
+    // calling [self publications] will repeatedly reschedule a retrieval, which is undesirable if the user cancels; containsItem is called very frequently
+    NSArray *pubs = [publications retain];
+    BOOL rv = [pubs containsObject:item];
+    [pubs release];
+    return rv;
 }
 
 - (NSNetService *)service { return service; }
