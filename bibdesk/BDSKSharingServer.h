@@ -59,7 +59,6 @@ extern NSString *BDSKSharedArchivedDataKey;
 
 - (NSData *)archivedSnapshotOfPublications;
 - (oneway void)registerHostNameForNotifications:(bycopy NSDictionary *)info;
-- (bycopy NSArray *)snapshotOfPublications;
 - (oneway void)notifyObserversOfChange;
 - (oneway void)removeRemoteObserverNamed:(NSString *)computerName;
 
@@ -77,8 +76,10 @@ extern NSString *BDSKSharedArchivedDataKey;
 + (NSString *)sharingName;
 - (NSNumber *)numberOfConnections;
 
+- (void)handleSharedGroupsChangedNotification:(NSNotification *)note;
 - (void)handleComputerNameChangedNotification:(NSNotification *)note;
 - (void)handlePasswordChangedNotification:(NSNotification *)note;
+- (void)handleApplicationWillTerminate:(NSNotification *)note;
 
 - (void)enableSharing;
 - (void)disableSharing;

@@ -171,6 +171,11 @@ NSString *BDSKComputerName() {
                                                  selector:@selector(handleSharedGroupsChangedNotification:)
                                                      name:BDSKSharedGroupsChangedNotification
                                                    object:nil];
+        
+        [[NSNotificationCenter defaultCenter] addObserver:self
+                                                 selector:@selector(handleApplicationWillTerminate:)
+                                                     name:NSApplicationWillTerminateNotification
+                                                   object:nil];
 
         objectsToNotify = [[NSMutableDictionary alloc] init];
         shouldKeepRunning = 1;
@@ -382,6 +387,11 @@ NSString *BDSKComputerName() {
     // We'll need to release the NSNetService sending this, since we want to recreate it in sync with the socket at the other end. Since there's only the one NSNetService in this server, we can just release it.
     [netService release];
     netService = nil;
+}
+
+- (void)handleApplicationWillTerminate:(NSNotification *)note;
+{
+    [self disableSharing];
 }
 
 - (NSArray *)snapshotOfPublications
