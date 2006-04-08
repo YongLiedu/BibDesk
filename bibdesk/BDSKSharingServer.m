@@ -152,14 +152,23 @@ NSString *BDSKComputerName() {
                                                      name:BDSKSharingPasswordChangedNotification
                                                    object:nil];
         
-#warning use other notifications?
         [[NSNotificationCenter defaultCenter] addObserver:self
-                                                 selector:@selector(handleBibItemAddDelNotification:)
+                                                 selector:@selector(queueDataChangedNotification:)
+                                                     name:BDSKDocumentControllerAddDocumentNotification
+                                                   object:nil];
+
+        [[NSNotificationCenter defaultCenter] addObserver:self
+                                                 selector:@selector(queueDataChangedNotification:)
+                                                     name:BDSKDocumentControllerRemoveDocumentNotification
+                                                   object:nil];                                                       
+                                                       
+        [[NSNotificationCenter defaultCenter] addObserver:self
+                                                 selector:@selector(queueDataChangedNotification:)
                                                      name:BDSKDocAddItemNotification
                                                    object:nil];
 
         [[NSNotificationCenter defaultCenter] addObserver:self
-                                                 selector:@selector(handleBibItemAddDelNotification:)
+                                                 selector:@selector(queueDataChangedNotification:)
                                                      name:BDSKDocDelItemNotification
                                                    object:nil];
         
@@ -192,18 +201,26 @@ NSString *BDSKComputerName() {
     return [NSNumber numberWithUnsignedInt:[objectsToNotify count]]; 
 }
 
-// we'll get these notifications on the main thread, and pass off to our secondary thread to handle
-- (void)handleBibItemAddDelNotification:(NSNotification *)note;
+- (void)handleQueuedDataChanged;
 {
     // not the default connection here; we want to call our background thread, but only if it's running
-    if(shouldKeepRunning == 1){
+    // add a hidden pref in case this traffic turns us into a bad network citizen; manual updates will still work
+    if(shouldKeepRunning == 1 && [[NSUserDefaults standardUserDefaults] boolForKey:@"BDSKDisableRemoteChangeNotifications"] == 0){
         NSConnection *conn = [NSConnection connectionWithRegisteredName:[BDSKSharingServer localConnectionName] host:nil];
         if(conn == nil)
             NSLog(@"-[%@ %@]: unable to get thread connection", [self class], NSStringFromSelector(_cmd));
         id proxy = [conn rootProxy];
         [proxy setProtocolForProxy:@protocol(BDSKSharingProtocol)];
         [proxy notifyObserversOfChange];
-    }
+    }    
+}
+
+// we'll get these notifications on the main thread, and pass off to our secondary thread to handle; they're queued to reduce network traffic
+- (void)queueDataChangedNotification:(NSNotification *)note;
+{
+    SEL theSEL = @selector(handleQueuedDataChanged);
+    [NSObject cancelPreviousPerformRequestsWithTarget:self selector:theSEL object:nil];
+    [self performSelector:theSEL withObject:nil afterDelay:5.0];
 }
 
 - (void)handleSharedGroupsChangedNotification:(NSNotification *)note;

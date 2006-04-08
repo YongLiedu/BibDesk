@@ -76,6 +76,7 @@ extern NSString *BDSKSharedArchivedDataKey;
 + (NSString *)sharingName;
 - (NSNumber *)numberOfConnections;
 
+- (void)queueDataChangedNotification:(NSNotification *)note;
 - (void)handleSharedGroupsChangedNotification:(NSNotification *)note;
 - (void)handleComputerNameChangedNotification:(NSNotification *)note;
 - (void)handlePasswordChangedNotification:(NSNotification *)note;
