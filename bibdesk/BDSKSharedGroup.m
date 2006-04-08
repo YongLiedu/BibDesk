@@ -235,6 +235,11 @@
     [proxy _retrievePublicationsBDSKSharedGroupDOServer]; 
 }
 
+- (void)notifyOnMainThreadWhenDone
+{
+    [[NSNotificationCenter defaultCenter] postNotificationName:BDSKSharedGroupFinishedNotification object:self];
+}
+
 - (void)_retrievePublicationsBDSKSharedGroupDOServer;
 {
 
@@ -301,7 +306,17 @@
         [self setCount:[publications count]];
         if([publications count]){
             [self setNeedsUpdate:NO];
-            [[NSNotificationCenter defaultCenter] postNotificationName:BDSKSharedGroupFinishedNotification object:self];
+            
+            // post the notification on the main thread; this ends up calling UI updates
+            id proxy = nil;
+            @try {
+                proxy = [mainThreadConnection rootProxy];
+                [proxy notifyOnMainThreadWhenDone];
+            }
+            @catch(id exception) {
+                NSLog(@"Unable to connect to main thread and notify.");
+                proxy = nil;
+            }            
         }
     }
     @catch(id exception){
