@@ -67,6 +67,9 @@
         serverSharingName = [[NSString alloc] initWithFormat:@"%@%@%d", [[NSHost currentHost] name], [[self class] description], connectionIdx++];
         // this just needs to be unique on localhost
         localConnectionName = [[NSString alloc] initWithFormat:@"%@%d", [[self class] description], connectionIdx++];
+        mainThreadConnection = [[NSConnection alloc] initWithReceivePort:[NSPort port] sendPort:nil];
+        [mainThreadConnection setRootObject:self];
+        [mainThreadConnection enableMultipleThreads];
         
         // set up flags
         flags.shouldKeepRunning = 1;
@@ -82,6 +85,10 @@
 - (void)dealloc
 {
     [self stopDOServer];
+    [mainThreadConnection invalidate];
+    [mainThreadConnection setRootObject:nil];
+    [mainThreadConnection release];
+    
     [service release];
     [publications release];
     [serverSharingName release];
@@ -120,7 +127,7 @@
     OSAtomicCompareAndSwap32Barrier(1, 0, (int32_t *)&flags.shouldKeepRunning);
     NSConnection *conn = [NSConnection connectionWithRegisteredName:localConnectionName host:nil];
     if(conn == nil)
-        NSLog(@"unable to get thread connection");
+        NSLog(@"-[%@ %@]: unable to get thread connection", [self class], NSStringFromSelector(_cmd));
     id proxy = [conn rootProxy];
     [proxy _cleanupBDSKSharedGroupDOServer];
 }
@@ -132,6 +139,7 @@
     return YES;
 }
 
+// this must not be changed to (oneway); we need to wait for it to finish
 - (void)runPasswordPrompt
 {
     NSAssert([NSThread inMainThread] == 1, @"password controller must be run from the main thread");
@@ -141,19 +149,28 @@
     [pwc release];
 }
 
+// this can be called from any thread
 - (NSData *)authenticationDataForComponents:(NSArray *)components;
 {
     NSData *password = [BDSKPasswordController passwordHashedForKeychainServiceName:[BDSKPasswordController keychainServiceNameWithComputerName:[self name]]];
 
-    if(password == nil || flags.authenticationFailed == 1){
-        NSLog(@"no password, need to prompt; thread is %@", [NSThread currentThread]);
+    if(password == nil || flags.authenticationFailed == 1){   
         
-#warning FIXME this hangs, at least on localhost
-        [self performSelectorOnMainThread:@selector(runPasswordPrompt) withObject:nil waitUntilDone:YES];
-        NSLog(@"retrying password from keychain...");
+        // run the prompt on the main thread
+        id proxy = nil;
+        @try {
+            proxy = [mainThreadConnection rootProxy];
+            [proxy runPasswordPrompt];
+        }
+        @catch(id exception) {
+            NSLog(@"Unable to connect to main thread and run password prompt.");
+            proxy = nil;
+        }
+        
+        // retry from the keychain
         password = [BDSKPasswordController passwordHashedForKeychainServiceName:[BDSKPasswordController keychainServiceNameWithComputerName:[self name]]];
         
-        // reset this; the connection will change it back if we fail again
+        // assume we succeeded; the exception handler for the connection will change it back if we fail again
         OSAtomicCompareAndSwap32Barrier(1, 0, (int32_t *)&flags.authenticationFailed);
     }
     
@@ -213,7 +230,7 @@
 {
     NSConnection *conn = [NSConnection connectionWithRegisteredName:localConnectionName host:nil];
     if(conn == nil)
-        NSLog(@"unable to get thread connection");
+        NSLog(@"-[%@ %@]: unable to get thread connection", [self class], NSStringFromSelector(_cmd));
     id proxy = [conn rootProxy];
     [proxy _retrievePublicationsBDSKSharedGroupDOServer]; 
 }
@@ -266,9 +283,6 @@
         [publications autorelease];
         publications = nil;
 
-        // this is really slow, because it ends up copying each object; are these passed by reference?
-        //publications = [[proxyObject snapshotOfPublications] copy];
-        
         NSData *proxyData = [proxyObject archivedSnapshotOfPublications];
         
         if([proxyData length] != 0){

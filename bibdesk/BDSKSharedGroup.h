@@ -55,6 +55,7 @@ typedef struct _BDSKSharedGroupFlags {
 
     NSString *serverSharingName;
     NSString *localConnectionName;
+    NSConnection *mainThreadConnection;
 }
 
 - (id)initWithService:(NSNetService *)aService;
