@@ -172,7 +172,7 @@ NSString *BDSKComputerName() {
                                                      name:BDSKSharedGroupsChangedNotification
                                                    object:nil];
 
-        NSMutableDictionary *objectsToNotify = [[NSMutableDictionary alloc] init];
+        objectsToNotify = [[NSMutableDictionary alloc] init];
         shouldKeepRunning = 1;
     }
     return self;
