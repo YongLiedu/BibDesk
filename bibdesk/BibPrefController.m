@@ -284,6 +284,8 @@ NSString *BDSKSharedGroupFinishedNotification = @"BDSKSharedGroupFinishedNotific
 NSString *BDSKComputerNameChangedNotification = @"BDSKComputerNameChangedNotification";
 NSString *BDSKSharingNameChangedNotification = @"BDSKSharingNameChangedNotification";
 NSString *BDSKSharingPasswordChangedNotification = @"BDSKSharingPasswordChangedNotification";
+NSString *BDSKDocumentControllerAddDocumentNotification = @"BDSKDocumentControllerAddDocumentNotification";
+NSString *BDSKDocumentControllerRemoveDocumentNotification = @"BDSKDocumentControllerRemoveDocumentNotification";
 
 #pragma mark Exception name strings
 

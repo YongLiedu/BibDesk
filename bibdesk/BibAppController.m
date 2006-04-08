@@ -482,6 +482,18 @@
 
 #pragma mark Overridden NSDocumentController methods
 
+- (void)addDocument:(id)aDocument{
+    [super addDocument:aDocument];
+    [[NSNotificationCenter defaultCenter] postNotificationName:BDSKDocumentControllerAddDocumentNotification object:aDocument];
+}
+
+- (void)removeDocument:(id)aDocument{
+    [aDocument retain];
+    [super removeDocument:aDocument];
+    [[NSNotificationCenter defaultCenter] postNotificationName:BDSKDocumentControllerRemoveDocumentNotification object:aDocument];
+    [aDocument release];
+}
+
 - (BOOL) validateMenuItem:(NSMenuItem*)menuItem{
 	SEL act = [menuItem action];
 
