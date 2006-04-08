@@ -73,10 +73,8 @@
         [mainThreadConnection enableMultipleThreads];
         
         // set up flags
+        memset(&flags, 0, sizeof(flags));
         flags.shouldKeepRunning = 1;
-        flags.isRetrieving = 0;
-        flags.authenticationFailed = 0;
-        flags.canceledAuthentication = 0;
         connection = nil;
 
         // if we detach in -publications, connection setup doesn't happen in time
@@ -89,8 +87,6 @@
 
 - (void)dealloc
 {
-    [self stopDOServer];
-
     [service release];
     [publications release];
     [serverSharingName release];
@@ -156,39 +152,45 @@
     return rv;
 }
 
+- (int)runAuthenticationFailedAlert
+{
+    NSAssert([NSThread inMainThread] == 1, @"runAuthenticationFailedAlert must be run from the main thread");
+    return NSRunAlertPanel(NSLocalizedString(@"Authentication Failed", @""), [NSString stringWithFormat:NSLocalizedString(@"Incorrect password for BibDesk Sharing on server %@.  Reselect to try again.", @""), [service name]], nil, nil, nil);
+}
+
 // this can be called from any thread
 - (NSData *)authenticationDataForComponents:(NSArray *)components;
 {
     NSData *password = nil;
+    OSAtomicCompareAndSwap32Barrier(1, 0, (int32_t *)&flags.canceledAuthentication);
     
-    if(flags.canceledAuthentication == 0){   
-        
-        int rv = 1;
-        if(flags.authenticationFailed == 0)
-            password = [BDSKPasswordController passwordHashedForKeychainServiceName:[BDSKPasswordController keychainServiceNameWithComputerName:[self name]]];
+    int rv = 1;
+    if(flags.authenticationFailed == 0)
+        password = [BDSKPasswordController passwordHashedForKeychainServiceName:[BDSKPasswordController keychainServiceNameWithComputerName:[self name]]];
 
-        if(password == nil){   
-            
-            // run the prompt on the main thread
-            id proxy = nil;
-            @try {
-                proxy = [mainThreadConnection rootProxy];
-                rv = [proxy runPasswordPrompt];
-            }
-            @catch(id exception) {
-                NSLog(@"Unable to connect to main thread and run password prompt.");
-                proxy = nil;
-            }
-            
-            // retry from the keychain
-            if (rv == 1)
-                password = [BDSKPasswordController passwordHashedForKeychainServiceName:[BDSKPasswordController keychainServiceNameWithComputerName:[self name]]];
-            else
-                OSAtomicCompareAndSwap32Barrier(0, 1, (int32_t *)&flags.canceledAuthentication);
-            
-            // assume we succeeded; the exception handler for the connection will change it back if we fail again
-            OSAtomicCompareAndSwap32Barrier(1, 0, (int32_t *)&flags.authenticationFailed);
+    if(password == nil){   
+        
+        // run the prompt on the main thread
+        id proxy = nil;
+        @try {
+            // we have to create our own connection to the mainThreadConnection's ports
+            NSConnection *conn = [NSConnection connectionWithReceivePort:nil sendPort:[mainThreadConnection receivePort]];
+            proxy = [conn rootProxy];
+            rv = [proxy runPasswordPrompt];
         }
+        @catch(id exception) {
+            NSLog(@"Unable to connect to main thread and run password prompt.");
+            proxy = nil;
+        }
+        
+        // retry from the keychain
+        if (rv == BDSKPasswordReturn)
+            password = [BDSKPasswordController passwordHashedForKeychainServiceName:[BDSKPasswordController keychainServiceNameWithComputerName:[self name]]];
+        else
+            OSAtomicCompareAndSwap32Barrier(0, 1, (int32_t *)&flags.canceledAuthentication);
+        
+        // assume we succeeded; the exception handler for the connection will change it back if we fail again
+        OSAtomicCompareAndSwap32Barrier(1, 0, (int32_t *)&flags.authenticationFailed);
     }
     
     // doc says we're required to return empty NSData instead of nil
@@ -279,7 +281,7 @@
         NSPort *sendPort = [[NSSocketPortNameServer sharedInstance] portForName:portName host:[service hostName]];
         
         if(sendPort == nil)
-            NSLog(@"client: unable to look up server");
+            NSLog(@"client: unable to look up server %@", [service hostName]);
         @try {
             conn = [NSConnection connectionWithReceivePort:nil sendPort:sendPort];
             // ask for password
@@ -288,10 +290,22 @@
         }
         @catch (id exception) {
             // flag authentication failures so we get a prompt the next time around (in case our password was wrong)
-            if([exception respondsToSelector:@selector(name)] && [[exception name] isEqualToString:NSFailedAuthenticationException])
-                OSAtomicCompareAndSwap32Barrier(0, 1, (int32_t *)&flags.authenticationFailed);
-            else
+            // we also get this if the user canceled, since an empty data will be returned
+            if([exception respondsToSelector:@selector(name)] && [[exception name] isEqualToString:NSFailedAuthenticationException]){
+
+                // if the user didn't cancel, set an auth failure flag and show an alert
+                if(flags.canceledAuthentication == 0){
+                    OSAtomicCompareAndSwap32Barrier(0, 1, (int32_t *)&flags.authenticationFailed);
+
+                    conn = [NSConnection connectionWithReceivePort:nil sendPort:[mainThreadConnection receivePort]];
+                    proxyObject = [conn rootProxy];
+                    [proxyObject runAuthenticationFailedAlert];
+                }
+                
+            } else if(flags.canceledAuthentication == 0){
+                // don't log auth failures
                 NSLog(@"client: %@", exception);
+            }
             conn = nil;
             proxyObject = nil;
         }
@@ -327,7 +341,8 @@
             // post the notification on the main thread; this ends up calling UI updates
             id proxy = nil;
             @try {
-                proxy = [mainThreadConnection rootProxy];
+                conn = [NSConnection connectionWithReceivePort:nil sendPort:[mainThreadConnection receivePort]];
+                proxy = [conn rootProxy];
                 [proxy notifyOnMainThreadWhenDone];
             }
             @catch(id exception) {
@@ -337,7 +352,7 @@
         }
     }
     @catch(id exception){
-        NSLog(@"%@: discarding exception %@ while retrieving publications", self, exception);
+        NSLog(@"%@: discarding exception %@ while retrieving publications", [self class], exception);
     }
     @finally{
         [pool release];
