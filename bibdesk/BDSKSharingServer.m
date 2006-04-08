@@ -123,13 +123,6 @@ NSString *BDSKComputerName() {
     NSString *sharingName = [[OFPreferenceWrapper sharedPreferenceWrapper] objectForKey:BDSKSharingNameKey];
     if([NSString isEmptyString:sharingName])
         sharingName = BDSKComputerName();
-   
-    // this is for testing purposes, so we can run several apps on the same computer
-    if([[NSUserDefaults standardUserDefaults] boolForKey:@"BDSKEnableSharingWithSelfKey"]){
-        static int r = 0;
-        while (r == 0) r = rand() % 100;
-        sharingName = [NSString stringWithFormat:@"%@%i", sharingName, r];
-    }        
     return sharingName;
 }
 
