@@ -69,7 +69,8 @@ NSString *BDSKServiceNameForKeychain = @"BibDesk Sharing";
 - (BDSKPasswordControllerStatus)runModalForName:(NSString *)aName;
 {
     [self setName:aName];    
-    int returnValue = [NSApp runModalForWindow:[self window]];    
+    int returnValue = [NSApp runModalForWindow:[self window]];
+    [[self window] orderOut:self];    
     [self setName:nil];
     
     return returnValue;
@@ -79,19 +80,18 @@ NSString *BDSKServiceNameForKeychain = @"BibDesk Sharing";
 
 - (NSString *)windowNibName { return @"BDSKPasswordController"; }
 
-- (IBAction)changePassword:(id)sender
-{
-    NSAssert(name != nil, @"name is nil");
-    
-    NSString *password = [passwordField stringValue];
-    NSParameterAssert(password != nil);
-    
-    [BDSKPasswordController addOrModifyPassword:password name:name userName:nil];
-}
-
 - (IBAction)buttonAction:(id)sender
 {    
-    [NSApp stopModalWithCode:[sender tag]];
+    int returnValue = [sender tag];
+    if (returnValue == BDSKPasswordReturn) {
+        NSAssert(name != nil, @"name is nil");
+        
+        NSString *password = [passwordField stringValue];
+        NSParameterAssert(password != nil);
+        
+        [BDSKPasswordController addOrModifyPassword:password name:name userName:nil];
+    }
+    [NSApp stopModalWithCode:returnValue];
 }
 
 // convenience method for keychain

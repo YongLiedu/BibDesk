@@ -1,10 +1,10 @@
 {
     IBClasses = (
         {
-            ACTIONS = {buttonAction = id; changePassword = id; }; 
+            ACTIONS = {buttonAction = id; }; 
             CLASS = BDSKPasswordController; 
             LANGUAGE = ObjC; 
-            OUTLETS = {passwordField = NSSecureTextField; service = id; statusField = NSTextField; }; 
+            OUTLETS = {passwordField = NSSecureTextField; statusField = NSTextField; }; 
             SUPERCLASS = NSWindowController; 
         }, 
         {CLASS = FirstResponder; LANGUAGE = ObjC; SUPERCLASS = NSObject; }
