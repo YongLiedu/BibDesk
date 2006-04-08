@@ -61,13 +61,13 @@ static BDSKSharingBrowser *sharedBrowser = nil;
     if (self = [super init]){
         sharedGroups = nil;
         browser = nil;
-        unresolvedNetServices = [[NSMutableArray alloc] initWithCapacity:10];
+        unresolvedNetServices = [[NSMutableArray alloc] initWithCapacity:10];        
     }
     return self;
 }
 
 - (void)dealloc{
-    // @@ hack to break DO retain cycle
+    // @@ hack to break DO retain cycle (theoretical since this never gets called)
     [sharedGroups makeObjectsPerformSelector:@selector(stopDOServer)];
     [sharedGroups release];
     [browser release];
@@ -153,6 +153,8 @@ static BDSKSharingBrowser *sharedBrowser = nil;
 - (void)disableSharedBrowsing;
 {
     if(sharedGroups != nil){
+        // stop the server(s) or the groups won't be released properly
+        [sharedGroups makeObjectsPerformSelector:@selector(stopDOServer)];
         [sharedGroups release];
         sharedGroups = nil;
         [browser release];
