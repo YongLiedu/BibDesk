@@ -76,6 +76,7 @@
         flags.shouldKeepRunning = 1;
         flags.isRetrieving = 0;
         flags.authenticationFailed = 0;
+        flags.canceledAuthentication = 0;
         connection = nil;
 
         // if we detach in -publications, connection setup doesn't happen in time
@@ -145,39 +146,49 @@
     return YES;
 }
 
-// this must not be changed to (oneway); we need to wait for it to finish
-- (void)runPasswordPrompt
+- (int)runPasswordPrompt
 {
     NSAssert([NSThread inMainThread] == 1, @"password controller must be run from the main thread");
     BDSKPasswordController *pwc = [[BDSKPasswordController alloc] init];
-    [pwc runModalForName:[BDSKPasswordController keychainServiceNameWithComputerName:[self name]]];
+    int rv = [pwc runModalForName:[BDSKPasswordController keychainServiceNameWithComputerName:[self name]]];
     [pwc close];
     [pwc release];
+    return rv;
 }
 
 // this can be called from any thread
 - (NSData *)authenticationDataForComponents:(NSArray *)components;
 {
-    NSData *password = [BDSKPasswordController passwordHashedForKeychainServiceName:[BDSKPasswordController keychainServiceNameWithComputerName:[self name]]];
+    NSData *password = nil;
+    
+    if(flags.canceledAuthentication == 0){   
+        
+        int rv = 1;
+        if(flags.authenticationFailed == 0)
+            password = [BDSKPasswordController passwordHashedForKeychainServiceName:[BDSKPasswordController keychainServiceNameWithComputerName:[self name]]];
 
-    if(password == nil || flags.authenticationFailed == 1){   
-        
-        // run the prompt on the main thread
-        id proxy = nil;
-        @try {
-            proxy = [mainThreadConnection rootProxy];
-            [proxy runPasswordPrompt];
+        if(password == nil){   
+            
+            // run the prompt on the main thread
+            id proxy = nil;
+            @try {
+                proxy = [mainThreadConnection rootProxy];
+                rv = [proxy runPasswordPrompt];
+            }
+            @catch(id exception) {
+                NSLog(@"Unable to connect to main thread and run password prompt.");
+                proxy = nil;
+            }
+            
+            // retry from the keychain
+            if (rv == 1)
+                password = [BDSKPasswordController passwordHashedForKeychainServiceName:[BDSKPasswordController keychainServiceNameWithComputerName:[self name]]];
+            else
+                OSAtomicCompareAndSwap32Barrier(0, 1, (int32_t *)&flags.canceledAuthentication);
+            
+            // assume we succeeded; the exception handler for the connection will change it back if we fail again
+            OSAtomicCompareAndSwap32Barrier(1, 0, (int32_t *)&flags.authenticationFailed);
         }
-        @catch(id exception) {
-            NSLog(@"Unable to connect to main thread and run password prompt.");
-            proxy = nil;
-        }
-        
-        // retry from the keychain
-        password = [BDSKPasswordController passwordHashedForKeychainServiceName:[BDSKPasswordController keychainServiceNameWithComputerName:[self name]]];
-        
-        // assume we succeeded; the exception handler for the connection will change it back if we fail again
-        OSAtomicCompareAndSwap32Barrier(1, 0, (int32_t *)&flags.authenticationFailed);
     }
     
     // doc says we're required to return empty NSData instead of nil
