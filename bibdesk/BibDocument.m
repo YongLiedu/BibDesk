@@ -316,8 +316,11 @@ NSString *BDSKWeblocFilePboardType = @"CorePasteboardFlavorType 0x75726C20";
     // we don't do this in appcontroller as we want our data to be loaded
     sharedGroups = nil;
     if(floor(NSAppKitVersionNumber) > NSAppKitVersionNumber10_3){
-        if([[OFPreferenceWrapper sharedPreferenceWrapper] boolForKey:BDSKShouldLookForSharedFilesKey])
+        if([[OFPreferenceWrapper sharedPreferenceWrapper] boolForKey:BDSKShouldLookForSharedFilesKey]){
             [[BDSKSharingBrowser sharedBrowser] enableSharedBrowsing];
+            // force an initial update of the tableview, if browsing is already in progress
+            [self handleSharedGroupsChangedNotification:nil];
+        }
         if([[OFPreferenceWrapper sharedPreferenceWrapper] boolForKey:BDSKShouldShareFilesKey])
             [[BDSKSharingServer defaultServer] enableSharing];
     }    
@@ -415,8 +418,6 @@ NSString *BDSKWeblocFilePboardType = @"CorePasteboardFlavorType 0x75726C20";
     [lastSelectedColumnForSort release];
     [sortGroupsKey release];
 	[promisedPboardTypes release];
-    // @@ hack
-    [sharedGroups makeObjectsPerformSelector:@selector(stopDOServer)];
     [sharedGroups release];
     [super dealloc];
 }

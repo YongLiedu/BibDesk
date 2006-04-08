@@ -67,6 +67,8 @@ static BDSKSharingBrowser *sharedBrowser = nil;
 }
 
 - (void)dealloc{
+    // @@ hack to break DO retain cycle
+    [sharedGroups makeObjectsPerformSelector:@selector(stopDOServer)];
     [sharedGroups release];
     [browser release];
     [unresolvedNetServices release];
@@ -94,16 +96,16 @@ static BDSKSharingBrowser *sharedBrowser = nil;
     if([NSString isEmptyString:serviceIdentifier] == NO && ([[BDSKSharingServer sharingName] isEqual:[aNetService name]] == NO || [[NSUserDefaults standardUserDefaults] boolForKey:@"BDSKEnableSharingWithSelfKey"])){
 
         // we don't want it to message us again
-            [aNetService setDelegate:nil];
+        [aNetService setDelegate:nil];
 
-            BDSKSharedGroup *group = [[BDSKSharedGroup alloc] initWithService:aNetService];
-            [sharedGroups addObject:group];
-            [group release];
-            
-            // remove from the list of unresolved services
-            [unresolvedNetServices removeObject:aNetService];
-            
-            [[NSNotificationCenter defaultCenter] postNotificationName:BDSKSharedGroupsChangedNotification object:self];
+        BDSKSharedGroup *group = [[BDSKSharedGroup alloc] initWithService:aNetService];
+        [sharedGroups addObject:group];
+        [group release];
+        
+        // remove from the list of unresolved services
+        [unresolvedNetServices removeObject:aNetService];
+        
+        [[NSNotificationCenter defaultCenter] postNotificationName:BDSKSharedGroupsChangedNotification object:self];
     }
 
 }
