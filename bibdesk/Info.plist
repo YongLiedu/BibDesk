@@ -812,7 +812,7 @@
                 <key>helpURL</key>
                 <string>Sharing-Preferences</string>
                 <key>icon</key>
-                <string>bonjourIcon.tiff</string>
+                <string>networkIcon.tiff</string>
                 <key>identifier</key>
                 <string>bp_sharing</string>
                 <key>nib</key>

@@ -657,6 +657,7 @@
 		F9F0C95009A95725004BBE5E /* PDFMetadata.h in Headers */ = {isa = PBXBuildFile; fileRef = F91F284609A661A700419960 /* PDFMetadata.h */; };
 		F9F78CD407D5320D004B68AF /* BDSKStringEncodingManager.h in Headers */ = {isa = PBXBuildFile; fileRef = F9F78CD207D5320D004B68AF /* BDSKStringEncodingManager.h */; };
 		F9F78CD507D5320D004B68AF /* BDSKStringEncodingManager.m in Sources */ = {isa = PBXBuildFile; fileRef = F9F78CD307D5320D004B68AF /* BDSKStringEncodingManager.m */; };
+		F9FF241309E873A300BB1706 /* networkIcon.tiff in Resources */ = {isa = PBXBuildFile; fileRef = F9FF241209E873A300BB1706 /* networkIcon.tiff */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXBuildStyle section */
@@ -1475,6 +1476,7 @@
 		F9F14A5A075811F9008BA22F /* BibDeskInputManager.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = BibDeskInputManager.xcodeproj; path = ../bibdeskinputmanager/BibDeskInputManager.xcodeproj; sourceTree = SOURCE_ROOT; };
 		F9F78CD207D5320D004B68AF /* BDSKStringEncodingManager.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BDSKStringEncodingManager.h; sourceTree = "<group>"; };
 		F9F78CD307D5320D004B68AF /* BDSKStringEncodingManager.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BDSKStringEncodingManager.m; sourceTree = "<group>"; };
+		F9FF241209E873A300BB1706 /* networkIcon.tiff */ = {isa = PBXFileReference; lastKnownFileType = image.tiff; path = networkIcon.tiff; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -1959,6 +1961,7 @@
 		F9022DDA0758089500C3F701 /* Images */ = {
 			isa = PBXGroup;
 			children = (
+				F9FF241209E873A300BB1706 /* networkIcon.tiff */,
 				F9022DA20758088000C3F701 /* Action_Pressed.tiff */,
 				F9022DA30758088000C3F701 /* Action.tiff */,
 				F9022DA40758088000C3F701 /* Add_Pressed.tiff */,
@@ -3068,6 +3071,7 @@
 				F95D3FA709DDF51D00D793A6 /* BibPref_Sharing.nib in Resources */,
 				F92ECBF109DF09C200A244D0 /* BDSKPasswordController.nib in Resources */,
 				CE518F6609E52D6A00E97C3A /* BDSKTextViewFindPanel.nib in Resources */,
+				F9FF241309E873A300BB1706 /* networkIcon.tiff in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
