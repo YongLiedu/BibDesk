@@ -42,9 +42,9 @@ extern NSString *BDSKTXTAuthenticateKey;
 extern NSString *BDSKTXTComputerNameKey;
 extern NSString *BDSKTXTVersionKey;
 
-#define DO_TCP_PORT 64000
-
 extern NSString *BDSKSharedArchivedDataKey;
+extern NSString *BDSKComputerNameChangedNotification;
+extern NSString *BDSKHostNameChangedNotification;
 
 // implemented by the shared group
 @protocol BDSKClientProtocol
