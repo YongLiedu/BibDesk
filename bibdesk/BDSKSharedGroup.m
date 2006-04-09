@@ -70,8 +70,11 @@ static NSImage *unlockedIcon = nil;
         NSImage *badge = [NSImage imageNamed:@"SmallLock_Locked"];
         
         [image lockFocus];
+        [NSGraphicsContext saveGraphicsState];
+        [[NSGraphicsContext currentContext] setImageInterpolation:NSImageInterpolationHigh];
         [[self icon] drawInRect:iconRect fromRect:iconRect operation:NSCompositeSourceOver  fraction:1.0];
         [badge drawInRect:badgeRect fromRect:iconRect operation:NSCompositeSourceOver  fraction:1.0];
+        [NSGraphicsContext restoreGraphicsState];
         [image unlockFocus];
         
         lockedIcon = image;
@@ -87,8 +90,11 @@ static NSImage *unlockedIcon = nil;
         NSImage *badge = [NSImage imageNamed:@"SmallLock_Unlocked"];
         
         [image lockFocus];
+        [NSGraphicsContext saveGraphicsState];
+        [[NSGraphicsContext currentContext] setImageInterpolation:NSImageInterpolationHigh];
         [[self icon] drawInRect:iconRect fromRect:iconRect operation:NSCompositeSourceOver  fraction:1.0];
         [badge drawInRect:badgeRect fromRect:iconRect operation:NSCompositeSourceOver  fraction:1.0];
+        [NSGraphicsContext restoreGraphicsState];
         [image unlockFocus];
         
         unlockedIcon = image;
