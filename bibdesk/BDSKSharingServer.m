@@ -54,9 +54,7 @@ static id sharedInstance = nil;
 static int localConnectionCount = 0;
 
 // TXT record keys
-NSString *BDSKTXTPasswordKey = @"pass";
 NSString *BDSKTXTAuthenticateKey = @"authenticate";
-NSString *BDSKTXTUniqueIdentifierKey = @"hostid";
 NSString *BDSKTXTComputerNameKey = @"name";
 NSString *BDSKTXTVersionKey = @"txtvers";
 
@@ -316,9 +314,6 @@ NSString *BDSKComputerName() {
     netService = [[NSNetService alloc] initWithDomain:@"" type:BDSKNetServiceDomain name:[BDSKSharingServer sharingName] port:chosenPort];
     [netService setDelegate:self];
     NSMutableDictionary *dictionary = [NSMutableDictionary dictionaryWithCapacity:4];
-#warning remove?
-    // computer name should be always up-to-date and unique now
-    [dictionary setObject:[BDSKSharingBrowser uniqueIdentifier] forKey:BDSKTXTUniqueIdentifierKey];
     [dictionary setObject:@"0" forKey:BDSKTXTVersionKey];
     [dictionary setObject:[BDSKSharingServer sharingName] forKey:BDSKTXTComputerNameKey];
     [dictionary setObject:[[OFPreferenceWrapper sharedPreferenceWrapper] stringForKey:BDSKSharingRequiresPasswordKey] forKey:BDSKTXTAuthenticateKey];
@@ -548,7 +543,7 @@ NSString *BDSKComputerName() {
 - (oneway void)registerHostNameForNotifications:(NSDictionary *)info
 {
     NSParameterAssert(info != nil);
-    NSString *name = [info objectForKey:@"computer"];
+    NSString *name = [info objectForKey:BDSKSharedGroupComputerNameInfoKey];
     if(name != nil)
         [objectsToNotify setObject:info forKey:name];
     else
@@ -562,8 +557,8 @@ NSString *BDSKComputerName() {
     NSEnumerator *e = [[NSDictionary dictionaryWithDictionary:objectsToNotify] objectEnumerator];
     NSDictionary *info;
     while(info = [e nextObject]){
-        NSString *hostName = [info objectForKey:@"hostname"];
-        NSString *portName = [info objectForKey:@"portname"];
+        NSString *hostName = [info objectForKey:BDSKSharedGroupHostNameInfoKey];
+        NSString *portName = [info objectForKey:BDSKSharedGroupPortnameInfoKey];
         NSPort *sendPort = [[NSSocketPortNameServer sharedInstance] portForName:portName host:hostName];
         
         NSConnection *conn = nil;

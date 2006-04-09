@@ -87,13 +87,9 @@ static BDSKSharingBrowser *sharedBrowser = nil;
     
     // +[NSNetService dictionaryFromTXTRecordData:] will crash if you pass a nil data
     NSDictionary *TXTDictionary = TXTData ? [NSNetService dictionaryFromTXTRecordData:TXTData] : nil;
-    NSString *serviceIdentifier = [[NSString alloc] initWithData:[TXTDictionary objectForKey:BDSKTXTUniqueIdentifierKey] encoding:NSUTF8StringEncoding];
-    [serviceIdentifier autorelease];
 
-    // In general, we want to ignore our own shared services, although this doesn't cause problems with the run loop anymore (since the DO servers have their own threads)
-
-    // Ignore our own services; quit/relaunch opening the same doc  can give us a stale service (from the previous run).  Since SystemConfiguration guarantees that we have a unique computer name, this should be safe.
-    if([NSString isEmptyString:serviceIdentifier] == NO && ([[BDSKSharingServer sharingName] isEqual:[aNetService name]] == NO || [[NSUserDefaults standardUserDefaults] boolForKey:@"BDSKEnableSharingWithSelfKey"])){
+    // In general, we want to ignore our own shared services, although this doesn't cause problems with the run loop anymore (since the DO servers have their own threads)  Since SystemConfiguration guarantees that we have a unique computer name, this should be safe.
+    if([[BDSKSharingServer sharingName] isEqual:[aNetService name]] == NO || [[NSUserDefaults standardUserDefaults] boolForKey:@"BDSKEnableSharingWithSelfKey"]){
 
         // we don't want it to message us again
         [aNetService setDelegate:nil];
@@ -170,21 +166,6 @@ static BDSKSharingBrowser *sharedBrowser = nil;
         [self disableSharedBrowsing];
         [self enableSharedBrowsing];
     }
-}
-
-+ (NSString *)uniqueIdentifier;
-{
-    // use to identify services sent from this machine
-    static NSString *uniqueIdentifier = nil;
-    if(uniqueIdentifier == nil){
-        /* http://developer.apple.com/qa/qa2001/qa1306.html indicates that ASCII 1 is used to separate old style TXT records, so creating a TXT dictionary with a globallyUniqueString directly is almost guaranteed to fail since they contain alphanumeric characters and underscores; therefore, we'll replace it with something that doesn't seem to appear in globallyUniqueString objects.  An alternative might be to use address comparison, but the docs indicate that the stable identifier for a service is its name, since port number, IP address, and host name can be ephemeral.  Unfortunately, we can't use the service name to determine if a service should be ignored, since we want to ignore all shares from a particular process, not just a given document.
-        */
-        NSMutableString *pInfo = [[[NSProcessInfo processInfo] globallyUniqueString] mutableCopy];
-        [pInfo replaceOccurrencesOfString:@"1" withString:@"~" options:0 range:NSMakeRange(0, [pInfo length])];
-        uniqueIdentifier = [pInfo copy];
-        [pInfo release];
-    }
-    return uniqueIdentifier;
 }
 
 @end
