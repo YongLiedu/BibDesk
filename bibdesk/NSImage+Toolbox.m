@@ -192,8 +192,10 @@ static NSImage *cautionIconImage = nil;
         
         image = [[NSImage alloc] initWithSize:dstSize];
         [image lockFocus];
+        [NSGraphicsContext saveGraphicsState];
         [[NSGraphicsContext currentContext] setImageInterpolation:NSImageInterpolationHigh];
         [baseImage drawInRect:dstRect fromRect:srcRect operation:NSCompositeCopy fraction:1.0];
+        [NSGraphicsContext restoreGraphicsState];
         [image unlockFocus];
         [image autorelease];
         
@@ -251,8 +253,10 @@ static NSImage *cautionIconImage = nil;
         
         image = [[NSImage alloc] initWithSize:dstSize];
         [image lockFocus];
+        [NSGraphicsContext saveGraphicsState];
         [[NSGraphicsContext currentContext] setImageInterpolation:NSImageInterpolationHigh];
         [baseImage drawInRect:dstRect fromRect:srcRect operation:NSCompositeCopy fraction:1.0];
+        [NSGraphicsContext restoreGraphicsState];
         [image unlockFocus];
         [image autorelease];
         
@@ -293,8 +297,10 @@ static NSImage *cautionIconImage = nil;
         
         image = [[NSImage alloc] initWithSize:dstSize];
         [image lockFocus];
+        [NSGraphicsContext saveGraphicsState];
         [[NSGraphicsContext currentContext] setImageInterpolation:NSImageInterpolationHigh];
         [baseImage drawInRect:dstRect fromRect:srcRect operation:NSCompositeCopy fraction:1.0];
+        [NSGraphicsContext restoreGraphicsState];
         [image unlockFocus];
         [image autorelease];
         
