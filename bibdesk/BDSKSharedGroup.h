@@ -66,5 +66,4 @@ typedef struct _BDSKSharedGroupFlags {
 - (void)stopDOServer;
 - (void)runDOServer;
 
-
 @end
