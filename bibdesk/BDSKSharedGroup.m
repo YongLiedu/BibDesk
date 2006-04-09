@@ -218,13 +218,13 @@
         }
         
         // retry from the keychain
-        if (rv == BDSKPasswordReturn)
+        if (rv == BDSKPasswordReturn){
             password = [BDSKPasswordController passwordHashedForKeychainServiceName:[BDSKPasswordController keychainServiceNameWithComputerName:[self name]]];
-        else
+            // assume we succeeded; the exception handler for the connection will change it back if we fail again
+            OSAtomicCompareAndSwap32Barrier(1, 0, (int32_t *)&flags.authenticationFailed);
+        }else{
             OSAtomicCompareAndSwap32Barrier(0, 1, (int32_t *)&flags.canceledAuthentication);
-        
-        // assume we succeeded; the exception handler for the connection will change it back if we fail again
-        OSAtomicCompareAndSwap32Barrier(1, 0, (int32_t *)&flags.authenticationFailed);
+        }
     }
     
     // doc says we're required to return empty NSData instead of nil
