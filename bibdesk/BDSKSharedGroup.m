@@ -43,12 +43,16 @@
 #import "NSImage+Toolbox.h"
 #import <libkern/OSAtomic.h>
 
+NSString *BDSKSharedGroupHostNameInfoKey = @"hostname";
+NSString *BDSKSharedGroupPortnameInfoKey = @"portname";
+NSString *BDSKSharedGroupComputerNameInfoKey = @"computer";
+
 // private methods for inter-thread messaging
 @protocol BDSKSharedGroupServerThread
 
-- (void)_cleanupBDSKSharedGroupDOServer;
-- (void)_retrievePublicationsBDSKSharedGroupDOServer;
-- (int)runPasswordPrompt;
+- (void)_cleanupBDSKSharedGroupDOServer; /* probably shouldn't be oneway, since it gets called when quitting the app */
+- (oneway void)_retrievePublicationsBDSKSharedGroupDOServer;
+- (int)runPasswordPrompt; /* must not be declared oneway */
 - (int)runAuthenticationFailedAlert;
 
 @end
@@ -317,7 +321,7 @@ static NSImage *unlockedIcon = nil;
     [[NSNotificationCenter defaultCenter] postNotificationName:BDSKSharedGroupFinishedNotification object:self];
 }
 
-- (void)_retrievePublicationsBDSKSharedGroupDOServer;
+- (oneway void)_retrievePublicationsBDSKSharedGroupDOServer;
 {
     
     // set so we don't try calling this multiple times
@@ -368,12 +372,12 @@ static NSImage *unlockedIcon = nil;
             conn = nil;
             proxyObject = nil;
         }
-        
+
         [proxyObject setProtocolForProxy:@protocol(BDSKSharingProtocol)];
         
         // need hostname and portname for the NSSocketPort connection on the other end
         // use computer as the notification identifier for this host on the other end
-        [proxyObject registerHostNameForNotifications:[NSDictionary dictionaryWithObjectsAndKeys:[[NSHost currentHost] name], @"hostname", serverSharingName, @"portname", [BDSKSharingServer sharingName], @"computer", nil]];
+        [proxyObject registerHostNameForNotifications:[NSDictionary dictionaryWithObjectsAndKeys:[[NSHost currentHost] name], BDSKSharedGroupHostNameInfoKey, serverSharingName, BDSKSharedGroupPortnameInfoKey, [BDSKSharingServer sharingName], BDSKSharedGroupComputerNameInfoKey, nil]];
         
         [publications autorelease];
         publications = nil;

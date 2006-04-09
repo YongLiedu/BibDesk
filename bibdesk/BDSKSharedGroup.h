@@ -39,6 +39,10 @@
 #import <Cocoa/Cocoa.h>
 #import "BDSKGroup.h"
 
+extern NSString *BDSKSharedGroupHostNameInfoKey;
+extern NSString *BDSKSharedGroupPortnameInfoKey;
+extern NSString *BDSKSharedGroupComputerNameInfoKey;
+
 typedef struct _BDSKSharedGroupFlags {
     volatile int32_t shouldKeepRunning __attribute__ ((aligned (4)));
     volatile int32_t isRetrieving __attribute__ ((aligned (4)));
