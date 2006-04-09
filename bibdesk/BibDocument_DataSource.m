@@ -264,11 +264,35 @@
 }
 
 - (void)tableView:(NSTableView *)tv willDisplayCell:(id)aCell forTableColumn:(NSTableColumn *)aTableColumn row:(int)row{
-    if (tv == tableView && [aCell isKindOfClass:[NSButtonCell class]]) {
-        if (row != -1 && [[shownPublications objectAtIndex:row] document] == nil) 
-            [aCell setEnabled:NO];
-        else
-            [aCell setEnabled:YES];
+    if (row == -1) return;
+    if (tv == tableView) {
+        if ([aCell isKindOfClass:[NSButtonCell class]]) {
+            if ([[shownPublications objectAtIndex:row] document] == nil) 
+                [aCell setEnabled:NO];
+            else
+                [aCell setEnabled:YES];
+        }
+    } else if (tv == groupTableView) {
+        BDSKGroup *group = [self objectInGroupsAtIndex:row];
+        if ([group isShared] == NO) return;
+        
+        NSProgressIndicator *spinner = [sharedGroupSpinners objectForKey:[group name]];
+        
+        if ([(BDSKSharedGroup *)group isRetrieving]) {
+            int column = [[tv tableColumns] indexOfObject:aTableColumn];
+            NSRect rect = [tv frameOfCellAtColumn:column row:row];
+            NSSize size = [spinner frame].size;
+            rect.origin.x = NSMaxX(rect) - size.width - 2.0;
+            rect.origin.y += floorf((NSHeight(rect) - size.height) / 2.0);
+            rect.size = size;
+            [spinner setFrame:rect];
+            if([[tv subviews] containsObject:spinner] == NO)
+                [tv addSubview:spinner];
+            [spinner startAnimation:nil];
+        } else {
+            [spinner stopAnimation:nil];
+            [spinner removeFromSuperview];
+        }
     }
 }
 

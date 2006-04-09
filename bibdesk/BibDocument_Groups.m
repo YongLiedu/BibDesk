@@ -226,6 +226,26 @@ The groupedPublications array is a subset of the publications array, developed b
     if (array != nil)
         sharedGroups = [array mutableCopy];
     
+    if (sharedGroupSpinners == nil) {
+        sharedGroupSpinners = [[NSMutableDictionary alloc] initWithCapacity:5];
+    } else {
+        [[sharedGroupSpinners allValues] makeObjectsPerformSelector:@selector(removeFromSuperview)];
+        [sharedGroupSpinners removeAllObjects];
+    }
+    
+    NSEnumerator *groupEnum = [array objectEnumerator];
+    BDSKSharedGroup *group;
+    
+    while(group = [groupEnum nextObject]){
+        NSProgressIndicator *spinner = [[NSProgressIndicator alloc] init];
+        [spinner setControlSize:NSSmallControlSize];
+        [spinner setStyle:NSProgressIndicatorSpinningStyle];
+        [spinner setDisplayedWhenStopped:NO];
+        [spinner sizeToFit];
+        [sharedGroupSpinners setObject:spinner forKey:[group name]];
+        [spinner release];
+    }
+    
     [groupTableView reloadData];
 }
 

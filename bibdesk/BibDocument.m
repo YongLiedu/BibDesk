@@ -315,6 +315,7 @@ NSString *BDSKWeblocFilePboardType = @"CorePasteboardFlavorType 0x75726C20";
     // doesn't do anything when already enabled
     // we don't do this in appcontroller as we want our data to be loaded
     sharedGroups = nil;
+    sharedGroupSpinners = nil;
     if(floor(NSAppKitVersionNumber) > NSAppKitVersionNumber10_3){
         if([[OFPreferenceWrapper sharedPreferenceWrapper] boolForKey:BDSKShouldLookForSharedFilesKey]){
             [[BDSKSharingBrowser sharedBrowser] enableSharedBrowsing];
@@ -419,6 +420,7 @@ NSString *BDSKWeblocFilePboardType = @"CorePasteboardFlavorType 0x75726C20";
     [sortGroupsKey release];
 	[promisedPboardTypes release];
     [sharedGroups release];
+    [sharedGroupSpinners release];
     [super dealloc];
 }
 

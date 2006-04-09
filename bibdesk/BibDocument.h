@@ -176,6 +176,7 @@ extern NSString* BDSKWeblocFilePboardType; // core pasteboard type for webloc fi
     
     BOOL dragFromSharedGroups;
     NSMutableArray *sharedGroups;
+    NSMutableDictionary *sharedGroupSpinners;
     
     id fileSearchController;
 	
