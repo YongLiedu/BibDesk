@@ -67,6 +67,7 @@ typedef struct _BDSKSharedGroupFlags {
 - (id)initWithService:(NSNetService *)aService;
 - (NSArray *)publications;
 - (NSNetService *)service;
+- (BOOL)isRetrieving;
 
 - (void)stopDOServer;
 - (void)runDOServer;

@@ -205,6 +205,8 @@ static NSImage *unlockedIcon = nil;
 
 - (NSNetService *)service { return service; }
 
+- (BOOL)isRetrieving { return (flags.isRetrieving == 1); }
+
 - (NSImage *)icon {
     if(flags.needsAuthentication == 1)
         return (publications == nil) ? [[self class] lockedIcon] : [[self class] unlockedIcon];
