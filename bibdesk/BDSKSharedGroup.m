@@ -55,6 +55,47 @@
 
 @implementation BDSKSharedGroup
 
+static NSImage *lockedIcon = nil;
+static NSImage *unlockedIcon = nil;
+
++ (NSImage *)icon{
+    return [NSImage smallImageNamed:@"sharedFolderIcon"];
+}
+
++ (NSImage *)lockedIcon {
+    if(lockedIcon == nil){
+        NSRect iconRect = NSMakeRect(0.0, 0.0, 16.0, 16.0);
+        NSRect badgeRect = NSMakeRect(8.0, 0.0, 8.0, 8.0);
+        NSImage *image = [[NSImage alloc] initWithSize:iconRect.size];
+        NSImage *badge = [NSImage imageNamed:@"SmallLock_Locked"];
+        
+        [image lockFocus];
+        [[self icon] drawInRect:iconRect fromRect:iconRect operation:NSCompositeSourceOver  fraction:1.0];
+        [badge drawInRect:badgeRect fromRect:iconRect operation:NSCompositeSourceOver  fraction:1.0];
+        [image unlockFocus];
+        
+        lockedIcon = image;
+    }
+    return lockedIcon;
+}
+
++ (NSImage *)unlockedIcon {
+    if(unlockedIcon == nil){
+        NSRect iconRect = NSMakeRect(0.0, 0.0, 16.0, 16.0);
+        NSRect badgeRect = NSMakeRect(8.0, 0.0, 8.0, 8.0);
+        NSImage *image = [[NSImage alloc] initWithSize:iconRect.size];
+        NSImage *badge = [NSImage imageNamed:@"SmallLock_Unlocked"];
+        
+        [image lockFocus];
+        [[self icon] drawInRect:iconRect fromRect:iconRect operation:NSCompositeSourceOver  fraction:1.0];
+        [badge drawInRect:badgeRect fromRect:iconRect operation:NSCompositeSourceOver  fraction:1.0];
+        [image unlockFocus];
+        
+        unlockedIcon = image;
+    }
+    return unlockedIcon;
+}
+
 /* @@ Warning: retain cycle, since the NSThread retains us (and we keep running it).  Best option may be to convert this server to a separate object, and each shared group will "own" one, and then stop it when the group is deallocated.  For now, we have the owner call stopDOServer when the app terminates or a host goes away, which ensures that shared groups are dealloced properly. */
 
 - (id)initWithService:(NSNetService *)aService;
@@ -80,7 +121,14 @@
         memset(&flags, 0, sizeof(flags));
         flags.shouldKeepRunning = 1;
         connection = nil;
-
+        
+        NSData *TXTData = [service TXTRecordData];
+        if(TXTData){
+            NSDictionary *dict = [NSNetService dictionaryFromTXTRecordData:TXTData];
+            if([[NSString stringWithData:[dict objectForKey:BDSKTXTAuthenticateKey] encoding:NSUTF8StringEncoding] intValue] == 1)
+                OSAtomicCompareAndSwap32Barrier(0, 1, (int32_t *)&flags.needsAuthentication);
+        }
+        
         // if we detach in -publications, connection setup doesn't happen in time
         [NSThread detachNewThreadSelector:@selector(runDOServer) toTarget:self withObject:nil];
 
@@ -158,7 +206,9 @@
 - (NSNetService *)service { return service; }
 
 - (NSImage *)icon {
-	return [NSImage smallImageNamed:@"sharedFolderIcon"];
+    if(flags.needsAuthentication == 1)
+        return (publications == nil) ? [[self class] lockedIcon] : [[self class] unlockedIcon];
+    return [[self class] icon];
 }
 
 - (BOOL)isShared { return YES; }
@@ -261,9 +311,6 @@
         // we need the port name from the TXTRecord
         NSString *portName = [NSString stringWithData:[dict objectForKey:BDSKTXTComputerNameKey] encoding:NSUTF8StringEncoding];
         NSPort *sendPort = [[NSSocketPortNameServer sharedInstance] portForName:portName host:[service hostName]];
-        
-        if([[NSString stringWithData:[dict objectForKey:BDSKTXTAuthenticateKey] encoding:NSUTF8StringEncoding] intValue] == 1)
-            OSAtomicCompareAndSwap32Barrier(0, 1, (int32_t *)&flags.needsAuthentication);
         
         if(sendPort == nil)
             NSLog(@"client: unable to look up server %@", [service hostName]);
