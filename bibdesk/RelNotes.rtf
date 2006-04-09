@@ -13,7 +13,78 @@
 \pard\tx1440\tx2880\tx4320\tx5760\tx7200\ql\qnatural
 
 \f2\b\fs28 \cf0 \
-Changes since 1.2.4\
+Changes since 1.2.5\
+\pard\tx1440\tx2880\tx4320\tx5760\tx7200\ql\qnatural
+
+\f3\i\fs26 \cf0 \
+New Features\
+\pard\tx1440\tx2880\tx4320\tx5760\tx7200\ql\qnatural
+
+\f1\i0\b0\fs22 \cf0   \'a5  Added action to retry autofile, and dump error information to the desktop\
+  \'a5  Can display author or editor in the main table\
+  \'a5  Context menu in PDF views has an option to save the file (10.4 only)\
+  \'a5  Added option to save a session (last open file(s)); see General prefs\
+  \'a5  Added menu item to View menu to change preview display prefs\
+  \'a5  Can now link unparseable files to Local-Url by dropping on a row in the main table (RFE #1426720)\
+  \'a5  Recently modified PDF files in the system downloads folder (specified in Safari/OmniWeb  prefs, possibly others) are now added to the editor's recent file list (10.4 only)\
+  \'a5  The input manager now supports \\eqref autocompletion\
+  \'a5  All tableviews have a nice drop highlight, instead of Apple's really ugly one\
+  \'a5  Editor tabview now has opt-cmd-arrow key equivalents for navigation\
+  \'a5  File prefs has a reset button for character conversions\
+  \'a5  Preview prefs has a reset button for the template file\
+  \'a5  Can now define global macros in BibTeX or bst files via prefs\
+  \'a5  Drag-and-drop of .bib and .bst files is now allowed on macro definition and file windows\
+  \'a5  Newlines in form fields of the editor are now converted to a single space for copy/paste convenience (RFE #1457532)\
+  \'a5  Added support for sharing files via Bonjour (RFE #1458200)\
+  \'a5  Added support for exporting as EndNote XML (following Alex Montgomery's AppleScript)\
+\pard\tx1440\tx2880\tx4320\tx5760\tx7200\ql\qnatural
+
+\f3\i\b\fs26 \cf0 \
+Bugs Fixed\
+\pard\tx1440\tx2880\tx4320\tx5760\tx7200\ql\qnatural
+
+\f1\i0\b0\fs22 \cf0   \'a5  Select sorted table column after rebuilding it\
+  \'a5  Fixed bug #1447828, IS was mapped to Number instead of ISSN in RIS parsing\
+  \'a5  Check for complete entries is default response in consolidate linked files\
+  \'a5  Undo doesn't register if consolidate linked files is canceled\
+  \'a5  Fixed removing target file on forced moves\
+  \'a5  Prompt to move linked file when editing a local file field\
+  \'a5  Fixed bug #1449769, exception raised when dropping text on the dock icon\
+  \'a5  Unknown types are handled more gracefully when pasting\
+  \'a5  Validate the "Revert" menu item so it's disabled when you haven't changed the document\
+  \'a5  Brought font changing options back to preferences\
+  \'a5  Made DOI resolution more robust; anything before the first digit is now stripped\
+  \'a5  Fixed keyview loops in pref panes\
+  \'a5  Fixed invalid URL character ranges (used when parsing annote/abstract for URL)\
+  \'a5  Fixed top reported crasher of font changes in abstract/annote text views\
+  \'a5  Fixed bug #1451900, preview display prefs were disconnected\
+  \'a5  Text in editor text views is now pasted as plain text by default\
+  \'a5  Changed TeX preview shortcut to cmd-shift-t, since we now have a font menu\
+  \'a5  Fixed editor autocompletion on 10.3.9\
+  \'a5  Correct download path from Safari is now used\
+  \'a5  Fixed bug #1454094, data loss when saving files that have macros within macros; this is now fully supported\
+  \'a5  Circular macro definitions will now generate a warning\
+  \'a5  Allow dropping and pasting weblocs and URLs on the main table and group table\
+  \'a5  Fix exception raised when undoing an edit in an editor textview under some circumstances\
+  \'a5  Ensure that note type fiels are not inherited as crossrefs\
+  \'a5  Fixed drag image for \\cite command\
+  \'a5  Don't allow drags to cells or buttons representing the same field as the source in the same editor\
+  \'a5  Fixed crash in typeahead helper that could occur when closing a document\
+  \'a5  Fixed bug in dragging text to editor window\
+  \'a5  Complex strings are not added as completions\
+  \'a5  Fixed bug #1460089, macros were copied as expanded values\
+  \'a5  Fixed bug #1460062, table scrolled to beginning after delete\
+  \'a5  EP is now removed after merging page numbers in RIS parser\
+  \'a5  Fixed a bug that prevented previews from being updated when changing BibTeX styles in prefs\
+  \'a5  Internal fields are now included for TeX previewing\
+  \'a5  Default to @article instead of @misc for RIS\
+  \'a5  Fixed bug that occurred when passing accented characters to regexes\
+  \'a5  Some warning sheets are now run application modal, which fixes a crashing bug under certain conditions\
+  \'a5  PCRE style regular expressions are now used throughout\
+  \
+\pard\tx1440\tx2880\tx4320\tx5760\tx7200\ql\qnatural
+
+\f2\b\fs28 \cf0 Changes since 1.2.4\
 \pard\tx1440\tx2880\tx4320\tx5760\tx7200\ql\qnatural
 
 \f3\i\fs26 \cf0 \
