@@ -39,6 +39,7 @@
 #import <Cocoa/Cocoa.h>
 
 extern NSString *BDSKTXTPasswordKey;
+extern NSString *BDSKTXTAuthenticateKey;
 extern NSString *BDSKTXTUniqueIdentifierKey;
 extern NSString *BDSKTXTComputerNameKey;
 extern NSString *BDSKTXTVersionKey;

@@ -55,6 +55,7 @@ static int localConnectionCount = 0;
 
 // TXT record keys
 NSString *BDSKTXTPasswordKey = @"pass";
+NSString *BDSKTXTAuthenticateKey = @"authenticate";
 NSString *BDSKTXTUniqueIdentifierKey = @"hostid";
 NSString *BDSKTXTComputerNameKey = @"name";
 NSString *BDSKTXTVersionKey = @"txtvers";
@@ -320,6 +321,7 @@ NSString *BDSKComputerName() {
     [dictionary setObject:[BDSKSharingBrowser uniqueIdentifier] forKey:BDSKTXTUniqueIdentifierKey];
     [dictionary setObject:@"0" forKey:BDSKTXTVersionKey];
     [dictionary setObject:[BDSKSharingServer sharingName] forKey:BDSKTXTComputerNameKey];
+    [dictionary setObject:[[OFPreferenceWrapper sharedPreferenceWrapper] stringForKey:BDSKSharingRequiresPasswordKey] forKey:BDSKTXTAuthenticateKey];
     [netService setTXTRecordData:[NSNetService dataFromTXTRecordDictionary:dictionary]];
     
     [NSThread detachNewThreadSelector:@selector(runDOServer) toTarget:self withObject:nil];

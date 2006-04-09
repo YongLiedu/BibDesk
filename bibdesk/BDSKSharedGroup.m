@@ -194,6 +194,9 @@
 // this can be called from any thread
 - (NSData *)authenticationDataForComponents:(NSArray *)components;
 {
+    if(flags.needsAuthentication == 0)
+        return [[NSData data] sha1Signature];
+    
     NSData *password = nil;
     OSAtomicCompareAndSwap32Barrier(1, 0, (int32_t *)&flags.canceledAuthentication);
     
@@ -259,6 +262,9 @@
         NSString *portName = [NSString stringWithData:[dict objectForKey:BDSKTXTComputerNameKey] encoding:NSUTF8StringEncoding];
         NSPort *sendPort = [[NSSocketPortNameServer sharedInstance] portForName:portName host:[service hostName]];
         
+        if([[NSString stringWithData:[dict objectForKey:BDSKTXTAuthenticateKey] encoding:NSUTF8StringEncoding] intValue] == 1)
+            OSAtomicCompareAndSwap32Barrier(0, 1, (int32_t *)&flags.needsAuthentication);
+        
         if(sendPort == nil)
             NSLog(@"client: unable to look up server %@", [service hostName]);
         @try {
@@ -282,7 +288,7 @@
                     [proxyObject runAuthenticationFailedAlert];
                 }
                 
-            } else if(flags.canceledAuthentication == 0){
+            } else {
                 // don't log auth failures
                 NSLog(@"client: %@", exception);
             }
