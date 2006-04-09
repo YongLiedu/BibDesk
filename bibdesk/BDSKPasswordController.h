@@ -55,7 +55,7 @@ typedef enum {
 }
 - (void)setName:(NSString *)aName;
 - (void)setStatus:(NSString *)status;
-- (BDSKPasswordControllerStatus)runModalForName:(NSString *)aName;
+- (BDSKPasswordControllerStatus)runModalForKeychainServiceName:(NSString *)aName message:(NSString *)status;
 - (IBAction)buttonAction:(id)sender;
 
 + (NSData *)sharingPasswordForCurrentUserUnhashed;

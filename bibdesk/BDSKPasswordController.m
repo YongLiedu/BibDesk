@@ -66,9 +66,11 @@ NSString *BDSKServiceNameForKeychain = @"BibDesk Sharing";
     }
 }
 
-- (BDSKPasswordControllerStatus)runModalForName:(NSString *)aName;
+- (BDSKPasswordControllerStatus)runModalForKeychainServiceName:(NSString *)aName message:(NSString *)status;
 {
     [self setName:aName];    
+    [self window]; // load window before setStatus
+    [self setStatus:([NSString isEmptyString:status] ? @"" : status)];
     int returnValue = [NSApp runModalForWindow:[self window]];
     [[self window] orderOut:self];    
     [self setName:nil];
