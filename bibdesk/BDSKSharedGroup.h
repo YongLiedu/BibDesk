@@ -60,6 +60,10 @@ typedef struct _BDSKSharedGroupFlags {
     NSConnection *mainThreadConnection;
 }
 
++ (NSImage *)icon;
++ (NSImage *)lockedIcon;
++ (NSImage *)unlockedIcon;
+
 - (id)initWithService:(NSNetService *)aService;
 - (NSArray *)publications;
 - (NSNetService *)service;
