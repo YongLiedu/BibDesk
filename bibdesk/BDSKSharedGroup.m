@@ -69,7 +69,7 @@ static NSImage *unlockedIcon = nil;
 + (NSImage *)lockedIcon {
     if(lockedIcon == nil){
         NSRect iconRect = NSMakeRect(0.0, 0.0, 16.0, 16.0);
-        NSRect badgeRect = NSMakeRect(9.0, 0.0, 8.0, 8.0);
+        NSRect badgeRect = NSMakeRect(7.0, 0.0, 10.0, 10.0);
         NSImage *image = [[NSImage alloc] initWithSize:iconRect.size];
         NSImage *badge = [NSImage imageNamed:@"SmallLock_Locked"];
         
@@ -89,7 +89,7 @@ static NSImage *unlockedIcon = nil;
 + (NSImage *)unlockedIcon {
     if(unlockedIcon == nil){
         NSRect iconRect = NSMakeRect(0.0, 0.0, 16.0, 16.0);
-        NSRect badgeRect = NSMakeRect(9.0, 0.0, 8.0, 8.0);
+        NSRect badgeRect = NSMakeRect(7.0, 0.0, 10.0, 10.0);
         NSImage *image = [[NSImage alloc] initWithSize:iconRect.size];
         NSImage *badge = [NSImage imageNamed:@"SmallLock_Unlocked"];
         
@@ -398,22 +398,20 @@ static NSImage *unlockedIcon = nil;
             }
         }    
         [self setCount:[publications count]];
-        if([publications count]){
-            [self setNeedsUpdate:NO];
-            
-            // post the notification on the main thread; this ends up calling UI updates
-            id proxy = nil;
-            @try {
-                conn = [NSConnection connectionWithReceivePort:nil sendPort:[mainThreadConnection receivePort]];
-                proxy = [conn rootProxy];
-                [proxy setProtocolForProxy:@protocol(BDSKSharedGroupServerThread)];
-                [proxy notifyOnMainThreadWhenDone];
-            }
-            @catch(id exception) {
-                NSLog(@"Unable to connect to main thread and notify.");
-                proxy = nil;
-            }            
+        [self setNeedsUpdate:NO];
+        
+        // post the notification on the main thread; this ends up calling UI updates
+        id proxy = nil;
+        @try {
+            conn = [NSConnection connectionWithReceivePort:nil sendPort:[mainThreadConnection receivePort]];
+            proxy = [conn rootProxy];
+            [proxy setProtocolForProxy:@protocol(BDSKSharedGroupServerThread)];
+            [proxy notifyOnMainThreadWhenDone];
         }
+        @catch(id exception) {
+            NSLog(@"Unable to connect to main thread and notify.");
+            proxy = nil;
+        }            
     }
     @catch(id exception){
         NSLog(@"%@: discarding exception %@ while retrieving publications", [self class], exception);
