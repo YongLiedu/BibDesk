@@ -597,7 +597,7 @@ NSString *BDSKComputerName() {
             conn = nil;
             proxyObject = nil;
             // since it's not accessible, remove it from future notifications (we know it has this key)
-            [objectsToNotify removeObjectForKey:[info objectForKey:@"computer"]];
+            [objectsToNotify removeObjectForKey:[info objectForKey:BDSKSharedGroupComputerNameInfoKey]];
         }
         [proxyObject setProtocolForProxy:@protocol(BDSKClientProtocol)];
         if(proxyObject)
