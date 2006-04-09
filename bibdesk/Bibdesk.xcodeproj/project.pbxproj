@@ -299,6 +299,8 @@
 		CE3B682B09D1B0190017D339 /* BDSKImagePopUpButton.m in Sources */ = {isa = PBXBuildFile; fileRef = CE3B682709D1B0190017D339 /* BDSKImagePopUpButton.m */; };
 		CE3B682C09D1B0190017D339 /* BDSKImagePopUpButtonCell.h in Headers */ = {isa = PBXBuildFile; fileRef = CE3B682809D1B0190017D339 /* BDSKImagePopUpButtonCell.h */; };
 		CE3B682D09D1B0190017D339 /* BDSKImagePopUpButtonCell.m in Sources */ = {isa = PBXBuildFile; fileRef = CE3B682909D1B0190017D339 /* BDSKImagePopUpButtonCell.m */; };
+		CE4B691C09E9235200CCA14F /* SmallLock_Locked.tif in Resources */ = {isa = PBXBuildFile; fileRef = CE4B691A09E9235200CCA14F /* SmallLock_Locked.tif */; };
+		CE4B691D09E9235200CCA14F /* SmallLock_Unlocked.tif in Resources */ = {isa = PBXBuildFile; fileRef = CE4B691B09E9235200CCA14F /* SmallLock_Unlocked.tif */; };
 		CE518F2709E526E000E97C3A /* BDSKTextViewFindController.h in Headers */ = {isa = PBXBuildFile; fileRef = CE518F2509E526E000E97C3A /* BDSKTextViewFindController.h */; };
 		CE518F2809E526E000E97C3A /* BDSKTextViewFindController.m in Sources */ = {isa = PBXBuildFile; fileRef = CE518F2609E526E000E97C3A /* BDSKTextViewFindController.m */; };
 		CE518F6609E52D6A00E97C3A /* BDSKTextViewFindPanel.nib in Resources */ = {isa = PBXBuildFile; fileRef = CE518F6409E52D6A00E97C3A /* BDSKTextViewFindPanel.nib */; };
@@ -1114,6 +1116,8 @@
 		CE3B682709D1B0190017D339 /* BDSKImagePopUpButton.m */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.objc; path = BDSKImagePopUpButton.m; sourceTree = "<group>"; };
 		CE3B682809D1B0190017D339 /* BDSKImagePopUpButtonCell.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = BDSKImagePopUpButtonCell.h; sourceTree = "<group>"; };
 		CE3B682909D1B0190017D339 /* BDSKImagePopUpButtonCell.m */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.objc; path = BDSKImagePopUpButtonCell.m; sourceTree = "<group>"; };
+		CE4B691A09E9235200CCA14F /* SmallLock_Locked.tif */ = {isa = PBXFileReference; lastKnownFileType = image.tiff; name = SmallLock_Locked.tif; path = Images/SmallLock_Locked.tif; sourceTree = "<group>"; };
+		CE4B691B09E9235200CCA14F /* SmallLock_Unlocked.tif */ = {isa = PBXFileReference; lastKnownFileType = image.tiff; name = SmallLock_Unlocked.tif; path = Images/SmallLock_Unlocked.tif; sourceTree = "<group>"; };
 		CE518F2509E526E000E97C3A /* BDSKTextViewFindController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BDSKTextViewFindController.h; sourceTree = "<group>"; };
 		CE518F2609E526E000E97C3A /* BDSKTextViewFindController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BDSKTextViewFindController.m; sourceTree = "<group>"; };
 		CE518F6509E52D6A00E97C3A /* English */ = {isa = PBXFileReference; lastKnownFileType = wrapper.nib; name = English; path = English.lproj/BDSKTextViewFindPanel.nib; sourceTree = "<group>"; };
@@ -2006,6 +2010,8 @@
 				F9EF21C908B1575D00AAC9A9 /* ScrollArrowRight_Pressed.tiff */,
 				F9EF21CA08B1575D00AAC9A9 /* ScrollArrowRight.tiff */,
 				CE386D0609D7075C00B9D1F0 /* sharedFolderIcon.tiff */,
+				CE4B691A09E9235200CCA14F /* SmallLock_Locked.tif */,
+				CE4B691B09E9235200CCA14F /* SmallLock_Unlocked.tif */,
 				F97BF343090B19520063504B /* smartFolderIcon.tiff */,
 				3DBB79BF081538CA0050C0CD /* stop_small.tiff */,
 				F9022DBA0758088000C3F701 /* startup.tiff */,
@@ -3068,6 +3074,8 @@
 				F92ECBF109DF09C200A244D0 /* BDSKPasswordController.nib in Resources */,
 				CE518F6609E52D6A00E97C3A /* BDSKTextViewFindPanel.nib in Resources */,
 				F9FF241309E873A300BB1706 /* networkIcon.tiff in Resources */,
+				CE4B691C09E9235200CCA14F /* SmallLock_Locked.tif in Resources */,
+				CE4B691D09E9235200CCA14F /* SmallLock_Unlocked.tif in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
