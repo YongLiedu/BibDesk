@@ -109,6 +109,10 @@ static NSImage *unlockedIcon = nil;
     NSParameterAssert(aService != nil);
     if(self = [super initWithName:@"" key:@"" count:0]){
         service = [aService retain];
+        
+        // monitor changes to the TXT data
+        [service setDelegate:self];
+        [service startMonitoring];
 
         publications = nil;
         needsUpdate = YES;
@@ -145,6 +149,7 @@ static NSImage *unlockedIcon = nil;
 
 - (void)dealloc
 {
+    [service setDelegate:nil];
     [service release];
     [publications release];
     [serverSharingName release];
@@ -290,6 +295,19 @@ static NSImage *unlockedIcon = nil;
     
     // doc says we're required to return empty NSData instead of nil
     return password ? password : [NSData data];
+}
+
+// monitor the TXT record in case the server changes password requirements
+- (void)netService:(NSNetService *)sender didUpdateTXTRecordData:(NSData *)data
+{
+    OBASSERT(sender == service);
+    OBASSERT(data != nil);
+    if(data){
+        NSDictionary *dict = [NSNetService dictionaryFromTXTRecordData:data];
+        int32_t val = [[NSString stringWithData:[dict objectForKey:BDSKTXTAuthenticateKey] encoding:NSUTF8StringEncoding] intValue];
+        int32_t oldVal = flags.needsAuthentication;
+        OSAtomicCompareAndSwap32Barrier(oldVal, val, (int32_t *)&flags.needsAuthentication);
+    }
 }
 
 #pragma mark ServerThread
