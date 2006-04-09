@@ -69,7 +69,7 @@ static NSImage *unlockedIcon = nil;
 + (NSImage *)lockedIcon {
     if(lockedIcon == nil){
         NSRect iconRect = NSMakeRect(0.0, 0.0, 16.0, 16.0);
-        NSRect badgeRect = NSMakeRect(7.0, 0.0, 10.0, 10.0);
+        NSRect badgeRect = NSMakeRect(7.0, 0.0, 11.0, 11.0);
         NSImage *image = [[NSImage alloc] initWithSize:iconRect.size];
         NSImage *badge = [NSImage imageNamed:@"SmallLock_Locked"];
         
@@ -89,7 +89,7 @@ static NSImage *unlockedIcon = nil;
 + (NSImage *)unlockedIcon {
     if(unlockedIcon == nil){
         NSRect iconRect = NSMakeRect(0.0, 0.0, 16.0, 16.0);
-        NSRect badgeRect = NSMakeRect(7.0, 0.0, 10.0, 10.0);
+        NSRect badgeRect = NSMakeRect(6.0, 0.0, 11.0, 11.0);
         NSImage *image = [[NSImage alloc] initWithSize:iconRect.size];
         NSImage *badge = [NSImage imageNamed:@"SmallLock_Unlocked"];
         
