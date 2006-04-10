@@ -2001,9 +2001,12 @@ modify the template and TeX command appropriately.
 @cindex sharing, preferences
 @cindex sharing
 @cindex shared browsing
+@cindex Bonjour, firewall
 
 Using the Sharing preference pane you can make Bibdesk share your bibliographies with others 
-or look for bibliographies other people share on your network.  
+via Bonjour or look for bibliographies other people share on your network.  Mac OS X 10.4 (Tiger) or later
+is required for this feature, and it likely will not work if you have enabled the system's
+built-in firewall.
 
 @image{gfx/sharingPrefs}
 
@@ -2014,8 +2017,8 @@ Bibdesk applications on your network.
 
 @prefitem{Shared name} This is the name that others will see when they look for your shared bibliographies. 
 
-@prefitem{Required password} Selecting this will require others to authenticate themselves with this 
-sharing password.
+@prefitem{Require password} Selecting this will require others to authenticate themselves with this 
+sharing password.  The password is stored in your keychain, and is never transmitted in clear text.
 
 @c --------------------------------------------------------------------------------------
 
