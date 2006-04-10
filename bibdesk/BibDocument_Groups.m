@@ -206,9 +206,6 @@ The groupedPublications array is a subset of the publications array, developed b
 - (void)handleSharedGroupFinishedNotification:(NSNotification *)notification{
     BDSKGroup *group = [notification object];
     
-    if([sharedGroups containsObject:group] == NO)
-        return;
-    
     if([sortGroupsKey isEqualToString:BDSKGroupCellCountKey]){
         [self sortGroupsByKey:sortGroupsKey];
     }else{
@@ -219,13 +216,22 @@ The groupedPublications array is a subset of the publications array, developed b
 }
 
 - (void)handleSharedGroupsChangedNotification:(NSNotification *)notification{
+    // this is a hack to keep us from getting selection change notifications while sorting (which updates the TeX and attributed text previews)
+    [groupTableView setDelegate:nil];
+	NSArray *selectedGroups = [self selectedGroups];
+	
     NSArray *array = [[BDSKSharingBrowser sharedBrowser] sharedGroups];
     
     [sharedGroups release];
     sharedGroups = nil;
-    if (array != nil)
+    if (array != nil) {
         sharedGroups = [array mutableCopy];
+        // now sort using the current column and order
+        SEL sortSelector = ([sortGroupsKey isEqualToString:BDSKGroupCellCountKey]) ? @selector(countCompare:) : @selector(nameCompare:);
+        [sharedGroups sortUsingSelector:sortSelector ascending:!sortGroupsDescending usingLock:nil];
+    }
     
+    // rebuild the dictionary of spinners
     if (sharedGroupSpinners == nil) {
         sharedGroupSpinners = [[NSMutableDictionary alloc] initWithCapacity:5];
     } else {
@@ -245,8 +251,27 @@ The groupedPublications array is a subset of the publications array, developed b
         [sharedGroupSpinners setObject:spinner forKey:[group name]];
         [spinner release];
     }
-    
+	
     [groupTableView reloadData];
+	NSMutableIndexSet *selIndexes = [[NSMutableIndexSet alloc] init];
+	
+	// select the current groups, if still around. Otherwise select All Publications
+	if([selectedGroups count] != 0){
+		unsigned int row = [self countOfGroups];
+		while(row--){
+			if([selectedGroups containsObject:[self objectInGroupsAtIndex:row]])
+				[selIndexes addIndex:row];
+		}
+	}
+	if ([selIndexes count] == 0)
+		[selIndexes addIndex:0];
+	[groupTableView selectRowIndexes:selIndexes byExtendingSelection:NO];
+    [selIndexes release];
+	
+	[self displaySelectedGroups]; // the selection may not have changed, so we won't get this from the notification
+    
+	// reset ourself as delegate
+    [groupTableView setDelegate:self];
 }
 
 // this method uses counted sets to compute the number of publications per group; each group object is just a name
