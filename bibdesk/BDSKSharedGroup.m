@@ -50,11 +50,18 @@ NSString *BDSKSharedGroupComputerNameInfoKey = @"computer";
 // private methods for inter-thread messaging
 @protocol BDSKSharedGroupServerThread
 
-- (void)_cleanupBDSKSharedGroupDOServer; /* probably shouldn't be oneway, since it gets called when quitting the app */
-- (oneway void)_retrievePublicationsBDSKSharedGroupDOServer;
+- (void)cleanupBDSKSharedGroupDOServer; /* probably shouldn't be oneway, since it gets called when quitting the app */
+- (oneway void)retrievePublicationsBDSKSharedGroupDOServer;
 - (int)runPasswordPrompt; /* must not be declared oneway */
 - (int)runAuthenticationFailedAlert;
+- (void)notifyWhenDone;
 
+@end
+
+@interface BDSKSharedGroup (Private)
+- (id)mainThreadProxy;
+- (id)localProxy;
+- (void)runDOServer;
 @end
 
 @implementation BDSKSharedGroup
@@ -171,12 +178,7 @@ static NSImage *unlockedIcon = nil;
 {
     // we're in the main thread, so set the stop flag
     OSAtomicCompareAndSwap32Barrier(1, 0, (int32_t *)&flags.shouldKeepRunning);
-    NSConnection *conn = [NSConnection connectionWithRegisteredName:localConnectionName host:nil];
-    if(conn == nil)
-        NSLog(@"-[%@ %@]: unable to get thread connection", [self class], NSStringFromSelector(_cmd));
-    id proxy = [conn rootProxy];
-    [proxy setProtocolForProxy:@protocol(BDSKSharedGroupServerThread)];
-    [proxy _cleanupBDSKSharedGroupDOServer];
+    [[self localProxy] cleanupBDSKSharedGroupDOServer];
         
     [mainThreadConnection invalidate];
     [mainThreadConnection setRootObject:nil];
@@ -186,12 +188,7 @@ static NSImage *unlockedIcon = nil;
 
 - (void)retrievePublications;
 {
-    NSConnection *conn = [NSConnection connectionWithRegisteredName:localConnectionName host:nil];
-    if(conn == nil)
-        NSLog(@"-[%@ %@]: unable to get thread connection", [self class], NSStringFromSelector(_cmd));
-    id proxy = [conn rootProxy];
-    [proxy setProtocolForProxy:@protocol(BDSKSharedGroupServerThread)];
-    [proxy _retrievePublicationsBDSKSharedGroupDOServer]; 
+    [[self localProxy] retrievePublicationsBDSKSharedGroupDOServer]; 
 }
 
 - (NSString *)name { return [[[service name] retain] autorelease]; }
@@ -232,7 +229,37 @@ static NSImage *unlockedIcon = nil;
 
 - (BOOL)hasEditableName { return NO; }
 
-#pragma mark -
+@end
+
+
+@implementation BDSKSharedGroup (Private)
+
+#pragma mark Proxies for inter-thread communication
+
+- (id)mainThreadProxy{
+    NSConnection *conn = nil;
+    id proxy = nil;
+    @try {
+        conn = [NSConnection connectionWithReceivePort:nil sendPort:[mainThreadConnection receivePort]];
+        proxy = [conn rootProxy];
+        [proxy setProtocolForProxy:@protocol(BDSKSharedGroupServerThread)];
+    }
+    @catch(id exception) {
+        NSLog(@"Unable to connect to main thread.");
+        proxy = nil;
+    }
+    return proxy;
+}
+
+- (id)localProxy{
+    NSConnection *conn = [NSConnection connectionWithRegisteredName:localConnectionName host:nil];
+    if(conn == nil)
+        NSLog(@"Unable to get local thread connection");
+    id proxy = [conn rootProxy];
+    [proxy setProtocolForProxy:@protocol(BDSKSharedGroupServerThread)];
+    return proxy;
+}
+
 #pragma mark Authentication
 
 - (int)runPasswordPrompt
@@ -274,18 +301,7 @@ static NSImage *unlockedIcon = nil;
     if(password == nil){   
         
         // run the prompt on the main thread
-        id proxy = nil;
-        @try {
-            // we have to create our own connection to the mainThreadConnection's ports
-            NSConnection *conn = [NSConnection connectionWithReceivePort:nil sendPort:[mainThreadConnection receivePort]];
-            proxy = [conn rootProxy];
-            [proxy setProtocolForProxy:@protocol(BDSKSharedGroupServerThread)];
-            rv = [proxy runPasswordPrompt];
-        }
-        @catch(id exception) {
-            NSLog(@"Unable to connect to main thread and run password prompt.");
-            proxy = nil;
-        }
+        rv = [[self mainThreadProxy] runPasswordPrompt];
         
         // retry from the keychain
         if (rv == BDSKPasswordReturn){
@@ -316,12 +332,13 @@ static NSImage *unlockedIcon = nil;
 
 #pragma mark ServerThread
 
-- (void)notifyOnMainThreadWhenDone
+- (void)notifyWhenDone
 {
+    NSAssert([NSThread inMainThread] == 1, @"notification must be run from the main thread");
     [[NSNotificationCenter defaultCenter] postNotificationName:BDSKSharedGroupFinishedNotification object:self];
 }
 
-- (oneway void)_retrievePublicationsBDSKSharedGroupDOServer;
+- (oneway void)retrievePublicationsBDSKSharedGroupDOServer;
 {
     
     // set so we don't try calling this multiple times
@@ -359,10 +376,7 @@ static NSImage *unlockedIcon = nil;
                 if(flags.canceledAuthentication == 0){
                     OSAtomicCompareAndSwap32Barrier(0, 1, (int32_t *)&flags.authenticationFailed);
                     
-                    conn = [NSConnection connectionWithReceivePort:nil sendPort:[mainThreadConnection receivePort]];
-                    proxyObject = [conn rootProxy];
-                    [proxyObject setProtocolForProxy:@protocol(BDSKSharedGroupServerThread)];
-                    [proxyObject runAuthenticationFailedAlert];
+                    [[self mainThreadProxy] runAuthenticationFailedAlert];
                 }
                 
             } else {
@@ -403,17 +417,7 @@ static NSImage *unlockedIcon = nil;
         [self setNeedsUpdate:NO];
         
         // post the notification on the main thread; this ends up calling UI updates
-        id proxy = nil;
-        @try {
-            conn = [NSConnection connectionWithReceivePort:nil sendPort:[mainThreadConnection receivePort]];
-            proxy = [conn rootProxy];
-            [proxy setProtocolForProxy:@protocol(BDSKSharedGroupServerThread)];
-            [proxy notifyOnMainThreadWhenDone];
-        }
-        @catch(id exception) {
-            NSLog(@"Unable to connect to main thread and notify.");
-            proxy = nil;
-        }            
+        [[self mainThreadProxy] notifyWhenDone];
     }
     @catch(id exception){
         NSLog(@"%@: discarding exception %@ while retrieving publications", [self class], exception);
@@ -424,7 +428,7 @@ static NSImage *unlockedIcon = nil;
     }
 }
 
-- (void)_cleanupBDSKSharedGroupDOServer;
+- (void)cleanupBDSKSharedGroupDOServer;
 {
     // must be on the background thread, or the connection won't be removed from the correct run loop
     [[NSSocketPortNameServer sharedInstance] removePortForName:serverSharingName];

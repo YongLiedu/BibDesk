@@ -73,7 +73,7 @@ typedef struct _BDSKSharedGroupFlags {
 - (NSNetService *)service;
 - (BOOL)isRetrieving;
 
+// this should probably be private, but see the comment before initWithService
 - (void)stopDOServer;
-- (void)runDOServer;
 
 @end
