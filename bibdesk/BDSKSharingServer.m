@@ -450,13 +450,15 @@ NSString *BDSKComputerName() {
 {
     NSData *dataToSend = [NSKeyedArchiver archivedDataWithRootObject:[self snapshotOfPublications]];
     if(dataToSend != nil){
-        // If we want to make this cross-platform (say if JabRef wanted to add Bonjour support), we could pass BibTeX as another key in the dictionary, and use an XML plist for reading at the other end
         NSDictionary *dictionary = [NSDictionary dictionaryWithObjectsAndKeys:dataToSend, BDSKSharedArchivedDataKey, nil];
         NSString *errorString = nil;
         dataToSend = [NSPropertyListSerialization dataFromPropertyList:dictionary format:NSPropertyListBinaryFormat_v1_0 errorDescription:&errorString];
         if(errorString != nil){
             NSLog(@"Error serializing publications for sharing: %@", errorString);
             [errorString release];
+        } else {
+            // Omni's bzip2 method caused a hang when I tried it, but -compressedData produced a 50% size decrease
+            dataToSend = [dataToSend compressedData];
         }
     }
     return dataToSend;
