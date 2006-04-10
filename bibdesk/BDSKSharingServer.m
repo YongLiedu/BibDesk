@@ -458,7 +458,8 @@ NSString *BDSKComputerName() {
             [errorString release];
         } else {
             // Omni's bzip2 method caused a hang when I tried it, but -compressedData produced a 50% size decrease
-            dataToSend = [dataToSend compressedData];
+            @try{ dataToSend = [dataToSend compressedData]; }
+            @catch(id exception){ NSLog(@"Ignoring exception %@ raised while compressing data to share.", exception); }
         }
     }
     return dataToSend;

@@ -385,7 +385,8 @@ static NSImage *unlockedIcon = nil;
         NSData *proxyData = [proxyObject archivedSnapshotOfPublications];
         
         if([proxyData length] != 0){
-            proxyData = [proxyData decompressedData];
+            if([proxyData mightBeCompressed])
+                proxyData = [proxyData decompressedData];
             NSString *errorString = nil;
             NSDictionary *dictionary = [NSPropertyListSerialization propertyListFromData:proxyData mutabilityOption:NSPropertyListImmutable format:NULL errorDescription:&errorString];
             if(errorString != nil){
