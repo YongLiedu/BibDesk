@@ -468,8 +468,19 @@ NSString *BDSKComputerName() {
 - (BOOL)connection:(NSConnection *)parentConnection shouldMakeNewConnection:(NSConnection *)newConnection
 {
     // set the child connection's delegate so we get authentication messages
-    [newConnection setDelegate:self];
-    return YES;
+    // this hidden pref will be zero by default, but we'll add a limit here just in case it's needed
+    static int maxConnections = 0;
+    if(maxConnections == 0)
+        maxConnections = MAX(20, [[NSUserDefaults standardUserDefaults] integerForKey:@"BDSKSharingServerMaxConnections"]);
+    
+    BOOL allowConnection = [objectsToNotify count] < maxConnections;
+    if(allowConnection){
+        [newConnection setDelegate:self];
+    } else {
+        NSLog(@"*** WARNING *** Maximum number of sharing clients (%d) exceeded.", maxConnections);
+        NSLog(@"Use `defaults write %@ BDSKSharingServerMaxConnections N` to change the limit to N.", [[NSBundle mainBundle] bundleIdentifier]);
+    }
+    return allowConnection;
 }
 
 - (BOOL)authenticateComponents:(NSArray *)components withData:(NSData *)authenticationData
