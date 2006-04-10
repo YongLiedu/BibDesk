@@ -125,7 +125,7 @@
 	[[[self undoManager] prepareWithInvocationTarget:self] addSmartGroup:group];
 	
 	[group setUndoManager:nil];
-	[smartGroups removeObject:group];
+	[smartGroups removeObjectIdenticalTo:group];
     [groupTableView reloadData];
 }
 
