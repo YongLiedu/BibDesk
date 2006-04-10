@@ -90,6 +90,8 @@
         [enableSharingButton setToolTip:disabledTip];
         [enableBrowsingButton setEnabled:NO];
         [enableBrowsingButton setToolTip:disabledTip];
+        
+        NSBeginAlertSheet(NSLocalizedString(@"Not Supported on Panther", @""), nil, nil, nil, [[OAPreferenceController sharedPreferenceController] window], nil, NULL, NULL, NULL, NSLocalizedString(@"Sharing via Bonjour is only supported on Mac OS X 10.4 and later systems.", @""));
     }
     
     [usePasswordButton setState:[defaults boolForKey:BDSKSharingRequiresPasswordKey] ? NSOnState : NSOffState];
