@@ -43,25 +43,14 @@ extern NSString *BDSKSharedGroupHostNameInfoKey;
 extern NSString *BDSKSharedGroupPortnameInfoKey;
 extern NSString *BDSKSharedGroupComputerNameInfoKey;
 
-typedef struct _BDSKSharedGroupFlags {
-    volatile int32_t shouldKeepRunning __attribute__ ((aligned (4)));
-    volatile int32_t isRetrieving __attribute__ ((aligned (4)));
-    volatile int32_t authenticationFailed __attribute__ ((aligned (4)));
-    volatile int32_t canceledAuthentication __attribute__ ((aligned (4)));
-    volatile int32_t needsAuthentication __attribute__ ((aligned (4)));
-} BDSKSharedGroupFlags;    
+@class BDSKSharedGroupServer;
 
 @interface BDSKSharedGroup : BDSKGroup
 {
-    NSNetService *service;
+    NSString *name;
     NSArray *publications;
-    NSConnection *connection;
+    BDSKSharedGroupServer *server;
     BOOL needsUpdate;
-    BDSKSharedGroupFlags flags;
-
-    NSString *serverSharingName;
-    NSString *localConnectionName;
-    NSConnection *mainThreadConnection;
 }
 
 + (NSImage *)icon;
@@ -70,10 +59,9 @@ typedef struct _BDSKSharedGroupFlags {
 
 - (id)initWithService:(NSNetService *)aService;
 - (NSArray *)publications;
-- (NSNetService *)service;
+- (void)setPublications:(NSArray *)newPublications;
 - (BOOL)isRetrieving;
-
-// this should probably be private, but see the comment before initWithService
-- (void)stopDOServer;
+- (BOOL)needsUpdate;
+- (void)setNeedsUpdate:(BOOL)flag;
 
 @end

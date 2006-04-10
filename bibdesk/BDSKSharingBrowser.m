@@ -67,8 +67,6 @@ static BDSKSharingBrowser *sharedBrowser = nil;
 }
 
 - (void)dealloc{
-    // @@ hack to break DO retain cycle (theoretical since this never gets called)
-    [sharedGroups makeObjectsPerformSelector:@selector(stopDOServer)];
     [sharedGroups release];
     [browser release];
     [unresolvedNetServices release];
@@ -117,21 +115,19 @@ static BDSKSharingBrowser *sharedBrowser = nil;
 
 - (void)netServiceBrowser:(NSNetServiceBrowser *)aNetServiceBrowser didRemoveService:(NSNetService *)aNetService moreComing:(BOOL)moreComing
 {
+    NSString *name = [aNetService name];
     NSEnumerator *e = [sharedGroups objectEnumerator];
-    NSMutableArray *array = [NSMutableArray array];
-    BDSKSharedGroup *group;
+    BDSKSharedGroup *group = nil;
     
-    // create an array of the groups we should keep by comparing services with the one that just went away
+    // find the group we should remove
     while(group = [e nextObject]){
-        if([[group service] isEqual:aNetService] == NO)
-            [array addObject:group];
-        else
-            [group stopDOServer];
+        if([[group name] isEqualToString:name])
+            break;
     }
-    
-    [sharedGroups setArray:array];
-    
-    [[NSNotificationCenter defaultCenter] postNotificationName:BDSKSharedGroupsChangedNotification object:self userInfo:[NSDictionary dictionaryWithObject:aNetService forKey:@"removedservice"]];
+    if(group != nil){
+        [sharedGroups removeObject:group];
+        [[NSNotificationCenter defaultCenter] postNotificationName:BDSKSharedGroupsChangedNotification object:self userInfo:[NSDictionary dictionaryWithObject:aNetService forKey:@"removedservice"]];
+    }
 }
 
 - (void)enableSharedBrowsing;
@@ -149,8 +145,6 @@ static BDSKSharingBrowser *sharedBrowser = nil;
 - (void)disableSharedBrowsing;
 {
     if(sharedGroups != nil){
-        // stop the server(s) or the groups won't be released properly
-        [sharedGroups makeObjectsPerformSelector:@selector(stopDOServer)];
         [sharedGroups release];
         sharedGroups = nil;
         [browser release];

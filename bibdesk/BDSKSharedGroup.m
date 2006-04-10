@@ -47,22 +47,57 @@ NSString *BDSKSharedGroupHostNameInfoKey = @"hostname";
 NSString *BDSKSharedGroupPortnameInfoKey = @"portname";
 NSString *BDSKSharedGroupComputerNameInfoKey = @"computer";
 
-// private methods for inter-thread messaging
-@protocol BDSKSharedGroupServerThread
+typedef struct _BDSKSharedGroupFlags {
+    volatile int32_t shouldKeepRunning __attribute__ ((aligned (4)));
+    volatile int32_t isRetrieving __attribute__ ((aligned (4)));
+    volatile int32_t authenticationFailed __attribute__ ((aligned (4)));
+    volatile int32_t canceledAuthentication __attribute__ ((aligned (4)));
+    volatile int32_t needsAuthentication __attribute__ ((aligned (4)));
+} BDSKSharedGroupFlags;    
 
-- (void)cleanupBDSKSharedGroupDOServer; /* probably shouldn't be oneway, since it gets called when quitting the app */
-- (oneway void)retrievePublicationsBDSKSharedGroupDOServer;
-- (int)runPasswordPrompt; /* must not be declared oneway */
+
+// private protocols for inter-thread messaging
+@protocol BDSKSharedGroupServerLocalThread
+
+- (void)cleanup; // probably shouldn't be oneway, since it gets called when quitting the app 
+- (oneway void)retrievePublications;
+
+@end
+
+@protocol BDSKSharedGroupServerMainThread
+
+- (void)setPublications:(NSArray *)publications; // must not be declared oneway 
+- (int)runPasswordPrompt;
 - (int)runAuthenticationFailedAlert;
-- (void)notifyWhenDone;
 
 @end
 
-@interface BDSKSharedGroup (Private)
+
+// private class for DO server. We have it as a separate object so we don't get a retain loop, we remove it from the thread runloop in the group's dealloc
+@interface BDSKSharedGroupServer : NSObject <BDSKSharedGroupServerLocalThread, BDSKSharedGroupServerMainThread, BDSKClientProtocol> {
+    NSNetService *service;
+    BDSKSharedGroup *group;
+    NSConnection *connection;
+    BDSKSharedGroupFlags flags;
+
+    NSString *serverSharingName;
+    NSString *localConnectionName;
+    NSConnection *mainThreadConnection;
+}
+
+- (id)initWithGroup:(BDSKSharedGroup *)aGroup andService:(NSNetService *)aService;
+
+- (BOOL)isRetrieving;
+- (BOOL)needsAuthentication;
+
 - (id)mainThreadProxy;
-- (id)localProxy;
+- (id)localThreadProxy;
+
 - (void)runDOServer;
+- (void)stopDOServer;
+
 @end
+
 
 @implementation BDSKSharedGroup
 
@@ -113,26 +148,105 @@ static NSImage *unlockedIcon = nil;
     return unlockedIcon;
 }
 
-/* @@ Warning: retain cycle, since the NSThread retains us (and we keep running it).  Best option may be to convert this server to a separate object, and each shared group will "own" one, and then stop it when the group is deallocated.  For now, we have the owner call stopDOServer when the app terminates or a host goes away, which ensures that shared groups are dealloced properly. */
-
 - (id)initWithService:(NSNetService *)aService;
 {
     NSParameterAssert(aService != nil);
     if(self = [super initWithName:@"" key:@"" count:0]){
+        name = [[aService name] copy];
+
+        publications = nil;
+        needsUpdate = YES;
+        
+        server = [[BDSKSharedGroupServer alloc] initWithGroup:self andService:aService];
+    }
+    
+    return self;
+}
+
+- (void)dealloc;
+{
+    [server stopDOServer];
+    [server release];
+    [name release];
+    [publications release];
+    [super dealloc];
+}
+
+- (NSString *)name { return name; }
+
+- (NSString *)description;
+{
+    return [NSString stringWithFormat:@"<%@ %p>: {\n\tneeds update: %@\n\tname: %@\n }", [self class], self, (needsUpdate ? @"yes" : @"no"), name];
+}
+
+- (NSArray *)publications;
+{
+    if([self isRetrieving] == NO && ([self needsUpdate] == YES || publications == nil)){
+        // let the server get the publications asynchronously
+        [[server localThreadProxy] retrievePublications]; 
+    }
+    // this will likely be nil the first time; retain since our server thread could release it at any time
+    return [[publications retain] autorelease];
+}
+
+- (void)setPublications:(NSArray *)newPublications;
+{
+    if(newPublications != publications){
+        [publications release];
+        publications = [newPublications retain];
+    }
+    
+    [self setCount:[publications count]];
+    [self setNeedsUpdate:NO];
+    
+    [[NSNotificationCenter defaultCenter] postNotificationName:BDSKSharedGroupFinishedNotification object:self];
+}
+
+- (BOOL)containsItem:(BibItem *)item {
+    // calling [self publications] will repeatedly reschedule a retrieval, which is undesirable if the user cancels; containsItem is called very frequently
+    NSArray *pubs = [publications retain];
+    BOOL rv = [pubs containsObject:item];
+    [pubs release];
+    return rv;
+}
+
+- (BOOL)isRetrieving { return (BOOL)[server isRetrieving]; }
+
+- (BOOL)needsUpdate { return needsUpdate; }
+
+- (void)setNeedsUpdate:(BOOL)flag { needsUpdate = flag; }
+
+- (NSImage *)icon {
+    if([server needsAuthentication])
+        return (publications == nil) ? [[self class] lockedIcon] : [[self class] unlockedIcon];
+    return [[self class] icon];
+}
+
+- (BOOL)isShared { return YES; }
+
+- (BOOL)hasEditableName { return NO; }
+
+@end
+
+
+@implementation BDSKSharedGroupServer
+
+- (id)initWithGroup:(BDSKSharedGroup *)aGroup andService:(NSNetService *)aService;
+{
+    if (self = [super init]) {
+        group = aGroup; // don't retain since it retains us
+        
         service = [aService retain];
         
         // monitor changes to the TXT data
         [service setDelegate:self];
         [service startMonitoring];
-
-        publications = nil;
-        needsUpdate = YES;
         
         static int connectionIdx = 0;
-        // this needs to be unique on the network and among our shared groups
-        serverSharingName = [[NSString alloc] initWithFormat:@"%@%@%d", [[NSHost currentHost] name], [[self class] description], connectionIdx++];
         // this just needs to be unique on localhost
         localConnectionName = [[NSString alloc] initWithFormat:@"%@%d", [[self class] description], connectionIdx++];
+        // this needs to be unique on the network and among our shared group servers
+        serverSharingName = [[NSString alloc] initWithFormat:@"%@%@", [[NSHost currentHost] name], localConnectionName];
 
         mainThreadConnection = [[NSConnection alloc] initWithReceivePort:[NSPort port] sendPort:nil];
         [mainThreadConnection setRootObject:self];
@@ -152,33 +266,24 @@ static NSImage *unlockedIcon = nil;
         
         // if we detach in -publications, connection setup doesn't happen in time
         [NSThread detachNewThreadSelector:@selector(runDOServer) toTarget:self withObject:nil];
-
     }
-    
     return self;
 }
 
-- (void)dealloc
+- (void)dealloc;
 {
     [service setDelegate:nil];
     [service release];
-    [publications release];
     [serverSharingName release];
     [localConnectionName release];
     [super dealloc];
-}
-
-- (oneway void)setNeedsUpdate:(BOOL)flag
-{
-    // this is only called from the DO thread
-    needsUpdate = flag;
 }
 
 - (void)stopDOServer;
 {
     // we're in the main thread, so set the stop flag
     OSAtomicCompareAndSwap32Barrier(1, 0, (int32_t *)&flags.shouldKeepRunning);
-    [[self localProxy] cleanupBDSKSharedGroupDOServer];
+    [[self localThreadProxy] cleanup];
         
     [mainThreadConnection invalidate];
     [mainThreadConnection setRootObject:nil];
@@ -186,63 +291,22 @@ static NSImage *unlockedIcon = nil;
     mainThreadConnection = nil;
 }
 
-- (void)retrievePublications;
-{
-    [[self localProxy] retrievePublicationsBDSKSharedGroupDOServer]; 
-}
+- (oneway void)setNeedsUpdate:(BOOL)flag { [group setNeedsUpdate:flag]; }
 
-- (NSString *)name { return [[[service name] retain] autorelease]; }
+- (BOOL)isRetrieving { return (BOOL)flags.isRetrieving; }
 
-- (NSString *)description
-{
-    return [NSString stringWithFormat:@"<%@ %p>: {\n\tneeds update: %@\n\tname: %@\nservice: %@\n }", [self class], self, (needsUpdate ? @"yes" : @"no"), [self name], service];
-}
-
-- (NSArray *)publications
-{
-    if(flags.isRetrieving == 0 && (needsUpdate == YES || publications == nil)){
-        [self retrievePublications];
-    }
-    // this will likely be nil the first time; retain since our server thread could release it at any time
-    return [[publications retain] autorelease];
-}
-
-- (BOOL)containsItem:(BibItem *)item {
-    // calling [self publications] will repeatedly reschedule a retrieval, which is undesirable if the user cancels; containsItem is called very frequently
-    NSArray *pubs = [publications retain];
-    BOOL rv = [pubs containsObject:item];
-    [pubs release];
-    return rv;
-}
-
-- (NSNetService *)service { return service; }
-
-- (BOOL)isRetrieving { return (flags.isRetrieving == 1); }
-
-- (NSImage *)icon {
-    if(flags.needsAuthentication == 1)
-        return (publications == nil) ? [[self class] lockedIcon] : [[self class] unlockedIcon];
-    return [[self class] icon];
-}
-
-- (BOOL)isShared { return YES; }
-
-- (BOOL)hasEditableName { return NO; }
-
-@end
-
-
-@implementation BDSKSharedGroup (Private)
+- (BOOL)needsAuthentication { return (BOOL)flags.needsAuthentication; }
 
 #pragma mark Proxies for inter-thread communication
 
-- (id)mainThreadProxy{
+- (id)mainThreadProxy;
+{
     NSConnection *conn = nil;
     id proxy = nil;
     @try {
         conn = [NSConnection connectionWithReceivePort:nil sendPort:[mainThreadConnection receivePort]];
         proxy = [conn rootProxy];
-        [proxy setProtocolForProxy:@protocol(BDSKSharedGroupServerThread)];
+        [proxy setProtocolForProxy:@protocol(BDSKSharedGroupServerMainThread)];
     }
     @catch(id exception) {
         NSLog(@"Unable to connect to main thread.");
@@ -251,31 +315,32 @@ static NSImage *unlockedIcon = nil;
     return proxy;
 }
 
-- (id)localProxy{
+- (id)localThreadProxy;
+{
     NSConnection *conn = [NSConnection connectionWithRegisteredName:localConnectionName host:nil];
     if(conn == nil)
         NSLog(@"Unable to get local thread connection");
     id proxy = [conn rootProxy];
-    [proxy setProtocolForProxy:@protocol(BDSKSharedGroupServerThread)];
+    [proxy setProtocolForProxy:@protocol(BDSKSharedGroupServerLocalThread)];
     return proxy;
 }
 
 #pragma mark Authentication
 
-- (int)runPasswordPrompt
+- (int)runPasswordPrompt;
 {
     NSAssert([NSThread inMainThread] == 1, @"password controller must be run from the main thread");
     BDSKPasswordController *pwc = [[BDSKPasswordController alloc] init];
-    int rv = [pwc runModalForKeychainServiceName:[BDSKPasswordController keychainServiceNameWithComputerName:[self name]] message:[NSString stringWithFormat:@"%@ %@", NSLocalizedString(@"Enter password for", @""), [self name]]];
+    int rv = [pwc runModalForKeychainServiceName:[BDSKPasswordController keychainServiceNameWithComputerName:[group name]] message:[NSString stringWithFormat:@"%@ %@", NSLocalizedString(@"Enter password for", @""), [group name]]];
     [pwc close];
     [pwc release];
     return rv;
 }
 
-- (int)runAuthenticationFailedAlert
+- (int)runAuthenticationFailedAlert;
 {
     NSAssert([NSThread inMainThread] == 1, @"runAuthenticationFailedAlert must be run from the main thread");
-    return NSRunAlertPanel(NSLocalizedString(@"Authentication Failed", @""), [NSString stringWithFormat:NSLocalizedString(@"Incorrect password for BibDesk Sharing on server %@.  Reselect to try again.", @""), [service name]], nil, nil, nil);
+    return NSRunAlertPanel(NSLocalizedString(@"Authentication Failed", @""), [NSString stringWithFormat:NSLocalizedString(@"Incorrect password for BibDesk Sharing on server %@.  Reselect to try again.", @""), [group name]], nil, nil, nil);
 }
 
 - (BOOL)connection:(NSConnection *)parentConnection shouldMakeNewConnection:(NSConnection *)newConnection
@@ -296,7 +361,7 @@ static NSImage *unlockedIcon = nil;
     
     int rv = 1;
     if(flags.authenticationFailed == 0)
-        password = [BDSKPasswordController passwordHashedForKeychainServiceName:[BDSKPasswordController keychainServiceNameWithComputerName:[self name]]];
+        password = [BDSKPasswordController passwordHashedForKeychainServiceName:[BDSKPasswordController keychainServiceNameWithComputerName:[group name]]];
     
     if(password == nil){   
         
@@ -305,7 +370,7 @@ static NSImage *unlockedIcon = nil;
         
         // retry from the keychain
         if (rv == BDSKPasswordReturn){
-            password = [BDSKPasswordController passwordHashedForKeychainServiceName:[BDSKPasswordController keychainServiceNameWithComputerName:[self name]]];
+            password = [BDSKPasswordController passwordHashedForKeychainServiceName:[BDSKPasswordController keychainServiceNameWithComputerName:[group name]]];
             // assume we succeeded; the exception handler for the connection will change it back if we fail again
             OSAtomicCompareAndSwap32Barrier(1, 0, (int32_t *)&flags.authenticationFailed);
         }else{
@@ -318,7 +383,7 @@ static NSImage *unlockedIcon = nil;
 }
 
 // monitor the TXT record in case the server changes password requirements
-- (void)netService:(NSNetService *)sender didUpdateTXTRecordData:(NSData *)data
+- (void)netService:(NSNetService *)sender didUpdateTXTRecordData:(NSData *)data;
 {
     OBASSERT(sender == service);
     OBASSERT(data != nil);
@@ -332,13 +397,13 @@ static NSImage *unlockedIcon = nil;
 
 #pragma mark ServerThread
 
-- (void)notifyWhenDone
+- (void)setPublications:(NSArray *)publications;
 {
-    NSAssert([NSThread inMainThread] == 1, @"notification must be run from the main thread");
-    [[NSNotificationCenter defaultCenter] postNotificationName:BDSKSharedGroupFinishedNotification object:self];
+    NSAssert([NSThread inMainThread] == 1, @"publications must be set from the main thread");
+    [group setPublications:publications];
 }
 
-- (oneway void)retrievePublicationsBDSKSharedGroupDOServer;
+- (oneway void)retrievePublications;
 {
     
     // set so we don't try calling this multiple times
@@ -393,9 +458,7 @@ static NSImage *unlockedIcon = nil;
         // use computer as the notification identifier for this host on the other end
         [proxyObject registerHostNameForNotifications:[NSDictionary dictionaryWithObjectsAndKeys:[[NSHost currentHost] name], BDSKSharedGroupHostNameInfoKey, serverSharingName, BDSKSharedGroupPortnameInfoKey, [BDSKSharingServer sharingName], BDSKSharedGroupComputerNameInfoKey, nil]];
         
-        [publications autorelease];
-        publications = nil;
-        
+        NSArray *publications = nil;
         NSData *proxyData = [proxyObject archivedSnapshotOfPublications];
         
         if([proxyData length] != 0){
@@ -409,15 +472,12 @@ static NSImage *unlockedIcon = nil;
             } else {
                 NSData *archive = [dictionary objectForKey:BDSKSharedArchivedDataKey];
                 if(archive != nil){
-                    publications = [[NSKeyedUnarchiver unarchiveObjectWithData:archive] retain];
+                    publications = [NSKeyedUnarchiver unarchiveObjectWithData:archive];
                 }
             }
-        }    
-        [self setCount:[publications count]];
-        [self setNeedsUpdate:NO];
-        
-        // post the notification on the main thread; this ends up calling UI updates
-        [[self mainThreadProxy] notifyWhenDone];
+        }
+        // set the publications on the main thread; this ends up posting notifications for UI updates
+        [[self mainThreadProxy] setPublications:publications];
     }
     @catch(id exception){
         NSLog(@"%@: discarding exception %@ while retrieving publications", [self class], exception);
@@ -428,7 +488,7 @@ static NSImage *unlockedIcon = nil;
     }
 }
 
-- (void)cleanupBDSKSharedGroupDOServer;
+- (void)cleanup;
 {
     // must be on the background thread, or the connection won't be removed from the correct run loop
     [[NSSocketPortNameServer sharedInstance] removePortForName:serverSharingName];
@@ -497,5 +557,3 @@ static NSImage *unlockedIcon = nil;
 }
 
 @end
-
-
