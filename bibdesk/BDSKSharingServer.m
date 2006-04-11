@@ -197,11 +197,6 @@ NSString *BDSKComputerName() {
                                                    object:nil];
         
         [[NSNotificationCenter defaultCenter] addObserver:self
-                                                 selector:@selector(handleSharedGroupsChangedNotification:)
-                                                     name:BDSKSharedGroupsChangedNotification
-                                                   object:nil];
-        
-        [[NSNotificationCenter defaultCenter] addObserver:self
                                                  selector:@selector(handleApplicationWillTerminate:)
                                                      name:NSApplicationWillTerminateNotification
                                                    object:nil];
@@ -245,29 +240,6 @@ NSString *BDSKComputerName() {
     SEL theSEL = @selector(handleQueuedDataChanged);
     [NSObject cancelPreviousPerformRequestsWithTarget:self selector:theSEL object:nil];
     [self performSelector:theSEL withObject:nil afterDelay:5.0];
-}
-
-- (void)handleSharedGroupsChangedNotification:(NSNotification *)note;
-{
-    // not the default connection here; we want to call our background thread, but only if it's running
-    NSDictionary *userInfo = [note userInfo];
-    NSNetService *service = [userInfo objectForKey:@"removedservice"];
-    NSString *nameToRemove = nil;
-    NSData *TXTData = [service TXTRecordData];
-    if(TXTData)
-        nameToRemove = [[NSNetService dictionaryFromTXTRecordData:TXTData] objectForKey:BDSKTXTComputerNameKey];
-    
-    if(nameToRemove != nil && shouldKeepRunning == 1){
-                
-        NSConnection *conn = [NSConnection connectionWithRegisteredName:[BDSKSharingServer localConnectionName] host:nil];
-        if(conn == nil)
-            NSLog(@"-[%@ %@]: unable to get thread connection", [self class], NSStringFromSelector(_cmd));
-        id proxy = [conn rootProxy];
-        [proxy setProtocolForProxy:@protocol(BDSKSharingProtocol)];
-        
-        // get computer name from NSNetService; will this always work?
-        [proxy removeRemoteObserverNamed:nameToRemove];
-    }    
 }
 
 //  handle changes from the OS
