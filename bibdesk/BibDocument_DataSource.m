@@ -300,12 +300,12 @@
 	NSTableView *tv = [aNotification object];
     if(tv == tableView){
         NSNotification *note = [NSNotification notificationWithName:BDSKTableSelectionChangedNotification object:self];
-        [[NSNotificationQueue defaultQueue] enqueueNotification:note postingStyle:NSPostNow coalesceMask:NSNotificationCoalescingOnName forModes:nil];
+        [[NSNotificationQueue defaultQueue] enqueueNotification:note postingStyle:NSPostWhenIdle coalesceMask:NSNotificationCoalescingOnName forModes:nil];
     }else if(tv == (NSTableView *)ccTableView){
 		[removeCustomCiteStringButton setEnabled:([tv numberOfSelectedRows] > 0)];
 	}else if(tv == groupTableView){
         NSNotification *note = [NSNotification notificationWithName:BDSKGroupTableSelectionChangedNotification object:self];
-        [[NSNotificationQueue defaultQueue] enqueueNotification:note postingStyle:NSPostNow coalesceMask:NSNotificationCoalescingOnName forModes:nil];
+        [[NSNotificationQueue defaultQueue] enqueueNotification:note postingStyle:NSPostWhenIdle coalesceMask:NSNotificationCoalescingOnName forModes:nil];
     }
 }
 
