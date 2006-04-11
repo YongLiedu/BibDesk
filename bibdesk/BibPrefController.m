@@ -260,6 +260,7 @@ NSString *BDSKPreviewDisplayChangedNotification = @"Preview Pane Preference Chan
 NSString *BDSKPreviewNeedsUpdateNotification = @"Preview Needs Update Notification";
 NSString *BDSKTableColumnChangedNotification = @"TableColumnChangedNotification";
 NSString *BDSKTableSelectionChangedNotification = @"TableSelectionChangedNotification";
+NSString *BDSKGroupTableSelectionChangedNotification = @"GroupTableSelectionChangedNotification";
 NSString *BDSKGroupFieldChangedNotification = @"GroupFieldChangedNotification";
 NSString *BDSKGroupAddRemoveNotification = @"BDSKGroupAddRemoveNotification";
 NSString *BDSKBibItemChangedNotification = @"BibItem Changed notification";

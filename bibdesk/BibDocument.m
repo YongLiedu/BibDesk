@@ -167,6 +167,11 @@ NSString *BDSKWeblocFilePboardType = @"CorePasteboardFlavorType 0x75726C20";
 													 name:BDSKTableSelectionChangedNotification
 												   object:self];
 
+		[[NSNotificationCenter defaultCenter] addObserver:self
+												 selector:@selector(handleGroupTableSelectionChangedNotification:)
+													 name:BDSKGroupTableSelectionChangedNotification
+												   object:self];
+
 		// register for tablecolumn changes notifications:
 		[[NSNotificationCenter defaultCenter] addObserver:self
 												 selector:@selector(handleTableColumnChangedNotification:)

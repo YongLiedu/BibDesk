@@ -67,10 +67,12 @@
 - (void)changeGroupFieldAction:(id)sender;
 - (void)addGroupFieldAction:(id)sender;
 - (void)removeGroupFieldAction:(id)sender;
+
 - (void)handleGroupFieldChangedNotification:(NSNotification *)notification;
 - (void)handleGroupAddRemoveNotification:(NSNotification *)notification;
 - (void)handleSharedGroupFinishedNotification:(NSNotification *)notification;
 - (void)handleSharedGroupsChangedNotification:(NSNotification *)notification;
+- (void)handleGroupTableSelectionChangedNotification:(NSNotification *)notification;
 
 - (IBAction)sortGroupsByGroup:(id)sender;
 - (IBAction)sortGroupsByCount:(id)sender;

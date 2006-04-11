@@ -299,13 +299,13 @@
 - (void)tableViewSelectionDidChange:(NSNotification *)aNotification{
 	NSTableView *tv = [aNotification object];
     if(tv == tableView){
-        [[NSNotificationCenter defaultCenter] postNotificationName:BDSKTableSelectionChangedNotification object:self];
+        NSNotification *note = [NSNotification notificationWithName:BDSKTableSelectionChangedNotification object:self];
+        [[NSNotificationQueue defaultQueue] enqueueNotification:note postingStyle:NSPostNow coalesceMask:NSNotificationCoalescingOnName forModes:nil];
     }else if(tv == (NSTableView *)ccTableView){
 		[removeCustomCiteStringButton setEnabled:([tv numberOfSelectedRows] > 0)];
 	}else if(tv == groupTableView){
-        // Mail and iTunes clear search when changing groups; users don't like this, though.  Xcode doesn't clear its search field, so at least there's some precedent for the opposite side.
-        [self displaySelectedGroups];
-        // could force selection of row 0 in the main table here, so we always display a preview, but that flashes the group table highlights annoyingly and may cause other selection problems
+        NSNotification *note = [NSNotification notificationWithName:BDSKGroupTableSelectionChangedNotification object:self];
+        [[NSNotificationQueue defaultQueue] enqueueNotification:note postingStyle:NSPostNow coalesceMask:NSNotificationCoalescingOnName forModes:nil];
     }
 }
 

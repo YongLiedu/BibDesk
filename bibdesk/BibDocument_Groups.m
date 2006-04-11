@@ -188,7 +188,7 @@ The groupedPublications array is a subset of the publications array, developed b
     return array;
 }
 
-#pragma mark UI updating
+#pragma mark Notification handlers
 
 - (void)handleGroupFieldChangedNotification:(NSNotification *)notification{
     // this is set in all of the action methods
@@ -202,6 +202,11 @@ The groupedPublications array is a subset of the publications array, developed b
 	[self updateAllSmartGroups];
 }
 
+- (void)handleGroupTableSelectionChangedNotification:(NSNotification *)notification{
+    // Mail and iTunes clear search when changing groups; users don't like this, though.  Xcode doesn't clear its search field, so at least there's some precedent for the opposite side.
+    [self displaySelectedGroups];
+    // could force selection of row 0 in the main table here, so we always display a preview, but that flashes the group table highlights annoyingly and may cause other selection problems
+}
 
 - (void)handleSharedGroupFinishedNotification:(NSNotification *)notification{
     BDSKGroup *group = [notification object];
@@ -274,6 +279,8 @@ The groupedPublications array is a subset of the publications array, developed b
 	// reset ourself as delegate
     [groupTableView setDelegate:self];
 }
+
+#pragma mark UI updating
 
 // this method uses counted sets to compute the number of publications per group; each group object is just a name
 // and a count, and a group knows how to compare itself with other groups for sorting/equality, but doesn't know 
