@@ -205,12 +205,13 @@ The groupedPublications array is a subset of the publications array, developed b
 
 - (void)handleSharedGroupFinishedNotification:(NSNotification *)notification{
     BDSKGroup *group = [notification object];
+    BOOL succeeded = [[[notification userInfo] objectForKey:@"succeeded"] boolValue];
     
     if([sortGroupsKey isEqualToString:BDSKGroupCellCountKey]){
         [self sortGroupsByKey:sortGroupsKey];
     }else{
         [groupTableView reloadData];
-        if ([[self selectedGroups] containsObject:group])
+        if ([[self selectedGroups] containsObject:group] && succeeded == YES)
             [self displaySelectedGroups];
     }
 }

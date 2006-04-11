@@ -211,7 +211,8 @@ static NSImage *unlockedIcon = nil;
     [self setCount:[publications count]];
     [self setNeedsUpdate:NO];
     
-    [[NSNotificationCenter defaultCenter] postNotificationName:BDSKSharedGroupFinishedNotification object:self];
+    NSDictionary *userInfo = [NSDictionary dictionaryWithObject:[NSNumber numberWithBool:(publications != nil)] forKey:@"succeeded"];
+    [[NSNotificationCenter defaultCenter] postNotificationName:BDSKSharedGroupFinishedNotification object:self userInfo:userInfo];
 }
 
 - (BOOL)containsItem:(BibItem *)item {
@@ -412,7 +413,7 @@ static NSImage *unlockedIcon = nil;
 - (void)unarchivePublications:(NSData *)archive;
 {
     NSAssert([NSThread inMainThread] == 1, @"publications must be set from the main thread");
-    NSArray *publications = [NSKeyedUnarchiver unarchiveObjectWithData:archive];
+    NSArray *publications = archive ? [NSKeyedUnarchiver unarchiveObjectWithData:archive] : nil;
     [group setPublications:publications];
 }
 
