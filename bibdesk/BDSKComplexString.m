@@ -219,7 +219,7 @@ Rather than relying on the same call sequence to be used, I think we should igno
 
 - (void)encodeWithCoder:(NSCoder *)coder{
     if([coder allowsKeyedCoding]){
-        OBASSERT([coder isKindOfClass:[NSKeyedUnarchiver class]]);
+        OBASSERT([coder isKindOfClass:[NSKeyedArchiver class]]);
         [coder encodeObject:nodes forKey:@"nodes"];
         [coder encodeBool:complex forKey:@"complex"];
         [coder encodeBool:inherited forKey:@"inherited"];
