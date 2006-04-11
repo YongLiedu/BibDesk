@@ -66,12 +66,13 @@ typedef struct _BDSKSharedGroupFlags {
 
 @protocol BDSKSharedGroupServerMainThread
 
-- (void)unarchivePublications:(NSData *)archive; // must not be declared oneway 
+- (oneway void)unarchivePublications:(bycopy NSData *)archive;
 - (int)runPasswordPrompt;
 - (int)runAuthenticationFailedAlert;
 
 @end
 
+#pragma mark -
 
 // private class for DO server. We have it as a separate object so we don't get a retain loop, we remove it from the thread runloop in the group's dealloc
 @interface BDSKSharedGroupServer : NSObject <BDSKSharedGroupServerLocalThread, BDSKSharedGroupServerMainThread, BDSKClientProtocol> {
@@ -92,14 +93,20 @@ typedef struct _BDSKSharedGroupFlags {
 
 - (id)mainThreadProxy;
 - (id)localThreadProxy;
+- (id)remoteServerProxy;
 
 - (void)runDOServer;
 - (void)stopDOServer;
 
 @end
 
+#pragma mark -
 
 @implementation BDSKSharedGroup
+
+#pragma mark Class methods
+
+// Cached icons
 
 static NSImage *lockedIcon = nil;
 static NSImage *unlockedIcon = nil;
@@ -148,6 +155,8 @@ static NSImage *unlockedIcon = nil;
     return unlockedIcon;
 }
 
+#pragma mark Init and dealloc
+
 - (id)initWithService:(NSNetService *)aService;
 {
     NSParameterAssert(aService != nil);
@@ -170,8 +179,11 @@ static NSImage *unlockedIcon = nil;
     [super dealloc];
 }
 
-// may be used in -[NSCell setObjectValue:] at some point
+// NSCopying protocol, may be used in -[NSCell setObjectValue:] at some point
+
 - (id)copyWithZone:(NSZone *)zone { return [self retain]; }
+
+// NSCoding protocol
 
 - (void)encodeWithCoder:(NSCoder *)aCoder;
 {
@@ -184,10 +196,14 @@ static NSImage *unlockedIcon = nil;
     return nil;
 }
 
+// Logging
+
 - (NSString *)description;
 {
     return [NSString stringWithFormat:@"<%@ %p>: {\n\tneeds update: %@\n\tname: %@\n }", [self class], self, (needsUpdate ? @"yes" : @"no"), name];
 }
+
+#pragma mark Accessors
 
 - (NSArray *)publications;
 {
@@ -213,19 +229,13 @@ static NSImage *unlockedIcon = nil;
     [[NSNotificationCenter defaultCenter] postNotificationName:BDSKSharedGroupFinishedNotification object:self userInfo:userInfo];
 }
 
-- (BOOL)containsItem:(BibItem *)item {
-    // calling [self publications] will repeatedly reschedule a retrieval, which is undesirable if the user canceled a password; containsItem is called very frequently
-    NSArray *pubs = [publications retain];
-    BOOL rv = [pubs containsObject:item];
-    [pubs release];
-    return rv;
-}
-
 - (BOOL)isRetrieving { return (BOOL)[server isRetrieving]; }
 
 - (BOOL)needsUpdate { return needsUpdate; }
 
 - (void)setNeedsUpdate:(BOOL)flag { needsUpdate = flag; }
+
+// BDSKGroup overrides
 
 - (NSImage *)icon {
     if([server needsAuthentication])
@@ -237,8 +247,17 @@ static NSImage *unlockedIcon = nil;
 
 - (BOOL)hasEditableName { return NO; }
 
+- (BOOL)containsItem:(BibItem *)item {
+    // calling [self publications] will repeatedly reschedule a retrieval, which is undesirable if the user canceled a password; containsItem is called very frequently
+    NSArray *pubs = [publications retain];
+    BOOL rv = [pubs containsObject:item];
+    [pubs release];
+    return rv;
+}
+
 @end
 
+#pragma mark -
 
 @implementation BDSKSharedGroupServer
 
@@ -269,13 +288,10 @@ static NSImage *unlockedIcon = nil;
         connection = nil;
         
         NSData *TXTData = [service TXTRecordData];
-        if(TXTData){
-            NSDictionary *dict = [NSNetService dictionaryFromTXTRecordData:TXTData];
-            if([[NSString stringWithData:[dict objectForKey:BDSKTXTAuthenticateKey] encoding:NSUTF8StringEncoding] intValue] == 1)
-                OSAtomicCompareAndSwap32Barrier(0, 1, (int32_t *)&flags.needsAuthentication);
-        }
+        if(TXTData)
+            [self netService:service didUpdateTXTRecordData:TXTData];
         
-        // if we detach in -publications, connection setup doesn't happen in time
+        // if we detach in -retrievePublications, connection setup doesn't happen in time
         [NSThread detachNewThreadSelector:@selector(runDOServer) toTarget:self withObject:nil];
     }
     return self;
@@ -290,17 +306,7 @@ static NSImage *unlockedIcon = nil;
     [super dealloc];
 }
 
-- (void)stopDOServer;
-{
-    // we're in the main thread, so set the stop flag
-    OSAtomicCompareAndSwap32Barrier(1, 0, (int32_t *)&flags.shouldKeepRunning);
-    [[self localThreadProxy] cleanup];
-        
-    [mainThreadConnection invalidate];
-    [mainThreadConnection setRootObject:nil];
-    [mainThreadConnection release];
-    mainThreadConnection = nil;
-}
+#pragma mark Accessors
 
 - (oneway void)setNeedsUpdate:(BOOL)flag { [group setNeedsUpdate:flag]; }
 
@@ -333,6 +339,57 @@ static NSImage *unlockedIcon = nil;
         NSLog(@"Unable to get local thread connection");
     id proxy = [conn rootProxy];
     [proxy setProtocolForProxy:@protocol(BDSKSharedGroupServerLocalThread)];
+    return proxy;
+}
+
+- (id)remoteServerProxy;
+{
+    NSConnection *conn = nil;
+    id proxy;
+    
+    NSData *TXTData = [service TXTRecordData];
+    NSDictionary *dict = nil;
+    if(TXTData)
+        dict = [NSNetService dictionaryFromTXTRecordData:TXTData];
+    
+    // we need the port name from the TXTRecord
+    NSString *portName = [NSString stringWithData:[dict objectForKey:BDSKTXTComputerNameKey] encoding:NSUTF8StringEncoding];
+    NSPort *sendPort = [[NSSocketPortNameServer sharedInstance] portForName:portName host:[service hostName]];
+    
+    if(sendPort == nil)
+        NSLog(@"client: unable to look up server %@", [service hostName]);
+    @try {
+        conn = [NSConnection connectionWithReceivePort:nil sendPort:sendPort];
+        // ask for password
+        [conn setDelegate:self];
+        proxy = [conn rootProxy];
+    }
+    @catch (id exception) {
+        // flag authentication failures so we get a prompt the next time around (in case our password was wrong)
+        // we also get this if the user canceled, since an empty data will be returned
+        if([exception respondsToSelector:@selector(name)] && [[exception name] isEqualToString:NSFailedAuthenticationException]){
+            
+            // if the user didn't cancel, set an auth failure flag and show an alert
+            if(flags.canceledAuthentication == 0){
+                OSAtomicCompareAndSwap32Barrier(0, 1, (int32_t *)&flags.authenticationFailed);
+                
+                [[self mainThreadProxy] runAuthenticationFailedAlert];
+            }
+            
+        } else {
+            // don't log auth failures
+            NSLog(@"client: %@", exception);
+        }
+        conn = nil;
+        proxy = nil;
+    }
+
+    [proxy setProtocolForProxy:@protocol(BDSKSharingProtocol)];
+    
+    // need hostname and portname for the NSSocketPort connection on the other end
+    // use computer as the notification identifier for this host on the other end
+    [proxy registerHostNameForNotifications:[NSDictionary dictionaryWithObjectsAndKeys:[[NSHost currentHost] name], BDSKSharedGroupHostNameInfoKey, serverSharingName, BDSKSharedGroupPortnameInfoKey, [BDSKSharingServer sharingName], BDSKSharedGroupComputerNameInfoKey, nil]];
+    
     return proxy;
 }
 
@@ -408,71 +465,28 @@ static NSImage *unlockedIcon = nil;
 
 #pragma mark ServerThread
 
-- (void)unarchivePublications:(NSData *)archive;
+- (oneway void)unarchivePublications:(bycopy NSData *)archive;
 {
+    // retain as the autoreleasepool of our caller will be released as we're oneway
+    [archive retain];
+    
     NSAssert([NSThread inMainThread] == 1, @"publications must be set from the main thread");
+    
     NSArray *publications = archive ? [NSKeyedUnarchiver unarchiveObjectWithData:archive] : nil;
+    [archive release];
     [group setPublications:publications];
 }
 
 - (oneway void)retrievePublications;
 {
-    
     // set so we don't try calling this multiple times
     OSAtomicCompareAndSwap32Barrier(0, 1, (int32_t *)&flags.isRetrieving);
     
     NSAutoreleasePool *pool = [NSAutoreleasePool new];
     
     @try {
-        NSConnection *conn = nil;
-        id proxyObject;
-        
-        NSData *TXTData = [service TXTRecordData];
-        NSDictionary *dict = nil;
-        if(TXTData)
-            dict = [NSNetService dictionaryFromTXTRecordData:TXTData];
-        
-        // we need the port name from the TXTRecord
-        NSString *portName = [NSString stringWithData:[dict objectForKey:BDSKTXTComputerNameKey] encoding:NSUTF8StringEncoding];
-        NSPort *sendPort = [[NSSocketPortNameServer sharedInstance] portForName:portName host:[service hostName]];
-        
-        if(sendPort == nil)
-            NSLog(@"client: unable to look up server %@", [service hostName]);
-        @try {
-            conn = [NSConnection connectionWithReceivePort:nil sendPort:sendPort];
-            // ask for password
-            [conn setDelegate:self];
-            proxyObject = [conn rootProxy];
-        }
-        @catch (id exception) {
-            // flag authentication failures so we get a prompt the next time around (in case our password was wrong)
-            // we also get this if the user canceled, since an empty data will be returned
-            if([exception respondsToSelector:@selector(name)] && [[exception name] isEqualToString:NSFailedAuthenticationException]){
-                
-                // if the user didn't cancel, set an auth failure flag and show an alert
-                if(flags.canceledAuthentication == 0){
-                    OSAtomicCompareAndSwap32Barrier(0, 1, (int32_t *)&flags.authenticationFailed);
-                    
-                    [[self mainThreadProxy] runAuthenticationFailedAlert];
-                }
-                
-            } else {
-                // don't log auth failures
-                NSLog(@"client: %@", exception);
-            }
-            conn = nil;
-            proxyObject = nil;
-        }
-
-        [proxyObject setProtocolForProxy:@protocol(BDSKSharingProtocol)];
-        
-        // need hostname and portname for the NSSocketPort connection on the other end
-        // use computer as the notification identifier for this host on the other end
-        [proxyObject registerHostNameForNotifications:[NSDictionary dictionaryWithObjectsAndKeys:[[NSHost currentHost] name], BDSKSharedGroupHostNameInfoKey, serverSharingName, BDSKSharedGroupPortnameInfoKey, [BDSKSharingServer sharingName], BDSKSharedGroupComputerNameInfoKey, nil]];
-        
-        NSArray *publications = nil;
-        NSData *proxyData = [proxyObject archivedSnapshotOfPublications];
         NSData *archive = nil;
+        NSData *proxyData = [[self remoteServerProxy] archivedSnapshotOfPublications];
         
         if([proxyData length] != 0){
             if([proxyData mightBeCompressed])
@@ -565,6 +579,18 @@ static NSImage *unlockedIcon = nil;
     @finally {
         [pool release];
     }
+}
+
+- (void)stopDOServer;
+{
+    // we're in the main thread, so set the stop flag
+    OSAtomicCompareAndSwap32Barrier(1, 0, (int32_t *)&flags.shouldKeepRunning);
+    [[self localThreadProxy] cleanup];
+        
+    [mainThreadConnection invalidate];
+    [mainThreadConnection setRootObject:nil];
+    [mainThreadConnection release];
+    mainThreadConnection = nil;
 }
 
 @end
