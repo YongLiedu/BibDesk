@@ -184,8 +184,6 @@ static NSImage *unlockedIcon = nil;
     return nil;
 }
 
-- (NSString *)name { return name; }
-
 - (NSString *)description;
 {
     return [NSString stringWithFormat:@"<%@ %p>: {\n\tneeds update: %@\n\tname: %@\n }", [self class], self, (needsUpdate ? @"yes" : @"no"), name];
