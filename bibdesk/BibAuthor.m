@@ -131,16 +131,29 @@ static BibAuthor *emptyAuthorInstance = nil;
 }
 
 - (id)initWithCoder:(NSCoder *)coder{
-    self = [super init];
-    memset(&flags, 0, sizeof(BibAuthorFlags));
-    [self splitName:[coder decodeObjectForKey:@"name"]]; // this should take care of the rest of the ivars, right?
-    publication = [coder decodeObjectForKey:@"publication"];
+    if([coder allowsKeyedCoding]){
+        self = [super init];
+        memset(&flags, 0, sizeof(BibAuthorFlags));
+        [self splitName:[coder decodeObjectForKey:@"name"]]; // this should take care of the rest of the ivars, right?
+        publication = [coder decodeObjectForKey:@"publication"];
+    } else {
+        self = [[NSKeyedUnarchiver unarchiveObjectWithData:[coder decodeDataObject]] retain];
+    }
     return self;
 }
 
 - (void)encodeWithCoder:(NSCoder *)coder{
-    [coder encodeObject:name forKey:@"name"];
-    [coder encodeConditionalObject:publication forKey:@"publication"];
+    if([coder allowsKeyedCoding]){
+        [coder encodeObject:name forKey:@"name"];
+        [coder encodeConditionalObject:publication forKey:@"publication"];
+    } else {
+        [coder encodeDataObject:[NSKeyedArchiver archivedDataWithRootObject:self]];
+    }  
+}
+
+- (id)replacementObjectForPortCoder:(NSPortCoder *)encoder
+{
+    return [encoder isByref] ? (id)[NSDistantObject proxyWithLocal:self connection:[encoder connection]] : self;
 }
 
 - (BOOL)isEqual:(BibAuthor *)otherAuth{

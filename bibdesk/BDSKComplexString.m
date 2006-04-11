@@ -199,25 +199,38 @@ Rather than relying on the same call sequence to be used, I think we should igno
 - (Class)classForKeyedArchiver { return BDSKComplexStringClass; }
 
 - (id)initWithCoder:(NSCoder *)coder{
-    if (self = [super init]) {
-        OBASSERT([coder isKindOfClass:[NSKeyedUnarchiver class]]);
-        nodes = [[coder decodeObjectForKey:@"nodes"] retain];
-        complex = [coder decodeBoolForKey:@"complex"];
-        inherited = [coder decodeBoolForKey:@"inherited"];
-        NSKeyedUnarchiver *unarchiver = (NSKeyedUnarchiver *)coder;
-        if ([[unarchiver delegate] respondsToSelector:@selector(unarchiverMacroResolver:)]) {
-            macroResolver = [[unarchiver delegate] unarchiverMacroResolver:unarchiver];
-        } else
-            macroResolver = nil;
-	}
+    if([coder allowsKeyedCoding]){
+        if (self = [super init]) {
+            OBASSERT([coder isKindOfClass:[NSKeyedUnarchiver class]]);
+            nodes = [[coder decodeObjectForKey:@"nodes"] retain];
+            complex = [coder decodeBoolForKey:@"complex"];
+            inherited = [coder decodeBoolForKey:@"inherited"];
+            NSKeyedUnarchiver *unarchiver = (NSKeyedUnarchiver *)coder;
+            if ([[unarchiver delegate] respondsToSelector:@selector(unarchiverMacroResolver:)]) {
+                macroResolver = [[unarchiver delegate] unarchiverMacroResolver:unarchiver];
+            } else
+                macroResolver = nil;
+        }
+    } else {       
+        self = [[NSKeyedUnarchiver unarchiveObjectWithData:[coder decodeDataObject]] retain];
+    }
     return self;
 }
 
 - (void)encodeWithCoder:(NSCoder *)coder{
-    OBASSERT([coder isKindOfClass:[NSKeyedArchiver class]]);
-    [coder encodeObject:nodes forKey:@"nodes"];
-	[coder encodeBool:complex forKey:@"complex"];
-	[coder encodeBool:inherited forKey:@"inherited"];
+    if([coder allowsKeyedCoding]){
+        OBASSERT([coder isKindOfClass:[NSKeyedUnarchiver class]]);
+        [coder encodeObject:nodes forKey:@"nodes"];
+        [coder encodeBool:complex forKey:@"complex"];
+        [coder encodeBool:inherited forKey:@"inherited"];
+    } else {
+        [coder encodeDataObject:[NSKeyedArchiver archivedDataWithRootObject:self]];
+    }
+}
+
+- (id)replacementObjectForPortCoder:(NSPortCoder *)encoder
+{
+    return [encoder isByref] ? (id)[NSDistantObject proxyWithLocal:self connection:[encoder connection]] : self;
 }
 
 #pragma mark overridden NSString Methods

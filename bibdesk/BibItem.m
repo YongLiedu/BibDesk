@@ -209,45 +209,57 @@ static NSParagraphStyle* bodyParagraphStyle = nil;
 }
 
 - (id)initWithCoder:(NSCoder *)coder{
-    self = [super init];
-    [self setFileType:[coder decodeObjectForKey:@"fileType"]];
-    [self setCiteKeyString:[coder decodeObjectForKey:@"citeKey"]];
-    [self setDate:[coder decodeObjectForKey:@"pubDate"]];
-    [self setDateCreated:[coder decodeObjectForKey:@"dateCreated"]];
-    [self setPubType:[coder decodeObjectForKey:@"pubType"]];
-    [self setDateModified:[coder decodeObjectForKey:@"dateModified"]];
-    pubFields = [[coder decodeObjectForKey:@"pubFields"] retain];
-	groups = [[NSMutableDictionary alloc] initWithCapacity:5];
-    people = [[coder decodeObjectForKey:@"people"] retain];
-    // set by the document, which we don't archive
-    document = nil;
-    hasBeenEdited = [coder decodeBoolForKey:@"hasBeenEdited"];
-    bibLock = [[NSLock alloc] init]; // not encoded
-    stringCache = [[BDSKBibItemStringCache alloc] initWithItem:self];
-
-	[[NSNotificationCenter defaultCenter] addObserver:self
-											 selector:@selector(typeInfoDidChange:)
-												 name:BDSKBibTypeInfoChangedNotification
-											   object:[BibTypeManager sharedManager]];
-
-	[[NSNotificationCenter defaultCenter] addObserver:self
-											 selector:@selector(customFieldsDidChange:)
-												 name:BDSKCustomFieldsChangedNotification
-											   object:nil];
-    
+    if([coder allowsKeyedCoding]){
+        self = [super init];
+        [self setFileType:[coder decodeObjectForKey:@"fileType"]];
+        [self setCiteKeyString:[coder decodeObjectForKey:@"citeKey"]];
+        [self setDate:[coder decodeObjectForKey:@"pubDate"]];
+        [self setDateCreated:[coder decodeObjectForKey:@"dateCreated"]];
+        [self setPubType:[coder decodeObjectForKey:@"pubType"]];
+        [self setDateModified:[coder decodeObjectForKey:@"dateModified"]];
+        pubFields = [[coder decodeObjectForKey:@"pubFields"] retain];
+        groups = [[NSMutableDictionary alloc] initWithCapacity:5];
+        people = [[coder decodeObjectForKey:@"people"] retain];
+        // set by the document, which we don't archive
+        document = nil;
+        hasBeenEdited = [coder decodeBoolForKey:@"hasBeenEdited"];
+        bibLock = [[NSLock alloc] init]; // not encoded
+        stringCache = [[BDSKBibItemStringCache alloc] initWithItem:self];
+        
+        [[NSNotificationCenter defaultCenter] addObserver:self
+                                                 selector:@selector(typeInfoDidChange:)
+                                                     name:BDSKBibTypeInfoChangedNotification
+                                                   object:[BibTypeManager sharedManager]];
+        
+        [[NSNotificationCenter defaultCenter] addObserver:self
+                                                 selector:@selector(customFieldsDidChange:)
+                                                     name:BDSKCustomFieldsChangedNotification
+                                                   object:nil];
+    } else {       
+        self = [[NSKeyedUnarchiver unarchiveObjectWithData:[coder decodeDataObject]] retain];
+    }
 	return self;
 }
 
 - (void)encodeWithCoder:(NSCoder *)coder{
-    [coder encodeObject:fileType forKey:@"fileType"];
-    [coder encodeObject:citeKey forKey:@"citeKey"];
-    [coder encodeObject:pubDate forKey:@"pubDate"];
-    [coder encodeObject:dateCreated forKey:@"dateCreated"];
-    [coder encodeObject:dateModified forKey:@"dateModified"];
-    [coder encodeObject:pubType forKey:@"pubType"];
-    [coder encodeObject:pubFields forKey:@"pubFields"];
-    [coder encodeObject:people forKey:@"people"];
-    [coder encodeBool:hasBeenEdited forKey:@"hasBeenEdited"];
+    if([coder allowsKeyedCoding]){
+        [coder encodeObject:fileType forKey:@"fileType"];
+        [coder encodeObject:citeKey forKey:@"citeKey"];
+        [coder encodeObject:pubDate forKey:@"pubDate"];
+        [coder encodeObject:dateCreated forKey:@"dateCreated"];
+        [coder encodeObject:dateModified forKey:@"dateModified"];
+        [coder encodeObject:pubType forKey:@"pubType"];
+        [coder encodeObject:pubFields forKey:@"pubFields"];
+        [coder encodeObject:people forKey:@"people"];
+        [coder encodeBool:hasBeenEdited forKey:@"hasBeenEdited"];
+    } else {
+        [coder encodeDataObject:[NSKeyedArchiver archivedDataWithRootObject:self]];
+    }        
+}
+
+- (id)replacementObjectForPortCoder:(NSPortCoder *)encoder
+{
+    return [encoder isByref] ? (id)[NSDistantObject proxyWithLocal:self connection:[encoder connection]] : self;
 }
 
 - (void)makeType{

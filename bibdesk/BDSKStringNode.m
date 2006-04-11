@@ -91,16 +91,29 @@
 }
 
 - (id)initWithCoder:(NSCoder *)coder{
-	if (self = [super init]) {
-		type = [coder decodeIntForKey:@"type"];
-		value = [[coder decodeObjectForKey:@"value"] retain];
-	}
+    if([coder allowsKeyedCoding]){
+        if (self = [super init]) {
+            type = [coder decodeIntForKey:@"type"];
+            value = [[coder decodeObjectForKey:@"value"] retain];
+        }
+    } else {       
+        self = [[NSKeyedUnarchiver unarchiveObjectWithData:[coder decodeDataObject]] retain];
+    }
 	return self;
 }
 
 - (void)encodeWithCoder:(NSCoder *)encoder{
-	[encoder encodeInt:type forKey:@"type"];
-    [encoder encodeObject:value forKey:@"value"];
+    if([encoder allowsKeyedCoding]){
+        [encoder encodeInt:type forKey:@"type"];
+        [encoder encodeObject:value forKey:@"value"];
+    } else {
+        [encoder encodeDataObject:[NSKeyedArchiver archivedDataWithRootObject:self]];
+    }
+}
+
+- (id)replacementObjectForPortCoder:(NSPortCoder *)encoder
+{
+    return [encoder isByref] ? (id)[NSDistantObject proxyWithLocal:self connection:[encoder connection]] : self;
 }
 
 - (BOOL)isEqual:(BDSKStringNode *)other{
