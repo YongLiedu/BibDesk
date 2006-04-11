@@ -66,7 +66,7 @@ typedef struct _BDSKSharedGroupFlags {
 
 @protocol BDSKSharedGroupServerMainThread
 
-- (void)setPublications:(bycopy NSArray *)publications; // must not be declared oneway 
+- (void)unarchivePublications:(NSData *)archive; // must not be declared oneway 
 - (int)runPasswordPrompt;
 - (int)runAuthenticationFailedAlert;
 
@@ -411,12 +411,11 @@ static NSImage *unlockedIcon = nil;
 
 #pragma mark ServerThread
 
-- (void)setPublications:(bycopy NSArray *)publications;
+- (void)unarchivePublications:(NSData *)archive;
 {
     NSAssert([NSThread inMainThread] == 1, @"publications must be set from the main thread");
-    [publications retain];
+    NSArray *publications = [NSKeyedUnarchiver unarchiveObjectWithData:archive];
     [group setPublications:publications];
-    [publications release];
 }
 
 - (oneway void)retrievePublications;
@@ -476,6 +475,7 @@ static NSImage *unlockedIcon = nil;
         
         NSArray *publications = nil;
         NSData *proxyData = [proxyObject archivedSnapshotOfPublications];
+        NSData *archive = nil;
         
         if([proxyData length] != 0){
             if([proxyData mightBeCompressed])
@@ -486,21 +486,19 @@ static NSImage *unlockedIcon = nil;
                 NSLog(@"Error reading shared data: %@", errorString);
                 [errorString release];
             } else {
-                NSData *archive = [dictionary objectForKey:BDSKSharedArchivedDataKey];
-                if(archive != nil){
-                    publications = [NSKeyedUnarchiver unarchiveObjectWithData:archive];
-                }
+                archive = [dictionary objectForKey:BDSKSharedArchivedDataKey];
             }
         }
-        // set the publications on the main thread; this ends up posting notifications for UI updates
-        [[self mainThreadProxy] setPublications:publications];
+        OSAtomicCompareAndSwap32Barrier(1, 0, (int32_t *)&flags.isRetrieving);
+        // use the main thread; this avoids an extra (un)archiving between threads and it ends up posting notifications for UI updates
+        [[self mainThreadProxy] unarchivePublications:archive];
     }
     @catch(id exception){
         NSLog(@"%@: discarding exception %@ while retrieving publications", [self class], exception);
+        OSAtomicCompareAndSwap32Barrier(1, 0, (int32_t *)&flags.isRetrieving);
     }
     @finally{
         [pool release];
-        OSAtomicCompareAndSwap32Barrier(1, 0, (int32_t *)&flags.isRetrieving);
     }
 }
 
