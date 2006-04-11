@@ -81,11 +81,6 @@ static BDSKSharingBrowser *sharedBrowser = nil;
 
 - (void)netServiceDidResolveAddress:(NSNetService *)aNetService
 {    
-    NSData *TXTData = [aNetService TXTRecordData];
-    
-    // +[NSNetService dictionaryFromTXTRecordData:] will crash if you pass a nil data
-    NSDictionary *TXTDictionary = TXTData ? [NSNetService dictionaryFromTXTRecordData:TXTData] : nil;
-
     // we don't want it to message us again
     [aNetService setDelegate:nil];
 
