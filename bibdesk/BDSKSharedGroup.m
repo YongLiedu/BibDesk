@@ -166,7 +166,6 @@ static NSImage *unlockedIcon = nil;
 {
     [server stopDOServer];
     [server release];
-    [name release];
     [publications release];
     [super dealloc];
 }
