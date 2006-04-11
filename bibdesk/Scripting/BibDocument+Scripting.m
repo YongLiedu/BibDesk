@@ -124,13 +124,13 @@ Getting the displayed publications.
 Getting and setting the selection of the table
 */
 - (NSArray*) selection { 
-    NSMutableArray *selection = [[self selectedPublications] mutableCopy];
-    NSEnumerator *sharedE = [sharedGroups objectEnumerator];
-    BDSKSharedGroup *shared;
+    NSMutableArray *selection = [NSMutableArray arrayWithCapacity:[self numberOfSelectedPubs]];
+    NSEnumerator *pubE = [[self selectedPublications] objectEnumerator];
+    BibItem *pub;
     
-    while (shared = [sharedE nextObject]) 
-        [selection removeObjectsInArray:[shared publications]];
-    return [selection autorelease];
+    while (pub = [pubE nextObject]) 
+        if ([pub document] != nil) [selection addObject:pub];
+    return selection;
 }
 
 
