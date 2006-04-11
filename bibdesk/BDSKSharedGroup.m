@@ -66,7 +66,7 @@ typedef struct _BDSKSharedGroupFlags {
 
 @protocol BDSKSharedGroupServerMainThread
 
-- (void)setPublications:(NSArray *)publications; // must not be declared oneway 
+- (void)setPublications:(bycopy NSArray *)publications; // must not be declared oneway 
 - (int)runPasswordPrompt;
 - (int)runAuthenticationFailedAlert;
 
@@ -172,6 +172,20 @@ static NSImage *unlockedIcon = nil;
     [super dealloc];
 }
 
+// may be used in -[NSCell setObjectValue:] at some point
+- (id)copyWithZone:(NSZone *)zone { return [self retain]; }
+
+- (void)encodeWithCoder:(NSCoder *)aCoder;
+{
+    [NSException raise:NSInternalInconsistencyException format:@"Instances of %@ do not support NSCoding", [self class]];
+}
+
+- (id)initWithCoder:(NSCoder *)aDecoder;
+{
+    [NSException raise:NSInternalInconsistencyException format:@"Instances of %@ do not support NSCoding", [self class]];
+    return nil;
+}
+
 - (NSString *)name { return name; }
 
 - (NSString *)description;
@@ -185,8 +199,8 @@ static NSImage *unlockedIcon = nil;
         // let the server get the publications asynchronously
         [[server localThreadProxy] retrievePublications]; 
     }
-    // this will likely be nil the first time; retain since our server thread could release it at any time
-    return [[publications retain] autorelease];
+    // this will likely be nil the first time
+    return publications;
 }
 
 - (void)setPublications:(NSArray *)newPublications;
@@ -203,7 +217,7 @@ static NSImage *unlockedIcon = nil;
 }
 
 - (BOOL)containsItem:(BibItem *)item {
-    // calling [self publications] will repeatedly reschedule a retrieval, which is undesirable if the user cancels; containsItem is called very frequently
+    // calling [self publications] will repeatedly reschedule a retrieval, which is undesirable if the user canceled a password; containsItem is called very frequently
     NSArray *pubs = [publications retain];
     BOOL rv = [pubs containsObject:item];
     [pubs release];
@@ -293,9 +307,9 @@ static NSImage *unlockedIcon = nil;
 
 - (oneway void)setNeedsUpdate:(BOOL)flag { [group setNeedsUpdate:flag]; }
 
-- (BOOL)isRetrieving { return (BOOL)flags.isRetrieving; }
+- (BOOL)isRetrieving { return flags.isRetrieving == 1; }
 
-- (BOOL)needsAuthentication { return (BOOL)flags.needsAuthentication; }
+- (BOOL)needsAuthentication { return flags.needsAuthentication == 1; }
 
 #pragma mark Proxies for inter-thread communication
 
@@ -397,10 +411,12 @@ static NSImage *unlockedIcon = nil;
 
 #pragma mark ServerThread
 
-- (void)setPublications:(NSArray *)publications;
+- (void)setPublications:(bycopy NSArray *)publications;
 {
     NSAssert([NSThread inMainThread] == 1, @"publications must be set from the main thread");
+    [publications retain];
     [group setPublications:publications];
+    [publications release];
 }
 
 - (oneway void)retrievePublications;
