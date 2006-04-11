@@ -116,18 +116,23 @@ static BDSKSharingBrowser *sharedBrowser = nil;
 
 - (void)netServiceBrowser:(NSNetServiceBrowser *)aNetServiceBrowser didRemoveService:(NSNetService *)aNetService moreComing:(BOOL)moreComing
 {
-    NSString *name = [aNetService name];
-    NSEnumerator *e = [sharedGroups objectEnumerator];
-    BDSKSharedGroup *group = nil;
-    
-    // find the group we should remove
-    while(group = [e nextObject]){
-        if([[group name] isEqualToString:name])
-            break;
-    }
-    if(group != nil){
-        [sharedGroups removeObject:group];
-        [[NSNotificationCenter defaultCenter] postNotificationName:BDSKSharedGroupsChangedNotification object:self userInfo:[NSDictionary dictionaryWithObject:aNetService forKey:@"removedservice"]];
+    if([unresolvedNetServices containsObject:aNetService]){
+        [aNetService setDelegate:nil];
+        [unresolvedNetServices removeObject:aNetService];
+    }else{
+        NSString *name = [aNetService name];
+        NSEnumerator *e = [sharedGroups objectEnumerator];
+        BDSKSharedGroup *group = nil;
+        
+        // find the group we should remove
+        while(group = [e nextObject]){
+            if([[group name] isEqualToString:name])
+                break;
+        }
+        if(group != nil){
+            [sharedGroups removeObject:group];
+            [[NSNotificationCenter defaultCenter] postNotificationName:BDSKSharedGroupsChangedNotification object:self];
+        }
     }
 }
 
