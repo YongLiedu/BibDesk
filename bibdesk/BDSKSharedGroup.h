@@ -47,7 +47,6 @@ extern NSString *BDSKSharedGroupComputerNameInfoKey;
 
 @interface BDSKSharedGroup : BDSKGroup
 {
-    NSString *name;
     NSArray *publications;
     BDSKSharedGroupServer *server;
     BOOL needsUpdate;
