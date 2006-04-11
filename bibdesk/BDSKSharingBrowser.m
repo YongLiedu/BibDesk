@@ -61,7 +61,7 @@ static BDSKSharingBrowser *sharedBrowser = nil;
     if (self = [super init]){
         sharedGroups = nil;
         browser = nil;
-        unresolvedNetServices = [[NSMutableArray alloc] initWithCapacity:10];        
+        unresolvedNetServices = nil;        
     }
     return self;
 }
@@ -143,6 +143,7 @@ static BDSKSharingBrowser *sharedBrowser = nil;
         browser = [[NSNetServiceBrowser alloc] init];
         [browser setDelegate:self];
         [browser searchForServicesOfType:BDSKNetServiceDomain inDomain:@""];    
+        unresolvedNetServices = [[NSMutableArray alloc] initWithCapacity:5];
         
         [[NSNotificationCenter defaultCenter] postNotificationName:BDSKSharedGroupsChangedNotification object:self];
     }
@@ -155,6 +156,9 @@ static BDSKSharingBrowser *sharedBrowser = nil;
         sharedGroups = nil;
         [browser release];
         browser = nil;
+        [unresolvedNetServices makeObjectsPerformSelector:@selector(setDelegate:) withObject:nil];
+        [unresolvedNetServices release];
+        unresolvedNetServices = nil;
         
         [[NSNotificationCenter defaultCenter] postNotificationName:BDSKSharedGroupsChangedNotification object:self];
     }
