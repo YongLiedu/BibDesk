@@ -86,26 +86,32 @@ static BDSKSharingBrowser *sharedBrowser = nil;
     // +[NSNetService dictionaryFromTXTRecordData:] will crash if you pass a nil data
     NSDictionary *TXTDictionary = TXTData ? [NSNetService dictionaryFromTXTRecordData:TXTData] : nil;
 
-    // In general, we want to ignore our own shared services, although this doesn't cause problems with the run loop anymore (since the DO servers have their own threads)  Since SystemConfiguration guarantees that we have a unique computer name, this should be safe.
-    if([[BDSKSharingServer sharingName] isEqual:[aNetService name]] == NO || [[NSUserDefaults standardUserDefaults] boolForKey:@"BDSKEnableSharingWithSelfKey"]){
+    // we don't want it to message us again
+    [aNetService setDelegate:nil];
 
-        // we don't want it to message us again
-        [aNetService setDelegate:nil];
+    BDSKSharedGroup *group = [[BDSKSharedGroup alloc] initWithService:aNetService];
+    [sharedGroups addObject:group];
+    [group release];
+    
+    // remove from the list of unresolved services
+    [unresolvedNetServices removeObject:aNetService];
+    
+    [[NSNotificationCenter defaultCenter] postNotificationName:BDSKSharedGroupsChangedNotification object:self];
+}
 
-        BDSKSharedGroup *group = [[BDSKSharedGroup alloc] initWithService:aNetService];
-        [sharedGroups addObject:group];
-        [group release];
-        
-        // remove from the list of unresolved services
-        [unresolvedNetServices removeObject:aNetService];
-        
-        [[NSNotificationCenter defaultCenter] postNotificationName:BDSKSharedGroupsChangedNotification object:self];
-    }
-
+- (void)netService:(NSNetService *)aNetService didNotResolve:(NSDictionary *)errorDict
+{
+    // do we want to try again, or show the error message?
+    [aNetService setDelegate:nil];
+    [unresolvedNetServices removeObject:aNetService];
 }
 
 - (void)netServiceBrowser:(NSNetServiceBrowser *)aNetServiceBrowser didFindService:(NSNetService *)aNetService moreComing:(BOOL)moreComing 
 {
+    // In general, we want to ignore our own shared services, although this doesn't cause problems with the run loop anymore (since the DO servers have their own threads)  Since SystemConfiguration guarantees that we have a unique computer name, this should be safe.
+    if([[BDSKSharingServer sharingName] isEqualToString:[aNetService name]] == YES && [[NSUserDefaults standardUserDefaults] boolForKey:@"BDSKEnableSharingWithSelfKey"] == NO)
+        return;
+
     // set as delegate and resolve, so we can find out if this originated from the localhost or a remote machine
     // we can't access TXT records until the service is resolved (this is documented in CFNetService, not NSNetService)
     [aNetService setDelegate:self];
