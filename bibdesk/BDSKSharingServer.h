@@ -76,7 +76,6 @@ extern NSString *BDSKHostNameChangedNotification;
 - (NSNumber *)numberOfConnections;
 
 - (void)queueDataChangedNotification:(NSNotification *)note;
-- (void)handleSharedGroupsChangedNotification:(NSNotification *)note;
 - (void)handleComputerNameChangedNotification:(NSNotification *)note;
 - (void)handlePasswordChangedNotification:(NSNotification *)note;
 - (void)handleApplicationWillTerminate:(NSNotification *)note;
