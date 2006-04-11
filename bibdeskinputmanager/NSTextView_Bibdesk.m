@@ -416,8 +416,6 @@ BDIndexOfItemInArrayWithPrefix(NSArray *array, NSString *prefix)
     
     if(isCompletingTeX || [self refLabelRange].location != NSNotFound)
         [self fixRange:&charRange];
-    
-    originalInsertIMP(self, _cmd, word, charRange, movement, flag);
 
 	if (!flag || ([word rangeOfString:BDSKInsertionString].location == NSNotFound)) {
 		// this is just a preliminary completion (suggestion) or the word wasn't suggested by us anyway, so let the text system deal with this
