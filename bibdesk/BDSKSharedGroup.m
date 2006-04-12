@@ -413,11 +413,13 @@ static NSImage *unlockedIcon = nil;
         proxy = nil;
     }
 
-    [proxy setProtocolForProxy:@protocol(BDSKSharingProtocol)];
-    
-    // use uniqueIdentifier as the notification identifier for this host on the other end
-    if(uniqueIdentifier == nil)
-        [self registerAsClientWithRemoteServer];
+    if (proxy != nil) {
+        [proxy setProtocolForProxy:@protocol(BDSKSharingProtocol)];
+        
+        // use uniqueIdentifier as the notification identifier for this host on the other end
+        if(uniqueIdentifier == nil)
+            [self registerAsClientWithRemoteServer];
+    }
     
     return proxy;
 }
@@ -544,7 +546,8 @@ static NSImage *unlockedIcon = nil;
 
 - (void)cleanup;
 {
-    // clean up our remote end
+    // clean up our remote end. we don't want to authentify though
+    OSAtomicCompareAndSwap32Barrier(1, 0, (int32_t *)&flags.needsAuthentication);
     [[self remoteServerProxy] removeRemoteObserverForIdentifier:uniqueIdentifier];
     
     // must be on the background thread, or the connection won't be removed from the correct run loop
