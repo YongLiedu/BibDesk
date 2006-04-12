@@ -331,7 +331,7 @@ static NSImage *unlockedIcon = nil;
     NSConnection *conn = [NSConnection connectionWithRegisteredName:mainThreadConnectionName host:nil];
     if(conn == nil)
         @throw @"Unable to get main thread connection";
-    id proxy = [conn rootProxy];
+    id proxy = nil;
     @try {
         proxy = [conn rootProxy];
         [proxy setProtocolForProxy:@protocol(BDSKSharedGroupServerMainThread)];
