@@ -317,7 +317,8 @@ static NSImage *unlockedIcon = nil;
 
 #pragma mark Accessors
 
-- (NSString *)uniqueIdentifier { return uniqueIdentifier; }
+// BDSKClientProtocol
+- (bycopy NSString *)uniqueIdentifier { return uniqueIdentifier; }
 
 - (oneway void)setNeedsUpdate:(BOOL)flag { [group setNeedsUpdate:flag]; }
 
@@ -354,24 +355,6 @@ static NSImage *unlockedIcon = nil;
     return proxy;
 }
 
-// register for setNeedsUpdate: when the remote server adds/modifies something
-- (void)registerAsClientWithRemoteServer;
-{
-    if(uniqueIdentifier == nil){
-        // @@ recursion: make sure uniqueIdentifier is non-nil before calling [self remoteServerProxy]
-        uniqueIdentifier = [[[NSProcessInfo processInfo] globallyUniqueString] copy];
-        id proxy = [self remoteServerProxy];
-        @try {
-            [proxy registerClientForNotifications:self];
-        }
-        @catch(id exception) {
-            [uniqueIdentifier release];
-            uniqueIdentifier = nil;
-            NSLog(@"%@: unable to register with remote server", [self class]);
-        }
-    }
-}
-
 - (id)remoteServerProxy;
 {
     NSConnection *conn = nil;
@@ -402,8 +385,8 @@ static NSImage *unlockedIcon = nil;
             // if the user didn't cancel, set an auth failure flag and show an alert
             if(flags.canceledAuthentication == 0){
                 OSAtomicCompareAndSwap32Barrier(0, 1, (int32_t *)&flags.authenticationFailed);
-                
-                if(flags.needsAuthentication == 1)
+                // don't show the alert when we couldn't authenticate when cleaing up
+                if(flags.shouldKeepRunning == 1)
                     [[self mainThreadProxy] runAuthenticationFailedAlert];
             }
             
@@ -418,9 +401,18 @@ static NSImage *unlockedIcon = nil;
     if (proxy != nil) {
         [proxy setProtocolForProxy:@protocol(BDSKSharingProtocol)];
         
-        // use uniqueIdentifier as the notification identifier for this host on the other end
-        if(uniqueIdentifier == nil)
-            [self registerAsClientWithRemoteServer];
+        if(uniqueIdentifier == nil){
+            // use uniqueIdentifier as the notification identifier for this host on the other end
+            uniqueIdentifier = [[[NSProcessInfo processInfo] globallyUniqueString] copy];
+            @try {
+                [proxy registerClientForNotifications:self];
+            }
+            @catch(id exception) {
+                [uniqueIdentifier release];
+                uniqueIdentifier = nil;
+                NSLog(@"%@: unable to register with remote server", [self class]);
+            }
+        }
     }
     
     return proxy;
@@ -454,7 +446,7 @@ static NSImage *unlockedIcon = nil;
 // this can be called from any thread
 - (NSData *)authenticationDataForComponents:(NSArray *)components;
 {
-    if(flags.needsAuthentication == 0)
+    if(flags.needsAuthentication == 0 || flags.shouldKeepRunning == 0)
         return [[NSData data] sha1Signature];
     
     NSData *password = nil;
@@ -548,8 +540,7 @@ static NSImage *unlockedIcon = nil;
 
 - (void)cleanup;
 {
-    // clean up our remote end. we don't want to authentify though
-    OSAtomicCompareAndSwap32Barrier(1, 0, (int32_t *)&flags.needsAuthentication);
+    // clean up our remote end
     [[self remoteServerProxy] removeRemoteObserverForIdentifier:uniqueIdentifier];
     
     // must be on the background thread, or the connection won't be removed from the correct run loop
