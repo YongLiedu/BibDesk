@@ -39,10 +39,6 @@
 #import <Cocoa/Cocoa.h>
 #import "BDSKGroup.h"
 
-extern NSString *BDSKSharedGroupHostNameInfoKey;
-extern NSString *BDSKSharedGroupPortnameInfoKey;
-extern NSString *BDSKSharedGroupComputerNameInfoKey;
-
 @class BDSKSharedGroupServer;
 
 @interface BDSKSharedGroup : BDSKGroup

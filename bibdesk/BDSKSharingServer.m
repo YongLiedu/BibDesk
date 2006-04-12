@@ -551,53 +551,45 @@ NSString *BDSKComputerName() {
     CFRunLoopStop( CFRunLoopGetCurrent() );
 }
 
-- (oneway void)registerHostNameForNotifications:(NSDictionary *)info
+- (oneway void)registerClientForNotifications:(byref id)clientObject;
 {
-    NSParameterAssert(info != nil);
-    NSString *name = [info objectForKey:BDSKSharedGroupComputerNameInfoKey];
-    if(name != nil)
-        [objectsToNotify setObject:info forKey:name];
+    NSParameterAssert(clientObject != nil);
+    NSString *uniqueIdentifier = [clientObject uniqueIdentifier];
+    if(clientObject != nil)
+        [objectsToNotify setObject:clientObject forKey:uniqueIdentifier];
     else
-        NSLog(@"Error: missing computer name in %@", info);
+        NSLog(@"Error: missing identifier for distant object @", clientObject);
 }
 
 - (oneway void)notifyObserversOfChange;
 {
     // here is where we notify other hosts that something changed
-    // get each info dictionary from our table of dictionaries
-    NSEnumerator *e = [[NSDictionary dictionaryWithDictionary:objectsToNotify] objectEnumerator];
-    NSDictionary *info;
-    while(info = [e nextObject]){
-        NSString *hostName = [info objectForKey:BDSKSharedGroupHostNameInfoKey];
-        NSString *portName = [info objectForKey:BDSKSharedGroupPortnameInfoKey];
-        NSPort *sendPort = [[NSSocketPortNameServer sharedInstance] portForName:portName host:hostName];
+    // copy the dictionary since it's mutable
+    NSDictionary *copy = [NSDictionary dictionaryWithDictionary:objectsToNotify];
+    NSEnumerator *e = [copy keyEnumerator];
+    id proxyObject;
+    NSString *key;
+    
+    while(key = [e nextObject]){
         
-        NSConnection *conn = nil;
-        id proxyObject;
+        proxyObject = [copy objectForKey:key];
+        [proxyObject setProtocolForProxy:@protocol(BDSKClientProtocol)];
+        
         @try {
-            conn = [NSConnection connectionWithReceivePort:nil sendPort:sendPort];
-            proxyObject = [conn rootProxy];
+            [proxyObject setNeedsUpdate:YES];
         }
         @catch (id exception) {
-            NSLog(@"client: %@ trying to reach host %@", exception, hostName);
-            conn = nil;
-            proxyObject = nil;
+            NSLog(@"server: \"%@\" trying to reach host %@", exception, proxyObject);
             // since it's not accessible, remove it from future notifications (we know it has this key)
-            [objectsToNotify removeObjectForKey:[info objectForKey:BDSKSharedGroupComputerNameInfoKey]];
+            [objectsToNotify removeObjectForKey:key];
         }
-        [proxyObject setProtocolForProxy:@protocol(BDSKClientProtocol)];
-        if(proxyObject)
-            [proxyObject setNeedsUpdate:YES];
-        else
-            NSLog(@"server: unable to get proxy object for shared group");
     }
-    
 }
 
-- (oneway void)removeRemoteObserverNamed:(NSString *)computerName;
+- (oneway void)removeRemoteObserverForIdentifier:(NSString *)identifier;
 {
-    NSParameterAssert(computerName != nil);
-    [objectsToNotify removeObjectForKey:computerName];
+    NSParameterAssert(identifier != nil);
+    [objectsToNotify removeObjectForKey:identifier];
 }
 
 @end

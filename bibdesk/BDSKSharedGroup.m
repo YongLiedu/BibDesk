@@ -43,10 +43,6 @@
 #import "NSImage+Toolbox.h"
 #import <libkern/OSAtomic.h>
 
-NSString *BDSKSharedGroupHostNameInfoKey = @"hostname";
-NSString *BDSKSharedGroupPortnameInfoKey = @"portname";
-NSString *BDSKSharedGroupComputerNameInfoKey = @"computer";
-
 typedef struct _BDSKSharedGroupFlags {
     volatile int32_t shouldKeepRunning __attribute__ ((aligned (4)));
     volatile int32_t isRetrieving __attribute__ ((aligned (4)));
@@ -84,6 +80,7 @@ typedef struct _BDSKSharedGroupFlags {
     NSString *serverSharingName;
     NSString *localConnectionName;
     NSString *mainThreadConnectionName;
+    NSString *uniqueIdentifier;
 }
 
 - (id)initWithGroup:(BDSKSharedGroup *)aGroup andService:(NSNetService *)aService;
@@ -285,7 +282,7 @@ static NSImage *unlockedIcon = nil;
         [mainThreadConn setRootObject:self];
         [mainThreadConn enableMultipleThreads];
         NSAssert([mainThreadConn registerName:mainThreadConnectionName] == YES, @"failed to register main thread connection name");
-        // DO NOT release mainThreadConn here, or it will stop working; release in cleanup
+        // If you release mainThreadConn here, it will stop working; release in cleanup -> zombie
        
         // set up flags
         memset(&flags, 0, sizeof(flags));
@@ -296,6 +293,9 @@ static NSImage *unlockedIcon = nil;
         if(TXTData)
             [self netService:service didUpdateTXTRecordData:TXTData];
         
+        // test this to see if we've registered with the remote host
+        uniqueIdentifier = nil;
+        
         // if we detach in -retrievePublications, connection setup doesn't happen in time
         [NSThread detachNewThreadSelector:@selector(runDOServer) toTarget:self withObject:nil];
     }
@@ -304,15 +304,19 @@ static NSImage *unlockedIcon = nil;
 
 - (void)dealloc;
 {
+    BDSKLOGIMETHOD();
     [service setDelegate:nil];
     [service release];
     [serverSharingName release];
     [localConnectionName release];
     [mainThreadConnectionName release];
+    [uniqueIdentifier release];
     [super dealloc];
 }
 
 #pragma mark Accessors
+
+- (NSString *)uniqueIdentifier { return uniqueIdentifier; }
 
 - (oneway void)setNeedsUpdate:(BOOL)flag { [group setNeedsUpdate:flag]; }
 
@@ -347,6 +351,24 @@ static NSImage *unlockedIcon = nil;
     id proxy = [conn rootProxy];
     [proxy setProtocolForProxy:@protocol(BDSKSharedGroupServerLocalThread)];
     return proxy;
+}
+
+// register for setNeedsUpdate: when the remote server adds/modifies something
+- (void)registerAsClientWithRemoteServer;
+{
+    if(uniqueIdentifier == nil){
+        // @@ recursion: make sure uniqueIdentifier is non-nil before calling [self remoteServerProxy]
+        uniqueIdentifier = [[[NSProcessInfo processInfo] globallyUniqueString] copy];
+        id proxy = [self remoteServerProxy];
+        @try {
+            [proxy registerClientForNotifications:self];
+        }
+        @catch(id exception) {
+            [uniqueIdentifier release];
+            uniqueIdentifier = nil;
+            NSLog(@"%@: unable to register with remote server", [self class]);
+        }
+    }
 }
 
 - (id)remoteServerProxy;
@@ -393,9 +415,9 @@ static NSImage *unlockedIcon = nil;
 
     [proxy setProtocolForProxy:@protocol(BDSKSharingProtocol)];
     
-    // need hostname and portname for the NSSocketPort connection on the other end
-    // use computer as the notification identifier for this host on the other end
-    [proxy registerHostNameForNotifications:[NSDictionary dictionaryWithObjectsAndKeys:[[NSHost currentHost] name], BDSKSharedGroupHostNameInfoKey, serverSharingName, BDSKSharedGroupPortnameInfoKey, [BDSKSharingServer sharingName], BDSKSharedGroupComputerNameInfoKey, nil]];
+    // use uniqueIdentifier as the notification identifier for this host on the other end
+    if(uniqueIdentifier == nil)
+        [self registerAsClientWithRemoteServer];
     
     return proxy;
 }
@@ -509,12 +531,7 @@ static NSImage *unlockedIcon = nil;
         }
         OSAtomicCompareAndSwap32Barrier(1, 0, (int32_t *)&flags.isRetrieving);
         // use the main thread; this avoids an extra (un)archiving between threads and it ends up posting notifications for UI updates
-        id proxy = [[self mainThreadProxy] retain];
-        [proxy unarchivePublications:archive];
-        [[[proxy connectionForProxy] sendPort] invalidate];
-        [[[proxy connectionForProxy] receivePort] invalidate];
-        [[proxy connectionForProxy] invalidate];
-        [proxy release];
+        [[self mainThreadProxy] unarchivePublications:archive];
     }
     @catch(id exception){
         NSLog(@"%@: discarding exception \"%@\" while retrieving publications", [self class], exception);
@@ -527,6 +544,9 @@ static NSImage *unlockedIcon = nil;
 
 - (void)cleanup;
 {
+    // clean up our remote end
+    [[self remoteServerProxy] removeRemoteObserverForIdentifier:uniqueIdentifier];
+    
     // must be on the background thread, or the connection won't be removed from the correct run loop
     [[[NSSocketPortNameServer sharedInstance] portForName:serverSharingName] invalidate];
     [[NSSocketPortNameServer sharedInstance] removePortForName:serverSharingName];
@@ -601,11 +621,10 @@ static NSImage *unlockedIcon = nil;
     [[self localThreadProxy] cleanup];
      
     NSConnection *mainThreadConn = [NSConnection connectionWithRegisteredName:mainThreadConnectionName host:nil];
-    [[mainThreadConn receivePort] invalidate];
-    [mainThreadConn invalidate];
     [mainThreadConn setRootObject:nil];
     [mainThreadConn registerName:nil];
-    [mainThreadConn release];
+    [[mainThreadConn receivePort] invalidate];
+    [mainThreadConn invalidate];
 }
 
 @end

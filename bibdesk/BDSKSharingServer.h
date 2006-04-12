@@ -50,6 +50,7 @@ extern NSString *BDSKHostNameChangedNotification;
 @protocol BDSKClientProtocol
 
 - (oneway void)setNeedsUpdate:(BOOL)flag;
+- (bycopy NSString *)uniqueIdentifier;
 
 @end
 
@@ -57,9 +58,9 @@ extern NSString *BDSKHostNameChangedNotification;
 @protocol BDSKSharingProtocol
 
 - (NSData *)archivedSnapshotOfPublications;
-- (oneway void)registerHostNameForNotifications:(bycopy NSDictionary *)info;
+- (oneway void)registerClientForNotifications:(byref id)clientObject;
 - (oneway void)notifyObserversOfChange;
-- (oneway void)removeRemoteObserverNamed:(NSString *)computerName;
+- (oneway void)removeRemoteObserverForIdentifier:(NSString *)identifier;
 
 @end
 
