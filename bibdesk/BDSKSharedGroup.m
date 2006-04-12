@@ -83,7 +83,7 @@ typedef struct _BDSKSharedGroupFlags {
 
     NSString *serverSharingName;
     NSString *localConnectionName;
-    NSConnection *mainThreadConnection;
+    NSString *mainThreadConnectionName;
 }
 
 - (id)initWithGroup:(BDSKSharedGroup *)aGroup andService:(NSNetService *)aService;
@@ -278,10 +278,15 @@ static NSImage *unlockedIcon = nil;
         // this needs to be unique on the network and among our shared group servers
         serverSharingName = [[NSString alloc] initWithFormat:@"%@%@", [[NSHost currentHost] name], localConnectionName];
 
-        mainThreadConnection = [[NSConnection alloc] initWithReceivePort:[NSPort port] sendPort:nil];
-        [mainThreadConnection setRootObject:self];
-        [mainThreadConnection enableMultipleThreads];
+        mainThreadConnectionName = [[NSString alloc] initWithFormat:@"%@%d", [[self class] description], connectionIdx++];
         
+        // keeping this connection as an ivar causes a leak, but registering it with a known name works fine
+        NSConnection *mainThreadConn = [[NSConnection alloc] initWithReceivePort:[NSPort port] sendPort:nil];
+        [mainThreadConn setRootObject:self];
+        [mainThreadConn enableMultipleThreads];
+        NSAssert([mainThreadConn registerName:mainThreadConnectionName] == YES, @"failed to register main thread connection name");
+        // DO NOT release mainThreadConn here, or it will stop working; release in cleanup
+       
         // set up flags
         memset(&flags, 0, sizeof(flags));
         flags.shouldKeepRunning = 1;
@@ -303,6 +308,7 @@ static NSImage *unlockedIcon = nil;
     [service release];
     [serverSharingName release];
     [localConnectionName release];
+    [mainThreadConnectionName release];
     [super dealloc];
 }
 
@@ -318,10 +324,11 @@ static NSImage *unlockedIcon = nil;
 
 - (id)mainThreadProxy;
 {
-    NSConnection *conn = nil;
-    id proxy = nil;
+    NSConnection *conn = [NSConnection connectionWithRegisteredName:mainThreadConnectionName host:nil];
+    if(conn == nil)
+        @throw @"Unable to get main thread connection";
+    id proxy = [conn rootProxy];
     @try {
-        conn = [NSConnection connectionWithReceivePort:nil sendPort:[mainThreadConnection receivePort]];
         proxy = [conn rootProxy];
         [proxy setProtocolForProxy:@protocol(BDSKSharedGroupServerMainThread)];
     }
@@ -336,7 +343,7 @@ static NSImage *unlockedIcon = nil;
 {
     NSConnection *conn = [NSConnection connectionWithRegisteredName:localConnectionName host:nil];
     if(conn == nil)
-        NSLog(@"Unable to get local thread connection");
+        @throw @"Unable to get local thread connection";
     id proxy = [conn rootProxy];
     [proxy setProtocolForProxy:@protocol(BDSKSharedGroupServerLocalThread)];
     return proxy;
@@ -502,10 +509,15 @@ static NSImage *unlockedIcon = nil;
         }
         OSAtomicCompareAndSwap32Barrier(1, 0, (int32_t *)&flags.isRetrieving);
         // use the main thread; this avoids an extra (un)archiving between threads and it ends up posting notifications for UI updates
-        [[self mainThreadProxy] unarchivePublications:archive];
+        id proxy = [[self mainThreadProxy] retain];
+        [proxy unarchivePublications:archive];
+        [[[proxy connectionForProxy] sendPort] invalidate];
+        [[[proxy connectionForProxy] receivePort] invalidate];
+        [[proxy connectionForProxy] invalidate];
+        [proxy release];
     }
     @catch(id exception){
-        NSLog(@"%@: discarding exception %@ while retrieving publications", [self class], exception);
+        NSLog(@"%@: discarding exception \"%@\" while retrieving publications", [self class], exception);
         OSAtomicCompareAndSwap32Barrier(1, 0, (int32_t *)&flags.isRetrieving);
     }
     @finally{
@@ -516,6 +528,7 @@ static NSImage *unlockedIcon = nil;
 - (void)cleanup;
 {
     // must be on the background thread, or the connection won't be removed from the correct run loop
+    [[[NSSocketPortNameServer sharedInstance] portForName:serverSharingName] invalidate];
     [[NSSocketPortNameServer sharedInstance] removePortForName:serverSharingName];
     [connection invalidate];
     [connection setRootObject:nil];
@@ -543,7 +556,7 @@ static NSImage *unlockedIcon = nil;
     
     @try {
         if([[NSSocketPortNameServer sharedInstance] registerPort:receivePort name:serverSharingName] == NO)
-            @throw [NSString stringWithFormat:@"Unable to register port %@ and name %@", receivePort, [BDSKSharingServer sharingName]];
+            @throw [NSString stringWithFormat:@"Unable to register port %@ and name %@", receivePort, serverSharingName];
         
         // this is our public server name for receiving change notifications from the remote server
         connection = [[NSConnection alloc] initWithReceivePort:receivePort sendPort:nil];
@@ -571,7 +584,7 @@ static NSImage *unlockedIcon = nil;
     @catch(id exception) {
         [connection release];
         connection = nil;
-        NSLog(@"Discarding exception %@ raised in object %@", exception, self);
+        NSLog(@"Discarding exception \"%@\" raised in object %@", exception, self);
         // reset the flag so we can start over; shouldn't be necessary
         OSAtomicCompareAndSwap32Barrier(0, 1, (int32_t *)&flags.shouldKeepRunning);
     }
@@ -586,11 +599,13 @@ static NSImage *unlockedIcon = nil;
     // we're in the main thread, so set the stop flag
     OSAtomicCompareAndSwap32Barrier(1, 0, (int32_t *)&flags.shouldKeepRunning);
     [[self localThreadProxy] cleanup];
-        
-    [mainThreadConnection invalidate];
-    [mainThreadConnection setRootObject:nil];
-    [mainThreadConnection release];
-    mainThreadConnection = nil;
+     
+    NSConnection *mainThreadConn = [NSConnection connectionWithRegisteredName:mainThreadConnectionName host:nil];
+    [[mainThreadConn receivePort] invalidate];
+    [mainThreadConn invalidate];
+    [mainThreadConn setRootObject:nil];
+    [mainThreadConn registerName:nil];
+    [mainThreadConn release];
 }
 
 @end
