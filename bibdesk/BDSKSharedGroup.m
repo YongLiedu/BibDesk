@@ -542,7 +542,8 @@ static NSImage *unlockedIcon = nil;
 - (void)cleanup;
 {
     // clean up our remote end
-    [[self remoteServerProxy] removeRemoteObserverForIdentifier:uniqueIdentifier];
+    if (uniqueIdentifier != nil)
+        [[self remoteServerProxy] removeRemoteObserverForIdentifier:uniqueIdentifier];
     
     // must be on the background thread, or the connection won't be removed from the correct run loop
     [[[NSSocketPortNameServer sharedInstance] portForName:serverSharingName] invalidate];
