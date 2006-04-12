@@ -75,6 +75,7 @@ typedef struct _BDSKSharedGroupFlags {
     NSNetService *service;
     BDSKSharedGroup *group;
     NSConnection *connection;
+    NSConnection *mainThreadConnection;
     BDSKSharedGroupFlags flags;
 
     NSString *serverSharingName;
@@ -277,12 +278,12 @@ static NSImage *unlockedIcon = nil;
 
         mainThreadConnectionName = [[NSString alloc] initWithFormat:@"%@%d", [[self class] description], connectionIdx++];
         
-        // keeping this connection as an ivar causes a leak, but registering it with a known name works fine
-        NSConnection *mainThreadConn = [[NSConnection alloc] initWithReceivePort:[NSPort port] sendPort:nil];
-        [mainThreadConn setRootObject:self];
-        [mainThreadConn enableMultipleThreads];
-        NSAssert([mainThreadConn registerName:mainThreadConnectionName] == YES, @"failed to register main thread connection name");
-        // If you release mainThreadConn here, it will stop working; release in cleanup -> zombie
+        // registering it with a known name causes a leak, but keeping this connection as an ivar works fine
+        mainThreadConnection = [[NSConnection alloc] initWithReceivePort:[NSPort port] sendPort:nil];
+        [mainThreadConnection setRootObject:self];
+        [mainThreadConnection enableMultipleThreads];
+        NSAssert([mainThreadConnection registerName:mainThreadConnectionName] == YES, @"failed to register main thread connection name");
+        // If you release mainThreadConnection here, it will stop working; release in stopDOServer -> zombie
        
         // set up flags
         memset(&flags, 0, sizeof(flags));
@@ -402,7 +403,8 @@ static NSImage *unlockedIcon = nil;
             if(flags.canceledAuthentication == 0){
                 OSAtomicCompareAndSwap32Barrier(0, 1, (int32_t *)&flags.authenticationFailed);
                 
-                [[self mainThreadProxy] runAuthenticationFailedAlert];
+                if(flags.needsAuthentication == 1)
+                    [[self mainThreadProxy] runAuthenticationFailedAlert];
             }
             
         } else {
@@ -623,11 +625,13 @@ static NSImage *unlockedIcon = nil;
     OSAtomicCompareAndSwap32Barrier(1, 0, (int32_t *)&flags.shouldKeepRunning);
     [[self localThreadProxy] cleanup];
      
-    NSConnection *mainThreadConn = [NSConnection connectionWithRegisteredName:mainThreadConnectionName host:nil];
-    [mainThreadConn setRootObject:nil];
-    [mainThreadConn registerName:nil];
-    [[mainThreadConn receivePort] invalidate];
-    [mainThreadConn invalidate];
+    //NSConnection *mainThreadConnection = [NSConnection connectionWithRegisteredName:mainThreadConnectionName host:nil];
+    [mainThreadConnection setRootObject:nil];
+    [mainThreadConnection registerName:nil];
+    [[mainThreadConnection receivePort] invalidate];
+    [mainThreadConnection invalidate];
+    [mainThreadConnection release];
+    mainThreadConnection = nil;
 }
 
 @end
