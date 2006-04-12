@@ -405,7 +405,7 @@ static NSImage *unlockedIcon = nil;
             // use uniqueIdentifier as the notification identifier for this host on the other end
             uniqueIdentifier = [[[NSProcessInfo processInfo] globallyUniqueString] copy];
             @try {
-                [proxy registerClientForNotifications:self];
+                //[proxy registerClientForNotifications:self];
             }
             @catch(id exception) {
                 [uniqueIdentifier release];
@@ -446,7 +446,7 @@ static NSImage *unlockedIcon = nil;
 // this can be called from any thread
 - (NSData *)authenticationDataForComponents:(NSArray *)components;
 {
-    if(flags.needsAuthentication == 0 || flags.shouldKeepRunning == 0)
+    if(flags.needsAuthentication == 0)
         return [[NSData data] sha1Signature];
     
     NSData *password = nil;
@@ -456,7 +456,7 @@ static NSImage *unlockedIcon = nil;
     if(flags.authenticationFailed == 0)
         password = [BDSKPasswordController passwordHashedForKeychainServiceName:[BDSKPasswordController keychainServiceNameWithComputerName:[group name]]];
     
-    if(password == nil){   
+    if(password == nil && flags.shouldKeepRunning == 1){   
         
         // run the prompt on the main thread
         rv = [[self mainThreadProxy] runPasswordPrompt];
