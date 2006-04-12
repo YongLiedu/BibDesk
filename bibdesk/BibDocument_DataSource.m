@@ -240,7 +240,7 @@
 	}else if(tv == groupTableView){
 		if ([[self objectInGroupsAtIndex:row] hasEditableName] == NO) 
 			return NO;
-		else if (row > [smartGroups count] + [sharedGroups count] &&
+		else if (NSLocationInRange(row, [self rangeOfSimpleGroups]) &&
 				 [[OFPreferenceWrapper sharedPreferenceWrapper] boolForKey:BDSKWarnOnRenameGroupKey]) {
 			
 			BDSKAlert *alert = [BDSKAlert alertWithMessageText:NSLocalizedString(@"Warning", @"Warning")
@@ -436,7 +436,7 @@
                               NSLocalizedString(@"The groups you want to drag do not contain any items.", @""));
             return NO;
         }
-        dragFromSharedGroups = ([rowIndexes firstIndex] > [smartGroups count]  && [rowIndexes lastIndex] <= [smartGroups count]  + [sharedGroups count]);
+        dragFromSharedGroups = [self hasOnlySharedGroupsAtIndexes:rowIndexes];
 			
     } else if(tv == (NSTableView *)ccTableView){
 		// drag from the custom cite drawer table
@@ -457,13 +457,13 @@
         dragCopyType = 1; // only type that makes sense here
         
         NSIndexSet *indexes = [groupTableView selectedRowIndexes];
-        dragFromSharedGroups = ([indexes firstIndex] > [smartGroups count]  && [indexes lastIndex] <= [smartGroups count]  + [sharedGroups count]);
+        dragFromSharedGroups = [self hasOnlySharedGroupsAtIndexes:rowIndexes];
     }else{
 		// drag from the main table
 		pubs = [shownPublications objectsAtIndexes:rowIndexes];
         
         NSIndexSet *indexes = [groupTableView selectedRowIndexes];
-        dragFromSharedGroups = ([indexes firstIndex] > [smartGroups count]  && [indexes lastIndex] <= [smartGroups count]  + [sharedGroups count]);
+        dragFromSharedGroups = [self hasOnlySharedGroupsAtIndexes:rowIndexes];
 
 		if(pboard == [NSPasteboard pasteboardWithName:NSDragPboard]){
 			// see where we clicked in the table
@@ -899,7 +899,7 @@
             return NSDragOperationCopy;
         }
         // not sure why this check is necessary, but it silences an error message when you drag off the list of items
-        if([info draggingSource] == groupTableView || row >= [tv numberOfRows] || row <= [smartGroups count] + [sharedGroups count] || (type == nil && [info draggingSource] != tableView)) 
+        if([info draggingSource] == groupTableView || row >= [tv numberOfRows] || NSLocationInRange(row, [self rangeOfSimpleGroups]) == NO || (type == nil && [info draggingSource] != tableView)) 
             return NSDragOperationNone;
         
         // here we actually target a specific row
@@ -971,7 +971,7 @@
 		
 		if (([info draggingSource] == groupTableView || [info draggingSource] == tableView) && dragFromSharedGroups && row == 0) {
             return [self addPublicationsFromPasteboard:pboard error:NULL];
-        } else if([info draggingSource] == groupTableView || row <= [smartGroups count] + [sharedGroups count]) {
+        } else if([info draggingSource] == groupTableView || NSLocationInRange(row, [self rangeOfSimpleGroups]) == NO) {
             return NO;
         } else if([info draggingSource] == tableView){
             // we already have these publications, so we just want to add them to the group, not the document

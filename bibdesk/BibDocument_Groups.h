@@ -44,6 +44,16 @@
 
 - (unsigned int)countOfGroups;
 - (BDSKGroup *)objectInGroupsAtIndex:(unsigned int)index;
+
+- (NSRange)rangeOfSimpleGroups;
+- (NSRange)rangeOfSmartGroups;
+- (NSRange)rangeOfSharedGroups;
+- (unsigned int)numberOfSimpleGroupsAtIndexes:(NSIndexSet *)indexes;
+- (unsigned int)numberOfSmartGroupsAtIndexes:(NSIndexSet *)indexes;
+- (unsigned int)numberOfSharedGroupsAtIndexes:(NSIndexSet *)indexes;
+- (BOOL)hasSharedGroupsAtIndexes:(NSIndexSet *)indexes;
+- (BOOL)hasOnlySharedGroupsAtIndexes:(NSIndexSet *)indexes;
+
 - (void)addSmartGroup:(BDSKSmartGroup *)group;
 - (void)removeSmartGroup:(BDSKSmartGroup *)group;
 - (void)removeSmartGroupNamed:(id)name;

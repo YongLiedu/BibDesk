@@ -50,8 +50,8 @@
 - (BOOL) validateCutMenuItem:(NSMenuItem*) menuItem {
 	if ([documentWindow firstResponder] != tableView ||
 		[self numberOfSelectedPubs] == 0 ||
-        [[self selectedGroups] firstObjectCommonWithArray:sharedGroups] != nil) {
-		// no selection
+        [self hasSharedGroupsAtIndexes:[groupTableView selectedRowIndexes]]) {
+		// no selection or selection includes shared groups
 		return NO;
 	}
 	else {
@@ -63,7 +63,7 @@
 - (BOOL) validateAlternateCutMenuItem:(NSMenuItem*) menuItem {
 	if ([documentWindow firstResponder] != tableView ||
 		[self numberOfSelectedPubs] == 0 ||
-        [[self selectedGroups] firstObjectCommonWithArray:sharedGroups] != nil) {
+        [self hasSharedGroupsAtIndexes:[groupTableView selectedRowIndexes]]) {
 		// no selection
 		return NO;
 	}
@@ -269,18 +269,13 @@
 	NSString * s;
 	int n = [self numberOfSelectedPubs];
 	int m = 0; // number of non-smart groups
-	NSArray *selectedGroups = [self selectedGroups];
+    NSIndexSet *selIndexes = [groupTableView selectedRowIndexes];
     
     // don't remove from single valued group field, as that will clear the field, which is most probably a mistake. See bug # 1435344
-	if([selectedGroups containsObject:allPublicationsGroup]) {
+	if([selIndexes firstIndex] == 0) {
         return [self validateDeleteSelectionMenuItem:menuItem];
     } else if ([[[BibTypeManager sharedManager] singleValuedGroupFields] containsObject:[self currentGroupField]] == NO) {
-        NSEnumerator *groupEnum = [selectedGroups objectEnumerator];
-        BDSKGroup *group;
-        while (group = [groupEnum nextObject]) {
-             if([group isSmart] == NO && [group isShared] == NO)
-                m++;
-        }
+        m = [self numberOfSimpleGroupsAtIndexes:selIndexes];
     }
 	
 	if (n == 0 || m == 0) {
@@ -591,12 +586,7 @@
 } 
 
 - (BOOL) validateRemoveSmartGroupMenuItem:(NSMenuItem *)menuItem{
-	int row = [smartGroups count] + 1;
-	int n = 0;
-	while (--row) {
-		if ([groupTableView isRowSelected:row])
-			n++;
-	}
+    int n = [self numberOfSmartGroupsAtIndexes:[groupTableView selectedRowIndexes]];
 	
 	NSString *s = @"";
 	

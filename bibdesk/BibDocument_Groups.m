@@ -57,7 +57,7 @@
 #pragma mark Indexed accessors
 
 - (unsigned int)countOfGroups {
-    return [smartGroups count] + [groups count] + 1 + [sharedGroups count];
+    return [smartGroups count] + [sharedGroups count] + [groups count] + 1 ;
 }
 
 - (BDSKGroup *)objectInGroupsAtIndex:(unsigned int)index {
@@ -76,34 +76,72 @@
 // mutable to-many accessor:  not presently used
 - (void)insertObject:(BDSKGroup *)group inGroupsAtIndex:(unsigned int)index {
     // we don't actually put it in the requested place, rather put it at the end of the current array
-	OBASSERT(index > 0);
-    
-    if(index == 0)
-        return;
-    unsigned int smartCount = [smartGroups count];
-    unsigned int sharedCount = [sharedGroups count];
+    NSRange simpleRange = [self rangeOfSimpleGroups];
 	
 	if ([group isSmart]) // we don't care about the index, as we resort anyway. This activates undo
 		[self addSmartGroup:(BDSKSmartGroup *)group];
-	OBASSERT(index > smartCount + sharedCount);
-	if(index <= smartCount + sharedCount)
-		return;
-	[groups insertObject:group atIndex:(index - smartCount - sharedCount - 1)]; 
+	else if (NSLocationInRange(index, simpleRange))
+        [groups insertObject:group atIndex:(index - simpleRange.location)];
+    else
+        OBASSERT_NOT_REACHED("invalid insertion index for group");
 }
 
 // mutable to-many accessor:  not presently used
 - (void)removeObjectFromGroupsAtIndex:(unsigned int)index {
-    OBASSERT(index > 0);
-
-    if(index == 0)
-        return;
+    NSRange simpleRange = [self rangeOfSimpleGroups];
+    NSRange smartRange = [self rangeOfSmartGroups];
     
-    unsigned int smartCount = [smartGroups count];
-    if(index <= smartCount) // this activates undo
-        [smartGroups removeObject:[smartGroups objectAtIndex:(index - 1)]];
+    if (NSLocationInRange(index, smartRange))
+        [smartGroups removeObject:[smartGroups objectAtIndex:(index - smartRange.location)]];
+    else if (NSLocationInRange(index, simpleRange))
+        [groups removeObjectAtIndex:(index - simpleRange.location)];
     else
-        [groups removeObjectAtIndex:(index - smartCount - 1)];
+        OBASSERT_NOT_REACHED("group cannot be removed");
 
+}
+
+- (NSRange)rangeOfSimpleGroups{
+    return NSMakeRange([smartGroups count] + [sharedGroups count] + 1, [groups count]);
+}
+
+- (NSRange)rangeOfSmartGroups{
+    return NSMakeRange(1, [smartGroups count]);
+}
+
+- (NSRange)rangeOfSharedGroups{
+    return NSMakeRange([smartGroups count] + 1, [sharedGroups count]);
+}
+
+- (unsigned int)numberOfSimpleGroupsAtIndexes:(NSIndexSet *)indexes{
+    NSRange simpleRange = [self rangeOfSimpleGroups];
+    unsigned int maxCount = MIN([indexes count], simpleRange.length);
+    unsigned int buffer[maxCount];
+    return [indexes getIndexes:buffer maxCount:maxCount inIndexRange:&simpleRange];
+}
+
+- (unsigned int)numberOfSmartGroupsAtIndexes:(NSIndexSet *)indexes{
+    NSRange smartRange = [self rangeOfSmartGroups];
+    unsigned int maxCount = MIN([indexes count], smartRange.length);
+    unsigned int buffer[maxCount];
+    return [indexes getIndexes:buffer maxCount:maxCount inIndexRange:&smartRange];
+}
+
+- (unsigned int)numberOfSharedGroupsAtIndexes:(NSIndexSet *)indexes{
+    NSRange sharedRange = [self rangeOfSharedGroups];
+    unsigned int maxCount = MIN([indexes count], sharedRange.length);
+    unsigned int buffer[maxCount];
+    return [indexes getIndexes:buffer maxCount:maxCount inIndexRange:&sharedRange];
+}
+
+- (BOOL)hasSharedGroupsAtIndexes:(NSIndexSet *)indexes{
+    NSRange sharedRange = [self rangeOfSharedGroups];
+    return [indexes intersectsIndexesInRange:sharedRange];
+}
+
+- (BOOL)hasOnlySharedGroupsAtIndexes:(NSIndexSet *)indexes{
+    NSRange sharedRange = [self rangeOfSharedGroups];
+    NSIndexSet *sharedIndexes = [NSIndexSet indexSetWithIndexesInRange:sharedRange];
+    return [sharedIndexes containsIndexes:indexes];
 }
 
 #pragma mark Accessors
@@ -395,11 +433,12 @@ The groupedPublications array is a subset of the publications array, developed b
 // if this becomes slow, we could make filters thread safe and update them in the background
 - (void)updateAllSmartGroups{
 
-	unsigned int row = [smartGroups count] + 1;
+	NSRange smartRange = [self rangeOfSmartGroups];
+    unsigned int row = NSMaxRange(smartRange);
     NSArray *array = [publications copy];
 	BOOL shouldUpdate = NO;
     
-    while(--row){
+    while(NSLocationInRange(--row, smartRange)){
 		[(BDSKSmartGroup *)[self objectInGroupsAtIndex:row] filterItems:array];
 		if([groupTableView isRowSelected:row])
 			shouldUpdate = YES;
@@ -457,9 +496,8 @@ The groupedPublications array is a subset of the publications array, developed b
     
     // This allows us to be slightly lazy, only putting the visible group rows in the dictionary
     NSIndexSet *visibleIndexes = [NSIndexSet indexSetWithIndexesInRange:indexRange];
-    int cnt = [visibleIndexes count];
-	int smartCount = [smartGroups count];
-    int sharedCount = [sharedGroups count];
+    unsigned int cnt = [visibleIndexes count];
+    NSRange simpleRange = [self rangeOfSimpleGroups];
     
     // Mutable dictionary with fixed capacity using NSObjects for keys with ints for values; this gives us a fast lookup of row name->index.  Dictionaries can use any pointer-size element for a key or value; see /Developer/Examples/CoreFoundation/Dictionary.  Keys are retained rather than copied for efficiency.  Shark says that BibAuthors are created with alloc/init when using the copy callbacks, so NSShouldRetainWithZone() must be returning NO?
     CFMutableDictionaryRef rowDict = CFDictionaryCreateMutable(CFAllocatorGetDefault(), cnt, &OFNSObjectDictionaryKeyCallbacks, &OFIntegerDictionaryValueCallbacks);
@@ -468,8 +506,8 @@ The groupedPublications array is a subset of the publications array, developed b
     
     // exclude smart and shared groups
     while(cnt != NSNotFound){
-		if(cnt > (smartCount + sharedCount))
-			CFDictionaryAddValue(rowDict, (void *)[[groups objectAtIndex:cnt - smartCount - sharedCount - 1] name], (void *)cnt);
+		if(NSLocationInRange(cnt, simpleRange))
+			CFDictionaryAddValue(rowDict, (void *)[[groups objectAtIndex:cnt - simpleRange.location] name], (void *)cnt);
         cnt = [visibleIndexes indexGreaterThanIndex:cnt];
     }
     
@@ -682,12 +720,13 @@ The groupedPublications array is a subset of the publications array, developed b
 	
 	if(returnCode == NSOKButton){
 		BDSKSmartGroup *group = [[BDSKSmartGroup alloc] initWithFilter:[filterController filter]];
+        unsigned int insertIndex = NSMaxRange([self rangeOfSmartGroups]);
 		[self addSmartGroup:group];
 		[group release];
 		
 		[groupTableView reloadData];
-		[groupTableView selectRowIndexes:[NSIndexSet indexSetWithIndex:[smartGroups count]] byExtendingSelection:NO];
-		[groupTableView editColumn:0 row:[smartGroups count] withEvent:nil select:YES];
+		[groupTableView selectRowIndexes:[NSIndexSet indexSetWithIndex:insertIndex] byExtendingSelection:NO];
+		[groupTableView editColumn:0 row:insertIndex withEvent:nil select:YES];
 		[[self undoManager] setActionName:NSLocalizedString(@"Add Smart Group",@"Add smart group")];
 		// updating of the tables is done when finishing the edit of the name
 	}
@@ -779,7 +818,7 @@ The groupedPublications array is a subset of the publications array, developed b
     OBASSERT(i != NSNotFound);
     
     if(i != NSNotFound){
-        i += [smartGroups count] + 1;
+        i += [self rangeOfSimpleGroups].location;
         [groupTableView selectRowIndexes:[NSIndexSet indexSetWithIndex:i] byExtendingSelection:NO];
         [groupTableView scrollRowToVisible:i];
         
