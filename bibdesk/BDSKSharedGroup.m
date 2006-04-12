@@ -405,7 +405,8 @@ static NSImage *unlockedIcon = nil;
             // use uniqueIdentifier as the notification identifier for this host on the other end
             uniqueIdentifier = [[[NSProcessInfo processInfo] globallyUniqueString] copy];
             @try {
-                //[proxy registerClientForNotifications:self];
+                // @@ unfortunately this leads to a leak
+                [proxy registerClientForNotifications:self];
             }
             @catch(id exception) {
                 [uniqueIdentifier release];
