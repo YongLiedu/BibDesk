@@ -811,7 +811,6 @@ NSString *BDSKWeblocFilePboardType = @"CorePasteboardFlavorType 0x75726C20";
 
 - (NSData *)rssDataForPublications:(NSArray *)items{
     NSEnumerator *e = [items objectEnumerator];
-    id tmp = nil;
 	BibItem *pub = nil;
     NSMutableData *d = [NSMutableData data];
 
@@ -846,7 +845,7 @@ NSString *BDSKWeblocFilePboardType = @"CorePasteboardFlavorType 0x75726C20";
     NSData *doubleLineFeed = [[NSString stringWithString:@"\n\n"] dataUsingEncoding:NSUTF8StringEncoding];
 	while(pub = [e nextObject]){
 		[d appendData:doubleLineFeed];
-        [d appendData:[[tmp RSSValue] dataUsingEncoding:NSUTF8StringEncoding]];
+        [d appendData:[[pub RSSValue] dataUsingEncoding:NSUTF8StringEncoding]];
     }
 	
     [d appendData:[@"</channel>\n</rss>" dataUsingEncoding:NSUTF8StringEncoding]];
