@@ -50,6 +50,9 @@
 
 #pragma mark initialization
 
++ (void)initialize{
+    [self setKeys:[NSArray arrayWithObject:@"document"] triggerChangeNotificationsForDependentKey:@"publications"];
+}
 
 - (NSString *)windowNibName{return @"BibPersonView";}
 
