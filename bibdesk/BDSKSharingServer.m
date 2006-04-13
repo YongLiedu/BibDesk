@@ -493,14 +493,14 @@ NSString *BDSKComputerName() {
         
         // we'll use this to communicate between threads on the localhost
         // @@ does this succeed after a stop/restart with a new thread?
-        NSConnection *threadConnection = [NSConnection defaultConnection];
-        if(threadConnection == nil)
+        NSConnection *localConnection = [NSConnection defaultConnection];
+        if(localConnection == nil)
             @throw @"Unable to get default connection";
-        [threadConnection setRootObject:self];
+        [localConnection setRootObject:self];
         
         // @@ workaround: ensure that the name is unique, or else registerName: fails when we restart (in spite of explicitly deregistering it)
         localConnectionCount++;
-        if([threadConnection registerName:[BDSKSharingServer localConnectionName]] == NO)
+        if([localConnection registerName:[BDSKSharingServer localConnectionName]] == NO)
             @throw @"Unable to register local connection";
         
         do {
@@ -554,11 +554,18 @@ NSString *BDSKComputerName() {
 - (oneway void)registerClientForNotifications:(byref id)clientObject;
 {
     NSParameterAssert(clientObject != nil);
-    NSString *uniqueIdentifier = [clientObject uniqueIdentifier];
-    if(clientObject != nil)
+    NSString *uniqueIdentifier = nil;
+    @try {
+        uniqueIdentifier = [clientObject uniqueIdentifier];
+    }
+    @catch(id exception) {
+        NSLog(@"%@ ignoring exception \"%@\" while registering a remote server", [self class], exception);
+        uniqueIdentifier = nil;
+    }
+    if(clientObject != nil && uniqueIdentifier != nil)
         [objectsToNotify setObject:clientObject forKey:uniqueIdentifier];
     else
-        NSLog(@"Error: missing identifier for distant object @", clientObject);
+        NSLog(@"Error: missing identifier or distant object");
 }
 
 - (oneway void)notifyObserversOfChange;
@@ -589,6 +596,7 @@ NSString *BDSKComputerName() {
 - (oneway void)removeRemoteObserverForIdentifier:(NSString *)identifier;
 {
     NSParameterAssert(identifier != nil);
+    BDSKInvalidateProxyConnectionAndPorts([objectsToNotify objectForKey:identifier], YES, YES);
     [objectsToNotify removeObjectForKey:identifier];
 }
 
