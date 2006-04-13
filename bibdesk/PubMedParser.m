@@ -187,7 +187,6 @@ static BibItem *createBibItemWithPubMedDictionary(NSMutableDictionary *pubDict, 
         
     }
     
-#warning lame error checking
     if(outError) *outError = nil;
     
     [pubDict release];
