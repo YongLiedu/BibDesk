@@ -457,13 +457,13 @@
         dragCopyType = 1; // only type that makes sense here
         
         NSIndexSet *indexes = [groupTableView selectedRowIndexes];
-        dragFromSharedGroups = [self hasOnlySharedGroupsAtIndexes:rowIndexes];
+        dragFromSharedGroups = [self hasOnlySharedGroupsAtIndexes:indexes];
     }else{
 		// drag from the main table
 		pubs = [shownPublications objectsAtIndexes:rowIndexes];
         
         NSIndexSet *indexes = [groupTableView selectedRowIndexes];
-        dragFromSharedGroups = [self hasOnlySharedGroupsAtIndexes:rowIndexes];
+        dragFromSharedGroups = [self hasOnlySharedGroupsAtIndexes:indexes];
 
 		if(pboard == [NSPasteboard pasteboardWithName:NSDragPboard]){
 			// see where we clicked in the table
