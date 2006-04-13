@@ -54,7 +54,8 @@ typedef struct _BDSKSharedGroupFlags {
 // private protocols for inter-thread messaging
 @protocol BDSKSharedGroupServerLocalThread
 
-- (void)cleanup; // probably shouldn't be oneway, since it gets called when quitting the app 
+// -cleanup is declared oneway so it happens asynchronously when you disable sharing; otherwise we block the main thread until it completes, but we need to find out if blocking at cleanup on NSApplicationWillTerminate is necessary
+- (oneway void)cleanup; 
 - (oneway void)retrievePublications;
 
 @end
@@ -71,15 +72,16 @@ typedef struct _BDSKSharedGroupFlags {
 
 // private class for DO server. We have it as a separate object so we don't get a retain loop, we remove it from the thread runloop in the group's dealloc
 @interface BDSKSharedGroupServer : NSObject <BDSKSharedGroupServerLocalThread, BDSKSharedGroupServerMainThread, BDSKClientProtocol> {
-    NSNetService *service;
-    BDSKSharedGroup *group;
-    NSConnection *connection;
-    NSConnection *mainThreadConnection;
-    BDSKSharedGroupFlags flags;
+    NSNetService *service;              // service with information about the remote server (BDSKSharingServer)
+    BDSKSharedGroup *group;             // the owner of the local server (BDSKSharedGroupServer)
+    NSString *passwordName;             // [group name] copied since the local server doesn't retain the group
+    NSConnection *connection;           // connection to the remote server
+    NSConnection *mainThreadConnection; // so the local server thread can talk to the main thread
+    BDSKSharedGroupFlags flags;         // state variables
 
-    NSString *serverSharingName;
-    NSString *localConnectionName;
-    NSString *uniqueIdentifier;
+    NSString *serverSharingName;        // name we register as with the nameserver
+    NSString *localConnectionName;      // name for the shared group to communicate with its server's thread
+    NSString *uniqueIdentifier;         // used by the remote server
 }
 
 - (id)initWithGroup:(BDSKSharedGroup *)aGroup andService:(NSNetService *)aService;
@@ -87,8 +89,11 @@ typedef struct _BDSKSharedGroupFlags {
 - (BOOL)isRetrieving;
 - (BOOL)needsAuthentication;
 
+// proxy object for performing methods of the BDSKSharedGroup on the main thread
 - (id)mainThreadProxy;
+// proxy object for performing methods of the BDSKSharedGroup on its worker thread
 - (id)localThreadProxy;
+// proxy object for messaging the remote server
 - (id)remoteServerProxy;
 
 - (void)runDOServer;
@@ -262,6 +267,9 @@ static NSImage *unlockedIcon = nil;
     if (self = [super init]) {
         group = aGroup; // don't retain since it retains us
         
+        // copy this since we may need it after the group is gone (authentication during cleanup)
+        passwordName = [[aGroup name] copy];
+        
         service = [aService retain];
         
         // monitor changes to the TXT data
@@ -303,6 +311,7 @@ static NSImage *unlockedIcon = nil;
     [serverSharingName release];
     [localConnectionName release];
     [uniqueIdentifier release];
+    [passwordName release];
     [super dealloc];
 }
 
@@ -311,7 +320,11 @@ static NSImage *unlockedIcon = nil;
 // BDSKClientProtocol
 - (bycopy NSString *)uniqueIdentifier { return uniqueIdentifier; }
 
-- (oneway void)setNeedsUpdate:(BOOL)flag { [group setNeedsUpdate:flag]; }
+- (oneway void)setNeedsUpdate:(BOOL)flag { 
+    // don't message the group during cleanup
+    if(flags.shouldKeepRunning == 1)
+        [group setNeedsUpdate:flag]; 
+}
 
 - (BOOL)isRetrieving { return flags.isRetrieving == 1; }
 
@@ -444,7 +457,7 @@ void BDSKInvalidateProxyConnectionAndPorts(id aProxy, BOOL invalidateReceivePort
 {
     NSAssert([NSThread inMainThread] == 1, @"password controller must be run from the main thread");
     BDSKPasswordController *pwc = [[BDSKPasswordController alloc] init];
-    int rv = [pwc runModalForKeychainServiceName:[BDSKPasswordController keychainServiceNameWithComputerName:[group name]] message:[NSString stringWithFormat:@"%@ %@", NSLocalizedString(@"Enter password for", @""), [group name]]];
+    int rv = [pwc runModalForKeychainServiceName:[BDSKPasswordController keychainServiceNameWithComputerName:passwordName] message:[NSString stringWithFormat:@"%@ %@", NSLocalizedString(@"Enter password for", @""), passwordName]];
     [pwc close];
     [pwc release];
     return rv;
@@ -453,7 +466,7 @@ void BDSKInvalidateProxyConnectionAndPorts(id aProxy, BOOL invalidateReceivePort
 - (int)runAuthenticationFailedAlert;
 {
     NSAssert([NSThread inMainThread] == 1, @"runAuthenticationFailedAlert must be run from the main thread");
-    return NSRunAlertPanel(NSLocalizedString(@"Authentication Failed", @""), [NSString stringWithFormat:NSLocalizedString(@"Incorrect password for BibDesk Sharing on server %@.  Reselect to try again.", @""), [group name]], nil, nil, nil);
+    return NSRunAlertPanel(NSLocalizedString(@"Authentication Failed", @""), [NSString stringWithFormat:NSLocalizedString(@"Incorrect password for BibDesk Sharing on server %@.  Reselect to try again.", @""), passwordName], nil, nil, nil);
 }
 
 - (BOOL)connection:(NSConnection *)parentConnection shouldMakeNewConnection:(NSConnection *)newConnection
@@ -474,7 +487,7 @@ void BDSKInvalidateProxyConnectionAndPorts(id aProxy, BOOL invalidateReceivePort
     
     int rv = 1;
     if(flags.authenticationFailed == 0)
-        password = [BDSKPasswordController passwordHashedForKeychainServiceName:[BDSKPasswordController keychainServiceNameWithComputerName:[group name]]];
+        password = [BDSKPasswordController passwordHashedForKeychainServiceName:[BDSKPasswordController keychainServiceNameWithComputerName:passwordName]];
     
     if(password == nil && flags.shouldKeepRunning == 1){   
         
@@ -485,7 +498,7 @@ void BDSKInvalidateProxyConnectionAndPorts(id aProxy, BOOL invalidateReceivePort
         
         // retry from the keychain
         if (rv == BDSKPasswordReturn){
-            password = [BDSKPasswordController passwordHashedForKeychainServiceName:[BDSKPasswordController keychainServiceNameWithComputerName:[group name]]];
+            password = [BDSKPasswordController passwordHashedForKeychainServiceName:[BDSKPasswordController keychainServiceNameWithComputerName:passwordName]];
             // assume we succeeded; the exception handler for the connection will change it back if we fail again
             OSAtomicCompareAndSwap32Barrier(1, 0, (int32_t *)&flags.authenticationFailed);
         }else{
@@ -562,7 +575,7 @@ void BDSKInvalidateProxyConnectionAndPorts(id aProxy, BOOL invalidateReceivePort
     }
 }
 
-- (void)cleanup;
+- (oneway void)cleanup;
 {
     // clean up our remote end
     if (uniqueIdentifier != nil){
