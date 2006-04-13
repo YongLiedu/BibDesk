@@ -69,6 +69,10 @@
 /* (new objects are inserted just after old objects that are NSOrderedSame) */
 - (void)insertObject:anObject inArraySortedUsingDescriptors:(NSArray *)sortDescriptors;
 {
+    // nil or zero-length sortDescriptors arg is not handled
+    NSParameterAssert([sortDescriptors count]);
+    if([sortDescriptors count] > 1)
+        NSLog(@"*** WARNING: Multiple sort descriptors are not supported by method %@.", NSStringFromSelector(_cmd));
     unsigned int low = 0;
     unsigned int range = 1;
     unsigned int test = 0;
@@ -82,7 +86,7 @@
     typedef NSComparisonResult (*compareImpType)(id, SEL, id, id); 
     compareImpType compareImp = (compareImpType)[sort methodForSelector:@selector(compareObject:toObject:)];
 
-#warning multiple descriptors
+    // @@ does not support multiple descriptors at this time
     while (count >= range) /* range is the lowest power of 2 > count */
         range <<= 1;
     
