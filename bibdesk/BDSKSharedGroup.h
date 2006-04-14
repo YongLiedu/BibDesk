@@ -58,6 +58,7 @@ extern void BDSKInvalidateProxyConnectionAndPorts(id aProxy, BOOL invalidateRece
 - (NSArray *)publications;
 - (void)setPublications:(NSArray *)newPublications;
 - (BOOL)isRetrieving;
+- (BOOL)failedLoad;
 - (BOOL)needsUpdate;
 - (void)setNeedsUpdate:(BOOL)flag;
 

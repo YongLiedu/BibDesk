@@ -49,6 +49,7 @@ typedef struct _BDSKSharedGroupFlags {
     volatile int32_t authenticationFailed __attribute__ ((aligned (4)));
     volatile int32_t canceledAuthentication __attribute__ ((aligned (4)));
     volatile int32_t needsAuthentication __attribute__ ((aligned (4)));
+    volatile int32_t failedLoad __attribute__ ((aligned (4)));
 } BDSKSharedGroupFlags;    
 
 // private protocols for inter-thread messaging
@@ -88,6 +89,7 @@ typedef struct _BDSKSharedGroupFlags {
 
 - (BOOL)isRetrieving;
 - (BOOL)needsAuthentication;
+- (BOOL)failedLoad;
 
 // proxy object for performing methods of the BDSKSharedGroup on the main thread
 - (id)mainThreadProxy;
@@ -232,6 +234,8 @@ static NSImage *unlockedIcon = nil;
 
 - (BOOL)isRetrieving { return (BOOL)[server isRetrieving]; }
 
+- (BOOL)failedLoad { return [server failedLoad]; }
+
 - (BOOL)needsUpdate { return needsUpdate; }
 
 - (void)setNeedsUpdate:(BOOL)flag { needsUpdate = flag; }
@@ -241,7 +245,8 @@ static NSImage *unlockedIcon = nil;
 - (NSImage *)icon {
     if([server needsAuthentication])
         return (publications == nil) ? [[self class] lockedIcon] : [[self class] unlockedIcon];
-    return [[self class] icon];
+    else
+        return [[self class] icon];
 }
 
 - (BOOL)isShared { return YES; }
@@ -330,6 +335,8 @@ static NSImage *unlockedIcon = nil;
 
 - (BOOL)needsAuthentication { return flags.needsAuthentication == 1; }
 
+- (BOOL)failedLoad { return flags.failedLoad == 1; }
+
 #pragma mark Proxies for inter-thread communication
 
 // forget about using a connection or its ports after calling this function; you have
@@ -399,14 +406,20 @@ void BDSKInvalidateProxyConnectionAndPorts(id aProxy, BOOL invalidateReceivePort
     NSPort *sendPort = [[NSSocketPortNameServer sharedInstance] portForName:portName host:[service hostName]];
     
     if(sendPort == nil)
-        NSLog(@"client: unable to look up server %@", [service hostName]);
+        @throw [NSString stringWithFormat:@"%@: unable to look up server %@", NSStringFromSelector(_cmd), [service hostName]];
     @try {
         conn = [NSConnection connectionWithReceivePort:nil sendPort:sendPort];
+        [conn setRequestTimeout:60];
         // ask for password
         [conn setDelegate:self];
         proxy = [conn rootProxy];
     }
     @catch (id exception) {
+        
+        BDSKInvalidateProxyConnectionAndPorts(proxy, YES, NO);
+        conn = nil;
+        proxy = nil;
+
         // flag authentication failures so we get a prompt the next time around (in case our password was wrong)
         // we also get this if the user canceled, since an empty data will be returned
         if([exception respondsToSelector:@selector(name)] && [[exception name] isEqualToString:NSFailedAuthenticationException]){
@@ -414,7 +427,7 @@ void BDSKInvalidateProxyConnectionAndPorts(id aProxy, BOOL invalidateReceivePort
             // if the user didn't cancel, set an auth failure flag and show an alert
             if(flags.canceledAuthentication == 0){
                 OSAtomicCompareAndSwap32Barrier(0, 1, (int32_t *)&flags.authenticationFailed);
-                // don't show the alert when we couldn't authenticate when cleaing up
+                // don't show the alert when we couldn't authenticate when cleaning up
                 if(flags.shouldKeepRunning == 1){
                     id mainThreadProxy = [self mainThreadProxy];
                     [mainThreadProxy runAuthenticationFailedAlert];
@@ -423,11 +436,8 @@ void BDSKInvalidateProxyConnectionAndPorts(id aProxy, BOOL invalidateReceivePort
             }
             
         } else {
-            // don't log auth failures
-            NSLog(@"client: %@", exception);
+            @throw [NSString stringWithFormat:@"%@: exception \"%@\" while connecting to remote server %@", NSStringFromSelector(_cmd), exception, [service hostName]];
         }
-        conn = nil;
-        proxy = nil;
     }
 
     if (proxy != nil) {
@@ -443,7 +453,8 @@ void BDSKInvalidateProxyConnectionAndPorts(id aProxy, BOOL invalidateReceivePort
             @catch(id exception) {
                 [uniqueIdentifier release];
                 uniqueIdentifier = nil;
-                NSLog(@"%@: unable to register with remote server", [self class]);
+                NSLog(@"%@: unable to register with remote server %@", [self class], [service hostName]);
+                // don't throw; this isn't critical
             }
         }
     }
@@ -541,6 +552,7 @@ void BDSKInvalidateProxyConnectionAndPorts(id aProxy, BOOL invalidateReceivePort
 {
     // set so we don't try calling this multiple times
     OSAtomicCompareAndSwap32Barrier(0, 1, (int32_t *)&flags.isRetrieving);
+    OSAtomicCompareAndSwap32Barrier(1, 0, (int32_t *)&flags.failedLoad);
     
     NSAutoreleasePool *pool = [NSAutoreleasePool new];
     
@@ -556,8 +568,9 @@ void BDSKInvalidateProxyConnectionAndPorts(id aProxy, BOOL invalidateReceivePort
             NSString *errorString = nil;
             NSDictionary *dictionary = [NSPropertyListSerialization propertyListFromData:proxyData mutabilityOption:NSPropertyListImmutable format:NULL errorDescription:&errorString];
             if(errorString != nil){
-                NSLog(@"Error reading shared data: %@", errorString);
+                NSString *errorStr = [NSString stringWithFormat:@"Error reading shared data: %@", errorString];
                 [errorString release];
+                @throw errorStr;
             } else {
                 archive = [dictionary objectForKey:BDSKSharedArchivedDataKey];
             }
@@ -569,6 +582,7 @@ void BDSKInvalidateProxyConnectionAndPorts(id aProxy, BOOL invalidateReceivePort
     @catch(id exception){
         NSLog(@"%@: discarding exception \"%@\" while retrieving publications", [self class], exception);
         OSAtomicCompareAndSwap32Barrier(1, 0, (int32_t *)&flags.isRetrieving);
+        OSAtomicCompareAndSwap32Barrier(0, 1, (int32_t *)&flags.failedLoad);
     }
     @finally{
         [pool release];
@@ -579,9 +593,15 @@ void BDSKInvalidateProxyConnectionAndPorts(id aProxy, BOOL invalidateReceivePort
 {
     // clean up our remote end
     if (uniqueIdentifier != nil){
-        id proxy = [self remoteServerProxy];
-        [proxy removeRemoteObserverForIdentifier:uniqueIdentifier];
-        BDSKInvalidateProxyConnectionAndPorts(proxy, YES, NO);
+        id proxy = nil;
+        @try {
+            proxy = [self remoteServerProxy];
+            [proxy removeRemoteObserverForIdentifier:uniqueIdentifier];
+            BDSKInvalidateProxyConnectionAndPorts(proxy, YES, NO);
+        }
+        @catch(id exception) {
+            NSLog(@"%@ ignoring exception \"%@\" raised during cleanup", [self class], exception);
+        }
     }
     
     // must be on the background thread, or the connection won't be removed from the correct run loop
