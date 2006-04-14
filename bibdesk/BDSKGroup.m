@@ -198,6 +198,10 @@
     hasEditableName = flag;
 }
 
+- (BOOL)failedDownload {
+    return NO;
+}
+
 @end
 
 

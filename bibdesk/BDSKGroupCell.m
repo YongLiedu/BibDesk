@@ -41,6 +41,7 @@
 #import <OmniBase/rcsid.h>
 #import "NSBezierPath_BDSKExtensions.h"
 #import <OmniBase/OBUtilities.h>
+#import "NSImage+Toolbox.h"
 
 static NSMutableParagraphStyle *BDSKGroupCellStringParagraphStyle = nil;
 static NSMutableParagraphStyle *BDSKGroupCellCountParagraphStyle = nil;
@@ -194,10 +195,17 @@ NSRect ignored, imageRect, textRect, countRect; \
 \
 NSSize imageSize = NSMakeSize(NSHeight(aRect) + 1, NSHeight(aRect) + 1); \
 NSSize countSize = NSZeroSize; \
+BOOL failedDownload = [groupValue failedDownload]; \
+BOOL controlViewIsFlipped = [controlView isFlipped]; \
+\
 float countSep = 0.0; \
 if([groupValue count] > 0) { \
     countSize = [countString size]; \
     countSep = countSize.height/2.0 - 0.5; \
+} \
+else if(failedDownload) { \
+    countSize = NSMakeSize(16, 16); \
+    countSep = 1.0; \
 } \
 \
 /* set up the border around the image */ \
@@ -214,7 +222,7 @@ if (countSize.width > 0) { \
 /* this is the main difference from OATextWithIconCell, which ends up with a really weird text baseline for tall cells */\
 float vOffset = (NSHeight(aRect) - [layoutManager defaultLineHeightForFont:[self font]])/2; \
 \
-if (![controlView isFlipped]) \
+if (controlViewIsFlipped == NO) \
 textRect.origin.y -= floorf(vOffset); \
 else \
 textRect.origin.y += floorf(vOffset); \
@@ -254,9 +262,16 @@ textRect.origin.y += floorf(vOffset); \
     textRect = NSInsetRect(textRect, 1.0f, 0.0);    
     
     [label drawInRect:textRect];
-	
-    // Draw the count
-	if (countSize.width > 0) {
+    
+    if (failedDownload) {
+        NSImage *cautionImage = [NSImage cautionIconImage];
+        NSSize cautionImageSize = [cautionImage size];
+        NSRect cautionIconRect = NSMakeRect(0, 0, cautionImageSize.width, cautionImageSize.height);
+        if(controlViewIsFlipped)
+            [[NSImage cautionIconImage] drawFlippedInRect:countRect fromRect:cautionIconRect operation:NSCompositeSourceOver fraction:1.0];
+        else
+            [[NSImage cautionIconImage] drawInRect:countRect fromRect:cautionIconRect operation:NSCompositeSourceOver fraction:1.0];
+    } else if (countSize.width > 0) {
         [NSGraphicsContext saveGraphicsState];
 		[bgColor setFill];
 		[NSBezierPath fillHorizontalOvalAroundRect:NSIntegralRect(countRect)];
@@ -264,11 +279,11 @@ textRect.origin.y += floorf(vOffset); \
 
 		[countString drawInRect:countRect];
     }
-	
+    	
     // Draw the image
 	imageRect.size = imageSize;
 	imageRect.origin.y += ceilf((NSHeight(aRect) - imageSize.height) / 2.0);
-	if ([controlView isFlipped])
+	if (controlViewIsFlipped)
 		[[groupValue icon] drawFlippedInRect:imageRect operation:NSCompositeSourceOver];
 	else
 		[[groupValue icon] drawInRect:imageRect fromRect:NSZeroRect operation:NSCompositeSourceOver fraction:1.0];

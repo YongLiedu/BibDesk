@@ -174,6 +174,12 @@
 */
 - (void)setEditableName:(BOOL)flag;
 
+/*!
+    @method     failedDownload
+    @abstract   Method for remote groups.  Returns NO by default.
+*/
+- (BOOL)failedDownload;
+
 @end
 
 
