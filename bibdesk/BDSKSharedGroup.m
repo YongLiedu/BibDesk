@@ -394,7 +394,7 @@ void BDSKInvalidateProxyConnectionAndPorts(id aProxy, BOOL invalidateReceivePort
 - (id)remoteServerProxy;
 {
     NSConnection *conn = nil;
-    id proxy;
+    id proxy = nil;
     
     NSData *TXTData = [service TXTRecordData];
     NSDictionary *dict = nil;
