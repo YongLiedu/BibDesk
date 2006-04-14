@@ -277,14 +277,14 @@
         if ([group isShared] == NO) return;
         
         NSProgressIndicator *spinner = [sharedGroupSpinners objectForKey:[group name]];
+        int column = [[tv tableColumns] indexOfObject:aTableColumn];
+        NSRect rect = [tv frameOfCellAtColumn:column row:row];
+        NSSize size = [spinner frame].size;
+        rect.origin.x = NSMaxX(rect) - size.width - 2.0;
+        rect.origin.y += floorf((NSHeight(rect) - size.height) / 2.0);
+        rect.size = size;
         
         if ([(BDSKSharedGroup *)group isRetrieving]) {
-            int column = [[tv tableColumns] indexOfObject:aTableColumn];
-            NSRect rect = [tv frameOfCellAtColumn:column row:row];
-            NSSize size = [spinner frame].size;
-            rect.origin.x = NSMaxX(rect) - size.width - 2.0;
-            rect.origin.y += floorf((NSHeight(rect) - size.height) / 2.0);
-            rect.size = size;
             [spinner setFrame:rect];
             if([[tv subviews] containsObject:spinner] == NO)
                 [tv addSubview:spinner];
@@ -292,6 +292,12 @@
         } else {
             [spinner stopAnimation:nil];
             [spinner removeFromSuperview];
+        }
+        if ([(BDSKSharedGroup *)group failedLoad]) {
+            if([tv isFlipped])
+                [[NSImage cautionIconImage] drawFlippedInRect:rect fromRect:NSMakeRect(0,0,16,16) operation:NSCompositeSourceOver fraction:1.0];
+            else
+                [[NSImage cautionIconImage] drawInRect:rect fromRect:NSMakeRect(0,0,16,16) operation:NSCompositeSourceOver fraction:1.0];
         }
     }
 }
