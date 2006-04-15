@@ -213,6 +213,9 @@ static NSImage *unlockedIcon = nil;
     if([self isRetrieving] == NO && ([self needsUpdate] == YES || publications == nil)){
         // let the server get the publications asynchronously
         [[server localThreadProxy] retrievePublications]; 
+        
+        // use this to notify the tableview to start the progress indicators
+        [[NSNotificationCenter defaultCenter] postNotificationName:BDSKSharedGroupFinishedNotification object:self userInfo:nil];
     }
     // this will likely be nil the first time
     return publications;
