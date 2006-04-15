@@ -79,14 +79,26 @@ static BDSKSharingBrowser *sharedBrowser = nil;
 
 #pragma mark Reading other data
 
+- (BOOL)shouldAddService:(NSNetService *)aNetService
+{
+    NSData *TXTData = [aNetService TXTRecordData];
+    NSString *version = nil;
+    // check the version for compatibility; this is our own versioning system
+    if(TXTData)
+        version = [NSString stringWithData:[[NSNetService dictionaryFromTXTRecordData:TXTData] objectForKey:BDSKTXTVersionKey] encoding:NSUTF8StringEncoding];
+    return [version isEqualToString:[BDSKSharingServer supportedProtocolVersion]];
+}
+
 - (void)netServiceDidResolveAddress:(NSNetService *)aNetService
 {    
-    // we don't want it to message us again
+    // we don't want it to message us again (the shared group will become the delegate)
     [aNetService setDelegate:nil];
 
-    BDSKSharedGroup *group = [[BDSKSharedGroup alloc] initWithService:aNetService];
-    [sharedGroups addObject:group];
-    [group release];
+    if([self shouldAddService:aNetService]){
+        BDSKSharedGroup *group = [[BDSKSharedGroup alloc] initWithService:aNetService];
+        [sharedGroups addObject:group];
+        [group release];
+    }
     
     // remove from the list of unresolved services
     [unresolvedNetServices removeObject:aNetService];

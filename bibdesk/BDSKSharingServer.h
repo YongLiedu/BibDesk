@@ -74,6 +74,7 @@ extern NSString *BDSKHostNameChangedNotification;
 
 + (id)defaultServer;
 + (NSString *)sharingName;
++ (NSString *)supportedProtocolVersion;
 - (NSNumber *)numberOfConnections;
 
 - (void)queueDataChangedNotification:(NSNotification *)note;

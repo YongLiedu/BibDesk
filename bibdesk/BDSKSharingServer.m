@@ -92,7 +92,7 @@ NSString *BDSKComputerName() {
 
 @interface BDSKSharingServer (ServerThread)
 
-- (void)_cleanupBDSKSharingDOServer;
+- (void)cleanup;
 - (void)runDOServer;
 
 @end
@@ -155,6 +155,9 @@ NSString *BDSKComputerName() {
 + (NSString *)localConnectionName { 
     return [NSString stringWithFormat:@"%@%d", [[self class] description], localConnectionCount]; 
 }
+
+// If we introduce incompatible changes in future, bump this to avoid sharing breakage
++ (NSString *)supportedProtocolVersion { return @"0"; }
 
 + (id)defaultServer;
 {
@@ -270,7 +273,7 @@ NSString *BDSKComputerName() {
     if(conn == nil)
         NSLog(@"-[%@ %@]: unable to get thread connection", [self class], NSStringFromSelector(_cmd));
     id proxy = [conn rootProxy];
-    [proxy _cleanupBDSKSharingDOServer];   
+    [proxy cleanup];   
 }
 
 - (void)enableSharing
@@ -311,7 +314,7 @@ NSString *BDSKComputerName() {
     netService = [[NSNetService alloc] initWithDomain:@"" type:BDSKNetServiceDomain name:[BDSKSharingServer sharingName] port:chosenPort];
     [netService setDelegate:self];
     NSMutableDictionary *dictionary = [NSMutableDictionary dictionaryWithCapacity:4];
-    [dictionary setObject:@"0" forKey:BDSKTXTVersionKey];
+    [dictionary setObject:[BDSKSharingServer supportedProtocolVersion] forKey:BDSKTXTVersionKey];
     [dictionary setObject:[BDSKSharingServer sharingName] forKey:BDSKTXTComputerNameKey];
     [dictionary setObject:[[OFPreferenceWrapper sharedPreferenceWrapper] stringForKey:BDSKSharingRequiresPasswordKey] forKey:BDSKTXTAuthenticateKey];
     [netService setTXTRecordData:[NSNetService dataFromTXTRecordDictionary:dictionary]];
@@ -532,7 +535,7 @@ NSString *BDSKComputerName() {
     
 }
 
-- (void)_cleanupBDSKSharingDOServer
+- (void)cleanup
 {
     // only safe to access this from the server thread
     [objectsToNotify removeAllObjects];
