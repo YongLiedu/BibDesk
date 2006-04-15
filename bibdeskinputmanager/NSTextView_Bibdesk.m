@@ -417,17 +417,13 @@ BDIndexOfItemInArrayWithPrefix(NSArray *array, NSString *prefix)
     if(isCompletingTeX || [self refLabelRange].location != NSNotFound)
         [self fixRange:&charRange];
 
-	if (!flag || ([word rangeOfString:BDSKInsertionString].location == NSNotFound)) {
-		// this is just a preliminary completion (suggestion) or the word wasn't suggested by us anyway, so let the text system deal with this
-		originalInsertIMP(self, _cmd, word, charRange, movement, flag);
-	} else {	
-		// strip the comment for this, this assumes cite keys can't have spaces in them
+	if (flag == YES && ([word rangeOfString:BDSKInsertionString].location != NSNotFound)) {
+        // this is one of our suggestions, so we need to trim it
+        // strip the comment for this, this assumes cite keys can't have spaces in them
 		NSRange firstSpace = [word rangeOfString:@" "];
 		word = [word substringToIndex:firstSpace.location];
-		
-		originalInsertIMP(self, _cmd, word, charRange, movement, flag);
 	}
-
+    originalInsertIMP(self, _cmd, word, charRange, movement, flag);
 }
 
 @end
