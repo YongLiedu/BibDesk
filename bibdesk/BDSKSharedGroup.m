@@ -49,7 +49,7 @@ typedef struct _BDSKSharedGroupFlags {
     volatile int32_t authenticationFailed __attribute__ ((aligned (4)));
     volatile int32_t canceledAuthentication __attribute__ ((aligned (4)));
     volatile int32_t needsAuthentication __attribute__ ((aligned (4)));
-    volatile int32_t failedLoad __attribute__ ((aligned (4)));
+    volatile int32_t failedDownload __attribute__ ((aligned (4)));
 } BDSKSharedGroupFlags;    
 
 // private protocols for inter-thread messaging
@@ -89,7 +89,7 @@ typedef struct _BDSKSharedGroupFlags {
 
 - (BOOL)isRetrieving;
 - (BOOL)needsAuthentication;
-- (BOOL)failedLoad;
+- (BOOL)failedDownload;
 
 // proxy object for performing methods of the BDSKSharedGroup on the main thread
 - (id)mainThreadProxy;
@@ -234,7 +234,7 @@ static NSImage *unlockedIcon = nil;
 
 - (BOOL)isRetrieving { return (BOOL)[server isRetrieving]; }
 
-- (BOOL)failedLoad { return [server failedLoad]; }
+- (BOOL)failedDownload { return [server failedDownload]; }
 
 - (BOOL)needsUpdate { return needsUpdate; }
 
@@ -335,7 +335,7 @@ static NSImage *unlockedIcon = nil;
 
 - (BOOL)needsAuthentication { return flags.needsAuthentication == 1; }
 
-- (BOOL)failedLoad { return flags.failedLoad == 1; }
+- (BOOL)failedDownload { return flags.failedDownload == 1; }
 
 #pragma mark Proxies for inter-thread communication
 
@@ -552,7 +552,7 @@ void BDSKInvalidateProxyConnectionAndPorts(id aProxy, BOOL invalidateReceivePort
 {
     // set so we don't try calling this multiple times
     OSAtomicCompareAndSwap32Barrier(0, 1, (int32_t *)&flags.isRetrieving);
-    OSAtomicCompareAndSwap32Barrier(1, 0, (int32_t *)&flags.failedLoad);
+    OSAtomicCompareAndSwap32Barrier(1, 0, (int32_t *)&flags.failedDownload);
     
     NSAutoreleasePool *pool = [NSAutoreleasePool new];
     
@@ -582,7 +582,10 @@ void BDSKInvalidateProxyConnectionAndPorts(id aProxy, BOOL invalidateReceivePort
     @catch(id exception){
         NSLog(@"%@: discarding exception \"%@\" while retrieving publications", [self class], exception);
         OSAtomicCompareAndSwap32Barrier(1, 0, (int32_t *)&flags.isRetrieving);
-        OSAtomicCompareAndSwap32Barrier(0, 1, (int32_t *)&flags.failedLoad);
+        OSAtomicCompareAndSwap32Barrier(0, 1, (int32_t *)&flags.failedDownload);
+        
+        // this posts a notification that the publications of the group changed, forcing a redisplay of the table cell
+        [group performSelectorOnMainThread:@selector(setPublications:) withObject:nil waitUntilDone:NO];
     }
     @finally{
         [pool release];
