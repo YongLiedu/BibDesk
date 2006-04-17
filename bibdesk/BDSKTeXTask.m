@@ -447,6 +447,27 @@
 	return YES;
 }
 
+// caller must have acquired wrlock on dataFileLock
+- (void)removeOutputFilesFromPreviousRun{
+    // use FSDeleteObject for thread safety
+    const FSRef fileRef;
+    NSArray *filesToRemove = [NSArray arrayWithObjects:pdfFilePath, rtfFilePath, bblFilePath, logFilePath, nil];
+    NSEnumerator *e = [filesToRemove objectEnumerator];
+    NSString *path;
+    CFAllocatorRef alloc = CFRetain(CFAllocatorGetDefault());
+    CFURLRef fileURL;
+    
+    while(path = [e nextObject]){
+        fileURL = CFURLCreateWithFileSystemPath(alloc, (CFStringRef)path, kCFURLPOSIXPathStyle, FALSE);
+        if(fileURL){
+            if(CFURLGetFSRef(fileURL, (struct FSRef *)&fileRef))
+                FSDeleteObject(&fileRef);
+            CFRelease(fileURL);
+        }
+    }
+    CFRelease(alloc);
+}
+
 - (BOOL)runTeXTasksForLaTeX{
     volatile int lockStatus;
     volatile BOOL rv;
@@ -457,6 +478,9 @@
         NSLog(@"error %d occurred locking in %@", lockStatus, self);
         return NO;
     }
+
+    // nuke the data files, otherwise we always return yes for hasData calls, even if the TeX run failed
+    [self removeOutputFilesFromPreviousRun];
         
     if(![self runPDFTeXTask] ||
        ![self runBibTeXTask]){
