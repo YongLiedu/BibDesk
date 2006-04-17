@@ -239,14 +239,13 @@ static BDSKPreviewer *thePreviewer;
 	// get the data to display
 	if(state == BDSKShowingPreviewState){
 		
-		if([texTask hasRTFData])
-			attrString = [[NSAttributedString alloc] initWithRTF:[texTask RTFData] documentAttributes:NULL];
+        NSData *rtfData = nil;
+		if([texTask hasRTFData] && (rtfData = [texTask RTFData]) != nil)
+			attrString = [[NSAttributedString alloc] initWithRTF:rtfData documentAttributes:NULL];
 		else
 			message = NSLocalizedString(@"***** ERROR:  unable to create preview *****", @"");
 		
-		if([texTask hasPDFData]){
-			pdfData = [texTask PDFData];
-		} else {
+		if([texTask hasPDFData] == NO || (pdfData = [texTask PDFData]) == nil){
 			// show the TeX log file in the view
 			NSMutableString *errorString = [[NSMutableString alloc] initWithCapacity:200];
 			[errorString appendString:NSLocalizedString(@"TeX preview generation failed.  Please review the log below to determine the cause.", @"")];
