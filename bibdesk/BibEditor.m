@@ -103,6 +103,10 @@ static int numberOfOpenEditors = 0;
     return @"BibEditor";
 }
 
+- (NSString *)representedFilename{
+    NSString *fname = [theBib localURLPath];
+    return fname ? fname : @"";
+}
 
 - (id)initWithBibItem:(BibItem *)aBib document:(BibDocument *)doc{
     self = [super initWithWindowNibName:@"BibEditor"];
