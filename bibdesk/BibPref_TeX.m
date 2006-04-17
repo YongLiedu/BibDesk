@@ -158,14 +158,22 @@
     // edit the previewtemplate.tex file, so the bibpreview.tex is only edited by PDFPreviewer
     NSString *path = [applicationSupportPath stringByAppendingPathComponent:@"previewtemplate.tex"];
     NSURL *url = nil;
+    
+    if([[NSFileManager defaultManager] fileExistsAtPath:path] == NO)
+        [self resetTeXPreviewFile:nil];
 
     url = [NSURL fileURLWithPath:path];
-    // we could check to see if the file exists, but this is already done at startup
-	if([url isFileURL]){
-	    LSOpenCFURLRef((CFURLRef)url, NULL);
-	} else
-	    NSLog(@"The url is not a FileURL.");
+    
+    if([[NSWorkspace sharedWorkspace] openURL:url] == NO)
+        NSBeginAlertSheet(NSLocalizedString(@"Unable to Open File", @""), NSLocalizedString(@"Reveal", @""), NSLocalizedString(@"Cancel", @""), nil, [[OAPreferenceController sharedPreferenceController] window], self, @selector(openTemplateFailureSheetDidEnd:returnCode:path:), NULL, [[url path] retain], NSLocalizedString(@"The system was unable to find an application to open the TeX template file.  Choose \"Reveal\" to show it in the Finder.", @""));
 }
+
+- (void)openTemplateFailureSheetDidEnd:(NSWindow *)sheet returnCode:(int)returnCode path:(void *)path{
+    [(id)path autorelease];
+    if(returnCode == NSAlertDefaultReturn)
+        [[NSWorkspace sharedWorkspace] selectFile:path inFileViewerRootedAtPath:@""];
+}
+        
 
 - (IBAction)resetTeXPreviewFile:(id)sender{
     NSFileManager *fileManager = [NSFileManager defaultManager];
@@ -173,8 +181,8 @@
     NSString *previewTemplatePath = [applicationSupportPath stringByAppendingPathComponent:@"previewtemplate.tex"];
     if([fileManager fileExistsAtPath:previewTemplatePath])
         [fileManager removeFileAtPath:previewTemplatePath handler:nil];
-    // copy template.txt file from the bundle
-    [fileManager copyPath:[[NSBundle mainBundle] pathForResource:@"template" ofType:@"txt"]
+    // copy previewtemplate.tex file from the bundle
+    [fileManager copyPath:[[NSBundle mainBundle] pathForResource:@"previewtemplate" ofType:@"tex"]
                    toPath:previewTemplatePath handler:nil];
 }
 
