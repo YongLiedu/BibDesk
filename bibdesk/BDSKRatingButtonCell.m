@@ -130,10 +130,10 @@
 }
 
 - (BOOL)trackMouse:(NSEvent *)theEvent inRect:(NSRect)cellFrame ofView:(NSView *)controlView untilMouseUp:(BOOL)untilMouseUp {
-	NSPoint mouseLoc = [controlView convertPoint:[theEvent locationInWindow] fromView:nil];
-
     if ([self isEnabled] == NO)
         return NO;
+
+	NSPoint mouseLoc = [controlView convertPoint:[theEvent locationInWindow] fromView:nil];
 
 	BOOL keepOn = YES;
     BOOL mouseWentUp = NO;
@@ -187,30 +187,25 @@
 		offset = mouseLoc.x - buttonRect.origin.x - margin;
 		if (offset < border)
 			offset = border;
-        if (keepOn == YES && [self continueTracking:lastLoc at:mouseLoc inView:controlView] == NO) {
-            keepOn = NO;
-        } else {
-            switch ([theEvent type]) {
-                case NSLeftMouseUp:
-                    keepOn = NO;
-                    mouseWentUp = YES;
-                case NSLeftMouseDragged:
-                    newRating = (offset < 2) ? 0 : ceil(offset / OUTER_SIZE);
-                    if (newRating > maxRating)
-                        newRating = maxRating;
-                    if (rating != newRating) {
-                        rating = newRating;
-                        [controlView setNeedsDisplayInRect:buttonRect];
-                    }
-                    if (keepOn == NO && [self target] && [self action])
-                        [[self target] performSelector:[self action] withObject:controlView];
-                    break;
-                default:
-                    break;
-            }
+        switch ([theEvent type]) {
+            case NSLeftMouseUp:
+                keepOn = NO;
+                mouseWentUp = YES;
+            case NSLeftMouseDragged:
+                newRating = (offset < 2) ? 0 : ceil(offset / OUTER_SIZE);
+                if (newRating > maxRating)
+                    newRating = maxRating;
+                if (rating != newRating) {
+                    rating = newRating;
+                    [controlView setNeedsDisplayInRect:buttonRect];
+                }
+                if (keepOn == NO && [self target] && [self action])
+                    [[self target] performSelector:[self action] withObject:controlView];
+                break;
+            default:
+                break;
         }
-	}
-    [self stopTracking:lastLoc at:mouseLoc inView:controlView mouseIsUp:mouseWentUp];
+    }
 	return YES;
 }
 
