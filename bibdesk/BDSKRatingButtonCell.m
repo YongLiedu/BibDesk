@@ -131,10 +131,10 @@
 
 - (BOOL)trackMouse:(NSEvent *)theEvent inRect:(NSRect)cellFrame ofView:(NSView *)controlView untilMouseUp:(BOOL)untilMouseUp {
 	NSPoint mouseLoc = [controlView convertPoint:[theEvent locationInWindow] fromView:nil];
-    
-    if ([self startTrackingAt:mouseLoc inView:controlView] == NO)
+
+    if ([self isEnabled] == NO)
         return NO;
-    
+
 	BOOL keepOn = YES;
     BOOL mouseWentUp = NO;
     NSPoint lastLoc = mouseLoc;
