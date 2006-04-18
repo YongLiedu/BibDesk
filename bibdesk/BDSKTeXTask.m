@@ -105,7 +105,17 @@
         rtfFilePath = [[filePath stringByAppendingPathExtension:@"rtf"] retain];
         logFilePath = [[filePath stringByAppendingPathExtension:@"log"] retain];
         
-		binDirPath = nil; // set from where we run the tasks, since some programs (e.g. XeLaTeX) need a real path setting        
+		binDirPath = nil; // set from where we run the tasks, since some programs (e.g. XeLaTeX) need a real path setting     
+        
+        // some users set BIBINPUTS in environment.plist, which will break our preview unless they added "." to the path (bug #1471984)
+        const char *bibInputs = getenv("BIBINPUTS");
+        if(bibInputs != NULL){
+            NSString *value = [NSString stringWithCString:bibInputs];
+            if([value rangeOfString:workingDirPath].length == 0){
+                value = [NSString stringWithFormat:@"%@:%@", value, workingDirPath];
+                setenv("BIBINPUTS", [value cString], 1);
+            }
+        }        
 		
 		[self writeHelperFiles];
 		
@@ -221,7 +231,7 @@
         NSString *new_path = [NSString stringWithFormat: @"%@:%@", original_path, binDirPath];
         setenv("PATH", [new_path cString], 1);
     }
-    
+        
     NS_DURING
         rv = ([self writeTeXFile:(flag == BDSKGenerateLTB)] &&
               [self writeBibTeXFile:bibStr] &&
