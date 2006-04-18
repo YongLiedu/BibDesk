@@ -151,6 +151,12 @@
 	[[NSNotificationCenter defaultCenter] postNotificationName:BDSKPreviewNeedsUpdateNotification object:self];
 }
 
+- (void)openTemplateFailureSheetDidEnd:(NSWindow *)sheet returnCode:(int)returnCode path:(void *)path{
+    [(id)path autorelease];
+    if(returnCode == NSAlertDefaultReturn)
+        [[NSWorkspace sharedWorkspace] selectFile:path inFileViewerRootedAtPath:@""];
+}
+
 - (IBAction)openTeXPreviewFile:(id)sender{
     // Edit the TeX template in the Application Support folder
     NSString *applicationSupportPath = [[NSFileManager defaultManager] currentApplicationSupportPathForCurrentUser];
@@ -164,16 +170,9 @@
 
     url = [NSURL fileURLWithPath:path];
     
-    if([[NSWorkspace sharedWorkspace] openURL:url] == NO)
-        NSBeginAlertSheet(NSLocalizedString(@"Unable to Open File", @""), NSLocalizedString(@"Reveal", @""), NSLocalizedString(@"Cancel", @""), nil, [[OAPreferenceController sharedPreferenceController] window], self, @selector(openTemplateFailureSheetDidEnd:returnCode:path:), NULL, [[url path] retain], NSLocalizedString(@"The system was unable to find an application to open the TeX template file.  Choose \"Reveal\" to show it in the Finder.", @""));
+    if([[NSWorkspace sharedWorkspace] openURL:url] == NO && [[NSWorkspace sharedWorkspace] openURLs:[NSArray arrayWithObject:url] withAppBundleIdentifier:@"com.apple.textedit" options:0 additionalEventParamDescriptor:nil launchIdentifiers:NULL] == NO)
+        NSBeginAlertSheet(NSLocalizedString(@"Unable to Open File", @""), NSLocalizedString(@"Reveal", @""), NSLocalizedString(@"Cancel", @""), nil, [[OAPreferenceController sharedPreferenceController] window], self, @selector(openTemplateFailureSheetDidEnd:returnCode:path:), NULL, [[url path] retain], NSLocalizedString(@"The system was unable to find an application to open the TeX template file.  Choose \"Reveal\" to show the template in the Finder.", @""));
 }
-
-- (void)openTemplateFailureSheetDidEnd:(NSWindow *)sheet returnCode:(int)returnCode path:(void *)path{
-    [(id)path autorelease];
-    if(returnCode == NSAlertDefaultReturn)
-        [[NSWorkspace sharedWorkspace] selectFile:path inFileViewerRootedAtPath:@""];
-}
-        
 
 - (IBAction)resetTeXPreviewFile:(id)sender{
     NSFileManager *fileManager = [NSFileManager defaultManager];
