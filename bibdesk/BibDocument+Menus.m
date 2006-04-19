@@ -551,8 +551,6 @@
 }
 
 - (BOOL)validateSelectCrossrefParentMenuItem:(NSMenuItem *)menuItem{
-    NSString *s = NSLocalizedString(@"Select Parent Publication", @"Select the crossref parent of this pub");
-    [menuItem setTitle:s];
     if([self numberOfSelectedPubs] == 1){
         BibItem *selectedBI = [[self selectedPublications] objectAtIndex:0];
         if(![NSString isEmptyString:[selectedBI valueOfField:BDSKCrossrefString inherit:NO]])
@@ -562,8 +560,6 @@
 }
 
 - (BOOL)validateCreateNewPubUsingCrossrefMenuItem:(NSMenuItem *)menuItem{
-    NSString *s = NSLocalizedString(@"New Publication With Crossref", @"New publication with this pub as parent");
-    [menuItem setTitle:s];
     if([self numberOfSelectedPubs] == 1){
         BibItem *selectedBI = [[self selectedPublications] objectAtIndex:0];
         

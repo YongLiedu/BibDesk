@@ -928,6 +928,12 @@ static int numberOfOpenEditors = 0;
 		[menuItem setTitle: NSLocalizedString(@"Duplicate Title to Booktitle", @"Duplicate Title to Booktitle")];
 		return (![NSString isEmptyString:[theBib valueOfField:BDSKTitleString]]);
 	}
+	else if ([menuItem action] == @selector(selectCrossrefParentAction:)) {
+        return ([NSString isEmptyString:[theBib valueOfField:BDSKCrossrefString inherit:NO]] == NO);
+	}
+	else if ([menuItem action] == @selector(createNewPubUsingCrossrefAction:)) {
+        return ([NSString isEmptyString:[theBib valueOfField:BDSKCrossrefString inherit:NO]] == YES);
+	}
 	else if ([menuItem action] == @selector(openLinkedFile:)) {
 		NSString *field = (NSString *)[menuItem representedObject];
 		if (field == nil)
@@ -2011,23 +2017,19 @@ static int numberOfOpenEditors = 0;
 		[self close];
 }
 
-- (IBAction)showMacrosWindow:(id)sender{
-    [theDocument showMacrosWindow:self];
-}
-
-- (void)saveDocument:(id)sender{
-    [theDocument saveDocument:sender];
-}
-
-- (void)saveDocumentAs:(id)sender{
-    [theDocument saveDocumentAs:sender];
-}
-
 // these methods are for crossref interaction with the form
 - (void)openParentItem:(id)sender{
     BibItem *parent = [theBib crossrefParent];
     if(parent)
         [theDocument editPub:parent];
+}
+
+- (IBAction)selectCrossrefParentAction:(id)sender{
+    [[self document] selectCrossrefParentForItem:theBib];
+}
+
+- (IBAction)createNewPubUsingCrossrefAction:(id)sender{
+    [[self document] createNewPubUsingCrossrefForItem:theBib];
 }
 
 #pragma mark BDSKForm delegate methods

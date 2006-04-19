@@ -3425,9 +3425,8 @@ NSString *BDSKWeblocFilePboardType = @"CorePasteboardFlavorType 0x75726C20";
 	[self performSortForCrossrefs];
 }
 
-- (IBAction)selectCrossrefParentAction:(id)sender{
-    BibItem *selectedBI = [[self selectedPublications] lastObject];
-    NSString *crossref = [selectedBI valueOfField:BDSKCrossrefString inherit:NO];
+- (void)selectCrossrefParentForItem:(BibItem *)item{
+    NSString *crossref = [item valueOfField:BDSKCrossrefString inherit:NO];
     [tableView deselectAll:nil];
     BibItem *parent = [self publicationForCiteKey:crossref];
     if(crossref && parent){
@@ -3437,12 +3436,16 @@ NSString *BDSKWeblocFilePboardType = @"CorePasteboardFlavorType 0x75726C20";
         NSBeep(); // if no parent found
 }
 
-- (IBAction)createNewPubUsingCrossrefAction:(id)sender{
+- (IBAction)selectCrossrefParentAction:(id)sender{
     BibItem *selectedBI = [[self selectedPublications] lastObject];
+    [self selectCrossrefParentForItem:selectedBI];
+}
+
+- (void)createNewPubUsingCrossrefForItem:(BibItem *)item{
     BibItem *newBI = [[BibItem alloc] init];
-	NSString *parentType = [selectedBI type];
+	NSString *parentType = [item type];
     
-	[newBI setField:BDSKCrossrefString toValue:[selectedBI citeKey]];
+	[newBI setField:BDSKCrossrefString toValue:[item citeKey]];
 	if ([parentType isEqualToString:@"proceedings"]) {
 		[newBI setType:@"inproceedings"];
 	} else if ([parentType isEqualToString:@"book"] || 
@@ -3455,6 +3458,11 @@ NSString *BDSKWeblocFilePboardType = @"CorePasteboardFlavorType 0x75726C20";
     [self addPublication:newBI];
     [newBI release];
     [self editPub:newBI];
+}
+
+- (IBAction)createNewPubUsingCrossrefAction:(id)sender{
+    BibItem *selectedBI = [[self selectedPublications] lastObject];
+    [self createNewPubUsingCrossrefForItem:selectedBI];
 }
 
 - (IBAction)duplicateTitleToBooktitle:(id)sender{

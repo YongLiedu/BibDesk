@@ -395,8 +395,10 @@ extern NSString* BDSKWeblocFilePboardType; // core pasteboard type for webloc fi
 
 - (void)performSortForCrossrefs;
 
+- (void)selectCrossrefParentForItem:(BibItem *)item;
 - (IBAction)selectCrossrefParentAction:(id)sender;
 
+- (void)createNewPubUsingCrossrefForItem:(BibItem *)item;
 - (IBAction)createNewPubUsingCrossrefAction:(id)sender;
 
 - (IBAction)duplicateTitleToBooktitle:(id)sender;
