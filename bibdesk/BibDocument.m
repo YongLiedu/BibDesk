@@ -2950,6 +2950,9 @@ NSString *BDSKWeblocFilePboardType = @"CorePasteboardFlavorType 0x75726C20";
 
 - (IBAction)refreshSharing:(id)sender{
     [[BDSKSharingServer defaultServer] restartSharingIfNeeded];
+}
+
+- (IBAction)refreshSharedBrowsing:(id)sender{
     [[BDSKSharingBrowser sharedBrowser] restartSharedBrowsingIfNeeded];
 }
 

@@ -791,7 +791,9 @@ extern NSString* BDSKWeblocFilePboardType; // core pasteboard type for webloc fi
 - (IBAction)changeGroupTableFont:(id)sender;
 
 - (IBAction)changePreviewDisplay:(id)sender;
+
 - (IBAction)refreshSharing:(id)sender;
+- (IBAction)refreshSharedBrowsing:(id)sender;
 
 - (IBAction)toggleShowingCustomCiteDrawer:(id)sender;
 

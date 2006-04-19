@@ -706,7 +706,12 @@
 
 - (BOOL)validateRefreshSharingMenuItem:(NSMenuItem *)menuItem {
     OFPreferenceWrapper *pw = [OFPreferenceWrapper sharedPreferenceWrapper];
-    return ([pw boolForKey:BDSKShouldLookForSharedFilesKey] || [pw boolForKey:BDSKShouldShareFilesKey]);
+    return ([pw boolForKey:BDSKShouldShareFilesKey]);
+}
+
+- (BOOL)validateRefreshSharedBrowsingMenuItem:(NSMenuItem *)menuItem {
+    OFPreferenceWrapper *pw = [OFPreferenceWrapper sharedPreferenceWrapper];
+    return ([pw boolForKey:BDSKShouldLookForSharedFilesKey]);
 }
 
 - (BOOL) validateMenuItem:(NSMenuItem*)menuItem{
@@ -840,6 +845,9 @@
     }
     else if (act == @selector(refreshSharing:)){
         return [self validateRefreshSharingMenuItem:menuItem];
+    }
+    else if (act == @selector(refreshSharedBrowsing:)){
+        return [self validateRefreshSharedBrowsingMenuItem:menuItem];
     }
     else {
 		return [super validateMenuItem:menuItem];

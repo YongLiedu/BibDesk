@@ -74,6 +74,7 @@
                 postItemToWeblog = id; 
                 quickSearchAddField = id; 
                 quickSearchRemoveField = id; 
+                refreshSharedBrowsing = id; 
                 refreshSharing = id; 
                 removeCustomCiteString = id; 
                 removeGroupFieldAction = id; 
