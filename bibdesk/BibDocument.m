@@ -1494,7 +1494,7 @@ NSString *BDSKWeblocFilePboardType = @"CorePasteboardFlavorType 0x75726C20";
 - (IBAction)openLinkedFile:(id)sender{
 	NSString *field = [sender representedObject];
     if (field == nil)
-		field = BDSKUrlString;
+		field = BDSKLocalUrlString;
     [self openLinkedFileForField:field];
 }
 
@@ -1543,7 +1543,7 @@ NSString *BDSKWeblocFilePboardType = @"CorePasteboardFlavorType 0x75726C20";
 - (IBAction)revealLinkedFile:(id)sender{
 	NSString *field = [sender representedObject];
     if (field == nil)
-		field = BDSKUrlString;
+		field = BDSKLocalUrlString;
     [self revealLinkedFileForField:field];
 }
 
