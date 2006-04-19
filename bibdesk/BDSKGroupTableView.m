@@ -245,22 +245,20 @@
 - (void)selectRowIndexes:(NSIndexSet *)indexes byExtendingSelection:(BOOL)extend{
     NSIndexSet *singleIndexes = [[self delegate] tableViewSingleSelectionIndexes:self];
     
-    if ([indexes intersectsIndexSet:singleIndexes]) {
-        if ([indexes count] == 1) {
-            extend = NO;
-        } else {
-            NSMutableIndexSet *mutableIndexes = [[indexes mutableCopy] autorelease];
-            [mutableIndexes removeIndexes:singleIndexes];
-            if ([mutableIndexes count] > 0) 
-                indexes = mutableIndexes;
-            else
-                return;
-        }
+    // don't extend rows that should be in single selection
+    if (extend == YES && [[self selectedRowIndexes] intersectsIndexSet:singleIndexes])
+        return;
+    // remove single selection rows from multiple selections
+    if ((extend == YES || [indexes count] > 1) && [indexes intersectsIndexSet:singleIndexes]) {
+        NSMutableIndexSet *mutableIndexes = [[indexes mutableCopy] autorelease];
+        [mutableIndexes removeIndexes:singleIndexes];
+        indexes = mutableIndexes;
     }
-    if (extend == YES && [[self selectedRowIndexes] intersectsIndexSet:singleIndexes]) 
-        extend = NO;
+    if ([indexes count] == 0) 
+        return;
     
     [super selectRowIndexes:indexes byExtendingSelection:extend];
+    // this is needed because we draw multiple selections differently and OAGradientTableView calls this only for deprecated 10.3 methods
     [self setNeedsDisplay:YES];
 }
 
