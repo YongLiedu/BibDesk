@@ -117,6 +117,8 @@
 
 - (void)dealloc{
     OBASSERT(download == nil);
+    // next line is a workaround for a nasty webview crasher; looks like it messages a garbage pointer to its undo manager
+    [webView setEditingDelegate:nil];
     [item release];
     [fields release];
     [bookmarks release];
@@ -1501,7 +1503,7 @@
 
 - (void)reloadData{
     [super reloadData];
-    [typeAheadHelper queueSelectorOnce:@selector(rebuildTypeAheadSearchCache)];
+    [typeAheadHelper rebuildTypeAheadSearchCache];
 }
 
 @end
