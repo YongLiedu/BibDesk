@@ -45,6 +45,7 @@
 #import "NSBezierPath_BDSKExtensions.h"
 #import "BibDocument_Groups.h"
 #import "NSTableView_BDSKExtensions.h"
+#import "NSIndexSet_BDSKExtensions.h"
 
 @implementation BDSKGroupTableView
 
@@ -240,31 +241,45 @@
 		[[self dataSource] tableView:self concludeDragOperation:operation];
 }
 
-// make sure we never select the first row together with any other row
+// make sure that certain rows are only selected as a single selection
 - (void)selectRowIndexes:(NSIndexSet *)indexes byExtendingSelection:(BOOL)extend{
-	if ([self isRowSelected:0]) {
-		if ([indexes containsIndex:0] && [indexes count] > 1) {
-			NSMutableIndexSet *mutableIndexes = [indexes mutableCopy];
-			[mutableIndexes removeIndex:0];
-			indexes = [mutableIndexes autorelease];
-		}
-		extend = NO;
-	} else if ([indexes containsIndex:0]) {
-		indexes = [NSIndexSet indexSetWithIndex:0];
-		extend = NO;
-	}
-	[super selectRowIndexes:indexes byExtendingSelection:extend];
+    NSIndexSet *singleIndexes = [[self delegate] tableViewSingleSelectionIndexes:self];
+    
+    if ([indexes intersectsIndexSet:singleIndexes]) {
+        if ([indexes count] == 1) {
+            extend = NO;
+        } else {
+            NSMutableIndexSet *mutableIndexes = [[indexes mutableCopy] autorelease];
+            [mutableIndexes removeIndexes:singleIndexes];
+            if ([mutableIndexes count] > 0) 
+                indexes = mutableIndexes;
+            else
+                return;
+        }
+    }
+    if (extend == YES && [[self selectedRowIndexes] intersectsIndexSet:singleIndexes]) 
+        extend = NO;
+    
+    [super selectRowIndexes:indexes byExtendingSelection:extend];
+    [self setNeedsDisplay:YES];
 }
 
 // the default implementation is broken with the above modifications, and would be invalid anyway
 - (IBAction)selectAll:(id)sender {
-	int numRows = [self numberOfRows];
-	if (numRows == 1) 
-		return;
-	// this follows the default implementation: do it in 2 steps to make sure the selectedRow will be the last one
-	if (numRows > 2)
-		[self selectRowIndexes:[NSIndexSet indexSetWithIndexesInRange:NSMakeRange(1,numRows - 2)] byExtendingSelection:NO];
-	[self selectRowIndexes:[NSIndexSet indexSetWithIndex:numRows - 1] byExtendingSelection:YES];
+    NSIndexSet *singleIndexes = [[self delegate] tableViewSingleSelectionIndexes:self];
+    NSMutableIndexSet *indexes = [NSMutableIndexSet indexSetWithIndexesInRange:NSMakeRange(0, [self numberOfRows])];
+    [indexes removeIndexes:singleIndexes];
+    if ([indexes count] == 0) {
+        return;
+    } else if ([indexes count] == 1) {
+        [self selectRowIndexes:indexes byExtendingSelection:NO];
+    } else {
+        // this follows the default implementation: do it in 2 steps to make sure the selectedRow will be the last one
+        NSIndexSet *lastIndex = [NSIndexSet indexSetWithIndex:[indexes lastIndex]];
+        [indexes removeIndex:[indexes lastIndex]];
+        [self selectRowIndexes:indexes byExtendingSelection:NO];
+        [self selectRowIndexes:lastIndex byExtendingSelection:YES];
+    }
 }
 
 // the default implementation would be meaningless anyway as we don't allow empty selection

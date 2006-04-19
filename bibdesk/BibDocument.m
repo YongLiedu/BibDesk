@@ -3636,6 +3636,10 @@ NSString *BDSKWeblocFilePboardType = @"CorePasteboardFlavorType 0x75726C20";
     return [self _indexesOfRowsToHighlightInRange:indexRange tableView:tview];
 }
 
+- (NSIndexSet *)tableViewSingleSelectionIndexes:(BDSKGroupTableView *)tview{
+    return [self _tableViewSingleSelectionIndexes:tview];
+}
+
 - (void)setFileName:(NSString *)fileName{ 
     // make sure that changes in the displayName are observed, as NSDocument doesn't use a KVC compliant method for setting it
     [self willChangeValueForKey:@"displayName"];

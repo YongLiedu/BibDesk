@@ -102,5 +102,6 @@
 - (void)updateLastImportGroupFromDate:(NSDate *)startDate toDate:(NSDate *)endDate;
 
 - (NSIndexSet *)_indexesOfRowsToHighlightInRange:(NSRange)indexRange tableView:(BDSKGroupTableView *)tview;
+- (NSIndexSet *)_tableViewSingleSelectionIndexes:(BDSKGroupTableView *)tview;
 
 @end

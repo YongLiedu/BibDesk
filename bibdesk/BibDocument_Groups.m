@@ -541,6 +541,12 @@ The groupedPublications array is a subset of the publications array, developed b
     return indexSet;
 }
 
+- (NSIndexSet *)_tableViewSingleSelectionIndexes:(BDSKGroupTableView *)tview{
+    NSMutableIndexSet *indexes = [NSMutableIndexSet indexSetWithIndexesInRange:[self rangeOfSharedGroups]];
+    [indexes addIndex:0];
+    return indexes;
+}
+
 - (NSMenu *)groupFieldsMenu {
 	NSMenu *menu = [[NSMenu allocWithZone:[NSMenu menuZone]] init];
 	NSMenuItem *menuItem;

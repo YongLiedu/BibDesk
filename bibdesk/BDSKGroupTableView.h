@@ -46,6 +46,7 @@
 @protocol BDSKGroupTableDelegate <NSObject>
 
 - (NSIndexSet *)indexesOfRowsToHighlightInRange:(NSRange)indexRange tableView:(BDSKGroupTableView *)tview;
+- (NSIndexSet *)tableViewSingleSelectionIndexes:(BDSKGroupTableView *)tview;
 
 @end
 
