@@ -48,6 +48,8 @@
 @implementation BibDocument (Menus)
 
 - (BOOL) validateCutMenuItem:(NSMenuItem*) menuItem {
+    if ([documentWindow isKeyWindow] == NO)
+        return NO;
 	if ([documentWindow firstResponder] != tableView ||
 		[self numberOfSelectedPubs] == 0 ||
         [self hasSharedGroupsAtIndexes:[groupTableView selectedRowIndexes]]) {
@@ -61,6 +63,8 @@
 }	
 
 - (BOOL) validateAlternateCutMenuItem:(NSMenuItem*) menuItem {
+    if ([documentWindow isKeyWindow] == NO)
+        return NO;
 	if ([documentWindow firstResponder] != tableView ||
 		[self numberOfSelectedPubs] == 0 ||
         [self hasSharedGroupsAtIndexes:[groupTableView selectedRowIndexes]]) {
@@ -74,6 +78,8 @@
 }	
 
 - (BOOL) validateCopyMenuItem:(NSMenuItem*) menuItem {
+    if ([documentWindow isKeyWindow] == NO)
+        return NO;
 	if ([documentWindow firstResponder] != tableView ||
 		[self numberOfSelectedPubs] == 0) {
 		// no selection
@@ -191,7 +197,7 @@
 }
 
 - (BOOL)validatePasteMenuItem:(NSMenuItem *)menuItem{
-	return ([documentWindow firstResponder] != tableView ? NO : YES);
+	return ([documentWindow isKeyWindow] == YES && [documentWindow firstResponder] == tableView);
 }
 
 - (BOOL)validateExportSelectionMenuItem:(NSMenuItem *)menuItem{
@@ -199,6 +205,8 @@
 }
 
 - (BOOL)validateDuplicateMenuItem:(NSMenuItem *)menuItem{
+    if ([documentWindow isKeyWindow] == NO)
+        return NO;
 	if ([documentWindow firstResponder] != tableView ||
 		[self numberOfSelectedPubs] == 0 ||
         [[self selectedGroups] firstObjectCommonWithArray:sharedGroups] != nil)
@@ -379,6 +387,7 @@
 		return NO;
 	}
 }	
+
 - (BOOL) validateOpenRemoteURLMenuItem:(NSMenuItem*) menuItem {
 	NSString * s;
 	NSString *field = [menuItem representedObject];
@@ -413,11 +422,13 @@
 		return NO;
 	}
 }	
+
 - (BOOL) validateDuplicateTitleToBooktitleMenuItem:(NSMenuItem*) menuItem {
 	NSString * s;
 	
-	if ([self numberOfSelectedPubs] == 0 ||
-        [[self selectedGroups] firstObjectCommonWithArray:sharedGroups] != nil) {
+	if ([self numberOfSelectedPubs] == 0 || 
+        [documentWindow isKeyWindow] == NO || 
+        [self hasSharedGroupsAtIndexes:[groupTableView selectedRowIndexes]] == YES) {
 		// no selection
 		s = NSLocalizedString(@"Duplicate Title to Booktitle", @"Duplicate Title to Booktitle");
 		[menuItem setTitle:s];
@@ -439,7 +450,8 @@
 	NSString * s;
 	
 	if ([self numberOfSelectedPubs] == 0 || 
-        [[self selectedGroups] firstObjectCommonWithArray:sharedGroups] != nil) {
+        [documentWindow isKeyWindow] == NO || 
+        [self hasSharedGroupsAtIndexes:[groupTableView selectedRowIndexes]] == YES) {
 		// no selection
 		s = NSLocalizedString(@"Generate Cite Key", @"Generate Cite Key");
 		[menuItem setTitle:s];
@@ -461,8 +473,9 @@
 - (BOOL) validateConsolidateLinkedFilesMenuItem:(NSMenuItem*) menuItem {
 	NSString * s;
 	
-	if ([self numberOfSelectedPubs] == 0 ||
-        [[self selectedGroups] firstObjectCommonWithArray:sharedGroups] != nil) {
+	if ([self numberOfSelectedPubs] == 0 || 
+        [documentWindow isKeyWindow] == NO || 
+        [self hasSharedGroupsAtIndexes:[groupTableView selectedRowIndexes]] == YES) {
 		// no selection
 		s = [NSString stringWithFormat:@"%@%C",NSLocalizedString(@"Consolidate Linked Files", @"Consolidate Linked Files..."),0x2026];
 		[menuItem setTitle:s];
@@ -484,7 +497,8 @@
 
 - (BOOL) validatePrintDocumentMenuItem:(NSMenuItem*) menuItem {
 	// change name of menu item to indicate that we are only printing the selection?
-    if ([self numberOfSelectedPubs] == 0){
+    if ([self numberOfSelectedPubs] == 0 || 
+        [documentWindow isKeyWindow] == NO){
 		// no selection => no printing
 		return NO;
 	}
@@ -535,6 +549,7 @@
 	[menuItem setTitle:s];
 	return YES;
 }
+
 - (BOOL)validateSelectCrossrefParentMenuItem:(NSMenuItem *)menuItem{
     NSString *s = NSLocalizedString(@"Select Parent Publication", @"Select the crossref parent of this pub");
     [menuItem setTitle:s];
@@ -628,6 +643,8 @@
 } 
 
 - (BOOL) validateEditGroupMenuItem:(NSMenuItem *)menuItem{
+    if ([documentWindow isKeyWindow] == NO)
+        return NO;
 	int row = [groupTableView selectedRow];
 	if ([groupTableView numberOfSelectedRows] == 1 && row > 0) {
 		// single smart group selection
@@ -644,7 +661,11 @@
 } 
 
 - (BOOL) validateEditActionMenuItem:(NSMenuItem *)menuItem{
-	id firstResponder = [documentWindow firstResponder];
+    if ([documentWindow isKeyWindow] == NO) {
+        [menuItem setTitle:NSLocalizedString(@"Get Info", @"Get Info")];
+        return NO;
+	}
+    id firstResponder = [documentWindow firstResponder];
 	if (firstResponder == tableView) {
 		return [self validateEditSelectionMenuItem:menuItem];
 	} else if (firstResponder == groupTableView) {
@@ -655,7 +676,9 @@
 } 
 
 - (BOOL) validateDeleteMenuItem:(NSMenuItem*) menuItem {
-	id firstResponder = [documentWindow firstResponder];
+    if ([documentWindow isKeyWindow] == NO)
+        return NO;
+    id firstResponder = [documentWindow firstResponder];
 	if (firstResponder == tableView) {
 		return [self validateRemoveSelectionMenuItem:menuItem];
 	} else if (firstResponder == groupTableView) {
@@ -666,6 +689,8 @@
 }
 
 - (BOOL) validateAlternateDeleteMenuItem:(NSMenuItem*) menuItem {
+    if ([documentWindow isKeyWindow] == NO)
+        return NO;
 	id firstResponder = [documentWindow firstResponder];
 	if (firstResponder == tableView) {
 		return [self validateDeleteSelectionMenuItem:menuItem];
@@ -674,6 +699,18 @@
 	} else {
 		return NO;
 	}
+}
+
+- (BOOL)validateSelectAllPublicationsMenuItem:(NSMenuItem *)menuItem{
+    return ([documentWindow isKeyWindow] == YES);
+}
+
+- (BOOL)validateDeselectAllPublicationsMenuItem:(NSMenuItem *)menuItem{
+    return ([documentWindow isKeyWindow] == YES);
+}
+
+- (BOOL)validateSelectAllPublicationsGroupMenuItem:(NSMenuItem *)menuItem{
+    return ([documentWindow isKeyWindow] == YES);
 }
 
 - (BOOL) validateSelectPossibleDuplicatesMenuItem:(NSMenuItem *)menuItem{
@@ -827,6 +864,15 @@
     }
 	else if (act == @selector(alternateDelete:)) {
 		return [self validateAlternateDeleteMenuItem:menuItem];
+    }
+	else if (act == @selector(selectAllPublications:)){
+        return [self validateSelectAllPublicationsMenuItem:menuItem];
+    }
+	else if (act == @selector(deselectAllPublications:)){
+        return [self validateDeselectAllPublicationsMenuItem:menuItem];
+    }
+	else if (act == @selector(selectAllPublicationsGroup:)){
+        return [self validateSelectAllPublicationsGroupMenuItem:menuItem];
     }
 	else if (act == @selector(selectPossibleDuplicates:)){
         return [self validateSelectPossibleDuplicatesMenuItem:menuItem];
