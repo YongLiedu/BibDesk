@@ -91,11 +91,11 @@ typedef struct _BDSKSharedGroupFlags {
 - (BOOL)failedDownload;
 
 // proxy object for performing methods of the BDSKSharedGroup on the main thread
-- (id)mainThreadProxy;
+- (id <BDSKSharedGroupServerMainThread>)mainThreadProxy;
 // proxy object for performing methods of the BDSKSharedGroup on its worker thread
-- (id)localThreadProxy;
+- (id <BDSKSharedGroupServerLocalThread>)localThreadProxy;
 // proxy object for messaging the remote server
-- (id)remoteServerProxy;
+- (id <BDSKSharingProtocol>)remoteServerProxy;
 
 - (void)runDOServer;
 - (void)stopDOServer;
@@ -358,7 +358,7 @@ void BDSKInvalidateProxyConnectionAndPorts(id aProxy, BOOL invalidateReceivePort
         [receivePort invalidate];
 }    
 
-- (id)mainThreadProxy;
+- (id <BDSKSharedGroupServerMainThread>)mainThreadProxy;
 {
     id proxy = nil;
     NSConnection *conn = [NSConnection connectionWithReceivePort:nil sendPort:[mainThreadConnection receivePort]];
@@ -375,7 +375,7 @@ void BDSKInvalidateProxyConnectionAndPorts(id aProxy, BOOL invalidateReceivePort
     return proxy;
 }
 
-- (id)localThreadProxy;
+- (id <BDSKSharedGroupServerLocalThread>)localThreadProxy;
 {
     NSConnection *conn = [NSConnection connectionWithRegisteredName:localConnectionName host:nil];
     id proxy = nil;
@@ -390,7 +390,7 @@ void BDSKInvalidateProxyConnectionAndPorts(id aProxy, BOOL invalidateReceivePort
     return proxy;
 }
 
-- (id)remoteServerProxy;
+- (id <BDSKSharingProtocol>)remoteServerProxy;
 {
     if (remoteServer != nil)
         return remoteServer;
