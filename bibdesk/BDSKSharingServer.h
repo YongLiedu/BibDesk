@@ -39,10 +39,10 @@
 #import <Cocoa/Cocoa.h>
 
 extern NSString *BDSKTXTAuthenticateKey;
-extern NSString *BDSKTXTComputerNameKey;
 extern NSString *BDSKTXTVersionKey;
 
 extern NSString *BDSKSharedArchivedDataKey;
+
 extern NSString *BDSKComputerNameChangedNotification;
 extern NSString *BDSKHostNameChangedNotification;
 

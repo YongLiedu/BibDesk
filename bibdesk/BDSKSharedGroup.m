@@ -80,7 +80,6 @@ typedef struct _BDSKSharedGroupFlags {
     NSConnection *mainThreadConnection; // so the local server thread can talk to the main thread
     BDSKSharedGroupFlags flags;         // state variables
 
-    NSString *serverSharingName;        // name we register as with the nameserver
     NSString *localConnectionName;      // name for the shared group to communicate with its server's thread
     NSString *uniqueIdentifier;         // used by the remote server
 }
@@ -287,8 +286,6 @@ static NSImage *unlockedIcon = nil;
         static int connectionIdx = 0;
         // this just needs to be unique on localhost
         localConnectionName = [[NSString alloc] initWithFormat:@"%@%d", [[self class] description], connectionIdx++];
-        // this needs to be unique on the network and among our shared group servers
-        serverSharingName = [[NSString alloc] initWithFormat:@"%@%@", [[NSHost currentHost] name], localConnectionName];
         
         mainThreadConnection = [[NSConnection alloc] initWithReceivePort:[NSPort port] sendPort:nil];
         [mainThreadConnection setRootObject:self];
@@ -316,7 +313,6 @@ static NSImage *unlockedIcon = nil;
 {
     [service setDelegate:nil];
     [service release];
-    [serverSharingName release];
     [localConnectionName release];
     [uniqueIdentifier release];
     [passwordName release];
@@ -402,14 +398,7 @@ void BDSKInvalidateProxyConnectionAndPorts(id aProxy, BOOL invalidateReceivePort
     NSConnection *conn = nil;
     id proxy = nil;
     
-    NSData *TXTData = [service TXTRecordData];
-    NSDictionary *dict = nil;
-    if(TXTData)
-        dict = [NSNetService dictionaryFromTXTRecordData:TXTData];
-    
-    // we need the port name from the TXTRecord
-    NSString *portName = [NSString stringWithData:[dict objectForKey:BDSKTXTComputerNameKey] encoding:NSUTF8StringEncoding];
-    NSPort *sendPort = [[NSSocketPortNameServer sharedInstance] portForName:portName host:[service hostName]];
+    NSPort *sendPort = [[NSSocketPortNameServer sharedInstance] portForName:[service name] host:[service hostName]];
     
     if(sendPort == nil)
         @throw [NSString stringWithFormat:@"%@: unable to look up server %@", NSStringFromSelector(_cmd), [service hostName]];
