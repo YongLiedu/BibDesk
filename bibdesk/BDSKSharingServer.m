@@ -90,12 +90,17 @@ NSString *BDSKComputerName() {
     return [(id)SCDynamicStoreCopyComputerName(dynamicStore, NULL) autorelease];
 }
 
-@interface BDSKSharingServer (ServerThread)
+#pragma mark -
+
+// private protocol for inter-thread messaging
+@protocol BDSKSharingServerLocalThread
 
 - (void)cleanup;
-- (void)runDOServer;
+- (oneway void)notifyClientsOfChange;
 
 @end
+
+#pragma mark -
 
 @implementation BDSKSharingServer
 
@@ -154,6 +159,11 @@ NSString *BDSKComputerName() {
 // name for localhost thread connection
 + (NSString *)localConnectionName { 
     return [NSString stringWithFormat:@"%@%d", [[self class] description], localConnectionCount]; 
+}
+
++ (NSString *)uniqueLocalConnectionName {
+    localConnectionCount++;
+    return [self localConnectionName];
 }
 
 // If we introduce incompatible changes in future, bump this to avoid sharing breakage
@@ -230,10 +240,15 @@ NSString *BDSKComputerName() {
     // add a hidden pref in case this traffic turns us into a bad network citizen; manual updates will still work
     if(shouldKeepRunning == 1 && [[NSUserDefaults standardUserDefaults] boolForKey:@"BDSKDisableRemoteChangeNotifications"] == 0){
         NSConnection *conn = [NSConnection connectionWithRegisteredName:[BDSKSharingServer localConnectionName] host:nil];
-        if(conn == nil)
-            NSLog(@"-[%@ %@]: unable to get thread connection", [self class], NSStringFromSelector(_cmd));
-        id proxy = [conn rootProxy];
-        [proxy setProtocolForProxy:@protocol(BDSKSharingProtocol)];
+        id proxy = nil;
+        @try {
+            proxy = [conn rootProxy];
+            [proxy setProtocolForProxy:@protocol(BDSKSharingServerLocalThread)];
+        }
+        @catch(id exception) {
+            NSLog(@"%@: unable to connect to local thread proxy", [self class]);
+            proxy = nil;
+        }
         [proxy notifyClientsOfChange];
     }    
 }
@@ -276,9 +291,15 @@ NSString *BDSKComputerName() {
     // the connect to the remote port should tickle the runloop and cause the thread to exit after cleanup
     OSAtomicCompareAndSwap32Barrier(1, 0, (int32_t *)&shouldKeepRunning);
     NSConnection *conn = [NSConnection connectionWithRegisteredName:[BDSKSharingServer localConnectionName] host:nil];
-    if(conn == nil)
-        NSLog(@"-[%@ %@]: unable to get thread connection", [self class], NSStringFromSelector(_cmd));
-    id proxy = [conn rootProxy];
+    id proxy = nil;
+    @try {
+        proxy = [conn rootProxy];
+        [proxy setProtocolForProxy:@protocol(BDSKSharingServerLocalThread)];
+    }
+    @catch(id exception) {
+        NSLog(@"%@: unable to connect to local thread proxy", [self class]);
+        proxy = nil;
+    }
     [proxy cleanup];   
 }
 
@@ -494,7 +515,8 @@ NSString *BDSKComputerName() {
         if([[NSSocketPortNameServer sharedInstance] registerPort:receivePort name:[BDSKSharingServer sharingName]] == NO)
             @throw [NSString stringWithFormat:@"Unable to register port %@ and name %@", receivePort, [BDSKSharingServer sharingName]];
         connection = [[NSConnection alloc] initWithReceivePort:receivePort sendPort:nil];
-        [connection setRootObject:self];
+        NSProtocolChecker *checker = [NSProtocolChecker protocolCheckerWithTarget:self protocol:@protocol(BDSKSharingProtocol)];
+        [connection setRootObject:checker];
         
         // so we get connection:shouldMakeNewConnection: messages
         [connection setDelegate:self];
@@ -507,8 +529,7 @@ NSString *BDSKComputerName() {
         [localConnection setRootObject:self];
         
         // @@ workaround: ensure that the name is unique, or else registerName: fails when we restart (in spite of explicitly deregistering it)
-        localConnectionCount++;
-        if([localConnection registerName:[BDSKSharingServer localConnectionName]] == NO)
+        if([localConnection registerName:[BDSKSharingServer uniqueLocalConnectionName]] == NO)
             @throw @"Unable to register local connection";
         
         remoteClientTimer = [[NSTimer scheduledTimerWithTimeInterval:60.0 target:self selector:@selector(pingClients:) userInfo:NULL repeats:YES] retain];
@@ -569,6 +590,7 @@ NSString *BDSKComputerName() {
 - (oneway void)registerClient:(byref id)clientObject forIdentifier:(bycopy NSString *)identifier;
 {
     NSParameterAssert(clientObject != nil && identifier != nil);
+    [clientObject setProtocolForProxy:@protocol(BDSKClientProtocol)];
     [remoteClients setObject:clientObject forKey:identifier];
     [self performSelectorOnMainThread:@selector(notifyClientConnectionsChanged) withObject:nil waitUntilDone:NO];
 }
@@ -592,7 +614,6 @@ NSString *BDSKComputerName() {
     while(key = [e nextObject]){
         
         proxyObject = [copy objectForKey:key];
-        [proxyObject setProtocolForProxy:@protocol(BDSKClientProtocol)];
         
         @try {
             [proxyObject setNeedsUpdate:YES];
@@ -616,7 +637,6 @@ NSString *BDSKComputerName() {
     while(key = [e nextObject]){
         
         proxyObject = [copy objectForKey:key];
-        [proxyObject setProtocolForProxy:@protocol(BDSKClientProtocol)];
         
         @try {
             [proxyObject isAlive];

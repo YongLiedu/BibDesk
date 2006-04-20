@@ -60,11 +60,12 @@ extern NSString *BDSKHostNameChangedNotification;
 - (bycopy NSData *)archivedSnapshotOfPublications;
 - (oneway void)registerClient:(byref id)clientObject forIdentifier:(bycopy NSString *)identifier;
 - (oneway void)removeClientForIdentifier:(bycopy NSString *)identifier;
-- (oneway void)notifyClientsOfChange;
 
 @end
 
-@interface BDSKSharingServer : NSObject <BDSKSharingProtocol> {
+@protocol BDSKSharingServerLocalThread;
+
+@interface BDSKSharingServer : NSObject <BDSKSharingProtocol, BDSKSharingServerLocalThread> {
     NSConnection *connection;
     
     NSNetService *netService;
@@ -91,5 +92,8 @@ extern NSString *BDSKHostNameChangedNotification;
 - (void)enableSharing;
 - (void)disableSharing;
 - (void)restartSharingIfNeeded;
+
+- (void)runDOServer;
+- (void)stopDOServer;
 
 @end

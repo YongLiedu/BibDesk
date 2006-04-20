@@ -442,7 +442,8 @@ void BDSKInvalidateProxyConnectionAndPorts(id aProxy, BOOL invalidateReceivePort
             // use uniqueIdentifier as the notification identifier for this host on the other end
             uniqueIdentifier = [[[NSProcessInfo processInfo] globallyUniqueString] copy];
             @try {
-                [proxy registerClient:self forIdentifier:uniqueIdentifier];
+                NSProtocolChecker *checker = [NSProtocolChecker protocolCheckerWithTarget:self protocol:@protocol(BDSKClientProtocol)];
+                [proxy registerClient:checker forIdentifier:uniqueIdentifier];
             }
             @catch(id exception) {
                 [uniqueIdentifier release];
