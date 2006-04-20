@@ -76,7 +76,7 @@ typedef struct _BDSKSharedGroupFlags {
     NSNetService *service;              // service with information about the remote server (BDSKSharingServer)
     BDSKSharedGroup *group;             // the owner of the local server (BDSKSharedGroupServer)
     NSString *passwordName;             // [group name] copied since the local server doesn't retain the group
-    NSConnection *connection;           // connection to the remote server
+    id remoteServer;                    // proxy for the remote server
     NSConnection *mainThreadConnection; // so the local server thread can talk to the main thread
     BDSKSharedGroupFlags flags;         // state variables
 
@@ -297,7 +297,7 @@ static NSImage *unlockedIcon = nil;
         // set up flags
         memset(&flags, 0, sizeof(flags));
         flags.shouldKeepRunning = 1;
-        connection = nil;
+        remoteServer = nil;
         
         NSData *TXTData = [service TXTRecordData];
         if(TXTData)
@@ -326,13 +326,13 @@ static NSImage *unlockedIcon = nil;
 #pragma mark Accessors
 
 // BDSKClientProtocol
-- (bycopy NSString *)uniqueIdentifier { return uniqueIdentifier; }
-
 - (oneway void)setNeedsUpdate:(BOOL)flag { 
     // don't message the group during cleanup
     if(flags.shouldKeepRunning == 1)
         [group setNeedsUpdate:flag]; 
 }
+
+- (BOOL)isAlive{ return YES; }
 
 - (BOOL)isRetrieving { return flags.isRetrieving == 1; }
 
@@ -396,6 +396,9 @@ void BDSKInvalidateProxyConnectionAndPorts(id aProxy, BOOL invalidateReceivePort
 
 - (id)remoteServerProxy;
 {
+    if (remoteServer != nil)
+        return remoteServer;
+    
     NSConnection *conn = nil;
     id proxy = nil;
     
@@ -450,8 +453,7 @@ void BDSKInvalidateProxyConnectionAndPorts(id aProxy, BOOL invalidateReceivePort
             // use uniqueIdentifier as the notification identifier for this host on the other end
             uniqueIdentifier = [[[NSProcessInfo processInfo] globallyUniqueString] copy];
             @try {
-                // @@ unfortunately this leads to a leak
-                [proxy registerClientForNotifications:self];
+                [proxy registerClient:self forIdentifier:uniqueIdentifier];
             }
             @catch(id exception) {
                 [uniqueIdentifier release];
@@ -462,7 +464,8 @@ void BDSKInvalidateProxyConnectionAndPorts(id aProxy, BOOL invalidateReceivePort
         }
     }
     
-    return proxy;
+    remoteServer = [proxy retain];
+    return remoteServer;
 }
 
 #pragma mark Authentication
@@ -563,7 +566,7 @@ void BDSKInvalidateProxyConnectionAndPorts(id aProxy, BOOL invalidateReceivePort
         NSData *archive = nil;
         id proxy = [self remoteServerProxy];
         NSData *proxyData = [proxy archivedSnapshotOfPublications];
-        BDSKInvalidateProxyConnectionAndPorts(proxy, YES, NO);
+        //BDSKInvalidateProxyConnectionAndPorts(proxy, YES, NO);
         
         if([proxyData length] != 0){
             if([proxyData mightBeCompressed])
@@ -599,24 +602,16 @@ void BDSKInvalidateProxyConnectionAndPorts(id aProxy, BOOL invalidateReceivePort
 {
     // clean up our remote end
     if (uniqueIdentifier != nil){
-        id proxy = nil;
         @try {
-            proxy = [self remoteServerProxy];
-            [proxy removeRemoteObserverForIdentifier:uniqueIdentifier];
-            BDSKInvalidateProxyConnectionAndPorts(proxy, YES, NO);
+            [remoteServer removeClientForIdentifier:uniqueIdentifier];
+            BDSKInvalidateProxyConnectionAndPorts(remoteServer, YES, NO);
+            [remoteServer release];
+            remoteServer = nil;
         }
         @catch(id exception) {
             NSLog(@"%@ ignoring exception \"%@\" raised during cleanup", [self class], exception);
         }
     }
-    
-    // must be on the background thread, or the connection won't be removed from the correct run loop
-    [[[NSSocketPortNameServer sharedInstance] portForName:serverSharingName] invalidate];
-    [[NSSocketPortNameServer sharedInstance] removePortForName:serverSharingName];
-    [connection invalidate];
-    [connection setRootObject:nil];
-    [connection release];
-    connection = nil;
     
     // defaultConnection is still retaining us...
     NSConnection *localConn = [NSConnection connectionWithRegisteredName:localConnectionName host:nil];
@@ -632,25 +627,13 @@ void BDSKInvalidateProxyConnectionAndPorts(id aProxy, BOOL invalidateReceivePort
 {
     // detach a new thread to run this
     NSAssert([NSThread inMainThread] == NO, @"do not run the server in the main thread");
-    NSAssert(connection == nil, @"server is already running");
+    NSAssert(remoteServer == nil, @"server is already running");
 
     NSAutoreleasePool *pool = [NSAutoreleasePool new];
     
     OSAtomicCompareAndSwap32Barrier(0, 1, (int32_t *)&flags.shouldKeepRunning);
-    NSSocketPort *receivePort = [[[NSSocketPort alloc] init] autorelease];
     
     @try {
-        if([[NSSocketPortNameServer sharedInstance] registerPort:receivePort name:serverSharingName] == NO)
-            @throw [NSString stringWithFormat:@"Unable to register port %@ and name %@", receivePort, serverSharingName];
-        
-        // this is our public server name for receiving change notifications from the remote server
-        connection = [[NSConnection alloc] initWithReceivePort:receivePort sendPort:nil];
-        
-        // connection retains us also...
-        [connection setRootObject:self];
-        
-        // don't set the delegate, as we don't authenticate connections here (this connection won't be used if we can't authenticate in the first place)
-        
         // we'll use this to communicate between threads on the localhost
         // @@ does this succeed after a stop/restart with a new thread?
         NSConnection *localConnection = [NSConnection defaultConnection];
@@ -667,8 +650,6 @@ void BDSKInvalidateProxyConnectionAndPorts(id aProxy, BOOL invalidateReceivePort
         } while (flags.shouldKeepRunning == 1);
     }
     @catch(id exception) {
-        [connection release];
-        connection = nil;
         NSLog(@"Discarding exception \"%@\" raised in object %@", exception, self);
         // reset the flag so we can start over; shouldn't be necessary
         OSAtomicCompareAndSwap32Barrier(0, 1, (int32_t *)&flags.shouldKeepRunning);

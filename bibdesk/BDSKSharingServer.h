@@ -50,17 +50,17 @@ extern NSString *BDSKHostNameChangedNotification;
 @protocol BDSKClientProtocol
 
 - (oneway void)setNeedsUpdate:(BOOL)flag;
-- (bycopy NSString *)uniqueIdentifier;
+- (BOOL)isAlive;
 
 @end
 
 // implemented by the server
 @protocol BDSKSharingProtocol
 
-- (NSData *)archivedSnapshotOfPublications;
-- (oneway void)registerClientForNotifications:(byref id)clientObject;
-- (oneway void)notifyObserversOfChange;
-- (oneway void)removeRemoteObserverForIdentifier:(NSString *)identifier;
+- (bycopy NSData *)archivedSnapshotOfPublications;
+- (oneway void)registerClient:(byref id)clientObject forIdentifier:(bycopy NSString *)identifier;
+- (oneway void)removeClientForIdentifier:(bycopy NSString *)identifier;
+- (oneway void)notifyClientsOfChange;
 
 @end
 
@@ -68,19 +68,25 @@ extern NSString *BDSKHostNameChangedNotification;
     NSConnection *connection;
     
     NSNetService *netService;
-    NSMutableDictionary *objectsToNotify;
+    NSMutableDictionary *remoteClients;
+    NSTimer *remoteClientTimer;
+    
     volatile int32_t shouldKeepRunning __attribute__ ((aligned (4)));
 }
 
 + (id)defaultServer;
 + (NSString *)sharingName;
 + (NSString *)supportedProtocolVersion;
-- (NSNumber *)numberOfConnections;
+- (unsigned int)numberOfConnections;
 
 - (void)queueDataChangedNotification:(NSNotification *)note;
 - (void)handleComputerNameChangedNotification:(NSNotification *)note;
 - (void)handlePasswordChangedNotification:(NSNotification *)note;
 - (void)handleApplicationWillTerminate:(NSNotification *)note;
+
+- (void)notifyClientConnectionsChanged;
+
+- (void)pingClients:(NSTimer *)timer;
 
 - (void)enableSharing;
 - (void)disableSharing;

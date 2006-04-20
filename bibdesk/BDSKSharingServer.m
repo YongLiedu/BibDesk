@@ -204,7 +204,8 @@ NSString *BDSKComputerName() {
                                                      name:NSApplicationWillTerminateNotification
                                                    object:nil];
 
-        objectsToNotify = [[NSMutableDictionary alloc] init];
+        remoteClients = [[NSMutableDictionary alloc] init];
+        remoteClientTimer = nil;
         shouldKeepRunning = 1;
     }
     return self;
@@ -214,13 +215,13 @@ NSString *BDSKComputerName() {
 {
     [[NSNotificationCenter defaultCenter] removeObserver:self];
     [connection release];
-    [objectsToNotify release];
+    [remoteClients release];
     [super dealloc];
 }
 
-- (NSNumber *)numberOfConnections { 
+- (unsigned int)numberOfConnections { 
     // minor thread-safety issue here; this may be off by one
-    return [NSNumber numberWithUnsignedInt:[objectsToNotify count]]; 
+    return [remoteClients count]; 
 }
 
 - (void)handleQueuedDataChanged;
@@ -233,7 +234,7 @@ NSString *BDSKComputerName() {
             NSLog(@"-[%@ %@]: unable to get thread connection", [self class], NSStringFromSelector(_cmd));
         id proxy = [conn rootProxy];
         [proxy setProtocolForProxy:@protocol(BDSKSharingProtocol)];
-        [proxy notifyObserversOfChange];
+        [proxy notifyClientsOfChange];
     }    
 }
 
@@ -262,6 +263,11 @@ NSString *BDSKComputerName() {
 - (void)handlePasswordChangedNotification:(NSNotification *)note;
 {
     [self restartSharingIfNeeded];
+}
+
+- (void)notifyClientConnectionsChanged;
+{
+    [[NSNotificationCenter defaultCenter] postNotificationName:BDSKClientConnectionsChangedNotification object:nil];
 }
 
 - (void)stopDOServer
@@ -421,7 +427,7 @@ NSString *BDSKComputerName() {
     return [set allObjects];
 }
 
-- (NSData *)archivedSnapshotOfPublications
+- (bycopy NSData *)archivedSnapshotOfPublications
 {
     NSData *dataToSend = [NSKeyedArchiver archivedDataWithRootObject:[self snapshotOfPublications]];
     if(dataToSend != nil){
@@ -451,7 +457,7 @@ NSString *BDSKComputerName() {
     if(maxConnections == 0)
         maxConnections = MAX(20, [[NSUserDefaults standardUserDefaults] integerForKey:@"BDSKSharingServerMaxConnections"]);
     
-    BOOL allowConnection = [objectsToNotify count] < maxConnections;
+    BOOL allowConnection = [remoteClients count] < maxConnections;
     if(allowConnection){
         [newConnection setDelegate:self];
     } else {
@@ -506,6 +512,8 @@ NSString *BDSKComputerName() {
         if([localConnection registerName:[BDSKSharingServer localConnectionName]] == NO)
             @throw @"Unable to register local connection";
         
+        remoteClientTimer = [[NSTimer scheduledTimerWithTimeInterval:60.0 target:self selector:@selector(pingClients:) userInfo:NULL repeats:YES] retain];
+        
         do {
             [pool release];
             pool = [NSAutoreleasePool new];
@@ -537,8 +545,13 @@ NSString *BDSKComputerName() {
 
 - (void)cleanup
 {
+    [remoteClientTimer invalidate];
+    [remoteClientTimer release];
+    remoteClientTimer = nil;
+    
     // only safe to access this from the server thread
-    [objectsToNotify removeAllObjects];
+    [remoteClients removeAllObjects];
+    [self performSelectorOnMainThread:@selector(notifyClientConnectionsChanged) withObject:nil waitUntilDone:NO];
     
     [[NSSocketPortNameServer sharedInstance] removePortForName:[BDSKSharingServer sharingName]];
     [connection invalidate];
@@ -554,28 +567,25 @@ NSString *BDSKComputerName() {
     CFRunLoopStop( CFRunLoopGetCurrent() );
 }
 
-- (oneway void)registerClientForNotifications:(byref id)clientObject;
+- (oneway void)registerClient:(byref id)clientObject forIdentifier:(bycopy NSString *)identifier;
 {
-    NSParameterAssert(clientObject != nil);
-    NSString *uniqueIdentifier = nil;
-    @try {
-        uniqueIdentifier = [clientObject uniqueIdentifier];
-    }
-    @catch(id exception) {
-        NSLog(@"%@ ignoring exception \"%@\" while registering a remote server", [self class], exception);
-        uniqueIdentifier = nil;
-    }
-    if(clientObject != nil && uniqueIdentifier != nil)
-        [objectsToNotify setObject:clientObject forKey:uniqueIdentifier];
-    else
-        NSLog(@"Error: missing identifier or distant object");
+    NSParameterAssert(clientObject != nil && identifier != nil);
+    [remoteClients setObject:clientObject forKey:identifier];
+    [self performSelectorOnMainThread:@selector(notifyClientConnectionsChanged) withObject:nil waitUntilDone:NO];
 }
 
-- (oneway void)notifyObserversOfChange;
+- (oneway void)removeClientForIdentifier:(bycopy NSString *)identifier;
+{
+    NSParameterAssert(identifier != nil);
+    [remoteClients removeObjectForKey:identifier];
+    [self performSelectorOnMainThread:@selector(notifyClientConnectionsChanged) withObject:nil waitUntilDone:NO];
+}
+
+- (oneway void)notifyClientsOfChange;
 {
     // here is where we notify other hosts that something changed
     // copy the dictionary since it's mutable
-    NSDictionary *copy = [NSDictionary dictionaryWithDictionary:objectsToNotify];
+    NSDictionary *copy = [NSDictionary dictionaryWithDictionary:remoteClients];
     NSEnumerator *e = [copy keyEnumerator];
     id proxyObject;
     NSString *key;
@@ -591,16 +601,33 @@ NSString *BDSKComputerName() {
         @catch (id exception) {
             NSLog(@"server: \"%@\" trying to reach host %@", exception, proxyObject);
             // since it's not accessible, remove it from future notifications (we know it has this key)
-            [objectsToNotify removeObjectForKey:key];
+            [self removeClientForIdentifier:key];
         }
     }
 }
 
-- (oneway void)removeRemoteObserverForIdentifier:(NSString *)identifier;
+- (void)pingClients:(NSTimer *)timer;
 {
-    NSParameterAssert(identifier != nil);
-    BDSKInvalidateProxyConnectionAndPorts([objectsToNotify objectForKey:identifier], YES, YES);
-    [objectsToNotify removeObjectForKey:identifier];
+    // copy the dictionary since it's mutable
+    NSDictionary *copy = [NSDictionary dictionaryWithDictionary:remoteClients];
+    NSEnumerator *e = [copy keyEnumerator];
+    id proxyObject;
+    NSString *key;
+    
+    while(key = [e nextObject]){
+        
+        proxyObject = [copy objectForKey:key];
+        [proxyObject setProtocolForProxy:@protocol(BDSKClientProtocol)];
+        
+        @try {
+            [proxyObject isAlive];
+        }
+        @catch (id exception) {
+            NSLog(@"server: \"%@\" could not reach host %@", exception, proxyObject);
+            // since it's not accessible, remove it from future notifications (we know it has this key)
+            [self removeClientForIdentifier:key];
+        }
+    }
 }
 
 @end
