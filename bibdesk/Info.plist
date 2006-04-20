@@ -247,9 +247,9 @@
 					<key>Local-Url Clean Braces or TeX</key>
 					<integer>2</integer>
 					<key>Local-Url Format</key>
-					<string>%L</string>
+					<string>%l%n0%e</string>
 					<key>Local-Url Format Preset</key>
-					<integer>1</integer>
+					<integer>2</integer>
 					<key>Local-Url Generate Lowercase</key>
 					<false/>
 					<key>Path to the papers folder</key>
