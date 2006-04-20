@@ -56,6 +56,6 @@
 - (IBAction)toggleSharing:(id)sender;
 
 - (void)handleSharingNameChanged:(NSNotification *)aNotification;
-- (void)handleSharedGroupsChanged:(NSNotification *)aNotification;
+- (void)handleClientConnectionsChanged:(NSNotification *)aNotification;
 
 @end

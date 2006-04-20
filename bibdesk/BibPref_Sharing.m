@@ -51,7 +51,7 @@
     [super awakeFromNib];
     
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(handleSharingNameChanged:) name:BDSKSharingNameChangedNotification object:nil];
-    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(handleSharedGroupsChanged:) name:BDSKSharedGroupsChangedNotification object:nil];
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(handleClientConnectionsChanged:) name:BDSKClientConnectionsChangedNotification object:nil];
     
     NSData *pwData = [BDSKPasswordController sharingPasswordForCurrentUserUnhashed];
     if(pwData != nil){
@@ -73,7 +73,7 @@
         [self updateUI];
 }
 
-- (void)handleSharedGroupsChanged:(NSNotification *)aNotification;
+- (void)handleClientConnectionsChanged:(NSNotification *)aNotification;
 {
     [self updateUI];
 }
@@ -98,15 +98,17 @@
     [passwordField setEnabled:[defaults boolForKey:BDSKSharingRequiresPasswordKey]];
     
     [sharedNameField setStringValue:[BDSKSharingServer sharingName]];
+    NSString *statusMessage = nil;
     if([defaults boolForKey:BDSKShouldShareFilesKey]){
-        NSNumber *number = [[BDSKSharingServer defaultServer] numberOfConnections];
-        if([number intValue]  == 1)
-            [statusField setStringValue:NSLocalizedString(@"Status:  On, 1 user connected", @"Bonjour sharing status")];
+        unsigned int number = [[BDSKSharingServer defaultServer] numberOfConnections];
+        if(number == 1)
+            statusMessage = NSLocalizedString(@"On, 1 user connected", @"Bonjour sharing is on status message, single connection");
         else
-            [statusField setStringValue:[NSString stringWithFormat:NSLocalizedString(@"Status:  On, %@ users connected", @"single NSString specifier; Bonjour sharing status"), number]];
+            statusMessage = [NSString stringWithFormat:NSLocalizedString(@"On, %i users connected", @"Bonjour sharing is on status message, multiple connections"), number];
     }else{
-        [statusField setStringValue:NSLocalizedString(@"Status:  Off", @"Bonjour sharing status")];
+        statusMessage = NSLocalizedString(@"Off", @"Bonjour sharing is off status message");
     }
+    [statusField setStringValue:statusMessage];
 }
 
 - (IBAction)togglePassword:(id)sender
