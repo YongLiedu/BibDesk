@@ -645,8 +645,11 @@
 	if ([groupTableView numberOfSelectedRows] == 1 && row > 0) {
 		// single smart group selection
         BDSKGroup *group = [self objectInGroupsAtIndex:row];
-		if ([group isSmart] == YES || 
-            ([group isShared] == NO && [[[BibTypeManager sharedManager] personFieldsSet] containsObject:currentGroupField]))
+		if (group == lastImportGroup) 
+			return NO;
+        else if ([group isSmart] == YES)
+			return YES;
+        else if ([group isShared] == NO && [[[BibTypeManager sharedManager] personFieldsSet] containsObject:currentGroupField])
 			return YES;
 		else
 			return NO;

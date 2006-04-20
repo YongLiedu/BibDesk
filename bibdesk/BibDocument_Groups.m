@@ -774,6 +774,10 @@ The groupedPublications array is a subset of the publications array, developed b
 	BDSKGroup *group = [self objectInGroupsAtIndex:row];
 	
 	if ([group isSmart]) {
+        if (group == lastImportGroup) {
+            NSBeep();
+            return;
+        }
 		BDSKFilter *filter = [(BDSKSmartGroup *)[smartGroups objectAtIndex:row - 1] filter];
 		BDSKFilterController *filterController = [[BDSKFilterController alloc] initWithFilter:filter];
 		
