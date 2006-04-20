@@ -108,6 +108,8 @@ NSString *BDSKColumnWidthsKey = @"Column Widths by Name";
 NSString *BDSKColumnOrderKey = @"Column Names in Order";
 NSString *BDSKDefaultSortedTableColumnKey = @"Default table column to sort new documents";
 NSString *BDSKDefaultSortedTableColumnIsDescendingKey = @"Default table column sort order";
+NSString *BDSKSortGroupsKey = @"BDSKSortGroupsKey";
+NSString *BDSKSortGroupsDescendingKey = @"BDSKSortGroupsDescendingKey";
 
 NSString *BDSKShowStatusBarKey = @"Show Status Bar";
 NSString *BDSKShowEditorStatusBarKey = @"Show Editor Status Bar";

@@ -460,9 +460,13 @@
 				<key>defaultsDictionary</key>
 				<dict>
 					<key>Default table column sort order</key>
-					<integer>1</integer>
+					<false/>
 					<key>Default table column to sort new documents</key>
 					<string>Title</string>
+					<key>BDSKSortGroupsDescendingKey</key>
+					<false/>
+					<key>BDSKSortGroupsKey</key>
+					<string>stringValue</string>
 					<key>Font family to use for RTF preview display</key>
 					<string>Gill Sans</string>
 					<key>Font size for preview pane in document view</key>

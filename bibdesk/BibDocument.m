@@ -243,8 +243,8 @@ NSString *BDSKWeblocFilePboardType = @"CorePasteboardFlavorType 0x75726C20";
         [self setDocumentStringEncoding:[[OFPreferenceWrapper sharedPreferenceWrapper] integerForKey:BDSKDefaultStringEncodingKey]]; 
 
 		sortDescending = NO;
-		sortGroupsDescending = NO;
-		sortGroupsKey = [BDSKGroupCellStringKey retain];
+		sortGroupsDescending = [[OFPreferenceWrapper sharedPreferenceWrapper] boolForKey:BDSKSortGroupsDescendingKey];
+		sortGroupsKey = [[[OFPreferenceWrapper sharedPreferenceWrapper] objectForKey:BDSKSortGroupsKey] retain];
         
     }
     return self;
@@ -3016,8 +3016,11 @@ NSString *BDSKWeblocFilePboardType = @"CorePasteboardFlavorType 0x75726C20";
 
 - (void)saveSortOrder{ 
     // @@ if we switch to NSArrayController, we should just archive the sort descriptors (see BDSKFileContentSearchController)
-    [[OFPreferenceWrapper sharedPreferenceWrapper] setObject:[lastSelectedColumnForSort identifier] forKey:BDSKDefaultSortedTableColumnKey];
-    [[OFPreferenceWrapper sharedPreferenceWrapper] setBool:sortDescending forKey:BDSKDefaultSortedTableColumnIsDescendingKey];
+    OFPreferenceWrapper *pw = [OFPreferenceWrapper sharedPreferenceWrapper];
+    [pw setObject:[lastSelectedColumnForSort identifier] forKey:BDSKDefaultSortedTableColumnKey];
+    [pw setBool:sortDescending forKey:BDSKDefaultSortedTableColumnIsDescendingKey];
+    [pw setObject:sortGroupsKey forKey:BDSKSortGroupsKey];
+    [pw setBool:sortGroupsDescending forKey:BDSKSortGroupsDescendingKey];
 }  
 
 - (void)windowWillClose:(NSNotification *)notification{

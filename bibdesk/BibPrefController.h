@@ -130,6 +130,8 @@ extern NSString *BDSKColumnWidthsKey;
 extern NSString *BDSKColumnOrderKey;
 extern NSString *BDSKDefaultSortedTableColumnKey;
 extern NSString *BDSKDefaultSortedTableColumnIsDescendingKey;
+extern NSString *BDSKSortGroupsKey;
+extern NSString *BDSKSortGroupsDescendingKey;
 
 extern NSString *BDSKPubTypeStringKey;
 extern NSString *BDSKShowWarningsKey;
