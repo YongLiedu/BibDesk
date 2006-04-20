@@ -37,6 +37,7 @@ New Features\
   \'a5  Newlines in form fields of the editor are now converted to a single space for copy/paste convenience (RFE #1457532)\
   \'a5  Added support for sharing files via Bonjour (RFE #1458200)\
   \'a5  Added support for exporting as EndNote XML (following Alex Montgomery's AppleScript)\
+  \'a5  Added action to create crossref parents from the editor\
 \pard\tx1440\tx2880\tx4320\tx5760\tx7200\ql\qnatural
 
 \f3\i\b\fs26 \cf0 \
@@ -83,6 +84,13 @@ Bugs Fixed\
   \'a5  PCRE style regular expressions are now used throughout\
   \'a5  Fixed bug #1469659, empty RSS export\
   \'a5  Removed duplicate insertion from input manager\
+  \'a5  Open previewtemplate.tex with TextEdit or reveal in the Finder if no default application exists\
+  \'a5  Copy previewtemplate.tex instead of template.txt when resetting the TeX preview template\
+  \'a5  Log output from failed TeX/BibTeX run in the previewer should now appear reliably in the previewer\
+  \'a5  The previewer now adds its own directory to $BIBINPUTS if necessary, since some users put this in environment.plist\
+  \'a5  Fixed crash in typeahead helper when closing text import sheet\
+  \'a5  Worked around WebKit crash that could occur after closing the text import sheet\
+  \'a5  Added discussion of delete behavior to online help\
   \
 \pard\tx1440\tx2880\tx4320\tx5760\tx7200\ql\qnatural
 
