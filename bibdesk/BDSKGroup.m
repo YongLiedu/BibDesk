@@ -202,6 +202,11 @@
     return NO;
 }
 
+
+- (BOOL)isRetrieving {
+    return NO;
+}
+
 @end
 
 

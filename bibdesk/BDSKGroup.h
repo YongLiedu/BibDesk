@@ -180,6 +180,12 @@
 */
 - (BOOL)failedDownload;
 
+/*!
+    @method     isRetrieving
+    @abstract   Method for remote groups.  Returns NO by default.
+*/
+- (BOOL)isRetrieving;
+
 @end
 
 
