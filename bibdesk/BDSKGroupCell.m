@@ -196,16 +196,21 @@ NSRect ignored, imageRect, textRect, countRect; \
 NSSize imageSize = NSMakeSize(NSHeight(aRect) + 1, NSHeight(aRect) + 1); \
 NSSize countSize = NSZeroSize; \
 BOOL failedDownload = [groupValue failedDownload]; \
+BOOL isRetrieving = [groupValue isRetrieving]; \
 BOOL controlViewIsFlipped = [controlView isFlipped]; \
 \
 float countSep = 0.0; \
-if([groupValue count] > 0) { \
-    countSize = [countString size]; \
-    countSep = countSize.height/2.0 - 0.5; \
-} \
-else if(failedDownload) { \
+if(failedDownload) { \
     countSize = NSMakeSize(16, 16); \
     countSep = 1.0; \
+} \
+else if(isRetrieving) { \
+    countSize = NSMakeSize(16, 16); \
+    countSep = 1.0; \
+} \
+else if([groupValue count] > 0) { \
+    countSize = [countString size]; \
+    countSep = countSize.height/2.0 - 0.5; \
 } \
 \
 /* set up the border around the image */ \
@@ -271,7 +276,7 @@ textRect.origin.y += floorf(vOffset); \
             [[NSImage cautionIconImage] drawFlippedInRect:countRect fromRect:cautionIconRect operation:NSCompositeSourceOver fraction:1.0];
         else
             [[NSImage cautionIconImage] drawInRect:countRect fromRect:cautionIconRect operation:NSCompositeSourceOver fraction:1.0];
-    } else if (countSize.width > 0) {
+    } else if (countSize.width > 0 && isRetrieving == NO) {
         [NSGraphicsContext saveGraphicsState];
 		[bgColor setFill];
 		[NSBezierPath fillHorizontalOvalAroundRect:NSIntegralRect(countRect)];

@@ -282,7 +282,7 @@
             int column = [[tv tableColumns] indexOfObject:aTableColumn];
             NSRect rect = [tv frameOfCellAtColumn:column row:row];
             NSSize size = [spinner frame].size;
-            rect.origin.x = NSMaxX(rect) - size.width - 2.0;
+            rect.origin.x = NSMaxX(rect) - size.width - 3.0;
             rect.origin.y += floorf((NSHeight(rect) - size.height) / 2.0);
             rect.size = size;
             
