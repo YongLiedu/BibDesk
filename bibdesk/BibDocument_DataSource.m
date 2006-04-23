@@ -431,13 +431,13 @@
                 }
                 pubs = pubsInGroup;
             }
+            dragFromSharedGroups = [self hasSharedGroupsAtIndexes:rowIndexes];
 		}
 		if([pubs count] == 0){
             NSBeginAlertSheet(NSLocalizedString(@"Empty Groups", @""),nil,nil,nil,documentWindow,nil,NULL,NULL,NULL,
                               NSLocalizedString(@"The groups you want to drag do not contain any items.", @""));
             return NO;
         }
-        dragFromSharedGroups = [self hasOnlySharedGroupsAtIndexes:rowIndexes];
 			
     } else if(tv == (NSTableView *)ccTableView){
 		// drag from the custom cite drawer table
@@ -457,14 +457,12 @@
         pubs = [self selectedPublications];
         dragCopyType = 1; // only type that makes sense here
         
-        NSIndexSet *indexes = [groupTableView selectedRowIndexes];
-        dragFromSharedGroups = [self hasOnlySharedGroupsAtIndexes:indexes];
+        dragFromSharedGroups = [self hasSharedGroupsAtIndexes:[groupTableView selectedRowIndexes]];
     }else{
 		// drag from the main table
 		pubs = [shownPublications objectsAtIndexes:rowIndexes];
         
-        NSIndexSet *indexes = [groupTableView selectedRowIndexes];
-        dragFromSharedGroups = [self hasOnlySharedGroupsAtIndexes:indexes];
+        dragFromSharedGroups = [self hasSharedGroupsAtIndexes:[groupTableView selectedRowIndexes]];
 
 		if(pboard == [NSPasteboard pasteboardWithName:NSDragPboard]){
 			// see where we clicked in the table
@@ -895,7 +893,9 @@
             return NSDragOperationEvery; // if it's not from me, copying is OK
         }
     }else if(tv == groupTableView){
-		if (([info draggingSource] == groupTableView || [info draggingSource] == tableView) && dragFromSharedGroups && row == 0) {
+		if (([info draggingSource] == groupTableView || [info draggingSource] == tableView) && dragFromSharedGroups) {
+            if (row != 0)
+                return NSDragOperationNone;
             [tv setDropRow:row dropOperation:NSTableViewDropOn];
             return NSDragOperationCopy;
         }
