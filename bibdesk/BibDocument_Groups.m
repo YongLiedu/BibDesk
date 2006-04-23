@@ -486,7 +486,7 @@ The groupedPublications array is a subset of the publications array, developed b
 - (NSIndexSet *)_indexesOfRowsToHighlightInRange:(NSRange)indexRange tableView:(BDSKGroupTableView *)tview{
    
     if([tableView numberOfSelectedRows] == 0 || 
-       [self hasSharedGroupsAtIndexes:[tableView selectedRowIndexes]])
+       [self hasSharedGroupsAtIndexes:[groupTableView selectedRowIndexes]])
         return [NSIndexSet indexSet];
     
     // This allows us to be slightly lazy, only putting the visible group rows in the dictionary
