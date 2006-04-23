@@ -1898,9 +1898,6 @@ NSString *BDSKWeblocFilePboardType = @"CorePasteboardFlavorType 0x75726C20";
     
 	if ([newPubs count] == 0) 
 		return YES; // nothing to do
-    
-    // this will be the start date for our smart group that shows the latest import
-    NSDate *addDate = [NSDate dateWithTimeIntervalSinceNow:-1.0];
 	
     [groupTableView selectRowIndexes:[NSIndexSet indexSetWithIndex:0] byExtendingSelection:NO];    
 	[self addPublications:newPubs];
@@ -1909,8 +1906,8 @@ NSString *BDSKWeblocFilePboardType = @"CorePasteboardFlavorType 0x75726C20";
 		[newFilePubs makeObjectsPerformSelector:@selector(autoFilePaper)];
     
     // set Date-Added to the current date, since unarchived items will have their own (incorrect) date
-    NSString *todayDescription = [[NSCalendarDate date] description];
-    [newPubs makeObjectsPerformSelector:@selector(setField:toValue:) withObject:BDSKDateCreatedString withObject:todayDescription];
+    NSCalendarDate *importDate = [NSCalendarDate date];
+    [newPubs makeObjectsPerformSelector:@selector(setField:toValue:) withObject:BDSKDateCreatedString withObject:[importDate description]];
 	
 	if([[OFPreferenceWrapper sharedPreferenceWrapper] boolForKey:BDSKEditOnPasteKey]) {
 		[self editPubCmd:nil]; // this will ask the user when there are many pubs
@@ -1918,10 +1915,9 @@ NSString *BDSKWeblocFilePboardType = @"CorePasteboardFlavorType 0x75726C20";
 	
 	[[self undoManager] setActionName:NSLocalizedString(@"Add Publication",@"")];
     
-    // set up the smart group that shows the latest import; we use a +/- 1 second time interval
-    // to determine which pubs belong in this group
+    // set up the smart group that shows the latest import
     // @@ do this for items added via the editor?  doesn't seem as useful
-    [self updateLastImportGroupFromDate:addDate toDate:[NSDate dateWithTimeIntervalSinceNow:1.0]];
+    [self updateLastImportGroupForDate:importDate];
     
     return YES;
 }

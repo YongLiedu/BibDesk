@@ -1073,7 +1073,12 @@ The groupedPublications array is a subset of the publications array, developed b
     [groupTableView setDelegate:self];
 }
 
-- (void)updateLastImportGroupFromDate:(NSDate *)startDate toDate:(NSDate *)endDate {
+- (void)updateLastImportGroupForDate:(NSDate *)date {
+    // we use a +/- 1 second time interval to determine which pubs belong in this group
+    // any pubs added in the next second after the paste will also be in this group, but that's not likely
+    NSDate *startDate = [[[NSDate alloc] initWithTimeInterval:-1.0 sinceDate:date] autorelease];
+    NSDate *endDate = [[[NSDate alloc] initWithTimeInterval:1.0 sinceDate:date] autorelease];
+    
     NSMutableArray *conditions = [NSMutableArray array];
     BDSKCondition *condition = nil;
     condition = [[[BDSKCondition alloc] init] autorelease];
@@ -1085,7 +1090,6 @@ The groupedPublications array is a subset of the publications array, developed b
     condition = [[[BDSKCondition alloc] init] autorelease];
     [condition setComparison:BDSKSmaller];
     [condition setKey:BDSKDateCreatedString];
-    // any pubs added in the next second after the paste will also be in this group, but that's not likely
     [condition setValue:[endDate description]];
     [conditions addObject:condition];
     

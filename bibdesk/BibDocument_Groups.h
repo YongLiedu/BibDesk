@@ -99,7 +99,7 @@
 - (void)handleFilterChangedNotification:(NSNotification *)notification;
 - (void)sortGroupsByKey:(NSString *)key;
 
-- (void)updateLastImportGroupFromDate:(NSDate *)startDate toDate:(NSDate *)endDate;
+- (void)updateLastImportGroupForDate:(NSDate *)date;
 
 - (NSIndexSet *)_indexesOfRowsToHighlightInRange:(NSRange)indexRange tableView:(BDSKGroupTableView *)tview;
 - (NSIndexSet *)_tableViewSingleSelectionIndexes:(BDSKGroupTableView *)tview;
