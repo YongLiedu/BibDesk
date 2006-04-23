@@ -403,11 +403,11 @@
 - (IBAction)generateCiteKey:(id)sender;
 
 /*!
-    @method     generateLocalUrl:
+    @method     consolidateLinkedFiles:
     @abstract   Action to auto file the linked paper, using the local-url format string. 
     @discussion (comprehensive description)
 */
-- (IBAction)generateLocalUrl:(id)sender;
+- (IBAction)consolidateLinkedFiles:(id)sender;
 
 /*!
     @method     duplicateTitleToBooktitle:

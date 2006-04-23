@@ -25,11 +25,11 @@
                 changeRating = id; 
                 chooseLocalURL = id; 
                 citeKeyDidChange = id; 
+                consolidateLinkedFiles = id; 
                 downloadLinkedFileAsLocalUrl = id; 
                 duplicateTitleToBooktitle = id; 
                 editSelectedFieldAsRawBibTeX = id; 
                 generateCiteKey = id; 
-                generateLocalUrl = id; 
                 moveLinkedFile = id; 
                 openLinkedFile = id; 
                 openParentItem = id; 

@@ -919,7 +919,8 @@ static int numberOfOpenEditors = 0;
 		[menuItem setTitle: NSLocalizedString(@"Generate Cite Key", @"Generate Cite Key")];
 		return YES;
 	}
-	else if ([menuItem action] == @selector(generateLocalUrl:)) {
+	else if ([menuItem action] == @selector(consolidateLinkedFiles:)) {
+		[menuItem setTitle: NSLocalizedString(@"Consolidate Linked File", @"Consolidate Linked File")];
 		NSString *lurl = [theBib localURLPath];
 		return (lurl && [[NSFileManager defaultManager] fileExistsAtPath:lurl]);
 	}
@@ -1139,7 +1140,7 @@ static int numberOfOpenEditors = 0;
 	[tabView selectFirstTabViewItem:self];
 }
 
-- (IBAction)generateLocalUrl:(id)sender{
+- (IBAction)consolidateLinkedFiles:(id)sender{
 	[self finalizeChangesPreservingSelection:YES];
 	
 	if (![theBib canSetLocalUrl]){
