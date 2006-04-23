@@ -166,8 +166,7 @@
 	}
 	
 	// we aren't linking, so here we decide which fields to overwrite, and just copy values over
-	NSDictionary *bibDict = [tempBI pubFields];
-	NSEnumerator *newKeyE = [bibDict keyEnumerator];
+	NSEnumerator *newKeyE = [[tempBI allFields] objectEnumerator];
 	NSString *key;
 	NSString *oldValue;
 	NSString *newValue;
@@ -178,11 +177,11 @@
 	[editorBib setType:[tempBI type]]; // do we want this always?
 	
 	while(key = [newKeyE nextObject]){
-		newValue = [bibDict objectForKey:key];
+		newValue = [tempBI valueOfField:key inherit:NO];
 		if([newValue isEqualToString:@""])
 			continue;
 		
-		oldValue = [[editorBib pubFields] objectForKey:key]; // value is the value of key in the dragged-onto window.
+		oldValue = [editorBib valueOfField:key inherit:NO]; // value is the value of key in the dragged-onto window.
 		
 		// only set the field if we force or the value was empty
 		if((modifier & optionKey) || [NSString isEmptyString:oldValue]){

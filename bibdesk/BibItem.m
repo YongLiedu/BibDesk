@@ -243,6 +243,7 @@ static NSParagraphStyle* bodyParagraphStyle = nil;
 
 - (void)encodeWithCoder:(NSCoder *)coder{
     if([coder allowsKeyedCoding]){
+        [bibLock lock];
         [coder encodeObject:fileType forKey:@"fileType"];
         [coder encodeObject:citeKey forKey:@"citeKey"];
         [coder encodeObject:pubDate forKey:@"pubDate"];
@@ -252,6 +253,7 @@ static NSParagraphStyle* bodyParagraphStyle = nil;
         [coder encodeObject:pubFields forKey:@"pubFields"];
         [coder encodeObject:people forKey:@"people"];
         [coder encodeBool:hasBeenEdited forKey:@"hasBeenEdited"];
+        [bibLock unlock];
     } else {
         [coder encodeDataObject:[NSKeyedArchiver archivedDataWithRootObject:self]];
     }        
@@ -373,8 +375,8 @@ static NSParagraphStyle* bodyParagraphStyle = nil;
 		return NO;
 	
 	// compare all fields, but compare relevant values as nil might mean 0 for some keys etc.
-	NSMutableSet *keys = [[NSMutableSet alloc] initWithArray:[pubFields allKeysUsingLock:bibLock]];
-	[keys addObjectsFromArray:[[aBI pubFields] allKeys]];
+	NSMutableSet *keys = [[NSMutableSet alloc] initWithArray:[self allFields]];
+	[keys addObjectsFromArray:[aBI allFields]];
 	NSEnumerator *keyEnum = [keys objectEnumerator];
     [keys release];
 
@@ -465,10 +467,15 @@ static NSParagraphStyle* bodyParagraphStyle = nil;
     
     if(inherit && (parent = [self crossrefParent])){
         NSMutableDictionary *parentCopy = [[[parent peopleInheriting:NO] mutableCopy] autorelease];
+        [bibLock lock];
         [parentCopy addEntriesFromDictionary:people]; // replace keys in parent with our keys, but inherit keys we don't have
+        [bibLock unlock];
         return parentCopy;
     } else {
-        return people;
+        [bibLock lock];
+        NSDictionary *copy = [[people copy] autorelease];
+        [bibLock unlock];
+        return copy;
     }
 }
 
@@ -555,7 +562,7 @@ static NSParagraphStyle* bodyParagraphStyle = nil;
 - (BibAuthor *)authorAtIndex:(int)index inherit:(BOOL)inherit{ 
 	NSArray *auths = [self pubAuthorsInheriting:inherit];
 	if ([auths count] > index)
-        return [(NSMutableArray *)auths objectAtIndex:index usingLock:bibLock]; // not too nice. Is the lock necessary?
+        return [auths objectAtIndex:index];
     else
         return [BibAuthor emptyAuthor];
 }
@@ -663,7 +670,7 @@ static NSParagraphStyle* bodyParagraphStyle = nil;
 - (BibAuthor *)authorOrEditorAtIndex:(int)index inherit:(BOOL)inherit{ 
 	NSArray *auths = [self pubAuthorsOrEditorsInheriting:inherit];
 	if ([auths count] > index)
-        return [(NSMutableArray *)auths objectAtIndex:index usingLock:bibLock]; // not too nice. Is the lock necessary?
+        return [auths objectAtIndex:index];
     else
         return [BibAuthor emptyAuthor];
 }
@@ -1178,8 +1185,15 @@ static NSParagraphStyle* bodyParagraphStyle = nil;
 	
 }
 
-- (NSMutableDictionary *)pubFields{
-    return pubFields;
+- (NSDictionary *)pubFields{
+    [bibLock lock];
+    NSDictionary *copy = [[pubFields copy] autorelease];
+    [bibLock unlock];
+    return copy;
+}
+
+- (NSArray *)allFields{
+    return [pubFields allKeysUsingLock:bibLock];
 }
 
 #pragma mark -

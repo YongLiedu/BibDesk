@@ -577,7 +577,8 @@
 - (void)addField:(NSString *)key;
 - (void)addField:(NSString *)key withModDate:(NSCalendarDate *)date;
 
-- (NSMutableDictionary *)pubFields;
+- (NSDictionary *)pubFields;
+- (NSArray *)allFields;
 
 /*!
     @method bibTeXString
