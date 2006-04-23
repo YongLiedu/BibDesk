@@ -338,26 +338,6 @@ static NSImage *unlockedIcon = nil;
 
 #pragma mark Proxies for inter-thread communication
 
-// forget about using a connection or its ports after calling this function; you have
-// the option to only invalidate one of the ports, though (typically the one passed as
-// nil when creating the NSConnection)
-void BDSKInvalidateProxyConnectionAndPorts(id aProxy, BOOL invalidateReceivePort, BOOL invalidateSendPort)
-{
-    NSConnection *conn = [aProxy connectionForProxy];
-    NSPort *sendPort = [conn sendPort];
-    NSPort *receivePort = [conn receivePort];
-    [conn invalidate];
-    
-    // both of these cause connections to be retained
-    [conn setRootObject:nil];
-    [conn registerName:nil];
-    
-    if(invalidateSendPort == YES)
-        [sendPort invalidate];
-    if(invalidateReceivePort == YES)
-        [receivePort invalidate];
-}    
-
 - (id <BDSKSharedGroupServerMainThread>)mainThreadProxy;
 {
     id proxy = nil;
@@ -411,7 +391,9 @@ void BDSKInvalidateProxyConnectionAndPorts(id aProxy, BOOL invalidateReceivePort
     }
     @catch (id exception) {
         
-        BDSKInvalidateProxyConnectionAndPorts(proxy, YES, NO);
+        [conn setDelegate:nil];
+        [conn setRootObject:nil];
+        [conn invalidate];
         conn = nil;
         proxy = nil;
 
@@ -424,9 +406,7 @@ void BDSKInvalidateProxyConnectionAndPorts(id aProxy, BOOL invalidateReceivePort
                 OSAtomicCompareAndSwap32Barrier(0, 1, (int32_t *)&flags.authenticationFailed);
                 // don't show the alert when we couldn't authenticate when cleaning up
                 if(flags.shouldKeepRunning == 1){
-                    id mainThreadProxy = [self mainThreadProxy];
-                    [mainThreadProxy runAuthenticationFailedAlert];
-                    BDSKInvalidateProxyConnectionAndPorts(mainThreadProxy, YES, NO);
+                    [[self mainThreadProxy] runAuthenticationFailedAlert];
                 }
             }
             
@@ -499,9 +479,7 @@ void BDSKInvalidateProxyConnectionAndPorts(id aProxy, BOOL invalidateReceivePort
     if(password == nil && flags.shouldKeepRunning == 1){   
         
         // run the prompt on the main thread
-        id mainThreadProxy = [self mainThreadProxy];
-        rv = [mainThreadProxy runPasswordPrompt];
-        BDSKInvalidateProxyConnectionAndPorts(mainThreadProxy, YES, NO);
+        rv = [[self mainThreadProxy] runPasswordPrompt];
         
         // retry from the keychain
         if (rv == BDSKPasswordReturn){
@@ -554,9 +532,7 @@ void BDSKInvalidateProxyConnectionAndPorts(id aProxy, BOOL invalidateReceivePort
     
     @try {
         NSData *archive = nil;
-        id proxy = [self remoteServerProxy];
-        NSData *proxyData = [proxy archivedSnapshotOfPublications];
-        //BDSKInvalidateProxyConnectionAndPorts(proxy, YES, NO);
+        NSData *proxyData = [[self remoteServerProxy] archivedSnapshotOfPublications];
         
         if([proxyData length] != 0){
             if([proxyData mightBeCompressed])
@@ -594,7 +570,12 @@ void BDSKInvalidateProxyConnectionAndPorts(id aProxy, BOOL invalidateReceivePort
     if (uniqueIdentifier != nil){
         @try {
             [remoteServer removeClientForIdentifier:uniqueIdentifier];
-            BDSKInvalidateProxyConnectionAndPorts(remoteServer, YES, NO);
+            
+            NSConnection *conn = [remoteServer connectionForProxy];
+            [conn setDelegate:nil];
+            [conn setRootObject:nil];
+            [[conn receivePort] invalidate];
+            [conn invalidate];
             [remoteServer release];
             remoteServer = nil;
         }

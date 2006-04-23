@@ -39,7 +39,6 @@
 #import <Cocoa/Cocoa.h>
 #import "BDSKGroup.h"
 
-extern void BDSKInvalidateProxyConnectionAndPorts(id aProxy, BOOL invalidateReceivePort, BOOL invalidateSendPort);
 
 @class BDSKSharedGroupServer;
 

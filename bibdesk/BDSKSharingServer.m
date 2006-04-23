@@ -532,7 +532,8 @@ NSString *BDSKComputerName() {
         if([localConnection registerName:[BDSKSharingServer uniqueLocalConnectionName]] == NO)
             @throw @"Unable to register local connection";
         
-        remoteClientTimer = [[NSTimer scheduledTimerWithTimeInterval:60.0 target:self selector:@selector(pingClients:) userInfo:NULL repeats:YES] retain];
+        // we could periodically check if remote clients are alive, but we do this implicitly when notifying them
+        //remoteClientTimer = [[NSTimer scheduledTimerWithTimeInterval:300.0 target:self selector:@selector(pingClients:) userInfo:NULL repeats:YES] retain];
         
         do {
             [pool release];
@@ -541,6 +542,8 @@ NSString *BDSKComputerName() {
         } while (shouldKeepRunning == 1);
     }
     @catch(id exception) {
+        [connection setDelegate:nil];
+        [connection setRootObject:nil];
         [connection release];
         connection = nil;
         
@@ -574,8 +577,9 @@ NSString *BDSKComputerName() {
     [self performSelectorOnMainThread:@selector(notifyClientConnectionsChanged) withObject:nil waitUntilDone:NO];
     
     [[NSSocketPortNameServer sharedInstance] removePortForName:[BDSKSharingServer sharingName]];
-    [connection invalidate];
+    [connection setDelegate:nil];
     [connection setRootObject:nil];
+    [connection invalidate];
     [connection release];
     connection = nil;
     
