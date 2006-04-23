@@ -81,6 +81,18 @@
     return result;
 }
 
+- (NSArray *)allValuesUsingLock:(NSLock *)aLock{
+    
+    NSArray *result;
+    
+    [aLock lock];
+    result = [self allValues];
+    [[result retain] autorelease];
+    [aLock unlock];
+    
+    return result;
+}
+
 - (void)removeObjectsForKeys:(NSArray *)keyArray usingLock:(NSLock *)aLock{
     
     [aLock lock];
