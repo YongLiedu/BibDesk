@@ -138,12 +138,6 @@
     return [indexes intersectsIndexesInRange:sharedRange];
 }
 
-- (BOOL)hasOnlySharedGroupsAtIndexes:(NSIndexSet *)indexes{
-    NSRange sharedRange = [self rangeOfSharedGroups];
-    NSIndexSet *sharedIndexes = [NSIndexSet indexSetWithIndexesInRange:sharedRange];
-    return [sharedIndexes containsIndexes:indexes];
-}
-
 #pragma mark Accessors
 
 - (void)addSmartGroup:(BDSKSmartGroup *)group {
@@ -491,7 +485,8 @@ The groupedPublications array is a subset of the publications array, developed b
 
 - (NSIndexSet *)_indexesOfRowsToHighlightInRange:(NSRange)indexRange tableView:(BDSKGroupTableView *)tview{
    
-    if([tableView numberOfSelectedRows] == 0)
+    if([tableView numberOfSelectedRows] == 0 || 
+       [self hasSharedGroupsAtIndexes:[tableView selectedRowIndexes]])
         return [NSIndexSet indexSet];
     
     // This allows us to be slightly lazy, only putting the visible group rows in the dictionary
