@@ -46,7 +46,6 @@
 //
 // Modified after http://www.cocoadev.com/index.pl?GradientFill
 //
-// TODO: implement angle parameter, adjust vectors
 
 - (void)fillPathVertically:(BOOL)isVertical withStartColor:(NSColor *)inStartColor endColor:(NSColor *)inEndColor;
 {
@@ -59,39 +58,34 @@
     
     // optimization recommended by Apple; if you're using the same filter and just changing its inputs, keep an instance of it
     static CIFilter *filter = nil;
-    if(filter == nil)
+    if(filter == nil){
         filter = [[CIFilter filterWithName:@"CILinearGradient"] retain];
-    
-    // since we're explicitly setting all four inputs, we don't need to use [filter setDefaults]
+        
+        // this never changes, so we'll only set it once
+        [filter setValue:[CIVector vectorWithX:0.0 Y:0.0] forKey:@"inputPoint0"];
+    }
+
+    // since we explicitly set all four inputs, we don't need to use [filter setDefaults]
     [filter setValue:startColor forKey:@"inputColor0"];
     [filter setValue:endColor forKey:@"inputColor1"];
     
-    CIVector *startVector;
     CIVector *endVector;
     
     NSRect aRect = [self bounds];
-    float width = NSWidth(aRect);
-    float height = NSHeight(aRect);
+    endVector = isVertical ? [CIVector vectorWithX:0.0 Y:NSHeight(aRect)] : [CIVector vectorWithX:NSWidth(aRect) Y:0.0];
     
-    startVector = [CIVector vectorWithX:0.0 Y:0.0];
-	if(isVertical)
-		endVector = [CIVector vectorWithX:0.0 Y:height];
-	else
-		endVector = [CIVector vectorWithX:width Y:0.0];
-    
-    [filter setValue:startVector forKey:@"inputPoint0"];
     [filter setValue:endVector forKey:@"inputPoint1"];
     
     image = [filter valueForKey:@"outputImage"];
     
-    [NSGraphicsContext saveGraphicsState];
+    NSGraphicsContext *nsContext = [NSGraphicsContext currentContext];
+    [nsContext saveGraphicsState];
     
 	[self addClip];
 	
-    CIContext *context = [[NSGraphicsContext currentContext] CIContext];
-    [context drawImage:image atPoint:CGPointMake(aRect.origin.x, aRect.origin.y) fromRect:CGRectMake( 0.0, 0.0, NSWidth(aRect), height )];
+    [[nsContext CIContext] drawImage:image atPoint:*(CGPoint *)&(aRect.origin) fromRect:*(CGRect *)&aRect];
     
-    [NSGraphicsContext restoreGraphicsState];
+    [nsContext restoreGraphicsState];
 }
 
 - (void)fillPathVerticallyWithStartColor:(NSColor *)inStartColor endColor:(NSColor *)inEndColor;
