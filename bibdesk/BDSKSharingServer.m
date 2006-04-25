@@ -409,6 +409,7 @@ NSString *BDSKComputerName() {
 
 - (void)dealloc
 {
+    BDSKLOGIMETHOD();
     [remoteClients release];
     [remoteClientsLock release];
     [super dealloc];
@@ -511,7 +512,11 @@ NSString *BDSKComputerName() {
 }
 
 - (oneway void)cleanup
-{   
+{
+    NSEnumerator *clientEnum = [[remoteClients allValuesUsingLock:remoteClientsLock] objectEnumerator];
+    id client;
+    while (client = [clientEnum nextObject]) 
+        [[client connectionForProxy] invalidate];
     [remoteClients removeAllObjectsUsingLock:remoteClientsLock];
     [self performSelectorOnMainThread:@selector(notifyClientConnectionsChanged) withObject:nil waitUntilDone:NO];
     
@@ -538,6 +543,7 @@ NSString *BDSKComputerName() {
 - (oneway void)removeClientForIdentifier:(bycopy NSString *)identifier;
 {
     NSParameterAssert(identifier != nil);
+    [[[remoteClients objectForKey:identifier usingLock:remoteClientsLock] connectionForProxy] invalidate];
     [remoteClients removeObjectForKey:identifier usingLock:remoteClientsLock];
     [self performSelectorOnMainThread:@selector(notifyClientConnectionsChanged) withObject:nil waitUntilDone:NO];
 }
