@@ -507,18 +507,19 @@ static NSImage *unlockedIcon = nil;
     if (uniqueIdentifier != nil){
         @try {
             [remoteServer removeClientForIdentifier:uniqueIdentifier];
-            
-            NSConnection *conn = [remoteServer connectionForProxy];
-            [conn setDelegate:nil];
-            [conn setRootObject:nil];
-            [[conn receivePort] invalidate];
-            [conn invalidate];
-            [remoteServer release];
-            remoteServer = nil;
         }
         @catch(id exception) {
             NSLog(@"%@ ignoring exception \"%@\" raised during cleanup", [self class], exception);
         }
+    }
+    if (remoteServer != nil){
+        NSConnection *conn = [remoteServer connectionForProxy];
+        [conn setDelegate:nil];
+        [conn setRootObject:nil];
+        [[conn receivePort] invalidate];
+        [conn invalidate];
+        [remoteServer release];
+        remoteServer = nil;
     }
     
     [super cleanup];
