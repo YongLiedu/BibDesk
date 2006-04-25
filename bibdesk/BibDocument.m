@@ -216,8 +216,8 @@ NSString *BDSKWeblocFilePboardType = @"CorePasteboardFlavorType 0x75726C20";
                                                    object:nil];
         
 		[[NSNotificationCenter defaultCenter] addObserver:self
-												 selector:@selector(handleSharedGroupFinishedNotification:)
-													 name:BDSKSharedGroupFinishedNotification
+												 selector:@selector(handleSharedGroupUpdatedNotification:)
+													 name:BDSKSharedGroupUpdatedNotification
 												   object:nil];
         
         [[NSNotificationCenter defaultCenter] addObserver:self

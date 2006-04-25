@@ -266,7 +266,7 @@ extern NSString *BDSKFilterChangedNotification;
 extern NSString *BDSKStopWordsChangedNotification;
 extern NSString *BDSKSharingChangedNotification;
 extern NSString *BDSKSharedGroupsChangedNotification;
-extern NSString *BDSKSharedGroupFinishedNotification;
+extern NSString *BDSKSharedGroupUpdatedNotification;
 extern NSString *BDSKClientConnectionsChangedNotification;
 extern NSString *BDSKSharingNameChangedNotification;
 extern NSString *BDSKSharingPasswordChangedNotification;

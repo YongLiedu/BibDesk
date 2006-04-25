@@ -79,7 +79,7 @@
 
 - (void)handleGroupFieldChangedNotification:(NSNotification *)notification;
 - (void)handleGroupAddRemoveNotification:(NSNotification *)notification;
-- (void)handleSharedGroupFinishedNotification:(NSNotification *)notification;
+- (void)handleSharedGroupUpdatedNotification:(NSNotification *)notification;
 - (void)handleSharedGroupsChangedNotification:(NSNotification *)notification;
 - (void)handleGroupTableSelectionChangedNotification:(NSNotification *)notification;
 

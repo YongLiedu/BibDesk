@@ -240,7 +240,7 @@ The groupedPublications array is a subset of the publications array, developed b
     // could force selection of row 0 in the main table here, so we always display a preview, but that flashes the group table highlights annoyingly and may cause other selection problems
 }
 
-- (void)handleSharedGroupFinishedNotification:(NSNotification *)notification{
+- (void)handleSharedGroupUpdatedNotification:(NSNotification *)notification{
     BDSKGroup *group = [notification object];
     BOOL succeeded = [[[notification userInfo] objectForKey:@"succeeded"] boolValue];
     

@@ -202,7 +202,8 @@ static NSImage *unlockedIcon = nil;
         [server retrievePublicationsInBackground]; 
         
         // use this to notify the tableview to start the progress indicators
-        [[NSNotificationCenter defaultCenter] postNotificationName:BDSKSharedGroupFinishedNotification object:self userInfo:nil];
+        NSDictionary *userInfo = [NSDictionary dictionaryWithObject:[NSNumber numberWithBool:NO] forKey:@"succeeded"];
+        [[NSNotificationCenter defaultCenter] postNotificationName:BDSKSharedGroupUpdatedNotification object:self userInfo:userInfo];
     }
     // this will likely be nil the first time
     return publications;
@@ -219,7 +220,7 @@ static NSImage *unlockedIcon = nil;
     [self setNeedsUpdate:NO];
     
     NSDictionary *userInfo = [NSDictionary dictionaryWithObject:[NSNumber numberWithBool:(publications != nil)] forKey:@"succeeded"];
-    [[NSNotificationCenter defaultCenter] postNotificationName:BDSKSharedGroupFinishedNotification object:self userInfo:userInfo];
+    [[NSNotificationCenter defaultCenter] postNotificationName:BDSKSharedGroupUpdatedNotification object:self userInfo:userInfo];
 }
 
 - (BOOL)isRetrieving { return (BOOL)[server isRetrieving]; }
