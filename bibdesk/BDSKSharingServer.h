@@ -65,14 +65,9 @@ extern NSString *BDSKHostNameChangedNotification;
 
 @protocol BDSKSharingServerLocalThread;
 
-@interface BDSKSharingServer : NSObject <BDSKSharingProtocol, BDSKSharingServerLocalThread> {
-    NSConnection *connection;
-    
+@interface BDSKSharingServer : NSObject {    
     NSNetService *netService;
-    NSMutableDictionary *remoteClients;
-    NSTimer *remoteClientTimer;
-    
-    volatile int32_t shouldKeepRunning __attribute__ ((aligned (4)));
+    id server;
 }
 
 + (id)defaultServer;
@@ -85,15 +80,8 @@ extern NSString *BDSKHostNameChangedNotification;
 - (void)handlePasswordChangedNotification:(NSNotification *)note;
 - (void)handleApplicationWillTerminate:(NSNotification *)note;
 
-- (void)notifyClientConnectionsChanged;
-
-- (void)pingClients:(NSTimer *)timer;
-
 - (void)enableSharing;
 - (void)disableSharing;
 - (void)restartSharingIfNeeded;
-
-- (void)runDOServer;
-- (void)stopDOServer;
 
 @end

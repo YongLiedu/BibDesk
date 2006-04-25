@@ -47,6 +47,8 @@
 #import "BibDocument.h"
 #import <libkern/OSAtomic.h>
 #import "BDSKSharedGroup.h"
+#import "BDSKAsynchronousDOServer.h"
+#import "NSMutableDictionary+ThreadSafety.h"
 
 #include <sys/socket.h>
 #include <netinet/in.h>
@@ -95,9 +97,16 @@ NSString *BDSKComputerName() {
 // private protocol for inter-thread messaging
 @protocol BDSKSharingServerLocalThread
 
-- (void)cleanup;
+- (oneway void)cleanup;
 - (oneway void)notifyClientsOfChange;
 
+@end
+
+@interface BDSKSharingDOServer : BDSKAsynchronousDOServer {
+    NSConnection *connection;
+    NSMutableDictionary *remoteClients;
+    NSLock *remoteClientsLock;
+}
 @end
 
 #pragma mark -
@@ -156,16 +165,6 @@ NSString *BDSKComputerName() {
     return sharingName;
 }
 
-// name for localhost thread connection
-+ (NSString *)localConnectionName { 
-    return [NSString stringWithFormat:@"%@%d", [[self class] description], localConnectionCount]; 
-}
-
-+ (NSString *)uniqueLocalConnectionName {
-    localConnectionCount++;
-    return [self localConnectionName];
-}
-
 // If we introduce incompatible changes in future, bump this to avoid sharing breakage
 + (NSString *)supportedProtocolVersion { return @"0"; }
 
@@ -214,9 +213,6 @@ NSString *BDSKComputerName() {
                                                      name:NSApplicationWillTerminateNotification
                                                    object:nil];
 
-        remoteClients = [[NSMutableDictionary alloc] init];
-        remoteClientTimer = nil;
-        shouldKeepRunning = 1;
     }
     return self;
 }
@@ -224,32 +220,20 @@ NSString *BDSKComputerName() {
 - (void)dealloc
 {
     [[NSNotificationCenter defaultCenter] removeObserver:self];
-    [connection release];
-    [remoteClients release];
     [super dealloc];
 }
 
 - (unsigned int)numberOfConnections { 
     // minor thread-safety issue here; this may be off by one
-    return [remoteClients count]; 
+    return [server numberOfConnections]; 
 }
 
 - (void)handleQueuedDataChanged;
 {
     // not the default connection here; we want to call our background thread, but only if it's running
     // add a hidden pref in case this traffic turns us into a bad network citizen; manual updates will still work
-    if(shouldKeepRunning == 1 && [[NSUserDefaults standardUserDefaults] boolForKey:@"BDSKDisableRemoteChangeNotifications"] == 0){
-        NSConnection *conn = [NSConnection connectionWithRegisteredName:[BDSKSharingServer localConnectionName] host:nil];
-        id proxy = nil;
-        @try {
-            proxy = [conn rootProxy];
-            [proxy setProtocolForProxy:@protocol(BDSKSharingServerLocalThread)];
-        }
-        @catch(id exception) {
-            NSLog(@"%@: unable to connect to local thread proxy", [self class]);
-            proxy = nil;
-        }
-        [proxy notifyClientsOfChange];
+    if([server shouldKeepRunning] && [[NSUserDefaults standardUserDefaults] boolForKey:@"BDSKDisableRemoteChangeNotifications"] == 0){
+        [[server serverOnServerThread] notifyClientsOfChange];
     }    
 }
 
@@ -278,29 +262,6 @@ NSString *BDSKComputerName() {
 - (void)handlePasswordChangedNotification:(NSNotification *)note;
 {
     [self restartSharingIfNeeded];
-}
-
-- (void)notifyClientConnectionsChanged;
-{
-    [[NSNotificationCenter defaultCenter] postNotificationName:BDSKClientConnectionsChangedNotification object:nil];
-}
-
-- (void)stopDOServer
-{
-    // we're in the main thread, so set the stop flag
-    // the connect to the remote port should tickle the runloop and cause the thread to exit after cleanup
-    OSAtomicCompareAndSwap32Barrier(1, 0, (int32_t *)&shouldKeepRunning);
-    NSConnection *conn = [NSConnection connectionWithRegisteredName:[BDSKSharingServer localConnectionName] host:nil];
-    id proxy = nil;
-    @try {
-        proxy = [conn rootProxy];
-        [proxy setProtocolForProxy:@protocol(BDSKSharingServerLocalThread)];
-    }
-    @catch(id exception) {
-        NSLog(@"%@: unable to connect to local thread proxy", [self class]);
-        proxy = nil;
-    }
-    [proxy cleanup];   
 }
 
 - (void)enableSharing
@@ -345,7 +306,7 @@ NSString *BDSKComputerName() {
     [dictionary setObject:[[OFPreferenceWrapper sharedPreferenceWrapper] stringForKey:BDSKSharingRequiresPasswordKey] forKey:BDSKTXTAuthenticateKey];
     [netService setTXTRecordData:[NSNetService dataFromTXTRecordDictionary:dictionary]];
     
-    [NSThread detachNewThreadSelector:@selector(runDOServer) toTarget:self withObject:nil];
+    server = [[BDSKSharingDOServer alloc] init];
     
     // our DO server will also use Bonjour, but this gives us a browseable name
     [netService publish];
@@ -354,12 +315,14 @@ NSString *BDSKComputerName() {
 
 - (void)disableSharing
 {
-    if(netService != nil && shouldKeepRunning == 1){
+    if(netService != nil && [server shouldKeepRunning]){
         [netService stop];
         [netService release];
         netService = nil;
         
-        [self stopDOServer];
+        [server stopDOServer];
+        [server release];
+        server = nil;
     }
 }
 
@@ -432,6 +395,61 @@ NSString *BDSKComputerName() {
     [self disableSharing];
 }
 
+@end
+
+@implementation BDSKSharingDOServer
+
+- (id)init
+{
+    if(self = [super init]){
+        remoteClients = [[NSMutableDictionary alloc] init];
+        remoteClientsLock = [[NSLock alloc] init];
+        
+        // setup our DO server that will handle requests for publications and passwords
+        @try {
+            NSPort *receivePort = [NSSocketPort port];
+            if([[NSSocketPortNameServer sharedInstance] registerPort:receivePort name:[BDSKSharingServer sharingName]] == NO)
+                @throw [NSString stringWithFormat:@"Unable to register port %@ and name %@", receivePort, [BDSKSharingServer sharingName]];
+            connection = [[NSConnection alloc] initWithReceivePort:receivePort sendPort:nil];
+            NSProtocolChecker *checker = [NSProtocolChecker protocolCheckerWithTarget:self protocol:@protocol(BDSKSharingProtocol)];
+            [connection setRootObject:checker];
+            
+            // so we get connection:shouldMakeNewConnection: messages
+            [connection setDelegate:self];
+                        
+        }
+        @catch(id exception) {
+            [connection setDelegate:nil];
+            [connection setRootObject:nil];
+            [connection release];
+            connection = nil;
+            
+            [self stopDOServer];
+            [self autorelease];
+            self = nil;
+        }
+        
+    }
+    return self;
+}
+
+- (void)dealloc
+{
+    BDSKLOGIMETHOD();
+    [remoteClients release];
+    [remoteClientsLock release];
+    [super dealloc];
+}
+
+- (unsigned int)numberOfConnections { 
+    return [remoteClients countUsingLock:remoteClientsLock]; 
+}
+
+- (void)notifyClientConnectionsChanged;
+{
+    [[NSNotificationCenter defaultCenter] postNotificationName:BDSKClientConnectionsChangedNotification object:nil];
+}
+
 - (NSArray *)snapshotOfPublications
 {
     NSMutableSet *set = nil;
@@ -477,7 +495,7 @@ NSString *BDSKComputerName() {
     if(maxConnections == 0)
         maxConnections = MAX(20, [[NSUserDefaults standardUserDefaults] integerForKey:@"BDSKSharingServerMaxConnections"]);
     
-    BOOL allowConnection = [remoteClients count] < maxConnections;
+    BOOL allowConnection = [remoteClients countUsingLock:remoteClientsLock] < maxConnections;
     if(allowConnection){
         [newConnection setDelegate:self];
     } else {
@@ -497,112 +515,35 @@ NSString *BDSKComputerName() {
     return status;
 }
 
-// don't put these in a category, since we have formal protocols to deal with
-
-- (void)runDOServer
-{
-    // detach a new thread to run this
-    NSAssert([NSThread inMainThread] == NO, @"do not run the server in the main thread");
-    NSAssert(connection == nil, @"server is already running");
-    
-    NSAutoreleasePool *pool = [NSAutoreleasePool new];
-    
-    OSAtomicCompareAndSwap32Barrier(0, 1, (int32_t *)&shouldKeepRunning);
-    
-    // setup our DO server that will handle requests for publications and passwords
-    NSSocketPort *receivePort = [[[NSSocketPort alloc] init] autorelease];
-    @try {
-        if([[NSSocketPortNameServer sharedInstance] registerPort:receivePort name:[BDSKSharingServer sharingName]] == NO)
-            @throw [NSString stringWithFormat:@"Unable to register port %@ and name %@", receivePort, [BDSKSharingServer sharingName]];
-        connection = [[NSConnection alloc] initWithReceivePort:receivePort sendPort:nil];
-        NSProtocolChecker *checker = [NSProtocolChecker protocolCheckerWithTarget:self protocol:@protocol(BDSKSharingProtocol)];
-        [connection setRootObject:checker];
-        
-        // so we get connection:shouldMakeNewConnection: messages
-        [connection setDelegate:self];
-        
-        // we'll use this to communicate between threads on the localhost
-        // @@ does this succeed after a stop/restart with a new thread?
-        NSConnection *localConnection = [NSConnection defaultConnection];
-        if(localConnection == nil)
-            @throw @"Unable to get default connection";
-        [localConnection setRootObject:self];
-        
-        // @@ workaround: ensure that the name is unique, or else registerName: fails when we restart (in spite of explicitly deregistering it)
-        if([localConnection registerName:[BDSKSharingServer uniqueLocalConnectionName]] == NO)
-            @throw @"Unable to register local connection";
-        
-        // we could periodically check if remote clients are alive, but we do this implicitly when notifying them
-        //remoteClientTimer = [[NSTimer scheduledTimerWithTimeInterval:300.0 target:self selector:@selector(pingClients:) userInfo:NULL repeats:YES] retain];
-        
-        do {
-            [pool release];
-            pool = [NSAutoreleasePool new];
-            CFRunLoopRun();
-        } while (shouldKeepRunning == 1);
-    }
-    @catch(id exception) {
-        [connection setDelegate:nil];
-        [connection setRootObject:nil];
-        [connection release];
-        connection = nil;
-        
-        [[NSConnection defaultConnection] setRootObject:nil];
-        [[NSConnection defaultConnection] registerName:nil];
-
-        // browsers shouldn't see us if this failed
-        [netService stop];
-        [netService release];
-        netService = nil;
-        
-        NSLog(@"Discarding exception %@ raised in object %@", exception, self);
-        // reset the flag
-        OSAtomicCompareAndSwap32Barrier(1, 0, (int32_t *)&shouldKeepRunning);
-    }
-    
-    @finally {
-        [pool release];
-    }
-    
-}
-
-- (void)cleanup
-{
-    [remoteClientTimer invalidate];
-    [remoteClientTimer release];
-    remoteClientTimer = nil;
-    
-    // only safe to access this from the server thread
-    [remoteClients removeAllObjects];
+- (oneway void)cleanup
+{   
+    [remoteClients removeAllObjectsUsingLock:remoteClientsLock];
     [self performSelectorOnMainThread:@selector(notifyClientConnectionsChanged) withObject:nil waitUntilDone:NO];
     
+    NSPort *port = [[NSSocketPortNameServer sharedInstance] portForName:[BDSKSharingServer sharingName]];
     [[NSSocketPortNameServer sharedInstance] removePortForName:[BDSKSharingServer sharingName]];
+    [port invalidate];
     [connection setDelegate:nil];
     [connection setRootObject:nil];
     [connection invalidate];
     [connection release];
     connection = nil;
     
-    // default connection retains us as well
-    [[NSConnection defaultConnection] setRootObject:nil];
-    [[NSConnection defaultConnection] registerName:nil];
-    
-    // this seems dirty, but we need to unblock and allow the thread to release us
-    CFRunLoopStop( CFRunLoopGetCurrent() );
+    [super cleanup];
 }
 
 - (oneway void)registerClient:(byref id)clientObject forIdentifier:(bycopy NSString *)identifier;
 {
     NSParameterAssert(clientObject != nil && identifier != nil);
     [clientObject setProtocolForProxy:@protocol(BDSKClientProtocol)];
-    [remoteClients setObject:clientObject forKey:identifier];
+    [remoteClients setObject:clientObject forKey:identifier usingLock:remoteClientsLock];
     [self performSelectorOnMainThread:@selector(notifyClientConnectionsChanged) withObject:nil waitUntilDone:NO];
 }
 
 - (oneway void)removeClientForIdentifier:(bycopy NSString *)identifier;
 {
     NSParameterAssert(identifier != nil);
-    [remoteClients removeObjectForKey:identifier];
+    [remoteClients removeObjectForKey:identifier usingLock:remoteClientsLock];
     [self performSelectorOnMainThread:@selector(notifyClientConnectionsChanged) withObject:nil waitUntilDone:NO];
 }
 
@@ -624,29 +565,6 @@ NSString *BDSKComputerName() {
         }
         @catch (id exception) {
             NSLog(@"server: \"%@\" trying to reach host %@", exception, proxyObject);
-            // since it's not accessible, remove it from future notifications (we know it has this key)
-            [self removeClientForIdentifier:key];
-        }
-    }
-}
-
-- (void)pingClients:(NSTimer *)timer;
-{
-    // copy the dictionary since it's mutable
-    NSDictionary *copy = [NSDictionary dictionaryWithDictionary:remoteClients];
-    NSEnumerator *e = [copy keyEnumerator];
-    id proxyObject;
-    NSString *key;
-    
-    while(key = [e nextObject]){
-        
-        proxyObject = [copy objectForKey:key];
-        
-        @try {
-            [proxyObject isAlive];
-        }
-        @catch (id exception) {
-            NSLog(@"server: \"%@\" could not reach host %@", exception, proxyObject);
             // since it's not accessible, remove it from future notifications (we know it has this key)
             [self removeClientForIdentifier:key];
         }

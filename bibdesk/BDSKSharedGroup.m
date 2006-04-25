@@ -41,10 +41,9 @@
 #import "BDSKPasswordController.h"
 #import "NSArray_BDSKExtensions.h"
 #import "NSImage+Toolbox.h"
-#import <libkern/OSAtomic.h>
+#import <BDSKAsynchronousDOServer.h>
 
 typedef struct _BDSKSharedGroupFlags {
-    volatile int32_t shouldKeepRunning __attribute__ ((aligned (4)));
     volatile int32_t isRetrieving __attribute__ ((aligned (4)));
     volatile int32_t authenticationFailed __attribute__ ((aligned (4)));
     volatile int32_t canceledAuthentication __attribute__ ((aligned (4)));
@@ -63,7 +62,6 @@ typedef struct _BDSKSharedGroupFlags {
 
 @protocol BDSKSharedGroupServerMainThread
 
-- (oneway void)setLocalServer:(byref id)anObject;
 - (oneway void)unarchivePublications:(bycopy NSData *)archive;
 - (int)runPasswordPrompt;
 - (int)runAuthenticationFailedAlert;
@@ -73,18 +71,12 @@ typedef struct _BDSKSharedGroupFlags {
 #pragma mark -
 
 // private class for DO server. We have it as a separate object so we don't get a retain loop, we remove it from the thread runloop in the group's dealloc
-@interface BDSKSharedGroupServer : NSObject <BDSKSharedGroupServerLocalThread, BDSKSharedGroupServerMainThread, BDSKClientProtocol> {
+@interface BDSKSharedGroupServer : BDSKAsynchronousDOServer <BDSKSharedGroupServerLocalThread, BDSKSharedGroupServerMainThread, BDSKClientProtocol> {
     NSNetService *service;              // service with information about the remote server (BDSKSharingServer)
     BDSKSharedGroup *group;             // the owner of the local server (BDSKSharedGroupServer)
     NSString *passwordName;             // [group name] copied since the local server doesn't retain the group
-    id remoteServer;                    // proxy for the remote server
-    id mainServer;                      // proxy for the main thread
-    id localServer;                     // proxy for the local server thread
-    NSConnection *mainThreadConnection; // so the local server thread can talk to the main thread
-    NSConnection *localThreadConnection; // so the main thread can talk to the local server thread
-    
+    id remoteServer;
     BDSKSharedGroupFlags flags;         // state variables
-
     NSString *uniqueIdentifier;         // used by the remote server
 }
 
@@ -98,9 +90,6 @@ typedef struct _BDSKSharedGroupFlags {
 - (id <BDSKSharingProtocol>)remoteServer;
 
 - (void)retrievePublicationsInBackground;
-
-- (void)runDOServerForPorts:(NSArray *)ports;
-- (void)stopDOServer;
 
 @end
 
@@ -285,34 +274,16 @@ static NSImage *unlockedIcon = nil;
         [service setDelegate:self];
         [service startMonitoring];
         
-        // set up a connection to communicate with the local background thread
-        NSPort *port1 = [NSPort port];
-        NSPort *port2 = [NSPort port];
-        
-        mainThreadConnection = [[NSConnection alloc] initWithReceivePort:port1 sendPort:port2];
-        [mainThreadConnection setRootObject:self];
-        [mainThreadConnection enableMultipleThreads];
-       
         // set up flags
         memset(&flags, 0, sizeof(flags));
-        flags.shouldKeepRunning = 1;
         
         // set up the authentication flag
         NSData *TXTData = [service TXTRecordData];
         if(TXTData)
             [self netService:service didUpdateTXTRecordData:TXTData];
         
-        // these will be set when the background thread sets up
-        localThreadConnection = nil;
-        mainServer = nil;
-        localServer = nil;
-        remoteServer = nil;
         // test this to see if we've registered with the remote host
         uniqueIdentifier = nil;
-        
-        // run a background thread to connect to the remote server
-        // this will connect back to the connection we just set up
-        [NSThread detachNewThreadSelector:@selector(runDOServerForPorts:) toTarget:self withObject:[NSArray arrayWithObjects:port2, port1, nil]];
     }
     return self;
 }
@@ -331,7 +302,7 @@ static NSImage *unlockedIcon = nil;
 // BDSKClientProtocol
 - (oneway void)setNeedsUpdate:(BOOL)flag { 
     // don't message the group during cleanup
-    if(flags.shouldKeepRunning == 1)
+    if([self shouldKeepRunning])
         [group setNeedsUpdate:flag]; 
 }
 
@@ -344,12 +315,6 @@ static NSImage *unlockedIcon = nil;
 - (BOOL)failedDownload { return flags.failedDownload == 1; }
 
 #pragma mark Proxies
-
-- (oneway void)setLocalServer:(byref id)anObject;
-{
-    [anObject setProtocolForProxy:@protocol(BDSKSharedGroupServerLocalThread)];
-    localServer = [anObject retain];
-}
 
 - (id <BDSKSharingProtocol>)remoteServer;
 {
@@ -386,8 +351,8 @@ static NSImage *unlockedIcon = nil;
             if(flags.canceledAuthentication == 0){
                 OSAtomicCompareAndSwap32Barrier(0, 1, (int32_t *)&flags.authenticationFailed);
                 // don't show the alert when we couldn't authenticate when cleaning up
-                if(flags.shouldKeepRunning == 1){
-                    [mainServer runAuthenticationFailedAlert];
+                if([self shouldKeepRunning]){
+                    [[self serverOnMainThread] runAuthenticationFailedAlert];
                 }
             }
             
@@ -450,10 +415,10 @@ static NSImage *unlockedIcon = nil;
     if(flags.authenticationFailed == 0)
         password = [BDSKPasswordController passwordHashedForKeychainServiceName:[BDSKPasswordController keychainServiceNameWithComputerName:passwordName]];
     
-    if(password == nil && flags.shouldKeepRunning == 1){   
+    if(password == nil && [self shouldKeepRunning]){   
         
         // run the prompt on the main thread
-        rv = [mainServer runPasswordPrompt];
+        rv = [[self serverOnMainThread] runPasswordPrompt];
         
         // retry from the keychain
         if (rv == BDSKPasswordReturn){
@@ -484,6 +449,9 @@ static NSImage *unlockedIcon = nil;
 
 #pragma mark ServerThread
 
+- (Protocol *)protocolForServerThread { return @protocol(BDSKSharedGroupServerLocalThread); }
+- (Protocol *)protocolForMainThread { return @protocol(BDSKSharedGroupServerMainThread); }
+
 - (oneway void)unarchivePublications:(bycopy NSData *)archive;
 {
     // retain as the autoreleasepool of our caller will be released as we're oneway
@@ -496,7 +464,7 @@ static NSImage *unlockedIcon = nil;
     [group setPublications:publications];
 }
 
-- (void)retrievePublicationsInBackground{ [localServer retrievePublications]; }
+- (void)retrievePublicationsInBackground{ [[self serverOnServerThread] retrievePublications]; }
 
 - (oneway void)retrievePublications;
 {
@@ -525,7 +493,7 @@ static NSImage *unlockedIcon = nil;
         }
         OSAtomicCompareAndSwap32Barrier(1, 0, (int32_t *)&flags.isRetrieving);
         // use the main thread; this avoids an extra (un)archiving between threads and it ends up posting notifications for UI updates
-        [mainServer unarchivePublications:archive];
+        [[self serverOnMainThread] unarchivePublications:archive];
     }
     @catch(id exception){
         NSLog(@"%@: discarding exception \"%@\" while retrieving publications", [self class], exception);
@@ -560,74 +528,7 @@ static NSImage *unlockedIcon = nil;
         }
     }
     
-    // clean up the connection in the local thread
-    [localThreadConnection setRootObject:nil];
-    [[localThreadConnection receivePort] invalidate];
-    [localThreadConnection invalidate];
-    [localThreadConnection release];
-    localThreadConnection = nil;
-    [mainServer release];
-    mainServer = nil;
-     
-    // clean up the connection in the main thread
-    // not sure why we can't do this on the main thread, probably because we are oneway
-    [mainThreadConnection setRootObject:nil];
-    [[mainThreadConnection receivePort] invalidate];
-    [mainThreadConnection invalidate];
-    [mainThreadConnection release];
-    mainThreadConnection = nil;
-    [localServer release];
-    localServer = nil;
-    
-    // this seems dirty, but we need to unblock and allow the thread to release us
-    CFRunLoopStop( CFRunLoopGetCurrent() );
-}
-
-- (void)runDOServerForPorts:(NSArray *)ports;
-{
-    // detach a new thread to run this
-    NSAssert([NSThread inMainThread] == NO, @"do not run the server in the main thread");
-    NSAssert(remoteServer == nil, @"server is already running");
-
-    NSAutoreleasePool *pool = [NSAutoreleasePool new];
-    
-    OSAtomicCompareAndSwap32Barrier(0, 1, (int32_t *)&flags.shouldKeepRunning);
-    
-    @try {
-        // we'll use this to communicate between threads on the localhost
-        localThreadConnection = [[NSConnection alloc] initWithReceivePort:[ports objectAtIndex:0] sendPort:[ports objectAtIndex:1]];
-        if(localThreadConnection == nil)
-            @throw @"Unable to get default connection";
-        [localThreadConnection setRootObject:self];
-        
-        mainServer = [[localThreadConnection rootProxy] retain];
-        [mainServer setProtocolForProxy:@protocol(BDSKSharedGroupServerMainThread)];
-        // handshake, this sets the proxy at the other side
-        [mainServer setLocalServer:self];
-        
-        do {
-            [pool release];
-            pool = [NSAutoreleasePool new];
-            CFRunLoopRun();
-        } while (flags.shouldKeepRunning == 1);
-    }
-    @catch(id exception) {
-        NSLog(@"Discarding exception \"%@\" raised in object %@", exception, self);
-        // reset the flag so we can start over; shouldn't be necessary
-        OSAtomicCompareAndSwap32Barrier(0, 1, (int32_t *)&flags.shouldKeepRunning);
-    }
-    
-    @finally {
-        [pool release];
-    }
-}
-
-- (void)stopDOServer;
-{
-    // we're in the main thread, so set the stop flag
-    OSAtomicCompareAndSwap32Barrier(1, 0, (int32_t *)&flags.shouldKeepRunning);
-    // this cleans up the connections, ports and proxies on both sides
-    [localServer cleanup];
+    [super cleanup];
 }
 
 @end
