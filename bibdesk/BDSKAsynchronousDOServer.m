@@ -38,14 +38,6 @@
 
 #import "BDSKAsynchronousDOServer.h"
 
-@protocol BDSKAsyncDOServerThread
-- (oneway void)cleanup; 
-@end
-
-@protocol BDSKAsyncDOServerMainThread
-- (oneway void)setLocalServer:(byref id)anObject;
-@end
-
 @implementation BDSKAsynchronousDOServer
 
 - (id)init;
@@ -136,6 +128,9 @@
         // handshake, this sets the proxy at the other side
         [serverOnMainThread setLocalServer:self];
         
+        // allow subclasses to do some custom setup
+        [self serverDidSetup];
+        
         do {
             [pool release];
             pool = [NSAutoreleasePool new];
@@ -152,6 +147,8 @@
         [pool release];
     }
 }
+
+- (void)serverDidSetup{}
 
 #pragma mark -
 #pragma mark API

@@ -95,9 +95,8 @@ NSString *BDSKComputerName() {
 #pragma mark -
 
 // private protocol for inter-thread messaging
-@protocol BDSKSharingServerLocalThread
+@protocol BDSKSharingServerLocalThread <BDSKAsyncDOServerThread>
 
-- (oneway void)cleanup;
 - (oneway void)notifyClientsOfChange;
 
 @end
@@ -173,54 +172,6 @@ NSString *BDSKComputerName() {
     if(sharedInstance == nil && (floor(NSAppKitVersionNumber) > NSAppKitVersionNumber10_3))
         sharedInstance = [[self alloc] init];
     return sharedInstance;
-}
-
-- (id)init
-{
-    if(self = [super init]){
-        [[NSNotificationCenter defaultCenter] addObserver:self
-                                                 selector:@selector(handleComputerNameChangedNotification:)
-                                                     name:BDSKComputerNameChangedNotification
-                                                   object:nil];
-        
-        [[NSNotificationCenter defaultCenter] addObserver:self
-                                                 selector:@selector(handlePasswordChangedNotification:)
-                                                     name:BDSKSharingPasswordChangedNotification
-                                                   object:nil];
-        
-        [[NSNotificationCenter defaultCenter] addObserver:self
-                                                 selector:@selector(queueDataChangedNotification:)
-                                                     name:BDSKDocumentControllerAddDocumentNotification
-                                                   object:nil];
-
-        [[NSNotificationCenter defaultCenter] addObserver:self
-                                                 selector:@selector(queueDataChangedNotification:)
-                                                     name:BDSKDocumentControllerRemoveDocumentNotification
-                                                   object:nil];                                                       
-                                                       
-        [[NSNotificationCenter defaultCenter] addObserver:self
-                                                 selector:@selector(queueDataChangedNotification:)
-                                                     name:BDSKDocAddItemNotification
-                                                   object:nil];
-
-        [[NSNotificationCenter defaultCenter] addObserver:self
-                                                 selector:@selector(queueDataChangedNotification:)
-                                                     name:BDSKDocDelItemNotification
-                                                   object:nil];
-        
-        [[NSNotificationCenter defaultCenter] addObserver:self
-                                                 selector:@selector(handleApplicationWillTerminate:)
-                                                     name:NSApplicationWillTerminateNotification
-                                                   object:nil];
-
-    }
-    return self;
-}
-
-- (void)dealloc
-{
-    [[NSNotificationCenter defaultCenter] removeObserver:self];
-    [super dealloc];
 }
 
 - (unsigned int)numberOfConnections { 
@@ -310,7 +261,44 @@ NSString *BDSKComputerName() {
     
     // our DO server will also use Bonjour, but this gives us a browseable name
     [netService publish];
+    
+    // register for notifications
+    NSNotificationCenter *nc = [NSNotificationCenter defaultCenter];
+    
+    [nc addObserver:self
+           selector:@selector(handleComputerNameChangedNotification:)
+               name:BDSKComputerNameChangedNotification
+             object:nil];
+    
+    [nc addObserver:self
+           selector:@selector(handlePasswordChangedNotification:)
+               name:BDSKSharingPasswordChangedNotification
+             object:nil];
+    
+    [nc addObserver:self
+           selector:@selector(queueDataChangedNotification:)
+               name:BDSKDocumentControllerAddDocumentNotification
+             object:nil];
 
+    [nc addObserver:self
+           selector:@selector(queueDataChangedNotification:)
+               name:BDSKDocumentControllerRemoveDocumentNotification
+             object:nil];                     
+                 
+    [nc addObserver:self
+           selector:@selector(queueDataChangedNotification:)
+               name:BDSKDocAddItemNotification
+             object:nil];
+
+    [nc addObserver:self
+           selector:@selector(queueDataChangedNotification:)
+               name:BDSKDocDelItemNotification
+             object:nil];
+    
+    [nc addObserver:self
+           selector:@selector(handleApplicationWillTerminate:)
+               name:NSApplicationWillTerminateNotification
+             object:nil];
 }
 
 - (void)disableSharing
@@ -323,6 +311,17 @@ NSString *BDSKComputerName() {
         [server stopDOServer];
         [server release];
         server = nil;
+        
+        // unregister for notifications
+        NSNotificationCenter *nc = [NSNotificationCenter defaultCenter];
+        
+        [nc removeObserver:self name:BDSKComputerNameChangedNotification object:nil];
+        [nc removeObserver:self name:BDSKSharingPasswordChangedNotification object:nil];
+        [nc removeObserver:self name:BDSKDocumentControllerAddDocumentNotification object:nil];
+        [nc removeObserver:self name:BDSKDocumentControllerRemoveDocumentNotification object:nil];                                                       
+        [nc removeObserver:self name:BDSKDocAddItemNotification object:nil];
+        [nc removeObserver:self name:BDSKDocDelItemNotification object:nil];
+        [nc removeObserver:self name:NSApplicationWillTerminateNotification object:nil];
     }
 }
 
@@ -404,38 +403,12 @@ NSString *BDSKComputerName() {
     if(self = [super init]){
         remoteClients = [[NSMutableDictionary alloc] init];
         remoteClientsLock = [[NSLock alloc] init];
-        
-        // setup our DO server that will handle requests for publications and passwords
-        @try {
-            NSPort *receivePort = [NSSocketPort port];
-            if([[NSSocketPortNameServer sharedInstance] registerPort:receivePort name:[BDSKSharingServer sharingName]] == NO)
-                @throw [NSString stringWithFormat:@"Unable to register port %@ and name %@", receivePort, [BDSKSharingServer sharingName]];
-            connection = [[NSConnection alloc] initWithReceivePort:receivePort sendPort:nil];
-            NSProtocolChecker *checker = [NSProtocolChecker protocolCheckerWithTarget:self protocol:@protocol(BDSKSharingProtocol)];
-            [connection setRootObject:checker];
-            
-            // so we get connection:shouldMakeNewConnection: messages
-            [connection setDelegate:self];
-                        
-        }
-        @catch(id exception) {
-            [connection setDelegate:nil];
-            [connection setRootObject:nil];
-            [connection release];
-            connection = nil;
-            
-            [self stopDOServer];
-            [self autorelease];
-            self = nil;
-        }
-        
     }
     return self;
 }
 
 - (void)dealloc
 {
-    BDSKLOGIMETHOD();
     [remoteClients release];
     [remoteClientsLock release];
     [super dealloc];
@@ -487,6 +460,8 @@ NSString *BDSKComputerName() {
 #pragma mark -
 #pragma mark Server Thread
 
+- (Protocol *)protocolForServerThread { return @protocol(BDSKSharingServerLocalThread); }
+
 - (BOOL)connection:(NSConnection *)parentConnection shouldMakeNewConnection:(NSConnection *)newConnection
 {
     // set the child connection's delegate so we get authentication messages
@@ -513,6 +488,26 @@ NSString *BDSKComputerName() {
         status = [authenticationData isEqual:myPasswordHashed];
     }
     return status;
+}
+
+- (void)serverDidSetup
+{
+    // setup our DO server that will handle requests for publications and passwords
+    @try {
+        NSPort *receivePort = [NSSocketPort port];
+        if([[NSSocketPortNameServer sharedInstance] registerPort:receivePort name:[BDSKSharingServer sharingName]] == NO)
+            @throw [NSString stringWithFormat:@"Unable to register port %@ and name %@", receivePort, [BDSKSharingServer sharingName]];
+        connection = [[NSConnection alloc] initWithReceivePort:receivePort sendPort:nil];
+        NSProtocolChecker *checker = [NSProtocolChecker protocolCheckerWithTarget:self protocol:@protocol(BDSKSharingProtocol)];
+        [connection setRootObject:checker];
+        
+        // so we get connection:shouldMakeNewConnection: messages
+        [connection setDelegate:self];
+                    
+    }
+    @catch(id exception) {
+        [self stopDOServer];
+    }
 }
 
 - (oneway void)cleanup

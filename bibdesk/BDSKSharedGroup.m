@@ -52,15 +52,13 @@ typedef struct _BDSKSharedGroupFlags {
 } BDSKSharedGroupFlags;    
 
 // private protocols for inter-thread messaging
-@protocol BDSKSharedGroupServerLocalThread
+@protocol BDSKSharedGroupServerLocalThread <BDSKAsyncDOServerThread>
 
-// -cleanup is declared oneway so it happens asynchronously when you disable sharing; otherwise we block the main thread until it completes, but we need to find out if blocking at cleanup on NSApplicationWillTerminate is necessary
-- (oneway void)cleanup; 
 - (oneway void)retrievePublications;
 
 @end
 
-@protocol BDSKSharedGroupServerMainThread
+@protocol BDSKSharedGroupServerMainThread <BDSKAsyncDOServerMainThread>
 
 - (oneway void)unarchivePublications:(bycopy NSData *)archive;
 - (int)runPasswordPrompt;
@@ -74,7 +72,6 @@ typedef struct _BDSKSharedGroupFlags {
 @interface BDSKSharedGroupServer : BDSKAsynchronousDOServer <BDSKSharedGroupServerLocalThread, BDSKSharedGroupServerMainThread, BDSKClientProtocol> {
     NSNetService *service;              // service with information about the remote server (BDSKSharingServer)
     BDSKSharedGroup *group;             // the owner of the local server (BDSKSharedGroupServer)
-    NSString *passwordName;             // [group name] copied since the local server doesn't retain the group
     id remoteServer;
     BDSKSharedGroupFlags flags;         // state variables
     NSString *uniqueIdentifier;         // used by the remote server
@@ -265,9 +262,6 @@ static NSImage *unlockedIcon = nil;
     if (self = [super init]) {
         group = aGroup; // don't retain since it retains us
         
-        // copy this since we may need it after the group is gone (authentication during cleanup)
-        passwordName = [[aGroup name] copy];
-        
         service = [aService retain];
         
         // monitor changes to the TXT data
@@ -293,7 +287,6 @@ static NSImage *unlockedIcon = nil;
     [service setDelegate:nil];
     [service release];
     [uniqueIdentifier release];
-    [passwordName release];
     [super dealloc];
 }
 
@@ -390,7 +383,7 @@ static NSImage *unlockedIcon = nil;
 {
     NSAssert([NSThread inMainThread] == 1, @"password controller must be run from the main thread");
     BDSKPasswordController *pwc = [[BDSKPasswordController alloc] init];
-    int rv = [pwc runModalForKeychainServiceName:[BDSKPasswordController keychainServiceNameWithComputerName:passwordName] message:[NSString stringWithFormat:@"%@ %@", NSLocalizedString(@"Enter password for", @""), passwordName]];
+    int rv = [pwc runModalForKeychainServiceName:[BDSKPasswordController keychainServiceNameWithComputerName:[service name]] message:[NSString stringWithFormat:@"%@ %@", NSLocalizedString(@"Enter password for", @""), [service name]]];
     [pwc close];
     [pwc release];
     return rv;
@@ -399,7 +392,7 @@ static NSImage *unlockedIcon = nil;
 - (int)runAuthenticationFailedAlert;
 {
     NSAssert([NSThread inMainThread] == 1, @"runAuthenticationFailedAlert must be run from the main thread");
-    return NSRunAlertPanel(NSLocalizedString(@"Authentication Failed", @""), [NSString stringWithFormat:NSLocalizedString(@"Incorrect password for BibDesk Sharing on server %@.  Reselect to try again.", @""), passwordName], nil, nil, nil);
+    return NSRunAlertPanel(NSLocalizedString(@"Authentication Failed", @""), [NSString stringWithFormat:NSLocalizedString(@"Incorrect password for BibDesk Sharing on server %@.  Reselect to try again.", @""), [service name]], nil, nil, nil);
 }
 
 // this can be called from any thread
@@ -413,7 +406,7 @@ static NSImage *unlockedIcon = nil;
     
     int rv = 1;
     if(flags.authenticationFailed == 0)
-        password = [BDSKPasswordController passwordHashedForKeychainServiceName:[BDSKPasswordController keychainServiceNameWithComputerName:passwordName]];
+        password = [BDSKPasswordController passwordHashedForKeychainServiceName:[BDSKPasswordController keychainServiceNameWithComputerName:[service name]]];
     
     if(password == nil && [self shouldKeepRunning]){   
         
@@ -422,7 +415,7 @@ static NSImage *unlockedIcon = nil;
         
         // retry from the keychain
         if (rv == BDSKPasswordReturn){
-            password = [BDSKPasswordController passwordHashedForKeychainServiceName:[BDSKPasswordController keychainServiceNameWithComputerName:passwordName]];
+            password = [BDSKPasswordController passwordHashedForKeychainServiceName:[BDSKPasswordController keychainServiceNameWithComputerName:[service name]]];
             // assume we succeeded; the exception handler for the connection will change it back if we fail again
             OSAtomicCompareAndSwap32Barrier(1, 0, (int32_t *)&flags.authenticationFailed);
         }else{
