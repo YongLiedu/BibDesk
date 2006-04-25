@@ -4,7 +4,7 @@
 //
 //  Created by Adam Maxwell on 01/27/05.
 /*
- This software is Copyright (c) 2005
+ This software is Copyright (c) 2005, 2006
  Adam Maxwell. All rights reserved.
 
  Redistribution and use in source and binary forms, with or without
@@ -97,6 +97,22 @@
     
     [aLock lock];
     [self removeObjectsForKeys:keyArray];
+    [aLock unlock];
+}
+
+- (unsigned)countUsingLock:(NSLock *)aLock;
+{
+    unsigned int count;
+    [aLock lock];
+    count = [self count];
+    [aLock unlock];
+    return count;
+}
+
+- (void)removeAllObjectsUsingLock:(NSLock *)aLock;
+{
+    [aLock lock];
+    [self removeAllObjects];
     [aLock unlock];
 }
 

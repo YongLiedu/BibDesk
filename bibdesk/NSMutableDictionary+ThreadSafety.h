@@ -5,7 +5,7 @@
 //  Created by Adam Maxwell on 01/27/05.
 //  From Apple TN2059
 /*
- This software is Copyright (c) 2005
+ This software is Copyright (c) 2005, 2006
  Adam Maxwell. All rights reserved.
 
  Redistribution and use in source and binary forms, with or without
@@ -48,6 +48,8 @@
 - (NSArray *)allKeysUsingLock:(NSLock *)aLock;
 - (NSArray *)allValuesUsingLock:(NSLock *)aLock;
 - (void)removeObjectsForKeys:(NSArray *)keyArray usingLock:(NSLock *)aLock;
+- (unsigned)countUsingLock:(NSLock *)aLock;
+- (void)removeAllObjectsUsingLock:(NSLock *)aLock;
 
 @end
 
