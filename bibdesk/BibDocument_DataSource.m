@@ -958,6 +958,36 @@
         }else{
             [groupTableView selectRowIndexes:[NSIndexSet indexSetWithIndex:0] byExtendingSelection:NO];
             
+            if([type isEqualToString:NSFilenamesPboardType]){
+                NSArray *filenames = [pboard propertyListForType:NSFilenamesPboardType];
+                if([filenames count] == 1){
+                    NSString *file = [filenames lastObject];
+                    if([[file pathExtension] caseInsensitiveCompare:@"aux"] == NSOrderedSame){
+                        NSString *auxString = [NSString stringWithContentsOfFile:file];
+                        
+                        if (auxString == nil)
+                            return NO;
+                        
+                        NSScanner *scanner = [NSScanner scannerWithString:auxString];
+                        NSString *key = nil;
+                        NSArray *items = nil;
+                        NSMutableArray *selItems = [NSMutableArray array];
+                        
+                        while ([scanner isAtEnd] == NO && 
+                               [scanner scanUpToString:@"\\bibcite{" intoString:NULL] && 
+                               [scanner scanString:@"\\bibcite{" intoString:NULL]) {
+                            if([scanner scanUpToString:@"}" intoString:&key]) {
+                                if (items = [itemsForCiteKeys arrayForKey:key])
+                                    [selItems addObjectsFromArray:items];
+                            }
+                        }
+                        [self highlightBibs:selItems];
+                        
+                        return YES;
+                    }
+                }
+            }
+            
             BOOL result = [self addPublicationsFromPasteboard:pboard error:NULL];
             
             if (result) [self updateUI];
@@ -1217,9 +1247,12 @@ available from the receiving pastebaord."*/
         
     NSString *fileName = [fileNames lastObject];
     NSSet *unreadableTypes = [NSSet caseInsensitiveStringSetWithObjects:@"pdf", @"ps", @"eps", @"doc", @"htm", @"textClipping", @"webloc", @"html", @"rtf", @"tiff", @"tif", @"png", @"jpg", @"jpeg", nil];
+    NSSet *readableTypes = [NSSet caseInsensitiveStringSetWithObjects:@"bib", @"aux", @"ris", @"fcgi", @"refman", nil];
     
     if([unreadableTypes containsObject:[fileName pathExtension]])
         return YES;
+    if([readableTypes containsObject:[fileName pathExtension]])
+        return NO;
     
     NSData *contentData = [[NSData alloc] initWithContentsOfFile:fileName];
     NSString *contentString = [[NSString alloc] initWithData:contentData encoding:NSUTF8StringEncoding];
