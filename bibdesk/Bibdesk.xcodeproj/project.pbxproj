@@ -571,6 +571,8 @@
 		F941B7EB08AA574200F04ECD /* BDSKOverlay.m in Sources */ = {isa = PBXBuildFile; fileRef = F941B7E908AA574200F04ECD /* BDSKOverlay.m */; };
 		F9463F4509436F7500CC4549 /* NSSet_BDSKExtensions.h in Headers */ = {isa = PBXBuildFile; fileRef = F9463F4309436F7500CC4549 /* NSSet_BDSKExtensions.h */; };
 		F9463F4609436F7500CC4549 /* NSSet_BDSKExtensions.m in Sources */ = {isa = PBXBuildFile; fileRef = F9463F4409436F7500CC4549 /* NSSet_BDSKExtensions.m */; };
+		F946DCE809FDC4B600D471DF /* BDSKAsynchronousDOServer.h in Headers */ = {isa = PBXBuildFile; fileRef = F946DCE609FDC4B600D471DF /* BDSKAsynchronousDOServer.h */; };
+		F946DCE909FDC4B600D471DF /* BDSKAsynchronousDOServer.m in Sources */ = {isa = PBXBuildFile; fileRef = F946DCE709FDC4B600D471DF /* BDSKAsynchronousDOServer.m */; };
 		F947A01C09AA80E4004C27FF /* PDFDocument_BDSKExtensions.m in Sources */ = {isa = PBXBuildFile; fileRef = F947A01B09AA80E4004C27FF /* PDFDocument_BDSKExtensions.m */; };
 		F9484D8D08D68C3200153BDA /* KFAppleScriptHandlerAdditionsCore.h in Headers */ = {isa = PBXBuildFile; fileRef = F9484D8908D68C3200153BDA /* KFAppleScriptHandlerAdditionsCore.h */; };
 		F9484D8E08D68C3200153BDA /* KFAppleScriptHandlerAdditionsCore.m in Sources */ = {isa = PBXBuildFile; fileRef = F9484D8A08D68C3200153BDA /* KFAppleScriptHandlerAdditionsCore.m */; };
@@ -1079,7 +1081,7 @@
 		3DFF35600816B55B0052F37C /* forward_small.tiff */ = {isa = PBXFileReference; lastKnownFileType = image.tiff; name = forward_small.tiff; path = Images/forward_small.tiff; sourceTree = "<group>"; };
 		3DFF35620816B5780052F37C /* reload_small.tiff */ = {isa = PBXFileReference; lastKnownFileType = image.tiff; name = reload_small.tiff; path = Images/reload_small.tiff; sourceTree = "<group>"; };
 		8D1107310486CEB800E47090 /* Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
-		8D1107320486CEB800E47090 /* BibDesk.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = BibDesk.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		8D1107320486CEB800E47090 /* BibDesk.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = BibDesk.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		CE1A7ED4090BDEB600ACC864 /* BDSKHeaderPopUpButtonCell.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BDSKHeaderPopUpButtonCell.h; sourceTree = "<group>"; };
 		CE1A7ED5090BDEB600ACC864 /* BDSKHeaderPopUpButtonCell.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BDSKHeaderPopUpButtonCell.m; sourceTree = "<group>"; };
 		CE1A7EDD090BDF1C00ACC864 /* BDSKHeaderPopUpButton.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BDSKHeaderPopUpButton.h; sourceTree = "<group>"; };
@@ -1387,6 +1389,8 @@
 		F941B7E908AA574200F04ECD /* BDSKOverlay.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BDSKOverlay.m; sourceTree = "<group>"; };
 		F9463F4309436F7500CC4549 /* NSSet_BDSKExtensions.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = NSSet_BDSKExtensions.h; sourceTree = "<group>"; };
 		F9463F4409436F7500CC4549 /* NSSet_BDSKExtensions.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = NSSet_BDSKExtensions.m; sourceTree = "<group>"; };
+		F946DCE609FDC4B600D471DF /* BDSKAsynchronousDOServer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BDSKAsynchronousDOServer.h; sourceTree = "<group>"; };
+		F946DCE709FDC4B600D471DF /* BDSKAsynchronousDOServer.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BDSKAsynchronousDOServer.m; sourceTree = "<group>"; };
 		F947A01A09AA80E4004C27FF /* PDFDocument_BDSKExtensions.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PDFDocument_BDSKExtensions.h; sourceTree = "<group>"; };
 		F947A01B09AA80E4004C27FF /* PDFDocument_BDSKExtensions.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = PDFDocument_BDSKExtensions.m; sourceTree = "<group>"; };
 		F9484D8908D68C3200153BDA /* KFAppleScriptHandlerAdditionsCore.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = KFAppleScriptHandlerAdditionsCore.h; path = ../bibdesk_vendorsrc/kenferry/KFAppleScriptHandlerAdditionsCore.h; sourceTree = SOURCE_ROOT; };
@@ -1903,6 +1907,7 @@
 		CE38FA8C091D260400BCB69D /* Managers */ = {
 			isa = PBXGroup;
 			children = (
+				F946DCE709FDC4B600D471DF /* BDSKAsynchronousDOServer.m */,
 				F9A6742907D04E8000782ACD /* BDSKFontManager.m */,
 				CE3B5E7B09CEDE470017D339 /* BDSKMacroResolver.m */,
 				F9DB863E08A07ADC00CB3D53 /* BDSKPreviewMessageQueue.m */,
@@ -2061,6 +2066,7 @@
 				F9E6C5970999323D00A8B97D /* BDSKParserProtocol.h */,
 				F9022C1B0758013E00C3F701 /* BDAlias.h */,
 				CE2209A5093639B0004D7D92 /* BDSKAlert.h */,
+				F946DCE609FDC4B600D471DF /* BDSKAsynchronousDOServer.h */,
 				3D824AA607D099C300FB2F67 /* BDSKBackgroundView.h */,
 				2730077607CF20B500F2E485 /* BDSKBorderlessKeyWindow.h */,
 				3D866C2608031CEC00FF1724 /* BDSKCharacterConversion.h */,
@@ -2504,6 +2510,7 @@
 				CE51922009E5755600E97C3A /* BDSKFindFieldEditor.h in Headers */,
 				F92EF32209E6242200A244D0 /* BDSKSharedGroup.h in Headers */,
 				CE573D2609F6A0300020EC16 /* NSIndexSet_BDSKExtensions.h in Headers */,
+				F946DCE809FDC4B600D471DF /* BDSKAsynchronousDOServer.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -3442,6 +3449,7 @@
 				CE51922109E5755600E97C3A /* BDSKFindFieldEditor.m in Sources */,
 				F92EF32309E6242200A244D0 /* BDSKSharedGroup.m in Sources */,
 				CE573D2709F6A0300020EC16 /* NSIndexSet_BDSKExtensions.m in Sources */,
+				F946DCE909FDC4B600D471DF /* BDSKAsynchronousDOServer.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
