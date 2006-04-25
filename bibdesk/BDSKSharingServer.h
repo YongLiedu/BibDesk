@@ -51,6 +51,7 @@ extern NSString *BDSKHostNameChangedNotification;
 
 - (oneway void)setNeedsUpdate:(BOOL)flag;
 - (BOOL)isAlive;
+- (oneway void)invalidate;
 
 @end
 

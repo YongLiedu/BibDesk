@@ -525,4 +525,11 @@ static NSImage *unlockedIcon = nil;
     [super cleanup];
 }
 
+- (oneway void)invalidate
+{
+    // set this to nil so we won't try to get back to the remote server
+    [uniqueIdentifier release];
+    uniqueIdentifier = nil;
+}
+
 @end

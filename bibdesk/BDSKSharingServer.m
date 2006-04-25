@@ -409,7 +409,6 @@ NSString *BDSKComputerName() {
 
 - (void)dealloc
 {
-    BDSKLOGIMETHOD();
     [remoteClients release];
     [remoteClientsLock release];
     [super dealloc];
@@ -515,8 +514,15 @@ NSString *BDSKComputerName() {
 {
     NSEnumerator *clientEnum = [[remoteClients allValuesUsingLock:remoteClientsLock] objectEnumerator];
     id client;
-    while (client = [clientEnum nextObject]) 
+    while (client = [clientEnum nextObject]) {
+        @try {
+            [client invalidate];
+        }
+        @catch (id exception) {
+            NSLog(@"%@: ignoring exception \"%@\" raised while invalidating client %@", [self class], exception, client);
+        }
         [[client connectionForProxy] invalidate];
+    }
     [remoteClients removeAllObjectsUsingLock:remoteClientsLock];
     [self performSelectorOnMainThread:@selector(notifyClientConnectionsChanged) withObject:nil waitUntilDone:NO];
     
