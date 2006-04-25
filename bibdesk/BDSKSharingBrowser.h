@@ -49,6 +49,7 @@ extern NSString *BDSKComputerName();
 }
 
 + (id)sharedBrowser;
++ (NSString *)requiredProtocolVersion;
 
 - (NSArray *)sharedGroups;
 

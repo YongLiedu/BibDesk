@@ -101,11 +101,18 @@ NSString *BDSKComputerName() {
 
 @end
 
-@interface BDSKSharingDOServer : BDSKAsynchronousDOServer {
+@interface BDSKSharingDOServer : BDSKAsynchronousDOServer <BDSKSharingServerLocalThread> {
     NSConnection *connection;
     NSMutableDictionary *remoteClients;
     NSLock *remoteClientsLock;
 }
+
++ (NSString *)requiredProtocolVersion;
+
+- (unsigned int)numberOfConnections;
+- (void)notifyClientConnectionsChanged;
+- (NSArray *)snapshotOfPublications;
+
 @end
 
 #pragma mark -
@@ -398,6 +405,10 @@ NSString *BDSKComputerName() {
 
 @implementation BDSKSharingDOServer
 
+// This is the minimal version for the client that we require
+// If we introduce incompatible changes in future, bump this to avoid sharing breakage
++ (NSString *)requiredProtocolVersion { return @"0"; }
+
 - (id)init
 {
     if(self = [super init]){
@@ -512,16 +523,20 @@ NSString *BDSKComputerName() {
 
 - (oneway void)cleanup
 {
-    NSEnumerator *clientEnum = [[remoteClients allValuesUsingLock:remoteClientsLock] objectEnumerator];
-    id client;
-    while (client = [clientEnum nextObject]) {
+    NSDictionary *copy = [NSDictionary dictionaryWithDictionary:remoteClients];
+    NSEnumerator *e = [copy keyEnumerator];
+    id proxyObject;
+    NSString *key;
+    
+    while(key = [e nextObject]){
+        proxyObject = [[copy objectForKey:key] objectForKey:@"object"];
         @try {
-            [client invalidate];
+            [proxyObject invalidate];
         }
         @catch (id exception) {
-            NSLog(@"%@: ignoring exception \"%@\" raised while invalidating client %@", [self class], exception, client);
+            NSLog(@"%@: ignoring exception \"%@\" raised while invalidating client %@", [self class], exception, proxyObject);
         }
-        [[client connectionForProxy] invalidate];
+        [[proxyObject connectionForProxy] invalidate];
     }
     [remoteClients removeAllObjectsUsingLock:remoteClientsLock];
     [self performSelectorOnMainThread:@selector(notifyClientConnectionsChanged) withObject:nil waitUntilDone:NO];
@@ -538,18 +553,25 @@ NSString *BDSKComputerName() {
     [super cleanup];
 }
 
-- (oneway void)registerClient:(byref id)clientObject forIdentifier:(bycopy NSString *)identifier;
+- (oneway void)registerClient:(byref id)clientObject forIdentifier:(bycopy NSString *)identifier version:(bycopy NSString *)version;
 {
-    NSParameterAssert(clientObject != nil && identifier != nil);
+    NSParameterAssert(clientObject != nil && identifier != nil && version != nil);
+    
+    // we don't register clients that have a version we don't support
+    if([version numericCompare:[BDSKSharingDOServer requiredProtocolVersion]] == NSOrderedAscending)
+        return;
+    
     [clientObject setProtocolForProxy:@protocol(BDSKClientProtocol)];
-    [remoteClients setObject:clientObject forKey:identifier usingLock:remoteClientsLock];
+    NSDictionary *clientInfo = [NSDictionary dictionaryWithObjectsAndKeys:clientObject, @"object", version, @"version", nil];
+    [remoteClients setObject:clientInfo forKey:identifier usingLock:remoteClientsLock];
     [self performSelectorOnMainThread:@selector(notifyClientConnectionsChanged) withObject:nil waitUntilDone:NO];
 }
 
 - (oneway void)removeClientForIdentifier:(bycopy NSString *)identifier;
 {
     NSParameterAssert(identifier != nil);
-    [[[remoteClients objectForKey:identifier usingLock:remoteClientsLock] connectionForProxy] invalidate];
+    id proxyObject = [[remoteClients objectForKey:identifier usingLock:remoteClientsLock] objectForKey:@"object"];
+    [[proxyObject connectionForProxy] invalidate];
     [remoteClients removeObjectForKey:identifier usingLock:remoteClientsLock];
     [self performSelectorOnMainThread:@selector(notifyClientConnectionsChanged) withObject:nil waitUntilDone:NO];
 }
@@ -565,7 +587,7 @@ NSString *BDSKComputerName() {
     
     while(key = [e nextObject]){
         
-        proxyObject = [copy objectForKey:key];
+        proxyObject = [[copy objectForKey:key] objectForKey:@"object"];
         
         @try {
             [proxyObject setNeedsUpdate:YES];

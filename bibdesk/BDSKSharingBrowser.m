@@ -51,6 +51,10 @@ NSString *BDSKNetServiceDomain = @"_bdsk._tcp.";
 
 static BDSKSharingBrowser *sharedBrowser = nil;
 
+// This is the minimal version for the server that we require
+// If we introduce incompatible changes in future, bump this to avoid sharing breakage
++ (NSString *)requiredProtocolVersion { return @"0"; }
+
 + (id)sharedBrowser{
     if(sharedBrowser == nil)
         sharedBrowser = [[BDSKSharingBrowser alloc] init];
@@ -86,7 +90,7 @@ static BDSKSharingBrowser *sharedBrowser = nil;
     // check the version for compatibility; this is our own versioning system
     if(TXTData)
         version = [NSString stringWithData:[[NSNetService dictionaryFromTXTRecordData:TXTData] objectForKey:BDSKTXTVersionKey] encoding:NSUTF8StringEncoding];
-    return [version isEqualToString:[BDSKSharingServer supportedProtocolVersion]];
+    return [version numericCompare:[BDSKSharingBrowser requiredProtocolVersion]] != NSOrderedAscending;
 }
 
 - (void)netServiceDidResolveAddress:(NSNetService *)aNetService

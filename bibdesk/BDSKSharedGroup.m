@@ -77,6 +77,8 @@ typedef struct _BDSKSharedGroupFlags {
     NSString *uniqueIdentifier;         // used by the remote server
 }
 
++ (NSString *)supportedProtocolVersion;
+
 - (id)initWithGroup:(BDSKSharedGroup *)aGroup andService:(NSNetService *)aService;
 
 - (BOOL)isRetrieving;
@@ -258,6 +260,9 @@ static NSImage *unlockedIcon = nil;
 
 @implementation BDSKSharedGroupServer
 
+// If we introduce incompatible changes in future, bump this to avoid sharing breakage
++ (NSString *)supportedProtocolVersion { return @"0"; }
+
 - (id)initWithGroup:(BDSKSharedGroup *)aGroup andService:(NSNetService *)aService;
 {
     if (self = [super init]) {
@@ -363,7 +368,7 @@ static NSImage *unlockedIcon = nil;
             uniqueIdentifier = [[[NSProcessInfo processInfo] globallyUniqueString] copy];
             @try {
                 NSProtocolChecker *checker = [NSProtocolChecker protocolCheckerWithTarget:self protocol:@protocol(BDSKClientProtocol)];
-                [proxy registerClient:checker forIdentifier:uniqueIdentifier];
+                [proxy registerClient:checker forIdentifier:uniqueIdentifier version:[BDSKSharedGroupServer supportedProtocolVersion]];
             }
             @catch(id exception) {
                 [uniqueIdentifier release];
