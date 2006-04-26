@@ -3039,6 +3039,10 @@ static int numberOfOpenEditors = 0;
 @implementation BDSKTabView
 
 - (BOOL)performKeyEquivalent:(NSEvent *)theEvent{
+    NSEventType type = [theEvent type];
+    // workaround for an NSForm bug: when selecting a button in a modal dialog after committing an edit it can try a keyEquivalent with the mouseUp event
+    if (type != NSKeyDown && type != NSKeyDown)
+        return NO;
     unichar c = [[theEvent charactersIgnoringModifiers] characterAtIndex:0];
     unsigned int flags = [theEvent modifierFlags];
     
