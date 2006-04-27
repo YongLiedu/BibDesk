@@ -1322,7 +1322,7 @@ NSString *BDSKWeblocFilePboardType = @"CorePasteboardFlavorType 0x75726C20";
 	int numSelectedPubs = [self numberOfSelectedPubs];
 	
     if (numSelectedPubs == 0 ||
-        [[self selectedGroups] firstObjectCommonWithArray:sharedGroups] != nil) {
+        [self hasSharedGroupsSelected] == YES) {
         return;
     }
 	
@@ -1807,7 +1807,7 @@ NSString *BDSKWeblocFilePboardType = @"CorePasteboardFlavorType 0x75726C20";
 - (IBAction)duplicate:(id)sender{
 	if ([documentWindow firstResponder] != tableView ||
 		[self numberOfSelectedPubs] == 0 ||
-        [[self selectedGroups] firstObjectCommonWithArray:sharedGroups] != nil) {
+        [self hasSharedGroupsSelected] == YES) {
 		NSBeep();
 		return;
 	}
@@ -2836,12 +2836,14 @@ NSString *BDSKWeblocFilePboardType = @"CorePasteboardFlavorType 0x75726C20";
 		[statusStr appendFormat:@"%i %@ ", shownPubsCount, ofStr];
 	}
 	[statusStr appendFormat:@"%i %@", groupPubsCount, (groupPubsCount == 1) ? NSLocalizedString(@"publication", @"publication") : NSLocalizedString(@"publications", @"publications")];
-	if (groupPubsCount != totalPubsCount &&
-        [[self selectedGroups] firstObjectCommonWithArray:sharedGroups] == nil) {
+	if ([self hasSharedGroupsSelected] == YES) {
+        // we can only one shared group selected at a time
+        [statusStr appendFormat:@" %@ \"%@\"", NSLocalizedString(@"in shared group", @"in shared group"), [[[self selectedGroups] lastObject] stringValue]];
+	} else if (groupPubsCount != totalPubsCount) {
 		NSString *groupStr = ([groupTableView numberOfSelectedRows] == 1) ?
-			[NSString stringWithFormat:@"%@ %@", NSLocalizedString(@"group", @"group"), [[[self selectedGroups] lastObject] stringValue]] :
+			[NSString stringWithFormat:@"%@ \"%@\"", NSLocalizedString(@"group", @"group"), [[[self selectedGroups] lastObject] stringValue]] :
 			NSLocalizedString(@"multiple groups", @"multiple groups");
-		[statusStr appendFormat:@" %@ %@ (%@ %i)", NSLocalizedString(@"in", @"in"), groupStr, ofStr, totalPubsCount];
+        [statusStr appendFormat:@" %@ %@ (%@ %i)", NSLocalizedString(@"in", @"in"), groupStr, ofStr, totalPubsCount];
 	}
 	[self setStatus:statusStr];
     [statusStr release];
@@ -3150,7 +3152,7 @@ NSString *BDSKWeblocFilePboardType = @"CorePasteboardFlavorType 0x75726C20";
 {
     unsigned int numberOfSelectedPubs = [self numberOfSelectedPubs];
 	if (numberOfSelectedPubs == 0 ||
-        [[self selectedGroups] firstObjectCommonWithArray:sharedGroups] != nil) return;
+        [self hasSharedGroupsSelected] == YES) return;
 	
 	NSEnumerator *selEnum = [[self selectedPublications] objectEnumerator];
 	BibItem *aPub;
@@ -3466,7 +3468,7 @@ NSString *BDSKWeblocFilePboardType = @"CorePasteboardFlavorType 0x75726C20";
 
 - (IBAction)duplicateTitleToBooktitle:(id)sender{
 	if ([self numberOfSelectedPubs] == 0 ||
-        [[self selectedGroups] firstObjectCommonWithArray:sharedGroups] != nil) return;
+        [self hasSharedGroupsSelected] == YES) return;
 	
 	BDSKAlert *alert = [BDSKAlert alertWithMessageText:NSLocalizedString(@"Overwrite Booktitle?", @"")
 										 defaultButton:NSLocalizedString(@"Don't Overwrite", @"Don't Overwrite")
@@ -3526,7 +3528,7 @@ NSString *BDSKWeblocFilePboardType = @"CorePasteboardFlavorType 0x75726C20";
 #pragma mark AutoFile stuff
 
 - (IBAction)consolidateLinkedFiles:(id)sender{
-    if ([[self selectedGroups] firstObjectCommonWithArray:sharedGroups] != nil) {
+    if ([self hasSharedGroupsSelected] == YES) {
         NSBeep();
         return;
     }

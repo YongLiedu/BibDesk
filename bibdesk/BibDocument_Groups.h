@@ -52,6 +52,7 @@
 - (unsigned int)numberOfSmartGroupsAtIndexes:(NSIndexSet *)indexes;
 - (unsigned int)numberOfSharedGroupsAtIndexes:(NSIndexSet *)indexes;
 - (BOOL)hasSharedGroupsAtIndexes:(NSIndexSet *)indexes;
+- (BOOL)hasSharedGroupsSelected;
 
 - (void)addSmartGroup:(BDSKSmartGroup *)group;
 - (void)removeSmartGroup:(BDSKSmartGroup *)group;

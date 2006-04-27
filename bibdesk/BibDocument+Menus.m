@@ -52,7 +52,7 @@
         return NO;
 	if ([documentWindow firstResponder] != tableView ||
 		[self numberOfSelectedPubs] == 0 ||
-        [self hasSharedGroupsAtIndexes:[groupTableView selectedRowIndexes]]) {
+        [self hasSharedGroupsSelected] == YES) {
 		// no selection or selection includes shared groups
 		return NO;
 	}
@@ -67,7 +67,7 @@
         return NO;
 	if ([documentWindow firstResponder] != tableView ||
 		[self numberOfSelectedPubs] == 0 ||
-        [self hasSharedGroupsAtIndexes:[groupTableView selectedRowIndexes]]) {
+        [self hasSharedGroupsSelected] == YES) {
 		// no selection
 		return NO;
 	}
@@ -209,7 +209,7 @@
         return NO;
 	if ([documentWindow firstResponder] != tableView ||
 		[self numberOfSelectedPubs] == 0 ||
-        [[self selectedGroups] firstObjectCommonWithArray:sharedGroups] != nil)
+        [self hasSharedGroupsSelected] == YES)
 		return NO;
 	return YES;
 }
@@ -247,7 +247,7 @@
 	int n = [self numberOfSelectedPubs];
 	
 	if (n == 0 ||
-        [[self selectedGroups] firstObjectCommonWithArray:sharedGroups] != nil) {
+        [self hasSharedGroupsSelected] == YES) {
 		// no selection
 		if (![[menuItem menu] supermenu]) {
 			s = NSLocalizedString(@"Delete", @"Delete");
@@ -428,7 +428,7 @@
 	
 	if ([self numberOfSelectedPubs] == 0 || 
         [documentWindow isKeyWindow] == NO || 
-        [self hasSharedGroupsAtIndexes:[groupTableView selectedRowIndexes]] == YES) {
+        [self hasSharedGroupsSelected] == YES) {
 		// no selection
 		s = NSLocalizedString(@"Duplicate Title to Booktitle", @"Duplicate Title to Booktitle");
 		[menuItem setTitle:s];
@@ -451,7 +451,7 @@
 	
 	if ([self numberOfSelectedPubs] == 0 || 
         [documentWindow isKeyWindow] == NO || 
-        [self hasSharedGroupsAtIndexes:[groupTableView selectedRowIndexes]] == YES) {
+        [self hasSharedGroupsSelected] == YES) {
 		// no selection
 		s = NSLocalizedString(@"Generate Cite Key", @"Generate Cite Key");
 		[menuItem setTitle:s];
@@ -475,7 +475,7 @@
 	
 	if ([self numberOfSelectedPubs] == 0 || 
         [documentWindow isKeyWindow] == NO || 
-        [self hasSharedGroupsAtIndexes:[groupTableView selectedRowIndexes]] == YES) {
+        [self hasSharedGroupsSelected] == YES) {
 		// no selection
 		s = [NSString stringWithFormat:@"%@%C",NSLocalizedString(@"Consolidate Linked Files", @"Consolidate Linked Files..."),0x2026];
 		[menuItem setTitle:s];
