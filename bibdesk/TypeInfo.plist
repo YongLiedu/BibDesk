@@ -115,10 +115,6 @@
 		<string>Year</string>
 		<key>ED</key>
 		<string>Editor</string>
-		<key>IP</key>
-		<string>Number</string>
-		<key>IS</key>
-		<string>Issn</string>
 		<key>JA</key>
 		<string>Journal</string>
 		<key>JF</key>

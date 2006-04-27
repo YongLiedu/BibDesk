@@ -76,6 +76,12 @@ static void mergePageNumbers(NSMutableDictionary *dict);
  @param      dict NSMutableDictionary containing a single RIS bibliography entry
  */
 static void chooseAuthors(NSMutableDictionary *dict);
+/*!
+@function   chooseNumber
+ @abstract   PubMed uses IP for the issue number, while others use the IS tag. 
+ @param      dict NSMutableDictionary containing a single RIS bibliography entry
+ */
+static void chooseNumber(NSMutableDictionary *dict);
 
 // creates a new BibItem from the dictionary and date passed; the date should be nil for paste/drag files
 // caller is responsible for releasing the returned item
@@ -269,6 +275,28 @@ static void chooseAuthors(NSMutableDictionary *dict){
 	}
 }
 
+static NSString *RISIpString = @"Ip";
+static NSString *RISIsString = @"Is";
+
+static void chooseNumber(NSMutableDictionary *dict)
+{
+    // PubMed uses IP for Number and IS for ISSN, while ISI and Scopus use IS for Number
+    NSString *ip = [dict objectForKey:RISIpString];
+    NSString *is = [dict objectForKey:RISIsString];
+    
+    if(ip != nil){
+        [dict setObject:ip forKey:BDSKNumberString];
+		[dict removeObjectForKey:RISIpString];
+        if(is != nil){
+            [dict setObject:is forKey:@"Issn"];
+            [dict removeObjectForKey:RISIsString];
+        }
+    }else if(is != nil){
+        [dict setObject:is forKey:BDSKNumberString];
+		[dict removeObjectForKey:RISIsString];
+	}
+}
+
 static BibItem *createBibItemWithPubMedDictionary(NSMutableDictionary *pubDict, NSCalendarDate *date)
 {
     
@@ -279,6 +307,8 @@ static BibItem *createBibItemWithPubMedDictionary(NSMutableDictionary *pubDict, 
     mergePageNumbers(pubDict);
 	// choose the authors from the FAU or AU tag as available
     chooseAuthors(pubDict);
+	// choose the authors from the IP or IS tag as available
+    chooseNumber(pubDict);
 	
     newBI = [[BibItem alloc] initWithType:@"article"
 								 fileType:BDSKBibtexString
@@ -302,9 +332,11 @@ static NSString *RISEndPageString = @"Ep";
 
 static void mergePageNumbers(NSMutableDictionary *dict)
 {
+    // PubMed uses IP for pages and IS for ISSN, while ISI and Scopus use IS for pages
     NSString *start = [dict objectForKey:RISStartPageString];
     NSString *end = [dict objectForKey:RISEndPageString];
-   if(start != nil && end != nil){
+    
+    if(start != nil && end != nil){
        NSMutableString *merge = [start mutableCopy];
        [merge appendString:@"--"];
        [merge appendString:end];
@@ -313,7 +345,7 @@ static void mergePageNumbers(NSMutableDictionary *dict)
        
        [dict removeObjectForKey:RISStartPageString];
        [dict removeObjectForKey:RISEndPageString];
-   }
+	}
 }
 
 @end
