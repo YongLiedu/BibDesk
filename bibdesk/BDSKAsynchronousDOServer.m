@@ -38,6 +38,11 @@
 
 #import "BDSKAsynchronousDOServer.h"
 
+@interface BDSKAsynchronousDOServer (Private)
+// avoid categories in the implementation, since categories and formal protocols don't mix
+- (void)runDOServerForPorts:(NSArray *)ports;
+@end
+
 @implementation BDSKAsynchronousDOServer
 
 - (id)init;

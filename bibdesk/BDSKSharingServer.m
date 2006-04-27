@@ -55,7 +55,6 @@
 #include <unistd.h>
 
 static id sharedInstance = nil;
-static int localConnectionCount = 0;
 
 // TXT record keys
 NSString *BDSKTXTAuthenticateKey = @"authenticate";
