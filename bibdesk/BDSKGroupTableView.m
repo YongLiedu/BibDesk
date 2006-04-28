@@ -142,34 +142,50 @@
     [self reloadData]; // otherwise the change isn't immediately visible
 }
 
-- (void)drawDropHighlightOnRow:(int)rowIndex usingColor:(NSColor *)highlightColor
+- (void)drawHighlightOnRows:(NSIndexSet *)rows usingColor:(NSColor *)highlightColor
 {
+    NSParameterAssert(rows != nil);
+    NSParameterAssert(highlightColor != nil);
+    
+    // don't highlight selected rows
+    NSMutableIndexSet *rowsToHighlight = [rows mutableCopy];
+    [rowsToHighlight removeIndexes:[self selectedRowIndexes]];
+    
     float lineWidth = 1.0f;
     float heightOffset = [self intercellSpacing].height / 2;
     
     [self lockFocus];
     [NSGraphicsContext saveGraphicsState];
     
-    NSRect drawRect = [self rectOfRow:rowIndex];
+    // use a dark stroke with a light center fill
+    [[highlightColor colorWithAlphaComponent:0.2] setFill];
+    [[highlightColor colorWithAlphaComponent:0.8] setStroke];
     
-    drawRect.size.width -= 2 * lineWidth;
-    drawRect.origin.x += lineWidth;
+    unsigned rowIndex = [rowsToHighlight firstIndex];
+    NSRect drawRect;
+    NSBezierPath *path;
     
-    drawRect.size.height -= heightOffset;
-    drawRect.origin.y += heightOffset/2.0;
+    while(rowIndex != NSNotFound){
+        
+        drawRect = [self rectOfRow:rowIndex];
+        drawRect.size.width -= 2 * lineWidth;
+        drawRect.origin.x += lineWidth;
+        
+        drawRect.size.height -= heightOffset;
+        drawRect.origin.y += heightOffset/2.0;
+        
+        path = [NSBezierPath bezierPathWithRoundRectInRect:drawRect radius:4.0];
+        [path setLineWidth:lineWidth];
+        [path fill];
+        [path stroke];
+        
+        rowIndex = [rowsToHighlight indexGreaterThanIndex:rowIndex];
+    }
     
-    NSBezierPath *path = [NSBezierPath bezierPathWithRoundRectInRect:drawRect radius:4.0];
-    
-    [path setLineWidth:lineWidth];
-    
-    [[highlightColor colorWithAlphaComponent:0.2] set];
-    [path fill];
-    
-    [[highlightColor colorWithAlphaComponent:0.8] set];
-    [path stroke];
+    [rowsToHighlight release];
     
     [NSGraphicsContext restoreGraphicsState];
-    [self unlockFocus];
+    [self unlockFocus];    
 }
 
 // we override this private method to draw something nicer than the default ugly black square
@@ -178,7 +194,7 @@
 
 -(void)_drawDropHighlightOnRow:(int)rowIndex
 {
-    [self drawDropHighlightOnRow:rowIndex usingColor:[NSColor alternateSelectedControlColor]];
+    [self drawHighlightOnRows:[NSIndexSet indexSetWithIndex:rowIndex] usingColor:[NSColor alternateSelectedControlColor]];
 }
 
 // public method for updating the highlights (as when another table's selection changes)
@@ -187,25 +203,10 @@
     [self setNeedsDisplay:YES];
 }
 
-- (void)drawHighlightOnRows:(NSIndexSet *)rows
-{
-    unsigned row = [rows firstIndex];
-    
-    while(row != NSNotFound){
-		if([self isRowSelected:row] == NO)
-			[self drawDropHighlightOnRow:row usingColor:[NSColor disabledControlTextColor]];
-        row = [rows indexGreaterThanIndex:row];
-    }
-}
-
 - (void)highlightSelectionInClipRect:(NSRect)clipRect
 {
     [super highlightSelectionInClipRect:clipRect];
-    
-    if(floor(NSAppKitVersionNumber) <= NSAppKitVersionNumber10_2)
-        return;
-    
-    [self drawHighlightOnRows:[[self delegate] indexesOfRowsToHighlightInRange:[self rowsInRect:clipRect] tableView:self]];
+    [self drawHighlightOnRows:[[self delegate] indexesOfRowsToHighlightInRange:[self rowsInRect:clipRect] tableView:self] usingColor:[NSColor disabledControlTextColor]];
 }
 
 - (void)setDelegate:(id <BDSKGroupTableDelegate>)aDelegate
