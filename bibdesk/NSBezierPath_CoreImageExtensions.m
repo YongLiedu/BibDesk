@@ -83,7 +83,7 @@
     
 	[self addClip];
 	
-    [[nsContext CIContext] drawImage:image atPoint:*(CGPoint *)&(aRect.origin) fromRect:*(CGRect *)&aRect];
+    [[nsContext CIContext] drawImage:image atPoint:*(CGPoint *)&(aRect.origin) fromRect:CGRectMake(0.0, 0.0, NSWidth(aRect), NSHeight(aRect))];
     
     [nsContext restoreGraphicsState];
 }
