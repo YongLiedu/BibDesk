@@ -317,12 +317,15 @@ static NSImage *cautionIconImage = nil;
 	NSImage *flippedImage;
 	NSAffineTransform *transform = [NSAffineTransform transform];
 	NSSize size = [self size];
+    NSRect rect = {NSZeroPoint, size};
 	NSAffineTransformStruct flip = {-1.0, 0.0, 0.0, 1.0, size.width, 0.0};	
 	flippedImage = [[[NSImage alloc] initWithSize:size] autorelease];
 	[flippedImage lockFocus];
-	[transform setTransformStruct:flip];
+    [NSGraphicsContext saveGraphicsState];
+    [transform setTransformStruct:flip];
 	[transform concat];
-	[self drawAtPoint:NSMakePoint(0, 0) fromRect:NSMakeRect(0, 0, size.width, size.height) operation:NSCompositeCopy fraction:1.0];
+	[self drawAtPoint:NSZeroPoint fromRect:rect operation:NSCompositeCopy fraction:1.0];
+    [NSGraphicsContext restoreGraphicsState];
 	[flippedImage unlockFocus];
 	return flippedImage;
 }
@@ -338,8 +341,10 @@ static NSImage *cautionIconImage = nil;
     [self drawInRect:iconRect fromRect:NSZeroRect operation:NSCompositeCopy fraction:1.0];
     
     // blend with black to create a highlighted appearance
+    [NSGraphicsContext saveGraphicsState];
     [[[NSColor blackColor] colorWithAlphaComponent:0.3] set];
     NSRectFillUsingOperation(iconRect, NSCompositeSourceAtop);
+    [NSGraphicsContext restoreGraphicsState];
     [newImage unlockFocus];
     
     return [newImage autorelease];
