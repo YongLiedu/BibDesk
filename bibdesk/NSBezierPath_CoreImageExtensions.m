@@ -68,9 +68,9 @@
     
     NSRect aRect = [self bounds];
     
-    [filter setValue:[CIVector vectorWithX:aRect.origin.x Y:aRect.origin.y] forKey:@"inputPoint0"];
+    [filter setValue:[CIVector vectorWithX:NSMinX(aRect) Y:NSMinY(aRect)] forKey:@"inputPoint0"];
     
-    CIVector *endVector = isVertical ? [CIVector vectorWithX:aRect.origin.x Y:NSHeight(aRect)] : [CIVector vectorWithX:NSWidth(aRect) Y:aRect.origin.y];
+    CIVector *endVector = isVertical ? [CIVector vectorWithX:NSMinX(aRect) Y:NSMaxY(aRect)] : [CIVector vectorWithX:NSMaxX(aRect) Y:NSMinY(aRect)];
     
     [filter setValue:endVector forKey:@"inputPoint1"];
     
