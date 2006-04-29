@@ -37,14 +37,14 @@
  */
 
 #import <Cocoa/Cocoa.h>
-#import <OmniAppKit/OmniAppKit.h>
 #import "BDSKFilter.h"
-#import "BDSKConditionController.h"
 
+@class BDSKConditionController;
+@class BDSKConditionsView;
 
 @interface BDSKFilterController : NSWindowController {
 	IBOutlet NSPopUpButton *conjunctionPopUp;
-	IBOutlet OAStackView *stackView;
+	IBOutlet BDSKConditionsView *conditionsView;
 	IBOutlet NSTextField *messageStartTextField;
 	IBOutlet NSTextField *messageEndTextField;
 	IBOutlet NSObjectController *ownerController;
@@ -65,6 +65,5 @@
 - (void)setConditionControllers:(NSArray *)newConditionControllers;
 - (BDSKConjunction)conjunction;
 - (void)setConjunction:(BDSKConjunction)newConjunction;
-- (NSArray *)subviewsForStackView:(OAStackView *)aStackView;
 
 @end

@@ -37,6 +37,8 @@
  */
 
 #import "BDSKFilterController.h"
+#import "BDSKConditionController.h"
+#import "BDSKConditionsView.h"
 
 
 @implementation BDSKFilterController
@@ -78,15 +80,17 @@
 	NSEnumerator *cEnum = [[filter conditions] objectEnumerator];
 	BDSKCondition *condition = nil;
 	BDSKConditionController *controller = nil;
+    BOOL canRemove = ([[filter conditions] count] > 1);
 	
 	[conditionControllers removeAllObjects];
 	while (condition = [cEnum nextObject]) {
 		controller = [[BDSKConditionController alloc] initWithFilterController:self condition:[[condition copy] autorelease]];
+        [controller setCanRemove:canRemove];
 		[conditionControllers addObject:[controller autorelease]];
+        [conditionsView addView:[controller view]];
 	}
 	
 	[ownerController setContent:self]; // fix for binding-to-nib-owner bug
-	[stackView setLayoutEnabled:YES display:NO];
 	[self updateUI];
 }
 
@@ -101,17 +105,6 @@
 		[messageEndTextField setHidden:NO];
 	}
 	[messageStartTextField sizeToFit];
-	
-	int dHeight = -[stackView frame].size.height;
-	if ([conditionControllers count]) 
-		dHeight += [[(BDSKConditionController *)[conditionControllers objectAtIndex:0] view] frame].size.height * [conditionControllers count];
-	NSRect winFrame = [[self window] frame];
-	winFrame.size.height += dHeight;
-	winFrame.origin.y -= dHeight;
-	
-	if (dHeight < 0) [stackView reloadSubviews];		
-	[[self window] setFrame:winFrame display:YES animate:YES];
-	if (dHeight >= 0) [stackView reloadSubviews];		
 }
 
 - (IBAction)set:(id)sender {
@@ -155,15 +148,23 @@
 
 - (void)insertNewConditionAfter:(BDSKConditionController *)aConditionController {
 	unsigned int index = [conditionControllers indexOfObject:aConditionController];
+    unsigned int count = [conditionControllers count];
 	if (index == NSNotFound) 
 		index = [conditionControllers count] - 1;
 	BDSKConditionController *newController = [[[BDSKConditionController alloc] initWithFilterController:self] autorelease];
-	[conditionControllers insertObject:newController atIndex:index + 1];
+    [newController setCanRemove:(count > 0)];
+	if (count == 1)
+        [[conditionControllers objectAtIndex:0] setCanRemove:YES];
+    [conditionControllers insertObject:newController atIndex:index + 1];
+    [conditionsView addView:[newController view]];
 	[self updateUI];
 }
 
 - (void)removeConditionController:(BDSKConditionController *)aConditionController {
 	[conditionControllers removeObject:aConditionController]; 
+    [conditionsView removeView:[aConditionController view]];
+	if ([conditionControllers count] == 1)
+        [[conditionControllers objectAtIndex:0] setCanRemove:NO];
 	[self updateUI];
 }
 
@@ -188,21 +189,6 @@
 
 - (void)setConjunction:(BDSKConjunction)newConjunction {
 	conjunction = newConjunction;
-}
-
-- (NSArray *)subviewsForStackView:(OAStackView *)aStackView {
-	NSMutableArray *views = [NSMutableArray arrayWithCapacity:[conditionControllers count]];
-	NSEnumerator *cEnum = [conditionControllers objectEnumerator];
-	BDSKConditionController *controller = nil;
-	NSView *stretchableView = [[[NSView alloc] init] autorelease];
-	[stretchableView setAutoresizingMask:NSViewHeightSizable];
-	
-	while (controller = [cEnum nextObject]) {
-		[controller setCanRemove:[self canRemoveCondition]];
-		[views addObject:[controller view]];
-	}
-	[views addObject:stretchableView]; // stackView needs at least one vertically resizable subview
-	return views;
 }
 
 - (void)windowWillClose:(NSNotification *)aNotification {

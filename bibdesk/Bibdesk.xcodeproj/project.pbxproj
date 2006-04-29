@@ -278,6 +278,8 @@
 		CE2AFE5A0911425F00E65C87 /* BDSKGroupCell.m in Sources */ = {isa = PBXBuildFile; fileRef = CE2AFE580911425F00E65C87 /* BDSKGroupCell.m */; };
 		CE30FAD70919713100CB1A19 /* BDSKStatusBar.h in Headers */ = {isa = PBXBuildFile; fileRef = CE30FAD50919713100CB1A19 /* BDSKStatusBar.h */; };
 		CE30FAD80919713100CB1A19 /* BDSKStatusBar.m in Sources */ = {isa = PBXBuildFile; fileRef = CE30FAD60919713100CB1A19 /* BDSKStatusBar.m */; };
+		CE34E9790A03C16B00222942 /* BDSKConditionsView.h in Headers */ = {isa = PBXBuildFile; fileRef = CE34E9770A03C16B00222942 /* BDSKConditionsView.h */; };
+		CE34E97A0A03C16B00222942 /* BDSKConditionsView.m in Sources */ = {isa = PBXBuildFile; fileRef = CE34E9780A03C16B00222942 /* BDSKConditionsView.m */; };
 		CE386D0709D7075C00B9D1F0 /* sharedFolderIcon.tiff in Resources */ = {isa = PBXBuildFile; fileRef = CE386D0609D7075C00B9D1F0 /* sharedFolderIcon.tiff */; };
 		CE38FB86091D946A00BCB69D /* BDSKCondition.h in Headers */ = {isa = PBXBuildFile; fileRef = CE38FB82091D946900BCB69D /* BDSKCondition.h */; };
 		CE38FB87091D946A00BCB69D /* BDSKCondition.m in Sources */ = {isa = PBXBuildFile; fileRef = CE38FB83091D946900BCB69D /* BDSKCondition.m */; };
@@ -1099,6 +1101,8 @@
 		CE2AFE580911425F00E65C87 /* BDSKGroupCell.m */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.objc; path = BDSKGroupCell.m; sourceTree = "<group>"; };
 		CE30FAD50919713100CB1A19 /* BDSKStatusBar.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BDSKStatusBar.h; sourceTree = "<group>"; };
 		CE30FAD60919713100CB1A19 /* BDSKStatusBar.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BDSKStatusBar.m; sourceTree = "<group>"; };
+		CE34E9770A03C16B00222942 /* BDSKConditionsView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BDSKConditionsView.h; sourceTree = "<group>"; };
+		CE34E9780A03C16B00222942 /* BDSKConditionsView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BDSKConditionsView.m; sourceTree = "<group>"; };
 		CE386D0609D7075C00B9D1F0 /* sharedFolderIcon.tiff */ = {isa = PBXFileReference; lastKnownFileType = image.tiff; name = sharedFolderIcon.tiff; path = Images/sharedFolderIcon.tiff; sourceTree = "<group>"; };
 		CE38FB82091D946900BCB69D /* BDSKCondition.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = BDSKCondition.h; sourceTree = "<group>"; };
 		CE38FB83091D946900BCB69D /* BDSKCondition.m */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.objc; path = BDSKCondition.m; sourceTree = "<group>"; };
@@ -1764,6 +1768,7 @@
 				3D824AA707D099C300FB2F67 /* BDSKBackgroundView.m */,
 				2730077707CF20B500F2E485 /* BDSKBorderlessKeyWindow.m */,
 				CEEC6C53093A411E00A64F54 /* BDSKCollapsibleView.m */,
+				CE34E9780A03C16B00222942 /* BDSKConditionsView.m */,
 				F9022C3D0758027800C3F701 /* BDSKCustomCiteTableView.m */,
 				CEEC70E0093B6EC200A64F54 /* BDSKDragImageView.m */,
 				F9022C410758027800C3F701 /* BDSKDragTableView.m */,
@@ -2075,6 +2080,7 @@
 				273007A407CF216700F2E485 /* BDSKComplexString.h */,
 				CE38FB82091D946900BCB69D /* BDSKCondition.h */,
 				CE38FB84091D946A00BCB69D /* BDSKConditionController.h */,
+				CE34E9770A03C16B00222942 /* BDSKConditionsView.h */,
 				F9022C3A0758027800C3F701 /* BDSKConverter.h */,
 				F96769FE0916B63900B42F6A /* BDSKCountedSet.h */,
 				F9022C3C0758027800C3F701 /* BDSKCustomCiteTableView.h */,
@@ -2511,6 +2517,7 @@
 				F92EF32209E6242200A244D0 /* BDSKSharedGroup.h in Headers */,
 				CE573D2609F6A0300020EC16 /* NSIndexSet_BDSKExtensions.h in Headers */,
 				F946DCE809FDC4B600D471DF /* BDSKAsynchronousDOServer.h in Headers */,
+				CE34E9790A03C16B00222942 /* BDSKConditionsView.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -3450,6 +3457,7 @@
 				F92EF32309E6242200A244D0 /* BDSKSharedGroup.m in Sources */,
 				CE573D2709F6A0300020EC16 /* NSIndexSet_BDSKExtensions.m in Sources */,
 				F946DCE909FDC4B600D471DF /* BDSKAsynchronousDOServer.m in Sources */,
+				CE34E97A0A03C16B00222942 /* BDSKConditionsView.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
