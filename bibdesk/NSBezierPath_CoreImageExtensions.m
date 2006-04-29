@@ -58,21 +58,19 @@
     
     // optimization recommended by Apple; if you're using the same filter and just changing its inputs, keep an instance of it
     static CIFilter *filter = nil;
-    if(filter == nil){
+    if(filter == nil)
         filter = [[CIFilter filterWithName:@"CILinearGradient"] retain];
-        
-        // this never changes, so we'll only set it once
-        [filter setValue:[CIVector vectorWithX:0.0 Y:0.0] forKey:@"inputPoint0"];
-    }
-
+    
+    
     // since we explicitly set all four inputs, we don't need to use [filter setDefaults]
     [filter setValue:startColor forKey:@"inputColor0"];
     [filter setValue:endColor forKey:@"inputColor1"];
     
-    CIVector *endVector;
-    
     NSRect aRect = [self bounds];
-    endVector = isVertical ? [CIVector vectorWithX:0.0 Y:NSHeight(aRect)] : [CIVector vectorWithX:NSWidth(aRect) Y:0.0];
+    
+    [filter setValue:[CIVector vectorWithX:aRect.origin.x Y:aRect.origin.y] forKey:@"inputPoint0"];
+    
+    CIVector *endVector = isVertical ? [CIVector vectorWithX:aRect.origin.x Y:NSHeight(aRect)] : [CIVector vectorWithX:NSWidth(aRect) Y:aRect.origin.y];
     
     [filter setValue:endVector forKey:@"inputPoint1"];
     
@@ -83,7 +81,7 @@
     
 	[self addClip];
 	
-    [[nsContext CIContext] drawImage:image atPoint:*(CGPoint *)&(aRect.origin) fromRect:CGRectMake(0.0, 0.0, NSWidth(aRect), NSHeight(aRect))];
+    [[nsContext CIContext] drawImage:image atPoint:*(CGPoint *)&(aRect.origin) fromRect:*(CGRect *)&aRect];
     
     [nsContext restoreGraphicsState];
 }
