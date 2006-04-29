@@ -208,6 +208,7 @@ typedef struct WLDragMapEntryStruct
 // note: IC is not thread safe
 - (NSURL *)internetConfigDownloadURL;
 {
+    NSAssert([NSThread inMainThread], @"InternetConfig is not thread safe");
     OSStatus err;
 	ICInstance inst;
 	ICAttr junk = 0;
@@ -236,87 +237,90 @@ typedef struct WLDragMapEntryStruct
     return [(id)pathURL autorelease];
 }
 
+#pragma mark Thread safe methods
+
+- (BOOL)createDirectoryAtPathWithNoAttributes:(NSString *)path
+{
+    NSParameterAssert(path != nil);
+    
+    NSURL *parent = [NSURL fileURLWithPath:[path stringByDeletingLastPathComponent]];
+    NSString *fileName = [path lastPathComponent];
+    unsigned length = [fileName length];
+    UniChar *name = (UniChar *)NSZoneMalloc(NULL, length * sizeof(UniChar));
+    [fileName getCharacters:name];
+    
+    FSRef parentFileRef, newFileRef;
+    BOOL success = CFURLGetFSRef((CFURLRef)parent, &parentFileRef);
+    OSErr err = noErr;
+    if(success)    
+        err = FSCreateDirectoryUnicode(&parentFileRef, length, name, kFSCatInfoNone, NULL, NULL, NULL, NULL);
+
+    NSZoneFree(NULL, name);
+    if(noErr != err)
+        success = NO;
+    
+    return success;
+}
+
+- (BOOL)fileExistsAtPathThreadSafe:(NSString *)path{
+    NSParameterAssert(path != nil);
+    NSURL *fileURL = [[NSURL alloc] initFileURLWithPath:path];
+    FSRef fileRef;
+    BOOL exists = (fileURL && CFURLGetFSRef((CFURLRef)fileURL, &fileRef));
+    [fileURL release];
+    return exists;
+}
+
+- (BOOL)deleteFileAtPath:(NSString *)path{
+    NSURL *fileURL = [NSURL fileURLWithPath:path];
+    FSRef fileRef;
+    BOOL success;
+    
+    // this means we return NO if the file didn't exist
+    if((success = CFURLGetFSRef((CFURLRef)fileURL, &fileRef)) == YES)
+        success = (noErr == FSDeleteObject(&fileRef));
+    
+    return success;
+}
+
+#pragma mark Spotlight support
+
+// not application-specific; append the bundle identifier
+- (NSString *)metadataFolderPath{
+    return [[NSSearchPathForDirectoriesInDomains(NSCachesDirectory, NSUserDomainMask, YES) lastObject] stringByAppendingPathComponent:@"Metadata"];
+}
+    
 - (NSString *)spotlightCacheFolderPathByCreating:(NSError **)anError{
 
     NSString *cachePath = nil;
     
-    @synchronized(self){
-        NSString *basePath = [[NSSearchPathForDirectoriesInDomains(NSCachesDirectory, NSUserDomainMask, YES) lastObject] stringByAppendingPathComponent:@"Metadata"];
-        NSAssert(basePath != nil, @"nil cache base path");
-        
-        volatile BOOL dirExists = YES;
-        
-        @try{
-            if(![self fileExistsAtPath:basePath])
-                dirExists = [self createDirectoryAtPath:basePath attributes:nil];
-        }
-        @catch(NSException *localException){
-            NSLog(@"%@: caught %@: %@", NSStringFromSelector(_cmd), [localException name], [localException reason]);
-        }
-        
-        if(!dirExists){
-            if(anError != nil)
-                *anError = [NSError errorWithDomain:NSCocoaErrorDomain code:NSFileWriteUnknownError userInfo:[NSDictionary dictionaryWithObjectsAndKeys:basePath, NSFilePathErrorKey, NSLocalizedString(@"Unable to create the cache directory.", @""), NSLocalizedDescriptionKey, nil]];
-            return nil;
-        }
-        
+    NSString *basePath = [self metadataFolderPath];
+    
+    BOOL dirExists = YES;
+    
+    if(![self fileExistsAtPathThreadSafe:basePath])
+        dirExists = [self createDirectoryAtPathWithNoAttributes:basePath];
+    
+    if(dirExists){
         cachePath = [basePath stringByAppendingPathComponent:[[NSBundle mainBundle] bundleIdentifier]];
-        volatile BOOL mdExists = YES;
-        
-        @try{
-            if(![self fileExistsAtPath:cachePath])
-                mdExists = [self createDirectoryAtPath:cachePath attributes:nil];
-        }
-        @catch(NSException *localException){
-            NSLog(@"%@: caught %@: %@", NSStringFromSelector(_cmd), [localException name], [localException reason]);
-        }
-        
-        if(!mdExists){
-            if(anError != nil)
-                *anError = [NSError errorWithDomain:NSCocoaErrorDomain code:NSFileWriteUnknownError userInfo:[NSDictionary dictionaryWithObjectsAndKeys:cachePath, NSFilePathErrorKey, NSLocalizedString(@"Unable to create the cache directory.", @""), NSLocalizedDescriptionKey, nil]];
-            return nil;
-        }
-        
+        if(![self fileExistsAtPath:cachePath])
+            dirExists = [self createDirectoryAtPathWithNoAttributes:cachePath];
     }
+
+    if(dirExists == NO && anError != nil){
+        *anError = [NSError errorWithDomain:NSCocoaErrorDomain code:NSFileWriteUnknownError userInfo:[NSDictionary dictionaryWithObjectsAndKeys:basePath, NSFilePathErrorKey, NSLocalizedString(@"Unable to create the cache directory.", @""), NSLocalizedDescriptionKey, nil]];
+    }
+        
     return cachePath;
 }
 
 - (BOOL)removeSpotlightCacheFolder{
-    
-    volatile BOOL removed;
-
-    @synchronized(self){
-        if(![self spotlightCacheFolderExists])
-            return NO;
-        
-        NSError *error = nil;
-        NSString *path = [self spotlightCacheFolderPathByCreating:&error];
-        if(error != nil)
-            return NO;
-                
-        @try{
-            removed = [self removeFileAtPath:path handler:nil];
-        }
-        @catch(NSException *localException){
-            removed = NO;
-            NSLog(@"%@: caught %@: %@", NSStringFromSelector(_cmd), [localException name], [localException reason]);
-        }
-    }
-    return removed;
-
+    return [self deleteFileAtPath:[self spotlightCacheFolderPathByCreating:NULL]];
 }
 
 - (BOOL)spotlightCacheFolderExists{
-    
-    volatile BOOL status;
-    
-    @synchronized(self){
-        NSString *path = [[NSSearchPathForDirectoriesInDomains(NSCachesDirectory, NSUserDomainMask, YES) lastObject] stringByAppendingPathComponent:@"Metadata"];
-        NSAssert(path != nil, @"nil caches path");
-        path = [path stringByAppendingPathComponent:[[NSBundle mainBundle] bundleIdentifier]];
-        status = [self fileExistsAtPath:path];
-    }
-    return status;
+    NSString *path = [[self metadataFolderPath] stringByAppendingPathComponent:[[NSBundle mainBundle] bundleIdentifier]];
+    return [self fileExistsAtPathThreadSafe:path];
 }
 
 - (BOOL)removeSpotlightCacheForItemsNamed:(NSArray *)itemNames{
@@ -331,45 +335,38 @@ typedef struct WLDragMapEntryStruct
 
 - (BOOL)removeSpotlightCacheForItemNamed:(NSString *)itemName{
 
-    volatile BOOL removed;
-    
-    @synchronized(self){
-        NSString *fileName = [itemName stringByAppendingPathExtension:@"bdskcache"];
-        NSError *error = nil;
-        
-        fileName = [[self spotlightCacheFolderPathByCreating:&error] stringByAppendingPathComponent:fileName];
-        
-        @try{
-            removed = [self removeFileAtPath:fileName handler:nil];
-        }
-        @catch(NSException *localException){
-            removed = NO;
-            NSLog(@"%@: caught %@: %@", NSStringFromSelector(_cmd), [localException name], [localException reason]);
-        }
-        
-    }
-    return removed;
-
+    NSString *fileName = [itemName stringByAppendingPathExtension:@"bdskcache"];
+    fileName = [[self spotlightCacheFolderPathByCreating:NULL] stringByAppendingPathComponent:fileName];
+    return [self deleteFileAtPath:fileName];
 }
+
+#pragma mark Webloc files
 
 - (BOOL)createWeblocFileAtPath:(NSString *)fullPath withURL:(NSURL *)destURL;
 {
-    @synchronized(self){
+    BOOL success = YES;
 
-        volatile BOOL success = YES;
-        
-        @try{
-            // create an empty file, since weblocs are just a resource
-            success = [self createFileAtPath:fullPath contents:nil attributes:nil];
-        }
-        @catch(NSException *localException){
-            NSLog(@"%@: caught %@: %@", NSStringFromSelector(_cmd), [localException name], [localException reason]);
-            success = NO;
-        }
-            
-        // in case it failed without raising an exception...
-        if(!success) return NO;
-        
+    // create an empty file, since weblocs are just a resource
+    NSURL *parent = [NSURL fileURLWithPath:[fullPath stringByDeletingLastPathComponent]];
+    NSString *fileName = [fullPath lastPathComponent];
+    unsigned length = [fileName length];
+    UniChar *name = (UniChar *)NSZoneMalloc(NULL, length * sizeof(UniChar));
+    [fileName getCharacters:name];
+    
+    FSRef parentFileRef, newFileRef;
+    success = CFURLGetFSRef((CFURLRef)parent, &parentFileRef);
+    OSErr err = noErr;
+    if(success)    
+        err = FSCreateFileUnicode(&parentFileRef, (UniCharCount)length, name, kFSCatInfoNone, NULL, &newFileRef, NULL);
+    NSZoneFree(NULL, name);
+    if(noErr != err)
+        success = NO;
+    
+    if(success){
+        NSURL *newFile = [(id)CFURLCreateFromFSRef(CFAllocatorGetDefault(), &newFileRef) autorelease];
+        OBASSERT([[newFile path] isEqual:fullPath]);
+        fullPath = [newFile path];
+                
         OFResourceFork *resourceFork = [[OFResourceFork alloc] initWithContentsOfFile:fullPath forkType:OFResourceForkType createFork:YES];
 
         NSString *urlString = [destURL absoluteString];
@@ -387,31 +384,28 @@ typedef struct WLDragMapEntryStruct
         [resourceFork setData:[WLDragMapEntry dragDataWithEntries:entries] forResourceType:'drag' resID:128];
         [entries release];
         [resourceFork release];
-        
     }
-    return YES;
+        
+    return success;
 }
 
 - (void)createWeblocFiles:(NSDictionary *)fullPathDict{
+        
+    NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
     
-    @synchronized(self){
+    @try {    
+        NSString *path;
+        NSEnumerator *pathEnum = [fullPathDict keyEnumerator];
         
-        NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
-        
-        @try {    
-            NSString *path;
-            NSEnumerator *pathEnum = [fullPathDict keyEnumerator];
-            
-            while(path = [pathEnum nextObject])
-                [self createWeblocFileAtPath:path withURL:[fullPathDict objectForKey:path]];
-        }
-        @catch(NSException *localException) {
-            NSLog(@"%@: discarding %@: %@", NSStringFromSelector(_cmd), [localException name], [localException reason]);
-        }
-        
-        @finally {
-            [pool release];
-        }
+        while(path = [pathEnum nextObject])
+            [self createWeblocFileAtPath:path withURL:[fullPathDict objectForKey:path]];
+    }
+    @catch(id localException) {
+        NSLog(@"%@: discarding %@", NSStringFromSelector(_cmd), localException);
+    }
+    
+    @finally {
+        [pool release];
     }
 }
 
