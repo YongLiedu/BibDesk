@@ -789,14 +789,14 @@
 		image = [[[NSImage alloc] initWithSize:size] autorelease];
         
         [image lockFocus];
-		
-		[[color colorWithAlphaComponent:0.2] set];
+        
+		[NSGraphicsContext saveGraphicsState];
+		[[color colorWithAlphaComponent:0.2] setFill];
 		[NSBezierPath fillRoundRectInRect:rect radius:4.0];
-		[[color colorWithAlphaComponent:0.8] set];
+		[[color colorWithAlphaComponent:0.8] setStroke];
 		[NSBezierPath setDefaultLineWidth:2.0];
 		[NSBezierPath strokeRoundRectInRect:rect radius:4.0];
 		
-		[NSGraphicsContext saveGraphicsState];
 		NSRectClip(NSInsetRect(rect, 2.0, 2.0));
         [attrString drawAtPoint:point];
 		[NSGraphicsContext restoreGraphicsState];
@@ -836,11 +836,13 @@
 		
 		[image drawInRect:rect fromRect:iconRect operation:NSCompositeCopy fraction:1.0];
 		
+        [NSGraphicsContext saveGraphicsState];
 		// draw a count of the rows being dragged, similar to Mail.app
-		[[NSColor redColor] set];
+		[[NSColor redColor] setFill];
 		[NSBezierPath fillHorizontalOvalAroundRect:countRect];
 		[countString drawInRect:countRect];
-		
+		[NSGraphicsContext restoreGraphicsState];
+        
 		[labeledImage unlockFocus];
 		
 		image = labeledImage;
