@@ -103,6 +103,7 @@
 		[messageStartTextField setStringValue:NSLocalizedString(@"Match", @"")];
 		[conjunctionPopUp setHidden:NO];
 		[messageEndTextField setHidden:NO];
+        [[messageStartTextField superview] setNeedsDisplayInRect:[messageStartTextField frame]];
 	}
 	[messageStartTextField sizeToFit];
 }
@@ -150,22 +151,24 @@
 	unsigned int index = [conditionControllers indexOfObject:aConditionController];
     unsigned int count = [conditionControllers count];
 	if (index == NSNotFound) 
-		index = [conditionControllers count] - 1;
+		index = count - 1;
 	BDSKConditionController *newController = [[[BDSKConditionController alloc] initWithFilterController:self] autorelease];
-    [newController setCanRemove:(count > 0)];
-	if (count == 1)
-        [[conditionControllers objectAtIndex:0] setCanRemove:YES];
     [conditionControllers insertObject:newController atIndex:index + 1];
     [conditionsView addView:[newController view]];
-	[self updateUI];
+    [newController setCanRemove:(count > 0)];
+	if (count == 1) {
+        [[conditionControllers objectAtIndex:0] setCanRemove:YES];
+        [self updateUI];
+    }
 }
 
 - (void)removeConditionController:(BDSKConditionController *)aConditionController {
 	[conditionControllers removeObject:aConditionController]; 
     [conditionsView removeView:[aConditionController view]];
-	if ([conditionControllers count] == 1)
+	if ([conditionControllers count] == 1) {
         [[conditionControllers objectAtIndex:0] setCanRemove:NO];
-	[self updateUI];
+        [self updateUI];
+    }
 }
 
 - (BOOL)canRemoveCondition {
