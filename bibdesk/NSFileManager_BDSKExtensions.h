@@ -75,4 +75,9 @@
 - (BOOL)removeSpotlightCacheForItemsNamed:(NSArray *)itemNames;
 - (BOOL)removeSpotlightCacheForItemNamed:(NSString *)itemName;
 
+- (BOOL)createDirectoryAtPathWithNoAttributes:(NSString *)path;
+- (BOOL)objectExistsAtFileURL:(NSURL *)fileURL;
+- (BOOL)deleteObjectAtFileURL:(NSURL *)fileURL error:(NSError **)error;
+- (BOOL)copyObjectAtURL:(NSURL *)srcURL toDirectoryAtURL:(NSURL *)dstURL error:(NSError **)error;
+
 @end

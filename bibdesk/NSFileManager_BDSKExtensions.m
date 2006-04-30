@@ -40,6 +40,8 @@
 #import "NSFileManager_BDSKExtensions.h"
 #import "BibPrefController.h"
 #import <OmniFoundation/OFResourceFork.h>
+#import "NSURL_BDSKExtensions.h"
+#import "FSCopyObject.h"
 
 /* 
 The WLDragMapHeaderStruct stuff was borrowed from CocoaTech Foundation, http://www.cocoatech.com (BSD licensed).  This is used for creating WebLoc files, which are a resource-only Finder clipping.  Apple provides no API for creating them, so apparently everyone just reverse-engineers the resource file format and creates them.  Since I have no desire to mess with ResEdit anymore, we're borrowing this code directly and using Omni's resource fork methods to create the file.  Note that you can check the contents of a resource fork in Terminal with `cat somefile/rsrc`, not that it's incredibly helpful. 
@@ -262,23 +264,79 @@ typedef struct WLDragMapEntryStruct
     return success;
 }
 
-- (BOOL)fileExistsAtPathThreadSafe:(NSString *)path{
-    NSParameterAssert(path != nil);
-    NSURL *fileURL = [[NSURL alloc] initFileURLWithPath:path];
+- (BOOL)objectExistsAtFileURL:(NSURL *)fileURL{
+    NSParameterAssert(fileURL != nil);
+    NSParameterAssert([fileURL isFileURL]);
     FSRef fileRef;
-    BOOL exists = (fileURL && CFURLGetFSRef((CFURLRef)fileURL, &fileRef));
-    [fileURL release];
+    
+    // we can use CFURLGetFSRef to see if a file exists, but it fails if there is an alias in the path before the last path component; this method should return YES even if the file is pointed to by an alias
+    CFURLRef resolvedURL = BDCopyFileURLResolvingAliases((CFURLRef)fileURL);
+    BOOL exists;
+    if(resolvedURL){
+        exists = YES;
+        CFRelease(resolvedURL);
+    } else {
+        exists = NO;
+    }
     return exists;
 }
 
-- (BOOL)deleteFileAtPath:(NSString *)path{
-    NSURL *fileURL = [NSURL fileURLWithPath:path];
+- (BOOL)deleteObjectAtFileURL:(NSURL *)fileURL error:(NSError **)error{
+    NSParameterAssert(fileURL != nil);
+    NSParameterAssert([fileURL isFileURL]);
+
     FSRef fileRef;
+    BOOL success = CFURLGetFSRef((CFURLRef)fileURL, &fileRef);
+    
+    // if we couldn't create the FSRef, try to resolve aliases
+    if(NO == success){
+        CFURLRef resolvedURL = BDCopyFileURLResolvingAliases((CFURLRef)fileURL);
+        if(resolvedURL){
+            success = CFURLGetFSRef(resolvedURL, &fileRef);
+            CFRelease(resolvedURL);
+        } else {
+            success = NO;
+        }
+    }
+    
+    if(NO == success && error != nil)
+        *error = [NSError errorWithDomain:@"NSCocoaErrorDomain" code:0 userInfo:[NSDictionary dictionaryWithObject:NSLocalizedString(@"File does not exist.", @"") forKey:NSLocalizedDescriptionKey]];
+    
+    if(YES == success){
+        success = (noErr == FSDeleteObject(&fileRef));
+        if(NO == success && error != nil)
+            *error = [NSError errorWithDomain:@"NSCocoaErrorDomain" code:0 userInfo:[NSDictionary dictionaryWithObject:NSLocalizedString(@"Unable to delete file.", @"") forKey:NSLocalizedDescriptionKey]];
+    }
+    
+    return success;
+}
+
+- (BOOL)copyObjectAtURL:(NSURL *)srcURL toDirectoryAtURL:(NSURL *)dstURL error:(NSError **)error;
+{
+    NSParameterAssert(srcURL != nil);
+    NSParameterAssert(dstURL != nil);
+    
+    FSRef srcFileRef, dstDirRef;
     BOOL success;
     
-    // this means we return NO if the file didn't exist
-    if((success = CFURLGetFSRef((CFURLRef)fileURL, &fileRef)) == YES)
-        success = (noErr == FSDeleteObject(&fileRef));
+    //@@ should we resolve aliases here?
+    success = CFURLGetFSRef((CFURLRef)srcURL, &srcFileRef);
+    if(success)
+        success = CFURLGetFSRef((CFURLRef)dstURL, &dstDirRef);
+    
+    OSErr err = noErr;
+    
+    if(success)
+        err = FSCopyObject(&srcFileRef, &dstDirRef, 0 /*recurse all directories*/, kFSCatInfoNone, kDupeActionStandard, NULL, FALSE, FALSE, NULL, NULL, NULL, NULL);
+
+    if(NO == success && error != nil){
+        NSString *errorMessage = nil;
+        if(GetMacOSStatusCommentString != NULL && noErr != err)
+            errorMessage = [NSString stringWithUTF8String:GetMacOSStatusCommentString(err)];
+        if(nil == errorMessage)
+            errorMessage = NSLocalizedString(@"Unable to copy file.", @"");
+        *error = [NSError errorWithDomain:NSOSStatusErrorDomain code:err userInfo:[NSDictionary dictionaryWithObject:errorMessage forKey:NSLocalizedDescriptionKey]];
+    }
     
     return success;
 }
@@ -298,7 +356,7 @@ typedef struct WLDragMapEntryStruct
     
     BOOL dirExists = YES;
     
-    if(![self fileExistsAtPathThreadSafe:basePath])
+    if(![self objectExistsAtFileURL:[NSURL fileURLWithPath:basePath]])
         dirExists = [self createDirectoryAtPathWithNoAttributes:basePath];
     
     if(dirExists){
@@ -315,12 +373,12 @@ typedef struct WLDragMapEntryStruct
 }
 
 - (BOOL)removeSpotlightCacheFolder{
-    return [self deleteFileAtPath:[self spotlightCacheFolderPathByCreating:NULL]];
+    return [self deleteObjectAtFileURL:[NSURL fileURLWithPath:[self spotlightCacheFolderPathByCreating:NULL]] error:NULL];
 }
 
 - (BOOL)spotlightCacheFolderExists{
     NSString *path = [[self metadataFolderPath] stringByAppendingPathComponent:[[NSBundle mainBundle] bundleIdentifier]];
-    return [self fileExistsAtPathThreadSafe:path];
+    return [self objectExistsAtFileURL:[NSURL fileURLWithPath:path]];
 }
 
 - (BOOL)removeSpotlightCacheForItemsNamed:(NSArray *)itemNames{
@@ -337,7 +395,7 @@ typedef struct WLDragMapEntryStruct
 
     NSString *fileName = [itemName stringByAppendingPathExtension:@"bdskcache"];
     fileName = [[self spotlightCacheFolderPathByCreating:NULL] stringByAppendingPathComponent:fileName];
-    return [self deleteFileAtPath:fileName];
+    return [self deleteObjectAtFileURL:[NSURL fileURLWithPath:fileName] error:NULL];
 }
 
 #pragma mark Webloc files
@@ -410,26 +468,19 @@ typedef struct WLDragMapEntryStruct
 }
 
 - (void)copyFilesInPathDictionary:(NSDictionary *)fullPathDict{
-    @synchronized(self){
         
-        NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
-        
-        @try {    
-            NSString *originalPath;
-            NSEnumerator *pathEnum = [fullPathDict keyEnumerator];
-            
-            while(originalPath = [pathEnum nextObject])
-                if([self copyPath:originalPath toPath:[fullPathDict valueForKey:originalPath] handler:nil] == NO)
-                    NSLog(@"Unable to copy %@ to %@", originalPath, [fullPathDict valueForKey:originalPath]);
-        }
-        @catch(NSException *localException) {
-            NSLog(@"%@: discarding %@: %@", NSStringFromSelector(_cmd), [localException name], [localException reason]);
-        }
-        
-        @finally {
-            [pool release];
-        }
+    NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
+    
+    NSString *originalPath;
+    NSEnumerator *pathEnum = [fullPathDict keyEnumerator];
+    NSError *error;
+    NSURL *dstDir;
+    while(originalPath = [pathEnum nextObject]){
+        dstDir = [NSURL fileURLWithPath:[[fullPathDict valueForKey:originalPath] stringByDeletingLastPathComponent]];
+        if([self copyObjectAtURL:[NSURL fileURLWithPath:originalPath] toDirectoryAtURL:dstDir error:&error])
+            NSLog(@"Unable to copy %@ to %@.  Error %@", originalPath, [fullPathDict valueForKey:originalPath], error);
     }
+    [pool release];
 }
 
 - (void)copyFilesInBackgroundThread:(NSDictionary *)fullPathDict{
