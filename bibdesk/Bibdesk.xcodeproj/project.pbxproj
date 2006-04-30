@@ -653,6 +653,10 @@
 		F9E6C9BA099A99ED00A8B97D /* NSFileManager_ExtendedAttributes.m in Sources */ = {isa = PBXBuildFile; fileRef = F9E6C936099A8FEF00A8B97D /* NSFileManager_ExtendedAttributes.m */; };
 		F9E7591B0942AE7C00CFB46F /* BDSKDateStringFormatter.h in Headers */ = {isa = PBXBuildFile; fileRef = F9E759190942AE7C00CFB46F /* BDSKDateStringFormatter.h */; };
 		F9E7591C0942AE7C00CFB46F /* BDSKDateStringFormatter.m in Sources */ = {isa = PBXBuildFile; fileRef = F9E7591A0942AE7C00CFB46F /* BDSKDateStringFormatter.m */; };
+		F9ED4DAC0A0437E20048D912 /* FSCopyObject.c in Sources */ = {isa = PBXBuildFile; fileRef = F9ED4DA80A0437E20048D912 /* FSCopyObject.c */; };
+		F9ED4DAD0A0437E20048D912 /* FSCopyObject.h in Headers */ = {isa = PBXBuildFile; fileRef = F9ED4DA90A0437E20048D912 /* FSCopyObject.h */; };
+		F9ED4DAE0A0437E20048D912 /* GenLinkedList.c in Sources */ = {isa = PBXBuildFile; fileRef = F9ED4DAA0A0437E20048D912 /* GenLinkedList.c */; };
+		F9ED4DAF0A0437E20048D912 /* GenLinkedList.h in Headers */ = {isa = PBXBuildFile; fileRef = F9ED4DAB0A0437E20048D912 /* GenLinkedList.h */; };
 		F9EF21B608B1572500AAC9A9 /* BDSKScrollableTextField.h in Headers */ = {isa = PBXBuildFile; fileRef = F9EF21B208B1572500AAC9A9 /* BDSKScrollableTextField.h */; };
 		F9EF21B708B1572600AAC9A9 /* BDSKScrollableTextField.m in Sources */ = {isa = PBXBuildFile; fileRef = F9EF21B308B1572500AAC9A9 /* BDSKScrollableTextField.m */; };
 		F9EF21B808B1572600AAC9A9 /* BDSKScrollableTextFieldCell.h in Headers */ = {isa = PBXBuildFile; fileRef = F9EF21B408B1572500AAC9A9 /* BDSKScrollableTextFieldCell.h */; };
@@ -1083,7 +1087,7 @@
 		3DFF35600816B55B0052F37C /* forward_small.tiff */ = {isa = PBXFileReference; lastKnownFileType = image.tiff; name = forward_small.tiff; path = Images/forward_small.tiff; sourceTree = "<group>"; };
 		3DFF35620816B5780052F37C /* reload_small.tiff */ = {isa = PBXFileReference; lastKnownFileType = image.tiff; name = reload_small.tiff; path = Images/reload_small.tiff; sourceTree = "<group>"; };
 		8D1107310486CEB800E47090 /* Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
-		8D1107320486CEB800E47090 /* BibDesk.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = BibDesk.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		8D1107320486CEB800E47090 /* BibDesk.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = BibDesk.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		CE1A7ED4090BDEB600ACC864 /* BDSKHeaderPopUpButtonCell.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BDSKHeaderPopUpButtonCell.h; sourceTree = "<group>"; };
 		CE1A7ED5090BDEB600ACC864 /* BDSKHeaderPopUpButtonCell.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BDSKHeaderPopUpButtonCell.m; sourceTree = "<group>"; };
 		CE1A7EDD090BDF1C00ACC864 /* BDSKHeaderPopUpButton.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BDSKHeaderPopUpButton.h; sourceTree = "<group>"; };
@@ -1478,6 +1482,10 @@
 		F9E6C936099A8FEF00A8B97D /* NSFileManager_ExtendedAttributes.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = NSFileManager_ExtendedAttributes.m; sourceTree = "<group>"; };
 		F9E759190942AE7C00CFB46F /* BDSKDateStringFormatter.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BDSKDateStringFormatter.h; sourceTree = "<group>"; };
 		F9E7591A0942AE7C00CFB46F /* BDSKDateStringFormatter.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BDSKDateStringFormatter.m; sourceTree = "<group>"; };
+		F9ED4DA80A0437E20048D912 /* FSCopyObject.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = FSCopyObject.c; sourceTree = "<group>"; };
+		F9ED4DA90A0437E20048D912 /* FSCopyObject.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = FSCopyObject.h; sourceTree = "<group>"; };
+		F9ED4DAA0A0437E20048D912 /* GenLinkedList.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = GenLinkedList.c; sourceTree = "<group>"; };
+		F9ED4DAB0A0437E20048D912 /* GenLinkedList.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = GenLinkedList.h; sourceTree = "<group>"; };
 		F9EF21B208B1572500AAC9A9 /* BDSKScrollableTextField.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BDSKScrollableTextField.h; sourceTree = "<group>"; };
 		F9EF21B308B1572500AAC9A9 /* BDSKScrollableTextField.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BDSKScrollableTextField.m; sourceTree = "<group>"; };
 		F9EF21B408B1572500AAC9A9 /* BDSKScrollableTextFieldCell.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BDSKScrollableTextFieldCell.h; sourceTree = "<group>"; };
@@ -1660,6 +1668,10 @@
 		29B97315FDCFA39411CA2CEA /* Other Sources */ = {
 			isa = PBXGroup;
 			children = (
+				F9ED4DA80A0437E20048D912 /* FSCopyObject.c */,
+				F9ED4DA90A0437E20048D912 /* FSCopyObject.h */,
+				F9ED4DAA0A0437E20048D912 /* GenLinkedList.c */,
+				F9ED4DAB0A0437E20048D912 /* GenLinkedList.h */,
 				F9484D8908D68C3200153BDA /* KFAppleScriptHandlerAdditionsCore.h */,
 				F9484D8A08D68C3200153BDA /* KFAppleScriptHandlerAdditionsCore.m */,
 				F9484D8B08D68C3200153BDA /* KFASHandlerAdditions-TypeTranslation.h */,
@@ -2518,6 +2530,8 @@
 				CE573D2609F6A0300020EC16 /* NSIndexSet_BDSKExtensions.h in Headers */,
 				F946DCE809FDC4B600D471DF /* BDSKAsynchronousDOServer.h in Headers */,
 				CE34E9790A03C16B00222942 /* BDSKConditionsView.h in Headers */,
+				F9ED4DAD0A0437E20048D912 /* FSCopyObject.h in Headers */,
+				F9ED4DAF0A0437E20048D912 /* GenLinkedList.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -3458,6 +3472,8 @@
 				CE573D2709F6A0300020EC16 /* NSIndexSet_BDSKExtensions.m in Sources */,
 				F946DCE909FDC4B600D471DF /* BDSKAsynchronousDOServer.m in Sources */,
 				CE34E97A0A03C16B00222942 /* BDSKConditionsView.m in Sources */,
+				F9ED4DAC0A0437E20048D912 /* FSCopyObject.c in Sources */,
+				F9ED4DAE0A0437E20048D912 /* GenLinkedList.c in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
