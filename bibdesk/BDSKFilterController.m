@@ -154,12 +154,13 @@
 		index = count - 1;
 	BDSKConditionController *newController = [[[BDSKConditionController alloc] initWithFilterController:self] autorelease];
     [conditionControllers insertObject:newController atIndex:index + 1];
-    [conditionsView addView:[newController view]];
+    [conditionsView insertView:[newController view] atIndex:index + 1];
     [newController setCanRemove:(count > 0)];
 	if (count == 1) {
         [[conditionControllers objectAtIndex:0] setCanRemove:YES];
         [self updateUI];
     }
+    [conditionsView scrollRectToVisible:[[newController view] frame]];
 }
 
 - (void)removeConditionController:(BDSKConditionController *)aConditionController {

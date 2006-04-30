@@ -81,22 +81,35 @@
         [self setFrameSize:newSize];
 }
 
-- (void)addView:(NSView *)view {
-    NSArray *subviews = [self subviews];
+- (void)insertView:(NSView *)view atIndex:(unsigned int)index{
+    NSArray *subviews = [[self subviews] copy];
     
-    NSView *lastView = [subviews lastObject]; // use the lastView to compute location of next view
+    float yPosition = (index > 0) ? NSMaxY([[subviews objectAtIndex:index - 1] frame]) + SEPARATION : 0.0f;
+    NSSize size = [view frame].size;
+    int i, count = [subviews count];
     
+    for (i = index; i < count; i++) 
+        [[subviews objectAtIndex:i] removeFromSuperview];
+    
+    [view setFrameOrigin:NSMakePoint(0.0l, yPosition)];
+    [view setFrameSize:NSMakeSize(NSWidth([self frame]), size.height)];
     [self addSubview:view];
-    if (lastView != nil) {
-        float yPosition = NSMaxY([lastView frame]) + SEPARATION;
+    
+    for (i = index; i < count; i++) {
+        yPosition = NSMaxY([view frame]) + SEPARATION;
+        view = [subviews objectAtIndex:i];
         [view setFrameOrigin:NSMakePoint(0.0l, yPosition)];
+        [self addSubview:view];
     }
     
-    NSSize size = [view frame].size;
-    [view setFrameSize:NSMakeSize(NSWidth([self frame]), size.height)];
+    [subviews release];
     
     [self updateSize];
     [self setNeedsDisplay:YES];
+}
+
+- (void)addView:(NSView *)view {
+    [self insertView:view atIndex:[[self subviews] count]];
 }
 
 - (void)removeView:(NSView *)view {
