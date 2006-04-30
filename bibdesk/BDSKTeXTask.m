@@ -89,8 +89,8 @@
 		NSFileManager *fm = [NSFileManager defaultManager];
         
 		workingDirPath = [dirPath retain];
-		if (![fm fileExistsAtPath:workingDirPath])
-			[fm createDirectoryAtPath:workingDirPath attributes:nil];
+		if (![fm objectExistsAtFileURL:[NSURL fileURLWithPath:workingDirPath]])
+			[fm createDirectoryAtPathWithNoAttributes:workingDirPath];
 		
 		applicationSupportPath = [[fm currentApplicationSupportPathForCurrentUser] retain];
 		texTemplatePath = [[applicationSupportPath stringByAppendingPathComponent:@"previewtemplate.tex"] retain];
@@ -138,7 +138,6 @@
 
 - (void)dealloc{
     [[NSNotificationCenter defaultCenter] removeObserver:self];
-	[[NSFileManager defaultManager] removeFileAtPath:workingDirPath handler:NULL];
 	[workingDirPath release];
     [applicationSupportPath release];
     [texTemplatePath release];
@@ -167,12 +166,10 @@
 - (void)applicationWillTerminate:(NSNotification *)aNotification{
     // this is not effective if the user does a copy command that calls a TeX task, then quits the app before pasting, since the pasteboard asks for the data after NSApplicationWillTerminate
     [self terminate];
+    [[NSFileManager defaultManager] deleteObjectAtFileURL:[NSURL fileURLWithPath:workingDirPath] error:NULL];
 }
 
 - (void)terminate{
-     
-    if(![self isProcessing])
-        return;
     
     NSDate *referenceDate = [NSDate date];
     
@@ -402,6 +399,8 @@
     NSString *pathExt = nil;
     
 	BOOL isDir;
+    NSURL *dstURL = [NSURL fileURLWithPath:workingDirPath];
+    NSError *error;
 		
 	// copy all user .cfg and .sty files from application support
 	fileEnum = [[fm directoryContentsAtPath:applicationSupportPath] objectEnumerator];
@@ -409,11 +408,11 @@
 		path = [applicationSupportPath stringByAppendingPathComponent:file];
         pathExt = [file pathExtension];
 		if([fm fileExistsAtPath:path isDirectory:&isDir] && !isDir &&
-		   ([pathExt isEqualToString:@"cfg"] ||
-		    [pathExt isEqualToString:@"sty"])){
+		   ([pathExt isEqual:@"cfg"] ||
+		    [pathExt isEqual:@"sty"])){
 			
-			if(![fm copyPath:path toPath:[workingDirPath stringByAppendingPathComponent:file] handler:nil])
-                NSLog(@"unable to copy helper file %@ to %@", file, workingDirPath);
+			if(![fm copyObjectAtURL:[NSURL fileURLWithPath:path] toDirectoryAtURL:dstURL error:&error])
+                NSLog(@"unable to copy helper file %@ to %@; error %@", file, workingDirPath, [error localizedDescription]);
 		}
 	}
 }
@@ -558,7 +557,7 @@
 - (BOOL)runPDFTeXTask{
     NSString *pdftexbinpath = [[OFPreferenceWrapper sharedPreferenceWrapper] objectForKey:BDSKTeXBinPathKey];
     
-    if(![[NSFileManager defaultManager] fileExistsAtPath:pdftexbinpath]){
+    if(![[NSFileManager defaultManager] objectExistsAtFileURL:[NSURL fileURLWithPath:pdftexbinpath]]){
         NSLog(@"runPDFTeXTask cannot continue: %@ not found", pdftexbinpath);
         return NO;    
     }
@@ -570,7 +569,7 @@
 - (BOOL)runBibTeXTask{
     NSString *bibtexbinpath = [[OFPreferenceWrapper sharedPreferenceWrapper] objectForKey:BDSKBibTeXBinPathKey];
 
-    if(![[NSFileManager defaultManager] fileExistsAtPath:bibtexbinpath]){        
+    if(![[NSFileManager defaultManager] objectExistsAtFileURL:[NSURL fileURLWithPath:bibtexbinpath]]){        
         NSLog(@"runBibTeXTask cannot continue: %@ not found", bibtexbinpath);
         return NO;     
     }    
