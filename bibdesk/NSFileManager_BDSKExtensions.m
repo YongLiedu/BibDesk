@@ -325,9 +325,15 @@ typedef struct WLDragMapEntryStruct
         success = CFURLGetFSRef((CFURLRef)dstURL, &dstDirRef);
     
     OSErr err = noErr;
-    
-    if(success)
-        err = FSCopyObject(&srcFileRef, &dstDirRef, 0 /*recurse all directories*/, kFSCatInfoNone, kDupeActionStandard, NULL, FALSE, FALSE, NULL, NULL, NULL, NULL);
+
+    if(success){
+        // FSCopyObjectSync is only available on 10.4.  We use it on 10.4, though, because FSCopyObject loses xattrs rdar://problem/4531816
+        // unfortunately, neither function copies Spotlight comments (and neither does NSFileManager) rdar://problem/4531819
+        if(FSCopyObjectSync != NULL)
+            err = FSCopyObjectSync(&srcFileRef, &dstDirRef, NULL, NULL, 0);
+        else
+            err = FSCopyObject(&srcFileRef, &dstDirRef, 0 /*recurse all directories*/, kFSCatInfoNone, kDupeActionStandard, NULL, FALSE, FALSE, NULL, NULL, NULL, NULL);
+    }
 
     if(NO == success && error != nil){
         NSString *errorMessage = nil;
