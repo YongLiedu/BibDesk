@@ -53,6 +53,7 @@
 #import "BDSKMacroResolver.h"
 
 static NSString *BibTeXParserInternalException = @"BibTeXParserInternalException";
+static NSLock *parserLock = nil;
 
 @interface BibTeXParser (Private)
 
@@ -67,6 +68,11 @@ static NSString *stringFromBTField(AST *field,  NSString *fieldName,  NSString *
 @end
 
 @implementation BibTeXParser
+
++ (void)initialize{
+    if(nil == parserLock)
+        parserLock = [[NSLock alloc] init];
+}
 
 /// libbtparse methods
 + (NSMutableArray *)itemsFromData:(NSData *)inData
@@ -122,6 +128,8 @@ static NSString *stringFromBTField(AST *field,  NSString *fieldName,  NSString *
 
     buf = (const char *) [inData bytes];
 
+    [parserLock lock];
+    
     bt_initialize();
     bt_set_stringopts(BTE_PREAMBLE, BTO_EXPAND);
     bt_set_stringopts(BTE_MACRODEF, BTO_MINIMAL);
@@ -321,6 +329,7 @@ static NSString *stringFromBTField(AST *field,  NSString *fieldName,  NSString *
         
         // docs say to return nil in an error condition, rather than checking the NSError itself, but we may want to return partial data
         if(error && outError) *outError = error;
+        [parserLock unlock];
     }
     return returnArray;
 }
@@ -334,6 +343,10 @@ static NSString *stringFromBTField(AST *field,  NSString *fieldName,  NSString *
     char *entryType = NULL;
     char *fieldName = NULL;
     
+    // assume the caller will try again at some point when it can get a lock
+    if([parserLock tryLock] == NO)
+        return nil;
+
     bt_initialize();
     bt_set_stringopts(BTE_MACRODEF, BTO_MINIMAL);
     boolean ok;
@@ -362,6 +375,7 @@ static NSString *stringFromBTField(AST *field,  NSString *fieldName,  NSString *
         field = NULL;
     }
     bt_cleanup();
+    [parserLock unlock];
     fclose(stream);
     return retDict;
 }
@@ -377,6 +391,11 @@ static NSString *stringFromBTField(AST *field,  NSString *fieldName,  NSString *
 	ushort options = BTO_MINIMAL;
 	boolean ok;
 	
+#warning throw exception?  is this method used?
+    // assume the caller will try again at some point when it can get a lock
+    if([parserLock tryLock] == NO)
+        return nil;
+    
 	bt_initialize();
 	NSError *error = nil;
     
@@ -393,7 +412,8 @@ static NSString *stringFromBTField(AST *field,  NSString *fieldName,  NSString *
 	bt_parse_entry_s(NULL, NULL, 1, options, NULL);
 	bt_free_ast(entry);
 	bt_cleanup();
-	
+	[parserLock lock];
+    
 	return valueString;
 }
 

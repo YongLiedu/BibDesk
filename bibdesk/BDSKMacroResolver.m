@@ -368,7 +368,7 @@ static BDSKGlobalMacroResolver *defaultMacroResolver;
     NSString *file;
     BOOL hadProblems;
     
-    fileMacroDefinitions = (NSMutableDictionary *)BDSKCreateCaseInsensitiveKeyMutableDictionary();
+    NSMutableDictionary *dict = (NSMutableDictionary *)BDSKCreateCaseInsensitiveKeyMutableDictionary();
     
     while (file = [fileE nextObject]) {
         NSString *fileContent = [NSString stringWithContentsOfFile:file];
@@ -390,10 +390,15 @@ static BDSKGlobalMacroResolver *defaultMacroResolver;
                 if([self macroDefinition:macroString dependsOnMacro:macroKey])
                     NSLog(@"Macro from file %@ leads to circular definition, ignored: %@ = %@", file, macroKey, [macroString stringAsBibTeXString]);
                 else
-                    [fileMacroDefinitions setObject:macroString forKey:macroKey];
+                    [dict setObject:macroString forKey:macroKey];
             }
         }
     }
+    // @@ hack to allow lazy loading in case this is called while opening a .bib file
+    if([dict count])
+        fileMacroDefinitions = dict;
+    else
+        [dict release];
 }
 
 - (void)synchronize{
