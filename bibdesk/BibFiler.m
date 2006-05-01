@@ -476,6 +476,7 @@ static BibFiler *sharedFiler = nil;
 - (BOOL)movePath:(NSString *)path toPath:(NSString *)newPath force:(BOOL)force error:(NSError **)error{
     NSString *resolvedPath = nil;
     NSString *resolvedNewPath = nil;
+    NSString *comment = nil;
     NSString *status = nil;
     NSString *fix = nil;
     int statusFlag = BDSKNoError;
@@ -548,7 +549,7 @@ static BibFiler *sharedFiler = nil;
         }
         if(statusFlag == BDSKNoError && ignoreMove == NO){
             // get the Finder comment (spotlight comment)
-            comment = [self commentAtURL:[NSURL fileURLWithPath:resolvedPath]];
+            comment = [self commentForURL:[NSURL fileURLWithPath:resolvedPath]];
             NSString *fileType = [[self fileAttributesAtPath:resolvedPath traverseLink:NO] objectForKey:NSFileType];
             NS_DURING
                 [self createPathToFile:resolvedNewPath attributes:nil]; // create parent directories if necessary (OmniFoundation)
