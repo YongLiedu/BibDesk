@@ -270,8 +270,16 @@ static NSParagraphStyle* bodyParagraphStyle = nil;
     NSEnumerator *reqFieldsE = [[typeMan requiredFieldsForType:pubType] objectEnumerator];
     NSEnumerator *optFieldsE = [[typeMan optionalFieldsForType:pubType] objectEnumerator];
     NSEnumerator *defFieldsE = [[typeMan userDefaultFieldsForType:pubType] objectEnumerator];
-    NSMutableArray *removeKeys = [[pubFields allKeysForObject:@""] mutableCopy];
   
+    NSMutableArray *removeKeys = [NSMutableArray array];
+    NSEnumerator *keyE = [[pubFields allKeysUsingLock:bibLock] objectEnumerator];
+    NSString *key;
+    
+    while (key = [keyE nextObject]) {
+        if ([[pubFields objectForKey:key usingLock:bibLock] isEqualAsComplexString:@""])
+            [removeKeys addObject:key];
+    }
+    
     while(fieldString = [reqFieldsE nextObject]){
         addkey(fieldString)
     }
@@ -287,7 +295,7 @@ static NSParagraphStyle* bodyParagraphStyle = nil;
 
     // now remove everything that's left in remove keys from pubfields
     [pubFields removeObjectsForKeys:removeKeys usingLock:bibLock];
-    [removeKeys release];
+    
 }
 
 - (void)dealloc{
