@@ -311,24 +311,114 @@ typedef struct WLDragMapEntryStruct
     return success;
 }
 
+// Sets a file ref descriptor from a path, without following symlinks
+// Based on OAAppKit's fillAEDescFromPath and an example in http://www.cocoadev.com/index.pl?FSMakeFSSpec
+static OSErr BDSKFillAEDescFromPath(AEDesc *fileRefDesc, NSString *path, BOOL isSymLink)
+{
+    FSRef fileRef;
+    OSErr err;
+
+    bzero(&fileRef, sizeof(fileRef));
+    
+    if (isSymLink) {
+        // FSPathMakeRef follows symlinks, so we need to do a bit more here to get the descriptor for the symlink itself
+        const UInt8 *parentPath;
+        FSRef parentRef;
+        HFSUniStr255 fileName;
+        
+        parentPath = (UInt8 *)[[path stringByDeletingLastPathComponent] fileSystemRepresentation];
+        err = FSPathMakeRef(parentPath, &parentRef, NULL);
+        if(err == noErr){
+            [[path lastPathComponent] getCharacters:fileName.unicode];
+            fileName.length = [[path lastPathComponent] length];
+            if (fileName.length == 0)
+                err = fnfErr;
+            else 
+                err = FSMakeFSRefUnicode(&parentRef, fileName.length, fileName.unicode, kTextEncodingFullName, &fileRef);
+        }
+    } else {
+        err = FSPathMakeRef((UInt8 *)[path fileSystemRepresentation], &fileRef, NULL);
+    }
+    
+    if (err != noErr) 
+        return err;
+
+    AEInitializeDesc(fileRefDesc);
+    AEReplaceDescData(typeFSRef, &fileRef, sizeof(fileRef), fileRefDesc);
+
+    // The Finder isn't very good at coercions, so we have to do this ourselves, however we don't want to loose symlinks
+    if (err == noErr && isSymLink == NO) {
+        err = AECoerceDesc(fileRefDesc, typeAlias, fileRefDesc);
+    }
+    if (err != noErr) 
+        AEDisposeDesc(fileRefDesc);
+    
+    return err;
+}
+
+static OSType finderSignatureBytes = 'MACS';
+
+// Sets the Finder comment (Spotlight comment) field via the Finder; this method takes 0.01s to execute, vs. 0.5s for NSAppleScript
+// Based on OAAppKit's setComment:forPath: and http://developer.apple.com/samplecode/MoreAppleEvents/MoreAppleEvents.html (which is dated)
 - (BOOL)setComment:(NSString *)comment forURL:(NSURL *)fileURL;
 {
     NSParameterAssert(comment != nil);
     NSParameterAssert([fileURL isFileURL]);
+    NSString *path = [fileURL path];
+    BOOL isSymLink = [[[self fileAttributesAtPath:path traverseLink:NO] objectForKey:NSFileType] isEqualToString:NSFileTypeSymbolicLink];
     BOOL success = YES;
+    NSAppleEventDescriptor *commentTextDesc;
+    OSErr err;
+    AEDesc fileDesc, builtEvent, replyEvent;
+    const char *eventFormat =
+        "'----': 'obj '{ "         // Direct object is the file comment we want to modify
+        "  form: enum(prop), "     //  ... the comment is an object's property...
+        "  seld: type(comt), "     //  ... selected by the 'comt' 4CC ...
+        "  want: type(prop), "     //  ... which we want to interpret as a property (not as e.g. text).
+        "  from: 'obj '{ "         // It's the property of an object...
+        "      form: enum(indx), "
+        "      want: type(file), " //  ... of type 'file' ...
+        "      seld: @,"           //  ... selected by an alias ...
+        "      from: null() "      //  ... according to the receiving application.
+        "              }"
+        "             }, "
+        "data: @";                 // The data is what we want to set the direct object to.
+
+    commentTextDesc = [NSAppleEventDescriptor descriptorWithString:comment];
+
+    err = BDSKFillAEDescFromPath(&fileDesc, path, isSymLink);
     
-    @try {
-        // Omni raises if there's a failure; we'll catch the exception and return a boolean
-        [self setComment:comment forPath:[fileURL path]];
+    if (err == noErr) {
+
+        AEInitializeDesc(&builtEvent);
+        AEInitializeDesc(&replyEvent);
+        err = AEBuildAppleEvent(kAECoreSuite, kAESetData,
+                                typeApplSignature, &finderSignatureBytes, sizeof(finderSignatureBytes),
+                                kAutoGenerateReturnID, kAnyTransactionID,
+                                &builtEvent, NULL,
+                                eventFormat,
+                                &fileDesc, [commentTextDesc aeDesc]);
+
+        AEDisposeDesc(&fileDesc);
+
+        if (err == noErr) {
+            err = AESend(&builtEvent, &replyEvent,
+                         kAENoReply, kAENormalPriority, kAEDefaultTimeout,
+                         NULL, NULL);
+
+            AEDisposeDesc(&builtEvent);
+            AEDisposeDesc(&replyEvent);
+        }
     }
-    @catch(id exception) {
+    
+    if (err != noErr) {
         NSLog(@"Unable to set comment for file %@", fileURL);
         success = NO;
     }
     return success;
 }
 
-// Sets the Finder comment (Spotlight comment) field via the Finder; this method takes 0.01s to execute, vs. 0.5s for NSAppleScript
+// Gets the Finder comment (Spotlight comment) field via the Finder; this method takes 0.01s to execute, vs. 0.5s for NSAppleScript
 // Based on setComment:forPath: and http://developer.apple.com/samplecode/MoreAppleEvents/MoreAppleEvents.html (which is dated)
 - (NSString *)commentForURL:(NSURL *)fileURL;
 {
@@ -359,7 +449,6 @@ typedef struct WLDragMapEntryStruct
     AEInitializeDesc(&builtEvent);
     AEInitializeDesc(&replyEvent);
     AEBuildError error;
-    OSType finderSignatureBytes = 'MACS';
 
     if(noErr == err)
         err = AEBuildAppleEvent(kAECoreSuite, kAEGetData,
