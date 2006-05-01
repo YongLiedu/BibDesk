@@ -93,7 +93,7 @@
 - (IBAction)selectAllPublicationsGroup:(id)sender;
 - (IBAction)editNewGroupWithSelection:(id)sender;
 - (NSData *)serializedSmartGroupsData;
-- (void)addSmartGroupsFromSerializedData:(NSData *)data;
+- (void)setSmartGroupsFromSerializedData:(NSData *)data;
 - (void)addSmartGroupSheetDidEnd:(NSWindow *)sheet returnCode:(int) returnCode contextInfo:(void *)contextInfo;
 
 - (void)handleFilterChangedNotification:(NSNotification *)notification;

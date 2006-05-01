@@ -1135,7 +1135,7 @@ The groupedPublications array is a subset of the publications array, developed b
 	return data;
 }
 
-- (void)addSmartGroupsFromSerializedData:(NSData *)data {
+- (void)setSmartGroupsFromSerializedData:(NSData *)data {
 	NSString *error = nil;
 	NSPropertyListFormat format = NSPropertyListXMLFormat_v1_0;
 	id plist = [NSPropertyListSerialization propertyListFromData:data
@@ -1168,7 +1168,7 @@ The groupedPublications array is a subset of the publications array, developed b
 		[filter release];
 	}
 	
-	[smartGroups addObjectsFromArray:array];
+	[smartGroups setArray:array];
 }
 
 

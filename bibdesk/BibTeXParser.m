@@ -228,7 +228,7 @@ static NSString *stringFromBTField(AST *field,  NSString *fieldName,  NSString *
                                         range = [commentStr rangeOfString:@"}" options:NSBackwardsSearch];
                                         if(range.location != NSNotFound){
                                             [commentStr deleteCharactersInRange:NSMakeRange(range.location,[commentStr length] - range.location)];
-                                            [(BibDocument *)aDocument addSmartGroupsFromSerializedData:[commentStr dataUsingEncoding:NSUTF8StringEncoding]];
+                                            [(BibDocument *)aDocument setSmartGroupsFromSerializedData:[commentStr dataUsingEncoding:NSUTF8StringEncoding]];
                                         }
                                     }
                                 }
