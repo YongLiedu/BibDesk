@@ -547,6 +547,8 @@ static BibFiler *sharedFiler = nil;
             }
         }
         if(statusFlag == BDSKNoError && ignoreMove == NO){
+            // get the Finder comment (spotlight comment)
+            comment = [self commentAtURL:[NSURL fileURLWithPath:resolvedPath]];
             NSString *fileType = [[self fileAttributesAtPath:resolvedPath traverseLink:NO] objectForKey:NSFileType];
             NS_DURING
                 [self createPathToFile:resolvedNewPath attributes:nil]; // create parent directories if necessary (OmniFoundation)
@@ -604,6 +606,9 @@ static BibFiler *sharedFiler = nil;
             *error = [NSError errorWithDomain:@"BibFilerErrorDomain" code:statusFlag userInfo:userInfo];
         }
         return NO;
+    }else if([NSString isEmptyString:comment] == NO){
+        // set the Finder comment (spotlight comment)
+        [self setComment:comment forURL:[NSURL fileURLWithPath:resolvedNewPath]];
     }
     return YES;
 }
