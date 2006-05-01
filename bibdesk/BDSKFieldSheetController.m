@@ -108,11 +108,14 @@
 	   didEndSelector:NULL
 		  contextInfo:NULL];
 	int returnCode = [NSApp runModalForWindow:[self window]];
-	
+    
 	[NSApp endSheet:[self window] returnCode:returnCode];
 	[[self window] orderOut:self];
     
     if(returnCode == NSOKButton){
+        // commit edits
+        if ([[self window] makeFirstResponder:[self window]] == NO)
+            [[self window] endEditingFor:nil];
         NSString *newField = [self field];
         return (newField == nil) ? @"" : [[newField copy] autorelease];
     }else{
