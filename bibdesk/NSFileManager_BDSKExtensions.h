@@ -75,6 +75,11 @@
 - (BOOL)removeSpotlightCacheForItemsNamed:(NSArray *)itemNames;
 - (BOOL)removeSpotlightCacheForItemNamed:(NSString *)itemName;
 
+// Finder comments
+- (BOOL)setComment:(NSString *)comment forURL:(NSURL *)fileURL;
+- (NSString *)commentForURL:(NSURL *)fileURL;
+
+// Thread safe API
 - (BOOL)createDirectoryAtPathWithNoAttributes:(NSString *)path;
 - (BOOL)objectExistsAtFileURL:(NSURL *)fileURL;
 - (BOOL)deleteObjectAtFileURL:(NSURL *)fileURL error:(NSError **)error;
