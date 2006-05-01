@@ -343,9 +343,8 @@ static NSString *stringFromBTField(AST *field,  NSString *fieldName,  NSString *
     char *entryType = NULL;
     char *fieldName = NULL;
     
-    // assume the caller will try again at some point when it can get a lock
-    if([parserLock tryLock] == NO)
-        return nil;
+    // @@ are we sure this cannot lead to a deadlock?
+    [parserLock lock];
 
     bt_initialize();
     bt_set_stringopts(BTE_MACRODEF, BTO_MINIMAL);
