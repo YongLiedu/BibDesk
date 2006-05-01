@@ -329,7 +329,7 @@ typedef struct WLDragMapEntryStruct
 }
 
 // Sets the Finder comment (Spotlight comment) field via the Finder; this method takes 0.01s to execute, vs. 0.5s for NSAppleScript
-// Based on setComment:forPath: and
+// Based on setComment:forPath: and http://developer.apple.com/samplecode/MoreAppleEvents/MoreAppleEvents.html (which is dated)
 - (NSString *)commentForURL:(NSURL *)fileURL;
 {
     NSParameterAssert([fileURL isFileURL]);
