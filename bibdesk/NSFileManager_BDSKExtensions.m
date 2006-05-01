@@ -371,10 +371,10 @@ typedef struct WLDragMapEntryStruct
     
     AEDisposeDesc(&fileDesc);
     
+    // AESend is the only function called in this method that is not thread safe
     if(noErr == err)
         err = AESend(&builtEvent, &replyEvent, kAEWaitReply, kAENormalPriority, kAEDefaultTimeout, NULL, NULL);
     AEDisposeDesc(&builtEvent);
-    
     
 	AEDesc replyDesc;
     AEInitializeDesc(&replyDesc);

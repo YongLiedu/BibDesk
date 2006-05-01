@@ -75,7 +75,7 @@
 - (BOOL)removeSpotlightCacheForItemsNamed:(NSArray *)itemNames;
 - (BOOL)removeSpotlightCacheForItemNamed:(NSString *)itemName;
 
-// Finder comments
+// Finder comments (not thread safe)
 - (BOOL)setComment:(NSString *)comment forURL:(NSURL *)fileURL;
 - (NSString *)commentForURL:(NSURL *)fileURL;
 
