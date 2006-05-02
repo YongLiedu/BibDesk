@@ -1194,14 +1194,14 @@ The groupedPublications array is a subset of the publications array, developed b
 - (NSData *)serializedGroupsData {
     NSMutableDictionary *dict = [NSMutableDictionary dictionaryWithCapacity:2];
 	NSMutableArray *array = [NSMutableArray arrayWithCapacity:[staticGroups count]];
-	NSArray *keys;
+	NSString *keys;
     NSDictionary *groupDict;
 	NSEnumerator *groupEnum = [staticGroups objectEnumerator];
 	BDSKGroup *group;
 	
     groupEnum = [staticGroups objectEnumerator];
 	while (group = [groupEnum nextObject]) {
-		keys = [[(BDSKStaticGroup *)group publications] valueForKeyPath:@"@distinctUnionOfObjects.citeKey"];
+		keys = [[[(BDSKStaticGroup *)group publications] valueForKeyPath:@"@distinctUnionOfObjects.citeKey"] componentsJoinedByString:@"'"];
         groupDict = [[NSDictionary alloc] initWithObjectsAndKeys:[group stringValue], @"group name", keys, @"keys", nil];
 		[array addObject:groupDict];
 		[groupDict release];
@@ -1210,7 +1210,7 @@ The groupedPublications array is a subset of the publications array, developed b
         [dict setObject:array forKey:@"static groups"];
     
 	groupEnum = [smartGroups objectEnumerator];
-	while (groupDict = [groupEnum nextObject]) {
+	while (group = [groupEnum nextObject]) {
 		groupDict = [[[(BDSKSmartGroup *)group filter] dictionaryValue] mutableCopy];
 		[(NSMutableDictionary *)groupDict setObject:[group stringValue] forKey:@"group name"];
 		[array addObject:groupDict];
@@ -1263,7 +1263,7 @@ The groupedPublications array is a subset of the publications array, developed b
 	
     groupEnum = [[plist objectForKey:@"static groups"] objectEnumerator];
 	while (groupDict = [groupEnum nextObject]) {
-        keys = [groupDict objectForKey:@"keys"];
+        keys = [[groupDict objectForKey:@"keys"] componentsSeparatedByString:@","];
         keyEnum = [keys objectEnumerator];
         pubArray = [[NSMutableArray alloc] initWithCapacity:[keys count]];
         while (key = [keyEnum nextObject]) 
