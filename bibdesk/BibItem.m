@@ -2538,6 +2538,8 @@ static NSParagraphStyle* bodyParagraphStyle = nil;
     // pubDate is a derived field based on Month and Year fields; we take the 15th day of the month to avoid edge cases
     if (key == nil || [BDSKAllFieldsString isEqualToString:key] || [BDSKYearString isEqualToString:key] || [BDSKMonthString isEqualToString:key]) {
 		NSString *yearValue = [pubFields objectForKey:BDSKYearString usingLock:bibLock];
+        if([yearValue isComplex])
+            yearValue = [(BDSKStringNode *)[[(BDSKComplexString *)yearValue nodes] objectAtIndex:0] value];
 		if (![NSString isEmptyString:yearValue]) {
 			NSString *monthValue = [pubFields objectForKey:BDSKMonthString usingLock:bibLock];
 			if([monthValue isComplex])
