@@ -128,7 +128,8 @@ static NSString *stringFromBTField(AST *field,  NSString *fieldName,  NSString *
 
     buf = (const char *) [inData bytes];
 
-    [parserLock lock];
+    if([parserLock tryLock] == NO)
+        [NSException raise:NSInternalInconsistencyException format:@"Attempt to reenter the parser.  Please report this error."];
     
     bt_initialize();
     bt_set_stringopts(BTE_PREAMBLE, BTO_EXPAND);
@@ -343,8 +344,8 @@ static NSString *stringFromBTField(AST *field,  NSString *fieldName,  NSString *
     char *entryType = NULL;
     char *fieldName = NULL;
     
-    // @@ are we sure this cannot lead to a deadlock?
-    [parserLock lock];
+    if([parserLock tryLock] == NO)
+        [NSException raise:NSInternalInconsistencyException format:@"Attempt to reenter the parser.  Please report this error."];
 
     bt_initialize();
     bt_set_stringopts(BTE_MACRODEF, BTO_MINIMAL);
@@ -390,10 +391,8 @@ static NSString *stringFromBTField(AST *field,  NSString *fieldName,  NSString *
 	ushort options = BTO_MINIMAL;
 	boolean ok;
 	
-#warning throw exception?  is this method used?
-    // assume the caller will try again at some point when it can get a lock
     if([parserLock tryLock] == NO)
-        return nil;
+        [NSException raise:NSInternalInconsistencyException format:@"Attempt to reenter the parser.  Please report this error."];
     
 	bt_initialize();
 	NSError *error = nil;
@@ -411,7 +410,7 @@ static NSString *stringFromBTField(AST *field,  NSString *fieldName,  NSString *
 	bt_parse_entry_s(NULL, NULL, 1, options, NULL);
 	bt_free_ast(entry);
 	bt_cleanup();
-	[parserLock lock];
+	[parserLock unlock];
     
 	return valueString;
 }
