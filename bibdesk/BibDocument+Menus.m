@@ -645,11 +645,9 @@
 	if ([groupTableView numberOfSelectedRows] == 1 && row > 0) {
 		// single smart group selection
         BDSKGroup *group = [self objectInGroupsAtIndex:row];
-		if (group == lastImportGroup) 
-			return NO;
-        else if ([group isSmart] == YES)
+		if ([group isSmart] == YES)
 			return YES;
-        else if ([group isShared] == NO && [[[BibTypeManager sharedManager] personFieldsSet] containsObject:currentGroupField])
+        else if ([group isCategory] == YES && [[[BibTypeManager sharedManager] personFieldsSet] containsObject:currentGroupField])
 			return YES;
 		else
 			return NO;
@@ -727,7 +725,7 @@
 }
 
 - (BOOL)validateEditNewGroupWithSelectionMenuItem:(NSMenuItem *)menuItem {
-    return ([self numberOfSelectedPubs] > 0 && [[[BibTypeManager sharedManager] singleValuedGroupFields] containsObject:[self currentGroupField]]  == NO && [[[BibTypeManager sharedManager] personFieldsSet] containsObject:[self currentGroupField]] == NO);
+    return ([self numberOfSelectedPubs] > 0);
 }
 
 - (BOOL)validateRevertDocumentToSavedMenuItem:(NSMenuItem *)menuItem {
@@ -841,7 +839,7 @@
 	else if (act == @selector(changeGroupFieldAction:)) {
         return [self validateChangeGroupFieldMenuItem:menuItem];
 	}
-	else if (act == @selector(removeSmartGroupAction:)) {
+	else if (act == @selector(removeSelectedGroups:)) {
         return [self validateRemoveSmartGroupMenuItem:menuItem];
 	}
 	else if (act == @selector(editGroupAction:)) {

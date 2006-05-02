@@ -224,6 +224,10 @@
 			[(BDSKSmartGroup *)group setName:object];
 			[[self undoManager] setActionName:NSLocalizedString(@"Rename Smart Group",@"Rename smart group")];
 			[self sortGroupsByKey:sortGroupsKey];
+		}else if([group isStatic] == YES){
+			[(BDSKStaticGroup *)group setName:object];
+			[[self undoManager] setActionName:NSLocalizedString(@"Rename Static Group",@"Rename static group")];
+			[self sortGroupsByKey:sortGroupsKey];
 		}else{
 			NSArray *pubs = [groupedPublications copy];
 			[self movePublications:pubs fromGroup:group toGroupNamed:object];
@@ -902,7 +906,7 @@
             return NSDragOperationCopy;
         }
         // not sure why this check is necessary, but it silences an error message when you drag off the list of items
-        if([info draggingSource] == groupTableView || row >= [tv numberOfRows] || NSLocationInRange(row, [self rangeOfSimpleGroups]) == NO || (type == nil && [info draggingSource] != tableView)) 
+        if([info draggingSource] == groupTableView || row >= [tv numberOfRows] || (NSLocationInRange(row, [self rangeOfSimpleGroups]) == NO && NSLocationInRange(row, [self rangeOfStaticGroups]) == NO) || (type == nil && [info draggingSource] != tableView)) 
             return NSDragOperationNone;
         
         // here we actually target a specific row
@@ -1004,7 +1008,7 @@
 		
 		if (([info draggingSource] == groupTableView || [info draggingSource] == tableView) && dragFromSharedGroups && row == 0) {
             return [self addPublicationsFromPasteboard:pboard error:NULL];
-        } else if([info draggingSource] == groupTableView || NSLocationInRange(row, [self rangeOfSimpleGroups]) == NO) {
+        } else if([info draggingSource] == groupTableView || (NSLocationInRange(row, [self rangeOfSimpleGroups]) == NO && NSLocationInRange(row, [self rangeOfStaticGroups]) == NO)) {
             return NO;
         } else if([info draggingSource] == tableView){
             // we already have these publications, so we just want to add them to the group, not the document
@@ -1025,6 +1029,7 @@
             // reselect if necessary, or we default to selecting the all publications group (which is really annoying when creating a new pub by dropping a PDF on a group)
             if(shouldSelect) 
                 [self selectGroup:group];
+            [groupTableView reloadData];
         }
         
         return YES;
@@ -1050,7 +1055,7 @@
 	if (tv == tableView) {
 		[self removeSelectedPubs:nil];
 	} else if (tv == groupTableView) {
-		[self removeSmartGroupAction:nil];
+		[self removeSelectedGroups:nil];
 	}
 }
 

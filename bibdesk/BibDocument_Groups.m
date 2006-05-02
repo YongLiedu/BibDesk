@@ -57,20 +57,26 @@
 #pragma mark Indexed accessors
 
 - (unsigned int)countOfGroups {
-    return [smartGroups count] + [sharedGroups count] + [groups count] + 1 ;
+    return [smartGroups count] + [sharedGroups count] + [staticGroups count] + [groups count] + 1 ;
 }
 
 - (BDSKGroup *)objectInGroupsAtIndex:(unsigned int)index {
+    unsigned int specialCount = (lastImportGroup == nil) ? 1 : 2;
 	unsigned int smartCount = [smartGroups count];
     unsigned int sharedCount = [sharedGroups count];
+    unsigned int staticCount = [staticGroups count];
 	if (index == 0)
 		return allPublicationsGroup;
-	else if (index <= smartCount)
-		return [smartGroups objectAtIndex:index - 1];
-	else if (index <= smartCount + sharedCount)
-        return [sharedGroups objectAtIndex:index - smartCount - 1];
+	else if (index < specialCount)
+		return lastImportGroup;
+	else if (index < smartCount + specialCount)
+		return [smartGroups objectAtIndex:index - specialCount];
+	else if (index < smartCount + sharedCount + specialCount)
+        return [sharedGroups objectAtIndex:index - smartCount - specialCount];
+	else if (index < smartCount + sharedCount + staticCount + specialCount)
+        return [staticGroups objectAtIndex:index - smartCount - sharedCount - specialCount];
     else
-		return [groups objectAtIndex:index - smartCount - sharedCount - 1];
+		return [groups objectAtIndex:index - smartCount - sharedCount - staticCount - specialCount];
 }
 
 // mutable to-many accessor:  not presently used
@@ -101,15 +107,23 @@
 }
 
 - (NSRange)rangeOfSimpleGroups{
-    return NSMakeRange([smartGroups count] + [sharedGroups count] + 1, [groups count]);
+    unsigned int specialCount = (lastImportGroup == nil) ? 1 : 2;
+    return NSMakeRange([smartGroups count] + [sharedGroups count] + [staticGroups count] + specialCount, [groups count]);
 }
 
 - (NSRange)rangeOfSmartGroups{
-    return NSMakeRange(1, [smartGroups count]);
+    unsigned int specialCount = (lastImportGroup == nil) ? 1 : 2;
+    return NSMakeRange(specialCount, [smartGroups count]);
 }
 
 - (NSRange)rangeOfSharedGroups{
-    return NSMakeRange([smartGroups count] + 1, [sharedGroups count]);
+    unsigned int specialCount = (lastImportGroup == nil) ? 1 : 2;
+    return NSMakeRange([smartGroups count] + specialCount, [sharedGroups count]);
+}
+
+- (NSRange)rangeOfStaticGroups{
+    unsigned int specialCount = (lastImportGroup == nil) ? 1 : 2;
+    return NSMakeRange([smartGroups count] + [sharedGroups count] + specialCount, [staticGroups count]);
 }
 
 - (unsigned int)numberOfSimpleGroupsAtIndexes:(NSIndexSet *)indexes{
@@ -131,6 +145,13 @@
     unsigned int maxCount = MIN([indexes count], sharedRange.length);
     unsigned int buffer[maxCount];
     return [indexes getIndexes:buffer maxCount:maxCount inIndexRange:&sharedRange];
+}
+
+- (unsigned int)numberOfStaticGroupsAtIndexes:(NSIndexSet *)indexes{
+    NSRange staticRange = [self rangeOfStaticGroups];
+    unsigned int maxCount = MIN([indexes count], staticRange.length);
+    unsigned int buffer[maxCount];
+    return [indexes getIndexes:buffer maxCount:maxCount inIndexRange:&staticRange];
 }
 
 - (BOOL)hasSharedGroupsAtIndexes:(NSIndexSet *)indexes{
@@ -173,6 +194,35 @@
     while(sGroup = [e nextObject]){
         if([[sGroup name] isEqual:name]){
             [self removeSmartGroup:sGroup];
+            break;
+        }
+    }
+}
+
+- (void)addStaticGroup:(BDSKStaticGroup *)group {
+	[[[self undoManager] prepareWithInvocationTarget:self] removeStaticGroup:group];
+	
+	[group setUndoManager:[self undoManager]];
+	[staticGroups addObject:group];
+    [groupTableView reloadData];
+}
+
+- (void)removeStaticGroup:(BDSKStaticGroup *)group {
+	[[[self undoManager] prepareWithInvocationTarget:self] addStaticGroup:group];
+	
+	[group setUndoManager:nil];
+	[staticGroups removeObjectIdenticalTo:group];
+    [groupTableView reloadData];
+}
+
+// assumes you only have a single static group with this name; that assumption is not enforced elsewhere
+- (void)removeStaticGroupNamed:(id)name {
+    NSEnumerator *e = [staticGroups objectEnumerator];
+    BDSKStaticGroup *sGroup = nil;
+    
+    while(sGroup = [e nextObject]){
+        if([[sGroup name] isEqual:name]){
+            [self removeStaticGroup:sGroup];
             break;
         }
     }
@@ -242,6 +292,13 @@ The groupedPublications array is a subset of the publications array, developed b
     // Mail and iTunes clear search when changing groups; users don't like this, though.  Xcode doesn't clear its search field, so at least there's some precedent for the opposite side.
     [self displaySelectedGroups];
     // could force selection of row 0 in the main table here, so we always display a preview, but that flashes the group table highlights annoyingly and may cause other selection problems
+}
+
+- (void)handleStaticGroupChangedNotification:(NSNotification *)notification{
+    BDSKGroup *group = [notification object];
+    [groupTableView reloadData];
+    if ([[self selectedGroups] containsObject:group])
+        [self displaySelectedGroups];
 }
 
 - (void)handleSharedGroupUpdatedNotification:(NSNotification *)notification{
@@ -357,7 +414,7 @@ The groupedPublications array is a subset of the publications array, developed b
     // now add the group names that we found from our BibItems, using a generic folder icon
     // use OATextWithIconCell keys
     while(groupName = [groupEnum nextObject]){
-        group = [[BDSKGroup alloc] initWithName:groupName key:groupField count:[countedSet countForObject:groupName]];
+        group = [[BDSKCategoryGroup alloc] initWithName:groupName key:groupField count:[countedSet countForObject:groupName]];
         [mutableGroups addObject:group];
         [group release];
     }
@@ -373,7 +430,7 @@ The groupedPublications array is a subset of the publications array, developed b
     // add the "empty" group at index 0; this is a group of pubs whose value is empty for this field, so they
     // will not be contained in any of the other groups for the currently selected group field (hence multiple selection is desirable)
     if(emptyCount > 0){
-        group = [[BDSKGroup alloc] initEmptyGroupWithClass:([[[BibTypeManager sharedManager] personFieldsSet] containsObject:groupField]?[BibAuthor class]:[NSString class]) key:groupField count:emptyCount];
+        group = [[BDSKCategoryGroup alloc] initEmptyGroupWithClass:([[[BibTypeManager sharedManager] personFieldsSet] containsObject:groupField]?[BibAuthor class]:[NSString class]) key:groupField count:emptyCount];
         [mutableGroups insertObject:group atIndex:0];
         [group release];
     }
@@ -739,7 +796,20 @@ The groupedPublications array is a subset of the publications array, developed b
 	[filterController release];
 }
 
-- (void)removeSmartGroupAction:(id)sender {
+- (void)addStaticGroupAction:(id)sender {
+    BDSKStaticGroup *group = [[BDSKStaticGroup alloc] init];
+    unsigned int insertIndex = NSMaxRange([self rangeOfStaticGroups]);
+    [self addStaticGroup:group];
+    [group release];
+    
+    [groupTableView reloadData];
+    [groupTableView selectRowIndexes:[NSIndexSet indexSetWithIndex:insertIndex] byExtendingSelection:NO];
+    [groupTableView editColumn:0 row:insertIndex withEvent:nil select:YES];
+    [[self undoManager] setActionName:NSLocalizedString(@"Add Static Group",@"Add static group")];
+    // updating of the tables is done when finishing the edit of the name
+}
+
+- (void)removeSelectedGroups:(id)sender {
 	NSIndexSet *rowIndexes = [groupTableView selectedRowIndexes];
     unsigned int rowIndex = [rowIndexes firstIndex];
 	BDSKGroup *group;
@@ -750,13 +820,16 @@ The groupedPublications array is a subset of the publications array, developed b
 		if ([group isSmart] == YES) {
 			[self removeSmartGroup:(BDSKSmartGroup *)group];
 			count++;
+		} else if ([group isStatic] == YES && group != lastImportGroup) {
+			[self removeStaticGroup:(BDSKStaticGroup *)group];
+			count++;
         }
 		rowIndex = [rowIndexes indexGreaterThanIndex:rowIndex];
 	}
 	if (count == 0) {
 		NSBeep();
 	} else {
-		[[self undoManager] setActionName:NSLocalizedString(@"Remove Smart Group",@"Remove smart group")];
+		[[self undoManager] setActionName:NSLocalizedString(@"Remove Groups",@"Remove groups")];
 		[self sortGroupsByKey:sortGroupsKey];
 	}
 }
@@ -773,10 +846,6 @@ The groupedPublications array is a subset of the publications array, developed b
 	BDSKGroup *group = [self objectInGroupsAtIndex:row];
 	
 	if ([group isSmart]) {
-        if (group == lastImportGroup) {
-            NSBeep();
-            return;
-        }
 		BDSKFilter *filter = [(BDSKSmartGroup *)[smartGroups objectAtIndex:row - 1] filter];
 		BDSKFilterController *filterController = [[BDSKFilterController alloc] initWithFilter:filter];
 		
@@ -786,7 +855,7 @@ The groupedPublications array is a subset of the publications array, developed b
 		   didEndSelector:NULL
 			  contextInfo:nil];
 		[filterController release];
-	} else if ([group isShared] == NO && [[[BibTypeManager sharedManager] personFieldsSet] containsObject:currentGroupField]) {
+	} else if ([group isShared] == NO && [group isStatic] == NO && [[[BibTypeManager sharedManager] personFieldsSet] containsObject:currentGroupField]) {
 		[self showPerson:(BibAuthor *)[group name]];
 	}
 }
@@ -811,33 +880,42 @@ The groupedPublications array is a subset of the publications array, developed b
 }
 
 - (IBAction)editNewGroupWithSelection:(id)sender{
-    
+    NSArray *names = [staticGroups valueForKeyPath:@"distinctUnionOfObjects.name"];
     NSArray *pubs = [self selectedPublications];
-    NSString *name = NSLocalizedString(@"Untitled", @"");
-    BDSKGroup *group = [[[BDSKGroup alloc] initWithName:name key:currentGroupField count:[pubs count]] autorelease];
+    NSString *baseName = NSLocalizedString(@"Untitled", @"");
+    NSString *name = baseName;
+    BDSKStaticGroup *group;
     unsigned int i = 1;
-    while([groups containsObject:group]){
-        group = [[[BDSKGroup alloc] initWithName:[NSString stringWithFormat:@"%@%d", name, i++] key:currentGroupField count:[pubs count]] autorelease];
+    while([names containsObject:name]){
+        name = [NSString stringWithFormat:@"%@%d", baseName, i++];
     }
     
-    [self addPublications:pubs toGroup:group];    
+    group = [[[BDSKStaticGroup alloc] initWithName:name publications:pubs] autorelease];
+    
+    [self addStaticGroup:group];    
     [groupTableView deselectAll:nil];
     
-    i = [groups indexOfObject:group];
+    i = [staticGroups indexOfObject:group];
     OBASSERT(i != NSNotFound);
     
     if(i != NSNotFound){
-        i += [self rangeOfSimpleGroups].location;
+        i += [self rangeOfStaticGroups].location;
         [groupTableView selectRowIndexes:[NSIndexSet indexSetWithIndex:i] byExtendingSelection:NO];
         [groupTableView scrollRowToVisible:i];
         
-        // don't show the warning sheet, since presumably the user wants to change the group name
         [groupTableView editColumn:0 row:i withEvent:nil select:YES];
     }
 }
 
 - (BOOL)addPublications:(NSArray *)pubs toGroup:(BDSKGroup *)group{
-	OBASSERT([group isSmart] == NO && group != allPublicationsGroup);
+	OBASSERT([group isSmart] == NO && [group isShared] == NO && group != allPublicationsGroup && group != lastImportGroup);
+    
+    if ([group isStatic]) {
+        [(BDSKStaticGroup *)group addPublicationsFromArray:pubs];
+		[[self undoManager] setActionName:NSLocalizedString(@"Add To Group", @"Add to group")];
+        return YES;
+    }
+    
     NSEnumerator *pubEnum = [pubs objectEnumerator];
     BibItem *pub;
 	int count = 0;
@@ -887,7 +965,7 @@ The groupedPublications array is a subset of the publications array, developed b
 	NSString *groupName = nil;
     
     while(group = [groupEnum nextObject]){
-		if([group isSmart] == YES || group == allPublicationsGroup)
+		if([group isSmart] == YES || [group isShared] == YES || group == allPublicationsGroup || group == lastImportGroup)
 			continue;
 		
 		if (groupName == nil)
@@ -895,9 +973,17 @@ The groupedPublications array is a subset of the publications array, developed b
 		else
 			groupName = @"selected groups";
 		
+        if ([group isStatic]) {
+            [(BDSKStaticGroup *)group removePublicationsInArray:pubs];
+            [[self undoManager] setActionName:NSLocalizedString(@"Remove From Group", @"Remove from group")];
+            count = [pubs count];
+            continue;
+        }
+		
 		NSEnumerator *pubEnum = [pubs objectEnumerator];
 		BibItem *pub;
 		int rv;
+        int tmpCount = 0;
 		
 		while(pub = [pubEnum nextObject]){
 			OBASSERT([pub isKindOfClass:[BibItem class]]);        
@@ -905,7 +991,7 @@ The groupedPublications array is a subset of the publications array, developed b
 			rv = [pub removeFromGroup:group handleInherited:handleInherited];
 			
 			if(rv == BDSKOperationSet || rv == BDSKOperationAppend){
-				count++;
+				tmpCount++;
 			}else if(rv == BDSKOperationAsk){
 				BDSKAlert *alert = [BDSKAlert alertWithMessageText:NSLocalizedString(@"Inherited Value", @"alert title")
 													 defaultButton:NSLocalizedString(@"Don't Change", @"Don't change")
@@ -923,6 +1009,8 @@ The groupedPublications array is a subset of the publications array, developed b
 				}
 			}
 		}
+        
+        count = MAX(count, tmpCount);
 	}
 	
 	if(count > 0){
@@ -945,7 +1033,7 @@ The groupedPublications array is a subset of the publications array, developed b
 	BibItem *pub;
 	int rv;
 	
-	if([group isSmart] || [group hasEditableName] == NO)
+	if([group isCategory] == NO)
 		return NO;
 	
 	while(pub = [pubEnum nextObject]){
@@ -1032,20 +1120,15 @@ The groupedPublications array is a subset of the publications array, developed b
         }
     }
     
-    if (lastImportGroup != nil)
-        [smartGroups removeObject:lastImportGroup];
-    
     [groups sortUsingDescriptors:sortDescriptors];
     [smartGroups sortUsingDescriptors:sortDescriptors];
     [sharedGroups sortUsingDescriptors:sortDescriptors];
+    [staticGroups sortUsingDescriptors:sortDescriptors];
 	
     if (emptyGroup != nil) {
         [groups insertObject:emptyGroup atIndex:0];
         [emptyGroup release];
     }
-    
-    if (lastImportGroup != nil)
-        [smartGroups insertObject:lastImportGroup atIndex:0];
     
     // Set the graphic for the new column header
 	BDSKHeaderPopUpButtonCell *headerPopup = (BDSKHeaderPopUpButtonCell *)[(BDSKGroupTableHeaderView *)[groupTableView headerView] popUpHeaderCell];
@@ -1070,69 +1153,6 @@ The groupedPublications array is a subset of the publications array, developed b
 	
     // reset ourself as delegate
     [groupTableView setDelegate:self];
-}
-
-- (void)updateLastImportGroupForDate:(NSDate *)date {
-    // we use a +/- 1 second time interval to determine which pubs belong in this group
-    // any pubs added in the next second after the paste will also be in this group, but that's not likely
-    NSDate *startDate = [[[NSDate alloc] initWithTimeInterval:-1.0 sinceDate:date] autorelease];
-    NSDate *endDate = [[[NSDate alloc] initWithTimeInterval:1.0 sinceDate:date] autorelease];
-    
-    NSMutableArray *conditions = [NSMutableArray array];
-    BDSKCondition *condition = nil;
-    condition = [[[BDSKCondition alloc] init] autorelease];
-    [condition setComparison:BDSKLarger];
-    [condition setKey:BDSKDateCreatedString];
-    [condition setValue:[startDate description]];
-    [conditions addObject:condition];
-    
-    condition = [[[BDSKCondition alloc] init] autorelease];
-    [condition setComparison:BDSKSmaller];
-    [condition setKey:BDSKDateCreatedString];
-    [condition setValue:[endDate description]];
-    [conditions addObject:condition];
-    
-    if (lastImportGroup == nil) {
-        BDSKFilter *filter = [[[BDSKFilter alloc] initWithConditions:conditions] autorelease];
-		lastImportGroup = [[BDSKSmartGroup alloc] initWithName:NSLocalizedString(@"Last Import", @"Last Import") count:0 filter:filter];
-        [lastImportGroup setEditableName:NO];
-        [smartGroups insertObject:lastImportGroup atIndex:0];
-    } else {
-        [[lastImportGroup filter] setConditions:conditions];
-    }
-    
-    NSArray *array = [[self publications] copy];
-	[lastImportGroup filterItems:array]; // update the count
-    [array release];
-    [groupTableView reloadData];
-}
-
-- (NSData *)serializedSmartGroupsData {
-	NSMutableArray *array = [NSMutableArray arrayWithCapacity:[smartGroups count]];
-	NSMutableDictionary *dict;
-	NSEnumerator *groupEnum = [smartGroups objectEnumerator];
-	BDSKSmartGroup *group;
-	
-	while (group = [groupEnum nextObject]) {
-        if (group == lastImportGroup) continue;
-		dict = [[[group filter] dictionaryValue] mutableCopy];
-		[dict setObject:[group stringValue] forKey:@"group name"];
-		[array addObject:dict];
-		[dict release];
-	}
-	
-	NSString *error = nil;
-	NSPropertyListFormat format = NSPropertyListXMLFormat_v1_0;
-	NSData *data = [NSPropertyListSerialization dataFromPropertyList:array
-															  format:format 
-													errorDescription:&error];
-    	
-	if (error) {
-		NSLog(@"Error serializing: %@", error);
-        [error release];
-		return nil;
-	}
-	return data;
 }
 
 - (void)setSmartGroupsFromSerializedData:(NSData *)data {
@@ -1171,5 +1191,104 @@ The groupedPublications array is a subset of the publications array, developed b
 	[smartGroups setArray:array];
 }
 
+- (NSData *)serializedGroupsData {
+    NSMutableDictionary *dict = [NSMutableDictionary dictionaryWithCapacity:2];
+	NSMutableArray *array = [NSMutableArray arrayWithCapacity:[staticGroups count]];
+	NSArray *keys;
+    NSDictionary *groupDict;
+	NSEnumerator *groupEnum = [staticGroups objectEnumerator];
+	BDSKGroup *group;
+	
+    groupEnum = [staticGroups objectEnumerator];
+	while (group = [groupEnum nextObject]) {
+		keys = [[(BDSKStaticGroup *)group publications] valueForKeyPath:@"@distinctUnionOfObjects.citeKey"];
+        groupDict = [[NSDictionary alloc] initWithObjectsAndKeys:[group stringValue], @"group name", keys, @"keys", nil];
+		[array addObject:groupDict];
+		[groupDict release];
+	}
+    if([array count])
+        [dict setObject:array forKey:@"static groups"];
+    
+	groupEnum = [smartGroups objectEnumerator];
+	while (groupDict = [groupEnum nextObject]) {
+		groupDict = [[[(BDSKSmartGroup *)group filter] dictionaryValue] mutableCopy];
+		[(NSMutableDictionary *)groupDict setObject:[group stringValue] forKey:@"group name"];
+		[array addObject:groupDict];
+		[groupDict release];
+	}
+    if([array count])
+        [dict setObject:array forKey:@"smart groups"];
+	
+	NSString *error = nil;
+	NSPropertyListFormat format = NSPropertyListXMLFormat_v1_0;
+	NSData *data = [NSPropertyListSerialization dataFromPropertyList:dict
+															  format:format 
+													errorDescription:&error];
+    	
+	if (error) {
+		NSLog(@"Error serializing: %@", error);
+        [error release];
+		return nil;
+	}
+	return data;
+}
+
+- (void)setGroupsFromSerializedData:(NSData *)data {
+	NSString *error = nil;
+	NSPropertyListFormat format = NSPropertyListXMLFormat_v1_0;
+	id plist = [NSPropertyListSerialization propertyListFromData:data
+												mutabilityOption:NSPropertyListImmutable
+														  format:&format 
+												errorDescription:&error];
+	
+	if (error) {
+		NSLog(@"Error deserializing: %@", error);
+        [error release];
+		return;
+	}
+	if ([plist isKindOfClass:[NSDictionary class]] == NO) {
+		NSLog(@"Serialized static groups was no dictionary.");
+		return;
+	}
+    
+    NSEnumerator *groupEnum;
+	NSDictionary *groupDict;
+	NSMutableArray *array = [NSMutableArray array];
+	BDSKGroup *group;
+    NSMutableArray *pubArray;
+    NSArray *keys;
+    NSEnumerator *keyEnum;
+    NSString *key;
+	BDSKFilter *filter;
+	
+    groupEnum = [[plist objectForKey:@"static groups"] objectEnumerator];
+	while (groupDict = [groupEnum nextObject]) {
+        keys = [groupDict objectForKey:@"keys"];
+        keyEnum = [keys objectEnumerator];
+        pubArray = [[NSMutableArray alloc] initWithCapacity:[keys count]];
+        while (key = [keyEnum nextObject]) 
+            [pubArray addObjectsFromArray:[itemsForCiteKeys arrayForKey:key]];
+		group = [[BDSKStaticGroup alloc] initWithName:[groupDict objectForKey:@"group name"] publications:pubArray];
+		[(BDSKStaticGroup *)group setUndoManager:[self undoManager]];
+		[array addObject:group];
+		[group release];
+		[pubArray release];
+	}
+	
+	[staticGroups setArray:array];
+    
+    [array removeAllObjects];
+	groupEnum = [[plist objectForKey:@"smart groups"] objectEnumerator];
+    while (groupDict = [groupEnum nextObject]) {
+		filter = [[BDSKFilter alloc] initWithDictionary:groupDict];
+		group = [[BDSKSmartGroup alloc] initWithName:[groupDict objectForKey:@"group name"] count:0 filter:filter];
+		[(BDSKSmartGroup *)group setUndoManager:[self undoManager]];
+		[array addObject:group];
+		[group release];
+		[filter release];
+	}
+	
+	[smartGroups setArray:array];
+}
 
 @end

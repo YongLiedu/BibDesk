@@ -114,6 +114,7 @@ NSString *BDSKWeblocFilePboardType = @"CorePasteboardFlavorType 0x75726C20";
         groupedPublications = [[NSMutableArray alloc] initWithCapacity:1];
         groups = [[NSMutableArray alloc] initWithCapacity:1];
         smartGroups = [[NSMutableArray alloc] initWithCapacity:1];
+        staticGroups = [[NSMutableArray alloc] initWithCapacity:1];
 		allPublicationsGroup = [[BDSKGroup alloc] initWithAllPublications];
 		lastImportGroup = nil;
                 
@@ -213,6 +214,11 @@ NSString *BDSKWeblocFilePboardType = @"CorePasteboardFlavorType 0x75726C20";
         [[NSNotificationCenter defaultCenter] addObserver:self
                                                  selector:@selector(handleFilterChangedNotification:)
                                                      name:BDSKFilterChangedNotification
+                                                   object:nil];
+        
+        [[NSNotificationCenter defaultCenter] addObserver:self
+                                                 selector:@selector(handleStaticGroupChangedNotification:)
+                                                     name:BDSKStaticGroupChangedNotification
                                                    object:nil];
         
 		[[NSNotificationCenter defaultCenter] addObserver:self
@@ -411,6 +417,7 @@ NSString *BDSKWeblocFilePboardType = @"CorePasteboardFlavorType 0x75726C20";
     [groupedPublications release];
     [groups release];
     [smartGroups release];
+    [staticGroups release];
     [allPublicationsGroup release];
     [lastImportGroup release];
     [frontMatter release];
@@ -526,6 +533,9 @@ NSString *BDSKWeblocFilePboardType = @"CorePasteboardFlavorType 0x75726C20";
 	[[NSNotificationCenter defaultCenter] postNotificationName:BDSKDocWillRemoveItemNotification
 														object:self
 													  userInfo:notifInfo];	
+    
+    [lastImportGroup removePublicationsInArray:pubs];
+    [staticGroups makeObjectsPerformSelector:@selector(removePublicationsInArray:) withObject:pubs];
     
 	[publications removeObjectsAtIndexes:indexes];
 	
@@ -1010,9 +1020,9 @@ NSString *BDSKWeblocFilePboardType = @"CorePasteboardFlavorType 0x75726C20";
         [d appendData:[[pub bibTeXStringDroppingInternal:drop] dataUsingEncoding:encoding allowLossyConversion:YES]];
     }
 	
-	if([smartGroups count]> 0){
-        [d appendData:[@"\n\n@comment{BibDesk Smart Groups{\n" dataUsingEncoding:encoding allowLossyConversion:YES]];
-		[d appendData:[self serializedSmartGroupsData]];
+	if([smartGroups count] + [staticGroups count] > 0){
+        [d appendData:[@"\n\n@comment{BibDesk Groups{\n" dataUsingEncoding:encoding allowLossyConversion:YES]];
+		[d appendData:[self serializedGroupsData]];
         [d appendData:[@"}}" dataUsingEncoding:encoding allowLossyConversion:YES]];
 	}
 	[d appendData:[@"\n" dataUsingEncoding:encoding allowLossyConversion:YES]];
@@ -1287,7 +1297,7 @@ NSString *BDSKWeblocFilePboardType = @"CorePasteboardFlavorType 0x75726C20";
             NSEnumerator *groupEnum = [selectedGroups objectEnumerator];
             BDSKGroup *group;
             while(group = [groupEnum nextObject]){
-                if([group isSmart] == NO && [group isShared] == NO){
+                if([group isStatic] == YES && [group isCategory] == YES && group != lastImportGroup){
                     canRemove = YES;
                     break;
                 }
@@ -1622,7 +1632,7 @@ NSString *BDSKWeblocFilePboardType = @"CorePasteboardFlavorType 0x75726C20";
 	if (firstResponder == tableView) {
 		[self deleteSelectedPubs:sender];
 	} else if (firstResponder == groupTableView) {
-		[self removeSmartGroupAction:sender];
+		[self removeSelectedGroups:sender];
 	}
 }
 
@@ -1833,7 +1843,7 @@ NSString *BDSKWeblocFilePboardType = @"CorePasteboardFlavorType 0x75726C20";
 	NSEnumerator *groupEnum = [[self selectedGroups] objectEnumerator];
 	BDSKGroup *group;
 	while (group = [groupEnum nextObject]) {
-		if ([group isSmart] == NO && group != allPublicationsGroup)
+		if ([group isCategory])
 			[newBI addToGroup:group handleInherited:BDSKOperationSet];
     }
 	
@@ -1917,7 +1927,10 @@ NSString *BDSKWeblocFilePboardType = @"CorePasteboardFlavorType 0x75726C20";
     
     // set up the smart group that shows the latest import
     // @@ do this for items added via the editor?  doesn't seem as useful
-    [self updateLastImportGroupForDate:importDate];
+    if(lastImportGroup == nil)
+        lastImportGroup = [[BDSKStaticGroup alloc] initWithLastImport:newPubs];
+    else 
+        [lastImportGroup setPublications:newPubs];
     
     return YES;
 }

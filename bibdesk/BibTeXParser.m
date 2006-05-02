@@ -205,14 +205,19 @@ static NSString *stringFromBTField(AST *field,  NSString *fieldName,  NSString *
                             const char *smartGroupStr = "BibDesk Smart Groups";
                             size_t smartGroupStrLength = strlen(smartGroupStr);
                             Boolean isSmartGroup = FALSE;
+                            const char *groupStr = "BibDesk Groups";
+                            size_t groupStrLength = strlen(groupStr);
+                            Boolean isGroup = FALSE;
                             
                             while(field = bt_next_value(entry, field, NULL, &text)){
                                 if(text){
                                     if(strlen(text) >= smartGroupStrLength && strncmp(text, smartGroupStr, smartGroupStrLength) == 0)
                                         isSmartGroup = TRUE;
+                                    else if(strlen(text) >= groupStrLength && strncmp(text, groupStr, groupStrLength) == 0)
+                                        isGroup = TRUE;
                                     
                                     // encoding will be UTF-8 for the plist, so make sure we use it for each line
-                                    tmpStr = [[NSString alloc] initWithCString:text usingEncoding:(isSmartGroup ? NSUTF8StringEncoding : parserEncoding)];
+                                    tmpStr = [[NSString alloc] initWithCString:text usingEncoding:((isSmartGroup || isGroup)? NSUTF8StringEncoding : parserEncoding)];
                                     
                                     if(tmpStr) 
                                         [commentStr appendString:tmpStr];
@@ -221,7 +226,7 @@ static NSString *stringFromBTField(AST *field,  NSString *fieldName,  NSString *
                                     [tmpStr release];
                                 }
                             }
-                            if(isSmartGroup == TRUE){
+                            if(isSmartGroup == TRUE || isGroup == TRUE){
                                 if(aDocument){
                                     NSRange range = [commentStr rangeOfString:@"{"];
                                     if(range.location != NSNotFound){
@@ -229,7 +234,10 @@ static NSString *stringFromBTField(AST *field,  NSString *fieldName,  NSString *
                                         range = [commentStr rangeOfString:@"}" options:NSBackwardsSearch];
                                         if(range.location != NSNotFound){
                                             [commentStr deleteCharactersInRange:NSMakeRange(range.location,[commentStr length] - range.location)];
-                                            [(BibDocument *)aDocument setSmartGroupsFromSerializedData:[commentStr dataUsingEncoding:NSUTF8StringEncoding]];
+                                            if (isSmartGroup == TRUE)
+                                                [(BibDocument *)aDocument setSmartGroupsFromSerializedData:[commentStr dataUsingEncoding:NSUTF8StringEncoding]];
+                                            else
+                                                [(BibDocument *)aDocument setGroupsFromSerializedData:[commentStr dataUsingEncoding:NSUTF8StringEncoding]];
                                         }
                                     }
                                 }

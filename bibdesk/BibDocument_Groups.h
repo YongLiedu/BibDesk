@@ -39,6 +39,7 @@
 #import "BibDocument.h"
 
 @class BDSKSmartGroup;
+@class BDSKStaticGroup;
 
 @interface BibDocument (Groups)
 
@@ -48,15 +49,20 @@
 - (NSRange)rangeOfSimpleGroups;
 - (NSRange)rangeOfSmartGroups;
 - (NSRange)rangeOfSharedGroups;
+- (NSRange)rangeOfStaticGroups;
 - (unsigned int)numberOfSimpleGroupsAtIndexes:(NSIndexSet *)indexes;
 - (unsigned int)numberOfSmartGroupsAtIndexes:(NSIndexSet *)indexes;
 - (unsigned int)numberOfSharedGroupsAtIndexes:(NSIndexSet *)indexes;
+- (unsigned int)numberOfStaticGroupsAtIndexes:(NSIndexSet *)indexes;
 - (BOOL)hasSharedGroupsAtIndexes:(NSIndexSet *)indexes;
 - (BOOL)hasSharedGroupsSelected;
 
 - (void)addSmartGroup:(BDSKSmartGroup *)group;
 - (void)removeSmartGroup:(BDSKSmartGroup *)group;
 - (void)removeSmartGroupNamed:(id)name;
+- (void)addStaticGroup:(BDSKStaticGroup *)group;
+- (void)removeStaticGroup:(BDSKStaticGroup *)group;
+- (void)removeStaticGroupNamed:(id)name;
 - (void)setCurrentGroupField:(NSString *)field;
 - (NSString *)currentGroupField;
 
@@ -80,6 +86,7 @@
 
 - (void)handleGroupFieldChangedNotification:(NSNotification *)notification;
 - (void)handleGroupAddRemoveNotification:(NSNotification *)notification;
+- (void)handleStaticGroupChangedNotification:(NSNotification *)notification;
 - (void)handleSharedGroupUpdatedNotification:(NSNotification *)notification;
 - (void)handleSharedGroupsChangedNotification:(NSNotification *)notification;
 - (void)handleGroupTableSelectionChangedNotification:(NSNotification *)notification;
@@ -87,19 +94,19 @@
 - (IBAction)sortGroupsByGroup:(id)sender;
 - (IBAction)sortGroupsByCount:(id)sender;
 - (void)addSmartGroupAction:(id)sender;
-- (void)removeSmartGroupAction:(id)sender;
+- (void)removeSelectedGroups:(id)sender;
 - (void)editGroupAction:(id)sender;
 - (void)renameGroupAction:(id)sender;
 - (IBAction)selectAllPublicationsGroup:(id)sender;
 - (IBAction)editNewGroupWithSelection:(id)sender;
-- (NSData *)serializedSmartGroupsData;
-- (void)setSmartGroupsFromSerializedData:(NSData *)data;
 - (void)addSmartGroupSheetDidEnd:(NSWindow *)sheet returnCode:(int) returnCode contextInfo:(void *)contextInfo;
+
+- (void)setSmartGroupsFromSerializedData:(NSData *)data;
+- (NSData *)serializedGroupsData;
+- (void)setGroupsFromSerializedData:(NSData *)data;
 
 - (void)handleFilterChangedNotification:(NSNotification *)notification;
 - (void)sortGroupsByKey:(NSString *)key;
-
-- (void)updateLastImportGroupForDate:(NSDate *)date;
 
 - (NSIndexSet *)_indexesOfRowsToHighlightInRange:(NSRange)indexRange tableView:(BDSKGroupTableView *)tview;
 - (NSIndexSet *)_tableViewSingleSelectionIndexes:(BDSKGroupTableView *)tview;

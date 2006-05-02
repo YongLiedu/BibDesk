@@ -50,6 +50,7 @@
 @class BibEditor;
 @class BibAuthor;
 @class BDSKGroup;
+@class BDSKStaticGroup;
 @class BDSKSmartGroup;
 @class AGRegex;
 @class BDSKAlert;
@@ -167,9 +168,10 @@ extern NSString* BDSKWeblocFilePboardType; // core pasteboard type for webloc fi
     IBOutlet BDSKGroupTableView *groupTableView;
     NSMutableArray *groups;
     NSMutableArray *smartGroups;
+    NSMutableArray *staticGroups;
     NSMutableArray *groupedPublications;
 	BDSKGroup *allPublicationsGroup;
-	BDSKSmartGroup *lastImportGroup;
+	BDSKStaticGroup *lastImportGroup;
 	NSString *currentGroupField;
     IBOutlet OASplitView *groupSplitView;
 	float lastGroupViewWidth;

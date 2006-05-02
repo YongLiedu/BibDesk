@@ -2116,8 +2116,9 @@ static NSParagraphStyle* bodyParagraphStyle = nil;
 	return [[self groupsForField:field] containsObject:name];
 }
 
-- (int)addToGroup:(BDSKGroup *)group handleInherited:(int)operation{
-	OBASSERT([group isSmart] == NO);
+- (int)addToGroup:(BDSKGroup *)aGroup handleInherited:(int)operation{
+	OBASSERT([aGroup isCategory] == YES);
+    BDSKCategoryGroup *group = (BDSKCategoryGroup *)aGroup;
     // don't add it twice
 	id groupName = [group name];
 	NSString *field = [group key];
@@ -2167,8 +2168,9 @@ static NSParagraphStyle* bodyParagraphStyle = nil;
 	return operation;
 }
 
-- (int)removeFromGroup:(BDSKGroup *)group handleInherited:(int)operation{
-	OBASSERT([group isSmart] == NO);
+- (int)removeFromGroup:(BDSKGroup *)aGroup handleInherited:(int)operation{
+	OBASSERT([aGroup isCategory] == YES);
+    BDSKCategoryGroup *group = (BDSKCategoryGroup *)aGroup;
 	id groupName = [group name];
 	NSString *field = [group key];
 	OBASSERT(field != nil);
@@ -2300,8 +2302,9 @@ static NSParagraphStyle* bodyParagraphStyle = nil;
 	return operation;
 }
 
-- (int)replaceGroup:(BDSKGroup *)group withGroupNamed:(NSString *)newGroupName handleInherited:(int)operation{
-	OBASSERT([group isSmart] == NO);
+- (int)replaceGroup:(BDSKGroup *)aGroup withGroupNamed:(NSString *)newGroupName handleInherited:(int)operation{
+	OBASSERT([aGroup isCategory] == YES);
+    BDSKCategoryGroup *group = (BDSKCategoryGroup *)aGroup;
 	id groupName = [group name];
 	NSString *field = [group key];
 	OBASSERT(field != nil);
