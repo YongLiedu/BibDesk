@@ -297,7 +297,6 @@ static NSString *stringFromBTField(AST *field,  NSString *fieldName,  NSString *
                     newBI = [[BibItem alloc] initWithType:[entryType lowercaseString]
                                                  fileType:BDSKBibtexString
                                                 pubFields:dictionary
-                                                  authors:nil
                                               createdDate:[filePath isEqualToString:@"Paste/Drag"] ? [NSCalendarDate date] : nil];
 
                     tmpStr = [[NSString alloc] initWithCString:bt_entry_key(entry) usingEncoding:parserEncoding];
