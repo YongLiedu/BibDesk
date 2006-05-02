@@ -281,6 +281,7 @@ NSString *BDSKCustomFieldsChangedNotification = @"Custom Fields Changed Notifica
 NSString *BDSKResortDocumentNotification = @"Update table sort";
 NSString *BDSKFilterChangedNotification = @"Filter Changed Notification";
 NSString *BDSKStopWordsChangedNotification = @"BDSKStopWordsChangedNotification";
+NSString *BDSKStaticGroupChangedNotification = @"BDSKStaticGroupChangedNotification";
 NSString *BDSKSharingChangedNotification = @"BDSKSharingChangedNotification";
 NSString *BDSKSharedGroupsChangedNotification = @"BDSKSharedGroupsChangedNotification";
 NSString *BDSKSharedGroupUpdatedNotification = @"BDSKSharedGroupUpdatedNotification";

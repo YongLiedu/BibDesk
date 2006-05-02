@@ -264,6 +264,7 @@ extern NSString *BDSKCustomFieldsChangedNotification;
 extern NSString *BDSKResortDocumentNotification;
 extern NSString *BDSKFilterChangedNotification;
 extern NSString *BDSKStopWordsChangedNotification;
+extern NSString *BDSKStaticGroupChangedNotification;
 extern NSString *BDSKSharingChangedNotification;
 extern NSString *BDSKSharedGroupsChangedNotification;
 extern NSString *BDSKSharedGroupUpdatedNotification;
