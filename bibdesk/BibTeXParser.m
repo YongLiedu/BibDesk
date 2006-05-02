@@ -422,10 +422,7 @@ static NSString *stringFromBTField(AST *field,  NSString *fieldName,  NSString *
 	return valueString;
 }
 
-+ (NSDictionary *)macrosFromBibTeXString:(NSString *)stringContents isStyle:(BOOL)isStyle document:(BibDocument *)aDocument{
-    NSString *macroKeyword = (isStyle) ? @"MACRO" : @"@STRING";
-    NSString *macroKeyEnd = (isStyle) ? @"}" : @"=";
-    
++ (NSDictionary *)macrosFromBibTeXString:(NSString *)stringContents document:(BibDocument *)aDocument{
     NSScanner *scanner = [[NSScanner alloc] initWithString:stringContents];
     [scanner setCharactersToBeSkipped:nil];
     
@@ -442,26 +439,19 @@ static NSString *stringFromBTField(AST *field,  NSString *fieldName,  NSString *
     
     while(![scanner isAtEnd]){
         
-        [scanner scanUpToString:macroKeyword intoString:nil]; // don't check the return value on this, in case there are no characters between the initial location and the keyword
+        [scanner scanUpToString:@"@STRING" intoString:nil]; // don't check the return value on this, in case there are no characters between the initial location and the keyword
         
         // scan past the keyword
-        if(![scanner scanString:macroKeyword intoString:nil])
+        if(![scanner scanString:@"@STRING" intoString:nil])
             break;
         
 		[scanner scanCharactersFromSet:[NSCharacterSet whitespaceAndNewlineCharacterSet] intoString:nil];
 
         // scan the key
 		if(![scanner scanString:@"{" intoString:nil] ||
-           ![scanner scanUpToString:macroKeyEnd intoString:&key] ||
-           ![scanner scanString:macroKeyEnd intoString:nil])
+           ![scanner scanUpToString:@"=" intoString:&key] ||
+           ![scanner scanString:@"=" intoString:nil])
             continue;
-        
-        if (isStyle) {
-            [scanner scanCharactersFromSet:[NSCharacterSet whitespaceAndNewlineCharacterSet] intoString:nil];
-            
-            if(![scanner scanString:@"{" intoString:nil])
-                continue;
-        }
         
         value = [NSMutableString string];
         nesting = 1;
@@ -506,12 +496,83 @@ static NSString *stringFromBTField(AST *field,  NSString *fieldName,  NSString *
     return ([macros count] ? macros : nil);
 }
 
-+ (NSDictionary *)macrosFromBibTeXString:(NSString *)stringContents document:(BibDocument *)aDocument{
-    return [self macrosFromBibTeXString:stringContents isStyle:NO document:aDocument];
-}
-
 + (NSDictionary *)macrosFromBibTeXStyle:(NSString *)styleContents document:(BibDocument *)aDocument{
-    return [self macrosFromBibTeXString:styleContents isStyle:YES document:aDocument];
+    NSScanner *scanner = [[NSScanner alloc] initWithString:styleContents];
+    [scanner setCharactersToBeSkipped:nil];
+    
+    NSMutableDictionary *macros = [NSMutableDictionary dictionary];
+    NSString *key = nil;
+    NSMutableString *value;
+
+	NSCharacterSet *bracesCharSet = [NSCharacterSet curlyBraceCharacterSet];
+	NSString *s;
+	int nesting;
+	unichar ch;
+    
+    // NSScanner is case-insensitive by default
+    
+    while(![scanner isAtEnd]){
+        
+        [scanner scanUpToString:@"MACRO" intoString:nil]; // don't check the return value on this, in case there are no characters between the initial location and the keyword
+        
+        // scan past the keyword
+        if(![scanner scanString:@"MACRO" intoString:nil])
+            break;
+        
+		[scanner scanCharactersFromSet:[NSCharacterSet whitespaceAndNewlineCharacterSet] intoString:nil];
+
+        // scan the key
+		if(![scanner scanString:@"{" intoString:nil] ||
+           ![scanner scanUpToString:@"}" intoString:&key] ||
+           ![scanner scanString:@"}" intoString:nil])
+            continue;
+        
+        [scanner scanCharactersFromSet:[NSCharacterSet whitespaceAndNewlineCharacterSet] intoString:nil];
+        
+        if(![scanner scanString:@"{" intoString:nil])
+            continue;
+        
+        value = [NSMutableString string];
+        nesting = 1;
+        while(nesting > 0 && ![scanner isAtEnd]){
+            if([scanner scanUpToCharactersFromSet:bracesCharSet intoString:&s])
+                [value appendString:s];
+            if([scanner isAtEnd]) break;
+            if([styleContents characterAtIndex:[scanner scanLocation] - 1] != '\\'){
+                // we found an unquoted brace
+                ch = [styleContents characterAtIndex:[scanner scanLocation]];
+                if(ch == '}'){
+                    --nesting;
+                }else{
+                    ++nesting;
+                }
+                if (nesting > 0) // we don't include the outer braces
+                    [value appendFormat:@"%C",ch];
+            }
+            [scanner setScanLocation:[scanner scanLocation] + 1];
+        }
+        if(nesting > 0)
+            continue;
+        
+        [value removeSurroundingWhitespace];
+        
+        key = [key stringByRemovingSurroundingWhitespace];
+        @try{
+            value = [NSString complexStringWithBibTeXString:value macroResolver:[aDocument macroResolver]];
+            [macros setObject:value forKey:key];
+        }
+        @catch(id exception){
+            if([[exception name] isEqualToString:BDSKComplexStringException])
+                NSLog(@"Ignoring invalid complex macro: %@",[exception reason]);
+            else
+                NSLog(@"Ignoring exception %@ while parsing macro: %@", [exception name], [exception reason]);
+        }
+		
+    }
+	
+    [scanner release];
+    
+    return ([macros count] ? macros : nil);
 }
 
 static CFArrayRef

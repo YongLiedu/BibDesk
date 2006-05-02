@@ -82,16 +82,6 @@
 + (NSDictionary *)macrosFromBibTeXString:(NSString *)aString hadProblems:(BOOL *)hadProblems document:(BibDocument *)aDocument;
 
 /*!
-    @method     macrosFromBibTeXString:isStyle:document:
-    @abstract   Returns a dictionary of macro definitions from a BibTeX (style) file (.bib or .bst extension).
-    @discussion The returned macros can contain circular macro definitions.
-    @param      stringContents The contents of the file as a string
-    @param      aDocument (description)
-    @result     Returns nil if nothing was found or an error occurred.
-*/
-+ (NSDictionary *)macrosFromBibTeXString:(NSString *)stringContents isStyle:(BOOL)isStyle document:(BibDocument *)aDocument;
-
-/*!
     @method     macrosFromBibTeXString:document:
     @abstract   Returns a dictionary of macro definitions from a BibTeX file (.bib extension).
     @discussion The definitions take the form <tt>@STRING {ibmjrd = "IBM Journal of Research and Development"}</tt>
