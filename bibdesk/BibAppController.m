@@ -762,18 +762,18 @@
     // mark as dirty, since we've changed the cite keys
     [doc updateChangeCount:NSChangeDone];
     
-    if(success){
-        // search so we only see the ones that have the temporary key
+    // search so we only see the ones that have the temporary key; checking success isn't effective here, since it returns NO even if we loaded partial data
+    if([[doc publications] count]){
         [doc performSelector:@selector(setSelectedSearchFieldKey:) withObject:BDSKCiteKeyString];
         [doc performSelector:@selector(setFilterField:) withObject:@"FixMe"];
         NSBeginAlertSheet(NSLocalizedString(@"Temporary Cite Keys.",@""), 
                           nil, nil, nil, // buttons
-                          [[[doc windowControllers] objectAtIndex:0] window],
+                          [[[doc windowControllers] firstObject] window],
                           nil,
                           nil,
                           nil,
                           nil,
-                          NSLocalizedString(@"This document was opened using a temporary cite key for the publications shown.  In order to use your file with BibTeX, you should generate valid cite keys for all of the items in this file.", @""));
+                          NSLocalizedString(@"This document was opened using a temporary cite key for the publications shown.  In order to use your file with BibTeX, you must generate valid cite keys for all of the items in this file.", @""));
     }
     return doc;
 }
