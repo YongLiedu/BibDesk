@@ -56,7 +56,7 @@
 
     [warnOnDeleteButton setState:([defaults boolForKey:BDSKWarnOnDeleteKey] == YES) ? NSOnState : NSOffState];
 
-    [warnOnRemovalFromGroupButton setState:([defaults boolForKey:BDSKLocalUrlCleanOptionKey] == YES) ? NSOnState : NSOffState];
+    [warnOnRemovalFromGroupButton setState:([defaults boolForKey:BDSKWarnOnRemovalFromGroupKey] == YES) ? NSOnState : NSOffState];
 
     [warnOnRenameGroupButton setState:([defaults boolForKey:BDSKWarnOnRenameGroupKey] == YES) ? NSOnState : NSOffState];
 }
