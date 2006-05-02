@@ -78,8 +78,8 @@
                 refreshSharing = id; 
                 removeCustomCiteString = id; 
                 removeGroupFieldAction = id; 
+                removeSelectedGroups = id; 
                 removeSelectedPubs = id; 
-                removeSmartGroupAction = id; 
                 renameGroupAction = id; 
                 revealLinkedFile = id; 
                 searchByContent = id; 
