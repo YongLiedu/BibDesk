@@ -596,29 +596,30 @@
 	return YES;
 } 
 
-- (BOOL) validateRemoveSmartGroupMenuItem:(NSMenuItem *)menuItem{
+- (BOOL) validateRemoveSelectedGroupsMenuItem:(NSMenuItem *)menuItem{
     int n = [self numberOfSmartGroupsAtIndexes:[groupTableView selectedRowIndexes]];
+    n += [self numberOfStaticGroupsAtIndexes:[groupTableView selectedRowIndexes]];
 	
 	NSString *s = @"";
 	
 	if (n == 0) {
 		// no smart group selected
 		if (![[menuItem menu] supermenu]) {
-			s = NSLocalizedString(@"Remove Smart Group", @"Remove smart group");
+			s = NSLocalizedString(@"Remove Group", @"Remove group");
 			[menuItem setTitle:s];
 		}
 		return NO;
 	} else if (n == 1) {
 		// single smart group selected
 		if (![[menuItem menu] supermenu]) {
-			s = NSLocalizedString(@"Remove Smart Group", @"Remove smart group");
+			s = NSLocalizedString(@"Remove Group", @"Remove group");
 			[menuItem setTitle:s];
 		}
 		return YES;
 	} else {
 		// multiple smart groups selected
 		if (![[menuItem menu] supermenu]) {
-			s = NSLocalizedString(@"Remove %i Smart Groups", @"Remove %i smart groups");
+			s = NSLocalizedString(@"Remove %i Groups", @"Remove %i groups");
 			[menuItem setTitle:[NSString stringWithFormat:s, n]];
 		}
 		return YES;
@@ -679,7 +680,7 @@
 	if (firstResponder == tableView) {
 		return [self validateRemoveSelectionMenuItem:menuItem];
 	} else if (firstResponder == groupTableView) {
-		return [self validateRemoveSmartGroupMenuItem:menuItem];
+		return [self validateRemoveSelectedGroupsMenuItem:menuItem];
 	} else {
 		return NO;
 	}
@@ -692,7 +693,7 @@
 	if (firstResponder == tableView) {
 		return [self validateDeleteSelectionMenuItem:menuItem];
 	} else if (firstResponder == groupTableView) {
-		return [self validateRemoveSmartGroupMenuItem:menuItem];
+		return [self validateRemoveSelectedGroupsMenuItem:menuItem];
 	} else {
 		return NO;
 	}
@@ -840,7 +841,7 @@
         return [self validateChangeGroupFieldMenuItem:menuItem];
 	}
 	else if (act == @selector(removeSelectedGroups:)) {
-        return [self validateRemoveSmartGroupMenuItem:menuItem];
+        return [self validateRemoveSelectedGroupsMenuItem:menuItem];
 	}
 	else if (act == @selector(editGroupAction:)) {
         return [self validateEditGroupMenuItem:menuItem];
