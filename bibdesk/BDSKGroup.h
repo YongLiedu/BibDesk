@@ -196,22 +196,6 @@
 @end
 
 
-@interface BDSKScratchGroup : BDSKGroup {
-	NSMutableArray *publications;
-}
-
-- (id)initWithName:(id)aName publications:(NSArray *)array;
-
-- (NSArray *)publications;
-- (void)setPublications:(NSArray *)newPublications;
-- (void)addPublication:(BibItem *)item;
-- (void)addPublicationsFromArray:(NSArray *)items;
-- (void)removePublication:(BibItem *)item;
-- (void)removePublicationsInArray:(NSArray *)items;
-
-@end
-
-
 @interface BDSKSmartGroup : BDSKGroup {
 	BDSKFilter *filter;
 	NSUndoManager *undoManager;
