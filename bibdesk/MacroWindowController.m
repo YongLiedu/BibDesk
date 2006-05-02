@@ -451,6 +451,9 @@
     if([aString rangeOfString:@"MACRO" options:NSCaseInsensitiveSearch].location != NSNotFound)
         [defs addEntriesFromDictionary:[BibTeXParser macrosFromBibTeXStyle:aString document:document]]; // in case these are style defs
 
+    if ([defs count] == 0)
+        return NO;
+    
     NSEnumerator *e = [defs keyEnumerator];
     NSString *macroKey;
     NSString *macroString;
@@ -471,7 +474,7 @@
                         NSLocalizedString(@"Some macros you tried to add would lead to circular definitions and were ignored.", @""),
                         NSLocalizedString(@"OK", @"OK"), nil, nil);
     }
-    return !hadProblems;
+    return YES;
 }
 
 #pragma mark || Methods to support the type-ahead selector.
