@@ -152,7 +152,7 @@ static NSImage *unlockedIcon = nil;
 - (id)initWithService:(NSNetService *)aService;
 {
     NSParameterAssert(aService != nil);
-    if(self = [super initWithName:[aService name] key:@"" count:0]){
+    if(self = [super initWithName:[aService name] count:0]){
 
         publications = nil;
         needsUpdate = YES;

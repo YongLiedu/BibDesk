@@ -43,20 +43,17 @@
 
 @interface BDSKGroup : NSObject <NSCopying, NSCoding> {
 	id name;
-	NSString *key;
 	int count;
-    BOOL hasEditableName;
 }
 
 /*!
-	@method initWithName:key:count:
+	@method initWithName:count:
 	@abstract Initializes and returns a new group instance with a name and count. 
 	@discussion This is the designated initializer. 
 	@param aName The name for the group.
-	@param aKey The key for the group.
 	@param count The count for the group.
 */
-- (id)initWithName:(id)aName key:(NSString *)aKey count:(int)aCount;
+- (id)initWithName:(id)aName count:(int)aCount;
 
 /*!
 	@method initWithAllPublications
@@ -66,27 +63,11 @@
 - (id)initWithAllPublications;
 
 /*!
-    @method     initEmptyGroupWithClass:key:count:
-    @abstract   Initializes and returns a new Empty group for the specified key
-    @param      aClass The class for the group objects; this should be BibAuthor or NSString, at present
-	@param      aKey The key for the group.
-	@param      count The count for the group.
-*/
-- (id)initEmptyGroupWithClass:(Class)aClass key:(NSString *)aKey count:(int)aCount;
-
-/*!
 	@method name
 	@abstract Returns the name of the group.
 	@discussion -
 */
 - (id)name;
-
-/*!
-	@method key
-	@abstract Returns the key of the group.
-	@discussion -
-*/
-- (NSString *)key;
 
 /*!
 	@method count
@@ -111,11 +92,25 @@
 - (NSImage *)icon;
 
 /*!
+	@method isStatic
+	@abstract Boolean, returns whether the receiver is a static group. 
+	@discussion -
+*/
+- (BOOL)isStatic;
+
+/*!
 	@method isSmart
 	@abstract Boolean, returns whether the receiver is a smart group. 
 	@discussion -
 */
 - (BOOL)isSmart;
+
+/*!
+	@method isCategory
+	@abstract Boolean, returns whether the receiver is a category group. 
+	@discussion -
+*/
+- (BOOL)isCategory;
 
 /*!
 	@method isShared
@@ -176,12 +171,6 @@
 - (BOOL)hasEditableName;
 
 /*!
-    @method     setEditableName:
-    @abstract   Sets whether the name is editable; useful for groups created in code and identified by name.
-*/
-- (void)setEditableName:(BOOL)flag;
-
-/*!
     @method     failedDownload
     @abstract   Method for remote groups.  Returns NO by default.
 */
@@ -192,6 +181,134 @@
     @abstract   Method for remote groups.  Returns NO by default.
 */
 - (BOOL)isRetrieving;
+
+@end
+
+
+@interface BDSKCategoryGroup : BDSKGroup {
+	NSString *key;
+}
+
+/*!
+	@method initWithName:key:count:
+	@abstract Initializes and returns a new group instance with a name and count. 
+	@discussion This is the designated initializer. 
+	@param aName The name for the group.
+	@param aKey The key for the group.
+	@param count The count for the group.
+*/
+- (id)initWithName:(id)aName key:(NSString *)aKey count:(int)aCount;
+
+/*!
+    @method     initEmptyGroupWithClass:key:count:
+    @abstract   Initializes and returns a new Empty group for the specified key
+    @param      aClass The class for the group objects; this should be BibAuthor or NSString, at present
+	@param      aKey The key for the group.
+	@param      count The count for the group.
+*/
+- (id)initEmptyGroupWithClass:(Class)aClass key:(NSString *)aKey count:(int)aCount;
+
+/*!
+	@method key
+	@abstract Returns the key of the group.
+	@discussion -
+*/
+- (NSString *)key;
+
+@end
+
+
+@interface BDSKStaticGroup : BDSKGroup {
+	NSMutableArray *publications;
+	NSUndoManager *undoManager;
+}
+
+/*!
+	@method initWithName:publications:
+	@abstract Initializes and returns a new group instance with a name and publications.
+	@discussion This is the designated initializer. 
+	@param aName The name for the static group.
+	@param array The publications for the static group.
+*/
+- (id)initWithName:(id)aName publications:(NSArray *)array;
+
+/*!
+	@method initForLastImport:
+	@abstract Initializes and returns a new Last Import group. 
+	@discussion -
+	@param array The publications for the static group.
+*/
+- (id)initWithLastImport:(NSArray *)array;
+
+/*!
+	@method setName:
+	@abstract Sets the name for the group.
+	@discussion -
+	@param newName The new name to set.
+*/
+- (void)setName:(id)newName;
+
+/*!
+	@method publications
+	@abstract Returns the publications in the group.
+	@discussion -
+*/
+- (NSArray *)publications;
+
+/*!
+	@method setPublications:
+	@abstract Sets the publications of the group.
+	@discussion -
+	@param newPublications The publications to set.
+*/
+- (void)setPublications:(NSArray *)newPublications;
+
+/*!
+	@method addPublication:
+	@abstract Adds a publication to the group.
+	@discussion -
+	@param item The publication to add.
+*/
+- (void)addPublication:(BibItem *)item;
+
+/*!
+	@method addPublicationsFromArray:
+	@abstract Adds publications from the group.
+	@discussion -
+	@param items The publications to add.
+*/
+- (void)addPublicationsFromArray:(NSArray *)items;
+
+/*!
+	@method removePublication:
+	@abstract Removes a publication from the group.
+	@discussion -
+	@param item The publication to remove.
+*/
+- (void)removePublication:(BibItem *)item;
+
+/*!
+	@method removePublicationsInArray:
+	@abstract Removes publications from the group.
+	@discussion -
+	@param items The publications to remove.
+*/
+- (void)removePublicationsInArray:(NSArray *)items;
+
+/*!
+	@method undoManager
+	@abstract Returns the undo manager of the group.
+	@discussion -
+*/
+- (NSUndoManager *)undoManager;
+
+/*!
+	@method setUndoManager:
+	@abstract Sets the undo manager for the group.
+	@discussion -
+	@param newUndoManager The new undo manager to set.
+*/
+- (void)setUndoManager:(NSUndoManager *)newUndoManager;
 
 @end
 

@@ -47,18 +47,19 @@
 
 
 // a private subclass for the All Publication group
-@interface BDSKAllPublicationsGroup : BDSKGroup {
-} 
-@end
+@interface BDSKAllPublicationsGroup : BDSKGroup @end
 
 // a private subclass for the Empty ... group
-@interface BDSKEmptyGroup : BDSKGroup @end
+@interface BDSKEmptyGroup : BDSKCategoryGroup @end
+
+// a private subclass for the Last Import group
+@interface BDSKLastImportGroup : BDSKStaticGroup @end
 
 
 @implementation BDSKGroup
 
 - (id)init {
-	self = [self initWithName:NSLocalizedString(@"Group", @"Group") key:nil count:0];
+	self = [self initWithName:NSLocalizedString(@"Group", @"Group") count:0];
     return self;
 }
 
@@ -69,21 +70,11 @@
 	return self;
 }
 
-- (id)initEmptyGroupWithClass:(Class)aClass key:(NSString *)aKey count:(int)aCount {
-    NSZone *zone = [self zone];
-    [self release];
-    NSParameterAssert([aClass isEqual:[BibAuthor class]] || [aClass isEqual:[NSString class]]);
-    id aName = [aClass isEqual:[BibAuthor class]] ? [BibAuthor emptyAuthor] : @"";
-    return [[BDSKEmptyGroup allocWithZone:zone] initWithName:aName key:aKey count:aCount];
-}
-
 // designated initializer
-- (id)initWithName:(id)aName key:(NSString *)aKey count:(int)aCount {
+- (id)initWithName:(id)aName count:(int)aCount {
     if (self = [super init]) {
-        key = [aKey copy];
         name = [aName copy];
         count = aCount;
-        hasEditableName = YES;
     }
     return self;
 }
@@ -93,7 +84,6 @@
 - (id)initWithCoder:(NSCoder *)decoder {
 	if (self = [super init]) {
 		name = [[decoder decodeObjectForKey:@"name"] retain];
-		key = [[decoder decodeObjectForKey:@"key"] retain];
 		count = [decoder decodeIntForKey:@"count"];
 	}
 	return self;
@@ -101,19 +91,17 @@
 
 - (void)encodeWithCoder:(NSCoder *)coder {
 	[coder encodeObject:name forKey:@"name"];
-	[coder encodeObject:key forKey:@"key"];
 	[coder encodeInt:count forKey:@"count"];
 }
 
 // NSCopying protocol
 
 - (id)copyWithZone:(NSZone *)aZone {
-	id copy = [[[self class] allocWithZone:aZone] initWithName:name key:key count:count];
+	id copy = [[[self class] allocWithZone:aZone] initWithName:name count:count];
 	return copy;
 }
 
 - (void)dealloc {
-    [key release];
     [name release];
     [super dealloc];
 }
@@ -124,22 +112,17 @@
 	if (![other isMemberOfClass:[self class]]) 
 		return NO;
 	// we don't care about the count for identification
-	return (([[self key] isEqualToString:[other key]] || ([self key] == nil && [other key] == nil)) &&
-			[[self name] isEqual:[(BDSKGroup *)other name]]);
+	return [[self name] isEqual:[(BDSKGroup *)other name]];
 }
 
 - (NSString *)description {
-    return [NSString stringWithFormat:@"%@\tname=\"%@\"\t key=\"%@\"\t count=%d", [super description], name, key, count];
+    return [NSString stringWithFormat:@"%@: name=\"%@\",count=%d", [self class], name, count];
 }
 
 // accessors
 
 - (id)name {
     return [[name retain] autorelease];
-}
-
-- (NSString *)key {
-    return [[key retain] autorelease];
 }
 
 - (int)count {
@@ -156,7 +139,15 @@
 	return [NSImage smallImageNamed:@"genericFolderIcon"];
 }
 
+- (BOOL)isStatic {
+	return NO;
+}
+
 - (BOOL)isSmart {
+	return NO;
+}
+
+- (BOOL)isCategory {
 	return NO;
 }
 
@@ -189,17 +180,11 @@
 }
 
 - (BOOL)containsItem:(BibItem *)item {
-	if (key == nil)
-		return YES;
-	return [item isContainedInGroupNamed:name forField:key];
+    return YES;
 }
 
 - (BOOL)hasEditableName {
-    return hasEditableName;
-}
-
-- (void)setEditableName:(BOOL)flag {
-    hasEditableName = flag;
+    return YES;
 }
 
 - (BOOL)failedDownload {
@@ -213,6 +198,7 @@
 
 @end
 
+#pragma mark -
 
 @implementation BDSKAllPublicationsGroup
 
@@ -224,7 +210,7 @@ static NSString *BDSKAllPublicationsLocalizedString = nil;
 }
 
 - (id)init {
-	self = [super initWithName:BDSKAllPublicationsLocalizedString key:nil count:0];
+	self = [super initWithName:BDSKAllPublicationsLocalizedString count:0];
     return self;
 }
 
@@ -242,6 +228,88 @@ static NSString *BDSKAllPublicationsLocalizedString = nil;
 }
  
 @end
+
+#pragma mark -
+
+@implementation BDSKCategoryGroup
+
+// designated initializer
+- (id)initWithName:(id)aName key:(NSString *)aKey count:(int)aCount {
+    if (self = [super initWithName:aName count:aCount]) {
+        key = [aKey copy];
+    }
+    return self;
+}
+
+// super's designated initializer
+- (id)initWithName:(id)aName count:(int)aCount {
+    self = [self initWithName:aName key:nil count:aCount];
+    return self;
+}
+
+- (id)initEmptyGroupWithClass:(Class)aClass key:(NSString *)aKey count:(int)aCount {
+    NSZone *zone = [self zone];
+    [self release];
+    NSParameterAssert([aClass isEqual:[BibAuthor class]] || [aClass isEqual:[NSString class]]);
+    id aName = [aClass isEqual:[BibAuthor class]] ? [BibAuthor emptyAuthor] : @"";
+    return [[BDSKEmptyGroup allocWithZone:zone] initWithName:aName key:aKey count:aCount];
+}
+
+// NSCoding protocol
+
+- (id)initWithCoder:(NSCoder *)decoder {
+	if (self = [super initWithCoder:decoder]) {
+		key = [[decoder decodeObjectForKey:@"key"] retain];
+	}
+	return self;
+}
+
+- (void)encodeWithCoder:(NSCoder *)coder {
+	[super encodeWithCoder:coder];
+	[coder encodeObject:key forKey:@"key"];
+}
+
+// NSCopying protocol
+
+- (id)copyWithZone:(NSZone *)aZone {
+	id copy = [[[self class] allocWithZone:aZone] initWithName:name key:key count:count];
+	return copy;
+}
+
+- (void)dealloc {
+    [key release];
+    [super dealloc];
+}
+
+- (BOOL)isEqual:(id)other {
+	if ([super isEqual:other] == NO) 
+		return NO;
+	return [[self key] isEqualToString:[other key]] || ([self key] == nil && [other key] == nil);
+}
+
+- (NSString *)description {
+    return [NSString stringWithFormat:@"%@, key=\"%@\"", [super description], key];
+}
+
+- (BOOL)containsItem:(BibItem *)item {
+	if (key == nil)
+		return YES;
+	return [item isContainedInGroupNamed:name forField:key];
+}
+
+// accessors
+
+- (BOOL)isCategory {
+	return YES;
+}
+
+- (NSString *)key {
+    return [[key retain] autorelease];
+}
+
+@end
+
+#pragma mark -
 
 @implementation BDSKEmptyGroup
 
@@ -278,6 +346,138 @@ static NSString *BDSKAllPublicationsLocalizedString = nil;
 
 @end
 
+#pragma mark -
+
+@implementation BDSKStaticGroup
+
+static NSString *BDSKLastImportLocalizedString = nil;
+
++ (void)initialize{
+    OBINITIALIZE;
+    BDSKLastImportLocalizedString = [NSLocalizedString(@"Last Import", @"group name for last import") copy];
+}
+
+- (id)initWithLastImport:(NSArray *)array {
+	NSZone *zone = [self zone];
+	[[super init] release];
+	self = [[BDSKLastImportGroup allocWithZone:zone] initWithName:BDSKLastImportLocalizedString publications:array];
+	return self;
+}
+
+// designated initializer
+- (id)initWithName:(id)aName publications:(NSArray *)array {
+    if (self = [super initWithName:aName count:[array count]]) {
+        publications = (array == nil) ? [[NSMutableArray alloc] init] : [array mutableCopy];
+		undoManager = nil;
+    }
+    return self;
+}
+
+// super's designated initializer
+- (id)initWithName:(id)aName count:(int)aCount {
+    self = [self initWithName:aName publications:nil];
+    return self;
+}
+
+- (void)dealloc {
+	[[self undoManager] removeAllActionsWithTarget:self];
+    [undoManager release];
+    [publications release];
+    [super dealloc];
+}
+
+- (NSImage *)icon {
+	return [NSImage smallImageNamed:@"staticFolderIcon"];
+}
+
+- (BOOL)isStatic {
+    return YES;
+}
+
+- (void)setName:(id)newName {
+    if (name != newName) {
+		[(BDSKStaticGroup *)[[self undoManager] prepareWithInvocationTarget:self] setName:name];
+        [name release];
+        name = [newName retain];
+    }
+}
+
+- (NSArray *)publications {
+    return publications;
+}
+
+- (void)setPublications:(NSArray *)newPublications {
+    if (newPublications != publications) {
+		[[[self undoManager] prepareWithInvocationTarget:self] setPublications:publications];
+        [publications release];
+        publications = [newPublications retain];
+        [self setCount:[publications count]];
+        [[NSNotificationCenter defaultCenter] postNotificationName:BDSKStaticGroupChangedNotification object:nil];
+    }
+}
+
+- (void)addPublication:(BibItem *)item {
+    [[[self undoManager] prepareWithInvocationTarget:self] removePublication:item];
+    [publications addObject:item];
+    [self setCount:[publications count]];
+    [[NSNotificationCenter defaultCenter] postNotificationName:BDSKStaticGroupChangedNotification object:nil];
+}
+
+- (void)addPublicationsFromArray:(NSArray *)items {
+    [[[self undoManager] prepareWithInvocationTarget:self] removePublicationsInArray:items];
+    [publications addObjectsFromArray:items];
+    [self setCount:[publications count]];
+    [[NSNotificationCenter defaultCenter] postNotificationName:BDSKStaticGroupChangedNotification object:nil];
+}
+
+- (void)removePublication:(BibItem *)item {
+    [[[self undoManager] prepareWithInvocationTarget:self] addPublication:item];
+    [publications removeObject:item];
+    [self setCount:[publications count]];
+    [[NSNotificationCenter defaultCenter] postNotificationName:BDSKStaticGroupChangedNotification object:nil];
+}
+
+- (void)removePublicationsInArray:(NSArray *)items {
+    [[[self undoManager] prepareWithInvocationTarget:self] addPublicationsFromArray:items];
+    [publications removeObjectsInArray:items];
+    [self setCount:[publications count]];
+    [[NSNotificationCenter defaultCenter] postNotificationName:BDSKStaticGroupChangedNotification object:nil];
+}
+
+- (BOOL)containsItem:(BibItem *)item {
+	return [publications containsObject:item];
+}
+
+- (NSUndoManager *)undoManager {
+    return undoManager;
+}
+
+- (void)setUndoManager:(NSUndoManager *)newUndoManager {
+    if (undoManager != newUndoManager) {
+        [undoManager release];
+        undoManager = [newUndoManager retain];
+    }
+}
+
+@end
+
+#pragma mark -
+
+@implementation BDSKLastImportGroup
+
+// @@ custom icon
+- (NSImage *)icon {
+	return [NSImage smallImageNamed:@"staticFolderIcon"];
+}
+
+- (BOOL)hasEditableName {
+    return NO;
+}
+
+@end
+
+#pragma mark -
+
 @implementation BDSKSmartGroup
 
 // old designated initializer
@@ -290,7 +490,7 @@ static NSString *BDSKAllPublicationsLocalizedString = nil;
 
 // designated initializer
 - (id)initWithName:(id)aName count:(int)aCount filter:(BDSKFilter *)aFilter {
-    if (self = [super initWithName:aName key:nil count:aCount]) {
+    if (self = [super initWithName:aName count:aCount]) {
         filter = [aFilter copy];
 		undoManager = nil;
 		[filter setUndoManager:nil];
@@ -344,7 +544,7 @@ static NSString *BDSKAllPublicationsLocalizedString = nil;
 }
 
 - (NSString *)description {
-    return [NSString stringWithFormat:@"%@ filter={ %@ }", [super description], filter];
+    return [NSString stringWithFormat:@"%@, filter={ %@ }", [super description], filter];
 }
 
 // "static" properties
