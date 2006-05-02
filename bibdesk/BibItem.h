@@ -76,17 +76,16 @@
 - (id)init;
 
 /*!
-     @method initWithType:fileType:pubFields:authors:createdDate:
+     @method initWithType:fileType:pubFields:createdDate:
      @abstract Initializes an alloc'd BibItem to a type and allows to set the authors. This is the designated intializer.
      @discussion This lets you set the type and the Authors array at initialization time. Call it with an empty array for authArray if you don't want to do that -<em>Don't use nil</em> The authors array is kept up but isn't used much right now. This will change. The createdDate should be nil when the BibItem is not newly added, such as in a parser. 
      @param fileType A string representing which kind of file this item was read from.
      @param type A string representing the type of entry this item is - used to make the BibItem have the right entries in its dictionary.
      @param fieldsDict The dictionary of fields to initialize the item with.
-     @param authArray A NSMutableArray of NSStrings, one for each author.
      @param date The created date of the BibItem. Pass nil if this is not a newly added BibItem (i.e. when it is added from a file). 
      @result The receiver, initialized to type and containing authors authArray.
 */
-- (id)initWithType:(NSString *)type fileType:(NSString *)inFileType pubFields:(NSDictionary *)fieldsDict authors:(NSMutableArray *)authArray createdDate:(NSCalendarDate *)date;
+- (id)initWithType:(NSString *)type fileType:(NSString *)inFileType pubFields:(NSDictionary *)fieldsDict createdDate:(NSCalendarDate *)date;
 
 /*!
     @method makeType
@@ -125,6 +124,7 @@
 
 /* Methods for handling people objects (BibAuthors) which may be any people type (Author, Editor, etc.)
 */
+- (void)rebuildPeople;
 - (NSSet *)allPeople;
 - (int)numberOfPeople;
 - (NSArray *)sortedPeople;

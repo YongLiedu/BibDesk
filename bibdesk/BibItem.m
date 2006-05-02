@@ -132,7 +132,6 @@ static NSParagraphStyle* bodyParagraphStyle = nil;
 	self = [self initWithType:[pw stringForKey:BDSKPubTypeStringKey]
 									  fileType:BDSKBibtexString // Not Sure if this is good.
 									 pubFields:nil
-									   authors:nil
 								   createdDate:[NSCalendarDate calendarDate]];
 	if (self) {
         [self setHasBeenEdited:NO]; // for new, empty bibs:  set this here, since makeType: and updateMetadataForKey set it to YES in our call to initWithType: above
@@ -140,7 +139,7 @@ static NSParagraphStyle* bodyParagraphStyle = nil;
 	return self;
 }
 
-- (id)initWithType:(NSString *)type fileType:(NSString *)inFileType pubFields:(NSDictionary *)fieldsDict authors:(NSMutableArray *)authArray createdDate:(NSCalendarDate *)date{ // this is the designated initializer.
+- (id)initWithType:(NSString *)type fileType:(NSString *)inFileType pubFields:(NSDictionary *)fieldsDict createdDate:(NSCalendarDate *)date{ // this is the designated initializer.
     if (self = [super init]){
 		bibLock = [[NSLock alloc] init];
 		[bibLock lock];
@@ -155,12 +154,7 @@ static NSParagraphStyle* bodyParagraphStyle = nil;
 			[pubFields setObject:nowStr forKey:BDSKDateModifiedString];
         }
         
-        people = [[NSMutableDictionary alloc] initWithCapacity:2];
-		if(authArray){
-			NSMutableArray *pubAuthors = [authArray mutableCopy];
-            [people setObject:pubAuthors forKey:BDSKAuthorString];
-            [pubAuthors release];
-        }
+        people = nil;
         
         document = nil;
         [bibLock unlock];
@@ -200,7 +194,6 @@ static NSParagraphStyle* bodyParagraphStyle = nil;
     BibItem *theCopy = [[[self class] allocWithZone: zone] initWithType:pubType
                                                                fileType:fileType
 															  pubFields:pubFields
-                                                                authors:[people objectForKey:BDSKAuthorString usingLock:bibLock]
 															createdDate:[NSCalendarDate calendarDate]];
     [theCopy setCiteKeyString: citeKey];
     [theCopy setDate: pubDate];
@@ -219,7 +212,6 @@ static NSParagraphStyle* bodyParagraphStyle = nil;
         [self setDateModified:[coder decodeObjectForKey:@"dateModified"]];
         pubFields = [[coder decodeObjectForKey:@"pubFields"] retain];
         groups = [[NSMutableDictionary alloc] initWithCapacity:5];
-        people = [[coder decodeObjectForKey:@"people"] retain];
         // set by the document, which we don't archive
         document = nil;
         hasBeenEdited = [coder decodeBoolForKey:@"hasBeenEdited"];
@@ -251,7 +243,7 @@ static NSParagraphStyle* bodyParagraphStyle = nil;
         [coder encodeObject:dateModified forKey:@"dateModified"];
         [coder encodeObject:pubType forKey:@"pubType"];
         [coder encodeObject:pubFields forKey:@"pubFields"];
-        [coder encodeObject:people forKey:@"people"];
+        [coder encodeObject:[self peopleInheriting:NO] forKey:@"people"]; // legacy, for sharing with older versions
         [coder encodeBool:hasBeenEdited forKey:@"hasBeenEdited"];
         [bibLock unlock];
     } else {
@@ -432,6 +424,31 @@ static NSParagraphStyle* bodyParagraphStyle = nil;
 
 #pragma mark Generic person handling code
 
+- (void)rebuildPeople{
+    NSEnumerator *pEnum = [[[BibTypeManager sharedManager] personFieldsSet] objectEnumerator];
+    NSString *personStr;
+    NSMutableArray *tmpPeople;
+    NSString *personType;
+    
+    [bibLock lock];
+    if (people == nil)
+        people = [[NSMutableDictionary alloc] initWithCapacity:2];
+    [bibLock unlock];
+    
+    while(personType = [pEnum nextObject]){
+        // get the string representation from pubFields
+        personStr = [pubFields objectForKey:personType usingLock:bibLock];
+        
+        // don't check for an empty string, since that is valid here (we may be deleting authors)
+        if(personStr != nil){
+            // parse into an array of author objects
+            tmpPeople = [[BibTeXParser authorsFromBibtexString:personStr withPublication:self] mutableCopy];
+            [people setObject:tmpPeople forKey:personType usingLock:bibLock];
+            [tmpPeople release];
+        }
+    }
+}
+
 // this returns a set so it's clear that the objects are unordered
 - (NSSet *)allPeople{
     NSArray *allArrays = [[self people] allValues];
@@ -457,6 +474,8 @@ static NSParagraphStyle* bodyParagraphStyle = nil;
 }
 
 - (NSArray *)peopleArrayForField:(NSString *)field inherit:(BOOL)inherit{
+    if (people == nil)
+        [self rebuildPeople];
     
     NSArray *peopleArray = [people objectForKey:field usingLock:bibLock];
     if([peopleArray count] == 0 && inherit){
@@ -472,6 +491,9 @@ static NSParagraphStyle* bodyParagraphStyle = nil;
 
 - (NSDictionary *)peopleInheriting:(BOOL)inherit{
     BibItem *parent;
+    
+    if (people == nil)
+        [self rebuildPeople];
     
     if(inherit && (parent = [self crossrefParent])){
         NSMutableDictionary *parentCopy = [[[parent peopleInheriting:NO] mutableCopy] autorelease];
@@ -2484,23 +2506,8 @@ static NSParagraphStyle* bodyParagraphStyle = nil;
     [stringCache removeValueForKey:key];
     
     // re-parse people (authors, editors, etc.) if necessary
-    if (key == nil || [BDSKAllFieldsString isEqualToString:key] || [[[BibTypeManager sharedManager] personFieldsSet] containsObject:key]) {
-        NSEnumerator *pEnum = [[[BibTypeManager sharedManager] personFieldsSet] objectEnumerator];
-        NSString *personStr;
-        NSMutableArray *tmpPeople;
-        NSString *personType;
-        while(personType = [pEnum nextObject]){
-            // get the string representation from pubFields
-            personStr = [pubFields objectForKey:personType usingLock:bibLock];
-            
-            // don't check for an empty string, since that is valid here (we may be deleting authors)
-            if(personStr != nil){
-                // parse into an array of author objects
-                tmpPeople = [[BibTeXParser authorsFromBibtexString:personStr withPublication:self] mutableCopy];
-                [people setObject:tmpPeople forKey:personType usingLock:bibLock];
-                [tmpPeople release];
-            }
-        }
+    if (people != nil && ([BDSKAllFieldsString isEqualToString:key] || [[[BibTypeManager sharedManager] personFieldsSet] containsObject:key])) {
+       [self rebuildPeople];
 	}
 	
 	if([BDSKLocalUrlString isEqualToString:key])

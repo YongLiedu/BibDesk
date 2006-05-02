@@ -164,6 +164,10 @@
 	return NO;
 }
 
+- (BOOL)isScratch {
+	return NO;
+}
+
 // custom accessors
 
 - (NSString *)stringValue {
@@ -270,6 +274,77 @@ static NSString *BDSKAllPublicationsLocalizedString = nil;
 
 - (BOOL)hasEditableName {
     return NO;
+}
+
+@end
+
+
+@implementation BDSKScratchGroup
+
+- (id)init {
+    self = [self initWithName:NSLocalizedString(@"Scratch", @"Scratch") publications:nil];
+    return self;
+}
+
+- (id)initWithName:(id)aName publications:(NSArray *)array {
+    if (self = [super initWithName:aName key:nil count:[array count]]) {
+        publications = (array == nil) ? [[NSMutableArray alloc] init] : [array mutableCopy];
+    }
+    return self;
+}
+
+- (id)initWithName:(id)aName key:(NSString *)key count:(int)aCount {
+    self = [self initWithName:aName publications:nil];
+    return self;
+}
+
+- (NSImage *)icon {
+	return [NSImage smallImageNamed:@"scratchFolderIcon"];
+}
+
+- (void)dealloc {
+    [publications release];
+    [super dealloc];
+}
+
+- (BOOL)isScratch {
+    return YES;
+}
+
+- (NSArray *)publications {
+    return publications;
+}
+
+- (void)setPublications:(NSArray *)newPublications {
+    if (newPublications != publications) {
+        [publications release];
+        publications = [newPublications retain];
+        [self setCount:[publications count]];
+    }
+}
+
+- (void)addPublication:(BibItem *)item {
+    [publications addObject:item];
+    [self setCount:[publications count]];
+}
+
+- (void)addPublicationsFromArray:(NSArray *)items {
+    [publications addObjectsFromArray:items];
+    [self setCount:[publications count]];
+}
+
+- (void)removePublication:(BibItem *)item {
+    [publications removeObject:item];
+    [self setCount:[publications count]];
+}
+
+- (void)removePublicationsInArray:(NSArray *)items {
+    [publications removeObjectsInArray:items];
+    [self setCount:[publications count]];
+}
+
+- (BOOL)containsItem:(BibItem *)item {
+	return [publications containsObject:item];
 }
 
 @end

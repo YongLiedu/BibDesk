@@ -125,6 +125,13 @@
 - (BOOL)isShared;
 
 /*!
+	@method isScratch
+	@abstract Boolean, returns whether the receiver is a scratch group. 
+	@discussion -
+*/
+- (BOOL)isScratch;
+
+/*!
 	@method stringValue
 	@abstract Returns string value of the name.
 	@discussion -
@@ -185,6 +192,22 @@
     @abstract   Method for remote groups.  Returns NO by default.
 */
 - (BOOL)isRetrieving;
+
+@end
+
+
+@interface BDSKScratchGroup : BDSKGroup {
+	NSMutableArray *publications;
+}
+
+- (id)initWithName:(id)aName publications:(NSArray *)array;
+
+- (NSArray *)publications;
+- (void)setPublications:(NSArray *)newPublications;
+- (void)addPublication:(BibItem *)item;
+- (void)addPublicationsFromArray:(NSArray *)items;
+- (void)removePublication:(BibItem *)item;
+- (void)removePublicationsInArray:(NSArray *)items;
 
 @end
 

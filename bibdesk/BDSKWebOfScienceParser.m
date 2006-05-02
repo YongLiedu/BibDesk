@@ -227,7 +227,7 @@ static void fixDateBySplittingString(NSMutableDictionary *pubDict)
                         type = type ? [typeManager bibtexTypeForWebOfScienceType:type] : @"misc";
                     }
                     
-                    newBI = [[BibItem alloc] initWithType:type fileType:BDSKBibtexString pubFields:pubDict authors:nil createdDate:[NSCalendarDate date]];
+                    newBI = [[BibItem alloc] initWithType:type fileType:BDSKBibtexString pubFields:pubDict createdDate:[NSCalendarDate date]];
                     [newBI setCiteKeyString:[newBI suggestedCiteKey]];
 					[returnArray addObject:newBI];
 					[newBI release];

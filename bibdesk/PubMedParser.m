@@ -313,7 +313,6 @@ static BibItem *createBibItemWithPubMedDictionary(NSMutableDictionary *pubDict, 
     newBI = [[BibItem alloc] initWithType:@"article"
 								 fileType:BDSKBibtexString
 								pubFields:pubDict
-								  authors:nil
 							  createdDate:date];
     // set the pub type if we know the bibtex equivalent, otherwise leave it as misc
     if([typeManager bibtexTypeForPubMedType:[pubDict objectForKey:@"Ty"]] != nil){ // "standard" RIS, if such a thing exists

@@ -66,7 +66,6 @@ static NSString *repositorySpecifierStrings[] = {@"", @"%a00", @"%A0", @"%t0", @
 		previewItem = [[BibItem alloc] initWithType:[defaults stringForKey:BDSKPubTypeStringKey]
 										   fileType:BDSKBibtexString
 										  pubFields:previewFields
-											authors:nil
 										createdDate:[NSCalendarDate calendarDate]];
 	}
 	return self;
