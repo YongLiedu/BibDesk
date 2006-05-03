@@ -101,6 +101,10 @@
 - (IBAction)editNewGroupWithSelection:(id)sender;
 - (void)addSmartGroupSheetDidEnd:(NSWindow *)sheet returnCode:(int) returnCode contextInfo:(void *)contextInfo;
 
+- (IBAction)mergeInSharedGroup:(id)sender;
+- (IBAction)mergeInSharedPublications:(id)sender;
+- (void)mergeInPublications:(NSArray *)items;
+
 - (void)setSmartGroupsFromSerializedData:(NSData *)data;
 - (NSData *)serializedGroupsData;
 - (void)setGroupsFromSerializedData:(NSData *)data;

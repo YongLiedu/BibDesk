@@ -907,6 +907,61 @@ The groupedPublications array is a subset of the publications array, developed b
     }
 }
 
+- (IBAction)mergeInSharedGroup:(id)sender{
+    if ([self hasSharedGroupsSelected] == NO) {
+        NSBeep();
+        return;
+    }
+    [self mergeInPublications:[self selectedSharedPublications]];
+}
+
+- (IBAction)mergeInSharedPublications:(id)sender{
+    if ([self hasSharedGroupsSelected] == NO || [self numberOfSelectedPubs] == 0) {
+        NSBeep();
+        return;
+    }
+    [self mergeInPublications:[self selectedPublications]];
+}
+
+- (void)mergeInPublications:(NSArray *)items{
+    // first construct a set of current items to compare based on BibItem equality callbacks
+    CFIndex countOfItems = [publications count];
+    BibItem **pubs = NSZoneMalloc([self zone], sizeof(BibItem *) * countOfItems);
+    [publications getObjects:pubs];
+    NSSet *currentPubs = (NSSet *)CFSetCreate(CFAllocatorGetDefault(), (const void **)pubs, countOfItems, &BDSKBibItemEqualityCallBacks);
+    
+    NSMutableArray *array = [NSMutableArray arrayWithCapacity:[items count]];
+    NSEnumerator *pubEnum = [items objectEnumerator];
+    BibItem *pub;
+    
+    while (pub = [pubEnum nextObject]) {
+        if ([currentPubs containsObject:pub] == NO)
+            [array addObject:pub];
+    }
+    
+    if ([array count] == 0)
+        return;
+    
+    // archive and unarchive mainly to get complex strings with the correct macroResolver
+    NSMutableData *data = [NSMutableData data];
+    NSKeyedArchiver *archiver = [[NSKeyedArchiver alloc] initForWritingWithMutableData:data];
+    NSArray *newPubs;
+    
+    [archiver encodeObject:array forKey:@"publications"];
+    [archiver finishEncoding];
+    [archiver release];
+    
+    newPubs = [self newPublicationsFromArchivedData:data];
+    
+    [groupTableView selectRowIndexes:[NSIndexSet indexSetWithIndex:0] byExtendingSelection:NO];    
+	[self addPublications:newPubs];
+	[self highlightBibs:newPubs];
+    
+    // @@ should we set the last import group?
+	
+	[[self undoManager] setActionName:NSLocalizedString(@"Merge Shared Publications",@"")];
+}
+
 - (BOOL)addPublications:(NSArray *)pubs toGroup:(BDSKGroup *)group{
 	OBASSERT([group isSmart] == NO && [group isShared] == NO && group != allPublicationsGroup && group != lastImportGroup);
     
