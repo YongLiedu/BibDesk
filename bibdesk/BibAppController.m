@@ -1647,3 +1647,36 @@ OFWeakRetainConcreteImplementation_NULL_IMPLEMENTATION
 }
 
 @end
+
+@interface NSSavePanel (AppleBugPrivate)
+- (BOOL)_canShowGoto;
+@end
+
+@interface BDSKPosingSavePanel : NSSavePanel @end
+
+@implementation BDSKPosingSavePanel
+
++ (void)load
+{
+    [self poseAsClass:NSClassFromString(@"NSSavePanel")];
+}
+
+// hack around an acknowledged Apple bug (http://www.cocoabuilder.com/archive/message/cocoa/2006/4/14/161080) that causes the goto panel to be displayed when trying to enter a leading / in "Open Using Filter" accessory view (our bug #1480815)
+- (BOOL)_canShowGoto;
+{
+    id firstResponder = [self firstResponder];
+    // this is likely a field editor, but we have to make sure
+    if([firstResponder isKindOfClass:[NSText class]] && [firstResponder isFieldEditor] && [firstResponder respondsToSelector:@selector(superview)]){
+        // if it's our custom view, the control will be a combo box (superview of the field editor)
+        NSView *superview = [firstResponder superview];
+        NSEnumerator *viewE = [[[self accessoryView] subviews] objectEnumerator];
+        NSView *aView;
+        while(aView = [viewE nextObject]){
+            if([superview isDescendantOf:aView])
+                return NO;
+        }
+    }
+    return [super _canShowGoto];
+}
+
+@end
