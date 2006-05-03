@@ -66,6 +66,8 @@
 - (void)setCurrentGroupField:(NSString *)field;
 - (NSString *)currentGroupField;
 
+- (NSMutableArray *)staticGroups;
+
 - (NSArray *)selectedGroups;
 - (NSArray *)selectedSharedPublications;
 - (void)updateGroupsPreservingSelection:(BOOL)preserve;

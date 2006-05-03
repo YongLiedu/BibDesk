@@ -114,7 +114,8 @@ NSString *BDSKWeblocFilePboardType = @"CorePasteboardFlavorType 0x75726C20";
         groupedPublications = [[NSMutableArray alloc] initWithCapacity:1];
         groups = [[NSMutableArray alloc] initWithCapacity:1];
         smartGroups = [[NSMutableArray alloc] initWithCapacity:1];
-        staticGroups = [[NSMutableArray alloc] initWithCapacity:1];
+        staticGroups = nil;
+        tmpStaticGroups = nil;
 		allPublicationsGroup = [[BDSKGroup alloc] initWithAllPublications];
 		lastImportGroup = nil;
                 
@@ -535,7 +536,7 @@ NSString *BDSKWeblocFilePboardType = @"CorePasteboardFlavorType 0x75726C20";
 													  userInfo:notifInfo];	
     
     [lastImportGroup removePublicationsInArray:pubs];
-    [staticGroups makeObjectsPerformSelector:@selector(removePublicationsInArray:) withObject:pubs];
+    [[self staticGroups] makeObjectsPerformSelector:@selector(removePublicationsInArray:) withObject:pubs];
     
 	[publications removeObjectsAtIndexes:indexes];
 	
@@ -1020,7 +1021,7 @@ NSString *BDSKWeblocFilePboardType = @"CorePasteboardFlavorType 0x75726C20";
         [d appendData:[[pub bibTeXStringDroppingInternal:drop] dataUsingEncoding:encoding allowLossyConversion:YES]];
     }
 	
-	if([smartGroups count] + [staticGroups count] > 0){
+	if([smartGroups count] + [[self staticGroups] count] > 0){
         [d appendData:[@"\n\n@comment{BibDesk Groups{\n" dataUsingEncoding:encoding allowLossyConversion:YES]];
 		[d appendData:[self serializedGroupsData]];
         [d appendData:[@"}}" dataUsingEncoding:encoding allowLossyConversion:YES]];
@@ -3357,6 +3358,13 @@ NSString *BDSKWeblocFilePboardType = @"CorePasteboardFlavorType 0x75726C20";
 		return nil;
     // may have duplicate items for the same key, so just return the first one
     return [items objectAtIndex:0];
+}
+
+- (NSArray *)allPublicationsForCiteKey:(NSString *)key{
+	NSArray *items = nil;
+    if ([NSString isEmptyString:key] == NO) 
+		items = [[self itemsForCiteKeys] arrayForKey:key];
+    return (items == nil) ? [NSArray array] : items;
 }
 
 - (BOOL)citeKeyIsCrossreffed:(NSString *)key{

@@ -169,6 +169,7 @@ extern NSString* BDSKWeblocFilePboardType; // core pasteboard type for webloc fi
     NSMutableArray *groups;
     NSMutableArray *smartGroups;
     NSMutableArray *staticGroups;
+    NSMutableArray *tmpStaticGroups;
     NSMutableArray *groupedPublications;
 	BDSKGroup *allPublicationsGroup;
 	BDSKStaticGroup *lastImportGroup;
@@ -639,6 +640,7 @@ extern NSString* BDSKWeblocFilePboardType; // core pasteboard type for webloc fi
 */
 - (BibItem *)publicationForCiteKey:(NSString *)key;
 
+- (NSArray *)allPublicationsForCiteKey:(NSString *)key;
 
     /*!
 @method citeKeyIsUsed:byItemOtherThan

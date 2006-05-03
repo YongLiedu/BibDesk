@@ -57,14 +57,14 @@
 #pragma mark Indexed accessors
 
 - (unsigned int)countOfGroups {
-    return [smartGroups count] + [sharedGroups count] + [staticGroups count] + [groups count] + 1 ;
+    return [smartGroups count] + [sharedGroups count] + [[self staticGroups] count] + [groups count] + 1 ;
 }
 
 - (BDSKGroup *)objectInGroupsAtIndex:(unsigned int)index {
     unsigned int specialCount = (lastImportGroup == nil) ? 1 : 2;
 	unsigned int smartCount = [smartGroups count];
     unsigned int sharedCount = [sharedGroups count];
-    unsigned int staticCount = [staticGroups count];
+    unsigned int staticCount = [[self staticGroups] count];
 	if (index == 0)
 		return allPublicationsGroup;
 	else if (index < specialCount)
@@ -74,7 +74,7 @@
 	else if (index < smartCount + sharedCount + specialCount)
         return [sharedGroups objectAtIndex:index - smartCount - specialCount];
 	else if (index < smartCount + sharedCount + staticCount + specialCount)
-        return [staticGroups objectAtIndex:index - smartCount - sharedCount - specialCount];
+        return [[self staticGroups] objectAtIndex:index - smartCount - sharedCount - specialCount];
     else
 		return [groups objectAtIndex:index - smartCount - sharedCount - staticCount - specialCount];
 }
@@ -108,7 +108,7 @@
 
 - (NSRange)rangeOfSimpleGroups{
     unsigned int specialCount = (lastImportGroup == nil) ? 1 : 2;
-    return NSMakeRange([smartGroups count] + [sharedGroups count] + [staticGroups count] + specialCount, [groups count]);
+    return NSMakeRange([smartGroups count] + [sharedGroups count] + [[self staticGroups] count] + specialCount, [groups count]);
 }
 
 - (NSRange)rangeOfSmartGroups{
@@ -123,7 +123,7 @@
 
 - (NSRange)rangeOfStaticGroups{
     unsigned int specialCount = (lastImportGroup == nil) ? 1 : 2;
-    return NSMakeRange([smartGroups count] + [sharedGroups count] + specialCount, [staticGroups count]);
+    return NSMakeRange([smartGroups count] + [sharedGroups count] + specialCount, [[self staticGroups] count]);
 }
 
 - (unsigned int)numberOfSimpleGroupsAtIndexes:(NSIndexSet *)indexes{
@@ -165,6 +165,34 @@
 
 #pragma mark Accessors
 
+- (NSMutableArray *)staticGroups{
+    if (staticGroups == nil) {
+        staticGroups = [[NSMutableArray alloc] init];
+        
+        NSEnumerator *groupEnum = [tmpStaticGroups objectEnumerator];
+        NSDictionary *groupDict;
+        BDSKStaticGroup *group;
+        NSMutableArray *pubArray;
+        NSArray *keys;
+        NSEnumerator *keyEnum;
+        NSString *key;
+        
+        while (groupDict = [groupEnum nextObject]) {
+            keys = [[groupDict objectForKey:@"keys"] componentsSeparatedByString:@","];
+            keyEnum = [keys objectEnumerator];
+            pubArray = [[NSMutableArray alloc] initWithCapacity:[keys count]];
+            while (key = [keyEnum nextObject]) 
+                [pubArray addObjectsFromArray:[self allPublicationsForCiteKey:key]];
+            group = [[BDSKStaticGroup alloc] initWithName:[groupDict objectForKey:@"group name"] publications:pubArray];
+            [group setUndoManager:[self undoManager]];
+            [staticGroups addObject:group];
+            [group release];
+            [pubArray release];
+        }
+    }
+    return staticGroups;
+}
+
 - (void)addSmartGroup:(BDSKSmartGroup *)group {
 	[[[self undoManager] prepareWithInvocationTarget:self] removeSmartGroup:group];
     
@@ -203,7 +231,7 @@
 	[[[self undoManager] prepareWithInvocationTarget:self] removeStaticGroup:group];
 	
 	[group setUndoManager:[self undoManager]];
-	[staticGroups addObject:group];
+	[[self staticGroups] addObject:group];
     [groupTableView reloadData];
 }
 
@@ -211,13 +239,13 @@
 	[[[self undoManager] prepareWithInvocationTarget:self] addStaticGroup:group];
 	
 	[group setUndoManager:nil];
-	[staticGroups removeObjectIdenticalTo:group];
+	[[self staticGroups] removeObjectIdenticalTo:group];
     [groupTableView reloadData];
 }
 
 // assumes you only have a single static group with this name; that assumption is not enforced elsewhere
 - (void)removeStaticGroupNamed:(id)name {
-    NSEnumerator *e = [staticGroups objectEnumerator];
+    NSEnumerator *e = [[self staticGroups] objectEnumerator];
     BDSKStaticGroup *sGroup = nil;
     
     while(sGroup = [e nextObject]){
@@ -880,7 +908,7 @@ The groupedPublications array is a subset of the publications array, developed b
 }
 
 - (IBAction)editNewGroupWithSelection:(id)sender{
-    NSArray *names = [staticGroups valueForKeyPath:@"distinctUnionOfObjects.name"];
+    NSArray *names = [[self staticGroups] valueForKeyPath:@"distinctUnionOfObjects.name"];
     NSArray *pubs = [self selectedPublications];
     NSString *baseName = NSLocalizedString(@"Untitled", @"");
     NSString *name = baseName;
@@ -895,7 +923,7 @@ The groupedPublications array is a subset of the publications array, developed b
     [self addStaticGroup:group];    
     [groupTableView deselectAll:nil];
     
-    i = [staticGroups indexOfObject:group];
+    i = [[self staticGroups] indexOfObject:group];
     OBASSERT(i != NSNotFound);
     
     if(i != NSNotFound){
@@ -1178,7 +1206,7 @@ The groupedPublications array is a subset of the publications array, developed b
     [groups sortUsingDescriptors:sortDescriptors];
     [smartGroups sortUsingDescriptors:sortDescriptors];
     [sharedGroups sortUsingDescriptors:sortDescriptors];
-    [staticGroups sortUsingDescriptors:sortDescriptors];
+    [[self staticGroups] sortUsingDescriptors:sortDescriptors];
 	
     if (emptyGroup != nil) {
         [groups insertObject:emptyGroup atIndex:0];
@@ -1248,14 +1276,14 @@ The groupedPublications array is a subset of the publications array, developed b
 
 - (NSData *)serializedGroupsData {
     NSMutableDictionary *dict = [NSMutableDictionary dictionaryWithCapacity:2];
-	NSMutableArray *staticArray = [NSMutableArray arrayWithCapacity:[staticGroups count]];
+	NSMutableArray *staticArray = [NSMutableArray arrayWithCapacity:[[self staticGroups] count]];
 	NSMutableArray *smartArray = [NSMutableArray arrayWithCapacity:[smartGroups count]];
 	NSString *keys;
     NSDictionary *groupDict;
-	NSEnumerator *groupEnum = [staticGroups objectEnumerator];
+	NSEnumerator *groupEnum = [[self staticGroups] objectEnumerator];
 	BDSKGroup *group;
 	
-    groupEnum = [staticGroups objectEnumerator];
+    groupEnum = [[self staticGroups] objectEnumerator];
 	while (group = [groupEnum nextObject]) {
 		keys = [[[(BDSKStaticGroup *)group publications] valueForKeyPath:@"@distinctUnionOfObjects.citeKey"] componentsJoinedByString:@"'"];
         groupDict = [[NSDictionary alloc] initWithObjectsAndKeys:[group stringValue], @"group name", keys, @"keys", nil];
@@ -1307,34 +1335,12 @@ The groupedPublications array is a subset of the publications array, developed b
 		return;
 	}
     
-    NSEnumerator *groupEnum;
+    NSEnumerator *groupEnum = [[plist objectForKey:@"smart groups"] objectEnumerator];
 	NSDictionary *groupDict;
 	NSMutableArray *array = [NSMutableArray array];
 	BDSKGroup *group;
-    NSMutableArray *pubArray;
-    NSArray *keys;
-    NSEnumerator *keyEnum;
-    NSString *key;
 	BDSKFilter *filter;
-	
-    groupEnum = [[plist objectForKey:@"static groups"] objectEnumerator];
-	while (groupDict = [groupEnum nextObject]) {
-        keys = [[groupDict objectForKey:@"keys"] componentsSeparatedByString:@","];
-        keyEnum = [keys objectEnumerator];
-        pubArray = [[NSMutableArray alloc] initWithCapacity:[keys count]];
-        while (key = [keyEnum nextObject]) 
-            [pubArray addObjectsFromArray:[itemsForCiteKeys arrayForKey:key]];
-		group = [[BDSKStaticGroup alloc] initWithName:[groupDict objectForKey:@"group name"] publications:pubArray];
-		[(BDSKStaticGroup *)group setUndoManager:[self undoManager]];
-		[array addObject:group];
-		[group release];
-		[pubArray release];
-	}
-	
-	[staticGroups setArray:array];
     
-    [array removeAllObjects];
-	groupEnum = [[plist objectForKey:@"smart groups"] objectEnumerator];
     while (groupDict = [groupEnum nextObject]) {
 		filter = [[BDSKFilter alloc] initWithDictionary:groupDict];
 		group = [[BDSKSmartGroup alloc] initWithName:[groupDict objectForKey:@"group name"] count:0 filter:filter];
@@ -1345,6 +1351,8 @@ The groupedPublications array is a subset of the publications array, developed b
 	}
 	
 	[smartGroups setArray:array];
+	
+    tmpStaticGroups = [[plist objectForKey:@"static groups"] retain];
 }
 
 @end
