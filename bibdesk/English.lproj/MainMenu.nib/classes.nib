@@ -123,6 +123,7 @@
                 makeNewExternalSource = id; 
                 makeNewNotepad = id; 
                 makeSearchFieldKey = id; 
+                mergeInSharedPublications = id; 
                 newBDSKLibrary = id; 
                 newPub = id; 
                 openLinkedFile = id; 

@@ -733,10 +733,17 @@
     return [self isDocumentEdited];
 }
 
-
 - (BOOL)validateChangePreviewDisplayMenuItem:(NSMenuItem *)menuItem {
     [menuItem setState:([menuItem tag] == [[OFPreferenceWrapper sharedPreferenceWrapper] integerForKey:BDSKPreviewDisplayKey]) ? NSOnState : NSOffState];
     return YES;
+}
+
+- (BOOL)validateMergeInSharedGroupMenuItem:(NSMenuItem *)menuItem {
+    return ([self hasSharedGroupsSelected]);
+}
+
+- (BOOL)validateMergeInSharedPublicationsMenuItem:(NSMenuItem *)menuItem {
+    return ([self hasSharedGroupsSelected] && [self numberOfSelectedPubs] > 0);
 }
 
 - (BOOL)validateRefreshSharingMenuItem:(NSMenuItem *)menuItem {
@@ -886,6 +893,12 @@
     }
     else if (act == @selector(changePreviewDisplay:)){
         return [self validateChangePreviewDisplayMenuItem:menuItem];
+    }
+    else if (act == @selector(mergeInSharedGroup:)){
+        return [self validateMergeInSharedGroupMenuItem:menuItem];
+    }
+    else if (act == @selector(mergeInSharedPublications:)){
+        return [self validateMergeInSharedPublicationsMenuItem:menuItem];
     }
     else if (act == @selector(refreshSharing:)){
         return [self validateRefreshSharingMenuItem:menuItem];
