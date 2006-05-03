@@ -172,30 +172,32 @@ static NSString *stringFromBTField(AST *field,  NSString *fieldName,  NSString *
                             }
                             [frontMatter appendString:@"\"}"];
                         }else if([entryType isEqualToString:@"string"]){
-                            // get the field name
-                            field = bt_next_field (entry, NULL, &fieldname);
-                            NSString *macroKey = [NSString stringWithCString: field->text usingEncoding:parserEncoding];
-                            NSString *macroString = stringFromBTField(field, sFieldName, filePath, aDocument, parserEncoding); // handles TeXification
-                            if([macroResolver macroDefinition:macroString dependsOnMacro:macroKey]){
-                                NSString *type = NSLocalizedString(@"Error", @"");
-                                NSString *message = NSLocalizedString(@"Macro leads to circular definition, ignored.", @"");
+                            // get the field name, there can be several macros in a single entry
+                            field = NULL;
+                            while (field = bt_next_field (entry, field, &fieldname)){
+                                NSString *macroKey = [NSString stringWithCString: field->text usingEncoding:parserEncoding];
+                                NSString *macroString = stringFromBTField(field, sFieldName, filePath, aDocument, parserEncoding); // handles TeXification
+                                if([macroResolver macroDefinition:macroString dependsOnMacro:macroKey]){
+                                    NSString *type = NSLocalizedString(@"Error", @"");
+                                    NSString *message = NSLocalizedString(@"Macro leads to circular definition, ignored.", @"");
 
-                                BDSKErrObj *errorObject = [[BDSKErrObj alloc] init];
-                                [errorObject setValue:filePath forKey:@"fileName"];
-                                [errorObject setValue:[NSNumber numberWithInt:field->line] forKey:@"lineNumber"];
-                                [errorObject setValue:type forKey:@"errorClassName"];
-                                [errorObject setValue:message forKey:@"errorMessage"];
-                                
-                                [[NSNotificationCenter defaultCenter] postNotificationName:BDSKParserErrorNotification
-                                                                                    object:errorObject];
-                                [errorObject release];
-                                // make sure the error panel is displayed, regardless of prefs; we can't show the "Keep going/data loss" alert, though
-                                [[BDSKErrorObjectController sharedErrorObjectController] performSelectorOnMainThread:@selector(showErrorPanel:) withObject:nil waitUntilDone:NO];
-                                
-                                OFError(&error, BDSKParserError, NSLocalizedDescriptionKey, NSLocalizedString(@"Circular macro ignored.", @""), nil);
-                            }else{
-                                [macroResolver addMacroDefinitionWithoutUndo:macroString forMacro:macroKey];
-                            }
+                                    BDSKErrObj *errorObject = [[BDSKErrObj alloc] init];
+                                    [errorObject setValue:filePath forKey:@"fileName"];
+                                    [errorObject setValue:[NSNumber numberWithInt:field->line] forKey:@"lineNumber"];
+                                    [errorObject setValue:type forKey:@"errorClassName"];
+                                    [errorObject setValue:message forKey:@"errorMessage"];
+                                    
+                                    [[NSNotificationCenter defaultCenter] postNotificationName:BDSKParserErrorNotification
+                                                                                        object:errorObject];
+                                    [errorObject release];
+                                    // make sure the error panel is displayed, regardless of prefs; we can't show the "Keep going/data loss" alert, though
+                                    [[BDSKErrorObjectController sharedErrorObjectController] performSelectorOnMainThread:@selector(showErrorPanel:) withObject:nil waitUntilDone:NO];
+                                    
+                                    OFError(&error, BDSKParserError, NSLocalizedDescriptionKey, NSLocalizedString(@"Circular macro ignored.", @""), nil);
+                                }else{
+                                    [macroResolver addMacroDefinitionWithoutUndo:macroString forMacro:macroKey];
+                                }
+                            } // end while field - process next macro
                         }else if([entryType isEqualToString:@"comment"]){
                             NSMutableString *commentStr = [[NSMutableString alloc] init];
                             field = NULL;
@@ -372,10 +374,12 @@ static NSString *stringFromBTField(AST *field,  NSString *fieldName,  NSString *
         }
         entryType = bt_entry_type(entry);
         if(strcmp(entryType, "string") == 0){
-            field = bt_next_field(entry, NULL, &fieldName);
-            macroKey = [NSString stringWithCString: field->text usingEncoding:NSUTF8StringEncoding];
-            macroString = stringFromBTField(field, nil, @"Paste/Drag", aDocument, NSUTF8StringEncoding); // handles TeXification
-            [retDict setObject:macroString forKey:macroKey];
+            field = NULL;
+            while(field = bt_next_field (entry, field, &fieldName)){
+                macroKey = [NSString stringWithCString: field->text usingEncoding:NSUTF8StringEncoding];
+                macroString = stringFromBTField(field, nil, @"Paste/Drag", aDocument, NSUTF8StringEncoding); // handles TeXification
+                [retDict setObject:macroString forKey:macroKey];
+            }
         }
         bt_free_ast(entry);
         entry = NULL;
@@ -422,6 +426,7 @@ static NSString *stringFromBTField(AST *field,  NSString *fieldName,  NSString *
 	return valueString;
 }
 
+// @@ TODO: we should also accept multiple macros in a single entry and brackets IO braces around the entries
 + (NSDictionary *)macrosFromBibTeXString:(NSString *)stringContents document:(BibDocument *)aDocument{
     NSScanner *scanner = [[NSScanner alloc] initWithString:stringContents];
     [scanner setCharactersToBeSkipped:nil];
