@@ -206,7 +206,10 @@
 - (void)highlightSelectionInClipRect:(NSRect)clipRect
 {
     [super highlightSelectionInClipRect:clipRect];
-    [self drawHighlightOnRows:[[self delegate] indexesOfRowsToHighlightInRange:[self rowsInRect:clipRect] tableView:self] usingColor:[NSColor disabledControlTextColor]];
+    // check this in case it's been disconnected in one of our reloading optimizations
+    id delegate = [self delegate];
+    if(delegate != nil)
+        [self drawHighlightOnRows:[delegate indexesOfRowsToHighlightInRange:[self rowsInRect:clipRect] tableView:self] usingColor:[NSColor disabledControlTextColor]];
 }
 
 - (void)setDelegate:(id <BDSKGroupTableDelegate>)aDelegate
