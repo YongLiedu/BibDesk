@@ -235,6 +235,7 @@ static NSParagraphStyle* bodyParagraphStyle = nil;
 
 - (void)encodeWithCoder:(NSCoder *)coder{
     if([coder allowsKeyedCoding]){
+        NSDictionary *peopleDict = [self peopleInheriting:NO]; // this uses biblock
         [bibLock lock];
         [coder encodeObject:fileType forKey:@"fileType"];
         [coder encodeObject:citeKey forKey:@"citeKey"];
@@ -243,7 +244,7 @@ static NSParagraphStyle* bodyParagraphStyle = nil;
         [coder encodeObject:dateModified forKey:@"dateModified"];
         [coder encodeObject:pubType forKey:@"pubType"];
         [coder encodeObject:pubFields forKey:@"pubFields"];
-        [coder encodeObject:[self peopleInheriting:NO] forKey:@"people"]; // legacy, for sharing with older versions
+        [coder encodeObject:peopleDict forKey:@"people"]; // legacy, for sharing with older versions
         [coder encodeBool:hasBeenEdited forKey:@"hasBeenEdited"];
         [bibLock unlock];
     } else {
