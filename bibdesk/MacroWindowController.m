@@ -442,11 +442,12 @@
 - (BOOL)addMacrosFromBibTeXString:(NSString *)aString{
 	BibDocument *document = [macroDataSource document];
 	
+    BOOL hadProblems = NO;
     BOOL hadCircular = NO;
     NSMutableDictionary *defs = [NSMutableDictionary dictionary];
     
     if([aString rangeOfString:@"@string" options:NSCaseInsensitiveSearch].location != NSNotFound)
-        [defs addEntriesFromDictionary:[BibTeXParser macrosFromBibTeXString:aString document:document]];
+        [defs addEntriesFromDictionary:[BibTeXParser macrosFromBibTeXString:aString hadProblems:&hadProblems document:document]];
             
     if([aString rangeOfString:@"MACRO" options:NSCaseInsensitiveSearch].location != NSNotFound)
         [defs addEntriesFromDictionary:[BibTeXParser macrosFromBibTeXStyle:aString document:document]]; // in case these are style defs
