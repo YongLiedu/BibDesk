@@ -1193,7 +1193,8 @@ The groupedPublications array is a subset of the publications array, developed b
 
 - (NSData *)serializedGroupsData {
     NSMutableDictionary *dict = [NSMutableDictionary dictionaryWithCapacity:2];
-	NSMutableArray *array = [NSMutableArray arrayWithCapacity:[staticGroups count]];
+	NSMutableArray *staticArray = [NSMutableArray arrayWithCapacity:[staticGroups count]];
+	NSMutableArray *smartArray = [NSMutableArray arrayWithCapacity:[smartGroups count]];
 	NSString *keys;
     NSDictionary *groupDict;
 	NSEnumerator *groupEnum = [staticGroups objectEnumerator];
@@ -1203,21 +1204,21 @@ The groupedPublications array is a subset of the publications array, developed b
 	while (group = [groupEnum nextObject]) {
 		keys = [[[(BDSKStaticGroup *)group publications] valueForKeyPath:@"@distinctUnionOfObjects.citeKey"] componentsJoinedByString:@"'"];
         groupDict = [[NSDictionary alloc] initWithObjectsAndKeys:[group stringValue], @"group name", keys, @"keys", nil];
-		[array addObject:groupDict];
+		[staticArray addObject:groupDict];
 		[groupDict release];
 	}
-    if([array count])
-        [dict setObject:array forKey:@"static groups"];
+    if([staticArray count])
+        [dict setObject:staticArray forKey:@"static groups"];
     
 	groupEnum = [smartGroups objectEnumerator];
 	while (group = [groupEnum nextObject]) {
 		groupDict = [[[(BDSKSmartGroup *)group filter] dictionaryValue] mutableCopy];
 		[(NSMutableDictionary *)groupDict setObject:[group stringValue] forKey:@"group name"];
-		[array addObject:groupDict];
+		[smartArray addObject:groupDict];
 		[groupDict release];
 	}
-    if([array count])
-        [dict setObject:array forKey:@"smart groups"];
+    if([smartArray count])
+        [dict setObject:smartArray forKey:@"smart groups"];
 	
 	NSString *error = nil;
 	NSPropertyListFormat format = NSPropertyListXMLFormat_v1_0;
