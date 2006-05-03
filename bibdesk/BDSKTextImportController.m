@@ -1153,6 +1153,13 @@
 	if ([NSString isEmptyString:selString] == YES)
 		return NO;
 	
+    
+    // convert newlines to a single space, then collapse (RFE #1480354)
+    if ([[BibTypeManager sharedManager] isNoteField:selKey] == NO && [selString containsCharacterInSet:[NSCharacterSet newlineCharacterSet]] == YES) {
+        selString = [selString stringByReplacingCharactersInSet:[NSCharacterSet newlineCharacterSet] withString:@" "];
+        selString = [selString fastStringByCollapsingWhitespaceAndRemovingSurroundingWhitespace];
+    }
+    
     [item setField:selKey toValue:selString];
     
 	[[item undoManager] setActionName:NSLocalizedString(@"Edit Publication",@"")];
