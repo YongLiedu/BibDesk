@@ -29,6 +29,7 @@
                 addCustomCiteString = id; 
                 addGroupFieldAction = id; 
                 addSmartGroupAction = id; 
+                addStaticGroupAction = id; 
                 changeGroupFieldAction = id; 
                 changeGroupTableFont = id; 
                 changeMainTableFont = id; 
