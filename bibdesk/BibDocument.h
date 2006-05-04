@@ -167,7 +167,7 @@ extern NSString* BDSKWeblocFilePboardType; // core pasteboard type for webloc fi
     NSString *promiseDragColumnIdentifier;
 
     IBOutlet BDSKGroupTableView *groupTableView;
-    NSMutableArray *groups;
+    NSMutableArray *categoryGroups;
     NSMutableArray *smartGroups;
     NSMutableArray *staticGroups;
     NSMutableArray *tmpStaticGroups;

@@ -283,7 +283,7 @@
 	if([selIndexes firstIndex] == 0) {
         return [self validateDeleteSelectionMenuItem:menuItem];
     } else if ([[[BibTypeManager sharedManager] singleValuedGroupFields] containsObject:[self currentGroupField]] == NO) {
-        m = [self numberOfSimpleGroupsAtIndexes:selIndexes];
+        m = [self numberOfCategoryGroupsAtIndexes:selIndexes];
     }
 	
 	if (n == 0 || m == 0) {

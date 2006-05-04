@@ -57,80 +57,85 @@
 #pragma mark Indexed accessors
 
 - (unsigned int)countOfGroups {
-    return [smartGroups count] + [sharedGroups count] + [[self staticGroups] count] + [groups count] + 1 ;
+    return [smartGroups count] + [sharedGroups count] + [[self staticGroups] count] + [categoryGroups count] + 1 ;
 }
 
 - (BDSKGroup *)objectInGroupsAtIndex:(unsigned int)index {
-    unsigned int specialCount = (lastImportGroup == nil) ? 1 : 2;
-	unsigned int smartCount = [smartGroups count];
-    unsigned int sharedCount = [sharedGroups count];
-    unsigned int staticCount = [[self staticGroups] count];
-	if (index == 0)
+    unsigned int count;
+    
+    if (index == 0)
 		return allPublicationsGroup;
-	else if (index < specialCount)
-		return lastImportGroup;
-	else if (index < smartCount + specialCount)
-		return [smartGroups objectAtIndex:index - specialCount];
-	else if (index < smartCount + sharedCount + specialCount)
-        return [sharedGroups objectAtIndex:index - smartCount - specialCount];
-	else if (index < smartCount + sharedCount + staticCount + specialCount)
-        return [[self staticGroups] objectAtIndex:index - smartCount - sharedCount - specialCount];
-    else
-		return [groups objectAtIndex:index - smartCount - sharedCount - staticCount - specialCount];
+    
+    if (lastImportGroup != nil) {
+        if (index == 1)
+            return lastImportGroup;
+        index -= 1;
+    }
+    
+    count = [sharedGroups count];
+    if (index < count)
+        return [sharedGroups objectAtIndex:index];
+    index -= count;
+    
+	count = [smartGroups count];
+    if (index < count)
+		return [smartGroups objectAtIndex:index];
+    index -= count;
+    
+    count = [[self staticGroups] count];
+    if (index < count)
+        return [[self staticGroups] objectAtIndex:index];
+    index -= count;
+    
+    return [categoryGroups objectAtIndex:index];
 }
 
 // mutable to-many accessor:  not presently used
 - (void)insertObject:(BDSKGroup *)group inGroupsAtIndex:(unsigned int)index {
     // we don't actually put it in the requested place, rather put it at the end of the current array
-    NSRange simpleRange = [self rangeOfSimpleGroups];
-	
-	if ([group isSmart]) // we don't care about the index, as we resort anyway. This activates undo
+	if ([group isSmart]) 
 		[self addSmartGroup:(BDSKSmartGroup *)group];
-	else if (NSLocationInRange(index, simpleRange))
-        [groups insertObject:group atIndex:(index - simpleRange.location)];
+	else if ([group isStatic])
+		[self addStaticGroup:(BDSKStaticGroup *)group];
     else
         OBASSERT_NOT_REACHED("invalid insertion index for group");
 }
 
 // mutable to-many accessor:  not presently used
 - (void)removeObjectFromGroupsAtIndex:(unsigned int)index {
-    NSRange simpleRange = [self rangeOfSimpleGroups];
     NSRange smartRange = [self rangeOfSmartGroups];
+    NSRange staticRange = [self rangeOfStaticGroups];
     
     if (NSLocationInRange(index, smartRange))
         [smartGroups removeObject:[smartGroups objectAtIndex:(index - smartRange.location)]];
-    else if (NSLocationInRange(index, simpleRange))
-        [groups removeObjectAtIndex:(index - simpleRange.location)];
+    else if (NSLocationInRange(index, staticRange))
+        [staticGroups removeObjectAtIndex:(index - staticRange.location)];
     else
         OBASSERT_NOT_REACHED("group cannot be removed");
 
 }
 
-- (NSRange)rangeOfSimpleGroups{
-    unsigned int specialCount = (lastImportGroup == nil) ? 1 : 2;
-    return NSMakeRange([smartGroups count] + [sharedGroups count] + [[self staticGroups] count] + specialCount, [groups count]);
+- (NSRange)rangeOfSharedGroups{
+    return NSMakeRange((lastImportGroup == nil) ? 1 : 2, [sharedGroups count]);
 }
 
 - (NSRange)rangeOfSmartGroups{
-    unsigned int specialCount = (lastImportGroup == nil) ? 1 : 2;
-    return NSMakeRange(specialCount, [smartGroups count]);
-}
-
-- (NSRange)rangeOfSharedGroups{
-    unsigned int specialCount = (lastImportGroup == nil) ? 1 : 2;
-    return NSMakeRange([smartGroups count] + specialCount, [sharedGroups count]);
+    return NSMakeRange(NSMaxRange([self rangeOfSharedGroups]), [smartGroups count]);
 }
 
 - (NSRange)rangeOfStaticGroups{
-    unsigned int specialCount = (lastImportGroup == nil) ? 1 : 2;
-    return NSMakeRange([smartGroups count] + [sharedGroups count] + specialCount, [[self staticGroups] count]);
+    return NSMakeRange(NSMaxRange([self rangeOfSmartGroups]), [[self staticGroups] count]);
 }
 
-- (unsigned int)numberOfSimpleGroupsAtIndexes:(NSIndexSet *)indexes{
-    NSRange simpleRange = [self rangeOfSimpleGroups];
-    unsigned int maxCount = MIN([indexes count], simpleRange.length);
+- (NSRange)rangeOfCategoryGroups{
+    return NSMakeRange(NSMaxRange([self rangeOfStaticGroups]), [categoryGroups count]);
+}
+
+- (unsigned int)numberOfCategoryGroupsAtIndexes:(NSIndexSet *)indexes{
+    NSRange categoryRange = [self rangeOfCategoryGroups];
+    unsigned int maxCount = MIN([indexes count], categoryRange.length);
     unsigned int buffer[maxCount];
-    return [indexes getIndexes:buffer maxCount:maxCount inIndexRange:&simpleRange];
+    return [indexes getIndexes:buffer maxCount:maxCount inIndexRange:&categoryRange];
 }
 
 - (unsigned int)numberOfSmartGroupsAtIndexes:(NSIndexSet *)indexes{
@@ -306,7 +311,10 @@ The groupedPublications array is a subset of the publications array, developed b
 
 - (void)handleGroupFieldChangedNotification:(NSNotification *)notification{
     // this is set in all of the action methods
-    OBPRECONDITION([[[(BDSKGroupTableHeaderView *)[groupTableView headerView] popUpHeaderCell] titleOfSelectedItem] isEqualToString:[self currentGroupField]]);
+    NSString *selectedItem = [[(BDSKGroupTableHeaderView *)[groupTableView headerView] popUpHeaderCell] titleOfSelectedItem];
+    if (selectedItem == nil)
+        selectedItem = @"";
+    OBPRECONDITION([selectedItem isEqualToString:[self currentGroupField]]);
     // use the most recently changed group as default for newly opened documents; could also store on a per-document basis
     [[OFPreferenceWrapper sharedPreferenceWrapper] setObject:currentGroupField forKey:BDSKCurrentGroupFieldKey];
 	[self updateGroupsPreservingSelection:NO];
@@ -413,59 +421,67 @@ The groupedPublications array is a subset of the publications array, developed b
 	NSArray *selectedGroups = [self selectedGroups];
 	
     NSString *groupField = [self currentGroupField];
-
-	BDSKCountedSet *countedSet;
-    if([[[BibTypeManager sharedManager] personFieldsSet] containsObject:groupField])
-        countedSet = [[BDSKCountedSet alloc] initFuzzyAuthorCountedSet];
-    else
-        countedSet = [[BDSKCountedSet alloc] initCaseInsensitive:YES withCapacity:[publications count]];
     
-    int emptyCount = 0;
-    
-    NSEnumerator *pubEnum = [publications objectEnumerator];
-    BibItem *pub;
-    
-    NSSet *tmpSet = nil;
-    while(pub = [pubEnum nextObject]){
-        tmpSet = [pub groupsForField:groupField];
-        if([tmpSet count])
-            [countedSet unionSet:tmpSet];
+    if ([NSString isEmptyString:groupField]) {
+        
+        [categoryGroups removeAllObjects];
+        
+    } else {
+        
+        BDSKCountedSet *countedSet;
+        if([[[BibTypeManager sharedManager] personFieldsSet] containsObject:groupField])
+            countedSet = [[BDSKCountedSet alloc] initFuzzyAuthorCountedSet];
         else
-            emptyCount++;
+            countedSet = [[BDSKCountedSet alloc] initCaseInsensitive:YES withCapacity:[publications count]];
+        
+        int emptyCount = 0;
+        
+        NSEnumerator *pubEnum = [publications objectEnumerator];
+        BibItem *pub;
+        
+        NSSet *tmpSet = nil;
+        while(pub = [pubEnum nextObject]){
+            tmpSet = [pub groupsForField:groupField];
+            if([tmpSet count])
+                [countedSet unionSet:tmpSet];
+            else
+                emptyCount++;
+        }
+        
+        NSMutableArray *mutableGroups = [[NSMutableArray alloc] initWithCapacity:[countedSet count] + 1];
+        NSEnumerator *groupEnum = [countedSet objectEnumerator];
+        id groupName;
+        BDSKGroup *group;
+                
+        // now add the group names that we found from our BibItems, using a generic folder icon
+        // use OATextWithIconCell keys
+        while(groupName = [groupEnum nextObject]){
+            group = [[BDSKCategoryGroup alloc] initWithName:groupName key:groupField count:[countedSet countForObject:groupName]];
+            [mutableGroups addObject:group];
+            [group release];
+        }
+        
+        // now sort using the current column and order
+        SEL sortSelector = ([sortGroupsKey isEqualToString:BDSKGroupCellCountKey]) ?
+                            @selector(countCompare:) : @selector(nameCompare:);
+        [mutableGroups sortUsingSelector:sortSelector ascending:!sortGroupsDescending usingLock:nil];
+        
+        // add the "empty" group at index 0; this is a group of pubs whose value is empty for this field, so they
+        // will not be contained in any of the other groups for the currently selected group field (hence multiple selection is desirable)
+        if(emptyCount > 0){
+            group = [[BDSKCategoryGroup alloc] initEmptyGroupWithKey:groupField count:emptyCount];
+            [mutableGroups insertObject:group atIndex:0];
+            [group release];
+        }
+        
+        [categoryGroups setArray:mutableGroups];
+        [countedSet release];
+        [mutableGroups release];
+        
     }
     
-    NSMutableArray *mutableGroups = [[NSMutableArray alloc] initWithCapacity:[countedSet count] + 1];
-    NSEnumerator *groupEnum = [countedSet objectEnumerator];
-    id groupName;
-    BDSKGroup *group;
-            
-    // now add the group names that we found from our BibItems, using a generic folder icon
-    // use OATextWithIconCell keys
-    while(groupName = [groupEnum nextObject]){
-        group = [[BDSKCategoryGroup alloc] initWithName:groupName key:groupField count:[countedSet countForObject:groupName]];
-        [mutableGroups addObject:group];
-        [group release];
-    }
-    
-	// now sort using the current column and order
-	SEL sortSelector = ([sortGroupsKey isEqualToString:BDSKGroupCellCountKey]) ?
-						@selector(countCompare:) : @selector(nameCompare:);
-	[mutableGroups sortUsingSelector:sortSelector ascending:!sortGroupsDescending usingLock:nil];
-    
-	// update the count for the first item, not sure if it should be done here
+    // update the count for the first item, not sure if it should be done here
     [allPublicationsGroup setCount:[publications count]];
-    
-    // add the "empty" group at index 0; this is a group of pubs whose value is empty for this field, so they
-    // will not be contained in any of the other groups for the currently selected group field (hence multiple selection is desirable)
-    if(emptyCount > 0){
-        group = [[BDSKCategoryGroup alloc] initEmptyGroupWithKey:groupField count:emptyCount];
-        [mutableGroups insertObject:group atIndex:0];
-        [group release];
-    }
-	
-    [groups setArray:mutableGroups];
-    [countedSet release];
-    [mutableGroups release];
 	
     [groupTableView reloadData];
 	NSMutableIndexSet *selIndexes = [[NSMutableIndexSet alloc] init];
@@ -581,7 +597,7 @@ The groupedPublications array is a subset of the publications array, developed b
     // This allows us to be slightly lazy, only putting the visible group rows in the dictionary
     NSIndexSet *visibleIndexes = [NSIndexSet indexSetWithIndexesInRange:indexRange];
     unsigned int cnt = [visibleIndexes count];
-    NSRange simpleRange = [self rangeOfSimpleGroups];
+    NSRange categoryRange = [self rangeOfCategoryGroups];
     
     // Mutable dictionary with fixed capacity using NSObjects for keys with ints for values; this gives us a fast lookup of row name->index.  Dictionaries can use any pointer-size element for a key or value; see /Developer/Examples/CoreFoundation/Dictionary.  Keys are retained rather than copied for efficiency.  Shark says that BibAuthors are created with alloc/init when using the copy callbacks, so NSShouldRetainWithZone() must be returning NO?
     CFMutableDictionaryRef rowDict = CFDictionaryCreateMutable(CFAllocatorGetDefault(), cnt, &OFNSObjectDictionaryKeyCallbacks, &OFIntegerDictionaryValueCallbacks);
@@ -590,8 +606,8 @@ The groupedPublications array is a subset of the publications array, developed b
     
     // exclude smart and shared groups
     while(cnt != NSNotFound){
-		if(NSLocationInRange(cnt, simpleRange))
-			CFDictionaryAddValue(rowDict, (void *)[[groups objectAtIndex:cnt - simpleRange.location] name], (void *)cnt);
+		if(NSLocationInRange(cnt, categoryRange))
+			CFDictionaryAddValue(rowDict, (void *)[[categoryGroups objectAtIndex:cnt - categoryRange.location] name], (void *)cnt);
         cnt = [visibleIndexes indexGreaterThanIndex:cnt];
     }
     
@@ -1205,21 +1221,21 @@ The groupedPublications array is a subset of the publications array, developed b
     
     BDSKGroup *emptyGroup = nil;
     
-    if ([groups count] > 0) {
-        id firstName = [[groups objectAtIndex:0] name];
+    if ([categoryGroups count] > 0) {
+        id firstName = [[categoryGroups objectAtIndex:0] name];
         if ([firstName isEqual:@""] || [firstName isEqual:[BibAuthor emptyAuthor]]) {
-            emptyGroup = [[groups objectAtIndex:0] retain];
-            [groups removeObjectAtIndex:0];
+            emptyGroup = [[categoryGroups objectAtIndex:0] retain];
+            [categoryGroups removeObjectAtIndex:0];
         }
     }
     
-    [groups sortUsingDescriptors:sortDescriptors];
+    [categoryGroups sortUsingDescriptors:sortDescriptors];
     [smartGroups sortUsingDescriptors:sortDescriptors];
     [sharedGroups sortUsingDescriptors:sortDescriptors];
     [[self staticGroups] sortUsingDescriptors:sortDescriptors];
 	
     if (emptyGroup != nil) {
-        [groups insertObject:emptyGroup atIndex:0];
+        [categoryGroups insertObject:emptyGroup atIndex:0];
         [emptyGroup release];
     }
     
