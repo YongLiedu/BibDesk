@@ -251,7 +251,7 @@ typedef struct WLDragMapEntryStruct
     UniChar *name = (UniChar *)NSZoneMalloc(NULL, length * sizeof(UniChar));
     [fileName getCharacters:name];
     
-    FSRef parentFileRef, newFileRef;
+    FSRef parentFileRef;
     BOOL success = CFURLGetFSRef((CFURLRef)parent, &parentFileRef);
     OSErr err = noErr;
     if(success)    
@@ -267,7 +267,6 @@ typedef struct WLDragMapEntryStruct
 - (BOOL)objectExistsAtFileURL:(NSURL *)fileURL{
     NSParameterAssert(fileURL != nil);
     NSParameterAssert([fileURL isFileURL]);
-    FSRef fileRef;
     
     // we can use CFURLGetFSRef to see if a file exists, but it fails if there is an alias in the path before the last path component; this method should return YES even if the file is pointed to by an alias
     CFURLRef resolvedURL = BDCopyFileURLResolvingAliases((CFURLRef)fileURL);
