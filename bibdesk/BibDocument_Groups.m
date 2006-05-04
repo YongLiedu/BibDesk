@@ -65,9 +65,10 @@
     
     if (index == 0)
 		return allPublicationsGroup;
+    index -= 1;
     
     if (lastImportGroup != nil) {
-        if (index == 1)
+        if (index == 0)
             return lastImportGroup;
         index -= 1;
     }
