@@ -42,10 +42,10 @@
 
 
 extern NSString* 	BibEditorToolbarIdentifier;
-extern NSString*	ViewLocalEditorToolbarItemIdentifier;
-extern NSString*	ViewRemoteEditorToolbarItemIdentifier;
-extern NSString*	ToggleSnoopDrawerToolbarItemIdentifier;
-extern NSString*	AuthorTableToolbarItemIdentifier;
+extern NSString*	BibEditorToolbarViewLocalItemIdentifier;
+extern NSString*	BibEditorToolbarViewRemoteItemIdentifier;
+extern NSString*	BibEditorToolbarSnoopDrawerItemIdentifier;
+extern NSString*	BibEditorToolbarAuthorTableItemIdentifier;
 
 @interface BibEditor (Toolbar)
 

@@ -103,7 +103,7 @@
                 SaveEncodingAccessoryView = NSView; 
                 URLMenu = NSMenu; 
                 actionMenu = NSMenu; 
-                actionMenuButton = RYZImagePopUpButton; 
+                actionMenuButton = BDSKImagePopUpButton; 
                 actionMenuFirstItem = NSMenuItem; 
                 addCustomCiteStringButton = NSButton; 
                 ccTableView = BDSKCustomCiteTableView; 
@@ -114,6 +114,8 @@
                 documentWindow = NSWindow; 
                 fileMenu = NSMenu; 
                 fileSearchController = id; 
+                groupActionMenuButton = BDSKImagePopUpButton; 
+                groupMenu = NSMenu; 
                 groupSplitView = OASplitView; 
                 groupTableView = BDSKGroupTableView; 
                 previewField = NSTextView; 
@@ -125,7 +127,6 @@
                 rssExportTextField = NSTextField; 
                 saveTextEncodingPopupButton = NSPopUpButton; 
                 searchField = NSSearchField; 
-                smartGroupMenu = NSMenu; 
                 splitView = OASplitView; 
                 statusBar = BDSKStatusBar; 
                 tableView = BDSKDragTableView; 

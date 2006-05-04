@@ -37,13 +37,13 @@
 #import "BibDocument+Menus.h"
 #import "NSImage+Toolbox.h"
 
-extern NSString* 	BibDocToolbarIdentifier;
-extern NSString*	NewDocToolbarItemIdentifier;
-extern NSString*	SearchFieldDocToolbarItemIdentifier;
-extern NSString*	EditDocToolbarItemIdentifier;
-extern NSString*	DelDocToolbarItemIdentifier;
-extern NSString*	PrvDocToolbarItemIdentifier;
-extern NSString*	ToggleCiteDrawerToolbarItemIdentifier;
+extern NSString* 	BibDocumentToolbarIdentifier;
+extern NSString*	BibDocumentToolbarNewItemIdentifier;
+extern NSString*	BibDocumentToolbarSearchItemIdentifier;
+extern NSString*	BibDocumentToolbarEditItemIdentifier;
+extern NSString*	BibDocumentToolbarDeleteItemIdentifier;
+extern NSString*	BibDocumentToolbarPreviewItemIdentifier;
+extern NSString*	BibDocumentToolbarCiteDrawerItemIdentifier;
 
 @interface BibDocument (Toolbar)
 

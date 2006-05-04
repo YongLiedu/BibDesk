@@ -525,7 +525,7 @@
 
 - (BOOL) validateToolbarItem: (NSToolbarItem *) toolbarItem {
 
-	if ([[toolbarItem itemIdentifier] isEqualToString:PrvDocToolbarItemIdentifier]) {
+	if ([[toolbarItem itemIdentifier] isEqualToString:BibDocumentToolbarPreviewItemIdentifier]) {
 		return ([[OFPreferenceWrapper sharedPreferenceWrapper] boolForKey:BDSKUsesTeXKey]);
 	}
 	

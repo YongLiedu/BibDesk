@@ -39,11 +39,11 @@
 #import "BibEditor_Toolbar.h"
 #import "BDSKMenuItem.h"
 
-NSString* 	BibEditorToolbarIdentifier 		= @"BibDesk Editor Toolbar Identifier";
-NSString*	ViewLocalEditorToolbarItemIdentifier 	= @"View Local Editor Item Identifier";
-NSString*	ViewRemoteEditorToolbarItemIdentifier 	= @"View Remote Editor Item Identifier";
-NSString*	ToggleSnoopDrawerToolbarItemIdentifier 	= @"Toggle Snoop Drawer Identifier";
-NSString*	AuthorTableToolbarItemIdentifier 	= @"Author Table Item Identifier";
+NSString *BibEditorToolbarIdentifier = @"BibEditorToolbarIdentifier";
+NSString *BibEditorToolbarViewLocalItemIdentifier = @"BibEditorToolbarViewLocalItemIdentifier";
+NSString *BibEditorToolbarViewRemoteItemIdentifier = @"BibEditorToolbarViewRemoteItemIdentifier";
+NSString *BibEditorToolbarSnoopDrawerItemIdentifier = @"BibEditorToolbarSnoopDrawerItemIdentifier";
+NSString *BibEditorToolbarAuthorTableItemIdentifier = @"BibEditorToolbarAuthorTableItemIdentifier";
 
 @implementation BibEditor (Toolbar)
 
@@ -96,7 +96,7 @@ static void addToolbarItem(NSMutableDictionary *theDict,NSString *identifier,NSS
 											 action:NULL
 									  keyEquivalent:@""] autorelease];
     [menuItem setDelegate:self];
-	addToolbarItem(toolbarItems, ViewLocalEditorToolbarItemIdentifier,
+	addToolbarItem(toolbarItems, BibEditorToolbarViewLocalItemIdentifier,
                    NSLocalizedString(@"View File",@""), 
 				   NSLocalizedString(@"View File",@""),
                    NSLocalizedString(@"View File",@""),
@@ -109,7 +109,7 @@ static void addToolbarItem(NSMutableDictionary *theDict,NSString *identifier,NSS
 										   action:NULL
 									keyEquivalent:@""] autorelease];
     [menuItem setDelegate:self];
-    addToolbarItem(toolbarItems, ViewRemoteEditorToolbarItemIdentifier,
+    addToolbarItem(toolbarItems, BibEditorToolbarViewRemoteItemIdentifier,
                    NSLocalizedString(@"View Remote",@""), 
 				   NSLocalizedString(@"View Remote URL",@""),
                    NSLocalizedString(@"View in Web Browser",@""),
@@ -122,7 +122,7 @@ static void addToolbarItem(NSMutableDictionary *theDict,NSString *identifier,NSS
 											 action:NULL
 									  keyEquivalent:@""] autorelease];
     [menuItem setDelegate:self];
-    addToolbarItem(toolbarItems, ToggleSnoopDrawerToolbarItemIdentifier,
+    addToolbarItem(toolbarItems, BibEditorToolbarSnoopDrawerItemIdentifier,
                    NSLocalizedString(@"View in Drawer",@""), 
 				   NSLocalizedString(@"View in Drawer",@""),
                    NSLocalizedString(@"View File in Drawer",@""),
@@ -135,7 +135,7 @@ static void addToolbarItem(NSMutableDictionary *theDict,NSString *identifier,NSS
 											 action:@selector(showPersonDetailCmd:)
 									  keyEquivalent:@""] autorelease];
     [menuItem setTarget:self];
-    addToolbarItem(toolbarItems, AuthorTableToolbarItemIdentifier,
+    addToolbarItem(toolbarItems, BibEditorToolbarAuthorTableItemIdentifier,
                    NSLocalizedString(@"Authors",@""), 
 				   NSLocalizedString(@"Authors",@""),
                    NSLocalizedString(@"Authors",@""),
@@ -187,20 +187,20 @@ static void addToolbarItem(NSMutableDictionary *theDict,NSString *identifier,NSS
 
 - (NSArray *) toolbarDefaultItemIdentifiers: (NSToolbar *) toolbar {
     return [NSArray arrayWithObjects:
-		ViewLocalEditorToolbarItemIdentifier,
-		ViewRemoteEditorToolbarItemIdentifier,
-		ToggleSnoopDrawerToolbarItemIdentifier,
+		BibEditorToolbarViewLocalItemIdentifier,
+		BibEditorToolbarViewRemoteItemIdentifier,
+		BibEditorToolbarSnoopDrawerItemIdentifier,
 		NSToolbarFlexibleSpaceItemIdentifier, 
-		AuthorTableToolbarItemIdentifier, nil];
+		BibEditorToolbarAuthorTableItemIdentifier, nil];
 }
 
 
 - (NSArray *) toolbarAllowedItemIdentifiers: (NSToolbar *) toolbar {
     return [NSArray arrayWithObjects: 
-		ViewLocalEditorToolbarItemIdentifier,
-		ViewRemoteEditorToolbarItemIdentifier,
-		ToggleSnoopDrawerToolbarItemIdentifier,
-		AuthorTableToolbarItemIdentifier,
+		BibEditorToolbarViewLocalItemIdentifier,
+		BibEditorToolbarViewRemoteItemIdentifier,
+		BibEditorToolbarSnoopDrawerItemIdentifier,
+		BibEditorToolbarAuthorTableItemIdentifier,
 		NSToolbarFlexibleSpaceItemIdentifier, 
 		NSToolbarSpaceItemIdentifier, 
 		NSToolbarSeparatorItemIdentifier, 
@@ -210,19 +210,19 @@ static void addToolbarItem(NSMutableDictionary *theDict,NSString *identifier,NSS
 - (void) toolbarWillAddItem: (NSNotification *) notif {
     NSToolbarItem *addedItem = [[notif userInfo] objectForKey: @"item"];
     
-	if([[addedItem itemIdentifier] isEqualToString: ViewLocalEditorToolbarItemIdentifier]) {
+	if([[addedItem itemIdentifier] isEqualToString: BibEditorToolbarViewLocalItemIdentifier]) {
 		if (viewLocalToolbarItem != addedItem) {
 			[viewLocalToolbarItem autorelease];
 			viewLocalToolbarItem = [addedItem retain];
 		}
     }
-	else if([[addedItem itemIdentifier] isEqualToString: ViewRemoteEditorToolbarItemIdentifier]) {
+	else if([[addedItem itemIdentifier] isEqualToString: BibEditorToolbarViewRemoteItemIdentifier]) {
 		if (viewRemoteToolbarItem != addedItem) {
 			[viewRemoteToolbarItem autorelease];
 			viewRemoteToolbarItem = [addedItem retain];
 		}
     }
-	else if([[addedItem itemIdentifier] isEqualToString: ToggleSnoopDrawerToolbarItemIdentifier]) {
+	else if([[addedItem itemIdentifier] isEqualToString: BibEditorToolbarSnoopDrawerItemIdentifier]) {
 		if (documentSnoopToolbarItem != addedItem) {
 			[documentSnoopToolbarItem autorelease];
 			documentSnoopToolbarItem = [addedItem retain];

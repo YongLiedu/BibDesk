@@ -143,9 +143,10 @@ extern NSString* BDSKWeblocFilePboardType; // core pasteboard type for webloc fi
     // --------------------------------------------------------------------------------------
 	IBOutlet NSMenu * fileMenu;
 	IBOutlet NSMenu * URLMenu;
-	IBOutlet NSMenu * smartGroupMenu;
+	IBOutlet NSMenu * groupMenu;
 	IBOutlet NSMenu * actionMenu;
 	IBOutlet BDSKImagePopUpButton * actionMenuButton;
+	IBOutlet BDSKImagePopUpButton * groupActionMenuButton;
 	IBOutlet NSMenuItem * actionMenuFirstItem;
 
     // ----------------------------------------------------------------------------------------

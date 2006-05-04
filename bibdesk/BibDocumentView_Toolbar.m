@@ -38,14 +38,15 @@
 #import "BibDocument_Search.h"
 #import "BibAppController.h"
 
-NSString* 	BibDocToolbarIdentifier 		= @"BibDesk Browser Toolbar Identifier";
-NSString*	NewDocToolbarItemIdentifier 	= @"New Document Item Identifier";
-NSString*	SearchFieldDocToolbarItemIdentifier 	= @"NSSearchField Document Item Identifier";
-NSString*	ActionMenuToolbarItemIdentifier 	= @"Action Menu Item Identifier";
-NSString*	EditDocToolbarItemIdentifier 	= @"Edit Document Item Identifier";
-NSString*	DelDocToolbarItemIdentifier 	= @"Del Document Item Identifier";
-NSString*	PrvDocToolbarItemIdentifier 	= @"Show Preview  Item Identifier";
-NSString*	ToggleCiteDrawerToolbarItemIdentifier 	= @"Toggle Cite Drawer Identifier";
+NSString *BibDocumentToolbarIdentifier = @"BibDocumentToolbarIdentifier";
+NSString *BibDocumentToolbarNewItemIdentifier = @"BibDocumentToolbarNewItemIdentifier";
+NSString *BibDocumentToolbarSearchItemIdentifier = @"BibDocumentToolbarSearchItemIdentifier";
+NSString *BibDocumentToolbarActionItemIdentifier = @"BibDocumentToolbarActionItemIdentifier";
+NSString *BibDocumentToolbarGroupActionItemIdentifier = @"BibDocumentToolbarGroupActionItemIdentifier";
+NSString *BibDocumentToolbarEditItemIdentifier = @"BibDocumentToolbarEditItemIdentifier";
+NSString *BibDocumentToolbarDeleteItemIdentifier = @"BibDocumentToolbarDeleteItemIdentifier";
+NSString *BibDocumentToolbarPreviewItemIdentifier = @"BibDocumentToolbarPreviewItemIdentifier";
+NSString *BibDocumentToolbarCiteDrawerItemIdentifier = @"BibDocumentToolbarCiteDrawerItemIdentifier";
 
 @implementation BibDocument (Toolbar)
 
@@ -79,7 +80,7 @@ static void addToolbarItem(NSMutableDictionary *theDict,NSString *identifier,NSS
 // called from WindowControllerDidLoadNib.
 - (void) setupToolbar {
     // Create a new toolbar instance, and attach it to our document window
-    NSToolbar *toolbar = [[[NSToolbar alloc] initWithIdentifier:BibDocToolbarIdentifier] autorelease];
+    NSToolbar *toolbar = [[[NSToolbar alloc] initWithIdentifier:BibDocumentToolbarIdentifier] autorelease];
     NSMenuItem *menuItem;
 
     toolbarItems=[[NSMutableDictionary dictionary] retain];
@@ -94,7 +95,7 @@ static void addToolbarItem(NSMutableDictionary *theDict,NSString *identifier,NSS
 
     // add toolbaritems:
 
-    addToolbarItem(toolbarItems, NewDocToolbarItemIdentifier,
+    addToolbarItem(toolbarItems, BibDocumentToolbarNewItemIdentifier,
                    NSLocalizedString(@"New",@""), 
 				   NSLocalizedString(@"New Publication",@""),
                    NSLocalizedString(@"Create New Publication",@""),
@@ -103,7 +104,7 @@ static void addToolbarItem(NSMutableDictionary *theDict,NSString *identifier,NSS
 				   @selector(newPub:),
                    nil);
 
-    addToolbarItem(toolbarItems, DelDocToolbarItemIdentifier,
+    addToolbarItem(toolbarItems, BibDocumentToolbarDeleteItemIdentifier,
                    NSLocalizedString(@"Delete",@""), 
 				   NSLocalizedString(@"Delete Publication",@""),
                    NSLocalizedString(@"Delete Selected Publication(s)",@""),
@@ -112,7 +113,7 @@ static void addToolbarItem(NSMutableDictionary *theDict,NSString *identifier,NSS
 				   @selector(deleteSelectedPubs:),
                    nil);
 
-    addToolbarItem(toolbarItems, EditDocToolbarItemIdentifier,
+    addToolbarItem(toolbarItems, BibDocumentToolbarEditItemIdentifier,
                    NSLocalizedString(@"Edit",@""),
                    NSLocalizedString(@"Edit Publication",@""),
                    NSLocalizedString(@"Edit Selected Publication(s)",@""),
@@ -121,7 +122,7 @@ static void addToolbarItem(NSMutableDictionary *theDict,NSString *identifier,NSS
                    @selector(editPubCmd:), 
 				   nil);
 
-    addToolbarItem(toolbarItems, EditDocToolbarItemIdentifier,
+    addToolbarItem(toolbarItems, BibDocumentToolbarEditItemIdentifier,
                    NSLocalizedString(@"Edit",@""),
                    NSLocalizedString(@"Edit Publication",@""),
                    NSLocalizedString(@"Edit Selected Publication(s)",@""),
@@ -131,7 +132,7 @@ static void addToolbarItem(NSMutableDictionary *theDict,NSString *identifier,NSS
 				   nil);
 	
 	
-	addToolbarItem(toolbarItems, PrvDocToolbarItemIdentifier,
+	addToolbarItem(toolbarItems, BibDocumentToolbarPreviewItemIdentifier,
                    NSLocalizedString(@"Preview",@""),
                    NSLocalizedString(@"Show/Hide Preview",@""),
                    NSLocalizedString(@"Show/Hide Preview Panel",@""),
@@ -140,7 +141,7 @@ static void addToolbarItem(NSMutableDictionary *theDict,NSString *identifier,NSS
                    @selector(toggleShowingPreviewPanel:), NULL);
 	
 	
-    addToolbarItem(toolbarItems, ToggleCiteDrawerToolbarItemIdentifier,
+    addToolbarItem(toolbarItems, BibDocumentToolbarCiteDrawerItemIdentifier,
                    NSLocalizedString(@"Cite Drawer",@""),
                    NSLocalizedString(@"Toggle Custom Citations Drawer",@""),
                    NSLocalizedString(@"Toggle Custom Citations Drawer",@""),
@@ -154,7 +155,7 @@ static void addToolbarItem(NSMutableDictionary *theDict,NSString *identifier,NSS
 									keyEquivalent:@""] autorelease];
 	[menuItem setTag:NSFindPanelActionShowFindPanel];
 	[menuItem setTarget:self];
-    addToolbarItem(toolbarItems, SearchFieldDocToolbarItemIdentifier,
+    addToolbarItem(toolbarItems, BibDocumentToolbarSearchItemIdentifier,
                    NSLocalizedString(@"Search",@""),
                    NSLocalizedString(@"Search",@""),
                    NSLocalizedString(@"Search using Boolean '+' and '|', see Help for details",@""),
@@ -168,12 +169,26 @@ static void addToolbarItem(NSMutableDictionary *theDict,NSString *identifier,NSS
 										   action:NULL 
 									keyEquivalent:@""] autorelease];
 	[menuItem setSubmenu: actionMenu];
-    addToolbarItem(toolbarItems, ActionMenuToolbarItemIdentifier,
+    addToolbarItem(toolbarItems, BibDocumentToolbarActionItemIdentifier,
                    NSLocalizedString(@"Action",@""),
                    NSLocalizedString(@"Action",@""),
                    NSLocalizedString(@"Action for Selection",@""),
                    self, @selector(setView:),
                    actionMenuButton,
+                   NULL, 
+				   menuItem);
+	
+	
+	menuItem = [[[NSMenuItem allocWithZone:[NSMenu menuZone]] initWithTitle:NSLocalizedString(@"Group Action",@"") 
+										   action:NULL 
+									keyEquivalent:@""] autorelease];
+	[menuItem setSubmenu: groupMenu];
+    addToolbarItem(toolbarItems, BibDocumentToolbarGroupActionItemIdentifier,
+                   NSLocalizedString(@"Group Action",@""),
+                   NSLocalizedString(@"Group Action",@""),
+                   NSLocalizedString(@"Group Action",@""),
+                   self, @selector(setView:),
+                   groupActionMenuButton,
                    NULL, 
 				   menuItem);
     
@@ -205,7 +220,7 @@ static void addToolbarItem(NSMutableDictionary *theDict,NSString *identifier,NSS
     [newItem setMenuFormRepresentation:[item menuFormRepresentation]];
     // If we have a custom view, we *have* to set the min/max size - otherwise, it'll default to 0,0 and the custom
     // view won't show up at all!  This doesn't affect toolbar items with images, however.
-    if ([itemIdent isEqualToString:SearchFieldDocToolbarItemIdentifier])
+    if ([itemIdent isEqualToString:BibDocumentToolbarSearchItemIdentifier])
     {
         [newItem setMinSize:NSMakeSize(110,NSHeight([[item view] bounds]))];
         [newItem setMaxSize:NSMakeSize(1000,NSHeight([[item view] bounds]))];
@@ -223,28 +238,29 @@ static void addToolbarItem(NSMutableDictionary *theDict,NSString *identifier,NSS
 
 - (NSArray *) toolbarDefaultItemIdentifiers: (NSToolbar *) toolbar {
     return [NSArray arrayWithObjects:
-		ActionMenuToolbarItemIdentifier,
+		BibDocumentToolbarActionItemIdentifier,
 		NSToolbarSpaceItemIdentifier, 
-		NewDocToolbarItemIdentifier,
-		EditDocToolbarItemIdentifier, 
-		DelDocToolbarItemIdentifier, 
+		BibDocumentToolbarNewItemIdentifier,
+		BibDocumentToolbarEditItemIdentifier, 
+		BibDocumentToolbarDeleteItemIdentifier, 
 		NSToolbarSeparatorItemIdentifier, 
-		PrvDocToolbarItemIdentifier,
+		BibDocumentToolbarPreviewItemIdentifier,
 		NSToolbarFlexibleSpaceItemIdentifier, 
-		SearchFieldDocToolbarItemIdentifier,
-		ToggleCiteDrawerToolbarItemIdentifier, nil];
+		BibDocumentToolbarSearchItemIdentifier,
+		BibDocumentToolbarCiteDrawerItemIdentifier, nil];
 }
 
 
 - (NSArray *) toolbarAllowedItemIdentifiers: (NSToolbar *) toolbar {
     return [NSArray arrayWithObjects: 
-		NewDocToolbarItemIdentifier, 
-		EditDocToolbarItemIdentifier, 
-		DelDocToolbarItemIdentifier,
-		PrvDocToolbarItemIdentifier , 
-		ActionMenuToolbarItemIdentifier,
-		SearchFieldDocToolbarItemIdentifier,
-		ToggleCiteDrawerToolbarItemIdentifier,
+		BibDocumentToolbarNewItemIdentifier, 
+		BibDocumentToolbarEditItemIdentifier, 
+		BibDocumentToolbarDeleteItemIdentifier,
+		BibDocumentToolbarPreviewItemIdentifier , 
+		BibDocumentToolbarActionItemIdentifier,
+		BibDocumentToolbarGroupActionItemIdentifier,
+		BibDocumentToolbarSearchItemIdentifier,
+		BibDocumentToolbarCiteDrawerItemIdentifier,
 		NSToolbarPrintItemIdentifier,
 		NSToolbarFlexibleSpaceItemIdentifier, 
 		NSToolbarSpaceItemIdentifier, 
@@ -255,11 +271,11 @@ static void addToolbarItem(NSMutableDictionary *theDict,NSString *identifier,NSS
 - (void) toolbarWillAddItem: (NSNotification *) notif {
     NSToolbarItem *addedItem = [[notif userInfo] objectForKey: @"item"];
 
-    if([[addedItem itemIdentifier] isEqualToString: SearchFieldDocToolbarItemIdentifier]) {
+    if([[addedItem itemIdentifier] isEqualToString: BibDocumentToolbarSearchItemIdentifier]) {
 //		searchFieldToolbarItem = addedItem;
-    }else if([[addedItem itemIdentifier] isEqualToString: DelDocToolbarItemIdentifier]){
+    }else if([[addedItem itemIdentifier] isEqualToString: BibDocumentToolbarDeleteItemIdentifier]){
 //        delPubButton = addedItem;
-    }else if([[addedItem itemIdentifier] isEqualToString: EditDocToolbarItemIdentifier]){
+    }else if([[addedItem itemIdentifier] isEqualToString: BibDocumentToolbarEditItemIdentifier]){
 //        editPubButton = addedItem;
     }
 
@@ -282,10 +298,10 @@ static void addToolbarItem(NSMutableDictionary *theDict,NSString *identifier,NSS
     BOOL enable = YES;
     if ([[toolbarItem itemIdentifier] isEqualToString: NSToolbarPrintItemIdentifier]) {
 		enable = [self validatePrintDocumentMenuItem:nil];
-    }else if([[toolbarItem itemIdentifier] isEqualToString: EditDocToolbarItemIdentifier]
-			 || [[toolbarItem itemIdentifier] isEqualToString: ActionMenuToolbarItemIdentifier]){
+    }else if([[toolbarItem itemIdentifier] isEqualToString: BibDocumentToolbarEditItemIdentifier]
+			 || [[toolbarItem itemIdentifier] isEqualToString: BibDocumentToolbarActionItemIdentifier]){
         if([self numberOfSelectedPubs] == 0) enable = NO;
-    }else if([[toolbarItem itemIdentifier] isEqualToString: DelDocToolbarItemIdentifier]){
+    }else if([[toolbarItem itemIdentifier] isEqualToString: BibDocumentToolbarDeleteItemIdentifier]){
         if([self numberOfSelectedPubs] == 0 || [documentWindow isKeyWindow] == NO) enable = NO;  // disable click-through
     }
 

@@ -296,6 +296,13 @@ NSString *BDSKWeblocFilePboardType = @"CorePasteboardFlavorType 0x75726C20";
 	[[actionMenuButton cell] setUsesItemFromMenu:NO];
 	[[actionMenuButton cell] setRefreshesMenu:NO];
 	
+	[groupActionMenuButton setArrowImage:[NSImage imageNamed:@"ArrowPointingDown"]];
+	[groupActionMenuButton setShowsMenuWhenIconClicked:YES];
+	[[groupActionMenuButton cell] setAltersStateOfSelectedItem:NO];
+	[[groupActionMenuButton cell] setAlwaysUsesFirstItemAsSelected:NO];
+	[[groupActionMenuButton cell] setUsesItemFromMenu:NO];
+	[[groupActionMenuButton cell] setRefreshesMenu:NO];
+	
 	BDSKImagePopUpButton *cornerViewButton = (BDSKImagePopUpButton*)[tableView cornerView];
 	[cornerViewButton setAlternateImage:[NSImage imageNamed:@"cornerColumns_Pressed"]];
 	[cornerViewButton setShowsMenuWhenIconClicked:YES];
@@ -2578,7 +2585,7 @@ NSString *BDSKWeblocFilePboardType = @"CorePasteboardFlavorType 0x75726C20";
 		}
 		
 	}else if (tv == groupTableView){
-		myMenu = [smartGroupMenu copy];
+		myMenu = [groupMenu copy];
 	}else{
 		return nil;
 	}
