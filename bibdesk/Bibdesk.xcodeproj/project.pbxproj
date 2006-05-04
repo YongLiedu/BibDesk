@@ -277,6 +277,7 @@
 		CE2AFE590911425F00E65C87 /* BDSKGroupCell.h in Headers */ = {isa = PBXBuildFile; fileRef = CE2AFE570911425F00E65C87 /* BDSKGroupCell.h */; };
 		CE2AFE5A0911425F00E65C87 /* BDSKGroupCell.m in Sources */ = {isa = PBXBuildFile; fileRef = CE2AFE580911425F00E65C87 /* BDSKGroupCell.m */; };
 		CE2C16F90A0A149E006F0A73 /* gear2.tiff in Resources */ = {isa = PBXBuildFile; fileRef = CE2C16F80A0A149E006F0A73 /* gear2.tiff */; };
+		CE2C18920A0A43BE006F0A73 /* importFolderIcon.tiff in Resources */ = {isa = PBXBuildFile; fileRef = CE2C18910A0A43BE006F0A73 /* importFolderIcon.tiff */; };
 		CE30FAD70919713100CB1A19 /* BDSKStatusBar.h in Headers */ = {isa = PBXBuildFile; fileRef = CE30FAD50919713100CB1A19 /* BDSKStatusBar.h */; };
 		CE30FAD80919713100CB1A19 /* BDSKStatusBar.m in Sources */ = {isa = PBXBuildFile; fileRef = CE30FAD60919713100CB1A19 /* BDSKStatusBar.m */; };
 		CE31E4100A07928C00F5BD47 /* staticFolderIcon.tiff in Resources */ = {isa = PBXBuildFile; fileRef = CE31E40F0A07928C00F5BD47 /* staticFolderIcon.tiff */; };
@@ -1106,6 +1107,7 @@
 		CE2AFE570911425F00E65C87 /* BDSKGroupCell.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = BDSKGroupCell.h; sourceTree = "<group>"; };
 		CE2AFE580911425F00E65C87 /* BDSKGroupCell.m */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.objc; path = BDSKGroupCell.m; sourceTree = "<group>"; };
 		CE2C16F80A0A149E006F0A73 /* gear2.tiff */ = {isa = PBXFileReference; lastKnownFileType = image.tiff; name = gear2.tiff; path = Images/gear2.tiff; sourceTree = "<group>"; };
+		CE2C18910A0A43BE006F0A73 /* importFolderIcon.tiff */ = {isa = PBXFileReference; lastKnownFileType = image.tiff; name = importFolderIcon.tiff; path = Images/importFolderIcon.tiff; sourceTree = "<group>"; };
 		CE30FAD50919713100CB1A19 /* BDSKStatusBar.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BDSKStatusBar.h; sourceTree = "<group>"; };
 		CE30FAD60919713100CB1A19 /* BDSKStatusBar.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BDSKStatusBar.m; sourceTree = "<group>"; };
 		CE31E40F0A07928C00F5BD47 /* staticFolderIcon.tiff */ = {isa = PBXFileReference; lastKnownFileType = image.tiff; name = staticFolderIcon.tiff; path = Images/staticFolderIcon.tiff; sourceTree = "<group>"; };
@@ -1994,7 +1996,6 @@
 		F9022DDA0758089500C3F701 /* Images */ = {
 			isa = PBXGroup;
 			children = (
-				CE2C16F80A0A149E006F0A73 /* gear2.tiff */,
 				F9FF241209E873A300BB1706 /* networkIcon.tiff */,
 				F9022DA20758088000C3F701 /* Action_Pressed.tiff */,
 				F9022DA30758088000C3F701 /* Action.tiff */,
@@ -2023,8 +2024,10 @@
 				F9022DAF0758088000C3F701 /* FolderPenIcon.icns */,
 				3DFF35600816B55B0052F37C /* forward_small.tiff */,
 				3D4373AC07FB3E960007BA84 /* gear.tiff */,
+				CE2C16F80A0A149E006F0A73 /* gear2.tiff */,
 				F92F4E460788DEDD001B8F82 /* genericBibDocIcon.tiff */,
 				F97BEBB4090886E50063504B /* genericFolderIcon.tiff */,
+				CE2C18910A0A43BE006F0A73 /* importFolderIcon.tiff */,
 				F9022DB00758088000C3F701 /* inputmanager.tiff */,
 				F9022DB10758088000C3F701 /* key.tiff */,
 				F9022DB20758088000C3F701 /* newdoc.tiff */,
@@ -3119,6 +3122,7 @@
 				CE4B691D09E9235200CCA14F /* SmallLock_Unlocked.tiff in Resources */,
 				CE31E4100A07928C00F5BD47 /* staticFolderIcon.tiff in Resources */,
 				CE2C16F90A0A149E006F0A73 /* gear2.tiff in Resources */,
+				CE2C18920A0A43BE006F0A73 /* importFolderIcon.tiff in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
