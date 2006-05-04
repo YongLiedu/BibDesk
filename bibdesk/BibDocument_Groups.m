@@ -458,7 +458,7 @@ The groupedPublications array is a subset of the publications array, developed b
     // add the "empty" group at index 0; this is a group of pubs whose value is empty for this field, so they
     // will not be contained in any of the other groups for the currently selected group field (hence multiple selection is desirable)
     if(emptyCount > 0){
-        group = [[BDSKCategoryGroup alloc] initEmptyGroupWithClass:([[[BibTypeManager sharedManager] personFieldsSet] containsObject:groupField]?[BibAuthor class]:[NSString class]) key:groupField count:emptyCount];
+        group = [[BDSKCategoryGroup alloc] initEmptyGroupWithKey:groupField count:emptyCount];
         [mutableGroups insertObject:group atIndex:0];
         [group release];
     }
@@ -873,6 +873,11 @@ The groupedPublications array is a subset of the publications array, developed b
 	if(row <= 0) return;
 	BDSKGroup *group = [self objectInGroupsAtIndex:row];
 	
+    if ([group isEditable] == NO) {
+		NSBeep();
+        return;
+    }
+    
 	if ([group isSmart]) {
 		BDSKFilter *filter = [(BDSKSmartGroup *)[smartGroups objectAtIndex:row - 1] filter];
 		BDSKFilterController *filterController = [[BDSKFilterController alloc] initWithFilter:filter];
@@ -883,7 +888,9 @@ The groupedPublications array is a subset of the publications array, developed b
 		   didEndSelector:NULL
 			  contextInfo:nil];
 		[filterController release];
-	} else if ([group isShared] == NO && [group isStatic] == NO && [[[BibTypeManager sharedManager] personFieldsSet] containsObject:currentGroupField]) {
+	} else if ([group isCategory]) {
+        // this must be a person field
+        OBASSERT([[group name] isKindOfClass:[BibAuthor class]]);
 		[self showPerson:(BibAuthor *)[group name]];
 	}
 }

@@ -644,14 +644,8 @@
         return NO;
 	int row = [groupTableView selectedRow];
 	if ([groupTableView numberOfSelectedRows] == 1 && row > 0) {
-		// single smart group selection
-        BDSKGroup *group = [self objectInGroupsAtIndex:row];
-		if ([group isSmart] == YES)
-			return YES;
-        else if ([group isCategory] == YES && [[[BibTypeManager sharedManager] personFieldsSet] containsObject:currentGroupField])
-			return YES;
-		else
-			return NO;
+		// single group selection
+        return [[self objectInGroupsAtIndex:row] isEditable];
 	} else {
 		// multiple selection or no smart group selected
 		return NO;

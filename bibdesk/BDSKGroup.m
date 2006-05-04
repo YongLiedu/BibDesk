@@ -42,7 +42,7 @@
 #import "NSImage+Toolbox.h"
 #import "BibItem.h"
 #import "BibAuthor.h"
-#import "BDSKSharingBrowser.h"
+#import "BibTypeManager.h"
 #import <OmniBase/OBUtilities.h>
 
 
@@ -58,6 +58,7 @@
 
 @implementation BDSKGroup
 
+// super's designated initializer
 - (id)init {
 	self = [self initWithName:NSLocalizedString(@"Group", @"Group") count:0];
     return self;
@@ -136,7 +137,8 @@
 // "static" accessors
 
 - (NSImage *)icon {
-	return [NSImage smallImageNamed:@"genericFolderIcon"];
+    OBRequestConcreteImplementation(self, _cmd);
+	return nil;
 }
 
 - (BOOL)isStatic {
@@ -185,6 +187,10 @@
 
 - (BOOL)hasEditableName {
     return YES;
+}
+
+- (BOOL)isEditable {
+    return NO;
 }
 
 - (BOOL)failedDownload {
@@ -247,11 +253,10 @@ static NSString *BDSKAllPublicationsLocalizedString = nil;
     return self;
 }
 
-- (id)initEmptyGroupWithClass:(Class)aClass key:(NSString *)aKey count:(int)aCount {
+- (id)initEmptyGroupWithKey:(NSString *)aKey count:(int)aCount {
     NSZone *zone = [self zone];
-    [self release];
-    NSParameterAssert([aClass isEqual:[BibAuthor class]] || [aClass isEqual:[NSString class]]);
-    id aName = [aClass isEqual:[BibAuthor class]] ? [BibAuthor emptyAuthor] : @"";
+	[[super init] release];
+    id aName = ([[[BibTypeManager sharedManager] personFieldsSet] containsObject:aKey]) ? [BibAuthor emptyAuthor] : @"";
     return [[BDSKEmptyGroup allocWithZone:zone] initWithName:aName key:aKey count:aCount];
 }
 
@@ -307,6 +312,14 @@ static NSString *BDSKAllPublicationsLocalizedString = nil;
     return [[key retain] autorelease];
 }
 
+- (NSImage *)icon {
+	return [NSImage smallImageNamed:@"genericFolderIcon"];
+}
+
+- (BOOL)isEditable {
+    return [[[BibTypeManager sharedManager] personFieldsSet] containsObject:key];
+}
+
 @end
 
 #pragma mark -
@@ -344,6 +357,10 @@ static NSString *BDSKAllPublicationsLocalizedString = nil;
     return NO;
 }
 
+- (BOOL)isEditable {
+    return NO;
+}
+
 @end
 
 #pragma mark -
@@ -367,7 +384,7 @@ static NSString *BDSKLastImportLocalizedString = nil;
 // designated initializer
 - (id)initWithName:(id)aName publications:(NSArray *)array {
     if (self = [super initWithName:aName count:[array count]]) {
-        publications = (array == nil) ? [[NSMutableArray alloc] init] : [array mutableCopy];
+        publications = [array mutableCopy];
 		undoManager = nil;
     }
     return self;
@@ -375,7 +392,7 @@ static NSString *BDSKLastImportLocalizedString = nil;
 
 // super's designated initializer
 - (id)initWithName:(id)aName count:(int)aCount {
-    self = [self initWithName:aName publications:nil];
+    self = [self initWithName:aName publications:[NSArray array]];
     return self;
 }
 
@@ -465,12 +482,15 @@ static NSString *BDSKLastImportLocalizedString = nil;
 
 @implementation BDSKLastImportGroup
 
-// @@ custom icon
 - (NSImage *)icon {
-	return [NSImage smallImageNamed:@"staticFolderIcon"];
+	return [NSImage smallImageNamed:@"importFolderIcon"];
 }
 
 - (BOOL)hasEditableName {
+    return NO;
+}
+
+- (BOOL)isEditable {
     return NO;
 }
 
@@ -480,7 +500,7 @@ static NSString *BDSKLastImportLocalizedString = nil;
 
 @implementation BDSKSmartGroup
 
-// old designated initializer
+// super's designated initializer
 - (id)initWithName:(id)aName count:(int)aCount {
     BDSKFilter *aFilter = [[BDSKFilter alloc] init];
 	self = [self initWithName:aName count:aCount filter:aFilter];
@@ -600,6 +620,10 @@ static NSString *BDSKLastImportLocalizedString = nil;
 	NSArray *filteredItems = [filter filterItems:items];
 	[self setCount:[filteredItems count]];
 	return filteredItems;
+}
+
+- (BOOL)isEditable {
+    return YES;
 }
 
 @end

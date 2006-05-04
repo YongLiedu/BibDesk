@@ -171,6 +171,12 @@
 - (BOOL)hasEditableName;
 
 /*!
+    @method     isEditable
+    @abstract   Returns NO by default.  Editable subclasses should override this to allow editing of its properties.
+*/
+- (BOOL)isEditable;
+
+/*!
     @method     failedDownload
     @abstract   Method for remote groups.  Returns NO by default.
 */
@@ -200,13 +206,12 @@
 - (id)initWithName:(id)aName key:(NSString *)aKey count:(int)aCount;
 
 /*!
-    @method     initEmptyGroupWithClass:key:count:
+    @method     initEmptyGroupWithKey:count:
     @abstract   Initializes and returns a new Empty group for the specified key
-    @param      aClass The class for the group objects; this should be BibAuthor or NSString, at present
 	@param      aKey The key for the group.
 	@param      count The count for the group.
 */
-- (id)initEmptyGroupWithClass:(Class)aClass key:(NSString *)aKey count:(int)aCount;
+- (id)initEmptyGroupWithKey:(NSString *)aKey count:(int)aCount;
 
 /*!
 	@method key
