@@ -992,7 +992,10 @@ The groupedPublications array is a subset of the publications array, developed b
 	[self addPublications:newPubs];
 	[self highlightBibs:newPubs];
     
-    // @@ should we set the last import group?
+    if(lastImportGroup == nil)
+        lastImportGroup = [[BDSKStaticGroup alloc] initWithLastImport:newPubs];
+    else 
+        [lastImportGroup setPublications:newPubs];
 	
 	[[self undoManager] setActionName:NSLocalizedString(@"Merge Shared Publications",@"")];
 }
