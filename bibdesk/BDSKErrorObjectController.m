@@ -406,6 +406,10 @@ static inline NSRange invalidatedRange(NSString *string, NSRange proposedRange){
 
 - (void)removeErrorObjsForDocument:(id)document{
 	
+    if ([errorsController filterValue] == document) {
+        [errorsController setFilterValue:[BDSKPlaceHolderFilterItem allItemsPlaceHolderFilterItem]];
+    }
+    
 	if ([self currentDocument] == document) {
 		[self handoverErrorObjsForDocument:document];
 		[self setCurrentDocument:nil];
