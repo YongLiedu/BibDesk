@@ -41,6 +41,18 @@
 
 @implementation BDSKSpotlightView;
 
+static NSColor *maskColor = nil;
+static CIFilter *gaussianFilter = nil;
+
++ (void)initialize
+{
+    static BOOL alreadyInit = NO;
+    if(NO == alreadyInit){
+        gaussianFilter = [[CIFilter filterWithName:@"CIGaussianBlur"] retain];    
+        maskColor = [[[NSColor blackColor] colorWithAlphaComponent:0.3] retain];
+    }
+}
+
 - (id)initWithFrame:(NSRect)frameRect delegate:(id)anObject;
 {
     if(self = [super initWithFrame:frameRect]){
@@ -57,39 +69,47 @@
 
 - (CIImage *)image
 {
-    NSImage *image = [[NSImage alloc] initWithSize:[self bounds].size];
     NSArray *highlightRects = [delegate highlightRects];
+    
+    // array of NSValue objects
     NSEnumerator *rectEnum = [highlightRects objectEnumerator];
     NSValue *value;
-    NSBezierPath *path = [NSBezierPath bezierPathWithRect:[self bounds]];
+    
+    NSRect boundsRect = [self bounds];
+    NSBezierPath *path = [NSBezierPath bezierPathWithRect:boundsRect];
+    
+    // this causes the paths we append to act as holes in the overall path
     [path setWindingRule:NSEvenOddWindingRule];
     
     while(value = [rectEnum nextObject]){
         [path appendBezierPathWithOvalInRect:[value rectValue]];
     }
     
+    NSImage *image = [[NSImage alloc] initWithSize:boundsRect.size];
+
+    [image lockFocus];
     NSGraphicsContext *nsContext = [NSGraphicsContext currentContext];
     [nsContext saveGraphicsState];
-    [image lockFocus];
-    [[[NSColor blackColor] colorWithAlphaComponent:0.3] setFill];
-    [path fill];
-    [image unlockFocus];
-    [nsContext restoreGraphicsState];
     
+    // fill the mask with black
+    [maskColor setFill];
+    [path fill];
+    
+    [nsContext restoreGraphicsState];
+    [image unlockFocus];
+
     CIImage *ciImage = [[CIImage alloc] initWithData:[image TIFFRepresentation]];
     [image release];
     
-    static CIFilter *filter = nil;
-    if(nil == filter)
-        filter = [[CIFilter filterWithName:@"CIGaussianBlur"] retain];
-    
     // sys prefs uses fuzzier circles for more matches; filter range 0 -- 100, values 0 -- 10 are reasonable?
     int radius = MIN([highlightRects count], 10);
-    [filter setValue:[NSNumber numberWithInt:radius] forKey:@"inputRadius"];
-    [filter setValue:ciImage forKey:@"inputImage"];
+    
+    // apply the blur filter to soften the edges of the circles
+    [gaussianFilter setValue:[NSNumber numberWithInt:radius] forKey:@"inputRadius"];
+    [gaussianFilter setValue:ciImage forKey:@"inputImage"];
     [ciImage release];
     
-    return [filter valueForKey:@"outputImage"];
+    return [gaussianFilter valueForKey:@"outputImage"];
 }
 
 // sys prefs draws solid black for no matches, so we'll do the same
