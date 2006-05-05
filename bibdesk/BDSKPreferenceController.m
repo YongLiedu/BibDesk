@@ -42,11 +42,6 @@
 #import <OmniAppKit/NSToolbar-OAExtensions.h>
 #import <OmniAppKit/OAPreferenceClient.h>
 
-// Implement this in pref clients to add search terms; could add in the plist, but that requires overriding another private method for registering client records (and Obj-C is easier than XML anyway)
-@interface OAPreferenceClient (Search)
-- (NSArray *)searchIndexTerms;
-@end
-
 @interface NSArray (Search)
 - (BOOL)containsCaseInsensitiveSubstring:(NSString *)substring;
 @end
@@ -93,12 +88,17 @@
         [[overlayWindow contentView] addSubview:view];
         [view release];
         isSearchActive = NO;
+        NSString *path = [[NSBundle mainBundle] pathForResource:@"PreferenceSearchTerms" ofType:@"plist"];
+        if(nil == path)
+            [NSException raise:NSInternalInconsistencyException format:@"unable to find search terms dictionary"];
+        clientIdentiferSearchTerms = [[NSDictionary alloc] initWithContentsOfFile:path];
     }
     return self;
 }
 
 - (void)dealloc
 {
+    [clientIdentiferSearchTerms release];
     [searchTerm release];
     [overlayWindow release];
     [super dealloc];
@@ -125,18 +125,24 @@
     NSEnumerator *viewE = [preferencesIconViews objectEnumerator];
     OAPreferencesIconView *view;
     NSMutableArray *rectArray = [NSMutableArray arrayWithCapacity:10];
-    
+    NSMutableDictionary *dict = [NSMutableDictionary dictionary];
     while(view = [viewE nextObject]){
         NSArray *records = [view preferenceClientRecords];
         unsigned i, numberOfRecords = [records count];
-    
+        NSString *identifier;
+        
         for(i = 0; i < numberOfRecords; i++){
             
-            // one drawback of using the clients instead of the records is that this forces them all to load...
-            OAPreferenceClient *client = [self clientWithIdentifier:[[records objectAtIndex:i] identifier]];
-            NSArray *array = nil;
             
-            if([client respondsToSelector:@selector(searchIndexTerms)] && (array = [client searchIndexTerms]) != nil && [array containsCaseInsensitiveSubstring:searchTerm]){
+            NSArray *array = nil;
+            identifier = [[records objectAtIndex:i] identifier];
+
+            OBPRECONDITION(identifier != nil);
+            if(nil != identifier)
+                array = [clientIdentiferSearchTerms objectForKey:identifier];
+            OBPOSTCONDITION(array != nil);
+            
+            if(array != nil && [array containsCaseInsensitiveSubstring:searchTerm]){
                 // this is a private method, but declared in the header
                 NSRect rect = [view _boundsForIndex:i];
                 

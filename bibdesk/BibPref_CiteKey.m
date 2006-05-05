@@ -227,11 +227,6 @@ static NSString *repositorySpecifierStrings[] = {@"", @"%a00", @"%A0", @"%t0", @
 	[self updateUI];
 }
 
-- (NSArray *)searchIndexTerms;
-{
-    return [NSArray arrayWithObjects:@"cite key", @"format", @"auto generate", nil];
-}
-
 #pragma mark Format sheet stuff
 
 - (IBAction)showFormatSheet:(id)sender{

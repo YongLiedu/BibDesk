@@ -47,6 +47,7 @@
     BDSKOverlayWindow *overlayWindow;
     NSString *searchTerm;
     BOOL isSearchActive;
+    NSDictionary *clientIdentiferSearchTerms;
 }
 
 - (IBAction)search:(id)sender;

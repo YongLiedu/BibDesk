@@ -1,0 +1,99 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple Computer//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>bp_ScriptHooks</key>
+	<array>
+		<string>script</string>
+		<string>AppleScript</string>
+		<string>hook</string>
+	</array>
+	<key>bp_TeX</key>
+	<array>
+		<string>TeX</string>
+		<string>path</string>
+		<string>bibtex</string>
+		<string>pdflatex</string>
+		<string>style</string>
+		<string>template</string>
+		<string>encoding</string>
+		<string>preview</string>
+	</array>
+	<key>bp_autofile</key>
+	<array>
+		<string>papers folder</string>
+		<string>format</string>
+		<string>file</string>
+	</array>
+	<key>bp_cite</key>
+	<array>
+		<string>drag copy paste</string>
+		<string>cite command</string>
+		<string>bracket</string>
+		<string>tilde</string>
+		<string>drawer</string>
+	</array>
+	<key>bp_citekey</key>
+	<array>
+		<string>auto generate</string>
+		<string>format</string>
+		<string>cite key</string>
+	</array>
+	<key>bp_crossref</key>
+	<array>
+		<string>booktitle title</string>
+		<string>crossref</string>
+		<string>sort</string>
+		<string>inherit</string>
+		<string>duplicate</string>
+		<string>types</string>
+	</array>
+	<key>bp_defaults</key>
+	<array>
+		<string>custom fields</string>
+		<string>rss</string>
+		<string>global macro</string>
+		<string>bibtex</string>
+		<string>types</string>
+	</array>
+	<key>bp_display</key>
+	<array>
+		<string>sorting stop words</string>
+		<string>fonts</string>
+		<string>author editor name display abbreviate</string>
+		<string>preview</string>
+		<string>annote abstract details</string>
+	</array>
+	<key>bp_files</key>
+	<array>
+		<string>save encoding unicode</string>
+		<string>tex accented characters</string>
+		<string>custom conversions</string>
+		<string>normalized author</string>
+		<string>annote abstract rss</string>
+		<string>backups time</string>
+		<string>warnings errors files</string>
+	</array>
+	<key>bp_general</key>
+	<array>
+		<string>application launch</string>
+		<string>save session open file default</string>
+		<string>editing pasting paste dragging</string>
+		<string>warnings groups</string>
+	</array>
+	<key>bp_inputmanager</key>
+	<array>
+		<string>inputmanager input manager</string>
+		<string>external completion</string>
+		<string>autocomplete</string>
+		<string>texshop itexmac textedit xcode</string>
+		<string>update reinstall</string>
+	</array>
+	<key>bp_sharing</key>
+	<array>
+		<string>sharing browsing browse share connect</string>
+		<string>bonjour rendezvous</string>
+		<string>password</string>
+	</array>
+</dict>
+</plist>

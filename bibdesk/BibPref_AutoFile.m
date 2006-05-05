@@ -396,11 +396,6 @@ static NSString *repositorySpecifierStrings[] = {@"", @"%a00", @"%A0", @"%t0", @
 	[formatSheetField setTextColor:(set ? [NSColor redColor] : [NSColor blackColor])]; // overdone?
 }
 
-- (NSArray *)searchIndexTerms;
-{
-    return [NSArray arrayWithObjects:@"file", @"autofile", @"path", nil];
-}
-
 @end
 
 //
