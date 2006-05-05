@@ -112,6 +112,11 @@
     return NO;
 }
 
+- (NSArray *)searchIndexTerms;
+{
+    return [NSArray arrayWithObjects:@"cite key", @"bracket", @"drawer", @"drag", nil];
+}
+
 @end
 
 @implementation BDSKDragCopyCiteKeyFormatter

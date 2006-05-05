@@ -154,7 +154,7 @@
 
 - (IBAction)removeSelectedTerm:(id)sender
 {
-    [[[OAPreferenceController sharedPreferenceController] window] makeFirstResponder:tableView];  // end editing 
+    [[[BDSKPreferenceController sharedPreferenceController] window] makeFirstResponder:tableView];  // end editing 
     NSMutableArray *mutableArray = [[[OFPreferenceWrapper sharedPreferenceWrapper] arrayForKey:BDSKIgnoredSortTermsKey] mutableCopy];
     
     int selRow = [tableView selectedRow];

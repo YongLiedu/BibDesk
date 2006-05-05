@@ -14,6 +14,7 @@
     #import "NSString_BDSKExtensions.h"
     #import "BDSKComplexString.h"
     #import "BibPrefController.h"
+    #import "BDSKPreferenceController.h"
 
 #if defined (OMNI_ASSERTIONS_ON)
 

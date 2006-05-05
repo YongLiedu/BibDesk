@@ -84,7 +84,7 @@
     [openPanel beginSheetForDirectory:directory 
 								 file:nil
 								types:[NSArray arrayWithObject:@"scpt"] 
-					   modalForWindow:[[OAPreferenceController sharedPreferenceController] window] 
+					   modalForWindow:[[BDSKPreferenceController sharedPreferenceController] window] 
 						modalDelegate:self 
 					   didEndSelector:@selector(openPanelDidEnd:returnCode:contextInfo:) 
 						  contextInfo:NULL];

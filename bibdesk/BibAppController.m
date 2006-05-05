@@ -71,6 +71,7 @@
 #import <SystemConfiguration/SystemConfiguration.h>
 #import "BDSKSharingBrowser.h"
 #import "BDSKSharingServer.h"
+#import "BDSKPreferenceController.h"
 
 @implementation BibAppController
 
@@ -177,8 +178,8 @@
                 [[OFPreferenceWrapper sharedPreferenceWrapper] setObject:formatString forKey:BDSKCiteKeyFormatKey];
 				[self setRequiredFieldsForCiteKey: [BDSKFormatParser requiredFieldsForFormat:formatString]];
 			}else{
-				[[OAPreferenceController sharedPreferenceController] showPreferencesPanel:self];
-				[[OAPreferenceController sharedPreferenceController] setCurrentClientByClassName:@"BibPref_CiteKey"];
+				[[BDSKPreferenceController sharedPreferenceController] showPreferencesPanel:self];
+				[[BDSKPreferenceController sharedPreferenceController] setCurrentClientByClassName:@"BibPref_CiteKey"];
 			}
 		}
 		
@@ -199,8 +200,8 @@
 				[[OFPreferenceWrapper sharedPreferenceWrapper] setObject:formatString forKey:BDSKLocalUrlFormatKey];
 				[self setRequiredFieldsForLocalUrl: [BDSKFormatParser requiredFieldsForFormat:formatString]];
 			}else{
-				[[OAPreferenceController sharedPreferenceController] showPreferencesPanel:self];
-				[[OAPreferenceController sharedPreferenceController] setCurrentClientByClassName:@"BibPref_AutoFile"];
+				[[BDSKPreferenceController sharedPreferenceController] showPreferencesPanel:self];
+				[[BDSKPreferenceController sharedPreferenceController] setCurrentClientByClassName:@"BibPref_AutoFile"];
 			}
 		}
 		
@@ -1140,7 +1141,7 @@
 }
 
 - (IBAction)showPreferencePanel:(id)sender{
-    [[OAPreferenceController sharedPreferenceController] showPreferencesPanel:sender];
+    [[BDSKPreferenceController sharedPreferenceController] showPreferencesPanel:sender];
 }
 
 - (IBAction)toggleShowingErrorPanel:(id)sender{
@@ -1175,8 +1176,8 @@
                            informativeTextWithFormat:NSLocalizedString(@"You appear to be using the BibDesk autocompletion plugin, and a newer version is available.  Would you like to open the completion preferences so that you can update the plugin?",@"")];
     int rv = [anAlert runModal];
     if(rv == NSAlertDefaultReturn){
-        [[OAPreferenceController sharedPreferenceController] showPreferencesPanel:nil];
-        [[OAPreferenceController sharedPreferenceController] setCurrentClientByClassName:@"BibPref_InputManager"];
+        [[BDSKPreferenceController sharedPreferenceController] showPreferencesPanel:nil];
+        [[BDSKPreferenceController sharedPreferenceController] setCurrentClientByClassName:@"BibPref_InputManager"];
     }
     
 }

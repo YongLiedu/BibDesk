@@ -171,7 +171,7 @@
     url = [NSURL fileURLWithPath:path];
     
     if([[NSWorkspace sharedWorkspace] openURL:url] == NO && [[NSWorkspace sharedWorkspace] openURLs:[NSArray arrayWithObject:url] withAppBundleIdentifier:@"com.apple.textedit" options:0 additionalEventParamDescriptor:nil launchIdentifiers:NULL] == NO)
-        NSBeginAlertSheet(NSLocalizedString(@"Unable to Open File", @""), NSLocalizedString(@"Reveal", @""), NSLocalizedString(@"Cancel", @""), nil, [[OAPreferenceController sharedPreferenceController] window], self, @selector(openTemplateFailureSheetDidEnd:returnCode:path:), NULL, [[url path] retain], NSLocalizedString(@"The system was unable to find an application to open the TeX template file.  Choose \"Reveal\" to show the template in the Finder.", @""));
+        NSBeginAlertSheet(NSLocalizedString(@"Unable to Open File", @""), NSLocalizedString(@"Reveal", @""), NSLocalizedString(@"Cancel", @""), nil, [[BDSKPreferenceController sharedPreferenceController] window], self, @selector(openTemplateFailureSheetDidEnd:returnCode:path:), NULL, [[url path] retain], NSLocalizedString(@"The system was unable to find an application to open the TeX template file.  Choose \"Reveal\" to show the template in the Finder.", @""));
 }
 
 - (IBAction)resetTeXPreviewFile:(id)sender{

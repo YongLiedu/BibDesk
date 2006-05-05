@@ -189,7 +189,7 @@ static int tableIconSize = 24;
 					 alternateButton:nil
 					     otherButton:nil
 			       informativeTextWithFormat:NSLocalizedString(@"Unable to install plugin at %@, please check file or directory permissions.",@""), inputManagerPath];
-	[anAlert beginSheetModalForWindow:[[OAPreferenceController sharedPreferenceController] window]
+	[anAlert beginSheetModalForWindow:[[BDSKPreferenceController sharedPreferenceController] window]
 			    modalDelegate:nil
 			   didEndSelector:nil
 			      contextInfo:nil];    
@@ -213,7 +213,7 @@ static int tableIconSize = 24;
     [op beginSheetForDirectory:nil
 			  file:nil
 			 types:[NSArray arrayWithObject:@"app"]
-		modalForWindow:[[OAPreferenceController sharedPreferenceController] window]
+		modalForWindow:[[BDSKPreferenceController sharedPreferenceController] window]
 		 modalDelegate:self
 		didEndSelector:@selector(openPanelDidEnd:returnCode:contextInfo:)
 		   contextInfo:nil];
@@ -234,7 +234,7 @@ static int tableIconSize = 24;
                              alternateButton:nil
                              otherButton:nil
                        informativeTextWithFormat:NSLocalizedString(@"%@ is not a Cocoa application.",@""), [[sheet filenames] objectAtIndex:0]];
-            [anAlert beginSheetModalForWindow:[[OAPreferenceController sharedPreferenceController] window]
+            [anAlert beginSheetModalForWindow:[[BDSKPreferenceController sharedPreferenceController] window]
                     modalDelegate:nil
                        didEndSelector:nil
                       contextInfo:nil];
@@ -250,7 +250,7 @@ static int tableIconSize = 24;
                              alternateButton:nil
                              otherButton:nil
                        informativeTextWithFormat:NSLocalizedString(@"The selected application does not have a bundle identifier.  Please inform the author of %@.",@""), [[sheet filenames] objectAtIndex:0]];
-            [anAlert beginSheetModalForWindow:[[OAPreferenceController sharedPreferenceController] window]
+            [anAlert beginSheetModalForWindow:[[BDSKPreferenceController sharedPreferenceController] window]
                     modalDelegate:nil
                        didEndSelector:nil
                       contextInfo:nil];

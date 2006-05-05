@@ -92,8 +92,8 @@ static BibFiler *sharedFiler = nil;
 							 NSLocalizedString(@"The Papers Folder you've chosen either doesn't exist or isn't a folder. Any files you have dragged in will be linked to in their original location. Press \"Go to Preferences\" to set the Papers Folder.",@""),
 							 NSLocalizedString(@"OK",@"OK"),NSLocalizedString(@"Go to Preferences",@""),nil);
 		if (rv == NSAlertAlternateReturn){
-				[[OAPreferenceController sharedPreferenceController] showPreferencesPanel:self];
-				[[OAPreferenceController sharedPreferenceController] setCurrentClientByClassName:@"BibPref_AutoFile"];
+				[[BDSKPreferenceController sharedPreferenceController] showPreferencesPanel:self];
+				[[BDSKPreferenceController sharedPreferenceController] setCurrentClientByClassName:@"BibPref_AutoFile"];
 		}
 		return;
 	}

@@ -169,7 +169,7 @@ static NSString *repositorySpecifierStrings[] = {@"", @"%a00", @"%A0", @"%t0", @
     [openPanel beginSheetForDirectory:nil 
 								 file:nil
 								types:nil
-					   modalForWindow:[[OAPreferenceController sharedPreferenceController] window] 
+					   modalForWindow:[[BDSKPreferenceController sharedPreferenceController] window] 
 						modalDelegate:self 
 					   didEndSelector:@selector(openPanelDidEnd:returnCode:contextInfo:) 
 						  contextInfo:NULL];
@@ -394,6 +394,11 @@ static NSString *repositorySpecifierStrings[] = {@"", @"%a00", @"%A0", @"%t0", @
 	}
 	[formatWarningButton setEnabled:set];
 	[formatSheetField setTextColor:(set ? [NSColor redColor] : [NSColor blackColor])]; // overdone?
+}
+
+- (NSArray *)searchIndexTerms;
+{
+    return [NSArray arrayWithObjects:@"file", @"autofile", @"path", nil];
 }
 
 @end

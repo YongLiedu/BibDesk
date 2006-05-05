@@ -162,8 +162,8 @@ static BDSKPreviewer *thePreviewer;
 
 - (void)shouldShowTeXPreferences:(NSWindow *)sheet returnCode:(int)returnCode contextInfo:(void *)contextInfo{
     if(returnCode == NSAlertDefaultReturn){
-        [[OAPreferenceController sharedPreferenceController] showPreferencesPanel:nil];
-        [[OAPreferenceController sharedPreferenceController] setCurrentClientByClassName:@"BibPref_TeX"];
+        [[BDSKPreferenceController sharedPreferenceController] showPreferencesPanel:nil];
+        [[BDSKPreferenceController sharedPreferenceController] setCurrentClientByClassName:@"BibPref_TeX"];
     }else{
 		[self hidePreviewPanel:nil];
 	}
