@@ -63,6 +63,10 @@
 
 @end
 
+@interface OAPreferenceController (PrivateOverride)
+- (void)_showAllIcons:(id)sender;
+@end
+
 @implementation BDSKPreferenceController
 
 + (id)sharedPreferenceController;
@@ -119,14 +123,28 @@
 
 - (BOOL)isSearchActive { return isSearchActive; }
 
+static NSRect insetButtonRectAndShift(const NSRect aRect)
+{
+    // convert to a square
+    float side = MAX(NSHeight(aRect), NSWidth(aRect));
+    NSPoint center = NSMakePoint(NSMidX(aRect), NSMidY(aRect));
+    
+    // raise to account for the text; this is the button rect
+    center.y += 10;
+    
+    return NSInsetRect(NSMakeRect(center.x - side/2, center.y - side/2, side, side), 10, 10);
+}
+
 - (NSArray *)highlightRects;
 {
     // we have an array of OAPreferencesIconViews; one per category (row)
     NSEnumerator *viewE = [preferencesIconViews objectEnumerator];
     OAPreferencesIconView *view;
     NSMutableArray *rectArray = [NSMutableArray arrayWithCapacity:10];
-    NSMutableDictionary *dict = [NSMutableDictionary dictionary];
+
     while(view = [viewE nextObject]){
+        
+        // get the preference client records; these are basically plists for each pref pane
         NSArray *records = [view preferenceClientRecords];
         unsigned i, numberOfRecords = [records count];
         NSString *identifier;
@@ -148,7 +166,7 @@
                 
                 // convert from view-local to window coordinates
                 rect = [view convertRect:rect toView:nil];
-                [rectArray addObject:[NSValue valueWithRect:NSInsetRect(rect, 5, 5)]];
+                [rectArray addObject:[NSValue valueWithRect:insetButtonRectAndShift(rect)]];
             }
         }
     }
@@ -202,15 +220,24 @@
 
 - (void)search:(id)sender;
 {
-    if([[[preferenceBox contentView] subviews] lastObject] != showAllIconsView){
-        if([self respondsToSelector:@selector(_showAllIcons:)])
-            [self performSelector:@selector(_showAllIcons:) withObject:nil];
-        [[self window] makeFirstResponder:sender];
-        // @@ fix selected range in cell
-    }
     NSString *term = [sender stringValue];
+
+    if([[[preferenceBox contentView] subviews] lastObject] != showAllIconsView){
+        // this method will lose our first responder
+        if([self respondsToSelector:@selector(_showAllIcons:)])
+            [self _showAllIcons:nil];
+        [[self window] makeFirstResponder:sender];
+        
+        // we just lost the insertion point; if the user just started typing, it should be at the end
+        NSText *editor = (NSText *)[[self window] firstResponder];
+        if(nil != editor && [editor isKindOfClass:[NSText class]])
+            [editor setSelectedRange:NSMakeRange([term length], 0)];
+    }
+
     isSearchActive = ([term isEqualToString:@""] || nil == term) ? NO : YES;
     [self setSearchTerm:[sender stringValue]];
+    
+    // the view will now ask us which icons to highlight
     [[overlayWindow contentView] setNeedsDisplay:YES];
 }
 
