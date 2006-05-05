@@ -58,7 +58,8 @@
 - (CIImage *)image
 {
     NSImage *image = [[NSImage alloc] initWithSize:[self bounds].size];
-    NSEnumerator *rectEnum = [[delegate highlightRects] objectEnumerator];
+    NSArray *highlightRects = [delegate highlightRects];
+    NSEnumerator *rectEnum = [highlightRects objectEnumerator];
     NSValue *value;
     NSBezierPath *path = [NSBezierPath bezierPathWithRect:[self bounds]];
     [path setWindingRule:NSEvenOddWindingRule];
@@ -75,24 +76,29 @@
     [image unlockFocus];
     [nsContext restoreGraphicsState];
     
-    CIImage *ciImage = [CIImage imageWithData:[image TIFFRepresentation]];
+    CIImage *ciImage = [[CIImage alloc] initWithData:[image TIFFRepresentation]];
     [image release];
     
     static CIFilter *filter = nil;
-    if(nil == filter){
+    if(nil == filter)
         filter = [[CIFilter filterWithName:@"CIGaussianBlur"] retain];
-        [filter setValue:[NSNumber numberWithInt:5] forKey:@"inputRadius"];
-    }
+    
+    // sys prefs uses fuzzier circles for more matches; filter range 0 -- 100, values 0 -- 10 are reasonable?
+    int radius = MIN([highlightRects count], 10);
+    [filter setValue:[NSNumber numberWithInt:radius] forKey:@"inputRadius"];
     [filter setValue:ciImage forKey:@"inputImage"];
+    [ciImage release];
     
     return [filter valueForKey:@"outputImage"];
 }
 
+// sys prefs draws solid black for no matches, so we'll do the same
 - (void)drawRect:(NSRect)aRect;
 {
     if([delegate isSearchActive]){
         CIContext *ciContext = [[NSGraphicsContext currentContext] CIContext];
-        [ciContext drawImage:[self image] atPoint:CGPointZero fromRect:CGRectMake(0,0,NSWidth([self bounds]),NSHeight([self bounds]))];
+        NSRect boundsRect = [self bounds];
+        [ciContext drawImage:[self image] atPoint:CGPointZero fromRect:CGRectMake(0,0,NSWidth(boundsRect),NSHeight(boundsRect))];
     } else {
         [[NSColor clearColor] setFill];
         NSRectFill(aRect);
