@@ -88,7 +88,7 @@
     if(self = [super init]){
         NSWindow *theWindow = [self window];
         overlayWindow = [[BDSKOverlayWindow alloc] initWithContentRect:[[theWindow contentView] frame] styleMask:[theWindow styleMask] backing:[theWindow backingType] defer:YES];
-        NSView *view = [[BDSKSpotlightView alloc] initWithFrame:[[theWindow contentView] frame] delegate:self];
+        NSView *view = [[NSClassFromString(@"BDSKSpotlightView") alloc] initWithFrame:[[theWindow contentView] frame] delegate:self];
         [overlayWindow overlayView:[theWindow contentView]];
         [[overlayWindow contentView] addSubview:view];
         [view release];
