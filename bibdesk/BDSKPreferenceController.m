@@ -132,6 +132,7 @@
     
         for(i = 0; i < numberOfRecords; i++){
             
+            // one drawback of using the clients instead of the records is that this forces them all to load...
             OAPreferenceClient *client = [self clientWithIdentifier:[[records objectAtIndex:i] identifier]];
             NSArray *array = nil;
             
