@@ -60,6 +60,7 @@
 @class MacroWindowController;
 @class BDSKDragTableView;
 @class BDSKMacroResolver;
+@class BDSKCollapsibleView;
 
 enum {
 	BDSKOperationIgnore = NSAlertDefaultReturn, // 1
@@ -177,6 +178,10 @@ extern NSString* BDSKWeblocFilePboardType; // core pasteboard type for webloc fi
 	NSString *currentGroupField;
     IBOutlet OASplitView *groupSplitView;
 	float lastGroupViewWidth;
+    
+    IBOutlet BDSKImagePopUpButton *groupActionButton;
+    IBOutlet BDSKCollapsibleView *groupCollapsibleView;
+    IBOutlet BDSKGradientView *groupGradientView;
     
     BOOL dragFromSharedGroups;
     NSMutableArray *sharedGroups;

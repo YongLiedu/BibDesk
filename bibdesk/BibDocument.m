@@ -77,6 +77,7 @@
 #import "ApplicationServices/ApplicationServices.h"
 #import "BDSKImagePopUpButton.h"
 #import "BDSKRatingButton.h"
+#import "BDSKCollapsibleView.h"
 
 #import "BDSKMacroResolver.h"
 #import "MacroWindowController.h"
@@ -266,9 +267,12 @@ NSString *BDSKWeblocFilePboardType = @"CorePasteboardFlavorType 0x75726C20";
     NSArray *dragTypes = [NSArray arrayWithObjects:BDSKBibItemPboardType, BDSKWeblocFilePboardType, BDSKReferenceMinerStringPboardType, NSStringPboardType, NSFilenamesPboardType, NSURLPboardType, nil];
     [tableView registerForDraggedTypes:dragTypes];
     [groupTableView registerForDraggedTypes:dragTypes];
+    
+    [groupCollapsibleView setCollapseEdges:BDSKMinXEdgeMask];
+    [groupCollapsibleView setMinSize:NSMakeSize(56.0, 20.0f)];
+    [groupGradientView setUpperColor:[NSColor colorWithCalibratedWhite:0.75 alpha:1.0]];
+    [groupGradientView setLowerColor:[NSColor colorWithCalibratedWhite:0.9 alpha:1.0]];
 
-    NSString *filename = [[self fileName] lastPathComponent];
-	if (filename == nil) filename = @"";
 	[splitView setPositionAutosaveName:@"OASplitView Position Main Window"];
     [groupSplitView setPositionAutosaveName:@"OASplitView Position Group Table"];
     
@@ -278,7 +282,7 @@ NSString *BDSKWeblocFilePboardType = @"CorePasteboardFlavorType 0x75726C20";
 	} else {
 		// make sure they are ordered correctly, mainly for the focus ring
 		[statusBar removeFromSuperview];
-		[[documentWindow contentView]  addSubview:statusBar positioned:NSWindowBelow relativeTo:nil];
+		[[splitView superview]  addSubview:statusBar positioned:NSWindowBelow relativeTo:nil];
 	}
 	[statusBar setProgressIndicatorStyle:BDSKProgressIndicatorSpinningStyle];
 
@@ -302,6 +306,14 @@ NSString *BDSKWeblocFilePboardType = @"CorePasteboardFlavorType 0x75726C20";
 	[[groupActionMenuButton cell] setAlwaysUsesFirstItemAsSelected:NO];
 	[[groupActionMenuButton cell] setUsesItemFromMenu:NO];
 	[[groupActionMenuButton cell] setRefreshesMenu:NO];
+	
+	[groupActionButton setArrowImage:nil];
+	[groupActionButton setAlternateImage:[NSImage imageNamed:@"GroupAction_Pressed"]];
+	[groupActionButton setShowsMenuWhenIconClicked:YES];
+	[[groupActionButton cell] setAltersStateOfSelectedItem:NO];
+	[[groupActionButton cell] setAlwaysUsesFirstItemAsSelected:NO];
+	[[groupActionButton cell] setUsesItemFromMenu:NO];
+	[[groupActionButton cell] setRefreshesMenu:NO];
 	
 	BDSKImagePopUpButton *cornerViewButton = (BDSKImagePopUpButton*)[tableView cornerView];
 	[cornerViewButton setAlternateImage:[NSImage imageNamed:@"cornerColumns_Pressed"]];
@@ -2933,7 +2945,7 @@ NSString *BDSKWeblocFilePboardType = @"CorePasteboardFlavorType 0x75726C20";
 #pragma mark View Actions
 
 - (IBAction)toggleStatusBar:(id)sender{
-	[statusBar toggleBelowView:groupSplitView offset:1.0];
+	[statusBar toggleBelowView:splitView offset:1.0];
 	[[OFPreferenceWrapper sharedPreferenceWrapper] setBool:[statusBar isVisible] forKey:BDSKShowStatusBarKey];
 }
 

@@ -1,5 +1,11 @@
 {
     IBClasses = (
+        {
+            CLASS = BDSKCollapsibleView; 
+            LANGUAGE = ObjC; 
+            OUTLETS = {contentView = id; }; 
+            SUPERCLASS = NSView; 
+        }, 
         {CLASS = BDSKCustomCiteTableView; LANGUAGE = ObjC; SUPERCLASS = NSTableView; }, 
         {CLASS = BDSKDragOutlineView; LANGUAGE = ObjC; SUPERCLASS = NSOutlineView; }, 
         {CLASS = BDSKDragTableView; LANGUAGE = ObjC; SUPERCLASS = NSTableView; }, 
@@ -114,7 +120,11 @@
                 documentWindow = NSWindow; 
                 fileMenu = NSMenu; 
                 fileSearchController = id; 
+                groupActionButton = BDSKImagePopUpButton; 
                 groupActionMenuButton = BDSKImagePopUpButton; 
+                groupAddButton = NSButton; 
+                groupCollapsibleView = BDSKCollapsibleView; 
+                groupGradientView = BDSKGradientView; 
                 groupMenu = NSMenu; 
                 groupSplitView = OASplitView; 
                 groupTableView = BDSKGroupTableView; 
