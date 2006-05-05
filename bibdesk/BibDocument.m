@@ -235,6 +235,11 @@ NSString *BDSKWeblocFilePboardType = @"CorePasteboardFlavorType 0x75726C20";
                                                    object:nil];
         
         [[NSNotificationCenter defaultCenter] addObserver:self
+                                                 selector:@selector(handleFlagsChangedNotification:)
+                                                     name:OAFlagsChangedNotification
+                                                   object:nil];
+        
+        [[NSNotificationCenter defaultCenter] addObserver:self
                                                  selector:@selector(handleApplicationWillTerminateNotification:)
                                                      name:NSApplicationWillTerminateNotification
                                                    object:nil];
@@ -292,7 +297,7 @@ NSString *BDSKWeblocFilePboardType = @"CorePasteboardFlavorType 0x75726C20";
 	} else {
 		// make sure they are ordered correctly, mainly for the focus ring
 		[statusBar removeFromSuperview];
-		[[splitView superview]  addSubview:statusBar positioned:NSWindowBelow relativeTo:nil];
+		[[mainBox superview] addSubview:statusBar positioned:NSWindowBelow relativeTo:nil];
 	}
 	[statusBar setProgressIndicatorStyle:BDSKProgressIndicatorSpinningStyle];
 
@@ -2717,6 +2722,22 @@ NSString *BDSKWeblocFilePboardType = @"CorePasteboardFlavorType 0x75726C20";
     [self sortPubsByColumn:nil];
 }
 
+- (void)handleFlagsChangedNotification:(NSNotification *)notification{
+    unsigned int modifierFlags = [[notification object] modifierFlags];
+    
+    if (modifierFlags & NSAlternateKeyMask) {
+        [groupAddButton setImage:[NSImage imageNamed:@"GroupAddSmart"]];
+        [groupAddButton setAlternateImage:[NSImage imageNamed:@"GroupAddSmart_Pressed"]];
+        [groupAddButton setAction:@selector(addSmartGroupAction:)];
+        [groupAddButton setToolTip:NSLocalizedString(@"Add new smart group.", @"")];
+    } else {
+        [groupAddButton setImage:[NSImage imageNamed:@"GroupAdd"]];
+        [groupAddButton setAlternateImage:[NSImage imageNamed:@"GroupAdd_Pressed"]];
+        [groupAddButton setAction:@selector(addStaticGroupAction:)];
+        [groupAddButton setToolTip:NSLocalizedString(@"Add new group.", @"")];
+    }
+}
+
 - (void)handleApplicationWillTerminateNotification:(NSNotification *)notification{
     [self saveSortOrder];
 }
@@ -2955,7 +2976,7 @@ NSString *BDSKWeblocFilePboardType = @"CorePasteboardFlavorType 0x75726C20";
 #pragma mark View Actions
 
 - (IBAction)toggleStatusBar:(id)sender{
-	[statusBar toggleBelowView:splitView offset:1.0];
+	[statusBar toggleBelowView:mainBox offset:1.0];
 	[[OFPreferenceWrapper sharedPreferenceWrapper] setBool:[statusBar isVisible] forKey:BDSKShowStatusBarKey];
 }
 

@@ -102,6 +102,7 @@ extern NSString* BDSKWeblocFilePboardType; // core pasteboard type for webloc fi
     IBOutlet NSMenuItem *ctxCopyTex;
     IBOutlet NSMenuItem *ctxCopyPDF;
     IBOutlet BDSKSplitView* splitView;
+    IBOutlet NSBox* mainBox;
     // for the splitview double-click handling
     float lastPreviewHeight;
 	
@@ -181,6 +182,7 @@ extern NSString* BDSKWeblocFilePboardType; // core pasteboard type for webloc fi
 	float lastGroupViewWidth;
     
     IBOutlet BDSKImagePopUpButton *groupActionButton;
+    IBOutlet NSButton *groupAddButton;
     IBOutlet BDSKCollapsibleView *groupCollapsibleView;
     IBOutlet BDSKGradientView *groupGradientView;
     

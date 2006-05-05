@@ -31,16 +31,16 @@
 	<array/>
 	<key>IBOpenObjects</key>
 	<array>
-		<integer>661</integer>
-		<integer>819</integer>
-		<integer>5</integer>
 		<integer>433</integer>
 		<integer>777</integer>
+		<integer>819</integer>
+		<integer>277</integer>
+		<integer>324</integer>
+		<integer>702</integer>
+		<integer>661</integer>
 		<integer>786</integer>
 		<integer>641</integer>
-		<integer>277</integer>
-		<integer>702</integer>
-		<integer>324</integer>
+		<integer>5</integer>
 	</array>
 	<key>IBSystem Version</key>
 	<string>8I127</string>

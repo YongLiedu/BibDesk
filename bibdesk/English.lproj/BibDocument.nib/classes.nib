@@ -128,6 +128,7 @@
                 groupMenu = NSMenu; 
                 groupSplitView = OASplitView; 
                 groupTableView = BDSKGroupTableView; 
+                mainBox = NSBox; 
                 previewField = NSTextView; 
                 quickSearchButton = NSPopUpButton; 
                 quickSearchClearButton = NSButton; 
@@ -144,7 +145,7 @@
             SUPERCLASS = NSDocument; 
         }, 
         {
-            ACTIONS = {clearQuickSearch = id; selectCrossrefParentAction = id; }; 
+            ACTIONS = {"" = id; clearQuickSearch = id; selectCrossrefParentAction = id; }; 
             CLASS = FirstResponder; 
             LANGUAGE = ObjC; 
             SUPERCLASS = NSObject; 

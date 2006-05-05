@@ -42,6 +42,7 @@
 #import "BibItem.h"
 #import "CFString_BDSKExtensions.h"
 #import "BDSKFieldSheetController.h"
+#import "BDSKSplitView.h"
 
 static NSString *BDSKFileContentLocalizedString = nil;
 
@@ -531,7 +532,7 @@ NSRange rangeOfStringUsingLossyTargetString(NSString *substring, NSString *targe
     [animation startAnimation];
     
     [splitView retain];
-    [groupSplitView replaceSubview:splitView with:contentView];
+    [mainBox replaceSubview:splitView with:contentView];
     
     [searchField setTarget:fileSearchController];
     [searchField setAction:@selector(search:)];
@@ -560,7 +561,7 @@ NSRange rangeOfStringUsingLossyTargetString(NSString *substring, NSString *targe
     
     [animation startAnimation];
     
-    [groupSplitView replaceSubview:view with:splitView];
+    [mainBox replaceSubview:view with:splitView];
     [splitView release];
     
     [searchField setTarget:self];
