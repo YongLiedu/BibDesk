@@ -616,6 +616,8 @@
 		F994B8F707F5F65F00751DA1 /* RelNotes.rtf in Resources */ = {isa = PBXBuildFile; fileRef = F994B8F607F5F65F00751DA1 /* RelNotes.rtf */; };
 		F99BC25E095A5C7000E018C3 /* NSArray_BDSKExtensions.h in Headers */ = {isa = PBXBuildFile; fileRef = F99BC25C095A5C7000E018C3 /* NSArray_BDSKExtensions.h */; };
 		F99BC25F095A5C7000E018C3 /* NSArray_BDSKExtensions.m in Sources */ = {isa = PBXBuildFile; fileRef = F99BC25D095A5C7000E018C3 /* NSArray_BDSKExtensions.m */; };
+		F9A411F10A0B1FEF008493C0 /* BDSKSpotlightView.m in Sources */ = {isa = PBXBuildFile; fileRef = F9A411F00A0B1FEF008493C0 /* BDSKSpotlightView.m */; };
+		F9A411FC0A0B2066008493C0 /* BDSKPreferenceController.m in Sources */ = {isa = PBXBuildFile; fileRef = F9DAC7A10A0A95BC0099117E /* BDSKPreferenceController.m */; };
 		F9A6742A07D04E8000782ACD /* BDSKFontManager.h in Headers */ = {isa = PBXBuildFile; fileRef = F9A6742807D04E8000782ACD /* BDSKFontManager.h */; };
 		F9A6742B07D04E8000782ACD /* BDSKFontManager.m in Sources */ = {isa = PBXBuildFile; fileRef = F9A6742907D04E8000782ACD /* BDSKFontManager.m */; };
 		F9A6772D07D2D57F00782ACD /* MultiplePageView.h in Headers */ = {isa = PBXBuildFile; fileRef = F9A6772B07D2D57F00782ACD /* MultiplePageView.h */; };
@@ -629,6 +631,7 @@
 		F9D3E285088DA01F00E70D49 /* BDSKFormCell.h in Headers */ = {isa = PBXBuildFile; fileRef = F9D3E283088DA01F00E70D49 /* BDSKFormCell.h */; };
 		F9D3E286088DA01F00E70D49 /* BDSKFormCell.m in Sources */ = {isa = PBXBuildFile; fileRef = F9D3E284088DA01F00E70D49 /* BDSKFormCell.m */; };
 		F9D5A8CB07B9B94F0092E7E2 /* BDSKDragWindow.h in Headers */ = {isa = PBXBuildFile; fileRef = F9022C420758027800C3F701 /* BDSKDragWindow.h */; };
+		F9DAC7A20A0A95BC0099117E /* BDSKPreferenceController.h in Headers */ = {isa = PBXBuildFile; fileRef = F9DAC7A00A0A95BC0099117E /* BDSKPreferenceController.h */; };
 		F9DB863F08A07ADC00CB3D53 /* BDSKPreviewMessageQueue.h in Headers */ = {isa = PBXBuildFile; fileRef = F9DB863D08A07ADC00CB3D53 /* BDSKPreviewMessageQueue.h */; };
 		F9DB864008A07ADC00CB3D53 /* BDSKPreviewMessageQueue.m in Sources */ = {isa = PBXBuildFile; fileRef = F9DB863E08A07ADC00CB3D53 /* BDSKPreviewMessageQueue.m */; };
 		F9DB895C08A54BBA00CB3D53 /* BDSKTeXTask.h in Headers */ = {isa = PBXBuildFile; fileRef = F9DB895A08A54BBA00CB3D53 /* BDSKTeXTask.h */; };
@@ -1090,7 +1093,7 @@
 		3DFF35600816B55B0052F37C /* forward_small.tiff */ = {isa = PBXFileReference; lastKnownFileType = image.tiff; name = forward_small.tiff; path = Images/forward_small.tiff; sourceTree = "<group>"; };
 		3DFF35620816B5780052F37C /* reload_small.tiff */ = {isa = PBXFileReference; lastKnownFileType = image.tiff; name = reload_small.tiff; path = Images/reload_small.tiff; sourceTree = "<group>"; };
 		8D1107310486CEB800E47090 /* Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
-		8D1107320486CEB800E47090 /* BibDesk.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = BibDesk.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		8D1107320486CEB800E47090 /* BibDesk.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = BibDesk.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		CE1A7ED4090BDEB600ACC864 /* BDSKHeaderPopUpButtonCell.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BDSKHeaderPopUpButtonCell.h; sourceTree = "<group>"; };
 		CE1A7ED5090BDEB600ACC864 /* BDSKHeaderPopUpButtonCell.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BDSKHeaderPopUpButtonCell.m; sourceTree = "<group>"; };
 		CE1A7EDD090BDF1C00ACC864 /* BDSKHeaderPopUpButton.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BDSKHeaderPopUpButton.h; sourceTree = "<group>"; };
@@ -1448,6 +1451,8 @@
 		F994B8F607F5F65F00751DA1 /* RelNotes.rtf */ = {isa = PBXFileReference; lastKnownFileType = text.rtf; path = RelNotes.rtf; sourceTree = "<group>"; };
 		F99BC25C095A5C7000E018C3 /* NSArray_BDSKExtensions.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = NSArray_BDSKExtensions.h; sourceTree = "<group>"; };
 		F99BC25D095A5C7000E018C3 /* NSArray_BDSKExtensions.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = NSArray_BDSKExtensions.m; sourceTree = "<group>"; };
+		F9A411EF0A0B1FEF008493C0 /* BDSKSpotlightView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BDSKSpotlightView.h; sourceTree = "<group>"; };
+		F9A411F00A0B1FEF008493C0 /* BDSKSpotlightView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BDSKSpotlightView.m; sourceTree = "<group>"; };
 		F9A6742807D04E8000782ACD /* BDSKFontManager.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BDSKFontManager.h; sourceTree = "<group>"; };
 		F9A6742907D04E8000782ACD /* BDSKFontManager.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BDSKFontManager.m; sourceTree = "<group>"; };
 		F9A6772B07D2D57F00782ACD /* MultiplePageView.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = MultiplePageView.h; sourceTree = "<group>"; };
@@ -1461,6 +1466,8 @@
 		F9CE58EB0842411D0072DF55 /* ArrowImage.tiff */ = {isa = PBXFileReference; lastKnownFileType = image.tiff; name = ArrowImage.tiff; path = Images/ArrowImage.tiff; sourceTree = "<group>"; };
 		F9D3E283088DA01F00E70D49 /* BDSKFormCell.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = BDSKFormCell.h; sourceTree = "<group>"; };
 		F9D3E284088DA01F00E70D49 /* BDSKFormCell.m */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.objc; path = BDSKFormCell.m; sourceTree = "<group>"; };
+		F9DAC7A00A0A95BC0099117E /* BDSKPreferenceController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BDSKPreferenceController.h; sourceTree = "<group>"; };
+		F9DAC7A10A0A95BC0099117E /* BDSKPreferenceController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BDSKPreferenceController.m; sourceTree = "<group>"; };
 		F9DB863D08A07ADC00CB3D53 /* BDSKPreviewMessageQueue.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BDSKPreviewMessageQueue.h; sourceTree = "<group>"; };
 		F9DB863E08A07ADC00CB3D53 /* BDSKPreviewMessageQueue.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BDSKPreviewMessageQueue.m; sourceTree = "<group>"; };
 		F9DB895A08A54BBA00CB3D53 /* BDSKTeXTask.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BDSKTeXTask.h; sourceTree = "<group>"; };
@@ -1815,6 +1822,7 @@
 				F9EF21B308B1572500AAC9A9 /* BDSKScrollableTextField.m */,
 				F9EF21B508B1572500AAC9A9 /* BDSKScrollableTextFieldCell.m */,
 				CEF7AC050915929E00BE9E02 /* BDSKSplitView.m */,
+				F9A411F00A0B1FEF008493C0 /* BDSKSpotlightView.m */,
 				CE30FAD60919713100CB1A19 /* BDSKStatusBar.m */,
 				F9DCEA4E094B7D1100AEE662 /* BDSKTextWithIconCell.m */,
 				F98F33C90892D4B700C1427D /* BDSKZoomablePDFView.m */,
@@ -1874,6 +1882,7 @@
 				CE38FB8D091D94A100BCB69D /* BDSKFilterController.m */,
 				F97965F0086909EA00050427 /* BDSKFindController.m */,
 				F92ECBF309DF09DA00A244D0 /* BDSKPasswordController.m */,
+				F9DAC7A10A0A95BC0099117E /* BDSKPreferenceController.m */,
 				F9022C58075802E300C3F701 /* BDSKPreviewer.m */,
 				27AFAF9B080D1E1B0096F5D2 /* BDSKTextImportController.m */,
 				F98AA6800971E3F400184BD8 /* BDSKTextViewCompletionController.m */,
@@ -2142,6 +2151,7 @@
 				CEF9433F092656BB00750FFA /* BDSKPathIconTransformer.h */,
 				CEF9420F0926458C00750FFA /* BDSKPathColorTransformer.h */,
 				F94DE74909CB46FF00B5FD51 /* BDSKPersistentSearch.h */,
+				F9DAC7A00A0A95BC0099117E /* BDSKPreferenceController.h */,
 				F9022C57075802E300C3F701 /* BDSKPreviewer.h */,
 				F9DB863D08A07ADC00CB3D53 /* BDSKPreviewMessageQueue.h */,
 				CE59A37F09BC80A100AF3935 /* BDSKPreviewTextView.h */,
@@ -2162,6 +2172,7 @@
 				F92ED7CA09E0A93400A244D0 /* BDSKSharingServer.h */,
 				F9022C59075802E300C3F701 /* BDSKShellTask.h */,
 				CEF7AC040915929E00BE9E02 /* BDSKSplitView.h */,
+				F9A411EF0A0B1FEF008493C0 /* BDSKSpotlightView.h */,
 				CE30FAD50919713100CB1A19 /* BDSKStatusBar.h */,
 				F9F78CD207D5320D004B68AF /* BDSKStringEncodingManager.h */,
 				F9025DA90969AB69008A551C /* BDSKStringNode.h */,
@@ -2541,6 +2552,7 @@
 				CE34E9790A03C16B00222942 /* BDSKConditionsView.h in Headers */,
 				F9ED4DAD0A0437E20048D912 /* FSCopyObject.h in Headers */,
 				F9ED4DAF0A0437E20048D912 /* GenLinkedList.h in Headers */,
+				F9DAC7A20A0A95BC0099117E /* BDSKPreferenceController.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -3486,6 +3498,7 @@
 				CE34E97A0A03C16B00222942 /* BDSKConditionsView.m in Sources */,
 				F9ED4DAC0A0437E20048D912 /* FSCopyObject.c in Sources */,
 				F9ED4DAE0A0437E20048D912 /* GenLinkedList.c in Sources */,
+				F9A411FC0A0B2066008493C0 /* BDSKPreferenceController.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -3497,6 +3510,7 @@
 				CE28347309176CD0006B4C63 /* NSBezierPath_CoreImageExtensions.m in Sources */,
 				F91A2D6E089A7D4B0009B1C1 /* BDSKZoomablePDFView.m in Sources */,
 				F9E6C9BA099A99ED00A8B97D /* NSFileManager_ExtendedAttributes.m in Sources */,
+				F9A411F10A0B1FEF008493C0 /* BDSKSpotlightView.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
