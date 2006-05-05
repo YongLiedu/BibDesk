@@ -41,5 +41,10 @@
 
 
 @interface BDSKSplitView : OASplitView {
+    NSImage *endImage;
 }
+
+- (NSImage *)endImage;
+- (void)setEndImage:(NSImage *)image;
+
 @end

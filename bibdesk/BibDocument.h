@@ -60,6 +60,7 @@
 @class MacroWindowController;
 @class BDSKDragTableView;
 @class BDSKMacroResolver;
+@class BDSKSplitView;
 @class BDSKCollapsibleView;
 
 enum {
@@ -100,7 +101,7 @@ extern NSString* BDSKWeblocFilePboardType; // core pasteboard type for webloc fi
     IBOutlet NSMenuItem *ctxCopyBibTex;
     IBOutlet NSMenuItem *ctxCopyTex;
     IBOutlet NSMenuItem *ctxCopyPDF;
-    IBOutlet OASplitView* splitView;
+    IBOutlet BDSKSplitView* splitView;
     // for the splitview double-click handling
     float lastPreviewHeight;
 	
@@ -176,7 +177,7 @@ extern NSString* BDSKWeblocFilePboardType; // core pasteboard type for webloc fi
 	BDSKGroup *allPublicationsGroup;
 	BDSKStaticGroup *lastImportGroup;
 	NSString *currentGroupField;
-    IBOutlet OASplitView *groupSplitView;
+    IBOutlet BDSKSplitView *groupSplitView;
 	float lastGroupViewWidth;
     
     IBOutlet BDSKImagePopUpButton *groupActionButton;

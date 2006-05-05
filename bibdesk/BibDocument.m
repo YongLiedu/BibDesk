@@ -77,6 +77,7 @@
 #import "ApplicationServices/ApplicationServices.h"
 #import "BDSKImagePopUpButton.h"
 #import "BDSKRatingButton.h"
+#import "BDSKSplitView.h"
 #import "BDSKCollapsibleView.h"
 
 #import "BDSKMacroResolver.h"
@@ -269,9 +270,18 @@ NSString *BDSKWeblocFilePboardType = @"CorePasteboardFlavorType 0x75726C20";
     [groupTableView registerForDraggedTypes:dragTypes];
     
     [groupCollapsibleView setCollapseEdges:BDSKMinXEdgeMask];
-    [groupCollapsibleView setMinSize:NSMakeSize(56.0, 20.0f)];
+    [groupCollapsibleView setMinSize:NSMakeSize(56.0, 20.0)];
     [groupGradientView setUpperColor:[NSColor colorWithCalibratedWhite:0.75 alpha:1.0]];
     [groupGradientView setLowerColor:[NSColor colorWithCalibratedWhite:0.9 alpha:1.0]];
+
+    // make sure they are ordered correctly, mainly for the focus ring
+	[groupCollapsibleView retain];
+    [groupCollapsibleView removeFromSuperview];
+    [[[groupTableView enclosingScrollView] superview] addSubview:groupCollapsibleView positioned:NSWindowBelow relativeTo:nil];
+	[groupCollapsibleView release];
+    
+    [groupSplitView setEndImage:[NSImage imageNamed:@"splitViewBottom"]];
+    [splitView setEndImage:[NSImage imageNamed:@"splitViewLeft"]];
 
 	[splitView setPositionAutosaveName:@"OASplitView Position Main Window"];
     [groupSplitView setPositionAutosaveName:@"OASplitView Position Group Table"];

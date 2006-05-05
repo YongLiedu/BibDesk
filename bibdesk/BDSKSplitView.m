@@ -42,6 +42,13 @@
 
 @implementation BDSKSplitView
 
+- (id)initWithFrame:(NSRect)frameRect{
+    if (self = [super initWithFrame:frameRect]) {
+        endImage = nil;
+    }
+    return self;
+}
+
 - (void)drawRect:(NSRect)rect {
     if(floor(NSAppKitVersionNumber) <= NSAppKitVersionNumber10_3){
 		[super drawRect:rect];
@@ -70,6 +77,8 @@
 		}
 		if (NSIntersectsRect(rect, divRect)) {
 			[[NSBezierPath bezierPathWithRect:divRect] fillPathVertically:![self isVertical] withStartColor:startColor endColor:endColor];
+            if (endImage != nil)
+                [endImage compositeToPoint:NSMakePoint(NSMinX(divRect), NSMaxY(divRect)) operation:NSCompositeSourceOver];
 			[self drawDividerInRect: divRect];
 		}
 	}
@@ -87,6 +96,17 @@
 	[[NSNotificationCenter defaultCenter] postNotificationName:NSSplitViewWillResizeSubviewsNotification object:self];
 	[super adjustSubviews];
 	[[NSNotificationCenter defaultCenter] postNotificationName:NSSplitViewDidResizeSubviewsNotification object:self];
+}
+
+- (NSImage *)endImage {
+    return [[endImage retain] autorelease];
+}
+
+- (void)setEndImage:(NSImage *)image {
+    if (endImage != image) {
+        [endImage release];
+        endImage = [image retain];
+    }
 }
 
 @end
