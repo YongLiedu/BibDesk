@@ -429,7 +429,7 @@ static NSString *BDSKLastImportLocalizedString = nil;
         [publications release];
         publications = [newPublications retain];
         [self setCount:[publications count]];
-        [[NSNotificationCenter defaultCenter] postNotificationName:BDSKStaticGroupChangedNotification object:nil];
+        [[NSNotificationCenter defaultCenter] postNotificationName:BDSKStaticGroupChangedNotification object:self];
     }
 }
 
@@ -437,28 +437,28 @@ static NSString *BDSKLastImportLocalizedString = nil;
     [[[self undoManager] prepareWithInvocationTarget:self] removePublication:item];
     [publications addObject:item];
     [self setCount:[publications count]];
-    [[NSNotificationCenter defaultCenter] postNotificationName:BDSKStaticGroupChangedNotification object:nil];
+    [[NSNotificationCenter defaultCenter] postNotificationName:BDSKStaticGroupChangedNotification object:self];
 }
 
 - (void)addPublicationsFromArray:(NSArray *)items {
     [[[self undoManager] prepareWithInvocationTarget:self] removePublicationsInArray:items];
     [publications addObjectsFromArray:items];
     [self setCount:[publications count]];
-    [[NSNotificationCenter defaultCenter] postNotificationName:BDSKStaticGroupChangedNotification object:nil];
+    [[NSNotificationCenter defaultCenter] postNotificationName:BDSKStaticGroupChangedNotification object:self];
 }
 
 - (void)removePublication:(BibItem *)item {
     [[[self undoManager] prepareWithInvocationTarget:self] addPublication:item];
     [publications removeObject:item];
     [self setCount:[publications count]];
-    [[NSNotificationCenter defaultCenter] postNotificationName:BDSKStaticGroupChangedNotification object:nil];
+    [[NSNotificationCenter defaultCenter] postNotificationName:BDSKStaticGroupChangedNotification object:self];
 }
 
 - (void)removePublicationsInArray:(NSArray *)items {
     [[[self undoManager] prepareWithInvocationTarget:self] addPublicationsFromArray:items];
     [publications removeObjectsInArray:items];
     [self setCount:[publications count]];
-    [[NSNotificationCenter defaultCenter] postNotificationName:BDSKStaticGroupChangedNotification object:nil];
+    [[NSNotificationCenter defaultCenter] postNotificationName:BDSKStaticGroupChangedNotification object:self];
 }
 
 - (BOOL)containsItem:(BibItem *)item {
