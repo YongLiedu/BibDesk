@@ -39,6 +39,8 @@
 #import "BDSKSpotlightView.h"
 #import <QuartzCore/QuartzCore.h>
 
+#define MAX_BLUR 10.0f
+
 @implementation BDSKSpotlightView;
 
 static NSColor *maskColor = nil;
@@ -75,7 +77,8 @@ static CIFilter *gaussianFilter = nil;
     NSEnumerator *rectEnum = [highlightRects objectEnumerator];
     NSValue *value;
     
-    NSRect boundsRect = [self bounds];
+    // we make the bounds larger so the blurred edges will fall outside the view
+    NSRect boundsRect = NSInsetRect([self bounds] , -MAX_BLUR, -MAX_BLUR);
     NSBezierPath *path = [NSBezierPath bezierPathWithRect:boundsRect];
     
     // this causes the paths we append to act as holes in the overall path
@@ -84,6 +87,12 @@ static CIFilter *gaussianFilter = nil;
     while(value = [rectEnum nextObject]){
         [path appendBezierPathWithOvalInRect:[value rectValue]];
     }
+    
+    // we need to shift because canvas of the image is at positive values
+    NSAffineTransform *transform = [NSAffineTransform transform];
+
+    [transform translateXBy:MAX_BLUR yBy:MAX_BLUR];
+    [path transformUsingAffineTransform:transform];
     
     NSImage *image = [[NSImage alloc] initWithSize:boundsRect.size];
 
@@ -102,7 +111,7 @@ static CIFilter *gaussianFilter = nil;
     [image release];
     
     // sys prefs uses fuzzier circles for more matches; filter range 0 -- 100, values 0 -- 10 are reasonable?
-    int radius = MIN([highlightRects count], 10);
+    int radius = MIN([highlightRects count], MAX_BLUR);
     
     // apply the blur filter to soften the edges of the circles
     [gaussianFilter setValue:[NSNumber numberWithInt:radius] forKey:@"inputRadius"];
@@ -118,7 +127,9 @@ static CIFilter *gaussianFilter = nil;
     if([delegate isSearchActive]){
         CIContext *ciContext = [[NSGraphicsContext currentContext] CIContext];
         NSRect boundsRect = [self bounds];
-        [ciContext drawImage:[self image] atPoint:CGPointZero fromRect:CGRectMake(0,0,NSWidth(boundsRect),NSHeight(boundsRect))];
+        // remember that we shifted the image
+        CGRect imageRect = CGRectMake(NSMinX(boundsRect) + MAX_BLUR, NSMinY(boundsRect) + MAX_BLUR, NSWidth(boundsRect), NSHeight(boundsRect));
+        [ciContext drawImage:[self image] atPoint:*(CGPoint*)&(boundsRect.origin) fromRect:imageRect];
     } else {
         [[NSColor clearColor] setFill];
         NSRectFill(aRect);
