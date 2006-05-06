@@ -144,6 +144,8 @@ zzs_init(int sz, int strs)
     if ( strings == NULL )
     {
         fprintf(stderr, "Cannot allocate string table of size %d\n", strs);
+        /* ARM: ran into this limit on BibDesk bug #1482852 */
+        fprintf(stderr, "Increase STRING_SIZE in macros.c and recompile\n");
         exit(1);
     }
     size = sz;
