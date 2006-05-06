@@ -896,7 +896,7 @@ The groupedPublications array is a subset of the publications array, developed b
     }
     
 	if ([group isSmart]) {
-		BDSKFilter *filter = [(BDSKSmartGroup *)[smartGroups objectAtIndex:row - 1] filter];
+		BDSKFilter *filter = [(BDSKSmartGroup *)group filter];
 		BDSKFilterController *filterController = [[BDSKFilterController alloc] initWithFilter:filter];
 		
 		[NSApp beginSheet:[filterController window]
