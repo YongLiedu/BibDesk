@@ -71,14 +71,14 @@
 
 + (id)sharedPreferenceController;
 {
+    if(floor(NSAppKitVersionNumber) <= NSAppKitVersionNumber10_3)
+        return [OAPreferenceController sharedPreferenceController];
+    
     static id sharedController = nil;
 
-    if(nil == sharedController){
-        if(floor(NSAppKitVersionNumber) <= NSAppKitVersionNumber10_3)
-            sharedController = [[super sharedPreferenceController] retain];
-        else
-            sharedController = [[BDSKPreferenceController alloc] init];
-    }
+    if(nil == sharedController)
+            sharedController = [[self alloc] init];
+    
     return sharedController;
 }
 
