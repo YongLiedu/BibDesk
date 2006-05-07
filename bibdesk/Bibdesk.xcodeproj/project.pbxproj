@@ -332,6 +332,7 @@
 		CE7E1FB50A0BD5CE009D04C3 /* splitViewLeft.tiff in Resources */ = {isa = PBXBuildFile; fileRef = CE7E1FB40A0BD5CE009D04C3 /* splitViewLeft.tiff */; };
 		CE7E207E0A0BF833009D04C3 /* GroupAddSmart_Pressed.tiff in Resources */ = {isa = PBXBuildFile; fileRef = CE7E207C0A0BF833009D04C3 /* GroupAddSmart_Pressed.tiff */; };
 		CE7E207F0A0BF833009D04C3 /* GroupAddSmart.tiff in Resources */ = {isa = PBXBuildFile; fileRef = CE7E207D0A0BF833009D04C3 /* GroupAddSmart.tiff */; };
+		CE7E29E00A0E84D6009D04C3 /* CIImage_BDSKExtensions.m in Sources */ = {isa = PBXBuildFile; fileRef = CE7E29D70A0E84AB009D04C3 /* CIImage_BDSKExtensions.m */; };
 		CE969E330931E4F500EE3DFD /* NSTableHeaderView_BDSKExtensions.h in Headers */ = {isa = PBXBuildFile; fileRef = CE969E310931E4F500EE3DFD /* NSTableHeaderView_BDSKExtensions.h */; };
 		CE969E340931E4F500EE3DFD /* NSTableHeaderView_BDSKExtensions.m in Sources */ = {isa = PBXBuildFile; fileRef = CE969E320931E4F500EE3DFD /* NSTableHeaderView_BDSKExtensions.m */; };
 		CE9DBEDF093CF2640008648B /* BibDeskBibliographyCommand.h in Headers */ = {isa = PBXBuildFile; fileRef = CE9DBEDD093CF2640008648B /* BibDeskBibliographyCommand.h */; };
@@ -1174,6 +1175,8 @@
 		CE7E1FB40A0BD5CE009D04C3 /* splitViewLeft.tiff */ = {isa = PBXFileReference; lastKnownFileType = image.tiff; name = splitViewLeft.tiff; path = Images/splitViewLeft.tiff; sourceTree = "<group>"; };
 		CE7E207C0A0BF833009D04C3 /* GroupAddSmart_Pressed.tiff */ = {isa = PBXFileReference; lastKnownFileType = image.tiff; name = GroupAddSmart_Pressed.tiff; path = Images/GroupAddSmart_Pressed.tiff; sourceTree = "<group>"; };
 		CE7E207D0A0BF833009D04C3 /* GroupAddSmart.tiff */ = {isa = PBXFileReference; lastKnownFileType = image.tiff; name = GroupAddSmart.tiff; path = Images/GroupAddSmart.tiff; sourceTree = "<group>"; };
+		CE7E29D60A0E84AA009D04C3 /* CIImage_BDSKExtensions.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CIImage_BDSKExtensions.h; sourceTree = "<group>"; };
+		CE7E29D70A0E84AB009D04C3 /* CIImage_BDSKExtensions.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CIImage_BDSKExtensions.m; sourceTree = "<group>"; };
 		CE969E310931E4F500EE3DFD /* NSTableHeaderView_BDSKExtensions.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = NSTableHeaderView_BDSKExtensions.h; sourceTree = "<group>"; };
 		CE969E320931E4F500EE3DFD /* NSTableHeaderView_BDSKExtensions.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = NSTableHeaderView_BDSKExtensions.m; sourceTree = "<group>"; };
 		CE9DBEDD093CF2640008648B /* BibDeskBibliographyCommand.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = BibDeskBibliographyCommand.h; path = Scripting/BibDeskBibliographyCommand.h; sourceTree = "<group>"; };
@@ -1856,6 +1859,7 @@
 		CE38FA7D091D210C00BCB69D /* AppKit Extensions */ = {
 			isa = PBXGroup;
 			children = (
+				CE7E29D70A0E84AB009D04C3 /* CIImage_BDSKExtensions.m */,
 				CE67E3D7092B6DF700410758 /* NSAlert_BDSKExtensions.m */,
 				F97BF0B8090AE7520063504B /* NSBezierPath_BDSKExtensions.m */,
 				CE28346209176C88006B4C63 /* NSBezierPath_CoreImageExtensions.m */,
@@ -2253,6 +2257,7 @@
 				F9022C950758038000C3F701 /* BibTeXParser.h */,
 				F9022C970758038000C3F701 /* BibTypeManager.h */,
 				F9025F2E0969D66F008A551C /* CFString_BDSKExtensions.h */,
+				CE7E29D60A0E84AA009D04C3 /* CIImage_BDSKExtensions.h */,
 				F9022C990758038000C3F701 /* DraggableScrollView.h */,
 				F9022C9B0758038000C3F701 /* html2tex.h */,
 				2730077907CF20B500F2E485 /* MacroTextFieldWindowController.h */,
@@ -3547,6 +3552,7 @@
 				F91A2D6E089A7D4B0009B1C1 /* BDSKZoomablePDFView.m in Sources */,
 				F9E6C9BA099A99ED00A8B97D /* NSFileManager_ExtendedAttributes.m in Sources */,
 				F9A411F10A0B1FEF008493C0 /* BDSKSpotlightView.m in Sources */,
+				CE7E29E00A0E84D6009D04C3 /* CIImage_BDSKExtensions.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
