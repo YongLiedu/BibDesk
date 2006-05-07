@@ -39,12 +39,12 @@
 #import "BDSKSpotlightView.h"
 #import <QuartzCore/QuartzCore.h>
 
-#define MAX_BLUR 10.0f
-
 @implementation BDSKSpotlightView;
 
 static NSColor *maskColor = nil;
 static CIFilter *gaussianFilter = nil;
+static CIFilter *shiftFilter = nil;
+static CIFilter *cropFilter = nil;
 
 + (void)initialize
 {
@@ -52,6 +52,8 @@ static CIFilter *gaussianFilter = nil;
     if(NO == alreadyInit){
         gaussianFilter = [[CIFilter filterWithName:@"CIGaussianBlur"] retain];    
         maskColor = [[[NSColor blackColor] colorWithAlphaComponent:0.3] retain];
+        shiftFilter = [[CIFilter filterWithName:@"CIAffineTransform"] retain];
+        cropFilter = [[CIFilter filterWithName:@"CICrop"] retain];
     }
 }
 
@@ -69,7 +71,7 @@ static CIFilter *gaussianFilter = nil;
     delegate = anObject;
 }
 
-- (CIImage *)image
+- (CIImage *)spotlightMaskImageWithSize:(NSSize)imageSize
 {
     NSArray *highlightRects = [delegate highlightRects];
     
@@ -77,8 +79,13 @@ static CIFilter *gaussianFilter = nil;
     NSEnumerator *rectEnum = [highlightRects objectEnumerator];
     NSValue *value;
     
+    NSRect boundsRect = NSMakeRect(0, 0, imageSize.width, imageSize.height);
+    
+    int maximumBlur = 10;
+    float blurPadding = maximumBlur * 2;
+
     // we make the bounds larger so the blurred edges will fall outside the view
-    NSRect boundsRect = NSInsetRect([self bounds] , -MAX_BLUR, -MAX_BLUR);
+    boundsRect = NSInsetRect([self bounds] , -blurPadding, -blurPadding);
     NSBezierPath *path = [NSBezierPath bezierPathWithRect:boundsRect];
     
     // this causes the paths we append to act as holes in the overall path
@@ -90,8 +97,7 @@ static CIFilter *gaussianFilter = nil;
     
     // we need to shift because canvas of the image is at positive values
     NSAffineTransform *transform = [NSAffineTransform transform];
-
-    [transform translateXBy:MAX_BLUR yBy:MAX_BLUR];
+    [transform translateXBy:blurPadding yBy:blurPadding];
     [path transformUsingAffineTransform:transform];
     
     NSImage *image = [[NSImage alloc] initWithSize:boundsRect.size];
@@ -111,14 +117,24 @@ static CIFilter *gaussianFilter = nil;
     [image release];
     
     // sys prefs uses fuzzier circles for more matches; filter range 0 -- 100, values 0 -- 10 are reasonable?
-    int radius = MIN([highlightRects count], MAX_BLUR);
+    int radius = MIN([highlightRects count], maximumBlur);
     
     // apply the blur filter to soften the edges of the circles
     [gaussianFilter setValue:[NSNumber numberWithInt:radius] forKey:@"inputRadius"];
     [gaussianFilter setValue:ciImage forKey:@"inputImage"];
     [ciImage release];
-    
-    return [gaussianFilter valueForKey:@"outputImage"];
+
+    // shift the image back
+    [transform invert];
+    [shiftFilter setValue:transform forKey:@"inputTransform"];
+    [shiftFilter setValue:[gaussianFilter valueForKey:@"outputImage"] forKey:@"inputImage"];
+
+    // crop to the original bounds size
+    CIVector *cropVector = [CIVector vectorWithX:0 Y:0 Z:imageSize.width W:imageSize.height];
+    [cropFilter setValue:cropVector forKey:@"inputRectangle"];
+    [cropFilter setValue:[shiftFilter valueForKey:@"outputImage"] forKey:@"inputImage"];
+
+    return [cropFilter valueForKey:@"outputImage"];
 }
 
 // sys prefs draws solid black for no matches, so we'll do the same
@@ -127,9 +143,7 @@ static CIFilter *gaussianFilter = nil;
     if([delegate isSearchActive]){
         CIContext *ciContext = [[NSGraphicsContext currentContext] CIContext];
         NSRect boundsRect = [self bounds];
-        // remember that we shifted the image
-        CGRect imageRect = CGRectMake(NSMinX(boundsRect) + MAX_BLUR, NSMinY(boundsRect) + MAX_BLUR, NSWidth(boundsRect), NSHeight(boundsRect));
-        [ciContext drawImage:[self image] atPoint:*(CGPoint*)&(boundsRect.origin) fromRect:imageRect];
+        [ciContext drawImage:[self spotlightMaskImageWithSize:boundsRect.size] atPoint:CGPointZero fromRect:CGRectMake(0, 0, NSWidth(boundsRect), NSHeight(boundsRect))];
     } else {
         [[NSColor clearColor] setFill];
         NSRectFill(aRect);
