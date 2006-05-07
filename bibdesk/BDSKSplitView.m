@@ -37,16 +37,50 @@
  */
 
 #import "BDSKSplitView.h"
+#import "BDSKStatusBar.h"
 #import "NSBezierPath_CoreImageExtensions.h"
 
+#define END_JOIN_WIDTH 3.0f
+#define END_JOIN_HEIGHT 20.0f
 
 @implementation BDSKSplitView
 
++ (NSColor *)startColor{
+    static NSColor *startColor = nil;
+    if (startColor == nil)
+        startColor = [[NSColor colorWithCalibratedWhite:0.85 alpha:1.0] retain];
+    return startColor;
+}
+
++ (NSColor *)endColor{
+    static NSColor *endColor = nil;
+    if (endColor == nil)
+        endColor = [[NSColor colorWithCalibratedWhite:0.95 alpha:1.0] retain];
+   return endColor;
+}
+
 - (id)initWithFrame:(NSRect)frameRect{
     if (self = [super initWithFrame:frameRect]) {
-        endImage = nil;
+        drawEnd = NO;
     }
     return self;
+}
+
+- (void)drawBlendedJoinEndAtLeftInRect:(NSRect)rect {
+    // this blends us smoothly with the a vertical divider on our left
+    [[NSBezierPath bezierPathWithRect:rect] fillPathWithColor:[[self class] startColor]
+                                               blendedAtRight:NO
+                                  ofVerticalGradientFromColor:[[self class] startColor]
+                                                      toColor:[[self class] endColor]];
+}
+
+- (void)drawBlendedJoinEndAtBottomInRect:(NSRect)rect {
+    // this blends us smoothly with the status bar
+    [[NSBezierPath bezierPathWithRect:rect] fillPathWithHorizontalGradientFromColor:[[self class] startColor]
+                                                                            toColor:[[self class] endColor]
+                                                                       blendedAtTop:NO
+                                                        ofVerticalGradientFromColor:[BDSKStatusBar lowerColor]
+                                                                            toColor:[BDSKStatusBar upperColor]];
 }
 
 - (void)drawRect:(NSRect)rect {
@@ -59,10 +93,6 @@
 	int i, count = [subviews count];
 	id view;
 	NSRect divRect;
-	NSColor *startColor, *endColor;
-
-	startColor = [NSColor colorWithCalibratedWhite:0.85 alpha:1.0];
-	endColor = [NSColor colorWithCalibratedWhite:0.95 alpha:1.0];
 
 	// draw the dimples 
 	for (i = 0; i < (count-1); i++) {
@@ -76,9 +106,17 @@
 			divRect.size.width = [self dividerThickness];
 		}
 		if (NSIntersectsRect(rect, divRect)) {
-			[[NSBezierPath bezierPathWithRect:divRect] fillPathVertically:![self isVertical] withStartColor:startColor endColor:endColor];
-            if (endImage != nil)
-                [endImage compositeToPoint:NSMakePoint(NSMinX(divRect), NSMaxY(divRect)) operation:NSCompositeSourceOver];
+			[[NSBezierPath bezierPathWithRect:divRect] fillPathVertically:![self isVertical] withStartColor:[[self class] startColor] endColor:[[self class] endColor]];
+            if (drawEnd) {
+                NSRect endRect, ignored;
+                if ([self isVertical]) {
+                    NSDivideRect(divRect, &endRect, &ignored, END_JOIN_HEIGHT, NSMaxYEdge);
+                    [self drawBlendedJoinEndAtBottomInRect:endRect];
+                } else {
+                    NSDivideRect(divRect, &endRect, &ignored, END_JOIN_WIDTH, NSMinXEdge);
+                    [self drawBlendedJoinEndAtLeftInRect:endRect];
+                }
+            }
 			[self drawDividerInRect: divRect];
 		}
 	}
@@ -98,15 +136,12 @@
 	[[NSNotificationCenter defaultCenter] postNotificationName:NSSplitViewDidResizeSubviewsNotification object:self];
 }
 
-- (NSImage *)endImage {
-    return [[endImage retain] autorelease];
+- (BOOL)drawEnd {
+    return drawEnd;
 }
 
-- (void)setEndImage:(NSImage *)image {
-    if (endImage != image) {
-        [endImage release];
-        endImage = [image retain];
-    }
+- (void)setDrawEnd:(BOOL)flag {
+    drawEnd = flag;
 }
 
 @end

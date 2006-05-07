@@ -285,8 +285,8 @@ NSString *BDSKWeblocFilePboardType = @"CorePasteboardFlavorType 0x75726C20";
     [[[groupTableView enclosingScrollView] superview] addSubview:groupCollapsibleView positioned:NSWindowBelow relativeTo:nil];
 	[groupCollapsibleView release];
     
-    [groupSplitView setEndImage:[NSImage imageNamed:@"splitViewBottom"]];
-    [splitView setEndImage:[NSImage imageNamed:@"splitViewLeft"]];
+    [groupSplitView setDrawEnd:YES];
+    [splitView setDrawEnd:YES];
 
 	[splitView setPositionAutosaveName:@"OASplitView Position Main Window"];
     [groupSplitView setPositionAutosaveName:@"OASplitView Position Group Table"];
