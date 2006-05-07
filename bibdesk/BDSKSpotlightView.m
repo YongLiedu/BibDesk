@@ -71,22 +71,20 @@ static CIFilter *cropFilter = nil;
     delegate = anObject;
 }
 
-- (CIImage *)spotlightMaskImageWithSize:(NSSize)imageSize
+- (CIImage *)spotlightMaskImageWithFrame:(NSRect)aRect
 {
     NSArray *highlightRects = [delegate highlightRects];
     
-    // array of NSValue objects
+    // array of NSValue objects; aRect and highlightRects should have same coordinate system
     NSEnumerator *rectEnum = [highlightRects objectEnumerator];
     NSValue *value;
-    
-    NSRect boundsRect = NSMakeRect(0, 0, imageSize.width, imageSize.height);
-    
+        
     int maximumBlur = 10;
     float blurPadding = maximumBlur * 2;
 
     // we make the bounds larger so the blurred edges will fall outside the view
-    boundsRect = NSInsetRect([self bounds] , -blurPadding, -blurPadding);
-    NSBezierPath *path = [NSBezierPath bezierPathWithRect:boundsRect];
+    NSRect maskRect = NSInsetRect(aRect, -blurPadding, -blurPadding);
+    NSBezierPath *path = [NSBezierPath bezierPathWithRect:maskRect];
     
     // this causes the paths we append to act as holes in the overall path
     [path setWindingRule:NSEvenOddWindingRule];
@@ -100,7 +98,7 @@ static CIFilter *cropFilter = nil;
     [transform translateXBy:blurPadding yBy:blurPadding];
     [path transformUsingAffineTransform:transform];
     
-    NSImage *image = [[NSImage alloc] initWithSize:boundsRect.size];
+    NSImage *image = [[NSImage alloc] initWithSize:maskRect.size];
 
     [image lockFocus];
     NSGraphicsContext *nsContext = [NSGraphicsContext currentContext];
@@ -130,7 +128,7 @@ static CIFilter *cropFilter = nil;
     [shiftFilter setValue:[gaussianFilter valueForKey:@"outputImage"] forKey:@"inputImage"];
 
     // crop to the original bounds size
-    CIVector *cropVector = [CIVector vectorWithX:0 Y:0 Z:imageSize.width W:imageSize.height];
+    CIVector *cropVector = [CIVector vectorWithX:0 Y:0 Z:NSWidth(aRect) W:NSHeight(aRect)];
     [cropFilter setValue:cropVector forKey:@"inputRectangle"];
     [cropFilter setValue:[shiftFilter valueForKey:@"outputImage"] forKey:@"inputImage"];
 
@@ -143,7 +141,7 @@ static CIFilter *cropFilter = nil;
     if([delegate isSearchActive]){
         CIContext *ciContext = [[NSGraphicsContext currentContext] CIContext];
         NSRect boundsRect = [self bounds];
-        [ciContext drawImage:[self spotlightMaskImageWithSize:boundsRect.size] atPoint:CGPointZero fromRect:CGRectMake(0, 0, NSWidth(boundsRect), NSHeight(boundsRect))];
+        [ciContext drawImage:[self spotlightMaskImageWithFrame:boundsRect] atPoint:CGPointZero fromRect:CGRectMake(0, 0, NSWidth(boundsRect), NSHeight(boundsRect))];
     } else {
         [[NSColor clearColor] setFill];
         NSRectFill(aRect);
