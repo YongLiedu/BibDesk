@@ -306,7 +306,9 @@
 #if DEBUG
 		NSLog(@"Bye bye");
 #endif
-		[NSApp terminate:self];
+        // make sure we allow ourselves to quit
+		_shouldQuit = YES;
+        [NSApp terminate:self];
 	}
 }
 
