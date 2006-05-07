@@ -98,9 +98,9 @@ static CIFilter *cropFilter = nil;
     [transform translateXBy:blurPadding yBy:blurPadding];
     [path transformUsingAffineTransform:transform];
     
-    NSImage *image = [[NSImage alloc] initWithSize:maskRect.size];
+    NSImage *nsImage = [[NSImage alloc] initWithSize:maskRect.size];
 
-    [image lockFocus];
+    [nsImage lockFocus];
     NSGraphicsContext *nsContext = [NSGraphicsContext currentContext];
     [nsContext saveGraphicsState];
     
@@ -109,13 +109,13 @@ static CIFilter *cropFilter = nil;
     [path fill];
     
     [nsContext restoreGraphicsState];
-    [image unlockFocus];
+    [nsImage unlockFocus];
 
-    CIImage *ciImage = [[CIImage alloc] initWithData:[image TIFFRepresentation]];
-    [image release];
+    CIImage *ciImage = [[CIImage alloc] initWithData:[nsImage TIFFRepresentation]];
+    [nsImage release];
     
     // sys prefs uses fuzzier circles for more matches; filter range 0 -- 100, values 0 -- 10 are reasonable?
-    int radius = MIN([highlightRects count], maximumBlur);
+    float radius = MIN([highlightRects count], maximumBlur);
     
     // apply the blur filter to soften the edges of the circles
     CIImage *blurredImage = [ciImage blurredImageWithBlurRadius:radius];
