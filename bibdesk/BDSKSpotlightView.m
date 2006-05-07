@@ -38,6 +38,7 @@
 
 #import "BDSKSpotlightView.h"
 #import <QuartzCore/QuartzCore.h>
+#import "CIImage_BDSKExtensions.h"
 
 @implementation BDSKSpotlightView;
 
