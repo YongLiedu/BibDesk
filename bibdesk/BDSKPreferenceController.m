@@ -77,7 +77,7 @@
     static id sharedController = nil;
 
     if(nil == sharedController)
-            sharedController = [[self alloc] init];
+        sharedController = [[self alloc] init];
     
     return sharedController;
 }
@@ -253,7 +253,7 @@ static NSRect insetButtonRectAndShift(const NSRect aRect)
         [tbItem setAction:@selector(search:)];
         [tbItem setTarget:self];
         [tbItem setMinSize:NSMakeSize(60, NSHeight([searchField frame]))];
-        [tbItem setMaxSize:NSMakeSize(200,NSHeight([searchField frame]))];
+        [tbItem setMaxSize:NSMakeSize(NSWidth([[self window] frame])/3,NSHeight([searchField frame]))];
         [tbItem setView:searchField];
         [searchField release];
         
