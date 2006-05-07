@@ -509,15 +509,28 @@ static OSType finderSignatureBytes = 'MACS';
         success = CFURLGetFSRef((CFURLRef)dstURL, &dstDirRef);
     
     OSErr err = noErr;
-
+    NSString *comment = [self commentForURL:srcURL];
+    FSRef newObjectRef;
+    
     if(success){
         // FSCopyObjectSync is only available on 10.4.  We use it on 10.4, though, because FSCopyObject loses xattrs rdar://problem/4531816
         // unfortunately, neither function copies Spotlight comments (and neither does NSFileManager) rdar://problem/4531819
         if(FSCopyObjectSync != NULL)
-            err = FSCopyObjectSync(&srcFileRef, &dstDirRef, NULL, NULL, 0);
+            err = FSCopyObjectSync(&srcFileRef, &dstDirRef, NULL, &newObjectRef, 0);
         else
-            err = FSCopyObject(&srcFileRef, &dstDirRef, 0 /*recurse all directories*/, kFSCatInfoNone, kDupeActionStandard, NULL, FALSE, FALSE, NULL, NULL, NULL, NULL);
+            err = FSCopyObject(&srcFileRef, &dstDirRef, 0 /*recurse all directories*/, kFSCatInfoNone, kDupeActionStandard, NULL, FALSE, FALSE, NULL, NULL, &newObjectRef, NULL);
     }
+    
+    // set the file comment if necessary
+    if(noErr == err && nil != comment){
+        CFURLRef newFileURL = CFURLCreateFromFSRef(CFAllocatorGetDefault(), &newObjectRef);
+        if(newFileURL){
+            [self setComment:comment forURL:(NSURL *)newFileURL];
+            CFRelease(newFileURL);
+        } else {
+            err = coreFoundationUnknownErr;
+        }
+    }        
 
     if(NO == success && error != nil){
         NSString *errorMessage = nil;
