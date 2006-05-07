@@ -37,6 +37,7 @@
  */
 
 #import "NSBezierPath_CoreImageExtensions.h"
+#import "CIImage_BDSKExtensions.h"
 #import <QuartzCore/QuartzCore.h>
 
 
@@ -49,39 +50,27 @@
 
 - (void)fillPathVertically:(BOOL)isVertical withStartColor:(NSColor *)inStartColor endColor:(NSColor *)inEndColor;
 {
-    CIImage *image;    
-    inStartColor = [inStartColor colorUsingColorSpaceName:NSCalibratedRGBColorSpace];
-    inEndColor = [inEndColor colorUsingColorSpaceName:NSCalibratedRGBColorSpace];
+    CIColor *startColor = [CIColor colorWithNSColor:inStartColor];
+    CIColor *endColor = [CIColor colorWithNSColor:inEndColor];
     
-    CIColor *startColor = [CIColor colorWithRed:[inStartColor redComponent] green:[inStartColor greenComponent] blue:[inStartColor blueComponent] alpha:[inStartColor alphaComponent]];
-    CIColor *endColor = [CIColor colorWithRed:[inEndColor redComponent] green:[inEndColor greenComponent] blue:[inEndColor blueComponent] alpha:[inEndColor alphaComponent]];
+    NSRect bounds = [self bounds];
+    CGRect aRect = *(CGRect*)&bounds;
+    CGPoint startPoint = aRect.origin;
+    CGPoint endPoint = startPoint;
     
-    // optimization recommended by Apple; if you're using the same filter and just changing its inputs, keep an instance of it
-    static CIFilter *filter = nil;
-    if(filter == nil)
-        filter = [[CIFilter filterWithName:@"CILinearGradient"] retain];
-    
-    
-    // since we explicitly set all four inputs, we don't need to use [filter setDefaults]
-    [filter setValue:startColor forKey:@"inputColor0"];
-    [filter setValue:endColor forKey:@"inputColor1"];
-    
-    NSRect aRect = [self bounds];
-    
-    [filter setValue:[CIVector vectorWithX:NSMinX(aRect) Y:NSMinY(aRect)] forKey:@"inputPoint0"];
-    
-    CIVector *endVector = isVertical ? [CIVector vectorWithX:NSMinX(aRect) Y:NSMaxY(aRect)] : [CIVector vectorWithX:NSMaxX(aRect) Y:NSMinY(aRect)];
-    
-    [filter setValue:endVector forKey:@"inputPoint1"];
-    
-    image = [filter valueForKey:@"outputImage"];
+    if(isVertical)
+        endPoint.y += CGRectGetHeight(aRect);
+    else
+        endPoint.x += CGRectGetWidth(aRect);
+        
+    CIImage *image = [CIImage imageInRect:aRect withLinearGradientFromPoint:startPoint toPoint:endPoint fromColor:startColor toColor:endColor];
     
     NSGraphicsContext *nsContext = [NSGraphicsContext currentContext];
     [nsContext saveGraphicsState];
     
 	[self addClip];
 	
-    [[nsContext CIContext] drawImage:image atPoint:*(CGPoint *)&(aRect.origin) fromRect:*(CGRect *)&aRect];
+    [[nsContext CIContext] drawImage:image atPoint:aRect.origin fromRect:aRect];
     
     [nsContext restoreGraphicsState];
 }
@@ -94,6 +83,88 @@
 - (void)fillPathHorizontallyWithStartColor:(NSColor *)inStartColor endColor:(NSColor *)inEndColor;
 {
 	[self fillPathVertically:NO withStartColor:inStartColor endColor:inEndColor];
+}
+
+- (void)fillPathWithHorizontalGradientFromColor:(NSColor *)inFgStartColor toColor:(NSColor *)inFgEndColor blendedAtTop:(BOOL)top ofVerticalGradientFromColor:(NSColor *)inBgStartColor toColor:(NSColor *)inBgEndColor {
+    CIColor *fgStartColor = [CIColor colorWithNSColor:inFgStartColor];
+    CIColor *fgEndColor = [CIColor colorWithNSColor:inFgEndColor];
+    CIColor *bgStartColor = [CIColor colorWithNSColor:inBgStartColor];
+    CIColor *bgEndColor = [CIColor colorWithNSColor:inBgEndColor];
+    
+    NSRect bounds = [self bounds];
+    CGRect aRect = *(CGRect*)&bounds;
+    
+    CIImage *image = [CIImage imageInRect:aRect withHorizontalGradientFromColor:fgStartColor toColor:fgEndColor blendedAtTop:top ofVerticalGradientFromColor:bgStartColor toColor:bgEndColor];
+    
+    NSGraphicsContext *nsContext = [NSGraphicsContext currentContext];
+    [nsContext saveGraphicsState];
+    
+	[self addClip];
+	
+    [[nsContext CIContext] drawImage:image atPoint:aRect.origin fromRect:aRect];
+    
+    [nsContext restoreGraphicsState];
+}
+
+- (void)fillPathWithVerticalGradientFromColor:(NSColor *)inFgStartColor toColor:(NSColor *)inFgEndColor blendedAtRight:(BOOL)right ofHorizontalGradientFromColor:(NSColor *)inBgStartColor toColor:(NSColor *)inBgEndColor {
+    CIColor *fgStartColor = [CIColor colorWithNSColor:inFgStartColor];
+    CIColor *fgEndColor = [CIColor colorWithNSColor:inFgEndColor];
+    CIColor *bgStartColor = [CIColor colorWithNSColor:inBgStartColor];
+    CIColor *bgEndColor = [CIColor colorWithNSColor:inBgEndColor];
+    
+    NSRect bounds = [self bounds];
+    CGRect aRect = *(CGRect*)&bounds;
+    
+    CIImage *image = [CIImage imageInRect:aRect withVerticalGradientFromColor:fgStartColor toColor:fgEndColor blendedAtRight:right ofHorizontalGradientFromColor:bgStartColor toColor:bgEndColor];
+    
+    NSGraphicsContext *nsContext = [NSGraphicsContext currentContext];
+    [nsContext saveGraphicsState];
+    
+	[self addClip];
+	
+    [[nsContext CIContext] drawImage:image atPoint:aRect.origin fromRect:aRect];
+    
+    [nsContext restoreGraphicsState];
+}
+
+- (void)fillPathWithColor:(NSColor *)inFgColor blendedAtRight:(BOOL)right ofVerticalGradientFromColor:(NSColor *)inBgStartColor toColor:(NSColor *)inBgEndColor {
+    CIColor *fgColor = [CIColor colorWithNSColor:inFgColor];
+    CIColor *bgStartColor = [CIColor colorWithNSColor:inBgStartColor];
+    CIColor *bgEndColor = [CIColor colorWithNSColor:inBgEndColor];
+    
+    NSRect bounds = [self bounds];
+    CGRect aRect = *(CGRect*)&bounds;
+    
+    CIImage *image = [CIImage imageInRect:aRect withColor:fgColor blendedAtRight:right ofVerticalGradientFromColor:bgStartColor toColor:bgEndColor];
+    
+    NSGraphicsContext *nsContext = [NSGraphicsContext currentContext];
+    [nsContext saveGraphicsState];
+    
+	[self addClip];
+	
+    [[nsContext CIContext] drawImage:image atPoint:aRect.origin fromRect:aRect];
+    
+    [nsContext restoreGraphicsState];
+}
+
+- (void)fillPathWithColor:(NSColor *)inFgColor blendedAtTop:(BOOL)top ofHorizontalGradientFromColor:(NSColor *)inBgStartColor toColor:(NSColor *)inBgEndColor {
+    CIColor *fgColor = [CIColor colorWithNSColor:inFgColor];
+    CIColor *bgStartColor = [CIColor colorWithNSColor:inBgStartColor];
+    CIColor *bgEndColor = [CIColor colorWithNSColor:inBgEndColor];
+    
+    NSRect bounds = [self bounds];
+    CGRect aRect = *(CGRect*)&bounds;
+    
+    CIImage *image = [CIImage imageInRect:aRect withColor:fgColor blendedAtTop:top ofHorizontalGradientFromColor:bgStartColor toColor:bgEndColor];
+    
+    NSGraphicsContext *nsContext = [NSGraphicsContext currentContext];
+    [nsContext saveGraphicsState];
+    
+	[self addClip];
+	
+    [[nsContext CIContext] drawImage:image atPoint:aRect.origin fromRect:aRect];
+    
+    [nsContext restoreGraphicsState];
 }
 
 @end
