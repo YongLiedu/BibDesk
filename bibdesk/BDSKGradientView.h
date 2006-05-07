@@ -41,11 +41,16 @@
 
 @interface BDSKGradientView : NSView
 {
+    @private;
     NSColor *startColor;
     NSColor *endColor;
 }
 
 - (void)setLowerColor:(NSColor *)color;
 - (void)setUpperColor:(NSColor *)color;
+
+// for subclassers
+- (NSColor *)lowerColor;
+- (NSColor *)upperColor;
 
 @end

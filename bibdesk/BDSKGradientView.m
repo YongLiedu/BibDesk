@@ -39,19 +39,17 @@
 #import "BDSKGradientView.h"
 #import "NSBezierPath_CoreImageExtensions.h"
 
-@implementation BDSKGradientView
+@interface BDSKGradientView (Private)
 
-- (void)setDefaultColors
-{
-    [self setLowerColor:[NSColor gridColor]];
-    [self setUpperColor:[NSColor headerColor]];
-}
+- (void)setDefaultColors;
+
+@end
+
+@implementation BDSKGradientView
 
 - (id)initWithFrame:(NSRect)frame
 {
-    if([super initWithFrame:frame] == nil)
-        return nil;
-
+    self = [super initWithFrame:frame];
     [self setDefaultColors];
     return self;
 }
@@ -60,7 +58,7 @@
 {
     if(floor(NSAppKitVersionNumber) > NSAppKitVersionNumber10_3){
         // fill entire view, not just the (possibly clipped) aRect
-		[[NSBezierPath bezierPathWithRect:[self bounds]] fillPathVerticallyWithStartColor:startColor endColor:endColor];
+		[[NSBezierPath bezierPathWithRect:[self bounds]] fillPathVerticallyWithStartColor:[self upperColor] endColor:[self lowerColor]];
 	}
 }
 
@@ -80,12 +78,28 @@
     }
 }    
 
+- (NSColor *)lowerColor { return endColor; }
+- (NSColor *)upperColor { return startColor; }
+
 // required in order for redisplay to work properly with the controls
 - (BOOL)isOpaque{ 
     if(floor(NSAppKitVersionNumber) > NSAppKitVersionNumber10_3){
 		return YES;
 	}
 	return NO;
+}
+
+- (BOOL)isFlipped { return NO; }
+
+@end
+
+@implementation BDSKGradientView (Private)
+
+// provides an example implementation
+- (void)setDefaultColors
+{
+    [self setLowerColor:[NSColor gridColor]];
+    [self setUpperColor:[NSColor headerColor]];
 }
 
 @end

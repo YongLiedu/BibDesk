@@ -85,10 +85,14 @@
 	[super dealloc];
 }
 
-- (void)setDefaultColors
+- (NSColor *)upperColor
 {
-    [self setUpperColor:[[self class] upperColor]];
-    [self setLowerColor:[[self class] lowerColor]];
+    return [[self class] upperColor];
+}
+
+- (NSColor *)lowerColor
+{
+    return [[self class] lowerColor];
 }
 
 - (void)drawRect:(NSRect)rect {
