@@ -42,7 +42,6 @@
 @implementation BDSKSpotlightView;
 
 static NSColor *maskColor = nil;
-static CIFilter *gaussianFilter = nil;
 static CIFilter *shiftFilter = nil;
 static CIFilter *cropFilter = nil;
 
@@ -50,10 +49,10 @@ static CIFilter *cropFilter = nil;
 {
     static BOOL alreadyInit = NO;
     if(NO == alreadyInit){
-        gaussianFilter = [[CIFilter filterWithName:@"CIGaussianBlur"] retain];    
         maskColor = [[[NSColor blackColor] colorWithAlphaComponent:0.3] retain];
         shiftFilter = [[CIFilter filterWithName:@"CIAffineTransform"] retain];
         cropFilter = [[CIFilter filterWithName:@"CICrop"] retain];
+        alreadyInit = YES;
     }
 }
 
@@ -118,14 +117,13 @@ static CIFilter *cropFilter = nil;
     int radius = MIN([highlightRects count], maximumBlur);
     
     // apply the blur filter to soften the edges of the circles
-    [gaussianFilter setValue:[NSNumber numberWithInt:radius] forKey:@"inputRadius"];
-    [gaussianFilter setValue:ciImage forKey:@"inputImage"];
+    CIImage *blurredImage = [ciImage blurredImageWithBlurRadius:radius];
     [ciImage release];
 
     // shift the image back
     [transform invert];
     [shiftFilter setValue:transform forKey:@"inputTransform"];
-    [shiftFilter setValue:[gaussianFilter valueForKey:@"outputImage"] forKey:@"inputImage"];
+    [shiftFilter setValue:blurredImage forKey:@"inputImage"];
 
     // crop to the original bounds size
     CIVector *cropVector = [CIVector vectorWithX:0 Y:0 Z:NSWidth(aRect) W:NSHeight(aRect)];
