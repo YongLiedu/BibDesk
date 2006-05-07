@@ -48,15 +48,15 @@
 
 + (NSColor *)lowerColor{
     static NSColor *lowerColor = nil;
-    if (lowerColor = nil)
-        lowerColor = [[NSColor colorWithCalibratedWhite:0.9 alpha:1.0] retain];
+    if (lowerColor == nil)
+        lowerColor = [[NSColor colorWithCalibratedWhite:0.75 alpha:1.0] retain];
     return lowerColor;
 }
 
 + (NSColor *)upperColor{
     static NSColor *upperColor = nil;
-    if (upperColor = nil)
-        upperColor = [[NSColor colorWithCalibratedWhite:0.75 alpha:1.0] retain];
+    if (upperColor == nil)
+        upperColor = [[NSColor colorWithCalibratedWhite:0.9 alpha:1.0] retain];
     return upperColor;
 }
 
