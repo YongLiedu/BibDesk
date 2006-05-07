@@ -46,6 +46,8 @@ static CIFilter *linearFilter = nil;
 static CIFilter *gaussianFilter = nil;
 static CIFilter *blendFilter = nil;
 static CIFilter *gaussianBlurFilter = nil;
+static CIFilter *transformFilter = nil;
+static CIFilter *cropFilter = nil;
 
 + (void)initialize
 {
@@ -56,6 +58,8 @@ static CIFilter *gaussianBlurFilter = nil;
         gaussianFilter = [[CIFilter filterWithName:@"CIGaussianGradient"] retain];    
         blendFilter = [[CIFilter filterWithName:@"CIBlendWithMask"] retain];    
         gaussianBlurFilter = [[CIFilter filterWithName:@"CIGaussianBlur"] retain];    
+        transformFilter = [[CIFilter filterWithName:@"CIAffineTransform"] retain];
+        cropFilter = [[CIFilter filterWithName:@"CICrop"] retain];
         alreadyInit = YES;
     }
 }
@@ -159,7 +163,6 @@ static CIFilter *gaussianBlurFilter = nil;
 
 - (CIImage *)blendedImageWithBackground:(CIImage *)background usingMask:(CIImage *)mask;
 {
-    
     [blendFilter setValue:self forKey:@"inputImage"];
     [blendFilter setValue:background forKey:@"inputBackgroundImage"];
     [blendFilter setValue:mask forKey:@"inputMaskImage"];
@@ -173,6 +176,28 @@ static CIFilter *gaussianBlurFilter = nil;
     [gaussianBlurFilter setValue:self forKey:@"inputImage"];
     
     return [gaussianBlurFilter valueForKey:@"outputImage"];
+}
+
+- (CIImage *)croppedImageWithRect:(CGRect)aRect;
+{
+    CIImage *image = self;
+    
+    if (CGPointEqualToPoint(aRect.origin, CGPointZero) == NO) {
+        // shift the cropped rect to the origin
+        NSAffineTransform *transform = [NSAffineTransform transform];
+        [transform translateXBy:-CGRectGetMinX(aRect) yBy:-CGRectGetMinY(aRect)];
+        [transformFilter setValue:transform forKey:@"inputTransform"];
+        [transformFilter setValue:self forKey:@"inputImage"];
+        
+        image = [transformFilter valueForKey:@"outputImage"];
+    }
+    
+    CIVector *cropVector = [CIVector vectorWithX:0 Y:0 Z:CGRectGetWidth(aRect) W:CGRectGetHeight(aRect)];
+    
+    [cropFilter setValue:cropVector forKey:@"inputRectangle"];
+    [cropFilter setValue:image forKey:@"inputImage"];
+    
+    return [cropFilter valueForKey:@"outputImage"];
 }
 
 @end 

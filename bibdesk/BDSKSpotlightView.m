@@ -43,16 +43,12 @@
 @implementation BDSKSpotlightView;
 
 static NSColor *maskColor = nil;
-static CIFilter *shiftFilter = nil;
-static CIFilter *cropFilter = nil;
 
 + (void)initialize
 {
     static BOOL alreadyInit = NO;
     if(NO == alreadyInit){
         maskColor = [[[NSColor blackColor] colorWithAlphaComponent:0.3] retain];
-        shiftFilter = [[CIFilter filterWithName:@"CIAffineTransform"] retain];
-        cropFilter = [[CIFilter filterWithName:@"CICrop"] retain];
         alreadyInit = YES;
     }
 }
@@ -120,18 +116,12 @@ static CIFilter *cropFilter = nil;
     // apply the blur filter to soften the edges of the circles
     CIImage *blurredImage = [ciImage blurredImageWithBlurRadius:radius];
     [ciImage release];
+    
+    // crop to the original bounds size, this also shifts it back to the origin
+    aRect.origin = NSMakePoint(blurPadding, blurPadding);
+    ciImage = [blurredImage croppedImageWithRect:*(CGRect*)&aRect];
 
-    // shift the image back
-    [transform invert];
-    [shiftFilter setValue:transform forKey:@"inputTransform"];
-    [shiftFilter setValue:blurredImage forKey:@"inputImage"];
-
-    // crop to the original bounds size
-    CIVector *cropVector = [CIVector vectorWithX:0 Y:0 Z:NSWidth(aRect) W:NSHeight(aRect)];
-    [cropFilter setValue:cropVector forKey:@"inputRectangle"];
-    [cropFilter setValue:[shiftFilter valueForKey:@"outputImage"] forKey:@"inputImage"];
-
-    return [cropFilter valueForKey:@"outputImage"];
+    return ciImage;
 }
 
 // sys prefs draws solid black for no matches, so we'll do the same

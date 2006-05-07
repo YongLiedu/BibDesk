@@ -53,6 +53,7 @@
 
 - (CIImage *)blendedImageWithBackground:(CIImage *)background usingMask:(CIImage *)mask;
 - (CIImage *)blurredImageWithBlurRadius:(float)radius;
+- (CIImage *)croppedImageWithRect:(CGRect)aRect;
 
 @end
 
