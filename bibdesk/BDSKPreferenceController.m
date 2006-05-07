@@ -130,18 +130,27 @@ static NSRect insetButtonRectAndShift(const NSRect aRect)
     NSPoint center = NSMakePoint(NSMidX(aRect), NSMidY(aRect));
     
     // raise to account for the text; this is the button rect
+    // @@ resolution independence
     center.y += 10;
     
     return NSInsetRect(NSMakeRect(center.x - side/2, center.y - side/2, side, side), 10, 10);
 }
 
-- (NSArray *)highlightRects;
+static inline NSRect convertRectInWindowToScreen(NSRect aRect, NSWindow *window)
+{
+    NSPoint pt = [window convertBaseToScreen:aRect.origin];
+    aRect.origin = pt;
+    return aRect;
+}
+
+- (NSArray *)highlightRectsInScreenCoordinates;
 {
     // we have an array of OAPreferencesIconViews; one per category (row)
     NSEnumerator *viewE = [preferencesIconViews objectEnumerator];
     OAPreferencesIconView *view;
     NSMutableArray *rectArray = [NSMutableArray arrayWithCapacity:10];
-
+    NSWindow *theWindow = [self window];
+    
     while(view = [viewE nextObject]){
         
         // get the preference client records; these are basically plists for each pref pane
@@ -164,8 +173,8 @@ static NSRect insetButtonRectAndShift(const NSRect aRect)
                 // this is a private method, but declared in the header
                 NSRect rect = [view _boundsForIndex:i];
                 
-                // convert from view-local to window coordinates
-                rect = [view convertRect:rect toView:nil];
+                // convert to screen coordinates
+                rect = convertRectInWindowToScreen([view convertRect:rect toView:nil], theWindow);
                 [rectArray addObject:[NSValue valueWithRect:insetButtonRectAndShift(rect)]];
             }
         }

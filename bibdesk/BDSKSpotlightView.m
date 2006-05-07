@@ -69,7 +69,7 @@ static NSColor *maskColor = nil;
 
 - (CIImage *)spotlightMaskImageWithFrame:(NSRect)aRect
 {
-    NSArray *highlightRects = [delegate highlightRects];
+    NSArray *highlightRects = [delegate highlightRectsInScreenCoordinates];
     
     // array of NSValue objects; aRect and highlightRects should have same coordinate system
     NSEnumerator *rectEnum = [highlightRects objectEnumerator];
@@ -85,30 +85,51 @@ static NSColor *maskColor = nil;
     // this causes the paths we append to act as holes in the overall path
     [path setWindingRule:NSEvenOddWindingRule];
     
+    NSRect holeRect;
+    NSPoint baseOrigin;
+    NSWindow *window = [self window];
+    
     while(value = [rectEnum nextObject]){
-        [path appendBezierPathWithOvalInRect:[value rectValue]];
+        holeRect = [value rectValue];
+        baseOrigin = [window convertScreenToBase:holeRect.origin];
+        holeRect.origin = baseOrigin;
+        [path appendBezierPathWithOvalInRect:holeRect];
     }
     
     // we need to shift because canvas of the image is at positive values
     NSAffineTransform *transform = [NSAffineTransform transform];
     [transform translateXBy:blurPadding yBy:blurPadding];
     [path transformUsingAffineTransform:transform];
+        
+    // @@ resolution independence:  drawing to an NSImage and then creating the CIImage with -[NSImage TIFFRepresentation] gives an incorrect CIImage extent when display scaling is turned on, probably due to NSCachedImageRep.  Drawing directly to an NSBitmapImageRep gives the correct overall size, but the hole locations are off.
+    NSBitmapImageRep* offscreenRep = nil;    
+    offscreenRep = [[NSBitmapImageRep alloc] initWithBitmapDataPlanes:NULL
+                                                           pixelsWide:NSWidth(maskRect) 
+                                                           pixelsHigh:NSHeight(maskRect)
+                                                        bitsPerSample:8 
+                                                      samplesPerPixel:4 
+                                                             hasAlpha:YES 
+                                                             isPlanar:NO 
+                                                       colorSpaceName:NSCalibratedRGBColorSpace 
+                                                         bitmapFormat:0 
+                                                          bytesPerRow:(4 * NSWidth(maskRect)) 
+                                                         bitsPerPixel:32];
     
-    NSImage *nsImage = [[NSImage alloc] initWithSize:maskRect.size];
-
-    [nsImage lockFocus];
-    NSGraphicsContext *nsContext = [NSGraphicsContext currentContext];
-    [nsContext saveGraphicsState];
+    [NSGraphicsContext saveGraphicsState];
+    [NSGraphicsContext setCurrentContext:[NSGraphicsContext graphicsContextWithBitmapImageRep:offscreenRep]];
     
-    // fill the mask with black
+    // fill the entire space with clear
+    [[NSColor clearColor] setFill];
+    NSRectFill(maskRect);
+    
+    // draw the mask
     [maskColor setFill];
     [path fill];
     
-    [nsContext restoreGraphicsState];
-    [nsImage unlockFocus];
-
-    CIImage *ciImage = [[CIImage alloc] initWithData:[nsImage TIFFRepresentation]];
-    [nsImage release];
+    [NSGraphicsContext restoreGraphicsState];
+    
+    CIImage *ciImage = [[CIImage alloc] initWithData:[offscreenRep TIFFRepresentation]];
+    [offscreenRep release];
     
     // sys prefs uses fuzzier circles for more matches; filter range 0 -- 100, values 0 -- 10 are reasonable?
     float radius = MIN([highlightRects count], maximumBlur);
@@ -119,7 +140,7 @@ static NSColor *maskColor = nil;
     
     // crop to the original bounds size, this also shifts it back to the origin
     aRect.origin = NSMakePoint(blurPadding, blurPadding);
-    ciImage = [blurredImage croppedImageWithRect:*(CGRect*)&aRect];
+    ciImage = [blurredImage croppedImageWithRect:*(CGRect *)&aRect];
 
     return ciImage;
 }

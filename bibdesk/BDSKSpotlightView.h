@@ -40,7 +40,7 @@
 
 @protocol BDSKSpotlightViewDelegate <NSObject>
 
-- (NSArray *)highlightRects;
+- (NSArray *)highlightRectsInScreenCoordinates;
 - (BOOL)isSearchActive;
 
 @end
