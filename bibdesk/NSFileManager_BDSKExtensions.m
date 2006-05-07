@@ -368,7 +368,7 @@ static OSType finderSignatureBytes = 'MACS';
     BOOL success = YES;
     NSAppleEventDescriptor *commentTextDesc;
     OSErr err;
-    AEDesc fileDesc, builtEvent, replyEvent;
+    AEDesc fileDesc, builtEvent;
     const char *eventFormat =
         "'----': 'obj '{ "         // Direct object is the file comment we want to modify
         "  form: enum(prop), "     //  ... the comment is an object's property...
@@ -390,7 +390,6 @@ static OSType finderSignatureBytes = 'MACS';
     if (err == noErr) {
 
         AEInitializeDesc(&builtEvent);
-        AEInitializeDesc(&replyEvent);
         err = AEBuildAppleEvent(kAECoreSuite, kAESetData,
                                 typeApplSignature, &finderSignatureBytes, sizeof(finderSignatureBytes),
                                 kAutoGenerateReturnID, kAnyTransactionID,
@@ -400,14 +399,10 @@ static OSType finderSignatureBytes = 'MACS';
 
         AEDisposeDesc(&fileDesc);
 
-        if (err == noErr) {
-            err = AESend(&builtEvent, &replyEvent,
-                         kAENoReply, kAENormalPriority, kAEDefaultTimeout,
-                         NULL, NULL);
+        if (err == noErr)
+            err = AESendMessage(&builtEvent, NULL, kAENoReply, kAEDefaultTimeout);
 
-            AEDisposeDesc(&builtEvent);
-            AEDisposeDesc(&replyEvent);
-        }
+        AEDisposeDesc(&builtEvent);
     }
     
     if (err != noErr) {
@@ -459,9 +454,8 @@ static OSType finderSignatureBytes = 'MACS';
     
     AEDisposeDesc(&fileDesc);
     
-    // AESend is the only function called in this method that is not thread safe
     if(noErr == err)
-        err = AESend(&builtEvent, &replyEvent, kAEWaitReply, kAENormalPriority, kAEDefaultTimeout, NULL, NULL);
+        err = AESendMessage(&builtEvent, &replyEvent, kAEWaitReply, kAEDefaultTimeout);
     AEDisposeDesc(&builtEvent);
     
 	AEDesc replyDesc;
