@@ -276,8 +276,8 @@ NSString *BDSKWeblocFilePboardType = @"CorePasteboardFlavorType 0x75726C20";
     
     [groupCollapsibleView setCollapseEdges:BDSKMinXEdgeMask];
     [groupCollapsibleView setMinSize:NSMakeSize(56.0, 20.0)];
-    [groupGradientView setUpperColor:[NSColor colorWithCalibratedWhite:0.75 alpha:1.0]];
-    [groupGradientView setLowerColor:[NSColor colorWithCalibratedWhite:0.9 alpha:1.0]];
+    [groupGradientView setUpperColor:[NSColor colorWithCalibratedWhite:0.9 alpha:1.0]];
+    [groupGradientView setLowerColor:[NSColor colorWithCalibratedWhite:0.75 alpha:1.0]];
 
     // make sure they are ordered correctly, mainly for the focus ring
 	[groupCollapsibleView retain];

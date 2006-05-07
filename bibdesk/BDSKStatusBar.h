@@ -54,6 +54,9 @@ typedef enum {
 	id delegate;
 }
 
++ (NSColor *)lowerColor;
++ (NSColor *)upperColor;
+
 /*!
 	@method toggleBelowView:offset:
 	@abstract Toggles the visibility of the status bar in the window, resizes the view to cover or open up the frame occupied by the receiver.

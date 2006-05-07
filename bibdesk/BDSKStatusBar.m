@@ -46,6 +46,20 @@
 
 @implementation BDSKStatusBar
 
++ (NSColor *)lowerColor{
+    static NSColor *lowerColor = nil;
+    if (lowerColor = nil)
+        lowerColor = [[NSColor colorWithCalibratedWhite:0.9 alpha:1.0] retain];
+    return lowerColor;
+}
+
++ (NSColor *)upperColor{
+    static NSColor *upperColor = nil;
+    if (upperColor = nil)
+        upperColor = [[NSColor colorWithCalibratedWhite:0.75 alpha:1.0] retain];
+    return upperColor;
+}
+
 - (id)initWithFrame:(NSRect)frame {
     self = [super initWithFrame:frame];
     if (self) {
@@ -60,8 +74,6 @@
 		
 		delegate = nil;
 		
-        [self setUpperColor:[NSColor colorWithCalibratedWhite:0.75 alpha:1.0]];
-        [self setLowerColor:[NSColor colorWithCalibratedWhite:0.9 alpha:1.0]];
     }
     return self;
 }
@@ -71,6 +83,12 @@
 	[iconCell release];
 	[icons release];
 	[super dealloc];
+}
+
+- (void)setDefaultColors
+{
+    [self setUpperColor:[[self class] upperColor]];
+    [self setLowerColor:[[self class] lowerColor]];
 }
 
 - (void)drawRect:(NSRect)rect {

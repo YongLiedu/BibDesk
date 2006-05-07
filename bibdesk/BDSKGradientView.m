@@ -43,8 +43,8 @@
 
 - (void)setDefaultColors
 {
-    [self setLowerColor:[NSColor headerColor]];
-    [self setUpperColor:[NSColor gridColor]];
+    [self setLowerColor:[NSColor gridColor]];
+    [self setUpperColor:[NSColor headerColor]];
 }
 
 - (id)initWithFrame:(NSRect)frame
@@ -66,17 +66,17 @@
 
 - (void)setLowerColor:(NSColor *)color
 {
-    if(startColor != color){
-        [startColor release];
-        startColor = [color retain];
+    if(endColor != color){
+        [endColor release];
+        endColor = [color retain];
     }
 }
 
 - (void)setUpperColor:(NSColor *)color
 {
-    if(endColor != color){
-        [endColor release];
-        endColor = [color retain];
+    if(startColor != color){
+        [startColor release];
+        startColor = [color retain];
     }
 }    
 
