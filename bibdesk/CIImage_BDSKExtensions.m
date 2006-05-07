@@ -169,7 +169,7 @@ static CIFilter *gaussianBlurFilter = nil;
 
 - (CIImage *)blurredImageWithBlurRadius:(float)radius;
 {
-    [gaussianBlurFilter setValue:[NSNumber numberWithInt:radius] forKey:@"inputRadius"];
+    [gaussianBlurFilter setValue:[NSNumber numberWithFloat:radius] forKey:@"inputRadius"];
     [gaussianBlurFilter setValue:self forKey:@"inputImage"];
     
     return [gaussianBlurFilter valueForKey:@"outputImage"];
