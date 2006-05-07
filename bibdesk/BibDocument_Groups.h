@@ -96,6 +96,7 @@
 - (IBAction)sortGroupsByGroup:(id)sender;
 - (IBAction)sortGroupsByCount:(id)sender;
 - (void)addSmartGroupAction:(id)sender;
+- (void)addStaticGroupAction:(id)sender;
 - (void)removeSelectedGroups:(id)sender;
 - (void)editGroupAction:(id)sender;
 - (void)renameGroupAction:(id)sender;

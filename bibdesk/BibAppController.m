@@ -757,7 +757,7 @@
     doc = [self openUntitledDocumentOfType:@"bibTeX database" display:NO];
     [doc setFileName:filePath]; // required for error handling; mark it dirty, so it's obviously modified
     [doc setFileType:@"bibTeX database"];  // this looks redundant, but it's necessary to enable saving the file (at least on AppKit == 10.3)
-    BOOL success = [doc loadBibTeXDataRepresentation:data fromURL:[NSURL fileURLWithPath:filePath] encoding:encoding error:NULL];
+    [doc loadBibTeXDataRepresentation:data fromURL:[NSURL fileURLWithPath:filePath] encoding:encoding error:NULL];
     [doc showWindows];
     
     // mark as dirty, since we've changed the cite keys
