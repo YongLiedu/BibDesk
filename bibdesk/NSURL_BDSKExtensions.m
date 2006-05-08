@@ -116,7 +116,7 @@ CFURLRef BDCopyFileURLResolvingAliases(CFURLRef fileURL)
     }
     @catch(id exception){
         if(exception == BDSKAliasResolutionException){
-            // dispose of the unresolvable fileURL, and set it to point to the original URL (could just return originalURL here, but that's more confusing to read)
+            // dispose of the unresolvable fileURL and return NULL in case of error
             CFRelease(fileURL);
             return NULL;
         } else {
