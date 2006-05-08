@@ -49,8 +49,9 @@ static CIFilter *gaussianBlurFilter = nil;
 static CIFilter *transformFilter = nil;
 static CIFilter *cropFilter = nil;
 
-+ (void)initialize
++ (void)load
 {
+    NSAutoreleasePool *pool = [NSAutoreleasePool new];
     static BOOL alreadyInit = NO;
     if(NO == alreadyInit){
         colorFilter = [[CIFilter filterWithName:@"CIConstantColorGenerator"] retain];    
@@ -62,6 +63,7 @@ static CIFilter *cropFilter = nil;
         cropFilter = [[CIFilter filterWithName:@"CICrop"] retain];
         alreadyInit = YES;
     }
+    [pool release];
 }
 
 + (CIImage *)imageWithConstantColor:(CIColor *)color;
