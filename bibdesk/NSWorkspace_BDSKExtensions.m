@@ -49,7 +49,7 @@
     // Passing a nil argument is a misuse of this method, so don't do it.
     NSParameterAssert(fileURL != nil);
     NSParameterAssert(searchString != nil);
-    if(![fileURL isFileURL]) [NSException raise:NSInvalidArgumentException format:@"\"%@\" is not a valid file URL.", fileURL];
+    NSParameterAssert([fileURL isFileURL]);
     
     /*
      Modified after Apple sample code for FinderLaunch http://developer.apple.com/samplecode/FinderLaunch/FinderLaunch.html
@@ -57,28 +57,28 @@
      */
     
     OSStatus err = noErr;
-	AppleEvent theAEvent, theReply;
+	AppleEvent theAEvent;
 	AEAddressDesc fndrAddress;
 	AEDescList targetListDesc;
 	OSType fndrCreator;
 	AliasHandle targetAlias;    
     AEDesc searchText;
     
-	AECreateDesc(typeNull, NULL, 0, &theAEvent);
-	AECreateDesc(typeNull, NULL, 0, &fndrAddress);
-	AECreateDesc(typeNull, NULL, 0, &theReply);
-	AECreateDesc(typeNull, NULL, 0, &targetListDesc);
+    // initialize descriptors so we can safely dispose of them
+    AEInitializeDesc(&theAEvent);
+    AEInitializeDesc(&fndrAddress);
+    AEInitializeDesc(&targetListDesc);
+    AEInitializeDesc(&searchText);
 	targetAlias = NULL;
-    
 
     fileURL = [fileURL fileURLByResolvingAliases]; 
     OBASSERT(fileURL != nil);
     if(fileURL == nil)
-        return NO;
+        err = fnfErr;
     
     // Find the application that should open this file.  NB: we need to release this URL when we're done with it.
     CFURLRef appURL = NULL;
-	if (appURL == NULL)
+	if(noErr == err)
 		err = LSGetApplicationForURL((CFURLRef)fileURL, kLSRolesAll, NULL, &appURL);
 		
     
@@ -86,8 +86,9 @@
     if (err == noErr)
         err = LSOpenCFURLRef(appURL, NULL);
     
-    // Get the type info of the creator application from LS, so we know should receive the event; this is more reliable than getting the FInfo for the fileURL from FSGetCatalogInfo, which sometimes gives weird, invalid creator codes.
+    // Get the type info of the creator application from LS, so we know should receive the event
     LSItemInfoRecord lsRecord;
+    memset(&lsRecord, 0, sizeof(LSItemInfoRecord));
     
     if(err == noErr)
         err = LSCopyItemInfoForURL(appURL, kLSRequestTypeCreator, &lsRecord);
@@ -127,7 +128,7 @@
     // Was using BDAlias to get an AliasHandle, but it crashes if the file doesn't exist; we now check for that, and we'll create our own AliasHandle to be extra safe
     FSRef fileRef;
     if(CFURLGetFSRef((CFURLRef)fileURL, &fileRef) == NO)
-        err = fnfErr; // wild guess since CF is unhelpful here...should never happen, though, since we bailed if the alias couldn't be resolved
+        err = coreFoundationUnknownErr;
     
     if(err == noErr)
         err = FSNewAlias(NULL, &fileRef, &targetAlias);
@@ -144,14 +145,12 @@
     
     // Finally send the event
     if (err == noErr)
-        err = AESend(&theAEvent, &theReply, kAENoReply,
-                     kAENormalPriority, kAEDefaultTimeout, NULL, NULL);
+        AESendMessage(&theAEvent, NULL, kAENoReply, kAEDefaultTimeout);
     
     /* clean up and leave */
 	AEDisposeDesc(&targetListDesc);
 	AEDisposeDesc(&theAEvent);
 	AEDisposeDesc(&fndrAddress);
-	AEDisposeDesc(&theReply);
     AEDisposeDesc(&searchText);
 	
     return (err == noErr);
