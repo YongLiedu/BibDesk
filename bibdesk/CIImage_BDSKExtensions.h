@@ -43,16 +43,31 @@
 @interface CIImage (BDSKExtensions)
 
 + (CIImage *)imageWithConstantColor:(CIColor *)color;
+
+// the order of the colors is the opposite of the order of the points for some reason
 + (CIImage *)imageInRect:(CGRect)aRect withLinearGradientFromPoint:(CGPoint)startPoint toPoint:(CGPoint)endPoint fromColor:(CIColor *)startColor toColor:(CIColor *)endColor;
+
+// startColor is the color at the right
 + (CIImage *)imageInRect:(CGRect)aRect withHorizontalGradientFromColor:(CIColor *)startColor toColor:(CIColor *)endColor;
+
+// startColor is the color at the bottom
 + (CIImage *)imageInRect:(CGRect)aRect withVerticalGradientFromColor:(CIColor *)startColor toColor:(CIColor *)endColor;
+
+// startColor is the color at the center
++ (CIImage *)imageWithGaussianGradientWithCenter:(CGPoint)center radius:(float)radius fromColor:(CIColor *)startColor toColor:(CIColor *)endColor;
+
 + (CIImage *)imageInRect:(CGRect)aRect withHorizontalGradientFromColor:(CIColor *)fgStartColor toColor:(CIColor *)fgEndColor blendedAtTop:(BOOL)top ofVerticalGradientFromColor:(CIColor *)bgStartColor toColor:(CIColor *)bgEndColor;
+
 + (CIImage *)imageInRect:(CGRect)aRect withVerticalGradientFromColor:(CIColor *)fgStartColor toColor:(CIColor *)fgEndColor blendedAtRight:(BOOL)right ofHorizontalGradientFromColor:(CIColor *)bgStartColor toColor:(CIColor *)bgEndColor;
+
 + (CIImage *)imageInRect:(CGRect)aRect withColor:(CIColor *)fgColor blendedAtRight:(BOOL)right ofVerticalGradientFromColor:(CIColor *)bgStartColor toColor:(CIColor *)bgEndColor;
+
 + (CIImage *)imageInRect:(CGRect)aRect withColor:(CIColor *)fgColor blendedAtTop:(BOOL)top ofHorizontalGradientFromColor:(CIColor *)bgStartColor toColor:(CIColor *)bgEndColor;
 
 - (CIImage *)blendedImageWithBackground:(CIImage *)background usingMask:(CIImage *)mask;
+
 - (CIImage *)blurredImageWithBlurRadius:(float)radius;
+
 - (CIImage *)croppedImageWithRect:(CGRect)aRect;
 
 @end
@@ -61,6 +76,7 @@
 @interface CIColor (BDSKExtensions)
 
 + (CIColor *)colorWithWhite:(float)white;
+
 + (CIColor *)colorWithNSColor:(NSColor *)color;
 
 @end 
