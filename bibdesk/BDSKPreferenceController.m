@@ -42,20 +42,19 @@
 #import <OmniAppKit/NSToolbar-OAExtensions.h>
 #import <OmniAppKit/OAPreferenceClient.h>
 
-@interface NSArray (Search)
+@interface NSArray (PreferencesSearch)
 - (BOOL)containsCaseInsensitiveSubstring:(NSString *)substring;
 @end
 
-@implementation NSArray (Search)
+@implementation NSArray (PreferencesSearch)
 
 - (BOOL)containsCaseInsensitiveSubstring:(NSString *)substring;
 {
     unsigned idx = [self count];
-    id anObject;
-    Class NSStringClass = [NSString class];
+    NSString *aString;
     while(idx--){
-        anObject = [self objectAtIndex:idx];
-        if([anObject isKindOfClass:NSStringClass] && [anObject rangeOfString:substring options:NSCaseInsensitiveSearch].length > 0)
+        aString = [self objectAtIndex:idx];
+        if([aString rangeOfString:substring options:NSCaseInsensitiveSearch].length > 0)
             return YES;
     }
     return NO;
@@ -63,7 +62,7 @@
 
 @end
 
-@interface OAPreferenceController (PrivateOverride)
+@interface OAPreferenceController (PrivateMethods)
 - (void)_showAllIcons:(id)sender;
 @end
 
@@ -183,35 +182,18 @@ static inline NSRect convertRectInWindowToScreen(NSRect aRect, NSWindow *window)
     return rectArray;
 }
 
-// override this private method so we can add the searchfield to the toolbar item array (don't call super)
-- (void)_setupCustomizableToolbar;
+- (NSArray *)toolbarDefaultItemIdentifiers:(NSToolbar *)tb;
 {
-    NSArray *constantToolbarItems, *defaultClients;
-    NSMutableArray *allClients;
-    NSEnumerator *enumerator;
-    id aClientRecord;
-    
-    constantToolbarItems = [NSArray arrayWithObjects:@"OAPreferencesShowAll", @"OAPreferencesPrevious", @"OAPreferencesNext", NSToolbarSeparatorItemIdentifier, @"PreferencesSearchField", nil];
-    
-    defaultClients = [[NSUserDefaults standardUserDefaults] arrayForKey:@"FavoritePreferenceIdentifiers"];
-    
-    allClients = [[NSMutableArray alloc] initWithCapacity:[_clientRecords count]];
-    enumerator = [_clientRecords objectEnumerator];
-    while ((aClientRecord = [enumerator nextObject])) {
-        [allClients addObject:[(OAPreferenceClientRecord *)aClientRecord identifier]];
-    }
-    
-    defaultToolbarItems = [[constantToolbarItems arrayByAddingObjectsFromArray:defaultClients] retain];
-    allowedToolbarItems = [[constantToolbarItems arrayByAddingObjectsFromArray:allClients] retain];
-    
-    toolbar = [[NSToolbar alloc] initWithIdentifier:@"OAPreferenceIdentifiers"];
-    [toolbar setAllowsUserCustomization:YES];
-    [toolbar setAutosavesConfiguration:NO]; // Don't store the configured items or new items won't show up!
-    [toolbar setDelegate:self];
-    [toolbar setAlwaysCustomizableByDrag:YES];
-    [toolbar setShowsContextMenu:NO];
-    [window setToolbar:toolbar];
-    [toolbar setIndexOfFirstMovableItem:([constantToolbarItems count] - 1)];
+    NSMutableArray *array = [NSMutableArray arrayWithArray:[super toolbarDefaultItemIdentifiers:tb]];
+    [array addObject:@"PreferencesSearchField"];
+    return array;
+}
+
+- (NSArray *)toolbarAllowedItemIdentifiers:(NSToolbar *)tb;
+{
+    NSMutableArray *array = [NSMutableArray arrayWithArray:[super toolbarAllowedItemIdentifiers:tb]];
+    [array addObject:@"PreferencesSearchField"];
+    return array;
 }
 
 - (NSArray *)toolbarSelectableItemIdentifiers:(NSToolbar *)tb;
