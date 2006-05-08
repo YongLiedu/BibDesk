@@ -41,33 +41,12 @@
 
 @implementation CIImage (BDSKExtensions)
 
-static CIFilter *colorFilter = nil;
-static CIFilter *linearFilter = nil;
-static CIFilter *gaussianFilter = nil;
-static CIFilter *blendFilter = nil;
-static CIFilter *gaussianBlurFilter = nil;
-static CIFilter *transformFilter = nil;
-static CIFilter *cropFilter = nil;
-
-+ (void)load
-{
-    NSAutoreleasePool *pool = [NSAutoreleasePool new];
-    static BOOL alreadyInit = NO;
-    if(NO == alreadyInit){
-        colorFilter = [[CIFilter filterWithName:@"CIConstantColorGenerator"] retain];    
-        linearFilter = [[CIFilter filterWithName:@"CILinearGradient"] retain];    
-        gaussianFilter = [[CIFilter filterWithName:@"CIGaussianGradient"] retain];    
-        blendFilter = [[CIFilter filterWithName:@"CIBlendWithMask"] retain];    
-        gaussianBlurFilter = [[CIFilter filterWithName:@"CIGaussianBlur"] retain];    
-        transformFilter = [[CIFilter filterWithName:@"CIAffineTransform"] retain];
-        cropFilter = [[CIFilter filterWithName:@"CICrop"] retain];
-        alreadyInit = YES;
-    }
-    [pool release];
-}
-
 + (CIImage *)imageWithConstantColor:(CIColor *)color;
 {
+    static CIFilter *colorFilter = nil;
+    if (colorFilter == nil)
+        colorFilter = [[CIFilter filterWithName:@"CIConstantColorGenerator"] retain];    
+    
     [colorFilter setValue:color forKey:@"inputColor"];
     
     return [colorFilter valueForKey:@"outputImage"];
@@ -75,6 +54,10 @@ static CIFilter *cropFilter = nil;
 
 + (CIImage *)imageInRect:(CGRect)aRect withLinearGradientFromPoint:(CGPoint)startPoint toPoint:(CGPoint)endPoint fromColor:(CIColor *)startColor toColor:(CIColor *)endColor;
 {
+    static CIFilter *linearFilter = nil;
+    if (linearFilter == nil)
+        linearFilter = [[CIFilter filterWithName:@"CILinearGradient"] retain];    
+    
     [linearFilter setValue:startColor forKey:@"inputColor0"];
     [linearFilter setValue:endColor forKey:@"inputColor1"];
     
@@ -100,22 +83,29 @@ static CIFilter *cropFilter = nil;
     return [self imageInRect:aRect withLinearGradientFromPoint:startPoint toPoint:endPoint fromColor:startColor toColor:endColor];
 }
 
++ (CIImage *)imageWithGaussianGradientWithCenter:(CGPoint)center radius:(float)radius fromColor:(CIColor *)startColor toColor:(CIColor *)endColor;
+{
+    static CIFilter *gaussianFilter = nil;
+    if (gaussianFilter == nil)
+        gaussianFilter = [[CIFilter filterWithName:@"CIGaussianGradient"] retain];    
+    
+    [gaussianFilter setValue:startColor forKey:@"inputColor0"];
+    [gaussianFilter setValue:endColor forKey:@"inputColor1"];
+    
+    [gaussianFilter setValue:[NSNumber numberWithFloat:radius] forKey:@"inputRadius"];
+    [gaussianFilter setValue:[CIVector vectorWithX:center.x Y:center.y] forKey:@"inputCenter"];
+    
+    return [gaussianFilter valueForKey:@"outputImage"];
+}
+
 + (CIImage *)imageInRect:(CGRect)aRect withHorizontalGradientFromColor:(CIColor *)fgStartColor toColor:(CIColor *)fgEndColor blendedAtTop:(BOOL)top ofVerticalGradientFromColor:(CIColor *)bgStartColor toColor:(CIColor *)bgEndColor;
 {
     float radius = CGRectGetWidth(aRect) / 2;
-    
-    CIVector *centerVector = [CIVector vectorWithX:CGRectGetMidX(aRect) Y:(top ? CGRectGetMaxY(aRect) : CGRectGetMinY(aRect))];
-    
-    [gaussianFilter setValue:[CIColor colorWithWhite:1.0] forKey:@"inputColor0"];
-    [gaussianFilter setValue:[CIColor colorWithWhite:0.0] forKey:@"inputColor1"];
-    
-    [gaussianFilter setValue:[NSNumber numberWithFloat:radius] forKey:@"inputRadius"];
-    [gaussianFilter setValue:centerVector forKey:@"inputCenter"];
-    
-    CIImage *mask = [gaussianFilter valueForKey:@"outputImage"];
+    CGPoint center = CGPointMake(CGRectGetMidX(aRect), top ? CGRectGetMaxY(aRect) : CGRectGetMinY(aRect));
     
     CIImage *foreground = [self imageInRect:aRect withHorizontalGradientFromColor:fgStartColor toColor:fgEndColor];
     CIImage *background = [self imageInRect:aRect withVerticalGradientFromColor:bgStartColor toColor:bgEndColor];
+    CIImage *mask = [self imageWithGaussianGradientWithCenter:center radius:radius fromColor:[CIColor colorWithWhite:1.0] toColor:[CIColor colorWithWhite:0.0]];
     
     return [foreground blendedImageWithBackground:background usingMask:mask];
 }
@@ -123,18 +113,11 @@ static CIFilter *cropFilter = nil;
 + (CIImage *)imageInRect:(CGRect)aRect withVerticalGradientFromColor:(CIColor *)fgStartColor toColor:(CIColor *)fgEndColor blendedAtRight:(BOOL)right ofHorizontalGradientFromColor:(CIColor *)bgStartColor toColor:(CIColor *)bgEndColor;
 {
     float radius = CGRectGetHeight(aRect) / 2;
-    CIVector *centerVector = [CIVector vectorWithX:(right ? CGRectGetMaxX(aRect) : CGRectGetMinX(aRect)) Y:CGRectGetMidY(aRect)];
-    
-    [gaussianFilter setValue:[CIColor colorWithWhite:1.0] forKey:@"inputColor0"];
-    [gaussianFilter setValue:[CIColor colorWithWhite:0.0] forKey:@"inputColor1"];
-    
-    [gaussianFilter setValue:[NSNumber numberWithFloat:radius] forKey:@"inputRadius"];
-    [gaussianFilter setValue:centerVector forKey:@"inputCenter"];
-    
-    CIImage *mask = [gaussianFilter valueForKey:@"outputImage"];
+    CGPoint center = CGPointMake(right ? CGRectGetMaxX(aRect) : CGRectGetMinX(aRect), CGRectGetMidY(aRect));
     
     CIImage *foreground = [self imageInRect:aRect withVerticalGradientFromColor:fgStartColor toColor:fgEndColor];
     CIImage *background = [self imageInRect:aRect withHorizontalGradientFromColor:bgStartColor toColor:bgEndColor];
+    CIImage *mask = [self imageWithGaussianGradientWithCenter:center radius:radius fromColor:[CIColor colorWithWhite:1.0] toColor:[CIColor colorWithWhite:0.0]];
     
     return [foreground blendedImageWithBackground:background usingMask:mask];
 }
@@ -165,6 +148,10 @@ static CIFilter *cropFilter = nil;
 
 - (CIImage *)blendedImageWithBackground:(CIImage *)background usingMask:(CIImage *)mask;
 {
+    static CIFilter *blendFilter = nil;
+    if (blendFilter == nil)
+        blendFilter = [[CIFilter filterWithName:@"CIBlendWithMask"] retain];    
+    
     [blendFilter setValue:self forKey:@"inputImage"];
     [blendFilter setValue:background forKey:@"inputBackgroundImage"];
     [blendFilter setValue:mask forKey:@"inputMaskImage"];
@@ -174,6 +161,10 @@ static CIFilter *cropFilter = nil;
 
 - (CIImage *)blurredImageWithBlurRadius:(float)radius;
 {
+    static CIFilter *gaussianBlurFilter = nil;
+    if (gaussianBlurFilter == nil)
+        gaussianBlurFilter = [[CIFilter filterWithName:@"CIGaussianBlur"] retain];    
+    
     [gaussianBlurFilter setValue:[NSNumber numberWithFloat:radius] forKey:@"inputRadius"];
     [gaussianBlurFilter setValue:self forKey:@"inputImage"];
     
@@ -182,6 +173,13 @@ static CIFilter *cropFilter = nil;
 
 - (CIImage *)croppedImageWithRect:(CGRect)aRect;
 {
+    static CIFilter *transformFilter = nil;
+    static CIFilter *cropFilter = nil;
+    if (transformFilter == nil)
+        transformFilter = [[CIFilter filterWithName:@"CIAffineTransform"] retain];    
+    if (cropFilter == nil)
+        cropFilter = [[CIFilter filterWithName:@"CICrop"] retain];    
+    
     CIImage *image = self;
     
     if (CGPointEqualToPoint(aRect.origin, CGPointZero) == NO) {
