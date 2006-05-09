@@ -1429,7 +1429,7 @@ NSString *BDSKWeblocFilePboardType = @"CorePasteboardFlavorType 0x75726C20";
     NSMutableArray *files = [NSMutableArray array];
     
     while (pub = [e nextObject]) {
-        pubPath = [pub localURLPath];
+        pubPath = [pub localUrlPath];
         
         if([dfm fileExistsAtPath:pubPath])
             [files addObject:pubPath];

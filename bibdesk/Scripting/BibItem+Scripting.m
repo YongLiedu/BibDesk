@@ -195,7 +195,7 @@ Extra wrapping of the created and modified date methods to
 }
 
 - (NSString*) localURL {
-	NSString *localURL = [self localURLPath];
+	NSString *localURL = [self localUrlPath];
 	return localURL ? localURL : @"";
 }
 

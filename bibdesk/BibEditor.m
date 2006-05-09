@@ -105,7 +105,7 @@ static int numberOfOpenEditors = 0;
 }
 
 - (NSString *)representedFilename{
-    NSString *fname = [theBib localURLPath];
+    NSString *fname = [theBib localUrlPath];
     return fname ? fname : @"";
 }
 
@@ -922,7 +922,7 @@ static int numberOfOpenEditors = 0;
 	}
 	else if ([menuItem action] == @selector(consolidateLinkedFiles:)) {
 		[menuItem setTitle: NSLocalizedString(@"Consolidate Linked File", @"Consolidate Linked File")];
-		NSString *lurl = [theBib localURLPath];
+		NSString *lurl = [theBib localUrlPath];
 		return (lurl && [[NSFileManager defaultManager] fileExistsAtPath:lurl]);
 	}
 	else if ([menuItem action] == @selector(duplicateTitleToBooktitle:)) {
@@ -2425,7 +2425,7 @@ static int numberOfOpenEditors = 0;
 {
 	int requiredContent = [[documentSnoopButton selectedItem] tag];
 	int currentContent = drawerState & (BDSKDrawerStateTextMask | BDSKDrawerStateWebMask);
-    NSString *lurl = [theBib localURLPath];
+    NSString *lurl = [theBib localUrlPath];
     NSURL *rurl = [theBib remoteURL];
 	int state = requiredContent;
 	

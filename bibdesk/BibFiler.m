@@ -171,7 +171,7 @@ static BibFiler *sharedFiler = nil;
 		if(initial){
 			// autofile action: an array of BibItems
 			paper = (BibItem *)paperInfo;
-			path = [paper localURLPathInheriting:NO];
+			path = [paper localUrlPathInheriting:NO];
 			newPath = [[NSURL URLWithString:[paper suggestedLocalUrl]] path];
 		}else{
 			// undo: a list of info dictionaries. We should move the file back!

@@ -1935,11 +1935,11 @@ static NSParagraphStyle* bodyParagraphStyle = nil;
     return [NSURL URLWithStringByNormalizingPercentEscapes:value baseURL:baseURL];
 }
 
-- (NSString *)localURLPath{
-	return [self localURLPathInheriting:YES];
+- (NSString *)localUrlPath{
+	return [self localUrlPathInheriting:YES];
 }
 
-- (NSString *)localURLPathInheriting:(BOOL)inherit{
+- (NSString *)localUrlPathInheriting:(BOOL)inherit{
 	return [self localFilePathForField:BDSKLocalUrlString relativeTo:[[document fileName] stringByDeletingLastPathComponent] inherit:inherit];
 }
 
@@ -2045,7 +2045,7 @@ static NSParagraphStyle* bodyParagraphStyle = nil;
 - (BOOL)autoFilePaper
 {
     // we can't autofile if it's disabled or there is nothing to file
-	if ([[OFPreferenceWrapper sharedPreferenceWrapper] boolForKey:BDSKFilePapersAutomaticallyKey] == NO || [self localURLPath] == nil)
+	if ([[OFPreferenceWrapper sharedPreferenceWrapper] boolForKey:BDSKFilePapersAutomaticallyKey] == NO || [self localUrlPath] == nil)
 		return NO;
 	
 	if ([self canSetLocalUrl]) {

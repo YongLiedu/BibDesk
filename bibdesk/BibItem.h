@@ -716,21 +716,21 @@
 - (NSURL *)remoteURLForField:(NSString *)field;
 
 /*!
-    @method     localURLPath
-    @abstract   Calls localURLPathInheriting: with inherit set to YES. 
+    @method     localUrlPath
+    @abstract   Calls localUrlPathInheriting: with inherit set to YES. 
     @discussion -
     @result     a complete path with no tildes, or nil if an error occurred.
 */
-- (NSString *)localURLPath; 
+- (NSString *)localUrlPath; 
 
 /*!
-    @method     localURLPathInheriting:
+    @method     localUrlPathInheriting:
     @abstract   Calls localFilePathForField:relativeTo:inherit: with the Local-Url field and the path to the document.
 	@param      inherit Boolean, if set follows the Crossref to find inherited date.
     @discussion -
     @result     a complete path with no tildes, or nil if an error occurred.
 */
-- (NSString *)localURLPathInheriting:(BOOL)inherit;
+- (NSString *)localUrlPathInheriting:(BOOL)inherit;
 
 /*!
     @method     localFilePathForField:
