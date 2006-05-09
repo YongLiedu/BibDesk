@@ -216,6 +216,7 @@ static inline BOOL hasValidPercentEscapeFromIndex(NSString *string, unsigned sta
             urlString = [self URLStringFromRange:&range inString:string];
             url = urlString ? [[NSURL alloc] initWithString:urlString] : nil;
             if([url scheme]) [textStorage addAttribute:NSLinkAttributeName value:url range:range];
+            [url release];
         }
         
     } while (range.length);
