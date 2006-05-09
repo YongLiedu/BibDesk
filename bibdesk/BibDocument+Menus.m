@@ -550,8 +550,12 @@
 	return YES;
 }
 
+- (BOOL)validateSortForCrossrefsMenuItem:(NSMenuItem *)menuItem{
+    return ([self hasSharedGroupsSelected] == NO);
+}
+
 - (BOOL)validateSelectCrossrefParentMenuItem:(NSMenuItem *)menuItem{
-    if([self numberOfSelectedPubs] == 1){
+    if([self numberOfSelectedPubs] == 1 && [self hasSharedGroupsSelected] == NO){
         BibItem *selectedBI = [[self selectedPublications] objectAtIndex:0];
         if(![NSString isEmptyString:[selectedBI valueOfField:BDSKCrossrefString inherit:NO]])
             return YES;
@@ -560,7 +564,7 @@
 }
 
 - (BOOL)validateCreateNewPubUsingCrossrefMenuItem:(NSMenuItem *)menuItem{
-    if([self numberOfSelectedPubs] == 1){
+    if([self numberOfSelectedPubs] == 1 && [self hasSharedGroupsSelected] == NO){
         BibItem *selectedBI = [[self selectedPublications] objectAtIndex:0];
         
         // only valid if the selected pub (parent-to-be) doesn't have a crossref field
@@ -705,9 +709,13 @@
     return ([documentWindow isKeyWindow] == YES);
 }
 
+- (BOOL) validateSelectDuplicatesMenuItem:(NSMenuItem *)menuItem{
+    return ([self hasSharedGroupsSelected] == NO);
+}
+
 - (BOOL) validateSelectPossibleDuplicatesMenuItem:(NSMenuItem *)menuItem{
     [menuItem setTitle:[NSLocalizedString(@"Select Duplicates by ", @"for selecting duplicate publications; requires a single trailing space") stringByAppendingString:[lastSelectedColumnForSort identifier]]];
-    return YES;
+    return ([self hasSharedGroupsSelected] == NO);
 }
 
 - (BOOL)validateFindPanelActionMenuItem:(NSMenuItem *)menuItem {
@@ -832,6 +840,9 @@
 	else if (act == @selector(importFromWebAction:)) {
 		return [self validateNewPubFromWebMenuItem:menuItem];
 	}
+	else if (act == @selector(sortForCrossrefs:)) {
+        return [self validateSortForCrossrefsMenuItem:menuItem];
+	}
 	else if (act == @selector(selectCrossrefParentAction:)) {
         return [self validateSelectCrossrefParentMenuItem:menuItem];
 	}
@@ -878,6 +889,9 @@
     }
 	else if (act == @selector(selectAllPublicationsGroup:)){
         return [self validateSelectAllPublicationsGroupMenuItem:menuItem];
+    }
+	else if (act == @selector(selectDuplicates:)){
+        return [self validateSelectDuplicatesMenuItem:menuItem];
     }
 	else if (act == @selector(selectPossibleDuplicates:)){
         return [self validateSelectPossibleDuplicatesMenuItem:menuItem];
