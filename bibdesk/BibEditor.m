@@ -87,11 +87,12 @@ enum{
 - (id)initWithPostScriptData:(NSData *)data;
 @end
 
-@interface BibEditor (PrivateSetup)
+@interface BibEditor (Private)
 
 - (void)setupDrawer;
 - (void)setupButtons;
 - (void)registerForNotifications;
+- (void)breakTextStorageConnections;
 
 @end
 
@@ -2725,6 +2726,9 @@ static int numberOfOpenEditors = 0;
 	[[BDSKScriptHookManager sharedManager] runScriptHookWithName:BDSKCloseEditorWindowScriptHookName 
 												 forPublications:[NSArray arrayWithObject:theBib]];
 	
+    // see method for notes
+    [self breakTextStorageConnections];
+    
     // @@ problem here:  BibEditor is the delegate for a lot of things, and if they get messaged before the window goes away, but after the editor goes away, we have crashes.  In particular, the finalizeChanges (or something?) ends up causing the window and form to be redisplayed if a form cell is selected when you close the window, and the form sends formCellHasArrowButton to a garbage editor.  Rather than set the delegate of all objects to nil here, we'll just hang around a bit longer.
     [[self retain] autorelease];
 }
@@ -2918,7 +2922,7 @@ static int numberOfOpenEditors = 0;
 
 @end
 
-@implementation BibEditor (PrivateSetup)
+@implementation BibEditor (Private)
 
 - (void)setupDrawer {
     
@@ -3031,6 +3035,22 @@ static int numberOfOpenEditors = 0;
 											 selector:@selector(macrosDidChange:)
 												 name:BDSKMacroDefinitionChangedNotification
 											   object:nil];
+}
+
+- (void)breakTextStorageConnections {
+    
+    // This is a fix for bug #1483613 (and others).  We set some of the BibItem's fields to -[[NSTextView textStorage] mutableString] for efficiency in tracking changes for live editing updates in the main window preview.  However, this causes a retain cycle, as the text storage retains its text view; any font changes to the editor text view will cause the retained textview to message its delegate (BibEditor) which is garbage in -[NSTextView _addToTypingAttributes].
+    NSSet *fields = [NSSet setWithObjects:BDSKAnnoteString, BDSKAbstractString, BDSKRssDescriptionString, nil];
+    NSEnumerator *fieldE = [fields objectEnumerator];
+    NSString *currentValue = nil;
+    NSString *fieldName = nil;
+    while(fieldName = [fieldE nextObject]){
+        currentValue = [[theBib valueOfField:fieldName] copy];
+        // set without undo, or we dirty the document every time the editor is closed
+        if(nil != currentValue)
+            [theBib setField:fieldName toValueWithoutUndo:currentValue];
+        [currentValue release];
+    }
 }
 
 @end
