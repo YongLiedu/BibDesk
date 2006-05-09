@@ -66,6 +66,8 @@
 - (void)_showAllIcons:(id)sender;
 @end
 
+static NSString *BDSKPreferencesSearchField = @"BDSKPreferencesSearchField";
+
 @implementation BDSKPreferenceController
 
 + (id)sharedPreferenceController;
@@ -118,6 +120,14 @@
 {
     [super showPreferencesPanel:sender];
     [overlayWindow orderFront:nil];
+    
+    // Sys Prefs gives focus to the search field when launching
+    NSEnumerator *tbEnumerator = [[[[self window] toolbar] items] objectEnumerator];
+    id anItem;
+    while(anItem = [tbEnumerator nextObject]){
+        if([[anItem itemIdentifier] isEqual:BDSKPreferencesSearchField])
+            [[self window] makeFirstResponder:[anItem view]];
+    }
 }
 
 - (BOOL)isSearchActive { return isSearchActive; }
@@ -185,21 +195,21 @@ static inline NSRect convertRectInWindowToScreen(NSRect aRect, NSWindow *window)
 - (NSArray *)toolbarDefaultItemIdentifiers:(NSToolbar *)tb;
 {
     NSMutableArray *array = [NSMutableArray arrayWithArray:[super toolbarDefaultItemIdentifiers:tb]];
-    [array addObject:@"PreferencesSearchField"];
+    [array addObject:BDSKPreferencesSearchField];
     return array;
 }
 
 - (NSArray *)toolbarAllowedItemIdentifiers:(NSToolbar *)tb;
 {
     NSMutableArray *array = [NSMutableArray arrayWithArray:[super toolbarAllowedItemIdentifiers:tb]];
-    [array addObject:@"PreferencesSearchField"];
+    [array addObject:BDSKPreferencesSearchField];
     return array;
 }
 
 - (NSArray *)toolbarSelectableItemIdentifiers:(NSToolbar *)tb;
 {
     NSMutableArray *array = [NSMutableArray arrayWithArray:[super toolbarSelectableItemIdentifiers:tb]];
-    [array removeObject:@"PreferencesSearchField"];
+    [array removeObject:BDSKPreferencesSearchField];
     return array;
 }
 
@@ -235,8 +245,8 @@ static inline NSRect convertRectInWindowToScreen(NSRect aRect, NSWindow *window)
 - (NSToolbarItem *)toolbar:(NSToolbar *)tb itemForItemIdentifier:(NSString *)itemIdentifier willBeInsertedIntoToolbar:(BOOL)flag;
 {
     NSToolbarItem *tbItem = nil;
-    if([itemIdentifier isEqual:@"PreferencesSearchField"]){
-        tbItem = [[NSToolbarItem alloc] initWithItemIdentifier:@"PreferencesSearchField"];
+    if([itemIdentifier isEqual:BDSKPreferencesSearchField]){
+        tbItem = [[NSToolbarItem alloc] initWithItemIdentifier:BDSKPreferencesSearchField];
         NSSearchField *searchField = [[NSSearchField alloc] initWithFrame:NSMakeRect(0, 0, 30, 22)];
         [searchField setTarget:self];
         [searchField setAction:@selector(search:)];
