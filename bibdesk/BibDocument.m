@@ -3348,8 +3348,7 @@ NSString *BDSKWeblocFilePboardType = @"CorePasteboardFlavorType 0x75726C20";
     
     [pubsToRemove removeAllObjects];
     [pubsToRemove addObjectsFromArray:publications];
-    countOfItems = [pubsToRemove count];
-    CFIndex idx = countOfItems;
+    CFIndex idx = [pubsToRemove count];
     
     while(idx--){
         if([removeSet containsObject:[pubsToRemove objectAtIndex:idx]] == NO)
