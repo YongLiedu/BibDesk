@@ -177,24 +177,36 @@
         
         NSEnumerator *groupEnum = [tmpStaticGroups objectEnumerator];
         NSDictionary *groupDict;
-        BDSKStaticGroup *group;
-        NSMutableArray *pubArray;
+        BDSKStaticGroup *group = nil;
+        NSMutableArray *pubArray = nil;
         NSArray *keys;
         NSEnumerator *keyEnum;
         NSString *key;
         
         while (groupDict = [groupEnum nextObject]) {
-            keys = [[groupDict objectForKey:@"keys"] componentsSeparatedByString:@","];
-            keyEnum = [keys objectEnumerator];
-            pubArray = [[NSMutableArray alloc] initWithCapacity:[keys count]];
-            while (key = [keyEnum nextObject]) 
-                [pubArray addObjectsFromArray:[self allPublicationsForCiteKey:key]];
-            group = [[BDSKStaticGroup alloc] initWithName:[groupDict objectForKey:@"group name"] publications:pubArray];
-            [group setUndoManager:[self undoManager]];
-            [staticGroups addObject:group];
-            [group release];
-            [pubArray release];
+            @try {
+                keys = [[groupDict objectForKey:@"keys"] componentsSeparatedByString:@","];
+                keyEnum = [keys objectEnumerator];
+                pubArray = [[NSMutableArray alloc] initWithCapacity:[keys count]];
+                while (key = [keyEnum nextObject]) 
+                    [pubArray addObjectsFromArray:[self allPublicationsForCiteKey:key]];
+                group = [[BDSKStaticGroup alloc] initWithName:[groupDict objectForKey:@"group name"] publications:pubArray];
+                [group setUndoManager:[self undoManager]];
+                [staticGroups addObject:group];
+            }
+            @catch(id exception) {
+                NSLog(@"Ignoring exception \"%@\" while parsing static groups data.", exception);
+            }
+            @finally {
+                [group release];
+                group = nil;
+                [pubArray release];
+                pubArray = nil;
+            }
         }
+        
+        [tmpStaticGroups release];
+        tmpStaticGroups = nil;
     }
     return staticGroups;
 }
@@ -1289,68 +1301,34 @@ The groupedPublications array is a subset of the publications array, developed b
 		return;
 	}
 	
-	NSEnumerator *groupEnum = [plist objectEnumerator];
-	NSDictionary *groupDict;
-	NSMutableArray *array = [NSMutableArray arrayWithCapacity:[(NSArray *)plist count]];
-	BDSKSmartGroup *group;
-	BDSKFilter *filter;
-	
-	while (groupDict = [groupEnum nextObject]) {
-		filter = [[BDSKFilter alloc] initWithDictionary:groupDict];
-		group = [[BDSKSmartGroup alloc] initWithName:[groupDict objectForKey:@"group name"] count:0 filter:filter];
-		[group setUndoManager:[self undoManager]];
-		[array addObject:group];
-		[group release];
-		[filter release];
-	}
+    NSEnumerator *groupEnum = [plist objectEnumerator];
+    NSDictionary *groupDict;
+    NSMutableArray *array = [NSMutableArray arrayWithCapacity:[(NSArray *)plist count]];
+    BDSKSmartGroup *group = nil;
+    BDSKFilter *filter = nil;
+    
+    while (groupDict = [groupEnum nextObject]) {
+        @try {
+            filter = [[BDSKFilter alloc] initWithDictionary:groupDict];
+            group = [[BDSKSmartGroup alloc] initWithName:[groupDict objectForKey:@"group name"] count:0 filter:filter];
+            [group setUndoManager:[self undoManager]];
+            [array addObject:group];
+        }
+        @catch(id exception) {
+            NSLog(@"Ignoring exception \"%@\" while parsing smart groups data.", exception);
+        }
+        @finally {
+            [group release];
+            group = nil;
+            [filter release];
+            filter = nil;
+        }
+    }
 	
 	[smartGroups setArray:array];
 }
 
-- (NSData *)serializedGroupsData {
-    NSMutableDictionary *dict = [NSMutableDictionary dictionaryWithCapacity:2];
-	NSMutableArray *staticArray = [NSMutableArray arrayWithCapacity:[[self staticGroups] count]];
-	NSMutableArray *smartArray = [NSMutableArray arrayWithCapacity:[smartGroups count]];
-	NSString *keys;
-    NSDictionary *groupDict;
-	NSEnumerator *groupEnum = [[self staticGroups] objectEnumerator];
-	BDSKGroup *group;
-	
-    groupEnum = [[self staticGroups] objectEnumerator];
-	while (group = [groupEnum nextObject]) {
-		keys = [[[(BDSKStaticGroup *)group publications] valueForKeyPath:@"@distinctUnionOfObjects.citeKey"] componentsJoinedByString:@"'"];
-        groupDict = [[NSDictionary alloc] initWithObjectsAndKeys:[group stringValue], @"group name", keys, @"keys", nil];
-		[staticArray addObject:groupDict];
-		[groupDict release];
-	}
-    if([staticArray count])
-        [dict setObject:staticArray forKey:@"static groups"];
-    
-	groupEnum = [smartGroups objectEnumerator];
-	while (group = [groupEnum nextObject]) {
-		groupDict = [[[(BDSKSmartGroup *)group filter] dictionaryValue] mutableCopy];
-		[(NSMutableDictionary *)groupDict setObject:[group stringValue] forKey:@"group name"];
-		[smartArray addObject:groupDict];
-		[groupDict release];
-	}
-    if([smartArray count])
-        [dict setObject:smartArray forKey:@"smart groups"];
-	
-	NSString *error = nil;
-	NSPropertyListFormat format = NSPropertyListXMLFormat_v1_0;
-	NSData *data = [NSPropertyListSerialization dataFromPropertyList:dict
-															  format:format 
-													errorDescription:&error];
-    	
-	if (error) {
-		NSLog(@"Error serializing: %@", error);
-        [error release];
-		return nil;
-	}
-	return data;
-}
-
-- (void)setGroupsFromSerializedData:(NSData *)data {
+- (void)setStaticGroupsFromSerializedData:(NSData *)data {
 	NSString *error = nil;
 	NSPropertyListFormat format = NSPropertyListXMLFormat_v1_0;
 	id plist = [NSPropertyListSerialization propertyListFromData:data
@@ -1363,29 +1341,67 @@ The groupedPublications array is a subset of the publications array, developed b
         [error release];
 		return;
 	}
-	if ([plist isKindOfClass:[NSDictionary class]] == NO) {
-		NSLog(@"Serialized static groups was no dictionary.");
+	if ([plist isKindOfClass:[NSArray class]] == NO) {
+		NSLog(@"Serialized static groups was no array.");
 		return;
 	}
-    
-    NSEnumerator *groupEnum = [[plist objectForKey:@"smart groups"] objectEnumerator];
-	NSDictionary *groupDict;
-	NSMutableArray *array = [NSMutableArray array];
-	BDSKGroup *group;
-	BDSKFilter *filter;
-    
-    while (groupDict = [groupEnum nextObject]) {
-		filter = [[BDSKFilter alloc] initWithDictionary:groupDict];
-		group = [[BDSKSmartGroup alloc] initWithName:[groupDict objectForKey:@"group name"] count:0 filter:filter];
-		[(BDSKSmartGroup *)group setUndoManager:[self undoManager]];
-		[array addObject:group];
-		[group release];
-		[filter release];
+	
+    tmpStaticGroups = [plist retain];
+}
+
+- (NSData *)serializedSmartGroupsData {
+	NSMutableArray *array = [NSMutableArray arrayWithCapacity:[smartGroups count]];
+    NSDictionary *groupDict;
+	NSEnumerator *groupEnum = [smartGroups objectEnumerator];
+	BDSKSmartGroup *group;
+	
+	while (group = [groupEnum nextObject]) {
+		groupDict = [[[group filter] dictionaryValue] mutableCopy];
+		[(NSMutableDictionary *)groupDict setObject:[group stringValue] forKey:@"group name"];
+		[array addObject:groupDict];
+		[groupDict release];
 	}
 	
-	[smartGroups setArray:array];
+	NSString *error = nil;
+	NSPropertyListFormat format = NSPropertyListXMLFormat_v1_0;
+	NSData *data = [NSPropertyListSerialization dataFromPropertyList:array
+															  format:format 
+													errorDescription:&error];
+    	
+	if (error) {
+		NSLog(@"Error serializing: %@", error);
+        [error release];
+		return nil;
+	}
+	return data;
+}
+
+- (NSData *)serializedStaticGroupsData {
+	NSMutableArray *array = [NSMutableArray arrayWithCapacity:[[self staticGroups] count]];
+	NSString *keys;
+    NSDictionary *groupDict;
+	NSEnumerator *groupEnum = [[self staticGroups] objectEnumerator];
+	BDSKStaticGroup *group;
 	
-    tmpStaticGroups = [[plist objectForKey:@"static groups"] retain];
+	while (group = [groupEnum nextObject]) {
+		keys = [[[group publications] valueForKeyPath:@"@distinctUnionOfObjects.citeKey"] componentsJoinedByString:@"'"];
+        groupDict = [[NSDictionary alloc] initWithObjectsAndKeys:[group stringValue], @"group name", keys, @"keys", nil];
+		[array addObject:groupDict];
+		[groupDict release];
+	}
+	
+	NSString *error = nil;
+	NSPropertyListFormat format = NSPropertyListXMLFormat_v1_0;
+	NSData *data = [NSPropertyListSerialization dataFromPropertyList:array
+															  format:format 
+													errorDescription:&error];
+    	
+	if (error) {
+		NSLog(@"Error serializing: %@", error);
+        [error release];
+		return nil;
+	}
+	return data;
 }
 
 @end

@@ -1055,9 +1055,14 @@ NSString *BDSKWeblocFilePboardType = @"CorePasteboardFlavorType 0x75726C20";
         [d appendData:[[pub bibTeXStringDroppingInternal:drop] dataUsingEncoding:encoding allowLossyConversion:YES]];
     }
 	
-	if([smartGroups count] + [[self staticGroups] count] > 0){
-        [d appendData:[@"\n\n@comment{BibDesk Groups{\n" dataUsingEncoding:encoding allowLossyConversion:YES]];
-		[d appendData:[self serializedGroupsData]];
+	if([staticGroups count] > 0){
+        [d appendData:[@"\n\n@comment{BibDesk Static Groups{\n" dataUsingEncoding:encoding allowLossyConversion:YES]];
+		[d appendData:[self serializedStaticGroupsData]];
+        [d appendData:[@"}}" dataUsingEncoding:encoding allowLossyConversion:YES]];
+	}
+	if([smartGroups count] > 0){
+        [d appendData:[@"\n\n@comment{BibDesk Smart Groups{\n" dataUsingEncoding:encoding allowLossyConversion:YES]];
+		[d appendData:[self serializedSmartGroupsData]];
         [d appendData:[@"}}" dataUsingEncoding:encoding allowLossyConversion:YES]];
 	}
 	[d appendData:[@"\n" dataUsingEncoding:encoding allowLossyConversion:YES]];

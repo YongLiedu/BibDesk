@@ -109,8 +109,9 @@
 - (NSArray *)mergeInPublications:(NSArray *)items;
 
 - (void)setSmartGroupsFromSerializedData:(NSData *)data;
-- (NSData *)serializedGroupsData;
-- (void)setGroupsFromSerializedData:(NSData *)data;
+- (void)setStaticGroupsFromSerializedData:(NSData *)data;
+- (NSData *)serializedSmartGroupsData;
+- (NSData *)serializedStaticGroupsData;
 
 - (void)handleFilterChangedNotification:(NSNotification *)notification;
 - (void)sortGroupsByKey:(NSString *)key;
