@@ -720,6 +720,12 @@
 }
 
 - (BOOL)validateEditNewGroupWithSelectionMenuItem:(NSMenuItem *)menuItem {
+    NSString *s;
+    if ([self hasSharedGroupsSelected])
+        s = NSLocalizedString(@"New Group With Merged Selection", @"New group with merged selection");
+    else
+        s = NSLocalizedString(@"New Group With Selection", @"New group with selection");
+    [menuItem setTitle:s];
     return ([self numberOfSelectedPubs] > 0);
 }
 
