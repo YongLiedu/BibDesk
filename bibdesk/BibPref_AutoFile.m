@@ -41,6 +41,8 @@
 #import "BDSKAlert.h"
 #import "BDSKFormatParser.h"
 #import "BibAppController.h"
+#import "BibItem.h"
+#import "BibDocument.h"
 
 #define MAX_PREVIEW_WIDTH	501.0
 #define MAX_FORMAT_WIDTH	288.0
@@ -51,7 +53,7 @@
 
 // these should correspond to the items in the popups set in IB
 static NSString *presetFormatStrings[] = {@"%L", @"%l%n0%e", @"%a1/%Y%u0.pdf", @"%a1/%T5.pdf"};
-static NSString *repositorySpecifierStrings[] = {@"", @"%a00", @"%A0", @"%t0", @"%T0", @"%Y", @"%y", @"%m", @"%k0", @"%L", @"%l", @"%e", @"%f{}0", @"%c{}", @"%f{Cite Key}", @"%r2", @"%R2", @"%d2", @"%u0", @"%U0", @"%n0", @"%0", @"%%"};
+static NSString *repositorySpecifierStrings[] = {@"", @"%a00", @"%A0", @"%t0", @"%T0", @"%Y", @"%y", @"%m", @"%k0", @"%L", @"%l", @"%e", @"%b", @"%f{}0", @"%c{}", @"%f{Cite Key}", @"%r2", @"%R2", @"%d2", @"%u0", @"%U0", @"%n0", @"%0", @"%%"};
 
 - (id)initWithTitle:(NSString *)newTitle defaultsArray:(NSArray *)newDefaultsArray controller:(OAPreferenceController *)controller{
 	if(self = [super initWithTitle:newTitle defaultsArray:newDefaultsArray controller:controller]){
@@ -63,16 +65,20 @@ static NSString *repositorySpecifierStrings[] = {@"", @"%a00", @"%A0", @"%t0", @
 			@"SourceForge", BDSKJournalString, @"1", BDSKVolumeString, @"96", BDSKPagesString, 
 			@"Keyword1,Keyword2", BDSKKeywordsString, 
 			@"Local File Name.pdf", BDSKLocalUrlString, nil];
+        previewDoc = [[BibDocument alloc] init];
+        [previewDoc setFileName:[NSHomeDirectory() stringByAppendingPathComponent:@"Document File Name"]];
 		previewItem = [[BibItem alloc] initWithType:[defaults stringForKey:BDSKPubTypeStringKey]
 										   fileType:BDSKBibtexString
 										  pubFields:previewFields
 										createdDate:[NSCalendarDate calendarDate]];
+        [previewItem setDocument:previewDoc];
 	}
 	return self;
 }
 
 - (void)dealloc{
 	[previewItem release];
+	[previewDoc release];
     [coloringEditor release];
 	[formatSheet release];
 	[super dealloc];
@@ -102,6 +108,7 @@ static NSString *repositorySpecifierStrings[] = {@"", @"%a00", @"%A0", @"%t0", @
 	NSRect frame;
 	
     [filePapersAutomaticallyCheckButton setState:[defaults boolForKey:BDSKFilePapersAutomaticallyKey] ? NSOnState : NSOffState];
+    [useRelativePathCheckButton setState:[defaults boolForKey:BDSKAutoFileUsesRelativePathKey] ? NSOnState : NSOffState];
 
     if ([NSString isEmptyString:papersFolder]) {
 		[papersFolderLocationTextField setStringValue:NSLocalizedString(@"Use Document Folder",@"")];
@@ -125,7 +132,13 @@ static NSString *repositorySpecifierStrings[] = {@"", @"%a00", @"%A0", @"%t0", @
 		[self setLocalUrlFormatInvalidWarning:NO message:nil];
 		
 		// use a BibItem with some data to build the preview local-url
-		[previewTextField setStringValue:[[[NSURL URLWithString:[previewItem suggestedLocalUrl]] path] stringByAbbreviatingWithTildeInPath]];
+        NSString *previewPath = [[NSURL URLWithString:[previewItem suggestedLocalUrl]] path];
+        NSString *documentFolder = [NSHomeDirectory() stringByAppendingString:@"/"];
+        if ([defaults boolForKey:BDSKAutoFileUsesRelativePathKey] && [previewPath hasPrefix:documentFolder])
+            previewPath = [previewPath substringFromIndex:[documentFolder length]];
+		else
+            previewPath = [previewPath stringByAbbreviatingWithTildeInPath];
+        [previewTextField setStringValue:previewPath];
 		[previewTextField sizeToFit];
 		frame = [previewTextField frame];
 		if (frame.size.width > MAX_PREVIEW_WIDTH) {
@@ -196,6 +209,7 @@ static NSString *repositorySpecifierStrings[] = {@"", @"%a00", @"%A0", @"%t0", @
 - (IBAction)toggleUseRelativePathAction:(id)sender{
 	[defaults setBool:([useRelativePathCheckButton state] == NSOnState)
 			   forKey:BDSKAutoFileUsesRelativePathKey];
+	[self updateUI];
 }
 
 - (IBAction)toggleFilePapersAutomaticallyAction:(id)sender{

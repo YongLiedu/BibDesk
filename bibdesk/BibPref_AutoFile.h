@@ -39,7 +39,8 @@
 
 #import <Foundation/Foundation.h>
 #import "BibPrefController.h"
-#import "BibItem.h"
+
+@class BibItem, BibDocument;
 
 @class BDSKFormatStringFieldEditor;
 
@@ -60,6 +61,7 @@
 	IBOutlet NSTextField *previewTextField;
 	IBOutlet NSMatrix *formatCleanRadio;
 	BibItem *previewItem;
+	BibDocument *previewDoc;
     
     BDSKFormatStringFieldEditor *coloringEditor;
 }
