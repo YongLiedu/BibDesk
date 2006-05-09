@@ -551,6 +551,15 @@
 - (void)setField: (NSString *)key toValue: (NSString *)value withModDate:(NSCalendarDate *)date;
 
 /*!
+    @method     setField:toValueWithoutUndo:
+    @abstract   Bypasses the undo and change notification mechanisms.  Only for use by BibEditor.
+    @discussion (comprehensive description)
+    @param      key (description)
+    @param      value (description)
+*/
+- (void)setField:(NSString *)key toValueWithoutUndo:(NSString *)value;
+
+/*!
     @method valueOfField:
     @abstract Calls valueOfField:inherit: with inherit set to YES. 
 	@param key The field name.

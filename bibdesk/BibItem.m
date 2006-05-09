@@ -1110,6 +1110,14 @@ static NSParagraphStyle* bodyParagraphStyle = nil;
 													  userInfo:notifInfo];
 }
 
+- (void)setField:(NSString *)key toValueWithoutUndo:(NSString *)value{
+    NSParameterAssert(nil != key);
+    NSParameterAssert(nil != value);
+    // this method is intended as a workaround for a BibEditor issue with using -[NSTextStorage mutableString] to track changes
+    OBPRECONDITION([value isEqualToString:[pubFields objectForKey:key usingLock:bibLock]]);
+    [pubFields setObject:value forKey:key usingLock:bibLock];
+}
+
 - (id)valueForUndefinedKey:(NSString *)key{
     return [self valueOfGenericField:key];
 }
