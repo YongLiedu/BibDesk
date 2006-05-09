@@ -44,7 +44,7 @@
 #import "BDSKSharingServer.h"
 #import "BDSKSharedGroup.h"
 
-// @@ register with http://www.dns-sd.org/ServiceTypes.html
+// Registered at http://www.dns-sd.org/ServiceTypes.html with TXT keys "txtvers" and "authenticate."
 NSString *BDSKNetServiceDomain = @"_bdsk._tcp.";
 
 @implementation BDSKSharingBrowser
