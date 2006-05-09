@@ -106,7 +106,7 @@
 
 - (IBAction)mergeInSharedGroup:(id)sender;
 - (IBAction)mergeInSharedPublications:(id)sender;
-- (void)mergeInPublications:(NSArray *)items;
+- (NSArray *)mergeInPublications:(NSArray *)items;
 
 - (void)setSmartGroupsFromSerializedData:(NSData *)data;
 - (NSData *)serializedGroupsData;

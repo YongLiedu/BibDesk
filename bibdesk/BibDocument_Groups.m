@@ -942,6 +942,10 @@ The groupedPublications array is a subset of the publications array, developed b
         name = [NSString stringWithFormat:@"%@%d", baseName, i++];
     }
     
+    // first merge in shared groups
+    if ([self hasSharedGroupsSelected] == YES)
+        pubs = [self mergeInPublications:pubs];
+    
     group = [[[BDSKStaticGroup alloc] initWithName:name publications:pubs] autorelease];
     
     [self addStaticGroup:group];    
@@ -975,7 +979,7 @@ The groupedPublications array is a subset of the publications array, developed b
     [self mergeInPublications:[self selectedPublications]];
 }
 
-- (void)mergeInPublications:(NSArray *)items{
+- (NSArray *)mergeInPublications:(NSArray *)items{
     // first construct a set of current items to compare based on BibItem equality callbacks
     CFIndex countOfItems = [publications count];
     BibItem **pubs = NSZoneMalloc([self zone], sizeof(BibItem *) * countOfItems);
@@ -992,7 +996,7 @@ The groupedPublications array is a subset of the publications array, developed b
     }
     
     if ([array count] == 0)
-        return;
+        return [NSArray array];
     
     // archive and unarchive mainly to get complex strings with the correct macroResolver
     NSMutableData *data = [NSMutableData data];
@@ -1015,6 +1019,8 @@ The groupedPublications array is a subset of the publications array, developed b
         [lastImportGroup setPublications:newPubs];
 	
 	[[self undoManager] setActionName:NSLocalizedString(@"Merge Shared Publications",@"")];
+    
+    return newPubs;
 }
 
 - (BOOL)addPublications:(NSArray *)pubs toGroup:(BDSKGroup *)group{
