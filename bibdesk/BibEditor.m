@@ -3040,12 +3040,11 @@ static int numberOfOpenEditors = 0;
 - (void)breakTextStorageConnections {
     
     // This is a fix for bug #1483613 (and others).  We set some of the BibItem's fields to -[[NSTextView textStorage] mutableString] for efficiency in tracking changes for live editing updates in the main window preview.  However, this causes a retain cycle, as the text storage retains its text view; any font changes to the editor text view will cause the retained textview to message its delegate (BibEditor) which is garbage in -[NSTextView _addToTypingAttributes].
-    NSSet *fields = [NSSet setWithObjects:BDSKAnnoteString, BDSKAbstractString, BDSKRssDescriptionString, nil];
-    NSEnumerator *fieldE = [fields objectEnumerator];
+    NSEnumerator *fieldE = [[[BibTypeManager sharedManager] noteFieldsSet] objectEnumerator];
     NSString *currentValue = nil;
     NSString *fieldName = nil;
     while(fieldName = [fieldE nextObject]){
-        currentValue = [[theBib valueOfField:fieldName] copy];
+        currentValue = [[theBib valueOfField:fieldName inherit:NO] copy];
         // set without undo, or we dirty the document every time the editor is closed
         if(nil != currentValue)
             [theBib setField:fieldName toValueWithoutUndo:currentValue];
