@@ -222,7 +222,7 @@ static BibFiler *sharedFiler = nil;
                 if(useRelativePath){
                     NSString *relativePath = newPath;
                     if ([newPath hasPrefix:papersFolderPath])
-                        [newPath substringFromIndex:[papersFolderPath length]];
+                        relativePath = [newPath substringFromIndex:[papersFolderPath length]];
                     [paper setField:field toValue:relativePath];
                 }else{
                     [paper setField:field toValue:newValue];
