@@ -211,7 +211,9 @@ const CFDictionaryValueCallBacks BDSKNSRetainedPointerDictionaryValueCallbacks =
 		// we might remove this, so keep a retained reference
         searchContentView = [[[self window] contentView] retain];
     }        
-
+    
+    // @@ workaround: the font from prefs seems to be overridden by the nib; maybe bindings issue?
+    [tableView changeFont:nil];
 }    
 
 - (NSString *)windowNibName
