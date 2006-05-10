@@ -41,8 +41,7 @@
 #import "BDSKAlert.h"
 #import "BDSKFormatParser.h"
 #import "BibAppController.h"
-#import "BibItem.h"
-#import "BibDocument.h"
+#import "BDSKPreviewItem.h"
 
 #define MAX_PREVIEW_WIDTH	501.0
 #define MAX_FORMAT_WIDTH	288.0
@@ -55,30 +54,7 @@
 static NSString *presetFormatStrings[] = {@"%L", @"%l%n0%e", @"%a1/%Y%u0.pdf", @"%a1/%T5.pdf"};
 static NSString *repositorySpecifierStrings[] = {@"", @"%a00", @"%A0", @"%t0", @"%T0", @"%Y", @"%y", @"%m", @"%k0", @"%L", @"%l", @"%e", @"%b", @"%f{}0", @"%c{}", @"%f{Cite Key}", @"%r2", @"%R2", @"%d2", @"%u0", @"%U0", @"%n0", @"%0", @"%%"};
 
-- (id)initWithTitle:(NSString *)newTitle defaultsArray:(NSArray *)newDefaultsArray controller:(OAPreferenceController *)controller{
-	if(self = [super initWithTitle:newTitle defaultsArray:newDefaultsArray controller:controller]){
-		// use a BibItem with some data to build the preview cite key
-		NSDictionary *previewFields = [NSDictionary dictionaryWithObjectsAndKeys:
-			@"BibDesk, a great application to manage your bibliographies", BDSKTitleString, 
-			@"McCracken, M. and Maxwell, A. and Howison, J. and Routley, M. and Spiegel, S.  and Porst, S. S. and Hofman, C. M.", BDSKAuthorString, 
-			@"2004", BDSKYearString, @"11", BDSKMonthString, 
-			@"SourceForge", BDSKJournalString, @"1", BDSKVolumeString, @"96", BDSKPagesString, 
-			@"Keyword1,Keyword2", BDSKKeywordsString, 
-			@"Local File Name.pdf", BDSKLocalUrlString, nil];
-        previewDoc = [[BibDocument alloc] init];
-        [previewDoc setFileName:[NSHomeDirectory() stringByAppendingPathComponent:@"Document File Name"]];
-		previewItem = [[BibItem alloc] initWithType:[defaults stringForKey:BDSKPubTypeStringKey]
-										   fileType:BDSKBibtexString
-										  pubFields:previewFields
-										createdDate:[NSCalendarDate calendarDate]];
-        [previewItem setDocument:previewDoc];
-	}
-	return self;
-}
-
 - (void)dealloc{
-	[previewItem release];
-	[previewDoc release];
     [coloringEditor release];
 	[formatSheet release];
 	[super dealloc];
@@ -91,6 +67,8 @@ static NSString *repositorySpecifierStrings[] = {@"", @"%a00", @"%A0", @"%t0", @
 	[formatter release];
     coloringEditor = [[BDSKFormatStringFieldEditor alloc] initWithFrame:[formatSheetField frame] parseField:BDSKLocalUrlString fileType:BDSKBibtexString];
     [papersFolderLocationTextField setFormatter:[[[BDSKFolderPathFormatter alloc] init] autorelease]];
+    [previewDisplay setStringValue:[[BDSKPreviewItem sharedItem] displayText]];
+    [previewDisplay sizeToFit];
 }
 
 // sheet's delegate must be connected to file's owner in IB
@@ -131,14 +109,7 @@ static NSString *repositorySpecifierStrings[] = {@"", @"%a00", @"%A0", @"%t0", @
 	if ([BDSKFormatParser validateFormat:&formatString attributedFormat:&attrFormat forField:BDSKLocalUrlString inFileType:BDSKBibtexString error:&error]) {
 		[self setLocalUrlFormatInvalidWarning:NO message:nil];
 		
-		// use a BibItem with some data to build the preview local-url
-        NSString *previewPath = [[NSURL URLWithString:[previewItem suggestedLocalUrl]] path];
-        NSString *documentFolder = [NSHomeDirectory() stringByAppendingString:@"/"];
-        if ([defaults boolForKey:BDSKAutoFileUsesRelativePathKey] && [previewPath hasPrefix:documentFolder])
-            previewPath = [previewPath substringFromIndex:[documentFolder length]];
-		else
-            previewPath = [previewPath stringByAbbreviatingWithTildeInPath];
-        [previewTextField setStringValue:previewPath];
+        [previewTextField setStringValue:[[BDSKPreviewItem sharedItem] suggestedLocalUrl]];
 		[previewTextField sizeToFit];
 		frame = [previewTextField frame];
 		if (frame.size.width > MAX_PREVIEW_WIDTH) {

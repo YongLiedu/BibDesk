@@ -40,8 +40,6 @@
 #import <Foundation/Foundation.h>
 #import "BibPrefController.h"
 
-@class BibItem, BibDocument;
-
 @class BDSKFormatStringFieldEditor;
 
 @interface BibPref_AutoFile : OAPreferenceClient {
@@ -60,8 +58,7 @@
     IBOutlet NSButton *formatLowercaseCheckButton;
 	IBOutlet NSTextField *previewTextField;
 	IBOutlet NSMatrix *formatCleanRadio;
-	BibItem *previewItem;
-	BibDocument *previewDoc;
+	IBOutlet NSTextField *previewDisplay;
     
     BDSKFormatStringFieldEditor *coloringEditor;
 }

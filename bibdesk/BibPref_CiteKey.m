@@ -41,6 +41,7 @@
 #import "BDSKAlert.h"
 #import "BDSKFormatParser.h"
 #import "BibAppController.h"
+#import "BDSKPreviewItem.h"
 
 #define MAX_PREVIEW_WIDTH	481
 #define MAX_FORMAT_WIDTH	266
@@ -51,25 +52,7 @@
 static NSString *presetFormatStrings[] = {@"%a1:%Y%u2", @"%a1:%Y%u0", @"%a33%y%m", @"%a1%Y%t15"};
 static NSString *repositorySpecifierStrings[] = {@"", @"%a00", @"%A0", @"%t0", @"%T0", @"%Y", @"%y", @"%m", @"%k0", @"%f{}0", @"%c{}", @"%r2", @"%R2", @"%d2", @"%u0", @"%U0", @"%n0", @"%0"};
 
-- (id)initWithTitle:(NSString *)newTitle defaultsArray:(NSArray *)newDefaultsArray controller:(OAPreferenceController *)controller{
-	if(self = [super initWithTitle:newTitle defaultsArray:newDefaultsArray controller:controller]){
-		// use a BibItem with some data to build the preview cite key
-		NSDictionary *previewFields = [NSDictionary dictionaryWithObjectsAndKeys:
-			@"BibDesk, a great application to manage your bibliographies", BDSKTitleString, 
-			@"McCracken, M. and Maxwell, A. and Howison, J. and Routley, M. and Spiegel, S.  and Porst, S. S. and Hofman, C. M.", BDSKAuthorString, 
-			@"2004", BDSKYearString, @"11", BDSKMonthString, 
-			@"SourceForge", BDSKJournalString, @"1", BDSKVolumeString, @"96", BDSKPagesString, 
-			@"Keyword1,Keyword2", BDSKKeywordsString, nil];
-		previewItem = [[BibItem alloc] initWithType:[defaults stringForKey:BDSKPubTypeStringKey]
-										   fileType:BDSKBibtexString
-										  pubFields:previewFields
-										createdDate:[NSCalendarDate calendarDate]];
-	}
-	return self;
-}
-
 - (void)dealloc{
-	[previewItem release];
     [coloringEditor release];
 	[formatSheet release];
 	[super dealloc];
@@ -81,6 +64,7 @@ static NSString *repositorySpecifierStrings[] = {@"", @"%a00", @"%A0", @"%t0", @
     [formatSheetField setFormatter:formatter];
 	[formatter release];
 	coloringEditor = [[BDSKFormatStringFieldEditor alloc] initWithFrame:[formatSheetField frame] parseField:BDSKCiteKeyString fileType:BDSKBibtexString];
+    [previewDisplay setStringValue:[[BDSKPreviewItem sharedItem] displayText]];
 }
 
 // sheet's delegate must be connected to file's owner in IB
@@ -104,7 +88,7 @@ static NSString *repositorySpecifierStrings[] = {@"", @"%a00", @"%A0", @"%t0", @
 	if ([BDSKFormatParser validateFormat:&citeKeyFormat attributedFormat:&attrFormat forField:BDSKCiteKeyString inFileType:BDSKBibtexString error:&error]) {
 		[self setCiteKeyFormatInvalidWarning:NO message:nil];
 		
-		[citeKeyLine setStringValue:[previewItem suggestedCiteKey]];
+		[citeKeyLine setStringValue:[[BDSKPreviewItem sharedItem] suggestedCiteKey]];
 		[citeKeyLine sizeToFit];
 		frame = [citeKeyLine frame];
 		if (frame.size.width > MAX_PREVIEW_WIDTH) {

@@ -55,7 +55,7 @@
     IBOutlet NSButton* citeKeyAutogenerateCheckButton;
     IBOutlet NSButton* citeKeyLowercaseCheckButton;
 	IBOutlet NSMatrix *formatCleanRadio;
-	BibItem *previewItem;
+	IBOutlet NSTextField *previewDisplay;
     
     BDSKFormatStringFieldEditor *coloringEditor;
 }
