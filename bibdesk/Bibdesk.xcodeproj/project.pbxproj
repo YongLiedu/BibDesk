@@ -281,6 +281,8 @@
 		CE30FAD70919713100CB1A19 /* BDSKStatusBar.h in Headers */ = {isa = PBXBuildFile; fileRef = CE30FAD50919713100CB1A19 /* BDSKStatusBar.h */; };
 		CE30FAD80919713100CB1A19 /* BDSKStatusBar.m in Sources */ = {isa = PBXBuildFile; fileRef = CE30FAD60919713100CB1A19 /* BDSKStatusBar.m */; };
 		CE31E4100A07928C00F5BD47 /* staticFolderIcon.tiff in Resources */ = {isa = PBXBuildFile; fileRef = CE31E40F0A07928C00F5BD47 /* staticFolderIcon.tiff */; };
+		CE3448020A11302F0026A92A /* BDSKPreviewItem.m in Sources */ = {isa = PBXBuildFile; fileRef = CE3448000A11302F0026A92A /* BDSKPreviewItem.m */; };
+		CE3448030A11302F0026A92A /* BDSKPreviewItem.h in Headers */ = {isa = PBXBuildFile; fileRef = CE3448010A11302F0026A92A /* BDSKPreviewItem.h */; };
 		CE34E9790A03C16B00222942 /* BDSKConditionsView.h in Headers */ = {isa = PBXBuildFile; fileRef = CE34E9770A03C16B00222942 /* BDSKConditionsView.h */; };
 		CE34E97A0A03C16B00222942 /* BDSKConditionsView.m in Sources */ = {isa = PBXBuildFile; fileRef = CE34E9780A03C16B00222942 /* BDSKConditionsView.m */; };
 		CE386D0709D7075C00B9D1F0 /* sharedFolderIcon.tiff in Resources */ = {isa = PBXBuildFile; fileRef = CE386D0609D7075C00B9D1F0 /* sharedFolderIcon.tiff */; };
@@ -1122,6 +1124,8 @@
 		CE30FAD50919713100CB1A19 /* BDSKStatusBar.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BDSKStatusBar.h; sourceTree = "<group>"; };
 		CE30FAD60919713100CB1A19 /* BDSKStatusBar.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BDSKStatusBar.m; sourceTree = "<group>"; };
 		CE31E40F0A07928C00F5BD47 /* staticFolderIcon.tiff */ = {isa = PBXFileReference; lastKnownFileType = image.tiff; name = staticFolderIcon.tiff; path = Images/staticFolderIcon.tiff; sourceTree = "<group>"; };
+		CE3448000A11302F0026A92A /* BDSKPreviewItem.m */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.objc; path = BDSKPreviewItem.m; sourceTree = "<group>"; };
+		CE3448010A11302F0026A92A /* BDSKPreviewItem.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = BDSKPreviewItem.h; sourceTree = "<group>"; };
 		CE34E9770A03C16B00222942 /* BDSKConditionsView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BDSKConditionsView.h; sourceTree = "<group>"; };
 		CE34E9780A03C16B00222942 /* BDSKConditionsView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BDSKConditionsView.m; sourceTree = "<group>"; };
 		CE386D0609D7075C00B9D1F0 /* sharedFolderIcon.tiff */ = {isa = PBXFileReference; lastKnownFileType = image.tiff; name = sharedFolderIcon.tiff; path = Images/sharedFolderIcon.tiff; sourceTree = "<group>"; };
@@ -1927,6 +1931,7 @@
 				CE38FB8B091D94A100BCB69D /* BDSKFilter.m */,
 				CE21D10909208B9D0075E607 /* BDSKGroup.m */,
 				F94DE74A09CB46FF00B5FD51 /* BDSKPersistentSearch.m */,
+				CE3448000A11302F0026A92A /* BDSKPreviewItem.m */,
 				CE51914A09E5615300E97C3A /* BDSKRegExFindPattern.m */,
 				CED65AB30906BCC6003EED90 /* BDSKScriptHook.m */,
 				F925332208FC9FB80045D563 /* BDSKSearchIndex.m */,
@@ -2178,6 +2183,7 @@
 				F94DE74909CB46FF00B5FD51 /* BDSKPersistentSearch.h */,
 				F9DAC7A00A0A95BC0099117E /* BDSKPreferenceController.h */,
 				F9022C57075802E300C3F701 /* BDSKPreviewer.h */,
+				CE3448010A11302F0026A92A /* BDSKPreviewItem.h */,
 				F9DB863D08A07ADC00CB3D53 /* BDSKPreviewMessageQueue.h */,
 				CE59A37F09BC80A100AF3935 /* BDSKPreviewTextView.h */,
 				F961FA9408C9429700332460 /* BDSKPrintableView.h */,
@@ -2579,6 +2585,7 @@
 				F9ED4DAD0A0437E20048D912 /* FSCopyObject.h in Headers */,
 				F9ED4DAF0A0437E20048D912 /* GenLinkedList.h in Headers */,
 				F9DAC7A20A0A95BC0099117E /* BDSKPreferenceController.h in Headers */,
+				CE3448030A11302F0026A92A /* BDSKPreviewItem.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -3532,6 +3539,7 @@
 				F9ED4DAC0A0437E20048D912 /* FSCopyObject.c in Sources */,
 				F9ED4DAE0A0437E20048D912 /* GenLinkedList.c in Sources */,
 				F9A411FC0A0B2066008493C0 /* BDSKPreferenceController.m in Sources */,
+				CE3448020A11302F0026A92A /* BDSKPreviewItem.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
