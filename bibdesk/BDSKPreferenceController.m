@@ -92,6 +92,7 @@ static NSString *BDSKPreferencesSearchField = @"BDSKPreferencesSearchField";
         [overlayWindow overlayView:[theWindow contentView]];
         [[overlayWindow contentView] addSubview:view];
         [view release];
+        [theWindow setShowsToolbarButton:NO];
         isSearchActive = NO;
         NSString *path = [[NSBundle mainBundle] pathForResource:@"PreferenceSearchTerms" ofType:@"plist"];
         if(nil == path)
