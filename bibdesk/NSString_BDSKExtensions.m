@@ -568,6 +568,28 @@ static int MAX_RATING = 5;
     }
 }
 
+- (NSString *)acronymValueIgnoringWordLength:(unsigned int)ignoreLength{
+    NSMutableString *result = [NSMutableString string];
+    NSArray *allComponents = [self componentsSeparatedByString:@" "]; // single whitespace
+    NSEnumerator *e = [allComponents objectEnumerator];
+    NSString *component = nil;
+	unsigned int currentIgnoreLength;
+    
+    while(component = [e nextObject]){
+		currentIgnoreLength = ignoreLength;
+        if(![component isEqualToString:@""]) // stringByTrimmingCharactersInSet will choke on an empty string
+            component = [component stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]];
+		if([component length] > 1 && [component characterAtIndex:[component length] - 1] == '.')
+			currentIgnoreLength = 0;
+		if(![component isEqualToString:@""])
+            component = [component stringByTrimmingCharactersInSet:[[NSCharacterSet alphanumericCharacterSet] invertedSet]];
+		if([component length] > currentIgnoreLength){
+            [result appendString:[[component substringToIndex:1] uppercaseString]];
+        }
+    }
+    return result;
+}
+
 #pragma mark HTML/XML
 
 - (NSString *)stringByConvertingHTMLLineBreaks{
