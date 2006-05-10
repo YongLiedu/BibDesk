@@ -87,11 +87,11 @@ static NSString *BDSKPreferencesSearchField = @"BDSKPreferencesSearchField";
 {
     if(self = [super init]){
         NSWindow *theWindow = [self window];
-        overlayWindow = [[BDSKOverlayWindow alloc] initWithContentRect:[[theWindow contentView] frame] styleMask:[theWindow styleMask] backing:[theWindow backingType] defer:YES];
+        overlay = [[BDSKOverlay alloc] initWithContentRect:[[theWindow contentView] frame] styleMask:[theWindow styleMask] backing:[theWindow backingType] defer:YES];
         NSView *view = [[NSClassFromString(@"BDSKSpotlightView") alloc] initWithFrame:[[theWindow contentView] frame] delegate:self];
-        [overlayWindow overlayView:[theWindow contentView]];
-        [[overlayWindow contentView] addSubview:view];
+        [overlay setContentView:view];
         [view release];
+        [overlay overlayView:[theWindow contentView]];
         [theWindow setShowsToolbarButton:NO];
         isSearchActive = NO;
         NSString *path = [[NSBundle mainBundle] pathForResource:@"PreferenceSearchTerms" ofType:@"plist"];
@@ -106,21 +106,21 @@ static NSString *BDSKPreferencesSearchField = @"BDSKPreferencesSearchField";
 {
     [clientIdentiferSearchTerms release];
     [searchTerm release];
-    [overlayWindow release];
+    [overlay release];
     [super dealloc];
 }
 
 - (void)iconView:(OAPreferencesIconView *)iconView buttonHitAtIndex:(unsigned int)index;
 {
     isSearchActive = NO;
-    [[overlayWindow contentView] setNeedsDisplay:YES];
+    [[overlay contentView] setNeedsDisplay:YES];
     [super iconView:iconView buttonHitAtIndex:index];
 }
 
 - (IBAction)showPreferencesPanel:(id)sender;
 {
     [super showPreferencesPanel:sender];
-    [overlayWindow orderFront:nil];
+    [overlay orderFront:nil];
     
     // Sys Prefs gives focus to the search field when launching
     NSEnumerator *tbEnumerator = [[[[self window] toolbar] items] objectEnumerator];
@@ -240,7 +240,7 @@ static inline NSRect convertRectInWindowToScreen(NSRect aRect, NSWindow *window)
     [self setSearchTerm:[sender stringValue]];
     
     // the view will now ask us which icons to highlight
-    [[overlayWindow contentView] setNeedsDisplay:YES];
+    [[overlay contentView] setNeedsDisplay:YES];
 }
 
 - (NSToolbarItem *)toolbar:(NSToolbar *)tb itemForItemIdentifier:(NSString *)itemIdentifier willBeInsertedIntoToolbar:(BOOL)flag;
