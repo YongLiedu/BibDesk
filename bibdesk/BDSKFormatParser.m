@@ -42,7 +42,6 @@
 #import "BibAuthor.h"
 #import "BDSKConverter.h"
 #import "BibTypeManager.h"
-#import "BibAppController.h"
 #import "NSString_BDSKExtensions.h"
 #import "NSDate_BDSKExtensions.h"
 
