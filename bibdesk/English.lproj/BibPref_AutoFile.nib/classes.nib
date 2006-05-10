@@ -33,6 +33,7 @@
                 formatSheetField = NSTextField; 
                 formatWarningButton = NSButton; 
                 papersFolderLocationTextField = NSTextField; 
+                previewDisplay = NSTextField; 
                 previewTextField = NSTextField; 
                 useRelativePathCheckButton = NSButton; 
             }; 

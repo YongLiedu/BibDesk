@@ -27,6 +27,7 @@
                 formatSheet = NSPanel; 
                 formatSheetField = NSTextField; 
                 formatWarningButton = NSButton; 
+                previewDisplay = NSTextField; 
             }; 
             SUPERCLASS = OAPreferenceClient; 
         }, 
