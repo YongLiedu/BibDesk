@@ -389,13 +389,6 @@
 - (void)downloadLinkedFileAsLocalUrl:(id)sender;
 
 /*!
-    @method     citeKeyIsValid:
-    @abstract   Checkes whether the proposed cite key is valid, i.e. unique. It just calls the one of the document.
-    @discussion (comprehensive description)
-*/
-- (BOOL)citeKeyIsValid:(NSString *)proposedCiteKey;
-
-/*!
     @method     generateCiteKey:
     @abstract   Action to generate a cite-key for the bibitem, using the cite-key format string. 
     @discussion (comprehensive description)

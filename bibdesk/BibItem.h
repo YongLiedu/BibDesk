@@ -498,6 +498,8 @@
 */
 - (NSString *)suggestedCiteKey;
 
+- (BOOL)isValidCiteKey:(NSString *)proposedCiteKey;
+
 /*
     @method canSetCiteKey
     @abstract Returns a boolean indicating whether all fields required for the generated cite key are set
@@ -780,6 +782,8 @@
 */
 - (NSString *)suggestedLocalUrl;
 
+- (BOOL)isValidLocalUrlPath:(NSString *)proposedPath;
+
 /*!
     @method canSetLocalUrl
     @abstract Returns a boolean indicating whether all fields required for the generated local-url are set
@@ -807,6 +811,8 @@
     @discussion - 
 */
 - (BOOL)autoFilePaper;
+
+- (NSString *)documentFileName;
 
 - (void)typeInfoDidChange:(NSNotification *)aNotification;
 - (void)customFieldsDidChange:(NSNotification *)aNotification;

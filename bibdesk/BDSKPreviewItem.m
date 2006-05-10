@@ -84,8 +84,6 @@
 
 #pragma mark BibItem simulation
 
-- (id<BDSKParseableItemDocument>)document { return self; }
-
 - (NSString *)fileType { return BDSKBibtexString; }
 
 - (NSString *)type { return @"article"; }
@@ -105,16 +103,21 @@
     return ([field isEqualToString:BDSKAuthorString]) ? pubAuthors : [NSArray array];
 }
 
+- (NSString *)documentFileName { return NSLocalizedString(@"Document File Name", @"Document filename for preview item in preferences"); }
+
+- (BOOL)isValidCiteKey:(NSString *)key { return YES; }
+
+- (BOOL)isValidLocalUrlPath:(NSString *)path { return YES; }
+
 - (NSString *)suggestedLocalUrl {
     OFPreferenceWrapper *pw = [OFPreferenceWrapper sharedPreferenceWrapper];
 	NSString *localUrlFormat = [pw objectForKey:BDSKLocalUrlFormatKey];
-	NSString *papersFolderPath = [[NSApp delegate] folderPathForFilingPapersFromDocument:[self document]];
 	NSString *relativeFile = [BDSKFormatParser parseFormat:localUrlFormat forField:BDSKLocalUrlString ofItem:self];
 	if ([pw boolForKey:BDSKLocalUrlLowercaseKey])
 		relativeFile = [relativeFile lowercaseString];
 	if ([pw boolForKey:BDSKAutoFileUsesRelativePathKey])
         return relativeFile;
-    return [[papersFolderPath stringByAppendingPathComponent:relativeFile] stringByAbbreviatingWithTildeInPath];
+    return [[NSHomeDirectory() stringByAppendingPathComponent:relativeFile] stringByAbbreviatingWithTildeInPath];
 }
 
 - (NSString *)suggestedCiteKey {
@@ -145,11 +148,5 @@
                           [self valueOfField:BDSKYearString], @".", nil];
     return string;
 }
-
-#pragma mark BibDocument simulation
-
-- (NSString *)fileName { return [NSHomeDirectory() stringByAppendingPathComponent:NSLocalizedString(@"Document File Name.bib", @"Document filename for preview item in preferences")]; }
-
-- (BOOL)citeKeyIsUsed:(NSString *)key byItemOtherThan:(id<BDSKParseableItem>)item { return NO; }
 
 @end

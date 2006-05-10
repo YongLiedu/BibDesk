@@ -38,10 +38,7 @@
 
 #import <Cocoa/Cocoa.h>
 
-@protocol BDSKParseableItemDocument;
-
 @protocol BDSKParseableItem <NSObject>
-- (id<BDSKParseableItemDocument>)document;
 - (NSString *)fileType;
 - (NSString *)type;
 - (NSString *)citeKey;
@@ -49,12 +46,9 @@
 - (NSString *)valueOfField:(NSString *)field;
 - (NSArray *)peopleArrayForField:(NSString *)field;
 - (NSString *)localFilePathForField:(NSString *)field;
-@end
-
-
-@protocol BDSKParseableItemDocument <NSObject>
-- (NSString *)fileName;
-- (BOOL)citeKeyIsUsed:(NSString *)key byItemOtherThan:(id<BDSKParseableItem>)item;
+- (NSString *)documentFileName;
+- (BOOL)isValidCiteKey:(NSString *)key;
+- (BOOL)isValidLocalUrlPath:(NSString *)key;
 @end
 
 

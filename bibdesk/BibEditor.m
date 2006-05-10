@@ -149,7 +149,7 @@ static int numberOfOpenEditors = 0;
 - (void)windowDidLoad{
     [[self window] setDelegate:self];
     [[self window] registerForDraggedTypes:[NSArray arrayWithObjects:BDSKBibItemPboardType, NSStringPboardType, nil]];					
-	[self setCiteKeyDuplicateWarning:![self citeKeyIsValid:[theBib citeKey]]];
+	[self setCiteKeyDuplicateWarning:![theBib isValidCiteKey:[theBib citeKey]]];
     [documentSnoopButton setIconImage:nil];
     [self fixURLs];
 }
@@ -1073,7 +1073,7 @@ static int numberOfOpenEditors = 0;
 		}
 
 		// still need to check duplicates ourselves:
-		if(![self citeKeyIsValid:newKey]){
+		if(![theBib isValidCiteKey:newKey]){
 			[self setCiteKeyDuplicateWarning:YES];
 		}else{
 			[self setCiteKeyDuplicateWarning:NO];
@@ -1100,13 +1100,6 @@ static int numberOfOpenEditors = 0;
 	}
 	[citeKeyWarningButton setEnabled:set];
 	[citeKeyField setTextColor:(set ? [NSColor redColor] : [NSColor blackColor])];
-}
-
-// @@ should also check validity using citekeyformatter
-- (BOOL)citeKeyIsValid:(NSString *)proposedCiteKey{
-	
-    return !([(BibDocument *)theDocument citeKeyIsUsed:proposedCiteKey byItemOtherThan:theBib] ||
-			 [proposedCiteKey isEqualToString:@""]);
 }
 
 - (IBAction)generateCiteKey:(id)sender{
@@ -1853,7 +1846,7 @@ static int numberOfOpenEditors = 0;
 		[citeKeyField setStringValue:newValue];
 		[self updateCiteKeyAutoGenerateStatus];
 		// still need to check duplicates ourselves:
-		if(![self citeKeyIsValid:newValue]){
+		if(![theBib isValidCiteKey:newValue]){
 			[self setCiteKeyDuplicateWarning:YES];
 		}else{
 			[self setCiteKeyDuplicateWarning:NO];

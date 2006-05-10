@@ -357,7 +357,7 @@
 					break;
 				case 'b':
 					// document filename
-					string = [[pub document] fileName];
+					string = [pub documentFileName];
 					if (string != nil) {
 						string = [[string lastPathComponent] stringByDeletingPathExtension];
 						string = [self stringBySanitizingString:string forField:fieldName inFileType:[pub fileType]]; 
@@ -557,18 +557,10 @@
 + (BOOL)stringIsValid:(NSString *)proposedStr forField:(NSString *)fieldName ofItem:(id <BDSKParseableItem>)pub
 {
 	if ([fieldName isEqualToString:BDSKCiteKeyString]) {
-		return !([NSString isEmptyString:proposedStr] ||
-				 [[pub document] citeKeyIsUsed:proposedStr byItemOtherThan:pub]);
+		return [pub isValidCiteKey:proposedStr];
 	}
 	else if ([[[OFPreferenceWrapper sharedPreferenceWrapper] stringArrayForKey:BDSKLocalFileFieldsKey] containsObject:fieldName]) {
-		if ([NSString isEmptyString:proposedStr])
-			return NO;
-		NSString *papersFolderPath = [[NSApp delegate] folderPathForFilingPapersFromDocument:[pub document]];
-		if ([[OFPreferenceWrapper sharedPreferenceWrapper] boolForKey:BDSKLocalUrlLowercaseKey])
-			proposedStr = [proposedStr lowercaseString];
-		if ([[NSFileManager defaultManager] fileExistsAtPath:[papersFolderPath stringByAppendingPathComponent:proposedStr]])
-			return NO;
-		return YES;
+		return [pub isValidLocalUrlPath:proposedStr];
 	}
 	else if ([[[OFPreferenceWrapper sharedPreferenceWrapper] stringArrayForKey:BDSKRemoteURLFieldsKey] containsObject:fieldName]) {
 		if ([NSString isEmptyString:proposedStr])

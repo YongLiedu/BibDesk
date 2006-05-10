@@ -988,6 +988,12 @@ static NSParagraphStyle* bodyParagraphStyle = nil;
 	return YES;
 }
 
+- (BOOL)isValidCiteKey:(NSString *)proposedCiteKey{
+	if ([NSString isEmptyString:proposedCiteKey] == YES)
+        return NO;
+    return ([document citeKeyIsUsed:proposedCiteKey byItemOtherThan:self] == NO);
+}
+
 #pragma mark Pub Fields
 
 - (NSDictionary *)pubFields{
@@ -2000,6 +2006,15 @@ static NSParagraphStyle* bodyParagraphStyle = nil;
     return [localURL fileURLByResolvingAliasesBeforeLastPathComponent];
 }
 
+- (BOOL)isValidLocalUrlPath:(NSString *)proposedPath{
+    if ([NSString isEmptyString:proposedPath])
+        return NO;
+    NSString *papersFolderPath = [[NSApp delegate] folderPathForFilingPapersFromDocument:document];
+    if ([[OFPreferenceWrapper sharedPreferenceWrapper] boolForKey:BDSKLocalUrlLowercaseKey])
+        proposedPath = [proposedPath lowercaseString];
+    return ([[NSFileManager defaultManager] fileExistsAtPath:[papersFolderPath stringByAppendingPathComponent:proposedPath]] == NO);
+}
+
 - (NSString *)suggestedLocalUrl{
 	NSString *localUrlFormat = [[OFPreferenceWrapper sharedPreferenceWrapper] objectForKey:BDSKLocalUrlFormatKey];
 	NSString *papersFolderPath = [[NSApp delegate] folderPathForFilingPapersFromDocument:document];
@@ -2070,6 +2085,10 @@ static NSParagraphStyle* bodyParagraphStyle = nil;
 		[self setNeedsToBeFiled:YES];
 	}
 	return NO;
+}
+
+- (NSString *)documentFileName {
+    return [document fileName];
 }
 
 #pragma mark -

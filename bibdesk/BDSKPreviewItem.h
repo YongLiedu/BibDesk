@@ -38,7 +38,7 @@
 
 #import "BDSKFormatParser.h"
 
-@interface BDSKPreviewItem : NSObject <BDSKParseableItem, BDSKParseableItemDocument> {
+@interface BDSKPreviewItem : NSObject <BDSKParseableItem> {
     NSDictionary *pubFields;
     NSArray *pubAuthors;
 }

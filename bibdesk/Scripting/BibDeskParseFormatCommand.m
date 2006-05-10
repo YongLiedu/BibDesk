@@ -12,7 +12,6 @@
 #import "BibItem.h"
 #import "BibPrefController.h"
 #import "BibAppController.h"
-#import "BibDocument.h"
 
 @implementation BibDeskParseFormatCommand
 
