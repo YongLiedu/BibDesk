@@ -88,10 +88,13 @@
 		[self remove]; // first remove from the old parentView
 	
 	parentView = [aView retain];
+    
+    NSWindow *parentWindow = [parentView window];
 	
 	// if the parent is a floating panel, we also should be. Otherwise we won't get on top.
-	[self setFloatingPanel:[[parentView window] isFloatingPanel]];
-	[[parentView window] addChildWindow:self ordered:NSWindowAbove];
+	[self setFloatingPanel:([parentWindow isKindOfClass:[NSPanel class]] && [(NSPanel *)parentWindow isFloatingPanel])];
+    [self setLevel:[parentWindow level]];
+	[parentWindow addChildWindow:self ordered:NSWindowAbove];
 	
 	// resize ourselves to cover the view, and observe future frame changes
 	[self parentViewFrameChanged:nil];
@@ -104,9 +107,9 @@
 		addObserver:self
 		   selector:@selector(parentWindowWillClose:)
 			   name:NSWindowWillCloseNotification
-			 object:[parentView window]];
+			 object:parentWindow];
 	
-	if ([[parentView window] isVisible])
+	if ([parentWindow isVisible])
 		[self orderFront:nil];
 }
 
@@ -191,8 +194,11 @@
 		[self remove]; // first remove from the old parentView
 	
 	parentView = [aView retain];
+    
+    NSWindow *parentWindow = [parentView window];
 	
-	[[parentView window] addChildWindow:self ordered:NSWindowAbove];
+    [self setLevel:[parentWindow level]];
+	[parentWindow addChildWindow:self ordered:NSWindowAbove];
 	
 	// resize ourselves to cover the view, and observe future frame changes
 	[self parentViewFrameChanged:nil];
@@ -205,9 +211,9 @@
 		addObserver:self
 		   selector:@selector(parentWindowWillClose:)
 			   name:NSWindowWillCloseNotification
-			 object:[parentView window]];
+			 object:parentWindow];
 	
-	if ([[parentView window] isVisible])
+	if ([parentWindow isVisible])
 		[self orderFront:nil];
 }
 
