@@ -77,13 +77,13 @@
 - (void)setDateModified:(NSCalendarDate *)newDateModified;
 - (void)setDate: (NSCalendarDate *)newDate;
 
+- (id)stringCache;
+
 // updates derived info from the dictionary
 - (void)updateMetadataForKey:(NSString *)key;
 
 @end
 
-
-#define addkey(s) if([pubFields objectForKey: s usingLock:bibLock] == nil){[pubFields setObject:@"" forKey: s usingLock:bibLock];} [removeKeys removeObject: s usingLock:bibLock];
 
 CFHashCode BibItemCaseInsensitiveCiteKeyHash(const void *item)
 {
@@ -109,6 +109,8 @@ const CFSetCallBacks BDSKBibItemEqualityCallBacks = {
 /* Paragraph styles cached for efficiency. */
 static NSParagraphStyle* keyParagraphStyle = nil;
 static NSParagraphStyle* bodyParagraphStyle = nil;
+
+#pragma mark -
 
 @implementation BibItem
 
@@ -257,40 +259,6 @@ static NSParagraphStyle* bodyParagraphStyle = nil;
     return [encoder isByref] ? (id)[NSDistantObject proxyWithLocal:self connection:[encoder connection]] : self;
 }
 
-- (void)makeType{
-    NSString *fieldString;
-    BibTypeManager *typeMan = [BibTypeManager sharedManager];
-    NSEnumerator *reqFieldsE = [[typeMan requiredFieldsForType:pubType] objectEnumerator];
-    NSEnumerator *optFieldsE = [[typeMan optionalFieldsForType:pubType] objectEnumerator];
-    NSEnumerator *defFieldsE = [[typeMan userDefaultFieldsForType:pubType] objectEnumerator];
-  
-    NSMutableArray *removeKeys = [NSMutableArray array];
-    NSEnumerator *keyE = [[pubFields allKeysUsingLock:bibLock] objectEnumerator];
-    NSString *key;
-    
-    while (key = [keyE nextObject]) {
-        if ([[pubFields objectForKey:key usingLock:bibLock] isEqualAsComplexString:@""])
-            [removeKeys addObject:key];
-    }
-    
-    while(fieldString = [reqFieldsE nextObject]){
-        addkey(fieldString)
-    }
-    while(fieldString = [optFieldsE nextObject]){
-        addkey(fieldString)
-    }
-    while(fieldString = [defFieldsE nextObject]){
-        addkey(fieldString)
-    }    
-    
-    //I don't enforce Keywords, but since there's GUI depending on them, I will enforce these others:
-    addkey(BDSKLocalUrlString) addkey(BDSKUrlString) addkey(BDSKAnnoteString) addkey(BDSKAbstractString) addkey(BDSKRssDescriptionString)
-
-    // now remove everything that's left in remove keys from pubfields
-    [pubFields removeObjectsForKeys:removeKeys usingLock:bibLock];
-    
-}
-
 - (void)dealloc{
     [[NSNotificationCenter defaultCenter] removeObserver:self];
     [[self undoManager] removeAllActionsWithTarget:self];
@@ -307,20 +275,6 @@ static NSParagraphStyle* bodyParagraphStyle = nil;
     [bibLock release];
     [stringCache release];
     [super dealloc];
-}
-
-- (BibDocument *)document {
-    return document;
-}
-
-- (void)setDocument:(BibDocument *)newDocument {
-    if (document != newDocument) {
-		document = newDocument;
-	}
-}
-
-- (NSUndoManager *)undoManager { // this may be nil
-    return [document undoManager];
 }
 
 - (NSString *)description{
@@ -406,6 +360,71 @@ static NSParagraphStyle* bodyParagraphStyle = nil;
             (unsigned int) self << (32 - 4));
 }
 
+#pragma mark -
+
+#pragma mark Type info
+
+#define addkey(s) if([pubFields objectForKey: s usingLock:bibLock] == nil){[pubFields setObject:@"" forKey: s usingLock:bibLock];} [removeKeys removeObject: s usingLock:bibLock];
+
+- (void)makeType{
+    NSString *fieldString;
+    BibTypeManager *typeMan = [BibTypeManager sharedManager];
+    NSEnumerator *reqFieldsE = [[typeMan requiredFieldsForType:pubType] objectEnumerator];
+    NSEnumerator *optFieldsE = [[typeMan optionalFieldsForType:pubType] objectEnumerator];
+    NSEnumerator *defFieldsE = [[typeMan userDefaultFieldsForType:pubType] objectEnumerator];
+  
+    NSMutableArray *removeKeys = [NSMutableArray array];
+    NSEnumerator *keyE = [[pubFields allKeysUsingLock:bibLock] objectEnumerator];
+    NSString *key;
+    
+    while (key = [keyE nextObject]) {
+        if ([[pubFields objectForKey:key usingLock:bibLock] isEqualAsComplexString:@""])
+            [removeKeys addObject:key];
+    }
+    
+    while(fieldString = [reqFieldsE nextObject]){
+        addkey(fieldString)
+    }
+    while(fieldString = [optFieldsE nextObject]){
+        addkey(fieldString)
+    }
+    while(fieldString = [defFieldsE nextObject]){
+        addkey(fieldString)
+    }    
+    
+    //I don't enforce Keywords, but since there's GUI depending on them, I will enforce these others:
+    addkey(BDSKLocalUrlString) addkey(BDSKUrlString) addkey(BDSKAnnoteString) addkey(BDSKAbstractString) addkey(BDSKRssDescriptionString)
+
+    // now remove everything that's left in remove keys from pubfields
+    [pubFields removeObjectsForKeys:removeKeys usingLock:bibLock];
+    
+}
+
+- (void)typeInfoDidChange:(NSNotification *)aNotification{
+	[self makeType];
+}
+
+- (void)customFieldsDidChange:(NSNotification *)aNotification{
+	[self makeType];
+	[groups removeAllObjects];
+}
+
+#pragma mark Document
+
+- (BibDocument *)document {
+    return document;
+}
+
+- (void)setDocument:(BibDocument *)newDocument {
+    if (document != newDocument) {
+		document = newDocument;
+	}
+}
+
+- (NSUndoManager *)undoManager { // this may be nil
+    return [document undoManager];
+}
+
 // accessors for fileorder
 - (NSNumber *)fileOrder{
     if (document == nil)
@@ -423,6 +442,7 @@ static NSParagraphStyle* bodyParagraphStyle = nil;
     [bibLock unlock];
 }
 
+#pragma mark -
 #pragma mark Generic person handling code
 
 - (void)rebuildPeople{
@@ -706,6 +726,7 @@ static NSParagraphStyle* bodyParagraphStyle = nil;
         return [BibAuthor emptyAuthor];
 }
 
+#pragma mark -
 #pragma mark Accessors
 
 - (BibItem *)crossrefParent{
@@ -777,6 +798,18 @@ static NSParagraphStyle* bodyParagraphStyle = nil;
 	}
     OBPOSTCONDITION([NSString isEmptyString:title] == NO);
 	return [title stringByRemovingTeX];
+}
+
+- (void)duplicateTitleToBooktitleOverwriting:(BOOL)overwrite{
+	NSString *title = [pubFields objectForKey:BDSKTitleString usingLock:bibLock];
+	
+	if([NSString isEmptyString:title])
+		return;
+	
+	NSString *booktitle = [pubFields objectForKey:BDSKBooktitleString usingLock:bibLock];
+	if(![NSString isEmptyString:booktitle] && !overwrite)
+		return;
+	[self setField:BDSKBooktitleString toValue:title];
 }
 
 - (NSCalendarDate *)date{
@@ -867,92 +900,6 @@ static NSParagraphStyle* bodyParagraphStyle = nil;
     [self setRatingField:BDSKRatingString toValue:rating];
 }
 
-- (void)setRatingField:(NSString *)field toValue:(unsigned int)rating{
-	if (rating > 5)
-		rating = 5;
-	[self setField:field toValue:[NSString stringWithFormat:@"%i", rating]];
-}
-
-- (int)ratingValueOfField:(NSString *)field{
-    return [[pubFields objectForKey:field usingLock:bibLock] intValue];
-}
-
-- (BOOL)boolValueOfField:(NSString *)field{
-    // stored as a string
-	return [(NSString *)[pubFields objectForKey:field usingLock:bibLock] booleanValue];
-}
-
-- (void)setBooleanField:(NSString *)field toValue:(BOOL)boolValue{
-	[self setField:field toValue:[NSString stringWithBool:boolValue]];
-}
-
-- (NSCellStateValue)triStateValueOfField:(NSString *)field{
-	return [(NSString *)[pubFields objectForKey:field usingLock:bibLock] triStateValue];
-}
-
-- (void)setTriStateField:(NSString *)field toValue:(NSCellStateValue)triStateValue{
-	if(![[pubFields allKeysUsingLock:bibLock] containsObject:field])
-		[self addField:field];
-	[self setField:field toValue:[NSString stringWithTriStateValue:triStateValue]];
-}
-
-- (int)intValueOfField:(NSString *)field {
-	BibTypeManager *typeManager = [BibTypeManager sharedManager];
-		
-	if([typeManager isRatingField:field]){
-		return [self ratingValueOfField:field];
-	}else if([typeManager isBooleanField:field]){
-		return (int)[self boolValueOfField:field];
-    }else if([typeManager isTriStateField:field]){
-		return (int)[self triStateValueOfField:field];
-	}else{
-		return 0;
-    }
-}
-
-- (NSString *)valueOfGenericField:(NSString *)field {
-	return [self valueOfGenericField:field inherit:YES];
-}
-
-- (NSString *)valueOfGenericField:(NSString *)field inherit:(BOOL)inherit {
-	BibTypeManager *typeManager = [BibTypeManager sharedManager];
-		
-	if([typeManager isRatingField:field]){
-		return [NSString stringWithFormat:@"%i", [self ratingValueOfField:field]];
-	}else if([typeManager isBooleanField:field]){
-		return [NSString stringWithBool:[self boolValueOfField:field]];
-    }else if([typeManager isTriStateField:field]){
-		return [NSString stringWithTriStateValue:[self triStateValueOfField:field]];
-	}else if([field isEqualToString:BDSKTypeString]){
-		return [self type];
-	}else if([field isEqualToString:BDSKCiteKeyString]){
-		return [self citeKey];
-	}else if([field isEqualToString:BDSKAllFieldsString]){
-        return [self allFieldsString];
-    }else{
-		return [self valueOfField:field inherit:inherit];
-    }
-}
-
-- (void)setGenericField:(NSString *)field toValue:(NSString *)value{
-    OBASSERT([field isEqualToString:BDSKAllFieldsString] == NO);
-	BibTypeManager *typeManager = [BibTypeManager sharedManager];
-	
-	if([typeManager isBooleanField:field]){
-		[self setBooleanField:field toValue:[value booleanValue]];
-    }else if([typeManager isTriStateField:field]){
-        [self setTriStateField:field toValue:[value triStateValue]];
-	}else if([typeManager isRatingField:field]){
-		[self setRatingField:field toValue:[value intValue]];
-	}else if([field isEqualToString:BDSKTypeString]){
-		[self setType:value];
-	}else if([field isEqualToString:BDSKCiteKeyString]){
-		[self setCiteKey:value];
-	}else{
-		[self setField:field toValue:value];
-	}
-}
-
 - (void)setHasBeenEdited:(BOOL)yn{
     //NSLog(@"set has been edited %@", (yn)?@"YES":@"NO");
     hasBeenEdited = yn;
@@ -960,42 +907,6 @@ static NSParagraphStyle* bodyParagraphStyle = nil;
 
 - (BOOL)hasBeenEdited{
     return hasBeenEdited;
-}
-
-- (NSString *)suggestedCiteKey
-{
-	NSString *citeKeyFormat = [[OFPreferenceWrapper sharedPreferenceWrapper] objectForKey:BDSKCiteKeyFormatKey];
-	NSString *ck = [BDSKFormatParser parseFormat:citeKeyFormat forField:BDSKCiteKeyString ofItem:self];
-	if ([[OFPreferenceWrapper sharedPreferenceWrapper] boolForKey:BDSKCiteKeyLowercaseKey]) {
-		ck = [ck lowercaseString];
-	}
-	return ck;
-}
-
-- (BOOL)canSetCiteKey
-{
-	if ([[NSApp delegate] requiredFieldsForCiteKey] == nil)
-		return NO;
-	
-	NSEnumerator *fEnum = [[[NSApp delegate] requiredFieldsForCiteKey] objectEnumerator];
-	NSString *fieldName;
-	NSString *fieldValue = [self citeKey];
-	
-	if (![NSString isEmptyString:fieldValue] && ![fieldValue isEqualToString:@"cite-key"]) {
-		return NO;
-	}
-	while (fieldName = [fEnum nextObject]) {
-		if ([fieldName isEqualToString:BDSKAuthorEditorString]) {
-			if ([NSString isEmptyString:[self valueOfField:BDSKAuthorString]] && 
-				[NSString isEmptyString:[self valueOfField:BDSKEditorString]])
-				return NO;
-		} else {
-			if ([NSString isEmptyString:[self valueOfField:fieldName]]) {
-				return NO;
-			}
-		}
-	}
-	return YES;
 }
 
 - (void)setCiteKey:(NSString *)newCiteKey{
@@ -1041,6 +952,55 @@ static NSParagraphStyle* bodyParagraphStyle = nil;
     return (citeKey != nil ? citeKey : @"");
 }
 
+- (NSString *)suggestedCiteKey
+{
+	NSString *citeKeyFormat = [[OFPreferenceWrapper sharedPreferenceWrapper] objectForKey:BDSKCiteKeyFormatKey];
+	NSString *ck = [BDSKFormatParser parseFormat:citeKeyFormat forField:BDSKCiteKeyString ofItem:self];
+	if ([[OFPreferenceWrapper sharedPreferenceWrapper] boolForKey:BDSKCiteKeyLowercaseKey]) {
+		ck = [ck lowercaseString];
+	}
+	return ck;
+}
+
+- (BOOL)canSetCiteKey
+{
+	if ([[NSApp delegate] requiredFieldsForCiteKey] == nil)
+		return NO;
+	
+	NSEnumerator *fEnum = [[[NSApp delegate] requiredFieldsForCiteKey] objectEnumerator];
+	NSString *fieldName;
+	NSString *fieldValue = [self citeKey];
+	
+	if (![NSString isEmptyString:fieldValue] && ![fieldValue isEqualToString:@"cite-key"]) {
+		return NO;
+	}
+	while (fieldName = [fEnum nextObject]) {
+		if ([fieldName isEqualToString:BDSKAuthorEditorString]) {
+			if ([NSString isEmptyString:[self valueOfField:BDSKAuthorString]] && 
+				[NSString isEmptyString:[self valueOfField:BDSKEditorString]])
+				return NO;
+		} else {
+			if ([NSString isEmptyString:[self valueOfField:fieldName]]) {
+				return NO;
+			}
+		}
+	}
+	return YES;
+}
+
+#pragma mark Pub Fields
+
+- (NSDictionary *)pubFields{
+    [bibLock lock];
+    NSDictionary *copy = [[pubFields copy] autorelease];
+    [bibLock unlock];
+    return copy;
+}
+
+- (NSArray *)allFields{
+    return [pubFields allKeysUsingLock:bibLock];
+}
+
 - (void)setPubFields: (NSDictionary *)newFields{
     if(newFields != pubFields){
         [bibLock lock];
@@ -1065,8 +1025,6 @@ static NSParagraphStyle* bodyParagraphStyle = nil;
 														  userInfo:notifInfo];
     }
 }
-
-#pragma mark Key Value Coding
 
 - (void)setField: (NSString *)key toValue: (NSString *)value{
 	[self setField:key toValue:value withModDate:[NSCalendarDate date]];
@@ -1116,10 +1074,6 @@ static NSParagraphStyle* bodyParagraphStyle = nil;
     // this method is intended as a workaround for a BibEditor issue with using -[NSTextStorage mutableString] to track changes
     OBPRECONDITION([value isEqualToString:[pubFields objectForKey:key usingLock:bibLock]]);
     [pubFields setObject:value forKey:key usingLock:bibLock];
-}
-
-- (id)valueForUndefinedKey:(NSString *)key{
-    return [self valueOfGenericField:key];
 }
 
 - (NSString *)valueOfField: (NSString *)key{
@@ -1224,19 +1178,202 @@ static NSParagraphStyle* bodyParagraphStyle = nil;
 	
 }
 
-- (NSDictionary *)pubFields{
-    [bibLock lock];
-    NSDictionary *copy = [[pubFields copy] autorelease];
-    [bibLock unlock];
-    return copy;
+#pragma mark Derived field values
+
+- (id)valueForUndefinedKey:(NSString *)key{
+    return [self valueOfGenericField:key];
 }
 
-- (NSArray *)allFields{
-    return [pubFields allKeysUsingLock:bibLock];
+- (NSString *)valueOfGenericField:(NSString *)field {
+	return [self valueOfGenericField:field inherit:YES];
+}
+
+- (NSString *)valueOfGenericField:(NSString *)field inherit:(BOOL)inherit {
+	BibTypeManager *typeManager = [BibTypeManager sharedManager];
+		
+	if([typeManager isRatingField:field]){
+		return [NSString stringWithFormat:@"%i", [self ratingValueOfField:field]];
+	}else if([typeManager isBooleanField:field]){
+		return [NSString stringWithBool:[self boolValueOfField:field]];
+    }else if([typeManager isTriStateField:field]){
+		return [NSString stringWithTriStateValue:[self triStateValueOfField:field]];
+	}else if([field isEqualToString:BDSKTypeString]){
+		return [self type];
+	}else if([field isEqualToString:BDSKCiteKeyString]){
+		return [self citeKey];
+	}else if([field isEqualToString:BDSKAllFieldsString]){
+        return [self allFieldsString];
+    }else{
+		return [self valueOfField:field inherit:inherit];
+    }
+}
+
+- (void)setGenericField:(NSString *)field toValue:(NSString *)value{
+    OBASSERT([field isEqualToString:BDSKAllFieldsString] == NO);
+	BibTypeManager *typeManager = [BibTypeManager sharedManager];
+	
+	if([typeManager isBooleanField:field]){
+		[self setBooleanField:field toValue:[value booleanValue]];
+    }else if([typeManager isTriStateField:field]){
+        [self setTriStateField:field toValue:[value triStateValue]];
+	}else if([typeManager isRatingField:field]){
+		[self setRatingField:field toValue:[value intValue]];
+	}else if([field isEqualToString:BDSKTypeString]){
+		[self setType:value];
+	}else if([field isEqualToString:BDSKCiteKeyString]){
+		[self setCiteKey:value];
+	}else{
+		[self setField:field toValue:value];
+	}
+}
+
+- (int)intValueOfField:(NSString *)field {
+	BibTypeManager *typeManager = [BibTypeManager sharedManager];
+		
+	if([typeManager isRatingField:field]){
+		return [self ratingValueOfField:field];
+	}else if([typeManager isBooleanField:field]){
+		return (int)[self boolValueOfField:field];
+    }else if([typeManager isTriStateField:field]){
+		return (int)[self triStateValueOfField:field];
+	}else{
+		return 0;
+    }
+}
+
+- (int)ratingValueOfField:(NSString *)field{
+    return [[pubFields objectForKey:field usingLock:bibLock] intValue];
+}
+
+- (void)setRatingField:(NSString *)field toValue:(unsigned int)rating{
+	if (rating > 5)
+		rating = 5;
+	[self setField:field toValue:[NSString stringWithFormat:@"%i", rating]];
+}
+
+- (BOOL)boolValueOfField:(NSString *)field{
+    // stored as a string
+	return [(NSString *)[pubFields objectForKey:field usingLock:bibLock] booleanValue];
+}
+
+- (void)setBooleanField:(NSString *)field toValue:(BOOL)boolValue{
+	[self setField:field toValue:[NSString stringWithBool:boolValue]];
+}
+
+- (NSCellStateValue)triStateValueOfField:(NSString *)field{
+	return [(NSString *)[pubFields objectForKey:field usingLock:bibLock] triStateValue];
+}
+
+- (void)setTriStateField:(NSString *)field toValue:(NSCellStateValue)triStateValue{
+	if(![[pubFields allKeysUsingLock:bibLock] containsObject:field])
+		[self addField:field];
+	[self setField:field toValue:[NSString stringWithTriStateValue:triStateValue]];
 }
 
 #pragma mark -
-#pragma mark Text Representations
+#pragma mark BibTeX strings
+
+- (NSString *)bibTeXStringByExpandingMacros:(BOOL)expand dropInternal:(BOOL)drop texify:(BOOL)shouldTeXify{
+	OFPreferenceWrapper *pw = [OFPreferenceWrapper sharedPreferenceWrapper];
+	NSMutableSet *knownKeys = nil;
+	NSSet *urlKeys = nil;
+	NSString *field;
+    NSString *value;
+    NSMutableString *s = [[[NSMutableString alloc] init] autorelease];
+    NSMutableArray *keys = [[pubFields allKeysUsingLock:bibLock] mutableCopy];
+	NSEnumerator *e;
+    
+    BibTypeManager *btm = [BibTypeManager sharedManager];
+    NSString *type = [self type];
+    NSAssert1(type != nil, @"Tried to use a nil pubtype in %@.  You will need to quit and relaunch BibDesk after fixing the error manually.", self );
+	[keys sortUsingSelector:@selector(caseInsensitiveCompare:)];
+	if ([pw boolForKey:BDSKSaveAnnoteAndAbstractAtEndOfItemKey]) {
+		NSArray *finalKeys = [[btm noteFieldsSet] allObjects];
+		[keys removeObjectsInArray:finalKeys]; // make sure these fields are at the end, as they can be long
+		[keys addObjectsFromArray:finalKeys];
+	}
+	if (drop) {
+        knownKeys = [[NSMutableSet alloc] initWithCapacity:14];
+		[knownKeys addObjectsFromArray:[btm requiredFieldsForType:type]];
+		[knownKeys addObjectsFromArray:[btm optionalFieldsForType:type]];
+		[knownKeys addObject:BDSKCrossrefString];
+	}
+	if(shouldTeXify)
+        urlKeys = [[BibTypeManager sharedManager] allURLFieldsSet];
+	
+	e = [keys objectEnumerator];
+	[keys release];
+
+    //build BibTeX entry:
+    [s appendString:@"@"];
+    
+    [s appendString:type];
+    [s appendString:@"{"];
+    [s appendString:[self citeKey]];
+    while(field = [e nextObject]){
+		if (drop && ![knownKeys containsObject:field])
+			continue;
+		
+        value = [pubFields objectForKey:field usingLock:bibLock];
+        NSString *valString;
+        
+		if([field isEqualToString:BDSKAuthorString] && [pw boolForKey:BDSKShouldSaveNormalizedAuthorNamesKey] && ![value isComplex]){ // only if it's not complex, use the normalized author name
+			value = [self bibTeXAuthorStringNormalized:YES inherit:NO];
+		}
+		
+		if(shouldTeXify && ![urlKeys containsObject:field]){
+			
+			@try{
+				value = [[BDSKConverter sharedConverter] stringByTeXifyingString:value];
+			}
+            @catch(id localException){
+                if([localException isKindOfClass:[NSException class]] && [[localException name] isEqualToString:BDSKTeXifyException]){
+                    // the exception from the converter has a description of the unichar that couldn't convert; we add some useful context to it, then rethrow
+                    NSException *exception = [NSException exceptionWithName:BDSKTeXifyException reason:[NSString stringWithFormat: NSLocalizedString(@"Character \"%@\" in the %@ of %@ can't be converted to TeX.", @"character conversion warning"), [localException reason], field, [self citeKey]] userInfo:[NSDictionary dictionaryWithObjectsAndKeys:self, @"item", field, @"field", nil]];
+                    @throw exception;
+                } else @throw;
+			}
+		}                
+		
+        if(expand == YES)
+            valString = [value stringAsExpandedBibTeXString];
+        else
+            valString = [value stringAsBibTeXString];
+        
+        if(![value isEqualToString:@""]){
+            [s appendString:@",\n\t"];
+            [s appendString:field];
+            [s appendString:@" = "];
+            [s appendString:valString];
+        }
+    }
+    [s appendString:@"}"];
+    [knownKeys release];
+    return s;
+}
+
+- (NSString *)bibTeXStringByExpandingMacros:(BOOL)expand dropInternal:(BOOL)drop{
+    BOOL shouldTeXify = [[OFPreferenceWrapper sharedPreferenceWrapper] boolForKey:BDSKShouldTeXifyWhenSavingAndCopyingKey];
+    return [self bibTeXStringByExpandingMacros:expand dropInternal:drop texify:shouldTeXify];
+}
+
+- (NSString *)bibTeXString{
+	return [self bibTeXStringByExpandingMacros:NO dropInternal:NO];
+}
+
+- (NSString *)bibTeXStringDroppingInternal:(BOOL)drop{
+	return [self bibTeXStringByExpandingMacros:NO dropInternal:drop];
+}
+
+- (NSString *)bibTeXStringByExpandingMacros{
+    return [self bibTeXStringByExpandingMacros:YES dropInternal:NO];
+}
+
+- (NSString *)bibTeXStringUnexpandedAndDeTeXifiedWithoutInternalFields{
+    return [self bibTeXStringByExpandingMacros:NO dropInternal:YES texify:NO];
+}
+
+#pragma mark Other text representations
 
 - (NSData *)RTFValue{
     NSAttributedString *aStr = [self attributedStringValue];
@@ -1499,108 +1636,6 @@ static NSParagraphStyle* bodyParagraphStyle = nil;
     }
     [s appendString:@"ER  - \n"];
     return s;
-}
-
-#pragma mark BibTeX strings
-
-- (NSString *)bibTeXStringByExpandingMacros:(BOOL)expand dropInternal:(BOOL)drop texify:(BOOL)shouldTeXify{
-	OFPreferenceWrapper *pw = [OFPreferenceWrapper sharedPreferenceWrapper];
-	NSMutableSet *knownKeys = nil;
-	NSSet *urlKeys = nil;
-	NSString *field;
-    NSString *value;
-    NSMutableString *s = [[[NSMutableString alloc] init] autorelease];
-    NSMutableArray *keys = [[pubFields allKeysUsingLock:bibLock] mutableCopy];
-	NSEnumerator *e;
-    
-    BibTypeManager *btm = [BibTypeManager sharedManager];
-    NSString *type = [self type];
-    NSAssert1(type != nil, @"Tried to use a nil pubtype in %@.  You will need to quit and relaunch BibDesk after fixing the error manually.", self );
-	[keys sortUsingSelector:@selector(caseInsensitiveCompare:)];
-	if ([pw boolForKey:BDSKSaveAnnoteAndAbstractAtEndOfItemKey]) {
-		NSArray *finalKeys = [[btm noteFieldsSet] allObjects];
-		[keys removeObjectsInArray:finalKeys]; // make sure these fields are at the end, as they can be long
-		[keys addObjectsFromArray:finalKeys];
-	}
-	if (drop) {
-        knownKeys = [[NSMutableSet alloc] initWithCapacity:14];
-		[knownKeys addObjectsFromArray:[btm requiredFieldsForType:type]];
-		[knownKeys addObjectsFromArray:[btm optionalFieldsForType:type]];
-		[knownKeys addObject:BDSKCrossrefString];
-	}
-	if(shouldTeXify)
-        urlKeys = [[BibTypeManager sharedManager] allURLFieldsSet];
-	
-	e = [keys objectEnumerator];
-	[keys release];
-
-    //build BibTeX entry:
-    [s appendString:@"@"];
-    
-    [s appendString:type];
-    [s appendString:@"{"];
-    [s appendString:[self citeKey]];
-    while(field = [e nextObject]){
-		if (drop && ![knownKeys containsObject:field])
-			continue;
-		
-        value = [pubFields objectForKey:field usingLock:bibLock];
-        NSString *valString;
-        
-		if([field isEqualToString:BDSKAuthorString] && [pw boolForKey:BDSKShouldSaveNormalizedAuthorNamesKey] && ![value isComplex]){ // only if it's not complex, use the normalized author name
-			value = [self bibTeXAuthorStringNormalized:YES inherit:NO];
-		}
-		
-		if(shouldTeXify && ![urlKeys containsObject:field]){
-			
-			@try{
-				value = [[BDSKConverter sharedConverter] stringByTeXifyingString:value];
-			}
-            @catch(id localException){
-                if([localException isKindOfClass:[NSException class]] && [[localException name] isEqualToString:BDSKTeXifyException]){
-                    // the exception from the converter has a description of the unichar that couldn't convert; we add some useful context to it, then rethrow
-                    NSException *exception = [NSException exceptionWithName:BDSKTeXifyException reason:[NSString stringWithFormat: NSLocalizedString(@"Character \"%@\" in the %@ of %@ can't be converted to TeX.", @"character conversion warning"), [localException reason], field, [self citeKey]] userInfo:[NSDictionary dictionaryWithObjectsAndKeys:self, @"item", field, @"field", nil]];
-                    @throw exception;
-                } else @throw;
-			}
-		}                
-		
-        if(expand == YES)
-            valString = [value stringAsExpandedBibTeXString];
-        else
-            valString = [value stringAsBibTeXString];
-        
-        if(![value isEqualToString:@""]){
-            [s appendString:@",\n\t"];
-            [s appendString:field];
-            [s appendString:@" = "];
-            [s appendString:valString];
-        }
-    }
-    [s appendString:@"}"];
-    [knownKeys release];
-    return s;
-}
-
-- (NSString *)bibTeXStringByExpandingMacros:(BOOL)expand dropInternal:(BOOL)drop{
-    BOOL shouldTeXify = [[OFPreferenceWrapper sharedPreferenceWrapper] boolForKey:BDSKShouldTeXifyWhenSavingAndCopyingKey];
-    return [self bibTeXStringByExpandingMacros:expand dropInternal:drop texify:shouldTeXify];
-}
-
-- (NSString *)bibTeXString{
-	return [self bibTeXStringByExpandingMacros:NO dropInternal:NO];
-}
-
-- (NSString *)bibTeXStringDroppingInternal:(BOOL)drop{
-	return [self bibTeXStringByExpandingMacros:NO dropInternal:drop];
-}
-
-- (NSString *)bibTeXStringByExpandingMacros{
-    return [self bibTeXStringByExpandingMacros:YES dropInternal:NO];
-}
-
-- (NSString *)bibTeXStringUnexpandedAndDeTeXifiedWithoutInternalFields{
-    return [self bibTeXStringByExpandingMacros:NO dropInternal:YES texify:NO];
 }
 
 #define AddXMLField(t,f) value = [self valueOfField:f]; if ([NSString isEmptyString:value] == NO) [s appendFormat:@"<%@>%@</%@>\n", t, [value stringByEscapingBasicXMLEntitiesUsingUTF8], t]
@@ -2059,26 +2094,8 @@ static NSParagraphStyle* bodyParagraphStyle = nil;
 	return NO;
 }
 
-- (void)typeInfoDidChange:(NSNotification *)aNotification{
-	[self makeType];
-}
-
-- (void)customFieldsDidChange:(NSNotification *)aNotification{
-	[self makeType];
-	[groups removeAllObjects];
-}
-
-- (void)duplicateTitleToBooktitleOverwriting:(BOOL)overwrite{
-	NSString *title = [pubFields objectForKey:BDSKTitleString usingLock:bibLock];
-	
-	if([NSString isEmptyString:title])
-		return;
-	
-	NSString *booktitle = [pubFields objectForKey:BDSKBooktitleString usingLock:bibLock];
-	if(![NSString isEmptyString:booktitle] && !overwrite)
-		return;
-	[self setField:BDSKBooktitleString toValue:title];
-}
+#pragma mark -
+#pragma mark Groups
 
 - (NSSet *)groupsForField:(NSString *)field{
 	// first see if we had it cached
@@ -2436,10 +2453,10 @@ static NSParagraphStyle* bodyParagraphStyle = nil;
 - (void)invalidateGroupNames{
 	[groups removeAllObjects];
 }
-
-- (id)stringCache { return stringCache; }
         
 @end
+
+#pragma mark -
 
 @implementation BibItem (PDFMetadata)
 
@@ -2481,6 +2498,8 @@ static NSParagraphStyle* bodyParagraphStyle = nil;
 
 @end
 
+#pragma mark -
+
 @implementation BibItem (Private)
 
 // The date setters should only be used at initialization or from updateMetadata:forKey:.  If you want to change the date, change the value in pubFields, and let updateMetadata handle the ivar.
@@ -2509,6 +2528,8 @@ static NSParagraphStyle* bodyParagraphStyle = nil;
     }
     [bibLock unlock];
 }
+
+- (id)stringCache { return stringCache; }
 
 - (void)updateMetadataForKey:(NSString *)key{
     
@@ -2594,6 +2615,7 @@ static NSParagraphStyle* bodyParagraphStyle = nil;
 
 @end
 
+#pragma mark -
 
 @implementation BDSKBibItemStringCache
 
