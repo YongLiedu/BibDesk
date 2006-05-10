@@ -38,7 +38,25 @@
 
 #import <Cocoa/Cocoa.h>
 
-@class BibItem;
+@protocol BDSKParseableItemDocument;
+
+@protocol BDSKParseableItem <NSObject>
+- (id<BDSKParseableItemDocument>)document;
+- (NSString *)fileType;
+- (NSString *)type;
+- (NSString *)citeKey;
+- (NSString *)container;
+- (NSString *)valueOfField:(NSString *)field;
+- (NSArray *)peopleArrayForField:(NSString *)field;
+- (NSString *)localFilePathForField:(NSString *)field;
+@end
+
+
+@protocol BDSKParseableItemDocument <NSObject>
+- (NSString *)fileName;
+- (BOOL)citeKeyIsUsed:(NSString *)key byItemOtherThan:(id<BDSKParseableItem>)item;
+@end
+
 
 @interface BDSKFormatParser : NSObject {
 }
@@ -52,7 +70,7 @@
     @param pub The BibItem for which to parse the format
 	@result The parsed format string 
 */
-+ (NSString *)parseFormat:(NSString *)format forField:(NSString *)fieldName ofItem:(BibItem *)pub;
++ (NSString *)parseFormat:(NSString *)format forField:(NSString *)fieldName ofItem:(id <BDSKParseableItem>)pub;
 
 /*!
     @method uniqueString:suffix:forField:ofItem:numberOfChars:from:to:force:
@@ -71,7 +89,7 @@
 + (NSString *)uniqueString:(NSString *)baseString 
 					suffix:(NSString *)suffix
 				  forField:(NSString *)fieldName 
-					ofItem:(BibItem *)pub
+					ofItem:(id <BDSKParseableItem>)pub
 			 numberOfChars:(unsigned int)number 
 					  from:(unichar)fromChar 
 						to:(unichar)toChar 
@@ -85,7 +103,7 @@
     @param fieldName The name of the field (e.g. "Author")
 	@param pub The item for which to check validity
 */
-+ (BOOL)stringIsValid:(NSString *)proposedStr forField:(NSString *)fieldName ofItem:(BibItem *)pub;
++ (BOOL)stringIsValid:(NSString *)proposedStr forField:(NSString *)fieldName ofItem:(id <BDSKParseableItem>)pub;
 
 /*!
  @method stringBySanitizingString:forField:inFieldType:

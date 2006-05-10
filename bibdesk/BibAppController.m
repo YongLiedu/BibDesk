@@ -801,7 +801,7 @@
 	requiredFieldsForLocalUrl = [newFields retain];
 }
 
-- (NSString *)folderPathForFilingPapersFromDocument:(BibDocument *)document {
+- (NSString *)folderPathForFilingPapersFromDocument:(id <BDSKParseableItemDocument>)document {
 	NSString *papersFolderPath = [[OFPreferenceWrapper sharedPreferenceWrapper] stringForKey:BDSKPapersFolderPathKey];
 	if ([NSString isEmptyString:papersFolderPath])
 		papersFolderPath = [[document fileName] stringByDeletingLastPathComponent];

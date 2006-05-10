@@ -37,7 +37,6 @@
  */
 
 #import "BDSKFormatParser.h"
-#import "BibItem.h"
 #import <OmniFoundation/NSAttributedString-OFExtensions.h>
 #import "BibPrefController.h"
 #import "BibAuthor.h"
@@ -45,12 +44,11 @@
 #import "BibTypeManager.h"
 #import "BibAppController.h"
 #import "NSString_BDSKExtensions.h"
-#import "BibDocument.h"
 #import "NSDate_BDSKExtensions.h"
 
 @implementation BDSKFormatParser
 
-+ (NSString *)parseFormat:(NSString *)format forField:(NSString *)fieldName ofItem:(BibItem *)pub
++ (NSString *)parseFormat:(NSString *)format forField:(NSString *)fieldName ofItem:(id <BDSKParseableItem>)pub
 {
 	NSMutableString *parsedStr = [NSMutableString string];
 	NSString *savedStr = nil;
@@ -409,7 +407,7 @@
 						[scanner scanString:@"}" intoString:NULL]) {
 						if (![scanner scanInt:&number]) number = 3;
 				
-						string = [pub acronymValueOfField:string ignore:number];
+						string = [[pub valueOfField:string] acronymValueIgnoringWordLength:number];
 						string = [self stringByStrictlySanitizingString:string forField:fieldName inFileType:[pub fileType]];
 						[parsedStr appendString:string];
 					}
@@ -524,7 +522,7 @@
 + (NSString *)uniqueString:(NSString *)baseStr
 					suffix:(NSString *)suffix
 				  forField:(NSString *)fieldName 
-					ofItem:(BibItem *)pub
+					ofItem:(id <BDSKParseableItem>)pub
 			 numberOfChars:(unsigned int)number 
 					  from:(unichar)fromChar 
 						to:(unichar)toChar 
@@ -556,7 +554,7 @@
 
 // this might be changed when more fields are available
 // do we want to add character checks as in CiteKeyFormatter?
-+ (BOOL)stringIsValid:(NSString *)proposedStr forField:(NSString *)fieldName ofItem:(BibItem *)pub
++ (BOOL)stringIsValid:(NSString *)proposedStr forField:(NSString *)fieldName ofItem:(id <BDSKParseableItem>)pub
 {
 	if ([fieldName isEqualToString:BDSKCiteKeyString]) {
 		return !([NSString isEmptyString:proposedStr] ||

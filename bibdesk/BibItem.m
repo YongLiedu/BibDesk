@@ -1095,28 +1095,6 @@ static NSParagraphStyle* bodyParagraphStyle = nil;
 	return value;
 }
 
-- (NSString *)acronymValueOfField:(NSString *)key ignore:(unsigned int)ignoreLength{
-    NSMutableString *result = [NSMutableString string];
-    NSArray *allComponents = [[self valueOfField:key] componentsSeparatedByString:@" "]; // single whitespace
-    NSEnumerator *e = [allComponents objectEnumerator];
-    NSString *component = nil;
-	unsigned int currentIgnoreLength;
-    
-    while(component = [e nextObject]){
-		currentIgnoreLength = ignoreLength;
-        if(![component isEqualToString:@""]) // stringByTrimmingCharactersInSet will choke on an empty string
-            component = [component stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]];
-		if([component length] > 1 && [component characterAtIndex:[component length] - 1] == '.')
-			currentIgnoreLength = 0;
-		if(![component isEqualToString:@""])
-            component = [component stringByTrimmingCharactersInSet:[[NSCharacterSet alphanumericCharacterSet] invertedSet]];
-		if([component length] > currentIgnoreLength){
-            [result appendString:[[component substringToIndex:1] uppercaseString]];
-        }
-    }
-    return result;
-}
-
 - (void)addField:(NSString *)key{
 	[self addField:key withModDate:[NSCalendarDate date]];
 }

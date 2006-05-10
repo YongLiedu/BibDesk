@@ -38,6 +38,7 @@
 
 @class OFMessageQueue;
 @class BibDocument;
+@protocol BDSKParseableItemDocument;
 
 /*!
     @class BibAppController
@@ -142,7 +143,7 @@
 - (NSArray *)requiredFieldsForLocalUrl;
 - (void)setRequiredFieldsForLocalUrl:(NSArray *)newFields;
 
-- (NSString *)folderPathForFilingPapersFromDocument:(BibDocument *)document;
+- (NSString *)folderPathForFilingPapersFromDocument:(id <BDSKParseableItemDocument>)document;
 
 /*!
 @method addString:forCompletionEntry:

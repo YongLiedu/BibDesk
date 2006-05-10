@@ -42,7 +42,7 @@
 #import <OmniFoundation/OFObject.h>
 
 @class BibDocument, BDSKGroup, BibAuthor, BDSKBibItemStringCache;
-@protocol BDSKMacroResolver;
+@protocol BDSKParseableItem;
 
 /*!
 @class BibItem
@@ -50,7 +50,7 @@
 @discussion This is the data model class that encapsulates each Bibtex entry. BibItems are created for each entry in a file, and a BibDocument keeps collections of BibItems. They are also created in response to drag-in or paste operations containing BibTeX source. Their textvalue method is used to provide the text that is written to a file on saves.
 
 */
-@interface BibItem : OFObject <NSCopying, NSCoding>{
+@interface BibItem : OFObject <NSCopying, NSCoding, BDSKParseableItem>{
     NSString *fileType;
     NSString *citeKey;    /*! @var citeKey the citeKey of the bibItem */
     NSCalendarDate *pubDate;
@@ -577,8 +577,6 @@
     
 */
 - (NSString *)valueOfField: (NSString *)key inherit: (BOOL)inherit;
-
-- (NSString *)acronymValueOfField:(NSString *)key ignore:(unsigned int)ignoreLength;
 
 - (void)removeField: (NSString *)key;
 - (void)removeField: (NSString *)key withModDate:(NSCalendarDate *)date;
