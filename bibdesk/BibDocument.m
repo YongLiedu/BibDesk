@@ -1326,7 +1326,7 @@ NSString *BDSKWeblocFilePboardType = @"CorePasteboardFlavorType 0x75726C20";
 }
 
 // this method is called for the main table; it's a wrapper for delete or remove from group
-- (IBAction)removeSelectedPubs:(id)sender{BDSKLOGIMETHOD();
+- (IBAction)removeSelectedPubs:(id)sender{
 	NSArray *selectedGroups = [self selectedGroups];
 	
 	if([selectedGroups containsObject:allPublicationsGroup]){
