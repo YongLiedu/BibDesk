@@ -1384,7 +1384,7 @@ The groupedPublications array is a subset of the publications array, developed b
 	BDSKStaticGroup *group;
 	
 	while (group = [groupEnum nextObject]) {
-		keys = [[[group publications] valueForKeyPath:@"@distinctUnionOfObjects.citeKey"] componentsJoinedByString:@"'"];
+		keys = [[[group publications] valueForKeyPath:@"@distinctUnionOfObjects.citeKey"] componentsJoinedByString:@","];
         groupDict = [[NSDictionary alloc] initWithObjectsAndKeys:[group stringValue], @"group name", keys, @"keys", nil];
 		[array addObject:groupDict];
 		[groupDict release];
