@@ -434,6 +434,8 @@ static NSString *BDSKLastImportLocalizedString = nil;
 }
 
 - (void)addPublication:(BibItem *)item {
+    if ([publications containsObjectIdenticalTo:item] == YES)
+        return;
     [[[self undoManager] prepareWithInvocationTarget:self] removePublication:item];
     [publications addObject:item];
     [self setCount:[publications count]];
@@ -441,6 +443,13 @@ static NSString *BDSKLastImportLocalizedString = nil;
 }
 
 - (void)addPublicationsFromArray:(NSArray *)items {
+    if ([publications firstObjectCommonWithArray:items]) {
+        NSMutableArray *mutableItems = [items mutableCopy];
+        [mutableItems removeObjectsInArray:publications];
+        items = [mutableItems autorelease];
+        if ([items count] == 0)
+            return;
+    }
     [[[self undoManager] prepareWithInvocationTarget:self] removePublicationsInArray:items];
     [publications addObjectsFromArray:items];
     [self setCount:[publications count]];
@@ -448,6 +457,8 @@ static NSString *BDSKLastImportLocalizedString = nil;
 }
 
 - (void)removePublication:(BibItem *)item {
+    if ([publications containsObjectIdenticalTo:item] == NO)
+        return;
     [[[self undoManager] prepareWithInvocationTarget:self] addPublication:item];
     [publications removeObject:item];
     [self setCount:[publications count]];
