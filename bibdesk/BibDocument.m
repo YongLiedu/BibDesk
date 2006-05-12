@@ -2278,11 +2278,11 @@ NSString *BDSKWeblocFilePboardType = @"CorePasteboardFlavorType 0x75726C20";
         
         sortDescriptor = [[BDSKTableSortDescriptor alloc] initWithKey:@"firstAuthorOrEditor" ascending:ascend selector:@selector(sortCompare:)];
         
-	}else if([tcID isEqualToString:BDSKSecondAuthorString]){
+	}else if([tcID isEqualToString:BDSKSecondAuthorEditorString]){
 		
         sortDescriptor = [[BDSKTableSortDescriptor alloc] initWithKey:@"secondAuthorOrEditor" ascending:ascend selector:@selector(sortCompare:)];
 		
-	}else if([tcID isEqualToString:BDSKThirdAuthorString]){
+	}else if([tcID isEqualToString:BDSKThirdAuthorEditorString]){
 		
         sortDescriptor = [[BDSKTableSortDescriptor alloc] initWithKey:@"thirdAuthorOrEditor" ascending:ascend selector:@selector(sortCompare:)];
         
