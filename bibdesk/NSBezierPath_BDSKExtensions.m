@@ -60,17 +60,14 @@
 + (NSBezierPath*)bezierPathWithRoundRectInRect:(NSRect)rect radius:(float)radius
 {
     OBASSERT([NSThread inMainThread]);
+    
     // Make sure radius doesn't exceed a maximum size to avoid artifacts:
-    if( radius >= (rect.size.height/2) )
-        radius = truncf(rect.size.height/2) - 1;
-    if( radius >= (rect.size.width/2) )
-        radius = truncf(rect.size.width/2) - 1;
+    radius = MIN(radius, 0.5f * MIN(NSHeight(rect), NSWidth(rect)));
     
     // Make sure silly values simply lead to un-rounded corners:
     if( radius <= 0 )
         return [self bezierPathWithRect:rect];
     
-    // Now draw our rectangle:
     NSRect innerRect = NSInsetRect(rect, radius, radius); // Make rect with corners being centers of the corner circles.
 	static NSBezierPath *path = nil;
     if(path == nil)
@@ -78,24 +75,19 @@
     
     [path removeAllPoints];    
     
-    [path moveToPoint: NSMakePoint(rect.origin.x,rect.origin.y +radius)];
+    // Now draw our rectangle:
+    [path moveToPoint: NSMakePoint(NSMinX(innerRect) - radius, NSMinY(innerRect))];
     
     // Bottom left (origin):
-    [path appendBezierPathWithArcWithCenter:innerRect.origin radius:radius startAngle:180.0 endAngle:270.0];
-    [path relativeLineToPoint:NSMakePoint(NSWidth(innerRect), 0.0)]; // Bottom edge.
-    
-    // Bottom right:
+    [path appendBezierPathWithArcWithCenter:NSMakePoint(NSMinX(innerRect), NSMinY(innerRect)) radius:radius startAngle:180.0 endAngle:270.0];
+    // Bottom edge and bottom right:
     [path appendBezierPathWithArcWithCenter:NSMakePoint(NSMaxX(innerRect), NSMinY(innerRect)) radius:radius startAngle:270.0 endAngle:360.0];
-    [path relativeLineToPoint:NSMakePoint(0.0, NSHeight(innerRect))]; // Right edge.
-    
-    // Top right:
+    // Left edge and top right:
     [path appendBezierPathWithArcWithCenter:NSMakePoint(NSMaxX(innerRect), NSMaxY(innerRect)) radius:radius startAngle:0.0  endAngle:90.0 ];
-    [path relativeLineToPoint:NSMakePoint(-NSWidth(innerRect), 0.0)]; // Top edge.
-    
-    // Top left:
-    [path appendBezierPathWithArcWithCenter:NSMakePoint(NSMinX(innerRect),NSMaxY(innerRect)) radius:radius startAngle:90.0  endAngle:180.0];
-    
-    [path closePath]; // Implicitly causes left edge.
+    // Top edge and top left:
+    [path appendBezierPathWithArcWithCenter:NSMakePoint(NSMinX(innerRect), NSMaxY(innerRect)) radius:radius startAngle:90.0  endAngle:180.0];
+    // Left edge:
+    [path closePath];
     
     return path;
 }
@@ -117,25 +109,22 @@
 {
     OBASSERT([NSThread inMainThread]);
 
-    // Make sure radius doesn't exceed a maximum size to avoid artifacts:
-    float radius = rect.size.height/2;
+    float radius = 0.5f * rect.size.height;
     
-    // Now draw our rectangle:
 	static NSBezierPath *path = nil;
     if(path == nil)
         path = [[self bezierPath] retain];
     
     [path removeAllPoints];
     
+    // Now draw our rectangle:
     [path moveToPoint: NSMakePoint(NSMinX(rect), NSMaxY(rect))];
     
     // Left half circle:
     [path appendBezierPathWithArcWithCenter:NSMakePoint(NSMinX(rect), NSMidY(rect)) radius:radius startAngle:90.0 endAngle:270.0];
-    // Bottom edge.
-	[path relativeLineToPoint:NSMakePoint(NSWidth(rect), 0.0)];
-    // Right half circle:
+    // Bottom edge and right half circle:
     [path appendBezierPathWithArcWithCenter:NSMakePoint(NSMaxX(rect), NSMidY(rect)) radius:radius startAngle:-90.0 endAngle:90.0];
-    // Top edge.
+    // Top edge:
     [path closePath];
     
     return path;
