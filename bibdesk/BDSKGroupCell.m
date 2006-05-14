@@ -42,6 +42,7 @@
 #import "NSBezierPath_BDSKExtensions.h"
 #import <OmniBase/OBUtilities.h>
 #import "NSImage+Toolbox.h"
+#import "NSGeometry_BDSKExtensions.h"
 
 static NSMutableParagraphStyle *BDSKGroupCellStringParagraphStyle = nil;
 static NSMutableParagraphStyle *BDSKGroupCellCountParagraphStyle = nil;
@@ -286,8 +287,7 @@ textRect.origin.y += floorf(vOffset); \
     }
     	
     // Draw the image
-	imageRect.size = imageSize;
-	imageRect.origin.y += ceilf(0.5f * (NSHeight(aRect) - imageSize.height));
+    imageRect = BDSKCenterRect(imageRect, imageSize, controlViewIsFlipped);
 	if (controlViewIsFlipped)
 		[[groupValue icon] drawFlippedInRect:imageRect operation:NSCompositeSourceOver];
 	else

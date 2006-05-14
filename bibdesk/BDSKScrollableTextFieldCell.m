@@ -37,6 +37,7 @@
  */
 
 #import "BDSKScrollableTextFieldCell.h"
+#import "NSGeometry_BDSKExtensions.h"
 
 
 @implementation BDSKScrollableTextFieldCell
@@ -124,9 +125,8 @@
 	
 	if(isClipped){
 		NSSize buttonSize = [[[self class] scrollArrowImageForButton:button highlighted:NO] size];
-		buttonRect.size = buttonSize;
-		buttonRect.origin.y = NSMinY(theRect) + floorf(0.5f * (NSHeight(theRect) - buttonSize.height));
-		if (button == BDSKScrollLeftButton)
+        buttonRect = BDSKCenterRect(theRect, buttonSize, NO);
+        if (button == BDSKScrollLeftButton)
 			buttonRect.origin.x = NSMaxX(theRect) - 2.0f * buttonSize.width;
 		else
 			buttonRect.origin.x = NSMaxX(theRect) - buttonSize.width;

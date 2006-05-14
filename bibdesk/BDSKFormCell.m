@@ -40,6 +40,7 @@
 #import "BDSKForm.h"
 #import "BDSKComplexString.h"
 #import "NSImage+Toolbox.h"
+#import "NSGeometry_BDSKExtensions.h"
 #import <OmniBase/OmniBase.h>
 
 #define ICON_PADDING 4.0
@@ -100,20 +101,16 @@ static NSSize fileIconSize;
 	
 	if(isArrow || [self hasFileIcon]){
 		NSSize size = isArrow ? arrowImageSize : fileIconSize;
-		buttonRect.size = size;
+        buttonRect = BDSKCenterRect(theRect, size, YES);
 		buttonRect.origin.x = NSMaxX(theRect) - size.width - ICON_PADDING;
-		buttonRect.origin.y = NSMinY(theRect) + ceilf(0.5f * (NSHeight(theRect) - size.height));
 	}
 	return buttonRect;
 }
 
 // returns the rect in which the cell's value text is drawn
 - (NSRect)textRectForBounds:(NSRect)theRect{
-    NSRect rect = [self drawingRectForBounds:theRect];
-    float textOffset = [self titleWidth];
-    rect.origin.x += textOffset;
-    rect.size.width -= textOffset;
-    
+    NSRect ignored, rect = [self drawingRectForBounds:theRect];
+    NSDivideRect(rect, &ignored, &rect, [self titleWidth], NSMinXEdge);
     return rect;
 }
 

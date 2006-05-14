@@ -37,6 +37,7 @@
  */
 
 #import "BDSKHeaderPopUpButtonCell.h"
+#import "NSGeometry_BDSKExtensions.h"
 #import <OmniAppkit/NSImage-OAExtensions.h>
 
 
@@ -126,8 +127,7 @@
 		NSDivideRect(cellFrame, &indicatorRect, &cellFrame, indicatorSize.width, NSMaxXEdge);
 		NSDivideRect(cellFrame, &ignored, &cellFrame, 4.0, NSMaxXEdge);
 		
-		indicatorRect.origin.y += ceilf(0.5f * (NSHeight(cellFrame) - indicatorSize.height));
-		indicatorRect.size = indicatorSize;
+        indicatorRect = BDSKCenterRect(indicatorRect, indicatorSize, [controlView isFlipped]);
 		
 		if ([controlView isFlipped])
 			[indicatorImage drawFlippedInRect:indicatorRect operation:NSCompositeSourceOver];

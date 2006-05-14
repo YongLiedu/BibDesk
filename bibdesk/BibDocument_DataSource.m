@@ -57,6 +57,7 @@
 #import "NSSet_BDSKExtensions.h"
 #import "BibEditor.h"
 #import "BDSKSharedGroup.h"
+#import "NSGeometry_BDSKExtensions.h"
 
 @implementation BibDocument (DataSource)
 
@@ -284,11 +285,11 @@
         
         if ([(BDSKSharedGroup *)group isRetrieving]) {
             int column = [[tv tableColumns] indexOfObject:aTableColumn];
-            NSRect rect = [tv frameOfCellAtColumn:column row:row];
+            NSRect ignored, rect = [tv frameOfCellAtColumn:column row:row];
             NSSize size = [spinner frame].size;
-            rect.origin.x = NSMaxX(rect) - size.width - 3.0;
-            rect.origin.y += floorf(0.5f * (NSHeight(rect) - size.height));
-            rect.size = size;
+            NSDivideRect(rect, &ignored, &rect, 3.0f, NSMaxXEdge);
+            NSDivideRect(rect, &rect, &ignored, size.width, NSMaxXEdge);
+            rect = BDSKCenterRectVertically(rect, size.height, [tv isFlipped]);
             
             [spinner setFrame:rect];
             if([[tv subviews] containsObject:spinner] == NO)

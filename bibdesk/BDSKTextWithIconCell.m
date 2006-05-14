@@ -36,6 +36,7 @@
  OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 #import "BDSKTextWithIconCell.h"
+#import "NSGeometry_BDSKExtensions.h"
 
 /* Almost all of this code is copy-and-paste from OATextWithIconCell, except for the text layout (which seems wrong in OATextWithIconCell). */
 
@@ -182,8 +183,7 @@ textRect.origin.y += vOffset; \
     [label release];
     
     // Draw the image
-    imageRect.size = imageSize;
-    imageRect.origin.y += ceilf(0.5f * (NSHeight(aRect) - imageSize.height));
+    imageRect = BDSKCenterRect(imageRect, imageSize, [controlView isFlipped]);
     if ([controlView isFlipped])
         [[self icon] drawFlippedInRect:imageRect operation:NSCompositeSourceOver];
     else

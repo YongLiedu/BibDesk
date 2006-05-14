@@ -37,6 +37,7 @@
  */
 
 #import "BDSKStatusBar.h"
+#import "NSGeometry_BDSKExtensions.h"
 #import <OmniBase/assertions.h>
 
 #define LEFT_MARGIN				5.0
@@ -96,36 +97,36 @@
 }
 
 - (void)drawRect:(NSRect)rect {
-	NSRect textRect = [self bounds];
-	NSSize size = [textCell cellSize];
+	NSRect textRect, ignored;
+    float rightMargin = RIGHT_MARGIN;
 	
 	[super drawRect:rect];
-	
-	textRect.origin.x += LEFT_MARGIN;
-	if (progressIndicator == nil) 
-		textRect.size.width = NSWidth(textRect) - LEFT_MARGIN - RIGHT_MARGIN;
-	else
-		textRect.size.width = NSMinX([progressIndicator frame]) - LEFT_MARGIN - MARGIN_BETWEEN_ITEMS;
+    
+    if (progressIndicator)
+        rightMargin += NSWidth([progressIndicator frame]) + MARGIN_BETWEEN_ITEMS;
+    NSDivideRect([self bounds], &ignored, &textRect, LEFT_MARGIN, NSMinXEdge);
+    NSDivideRect(textRect, &ignored, &textRect, rightMargin, NSMaxXEdge);
 	
 	NSEnumerator *dictEnum = [icons objectEnumerator];
 	NSDictionary *dict;
 	NSImage *icon;
 	NSRect iconRect;
+	NSSize size;
 	
 	while (dict = [dictEnum nextObject]) {
 		icon = [dict objectForKey:@"icon"];
-		iconRect.size = [icon size];
-		iconRect.origin.x = NSMaxX(textRect) - NSWidth(iconRect);
-		iconRect.origin.y = floorf(0.5f * (NSHeight(textRect) - NSHeight(iconRect)));
-		textRect.size.width = NSMinX(iconRect) - MARGIN_BETWEEN_ITEMS;
+		size = [icon size];
+        NSDivideRect(textRect, &iconRect, &textRect, size.width, NSMaxXEdge);
+        NSDivideRect(textRect, &ignored, &textRect, MARGIN_BETWEEN_ITEMS, NSMaxXEdge);
+        iconRect = BDSKCenterRectVertically(iconRect, size.height, [self isFlipped]);
 		[iconCell setImage:icon];
 		[iconCell drawWithFrame:iconRect inView:self];
 	}
 	
 	if (textRect.size.width < 0.0)
 		textRect.size.width = 0.0;
-	textRect.origin.y += floorf(0.5f * (NSHeight(textRect) - size.height));
-	textRect.size.height = size.height;
+	size = [textCell cellSize];
+    textRect = BDSKCenterRectVertically(textRect, size.height, [self isFlipped]);
 	[textCell drawWithFrame:textRect inView:self];
 }
 
@@ -307,24 +308,26 @@
 }
 
 - (void)rebuildToolTips {
-	NSRect rect = [self bounds];
+	NSRect ignored, rect;
+    float rightMargin = RIGHT_MARGIN;
 	
-	if (progressIndicator == nil) 
-		rect.size.width = NSWidth(rect) - LEFT_MARGIN - RIGHT_MARGIN;
-	else
-		rect.size.width = NSMinX([progressIndicator frame]) - LEFT_MARGIN - MARGIN_BETWEEN_ITEMS;
+	if (progressIndicator != nil) 
+		rightMargin += NSMinX([progressIndicator frame]) + MARGIN_BETWEEN_ITEMS;
 	
+    NSDivideRect([self bounds], &rect, &ignored, rightMargin, NSMaxXEdge);
+    
 	NSEnumerator *dictEnum = [icons objectEnumerator];
 	NSDictionary *dict;
 	NSRect iconRect;
+    NSSize size;
 	
 	[self removeAllToolTips];
 	
 	while (dict = [dictEnum nextObject]) {
-		iconRect.size = [(NSImage *)[dict objectForKey:@"icon"] size];
-		iconRect.origin.x = NSMaxX(rect) - NSWidth(iconRect);
-		iconRect.origin.y = floorf(0.5f * (NSHeight(rect) - NSHeight(iconRect)));
-		rect.size.width = NSMinX(iconRect) - MARGIN_BETWEEN_ITEMS;
+		size = [(NSImage *)[dict objectForKey:@"icon"] size];
+        NSDivideRect(rect, &iconRect, &rect, size.width, NSMaxXEdge);
+        NSDivideRect(rect, &ignored, &rect, MARGIN_BETWEEN_ITEMS, NSMaxXEdge);
+        iconRect = BDSKCenterRectVertically(iconRect, size.height, [self isFlipped]);
 		[self addToolTipRect:iconRect owner:self userData:[dict objectForKey:@"identifier"]];
 	}
 }
@@ -374,11 +377,11 @@
 		[self addSubview:progressIndicator];
 		[progressIndicator release];
 		
-		NSRect rect = [self bounds];
+		NSRect rect, ignored;
 		NSSize size = [progressIndicator frame].size;
-		rect.origin.x = NSMaxX(rect) - RIGHT_MARGIN - size.width;
-		rect.origin.y = floorf(NSMidY(rect) - 0.5f * size.height);
-		rect.size = size;
+        NSDivideRect([self bounds], &ignored, &rect, RIGHT_MARGIN, NSMaxXEdge);
+        NSDivideRect(rect, &rect, &ignored, size.width, NSMaxXEdge);
+        rect = BDSKCenterRect(rect, size, [self isFlipped]);
 		[progressIndicator setFrame:rect];
 	}
 	[self rebuildToolTips];
