@@ -345,11 +345,11 @@ static int BDSKCompletionMinHeight = 20;
     // get the remaining space on the screen
     float hSize = NSMaxX(screenFrame) - BDSKCompletionMaxWidth - topLeftPoint.x;
     hSize = hSize <= 0.0f ? BDSKCompletionMaxWidth + hSize : BDSKCompletionMaxWidth;
-    hSize = floor(fmaxf(hSize, BDSKCompletionMinWidth));
+    hSize = floorf(fmaxf(hSize, BDSKCompletionMinWidth));
     
     float vSize = topLeftPoint.y - BDSKCompletionMaxHeight;
     vSize = vSize <= 0.0f ? BDSKCompletionMaxHeight + vSize : BDSKCompletionMaxHeight;
-    vSize = floor(fmaxf(vSize, BDSKCompletionMinHeight));
+    vSize = floorf(fmaxf(vSize, BDSKCompletionMinHeight));
     
     NSSize adjustedSize = [self windowContentSize];
     if(adjustedSize.width > hSize)

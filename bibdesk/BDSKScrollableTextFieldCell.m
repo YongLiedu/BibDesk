@@ -125,9 +125,9 @@
 	if(isClipped){
 		NSSize buttonSize = [[[self class] scrollArrowImageForButton:button highlighted:NO] size];
 		buttonRect.size = buttonSize;
-		buttonRect.origin.y = NSMinY(theRect) + floor((NSHeight(theRect) - buttonSize.height) / 2);
+		buttonRect.origin.y = NSMinY(theRect) + floorf(0.5f * (NSHeight(theRect) - buttonSize.height));
 		if (button == BDSKScrollLeftButton)
-			buttonRect.origin.x = NSMaxX(theRect) - 2 * buttonSize.width;
+			buttonRect.origin.x = NSMaxX(theRect) - 2.0f * buttonSize.width;
 		else
 			buttonRect.origin.x = NSMaxX(theRect) - buttonSize.width;
 	}
@@ -161,7 +161,7 @@
 		if (scrollStep == maxScrollStep) 
 			textOrigin.x -= [self stringWidth] - NSWidth(textRect);
 		else
-			textOrigin.x -= scrollStep * NSWidth(textRect) / 2;
+			textOrigin.x -= 0.5f * scrollStep * NSWidth(textRect);
 	}
 	
 	// draw the (clipped) text

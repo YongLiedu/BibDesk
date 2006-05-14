@@ -210,7 +210,7 @@ else if(isRetrieving) { \
 } \
 else if([groupValue count] > 0) { \
     countSize = [countString size]; \
-    countSep = countSize.height/2.0 - 0.5; \
+    countSep = 0.5f * countSize.height - 0.5; \
 } \
 \
 /* set up the border around the image */ \
@@ -225,7 +225,7 @@ if (countSize.width > 0) { \
 } \
 \
 /* this is the main difference from OATextWithIconCell, which ends up with a really weird text baseline for tall cells */\
-float vOffset = (NSHeight(aRect) - [layoutManager defaultLineHeightForFont:[self font]])/2; \
+float vOffset = 0.5f * (NSHeight(aRect) - [layoutManager defaultLineHeightForFont:[self font]]); \
 \
 if (controlViewIsFlipped == NO) \
 textRect.origin.y -= floorf(vOffset); \
@@ -287,7 +287,7 @@ textRect.origin.y += floorf(vOffset); \
     	
     // Draw the image
 	imageRect.size = imageSize;
-	imageRect.origin.y += ceilf((NSHeight(aRect) - imageSize.height) / 2.0);
+	imageRect.origin.y += ceilf(0.5f * (NSHeight(aRect) - imageSize.height));
 	if (controlViewIsFlipped)
 		[[groupValue icon] drawFlippedInRect:imageRect operation:NSCompositeSourceOver];
 	else

@@ -100,7 +100,7 @@
 
 + (CIImage *)imageInRect:(CGRect)aRect withHorizontalGradientFromColor:(CIColor *)fgStartColor toColor:(CIColor *)fgEndColor blendedAtTop:(BOOL)top ofVerticalGradientFromColor:(CIColor *)bgStartColor toColor:(CIColor *)bgEndColor;
 {
-    float radius = CGRectGetWidth(aRect) / 2;
+    float radius = 0.5f * CGRectGetWidth(aRect);
     CGPoint center = CGPointMake(CGRectGetMidX(aRect), top ? CGRectGetMaxY(aRect) : CGRectGetMinY(aRect));
     
     CIImage *foreground = [self imageInRect:aRect withHorizontalGradientFromColor:fgStartColor toColor:fgEndColor];
@@ -112,7 +112,7 @@
 
 + (CIImage *)imageInRect:(CGRect)aRect withVerticalGradientFromColor:(CIColor *)fgStartColor toColor:(CIColor *)fgEndColor blendedAtRight:(BOOL)right ofHorizontalGradientFromColor:(CIColor *)bgStartColor toColor:(CIColor *)bgEndColor;
 {
-    float radius = CGRectGetHeight(aRect) / 2;
+    float radius = 0.5f * CGRectGetHeight(aRect);
     CGPoint center = CGPointMake(right ? CGRectGetMaxX(aRect) : CGRectGetMinX(aRect), CGRectGetMidY(aRect));
     
     CIImage *foreground = [self imageInRect:aRect withVerticalGradientFromColor:fgStartColor toColor:fgEndColor];

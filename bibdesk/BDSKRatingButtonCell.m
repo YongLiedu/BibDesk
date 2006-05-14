@@ -164,7 +164,7 @@
 			break;
 	}
 	
-	margin = (NSWidth(buttonRect) - innerWidth) / 2;
+	margin = 0.5f * (NSWidth(buttonRect) - innerWidth);
 	if (margin < border)
 		margin = border;
 	
@@ -303,11 +303,11 @@
 			break;
 	}
 	
-	margin = (NSWidth(buttonRect) - innerWidth) / 2;
+	margin = 0.5f * (NSWidth(buttonRect) - innerWidth);
 	if (margin < border)
 		margin = border;
 	
-	NSRect rect = NSMakeRect(NSMinX(buttonRect) + margin + (OUTER_SIZE - MARKER_SIZE) / 2, NSMinY(buttonRect) + (NSHeight(buttonRect) - MARKER_SIZE) / 2, MARKER_SIZE, MARKER_SIZE);
+	NSRect rect = NSMakeRect(NSMinX(buttonRect) + margin + 0.5f * (OUTER_SIZE - MARKER_SIZE), NSMinY(buttonRect) + 0.5f * (NSHeight(buttonRect) - MARKER_SIZE), MARKER_SIZE, MARKER_SIZE);
 	NSColor *color = ([self isEnabled]) ? [NSColor grayColor] : [NSColor lightGrayColor];
 	BOOL selected = NO;
 	int i = 0;
@@ -340,8 +340,8 @@
 	
 	if ((selected || [self isBordered]) && [self isEnabled] && rating < maxRating) {
 		rect.size = NSMakeSize(PLACEHOLDER_SIZE, PLACEHOLDER_SIZE);
-		rect.origin.x += (MARKER_SIZE - PLACEHOLDER_SIZE) / 2;
-		rect.origin.y += (MARKER_SIZE - PLACEHOLDER_SIZE) / 2;
+		rect.origin.x += 0.5f * (MARKER_SIZE - PLACEHOLDER_SIZE);
+		rect.origin.y += 0.5f * (MARKER_SIZE - PLACEHOLDER_SIZE);
 		[[NSColor lightGrayColor] set];
 		while (i++ <= maxRating) {
 			[[NSBezierPath bezierPathWithOvalInRect:rect] fill];
@@ -352,7 +352,7 @@
 	[NSGraphicsContext restoreGraphicsState];
 	
 	if (titleToDisplay) {
-		titleRect.origin.y = NSMidY(titleRect) - titleSize.height / 2; 
+		titleRect.origin.y = NSMidY(titleRect) - 0.5f * titleSize.height; 
 		titleRect.size.height = titleSize.height;
 		[titleToDisplay drawInRect:titleRect];
 	}

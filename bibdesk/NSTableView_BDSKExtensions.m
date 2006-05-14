@@ -295,7 +295,7 @@ static IMP originalDealloc;
     
     NSRect drawRect = (rowIndex == -1) ? [self visibleRect] : [self rectOfRow:rowIndex];
     
-    drawRect = NSInsetRect(drawRect, lineWidth/2.0, lineWidth/2.0);
+    drawRect = NSInsetRect(drawRect, 0.5f * lineWidth, 0.5f * lineWidth);
     
     NSBezierPath *path = [NSBezierPath bezierPathWithRoundRectInRect:drawRect radius:4.0];
     

@@ -116,7 +116,7 @@
 		icon = [dict objectForKey:@"icon"];
 		iconRect.size = [icon size];
 		iconRect.origin.x = NSMaxX(textRect) - NSWidth(iconRect);
-		iconRect.origin.y = floor((NSHeight(textRect) - NSHeight(iconRect)) / 2.0);
+		iconRect.origin.y = floorf(0.5f * (NSHeight(textRect) - NSHeight(iconRect)));
 		textRect.size.width = NSMinX(iconRect) - MARGIN_BETWEEN_ITEMS;
 		[iconCell setImage:icon];
 		[iconCell drawWithFrame:iconRect inView:self];
@@ -124,7 +124,7 @@
 	
 	if (textRect.size.width < 0.0)
 		textRect.size.width = 0.0;
-	textRect.origin.y += floor((NSHeight(textRect) - size.height) / 2.0);
+	textRect.origin.y += floorf(0.5f * (NSHeight(textRect) - size.height));
 	textRect.size.height = size.height;
 	[textCell drawWithFrame:textRect inView:self];
 }
@@ -323,7 +323,7 @@
 	while (dict = [dictEnum nextObject]) {
 		iconRect.size = [(NSImage *)[dict objectForKey:@"icon"] size];
 		iconRect.origin.x = NSMaxX(rect) - NSWidth(iconRect);
-		iconRect.origin.y = floor((NSHeight(rect) - NSHeight(iconRect)) / 2.0);
+		iconRect.origin.y = floorf(0.5f * (NSHeight(rect) - NSHeight(iconRect)));
 		rect.size.width = NSMinX(iconRect) - MARGIN_BETWEEN_ITEMS;
 		[self addToolTipRect:iconRect owner:self userData:[dict objectForKey:@"identifier"]];
 	}
@@ -377,7 +377,7 @@
 		NSRect rect = [self bounds];
 		NSSize size = [progressIndicator frame].size;
 		rect.origin.x = NSMaxX(rect) - RIGHT_MARGIN - size.width;
-		rect.origin.y = floor(NSMidY(rect) - size.height/2.0);
+		rect.origin.y = floorf(NSMidY(rect) - 0.5f * size.height);
 		rect.size = size;
 		[progressIndicator setFrame:rect];
 	}

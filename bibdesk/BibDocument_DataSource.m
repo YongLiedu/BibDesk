@@ -287,7 +287,7 @@
             NSRect rect = [tv frameOfCellAtColumn:column row:row];
             NSSize size = [spinner frame].size;
             rect.origin.x = NSMaxX(rect) - size.width - 3.0;
-            rect.origin.y += floorf((NSHeight(rect) - size.height) / 2.0);
+            rect.origin.y += floorf(0.5f * (NSHeight(rect) - size.height));
             rect.size = size;
             
             [spinner setFrame:rect];
@@ -820,7 +820,7 @@
 		NSRect countRect = {NSZeroPoint, [countString size]};
 		float countOffset;
 		
-		countOffset = floor(NSHeight(countRect) / 2.0); // make sure the cap radius is integral
+		countOffset = floorf(0.5f * NSHeight(countRect)); // make sure the cap radius is integral
 		countRect.size.height = 2.0 * countOffset;
 		
 		if (dragCopyType == BDSKBibTeXDragCopyType) {

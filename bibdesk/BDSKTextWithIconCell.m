@@ -151,7 +151,7 @@ NSDivideRect(textRect, &ignored, &textRect, BORDER_BETWEEN_IMAGE_AND_TEXT, rectE
 \
 /* this is the main difference from OATextWithIconCell, which ends up with a really weird text baseline for tall cells */\
 NSLayoutManager *lm = [[NSLayoutManager alloc] init]; \
-float vOffset = (NSHeight(aRect) - [lm defaultLineHeightForFont:[self font]])/2; \
+float vOffset = 0.5f * (NSHeight(aRect) - [lm defaultLineHeightForFont:[self font]]); \
 [lm release];  \
 \
 if (![controlView isFlipped]) \
@@ -183,7 +183,7 @@ textRect.origin.y += vOffset; \
     
     // Draw the image
     imageRect.size = imageSize;
-    imageRect.origin.y += ceil((NSHeight(aRect) - imageSize.height) / 2.0);
+    imageRect.origin.y += ceilf(0.5f * (NSHeight(aRect) - imageSize.height));
     if ([controlView isFlipped])
         [[self icon] drawFlippedInRect:imageRect operation:NSCompositeSourceOver];
     else

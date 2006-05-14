@@ -85,7 +85,7 @@
         NSColor *highlightColor = [NSColor alternateSelectedControlColor];
         float lineWidth = 2.0;
         
-        NSRect highlightRect = NSInsetRect([self cellFrameAtRow:dragRow column:0], lineWidth/2.0, lineWidth/2.0);
+        NSRect highlightRect = NSInsetRect([self cellFrameAtRow:dragRow column:0], 0.5f * lineWidth, 0.5f * lineWidth);
         
         NSBezierPath *path = [NSBezierPath bezierPathWithRoundRectInRect:highlightRect radius:4.0];
         

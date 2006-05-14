@@ -102,7 +102,7 @@ static NSSize fileIconSize;
 		NSSize size = isArrow ? arrowImageSize : fileIconSize;
 		buttonRect.size = size;
 		buttonRect.origin.x = NSMaxX(theRect) - size.width - ICON_PADDING;
-		buttonRect.origin.y = NSMinY(theRect) + ceilf((NSHeight(theRect) - size.height) / 2);
+		buttonRect.origin.y = NSMinY(theRect) + ceilf(0.5f * (NSHeight(theRect) - size.height));
 	}
 	return buttonRect;
 }

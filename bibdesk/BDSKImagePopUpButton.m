@@ -229,8 +229,8 @@
 	NSImage *dragImage = [[[NSImage alloc] initWithSize:size] autorelease];
 	NSPoint mouseLoc = [self convertPoint:[theEvent locationInWindow] fromView:nil];
 	
-	mouseLoc.x -= size.width / 2;
-	mouseLoc.y += size.height / 2;
+	mouseLoc.x -= 0.5f * size.width;
+	mouseLoc.y += 0.5f * size.height;
 	
 	if ([[self cell] usesItemFromMenu] == NO) {
 		iconImage = [self iconImage];
@@ -301,7 +301,7 @@
         NSColor *highlightColor = [NSColor alternateSelectedControlColor];
         float lineWidth = 2.0;
         
-        NSRect highlightRect = NSInsetRect([self bounds], lineWidth/2.0, lineWidth/2.0);
+        NSRect highlightRect = NSInsetRect([self bounds], 0.5f * lineWidth, 0.5f * lineWidth);
         
         NSBezierPath *path = [NSBezierPath bezierPathWithRoundRectInRect:highlightRect radius:4.0];
         

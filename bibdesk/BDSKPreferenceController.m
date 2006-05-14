@@ -143,7 +143,7 @@ static NSRect insetButtonRectAndShift(const NSRect aRect)
     // @@ resolution independence
     center.y += 10;
     
-    return NSInsetRect(NSMakeRect(center.x - side/2, center.y - side/2, side, side), 10, 10);
+    return NSInsetRect(NSMakeRect(center.x - 0.5f * side, center.y - 0.5f * side, side, side), 10, 10);
 }
 
 static inline NSRect convertRectInWindowToScreen(NSRect aRect, NSWindow *window)

@@ -126,7 +126,7 @@
 		NSDivideRect(cellFrame, &indicatorRect, &cellFrame, indicatorSize.width, NSMaxXEdge);
 		NSDivideRect(cellFrame, &ignored, &cellFrame, 4.0, NSMaxXEdge);
 		
-		indicatorRect.origin.y += ceil((NSHeight(cellFrame) - indicatorSize.height)/2.0);
+		indicatorRect.origin.y += ceilf(0.5f * (NSHeight(cellFrame) - indicatorSize.height));
 		indicatorRect.size = indicatorSize;
 		
 		if ([controlView isFlipped])
@@ -141,12 +141,12 @@
 	float height = 4.0 - controlSize;
 	float totalHeight = 3.0 + 2 * height;
 	NSBezierPath *path = [NSBezierPath bezierPath];
-	[path moveToPoint:NSMakePoint(NSMaxX(cellFrame) - 7.5 + controlSize, NSMidY(cellFrame) - totalHeight/2.0)];
-	[path relativeLineToPoint:NSMakePoint(-width/2.0, height)];
+	[path moveToPoint:NSMakePoint(NSMaxX(cellFrame) - 7.5 + controlSize, NSMidY(cellFrame) - 0.5f * totalHeight)];
+	[path relativeLineToPoint:NSMakePoint(-0.5f * width, height)];
 	[path relativeLineToPoint:NSMakePoint(width, 0.0)];
 	[path closePath];
 	[path relativeMoveToPoint:NSMakePoint(0.0, totalHeight)];
-	[path relativeLineToPoint:NSMakePoint(-width/2.0, -height)];
+	[path relativeLineToPoint:NSMakePoint(-0.5f * width, -height)];
 	[path relativeLineToPoint:NSMakePoint(width, 0.0)];
 	[path closePath];
     

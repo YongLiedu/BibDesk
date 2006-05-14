@@ -135,7 +135,7 @@
     [self setRowHeight:rowHeight];
     
     // default is (3.0, 2.0); use a larger spacing for the gradient and drop highlights
-    NSSize intercellSize = NSMakeSize(3.0, rowHeight / 2);
+    NSSize intercellSize = NSMakeSize(3.0, 0.5f * rowHeight);
     [self setIntercellSpacing:intercellSize];
 
 	[self tile];
@@ -152,7 +152,7 @@
     [rowsToHighlight removeIndexes:[self selectedRowIndexes]];
     
     float lineWidth = 1.0f;
-    float heightOffset = [self intercellSpacing].height / 2;
+    float heightOffset = 0.5f * [self intercellSpacing].height;
     
     [self lockFocus];
     [NSGraphicsContext saveGraphicsState];
@@ -168,11 +168,11 @@
     while(rowIndex != NSNotFound){
         
         drawRect = [self rectOfRow:rowIndex];
-        drawRect.size.width -= 2 * lineWidth;
+        drawRect.size.width -= 2.0f * lineWidth;
         drawRect.origin.x += lineWidth;
         
         drawRect.size.height -= heightOffset;
-        drawRect.origin.y += heightOffset/2.0;
+        drawRect.origin.y += 0.5f * heightOffset;
         
         path = [NSBezierPath bezierPathWithRoundRectInRect:drawRect radius:4.0];
         [path setLineWidth:lineWidth];
