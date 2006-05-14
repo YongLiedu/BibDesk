@@ -50,15 +50,17 @@
 }
 
 - (IBAction)performFindPanelAction:(id)sender {
-	if ([[[self window] delegate] respondsToSelector:@selector(performFindPanelAction:)]) 
-		[[[self window] delegate] performFindPanelAction:sender];
+    id delegate = [[self window] delegate];
+	if ([delegate respondsToSelector:@selector(performFindPanelAction:)]) 
+		[delegate performFindPanelAction:sender];
 	else
 		[super performFindPanelAction:sender];
 }
 
 - (BOOL)validateMenuItem:(id<NSMenuItem>)menuItem {
-	if ([[[self window] delegate] respondsToSelector:@selector(validateMenuItem:)] && [menuItem action] == @selector(performFindPanelAction:)) 
-		return [[[self window] delegate] validateMenuItem:menuItem];
+    id delegate = [[self window] delegate];
+	if ([menuItem action] == @selector(performFindPanelAction:) && [delegate respondsToSelector:@selector(performFindPanelAction:)] && [delegate respondsToSelector:@selector(validateMenuItem:)]) 
+		return [delegate validateMenuItem:menuItem];
 	else
 		return [super validateMenuItem:menuItem];
 }
