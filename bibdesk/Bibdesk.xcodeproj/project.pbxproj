@@ -281,6 +281,8 @@
 		CE30FAD70919713100CB1A19 /* BDSKStatusBar.h in Headers */ = {isa = PBXBuildFile; fileRef = CE30FAD50919713100CB1A19 /* BDSKStatusBar.h */; };
 		CE30FAD80919713100CB1A19 /* BDSKStatusBar.m in Sources */ = {isa = PBXBuildFile; fileRef = CE30FAD60919713100CB1A19 /* BDSKStatusBar.m */; };
 		CE31E4100A07928C00F5BD47 /* staticFolderIcon.tiff in Resources */ = {isa = PBXBuildFile; fileRef = CE31E40F0A07928C00F5BD47 /* staticFolderIcon.tiff */; };
+		CE3255FF0A1748D0002D6E4C /* NSGeometry_BDSKExtensions.h in Headers */ = {isa = PBXBuildFile; fileRef = CE3255FD0A1748D0002D6E4C /* NSGeometry_BDSKExtensions.h */; };
+		CE3256000A1748D0002D6E4C /* NSGeometry_BDSKExtensions.m in Sources */ = {isa = PBXBuildFile; fileRef = CE3255FE0A1748D0002D6E4C /* NSGeometry_BDSKExtensions.m */; };
 		CE3448020A11302F0026A92A /* BDSKPreviewItem.m in Sources */ = {isa = PBXBuildFile; fileRef = CE3448000A11302F0026A92A /* BDSKPreviewItem.m */; };
 		CE3448030A11302F0026A92A /* BDSKPreviewItem.h in Headers */ = {isa = PBXBuildFile; fileRef = CE3448010A11302F0026A92A /* BDSKPreviewItem.h */; };
 		CE34E9790A03C16B00222942 /* BDSKConditionsView.h in Headers */ = {isa = PBXBuildFile; fileRef = CE34E9770A03C16B00222942 /* BDSKConditionsView.h */; };
@@ -1124,6 +1126,8 @@
 		CE30FAD50919713100CB1A19 /* BDSKStatusBar.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BDSKStatusBar.h; sourceTree = "<group>"; };
 		CE30FAD60919713100CB1A19 /* BDSKStatusBar.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BDSKStatusBar.m; sourceTree = "<group>"; };
 		CE31E40F0A07928C00F5BD47 /* staticFolderIcon.tiff */ = {isa = PBXFileReference; lastKnownFileType = image.tiff; name = staticFolderIcon.tiff; path = Images/staticFolderIcon.tiff; sourceTree = "<group>"; };
+		CE3255FD0A1748D0002D6E4C /* NSGeometry_BDSKExtensions.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = NSGeometry_BDSKExtensions.h; sourceTree = "<group>"; };
+		CE3255FE0A1748D0002D6E4C /* NSGeometry_BDSKExtensions.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = NSGeometry_BDSKExtensions.m; sourceTree = "<group>"; };
 		CE3448000A11302F0026A92A /* BDSKPreviewItem.m */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.objc; path = BDSKPreviewItem.m; sourceTree = "<group>"; };
 		CE3448010A11302F0026A92A /* BDSKPreviewItem.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = BDSKPreviewItem.h; sourceTree = "<group>"; };
 		CE34E9770A03C16B00222942 /* BDSKConditionsView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BDSKConditionsView.h; sourceTree = "<group>"; };
@@ -1883,6 +1887,7 @@
 				F9235018089A813E00EFEB06 /* NSDate_BDSKExtensions.m */,
 				F95CC0C1087F5378002C5694 /* NSFileManager_BDSKExtensions.m */,
 				F9E6C936099A8FEF00A8B97D /* NSFileManager_ExtendedAttributes.m */,
+				CE3255FE0A1748D0002D6E4C /* NSGeometry_BDSKExtensions.m */,
 				CE573D2509F6A0300020EC16 /* NSIndexSet_BDSKExtensions.m */,
 				F916E68F07A9F9AA009EF011 /* NSMutableDictionary+ThreadSafety.m */,
 				F916E6A507A9FB56009EF011 /* NSMutableArray+ThreadSafety.m */,
@@ -2271,6 +2276,7 @@
 				F9235017089A813E00EFEB06 /* NSDate_BDSKExtensions.h */,
 				F95CC0C0087F5378002C5694 /* NSFileManager_BDSKExtensions.h */,
 				F9E6C935099A8FEF00A8B97D /* NSFileManager_ExtendedAttributes.h */,
+				CE3255FD0A1748D0002D6E4C /* NSGeometry_BDSKExtensions.h */,
 				F9022C9C0758038000C3F701 /* NSImage+Toolbox.h */,
 				CE573D2409F6A0300020EC16 /* NSIndexSet_BDSKExtensions.h */,
 				F916E6A007A9FB56009EF011 /* NSMutableArray+ThreadSafety.h */,
@@ -2586,6 +2592,7 @@
 				F9ED4DAF0A0437E20048D912 /* GenLinkedList.h in Headers */,
 				F9DAC7A20A0A95BC0099117E /* BDSKPreferenceController.h in Headers */,
 				CE3448030A11302F0026A92A /* BDSKPreviewItem.h in Headers */,
+				CE3255FF0A1748D0002D6E4C /* NSGeometry_BDSKExtensions.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -3540,6 +3547,7 @@
 				F9ED4DAE0A0437E20048D912 /* GenLinkedList.c in Sources */,
 				F9A411FC0A0B2066008493C0 /* BDSKPreferenceController.m in Sources */,
 				CE3448020A11302F0026A92A /* BDSKPreviewItem.m in Sources */,
+				CE3256000A1748D0002D6E4C /* NSGeometry_BDSKExtensions.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
