@@ -666,6 +666,8 @@ The groupedPublications array is a subset of the publications array, developed b
 	NSEnumerator *fieldEnum = [[[OFPreferenceWrapper sharedPreferenceWrapper] stringArrayForKey:BDSKGroupFieldsKey] objectEnumerator];
 	NSString *field;
 	
+    [menu addItemWithTitle:@"" action:NULL keyEquivalent:@""];
+	
 	while (field = [fieldEnum nextObject]) {
 		[menu addItemWithTitle:field action:NULL keyEquivalent:@""];
 	}
@@ -739,9 +741,9 @@ The groupedPublications array is a subset of the publications array, developed b
     [addFieldController release];
     
     if(newGroupField == nil)
-        return;
+        return; // the user canceled
     
-	if([[[BibTypeManager sharedManager] invalidGroupFields] containsObject:newGroupField]){
+	if([[[BibTypeManager sharedManager] invalidGroupFields] containsObject:newGroupField] || [newGroupField isEqualToString:@""]){
         NSBeginAlertSheet(NSLocalizedString(@"Invalid Field", @"Invalid Field"),
                           nil, nil, nil, documentWindow, nil, nil, nil, nil,
                           [NSString stringWithFormat:NSLocalizedString(@"The field \"%@\" can not be used for groups.", @""), newGroupField] );
