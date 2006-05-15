@@ -1001,7 +1001,7 @@
     return matches;
 }
 
-#pragma mark Panels
+#pragma mark Version checking
 
 - (BOOL)checkForNetworkAvailability:(NSError **)error{
     
@@ -1023,48 +1023,59 @@
     return result;
 }
 
+- (OFVersionNumber *)latestReleasedVersionNumber:(NSError **)error{
+    
+    NSError *downloadError;
+    NSURLRequest *request = [NSURLRequest requestWithURL:[NSURL URLWithString:@"http://bibdesk.sourceforge.net/bibdesk-versions-xml.txt"]];
+    NSURLResponse *response;
+    
+    // load it synchronously; either the user requested this on the main thread, or this is the update thread
+    NSData *theData = [NSURLConnection sendSynchronousRequest:request returningResponse:&response error:&downloadError];
+    NSDictionary *versionDictionary = nil;
+    OFVersionNumber *remoteVersion = nil;
+    
+    if(nil != theData){
+        NSString *err = nil;
+        versionDictionary = [NSPropertyListSerialization propertyListFromData:(NSData *)theData
+                                                             mutabilityOption:NSPropertyListImmutable
+                                                                       format:NULL
+                                                             errorDescription:&err];
+        if(nil != err){
+            // add the parsing error as underlying error, if the retrieval actually succeeded
+            OFError(&downloadError, BDSKNetworkError, NSLocalizedDescriptionKey, NSLocalizedString(@"Unable to create property list from update check download", @""), NSUnderlyingErrorKey, err, nil);
+            [err release];
+        } else {
+            remoteVersion = [[[OFVersionNumber alloc] initWithVersionString:[versionDictionary valueForKey:@"BibDesk"]] autorelease];
+        }
+    }
+    if(error) 
+        *error = downloadError;    
+    
+    return remoteVersion;
+}
+
 - (void)checkForUpdatesInBackground{
     
     NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
     
-    // CFURLCreateDataAndPropertiesFromResource can eventually crash if the network isn't available, so we'll check for it
     if([self checkForNetworkAvailability:NULL] == NO){
         [pool release];
         return;
     }
-    
-    if(![NSThread setThreadPriority:0])
-        NSLog(@"failed to set update check thread priority");
-    
+        
     NSString *currVersionNumber = [[[NSBundle mainBundle] infoDictionary] objectForKey:@"CFBundleShortVersionString"];
-        
-    NSURL *theURL = [NSURL URLWithString:@"http://bibdesk.sourceforge.net/bibdesk-versions-xml.txt"];
-    CFDataRef theData = NULL;
-    SInt32 status;
+    OFVersionNumber *localVersion = [[[OFVersionNumber alloc] initWithVersionString:currVersionNumber] autorelease];
     
-    if(CFURLCreateDataAndPropertiesFromResource(kCFAllocatorDefault, (CFURLRef)theURL, &theData, NULL, NULL, &status))
-    {
-        NSString *err = nil;
-        NSDictionary *prodVersionDict = [NSPropertyListSerialization propertyListFromData:(NSData *)theData
-                                                                         mutabilityOption:NSPropertyListImmutable
-                                                                                   format:NULL
-                                                                         errorDescription:&err];
-        if(theData != NULL) CFRelease(theData);
+    NSError *error = nil;
+    OFVersionNumber *remoteVersion = [self latestReleasedVersionNumber:&error];
+    
+    if(remoteVersion && [remoteVersion compareToVersionNumber:localVersion] == NSOrderedDescending){
+        [[OFMessageQueue mainQueue] queueSelector:@selector(displayUpdateAvailableWindow:) forObject:self withObject:[remoteVersion cleanVersionString]];
         
-        NSString *latestVersionNumber = [prodVersionDict valueForKey:@"BibDesk"];
-        if(err != nil){
-            NSLog(@"Unable to create property list from update check download");
-            [err release];
-        } else if(prodVersionDict != nil){
-            OFVersionNumber *remoteVersion = [[OFVersionNumber alloc] initWithVersionString:latestVersionNumber];
-            OFVersionNumber *localVersion = [[OFVersionNumber alloc] initWithVersionString:currVersionNumber];
-            
-            if([remoteVersion compareToVersionNumber:localVersion] == NSOrderedDescending)
-                [[OFMessageQueue mainQueue] queueSelector:@selector(displayUpdateAvailableWindow:) forObject:self withObject:latestVersionNumber];
-            
-            [remoteVersion release];
-            [localVersion release];
-        }
+    } else if(nil == remoteVersion){
+        if(nil != error && [NSApplication instancesRespondToSelector:@selector(presentError:)])
+            [NSApp performSelectorOnMainThread:@selector(presentError:) withObject:error waitUntilDone:YES];
+        NSLog(@"Unable to contact server for version check due to error %@", error);
     }
     [pool release];
     
@@ -1072,13 +1083,9 @@
 
 - (void)displayUpdateAvailableWindow:(NSString *)latestVersionNumber{
     int button;
-    button = NSRunAlertPanel(NSLocalizedString(@"A New Version is Available",
-                                               @"Alert when new version is available"),
-                             [NSString stringWithFormat:
-                                 NSLocalizedString(@"A new version of BibDesk is available (version %@). Would you like to download the new version now?",
-                                                   @"format string asking if the user would like to get the new version"), latestVersionNumber],
-                             NSLocalizedString(@"OK",@"OK"), 
-                             NSLocalizedString(@"Cancel",@"Cancel"), nil);
+    button = NSRunAlertPanel(NSLocalizedString(@"A New Version is Available", @"Alert when new version is available"),
+                             NSLocalizedString(@"A new version of BibDesk is available (version %@). Would you like to download the new version now?", @"format string asking if the user would like to get the new version"),
+                             nil, NSLocalizedString(@"Cancel",@"Cancel"), latestVersionNumber, nil);
     if (button == NSOKButton) {
         [[NSWorkspace sharedWorkspace] openURL:[NSURL URLWithString:@"http://bibdesk.sourceforge.net/"]];
     }
@@ -1091,47 +1098,33 @@
     NSError *error = nil;
     if([self checkForNetworkAvailability:&error] == NO){
         [self presentError:error];
-        return;
+    } else {
+        [self checkForUpdatesInBackground];
     }
-        
-    NSString *currVersionNumber = [[[NSBundle bundleForClass:[self class]]
-        infoDictionary] objectForKey:@"CFBundleShortVersionString"];
-        
-    NSDictionary *productVersionDict = [NSDictionary dictionaryWithContentsOfURL:
-        [NSURL URLWithString:@"http://bibdesk.sourceforge.net/bibdesk-versions-xml.txt"]];
     
-    NSString *latestVersionNumber = [productVersionDict valueForKey:@"BibDesk"];
-    
-    if(latestVersionNumber == nil){
-        NSRunAlertPanel(NSLocalizedString(@"Error",
-                                          @"Title of alert when an error happens"),
-                        NSLocalizedString(@"There was an error checking for updates.",
-                                          @"Alert text when the error happens."),
+    OFVersionNumber *remoteVersion = [self latestReleasedVersionNumber:&error];
+    if(nil == remoteVersion){
+        NSRunAlertPanel(NSLocalizedString(@"Error", @"Title of alert when an error happens"),
+                        NSLocalizedString(@"There was an error checking for updates.", @"Alert text when the error happens."),
                         NSLocalizedString(@"Give up", @"Accept & give up"), nil, nil);
         return;
     }
+        
+    NSString *currVersionNumber = [[[NSBundle mainBundle] infoDictionary] objectForKey:@"CFBundleShortVersionString"];
+    OFVersionNumber *localVersion = [[[OFVersionNumber alloc] initWithVersionString:currVersionNumber] autorelease];
     
-    OFVersionNumber *remoteVersion = [[OFVersionNumber alloc] initWithVersionString:latestVersionNumber];
-    OFVersionNumber *localVersion = [[OFVersionNumber alloc] initWithVersionString:currVersionNumber];
-    
-    if([remoteVersion compareToVersionNumber:localVersion] == NSOrderedDescending)
-    {
-        // tell user to download a new version
-        [self displayUpdateAvailableWindow:latestVersionNumber];
-    }
-    else
-    {
+    if([remoteVersion compareToVersionNumber:localVersion] == NSOrderedDescending){
+        [self displayUpdateAvailableWindow:[remoteVersion cleanVersionString]];
+    } else {
         // tell user software is up to date
-        NSRunAlertPanel(NSLocalizedString(@"BibDesk is up-to-date",
-                                          @"Title of alert when a the user's software is up to date."),
-                        NSLocalizedString(@"You have the most recent version of BibDesk.",
-                                          @"Alert text when the user's software is up to date."),
-                        NSLocalizedString(@"OK", @"OK"), nil, nil);                
+        NSRunAlertPanel(NSLocalizedString(@"BibDesk is up to date", @"Title of alert when a the user's software is up to date."),
+                        NSLocalizedString(@"You have the most recent version of BibDesk.", @"Alert text when the user's software is up to date."),
+                        nil, nil, nil);                
     }
-    [remoteVersion release];
-    [localVersion release];
     
 }
+
+#pragma mark Panels
 
 - (IBAction)visitWebSite:(id)sender{
     if(![[NSWorkspace sharedWorkspace] openURL:
