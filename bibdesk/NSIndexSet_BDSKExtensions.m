@@ -42,6 +42,8 @@
 @implementation NSIndexSet (BDSKExtensions)
 
 - (BOOL)intersectsIndexSet:(NSIndexSet *)indexSet{
+    if ([indexSet count] == 0)
+        return NO;
     unsigned int index = [indexSet firstIndex];
     while (index != NSNotFound) {
         if ([self containsIndex:index])
