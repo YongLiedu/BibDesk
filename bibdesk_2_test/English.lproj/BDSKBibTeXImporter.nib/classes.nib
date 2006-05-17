@@ -1,0 +1,13 @@
+{
+    IBClasses = (
+        {
+            ACTIONS = {chooseFileName = id; }; 
+            CLASS = BDSKBibTeXImporter; 
+            LANGUAGE = ObjC; 
+            OUTLETS = {view = NSView; }; 
+            SUPERCLASS = NSObject; 
+        }, 
+        {CLASS = FirstResponder; LANGUAGE = ObjC; SUPERCLASS = NSObject; }
+    ); 
+    IBVersion = 1; 
+}
