@@ -10,5 +10,15 @@
 
 /* A single header file for all importers */
 
-#include "BDSKBibTexImporter.h"
+@class BDSKDocument;
 
+@protocol BDSKImporter <NSObject>
++ (id<BDSKImporter>)sharedImporter;
++ (NSDictionary *)defaultSettings;
+- (id)initWithSettings:(NSDictionary *)newSettings;
+- (NSDictionary *)settings;
+- (NSView *)view;
+- (BOOL)importIntoDocument:(BDSKDocument *)document userInfo:(NSDictionary *)userInfo error:(NSError **)error;
+@end
+
+#include "BDSKBibTexImporter.h"

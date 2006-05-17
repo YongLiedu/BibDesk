@@ -5,6 +5,7 @@
 //  Copyright Michael McCracken 2005 . All rights reserved.
 
 #import "BDSKDocument.h"
+#import "BDSKImporters.h"
 #import "BDSKBibTeXParser.h"
 #import "BDSKPerson.h"
 
