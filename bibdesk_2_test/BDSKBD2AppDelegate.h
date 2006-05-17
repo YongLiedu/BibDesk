@@ -7,8 +7,6 @@
 
 #import <Cocoa/Cocoa.h>
 
-#import "BDSKEntityValueTransformers.h"
-
 @interface BDSKBD2AppDelegate : NSObject {
 
 }

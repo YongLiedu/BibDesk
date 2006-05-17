@@ -9,6 +9,9 @@
 #import "BDSKBD2AppDelegate.h"
 #import "BDSKInspectorWindowController.h"
 
+#pragma mark Import value transformers to register them
+#import "BDSKEntityValueTransformers.h"
+#import "BDSKFilePathToFileNameTransformer.h"
 
 @implementation BDSKBD2AppDelegate
 
@@ -19,6 +22,13 @@
         autorelease];
     [NSValueTransformer setValueTransformer:groupToItemNameTransformer
                                     forName:@"BDSKGroupEntityToItemDisplayNameTransformer"];
+
+    BDSKFilePathToFileNameTransformer *pathToNameTransformer;
+    pathToNameTransformer = [[[BDSKFilePathToFileNameTransformer alloc] init]
+        autorelease];
+    [NSValueTransformer setValueTransformer:pathToNameTransformer
+                                    forName:@"BDSKFilePathToFileNameTransformer"];
+    
 }
 
 - (IBAction)showNoteWindow:(id)sender {
