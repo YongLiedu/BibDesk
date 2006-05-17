@@ -6,6 +6,7 @@
 
 #import "BDSKDocument.h"
 #import "BDSKBibTeXParser.h"
+#import "BDSKPerson.h"
 
 NSString *BDSKPublicationPboardType = @"BDSKPublicationPboardType";
 NSString *BDSKPersonPboardType = @"BDSKPersonPboardType";
@@ -275,6 +276,8 @@ NSString *BDSKTagPboardType = @"BDSKTagPboardType";
 - (NSSet *)newPublicationsFromDictionaries:(NSSet *)dictionarySet{
     NSManagedObjectContext *moc = [self managedObjectContext];
     
+    NSMutableDictionary *allRelationshipsByName = [NSMutableDictionary dictionary];
+    
     NSMutableSet *returnSet = [[NSMutableSet alloc] initWithCapacity:[dictionarySet count]];
     NSEnumerator *dictEnum = [dictionarySet objectEnumerator];
     NSDictionary *dict;
@@ -292,23 +295,33 @@ NSString *BDSKTagPboardType = @"BDSKTagPboardType";
         id value;
         
         while (key = [keyEnum nextObject]) {
+            
             value = [dict objectForKey:key];
             key = [key capitalizedString];
+            
             if ([key isEqualToString:@"Author"] || [key isEqualToString:@"Editor"]) {
+                
                 NSArray *names = ([value isKindOfClass:[NSArray class]]) ? value : [NSArray arrayWithObject:value];
                 NSEnumerator *nameEnum = [names objectEnumerator];
                 NSString *name;
-                NSManagedObject *person;
                 NSManagedObject *relationship;
                 while (name = [nameEnum nextObject]) {
-                     // TODO: identify persons with the same name
-                     person = [NSEntityDescription insertNewObjectForEntityForName:PersonEntityName inManagedObjectContext:moc];
-                     relationship = [NSEntityDescription insertNewObjectForEntityForName:ContributorPublicationRelationshipEntityName inManagedObjectContext:moc];
-                     [person setValue:name forKey:@"name"];
-                     [relationship setValue:person forKey:@"contributor"];
-                     [relationship setValue:[key lowercaseString] forKey:@"relationshipType"];
-                     [relationship setValue:[NSNumber numberWithInt:[contributors count]] forKey:@"index"];
-                     [contributors addObject:relationship];
+                    // create a relationship to link to the publication
+                    relationship = [NSEntityDescription insertNewObjectForEntityForName:ContributorPublicationRelationshipEntityName inManagedObjectContext:moc];
+
+                    // add the relationship to a dictionary of sets - to be linked up later.
+                    NSString *normalizedName = [BDSKBibTeXParser normalizedNameFromString:name];
+                    NSMutableSet *relationshipSet = [allRelationshipsByName objectForKey:normalizedName];
+                    
+                    if(relationshipSet == nil){
+                        relationshipSet = [NSMutableSet set];
+                        [allRelationshipsByName setObject:relationshipSet forKey:normalizedName];
+                    }
+                    [relationshipSet addObject:relationship];
+                    
+                    [relationship setValue:[key lowercaseString] forKey:@"relationshipType"];
+                    [relationship setValue:[NSNumber numberWithInt:[contributors count]] forKey:@"index"];
+                    [contributors addObject:relationship];
                 }
             } else if ([key isEqualToString:@"Annotation"]) {
                 NSManagedObject *note = [NSEntityDescription insertNewObjectForEntityForName:NoteEntityName inManagedObjectContext:moc];
@@ -339,6 +352,23 @@ NSString *BDSKTagPboardType = @"BDSKTagPboardType";
         
         [returnSet addObject:publication];
     }
+    
+    // second pass to create people and link up relationships efficiently
+    
+    NSArray *newPeopleNames = [allRelationshipsByName allKeys];
+    NSMutableSet *people = [BDSKPerson findOrCreatePeopleWithNames:newPeopleNames
+                                              managedObjectContext:moc];
+    NSEnumerator *personE = [people objectEnumerator];
+    NSManagedObject *person = nil;
+    while(person = [personE nextObject]){
+        NSSet *relationships = [allRelationshipsByName objectForKey:[person valueForKey:@"name"]];
+        NSEnumerator *relationshipE = [relationships objectEnumerator];
+        NSManagedObject *relationship = nil;
+        while(relationship = [relationshipE nextObject]){
+            [relationship setValue:person forKey:@"contributor"];
+        }
+    }
+    
     
     return [returnSet autorelease];
 }

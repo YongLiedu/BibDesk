@@ -8,7 +8,7 @@
 
 #import "BDSKPerson.h"
 #import "BDSKBibTeXParser.h"
-
+#import "BDSKDataModelNames.h"
 
 @implementation BDSKPerson
 
@@ -18,6 +18,64 @@
     triggerChangeNotificationsForDependentKey:@"name"];
 }
 
+// This function efficiently finds-or-creates a list of People by their name,
+//  not duplicating people with the same name.
+// It's designed as one part of the 'efficient find or create' pattern seen in http://developer.apple.com/documentation/Cocoa/Conceptual/CoreData/Articles/cdImporting.html#//apple_ref/doc/uid/TP40003174 
+
++ (NSMutableSet *)findOrCreatePeopleWithNames:(NSArray *)names managedObjectContext:(NSManagedObjectContext *)moc{
+
+    NSMutableSet *foundPeople = [[NSMutableSet alloc] initWithCapacity:[names count]];
+    NSArray *sortedNames = [names sortedArrayUsingSelector:@selector(compare:)];
+    
+    NSEntityDescription *personEntityDescription = [NSEntityDescription
+    entityForName:PersonEntityName inManagedObjectContext:moc];
+    
+    NSFetchRequest *request = [[[NSFetchRequest alloc] init] autorelease];
+    [request setEntity:personEntityDescription];
+
+    [request setPredicate:[NSPredicate predicateWithFormat:@"(name IN %@)", sortedNames]];
+    
+    [request setSortDescriptors:[NSArray arrayWithObject:[[[NSSortDescriptor alloc]
+    initWithKey:@"name" ascending:YES] autorelease]]];
+    
+    NSError *error = nil;
+    NSArray *sortedPeopleMatchingNames = [moc executeFetchRequest:request error:&error];
+
+    int sortedNameIdx = 0;
+    int matchingPeopleIdx = 0;
+    NSString *curName = 0;
+    id curPerson = nil;
+    id newPerson = nil;
+    
+    for( ; sortedNameIdx != [sortedNames count]; matchingPeopleIdx++){
+        
+        curName = [sortedNames objectAtIndex:sortedNameIdx];
+        if(matchingPeopleIdx < [sortedPeopleMatchingNames count]){
+            curPerson = [sortedPeopleMatchingNames objectAtIndex:matchingPeopleIdx];
+        }else{
+            curPerson = nil;
+        }
+        
+        if (curPerson == nil || ![curName isEqualToString:[curPerson valueForKey:@"name"]]){
+            // no person for this name - create one 
+            newPerson = [NSEntityDescription insertNewObjectForEntityForName:PersonEntityName inManagedObjectContext:moc];
+            [newPerson setValue:curName forKey:@"name"];
+            [foundPeople addObject:newPerson];
+            sortedNameIdx++;
+        }else{
+            [foundPeople addObject:curPerson];
+            matchingPeopleIdx++;
+            sortedNameIdx++;
+        }
+    }
+         
+    assert([names count] == [foundPeople count]);
+    return [[foundPeople retain] autorelease];
+}
+
+// FIXME: this is copied and pasted into BDSKBibTeXParser.m.
+// it's important that the strings generated here and there match.
+// this is a code smell and should be refactored.
 - (NSString *)name{
     NSString *firstName = [self valueForKey:@"firstNamePart"];
     NSString *vonPart = [self valueForKey:@"vonNamePart"];

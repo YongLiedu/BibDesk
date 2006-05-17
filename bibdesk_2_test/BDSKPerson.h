@@ -13,11 +13,14 @@
 @interface BDSKPerson : BDSKContributor {
 
 }
++ (NSMutableSet *)findOrCreatePeopleWithNames:(NSArray *)names managedObjectContext:(NSManagedObjectContext *)moc;
 
 - (NSString *)name;
 - (void)setName:(NSString *)newName;
 
 - (BDSKPersonInstitutionRelationship *)currentInstitutionRelationship;
 - (NSString *)currentInstitutionRelationshipDisplayString;
+
+
 
 @end
