@@ -1018,7 +1018,7 @@ static NSParagraphStyle* bodyParagraphStyle = nil;
     return copy;
 }
 
-- (NSArray *)allFields{
+- (NSArray *)allFieldNames{
     return [pubFields allKeysUsingLock:bibLock];
 }
 
@@ -1937,7 +1937,6 @@ static NSParagraphStyle* bodyParagraphStyle = nil;
 - (id)allFields{
     if (templateFields == nil)
         [self prepareForTemplateParsing];
-    [templateFields setFieldNames:];
     return templateFields;
 }
 
