@@ -900,17 +900,14 @@ NSString *BDSKWeblocFilePboardType = @"CorePasteboardFlavorType 0x75726C20";
 - (NSData *)htmlDataForSelection:(BOOL)selected{
     NSString *applicationSupportPath = [[NSFileManager defaultManager] currentApplicationSupportPathForCurrentUser]; 
     
-	NSString *fileTemplate = nil;
+	NSString *fileTemplate = [NSString stringWithContentsOfFile:[applicationSupportPath stringByAppendingPathComponent:@"htmlExportTemplate"]];
     if (selected) {
-		NSMutableString *tmpString = [NSMutableString stringWithContentsOfFile:[applicationSupportPath stringByAppendingPathComponent:@"htmlExportTemplate"]];
-		[tmpString replaceOccurrencesOfString:@"<$publicationsAsHTML/>" withString:@"<$selectionAsHTML/>" options:0 range:NSMakeRange(0, [tmpString length])];
-		fileTemplate = tmpString;
-	} else {
-		fileTemplate = [NSString stringWithContentsOfFile:[applicationSupportPath stringByAppendingPathComponent:@"htmlExportTemplate"]];
+		NSMutableString *tmpString = [fileTemplate mutableCopy];
+		[tmpString replaceOccurrencesOfString:@"<$publications>" withString:@"<$selectedPublications>" options:0 range:NSMakeRange(0, [tmpString length])];
+		[tmpString replaceOccurrencesOfString:@"</$publications>" withString:@"</$selectedPublications>" options:0 range:NSMakeRange(0, [tmpString length])];
+		fileTemplate = [tmpString autorelease];
 	}
-	fileTemplate = [fileTemplate stringByParsingTagsWithStartDelimeter:@"<$"
-                                                          endDelimeter:@"/>" 
-                                                           usingObject:self];
+	fileTemplate = [BDSKTemplateParser stringByParsingTemplate:fileTemplate usingObject:self delegate:self];
     return [fileTemplate dataUsingEncoding:NSUTF8StringEncoding allowLossyConversion:YES];    
 }
 
@@ -1114,6 +1111,18 @@ NSString *BDSKWeblocFilePboardType = @"CorePasteboardFlavorType 0x75726C20";
     
     return [self LTBDataForPublications:items encoding:[self documentStringEncoding]];
     
+}
+
+#pragma mark Template parser delegate
+
+- (void)templateParserWillParseTemplate:(id)template usingObject:(id)object isAttributed:(BOOL)flag {
+    if ([object isKindOfClass:[BibItem class]]) 
+        [(BibItem *)object prepareForTemplateParsing];
+}
+
+- (void)templateParserDidParseTemplate:(id)template usingObject:(id)object isAttributed:(BOOL)flag {
+    if ([object isKindOfClass:[BibItem class]]) 
+        [(BibItem *)object cleanupAfterTemplateParsing];
 }
 
 #pragma mark -

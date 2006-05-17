@@ -41,7 +41,7 @@
 #import <Cocoa/Cocoa.h>
 #import <OmniFoundation/OFObject.h>
 
-@class BibDocument, BDSKGroup, BibAuthor, BDSKBibItemStringCache;
+@class BibDocument, BDSKGroup, BibAuthor, BDSKBibItemStringCache, BDSKFieldCollection;
 @protocol BDSKParseableItem;
 
 /*!
@@ -65,6 +65,7 @@
 	NSLock *bibLock;
     BOOL hasBeenEdited;
     BDSKBibItemStringCache *stringCache;
+    BDSKFieldCollection *templateFields;
 }
 
 /*!
@@ -687,6 +688,13 @@
     
 */
 - (NSString *)allFieldsString; 
+
+- (void)prepareForTemplateParsing;
+- (void)cleanupAfterTemplateParsing;
+- (id)requiredFields;
+- (id)optionalFields;
+- (id)defaultFields;
+- (id)fields;
 
 /*!
     @method     URLForField:

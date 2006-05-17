@@ -60,6 +60,7 @@
 #import "BDSKStringNode.h"
 #import "OFCharacterSet_BDSKExtensions.h"
 #import "PDFMetadata.h"
+#import "BibField.h"
 
 @interface BDSKBibItemStringCache : NSObject {
     BibItem *item;
@@ -68,6 +69,19 @@
 
 - (id)initWithItem:(BibItem *)anItem;
 - (void)removeValueForKey:(NSString *)key;
+
+@end
+
+@interface BDSKFieldCollection : NSObject {
+    BibItem *item;
+    NSArray *fieldNames;
+    NSEnumerator *nameEnumerator;
+    NSMutableSet *usedFields;
+}
+
+- (id)initWithItem:(BibItem *)anItem;
+- (void)setFieldNames:(NSArray *)array;
+- (NSEnumerator *)objectEnumerator;
 
 @end
 
@@ -174,6 +188,7 @@ static NSParagraphStyle* bodyParagraphStyle = nil;
 		groups = [[NSMutableDictionary alloc] initWithCapacity:5];
 		
         stringCache = [[BDSKBibItemStringCache alloc] initWithItem:self];
+        templateFields = nil;
         // updateMetadataForKey with a nil argument will set the dates properly if we read them from a file
         [self updateMetadataForKey:nil];
 		[[NSNotificationCenter defaultCenter] addObserver:self
@@ -1886,6 +1901,46 @@ static NSParagraphStyle* bodyParagraphStyle = nil;
     return result;
 }
 
+#pragma mark Templating
+
+- (void)prepareForTemplateParsing{
+    [templateFields release];
+    templateFields = [[BDSKFieldCollection alloc] initWithItem:self];
+}
+
+- (void)cleanupAfterTemplateParsing{
+    [templateFields release];
+    templateFields = nil;
+}
+
+- (id)requiredFields{
+    if (templateFields == nil)
+        [self prepareForTemplateParsing];
+    [templateFields setFieldNames:[[BibTypeManager sharedManager] requiredFieldsForType:[self type]]];
+    return templateFields;
+}
+
+- (id)optionalFields{
+    if (templateFields == nil)
+        [self prepareForTemplateParsing];
+    [templateFields setFieldNames:[[BibTypeManager sharedManager] optionalFieldsForType:[self type]]];
+    return templateFields;
+}
+
+- (id)defaultFields{
+    if (templateFields == nil)
+        [self prepareForTemplateParsing];
+    [templateFields setFieldNames:[[BibTypeManager sharedManager] userDefaultFieldsForType:[self type]]];
+    return templateFields;
+}
+
+- (id)fields{
+    if (templateFields == nil)
+        [self prepareForTemplateParsing];
+    [templateFields setFieldNames:[self allFields]];
+    return templateFields;
+}
+
 #pragma mark -
 #pragma mark URL handling
 
@@ -2669,6 +2724,57 @@ static NSParagraphStyle* bodyParagraphStyle = nil;
         }
     }
     return value;
+}
+
+@end
+
+
+@implementation BDSKFieldCollection 
+
+- (id)initWithItem:(BibItem *)anItem{
+    if (self = [super init]) {
+        item = anItem;
+        fieldNames = nil;
+        nameEnumerator = nil;
+        usedFields = [[NSMutableSet alloc] init];
+    }
+    return self;
+}
+
+- (void)dealloc{
+    [fieldNames release];
+    [usedFields release];
+    [super dealloc];
+}
+
+- (void)setFieldNames:(NSArray *)array{
+    if (array != fieldNames) {
+        [fieldNames release];
+        fieldNames = [array retain];
+    }
+}
+
+- (NSEnumerator *)objectEnumerator{
+    NSMutableArray *array = [NSMutableArray arrayWithCapacity:[fieldNames count]];
+    NSEnumerator *fnEnum = [fieldNames objectEnumerator];
+    NSString *name;
+    BibField *field;
+    while (name = [fnEnum nextObject]) {
+        if ([usedFields containsObject:name])
+            continue;
+        field = [[BibField alloc] initWithName:name bibItem:item];
+        [array addObject:field];
+        [field release];
+    }
+    return [array objectEnumerator];
+}
+
+- (id)valueForUndefinedKey:(NSString *)key{
+    key = [key capitalizedString];
+    if (key == nil)
+        return nil;
+    [usedFields addObject:key];
+    return [item valueOfGenericField:key];
 }
 
 @end
