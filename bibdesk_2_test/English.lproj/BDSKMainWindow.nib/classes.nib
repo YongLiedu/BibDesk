@@ -4,14 +4,21 @@
         {
             ACTIONS = {
                 addNewAutoGroup = id; 
+                addNewFolderGroup = id; 
                 addNewGroup = id; 
                 addNewSmartGroup = id; 
+                closeImportSettingsSheet = id; 
+                editSmartGroup = id; 
+                getInfo = id; 
                 importFromBibTeXFile = id; 
+                oneShotImportFromBibTeXFile = id; 
                 showWindowForSourceListSelection = id; 
             }; 
             CLASS = BDSKMainWindowController; 
             LANGUAGE = ObjC; 
             OUTLETS = {
+                importSettingsMainBox = NSBox; 
+                importSettingsWindow = NSWindow; 
                 selectedItemsArrayController = NSArrayController; 
                 sourceList = NSOutlineView; 
                 sourceListTreeController = NSTreeController; 
