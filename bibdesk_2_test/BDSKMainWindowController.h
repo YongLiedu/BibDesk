@@ -8,13 +8,17 @@
 
 #import <Cocoa/Cocoa.h>
 #import "BDSKSecondaryWindowController.h"
-
+#import "BDSKImporters.h"
 
 @interface BDSKMainWindowController : BDSKSecondaryWindowController {
 
     IBOutlet NSOutlineView *sourceList;
     IBOutlet NSArrayController *selectedItemsArrayController;
     IBOutlet NSTreeController *sourceListTreeController;
+    
+    // Importer stuff
+    IBOutlet NSWindow *importSettingsWindow;
+    IBOutlet NSBox *importSettingsWindowMainBox;    
 }
 
 - (NSSet *)sourceListSelectedItems;
@@ -32,6 +36,8 @@
 
 - (IBAction)getInfo:(id)sender;
 
-- (void)importFromBibTeXFile:(id)sender;
+- (void)importUsingImporter:(id)importer userInfo:(NSDictionary *)userInfo;
+- (IBAction)oneShotImportFromBibTeXFile:(id)sender;
+- (IBAction)closeImportSettingsSheet:(id)sender;
 
 @end

@@ -328,36 +328,55 @@
 
 #pragma mark other file format stuff
 
-// importing
+#pragma mark Importing
 
-// TODO: should this take an argument for the dictionary? what up there?
-- (void)importUsingImporter:(id /*<BDSKImporter>*/)importer{
-    // open a window using the importer's view 
-    // save a ptr to the current importer.
+
+- (void)importUsingImporter:(id)importer userInfo:(NSDictionary *)userInfo{
+    NSMutableDictionary *cinfo = [NSMutableDictionary dictionaryWithDictionary:userInfo];
+    [cinfo setObject:importer forKey:@"importer"];
+    
+    [[importSettingsWindow contentView] replaceSubview:importSettingsWindowMainBox
+                                                  with:[importer view]];
+    
+    [NSApp beginSheet:importSettingsWindow
+       modalForWindow:[self window]
+        modalDelegate:self
+       didEndSelector:@selector(importSheetDidEnd:returnCode:contextInfo:)
+          contextInfo:[cinfo retain]]; 
+}
+
+- (IBAction)closeImportSettingsSheet:(id)sender{
+    [NSApp endSheet:importSettingsWindow returnCode:[sender tag]];
+}
+
+- (void)importSheetDidEnd:(NSWindow *)sheet returnCode:(int)returnCode contextInfo:(void *)contextInfo{
+    NSLog(@"import sheet ended with code %d", returnCode);
+    if(returnCode == 0){
+        [sheet orderOut:self];
+        return; // do nothing
+    }
+    
+    NSMutableDictionary *userInfo = (NSMutableDictionary *) contextInfo;
+    id importer = [userInfo objectForKey:@"importer"];
+    
+    NSError *error = [importer importIntoDocument:[self document] 
+                                         userInfo:userInfo];
+    
+    // TODO: give a better error, please
+    if(error) NSRunAlertPanel(@"alert",@"import didn't work",@"OK",nil,nil);
+
+    [sheet orderOut:self];
 }
 
 - (IBAction)oneShotImportFromBibTeXFile:(id)sender{
-    // open file chooser
     
-    NSOpenPanel *openPanel = [NSOpenPanel openPanel];
-    int returnCode = [openPanel runModalForTypes:[NSArray arrayWithObject:@"bib"]];
-    if (returnCode == NSCancelButton)
-        return;
-    
-	NSString *path = [[openPanel filenames] objectAtIndex: 0];
-	if (path == nil)
-		return;
+    // this action is just an import from a BDSKBibTeXImporter with no extra settings.
+    NSDictionary *info = [NSDictionary dictionary];
 
-    NSData *data = [NSData dataWithContentsOfFile:path];
-    NSError *error = nil;
-    
-    [BDSKBibTeXParser itemsFromData:data error:&error document:(BDSKDocument *)[self document]];
+    [self importUsingImporter:[BDSKBibTeXImporter sharedImporter] 
+                         userInfo:info];
 }
 
-// TODO: implementation
-- (void)importFromBibTeXFile:(id)sender{
-
-}
 
 #pragma mark KVO
 
