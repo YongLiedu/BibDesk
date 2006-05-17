@@ -331,12 +331,18 @@
 #pragma mark Importing
 
 
-- (void)importUsingImporter:(id)importer userInfo:(NSDictionary *)userInfo{
+- (void)importUsingImporter:(id<BDSKImporter>)importer userInfo:(NSDictionary *)userInfo{
     NSMutableDictionary *cinfo = [NSMutableDictionary dictionaryWithDictionary:userInfo];
     [cinfo setObject:importer forKey:@"importer"];
     
-    [[importSettingsWindow contentView] replaceSubview:importSettingsWindowMainBox
-                                                  with:[importer view]];
+    NSView *view = [importer view];
+    NSSize winSize = [[importSettingsWindow contentView] frame].size;
+    NSSize oldSize = [importSettingsMainBox frame].size;
+    NSSize newSize = [view frame].size;
+    winSize.width += newSize.width - oldSize.width;
+    winSize.height += newSize.height - oldSize.height;
+    [importSettingsWindow setContentSize:winSize];
+    [importSettingsMainBox setContentView:view];
     
     [NSApp beginSheet:importSettingsWindow
        modalForWindow:[self window]
@@ -349,22 +355,21 @@
     [NSApp endSheet:importSettingsWindow returnCode:[sender tag]];
 }
 
-- (void)importSheetDidEnd:(NSWindow *)sheet returnCode:(int)returnCode contextInfo:(void *)contextInfo{
-    NSLog(@"import sheet ended with code %d", returnCode);
-    if(returnCode == 0){
+- (void)importSheetDidEnd:(NSWindow *)sheet returnCode:(int)returnCode contextInfo:(NSMutableDictionary *)userInfo{
+    if(returnCode == NSCancelButton){
         [sheet orderOut:self];
         return; // do nothing
     }
     
-    NSMutableDictionary *userInfo = (NSMutableDictionary *) contextInfo;
-    id importer = [userInfo objectForKey:@"importer"];
+    id<BDSKImporter> importer = [userInfo objectForKey:@"importer"];
     
-    NSError *error = [importer importIntoDocument:[self document] 
-                                         userInfo:userInfo];
+    NSError *error = nil;
     
     // TODO: give a better error, please
-    if(error) NSRunAlertPanel(@"alert",@"import didn't work",@"OK",nil,nil);
-
+    if ([importer importIntoDocument:[self document] userInfo:userInfo error:&error] == NO) {
+        NSRunAlertPanel(@"alert",@"import didn't work",@"OK",nil,nil);
+    }
+    
     [sheet orderOut:self];
 }
 
@@ -374,7 +379,7 @@
     NSDictionary *info = [NSDictionary dictionary];
 
     [self importUsingImporter:[BDSKBibTeXImporter sharedImporter] 
-                         userInfo:info];
+                     userInfo:info];
 }
 
 

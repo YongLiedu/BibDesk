@@ -18,7 +18,7 @@
     
     // Importer stuff
     IBOutlet NSWindow *importSettingsWindow;
-    IBOutlet NSBox *importSettingsWindowMainBox;    
+    IBOutlet NSBox *importSettingsMainBox;    
 }
 
 - (NSSet *)sourceListSelectedItems;
@@ -36,7 +36,7 @@
 
 - (IBAction)getInfo:(id)sender;
 
-- (void)importUsingImporter:(id)importer userInfo:(NSDictionary *)userInfo;
+- (void)importUsingImporter:(id<BDSKImporter>)importer userInfo:(NSDictionary *)userInfo;
 - (IBAction)oneShotImportFromBibTeXFile:(id)sender;
 - (IBAction)closeImportSettingsSheet:(id)sender;
 
