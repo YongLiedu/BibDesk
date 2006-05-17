@@ -9,8 +9,11 @@
 #import <Cocoa/Cocoa.h>
 #import "BDSKImporters.h"
 
+@class BDSKDragImageView;
+
 @interface BDSKBibTeXImporter : NSObject <BDSKImporter> {
     IBOutlet NSView *view;
+    IBOutlet BDSKDragImageView *imageView;
     NSString *fileName;
 }
 

@@ -10,6 +10,7 @@
 #import "BDSKBibTeXParser.h"
 #import "BDSKDataModelNames.h"
 #import "BDSKDocument.h"
+#import "BDSKDragImageView.h"
 
 static BDSKBibTeXImporter *sharedImporter = nil;
 
@@ -44,6 +45,10 @@ static BDSKBibTeXImporter *sharedImporter = nil;
 - (void)dealloc{
     [fileName release];
     [super dealloc];
+}
+
+- (void)awakeFromNib{
+    [imageView registerForDraggedTypes:[NSArray arrayWithObjects:NSFilenamesPboardType, nil]];
 }
 
 #pragma mark settings UI and configuration
@@ -106,6 +111,39 @@ static BDSKBibTeXImporter *sharedImporter = nil;
     }else{
         return nil;
     }
+}
+
+#pragma mark DragImageView drag & drop delegate
+
+- (NSDragOperation)dragImageView:(BDSKDragImageView *)aView validateDrop:(id <NSDraggingInfo>)sender {
+    if ([sender draggingSource] == aView)
+		return NSDragOperationNone;
+	
+	NSPasteboard *pboard = [sender draggingPasteboard];
+    
+    if([[pboard types] containsObject:NSFilenamesPboardType])
+        return NSDragOperationCopy;
+
+    return NSDragOperationNone;
+}
+
+- (BOOL)dragImageView:(BDSKDragImageView *)aView acceptDrop:(id <NSDraggingInfo>)sender {
+    NSPasteboard *pboard = [sender draggingPasteboard];
+    
+    if([[pboard types] containsObject:NSFilenamesPboardType] == NO)
+        return NO;
+	
+    NSEnumerator *fnEnum = [[pboard propertyListForType:NSFilenamesPboardType] objectEnumerator];
+    NSString *file = nil;
+    
+    while (file = [fnEnum nextObject]) {
+        if ([[file pathExtension] caseInsensitiveCompare:@"bib"] == NSOrderedSame) {
+            [self setValue:file forKey:@"fileName"];
+            return YES;
+        }
+    }
+    
+    return NO;
 }
 
 @end

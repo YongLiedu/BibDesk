@@ -4,10 +4,17 @@
             ACTIONS = {chooseFileName = id; }; 
             CLASS = BDSKBibTeXImporter; 
             LANGUAGE = ObjC; 
-            OUTLETS = {view = NSView; }; 
+            OUTLETS = {imageView = BDSKDragImageView; view = NSView; }; 
             SUPERCLASS = NSObject; 
         }, 
-        {CLASS = FirstResponder; LANGUAGE = ObjC; SUPERCLASS = NSObject; }
+        {
+            CLASS = BDSKDragImageView; 
+            LANGUAGE = ObjC; 
+            OUTLETS = {delegate = id; }; 
+            SUPERCLASS = NSImageView; 
+        }, 
+        {CLASS = FirstResponder; LANGUAGE = ObjC; SUPERCLASS = NSObject; }, 
+        {CLASS = NSObject; LANGUAGE = ObjC; }
     ); 
     IBVersion = 1; 
 }
