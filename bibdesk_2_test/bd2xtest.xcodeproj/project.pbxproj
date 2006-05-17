@@ -38,6 +38,10 @@
 		8D11072F0486CEB800E47090 /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1058C7A1FEA54F0111CA2CBB /* Cocoa.framework */; };
 		CE2AEF8B09952A6400473196 /* GroupIcon.tiff in Resources */ = {isa = PBXBuildFile; fileRef = CE2AEF8809952A6400473196 /* GroupIcon.tiff */; };
 		CE2AEF8D09952A6400473196 /* SmartGroupIcon.tiff in Resources */ = {isa = PBXBuildFile; fileRef = CE2AEF8A09952A6400473196 /* SmartGroupIcon.tiff */; };
+		CE3264850A1B6CEB002D6E4C /* BDSKDragImageView.h in CopyFiles */ = {isa = PBXBuildFile; fileRef = CE3264830A1B6CEB002D6E4C /* BDSKDragImageView.h */; };
+		CE3264860A1B6CEB002D6E4C /* BDSKDragImageView.m in Sources */ = {isa = PBXBuildFile; fileRef = CE3264840A1B6CEB002D6E4C /* BDSKDragImageView.m */; };
+		CE3264A80A1B6E62002D6E4C /* NSBezierPath_BDSKExtensions.h in CopyFiles */ = {isa = PBXBuildFile; fileRef = CE3264A60A1B6E62002D6E4C /* NSBezierPath_BDSKExtensions.h */; };
+		CE3264A90A1B6E62002D6E4C /* NSBezierPath_BDSKExtensions.m in Sources */ = {isa = PBXBuildFile; fileRef = CE3264A70A1B6E62002D6E4C /* NSBezierPath_BDSKExtensions.m */; };
 		CE3ACF7809B7D07300391900 /* FolderGroupIcon.tiff in Resources */ = {isa = PBXBuildFile; fileRef = CE3ACF7709B7D07300391900 /* FolderGroupIcon.tiff */; };
 		CE4B96DC0994DD97000447D2 /* BDSKGroup.m in Sources */ = {isa = PBXBuildFile; fileRef = CE4B96DB0994DD96000447D2 /* BDSKGroup.m */; };
 		CE5139020997A6C000C73C64 /* BTParse.framework in CopyFiles */ = {isa = PBXBuildFile; fileRef = 27BBB2BD08C5019600403839 /* BTParse.framework */; };
@@ -117,6 +121,8 @@
 			dstSubfolderSpec = 10;
 			files = (
 				CE5139020997A6C000C73C64 /* BTParse.framework in CopyFiles */,
+				CE3264850A1B6CEB002D6E4C /* BDSKDragImageView.h in CopyFiles */,
+				CE3264A80A1B6E62002D6E4C /* NSBezierPath_BDSKExtensions.h in CopyFiles */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -174,9 +180,13 @@
 		29B97325FDCFA39411CA2CEA /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = /System/Library/Frameworks/Foundation.framework; sourceTree = "<absolute>"; };
 		32CA4F630368D1EE00C91783 /* bd2xtest_Prefix.pch */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = bd2xtest_Prefix.pch; sourceTree = "<group>"; };
 		8D1107310486CEB800E47090 /* Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
-		8D1107320486CEB800E47090 /* bd2xtest.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = bd2xtest.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		8D1107320486CEB800E47090 /* bd2xtest.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = bd2xtest.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		CE2AEF8809952A6400473196 /* GroupIcon.tiff */ = {isa = PBXFileReference; lastKnownFileType = image.tiff; name = GroupIcon.tiff; path = Images/GroupIcon.tiff; sourceTree = "<group>"; };
 		CE2AEF8A09952A6400473196 /* SmartGroupIcon.tiff */ = {isa = PBXFileReference; lastKnownFileType = image.tiff; name = SmartGroupIcon.tiff; path = Images/SmartGroupIcon.tiff; sourceTree = "<group>"; };
+		CE3264830A1B6CEB002D6E4C /* BDSKDragImageView.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = BDSKDragImageView.h; sourceTree = "<group>"; };
+		CE3264840A1B6CEB002D6E4C /* BDSKDragImageView.m */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.objc; path = BDSKDragImageView.m; sourceTree = "<group>"; };
+		CE3264A60A1B6E62002D6E4C /* NSBezierPath_BDSKExtensions.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = NSBezierPath_BDSKExtensions.h; sourceTree = "<group>"; };
+		CE3264A70A1B6E62002D6E4C /* NSBezierPath_BDSKExtensions.m */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.objc; path = NSBezierPath_BDSKExtensions.m; sourceTree = "<group>"; };
 		CE3ACF7709B7D07300391900 /* FolderGroupIcon.tiff */ = {isa = PBXFileReference; lastKnownFileType = image.tiff; path = FolderGroupIcon.tiff; sourceTree = "<group>"; };
 		CE4B96DA0994DD96000447D2 /* BDSKGroup.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BDSKGroup.h; sourceTree = "<group>"; };
 		CE4B96DB0994DD96000447D2 /* BDSKGroup.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BDSKGroup.m; sourceTree = "<group>"; };
@@ -309,10 +319,14 @@
 		27224262088A50350000CF76 /* Views / Appkit Extensions */ = {
 			isa = PBXGroup;
 			children = (
+				CE3264830A1B6CEB002D6E4C /* BDSKDragImageView.h */,
+				CE3264840A1B6CEB002D6E4C /* BDSKDragImageView.m */,
 				277D91FC0896251C004C4105 /* ImageBackgroundBox.h */,
 				277D91FD0896251C004C4105 /* ImageBackgroundBox.m */,
 				2744F56A08889FC2001E0CC9 /* ImageAndTextCell.h */,
 				2744F56B08889FC2001E0CC9 /* ImageAndTextCell.m */,
+				CE3264A60A1B6E62002D6E4C /* NSBezierPath_BDSKExtensions.h */,
+				CE3264A70A1B6E62002D6E4C /* NSBezierPath_BDSKExtensions.m */,
 				CED1D9A80995FF760017917B /* NSTableView_BDSKExtensions.h */,
 				CED1D9A90995FF760017917B /* NSTableView_BDSKExtensions.m */,
 			);
@@ -662,6 +676,8 @@
 				CE7B179209A47322003C5A46 /* BDSKComparisonPredicateController.m in Sources */,
 				276AAF790A1AFC5D009A5679 /* BDSKBibTeXImporter.m in Sources */,
 				276AB1100A1B0964009A5679 /* BDSKFilePathToFileNameTransformer.m in Sources */,
+				CE3264860A1B6CEB002D6E4C /* BDSKDragImageView.m in Sources */,
+				CE3264A90A1B6E62002D6E4C /* NSBezierPath_BDSKExtensions.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
