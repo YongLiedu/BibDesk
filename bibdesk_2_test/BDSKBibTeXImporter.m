@@ -95,10 +95,12 @@ static BDSKBibTeXImporter *sharedImporter = nil;
     // open file chooser
     
     NSOpenPanel *op = [NSOpenPanel openPanel];
-    [op runModalForDirectory:nil
-                        file:@""];
+    int rv = [op runModalForDirectory:[fileName stringByDeletingLastPathComponent] 
+                                 file:@""
+                                types:[NSArray arrayWithObject:@"bib"]];
     
-    [self setValue:[[[op filenames] objectAtIndex:0] retain] forKey:@"fileName"];
+    if (rv == NSOKButton)
+        [self setValue:[[op filenames] objectAtIndex:0] forKey:@"fileName"];
 }
 
 
