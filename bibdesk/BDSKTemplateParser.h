@@ -39,20 +39,26 @@
 #import <Cocoa/Cocoa.h>
 
 
+@protocol BDSKTemplateParserDelegate
+
+- (void)templateParserWillParseTemplate:(id)template usingObject:(id)object isAttributed:(BOOL)flag;
+- (void)templateParserDidParseTemplate:(id)template usingObject:(id)object isAttributed:(BOOL)flag;
+
+@end
+
+
 @interface BDSKTemplateParser : NSObject
 
-- (NSString *)stringByParsingTemplate:(NSString *)template usingObject:(id)object;
-- (NSAttributedString *)attributedStringByParsingTemplate:(NSAttributedString *)template usingObject:(id)object;
++ (NSString *)stringByParsingTemplate:(NSString *)template usingObject:(id)object;
++ (NSString *)stringByParsingTemplate:(NSString *)template usingObject:(id)object delegate:(id <BDSKTemplateParserDelegate>)delegate;
++ (NSAttributedString *)attributedStringByParsingTemplate:(NSAttributedString *)template usingObject:(id)object;
++ (NSAttributedString *)attributedStringByParsingTemplate:(NSAttributedString *)template usingObject:(id)object delegate:(id <BDSKTemplateParserDelegate>)delegate;
 
 @end
+
 
 @interface NSObject (BDSKTemplateParser)
-- (NSString *)stringDescription;
-@end
 
-@interface NSObject (BDSKTemplateParserDelegate)
-- (void)templateParserWillParseTemplate:(NSString *)template;
-- (void)templateParserDidParseTemplate:(NSString *)template;
-- (void)templateParserWillParseAttributedTemplate:(NSAttributedString *)template;
-- (void)templateParserDidParseAttributedTemplate:(NSAttributedString *)template;
+- (NSString *)stringDescription;
+
 @end

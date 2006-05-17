@@ -49,14 +49,15 @@
 
 @implementation BDSKTemplateParser
 
-- (NSString *)stringByParsingTemplate:(NSString *)template usingObject:(id)object {
++ (NSString *)stringByParsingTemplate:(NSString *)template usingObject:(id)object {
+    return [self stringByParsingTemplate:template usingObject:object delegate:nil];
+}
+
++ (NSString *)stringByParsingTemplate:(NSString *)template usingObject:(id)object delegate:(id <BDSKTemplateParserDelegate>)delegate {
     NSScanner *scanner = [NSScanner scannerWithString:template];
     NSMutableString *result = [[NSMutableString alloc] init];
 
     [scanner setCharactersToBeSkipped:nil];
-    
-    if ([object respondsToSelector:@selector(templateParserWillParseTemplate:)])
-        [object templateParserWillParseTemplate:template];
     
     while (![scanner isAtEnd]) {
         NSString *beforeText;
@@ -83,7 +84,7 @@
                     [scanner scanString:RETURN_NEWLINE intoString:nil] || [scanner scanString:NEWLINE intoString:nil] || [scanner scanString:RETURN intoString:nil];
                     if ([scanner scanString:endTag intoString:nil])
                         continue;
-                    if ([scanner scanUpToString:endTag intoString:&template] && [scanner scanString:endTag intoString:nil]) {
+                    if ([scanner scanUpToString:endTag intoString:&itemTemplate] && [scanner scanString:endTag intoString:nil]) {
                         @try{
                             keyValue = [object valueForKeyPath:[tag stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceCharacterSet]]];
                         }
@@ -94,15 +95,12 @@
                             NSEnumerator *itemE = [keyValue objectEnumerator];
                             id item;
                             while (item = [itemE nextObject]) {
-                                @try{
-                                    keyValue = [self stringByParsingTemplate:itemTemplate usingObject:item];
-                                }
-                                @catch (id exception) {
-                                    keyValue = nil;
-                                }
+                                [delegate templateParserWillParseTemplate:itemTemplate usingObject:item isAttributed:NO];
+                                keyValue = [self stringByParsingTemplate:itemTemplate usingObject:item delegate:delegate];
+                                [delegate templateParserDidParseTemplate:itemTemplate usingObject:item isAttributed:NO];
                                 if (keyValue != nil)
                                     [result appendString:keyValue];
-                            }
+                           }
                         }
                         [scanner scanString:RETURN_NEWLINE intoString:nil] || [scanner scanString:NEWLINE intoString:nil] || [scanner scanString:RETURN intoString:nil];
                     }
@@ -111,20 +109,18 @@
         }
     }
     
-    if ([object respondsToSelector:@selector(templateParserDidParseTemplate:)]) 
-        [object templateParserDidParseTemplate:template];
-    
     return [result autorelease];    
 }
 
-- (NSAttributedString *)attributedStringByParsingTemplate:(NSAttributedString *)template usingObject:(id)object {
++ (NSAttributedString *)attributedStringByParsingTemplate:(NSAttributedString *)template usingObject:(id)object {
+    return [self attributedStringByParsingTemplate:template usingObject:object delegate:nil];
+}
+
++ (NSAttributedString *)attributedStringByParsingTemplate:(NSAttributedString *)template usingObject:(id)object delegate:(id <BDSKTemplateParserDelegate>)delegate {
     NSScanner *scanner = [NSScanner scannerWithString:[template string]];
     NSMutableAttributedString *result = [[NSMutableAttributedString alloc] init];
 
     [scanner setCharactersToBeSkipped:nil];
-    
-    if ([object respondsToSelector:@selector(templateParserWillParseAttributedTemplate:)]) 
-        [object templateParserWillParseAttributedTemplate:template];
     
     while (![scanner isAtEnd]) {
         NSString *beforeText;
@@ -185,7 +181,9 @@
                             NSEnumerator *itemE = [keyValue objectEnumerator];
                             id item;
                             while (item = [itemE nextObject]) {
-                                tmpAttrStr = [self attributedStringByParsingTemplate:itemTemplate usingObject:item];
+                                [delegate templateParserWillParseTemplate:template usingObject:item isAttributed:YES];
+                                tmpAttrStr = [self attributedStringByParsingTemplate:itemTemplate usingObject:item delegate:delegate];
+                                [delegate templateParserDidParseTemplate:template usingObject:item isAttributed:YES];
                                 if (tmpAttrStr != nil) {
                                     [result appendAttributedString:tmpAttrStr];
                                 }
@@ -197,9 +195,6 @@
             }
         }
     }
-    
-    if ([object respondsToSelector:@selector(templateParserDidParseAttributedTemplate:)]) 
-        [object templateParserDidParseAttributedTemplate:template];
     
     return [result autorelease];    
 }
