@@ -370,6 +370,28 @@ static NSString *BDSKBibTeXParserInternalException = @"BDSKBibTeXParserInternalE
     return [dictionary autorelease];
 }
 
++ (NSString *)normalizedNameFromString:(NSString *)aString{
+    NSDictionary *nameDict = [BDSKBibTeXParser splitPersonName:aString];
+    // FIXME: is there a decent way to do this without copy n' paste?
+    NSString *firstName = [nameDict valueForKey:@"firstNamePart"];
+    NSString *vonPart = [nameDict valueForKey:@"vonNamePart"];
+    NSString *lastName = [nameDict valueForKey:@"lastNamePart"];
+    NSString *jrPart = [nameDict valueForKey:@"jrNamePart"];
+    
+    BOOL FIRST = (firstName != nil && ![@"" isEqualToString:firstName]);
+    BOOL VON = (vonPart != nil && ![@"" isEqualToString:vonPart]);
+    BOOL LAST = (lastName != nil && ![@"" isEqualToString:lastName]);
+    BOOL JR = (jrPart != nil && ![@"" isEqualToString:jrPart]);
+    
+    return [NSString stringWithFormat:@"%@%@%@%@%@%@%@", (VON ? vonPart : @""),
+        (VON ? @" " : @""),
+        (LAST ? lastName : @""),
+        (JR ? @", " : @""),
+        (JR ? jrPart : @""),
+        (FIRST ? @", " : @""),
+        (FIRST ? firstName : @"")];
+}
+
 @end
 
 

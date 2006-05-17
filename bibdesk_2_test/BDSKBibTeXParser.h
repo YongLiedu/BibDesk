@@ -18,6 +18,7 @@
 + (NSSet *)itemsFromData:(NSData *)data error:(NSError **)outError frontMatter:(NSMutableString *)frontMatter filePath:(NSString *)filePath document:(BDSKDocument *)document;
 + (NSArray *)personNamesFromBibTeXString:(NSString *)aString;
 + (NSDictionary *)splitPersonName:(NSString *)newName;
++ (NSString *)normalizedNameFromString:(NSString *)aString;
 
 @end
 
