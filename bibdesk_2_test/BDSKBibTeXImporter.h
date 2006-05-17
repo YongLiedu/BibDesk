@@ -7,28 +7,12 @@
 //
 
 #import <Cocoa/Cocoa.h>
-@class BDSKDocument;
-#import "BDSKBibTeXParser.h"
-#import "BDSKDataModelNames.h"
+#import "BDSKImporters.h"
 
-@interface BDSKBibTeXImporter : NSObject {
-    IBOutlet NSView *view;    
+@interface BDSKBibTeXImporter : NSObject <BDSKImporter> {
+    IBOutlet NSView *view;
     NSString *fileName;
 }
-
-+ (BDSKBibTeXImporter *)sharedImporter;
-
-+ (NSDictionary *)defaultSettings;
-
-
-- (NSDictionary *)settings;
-
-- (NSView *)view;
-
-#pragma mark import action
-
-- (NSError *)importIntoDocument:(BDSKDocument *)document
-                       userInfo:(NSDictionary *)userInfo;
 
 #pragma mark UI actions
 - (IBAction)chooseFileName:(id)sender;

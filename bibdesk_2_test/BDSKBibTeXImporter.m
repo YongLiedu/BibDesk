@@ -7,6 +7,8 @@
 //
 
 #import "BDSKBibTeXImporter.h"
+#import "BDSKBibTeXParser.h"
+#import "BDSKDataModelNames.h"
 #import "BDSKDocument.h"
 
 static BDSKBibTeXImporter *sharedImporter = nil;
@@ -18,15 +20,15 @@ static BDSKBibTeXImporter *sharedImporter = nil;
 }
 
 
-+ (BDSKBibTeXImporter *)sharedImporter{
++ (id<BDSKImporter>)sharedImporter{
     if(sharedImporter == nil)
-        sharedImporter = [[BDSKBibTeXImporter alloc] init];
+        sharedImporter = [[self alloc] init];
     return sharedImporter;
 }
 
 
 - (id)init{
-    return [self initWithSettings:[BDSKBibTeXImporter defaultSettings]];
+    return [self initWithSettings:[[self class] defaultSettings]];
 }
 
 
@@ -66,16 +68,19 @@ static BDSKBibTeXImporter *sharedImporter = nil;
 
 #pragma mark import action
 
-- (NSError *)importIntoDocument:(BDSKDocument *)doc
-                       userInfo:(NSDictionary *)userInfo{
+- (BOOL)importIntoDocument:(BDSKDocument *)doc
+                  userInfo:(NSDictionary *)userInfo
+                     error:(NSError **)outError{
     
     NSLog(@"importIntoDocument %@ with fileName %@", doc, fileName);
 
     NSData *data = [NSData dataWithContentsOfFile:fileName];
     NSError *error = nil;
     [BDSKBibTeXParser itemsFromData:data error:&error document:doc];
-
-    return nil;
+    if (error && outError)
+        *outError = error;
+    
+    return (error != nil);
 }
 
 
