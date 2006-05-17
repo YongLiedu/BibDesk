@@ -249,7 +249,7 @@ static int numberOfOpenEditors = 0;
 
     // make two passes to get the required entries at top.
     i=0;
-    sKeys = [[theBib allFields] sortedArrayUsingSelector:@selector(caseInsensitiveCompare:)];
+    sKeys = [[theBib allFieldNames] sortedArrayUsingSelector:@selector(caseInsensitiveCompare:)];
 	
 	// now add the entries to the form
 	AddFormEntries([[BibTypeManager sharedManager] requiredFieldsForType:[theBib type]], reqAtt);
@@ -1378,7 +1378,7 @@ static int numberOfOpenEditors = 0;
 // raises the add field sheet
 - (IBAction)raiseAddField:(id)sender{
     BibTypeManager *typeMan = [BibTypeManager sharedManager];
-    NSArray *currentFields = [theBib allFields];
+    NSArray *currentFields = [theBib allFieldNames];
     NSArray *fieldNames = [typeMan allFieldNamesIncluding:nil excluding:currentFields];
     
     BDSKAddFieldSheetController *addFieldController = [[BDSKAddFieldSheetController alloc] initWithPrompt:NSLocalizedString(@"Name of field to add:",@"")
@@ -1418,7 +1418,7 @@ static int numberOfOpenEditors = 0;
 - (IBAction)raiseDelField:(id)sender{
     // populate the popupbutton
 	BibTypeManager *typeMan = [BibTypeManager sharedManager];
-	NSMutableArray *removableFields = [[theBib allFields] mutableCopy];
+	NSMutableArray *removableFields = [[theBib allFieldNames] mutableCopy];
 	[removableFields removeObjectsInArray:[NSArray arrayWithObjects:BDSKLocalUrlString, BDSKUrlString, BDSKAnnoteString, BDSKAbstractString, BDSKRssDescriptionString, nil]];
 	[removableFields removeObjectsInArray:[typeMan requiredFieldsForType:currentType]];
 	[removableFields removeObjectsInArray:[typeMan optionalFieldsForType:currentType]];

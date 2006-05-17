@@ -166,7 +166,7 @@
 	}
 	
 	// we aren't linking, so here we decide which fields to overwrite, and just copy values over
-	NSEnumerator *newKeyE = [[tempBI allFields] objectEnumerator];
+	NSEnumerator *newKeyE = [[tempBI allFieldNames] objectEnumerator];
 	NSString *key;
 	NSString *oldValue;
 	NSString *newValue;

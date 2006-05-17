@@ -694,6 +694,7 @@
 - (id)requiredFields;
 - (id)optionalFields;
 - (id)defaultFields;
+- (id)allFields;
 - (id)fields;
 
 /*!

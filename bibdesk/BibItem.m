@@ -345,8 +345,8 @@ static NSParagraphStyle* bodyParagraphStyle = nil;
 		return NO;
 	
 	// compare all fields, but compare relevant values as nil might mean 0 for some keys etc.
-	NSMutableSet *keys = [[NSMutableSet alloc] initWithArray:[self allFields]];
-	[keys addObjectsFromArray:[aBI allFields]];
+	NSMutableSet *keys = [[NSMutableSet alloc] initWithArray:[self allFieldNames]];
+	[keys addObjectsFromArray:[aBI allFieldNames]];
 	NSEnumerator *keyEnum = [keys objectEnumerator];
     [keys release];
 
@@ -1934,10 +1934,16 @@ static NSParagraphStyle* bodyParagraphStyle = nil;
     return templateFields;
 }
 
+- (id)allFields{
+    if (templateFields == nil)
+        [self prepareForTemplateParsing];
+    [templateFields setFieldNames:];
+    return templateFields;
+}
+
 - (id)fields{
     if (templateFields == nil)
         [self prepareForTemplateParsing];
-    [templateFields setFieldNames:[self allFields]];
     return templateFields;
 }
 

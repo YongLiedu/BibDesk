@@ -353,7 +353,7 @@
 
 - (IBAction)addField:(id)sender{
     BibTypeManager *typeMan = [BibTypeManager sharedManager];
-    NSArray *currentFields = [item allFields];
+    NSArray *currentFields = [item allFieldNames];
     NSArray *fieldNames = [typeMan allFieldNamesIncluding:nil excluding:currentFields];
     
     BDSKAddFieldSheetController *addFieldController = [[BDSKAddFieldSheetController alloc] initWithPrompt:NSLocalizedString(@"Name of field to add:",@"")
