@@ -92,7 +92,7 @@
 	<key>CFBundleExecutable</key>
 	<string>bd2xtest</string>
 	<key>CFBundleIconFile</key>
-	<string></string>
+	<string>bd2blueicon.icns</string>
 	<key>CFBundleIdentifier</key>
 	<string>net.sourceforge.bibdesk.bd2xtest</string>
 	<key>CFBundleInfoDictionaryVersion</key>
