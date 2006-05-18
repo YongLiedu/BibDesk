@@ -85,7 +85,7 @@ static BDSKBibTeXImporter *sharedImporter = nil;
     if (error && outError)
         *outError = error;
     
-    return (error != nil);
+    return (error == nil);
 }
 
 
