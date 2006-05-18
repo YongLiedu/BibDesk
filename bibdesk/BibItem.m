@@ -81,6 +81,7 @@
 
 - (id)initWithItem:(BibItem *)anItem;
 - (void)setFieldNames:(NSArray *)array;
+- (id)nonEmpty;
 - (NSEnumerator *)objectEnumerator;
 
 @end
@@ -2757,6 +2758,20 @@ static NSParagraphStyle* bodyParagraphStyle = nil;
         [fieldNames release];
         fieldNames = [array retain];
     }
+}
+
+- (id)nonEmpty{
+    NSMutableArray *array = [[NSMutableArray alloc] initWithCapacity:[fieldNames count]];
+    NSEnumerator *fnEnum = [fieldNames objectEnumerator];
+    NSString *name;
+    BibField *field;
+    while (name = [fnEnum nextObject]) {
+        if ([NSString isEmptyString:[item valueForKey:name]] == NO)
+            [array addObject:name];
+    }
+    [fieldNames release];
+    fieldNames = array;
+    return self;
 }
 
 - (NSEnumerator *)objectEnumerator{
