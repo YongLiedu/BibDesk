@@ -365,10 +365,8 @@
     
     NSError *error = nil;
     
-    [importer importIntoDocument:[self document] userInfo:userInfo error:&error];
-
-    if(error != nil){
-        NSLog(@"error: %@", error);
+    // TODO: give a better error, please
+    if ([importer importIntoDocument:[self document] userInfo:userInfo error:&error] == NO) {
         NSRunAlertPanel(@"alert",@"import didn't work",@"OK",nil,nil);
     }
     

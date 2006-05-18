@@ -73,7 +73,7 @@ static BDSKBibTeXImporter *sharedImporter = nil;
 
 #pragma mark import action
 
-- (void)importIntoDocument:(BDSKDocument *)doc
+- (BOOL)importIntoDocument:(BDSKDocument *)doc
                   userInfo:(NSDictionary *)userInfo
                      error:(NSError **)outError{
     
@@ -84,6 +84,8 @@ static BDSKBibTeXImporter *sharedImporter = nil;
     [BDSKBibTeXParser itemsFromData:data error:&error document:doc];
     if (error && outError)
         *outError = error;
+    
+    return (error != nil);
 }
 
 
