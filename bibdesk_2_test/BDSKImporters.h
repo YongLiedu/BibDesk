@@ -18,7 +18,7 @@
 - (id)initWithSettings:(NSDictionary *)newSettings;
 - (NSDictionary *)settings;
 - (NSView *)view;
-- (BOOL)importIntoDocument:(BDSKDocument *)document userInfo:(NSDictionary *)userInfo error:(NSError **)error;
+- (void)importIntoDocument:(BDSKDocument *)document userInfo:(NSDictionary *)userInfo error:(NSError **)error;
 @end
 
 #include "BDSKBibTexImporter.h"
