@@ -36,7 +36,7 @@
 
 #import <Cocoa/Cocoa.h>
 
-@protocol BDSKMacroResolver;
+@class BDSKMacroResolver;
 
 @interface BDSKFormCellFormatter : NSFormatter {
 	NSString *parsedString;

@@ -37,6 +37,7 @@
 #import "BDSKFormCellFormatter.h"
 #import "BDSKComplexString.h"
 #import "NSString_BDSKExtensions.h"
+#import "BDSKMacroResolver.h"
 
 @implementation BDSKFormCellFormatter
 
