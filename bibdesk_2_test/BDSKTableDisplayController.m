@@ -10,7 +10,7 @@
 #import "BDSKDataModelNames.h"
 
 
-@implementation BDSKTableDisplayController
+@implementation BDSKDisplayController
 
 + (void)initialize{
    [self setKeys:[NSArray arrayWithObject:@"document"] triggerChangeNotificationsForDependentKey:@"managedObjectContext"];
@@ -29,7 +29,6 @@
 }
 
 - (void)awakeFromNib{
-    [selectionDetailsBox setBackgroundImage:[NSImage imageNamed:@"coffeeStain"]];
     [mainView retain];
     [self setWindow:nil];
 }
@@ -38,18 +37,10 @@
 }
 
 - (NSView *)view{
-    if(mainView == nil){
-        [NSBundle loadNibNamed:[self windowNibName] owner:self];
+    if (mainView == nil) {
+        [self window]; // force load of the nib
     }
     return mainView;
-}
-
-- (NSArrayController *)itemsArrayController{
-    return itemsArrayController;
-}
-
-- (NSTableView *)itemsTableView{
-    return itemsTableView;
 }
 
 - (NSDocument *)document{
@@ -67,37 +58,23 @@
 	return [(NSPersistentDocument *)document managedObjectContext];
 }
 
-- (NSArray *)filterPredicates {
-    // should be implemented by the subclasses
-    return nil;
+- (NSString *)itemEntityName {
+    return itemEntityName;
 }
 
-// drag/drop
-
-- (BOOL)writeRowsWithIndexes:(NSIndexSet *)rowIndexes toPasteboard:(NSPasteboard *)pboard forType:(NSString *)type {
-    NSArray *allItems = [itemsArrayController arrangedObjects];
-    NSMutableArray *draggedItems = [[NSMutableArray alloc] initWithCapacity:[rowIndexes count]];
-    unsigned row = [rowIndexes firstIndex];
-    NSManagedObject *mo;
-    
-    [pboard declareTypes:[NSArray arrayWithObject:type] owner:self];
-    while (row != NSNotFound) {
-        mo = [allItems objectAtIndex:row];
-        [draggedItems addObject:[[mo objectID] URIRepresentation]];
-        row = [rowIndexes indexGreaterThanIndex:row];
+- (void)setItemEntityName:(NSString *)entityName {
+    if (entityName != itemEntityName) {
+        [itemEntityName release];
+        itemEntityName = [entityName retain];
+        [self updateUI];
     }
-    [pboard setData:[NSArchiver archivedDataWithRootObject:draggedItems] forType:type];
-    [draggedItems release];
-    
-    return YES;
 }
 
-- (BOOL)addRelationshipsFromPasteboard:(NSPasteboard *)pboard forType:(NSString *)type parentRow:(int)row keyPath:(NSString *)keyPath {
-	if (row == -1)
-		row = [itemsArrayController selectionIndex];
-	if (row == -1)
-		return NO;
-	
+- (void)updateUI {}
+
+#pragma mark Drag/drop
+
+- (BOOL)addRelationshipsFromPasteboard:(NSPasteboard *)pboard forType:(NSString *)type parent:(NSManagedObject *)parent keyPath:(NSString *)keyPath {
 	NSString *childKey = keyPath;
 	NSString *relationshipKey = keyPath;
 	BOOL hasRelationshipEntity = NO;
@@ -112,7 +89,6 @@
 	NSEnumerator *uriE = [draggedURIs objectEnumerator];
 	NSManagedObjectContext *moc = [self managedObjectContext];
 	NSURL *moURI;
-	NSManagedObject *parent = [[itemsArrayController arrangedObjects] objectAtIndex:row];
 	NSString *entityName = [[[[[parent entity] relationshipsByName] objectForKey:relationshipKey] destinationEntity] name];
 	BOOL isToMany = [[[[parent entity] relationshipsByName] objectForKey:relationshipKey] isToMany];
 	NSMutableSet *relationships = (isToMany) ? [parent mutableSetValueForKey:relationshipKey] : nil;
@@ -152,6 +128,159 @@
 	}
     
 	return YES;
+}
+
+@end
+
+
+@implementation BDSKItemDisplayController
+
+- (NSObjectController *)itemObjectController{
+    return itemObjectController;
+}
+
+@end
+
+
+@implementation BDSKTableDisplayController
+
+- (void)awakeFromNib{
+    [super awakeFromNib];
+    [mainView retain];
+    [self setWindow:nil];
+}
+
+- (NSArrayController *)itemsArrayController{
+    return itemsArrayController;
+}
+
+- (NSTableView *)itemsTableView{
+    return itemsTableView;
+}
+
+- (NSArray *)filterPredicates {
+    // should be implemented by the subclasses
+    return nil;
+}
+
+- (NSArray *)columnInfo {
+    NSArray *columnInfo = nil;
+    if ([itemEntityName isEqualToString:PublicationEntityName]) {
+        columnInfo = [NSArray arrayWithObjects:
+            [NSDictionary dictionaryWithObjectsAndKeys:@"title", @"keyPath", @"Title", @"displayName", nil], 
+            [NSDictionary dictionaryWithObjectsAndKeys:@"shortTitle", @"keyPath", @"Short Title", @"displayName", nil], 
+            nil];
+    } else if ([itemEntityName isEqualToString:PersonEntityName]) {
+        columnInfo = [NSArray arrayWithObjects:
+            [NSDictionary dictionaryWithObjectsAndKeys:@"firstNamePart", @"keyPath", @"First", @"displayName", nil], 
+            [NSDictionary dictionaryWithObjectsAndKeys:@"lastNamePart", @"keyPath", @"Last", @"displayName", nil], 
+            [NSDictionary dictionaryWithObjectsAndKeys:@"name", @"keyPath", @"Full Name", @"displayName", nil], 
+            nil];
+    } else if ([itemEntityName isEqualToString:InstitutionEntityName]) {
+        columnInfo = [NSArray arrayWithObjects:
+            [NSDictionary dictionaryWithObjectsAndKeys:@"name", @"keyPath", @"Name", @"displayName", nil], 
+            [NSDictionary dictionaryWithObjectsAndKeys:@"address", @"keyPath", @"Address", @"displayName", nil], 
+            nil];
+    } else if ([itemEntityName isEqualToString:VenueEntityName]) {
+        columnInfo = [NSArray arrayWithObjects:
+            [NSDictionary dictionaryWithObjectsAndKeys:@"name", @"keyPath", @"Name", @"displayName", nil], 
+            [NSDictionary dictionaryWithObjectsAndKeys:@"abbreviation", @"keyPath", @"Abbreviation", @"displayName", nil], 
+            [NSDictionary dictionaryWithObjectsAndKeys:@"acronym", @"keyPath", @"Acronym", @"displayName", nil], 
+            nil];
+    } else if ([itemEntityName isEqualToString:NoteEntityName]) {
+        columnInfo = [NSArray arrayWithObjects:
+            [NSDictionary dictionaryWithObjectsAndKeys:@"name", @"keyPath", @"Name", @"displayName", nil], 
+            [NSDictionary dictionaryWithObjectsAndKeys:@"value", @"keyPath", @"Value", @"displayName", nil], 
+            nil];
+    } else if ([itemEntityName isEqualToString:TagEntityName]) {
+        columnInfo = [NSArray arrayWithObjects:
+            [NSDictionary dictionaryWithObjectsAndKeys:@"name", @"keyPath", @"Name", @"displayName", nil], 
+            nil];
+    } else {
+        columnInfo = [NSArray arrayWithObjects:
+            [NSDictionary dictionaryWithObjectsAndKeys:@"name", @"keyPath", @"Name", @"displayName", nil], 
+            [NSDictionary dictionaryWithObjectsAndKeys:@"entity.name", @"keyPath", @"Type", @"displayName", nil], 
+            nil];
+    }
+    return columnInfo;
+}
+
+- (void)updateUI {
+    NSArray *columnInfo = [self columnInfo];
+    NSArray *tableColumns = [itemsTableView tableColumns];
+    NSTableColumn *tableColumn;
+    int i, count = [tableColumns count];
+    while (count--) {
+        tableColumn = [tableColumns objectAtIndex:count];
+        [tableColumn unbind:@"value"];
+        [itemsTableView removeTableColumn:tableColumn];
+    }
+    count = [columnInfo count];
+    for (i = 0; i < count; i++) {
+        NSDictionary *dict = [columnInfo objectAtIndex:i];
+        NSString *displayName = [dict objectForKey:@"displayName"];
+        NSString *keyPath = [dict objectForKey:@"keyPath"];
+        tableColumn = [[[NSTableColumn alloc] initWithIdentifier:keyPath] autorelease];
+        [[tableColumn headerCell] setStringValue:displayName];
+        [itemsTableView addTableColumn:tableColumn];
+        keyPath = [NSString stringWithFormat:@"arrangedObjects.%@", [dict objectForKey:keyPath]];
+        [tableColumn bind:@"value" toObject:itemsArrayController withKeyPath:keyPath options:0];
+    }
+    [itemsTableView sizeToFit];
+}
+
+#pragma mark Actions
+
+- (void)addItem {
+	NSManagedObjectContext *moc = [self managedObjectContext];
+    NSString *entityName = [self itemEntityName];
+    if ([entityName isEqualToString:@"Item"])
+        entityName = PublicationEntityName;
+	NSManagedObject *mo = [NSEntityDescription insertNewObjectForEntityForName:entityName inManagedObjectContext:moc];
+    [itemsArrayController addObject:mo];
+    [moc processPendingChanges];
+    [itemsArrayController setSelectedObjects:[NSArray arrayWithObject:mo]];
+}
+
+- (void)removeItems:(NSArray *)selectedItems {
+	NSManagedObjectContext *moc = [self managedObjectContext];
+	NSEnumerator *selEnum = [selectedItems objectEnumerator];
+	NSManagedObject *mo;
+	while (mo = [selEnum nextObject]) 
+		[moc deleteObject:mo];
+    [moc processPendingChanges];
+    // dirty fix for CoreData bug, which registers an extra change when objects are deleted
+    [[self document] updateChangeCount:NSChangeUndone];
+}
+
+#pragma mark Drag/drop
+
+- (BOOL)writeRowsWithIndexes:(NSIndexSet *)rowIndexes toPasteboard:(NSPasteboard *)pboard forType:(NSString *)type {
+    NSArray *allItems = [itemsArrayController arrangedObjects];
+    NSMutableArray *draggedItems = [[NSMutableArray alloc] initWithCapacity:[rowIndexes count]];
+    unsigned row = [rowIndexes firstIndex];
+    NSManagedObject *mo;
+    
+    [pboard declareTypes:[NSArray arrayWithObject:type] owner:self];
+    while (row != NSNotFound) {
+        mo = [allItems objectAtIndex:row];
+        [draggedItems addObject:[[mo objectID] URIRepresentation]];
+        row = [rowIndexes indexGreaterThanIndex:row];
+    }
+    [pboard setData:[NSArchiver archivedDataWithRootObject:draggedItems] forType:type];
+    [draggedItems release];
+    
+    return YES;
+}
+
+- (BOOL)addRelationshipsFromPasteboard:(NSPasteboard *)pboard forType:(NSString *)type parentRow:(int)row keyPath:(NSString *)keyPath {
+	if (row == -1)
+		row = [itemsArrayController selectionIndex];
+	if (row == -1)
+		return NO;
+	NSManagedObject *parent = [[itemsArrayController arrangedObjects] objectAtIndex:row];
+    
+    return [self addRelationshipsFromPasteboard:pboard forType:type parent:parent keyPath:keyPath];
 }
 
 @end
