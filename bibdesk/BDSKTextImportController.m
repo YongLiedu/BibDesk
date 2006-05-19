@@ -74,7 +74,7 @@
 - (BOOL)addCurrentSelectionToFieldAtIndex:(int)index;
 
 - (void)startTemporaryTypeAheadMode;
-- (void)endTemporaryTypeAheadModeAndSet:(BOOL)flag;
+- (void)endTemporaryTypeAheadModeAndSet:(BOOL)set edit:(BOOL)edit;
 - (BOOL)isInTemporaryTypeAheadMode;
 
 - (void)addBookmarkWithURLString:(NSString *)URLString title:(NSString *)title;
@@ -1384,18 +1384,25 @@
         savedFirstResponder = [(NSTextView *)savedFirstResponder delegate];
     }
     [[self window] makeFirstResponder:itemTableView];
+    if ([itemTableView selectedRow] == -1 && [itemTableView numberOfRows] > 0)
+        [itemTableView selectRowIndexes:[NSIndexSet indexSetWithIndex:0] byExtendingSelection:NO];
     [statusLine setStringValue:NSLocalizedString(@"Start typing to select a field. Press Enter to set or Tab to cancel.", @"")];
 }
 
-- (void)endTemporaryTypeAheadModeAndSet:(BOOL)flag{
+- (void)endTemporaryTypeAheadModeAndSet:(BOOL)set edit:(BOOL)edit{
     if (temporaryTypeAheadMode == NO)
         return;
     temporaryTypeAheadMode = NO;
-    [[self window] makeFirstResponder:savedFirstResponder];
+    if (edit == NO)
+        [[self window] makeFirstResponder:savedFirstResponder];
     savedFirstResponder = nil;
-    [statusLine setStringValue:@""];
-    if (flag)
+    if (set)
         [self addTextToCurrentFieldAction:itemTableView];
+    if (edit) {
+        int row = [itemTableView selectedRow];
+        if (row != -1)
+            [itemTableView editColumn:2 row:row withEvent:nil select:YES];
+    }
     [statusLine setStringValue:@""];
 }
 
@@ -1427,27 +1434,37 @@
         // these are returned for digits and the shift modifier, at least with the standard keyboard
         NSRange range = [@")!@#$%^&*(" rangeOfCharacterFromSet:[NSCharacterSet characterSetWithRange:NSMakeRange(c,1)]];
         if (range.location != NSNotFound) {
-            unsigned index = (unsigned)(range.location + 20);
-            if (flags & NSAlternateKeyMask)
-                index += 10;
-            if ([[self dataSource] addCurrentSelectionToFieldAtIndex:index] == NO) {
-                NSBeep();
-                return NO;
-            } else return YES;
+            c = (unichar)range.location + '0';
+            flags |= NSShiftKeyMask;
+        }
         
-        } else if (c >= '0' && c <= '9') {
+        if (c >= '0' && c <= '9') {
         
             unsigned index = (unsigned)(c - '0');
+            BOOL rv = YES;
             if (flags & NSAlternateKeyMask)
                 index += 10;
             if (flags & NSShiftKeyMask)
                 index += 20;
             if ([[self dataSource] addCurrentSelectionToFieldAtIndex:index] == NO) {
                 NSBeep();
-                return NO;
-            } else return YES;
+                rv = NO;
+            }
+            if ([[self dataSource] isInTemporaryTypeAheadMode])
+                [[self dataSource] endTemporaryTypeAheadModeAndSet:NO edit:NO];
+            return rv;
         
-        } else if ([[self dataSource] isInTemporaryTypeAheadMode] == NO && c == '=') {
+        } else if ([[self dataSource] isInTemporaryTypeAheadMode]) {
+        
+            if (c == NSTabCharacter || c == 0x001b) {
+                [[self dataSource] endTemporaryTypeAheadModeAndSet:NO edit:YES];
+                return YES;
+            } else if (c == NSCarriageReturnCharacter || c == NSEnterCharacter || c == NSNewlineCharacter) {
+                [[self dataSource] endTemporaryTypeAheadModeAndSet:YES edit:YES];
+                return YES;
+            }
+        
+        } else if (c == '=') {
         
             [[self dataSource] startTemporaryTypeAheadMode];
             return YES;
@@ -1473,10 +1490,10 @@
             NSBeep();
             return;
         } else if (c == NSTabCharacter || c == 0x001b) {
-            [[self dataSource] endTemporaryTypeAheadModeAndSet:NO];
+            [[self dataSource] endTemporaryTypeAheadModeAndSet:NO edit:NO];
             return;
         } else if (c == NSCarriageReturnCharacter || c == NSEnterCharacter || c == NSNewlineCharacter) {
-            [[self dataSource] endTemporaryTypeAheadModeAndSet:YES];
+            [[self dataSource] endTemporaryTypeAheadModeAndSet:YES edit:NO];
             return;
         } else if ([fieldNameCharSet characterIsMember:c] == NO) {
             NSBeep();
@@ -1492,7 +1509,7 @@
 }
 
 - (BOOL)resignFirstResponder {
-    [[self dataSource] endTemporaryTypeAheadModeAndSet:NO];
+    [[self dataSource] endTemporaryTypeAheadModeAndSet:NO edit:NO];
     return [super resignFirstResponder];
 }
 
