@@ -105,22 +105,10 @@ static CIFilter *cropFilter = nil;
     [transform translateXBy:blurPadding yBy:blurPadding];
     [path transformUsingAffineTransform:transform];
         
-    // @@ resolution independence:  drawing to an NSImage and then creating the CIImage with -[NSImage TIFFRepresentation] gives an incorrect CIImage extent when display scaling is turned on, probably due to NSCachedImageRep.  Drawing directly to an NSBitmapImageRep gives the correct overall size, but the hole locations are off.
-    NSBitmapImageRep* offscreenRep = nil;    
-    offscreenRep = [[NSBitmapImageRep alloc] initWithBitmapDataPlanes:NULL
-                                                           pixelsWide:NSWidth(maskRect) 
-                                                           pixelsHigh:NSHeight(maskRect)
-                                                        bitsPerSample:8 
-                                                      samplesPerPixel:4 
-                                                             hasAlpha:YES 
-                                                             isPlanar:NO 
-                                                       colorSpaceName:NSCalibratedRGBColorSpace 
-                                                         bitmapFormat:0 
-                                                          bytesPerRow:(4 * NSWidth(maskRect)) 
-                                                         bitsPerPixel:32];
-    
+    // @@ resolution independence:  drawing to an NSImage and then creating the CIImage with -[NSImage TIFFRepresentation] gives an incorrect CIImage extent when display scaling is turned on, probably due to NSCachedImageRep.  Drawing directly to an NSBitmapImageRep gives the correct overall size, but the hole locations are off, and there appears to be a blurred section on the top and right side.
+    NSImage *image = [[NSImage alloc] initWithSize:maskRect.size];
+    [image lockFocus];
     [NSGraphicsContext saveGraphicsState];
-    [NSGraphicsContext setCurrentContext:[NSGraphicsContext graphicsContextWithBitmapImageRep:offscreenRep]];
     
     // fill the entire space with clear
     [[NSColor clearColor] setFill];
@@ -131,9 +119,10 @@ static CIFilter *cropFilter = nil;
     [path fill];
     
     [NSGraphicsContext restoreGraphicsState];
+    [image unlockFocus];
     
-    CIImage *ciImage = [[CIImage alloc] initWithData:[offscreenRep TIFFRepresentation]];
-    [offscreenRep release];
+    CIImage *ciImage = [[CIImage alloc] initWithData:[image TIFFRepresentation]];
+    [image release];
     
     // sys prefs uses fuzzier circles for more matches; filter range 0 -- 100, values 0 -- 10 are reasonable?
     float radius = MIN([highlightRects count], maximumBlur);
