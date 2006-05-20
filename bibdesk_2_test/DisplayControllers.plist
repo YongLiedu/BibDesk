@@ -26,6 +26,10 @@
         };
     };
     "TableDisplayControllers" = {
+        "BDSKGenericTableDisplayController" = {    
+            DisplayableEntities = ("Item");
+            Bindings = ();
+        };
         "BDSKInstitutionTableDisplayController" = {    
             DisplayableEntities = ("Institution");
             Bindings = ();
