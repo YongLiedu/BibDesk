@@ -222,6 +222,9 @@ static NSString *defaultItemString = @"Default Item";
 
 - (void)openPanelDidEnd:(NSOpenPanel *)panel returnCode:(int)returnCode contextInfo:(void *)contextInfo
 {
+    if (returnCode == NSCancelButton)
+        return;
+    
     NSURL *fileURL = [[panel URLs] lastObject];
     if(fileURL){
         
