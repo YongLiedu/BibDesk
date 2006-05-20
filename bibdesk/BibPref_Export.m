@@ -151,20 +151,20 @@ static NSString *defaultItemString = @"Default Item";
 
     // add as a sibling of the selected node
     if([selectedNode isLeaf]){
-        [newNode setValue:NSLocalizedString(@"Double-click to choose file", @"") forKey:nameString];
+            [newNode setValue:NSLocalizedString(@"Double-click to choose file", @"") forKey:nameString];
         [(BDSKTreeNode *)[selectedNode parent] addChild:newNode];
     } else {
         
         [newNode setValue:NSLocalizedString(@"Double-click to change name", @"") forKey:nameString];
         [itemNodes addObject:newNode];
         
-        // add a child so newNode will be recognized as a non-leaf node
-        BDSKTemplate *child = [[BDSKTemplate alloc] initWithParent:newNode];
-        [child setValue:NSLocalizedString(@"Double-click to choose file", @"") forKey:nameString];
-        [child setValue:accessoryString forKey:rolesString];
+            // add a child so newNode will be recognized as a non-leaf node
+            BDSKTemplate *child = [[BDSKTemplate alloc] initWithParent:newNode];
+            [child setValue:NSLocalizedString(@"Double-click to choose file", @"") forKey:nameString];
+            [child setValue:accessoryString forKey:rolesString];
         [newNode addChild:child];
-        [child release];
-    }
+            [child release];
+        }
     
     [newNode release];
     [self updateUI];
@@ -278,6 +278,56 @@ static NSString *defaultItemString = @"Default Item";
 
 - (void)outlineView:(NSOutlineView *)outlineView willDisplayCell:(id)cell forTableColumn:(NSTableColumn *)tableColumn item:(id)item{
     [cell setTextColor:[item representedColorForKey:[tableColumn identifier]]];
+}
+
+- (BOOL)canDeleteSelectedItem
+{
+    BDSKTreeNode *selItem = [outlineView selectedItem];
+    return (([selItem isLeaf] && [[selItem parent] numberOfChildren] > 1) || [selItem isLeaf] == NO);
+}
+
+- (void)outlineViewSelectionDidChange:(NSNotification *)notification;
+{
+    [deleteButton setEnabled:[self canDeleteSelectedItem]];
+}
+
+- (void)tableView:(NSTableView *)tableView deleteRows:(NSArray *)rows;
+{
+    // currently we don't allow multiple selection, so we'll ignore the rows argument
+    if([self canDeleteSelectedItem])
+        [self removeNode:nil];
+    else
+        NSBeep();
+}
+
+#pragma mark Context menu
+
+- (BOOL)validateMenuItem:(id <NSMenuItem>)menuItem;
+{
+    SEL action = [menuItem action];
+    BOOL validate = NO;
+    if(@selector(delete:) == action){
+        validate = [self canDeleteSelectedItem];
+    } else if(@selector(revealInFinder:) == action || @selector(openFile:) == action){
+        int row = [outlineView selectedRow];
+        if(row >= 0)
+            validate = [[outlineView itemAtRow:row] isLeaf];
+    }
+    return validate;
+}
+
+- (IBAction)revealInFinder:(id)sender;
+{
+    int row = [outlineView selectedRow];
+    if(row >= 0)
+        [[NSWorkspace sharedWorkspace] selectFile:[[[outlineView itemAtRow:row] representedFileURL] path] inFileViewerRootedAtPath:@""];
+}
+
+- (IBAction)openFile:(id)sender;
+{
+    int row = [outlineView selectedRow];
+    if(row >= 0)
+        [[NSWorkspace sharedWorkspace] openURL:[[outlineView itemAtRow:row] representedFileURL]];
 }
 
 #pragma mark Combo box

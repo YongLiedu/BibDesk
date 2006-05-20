@@ -43,11 +43,15 @@
     IBOutlet NSOutlineView *outlineView;
     NSMutableArray *itemNodes;
     NSMutableArray *roles;    
+    IBOutlet NSButton *addButton;
+    IBOutlet NSButton *deleteButton;
 }
 
 - (IBAction)changeRole:(id)sender;
 - (IBAction)addNode:(id)sender;
 - (IBAction)removeNode:(id)sender;
+- (IBAction)revealInFinder:(id)sender;
+- (IBAction)openFile:(id)sender;
 
 @end
 

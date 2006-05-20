@@ -1,10 +1,18 @@
 {
     IBClasses = (
+        {CLASS = BDSKTemplate; LANGUAGE = ObjC; SUPERCLASS = BDSKTreeNode; }, 
+        {CLASS = BDSKTreeNode; LANGUAGE = ObjC; SUPERCLASS = NSObject; }, 
         {
-            ACTIONS = {addNode = id; changeRole = id; removeNode = id; }; 
+            ACTIONS = {
+                addNode = id; 
+                changeRole = id; 
+                openFile = id; 
+                removeNode = id; 
+                revealInFinder = id; 
+            }; 
             CLASS = "BibPref_Export"; 
             LANGUAGE = ObjC; 
-            OUTLETS = {outlineView = NSOutlineView; }; 
+            OUTLETS = {addButton = NSButton; deleteButton = NSButton; outlineView = NSOutlineView; }; 
             SUPERCLASS = OAPreferenceClient; 
         }, 
         {
