@@ -93,8 +93,8 @@
     }
     
     BDSKSecondaryWindowController *swc = [[BDSKSecondaryWindowController alloc] initWithWindowNibName:@"BDSKSecondaryWindow"];
-	[swc setSourceGroup:selectedGroup];
 	[[self document] addWindowController:[swc autorelease]];
+	[swc setSourceGroup:selectedGroup];
 	[swc showWindow:sender];
 }
 
@@ -105,7 +105,41 @@
         return;
     }
     
-    NSString *entityName = [selectedGroup valueForKey:@"itemEntityName"];
+    NSString *parentEntityName = [selectedGroup valueForKey:@"itemEntityName"];
+    NSString *entityName = nil;
+    
+    switch ([sender tag]) {
+        case 0:
+            entityName = parentEntityName;
+            break;
+        case 1:
+            entityName = PublicationEntityName;
+            break;
+        case 2:
+            entityName = PersonEntityName;
+            break;
+        case 3:
+            entityName = InstitutionEntityName;
+            break;
+        case 4:
+            entityName = VenueEntityName;
+            break;
+        case 5:
+            entityName = NoteEntityName;
+            break;
+        case 6:
+            entityName = TagEntityName;
+            break;
+        case 7:
+            entityName = ItemEntityName;
+            break;
+    }
+    
+    if ([parentEntityName isEqualToString:ItemEntityName] == NO && [selectedGroup canAddChildren] == YES && [parentEntityName isEqualToString:entityName] == NO) {
+        NSBeep();
+        return;
+    }
+    
     NSManagedObjectContext *context = [self managedObjectContext];
     id newGroup = [NSEntityDescription insertNewObjectForEntityForName:StaticGroupEntityName
                                                 inManagedObjectContext:context];
@@ -129,7 +163,41 @@
         return;
     }
     
-    NSString *entityName = [selectedGroup valueForKey:@"itemEntityName"];
+    NSString *parentEntityName = [selectedGroup valueForKey:@"itemEntityName"];
+    NSString *entityName = nil;
+    
+    switch ([sender tag]) {
+        case 0:
+            entityName = parentEntityName;
+            break;
+        case 1:
+            entityName = PublicationEntityName;
+            break;
+        case 2:
+            entityName = PersonEntityName;
+            break;
+        case 3:
+            entityName = InstitutionEntityName;
+            break;
+        case 4:
+            entityName = VenueEntityName;
+            break;
+        case 5:
+            entityName = NoteEntityName;
+            break;
+        case 6:
+            entityName = TagEntityName;
+            break;
+        case 7:
+            entityName = ItemEntityName;
+            break;
+    }
+    
+    if ([parentEntityName isEqualToString:ItemEntityName] == NO && [selectedGroup canAddChildren] == YES && [parentEntityName isEqualToString:entityName] == NO) {
+        NSBeep();
+        return;
+    }
+    
     NSManagedObjectContext *context = [self managedObjectContext];
     id newFolderGroup = [NSEntityDescription insertNewObjectForEntityForName:FolderGroupEntityName
                                                       inManagedObjectContext:context];
@@ -258,25 +326,31 @@
     id groupItem = [item valueForKey:@"observedObject"];
     NSString *entityName = [groupItem valueForKey:@"itemEntityName"];
     NSString *pboardType = nil;
+    NSArray *pboardTypes = nil;
     
     if ([groupItem isStatic] == NO)
         return NSDragOperationNone;
     
     if ([entityName isEqualToString:PublicationEntityName])
-        pboardType = BDSKPublicationPboardType;
+        pboardTypes = [NSArray arrayWithObjects:BDSKPublicationPboardType, nil];
     else if ([entityName isEqualToString:PersonEntityName])
-        pboardType = BDSKPersonPboardType;
+        pboardTypes = [NSArray arrayWithObjects:BDSKPersonPboardType, nil];
     else if ([entityName isEqualToString:InstitutionEntityName])
-        pboardType = BDSKInstitutionPboardType;
+        pboardTypes = [NSArray arrayWithObjects:BDSKInstitutionPboardType, nil];
     else if ([entityName isEqualToString:VenueEntityName])
-        pboardType = BDSKVenuePboardType;
+        pboardTypes = [NSArray arrayWithObjects:BDSKVenuePboardType, nil];
     else if ([entityName isEqualToString:NoteEntityName])
-        pboardType = BDSKNotePboardType;
+        pboardTypes = [NSArray arrayWithObjects:BDSKNotePboardType, nil];
     else if ([entityName isEqualToString:TagEntityName])
-        pboardType = BDSKTagPboardType;
-    else return NSDragOperationNone;
+        pboardTypes = [NSArray arrayWithObjects:BDSKTagPboardType, nil];
+    else if ([entityName isEqualToString:TaggedItemEntityName])
+        pboardTypes = [NSArray arrayWithObjects:BDSKPublicationPboardType, BDSKPersonPboardType, BDSKInstitutionPboardType, BDSKVenuePboardType, nil];
+    else if ([entityName isEqualToString:ItemEntityName])
+        pboardTypes = [NSArray arrayWithObjects:BDSKPublicationPboardType, BDSKPersonPboardType, BDSKInstitutionPboardType, BDSKVenuePboardType, BDSKNotePboardType, BDSKTagPboardType, nil];
+    else return NO;
     
-    if ([pboard availableTypeFromArray:[NSArray arrayWithObjects:pboardType, nil]] == nil)
+    pboardType = [pboard availableTypeFromArray:pboardTypes];
+    if (pboardType == nil)
         return NSDragOperationNone;
     if (index != NSOutlineViewDropOnItemIndex)
         [outlineView setDropItem:item dropChildIndex:NSOutlineViewDropOnItemIndex];
@@ -292,25 +366,31 @@
     id groupItem = [item valueForKey:@"observedObject"];
     NSString *entityName = [groupItem valueForKey:@"itemEntityName"];
     NSString *pboardType = nil;
+    NSArray *pboardTypes = nil;
     
     if ([groupItem isSmart] || [groupItem isCategory])
         return NO;
     
     if ([entityName isEqualToString:PublicationEntityName])
-        pboardType = BDSKPublicationPboardType;
+        pboardTypes = [NSArray arrayWithObjects:BDSKPublicationPboardType, nil];
     else if ([entityName isEqualToString:PersonEntityName])
-        pboardType = BDSKPersonPboardType;
+        pboardTypes = [NSArray arrayWithObjects:BDSKPersonPboardType, nil];
     else if ([entityName isEqualToString:InstitutionEntityName])
-        pboardType = BDSKInstitutionPboardType;
+        pboardTypes = [NSArray arrayWithObjects:BDSKInstitutionPboardType, nil];
     else if ([entityName isEqualToString:VenueEntityName])
-        pboardType = BDSKVenuePboardType;
+        pboardTypes = [NSArray arrayWithObjects:BDSKVenuePboardType, nil];
     else if ([entityName isEqualToString:NoteEntityName])
-        pboardType = BDSKNotePboardType;
+        pboardTypes = [NSArray arrayWithObjects:BDSKNotePboardType, nil];
     else if ([entityName isEqualToString:TagEntityName])
-        pboardType = BDSKTagPboardType;
+        pboardTypes = [NSArray arrayWithObjects:BDSKTagPboardType, nil];
+    else if ([entityName isEqualToString:TaggedItemEntityName])
+        pboardTypes = [NSArray arrayWithObjects:BDSKPublicationPboardType, BDSKPersonPboardType, BDSKInstitutionPboardType, BDSKVenuePboardType, nil];
+    else if ([entityName isEqualToString:ItemEntityName])
+        pboardTypes = [NSArray arrayWithObjects:BDSKPublicationPboardType, BDSKPersonPboardType, BDSKInstitutionPboardType, BDSKVenuePboardType, BDSKNotePboardType, BDSKTagPboardType, nil];
     else return NO;
     
-    if ([pboard availableTypeFromArray:[NSArray arrayWithObjects:pboardType, nil]] == nil)
+    pboardType = [pboard availableTypeFromArray:pboardTypes];
+    if (pboardType == nil)
         return NO;
     
 	NSArray *draggedURIs = [NSUnarchiver unarchiveObjectWithData:[pboard dataForType:pboardType]];
