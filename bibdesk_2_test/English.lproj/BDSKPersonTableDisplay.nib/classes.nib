@@ -1,0 +1,29 @@
+{
+    IBClasses = (
+        {
+            CLASS = BDSKDisplayController; 
+            LANGUAGE = ObjC; 
+            OUTLETS = {mainView = NSView; }; 
+            SUPERCLASS = NSWindowController; 
+        }, 
+        {
+            ACTIONS = {addPerson = id; removePersons = id; }; 
+            CLASS = BDSKPersonTableDisplayController; 
+            LANGUAGE = ObjC; 
+            SUPERCLASS = BDSKTableDisplayController; 
+        }, 
+        {
+            CLASS = BDSKTableDisplayController; 
+            LANGUAGE = ObjC; 
+            OUTLETS = {
+                currentItemDisplayView = NSView; 
+                itemsArrayController = NSArrayController; 
+                itemsTableView = NSTableView; 
+            }; 
+            SUPERCLASS = BDSKDisplayController; 
+        }, 
+        {CLASS = FirstResponder; LANGUAGE = ObjC; SUPERCLASS = NSObject; }, 
+        {CLASS = ImageBackgroundBox; LANGUAGE = ObjC; SUPERCLASS = NSBox; }
+    ); 
+    IBVersion = 1; 
+}

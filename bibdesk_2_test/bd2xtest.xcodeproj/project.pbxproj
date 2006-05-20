@@ -20,9 +20,6 @@
 		2744F57608889FC3001E0CC9 /* DisplayControllers.plist in Resources */ = {isa = PBXBuildFile; fileRef = 2744F56908889FC2001E0CC9 /* DisplayControllers.plist */; };
 		2744F57708889FC3001E0CC9 /* ImageAndTextCell.m in Sources */ = {isa = PBXBuildFile; fileRef = 2744F56B08889FC2001E0CC9 /* ImageAndTextCell.m */; };
 		2744F5800888A087001E0CC9 /* BDSKMainWindow.nib in Resources */ = {isa = PBXBuildFile; fileRef = 2744F5780888A087001E0CC9 /* BDSKMainWindow.nib */; };
-		2744F5810888A087001E0CC9 /* BDSKNoteTableDisplayController.nib in Resources */ = {isa = PBXBuildFile; fileRef = 2744F57A0888A087001E0CC9 /* BDSKNoteTableDisplayController.nib */; };
-		2744F5820888A087001E0CC9 /* BDSKPersonTableDisplayController.nib in Resources */ = {isa = PBXBuildFile; fileRef = 2744F57C0888A087001E0CC9 /* BDSKPersonTableDisplayController.nib */; };
-		2744F5830888A087001E0CC9 /* BDSKPublicationTableDisplayController.nib in Resources */ = {isa = PBXBuildFile; fileRef = 2744F57E0888A087001E0CC9 /* BDSKPublicationTableDisplayController.nib */; };
 		27667443088DC007004CA127 /* BDSKContributor.m in Sources */ = {isa = PBXBuildFile; fileRef = 27667442088DC007004CA127 /* BDSKContributor.m */; };
 		276AAF190A1AECAA009A5679 /* bd2blueicon.icns in Resources */ = {isa = PBXBuildFile; fileRef = 276AAF180A1AECAA009A5679 /* bd2blueicon.icns */; };
 		276AAF790A1AFC5D009A5679 /* BDSKBibTeXImporter.m in Sources */ = {isa = PBXBuildFile; fileRef = 276AAF770A1AFC5D009A5679 /* BDSKBibTeXImporter.m */; };
@@ -56,7 +53,6 @@
 		CE82DA2F09A32BC40027F436 /* BDSKStaticGroup.m in Sources */ = {isa = PBXBuildFile; fileRef = CE82DA2D09A32BC40027F436 /* BDSKStaticGroup.m */; };
 		CEB343A5099A11D500601FBA /* BDSKTag.m in Sources */ = {isa = PBXBuildFile; fileRef = CEB3439F099A11D500601FBA /* BDSKTag.m */; };
 		CEB343A9099A11D500601FBA /* BDSKTagTableDisplayController.m in Sources */ = {isa = PBXBuildFile; fileRef = CEB343A3099A11D500601FBA /* BDSKTagTableDisplayController.m */; };
-		CEB3441D099A17B000601FBA /* BDSKTagTableDisplayController.nib in Resources */ = {isa = PBXBuildFile; fileRef = CEB3441B099A17B000601FBA /* BDSKTagTableDisplayController.nib */; };
 		CEB763A80A1CD9F800DEA121 /* NSString_BDSKExtensions.m in Sources */ = {isa = PBXBuildFile; fileRef = CEB763A60A1CD9F800DEA121 /* NSString_BDSKExtensions.m */; };
 		CEB763BC0A1CDA9C00DEA121 /* NSCharacterSet_BDSKExtensions.m in Sources */ = {isa = PBXBuildFile; fileRef = CEB763BA0A1CDA9C00DEA121 /* NSCharacterSet_BDSKExtensions.m */; };
 		CEB763FC0A1CDBA400DEA121 /* BDSKComplexString.m in Sources */ = {isa = PBXBuildFile; fileRef = CEB763F60A1CDBA400DEA121 /* BDSKComplexString.m */; };
@@ -66,12 +62,28 @@
 		CEB764710A1CE00300DEA121 /* BDSKMacroEditor.m in Sources */ = {isa = PBXBuildFile; fileRef = CEB7646B0A1CE00200DEA121 /* BDSKMacroEditor.m */; };
 		CEB764730A1CE00300DEA121 /* BDSKScrollableTextField.m in Sources */ = {isa = PBXBuildFile; fileRef = CEB7646D0A1CE00200DEA121 /* BDSKScrollableTextField.m */; };
 		CEB764B10A1CE24900DEA121 /* BDSKScrollableTextFieldCell.m in Sources */ = {isa = PBXBuildFile; fileRef = CEB764AF0A1CE24900DEA121 /* BDSKScrollableTextFieldCell.m */; };
+		CEB7701C0A1F48EB00DEA121 /* BDSKInstitutionItemDisplay.nib in Resources */ = {isa = PBXBuildFile; fileRef = CEB770040A1F48EB00DEA121 /* BDSKInstitutionItemDisplay.nib */; };
+		CEB7701D0A1F48EB00DEA121 /* BDSKInstitutionTableDisplay.nib in Resources */ = {isa = PBXBuildFile; fileRef = CEB770060A1F48EB00DEA121 /* BDSKInstitutionTableDisplay.nib */; };
+		CEB7701E0A1F48EB00DEA121 /* BDSKNoteItemDisplay.nib in Resources */ = {isa = PBXBuildFile; fileRef = CEB770080A1F48EB00DEA121 /* BDSKNoteItemDisplay.nib */; };
+		CEB7701F0A1F48EB00DEA121 /* BDSKNoteTableDisplay.nib in Resources */ = {isa = PBXBuildFile; fileRef = CEB7700A0A1F48EB00DEA121 /* BDSKNoteTableDisplay.nib */; };
+		CEB770200A1F48EB00DEA121 /* BDSKPersonItemDisplay.nib in Resources */ = {isa = PBXBuildFile; fileRef = CEB7700C0A1F48EB00DEA121 /* BDSKPersonItemDisplay.nib */; };
+		CEB770210A1F48EB00DEA121 /* BDSKPersonTableDisplay.nib in Resources */ = {isa = PBXBuildFile; fileRef = CEB7700E0A1F48EB00DEA121 /* BDSKPersonTableDisplay.nib */; };
+		CEB770220A1F48EB00DEA121 /* BDSKPublicationItemDisplay.nib in Resources */ = {isa = PBXBuildFile; fileRef = CEB770100A1F48EB00DEA121 /* BDSKPublicationItemDisplay.nib */; };
+		CEB770230A1F48EB00DEA121 /* BDSKPublicationTableDisplay.nib in Resources */ = {isa = PBXBuildFile; fileRef = CEB770120A1F48EB00DEA121 /* BDSKPublicationTableDisplay.nib */; };
+		CEB770240A1F48EB00DEA121 /* BDSKTagItemDisplay.nib in Resources */ = {isa = PBXBuildFile; fileRef = CEB770140A1F48EB00DEA121 /* BDSKTagItemDisplay.nib */; };
+		CEB770250A1F48EB00DEA121 /* BDSKTagTableDisplay.nib in Resources */ = {isa = PBXBuildFile; fileRef = CEB770160A1F48EB00DEA121 /* BDSKTagTableDisplay.nib */; };
+		CEB770260A1F48EB00DEA121 /* BDSKVenueItemDisplay.nib in Resources */ = {isa = PBXBuildFile; fileRef = CEB770180A1F48EB00DEA121 /* BDSKVenueItemDisplay.nib */; };
+		CEB770270A1F48EB00DEA121 /* BDSKVenueTableDisplay.nib in Resources */ = {isa = PBXBuildFile; fileRef = CEB7701A0A1F48EB00DEA121 /* BDSKVenueTableDisplay.nib */; };
+		CEB770350A1F492B00DEA121 /* BDSKInstitutionItemDisplayController.m in Sources */ = {isa = PBXBuildFile; fileRef = CEB770290A1F492A00DEA121 /* BDSKInstitutionItemDisplayController.m */; };
+		CEB770370A1F492B00DEA121 /* BDSKNoteItemDisplayController.m in Sources */ = {isa = PBXBuildFile; fileRef = CEB7702B0A1F492A00DEA121 /* BDSKNoteItemDisplayController.m */; };
+		CEB770390A1F492B00DEA121 /* BDSKPersonItemDisplayController.m in Sources */ = {isa = PBXBuildFile; fileRef = CEB7702D0A1F492A00DEA121 /* BDSKPersonItemDisplayController.m */; };
+		CEB7703B0A1F492B00DEA121 /* BDSKPublicationItemDisplayController.m in Sources */ = {isa = PBXBuildFile; fileRef = CEB7702F0A1F492A00DEA121 /* BDSKPublicationItemDisplayController.m */; };
+		CEB7703D0A1F492B00DEA121 /* BDSKTagItemDisplayController.m in Sources */ = {isa = PBXBuildFile; fileRef = CEB770310A1F492A00DEA121 /* BDSKTagItemDisplayController.m */; };
+		CEB7703F0A1F492B00DEA121 /* BDSKVenueItemDisplayController.m in Sources */ = {isa = PBXBuildFile; fileRef = CEB770330A1F492A00DEA121 /* BDSKVenueItemDisplayController.m */; };
 		CEB797C0099823AD00AAB226 /* BDSKInstitution.m in Sources */ = {isa = PBXBuildFile; fileRef = CEB797B6099823AD00AAB226 /* BDSKInstitution.m */; };
 		CEB797C2099823AD00AAB226 /* BDSKInstitutionTableDisplayController.m in Sources */ = {isa = PBXBuildFile; fileRef = CEB797B8099823AD00AAB226 /* BDSKInstitutionTableDisplayController.m */; };
 		CEB797C4099823AD00AAB226 /* BDSKVenue.m in Sources */ = {isa = PBXBuildFile; fileRef = CEB797BA099823AD00AAB226 /* BDSKVenue.m */; };
 		CEB797C8099823AD00AAB226 /* BDSKVenueTableDisplayController.m in Sources */ = {isa = PBXBuildFile; fileRef = CEB797BE099823AD00AAB226 /* BDSKVenueTableDisplayController.m */; };
-		CEB798400998272D00AAB226 /* BDSKInstitutionTableDisplayController.nib in Resources */ = {isa = PBXBuildFile; fileRef = CEB7983C0998272D00AAB226 /* BDSKInstitutionTableDisplayController.nib */; };
-		CEB798410998272D00AAB226 /* BDSKVenueTableDisplayController.nib in Resources */ = {isa = PBXBuildFile; fileRef = CEB7983E0998272D00AAB226 /* BDSKVenueTableDisplayController.nib */; };
 		CEC5AF05098F7A0000DE1DB2 /* BDSKSecondaryWindowController.m in Sources */ = {isa = PBXBuildFile; fileRef = CEC5AF02098F7A0000DE1DB2 /* BDSKSecondaryWindowController.m */; };
 		CEC5AF06098F7A0000DE1DB2 /* BDSKTableDisplayController.m in Sources */ = {isa = PBXBuildFile; fileRef = CEC5AF04098F7A0000DE1DB2 /* BDSKTableDisplayController.m */; };
 		CEC5AF22098F7A9F00DE1DB2 /* Add_Pressed.tiff in Resources */ = {isa = PBXBuildFile; fileRef = CEC5AF20098F7A9F00DE1DB2 /* Add_Pressed.tiff */; };
@@ -164,9 +176,6 @@
 		2744F56A08889FC2001E0CC9 /* ImageAndTextCell.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = ImageAndTextCell.h; sourceTree = "<group>"; };
 		2744F56B08889FC2001E0CC9 /* ImageAndTextCell.m */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.objc; path = ImageAndTextCell.m; sourceTree = "<group>"; };
 		2744F5790888A087001E0CC9 /* English */ = {isa = PBXFileReference; lastKnownFileType = wrapper.nib; name = English; path = English.lproj/BDSKMainWindow.nib; sourceTree = "<group>"; };
-		2744F57B0888A087001E0CC9 /* English */ = {isa = PBXFileReference; lastKnownFileType = wrapper.nib; name = English; path = English.lproj/BDSKNoteTableDisplayController.nib; sourceTree = "<group>"; };
-		2744F57D0888A087001E0CC9 /* English */ = {isa = PBXFileReference; lastKnownFileType = wrapper.nib; name = English; path = English.lproj/BDSKPersonTableDisplayController.nib; sourceTree = "<group>"; };
-		2744F57F0888A087001E0CC9 /* English */ = {isa = PBXFileReference; lastKnownFileType = wrapper.nib; name = English; path = English.lproj/BDSKPublicationTableDisplayController.nib; sourceTree = "<group>"; };
 		27667441088DC007004CA127 /* BDSKContributor.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BDSKContributor.h; sourceTree = "<group>"; };
 		27667442088DC007004CA127 /* BDSKContributor.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BDSKContributor.m; sourceTree = "<group>"; };
 		276AAF180A1AECAA009A5679 /* bd2blueicon.icns */ = {isa = PBXFileReference; lastKnownFileType = image.icns; name = bd2blueicon.icns; path = Images/bd2blueicon.icns; sourceTree = "<group>"; };
@@ -219,7 +228,6 @@
 		CEB3439F099A11D500601FBA /* BDSKTag.m */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.objc; path = BDSKTag.m; sourceTree = "<group>"; };
 		CEB343A2099A11D500601FBA /* BDSKTagTableDisplayController.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = BDSKTagTableDisplayController.h; sourceTree = "<group>"; };
 		CEB343A3099A11D500601FBA /* BDSKTagTableDisplayController.m */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.objc; path = BDSKTagTableDisplayController.m; sourceTree = "<group>"; };
-		CEB3441C099A17B000601FBA /* English */ = {isa = PBXFileReference; lastKnownFileType = wrapper.nib; name = English; path = English.lproj/BDSKTagTableDisplayController.nib; sourceTree = "<group>"; };
 		CEB763A50A1CD9F800DEA121 /* NSString_BDSKExtensions.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = NSString_BDSKExtensions.h; sourceTree = "<group>"; };
 		CEB763A60A1CD9F800DEA121 /* NSString_BDSKExtensions.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = NSString_BDSKExtensions.m; sourceTree = "<group>"; };
 		CEB763B90A1CDA9C00DEA121 /* NSCharacterSet_BDSKExtensions.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = NSCharacterSet_BDSKExtensions.h; sourceTree = "<group>"; };
@@ -238,6 +246,30 @@
 		CEB7646D0A1CE00200DEA121 /* BDSKScrollableTextField.m */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.objc; path = BDSKScrollableTextField.m; sourceTree = "<group>"; };
 		CEB764AE0A1CE24900DEA121 /* BDSKScrollableTextFieldCell.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = BDSKScrollableTextFieldCell.h; sourceTree = "<group>"; };
 		CEB764AF0A1CE24900DEA121 /* BDSKScrollableTextFieldCell.m */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.objc; path = BDSKScrollableTextFieldCell.m; sourceTree = "<group>"; };
+		CEB770050A1F48EB00DEA121 /* English */ = {isa = PBXFileReference; lastKnownFileType = wrapper.nib; name = English; path = English.lproj/BDSKInstitutionItemDisplay.nib; sourceTree = "<group>"; };
+		CEB770070A1F48EB00DEA121 /* English */ = {isa = PBXFileReference; lastKnownFileType = wrapper.nib; name = English; path = English.lproj/BDSKInstitutionTableDisplay.nib; sourceTree = "<group>"; };
+		CEB770090A1F48EB00DEA121 /* English */ = {isa = PBXFileReference; lastKnownFileType = wrapper.nib; name = English; path = English.lproj/BDSKNoteItemDisplay.nib; sourceTree = "<group>"; };
+		CEB7700B0A1F48EB00DEA121 /* English */ = {isa = PBXFileReference; lastKnownFileType = wrapper.nib; name = English; path = English.lproj/BDSKNoteTableDisplay.nib; sourceTree = "<group>"; };
+		CEB7700D0A1F48EB00DEA121 /* English */ = {isa = PBXFileReference; lastKnownFileType = wrapper.nib; name = English; path = English.lproj/BDSKPersonItemDisplay.nib; sourceTree = "<group>"; };
+		CEB7700F0A1F48EB00DEA121 /* English */ = {isa = PBXFileReference; lastKnownFileType = wrapper.nib; name = English; path = English.lproj/BDSKPersonTableDisplay.nib; sourceTree = "<group>"; };
+		CEB770110A1F48EB00DEA121 /* English */ = {isa = PBXFileReference; lastKnownFileType = wrapper.nib; name = English; path = English.lproj/BDSKPublicationItemDisplay.nib; sourceTree = "<group>"; };
+		CEB770130A1F48EB00DEA121 /* English */ = {isa = PBXFileReference; lastKnownFileType = wrapper.nib; name = English; path = English.lproj/BDSKPublicationTableDisplay.nib; sourceTree = "<group>"; };
+		CEB770150A1F48EB00DEA121 /* English */ = {isa = PBXFileReference; lastKnownFileType = wrapper.nib; name = English; path = English.lproj/BDSKTagItemDisplay.nib; sourceTree = "<group>"; };
+		CEB770170A1F48EB00DEA121 /* English */ = {isa = PBXFileReference; lastKnownFileType = wrapper.nib; name = English; path = English.lproj/BDSKTagTableDisplay.nib; sourceTree = "<group>"; };
+		CEB770190A1F48EB00DEA121 /* English */ = {isa = PBXFileReference; lastKnownFileType = wrapper.nib; name = English; path = English.lproj/BDSKVenueItemDisplay.nib; sourceTree = "<group>"; };
+		CEB7701B0A1F48EB00DEA121 /* English */ = {isa = PBXFileReference; lastKnownFileType = wrapper.nib; name = English; path = English.lproj/BDSKVenueTableDisplay.nib; sourceTree = "<group>"; };
+		CEB770280A1F492A00DEA121 /* BDSKInstitutionItemDisplayController.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = BDSKInstitutionItemDisplayController.h; sourceTree = "<group>"; };
+		CEB770290A1F492A00DEA121 /* BDSKInstitutionItemDisplayController.m */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.objc; path = BDSKInstitutionItemDisplayController.m; sourceTree = "<group>"; };
+		CEB7702A0A1F492A00DEA121 /* BDSKNoteItemDisplayController.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = BDSKNoteItemDisplayController.h; sourceTree = "<group>"; };
+		CEB7702B0A1F492A00DEA121 /* BDSKNoteItemDisplayController.m */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.objc; path = BDSKNoteItemDisplayController.m; sourceTree = "<group>"; };
+		CEB7702C0A1F492A00DEA121 /* BDSKPersonItemDisplayController.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = BDSKPersonItemDisplayController.h; sourceTree = "<group>"; };
+		CEB7702D0A1F492A00DEA121 /* BDSKPersonItemDisplayController.m */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.objc; path = BDSKPersonItemDisplayController.m; sourceTree = "<group>"; };
+		CEB7702E0A1F492A00DEA121 /* BDSKPublicationItemDisplayController.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = BDSKPublicationItemDisplayController.h; sourceTree = "<group>"; };
+		CEB7702F0A1F492A00DEA121 /* BDSKPublicationItemDisplayController.m */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.objc; path = BDSKPublicationItemDisplayController.m; sourceTree = "<group>"; };
+		CEB770300A1F492A00DEA121 /* BDSKTagItemDisplayController.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = BDSKTagItemDisplayController.h; sourceTree = "<group>"; };
+		CEB770310A1F492A00DEA121 /* BDSKTagItemDisplayController.m */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.objc; path = BDSKTagItemDisplayController.m; sourceTree = "<group>"; };
+		CEB770320A1F492A00DEA121 /* BDSKVenueItemDisplayController.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = BDSKVenueItemDisplayController.h; sourceTree = "<group>"; };
+		CEB770330A1F492A00DEA121 /* BDSKVenueItemDisplayController.m */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.objc; path = BDSKVenueItemDisplayController.m; sourceTree = "<group>"; };
 		CEB797B5099823AD00AAB226 /* BDSKInstitution.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = BDSKInstitution.h; sourceTree = "<group>"; };
 		CEB797B6099823AD00AAB226 /* BDSKInstitution.m */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.objc; path = BDSKInstitution.m; sourceTree = "<group>"; };
 		CEB797B7099823AD00AAB226 /* BDSKInstitutionTableDisplayController.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = BDSKInstitutionTableDisplayController.h; sourceTree = "<group>"; };
@@ -246,8 +278,6 @@
 		CEB797BA099823AD00AAB226 /* BDSKVenue.m */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.objc; path = BDSKVenue.m; sourceTree = "<group>"; };
 		CEB797BD099823AD00AAB226 /* BDSKVenueTableDisplayController.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = BDSKVenueTableDisplayController.h; sourceTree = "<group>"; };
 		CEB797BE099823AD00AAB226 /* BDSKVenueTableDisplayController.m */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.objc; path = BDSKVenueTableDisplayController.m; sourceTree = "<group>"; };
-		CEB7983D0998272D00AAB226 /* English */ = {isa = PBXFileReference; lastKnownFileType = wrapper.nib; name = English; path = English.lproj/BDSKInstitutionTableDisplayController.nib; sourceTree = "<group>"; };
-		CEB7983F0998272D00AAB226 /* English */ = {isa = PBXFileReference; lastKnownFileType = wrapper.nib; name = English; path = English.lproj/BDSKVenueTableDisplayController.nib; sourceTree = "<group>"; };
 		CEC5AF01098F7A0000DE1DB2 /* BDSKSecondaryWindowController.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = BDSKSecondaryWindowController.h; sourceTree = "<group>"; };
 		CEC5AF02098F7A0000DE1DB2 /* BDSKSecondaryWindowController.m */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.objc; path = BDSKSecondaryWindowController.m; sourceTree = "<group>"; };
 		CEC5AF03098F7A0000DE1DB2 /* BDSKTableDisplayController.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = BDSKTableDisplayController.h; sourceTree = "<group>"; };
@@ -377,10 +407,10 @@
 				CEC5AF03098F7A0000DE1DB2 /* BDSKTableDisplayController.h */,
 				CEC5AF04098F7A0000DE1DB2 /* BDSKTableDisplayController.m */,
 				2744F56908889FC2001E0CC9 /* DisplayControllers.plist */,
-				2744F56508889FC2001E0CC9 /* BDSKPublicationTableDisplayController.h */,
-				2744F56608889FC2001E0CC9 /* BDSKPublicationTableDisplayController.m */,
 				2744F56108889FC2001E0CC9 /* BDSKPersonTableDisplayController.h */,
 				2744F56208889FC2001E0CC9 /* BDSKPersonTableDisplayController.m */,
+				2744F56508889FC2001E0CC9 /* BDSKPublicationTableDisplayController.h */,
+				2744F56608889FC2001E0CC9 /* BDSKPublicationTableDisplayController.m */,
 				2744F55D08889FC2001E0CC9 /* BDSKNoteTableDisplayController.h */,
 				2744F55E08889FC2001E0CC9 /* BDSKNoteTableDisplayController.m */,
 				CEB797B7099823AD00AAB226 /* BDSKInstitutionTableDisplayController.h */,
@@ -389,6 +419,18 @@
 				CEB797BE099823AD00AAB226 /* BDSKVenueTableDisplayController.m */,
 				CEB343A2099A11D500601FBA /* BDSKTagTableDisplayController.h */,
 				CEB343A3099A11D500601FBA /* BDSKTagTableDisplayController.m */,
+				CEB770280A1F492A00DEA121 /* BDSKInstitutionItemDisplayController.h */,
+				CEB770290A1F492A00DEA121 /* BDSKInstitutionItemDisplayController.m */,
+				CEB7702A0A1F492A00DEA121 /* BDSKNoteItemDisplayController.h */,
+				CEB7702B0A1F492A00DEA121 /* BDSKNoteItemDisplayController.m */,
+				CEB7702C0A1F492A00DEA121 /* BDSKPersonItemDisplayController.h */,
+				CEB7702D0A1F492A00DEA121 /* BDSKPersonItemDisplayController.m */,
+				CEB7702E0A1F492A00DEA121 /* BDSKPublicationItemDisplayController.h */,
+				CEB7702F0A1F492A00DEA121 /* BDSKPublicationItemDisplayController.m */,
+				CEB770300A1F492A00DEA121 /* BDSKTagItemDisplayController.h */,
+				CEB770310A1F492A00DEA121 /* BDSKTagItemDisplayController.m */,
+				CEB770320A1F492A00DEA121 /* BDSKVenueItemDisplayController.h */,
+				CEB770330A1F492A00DEA121 /* BDSKVenueItemDisplayController.m */,
 			);
 			name = "Display Controllers";
 			sourceTree = "<group>";
@@ -457,17 +499,9 @@
 			isa = PBXGroup;
 			children = (
 				277D9234089627D4004C4105 /* Images */,
+				CEB771390A1F5CC800DEA121 /* Displays */,
+				CEB7713A0A1F5CEF00DEA121 /* Windows */,
 				276AB0250A1B00FB009A5679 /* BDSKBibTeXImporter.nib */,
-				2744F5780888A087001E0CC9 /* BDSKMainWindow.nib */,
-				CEC5AF2A098F7AF400DE1DB2 /* BDSKSecondaryWindow.nib */,
-				CED1DB6E0996300F0017917B /* BDSKNoteWindow.nib */,
-				CED1DBE0099637B30017917B /* BDSKTagWindow.nib */,
-				2744F57E0888A087001E0CC9 /* BDSKPublicationTableDisplayController.nib */,
-				2744F57C0888A087001E0CC9 /* BDSKPersonTableDisplayController.nib */,
-				CEB7983C0998272D00AAB226 /* BDSKInstitutionTableDisplayController.nib */,
-				CEB7983E0998272D00AAB226 /* BDSKVenueTableDisplayController.nib */,
-				2744F57A0888A087001E0CC9 /* BDSKNoteTableDisplayController.nib */,
-				CEB3441B099A17B000601FBA /* BDSKTagTableDisplayController.nib */,
 				CE7B17AD09A473D8003C5A46 /* BDSKSmartGroupEditor.nib */,
 				CE7B17AB09A473D8003C5A46 /* BDSKComparisonPredicateView.nib */,
 				29B97318FDCFA39411CA2CEA /* MainMenu.nib */,
@@ -550,6 +584,36 @@
 				CEB763F80A1CDBA400DEA121 /* BDSKMacroResolver.m */,
 			);
 			name = "Complex Strings";
+			sourceTree = "<group>";
+		};
+		CEB771390A1F5CC800DEA121 /* Displays */ = {
+			isa = PBXGroup;
+			children = (
+				CEB770040A1F48EB00DEA121 /* BDSKInstitutionItemDisplay.nib */,
+				CEB770060A1F48EB00DEA121 /* BDSKInstitutionTableDisplay.nib */,
+				CEB770080A1F48EB00DEA121 /* BDSKNoteItemDisplay.nib */,
+				CEB7700A0A1F48EB00DEA121 /* BDSKNoteTableDisplay.nib */,
+				CEB7700C0A1F48EB00DEA121 /* BDSKPersonItemDisplay.nib */,
+				CEB7700E0A1F48EB00DEA121 /* BDSKPersonTableDisplay.nib */,
+				CEB770100A1F48EB00DEA121 /* BDSKPublicationItemDisplay.nib */,
+				CEB770120A1F48EB00DEA121 /* BDSKPublicationTableDisplay.nib */,
+				CEB770140A1F48EB00DEA121 /* BDSKTagItemDisplay.nib */,
+				CEB770160A1F48EB00DEA121 /* BDSKTagTableDisplay.nib */,
+				CEB770180A1F48EB00DEA121 /* BDSKVenueItemDisplay.nib */,
+				CEB7701A0A1F48EB00DEA121 /* BDSKVenueTableDisplay.nib */,
+			);
+			name = Displays;
+			sourceTree = "<group>";
+		};
+		CEB7713A0A1F5CEF00DEA121 /* Windows */ = {
+			isa = PBXGroup;
+			children = (
+				2744F5780888A087001E0CC9 /* BDSKMainWindow.nib */,
+				CEC5AF2A098F7AF400DE1DB2 /* BDSKSecondaryWindow.nib */,
+				CED1DB6E0996300F0017917B /* BDSKNoteWindow.nib */,
+				CED1DBE0099637B30017917B /* BDSKTagWindow.nib */,
+			);
+			name = Windows;
 			sourceTree = "<group>";
 		};
 		CEB8B51509B5248F0059A7EB /* Products */ = {
@@ -675,9 +739,6 @@
 				8D11072B0486CEB800E47090 /* InfoPlist.strings in Resources */,
 				2744F57608889FC3001E0CC9 /* DisplayControllers.plist in Resources */,
 				2744F5800888A087001E0CC9 /* BDSKMainWindow.nib in Resources */,
-				2744F5810888A087001E0CC9 /* BDSKNoteTableDisplayController.nib in Resources */,
-				2744F5820888A087001E0CC9 /* BDSKPersonTableDisplayController.nib in Resources */,
-				2744F5830888A087001E0CC9 /* BDSKPublicationTableDisplayController.nib in Resources */,
 				277D9232089627C7004C4105 /* coffeeStain.jpg in Resources */,
 				CEC5AF22098F7A9F00DE1DB2 /* Add_Pressed.tiff in Resources */,
 				CEC5AF23098F7A9F00DE1DB2 /* Add.tiff in Resources */,
@@ -688,15 +749,24 @@
 				CE2AEF8D09952A6400473196 /* SmartGroupIcon.tiff in Resources */,
 				CED1DB700996300F0017917B /* BDSKNoteWindow.nib in Resources */,
 				CED1DBE2099637B30017917B /* BDSKTagWindow.nib in Resources */,
-				CEB798400998272D00AAB226 /* BDSKInstitutionTableDisplayController.nib in Resources */,
-				CEB798410998272D00AAB226 /* BDSKVenueTableDisplayController.nib in Resources */,
-				CEB3441D099A17B000601FBA /* BDSKTagTableDisplayController.nib in Resources */,
 				CE7B17AF09A473D8003C5A46 /* BDSKComparisonPredicateView.nib in Resources */,
 				CE7B17B009A473D8003C5A46 /* BDSKSmartGroupEditor.nib in Resources */,
 				CE7B187709A4758B003C5A46 /* PredicateRules.plist in Resources */,
 				CE3ACF7809B7D07300391900 /* FolderGroupIcon.tiff in Resources */,
 				276AAF190A1AECAA009A5679 /* bd2blueicon.icns in Resources */,
 				276AB02C0A1B00FB009A5679 /* BDSKBibTeXImporter.nib in Resources */,
+				CEB7701C0A1F48EB00DEA121 /* BDSKInstitutionItemDisplay.nib in Resources */,
+				CEB7701D0A1F48EB00DEA121 /* BDSKInstitutionTableDisplay.nib in Resources */,
+				CEB7701E0A1F48EB00DEA121 /* BDSKNoteItemDisplay.nib in Resources */,
+				CEB7701F0A1F48EB00DEA121 /* BDSKNoteTableDisplay.nib in Resources */,
+				CEB770200A1F48EB00DEA121 /* BDSKPersonItemDisplay.nib in Resources */,
+				CEB770210A1F48EB00DEA121 /* BDSKPersonTableDisplay.nib in Resources */,
+				CEB770220A1F48EB00DEA121 /* BDSKPublicationItemDisplay.nib in Resources */,
+				CEB770230A1F48EB00DEA121 /* BDSKPublicationTableDisplay.nib in Resources */,
+				CEB770240A1F48EB00DEA121 /* BDSKTagItemDisplay.nib in Resources */,
+				CEB770250A1F48EB00DEA121 /* BDSKTagTableDisplay.nib in Resources */,
+				CEB770260A1F48EB00DEA121 /* BDSKVenueItemDisplay.nib in Resources */,
+				CEB770270A1F48EB00DEA121 /* BDSKVenueTableDisplay.nib in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -752,6 +822,12 @@
 				CEB764710A1CE00300DEA121 /* BDSKMacroEditor.m in Sources */,
 				CEB764730A1CE00300DEA121 /* BDSKScrollableTextField.m in Sources */,
 				CEB764B10A1CE24900DEA121 /* BDSKScrollableTextFieldCell.m in Sources */,
+				CEB770350A1F492B00DEA121 /* BDSKInstitutionItemDisplayController.m in Sources */,
+				CEB770370A1F492B00DEA121 /* BDSKNoteItemDisplayController.m in Sources */,
+				CEB770390A1F492B00DEA121 /* BDSKPersonItemDisplayController.m in Sources */,
+				CEB7703B0A1F492B00DEA121 /* BDSKPublicationItemDisplayController.m in Sources */,
+				CEB7703D0A1F492B00DEA121 /* BDSKTagItemDisplayController.m in Sources */,
+				CEB7703F0A1F492B00DEA121 /* BDSKVenueItemDisplayController.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -772,31 +848,7 @@
 				2744F5790888A087001E0CC9 /* English */,
 			);
 			name = BDSKMainWindow.nib;
-			sourceTree = SOURCE_ROOT;
-		};
-		2744F57A0888A087001E0CC9 /* BDSKNoteTableDisplayController.nib */ = {
-			isa = PBXVariantGroup;
-			children = (
-				2744F57B0888A087001E0CC9 /* English */,
-			);
-			name = BDSKNoteTableDisplayController.nib;
-			sourceTree = SOURCE_ROOT;
-		};
-		2744F57C0888A087001E0CC9 /* BDSKPersonTableDisplayController.nib */ = {
-			isa = PBXVariantGroup;
-			children = (
-				2744F57D0888A087001E0CC9 /* English */,
-			);
-			name = BDSKPersonTableDisplayController.nib;
-			sourceTree = SOURCE_ROOT;
-		};
-		2744F57E0888A087001E0CC9 /* BDSKPublicationTableDisplayController.nib */ = {
-			isa = PBXVariantGroup;
-			children = (
-				2744F57F0888A087001E0CC9 /* English */,
-			);
-			name = BDSKPublicationTableDisplayController.nib;
-			sourceTree = SOURCE_ROOT;
+			sourceTree = "<group>";
 		};
 		276AB0250A1B00FB009A5679 /* BDSKBibTeXImporter.nib */ = {
 			isa = PBXVariantGroup;
@@ -830,28 +882,100 @@
 			name = BDSKSmartGroupEditor.nib;
 			sourceTree = "<group>";
 		};
-		CEB3441B099A17B000601FBA /* BDSKTagTableDisplayController.nib */ = {
+		CEB770040A1F48EB00DEA121 /* BDSKInstitutionItemDisplay.nib */ = {
 			isa = PBXVariantGroup;
 			children = (
-				CEB3441C099A17B000601FBA /* English */,
+				CEB770050A1F48EB00DEA121 /* English */,
 			);
-			name = BDSKTagTableDisplayController.nib;
+			name = BDSKInstitutionItemDisplay.nib;
 			sourceTree = "<group>";
 		};
-		CEB7983C0998272D00AAB226 /* BDSKInstitutionTableDisplayController.nib */ = {
+		CEB770060A1F48EB00DEA121 /* BDSKInstitutionTableDisplay.nib */ = {
 			isa = PBXVariantGroup;
 			children = (
-				CEB7983D0998272D00AAB226 /* English */,
+				CEB770070A1F48EB00DEA121 /* English */,
 			);
-			name = BDSKInstitutionTableDisplayController.nib;
+			name = BDSKInstitutionTableDisplay.nib;
 			sourceTree = "<group>";
 		};
-		CEB7983E0998272D00AAB226 /* BDSKVenueTableDisplayController.nib */ = {
+		CEB770080A1F48EB00DEA121 /* BDSKNoteItemDisplay.nib */ = {
 			isa = PBXVariantGroup;
 			children = (
-				CEB7983F0998272D00AAB226 /* English */,
+				CEB770090A1F48EB00DEA121 /* English */,
 			);
-			name = BDSKVenueTableDisplayController.nib;
+			name = BDSKNoteItemDisplay.nib;
+			sourceTree = "<group>";
+		};
+		CEB7700A0A1F48EB00DEA121 /* BDSKNoteTableDisplay.nib */ = {
+			isa = PBXVariantGroup;
+			children = (
+				CEB7700B0A1F48EB00DEA121 /* English */,
+			);
+			name = BDSKNoteTableDisplay.nib;
+			sourceTree = "<group>";
+		};
+		CEB7700C0A1F48EB00DEA121 /* BDSKPersonItemDisplay.nib */ = {
+			isa = PBXVariantGroup;
+			children = (
+				CEB7700D0A1F48EB00DEA121 /* English */,
+			);
+			name = BDSKPersonItemDisplay.nib;
+			sourceTree = "<group>";
+		};
+		CEB7700E0A1F48EB00DEA121 /* BDSKPersonTableDisplay.nib */ = {
+			isa = PBXVariantGroup;
+			children = (
+				CEB7700F0A1F48EB00DEA121 /* English */,
+			);
+			name = BDSKPersonTableDisplay.nib;
+			sourceTree = "<group>";
+		};
+		CEB770100A1F48EB00DEA121 /* BDSKPublicationItemDisplay.nib */ = {
+			isa = PBXVariantGroup;
+			children = (
+				CEB770110A1F48EB00DEA121 /* English */,
+			);
+			name = BDSKPublicationItemDisplay.nib;
+			sourceTree = "<group>";
+		};
+		CEB770120A1F48EB00DEA121 /* BDSKPublicationTableDisplay.nib */ = {
+			isa = PBXVariantGroup;
+			children = (
+				CEB770130A1F48EB00DEA121 /* English */,
+			);
+			name = BDSKPublicationTableDisplay.nib;
+			sourceTree = "<group>";
+		};
+		CEB770140A1F48EB00DEA121 /* BDSKTagItemDisplay.nib */ = {
+			isa = PBXVariantGroup;
+			children = (
+				CEB770150A1F48EB00DEA121 /* English */,
+			);
+			name = BDSKTagItemDisplay.nib;
+			sourceTree = "<group>";
+		};
+		CEB770160A1F48EB00DEA121 /* BDSKTagTableDisplay.nib */ = {
+			isa = PBXVariantGroup;
+			children = (
+				CEB770170A1F48EB00DEA121 /* English */,
+			);
+			name = BDSKTagTableDisplay.nib;
+			sourceTree = "<group>";
+		};
+		CEB770180A1F48EB00DEA121 /* BDSKVenueItemDisplay.nib */ = {
+			isa = PBXVariantGroup;
+			children = (
+				CEB770190A1F48EB00DEA121 /* English */,
+			);
+			name = BDSKVenueItemDisplay.nib;
+			sourceTree = "<group>";
+		};
+		CEB7701A0A1F48EB00DEA121 /* BDSKVenueTableDisplay.nib */ = {
+			isa = PBXVariantGroup;
+			children = (
+				CEB7701B0A1F48EB00DEA121 /* English */,
+			);
+			name = BDSKVenueTableDisplay.nib;
 			sourceTree = "<group>";
 		};
 		CEC5AF2A098F7AF400DE1DB2 /* BDSKSecondaryWindow.nib */ = {
