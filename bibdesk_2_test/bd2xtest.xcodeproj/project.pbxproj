@@ -80,6 +80,9 @@
 		CEB7703B0A1F492B00DEA121 /* BDSKPublicationItemDisplayController.m in Sources */ = {isa = PBXBuildFile; fileRef = CEB7702F0A1F492A00DEA121 /* BDSKPublicationItemDisplayController.m */; };
 		CEB7703D0A1F492B00DEA121 /* BDSKTagItemDisplayController.m in Sources */ = {isa = PBXBuildFile; fileRef = CEB770310A1F492A00DEA121 /* BDSKTagItemDisplayController.m */; };
 		CEB7703F0A1F492B00DEA121 /* BDSKVenueItemDisplayController.m in Sources */ = {isa = PBXBuildFile; fileRef = CEB770330A1F492A00DEA121 /* BDSKVenueItemDisplayController.m */; };
+		CEB773960A1F732300DEA121 /* BDSKGenericTableDisplayController.h in CopyFiles */ = {isa = PBXBuildFile; fileRef = CEB773940A1F732300DEA121 /* BDSKGenericTableDisplayController.h */; };
+		CEB773970A1F732300DEA121 /* BDSKGenericTableDisplayController.m in Sources */ = {isa = PBXBuildFile; fileRef = CEB773950A1F732300DEA121 /* BDSKGenericTableDisplayController.m */; };
+		CEB773B30A1F753E00DEA121 /* BDSKGenericTableDisplay.nib in Resources */ = {isa = PBXBuildFile; fileRef = CEB773AD0A1F753D00DEA121 /* BDSKGenericTableDisplay.nib */; };
 		CEB797C0099823AD00AAB226 /* BDSKInstitution.m in Sources */ = {isa = PBXBuildFile; fileRef = CEB797B6099823AD00AAB226 /* BDSKInstitution.m */; };
 		CEB797C2099823AD00AAB226 /* BDSKInstitutionTableDisplayController.m in Sources */ = {isa = PBXBuildFile; fileRef = CEB797B8099823AD00AAB226 /* BDSKInstitutionTableDisplayController.m */; };
 		CEB797C4099823AD00AAB226 /* BDSKVenue.m in Sources */ = {isa = PBXBuildFile; fileRef = CEB797BA099823AD00AAB226 /* BDSKVenue.m */; };
@@ -143,6 +146,7 @@
 			files = (
 				CE5139020997A6C000C73C64 /* BTParse.framework in CopyFiles */,
 				CE3271C40A1C94CA002D6E4C /* BDSKKeyValuePair.h in CopyFiles */,
+				CEB773960A1F732300DEA121 /* BDSKGenericTableDisplayController.h in CopyFiles */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -270,6 +274,9 @@
 		CEB770310A1F492A00DEA121 /* BDSKTagItemDisplayController.m */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.objc; path = BDSKTagItemDisplayController.m; sourceTree = "<group>"; };
 		CEB770320A1F492A00DEA121 /* BDSKVenueItemDisplayController.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = BDSKVenueItemDisplayController.h; sourceTree = "<group>"; };
 		CEB770330A1F492A00DEA121 /* BDSKVenueItemDisplayController.m */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.objc; path = BDSKVenueItemDisplayController.m; sourceTree = "<group>"; };
+		CEB773940A1F732300DEA121 /* BDSKGenericTableDisplayController.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = BDSKGenericTableDisplayController.h; sourceTree = "<group>"; };
+		CEB773950A1F732300DEA121 /* BDSKGenericTableDisplayController.m */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.objc; path = BDSKGenericTableDisplayController.m; sourceTree = "<group>"; };
+		CEB773AE0A1F753D00DEA121 /* English */ = {isa = PBXFileReference; lastKnownFileType = wrapper.nib; name = English; path = English.lproj/BDSKGenericTableDisplay.nib; sourceTree = "<group>"; };
 		CEB797B5099823AD00AAB226 /* BDSKInstitution.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = BDSKInstitution.h; sourceTree = "<group>"; };
 		CEB797B6099823AD00AAB226 /* BDSKInstitution.m */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.objc; path = BDSKInstitution.m; sourceTree = "<group>"; };
 		CEB797B7099823AD00AAB226 /* BDSKInstitutionTableDisplayController.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = BDSKInstitutionTableDisplayController.h; sourceTree = "<group>"; };
@@ -404,9 +411,11 @@
 		27224263088A50590000CF76 /* Display Controllers */ = {
 			isa = PBXGroup;
 			children = (
+				2744F56908889FC2001E0CC9 /* DisplayControllers.plist */,
 				CEC5AF03098F7A0000DE1DB2 /* BDSKTableDisplayController.h */,
 				CEC5AF04098F7A0000DE1DB2 /* BDSKTableDisplayController.m */,
-				2744F56908889FC2001E0CC9 /* DisplayControllers.plist */,
+				CEB773940A1F732300DEA121 /* BDSKGenericTableDisplayController.h */,
+				CEB773950A1F732300DEA121 /* BDSKGenericTableDisplayController.m */,
 				2744F56108889FC2001E0CC9 /* BDSKPersonTableDisplayController.h */,
 				2744F56208889FC2001E0CC9 /* BDSKPersonTableDisplayController.m */,
 				2744F56508889FC2001E0CC9 /* BDSKPublicationTableDisplayController.h */,
@@ -589,6 +598,7 @@
 		CEB771390A1F5CC800DEA121 /* Displays */ = {
 			isa = PBXGroup;
 			children = (
+				CEB773AD0A1F753D00DEA121 /* BDSKGenericTableDisplay.nib */,
 				CEB770040A1F48EB00DEA121 /* BDSKInstitutionItemDisplay.nib */,
 				CEB770060A1F48EB00DEA121 /* BDSKInstitutionTableDisplay.nib */,
 				CEB770080A1F48EB00DEA121 /* BDSKNoteItemDisplay.nib */,
@@ -767,6 +777,7 @@
 				CEB770250A1F48EB00DEA121 /* BDSKTagTableDisplay.nib in Resources */,
 				CEB770260A1F48EB00DEA121 /* BDSKVenueItemDisplay.nib in Resources */,
 				CEB770270A1F48EB00DEA121 /* BDSKVenueTableDisplay.nib in Resources */,
+				CEB773B30A1F753E00DEA121 /* BDSKGenericTableDisplay.nib in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -828,6 +839,7 @@
 				CEB7703B0A1F492B00DEA121 /* BDSKPublicationItemDisplayController.m in Sources */,
 				CEB7703D0A1F492B00DEA121 /* BDSKTagItemDisplayController.m in Sources */,
 				CEB7703F0A1F492B00DEA121 /* BDSKVenueItemDisplayController.m in Sources */,
+				CEB773970A1F732300DEA121 /* BDSKGenericTableDisplayController.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -976,6 +988,14 @@
 				CEB7701B0A1F48EB00DEA121 /* English */,
 			);
 			name = BDSKVenueTableDisplay.nib;
+			sourceTree = "<group>";
+		};
+		CEB773AD0A1F753D00DEA121 /* BDSKGenericTableDisplay.nib */ = {
+			isa = PBXVariantGroup;
+			children = (
+				CEB773AE0A1F753D00DEA121 /* English */,
+			);
+			name = BDSKGenericTableDisplay.nib;
 			sourceTree = "<group>";
 		};
 		CEC5AF2A098F7AF400DE1DB2 /* BDSKSecondaryWindow.nib */ = {
