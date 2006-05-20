@@ -16,6 +16,8 @@
 #define LibraryGroupEntityName @"LibraryGroup"
 #define CategoryGroupEntityName @"CategoryGroup"
 
+#define ItemEntityName @"Item"
+#define TaggedItemEntityName @"TaggedItem"
 #define PublicationEntityName @"Publication"
 #define PersonEntityName @"Person"
 #define InstitutionEntityName @"Institution"
