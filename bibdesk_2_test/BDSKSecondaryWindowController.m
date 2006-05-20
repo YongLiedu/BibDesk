@@ -23,7 +23,8 @@
 
 - (id)initWithWindowNibName:(NSString *)windowNibName{
     if (self = [super initWithWindowNibName:windowNibName]){
-        displayControllersInfoDict = [[NSDictionary alloc] initWithContentsOfFile:[[NSBundle mainBundle] pathForResource:@"DisplayControllers" ofType:@"plist"]];
+        NSDictionary *infoDict = [NSDictionary dictionaryWithContentsOfFile:[[NSBundle mainBundle] pathForResource:@"DisplayControllers" ofType:@"plist"]];
+        displayControllersInfoDict = [[infoDict objectForKey:@"TableDisplayControllers"] retain];
         displayControllers = [[NSMutableArray alloc] initWithCapacity:10];
         currentDisplayControllerForEntity = [[NSMutableDictionary alloc] initWithCapacity:10];
 		sourceGroup = nil;
@@ -114,16 +115,14 @@
         if(currentDisplayController)
             [self unbindDisplayController:currentDisplayController];
         
-        if (newDisplayController != nil) {
-            [[newDisplayController view] setFrame:[currentDisplayView frame]];
-            [[currentDisplayView superview] replaceSubview:currentDisplayView with:[newDisplayController view]];
-            currentDisplayView = [newDisplayController view];
-            currentDisplayController = [newDisplayController retain];
-            [self bindDisplayController:currentDisplayController];
-        } else {
-            currentDisplayView = nil;
-            currentDisplayController = nil;
-        }
+        NSView *view = [newDisplayController view];
+        if (view == nil) 
+            view = [[[NSView alloc] init] autorelease];
+        [view setFrame:[currentDisplayView frame]];
+        [[currentDisplayView superview] replaceSubview:currentDisplayView with:view];
+        currentDisplayView = view;
+        currentDisplayController = [newDisplayController retain];
+        [self bindDisplayController:currentDisplayController];
     }
 }
 
