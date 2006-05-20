@@ -158,6 +158,9 @@ extern NSString* BDSKWeblocFilePboardType; // core pasteboard type for webloc fi
     IBOutlet NSView *rssExportAccessoryView;
     IBOutlet NSForm *rssExportForm;
     IBOutlet NSTextField* rssExportTextField;
+    IBOutlet NSView *htmlExportAccessoryView;
+    IBOutlet NSPopUpButton *htmlStylePopUpButton;
+    NSString *currentExportTemplateStyle;
     
     IBOutlet NSView *SaveEncodingAccessoryView;
     IBOutlet NSPopUpButton *saveTextEncodingPopupButton;

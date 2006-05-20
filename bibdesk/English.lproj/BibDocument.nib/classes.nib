@@ -36,9 +36,12 @@
                 addGroupFieldAction = id; 
                 addSmartGroupAction = id; 
                 addStaticGroupAction = id; 
+                alternateCut = id; 
+                alternateDelete = id; 
                 changeGroupFieldAction = id; 
                 changeGroupTableFont = id; 
                 changeMainTableFont = id; 
+                changePreviewDisplay = id; 
                 clearQuickSearch = id; 
                 columnsMenuAddTableColumn = id; 
                 columnsMenuSelectTableColumn = id; 
@@ -48,11 +51,13 @@
                 createNewPubUsingCrossrefAction = id; 
                 cut = id; 
                 deleteSelectedPubs = id; 
+                deselectAllPublications = id; 
                 duplicateTitleToBooktitle = id; 
                 editAction = id; 
                 editGroupAction = id; 
                 editPubCmd = id; 
                 emailPubCmd = id; 
+                exportAsAction = id; 
                 exportAsAtom = id; 
                 exportAsEncodedBib = id; 
                 exportAsEncodedPublicBib = id; 
@@ -60,6 +65,7 @@
                 exportAsMODS = id; 
                 exportAsRIS = id; 
                 exportAsRSS = id; 
+                exportSelectionAsAction = id; 
                 exportSelectionAsAtom = id; 
                 exportSelectionAsEncodedBib = id; 
                 exportSelectionAsEncodedPublicBib = id; 
@@ -93,8 +99,10 @@
                 searchByContent = id; 
                 searchFieldAction = id; 
                 searchFieldChangeKey = id; 
+                selectAllPublications = id; 
                 selectCrossrefParentAction = id; 
                 selectDuplicates = id; 
+                selectPossibleDuplicates = id; 
                 showMacrosWindow = id; 
                 sortForCrossrefs = id; 
                 sortGroupsByCount = id; 
@@ -126,8 +134,10 @@
                 groupCollapsibleView = BDSKCollapsibleView; 
                 groupGradientView = BDSKGradientView; 
                 groupMenu = NSMenu; 
-                groupSplitView = OASplitView; 
+                groupSplitView = BDSKSplitView; 
                 groupTableView = BDSKGroupTableView; 
+                htmlExportAccessoryView = NSView; 
+                htmlStylePopUpButton = NSPopUpButton; 
                 mainBox = NSBox; 
                 previewField = NSTextView; 
                 quickSearchButton = NSPopUpButton; 
@@ -138,7 +148,7 @@
                 rssExportTextField = NSTextField; 
                 saveTextEncodingPopupButton = NSPopUpButton; 
                 searchField = NSSearchField; 
-                splitView = OASplitView; 
+                splitView = BDSKSplitView; 
                 statusBar = BDSKStatusBar; 
                 tableView = BDSKDragTableView; 
             }; 

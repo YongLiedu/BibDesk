@@ -828,7 +828,31 @@
                 <key>title</key>
                 <string>Sharing Files</string>
             </dict>
-		</dict>
+            <key>BibPref_Export</key>
+            <dict>
+                <key>category</key>
+                <string>Data Preferences</string>
+                <key>categoryPriority</key>
+                <integer>2</integer>
+                <key>defaultsDictionary</key>
+                <dict>
+                </dict>
+                <key>helpURL</key>
+                <string>Export-Preferences</string>
+                <key>icon</key>
+                <string>exportPrefs.tiff</string>
+                <key>identifier</key>
+                <string>bp_export</string>
+                <key>nib</key>
+                <string>BibPref_Export</string>
+                <key>ordering</key>
+                <string>5</string>
+                <key>shortTitle</key>
+                <string>Export</string>
+                <key>title</key>
+                <string>Exporting Files</string>
+            </dict>
+        </dict>
 	</dict>
 	<key>OSAScriptingDefinition</key>
 	<string>BibDesk.sdef</string>

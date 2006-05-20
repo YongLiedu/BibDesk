@@ -99,6 +99,7 @@
 #import "PDFMetadata.h"
 #import "BDSKSharingServer.h"
 #import "BDSKSharingBrowser.h"
+#import "BibPref_Export.h"
 
 NSString *BDSKReferenceMinerStringPboardType = @"CorePasteboardFlavorType 0x57454253";
 NSString *BDSKBibItemPboardType = @"edu.ucsd.mmccrack.bibdesk BibItem pboard type";
@@ -468,6 +469,7 @@ NSString *BDSKWeblocFilePboardType = @"CorePasteboardFlavorType 0x75726C20";
 	[promisedPboardTypes release];
     [sharedGroups release];
     [sharedGroupSpinners release];
+    [currentExportTemplateStyle release];
     [super dealloc];
 }
 
@@ -745,6 +747,12 @@ NSString *BDSKWeblocFilePboardType = @"CorePasteboardFlavorType 0x75726C20";
     [self exportAsFileType:fileType selected:YES droppingInternal:([sender tag] == 1)];
 }
 
+- (IBAction)setCurrentExportTemplateStyle:(id)sender{
+    BDSKLOGIMETHOD();
+    [currentExportTemplateStyle autorelease];
+    currentExportTemplateStyle = [[sender titleOfSelectedItem] copy];
+}
+
 - (void)exportAsFileType:(NSString *)fileType selected:(BOOL)selected droppingInternal:(BOOL)drop{
     NSSavePanel *sp = [NSSavePanel savePanel];
     [sp setRequiredFileType:fileType];
@@ -752,11 +760,22 @@ NSString *BDSKWeblocFilePboardType = @"CorePasteboardFlavorType 0x75726C20";
     if([fileType isEqualToString:@"rss"]){
         [sp setAccessoryView:rssExportAccessoryView];
         // should call a [self setupRSSExportView]; to populate those with saved userdefaults!
-    } else {
-        if([fileType isEqualToString:@"bib"] || [fileType isEqualToString:@"ris"] || [fileType isEqualToString:@"ltb"]){ // this is for exporting bib files with alternate text encodings
-            [sp setAccessoryView:SaveEncodingAccessoryView];
-            [saveTextEncodingPopupButton selectItemWithTitle:[[BDSKStringEncodingManager sharedEncodingManager] displayedNameForStringEncoding:[self documentStringEncoding]]];
-        }
+    } else if([fileType isEqual:@"html"]){
+        [sp setAccessoryView:htmlExportAccessoryView];
+        [htmlStylePopUpButton removeAllItems];
+        [htmlStylePopUpButton addItemsWithTitles:[BDSKTemplate allStyleNames]];
+        [htmlStylePopUpButton setAction:@selector(setCurrentExportTemplateStyle:)];
+        [htmlStylePopUpButton setTarget:self];
+        
+        // @@ save last selection in prefs?  names can change, though...
+        if(nil != currentExportTemplateStyle)
+            [htmlStylePopUpButton selectItemWithTitle:currentExportTemplateStyle];
+        else
+            [htmlStylePopUpButton selectItemAtIndex:0];
+        
+    } else if([fileType isEqualToString:@"bib"] || [fileType isEqualToString:@"ris"] || [fileType isEqualToString:@"ltb"]){ // this is for exporting bib files with alternate text encodings
+        [sp setAccessoryView:SaveEncodingAccessoryView];
+        [saveTextEncodingPopupButton selectItemWithTitle:[[BDSKStringEncodingManager sharedEncodingManager] displayedNameForStringEncoding:[self documentStringEncoding]]];
     }
     NSDictionary *contextInfo = [[NSDictionary dictionaryWithObjectsAndKeys:
 		fileType, @"fileType", [NSNumber numberWithBool:drop], @"dropInternal", [NSNumber numberWithBool:selected], @"selected", nil] retain];
@@ -791,6 +810,12 @@ NSString *BDSKWeblocFilePboardType = @"CorePasteboardFlavorType 0x75726C20";
             fileData = [self rssDataForPublications:items];
         }else if([fileType isEqualToString:@"html"]){
             fileData = [self htmlDataForSelection:selected];
+            NSEnumerator *accessoryFileEnum = [[[BDSKTemplate templateForStyle:currentExportTemplateStyle] accessoryFileURLs] objectEnumerator];
+            NSURL *accessoryURL = nil;
+            NSURL *destDirURL = [NSURL fileURLWithPath:[fileName stringByDeletingLastPathComponent]];
+            while(accessoryURL = [accessoryFileEnum nextObject]){
+                [[NSFileManager defaultManager] copyObjectAtURL:accessoryURL toDirectoryAtURL:destDirURL error:NULL];
+            }
         }else if([fileType isEqualToString:@"mods"]){
             fileData = [self MODSDataForPublications:items];
         }else if([fileType isEqualToString:@"xml"]){
@@ -898,9 +923,8 @@ NSString *BDSKWeblocFilePboardType = @"CorePasteboardFlavorType 0x75726C20";
 }
 
 - (NSData *)htmlDataForSelection:(BOOL)selected{
-    NSString *applicationSupportPath = [[NSFileManager defaultManager] currentApplicationSupportPathForCurrentUser]; 
+	NSString *fileTemplate = [NSString stringWithContentsOfURL:[[BDSKTemplate templateForStyle:currentExportTemplateStyle] mainPageTemplateURL]];
     
-	NSString *fileTemplate = [NSString stringWithContentsOfFile:[applicationSupportPath stringByAppendingPathComponent:@"htmlExportTemplate"]];
     if (selected) {
 		NSMutableString *tmpString = [fileTemplate mutableCopy];
 		[tmpString replaceOccurrencesOfString:@"<$publications>" withString:@"<$selectedPublications>" options:0 range:NSMakeRange(0, [tmpString length])];
@@ -922,22 +946,25 @@ NSString *BDSKWeblocFilePboardType = @"CorePasteboardFlavorType 0x75726C20";
 - (NSString *)HTMLStringForPublications:(NSArray *)items{
     NSMutableString *s = [NSMutableString stringWithString:@""];
     NSString *applicationSupportPath = [[NSFileManager defaultManager] currentApplicationSupportPathForCurrentUser]; 
-    NSString *defaultItemTemplate = [NSString stringWithContentsOfFile:[applicationSupportPath stringByAppendingPathComponent:@"htmlItemExportTemplate"]];
-    NSString *itemTemplatePath;
     NSString *itemTemplate;
     NSEnumerator *e = [items objectEnumerator];
     BibItem *pub = nil;
     
     if([items count]) NSParameterAssert([[items objectAtIndex:0] isKindOfClass:[BibItem class]]);
     
+    BDSKTemplate *selectedTemplate = [BDSKTemplate templateForStyle:currentExportTemplateStyle];
+    OBPRECONDITION(nil != selectedTemplate);
+    NSString *defaultItemTemplate = [NSString stringWithContentsOfURL:[selectedTemplate defaultItemTemplateURL]];
+    OBPRECONDITION(nil != defaultItemTemplate);
+    NSURL *templateFileURL = nil;
+    
 	while(pub = [e nextObject]){
 
-		itemTemplatePath = [applicationSupportPath stringByAppendingFormat:@"/htmlItemExportTemplate-%@", [pub type]];
-		if ([[NSFileManager defaultManager] fileExistsAtPath:itemTemplatePath]) {
-			itemTemplate = [NSString stringWithContentsOfFile:itemTemplatePath];
-		} else {
-			itemTemplate = defaultItemTemplate;
-        }
+        templateFileURL = [selectedTemplate templateURLForType:[pub type]];
+        if(nil != templateFileURL && [[NSFileManager defaultManager] objectExistsAtFileURL:templateFileURL] == NO)
+            itemTemplate = [NSString stringWithContentsOfURL:templateFileURL];
+        else
+            itemTemplate = defaultItemTemplate;
 		[s appendString:[NSString stringWithString:@"\n\n"]];
         [s appendString:[pub HTMLValueUsingTemplateString:itemTemplate]];
     }
