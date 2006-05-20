@@ -208,7 +208,8 @@ static NSString *defaultItemString = @"Default Item";
 
 #warning this seems to be broken
 // probably uses isEqual: to determine if the object should be expanded
-// object is archived; return the unarchived object
+// object is archived; return the unarchived object (but I think NSOutlineView requires
+// unique objects, so I'm using pointer equality)
 - (id)outlineView:(NSOutlineView *)outlineView itemForPersistentObject:(id)object
 {
     return [NSKeyedUnarchiver unarchiveObjectWithData:object];
@@ -222,11 +223,8 @@ static NSString *defaultItemString = @"Default Item";
 
 - (void)openPanelDidEnd:(NSOpenPanel *)panel returnCode:(int)returnCode contextInfo:(void *)contextInfo
 {
-    if (returnCode == NSCancelButton)
-        return;
-    
     NSURL *fileURL = [[panel URLs] lastObject];
-    if(fileURL){
+    if(NSOKButton == returnCode && nil != fileURL){
         
         // use last path component as file name
         [(BDSKTemplate *)contextInfo setValue:[[fileURL path] lastPathComponent] forKey:nameString];
@@ -252,7 +250,12 @@ static NSString *defaultItemString = @"Default Item";
             [openPanel setCanChooseDirectories:YES];
             [openPanel setCanCreateDirectories:NO];
             [openPanel setPrompt:NSLocalizedString(@"Choose", @"")];
-            [openPanel beginSheetForDirectory:[[NSFileManager defaultManager] currentApplicationSupportPathForCurrentUser] file:nil types:nil modalForWindow:[[BDSKPreferenceController sharedPreferenceController] window] modalDelegate:self didEndSelector:@selector(openPanelDidEnd:returnCode:contextInfo:) contextInfo:[item retain]];
+            
+            // start the panel in the same directory as the item's existing path, or fall back to app support
+            NSString *dirPath = [[[item representedFileURL] path] stringByDeletingLastPathComponent];
+            if(nil == dirPath)
+                dirPath = dirPath;
+            [openPanel beginSheetForDirectory:dirPath file:nil types:nil modalForWindow:[[BDSKPreferenceController sharedPreferenceController] window] modalDelegate:self didEndSelector:@selector(openPanelDidEnd:returnCode:contextInfo:) contextInfo:[item retain]];
             
             // bypass the normal editing mechanism, or it'll reset the value
             shouldEdit = NO;
