@@ -39,12 +39,18 @@
 
 - (NSObjectController *)itemObjectController;
 
+- (BOOL)addRelationshipsFromPasteboard:(NSPasteboard *)pboard forType:(NSString *)type keyPath:(NSString *)keyPath;
+
 @end
 
 
 @interface BDSKTableDisplayController : BDSKDisplayController {
-    id currentSubDisplayController;
-    IBOutlet NSView *currentDisplaySubview;
+    NSManagedObject *currentItem;
+    NSDictionary *itemDisplayControllersInfoDict;
+    NSMutableArray *itemDisplayControllers;
+    NSMutableDictionary *currentItemDisplayControllerForEntity;
+    BDSKItemDisplayController *currentItemDisplayController;
+    IBOutlet NSView *currentItemDisplayView;
     IBOutlet NSArrayController *itemsArrayController;
     IBOutlet NSTableView *itemsTableView;
 }
@@ -53,6 +59,19 @@
 - (NSTableView *)itemsTableView;
 
 - (NSArray *)filterPredicates;
+
+- (NSManagedObject *)currentItem;
+- (void)setCurrentItem:(NSManagedObject *)newItem;
+
+- (BDSKItemDisplayController *)itemDisplayController;
+- (void)setItemDisplayController:(BDSKItemDisplayController *)newDisplayController;
+
+- (NSArray *)itemDisplayControllers;
+- (NSArray *)itemDisplayControllersForCurrentType;
+
+- (void)setupItemDisplayControllers;
+- (void)bindItemDisplayController:(BDSKItemDisplayController *)displayController;
+- (void)unbindItemDisplayController:(BDSKItemDisplayController *)displayController;
 
 - (void)addItem;
 - (void)removeItems:(NSArray *)selectedItems;

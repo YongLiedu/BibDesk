@@ -139,28 +139,63 @@
     return itemObjectController;
 }
 
+#pragma mark Drag/drop
+
+- (BOOL)addRelationshipsFromPasteboard:(NSPasteboard *)pboard forType:(NSString *)type keyPath:(NSString *)keyPath {
+	NSManagedObject *parent = [itemObjectController content];
+    
+    if (parent == nil || NSIsControllerMarker(parent))
+        return NO;
+    
+    return [self addRelationshipsFromPasteboard:pboard forType:type parent:parent keyPath:keyPath];
+}
+
 @end
 
 
 @implementation BDSKTableDisplayController
 
+- (id)init{
+	if (self = [super init]) {
+        NSDictionary *infoDict = [NSDictionary dictionaryWithContentsOfFile:[[NSBundle mainBundle] pathForResource:@"DisplayControllers" ofType:@"plist"]];
+        itemDisplayControllersInfoDict = [[infoDict objectForKey:@"ItemDisplayControllers"] retain];
+        itemDisplayControllers = [[NSMutableArray alloc] initWithCapacity:10];
+        currentItemDisplayControllerForEntity = [[NSMutableDictionary alloc] initWithCapacity:10];
+		currentItem = nil;
+	}
+	return self;
+}
+
+- (void)dealloc{
+    [itemsArrayController removeObserver:self forKeyPath:@"selectedObjects"];
+    if (currentItemDisplayView) 
+        [self setItemDisplayController:nil];
+    [itemDisplayControllers release];
+    [currentItemDisplayControllerForEntity release];        
+    [itemDisplayControllersInfoDict release];
+	[currentItem release];
+    [super dealloc];
+}
+
 - (void)awakeFromNib{
     [super awakeFromNib];
     [mainView retain];
     [self setWindow:nil];
-}
-
-- (NSArrayController *)itemsArrayController{
-    return itemsArrayController;
-}
-
-- (NSTableView *)itemsTableView{
-    return itemsTableView;
-}
-
-- (NSArray *)filterPredicates {
-    // should be implemented by the subclasses
-    return nil;
+    
+    [self setupItemDisplayControllers];
+	
+    if (currentItemDisplayView) {
+        NSString *entityClassName = [[[self currentItem] entity] name];
+        if (entityClassName != nil) {
+            BDSKItemDisplayController *newDisplayController = [currentItemDisplayControllerForEntity objectForKey:entityClassName];
+            if (newDisplayController != currentItemDisplayController){
+                [self unbindItemDisplayController:currentItemDisplayController];
+                [self setItemDisplayController:newDisplayController];
+            }
+        }
+    }
+    
+    [itemsArrayController addObserver:self forKeyPath:@"selectedObjects" options:0 context:NULL];
 }
 
 - (NSArray *)columnInfo {
@@ -229,6 +264,129 @@
     [itemsTableView sizeToFit];
 }
 
+#pragma mark Accessors
+
+- (NSArrayController *)itemsArrayController{
+    return itemsArrayController;
+}
+
+- (NSTableView *)itemsTableView{
+    return itemsTableView;
+}
+
+- (NSArray *)filterPredicates {
+    // should be implemented by the subclasses
+    return nil;
+}
+
+- (NSManagedObject *)currentItem{
+	return currentItem;
+}
+
+// this cannot be called after the display controller has been bound, due to binding issues.
+- (void)setCurrentItem:(NSManagedObject *)newItem{
+	if (newItem != currentItem) {
+		
+		BDSKItemDisplayController *newDisplayController = nil;
+		BOOL shouldChangeDisplayController = NO;
+		
+        if (currentItemDisplayView) {
+            NSString *oldEntityClassName = [[currentItem entity] name];
+            NSString *newEntityClassName = [[newItem entity] name];
+            
+            if ([newEntityClassName isEqualToString:oldEntityClassName] == NO) {
+                newDisplayController = [currentItemDisplayControllerForEntity objectForKey:newEntityClassName];
+                if (newDisplayController != currentItemDisplayController){
+                    [self unbindItemDisplayController:currentItemDisplayController];
+                    shouldChangeDisplayController = YES;
+                }
+            }
+        }
+		
+		[currentItem autorelease];
+		currentItem = [newItem retain];
+		
+		if (shouldChangeDisplayController == YES)
+			[self setItemDisplayController:newDisplayController];
+	}
+}
+
+- (BDSKItemDisplayController *)itemDisplayController{
+    return currentItemDisplayController;
+}
+
+- (void)setItemDisplayController:(BDSKItemDisplayController *)newDisplayController{
+    if(newDisplayController != currentItemDisplayController){
+        [currentItemDisplayController autorelease];
+        if(currentItemDisplayController)
+            [self unbindItemDisplayController:currentItemDisplayController];
+        
+        NSView *view = [newDisplayController view];
+        if (view == nil) 
+            view = [[[NSView alloc] init] autorelease];
+        [view setFrame:[currentItemDisplayView frame]];
+        [[currentItemDisplayView superview] replaceSubview:currentItemDisplayView with:view];
+        currentItemDisplayView = view;
+        currentItemDisplayController = [newDisplayController retain];
+        [self bindItemDisplayController:currentItemDisplayController];
+    }
+}
+
+- (NSArray *)itemDisplayControllers{
+	return itemDisplayControllers;
+}
+
+// TODO: this is totally incomplete.
+- (NSArray *)itemDisplayControllersForCurrentType{
+    NSSet* currentTypes = nil; // temporary, removed treecontroller.
+    NSLog(@"itemDisplayControllersForCurrentType - currentTypes is %@.", currentTypes);
+    
+    return [NSArray arrayWithObjects:currentItemDisplayController, nil];
+}
+
+
+#pragma mark Item Display Controller management
+
+- (void)setupItemDisplayControllers{
+    
+    NSArray *displayControllerClassNames = [itemDisplayControllersInfoDict allKeys];
+    NSEnumerator *displayControllerClassNameE = [displayControllerClassNames objectEnumerator];
+    NSString *displayControllerClassName = nil;
+    
+    while (displayControllerClassName = [displayControllerClassNameE nextObject]){
+        Class controllerClass = NSClassFromString(displayControllerClassName);
+        BDSKItemDisplayController *controllerObject = [[controllerClass alloc] init];
+        [controllerObject setDocument:[self document]];
+        [itemDisplayControllers addObject:controllerObject];
+        [controllerObject release];
+
+        NSDictionary *infoDict = [itemDisplayControllersInfoDict objectForKey:displayControllerClassName];
+           
+        //TODO: for now we have a 1:1 between DCs and entity names. 
+        // this code will need to get smarter when that changes.
+        NSString *displayableEntity = [[infoDict objectForKey:@"DisplayableEntities"] objectAtIndex:0];
+        [currentItemDisplayControllerForEntity setObject:controllerObject
+                                              forKey:displayableEntity];
+    }
+    
+}
+
+
+- (void)bindItemDisplayController:(BDSKItemDisplayController *)displayController{
+	// Not binding the contentSet will get all the managed objects for the entity
+	// Binding contentSet will not update a dynamic smart group
+    NSDictionary *options = [NSDictionary dictionaryWithObjectsAndKeys:[NSNumber numberWithBool:NO], NSRaisesForNotApplicableKeysBindingOption, [NSNumber numberWithBool:YES], NSConditionallySetsEnabledBindingOption, [NSNumber numberWithBool:YES], NSDeletesObjectsOnRemoveBindingsOption, nil];
+    // TODO: in future, this should create multiple bindings.?    
+    [[displayController itemObjectController] bind:@"contentObject" toObject:self
+                                       withKeyPath:@"currentItem" options:options];
+}
+
+
+// TODO: as the above method creates multiple bindings, this one will have to keep up.
+- (void)unbindItemDisplayController:(BDSKItemDisplayController *)displayController{
+	[[displayController itemObjectController] unbind:@"contentObject"];
+}
+
 #pragma mark Actions
 
 - (void)addItem {
@@ -281,6 +439,19 @@
 	NSManagedObject *parent = [[itemsArrayController arrangedObjects] objectAtIndex:row];
     
     return [self addRelationshipsFromPasteboard:pboard forType:type parent:parent keyPath:keyPath];
+}
+
+#pragma mark KVO
+
+- (void)observeValueForKeyPath:(NSString *)keyPath ofObject:(id)object change:(NSDictionary *)change context:(void *)context
+{
+    if (object == itemsArrayController && [keyPath isEqual:@"selectedObjects"]) {
+        NSArray *selectedItems = [itemsArrayController selectedObjects];
+        if ([selectedItems count] > 0)
+            [self setCurrentItem:[selectedItems lastObject]];
+        else
+            [self setCurrentItem:nil];
+    }
 }
 
 @end
