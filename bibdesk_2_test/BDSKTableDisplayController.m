@@ -184,84 +184,20 @@
     
     [self setupItemDisplayControllers];
 	
-    if (currentItemDisplayView) {
-        NSString *entityClassName = [[[self currentItem] entity] name];
-        if (entityClassName != nil) {
-            BDSKItemDisplayController *newDisplayController = [currentItemDisplayControllerForEntity objectForKey:entityClassName];
-            if (newDisplayController != currentItemDisplayController){
-                [self unbindItemDisplayController:currentItemDisplayController];
-                [self setItemDisplayController:newDisplayController];
-            }
-        }
-    }
+    [self updateUI];
     
     [itemsArrayController addObserver:self forKeyPath:@"selectedObjects" options:0 context:NULL];
 }
 
-- (NSArray *)columnInfo {
-    NSArray *columnInfo = nil;
-    if ([itemEntityName isEqualToString:PublicationEntityName]) {
-        columnInfo = [NSArray arrayWithObjects:
-            [NSDictionary dictionaryWithObjectsAndKeys:@"title", @"keyPath", @"Title", @"displayName", nil], 
-            [NSDictionary dictionaryWithObjectsAndKeys:@"shortTitle", @"keyPath", @"Short Title", @"displayName", nil], 
-            nil];
-    } else if ([itemEntityName isEqualToString:PersonEntityName]) {
-        columnInfo = [NSArray arrayWithObjects:
-            [NSDictionary dictionaryWithObjectsAndKeys:@"firstNamePart", @"keyPath", @"First", @"displayName", nil], 
-            [NSDictionary dictionaryWithObjectsAndKeys:@"lastNamePart", @"keyPath", @"Last", @"displayName", nil], 
-            [NSDictionary dictionaryWithObjectsAndKeys:@"name", @"keyPath", @"Full Name", @"displayName", nil], 
-            nil];
-    } else if ([itemEntityName isEqualToString:InstitutionEntityName]) {
-        columnInfo = [NSArray arrayWithObjects:
-            [NSDictionary dictionaryWithObjectsAndKeys:@"name", @"keyPath", @"Name", @"displayName", nil], 
-            [NSDictionary dictionaryWithObjectsAndKeys:@"address", @"keyPath", @"Address", @"displayName", nil], 
-            nil];
-    } else if ([itemEntityName isEqualToString:VenueEntityName]) {
-        columnInfo = [NSArray arrayWithObjects:
-            [NSDictionary dictionaryWithObjectsAndKeys:@"name", @"keyPath", @"Name", @"displayName", nil], 
-            [NSDictionary dictionaryWithObjectsAndKeys:@"abbreviation", @"keyPath", @"Abbreviation", @"displayName", nil], 
-            [NSDictionary dictionaryWithObjectsAndKeys:@"acronym", @"keyPath", @"Acronym", @"displayName", nil], 
-            nil];
-    } else if ([itemEntityName isEqualToString:NoteEntityName]) {
-        columnInfo = [NSArray arrayWithObjects:
-            [NSDictionary dictionaryWithObjectsAndKeys:@"name", @"keyPath", @"Name", @"displayName", nil], 
-            [NSDictionary dictionaryWithObjectsAndKeys:@"value", @"keyPath", @"Value", @"displayName", nil], 
-            nil];
-    } else if ([itemEntityName isEqualToString:TagEntityName]) {
-        columnInfo = [NSArray arrayWithObjects:
-            [NSDictionary dictionaryWithObjectsAndKeys:@"name", @"keyPath", @"Name", @"displayName", nil], 
-            nil];
-    } else {
-        columnInfo = [NSArray arrayWithObjects:
-            [NSDictionary dictionaryWithObjectsAndKeys:@"name", @"keyPath", @"Name", @"displayName", nil], 
-            [NSDictionary dictionaryWithObjectsAndKeys:@"entity.name", @"keyPath", @"Type", @"displayName", nil], 
-            nil];
-    }
-    return columnInfo;
-}
-
 - (void)updateUI {
-    NSArray *columnInfo = [self columnInfo];
-    NSArray *tableColumns = [itemsTableView tableColumns];
-    NSTableColumn *tableColumn;
-    int i, count = [tableColumns count];
-    while (count--) {
-        tableColumn = [tableColumns objectAtIndex:count];
-        [tableColumn unbind:@"value"];
-        [itemsTableView removeTableColumn:tableColumn];
+    if (currentItemDisplayController == nil && currentItemDisplayView != nil) {
+        NSEntityDescription *entity = [[self currentItem] entity];
+        BDSKItemDisplayController *newDisplayController = [self itemDisplayControllerForEntity:entity];
+        if (newDisplayController != currentItemDisplayController){
+            [self unbindItemDisplayController:currentItemDisplayController];
+            [self setItemDisplayController:newDisplayController];
+        }
     }
-    count = [columnInfo count];
-    for (i = 0; i < count; i++) {
-        NSDictionary *dict = [columnInfo objectAtIndex:i];
-        NSString *displayName = [dict objectForKey:@"displayName"];
-        NSString *keyPath = [dict objectForKey:@"keyPath"];
-        tableColumn = [[[NSTableColumn alloc] initWithIdentifier:keyPath] autorelease];
-        [[tableColumn headerCell] setStringValue:displayName];
-        [itemsTableView addTableColumn:tableColumn];
-        keyPath = [NSString stringWithFormat:@"arrangedObjects.%@", [dict objectForKey:keyPath]];
-        [tableColumn bind:@"value" toObject:itemsArrayController withKeyPath:keyPath options:0];
-    }
-    [itemsTableView sizeToFit];
 }
 
 #pragma mark Accessors
@@ -295,7 +231,7 @@
             NSString *newEntityClassName = [[newItem entity] name];
             
             if ([newEntityClassName isEqualToString:oldEntityClassName] == NO) {
-                newDisplayController = [currentItemDisplayControllerForEntity objectForKey:newEntityClassName];
+                newDisplayController = [self itemDisplayControllerForEntity:[newItem entity]];
                 if (newDisplayController != currentItemDisplayController){
                     [self unbindItemDisplayController:currentItemDisplayController];
                     shouldChangeDisplayController = YES;
@@ -371,6 +307,19 @@
     
 }
 
+- (BDSKItemDisplayController *)itemDisplayControllerForEntity:(NSEntityDescription *)entity{
+    NSManagedObjectContext *context = [self managedObjectContext];
+    id displayController = nil;
+    
+    if (entity == nil)
+        entity = [NSEntityDescription entityForName:[self itemEntityName] inManagedObjectContext:context];
+    
+    while (displayController == nil && entity != nil) {
+        displayController = [currentItemDisplayControllerForEntity objectForKey:[entity name]];
+        entity = [entity superentity];
+    }
+    return displayController;
+}
 
 - (void)bindItemDisplayController:(BDSKItemDisplayController *)displayController{
 	// Not binding the contentSet will get all the managed objects for the entity

@@ -69,6 +69,8 @@
 - (NSArray *)itemDisplayControllers;
 - (NSArray *)itemDisplayControllersForCurrentType;
 
+- (BDSKItemDisplayController *)itemDisplayControllerForEntity:(NSEntityDescription *)entity;
+
 - (void)setupItemDisplayControllers;
 - (void)bindItemDisplayController:(BDSKItemDisplayController *)displayController;
 - (void)unbindItemDisplayController:(BDSKItemDisplayController *)displayController;
