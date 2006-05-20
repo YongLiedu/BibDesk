@@ -14,7 +14,7 @@
 @implementation BDSKTagTableDisplayController
 
 - (NSString *)windowNibName{
-    return @"BDSKTagTableDisplayController";
+    return @"BDSKTagTableDisplay";
 }
 
 - (void)awakeFromNib{

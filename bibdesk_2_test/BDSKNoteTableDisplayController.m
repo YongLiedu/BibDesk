@@ -14,7 +14,7 @@
 @implementation BDSKNoteTableDisplayController
 
 - (NSString *)windowNibName{
-    return @"BDSKNoteTableDisplayController";
+    return @"BDSKNoteTableDisplay";
 }
 
 - (void)awakeFromNib{

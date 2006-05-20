@@ -14,15 +14,12 @@
 @implementation BDSKPersonTableDisplayController
 
 - (NSString *)windowNibName{
-    return @"BDSKPersonTableDisplayController";
+    return @"BDSKPersonTableDisplay";
 }
 
 - (void)awakeFromNib{
 	[super awakeFromNib];
 	[itemsTableView registerForDraggedTypes:[NSArray arrayWithObjects:BDSKPublicationPboardType, BDSKPersonPboardType, BDSKInstitutionPboardType, BDSKTagPboardType, nil]];
-	[publicationsTableView registerForDraggedTypes:[NSArray arrayWithObjects:BDSKPublicationPboardType, nil]];
-	[institutionsTableView registerForDraggedTypes:[NSArray arrayWithObjects:BDSKInstitutionPboardType, nil]];
-	[tagsTableView registerForDraggedTypes:[NSArray arrayWithObjects:BDSKTagPboardType, nil]];
 }
 
 #pragma mark Actions
@@ -42,37 +39,6 @@
 	while (person = [selEnum nextObject]) 
 		[moc deleteObject:person];
     [moc processPendingChanges];
-    // dirty fix for CoreData bug, which registers an extra change when objects are deleted
-    [[self document] updateChangeCount:NSChangeUndone];
-}
-
-- (IBAction)addPublication:(id)sender{
-	NSManagedObjectContext *moc = [self managedObjectContext];
-	NSManagedObject *publication = [NSEntityDescription insertNewObjectForEntityForName:PublicationEntityName inManagedObjectContext:moc];
-	NSManagedObject *relationship = [NSEntityDescription insertNewObjectForEntityForName:ContributorPublicationRelationshipEntityName inManagedObjectContext:moc];
-	[relationship setValue:[NSNumber numberWithInt:[[publicationsArrayController arrangedObjects] count]] forKey:@"index"];
-	[relationship setValue:publication forKey:@"publication"];
-	[relationship setValue:@"author" forKey:@"relationshipType"];
-	[publicationsArrayController addObject:relationship];
-}
-
-- (IBAction)removePublications:(NSArray *)selectedPublications {
-	[publicationsArrayController removeObject:selectedPublications];
-    // dirty fix for CoreData bug, which registers an extra change when objects are deleted
-    [[self document] updateChangeCount:NSChangeUndone];
-}
-
-- (IBAction)addInstitution:(id)sender{
-	NSManagedObjectContext *moc = [self managedObjectContext];
-	NSManagedObject *institution = [NSEntityDescription insertNewObjectForEntityForName:InstitutionEntityName inManagedObjectContext:moc];
-	NSManagedObject *relationship = [NSEntityDescription insertNewObjectForEntityForName:PersonInstitutionRelationshipEntityName inManagedObjectContext:moc];
-	[relationship setValue:institution forKey:@"institution"];
-	[relationship setValue:@"institution" forKey:@"relationshipType"];
-	[institutionsArrayController addObject:relationship];
-}
-
-- (IBAction)removeInstitutions:(NSArray *)selectedInstitutions {
-	[institutionsArrayController removeObject:selectedInstitutions];
     // dirty fix for CoreData bug, which registers an extra change when objects are deleted
     [[self document] updateChangeCount:NSChangeUndone];
 }
@@ -111,49 +77,7 @@
 }
 
 - (NSDragOperation)tableView:(NSTableView*)tv validateDrop:(id <NSDraggingInfo>)info proposedRow:(int)row proposedDropOperation:(NSTableViewDropOperation)op {
-	if (tv == publicationsTableView) {
-		
-        if ([[itemsArrayController selectedObjects] count] != 1)
-			return NSDragOperationNone;
-		NSPasteboard *pboard = [info draggingPasteboard];
-		NSString *type = [pboard availableTypeFromArray:[NSArray arrayWithObjects:BDSKPublicationPboardType, nil]];
-		if ([type isEqualToString:BDSKPublicationPboardType]) {
-			[tv setDropRow:-1 dropOperation:NSTableViewDropOn];
-			if ([[[info draggingSource] dataSource] document] == [self document])
-				return NSDragOperationLink;
-			else
-				return NSDragOperationCopy;
-		}
-        
-	} else if (tv == institutionsTableView) {
-		
-        if ([[itemsArrayController selectedObjects] count] != 1)
-			return NSDragOperationNone;
-		NSPasteboard *pboard = [info draggingPasteboard];
-		NSString *type = [pboard availableTypeFromArray:[NSArray arrayWithObjects:BDSKInstitutionPboardType, nil]];
-		if ([type isEqualToString:BDSKInstitutionPboardType]) {
-			[tv setDropRow:-1 dropOperation:NSTableViewDropOn];
-			if ([[[info draggingSource] dataSource] document] == [self document])
-				return NSDragOperationLink;
-			else
-				return NSDragOperationCopy;
-		}
-        
-    } else if (tv == tagsTableView) {
-		
-        if ([[itemsArrayController selectedObjects] count] != 1)
-			return NSDragOperationNone;
-		NSPasteboard *pboard = [info draggingPasteboard];
-		NSString *type = [pboard availableTypeFromArray:[NSArray arrayWithObjects:BDSKTagPboardType, nil]];
-		if ([type isEqualToString:BDSKTagPboardType]) {
-			[tv setDropRow:-1 dropOperation:NSTableViewDropOn];
-			if ([[[info draggingSource] dataSource] document] == [self document])
-				return NSDragOperationLink;
-			else
-				return NSDragOperationCopy;
-		}
-        
-	} else if (tv == itemsTableView) {
+	if (tv == itemsTableView) {
 		
         NSPasteboard *pboard = [info draggingPasteboard];
 		NSString *type = [pboard availableTypeFromArray:[NSArray arrayWithObjects:BDSKPublicationPboardType, BDSKPersonPboardType, BDSKInstitutionPboardType, BDSKTagPboardType, nil]];
@@ -176,28 +100,7 @@
 - (BOOL)tableView:(NSTableView *)tv acceptDrop:(id <NSDraggingInfo>)info row:(int)row dropOperation:(NSTableViewDropOperation)op {
 	NSPasteboard *pboard = [info draggingPasteboard];
 	
-    if (tv == publicationsTableView) {
-		
-        NSString *type = [pboard availableTypeFromArray:[NSArray arrayWithObjects:BDSKPublicationPboardType, nil]];
-		if (([info draggingSourceOperationMask] & NSDragOperationLink) &&
-			[type isEqualToString:BDSKPublicationPboardType])
-			return [self addRelationshipsFromPasteboard:pboard forType:type parentRow:-1 keyPath:@"publicationRelationships.publication"];
-        
-	} else if (tv == tagsTableView) {
-        
-        NSString *type = [pboard availableTypeFromArray:[NSArray arrayWithObjects:BDSKTagPboardType, nil]];
-		if (([info draggingSourceOperationMask] & NSDragOperationLink) &&
-			[type isEqualToString:BDSKTagPboardType])
-			return [self addRelationshipsFromPasteboard:pboard forType:type parentRow:-1 keyPath:@"tags"];
-        
-	} else if (tv == institutionsTableView) {
-        
-        NSString *type = [pboard availableTypeFromArray:[NSArray arrayWithObjects:BDSKInstitutionPboardType, nil]];
-		if (([info draggingSourceOperationMask] & NSDragOperationLink) &&
-			[type isEqualToString:BDSKInstitutionPboardType])
-			return [self addRelationshipsFromPasteboard:pboard forType:type parentRow:-1 keyPath:@"institutionRelationships.institution"];
-        
-    } else if (tv == itemsTableView) {
+    if (tv == itemsTableView) {
 		
         if (!([info draggingSourceOperationMask] & NSDragOperationLink))
 			return NO;

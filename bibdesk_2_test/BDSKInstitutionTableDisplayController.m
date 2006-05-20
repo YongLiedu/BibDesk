@@ -18,15 +18,12 @@
 }
 
 - (NSString *)windowNibName{
-    return @"BDSKInstitutionTableDisplayController";
+    return @"BDSKInstitutionTableDisplay";
 }
 
 - (void)awakeFromNib{
 	[super awakeFromNib];
 	[itemsTableView registerForDraggedTypes:[NSArray arrayWithObjects:BDSKPublicationPboardType, BDSKPersonPboardType, BDSKTagPboardType, nil]];
-	[personsTableView registerForDraggedTypes:[NSArray arrayWithObjects:BDSKPersonPboardType, nil]];
-	[publicationsTableView registerForDraggedTypes:[NSArray arrayWithObjects:BDSKPublicationPboardType, nil]];
-	[tagsTableView registerForDraggedTypes:[NSArray arrayWithObjects:BDSKTagPboardType, nil]];
 }
 
 #pragma mark Actions
@@ -46,37 +43,6 @@
 	while (institution = [selEnum nextObject]) 
 		[moc deleteObject:institution];
     [moc processPendingChanges];
-    // dirty fix for CoreData bug, which registers an extra change when objects are deleted
-    [[self document] updateChangeCount:NSChangeUndone];
-}
-
-- (IBAction)addPerson:(id)sender {
-	NSManagedObjectContext *moc = [self managedObjectContext];
-	NSManagedObject *person = [NSEntityDescription insertNewObjectForEntityForName:PersonEntityName inManagedObjectContext:moc];
-	NSManagedObject *relationship = [NSEntityDescription insertNewObjectForEntityForName:PersonInstitutionRelationshipEntityName inManagedObjectContext:moc];
-	[relationship setValue:person forKey:@"person"];
-	[relationship setValue:@"institution" forKey:@"relationshipType"];
-	[personsArrayController addObject:relationship];
-}
-
-- (IBAction)removePersons:(NSArray *)selectedPersons {
-	[personsArrayController removeObjects:selectedPersons];
-    // dirty fix for CoreData bug, which registers an extra change when objects are deleted
-    [[self document] updateChangeCount:NSChangeUndone];
-}
-
-- (IBAction)addPublication:(id)sender{
-	NSManagedObjectContext *moc = [self managedObjectContext];
-	NSManagedObject *publication = [NSEntityDescription insertNewObjectForEntityForName:PublicationEntityName inManagedObjectContext:moc];
-	NSManagedObject *relationship = [NSEntityDescription insertNewObjectForEntityForName:ContributorPublicationRelationshipEntityName inManagedObjectContext:moc];
-	[relationship setValue:[NSNumber numberWithInt:[[publicationsArrayController arrangedObjects] count]] forKey:@"index"];
-	[relationship setValue:publication forKey:@"publication"];
-	[relationship setValue:@"institution" forKey:@"relationshipType"];
-	[publicationsArrayController addObject:relationship];
-}
-
-- (IBAction)removePublications:(NSArray *)selectedPublications {
-	[publicationsArrayController removeObjects:selectedPublications];
     // dirty fix for CoreData bug, which registers an extra change when objects are deleted
     [[self document] updateChangeCount:NSChangeUndone];
 }
@@ -117,49 +83,7 @@
 }
 
 - (NSDragOperation)tableView:(NSTableView*)tv validateDrop:(id <NSDraggingInfo>)info proposedRow:(int)row proposedDropOperation:(NSTableViewDropOperation)op {
-	if (tv == publicationsTableView) {
-		
-        if ([[itemsArrayController selectedObjects] count] != 1)
-			return NSDragOperationNone;
-		NSPasteboard *pboard = [info draggingPasteboard];
-		NSString *type = [pboard availableTypeFromArray:[NSArray arrayWithObjects:BDSKPublicationPboardType, nil]];
-		if ([type isEqualToString:BDSKPublicationPboardType]) {
-			[tv setDropRow:-1 dropOperation:NSTableViewDropOn];
-			if ([[[info draggingSource] dataSource] document] == [self document])
-				return NSDragOperationLink;
-			else
-				return NSDragOperationCopy;
-		}
-        
-	} else if (tv == personsTableView) {
-		
-        if ([[itemsArrayController selectedObjects] count] != 1)
-			return NSDragOperationNone;
-		NSPasteboard *pboard = [info draggingPasteboard];
-		NSString *type = [pboard availableTypeFromArray:[NSArray arrayWithObjects:BDSKPersonPboardType, nil]];
-		if ([type isEqualToString:BDSKPersonPboardType]) {
-			[tv setDropRow:-1 dropOperation:NSTableViewDropOn];
-			if ([[[info draggingSource] dataSource] document] == [self document])
-				return NSDragOperationLink;
-			else
-				return NSDragOperationCopy;
-		}
-        
-    } else if (tv == tagsTableView) {
-		
-        if ([[itemsArrayController selectedObjects] count] != 1)
-			return NSDragOperationNone;
-		NSPasteboard *pboard = [info draggingPasteboard];
-		NSString *type = [pboard availableTypeFromArray:[NSArray arrayWithObjects:BDSKTagPboardType, nil]];
-		if ([type isEqualToString:BDSKTagPboardType]) {
-			[tv setDropRow:-1 dropOperation:NSTableViewDropOn];
-			if ([[[info draggingSource] dataSource] document] == [self document])
-				return NSDragOperationLink;
-			else
-				return NSDragOperationCopy;
-		}
-        
-	} else if (tv == itemsTableView) {
+	if (tv == itemsTableView) {
 		
         NSPasteboard *pboard = [info draggingPasteboard];
 		NSString *type = [pboard availableTypeFromArray:[NSArray arrayWithObjects:BDSKPublicationPboardType, BDSKPersonPboardType, BDSKTagPboardType, nil]];
@@ -180,21 +104,7 @@
 - (BOOL)tableView:(NSTableView *)tv acceptDrop:(id <NSDraggingInfo>)info row:(int)row dropOperation:(NSTableViewDropOperation)op {
 	NSPasteboard *pboard = [info draggingPasteboard];
 	
-    if (tv == publicationsTableView) {
-		
-        NSString *type = [pboard availableTypeFromArray:[NSArray arrayWithObjects:BDSKPublicationPboardType, nil]];
-		if (([info draggingSourceOperationMask] & NSDragOperationLink) &&
-			[type isEqualToString:BDSKPublicationPboardType])
-			return [self addRelationshipsFromPasteboard:pboard forType:type parentRow:-1 keyPath:@"publicationRelationships.publication"];
-        
-	} else if (tv == tagsTableView) {
-        
-        NSString *type = [pboard availableTypeFromArray:[NSArray arrayWithObjects:BDSKTagPboardType, nil]];
-		if (([info draggingSourceOperationMask] & NSDragOperationLink) &&
-			[type isEqualToString:BDSKTagPboardType])
-			return [self addRelationshipsFromPasteboard:pboard forType:type parentRow:-1 keyPath:@"tags"];
-        
-    } else if (tv == itemsTableView) {
+    if (tv == itemsTableView) {
 		
         if (!([info draggingSourceOperationMask] & NSDragOperationLink))
 			return NO;

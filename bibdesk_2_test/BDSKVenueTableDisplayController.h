@@ -11,8 +11,6 @@
 
 
 @interface BDSKVenueTableDisplayController : BDSKTableDisplayController {
-    IBOutlet NSArrayController *publicationsArrayController;
-	IBOutlet NSTableView *publicationsTableView;
 }
 
 - (IBAction)addVenue:(id)sender;

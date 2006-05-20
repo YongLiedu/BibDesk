@@ -10,19 +10,9 @@
 #import "BDSKTableDisplayController.h"
 
 @interface BDSKInstitutionTableDisplayController : BDSKTableDisplayController {
-    IBOutlet NSArrayController *personsArrayController;
-    IBOutlet NSArrayController *publicationsArrayController;
-    IBOutlet NSArrayController *tagsArrayController;
-    IBOutlet NSTableView *personsTableView;
-    IBOutlet NSTableView *publicationsTableView;
-    IBOutlet NSTableView *tagsTableView;
 }
 
 - (IBAction)addInstitution:(id)sender;
 - (IBAction)removeInstitutions:(NSArray *)selectedItems;
-- (IBAction)addPerson:(id)sender;
-- (IBAction)removePersons:(NSArray *)selectedPersons;
-- (IBAction)addPublication:(id)sender;
-- (IBAction)removePublications:(NSArray *)selectedPublications;
 
 @end
