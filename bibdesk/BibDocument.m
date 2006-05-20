@@ -747,8 +747,7 @@ NSString *BDSKWeblocFilePboardType = @"CorePasteboardFlavorType 0x75726C20";
     [self exportAsFileType:fileType selected:YES droppingInternal:([sender tag] == 1)];
 }
 
-- (IBAction)setCurrentExportTemplateStyle:(id)sender{
-    BDSKLOGIMETHOD();
+- (IBAction)changeCurrentExportTemplateStyle:(id)sender{
     [currentExportTemplateStyle autorelease];
     currentExportTemplateStyle = [[sender titleOfSelectedItem] copy];
 }
@@ -764,7 +763,7 @@ NSString *BDSKWeblocFilePboardType = @"CorePasteboardFlavorType 0x75726C20";
         [sp setAccessoryView:htmlExportAccessoryView];
         [htmlStylePopUpButton removeAllItems];
         [htmlStylePopUpButton addItemsWithTitles:[BDSKTemplate allStyleNames]];
-        [htmlStylePopUpButton setAction:@selector(setCurrentExportTemplateStyle:)];
+        [htmlStylePopUpButton setAction:@selector(changeCurrentExportTemplateStyle:)];
         [htmlStylePopUpButton setTarget:self];
         
         // @@ save last selection in prefs?  names can change, though...
