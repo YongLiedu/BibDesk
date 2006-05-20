@@ -34,6 +34,8 @@
 - (NSArray *)displayControllers;
 - (NSArray *)displayControllersForCurrentType;
 
+- (id)displayControllerForEntityName:(NSString *)entityName;
+
 - (void)setupDisplayControllers;
 - (void)bindDisplayController:(id)displayController;
 - (void)unbindDisplayController:(id)displayController;

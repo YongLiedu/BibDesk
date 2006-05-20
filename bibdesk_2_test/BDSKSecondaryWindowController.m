@@ -39,7 +39,7 @@
 	
 	NSString *entityClassName = [[self sourceGroup] itemEntityName];
 	if (entityClassName != nil) {
-		BDSKTableDisplayController *newDisplayController = [currentDisplayControllerForEntity objectForKey:entityClassName];
+		BDSKTableDisplayController *newDisplayController = [self displayControllerForEntityName:entityClassName];
 		if (newDisplayController != currentDisplayController){
 			[self unbindDisplayController:currentDisplayController];
 			[self setDisplayController:newDisplayController];
@@ -90,7 +90,7 @@
 		BOOL shouldChangeDisplayController = NO;
 		
 		if ([newEntityClassName isEqualToString:oldEntityClassName] == NO) {
-			newDisplayController = [currentDisplayControllerForEntity objectForKey:newEntityClassName];
+			newDisplayController = [self displayControllerForEntityName:newEntityClassName];
 			if (newDisplayController != currentDisplayController){
 				[self unbindDisplayController:currentDisplayController];
 				shouldChangeDisplayController = YES;
@@ -122,6 +122,7 @@
         [[currentDisplayView superview] replaceSubview:currentDisplayView with:view];
         currentDisplayView = view;
         currentDisplayController = [newDisplayController retain];
+        [currentDisplayController setItemEntityName:[sourceGroup itemEntityName]];
         [self bindDisplayController:currentDisplayController];
     }
 }
@@ -165,6 +166,17 @@
     
 }
 
+- (id)displayControllerForEntityName:(NSString *)entityName{
+    NSManagedObjectContext *context = [self managedObjectContext];
+    NSEntityDescription *entity = [NSEntityDescription entityForName:entityName inManagedObjectContext:context];
+    id displayController = nil;
+    
+    while (displayController == nil && entity != nil) {
+        displayController = [currentDisplayControllerForEntity objectForKey:[entity name]];
+        entity = [entity superentity];
+    }
+    return displayController;
+}
 
 - (void)bindDisplayController:(id)displayController{
 	// Not binding the contentSet will get all the managed objects for the entity
