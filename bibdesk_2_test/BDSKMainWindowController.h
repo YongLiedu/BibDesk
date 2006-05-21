@@ -18,7 +18,7 @@
     
     // Importer stuff
     IBOutlet NSWindow *importSettingsWindow;
-    IBOutlet NSBox *importSettingsMainBox;    
+    IBOutlet NSBox *importSettingsMainBox;
 }
 
 - (NSSet *)sourceListSelectedItems;

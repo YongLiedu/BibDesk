@@ -8,6 +8,19 @@
 
 #import <Cocoa/Cocoa.h>
 
+extern NSString *BDSKDocumentToolbarIdentifier;
+extern NSString *BDSKDocumentToolbarNewItemIdentifier;
+extern NSString *BDSKDocumentToolbarDeleteItemIdentifier;
+extern NSString *BDSKDocumentToolbarNewGroupIdentifier;
+extern NSString *BDSKDocumentToolbarNewSmartGroupIdentifier;
+extern NSString *BDSKDocumentToolbarNewFolderIdentifier;
+extern NSString *BDSKDocumentToolbarDeleteGroupIdentifier;
+extern NSString *BDSKDocumentToolbarGetInfoIdentifier;
+extern NSString *BDSKDocumentToolbarDetachIdentifier;
+extern NSString *BDSKDocumentToolbarSearchItemIdentifier;
+
+extern void addToolbarItem(NSMutableDictionary *theDict,NSString *identifier,NSString *label,NSString *paletteLabel,NSString *toolTip,id target,SEL settingSelector, id itemContent,SEL action, NSMenuItem *menuItem);
+
 @class BDSKGroup;
 
 @interface BDSKSecondaryWindowController : NSWindowController {
@@ -21,6 +34,8 @@
     id currentDisplayController;
     IBOutlet NSView *currentDisplayView;
     IBOutlet NSSearchField *searchField;
+    
+    NSMutableDictionary *toolbarItems;
 }
 
 - (NSManagedObjectContext *)managedObjectContext;
@@ -44,5 +59,7 @@
 - (IBAction)addNewItem:(id)sender;
 - (IBAction)removeSelectedItems:(id)sender;
 - (IBAction)delete:(id)sender;
+
+- (NSToolbar *) setupToolbar;
 
 @end

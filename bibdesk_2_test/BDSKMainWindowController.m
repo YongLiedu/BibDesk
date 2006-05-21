@@ -13,9 +13,7 @@
 #import "ImageAndTextCell.h"
 #import "BDSKBibTeXParser.h"
 #import "BDSKSmartGroupEditor.h"
-
-#import "BDSKPublicationTableDisplayController.h" // @@ TODO: itemdisplayflex this should be temporary
-#import "BDSKNoteTableDisplayController.h" // @@ TODO: itemdisplayflex this should be temporary
+#import "BDSKTableDisplayController.h"
 
 
 @implementation BDSKMainWindowController
@@ -53,9 +51,6 @@
 - (void)dealloc{
     [sourceListTreeController removeObserver:self forKeyPath:@"selectedObjects"];
     [super dealloc];
-}
-
--(void)windowDidLoad{ 
 }
 
 - (NSString *)windowTitleForDocumentDisplayName:(NSString *)displayName{
@@ -477,6 +472,117 @@
         if ([selectedItems count] > 0)
             [self setSourceGroup:[selectedItems lastObject]];
     }
+}
+
+#pragma mark Toolbar stuff
+
+- (NSToolbar *) setupToolbar {
+    NSToolbar *toolbar = [super setupToolbar];
+    
+    NSImage *image;
+    NSRect badgeRect = NSMakeRect(20.0, 0.0, 12.0, 12.0);
+    NSRect iconRect = NSMakeRect(0.0, 0.0, 32.0, 32.0);
+    
+    image = [[NSImage alloc] initWithSize:iconRect.size];
+    [image lockFocus];
+    [[NSImage imageNamed:@"New"] compositeToPoint:NSZeroPoint operation:NSCompositeCopy];
+    [[NSImage imageNamed:@"GroupIcon"] drawInRect:badgeRect fromRect:iconRect operation:NSCompositeSourceOver fraction:1.0];
+    [image unlockFocus];
+
+    addToolbarItem(toolbarItems, BDSKDocumentToolbarNewGroupIdentifier,
+                   NSLocalizedString(@"New Group",@""), 
+				   NSLocalizedString(@"New Group",@""),
+                   NSLocalizedString(@"Create New Group",@""),
+                   self, @selector(setImage:),
+				   image, 
+				   @selector(addNewGroup:),
+                   nil);
+    [image release];
+
+    image = [[NSImage alloc] initWithSize:iconRect.size];
+    [image lockFocus];
+    [[NSImage imageNamed:@"New"] compositeToPoint:NSZeroPoint operation:NSCompositeCopy];
+    [[NSImage imageNamed:@"SmartGroupIcon"] drawInRect:badgeRect fromRect:iconRect operation:NSCompositeSourceOver fraction:1.0];
+    [image unlockFocus];
+
+    addToolbarItem(toolbarItems, BDSKDocumentToolbarNewSmartGroupIdentifier,
+                   NSLocalizedString(@"New Smart Group",@""), 
+				   NSLocalizedString(@"New Smart Group",@""),
+                   NSLocalizedString(@"Create New Smart Group",@""),
+                   self, @selector(setImage:),
+				   image, 
+				   @selector(addNewSmartGroup:),
+                   nil);
+    [image release];
+
+    image = [[NSImage alloc] initWithSize:iconRect.size];
+    [image lockFocus];
+    [[NSImage imageNamed:@"New"] compositeToPoint:NSZeroPoint operation:NSCompositeCopy];
+    [[NSImage imageNamed:@"FolderGroupIcon"] drawInRect:badgeRect fromRect:iconRect operation:NSCompositeSourceOver fraction:1.0];
+    [image unlockFocus];
+
+    addToolbarItem(toolbarItems, BDSKDocumentToolbarNewFolderIdentifier,
+                   NSLocalizedString(@"New Folder",@""), 
+				   NSLocalizedString(@"New Folder",@""),
+                   NSLocalizedString(@"Create New Folder Group",@""),
+                   self, @selector(setImage:),
+				   image, 
+				   @selector(addNewFolder:),
+                   nil);
+    [image release];
+
+    image = [[NSImage alloc] initWithSize:iconRect.size];
+    [image lockFocus];
+    [[NSImage imageNamed:@"Delete"] compositeToPoint:NSZeroPoint operation:NSCompositeCopy];
+    [[NSImage imageNamed:@"GroupIcon"] drawInRect:badgeRect fromRect:iconRect operation:NSCompositeSourceOver fraction:1.0];
+    [image unlockFocus];
+
+    addToolbarItem(toolbarItems, BDSKDocumentToolbarDeleteGroupIdentifier,
+                   NSLocalizedString(@"Delete Group",@""), 
+				   NSLocalizedString(@"Delete Group",@""),
+                   NSLocalizedString(@"Delete Selected Group",@""),
+                   self, @selector(setImage:),
+				   image, 
+				   @selector(removeSelectedGroup:),
+                   nil);
+    [image release];
+
+    addToolbarItem(toolbarItems, BDSKDocumentToolbarDetachIdentifier,
+                   NSLocalizedString(@"Detach",@""), 
+				   NSLocalizedString(@"Detach",@""),
+                   NSLocalizedString(@"Detach Group",@""),
+                   self, @selector(setImage:),
+				   [NSImage imageNamed: @"Detach"], 
+				   @selector(showWindowForSourceListSelection:),
+                   nil);
+
+    return toolbar;
+}
+
+- (NSArray *) toolbarDefaultItemIdentifiers: (NSToolbar *) toolbar {
+    return [NSArray arrayWithObjects:
+		BDSKDocumentToolbarNewItemIdentifier, 
+		BDSKDocumentToolbarNewGroupIdentifier, 
+		BDSKDocumentToolbarDetachIdentifier, 
+		NSToolbarFlexibleSpaceItemIdentifier, 
+		BDSKDocumentToolbarSearchItemIdentifier, nil];
+}
+
+- (NSArray *) toolbarAllowedItemIdentifiers: (NSToolbar *) toolbar {
+    return [NSArray arrayWithObjects: 
+		BDSKDocumentToolbarNewItemIdentifier, 
+		BDSKDocumentToolbarDeleteItemIdentifier, 
+		BDSKDocumentToolbarNewGroupIdentifier, 
+		BDSKDocumentToolbarNewSmartGroupIdentifier, 
+		BDSKDocumentToolbarNewFolderIdentifier, 
+		BDSKDocumentToolbarDeleteGroupIdentifier, 
+		BDSKDocumentToolbarGetInfoIdentifier, 
+		BDSKDocumentToolbarDetachIdentifier, 
+		BDSKDocumentToolbarSearchItemIdentifier,
+		NSToolbarFlexibleSpaceItemIdentifier, 
+		NSToolbarSpaceItemIdentifier, 
+		NSToolbarSeparatorItemIdentifier, 
+		NSToolbarCustomizeToolbarItemIdentifier, nil];
 }
 
 @end

@@ -11,6 +11,17 @@
 #import "BDSKGroup.h"
 #import "BDSKDataModelNames.h"
 
+NSString *BDSKDocumentToolbarIdentifier = @"BDSKDocumentToolbarIdentifier";
+NSString *BDSKDocumentToolbarNewItemIdentifier = @"BDSKDocumentToolbarNewItemIdentifier";
+NSString *BDSKDocumentToolbarDeleteItemIdentifier = @"BDSKDocumentToolbarDeleteItemIdentifier";
+NSString *BDSKDocumentToolbarNewGroupIdentifier = @"BDSKDocumentToolbarNewGroupIdentifier";
+NSString *BDSKDocumentToolbarNewSmartGroupIdentifier = @"BDSKDocumentToolbarNewSmartGroupIdentifier";
+NSString *BDSKDocumentToolbarNewFolderIdentifier = @"BDSKDocumentToolbarNewFolderIdentifier";
+NSString *BDSKDocumentToolbarDeleteGroupIdentifier = @"BDSKDocumentToolbarDeleteGroupIdentifier";
+NSString *BDSKDocumentToolbarGetInfoIdentifier = @"BDSKDocumentToolbarGetInfoIdentifier";
+NSString *BDSKDocumentToolbarDetachIdentifier = @"BDSKDocumentToolbarDetachIdentifier";
+NSString *BDSKDocumentToolbarSearchItemIdentifier = @"BDSKDocumentToolbarSearchItemIdentifier";
+
 
 @implementation BDSKSecondaryWindowController
 
@@ -52,7 +63,9 @@
     [super dealloc];
 }
 
--(void)windowDidLoad{ 
+-(void)windowDidLoad{
+    // Attach the toolbar to the document window
+    [[self window] setToolbar: [self setupToolbar]];
 }
 
 - (void)windowWillClose:(NSNotification *)notification{
@@ -244,6 +257,142 @@
     } else {
         NSBeep();
     }
+}
+
+#pragma mark Toolbar stuff
+
+// label, palettelabel, toolTip, action, and menu can all be NULL, depending upon what you want the item to do
+void addToolbarItem(NSMutableDictionary *theDict,NSString *identifier,NSString *label,NSString *paletteLabel,NSString *toolTip,id target,SEL settingSelector, id itemContent,SEL action, NSMenuItem *menuItem)
+{
+    // here we create the NSToolbarItem and setup its attributes in line with the parameters
+    NSToolbarItem *item = [[[NSToolbarItem alloc] initWithItemIdentifier:identifier] autorelease];
+    [item setLabel:label];
+    [item setPaletteLabel:paletteLabel];
+    [item setToolTip:toolTip];
+    [item setTarget:target];
+    // the settingSelector parameter can either be @selector(setView:) or @selector(setImage:).  Pass in the right
+    // one depending upon whether your NSToolbarItem will have a custom view or an image, respectively
+    // (in the itemContent parameter).  Then this next line will do the right thing automatically.
+    [item performSelector:settingSelector withObject:itemContent];
+    [item setAction:action];
+    // The menuItem to be shown in text only mode. Don't reset this when we use the default behavior. 
+	if (menuItem)
+		[item setMenuFormRepresentation:menuItem];
+    // Now that we've setup all the settings for this new toolbar item, we add it to the dictionary.
+    // The dictionary retains the toolbar item for us, which is why we could autorelease it when we created
+    // it (above).
+    [theDict setObject:item forKey:identifier];
+}
+
+- (NSToolbar *) setupToolbar {
+    // Create a new toolbar instance, and attach it to our document window
+    NSToolbar *toolbar = [[[NSToolbar alloc] initWithIdentifier:BDSKDocumentToolbarIdentifier] autorelease];
+
+    toolbarItems = [[NSMutableDictionary dictionary] retain];
+    
+    // Set up toolbar properties: Allow customization, give a default display mode, and remember state in user defaults
+    [toolbar setAllowsUserCustomization: YES];
+    [toolbar setAutosavesConfiguration: YES];
+    [toolbar setDisplayMode: NSToolbarDisplayModeDefault];
+
+    // We are the delegate
+    [toolbar setDelegate: self];
+
+    // add toolbaritems:
+
+    addToolbarItem(toolbarItems, BDSKDocumentToolbarNewItemIdentifier,
+                   NSLocalizedString(@"New Item",@""), 
+				   NSLocalizedString(@"New Item",@""),
+                   NSLocalizedString(@"Create New Item",@""),
+                   self, @selector(setImage:),
+				   [NSImage imageNamed: @"New"], 
+				   @selector(addNewItem:),
+                   nil);
+
+    addToolbarItem(toolbarItems, BDSKDocumentToolbarDeleteItemIdentifier,
+                   NSLocalizedString(@"Delete Item",@""), 
+				   NSLocalizedString(@"Delete Item",@""),
+                   NSLocalizedString(@"Create Delete Item",@""),
+                   self, @selector(setImage:),
+				   [NSImage imageNamed: @"Delete"], 
+				   @selector(removeSelectedItems:),
+                   nil);
+
+    addToolbarItem(toolbarItems, BDSKDocumentToolbarSearchItemIdentifier,
+                   NSLocalizedString(@"Search",@""),
+                   NSLocalizedString(@"Search",@""),
+                   NSLocalizedString(@"Search",@""),
+                   self, @selector(setView:),
+                   searchField,
+                   NULL, 
+				   nil);
+
+    addToolbarItem(toolbarItems, BDSKDocumentToolbarGetInfoIdentifier,
+                   NSLocalizedString(@"Get Info",@""), 
+				   NSLocalizedString(@"Get Info",@""),
+                   NSLocalizedString(@"Get Info for Selected Item or Group",@""),
+                   self, @selector(setImage:),
+				   [NSImage imageNamed: @"Edit"], 
+				   @selector(getInfo:),
+                   nil);
+    
+    return toolbar;
+}
+
+- (NSToolbarItem *) toolbar: (NSToolbar *)toolbar
+      itemForItemIdentifier: (NSString *)itemIdent
+  willBeInsertedIntoToolbar:(BOOL) willBeInserted {
+
+    NSToolbarItem *newItem = [[[NSToolbarItem alloc] initWithItemIdentifier:itemIdent] autorelease];
+    NSToolbarItem *item = [toolbarItems objectForKey:itemIdent];
+
+    [newItem setLabel:[item label]];
+    [newItem setPaletteLabel:[item paletteLabel]];
+    if ([item view]!=nil)
+    {
+        [newItem setView:[item view]];
+    }
+    else
+    {
+        [newItem setImage:[item image]];
+    }
+    [newItem setToolTip:[item toolTip]];
+    [newItem setTarget:[item target]];
+    [newItem setAction:[item action]];
+    [newItem setMenuFormRepresentation:[item menuFormRepresentation]];
+    // If we have a custom view, we *have* to set the min/max size - otherwise, it'll default to 0,0 and the custom
+    // view won't show up at all!  This doesn't affect toolbar items with images, however.
+    if ([itemIdent isEqualToString:BDSKDocumentToolbarSearchItemIdentifier])
+    {
+        [newItem setMinSize:NSMakeSize(50,NSHeight([[item view] bounds]))];
+        [newItem setMaxSize:NSMakeSize(1000,NSHeight([[item view] bounds]))];
+    }
+	else if ([newItem view]!=nil)
+    {
+        [newItem setMinSize:[[item view] bounds].size];
+        [newItem setMaxSize:[[item view] bounds].size];
+    }
+
+    return newItem;
+}
+
+- (NSArray *) toolbarDefaultItemIdentifiers: (NSToolbar *) toolbar {
+    return [NSArray arrayWithObjects:
+		BDSKDocumentToolbarNewItemIdentifier,
+		NSToolbarFlexibleSpaceItemIdentifier, 
+		BDSKDocumentToolbarSearchItemIdentifier, nil];
+}
+
+- (NSArray *) toolbarAllowedItemIdentifiers: (NSToolbar *) toolbar {
+    return [NSArray arrayWithObjects: 
+		BDSKDocumentToolbarNewItemIdentifier, 
+		BDSKDocumentToolbarDeleteItemIdentifier, 
+		BDSKDocumentToolbarGetInfoIdentifier, 
+		BDSKDocumentToolbarSearchItemIdentifier,
+		NSToolbarFlexibleSpaceItemIdentifier, 
+		NSToolbarSpaceItemIdentifier, 
+		NSToolbarSeparatorItemIdentifier, 
+		NSToolbarCustomizeToolbarItemIdentifier, nil];
 }
 
 @end
