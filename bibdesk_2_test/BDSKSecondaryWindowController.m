@@ -11,9 +11,6 @@
 #import "BDSKGroup.h"
 #import "BDSKDataModelNames.h"
 
-#import "BDSKPublicationTableDisplayController.h" // @@ TODO: itemdisplayflex this should be temporary
-#import "BDSKNoteTableDisplayController.h" // @@ TODO: itemdisplayflex this should be temporary
-
 
 @implementation BDSKSecondaryWindowController
 
@@ -112,7 +109,7 @@
 }
 
 - (void)setDisplayController:(id)newDisplayController{
-    if(newDisplayController != currentDisplayController){
+    //if(newDisplayController != currentDisplayController){
         [currentDisplayController autorelease];
         if(currentDisplayController)
             [self unbindDisplayController:currentDisplayController];
@@ -126,7 +123,7 @@
         currentDisplayController = [newDisplayController retain];
         [currentDisplayController setItemEntityName:[sourceGroup itemEntityName]];
         [self bindDisplayController:currentDisplayController];
-    }
+    //}
 }
 
 - (NSArray *)displayControllers{
