@@ -91,10 +91,10 @@
 		
 		if ([newEntityClassName isEqualToString:oldEntityClassName] == NO) {
 			newDisplayController = [self displayControllerForEntityName:newEntityClassName];
-			if (newDisplayController != currentDisplayController){
+			//if (newDisplayController != currentDisplayController){
 				[self unbindDisplayController:currentDisplayController];
 				shouldChangeDisplayController = YES;
-			}
+			//}
 		}
 		
 		[sourceGroup autorelease];
