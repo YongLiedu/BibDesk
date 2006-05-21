@@ -1,4 +1,4 @@
-{\rtf1\mac\ansicpg10000\cocoartf824\cocoasubrtf380
+{\rtf1\mac\ansicpg10000\cocoartf824\cocoasubrtf410
 {\fonttbl\f0\fswiss\fcharset77 Helvetica;\f1\fnil\fcharset77 LucidaGrande;\f2\fswiss\fcharset77 Helvetica-Bold;
 \f3\fswiss\fcharset77 Helvetica-BoldOblique;\f4\fnil\fcharset77 Geneva;\f5\fnil\fcharset77 LucidaGrande-Bold;
 \f6\fswiss\fcharset77 Helvetica-Oblique;\f7\fnil\fcharset77 Verdana;\f8\fnil\fcharset80 AppleGothic;
@@ -10,6 +10,52 @@
 \pard\tx1440\tx2880\tx4320\tx5760\tx7200\ql\qnatural
 
 \f1\fs22 \cf0 \
+\pard\tx1440\tx2880\tx4320\tx5760\tx7200\ql\qnatural
+
+\f2\b\fs28 \cf0 \
+Changes since 1.2.6\
+\pard\tx1440\tx2880\tx4320\tx5760\tx7200\ql\qnatural
+
+\f3\i\fs26 \cf0 \
+New Features\
+\pard\tx1440\tx2880\tx4320\tx5760\tx7200\ql\qnatural
+
+\f1\i0\b0\fs22 \cf0   \'a5  Static groups; you can now group arbitrary publications together and save them in your file\
+  \'a5  Newlines and whitespace are now removed when pasting text into fields (RFE #1480354)\
+  \'a5  Menu action to merge shared items into your bibliography file (without introducing duplicates)\
+  \'a5  Added a search field and spotlight effect to the preferences window (Tiger only)\
+  \'a5  New action menu below the group tableview\
+  \'a5  Text template export preferences added, so multiple HTML (or other) templates can be saved in named sets (RFE #1488232)\
+\pard\tx1440\tx2880\tx4320\tx5760\tx7200\ql\qnatural
+
+\f3\i\b\fs26 \cf0 \
+Bugs Fixed\
+\pard\tx1440\tx2880\tx4320\tx5760\tx7200\ql\qnatural
+
+\f1\i0\b0\fs22 \cf0   \'a5  Change status line when a shared group is selected\
+  \'a5  PubMed IP tag is now used for number\
+  \'a5  Groub tableview highlighting should be significantly more efficient (fixed a beachball)\
+  \'a5  Added some thread safe file manager methods for Spotlight/webloc/TeX\
+  \'a5  Smart group conditions now display in a scroll view\
+  \'a5  Finder comments are now preserved when copying/moving files (workaround for Apple bug)\
+  \'a5  Fix bug #1479345; ensure that edits are committed before closing the add-field sheet, since people have never learned how to end editing on a cell\
+  \'a5  Fix crash when using a global macro definition file (bug #1490486)\
+  \'a5  Ensure that search for temporary cite keys is performed whenever opening a file with temp keys\
+  \'a5  Fix bug #1479970; use correct pref key for checkbox\
+  \'a5  Added a hack to work around an Apple bug in Tiger that breaks typing in the "Open Using Filter" dialog (bug #1480815)\
+  \'a5  Fix bug #1481678; select all docs for error filtering when closing a document\
+  \'a5  Fix bug #1482852; loading a document with a very large number of macros can run the parser out of memory (ugh!).  The limit is now higher and a useful error will be logged.\
+  \'a5  Set flag in ILCrashReporter to allow quitting; hopefull will eliminate the zombie crash reporter processes\
+  \'a5  Fixed bug that caused the file content search tableview to use the wrong font, even after changing it manually\
+  \'a5  Fixed memory leak in URL parsing code for abstract/annote text views\
+  \'a5  Fixed bug #1483613; crash when changing font in abstract/annote that occurred if you edited an abstract/annote, close the window, then opened another editor and changed the font.\
+  \'a5  Local-Url relative path is now handled correctly (thanks to Christian Jacobsen for the patch!)\
+  \'a5  Fixed status message when duplicates selected\
+  \'a5  Crossref menu items are now disabled when selecting shared items\
+  \'a5  Fixed sorting of "Author or Editor" columns\
+  \'a5  Fixed bug #1489184; empty index set could lead to a beachball\
+  \'a5  Revised update checking code to use NSURLConnection, which is hopefully less crash-prone than CFURLCreateDataAndPropertiesFromResource on authenticated network connections (bug #1489057)\
+  \'a5  Edit selected field in temporary typeahead mode when using command key modifier\
 \pard\tx1440\tx2880\tx4320\tx5760\tx7200\ql\qnatural
 
 \f2\b\fs28 \cf0 \
