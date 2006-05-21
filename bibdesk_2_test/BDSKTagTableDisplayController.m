@@ -22,27 +22,6 @@
 	[itemsTableView registerForDraggedTypes:[NSArray arrayWithObjects:BDSKPublicationPboardType, BDSKPersonPboardType, BDSKInstitutionPboardType, nil]];
 }
 
-#pragma mark Actions
-
-- (IBAction)addTag:(id)sender {
-	NSManagedObjectContext *moc = [self managedObjectContext];
-	NSManagedObject *note = [NSEntityDescription insertNewObjectForEntityForName:TagEntityName inManagedObjectContext:moc];
-    [itemsArrayController addObject:note];
-    [moc processPendingChanges];
-    [itemsArrayController setSelectedObjects:[NSArray arrayWithObject:note]];
-}
-
-- (IBAction)removeTags:(NSArray *)selectedItems {
-	NSManagedObjectContext *moc = [self managedObjectContext];
-	NSEnumerator *selEnum = [selectedItems objectEnumerator];
-	NSManagedObject *note;
-	while (note = [selEnum nextObject]) 
-		[moc deleteObject:note];
-    [moc processPendingChanges];
-    // dirty fix for CoreData bug, which registers an extra change when objects are deleted
-    [[self document] updateChangeCount:NSChangeUndone];
-}
-
 #pragma mark Filter predicate binding
 
 - (NSArray *)filterPredicates {

@@ -12,8 +12,4 @@
 
 @interface BDSKVenueTableDisplayController : BDSKTableDisplayController {
 }
-
-- (IBAction)addVenue:(id)sender;
-- (IBAction)removeVenues:(NSArray *)selectedItems;
-
 @end

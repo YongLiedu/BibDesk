@@ -22,27 +22,6 @@
 	[itemsTableView registerForDraggedTypes:[NSArray arrayWithObjects:BDSKPublicationPboardType, nil]];
 }
 
-#pragma mark Actions
-
-- (IBAction)addVenue:(id)sender {
-	NSManagedObjectContext *moc = [self managedObjectContext];
-	NSManagedObject *venue = [NSEntityDescription insertNewObjectForEntityForName:VenueEntityName inManagedObjectContext:moc];
-    [itemsArrayController addObject:venue];
-    [moc processPendingChanges];
-    [itemsArrayController setSelectedObjects:[NSArray arrayWithObject:venue]];
-}
-
-- (IBAction)removeVenues:(NSArray *)selectedItems {
-	NSManagedObjectContext *moc = [self managedObjectContext];
-	NSEnumerator *selEnum = [selectedItems objectEnumerator];
-	NSManagedObject *venue;
-	while (venue = [selEnum nextObject]) 
-		[moc deleteObject:venue];
-    [moc processPendingChanges];
-    // dirty fix for CoreData bug, which registers an extra change when objects are deleted
-    [[self document] updateChangeCount:NSChangeUndone];
-}
-
 #pragma mark NSTableView DataSource protocol
 
 // dummy implementation as the NSTableView DataSource protocols requires these methods
@@ -88,7 +67,7 @@
         NSString *type = [pboard availableTypeFromArray:[NSArray arrayWithObjects:BDSKPublicationPboardType, nil]];
 		if (([info draggingSourceOperationMask] & NSDragOperationLink) &&
 			[type isEqualToString:BDSKPublicationPboardType])
-			return [self addRelationshipsFromPasteboard:pboard forType:type parentRow:row keyPath:@"publication"];
+			return [self addRelationshipsFromPasteboard:pboard forType:type parentRow:row keyPath:@"publicationRelationships.publication"];
         
 	}
     

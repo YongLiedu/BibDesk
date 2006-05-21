@@ -22,27 +22,6 @@
 	[itemsTableView registerForDraggedTypes:[NSArray arrayWithObjects:BDSKPublicationPboardType, BDSKPersonPboardType, BDSKInstitutionPboardType, BDSKTagPboardType, nil]];
 }
 
-#pragma mark Actions
-
-- (IBAction)addPerson:(id)sender {
-	NSManagedObjectContext *moc = [self managedObjectContext];
-	NSManagedObject *person = [NSEntityDescription insertNewObjectForEntityForName:PersonEntityName inManagedObjectContext:moc];
-    [itemsArrayController addObject:person];
-    [moc processPendingChanges];
-    [itemsArrayController setSelectedObjects:[NSArray arrayWithObject:person]];
-}
-
-- (IBAction)removePersons:(NSArray *)selectedItems {
-	NSManagedObjectContext *moc = [self managedObjectContext];
-	NSEnumerator *selEnum = [selectedItems objectEnumerator];
-	NSManagedObject *person;
-	while (person = [selEnum nextObject]) 
-		[moc deleteObject:person];
-    [moc processPendingChanges];
-    // dirty fix for CoreData bug, which registers an extra change when objects are deleted
-    [[self document] updateChangeCount:NSChangeUndone];
-}
-
 #pragma mark Filter predicate binding
 
 - (NSArray *)filterPredicates {
@@ -165,7 +144,7 @@
 				[[person mutableSetValueForKey:@"containingGroups"] unionSet:[mo valueForKey:@"containingGroups"]];
                 [removedPersons addObject:mo];
 			}
-            [self removePersons:removedPersons];
+            [self removeItems:removedPersons];
             [removedPersons release];
             
 			return YES;

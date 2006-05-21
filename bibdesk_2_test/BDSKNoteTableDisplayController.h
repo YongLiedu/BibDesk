@@ -11,8 +11,4 @@
 
 @interface BDSKNoteTableDisplayController : BDSKTableDisplayController {
 }
-
-- (IBAction)addNote:(id)sender;
-- (IBAction)removeNotes:(NSArray *)selectedItems;
-
 @end

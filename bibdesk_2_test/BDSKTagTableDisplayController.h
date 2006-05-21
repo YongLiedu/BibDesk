@@ -11,8 +11,4 @@
 
 @interface BDSKTagTableDisplayController : BDSKTableDisplayController {
 }
-
-- (IBAction)addTag:(id)sender;
-- (IBAction)removeTags:(NSArray *)selectedItems;
-
 @end

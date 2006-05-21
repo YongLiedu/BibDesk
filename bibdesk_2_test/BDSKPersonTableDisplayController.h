@@ -11,8 +11,4 @@
 
 @interface BDSKPersonTableDisplayController : BDSKTableDisplayController {
 }
-
-- (IBAction)addPerson:(id)sender;
-- (IBAction)removePersons:(NSArray *)selectedItems;
-
 @end

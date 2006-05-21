@@ -25,25 +25,6 @@
 
 #pragma mark Actions
 
-- (IBAction)addPublication:(id)sender {
-	NSManagedObjectContext *moc = [self managedObjectContext];
-	NSManagedObject *publication = [NSEntityDescription insertNewObjectForEntityForName:PublicationEntityName inManagedObjectContext:moc];
-    [itemsArrayController addObject:publication];
-    [moc processPendingChanges];
-    [itemsArrayController setSelectedObjects:[NSArray arrayWithObject:publication]];
-}
-
-- (IBAction)removePublications:(NSArray *)selectedItems {
-	NSManagedObjectContext *moc = [self managedObjectContext];
-	NSEnumerator *selEnum = [selectedItems objectEnumerator];
-	NSManagedObject *publication;
-	while (publication = [selEnum nextObject]) 
-		[moc deleteObject:publication];
-    [moc processPendingChanges];
-    // dirty fix for CoreData bug, which registers an extra change when objects are deleted
-    [[self document] updateChangeCount:NSChangeUndone];
-}
-
 #pragma mark Filter predicate binding
 
 - (NSArray *)filterPredicates {

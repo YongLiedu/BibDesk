@@ -12,8 +12,4 @@
 
 @interface BDSKPublicationTableDisplayController : BDSKTableDisplayController {
 }
-
-- (IBAction)addPublication:(id)sender;
-- (IBAction)removePublications:(NSArray *)selectedItems;
-
 @end

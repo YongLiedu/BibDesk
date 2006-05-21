@@ -11,8 +11,4 @@
 
 @interface BDSKInstitutionTableDisplayController : BDSKTableDisplayController {
 }
-
-- (IBAction)addInstitution:(id)sender;
-- (IBAction)removeInstitutions:(NSArray *)selectedItems;
-
 @end
