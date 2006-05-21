@@ -102,6 +102,8 @@
 		
 		if (shouldChangeDisplayController == YES)
 			[self setDisplayController:newDisplayController];
+        
+        [currentDisplayController setEditable:[sourceGroup canAddItems]];
 	}
 }
 
@@ -222,18 +224,29 @@
         return;
     }
     
-    NSString *entityName = [selectedGroup valueForKey:@"itemEntityName"];
-    NSManagedObjectContext *context = [self managedObjectContext];
-    NSManagedObject *newItem = [NSEntityDescription insertNewObjectForEntityForName:entityName
-                                                             inManagedObjectContext:context];
-    
-    if ([selectedGroup isStatic] == YES) {
-        NSMutableSet *items = [selectedGroup mutableSetValueForKey:@"items"];
-        [items addObject:newItem];
+    [currentDisplayController addItem];
+}
+
+- (IBAction)removeSelectedItems:(id)sender {
+    BDSKGroup *selectedGroup = [self sourceGroup];
+    NSArray *selectedItems = [[currentDisplayController itemsArrayController] selectedObjects];
+    if (NSIsControllerMarker(selectedItems) || NSIsControllerMarker(selectedGroup) || [selectedGroup canAddItems] == NO) {
+        NSBeep();
+        return;
     }
     
-    [context processPendingChanges];
-    [[currentDisplayController itemsArrayController] setSelectedObjects:[NSArray arrayWithObject:newItem]];
+    [currentDisplayController removeItems:selectedItems];
+}
+
+- (IBAction)delete:(id)sender {
+    id firstResponder = [[self window] firstResponder];
+    if ([firstResponder isKindOfClass:[NSText class]] && [firstResponder isFieldEditor])
+        firstResponder = [firstResponder delegate];
+    if (firstResponder == [currentDisplayController itemsTableView]) {
+        [self removeSelectedItems:sender];
+    } else {
+        NSBeep();
+    }
 }
 
 @end

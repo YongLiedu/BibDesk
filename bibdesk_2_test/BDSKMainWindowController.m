@@ -98,17 +98,14 @@
 	[swc showWindow:sender];
 }
 
-- (IBAction)addNewGroup:(id)sender{
-    BDSKGroup *selectedGroup = [self sourceGroup];
-    if (NSIsControllerMarker(selectedGroup)) {
-        NSBeep();
-        return;
-    }
+- (NSString *)itemEntityNameOfType:(int)tag parentGroup:(BDSKGroup *)parentGroup{
+    if (NSIsControllerMarker(parentGroup)) 
+        return nil;
     
-    NSString *parentEntityName = [selectedGroup valueForKey:@"itemEntityName"];
+    NSString *parentEntityName = [parentGroup valueForKey:@"itemEntityName"];
     NSString *entityName = nil;
     
-    switch ([sender tag]) {
+    switch (tag) {
         case 0:
             entityName = parentEntityName;
             break;
@@ -133,9 +130,23 @@
         case 7:
             entityName = ItemEntityName;
             break;
+        case 8:
+            entityName = TaggedItemEntityName;
+            break;
     }
     
-    if ([parentEntityName isEqualToString:ItemEntityName] == NO && [selectedGroup canAddChildren] == YES && [parentEntityName isEqualToString:entityName] == NO) {
+    if ([parentEntityName isEqualToString:ItemEntityName] == NO && [parentEntityName isEqualToString:TaggedItemEntityName] == NO && 
+        [parentGroup canAddChildren] == YES && [parentEntityName isEqualToString:entityName] == NO) 
+        return nil;
+    
+    return entityName;
+}
+
+- (IBAction)addNewGroup:(id)sender{
+    BDSKGroup *selectedGroup = [self sourceGroup];
+    NSString *entityName = [self itemEntityNameOfType:[sender tag] parentGroup:selectedGroup];
+    
+    if (entityName == nil) {
         NSBeep();
         return;
     }
@@ -158,42 +169,9 @@
 
 - (IBAction)addNewFolderGroup:(id)sender{
     BDSKGroup *selectedGroup = [self sourceGroup];
-    if (NSIsControllerMarker(selectedGroup)) {
-        NSBeep();
-        return;
-    }
+    NSString *entityName = [self itemEntityNameOfType:[sender tag] parentGroup:selectedGroup];
     
-    NSString *parentEntityName = [selectedGroup valueForKey:@"itemEntityName"];
-    NSString *entityName = nil;
-    
-    switch ([sender tag]) {
-        case 0:
-            entityName = parentEntityName;
-            break;
-        case 1:
-            entityName = PublicationEntityName;
-            break;
-        case 2:
-            entityName = PersonEntityName;
-            break;
-        case 3:
-            entityName = InstitutionEntityName;
-            break;
-        case 4:
-            entityName = VenueEntityName;
-            break;
-        case 5:
-            entityName = NoteEntityName;
-            break;
-        case 6:
-            entityName = TagEntityName;
-            break;
-        case 7:
-            entityName = ItemEntityName;
-            break;
-    }
-    
-    if ([parentEntityName isEqualToString:ItemEntityName] == NO && [selectedGroup canAddChildren] == YES && [parentEntityName isEqualToString:entityName] == NO) {
+    if (entityName == nil) {
         NSBeep();
         return;
     }
@@ -206,7 +184,7 @@
     [newFolderGroup setValue:@"Untitled Folder" forKey:@"name"];
     
     if ([selectedGroup canAddChildren] == YES) {
-        // for non-smart groups we add the new group as a child
+        // for folder groups we add the new group as a child
         [[selectedGroup mutableSetValueForKey:@"children"] addObject:newFolderGroup];
     }
     
@@ -236,6 +214,33 @@
     
     [context processPendingChanges];
     // TODO: select the new group and edit. How to select?
+}
+
+- (IBAction)removeSelectedGroup:(id)sender{
+    BDSKGroup *selectedGroup = [self sourceGroup];
+    if (NSIsControllerMarker(selectedGroup) || [selectedGroup isLibrary] || [selectedGroup isCategory]) {
+        NSBeep();
+        return;
+    }
+    
+    NSManagedObjectContext *context = [self managedObjectContext];
+    [context deleteObject:selectedGroup];
+    [context processPendingChanges];
+    // dirty fix for CoreData bug, which registers an extra change when objects are deleted
+    [[self document] updateChangeCount:NSChangeUndone];
+}
+
+- (IBAction)delete:(id)sender {
+    id firstResponder = [[self window] firstResponder];
+    if ([firstResponder isKindOfClass:[NSText class]] && [firstResponder isFieldEditor])
+        firstResponder = [firstResponder delegate];
+    if (firstResponder == sourceList) {
+        [self removeSelectedGroup:sender];
+    } else if (firstResponder == [currentDisplayController itemsTableView]) {
+        [self removeSelectedItems:sender];
+    } else {
+        NSBeep();
+    }
 }
 
 - (IBAction)editSmartGroup:(id)sender{
@@ -296,7 +301,7 @@
         NSAlert *alert = [[[NSAlert alloc] init] autorelease];
         [alert addButtonWithTitle:NSLocalizedString(@"OK", @"OK")];
         [alert setAlertStyle:NSInformationalAlertStyle];
-        [alert setMessageText:([selectedGroup isSmart]) ? NSLocalizedString(@"Library", @"Library") : NSLocalizedString(@"Group", @"Group")];
+        [alert setMessageText:([selectedGroup isLibrary]) ? NSLocalizedString(@"Library", @"Library") : NSLocalizedString(@"Group", @"Group")];
         [alert setInformativeText:[NSString stringWithFormat:NSLocalizedString(@"This group contains %@ items.", @""), entityName]];
         [alert beginSheetModalForWindow:[self window] modalDelegate:nil didEndSelector:NULL contextInfo:NULL];
     }

@@ -42,5 +42,7 @@
 
 // actions
 - (IBAction)addNewItem:(id)sender;
+- (IBAction)removeSelectedItems:(id)sender;
+- (IBAction)delete:(id)sender;
 
 @end

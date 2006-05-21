@@ -32,6 +32,8 @@
 - (IBAction)addNewFolderGroup:(id)sender;
 - (IBAction)addNewSmartGroup:(id)sender;
 
+- (IBAction)removeSelectedGroup:(id)sender;
+
 - (IBAction)editSmartGroup:(id)sender;
 
 - (IBAction)getInfo:(id)sender;
