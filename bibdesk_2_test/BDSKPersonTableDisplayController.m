@@ -19,20 +19,18 @@
 
 - (void)awakeFromNib{
 	[super awakeFromNib];
-	[itemsTableView registerForDraggedTypes:[NSArray arrayWithObjects:BDSKPublicationPboardType, BDSKPersonPboardType, BDSKInstitutionPboardType, BDSKTagPboardType, nil]];
 }
 
-#pragma mark Filter predicate binding
+- (NSString *)itemEntityName {
+    return BDSKPersonPboardType;
+}
 
-- (NSArray *)filterPredicates {
-    static NSMutableArray *filterPredicates = nil;
-    if (filterPredicates == nil) {
-        NSDictionary *options;
-        filterPredicates = [[NSMutableArray alloc] initWithCapacity:1];
-        options = [NSDictionary dictionaryWithObjectsAndKeys:@"Name", NSDisplayNameBindingOption, @"name contains[c] $value", NSPredicateFormatBindingOption, nil];
-        [filterPredicates addObject:options];
-    }
-    return filterPredicates;
+- (NSArray *)acceptableDraggedTypes {
+    return [NSArray arrayWithObjects:BDSKPublicationPboardType, BDSKPersonPboardType, BDSKInstitutionPboardType, BDSKTagPboardType, nil];
+}
+
+- (void)setupTableColumns {
+    // we don't want to change the table columns
 }
 
 #pragma mark NSTableView DataSource protocol
@@ -59,45 +57,30 @@
 	if (tv == itemsTableView) {
 		
         NSPasteboard *pboard = [info draggingPasteboard];
-		NSString *type = [pboard availableTypeFromArray:[NSArray arrayWithObjects:BDSKPublicationPboardType, BDSKPersonPboardType, BDSKInstitutionPboardType, BDSKTagPboardType, nil]];
+		NSString *type = [pboard availableTypeFromArray:[NSArray arrayWithObjects:BDSKPersonPboardType, nil]];
         if ([tv setValidDropRow:row dropOperation:NSTableViewDropOn] == NO)
             return NSDragOperationNone;
-		if ([type isEqualToString:BDSKPublicationPboardType] || [type isEqualToString:BDSKInstitutionPboardType] || [type isEqualToString:BDSKTagPboardType]) {
-            if ([[[info draggingSource] dataSource] document] == [self document])
-				return NSDragOperationLink;
-			else
-				return NSDragOperationCopy;
-		} else if ([type isEqualToString:BDSKPersonPboardType] && [info draggingSource] == tv) {
-			return NSDragOperationLink;
-        }
-        
-	}
+		if ([type isEqualToString:BDSKPersonPboardType]) {
+            if ([info draggingSource] == tv) 
+                return NSDragOperationLink;
+		} else
+            return [super tableView:tv validateDrop:info proposedRow:row proposedDropOperation:op];
+    }
     
-	return NSDragOperationNone;
+    return NSDragOperationNone;
 }
 
 - (BOOL)tableView:(NSTableView *)tv acceptDrop:(id <NSDraggingInfo>)info row:(int)row dropOperation:(NSTableViewDropOperation)op {
-	NSPasteboard *pboard = [info draggingPasteboard];
 	
     if (tv == itemsTableView) {
 		
         if (!([info draggingSourceOperationMask] & NSDragOperationLink))
 			return NO;
-		NSString *type = [pboard availableTypeFromArray:[NSArray arrayWithObjects:BDSKPublicationPboardType, BDSKPersonPboardType, BDSKInstitutionPboardType, BDSKTagPboardType, nil]];
+        
+        NSPasteboard *pboard = [info draggingPasteboard];
+		NSString *type = [pboard availableTypeFromArray:[NSArray arrayWithObjects:BDSKPersonPboardType, nil]];
 		
-        if ([type isEqualToString:BDSKPublicationPboardType]) {
-			
-            return [self addRelationshipsFromPasteboard:pboard forType:type parentRow:row keyPath:@"publicationRelationships.publication"];
-            
-        } else if ([type isEqualToString:BDSKInstitutionPboardType]) {
-			
-            return [self addRelationshipsFromPasteboard:pboard forType:type parentRow:row keyPath:@"institutionRelationships.institution"];
-            
-        } else if ([type isEqualToString:BDSKTagPboardType]) {
-			
-            return [self addRelationshipsFromPasteboard:pboard forType:type parentRow:row keyPath:@"tags"];
-            
-		} else if ([type isEqualToString:BDSKPersonPboardType]) {
+        if ([type isEqualToString:BDSKPersonPboardType]) {
 			
             NSArray *draggedURIs = [NSUnarchiver unarchiveObjectWithData:[pboard dataForType:BDSKPersonPboardType]];
 			NSEnumerator *uriE = [draggedURIs objectEnumerator];
@@ -149,7 +132,12 @@
             
 			return YES;
             
-		}
+		} else {
+            
+            // create relationships for other types
+            return [super tableView:tv acceptDrop:info row:row dropOperation:op];
+            
+        }
 	}
     
 	return NO;

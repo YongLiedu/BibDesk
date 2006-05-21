@@ -479,21 +479,21 @@
     NSArray *pboardTypes = nil;
     
     if ([entityName isEqualToString:PublicationEntityName])
-        pboardTypes = [NSArray arrayWithObjects:BDSKPublicationPboardType, nil];
+        pboardTypes = [NSArray arrayWithObjects:BDSKPersonPboardType, BDSKInstitutionPboardType, BDSKVenuePboardType, BDSKTagPboardType, nil];
     else if ([entityName isEqualToString:PersonEntityName])
-        pboardTypes = [NSArray arrayWithObjects:BDSKPersonPboardType, nil];
+        pboardTypes = [NSArray arrayWithObjects:BDSKPublicationPboardType, BDSKInstitutionPboardType, BDSKTagPboardType, nil];
     else if ([entityName isEqualToString:InstitutionEntityName])
-        pboardTypes = [NSArray arrayWithObjects:BDSKInstitutionPboardType, nil];
+        pboardTypes = [NSArray arrayWithObjects:BDSKPublicationPboardType, BDSKPersonPboardType, BDSKTagPboardType, nil];
     else if ([entityName isEqualToString:VenueEntityName])
-        pboardTypes = [NSArray arrayWithObjects:BDSKVenuePboardType, nil];
+        pboardTypes = [NSArray arrayWithObjects:BDSKPublicationPboardType, nil];
     else if ([entityName isEqualToString:NoteEntityName])
-        pboardTypes = [NSArray arrayWithObjects:BDSKNotePboardType, nil];
+        pboardTypes = [NSArray arrayWithObjects:nil];
     else if ([entityName isEqualToString:TagEntityName])
-        pboardTypes = [NSArray arrayWithObjects:BDSKTagPboardType, nil];
+        pboardTypes = [NSArray arrayWithObjects:BDSKPublicationPboardType, BDSKPersonPboardType, BDSKInstitutionPboardType, nil];
     else if ([entityName isEqualToString:TaggedItemEntityName])
         pboardTypes = [NSArray arrayWithObjects:BDSKPublicationPboardType, BDSKPersonPboardType, BDSKInstitutionPboardType, BDSKVenuePboardType, nil];
     else if ([entityName isEqualToString:ItemEntityName])
-        pboardTypes = [NSArray arrayWithObjects:BDSKPublicationPboardType, BDSKPersonPboardType, BDSKInstitutionPboardType, BDSKVenuePboardType, BDSKNotePboardType, BDSKTagPboardType, nil];
+        pboardTypes = [NSArray arrayWithObjects:BDSKPublicationPboardType, BDSKPersonPboardType, BDSKInstitutionPboardType, BDSKVenuePboardType, BDSKTagPboardType, nil];
     
     return pboardTypes;
 }
