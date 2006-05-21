@@ -16,6 +16,7 @@
                 importDocumentUsingPhonyCiteKeys = id; 
                 importFromBibTeXFile = id; 
                 oneShotImportFromBibTeXFile = id; 
+                showWindowForSourceListSelection = id; 
             }; 
             CLASS = FirstResponder; 
             LANGUAGE = ObjC; 
