@@ -162,6 +162,7 @@
         itemDisplayControllers = [[NSMutableArray alloc] initWithCapacity:10];
         currentItemDisplayControllerForEntity = [[NSMutableDictionary alloc] initWithCapacity:10];
 		currentItem = nil;
+        isEditable = NO;
 	}
 	return self;
 }
@@ -213,6 +214,14 @@
 - (NSArray *)filterPredicates {
     // should be implemented by the subclasses
     return nil;
+}
+
+- (BOOL)isEditable {
+    return isEditable;
+}
+
+- (void)setEditable:(BOOL)value {
+    isEditable = value;
 }
 
 - (NSManagedObject *)currentItem{
@@ -339,9 +348,12 @@
 #pragma mark Actions
 
 - (void)addItem {
+    if ([itemsArrayController canAdd] == NO || [self isEditable] == NO)
+        return;
+    
 	NSManagedObjectContext *moc = [self managedObjectContext];
     NSString *entityName = [self itemEntityName];
-    if ([entityName isEqualToString:@"Item"])
+    if ([entityName isEqualToString:ItemEntityName] || [entityName isEqualToString:TaggedItemEntityName])
         entityName = PublicationEntityName;
 	NSManagedObject *mo = [NSEntityDescription insertNewObjectForEntityForName:entityName inManagedObjectContext:moc];
     [itemsArrayController addObject:mo];
@@ -350,6 +362,9 @@
 }
 
 - (void)removeItems:(NSArray *)selectedItems {
+    if (NSIsControllerMarker(selectedItems) || [itemsArrayController canRemove] == NO)
+        return;
+    
 	NSManagedObjectContext *moc = [self managedObjectContext];
 	NSEnumerator *selEnum = [selectedItems objectEnumerator];
 	NSManagedObject *mo;

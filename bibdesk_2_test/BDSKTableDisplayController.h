@@ -46,6 +46,7 @@
 
 @interface BDSKTableDisplayController : BDSKDisplayController {
     NSManagedObject *currentItem;
+    BOOL isEditable;
     NSDictionary *itemDisplayControllersInfoDict;
     NSMutableArray *itemDisplayControllers;
     NSMutableDictionary *currentItemDisplayControllerForEntity;
@@ -59,6 +60,9 @@
 - (NSTableView *)itemsTableView;
 
 - (NSArray *)filterPredicates;
+
+- (BOOL)isEditable;
+- (void)setEditable:(BOOL)value;
 
 - (NSManagedObject *)currentItem;
 - (void)setCurrentItem:(NSManagedObject *)newItem;
