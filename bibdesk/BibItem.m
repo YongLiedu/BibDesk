@@ -1638,7 +1638,7 @@ static NSParagraphStyle* bodyParagraphStyle = nil;
     return s;
 }
 
-#define AddXMLField(t,f) value = [self valueOfField:f]; if ([NSString isEmptyString:value] == NO) [s appendFormat:@"<%@>%@</%@>\n", t, [value stringByEscapingBasicXMLEntitiesUsingUTF8], t]
+#define AddXMLField(t,f) value = [self valueOfField:f]; if ([NSString isEmptyString:value] == NO) [s appendFormat:@"<%@>%@</%@>", t, [value stringByEscapingBasicXMLEntitiesUsingUTF8], t]
 
 - (NSString *)MODSString{
     NSDictionary *genreForTypeDict = [[BibTypeManager sharedManager] MODSGenresForBibTeXType:[self type]];
@@ -1648,7 +1648,7 @@ static NSParagraphStyle* bodyParagraphStyle = nil;
     
     [s appendString:@"<titleInfo>\n"];
     AddXMLField(@"title",BDSKTitleString);
-    [s appendString:@"</titleInfo>\n"];
+    [s appendString:@"\n</titleInfo>\n"];
     // note: may in the future want to output subtitles.
 
     NSArray *pubAuthors = [self pubAuthors];
@@ -1684,7 +1684,7 @@ static NSParagraphStyle* bodyParagraphStyle = nil;
         hostTitle = [hostTitle stringByEscapingBasicXMLEntitiesUsingUTF8];
         [s appendString:@"<titleInfo>\n"];
         AddXMLField(@"title",hostTitle);
-        [s appendString:@"</titleInfo>\n"];
+        [s appendString:@"\n</titleInfo>\n"];
         
         [s appendString:@"</relatedItem>\n"];
     }
@@ -1696,7 +1696,7 @@ static NSParagraphStyle* bodyParagraphStyle = nil;
 }
 
 - (NSString *)endNoteString{
-    NSMutableString *s = [NSMutableString stringWithString:@"<record>\n"];
+    NSMutableString *s = [NSMutableString stringWithString:@"<record>"];
     NSString *value;
     
     int refTypeID;
@@ -1708,6 +1708,8 @@ static NSParagraphStyle* bodyParagraphStyle = nil;
     NSString *isbnField = @"Isbn";
     NSString *numberField = BDSKNumberString;
     NSString *booktitleField = BDSKBooktitleString;
+    
+    // EndNote officially does not allow returns between tags
     
     if([entryType isEqualToString:@"misc"]){
         refTypeID = 13; // generic
@@ -1757,45 +1759,45 @@ static NSParagraphStyle* bodyParagraphStyle = nil;
     // begin writing record
     
     // ref-type
-    [s appendFormat:@"<ref-type>%i</ref-type>\n", refTypeID];
+    [s appendFormat:@"<ref-type>%i</ref-type>", refTypeID];
     
     // contributors
     
     NSEnumerator *authorE;
     BibAuthor *author;
     
-    [s appendString:@"<contributors>\n"];
+    [s appendString:@"<contributors>"];
     
     authorE = [[self peopleArrayForField:authorField] objectEnumerator];
-    [s appendString:@"<authors>\n"];
+    [s appendString:@"<authors>"];
     while (author = [authorE nextObject]){
-        [s appendStrings:@"<author>", [[author normalizedName] stringByEscapingBasicXMLEntitiesUsingUTF8], @"</author>\n", nil];
+        [s appendStrings:@"<author>", [[author normalizedName] stringByEscapingBasicXMLEntitiesUsingUTF8], @"</author>", nil];
     }
-    [s appendString:@"</authors>\n"];
+    [s appendString:@"</authors>"];
     
     authorE = [[self peopleArrayForField:editorField] objectEnumerator];
-    [s appendString:@"<secondary-authors>\n"];
+    [s appendString:@"<secondary-authors>"];
     while (author = [authorE nextObject]){
-        [s appendStrings:@"<author>", [[author normalizedName] stringByEscapingBasicXMLEntitiesUsingUTF8], @"</author>\n", nil];
+        [s appendStrings:@"<author>", [[author normalizedName] stringByEscapingBasicXMLEntitiesUsingUTF8], @"</author>", nil];
     }
-    [s appendString:@"</secondary-authors>\n"];
+    [s appendString:@"</secondary-authors>"];
     
     authorE = [[self peopleArrayForField:organizationField] objectEnumerator];
-    [s appendString:@"<tertiary-authors>\n"];
+    [s appendString:@"<tertiary-authors>"];
     while (author = [authorE nextObject]){
-        [s appendStrings:@"<author>", [[author normalizedName] stringByEscapingBasicXMLEntitiesUsingUTF8], @"</author>\n", nil];
+        [s appendStrings:@"<author>", [[author normalizedName] stringByEscapingBasicXMLEntitiesUsingUTF8], @"</author>", nil];
     }
-    [s appendString:@"</tertiary-authors>\n"];
+    [s appendString:@"</tertiary-authors>"];
     
-    [s appendString:@"</contributors>\n"];
+    [s appendString:@"</contributors>"];
     
     // titles
     
-    [s appendString:@"<titles>\n"];
+    [s appendString:@"<titles>"];
     AddXMLField(@"title",BDSKTitleString);
     AddXMLField(@"secondary-title",booktitleField);
     AddXMLField(@"tertiary-title",BDSKSeriesString);
-    [s appendString:@"</titles>\n"];
+    [s appendString:@"</titles>"];
     
     // publication info
     
@@ -1811,32 +1813,32 @@ static NSParagraphStyle* bodyParagraphStyle = nil;
     
     // dates
     
-    [s appendString:@"<dates>\n"];
+    [s appendString:@"<dates>"];
     AddXMLField(@"year",BDSKYearString);
-    [s appendString:@"<pub-dates>\n"];
+    [s appendString:@"<pub-dates>"];
     AddXMLField(@"date",BDSKMonthString);
-    [s appendString:@"</pub-dates>\n</dates>\n"];
+    [s appendString:@"</pub-dates></dates>"];
     
     // meta-data
     
-    [s appendStrings:@"<label>", [[self citeKey] stringByEscapingBasicXMLEntitiesUsingUTF8], @"</label>\n", nil];
-    [s appendString:@"<keywords>\n"];
+    [s appendStrings:@"<label>", [[self citeKey] stringByEscapingBasicXMLEntitiesUsingUTF8], @"</label>", nil];
+    [s appendString:@"<keywords>"];
     AddXMLField(@"keyword",BDSKKeywordsString);
-    [s appendString:@"<keywords>\n"];
-    [s appendString:@"<urls>\n"];
+    [s appendString:@"</keywords>"];
+    [s appendString:@"<urls>"];
     AddXMLField(@"pdf-urls",BDSKLocalUrlString);
     AddXMLField(@"related-urls",BDSKUrlString);
-    [s appendString:@"</urls>\n"];
+    [s appendString:@"</urls>"];
     AddXMLField(@"abstract",BDSKAbstractString);
     AddXMLField(@"research-notes",BDSKAnnoteString);
     AddXMLField(@"notes",@"Note");
     
     // custom
     
-    [s appendStrings:@"<custom3>", entryType, @"<custom3>/n", nil];
+    [s appendStrings:@"<custom3>", entryType, @"</custom3>", nil];
     AddXMLField(@"custom4",BDSKCrossrefString);
     
-    [s appendString:@"</record>"];
+    [s appendString:@"</record>\n"];
     
     return s;
 }
