@@ -22,7 +22,7 @@
 }
 
 - (NSString *)itemEntityName {
-    return BDSKPersonPboardType;
+    return PersonEntityName;
 }
 
 - (NSArray *)acceptableDraggedTypes {
