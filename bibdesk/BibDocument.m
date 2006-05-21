@@ -1021,7 +1021,6 @@ NSString *BDSKWeblocFilePboardType = @"CorePasteboardFlavorType 0x75726C20";
     AddDataFromString(@"<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<xml>\n<records>\n");
 	while(pub = [e nextObject]){
         AddDataFromString([pub endNoteString]);
-        AddDataFromString(@"\n");
     }
     AddDataFromString(@"</records>\n</xml>\n");
     
