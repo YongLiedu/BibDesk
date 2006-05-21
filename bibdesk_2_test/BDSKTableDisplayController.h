@@ -60,6 +60,7 @@
 - (NSTableView *)itemsTableView;
 
 - (NSArray *)filterPredicates;
+- (NSArray *)columnInfo;
 
 - (BOOL)isEditable;
 - (void)setEditable:(BOOL)value;
@@ -79,8 +80,12 @@
 - (void)bindItemDisplayController:(BDSKItemDisplayController *)displayController;
 - (void)unbindItemDisplayController:(BDSKItemDisplayController *)displayController;
 
+- (void)setupTableColumns;
+
 - (void)addItem;
 - (void)removeItems:(NSArray *)selectedItems;
+
+- (NSArray *)acceptableDraggedTypes;
 
 - (BOOL)writeRowsWithIndexes:(NSIndexSet *)rowIndexes toPasteboard:(NSPasteboard *)pboard forType:(NSString *)type;
 - (BOOL)addRelationshipsFromPasteboard:(NSPasteboard *)pboard forType:(NSString *)type parentRow:(int)row keyPath:(NSString *)keyPath;
