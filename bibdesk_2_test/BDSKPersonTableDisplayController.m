@@ -13,24 +13,8 @@
 
 @implementation BDSKPersonTableDisplayController
 
-- (NSString *)windowNibName{
-    return @"BDSKPersonTableDisplay";
-}
-
-- (void)awakeFromNib{
-	[super awakeFromNib];
-}
-
-- (NSString *)itemEntityName {
-    return PersonEntityName;
-}
-
 - (NSArray *)acceptableDraggedTypes {
     return [NSArray arrayWithObjects:BDSKPublicationPboardType, BDSKPersonPboardType, BDSKInstitutionPboardType, BDSKTagPboardType, nil];
-}
-
-- (void)setupTableColumns {
-    // we don't want to change the table columns
 }
 
 #pragma mark NSTableView DataSource protocol
