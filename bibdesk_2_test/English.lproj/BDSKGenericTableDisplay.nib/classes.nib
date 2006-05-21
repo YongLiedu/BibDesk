@@ -7,11 +7,6 @@
             SUPERCLASS = NSWindowController; 
         }, 
         {
-            CLASS = BDSKGenericTableDisplayController; 
-            LANGUAGE = ObjC; 
-            SUPERCLASS = BDSKTableDisplayController; 
-        }, 
-        {
             CLASS = BDSKTableDisplayController; 
             LANGUAGE = ObjC; 
             OUTLETS = {
