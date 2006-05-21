@@ -101,9 +101,6 @@
     NSString *entityName = nil;
     
     switch (tag) {
-        case 0:
-            entityName = parentEntityName;
-            break;
         case 1:
             entityName = PublicationEntityName;
             break;
@@ -128,6 +125,8 @@
         case 8:
             entityName = TaggedItemEntityName;
             break;
+        default:
+            entityName = parentEntityName;
     }
     
     if ([parentEntityName isEqualToString:ItemEntityName] == NO && [parentEntityName isEqualToString:TaggedItemEntityName] == NO && 
@@ -527,7 +526,7 @@
                    NSLocalizedString(@"Create New Folder Group",@""),
                    self, @selector(setImage:),
 				   image, 
-				   @selector(addNewFolder:),
+				   @selector(addNewFolderGroup:),
                    nil);
     [image release];
 
@@ -546,6 +545,15 @@
 				   @selector(removeSelectedGroup:),
                    nil);
     [image release];
+
+    addToolbarItem(toolbarItems, BDSKDocumentToolbarGetInfoIdentifier,
+                   NSLocalizedString(@"Get Info",@""), 
+				   NSLocalizedString(@"Get Info",@""),
+                   NSLocalizedString(@"Get Info for Selected Group",@""),
+                   self, @selector(setImage:),
+				   [NSImage imageNamed: @"Edit"], 
+				   @selector(getInfo:),
+                   nil);
 
     addToolbarItem(toolbarItems, BDSKDocumentToolbarDetachIdentifier,
                    NSLocalizedString(@"Detach",@""), 
@@ -583,6 +591,28 @@
 		NSToolbarSpaceItemIdentifier, 
 		NSToolbarSeparatorItemIdentifier, 
 		NSToolbarCustomizeToolbarItemIdentifier, nil];
+}
+
+- (BOOL) validateToolbarItem: (NSToolbarItem *) toolbarItem {
+    BDSKGroup *selectedGroup = [self sourceGroup];
+    
+    NSString *identifier = [toolbarItem itemIdentifier];
+    if ([identifier isEqualToString:BDSKDocumentToolbarNewItemIdentifier]) {
+        return NSIsControllerMarker(selectedGroup) == NO && [selectedGroup canAddItems] && [[currentDisplayController itemsArrayController] canAdd];
+    }else if([identifier isEqualToString:BDSKDocumentToolbarDeleteItemIdentifier]) {
+        return NSIsControllerMarker(selectedGroup) == NO && [selectedGroup canAddItems] && [[currentDisplayController itemsArrayController] canRemove];
+    }else if([identifier isEqualToString:BDSKDocumentToolbarNewGroupIdentifier] ||
+             [identifier isEqualToString:BDSKDocumentToolbarNewSmartGroupIdentifier] ||
+             [identifier isEqualToString:BDSKDocumentToolbarNewFolderIdentifier] ||
+             [identifier isEqualToString:BDSKDocumentToolbarGetInfoIdentifier]) {
+        return NSIsControllerMarker(selectedGroup) == NO;
+    }else if([identifier isEqualToString:BDSKDocumentToolbarDeleteGroupIdentifier]) {
+        return NSIsControllerMarker(selectedGroup) == NO && [selectedGroup isLibrary] == NO && [selectedGroup isCategory] == NO;
+    }else if([identifier isEqualToString:BDSKDocumentToolbarDetachIdentifier]) {
+        return NSIsControllerMarker(selectedGroup) == NO;
+    }
+
+    return YES;
 }
 
 @end

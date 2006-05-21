@@ -326,15 +326,6 @@ void addToolbarItem(NSMutableDictionary *theDict,NSString *identifier,NSString *
                    searchField,
                    NULL, 
 				   nil);
-
-    addToolbarItem(toolbarItems, BDSKDocumentToolbarGetInfoIdentifier,
-                   NSLocalizedString(@"Get Info",@""), 
-				   NSLocalizedString(@"Get Info",@""),
-                   NSLocalizedString(@"Get Info for Selected Item or Group",@""),
-                   self, @selector(setImage:),
-				   [NSImage imageNamed: @"Edit"], 
-				   @selector(getInfo:),
-                   nil);
     
     return toolbar;
 }
@@ -387,12 +378,24 @@ void addToolbarItem(NSMutableDictionary *theDict,NSString *identifier,NSString *
     return [NSArray arrayWithObjects: 
 		BDSKDocumentToolbarNewItemIdentifier, 
 		BDSKDocumentToolbarDeleteItemIdentifier, 
-		BDSKDocumentToolbarGetInfoIdentifier, 
 		BDSKDocumentToolbarSearchItemIdentifier,
 		NSToolbarFlexibleSpaceItemIdentifier, 
 		NSToolbarSpaceItemIdentifier, 
 		NSToolbarSeparatorItemIdentifier, 
 		NSToolbarCustomizeToolbarItemIdentifier, nil];
+}
+
+- (BOOL) validateToolbarItem: (NSToolbarItem *) toolbarItem {
+    BDSKGroup *selectedGroup = [self sourceGroup];
+    
+    NSString *identifier = [toolbarItem itemIdentifier];
+    if ([identifier isEqualToString:BDSKDocumentToolbarNewItemIdentifier]) {
+        return NSIsControllerMarker(selectedGroup) == NO && [selectedGroup canAddItems] && [[currentDisplayController itemsArrayController] canAdd];
+    }else if([identifier isEqualToString:BDSKDocumentToolbarDeleteItemIdentifier]) {
+        return NSIsControllerMarker(selectedGroup) == NO && [selectedGroup canAddItems] && [[currentDisplayController itemsArrayController] canRemove];
+    }
+
+    return YES;
 }
 
 @end
