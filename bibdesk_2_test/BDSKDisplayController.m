@@ -77,36 +77,9 @@
 
 - (NSString *)relationshipKeyForPasteboardType:(NSString *)type parent:(NSManagedObject *)parent{
     static NSDictionary *relationshipsKeyPathInfo = nil;
-    
     if (relationshipsKeyPathInfo == nil) {
-        relationshipsKeyPathInfo = [[NSDictionary alloc] initWithObjectsAndKeys:
-            [NSDictionary dictionaryWithObjectsAndKeys:
-                @"contributorRelationships.contributor", BDSKPersonPboardType,
-                @"contributorRelationships.contributor", BDSKInstitutionPboardType,
-                @"venue", BDSKVenuePboardType,
-                @"tags", BDSKTagPboardType,
-                nil], PublicationEntityName, 
-            [NSDictionary dictionaryWithObjectsAndKeys:
-                @"publicationRelationships.publication", BDSKPublicationPboardType,
-                @"institutionRelationships.institution", BDSKInstitutionPboardType,
-                @"tags", BDSKTagPboardType,
-                nil], PersonEntityName, 
-            [NSDictionary dictionaryWithObjectsAndKeys:
-                @"publicationRelationships.publication", BDSKPublicationPboardType,
-                @"personRelationships.person", BDSKPersonPboardType,
-                @"tags", BDSKTagPboardType,
-                nil], InstitutionEntityName, 
-            [NSDictionary dictionaryWithObjectsAndKeys:
-                @"Relationship.", BDSKPublicationPboardType,
-                @"tags", BDSKTagPboardType,
-                nil], VenueEntityName, 
-            [NSDictionary dictionaryWithObjectsAndKeys:
-                @"items", BDSKPublicationPboardType,
-                @"items", BDSKPersonPboardType,
-                @"items", BDSKInstitutionPboardType,
-                nil], TagEntityName, nil];
+        relationshipsKeyPathInfo = [[NSDictionary alloc] initWithContentsOfFile:[[NSBundle mainBundle] pathForResource:@"RelationshipsInfo" ofType:@"plist"]];
     }
-    
     return [[relationshipsKeyPathInfo objectForKey:[[parent entity] name]] objectForKey:type];
 }
 
