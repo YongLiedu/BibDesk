@@ -41,6 +41,7 @@
 #import "BDAlias.h"
 #import "NSFileManager_BDSKExtensions.h"
 
+// these keys are private to this class at present
 static NSString *BDSKExportTemplateTree = @"BDSKExportTemplateTree";
 static NSString *rolesString = @"role";
 static NSString *nameString = @"name";
@@ -70,7 +71,7 @@ static NSString *defaultItemString = @"Default Item";
     
     // we should only have a single template object to start with
     childNode = [[BDSKTemplate alloc] initWithParent:nil];
-    [childNode setValue:@"Default template" forKey:nameString];
+    [childNode setValue:@"Default HTML template" forKey:nameString];
     [itemNodes addObject:childNode];
     [childNode release];
     
@@ -106,7 +107,7 @@ static NSString *defaultItemString = @"Default Item";
     [super awakeFromNib];
     
     NSData *data = [defaults objectForKey:BDSKExportTemplateTree];
-    if(nil != data){
+    if([data length]){
         itemNodes = [[NSKeyedUnarchiver unarchiveObjectWithData:data] mutableCopy];
     } else {
         [self doLegacySetup];

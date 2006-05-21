@@ -836,6 +836,8 @@
                 <integer>2</integer>
                 <key>defaultsDictionary</key>
                 <dict>
+                    <key>BDSKExportTemplateTree</key>
+                    <data></data>
                 </dict>
                 <key>helpURL</key>
                 <string>Export-Preferences</string>
