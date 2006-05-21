@@ -69,6 +69,8 @@
 
 - (BOOL)isLeaf { return ([[self valueForKey:@"children"] count] == 0); }
 
+- (BOOL)isFolder { return YES; }
+
 - (BOOL)canAddChildren { return YES; }
 
 - (NSSet *)items {

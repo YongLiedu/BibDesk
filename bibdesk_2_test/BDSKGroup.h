@@ -28,6 +28,8 @@
 - (BOOL)isSmart;
 - (BOOL)isStatic;
 - (BOOL)isCategory;
+- (BOOL)isLibrary;
+- (BOOL)isFolder;
 
 - (BOOL)canAddItems;
 - (BOOL)canAddChildren;

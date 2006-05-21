@@ -387,6 +387,8 @@
 
 - (BOOL)isLeaf { return YES; }
 
+- (BOOL)isLibrary { return YES; }
+
 - (BOOL)canAddItems { return YES; }
 
 - (BOOL)canEdit { return NO; }

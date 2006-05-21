@@ -65,6 +65,10 @@
 
 - (BOOL)isCategory { return NO; }
 
+- (BOOL)isLibrary { return NO; }
+
+- (BOOL)isFolder { return NO; }
+
 - (BOOL)canAddChildren { return NO; }
 
 - (BOOL)canAddItems { return NO; }
