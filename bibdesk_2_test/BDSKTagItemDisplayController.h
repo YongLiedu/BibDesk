@@ -7,7 +7,7 @@
 //
 
 #import <Cocoa/Cocoa.h>
-#import "BDSKTableDisplayController.h"
+#import "BDSKDisplayController.h"
 
 @interface BDSKTagItemDisplayController : BDSKItemDisplayController {
     IBOutlet NSArrayController *taggedItemsArrayController;

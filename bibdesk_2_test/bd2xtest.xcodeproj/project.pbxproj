@@ -74,6 +74,8 @@
 		CEB7703F0A1F492B00DEA121 /* BDSKVenueItemDisplayController.m in Sources */ = {isa = PBXBuildFile; fileRef = CEB770330A1F492A00DEA121 /* BDSKVenueItemDisplayController.m */; };
 		CEB77CD30A20850100DEA121 /* FilterPredicates.plist in Resources */ = {isa = PBXBuildFile; fileRef = CEB77CD20A20850100DEA121 /* FilterPredicates.plist */; };
 		CEB77CEF0A2088A200DEA121 /* ColumnInfo.plist in Resources */ = {isa = PBXBuildFile; fileRef = CEB77CEE0A2088A200DEA121 /* ColumnInfo.plist */; };
+		CEB77D8E0A2095A800DEA121 /* BDSKDisplayController.h in CopyFiles */ = {isa = PBXBuildFile; fileRef = CEB77D8C0A2095A800DEA121 /* BDSKDisplayController.h */; };
+		CEB77D8F0A2095A800DEA121 /* BDSKDisplayController.m in Sources */ = {isa = PBXBuildFile; fileRef = CEB77D8D0A2095A800DEA121 /* BDSKDisplayController.m */; };
 		CEB797C0099823AD00AAB226 /* BDSKInstitution.m in Sources */ = {isa = PBXBuildFile; fileRef = CEB797B6099823AD00AAB226 /* BDSKInstitution.m */; };
 		CEB797C4099823AD00AAB226 /* BDSKVenue.m in Sources */ = {isa = PBXBuildFile; fileRef = CEB797BA099823AD00AAB226 /* BDSKVenue.m */; };
 		CEC5AF05098F7A0000DE1DB2 /* BDSKSecondaryWindowController.m in Sources */ = {isa = PBXBuildFile; fileRef = CEC5AF02098F7A0000DE1DB2 /* BDSKSecondaryWindowController.m */; };
@@ -135,6 +137,7 @@
 			files = (
 				CE5139020997A6C000C73C64 /* BTParse.framework in CopyFiles */,
 				CE3271C40A1C94CA002D6E4C /* BDSKKeyValuePair.h in CopyFiles */,
+				CEB77D8E0A2095A800DEA121 /* BDSKDisplayController.h in CopyFiles */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -253,6 +256,8 @@
 		CEB770330A1F492A00DEA121 /* BDSKVenueItemDisplayController.m */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.objc; path = BDSKVenueItemDisplayController.m; sourceTree = "<group>"; };
 		CEB77CD20A20850100DEA121 /* FilterPredicates.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist; path = FilterPredicates.plist; sourceTree = "<group>"; };
 		CEB77CEE0A2088A200DEA121 /* ColumnInfo.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist; path = ColumnInfo.plist; sourceTree = "<group>"; };
+		CEB77D8C0A2095A800DEA121 /* BDSKDisplayController.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = BDSKDisplayController.h; sourceTree = "<group>"; };
+		CEB77D8D0A2095A800DEA121 /* BDSKDisplayController.m */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.objc; path = BDSKDisplayController.m; sourceTree = "<group>"; };
 		CEB797B5099823AD00AAB226 /* BDSKInstitution.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = BDSKInstitution.h; sourceTree = "<group>"; };
 		CEB797B6099823AD00AAB226 /* BDSKInstitution.m */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.objc; path = BDSKInstitution.m; sourceTree = "<group>"; };
 		CEB797B9099823AD00AAB226 /* BDSKVenue.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = BDSKVenue.h; sourceTree = "<group>"; };
@@ -383,6 +388,8 @@
 		27224263088A50590000CF76 /* Display Controllers */ = {
 			isa = PBXGroup;
 			children = (
+				CEB77D8C0A2095A800DEA121 /* BDSKDisplayController.h */,
+				CEB77D8D0A2095A800DEA121 /* BDSKDisplayController.m */,
 				2744F56908889FC2001E0CC9 /* DisplayControllers.plist */,
 				CEC5AF03098F7A0000DE1DB2 /* BDSKTableDisplayController.h */,
 				CEC5AF04098F7A0000DE1DB2 /* BDSKTableDisplayController.m */,
@@ -786,6 +793,7 @@
 				CEB7703B0A1F492B00DEA121 /* BDSKPublicationItemDisplayController.m in Sources */,
 				CEB7703D0A1F492B00DEA121 /* BDSKTagItemDisplayController.m in Sources */,
 				CEB7703F0A1F492B00DEA121 /* BDSKVenueItemDisplayController.m in Sources */,
+				CEB77D8F0A2095A800DEA121 /* BDSKDisplayController.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
