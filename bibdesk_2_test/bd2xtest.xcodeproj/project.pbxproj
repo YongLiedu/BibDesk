@@ -77,6 +77,11 @@
 		CEB77D8F0A2095A800DEA121 /* BDSKDisplayController.m in Sources */ = {isa = PBXBuildFile; fileRef = CEB77D8D0A2095A800DEA121 /* BDSKDisplayController.m */; };
 		CEB77EC50A2097D300DEA121 /* RelationshipsInfo.plist in Resources */ = {isa = PBXBuildFile; fileRef = CEB77EC40A2097D300DEA121 /* RelationshipsInfo.plist */; };
 		CEB77EE70A209B7E00DEA121 /* BDSKGenericTableDisplay.nib in Resources */ = {isa = PBXBuildFile; fileRef = CEB77EE10A209B7E00DEA121 /* BDSKGenericTableDisplay.nib */; };
+		CEB77F5F0A20AB6100DEA121 /* Detach.tiff in Resources */ = {isa = PBXBuildFile; fileRef = CEB77F5D0A20AB6000DEA121 /* Detach.tiff */; };
+		CEB77F600A20AB6100DEA121 /* New.tiff in Resources */ = {isa = PBXBuildFile; fileRef = CEB77F5E0A20AB6000DEA121 /* New.tiff */; };
+		CEB780170A20B1ED00DEA121 /* Delete.tiff in Resources */ = {isa = PBXBuildFile; fileRef = CEB780160A20B1ED00DEA121 /* Delete.tiff */; };
+		CEB780310A20B35200DEA121 /* Edit.tiff in Resources */ = {isa = PBXBuildFile; fileRef = CEB780300A20B35200DEA121 /* Edit.tiff */; };
+		CEB780630A20BA4500DEA121 /* LibraryGroupIcon.tiff in Resources */ = {isa = PBXBuildFile; fileRef = CEB780620A20BA4400DEA121 /* LibraryGroupIcon.tiff */; };
 		CEB797C0099823AD00AAB226 /* BDSKInstitution.m in Sources */ = {isa = PBXBuildFile; fileRef = CEB797B6099823AD00AAB226 /* BDSKInstitution.m */; };
 		CEB797C4099823AD00AAB226 /* BDSKVenue.m in Sources */ = {isa = PBXBuildFile; fileRef = CEB797BA099823AD00AAB226 /* BDSKVenue.m */; };
 		CEC5AF05098F7A0000DE1DB2 /* BDSKSecondaryWindowController.m in Sources */ = {isa = PBXBuildFile; fileRef = CEC5AF02098F7A0000DE1DB2 /* BDSKSecondaryWindowController.m */; };
@@ -198,7 +203,7 @@
 		CE3264A70A1B6E62002D6E4C /* NSBezierPath_BDSKExtensions.m */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.objc; path = NSBezierPath_BDSKExtensions.m; sourceTree = "<group>"; };
 		CE3271C20A1C94CA002D6E4C /* BDSKKeyValuePair.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BDSKKeyValuePair.h; sourceTree = "<group>"; };
 		CE3271C30A1C94CA002D6E4C /* BDSKKeyValuePair.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BDSKKeyValuePair.m; sourceTree = "<group>"; };
-		CE3ACF7709B7D07300391900 /* FolderGroupIcon.tiff */ = {isa = PBXFileReference; lastKnownFileType = image.tiff; path = FolderGroupIcon.tiff; sourceTree = "<group>"; };
+		CE3ACF7709B7D07300391900 /* FolderGroupIcon.tiff */ = {isa = PBXFileReference; lastKnownFileType = image.tiff; name = FolderGroupIcon.tiff; path = Images/FolderGroupIcon.tiff; sourceTree = "<group>"; };
 		CE4B96DA0994DD96000447D2 /* BDSKGroup.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BDSKGroup.h; sourceTree = "<group>"; };
 		CE4B96DB0994DD96000447D2 /* BDSKGroup.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BDSKGroup.m; sourceTree = "<group>"; };
 		CE51379109977D9400C73C64 /* BDSKBibTeXParser.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BDSKBibTeXParser.h; sourceTree = "<group>"; };
@@ -260,6 +265,11 @@
 		CEB77D8D0A2095A800DEA121 /* BDSKDisplayController.m */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.objc; path = BDSKDisplayController.m; sourceTree = "<group>"; };
 		CEB77EC40A2097D300DEA121 /* RelationshipsInfo.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist; path = RelationshipsInfo.plist; sourceTree = "<group>"; };
 		CEB77EE20A209B7E00DEA121 /* English */ = {isa = PBXFileReference; lastKnownFileType = wrapper.nib; name = English; path = English.lproj/BDSKGenericTableDisplay.nib; sourceTree = "<group>"; };
+		CEB77F5D0A20AB6000DEA121 /* Detach.tiff */ = {isa = PBXFileReference; lastKnownFileType = image.tiff; name = Detach.tiff; path = Images/Detach.tiff; sourceTree = "<group>"; };
+		CEB77F5E0A20AB6000DEA121 /* New.tiff */ = {isa = PBXFileReference; lastKnownFileType = image.tiff; name = New.tiff; path = Images/New.tiff; sourceTree = "<group>"; };
+		CEB780160A20B1ED00DEA121 /* Delete.tiff */ = {isa = PBXFileReference; lastKnownFileType = image.tiff; name = Delete.tiff; path = Images/Delete.tiff; sourceTree = "<group>"; };
+		CEB780300A20B35200DEA121 /* Edit.tiff */ = {isa = PBXFileReference; lastKnownFileType = image.tiff; name = Edit.tiff; path = Images/Edit.tiff; sourceTree = "<group>"; };
+		CEB780620A20BA4400DEA121 /* LibraryGroupIcon.tiff */ = {isa = PBXFileReference; lastKnownFileType = image.tiff; name = LibraryGroupIcon.tiff; path = Images/LibraryGroupIcon.tiff; sourceTree = "<group>"; };
 		CEB797B5099823AD00AAB226 /* BDSKInstitution.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = BDSKInstitution.h; sourceTree = "<group>"; };
 		CEB797B6099823AD00AAB226 /* BDSKInstitution.m */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.objc; path = BDSKInstitution.m; sourceTree = "<group>"; };
 		CEB797B9099823AD00AAB226 /* BDSKVenue.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = BDSKVenue.h; sourceTree = "<group>"; };
@@ -440,6 +450,11 @@
 		277D9234089627D4004C4105 /* Images */ = {
 			isa = PBXGroup;
 			children = (
+				CEB780620A20BA4400DEA121 /* LibraryGroupIcon.tiff */,
+				CEB780300A20B35200DEA121 /* Edit.tiff */,
+				CEB780160A20B1ED00DEA121 /* Delete.tiff */,
+				CEB77F5D0A20AB6000DEA121 /* Detach.tiff */,
+				CEB77F5E0A20AB6000DEA121 /* New.tiff */,
 				276AAF180A1AECAA009A5679 /* bd2blueicon.icns */,
 				CE2AEF8809952A6400473196 /* GroupIcon.tiff */,
 				CE3ACF7709B7D07300391900 /* FolderGroupIcon.tiff */,
@@ -741,6 +756,11 @@
 				CEB77CEF0A2088A200DEA121 /* ColumnInfo.plist in Resources */,
 				CEB77EC50A2097D300DEA121 /* RelationshipsInfo.plist in Resources */,
 				CEB77EE70A209B7E00DEA121 /* BDSKGenericTableDisplay.nib in Resources */,
+				CEB77F5F0A20AB6100DEA121 /* Detach.tiff in Resources */,
+				CEB77F600A20AB6100DEA121 /* New.tiff in Resources */,
+				CEB780170A20B1ED00DEA121 /* Delete.tiff in Resources */,
+				CEB780310A20B35200DEA121 /* Edit.tiff in Resources */,
+				CEB780630A20BA4500DEA121 /* LibraryGroupIcon.tiff in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
