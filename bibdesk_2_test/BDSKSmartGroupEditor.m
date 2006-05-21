@@ -363,7 +363,7 @@ id BDSKAddOtherMarker;
 }
 
 - (NSArray *)entityNames {
-    return [NSArray arrayWithObjects:PublicationEntityName, PersonEntityName, InstitutionEntityName, VenueEntityName, NoteEntityName, TagEntityName, nil];
+    return [predicateRules objectForKey:@"entityNames"];
 }
 
 - (NSArray *)propertyNames {

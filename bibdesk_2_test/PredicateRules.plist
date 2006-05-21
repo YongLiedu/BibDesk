@@ -91,7 +91,82 @@
             }
         );
     };
+    entityNames = (
+        {
+            entityName = "Publication";
+            displayName = "Publication";
+        },
+        {
+            entityName = "Person";
+            displayName = "Person";
+        },
+        {
+            entityName = "Institution";
+            displayName = "Institution";
+        },
+        {
+            entityName = "Venue";
+            displayName = "Venue";
+        },
+        {
+            entityName = "Note";
+            displayName = "Note";
+        },
+        {
+            entityName = "Tag";
+            displayName = "Tag";
+        },
+        {
+            entityName = "Item";
+            displayName = "Any Type";
+        },
+        {
+            entityName = "TaggedItem";
+            displayName = "Any Tagged Type";
+        }
+    );
     propertyNames = {
+        Item = (
+            {
+                propertyName = "name";
+                displayName = "Name";
+                type = "string";
+            }
+        );
+        TaggedItem = (
+            {
+                propertyName = "name";
+                displayName = "Name";
+                type = "string";
+            },
+            {
+                propertyName = "tags.name";
+                displayName = "Tag";
+                type = "string";
+            },
+            {
+                propertyName = "notes.name";
+                displayName = "Note Name";
+                type = "string";
+            },
+            {
+                propertyName = "notes.value";
+                displayName = "Note Value";
+                type = "string";
+            }
+        );
+        Note = (
+            {
+                propertyName = "name";
+                displayName = "Name";
+                type = "string";
+            },
+            {
+                propertyName = "value";
+                displayName = "Value";
+                type = "string";
+            }
+        );
         Institution = (
             {
                 propertyName = "name";
@@ -109,8 +184,18 @@
                 type = "string";
             },
             {
-                propertyName = "tag.name";
+                propertyName = "tags.name";
                 displayName = "Tag";
+                type = "string";
+            },
+            {
+                propertyName = "notes.name";
+                displayName = "Note Name";
+                type = "string";
+            },
+            {
+                propertyName = "notes.value";
+                displayName = "Note Value";
                 type = "string";
             }
         );
@@ -118,7 +203,6 @@
             {
                 propertyName = "name";
                 displayName = "Name";
-                type = "string";
                 type = "string";
             },
             {
@@ -137,8 +221,18 @@
                 type = "string";
             },
             {
-                propertyName = "tag.name";
+                propertyName = "tags.name";
                 displayName = "Tag";
+                type = "string";
+            },
+            {
+                propertyName = "notes.name";
+                displayName = "Note Name";
+                type = "string";
+            },
+            {
+                propertyName = "notes.value";
+                displayName = "Note Value";
                 type = "string";
             }
         );
@@ -184,6 +278,16 @@
                 type = "string";
             },
             {
+                propertyName = "notes.name";
+                displayName = "Note Name";
+                type = "string";
+            },
+            {
+                propertyName = "notes.value";
+                displayName = "Note Value";
+                type = "string";
+            },
+            {
                 propertyName = "dateAdded";
                 displayName = "Date Added";
                 type = "date";
@@ -220,6 +324,16 @@
             {
                 propertyName = "name";
                 displayName = "Name";
+                type = "string";
+            },
+            {
+                propertyName = "notes.name";
+                displayName = "Note Name";
+                type = "string";
+            },
+            {
+                propertyName = "notes.value";
+                displayName = "Note Value";
                 type = "string";
             }
         );
