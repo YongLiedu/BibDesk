@@ -47,20 +47,20 @@ NSString *BDSKTagPboardType = @"BDSKTagPboardType";
         
         libraryGroup = [NSEntityDescription insertNewObjectForEntityForName:LibraryGroupEntityName
                                                      inManagedObjectContext:[self managedObjectContext]];
-        [libraryGroup setValue:NoteEntityName forKey:@"itemEntityName"];
-        [libraryGroup setValue:NSLocalizedString(@"All Notes", @"Top level Note group name") forKey:@"name"];
-        [libraryGroup setValue:[NSNumber numberWithShort:7] forKey:@"priority"];
-        
-        libraryGroup = [NSEntityDescription insertNewObjectForEntityForName:LibraryGroupEntityName
-                                                     inManagedObjectContext:[self managedObjectContext]];
         [libraryGroup setValue:InstitutionEntityName forKey:@"itemEntityName"];
         [libraryGroup setValue:NSLocalizedString(@"All Institutions", @"Top level Institution group name") forKey:@"name"];
-        [libraryGroup setValue:[NSNumber numberWithShort:6] forKey:@"priority"];
+        [libraryGroup setValue:[NSNumber numberWithShort:7] forKey:@"priority"];
         
         libraryGroup = [NSEntityDescription insertNewObjectForEntityForName:LibraryGroupEntityName
                                                      inManagedObjectContext:[self managedObjectContext]];
         [libraryGroup setValue:VenueEntityName forKey:@"itemEntityName"];
         [libraryGroup setValue:NSLocalizedString(@"All Venues", @"Top level Venue group name") forKey:@"name"];
+        [libraryGroup setValue:[NSNumber numberWithShort:6] forKey:@"priority"];
+        
+        libraryGroup = [NSEntityDescription insertNewObjectForEntityForName:LibraryGroupEntityName
+                                                     inManagedObjectContext:[self managedObjectContext]];
+        [libraryGroup setValue:NoteEntityName forKey:@"itemEntityName"];
+        [libraryGroup setValue:NSLocalizedString(@"All Notes", @"Top level Note group name") forKey:@"name"];
         [libraryGroup setValue:[NSNumber numberWithShort:5] forKey:@"priority"];
         
         libraryGroup = [NSEntityDescription insertNewObjectForEntityForName:LibraryGroupEntityName
