@@ -276,6 +276,21 @@ static BDSKErrorObjectController *sharedErrorObjectController = nil;
     [textStorage edited:NSTextStorageEditedAttributes range:NSMakeRange(0, [textStorage length]) changeInLength:0];
 }
 
+- (BOOL) validateMenuItem:(NSMenuItem*)menuItem{
+	SEL act = [menuItem action];
+
+	if (act == @selector(toggleShowingErrorPanel:)){ 
+		// menu item for toggling the error panel
+		// set the on/off state according to the panel's visibility
+		if ([[self window] isVisible]) {
+			[menuItem setState:NSOnState];
+		}else {
+			[menuItem setState:NSOffState];
+		}
+	}
+    return YES;
+}
+
 #pragma mark Notifications and Update
 
 - (void)handleErrorNotification:(NSNotification *)notification{
