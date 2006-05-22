@@ -5,7 +5,7 @@
         {
             ACTIONS = {
                 addNode = id; 
-                changeRole = id; 
+                editFile = id; 
                 openFile = id; 
                 removeNode = id; 
                 revealInFinder = id; 

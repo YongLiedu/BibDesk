@@ -43,7 +43,7 @@
 
 // these keys are private to this class at present
 static NSString *BDSKExportTemplateTree = @"BDSKExportTemplateTree";
-static NSString *rolesString = @"role";
+static NSString *roleString = @"role";
 static NSString *nameString = @"name";
 
 static NSString *accessoryString = @"Accessory File";
@@ -81,7 +81,7 @@ static NSString *defaultItemString = @"Default Item";
     if([[NSFileManager defaultManager] objectExistsAtFileURL:fileURL]){
         tmpNode = [[BDSKTemplate alloc] init];
         [tmpNode setValue:[[fileURL path] lastPathComponent] forKey:nameString];
-        [tmpNode setValue:mainPageString forKey:rolesString];
+        [tmpNode setValue:mainPageString forKey:roleString];
         // don't add it if the alias fails
         if([tmpNode setAliasFromURL:fileURL])
             [childNode addChild:tmpNode];
@@ -93,7 +93,7 @@ static NSString *defaultItemString = @"Default Item";
     if([[NSFileManager defaultManager] objectExistsAtFileURL:fileURL]){
         tmpNode = [[BDSKTemplate alloc] init];
         [tmpNode setValue:[[fileURL path] lastPathComponent] forKey:nameString];
-        [tmpNode setValue:defaultItemString forKey:rolesString];
+        [tmpNode setValue:defaultItemString forKey:roleString];
         // don't add it if the alias fails
         if([tmpNode setAliasFromURL:fileURL])
             [childNode addChild:tmpNode];
@@ -150,19 +150,23 @@ static NSString *defaultItemString = @"Default Item";
     BDSKTreeNode *selectedNode = [outlineView selectedItem];
     BDSKTemplate *newNode = [[BDSKTemplate alloc] init];
 
-    // add as a sibling of the selected node
     if([selectedNode isLeaf]){
+        // add as a sibling of the selected node
         [newNode setValue:NSLocalizedString(@"Double-click to choose file", @"") forKey:nameString];
-        [(BDSKTreeNode *)[selectedNode parent] addChild:newNode];
+        [[selectedNode parent] addChild:newNode];
+    } else if(selectedNode != nil && [outlineView isItemExpanded:selectedNode]){
+        // add as a child of the selected node
+        [newNode setValue:NSLocalizedString(@"Double-click to choose file", @"") forKey:nameString];
+        [selectedNode addChild:newNode];
     } else {
-        
+        // add as a non-leaf node
         [newNode setValue:NSLocalizedString(@"Double-click to change name", @"") forKey:nameString];
         [itemNodes addObject:newNode];
         
         // add a child so newNode will be recognized as a non-leaf node
         BDSKTemplate *child = [[BDSKTemplate alloc] init];
         [child setValue:NSLocalizedString(@"Double-click to choose file", @"") forKey:nameString];
-        [child setValue:accessoryString forKey:rolesString];
+        [child setValue:accessoryString forKey:roleString];
         [newNode addChild:child];
         [child release];
     }
@@ -187,22 +191,22 @@ static NSString *defaultItemString = @"Default Item";
 
 #pragma mark Outline View
 
-- (BOOL)outlineView:(NSOutlineView *)outlineView isItemExpandable:(id)item
+- (BOOL)outlineView:(NSOutlineView *)ov isItemExpandable:(id)item
 {
     return item ? (NO == [item isLeaf]) : YES;
 }
 
-- (int)outlineView:(NSOutlineView *)outlineView numberOfChildrenOfItem:(id)item
+- (int)outlineView:(NSOutlineView *)ov numberOfChildrenOfItem:(id)item
 { 
     return item ? [item numberOfChildren] : [itemNodes count];
 }
 
-- (id)outlineView:(NSOutlineView *)outlineView objectValueForTableColumn:(NSTableColumn *)tableColumn byItem:(id)item
+- (id)outlineView:(NSOutlineView *)ov objectValueForTableColumn:(NSTableColumn *)tableColumn byItem:(id)item
 {
     return [item valueForKey:[tableColumn identifier]];
 }
 
-- (id)outlineView:(NSOutlineView *)outlineView child:(int)index ofItem:(id)item
+- (id)outlineView:(NSOutlineView *)ov child:(int)index ofItem:(id)item
 {
     return nil == item ? [itemNodes objectAtIndex:index] : [[item children] objectAtIndex:index];
 }
@@ -211,13 +215,13 @@ static NSString *defaultItemString = @"Default Item";
 // probably uses isEqual: to determine if the object should be expanded
 // object is archived; return the unarchived object (but I think NSOutlineView requires
 // unique objects, so I'm using pointer equality)
-- (id)outlineView:(NSOutlineView *)outlineView itemForPersistentObject:(id)object
+- (id)outlineView:(NSOutlineView *)ov itemForPersistentObject:(id)object
 {
     return [NSKeyedUnarchiver unarchiveObjectWithData:object];
 }
 
 // return archived item
-- (id)outlineView:(NSOutlineView *)outlineView persistentObjectForItem:(id)item
+- (id)outlineView:(NSOutlineView *)ov persistentObjectForItem:(id)item
 {
     return [NSKeyedArchiver archivedDataWithRootObject:item];
 }
@@ -238,7 +242,7 @@ static NSString *defaultItemString = @"Default Item";
     [self updateUI];
 }
 
-- (BOOL)outlineView:(NSOutlineView *)outlineView shouldEditTableColumn:(NSTableColumn *)tableColumn item:(id)item;
+- (BOOL)outlineView:(NSOutlineView *)ov shouldEditTableColumn:(NSTableColumn *)tableColumn item:(id)item;
 {
     // leaf items are fully editable, but you can only edit the name of a parent item
 
@@ -260,7 +264,7 @@ static NSString *defaultItemString = @"Default Item";
             
             // bypass the normal editing mechanism, or it'll reset the value
             shouldEdit = NO;
-        } else if([identifier isEqualToString:rolesString]){
+        } else if([identifier isEqualToString:roleString]){
             shouldEdit = YES;
         } else [NSException raise:NSInternalInconsistencyException format:@"Unexpected table column identifier %@", identifier];
     } else if([identifier isEqualToString:nameString]){
@@ -273,12 +277,18 @@ static NSString *defaultItemString = @"Default Item";
 - (BOOL)tableViewShouldEditNextItemWhenEditingEnds:(NSTableView *)tv { return NO; }
 
 // this seems to be called when editing the NSComboBoxCell as well as the parent name
-- (void)outlineView:(NSOutlineView *)outlineView setObjectValue:(id)object forTableColumn:(NSTableColumn *)tableColumn byItem:(id)item{
+- (void)outlineView:(NSOutlineView *)ov setObjectValue:(id)object forTableColumn:(NSTableColumn *)tableColumn byItem:(id)item{
+    NSString *identifier = [tableColumn identifier];
+    if([identifier isEqualToString:roleString] && [item isLeaf] && [object isEqualToString:accessoryString] == NO && [(BDSKTemplate *)[item parent] hasChildWithRole:object]) {
+        [outlineView reloadData];
+        return;
+    }
     [item setValue:object forKey:[tableColumn identifier]];
 }
 
-- (void)outlineView:(NSOutlineView *)outlineView willDisplayCell:(id)cell forTableColumn:(NSTableColumn *)tableColumn item:(id)item{
-    [cell setTextColor:[item representedColorForKey:[tableColumn identifier]]];
+- (void)outlineView:(NSOutlineView *)ov willDisplayCell:(id)cell forTableColumn:(NSTableColumn *)tableColumn item:(id)item{
+    if ([cell respondsToSelector:@selector(setTextColor:)])
+        [cell setTextColor:[item representedColorForKey:[tableColumn identifier]]];
 }
 
 - (BOOL)canDeleteSelectedItem
@@ -301,7 +311,26 @@ static NSString *defaultItemString = @"Default Item";
         NSBeep();
 }
 
-#pragma mark Context menu
+#pragma mark ToolTps and Context menu
+
+- (NSString *)tableView:(NSTableView *)tv toolTipForTableColumn:(NSTableColumn *)tableColumn row:(int)row;
+{
+    if (row == -1)
+        return nil;
+    id item = [outlineView itemAtRow:row];
+    NSString *identifier = [tableColumn identifier];
+    if ([identifier isEqualToString:nameString] && [item isLeaf]) {
+        return [[item representedFileURL] path];
+    }
+    return nil;
+}
+
+- (NSMenu *)tableView:(NSTableView *)tv contextMenuForRow:(int)row column:(int)column;
+{
+    if (column != 0 || row == -1 || [[outlineView itemAtRow:row] isLeaf] == NO)
+        return nil;
+    return [tv menu];
+}
 
 - (BOOL)validateMenuItem:(id <NSMenuItem>)menuItem;
 {
@@ -309,7 +338,7 @@ static NSString *defaultItemString = @"Default Item";
     BOOL validate = NO;
     if(@selector(delete:) == action){
         validate = [self canDeleteSelectedItem];
-    } else if(@selector(revealInFinder:) == action || @selector(openFile:) == action){
+    } else if(@selector(revealInFinder:) == action || @selector(openFile:) == action || @selector(editFile:) == action){
         int row = [outlineView selectedRow];
         if(row >= 0)
             validate = [[outlineView itemAtRow:row] isLeaf];
@@ -331,17 +360,44 @@ static NSString *defaultItemString = @"Default Item";
         [[NSWorkspace sharedWorkspace] openURL:[[outlineView itemAtRow:row] representedFileURL]];
 }
 
+- (IBAction)editFile:(id)sender;
+{
+    if([outlineView selectedRow] == -1)
+        return;
+    
+    NSOpenPanel *openPanel = [NSOpenPanel openPanel];
+    [openPanel setCanChooseDirectories:NO];
+    [openPanel setAllowsMultipleSelection:NO];
+    [openPanel setPrompt:NSLocalizedString(@"Choose Editor", @"")];
+
+    [openPanel beginSheetForDirectory:[[NSFileManager defaultManager] applicationsDirectory] 
+                                 file:nil 
+                                types:[NSArray arrayWithObjects:@"app", nil] 
+                       modalForWindow:[[BDSKPreferenceController sharedPreferenceController] window] 
+                        modalDelegate:self 
+                       didEndSelector:@selector(chooseEditorPanelDidEnd:returnCode:contextInfo:) 
+                          contextInfo:nil];
+}
+
+- (void)chooseEditorPanelDidEnd:(NSOpenPanel *)openPanel returnCode:(int)returnCode contextInfo:(void *)contextInfo{
+    if(returnCode == NSOKButton){
+        NSString *appName = [[openPanel filenames] objectAtIndex:0];
+        NSString *filePath = [[[outlineView itemAtRow:[outlineView selectedRow]] representedFileURL] path];
+        [[NSWorkspace sharedWorkspace] openFile:filePath withApplication:appName];
+    }
+}
+
 #pragma mark Combo box
 
 - (NSCell *)tableView:(NSTableView *)tableView column:(OADataSourceTableColumn *)tableColumn dataCellForRow:(int)row;
 {
-    static NSTextFieldCell *textCell = nil;
-    if(nil == textCell)
-        textCell = [[NSTextFieldCell alloc] initTextCell:@""];
+    static NSCell *placeholderCell = nil;
+    if(nil == placeholderCell)
+        placeholderCell = [[NSCell alloc] initTextCell:@""];
     
     // if this is a non-editable cell, don't display the combo box
     if(NO == [[(NSOutlineView *)tableView itemAtRow:row] isLeaf])
-        return textCell;
+        return placeholderCell;
     else
         return [tableColumn dataCell];
 }
@@ -349,21 +405,6 @@ static NSString *defaultItemString = @"Default Item";
 - (id)comboBoxCell:(NSComboBoxCell *)aComboBoxCell objectValueForItemAtIndex:(int)index { return [roles objectAtIndex:index]; }
 
 - (int)numberOfItemsInComboBoxCell:(NSComboBoxCell *)aComboBoxCell { return [roles count]; }
-
-- (IBAction)changeRole:(id)sender;
-{
-    NSParameterAssert(nil != sender);
-    NSString *value = [sender stringValue];
-    int row = [outlineView clickedRow];
-    if(row >= 0){
-        BDSKTemplate *item = [outlineView itemAtRow:row];
-        if([item isLeaf] && NO == [[item parent] hasChildWithRole:value])
-            [item setValue:value forKey:rolesString];
-        else
-            NSBeep();
-    }
-    [self updateUI];
-}
 
 @end
 
@@ -422,7 +463,7 @@ static NSString *defaultItemString = @"Default Item";
     BDSKTemplate *aChild;
     NSURL *fileURL;
     while(aChild = [childE nextObject]){
-        if([[aChild valueForKey:rolesString] isEqualToString:accessoryString]){
+        if([[aChild valueForKey:roleString] isEqualToString:accessoryString]){
             fileURL = [aChild representedFileURL];
             if(fileURL)
                 [fileURLs addObject:fileURL];
@@ -443,7 +484,7 @@ static NSString *defaultItemString = @"Default Item";
     
     // assume roles are unique by grabbing the first one; this works for any case except the accessory files
     while(aNode = [nodeE nextObject]){
-        if([[aNode valueForKey:rolesString] isEqualToString:role])
+        if([[aNode valueForKey:roleString] isEqualToString:role])
             break;
     }
     return aNode;
@@ -484,7 +525,7 @@ static NSString *defaultItemString = @"Default Item";
     NSEnumerator *roleEnum = [[self children] objectEnumerator];
     id aChild;
     while(aChild = [roleEnum nextObject]){
-        if([[aChild valueForKey:rolesString] isEqualToString:aRole])
+        if([[aChild valueForKey:roleString] isEqualToString:aRole])
             return YES;
     }
     return NO;
