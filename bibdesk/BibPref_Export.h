@@ -39,6 +39,12 @@
 #import <Cocoa/Cocoa.h>
 #import "BDSKTreeNode.h"
 
+typedef enum _BDSKTemplateFormat {
+    BDSKTextTemplateFormat,
+    BDSKRTFTemplateFormat
+} BDSKTemplateFormat;
+
+
 @interface BibPref_Export : OAPreferenceClient {
     IBOutlet NSOutlineView *outlineView;
     NSMutableArray *itemNodes;
@@ -62,6 +68,8 @@
 
 + (NSArray *)allStyleNames;
 + (BDSKTemplate *)templateForStyle:(NSString *)styleName;
+
+- (BDSKTemplateFormat)templateFormat;
 
 - (NSURL *)mainPageTemplateURL;
 - (NSURL *)defaultItemTemplateURL;

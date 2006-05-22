@@ -72,6 +72,7 @@ static NSString *defaultItemString = @"Default Item";
     // we should only have a single template object to start with
     childNode = [[BDSKTemplate alloc] init];
     [childNode setValue:@"Default HTML template" forKey:nameString];
+    [childNode setValue:[NSNumber numberWithInt:0] forKey:roleString];
     [itemNodes addObject:childNode];
     [childNode release];
     
@@ -161,6 +162,7 @@ static NSString *defaultItemString = @"Default Item";
     } else {
         // add as a non-leaf node
         [newNode setValue:NSLocalizedString(@"Double-click to change name", @"") forKey:nameString];
+        [newNode setValue:[NSNumber numberWithInt:0] forKey:roleString];
         [itemNodes addObject:newNode];
         
         // add a child so newNode will be recognized as a non-leaf node
@@ -246,7 +248,6 @@ static NSString *defaultItemString = @"Default Item";
 {
     // leaf items are fully editable, but you can only edit the name of a parent item
 
-    BOOL shouldEdit = NO;
     NSString *identifier = [tableColumn identifier];
     if([item isLeaf]){
         // run an open panel for the filename
@@ -263,14 +264,13 @@ static NSString *defaultItemString = @"Default Item";
             [openPanel beginSheetForDirectory:dirPath file:nil types:nil modalForWindow:[[BDSKPreferenceController sharedPreferenceController] window] modalDelegate:self didEndSelector:@selector(openPanelDidEnd:returnCode:contextInfo:) contextInfo:[item retain]];
             
             // bypass the normal editing mechanism, or it'll reset the value
-            shouldEdit = NO;
+            return NO;
         } else if([identifier isEqualToString:roleString]){
-            shouldEdit = YES;
+            if([[item valueForKey:roleString] isEqualToString:mainPageString])
+                return NO;
         } else [NSException raise:NSInternalInconsistencyException format:@"Unexpected table column identifier %@", identifier];
-    } else if([identifier isEqualToString:nameString]){
-        shouldEdit = YES;
     }
-    return shouldEdit;
+    return YES;
 }
 
 // return NO to avoid popping the NSOpenPanel unexpectedly
@@ -284,17 +284,21 @@ static NSString *defaultItemString = @"Default Item";
         return;
     }
     [item setValue:object forKey:[tableColumn identifier]];
+    [self synchronizePrefs];
 }
 
 - (void)outlineView:(NSOutlineView *)ov willDisplayCell:(id)cell forTableColumn:(NSTableColumn *)tableColumn item:(id)item{
+    NSString *identifier = [tableColumn identifier];
     if ([cell respondsToSelector:@selector(setTextColor:)])
-        [cell setTextColor:[item representedColorForKey:[tableColumn identifier]]];
+        [cell setTextColor:[item representedColorForKey:identifier]];
+    if([identifier isEqualToString:roleString])
+        [cell setEnabled:[item isLeaf] == NO || [[item valueForKey:roleString] isEqualToString:mainPageString] == NO];
 }
 
 - (BOOL)canDeleteSelectedItem
 {
     BDSKTreeNode *selItem = [outlineView selectedItem];
-    return (([selItem isLeaf] && [[selItem parent] numberOfChildren] > 1) || [selItem isLeaf] == NO);
+    return ([selItem isLeaf] == NO || [[selItem valueForKey:roleString] isEqualToString:mainPageString] == NO);
 }
 
 - (void)outlineViewSelectionDidChange:(NSNotification *)notification;
@@ -432,15 +436,22 @@ static NSString *defaultItemString = @"Default Item";
 
 - (NSCell *)tableView:(NSTableView *)tableView column:(OADataSourceTableColumn *)tableColumn dataCellForRow:(int)row;
 {
-    static NSCell *placeholderCell = nil;
-    if(nil == placeholderCell)
-        placeholderCell = [[NSCell alloc] initTextCell:@""];
+    NSCell *cell = [tableColumn dataCell];
+    
+    static NSPopUpButtonCell *popupCell = nil;
+    if(nil == popupCell){
+        popupCell = [[NSPopUpButtonCell alloc] initTextCell:@"" pullsDown:NO];
+        [popupCell setFont:[cell font]];
+        [popupCell setBordered:NO];
+        [popupCell setControlSize:NSSmallControlSize];
+        [popupCell addItemsWithTitles:[NSArray arrayWithObjects:NSLocalizedString(@"Plain Text", @"Plain Text"), NSLocalizedString(@"RTF", @"RTF"), nil]];
+    }
     
     // if this is a non-editable cell, don't display the combo box
     if(NO == [[(NSOutlineView *)tableView itemAtRow:row] isLeaf])
-        return placeholderCell;
-    else
-        return [tableColumn dataCell];
+        cell = popupCell;
+    
+    return cell;
 }
 
 - (id)comboBoxCell:(NSComboBoxCell *)aComboBoxCell objectValueForItemAtIndex:(int)index { return [roles objectAtIndex:index]; }
@@ -481,6 +492,12 @@ static NSString *defaultItemString = @"Default Item";
     return aNode;
 }
 
+- (BDSKTemplateFormat)templateFormat;
+{
+    OBASSERT([self isLeaf] == NO);
+    return [[self valueForKey:roleString] intValue];
+}
+
 - (NSURL *)mainPageTemplateURL;
 {
     return [self templateURLForType:mainPageString];
@@ -493,12 +510,14 @@ static NSString *defaultItemString = @"Default Item";
 
 - (NSURL *)templateURLForType:(NSString *)pubType;
 {
+    OBASSERT([self isLeaf] == NO);
     NSParameterAssert(nil != pubType);
     return [[self childForRole:pubType] representedFileURL];
 }
 
 - (NSArray *)accessoryFileURLs;
 {
+    OBASSERT([self isLeaf] == NO);
     NSMutableArray *fileURLs = [NSMutableArray array];
     NSEnumerator *childE = [[self children] objectEnumerator];
     BDSKTemplate *aChild;
