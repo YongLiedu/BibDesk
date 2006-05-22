@@ -39,6 +39,8 @@
 #import "BibEditor_Toolbar.h"
 #import "BDSKMenuItem.h"
 
+#define TOOLBAR_BUTTON_SIZE NSMakeSize(32.0, 32.0)
+
 NSString *BibEditorToolbarIdentifier = @"BibEditorToolbarIdentifier";
 NSString *BibEditorToolbarViewLocalItemIdentifier = @"BibEditorToolbarViewLocalItemIdentifier";
 NSString *BibEditorToolbarViewRemoteItemIdentifier = @"BibEditorToolbarViewRemoteItemIdentifier";
@@ -155,30 +157,32 @@ static void addToolbarItem(NSMutableDictionary *theDict,NSString *identifier,NSS
   willBeInsertedIntoToolbar:(BOOL) willBeInserted {
 
     OAToolbarItem *newItem = [[[OAToolbarItem alloc] initWithItemIdentifier:itemIdent] autorelease];
-    NSToolbarItem *item=[toolbarItems objectForKey:itemIdent];
+    NSToolbarItem *item = [toolbarItems objectForKey:itemIdent];
 
     [newItem setLabel:[item label]];
     [newItem setPaletteLabel:[item paletteLabel]];
-    if ([item view]!=nil)
-    {
+    if ([item view] != nil) {
         [newItem setView:[item view]];
 		[newItem setDelegate:self];
-    }
-    else
-    {
+        // If we have a custom view, we *have* to set the min/max size - otherwise, it'll default to 0,0 and the custom
+        // view won't show up at all!  This doesn't affect toolbar items with images, however.
+        if ([itemIdent isEqualToString:BibEditorToolbarAuthorTableItemIdentifier]) {
+            [newItem setMinSize:[[item view] bounds].size];
+            [newItem setMaxSize:[[item view] bounds].size];
+        } else {
+            // This is an BDSKImagePopUpButton
+            // Set the sizes as a regular control size
+            // The actual controlSize might be different, so we shouldn't use [self bounds].size
+            [newItem setMinSize:TOOLBAR_SEARCHFIELD_MIN_SIZE];
+            [newItem setMaxSize:TOOLBAR_SEARCHFIELD_MAX_SIZE];
+        }
+    } else {
         [newItem setImage:[item image]];
     }
     [newItem setToolTip:[item toolTip]];
     [newItem setTarget:[item target]];
     [newItem setAction:[item action]];
     [newItem setMenuFormRepresentation:[item menuFormRepresentation]];
-    // If we have a custom view, we *have* to set the min/max size - otherwise, it'll default to 0,0 and the custom
-    // view won't show up at all!  This doesn't affect toolbar items with images, however.
-    if ([newItem view]!=nil)
-    {
-        [newItem setMinSize:[[item view] bounds].size];
-        [newItem setMaxSize:[[item view] bounds].size];
-    }
 
     return newItem;
 }
