@@ -1952,6 +1952,12 @@ static NSParagraphStyle* bodyParagraphStyle = nil;
 - (id)allFields{
     if (templateFields == nil)
         [self prepareForTemplateParsing];
+    NSMutableArray *allFields = [NSMutableArray array];
+    [allFields addObjectsFromArray:[[BibTypeManager sharedManager] requiredFieldsForType:[self type]]];
+    [allFields addObjectsFromArray:[[BibTypeManager sharedManager] optionalFieldsForType:[self type]]];
+    [allFields addObjectsFromArray:[[BibTypeManager sharedManager] userDefaultFieldsForType:[self type]]];
+    [allFields addObjectsFromArray:[self allFieldNames]];
+    [templateFields setFieldNames:allFields]; // handles duplicates
     return templateFields;
 }
 
@@ -2795,6 +2801,7 @@ static NSParagraphStyle* bodyParagraphStyle = nil;
     while (name = [fnEnum nextObject]) {
         if ([usedFields containsObject:name])
             continue;
+        [usedFields addObject:field];
         field = [[BibField alloc] initWithName:name bibItem:item];
         [array addObject:field];
         [field release];
