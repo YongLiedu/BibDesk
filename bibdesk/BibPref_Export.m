@@ -154,7 +154,7 @@ static NSString *defaultItemString = @"Default Item";
         // add as a sibling of the selected node
         [newNode setValue:NSLocalizedString(@"Double-click to choose file", @"") forKey:nameString];
         [[selectedNode parent] addChild:newNode];
-    } else if(selectedNode != nil && [outlineView isItemExpanded:selectedNode]){
+    } else if(nil != selectedNode && [outlineView isItemExpanded:selectedNode]){
         // add as a child of the selected node
         [newNode setValue:NSLocalizedString(@"Double-click to choose file", @"") forKey:nameString];
         [selectedNode addChild:newNode];
@@ -315,21 +315,55 @@ static NSString *defaultItemString = @"Default Item";
 
 - (NSString *)tableView:(NSTableView *)tv toolTipForTableColumn:(NSTableColumn *)tableColumn row:(int)row;
 {
-    if (row == -1)
-        return nil;
-    id item = [outlineView itemAtRow:row];
-    NSString *identifier = [tableColumn identifier];
-    if ([identifier isEqualToString:nameString] && [item isLeaf]) {
-        return [[item representedFileURL] path];
+    NSString *tooltip = nil;
+    if(row >= 0){
+        id item = [outlineView itemAtRow:row];
+        if ([[tableColumn identifier] isEqualToString:nameString] && [item isLeaf])
+            tooltip = [[item representedFileURL] path];
     }
-    return nil;
+    return tooltip;
 }
 
-- (NSMenu *)tableView:(NSTableView *)tv contextMenuForRow:(int)row column:(int)column;
+- (NSMenu *)tableView:(NSOutlineView *)tv contextMenuForRow:(int)row column:(int)column;
 {
-    if (column != 0 || row == -1 || [[outlineView itemAtRow:row] isLeaf] == NO)
-        return nil;
-    return [tv menu];
+    NSMenu *menu = nil;
+    NSURL *theURL = nil;
+    
+    if(0 == column && row >= 0 && [[outlineView itemAtRow:row] isLeaf])
+        theURL = [[tv itemAtRow:row] representedFileURL];
+    
+    if(nil != theURL){
+        
+        NSZone *menuZone = [NSMenu menuZone];
+        menu = [[[tv menu] copyWithZone:menuZone] autorelease];
+        
+        NSArray *applications = (NSArray *)LSCopyApplicationURLsForURL((CFURLRef)theURL, kLSRolesEditor | kLSRolesViewer);
+        NSEnumerator *appEnum = [applications objectEnumerator];
+        [applications release];
+        NSMenuItem *item;
+        
+        item = [[NSMenuItem allocWithZone:menuZone] initWithTitle:NSLocalizedString(@"Open With", @"") action:NULL keyEquivalent:@""];
+        NSMenu *submenu = [[[NSMenu allocWithZone:menuZone] initWithTitle:@""] autorelease];
+        [item setSubmenu:submenu];
+        [menu insertItem:item atIndex:0];
+        [item release];
+        
+        while(theURL = [appEnum nextObject]){
+            item = [[NSMenuItem allocWithZone:menuZone] initWithTitle:[[theURL path] lastPathComponent] action:@selector(editFile:) keyEquivalent:@""];
+            [item setTarget:self];
+            [item setRepresentedObject:theURL];
+            [submenu insertItem:item atIndex:0];
+            [item release];
+        }
+        
+        // add the choose... item
+        item = [[NSMenuItem allocWithZone:menuZone] initWithTitle:[NSString stringWithFormat:@"%@%@", NSLocalizedString(@"Choose",@""), [NSString horizontalEllipsisString]] action:@selector(editFile:) keyEquivalent:@""];
+        [item setTarget:self];
+        [item setRepresentedObject:nil];
+        [submenu addItem:item];
+        [item release];
+    }
+    return menu;
 }
 
 - (BOOL)validateMenuItem:(id <NSMenuItem>)menuItem;
@@ -362,21 +396,28 @@ static NSString *defaultItemString = @"Default Item";
 
 - (IBAction)editFile:(id)sender;
 {
-    if([outlineView selectedRow] == -1)
-        return;
-    
-    NSOpenPanel *openPanel = [NSOpenPanel openPanel];
-    [openPanel setCanChooseDirectories:NO];
-    [openPanel setAllowsMultipleSelection:NO];
-    [openPanel setPrompt:NSLocalizedString(@"Choose Editor", @"")];
-
-    [openPanel beginSheetForDirectory:[[NSFileManager defaultManager] applicationsDirectory] 
-                                 file:nil 
-                                types:[NSArray arrayWithObjects:@"app", nil] 
-                       modalForWindow:[[BDSKPreferenceController sharedPreferenceController] window] 
-                        modalDelegate:self 
-                       didEndSelector:@selector(chooseEditorPanelDidEnd:returnCode:contextInfo:) 
-                          contextInfo:nil];
+    // sender should be NSMenuItem with a representedObject of the application's URL (or nil if we're supposed to choose one)
+    int row = [outlineView selectedRow];
+    if(row >= 0){
+        
+        BDSKTemplate *selectedTemplate = [outlineView itemAtRow:row];
+        if([sender representedObject]){
+            [[NSWorkspace sharedWorkspace] openFile:[[selectedTemplate representedFileURL] path] withApplication:[[sender representedObject] path]];
+        } else {
+            NSOpenPanel *openPanel = [NSOpenPanel openPanel];
+            [openPanel setCanChooseDirectories:NO];
+            [openPanel setAllowsMultipleSelection:NO];
+            [openPanel setPrompt:NSLocalizedString(@"Choose Editor", @"")];
+            
+            [openPanel beginSheetForDirectory:[[NSFileManager defaultManager] applicationsDirectory] 
+                                         file:nil 
+                                        types:[NSArray arrayWithObjects:@"app", nil] 
+                               modalForWindow:[[BDSKPreferenceController sharedPreferenceController] window] 
+                                modalDelegate:self 
+                               didEndSelector:@selector(chooseEditorPanelDidEnd:returnCode:contextInfo:) 
+                                  contextInfo:nil];
+        }
+    }
 }
 
 - (void)chooseEditorPanelDidEnd:(NSOpenPanel *)openPanel returnCode:(int)returnCode contextInfo:(void *)contextInfo{
