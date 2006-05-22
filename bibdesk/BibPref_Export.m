@@ -451,15 +451,10 @@ static NSString *defaultItemString = @"Default Item";
 
 - (BOOL)setAliasFromURL:(NSURL *)aURL;
 {
-    NSParameterAssert([aURL isFileURL]);
     BDAlias *alias = nil;
-    FSRef fileRef;
-    BOOL rv;
-
-    if(CFURLGetFSRef((CFURLRef)aURL, &fileRef))
-        alias = [[BDAlias alloc] initWithFSRef:&fileRef];
+    alias = [[BDAlias alloc] initWithURL:aURL];
     
-    rv = (nil != alias);
+    BOOL rv = (nil != alias);
     
     if(alias)
         [self setValue:[alias aliasData] forKey:@"_BDAlias"];
@@ -470,16 +465,7 @@ static NSString *defaultItemString = @"Default Item";
 
 - (NSURL *)representedFileURL;
 {
-    BDAlias *alias = nil;
-    NSURL *fileURL = nil;
-    NSData *aliasData = [self valueForKey:@"_BDAlias"];
-    
-    if(aliasData)
-        alias = [BDAlias aliasWithData:aliasData];
-    if(alias)
-        fileURL = [NSURL fileURLWithPath:[alias fullPathNoUI]];
-
-    return fileURL;
+    return [[BDAlias aliasWithData:[self valueForKey:@"_BDAlias"]] fileURLNoUI];
 }
 
 - (NSColor *)representedColorForKey:(NSString *)key;
