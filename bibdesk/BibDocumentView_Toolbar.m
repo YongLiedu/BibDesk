@@ -122,16 +122,6 @@ static void addToolbarItem(NSMutableDictionary *theDict,NSString *identifier,NSS
                    @selector(editPubCmd:), 
 				   nil);
 
-    addToolbarItem(toolbarItems, BibDocumentToolbarEditItemIdentifier,
-                   NSLocalizedString(@"Edit",@""),
-                   NSLocalizedString(@"Edit Publication",@""),
-                   NSLocalizedString(@"Edit Selected Publication(s)",@""),
-                   self, @selector(setImage:), 
-				   [NSImage imageNamed: @"editdoc"],
-                   @selector(editPubCmd:), 
-				   nil);
-	
-	
 	addToolbarItem(toolbarItems, BibDocumentToolbarPreviewItemIdentifier,
                    NSLocalizedString(@"Preview",@""),
                    NSLocalizedString(@"Show/Hide Preview",@""),
@@ -139,7 +129,6 @@ static void addToolbarItem(NSMutableDictionary *theDict,NSString *identifier,NSS
                    nil, @selector(setImage:),
                    [NSImage imageNamed: @"preview"],
                    @selector(toggleShowingPreviewPanel:), NULL);
-	
 	
     addToolbarItem(toolbarItems, BibDocumentToolbarCiteDrawerItemIdentifier,
                    NSLocalizedString(@"Cite Drawer",@""),
