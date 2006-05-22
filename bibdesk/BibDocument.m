@@ -953,7 +953,7 @@ NSString *BDSKWeblocFilePboardType = @"CorePasteboardFlavorType 0x75726C20";
         
     } else if (format == BDSKRTFTemplateFormat) {
         
-        NSAttributedString *fileTemplate = [[[NSAttributedString alloc] initWithURL:[selectedTemplate mainPageTemplateURL]] autorelease];
+        NSAttributedString *fileTemplate = [[[NSAttributedString alloc] initWithURL:[selectedTemplate mainPageTemplateURL] documentAttributes:NULL] autorelease];
         OBPRECONDITION(nil != fileTemplate);
         
         if (selected) {
@@ -1021,7 +1021,7 @@ NSString *BDSKWeblocFilePboardType = @"CorePasteboardFlavorType 0x75726C20";
     } else if (format == BDSKRTFTemplateFormat) {
         
         NSMutableAttributedString *as = [[[NSMutableAttributedString alloc] init] autorelease];
-        NSAttributedString *defaultItemTemplate = [[[NSAttributedString alloc] initWithURL:[selectedTemplate defaultItemTemplateURL]] autorelease];
+        NSAttributedString *defaultItemTemplate = [[[NSAttributedString alloc] initWithURL:[selectedTemplate defaultItemTemplateURL] documentAttributes:NULL] autorelease];
         OBPRECONDITION(nil != defaultItemTemplate);
         NSURL *templateFileURL = nil;
         NSAttributedString *itemTemplate;
@@ -1030,7 +1030,7 @@ NSString *BDSKWeblocFilePboardType = @"CorePasteboardFlavorType 0x75726C20";
 
             templateFileURL = [selectedTemplate templateURLForType:[pub type]];
             if(nil != templateFileURL && [[NSFileManager defaultManager] objectExistsAtFileURL:templateFileURL] == NO)
-                itemTemplate = [[[NSAttributedString alloc] initWithURL:templateFileURL] autorelease];
+                itemTemplate = [[[NSAttributedString alloc] initWithURL:templateFileURL documentAttributes:NULL] autorelease];
             else
                 itemTemplate = defaultItemTemplate;
             [as appendAttributedString:[[[NSAttributedString alloc] initWithString:@"\n\n"] autorelease]];
