@@ -166,6 +166,7 @@
                 } else {
                     endTag = [NSString stringWithFormat:@"%@%@%@", START_CLOSE_DELIM, tag, END_DELIM];
                     [scanner scanString:RETURN_NEWLINE intoString:nil] || [scanner scanString:NEWLINE intoString:nil] || [scanner scanString:RETURN intoString:nil];
+                    start = [scanner scanLocation];
                     if ([scanner scanString:endTag intoString:nil])
                         continue;
                     if ([scanner scanUpToString:endTag intoString:nil] && [scanner scanString:endTag intoString:nil]) {
