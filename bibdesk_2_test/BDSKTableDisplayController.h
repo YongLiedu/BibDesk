@@ -54,6 +54,7 @@
 - (NSArray *)acceptableDraggedTypes;
 
 - (BOOL)writeRowsWithIndexes:(NSIndexSet *)rowIndexes toPasteboard:(NSPasteboard *)pboard forType:(NSString *)type;
+- (BOOL)canAddRelationshipsFromPasteboardType:(NSString *)type parentRow:(int)row;
 - (BOOL)addRelationshipsFromPasteboard:(NSPasteboard *)pboard forType:(NSString *)type parentRow:(int)row keyPath:(NSString *)keyPath;
 
 @end

@@ -28,6 +28,7 @@
 
 - (void)updateUI;
 
+- (BOOL)canAddRelationshipsFromPasteboardType:(NSString *)type parent:(NSManagedObject *)parent;
 - (BOOL)addRelationshipsFromPasteboard:(NSPasteboard *)pboard forType:(NSString *)type parent:(NSManagedObject *)parent keyPath:(NSString *)keyPath;
 
 @end

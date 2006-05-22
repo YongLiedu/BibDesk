@@ -83,6 +83,10 @@
     return [[relationshipsKeyPathInfo objectForKey:[[parent entity] name]] objectForKey:type];
 }
 
+- (BOOL)canAddRelationshipsFromPasteboardType:(NSString *)type parent:(NSManagedObject *)parent{
+    return [self relationshipKeyForPasteboardType:type parent:parent] != nil;
+}
+
 - (BOOL)addRelationshipsFromPasteboard:(NSPasteboard *)pboard forType:(NSString *)type parent:(NSManagedObject *)parent keyPath:(NSString *)keyPath {
 	if (keyPath == nil) {
         keyPath = [self relationshipKeyForPasteboardType:type parent:parent];

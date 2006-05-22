@@ -1,25 +1,25 @@
 {
-    PublicationEntityName = {
+    Publication = {
         BDSKPersonPboardType = "contributorRelationships.contributor";
         BDSKInstitutionPboardType = "contributorRelationships.contributor";
         BDSKVenuePboardType = "venue";
         BDSKTagPboardType = "tags";
     };
-    PersonEntityName = {
+    Person = {
         BDSKPublicationPboardType = "publicationRelationships.publication";
         BDSKInstitutionPboardType = "institutionRelationships.institution";
         BDSKTagPboardType = "tags";
     };
-    InstitutionEntityName = {
+    Institution = {
         BDSKPublicationPboardType = "publicationRelationships.publication";
         BDSKPersonPboardType = "personRelationships.person";
         BDSKTagPboardType = "tags";
     };
-    VenueEntityName = {
+    Venue = {
         BDSKPublicationPboardType = "Relationship.";
         BDSKTagPboardType = "tags";
     };
-    TagEntityName = {
+    Tag = {
         BDSKPublicationPboardType = "items";
         BDSKPersonPboardType = "items";
         BDSKInstitutionPboardType = "items";

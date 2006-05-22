@@ -42,7 +42,7 @@
 		
         NSPasteboard *pboard = [info draggingPasteboard];
 		NSString *type = [pboard availableTypeFromArray:[NSArray arrayWithObjects:BDSKPersonPboardType, nil]];
-        if ([tv setValidDropRow:row dropOperation:NSTableViewDropOn] == NO)
+        if ([tv setValidDropRow:&row dropOperation:NSTableViewDropOn] == NO)
             return NSDragOperationNone;
 		if ([type isEqualToString:BDSKPersonPboardType]) {
             if ([info draggingSource] == tv) 

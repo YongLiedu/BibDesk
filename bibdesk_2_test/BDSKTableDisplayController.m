@@ -367,6 +367,16 @@
     return YES;
 }
 
+- (BOOL)canAddRelationshipsFromPasteboardType:(NSString *)type parentRow:(int)row{
+	if (row == -1)
+		row = [itemsArrayController selectionIndex];
+	if (row == -1)
+		return NO;
+	NSManagedObject *parent = [[itemsArrayController arrangedObjects] objectAtIndex:row];
+    
+    return [self canAddRelationshipsFromPasteboardType:type parent:parent];
+}
+
 - (BOOL)addRelationshipsFromPasteboard:(NSPasteboard *)pboard forType:(NSString *)type parentRow:(int)row keyPath:(NSString *)keyPath {
 	if (row == -1)
 		row = [itemsArrayController selectionIndex];
@@ -403,14 +413,14 @@
 	
     if (tv == itemsTableView) {
         
-        if ([tv setValidDropRow:row dropOperation:NSTableViewDropOn] == NO)
+        if ([tv setValidDropRow:&row dropOperation:NSTableViewDropOn] == NO)
             return NSDragOperationNone;
 		
         NSEnumerator *typeEnum = [pboardTypes objectEnumerator];
         NSString *type;
         
         while (type = [typeEnum nextObject]) {
-            if ([pboard availableTypeFromArray:[NSArray arrayWithObject:type]]) {
+            if ([pboard availableTypeFromArray:[NSArray arrayWithObject:type]] && [self canAddRelationshipsFromPasteboardType:type parentRow:row]) {
                 if ([[[info draggingSource] dataSource] document] == [self document])
                     return NSDragOperationLink;
                 else
