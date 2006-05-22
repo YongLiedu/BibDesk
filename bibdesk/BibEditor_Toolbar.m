@@ -173,8 +173,8 @@ static void addToolbarItem(NSMutableDictionary *theDict,NSString *identifier,NSS
             // This is an BDSKImagePopUpButton
             // Set the sizes as a regular control size
             // The actual controlSize might be different, so we shouldn't use [self bounds].size
-            [newItem setMinSize:TOOLBAR_SEARCHFIELD_MIN_SIZE];
-            [newItem setMaxSize:TOOLBAR_SEARCHFIELD_MAX_SIZE];
+            [newItem setMinSize:TOOLBAR_BUTTON_SIZE];
+            [newItem setMaxSize:TOOLBAR_BUTTON_SIZE];
         }
     } else {
         [newItem setImage:[item image]];
