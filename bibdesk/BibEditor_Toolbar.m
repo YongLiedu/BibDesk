@@ -39,7 +39,7 @@
 #import "BibEditor_Toolbar.h"
 #import "BDSKMenuItem.h"
 
-#define TOOLBAR_BUTTON_SIZE NSMakeSize(32.0, 32.0)
+#define TOOLBAR_BUTTON_SIZE NSMakeSize(39.0, 32.0)
 
 NSString *BibEditorToolbarIdentifier = @"BibEditorToolbarIdentifier";
 NSString *BibEditorToolbarViewLocalItemIdentifier = @"BibEditorToolbarViewLocalItemIdentifier";

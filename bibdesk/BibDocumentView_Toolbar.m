@@ -38,7 +38,7 @@
 #import "BibDocument_Search.h"
 #import "BibAppController.h"
 
-#define TOOLBAR_BUTTON_SIZE NSMakeSize(32.0, 32.0)
+#define TOOLBAR_BUTTON_SIZE NSMakeSize(39.0, 32.0)
 #define TOOLBAR_SEARCHFIELD_MIN_SIZE NSMakeSize(110.0, 22.0)
 #define TOOLBAR_SEARCHFIELD_MAX_SIZE NSMakeSize(1000.0, 22.0)
 
