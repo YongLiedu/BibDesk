@@ -262,26 +262,34 @@ NSString *BDSKDocumentToolbarSearchItemIdentifier = @"BDSKDocumentToolbarSearchI
 #pragma mark Toolbar stuff
 
 // label, palettelabel, toolTip, action, and menu can all be NULL, depending upon what you want the item to do
-void addToolbarItem(NSMutableDictionary *theDict,NSString *identifier,NSString *label,NSString *paletteLabel,NSString *toolTip,id target,SEL settingSelector, id itemContent,SEL action, NSMenuItem *menuItem)
+- (NSToolbarItem *)addToolbarItemWithIdentifier:(NSString *)identifier label:(NSString *)label paletteLabel:(NSString *)paletteLabel toolTip:(NSString *)toolTip target:(id)target action:(SEL)action itemContent:(id)itemContent menuItem:(NSMenuItem *)menuItem
 {
     // here we create the NSToolbarItem and setup its attributes in line with the parameters
-    NSToolbarItem *item = [[[NSToolbarItem alloc] initWithItemIdentifier:identifier] autorelease];
+    NSToolbarItem *item = [[NSToolbarItem alloc] initWithItemIdentifier:identifier];
     [item setLabel:label];
     [item setPaletteLabel:paletteLabel];
     [item setToolTip:toolTip];
     [item setTarget:target];
-    // the settingSelector parameter can either be @selector(setView:) or @selector(setImage:).  Pass in the right
-    // one depending upon whether your NSToolbarItem will have a custom view or an image, respectively
-    // (in the itemContent parameter).  Then this next line will do the right thing automatically.
-    [item performSelector:settingSelector withObject:itemContent];
+    if ([itemContent isKindOfClass:[NSImage class]]) 
+        [item setImage:itemContent];
+    else if ([itemContent isKindOfClass:[NSView class]]) {
+        [item setView:itemContent];
+        // If we have a custom view, we *have* to set the min/max size - otherwise, it'll default to 0,0 and the custom
+        // view won't show up at all!  This doesn't affect toolbar items with images, however.
+        [item setMinSize:[itemContent bounds].size];
+        [item setMaxSize:[itemContent bounds].size];
+    }
     [item setAction:action];
     // The menuItem to be shown in text only mode. Don't reset this when we use the default behavior. 
-	if (menuItem)
+	if (menuItem != nil)
 		[item setMenuFormRepresentation:menuItem];
     // Now that we've setup all the settings for this new toolbar item, we add it to the dictionary.
     // The dictionary retains the toolbar item for us, which is why we could autorelease it when we created
     // it (above).
-    [theDict setObject:item forKey:identifier];
+    [toolbarItems setObject:item forKey:identifier];
+    [item release];
+    
+    return item;
 }
 
 - (NSToolbar *) setupToolbar {
@@ -299,33 +307,36 @@ void addToolbarItem(NSMutableDictionary *theDict,NSString *identifier,NSString *
     [toolbar setDelegate: self];
 
     // add toolbaritems:
+    NSToolbarItem *item;
 
-    addToolbarItem(toolbarItems, BDSKDocumentToolbarNewItemIdentifier,
-                   NSLocalizedString(@"New Item",@""), 
-				   NSLocalizedString(@"New Item",@""),
-                   NSLocalizedString(@"Create New Item",@""),
-                   self, @selector(setImage:),
-				   [NSImage imageNamed: @"New"], 
-				   @selector(addNewItem:),
-                   nil);
+    [self addToolbarItemWithIdentifier:BDSKDocumentToolbarNewItemIdentifier
+                                 label:NSLocalizedString(@"New Item",@"")
+                          paletteLabel:NSLocalizedString(@"New Item",@"")
+                               toolTip:NSLocalizedString(@"Create New Item",@"")
+                                target:self
+                                action:@selector(addNewItem:)
+                           itemContent:[NSImage imageNamed: @"New"]
+                              menuItem:nil];
 
-    addToolbarItem(toolbarItems, BDSKDocumentToolbarDeleteItemIdentifier,
-                   NSLocalizedString(@"Delete Item",@""), 
-				   NSLocalizedString(@"Delete Item",@""),
-                   NSLocalizedString(@"Create Delete Item",@""),
-                   self, @selector(setImage:),
-				   [NSImage imageNamed: @"Delete"], 
-				   @selector(removeSelectedItems:),
-                   nil);
+    [self addToolbarItemWithIdentifier:BDSKDocumentToolbarDeleteItemIdentifier
+                                 label:NSLocalizedString(@"Delete Item",@"")
+                          paletteLabel:NSLocalizedString(@"Delete Item",@"")
+                               toolTip:NSLocalizedString(@"Delete Selected Item",@"")
+                                target:self
+                                action:@selector(removeSelectedItems:)
+                           itemContent:[NSImage imageNamed: @"Delete"]
+                              menuItem:nil];
 
-    addToolbarItem(toolbarItems, BDSKDocumentToolbarSearchItemIdentifier,
-                   NSLocalizedString(@"Search",@""),
-                   NSLocalizedString(@"Search",@""),
-                   NSLocalizedString(@"Search",@""),
-                   self, @selector(setView:),
-                   searchField,
-                   NULL, 
-				   nil);
+    item = [self addToolbarItemWithIdentifier:BDSKDocumentToolbarSearchItemIdentifier
+                                 label:NSLocalizedString(@"Search",@"")
+                          paletteLabel:NSLocalizedString(@"Search",@"")
+                               toolTip:NSLocalizedString(@"Search",@"")
+                                target:nil
+                                action:NULL
+                           itemContent:searchField
+                              menuItem:nil];
+    [item setMinSize:NSMakeSize(50, NSHeight([searchField bounds]))];
+    [item setMaxSize:NSMakeSize(1000, NSHeight([searchField bounds]))];
     
     return toolbar;
 }
@@ -334,36 +345,8 @@ void addToolbarItem(NSMutableDictionary *theDict,NSString *identifier,NSString *
       itemForItemIdentifier: (NSString *)itemIdent
   willBeInsertedIntoToolbar:(BOOL) willBeInserted {
 
-    NSToolbarItem *newItem = [[[NSToolbarItem alloc] initWithItemIdentifier:itemIdent] autorelease];
     NSToolbarItem *item = [toolbarItems objectForKey:itemIdent];
-
-    [newItem setLabel:[item label]];
-    [newItem setPaletteLabel:[item paletteLabel]];
-    if ([item view]!=nil)
-    {
-        [newItem setView:[item view]];
-    }
-    else
-    {
-        [newItem setImage:[item image]];
-    }
-    [newItem setToolTip:[item toolTip]];
-    [newItem setTarget:[item target]];
-    [newItem setAction:[item action]];
-    [newItem setMenuFormRepresentation:[item menuFormRepresentation]];
-    // If we have a custom view, we *have* to set the min/max size - otherwise, it'll default to 0,0 and the custom
-    // view won't show up at all!  This doesn't affect toolbar items with images, however.
-    if ([itemIdent isEqualToString:BDSKDocumentToolbarSearchItemIdentifier])
-    {
-        [newItem setMinSize:NSMakeSize(50,NSHeight([[item view] bounds]))];
-        [newItem setMaxSize:NSMakeSize(1000,NSHeight([[item view] bounds]))];
-    }
-	else if ([newItem view]!=nil)
-    {
-        [newItem setMinSize:[[item view] bounds].size];
-        [newItem setMaxSize:[[item view] bounds].size];
-    }
-
+    NSToolbarItem *newItem = [[item copy] autorelease];
     return newItem;
 }
 

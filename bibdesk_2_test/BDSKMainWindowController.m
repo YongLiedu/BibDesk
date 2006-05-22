@@ -488,14 +488,14 @@
     [[NSImage imageNamed:@"GroupIcon"] drawInRect:badgeRect fromRect:iconRect operation:NSCompositeSourceOver fraction:1.0];
     [image unlockFocus];
 
-    addToolbarItem(toolbarItems, BDSKDocumentToolbarNewGroupIdentifier,
-                   NSLocalizedString(@"New Group",@""), 
-				   NSLocalizedString(@"New Group",@""),
-                   NSLocalizedString(@"Create New Group",@""),
-                   self, @selector(setImage:),
-				   image, 
-				   @selector(addNewGroup:),
-                   nil);
+    [self addToolbarItemWithIdentifier:BDSKDocumentToolbarNewGroupIdentifier
+                                 label:NSLocalizedString(@"New Group",@"")
+                          paletteLabel:NSLocalizedString(@"New Group",@"")
+                               toolTip:NSLocalizedString(@"Create New Group",@"")
+                                target:self
+                                action:@selector(addNewGroup:)
+                           itemContent:image
+                              menuItem:nil];
     [image release];
 
     image = [[NSImage alloc] initWithSize:iconRect.size];
@@ -504,14 +504,14 @@
     [[NSImage imageNamed:@"SmartGroupIcon"] drawInRect:badgeRect fromRect:iconRect operation:NSCompositeSourceOver fraction:1.0];
     [image unlockFocus];
 
-    addToolbarItem(toolbarItems, BDSKDocumentToolbarNewSmartGroupIdentifier,
-                   NSLocalizedString(@"New Smart Group",@""), 
-				   NSLocalizedString(@"New Smart Group",@""),
-                   NSLocalizedString(@"Create New Smart Group",@""),
-                   self, @selector(setImage:),
-				   image, 
-				   @selector(addNewSmartGroup:),
-                   nil);
+    [self addToolbarItemWithIdentifier:BDSKDocumentToolbarNewSmartGroupIdentifier
+                                 label:NSLocalizedString(@"New Smart Group",@"")
+                          paletteLabel:NSLocalizedString(@"New Smart Group",@"")
+                               toolTip:NSLocalizedString(@"Create New Smart Group",@"")
+                                target:self
+                                action:@selector(addNewSmartGroup:)
+                           itemContent:image
+                              menuItem:nil];
     [image release];
 
     image = [[NSImage alloc] initWithSize:iconRect.size];
@@ -520,14 +520,14 @@
     [[NSImage imageNamed:@"FolderGroupIcon"] drawInRect:badgeRect fromRect:iconRect operation:NSCompositeSourceOver fraction:1.0];
     [image unlockFocus];
 
-    addToolbarItem(toolbarItems, BDSKDocumentToolbarNewFolderIdentifier,
-                   NSLocalizedString(@"New Folder",@""), 
-				   NSLocalizedString(@"New Folder",@""),
-                   NSLocalizedString(@"Create New Folder Group",@""),
-                   self, @selector(setImage:),
-				   image, 
-				   @selector(addNewFolderGroup:),
-                   nil);
+    [self addToolbarItemWithIdentifier:BDSKDocumentToolbarNewFolderIdentifier
+                                 label:NSLocalizedString(@"New Folder",@"")
+                          paletteLabel:NSLocalizedString(@"New Folder",@"")
+                               toolTip:NSLocalizedString(@"Create New Folder Group",@"")
+                                target:self
+                                action:@selector(addNewFolderGroup:)
+                           itemContent:image
+                              menuItem:nil];
     [image release];
 
     image = [[NSImage alloc] initWithSize:iconRect.size];
@@ -536,33 +536,33 @@
     [[NSImage imageNamed:@"GroupIcon"] drawInRect:badgeRect fromRect:iconRect operation:NSCompositeSourceOver fraction:1.0];
     [image unlockFocus];
 
-    addToolbarItem(toolbarItems, BDSKDocumentToolbarDeleteGroupIdentifier,
-                   NSLocalizedString(@"Delete Group",@""), 
-				   NSLocalizedString(@"Delete Group",@""),
-                   NSLocalizedString(@"Delete Selected Group",@""),
-                   self, @selector(setImage:),
-				   image, 
-				   @selector(removeSelectedGroup:),
-                   nil);
+    [self addToolbarItemWithIdentifier:BDSKDocumentToolbarDeleteGroupIdentifier
+                                 label:NSLocalizedString(@"Delete Group",@"")
+                          paletteLabel:NSLocalizedString(@"Delete Group",@"")
+                               toolTip:NSLocalizedString(@"Delete Selected Group",@"")
+                                target:self
+                                action:@selector(removeSelectedGroup:)
+                           itemContent:image
+                              menuItem:nil];
     [image release];
 
-    addToolbarItem(toolbarItems, BDSKDocumentToolbarGetInfoIdentifier,
-                   NSLocalizedString(@"Get Info",@""), 
-				   NSLocalizedString(@"Get Info",@""),
-                   NSLocalizedString(@"Get Info for Selected Group",@""),
-                   self, @selector(setImage:),
-				   [NSImage imageNamed: @"Edit"], 
-				   @selector(getInfo:),
-                   nil);
+    [self addToolbarItemWithIdentifier:BDSKDocumentToolbarGetInfoIdentifier
+                                 label:NSLocalizedString(@"Get Info",@"")
+                          paletteLabel:NSLocalizedString(@"Get Info",@"")
+                               toolTip:NSLocalizedString(@"Get Info for Selected Group",@"")
+                                target:self
+                                action:@selector(getInfo:)
+                           itemContent:[NSImage imageNamed: @"Edit"]
+                              menuItem:nil];
 
-    addToolbarItem(toolbarItems, BDSKDocumentToolbarDetachIdentifier,
-                   NSLocalizedString(@"Detach",@""), 
-				   NSLocalizedString(@"Detach",@""),
-                   NSLocalizedString(@"Detach Group",@""),
-                   self, @selector(setImage:),
-				   [NSImage imageNamed: @"Detach"], 
-				   @selector(showWindowForSourceListSelection:),
-                   nil);
+    [self addToolbarItemWithIdentifier:BDSKDocumentToolbarDetachIdentifier
+                                 label:NSLocalizedString(@"Detach",@"")
+                          paletteLabel:NSLocalizedString(@"Detach",@"")
+                               toolTip:NSLocalizedString(@"Detach Selected Group",@"")
+                                target:self
+                                action:@selector(showWindowForSourceListSelection:)
+                           itemContent:[NSImage imageNamed: @"Detach"]
+                              menuItem:nil];
 
     return toolbar;
 }

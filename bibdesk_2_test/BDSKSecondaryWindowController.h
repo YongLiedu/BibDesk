@@ -19,8 +19,6 @@ extern NSString *BDSKDocumentToolbarGetInfoIdentifier;
 extern NSString *BDSKDocumentToolbarDetachIdentifier;
 extern NSString *BDSKDocumentToolbarSearchItemIdentifier;
 
-extern void addToolbarItem(NSMutableDictionary *theDict,NSString *identifier,NSString *label,NSString *paletteLabel,NSString *toolTip,id target,SEL settingSelector, id itemContent,SEL action, NSMenuItem *menuItem);
-
 @class BDSKGroup;
 
 @interface BDSKSecondaryWindowController : NSWindowController {
@@ -61,5 +59,6 @@ extern void addToolbarItem(NSMutableDictionary *theDict,NSString *identifier,NSS
 - (IBAction)delete:(id)sender;
 
 - (NSToolbar *) setupToolbar;
+- (NSToolbarItem *)addToolbarItemWithIdentifier:(NSString *)identifier label:(NSString *)label paletteLabel:(NSString *)paletteLabel toolTip:(NSString *)toolTip target:(id)target action:(SEL)action itemContent:(id)itemContent menuItem:(NSMenuItem *)menuItem;
 
 @end
