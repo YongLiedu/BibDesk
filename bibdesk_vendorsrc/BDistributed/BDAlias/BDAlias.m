@@ -342,12 +342,14 @@ static CFStringRef FSRefToPathCopy(const FSRef *inRef)
 
 - (NSURL *)fileURLNoUI
 {
-    return [NSURL fileURLWithPath:[self fullPathNoUI]];
+    NSString *path = [self fullPathNoUI];
+    return path == nil ? nil : [NSURL fileURLWithPath:path];
 }
 
 - (NSURL *)fileURL
 {
-    return [NSURL fileURLWithPath:[self fullPath]];
+    NSString *path = [self fullPath];
+    return path == nil ? nil : [NSURL fileURLWithPath:path];
 }
 
 + (BDAlias *)aliasWithAliasHandle:(AliasHandle)alias
