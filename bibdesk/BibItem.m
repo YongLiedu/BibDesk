@@ -1868,8 +1868,20 @@ static NSParagraphStyle* bodyParagraphStyle = nil;
     return s;
 }
 
-- (NSString *)HTMLValueUsingTemplateString:(NSString *)templateString{
-    return [templateString stringByParsingTagsWithStartDelimeter:@"<$" endDelimeter:@"/>" usingObject:self];
+- (NSString *)stringValueUsingTemplate:(NSString *)templateString{
+    NSString *string = nil;
+    [self prepareForTemplateParsing];
+    string = [BDSKTemplateParser stringByParsingTemplate:templateString usingObject:self];
+    [self cleanupAfterTemplateParsing];
+    return string;
+}
+
+- (NSAttributedString *)attributedStringValueUsingTemplate:(NSAttributedString *)templateAttributedString{
+    NSAttributedString *string = nil;
+    [self prepareForTemplateParsing];
+    string = [BDSKTemplateParser attributedStringByParsingTemplate:templateAttributedString usingObject:self];
+    [self cleanupAfterTemplateParsing];
+    return string;
 }
 
 - (NSString *)allFieldsString{

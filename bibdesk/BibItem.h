@@ -679,8 +679,6 @@
 */
 - (NSString *)RSSValue;
 
-- (NSString *)HTMLValueUsingTemplateString:(NSString *)templateString;
-
 /*!
     @method allFieldsString
     @abstract returns the value of each of the fields concatenated into a single string.
@@ -688,6 +686,9 @@
     
 */
 - (NSString *)allFieldsString; 
+
+- (NSString *)stringValueUsingTemplate:(NSString *)templateString;
+- (NSAttributedString *)attributedStringValueUsingTemplate:(NSAttributedString *)templateAttributedString;
 
 - (void)prepareForTemplateParsing;
 - (void)cleanupAfterTemplateParsing;

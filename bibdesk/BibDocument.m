@@ -808,8 +808,12 @@ NSString *BDSKWeblocFilePboardType = @"CorePasteboardFlavorType 0x75726C20";
         if([fileType isEqualToString:@"rss"]){
             fileData = [self rssDataForPublications:items];
         }else if([fileType isEqualToString:@"html"]){
-            fileData = [self htmlDataForSelection:selected];
-            NSEnumerator *accessoryFileEnum = [[[BDSKTemplate templateForStyle:currentExportTemplateStyle] accessoryFileURLs] objectEnumerator];
+            BDSKTemplate *selectedTemplate = [BDSKTemplate templateForStyle:currentExportTemplateStyle];
+            // @@ templating: need a better way to choose the extension
+            NSString *extension = ([selectedTemplate templateFormat] == BDSKRTFTemplateFormat) ? @"rtf" : @"txt";
+            fileName = [[fileName stringByDeletingPathExtension] stringByAppendingPathExtension:extension];
+            fileData = [self templateDataForSelection:selected];
+            NSEnumerator *accessoryFileEnum = [[selectedTemplate accessoryFileURLs] objectEnumerator];
             NSURL *accessoryURL = nil;
             NSURL *destDirURL = [NSURL fileURLWithPath:[fileName stringByDeletingLastPathComponent]];
             while(accessoryURL = [accessoryFileEnum nextObject]){
@@ -861,7 +865,7 @@ NSString *BDSKWeblocFilePboardType = @"CorePasteboardFlavorType 0x75726C20";
     }else if ([aType isEqualToString:@"Rich Site Summary file"]){
         data = [self rssDataForPublications:publications];
     }else if ([aType isEqualToString:@"HTML"]){
-        data = [self htmlDataForSelection:NO];
+        data = [self templateDataForSelection:NO];
     }else if ([aType isEqualToString:@"MODS"]){
         data = [self MODSDataForPublications:publications];
     }else if ([aType isEqualToString:@"EndNote XML"]){
@@ -878,6 +882,7 @@ NSString *BDSKWeblocFilePboardType = @"CorePasteboardFlavorType 0x75726C20";
 #define AddDataFromString(s) [d appendData:[s dataUsingEncoding:NSUTF8StringEncoding]]
 #define AddDataFromFormCellWithTag(n) [d appendData:[[[rssExportForm cellAtIndex:[rssExportForm indexOfCellWithTag:n]] stringValue] dataUsingEncoding:NSUTF8StringEncoding]]
 
+// @@ templating: use template to write rss? Then make accessory view data accessible through a temporary dictionary accessor
 - (NSData *)rssDataForPublications:(NSArray *)items{
     NSEnumerator *e = [items objectEnumerator];
 	BibItem *pub = nil;
@@ -921,31 +926,66 @@ NSString *BDSKWeblocFilePboardType = @"CorePasteboardFlavorType 0x75726C20";
     return d;
 }
 
-- (NSData *)htmlDataForSelection:(BOOL)selected{
-	NSString *fileTemplate = [NSString stringWithContentsOfURL:[[BDSKTemplate templateForStyle:currentExportTemplateStyle] mainPageTemplateURL]];
+- (NSData *)templateDataForSelection:(BOOL)selected{
+    BDSKTemplate *selectedTemplate = [BDSKTemplate templateForStyle:currentExportTemplateStyle];
+    OBPRECONDITION(nil != selectedTemplate);
+    BDSKTemplateFormat format = [selectedTemplate templateFormat];
     
-    if (selected) {
-		NSMutableString *tmpString = [fileTemplate mutableCopy];
-		[tmpString replaceOccurrencesOfString:@"<$publicationsAsHTML>" withString:@"<$selectionAsHTML>" options:0 range:NSMakeRange(0, [tmpString length])];
-		[tmpString replaceOccurrencesOfString:@"<$publications>" withString:@"<$selectedPublications>" options:0 range:NSMakeRange(0, [tmpString length])];
-		[tmpString replaceOccurrencesOfString:@"</$publications>" withString:@"</$selectedPublications>" options:0 range:NSMakeRange(0, [tmpString length])];
-		fileTemplate = [tmpString autorelease];
-	}
-	fileTemplate = [BDSKTemplateParser stringByParsingTemplate:fileTemplate usingObject:self delegate:self];
-    return [fileTemplate dataUsingEncoding:NSUTF8StringEncoding allowLossyConversion:YES];    
+    if (format = BDSKTextTemplateFormat) {
+        
+        NSString *fileTemplate = [NSString stringWithContentsOfURL:[selectedTemplate mainPageTemplateURL]];
+        OBPRECONDITION(nil != fileTemplate);
+        
+        if (selected) {
+            NSMutableString *tmpString = [fileTemplate mutableCopy];
+            [tmpString replaceOccurrencesOfString:@"<$publicationsUsingTemplate>" withString:@"<$selectionUsingTemplate>" options:0 range:NSMakeRange(0, [tmpString length])];
+            // legacy
+            [tmpString replaceOccurrencesOfString:@"<$publicationsAsHTML>" withString:@"<$selectionUsingTemplate>" options:0 range:NSMakeRange(0, [tmpString length])];
+            [tmpString replaceOccurrencesOfString:@"<$publications>" withString:@"<$selectedPublications>" options:0 range:NSMakeRange(0, [tmpString length])];
+            [tmpString replaceOccurrencesOfString:@"</$publications>" withString:@"</$selectedPublications>" options:0 range:NSMakeRange(0, [tmpString length])];
+            fileTemplate = [tmpString autorelease];
+        }
+        fileTemplate = [BDSKTemplateParser stringByParsingTemplate:fileTemplate usingObject:self delegate:self];
+        
+        return [fileTemplate dataUsingEncoding:NSUTF8StringEncoding allowLossyConversion:YES];
+        
+    } else if (format = BDSKRTFTemplateFormat) {
+        
+        NSAttributedString *fileTemplate = [[[NSAttributedString alloc] initWithContentsOfURL:[selectedTemplate mainPageTemplateURL]] autorelease];
+        OBPRECONDITION(nil != fileTemplate);
+        
+        if (selected) {
+            NSMutableAttributedString *tmpString = [fileTemplate mutableCopy];
+            NSRange range = [[tmpString string] rangeOfString:@"<$publicationsUsingTemplate>"];
+            if (range.location != NSNotFound)
+                [tmpString replaceCharactersInRange:range withString:@"<$selectionUsingTemplate>"];
+            range = [[tmpString string] rangeOfString:@"<$publications>"];
+            if (range.location != NSNotFound)
+                [tmpString replaceCharactersInRange:range withString:@"<$selectedPublications>"];
+            range = [[tmpString string] rangeOfString:@"</$publications>"];
+            if (range.location != NSNotFound)
+                [tmpString replaceCharactersInRange:range withString:@"</$selectedPublications>"];
+            fileTemplate = [tmpString autorelease];
+        }
+        fileTemplate = [BDSKTemplateParser attributedStringByParsingTemplate:fileTemplate usingObject:self delegate:self];
+        
+        return [fileTemplate RTFFromRange:NSMakeRange(0,[fileTemplate length]) documentAttributes:nil];
+        
+    }
 }
 
-- (NSString *)publicationsAsHTML{
-	return [self HTMLStringForPublications:publications];
+// legacy method, as it may appear as a key in older teplates
+- (NSString *)publicationsAsHTML{ return [self publicationsUsingTemplate]; }
+
+- (id)publicationsUsingTemplate{
+	return [self templateStringForPublications:publications];
 }
 
-- (NSString *)selectionAsHTML{
-	return [self HTMLStringForPublications:[self selectedPublications]];
+- (id)selectionUsingTemplate{
+	return [self templateStringForPublications:[self selectedPublications]];
 }
 
-- (NSString *)HTMLStringForPublications:(NSArray *)items{
-    NSMutableString *s = [NSMutableString stringWithString:@""];
-    NSString *itemTemplate;
+- (id)templateStringForPublications:(NSArray *)items{
     NSEnumerator *e = [items objectEnumerator];
     BibItem *pub = nil;
     
@@ -953,21 +993,53 @@ NSString *BDSKWeblocFilePboardType = @"CorePasteboardFlavorType 0x75726C20";
     
     BDSKTemplate *selectedTemplate = [BDSKTemplate templateForStyle:currentExportTemplateStyle];
     OBPRECONDITION(nil != selectedTemplate);
-    NSString *defaultItemTemplate = [NSString stringWithContentsOfURL:[selectedTemplate defaultItemTemplateURL]];
-    OBPRECONDITION(nil != defaultItemTemplate);
-    NSURL *templateFileURL = nil;
+    BDSKTemplateFormat format = [selectedTemplate templateFormat];
     
-	while(pub = [e nextObject]){
+    if (format = BDSKTextTemplateFormat) {
+        
+        NSMutableString *s = [NSMutableString stringWithString:@""];
+        NSString *defaultItemTemplate = [NSString stringWithContentsOfURL:[selectedTemplate defaultItemTemplateURL]];
+        OBPRECONDITION(nil != defaultItemTemplate);
+        NSURL *templateFileURL = nil;
+        NSString *itemTemplate;
+        
+        while(pub = [e nextObject]){
 
-        templateFileURL = [selectedTemplate templateURLForType:[pub type]];
-        if(nil != templateFileURL && [[NSFileManager defaultManager] objectExistsAtFileURL:templateFileURL] == NO)
-            itemTemplate = [NSString stringWithContentsOfURL:templateFileURL];
-        else
-            itemTemplate = defaultItemTemplate;
-		[s appendString:[NSString stringWithString:@"\n\n"]];
-        [s appendString:[pub HTMLValueUsingTemplateString:itemTemplate]];
+            templateFileURL = [selectedTemplate templateURLForType:[pub type]];
+            if(nil != templateFileURL && [[NSFileManager defaultManager] objectExistsAtFileURL:templateFileURL] == NO)
+                itemTemplate = [NSString stringWithContentsOfURL:templateFileURL];
+            else
+                itemTemplate = defaultItemTemplate;
+            [s appendString:[NSString stringWithString:@"\n\n"]];
+            [s appendString:[pub stringValueUsingTemplate:itemTemplate]];
+        }
+        
+        return s;
+        
+    } else if (format = BDSKRTFTemplateFormat) {
+        
+        NSMutableAttributedString *as = [[[NSMutableAttributedString alloc] init] autorelease];
+        NSAttributedString *defaultItemTemplate = [[[NSAttributedString alloc] initWithContentsOfURL:[selectedTemplate defaultItemTemplateURL]] autorelease];
+        OBPRECONDITION(nil != defaultItemTemplate);
+        NSURL *templateFileURL = nil;
+        NSAttributedString *itemTemplate;
+        
+        while(pub = [e nextObject]){
+
+            templateFileURL = [selectedTemplate templateURLForType:[pub type]];
+            if(nil != templateFileURL && [[NSFileManager defaultManager] objectExistsAtFileURL:templateFileURL] == NO)
+                itemTemplate = [[[NSAttributedString alloc] initWithContentsOfURL:templateFileURL] autorelease];
+            else
+                itemTemplate = defaultItemTemplate;
+            [as appendAttributedString:[[[NSAttributedString alloc] initWithString:@"\n\n"] autorelease]];
+            [as appendAttributedString:[pub attributedStringValueUsingTemplate:itemTemplate]];
+        }
+        
+        return as;
+    
     }
-    return s;
+    
+    return nil;
 }
 
 - (NSData *)atomDataForPublications:(NSArray *)items{
