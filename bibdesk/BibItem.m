@@ -2801,7 +2801,7 @@ static NSParagraphStyle* bodyParagraphStyle = nil;
     while (name = [fnEnum nextObject]) {
         if ([usedFields containsObject:name])
             continue;
-        [usedFields addObject:field];
+        [usedFields addObject:name];
         field = [[BibField alloc] initWithName:name bibItem:item];
         [array addObject:field];
         [field release];
