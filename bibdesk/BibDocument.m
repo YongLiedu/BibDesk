@@ -767,10 +767,12 @@ NSString *BDSKWeblocFilePboardType = @"CorePasteboardFlavorType 0x75726C20";
         [htmlStylePopUpButton setTarget:self];
         
         // @@ save last selection in prefs?  names can change, though...
-        if(nil != currentExportTemplateStyle)
+        if(nil != currentExportTemplateStyle){
             [htmlStylePopUpButton selectItemWithTitle:currentExportTemplateStyle];
-        else
+        }else{
             [htmlStylePopUpButton selectItemAtIndex:0];
+            currentExportTemplateStyle = [[htmlStylePopUpButton titleOfSelectedItem] retain];
+        }
         
     } else if([fileType isEqualToString:@"bib"] || [fileType isEqualToString:@"ris"] || [fileType isEqualToString:@"ltb"]){ // this is for exporting bib files with alternate text encodings
         [sp setAccessoryView:SaveEncodingAccessoryView];
