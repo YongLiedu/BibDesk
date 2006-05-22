@@ -165,10 +165,10 @@ static NSString *defaultItemString = @"Default Item";
         [newNode setValue:[NSNumber numberWithInt:0] forKey:roleString];
         [itemNodes addObject:newNode];
         
-        // add a child so newNode will be recognized as a non-leaf node
+        // each style needs at least a Main Page child, and newNode will be recognized as a non-leaf node
         BDSKTemplate *child = [[BDSKTemplate alloc] init];
         [child setValue:NSLocalizedString(@"Double-click to choose file", @"") forKey:nameString];
-        [child setValue:accessoryString forKey:roleString];
+        [child setValue:mainPageString forKey:roleString];
         [newNode addChild:child];
         [child release];
     }
