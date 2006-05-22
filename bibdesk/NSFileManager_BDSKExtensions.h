@@ -44,7 +44,7 @@
 
 - (NSString *)currentApplicationSupportPathForCurrentUser;
 - (NSString *)applicationSupportDirectory:(SInt16)domain;
-- (NSString *)desktopPathForCurrentUser;
+- (NSString *)applicationsDirectory;
 - (NSURL *)internetConfigDownloadURL;
 
 /*!

@@ -363,7 +363,7 @@ static BibFiler *sharedFiler = nil;
     }
     
     NSString *fileName = NSLocalizedString(@"BibDesk AutoFile Errors",@"Filename for dumped autofile errors.");
-    NSString *path = [[NSFileManager defaultManager] desktopPathForCurrentUser];
+    NSString *path = [[NSFileManager defaultManager] desktopDirectory];
     if (path == nil)
         return;
     path = [[[NSFileManager defaultManager] uniqueFilePath:[path stringByAppendingPathComponent:fileName] createDirectory:NO] stringByAppendingPathExtension:@"txt"];
@@ -507,7 +507,7 @@ static BibFiler *sharedFiler = nil;
         if([self fileExistsAtPath:resolvedNewPath]){
             if([self fileExistsAtPath:resolvedPath]){
                 if(force){
-                    NSString *backupPath = [[self desktopPathForCurrentUser] stringByAppendingPathComponent:[resolvedNewPath lastPathComponent]];
+                    NSString *backupPath = [[self desktopDirectory] stringByAppendingPathComponent:[resolvedNewPath lastPathComponent]];
                     backupPath = [self uniqueFilePath:backupPath createDirectory:NO];
                     if(![self movePath:resolvedNewPath toPath:backupPath force:NO error:NULL] && 
                         [self fileExistsAtPath:resolvedNewPath] && 

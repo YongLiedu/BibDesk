@@ -161,7 +161,7 @@ typedef struct WLDragMapEntryStruct
     return retStr;
 }
 
-- (NSString *)desktopPathForCurrentUser{
+- (NSString *)applicationsDirectory{
     
     NSString *path = nil;
     FSRef foundRef;
@@ -169,7 +169,7 @@ typedef struct WLDragMapEntryStruct
     CFURLRef url = NULL;
     BOOL isDir = YES;
     
-    err = FSFindFolder(kUserDomain,  kDesktopFolderType, kCreateFolder, &foundRef);
+    err = FSFindFolder(kLocalDomain,  kApplicationsFolderType, kDontCreateFolder, &foundRef);
     if(err == noErr){
         url = CFURLCreateFromFSRef(kCFAllocatorDefault, &foundRef);
     }
@@ -180,9 +180,9 @@ typedef struct WLDragMapEntryStruct
     }
     
     if(path == nil){
-        path = [NSHomeDirectory() stringByAppendingPathComponent:@"Desktop"];
+        path = @"/Applications";
         if([self fileExistsAtPath:path isDirectory:&isDir] == NO || isDir == NO){
-            NSLog(@"The system was unable to find your Desktop folder.", @"");
+            NSLog(@"The system was unable to find your Applications folder.", @"");
             return nil;
         }
     }
