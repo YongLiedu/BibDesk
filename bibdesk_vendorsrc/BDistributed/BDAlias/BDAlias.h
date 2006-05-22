@@ -49,6 +49,7 @@
 - (id)initWithPath:(NSString *)path relativeToPath:(NSString *)relPath;
 - (id)initWithFSRef:(FSRef *)ref;
 - (id)initWithFSRef:(FSRef *)ref relativeToFSRef:(FSRef *)relRef;
+- (id)initWithURL:(NSURL *)fileURL;
 
 - (void)dealloc;
 
@@ -72,11 +73,15 @@
 */
 - (NSString *)fullPathRelativeToPathNoUI:(NSString *)relPath;
 
+- (NSURL *)fileURLNoUI;
+- (NSURL *)fileURL;
+
 + (BDAlias *)aliasWithAliasHandle:(AliasHandle)alias;
 + (BDAlias *)aliasWithData:(NSData *)data;
 + (BDAlias *)aliasWithPath:(NSString *)fullPath;
 + (BDAlias *)aliasWithPath:(NSString *)path relativeToPath:(NSString *)relPath;
 + (BDAlias *)aliasWithFSRef:(FSRef *)ref;
 + (BDAlias *)aliasWithFSRef:(FSRef *)ref relativeToFSRef:(FSRef *)relRef;
++ (BDAlias *)aliasWithURL:(NSURL *)fileURL;
 
 @end

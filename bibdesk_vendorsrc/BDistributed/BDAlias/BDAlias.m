@@ -166,6 +166,7 @@ static CFStringRef FSRefToPathCopy(const FSRef *inRef)
     anErr = PathToFSRef((CFStringRef) fullPath, &ref);
     
     if (anErr != noErr) {
+        [self release];
         return nil;
     }
     
@@ -181,12 +182,14 @@ static CFStringRef FSRefToPathCopy(const FSRef *inRef)
                         &ref);
     
     if (anErr != noErr) {
+        [self release];
         return nil;
     }
     
     anErr = PathToFSRef((CFStringRef) relPath, &relRef);
     
     if (anErr != noErr) {
+        [self release];
         return nil;
     }
     
@@ -206,10 +209,25 @@ static CFStringRef FSRefToPathCopy(const FSRef *inRef)
     anErr = FSNewAlias(relRef, ref, &alias);
     
     if (anErr != noErr) {
+        [self release];
         return nil;
     }
     
     return [self initWithAliasHandle:alias];
+}
+
+- (id)initWithURL:(NSURL *)fileURL
+{
+    NSParameterAssert([fileURL isFileURL]);
+    FSRef fileRef;
+    
+    if(CFURLGetFSRef((CFURLRef)fileURL, &fileRef)){
+        self = [self initWithFSRef:&fileRef];
+    } else {
+        [self release];
+        self = nil;
+    }
+    return self;
 }
 
 - (void)dealloc
@@ -322,6 +340,16 @@ static CFStringRef FSRefToPathCopy(const FSRef *inRef)
     return [self fullPathRelativeToPathNoUI:nil];
 }
 
+- (NSURL *)fileURLNoUI
+{
+    return [NSURL fileURLWithPath:[self fullPathNoUI]];
+}
+
+- (NSURL *)fileURL
+{
+    return [NSURL fileURLWithPath:[self fullPath]];
+}
+
 + (BDAlias *)aliasWithAliasHandle:(AliasHandle)alias
 {
     return [[[BDAlias alloc] initWithAliasHandle:alias] autorelease];
@@ -350,6 +378,11 @@ static CFStringRef FSRefToPathCopy(const FSRef *inRef)
 + (BDAlias *)aliasWithFSRef:(FSRef *)ref relativeToFSRef:(FSRef *)relRef
 {
     return [[[BDAlias alloc] initWithFSRef:ref relativeToFSRef:relRef] autorelease];
+}
+
++ (BDAlias *)aliasWithURL:(NSURL *)fileURL
+{
+    return [[[BDAlias alloc] initWithURL:fileURL] autorelease];
 }
 
 @end
