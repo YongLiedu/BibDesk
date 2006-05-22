@@ -2766,7 +2766,6 @@ static NSParagraphStyle* bodyParagraphStyle = nil;
     NSMutableArray *array = [[NSMutableArray alloc] initWithCapacity:[fieldNames count]];
     NSEnumerator *fnEnum = [fieldNames objectEnumerator];
     NSString *name;
-    BibField *field;
     while (name = [fnEnum nextObject]) {
         if ([NSString isEmptyString:[item valueForKey:name]] == NO)
             [array addObject:name];

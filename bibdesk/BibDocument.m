@@ -945,7 +945,6 @@ NSString *BDSKWeblocFilePboardType = @"CorePasteboardFlavorType 0x75726C20";
 
 - (NSString *)HTMLStringForPublications:(NSArray *)items{
     NSMutableString *s = [NSMutableString stringWithString:@""];
-    NSString *applicationSupportPath = [[NSFileManager defaultManager] currentApplicationSupportPathForCurrentUser]; 
     NSString *itemTemplate;
     NSEnumerator *e = [items objectEnumerator];
     BibItem *pub = nil;

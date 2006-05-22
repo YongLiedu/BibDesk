@@ -398,6 +398,14 @@ static NSString *defaultItemString = @"Default Item";
         [[NSWorkspace sharedWorkspace] openURL:[[outlineView itemAtRow:row] representedFileURL]];
 }
 
+- (void)chooseEditorPanelDidEnd:(NSOpenPanel *)openPanel returnCode:(int)returnCode contextInfo:(void *)contextInfo{
+    if(returnCode == NSOKButton){
+        NSString *appName = [[openPanel filenames] objectAtIndex:0];
+        NSString *filePath = [[[outlineView itemAtRow:[outlineView selectedRow]] representedFileURL] path];
+        [[NSWorkspace sharedWorkspace] openFile:filePath withApplication:appName];
+    }
+}
+
 - (IBAction)editFile:(id)sender;
 {
     // sender should be NSMenuItem with a representedObject of the application's URL (or nil if we're supposed to choose one)
@@ -421,14 +429,6 @@ static NSString *defaultItemString = @"Default Item";
                                didEndSelector:@selector(chooseEditorPanelDidEnd:returnCode:contextInfo:) 
                                   contextInfo:nil];
         }
-    }
-}
-
-- (void)chooseEditorPanelDidEnd:(NSOpenPanel *)openPanel returnCode:(int)returnCode contextInfo:(void *)contextInfo{
-    if(returnCode == NSOKButton){
-        NSString *appName = [[openPanel filenames] objectAtIndex:0];
-        NSString *filePath = [[[outlineView itemAtRow:[outlineView selectedRow]] representedFileURL] path];
-        [[NSWorkspace sharedWorkspace] openFile:filePath withApplication:appName];
     }
 }
 

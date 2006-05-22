@@ -129,7 +129,6 @@
         NSString *endTag;
         int start;
         NSDictionary *attr;
-        NSString *tmpStr;
         NSAttributedString *tmpAttrStr;
         id keyValue;
         
