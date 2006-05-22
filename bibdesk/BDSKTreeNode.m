@@ -41,10 +41,10 @@
 
 @implementation BDSKTreeNode
 
-- (id)initWithParent:(id)anObject;
+- (id)init;
 {
     if(self = [super init]){
-        [self setParent:anObject];
+        [self setParent:nil];
         [self setChildren:[NSArray array]];
         columnValues = [[NSMutableDictionary alloc] initWithCapacity:2];
     }
@@ -66,7 +66,7 @@
 
 - (id)initWithCoder:(NSCoder *)coder;
 {
-    if(self = [self initWithParent:nil]){
+    if(self = [self init]){
         [self setChildren:[coder decodeObjectForKey:@"children"]];
         columnValues = [[coder decodeObjectForKey:@"columnValues"] retain];
         parent = [coder decodeObjectForKey:@"parent"];
@@ -81,16 +81,16 @@
     [coder encodeConditionalObject:parent forKey:@"parent"];
 }
 
-- (id)parent { return parent; }
+- (BDSKTreeNode *)parent { return parent; }
 
-- (void)setParent:(id)anObject;
+- (void)setParent:(BDSKTreeNode *)anObject;
 {
     parent = anObject;
 }
 
 - (id)copyWithZone:(NSZone *)aZone;
 {
-    BDSKTreeNode *node = [[[self class] alloc] initWithParent:[self parent]];
+    BDSKTreeNode *node = [[[self class] alloc] init];
     
     // deep copy the array of children, since the copy could modify the original
     NSMutableArray *newChildren = [[NSMutableArray alloc] initWithArray:[self children] copyItems:YES];
@@ -110,13 +110,19 @@
     [columnValues setValue:value forKey:key];
 }
 
-- (void)addChild:(id)anObject;
+- (void)addChild:(BDSKTreeNode *)anObject;
 {
     [children addObject:anObject];
+    
+    // make sure this child knows its parent
+    [anObject setParent:self];
 }
 
-- (void)removeChild:(id)anObject;
+- (void)removeChild:(BDSKTreeNode *)anObject;
 {
+    [anObject setParent:nil];
+    
+    // make sure to orphin this child
     [children removeObject:anObject];
 }
 

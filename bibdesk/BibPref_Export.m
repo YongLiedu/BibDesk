@@ -70,7 +70,7 @@ static NSString *defaultItemString = @"Default Item";
     BDSKTemplate *childNode = nil;
     
     // we should only have a single template object to start with
-    childNode = [[BDSKTemplate alloc] initWithParent:nil];
+    childNode = [[BDSKTemplate alloc] init];
     [childNode setValue:@"Default HTML template" forKey:nameString];
     [itemNodes addObject:childNode];
     [childNode release];
@@ -79,7 +79,7 @@ static NSString *defaultItemString = @"Default Item";
         
     NSURL *fileURL = [NSURL fileURLWithPath:[[[NSFileManager defaultManager] currentApplicationSupportPathForCurrentUser] stringByAppendingPathComponent:@"htmlExportTemplate"]];
     if([[NSFileManager defaultManager] objectExistsAtFileURL:fileURL]){
-        tmpNode = [[BDSKTemplate alloc] initWithParent:childNode];
+        tmpNode = [[BDSKTemplate alloc] init];
         [tmpNode setValue:[[fileURL path] lastPathComponent] forKey:nameString];
         [tmpNode setValue:mainPageString forKey:rolesString];
         // don't add it if the alias fails
@@ -91,7 +91,7 @@ static NSString *defaultItemString = @"Default Item";
     // a user could potentially have templates for multiple types; we could add all of those, as well
     fileURL = [NSURL fileURLWithPath:[[[NSFileManager defaultManager] currentApplicationSupportPathForCurrentUser] stringByAppendingPathComponent:@"htmlItemExportTemplate"]];
     if([[NSFileManager defaultManager] objectExistsAtFileURL:fileURL]){
-        tmpNode = [[BDSKTemplate alloc] initWithParent:childNode];
+        tmpNode = [[BDSKTemplate alloc] init];
         [tmpNode setValue:[[fileURL path] lastPathComponent] forKey:nameString];
         [tmpNode setValue:defaultItemString forKey:rolesString];
         // don't add it if the alias fails
@@ -148,24 +148,24 @@ static NSString *defaultItemString = @"Default Item";
 {
     // may be nil
     BDSKTreeNode *selectedNode = [outlineView selectedItem];
-    BDSKTemplate *newNode = [[BDSKTemplate alloc] initWithParent:selectedNode];
+    BDSKTemplate *newNode = [[BDSKTemplate alloc] init];
 
     // add as a sibling of the selected node
     if([selectedNode isLeaf]){
-            [newNode setValue:NSLocalizedString(@"Double-click to choose file", @"") forKey:nameString];
+        [newNode setValue:NSLocalizedString(@"Double-click to choose file", @"") forKey:nameString];
         [(BDSKTreeNode *)[selectedNode parent] addChild:newNode];
     } else {
         
         [newNode setValue:NSLocalizedString(@"Double-click to change name", @"") forKey:nameString];
         [itemNodes addObject:newNode];
         
-            // add a child so newNode will be recognized as a non-leaf node
-            BDSKTemplate *child = [[BDSKTemplate alloc] initWithParent:newNode];
-            [child setValue:NSLocalizedString(@"Double-click to choose file", @"") forKey:nameString];
-            [child setValue:accessoryString forKey:rolesString];
+        // add a child so newNode will be recognized as a non-leaf node
+        BDSKTemplate *child = [[BDSKTemplate alloc] init];
+        [child setValue:NSLocalizedString(@"Double-click to choose file", @"") forKey:nameString];
+        [child setValue:accessoryString forKey:rolesString];
         [newNode addChild:child];
-            [child release];
-        }
+        [child release];
+    }
     
     [newNode release];
     [self updateUI];

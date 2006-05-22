@@ -46,15 +46,15 @@
     BDSKTreeNode *parent;
 }
 
-- (id)initWithParent:(id)anObject;
+- (id)init;
 // uses isEqual:
-- (void)removeChild:(id)anObject;
-- (void)addChild:(id)anObject;
+- (void)removeChild:(BDSKTreeNode *)anObject;
+- (void)addChild:(BDSKTreeNode *)anObject;
 - (void)setChildren:(NSArray *)theChildren;
 - (NSArray *)children;
 - (unsigned int)numberOfChildren;
-- (id)parent;
-- (void)setParent:(id)aParent;
+- (BDSKTreeNode *)parent;
+- (void)setParent:(BDSKTreeNode *)aParent;
 - (BOOL)isLeaf;
 
 @end
