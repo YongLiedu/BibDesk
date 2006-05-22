@@ -11,6 +11,6 @@
 
 @interface NSTableView (BDSKExtensions)
 
-- (BOOL)setValidDropRow:(int)row dropOperation:(NSTableViewDropOperation)operation;
+- (BOOL)setValidDropRow:(int *)row dropOperation:(NSTableViewDropOperation)operation;
 
 @end

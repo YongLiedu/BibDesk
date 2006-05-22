@@ -11,17 +11,17 @@
 
 @implementation NSTableView (BDSKExtensions)
 
-- (BOOL)setValidDropRow:(int)row dropOperation:(NSTableViewDropOperation)operation{
-	if (row < 0)
-		row = 0;
+- (BOOL)setValidDropRow:(int *)row dropOperation:(NSTableViewDropOperation)operation{
+	if (*row < 0)
+		*row = 0;
 	if (operation == NSTableViewDropOn) {
 		unsigned numRows = [self numberOfRows];
         if (numRows == 0) 
 			return NO;
-		if (row >= numRows)
-			row = numRows - 1;
+		if (*row >= numRows)
+			*row = numRows - 1;
 	}
-	[self setDropRow:row dropOperation:operation];
+	[self setDropRow:*row dropOperation:operation];
 	return YES;
 }
 

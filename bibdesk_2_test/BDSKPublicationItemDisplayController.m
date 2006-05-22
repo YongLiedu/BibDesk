@@ -83,7 +83,7 @@
 			return NSDragOperationNone;
 		NSString *type = [pboard availableTypeFromArray:[NSArray arrayWithObjects:BDSKContributorRowsPboardType, BDSKPersonPboardType, nil]];
 		if ([type isEqualToString:BDSKContributorRowsPboardType] && [info draggingSource] == tv) {
-            if ([tv setValidDropRow:row dropOperation:NSTableViewDropAbove] == NO)
+            if ([tv setValidDropRow:&row dropOperation:NSTableViewDropAbove] == NO)
                 return NSDragOperationNone;
 			return NSDragOperationMove;
 		} else if ([type isEqualToString:BDSKPersonPboardType]) {
