@@ -323,11 +323,6 @@ The groupedPublications array is a subset of the publications array, developed b
 #pragma mark Notification handlers
 
 - (void)handleGroupFieldChangedNotification:(NSNotification *)notification{
-    // this is set in all of the action methods
-    NSString *selectedItem = [[(BDSKGroupTableHeaderView *)[groupTableView headerView] popUpHeaderCell] titleOfSelectedItem];
-    if (selectedItem == nil)
-        selectedItem = @"";
-    OBPRECONDITION([selectedItem isEqualToString:[self currentGroupField]]);
     // use the most recently changed group as default for newly opened documents; could also store on a per-document basis
     [[OFPreferenceWrapper sharedPreferenceWrapper] setObject:currentGroupField forKey:BDSKCurrentGroupFieldKey];
 	[self updateGroupsPreservingSelection:NO];
@@ -666,7 +661,7 @@ The groupedPublications array is a subset of the publications array, developed b
 	NSEnumerator *fieldEnum = [[[OFPreferenceWrapper sharedPreferenceWrapper] stringArrayForKey:BDSKGroupFieldsKey] objectEnumerator];
 	NSString *field;
 	
-    [menu addItemWithTitle:@"" action:NULL keyEquivalent:@""];
+    [menu addItemWithTitle:NSLocalizedString(@"No Field", @"No Field") action:NULL keyEquivalent:@""];
 	
 	while (field = [fieldEnum nextObject]) {
 		[menu addItemWithTitle:field action:NULL keyEquivalent:@""];
@@ -711,10 +706,11 @@ The groupedPublications array is a subset of the publications array, developed b
 - (void)changeGroupFieldAction:(id)sender{
 	BDSKGroupTableHeaderView *headerView = (BDSKGroupTableHeaderView *)[groupTableView headerView];
 	NSPopUpButtonCell *headerCell = [headerView popUpHeaderCell];
-	NSString *field = [headerCell titleOfSelectedItem];
+	NSString *field = ([headerCell indexOfSelectedItem] == 0) ? @"" : [headerCell titleOfSelectedItem];
     
 	if(![field isEqualToString:currentGroupField]){
 		[self setCurrentGroupField:field];
+        [headerCell setTitle:field];
 		
 		[[NSNotificationCenter defaultCenter] postNotificationName:BDSKGroupFieldChangedNotification
 															object:self
@@ -728,7 +724,11 @@ The groupedPublications array is a subset of the publications array, developed b
 	BDSKGroupTableHeaderView *headerView = (BDSKGroupTableHeaderView *)[groupTableView headerView];
 	NSPopUpButtonCell *headerCell = [headerView popUpHeaderCell];
 	
-	[headerCell selectItemWithTitle:currentGroupField];
+	[headerCell setTitle:currentGroupField];
+    if ([currentGroupField isEqualToString:@""])
+        [headerCell selectItemAtIndex:0];
+    else 
+        [headerCell selectItemWithTitle:currentGroupField];
     
 	BibTypeManager *typeMan = [BibTypeManager sharedManager];
 	NSArray *groupFields = [[OFPreferenceWrapper sharedPreferenceWrapper] stringArrayForKey:BDSKGroupFieldsKey];
@@ -761,6 +761,7 @@ The groupedPublications array is a subset of the publications array, developed b
 	[headerCell insertItemWithTitle:newGroupField atIndex:[groupFields count]];
 	[self setCurrentGroupField:newGroupField];
 	[headerCell selectItemWithTitle:currentGroupField];
+	[headerCell setTitle:currentGroupField];
 	
 	[[NSNotificationCenter defaultCenter] postNotificationName:BDSKGroupFieldChangedNotification
 														object:self
@@ -772,14 +773,18 @@ The groupedPublications array is a subset of the publications array, developed b
 	BDSKGroupTableHeaderView *headerView = (BDSKGroupTableHeaderView *)[groupTableView headerView];
 	NSPopUpButtonCell *headerCell = [headerView popUpHeaderCell];
 	
-	[headerCell selectItemWithTitle:currentGroupField];
+	[headerCell setTitle:currentGroupField];
+    if ([currentGroupField isEqualToString:@""])
+        [headerCell selectItemAtIndex:0];
+    else 
+        [headerCell selectItemWithTitle:currentGroupField];
     
     BDSKAddFieldSheetController *removeFieldController = [[BDSKRemoveFieldSheetController alloc] initWithPrompt:NSLocalizedString(@"Group field to remove:",@"")
                                                             fieldsArray:[[OFPreferenceWrapper sharedPreferenceWrapper] stringArrayForKey:BDSKGroupFieldsKey]];
 	NSString *oldGroupField = [removeFieldController runSheetModalForWindow:documentWindow];
     [removeFieldController release];
     
-    if(oldGroupField == nil)
+    if([NSString isEmptyString:oldGroupField])
         return;
     
     NSMutableArray *array = [[[OFPreferenceWrapper sharedPreferenceWrapper] stringArrayForKey:BDSKGroupFieldsKey] mutableCopy];
@@ -789,8 +794,9 @@ The groupedPublications array is a subset of the publications array, developed b
     
     [headerCell removeItemWithTitle:oldGroupField];
     if([oldGroupField isEqualToString:currentGroupField]){
-        [self setCurrentGroupField:[[headerCell itemAtIndex:0] title]];
-        [headerCell selectItemWithTitle:currentGroupField];
+        [self setCurrentGroupField:@""];
+        [headerCell selectItemAtIndex:0];
+        [headerCell setTitle:@""];
         
         [[NSNotificationCenter defaultCenter] postNotificationName:BDSKGroupFieldChangedNotification
                                                             object:self

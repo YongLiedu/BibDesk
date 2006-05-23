@@ -346,6 +346,8 @@ NSString *BDSKWeblocFilePboardType = @"CorePasteboardFlavorType 0x75726C20";
 	[headerCell setTarget:self];
 	[headerCell setMenu:[self groupFieldsMenu]];
 	[(BDSKHeaderPopUpButtonCell *)headerCell setIndicatorImage:[NSImage imageNamed:sortGroupsDescending ? @"NSDescendingSortIndicator" : @"NSAscendingSortIndicator"]];
+    [(BDSKHeaderPopUpButtonCell *)headerCell setUsesItemFromMenu:NO];
+	[headerCell setTitle:currentGroupField];
     if([headerCell itemWithTitle:currentGroupField])
         [headerCell selectItemWithTitle:currentGroupField];
     else

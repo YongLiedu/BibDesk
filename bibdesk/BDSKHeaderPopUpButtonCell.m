@@ -47,6 +47,7 @@
 	NSTableHeaderCell *aHeaderCell = [[NSTableHeaderCell allocWithZone:[self zone]] initTextCell:@""];
 	if (self = [self initWithHeaderCell:aHeaderCell]) {
 		[self setStringValue:aString];
+        [headerCell setStringValue:aString];
 	}
 	[aHeaderCell release];
 	return self;
@@ -113,9 +114,23 @@
 	return popupRect;
 }
 
+- (NSString *)title {
+    if ([self usesItemFromMenu])
+        return [super title];
+    else
+        return [headerCell title];
+}
+
+- (void)setTitle:(NSString *)title {
+    if ([self usesItemFromMenu])
+        [super setTitle:title];
+    [headerCell setTitle:title];
+}
+
 - (void)drawWithFrame:(NSRect)cellFrame inView:(NSView *)controlView {
 	// let the header cell do most of the drawing for usNSLog(@"%@ %@");
-	[headerCell setStringValue:[self title]];
+    if ([self usesItemFromMenu])
+        [headerCell setStringValue:[self title]];
 	[headerCell setState:[self isHighlighted]];
 	[headerCell drawWithFrame:cellFrame inView:controlView];
 	
