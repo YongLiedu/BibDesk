@@ -47,6 +47,20 @@
 @end
 
 
+/*!
+@class BDSKTemplateParser
+@abstract A parser class for parsing string and attributed string templates
+@discussion This class provides class methods to parse a template, either a string or an attributed string. 
+It replaces certain template tags by values obtained using KVC from an object. 
+The template tag can be a single tag of the form "<$key/>", for which the value obtained using KVC is substituted. 
+For attributed strings the attributes from the first character of the tag are added to the parsed value. 
+Alternatively, the tag can be a pair of start/end tags like "<$key>item template</$key>", 
+where the value obtained using KVC should be a collection, i.e. respond to objectEnumerator.
+The content of the tag ("item template") is parsed for each item in the collection. 
+Spaces up to a line break before and after a start or end tag are ignored, as well as the line break after it. 
+The delegate is send a message before and after an item in a collection is used for parsing. 
+The keys should be valid key paths (i.e. only letters and dots) and spaces are not allowed in the tags. 
+*/
 @interface BDSKTemplateParser : NSObject
 
 + (NSString *)stringByParsingTemplate:(NSString *)template usingObject:(id)object;
@@ -58,7 +72,15 @@
 
 
 @interface NSObject (BDSKTemplateParser)
-
 - (NSString *)stringDescription;
+@end
 
+
+@interface NSScanner (BDSKTemplateParser)
+- (BOOL)scanWhitespaceAndSingleNewline;
+@end
+
+
+@interface NSString (BDSKTemplateParser)
+- (NSRange)rangeOfTrailingWhitespaceLine;
 @end
