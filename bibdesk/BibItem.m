@@ -41,7 +41,6 @@
 #import "BibEditor.h"
 #import "BibTypeManager.h"
 #import "BibAuthor.h"
-#import "NSString+Templating.h"
 #import "BibPrefController.h"
 #import "NSString_BDSKExtensions.h"
 #import "BDSKConverter.h"

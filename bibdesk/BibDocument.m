@@ -71,7 +71,6 @@
 #import "BibTeXParser.h"
 #import "PubMedParser.h"
 #import "BDSKJSTORParser.h"
-#import "NSString+Templating.h"
 #import "BibFiler.h"
 
 #import "ApplicationServices/ApplicationServices.h"
