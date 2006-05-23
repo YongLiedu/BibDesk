@@ -812,9 +812,11 @@ NSString *BDSKWeblocFilePboardType = @"CorePasteboardFlavorType 0x75726C20";
         }else if([fileType isEqualToString:@"html"]){
             BDSKTemplate *selectedTemplate = [BDSKTemplate templateForStyle:currentExportTemplateStyle];
             // @@ templating: need a better way to choose the extension
-            NSString *extension = ([selectedTemplate templateFormat] == BDSKRTFTemplateFormat) ? @"rtf" : @"txt";
+            NSString *extension = nil;
+            if ([selectedTemplate templateFormat] == BDSKRTFTemplateFormat) extension = @"rtf";
+            if ([selectedTemplate templateFormat] == BDSKDocTemplateFormat) extension = @"doc";
             fileName = [[fileName stringByDeletingPathExtension] stringByAppendingPathExtension:extension];
-            fileData = [self templateDataForSelection:selected];
+            fileData = [self templatedDataForSelection:selected];
             NSEnumerator *accessoryFileEnum = [[selectedTemplate accessoryFileURLs] objectEnumerator];
             NSURL *accessoryURL = nil;
             NSURL *destDirURL = [NSURL fileURLWithPath:[fileName stringByDeletingLastPathComponent]];
@@ -867,7 +869,7 @@ NSString *BDSKWeblocFilePboardType = @"CorePasteboardFlavorType 0x75726C20";
     }else if ([aType isEqualToString:@"Rich Site Summary file"]){
         data = [self rssDataForPublications:publications];
     }else if ([aType isEqualToString:@"HTML"]){
-        data = [self templateDataForSelection:NO];
+        data = [self templatedDataForSelection:NO];
     }else if ([aType isEqualToString:@"MODS"]){
         data = [self MODSDataForPublications:publications];
     }else if ([aType isEqualToString:@"EndNote XML"]){
@@ -928,7 +930,7 @@ NSString *BDSKWeblocFilePboardType = @"CorePasteboardFlavorType 0x75726C20";
     return d;
 }
 
-- (NSData *)templateDataForSelection:(BOOL)selected{
+- (NSData *)templatedDataForSelection:(BOOL)selected{
     BDSKTemplate *selectedTemplate = [BDSKTemplate templateForStyle:currentExportTemplateStyle];
     OBPRECONDITION(nil != selectedTemplate);
     BDSKTemplateFormat format = [selectedTemplate templateFormat];
@@ -970,10 +972,32 @@ NSString *BDSKWeblocFilePboardType = @"CorePasteboardFlavorType 0x75726C20";
             fileTemplate = [tmpString autorelease];
         }
         fileTemplate = [BDSKTemplateParser attributedStringByParsingTemplate:fileTemplate usingObject:self delegate:self];
-        
         return [fileTemplate RTFFromRange:NSMakeRange(0,[fileTemplate length]) documentAttributes:nil];
         
+    } else if (format == BDSKDocTemplateFormat) {
+        
+        NSAttributedString *fileTemplate = [[[NSAttributedString alloc] initWithURL:[selectedTemplate mainPageTemplateURL] documentAttributes:NULL] autorelease];
+        OBPRECONDITION(nil != fileTemplate);
+        
+        if (selected) {
+            NSMutableAttributedString *tmpString = [fileTemplate mutableCopy];
+            NSRange range = [[tmpString string] rangeOfString:@"<$publicationsUsingTemplate>"];
+            if (range.location != NSNotFound)
+                [tmpString replaceCharactersInRange:range withString:@"<$selectionUsingTemplate>"];
+            range = [[tmpString string] rangeOfString:@"<$publications>"];
+            if (range.location != NSNotFound)
+                [tmpString replaceCharactersInRange:range withString:@"<$selectedPublications>"];
+            range = [[tmpString string] rangeOfString:@"</$publications>"];
+            if (range.location != NSNotFound)
+                [tmpString replaceCharactersInRange:range withString:@"</$selectedPublications>"];
+            fileTemplate = [tmpString autorelease];
+        }
+        fileTemplate = [BDSKTemplateParser attributedStringByParsingTemplate:fileTemplate usingObject:self delegate:self];
+        return [fileTemplate docFormatFromRange:NSMakeRange(0,[fileTemplate length]) documentAttributes:nil];
+        
     }
+    
+    return nil;
 }
 
 // legacy method, as it may appear as a key in older teplates
@@ -1018,7 +1042,7 @@ NSString *BDSKWeblocFilePboardType = @"CorePasteboardFlavorType 0x75726C20";
         
         return s;
         
-    } else if (format == BDSKRTFTemplateFormat) {
+    } else if (format == BDSKRTFTemplateFormat || format == BDSKDocTemplateFormat) {
         
         NSMutableAttributedString *as = [[[NSMutableAttributedString alloc] init] autorelease];
         NSAttributedString *defaultItemTemplate = [[[NSAttributedString alloc] initWithURL:[selectedTemplate defaultItemTemplateURL] documentAttributes:NULL] autorelease];

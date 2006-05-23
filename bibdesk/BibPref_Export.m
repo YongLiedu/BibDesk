@@ -213,10 +213,6 @@ static NSString *defaultItemString = @"Default Item";
     return nil == item ? [itemNodes objectAtIndex:index] : [[item children] objectAtIndex:index];
 }
 
-#warning this seems to be broken
-// probably uses isEqual: to determine if the object should be expanded
-// object is archived; return the unarchived object (but I think NSOutlineView requires
-// unique objects, so I'm using pointer equality)
 - (id)outlineView:(NSOutlineView *)ov itemForPersistentObject:(id)object
 {
     return [NSKeyedUnarchiver unarchiveObjectWithData:object];
@@ -444,7 +440,7 @@ static NSString *defaultItemString = @"Default Item";
         [popupCell setFont:[cell font]];
         [popupCell setBordered:NO];
         [popupCell setControlSize:NSSmallControlSize];
-        [popupCell addItemsWithTitles:[NSArray arrayWithObjects:NSLocalizedString(@"Plain Text", @"Plain Text"), NSLocalizedString(@"RTF", @"RTF"), nil]];
+        [popupCell addItemsWithTitles:[NSArray arrayWithObjects:NSLocalizedString(@"Plain Text", @"Plain Text"), NSLocalizedString(@"RTF", @"RTF"), NSLocalizedString(@"Doc", @"Doc"), nil]];
     }
     
     // if this is a non-editable cell, don't display the combo box

@@ -287,7 +287,7 @@ extern NSString* BDSKWeblocFilePboardType; // core pasteboard type for webloc fi
 
 - (NSData *)rssDataForPublications:(NSArray *)items;
 
-- (NSData *)templateDataForSelection:(BOOL)selected;
+- (NSData *)templatedDataForSelection:(BOOL)selected;
 
 - (id)publicationsUsingTemplate;
 - (id)selectionUsingTemplate;

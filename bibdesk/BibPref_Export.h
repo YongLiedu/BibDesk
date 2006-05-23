@@ -41,7 +41,8 @@
 
 typedef enum _BDSKTemplateFormat {
     BDSKTextTemplateFormat,
-    BDSKRTFTemplateFormat
+    BDSKRTFTemplateFormat,
+    BDSKDocTemplateFormat
 } BDSKTemplateFormat;
 
 
