@@ -13,18 +13,6 @@
 			buildPhases = (
 				3D8A577A082D308B008E818C /* ShellScript */,
 			);
-			buildSettings = {
-				OTHER_CFLAGS = "";
-				OTHER_LDFLAGS = "";
-				OTHER_REZFLAGS = "";
-				PRODUCT_NAME = "BibDesk Help";
-				SECTORDER_FLAGS = "";
-				WARNING_CFLAGS = (
-					"-Wmost",
-					"-Wno-four-char-constants",
-					"-Wno-unknown-pragmas",
-				);
-			};
 			dependencies = (
 			);
 			name = "BibDesk Help";
@@ -36,18 +24,6 @@
 			buildPhases = (
 				F98870BA07580DEF001D4D49 /* ShellScript */,
 			);
-			buildSettings = {
-				OTHER_CFLAGS = "";
-				OTHER_LDFLAGS = "";
-				OTHER_REZFLAGS = "";
-				PRODUCT_NAME = latex2rtf;
-				SECTORDER_FLAGS = "";
-				WARNING_CFLAGS = (
-					"-Wmost",
-					"-Wno-four-char-constants",
-					"-Wno-unknown-pragmas",
-				);
-			};
 			dependencies = (
 			);
 			name = latex2rtf;
@@ -59,18 +35,6 @@
 			buildPhases = (
 				F98870BE07580E0B001D4D49 /* ShellScript */,
 			);
-			buildSettings = {
-				OTHER_CFLAGS = "";
-				OTHER_LDFLAGS = "";
-				OTHER_REZFLAGS = "";
-				PRODUCT_NAME = pdftotext;
-				SECTORDER_FLAGS = "";
-				WARNING_CFLAGS = (
-					"-Wmost",
-					"-Wno-four-char-constants",
-					"-Wno-unknown-pragmas",
-				);
-			};
 			dependencies = (
 			);
 			name = pdftotext;
@@ -82,18 +46,6 @@
 			buildPhases = (
 				F98870CD07580E5F001D4D49 /* ShellScript */,
 			);
-			buildSettings = {
-				OTHER_CFLAGS = "";
-				OTHER_LDFLAGS = "";
-				OTHER_REZFLAGS = "";
-				PRODUCT_NAME = HeaderDoc;
-				SECTORDER_FLAGS = "";
-				WARNING_CFLAGS = (
-					"-Wmost",
-					"-Wno-four-char-constants",
-					"-Wno-unknown-pragmas",
-				);
-			};
 			dependencies = (
 			);
 			name = HeaderDoc;
@@ -105,18 +57,6 @@
 			buildPhases = (
 				F98870D307580E94001D4D49 /* ShellScript */,
 			);
-			buildSettings = {
-				OTHER_CFLAGS = "";
-				OTHER_LDFLAGS = "";
-				OTHER_REZFLAGS = "";
-				PRODUCT_NAME = DiskImage;
-				SECTORDER_FLAGS = "";
-				WARNING_CFLAGS = (
-					"-Wmost",
-					"-Wno-four-char-constants",
-					"-Wno-unknown-pragmas",
-				);
-			};
 			dependencies = (
 				F9E0F88B085B9AFA00006A72 /* PBXTargetDependency */,
 				F98870D807580EA1001D4D49 /* PBXTargetDependency */,
@@ -129,18 +69,6 @@
 			buildConfigurationList = F993F1F308553A61007A7657 /* Build configuration list for PBXAggregateTarget "BuildMeFirst" */;
 			buildPhases = (
 			);
-			buildSettings = {
-				OTHER_CFLAGS = "";
-				OTHER_LDFLAGS = "";
-				OTHER_REZFLAGS = "";
-				PRODUCT_NAME = BuildMeFirst;
-				SECTORDER_FLAGS = "";
-				WARNING_CFLAGS = (
-					"-Wmost",
-					"-Wno-four-char-constants",
-					"-Wno-unknown-pragmas",
-				);
-			};
 			dependencies = (
 				F9F14A4F075811DA008BA22F /* PBXTargetDependency */,
 				F9F14A51075811DA008BA22F /* PBXTargetDependency */,
@@ -635,6 +563,8 @@
 		F97BF344090B19520063504B /* smartFolderIcon.tiff in Resources */ = {isa = PBXBuildFile; fileRef = F97BF343090B19520063504B /* smartFolderIcon.tiff */; };
 		F98AA6810971E3F400184BD8 /* BDSKTextViewCompletionController.h in Headers */ = {isa = PBXBuildFile; fileRef = F98AA67F0971E3F400184BD8 /* BDSKTextViewCompletionController.h */; };
 		F98AA6820971E3F400184BD8 /* BDSKTextViewCompletionController.m in Sources */ = {isa = PBXBuildFile; fileRef = F98AA6800971E3F400184BD8 /* BDSKTextViewCompletionController.m */; };
+		F98DB3170A23C7730040D347 /* BDSKTemplate.h in Headers */ = {isa = PBXBuildFile; fileRef = F98DB3150A23C7730040D347 /* BDSKTemplate.h */; };
+		F98DB3180A23C7730040D347 /* BDSKTemplate.m in Sources */ = {isa = PBXBuildFile; fileRef = F98DB3160A23C7730040D347 /* BDSKTemplate.m */; };
 		F994B8F707F5F65F00751DA1 /* RelNotes.rtf in Resources */ = {isa = PBXBuildFile; fileRef = F994B8F607F5F65F00751DA1 /* RelNotes.rtf */; };
 		F99BC25E095A5C7000E018C3 /* NSArray_BDSKExtensions.h in Headers */ = {isa = PBXBuildFile; fileRef = F99BC25C095A5C7000E018C3 /* NSArray_BDSKExtensions.h */; };
 		F99BC25F095A5C7000E018C3 /* NSArray_BDSKExtensions.m in Sources */ = {isa = PBXBuildFile; fileRef = F99BC25D095A5C7000E018C3 /* NSArray_BDSKExtensions.m */; };
@@ -699,50 +629,6 @@
 		F9FEFCB10A0BC14D009193CA /* PreferenceSearchTerms.plist in Resources */ = {isa = PBXBuildFile; fileRef = F9FEFCB00A0BC14D009193CA /* PreferenceSearchTerms.plist */; };
 		F9FF241309E873A300BB1706 /* networkIcon.tiff in Resources */ = {isa = PBXBuildFile; fileRef = F9FF241209E873A300BB1706 /* networkIcon.tiff */; };
 /* End PBXBuildFile section */
-
-/* Begin PBXBuildStyle section */
-		275E2776078394920070398A /* Test */ = {
-			isa = PBXBuildStyle;
-			buildSettings = {
-				GCC_PREPROCESSOR_DEFINITIONS = UNIT_TESTING;
-				REZ_PREPROCESSOR_DEFINITIONS = "";
-			};
-			name = Test;
-		};
-		4A9504CCFFE6A4B311CA0CBA /* Development */ = {
-			isa = PBXBuildStyle;
-			buildSettings = {
-				COPY_PHASE_STRIP = NO;
-				GCC_DYNAMIC_NO_PIC = NO;
-				GCC_ENABLE_FIX_AND_CONTINUE = YES;
-				GCC_GENERATE_DEBUGGING_SYMBOLS = YES;
-				GCC_OPTIMIZATION_LEVEL = 0;
-				GCC_PREPROCESSOR_DEFINITIONS = "";
-				GCC_WARN_ALLOW_INCOMPLETE_PROTOCOL = NO;
-				OTHER_CFLAGS = "";
-				ZERO_LINK = YES;
-			};
-			name = Development;
-		};
-		4A9504CDFFE6A4B311CA0CBA /* Deployment */ = {
-			isa = PBXBuildStyle;
-			buildSettings = {
-				COPY_PHASE_STRIP = YES;
-				GCC_ENABLE_FIX_AND_CONTINUE = NO;
-				GCC_MODEL_TUNING = G4;
-				GCC_PREPROCESSOR_DEFINITIONS = USECRASHREPORTER;
-				GCC_WARN_ALLOW_INCOMPLETE_PROTOCOL = YES;
-				GCC_WARN_PEDANTIC = NO;
-				GCC_WARN_SIGN_COMPARE = NO;
-				GCC_WARN_UNINITIALIZED_AUTOS = YES;
-				GCC_WARN_UNUSED_FUNCTION = YES;
-				GCC_WARN_UNUSED_PARAMETER = NO;
-				GCC_WARN_UNUSED_VALUE = YES;
-				ZERO_LINK = NO;
-			};
-			name = Deployment;
-		};
-/* End PBXBuildStyle section */
 
 /* Begin PBXContainerItemProxy section */
 		CE67E7CE092C9CCE00410758 /* PBXContainerItemProxy */ = {
@@ -1116,7 +1002,7 @@
 		3DFF35600816B55B0052F37C /* forward_small.tiff */ = {isa = PBXFileReference; lastKnownFileType = image.tiff; name = forward_small.tiff; path = Images/forward_small.tiff; sourceTree = "<group>"; };
 		3DFF35620816B5780052F37C /* reload_small.tiff */ = {isa = PBXFileReference; lastKnownFileType = image.tiff; name = reload_small.tiff; path = Images/reload_small.tiff; sourceTree = "<group>"; };
 		8D1107310486CEB800E47090 /* Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
-		8D1107320486CEB800E47090 /* BibDesk.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = BibDesk.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		8D1107320486CEB800E47090 /* BibDesk.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = BibDesk.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		CE1A7ED4090BDEB600ACC864 /* BDSKHeaderPopUpButtonCell.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BDSKHeaderPopUpButtonCell.h; sourceTree = "<group>"; };
 		CE1A7ED5090BDEB600ACC864 /* BDSKHeaderPopUpButtonCell.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BDSKHeaderPopUpButtonCell.m; sourceTree = "<group>"; };
 		CE1A7EDD090BDF1C00ACC864 /* BDSKHeaderPopUpButton.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BDSKHeaderPopUpButton.h; sourceTree = "<group>"; };
@@ -1491,6 +1377,8 @@
 		F97BF343090B19520063504B /* smartFolderIcon.tiff */ = {isa = PBXFileReference; lastKnownFileType = image.tiff; name = smartFolderIcon.tiff; path = Images/smartFolderIcon.tiff; sourceTree = "<group>"; };
 		F98AA67F0971E3F400184BD8 /* BDSKTextViewCompletionController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BDSKTextViewCompletionController.h; sourceTree = "<group>"; };
 		F98AA6800971E3F400184BD8 /* BDSKTextViewCompletionController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BDSKTextViewCompletionController.m; sourceTree = "<group>"; };
+		F98DB3150A23C7730040D347 /* BDSKTemplate.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BDSKTemplate.h; sourceTree = "<group>"; };
+		F98DB3160A23C7730040D347 /* BDSKTemplate.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BDSKTemplate.m; sourceTree = "<group>"; };
 		F98F33C80892D4B700C1427D /* BDSKZoomablePDFView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BDSKZoomablePDFView.h; sourceTree = "<group>"; };
 		F98F33C90892D4B700C1427D /* BDSKZoomablePDFView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BDSKZoomablePDFView.m; sourceTree = "<group>"; };
 		F994B8F607F5F65F00751DA1 /* RelNotes.rtf */ = {isa = PBXFileReference; lastKnownFileType = text.rtf; path = RelNotes.rtf; sourceTree = "<group>"; };
@@ -1967,6 +1855,7 @@
 				F925332208FC9FB80045D563 /* BDSKSearchIndex.m */,
 				F92EF32109E6242100A244D0 /* BDSKSharedGroup.m */,
 				F9025DAA0969AB69008A551C /* BDSKStringNode.m */,
+				F98DB3160A23C7730040D347 /* BDSKTemplate.m */,
 				F963E42B0A1D7ADD00695DDC /* BDSKTreeNode.m */,
 				F9022C60075802E300C3F701 /* BibAuthor.m */,
 				F9022C6E075802E300C3F701 /* BibItem.m */,
@@ -2241,6 +2130,7 @@
 				F9F78CD207D5320D004B68AF /* BDSKStringEncodingManager.h */,
 				F9025DA90969AB69008A551C /* BDSKStringNode.h */,
 				CEF94412092668EA00750FFA /* BDSKTableSortDescriptor.h */,
+				F98DB3150A23C7730040D347 /* BDSKTemplate.h */,
 				CE325FCB0A1A74E9002D6E4C /* BDSKTemplateParser.h */,
 				F9DB895A08A54BBA00CB3D53 /* BDSKTeXTask.h */,
 				27AFAF9A080D1E1B0096F5D2 /* BDSKTextImportController.h */,
@@ -2628,6 +2518,7 @@
 				CE325FCD0A1A74E9002D6E4C /* BDSKTemplateParser.h in Headers */,
 				F963E45A0A1D828000695DDC /* BDSKTreeNode.h in Headers */,
 				F963E45C0A1D828100695DDC /* BibPref_Export.h in Headers */,
+				F98DB3170A23C7730040D347 /* BDSKTemplate.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -2646,57 +2537,11 @@
 			);
 			buildRules = (
 			);
-			buildSettings = {
-				FRAMEWORK_SEARCH_PATHS = /Users/mike/Code/bibdesk_vendorsrc/infinite_loop;
-				GCC_PRECOMPILE_PREFIX_HEADER = YES;
-				GCC_PREFIX_HEADER = "$(SYSTEM_LIBRARY_DIR)/Frameworks/Foundation.framework/Headers/Foundation.h";
-				GCC_WARN_FOUR_CHARACTER_CONSTANTS = NO;
-				GCC_WARN_UNKNOWN_PRAGMAS = NO;
-				INFOPLIST_FILE = "TestBibItem-Info.plist";
-				INSTALL_PATH = "$(USER_LIBRARY_DIR)/Bundles";
-				LIBRARY_SEARCH_PATHS = /Users/mike/Code/bibdesk_vendorsrc/gward/btparse;
-				OTHER_CFLAGS = "";
-				OTHER_LDFLAGS = (
-					"-framework",
-					Foundation,
-				);
-				OTHER_REZFLAGS = "";
-				PRODUCT_NAME = TestBibItem;
-				SECTORDER_FLAGS = "";
-				WARNING_CFLAGS = "-Wmost";
-			};
 			dependencies = (
 			);
 			name = TestBibItem;
 			productName = TestBibItem;
 			productReference = 275E270707838EE30070398A /* TestBibItem.bundle */;
-			productSettingsXML = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>
-<!DOCTYPE plist PUBLIC \"-//Apple Computer//DTD PLIST 1.0//EN\" \"http://www.apple.com/DTDs/PropertyList-1.0.dtd\">
-<plist version=\"1.0\">
-<dict>
-	<key>CFBundleDevelopmentRegion</key>
-	<string>English</string>
-	<key>CFBundleExecutable</key>
-	<string>TestBibItem</string>
-	<key>CFBundleGetInfoString</key>
-	<string></string>
-	<key>CFBundleIconFile</key>
-	<string></string>
-	<key>CFBundleIdentifier</key>
-	<string>com.MySoftwareCompany.TestBibItem</string>
-	<key>CFBundleInfoDictionaryVersion</key>
-	<string>6.0</string>
-	<key>CFBundlePackageType</key>
-	<string>APPL</string>
-	<key>CFBundleShortVersionString</key>
-	<string></string>
-	<key>CFBundleSignature</key>
-	<string>????</string>
-	<key>CFBundleVersion</key>
-	<string>1.0.0d1</string>
-</dict>
-</plist>
-";
 			productType = "com.apple.product-type.bundle";
 		};
 		27CD032307D82C7400806B7E /* TestComplexString */ = {
@@ -2712,56 +2557,11 @@
 			);
 			buildRules = (
 			);
-			buildSettings = {
-				FRAMEWORK_SEARCH_PATHS = $BUILD_DIR/;
-				GCC_PRECOMPILE_PREFIX_HEADER = YES;
-				GCC_PREFIX_HEADER = "$(SYSTEM_LIBRARY_DIR)/Frameworks/Foundation.framework/Headers/Foundation.h";
-				GCC_WARN_FOUR_CHARACTER_CONSTANTS = NO;
-				GCC_WARN_UNKNOWN_PRAGMAS = NO;
-				INFOPLIST_FILE = "TestComplexString-Info.plist";
-				INSTALL_PATH = "$(USER_LIBRARY_DIR)/Bundles";
-				OTHER_CFLAGS = "";
-				OTHER_LDFLAGS = (
-					"-framework",
-					Foundation,
-				);
-				OTHER_REZFLAGS = "";
-				PRODUCT_NAME = TestComplexString;
-				SECTORDER_FLAGS = "";
-				WARNING_CFLAGS = "-Wmost";
-			};
 			dependencies = (
 			);
 			name = TestComplexString;
 			productName = TestComplexString;
 			productReference = 27CD032407D82C7400806B7E /* TestComplexString.bundle */;
-			productSettingsXML = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>
-<!DOCTYPE plist PUBLIC \"-//Apple Computer//DTD PLIST 1.0//EN\" \"http://www.apple.com/DTDs/PropertyList-1.0.dtd\">
-<plist version=\"1.0\">
-<dict>
-	<key>CFBundleDevelopmentRegion</key>
-	<string>English</string>
-	<key>CFBundleExecutable</key>
-	<string>TestComplexString</string>
-	<key>CFBundleGetInfoString</key>
-	<string></string>
-	<key>CFBundleIconFile</key>
-	<string></string>
-	<key>CFBundleIdentifier</key>
-	<string>com.MySoftwareCompany.TestComplexString</string>
-	<key>CFBundleInfoDictionaryVersion</key>
-	<string>6.0</string>
-	<key>CFBundlePackageType</key>
-	<string>APPL</string>
-	<key>CFBundleShortVersionString</key>
-	<string></string>
-	<key>CFBundleSignature</key>
-	<string>????</string>
-	<key>CFBundleVersion</key>
-	<string>1.0.0d1</string>
-</dict>
-</plist>
-";
 			productType = "com.apple.product-type.bundle";
 		};
 		8D1107260486CEB800E47090 /* BibDesk */ = {
@@ -2783,20 +2583,6 @@
 			);
 			buildRules = (
 			);
-			buildSettings = {
-				FRAMEWORK_SEARCH_PATHS = "$(SOURCE_ROOT)/../bibdesk_vendorsrc/infinite_loop";
-				GCC_GENERATE_DEBUGGING_SYMBOLS = NO;
-				GCC_PRECOMPILE_PREFIX_HEADER = YES;
-				GCC_PREFIX_HEADER = Bibdesk_Prefix.pch;
-				HEADER_SEARCH_PATHS = "";
-				INFOPLIST_FILE = Info.plist;
-				INSTALL_PATH = "$(HOME)/Applications";
-				LIBRARY_SEARCH_PATHS = "$(SOURCE_ROOT)/../bibdesk_vendorsrc/gward/btparse";
-				OTHER_LDFLAGS = "";
-				PRODUCT_NAME = BibDesk;
-				WRAPPER_EXTENSION = app;
-				ZERO_LINK = YES;
-			};
 			dependencies = (
 				F9234FF3089A7E0300EFEB06 /* PBXTargetDependency */,
 				F9DE7867097F29D00033FBA8 /* PBXTargetDependency */,
@@ -2817,58 +2603,11 @@
 			);
 			buildRules = (
 			);
-			buildSettings = {
-				GCC_GENERATE_DEBUGGING_SYMBOLS = NO;
-				GCC_MODEL_TUNING = G5;
-				GCC_PRECOMPILE_PREFIX_HEADER = YES;
-				GCC_PREFIX_HEADER = "$(SYSTEM_LIBRARY_DIR)/Frameworks/AppKit.framework/Headers/AppKit.h";
-				INFOPLIST_FILE = "Untitled-Info.plist";
-				INSTALL_PATH = "$(USER_LIBRARY_DIR)/Bundles";
-				LIBRARY_STYLE = BUNDLE;
-				OPTIMIZATION_CFLAGS = "";
-				OTHER_CFLAGS = "";
-				OTHER_LDFLAGS = (
-					"-framework",
-					Foundation,
-					"-framework",
-					AppKit,
-				);
-				OTHER_REZFLAGS = "";
-				PREBINDING = NO;
-				PRODUCT_NAME = Untitled;
-				SECTORDER_FLAGS = "";
-				WARNING_CFLAGS = (
-					"-Wmost",
-					"-Wno-four-char-constants",
-					"-Wno-unknown-pragmas",
-				);
-			};
 			dependencies = (
 			);
 			name = Tiger;
 			productName = Untitled;
 			productReference = F91A2D66089A7CF70009B1C1 /* Tiger.bundle */;
-			productSettingsXML = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>
-<!DOCTYPE plist PUBLIC \"-//Apple Computer//DTD PLIST 1.0//EN\" \"http://www.apple.com/DTDs/PropertyList-1.0.dtd\">
-<plist version=\"1.0\">
-<dict>
-	<key>CFBundleDevelopmentRegion</key>
-	<string>English</string>
-	<key>CFBundleExecutable</key>
-	<string>Untitled</string>
-	<key>CFBundleIdentifier</key>
-	<string>com.yourcompany.Untitled</string>
-	<key>CFBundleInfoDictionaryVersion</key>
-	<string>6.0</string>
-	<key>CFBundlePackageType</key>
-	<string>APPL</string>
-	<key>CFBundleSignature</key>
-	<string>????</string>
-	<key>CFBundleVersion</key>
-	<string>1.0</string>
-</dict>
-</plist>
-";
 			productType = "com.apple.product-type.bundle";
 		};
 /* End PBXNativeTarget section */
@@ -2877,13 +2616,6 @@
 		29B97313FDCFA39411CA2CEA /* Project object */ = {
 			isa = PBXProject;
 			buildConfigurationList = F993F20208553A61007A7657 /* Build configuration list for PBXProject "Bibdesk" */;
-			buildSettings = {
-			};
-			buildStyles = (
-				4A9504CCFFE6A4B311CA0CBA /* Development */,
-				4A9504CDFFE6A4B311CA0CBA /* Deployment */,
-				275E2776078394920070398A /* Test */,
-			);
 			hasScannedForEncodings = 1;
 			mainGroup = 29B97314FDCFA39411CA2CEA /* BibDesk */;
 			projectDirPath = "";
@@ -3590,6 +3322,7 @@
 				CE325FCE0A1A74E9002D6E4C /* BDSKTemplateParser.m in Sources */,
 				F963E45B0A1D828100695DDC /* BDSKTreeNode.m in Sources */,
 				F963E45D0A1D828200695DDC /* BibPref_Export.m in Sources */,
+				F98DB3180A23C7730040D347 /* BDSKTemplate.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
