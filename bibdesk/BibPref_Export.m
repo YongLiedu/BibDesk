@@ -72,7 +72,7 @@ static NSString *defaultItemString = @"Default Item";
     // we should only have a single template object to start with
     childNode = [[BDSKTemplate alloc] init];
     [childNode setValue:@"Default HTML template" forKey:nameString];
-    [childNode setValue:[NSNumber numberWithInt:0] forKey:roleString];
+    [childNode setValue:@"html" forKey:roleString];
     [itemNodes addObject:childNode];
     [childNode release];
     
@@ -114,6 +114,8 @@ static NSString *defaultItemString = @"Default Item";
         [self doLegacySetup];
     }
 
+    fileTypes = [[NSArray alloc] initWithObjects:@"html", @"rss", @"csv", @"rtf", @"doc", nil];
+    
     roles = [[NSMutableArray alloc] initWithObjects:mainPageString, defaultItemString, accessoryString, nil];
     [roles addObjectsFromArray:[[BibTypeManager sharedManager] bibTypesForFileType:BDSKBibtexString]];
 
@@ -127,6 +129,7 @@ static NSString *defaultItemString = @"Default Item";
 {
     [itemNodes release];
     [roles release];
+    [fileTypes release];
     [super dealloc];
 }
 
@@ -162,7 +165,7 @@ static NSString *defaultItemString = @"Default Item";
     } else {
         // add as a non-leaf node
         [newNode setValue:NSLocalizedString(@"Double-click to change name", @"") forKey:nameString];
-        [newNode setValue:[NSNumber numberWithInt:0] forKey:roleString];
+        [newNode setValue:@"html" forKey:roleString];
         [itemNodes addObject:newNode];
         
         // each style needs at least a Main Page child, and newNode will be recognized as a non-leaf node
@@ -287,8 +290,14 @@ static NSString *defaultItemString = @"Default Item";
     NSString *identifier = [tableColumn identifier];
     if ([cell respondsToSelector:@selector(setTextColor:)])
         [cell setTextColor:[item representedColorForKey:identifier]];
-    if([identifier isEqualToString:roleString])
-        [cell setEnabled:[item isLeaf] == NO || [[item valueForKey:roleString] isEqualToString:mainPageString] == NO];
+    if([identifier isEqualToString:roleString]) {
+        [cell removeAllItems];
+        [cell addItemsWithObjectValues:([item isLeaf]) ? roles : fileTypes];
+        if ([item isLeaf] && [[item valueForKey:roleString] isEqualToString:mainPageString])
+            [cell setEnabled:NO];
+        else
+            [cell setEnabled:YES];
+    }
 }
 
 - (BOOL)canDeleteSelectedItem
@@ -475,6 +484,18 @@ static NSString *defaultItemString = @"Default Item";
     return names;
 }
 
++ (NSArray *)allStyleNamesForFormat:(BDSKTemplateFormat)formatType;
+{
+    NSMutableArray *names = [NSMutableArray array];
+    NSEnumerator *nodeE = [[NSKeyedUnarchiver unarchiveObjectWithData:[[OFPreferenceWrapper sharedPreferenceWrapper] objectForKey:BDSKExportTemplateTree]] objectEnumerator];
+    id aNode;
+    while(aNode = [nodeE nextObject]){
+        if(NO == [aNode isLeaf] && [aNode templateFormat] == formatType)
+            [names addObject:[aNode valueForKey:nameString]];
+    }
+    return names;
+}
+
 // accesses the node array in prefs
 + (BDSKTemplate *)templateForStyle:(NSString *)styleName;
 {
@@ -491,7 +512,19 @@ static NSString *defaultItemString = @"Default Item";
 - (BDSKTemplateFormat)templateFormat;
 {
     OBASSERT([self isLeaf] == NO);
-    return [[self valueForKey:roleString] intValue];
+    NSString *extension = [[self valueForKey:roleString] lowercaseString];
+    if ([extension caseInsensitiveCompare:@"rtf"] == NSOrderedSame)
+        return BDSKRTFTemplateFormat;
+    else if ([extension caseInsensitiveCompare:@"doc"] == NSOrderedSame)
+        return BDSKDocTemplateFormat;
+    else    
+        return BDSKTextTemplateFormat;
+}
+
+- (NSString *)fileExtension;
+{
+    OBASSERT([self isLeaf] == NO);
+    return [self valueForKey:roleString];
 }
 
 - (NSURL *)mainPageTemplateURL;

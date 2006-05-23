@@ -50,6 +50,7 @@ typedef enum _BDSKTemplateFormat {
     IBOutlet NSOutlineView *outlineView;
     NSMutableArray *itemNodes;
     NSMutableArray *roles;    
+    NSArray *fileTypes;    
     IBOutlet NSButton *addButton;
     IBOutlet NSButton *deleteButton;
 }
@@ -68,9 +69,11 @@ typedef enum _BDSKTemplateFormat {
 }
 
 + (NSArray *)allStyleNames;
++ (NSArray *)allStyleNamesForFormat:(BDSKTemplateFormat)formatType;
 + (BDSKTemplate *)templateForStyle:(NSString *)styleName;
 
 - (BDSKTemplateFormat)templateFormat;
+- (NSString *)fileExtension;
 
 - (NSURL *)mainPageTemplateURL;
 - (NSURL *)defaultItemTemplateURL;
