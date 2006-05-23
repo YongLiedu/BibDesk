@@ -131,10 +131,12 @@
         // copy html file template file:
         [fileManager copyPath:[[NSBundle mainBundle] pathForResource:@"rssExportTemplate" ofType:nil]
                toPath:[applicationSupportPath stringByAppendingPathComponent:@"rssExportTemplate"] handler:nil];
+    }
     if(![fileManager fileExistsAtPath:[applicationSupportPath stringByAppendingPathComponent:@"rtfExportTemplate"]]){
         // copy html file template file:
         [fileManager copyPath:[[NSBundle mainBundle] pathForResource:@"rtfExportTemplate" ofType:nil]
                toPath:[applicationSupportPath stringByAppendingPathComponent:@"rtfExportTemplate"] handler:nil];
+    }
 
     // register services
     [NSApp registerServicesMenuSendTypes:[NSArray arrayWithObjects:NSStringPboardType,nil] returnTypes:[NSArray arrayWithObjects:NSStringPboardType,nil]];
