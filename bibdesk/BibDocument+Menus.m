@@ -44,6 +44,7 @@
 #import "BDSKGroupTableView.h"
 #import "BibItem.h"
 #import "BibTypeManager.h"
+#import "BibPref_Export.h"
 
 @implementation BibDocument (Menus)
 
@@ -200,8 +201,26 @@
 	return ([documentWindow isKeyWindow] == YES && [documentWindow firstResponder] == tableView);
 }
 
+- (BOOL)validateExportMenuItem:(NSMenuItem *)menuItem{
+    if ([menuItem tag] == 4 && [[BDSKTemplate allStyleNamesForFormat:BDSKTextTemplateFormat] count] == 0)
+        return NO;
+    if ([menuItem tag] == 5 && [[BDSKTemplate allStyleNamesForFormat:BDSKRTFTemplateFormat] count] == 0)
+        return NO;
+    if ([menuItem tag] == 6 && [[BDSKTemplate allStyleNamesForFormat:BDSKDocTemplateFormat] count] == 0)
+        return NO;
+	return YES;
+}
+
 - (BOOL)validateExportSelectionMenuItem:(NSMenuItem *)menuItem{
-    return ([self numberOfSelectedPubs] != 0);
+    if ([self numberOfSelectedPubs] == 0)
+        return NO;
+    if ([menuItem tag] == 4 && [[BDSKTemplate allStyleNamesForFormat:BDSKTextTemplateFormat] count] == 0)
+        return NO;
+    if ([menuItem tag] == 5 && [[BDSKTemplate allStyleNamesForFormat:BDSKRTFTemplateFormat] count] == 0)
+        return NO;
+    if ([menuItem tag] == 6 && [[BDSKTemplate allStyleNamesForFormat:BDSKDocTemplateFormat] count] == 0)
+        return NO;
+	return YES;
 }
 
 - (BOOL)validateDuplicateMenuItem:(NSMenuItem *)menuItem{
@@ -788,6 +807,9 @@
 	}
 	else if (act == @selector(editPubCmd:)) {
 		return [self validateEditSelectionMenuItem:menuItem];
+	}
+	else if (act == @selector(exportAsAction:)) {
+		return [self validateExportMenuItem:menuItem];
 	}
 	else if (act == @selector(exportSelectionAsAction:)) {
 		return [self validateExportSelectionMenuItem:menuItem];
