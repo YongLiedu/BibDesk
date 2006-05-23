@@ -98,7 +98,7 @@
 #import "PDFMetadata.h"
 #import "BDSKSharingServer.h"
 #import "BDSKSharingBrowser.h"
-#import "BibPref_Export.h"
+#import "BDSKTemplate.h"
 
 NSString *BDSKReferenceMinerStringPboardType = @"CorePasteboardFlavorType 0x57454253";
 NSString *BDSKBibItemPboardType = @"edu.ucsd.mmccrack.bibdesk BibItem pboard type";

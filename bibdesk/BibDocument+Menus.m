@@ -44,7 +44,7 @@
 #import "BDSKGroupTableView.h"
 #import "BibItem.h"
 #import "BibTypeManager.h"
-#import "BibPref_Export.h"
+#import "BDSKTemplate.h"
 
 @implementation BibDocument (Menus)
 
