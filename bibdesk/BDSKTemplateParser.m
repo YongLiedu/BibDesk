@@ -293,12 +293,14 @@ static NSCharacterSet *letterAndDotCharacterSet = nil;
         nonWhitespace = [[[NSCharacterSet whitespaceCharacterSet] invertedSet] retain];
     NSRange lastCharRange = [self rangeOfCharacterFromSet:nonWhitespace options:NSBackwardsSearch];
     NSRange wsRange = NSMakeRange(NSNotFound, 0);
-    if (lastCharRange.location != NSNotFound) {
-        wsRange = NSMakeRange(0, [self length]);
+    unsigned int length = [self length];
+    if (lastCharRange.location == NSNotFound) {
+        wsRange = NSMakeRange(0, length);
     } else {
         unichar lastChar = [self characterAtIndex:lastCharRange.location];
-        if (lastCharRange.location < [self length] - 1 && (lastChar == '\r' || lastChar == '\n')) 
-            NSMakeRange(lastCharRange.location + 1, [self length] - lastCharRange.location - 1);
+        unsigned int rangeEnd = NSMaxRange(lastCharRange);
+        if (rangeEnd < length && (lastChar == '\r' || lastChar == '\n')) 
+            wsRange = NSMakeRange(rangeEnd, length - rangeEnd);
     }
     return wsRange;
 }
