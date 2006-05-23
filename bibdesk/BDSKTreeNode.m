@@ -81,6 +81,13 @@
     [coder encodeConditionalObject:parent forKey:@"parent"];
 }
 
+- (BOOL)isEqual:(id)other;
+{
+    // should we compare the children and/or parent as well?
+    return [other isKindOfClass:[self class]] && 
+           [((BDSKTreeNode *)other)->columnValues isEqualToDictionary:columnValues];
+}
+
 - (BDSKTreeNode *)parent { return parent; }
 
 - (void)setParent:(BDSKTreeNode *)anObject;
