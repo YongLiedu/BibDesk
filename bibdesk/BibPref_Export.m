@@ -40,66 +40,58 @@
 #import "BibTypeManager.h"
 #import "BDAlias.h"
 #import "NSFileManager_BDSKExtensions.h"
-
-// these keys are private to this class at present
-static NSString *BDSKExportTemplateTree = @"BDSKExportTemplateTree";
-static NSString *roleString = @"role";
-static NSString *nameString = @"name";
-
-static NSString *accessoryString = @"Accessory File";
-static NSString *mainPageString = @"Main Page";
-static NSString *defaultItemString = @"Default Item";
-
-@interface BDSKTemplate (Private)
-
-- (id)childForRole:(NSString *)role;
-- (BOOL)setAliasFromURL:(NSURL *)aURL;
-- (NSURL *)representedFileURL;
-- (NSColor *)representedColorForKey:(NSString *)key;
-- (BOOL)hasChildWithRole:(NSString *)aRole;
-
-@end
-
+#import "BDSKTemplate.h"
 
 @implementation BibPref_Export
 
-- (void)doLegacySetup
+- (void)doInitialSetup
 {
-    itemNodes = [[NSMutableArray alloc] initWithCapacity:5];
+    if(nil == itemNodes)
+        itemNodes = [[NSMutableArray alloc] initWithCapacity:5];
+    else
+        [itemNodes removeAllObjects];
     
-    BDSKTemplate *childNode = nil;
+    BDSKTemplate *template = nil;
     
-    // we should only have a single template object to start with
-    childNode = [[BDSKTemplate alloc] init];
-    [childNode setValue:@"Default HTML template" forKey:nameString];
-    [childNode setValue:@"html" forKey:roleString];
-    [itemNodes addObject:childNode];
-    [childNode release];
-    
-    BDSKTemplate *tmpNode = nil;
-        
+    // HTML template
+    template = [[BDSKTemplate alloc] init];
+    [template setValue:@"Default HTML template" forKey:BDSKTemplateNameString];
+    [template setValue:@"html" forKey:BDSKTemplateRoleString];
+    [itemNodes addObject:template];
+    [template release];
+            
+    // main page template
     NSURL *fileURL = [NSURL fileURLWithPath:[[[NSFileManager defaultManager] currentApplicationSupportPathForCurrentUser] stringByAppendingPathComponent:@"htmlExportTemplate"]];
-    if([[NSFileManager defaultManager] objectExistsAtFileURL:fileURL]){
-        tmpNode = [[BDSKTemplate alloc] init];
-        [tmpNode setValue:[[fileURL path] lastPathComponent] forKey:nameString];
-        [tmpNode setValue:mainPageString forKey:roleString];
-        // don't add it if the alias fails
-        if([tmpNode setAliasFromURL:fileURL])
-            [childNode addChild:tmpNode];
-        [tmpNode release];
-    }
+    [template addChildWithURL:fileURL role:BDSKTemplateMainPageString];
     
-    // a user could potentially have templates for multiple types; we could add all of those, as well
+    // a user could potentially have templates for multiple BibTeX types; we could add all of those, as well
     fileURL = [NSURL fileURLWithPath:[[[NSFileManager defaultManager] currentApplicationSupportPathForCurrentUser] stringByAppendingPathComponent:@"htmlItemExportTemplate"]];
-    if([[NSFileManager defaultManager] objectExistsAtFileURL:fileURL]){
-        tmpNode = [[BDSKTemplate alloc] init];
-        [tmpNode setValue:[[fileURL path] lastPathComponent] forKey:nameString];
-        [tmpNode setValue:defaultItemString forKey:roleString];
-        // don't add it if the alias fails
-        if([tmpNode setAliasFromURL:fileURL])
-            [childNode addChild:tmpNode];
-        [tmpNode release];
-    }
+    [template addChildWithURL:fileURL role:BDSKTemplateDefaultItemString];
+    
+    // RTF template
+    template = [[BDSKTemplate alloc] init];
+    [template setValue:@"Default RTF template" forKey:BDSKTemplateNameString];
+    [template setValue:@"rtf" forKey:BDSKTemplateRoleString];
+    [itemNodes addObject:template];
+    [template release];
+    fileURL = [NSURL fileURLWithPath:[[[NSFileManager defaultManager] currentApplicationSupportPathForCurrentUser] stringByAppendingPathComponent:@"rtfExportTemplate"]];
+    [template addChildWithURL:fileURL role:BDSKTemplateMainPageString];
+        
+    // RSS template
+    template = [[BDSKTemplate alloc] init];
+    [template setValue:@"Default RSS template" forKey:BDSKTemplateNameString];
+    [template setValue:@"rss" forKey:BDSKTemplateRoleString];
+    [itemNodes addObject:template];
+    [template release];
+    fileURL = [NSURL fileURLWithPath:[[[NSFileManager defaultManager] currentApplicationSupportPathForCurrentUser] stringByAppendingPathComponent:@"rssExportTemplate"]];
+    [template addChildWithURL:fileURL role:BDSKTemplateMainPageString];    
+}
+
+- (void)restoreDefaultsNoPrompt;
+{
+    [super restoreDefaultsNoPrompt];
+    [self doInitialSetup];
+    [self updateUI];
 }
 
 - (void)awakeFromNib
@@ -111,12 +103,12 @@ static NSString *defaultItemString = @"Default Item";
     if([data length]){
         itemNodes = [[NSKeyedUnarchiver unarchiveObjectWithData:data] mutableCopy];
     } else {
-        [self doLegacySetup];
+        [self doInitialSetup];
     }
 
     fileTypes = [[NSArray alloc] initWithObjects:@"html", @"rss", @"csv", @"rtf", @"doc", nil];
     
-    roles = [[NSMutableArray alloc] initWithObjects:mainPageString, defaultItemString, accessoryString, nil];
+    roles = [[NSMutableArray alloc] initWithObjects:BDSKTemplateMainPageString, BDSKTemplateDefaultItemString, BDSKTemplateAccessoryString, nil];
     [roles addObjectsFromArray:[[BibTypeManager sharedManager] bibTypesForFileType:BDSKBibtexString]];
 
     [outlineView setAutosaveExpandedItems:YES];
@@ -159,22 +151,22 @@ static NSString *defaultItemString = @"Default Item";
 
     if([selectedNode isLeaf]){
         // add as a sibling of the selected node
-        [newNode setValue:NSLocalizedString(@"Double-click to choose file", @"") forKey:nameString];
+        [newNode setValue:NSLocalizedString(@"Double-click to choose file", @"") forKey:BDSKTemplateNameString];
         [[selectedNode parent] addChild:newNode];
     } else if(nil != selectedNode && [outlineView isItemExpanded:selectedNode]){
         // add as a child of the selected node
-        [newNode setValue:NSLocalizedString(@"Double-click to choose file", @"") forKey:nameString];
+        [newNode setValue:NSLocalizedString(@"Double-click to choose file", @"") forKey:BDSKTemplateNameString];
         [selectedNode addChild:newNode];
     } else {
         // add as a non-leaf node
-        [newNode setValue:NSLocalizedString(@"Double-click to change name", @"") forKey:nameString];
-        [newNode setValue:@"html" forKey:roleString];
+        [newNode setValue:NSLocalizedString(@"Double-click to change name", @"") forKey:BDSKTemplateNameString];
+        [newNode setValue:@"html" forKey:BDSKTemplateRoleString];
         [itemNodes addObject:newNode];
         
         // each style needs at least a Main Page child, and newNode will be recognized as a non-leaf node
         BDSKTemplate *child = [[BDSKTemplate alloc] init];
-        [child setValue:NSLocalizedString(@"Double-click to choose file", @"") forKey:nameString];
-        [child setValue:mainPageString forKey:roleString];
+        [child setValue:NSLocalizedString(@"Double-click to choose file", @"") forKey:BDSKTemplateNameString];
+        [child setValue:BDSKTemplateMainPageString forKey:BDSKTemplateRoleString];
         [newNode addChild:child];
         [child release];
     }
@@ -236,7 +228,7 @@ static NSString *defaultItemString = @"Default Item";
     if(NSOKButton == returnCode && nil != fileURL){
         
         // use last path component as file name
-        [(BDSKTemplate *)contextInfo setValue:[[fileURL path] lastPathComponent] forKey:nameString];
+        [(BDSKTemplate *)contextInfo setValue:[[fileURL path] lastPathComponent] forKey:BDSKTemplateNameString];
         
         // track the file by alias; if this doesn't work, it will show up as red
         [(BDSKTemplate *)contextInfo setAliasFromURL:fileURL];
@@ -253,7 +245,7 @@ static NSString *defaultItemString = @"Default Item";
     NSString *identifier = [tableColumn identifier];
     if([item isLeaf]){
         // run an open panel for the filename
-        if([identifier isEqualToString:nameString]){
+        if([identifier isEqualToString:BDSKTemplateNameString]){
             NSOpenPanel *openPanel = [NSOpenPanel openPanel];
             [openPanel setCanChooseDirectories:YES];
             [openPanel setCanCreateDirectories:NO];
@@ -267,8 +259,8 @@ static NSString *defaultItemString = @"Default Item";
             
             // bypass the normal editing mechanism, or it'll reset the value
             return NO;
-        } else if([identifier isEqualToString:roleString]){
-            if([[item valueForKey:roleString] isEqualToString:mainPageString])
+        } else if([identifier isEqualToString:BDSKTemplateRoleString]){
+            if([[item valueForKey:BDSKTemplateRoleString] isEqualToString:BDSKTemplateMainPageString])
                 return NO;
         } else [NSException raise:NSInternalInconsistencyException format:@"Unexpected table column identifier %@", identifier];
     }
@@ -281,7 +273,7 @@ static NSString *defaultItemString = @"Default Item";
 // this seems to be called when editing the NSComboBoxCell as well as the parent name
 - (void)outlineView:(NSOutlineView *)ov setObjectValue:(id)object forTableColumn:(NSTableColumn *)tableColumn byItem:(id)item{
     NSString *identifier = [tableColumn identifier];
-    if([identifier isEqualToString:roleString] && [item isLeaf] && [object isEqualToString:accessoryString] == NO && [(BDSKTemplate *)[item parent] hasChildWithRole:object]) {
+    if([identifier isEqualToString:BDSKTemplateRoleString] && [item isLeaf] && [object isEqualToString:BDSKTemplateAccessoryString] == NO && [(BDSKTemplate *)[item parent] hasChildWithRole:object]) {
         [outlineView reloadData];
         return;
     }
@@ -293,10 +285,10 @@ static NSString *defaultItemString = @"Default Item";
     NSString *identifier = [tableColumn identifier];
     if ([cell respondsToSelector:@selector(setTextColor:)])
         [cell setTextColor:[item representedColorForKey:identifier]];
-    if([identifier isEqualToString:roleString]) {
+    if([identifier isEqualToString:BDSKTemplateRoleString]) {
         [cell removeAllItems];
         [cell addItemsWithObjectValues:([item isLeaf]) ? roles : fileTypes];
-        if ([item isLeaf] && [[item valueForKey:roleString] isEqualToString:mainPageString])
+        if ([item isLeaf] && [[item valueForKey:BDSKTemplateRoleString] isEqualToString:BDSKTemplateMainPageString])
             [cell setEnabled:NO];
         else
             [cell setEnabled:YES];
@@ -306,7 +298,7 @@ static NSString *defaultItemString = @"Default Item";
 - (BOOL)canDeleteSelectedItem
 {
     BDSKTreeNode *selItem = [outlineView selectedItem];
-    return ([selItem isLeaf] == NO || [[selItem valueForKey:roleString] isEqualToString:mainPageString] == NO);
+    return ([selItem isLeaf] == NO || [[selItem valueForKey:BDSKTemplateRoleString] isEqualToString:BDSKTemplateMainPageString] == NO);
 }
 
 - (void)outlineViewSelectionDidChange:(NSNotification *)notification;
@@ -323,14 +315,14 @@ static NSString *defaultItemString = @"Default Item";
         NSBeep();
 }
 
-#pragma mark ToolTps and Context menu
+#pragma mark ToolTips and Context menu
 
 - (NSString *)tableView:(NSTableView *)tv toolTipForTableColumn:(NSTableColumn *)tableColumn row:(int)row;
 {
     NSString *tooltip = nil;
     if(row >= 0){
         id item = [outlineView itemAtRow:row];
-        if ([[tableColumn identifier] isEqualToString:nameString] && [item isLeaf])
+        if ([[tableColumn identifier] isEqualToString:BDSKTemplateNameString] && [item isLeaf])
             tooltip = [[item representedFileURL] path];
     }
     return tooltip;
@@ -465,162 +457,5 @@ static NSString *defaultItemString = @"Default Item";
 - (id)comboBoxCell:(NSComboBoxCell *)aComboBoxCell objectValueForItemAtIndex:(int)index { return [roles objectAtIndex:index]; }
 
 - (int)numberOfItemsInComboBoxCell:(NSComboBoxCell *)aComboBoxCell { return [roles count]; }
-
-@end
-
-#pragma mark -
-#pragma mark BDSKTreeNode subclass
-
-@implementation BDSKTemplate
-
-#pragma mark API for templates
-
-+ (NSArray *)allStyleNames;
-{
-    NSMutableArray *names = [NSMutableArray array];
-    NSEnumerator *nodeE = [[NSKeyedUnarchiver unarchiveObjectWithData:[[OFPreferenceWrapper sharedPreferenceWrapper] objectForKey:BDSKExportTemplateTree]] objectEnumerator];
-    id aNode;
-    while(aNode = [nodeE nextObject]){
-        if(NO == [aNode isLeaf])
-            [names addObject:[aNode valueForKey:nameString]];
-    }
-    return names;
-}
-
-+ (NSArray *)allStyleNamesForFormat:(BDSKTemplateFormat)formatType;
-{
-    NSMutableArray *names = [NSMutableArray array];
-    NSEnumerator *nodeE = [[NSKeyedUnarchiver unarchiveObjectWithData:[[OFPreferenceWrapper sharedPreferenceWrapper] objectForKey:BDSKExportTemplateTree]] objectEnumerator];
-    id aNode;
-    while(aNode = [nodeE nextObject]){
-        if(NO == [aNode isLeaf] && [aNode templateFormat] == formatType)
-            [names addObject:[aNode valueForKey:nameString]];
-    }
-    return names;
-}
-
-// accesses the node array in prefs
-+ (BDSKTemplate *)templateForStyle:(NSString *)styleName;
-{
-    NSEnumerator *nodeE = [[NSKeyedUnarchiver unarchiveObjectWithData:[[OFPreferenceWrapper sharedPreferenceWrapper] objectForKey:BDSKExportTemplateTree]] objectEnumerator];
-    id aNode = nil;
-    
-    while(aNode = [nodeE nextObject]){
-        if(NO == [aNode isLeaf] && [[aNode valueForKey:nameString] isEqualToString:styleName])
-            break;
-    }
-    return aNode;
-}
-
-- (BDSKTemplateFormat)templateFormat;
-{
-    OBASSERT([self isLeaf] == NO);
-    NSString *extension = [[self valueForKey:roleString] lowercaseString];
-    if ([extension caseInsensitiveCompare:@"rtf"] == NSOrderedSame)
-        return BDSKRTFTemplateFormat;
-    else if ([extension caseInsensitiveCompare:@"doc"] == NSOrderedSame)
-        return BDSKDocTemplateFormat;
-    else    
-        return BDSKTextTemplateFormat;
-}
-
-- (NSString *)fileExtension;
-{
-    OBASSERT([self isLeaf] == NO);
-    return [self valueForKey:roleString];
-}
-
-- (NSURL *)mainPageTemplateURL;
-{
-    return [self templateURLForType:mainPageString];
-}
-
-- (NSURL *)defaultItemTemplateURL;
-{
-    return [self templateURLForType:defaultItemString];
-}
-
-- (NSURL *)templateURLForType:(NSString *)pubType;
-{
-    OBASSERT([self isLeaf] == NO);
-    NSParameterAssert(nil != pubType);
-    return [[self childForRole:pubType] representedFileURL];
-}
-
-- (NSArray *)accessoryFileURLs;
-{
-    OBASSERT([self isLeaf] == NO);
-    NSMutableArray *fileURLs = [NSMutableArray array];
-    NSEnumerator *childE = [[self children] objectEnumerator];
-    BDSKTemplate *aChild;
-    NSURL *fileURL;
-    while(aChild = [childE nextObject]){
-        if([[aChild valueForKey:roleString] isEqualToString:accessoryString]){
-            fileURL = [aChild representedFileURL];
-            if(fileURL)
-                [fileURLs addObject:fileURL];
-        }
-    }
-    return fileURLs;
-}
-
-@end
-
-@implementation BDSKTemplate (Private)
-
-- (id)childForRole:(NSString *)role;
-{
-    NSParameterAssert(nil != role);
-    NSEnumerator *nodeE = [[self children] objectEnumerator];
-    id aNode = nil;
-    
-    // assume roles are unique by grabbing the first one; this works for any case except the accessory files
-    while(aNode = [nodeE nextObject]){
-        if([[aNode valueForKey:roleString] isEqualToString:role])
-            break;
-    }
-    return aNode;
-}
-
-- (BOOL)setAliasFromURL:(NSURL *)aURL;
-{
-    BDAlias *alias = nil;
-    alias = [[BDAlias alloc] initWithURL:aURL];
-    
-    BOOL rv = (nil != alias);
-    
-    if(alias)
-        [self setValue:[alias aliasData] forKey:@"_BDAlias"];
-    [alias release];
-    
-    return rv;
-}
-
-- (NSURL *)representedFileURL;
-{
-    return [[BDAlias aliasWithData:[self valueForKey:@"_BDAlias"]] fileURLNoUI];
-}
-
-- (NSColor *)representedColorForKey:(NSString *)key;
-{
-    NSColor *color = [NSColor controlTextColor];
-    if([key isEqualToString:nameString] && [self isLeaf]){
-        NSURL *fileURL = [self representedFileURL];
-        if(nil == fileURL)
-            color = [NSColor redColor];
-    }
-    return color;
-}
-
-- (BOOL)hasChildWithRole:(NSString *)aRole;
-{
-    NSEnumerator *roleEnum = [[self children] objectEnumerator];
-    id aChild;
-    while(aChild = [roleEnum nextObject]){
-        if([[aChild valueForKey:roleString] isEqualToString:aRole])
-            return YES;
-    }
-    return NO;
-}
 
 @end

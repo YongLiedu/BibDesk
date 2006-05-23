@@ -37,14 +37,6 @@
  */
 
 #import <Cocoa/Cocoa.h>
-#import "BDSKTreeNode.h"
-
-typedef enum _BDSKTemplateFormat {
-    BDSKTextTemplateFormat,
-    BDSKRTFTemplateFormat,
-    BDSKDocTemplateFormat
-} BDSKTemplateFormat;
-
 
 @interface BibPref_Export : OAPreferenceClient {
     IBOutlet NSOutlineView *outlineView;
@@ -62,24 +54,3 @@ typedef enum _BDSKTemplateFormat {
 - (IBAction)editFile:(id)sender;
 
 @end
-
-// concrete subclass with specific accessors for the template tree
-@interface BDSKTemplate : BDSKTreeNode
-{
-}
-
-+ (NSArray *)allStyleNames;
-+ (NSArray *)allStyleNamesForFormat:(BDSKTemplateFormat)formatType;
-+ (BDSKTemplate *)templateForStyle:(NSString *)styleName;
-
-- (BDSKTemplateFormat)templateFormat;
-- (NSString *)fileExtension;
-
-- (NSURL *)mainPageTemplateURL;
-- (NSURL *)defaultItemTemplateURL;
-- (NSURL *)templateURLForType:(NSString *)pubType;
-- (NSArray *)accessoryFileURLs;
-
-@end
-
-
