@@ -121,6 +121,9 @@ static NSString *defaultItemString = @"Default Item";
 
     [outlineView setAutosaveExpandedItems:YES];
     
+    // Default behavior is to expand column 0, which slides column 1 outside the clip view; since we only have one expandable column, this is more annoying than helpful.
+    [outlineView setAutoresizesOutlineColumn:NO];
+    
     // this will synchronize prefs, as well
     [self updateUI];
 }
