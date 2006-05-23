@@ -835,7 +835,6 @@ NSString *BDSKWeblocFilePboardType = @"CorePasteboardFlavorType 0x75726C20";
         }else if([fileType isEqualToString:@"text"]){
             BDSKTemplate *selectedTemplate = [BDSKTemplate templateForStyle:currentExportTemplateStyle];
             NSString *extension = [selectedTemplate fileExtension];
-            BDSKTemplateFormat format = [selectedTemplate templateFormat];
             fileName = [[fileName stringByDeletingPathExtension] stringByAppendingPathExtension:extension];
             fileData = [self templatedStringDataForSelection:selected];
             NSEnumerator *accessoryFileEnum = [[selectedTemplate accessoryFileURLs] objectEnumerator];
@@ -1148,8 +1147,7 @@ NSString *BDSKWeblocFilePboardType = @"CorePasteboardFlavorType 0x75726C20";
 - (NSData *)templatedStringDataForSelection:(BOOL)selected{
     BDSKTemplate *selectedTemplate = [BDSKTemplate templateForStyle:currentExportTemplateStyle];
     OBPRECONDITION(nil != selectedTemplate);
-    BDSKTemplateFormat format = [selectedTemplate templateFormat];
-    OBPRECONDITION(format == BDSKTextTemplateFormat);
+    OBPRECONDITION([selectedTemplate templateFormat] == BDSKTextTemplateFormat);
     NSString *fileTemplate = [NSString stringWithContentsOfURL:[selectedTemplate mainPageTemplateURL]];
     OBPRECONDITION(nil != fileTemplate);
     
