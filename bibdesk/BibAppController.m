@@ -122,12 +122,19 @@
         // copy html file template file:
         [fileManager copyPath:[[NSBundle mainBundle] pathForResource:@"htmlExportTemplate" ofType:nil]
                toPath:[applicationSupportPath stringByAppendingPathComponent:@"htmlExportTemplate"] handler:nil];
-        
     }if(![fileManager fileExistsAtPath:[applicationSupportPath stringByAppendingPathComponent:@"htmlItemExportTemplate"]]){
         // copy html item template file:
         [fileManager copyPath:[[NSBundle mainBundle] pathForResource:@"htmlItemExportTemplate" ofType:nil]
                toPath:[applicationSupportPath stringByAppendingPathComponent:@"htmlItemExportTemplate"] handler:nil];
     }
+    if(![fileManager fileExistsAtPath:[applicationSupportPath stringByAppendingPathComponent:@"rssExportTemplate"]]){
+        // copy html file template file:
+        [fileManager copyPath:[[NSBundle mainBundle] pathForResource:@"rssExportTemplate" ofType:nil]
+               toPath:[applicationSupportPath stringByAppendingPathComponent:@"rssExportTemplate"] handler:nil];
+    if(![fileManager fileExistsAtPath:[applicationSupportPath stringByAppendingPathComponent:@"rtfExportTemplate"]]){
+        // copy html file template file:
+        [fileManager copyPath:[[NSBundle mainBundle] pathForResource:@"rtfExportTemplate" ofType:nil]
+               toPath:[applicationSupportPath stringByAppendingPathComponent:@"rtfExportTemplate"] handler:nil];
 
     // register services
     [NSApp registerServicesMenuSendTypes:[NSArray arrayWithObjects:NSStringPboardType,nil] returnTypes:[NSArray arrayWithObjects:NSStringPboardType,nil]];
