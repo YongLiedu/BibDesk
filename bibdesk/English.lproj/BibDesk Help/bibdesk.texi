@@ -149,6 +149,7 @@ about the BibTeX file format.
 * Character Conversion:: Character Conversion
 * Autogeneration Format Syntax:: Autogeneration Format Syntax
 * Character Encodings:: Character Encodings
+* Export Templates::    Export Templates
 @end menu
 
 @shortcontents
@@ -3128,6 +3129,359 @@ encoding, which is a widely used character encoding for Western European scripts
 @emph{The ``Non-lossy ASCII'' encoding provided by BibDesk should not be used unless you have a very specific
 need for that encoding; it is not compatible with TeX accented character sequences, but some users
 need it for other reasons.}
+
+@c ======================================================================================
+
+@node Export Templates
+@appendix Export Templates
+@abstract{Discussion of keys used in export templates.}
+
+@cindex template
+@cindex export template
+@cindex template tags
+@cindex key value coding
+
+@heading What is Key Value Coding?
+
+We will not attempt to give a full explanation of this concept. We only give some general hints that will be 
+useful for writing templates for BibDesk export. For more information, see Apple's 
+@url{http://developer.apple.com/documentation/Cocoa/Conceptual/KeyValueCoding/index.html, Key Value Coding Guide}. 
+
+@subheading Keys and Values
+
+A key is simply a name for a property of an object. Keys are usually contain just letters.
+
+@subheading Key paths
+
+Properties of objects can have properties themselves. You can find the property using a @emph{key path}. 
+A key path is simply several keys joined together by dots. For example the following key path describes 
+the property named @code{propertyKey} of a property named @code{valueKey} of some object. 
+@example
+valueKey.propertyKey
+@end example
+
+@subheading Collection keys
+
+A property can sometimes describe a collection of objets. For example the key @code{publications} describes 
+the collection of publication objects of a document. These @emph{collection keys} are handled slightly 
+different from keys describing single values, both inn key value coding and in BibDesk temnplates. 
+
+@subheading Key paths for collections
+
+The main difference for key value coding with collection keys is the meaning of key paths. 
+For collections, the value behind the dot is the name of a property of the @emph{items} in the collection, 
+not of the collection itself. For example if @code{collectionKey} describes some collection property and 
+@code{valueKey} is the name of a property of the @emph{items} in the collection, then the key path @code{collection.valueKey} 
+will describe another collection, which is made from all the properties named @code{valueKey} of the original items. 
+For example, the key path @code{publication.title} will give the collection of all the @emph{titles} of the publications. 
+
+When you want to get a propery of the @emph{collection} rather than the items, you need to insert an 
+@code{@@} at the beginning of the key. A collection can have two types of properties. 
+
+The first type of property for a collection is a property that modifies the whole collection, returning a new collection. 
+For example take a collection of all the fields of some publication. Then you can modify this collection by 
+removing all the fields that have not been set. The key for this property is @code{@@nonEmpty}. So the full key path 
+for all the non-empty fields would then be @code{allFields.@@nonEmpty}, which you can then use in a collection template tag. 
+Let's call them @emph{collection modifier keys}.
+
+Another type of a property for a collection is one that does not return another collection, but rather a single value property. 
+For example, the key path @code{collectionKey.@@count} will give the number of items in the collection. 
+Let's call those keys @emph{collection value keys}.
+
+
+@heading Use of template tags
+
+Key value coding is used in templates for Bibdesk's templated export feature. An export template can contain 
+certain special @emph{template tags}, which are similar to HTML tags, and are named by a key path. 
+The main idea of the templating feature is that the tags are replaced by the value of the 
+property described by the key path. 
+There are two types of template tags: @emph{value tags} and @emph{collection tags}. 
+
+@subheading Value tags
+
+The simplest tags are @emph{value tags}. They simply describe a single property value, 
+like the string value. The tags have the form
+@example
+<$valueKey/>
+@end example
+
+Or you can use a key path. 
+@example
+<$valueKey.modifierKey/>
+@end example
+You can often think of the extra components of the key path aftyer the dot as @emph{modifiers} of the properties. 
+For example assume that the property describes a string value. Then you could use a modifier key  
+@code{capitalizedString} that simply capitalizes the string value. For example for a publication, you could use the 
+template tag @code{<$title.capitalizedString/>}, which is replaced by the title of the publication written 
+in capital letters. 
+
+@subheading Collection tags
+
+A more advanced template tag is used to enumerate collection properties. 
+For example, in an export template, you might want to write out some properties for the collection of all publications. 
+Collection tags consist of two tags, a start tag and an end tag. 
+@example
+<$collectionKey>
+item template
+</$collectionKey>
+@end example
+The @code{item template} that is written between the start and end tag is used as a template that is passed 
+to the items of the collection. Keys in template tags appearing in the @code{item template} will be interpreted 
+as names of properties of those items. 
+
+As we noted earlier, key paths for collection properties modify the @emph{items} of the collection. 
+As they return a collection, we can use them again for a collection tag, as in the following example. 
+@example
+<$collectionKey.valueKey>
+item template
+</$collectionKey.valueKey>
+@end example
+This gives an enumeration over the values given by @code{valueKey} of the items in the collection. 
+
+You can also use @emph{collection modifier keys} to modify the collection. As these still give a 
+colletion, they should be used in collection tags, as in the example below. 
+@example
+<$collectionKey.@@modifierKey>
+item template
+</$collectionKey.@@modifierKey>
+@end example
+ 
+Or you can use @emph{collection value keys}. As these returns a single value, it should be used in a 
+@emph{value template tag}, something like the following. 
+@example
+<$collectionKey.@@collectionValueKey/>
+@end example
+
+@subheading Properties of @emph{which} object?
+
+We talked all the time about properties of objects. You can ask the question: of @emph{which} object are we taking a property? 
+This depends on the context for our template. BibDesk can have two types of templates: 
+the Main Page template file, and an Item template file. In the Main Page template file, the keys should describe 
+properties of the @emph{document}. For example the @code{fileName} of the document. In an Item template file, 
+the keys describe properties of @emph{publication} objects. For example the @code{title} of the publications. 
+
+However in between @emph{collection tags}, the keys describe properties of the @emph{items} in the collection. 
+For example, the following could appear in the Main Page template, as @code{publications} is the key for a collection 
+property of a document. 
+@example
+<$publications>
+    <$title/>
+</$publications>
+@end example
+This simple template will write out all the titles of the publications in the document. 
+
+For BibDesk there are essentially four types of objects. The top level @emph{document}, 
+a @emph{publication} item, a @emph{field} of a publication and an @emph{author} of a publication. 
+
+
+@heading Template Keys
+
+@menu
+* Template Keys::
+@end menu
+
+
+@node Template Keys
+@section Template Keys
+@abstract{Keys that can be used in export templates}
+
+@heading Value keys
+
+Here are lists of value keys that could be used in BibDesk export templates. 
+
+@subheading Document
+
+@multitable {publicationsUsingTemplate} {}
+@headitem Key @tab Description
+@item fileName
+@tab 
+@item publicationsUsingTemplate
+@tab 
+@end multitable
+
+@subheading Publication
+
+@multitable {pubAuthorsForDisplay} {}
+@headitem Key @tab Description
+@item type
+@tab 
+@item citeKey
+@tab 
+@item title
+@tab 
+@item container
+@tab 
+@item pubAuthorsForDisplay
+@tab 
+@item localUrlPath
+@tab 
+@item remoteURL
+@tab 
+@item fields.FieldName
+@tab FieldName can be the name of any field
+@end multitable
+
+@subheading Field
+
+@multitable {value} {}
+@headitem Key @tab Description
+@item name
+@tab 
+@item value
+@tab 
+@end multitable
+
+@subheading Author
+
+@multitable {abbreviatedNormalizedName} {}
+@headitem Key @tab Description
+@item name
+@tab 
+@item normalizedName
+@tab 
+@item abbreviatedName
+@tab 
+@item abbreviatedNormalizedName
+@tab 
+@item lastName
+@tab 
+@item firstName
+@tab 
+@item vonPart
+@tab 
+@item jrPart
+@tab 
+@end multitable
+
+
+@heading Collection keys
+
+Below are lists of colection keys that could be used in BibDesk export templates. 
+
+@subheading Document
+
+@multitable {publications} {}
+@headitem Key @tab Description
+@item publications
+@tab 
+@end multitable
+
+@subheading Publication
+
+@emph{Field collections are currently not exactly implemented as collections. 
+They can be used in collection template tags, but key paths do not work as for collections.}
+@multitable {optionalFields} {}
+@headitem Key @tab Description
+@item requiredFields
+@tab 
+@item optionalFields
+@tab 
+@item defaultFields
+@tab 
+@item allFields
+@tab 
+@item pubAuthors
+@tab 
+@end multitable
+
+
+@heading Value modifier keys
+
+@subheading Casing
+
+@multitable {capitalizedString} {}
+@headitem Key @tab Description
+@item capitalizedString
+@tab 
+@item lowercaseString
+@tab 
+@item uppercaseString
+@tab 
+@item uppercaseFirst
+@tab 
+@item lowercaseFirst
+@tab 
+@end multitable
+
+@subheading Cleaning
+
+@multitable {stringByCollapsingWhitespaceAndRemovingSurroundingWhitespace} {}
+@headitem Key @tab Description
+@item htmlString
+@tab 
+@item xmlString
+@tab 
+@item stringByRemovingTeX
+@tab 
+@item stringByRemovingCurlyBraces
+@tab 
+@item stringByRemovingSurroundingWhitespace
+@tab 
+@item stringByCollapsingWhitespaceAndRemovingSurroundingWhitespace
+@tab 
+@item stringByRemovingWhitespace
+@tab 
+@item stringByRemovingReturns
+@tab 
+@item fullyEncodeAsIURI
+@tab 
+@end multitable
+
+@subheading File paths
+
+@multitable {stringByAbbreviatingWithTildeInPath} {}
+@headitem Key @tab Description
+@item lastPathComponent
+@tab 
+@item stringByDeletingLastPathComponent
+@tab 
+@item pathExtension
+@tab 
+@item stringByAbbreviatingWithTildeInPath
+@tab 
+@item stringByExpandingTildeInPath
+@tab 
+@item stringByDeletingPathExtension
+@tab 
+@item stringByResolvingSymlinksInPath
+@tab 
+@item stringByStandardizingPath
+@tab 
+@item stringByNormalizingPath
+@tab 
+@end multitable
+
+
+@heading Collection modifier keys
+
+@subheading Field collection
+
+@emph{The current implementation doesn't use the @@, see earlier remark}
+@multitable {@@nonEmpty} {}
+@headitem Key @tab Description
+@item @@nonEmpty
+@tab 
+@end multitable
+
+
+@heading Collection value keys
+
+@subheading General
+
+@multitable {@@componentsJoinedByCommaAndAnd} {}
+@headitem Key @tab Description
+@item @@firstObject
+@tab 
+@item @@lastObject
+@tab 
+@item @@count
+@tab 
+@item @@componentsJoinedByComma
+@tab 
+@item @@componentsJoinedByCommaAndAnd
+@tab 
+@end multitable
+
 
 @bye
 
