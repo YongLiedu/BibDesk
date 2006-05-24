@@ -73,15 +73,26 @@
 
 @interface BDSKFieldCollection : NSObject {
     BibItem *item;
-    NSArray *fieldNames;
-    NSEnumerator *nameEnumerator;
     NSMutableSet *usedFields;
 }
 
 - (id)initWithItem:(BibItem *)anItem;
-- (void)setFieldNames:(NSArray *)array;
+- (id)fieldForName:(NSString *)name;
+- (BOOL)isUsedField:(NSString *)name;
+- (BOOL)isEmptyField:(NSString *)name;
+- (id)fieldsWithNames:(NSArray *)names;
+
+@end
+
+@interface BDSKFieldArray : NSArray {
+    NSMutableArray *fieldNames;
+    BDSKFieldCollection *fieldCollection;
+}
+
+- (id)initWithFieldCollection:(BDSKFieldCollection *)collection fieldNames:(NSArray *)array;
 - (id)nonEmpty;
-- (NSEnumerator *)objectEnumerator;
+- (unsigned int)count;
+- (id)objectAtIndex:(unsigned int)index;
 
 @end
 
@@ -1928,36 +1939,24 @@ static NSParagraphStyle* bodyParagraphStyle = nil;
 }
 
 - (id)requiredFields{
-    if (templateFields == nil)
-        [self prepareForTemplateParsing];
-    [templateFields setFieldNames:[[BibTypeManager sharedManager] requiredFieldsForType:[self type]]];
-    return templateFields;
+    return [[self fields] fieldsWithNames:[[BibTypeManager sharedManager] requiredFieldsForType:[self type]]];
 }
 
 - (id)optionalFields{
-    if (templateFields == nil)
-        [self prepareForTemplateParsing];
-    [templateFields setFieldNames:[[BibTypeManager sharedManager] optionalFieldsForType:[self type]]];
-    return templateFields;
+    return [[self fields] fieldsWithNames:[[BibTypeManager sharedManager] optionalFieldsForType:[self type]]];
 }
 
 - (id)defaultFields{
-    if (templateFields == nil)
-        [self prepareForTemplateParsing];
-    [templateFields setFieldNames:[[BibTypeManager sharedManager] userDefaultFieldsForType:[self type]]];
-    return templateFields;
+    return [[self fields] fieldsWithNames:[[BibTypeManager sharedManager] userDefaultFieldsForType:[self type]]];
 }
 
 - (id)allFields{
-    if (templateFields == nil)
-        [self prepareForTemplateParsing];
     NSMutableArray *allFields = [NSMutableArray array];
     [allFields addObjectsFromArray:[[BibTypeManager sharedManager] requiredFieldsForType:[self type]]];
     [allFields addObjectsFromArray:[[BibTypeManager sharedManager] optionalFieldsForType:[self type]]];
     [allFields addObjectsFromArray:[[BibTypeManager sharedManager] userDefaultFieldsForType:[self type]]];
-    [allFields addObjectsFromArray:[self allFieldNames]];
-    [templateFields setFieldNames:allFields]; // handles duplicates
-    return templateFields;
+    [allFields addObjectsFromArray:[self allFieldNames]]; // duplicate fields will be dropped
+    return [[self fields] fieldsWithNames:allFields];
 }
 
 - (id)fields{
@@ -2759,53 +2758,14 @@ static NSParagraphStyle* bodyParagraphStyle = nil;
 - (id)initWithItem:(BibItem *)anItem{
     if (self = [super init]) {
         item = anItem;
-        fieldNames = nil;
-        nameEnumerator = nil;
         usedFields = [[NSMutableSet alloc] init];
     }
     return self;
 }
 
 - (void)dealloc{
-    [fieldNames release];
     [usedFields release];
     [super dealloc];
-}
-
-- (void)setFieldNames:(NSArray *)array{
-    if (array != fieldNames) {
-        [fieldNames release];
-        fieldNames = [array retain];
-    }
-}
-
-- (id)nonEmpty{
-    NSMutableArray *array = [[NSMutableArray alloc] initWithCapacity:[fieldNames count]];
-    NSEnumerator *fnEnum = [fieldNames objectEnumerator];
-    NSString *name;
-    while (name = [fnEnum nextObject]) {
-        if ([NSString isEmptyString:[item valueForKey:name]] == NO)
-            [array addObject:name];
-    }
-    [fieldNames release];
-    fieldNames = array;
-    return self;
-}
-
-- (NSEnumerator *)objectEnumerator{
-    NSMutableArray *array = [NSMutableArray arrayWithCapacity:[fieldNames count]];
-    NSEnumerator *fnEnum = [fieldNames objectEnumerator];
-    NSString *name;
-    BibField *field;
-    while (name = [fnEnum nextObject]) {
-        if ([usedFields containsObject:name])
-            continue;
-        [usedFields addObject:name];
-        field = [[BibField alloc] initWithName:name bibItem:item];
-        [array addObject:field];
-        [field release];
-    }
-    return [array objectEnumerator];
 }
 
 - (id)valueForUndefinedKey:(NSString *)key{
@@ -2814,6 +2774,63 @@ static NSParagraphStyle* bodyParagraphStyle = nil;
         return nil;
     [usedFields addObject:key];
     return [item valueOfGenericField:key];
+}
+
+- (BOOL)isUsedField:(NSString *)name{
+    BOOL isUsed = [usedFields containsObject:[name capitalizedString]];
+    [usedFields addObject:name];
+    return isUsed;
+}
+
+- (BOOL)isEmptyField:(NSString *)name{
+    return [NSString isEmptyString:[item valueOfGenericField:name]];
+}
+
+- (id)fieldForName:(NSString *)name{
+    return [[[BibField alloc] initWithName:name bibItem:item] autorelease];
+}
+
+- (id)fieldsWithNames:(NSArray *)names{
+    return [[[BDSKFieldArray alloc] initWithFieldCollection:self fieldNames:names] autorelease];
+}
+
+@end
+
+@implementation BDSKFieldArray
+
+- (id)initWithFieldCollection:(BDSKFieldCollection *)collection fieldNames:(NSArray *)array{
+    if (self = [super init]) {
+        fieldCollection = [collection retain];
+        fieldNames = [[NSMutableArray alloc] initWithCapacity:[array count]];
+        NSEnumerator *fnEnum = [array objectEnumerator];
+        NSString *name;
+        while (name = [fnEnum nextObject]) 
+            if ([fieldCollection isUsedField:name] == NO)
+                [fieldNames addObject:name];
+    }
+    return self;
+}
+
+- (void)dealloc{
+    [fieldNames release];
+    [fieldCollection release];
+    [super dealloc];
+}
+
+- (unsigned int)count{
+    return [fieldNames count];
+}
+
+- (id)objectAtIndex:(unsigned int)index{
+    return [fieldCollection fieldForName:[fieldNames objectAtIndex:index]];
+}
+
+- (id)nonEmpty{
+    unsigned int i = [fieldNames count];
+    while (i--) 
+        if ([fieldCollection isEmptyField:[fieldNames objectAtIndex:i]])
+            [fieldNames removeObjectAtIndex:i];
+    return self;
 }
 
 @end
