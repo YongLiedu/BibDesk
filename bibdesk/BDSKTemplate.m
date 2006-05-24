@@ -57,9 +57,13 @@ NSString *BDSKTemplateDefaultItemString = @"Default Item";
     NSMutableArray *names = [NSMutableArray array];
     NSEnumerator *nodeE = [[NSKeyedUnarchiver unarchiveObjectWithData:[[OFPreferenceWrapper sharedPreferenceWrapper] objectForKey:BDSKExportTemplateTree]] objectEnumerator];
     id aNode;
+    NSString *name;
     while(aNode = [nodeE nextObject]){
-        if(NO == [aNode isLeaf])
-            [names addObject:[aNode valueForKey:BDSKTemplateNameString]];
+        if(NO == [aNode isLeaf]){
+            name = [aNode valueForKey:BDSKTemplateNameString];
+            if(name != nil)
+                [names addObject:name];
+        }
     }
     return names;
 }
@@ -69,9 +73,13 @@ NSString *BDSKTemplateDefaultItemString = @"Default Item";
     NSMutableArray *names = [NSMutableArray array];
     NSEnumerator *nodeE = [[NSKeyedUnarchiver unarchiveObjectWithData:[[OFPreferenceWrapper sharedPreferenceWrapper] objectForKey:BDSKExportTemplateTree]] objectEnumerator];
     id aNode;
+    NSString *name;
     while(aNode = [nodeE nextObject]){
-        if(NO == [aNode isLeaf] && [aNode templateFormat] == formatType)
-            [names addObject:[aNode valueForKey:BDSKTemplateNameString]];
+        if(NO == [aNode isLeaf] && [aNode templateFormat] == formatType){
+            name = [aNode valueForKey:BDSKTemplateNameString];
+            if(name != nil)
+                [names addObject:name];
+        }
     }
     return names;
 }
@@ -93,11 +101,13 @@ NSString *BDSKTemplateDefaultItemString = @"Default Item";
 {
     OBASSERT([self isLeaf] == NO);
     NSString *extension = [[self valueForKey:BDSKTemplateRoleString] lowercaseString];
-    if ([extension caseInsensitiveCompare:@"rtf"] == NSOrderedSame)
+    if (extension == nil)
+        return BDSKUnknownTemplateFormat;
+    else if ([extension caseInsensitiveCompare:@"rtf"] == NSOrderedSame)
         return BDSKRTFTemplateFormat;
     else if ([extension caseInsensitiveCompare:@"doc"] == NSOrderedSame)
         return BDSKDocTemplateFormat;
-    else    
+    else
         return BDSKTextTemplateFormat;
 }
 
@@ -197,9 +207,10 @@ NSString *BDSKTemplateDefaultItemString = @"Default Item";
 {
     NSColor *color = [NSColor controlTextColor];
     if([key isEqualToString:BDSKTemplateNameString] && [self isLeaf]){
-        NSURL *fileURL = [self representedFileURL];
-        if(nil == fileURL)
+        if(nil == [self representedFileURL])
             color = [NSColor redColor];
+    }else if(nil == [self valueForKey:key]){
+        color = [NSColor redColor];
     }
     return color;
 }

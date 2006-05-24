@@ -40,6 +40,7 @@
 #import "BDSKTreeNode.h"
 
 typedef enum _BDSKTemplateFormat {
+    BDSKUnknownTemplateFormat = -1,
     BDSKTextTemplateFormat,
     BDSKRTFTemplateFormat,
     BDSKDocTemplateFormat

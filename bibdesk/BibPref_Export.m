@@ -151,21 +151,16 @@
 
     if([selectedNode isLeaf]){
         // add as a sibling of the selected node
-        [newNode setValue:NSLocalizedString(@"Double-click to choose file", @"") forKey:BDSKTemplateNameString];
         [[selectedNode parent] addChild:newNode];
     } else if(nil != selectedNode && [outlineView isItemExpanded:selectedNode]){
         // add as a child of the selected node
-        [newNode setValue:NSLocalizedString(@"Double-click to choose file", @"") forKey:BDSKTemplateNameString];
         [selectedNode addChild:newNode];
     } else {
         // add as a non-leaf node
-        [newNode setValue:NSLocalizedString(@"Double-click to change name", @"") forKey:BDSKTemplateNameString];
-        [newNode setValue:@"html" forKey:BDSKTemplateRoleString];
         [itemNodes addObject:newNode];
         
         // each style needs at least a Main Page child, and newNode will be recognized as a non-leaf node
         BDSKTemplate *child = [[BDSKTemplate alloc] init];
-        [child setValue:NSLocalizedString(@"Double-click to choose file", @"") forKey:BDSKTemplateNameString];
         [child setValue:BDSKTemplateMainPageString forKey:BDSKTemplateRoleString];
         [newNode addChild:child];
         [child release];
@@ -203,7 +198,16 @@
 
 - (id)outlineView:(NSOutlineView *)ov objectValueForTableColumn:(NSTableColumn *)tableColumn byItem:(id)item
 {
-    return [item valueForKey:[tableColumn identifier]];
+    NSString *identifier = [tableColumn identifier];
+    id value = [item valueForKey:identifier];
+    if (value == nil) {
+        // set some placeholder message, this will show up in red
+        if ([identifier isEqualToString:BDSKTemplateRoleString])
+            value = ([item isLeaf]) ? NSLocalizedString(@"Choose role",@"") : NSLocalizedString(@"Choose file type",@"");
+        else if ([identifier isEqualToString:BDSKTemplateNameString])
+            value = ([item isLeaf]) ? NSLocalizedString(@"Double-click to choose file",@"") : NSLocalizedString(@"Double-click to change name",@"");
+    }
+    return value;
 }
 
 - (id)outlineView:(NSOutlineView *)ov child:(int)index ofItem:(id)item
