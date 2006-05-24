@@ -75,6 +75,10 @@ A wrapper object around the fields to access them in AppleScript.
     }
 }
 
+- (NSString *)description {
+    return [NSString stringWithFormat:@"{%@ = %@}",[self name], [self value]];
+}
+
 - (NSString *)name {
     return [[name retain] autorelease];
 }
