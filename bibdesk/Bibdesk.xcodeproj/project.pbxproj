@@ -187,6 +187,7 @@
 		8D11072B0486CEB800E47090 /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = 089C165CFE840E0CC02AAC07 /* InfoPlist.strings */; };
 		8D11072D0486CEB800E47090 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 29B97316FDCFA39411CA2CEA /* main.m */; settings = {ATTRIBUTES = (); }; };
 		8D11072F0486CEB800E47090 /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1058C7A1FEA54F0111CA2CBB /* Cocoa.framework */; };
+		CE0BDB410A24C4370095D555 /* docExportTemplate in Resources */ = {isa = PBXBuildFile; fileRef = CE0BDB400A24C4370095D555 /* docExportTemplate */; };
 		CE1A7F40090BEC3800ACC864 /* BDSKHeaderPopUpButtonCell.h in Headers */ = {isa = PBXBuildFile; fileRef = CE1A7ED4090BDEB600ACC864 /* BDSKHeaderPopUpButtonCell.h */; };
 		CE1A7F42090BEC3C00ACC864 /* BDSKHeaderPopUpButtonCell.m in Sources */ = {isa = PBXBuildFile; fileRef = CE1A7ED5090BDEB600ACC864 /* BDSKHeaderPopUpButtonCell.m */; };
 		CE1A7F4D090BED5400ACC864 /* BDSKHeaderPopUpButton.h in Headers */ = {isa = PBXBuildFile; fileRef = CE1A7EDD090BDF1C00ACC864 /* BDSKHeaderPopUpButton.h */; };
@@ -1002,7 +1003,8 @@
 		3DFF35600816B55B0052F37C /* forward_small.tiff */ = {isa = PBXFileReference; lastKnownFileType = image.tiff; name = forward_small.tiff; path = Images/forward_small.tiff; sourceTree = "<group>"; };
 		3DFF35620816B5780052F37C /* reload_small.tiff */ = {isa = PBXFileReference; lastKnownFileType = image.tiff; name = reload_small.tiff; path = Images/reload_small.tiff; sourceTree = "<group>"; };
 		8D1107310486CEB800E47090 /* Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
-		8D1107320486CEB800E47090 /* BibDesk.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = BibDesk.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		8D1107320486CEB800E47090 /* BibDesk.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = BibDesk.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		CE0BDB400A24C4370095D555 /* docExportTemplate */ = {isa = PBXFileReference; lastKnownFileType = file; path = docExportTemplate; sourceTree = "<group>"; };
 		CE1A7ED4090BDEB600ACC864 /* BDSKHeaderPopUpButtonCell.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BDSKHeaderPopUpButtonCell.h; sourceTree = "<group>"; };
 		CE1A7ED5090BDEB600ACC864 /* BDSKHeaderPopUpButtonCell.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BDSKHeaderPopUpButtonCell.m; sourceTree = "<group>"; };
 		CE1A7EDD090BDF1C00ACC864 /* BDSKHeaderPopUpButton.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BDSKHeaderPopUpButton.h; sourceTree = "<group>"; };
@@ -1693,6 +1695,7 @@
 				F91B5CF607657D820011ED22 /* htmlItemExportTemplate */,
 				CEB794620A238F4600DEA121 /* rssExportTemplate */,
 				CEB794630A238F4600DEA121 /* rtfExportTemplate */,
+				CE0BDB400A24C4370095D555 /* docExportTemplate */,
 				F9022D410758073E00C3F701 /* cfg */,
 				F9022D2C0758069E00C3F701 /* BibDeskInputManager */,
 				F95D3FA509DDF51D00D793A6 /* BibPref_Sharing.nib */,
@@ -2953,6 +2956,7 @@
 				F963E4500A1D81B000695DDC /* exportPrefs.tiff in Resources */,
 				CEB794640A238F4700DEA121 /* rssExportTemplate in Resources */,
 				CEB794650A238F4700DEA121 /* rtfExportTemplate in Resources */,
+				CE0BDB410A24C4370095D555 /* docExportTemplate in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
