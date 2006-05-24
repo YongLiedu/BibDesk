@@ -235,18 +235,22 @@
     return [NSKeyedArchiver archivedDataWithRootObject:item];
 }
 
-- (void)openPanelDidEnd:(NSOpenPanel *)panel returnCode:(int)returnCode contextInfo:(void *)contextInfo
+- (void)openPanelDidEnd:(NSOpenPanel *)panel returnCode:(int)returnCode contextInfo:(BDSKTemplate *)aNode
 {
     NSURL *fileURL = [[panel URLs] lastObject];
     if(NSOKButton == returnCode && nil != fileURL){
         
         // use last path component as file name
-        [(BDSKTemplate *)contextInfo setValue:[[fileURL path] lastPathComponent] forKey:BDSKTemplateNameString];
+        [aNode setValue:[[fileURL path] lastPathComponent] forKey:BDSKTemplateNameString];
         
         // track the file by alias; if this doesn't work, it will show up as red
-        [(BDSKTemplate *)contextInfo setAliasFromURL:fileURL];
+        [aNode setAliasFromURL:fileURL];
+        
+        NSString *extension = [[fileURL path] pathExtension];
+        if ([NSString isEmptyString:extension] == NO && [[aNode parent] valueForKey:BDSKTemplateRoleString] == nil) 
+            [[aNode parent] setValue:extension forKey:BDSKTemplateRoleString];
     }
-    [(id)contextInfo release];
+    [aNode release];
     [panel orderOut:nil];
     [self updateUI];
 }
@@ -268,7 +272,12 @@
             NSString *dirPath = [[[item representedFileURL] path] stringByDeletingLastPathComponent];
             if(nil == dirPath)
                 dirPath = dirPath;
-            [openPanel beginSheetForDirectory:dirPath file:nil types:nil modalForWindow:[[BDSKPreferenceController sharedPreferenceController] window] modalDelegate:self didEndSelector:@selector(openPanelDidEnd:returnCode:contextInfo:) contextInfo:[item retain]];
+            [openPanel beginSheetForDirectory:dirPath 
+                                         file:nil 
+                                        types:nil 
+                               modalForWindow:[[BDSKPreferenceController sharedPreferenceController] window] 
+                                modalDelegate:self didEndSelector:@selector(openPanelDidEnd:returnCode:contextInfo:) 
+                                  contextInfo:[item retain]];
             
             // bypass the normal editing mechanism, or it'll reset the value
             return NO;
