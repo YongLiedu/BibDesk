@@ -1153,9 +1153,9 @@ NSString *BDSKWeblocFilePboardType = @"CorePasteboardFlavorType 0x75726C20";
     
     if (selected) {
         NSMutableString *tmpString = [fileTemplate mutableCopy];
-        [tmpString replaceOccurrencesOfString:@"<$publicationsUsingTemplate>" withString:@"<$selectionUsingTemplate>" options:0 range:NSMakeRange(0, [tmpString length])];
+        [tmpString replaceOccurrencesOfString:@"<$publicationsUsingTemplate/>" withString:@"<$selectionUsingTemplate/>" options:0 range:NSMakeRange(0, [tmpString length])];
         // legacy
-        [tmpString replaceOccurrencesOfString:@"<$publicationsAsHTML>" withString:@"<$selectionUsingTemplate>" options:0 range:NSMakeRange(0, [tmpString length])];
+        [tmpString replaceOccurrencesOfString:@"<$publicationsAsHTML/>" withString:@"<$selectionUsingTemplate/>" options:0 range:NSMakeRange(0, [tmpString length])];
         [tmpString replaceOccurrencesOfString:@"<$publications>" withString:@"<$selectedPublications>" options:0 range:NSMakeRange(0, [tmpString length])];
         [tmpString replaceOccurrencesOfString:@"</$publications>" withString:@"</$selectedPublications>" options:0 range:NSMakeRange(0, [tmpString length])];
         fileTemplate = [tmpString autorelease];
