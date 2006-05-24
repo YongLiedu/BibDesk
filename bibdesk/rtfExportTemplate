@@ -16,14 +16,14 @@
 \f0\i0\b0\fs20 \cf2  (<$type/>)\
 \pard\tx560\tx1120\tx1680\tx2240\tx2800\tx3360\tx3920\tx4480\tx5040\tx5600\tx6160\tx6720\ql\qnatural\pardirnatural
 
-\fs24 \cf0 <$allFields.nonEmpty>
+\fs24 \cf0 <$allFields.@nonEmpty>
 \f1\b \
 <$name/>\
 \pard\tx560\tx1120\tx1680\tx2240\tx2800\tx3360\tx3920\tx4480\tx5040\tx5600\tx6160\tx6720\li1000\ri980\ql\qnatural\pardirnatural
 
 \f0\b0 \cf0 <$value/>\
 \pard\tx560\tx1120\tx1680\tx2240\tx2800\tx3360\tx3920\tx4480\tx5040\tx5600\tx6160\tx6720\ql\qnatural\pardirnatural
-\cf0 </$allFields.nonEmpty>\
+\cf0 </$allFields.@nonEmpty>\
 \
 \
 </$publications>
