@@ -3368,8 +3368,6 @@ Below are lists of colection keys that could be used in BibDesk export templates
 
 @subheading Publication
 
-@emph{Field collections are currently not exactly implemented as collections. 
-They can be used in collection template tags, but key paths do not work as for collections.}
 @multitable {optionalFields} {}
 @headitem Key @tab Description
 @item requiredFields
@@ -3454,9 +3452,23 @@ They can be used in collection template tags, but key paths do not work as for c
 
 @heading Collection modifier keys
 
+@subheading General
+
+@multitable {@@distinctUnionOfArrays} {}
+@headitem Key @tab Description
+@item @@unionOfObjects
+@tab 
+@item @@distinctUnionOfObjects
+@tab 
+@item @@unionOfArrays
+@tab 
+@item @@distinctUnionOfArrays
+@tab 
+@end multitable
+
+
 @subheading Field collection
 
-@emph{The current implementation doesn't use the @@, see earlier remark}
 @multitable {@@nonEmpty} {}
 @headitem Key @tab Description
 @item @@nonEmpty
