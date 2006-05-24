@@ -137,6 +137,11 @@
         [fileManager copyPath:[[NSBundle mainBundle] pathForResource:@"rtfExportTemplate" ofType:nil]
                toPath:[applicationSupportPath stringByAppendingPathComponent:@"rtfExportTemplate"] handler:nil];
     }
+    if(![fileManager fileExistsAtPath:[applicationSupportPath stringByAppendingPathComponent:@"docExportTemplate"]]){
+        // copy html file template file:
+        [fileManager copyPath:[[NSBundle mainBundle] pathForResource:@"docExportTemplate" ofType:nil]
+               toPath:[applicationSupportPath stringByAppendingPathComponent:@"docExportTemplate"] handler:nil];
+    }
 
     // register services
     [NSApp registerServicesMenuSendTypes:[NSArray arrayWithObjects:NSStringPboardType,nil] returnTypes:[NSArray arrayWithObjects:NSStringPboardType,nil]];

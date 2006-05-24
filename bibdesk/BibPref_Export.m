@@ -85,6 +85,15 @@
     [template release];
     fileURL = [NSURL fileURLWithPath:[[[NSFileManager defaultManager] currentApplicationSupportPathForCurrentUser] stringByAppendingPathComponent:@"rssExportTemplate"]];
     [template addChildWithURL:fileURL role:BDSKTemplateMainPageString];    
+        
+    // Doc template
+    template = [[BDSKTemplate alloc] init];
+    [template setValue:@"Default Doc template" forKey:BDSKTemplateNameString];
+    [template setValue:@"doc" forKey:BDSKTemplateRoleString];
+    [itemNodes addObject:template];
+    [template release];
+    fileURL = [NSURL fileURLWithPath:[[[NSFileManager defaultManager] currentApplicationSupportPathForCurrentUser] stringByAppendingPathComponent:@"docExportTemplate"]];
+    [template addChildWithURL:fileURL role:BDSKTemplateMainPageString];    
 }
 
 - (void)restoreDefaultsNoPrompt;
