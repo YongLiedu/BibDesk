@@ -175,8 +175,9 @@
         [child release];
     }
     
-    [newNode release];
     [self updateUI];
+    [outlineView expandItem:newNode];
+    [newNode release];
 }
 
 - (IBAction)removeNode:(id)sender;
