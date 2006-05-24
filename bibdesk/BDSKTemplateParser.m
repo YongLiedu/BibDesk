@@ -57,7 +57,7 @@ static NSCharacterSet *letterAndDotCharacterSet = nil;
     OBINITIALIZE;
     
     NSMutableCharacterSet *tmpSet = [[NSCharacterSet letterCharacterSet] mutableCopy];
-    [tmpSet addCharactersInString:@".-0123456789:;"];
+    [tmpSet addCharactersInString:@".-0123456789:;@"];
     letterAndDotCharacterSet = [tmpSet copy];
     [tmpSet release];
 }
