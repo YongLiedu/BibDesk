@@ -49,6 +49,7 @@
 - (id)init;
 // uses isEqual:
 - (void)removeChild:(BDSKTreeNode *)anObject;
+- (void)insertChild:(BDSKTreeNode *)anObject atIndex:(unsigned int)index;
 - (void)addChild:(BDSKTreeNode *)anObject;
 - (void)setChildren:(NSArray *)theChildren;
 - (NSArray *)children;

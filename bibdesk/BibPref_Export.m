@@ -42,6 +42,8 @@
 #import "NSFileManager_BDSKExtensions.h"
 #import "BDSKTemplate.h"
 
+static NSString *BDSKTemplateRowsPboardType = @"BDSKTemplateRowsPboardType";
+
 @implementation BibPref_Export
 
 - (void)doInitialSetup
@@ -124,6 +126,8 @@
     
     // Default behavior is to expand column 0, which slides column 1 outside the clip view; since we only have one expandable column, this is more annoying than helpful.
     [outlineView setAutoresizesOutlineColumn:NO];
+    
+    [outlineView registerForDraggedTypes:[NSArray arrayWithObjects:NSFilenamesPboardType, BDSKTemplateRowsPboardType, nil]];
     
     // this will synchronize prefs, as well
     [self updateUI];
@@ -336,6 +340,97 @@
         [self removeNode:nil];
     else
         NSBeep();
+}
+
+#pragma mark Drag / drop
+
+- (BOOL)outlineView:(NSOutlineView *)ov writeItems:(NSArray *)items toPasteboard:(NSPasteboard *)pboard{
+    BDSKTemplate *item = [items lastObject];
+    if ([item isLeaf] == NO || [[item valueForKey:BDSKTemplateRoleString] isEqualToString:BDSKTemplateMainPageString] == NO) {
+        [pboard declareTypes:[NSArray arrayWithObject:BDSKTemplateRowsPboardType] owner:nil];
+        [pboard setData:[NSKeyedArchiver archivedDataWithRootObject:[items lastObject]] forType:BDSKTemplateRowsPboardType];
+        return YES;
+    }
+    return NO;
+}
+
+- (NSDragOperation)outlineView:(NSOutlineView *)ov validateDrop:(id <NSDraggingInfo>)info proposedItem:(id)item proposedChildIndex:(int)index{
+    NSPasteboard *pboard = [info draggingPasteboard];
+    NSString *type = [pboard availableTypeFromArray:[NSArray arrayWithObjects:NSFilenamesPboardType, BDSKTemplateRowsPboardType, nil]];
+    
+    if ([type isEqualToString:NSFilenamesPboardType]) {
+        if ([item isLeaf] && index == NSOutlineViewDropOnItemIndex)
+            return NSDragOperationCopy;
+        else if ([item isLeaf] == NO && index != NSOutlineViewDropOnItemIndex && index > 0)
+            return NSDragOperationCopy;
+    } else if ([type isEqualToString:BDSKTemplateRowsPboardType]) {
+        if (index == NSOutlineViewDropOnItemIndex)
+            return NSDragOperationNone;
+        id dropItem = [NSKeyedUnarchiver unarchiveObjectWithData:[pboard dataForType:BDSKTemplateRowsPboardType]];
+        if ([dropItem isLeaf]) {
+            if ([[item children] containsObject:dropItem] && index > 0)
+                return NSDragOperationMove;
+        } else {
+            if (item == nil)
+                return NSDragOperationMove;
+        }
+    }
+    return NSDragOperationNone;
+}
+
+- (BOOL)outlineView:(NSOutlineView *)ov acceptDrop:(id <NSDraggingInfo>)info item:(id)item childIndex:(int)index{
+    NSPasteboard *pboard = [info draggingPasteboard];
+    NSString *type = [pboard availableTypeFromArray:[NSArray arrayWithObjects:NSFilenamesPboardType, BDSKTemplateRowsPboardType, nil]];
+    
+    if ([type isEqualToString:NSFilenamesPboardType]) {
+        NSString *fileName = [[pboard propertyListForType:NSFilenamesPboardType] objectAtIndex:0];
+        
+        if ([item isLeaf] && index == NSOutlineViewDropOnItemIndex) {
+            [item setValue:[fileName lastPathComponent] forKey:BDSKTemplateNameString];
+            // track the file by alias; if this doesn't work, it will show up as red
+            [item setAliasFromURL:[NSURL fileURLWithPath:fileName]];
+            NSString *extension = [fileName pathExtension];
+            if ([NSString isEmptyString:extension] == NO && [[item parent] valueForKey:BDSKTemplateRoleString] == nil) 
+                [[item parent] setValue:extension forKey:BDSKTemplateRoleString];
+            [self updateUI];
+            return YES;
+        } else if ([item isLeaf] == NO && index != NSOutlineViewDropOnItemIndex && index > 0) {
+            id newNode = [[BDSKTemplate alloc] init];
+            [newNode setValue:[fileName lastPathComponent] forKey:BDSKTemplateNameString];
+            [newNode setAliasFromURL:[NSURL fileURLWithPath:fileName]];
+            [item insertChild:newNode atIndex:index];
+            NSString *extension = [fileName pathExtension];
+            if ([NSString isEmptyString:extension] == NO && [item valueForKey:BDSKTemplateRoleString] == nil) 
+                [item setValue:extension forKey:BDSKTemplateRoleString];
+            [self updateUI];
+            return YES;
+        }
+    } else if ([type isEqualToString:BDSKTemplateRowsPboardType]) {
+        id dropItem = [NSKeyedUnarchiver unarchiveObjectWithData:[pboard dataForType:BDSKTemplateRowsPboardType]];
+        if ([dropItem isLeaf]) {
+            unsigned int sourceIndex = [[item children] indexOfObject:dropItem];
+            if (sourceIndex == NSNotFound)
+                return NO;
+            if (sourceIndex < index)
+                --index;
+            [item removeChild:dropItem];
+            [item insertChild:dropItem atIndex:index];
+            [self updateUI];
+            return YES;
+        } else {
+            unsigned int sourceIndex = [itemNodes indexOfObject:dropItem];
+            if (sourceIndex == NSNotFound)
+                return NO;
+            if (sourceIndex < index)
+                --index;
+            [[dropItem retain] autorelease];
+            [itemNodes removeObjectAtIndex:sourceIndex];
+            [itemNodes insertObject:dropItem atIndex:index];
+            [self updateUI];
+            return YES;
+        }
+    }
+    return NO;
 }
 
 #pragma mark ToolTips and Context menu
