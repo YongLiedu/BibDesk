@@ -47,6 +47,8 @@
 - (NSString *)applicationsDirectory;
 - (NSURL *)internetConfigDownloadURL;
 
+- (BOOL)copyFileFromResourcesToApplicationSupport:(NSString *)fileName;
+
 /*!
     @method     createWeblocFileAtPath:withURL:
     @abstract   Creates a webloc resource file at the destination path, for a given target URL.  This method is thread safe.

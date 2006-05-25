@@ -78,7 +78,6 @@
 + (void)initialize
 {
     OBINITIALIZE;
-    NSString *applicationSupportPath;
     NSFileManager *fileManager = [NSFileManager defaultManager];
     
     // since Quartz.framework doesn't exist on < 10.4, we can't link against it
@@ -94,55 +93,14 @@
     [[ILCrashReporter defaultReporter] launchReporterForCompany:@"BibDesk Project" reportAddr:@"bibdesk-crashes@lists.sourceforge.net"];
 #endif
     
-    // creates applications support path if necessary
-    applicationSupportPath = [fileManager currentApplicationSupportPathForCurrentUser];
+    [fileManager copyFileFromResourcesToApplicationSupport:@"previewtemplate.tex"];
+    [fileManager copyFileFromResourcesToApplicationSupport:@"template.txt"];
+    [fileManager copyFileFromResourcesToApplicationSupport:@"htmlExportTemplate"];
+    [fileManager copyFileFromResourcesToApplicationSupport:@"htmlItemExportTemplate"];
+    [fileManager copyFileFromResourcesToApplicationSupport:@"rssExportTemplate"];
+    [fileManager copyFileFromResourcesToApplicationSupport:@"rtfExportTemplate"];
+    [fileManager copyFileFromResourcesToApplicationSupport:@"docExportTemplate"];
     
-    if(![fileManager fileExistsAtPath:[applicationSupportPath stringByAppendingPathComponent:@"previewtemplate.tex"]]){
-        // copy previewtemplate.tex file (user-modifiable):
-        [fileManager copyPath:[[NSBundle mainBundle] pathForResource:@"previewtemplate" ofType:@"tex"]
-               toPath:[applicationSupportPath stringByAppendingPathComponent:@"previewtemplate.tex"] handler:nil];
-    }else{
-		// make sure we use the <<File>> template for the filename
-		NSMutableString *texTemplate = [[NSMutableString alloc] initWithContentsOfFile:[applicationSupportPath stringByAppendingPathComponent:@"previewtemplate.tex"]];
-		[texTemplate replaceOccurrencesOfString:@"\\bibliography{bibpreview}" withString:@"\\bibliography{<<File>>}" options:NSCaseInsensitiveSearch range:NSMakeRange(0,[texTemplate length])];
-		[[texTemplate dataUsingEncoding:[[OFPreferenceWrapper sharedPreferenceWrapper] integerForKey:BDSKTeXPreviewFileEncodingKey]] writeToFile:[applicationSupportPath stringByAppendingPathComponent:@"previewtemplate.tex"] atomically:YES];
-		[texTemplate release];
-	}
-    if(![fileManager fileExistsAtPath:[applicationSupportPath stringByAppendingPathComponent:@"template.txt"]]){
-        // copy template.txt file:
-        [fileManager copyPath:[[NSBundle mainBundle] pathForResource:@"template" ofType:@"txt"]
-               toPath:[applicationSupportPath stringByAppendingPathComponent:@"template.txt"] handler:nil];
-    }
-    if(![fileManager fileExistsAtPath:[applicationSupportPath stringByAppendingPathComponent:@"rssTemplate.txt"]]){
-        // copy rss template file:
-        [fileManager copyPath:[[NSBundle mainBundle] pathForResource:@"rssTemplate" ofType:@"txt"]
-               toPath:[applicationSupportPath stringByAppendingPathComponent:@"rssTemplate.txt"] handler:nil];
-    }
-    if(![fileManager fileExistsAtPath:[applicationSupportPath stringByAppendingPathComponent:@"htmlExportTemplate"]]){
-        // copy html file template file:
-        [fileManager copyPath:[[NSBundle mainBundle] pathForResource:@"htmlExportTemplate" ofType:nil]
-               toPath:[applicationSupportPath stringByAppendingPathComponent:@"htmlExportTemplate"] handler:nil];
-    }if(![fileManager fileExistsAtPath:[applicationSupportPath stringByAppendingPathComponent:@"htmlItemExportTemplate"]]){
-        // copy html item template file:
-        [fileManager copyPath:[[NSBundle mainBundle] pathForResource:@"htmlItemExportTemplate" ofType:nil]
-               toPath:[applicationSupportPath stringByAppendingPathComponent:@"htmlItemExportTemplate"] handler:nil];
-    }
-    if(![fileManager fileExistsAtPath:[applicationSupportPath stringByAppendingPathComponent:@"rssExportTemplate"]]){
-        // copy html file template file:
-        [fileManager copyPath:[[NSBundle mainBundle] pathForResource:@"rssExportTemplate" ofType:nil]
-               toPath:[applicationSupportPath stringByAppendingPathComponent:@"rssExportTemplate"] handler:nil];
-    }
-    if(![fileManager fileExistsAtPath:[applicationSupportPath stringByAppendingPathComponent:@"rtfExportTemplate"]]){
-        // copy html file template file:
-        [fileManager copyPath:[[NSBundle mainBundle] pathForResource:@"rtfExportTemplate" ofType:nil]
-               toPath:[applicationSupportPath stringByAppendingPathComponent:@"rtfExportTemplate"] handler:nil];
-    }
-    if(![fileManager fileExistsAtPath:[applicationSupportPath stringByAppendingPathComponent:@"docExportTemplate"]]){
-        // copy html file template file:
-        [fileManager copyPath:[[NSBundle mainBundle] pathForResource:@"docExportTemplate" ofType:nil]
-               toPath:[applicationSupportPath stringByAppendingPathComponent:@"docExportTemplate"] handler:nil];
-    }
-
     // register services
     [NSApp registerServicesMenuSendTypes:[NSArray arrayWithObjects:NSStringPboardType,nil] returnTypes:[NSArray arrayWithObjects:NSStringPboardType,nil]];
     
