@@ -3295,7 +3295,11 @@ Here are lists of value keys that could be used in BibDesk export templates.
 @headitem Key @tab Description
 @item fileName
 @tab 
+@item fileURL
+@tab 
 @item publicationsUsingTemplate
+@tab 
+@item currentDate
 @tab 
 @end multitable
 

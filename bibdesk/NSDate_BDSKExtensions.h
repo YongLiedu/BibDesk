@@ -57,5 +57,6 @@
 @interface NSCalendarDate (BDSKExtensions)
 
 - (NSCalendarDate *)initWithNaturalLanguageString:(NSString *)dateString;
+- (NSString *)shortDateDescription;
 
 @end

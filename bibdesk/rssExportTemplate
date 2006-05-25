@@ -7,7 +7,7 @@
 	<language>en</language>
 	<copyright>Copyright 2006</copyright>
 	<editor></editor>
-	<lastBuildDate></lastBuildDate>
+	<lastBuildDate><$currentDate.shortDateDescription/></lastBuildDate>
 	<$publications>
 	<item>
 		<title><$fields.Title.xmlString/></title>

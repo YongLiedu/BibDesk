@@ -307,5 +307,8 @@ Date format strings are not recognized anywhere in the string.  If the parsing f
     return (date != nil ? date : [[NSCalendarDate dateWithNaturalLanguageString:dateString] retain]);
 }
 
+- (NSString *)shortDateDescription{
+    return [self descriptionWithCalendarFormat:[[NSUserDefaults standardUserDefaults] stringForKey:NSShortDateFormatString]];
+}
 
 @end

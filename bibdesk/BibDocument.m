@@ -1274,6 +1274,10 @@ NSString *BDSKWeblocFilePboardType = @"CorePasteboardFlavorType 0x75726C20";
         [(BibItem *)object cleanupAfterTemplateParsing];
 }
 
+#pragma mark Convenience keys
+
+- (NSCalendarDate *)currentDate{ return [NSCalendarDate date]; }
+
 #pragma mark -
 #pragma mark Opening and Loading Files
 
