@@ -1615,10 +1615,15 @@ OFWeakRetainConcreteImplementation_NULL_IMPLEMENTATION
             
             // kMDItemWhereFroms is the closest we get to a URL field, so add our standard fields if available
             array = [[NSMutableArray alloc] initWithCapacity:2];
+            
             mdValue = [[anItem URLForField:BDSKUrlString] absoluteString];
             if(mdValue) [array addObject:mdValue];
+            
+            // calling one of the BibItem URL wrapper methods is unsafe since they call -[NSDocument fileName]
+            mdValue = [[anItem localFileURLForField:BDSKLocalUrlString relativeTo:docPath inherit:YES] absoluteString];
             mdValue = [[anItem URLForField:BDSKLocalUrlString] absoluteString];
             if(mdValue) [array addObject:mdValue];
+            
             [metadata setValue:array forKey:(NSString *)kMDItemWhereFroms];
             [array release];
 			
