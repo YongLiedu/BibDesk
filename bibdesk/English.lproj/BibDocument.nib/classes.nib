@@ -135,8 +135,6 @@
                 groupMenu = NSMenu; 
                 groupSplitView = BDSKSplitView; 
                 groupTableView = BDSKGroupTableView; 
-                htmlExportAccessoryView = NSView; 
-                htmlStylePopUpButton = NSPopUpButton; 
                 mainBox = NSBox; 
                 previewField = NSTextView; 
                 quickSearchButton = NSPopUpButton; 
@@ -151,6 +149,8 @@
                 splitView = BDSKSplitView; 
                 statusBar = BDSKStatusBar; 
                 tableView = BDSKDragTableView; 
+                templateExportAccessoryView = NSView; 
+                templateStylePopUpButton = NSPopUpButton; 
             }; 
             SUPERCLASS = NSDocument; 
         }, 

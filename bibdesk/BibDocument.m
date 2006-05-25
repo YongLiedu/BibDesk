@@ -779,13 +779,13 @@ NSString *BDSKWeblocFilePboardType = @"CorePasteboardFlavorType 0x75726C20";
         currentExportTemplateStyle = [[styles objectAtIndex:0] retain];
     }
     
-    [htmlStylePopUpButton removeAllItems];
-    [htmlStylePopUpButton addItemsWithTitles:styles];
-    [htmlStylePopUpButton setAction:@selector(changeCurrentExportTemplateStyle:)];
-    [htmlStylePopUpButton setTarget:self];
-    [htmlStylePopUpButton selectItemWithTitle:currentExportTemplateStyle];
+    [templateStylePopUpButton removeAllItems];
+    [templateStylePopUpButton addItemsWithTitles:styles];
+    [templateStylePopUpButton setAction:@selector(changeCurrentExportTemplateStyle:)];
+    [templateStylePopUpButton setTarget:self];
+    [templateStylePopUpButton selectItemWithTitle:currentExportTemplateStyle];
     
-    [savePanel setAccessoryView:htmlExportAccessoryView];
+    [savePanel setAccessoryView:templateExportAccessoryView];
 }
 
 - (void)exportAsFileType:(NSString *)fileType selected:(BOOL)selected droppingInternal:(BOOL)drop{
