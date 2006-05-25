@@ -697,6 +697,7 @@
 - (id)defaultFields;
 - (id)allFields;
 - (id)fields;
+- (id)persons;
 
 /*!
     @method     URLForField:

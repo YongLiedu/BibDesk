@@ -74,9 +74,11 @@
 @interface BDSKFieldCollection : NSObject {
     BibItem *item;
     NSMutableSet *usedFields;
+    BOOL isPersons;
 }
 
 - (id)initWithItem:(BibItem *)anItem;
+- (void)setPersons:(BOOL)flag;
 - (id)fieldForName:(NSString *)name;
 - (BOOL)isUsedField:(NSString *)name;
 - (BOOL)isEmptyField:(NSString *)name;
@@ -1962,6 +1964,14 @@ static NSParagraphStyle* bodyParagraphStyle = nil;
 - (id)fields{
     if (templateFields == nil)
         [self prepareForTemplateParsing];
+    [templateFields setPersons:NO];
+    return templateFields;
+}
+
+- (id)persons{
+    if (templateFields == nil)
+        [self prepareForTemplateParsing];
+    [templateFields setPersons:YES];
     return templateFields;
 }
 
@@ -2759,6 +2769,7 @@ static NSParagraphStyle* bodyParagraphStyle = nil;
     if (self = [super init]) {
         item = anItem;
         usedFields = [[NSMutableSet alloc] init];
+        isPersons = NO;
     }
     return self;
 }
@@ -2773,7 +2784,11 @@ static NSParagraphStyle* bodyParagraphStyle = nil;
     if (key == nil)
         return nil;
     [usedFields addObject:key];
-    return [item valueOfGenericField:key];
+    return (isPersons == YES) ? (id)[item peopleArrayForField:key] : (id)[item valueOfGenericField:key];
+}
+
+- (void)setPersons:(BOOL)flag{
+    isPersons = NO;
 }
 
 - (BOOL)isUsedField:(NSString *)name{

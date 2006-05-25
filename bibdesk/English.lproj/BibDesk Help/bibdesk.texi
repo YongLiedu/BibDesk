@@ -3299,6 +3299,8 @@ Here are lists of value keys that could be used in BibDesk export templates.
 @tab 
 @item publicationsUsingTemplate
 @tab 
+@item publicationsASHTML
+@tab deprecated
 @item currentDate
 @tab 
 @end multitable
@@ -3382,8 +3384,12 @@ Below are lists of colection keys that could be used in BibDesk export templates
 @tab 
 @item allFields
 @tab 
+@item persons.FieldName
+@tab FieldName can be Author or Editor
+@item pubFields
+@tab deprecated
 @item pubAuthors
-@tab 
+@tab deprecated
 @end multitable
 
 
