@@ -162,7 +162,7 @@ extern NSString* BDSKWeblocFilePboardType; // core pasteboard type for webloc fi
     IBOutlet NSPopUpButton *htmlStylePopUpButton;
     NSString *currentExportTemplateStyle;
     
-    IBOutlet NSView *SaveEncodingAccessoryView;
+    IBOutlet NSView *saveEncodingAccessoryView;
     IBOutlet NSPopUpButton *saveTextEncodingPopupButton;
     NSStringEncoding documentStringEncoding;
 	
@@ -267,16 +267,16 @@ extern NSString* BDSKWeblocFilePboardType; // core pasteboard type for webloc fi
 - (void)exportAsFileType:(NSString *)fileType selected:(BOOL)selected droppingInternal:(BOOL)drop;
 
 /*!
-    @method     savePanelDidEnd:returnCode:contextInfo:
- @abstract   Called after a save panel is closed.
- @discussion If the user chose to save, this calls the appropriate *DataRepresentation 
+    @method     exportPanelDidEnd:returnCode:contextInfo:
+ @abstract   Called after a export panel is closed.
+ @discussion If the user chose to export, this calls the appropriate *DataRepresentation 
  method to get the data to save. Otherwise, it just returns without doing anything.
 
     @param      sheet The save panel
     @param      returnCode what happened
     @param      contextInfo ...
 */
-- (void)savePanelDidEnd:(NSWindow *)sheet returnCode:(int)returnCode contextInfo:(void *)contextInfo;
+- (void)exportPanelDidEnd:(NSWindow *)sheet returnCode:(int)returnCode contextInfo:(void *)contextInfo;
 
 /*!
     @method     clearChangeCount

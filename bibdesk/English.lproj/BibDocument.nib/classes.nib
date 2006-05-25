@@ -114,7 +114,6 @@
             CLASS = BibDocument; 
             LANGUAGE = ObjC; 
             OUTLETS = {
-                SaveEncodingAccessoryView = NSView; 
                 URLMenu = NSMenu; 
                 actionMenu = NSMenu; 
                 actionMenuButton = BDSKImagePopUpButton; 
@@ -146,6 +145,7 @@
                 rssExportAccessoryView = NSView; 
                 rssExportForm = NSForm; 
                 rssExportTextField = NSTextField; 
+                saveEncodingAccessoryView = NSView; 
                 saveTextEncodingPopupButton = NSPopUpButton; 
                 searchField = NSSearchField; 
                 splitView = BDSKSplitView; 

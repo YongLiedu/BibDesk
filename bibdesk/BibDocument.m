@@ -617,23 +617,29 @@ NSString *BDSKWeblocFilePboardType = @"CorePasteboardFlavorType 0x75726C20";
 #pragma mark -
 #pragma mark  Document Saving
 
+#define SAVE_ENCODING_VIEW_OFFSET 12.0
+
 // if the user is saving in one of our plain text formats, give them an encoding option as well
 // this also requires overriding saveToFile:saveOperation:delegate:didSaveSelector:contextInfo:
 // to set the document's encoding before writing to the file
 - (BOOL)prepareSavePanel:(NSSavePanel *)savePanel{
     if([super prepareSavePanel:savePanel]){
         if([[self fileType] isEqualToString:@"bibTeX database"] || [[self fileType] isEqualToString:@"RIS/Medline File"]){
-            NSArray *oldViews = [[[savePanel accessoryView] subviews] retain]; // this should give us the file types popup from super and its label text field
-            [savePanel setAccessoryView:SaveEncodingAccessoryView]; // use our accessory view, since we've set the size appropriately in IB
-            NSEnumerator *e = [oldViews objectEnumerator];
+            NSRect sevFrame, ignored, avFrame = [[savePanel accessoryView] frame];
+            float height = NSHeight([saveEncodingAccessoryView frame]);
+            avFrame.size.height += height - SAVE_ENCODING_VIEW_OFFSET;
+            NSView *accessoryView = [[NSView alloc] initWithFrame:avFrame];
+            NSDivideRect([accessoryView bounds], &sevFrame, &ignored, height, NSMaxYEdge);
+            [saveEncodingAccessoryView setFrame:sevFrame];
+            [accessoryView addSubview:saveEncodingAccessoryView];
+            // this should give us the file types popup from super and its label text field
+            NSEnumerator *e = [[[savePanel accessoryView] subviews] objectEnumerator];
             NSView *aView = nil;
-            while(aView = [e nextObject]){ // now add in the subviews, excluding boxes (the old accessoryView box shouldn't be in the array)
-                if(![aView isKindOfClass:[NSBox class]])
-                    [[savePanel accessoryView] addSubview:aView];
+            while(aView = [e nextObject]){ // now add in the subviews to our new view
+                [accessoryView addSubview:aView];
             }
-            if([[savePanel accessoryView] respondsToSelector:@selector(sizeToFit)])
-                [(NSBox *)[savePanel accessoryView] sizeToFit]; // this keeps us from truncating the file types popup
-            [oldViews release];
+            [savePanel setAccessoryView:accessoryView];
+            [accessoryView release];
             // set the popup to reflect the document's present string encoding
             NSString *defaultEncName = [[BDSKStringEncodingManager sharedEncodingManager] displayedNameForStringEncoding:[self documentStringEncoding]];
             [saveTextEncodingPopupButton selectItemWithTitle:defaultEncName];
@@ -715,6 +721,8 @@ NSString *BDSKWeblocFilePboardType = @"CorePasteboardFlavorType 0x75726C20";
 - (void)clearChangeCount{
 	[self updateChangeCount:NSChangeCleared];
 }
+
+#pragma mark Document Exporting
 
 - (IBAction)exportAsAction:(id)sender{
     NSString *fileType = @"bib";
@@ -798,7 +806,7 @@ NSString *BDSKWeblocFilePboardType = @"CorePasteboardFlavorType 0x75726C20";
         [self prepareExportPanel:sp forTemplateFormat:BDSKDocTemplateFormat];
         
     } else if([fileType isEqualToString:@"bib"] || [fileType isEqualToString:@"ris"] || [fileType isEqualToString:@"ltb"]){ // this is for exporting bib files with alternate text encodings
-        [sp setAccessoryView:SaveEncodingAccessoryView];
+        [sp setAccessoryView:saveEncodingAccessoryView];
         [saveTextEncodingPopupButton selectItemWithTitle:[[BDSKStringEncodingManager sharedEncodingManager] displayedNameForStringEncoding:[self documentStringEncoding]]];
     }
     NSDictionary *contextInfo = [[NSDictionary dictionaryWithObjectsAndKeys:
@@ -807,13 +815,13 @@ NSString *BDSKWeblocFilePboardType = @"CorePasteboardFlavorType 0x75726C20";
                           file:( [self fileName] == nil ? nil : [[NSString stringWithString:[[self fileName] stringByDeletingPathExtension]] lastPathComponent])
                 modalForWindow:documentWindow
                  modalDelegate:self
-                didEndSelector:@selector(savePanelDidEnd:returnCode:contextInfo:)
+                didEndSelector:@selector(exportPanelDidEnd:returnCode:contextInfo:)
                    contextInfo:contextInfo];
 
 }
 
 // this is only called by export actions, and isn't part of the regular save process
-- (void)savePanelDidEnd:(NSWindow *)sheet returnCode:(int)returnCode contextInfo:(void *)contextInfo{
+- (void)exportPanelDidEnd:(NSWindow *)sheet returnCode:(int)returnCode contextInfo:(void *)contextInfo{
     NSData *fileData = nil;
     NSString *fileName = nil;
     NSSavePanel *sp = (NSSavePanel *)sheet;
