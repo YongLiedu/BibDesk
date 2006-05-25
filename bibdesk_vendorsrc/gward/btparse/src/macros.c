@@ -39,10 +39,12 @@
  * something like that.  I'm not sure of the exact Knuthian
  * specification.
  */
-/* ARM: changed STRING_SIZE to 8192 to fix BibDesk bug #1482852, where a
- * large .bib file hit the macro table limit.  Didn't change NUM_MACROS. */
-#define NUM_MACROS 547
-#define STRING_SIZE 8192
+/* ARM: changed STRING_SIZE to 32768 to fix BibDesk bug #1494620, where
+ * /usr/local/teTeX/share/texmf.tetex/bibtex/bib/ams/mrabbrev.bib
+ * hit the macro table limit.  Changed NUM_MACROS to 5470.
+ */
+#define NUM_MACROS 5470
+#define STRING_SIZE 32768
 
 Sym *AllMacros = NULL;                  /* `scope' so we can get back list */
                                         /* of all macros when done */
