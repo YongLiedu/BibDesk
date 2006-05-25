@@ -315,10 +315,6 @@ static NSString *BDSKTemplateRowsPboardType = @"BDSKTemplateRowsPboardType";
     if([identifier isEqualToString:BDSKTemplateRoleString]) {
         [cell removeAllItems];
         [cell addItemsWithObjectValues:([item isLeaf]) ? roles : fileTypes];
-        if ([item isLeaf] && [[item valueForKey:BDSKTemplateRoleString] isEqualToString:BDSKTemplateMainPageString])
-            [cell setEnabled:NO];
-        else
-            [cell setEnabled:YES];
     }
 }
 
@@ -554,20 +550,16 @@ static NSString *BDSKTemplateRowsPboardType = @"BDSKTemplateRowsPboardType";
 
 - (NSCell *)tableView:(NSTableView *)tableView column:(OADataSourceTableColumn *)tableColumn dataCellForRow:(int)row;
 {
-    NSCell *cell = [tableColumn dataCell];
-    
-    static NSPopUpButtonCell *popupCell = nil;
-    if(nil == popupCell){
-        popupCell = [[NSPopUpButtonCell alloc] initTextCell:@"" pullsDown:NO];
-        [popupCell setFont:[cell font]];
-        [popupCell setBordered:NO];
-        [popupCell setControlSize:NSSmallControlSize];
-        [popupCell addItemsWithTitles:[NSArray arrayWithObjects:NSLocalizedString(@"Plain Text", @"Plain Text"), NSLocalizedString(@"RTF", @"RTF"), NSLocalizedString(@"Doc", @"Doc"), nil]];
+    id cell = [tableColumn dataCell];
+    id item = [(NSOutlineView *)tableView itemAtRow:row];
+    if([item isLeaf] && [[item valueForKey:BDSKTemplateRoleString] isEqualToString:BDSKTemplateMainPageString]){
+        cell = [[[NSComboBoxCell alloc] initTextCell:@""] autorelease];
+        [cell setButtonBordered:NO];
+        [cell setBordered:NO];
+        [cell setControlSize:NSSmallControlSize];
+        [cell setFont:[NSFont systemFontOfSize:[NSFont systemFontSizeForControlSize:NSSmallControlSize]]];
+        [cell setEnabled:NO];
     }
-    
-    // if this is a non-editable cell, don't display the combo box
-    if(NO == [[(NSOutlineView *)tableView itemAtRow:row] isLeaf])
-        cell = popupCell;
     
     return cell;
 }
