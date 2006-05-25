@@ -698,6 +698,8 @@
 - (id)allFields;
 - (id)fields;
 - (id)persons;
+- (id)authors;
+- (id)editors;
 
 /*!
     @method     URLForField:

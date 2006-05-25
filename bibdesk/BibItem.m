@@ -1975,6 +1975,14 @@ static NSParagraphStyle* bodyParagraphStyle = nil;
     return templateFields;
 }
 
+- (id)authors{
+    return [[self persons] valueOfField:BDSKAuthorString];
+}
+
+- (id)editors{
+    return [[self persons] valueOfField:BDSKEditorString];
+}
+
 #pragma mark -
 #pragma mark URL handling
 

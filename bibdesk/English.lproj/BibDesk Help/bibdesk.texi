@@ -3386,6 +3386,10 @@ Below are lists of colection keys that could be used in BibDesk export templates
 @tab 
 @item persons.FieldName
 @tab FieldName can be Author or Editor
+@item authors
+@tab 
+@item editors
+@tab 
 @item pubFields
 @tab deprecated
 @item pubAuthors
