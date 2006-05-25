@@ -48,6 +48,7 @@ typedef enum _BDSKTemplateFormat {
 
 extern NSString *BDSKTemplateRoleString;
 extern NSString *BDSKTemplateNameString;
+extern NSString *BDSKTemplateFileURLString;
 extern NSString *BDSKExportTemplateTree;
 
 extern NSString *BDSKTemplateAccessoryString;
@@ -71,7 +72,7 @@ extern NSString *BDSKTemplateDefaultItemString;
 - (NSURL *)templateURLForType:(NSString *)pubType;
 - (NSArray *)accessoryFileURLs;
 - (NSURL *)representedFileURL;
-- (BOOL)setAliasFromURL:(NSURL *)aURL;
+- (void)setRepresentedFileURL:(NSURL *)aURL;
 
 - (BOOL)addChildWithURL:(NSURL *)fileURL role:(NSString *)role;
 - (id)childForRole:(NSString *)role;

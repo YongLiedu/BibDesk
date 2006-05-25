@@ -42,6 +42,7 @@
 
 NSString *BDSKTemplateRoleString = @"role";
 NSString *BDSKTemplateNameString = @"name";
+NSString *BDSKTemplateFileURLString = @"representedFileURL";
 NSString *BDSKExportTemplateTree = @"BDSKExportTemplateTree";
 
 NSString *BDSKTemplateAccessoryString = @"Accessory File";
@@ -158,10 +159,10 @@ NSString *BDSKTemplateDefaultItemString = @"Default Item";
     if(retVal){
         BDSKTemplate *newChild = [[BDSKTemplate alloc] init];
         
-        [newChild setValue:[[fileURL path] lastPathComponent] forKey:BDSKTemplateNameString];
+        [newChild setValue:fileURL forKey:BDSKTemplateFileURLString];
         [newChild setValue:role forKey:BDSKTemplateRoleString];
         // don't add it if the alias fails
-        if([newChild setAliasFromURL:fileURL])
+        if([newChild representedFileURL] != nil)
             [self addChild:newChild];
         else
             retVal = NO;
@@ -184,23 +185,31 @@ NSString *BDSKTemplateDefaultItemString = @"Default Item";
     return aNode;
 }
 
-- (BOOL)setAliasFromURL:(NSURL *)aURL;
+- (void)setRepresentedFileURL:(NSURL *)aURL;
 {
+    OBASSERT([self isLeaf]);
     BDAlias *alias = nil;
     alias = [[BDAlias alloc] initWithURL:aURL];
     
-    BOOL rv = (nil != alias);
-    
-    if(alias)
+    if(alias){
         [self setValue:[alias aliasData] forKey:@"_BDAlias"];
+        
+        [self setValue:[[aURL path] lastPathComponent] forKey:BDSKTemplateNameString];
+        
+        NSString *extension = [[aURL path] pathExtension];
+        if ([NSString isEmptyString:extension] == NO && [[self parent] valueForKey:BDSKTemplateRoleString] == nil) 
+            [[self parent] setValue:extension forKey:BDSKTemplateRoleString];
+    }
     [alias release];
-    
-    return rv;
 }
 
 - (NSURL *)representedFileURL;
 {
-    return [[BDAlias aliasWithData:[self valueForKey:@"_BDAlias"]] fileURLNoUI];
+    OBASSERT([self isLeaf]);
+    NSData *aliasData = [self valueForKey:@"_BDAlias"];
+    if (aliasData)
+        return [[BDAlias aliasWithData:aliasData] fileURLNoUI];
+    else return nil;
 }
 
 - (NSColor *)representedColorForKey:(NSString *)key;
