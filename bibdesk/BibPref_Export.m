@@ -302,10 +302,10 @@ static NSString *BDSKTemplateRowsPboardType = @"BDSKTemplateRowsPboardType";
     NSString *identifier = [tableColumn identifier];
     if([identifier isEqualToString:BDSKTemplateRoleString] && [item isLeaf] && [object isEqualToString:BDSKTemplateAccessoryString] == NO && [(BDSKTemplate *)[item parent] hasChildWithRole:object]) {
         [outlineView reloadData];
-        return;
+    } else {
+        [item setValue:object forKey:[tableColumn identifier]];
+        [self synchronizePrefs];
     }
-    [item setValue:object forKey:[tableColumn identifier]];
-    [self synchronizePrefs];
 }
 
 - (void)outlineView:(NSOutlineView *)ov willDisplayCell:(id)cell forTableColumn:(NSTableColumn *)tableColumn item:(id)item{
@@ -395,6 +395,8 @@ static NSString *BDSKTemplateRowsPboardType = @"BDSKTemplateRowsPboardType";
             [newNode setValue:[fileName lastPathComponent] forKey:BDSKTemplateNameString];
             [newNode setAliasFromURL:[NSURL fileURLWithPath:fileName]];
             [item insertChild:newNode atIndex:index];
+            [newNode release];
+            
             NSString *extension = [fileName pathExtension];
             if ([NSString isEmptyString:extension] == NO && [item valueForKey:BDSKTemplateRoleString] == nil) 
                 [item setValue:extension forKey:BDSKTemplateRoleString];
@@ -552,6 +554,8 @@ static NSString *BDSKTemplateRowsPboardType = @"BDSKTemplateRowsPboardType";
 {
     id cell = [tableColumn dataCell];
     id item = [(NSOutlineView *)tableView itemAtRow:row];
+    
+    // setting an NSComboBoxCell to disabled in outlineView:willDisplayCell:... results in a non-editable cell with black text instead of disabled text; creating a new cell works around that problem
     if([item isLeaf] && [[item valueForKey:BDSKTemplateRoleString] isEqualToString:BDSKTemplateMainPageString]){
         cell = [[[NSComboBoxCell alloc] initTextCell:@""] autorelease];
         [cell setButtonBordered:NO];
