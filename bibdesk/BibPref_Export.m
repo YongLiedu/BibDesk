@@ -357,6 +357,8 @@ static NSString *BDSKTemplateRowsPboardType = @"BDSKTemplateRowsPboardType";
     if ([type isEqualToString:NSFilenamesPboardType]) {
         if ([item isLeaf] && index == NSOutlineViewDropOnItemIndex)
             return NSDragOperationCopy;
+        else if (item == nil && index != NSOutlineViewDropOnItemIndex)
+            return NSDragOperationCopy;
         else if ([item isLeaf] == NO && index != NSOutlineViewDropOnItemIndex && index > 0)
             return NSDragOperationCopy;
     } else if ([type isEqualToString:BDSKTemplateRowsPboardType]) {
@@ -379,30 +381,49 @@ static NSString *BDSKTemplateRowsPboardType = @"BDSKTemplateRowsPboardType";
     NSString *type = [pboard availableTypeFromArray:[NSArray arrayWithObjects:NSFilenamesPboardType, BDSKTemplateRowsPboardType, nil]];
     
     if ([type isEqualToString:NSFilenamesPboardType]) {
-        NSString *fileName = [[pboard propertyListForType:NSFilenamesPboardType] objectAtIndex:0];
+        NSArray *fileNames = [pboard propertyListForType:NSFilenamesPboardType];
+        NSString *fileName;
+        NSIndexSet *selIndexes;
         
         if ([item isLeaf] && index == NSOutlineViewDropOnItemIndex) {
+            fileName = [fileNames objectAtIndex:0];
             [item setValue:[fileName lastPathComponent] forKey:BDSKTemplateNameString];
             // track the file by alias; if this doesn't work, it will show up as red
             [item setAliasFromURL:[NSURL fileURLWithPath:fileName]];
             NSString *extension = [fileName pathExtension];
             if ([NSString isEmptyString:extension] == NO && [[item parent] valueForKey:BDSKTemplateRoleString] == nil) 
                 [[item parent] setValue:extension forKey:BDSKTemplateRoleString];
-            [self updateUI];
-            return YES;
+            selIndexes = [NSIndexSet indexSetWithIndex:[outlineView rowForItem:item]];
+        } else if (item == nil && index != NSOutlineViewDropOnItemIndex) {
+            NSEnumerator *fileEnum = [fileNames objectEnumerator];
+            id newNode = nil, childNode = nil;
+            while (fileName = [fileEnum nextObject]) {
+                newNode = [[[BDSKTemplate alloc] init] autorelease];
+                childNode = [[[BDSKTemplate alloc] init] autorelease];
+                [childNode setValue:[fileName lastPathComponent] forKey:BDSKTemplateNameString];
+                [childNode setValue:BDSKTemplateMainPageString forKey:BDSKTemplateNameString];
+                [childNode setAliasFromURL:[NSURL fileURLWithPath:fileName]];
+                [newNode addChild:newNode];
+                [itemNodes insertObject:newNode atIndex:index++];
+                NSString *extension = [fileName pathExtension];
+                if ([NSString isEmptyString:extension] == NO) 
+                    [newNode setValue:extension forKey:BDSKTemplateRoleString];
+            }
+            selIndexes = [NSIndexSet indexSetWithIndex:[outlineView rowForItem:newNode]];
         } else if ([item isLeaf] == NO && index != NSOutlineViewDropOnItemIndex && index > 0) {
-            id newNode = [[BDSKTemplate alloc] init];
-            [newNode setValue:[fileName lastPathComponent] forKey:BDSKTemplateNameString];
-            [newNode setAliasFromURL:[NSURL fileURLWithPath:fileName]];
-            [item insertChild:newNode atIndex:index];
-            [newNode release];
-            
-            NSString *extension = [fileName pathExtension];
-            if ([NSString isEmptyString:extension] == NO && [item valueForKey:BDSKTemplateRoleString] == nil) 
-                [item setValue:extension forKey:BDSKTemplateRoleString];
-            [self updateUI];
-            return YES;
-        }
+            NSEnumerator *fileEnum = [fileNames objectEnumerator];
+            id newNode = nil;
+            while (fileName = [fileEnum nextObject]) {
+                newNode = [[[BDSKTemplate alloc] init] autorelease];
+                [newNode setValue:[fileName lastPathComponent] forKey:BDSKTemplateNameString];
+                [newNode setAliasFromURL:[NSURL fileURLWithPath:fileName]];
+                [item insertChild:newNode atIndex:index++];
+            }
+            selIndexes = [NSIndexSet indexSetWithIndex:[outlineView rowForItem:item] + index];
+        } else return NO;
+        [self updateUI];
+        [outlineView selectRowIndexes:selIndexes byExtendingSelection:NO];
+        return YES;
     } else if ([type isEqualToString:BDSKTemplateRowsPboardType]) {
         id dropItem = [NSKeyedUnarchiver unarchiveObjectWithData:[pboard dataForType:BDSKTemplateRowsPboardType]];
         if ([dropItem isLeaf]) {
@@ -413,8 +434,6 @@ static NSString *BDSKTemplateRowsPboardType = @"BDSKTemplateRowsPboardType";
                 --index;
             [item removeChild:dropItem];
             [item insertChild:dropItem atIndex:index];
-            [self updateUI];
-            return YES;
         } else {
             unsigned int sourceIndex = [itemNodes indexOfObject:dropItem];
             if (sourceIndex == NSNotFound)
@@ -424,9 +443,10 @@ static NSString *BDSKTemplateRowsPboardType = @"BDSKTemplateRowsPboardType";
             [[dropItem retain] autorelease];
             [itemNodes removeObjectAtIndex:sourceIndex];
             [itemNodes insertObject:dropItem atIndex:index];
-            [self updateUI];
-            return YES;
         }
+        [self updateUI];
+        [outlineView selectRowIndexes:[NSIndexSet indexSetWithIndex:[outlineView rowForItem:dropItem]] byExtendingSelection:NO];
+        return YES;
     }
     return NO;
 }
