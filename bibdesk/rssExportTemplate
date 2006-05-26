@@ -11,8 +11,8 @@
 	<$publications>
 	<item>
 		<title><$fields.Title.xmlString/></title>
-		<description>$fields.Rss-Description.xmlString</description>
-		<link>$fields.Url</link>
+		<description><$fields.Rss-Description.xmlString></description>
+		<link><$fields.Url></link>
 	</item>
 	</$publications>
 </channel>
