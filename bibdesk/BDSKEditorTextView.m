@@ -132,6 +132,15 @@
 // Determine if a % character is followed by two digits (valid in a URL)
 static inline BOOL hasValidPercentEscapeFromIndex(NSString *string, unsigned startIndex)
 {
+    static NSCharacterSet *hexadecimalCharacterSet = nil;
+    if (hexadecimalCharacterSet == nil) {
+        NSMutableCharacterSet *tmpSet = [[NSCharacterSet decimalDigitCharacterSet] mutableCopy];
+        [tmpSet addCharactersInRange:NSMakeRange('a', 6)];
+        [tmpSet addCharactersInRange:NSMakeRange('A', 6)];
+        hexadecimalCharacterSet = [tmpSet copy];
+        [tmpSet release];
+    }
+    
     NSCParameterAssert(startIndex == 0 || [string length] > startIndex);
     // require % and at least two additional chars
     if([string isEqualToString:@""] || [string characterAtIndex:startIndex] != '%' || [string length] <= (startIndex + 2))
@@ -140,7 +149,7 @@ static inline BOOL hasValidPercentEscapeFromIndex(NSString *string, unsigned sta
     // both characters following the % should be digits 0-9
     unichar ch1 = [string characterAtIndex:(startIndex + 1)];
     unichar ch2 = [string characterAtIndex:(startIndex + 2)];
-    return ((ch1 <= '9' && ch1 >= '0') && (ch2 <= '9' && ch2 >= '0')) ? YES : NO;
+    return ([hexadecimalCharacterSet characterIsMember:ch1] && [hexadecimalCharacterSet characterIsMember:ch2]) ? YES : NO;
 }
 
 /* Starts in the middle of a "word" (some range of interest) and searches forward and backward to find boundaries marked by characters that would be illegal for a URL.  Note that this may not be a valid URL in itself; it is just bounded by URL-like markers.
