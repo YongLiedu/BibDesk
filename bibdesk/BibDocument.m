@@ -790,7 +790,11 @@ NSString *BDSKWeblocFilePboardType = @"CorePasteboardFlavorType 0x75726C20";
 
 - (void)exportAsFileType:(NSString *)fileType selected:(BOOL)selected droppingInternal:(BOOL)drop{
     NSSavePanel *sp = [NSSavePanel savePanel];
-    [sp setRequiredFileType:fileType];
+    if ([fileType isEqualToString:@"text"]) {
+        [sp setAllowedFileTypes:[BDSKTemplate allFileTypesForFormat:BDSKTextTemplateFormat]];
+    } else {
+        [sp setRequiredFileType:fileType];
+    }
     [sp setDelegate:self];
     if([fileType isEqualToString:@"rss"]){
         [sp setAccessoryView:rssExportAccessoryView];
