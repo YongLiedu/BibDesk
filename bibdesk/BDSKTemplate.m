@@ -85,6 +85,22 @@ NSString *BDSKTemplateDefaultItemString = @"Default Item";
     return names;
 }
 
++ (NSArray *)allFileTypesForFormat:(BDSKTemplateFormat)formatType;
+{
+    NSMutableArray *fileTypes = [NSMutableArray array];
+    NSEnumerator *nodeE = [[NSKeyedUnarchiver unarchiveObjectWithData:[[OFPreferenceWrapper sharedPreferenceWrapper] objectForKey:BDSKExportTemplateTree]] objectEnumerator];
+    id aNode;
+    NSString *fileType;
+    while(aNode = [nodeE nextObject]){
+        if(NO == [aNode isLeaf] && [aNode templateFormat] == formatType){
+            fileType = [aNode valueForKey:BDSKTemplateRoleString];
+            if(fileType != nil)
+                [fileTypes addObject:fileType];
+        }
+    }
+    return fileTypes;
+}
+
 // accesses the node array in prefs
 + (BDSKTemplate *)templateForStyle:(NSString *)styleName;
 {
