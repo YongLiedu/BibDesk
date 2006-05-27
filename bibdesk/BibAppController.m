@@ -102,6 +102,8 @@
     [fileManager copyFileFromResourcesToApplicationSupport:@"rssExportTemplate"];
     [fileManager copyFileFromResourcesToApplicationSupport:@"rtfExportTemplate"];
     [fileManager copyFileFromResourcesToApplicationSupport:@"docExportTemplate"];
+    [fileManager copyFileFromResourcesToApplicationSupport:@"textServiceTemplate"];
+    [fileManager copyFileFromResourcesToApplicationSupport:@"rtfServiceTemplate"];
     
     // register services
     [NSApp registerServicesMenuSendTypes:[NSArray arrayWithObjects:NSStringPboardType,nil] returnTypes:[NSArray arrayWithObjects:NSStringPboardType,nil]];
